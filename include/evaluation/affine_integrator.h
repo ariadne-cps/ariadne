@@ -112,7 +112,7 @@ namespace Ariadne {
 
       /*! \brief A \f$C^\infty\f$ algorithm for integrating forward a zonotope for a time up to time \a step_size. 
        *
-       *  Overrides method in Integrator since we don't use the bounding set. 
+       *  Overrides method in VectorFieldEvolver since we don't use the bounding set. 
        */
      Geometry::Zonotope<I> reachability_step(const System::AffineVectorField<R>& affine_vector_field,
                                                const Geometry::Zonotope<I>& initial_set,

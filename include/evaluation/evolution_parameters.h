@@ -65,7 +65,7 @@ namespace Ariadne {
       /*! \brief The maximum number of steps for an iterative algorithm. */
       size_type maximum_number_of_steps() const;
 
-      /*! \brief The time after which an Applicator may approximate computed sets on a grid,
+      /*! \brief The time after which an MapEvolver may approximate computed sets on a grid,
        *  in order to use previously cached results for the grid. Increasing this 
        *  parameter may improve the accuracy of the computations.  
        *  If there is recurrence in the system, then this parameter should be set to 
@@ -83,7 +83,7 @@ namespace Ariadne {
       /*! \brief The maximum allowable radius of a basic set during integration. Decreasing this value increases the accuracy of the computation of an over-approximation. */
       R maximum_basic_set_radius() const;
 
-      /*! \brief The time after which an Integrator may approximate computed sets on a grid,
+      /*! \brief The time after which an VectorFieldEvolver may approximate computed sets on a grid,
        *  in order to use previously cached integration results for the grid. Increasing this 
        *  parameter improves the accuracy of the computations. Setting this parameter too
        *  low usually results in meaningless computations. A typical system trajectory 

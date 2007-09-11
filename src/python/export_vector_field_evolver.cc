@@ -33,7 +33,7 @@
 #include "system/affine_vector_field.h"
 
 #include "evaluation/evolution_parameters.h"
-#include "evaluation/integrator.h"
+#include "evaluation/vector_field_evolver.h"
 #include "evaluation/integrator_plugin_interface.h"
 #include "evaluation/lohner_integrator.h"
 #include "evaluation/affine_integrator.h"
@@ -77,42 +77,42 @@ void export_integrate()
   typedef Zonotope<I,R> BS;
 
   /*
-   class_< IntegratorWrapper<R>, boost::noncopyable >("Integrator",init<T,T,R>())
-    .def("integrate",(ListSet< Rectangle<R> >(Integrator<R>::*)(const VectorFieldInterface<R>&,const ListSet< Rectangle<R> >&,const time_type&)const)
-                                    (&Integrator<R>::integrate))
-    .def("reach",(ListSet< Rectangle<R> >(Integrator<R>::*)(const VectorFieldInterface<R>&,const ListSet< Rectangle<R> >&,const time_type&)const)
-                                    (&Integrator<R>::reach))
-    .def("integrate",(GridMaskSet<R>(Integrator<R>::*)(const VectorFieldInterface<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&,const time_type&)const)
-                                    (&Integrator<R>::integrate))
-    .def("reach",(GridMaskSet<R>(Integrator<R>::*)(const VectorFieldInterface<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&,const time_type&)const)
-                              (&Integrator<R>::reach))
-    .def("chainreach",(GridMaskSet<R>(Integrator<R>::*)(const VectorFieldInterface<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&)const)
-         (&Integrator<R>::chainreach))
-    .def("viable",(GridMaskSet<R>(Integrator<R>::*)(const VectorFieldInterface<R>&,const GridMaskSet<R>&)const)
-         (&Integrator<R>::viable))
-    .def("verify",(tribool(Integrator<R>::*)(const VectorFieldInterface<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&)const)
-         (&Integrator<R>::verify))
+   class_< IntegratorWrapper<R>, boost::noncopyable >("VectorFieldEvolver",init<T,T,R>())
+    .def("integrate",(ListSet< Rectangle<R> >(VectorFieldEvolver<R>::*)(const VectorFieldInterface<R>&,const ListSet< Rectangle<R> >&,const time_type&)const)
+                                    (&VectorFieldEvolver<R>::integrate))
+    .def("reach",(ListSet< Rectangle<R> >(VectorFieldEvolver<R>::*)(const VectorFieldInterface<R>&,const ListSet< Rectangle<R> >&,const time_type&)const)
+                                    (&VectorFieldEvolver<R>::reach))
+    .def("integrate",(GridMaskSet<R>(VectorFieldEvolver<R>::*)(const VectorFieldInterface<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&,const time_type&)const)
+                                    (&VectorFieldEvolver<R>::integrate))
+    .def("reach",(GridMaskSet<R>(VectorFieldEvolver<R>::*)(const VectorFieldInterface<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&,const time_type&)const)
+                              (&VectorFieldEvolver<R>::reach))
+    .def("chainreach",(GridMaskSet<R>(VectorFieldEvolver<R>::*)(const VectorFieldInterface<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&)const)
+         (&VectorFieldEvolver<R>::chainreach))
+    .def("viable",(GridMaskSet<R>(VectorFieldEvolver<R>::*)(const VectorFieldInterface<R>&,const GridMaskSet<R>&)const)
+         (&VectorFieldEvolver<R>::viable))
+    .def("verify",(tribool(VectorFieldEvolver<R>::*)(const VectorFieldInterface<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&)const)
+         (&VectorFieldEvolver<R>::verify))
   ;
   */
 
 
 
 
-  class_< Integrator<BS> >("Integrator",init<const EvolutionParameters<R>&,const IntegratorPluginInterface<BS>&>())
-    .def("integrate",(ListSet< Rectangle<R> >(Integrator<BS>::*)(const VectorFieldInterface<R>&,const ListSet< Rectangle<R> >&,const time_type&)const)
-                                    (&Integrator<BS>::integrate))
-    .def("reach",(ListSet< Rectangle<R> >(Integrator<BS>::*)(const VectorFieldInterface<R>&,const ListSet< Rectangle<R> >&,const time_type&)const)
-                                    (&Integrator<BS>::reach))
-    .def("integrate",(GridMaskSet<R>(Integrator<BS>::*)(const VectorFieldInterface<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&,const time_type&)const)
-                                    (&Integrator<BS>::integrate))
-    .def("reach",(GridMaskSet<R>(Integrator<BS>::*)(const VectorFieldInterface<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&,const time_type&)const)
-                              (&Integrator<BS>::reach))
-    .def("chainreach",(GridMaskSet<R>(Integrator<BS>::*)(const VectorFieldInterface<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&)const)
-         (&Integrator<BS>::chainreach))
-    .def("viable",(GridMaskSet<R>(Integrator<BS>::*)(const VectorFieldInterface<R>&,const GridMaskSet<R>&)const)
-         (&Integrator<BS>::viable))
-    .def("verify",(tribool(Integrator<BS>::*)(const VectorFieldInterface<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&)const)
-         (&Integrator<BS>::verify))
+  class_< VectorFieldEvolver<BS> >("VectorFieldEvolver",init<const EvolutionParameters<R>&,const IntegratorPluginInterface<BS>&>())
+    .def("integrate",(ListSet< Rectangle<R> >(VectorFieldEvolver<BS>::*)(const VectorFieldInterface<R>&,const ListSet< Rectangle<R> >&,const time_type&)const)
+                                    (&VectorFieldEvolver<BS>::integrate))
+    .def("reach",(ListSet< Rectangle<R> >(VectorFieldEvolver<BS>::*)(const VectorFieldInterface<R>&,const ListSet< Rectangle<R> >&,const time_type&)const)
+                                    (&VectorFieldEvolver<BS>::reach))
+    .def("integrate",(GridMaskSet<R>(VectorFieldEvolver<BS>::*)(const VectorFieldInterface<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&,const time_type&)const)
+                                    (&VectorFieldEvolver<BS>::integrate))
+    .def("reach",(GridMaskSet<R>(VectorFieldEvolver<BS>::*)(const VectorFieldInterface<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&,const time_type&)const)
+                              (&VectorFieldEvolver<BS>::reach))
+    .def("chainreach",(GridMaskSet<R>(VectorFieldEvolver<BS>::*)(const VectorFieldInterface<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&)const)
+         (&VectorFieldEvolver<BS>::chainreach))
+    .def("viable",(GridMaskSet<R>(VectorFieldEvolver<BS>::*)(const VectorFieldInterface<R>&,const GridMaskSet<R>&)const)
+         (&VectorFieldEvolver<BS>::viable))
+    .def("verify",(tribool(VectorFieldEvolver<BS>::*)(const VectorFieldInterface<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&)const)
+         (&VectorFieldEvolver<BS>::verify))
   ;
 
 

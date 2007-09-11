@@ -33,7 +33,7 @@
 #include "geometry/polytope.h"
 #include "geometry/rectangular_set.h"
 #include "system/grid_multimap.h"
-#include "evaluation/applicator.h"
+#include "evaluation/map_evolver.h"
 #include "evaluation/applicator_plugin.h"
 #include "output/epsstream.h"
 #include "output/logging.h"
@@ -99,7 +99,7 @@ test_apply()
   parameters.set_grid_length(grid_length);
   parameters.set_bounding_domain_size(bounding_domain_size);
 
-  Applicator<BS> apply(parameters);
+  MapEvolver<BS> apply(parameters);
   Rectangle<R> pfr=evaluate(henon_inverse,fr);
   cout << "r=" << r << " fr=" << fr << " pfr="<< pfr << endl;
   Zonotope<I,R> pfez=evaluate(henon_inverse,fez);

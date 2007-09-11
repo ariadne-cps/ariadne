@@ -36,10 +36,10 @@
 #include "system/affine_map.h"
 #include "system/affine_vector_field.h"
 #include "system/set_based_hybrid_automaton.h"
-#include "evaluation/applicator.h"
-#include "evaluation/integrator.h"
 #include "evaluation/lohner_integrator.h"
 #include "evaluation/affine_integrator.h"
+#include "evaluation/map_evolver.h"
+#include "evaluation/vector_field_evolver.h"
 #include "evaluation/set_based_hybrid_evolver.h"
 #include "output/epsstream.h"
 #include "output/logging.h"
@@ -109,8 +109,8 @@ int test_set_based_hybrid_evolver()
   parameters.set_maximum_step_size(maximum_step_size);
   parameters.set_lock_to_grid_time(lock_to_grid_time);
 
-  Applicator<BS> discrete_time_evolver(parameters);
-  Integrator<BS> continuous_time_evolver(parameters,AffineIntegrator<R>());
+  MapEvolver<BS> discrete_time_evolver(parameters);
+  VectorFieldEvolver<BS> continuous_time_evolver(parameters,AffineIntegrator<R>());
   SetBasedHybridEvolver<R> hybrid_evolver(discrete_time_evolver,continuous_time_evolver);
   
   Grid<R> grid(Vector<R>("[0.25,0.25]"));

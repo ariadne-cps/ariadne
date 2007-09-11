@@ -34,7 +34,7 @@
 #include "geometry/list_set.h"
 #include "system/affine_vector_field.h"
 #include "evaluation/evolution_parameters.h"
-#include "evaluation/integrator.h"
+#include "evaluation/vector_field_evolver.h"
 #include "evaluation/lohner_integrator.h"
 #include "evaluation/affine_integrator.h"
 #include "models/vanderpol.h"
@@ -74,11 +74,11 @@ test_integration_step()
   parameters.set_maximum_step_size(0.125);
   
   // Test constructor/destructor
-  Integrator< Zonotope<I,I> >* integrator_ptr;
+  VectorFieldEvolver< Zonotope<I,I> >* integrator_ptr;
   LohnerIntegrator<R>* lohner_ptr;
   lohner_ptr=new LohnerIntegrator<R>();
   delete lohner_ptr;
-  integrator_ptr=new Integrator< Zonotope<I,I> >(parameters,*lohner_ptr);
+  integrator_ptr=new VectorFieldEvolver< Zonotope<I,I> >(parameters,*lohner_ptr);
   delete integrator_ptr;
   
   AffineVectorField<R> avf=AffineVectorField<R>(Matrix<R>("[-0.25,-1.0;+1.0,-0.25]"),Vector<R>("[0.25,0.0]"));
@@ -127,7 +127,7 @@ test_integration_step()
   //nr=lohner.integration_step(vdp,r,h);
   //cout << nr << endl;
   LohnerIntegrator<R> plugin;
-  Integrator< Zonotope<I,I> > evolver(parameters,plugin);
+  VectorFieldEvolver< Zonotope<I,I> > evolver(parameters,plugin);
   niz=evolver.integration_step(vdp,iz,h);
   cout << niz << endl << endl;
   cout << endl << endl;
@@ -170,7 +170,7 @@ test_integrate()
   parameters.set_maximum_step_size(0.25);
   
   AffineIntegrator<R> plugin;
-  Integrator< Zonotope<I,I> > evolver(parameters,plugin);
+  VectorFieldEvolver< Zonotope<I,I> > evolver(parameters,plugin);
 
   AffineVectorField<R> affine_vector_field(Matrix<R>("[-2,-1;1,-2]"),Vector<R>("[0.125,0.25]"));
   

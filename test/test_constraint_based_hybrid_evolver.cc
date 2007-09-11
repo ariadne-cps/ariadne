@@ -37,7 +37,7 @@
 #include "system/affine_map.h"
 #include "system/affine_vector_field.h"
 #include "system/constraint_based_hybrid_automaton.h"
-#include "evaluation/applicator.h"
+#include "evaluation/evolution_parameters.h"
 #include "evaluation/applicator_plugin.h"
 #include "evaluation/lohner_integrator.h"
 #include "evaluation/affine_integrator.h"

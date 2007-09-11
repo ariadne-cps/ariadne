@@ -1,5 +1,5 @@
 /***************************************************************************
- *            applicator.h
+ *            map_evolver.h
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file applicator.h
+/*! \file map_evolver.h
  *  \brief Methods for computing the images of sets under maps.
  */
 
@@ -45,7 +45,7 @@ namespace Ariadne {
      *  \ingroup Applicators
      */
     template<class BS>
-    class Applicator {
+    class MapEvolver {
       typedef typename BS::real_type R;
       typedef Numeric::Interval<R> I;
      private:
@@ -53,19 +53,19 @@ namespace Ariadne {
       ApplicatorPluginInterface<BS>* _plugin;
      public:
       /*! \brief Default constructor chooses appropriate parameter values for maximum basic set radius and grid size. */
-      Applicator();
+      MapEvolver();
       
       /*! \brief Construct from evolution parameters. */
-      Applicator(const EvolutionParameters<R>& parameters);
+      MapEvolver(const EvolutionParameters<R>& parameters);
       
       /*! \brief Copy constructor. */
-      Applicator(const Applicator<BS>& other);
+      MapEvolver(const MapEvolver<BS>& other);
       
       /*! \brief Compute the image of a basic set under a continuous function. */
-      virtual ~Applicator();
+      virtual ~MapEvolver();
 
       /*! \brief Make a dynamically-allocated copy. */
-      Applicator<BS>* clone() const;
+      MapEvolver<BS>* clone() const;
       
       //@}
 

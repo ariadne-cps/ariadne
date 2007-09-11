@@ -114,7 +114,7 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::ConstraintBasedHybridEvolverP
     _detector(d.clone())
 {
   if(!this->_integrator) {
-    throw std::runtime_error("ConstraintBasedHybridEvolverPlugin::ConstraintBasedHybridEvolverPlugin(Applicator a, Integrator i, Detector d): Invalid integrator");
+    throw std::runtime_error("ConstraintBasedHybridEvolverPlugin::ConstraintBasedHybridEvolverPlugin(MapEvolver a, VectorFieldEvolver i, Detector d): Invalid integrator");
   }
 }
 

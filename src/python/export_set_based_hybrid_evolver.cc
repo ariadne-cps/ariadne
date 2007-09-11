@@ -26,8 +26,8 @@
 #include "geometry/zonotope.h"
 #include "geometry/hybrid_set.h"
 #include "system/set_based_hybrid_automaton.h"
-#include "evaluation/applicator.h"
-#include "evaluation/integrator.h"
+#include "evaluation/map_evolver.h"
+#include "evaluation/vector_field_evolver.h"
 #include "evaluation/set_based_hybrid_evolver.h"
 
 using namespace Ariadne;
@@ -46,7 +46,7 @@ void export_set_based_hybrid_evolver()
   typedef Numeric::Interval<R> I;
   typedef Zonotope<I,I> BS;
 
-  class_< SetBasedHybridEvolver<R> >("SetBasedHybridEvolver",init<Applicator<BS>&,Integrator<BS>&>()) 
+  class_< SetBasedHybridEvolver<R> >("SetBasedHybridEvolver",init<MapEvolver<BS>&,VectorFieldEvolver<BS>&>()) 
     .def("discrete_step",(HybridSet<R>(SetBasedHybridEvolver<R>::*)(const SetBasedHybridAutomaton<R>&,const HybridSet<R>&))&SetBasedHybridEvolver<R>::discrete_step)
     .def("continuous_chainreach",(HybridSet<R>(SetBasedHybridEvolver<R>::*)(const SetBasedHybridAutomaton<R>&,const HybridSet<R>&,const HybridSet<R>&))&SetBasedHybridEvolver<R>::continuous_chainreach)
     .def("chainreach",(HybridSet<R>(SetBasedHybridEvolver<R>::*)(const SetBasedHybridAutomaton<R>&,const HybridSet<R>&,const HybridSet<R>&))&SetBasedHybridEvolver<R>::chainreach)

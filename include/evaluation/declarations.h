@@ -32,8 +32,8 @@ namespace Ariadne {
   namespace Evaluation {
     template<class R> class Solver;
 
-    template<class R> class Applicator;
-    template<class R> class Integrator;
+    template<class R> class MapEvolver;
+    template<class R> class VectorFieldEvolver;
   
     template<class R> class ApplicatorPluginInterface;
     template<class R> class BounderPluginInterface;

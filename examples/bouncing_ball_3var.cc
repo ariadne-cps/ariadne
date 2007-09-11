@@ -19,8 +19,8 @@
 #include "system/affine_map.h"
 #include "system/affine_vector_field.h"
 #include "system/set_based_hybrid_automaton.h"
-#include "evaluation/applicator.h"
-#include "evaluation/integrator.h"
+#include "evaluation/map_evolver.h"
+#include "evaluation/vector_field_evolver.h"
 #include "evaluation/applicator_plugin.h"
 #include "evaluation/lohner_integrator.h"
 #include "evaluation/affine_integrator.h"
@@ -87,9 +87,9 @@ int bouncing_ball_automaton()
 
   LohnerIntegrator<R> lohner;
 
-  Applicator<BS> discrete_time_evolver(parameters);
-  Integrator<BS> continuous_time_evolver(parameters,lohner); 
-  SetBasedHybridEvolver<R> hybrid_evolver(discrete_time_evolver,continuous_time_evolver);
+  MapEvolver<BS> map_evolver(parameters);
+  VectorFieldEvolver<BS> vector_field_evolver(parameters,lohner); 
+  SetBasedHybridEvolver<R> hybrid_evolver(map_evolver,vector_field_evolver);
   
   Grid<R> grid(Vector<R>("[0.25,0.25,1.0]"));
   Rectangle<R> bounding_box(domain.neighbourhood(1));

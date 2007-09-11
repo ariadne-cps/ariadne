@@ -1,5 +1,5 @@
 /***************************************************************************
- *            integrator.h
+ *            vector_field_evolver.h
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file integrator.h
+/*! \file vector_field_evolver.h
  *  \brief Methods for integrating points and sets under a vector field.
  */
 
@@ -57,7 +57,7 @@ namespace Ariadne {
      *  \ingroup Integrate
      */
     template<class BS>
-    class Integrator {
+    class VectorFieldEvolver {
      private:
       typedef typename BS::real_type R;
       typedef typename Numeric::traits<R>::arithmetic_type F;
@@ -89,16 +89,16 @@ namespace Ariadne {
       typedef System::VectorFieldInterface<R> vector_field_type;
 
       /*! \brief Virtual destructor. */
-      virtual ~Integrator();
+      virtual ~VectorFieldEvolver();
 
       /*! \brief Constructor. */
-      Integrator(const EvolutionParameters<R>& parameters, const IntegratorPluginInterface<BS>& plugin);
+      VectorFieldEvolver(const EvolutionParameters<R>& parameters, const IntegratorPluginInterface<BS>& plugin);
 
       /*! \brief Copy constructor. */
-      Integrator(const Integrator<BS>& i);
+      VectorFieldEvolver(const VectorFieldEvolver<BS>& i);
 
       /*! \brief Make a dynamically-allocated copy. */
-      virtual Integrator<BS>* clone() const;
+      virtual VectorFieldEvolver<BS>* clone() const;
 
       //@{
       //! \name Parameters controlling the accuracy

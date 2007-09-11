@@ -76,8 +76,8 @@ EVALUATION_SRC = \
 	evaluation/bounder.cc \
 	evaluation/detector.cc \
 	evaluation/flow.cc \
-	evaluation/applicator.cc \
-	evaluation/integrator.cc \
+	evaluation/map_evolver.cc \
+	evaluation/vector_field_evolver.cc \
 	evaluation/set_based_hybrid_evolver.cc \
 	evaluation/constraint_based_hybrid_evolver.cc \
 	evaluation/constraint_based_hybrid_evolver_plugin.cc 

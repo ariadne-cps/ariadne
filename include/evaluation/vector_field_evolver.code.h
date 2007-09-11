@@ -1,5 +1,5 @@
 /***************************************************************************
- *            integrator.code.h
+ *            vector_field_evolver.code.h
  *
  *  Copyright  2006-7  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -59,7 +59,7 @@
 
 #include "../output/logging.h"
 
-#include "integrator.h"
+#include "vector_field_evolver.h"
 
 namespace {
     
@@ -105,7 +105,7 @@ using namespace Geometry;
 using namespace System;
 
 template<class BS>
-Evaluation::Integrator<BS>::~Integrator()
+Evaluation::VectorFieldEvolver<BS>::~VectorFieldEvolver()
 {
   delete _parameters;
   delete _bounder_plugin;
@@ -113,7 +113,7 @@ Evaluation::Integrator<BS>::~Integrator()
 }
 
 template<class BS>
-Evaluation::Integrator<BS>::Integrator(const Integrator<BS>& i)
+Evaluation::VectorFieldEvolver<BS>::VectorFieldEvolver(const VectorFieldEvolver<BS>& i)
   : _parameters(i._parameters->clone()),
     _bounder_plugin(i._bounder_plugin->clone()),
     _integrator_plugin(i._integrator_plugin->clone())
@@ -122,14 +122,14 @@ Evaluation::Integrator<BS>::Integrator(const Integrator<BS>& i)
 
 
 template<class BS>
-Evaluation::Integrator<BS>*
-  Evaluation::Integrator<BS>::clone() const
+Evaluation::VectorFieldEvolver<BS>*
+  Evaluation::VectorFieldEvolver<BS>::clone() const
 {
-  return new Integrator<BS>(*this);
+  return new VectorFieldEvolver<BS>(*this);
 }
 
 template<class BS>
-Evaluation::Integrator<BS>::Integrator(const EvolutionParameters<R>& parameters, const IntegratorPluginInterface<BS>& plugin)
+Evaluation::VectorFieldEvolver<BS>::VectorFieldEvolver(const EvolutionParameters<R>& parameters, const IntegratorPluginInterface<BS>& plugin)
   : _parameters(new EvolutionParameters<R>(parameters)),
     _bounder_plugin(new BounderPlugin<R>()),
     _integrator_plugin(plugin.clone())
@@ -139,57 +139,57 @@ Evaluation::Integrator<BS>::Integrator(const EvolutionParameters<R>& parameters,
 
 
 template<class BS>
-Evaluation::EvolutionParameters<typename Evaluation::Integrator<BS>::R>&
-Evaluation::Integrator<BS>::parameters() 
+Evaluation::EvolutionParameters<typename Evaluation::VectorFieldEvolver<BS>::R>&
+Evaluation::VectorFieldEvolver<BS>::parameters() 
 {
   return *this->_parameters;
 }
 
 template<class BS>
-const Evaluation::EvolutionParameters<typename Evaluation::Integrator<BS>::R>&
-Evaluation::Integrator<BS>::parameters() const
+const Evaluation::EvolutionParameters<typename Evaluation::VectorFieldEvolver<BS>::R>&
+Evaluation::VectorFieldEvolver<BS>::parameters() const
 {
   return *this->_parameters;
 }
 
 template<class BS>
 time_type 
-Evaluation::Integrator<BS>::minimum_step_size() const
+Evaluation::VectorFieldEvolver<BS>::minimum_step_size() const
 {
   return this->_parameters->minimum_step_size();
 }
 
 template<class BS>
 time_type 
-Evaluation::Integrator<BS>::maximum_step_size() const
+Evaluation::VectorFieldEvolver<BS>::maximum_step_size() const
 {
   return this->_parameters->maximum_step_size();
 }
 
 template<class BS>
-typename Evaluation::Integrator<BS>::R
-Evaluation::Integrator<BS>::minimum_basic_set_radius() const
+typename Evaluation::VectorFieldEvolver<BS>::R
+Evaluation::VectorFieldEvolver<BS>::minimum_basic_set_radius() const
 {
   return this->_parameters->minimum_basic_set_radius();
 }
 
 template<class BS>
-typename Evaluation::Integrator<BS>::R
-Evaluation::Integrator<BS>::maximum_basic_set_radius() const
+typename Evaluation::VectorFieldEvolver<BS>::R
+Evaluation::VectorFieldEvolver<BS>::maximum_basic_set_radius() const
 {
   return this->_parameters->maximum_basic_set_radius();
 }
 
 template<class BS>
-typename Evaluation::Integrator<BS>::R
-Evaluation::Integrator<BS>::grid_length() const
+typename Evaluation::VectorFieldEvolver<BS>::R
+Evaluation::VectorFieldEvolver<BS>::grid_length() const
 {
   return this->_parameters->grid_length();
 }
 
 template<class BS>
 time_type 
-Evaluation::Integrator<BS>::lock_to_grid_time() const
+Evaluation::VectorFieldEvolver<BS>::lock_to_grid_time() const
 {
   return this->_parameters->lock_to_grid_time();
 }
@@ -198,22 +198,22 @@ Evaluation::Integrator<BS>::lock_to_grid_time() const
 
 
 template<class BS>
-typename Evaluation::Integrator<BS>::list_set_type
-Evaluation::Integrator<BS>::subdivide(const basic_set_type& set) const
+typename Evaluation::VectorFieldEvolver<BS>::list_set_type
+Evaluation::VectorFieldEvolver<BS>::subdivide(const basic_set_type& set) const
 {
-  ARIADNE_LOG(5,"Integrator::subdivide(BasicSet)\n");
+  ARIADNE_LOG(5,"VectorFieldEvolver::subdivide(BasicSet)\n");
   return set.subdivide();
 }
 
 
 template<class BS>
-typename Evaluation::Integrator<BS>::basic_set_type
-Evaluation::Integrator<BS>::integration_step(const vector_field_type& vector_field, 
+typename Evaluation::VectorFieldEvolver<BS>::basic_set_type
+Evaluation::VectorFieldEvolver<BS>::integration_step(const vector_field_type& vector_field, 
                                              const basic_set_type& initial_set, 
                                              time_type& step_size) const
 {
-  ARIADNE_LOG(2,"BasicSet Integrator::integration_step(VectorFieldInterface,BasicSet,Time)\n");
-  ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set,"Integrator::integration_step(VectorFieldInterface,BasicSet,Time)");
+  ARIADNE_LOG(2,"BasicSet VectorFieldEvolver::integration_step(VectorFieldInterface,BasicSet,Time)\n");
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set,"VectorFieldEvolver::integration_step(VectorFieldInterface,BasicSet,Time)");
 
   bounding_set_type bounding_set=this->_bounder_plugin->estimate_flow_bounds(vector_field,initial_set.bounding_box(),step_size);
   bounding_set=this->_bounder_plugin->refine_flow_bounds(vector_field,initial_set.bounding_box(),bounding_set,step_size);
@@ -223,13 +223,13 @@ Evaluation::Integrator<BS>::integration_step(const vector_field_type& vector_fie
 
 
 template<class BS>
-typename Evaluation::Integrator<BS>::basic_set_type
-Evaluation::Integrator<BS>::reachability_step(const vector_field_type& vector_field, 
+typename Evaluation::VectorFieldEvolver<BS>::basic_set_type
+Evaluation::VectorFieldEvolver<BS>::reachability_step(const vector_field_type& vector_field, 
                                               const basic_set_type& initial_set, 
                                               time_type& step_size) const
 {
-  ARIADNE_LOG(2,"BasicSet Integrator::reachability_step(VectorFieldInterface,BasicSet,Time)\n");
-  ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set,"Integrator::reachability_step(VectorFieldInterface,BasicSet,Time)");
+  ARIADNE_LOG(2,"BasicSet VectorFieldEvolver::reachability_step(VectorFieldInterface,BasicSet,Time)\n");
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set,"VectorFieldEvolver::reachability_step(VectorFieldInterface,BasicSet,Time)");
   bounding_set_type bounding_set=this->_bounder_plugin->estimate_flow_bounds(vector_field,initial_set.bounding_box(),step_size);
   bounding_set=this->_bounder_plugin->refine_flow_bounds(vector_field,initial_set.bounding_box(),bounding_set,step_size);
   bounding_set=this->_bounder_plugin->refine_flow_bounds(vector_field,initial_set.bounding_box(),bounding_set,step_size);
@@ -240,12 +240,12 @@ Evaluation::Integrator<BS>::reachability_step(const vector_field_type& vector_fi
 
 
 template<class BS>
-Geometry::SetInterface<typename Evaluation::Integrator<BS>::R>*
-Evaluation::Integrator<BS>::integrate(const System::VectorFieldInterface<R>& vector_field, 
+Geometry::SetInterface<typename Evaluation::VectorFieldEvolver<BS>::R>*
+Evaluation::VectorFieldEvolver<BS>::integrate(const System::VectorFieldInterface<R>& vector_field, 
                                       const Geometry::SetInterface<R>& initial_set, 
                                       const Numeric::Rational& time) const
 {
-  ARIADNE_LOG(2,"SetInterface* Integrator::integrate(VectorFieldInterface,SetInterface>,Time)\n");
+  ARIADNE_LOG(2,"SetInterface* VectorFieldEvolver::integrate(VectorFieldInterface,SetInterface>,Time)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   const VectorFieldInterface<R>& cast_vector_field=vector_field;
   Rectangle<R> bb=initial_set.bounding_box();
@@ -262,7 +262,7 @@ Evaluation::Integrator<BS>::integrate(const System::VectorFieldInterface<R>& vec
 
 template<class BS>
 Geometry::SetInterface<typename BS::real_type>*
-Evaluation::Integrator<BS>::integrate(const System::VectorFieldInterface<R>& vector_field,
+Evaluation::VectorFieldEvolver<BS>::integrate(const System::VectorFieldInterface<R>& vector_field,
                                      const Geometry::SetInterface<R>& initial_set,
                                      const Geometry::SetInterface<R>& bounding_set,
                                      const time_type& time) const
@@ -292,13 +292,13 @@ Evaluation::Integrator<BS>::integrate(const System::VectorFieldInterface<R>& vec
 
 template<class BS>
 Geometry::SetInterface<typename BS::real_type>*
-Evaluation::Integrator<BS>::reach(const System::VectorFieldInterface<R>& vector_field,
+Evaluation::VectorFieldEvolver<BS>::reach(const System::VectorFieldInterface<R>& vector_field,
                                   const Geometry::SetInterface<R>& initial_set,
                                   const time_type& time) const
 {
   using namespace Geometry;
   typedef Numeric::Interval<BS> I;
-  ARIADNE_LOG(2,"SetInterface* Integrator::reach(VectorFile,SetInterface,Time)\n");
+  ARIADNE_LOG(2,"SetInterface* VectorFieldEvolver::reach(VectorFile,SetInterface,Time)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   const VectorFieldInterface<R>& cast_vector_field=vector_field;
   Rectangle<R> bb=initial_set.bounding_box();
@@ -312,7 +312,7 @@ Evaluation::Integrator<BS>::reach(const System::VectorFieldInterface<R>& vector_
 
 template<class BS>
 Geometry::SetInterface<typename BS::real_type>*
-Evaluation::Integrator<BS>::reach(const System::VectorFieldInterface<R>& vector_field,
+Evaluation::VectorFieldEvolver<BS>::reach(const System::VectorFieldInterface<R>& vector_field,
                                  const Geometry::SetInterface<R>& initial_set,
                                  const Geometry::SetInterface<R>& bounding_set,
                                  const time_type& time) const
@@ -341,7 +341,7 @@ Evaluation::Integrator<BS>::reach(const System::VectorFieldInterface<R>& vector_
 
 template<class BS>
 Geometry::SetInterface<typename BS::real_type>*
-Evaluation::Integrator<BS>::reach(const System::VectorFieldInterface<R>& vector_field,
+Evaluation::VectorFieldEvolver<BS>::reach(const System::VectorFieldInterface<R>& vector_field,
                                            const Geometry::SetInterface<R>& initial_set) const
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
@@ -351,7 +351,7 @@ Evaluation::Integrator<BS>::reach(const System::VectorFieldInterface<R>& vector_
 
 template<class BS>
 Geometry::SetInterface<typename BS::real_type>*
-Evaluation::Integrator<BS>::chainreach(const System::VectorFieldInterface<R>& vector_field,
+Evaluation::VectorFieldEvolver<BS>::chainreach(const System::VectorFieldInterface<R>& vector_field,
                                       const Geometry::SetInterface<R>& initial_set,
                                       const Geometry::SetInterface<R>& bounding_set) const
 {
@@ -379,13 +379,13 @@ Evaluation::Integrator<BS>::chainreach(const System::VectorFieldInterface<R>& ve
 
 template<class BS>
 Geometry::SetInterface<typename BS::real_type>*
-Evaluation::Integrator<BS>::viable(const System::VectorFieldInterface<R>& vector_field,
+Evaluation::VectorFieldEvolver<BS>::viable(const System::VectorFieldInterface<R>& vector_field,
                                   const Geometry::SetInterface<R>& bounding_set) const
 {
   using namespace Geometry;
-  ARIADNE_LOG(2,"SetInterface* Applicator::viable(VectorFieldInterface,SetInterface)\n");
+  ARIADNE_LOG(2,"SetInterface* MapEvolver::viable(VectorFieldInterface,SetInterface)\n");
   ARIADNE_LOG(3,"bounding_set="<<bounding_set<<"\n");
-  ARIADNE_CHECK_BOUNDED(bounding_set,"SetInterface* Integrator::viable(VectorFieldInterface vector_field, SetInterface bounding_set)");
+  ARIADNE_CHECK_BOUNDED(bounding_set,"SetInterface* VectorFieldEvolver::viable(VectorFieldInterface vector_field, SetInterface bounding_set)");
   Rectangle<R> bounding_box=bounding_set.bounding_box();
   Grid<R> grid(bounding_set.dimension(),this->grid_length());
   GridMaskSet<R> grid_bounding_set(grid,bounding_box);
@@ -396,7 +396,7 @@ Evaluation::Integrator<BS>::viable(const System::VectorFieldInterface<R>& vector
 
 template<class BS>
 tribool
-Evaluation::Integrator<BS>::verify(const System::VectorFieldInterface<R>& vector_field,
+Evaluation::VectorFieldEvolver<BS>::verify(const System::VectorFieldInterface<R>& vector_field,
                                   const Geometry::SetInterface<R>& initial_set,
                                   const Geometry::SetInterface<R>& safe_set) const
 {
@@ -431,11 +431,11 @@ Evaluation::Integrator<BS>::verify(const System::VectorFieldInterface<R>& vector
 
 template<class BS>
 BS
-Evaluation::Integrator<BS>::integrate(const VectorFieldInterface<R>& vector_field, 
+Evaluation::VectorFieldEvolver<BS>::integrate(const VectorFieldInterface<R>& vector_field, 
                                                const BS& initial_set, 
                                                const time_type& time) const
 {
-  ARIADNE_LOG(4,"BasicSet Integrator::reach(VectorFieldInterface vector_field, BasicSet initial_set, Time time)\n");
+  ARIADNE_LOG(4,"BasicSet VectorFieldEvolver::reach(VectorFieldInterface vector_field, BasicSet initial_set, Time time)\n");
   ARIADNE_LOG(5,"initial_set="<<initial_set<<"\n");
   
   if(time==0) { 
@@ -462,11 +462,11 @@ Evaluation::Integrator<BS>::integrate(const VectorFieldInterface<R>& vector_fiel
 
 template<class BS>
 Geometry::ListSet<BS> 
-Evaluation::Integrator<BS>::reach(const VectorFieldInterface<R>& vector_field, 
+Evaluation::VectorFieldEvolver<BS>::reach(const VectorFieldInterface<R>& vector_field, 
                                            const BS& initial_set, 
                                            const time_type& time) const
 {
-  ARIADNE_LOG(4,"ListSet<BS> Integrator::reach(VectorFieldInterface vector_field, BasicSet initial_set, Time time)\n");
+  ARIADNE_LOG(4,"ListSet<BS> VectorFieldEvolver::reach(VectorFieldInterface vector_field, BasicSet initial_set, Time time)\n");
   ARIADNE_LOG(5,"initial_set="<<initial_set<<"\n");
   
   if(time==0) { 
@@ -500,11 +500,11 @@ Evaluation::Integrator<BS>::reach(const VectorFieldInterface<R>& vector_field,
 // Template pattern for integrating a list set
 template<class BS>
 Geometry::ListSet<BS>
-Evaluation::Integrator<BS>::lower_integrate(const VectorFieldInterface<R>& vector_field, 
+Evaluation::VectorFieldEvolver<BS>::lower_integrate(const VectorFieldInterface<R>& vector_field, 
                                                      const ListSet<BS>& initial_set, 
                                                      const time_type& time) const
 {
-  ARIADNE_LOG(2,"ListSet< Rectangle<R> > Integrator::lower_integrate(VectorFieldInterface vector_field, ListSet< Rectangle<R> > initial_set, Time time)\n");
+  ARIADNE_LOG(2,"ListSet< Rectangle<R> > VectorFieldEvolver::lower_integrate(VectorFieldInterface vector_field, ListSet< Rectangle<R> > initial_set, Time time)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   using namespace Numeric;
   
@@ -563,11 +563,11 @@ Evaluation::Integrator<BS>::lower_integrate(const VectorFieldInterface<R>& vecto
 
 template<class BS>
 Geometry::ListSet<BS>
-Evaluation::Integrator<BS>::lower_reach(const VectorFieldInterface<R>& vector_field, 
+Evaluation::VectorFieldEvolver<BS>::lower_reach(const VectorFieldInterface<R>& vector_field, 
                                                  const ListSet<BS>& initial_set, 
                                                  const time_type& time) const
 {
-  ARIADNE_LOG(2,"ListSet< Rectangle<R> > Integrator::lower_reach(VectorFieldInterface vector_field, ListSet< Rectangle<R> > initial_set, Time time)\n");
+  ARIADNE_LOG(2,"ListSet< Rectangle<R> > VectorFieldEvolver::lower_reach(VectorFieldInterface vector_field, ListSet< Rectangle<R> > initial_set, Time time)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   using namespace Numeric;
   
@@ -626,15 +626,15 @@ Evaluation::Integrator<BS>::lower_reach(const VectorFieldInterface<R>& vector_fi
 // Template pattern for integrating a list set
 template<class BS>
 Geometry::ListSet<BS>
-Evaluation::Integrator<BS>::upper_integrate(const VectorFieldInterface<R>& vector_field, 
+Evaluation::VectorFieldEvolver<BS>::upper_integrate(const VectorFieldInterface<R>& vector_field, 
                                                      const ListSet<BS>& initial_set, 
                                                      const time_type& time) const
 {
-  ARIADNE_LOG(2,"ListSet< Rectangle<R> > Integrator::upper_integrate(VectorFieldInterface vector_field, ListSet< Rectangle<R> > initial_set, Time time)\n");
+  ARIADNE_LOG(2,"ListSet< Rectangle<R> > VectorFieldEvolver::upper_integrate(VectorFieldInterface vector_field, ListSet< Rectangle<R> > initial_set, Time time)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   using namespace Numeric;
   
-  if(verbosity>4) { std::clog << "ListSet< Rectangle<R> > Integrator::integrate(VectorFieldInterface,ListSet< Rectangle<R> >,Time)" << std::endl; } 
+  if(verbosity>4) { std::clog << "ListSet< Rectangle<R> > VectorFieldEvolver::integrate(VectorFieldInterface,ListSet< Rectangle<R> >,Time)" << std::endl; } 
   
   if(time==0) { 
     return initial_set;
@@ -716,11 +716,11 @@ Evaluation::Integrator<BS>::upper_integrate(const VectorFieldInterface<R>& vecto
 
 template<class BS>
 Geometry::ListSet<BS>
-Evaluation::Integrator<BS>::upper_reach(const VectorFieldInterface<R>& vector_field, 
+Evaluation::VectorFieldEvolver<BS>::upper_reach(const VectorFieldInterface<R>& vector_field, 
                                                  const ListSet<BS>& initial_set, 
                                                  const time_type& time) const
 {
-  ARIADNE_LOG(2,"ListSet<BasicSet> Integrator::integrate(VectorFieldInterface vector_field, ListSet<BasicSet> initial_set, Time time)\n");
+  ARIADNE_LOG(2,"ListSet<BasicSet> VectorFieldEvolver::integrate(VectorFieldInterface vector_field, ListSet<BasicSet> initial_set, Time time)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   using namespace Numeric;
   
@@ -814,11 +814,11 @@ Evaluation::Integrator<BS>::upper_reach(const VectorFieldInterface<R>& vector_fi
 
 template<class BS>
 Geometry::ListSet< Rectangle<typename BS::real_type> >
-Evaluation::Integrator<BS>::integrate(const System::VectorFieldInterface<R>& vector_field, 
+Evaluation::VectorFieldEvolver<BS>::integrate(const System::VectorFieldInterface<R>& vector_field, 
                                                const Geometry::ListSet< Rectangle<R> >& initial_set,
                                                const time_type& time) const
 {
-  ARIADNE_LOG(2,"ListSet<Rectangle> Integrator::integrate(VectorFieldInterface vector_field, ListSet<Rectangle> initial_set, Time time)\n");
+  ARIADNE_LOG(2,"ListSet<Rectangle> VectorFieldEvolver::integrate(VectorFieldInterface vector_field, ListSet<Rectangle> initial_set, Time time)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   ListSet< Rectangle<R> > result;
   const VectorFieldInterface<R>& vf=vector_field;
@@ -836,11 +836,11 @@ Evaluation::Integrator<BS>::integrate(const System::VectorFieldInterface<R>& vec
 
 template<class BS>
 Geometry::ListSet< Rectangle<typename BS::real_type> >
-Evaluation::Integrator<BS>::reach(const System::VectorFieldInterface<R>& vector_field, 
+Evaluation::VectorFieldEvolver<BS>::reach(const System::VectorFieldInterface<R>& vector_field, 
                                            const Geometry::ListSet< Rectangle<R> >& initial_set,
                                            const time_type& time) const
 {
-  ARIADNE_LOG(2,"ListSet<Rectangle> Integrator::integrate(VectorFieldInterface vector_field, ListSet<Rectangle> initial_set, Time time)\n");
+  ARIADNE_LOG(2,"ListSet<Rectangle> VectorFieldEvolver::integrate(VectorFieldInterface vector_field, ListSet<Rectangle> initial_set, Time time)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
 
   ListSet< Rectangle<R> > result;
@@ -859,16 +859,16 @@ Evaluation::Integrator<BS>::reach(const System::VectorFieldInterface<R>& vector_
 
 template<class BS>
 Geometry::GridMaskSet<typename BS::real_type>
-Evaluation::Integrator<BS>::integrate(const System::VectorFieldInterface<R>& vector_field, 
+Evaluation::VectorFieldEvolver<BS>::integrate(const System::VectorFieldInterface<R>& vector_field, 
                                                const Geometry::GridMaskSet<R>& initial_set,
                                                const Geometry::GridMaskSet<R>& bounding_set,
                                                const time_type& time) const
 {
-  ARIADNE_LOG(2,"GridMaskSet Integrator::integrate(VectorFieldInterface vector_field, GridMaskSet initial_set, GridMaskSet bounding_set, Time time)\n");
+  ARIADNE_LOG(2,"GridMaskSet VectorFieldEvolver::integrate(VectorFieldInterface vector_field, GridMaskSet initial_set, GridMaskSet bounding_set, Time time)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   const VectorFieldInterface<R>& vf=vector_field;
   
-  ARIADNE_CHECK_SAME_GRID(initial_set,bounding_set,"GridMaskSet Integrator::integrate(VectorFieldInterface,GridMaskSet,GridMaskSet,Time)");
+  ARIADNE_CHECK_SAME_GRID(initial_set,bounding_set,"GridMaskSet VectorFieldEvolver::integrate(VectorFieldInterface,GridMaskSet,GridMaskSet,Time)");
   using namespace System;
   using namespace Geometry;
   using namespace LinearAlgebra;
@@ -945,23 +945,23 @@ Evaluation::Integrator<BS>::integrate(const System::VectorFieldInterface<R>& vec
 
 template<class BS>
 Geometry::GridMaskSet<typename BS::real_type>
-Evaluation::Integrator<BS>::reach(const System::VectorFieldInterface<R>& vector_field, 
+Evaluation::VectorFieldEvolver<BS>::reach(const System::VectorFieldInterface<R>& vector_field, 
                                            const Geometry::GridMaskSet<R>& initial_set,
                                            const Geometry::GridMaskSet<R>& bounding_set,
                                            const time_type& time) const
 {
   using namespace Numeric;
   
-  ARIADNE_LOG(2,"GridMaskSet Integrator::reach(VectorFieldInterface vector_field, GridMaskSet initial_set, GridMaskSet bounding_set, Time time)\n");
+  ARIADNE_LOG(2,"GridMaskSet VectorFieldEvolver::reach(VectorFieldInterface vector_field, GridMaskSet initial_set, GridMaskSet bounding_set, Time time)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   typedef typename GridMaskSet<R>::const_iterator gms_const_iterator;
   typedef typename ListSet<BS>::const_iterator ls_const_iterator;
-  ARIADNE_CHECK_BOUNDED(initial_set,"GridMaskSet Integrator::reach(VectorFieldInterface,GridMaskSet,GridMaskSet,Time)");
-  ARIADNE_CHECK_BOUNDED(bounding_set,"GridMaskSet Integrator::reach(VectorFieldInterface,GridMaskSet,GridMaskSet,Time)");
+  ARIADNE_CHECK_BOUNDED(initial_set,"GridMaskSet VectorFieldEvolver::reach(VectorFieldInterface,GridMaskSet,GridMaskSet,Time)");
+  ARIADNE_CHECK_BOUNDED(bounding_set,"GridMaskSet VectorFieldEvolver::reach(VectorFieldInterface,GridMaskSet,GridMaskSet,Time)");
   const VectorFieldInterface<R>& vf=vector_field;
   
   if(!subset(initial_set,bounding_set)) {
-    throw std::runtime_error("GridMaskSet Integrator::reach(VectorFieldInterface,GridMaskSet,GridMaskSet,Time): Initial set must be subset of bounding set");
+    throw std::runtime_error("GridMaskSet VectorFieldEvolver::reach(VectorFieldInterface,GridMaskSet,GridMaskSet,Time): Initial set must be subset of bounding set");
   }
   
   const GridMaskSet<R>& is=initial_set;
@@ -1005,22 +1005,22 @@ Evaluation::Integrator<BS>::reach(const System::VectorFieldInterface<R>& vector_
 
 template<class BS>
 Geometry::GridMaskSet<typename BS::real_type>
-Evaluation::Integrator<BS>::chainreach(const System::VectorFieldInterface<R>& vector_field, 
+Evaluation::VectorFieldEvolver<BS>::chainreach(const System::VectorFieldInterface<R>& vector_field, 
                                                 const Geometry::GridMaskSet<R>& initial_set, 
                                                 const Geometry::GridMaskSet<R>& bounding_set) const
 {
-  ARIADNE_LOG(2,"GridMaskSet Integrator::chainreach(VectorFieldInterface vector_field, GridMaskSet initial_set, GridMaskSet bounding_set)\n");
+  ARIADNE_LOG(2,"GridMaskSet VectorFieldEvolver::chainreach(VectorFieldInterface vector_field, GridMaskSet initial_set, GridMaskSet bounding_set)\n");
   ARIADNE_LOG(5,"vector_field="<<vector_field<<"\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   typedef typename GridCellListSet<R>::const_iterator gcls_const_iterator;
   typedef typename GridMaskSet<R>::const_iterator gms_const_iterator;
   typedef typename ListSet<BS>::const_iterator ls_const_iterator;
-  ARIADNE_CHECK_BOUNDED(initial_set,"GridMaskSet Integrator::chainreach(VectorFieldInterface,GridMaskSet,GridMaskSet)");
-  ARIADNE_CHECK_BOUNDED(bounding_set,"GridMaskSet Integrator::chainreach(VectorFieldInterface,GridMaskSet,GridMaskSet)");
+  ARIADNE_CHECK_BOUNDED(initial_set,"GridMaskSet VectorFieldEvolver::chainreach(VectorFieldInterface,GridMaskSet,GridMaskSet)");
+  ARIADNE_CHECK_BOUNDED(bounding_set,"GridMaskSet VectorFieldEvolver::chainreach(VectorFieldInterface,GridMaskSet,GridMaskSet)");
   const VectorFieldInterface<R>& vf=vector_field;
   
   if(!subset(initial_set,bounding_set)) {
-    throw std::runtime_error("GridMaskSet Integrator::chainreach(VectorFieldInterface,GridMaskSet,GridMaskSet): Initial set must be subset of bounding set");
+    throw std::runtime_error("GridMaskSet VectorFieldEvolver::chainreach(VectorFieldInterface,GridMaskSet,GridMaskSet): Initial set must be subset of bounding set");
   }
   
   const GridMaskSet<R>& is=initial_set;
@@ -1089,15 +1089,15 @@ Evaluation::Integrator<BS>::chainreach(const System::VectorFieldInterface<R>& ve
 
 template<class BS>
 Geometry::GridMaskSet<typename BS::real_type>
-Evaluation::Integrator<BS>::viable(const System::VectorFieldInterface<R>& vector_field, 
+Evaluation::VectorFieldEvolver<BS>::viable(const System::VectorFieldInterface<R>& vector_field, 
                                             const Geometry::GridMaskSet<R>& bounding_set) const
 {
-  ARIADNE_LOG(2,"GridMaskSet Integrator::viable(VectorFieldInterface vector_field, GridMaskSet bounding_set)\n");
+  ARIADNE_LOG(2,"GridMaskSet VectorFieldEvolver::viable(VectorFieldInterface vector_field, GridMaskSet bounding_set)\n");
   ARIADNE_LOG(3,"bounding_set="<<bounding_set<<"\n");
   using namespace Geometry;
   typedef Numeric::Interval<R> I;
   typedef typename Geometry::GridMaskSet<R>::const_iterator gms_const_iterator;
-  ARIADNE_CHECK_BOUNDED(bounding_set,"Integrator<BS>::viable(VectorFieldInterface,GridMaskSet)");
+  ARIADNE_CHECK_BOUNDED(bounding_set,"VectorFieldEvolver<BS>::viable(VectorFieldInterface,GridMaskSet)");
   
   const VectorFieldInterface<R>& vf=vector_field;
   const Grid<R>& g=bounding_set.grid();
@@ -1147,18 +1147,18 @@ Evaluation::Integrator<BS>::viable(const System::VectorFieldInterface<R>& vector
 
 template<class BS>
 tribool
-Evaluation::Integrator<BS>::verify(const System::VectorFieldInterface<R>& vector_field, 
+Evaluation::VectorFieldEvolver<BS>::verify(const System::VectorFieldInterface<R>& vector_field, 
                                             const Geometry::GridMaskSet<R>& initial_set, 
                                             const Geometry::GridMaskSet<R>& safe_set) const
 {
-  ARIADNE_LOG(2,"GridMaskSet Integrator::verify(VectorFieldInterface vector_field, GridMaskSet initial_set, GridMaskSet safe_set)\n");
+  ARIADNE_LOG(2,"GridMaskSet VectorFieldEvolver::verify(VectorFieldInterface vector_field, GridMaskSet initial_set, GridMaskSet safe_set)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   ARIADNE_LOG(3,"safe_set="<<safe_set<<"\n");
 
   typedef typename GridCellListSet<R>::const_iterator gcls_const_iterator;
   typedef typename ListSet<BS>::const_iterator ls_const_iterator;
-  ARIADNE_CHECK_BOUNDED(initial_set,"tribool Integrator::verify(VectorFieldInterface,GridMaskSet,GridMaskSet)");
-  ARIADNE_CHECK_BOUNDED(safe_set,"tribool Integrator::verify(VectorFieldInterface,GridMaskSet,GridMaskSet)");
+  ARIADNE_CHECK_BOUNDED(initial_set,"tribool VectorFieldEvolver::verify(VectorFieldInterface,GridMaskSet,GridMaskSet)");
+  ARIADNE_CHECK_BOUNDED(safe_set,"tribool VectorFieldEvolver::verify(VectorFieldInterface,GridMaskSet,GridMaskSet)");
   const VectorFieldInterface<R>& vf=vector_field;
   
   if(!subset(initial_set,safe_set)) {

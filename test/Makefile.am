@@ -56,12 +56,11 @@ check_PROGRAMS = \
 	test_set_based_hybrid_automaton \
 	test_constraint_based_hybrid_automaton \
 	 \
-	test_newton \
-	test_apply \
+	test_newton_solver \
 	test_lohner_integrator \
 	test_affine_integrator \
-	test_integrate \
-	test_chainreach \
+	test_map_evolver \
+	test_vector_field_evolver \
 	test_set_based_hybrid_evolver \
 	test_constraint_based_hybrid_evolver \
 	test_constraint_based_hybrid_evolver_plugin \
@@ -126,14 +125,11 @@ test_level_set_SOURCES=test_level_set.cc
 test_set_based_hybrid_automaton_SOURCES=test_set_based_hybrid_automaton.cc
 test_constraint_based_hybrid_automaton_SOURCES=test_constraint_based_hybrid_automaton.cc
 
-
-test_newton_SOURCES=test_newton.cc
-test_apply_SOURCES=test_apply.cc
+test_newton_solver_SOURCES=test_newton.cc
 test_lohner_integrator_SOURCES=test_lohner_integrator.cc
 test_affine_integrator_SOURCES=test_affine_integrator.cc
-test_integrate_SOURCES=test_integrate.cc
-test_chainreach_SOURCES=test_chainreach.cc
-test_hybrid_evolution_step_SOURCES=test_hybrid_evolution_step.cc
+test_map_evolver_SOURCES=test_map_evolver.cc
+test_vector_field_evolver_SOURCES=test_vector_field_evolver.cc
 test_set_based_hybrid_evolver_SOURCES=test_set_based_hybrid_evolver.cc
 test_constraint_based_hybrid_evolver_SOURCES=test_constraint_based_hybrid_evolver.cc
 test_constraint_based_hybrid_evolver_plugin_SOURCES=test_constraint_based_hybrid_evolver_plugin.cc

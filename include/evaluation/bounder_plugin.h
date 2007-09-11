@@ -41,7 +41,7 @@ namespace Ariadne {
   namespace Evaluation {
 
     /*! \brief A class for bounding the flow of a vector field.
-     *  \ingroup Integrator
+     *  \ingroup VectorFieldEvolver
      */
     template<class R>
     class BounderPlugin

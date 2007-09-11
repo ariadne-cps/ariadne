@@ -1,5 +1,5 @@
 /***************************************************************************
- *            applicator.code.h
+ *            map_evolver.code.h
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "applicator.h"
+#include "map_evolver.h"
 
 #include <iosfwd>
 #include <string>
@@ -67,7 +67,7 @@ static const double DEFAULT_GRID_LENGTH=0.125;
 
 
 template<class BS>
-Evaluation::Applicator<BS>::Applicator() 
+Evaluation::MapEvolver<BS>::MapEvolver() 
   : _parameters(new EvolutionParameters<R>()),
     _plugin(new ApplicatorPlugin<BS>())
 {
@@ -77,7 +77,7 @@ Evaluation::Applicator<BS>::Applicator()
 
 
 template<class BS>
-Evaluation::Applicator<BS>::Applicator(const EvolutionParameters<R>& parameters)
+Evaluation::MapEvolver<BS>::MapEvolver(const EvolutionParameters<R>& parameters)
   : _parameters(new EvolutionParameters<R>(parameters)),
     _plugin(new ApplicatorPlugin<BS>())
 {
@@ -85,7 +85,7 @@ Evaluation::Applicator<BS>::Applicator(const EvolutionParameters<R>& parameters)
 
 
 template<class BS>
-Evaluation::Applicator<BS>::Applicator(const Applicator<BS>& other) 
+Evaluation::MapEvolver<BS>::MapEvolver(const MapEvolver<BS>& other) 
   : _parameters(new EvolutionParameters<R>(other.parameters())),
     _plugin(other._plugin->clone())
 {
@@ -94,7 +94,7 @@ Evaluation::Applicator<BS>::Applicator(const Applicator<BS>& other)
 
 
 template<class BS>
-Evaluation::Applicator<BS>::~Applicator() 
+Evaluation::MapEvolver<BS>::~MapEvolver() 
 {
   delete this->_parameters;
   delete this->_plugin;
@@ -102,26 +102,26 @@ Evaluation::Applicator<BS>::~Applicator()
 
 
 template<class BS>
-Evaluation::Applicator<BS>*
-Evaluation::Applicator<BS>::clone() const 
+Evaluation::MapEvolver<BS>*
+Evaluation::MapEvolver<BS>::clone() const 
 {
-  return new Applicator<BS>(*this);
+  return new MapEvolver<BS>(*this);
 }
 
 
 
 
 template<class BS>
-const Evaluation::EvolutionParameters<typename Evaluation::Applicator<BS>::R>&
-Evaluation::Applicator<BS>::parameters() const
+const Evaluation::EvolutionParameters<typename Evaluation::MapEvolver<BS>::R>&
+Evaluation::MapEvolver<BS>::parameters() const
 {
   return *this->_parameters;
 }
 
 
 template<class BS>
-Evaluation::EvolutionParameters<typename Evaluation::Applicator<BS>::R>&
-Evaluation::Applicator<BS>::parameters() 
+Evaluation::EvolutionParameters<typename Evaluation::MapEvolver<BS>::R>&
+Evaluation::MapEvolver<BS>::parameters() 
 {
   return *this->_parameters;
 }
@@ -133,7 +133,7 @@ Evaluation::Applicator<BS>::parameters()
 
 template<class BS>
 Geometry::ListSet< BS >
-Evaluation::Applicator<BS>::subdivide(const BS& bs) const
+Evaluation::MapEvolver<BS>::subdivide(const BS& bs) const
 {
   return bs.subdivide();
 }
@@ -143,9 +143,9 @@ Evaluation::Applicator<BS>::subdivide(const BS& bs) const
 
 template<class BS>
 BS 
-Evaluation::Applicator<BS>::evaluate(const System::MapInterface<R>& f, const BS& bs) const
+Evaluation::MapEvolver<BS>::evaluate(const System::MapInterface<R>& f, const BS& bs) const
 {
-  ARIADNE_LOG(4,"BS Applicator::evaluate(MapInterface,BasicSet)\n");
+  ARIADNE_LOG(4,"BS MapEvolver::evaluate(MapInterface,BasicSet)\n");
   return this->_plugin->evaluate(f,bs);
 }
 
@@ -157,10 +157,10 @@ Evaluation::Applicator<BS>::evaluate(const System::MapInterface<R>& f, const BS&
 
 
 template<class BS>
-Geometry::ListSet< Geometry::Rectangle<typename Evaluation::Applicator<BS>::R> >
-Evaluation::Applicator<BS>::image(const System::MapInterface<R>& f, const Geometry::ListSet< Geometry::Rectangle<R> >& ds) const 
+Geometry::ListSet< Geometry::Rectangle<typename Evaluation::MapEvolver<BS>::R> >
+Evaluation::MapEvolver<BS>::image(const System::MapInterface<R>& f, const Geometry::ListSet< Geometry::Rectangle<R> >& ds) const 
 {
-  ARIADNE_LOG(2,"GridMaskSet Applicator::image(MapInterface map, ListSet< Rectangle<Float> > initial_set)\n");
+  ARIADNE_LOG(2,"GridMaskSet MapEvolver::image(MapInterface map, ListSet< Rectangle<Float> > initial_set)\n");
   ARIADNE_LOG(3,"initial_set="<<ds<<"\n");
   Geometry::ListSet< Geometry::Rectangle<R> > result(f.result_dimension());
   Geometry::Rectangle<R> bb;
@@ -176,9 +176,9 @@ Evaluation::Applicator<BS>::image(const System::MapInterface<R>& f, const Geomet
 
 template<class BS>
 Geometry::ListSet< BS > 
-Evaluation::Applicator<BS>::image(const System::MapInterface<R>& f, const Geometry::ListSet< BS >& ds) const 
+Evaluation::MapEvolver<BS>::image(const System::MapInterface<R>& f, const Geometry::ListSet< BS >& ds) const 
 {
-  ARIADNE_LOG(2,"GridMaskSet Applicator::image(MapInterface map, ListSet< Rectangle<Float> > initial_set)\n");
+  ARIADNE_LOG(2,"GridMaskSet MapEvolver::image(MapInterface map, ListSet< Rectangle<Float> > initial_set)\n");
   ARIADNE_LOG(3,"initial_set="<<ds<<"\n");
   Geometry::ListSet<BS> result(f.result_dimension());
   for(typename Geometry::ListSet<BS>::const_iterator iter=ds.begin(); iter!=ds.end(); ++iter) {
@@ -189,15 +189,15 @@ Evaluation::Applicator<BS>::image(const System::MapInterface<R>& f, const Geomet
 
 
 template<class BS>
-Geometry::GridCellListSet<typename Evaluation::Applicator<BS>::R> 
-Evaluation::Applicator<BS>::image(const System::MapInterface<R>& f, 
+Geometry::GridCellListSet<typename Evaluation::MapEvolver<BS>::R> 
+Evaluation::MapEvolver<BS>::image(const System::MapInterface<R>& f, 
                                  const Geometry::GridCellListSet<R>& initial_set, 
                                  const Geometry::Grid<R>& image_grid) const 
 {
   using namespace Geometry;
   typedef Numeric::Interval<R> I;
   typedef typename GridCellListSet<R>::const_iterator gcls_const_iterator;
-  ARIADNE_LOG(2,"GridMaskSet Applicator::image(MapInterface map, GridCellListSet initial_set, Grid image_grid)\n");
+  ARIADNE_LOG(2,"GridMaskSet MapEvolver::image(MapInterface map, GridCellListSet initial_set, Grid image_grid)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\nimage_grid="<<image_grid<<"\n");
   
   GridCellListSet<R> image(image_grid);
@@ -216,18 +216,18 @@ Evaluation::Applicator<BS>::image(const System::MapInterface<R>& f,
 
 
 template<class BS>
-Geometry::GridMaskSet<typename Evaluation::Applicator<BS>::R> 
-Evaluation::Applicator<BS>::image(const System::MapInterface<R>& f, 
+Geometry::GridMaskSet<typename Evaluation::MapEvolver<BS>::R> 
+Evaluation::MapEvolver<BS>::image(const System::MapInterface<R>& f, 
                                  const Geometry::GridMaskSet<R>& initial_set, 
                                  const Geometry::GridMaskSet<R>& bounding_set) const 
 {
   using namespace Geometry;
   typedef Numeric::Interval<R> I;
   typedef typename GridMaskSet<R>::const_iterator gms_const_iterator;
-  ARIADNE_LOG(2,"GridMaskSet Applicator::image(MapInterface f, GridMaskSet initial_set, GridMaskSet bounding_set)\n");
+  ARIADNE_LOG(2,"GridMaskSet MapEvolver::image(MapInterface f, GridMaskSet initial_set, GridMaskSet bounding_set)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\nbounding_set="<<bounding_set);
-  ARIADNE_CHECK_BOUNDED(initial_set,"GridMaskSet Applicator<BS>::image(MapInterface,GridMaskSet,GridMaskSet)");
-  ARIADNE_CHECK_BOUNDED(bounding_set,"Applicator<BS>::image(MapInterface,GridMaskSet,GridMaskSet)");
+  ARIADNE_CHECK_BOUNDED(initial_set,"GridMaskSet MapEvolver<BS>::image(MapInterface,GridMaskSet,GridMaskSet)");
+  ARIADNE_CHECK_BOUNDED(bounding_set,"MapEvolver<BS>::image(MapInterface,GridMaskSet,GridMaskSet)");
   
   const Grid<R>& g=initial_set.grid();
   Combinatoric::LatticeBlock bd=bounding_set.block();
@@ -256,12 +256,12 @@ Evaluation::Applicator<BS>::image(const System::MapInterface<R>& f,
 
 
 template<class BS>
-Geometry::GridMaskSet<typename Evaluation::Applicator<BS>::R> 
-Evaluation::Applicator<BS>::preimage(const System::MapInterface<R>& f, 
+Geometry::GridMaskSet<typename Evaluation::MapEvolver<BS>::R> 
+Evaluation::MapEvolver<BS>::preimage(const System::MapInterface<R>& f, 
                                     const Geometry::GridMaskSet<R>& set, 
                                     const Geometry::GridMaskSet<R>& bounding_set) const 
 {
-  ARIADNE_LOG(2,"GridMaskSet Applicator::preimage(MapInterface,GridMaskSet,GridMaskSet)\n");
+  ARIADNE_LOG(2,"GridMaskSet MapEvolver::preimage(MapInterface,GridMaskSet,GridMaskSet)\n");
   ARIADNE_LOG(3,"set="<<set<<"\nbounding_set="<<bounding_set);
   using namespace Numeric;
   using namespace Geometry;
@@ -295,13 +295,13 @@ Evaluation::Applicator<BS>::preimage(const System::MapInterface<R>& f,
 
 
 template<class BS>
-Geometry::ListSet< Geometry::Rectangle<typename Evaluation::Applicator<BS>::R> >
-Evaluation::Applicator<BS>::reach(const System::MapInterface<R>& f, 
+Geometry::ListSet< Geometry::Rectangle<typename Evaluation::MapEvolver<BS>::R> >
+Evaluation::MapEvolver<BS>::reach(const System::MapInterface<R>& f, 
                                   const Geometry::ListSet< Geometry::Rectangle<R> >& initial_set) const 
 {
   using namespace Geometry;
   typedef Numeric::Interval<R> I;
-  ARIADNE_LOG(2,"ListSet<Rectangle> Applicator::reach(MapInterface,ListSet<Rectangle>\n");
+  ARIADNE_LOG(2,"ListSet<Rectangle> MapEvolver::reach(MapInterface,ListSet<Rectangle>\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   ListSet< Rectangle<R> > result; 
   Rectangle<R> r;
@@ -326,12 +326,12 @@ Evaluation::Applicator<BS>::reach(const System::MapInterface<R>& f,
 
 template<class BS>
 Geometry::ListSet<BS> 
-Evaluation::Applicator<BS>::reach(const System::MapInterface<R>& f, 
+Evaluation::MapEvolver<BS>::reach(const System::MapInterface<R>& f, 
                                   const Geometry::ListSet<BS>& initial_set) const 
 {
   using namespace Geometry;
   typedef Numeric::Interval<R> I;
-  ARIADNE_LOG(2,"GridMaskSet Applicator::reach(MapInterface,ListSet<BS>\n");
+  ARIADNE_LOG(2,"GridMaskSet MapEvolver::reach(MapInterface,ListSet<BS>\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   ListSet<BS> result; 
   BS bs;
@@ -353,13 +353,13 @@ Evaluation::Applicator<BS>::reach(const System::MapInterface<R>& f,
 
 
 template<class BS>
-Geometry::GridMaskSet<typename Evaluation::Applicator<BS>::R> 
-Evaluation::Applicator<BS>::reach(const System::MapInterface<R>& f, 
+Geometry::GridMaskSet<typename Evaluation::MapEvolver<BS>::R> 
+Evaluation::MapEvolver<BS>::reach(const System::MapInterface<R>& f, 
                                  const Geometry::GridMaskSet<R>& initial_set) const 
 {
   using namespace Geometry;
   typedef Numeric::Interval<R> I;
-  ARIADNE_LOG(2,"GridMaskSet Applicator::reach(MapInterface,GridMaskSet)\n");
+  ARIADNE_LOG(2,"GridMaskSet MapEvolver::reach(MapInterface,GridMaskSet)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   GridMaskSet<R> result(initial_set.grid(),initial_set.block());
   typedef typename GridMaskSet<R>::const_iterator basic_set_iterator;
@@ -384,18 +384,18 @@ Evaluation::Applicator<BS>::reach(const System::MapInterface<R>& f,
 
 
 template<class BS>
-Geometry::GridMaskSet<typename Evaluation::Applicator<BS>::R> 
-Evaluation::Applicator<BS>::chainreach(const System::MapInterface<R>& f, 
+Geometry::GridMaskSet<typename Evaluation::MapEvolver<BS>::R> 
+Evaluation::MapEvolver<BS>::chainreach(const System::MapInterface<R>& f, 
                                       const Geometry::GridMaskSet<R>& initial_set, 
                                       const Geometry::GridMaskSet<R>& bounding_set) const
 {
   using namespace Geometry;
   typedef Numeric::Interval<R> I;
   typedef typename Geometry::GridCellListSet<R>::const_iterator gcls_const_iterator;
-  ARIADNE_LOG(2,"GridMaskSet Applicator::chainreach(MapInterface map, GridMaskSet initial_set, GridMaskSet bounding_set)\n");
+  ARIADNE_LOG(2,"GridMaskSet MapEvolver::chainreach(MapInterface map, GridMaskSet initial_set, GridMaskSet bounding_set)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\nbounding_set="<<bounding_set<<"\n");
-  ARIADNE_CHECK_BOUNDED(initial_set,"GridMaskSet Applicator<BS>::chainreach(MapInterface,GridMaskSet,GridMaskSet)");
-  ARIADNE_CHECK_BOUNDED(bounding_set,"GridMaskSet Applicator<BS>::chainreach(MapInterface,GridMaskSet,GridMaskSet)");
+  ARIADNE_CHECK_BOUNDED(initial_set,"GridMaskSet MapEvolver<BS>::chainreach(MapInterface,GridMaskSet,GridMaskSet)");
+  ARIADNE_CHECK_BOUNDED(bounding_set,"GridMaskSet MapEvolver<BS>::chainreach(MapInterface,GridMaskSet,GridMaskSet)");
   
   const Grid<R>& g=bounding_set.grid();
   Combinatoric::LatticeBlock bd=bounding_set.block();
@@ -436,16 +436,16 @@ Evaluation::Applicator<BS>::chainreach(const System::MapInterface<R>& f,
 
 
 template<class BS>
-Geometry::GridMaskSet<typename Evaluation::Applicator<BS>::R>
-Evaluation::Applicator<BS>::viable(const System::MapInterface<R>& f, 
+Geometry::GridMaskSet<typename Evaluation::MapEvolver<BS>::R>
+Evaluation::MapEvolver<BS>::viable(const System::MapInterface<R>& f, 
                                   const Geometry::GridMaskSet<R>& bounding_set) const
 {
   using namespace Geometry;
   typedef Numeric::Interval<R> I;
   typedef typename Geometry::GridMaskSet<R>::const_iterator gms_const_iterator;
-  ARIADNE_LOG(2,"GridMaskSet Applicator::viable(MapInterface map, GridMaskSet bounding_set)\n");
+  ARIADNE_LOG(2,"GridMaskSet MapEvolver::viable(MapInterface map, GridMaskSet bounding_set)\n");
   ARIADNE_LOG(3,"bounding_set="<<bounding_set<<"\n");
-  ARIADNE_CHECK_BOUNDED(bounding_set,"Applicator<BS>::viable(MapInterface,GridMaskSet)");
+  ARIADNE_CHECK_BOUNDED(bounding_set,"MapEvolver<BS>::viable(MapInterface,GridMaskSet)");
   
   const Grid<R>& g=bounding_set.grid();
   Combinatoric::LatticeBlock bd=bounding_set.block();
@@ -485,17 +485,17 @@ Evaluation::Applicator<BS>::viable(const System::MapInterface<R>& f,
 
 template<class BS>
 tribool
-Evaluation::Applicator<BS>::verify(const System::MapInterface<R>& f, 
+Evaluation::MapEvolver<BS>::verify(const System::MapInterface<R>& f, 
                                   const Geometry::GridMaskSet<R>& initial_set, 
                                   const Geometry::GridMaskSet<R>& safe_set) const
 {
-  ARIADNE_LOG(2,"triboolEvaluation::Applicator::verify(MapInterface map, GridMaskSet initial_set,GridMaskSet  safe_set)\n");
+  ARIADNE_LOG(2,"triboolEvaluation::MapEvolver::verify(MapInterface map, GridMaskSet initial_set,GridMaskSet  safe_set)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n"<<"safe_set="<<safe_set);
   typedef Numeric::Interval<R> I;
   using namespace Geometry;
   typedef typename Geometry::GridCellListSet<R>::const_iterator gcls_const_iterator;
-  ARIADNE_CHECK_BOUNDED(initial_set,"Applicator<BS>::verify(...)");
-  ARIADNE_CHECK_BOUNDED(safe_set,"Applicator<BS>::verify(...)");
+  ARIADNE_CHECK_BOUNDED(initial_set,"MapEvolver<BS>::verify(...)");
+  ARIADNE_CHECK_BOUNDED(safe_set,"MapEvolver<BS>::verify(...)");
   
   const Grid<R>& g=initial_set.grid();
   Combinatoric::LatticeBlock bd=safe_set.block();
@@ -535,14 +535,14 @@ Evaluation::Applicator<BS>::verify(const System::MapInterface<R>& f,
 
 
 template<class BS>
-Geometry::SetInterface<typename Evaluation::Applicator<BS>::R>*
-Evaluation::Applicator<BS>::image(const System::MapInterface<R>& f, 
+Geometry::SetInterface<typename Evaluation::MapEvolver<BS>::R>*
+Evaluation::MapEvolver<BS>::image(const System::MapInterface<R>& f, 
                                  const Geometry::SetInterface<R>& set) const
 {
   // FIXME: Only computes an over-approximation to the image.
   using namespace Geometry;
   typedef Numeric::Interval<R> I;
-  ARIADNE_LOG(2,"SetInterface* Applicator::image(MapInterface,SetInterface)\n");
+  ARIADNE_LOG(2,"SetInterface* MapEvolver::image(MapInterface,SetInterface)\n");
   ARIADNE_LOG(3,"set="<<set<<"\n");
   ListSet<BS>* result=new ListSet<BS>;
   Rectangle<R> bb=set.bounding_box();
@@ -564,14 +564,14 @@ Evaluation::Applicator<BS>::image(const System::MapInterface<R>& f,
 
 
 template<class BS>
-Geometry::SetInterface<typename Evaluation::Applicator<BS>::R>*
-Evaluation::Applicator<BS>::preimage(const System::MapInterface<R>& map, 
+Geometry::SetInterface<typename Evaluation::MapEvolver<BS>::R>*
+Evaluation::MapEvolver<BS>::preimage(const System::MapInterface<R>& map, 
                                     const Geometry::SetInterface<R>& set,
                                     const Geometry::SetInterface<R>& bound) const
 {
   typedef Numeric::Interval<R> I;
   using namespace Geometry;
-  ARIADNE_LOG(2,"SetInterface* Applicator::preimage(MapInterface map, SetInterface set)\n");
+  ARIADNE_LOG(2,"SetInterface* MapEvolver::preimage(MapInterface map, SetInterface set)\n");
   ARIADNE_LOG(3,"set="<<set<<"\n");
   Rectangle<R> preimage_bounding_box=bound.bounding_box();
   Grid<R> preimage_grid(map.argument_dimension(),this->parameters().grid_length());
@@ -586,13 +586,13 @@ Evaluation::Applicator<BS>::preimage(const System::MapInterface<R>& map,
 
 
 template<class BS>
-Geometry::SetInterface<typename Evaluation::Applicator<BS>::R>*
-Evaluation::Applicator<BS>::reach(const System::MapInterface<R>& f, 
+Geometry::SetInterface<typename Evaluation::MapEvolver<BS>::R>*
+Evaluation::MapEvolver<BS>::reach(const System::MapInterface<R>& f, 
                                  const Geometry::SetInterface<R>& initial_set) const
 {
   typedef Numeric::Interval<R> I;
   using namespace Geometry;
-  ARIADNE_LOG(2,"SetInterface* Applicator::reach(MapInterface,SetInterface)\n");
+  ARIADNE_LOG(2,"SetInterface* MapEvolver::reach(MapInterface,SetInterface)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   const ListSet<BS>* list_initial_set_ptr=dynamic_cast<const ListSet<BS>*>(&initial_set);
   ARIADNE_LOG(4,"list_initial_set_ptr="<<list_initial_set_ptr<<"\n");
@@ -600,7 +600,7 @@ Evaluation::Applicator<BS>::reach(const System::MapInterface<R>& f,
     return new ListSet<BS>(this->reach(f,*list_initial_set_ptr));
   }
   
-  ARIADNE_CHECK_BOUNDED(initial_set,"SetInterface* Applicator::reach(MapInterface,SetInterface)");
+  ARIADNE_CHECK_BOUNDED(initial_set,"SetInterface* MapEvolver::reach(MapInterface,SetInterface)");
   
   ListSet<BS> list_initial_set;
   if(dynamic_cast<const RectangularSet<R>*>(&initial_set)) {
@@ -620,16 +620,16 @@ Evaluation::Applicator<BS>::reach(const System::MapInterface<R>& f,
 
 
 template<class BS>
-Geometry::SetInterface<typename Evaluation::Applicator<BS>::R>*
-Evaluation::Applicator<BS>::chainreach(const System::MapInterface<R>& map, 
+Geometry::SetInterface<typename Evaluation::MapEvolver<BS>::R>*
+Evaluation::MapEvolver<BS>::chainreach(const System::MapInterface<R>& map, 
                                       const Geometry::SetInterface<R>& initial_set, 
                                       const Geometry::SetInterface<R>& bounding_set) const
 {
   using namespace Geometry;
-  ARIADNE_LOG(2,"SetInterface* Applicator::chainreach(MapInterface,SetInterface,SetInterface)\n");
+  ARIADNE_LOG(2,"SetInterface* MapEvolver::chainreach(MapInterface,SetInterface,SetInterface)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n"<<"bounding_set="<<bounding_set<<"\n");
   
-  ARIADNE_CHECK_BOUNDED(bounding_set,"SetInterface* Applicator::chainreach(MapInterface map, SetInterface initial_set, SetInterface bounding_set)");
+  ARIADNE_CHECK_BOUNDED(bounding_set,"SetInterface* MapEvolver::chainreach(MapInterface map, SetInterface initial_set, SetInterface bounding_set)");
   Rectangle<R> bounding_box=bounding_set.bounding_box();
   Grid<R> grid(bounding_set.dimension(),this->parameters().grid_length());
   FiniteGrid<R> finite_grid(grid,bounding_box);
@@ -645,14 +645,14 @@ Evaluation::Applicator<BS>::chainreach(const System::MapInterface<R>& map,
 
 
 template<class BS>
-Geometry::SetInterface<typename Evaluation::Applicator<BS>::R>*
-Evaluation::Applicator<BS>::viable(const System::MapInterface<R>& map, 
+Geometry::SetInterface<typename Evaluation::MapEvolver<BS>::R>*
+Evaluation::MapEvolver<BS>::viable(const System::MapInterface<R>& map, 
                                   const Geometry::SetInterface<R>& bounding_set) const
 {
   using namespace Geometry;
-  ARIADNE_LOG(2,"SetInterface* Applicator::viable(MapInterface,SetInterface)\n");
+  ARIADNE_LOG(2,"SetInterface* MapEvolver::viable(MapInterface,SetInterface)\n");
   ARIADNE_LOG(3,"bounding_set="<<bounding_set<<"\n");
-  ARIADNE_CHECK_BOUNDED(bounding_set,"SetInterface* Applicator::viable(MapInterface map, SetInterface bounding_set)");
+  ARIADNE_CHECK_BOUNDED(bounding_set,"SetInterface* MapEvolver::viable(MapInterface map, SetInterface bounding_set)");
   Rectangle<R> bounding_box=bounding_set.bounding_box();
   Grid<R> grid(bounding_set.dimension(),this->parameters().grid_length());
   GridMaskSet<R> grid_bounding_set(grid,bounding_box);
@@ -664,14 +664,14 @@ Evaluation::Applicator<BS>::viable(const System::MapInterface<R>& map,
 
 template<class BS>
 tribool
-Evaluation::Applicator<BS>::verify(const System::MapInterface<R>& f, 
+Evaluation::MapEvolver<BS>::verify(const System::MapInterface<R>& f, 
                                   const Geometry::SetInterface<R>& initial_set, 
                                   const Geometry::SetInterface<R>& safe_set) const
 {
   using namespace Geometry;
-  ARIADNE_LOG(2,"triboolEvaluation::Applicator::verify(MapInterface,SetInterface,SetInterface)\n");
+  ARIADNE_LOG(2,"triboolEvaluation::MapEvolver::verify(MapInterface,SetInterface,SetInterface)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n"<<"safe_set="<<safe_set<<"\n");
-  ARIADNE_CHECK_BOUNDED(safe_set,"SetInterface* Applicator::verify(MapInterface map, SetInterface initial_set, SetInterface safe_set)");
+  ARIADNE_CHECK_BOUNDED(safe_set,"SetInterface* MapEvolver::verify(MapInterface map, SetInterface initial_set, SetInterface safe_set)");
   Rectangle<R> bounding_box=safe_set.bounding_box();
   Grid<R> grid(safe_set.dimension(),this->parameters().grid_length());
   FiniteGrid<R> finite_grid(grid,bounding_box);
@@ -687,12 +687,12 @@ Evaluation::Applicator<BS>::verify(const System::MapInterface<R>& f,
 
 
 template<class BS>
-System::GridMultiMap<typename Evaluation::Applicator<BS>::R> 
-Evaluation::Applicator<BS>::discretize(const System::MapInterface<R>& f, 
+System::GridMultiMap<typename Evaluation::MapEvolver<BS>::R> 
+Evaluation::MapEvolver<BS>::discretize(const System::MapInterface<R>& f, 
                                       const Geometry::GridMaskSet<R>& domain,
                                       const Geometry::Grid<R>& range_grid) const
 {
-  ARIADNE_LOG(2,"GridMultiMap*Evaluation::Applicator::discretize(MapInterface map, GridMaskSet domain, Grid range_grid)\n");
+  ARIADNE_LOG(2,"GridMultiMap*Evaluation::MapEvolver::discretize(MapInterface map, GridMaskSet domain, Grid range_grid)\n");
   ARIADNE_LOG(3,"domain="<<domain<<"\n"<<"range_grid="<<range_grid);
   using namespace Geometry;
   typedef Numeric::Interval<R> I;
@@ -713,8 +713,8 @@ Evaluation::Applicator<BS>::discretize(const System::MapInterface<R>& f,
 
 
 template<class BS>
-System::GridMultiMap<typename Evaluation::Applicator<BS>::R> 
-Evaluation::Applicator<BS>::control_synthesis(const System::DiscreteTimeSystem<R>& f, 
+System::GridMultiMap<typename Evaluation::MapEvolver<BS>::R> 
+Evaluation::MapEvolver<BS>::control_synthesis(const System::DiscreteTimeSystem<R>& f, 
                                              const Geometry::SetInterface<R>& initial_set,
                                              const Geometry::SetInterface<R>& target_set,
                                              const Geometry::GridMaskSet<R>& state_bounding_set,
@@ -724,7 +724,7 @@ Evaluation::Applicator<BS>::control_synthesis(const System::DiscreteTimeSystem<R
   // TODO: Use on-the-fly discretization
   // TODO: Use adaptive grid refinement
   
-  ARIADNE_LOG(2,"GridMultiMap* Applicator::control_synthesis(...)\n");
+  ARIADNE_LOG(2,"GridMultiMap* MapEvolver::control_synthesis(...)\n");
   typedef typename Numeric::traits<R>::interval_type I;
   
   using namespace Combinatoric;

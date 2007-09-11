@@ -1,5 +1,5 @@
 /***************************************************************************
- *            integrator.h
+ *            vector_field_evolver.h
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -48,7 +48,7 @@ namespace Ariadne {
     class Flow {
       typedef Numeric::Interval<R> I;
      public:
-      Flow(const Integrator<R>& i, const System::VectorFieldInterface<R>& vf);
+      Flow(const VectorFieldEvolver<R>& i, const System::VectorFieldInterface<R>& vf);
       Geometry::Point<I> evaluate(const Geometry::Point<I>& pt);
       Geometry::Point<I> jacobian(const Geometry::Point<I>& pt);
       

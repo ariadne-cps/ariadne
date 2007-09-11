@@ -25,8 +25,8 @@
 #include "../geometry/set_interface.h"
 #include "../geometry/hybrid_set.h"
 #include "../system/set_based_hybrid_automaton.h"
-#include "../evaluation/applicator.h"
-#include "../evaluation/integrator.h"
+#include "../evaluation/map_evolver.h"
+#include "../evaluation/vector_field_evolver.h"
 
 #include "../output/epsstream.h"
 #include "../output/logging.h"
@@ -72,8 +72,8 @@ Evaluation::SetBasedHybridEvolver<R>::~SetBasedHybridEvolver()
 }
 
 template<class R>
-Evaluation::SetBasedHybridEvolver<R>::SetBasedHybridEvolver(Applicator<BS>& a, Integrator<BS>& i)
-  : _applicator(new Applicator<BS>(a)), _integrator(new Integrator<BS>(i))
+Evaluation::SetBasedHybridEvolver<R>::SetBasedHybridEvolver(MapEvolver<BS>& a, VectorFieldEvolver<BS>& i)
+  : _applicator(new MapEvolver<BS>(a)), _integrator(new VectorFieldEvolver<BS>(i))
 {
 }
 

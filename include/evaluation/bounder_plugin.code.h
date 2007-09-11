@@ -53,7 +53,7 @@ Evaluation::BounderPlugin<R>::check_flow_bounds(const System::VectorFieldInterfa
                                              const Geometry::Rectangle<R>& b,
                                              const Numeric::Rational& h) const
 {
-  if(verbosity>6) { std::clog << "Integrator::check_flow_bounds" << std::endl; }
+  if(verbosity>6) { std::clog << "VectorFieldEvolver::check_flow_bounds" << std::endl; }
   using namespace Geometry;
   using namespace Numeric;
   return subset(r+Interval<R>(0,h)*vf(b),b);
@@ -81,7 +81,7 @@ Evaluation::BounderPlugin<R>::estimate_flow_bounds(const System::VectorFieldInte
   using namespace Geometry;
   using namespace Numeric;
   
-  if(verbosity>6) { std::clog << "Integrator::estimate_flow_bounds" << " (maximum_iterations=" << maximum_iterations << ")" << std::endl; }
+  if(verbosity>6) { std::clog << "VectorFieldEvolver::estimate_flow_bounds" << " (maximum_iterations=" << maximum_iterations << ")" << std::endl; }
   if(verbosity>7) { std::clog << "  h=" << h << "  r=" << r << "  vf(r)=" << vf(r) << std::endl; }
   
   typedef typename Numeric::traits<R>::arithmetic_type F;
@@ -129,7 +129,7 @@ Evaluation::BounderPlugin<R>::estimate_flow_bounds(const System::VectorFieldInte
   using namespace Geometry;
   using namespace Numeric;
   
-  if(verbosity>6) { std::clog << "Integrator::estimate_flow_bounds" << std::endl; }
+  if(verbosity>6) { std::clog << "VectorFieldEvolver::estimate_flow_bounds" << std::endl; }
   
   static const unsigned int max_tries=8;
   
@@ -165,7 +165,7 @@ Evaluation::BounderPlugin<R>::refine_flow_bounds(const System::VectorFieldInterf
                                               const Geometry::Rectangle<R>& estimated_bounds,
                                               const Numeric::Rational& step_size) const
 {
-  if(verbosity>6) { std::clog << "Integrator::refine_flow_bounds(VectorField,Rectangle,Rectangle,Time)" << std::endl; }
+  if(verbosity>6) { std::clog << "VectorFieldEvolver::refine_flow_bounds(VectorField,Rectangle,Rectangle,Time)" << std::endl; }
   
   using namespace System;
   using namespace Geometry;
@@ -192,7 +192,7 @@ Evaluation::BounderPlugin<R>::refine_flow_bounds(const System::VectorFieldInterf
                                               const Geometry::Rectangle<R>& estimated_bounds,
                                               const Numeric::Rational& step_size) const
 {
-  if(verbosity>6) { std::clog << "Integrator::refine_flow_bounds(VectorField,Point,Rectangle,Time)" << std::endl; }
+  if(verbosity>6) { std::clog << "VectorFieldEvolver::refine_flow_bounds(VectorField,Point,Rectangle,Time)" << std::endl; }
   
   using namespace System;
   using namespace Geometry;
@@ -218,7 +218,7 @@ Evaluation::BounderPlugin<R>::estimate_interval_flow_bounds(const System::Vector
                                                          const Geometry::Rectangle<R>& initial_set,
                                                          Numeric::Interval<R>& step_size) const
 {
-  if(verbosity>6) { std::clog << "Integrator::estimate_flow_bounds(VectorField,Point,TimeInterval)" << std::endl; }
+  if(verbosity>6) { std::clog << "VectorFieldEvolver::estimate_flow_bounds(VectorField,Point,TimeInterval)" << std::endl; }
   
   Numeric::Rational backwards_step_size=step_size.lower();
   Numeric::Rational forwards_step_size=step_size.upper();
@@ -242,7 +242,7 @@ Evaluation::BounderPlugin<R>::refine_interval_flow_bounds(const System::VectorFi
                                                        const Geometry::Rectangle<R>& estimated_bounds,
                                                        const Numeric::Interval<R>& step_size) const
 {
-  if(verbosity>6) { std::clog << "Integrator::refine_flow_bounds(VectorField,Point,Rectangle,TimeInterval)" << std::endl; }
+  if(verbosity>6) { std::clog << "VectorFieldEvolver::refine_flow_bounds(VectorField,Point,Rectangle,TimeInterval)" << std::endl; }
   
   using namespace System;
   using namespace Geometry;

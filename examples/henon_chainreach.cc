@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_chainreach.cc
+ *            henon_chainreach.cc
  *
  *  Copyright  2005-6  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -23,20 +23,17 @@
 
 #include <iostream>
 
-#include "test_float.h"
-
+#include "numeric/float.h"
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
 #include "geometry/grid.h"
 #include "geometry/grid_set.h"
 #include "geometry/partition_tree_set.h"
 #include "geometry/rectangular_set.h"
-#include "evaluation/applicator.h"
+#include "evaluation/map_evolver.h"
 #include "output/epsstream.h"
 #include "output/logging.h"
 #include "models/henon.h"
-
-#include "test.h"
 
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
@@ -46,15 +43,15 @@ using namespace Ariadne::Evaluation;
 using namespace Ariadne::Output;
 using namespace std;
 
-template<class R> int test_chainreach();
+template<class R> int henon_chainreach();
 
 int main() {
-  return test_chainreach<Float>();
+  return henon_chainreach<Float64>();
 }
 
 template<class R> 
 int 
-test_chainreach()
+henon_chainreach()
 {
   set_applicator_verbosity(0);
   
@@ -64,7 +61,7 @@ test_chainreach()
   double maximum_basic_set_radius=0.25;
   double grid_length=0.125;
 
-  int subdivisions=32;
+  int subdivisions=128;
 
   Point<R> params=Point<R>("(1.5,0.875)");
   R a=params[0];
@@ -92,10 +89,10 @@ test_chainreach()
   parameters.set_maximum_basic_set_radius(maximum_basic_set_radius);
   parameters.set_grid_length(grid_length);
   
-  Applicator<BS> apply(parameters);
-  apply.parameters().set_grid_length(16.0/subdivisions);
+  MapEvolver<BS> evolver(parameters);
+  evolver.parameters().set_grid_length(16.0/subdivisions);
 
-  GridMaskSet<R> gmcr=apply.chainreach(h,in,bd);
+  GridMaskSet<R> gmcr=evolver.chainreach(h,in,bd);
   PartitionTreeSet<R> ptcr=PartitionTreeSet<R>(gmcr);
 
   cout << gmcr <<endl;
@@ -107,7 +104,7 @@ test_chainreach()
 
   RectangularSet<R> ins(ir);
   RectangularSet<R> cbs(cb);
-  SetInterface<R>* crs=apply.chainreach(h,ins,cbs);
+  SetInterface<R>* crs=evolver.chainreach(h,ins,cbs);
   cout << "*crs=" << *crs <<endl;
   GridMaskSet<R>& gmcrs=*dynamic_cast<GridMaskSet<R>*>(crs);
   cout << "gmcrs=" << gmcrs <<endl;

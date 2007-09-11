@@ -75,7 +75,7 @@ template<class R>
 Geometry::Zonotope<R> 
 Evaluation::evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope<R>& z)  
 {
-  ARIADNE_LOG(6,"Zonotope<Float> Applicator::evaluate(MapInterface f, Zonotope<Float,Float> z)\n");
+  ARIADNE_LOG(6,"Zonotope<Float> MapEvolver::evaluate(MapInterface f, Zonotope<Float,Float> z)\n");
   ARIADNE_LOG(7,"  z="<<z<<"\n");
   typedef typename Numeric::traits<R>::arithmetic_type F;
   
@@ -127,7 +127,7 @@ template<class R>
 Geometry::Zonotope<Numeric::Interval<R>,R> 
 Evaluation::evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope<Numeric::Interval<R>,R>& z)  
 {
-  ARIADNE_LOG(6,"Zontope<Interval,Float> Applicator::evaluate(MapInterface f, Zonotope<Interval,Float> z)\n");
+  ARIADNE_LOG(6,"Zontope<Interval,Float> MapEvolver::evaluate(MapInterface f, Zonotope<Interval,Float> z)\n");
   ARIADNE_LOG(7,"  z="<<z<<"\n");
   typedef Numeric::Interval<R> I;
   
@@ -146,7 +146,7 @@ template<class R>
 Geometry::Zonotope< Numeric::Interval<R> > 
 Evaluation::evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope< Numeric::Interval<R> >& z)  
 {
-  ARIADNE_LOG(6,"Zontope<Interval,Interval> Applicator::evaluate(MapInterface f, Zonotope<Interval,Interval> z)\n");
+  ARIADNE_LOG(6,"Zontope<Interval,Interval> MapEvolver::evaluate(MapInterface f, Zonotope<Interval,Interval> z)\n");
   ARIADNE_LOG(7,"  z="<<z<<"\n");
   typedef Numeric::Interval<R> I;
   

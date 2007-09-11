@@ -24,7 +24,7 @@
 
 #include "numeric/float.h"
 
-#include "evaluation/integrator.h"
+#include "evaluation/vector_field_evolver.h"
 #include "evaluation/affine_integrator.h"
 
 #include "evaluation/affine_integrator.code.h"

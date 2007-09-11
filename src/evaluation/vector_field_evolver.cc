@@ -1,5 +1,5 @@
 /***************************************************************************
- *            applicator.cc
+ *            vector_field_evolver.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -22,34 +22,26 @@
  */
 
 #include "numeric/float.h"
-#include "geometry/zonotope.h"
 
-#include "evaluation/applicator_plugin.h"
-#include "evaluation/applicator_plugin.code.h"
+#include "evaluation/integrator_plugin_interface.h"
 
-#include "evaluation/applicator.h"
-#include "evaluation/applicator.code.h"
+#include "evaluation/vector_field_evolver.h"
+#include "evaluation/vector_field_evolver.code.h"
 
 namespace Ariadne {
   namespace Evaluation {
     using namespace Numeric;
 
 #ifdef ENABLE_FLOAT64
-    typedef Geometry::Zonotope<Interval<Float64>,Float64> IFZonotope64;
-    typedef Geometry::Zonotope<Interval<Float64>,Interval<Float64> > IIZonotope64;
-    template class ApplicatorPlugin<IFZonotope64>;
-    template class ApplicatorPlugin<IIZonotope64>;
-    template class Applicator<IFZonotope64>;
-    template class Applicator<IIZonotope64>;
+    template class VectorFieldEvolver< Geometry::Rectangle<Float64> >;
+    template class VectorFieldEvolver< Geometry::Zonotope< Interval<Float64>, Float64 > >;
+    template class VectorFieldEvolver< Geometry::Zonotope< Interval<Float64> > >;
 #endif
   
 #ifdef ENABLE_FLOATMP
-    typedef Geometry::Zonotope<Interval<FloatMP>,FloatMP> IFZonotopeMP;
-    typedef Geometry::Zonotope<Interval<FloatMP>,Interval<FloatMP> > IIZonotopeMP;
-    template class ApplicatorPlugin<IFZonotopeMP>;
-    template class ApplicatorPlugin<IIZonotopeMP>;
-    template class Applicator<IFZonotopeMP>;
-    template class Applicator<IIZonotopeMP>;
+    template class VectorFieldEvolver< Geometry::Rectangle<FloatMP> >;
+    template class VectorFieldEvolver< Geometry::Zonotope< Interval<FloatMP>, FloatMP > >;
+    template class VectorFieldEvolver< Geometry::Zonotope< Interval<FloatMP> > >;
 #endif
 
   }

@@ -29,7 +29,7 @@
 
 #include "system/vector_field_interface.h"
 
-#include "evaluation/integrator.h"
+#include "evaluation/integrator_plugin_interface.h"
 #include "evaluation/detector_plugin_interface.h"
 #include "evaluation/detector_plugin.h"
 
@@ -60,7 +60,7 @@ class DetectorPluginInterfaceWrapper : public DetectorPluginInterface<R>, public
   Interval<R> crossing_time(const VectorFieldInterface<R> vf, const ConstraintInterface<R>& c, const Point<I>& pt, const Rectangle<R>& b) const {
     return this->get_override("crossing_time")(); }
   TimeModel<R> crossing_time(const VectorFieldInterface<R> vf, const ConstraintInterface<R>& c, 
-                             const Rectangle<R>& d, const Rectangle<R>& b, const Integrator<R>& i) const {
+                             const Rectangle<R>& d, const Rectangle<R>& b) const {
     return this->get_override("crossing_time")(); }
 };
   

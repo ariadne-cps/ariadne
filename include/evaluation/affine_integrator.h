@@ -31,7 +31,7 @@
 #include "../linear_algebra/declarations.h"
 #include "../geometry/declarations.h"
 #include "../system/declarations.h"
-#include "../evaluation/integrator.h"
+#include "../evaluation/integrator_plugin_interface.h"
 
 namespace Ariadne {
   namespace Evaluation {
@@ -57,75 +57,64 @@ namespace Ariadne {
      */
     template<class R>
     class AffineIntegrator
-      : public IntegratorBase< R, System::AffineVectorField<R>, Geometry::Zonotope< Numeric::Interval<R> > > 
+      : public DifferentiableIntegratorPluginInterface< Geometry::Zonotope< Numeric::Interval<R> > > 
     {
       typedef Numeric::Interval<R> I;
-      typedef IntegratorBase< R, System::AffineVectorField<R>, Geometry::Zonotope<I> > Base_;
+      typedef Geometry::Zonotope<I> BS;
      public:
       /*! \brief Constructor. */
-      AffineIntegrator(const time_type& maximum_step_size, const time_type& lock_to_grid_time, const R& maximum_set_radius);
+      AffineIntegrator();
 
       /*! \brief Cloning operator. */
       virtual AffineIntegrator<R>* clone() const;
 
      public:
 
-      /*! \brief Subdivide the basic set into two pieces. */
-      virtual Geometry::ListSet< Geometry::Zonotope<I> > subdivide(const Geometry::Zonotope<I>& bs) const;
+      /*! \brief Integrate a basic set for within a bounding set. */
+      virtual Geometry::Point<I> flow_step(const System::VectorFieldInterface<R>& vf,
+                                           const Geometry::Point<I>& p,
+                                           const Numeric::Interval<R>& t,
+                                           const Geometry::Rectangle<R>& bb) const;
      
       /*! \brief Integrate a basic set for within a bounding set. */
-      virtual Geometry::Point<I> bounded_flow(const System::AffineVectorField<R>& vf,
-                                              const Geometry::Point<I>& p,
-                                              const Geometry::Rectangle<R>& bb,
-                                              const Numeric::Interval<R>&) const;
+      virtual LinearAlgebra::Matrix<I> flow_step_jacobian(const System::VectorFieldInterface<R>& vf,
+                                                          const Geometry::Point<I>& p,
+                                                          const Numeric::Interval<R>& r,
+                                                          const Geometry::Rectangle<R>& bb) const;
      
-      /*! \brief Integrate a basic set for within a bounding set. */
-      virtual LinearAlgebra::Matrix<I> bounded_flow_jacobian(const System::AffineVectorField<R>& vf,
-                                                             const Geometry::Point<I>& p,
-                                                             const Geometry::Rectangle<R>& bb,
-                                                             const Numeric::Interval<R>&) const;
-     
-
 
       /*! \brief A \f$C^\infty\f$ algorithm for integrating forward a zonotope. */
-      virtual Geometry::Zonotope<I> bounded_integration_step(const System::AffineVectorField<R>& vector_field,
-                                                             const Geometry::Zonotope<I>& initial_set,
-                                                             const Geometry::Rectangle<R>& bounding_set,
-                                                             const Numeric::Interval<R>& step_size) const;
-
-      
-      /*! \brief A \f$C^\infty\f$ algorithm for integrating forward a zonotope for a time up to time \a step_size. 
-       */
-      virtual Geometry::Zonotope<I> bounded_reachability_step(const System::AffineVectorField<R>& vector_field,
-                                                              const Geometry::Zonotope<I>& initial_set, 
-                                                              const Geometry::Rectangle<R>& bounding_set,
-                                                              const Numeric::Interval<R>& step_size) const;
-
-
-      /*! \brief A \f$C^\infty\f$ algorithm for integrating forward a zonotope. 
-      *
-      *  Overrides method in Integrator since we don't use the bounding set. 
-      */
-      virtual Geometry::Zonotope<I> integration_step(const System::AffineVectorField<R>& vector_field,
+      virtual Geometry::Zonotope<I> integration_step(const System::VectorFieldInterface<R>& vector_field,
                                                      const Geometry::Zonotope<I>& initial_set,
-                                                     time_type& step_size) const;
-
-
-      /*! \brief A \f$C^\infty\f$ algorithm for integrating forward a zonotope for a time up to time \a step_size.
-       *
-       *  Overrides method in Integrator since we don't use the bounding set. 
-       */
-      virtual Geometry::Zonotope<I> reachability_step(const System::AffineVectorField<R>& vector_field,
+                                                     const Numeric::Interval<R>& step_size,
+                                                     const Geometry::Rectangle<R>& bounding_set) const;
+      
+      /*! \brief A \f$C^\infty\f$ algorithm for integrating forward a zonotope for a time up to time \a step_size. */
+      virtual Geometry::Zonotope<I> reachability_step(const System::VectorFieldInterface<R>& affine_vector_field,
                                                       const Geometry::Zonotope<I>& initial_set,
-                                                      time_type& step_size) const;
+                                                      const Numeric::Interval<R>& step_size,
+                                                      const Geometry::Rectangle<R>& bounding_set) const;
+     public:
+      /*! \brief Integrate \a initial point for time \a step_size. */
+      Geometry::Point<I> flow_step(const System::AffineVectorField<R>& affine_vector_field,
+                                              const Geometry::Point<I>& initial_point,
+                                              const Numeric::Interval<R>& step_size) const;
 
+      /*! \brief Comput the spacial Jacobian derivative at \a initial point for time \a step_size. */
+      LinearAlgebra::Matrix<I> flow_step_jacobian(const System::AffineVectorField<R>& vector_field,
+                                                   const Geometry::Point<I>& affine_initial_point,
+                                                   const Numeric::Interval<R>& step_size) const;
 
-     private:
-      Geometry::Zonotope<I> _integration_step(const System::AffineVectorField<R>& vector_field,
+      /*! \brief A \f$C^\infty\f$ algorithm for integrating forward a zonotope for a time up to time \a step_size. */
+      Geometry::Zonotope<I> integration_step(const System::AffineVectorField<R>& affine_vector_field,
                                               const Geometry::Zonotope<I>& initial_set,
                                               const Numeric::Interval<R>& step_size) const;
 
-      Geometry::Zonotope<I> _reachability_step(const System::AffineVectorField<R>& vector_field,
+      /*! \brief A \f$C^\infty\f$ algorithm for integrating forward a zonotope for a time up to time \a step_size. 
+       *
+       *  Overrides method in Integrator since we don't use the bounding set. 
+       */
+     Geometry::Zonotope<I> reachability_step(const System::AffineVectorField<R>& affine_vector_field,
                                                const Geometry::Zonotope<I>& initial_set,
                                                const Numeric::Interval<R>& step_size) const;
 

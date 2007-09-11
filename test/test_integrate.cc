@@ -33,6 +33,8 @@
 #include "geometry/zonotope.h"
 #include "geometry/list_set.h"
 #include "system/affine_vector_field.h"
+#include "evaluation/evolution_parameters.h"
+#include "evaluation/integrator.h"
 #include "evaluation/lohner_integrator.h"
 #include "evaluation/affine_integrator.h"
 #include "models/vanderpol.h"
@@ -66,15 +68,18 @@ test_integration_step()
   cout << __PRETTY_FUNCTION__ << endl;
   typedef Interval<R> I;
 
-  // Test constructor/destructor
-  Integrator<R>* integrator_ptr;
-  LohnerIntegrator<R>* lohner_ptr;
-  lohner_ptr=new LohnerIntegrator<R>(0.125,0.5,0.125);
-  delete lohner_ptr;
-  integrator_ptr=new LohnerIntegrator<R>(0.125,0.5,0.125);
-  delete integrator_ptr;
+  EvolutionParameters<R> parameters;
+  parameters.set_maximum_basic_set_radius(0.125);
+  parameters.set_lock_to_grid_time(0.5);
+  parameters.set_maximum_step_size(0.125);
   
-  LohnerIntegrator<R> lohner=LohnerIntegrator<R>(0.125,0.5,0.125);
+  // Test constructor/destructor
+  Integrator< Zonotope<I,I> >* integrator_ptr;
+  LohnerIntegrator<R>* lohner_ptr;
+  lohner_ptr=new LohnerIntegrator<R>();
+  delete lohner_ptr;
+  integrator_ptr=new Integrator< Zonotope<I,I> >(parameters,*lohner_ptr);
+  delete integrator_ptr;
   
   AffineVectorField<R> avf=AffineVectorField<R>(Matrix<R>("[-0.25,-1.0;+1.0,-0.25]"),Vector<R>("[0.25,0.0]"));
   cout << "avf=" << avf << endl;
@@ -83,24 +88,24 @@ test_integration_step()
 
   Rectangle<R> r=Rectangle<R>("[0.98,1.02]x[0.48,0.52]");
   cout << "r=" << r << endl;
-  Zonotope<R> z=Zonotope<R>(r);
-  cout << "z=" << z << endl;
-  Zonotope<I> iz=Zonotope<I>(r);
+  Zonotope<I,R> fz=Zonotope<I,R>(r);
+  cout << "fz=" << fz << endl;
+  Zonotope<I,I> iz=Zonotope<I,I>(r);
   cout << "iz=" << iz << endl;
 
-  ListSet< Zonotope<R> > zls=ListSet< Zonotope<R> >(z);
-  zls.adjoin(Zonotope<R>(Rectangle<R>("[1.02,1.06]x[0.48,0.52]")));
-  cout << "zls.size()=" << zls.size() << endl;
+  ListSet< Zonotope<I,R> > fzls=ListSet< Zonotope<I,R> >(fz);
+  fzls.adjoin(Zonotope<R>(Rectangle<R>("[1.02,1.06]x[0.48,0.52]")));
+  cout << "fzls.size()=" << fzls.size() << endl;
   
-  ListSet< Zonotope<I> > izls=ListSet< Zonotope<I> >(iz);
-  izls.adjoin(Zonotope<I>(Rectangle<R>("[1.02,1.06]x[0.48,0.52]")));
+  ListSet< Zonotope<I,I> > izls=ListSet< Zonotope<I> >(iz);
+  izls.adjoin(Zonotope<I,I>(Rectangle<R>("[1.02,1.06]x[0.48,0.52]")));
   cout << "izls.size()=" << izls.size() << endl;
   
   Geometry::Rectangle<R> nr;
   Geometry::Zonotope<R> nz;
   Geometry::Zonotope<I> niz;
-  Geometry::ListSet< Zonotope<R> > nzls;
-  Geometry::ListSet< Zonotope<I> > nizls;
+  Geometry::ListSet< Zonotope<I,R> > nfzls;
+  Geometry::ListSet< Zonotope<I,I> > nizls;
   
   Float x0=0;
   Float x1=0.4;
@@ -121,7 +126,9 @@ test_integration_step()
   // Integration step
   //nr=lohner.integration_step(vdp,r,h);
   //cout << nr << endl;
-  niz=lohner.integration_step(vdp,iz,h);
+  LohnerIntegrator<R> plugin;
+  Integrator< Zonotope<I,I> > evolver(parameters,plugin);
+  niz=evolver.integration_step(vdp,iz,h);
   cout << niz << endl << endl;
   cout << endl << endl;
   
@@ -130,19 +137,19 @@ test_integration_step()
   // Integrate
   //nr=lohner.integrate(vdp,r,t);
   //cout << nr << endl;
-  niz=lohner.integrate(vdp,iz,t);
+  niz=evolver.integrate(vdp,iz,t);
   cout << niz << endl << endl;;
   
-  nizls=lohner.lower_integrate(vdp,izls,t);
+  nizls=evolver.lower_integrate(vdp,izls,t);
   cout << nizls << endl << endl;
   
-  nizls=lohner.lower_reach(vdp,izls,t);
+  nizls=evolver.lower_reach(vdp,izls,t);
   cout << nizls << endl << endl;
   
   // Affine vector field
   VectorFieldInterface<R>& avfr=avf;
   //AffineVectorField<R>& avfr=avf;
-  niz=lohner.integration_step(avfr,iz,h);
+  niz=evolver.integration_step(avfr,iz,h);
   cout << nz << endl;
   cout << endl;
   
@@ -157,8 +164,14 @@ test_integrate()
   typedef Interval<R> I;
   cout << __PRETTY_FUNCTION__ << endl;
   
-  AffineIntegrator<R> affine(0.125,1.0,0.25);
+  EvolutionParameters<R> parameters;
+  parameters.set_maximum_basic_set_radius(0.125);
+  parameters.set_lock_to_grid_time(1.0);
+  parameters.set_maximum_step_size(0.25);
   
+  AffineIntegrator<R> plugin;
+  Integrator< Zonotope<I,I> > evolver(parameters,plugin);
+
   AffineVectorField<R> affine_vector_field(Matrix<R>("[-2,-1;1,-2]"),Vector<R>("[0.125,0.25]"));
   
   Rectangle<R> bb("[-4,4]x[-4,4]");
@@ -177,20 +190,20 @@ test_integrate()
   GridMaskSet<R> integrate_set=initial_set;
   GridMaskSet<R> found_set=initial_set;
   for(uint i=0; i!=n; ++i) {
-    found_set=affine.integrate(affine_vector_field,found_set,bounding_set,time_type(integration_time/n));
+    found_set=evolver.integrate(affine_vector_field,found_set,bounding_set,time_type(integration_time/n));
     integrate_set.adjoin(found_set);
   }
-  GridMaskSet<R> reach_set=affine.reach(affine_vector_field,initial_set,bounding_set,integration_time);
+  GridMaskSet<R> reach_set=evolver.reach(affine_vector_field,initial_set,bounding_set,integration_time);
   cout << endl;
   
   // set_integrator_verbosity(4);
   
   integration_time=0.5;
-  affine.set_grid_size(0.0625);
+  evolver.parameters().set_grid_length(0.0625);
   PolyhedralSet<R> polyhedral_initial_set=PolyhedralSet<R>(Matrix<R>("[-2,0;0,-1;1,1]"),Vector<R>("[-1,-1,3]"));
   SetInterface<R>* polyhedral_initial_set_ptr=&polyhedral_initial_set;
-  SetInterface<R>* polyhedral_integrate_set_ptr=affine.integrate(affine_vector_field,*polyhedral_initial_set_ptr,integration_time);
-  SetInterface<R>* polyhedral_reach_set_ptr=affine.reach(affine_vector_field,*polyhedral_initial_set_ptr,integration_time);
+  SetInterface<R>* polyhedral_integrate_set_ptr=evolver.integrate(affine_vector_field,*polyhedral_initial_set_ptr,integration_time);
+  SetInterface<R>* polyhedral_reach_set_ptr=evolver.reach(affine_vector_field,*polyhedral_initial_set_ptr,integration_time);
 
   cout << "polyhedral_initial_set=" << *polyhedral_initial_set_ptr << endl;
   cout << "polyhedral_integrate_set=" << *polyhedral_integrate_set_ptr << endl;
@@ -201,16 +214,16 @@ test_integrate()
   //Grid<R> grid(Vector<R>("[0.125,0.125]"));
   Grid<R> grid(Vector<R>("[0.0625,0.0625]"));
   ListSet< Rectangle<R> > rectangle_list_initial_set=lower_approximation(*polyhedral_initial_set_ptr,grid);
-  ListSet< Rectangle<R> > rectangle_list_integrate_set=affine.integrate(affine_vector_field,rectangle_list_initial_set,integration_time);
-  ListSet< Rectangle<R> > rectangle_list_reach_set=affine.reach(affine_vector_field,rectangle_list_initial_set,integration_time);
+  ListSet< Rectangle<R> > rectangle_list_integrate_set=evolver.integrate(affine_vector_field,rectangle_list_initial_set,integration_time);
+  ListSet< Rectangle<R> > rectangle_list_reach_set=evolver.reach(affine_vector_field,rectangle_list_initial_set,integration_time);
 
   cout << rectangle_list_initial_set << endl;
   cout << rectangle_list_integrate_set << endl;
   cout << rectangle_list_reach_set << endl;
 
   ListSet< Zonotope<I> > zonotope_list_initial_set=rectangle_list_initial_set;
-  ListSet< Zonotope<I> > zonotope_list_integrate_set=affine.lower_integrate(affine_vector_field,zonotope_list_initial_set,integration_time);
-  ListSet< Zonotope<I> > zonotope_list_reach_set=affine.lower_reach(affine_vector_field,zonotope_list_initial_set,integration_time);
+  ListSet< Zonotope<I> > zonotope_list_integrate_set=evolver.lower_integrate(affine_vector_field,zonotope_list_initial_set,integration_time);
+  ListSet< Zonotope<I> > zonotope_list_reach_set=evolver.lower_reach(affine_vector_field,zonotope_list_initial_set,integration_time);
 
   cout << zonotope_list_initial_set << endl;
   cout << zonotope_list_integrate_set << endl;

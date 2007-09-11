@@ -72,8 +72,8 @@ Evaluation::SetBasedHybridEvolver<R>::~SetBasedHybridEvolver()
 }
 
 template<class R>
-Evaluation::SetBasedHybridEvolver<R>::SetBasedHybridEvolver(Applicator<R>& a, Integrator<R>& i)
-  : _applicator(a.clone()), _integrator(i.clone()) 
+Evaluation::SetBasedHybridEvolver<R>::SetBasedHybridEvolver(Applicator<BS>& a, Integrator<BS>& i)
+  : _applicator(new Applicator<BS>(a)), _integrator(new Integrator<BS>(i))
 {
 }
 
@@ -96,7 +96,7 @@ Evaluation::SetBasedHybridEvolver<R>::discrete_step(const System::SetBasedHybrid
   typedef Geometry::HybridSpace::const_iterator locations_iterator;
 
   Geometry::HybridSpace locations=automaton.locations();
-  R grid_separation=this->_applicator->grid_size();
+  R grid_separation=this->_applicator->parameters().grid_length();
 
   Geometry::HybridGridMaskSet<R> grid_initial_set;
   for(locations_iterator loc_iter=locations.begin(); loc_iter!=locations.end(); ++loc_iter) {
@@ -128,7 +128,7 @@ Evaluation::SetBasedHybridEvolver<R>::continuous_chainreach(const System::SetBas
   typedef Geometry::HybridSpace::const_iterator locations_iterator;
 
   Geometry::HybridSpace locations=automaton.locations();
-  R grid_separation=this->_applicator->grid_size();
+  R grid_separation=this->_applicator->parameters().grid_length();
 
   Geometry::HybridGridMaskSet<R> grid_initial_set;
   Geometry::HybridGridMaskSet<R> grid_bounding_set;
@@ -173,7 +173,7 @@ Evaluation::SetBasedHybridEvolver<R>::chainreach(const System::SetBasedHybridAut
       bs_iter!=bounding_set.locations_end(); ++bs_iter)
   {
     id_type id=bs_iter->first;
-    Grid<R> grid(bs_iter->second->dimension(),this->_applicator->grid_size());
+    Grid<R> grid(bs_iter->second->dimension(),this->_applicator->parameters().grid_length());
     FiniteGrid<R> fgrid(grid,bs_iter->second->bounding_box());
     ARIADNE_LOG(5,"Made grid"<<std::endl);
     grid_bounding_set.new_location(id,fgrid);

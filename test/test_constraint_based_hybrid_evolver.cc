@@ -38,6 +38,7 @@
 #include "system/affine_vector_field.h"
 #include "system/constraint_based_hybrid_automaton.h"
 #include "evaluation/applicator.h"
+#include "evaluation/applicator_plugin.h"
 #include "evaluation/lohner_integrator.h"
 #include "evaluation/affine_integrator.h"
 #include "evaluation/constraint_based_hybrid_evolver.h"
@@ -71,14 +72,20 @@ template<class R>
 ConstraintBasedHybridEvolver<R> 
 construct_evolver() 
 {
-  time_type maximum_step_size=0.125;
-  time_type lock_to_grid_time=0.5;
-  R maximum_set_radius=0.25;
-  R grid_size=0.125;
+  typedef Interval<R> I;
+  typedef Zonotope<I,I> BS;
+
+  EvolutionParameters<R> parameters;
+  parameters.set_maximum_step_size(0.125);
+  parameters.set_lock_to_grid_time(0.5);
+  parameters.set_maximum_basic_set_radius(0.25);
+  parameters.set_grid_length(0.125);
   
-  Applicator<R> apply(maximum_set_radius,grid_size);
-  LohnerIntegrator<R> lohner_integrator(maximum_step_size,lock_to_grid_time,maximum_set_radius); 
-  return ConstraintBasedHybridEvolver<R>(apply,lohner_integrator);
+  ApplicatorPlugin<BS> applicator;
+  LohnerIntegrator<R> lohner_integrator; 
+  const ApplicatorPluginInterface<BS>& applicator_plugin=applicator;
+  const IntegratorPluginInterface<BS>& integrator_plugin=lohner_integrator;
+  return ConstraintBasedHybridEvolver<R>(parameters,applicator_plugin,integrator_plugin);
 }
 
 
@@ -121,6 +128,7 @@ class TestConstraintBasedHybridEvolver
 {
  public:
   typedef Interval<R> I;
+  typedef Zonotope<I> BS;
 
   ConstraintBasedHybridAutomaton<R> automaton;
   ConstraintBasedHybridEvolver<R> evolver;

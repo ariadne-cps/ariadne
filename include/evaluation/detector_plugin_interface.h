@@ -1,5 +1,5 @@
 /***************************************************************************
- *            detector_interface.h
+ *            detector_plugin_interface.h
  *
  *  Copyright  2007  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file detector_interface.h
+/*! \file detector_plugin_interface.h
  *  \brief Methods for detecting crossings with constraints.
  */
 
-#ifndef ARIADNE_DETECTOR_INTERFACE_H
-#define ARIADNE_DETECTOR_INTERFACE_H
+#ifndef ARIADNE_DETECTOR_PLUGIN_INTERFACE_H
+#define ARIADNE_DETECTOR_PLUGIN_INTERFACE_H
 
 #include "../base/types.h"
 #include "../base/declarations.h"
@@ -45,19 +45,20 @@ namespace Ariadne {
      *  \ingroup Detection
      */
     template<class R>
-    class DetectorInterface 
+    class DetectorPluginInterface 
     {
       typedef Numeric::Interval<R> I;
+      typedef typename Geometry::Rectangle<R> BS;
      public:
       /*! \brief Virtual destructor. */
-      virtual ~DetectorInterface() { };
+      virtual ~DetectorPluginInterface() { };
 
       /*! \brief Make a dynamically-allocated copy. */
-      virtual DetectorInterface<R>* clone() const = 0;
+      virtual DetectorPluginInterface<R>* clone() const = 0;
 
       /*! \brief Compute the value of a constraint over a set. */
       virtual Numeric::Interval<R> value(const Geometry::ConstraintInterface<R>& c, 
-                                         const Geometry::BasicSetInterface<R>& bs) const = 0;
+                                         const Geometry::Rectangle<R>& r) const = 0;
 
       /*! \brief Determine whether constraint \a c1 forces constraint \a c2 within \a dom.
        */
@@ -65,22 +66,27 @@ namespace Ariadne {
                              const Geometry::ConstraintInterface<R>& c2,
                              const Geometry::Rectangle<R>& dom) const = 0;
 
+      /*! \brief Compute the normal derivative to of the vector field \a vf to the constraint \a c at the point \a pt.
+       */
+      virtual Numeric::Interval<R> normal_derivative(const System::VectorFieldInterface<R>& vf, 
+                                                     const Geometry::DifferentiableConstraintInterface<R>& c, 
+                                                     const Geometry::Point<I>& pt) const = 0;
+
       /*! \brief Estimate the time needed to cross a constraint. */
-      virtual Numeric::Interval<R> crossing_time(const System::VectorFieldInterface<R>, 
+      virtual Numeric::Interval<R> crossing_time(const System::VectorFieldInterface<R>& vf, 
                                                  const Geometry::ConstraintInterface<R>& c, 
                                                  const Geometry::Point<I>& pt, 
                                                  const Geometry::Rectangle<R>& b) const = 0;
 
-      /*! \brief Compute the value of a constraint over a set. */
-      virtual Evaluation::TimeModel<R> crossing_time(const System::VectorFieldInterface<R> vf, 
+      /*! \brief Compute the value of the crossing time over a set. */
+      virtual Evaluation::TimeModel<R> crossing_time(const System::VectorFieldInterface<R>& vf, 
                                                      const Geometry::ConstraintInterface<R>& c, 
                                                      const Geometry::Rectangle<R>& d, 
-                                                     const Geometry::Rectangle<R>& b, 
-                                                     const Evaluation::Integrator<R>& i) const = 0;
+                                                     const Geometry::Rectangle<R>& b) const = 0;
 
     };
 
   }
 }
 
-#endif /* ARIADNE_DETECTOR_INTERFACE_H */
+#endif /* ARIADNE_DETECTOR_PLUGIN_INTERFACE_H */

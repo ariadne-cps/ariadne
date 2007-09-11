@@ -93,7 +93,7 @@ template<class R> void export_affine_vector_field();
 template<class R> void export_set_based_hybrid_automaton();
 template<class R> void export_constraint_based_hybrid_automaton();
 
-template<class R> void export_evaluation_parameters();
+template<class R> void export_evolution_parameters();
 template<class R> void export_solve();
 template<class R> void export_apply();
 template<class R> void export_integrate();
@@ -189,7 +189,7 @@ BOOST_PYTHON_MODULE(ariadne)
   export_set_based_hybrid_automaton<Float>();
   export_constraint_based_hybrid_automaton<Float>();
 
-  export_evaluation_parameters<Float>();
+  export_evolution_parameters<Float>();
   export_solve<Float>();
   export_apply<Float>();
   export_integrate<Float>();

@@ -56,7 +56,6 @@
 #include "../system/vector_field.h"
 #include "../system/affine_vector_field.h"
 
-#include "../evaluation/integrator.h"
 
 #include "../output/logging.h"
 
@@ -90,13 +89,12 @@ template<class R>
 Evaluation::LohnerIntegrator<R>*
 Evaluation::LohnerIntegrator<R>::clone() const
 {
-  return new LohnerIntegrator<R>(this->maximum_step_size(),this->lock_to_grid_time(),this->maximum_basic_set_radius());
+  return new LohnerIntegrator<R>();
 }
 
 
 template<class R>
-Evaluation::LohnerIntegrator<R>::LohnerIntegrator(const time_type& maximum_step_size, const time_type& lock_to_grid_time, const R& maximum_basic_set_radius)
-  : Base_(maximum_step_size,lock_to_grid_time,maximum_basic_set_radius)
+Evaluation::LohnerIntegrator<R>::LohnerIntegrator()
 {
 }
 
@@ -112,15 +110,15 @@ Evaluation::LohnerIntegrator<R>::subdivide(const Geometry::Zonotope<I>& basic_se
 
 template<class R>
 Geometry::Point<typename Evaluation::LohnerIntegrator<R>::I>
-Evaluation::LohnerIntegrator<R>::bounded_flow(const System::VectorFieldInterface<R>& vector_field, 
-                                              const Geometry::Point<I>& initial_point, 
-                                              const Geometry::Rectangle<R>& bounding_box, 
-                                              const Numeric::Interval<R>& step_size) const
+Evaluation::LohnerIntegrator<R>::flow_step(const System::VectorFieldInterface<R>& vector_field, 
+                                           const Geometry::Point<I>& initial_point, 
+                                           const Numeric::Interval<R>& step_size, 
+                                           const Geometry::Rectangle<R>& bounding_box) const
 {
   // Use second order formula \f$ \Phi(t,p) = p + tf(p) + t^2/2 Df(B)f(B) \f$
   const System::VectorFieldInterface<R>& vf=vector_field;
   const Geometry::Point<I>& p=initial_point;
-  Geometry::Point<I> b=this->refine_flow_bounds(vector_field,Geometry::Rectangle<R>(initial_point),bounding_box,step_size.upper());
+  Geometry::Point<I> b=bounding_box;
   I h=step_size;
 
   
@@ -128,25 +126,14 @@ Evaluation::LohnerIntegrator<R>::bounded_flow(const System::VectorFieldInterface
 }
 
 
-template<class R>
-LinearAlgebra::Matrix<typename Evaluation::LohnerIntegrator<R>::I>
-Evaluation::LohnerIntegrator<R>::bounded_flow_jacobian(const System::VectorFieldInterface<R>& vector_field, 
-                                                       const Geometry::Point<I>& initial_point, 
-                                                       const Geometry::Rectangle<R>& bounding_box, 
-                                                       const Numeric::Interval<R>& step_size) const
-{
-  // Don't implement since this is a C^0 integrator.
-  throw NotImplemented(__PRETTY_FUNCTION__);
-}
-
 
 /*! Use the formula \f$ y(c+Ge,t) \in  c + tf(c) + \frac{t^2}{2} Df(B) f(B) + ( I + t Df(X) ) G e\f$  */
 template<class R>
 Geometry::Zonotope<typename Evaluation::LohnerIntegrator<R>::I>
-Evaluation::LohnerIntegrator<R>::bounded_integration_step(const System::VectorFieldInterface<R>& vector_field, 
+Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorFieldInterface<R>& vector_field, 
                                                           const Geometry::Zonotope<I>& initial_set, 
-                                                          const Geometry::Rectangle<R>& bounding_box, 
-                                                          const Numeric::Interval<R>& step_size) const
+                                                          const Numeric::Interval<R>& step_size, 
+                                                          const Geometry::Rectangle<R>& bounding_box) const
 {
   using namespace Numeric;
   using namespace LinearAlgebra;
@@ -196,10 +183,10 @@ Evaluation::LohnerIntegrator<R>::bounded_integration_step(const System::VectorFi
 
 template<class R>
 Geometry::Zonotope<typename Evaluation::LohnerIntegrator<R>::I> 
-Evaluation::LohnerIntegrator<R>::bounded_reachability_step(const System::VectorFieldInterface<R>& vector_field, 
+Evaluation::LohnerIntegrator<R>::reachability_step(const System::VectorFieldInterface<R>& vector_field, 
                                                            const Geometry::Zonotope<I>& initial_set,
-                                                           const Geometry::Rectangle<R>& bounding_box,
-                                                           const Numeric::Interval<R>& step_size) const
+                                                           const Numeric::Interval<R>& step_size,
+                                                           const Geometry::Rectangle<R>& bounding_box) const
 {
   using namespace Numeric;
   using namespace LinearAlgebra;
@@ -265,13 +252,12 @@ template<class R>
 Evaluation::C1LohnerIntegrator<R>*
 Evaluation::C1LohnerIntegrator<R>::clone() const
 {
-  return new C1LohnerIntegrator<R>(this->maximum_step_size(),this->lock_to_grid_time(),this->maximum_basic_set_radius());
+  return new C1LohnerIntegrator<R>();
 }
 
 
 template<class R>
-Evaluation::C1LohnerIntegrator<R>::C1LohnerIntegrator(const time_type& maximum_step_size, const time_type& lock_to_grid_time, const R& maximum_basic_set_radius)
-  : Base_(maximum_step_size,lock_to_grid_time,maximum_basic_set_radius)
+Evaluation::C1LohnerIntegrator<R>::C1LohnerIntegrator()
 {
 }
 
@@ -287,10 +273,10 @@ Evaluation::C1LohnerIntegrator<R>::subdivide(const Geometry::Zonotope<I>& basic_
 
 template<class R>
 Geometry::Point<typename Evaluation::C1LohnerIntegrator<R>::I>
-Evaluation::C1LohnerIntegrator<R>::bounded_flow(const System::VectorFieldInterface<R>& vector_field, 
-                                              const Geometry::Point<I>& initial_point, 
-                                              const Geometry::Rectangle<R>& bounding_box, 
-                                              const Numeric::Interval<R>& step_size) const
+Evaluation::C1LohnerIntegrator<R>::flow_step(const System::VectorFieldInterface<R>& vector_field, 
+                                             const Geometry::Point<I>& initial_point, 
+                                             const Numeric::Interval<R>& step_size, 
+                                             const Geometry::Rectangle<R>& bounding_box) const
 {
   // Use second order formula \f$ \Phi(t,p) = p + tf(p) + t^2/2 Df(B)f(B) \f$
   const System::VectorFieldInterface<R>& vf=vector_field;
@@ -299,7 +285,6 @@ Evaluation::C1LohnerIntegrator<R>::bounded_flow(const System::VectorFieldInterfa
   Geometry::Rectangle<R> bb=bounding_box;
   I h=step_size;
 
-  bb=this->refine_flow_bounds(vf,r,bb,step_size.upper());
   Geometry::Point<I> b=bb;
   
   return pt + h * ( vf(pt) + (h/2) * ( vf.jacobian(b) * vf(b) ) );
@@ -308,10 +293,10 @@ Evaluation::C1LohnerIntegrator<R>::bounded_flow(const System::VectorFieldInterfa
 
 template<class R>
 LinearAlgebra::Matrix<typename Evaluation::C1LohnerIntegrator<R>::I>
-Evaluation::C1LohnerIntegrator<R>::bounded_flow_jacobian(const System::VectorFieldInterface<R>& vector_field, 
-                                                       const Geometry::Point<I>& initial_point, 
-                                                       const Geometry::Rectangle<R>& bounding_box, 
-                                                       const Numeric::Interval<R>& step_size) const
+Evaluation::C1LohnerIntegrator<R>::flow_step_jacobian(const System::VectorFieldInterface<R>& vector_field, 
+                                                      const Geometry::Point<I>& initial_point, 
+                                                      const Numeric::Interval<R>& step_size, 
+                                                      const Geometry::Rectangle<R>& bounding_box) const
 {
   // Use first order formula \f$ D\Phi(t,p) = I + t Df(B) W \f$ where W is a bound for D\Phi([0,h],p)
   // Use ||W-I|| < e^{Lh}-1, where L is the  norm of Df
@@ -343,10 +328,10 @@ Evaluation::C1LohnerIntegrator<R>::bounded_flow_jacobian(const System::VectorFie
 
 template<class R>
 Geometry::Zonotope<typename Evaluation::C1LohnerIntegrator<R>::I>
-Evaluation::C1LohnerIntegrator<R>::bounded_integration_step(const System::VectorFieldInterface<R>& vector_field, 
+Evaluation::C1LohnerIntegrator<R>::integration_step(const System::VectorFieldInterface<R>& vector_field, 
                                                           const Geometry::Zonotope<I>& initial_set, 
-                                                          const Geometry::Rectangle<R>& bounding_box, 
-                                                          const Numeric::Interval<R>& step_size) const
+                                                          const Numeric::Interval<R>& step_size, 
+                                                          const Geometry::Rectangle<R>& bounding_box) const
 {
   using namespace Numeric;
   using namespace LinearAlgebra;
@@ -361,8 +346,8 @@ Evaluation::C1LohnerIntegrator<R>::bounded_integration_step(const System::Vector
   const Rectangle<R>& bb=bounding_box;
   const Interval<R>& h=step_size;
   
-  Matrix<I> Dphi=bounded_flow_jacobian(vf,c,bb,h);
-  Point<I> phic=bounded_flow(vf,c,bb,h);
+  Matrix<I> Dphi=flow_step_jacobian(vf,c,h,bb);
+  Point<I> phic=flow_step(vf,c,h,bb);
   Matrix<I> phiG=Dphi*G;
   ARIADNE_LOG(7,"  flow_jacobian="<<Dphi<<"\n");
   ARIADNE_LOG(7,"  new_centre="<<phic<<"\n  new_generators="<<phiG<<"\n");
@@ -374,10 +359,10 @@ Evaluation::C1LohnerIntegrator<R>::bounded_integration_step(const System::Vector
 
 template<class R>
 Geometry::Zonotope<typename Evaluation::C1LohnerIntegrator<R>::I> 
-Evaluation::C1LohnerIntegrator<R>::bounded_reachability_step(const System::VectorFieldInterface<R>& vector_field, 
+Evaluation::C1LohnerIntegrator<R>::reachability_step(const System::VectorFieldInterface<R>& vector_field, 
                                                            const Geometry::Zonotope<I>& initial_set,
-                                                           const Geometry::Rectangle<R>& bounding_box,
-                                                           const Numeric::Interval<R>& step_size) const
+                                                           const Numeric::Interval<R>& step_size,
+                                                           const Geometry::Rectangle<R>& bounding_box) const
 {
   using namespace Numeric;
   using namespace LinearAlgebra;
@@ -398,8 +383,8 @@ Evaluation::C1LohnerIntegrator<R>::bounded_reachability_step(const System::Vecto
   const dimension_type d=vf.dimension();
   const Matrix<I> id=Matrix<I>::identity(d);
 
-  Point<I> phic=this->bounded_flow(vf,c,bb,h/2);
-  Matrix<I> Dphi=this->bounded_flow_jacobian(vf,c,bb,h/2);
+  Point<I> phic=this->flow_step(vf,c,h/2,bb);
+  Matrix<I> Dphi=this->flow_step_jacobian(vf,c,h/2,bb);
   Vector<I> hhf=(h/2)*vf(bb);
 
   Zonotope<I> result(phic,Dphi*G,hhf);

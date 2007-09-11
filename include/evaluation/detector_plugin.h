@@ -1,7 +1,7 @@
 /***************************************************************************
- *            detector.h
+ *            detector_plugin.h
  *
- *  Copyright  2006  Alberto Casagrande, Pieter Collins
+ *  Copyright  2007  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
 
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file detector.h
+/*! \file detector_plugin.h
  *  \brief Methods for detecting crossings with constraints.
  */
 
-#ifndef ARIADNE_DETECTOR_H
-#define ARIADNE_DETECTOR_H
+#ifndef ARIADNE_DETECTOR_PLUGIN_H
+#define ARIADNE_DETECTOR_PLUGIN_H
 
 #include "../base/types.h"
 #include "../base/declarations.h"
@@ -36,43 +36,46 @@
 #include "../system/declarations.h"
 
 #include "../geometry/constraint_interface.h"
-#include "../evaluation/time_model.h"
+#include "../evaluation/detector_plugin_interface.h"
 
 namespace Ariadne {
   namespace Evaluation {
+
+    template<class R> class TimeModel;
 
     /*! \brief %Base class for constraint crossing and detection schemes. 
      *  \ingroup Detection
      */
     template<class R>
-    class Detector 
+    class DetectorPlugin
+      : public DetectorPluginInterface<R>
     {
       typedef Numeric::Interval<R> I;
      public:
       /*! \brief Virtual destructor. */
-      virtual ~Detector();
+      virtual ~DetectorPlugin();
 
       /*! \brief Default constructor. */
-      Detector();
+      DetectorPlugin();
 
       /*! \brief Copy constructor. */
-      Detector(const Detector<R>& det);
+      DetectorPlugin(const DetectorPlugin<R>& det);
 
       /*! \brief Make a dynamically-allocated copy. */
-      virtual Detector<R>* clone() const;
+      virtual DetectorPlugin<R>* clone() const;
 
       /*! \brief Test if a set entirely satisfies the constraint. */
       template<class BS>
       tribool satisfies(const BS& bs, const Geometry::ConstraintInterface<R>& c) const;
 
 
-      /*! \brief Compute the value of a constraint over a set. */
-      virtual  Numeric::Interval<R> value(const Geometry::ConstraintInterface<R>& c, 
-                                          const Geometry::BasicSetInterface<R>& bs) const;
-
       /*! \brief Compute the value of a constraint over a rectangle. */
       Numeric::Interval<R> value(const Geometry::ConstraintInterface<R>& c, 
                                  const Geometry::Rectangle<R>& r) const;
+
+      /*! \brief Compute the value of a constraint over a zonotope. */
+      Numeric::Interval<R> value(const Geometry::ConstraintInterface<R>& c, 
+                                 const Geometry::Zonotope<R,R>& z) const;
 
       /*! \brief Compute the value of a constraint over a zonotope. */
       Numeric::Interval<R> value(const Geometry::ConstraintInterface<R>& c, 
@@ -108,8 +111,7 @@ namespace Ariadne {
       virtual Evaluation::TimeModel<R> crossing_time(const System::VectorFieldInterface<R>& vf, 
                                                      const Geometry::ConstraintInterface<R>& c, 
                                                      const Geometry::Rectangle<R>& dom, 
-                                                     const Geometry::Rectangle<R>& bb,
-                                                     const Evaluation::Integrator<R>& i) const;
+                                                     const Geometry::Rectangle<R>& bb) const;
 
     };
 
@@ -122,7 +124,7 @@ namespace Ariadne {
 
 template<class R> template<class BS> inline
 tribool 
-Evaluation::Detector<R>::satisfies(const BS& bs,
+Evaluation::DetectorPlugin<R>::satisfies(const BS& bs,
                                    const Geometry::ConstraintInterface<R>& c) const
 {
   Numeric::Interval<R> ivl=this->value(c,bs);
@@ -138,4 +140,4 @@ Evaluation::Detector<R>::satisfies(const BS& bs,
 
 } // namespace Ariadne
 
-#endif /* ARIADNE_DETECTOR_H */
+#endif /* ARIADNE_DETECTOR_PLUGIN_H */

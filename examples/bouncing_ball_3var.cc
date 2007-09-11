@@ -20,6 +20,8 @@
 #include "system/affine_vector_field.h"
 #include "system/set_based_hybrid_automaton.h"
 #include "evaluation/applicator.h"
+#include "evaluation/integrator.h"
+#include "evaluation/applicator_plugin.h"
 #include "evaluation/lohner_integrator.h"
 #include "evaluation/affine_integrator.h"
 #include "evaluation/set_based_hybrid_evolver.h"
@@ -45,6 +47,9 @@ int main() {
 template<class R>
 int bouncing_ball_automaton() 
 {
+  typedef Interval<R> I;
+  typedef Zonotope<I> BS;
+  
   set_hybrid_evolver_verbosity(4);
 
   Rectangle<R> domain("[0,15]x[-20,20]x[0,10]");
@@ -74,10 +79,17 @@ int bouncing_ball_automaton()
   R maximum_set_radius=0.25;
   R grid_size=0.125;
 
-  Applicator<R> apply(maximum_set_radius, grid_size);
+  EvolutionParameters<R> parameters;
+  parameters.set_maximum_step_size(0.125);
+  parameters.set_lock_to_grid_time(0.5);
+  parameters.set_maximum_basic_set_radius(0.25);
+  parameters.set_grid_length(0.125);
 
-  AffineIntegrator<R> integrator(maximum_step_size,lock_to_grid_time,maximum_set_radius); 
-  SetBasedHybridEvolver<R> hybrid_evolver(apply,integrator);
+  LohnerIntegrator<R> lohner;
+
+  Applicator<BS> discrete_time_evolver(parameters);
+  Integrator<BS> continuous_time_evolver(parameters,lohner); 
+  SetBasedHybridEvolver<R> hybrid_evolver(discrete_time_evolver,continuous_time_evolver);
   
   Grid<R> grid(Vector<R>("[0.25,0.25,1.0]"));
   Rectangle<R> bounding_box(domain.neighbourhood(1));

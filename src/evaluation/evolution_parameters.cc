@@ -1,7 +1,7 @@
 /***************************************************************************
- *            applicator.cc
+ *            evolution_parameters.cc
  *
- *  Copyright  2006  Alberto Casagrande, Pieter Collins
+ *  Copyright  2007  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
 
@@ -20,36 +20,23 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+ 
 
 #include "numeric/float.h"
-#include "geometry/zonotope.h"
 
-#include "evaluation/applicator_plugin.h"
-#include "evaluation/applicator_plugin.code.h"
-
-#include "evaluation/applicator.h"
-#include "evaluation/applicator.code.h"
+#include "evaluation/evolution_parameters.h"
+#include "evaluation/evolution_parameters.code.h"
 
 namespace Ariadne {
   namespace Evaluation {
     using namespace Numeric;
 
 #ifdef ENABLE_FLOAT64
-    typedef Geometry::Zonotope<Interval<Float64>,Float64> IFZonotope64;
-    typedef Geometry::Zonotope<Interval<Float64>,Interval<Float64> > IIZonotope64;
-    template class ApplicatorPlugin<IFZonotope64>;
-    template class ApplicatorPlugin<IIZonotope64>;
-    template class Applicator<IFZonotope64>;
-    template class Applicator<IIZonotope64>;
+    template class EvolutionParameters<Float64>;
 #endif
   
 #ifdef ENABLE_FLOATMP
-    typedef Geometry::Zonotope<Interval<FloatMP>,FloatMP> IFZonotopeMP;
-    typedef Geometry::Zonotope<Interval<FloatMP>,Interval<FloatMP> > IIZonotopeMP;
-    template class ApplicatorPlugin<IFZonotopeMP>;
-    template class ApplicatorPlugin<IIZonotopeMP>;
-    template class Applicator<IFZonotopeMP>;
-    template class Applicator<IIZonotopeMP>;
+    template class EvolutionParameters<FloatMP>;
 #endif
 
   }

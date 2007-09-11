@@ -1,5 +1,5 @@
 /***************************************************************************
- *            evaluation_parameters.cc
+ *            bounder.cc
  *
  *  Copyright  2007  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -20,23 +20,23 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
 
 #include "numeric/float.h"
 
-#include "evaluation/evaluation_parameters.h"
-#include "evaluation/evaluation_parameters.code.h"
+#include "evaluation/bounder_plugin_interface.h"
+#include "evaluation/bounder_plugin.h"
+#include "evaluation/bounder_plugin.code.h"
 
 namespace Ariadne {
   namespace Evaluation {
     using namespace Numeric;
 
 #ifdef ENABLE_FLOAT64
-    template class EvaluationParameters<Float64>;
+    template class BounderPlugin<Float64>;
 #endif
   
 #ifdef ENABLE_FLOATMP
-    template class EvaluationParameters<FloatMP>;
+    template class BounderPlugin<FloatMP>;
 #endif
 
   }

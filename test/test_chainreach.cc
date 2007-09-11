@@ -58,8 +58,11 @@ test_chainreach()
 {
   set_applicator_verbosity(0);
   
-  double basic_set_radius=0.25;
-  double grid_size=0.125;
+  typedef Numeric::Interval<R> I;
+  typedef Geometry::Zonotope<I,R> BS;
+
+  double maximum_basic_set_radius=0.25;
+  double grid_length=0.125;
 
   int subdivisions=32;
 
@@ -85,8 +88,12 @@ test_chainreach()
   in.adjoin(over_approximation(ir,g));
   bd.adjoin(over_approximation(gbb,g));
 
-  Applicator<R> apply(basic_set_radius,grid_size);
-  apply.set_grid_size(16.0/subdivisions);
+  EvolutionParameters<R> parameters;
+  parameters.set_maximum_basic_set_radius(maximum_basic_set_radius);
+  parameters.set_grid_length(grid_length);
+  
+  Applicator<BS> apply(parameters);
+  apply.parameters().set_grid_length(16.0/subdivisions);
 
   GridMaskSet<R> gmcr=apply.chainreach(h,in,bd);
   PartitionTreeSet<R> ptcr=PartitionTreeSet<R>(gmcr);

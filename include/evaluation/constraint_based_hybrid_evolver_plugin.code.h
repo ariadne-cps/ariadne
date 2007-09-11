@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_evolver.code.h
+ *            constraint_based_hybrid_evolver_plugin.code.h
  *
  *  Copyright  2007  Pieter Collins
  *  Pieter.Collins@cwi.nl
@@ -33,10 +33,13 @@
 #include "../system/map.h"
 #include "../system/vector_field.h"
 #include "../system/constraint_based_hybrid_automaton.h"
-#include "../evaluation/applicator.h"
-#include "../evaluation/integrator.h"
-#include "../evaluation/detector.h"
+#include "../evaluation/applicator_plugin_interface.h"
+#include "../evaluation/bounder_plugin_interface.h"
+#include "../evaluation/integrator_plugin_interface.h"
+#include "../evaluation/detector_plugin_interface.h"
 
+#include "../evaluation/bounder_plugin.h"
+#include "../evaluation/detector_plugin.h"
 #include "../evaluation/lohner_integrator.h"
 
 #include "../output/epsstream.h"
@@ -94,50 +97,37 @@ using namespace System;
 
 
 template<class R>
-Evaluation::ConstraintBasedHybridEvolverPlugin<R>::ConstraintBasedHybridEvolverPlugin(const Applicator<R>& a, const Integrator<R>& i, const Detector<R>& d)
+Evaluation::ConstraintBasedHybridEvolverPlugin<R>::~ConstraintBasedHybridEvolverPlugin()
+{
+  delete _applicator;
+  delete _bounder;
+  delete _integrator;
+  delete _detector;
+}
+
+
+template<class R>
+Evaluation::ConstraintBasedHybridEvolverPlugin<R>::ConstraintBasedHybridEvolverPlugin(const ApplicatorPluginInterface<BS>& a, const IntegratorPluginInterface<BS>& i, const DetectorPluginInterface<R>& d)
   : _applicator(a.clone()), 
-    _integrator(dynamic_cast<LohnerIntegrator<R>*>(i.clone())),
+    _bounder(new BounderPlugin<R>()),
+    _integrator(dynamic_cast<C1LohnerIntegrator<R>*>(i.clone())),
     _detector(d.clone())
 {
   if(!this->_integrator) {
-    throw std::runtime_error("ConstraintBasedHybridEvolverPlugin::ConstraintBasedHybridEvolverPlugin(Applicator a, Integrator i): Invalid integrator");
+    throw std::runtime_error("ConstraintBasedHybridEvolverPlugin::ConstraintBasedHybridEvolverPlugin(Applicator a, Integrator i, Detector d): Invalid integrator");
   }
 }
 
 
 template<class R>
 Evaluation::ConstraintBasedHybridEvolverPlugin<R>::ConstraintBasedHybridEvolverPlugin(const ConstraintBasedHybridEvolverPlugin<R>& plugin)
-  :_applicator(plugin._applicator), 
-   _integrator(plugin._integrator),
-   _detector(plugin._detector)
+  : _applicator(plugin._applicator->clone()), 
+    _bounder(plugin._bounder->clone()), 
+    _integrator(plugin._integrator->clone()),
+    _detector(plugin._detector->clone())
 {
 }
 
-
-
-
-template<class R>
-time_type
-Evaluation::ConstraintBasedHybridEvolverPlugin<R>::maximum_step_size() const
-{
-  return this->_integrator->maximum_step_size();
-}
-
-
-template<class R>
-R
-Evaluation::ConstraintBasedHybridEvolverPlugin<R>::maximum_basic_set_radius() const
-{
-  return this->_integrator->maximum_basic_set_radius();
-}
-
-
-template<class R>
-R
-Evaluation::ConstraintBasedHybridEvolverPlugin<R>::maximum_splitting_set_radius() const
-{
-  return Numeric::div_down(this->_integrator->maximum_basic_set_radius(),8);
-}
 
 
 
@@ -218,7 +208,7 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::estimate_flow_bounds(const mo
                                                                    const timed_set_type& initial_set,
                                                                    time_type& maximum_step_size) const
 {
-  return this->_integrator->estimate_flow_bounds(mode.dynamic(),initial_set.bounding_box(),maximum_step_size);
+  return this->_bounder->estimate_flow_bounds(mode.dynamic(),initial_set.bounding_box(),maximum_step_size);
 }
 
 template<class R>
@@ -228,7 +218,7 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::refine_flow_bounds(const mode
                                                                  const bounding_box_type& bounding_set,
                                                                  const time_type& maximum_step_size) const
 {
-  return this->_integrator->refine_flow_bounds(mode.dynamic(),initial_set.bounding_box(),bounding_set,maximum_step_size);
+  return this->_bounder->refine_flow_bounds(mode.dynamic(),initial_set.bounding_box(),bounding_set,maximum_step_size);
 }
 
 
@@ -239,7 +229,7 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::refine_flow_bounds(const mode
 template<class R>
 tribool
 Evaluation::ConstraintBasedHybridEvolverPlugin<R>::enabled(const transition_type& transition,
-                                                      const bounding_box_type& bounding_box) const
+                                                           const bounding_box_type& bounding_box) const
 {
   return this->_detector->value(transition.constraint(),bounding_box) >= 0;
 }
@@ -248,9 +238,11 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::enabled(const transition_type
 template<class R>
 tribool
 Evaluation::ConstraintBasedHybridEvolverPlugin<R>::enabled(const transition_type& transition,
-                                            const timed_set_type& set) const
+                                                           const timed_set_type& set) const
 {
-  return this->_detector->value(transition.constraint(),set.continuous_state_set()) >= 0;
+  DetectorPlugin<R>* detector=dynamic_cast<DetectorPlugin<R>*>(this->_detector);
+  assert(detector);
+  return detector->value(transition.constraint(),set.continuous_state_set()) >= 0;
 }
 
 
@@ -258,8 +250,8 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::enabled(const transition_type
 template<class R>
 tribool
 Evaluation::ConstraintBasedHybridEvolverPlugin<R>::forces(const constraint_type& constraint1,
-                                           const constraint_type& constraint2,
-                                           const bounding_box_type& bounding_box) const
+                                                          const constraint_type& constraint2,
+                                                          const bounding_box_type& bounding_box) const
 {
   return this->_detector->forces(constraint1,constraint2,bounding_box);
 }
@@ -270,7 +262,7 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::forces(const constraint_type&
 template<class R>
 Numeric::Interval<R>
 Evaluation::ConstraintBasedHybridEvolverPlugin<R>::estimate_normal_derivative(const transition_type& transition,
-                                                               const bounding_box_type& bounding_box) const
+                                                                              const bounding_box_type& bounding_box) const
 {
   const vector_field_type& dynamic=transition.source().dynamic();
   const differentiable_constraint_type& constraint=dynamic_cast<const differentiable_constraint_type&>( transition.constraint());
@@ -286,8 +278,8 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::estimate_normal_derivative(co
 template<class R>
 Numeric::Interval<R>
 Evaluation::ConstraintBasedHybridEvolverPlugin<R>::estimate_crossing_time_step(const transition_type& transition, 
-                                                                const timed_set_type& initial_set,
-                                                                const bounding_box_type& bounding_box) const
+                                                                               const timed_set_type& initial_set,
+                                                                               const bounding_box_type& bounding_box) const
 {
   const vector_field_type& dynamic=transition.source().dynamic();
   const constraint_type& constraint=transition.constraint();
@@ -310,9 +302,8 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::compute_crossing_time_step(co
   const System::VectorFieldInterface<R>& dynamic=transition.source().dynamic();
   const Geometry::ConstraintInterface<R>& constraint=transition.constraint();
   const Geometry::Rectangle<R> domain=initial_set.bounding_box();
-  const Integrator<R>& integrator=*this->_integrator;
 
-  TimeModel<R> spacial_crossing_time_step=this->_detector->crossing_time(dynamic,constraint,domain,bounding_box,integrator);
+  TimeModel<R> spacial_crossing_time_step=this->_detector->crossing_time(dynamic,constraint,domain,bounding_box);
   ARIADNE_LOG(9,"    spacial_crossing_time_step="<<spacial_crossing_time_step<<"\n");
 
   // FIXME: Is this formula correct? Maybe the average crossing time is too small for the centre...
@@ -333,12 +324,13 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::compute_crossing_data(const t
                                                                     const timed_set_type& final_set,
                                                                     const bounding_box_type& bounding_box) const
 {
+  DetectorPlugin<R>* detector=dynamic_cast<DetectorPlugin<R>*>(this->_detector);
   const constraint_type& constraint = transition.constraint();
 
   // constraint might not be satisfied; compute further
   I value_range = this->_detector->value(constraint,bounding_box);
-  I initial_constraint_value = this->_detector->value(constraint,initial_set.continuous_state_set());
-  I final_constraint_value = this->_detector->value(constraint,final_set);
+  I initial_constraint_value = detector->value(constraint,initial_set.continuous_state_set());
+  I final_constraint_value = detector->value(constraint,final_set);
   I normal_derivative = this->estimate_normal_derivative(transition,bounding_box);
   I crossing_time_bounds = this->estimate_crossing_time_step(transition,initial_set,bounding_box);
   TimeModel<R> crossing_time_model=this->compute_crossing_time_step(transition,initial_set,bounding_box);
@@ -476,7 +468,7 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::compute_terminating_event_tim
   
   // Compute full crossing data
   std::map<id_type,crossing_data_type> crossing_data
-    = this->compute_crossing_data(possibly_enabled_transitions,initial_set,final_set,bounding_box,this->maximum_step_size());
+    = this->compute_crossing_data(possibly_enabled_transitions,initial_set,final_set,bounding_box,time_step_size);
   ARIADNE_LOG(6,"  crossing_data="<<crossing_data<<"\n");
 
 
@@ -596,7 +588,7 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::compute_enabled_activation_ti
       transition_iter!=transitions.end(); ++transition_iter)
   {
     if(transition_iter->kind()==System::activation_tag) {
-      if(possibly(!this->_detector->satisfies(bounding_box,transition_iter->constraint()))) {
+      if(possibly(this->enabled(*transition_iter,bounding_box))) {
         possibly_enabled_activations.insert(*transition_iter);
         ARIADNE_LOG(6,"  event "<<transition_iter->id()<<" with constraint "<<transition_iter->constraint()<<" possibly not satisfied by "<<bounding_box<<"\n");
       }
@@ -616,20 +608,22 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::compute_enabled_activation_ti
     I normal_derivative = LinearAlgebra::inner_product(dynamic(bounding_box),constraint.gradient(bounding_box));
     ARIADNE_LOG(7,"    event "<<transition_iter->id()<<" crossing time step is "<<crossing_time_step<<"\n");
   
+    tribool initially_enabled=this->enabled(transition,initial_set);
+    tribool finally_enabled=this->enabled(transition,final_set);
     if(minimum_time_step >= crossing_time_step || crossing_time_step >= maximum_time_step) {
-      if(definitely(not this->_detector->satisfies(initial_set,constraint))) {
+      if(definitely(initially_enabled)) {
         ARIADNE_LOG(7,"      activated entire evolution time\n");
         enabled_activations.insert(std::make_pair(event_id,std::make_pair(minimum_time_step,maximum_time_step)));
-      } else if(possibly(not this->_detector->satisfies(initial_set,constraint))) {
+      } else if(possibly(initially_enabled)) {
         ARIADNE_LOG(7,"      appears to be activated entire evolution time\n");
         enabled_activations.insert(std::make_pair(event_id,std::make_pair(minimum_time_step,maximum_time_step)));
       } else {
         ARIADNE_LOG(7,"      inactivated entire evolution time\n");
       }
-    } else if(this->_detector->satisfies(initial_set,constraint)) { 
+    } else if(not initially_enabled) {
       ARIADNE_LOG(7,"      event inactive at beginning of evolution step\n")
       enabled_activations.insert(std::make_pair(event_id,std::make_pair(crossing_time_step,maximum_time_step)));
-    } else if(this->_detector->satisfies(final_set,constraint)) { 
+    } else if(not finally_enabled) { 
       ARIADNE_LOG(7,"      event inactive at end end of evolution step\n");
       enabled_activations.insert(std::make_pair(event_id,std::make_pair(minimum_time_step,crossing_time_step)));
     } else {
@@ -682,7 +676,7 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::continuous_evolution_step(con
   assert(mode.id()==initial_set.discrete_state());
   I average_time_step = time_step.average();
   continuous_basic_set_type continuous_state_set = 
-      this->_integrator->bounded_integration_step(mode.dynamic(),initial_set.continuous_state_set(),bounding_box,average_time_step);
+      this->_integrator->integration_step(mode.dynamic(),initial_set.continuous_state_set(),average_time_step,bounding_box);
   Matrix<I>& generators = const_cast<Matrix<I>&>(continuous_state_set.generators());
   generators += outer_product(mode.dynamic()(bounding_box),time_step.gradient());
   timed_set_type integrated_set(initial_set.time()+time_step,initial_set.steps(),initial_set.discrete_state(),continuous_state_set);
@@ -708,7 +702,7 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::continuous_reachability_step(
   time_model_type average_time_step=(lower_time_step+upper_time_step)/2;
   time_type integration_time_step=average_time_step.average().midpoint();
   continuous_basic_set_type continuous_state_set = 
-      this->_integrator->bounded_integration_step(mode.dynamic(),initial_set.continuous_state_set(),bounding_box,integration_time_step);
+      this->_integrator->integration_step(mode.dynamic(),initial_set.continuous_state_set(),integration_time_step,bounding_box);
 
   R lower_time_bound=lower_time_step.bound().lower();
   R upper_time_bound=upper_time_step.bound().upper();
@@ -804,11 +798,14 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::unforced_jump_step(const tran
 template<class R>
 std::vector<typename Evaluation::ConstraintBasedHybridEvolverPlugin<R>::timed_set_type>
 Evaluation::ConstraintBasedHybridEvolverPlugin<R>::evolution_step(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
-                                                             const timed_set_type& initial_set,
-                                                             const time_type& final_time,
-                                                             EvolutionSemantics evolution_semantics,
-                                                             EvolutionKind evolution_kind) const
+                                                                  const timed_set_type& initial_set,
+                                                                  const time_type& final_time,
+                                                                  EvolutionSemantics evolution_semantics,
+                                                                  EvolutionKind evolution_kind) const
 {
+  // FIXME: this is a hack!
+  R maximum_splitting_set_radius = 0.0625;
+
   using namespace LinearAlgebra;
   using namespace Geometry;
   using namespace System;;
@@ -843,13 +840,13 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::evolution_step(const System::
   time_model_type zero_time_step=initial_set.time()*0;
 
   // Compute rough bounding box
-  time_type time_step_size=this->maximum_step_size();
-  Rectangle<R> bounding_box=this->_integrator->estimate_flow_bounds(dynamic,basic_set.bounding_box(),time_step_size);
+  time_type time_step_size=(final_time-initial_set.time()).bound().upper();
+  Rectangle<R> bounding_box=this->_bounder->estimate_flow_bounds(dynamic,basic_set.bounding_box(),time_step_size);
   ARIADNE_LOG(6,"  maximum_time_step_size="<<time_step_size<<"\n");
   ARIADNE_LOG(6,"  rough_bounding_box="<<bounding_box<<"\n");
-  bounding_box=this->_integrator->refine_flow_bounds(dynamic,basic_set.bounding_box(),bounding_box,time_step_size);
+  bounding_box=this->_bounder->refine_flow_bounds(dynamic,basic_set.bounding_box(),bounding_box,time_step_size);
   ARIADNE_LOG(6,"  improved_bounding_box="<<bounding_box<<"\n");
-  bounding_box=this->_integrator->refine_flow_bounds(dynamic,basic_set.bounding_box(),bounding_box,time_step_size);
+  bounding_box=this->_bounder->refine_flow_bounds(dynamic,basic_set.bounding_box(),bounding_box,time_step_size);
   ARIADNE_LOG(6,"  further_improved_bounding_box="<<bounding_box<<"\n\n");
 
   // Log some facts about the flow
@@ -902,7 +899,7 @@ Evaluation::ConstraintBasedHybridEvolverPlugin<R>::evolution_step(const System::
   
   if (terminating_event_times.size()>1) {
     // Subdivide if upper semantics and set is not too small
-    if(evolution_semantics==upper_semantics && initial_set.radius()>this->maximum_splitting_set_radius()) {
+    if(evolution_semantics==upper_semantics && initial_set.radius()>maximum_splitting_set_radius) {
       ARIADNE_LOG(3," Multiply enabled events: subdividing\n");
       return this->subdivide(initial_set);
     }

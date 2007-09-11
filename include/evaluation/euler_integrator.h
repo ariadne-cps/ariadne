@@ -30,7 +30,7 @@
 
 #include "../geometry/declarations.h"
 #include "../system/declarations.h"
-#include "../evaluation/integrator.h"
+#include "../evaluation/integrator_plugin_interface.h"
 
 namespace Ariadne {
   namespace Evaluation {
@@ -39,62 +39,40 @@ namespace Ariadne {
      */
     template<class R>
     class EulerIntegrator
-      : public IntegratorBase< R, System::VectorFieldInterface<R>, Geometry::Rectangle<R> > 
+      : public IntegratorPluginInterface< Geometry::Rectangle<R> >
     {
+      typedef Geometry::Rectangle<R> BS;
       typedef Numeric::Interval<R> I;
-      typedef IntegratorBase< R, System::VectorFieldInterface<R>, Geometry::Rectangle<R> >  Base_;
      public:
       /*! \brief Constructor. */
-      EulerIntegrator(const time_type& maximum_step_size, const time_type& lock_to_grid_time, const R& maximum_set_radius);
+      EulerIntegrator();
 
 
       /*! \brief Cloning operator. */
       virtual EulerIntegrator<R>* clone() const;
 
-      /*! \brief Subdivide a basic set. */
-      virtual Geometry::ListSet< Geometry::Rectangle<R> >
-      subdivide(const Geometry::Rectangle<R>&) const;
-
       /*! \brief A C0 algorithm for integrating forward a point. */
       virtual Geometry::Point<I> 
-      bounded_flow(const System::VectorFieldInterface<R>&,
-                   const Geometry::Point<I>&,
-                   const Geometry::Rectangle<R>&,
-                   const Numeric::Interval<R>&) const;
-
-      /*! \brief A C0 algorithm for computing the Jacobian. (Not provided) */
-      virtual LinearAlgebra::Matrix<I> 
-      bounded_flow_jacobian(const System::VectorFieldInterface<R>&,
-                            const Geometry::Point<I>&,
-                            const Geometry::Rectangle<R>&,
-                            const Numeric::Interval<R>&) const;
-
-      /*! \brief A C0 algorithm for integrating forward a rectangle. */
-      virtual Geometry::Rectangle<R> 
-      bounded_integration_step(const System::VectorFieldInterface<R>&,
-                               const Geometry::Rectangle<R>&,
-                               const Geometry::Rectangle<R>&,
-                               const Numeric::Interval<R>&) const;
-
-      /*! \brief A C0 algorithm for integrating forward a zonotope up to a certain time. */
-      virtual Geometry::Rectangle<R> 
-      bounded_reachability_step(const System::VectorFieldInterface<R>&,
-                                const Geometry::Rectangle<R>&,
-                                const Geometry::Rectangle<R>&,
-                                const Numeric::Interval<R>&) const;
+      flow_step(const System::VectorFieldInterface<R>&,
+                const Geometry::Point<I>&,
+                const Numeric::Interval<R>&,
+                const Geometry::Rectangle<R>&) const;
 
       /*! \brief A C0 algorithm for integrating forward a rectangle. */
       virtual Geometry::Rectangle<R> 
       integration_step(const System::VectorFieldInterface<R>&,
                        const Geometry::Rectangle<R>&,
-                       time_type&) const;
+                       const Numeric::Interval<R>&,
+                       const Geometry::Rectangle<R>&) const;
 
       /*! \brief A C0 algorithm for integrating forward a zonotope up to a certain time. */
       virtual Geometry::Rectangle<R> 
       reachability_step(const System::VectorFieldInterface<R>&,
                         const Geometry::Rectangle<R>&,
-                        time_type&) const;
-     };
+                        const Numeric::Interval<R>&,
+                        const Geometry::Rectangle<R>&) const;
+
+    };
 
     
   }

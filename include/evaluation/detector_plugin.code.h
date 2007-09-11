@@ -1,5 +1,5 @@
 /***************************************************************************
- *            detector.code.h
+ *            detector_plugin.code.h
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -31,6 +31,8 @@
 #include "geometry/constraint.h"
 
 #include "evaluation/exceptions.h"
+#include "../evaluation/time_model.h"
+#include "evaluation/bounder_plugin.h"
 #include "evaluation/lohner_integrator.h"
 
 #include "output/logging.h"
@@ -40,41 +42,33 @@ namespace Ariadne {
 namespace Evaluation { static int& verbosity = detector_verbosity; }
 
 template<class R>
-Evaluation::Detector<R>::~Detector()
+Evaluation::DetectorPlugin<R>::~DetectorPlugin()
 {
 }
 
 template<class R>
-Evaluation::Detector<R>::Detector()
+Evaluation::DetectorPlugin<R>::DetectorPlugin()
 {
 }
 
 template<class R>
-Evaluation::Detector<R>::Detector(const Detector<R>& det) 
+Evaluation::DetectorPlugin<R>::DetectorPlugin(const DetectorPlugin<R>& det) 
 {
 }
 
 template<class R>
-Evaluation::Detector<R>*
-Evaluation::Detector<R>::clone() const
+Evaluation::DetectorPlugin<R>*
+Evaluation::DetectorPlugin<R>::clone() const
 {
-  return new Detector<R>(*this);
+  return new DetectorPlugin<R>(*this);
 }
 
 
-
-template<class R>
-Numeric::Interval<R> 
-Evaluation::Detector<R>::value(const Geometry::ConstraintInterface<R>& c, 
-                               const Geometry::BasicSetInterface<R>& bs) const
-{
-  throw NotImplemented(__PRETTY_FUNCTION__);
-}
 
 
 template<class R>
 Numeric::Interval<R> 
-Evaluation::Detector<R>::value(const Geometry::ConstraintInterface<R>& c, 
+Evaluation::DetectorPlugin<R>::value(const Geometry::ConstraintInterface<R>& c, 
                                const Geometry::Rectangle<R>& r) const
 {
   Geometry::Point<I> pt=r;
@@ -84,7 +78,26 @@ Evaluation::Detector<R>::value(const Geometry::ConstraintInterface<R>& c,
 
 template<class R>
 Numeric::Interval<R> 
-Evaluation::Detector<R>::value(const Geometry::ConstraintInterface<R>& c, 
+Evaluation::DetectorPlugin<R>::value(const Geometry::ConstraintInterface<R>& c, 
+                               const Geometry::Zonotope<R,R>& z) const
+{
+  const Geometry::DifferentiableConstraintInterface<R>& dc=dynamic_cast<const Geometry::DifferentiableConstraintInterface<R>&>(c);
+  if(&dc) {
+    LinearAlgebra::Vector<I> e(z.number_of_generators(),I(-1,1));
+    const Geometry::Point<R>& zc=z.centre();
+    const LinearAlgebra::Matrix<R>& zG=z.generators();
+    Geometry::Rectangle<R> bb=z.bounding_box();
+    Geometry::Point<I> bpt(bb);
+    Numeric::Interval<R> v=dc.value(zc)+LinearAlgebra::inner_product(dc.gradient(bb)*zG,e);
+    return v;
+  } else {
+    return this->value(c,z.bounding_box());
+  }
+}
+
+template<class R>
+Numeric::Interval<R> 
+Evaluation::DetectorPlugin<R>::value(const Geometry::ConstraintInterface<R>& c, 
                                const Geometry::Zonotope<I,R>& z) const
 {
   const Geometry::DifferentiableConstraintInterface<R>& dc=dynamic_cast<const Geometry::DifferentiableConstraintInterface<R>&>(c);
@@ -103,7 +116,7 @@ Evaluation::Detector<R>::value(const Geometry::ConstraintInterface<R>& c,
 
 template<class R>
 Numeric::Interval<R> 
-Evaluation::Detector<R>::value(const Geometry::ConstraintInterface<R>& c, 
+Evaluation::DetectorPlugin<R>::value(const Geometry::ConstraintInterface<R>& c, 
                                const Geometry::Zonotope<I,I>& z) const
 {
   const Geometry::DifferentiableConstraintInterface<R>& dc=dynamic_cast<const Geometry::DifferentiableConstraintInterface<R>&>(c);
@@ -124,7 +137,7 @@ Evaluation::Detector<R>::value(const Geometry::ConstraintInterface<R>& c,
 
 template<class R>
 tribool 
-Evaluation::Detector<R>::forces(const Geometry::ConstraintInterface<R>& c1,
+Evaluation::DetectorPlugin<R>::forces(const Geometry::ConstraintInterface<R>& c1,
                                 const Geometry::ConstraintInterface<R>& c2,
                                 const Geometry::Rectangle<R>& dom) const
 {
@@ -149,7 +162,7 @@ Evaluation::Detector<R>::forces(const Geometry::ConstraintInterface<R>& c1,
 
 template<class R>
 Numeric::Interval<R> 
-Evaluation::Detector<R>::normal_derivative(const System::VectorFieldInterface<R>& vf, 
+Evaluation::DetectorPlugin<R>::normal_derivative(const System::VectorFieldInterface<R>& vf, 
                                            const Geometry::DifferentiableConstraintInterface<R>& dc, 
                                            const Geometry::Point<I>& pt) const
 {  
@@ -159,7 +172,7 @@ Evaluation::Detector<R>::normal_derivative(const System::VectorFieldInterface<R>
 
 template<class R>
 Numeric::Interval<R> 
-Evaluation::Detector<R>::crossing_time(const System::VectorFieldInterface<R>& vf, 
+Evaluation::DetectorPlugin<R>::crossing_time(const System::VectorFieldInterface<R>& vf, 
                                        const Geometry::ConstraintInterface<R>& c, 
                                        const Geometry::Point<I>& pt,
                                        const Geometry::Rectangle<R>& bb) const
@@ -176,13 +189,12 @@ Evaluation::Detector<R>::crossing_time(const System::VectorFieldInterface<R>& vf
 
 template<class R>
 Evaluation::TimeModel<R> 
-Evaluation::Detector<R>::crossing_time(const System::VectorFieldInterface<R>& vf, 
+Evaluation::DetectorPlugin<R>::crossing_time(const System::VectorFieldInterface<R>& vf, 
                                        const Geometry::ConstraintInterface<R>& c, 
                                        const Geometry::Rectangle<R>& d,
-                                       const Geometry::Rectangle<R>& bb,
-                                       const Evaluation::Integrator<R>& i) const
+                                       const Geometry::Rectangle<R>& bb) const
 {
-  ARIADNE_LOG(8,"    Detector::crossing_time(...)\n");
+  ARIADNE_LOG(8,"    DetectorPlugin::crossing_time(...)\n");
   static const int number_of_newton_steps=2;
 
   const System::VectorFieldInterface<R>& dynamic=vf;
@@ -190,15 +202,11 @@ Evaluation::Detector<R>::crossing_time(const System::VectorFieldInterface<R>& vf
     dynamic_cast<const Geometry::DifferentiableConstraintInterface<R>&>(c);
   const Geometry::Rectangle<R>& domain=d;
   const Geometry::Rectangle<R>& bounding_box=bb;
-  const Evaluation::Integrator<R>& integrator=i;
-  const Evaluation::LohnerIntegrator<R>& lohner_integrator=
-    dynamic_cast<const Evaluation::LohnerIntegrator<R>&>(integrator);
+  Evaluation::LohnerIntegrator<R> lohner_integrator;
+  Evaluation::BounderPlugin<R> bounder;
   
   if(!&constraint) {
-    throw std::runtime_error("Detector::crossing_time(...): Can only compute crossing time for differentiable constraint");
-  }
-  if(!&lohner_integrator) {
-    throw std::runtime_error("Detector::crossing_time(...): Can only compute crossing time using Lohner integrator");
+    throw std::runtime_error("DetectorPlugin::crossing_time(...): Can only compute crossing time for differentiable constraint");
   }
 
 
@@ -225,10 +233,10 @@ Evaluation::Detector<R>::crossing_time(const System::VectorFieldInterface<R>& vf
       flow_time += Numeric::Rational(centre_time_step.midpoint());
       Numeric::Interval<R> time_interval=Numeric::Rational(flow_time);
 
-      centre_bounding_box=integrator.refine_flow_bounds(dynamic,centre,bounding_box,centre_time_step.upper());
-      centre_bounding_box=integrator.refine_flow_bounds(dynamic,centre,centre_bounding_box,centre_time_step.upper());
+      centre_bounding_box=bounder.refine_flow_bounds(dynamic,centre,bounding_box,centre_time_step.upper());
+      centre_bounding_box=bounder.refine_flow_bounds(dynamic,centre,centre_bounding_box,centre_time_step.upper());
       
-      centre=lohner_integrator.bounded_flow(dynamic,centre,centre_bounding_box,flow_time);
+      centre=lohner_integrator.flow_step(dynamic,centre,flow_time,centre_bounding_box);
     }
   
     ARIADNE_LOG(9,"    estimated_centre_crossing_time="<<flow_time<<"\n");

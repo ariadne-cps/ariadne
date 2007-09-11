@@ -37,6 +37,7 @@
 #include "system/affine_vector_field.h"
 #include "system/set_based_hybrid_automaton.h"
 #include "evaluation/applicator.h"
+#include "evaluation/integrator.h"
 #include "evaluation/lohner_integrator.h"
 #include "evaluation/affine_integrator.h"
 #include "evaluation/set_based_hybrid_evolver.h"
@@ -55,14 +56,16 @@ using namespace Ariadne::Evaluation;
 using namespace Ariadne::Output;
 using namespace std;
 
-template<class R> int test_set_based_hybrid_evolution();
+template<class R> int test_set_based_hybrid_evolver();
   
 namespace Ariadne { namespace Evaluation { extern int verbosity; } }
 
 template<class R>
-int test_set_based_hybrid_evolution() 
+int test_set_based_hybrid_evolver() 
 {  
   //set_hybrid_evolver_verbosity(4);
+
+  typedef Zonotope< Interval<R> > BS;
 
   PolyhedralSet<R> space(Rectangle<R>("[-7.5,7.5]x[-7.5,7.5]"));
   AffineMap<R> identity(Matrix<R>("[1,0;0,-1]"),Vector<R>("[0,0]"));
@@ -97,12 +100,18 @@ int test_set_based_hybrid_evolution()
 
   time_type maximum_step_size=0.125;
   time_type lock_to_grid_time=0.25;
-  R maximum_set_radius=0.5;
-  R grid_size=0.125;
+  R maximum_basic_set_radius=0.5;
+  R grid_length=0.125;
 
-  Applicator<R> apply(maximum_set_radius,grid_size);
-  AffineIntegrator<R> integrator(maximum_step_size,lock_to_grid_time,maximum_set_radius); 
-  SetBasedHybridEvolver<R> hybrid_evolver(apply,integrator);
+  EvolutionParameters<R> parameters;
+  parameters.set_maximum_basic_set_radius(maximum_basic_set_radius);
+  parameters.set_grid_length(grid_length);
+  parameters.set_maximum_step_size(maximum_step_size);
+  parameters.set_lock_to_grid_time(lock_to_grid_time);
+
+  Applicator<BS> discrete_time_evolver(parameters);
+  Integrator<BS> continuous_time_evolver(parameters,AffineIntegrator<R>());
+  SetBasedHybridEvolver<R> hybrid_evolver(discrete_time_evolver,continuous_time_evolver);
   
   Grid<R> grid(Vector<R>("[0.25,0.25]"));
   FiniteGrid<R> finite_grid(grid,LatticeBlock("[-32,32]x[-32,32]"));
@@ -134,7 +143,7 @@ int test_set_based_hybrid_evolution()
        << " by continuous evolution" << endl << endl;
   
   epsfstream eps;
-  eps.open("test_hybrid_evolution-1.eps",bounding_box.expand(0.5));
+  eps.open("test_hybrid_evolver-1.eps",bounding_box.expand(0.5));
   eps << fill_colour(white) << bounding_box;
   eps << fill_colour(cyan) << automaton.mode(mode1_id).invariant();
   //eps << invariant1;
@@ -156,7 +165,7 @@ int test_set_based_hybrid_evolution()
   HybridGridMaskSet<R> discrete_reach=hybrid_evolver.discrete_step(automaton,initial_activated_set);
   cout << "Reached " << discrete_reach[mode2_id].size() << " cells by discrete step" << endl << endl;
   
-  eps.open("test_hybrid_evolution-2.eps",bounding_box.expand(0.5));
+  eps.open("test_hybrid_evolver-2.eps",bounding_box.expand(0.5));
   eps << fill_colour(white) << bounding_box;
   eps << fill_colour(cyan);
   eps << static_cast<const Polyhedron<R>&>(activation11);
@@ -182,7 +191,7 @@ int test_set_based_hybrid_evolution()
        << "out of (" << chainreach[mode1_id].capacity() << "," << chainreach[mode1_id].capacity() << ") "
        << endl << endl;
   
-  eps.open("test_hybrid_evolution-3.eps",bounding_box.expand(0.5));
+  eps.open("test_hybrid_evolver-3.eps",bounding_box.expand(0.5));
   eps << fill_colour(white) << bounding_box;
   eps << fill_colour(cyan) << activation11 << activation21;
   eps << fill_colour(magenta) << activation12;
@@ -216,7 +225,7 @@ int test_set_based_hybrid_evolution()
 
 
 int main() {
-  test_set_based_hybrid_evolution<Float>();
+  test_set_based_hybrid_evolver<Float>();
   cerr << "INCOMPLETE ";
   return 0;
 }

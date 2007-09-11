@@ -187,6 +187,7 @@ namespace Ariadne {
     {
       friend class ConstraintBasedHybridEvolver<R>;
       typedef Numeric::Interval<R> I;
+      typedef Geometry::Zonotope<I> BS;
      public:
       /*! \brief The type used for real numbers. */
       typedef R real_type;
@@ -221,21 +222,16 @@ namespace Ariadne {
       /*! \brief . */
       typedef CrossingData<R> crossing_data_type;
   
-      //! \name Constructors. */
+      //! \name Constructors and destructors. */
+
+      /*! \brief Destructor. */
+      ~ConstraintBasedHybridEvolverPlugin();
 
       /*! \brief Construct from an applicator, an integrator and a detector. */
-      ConstraintBasedHybridEvolverPlugin(const Applicator<R>& applicator, const Integrator<R>& integrator, const Detector<R>& detector);
+      ConstraintBasedHybridEvolverPlugin(const ApplicatorPluginInterface<BS>& applicator, const IntegratorPluginInterface<BS>& integrator, const DetectorPluginInterface<R>& detector);
 
       /*! \brief Copy constructor. */
       ConstraintBasedHybridEvolverPlugin(const ConstraintBasedHybridEvolverPlugin<R>& plugin);
-
-      //! \name Parameters controlling the evolution.
-      /*! \brief The maximum step size for integration. */
-      time_type maximum_step_size() const;
-      /*! \brief The maximum size of a basic set. */
-      real_type maximum_basic_set_radius() const;
-      /*! \brief The maximum size of a basic set which can be split across a transition boundary. */
-      real_type maximum_splitting_set_radius() const;
 
 
       //! \name Evolution steps
@@ -436,9 +432,10 @@ namespace Ariadne {
      public:
       mutable std::vector<timed_set_type> trace;
      private:
-      Applicator<R>* _applicator;
-      LohnerIntegrator<R>* _integrator;
-      Detector<R>* _detector;
+      ApplicatorPluginInterface<BS>* _applicator;
+      BounderPluginInterface<R>* _bounder;
+      DifferentiableIntegratorPluginInterface<BS>* _integrator;
+      DetectorPluginInterface<R>* _detector;
     };
 
 

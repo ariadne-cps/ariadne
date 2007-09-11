@@ -41,15 +41,16 @@ namespace Ariadne {
     /*! \brief A class for computing the image of a basic set under a map. 
      *  \ingroup Applicators
      */
-    template<class R>
+    template<class BS>
     class ApplicatorPluginInterface
     {
+      typedef typename BS::real_type R;
      public:
       /*! \brief Compute the image of a basic set under a continuous function. */
       virtual ~ApplicatorPluginInterface() { }
 
       /*! \brief Make a dynamically-allocated copy. */
-      virtual ApplicatorPluginInterface<R>* clone() const = 0;
+      virtual ApplicatorPluginInterface<BS>* clone() const = 0;
       
       //@}
 
@@ -59,8 +60,8 @@ namespace Ariadne {
 
       /*! \brief Compute the image of a basic set under a continuous function. Returns a dynamically allocated set. */
       virtual 
-      Geometry::BasicSetInterface<R>*
-      evaluate(const System::MapInterface<R>& f, const Geometry::BasicSetInterface<R>& s) const = 0;
+      BS
+      evaluate(const System::MapInterface<R>& f, const BS& s) const = 0;
 
       //@}
       

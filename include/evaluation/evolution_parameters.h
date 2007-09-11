@@ -1,5 +1,5 @@
 /***************************************************************************
- *            parameters.h
+ *            evolution_parameters.h
  *
  *  Copyright  2007  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file parameters.h
+/*! \file evolution_parameters.h
  *  \brief Parameters for controlling the accuracy of evaluation methods.
  */
 
-#ifndef ARIADNE_PARAMETERS_H
-#define ARIADNE_PARAMETERS_H
+#ifndef ARIADNE_EVOLUTION_PARAMETERS_H
+#define ARIADNE_EVOLUTION_PARAMETERS_H
 
 #include <boost/smart_ptr.hpp>
 
@@ -36,9 +36,9 @@
 namespace Ariadne {
   namespace Evaluation {
 
-    /*! \brief Parameters for controlling the accuracy of evaluation methods. */
+    /*! \brief Parameters for controlling the accuracy of evolution methods. */
     template<class R>
-    class EvaluationParameters {
+    class EvolutionParameters {
      private:
       size_type _maximum_number_of_steps;
       size_type _lock_to_grid_steps;
@@ -57,7 +57,10 @@ namespace Ariadne {
       R _bounding_domain_size;
      public:
       /*! \brief Default constructor. */
-      EvaluationParameters();
+      EvolutionParameters();
+      
+      /*! \brief Cloning operator. */
+      EvolutionParameters<R>* clone() const;
       
       /*! \brief The maximum number of steps for an iterative algorithm. */
       size_type maximum_number_of_steps() const;
@@ -147,4 +150,4 @@ namespace Ariadne {
   }
 }
 
-#endif /* ARIADNE_PARAMETERS_H */
+#endif /* ARIADNE_EVOLUTION_PARAMETERS_H */

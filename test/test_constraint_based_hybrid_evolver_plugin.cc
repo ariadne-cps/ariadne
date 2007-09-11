@@ -37,10 +37,11 @@
 #include "system/affine_map.h"
 #include "system/affine_vector_field.h"
 #include "system/constraint_based_hybrid_automaton.h"
-#include "evaluation/applicator.h"
+#include "evaluation/evolution_parameters.h"
+#include "evaluation/applicator_plugin.h"
 #include "evaluation/lohner_integrator.h"
 #include "evaluation/affine_integrator.h"
-#include "evaluation/detector.h"
+#include "evaluation/detector_plugin.h"
 #include "evaluation/constraint_based_hybrid_evolver.h"
 #include "evaluation/constraint_based_hybrid_evolver_plugin.h"
 #include "output/epsstream.h"
@@ -71,14 +72,18 @@ template<class R>
 ConstraintBasedHybridEvolverPlugin<R> 
 construct_evolver_plugin() 
 {
-  time_type maximum_step_size=0.125;
-  time_type lock_to_grid_time=0.5;
-  R maximum_set_radius=0.25;
-  R grid_size=0.125;
+  typedef Interval<R> I;
+  typedef Zonotope<I,I> BS;
+
+  EvolutionParameters<R> parameters;
+  parameters.set_maximum_step_size(0.125);
+  parameters.set_lock_to_grid_time(0.5);
+  parameters.set_maximum_basic_set_radius(0.25);
+  parameters.set_grid_length(0.125);
   
-  Applicator<R> apply(maximum_set_radius,grid_size);
-  LohnerIntegrator<R> lohner_integrator(maximum_step_size,lock_to_grid_time,maximum_set_radius); 
-  Detector<R> detector;
+  ApplicatorPlugin<BS> apply;
+  LohnerIntegrator<R> lohner_integrator; 
+  DetectorPlugin<R> detector;
   return ConstraintBasedHybridEvolverPlugin<R>(apply,lohner_integrator,detector);
 }
 

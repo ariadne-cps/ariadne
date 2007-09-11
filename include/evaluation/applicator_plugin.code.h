@@ -58,69 +58,22 @@
 
 namespace Ariadne {
 
-namespace Evaluation { 
-static int& verbosity = applicator_verbosity; 
-}
-
-template<class R>
-Evaluation::ApplicatorPlugin<R>::ApplicatorPlugin() 
-{
-}
-
-
-template<class R>
-Evaluation::ApplicatorPlugin<R>*
-Evaluation::ApplicatorPlugin<R>::clone() const 
-{
-  return new ApplicatorPlugin<R>();
-}
-
-
-
-template<class R>
-Geometry::BasicSetInterface<R>*
-Evaluation::ApplicatorPlugin<R>::evaluate(const System::MapInterface<R>& f, const Geometry::BasicSetInterface<R>& bs) const
-{
-  ARIADNE_LOG(6,"BasicSetInterface* Applicator::evaluate(MapInterface f, BasicSetInterface bs)\n");
-  using namespace Geometry;
-  typedef Numeric::Interval<R> I;
-  const Rectangle<R>* rptr=dynamic_cast<const BasicSetAdaptor< Rectangle<R> >*>(&bs);
-  if(rptr) {
-    return new Geometry::BasicSetAdaptor< Rectangle<R> >(this->evaluate(f,*rptr));
-  } 
-  const Zonotope<R,R>* rzptr=dynamic_cast<const BasicSetAdaptor< Zonotope<R,R> >*>(&bs);
-  if(rzptr) {
-    return new BasicSetAdaptor< Zonotope<R,R> >(this->evaluate(f,*rzptr));
-  } 
-  const Zonotope<I,R>* ezptr=dynamic_cast<const BasicSetAdaptor< Zonotope<I,R> >*>(&bs);
-  if(ezptr) {
-    return new BasicSetAdaptor< Zonotope<R,R> >(this->evaluate(f,*rzptr));
-  } 
-  const Zonotope<I,I>* izptr=dynamic_cast<const BasicSetAdaptor< Zonotope<I,I> >*>(&bs);
-  if(izptr) {
-    return new BasicSetAdaptor< Zonotope<R,R> >(this->evaluate(f,*rzptr));
-  } 
-  throw std::runtime_error("ApplicatorPlugin::evaluate(MapInterface,BasicSetInterface): unrecognised basic set type");
-}
-
+static int& verbosity = Evaluation::applicator_verbosity; 
 
 template<class R>
 Geometry::Rectangle<R> 
-Evaluation::ApplicatorPlugin<R>::evaluate(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& r) const
+Evaluation::evaluate(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& r) 
 {
-  ARIADNE_LOG(6,"Rectangle<Float> Applicator::evaluate(MapInterface f, Rectangle<Float> r)\n");
+  ARIADNE_LOG(6,"Rectangle<Float> evaluate(MapInterface f, Rectangle<Float> r)\n");
   ARIADNE_LOG(7,"  r="<<r<<"\n");
   ARIADNE_LOG(8,"  f(r)="<<Geometry::Rectangle<R>(f.image(Geometry::Point< Numeric::Interval<R> >(r)))<<"\n");
   return Geometry::Rectangle<R>(f.image(Geometry::Point< Numeric::Interval<R> >(r)));
 }
 
 
-
-
-
 template<class R>
 Geometry::Zonotope<R> 
-Evaluation::ApplicatorPlugin<R>::evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope<R>& z) const 
+Evaluation::evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope<R>& z)  
 {
   ARIADNE_LOG(6,"Zonotope<Float> Applicator::evaluate(MapInterface f, Zonotope<Float,Float> z)\n");
   ARIADNE_LOG(7,"  z="<<z<<"\n");
@@ -172,7 +125,7 @@ Evaluation::ApplicatorPlugin<R>::evaluate(const System::MapInterface<R>& f, cons
 
 template<class R>
 Geometry::Zonotope<Numeric::Interval<R>,R> 
-Evaluation::ApplicatorPlugin<R>::evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope<Numeric::Interval<R>,R>& z) const 
+Evaluation::evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope<Numeric::Interval<R>,R>& z)  
 {
   ARIADNE_LOG(6,"Zontope<Interval,Float> Applicator::evaluate(MapInterface f, Zonotope<Interval,Float> z)\n");
   ARIADNE_LOG(7,"  z="<<z<<"\n");
@@ -191,7 +144,7 @@ Evaluation::ApplicatorPlugin<R>::evaluate(const System::MapInterface<R>& f, cons
 
 template<class R>
 Geometry::Zonotope< Numeric::Interval<R> > 
-Evaluation::ApplicatorPlugin<R>::evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope< Numeric::Interval<R> >& z) const 
+Evaluation::evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope< Numeric::Interval<R> >& z)  
 {
   ARIADNE_LOG(6,"Zontope<Interval,Interval> Applicator::evaluate(MapInterface f, Zonotope<Interval,Interval> z)\n");
   ARIADNE_LOG(7,"  z="<<z<<"\n");
@@ -205,6 +158,46 @@ Evaluation::ApplicatorPlugin<R>::evaluate(const System::MapInterface<R>& f, cons
   ARIADNE_LOG(8,"  f(z)="<<result<<"\n");
   return result;
 }
+
+
+
+template<class BS>
+Evaluation::ApplicatorPlugin<BS>::ApplicatorPlugin() 
+{
+}
+
+
+template<class BS>
+Evaluation::ApplicatorPlugin<BS>*
+Evaluation::ApplicatorPlugin<BS>::clone() const 
+{
+  return new ApplicatorPlugin<BS>();
+}
+
+
+
+template<class BS>
+BS
+Evaluation::ApplicatorPlugin<BS>::evaluate(const System::MapInterface<R>& f, const BS& bs) const
+{
+  return Evaluation::evaluate(f,bs);
+}
+
+template<class BS>
+void
+Evaluation::ApplicatorPlugin<BS>::instantiate()
+{
+  Geometry::Rectangle<R>* r=0;
+  Geometry::Zonotope<R,R>* z=0;
+  Geometry::Zonotope<I,R>* fz=0;
+  Geometry::Zonotope<I,I>* iz=0;
+  System::MapInterface<R>* f=0;
+  Evaluation::evaluate(*f,*r);
+  Evaluation::evaluate(*f,*z);
+  Evaluation::evaluate(*f,*fz);
+  Evaluation::evaluate(*f,*iz);
+}
+
 
 
 }

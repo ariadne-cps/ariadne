@@ -31,6 +31,7 @@
 #include "geometry/rectangle.h"
 #include "geometry/parallelotope.h"
 #include "system/affine_vector_field.h"
+#include "evaluation/bounder_plugin.h"
 #include "evaluation/lohner_integrator.h"
 #include "evaluation/affine_integrator.h"
 #include "output/epsstream.h"
@@ -64,9 +65,10 @@ test_lohner_integrator()
   cout << __PRETTY_FUNCTION__ << endl;
   typedef Interval<R> I;
 
-  LohnerIntegrator<R> lohner=LohnerIntegrator<R>(0.125,0.5,0.0625);
-  C1LohnerIntegrator<R> c1lohner=C1LohnerIntegrator<R>(0.125,0.5,0.0625);
-  AffineIntegrator<R> affine=AffineIntegrator<R>(0.125,0.5,0.0625);
+  BounderPlugin<R> bounder;
+  LohnerIntegrator<R> lohner=LohnerIntegrator<R>();
+  C1LohnerIntegrator<R> c1lohner=C1LohnerIntegrator<R>();
+  AffineIntegrator<R> affine=AffineIntegrator<R>();
 
   Rectangle<R> bb=Rectangle<R>("[0.25,1.25]x[0.00,1.00]");
   Rectangle<R> r=Rectangle<R>("[0.96,1.04]x[0.46,0.54]");
@@ -85,24 +87,28 @@ test_lohner_integrator()
   cout << "h=" << h << endl;
   cout << "z.generators().norm()=" << norm(z.generators()) << endl;
 
-  const IntegratorBase< R, VectorFieldInterface<R>, Zonotope<I> >& integrator=lohner;
   const VectorFieldInterface<R>& vf=avf;
 
+  Rectangle<R> bb0,bb1,bb2,bb3,bb4;
   Zonotope<I> z0,z1,z2,z3,z4,zr1,zr2,zr3,zr4;
   Zonotope<I> c0z, c1z,afz;
   z0=z;
 
-  z1=lohner.integration_step(avf,z0,h);
-  z2=lohner.integration_step(avf,z1,h);
-  z3=lohner.integration_step(avf,z2,h);
-  z4=lohner.integration_step(avf,z3,h);
+  bb0=bounder.estimate_flow_bounds(avf,z0.bounding_box(),h);
+  z1=lohner.integration_step(avf,z0,h,bb0);
+  bb1=bounder.estimate_flow_bounds(avf,z1.bounding_box(),h);
+  z2=lohner.integration_step(avf,z1,h,bb1);
+  bb2=bounder.estimate_flow_bounds(avf,z2.bounding_box(),h);
+  z3=lohner.integration_step(avf,z2,h,bb2);
+  bb3=bounder.estimate_flow_bounds(avf,z3.bounding_box(),h);
+  z4=lohner.integration_step(avf,z3,h,bb3);
   cout << "z0=" << z0 << "\n"
        << "z1=" << z1 << "\nz4=" << z2 << "\n"
        << "z3=" << z3 << "\nz4=" << z4 << endl;
-  zr1=lohner.reachability_step(avf,z0,h);
-  zr2=lohner.reachability_step(avf,z1,h);
-  zr3=lohner.reachability_step(avf,z2,h);
-  zr4=lohner.reachability_step(avf,z3,h);
+  zr1=lohner.reachability_step(avf,z0,h,bb0);
+  zr2=lohner.reachability_step(avf,z1,h,bb1);
+  zr3=lohner.reachability_step(avf,z2,h,bb2);
+  zr4=lohner.reachability_step(avf,z3,h,bb3);
   cout << "zr1=" << zr1 << "\nzr2=" << zr2 << "\n"
        << "zr3=" << zr3 << "\nzr4=" << zr4 << "\n" << endl;
   c0z=z4;
@@ -121,30 +127,34 @@ test_lohner_integrator()
 
 
   cout << "\nC1LohnerIntegrator\n";
-  z1=c1lohner.integration_step(avf,z0,h);
-  z2=c1lohner.integration_step(avf,z1,h);
-  z3=c1lohner.integration_step(avf,z2,h);
-  z4=c1lohner.integration_step(avf,z3,h);
+  bb0=bounder.estimate_flow_bounds(avf,z0.bounding_box(),h);
+  z1=c1lohner.integration_step(avf,z0,h,bb0);
+  bb1=bounder.estimate_flow_bounds(avf,z1.bounding_box(),h);
+  z2=c1lohner.integration_step(avf,z1,h,bb1);
+  bb2=bounder.estimate_flow_bounds(avf,z2.bounding_box(),h);
+  z3=c1lohner.integration_step(avf,z2,h,bb2);
+  bb3=bounder.estimate_flow_bounds(avf,z3.bounding_box(),h);
+  z4=c1lohner.integration_step(avf,z3,h,bb3);
   cout << "z0=" << z0 << "\n"
        << "z1=" << z1 << "\nz4=" << z2 << "\n"
        << "z3=" << z3 << "\nz4=" << z4 << endl;
-  zr1=c1lohner.reachability_step(avf,z0,h);
-  zr2=c1lohner.reachability_step(avf,z1,h);
-  zr3=c1lohner.reachability_step(avf,z2,h);
-  zr4=c1lohner.reachability_step(avf,z3,h);
+  zr1=c1lohner.reachability_step(avf,z0,h,bb0);
+  zr2=c1lohner.reachability_step(avf,z1,h,bb1);
+  zr3=c1lohner.reachability_step(avf,z2,h,bb2);
+  zr4=c1lohner.reachability_step(avf,z3,h,bb3);
   cout << "zr1=" << zr1 << "\nzr2=" << zr2 << "\n"
        << "zr3=" << zr3 << "\nzr4=" << zr4 << "\n" << endl;
   c1z=z4;
   
   Point<I> pt0 = z0.centre();
-  Rectangle<R> bb0=c1lohner.estimate_flow_bounds(avf,Rectangle<R>(pt0),h);
-  Rectangle<R> rbb0=c1lohner.refine_flow_bounds(avf,Rectangle<R>(pt0),bb0,h);
-  Rectangle<R> rrbb0=c1lohner.refine_flow_bounds(avf,Rectangle<R>(pt0),rbb0,h);
-  Point<I> pt1 = c1lohner.bounded_flow(avf,pt0,bb0,h);
-  Point<I> rpt1 = c1lohner.bounded_flow(avf,pt0,rbb0,h);
-  Point<I> rrpt1 = c1lohner.bounded_flow(avf,pt0,rrbb0,h);
-  Matrix<I> mx1 = c1lohner.bounded_flow_jacobian(avf,pt0,bb0,h);
-  Matrix<I> rmx1 = c1lohner.bounded_flow_jacobian(avf,pt0,rbb0,h);
+  bb0=bounder.estimate_flow_bounds(avf,Rectangle<R>(pt0),h);
+  Rectangle<R> rbb0=bounder.refine_flow_bounds(avf,Rectangle<R>(pt0),bb0,h);
+  Rectangle<R> rrbb0=bounder.refine_flow_bounds(avf,Rectangle<R>(pt0),rbb0,h);
+  Point<I> pt1 = c1lohner.flow_step(avf,pt0,h,bb0);
+  Point<I> rpt1 = c1lohner.flow_step(avf,pt0,h,rbb0);
+  Point<I> rrpt1 = c1lohner.flow_step(avf,pt0,h,rrbb0);
+  Matrix<I> mx1 = c1lohner.flow_step_jacobian(avf,pt0,h,bb0);
+  Matrix<I> rmx1 = c1lohner.flow_step_jacobian(avf,pt0,h,rbb0);
   cout << "pt0=" << pt0 << "\n"
        << "bb0=" << bb0 << ", rbb0=" << rbb0 << ", rrbb0=" << rrbb0 << "\n"
        << "pt1=" << pt1 << ", rpt1=" << rpt1 << ", rrpt1=" << rrpt1 << "\n"

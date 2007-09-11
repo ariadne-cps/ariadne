@@ -33,19 +33,15 @@ namespace Ariadne {
     using namespace Numeric;
 
 #ifdef ENABLE_FLOAT64
-    template class Integrator<Float64>;
-
-    template class IntegratorBase< Float64, System::VectorFieldInterface<Float64>, Geometry::Rectangle<Float64> >;
-    template class IntegratorBase<Float64, System::VectorFieldInterface<Float64>, Geometry::Zonotope< Interval<Float64> > >;
-    template class IntegratorBase< Float64, System::AffineVectorField<Float64>, Geometry::Zonotope< Interval<Float64> > >;
+    template class Integrator< Geometry::Rectangle<Float64> >;
+    template class Integrator< Geometry::Zonotope< Interval<Float64>, Float64 > >;
+    template class Integrator< Geometry::Zonotope< Interval<Float64> > >;
 #endif
   
 #ifdef ENABLE_FLOATMP
-    template class Integrator<FloatMP>;
-
-    template class IntegratorBase< FloatMP, System::VectorFieldInterface<FloatMP>, Geometry::Rectangle<FloatMP> >;
-    template class IntegratorBase<FloatMP, System::VectorFieldInterface<FloatMP>, Geometry::Zonotope< Interval<FloatMP> > >;
-    template class IntegratorBase< FloatMP, System::AffineVectorField<FloatMP>, Geometry::Zonotope< Interval<FloatMP> > >;
+    template class Integrator< Geometry::Rectangle<FloatMP> >;
+    template class Integrator< Geometry::Zonotope< Interval<FloatMP>, FloatMP > >;
+    template class Integrator< Geometry::Zonotope< Interval<FloatMP> > >;
 #endif
 
   }

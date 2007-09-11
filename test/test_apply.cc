@@ -34,6 +34,7 @@
 #include "geometry/rectangular_set.h"
 #include "system/grid_multimap.h"
 #include "evaluation/applicator.h"
+#include "evaluation/applicator_plugin.h"
 #include "output/epsstream.h"
 #include "output/logging.h"
 
@@ -62,10 +63,11 @@ test_apply()
 {
   //set_evaluation_verbosity(0);
   typedef Interval<R> I;
+  typedef Zonotope<I,R> BS;
 
-  double basic_set_radius=0.25;
-  double grid_size=0.5;
-  double bound=4.0;
+  R maximum_basic_set_radius=0.25;
+  R grid_length=0.5;
+  R bounding_domain_size=4.0;
 
   R a=1.5;
   R b=0.5;
@@ -77,7 +79,7 @@ test_apply()
   Rectangle<R> bounding_box=Rectangle<R>("[-4,4]x[-4,4]") ;
   Rectangle<R> eps_bounding_box=bounding_box.neighbourhood(0.1);
   
-  Grid<R> grid(2,grid_size);
+  Grid<R> grid(2,grid_length);
   FiniteGrid<R> finite_grid=FiniteGrid<R>(grid,bounding_box); // grid
 
   Rectangle<R> r=Rectangle<R>("[1.499,1.501]x[0.499,0.501]"); // initial state
@@ -86,22 +88,21 @@ test_apply()
   Zonotope<I,I> iz=Zonotope<I,I>(Rectangle<R>("[1.499,1.501]x[0.499,0.501]")); // initial state
   Polytope<R> pl=Polytope<R>(Rectangle<R>("[1.499,1.501]x[0.499,0.501]")); // initial state
   
-  Applicator<R> apply(basic_set_radius,grid_size);
-
-  apply.set_grid_size(grid_size);
-  apply.set_maximum_basic_set_radius(4.0*grid_size);
-  apply.set_default_bound(bound);
-  
-
   //Test evaluation on different classes of sets
-  Rectangle<R> fr=apply.evaluate(henon,r);
-  Zonotope<R,R> fz=apply.evaluate(henon,z);
-  Zonotope<I,R> fez=apply.evaluate(henon,ez);
-  Zonotope<I,I> fiz=apply.evaluate(henon,iz);
+  Rectangle<R> fr=evaluate(henon,r);
+  Zonotope<R,R> fz=evaluate(henon,z);
+  Zonotope<I,R> fez=evaluate(henon,ez);
+  Zonotope<I,I> fiz=evaluate(henon,iz);
 
-  Rectangle<R> pfr=apply.evaluate(henon_inverse,fr);
+  EvolutionParameters<R> parameters;
+  parameters.set_maximum_basic_set_radius(maximum_basic_set_radius);
+  parameters.set_grid_length(grid_length);
+  parameters.set_bounding_domain_size(bounding_domain_size);
+
+  Applicator<BS> apply(parameters);
+  Rectangle<R> pfr=evaluate(henon_inverse,fr);
   cout << "r=" << r << " fr=" << fr << " pfr="<< pfr << endl;
-  Zonotope<I,R> pfez=apply.evaluate(henon_inverse,fez);
+  Zonotope<I,R> pfez=evaluate(henon_inverse,fez);
   cout << "ez=" << ez << " fez=" << fez << " pfez="<< pfez << endl;
   
   RectangularSet<R> bounding_set(bounding_box);
@@ -161,9 +162,9 @@ test_apply()
   shared_ptr< SetInterface<R> > image_set_ptr(apply.image(henon,initial_set));
   cout << "image_set=" << *image_set_ptr << endl;
   cout << "Computing preimage set" << endl;
-  apply.set_grid_size(grid_size/2);
+  apply.parameters().set_grid_length((grid_length/2).midpoint());
   shared_ptr< SetInterface<R> > preimage_set_ptr(apply.preimage(henon,initial_set,bounding_set));
-  apply.set_grid_size(grid_size);
+  apply.parameters().set_grid_length(grid_length);
   cout << "preimage_set=" << *preimage_set_ptr << endl;
   cout << "Computing inverse image set" << endl;
   shared_ptr< SetInterface<R> > inverse_image_set_ptr(apply.image(henon_inverse,initial_set));
@@ -178,10 +179,10 @@ test_apply()
   
 
   cout << "Computing reach set" << endl;
-  apply.set_grid_size(0.25*grid_size);
+  apply.parameters().set_grid_length((0.25*grid_length).midpoint());
   shared_ptr< SetInterface<R> > reach_set_ptr(apply.reach(henon,initial_set));
   cout << "reach_set=" << *reach_set_ptr << endl;
-  apply.set_grid_size(grid_size);
+  apply.parameters().set_grid_length(grid_length);
   cout << "Computing chainreach set" << endl;
   shared_ptr< SetInterface<R> > chainreach_set_ptr(apply.chainreach(henon,initial_set,bounding_set));
   cout << "chainreach_set=" << *chainreach_set_ptr << endl;
@@ -197,7 +198,7 @@ test_apply()
   
 
   cout << "Computing viability kernel" << endl;
-  apply.set_grid_size(grid_size);
+  apply.parameters().set_grid_length(grid_length);
   shared_ptr< SetInterface<R> > viability_kernel_ptr(apply.viable(henon,bounding_set));
   cout << "viability_kernel=" << *viability_kernel_ptr << endl;
 

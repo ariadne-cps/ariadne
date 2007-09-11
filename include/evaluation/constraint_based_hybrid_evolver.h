@@ -45,6 +45,7 @@
 namespace Ariadne {  
   namespace Evaluation {
   
+    template<class R> class EvolutionParameters;
     template<class R> class ConstraintBasedHybridEvolverPlugin;
 
 
@@ -57,6 +58,7 @@ namespace Ariadne {
     class ConstraintBasedHybridEvolver
     {
       typedef Numeric::Interval<R> I;
+      typedef Geometry::Zonotope<I,I> BS;
      public:
       typedef typename System::ConstraintBasedDiscreteMode<R> mode_type;
       typedef typename System::ConstraintBasedDiscreteTransition<R> transition_type;
@@ -79,10 +81,10 @@ namespace Ariadne {
       ConstraintBasedHybridEvolver(const ConstraintBasedHybridEvolver<R>& evolver);
 
       /*! \brief Construct from an applicator and an integrator. (Deprecated) */
-      ConstraintBasedHybridEvolver(const Applicator<R>& applicator, const Integrator<R>& integrator);
+      ConstraintBasedHybridEvolver(const EvolutionParameters<R>& parameters, const ApplicatorPluginInterface<BS>& applicator, const IntegratorPluginInterface<BS>& integrator);
 
       /*! \brief Construct from an applicator, an integrator and a detector. */
-      ConstraintBasedHybridEvolver(const Applicator<R>& applicator, const Integrator<R>& integrator, const Detector<R>& detector);
+      ConstraintBasedHybridEvolver(const EvolutionParameters<R>& parameters, const ApplicatorPluginInterface<BS>& applicator, const IntegratorPluginInterface<BS>& integrator, const DetectorPluginInterface<R>& detector);
 
       /*! \brief Virtual destructor. */
       virtual ~ConstraintBasedHybridEvolver();
@@ -90,9 +92,13 @@ namespace Ariadne {
 
       //@{
       //! \name Parameters controlling the evolution.
+      /*! \brief A reference to the parameters controlling the evolution. */
+      EvolutionParameters<R>& parameters();
+      const EvolutionParameters<R>& parameters() const;
+
       /*! \brief The maximum step size for integration. */
       time_type maximum_step_size() const;
-      /*! \brief The maximum step size for integration. */
+      /*! \brief The maximum basic set radius before subdivision. */
       real_type maximum_basic_set_radius() const;
       /*! \brief The time before the sets are locked to the grid. */
       time_type lock_to_grid_time() const;
@@ -268,9 +274,10 @@ namespace Ariadne {
       hybrid_list_set_type _compute_list_set(const working_sets_type& working_sets, const Geometry::HybridSpace& locations) const;
 
      private:
+      EvolutionParameters<R>* _parameters;
       ConstraintBasedHybridEvolverPlugin<R>* _plugin;
       mutable std::vector<timed_set_type> _trace;
-    };
+   };
 
 
   }

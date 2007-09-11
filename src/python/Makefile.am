@@ -84,7 +84,7 @@ ARIADNE_SRC = ariadne_module.cc \
 	export_set_based_hybrid_automaton.cc \
 	export_constraint_based_hybrid_automaton.cc \
 	 \
-	export_evaluation_parameters.cc \
+	export_evolution_parameters.cc \
 	export_solve.cc \
 	export_apply.cc \
 	export_integrate.cc \

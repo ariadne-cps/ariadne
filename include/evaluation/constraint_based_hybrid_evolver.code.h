@@ -30,10 +30,12 @@
 #include "../system/map.h"
 #include "../system/vector_field.h"
 #include "../system/constraint_based_hybrid_automaton.h"
-#include "../evaluation/applicator.h"
-#include "../evaluation/integrator.h"
+#include "../evaluation/evolution_parameters.h"
+#include "../evaluation/applicator_plugin_interface.h"
+#include "../evaluation/integrator_plugin_interface.h"
+#include "../evaluation/detector_plugin_interface.h"
 #include "../evaluation/lohner_integrator.h"
-#include "../evaluation/detector.h"
+#include "../evaluation/detector_plugin.h"
 
 #include "../evaluation/constraint_based_hybrid_evolver_plugin.h"
 
@@ -80,25 +82,29 @@ using namespace System;
 template<class R>
 Evaluation::ConstraintBasedHybridEvolver<R>::~ConstraintBasedHybridEvolver()
 {
+  delete this->_parameters;
   delete this->_plugin;
 }
 
 
 template<class R>
-Evaluation::ConstraintBasedHybridEvolver<R>::ConstraintBasedHybridEvolver(const Applicator<R>& a, const Integrator<R>& i)
-  : _plugin(new ConstraintBasedHybridEvolverPlugin<R>(a,i,Detector<R>()))
+Evaluation::ConstraintBasedHybridEvolver<R>::ConstraintBasedHybridEvolver(const EvolutionParameters<R>& p, const ApplicatorPluginInterface<BS>& a, const IntegratorPluginInterface<BS>& i)
+  : _parameters(new EvolutionParameters<R>(p)),
+    _plugin(new ConstraintBasedHybridEvolverPlugin<R>(a,i,DetectorPlugin<R>()))
 {
 }
 
 template<class R>
-Evaluation::ConstraintBasedHybridEvolver<R>::ConstraintBasedHybridEvolver(const Applicator<R>& a, const Integrator<R>& i, const Detector<R>& d)
-  : _plugin(new ConstraintBasedHybridEvolverPlugin<R>(a,i,d))
+Evaluation::ConstraintBasedHybridEvolver<R>::ConstraintBasedHybridEvolver(const EvolutionParameters<R>& p, const ApplicatorPluginInterface<BS>& a, const IntegratorPluginInterface<BS>& i, const DetectorPluginInterface<R>& d)
+  : _parameters(new EvolutionParameters<R>(p)),
+    _plugin(new ConstraintBasedHybridEvolverPlugin<R>(a,i,d))
 {
 }
 
 template<class R>
 Evaluation::ConstraintBasedHybridEvolver<R>::ConstraintBasedHybridEvolver(const ConstraintBasedHybridEvolver<R>& evolver)
-  :_plugin(evolver._plugin)
+  : _parameters(new EvolutionParameters<R>(*evolver._parameters)),
+    _plugin(new ConstraintBasedHybridEvolverPlugin<R>(*evolver._plugin))
 {
 }
 
@@ -113,10 +119,26 @@ Evaluation::ConstraintBasedHybridEvolver<R>::trace() const
 
 
 template<class R>
-time_type
+Evaluation::EvolutionParameters<R>&
+Evaluation::ConstraintBasedHybridEvolver<R>::parameters() 
+{
+  return *this->_parameters;
+}
+
+
+template<class R>
+const Evaluation::EvolutionParameters<R>&
+Evaluation::ConstraintBasedHybridEvolver<R>::parameters() const
+{
+  return *this->_parameters;
+}
+
+
+template<class R>
+Numeric::Rational
 Evaluation::ConstraintBasedHybridEvolver<R>::maximum_step_size() const
 {
-  return this->_plugin->_integrator->maximum_step_size();
+  return this->_parameters->maximum_step_size();
 }
 
 
@@ -124,15 +146,15 @@ template<class R>
 R
 Evaluation::ConstraintBasedHybridEvolver<R>::maximum_basic_set_radius() const
 {
-  return this->_plugin->_integrator->maximum_basic_set_radius();
+  return this->_parameters->maximum_basic_set_radius();
 }
 
 
 template<class R>
-time_type
+Numeric::Rational
 Evaluation::ConstraintBasedHybridEvolver<R>::lock_to_grid_time() const
 {
-  return this->_plugin->_integrator->lock_to_grid_time();
+  return this->_parameters->lock_to_grid_time();
 }
 
 

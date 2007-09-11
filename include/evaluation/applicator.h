@@ -1,7 +1,6 @@
 /***************************************************************************
  *            applicator.h
  *
- *  17 January 2006
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
@@ -36,7 +35,8 @@
 #include "../geometry/declarations.h"
 #include "../system/declarations.h"
 
-#include "../evaluation/applicator_plugin.h"
+#include "../evaluation/evolution_parameters.h"
+#include "../evaluation/applicator_plugin_interface.h"
 
 namespace Ariadne {
   namespace Evaluation {
@@ -44,29 +44,28 @@ namespace Ariadne {
     /*! \brief A class for computing the image of a set under a map. 
      *  \ingroup Applicators
      */
-    template<class R>
+    template<class BS>
     class Applicator {
+      typedef typename BS::real_type R;
       typedef Numeric::Interval<R> I;
      private:
-      R _default_bound;
-      R _maximum_basic_set_radius;
-      R _grid_size;
-      ApplicatorPlugin<R>* _plugin;
+      EvolutionParameters<R>* _parameters;
+      ApplicatorPluginInterface<BS>* _plugin;
      public:
       /*! \brief Default constructor chooses appropriate parameter values for maximum basic set radius and grid size. */
       Applicator();
       
-      /*! \brief Construct from a maximum basic set radius and grid size. */
-      Applicator(const R& maximum_basic_set_radius, const R& grid_size);
+      /*! \brief Construct from evolution parameters. */
+      Applicator(const EvolutionParameters<R>& parameters);
       
       /*! \brief Copy constructor. */
-      Applicator(const Applicator<R>& other);
+      Applicator(const Applicator<BS>& other);
       
       /*! \brief Compute the image of a basic set under a continuous function. */
       virtual ~Applicator();
 
       /*! \brief Make a dynamically-allocated copy. */
-      Applicator<R>* clone() const;
+      Applicator<BS>* clone() const;
       
       //@}
 
@@ -74,85 +73,29 @@ namespace Ariadne {
       //@{ 
       //! \name Methods to set and get the parameters controlling the accuracy.
 
-      /*! \brief The maximum allowable radius of a basic set during iteration. */
-      virtual R maximum_basic_set_radius() const;
+      /*! \brief The parameters controlling the accuracy. */
+      virtual const EvolutionParameters<R>& parameters() const;
 
-      /*! \brief Set the maximum allowable radius of a basic set during iteration. */
-      void set_maximum_basic_set_radius(const R&);
-
-      /*! \brief The default size of the approximation grid. */
-      virtual R grid_size() const;
-
-      /*! \brief Set the default size of the approximation grid. */
-      void set_grid_size(const R&);
-
-      /*! \brief The default bound to use if necessary. */
-      virtual R default_bound() const;
-
-      /*! \brief Set the default bound. */
-      void set_default_bound(const R&);
+      /*! \brief A reference to the parameters controlling the accuracy. */
+      virtual EvolutionParameters<R>& parameters();
 
       //@}
 
 
       //@{ 
       //! \name Supporting geometric routines.
-      /*! \brief Subdivide a rectangle into smaller pieces. */
-      virtual Geometry::ListSet< Geometry::Rectangle<R> >
-      subdivide(const Geometry::Rectangle<R>& s) const;
-      /*! \brief Subdivide a zonotope into smaller pieces. */
-      virtual Geometry::ListSet< Geometry::Zonotope<R,R> >
-      subdivide(const Geometry::Zonotope<R,R>& s) const;
-      /*! \brief Subdivide a zonotope into smaller pieces. */
-      virtual Geometry::ListSet< Geometry::Zonotope<I,R> >
-      subdivide(const Geometry::Zonotope<I,R>& s) const;
-      /*! \brief Subdivide a zonotope into smaller pieces. */
-      virtual Geometry::ListSet< Geometry::Zonotope<I,I> >
-      subdivide(const Geometry::Zonotope<I,I>& s) const;
+      /*! \brief Subdivide a basic set into smaller pieces. */
+      virtual Geometry::ListSet< BS > subdivide(const BS& bs) const;
       //@}
 
 
       //@{ 
       //! \name Methods for applying a system to a basic set.
 
-      /*! \brief Compute the image of a rectangle under a continuous function. */
+      /*! \brief Compute the image of a basic set under a continuous function. */
       virtual 
-      Geometry::Rectangle<R> 
-      evaluate(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& s) const;
-
-      /*! \brief Compute the image of a zonotope under a differentiable function. */
-      virtual 
-      Geometry::Zonotope<R> 
-      evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope<R>& s) const;
-
-      /*! \brief Compute the image of a zonotope under a differentiable function. */
-      virtual 
-      Geometry::Zonotope<Numeric::Interval<R>,R> 
-      evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope<Numeric::Interval<R>,R>& s) const;
-
-      /*! \brief Compute the image of an interval zonotope under a differentiable function. */
-      virtual 
-      Geometry::Zonotope< Numeric::Interval<R> > 
-      evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope< Numeric::Interval<R> >& s) const;
-
-      //@}
-
-     protected:
-      //@{ 
-      //! \name Generic methods for applying a system to a set.
-
-      /*! \brief Template for computing the image of a list set. */
-      template<class BS>
-      Geometry::ListSet<BS> 
-      image_list_set(const System::MapInterface<R>& f, 
-                     const Geometry::ListSet<BS>& initial_set) const;
-
-      
-      /*! \brief Template for computing the image of a basic set. */
-      template<class BS>
-      BS
-      image_basic_set(const System::MapInterface<R>& f, 
-                      const BS& initial_set) const;
+      BS 
+      evaluate(const System::MapInterface<R>& f, const BS& bs) const;
 
       //@}
 
@@ -167,19 +110,9 @@ namespace Ariadne {
        
       /*! \brief Compute the image of a list set under a map. */
       virtual 
-      Geometry::ListSet< Geometry::Zonotope<R> > 
-      image(const System::MapInterface<R>& f, const Geometry::ListSet< Geometry::Zonotope<R> >& ds) const;
-            
-      /*! \brief Compute the image of a list set under a map. */
-      virtual 
-      Geometry::ListSet<Geometry::Zonotope<Numeric::Interval<R>,R> >
-      image(const System::MapInterface<R>& f, const Geometry::ListSet<Geometry::Zonotope<Numeric::Interval<R>,R> >& ds) const;
-      
-      /*! \brief Compute the image of a list set under a map. */
-      virtual 
-      Geometry::ListSet< Geometry::Zonotope<Numeric::Interval<R> > >
-      image(const System::MapInterface<R>& f, const Geometry::ListSet< Geometry::Zonotope<Numeric::Interval<R> > >& ds) const;
-      
+      Geometry::ListSet< BS > 
+      image(const System::MapInterface<R>& f, const Geometry::ListSet< BS >& ds) const;
+       
       
       /*! \brief Compute the image of \a map starting in \a initial_set computing the result on \a grid. */
       virtual
@@ -215,9 +148,16 @@ namespace Ariadne {
 
       /*! \brief Compute the reachable set of \a map starting in \a initial_set. */
       virtual
-      Geometry::ListSet< Geometry::Zonotope<Numeric::Interval<R>,R> > 
+      Geometry::ListSet< Geometry::Rectangle<R> > 
       reach(const System::MapInterface<R>& map, 
-            const Geometry::ListSet< Geometry::Zonotope<Numeric::Interval<R>,R> >& initial_set) const;
+            const Geometry::ListSet< Geometry::Rectangle<R> >& initial_set) const;
+
+           
+      /*! \brief Compute the reachable set of \a map starting in \a initial_set. */
+      virtual
+      Geometry::ListSet<BS> 
+      reach(const System::MapInterface<R>& map, 
+            const Geometry::ListSet<BS>& initial_set) const;
 
            
       /*! \brief Compute the reachable set of \a map starting in \a initial_set. */

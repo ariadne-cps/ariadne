@@ -1,5 +1,5 @@
 /***************************************************************************
- *            python/export_integrator.cc
+ *            python/export_detector.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
@@ -30,8 +30,8 @@
 #include "system/vector_field_interface.h"
 
 #include "evaluation/integrator.h"
-#include "evaluation/detector_interface.h"
-#include "evaluation/detector.h"
+#include "evaluation/detector_plugin_interface.h"
+#include "evaluation/detector_plugin.h"
 
 
 using namespace Ariadne;
@@ -46,13 +46,13 @@ using namespace Ariadne::Python;
 using namespace boost::python;
 
 template<class R>
-class DetectorInterfaceWrapper : public DetectorInterface<R>, public wrapper< DetectorInterface<R> >
+class DetectorPluginInterfaceWrapper : public DetectorPluginInterface<R>, public wrapper< DetectorPluginInterface<R> >
 {
   typedef Interval<R> I;
  public:
-  DetectorInterfaceWrapper() : DetectorInterface<R>() { }
-  DetectorInterfaceWrapper<R>* clone() const { 
-    return new DetectorInterfaceWrapper<R>(*this); }
+  DetectorPluginInterfaceWrapper() : DetectorPluginInterface<R>() { }
+  DetectorPluginInterfaceWrapper<R>* clone() const { 
+    return new DetectorPluginInterfaceWrapper<R>(*this); }
   Interval<R> value(const ConstraintInterface<R>& c, BasicSetInterface<R>& bs) const {
     return this->get_override("value")(); }
   tribool forces(const ConstraintInterface<R>& c1, const ConstraintInterface<R>& c2, Rectangle<R>& dom) const {
@@ -71,33 +71,33 @@ void export_detector()
   typedef Interval<R> I;
 
   /*
-  class_< DetectorInterface<R> >("DetectorInterface",init<>())
+  class_< DetectorPluginInterface<R> >("DetectorPluginInterface",init<>())
   ;
 
-  class_< Detector<R>, bases<DetectorInterface<R> > >("Detector",init<>())
+  class_< DetectorPlugin<R>, bases<DetectorPluginInterface<R> > >("DetectorPlugin",init<>())
   */  
 
-  class_< Detector<R> >("Detector",init<>())
+  class_< DetectorPlugin<R> >("DetectorPlugin",init<>())
     .def("satisfies",
-         (tribool(Detector<R>::*)(const Rectangle<R>&,const ConstraintInterface<R>&)const) &Detector<R>::satisfies)
+         (tribool(DetectorPlugin<R>::*)(const Rectangle<R>&,const ConstraintInterface<R>&)const) &DetectorPlugin<R>::satisfies)
     .def("satisfies",
-         (tribool(Detector<R>::*)(const Zonotope<I,R>&,const ConstraintInterface<R>&)const) &Detector<R>::satisfies)
+         (tribool(DetectorPlugin<R>::*)(const Zonotope<I,R>&,const ConstraintInterface<R>&)const) &DetectorPlugin<R>::satisfies)
     .def("satisfies",
-         (tribool(Detector<R>::*)(const Zonotope<I,I>&,const ConstraintInterface<R>&)const) &Detector<R>::satisfies)
+         (tribool(DetectorPlugin<R>::*)(const Zonotope<I,I>&,const ConstraintInterface<R>&)const) &DetectorPlugin<R>::satisfies)
     .def("value",
-         (Interval<R>(Detector<R>::*)(const ConstraintInterface<R>&,const Rectangle<R>&)const) &Detector<R>::value)
+         (Interval<R>(DetectorPlugin<R>::*)(const ConstraintInterface<R>&,const Rectangle<R>&)const) &DetectorPlugin<R>::value)
     .def("value",
-         (Interval<R>(Detector<R>::*)(const ConstraintInterface<R>&,const Zonotope<I,R>&)const) &Detector<R>::value)
+         (Interval<R>(DetectorPlugin<R>::*)(const ConstraintInterface<R>&,const Zonotope<I,R>&)const) &DetectorPlugin<R>::value)
     .def("value",
-         (Interval<R>(Detector<R>::*)(const ConstraintInterface<R>&,const Zonotope<I,I>&)const) &Detector<R>::value)
+         (Interval<R>(DetectorPlugin<R>::*)(const ConstraintInterface<R>&,const Zonotope<I,I>&)const) &DetectorPlugin<R>::value)
     .def("forces",
-         (tribool(Detector<R>::*)(const ConstraintInterface<R>&,const ConstraintInterface<R>&,const Rectangle<R>&)const) &Detector<R>::forces)
+         (tribool(DetectorPlugin<R>::*)(const ConstraintInterface<R>&,const ConstraintInterface<R>&,const Rectangle<R>&)const) &DetectorPlugin<R>::forces)
     .def("normal_derivative",
-         (Interval<R>(Detector<R>::*)(const VectorFieldInterface<R>&,const DifferentiableConstraintInterface<R>&,const Point<I>&)const) &Detector<R>::normal_derivative)
+         (Interval<R>(DetectorPlugin<R>::*)(const VectorFieldInterface<R>&,const DifferentiableConstraintInterface<R>&,const Point<I>&)const) &DetectorPlugin<R>::normal_derivative)
     .def("crossing_time",
-         (Interval<R>(Detector<R>::*)(const VectorFieldInterface<R>&,const ConstraintInterface<R>&,const Point<I>&,const Rectangle<R>&)const) &Detector<R>::crossing_time)
+         (Interval<R>(DetectorPlugin<R>::*)(const VectorFieldInterface<R>&,const ConstraintInterface<R>&,const Point<I>&,const Rectangle<R>&)const) &DetectorPlugin<R>::crossing_time)
     .def("crossing_time",
-         (TimeModel<R>(Detector<R>::*)(const VectorFieldInterface<R>&,const ConstraintInterface<R>&,const Rectangle<R>&,const Rectangle<R>&,const Integrator<R>&)const) &Detector<R>::crossing_time)
+         (TimeModel<R>(DetectorPlugin<R>::*)(const VectorFieldInterface<R>&,const ConstraintInterface<R>&,const Rectangle<R>&,const Rectangle<R>&)const) &DetectorPlugin<R>::crossing_time)
    ;
 
 }

@@ -45,9 +45,10 @@ namespace Ariadne {
     /*! \brief A class for computing the image of a basic set under a map. 
      *  \ingroup Integrators
      */
-    template<class R>
+    template<class BS>
     class IntegratorPluginInterface
     {
+      typedef typename BS::real_type R;
       typedef Numeric::Interval<R> I;
      public:
       //@{ 
@@ -55,7 +56,7 @@ namespace Ariadne {
       /*! \brief Virtual destructor. */
       virtual ~IntegratorPluginInterface() { }
       /*! \brief Make a dynamically-allocated copy. */
-      virtual IntegratorPluginInterface<R>* clone() const { return this->_clone(); }
+      virtual IntegratorPluginInterface<BS>* clone() const = 0;
       //@}
 
 
@@ -63,50 +64,53 @@ namespace Ariadne {
       //! \name Methods for applying a system to a basic set.
 
       /*! \brief Compute the flow of a point. */
+      virtual 
       Geometry::Point<I> 
       flow_step(const System::VectorFieldInterface<R>& f, 
-                const Geometry::Point<I>& s, 
-                const Geometry::Rectangle<R>& bb, 
-                const Numeric::Interval<R>& t) const 
-      {
-        return this->_integration_step(f,s,bb,t);
-      }
+                        const Geometry::Point<I>& s, 
+                        const Numeric::Interval<R>& t, 
+                        const Geometry::Rectangle<R>& bb) const = 0;
 
-      /*! \brief Compute the flow of a point. */
-      LinearAlgebra::Matrix<I> 
-      flow_step_jacobian(const System::VectorFieldInterface<R>& f, 
-                         const Geometry::Point<I>& s, 
-                         const Geometry::Rectangle<R>& bb, 
-                         const Numeric::Interval<R>& t) const 
-      {
-        return this->_integration_step(f,s,bb,t);
-      }
 
       /*! \brief Compute the image of a basic set under a continuous function. Returns a dynamically allocated set. */
-      Geometry::BasicSetInterface<R>* 
+      
+      virtual 
+      BS
       integration_step(const System::VectorFieldInterface<R>& f, 
-                       const Geometry::BasicSetInterface<R>& s, 
-                       const Geometry::Rectangle<R>& bb, 
-                       const Numeric::Interval<R>& t) const 
-      {
-        return this->_integration_step(f,s,bb,t);
-      }
-
+                       const BS& s, 
+                       const Numeric::Interval<R>& t, 
+                       const Geometry::Rectangle<R>& bb) const = 0; 
+      
       /*! \brief Compute the image of a basic set under a continuous function. Returns a dynamically allocated set. */
-      Geometry::BasicSetInterface<R>* 
+      virtual 
+      BS
       reachability_step(const System::VectorFieldInterface<R>& f, 
-                        const Geometry::BasicSetInterface<R>& s, 
-                        const Geometry::Rectangle<R>& bb, 
-                        const Numeric::Interval<R>& t) const 
-      {
-        return this->_reachability_step(f,s,bb,t);
-      }
+                                const BS& s, 
+                                const Numeric::Interval<R>& t, 
+                                const Geometry::Rectangle<R>& bb) const = 0;
       //@}
-     private:
-      // Implementation provided by private methods.
-      virtual IntegratorPluginInterface<R>* _clone() const = 0;
-      virtual Geometry::BasicSetInterface<R>* _integration_step(const System::VectorFieldInterface<R>& f, const Geometry::BasicSetInterface<R>& s, const Geometry::Rectangle<R>&, const Numeric::Interval<R>&) const = 0;
-      virtual Geometry::BasicSetInterface<R>* _reachability_step(const System::VectorFieldInterface<R>& f, const Geometry::BasicSetInterface<R>& s, const Geometry::Rectangle<R>&, const Numeric::Interval<R>&) const = 0;
+    };
+
+
+    /*! \brief A class for computing the image of a basic set under a differentiable map. 
+     *  \ingroup Integrators
+     */
+    template<class BS>
+    class DifferentiableIntegratorPluginInterface
+      : public IntegratorPluginInterface<BS>
+    {
+      typedef typename BS::real_type R;
+      typedef Numeric::Interval<R> I;
+     public:
+      /*! \brief Make a dynamically-allocated copy. */
+      virtual DifferentiableIntegratorPluginInterface<BS>* clone() const = 0;
+      //@{ 
+      //! \name Methods for computing flow Jacobians. 
+      /*! \brief Compute the spacial jacobian over a flow step of time \a t starting at \a p assuming that the flow remains within \a bb. */
+      virtual LinearAlgebra::Matrix<I> flow_step_jacobian(const System::VectorFieldInterface<R>& vf,
+                                                          const Geometry::Point<I>& p,
+                                                          const Numeric::Interval<R>& t,
+                                                          const Geometry::Rectangle<R>& bb) const = 0;
     };
 
   }

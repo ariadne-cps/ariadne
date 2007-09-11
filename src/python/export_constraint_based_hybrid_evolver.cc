@@ -23,10 +23,13 @@
 
 #include "python/python_float.h"
 
+#include "geometry/zonotope.h"
 #include "geometry/hybrid_set.h"
 #include "system/constraint_based_hybrid_automaton.h"
-#include "evaluation/applicator.h"
-#include "evaluation/integrator.h"
+#include "evaluation/evolution_parameters.h"
+#include "evaluation/applicator_plugin_interface.h"
+#include "evaluation/integrator_plugin_interface.h"
+#include "evaluation/detector_plugin_interface.h"
 #include "evaluation/constraint_based_hybrid_evolver.h"
 
 using namespace Ariadne;
@@ -42,7 +45,9 @@ using namespace boost::python;
 template<class R>
 void export_constraint_based_hybrid_evolver() 
 {
-  class_< ConstraintBasedHybridEvolver<R> >("ConstraintBasedHybridEvolver",init<Applicator<R>&,Integrator<R>&>()) 
+  typedef typename ConstraintBasedHybridEvolver<R>::continuous_basic_set_type BS;
+
+  class_< ConstraintBasedHybridEvolver<R> >("ConstraintBasedHybridEvolver",init<const EvolutionParameters<R>&,ApplicatorPluginInterface<BS>&,IntegratorPluginInterface<BS>&,DetectorPluginInterface<R>&>()) 
     .def("discrete_step",(HybridSet<R>(ConstraintBasedHybridEvolver<R>::*)(const ConstraintBasedHybridAutomaton<R>&,const HybridSet<R>&)const)&ConstraintBasedHybridEvolver<R>::discrete_step)
     .def("continuous_chainreach",(HybridSet<R>(ConstraintBasedHybridEvolver<R>::*)(const ConstraintBasedHybridAutomaton<R>&,const HybridSet<R>&,const HybridSet<R>&)const)&ConstraintBasedHybridEvolver<R>::continuous_chainreach)
 

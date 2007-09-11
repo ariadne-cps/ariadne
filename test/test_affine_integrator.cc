@@ -80,7 +80,7 @@ test_affine_integrator()
   time_type h=0.125;
   time_type hh=h/2;
   time_type th=h*2;
-  AffineIntegrator<R> affine(0.125,0.5,0.25);
+  AffineIntegrator<R> affine;
   AffineVectorField<R> avf(A,b);
   Rectangle<R> bb("[-4,0]x[-2,2]");
   Rectangle<R> r("[-3.125,-2.875]x[-0.125,0.125]");

@@ -40,13 +40,23 @@
 namespace Ariadne {
   namespace Evaluation {
 
+
+    template<class R> Geometry::Rectangle<R> evaluate(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& r); 
+    template<class R> Geometry::Zonotope<R> evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope<R>& z); 
+    template<class R> Geometry::Zonotope<Numeric::Interval<R>,R> evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope<Numeric::Interval<R>,R>& z); 
+    template<class R> Geometry::Zonotope< Numeric::Interval<R> > evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope< Numeric::Interval<R> >& z); 
+
+
+  
     /*! \brief A class for computing the image of a basic set under a map. 
      *  \ingroup Applicators
      */
-    template<class R>
+    template<class BS>
     class ApplicatorPlugin
-      : public ApplicatorPluginInterface<R>
+      : public ApplicatorPluginInterface<BS>
     {
+      typedef typename BS::real_type R;
+      typedef Numeric::Interval<R> I;
      public:
       //@{ 
       //! \name Constructors and cloning operations.
@@ -54,7 +64,7 @@ namespace Ariadne {
       ApplicatorPlugin();
 
       /*! \brief Make a dynamically-allocated copy. */
-      ApplicatorPlugin<R>* clone() const;
+      ApplicatorPlugin<BS>* clone() const;
      
       //@}
 
@@ -62,31 +72,12 @@ namespace Ariadne {
       //@{ 
       //! \name Methods for applying a system to a basic set.
 
-      /*! \brief Compute the image of a basic set under a continuous function. Returns a dynamically allocated set. */
+      /*! \brief Compute the image of a basic set under a continuous function. */
       virtual 
-      Geometry::BasicSetInterface<R>*
-      evaluate(const System::MapInterface<R>& f, const Geometry::BasicSetInterface<R>& s) const;
-
-      /*! \brief Compute the image of a rectangle under a continuous function. */
-      virtual 
-      Geometry::Rectangle<R> 
-      evaluate(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& s) const;
-
-      /*! \brief Compute the image of a zonotope under a differentiable function. */
-      virtual 
-      Geometry::Zonotope<R> 
-      evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope<R>& s) const;
-
-      /*! \brief Compute the image of a zonotope under a differentiable function. */
-      virtual 
-      Geometry::Zonotope<Numeric::Interval<R>,R> 
-      evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope<Numeric::Interval<R>,R>& s) const;
-
-      /*! \brief Compute the image of an interval zonotope under a differentiable function. */
-      virtual 
-      Geometry::Zonotope< Numeric::Interval<R> > 
-      evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope< Numeric::Interval<R> >& s) const;
-
+      BS
+      evaluate(const System::MapInterface<R>& f, const BS& s) const;
+     private:
+      static void instantiate();
       //@}
     };
 

@@ -66,12 +66,13 @@ SYSTEM_SRC = \
 
 
 EVALUATION_SRC = \
-	evaluation/evaluation_parameters.cc \
+	evaluation/evolution_parameters.cc \
 	evaluation/solver.cc \
 	evaluation/newton_solver.cc \
 	evaluation/euler_integrator.cc \
 	evaluation/affine_integrator.cc \
 	evaluation/lohner_integrator.cc \
+	evaluation/bounder.cc \
 	evaluation/detector.cc \
 	evaluation/flow.cc \
 	evaluation/applicator.cc \

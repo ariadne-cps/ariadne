@@ -387,6 +387,10 @@ namespace Ariadne {
     void 
     LatticeMaskSet::adjoin(const LatticeBlock& lb) 
     {
+      if(lb.empty()) {
+        return;
+      }
+
       LatticeBlock r=regular_intersection(this->block(),lb);
       if(!subset(lb,this->block())) {
         this->_unbounded=true;

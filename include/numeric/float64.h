@@ -30,11 +30,13 @@
 
 #include <cmath>
 #include <limits>
+#include <sstream>
 #include <mpfr.h>
 #include <boost/numeric/interval/rounded_arith.hpp>
 #include <boost/numeric/interval/rounded_transc.hpp>
 #include <boost/numeric/interval/hw_rounding.hpp>
 
+#include "../debug.h"
 #include "../numeric/numerical_traits.h"
 #include "../numeric/function.h"
 #include "../numeric/rational.h"
@@ -55,7 +57,7 @@ namespace Ariadne {
     //typedef double Float64;
 #endif
  
-    class Float64 {
+  class Float64 {
      public:
       typedef boost::numeric::interval_lib::rounded_arith_std<double> rounded_arith;
       typedef boost::numeric::interval_lib::rounded_transc_std<double> rounding;
@@ -65,6 +67,7 @@ namespace Ariadne {
       Float64(const uint& n) : _value(n) { }
       Float64(const double& x) : _value(x) { }
       Float64(const Float64& x) : _value(x._value) { }
+      Float64(const std::string& str);
       
       Float64& operator=(const int& n) { this->_value=n; return *this; }
       Float64& operator=(const double& x) { this->_value=x; return *this; }
@@ -77,9 +80,6 @@ namespace Ariadne {
       double _value;
     };
        
-    inline std::ostream& operator<<(std::ostream& os, const Float64& x) { return os << x.get_d(); }
-    inline std::istream& operator>>(std::istream& is, Float64& x) { double d; is >> d; x=d; return is; }
-    
     template<> inline std::string name<Numeric::Float64>() { return "Float64"; }
     template<> inline std::string name<Numeric::Interval<Numeric::Float64> >() { return "Interval<Float64>"; }
    
@@ -221,6 +221,13 @@ namespace Ariadne {
     template<> inline Float64 neg_down(const Float64& x) { return neg_exact(x); }
     template<> inline Float64 neg_up(const Float64& x) { return neg_exact(x); }
    
+    template<> inline Float64 rec_down(const Float64& x) {
+      Float64 o(1); return Float64::rounding().div_down(o.get_d(),x.get_d()); }
+    template<> inline Float64 rec_up(const Float64& x) {
+      Float64 o(1); return Float64::rounding().div_up(o.get_d(),x.get_d()); }
+    template<> inline Float64 rec_approx(const Float64& x) { 
+      return 1/x.get_d(); }
+   
     template<> inline Float64 abs_exact(const Float64& x) { return abs(x); }
     template<> inline Float64 abs_approx(const Float64& x) { return abs_exact(x); }
     template<> inline Float64 abs_down(const Float64& x) { return abs_exact(x);  }
@@ -270,21 +277,21 @@ namespace Ariadne {
 
     
    
-     template<> inline Float64 med_approx(const Float64& x1,const Float64& x2) {
+    template<> inline Float64 med_approx(const Float64& x1,const Float64& x2) {
       return (x1.get_d()+x2.get_d())/2; }
     
     template<> inline Float64 pow_approx(const Float64& x1, const int& n2) {
       return std::pow(x1.get_d(),n2); }
     template<> inline Float64 pow_down(const Float64& x1,const int& n2) {
-      if(n2<0) { return pow_down(div_down(Float64(1.0),x1),-n2); }
-      if(n2==0) { return 1.0; }
-      Float64 r=1.0; Float64 p=x1; int n=n2;
+      Float64 x=x1; int n=n2; if(n2<0) { x=div_down(Float64(1.0),x); n=-n; }
+      if(n==0) { return 1.0; }
+      Float64 r=1.0; Float64 p=x;
       while(n) { if(n%2) { r=mul_down(r,p); } p=mul_down(p,p); n=n/2; }
       return r; }
     template<> inline Float64 pow_up(const Float64& x1,const int& n2) {
-      if(n2<0) { return pow_up(div_up(Float64(1.0),x1),-n2); }
-      if(n2==0) { return 1.0; }
-      Float64 r=1.0; Float64 p=x1; int n=n2;
+      Float64 x=x1; int n=n2; if(n2<0) { x=div_up(Float64(1.0),x); n=-n; }
+      if(n==0) { return 1.0; }
+      Float64 r=1.0; Float64 p=x;
       while(n) { if(n%2) { r=mul_up(r,p); } p=mul_up(p,p); n=n/2; }
       return r; }
       
@@ -421,7 +428,13 @@ namespace Ariadne {
     template<> inline Float64 atanh_up(const Float64& x) {
       return Float64::rounding().atanh_up(x.get_d()); }
       
-    
+    inline std::ostream& operator<<(std::ostream& os, const Float64& x) { return os << x.get_d(); }
+    inline std::istream& operator>>(std::istream& is, Float64& x) { 
+      Rational q; is >> q; if(q!=q.get_d()) { throw std::runtime_error("Cannot construct Float64 exactly from string literal."); } x=q.get_d(); return is; }
+    inline Float64::Float64(const std::string& str) : _value() { std::stringstream ss(str); ss >> *this; }
+
+  
+  
     inline Float64 operator+(const Float64& x) { return x; }
     inline Float64 operator-(const Float64& x) { return neg(x); }
       

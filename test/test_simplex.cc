@@ -42,7 +42,7 @@ using namespace std;
 template<class R> int test_simplex();
 
 int main() {
-  test_simplex<Float>();
+  test_simplex<Flt>();
 
   tribool x=indeterminate;
   cout << x << endl;

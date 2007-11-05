@@ -52,7 +52,7 @@ int main() {
   
 #ifdef FLOAT_TEST
   //  test_lpslv<double>();
-  test_lpslv<Float64>();
+  test_lpslv<Flt64>();
 #else
   test_lpslv<Rational>();
 #endif

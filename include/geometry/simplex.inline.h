@@ -22,41 +22,39 @@
  */
 
 namespace Ariadne {
-  namespace Geometry {
 
-    template<class R> inline
-    Simplex<R>::Simplex(const Simplex<R>& s)
-      : Polytope<R>(s) 
-    { 
-    }
-
-    template<class R> inline
-    Simplex<R>& 
-    Simplex<R>::operator=(const Simplex<R>& s) 
-    {
-      if(this != &s) {
-        this->Polytope<R>::operator=(s); 
-      }
-      return *this;
-    }
-    
-    
-    
-    template<class R> inline 
-    std::ostream& 
-    operator<<(std::ostream& os, const Simplex<R>& s) 
-    {
-      return s.write(os);
-    }
-    
-    
-    template<class R> inline
-    std::istream& 
-    operator>>(std::istream& is, Simplex<R>& s) 
-    {
-      return s.read(is);
-    }
-
-     
-  }
+template<class X> inline
+Geometry::Simplex<X>::Simplex(const Simplex<X>& s)
+  : Polytope<X>(s) 
+{ 
 }
+
+template<class X> inline
+Geometry::Simplex<X>& 
+Geometry::Simplex<X>::operator=(const Simplex<X>& s) 
+{
+  if(this != &s) {
+    this->Polytope<X>::operator=(s); 
+  }
+  return *this;
+}
+
+
+
+template<class X> inline 
+std::ostream& 
+Geometry::operator<<(std::ostream& os, const Simplex<X>& s) 
+{
+  return s.write(os);
+}
+
+
+template<class X> inline
+std::istream& 
+Geometry::operator>>(std::istream& is, Simplex<X>& s) 
+{
+  return s.read(is);
+}
+
+
+} // namespace Ariadne

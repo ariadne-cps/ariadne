@@ -32,10 +32,12 @@
 
 #ifdef ENABLE_FLOAT64
 #include "float64.h"
+namespace Ariadne { namespace Numeric { template<class R> class Interval; typedef Interval<Float64> Interval64; } }
 #endif
 
 #ifdef ENABLE_FLOATMP
 #include "floatmp.h"
+namespace Ariadne { namespace Numeric { template<class R> class Interval; typedef Interval<FloatMP> IntervalMP; } }
 #endif
 
 #endif /* ARIADNE_FLOAT_H */

@@ -61,9 +61,11 @@ namespace Ariadne {
      * and is given by \f$d(d+1)\f$.
      *
      */
-    template<class R>
-    class Parallelotope : public Zonotope<R> {
+    template<class XC, class XG=XC>
+    class Parallelotope
+      : public Zonotope<XC,XG> {
      private:
+      typedef typename Numeric::traits<XC>::number_type R;
       typedef typename Numeric::traits<R>::arithmetic_type F;
       typedef typename Numeric::traits<R>::interval_type I;
      public:
@@ -78,63 +80,49 @@ namespace Ariadne {
       explicit Parallelotope(dimension_type n=0);
       
       /*! \brief Construct from centre and directions. */
-      explicit Parallelotope(const LinearAlgebra::Vector<R>& c, const LinearAlgebra::Matrix<R>& m);
-      
-      /*! \brief Construct from centre and directions. */
-      explicit Parallelotope(const Point<R>& c, const LinearAlgebra::Matrix<R>& m);
+      template<class RC,class RG> explicit Parallelotope(const Point<RC>& c, const LinearAlgebra::Matrix<RG>& m);
        
       /*! \brief Construct from a rectangle. */
-      template<class Rl> explicit Parallelotope(const Rectangle<Rl>& r);
+      template<class RR> explicit Parallelotope(const Rectangle<RR>& r);
       
       /*! \brief Construct from a string literal. */
-      explicit Parallelotope(const std::string& s);
+      explicit Parallelotope(const std::string& str);
         
       
       /*! \brief Construct from a zonotope. */
-      Parallelotope(const Zonotope<R>& z);
+      template<class RC,class RG> Parallelotope(const Zonotope<RC,RG>& z);
 
       /*! \brief Copy constructor. */
-      Parallelotope(const Parallelotope<R>& original);
+      template<class RC,class RG> Parallelotope(const Parallelotope<RC,RG>& original);
 
       /*! \brief Assign from a rectangle. */
-      template<class Rl> Parallelotope<R>& operator=(const Rectangle<Rl>& r);
+      template<class RR> Parallelotope<XC,XG>& operator=(const Rectangle<RR>& r);
       //@}
       
       
       //@{
       //! \name Geometric operations
-      /*! \brief Tests if the parallelotope contains \a point. */
-      tribool contains(const Point<R>& point) const;
 
-#ifdef DOXYGEN
-      /*! \brief Tests inclusion of \a A in \a B. */
-      friend tribool subset(const Rectangle<R>& A, const Parallelotope<R>& B);
-#endif
-      
-      /*! \brief The vertices of the parallelotope. */
-      PointList<F> vertices() const;
+      /*! \brief Resize to \a d dimensions. */
+      void resize(dimension_type d);
       
       /*! \brief Subdivide into two smaller pieces. */
-      ListSet< Parallelotope<R> > divide() const;
+      ListSet< Parallelotope<XC,XG> > divide() const;
       
       /*! \brief Subdivide into smaller pieces in each dimension. */
-      ListSet< Parallelotope<R> > subdivide() const;      
+      ListSet< Parallelotope<XC,XG> > subdivide() const;      
 
       /*! \brief An approximation to the volume. */
-      R volume() const;
+      F volume() const;
       //@}
       
-      /*! \brief Scale the parallelotope by at least \a sf. */
-      static Parallelotope<R> scale(const Parallelotope<R>& p, const R& sf);
-
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream& os) const;
       /*! \brief Read from an input stream. */
       std::istream& read(std::istream& is);
      private:
-      static tribool _instantiate_geometry_operators();
+      static tribool _instantiate();
      private:
-      static tribool subset(const Rectangle<R>& r, const Parallelotope<R>& p);
       static LinearAlgebra::Matrix<R> compute_generators(const Rectangle<R>& r);
       static void compute_linear_inequalities(LinearAlgebra::Matrix<R>&, LinearAlgebra::Vector<R>&, LinearAlgebra::Vector<R>&);
       LinearAlgebra::Vector<F> coordinates(const Point<R>& s) const;
@@ -143,61 +131,18 @@ namespace Ariadne {
       mutable LinearAlgebra::Matrix<F> _generators_inverse;
     };
     
-    
-    
-     
-    template<class R>
-    class Parallelotope< Numeric::Interval<R> > 
-      : public Zonotope< Numeric::Interval<R> >
-    {
-      typedef typename Numeric::traits<R>::arithmetic_type F;
-      typedef typename Numeric::traits<R>::interval_type I;
-     public:
-      /* The real number type. */
-      typedef I real_type;
-      /* The type of denotable point contained by the parallelotope. */
-      typedef Point<I> state_type;
-     
-      Parallelotope(dimension_type d=0);
-      
-      template<class Rl1, class Rl2> 
-      Parallelotope(const Point<Rl1>& c, const LinearAlgebra::Matrix<Rl2>& g);
-      
-      Parallelotope(const Rectangle<R>& r);
-      
-      Parallelotope(const Zonotope<R>& z);
-
-      Parallelotope(const Zonotope<I>& z);
-      
-      /* Tests if the parallelotope contains \a point. */
-      tribool contains(const Point<I>& point) const;
-
-      /* The vertices of the parallelotope. */
-      PointList<F> vertices() const;
-      
-      /* Write to an output stream. */
-      std::ostream& write(std::ostream& os) const;
-      
-     private:
-      void _compute_generators_inverse() const;
-      static tribool _instantiate_geometry_operators();
-     private:
-      mutable LinearAlgebra::Matrix<I> _generators_inverse;
-    };
-    
-    
-    template<class R>
-    tribool
-    subset(const Rectangle<R>& r, const Parallelotope<R>& p);
-    
 
     /*! \brief Computes an over approximation from a parallelotope (returns the argument). */
     template<class R> 
-    Parallelotope<R> over_approximation(const Parallelotope<R>& p);
+    Parallelotope<R,R> over_approximation(const Parallelotope<R,R>& p);
     
     /*! \brief Computes an over approximation from an interval parallelotope. */
     template<class R> 
-    Parallelotope<R> over_approximation(const Parallelotope< Numeric::Interval<R> >& p);
+    Parallelotope<R,R> over_approximation(const Parallelotope< Numeric::Interval<R>, R >& p);
+    
+    /*! \brief Computes an over approximation from an interval parallelotope. */
+    template<class R> 
+    Parallelotope<Numeric::Interval<R>,R> over_approximation(const Parallelotope< Numeric::Interval<R>, Numeric::Interval<R> >& p);
     
     /*! \brief Computes an over approximation from a zonotope using a qr factorization. */
     template<class R> 
@@ -205,22 +150,19 @@ namespace Ariadne {
     
     /*! \brief Computes an over approximation from an uniform error zonotope using a qr factorization. */
     template<class R> 
-    Parallelotope<R> orthogonal_over_approximation(const Zonotope<Numeric::Interval<R>,R>& ez);
+    Parallelotope<Numeric::Interval<R>,R> orthogonal_over_approximation(const Zonotope<Numeric::Interval<R>,R>& ez);
     
     /*! \brief Computes an over approximation from an interval zonotope using a qr factorization. */
     template<class R> 
-    Parallelotope<R> orthogonal_over_approximation(const Zonotope< Numeric::Interval<R> >& iz);
+    Parallelotope< Numeric::Interval<R> > orthogonal_over_approximation(const Zonotope< Numeric::Interval<R> >& iz);
     
     
     
-    template<class R>
-    std::istream& operator>>(std::ostream& is, Parallelotope<R>& p);
+    template<class XC, class XG>
+    std::istream& operator>>(std::ostream& is, Parallelotope<XC,XG>& p);
     
-    template<class R>
-    std::ostream& operator<<(std::ostream& os, const Parallelotope<R>& p);
-    
-    template<class R>
-    std::ostream& operator<<(std::ostream& os, const Parallelotope< Numeric::Interval<R> >& p) ;
+    template<class XC, class XG>
+    std::ostream& operator<<(std::ostream& os, const Parallelotope<XC,XG>& p);
     
   }
 }

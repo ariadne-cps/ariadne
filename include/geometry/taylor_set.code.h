@@ -39,27 +39,28 @@
 #include "../geometry/zonotope.h"
 #include "../geometry/list_set.h"
 
-namespace Ariadne {
-  namespace Geometry {
-    
-    extern int verbosity;
-   
-    template<class R>
-    void
-    TaylorSet<R>::_instantiate_geometry_operators() 
-    {
-      Zonotope<Numeric::Interval<R>,R>* z=0;
-      TaylorSet<R>* ts=0;
-      *z=over_approximation(*ts);
-    }
-    
-    template<class R> 
-    Zonotope<Numeric::Interval<R>,R> 
-    over_approximation(const TaylorSet<R>&) 
-    {
-      throw NotImplemented(__PRETTY_FUNCTION__);
-    }
- 
+#include "../output/logging.h"
 
-  }
+namespace Ariadne {
+    
+extern int Geometry::verbosity; 
+   
+template<class R>
+void
+Geometry::TaylorSet<R>::_instantiate_geometry_operators() 
+{
+  Zonotope<Numeric::Interval<R>,R>* z=0;
+  TaylorSet<R>* ts=0;
+  *z=over_approximation(*ts);
 }
+    
+template<class R> 
+Geometry::Zonotope<Numeric::Interval<R>,R> 
+Geometry::over_approximation(const TaylorSet<R>&) 
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+
+
+} // namespace Ariadne

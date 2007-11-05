@@ -31,7 +31,6 @@ namespace Ariadne {
     using namespace Numeric;
     
     template class Polynomial<Rational>;
-    template void add(Polynomial<Rational>&,const Polynomial<Rational>&,const Polynomial<Rational>&);
 
 #ifdef ENABLE_FLOAT64
     template class Polynomial<Float64>;

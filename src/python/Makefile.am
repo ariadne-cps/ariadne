@@ -1,4 +1,4 @@
-LIBS = -lboost_python -lmpfr -lppl -lgmpxx
+LIBS = -lboost_python -lmpfr -lgmpxx
 AM_LDFLAGS = -module
 CXX_FLAGS = -Wall -O0 -fpic
 INCLUDES = -I$(top_srcdir)/include 
@@ -45,19 +45,23 @@ ARIADNE_SRC = ariadne_module.cc \
 	export_rational.cc \
 	export_float.cc \
 	export_interval.cc \
-	export_derivative.cc \
 	 \
 	export_vector.cc \
+	export_covector.cc \
 	export_matrix.cc \
 	export_tensor.cc \
 	export_linear_program.cc \
 	 \
 	export_function.cc \
-	export_differential.cc \
+	export_first_derivative.cc \
+	export_scalar_derivative.cc \
+	export_taylor_derivative.cc \
 	 \
 	export_point.cc \
 	export_set.cc \
+	export_geometry_interval.cc \
 	export_rectangle.cc \
+	export_orthotope.cc \
 	export_zonotope.cc \
 	export_parallelotope.cc \
 	export_polytope.cc \
@@ -94,8 +98,8 @@ ARIADNE_SRC = ariadne_module.cc \
 	export_set_based_hybrid_evolver.cc \
 	export_constraint_based_hybrid_evolver.cc \
 	 \
-	export_postscript_output.cc \
-	export_tex_output.cc \
 	export_text_output.cc \
+	export_latex_output.cc \
+	export_postscript_output.cc \
 	 \
 	export_models.cc

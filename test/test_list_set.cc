@@ -45,7 +45,7 @@ using namespace std;
 template<class R> int test_list_set();
   
 int main() {
-  test_list_set<Float>();
+  test_list_set<Flt>();
   cerr << "INCOMPLETE ";
 }
 

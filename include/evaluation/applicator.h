@@ -41,20 +41,21 @@ namespace Ariadne {
   namespace Evaluation {
 
 
-    template<class R> Geometry::Rectangle<R> evaluate(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& r); 
-    template<class R> Geometry::Zonotope<R> evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope<R>& z); 
-    template<class R> Geometry::Zonotope<Numeric::Interval<R>,R> evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope<Numeric::Interval<R>,R>& z); 
-    template<class R> Geometry::Zonotope< Numeric::Interval<R> > evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope< Numeric::Interval<R> >& z); 
+    template<class R> Geometry::Rectangle<R> apply(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& r); 
+    template<class R> Geometry::Zonotope<R> apply(const System::MapInterface<R>& f, const Geometry::Zonotope<R>& z); 
+    template<class R> Geometry::Zonotope<Numeric::Interval<R>,R> apply(const System::MapInterface<R>& f, const Geometry::Zonotope<Numeric::Interval<R>,R>& z); 
+    template<class R> Geometry::Zonotope< Numeric::Interval<R> > apply(const System::MapInterface<R>& f, const Geometry::Zonotope< Numeric::Interval<R> >& z); 
 
 
   
     /*! \brief A class for computing the image of a basic set under a map. 
      *  \ingroup Applicators
      */
-    template<class R>
+    template<class BS>
     class Applicator
-      : public ApplicatorInterface<R>
+      : public ApplicatorInterface<BS>
     {
+      typedef typename BS::real_type R;
       typedef Numeric::Interval<R> I;
      public:
       //@{ 
@@ -63,7 +64,7 @@ namespace Ariadne {
       Applicator();
 
       /*! \brief Make a dynamically-allocated copy. */
-      Applicator<R>* clone() const;
+      Applicator<BS>* clone() const;
      
       //@}
 
@@ -72,13 +73,7 @@ namespace Ariadne {
       //! \name Methods for applying a system to a basic set.
 
       /*! \brief Compute the image of a rectangle under a continuous function. */
-      virtual Geometry::Rectangle<R> evaluate(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& s) const;
-      /*! \brief Compute the image of a zonotope under a continuous function. */
-      virtual Geometry::Zonotope<R,R> evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope<R,R>& s) const;
-      /*! \brief Compute the image of a zonotope under a continuous function. */
-      virtual Geometry::Zonotope<I,R> evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope<I,R>& s) const;
-      /*! \brief Compute the image of a zonotope under a continuous function. */
-      virtual Geometry::Zonotope<I,I> evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope<I,I>& s) const;
+      virtual BS apply(const System::MapInterface<R>& f, const BS& bs) const;
      private:
       static void instantiate();
       //@}

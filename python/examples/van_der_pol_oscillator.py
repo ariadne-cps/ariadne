@@ -1,9 +1,12 @@
 #!/usr/bin/python
 
 ##############################################################################
-#            test_polyhedron.py
+#            van_der_pol_oscillator.py
 #
-#  Copyright 2006  Pieter Collins <Pieter.Collins@cwi.nl>
+#  Copyright 2006  Pieter Collins 
+#
+# Maintainer: Pieter Collins <Pieter.Collins@cwi.nl>
+#
 ##############################################################################
 
 # This program is free software; you can redistribute it and/or modify
@@ -28,20 +31,18 @@ mu=Float(0.25)
 
 vdp=VanDerPolEquation(mu)
 
-maximum_step_size=0.125
-lock_to_grid_time=1.0
-maximum_set_size=0.0625
-lohner=LohnerIntegrator(maximum_step_size,lock_to_grid_time,maximum_set_size)
+parameters=EvolutionParameters()
+parameters.set_maximum_step_size(Rational(0.125))
+parameters.set_lock_to_grid_time(Rational(1.0))
+parameters.set_maximum_basic_set_radius(Float(0.0625))
 
-print "Available integration methods:",dir(lohner),"\n"
+integrator=C1LohnerIntegrator()
+evolver=VectorFieldEvolver(parameters,integrator)
+
+print "Available integration methods:",dir(evolver),"\n"
 
 subdivisions=128
-grid_extent=Rectangle("[-4,4]x[-2,2]") # grid bounding box
-finite_grid=FiniteGrid(grid_extent,128)
-grid=finite_grid.grid()
-initial_set=Rectangle("[0.99,1.01]x[0.49,0.51]")
-#initial_set=IntervalZonotope(initial_set)
-initial_set=RectangleListSet(initial_set)
+initial_set=RectangularSet([[0.99,1.01],[0.49,0.51]])
 
 print "initial_set =", initial_set,"\n"
 
@@ -53,18 +54,19 @@ flow_time=flow_steps*step_size
 reach_time=reach_steps*step_size
 
 print "Integrate initial set for time",flow_time
-flowed_set=lohner.integrate(vdp,initial_set,flow_time)
+flowed_set=evolver.integrate(vdp,initial_set,flow_time)
+print flowed_set
 print "  ",flowed_set,"\n"
 
 print "Computing reachable set from time",flow_time,"to time",flow_time,"+",reach_time
-reach_set=lohner.reach(vdp,flowed_set,reach_time)
+reach_set=evolver.reach(vdp,flowed_set,reach_time)
 print reach_set,"\n\n"
 
 
 intermediate_sets=ZonotopeListSet(initial_set)
 current_set=initial_set
 for i in range(0,flow_steps+reach_steps):
-  current_set=lohner.integrate(vdp,current_set,step_size)
+  current_set=evolver.integrate(vdp,current_set,step_size)
   intermediate_sets.adjoin(ZonotopeListSet(current_set))
 
 print "initial set:",initial_set

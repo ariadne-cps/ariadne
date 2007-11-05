@@ -39,7 +39,7 @@ namespace Ariadne {
      */
     template<class R>
     class EulerIntegrator
-      : public IntegratorInterface<R>
+      : public IntegratorInterface< Geometry::Rectangle<R> >
     {
       typedef Numeric::Interval<R> I;
      public:
@@ -49,13 +49,6 @@ namespace Ariadne {
 
       /*! \brief Cloning operator. */
       virtual EulerIntegrator<R>* clone() const;
-
-      /*! \brief A C0 algorithm for integrating forward a point. */
-      virtual Geometry::Point<I> 
-      flow_step(const System::VectorFieldInterface<R>&,
-                const Geometry::Point<I>&,
-                const Numeric::Interval<R>&,
-                const Geometry::Rectangle<R>&) const;
 
       /*! \brief A C0 algorithm for integrating forward a rectangle. */
       virtual Geometry::Rectangle<R> 
@@ -71,34 +64,8 @@ namespace Ariadne {
                         const Numeric::Interval<R>&,
                         const Geometry::Rectangle<R>&) const;
 
-      /*! \brief A C0 algorithm for integrating forward a zonotope. */
-      virtual Geometry::Zonotope<I,R> 
-      integration_step(const System::VectorFieldInterface<R>&,
-                       const Geometry::Zonotope<I,R>&,
-                       const Numeric::Interval<R>&,
-                       const Geometry::Rectangle<R>&) const;
-
-      /*! \brief A C0 algorithm for integrating forward a zonotope up to a certain time. */
-      virtual Geometry::Zonotope<I,R> 
-      reachability_step(const System::VectorFieldInterface<R>&,
-                        const Geometry::Zonotope<I,R>&,
-                        const Numeric::Interval<R>&,
-                        const Geometry::Rectangle<R>&) const;
-
-      /*! \brief A C0 algorithm for integrating forward a zonotope. */
-      virtual Geometry::Zonotope<I,I> 
-      integration_step(const System::VectorFieldInterface<R>&,
-                       const Geometry::Zonotope<I,I>&,
-                       const Numeric::Interval<R>&,
-                       const Geometry::Rectangle<R>&) const;
-
-      /*! \brief A C0 algorithm for integrating forward a zonotope up to a certain time. */
-      virtual Geometry::Zonotope<I,I> 
-      reachability_step(const System::VectorFieldInterface<R>&,
-                        const Geometry::Zonotope<I,I>&,
-                        const Numeric::Interval<R>&,
-                        const Geometry::Rectangle<R>&) const;
-
+      /*! \brief Write to an output stream. */
+      virtual std::ostream& write(std::ostream&) const;
     };
 
     

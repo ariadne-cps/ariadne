@@ -39,10 +39,22 @@ LinearAlgebra::Matrix<R>::Matrix(const size_type& r, const size_type& c)
 
 
 template<class R> template<class RR> inline
-LinearAlgebra::Matrix<R>::Matrix(const size_type& nr, const size_type& nc,const RR* ptr)
+LinearAlgebra::Matrix<R>::Matrix(const size_type& nr, const size_type& nc, const RR* ptr)
   
   : _nr(nr), _nc(nc), _array(ptr,ptr+nr*nc) 
 { 
+}
+
+template<class R> template<int NN, class RR> inline
+LinearAlgebra::Matrix<R>::Matrix(const size_type& nr, const size_type& nc, const RR ary[][NN])
+  
+  : _nr(nr), _nc(nc), _array(nr*nc) 
+{ 
+  for(size_type i=0; i!=nr; ++i) { 
+    for(size_type j=0; j!=nc; ++j) { 
+      (*this)(i,j)=static_cast<RR>(ary[i][j]);
+    } 
+  } 
 }
 
 

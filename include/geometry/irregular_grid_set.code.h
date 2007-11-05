@@ -28,107 +28,106 @@
 #include "list_set.h"
 
 namespace Ariadne {
-  namespace Geometry {
 
 
 
-    template<class R>
-    IrregularGridMaskSet<R>::IrregularGridMaskSet(const ListSet< Rectangle<R> >& rls) 
-      : _grid(IrregularGrid<R>(rls)), 
-        _lattice_set(_grid.block())
+template<class R>
+Geometry::IrregularGridMaskSet<R>::IrregularGridMaskSet(const ListSet< Rectangle<R> >& rls) 
+  : _grid(IrregularGrid<R>(rls)), 
+    _lattice_set(_grid.block())
+{
+  for(typename ListSet< Rectangle<R> >::const_iterator r_iter=rls.begin(); 
+      r_iter!=rls.end(); ++r_iter) 
     {
-      for(typename ListSet< Rectangle<R> >::const_iterator r_iter=rls.begin(); 
-          r_iter!=rls.end(); ++r_iter) 
-      {
-        this->_lattice_set.adjoin(this->_grid.index_block(*r_iter));
+      this->_lattice_set.adjoin(this->_grid.index_block(*r_iter));
+    }
+}    
+
+
+
+template<class R>
+dimension_type 
+Geometry::IrregularGridMaskSet<R>::dimension() const
+{
+  return this->_grid.dimension();
+}
+
+
+template<class R>
+const Geometry::IrregularGrid<R>&
+Geometry::IrregularGridMaskSet<R>::grid() const
+{
+  return this->_grid;
+}
+
+
+template<class R>
+const Combinatoric::LatticeMaskSet&
+Geometry::IrregularGridMaskSet<R>::lattice_set() const
+{
+  return this->_lattice_set;
+}
+
+
+
+template<class R>
+Geometry::IrregularGridMaskSet<R>::operator ListSet< Rectangle<R> > () const
+{
+  ListSet< Rectangle<R> > result(this->dimension());
+  for(Combinatoric::LatticeMaskSet::const_iterator lms_iter=this->_lattice_set.begin(); 
+      lms_iter!=this->_lattice_set.end(); ++lms_iter) 
+    {
+      result.adjoin(this->_grid.rectangle(*lms_iter));
+    }
+  return result;
+}    
+
+template<class R> 
+tribool
+Geometry::subset(const Rectangle<R>& r, const IrregularGridMaskSet<R>& igms)
+{
+  return Combinatoric::subset(igms.grid().index_block(r),igms.lattice_set());
+}
+
+
+template<class R> 
+tribool
+Geometry::subset(const ListSet< Rectangle<R> >& rls, const IrregularGridMaskSet<R>& igms)
+{
+  for(typename ListSet< Rectangle<R> >::const_iterator rls_iter=rls.begin();
+      rls_iter!=rls.end(); ++rls_iter)
+    {        
+      if(!subset(*rls_iter,igms)) {
+        return false;
       }
-    }    
-   
-
- 
-    template<class R>
-    dimension_type 
-    IrregularGridMaskSet<R>::dimension() const
-    {
-      return this->_grid.dimension();
     }
+  return true;
+}
 
 
-    template<class R>
-    const IrregularGrid<R>&
-    IrregularGridMaskSet<R>::grid() const
-    {
-      return this->_grid;
-    }
+template<class R>
+std::ostream&
+Geometry::IrregularGridMaskSet<R>::write(std::ostream& os) const
+{
+  os << "IrregularGridMaskSet( grid=" << this->_grid 
+     << ", lattice_set=" << this->_lattice_set << " )";
+  return os;
+}
 
 
-    template<class R>
-    const Combinatoric::LatticeMaskSet&
-    IrregularGridMaskSet<R>::lattice_set() const
-    {
-      return this->_lattice_set;
-    }
+template<class R>
+void
+Geometry::IrregularGridMaskSet<R>::_instantiate() 
+{
+  Rectangle<R>* r=0;
+  ListSet< Rectangle<R> >* rls=0;
+  IrregularGridMaskSet<R>* igms=0;
+  subset(*r,*igms);
+  subset(*rls,*igms);
+}
 
 
-  
-    template<class R>
-    IrregularGridMaskSet<R>::operator ListSet< Rectangle<R> > () const
-    {
-      ListSet< Rectangle<R> > result(this->dimension());
-      for(Combinatoric::LatticeMaskSet::const_iterator lms_iter=this->_lattice_set.begin(); 
-          lms_iter!=this->_lattice_set.end(); ++lms_iter) 
-      {
-        result.adjoin(this->_grid.rectangle(*lms_iter));
-      }
-      return result;
-    }    
-   
-    template<class R> 
-    tribool
-    subset(const Rectangle<R>& r, const IrregularGridMaskSet<R>& igms)
-    {
-      return Combinatoric::subset(igms.grid().index_block(r),igms.lattice_set());
-    }
-
-
-    template<class R> 
-    tribool
-    subset(const ListSet< Rectangle<R> >& rls, const IrregularGridMaskSet<R>& igms)
-    {
-      for(typename ListSet< Rectangle<R> >::const_iterator rls_iter=rls.begin();
-          rls_iter!=rls.end(); ++rls_iter)
-      {        
-        if(!subset(*rls_iter,igms)) {
-          return false;
-        }
-      }
-      return true;
-    }
-
-
-    template<class R>
-    std::ostream&
-    IrregularGridMaskSet<R>::write(std::ostream& os) const
-    {
-      os << "IrregularGridMaskSet( grid=" << this->_grid 
-         << ", lattice_set=" << this->_lattice_set << " )";
-      return os;
-    }
-
-
-    template<class R>
-    void
-    IrregularGridMaskSet<R>::_instantiate() 
-    {
-      Rectangle<R>* r=0;
-      ListSet< Rectangle<R> >* rls=0;
-      IrregularGridMaskSet<R>* igms=0;
-      subset(*r,*igms);
-      subset(*rls,*igms);
-    }
-
-  }
-} 
+} // namespace Ariadne
 
 
 

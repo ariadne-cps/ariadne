@@ -51,7 +51,7 @@ template<> int test_linear_algebra<Rational>();
 
 int main() {
   test_linear_algebra<Rational>();
-  test_linear_algebra<Float>();
+  test_linear_algebra<Flt>();
 }
 
 template<> 

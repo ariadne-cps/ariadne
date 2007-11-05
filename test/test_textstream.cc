@@ -48,11 +48,11 @@ using namespace std;
 
 int main() {
 
-  Rectangle<Float> bbox(2);
+  Rectangle<Flt> bbox(2);
 
-  Point<Float> pt("(0.0,0.0)");
+  Point<Flt> pt("(0.0,0.0)");
 
-  Rectangle<Float> r1,r2,r3,r4;
+  Rectangle<Flt> r1,r2,r3,r4;
   string input("[-0.125,1.125]x[-0.25, 3.25] "
                "[ 0.0125,1.0]x[0.0,2.0] "
                "[ 0.5,1.0]x[1.0,3.0] "
@@ -62,8 +62,8 @@ int main() {
   stringstream iss(input);
 
   iss >> bbox >> r1 >> r2 >> r3 >> r4;
-  Zonotope<Float> z3(r3);
-  Polytope<Float> p4(r4);
+  Zonotope<Flt> z3(r3);
+  Polytope<Flt> p4(r4);
   
   cout << bbox << "\n";
   cout << r1 << "\n" << r2 << endl;
@@ -88,10 +88,10 @@ int main() {
   cout << endl;
 
   // Test output of grid mask set
-  Rectangle<Float> bb("[0,1]x[0,1]x[0,1]");
-  Grid<Float> g(Vector<Float>("[0.25,0.25,0.25]"));
-  GridMaskSet<Float> gms(g,bb);
-  Rectangle<Float> r("[0.33,0.66]x[0.125,0.375]x[0.25,0.75]");
+  Rectangle<Flt> bb("[0,1]x[0,1]x[0,1]");
+  Grid<Flt> g(Vector<Flt>("[0.25,0.25,0.25]"));
+  GridMaskSet<Flt> gms(g,bb);
+  Rectangle<Flt> r("[0.33,0.66]x[0.125,0.375]x[0.25,0.75]");
   cout << "gms.size()=" << gms.size() << endl;
   gms.adjoin_outer_approximation(r);
   cout << "gms.size()=" << gms.size() << endl;

@@ -44,6 +44,8 @@ namespace Ariadne {
       Float(int n);
       /*! \brief Construct from a double-precision number. */
       Float(double x);
+      /*! \brief Construct from a string literal. Throws an exception if the numerical value of the string is not exactly representable. */
+      Float(const std::string& str);
       /*! \brief Copy constructor. */
       Float(const Float& x);
       

@@ -36,9 +36,76 @@ using namespace Ariadne::Geometry;
 using namespace Ariadne::Python;
 
 #include <boost/python.hpp>
+#include <boost/python/detail/api_placeholder.hpp>
+
 #include "python/python_utilities.h"
+#include "python/read_scalar.h"
+
 using namespace boost::python;
 
+
+template<class X>
+std::string
+__str__(const Rectangle<X>& r)
+{
+  std::stringstream ss;
+  ss << r;
+  return ss.str();
+}
+
+template<class X>
+std::string
+__repr__(const Rectangle<X>& r)
+{
+  std::stringstream ss;
+  ss << "Rectangle(";
+  if(r.empty()) {
+    ss << r.dimension();
+  } else {
+    for(dimension_type i=0; i!=r.dimension(); ++i) {
+      ss << (i==0 ? '[' : ',') << '[' << r.lower_bound(i) << ',' << r.upper_bound(i) << ']';
+    }
+    ss << ']';
+  }
+  ss << ")";
+  return ss.str();
+}
+
+template<class R>  
+Rectangle<R>* 
+make_rectangle(const boost::python::object& obj) 
+{
+  // See "Extracting C++ objects" in the Boost Python tutorial
+  boost::python::list elements=extract<list>(obj);
+  int d=boost::python::len(elements);
+  Rectangle<R>& r=*new Rectangle<R>(d);
+  for(int i=0; i!=d; ++i) {
+    extract<list> extract_list(elements[i]);
+    if(extract_list.check()) {
+      boost::python::list pair=extract_list();
+      if(boost::python::len(pair)!=2) {
+        throw std::runtime_error("Rectangle must be list of pairs representing intervals");
+      }
+      R l=read_scalar<R>(pair[0]);
+      R u=read_scalar<R>(pair[1]);
+      r.set_lower_bound(i,static_cast<R>(l));
+      r.set_upper_bound(i,static_cast<R>(u));
+    } else {
+      extract<std::string> extract_string(elements[i]);
+      if(extract_string.check()) {
+        Interval<R> interval(extract_string());
+        r.set_lower_bound(i,interval.lower());
+        r.set_upper_bound(i,interval.upper());
+      } else {
+        extract< Interval<R> > extract_interval(elements[i]);
+        Interval<R> interval=extract_interval();
+        r.set_lower_bound(i,interval.lower());
+        r.set_upper_bound(i,interval.upper());
+      } 
+    }
+  }
+  return &r;
+}
 
 template<class R> inline
 Rectangle<R> over_approximation_of_minkowski_sum(const Rectangle<R>& r1, const Rectangle<R>& r2) {
@@ -57,11 +124,13 @@ void export_rectangle()
   typedef Interval<R> I;
   
   class_< Rectangle<R> >("Rectangle",init<int>())
+    .def("__init__", make_constructor(&make_rectangle<R>) )
+    .def(init< int >())
     .def(init< Point<R>,Point<R> >())
     .def(init< Rectangle<R> >())
-    .def(init< Vector< Interval<R> > >())
-    .def(init< Point< Interval<R> > >())
-    .def(init<std::string>())
+    .def(init< Vector<I> >())
+    .def(init< Point<I> >())
+    //.def(init<std::string>())
     .def("empty", &Rectangle<R>::empty)
     .def("dimension", &Rectangle<R>::dimension)
     .def("contains", &Rectangle<R>::contains)
@@ -79,7 +148,8 @@ void export_rectangle()
     .def("neighbourhood", &Rectangle<R>::neighbourhood)
     .def("__add__", &over_approximation_of_minkowski_sum<R>)
     .def("__sub__", &over_approximation_of_minkowski_difference<R>)
-    .def(self_ns::str(self))
+    .def("__str__",&__str__<R>)
+    .def("__repr__",&__repr__<R>)
   ;
 
   def("rectangular_hull", (Rectangle<R>(*)(const Rectangle<R>&, const Rectangle<R>&))(&rectangular_hull));
@@ -89,10 +159,12 @@ void export_rectangle()
   def("subset", (tribool(*)(const Rectangle<R>&, const Rectangle<R>&))(&subset));
 
 
-  class_< Rectangle<I> >("IntervalRectangle",init<int>())
+
+  class_< Rectangle<I> >("FuzzyRectangle",init<int>())
     .def(init< Point<I>, Point<I> >())
     .def(init< Rectangle<R> >())
     .def(init< Rectangle<I> >())
+    //.def(init<std::string>())
     .def("dimension", &Rectangle<I>::dimension)
     .def("contains", &Rectangle<I>::contains)
     .def("set_lower_bound", &Rectangle<I>::set_lower_bound)
@@ -102,7 +174,8 @@ void export_rectangle()
     .def("upper_corner", &Rectangle<I>::upper_corner)
     .def("lower_bound", &Rectangle<I>::lower_bound, return_value_policy<copy_const_reference>())
     .def("upper_bound", &Rectangle<I>::upper_bound, return_value_policy<copy_const_reference>())
-    .def(self_ns::str(self))
+    .def("__str__",&__str__<I>)
+    .def("__repr__",&__repr__<I>)
   ;
 
   def("under_approximation", (Rectangle<R>(*)(const Rectangle<I>&))(&under_approximation));

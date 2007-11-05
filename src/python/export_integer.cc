@@ -33,9 +33,27 @@ using namespace Ariadne::Python;
 #include <boost/python.hpp>
 using namespace boost::python;
 
+std::string
+__str__(const Integer& z)
+{
+  std::stringstream ss;
+  ss << z;
+  return ss.str();
+}
+
+std::string
+__repr__(const Integer& z)
+{
+  std::stringstream ss;
+  ss << "Integer(" << z << ")";
+  return ss.str();
+}
+
+
 void export_integer() {
   class_<Integer>("Integer")
     .def(init<int>())
+    .def(init<std::string>())
     .def(init<Integer>())
     .def("__neg__", &neg<Integer,Integer>)
     .def("__add__", &add<Integer,Integer,Integer>)
@@ -62,7 +80,8 @@ void export_integer() {
     .def("__le__", &le<bool,Integer,Integer>)
     .def("__ge__", &ge<bool,Integer,int>)
     .def("__ge__", &ge<bool,Integer,Integer>)
-    .def(self_ns::str(self))
+    .def("__str__", &__str__)
+    .def("__repr__", &__repr__)
   ;
 
   def("max",&max<Integer,Integer,Integer>);

@@ -27,61 +27,61 @@
 #include "point_list.h"
 
 namespace Ariadne {
-  namespace Geometry {
+
 
     
-    template<class R> 
-    void
-    PointList<R>::reserve(size_type n)
-    {
-      if(this->capacity()>=n) { return; }
-      LinearAlgebra::Matrix<R> old(this->_pts);
-      _pts=LinearAlgebra::Matrix<R>(this->dimension()+1,n);
-      for(size_type j=0; j!=this->size(); ++j) {
-        for(size_type i=0; i!=this->dimension()+1u; ++i) {
-          _pts(i,j)=old(i,j);
-        }
-      }
-    }    
-    
-    
-    template<class R>
-    const LinearAlgebra::Matrix<R>&
-    PointList<R>::generators() const 
-    { 
-      return this->_pts;
+template<class X> 
+void
+Geometry::PointList<X>::reserve(size_type n)
+{
+  if(this->capacity()>=n) { return; }
+  LinearAlgebra::Matrix<X> old(this->_pts);
+  _pts=LinearAlgebra::Matrix<X>(this->dimension()+1,n);
+  for(size_type j=0; j!=this->size(); ++j) {
+    for(size_type i=0; i!=this->dimension()+1u; ++i) {
+      _pts(i,j)=old(i,j);
     }
-    
-    
-    template<class R>
-    void
-    PointList<R>::push_back(const Point<R>& pt) 
-    {
-      if(this->_size==0) {
-        _pts.resize(pt.dimension()+1,1);
-      }
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(*this,pt,"PointList<R>::push_back(Point<R>)");
-      if(this->size()==this->capacity()) {
-        reserve(this->size()*2);
-      }
-      for(size_type i=0; i!=pt.dimension(); ++i) {
-          _pts(i,this->size())=pt[i];
-      }
-      _pts(pt.dimension(),this->size())=R(1);
-      ++this->_size;
-    }
-    
-    template<class R> 
-    std::ostream& 
-    PointList<R>::write(std::ostream& os) const
-    {
-      const PointList<R>& ptl=*this;
-      if(ptl.size()==0) { os << "[ "; }
-      for(size_type j=0; j!=ptl.size(); ++j) {
-        os << ((j==0) ? '[' : ',') << ptl[j]; 
-      }
-      return os << ']';
-    }
-      
   }
+}    
+
+
+template<class X>
+const LinearAlgebra::Matrix<X>&
+Geometry::PointList<X>::generators() const 
+{ 
+  return this->_pts;
 }
+
+
+template<class X>
+void
+Geometry::PointList<X>::push_back(const Point<X>& pt) 
+{
+  if(this->_size==0) {
+    _pts.resize(pt.dimension()+1,1);
+  }
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(*this,pt,"PointList<X>::push_back(Point<X>)");
+  if(this->size()==this->capacity()) {
+    reserve(this->size()*2);
+  }
+  for(size_type i=0; i!=pt.dimension(); ++i) {
+    _pts(i,this->size())=pt[i];
+  }
+  _pts(pt.dimension(),this->size())=static_cast<X>(1);
+  ++this->_size;
+}
+
+template<class X> 
+std::ostream& 
+Geometry::PointList<X>::write(std::ostream& os) const
+{
+  const PointList<X>& ptl=*this;
+  if(ptl.size()==0) { os << "[ "; }
+  for(size_type j=0; j!=ptl.size(); ++j) {
+    os << ((j==0) ? '[' : ',') << ptl[j]; 
+  }
+  return os << ']';
+}
+
+
+} // namespace Ariadne

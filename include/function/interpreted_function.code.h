@@ -33,7 +33,7 @@
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
 #include "../function/exceptions.h"
-#include "../function/differential.h"
+#include "../function/first_derivative.h"
 #include "../function/virtual_machine.h"
 #include "../input/modelica.h"
 
@@ -147,7 +147,7 @@ Function::InterpretedFunction<R>::evaluate(const LinearAlgebra::Vector<A>& x) co
 
 template<class R>
 typename Function::InterpretedFunction<R>::A
-Function::InterpretedFunction<R>::derivative(const LinearAlgebra::Vector<A>& x, const size_type& i, const LinearAlgebra::MultiIndex& j) const
+Function::InterpretedFunction<R>::derivative(const LinearAlgebra::Vector<A>& x, const size_type& i, const MultiIndex& j) const
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
@@ -157,22 +157,22 @@ template<class R>
 LinearAlgebra::Matrix<typename Function::InterpretedFunction<R>::A>
 Function::InterpretedFunction<R>::jacobian(const LinearAlgebra::Vector<A>& x) const
 {
-  typedef Numeric::Differential< A,LinearAlgebra::Vector<A> > Differential;
+  typedef FirstDerivative< A,LinearAlgebra::Vector<A> > FD;
   size_type m=this->result_size();
   size_type n=this->argument_size();
-  Differential dx(0.0,n);
-  array<Differential> y(m,dx);
-  array<Differential> a(n,dx);
-  array<Differential> t(this->_intermediates_size);
-  array<Differential> c(this->_constants_size);
+  FD dx(0.0,n);
+  array<FD> y(m,dx);
+  array<FD> a(n,dx);
+  array<FD> t(this->_intermediates_size);
+  array<FD> c(this->_constants_size);
   for(size_type i=0; i!=n; ++i) {
-    a[i]=Differential(x[i],n,i);
+    a[i]=FD(x[i],n,i);
   }
   for(size_type i=0; i!=c.size(); ++i) {
-    c[i]=Differential(A(this->_constants[i]),n);
+    c[i]=FD(A(this->_constants[i]),n);
   }
   ARIADNE_LOG(7,"y="<<y<<"  a="<<a<<"  t="<<t<<"  c="<<c);
-  Differential* args[4]={ y.begin(), a.begin(), t.begin(), c.begin() };
+  FD* args[4]={ y.begin(), a.begin(), t.begin(), c.begin() };
   VirtualMachine machine;
   machine.evaluate(this->_operations,args);
   ARIADNE_LOG(7,"y="<<y<<"  t="<<t);

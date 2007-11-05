@@ -26,6 +26,7 @@
 #include <string>
 
 #include "ariadne.h"
+#include "numeric/numerical_traits.h"
 #include "numeric/rational.h"
 #include "numeric/float64.h"
 #include "geometry/ddconv.h"
@@ -39,14 +40,6 @@ using namespace Ariadne::LinearAlgebra;
 using namespace Ariadne::Geometry;
 using namespace std;
 
-template<class R> class nt {
-  public: typedef R at;
-};
-  
-template<> class nt<Float64> {
-  public: typedef Interval<Float64> at;
-};
-  
 
 
 template<class R>
@@ -54,7 +47,7 @@ int
 test_ddconv() 
 {
   cout << "test_ddconv<" << name<R>() << ">" << endl;
-  typedef typename nt<R>::at F;
+  typedef typename Numeric::traits<R>::arithmetic_type F;
   
   std::vector< LinearAlgebra::Vector<F> > constraints;
   std::vector< LinearAlgebra::Vector<F> > generators;

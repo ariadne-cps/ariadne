@@ -41,7 +41,7 @@ using namespace std;
 template<class R> int test_point();
 
 int main() {
-  test_point<Float>();
+  test_point<Flt>();
   return 0;
 }
 

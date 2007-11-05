@@ -36,6 +36,7 @@
 #include "../geometry/set_interface.h"
 #include "../geometry/grid_cell_list_set.h"
 #include "../geometry/grid_mask_set.h"
+#include "../geometry/discrete_state.h"
 #include "../geometry/hybrid_space.h"
 #include "../geometry/hybrid_set_iterator.h"
 
@@ -44,9 +45,6 @@
 
 namespace Ariadne {
   namespace Geometry {
-
-    /*! \brief The type identifying a discrete locatation of a hybrid system. */
-    typedef id_type location_type;
 
     class basic_set_tag;
     class denotable_set_tag;
@@ -61,12 +59,13 @@ namespace Ariadne {
     {
       typedef typename S::real_type R;
      public:
+      typedef DiscreteState discrete_state_type;
       typedef boost::shared_ptr<S> pointer_type;
       typedef typename S::real_type real_type;
       typedef typename S::state_type state_type;
       typedef S set_type;
-      typedef typename std::map<location_type,pointer_type>::iterator locations_iterator;
-      typedef typename std::map<location_type,pointer_type>::const_iterator locations_const_iterator;
+      typedef typename std::map<discrete_state_type,pointer_type>::iterator locations_iterator;
+      typedef typename std::map<discrete_state_type,pointer_type>::const_iterator locations_const_iterator;
      protected:
       /*! \brief Construct a set with no locations. */
       HybridAbstractSet();
@@ -85,28 +84,28 @@ namespace Ariadne {
       virtual ~HybridAbstractSet();
       
       /*! \brief Create a new location with dimension \a d. */
-      S& new_location(location_type q, dimension_type d);
+      S& new_location(discrete_state_type q, dimension_type d);
       /*! \brief Create a new location based on the set \a s. */
-      S& new_location(location_type q, const S& s);
+      S& new_location(discrete_state_type q, const S& s);
       /*! \brief Create a new location based on the parameter \a t. */
-      template<class T> S& new_location(location_type q, const T& t);
+      template<class T> S& new_location(discrete_state_type q, const T& t);
       /*! \brief Create a new location based on the parameters \a t1 and \a t2. */
-      template<class T1, class T2> S& new_location(location_type q, const T1& t1, const T2& t2);
+      template<class T1, class T2> S& new_location(discrete_state_type q, const T1& t1, const T2& t2);
       /*! \brief Create a new location based on the rectangle \a r. */
-      S& new_location(location_type q, const Rectangle<R>& r);
+      S& new_location(discrete_state_type q, const Rectangle<R>& r);
       /*! \brief Create a new location based on the polyhedron \a p. */
-      S& new_location(location_type q, const Polyhedron<R>& p);
+      S& new_location(discrete_state_type q, const Polyhedron<R>& p);
 
       /*! \brief The discrete locations of the set. */
       HybridSpace locations() const;
       /*! \brief The number of discrete locations or components comprising the set. */
-      location_type number_of_locations() const;
+      size_type number_of_locations() const;
       /*! \brief Check if the hybrid set has a component for discrete location \a q. */
-      bool has_location(location_type q) const;
+      bool has_location(discrete_state_type q) const;
       /*! \brief A reference to the state set corresponding to discrete location \a q. */
-      S& operator[](location_type q);
+      S& operator[](discrete_state_type q);
       /*! \brief The state set corresponding to discrete location \a q. */
-      const S& operator[](location_type q) const;
+      const S& operator[](discrete_state_type q) const;
       
       /*! \brief Clear all discrete locations. */
       void clear();
@@ -127,7 +126,7 @@ namespace Ariadne {
       /*! \brief Write to an output stream. */
       virtual std::ostream& write(std::ostream& os) const;
      private:
-      std::map< location_type, pointer_type > _component_sets;
+      std::map< discrete_state_type, pointer_type > _component_sets;
     };
 
 

@@ -22,6 +22,7 @@
  */
  
 #include "map_evolver.h"
+#include "map_orbiter.h"
 
 #include <iosfwd>
 #include <string>
@@ -45,16 +46,20 @@
 #include "../geometry/list_set.h"
 #include "../geometry/grid.h"
 #include "../geometry/grid_set.h"
+#include "../geometry/partition_tree_set.h"
 #include "../geometry/grid_approximation.h"
 #include "../geometry/rectangular_set.h"
+#include "../geometry/orbit.h"
 
 #include "../system/grid_multimap.h"
 
 
-#include "../system/map.h"
+#include "../system/map_interface.h"
+#include "../system/discrete_map.h"
 #include "../system/discrete_time_system.h"
 
 #include "../evaluation/applicator.h"
+#include "../evaluation/model_checker.h"
 
 #include "../output/logging.h"
 
@@ -68,10 +73,43 @@ static const double DEFAULT_GRID_LENGTH=0.125;
 
 
 
+template<class R> inline
+Evaluation::EvolutionParameters<R>*
+Evaluation::MapEvolver<R>::default_parameters() 
+{
+  return new EvolutionParameters<R>();
+}
+
+template<class R> inline
+Evaluation::MapOrbiterInterface<R>*
+Evaluation::MapEvolver<R>::default_orbiter() 
+{
+  typedef Geometry::Zonotope<I,R> BS;
+  const EvolutionParameters<R>& parameters=*this->_parameters;
+  Applicator<BS> applicator;
+  return new MapOrbiter<BS>(parameters,applicator);
+}
+
+template<class R> inline
+Evaluation::ModelChecker<R>
+Evaluation::MapEvolver<R>::model_checker() const
+{
+  return ModelChecker<R>(*this->_parameters);
+}
+
+template<class R> inline
+System::DiscreteMap<R>
+Evaluation::MapEvolver<R>::discrete_map(const System::MapInterface<R>& f) const
+{
+  return System::DiscreteMap<R>(f,*this->_orbiter);
+}
+
+
+
 template<class R>
 Evaluation::MapEvolver<R>::MapEvolver() 
-  : _parameters(new EvolutionParameters<R>()),
-    _applicator(new Applicator<R>())
+  : _parameters(default_parameters()),
+    _orbiter(default_orbiter())
 {
   _parameters->set_maximum_basic_set_radius(DEFAULT_MAXIMUM_BASIC_SET_RADIUS);
   _parameters->set_grid_length(DEFAULT_GRID_LENGTH);
@@ -81,15 +119,16 @@ Evaluation::MapEvolver<R>::MapEvolver()
 template<class R>
 Evaluation::MapEvolver<R>::MapEvolver(const EvolutionParameters<R>& parameters)
   : _parameters(new EvolutionParameters<R>(parameters)),
-    _applicator(new Applicator<R>())
+    _orbiter(default_orbiter())
 {
 }
+
 
 
 template<class R>
 Evaluation::MapEvolver<R>::MapEvolver(const MapEvolver<R>& other) 
   : _parameters(new EvolutionParameters<R>(other.parameters())),
-    _applicator(other._applicator->clone())
+    _orbiter(other._orbiter->clone())
 {
 }
 
@@ -99,7 +138,7 @@ template<class R>
 Evaluation::MapEvolver<R>::~MapEvolver() 
 {
   delete this->_parameters;
-  delete this->_applicator;
+  delete this->_orbiter;
 }
 
 
@@ -133,22 +172,58 @@ Evaluation::MapEvolver<R>::parameters()
 
 
 
+
+
+
 template<class R>
-Geometry::ListSet< typename Evaluation::MapEvolver<R>::BS >
-Evaluation::MapEvolver<R>::subdivide(const BS& bs) const
+Geometry::Rectangle<R>
+Evaluation::MapEvolver<R>::apply(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& r) const
 {
-  return bs.subdivide();
+  ARIADNE_LOG(4,"BS MapEvolver::apply(MapInterface,Rectangle)\n");
+  return this->_orbiter->apply(f,r);
+}
+
+template<class R>
+Geometry::GridCellListSet<R>
+Evaluation::MapEvolver<R>::apply(const System::MapInterface<R>& f, const Geometry::GridCell<R>& gc) const
+{
+  ARIADNE_LOG(4,"GridCellListSet MapEvolver::apply(MapInterface,GridCell)\n");
+  return this->_orbiter->apply(f,gc,gc.grid());
+}
+
+template<class R>
+Geometry::GridCellListSet<R>
+Evaluation::MapEvolver<R>::apply(const System::MapInterface<R>& f, const Geometry::GridCell<R>& gc, const Geometry::Grid<R>& g) const
+{
+  ARIADNE_LOG(4,"GridCellListSet MapEvolver::apply(MapInterface,GridCell)\n");
+  return this->_orbiter->apply(f,gc,g);
 }
 
 
 
 
 template<class R>
-typename Evaluation::MapEvolver<R>::BS 
-Evaluation::MapEvolver<R>::evaluate(const System::MapInterface<R>& f, const BS& bs) const
+Geometry::DiscreteTimeOrbit< Numeric::Integer, Geometry::Rectangle<R> >
+Evaluation::MapEvolver<R>::orbit(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& r, const Numeric::Integer& n) const
 {
-  ARIADNE_LOG(4,"BS MapEvolver::evaluate(MapInterface,BasicSet)\n");
-  return this->_applicator->evaluate(f,bs);
+  ARIADNE_LOG(4,"DiscreteTimeOrbit<Integer,Rectangle> MapEvolver::orbit(MapInterface,RectangleRectangle)\n");
+  return this->_orbiter->orbit(f,r,n,Numeric::inf<R>());
+}
+
+template<class R>
+Geometry::DiscreteTimeOrbit< Numeric::Integer, Geometry::Rectangle<R> >
+Evaluation::MapEvolver<R>::orbit(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& r, const Numeric::Integer& n, const R& mbsr) const
+{
+  ARIADNE_LOG(4,"DiscreteTimeOrbit<Integer,Rectangle> MapEvolver::orbit(MapInterface,Rectangle,Integer,Float)\n");
+  return this->_orbiter->orbit(f,r,n,mbsr);
+}
+
+template<class R>
+Geometry::DiscreteTimeOrbit< Numeric::Integer, Geometry::GridCellListSet<R> >
+Evaluation::MapEvolver<R>::orbit(const System::MapInterface<R>& f, const Geometry::GridCell<R>& gc, const Numeric::Integer& n) const
+{
+  ARIADNE_LOG(4,"DiscreteTimeOrbit<Integer,GridCellListSet> MapEvolver::orbit(MapInterface,GridCell,Integer)\n");
+  return this->_orbiter->orbit(f,gc,n);
 }
 
 
@@ -160,33 +235,10 @@ Evaluation::MapEvolver<R>::evaluate(const System::MapInterface<R>& f, const BS& 
 
 template<class R>
 Geometry::ListSet< Geometry::Rectangle<R> >
-Evaluation::MapEvolver<R>::image(const System::MapInterface<R>& f, const Geometry::ListSet< Geometry::Rectangle<R> >& ds) const 
+Evaluation::MapEvolver<R>::image(const System::MapInterface<R>& f, const Geometry::ListSet< Geometry::Rectangle<R> >& initial_set) const 
 {
   ARIADNE_LOG(2,"GridMaskSet MapEvolver::image(MapInterface map, ListSet< Rectangle<Float> > initial_set)\n");
-  ARIADNE_LOG(3,"initial_set="<<ds<<"\n");
-  Geometry::ListSet< Geometry::Rectangle<R> > result(f.result_dimension());
-  Geometry::Rectangle<R> bb;
-  BS bs,fbs;
-  for(typename Geometry::ListSet< Geometry::Rectangle<R> >::const_iterator iter=ds.begin(); iter!=ds.end(); ++iter) {
-    bs=*iter;
-    fbs=this->evaluate(f,bs);
-    bb=fbs.bounding_box();
-    result.push_back(bb);
-  }
-  return result;
-}
-
-template<class R>
-Geometry::ListSet< typename Evaluation::MapEvolver<R>::BS > 
-Evaluation::MapEvolver<R>::image(const System::MapInterface<R>& f, const Geometry::ListSet< BS >& ds) const 
-{
-  ARIADNE_LOG(2,"GridMaskSet MapEvolver::image(MapInterface map, ListSet< Rectangle<Float> > initial_set)\n");
-  ARIADNE_LOG(3,"initial_set="<<ds<<"\n");
-  Geometry::ListSet<BS> result(f.result_dimension());
-  for(typename Geometry::ListSet<BS>::const_iterator iter=ds.begin(); iter!=ds.end(); ++iter) {
-    result.push_back(this->evaluate(f,*iter));
-  }
-  return result;
+  return this->model_checker().image(this->discrete_map(f),initial_set);
 }
 
 
@@ -196,22 +248,8 @@ Evaluation::MapEvolver<R>::image(const System::MapInterface<R>& f,
                                  const Geometry::GridCellListSet<R>& initial_set, 
                                  const Geometry::Grid<R>& image_grid) const 
 {
-  using namespace Geometry;
-  typedef Numeric::Interval<R> I;
-  typedef typename GridCellListSet<R>::const_iterator gcls_const_iterator;
   ARIADNE_LOG(2,"GridMaskSet MapEvolver::image(MapInterface map, GridCellListSet initial_set, Grid image_grid)\n");
-  ARIADNE_LOG(3,"initial_set="<<initial_set<<"\nimage_grid="<<image_grid<<"\n");
-  
-  GridCellListSet<R> image(image_grid);
-  
-  BS bs,fbs;
-  
-  for(gcls_const_iterator iter=initial_set.begin(); iter!=initial_set.end(); ++iter) {
-    bs=*iter;
-    fbs=this->evaluate(f,bs);
-    image.adjoin(Geometry::fuzzy_outer_approximation(fbs,image_grid));
-  }
-  return image;
+  return this->model_checker().image(this->discrete_map(f),initial_set,image_grid);
 }
 
 
@@ -223,34 +261,8 @@ Evaluation::MapEvolver<R>::image(const System::MapInterface<R>& f,
                                  const Geometry::GridMaskSet<R>& initial_set, 
                                  const Geometry::GridMaskSet<R>& bounding_set) const 
 {
-  using namespace Geometry;
-  typedef Numeric::Interval<R> I;
-  typedef typename GridMaskSet<R>::const_iterator gms_const_iterator;
-  ARIADNE_LOG(2,"GridMaskSet MapEvolver::image(MapInterface f, GridMaskSet initial_set, GridMaskSet bounding_set)\n");
-  ARIADNE_LOG(3,"initial_set="<<initial_set<<"\nbounding_set="<<bounding_set);
-  ARIADNE_CHECK_BOUNDED(initial_set,"GridMaskSet MapEvolver<R>::image(MapInterface,GridMaskSet,GridMaskSet)");
-  ARIADNE_CHECK_BOUNDED(bounding_set,"MapEvolver<R>::image(MapInterface,GridMaskSet,GridMaskSet)");
-  
-  const Grid<R>& g=initial_set.grid();
-  Combinatoric::LatticeBlock bd=bounding_set.block();
-  GridMaskSet<R> image(g,bd);
-  Rectangle<R> bb=initial_set.bounding_box();
-  
-  Rectangle<R> r;
-  BS bs,fbs;
-  
-  for(gms_const_iterator iter=initial_set.begin(); iter!=initial_set.end(); ++iter) {
-    r=*iter;
-    bs=r;
-    fbs=this->evaluate(f,bs);
-    ARIADNE_LOG(7,"bs="<<bs<<", fbs="<<fbs<<"\n");
-    GridCellListSet<R> gbs=Geometry::fuzzy_outer_approximation(fbs,g);
-    ARIADNE_LOG(7,"gbs="<<gbs);
-    image.adjoin(gbs);
-    ARIADNE_LOG(9,"image.size()="<<image.size()<<"\n");
-    assert((bool)(subset(gbs,image)));
-  }
-  return regular_intersection(image,bounding_set);
+  ARIADNE_LOG(2,"GridMaskSet MapEvolver::preimage(MapInterface,PartitionTreeSet,Rectangle)\n");
+  return this->model_checker().image(this->discrete_map(f),initial_set,bounding_set);
 }
 
 
@@ -264,125 +276,52 @@ Evaluation::MapEvolver<R>::preimage(const System::MapInterface<R>& f,
                                     const Geometry::GridMaskSet<R>& bounding_set) const 
 {
   ARIADNE_LOG(2,"GridMaskSet MapEvolver::preimage(MapInterface,GridMaskSet,GridMaskSet)\n");
-  ARIADNE_LOG(3,"set="<<set<<"\nbounding_set="<<bounding_set);
-  using namespace Numeric;
-  using namespace Geometry;
-  typedef typename GridMaskSet<R>::const_iterator basic_set_iterator;
-  GridMaskSet<R> result(bounding_set);
-  result.clear();
-  Rectangle<R> r;
-  BS bs,fbs;
-  GridCellListSet<R> fgcls(set.grid());
-  ARIADNE_LOG(7,"Preimage testing "<<bounding_set.size()<<" cells\n");
-  size_type tested=0;
-  for(typename GridMaskSet<R>::const_iterator bnd_iter=bounding_set.begin(); 
-      bnd_iter!=bounding_set.end(); ++bnd_iter)
-    {
-      if(tested%256==0 && tested!=0) {
-        ARIADNE_LOG(7,"Preimage tested "<<tested<<" cells; found "<<result.size()<<" cells in preimage\n");
-      }
-      ++tested;
-      fgcls.clear();
-      r=*bnd_iter;
-      bs=r;
-      fbs=this->evaluate(f,bs);
-      fgcls.adjoin(Geometry::fuzzy_outer_approximation(fbs,fgcls.grid()));
-      if(subset(fgcls,set)) {
-        result.adjoin(*bnd_iter);
-      }
-    }
-  return result;
+  return this->model_checker().preimage(this->discrete_map(f),set,bounding_set);
+}
+
+template<class R>
+Geometry::PartitionTreeSet<R> 
+Evaluation::MapEvolver<R>::preimage(const System::MapInterface<R>& f, 
+                                    const Geometry::PartitionTreeSet<R>& set, 
+                                    const Geometry::Rectangle<R>& bound) const 
+{
+  ARIADNE_LOG(2,"GridMaskSet MapEvolver::preimage(MapInterface,PartitionTreeSet,Rectangle)\n");
+  return this->model_checker().preimage(this->discrete_map(f),set,bound);
 }
 
 
 
 template<class R>
 Geometry::ListSet< Geometry::Rectangle<R> >
-Evaluation::MapEvolver<R>::reach(const System::MapInterface<R>& f, 
-                                  const Geometry::ListSet< Geometry::Rectangle<R> >& initial_set) const 
+Evaluation::MapEvolver<R>::iterate(const System::MapInterface<R>& f, 
+                                   const Geometry::ListSet< Geometry::Rectangle<R> >& initial_set,
+                                   const Numeric::Integer& steps) const 
 {
-  using namespace Geometry;
-  typedef Numeric::Interval<R> I;
-  ARIADNE_LOG(2,"ListSet<Rectangle> MapEvolver::reach(MapInterface,ListSet<Rectangle>\n");
-  ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
-  ListSet< Rectangle<R> > result; 
-  Rectangle<R> r;
-  BS bs;
-  for(typename ListSet< Rectangle<R> >::const_iterator r_iter=initial_set.begin();
-      r_iter!=initial_set.end(); ++r_iter)
-    {
-      ARIADNE_LOG(6,"  computing reach for r="<<*r_iter);
-      size_type steps=0;
-      r=*r_iter;
-      bs=r;
-      while(bs.radius()<this->parameters().maximum_basic_set_radius()) {
-        result.adjoin(bs.bounding_box());
-        bs=this->evaluate(f,bs);
-        ++steps;
-      }
-      ARIADNE_LOG(6,"  iterated "<<steps<<" time steps");
-    }
-  return result;
+  ARIADNE_LOG(2,"ListSet<Rectangle> MapEvolver::initial(MapInterface,ListSet<Rectangle>,Integer)\n");
+  return this->model_checker().iterate(this->discrete_map(f),initial_set,steps);
+}
+
+template<class R>
+Geometry::ListSet< Geometry::Rectangle<R> >
+Evaluation::MapEvolver<R>::reach(const System::MapInterface<R>& f, 
+                                 const Geometry::ListSet< Geometry::Rectangle<R> >& initial_set,
+                                 const Numeric::Integer& steps) const 
+{
+  ARIADNE_LOG(2,"ListSet<Rectangle> MapEvolver::reach(MapInterface,ListSet<Rectangle>,Integer)\n");
+  return this->model_checker().reach(this->discrete_map(f),initial_set,steps);
 }
 
 
 template<class R>
-Geometry::ListSet<typename Evaluation::MapEvolver<R>::BS> 
-Evaluation::MapEvolver<R>::reach(const System::MapInterface<R>& f, 
-                                  const Geometry::ListSet<BS>& initial_set) const 
+Geometry::ListSet< Geometry::Rectangle<R> >
+Evaluation::MapEvolver<R>::lower_reach(const System::MapInterface<R>& f, 
+                                       const Geometry::ListSet< Geometry::Rectangle<R> >& initial_set) const 
 {
-  using namespace Geometry;
-  typedef Numeric::Interval<R> I;
-  ARIADNE_LOG(2,"GridMaskSet MapEvolver::reach(MapInterface,ListSet<BS>\n");
-  ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
-  ListSet<BS> result; 
-  BS bs;
-  for(typename ListSet<BS>::const_iterator bs_iter=initial_set.begin();
-      bs_iter!=initial_set.end(); ++bs_iter)
-    {
-      ARIADNE_LOG(6,"  computing reach for bs="<<*bs_iter);
-      size_type steps=0;
-      bs=*bs_iter;
-      while(bs.radius()<this->parameters().maximum_basic_set_radius()) {
-        result.adjoin(bs);
-        bs=this->evaluate(f,bs);
-        ++steps;
-      }
-      ARIADNE_LOG(6,"  iterated "<<steps<<" time steps");
-    }
-  return result;
+  ARIADNE_LOG(2,"ListSet<Rectangle> MapEvolver::(MapInterface map, ListSet<Rectangle> initial_set\n");
+  return this->model_checker().lower_reach(this->discrete_map(f),initial_set);
 }
 
 
-template<class R>
-Geometry::GridMaskSet<R> 
-Evaluation::MapEvolver<R>::reach(const System::MapInterface<R>& f, 
-                                 const Geometry::GridMaskSet<R>& initial_set) const 
-{
-  using namespace Geometry;
-  typedef Numeric::Interval<R> I;
-  ARIADNE_LOG(2,"GridMaskSet MapEvolver::reach(MapInterface,GridMaskSet)\n");
-  ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
-  GridMaskSet<R> result(initial_set.grid(),initial_set.block());
-  typedef typename GridMaskSet<R>::const_iterator basic_set_iterator;
-  Rectangle<R> rectangle(initial_set.dimension());
-  BS basic_set;
-  for(basic_set_iterator bs_iter=initial_set.begin(); 
-      bs_iter!=initial_set.end(); ++bs_iter)
-    {
-      ARIADNE_LOG(6,"  computing reach for cell="<<*bs_iter);
-      size_type steps=0;
-      rectangle=*bs_iter;
-      basic_set=rectangle;
-      while(basic_set.radius() < this->parameters().maximum_basic_set_radius()) {
-        result.adjoin(Geometry::fuzzy_outer_approximation(basic_set,result.grid()));
-        basic_set=this->evaluate(f,basic_set);
-        ++steps;
-      }
-      ARIADNE_LOG(6,"  iterated "<<steps<<" time steps");
-    }
-  return result;
-}
 
 
 template<class R>
@@ -391,48 +330,8 @@ Evaluation::MapEvolver<R>::chainreach(const System::MapInterface<R>& f,
                                       const Geometry::GridMaskSet<R>& initial_set, 
                                       const Geometry::GridMaskSet<R>& bounding_set) const
 {
-  using namespace Geometry;
-  typedef Numeric::Interval<R> I;
-  typedef typename Geometry::GridCellListSet<R>::const_iterator gcls_const_iterator;
   ARIADNE_LOG(2,"GridMaskSet MapEvolver::chainreach(MapInterface map, GridMaskSet initial_set, GridMaskSet bounding_set)\n");
-  ARIADNE_LOG(3,"initial_set="<<initial_set<<"\nbounding_set="<<bounding_set<<"\n");
-  ARIADNE_CHECK_BOUNDED(initial_set,"GridMaskSet MapEvolver<R>::chainreach(MapInterface,GridMaskSet,GridMaskSet)");
-  ARIADNE_CHECK_BOUNDED(bounding_set,"GridMaskSet MapEvolver<R>::chainreach(MapInterface,GridMaskSet,GridMaskSet)");
-  
-  const Grid<R>& g=bounding_set.grid();
-  Combinatoric::LatticeBlock bd=bounding_set.block();
-  GridBlock<R> bb(g,bd);
-  GridMaskSet<R> result(g,bd);
-  GridCellListSet<R> found(g);
-  GridCellListSet<R> image(g);
-  
-  Rectangle<R> r(g.dimension());
-  BS bs,fbs;
-  
-  uint step=0;
-  found=initial_set;
-  while(!subset(found,result)) {
-    ARIADNE_LOG(3,"Chainreach step "<<step<<": found "<<found.size()<<" cells, ");
-    found=difference(found,result);
-    ARIADNE_LOG(3,found.size()<<" of which are new.\n");
-    ARIADNE_LOG(3,"reached "<<result.size()<<" cells in total.\n");
-    result.adjoin(found);
-    image.clear(); 
-    uint size=0;
-    for(gcls_const_iterator iter=found.begin(); iter!=found.end(); ++iter) {
-      ++size;
-      r=*iter;
-      bs=r;
-      fbs=this->evaluate(f,bs);
-      if(!disjoint(fbs.bounding_box(),bounding_set)) {
-        image.adjoin(Geometry::fuzzy_outer_approximation(fbs,g));
-      }
-    }
-    image.unique_sort();
-    found=regular_intersection(image,bounding_set);
-    ++step;
-  }
-  return result;
+  return this->model_checker().chainreach(this->discrete_map(f),initial_set,bounding_set);
 }
 
 
@@ -442,46 +341,8 @@ Geometry::GridMaskSet<R>
 Evaluation::MapEvolver<R>::viable(const System::MapInterface<R>& f, 
                                   const Geometry::GridMaskSet<R>& bounding_set) const
 {
-  using namespace Geometry;
-  typedef Numeric::Interval<R> I;
-  typedef typename Geometry::GridMaskSet<R>::const_iterator gms_const_iterator;
   ARIADNE_LOG(2,"GridMaskSet MapEvolver::viable(MapInterface map, GridMaskSet bounding_set)\n");
-  ARIADNE_LOG(3,"bounding_set="<<bounding_set<<"\n");
-  ARIADNE_CHECK_BOUNDED(bounding_set,"MapEvolver<R>::viable(MapInterface,GridMaskSet)");
-  
-  const Grid<R>& g=bounding_set.grid();
-  Combinatoric::LatticeBlock bd=bounding_set.block();
-  GridBlock<R> bb(g,bd);
-  GridMaskSet<R> result(g,bd);
-  GridCellListSet<R> unsafe(g);
-  
-  Rectangle<R> r(g.dimension());
-  Rectangle<R> fr(g.dimension());
-  GridBlock<R> fgb(g);
-  Zonotope<R> z(g.dimension());
-  Zonotope<R> fz(g.dimension());
-  GridCellListSet<R> fgcls(g);
-  
-  result=bounding_set;
-  size_type step=0;
-
-  ARIADNE_LOG(3,"Computing discretization...\n");
-  System::GridMultiMap<R> discretization=this->discretize(f,bounding_set,bounding_set.grid());
-  ARIADNE_LOG(3,"   Done computing discretization.\n");
-  do {
-    ARIADNE_LOG(3,"Viability step "<<step+1<< ": testing "<<result.size()<<" cells.\n");
-    ++step;
-    unsafe.clear();
-    for(gms_const_iterator iter=result.begin(); iter!=result.end(); ++iter) {
-      fgcls=discretization.image(*iter);
-      ARIADNE_LOG(7,"cell="<<*iter<<", image.size()="<<fgcls.size()<<"\n");
-      if(!overlap(result,fgcls)) {
-        unsafe.adjoin(*iter);
-      }
-    }
-    result.remove(unsafe);
-  } while(!unsafe.empty());
-  return result;
+  return this->model_checker().viable(this->discrete_map(f),bounding_set);
 }
 
 
@@ -491,7 +352,8 @@ Evaluation::MapEvolver<R>::verify(const System::MapInterface<R>& f,
                                   const Geometry::GridMaskSet<R>& initial_set, 
                                   const Geometry::GridMaskSet<R>& safe_set) const
 {
-  ARIADNE_LOG(2,"triboolEvaluation::MapEvolver::verify(MapInterface map, GridMaskSet initial_set,GridMaskSet  safe_set)\n");
+  ARIADNE_LOG(2,"triboolEvaluation::MapEvolver::verify(MapInterface map, GridMaskSet initial_set, GridMaskSet safe_set)\n");
+  return this->model_checker().verify(this->discrete_map(f),initial_set,safe_set);
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n"<<"safe_set="<<safe_set);
   typedef Numeric::Interval<R> I;
   using namespace Geometry;
@@ -508,30 +370,26 @@ Evaluation::MapEvolver<R>::verify(const System::MapInterface<R>& f,
   GridCellListSet<R> image(g);
   
   Rectangle<R> r(g.dimension());
-  BS bs,fbs;
   
   found=initial_set;
   while(!subset(found,reach)) {
     found=difference(found,reach);
     reach.adjoin(found);
     image.clear();
-    uint size=0;
     for(gcls_const_iterator iter=found.begin(); iter!=found.end(); ++iter) {
-      ++size;
-      r=*iter;
-      bs=r;
-      fbs=this->evaluate(f,bs);
-      cell_image.adjoin(Geometry::fuzzy_outer_approximation(fbs,g));
+      cell_image=this->apply(f,*iter);
       if(!subset(cell_image,safe_set)) {
         return false;
       }
       image.adjoin(cell_image);
-      cell_image.clear();
     }
     found=image;
   }
   return true;
 }
+
+
+
 
 
 
@@ -543,24 +401,16 @@ Evaluation::MapEvolver<R>::image(const System::MapInterface<R>& f,
 {
   // FIXME: Only computes an over-approximation to the image.
   using namespace Geometry;
+  using namespace System;
   typedef Numeric::Interval<R> I;
   ARIADNE_LOG(2,"SetInterface* MapEvolver::image(MapInterface,SetInterface)\n");
   ARIADNE_LOG(3,"set="<<set<<"\n");
-  ListSet<BS>* result=new ListSet<BS>;
-  Rectangle<R> bb=set.bounding_box();
-  Grid<R> arg_grid(f.argument_dimension(),this->parameters().grid_length());
-  GridMaskSet<R> grid_arg_set(arg_grid,bb);
-  grid_arg_set.adjoin_outer_approximation(set);
-  Rectangle<R> r(f.argument_dimension());
-  BS bs;
-  for(typename GridMaskSet<R>::const_iterator cell_iter=grid_arg_set.begin();
-      cell_iter!=grid_arg_set.end(); ++cell_iter)
-    {
-      bs=(r=*cell_iter);
-      bs=this->evaluate(f,bs);
-      result->adjoin(bs);
-    }
-  return result;
+  Grid<R> argument_grid(f.argument_dimension(),this->parameters().grid_length());
+  Grid<R> result_grid(f.result_dimension(),this->parameters().grid_length());
+  GridCellListSet<R> grid_initial_set=Geometry::outer_approximation(set,argument_grid);
+  DiscreteMap<R> map(f,*this->_orbiter);
+  ModelChecker<R> model_checker(this->parameters());
+  return new GridCellListSet<R>(model_checker.image(map,grid_initial_set,result_grid));
 }
 
 
@@ -589,22 +439,24 @@ Evaluation::MapEvolver<R>::preimage(const System::MapInterface<R>& map,
 
 template<class R>
 Geometry::SetInterface<R>*
-Evaluation::MapEvolver<R>::reach(const System::MapInterface<R>& f, 
-                                 const Geometry::SetInterface<R>& initial_set) const
+Evaluation::MapEvolver<R>::iterate(const System::MapInterface<R>& f, 
+                                   const Geometry::SetInterface<R>& initial_set,
+                                   const Numeric::Integer& steps) const
 {
   typedef Numeric::Interval<R> I;
   using namespace Geometry;
-  ARIADNE_LOG(2,"SetInterface* MapEvolver::reach(MapInterface,SetInterface)\n");
+  ARIADNE_LOG(2,"SetInterface* MapEvolver::iterate(MapInterface,SetInterface,Integer)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
-  const ListSet<BS>* list_initial_set_ptr=dynamic_cast<const ListSet<BS>*>(&initial_set);
+  ARIADNE_LOG(3,"steps="<<steps<<"\n");
+  const ListSet< Rectangle<R> >* list_initial_set_ptr=dynamic_cast<const ListSet< Rectangle<R> >*>(&initial_set);
   ARIADNE_LOG(4,"list_initial_set_ptr="<<list_initial_set_ptr<<"\n");
   if(list_initial_set_ptr) {
-    return new ListSet<BS>(this->reach(f,*list_initial_set_ptr));
+    return new ListSet< Rectangle<R> >(this->iterate(f,*list_initial_set_ptr,steps));
   }
   
-  ARIADNE_CHECK_BOUNDED(initial_set,"SetInterface* MapEvolver::reach(MapInterface,SetInterface)");
+  ARIADNE_CHECK_BOUNDED(initial_set,"SetInterface* MapEvolver::iterate(MapInterface,SetInterface,Integer)");
   
-  ListSet<BS> list_initial_set;
+  ListSet< Rectangle<R> > list_initial_set;
   if(dynamic_cast<const RectangularSet<R>*>(&initial_set)) {
     ARIADNE_LOG(4,"Cast to RectangularSet<R>\n");
   }
@@ -614,11 +466,86 @@ Evaluation::MapEvolver<R>::reach(const System::MapInterface<R>& f,
   GridMaskSet<R> gms(grid,bounding_box);
   gms.adjoin_inner_approximation(initial_set);
   ARIADNE_LOG(4,"gms="<<gms);
-  list_initial_set=ListSet<BS>(gms);
+  list_initial_set=ListSet< Rectangle<R> >(gms);
   
-  return new ListSet<BS>(this->reach(f,list_initial_set));      
+  return new ListSet< Rectangle<R> >(this->iterate(f,list_initial_set,steps));      
 }
 
+template<class R>
+Geometry::SetInterface<R>*
+Evaluation::MapEvolver<R>::reach(const System::MapInterface<R>& f, 
+                                       const Geometry::SetInterface<R>& initial_set,
+                                       const Numeric::Integer& steps) const
+{
+  typedef Numeric::Interval<R> I;
+  using namespace Geometry;
+  ARIADNE_LOG(2,"SetInterface* MapEvolver::reach(MapInterface,SetInterface,Integer)\n");
+  ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
+  ARIADNE_LOG(3,"steps="<<steps<<"\n");
+  const ListSet< Rectangle<R> >* list_initial_set_ptr=dynamic_cast<const ListSet< Rectangle<R> >*>(&initial_set);
+  ARIADNE_LOG(4,"list_initial_set_ptr="<<list_initial_set_ptr<<"\n");
+  if(list_initial_set_ptr) {
+    return new ListSet< Rectangle<R> >(this->reach(f,*list_initial_set_ptr,steps));
+  }
+  
+  ARIADNE_CHECK_BOUNDED(initial_set,"SetInterface* MapEvolver::reach(MapInterface,SetInterface,Integer)");
+  
+  ListSet< Rectangle<R> > list_initial_set;
+  if(dynamic_cast<const RectangularSet<R>*>(&initial_set)) {
+    ARIADNE_LOG(4,"Cast to RectangularSet<R>\n");
+  }
+  
+  Grid<R> grid(initial_set.dimension(),this->parameters().grid_length());
+  Rectangle<R> bounding_box=initial_set.bounding_box();
+  GridMaskSet<R> gms(grid,bounding_box);
+  gms.adjoin_inner_approximation(initial_set);
+  ARIADNE_LOG(4,"gms="<<gms);
+  list_initial_set=ListSet< Rectangle<R> >(gms);
+  
+  return new ListSet< Rectangle<R> >(this->reach(f,list_initial_set,steps));      
+}
+
+
+template<class R>
+Geometry::SetInterface<R>*
+Evaluation::MapEvolver<R>::lower_reach(const System::MapInterface<R>& f, 
+                                       const Geometry::SetInterface<R>& initial_set) const
+{
+  typedef Numeric::Interval<R> I;
+  using namespace Geometry;
+  ARIADNE_LOG(2,"SetInterface* MapEvolver::lower_reach(MapInterface,SetInterface)\n");
+  ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
+  
+  const ListSet< Rectangle<R> >* rectangle_list_initial_set_ptr=dynamic_cast<const ListSet< Rectangle<R> >*>(&initial_set);
+  ARIADNE_LOG(4,"rectangle_list_initial_set_ptr="<<rectangle_list_initial_set_ptr<<"\n");
+  if(rectangle_list_initial_set_ptr) {
+    return new ListSet< Rectangle<R> >(this->lower_reach(f,*rectangle_list_initial_set_ptr));
+  }
+  
+  ARIADNE_CHECK_BOUNDED(initial_set,"SetInterface* MapEvolver::lower_reach(MapInterface,SetInterface)");
+  
+  ListSet< Rectangle<R> > list_initial_set;
+  if(dynamic_cast<const RectangularSet<R>*>(&initial_set)) {
+    ARIADNE_LOG(4,"Cast to RectangularSet<R>\n");
+  }
+  
+  Grid<R> grid(initial_set.dimension(),this->parameters().grid_length());
+  ListSet< Rectangle<R> > rls=Geometry::point_approximation(initial_set,grid);
+  ARIADNE_LOG(4,"rls="<<rls);
+  
+  return new ListSet< Rectangle<R> >(this->lower_reach(f,rls));      
+}
+
+
+
+template<class R>
+Geometry::SetInterface<R>*
+Evaluation::MapEvolver<R>::chainreach(const System::MapInterface<R>& map, 
+                                      const Geometry::SetInterface<R>& initial_set) const
+{
+  Geometry::RectangularSet<R> bounding_set(this->_parameters->bounding_box(map.argument_dimension()));
+  return this->chainreach(map,initial_set,bounding_set);
+}
 
 
 template<class R>
@@ -699,15 +626,12 @@ Evaluation::MapEvolver<R>::discretize(const System::MapInterface<R>& f,
   using namespace Geometry;
   typedef Numeric::Interval<R> I;
   System::GridMultiMap<R> result(domain.grid(),range_grid);
-  BS basic_set;
-  BS image_set;
   for(typename GridMaskSet<R>::const_iterator dom_iter=domain.begin();
       dom_iter!=domain.end(); ++dom_iter)
     {
-      const GridCell<R>& cell=*dom_iter;
-      basic_set=cell;
-      image_set=this->evaluate(f,basic_set);
-      result.adjoin_to_image(cell,outer_approximation(image_set,range_grid));
+      const GridCell<R>& gc=*dom_iter;
+      GridCellListSet<R> gcls=this->apply(f,gc,range_grid);
+      result.adjoin_to_image(gc,gcls);
     }
   return result;
 }

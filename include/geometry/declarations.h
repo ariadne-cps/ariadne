@@ -28,6 +28,7 @@
 #ifndef ARIADNE_GEOMETRY_DECLARATIONS_H
 #define ARIADNE_GEOMETRY_DECLARATIONS_H
 
+#include "orthotope.decl.h"
 #include "zonotope.decl.h"
 
 namespace Ariadne { 
@@ -37,7 +38,8 @@ namespace Ariadne {
 
     template<class E> class RectangleExpression;
     template<class R> class Rectangle;
-    template<class R> class Parallelotope;
+    template<class RC,class RG> class Parallelotope;
+    template<class RC,class RG> class Orthotope;
     template<class RC,class RG> class Zonotope;
     template<class R> class Simplex;
     template<class R> class Constraint;
@@ -73,6 +75,9 @@ namespace Ariadne {
     template<class R> class DifferentiableCurveInterface;
     template<class R> class ConstraintInterface;
     template<class R> class DifferentiableConstraintInterface;
+  
+    template<class T, class BS> class DiscreteTimeOrbit;
+    template<class T, class ES, class RS> class ContinuousTimeOrbit;
 
     class HybridSpace;
     template<class S> class HybridSet;

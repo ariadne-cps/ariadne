@@ -49,7 +49,7 @@ using namespace std;
 template<class R> int test_affine_integrator();
 
 int main() {
-  test_affine_integrator<Float>();
+  test_affine_integrator<Flt>();
   return 0;
 }
 

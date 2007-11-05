@@ -35,7 +35,7 @@
 
 #include "../base/array.h"
 #include "../linear_algebra/matrix.h"
-#include "../function/polynomial_model.h"
+#include "../function/polynomial.h"
 #include "../system/map.h"
 
 namespace Ariadne {
@@ -59,23 +59,22 @@ namespace Ariadne {
       PolynomialMap(const std::string& s);
       /*! \brief The zero polynomial map in \a n variables with \a m dimensional image. */
       PolynomialMap(const dimension_type& m, const dimension_type& n)
-        : _argument_dimension(n), _components(m,Function::Polynomial<R>(n)) { }
+        : _polynomial(m,n,0) { }
       /*! \brief Construct from an array of polynomials. */
-      PolynomialMap(const array< Function::Polynomial<R> >& c) : _components(c) { 
-        this->_set_argument_dimension(this->_compute_maximum_component_dimension()); }
+      PolynomialMap(const Function::Polynomial<R>& p) : _polynomial(p) { }
       /*! \brief Copy constructor. */
       PolynomialMap(const PolynomialMap<R>& pm)
-        : _argument_dimension(pm._argument_dimension), _components(pm._components) { }
+        : _polynomial(pm._polynomial) { }
         
       /*! \brief Returns a pointer to a dynamically-allocated copy of the map. */
       virtual PolynomialMap<R>* clone() const { return new PolynomialMap<R>(*this); }
       
       /*! \brief The \a i th component polynomial. */
-      const Function::Polynomial<R>& component(size_type i) const { return _components[i]; }
+      Function::Polynomial<R> component(size_type i) const { return _polynomial.component(i); }
       /*! \brief The dimension of the argument. */
-      virtual dimension_type argument_dimension() const { return _argument_dimension; }
+      virtual dimension_type argument_dimension() const { return _polynomial.argument_size(); }
       /*! \brief The dimension of the result. */
-      virtual dimension_type result_dimension() const { return _components.size(); }
+      virtual dimension_type result_dimension() const { return _polynomial.result_size(); }
       /*! \brief The dimension of the result. */
       virtual smoothness_type smoothness() const { return std::numeric_limits<smoothness_type>::max(); }
       
@@ -93,13 +92,8 @@ namespace Ariadne {
       /*! \brief Read from an intput stream. */
       virtual std::istream& read(std::istream& is);
      private:
-      void _compute_jacobian() const;
-      void _set_argument_dimension(const dimension_type& n);
-      dimension_type _compute_maximum_component_dimension() const;
-     private:
       /* Components of the map. */
-      dimension_type _argument_dimension;
-      array< Function::Polynomial<R> > _components;
+      Function::Polynomial<R> _polynomial;
     };
     
 

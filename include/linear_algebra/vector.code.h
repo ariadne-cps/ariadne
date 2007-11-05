@@ -31,43 +31,42 @@
 #include "../base/stlio.h"
 
 namespace Ariadne {
-  namespace LinearAlgebra {
 
-    template<class R>
-    Vector<R>::Vector(const std::string& str)
-      : _array(1)
-    {  
-      std::istringstream ss(str); 
-      ss >> *this; 
-    }      
+template<class R>
+LinearAlgebra::Vector<R>::Vector(const std::string& str)
+  : _array(1)
+{  
+  std::istringstream ss(str); 
+  ss >> *this; 
+}      
 
-    template<class R>
-    std::ostream&
-    Vector<R>::write(std::ostream& os) const
-    {  
-      os << "[";
-      if(this->size()>0) {
-        os << (*this)(0);
-        for(uint i=1; i!=this->size(); ++i) {
-          os << "," << (*this)(i);
-        }
-      }
-      os << "]";
-      return os;
-    }      
-
-    template<class R>
-    std::istream&
-    Vector<R>::read(std::istream& is)
-    {  
-      std::vector<R> stdvec;
-      is >> stdvec;
-      *this=Vector<R>(stdvec.size());
-      for(size_type i=0; i!=this->size(); ++i) {
-        (*this)(i)=stdvec[i];
-      }
-      return is;
-    }      
-
+template<class R>
+std::ostream&
+LinearAlgebra::Vector<R>::write(std::ostream& os) const
+{  
+  os << "[";
+  if(this->size()>0) {
+    os << (*this)(0);
+    for(uint i=1; i!=this->size(); ++i) {
+      os << "," << (*this)(i);
+    }
   }
+  os << "]";
+  return os;
+}      
+
+template<class R>
+std::istream&
+LinearAlgebra::Vector<R>::read(std::istream& is)
+{  
+  std::vector<R> stdvec;
+  is >> stdvec;
+  *this=Vector<R>(stdvec.size());
+  for(size_type i=0; i!=this->size(); ++i) {
+    (*this)(i)=stdvec[i];
+  }
+  return is;
+}      
+
+
 }

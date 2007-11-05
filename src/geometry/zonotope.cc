@@ -37,17 +37,17 @@ namespace Ariadne {
     template class ZonotopeVerticesIterator<Rational>;
 
 #ifdef ENABLE_FLOAT64
-    template class Zonotope<Float64>;
-    template class Zonotope<Interval<Float64>,Float64>;
-    template class Zonotope< Interval<Float64> >;
-    template class ZonotopeVerticesIterator<Float64>;
+    template class Zonotope<Float64,Float64>;
+    template class Zonotope<Interval64,Float64>;
+    template class Zonotope<Interval64,Interval64>;
+    template class ZonotopeVerticesIterator<Float64,Float64>;
 #endif
   
 #ifdef ENABLE_FLOATMP
-    template class Zonotope<FloatMP>;
-    template class Zonotope<Interval<FloatMP>,FloatMP>;
-    template class Zonotope< Interval<FloatMP> >;
-    template class ZonotopeVerticesIterator<FloatMP>;
+    template class Zonotope<FloatMP,FloatMP>;
+    template class Zonotope<IntervalMP,FloatMP>;
+    template class Zonotope<IntervalMP,IntervalMP>;
+    template class ZonotopeVerticesIterator<FloatMP,FloatMP>;
 #endif
 
   }

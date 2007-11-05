@@ -23,176 +23,229 @@
 
 namespace Ariadne {  
   namespace Geometry {
-
-    template<class R> template<class Rl> inline 
-    Polyhedron<R>::Polyhedron(const Polytope<Rl>& p)
-    { 
-      (*this)=polyhedron(p);
-    }
-        
-    template<class R> template<class Rl> inline 
-    Polyhedron<R>::Polyhedron(const Polyhedron<Rl>& p)
-      : _dimension(p.dimension()), 
-        _number_of_constraints(p.number_of_constraints()), 
-        _data(p.data())
-    { 
-    }
-        
-
-
-    template<class R> inline 
-    array<R>& 
-    Polyhedron<R>::data() 
-    { 
-      return this->_data; 
-    }
-    
-    template<class R> inline 
-    const array<R>& 
-    Polyhedron<R>::data() const
-    { 
-      return this->_data; 
-    }
-    
-     
-    template<class R> inline 
-    R* 
-    Polyhedron<R>::begin() 
-    {
-      return this->_data.begin(); 
-    }
-    
-
-    template<class R> inline 
-    const R* 
-    Polyhedron<R>::begin() const 
-    {
-      return this->_data.begin(); 
-    }
-
-
-
-    template<class R> inline 
-    const LinearAlgebra::MatrixSlice<R> 
-    Polyhedron<R>::constraints() const 
-    { 
-      return LinearAlgebra::MatrixSlice<R>(this->_number_of_constraints,
-                                           this->_dimension+1u,
-                                           const_cast<R*>(this->begin()),
-                                           this->_dimension+1u,
-                                           1u);
-    }
-    
-
-    template<class R> inline 
-    LinearAlgebra::Matrix<R> 
-    Polyhedron<R>::A() const 
-    { 
-      return -LinearAlgebra::MatrixSlice<R>(this->number_of_constraints(),
-                                            this->dimension(),
-                                            const_cast<R*>(this->begin()),
-                                            this->dimension()+1,1u);
-    }
-    
-    template<class R> inline 
-    LinearAlgebra::Vector<R> 
-    Polyhedron<R>::b() const 
-    { 
-      return LinearAlgebra::VectorSlice<R>(this->number_of_constraints(),
-                                           const_cast<R*>(this->begin()+this->dimension()),
-                                           this->dimension()+1u);
-    }
-    
-
-    template<class R> inline 
-    size_type 
-    Polyhedron<R>::number_of_constraints() const 
-    { 
-      return this->_number_of_constraints;
-    }
-    
-    
-
-    
-    
-    template<class R> inline
-    PolyhedralConstraint<R>::PolyhedralConstraint(const dimension_type d, const R* a)
-      : _d(d), _a(a) 
-    { 
-    }
-    
-    
-    template<class R> inline
-    dimension_type
-    PolyhedralConstraint<R>::dimension() const
-    { 
-      return this->_d;
-    }
-    
-    
-    template<class R1> template<class R2> inline 
-    tribool PolyhedralConstraint<R1>::satisfied_by(const Point<R2>& pt) const
-    {
-      typedef typename Numeric::traits<R1,R2>::arithmetic_type F;
-      F prod=0;
-      for(dimension_type i=0; i!=pt.dimension(); ++i) {
-        prod+=this->_a[i]*pt[i]; 
-      }
-      prod+=this->_a[pt.dimension()]; 
-      return prod>=0;
-    }
-    
-    
-    
-    
-    
-    
-    template<class R>
+    template<class X>
     class PolyhedronConstraintsIterator
-      : public boost::iterator_facade<PolyhedronConstraintsIterator<R>,
-                                      PolyhedralConstraint<R>,
+      : public boost::iterator_facade<PolyhedronConstraintsIterator<X>,
+                                      PolyhedralConstraint<X>,
                                       boost::forward_traversal_tag,
-                                      const PolyhedralConstraint<R>&,
-                                      const PolyhedralConstraint<R>*
-                                     >
+                                      const PolyhedralConstraint<X>&,
+                                      const PolyhedralConstraint<X>*
+                                      >
     {
      public:
-      PolyhedronConstraintsIterator(const Polyhedron<R>& ply, const size_type& n)
+      PolyhedronConstraintsIterator(const Polyhedron<X>& ply, const size_type& n)
         : _c(ply.dimension(),ply.constraints().begin()+n*(ply.dimension()+1)) { }
-      bool equal(const PolyhedronConstraintsIterator<R>& other) const { 
+      bool equal(const PolyhedronConstraintsIterator<X>& other) const { 
         return this->_c._a==other._c._a; }
-      const PolyhedralConstraint<R>& dereference() const { return _c; }
+      const PolyhedralConstraint<X>& dereference() const { return _c; }
       void increment() { _c._a+=_c._d+1u; ; }
      private:
-      PolyhedralConstraint<R> _c;
+      PolyhedralConstraint<X> _c;
     };
-    
-    
-    
-    
-    
-    
-    template<class R> inline
-    std::ostream& operator<<(std::ostream& os, const PolyhedralConstraint<R>& c) 
-    {
-      return c.write(os); 
-    }
-    
-    
-    template<class R> inline
-    std::ostream& operator<<(std::ostream& os, const Polyhedron<R>& p) 
-    {
-      return p.write(os); 
-    }
-    
-    
-    template<class R> inline
-    std::istream& operator>>(std::istream& os, Polyhedron<R>& p) 
-    {
-      return p.read(os); 
-    }
-   
+  
+  } // namespace Geometry
+} // namespace Ariadne 
 
 
+
+
+namespace Ariadne {
+
+template<class X> template<class XX> inline
+Geometry::Polyhedron<X>::Polyhedron(const Rectangle<XX>& r)
+  : _dimension(r.dimension()), 
+    _number_of_constraints(r.dimension()*2u),
+    _data((r.dimension()+1u)*r.dimension()*2u,static_cast<X>(0))
+{
+  dimension_type d=r.dimension();
+  LinearAlgebra::MatrixSlice<X> constraints=this->_constraints();
+  for(size_type i=0; i!=d; ++i) {
+    constraints(i,i)=static_cast<X>(1);
+    constraints(i,d)=-r.lower_bound(i);
+    constraints(i+d,i)=static_cast<X>(-1); 
+    constraints(i+d,d)=r.upper_bound(i);
   }
 }
+
+template<class X> template<class XX> inline 
+Geometry::Polyhedron<X>::Polyhedron(const Polytope<XX>& p)
+{ 
+  (*this)=polyhedron(p);
+}
+
+template<class X> template<class XX> inline 
+Geometry::Polyhedron<X>::Polyhedron(const Polyhedron<XX>& p)
+  : _dimension(p.dimension()), 
+    _number_of_constraints(p.number_of_constraints()), 
+    _data(p.data())
+{ 
+}
+
+template<class X> template<class XX> inline
+Geometry::Polyhedron<X>&
+Geometry::Polyhedron<X>::operator=(const Polyhedron<XX>& plhd)
+  
+{
+  if(this!=&plhd) {
+    this->_dimension=plhd.dimension();
+    this->_number_of_constraints=plhd.number_of_constraints();
+    this->_data=plhd.data();
+  }
+  return *this;
+}
+
+template<class X> template<class XX> inline
+tribool 
+Geometry::Polyhedron<X>::contains(const Point<XX>& pt) const
+{
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(*this,pt,"tribool Polyhedron::contains(Point pt)");
+  tribool result=true;
+  for(constraints_const_iterator i=this->constraints_begin(); 
+      i!=this->constraints_end(); ++i) {
+    result=result && i->satisfied_by(pt); 
+    if(!result) { return result; }
+  }
+  return result;
+}
+
+
+template<class X> inline 
+array<X>& 
+Geometry::Polyhedron<X>::data() 
+{ 
+  return this->_data; 
+}
+
+template<class X> inline 
+const array<X>& 
+Geometry::Polyhedron<X>::data() const
+{ 
+  return this->_data; 
+}
+
+
+template<class X> inline 
+X* 
+Geometry::Polyhedron<X>::begin() 
+{
+  return this->_data.begin(); 
+}
+
+
+template<class X> inline 
+const X* 
+Geometry::Polyhedron<X>::begin() const 
+{
+  return this->_data.begin(); 
+}
+
+
+
+template<class X> inline 
+const LinearAlgebra::MatrixSlice<X> 
+Geometry::Polyhedron<X>::constraints() const 
+{ 
+  return LinearAlgebra::MatrixSlice<X>(this->_number_of_constraints,
+                                       this->_dimension+1u,
+                                       const_cast<X*>(this->begin()),
+                                       this->_dimension+1u,
+                                       1u);
+}
+
+
+template<class X> inline 
+LinearAlgebra::Matrix<X> 
+Geometry::Polyhedron<X>::A() const 
+{ 
+  return -LinearAlgebra::MatrixSlice<X>(this->number_of_constraints(),
+                                        this->dimension(),
+                                        const_cast<X*>(this->begin()),
+                                        this->dimension()+1,1u);
+}
+
+template<class X> inline 
+LinearAlgebra::Vector<X> 
+Geometry::Polyhedron<X>::b() const 
+{ 
+  return LinearAlgebra::VectorSlice<X>(this->number_of_constraints(),
+                                       const_cast<X*>(this->begin()+this->dimension()),
+                                       this->dimension()+1u);
+}
+
+
+template<class X> inline 
+size_type 
+Geometry::Polyhedron<X>::number_of_constraints() const 
+{ 
+  return this->_number_of_constraints;
+}
+
+
+
+
+
+template<class X> inline
+Geometry::PolyhedralConstraint<X>::PolyhedralConstraint(const dimension_type d, const X* a)
+  : _d(d), _a(a) 
+{ 
+}
+
+
+template<class X> inline
+dimension_type
+Geometry::PolyhedralConstraint<X>::dimension() const
+{ 
+  return this->_d;
+}
+
+
+template<class X1> template<class X2> inline 
+tribool 
+Geometry::PolyhedralConstraint<X1>::satisfied_by(const Point<X2>& pt) const
+{
+  typedef typename Numeric::traits<X1,X2>::arithmetic_type F;
+  F prod=0;
+  for(dimension_type i=0; i!=pt.dimension(); ++i) {
+    prod+=this->_a[i]*pt[i]; 
+  }
+  prod+=this->_a[pt.dimension()]; 
+  return prod>=0;
+}
+
+
+
+
+
+
+
+
+
+
+
+template<class X> inline
+std::ostream& 
+Geometry::operator<<(std::ostream& os, const PolyhedralConstraint<X>& c) 
+{
+  return c.write(os); 
+}
+
+
+template<class X> inline
+std::ostream& 
+Geometry::operator<<(std::ostream& os, const Polyhedron<X>& p) 
+{
+  return p.write(os); 
+}
+
+
+template<class X> inline
+std::istream& 
+Geometry::operator>>(std::istream& os, Polyhedron<X>& p) 
+{
+  return p.read(os); 
+}
+
+
+
+
+} // namespace Ariadne

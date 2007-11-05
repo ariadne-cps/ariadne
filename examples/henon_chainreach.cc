@@ -111,7 +111,7 @@ henon_chainreach()
   cout << "gmcrs.size()=" << gmcrs.size() << " of " << gmcrs.capacity() << endl;
 
   epsfstream eps;
-  eps.open("test_chainreach-1.eps",epsbb);
+  eps.open("henon_chainreach-1.eps",epsbb);
   eps << fill_colour(white) << cb;
   eps << line_style(false);
   eps << fill_colour(green) << gmcr;
@@ -120,7 +120,7 @@ henon_chainreach()
   eps << ptcr.partition_tree();
   eps.close();
 
-  eps.open("test_chainreach-2.eps",epsbb);
+  eps.open("henon_chainreach-2.eps",epsbb);
   eps << line_style(false);
   eps << fill_colour(red) << difference(gmcr.neighbourhood(),gmcr);
   eps << fill_colour(blue) << gmcr.adjoining();
@@ -128,7 +128,7 @@ henon_chainreach()
   eps.close();
 
   epsbb=Rectangle<R>("[-4.1,4.1]x[-4.1,4.1]"); // eps bounding box
-  eps.open("test_chainreach-3.eps",epsbb);
+  eps.open("henon_chainreach-3.eps",epsbb);
   eps << line_style(false);
   eps << fill_colour(green) << gmcr;
   eps.close();

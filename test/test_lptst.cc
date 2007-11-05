@@ -50,7 +50,7 @@ int main() {
   set_linear_algebra_verbosity(1);
   
  #ifdef FLOAT_TEST
-  test_lptst<Float64>();
+  test_lptst<Flt64>();
 #else
   test_lptst<Rational>();
 #endif

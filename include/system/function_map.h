@@ -36,18 +36,18 @@
 #include "../numeric/declarations.h"
 #include "../numeric/numerical_traits.h"
 #include "../linear_algebra/declarations.h"
-#include "../function/function_interface.h"
-#include "../function/interpreted_function.h"
+#include "../function/declarations.h"
 #include "../geometry/declarations.h"
 #include "../system/map.h"
 
+#include "../function/function_interface.h"
 
 namespace Ariadne {
   namespace System {
 
     /*!\ingroup System
      * \ingroup DiscreteTime
-     * \brief A map (discrete-time dynamical system) described by an object satisfying the Function interface.
+     * \brief A map (discrete-time dynamical system) described by an object satisfying the FunctionInterface.
      */
     template<class R>
     class FunctionMap
@@ -75,7 +75,7 @@ namespace Ariadne {
       /*! \brief An over-approximation to the image of a point. */
       virtual Geometry::Point<A> image(const Geometry::Point<A>& pt) const;
       /*! \brief The derivative of the \a i th component with respect to the multi-index j. */
-      virtual A derivative(const Geometry::Point<A>& x, const size_type& i, const LinearAlgebra::MultiIndex& j) const;
+      virtual A derivative(const Geometry::Point<A>& x, const size_type& i, const Function::MultiIndex& j) const;
       /*! \brief The Jacobian derivative matrix over a rectangle. */
       virtual LinearAlgebra::Matrix<A> jacobian(const Geometry::Point<A>& x) const;
         

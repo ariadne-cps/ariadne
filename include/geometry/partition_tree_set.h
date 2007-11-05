@@ -369,6 +369,8 @@ namespace Ariadne {
       PartitionTreeSet<R> inner_approximation(const SetInterface& s, const PartitionScheme<R>& ps, const uint depth);
 #endif
 
+      /*! \brief Write a summary to an output stream. */
+      std::ostream& summarize(std::ostream&) const;
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream&) const;
      private:

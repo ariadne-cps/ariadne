@@ -29,74 +29,74 @@
 #include "../base/stlio.h"
 
 namespace Ariadne {
-  namespace Geometry {
 
-    template<class R>
-    Simplex<R>::Simplex()
-      : Polytope<R>(LinearAlgebra::Matrix<R>(0,1))
-    {
-    }
-  
-    template<class R>
-    Simplex<R>::Simplex(const LinearAlgebra::Matrix<R>& A)
-      : Polytope<R>(A)
-    {
-      ARIADNE_CHECK_DIMENSION(*this,A.number_of_columns()-1,"Simplex::Simplex(Matrix A)");
-    }
-    
-    template<class R>
-    Simplex<R>::Simplex(const PointList<R>& v)
-      : Polytope<R>(v)
-    {
-      ARIADNE_CHECK_DIMENSION(*this,v.size()-1,"Simplex::Simplex(PointList v)");
-    }
-    
-    template<class R>
-    tribool
-    Simplex<R>::contains(const Point<R>& pt) const
-    {
-      typedef typename Numeric::traits<R>::arithmetic_type F;
-      LinearAlgebra::Vector<F> coords=this->coordinates(pt);
-      //std::cerr << "coordinates" << pt << "=" << coords << std::endl;
-      tribool result=true;
-      for(dimension_type i=0; i!=this->dimension()+1; ++i) {
-        result = result && (coords(i)>=0);
-        //if(!result) { return result; }
-      }
-      return result;
-    }
 
-    template<class R>
-    LinearAlgebra::Vector<typename Numeric::traits<R>::arithmetic_type>
-    Simplex<R>::coordinates(const Point<R>& pt) const
-    {
-      typedef typename Numeric::traits<R>::arithmetic_type F;
-      LinearAlgebra::Vector<F> v(pt.dimension()+1);
-      for(dimension_type i=0; i!=pt.dimension(); ++i) { 
-        v(i)=pt[i];
-      }
-      v(pt.dimension())=1;
-      LinearAlgebra::Matrix<F> Ginv=LinearAlgebra::inverse(this->generators());
-      return Ginv*v;
-    }
-    
-    template<class R>
-    std::ostream&
-    Simplex<R>::write(std::ostream& os) const
-    {
-      const Simplex<R>& s=*this;
-      if(s.dimension() > 0) {
-        os << "Simplex( vertices=" << s.vertices() << " )";
-      }
-      return os;
-    }
-    
-    template<class R>
-    std::istream& 
-    Simplex<R>::read(std::istream& is)
-    {
-      throw NotImplemented(__PRETTY_FUNCTION__);
-    }
-      
-  }
+template<class X>
+Geometry::Simplex<X>::Simplex()
+  : Polytope<X>(LinearAlgebra::Matrix<X>(0,1))
+{
 }
+
+template<class X>
+Geometry::Simplex<X>::Simplex(const LinearAlgebra::Matrix<X>& A)
+  : Polytope<X>(A)
+{
+  ARIADNE_CHECK_DIMENSION(*this,A.number_of_columns()-1,"Simplex::Simplex(Matrix A)");
+}
+
+template<class X>
+Geometry::Simplex<X>::Simplex(const PointList<X>& v)
+  : Polytope<X>(v)
+{
+  ARIADNE_CHECK_DIMENSION(*this,v.size()-1,"Simplex::Simplex(PointList v)");
+}
+
+template<class X>
+tribool
+Geometry::Simplex<X>::contains(const Point<X>& pt) const
+{
+  typedef typename Numeric::traits<X>::arithmetic_type F;
+  LinearAlgebra::Vector<F> coords=this->coordinates(pt);
+  //std::cerr << "coordinates" << pt << "=" << coords << std::endl;
+  tribool result=true;
+  for(dimension_type i=0; i!=this->dimension()+1; ++i) {
+    result = result && (coords(i)>=0);
+    //if(!result) { return result; }
+  }
+  return result;
+}
+
+template<class X>
+LinearAlgebra::Vector<typename Numeric::traits<X>::arithmetic_type>
+Geometry::Simplex<X>::coordinates(const Point<X>& pt) const
+{
+  typedef typename Numeric::traits<X>::arithmetic_type F;
+  LinearAlgebra::Vector<F> v(pt.dimension()+1);
+  for(dimension_type i=0; i!=pt.dimension(); ++i) { 
+    v(i)=pt[i];
+  }
+  v(pt.dimension())=1;
+  LinearAlgebra::Matrix<F> Ginv=LinearAlgebra::inverse(this->generators());
+  return Ginv*v;
+}
+
+template<class X>
+std::ostream&
+Geometry::Simplex<X>::write(std::ostream& os) const
+{
+  const Simplex<X>& s=*this;
+  if(s.dimension() > 0) {
+    os << "Simplex( vertices=" << s.vertices() << " )";
+  }
+  return os;
+}
+
+template<class X>
+std::istream& 
+Geometry::Simplex<X>::read(std::istream& is)
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+
+} // namespace Ariadne

@@ -50,7 +50,7 @@ int main() {
   
 #ifdef FLOAT_TEST
   //  test_lpfsp<double>();
-  test_lpfsp<Float64>();
+  test_lpfsp<Flt64>();
 #else
   test_lpfsp<Rational>();
 #endif

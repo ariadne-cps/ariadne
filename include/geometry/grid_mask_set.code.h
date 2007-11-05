@@ -24,6 +24,8 @@
 #include "grid_mask_set.h"
 
 #include <ostream>
+#include <sstream>
+#include <string>
 
 #include "../base/stlio.h"
 
@@ -523,10 +525,65 @@ Geometry::GridMaskSet<R>::operator ListSet< Rectangle<R> >() const
 
 
 
+template<class R> 
+void 
+Geometry::GridMaskSet<R>::adjoin_outer_approximation(const ListSet< Rectangle<R> >& rls)
+{
+  for(size_type i=0; i!=rls.size(); ++i) {
+    this->adjoin_outer_approximation(rls[i]);
+  }
+}
+
+template<class R> 
+void 
+Geometry::GridMaskSet<R>::adjoin_outer_approximation(const SetInterface<R>& s)
+{
+  FiniteGrid<R> fg(this->grid(),this->block());
+  this->adjoin(outer_approximation(s,fg));
+}
+
+template<class R> 
+void 
+Geometry::GridMaskSet<R>::adjoin_inner_approximation(const SetInterface<R>& s)
+{
+  FiniteGrid<R> fg(this->grid(),this->block());
+  this->adjoin(inner_approximation(s,fg));
+}
+
+template<class R> 
+void 
+Geometry::GridMaskSet<R>::restrict_outer_approximation(const SetInterface<R>& s)
+{
+  FiniteGrid<R> fg(this->grid(),this->block());
+  this->restrict(outer_approximation(s,fg));
+}
+
+template<class R> 
+void 
+Geometry::GridMaskSet<R>::restrict_inner_approximation(const SetInterface<R>& s)
+{
+  FiniteGrid<R> fg(this->grid(),this->block());
+  this->restrict(inner_approximation(s,fg));
+}
 
 
 
 
+
+
+template<class R>
+std::ostream& 
+Geometry::GridMaskSet<R>::summarize(std::ostream& os) const 
+{
+  os << "GridMaskSet( " << std::flush;
+  os << " grid=" << this->grid() << ",";
+  os << " block=" << this->block() << ",";
+  os << " extent=" << Rectangle<R>(this->bounds()) << ",";
+  os << " size=" << this->size() << ",";
+  os << " capacity=" << this->capacity() << ",";
+  os << " )";
+  return os;
+}
 
 template<class R>
 std::ostream& 

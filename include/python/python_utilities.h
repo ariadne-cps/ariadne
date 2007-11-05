@@ -115,6 +115,16 @@ namespace Python {
   }
 
 
+  template<class Res, class Arg> inline
+  Res floor(const Arg& a) {
+    return Res(floor(a));
+  }
+
+  template<class Res, class Arg> inline
+  Res ceil(const Arg& a) {
+    return Res(ceil(a));
+  }
+
   template<class Res, class Arg1, class Arg2> inline
   Res min(const Arg1& a1, const Arg2& a2) {
     return Res(min(Res(a1),Res(a2)));

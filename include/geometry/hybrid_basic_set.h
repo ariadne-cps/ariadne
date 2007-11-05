@@ -28,13 +28,11 @@
 #include <iostream>
 
 #include "../geometry/declarations.h"
+#include "../geometry/discrete_state.h"
 #include "../geometry/hybrid_space.h"
 
 namespace Ariadne {
   namespace Geometry {
-
-    /*! \brief The type identifying a discrete locatation of a hybrid system. */
-    typedef id_type location_type;
 
     class basic_set_tag;
 
@@ -56,16 +54,18 @@ namespace Ariadne {
       /*! \brief */
       typedef typename BS::real_type real_type;
       /*! \brief */
+      typedef DiscreteState discrete_state_type;
+      /*! \brief */
       typedef basic_set_tag set_category;
 
       // No default constructor as original set need not have default constructor
       // HybridBasicSet() : BS(), _discrete_state() { }
       /*! \brief */
-      template<class A> HybridBasicSet(const id_type& q, const A& a) : BS(a), _discrete_state(q) { }
+      template<class A> HybridBasicSet(const discrete_state_type& q, const A& a) : BS(a), _discrete_state(q) { }
       /*! \brief */
       HybridBasicSet(const HybridBasicSet<BS>& hbs) : BS(hbs.continuous_state_set()), _discrete_state(hbs.discrete_state()) { }
       /*! \brief */
-      const id_type& discrete_state() const { return this->_discrete_state; }
+      const discrete_state_type& discrete_state() const { return this->_discrete_state; }
       /*! \brief */
       const BS& continuous_state_set() const { return *this; }
     
@@ -78,7 +78,7 @@ namespace Ariadne {
       /*! \brief */
       bool operator<(const HybridBasicSet<BS>& other) const { return this->_discrete_state<other->_discrete_state; }
      private:
-      id_type _discrete_state;
+      discrete_state_type _discrete_state;
     };
   
 
@@ -99,17 +99,18 @@ namespace Ariadne {
       typedef typename BS::real_type R;
      public:
       typedef typename BS::real_type real_type;
+      typedef DiscreteState discrete_state_type;
       typedef basic_set_tag set_category;
 
       /*! \brief */
-      template<class A> HybridTimedBasicSet(const time_type& t, const discrete_time_type& n, const id_type& q, const A& a)
+      template<class A> HybridTimedBasicSet(const time_type& t, const discrete_time_type& n, const discrete_state_type& q, const A& a)
         : _time(t), _steps(n), _discrete_state(q), _continuous_state_set(a) { }
       /*! \brief */
       const time_type& time() const { return this->_time; }
       /*! \brief */
       const discrete_time_type& steps() const { return this->_steps; }
       /*! \brief */
-      const id_type& discrete_state() const { return this->_discrete_state; }
+      const discrete_state_type& discrete_state() const { return this->_discrete_state; }
       /*! \brief */
       const BS& continuous_state_set() const { return this->_continuous_state_set; } 
 
@@ -129,7 +130,7 @@ namespace Ariadne {
      private:
       time_type _time;
       discrete_time_type _steps;
-      id_type _discrete_state;
+      discrete_state_type _discrete_state;
       BS _continuous_state_set;
     };
   

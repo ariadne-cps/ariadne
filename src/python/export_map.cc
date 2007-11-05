@@ -24,6 +24,7 @@
 
 #include "python/python_float.h"
 
+#include "linear_algebra/matrix.h"
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
 #include "function/interpreted_function.h"

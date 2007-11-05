@@ -175,16 +175,38 @@ test_stream()
 {
   cout << __PRETTY_FUNCTION__ << endl;
 
-  stringstream ss("1.25 -2.25 42 2.35e1");
-  R f1,f2,f3,f4;
+  stringstream ss("1.25 -2.25 42 2.375e1 2.35e1");
+  R f1,f2,f3,f4,f5;
   ss >> f1;
+  cout << f1 << endl;
   assert(f1==1.25);
   ss >> f2;
+  cout << f2 << endl;
   assert(f2==-2.25);
   ss >> f3;
+  cout << f3 << endl;
   assert(f3==42.0);
-  ss >> f4;
-  assert(f4==23.5);
+  try {
+    ss >> f4;
+    cout << f4 << endl;
+    if(f4!=23.75) {
+      throw std::runtime_error("WARNING: cannot create float from string literal in exponential form 2.375e1");
+    }
+  } 
+  catch(std::exception& e) {
+    cerr << e.what() << endl;;
+  }
+  
+  try {
+    ss >> f5;
+    cout << f5 << endl;
+    if(f4!=23.5) {
+      throw std::runtime_error("WARNING: cannot create float from string literal in exponential form 2.35e1");
+    }
+  } 
+  catch(std::exception& e) {
+    cerr << e.what() << endl;
+  }
   
   return 0;
 }

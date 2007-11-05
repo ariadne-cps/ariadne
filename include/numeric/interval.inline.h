@@ -644,6 +644,7 @@ namespace Ariadne {
   
     template<class R,class N> inline
     Interval<R> pow(const Interval<R>& x, const N& n) {
+      if(n<0) { return pow(1/x,-n); }
       Interval<R> result=R(1);
       for(N i=0; i!=n; ++i) {
         result*=x;
@@ -749,14 +750,14 @@ namespace Ariadne {
     template<class R> 
     std::istream& Interval<R>::read(std::istream& is) {
       char c;
-      R l;
-      R u;
       is >> c;
       if(c=='[') {
-        is >> l >> c;
+        Rational l;
+       is >> l >> c;
         if(c!=',' && c!=':') {
           is.setstate(std::ios_base::failbit);
         }
+        Rational u;
         is >> u >> c;
         if(c!=']') {
           is.setstate(std::ios_base::failbit);
@@ -764,8 +765,9 @@ namespace Ariadne {
         (*this)=Interval<R>(l,u);
       } else {
         is.putback(c);
-        is >> l;
-        (*this)=Interval<R>(l);
+        Rational q;
+        is >> q;
+        (*this)=Interval<R>(q);
       }
       return is;
     }
@@ -783,6 +785,14 @@ namespace Ariadne {
       return x.read(is);
     }
     
+    template<class R> inline 
+    Interval<R>::Interval(const char* cstr) {
+      std::stringstream ss; ss<<cstr; ss >> *this; }
+
+    template<class R> inline 
+    Interval<R>::Interval(const std::string& str) {
+      ::std::stringstream sss(str); sss >> *this; }
+
   } // namespace Numeric
 } // namespace Ariadne
   

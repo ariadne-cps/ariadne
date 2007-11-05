@@ -59,6 +59,9 @@ namespace Ariadne {
     /*! \brief Unary negation. */
     template<class R> inline R neg(const R& x);
     
+    /*! \brief Reciprocal. */
+    template<class R> inline R rec(const R& x);
+    
     /*! \brief Addition. */
     template<class R> inline R add(const R& x1,const R& x2);
     

@@ -48,41 +48,26 @@ void export_map_evolver()
   typedef Interval<R> I;
   typedef Zonotope<I,R> BS;
 
-  class_< MapEvolver<R> >("MapEvolver",init< EvolutionParameters<R> >())
-    .def(init<>())
-    .def("image",(SetInterface<R>*(MapEvolver<R>::*)(const MapInterface<R>&,const SetInterface<R>&)const)
-                   (&MapEvolver<R>::image),return_value_policy<manage_new_object>(),"Compute the image of a set under a map" )
-    .def("preimage",(SetInterface<R>*(MapEvolver<R>::*)(const MapInterface<R>&,const SetInterface<R>&,const SetInterface<R>&)const)
-                   (&MapEvolver<R>::preimage),return_value_policy<manage_new_object>(),"Compute the preimage of a set under a map" )
-    .def("reach",(SetInterface<R>*(MapEvolver<R>::*)(const MapInterface<R>&,const SetInterface<R>&)const)
-                   (&MapEvolver<R>::reach),return_value_policy<manage_new_object>(),"Compute the reachable set under a map" )
-    .def("chainreach",(SetInterface<R>*(MapEvolver<R>::*)(const MapInterface<R>&,const SetInterface<R>&,const SetInterface<R>&)const)
-                        (&MapEvolver<R>::chainreach),return_value_policy<manage_new_object>(), "Compute the chain reachable set")
-    .def("viable",(SetInterface<R>*(MapEvolver<R>::*)(const MapInterface<R>&,const SetInterface<R>&)const)
-                        (&MapEvolver<R>::viable),return_value_policy<manage_new_object>(), "Compute the viability kernel")
-    .def("verify",(tribool(MapEvolver<R>::*)(const MapInterface<R>&,const SetInterface<R>&,const SetInterface<R>&)const)
-                    (&MapEvolver<R>::verify), "Verify that the reachable set lies within a safe set")
+  class_< MapEvolver<R> > evolver_class("MapEvolver",init< EvolutionParameters<R> >());
+  evolver_class.def(init<const EvolutionParameters<R>&,const ApplicatorInterface<BS>&>());
+  evolver_class.def("image",(SetInterface<R>*(MapEvolver<R>::*)(const MapInterface<R>&,const SetInterface<R>&)const)
+                    (&MapEvolver<R>::image),return_value_policy<manage_new_object>(),"Compute the image of a set under a map" );
+  evolver_class.def("preimage",(SetInterface<R>*(MapEvolver<R>::*)(const MapInterface<R>&,const SetInterface<R>&,const SetInterface<R>&)const)
+                    (&MapEvolver<R>::preimage),return_value_policy<manage_new_object>(),"Compute the preimage of a set under a map" );
+  evolver_class.def("iterate",(SetInterface<R>*(MapEvolver<R>::*)(const MapInterface<R>&,const SetInterface<R>&,const Integer&)const)
+                    (&MapEvolver<R>::iterate),return_value_policy<manage_new_object>(),"Compute an approximation to the iterate of a set under a map" );
+  evolver_class.def("reach",(SetInterface<R>*(MapEvolver<R>::*)(const MapInterface<R>&,const SetInterface<R>&,const Integer&)const)
+                    (&MapEvolver<R>::reach),return_value_policy<manage_new_object>(),"Compute an approximation to the timed reachable set under a map" );
+  evolver_class.def("lower_reach",(SetInterface<R>*(MapEvolver<R>::*)(const MapInterface<R>&,const SetInterface<R>&)const)
+                    (&MapEvolver<R>::lower_reach),return_value_policy<manage_new_object>(),"Compute a lower-approximation to the reachable set under a map" );
+  evolver_class.def("chainreach",(SetInterface<R>*(MapEvolver<R>::*)(const MapInterface<R>&,const SetInterface<R>&,const SetInterface<R>&)const)
+                    (&MapEvolver<R>::chainreach),return_value_policy<manage_new_object>(), "Compute an outer-approximation to the chain reachable set");
+  evolver_class.def("viable",(SetInterface<R>*(MapEvolver<R>::*)(const MapInterface<R>&,const SetInterface<R>&)const)
+                    (&MapEvolver<R>::viable),return_value_policy<manage_new_object>(), "Compute the viability kernel");
+  evolver_class.def("verify",(tribool(MapEvolver<R>::*)(const MapInterface<R>&,const SetInterface<R>&,const SetInterface<R>&)const)
+                    (&MapEvolver<R>::verify), "Verify that the reachable set lies within a safe set");
 
-    .def("evaluate",(Rectangle<R>(MapEvolver<R>::*)(const MapInterface<R>&,const Rectangle<R>&)const)
-                   (&MapEvolver<R>::evaluate),"Compute the image of a rectangle under a map")
-    .def("evaluate",(Zonotope<R>(MapEvolver<R>::*)(const MapInterface<R>&,const Zonotope<I,R>&)const)
-                   (&MapEvolver<R>::evaluate),"Compute the image of a zonotope under a map" )
-    .def("image",(ListSet< Zonotope<I,R> >(MapEvolver<R>::*)(const MapInterface<R>&,const ListSet< Zonotope<I,R> >&)const)
-                        (&MapEvolver<R>::image), "Compute the image of a list of zonotopes under a map")
-    .def("image",(GridMaskSet<R>(MapEvolver<R>::*)(const MapInterface<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&)const)
-                   (&MapEvolver<R>::image),"Compute the image of a set under a map" )
-    .def("preimage",(GridMaskSet<R>(MapEvolver<R>::*)(const MapInterface<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&)const)
-                   (&MapEvolver<R>::image),"Compute the preimage of a set under a map" )
-    .def("reach",(ListSet< Zonotope<I,R> >(MapEvolver<R>::*)(const MapInterface<R>&,const ListSet< Zonotope<I,R> >&)const)
-                        (&MapEvolver<R>::reach), "Compute the reachable set")
-    .def("chainreach",(GridMaskSet<R>(MapEvolver<R>::*)(const MapInterface<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&)const)
-                        (&MapEvolver<R>::chainreach), "Compute the chain reachable set")
-    .def("viable",(GridMaskSet<R>(MapEvolver<R>::*)(const MapInterface<R>&,const GridMaskSet<R>&)const)
-                        (&MapEvolver<R>::viable), "Compute the viability kernel")
-    .def("verify",(tribool(MapEvolver<R>::*)(const MapInterface<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&)const)
-                    (&MapEvolver<R>::verify), "Verify that the reachable set lies within a safe set")
-  ;
- 
+
 }
 
 template void export_map_evolver<Float>();

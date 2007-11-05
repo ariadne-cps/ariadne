@@ -180,6 +180,8 @@ namespace Ariadne {
       /*! \brief Restricts to the inner-approximation of the set \a s. */
       void restrict_inner_approximation(const SetInterface<R>& s);
 
+      /*! \brief Write a summary to an output stream. */
+      std::ostream& summarize(std::ostream&) const;
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream&) const;
      private: 

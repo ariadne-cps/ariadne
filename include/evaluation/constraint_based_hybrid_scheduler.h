@@ -48,6 +48,8 @@
 #include "../evaluation/declarations.h"
 #include "../evaluation/exceptions.h"
 
+#include "../geometry/discrete_state.h"
+#include "../system/discrete_event.h"
 #include "../evaluation/hybrid_time.h"
 
 namespace Ariadne {  
@@ -198,6 +200,10 @@ namespace Ariadne {
       /*! \brief . */
       typedef typename System::ConstraintBasedDiscreteTransition<R> transition_type;
       /*! \brief . */
+      typedef typename System::DiscreteEvent discrete_event_type;
+      /*! \brief . */
+      typedef typename Geometry::DiscreteState discrete_state_type;
+      /*! \brief . */
       typedef typename Geometry::Zonotope<Numeric::Interval<R> > continuous_basic_set_type;
       /*! \brief . */
       typedef Geometry::HybridBasicSet<continuous_basic_set_type> hybrid_basic_set_type;
@@ -228,7 +234,7 @@ namespace Ariadne {
       ~ConstraintBasedHybridScheduler();
 
       /*! \brief Construct from an applicator, an integrator and a detector. */
-      ConstraintBasedHybridScheduler(const ApplicatorInterface<R>& applicator, const IntegratorInterface<R>& integrator, const DetectorInterface<R>& detector);
+      ConstraintBasedHybridScheduler(const ApplicatorInterface<BS>& applicator, const IntegratorInterface<BS>& integrator, const DetectorInterface<R>& detector);
 
       /*! \brief Copy constructor. */
       ConstraintBasedHybridScheduler(const ConstraintBasedHybridScheduler<R>& plugin);
@@ -243,7 +249,8 @@ namespace Ariadne {
       std::vector<timed_set_type>
       evolution_step(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
                      const timed_set_type& initial_set,
-                     const time_type& maximum_time,
+                     const time_type& maximum_time_step,
+                     const time_type& maximum_time_step_size,
                      EvolutionSemantics evolution_semantics,
                      EvolutionKind evolution_kind) const;
 
@@ -251,25 +258,29 @@ namespace Ariadne {
       std::vector<timed_set_type>
       lower_evolution_step(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
                            const timed_set_type& initial_set,
-                           const time_type& maximum_time) const;
+                           const time_type& maximum_time,
+                           const time_type& maximum_time_step_size) const;
 
       /*! \brief Compute the an over-approximation to the evolution of a timed basic set using upper semantics. */
       std::vector<timed_set_type>
       upper_evolution_step(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
                            const timed_set_type& initial_set,
-                           const time_type& maximum_time) const;
+                           const time_type& maximum_time,
+                           const time_type& maximum_time_step_size) const;
 
       /*! \brief Compute the possible states reached during an evolution step using lower semantics. */
       std::vector<timed_set_type>
       lower_reachability_step(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
                               const timed_set_type& initial_set,
-                              const time_type& maximum_time) const;
+                              const time_type& maximum_time,
+                              const time_type& maximum_time_step_size) const;
 
       /*! \brief Compute the possible states reached during an evolution step using upper semantics. */
       std::vector<timed_set_type>
       upper_reachability_step(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
                               const timed_set_type& initial_set,
-                              const time_type& maximum_time) const;
+                              const time_type& maximum_time,
+                              const time_type& maximum_time_step_size) const;
 
 
       //! \name Single event evolution steps
@@ -364,7 +375,7 @@ namespace Ariadne {
 
                              
       /*! \brief Compute the crossings with the guard set. */
-      std::map<id_type, crossing_data_type>
+      std::map<discrete_event_type, crossing_data_type>
       compute_crossing_data(const reference_set<const transition_type>& transitions,
                             const timed_set_type& initial_set,
                             const timed_set_type& final_set,
@@ -373,7 +384,7 @@ namespace Ariadne {
 
 
       /*! \brief Compute the crossings with the guard set. */
-      std::map<id_type, time_model_type>
+      std::map<discrete_event_type, time_model_type>
       compute_terminating_event_times(const mode_type& mode,
                                       const timed_set_type& initial_set,
                                       const timed_set_type& final_set,
@@ -382,7 +393,7 @@ namespace Ariadne {
                                       const time_type& time_step_size) const;
 
       /*! \brief Compute the activations which are enabled. */
-      std::map<id_type, time_model_pair_type>
+      std::map<discrete_event_type, time_model_pair_type>
       compute_enabled_activation_times(const mode_type& mode,
                                        const timed_set_type& initial_set,
                                        const timed_set_type& final_set,
@@ -390,8 +401,9 @@ namespace Ariadne {
                                        const bounding_box_type& bounding_box) const;
  
 
-      I compute_evolution_time_bounds(const std::map<id_type, time_model_type>& event_times) const;
-      I compute_evolution_time_bounds(const std::map<id_type, crossing_data_type>& crossing_data) const;
+      I compute_evolution_time_bounds(const std::map<discrete_event_type, time_model_type>& event_times) const;
+
+      I compute_evolution_time_bounds(const std::map<discrete_event_type, crossing_data_type>& crossing_data) const;
 
       reference_set<transition_type>
       compute_possibly_enabled_transitions(const mode_type& mode,
@@ -409,17 +421,10 @@ namespace Ariadne {
 
       /*! \brief Compute the crossing times for a set of modes. */
       Geometry::Rectangle<R> 
-      estimate_flow_bounds(const mode_type& mode, 
-                           const timed_set_type& initial_set,
-                           time_type& maximum_step_size) const;
+      flow_bounds(const mode_type& mode, 
+                  const timed_set_type& initial_set,
+                  time_type& maximum_step_size) const;
 
-       /*! \brief Compute the crossing times for a set of modes. */
-      Geometry::Rectangle<R> 
-      refine_flow_bounds(const mode_type& mode, 
-                         const timed_set_type& initial_set,
-                         const bounding_box_type& bounding_set,
-                         const time_type& maximum_step_size) const;
-     
       /*! \brief Subdivide the set. */
       std::vector<timed_set_type> 
       subdivide(const timed_set_type& ts) const;
@@ -432,9 +437,9 @@ namespace Ariadne {
      public:
       mutable std::vector<timed_set_type> trace;
      private:
-      ApplicatorInterface<R>* _applicator;
+      ApplicatorInterface<BS>* _applicator;
       BounderInterface<R>* _bounder;
-      DifferentiableIntegratorInterface<R>* _integrator;
+      IntegratorInterface<BS>* _integrator;
       DetectorInterface<R>* _detector;
     };
 

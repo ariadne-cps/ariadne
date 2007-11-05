@@ -30,6 +30,7 @@
 
 #include <gmpxx.h>
 #include <iostream>
+#include <sstream>
 #include <stdexcept>
 
 #include "../numeric/numerical_traits.h"
@@ -55,6 +56,8 @@ namespace Ariadne {
       //! \name Constructors and assignment operators
       /*! \brief Default constructor constructs the integer 0. */
       Integer() : mpz_class() { }
+      /*! \brief Construct from a string literal. */
+      Integer(const std::string& str);
       /*! \brief Copy constructor. */
       Integer(const Integer& z) : mpz_class(z) { }
       /*! \brief Copy assignment operator. */
@@ -77,6 +80,8 @@ namespace Ariadne {
       /*! \brief The absolute value \a z. */
       friend Integer abs(const Integer& z);
       
+      /*! \brief In-place increment. */
+      friend Integer& operator++(Integer& z);
       /*! \brief In-place addition. */
       friend Integer& operator+=(Integer& z1, const Integer& z2);
       /*! \brief In-place subtraction of a number. */
@@ -131,6 +136,11 @@ namespace Ariadne {
     template<> inline int conv_down<int>(const int& n) { return n; }
     template<> inline int conv_up<int>(const int& n) { return n; }
     
+    inline Integer& operator++(Integer& i) {
+      i=i+1; return i;
+    }
+
+  inline Integer::Integer(const std::string& str) { std::stringstream ss(str); ss >> *this; }
 
     //! \name %Integer arithmetic
     //@{

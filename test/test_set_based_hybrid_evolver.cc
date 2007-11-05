@@ -36,6 +36,7 @@
 #include "system/affine_map.h"
 #include "system/affine_vector_field.h"
 #include "system/set_based_hybrid_automaton.h"
+#include "evaluation/applicator.h"
 #include "evaluation/lohner_integrator.h"
 #include "evaluation/affine_integrator.h"
 #include "evaluation/map_evolver.h"
@@ -84,12 +85,12 @@ int test_set_based_hybrid_evolver()
    
   
   SetBasedHybridAutomaton<R> automaton("Affine automaton");
-  id_type mode1_id=2;
-  id_type mode2_id=3;
+  DiscreteState mode1_id(2);
+  DiscreteState mode2_id(3);
   const SetBasedDiscreteMode<R>& mode1=automaton.new_mode(mode1_id,dynamic1,invariant1);
   const SetBasedDiscreteMode<R>& mode2=automaton.new_mode(mode2_id,dynamic2,invariant2);
-  id_type event1_id=5;
-  id_type event2_id=7;
+  DiscreteEvent event1_id(5);
+  DiscreteEvent event2_id(7);
   const SetBasedDiscreteTransition<R>& transition11=automaton.new_transition(event1_id,mode1_id,mode1_id,reset11,activation11);
   const SetBasedDiscreteTransition<R>& transition21=automaton.new_transition(event1_id,mode2_id,mode1_id,reset21,activation21);
   const SetBasedDiscreteTransition<R>& transition12=automaton.new_transition(event2_id,mode1_id,mode2_id,reset12,activation12);
@@ -109,8 +110,11 @@ int test_set_based_hybrid_evolver()
   parameters.set_maximum_step_size(maximum_step_size);
   parameters.set_lock_to_grid_time(lock_to_grid_time);
 
-  MapEvolver<R> discrete_time_evolver(parameters);
-  VectorFieldEvolver<R> continuous_time_evolver(parameters,AffineIntegrator<R>());
+  Applicator<BS> applicator;
+  AffineIntegrator<R> affine_integrator;
+  IntegratorInterface<BS>& integrator=affine_integrator;
+  MapEvolver<R> discrete_time_evolver(parameters,applicator);
+  VectorFieldEvolver<R> continuous_time_evolver(parameters,integrator);
   SetBasedHybridEvolver<R> hybrid_evolver(discrete_time_evolver,continuous_time_evolver);
   
   Grid<R> grid(Vector<R>("[0.25,0.25]"));
@@ -224,8 +228,19 @@ int test_set_based_hybrid_evolver()
 }
 
 
-int main() {
-  test_set_based_hybrid_evolver<Float>();
+int main(int nargs, const char* args[]) 
+{
+  int hybrid_evolver_verbosity = 0;
+  int integrator_verbosity = 0;
+  if(nargs>1) {
+    hybrid_evolver_verbosity = std::atoi(args[1]);
+  }
+  if(nargs>2) {
+    integrator_verbosity = std::atoi(args[2]);
+  }
+  set_hybrid_evolver_verbosity(hybrid_evolver_verbosity);
+  set_integrator_verbosity(integrator_verbosity);
+  test_set_based_hybrid_evolver<Flt>();
   cerr << "INCOMPLETE ";
   return 0;
 }

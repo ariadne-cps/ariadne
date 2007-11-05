@@ -22,144 +22,85 @@
  */
  
 namespace Ariadne {
-  namespace Geometry {
+
     
     
-    template<class R> inline 
-    Parallelotope<R>::Parallelotope(dimension_type n)
-      : Zonotope<R>(n,n) 
-    { 
-    }
-    
-    
-    template<class R> inline 
-    Parallelotope<R>::Parallelotope(const LinearAlgebra::Vector<R>& c, const LinearAlgebra::Matrix<R>& G) 
-      : Zonotope<R>(Point<R>(c),G)
-    {
-      if (G.number_of_rows()!=G.number_of_columns()) {
-        ARIADNE_THROW(InvalidGenerators,"Parallelotope::Parallelotope(Vector c, Matrix G)"," G="<<G<<" is not a square matrix");
-      }
-    }
-    
-    
-    template<class R> inline 
-    Parallelotope<R>::Parallelotope(const Point<R>& c, const LinearAlgebra::Matrix<R>& G)
-      : Zonotope<R>(c,G)
-    {
-      if (G.number_of_rows()!=G.number_of_columns()) {
-        ARIADNE_THROW(InvalidGenerators,"Parallelotope::Parallelotope(Vector c, Matrix G)"," G="<<G<<" is not a square matrix");
-      }
-    }
-    
-    
-    template<class R> template<class Rl> inline 
-    Parallelotope<R>::Parallelotope(const Rectangle<Rl>& r)
-      : Zonotope<R>(r) 
-    { 
-    }
-    
-    
-    template<class R> inline 
-    Parallelotope<R>::Parallelotope(const std::string& s)
-      : Zonotope<R>(s) 
-    { 
-    }
-    
-    
-    template<class R> inline 
-    Parallelotope<R>::Parallelotope(const Zonotope<R>& z)
-      : Zonotope<R>(z) 
-    { 
-      if (z.dimension()!=z.number_of_generators()) {
-        ARIADNE_THROW(InvalidGenerators,"Parallelotope::Parallelotope(Zonotope z)"," z="<<z<<" is not a parallelotope");
-      }
-    }
-    
-    template<class R> inline 
-    Parallelotope<R>::Parallelotope(const Parallelotope<R>& original)
-      : Zonotope<R>(original) 
-    { 
-    }
-    
-    
-    template<class R> template<class Rl> inline 
-    Parallelotope<R>& 
-    Parallelotope<R>::operator=(const Rectangle<Rl>& r)
-    {
-      Zonotope<R>& z=*this; z=r; return *this;
-    }
-    
-    
-    template<class R> inline
-    Parallelotope<R> scale(const Parallelotope<R>& p, const R& scale_factor) 
-    {
-      return Parallelotope<R>::scale(p,scale_factor);
-    }
-    
-    
-    template<class R> inline
-    std::ostream& operator<<(std::ostream& os, const Parallelotope<R>& p) 
-    {
-      return p.write(os);
-    }
-    
-    
-    template<class R> inline
-    std::istream& operator>>(std::ostream& is, Parallelotope<R>& p) 
-    {
-      return p.read(is);
-    }
+template<class XC,class XG> inline 
+Geometry::Parallelotope<XC,XG>::Parallelotope(dimension_type n)
+  : Zonotope<XC,XG>(n,n) 
+{ 
+}
 
 
-
-
-
-    template<class R> inline
-    Parallelotope< Numeric::Interval<R> >::Parallelotope(dimension_type d)
-      : Zonotope< Numeric::Interval<R> >(d) 
-    { 
-    }
-    
-    
-    template<class R> template<class Rl1, class Rl2> inline
-    Parallelotope< Numeric::Interval<R> >::Parallelotope(const Point<Rl1>& c, const LinearAlgebra::Matrix<Rl2>& g)
-      : Zonotope< Numeric::Interval<R> >(c,g) 
-    { 
-    }
-    
-    
-    template<class R> inline
-    Parallelotope< Numeric::Interval<R> >::Parallelotope(const Rectangle<R>& r)
-      : Zonotope< Numeric::Interval<R> >(r) 
-    { 
-    }
-    
-    
-    template<class R> inline
-    Parallelotope< Numeric::Interval<R> >::Parallelotope(const Zonotope<R>& z)
-      : Zonotope< Numeric::Interval<R> >(z) 
-    { 
-      if(z.dimension()!=z.number_of_generators()) { 
-        ARIADNE_THROW(InvalidGenerators,"Parallelotope<Interval>::Parallelotope(Zonotope z)","z.generators()="<<z.generators()<<" which is not a square matrix");
-      }
-    }
-    
-    
-    template<class R> inline
-    Parallelotope< Numeric::Interval<R> >::Parallelotope(const Zonotope<I>& z)
-      : Zonotope< Numeric::Interval<R> >(z) 
-    { 
-      if(z.dimension()!=z.number_of_generators()) { 
-        ARIADNE_THROW(InvalidGenerators,"Parallelotope<Interval>::Parallelotope(Zonotope<Interval> z)","z.generators()="<<z.generators()<<" which is not a square matrix");
-      }
-    }
-    
-    
-    template<class R> inline
-    std::ostream& operator<<(std::ostream& os, const Parallelotope< Numeric::Interval<R> >& p) 
-    {
-      return p.write(os);
-    }
-    
+template<class XC,class XG> template<class RC, class RG> inline 
+Geometry::Parallelotope<XC,XG>::Parallelotope(const Point<RC>& c, const LinearAlgebra::Matrix<RG>& G)
+  : Zonotope<XC,XG>(c,G)
+{
+  if (G.number_of_rows()!=G.number_of_columns()) {
+    ARIADNE_THROW(InvalidGenerators,"Parallelotope::Parallelotope(Vector c, Matrix G)"," G="<<G<<" is not a square matrix");
   }
 }
+
+
+template<class XC,class XG> template<class RR> inline 
+Geometry::Parallelotope<XC,XG>::Parallelotope(const Rectangle<RR>& r)
+  : Zonotope<XC,XG>(r) 
+{ 
+}
+
+
+template<class XC, class XG> inline 
+Geometry::Parallelotope<XC,XG>::Parallelotope(const std::string& str)
+  : Zonotope<XC,XG>(str) 
+{ 
+  if (this->dimension()!=this->number_of_generators()) {
+    ARIADNE_THROW(InvalidGenerators,"Parallelotope::Parallelotope(string str)"," str=\""<<str<<"\" does not describle a parallelotope");
+  }
+}
+
+
+template<class XC, class XG> template<class RC, class RG> inline 
+Geometry::Parallelotope<XC,XG>::Parallelotope(const Zonotope<RC,RG>& z)
+  : Zonotope<XC,XG>(z) 
+{ 
+  if (z.dimension()!=z.number_of_generators()) {
+    ARIADNE_THROW(InvalidGenerators,"Parallelotope::Parallelotope(Zonotope z)"," z="<<z<<" is not a parallelotope");
+  }
+}
+
+template<class XC, class XG> template<class RC, class RG> inline 
+Geometry::Parallelotope<XC,XG>::Parallelotope(const Parallelotope<RC,RG>& original)
+  : Zonotope<XC,XG>(original) 
+{ 
+}
+
+
+template<class XC, class XG> template<class RR> inline 
+Geometry::Parallelotope<XC,XG>& 
+Geometry::Parallelotope<XC,XG>::operator=(const Rectangle<RR>& r)
+{
+  Zonotope<XC,XG>& z=*this; z=r; return *this;
+}
+
+
+
+
+template<class XC, class XG> inline
+std::ostream& 
+Geometry::operator<<(std::ostream& os, const Parallelotope<XC,XG>& p) 
+{
+  return p.write(os);
+}
+
+
+template<class XC, class XG> inline
+std::istream& 
+Geometry::operator>>(std::ostream& is, Parallelotope<XC,XG>& p) 
+{
+  return p.read(is);
+}
+
+
+
+
+} // namespace Ariadne

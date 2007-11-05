@@ -51,7 +51,7 @@ using namespace std;
 template<class R> int test_lohner_integrator();
 
 int main() {
-  test_lohner_integrator<Float>();
+  test_lohner_integrator<Flt>();
   return 0;
 }
 

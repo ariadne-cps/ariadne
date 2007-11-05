@@ -209,28 +209,6 @@ Evaluation::AffineIntegrator<R>::flow_step_jacobian(const System::VectorFieldInt
      
 
 
-template<class R>
-Geometry::Rectangle<R>
-Evaluation::AffineIntegrator<R>::integration_step(const System::VectorFieldInterface<R>& vector_field, 
-                                                  const Geometry::Rectangle<R>& initial_set, 
-                                                  const Numeric::Interval<R>& step_size, 
-                                                  const Geometry::Rectangle<R>& bounding_set) const
-{
-  return this->integration_step(vector_field,Geometry::Zonotope<I>(initial_set),step_size,bounding_set).bounding_box();
-}
-
-
-
-template<class R>
-Geometry::Rectangle<R> 
-Evaluation::AffineIntegrator<R>::reachability_step(const System::VectorFieldInterface<R>& vector_field, 
-                                                   const Geometry::Rectangle<R>& initial_set, 
-                                                   const Numeric::Interval<R>& step_size, 
-                                                   const Geometry::Rectangle<R>& bounding_set) const
-{
-  return this->reachability_step(vector_field,Geometry::Zonotope<I>(initial_set),step_size,bounding_set).bounding_box();
-}
-
 
 template<class R>
 Geometry::Zonotope< Numeric::Interval<R>,R > 
@@ -258,7 +236,7 @@ Evaluation::AffineIntegrator<R>::reachability_step(const System::VectorFieldInte
 template<class R>
 Geometry::Zonotope< Numeric::Interval<R> > 
 Evaluation::AffineIntegrator<R>::integration_step(const System::VectorFieldInterface<R>& vector_field, 
-                                                  const Geometry::Zonotope< Numeric::Interval<R> >& initial_set, 
+                                                  const Geometry::Zonotope<I,I>& initial_set, 
                                                   const Numeric::Interval<R>& step_size, 
                                                   const Geometry::Rectangle<R>& bounding_set) const
 {
@@ -274,7 +252,7 @@ Evaluation::AffineIntegrator<R>::integration_step(const System::VectorFieldInter
 template<class R>
 Geometry::Zonotope< Numeric::Interval<R> > 
 Evaluation::AffineIntegrator<R>::reachability_step(const System::VectorFieldInterface<R>& vector_field, 
-                                                   const Geometry::Zonotope< Numeric::Interval<R> >& initial_set, 
+                                                   const Geometry::Zonotope<I,I>& initial_set, 
                                                    const Numeric::Interval<R>& step_size, 
                                                    const Geometry::Rectangle<R>& bounding_set) const
 {
@@ -340,8 +318,8 @@ Evaluation::AffineIntegrator<R>::flow_step_jacobian(const System::AffineVectorFi
 template<class R>
 Geometry::Zonotope< Numeric::Interval<R> > 
 Evaluation::AffineIntegrator<R>::integration_step(const System::AffineVectorField<R>& affine_vector_field, 
-                                                   const Geometry::Zonotope< Numeric::Interval<R> >& initial_set, 
-                                                   const Numeric::Interval<R>& step_size) const
+                                                  const Geometry::Zonotope<I,I>& initial_set, 
+                                                  const Numeric::Interval<R>& step_size) const
 {
   using namespace LinearAlgebra;
   using namespace Geometry;
@@ -356,6 +334,7 @@ Evaluation::AffineIntegrator<R>::integration_step(const System::AffineVectorFiel
   
   ARIADNE_LOG(9,"vf="<<vf<<"\n");
   ARIADNE_LOG(7,"z="<<z<<"\n");
+  ARIADNE_LOG(7,"h="<<h<<"\n");
   ARIADNE_LOG(7,"vf(c)="<<vf(z.centre())<<", h="<<h<<"\n");
   
   // Use the formula x(t) = x0 + h * P * ( A * x0 + b ) 
@@ -388,8 +367,8 @@ Evaluation::AffineIntegrator<R>::integration_step(const System::AffineVectorFiel
 template<class R>
 Geometry::Zonotope< Numeric::Interval<R> > 
 Evaluation::AffineIntegrator<R>::reachability_step(const System::AffineVectorField<R>& vector_field, 
-                                                    const Geometry::Zonotope< Numeric::Interval<R> >& initial_set, 
-                                                    const Numeric::Interval<R>& step_size) const
+                                                   const Geometry::Zonotope<I,I>& initial_set, 
+                                                   const Numeric::Interval<R>& step_size) const
 {
   using namespace Numeric;
   using namespace LinearAlgebra;
@@ -430,6 +409,13 @@ Evaluation::AffineIntegrator<R>::reachability_step(const System::AffineVectorFie
   return iz;
 }
 
+
+template<class R>
+std::ostream&
+Evaluation::AffineIntegrator<R>::write(std::ostream& os) const
+{
+  return os << "AffineIntegrator( )";
+}
 
 
 }

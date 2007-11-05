@@ -45,7 +45,7 @@ using namespace std;
 template<class R> int test_function();
   
 int main() {
-  return test_function<Float>();
+  return test_function<Flt>();
 }
 
 template<class R>

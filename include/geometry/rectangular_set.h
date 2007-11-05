@@ -49,6 +49,12 @@ namespace Ariadne {
       RectangularSet(const std::string& str)
         : SetInterface<R>(), _rectangle(str) { }
       /*! \brief */
+      template<class R1> RectangularSet(const dimension_type& d, const R1 a[][2])
+        : SetInterface<R>(), _rectangle(d,a) { }
+      /*! \brief */
+      template<class R1> RectangularSet(const Point<R1>& pt)
+        : SetInterface<R>(), _rectangle(pt) { }
+      /*! \brief */
       template<class R1> RectangularSet(const Rectangle<R1>& r)
         : SetInterface<R>(), _rectangle(r) { }
       /*! \brief */

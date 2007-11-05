@@ -40,15 +40,15 @@ namespace Ariadne {
 #ifdef ENABLE_FLOAT64
     template class Polyhedron<Float64>;
     template class PolyhedralConstraint<Float64>;
-    template class Polyhedron< Interval<Float64> >;
-    template class PolyhedralConstraint< Interval<Float64> >;
+    template class Polyhedron<Interval64>;
+    template class PolyhedralConstraint<Interval64>;
 #endif
   
 #ifdef ENABLE_FLOATMP
     template class Polyhedron<FloatMP>;
     template class PolyhedralConstraint<FloatMP>;
-    template class Polyhedron< Interval<FloatMP> >;
-    template class PolyhedralConstraint< Interval<FloatMP> >;
+    template class Polyhedron<IntervalMP>;
+    template class PolyhedralConstraint<IntervalMP>;
 #endif
 
   }

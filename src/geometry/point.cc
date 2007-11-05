@@ -34,15 +34,16 @@ namespace Ariadne {
     using namespace Numeric;
     
     template class Point<Rational>;
+    template class Point< Interval<Rational> >;
 
 #ifdef ENABLE_FLOAT64
     template class Point<Float64>;
-    template class Point< Interval<Float64> >;
+    template class Point<Interval64>;
 #endif
   
 #ifdef ENABLE_FLOATMP
     template class Point<FloatMP>;
-    template class Point< Interval<FloatMP> >;
+    template class Point<IntervalMP>;
 #endif
 
   }

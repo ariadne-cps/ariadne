@@ -25,6 +25,8 @@
 #include "../linear_algebra/matrix.h"
 
 #include "../function/function_interface.h"
+#include "../function/interpreted_function.h"
+#include "../function/multi_index.h"
 
 #include "../geometry/point.h"
 #include "../geometry/rectangle.h"
@@ -141,7 +143,7 @@ System::FunctionMap<R>::jacobian(const Geometry::Point<A>& x) const
 
 template<class R>
 typename System::FunctionMap<R>::A
-System::FunctionMap<R>::derivative(const Geometry::Point<A>& x, const size_type& i, const LinearAlgebra::MultiIndex& j) const 
+System::FunctionMap<R>::derivative(const Geometry::Point<A>& x, const size_type& i, const Function::MultiIndex& j) const 
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }

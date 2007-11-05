@@ -48,7 +48,6 @@ void export_lattice_set() {
     ;
 
   class_<LatticeBlock>("LatticeBlock",init<IndexArray,IndexArray>())
-    .def(init<std::string>())
     .def(init<const LatticeCell&>())
     .def(init<const LatticeBlock&>())
     .def("dimension", &LatticeBlock::dimension)

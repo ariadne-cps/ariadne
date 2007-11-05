@@ -23,6 +23,9 @@
 
 #include "python/python_float.h"
 
+#include "geometry/rectangle.h"
+#include "geometry/zonotope.h"
+#include "evaluation/applicator_interface.h"
 #include "evaluation/applicator.h"
 
 using namespace Ariadne;
@@ -35,10 +38,49 @@ using namespace Ariadne::Python;
 #include <boost/python.hpp>
 using namespace boost::python;
 
+template<class BS>
+class ApplicatorWrapper
+  : public ApplicatorInterface<BS>,
+    public wrapper< ApplicatorInterface<BS> >
+{
+  typedef typename BS::real_type R;
+  typedef Interval<R> I;
+ public:
+  ApplicatorWrapper() { }
+  ApplicatorWrapper<BS>* clone() const { return this->get_override("clone")(); }
+  BS apply(const MapInterface<R>&, const BS&) const {
+    return this->get_override("apply")(); }
+  std::ostream& write(std::ostream&) const {
+    return this->get_override("write")(); }
+};
+
+template<class R>
+class GeneralApplicator
+  : public Applicator< Rectangle<R> >,
+    public Applicator< Zonotope<Interval<R>,R> >,
+    public Applicator< Zonotope< Interval<R>, Interval<R> > >
+{
+  GeneralApplicator<R>* clone() const { return new GeneralApplicator<R>(*this); }
+};
+
+
 template<class R>
 void export_applicator() 
 {
- 
+  typedef Numeric::Interval<R> I;
+  class_< ApplicatorWrapper< Rectangle<R> >, boost::noncopyable >("RectangleApplicatorInterface",init<>());
+  class_< ApplicatorWrapper< Zonotope<I,R> >, boost::noncopyable >("C0ZonotopeApplicatorInterface",init<>());
+  class_< ApplicatorWrapper< Zonotope<I,I> >, boost::noncopyable >("C1ZonotopeApplicatorInterface",init<>());
+
+  class_< Applicator< Rectangle<R> >, bases<ApplicatorInterface< Rectangle<R> > > >("RectangleApplicator",init<>());
+  class_< Applicator< Zonotope<I,R> >, bases<ApplicatorInterface< Zonotope<I,R> > > >("C0ZonotopeApplicator",init<>());
+  class_< Applicator< Zonotope<I,I> >, bases<ApplicatorInterface< Zonotope<I,I> > > >("C1ZonotopeApplicator",init<>());
+
+  class_< GeneralApplicator<R>, 
+        bases<ApplicatorInterface< Rectangle<R> >,
+              ApplicatorInterface< Zonotope<I,R> >,
+              ApplicatorInterface< Zonotope<I,I> > > >("Applicator",init<>());
+
 }
 
 template void export_applicator<Float>();

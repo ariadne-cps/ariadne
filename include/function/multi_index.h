@@ -94,6 +94,8 @@ namespace Ariadne {
       /*! The position of the element in the array of tensor values. */
       size_type position() const;
       
+      /*! The product of the factorials of the indices. */
+      size_type factorial() const;
       /*! The number of ordered index arrays with each element occurring the number of times specified by the multi index. */
       size_type number() const;
       
@@ -197,6 +199,16 @@ namespace Ariadne {
     }
       
     inline
+    size_type MultiIndex::factorial() const
+    {
+      size_type result=1;
+      for(size_type k=0; k!=this->number_of_variables(); ++k) {
+        result*=Numeric::factorial((*this)[k]);
+      }
+      return result;
+    }
+      
+    inline
     size_type MultiIndex::position() const
     {
       size_type deg=this->degree()-1;
@@ -293,6 +305,40 @@ namespace Ariadne {
     }
     
 
+    inline
+    size_type 
+    number(const MultiIndex& i)
+    {
+      size_type result=Numeric::factorial(i.degree());
+      for(size_type k=0; k!=i.number_of_variables(); ++k) {
+        result/=Numeric::factorial(i[k]);
+      }
+      return result;
+    }
+      
+    inline
+    size_type 
+    factorial(const MultiIndex& i)
+    {
+      size_type result=1;
+      for(size_type k=0; k!=i.number_of_variables(); ++k) {
+        result*=Numeric::factorial(i[k]);
+      }
+      return result;
+    }
+      
+    inline
+    size_type 
+    choose(const MultiIndex& n, const MultiIndex& k)
+    {
+      assert(n.number_of_variables()==k.number_of_variables());
+      size_type result=1;
+      for(size_type i=0; i!=n.number_of_variables(); ++i) {
+        result*=Numeric::choose(n[i],k[i]);
+      }
+      return result;
+    }
+      
     class MultiIndexIterator
       : public boost::iterator_facade<MultiIndexIterator,
                                MultiIndex,

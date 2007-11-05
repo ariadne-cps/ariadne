@@ -56,7 +56,7 @@ int main() {
   
   cout << boolalpha;
   
-  test_level_set<Float>();
+  test_level_set<Flt>();
 }
 
 

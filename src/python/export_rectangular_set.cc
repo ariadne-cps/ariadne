@@ -32,13 +32,56 @@ using namespace Ariadne::Geometry;
 using namespace Ariadne::Python;
 
 #include <boost/python.hpp>
+#include <boost/python/detail/api_placeholder.hpp>
 using namespace boost::python;
+
+template<class R>  
+RectangularSet<R>* 
+make_rectangular_set(boost::python::object obj) 
+{
+  // See "Extracting C++ objects" in the Boost Python tutorial
+  boost::python::list elements=extract<list>(obj);
+  int d=boost::python::len(elements);
+  Rectangle<R> r(d);
+  for(int i=0; i!=d; ++i) {
+    extract< Interval<R> > extract_interval(elements[i]);
+    if (extract_interval.check()) {
+      Interval<R> interval=extract_interval();
+      r.set_lower_bound(i,interval.lower());
+      r.set_upper_bound(i,interval.upper());
+    } else {
+      extract<list> extract_list(elements[i]);
+      boost::python::list pair=extract_list();
+      if(boost::python::len(pair)!=2) {
+        throw std::runtime_error("Rectangle must be list of pairs representing intervals");
+      }
+      extract<double> l(pair[0]);
+      if (l.check()) {
+        r.set_lower_bound(i,static_cast<R>(l));
+      } else {
+        extract<R> l(pair[0]);
+        r.set_lower_bound(i,static_cast<R>(l));
+      }
+      extract<double> u(pair[1]);
+      if (u.check()) {
+        r.set_upper_bound(i,static_cast<R>(u));
+      } else {
+        extract<R> u(pair[0]);
+        r.set_upper_bound(i,static_cast<R>(u));
+      }
+    }
+  }
+  return new RectangularSet<R>(r);
+}
 
 template<class R>
 void export_rectangular_set() 
 {
-  class_< RectangularSet<R>, bases< SetInterface<R>, Rectangle<R> > >("RectangularSet",init< Rectangle<R> >())
-    .def(init< std::string >())
+  typedef Numeric::Interval<R> I;
+  
+  class_< RectangularSet<R>, bases< SetInterface<R>, Rectangle<R> > >("RectangularSet",no_init)
+    .def("__init__", make_constructor(&make_rectangular_set<R>) )
+    .def(init< Point<I> >())
     .def(init< Rectangle<R> >())
     .def("rectangle", &RectangularSet<R>::operator const Rectangle<R>&,return_value_policy<copy_const_reference>())
     .def("dimension", &RectangularSet<R>::dimension)

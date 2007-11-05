@@ -58,14 +58,12 @@ using namespace Ariadne::Evaluation;
 using namespace Ariadne::Output;
 using namespace std;
 
-static const int verbosity = 0;
-
-static const id_type mode1_id = 1;
-static const id_type mode2_id = 2;
-static const id_type mode3_id = 3;
-static const id_type event20_id = 6;
-static const id_type event12_id = 4;
-static const id_type event23_id = 5;
+static const DiscreteState dstate1(1);
+static const DiscreteState dstate2(2);
+static const DiscreteState dstate3(3);
+static const DiscreteEvent event20_id(6);
+static const DiscreteEvent event12_id(4);
+static const DiscreteEvent event23_id(5);
   
 
 template<class R>
@@ -81,10 +79,10 @@ construct_evolver()
   parameters.set_maximum_basic_set_radius(0.25);
   parameters.set_grid_length(0.125);
   
-  Applicator<R> applicator;
-  LohnerIntegrator<R> lohner_integrator; 
-  const ApplicatorInterface<R>& applicator_interface=applicator;
-  const IntegratorInterface<R>& integrator_interface=lohner_integrator;
+  Applicator<BS> applicator;
+  C1LohnerIntegrator<R> lohner_integrator; 
+  const ApplicatorInterface<BS>& applicator_interface=applicator;
+  const IntegratorInterface<BS>& integrator_interface=lohner_integrator;
   return ConstraintBasedHybridEvolver<R>(parameters,applicator_interface,integrator_interface);
 }
 
@@ -94,7 +92,7 @@ template<class R>
 ConstraintBasedHybridAutomaton<R> 
 construct_automaton() 
 {
-    AffineVectorField<R> dynamic1(Matrix<R>("[-1,-0.2;0.2,-1]"),Vector<R>("[5,0]"));
+    AffineVectorField<R> dynamic1(Matrix<R>("[-1,-0.25;0.25,-1]"),Vector<R>("[5,0]"));
     AffineVectorField<R> dynamic2(Matrix<R>("[0,0; 0,0]"),Vector<R>("[0.75,1]"));
     AffineVectorField<R> dynamic3(Matrix<R>("[0,0; 0,0]"),Vector<R>("[1,-0.75]"));
 
@@ -106,12 +104,12 @@ construct_automaton()
     
     ConstraintBasedHybridAutomaton<R> automaton("");
 
-    automaton.new_mode(mode1_id,dynamic1);
-    automaton.new_mode(mode2_id,dynamic2);
-    automaton.new_mode(mode3_id,dynamic3);
-    automaton.new_invariant(event20_id,mode2_id,invariant2);
-    automaton.new_forced_transition(event12_id,mode1_id,mode2_id,reset12,guard12);
-    automaton.new_unforced_transition(event23_id,mode2_id,mode3_id,reset23,activation23);
+    automaton.new_mode(dstate1,dynamic1);
+    automaton.new_mode(dstate2,dynamic2);
+    automaton.new_mode(dstate3,dynamic3);
+    automaton.new_invariant(event20_id,dstate2,invariant2);
+    automaton.new_forced_transition(event12_id,dstate1,dstate2,reset12,guard12);
+    automaton.new_unforced_transition(event23_id,dstate2,dstate3,reset23,activation23);
 
     cout << "automaton = " << flush;
     cout << automaton << endl << endl;
@@ -150,8 +148,8 @@ class TestConstraintBasedHybridEvolver
     t=1.90;
     size_type n=2;
 
-    id_type initial_discrete_mode = mode1_id;
-    Zonotope<I,I> initial_basic_set(Point<R>("(0.5,0)"),Matrix<R>("[0.02,0.0; 0.0,0.02]"));
+    DiscreteState initial_discrete_mode = dstate1;
+    Zonotope<I,I> initial_basic_set(Point<R>("(0.5,0)"),Matrix<R>("[0.03125,0.0; 0.0,0.03125]"));
     HybridListSet< Zonotope<I,I> > initial_set(automaton.locations());
     initial_set.adjoin(initial_discrete_mode,initial_basic_set);
   
@@ -188,10 +186,10 @@ class TestConstraintBasedHybridEvolver
     eps << fill_colour(cyan) << closed_intersection(bounding_polyhedron,activation_polyhedron);
 
     for(uint i=0; i!=evolver.trace().size(); ++i) {
-      switch(evolver.trace()[i].discrete_state()) {
-        case mode1_id: eps << fill_colour(Output::green); break;
-        case mode2_id: eps << fill_colour(Output::red); break;
-        case mode3_id: eps << fill_colour(Output::cyan); break;
+      switch(evolver.trace()[i].discrete_state().id()) {
+        case 1: eps << fill_colour(Output::green); break;
+        case 2: eps << fill_colour(Output::red); break;
+        case 3: eps << fill_colour(Output::cyan); break;
       }
       eps << evolver.trace()[i].continuous_state_set();
     }      
@@ -200,19 +198,19 @@ class TestConstraintBasedHybridEvolver
     eps.open("test_hybrid_evolution-evolve.eps",bounding_box);
     eps << fill_colour(magenta) << closed_intersection(bounding_polyhedron,guard_polyhedron);
     eps << fill_colour(cyan) << closed_intersection(bounding_polyhedron,activation_polyhedron);
-    eps << fill_colour(Output::yellow) << initial_set[mode1_id];
-    eps << fill_colour(Output::white) << evolved_set[mode1_id];
-    eps << fill_colour(Output::white) << evolved_set[mode2_id];
-    eps << fill_colour(Output::white) << evolved_set[mode3_id];
+    eps << fill_colour(Output::yellow) << initial_set[dstate1];
+    eps << fill_colour(Output::white) << evolved_set[dstate1];
+    eps << fill_colour(Output::white) << evolved_set[dstate2];
+    eps << fill_colour(Output::white) << evolved_set[dstate3];
     eps.close();
     
     eps.open("test_hybrid_evolution-reach.eps",bounding_box);
     eps << fill_colour(magenta) << closed_intersection(bounding_polyhedron,guard_polyhedron);
     eps << fill_colour(cyan) << closed_intersection(bounding_polyhedron,activation_polyhedron);
-    eps << fill_colour(Output::green) << reached_set[mode1_id];
-    eps << fill_colour(Output::red) << reached_set[mode2_id];
-    eps << fill_colour(Output::blue) << reached_set[mode3_id];
-    eps << fill_colour(Output::yellow) << initial_set[mode1_id];
+    eps << fill_colour(Output::green) << reached_set[dstate1];
+    eps << fill_colour(Output::red) << reached_set[dstate2];
+    eps << fill_colour(Output::blue) << reached_set[dstate3];
+    eps << fill_colour(Output::yellow) << initial_set[dstate1];
     eps.close();
 
     return 0;
@@ -228,10 +226,12 @@ class TestConstraintBasedHybridEvolver
 
 
 
-int main() {
-  set_hybrid_evolver_verbosity(::verbosity);
+int main(int nargs, const char* args[]) {
+  int verbosity = 0;
+  if(nargs>1) { verbosity=std::atoi(args[1]); }
+  set_hybrid_evolver_verbosity(verbosity);
 
-  TestConstraintBasedHybridEvolver<Float>().test();
+  TestConstraintBasedHybridEvolver<Flt>().test();
   cerr << "INCOMPLETE ";
   return 0;
 }

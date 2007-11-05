@@ -52,12 +52,16 @@ namespace Ariadne {
      * than general polytopes, since it can be performed by a simple matrix inversion
      * without the need to solve a linear programming problem.
      */
-    template<class R>
-    class Simplex : public Polytope<R>
+    template<class X>
+    class Simplex
+      : public Polytope<X>
     {
+      typedef typename Numeric::traits<X>::number_type R;
      public:
       /*! \brief The type of denotable real number used for the corners. */
       typedef R real_type;
+      /*! \brief The type of denotable real number used for the corners. */
+      typedef X value_type;
       /*! \brief The type of denotable point contained by the simplex. */
       typedef Point<R> state_type;
      
@@ -68,21 +72,21 @@ namespace Ariadne {
       Simplex();
     
       /*! \brief Construct from matrix giving the vertices in column form. */
-      explicit Simplex(const LinearAlgebra::Matrix<R>& A);
+      explicit Simplex(const LinearAlgebra::Matrix<X>& A);
       
       /*! \brief Construct from list of vertices. */
-      explicit Simplex(const PointList<R>& v);
+      explicit Simplex(const PointList<X>& v);
       
       /*! \brief Copy constructor. */
-      Simplex(const Simplex<R>& s);
+      Simplex(const Simplex<X>& s);
 
       /*! \brief Copy assignment operator. */
-      Simplex<R>& operator=(const Simplex<R>& s);
+      Simplex<X>& operator=(const Simplex<X>& s);
       //@}
     
       //! \name Geometric predicates
       //! \brief Specialized containment predicate
-      tribool contains(const Point<R>& pt) const;
+      tribool contains(const Point<X>& pt) const;
       //@}
       
       //@{ 
@@ -93,11 +97,11 @@ namespace Ariadne {
       std::istream& read(std::istream& is);
       //@}
      public:
-      LinearAlgebra::Vector<typename Numeric::traits<R>::arithmetic_type> coordinates(const Point<R>& s) const;
+      LinearAlgebra::Vector<typename Numeric::traits<X>::arithmetic_type> coordinates(const Point<X>& s) const;
     };
   
-    template<class R> std::ostream& operator<<(std::ostream& os, const Simplex<R>& s);
-    template<class R> std::istream& operator>>(std::istream& is, Simplex<R>& s);
+    template<class X> std::ostream& operator<<(std::ostream& os, const Simplex<X>& s);
+    template<class X> std::istream& operator>>(std::istream& is, Simplex<X>& s);
     
   }
 }

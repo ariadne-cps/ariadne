@@ -265,6 +265,9 @@ namespace Ariadne {
       template<class BS>
       void adjoin_inner_approximation(const BS& bs);
 
+      /*! \brief Adjoins an outer-approximation of the rectangle list set \a rls. */
+      void adjoin_outer_approximation(const ListSet< Rectangle<R> >& rls);
+
       /*! \brief Adjoins an outer-approximation of the set \a s. */
       void adjoin_outer_approximation(const SetInterface<R>& s);
 
@@ -276,6 +279,9 @@ namespace Ariadne {
 
       /*! \brief Restricts to an inner-approximation of the set \a s. */
       void restrict_inner_approximation(const SetInterface<R>& s);
+
+      /*! \brief Write a summary to an output stream. */
+      std::ostream& summarize(std::ostream&) const;
 
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream&) const;

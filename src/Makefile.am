@@ -5,7 +5,7 @@ phony: lib
 lib: libgeometric.la libariadne.la
 
 INCLUDES = -I$(top_srcdir)/include 
-LDADD = -lmpfr -lppl -lgmpxx
+LDADD = -lmpfr -lgmpxx
 
 #SUBDIRS = base numeric linear_algebra linear_programming combinatoric function geometry system evaluation output input python
 
@@ -19,7 +19,8 @@ NUMERIC_SRC = \
 	numeric/interval.cc
 
 LINEAR_ALGEBRA_SRC = \
-	linear_algebra/vector.cc linear_algebra/matrix.cc \
+	linear_algebra/vector.cc linear_algebra/covector.cc \
+	linear_algebra/matrix.cc \
 	linear_algebra/tensor.cc \
 	linear_algebra/matrix_function.cc 
 
@@ -34,15 +35,16 @@ COMBINATORIC_SRC = \
 
 FUNCTION_SRC = \
 	function/interpreted_function.cc \
-	function/affine_model.cc \
-	function/polynomial_model.cc \
+	function/affine_variable.cc function/affine_model.cc \
+	function/taylor_model.cc \
 	function/polynomial.cc
 
 GEOMETRY_SRC = \
 	geometry/point.cc geometry/point_list.cc \
 	geometry/rectangle.cc \
-	geometry/polytope.cc geometry/polyhedron.cc \
-	geometry/zonotope.cc geometry/parallelotope.cc geometry/simplex.cc \
+	geometry/polyhedron.cc \
+	geometry/polytope.cc geometry/simplex.cc \
+	geometry/zonotope.cc geometry/orthotope.cc geometry/parallelotope.cc \
 	geometry/ellipsoid.cc geometry/sphere.cc \
 	geometry/taylor_set.cc \
 	geometry/list_set.cc \
@@ -63,21 +65,25 @@ SYSTEM_SRC = \
 	system/vector_field.cc system/affine_vector_field.cc \
 	system/multimap.cc system/affine_multimap.cc \
 	system/set_based_hybrid_automaton.cc system/constraint_based_hybrid_automaton.cc \
-	system/grid_multimap.cc 
+	system/discrete_map.cc system/grid_multimap.cc 
 
 
 EVALUATION_SRC = \
 	evaluation/evolution_parameters.cc \
 	evaluation/solver.cc \
 	evaluation/newton_solver.cc \
+	evaluation/approximator.cc \
 	evaluation/applicator.cc \
 	evaluation/euler_integrator.cc \
 	evaluation/affine_integrator.cc \
 	evaluation/lohner_integrator.cc \
 	evaluation/bounder.cc \
 	evaluation/detector.cc \
-	evaluation/flow.cc \
+	evaluation/flower.cc \
+	evaluation/model_checker.cc \
+	evaluation/map_orbiter.cc \
 	evaluation/map_evolver.cc \
+	evaluation/vector_field_orbiter.cc \
 	evaluation/vector_field_evolver.cc \
 	evaluation/set_based_hybrid_evolver.cc \
 	evaluation/constraint_based_hybrid_evolver.cc \
@@ -87,11 +93,11 @@ OUTPUT_SRC = \
 	output/logging.cc \
 	output/colour.cc \
 	output/geometry2d.cc \
-	output/epsstream.cc \
 	output/textstream.cc \
+	output/latexstream.cc \
+	output/epsstream.cc \
 	output/chompstream.cc \
-	output/dotstream.cc \
-	output/texstream.cc 
+	output/dotstream.cc 
 
 INPUT_SRC = \
 	input/modelica.cc 
@@ -102,12 +108,12 @@ noinst_LTLIBRARIES = libbase.la libnumeric.la liblinearalgebra.la liblinearprogr
 	liboutput.la libinput.la
 
 lib_LTLIBRARIES = libariadne.la libgeometric.la 
-libariadne_la_LIBADD = $(noinst_LTLIBRARIES) -lmpfr -lppl -lgmpxx
+libariadne_la_LIBADD = $(noinst_LTLIBRARIES) -lmpfr -lgmpxx
 libariadne_la_SOURCES = 
 nodist_EXTRA_libariadne_la_SOURCES = dummy.cc
 
 libgeometric_la_LIBADD = libbase.la libnumeric.la liblinearalgebra.la liblinearprogramming.la \
-	libcombinatoric.la libfunction.la libgeometry.la -lmpfr -lppl -lgmpxx
+	libcombinatoric.la libfunction.la libgeometry.la -lmpfr -lgmpxx
 libgeometric_la_SOURCES = 
 nodist_EXTRA_libgeometric_la_SOURCES = dummy.cc
 

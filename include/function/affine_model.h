@@ -46,8 +46,13 @@ namespace Ariadne {
   namespace Function {
       
     template<class R> class AffineModel;
-    template<class R> AffineModel<R> operator+(const AffineModel<R>&, const AffineModel<R>&);
-    template<class R> AffineModel<R> operator*(const AffineModel<R>&, const AffineModel<R>&);
+    template<class R> void pos(AffineModel<R>&, const AffineModel<R>&);
+    template<class R> void neg(AffineModel<R>&, const AffineModel<R>&);
+    template<class R> void rec(AffineModel<R>&, const AffineModel<R>&);
+    template<class R> void add(AffineModel<R>&, const AffineModel<R>&, const AffineModel<R>&);
+    template<class R> void sub(AffineModel<R>&, const AffineModel<R>&, const AffineModel<R>&);
+    template<class R> void mul(AffineModel<R>&, const AffineModel<R>&, const AffineModel<R>&);
+    template<class R> void div(AffineModel<R>&, const AffineModel<R>&, const AffineModel<R>&);
     template<class R> AffineModel<R> reduce(const AffineModel<R>&, size_type);
     template<class R> AffineModel<R> compose(const AffineModel<R>&, const AffineModel<R>&);
     template<class R> AffineModel<R> inverse(const AffineModel<R>&);

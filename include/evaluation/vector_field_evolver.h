@@ -48,56 +48,57 @@ namespace Ariadne {
 
    
     template<class R> class EvolutionParameters;
-    template<class R> class IntegratorInterface;
+    template<class BS> class IntegratorInterface;
     template<class R> class BounderInterface;
 
 
 
-    /*! \brief %Base class for integration schemes. 
+    /*! \brief Class for computing the evolution of a continuous-time autonomous system.
      *  \ingroup Integrate
      */
     template<class R>
     class VectorFieldEvolver {
      private:
       typedef Numeric::Interval<R> I;
-      typedef Geometry::Zonotope<I,R> BS;
+      typedef Geometry::Zonotope<I,I> BS;
 
       EvolutionParameters<R>* _parameters;
       BounderInterface<R>* _bounder;
-      IntegratorInterface<R>* _integrator;
+      IntegratorInterface<BS>* _integrator;
      public:
-      /*! The type used to denote real numbers. */
       typedef R real_type;
 
-      /*! The type used to denote an interval of real numbers. */
       typedef Numeric::Interval<R> interval_type;
      
-      /*! The type used to denote real numbers. */
       typedef Geometry::Point<I> point_type;
 
-      /*! The type used to denote real numbers. */
       typedef Geometry::Rectangle<R> bounding_set_type;
 
-      /*! The type used to denote real numbers. */
       typedef BS basic_set_type;
 
-      /*! The type used to denote real numbers. */
       typedef Geometry::ListSet<BS> list_set_type;
 
-      /*! The type used to denote real numbers. */
       typedef System::VectorFieldInterface<R> vector_field_type;
+
+      //@{
+      //! \name Constructors and destructors
 
       /*! \brief Virtual destructor. */
       virtual ~VectorFieldEvolver();
 
-      /*! \brief Constructor. */
-      VectorFieldEvolver(const EvolutionParameters<R>& parameters, const IntegratorInterface<R>& plugin);
+      /*! \brief Construct from evolution paramters. */
+      VectorFieldEvolver(const EvolutionParameters<R>& parameters);
+
+      /*! \brief Construct from evolution parameters and an integration method. */
+      template<class BST>
+      VectorFieldEvolver(const EvolutionParameters<R>& parameters, const IntegratorInterface<BST>& plugin);
 
       /*! \brief Copy constructor. */
       VectorFieldEvolver(const VectorFieldEvolver<R>& i);
 
       /*! \brief Make a dynamically-allocated copy. */
       virtual VectorFieldEvolver<R>* clone() const;
+      //@}
 
       //@{
       //! \name Parameters controlling the accuracy
@@ -106,28 +107,13 @@ namespace Ariadne {
       const EvolutionParameters<R>& parameters() const;
       /*! \brief A reference to the parameters controlling the accuracy. */
       EvolutionParameters<R>& parameters();
-
-      /*! \brief A suggested minimum step size for integration. */
-      virtual time_type minimum_step_size() const;
-      /*! \brief The maximum allowable step size for integration. */
-      virtual time_type maximum_step_size() const;
-      /*! \brief A suggested minimum radius of a basic set after a subdivision (not a strict bound). */
-      virtual R minimum_basic_set_radius() const;
-      /*! \brief The maximum allowable radius of a basic set during integration. */
-      virtual R maximum_basic_set_radius() const;
-      /*! \brief The time after which an integrator may approximate computed sets on a grid,
-       *  in order to use previously caches integration results for the grid. */
-      virtual time_type lock_to_grid_time() const;
-      /*! \brief The time after which an integrator may approximate computed sets on a grid,
-       *  in order to use previously caches integration results for the grid. */
-      virtual R grid_length() const;
       //@}
 
       //@{
       //! \name Integration routines
 
 
-     /*! \brief Integrate \a intial_set for time \a time under \a vector_field. Returns a dynamically allocated set. */
+      /*! \brief Integrate \a intial_set for time \a time under \a vector_field. Returns a dynamically allocated set. */
       virtual Geometry::SetInterface<R>* integrate(const System::VectorFieldInterface<R>& vector_field,
                                                    const Geometry::SetInterface<R>& initial_set,
                                                    const Numeric::Rational& time) const;
@@ -150,8 +136,20 @@ namespace Ariadne {
                                                const Numeric::Rational& time) const;
 
       /*! \brief Integrate \a intial_set for all times under \a vector_field. Returns a dynamically allocated set. */
-      virtual Geometry::SetInterface<R>* reach(const System::VectorFieldInterface<R>& vector_field,
-                                               const Geometry::SetInterface<R>& initial_set) const;
+      virtual Geometry::SetInterface<R>* lower_reach(const System::VectorFieldInterface<R>& vector_field,
+                                                     const Geometry::SetInterface<R>& initial_set) const;
+
+      /*! \brief Integrate \a intial_set for all times under \a vector_field, while remaining in \a bounding_set. Returns a dynamically allocated set. */
+      virtual Geometry::SetInterface<R>* lower_reach(const System::VectorFieldInterface<R>& vector_field,
+                                                     const Geometry::SetInterface<R>& initial_set,
+                                                     const Geometry::SetInterface<R>& bounding_set) const;
+
+      /*! \brief Integrate \a intial_set for all times under \a vector_field. 
+       *
+       * Implemented by repeated calls to integrate(...) followed by a single call to reach(...).
+       */
+      virtual Geometry::SetInterface<R>* chainreach(const System::VectorFieldInterface<R>& vector_field,
+                                                   const Geometry::SetInterface<R>& initial_set) const;
 
       /*! \brief Integrate \a intial_set for all times under \a vector_field, while remaining in \a bounding_set. 
        *
@@ -176,17 +174,26 @@ namespace Ariadne {
 
 
      public:
-      //@{
-      //! \name Supporting geometric routines
-      /*! \brief Subdivide the basic set into smaller pieces whose radius tends to zero with repeated subdivisions. */
-      virtual list_set_type subdivide(const basic_set_type&) const;
-      //@}
-
- 
-     public:
-
-      //@{
+     //@{
       //! \name Single-step integration of points and basic sets, with a suggested step size. */
+      /*! \brief Integrate a basic set. */
+      virtual bounding_set_type flow_bounds(const vector_field_type&,
+                                            const basic_set_type&,
+                                            time_type&) const;
+
+      /*! \brief Integrate a basic set, assuming the flow remains in the bounding set. */
+      virtual basic_set_type integration_step(const vector_field_type&,
+                                              const basic_set_type&,
+                                              const time_type&,
+                                              const bounding_set_type&) const;
+
+      /*! \brief Integrate a basic set up to a given time assuming the flow remains in the bounding set. */
+      virtual basic_set_type reachability_step(const vector_field_type&,
+                                               const basic_set_type&,
+                                               const time_type&,
+                                               const bounding_set_type&) const;
+
+
       /*! \brief Integrate a basic set. */
       virtual basic_set_type integration_step(const vector_field_type&,
                                               const basic_set_type&,
@@ -200,109 +207,125 @@ namespace Ariadne {
       //@}
 
      public:
+      //@{ 
+      //! \name Integration of concrete sets. 
+
+      /*! \brief Integrating a list set (computes a lower-approximation). */
+      Geometry::ListSet< Geometry::Rectangle<R> >
+      lower_integrate(const System::VectorFieldInterface<R>& vector_field, 
+                      const Geometry::ListSet< Geometry::Rectangle<R> >& initial_set, 
+                      const time_type& time) const;
       
-      /*! \brief Template for integrating a basic set. */
-      BS
-      integrate(const System::VectorFieldInterface<R>& vector_field, 
-                const BS& initial_set, 
-                const time_type& time) const;
-
-      /*! \brief Template for computing the reachable set from a basic. */
-      Geometry::ListSet<BS> 
-      reach(const System::VectorFieldInterface<R>& vector_field, 
-            const BS& initial_set, 
-            const time_type& time) const;
-
-
-
-     public:
       
-      /*! \brief Template for integrating a list set. */
+      /*! \brief Computing the timed reachable set from a list set (computes a lower-approximation). */
+      Geometry::ListSet< Geometry::Rectangle<R> >
+      lower_reach(const System::VectorFieldInterface<R>& vector_field, 
+                  const Geometry::ListSet< Geometry::Rectangle<R> >& initial_set, 
+                  const time_type& time) const;
+
+      /*! \brief Computing the timed reachable set from a list set (computes a lower-approximation). */
+      Geometry::ListSet< Geometry::Rectangle<R> >
+      lower_reach(const System::VectorFieldInterface<R>& vector_field, 
+                  const Geometry::ListSet< Geometry::Rectangle<R> >& initial_set, 
+                  const Geometry::SetInterface<R>& bounding_set, 
+                  const time_type& time) const;
+
+      /*! \brief Integrating a list set. (%Deprecated) */
       Geometry::ListSet<BS> 
       lower_integrate(const System::VectorFieldInterface<R>& vector_field, 
                       const Geometry::ListSet<BS>& initial_set, 
                       const time_type& time) const;
 
       
-      /*! \brief Template for computing the reachable set from a list set. */
+      /*! \brief Compute the reachable set from a list set. (%Deprecated) */
       Geometry::ListSet<BS> 
       lower_reach(const System::VectorFieldInterface<R>& vector_field, 
                   const Geometry::ListSet<BS>& initial_set, 
                   const time_type& time) const;
 
-       /*! \brief Template for integrating a list set. */
+      /*! \brief Compute the reachable set from a list set. (%Deprecated) */
+      Geometry::ListSet<BS> 
+      lower_reach(const System::VectorFieldInterface<R>& vector_field, 
+                  const Geometry::ListSet<BS>& initial_set, 
+                  const Geometry::SetInterface<R>& bounding_set, 
+                  const time_type& time) const;
+
+       /*! \brief Integrate a list set. (%Deprecated) */
       Geometry::ListSet<BS>
       upper_integrate(const System::VectorFieldInterface<R>& vector_field, 
                       const Geometry::ListSet<BS>& initial_set, 
                       const time_type& time) const;
 
       
-      /*! \brief Template for computing the reachable set from a list set. */
+      /*! \brief Template for computing the reachable set from a list set. (%Deprecated) */
       Geometry::ListSet<BS>
       upper_reach(const System::VectorFieldInterface<R>& vector_field, 
                   const Geometry::ListSet<BS>& initial_set, 
                   const time_type& time) const;
 
-     public:
 
-
-      /*! \brief Template for integrating a list set (computes a lower-approximation). */
-      Geometry::ListSet< Geometry::Rectangle<R> >
-      integrate(const System::VectorFieldInterface<R>& vector_field, 
-                const Geometry::ListSet< Geometry::Rectangle<R> >& initial_set, 
-                const time_type& time) const;
-
-      
-      /*! \brief Template for computing the reachable set from a list set (computes a lower-approximation). */
-       
-      Geometry::ListSet< Geometry::Rectangle<R> >
-      reach(const System::VectorFieldInterface<R>& vector_field, 
-            const Geometry::ListSet< Geometry::Rectangle<R> >& initial_set, 
-            const time_type& time) const;
-
-
-      /*! \brief Template for computing the integral set from a list set. */
+      /*! \brief Computing the integral set from a grid mask set while remaining in a bounding set. */
       Geometry::GridMaskSet<R>
-      integrate(const System::VectorFieldInterface<R>& vector_field, 
-                const Geometry::GridMaskSet<R>& initial_set, 
-                const Geometry::GridMaskSet<R>& bounding_set,
-                const time_type& time) const;
+      bounded_integrate(const System::VectorFieldInterface<R>& vector_field, 
+                        const Geometry::GridMaskSet<R>& initial_set, 
+                        const Geometry::GridMaskSet<R>& bounding_set,
+                        const time_type& time) const;
 
       /*! \brief Template for computing the reachable set. */
       Geometry::GridMaskSet<R>
-      reach(const System::VectorFieldInterface<R>& vector_field, 
-                  const Geometry::GridMaskSet<R>& initial_set,
-                  const Geometry::GridMaskSet<R>& bounding_set,
-                  const time_type& time) const;
+      bounded_reach(const System::VectorFieldInterface<R>& vector_field, 
+                    const Geometry::GridMaskSet<R>& initial_set,
+                    const Geometry::GridMaskSet<R>& bounding_set,
+                    const time_type& time) const;
 
-      /*! \brief Template for computing the chain-reachable set. */
+      /*! \brief Compute the chain-reachable set. */
       Geometry::GridMaskSet<R>
       chainreach(const System::VectorFieldInterface<R>& vector_field, 
                  const Geometry::GridMaskSet<R>& initial_set, 
                  const Geometry::GridMaskSet<R>& bounding_set) const;
 
-      /*! \brief Template for computing the viability kernel. */
+      /*! \brief Compute the viability kernel. */
       Geometry::GridMaskSet<R>
       viable(const System::VectorFieldInterface<R>& vector_field, 
              const Geometry::GridMaskSet<R>& bounding_set) const;
 
-      /*! \brief Template for verifying system evolution. */
+      /*! \brief Verify system evolution. */
       tribool
       verify(const System::VectorFieldInterface<R>& vector_field, 
              const Geometry::GridMaskSet<R>& initial_set, 
              const Geometry::GridMaskSet<R>& bounding_set) const;
 
+      //@}
 
-     protected:
-      /*! \brief The identity function. */ 
-      BS identity(const BS& bs) const;
+     private:
+
+      /*! \brief Integrate a basic set. */
+      BS
+      integrate(const System::VectorFieldInterface<R>& vector_field, 
+                const BS& initial_set, 
+                const time_type& time) const;
+
+      /*! \brief Compute the reachable set from a basic. */
+      Geometry::ListSet<BS> 
+      reach(const System::VectorFieldInterface<R>& vector_field, 
+            const BS& initial_set, 
+            const time_type& time) const;
+
+
+    private:
+      //@{
+      //! \name Supporting geometric routines
+      /*! \brief Subdivide the basic set into smaller pieces whose radius tends to zero with repeated subdivisions. */
+      virtual list_set_type subdivide(const basic_set_type&) const;
+      //@}
+
     };
-
-
-
+ 
 
     
   }
 }
+
+#include "vector_field_evolver.inline.h"
 
 #endif /* ARIADNE_INTEGRATE_H */

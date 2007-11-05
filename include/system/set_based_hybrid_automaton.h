@@ -36,11 +36,13 @@
 
 #include "../base/stlio.h"
 #include "../geometry/exceptions.h"
+#include "../geometry/discrete_state.h"
 #include "../geometry/set_interface.h"
 #include "../system/exceptions.h"
 #include "../system/map_interface.h"
 #include "../system/vector_field_interface.h"
 
+#include "discrete_event.h"
 
 namespace Ariadne {  
 
@@ -54,7 +56,7 @@ template<class R> class SetBasedDiscreteMode;
 template<class R> class SetBasedDiscreteTransition;  
 template<class R> class SetBasedHybridAutomaton;  
 
-/*!\ingroup HybridTime
+/*!
  * \brief A discrete mode of a SetBasedHybridAutomaton, comprising continuous evolution given by a VectorField
  * within and invariant Geometry::SetInterface. 
  *
@@ -70,8 +72,8 @@ class SetBasedDiscreteMode {
       
   private:
     
-    // The discrete mode's identificator.
-    id_type _id;
+    // The discrete mode's discrete state.
+    Geometry::DiscreteState _state;
   
     // The discrete mode's vector field.
     boost::shared_ptr< const VectorFieldInterface<R> > _dynamic;
@@ -80,25 +82,29 @@ class SetBasedDiscreteMode {
     boost::shared_ptr< const Geometry::SetInterface<R> > _invariant;
   
   public:
-    
     /*! \brief Copy constructor. */
     SetBasedDiscreteMode(const SetBasedDiscreteMode<R>& original)
-      : _id(original._id), _dynamic(original._dynamic),
+      : _state(original._state), _dynamic(original._dynamic),
         _invariant(original._invariant) {}
     
     /*! \brief Copy assignment operator. */
-    SetBasedDiscreteMode<R>& operator=(const SetBasedDiscreteMode<R> &original) {
+    SetBasedDiscreteMode<R>& operator=(const SetBasedDiscreteMode<R>& original) {
       if(this!=&original) {
-        this->_id=original._id;
+        this->_state=original._state;
         this->_dynamic=original._dynamic;
         this->_invariant=original._invariant;
       }
       return *this;      
     }
 
-    /*! \brief The discrete mode's identifier. */
+    /*! \brief The discrete mode's identifier. (%Deprecated) */
     id_type id() const {
-      return this->_id;
+      return this->_state.id();
+    }
+    
+    /*! \brief The mode's discrete state. */
+    Geometry::DiscreteState discrete_state() const {
+      return this->_state;
     }
     
     /*! \brief The discrete mode's dynamic (a vector field). */
@@ -124,19 +130,19 @@ class SetBasedDiscreteMode {
      * \param dynamic is the mode's vector field.
      * \param invariant is the mode's invariant.
      */
-    SetBasedDiscreteMode(id_type id,
-                 const VectorFieldInterface<R> &dynamic, 
-                 const Geometry::SetInterface<R> &invariant)
-      :  _id(id), _dynamic(dynamic.clone()), _invariant(invariant.clone()) 
+    SetBasedDiscreteMode(Geometry::DiscreteState state,
+                 const VectorFieldInterface<R>& dynamic, 
+                 const Geometry::SetInterface<R>& invariant)
+      :  _state(state), _dynamic(dynamic.clone()), _invariant(invariant.clone()) 
     {
       ARIADNE_CHECK_EQUAL_DIMENSIONS(dynamic,invariant,"SetBasedDiscreteMode::SetBasedDiscreteMode(...)");
     }
     
     /* Construct from objects managed by shared pointers (for internal use) */
-    SetBasedDiscreteMode(id_type id,
+    SetBasedDiscreteMode(Geometry::DiscreteState state,
                  const boost::shared_ptr< VectorFieldInterface<R> > dynamic, 
                  const boost::shared_ptr< Geometry::SetInterface<R> > invariant)
-      :  _id(id), _dynamic(dynamic), _invariant(invariant) 
+      :  _state(state), _dynamic(dynamic), _invariant(invariant) 
     {
       ARIADNE_CHECK_EQUAL_DIMENSIONS(*dynamic,*invariant,"SetBasedDiscreteMode::SetBasedDiscreteMode(...)");
     }
@@ -148,7 +154,7 @@ std::ostream&
 SetBasedDiscreteMode<R>::write(std::ostream& os) const 
 { 
   return os << "SetBasedDiscreteMode( "
-            << "id=" << this->id() << ", " 
+            << "discrete_state=" << this->discrete_state() << ", " 
             << "invariant=" << this->invariant() << ", "
             << "dynamic=" << this->dynamic() << " )"; 
 }
@@ -168,7 +174,7 @@ bool operator<(const SetBasedDiscreteMode<R>& mode1, const SetBasedDiscreteMode<
 
 
 
-/*! \ingroup HybridTime
+/*!
  * \brief A discrete transition of a SetBasedHybridAutomaton, representing an instantaneous
  * jump from one SetBasedDiscreteMode to another, governed by an activation Geometry::SetInterface and a reset MapInterface.
  *
@@ -181,7 +187,7 @@ class SetBasedDiscreteTransition
   friend class SetBasedHybridAutomaton<R>;
   private:
     // \brief The discrete transition's identificator.
-    id_type _event_id;
+    DiscreteEvent _event;
   
     // \brief The source of the discrete transition.
     const SetBasedDiscreteMode<R>* _source;   
@@ -197,14 +203,14 @@ class SetBasedDiscreteTransition
     
   public:
     /*! \brief Copy constructor. */
-    SetBasedDiscreteTransition(const SetBasedDiscreteTransition<R> &original)
-      : _event_id(original._event_id), _source(original._source), _destination(original._destination), 
+    SetBasedDiscreteTransition(const SetBasedDiscreteTransition<R>& original)
+      : _event(original._event), _source(original._source), _destination(original._destination), 
         _activation(original._activation), _reset(original._reset) { 
     }
                 
     /*! \brief Copy assignment operator. */
-    SetBasedDiscreteTransition<R>& operator=(const SetBasedDiscreteTransition<R> &original) {
-      this->_event_id=original._event_id;
+    SetBasedDiscreteTransition<R>& operator=(const SetBasedDiscreteTransition<R>& original) {
+      this->_event=original._event;
       this->_source=original._source;
       this->_destination=original._destination;
       this->_activation=original._activation;
@@ -212,28 +218,33 @@ class SetBasedDiscreteTransition
       return *this;
     }
     
-    /*! \brief The unique identifier of the discrete transition. */
+    /*! \brief The unique identifier of the discrete transition. (%Deprecated) */
     id_type id() const {
-      return this->_event_id;
+      return this->_event.id();
+    }      
+
+    /*! \brief The discrete event associated with the discrete transition. */
+    DiscreteEvent discrete_event() const {
+      return this->_event;
     }      
 
     /*! \brief The source mode of the discrete transition. */
-    const SetBasedDiscreteMode<R> &source() const {
+    const SetBasedDiscreteMode<R>& source() const {
       return *this->_source;
     }      
 
     /*! \brief The destination of the discrete transition. */
-    const SetBasedDiscreteMode<R> &destination() const { 
+    const SetBasedDiscreteMode<R>& destination() const { 
       return *this->_destination;
     }
   
     /*! \brief The activation region of the discrete transition. */
-    const Geometry::SetInterface<R> &activation() const { 
+    const Geometry::SetInterface<R>& activation() const { 
       return *this->_activation;
     }
 
     /*! \brief The reset map of the discrete transition. */
-    const MapInterface<R> &reset() const { 
+    const MapInterface<R>& reset() const { 
       return *this->_reset;
     }
     
@@ -242,7 +253,7 @@ class SetBasedDiscreteTransition
   private:
  
     /* Constructor.
-     * \param event_id is the identifier of the discrete event.
+     * \param event is the discrete event.
      * \param source is the source mode of the discrete 
      * transition.
      * \param source is the source mode of the discrete 
@@ -254,12 +265,12 @@ class SetBasedDiscreteTransition
      * \param activation is the activation region of the 
      * discrete transition.
       */
-    SetBasedDiscreteTransition(id_type event_id, 
-                       const SetBasedDiscreteMode<R> &source, 
-                       const SetBasedDiscreteMode<R> &destination,
-                       const MapInterface<R> &reset,
-                       const Geometry::SetInterface<R> &activation)
-      : _event_id(event_id), _source(&source), _destination(&destination), 
+    SetBasedDiscreteTransition(DiscreteEvent event, 
+                               const SetBasedDiscreteMode<R>& source, 
+                               const SetBasedDiscreteMode<R>& destination,
+                               const MapInterface<R>& reset,
+                               const Geometry::SetInterface<R>& activation)
+      : _event(event), _source(&source), _destination(&destination), 
         _activation(activation.clone()), _reset(reset.clone()) 
     { 
       ARIADNE_CHECK_EQUAL_DIMENSIONS(activation,source,"SetBasedDiscreteTransition::SetBasedDiscreteTransition(...)");
@@ -268,12 +279,12 @@ class SetBasedDiscreteTransition
     }
 
     /* Construct from shared pointers (for internal use). */
-    SetBasedDiscreteTransition(id_type event_id,
-                       const SetBasedDiscreteMode<R> &source, 
-                       const SetBasedDiscreteMode<R> &destination,
+    SetBasedDiscreteTransition(DiscreteEvent event,
+                       const SetBasedDiscreteMode<R>& source, 
+                       const SetBasedDiscreteMode<R>& destination,
                        const boost::shared_ptr< MapInterface<R> > reset,
                        const boost::shared_ptr< Geometry::SetInterface<R> > activation) 
-      : _event_id(event_id), _source(&source), _destination(&destination), 
+      : _event(event), _source(&source), _destination(&destination), 
         _activation(activation), _reset(reset) 
     { 
       ARIADNE_CHECK_EQUAL_DIMENSIONS(*activation,source,"SetBasedDiscreteTransition::SetBasedDiscreteTransition(...)");
@@ -282,12 +293,12 @@ class SetBasedDiscreteTransition
     }
 
     /* Construct from shared pointers (for internal use). */
-    SetBasedDiscreteTransition(id_type event_id,
+    SetBasedDiscreteTransition(DiscreteEvent event,
                        const boost::shared_ptr< SetBasedDiscreteMode<R> > source, 
                        const boost::shared_ptr< SetBasedDiscreteMode<R> > destination,
                        const boost::shared_ptr< MapInterface<R> > reset,
                        const boost::shared_ptr< Geometry::SetInterface<R> > activation) 
-      : _event_id(event_id), _source(&*source), _destination(&*destination), 
+      : _event(event), _source(&*source), _destination(&*destination), 
         _activation(activation), _reset(reset) 
     { 
       ARIADNE_CHECK_EQUAL_DIMENSIONS(*activation,*source,"SetBasedDiscreteTransition::SetBasedDiscreteTransition(...)");
@@ -303,9 +314,9 @@ std::ostream&
 SetBasedDiscreteTransition<R>::write(std::ostream& os) const 
 { 
   return os << "SetBasedDiscreteTransition( "
-            << "id=" << this->id() << ", " 
-            << "source_id=" << this->source().id() << ", "
-            << "destination_id=" << this->destination().id() << ", "
+            << "event=" << this->discrete_event() << ", " 
+            << "source=" << this->source().discrete_state() << ", "
+            << "destination=" << this->destination().discrete_state() << ", "
             << "activation=" << this->activation() << ", "
             << "reset=" << this->reset() << " )"; 
 }
@@ -351,7 +362,7 @@ bool operator<(const SetBasedDiscreteTransition<R>& transition1, const SetBasedD
  * Each discrete transition represents an jump from a \a source
  * mode to a \a destination mode. 
  * There can be at most one discrete transition in an automaton
- * with the same event_id and source_id.
+ * with the same event and source.
  */
 template< class R >
 class SetBasedHybridAutomaton
@@ -364,7 +375,7 @@ class SetBasedHybridAutomaton
  private: 
   static std::list<std::string> system_names;
   
- protected:
+ private:
   /*! \brief The hybrid automaton's name. */
   std::string _name;
   
@@ -378,93 +389,91 @@ class SetBasedHybridAutomaton
   std::set< SetBasedDiscreteTransition<R> > _transitions;
   
  public:
+  //@{
+  //! \name Constructors and destructors 
   
-  /*! \brief This is a hybrid automaton class constructor.
-   *  
-   * This constructor initializes the object of the
-   * hybrid automaton class.
-   * \param name is the name of the hybrid automaton.
-   */
-  SetBasedHybridAutomaton(const std::string &name);
+  /*! \brief Construct a named automaton. */
+  SetBasedHybridAutomaton(const std::string& name);
   
-  /*! \brief  This is the destructor of the class hybrid 
-   * automaton.
-   *
-   * This destructor deletes in a safe way an object of the
-   * hybrid automaton class.
-   */
+  /*! \brief  Destructor. */
   ~SetBasedHybridAutomaton();
-  
-  /*! \brief Adds a discrete mode.
+  //@}
+
+  //@{ 
+  //! \name Methods for building the automaton.
+
+  /*! \brief Adds a discrete mode to the automaton.
    *
-   * This method adds a discrete mode to automaton definition.
-   * \param id is the unique key or identifyer of the discrete mode.
-   * \param dynamic is the discrete mode's vector field.
-   * \param invariant is the discrete mode's invariant.
+   * \param state is the mode's discrete state.
+   * \param dynamic is the mode's vector field.
+   * \param invariant is the mode's invariant.
    */
-  const SetBasedDiscreteMode<R>& new_mode(id_type id,
-                                  const VectorFieldInterface<R>& dynamic,
-                                  const Geometry::SetInterface<R>& invariant);
+  const SetBasedDiscreteMode<R>& new_mode(Geometry::DiscreteState state,
+                                          const System::VectorFieldInterface<R>& dynamic,
+                                          const Geometry::SetInterface<R>& invariant);
     
-  /*! \brief Add a discrete transition.
+  /*! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and destination modes.
    *
-   * This method creates a new discrete transition from the source mode to the 
-   * destination mode.
-   * \param event_id is the unique identifyer of the discrete event. 
-   * \param source is the discrete transition's source.
-   * \param destination is the discrete transition's destination.
+   * \param event is the transition's event.
+   * \param source is the transition's source location.
+   * \param destination is the transition's destination location.
+   * \param reset is the transition's reset.
+   * \param activation is the transition's activation region.
+   */
+  const SetBasedDiscreteTransition<R>& new_transition(System::DiscreteEvent event,
+                                                      Geometry::DiscreteState source, 
+                                                      Geometry::DiscreteState destination,
+                                                      const System::MapInterface<R>& reset,
+                                                      const Geometry::SetInterface<R>& activation);
+
+  /*! \brief Adds a discrete transition to the automaton using the discrete modes to specify the source and destination.
+   *
+   * \param event is the discrete transition's discrete event. 
+   * \param source is the discrete transition's source mode.
+   * \param destination is the discrete transition's destination mode.
    * \param reset is the discrete transition's reset.
    * \param activation is the discrete transition's activation region.
    */
-  const SetBasedDiscreteTransition<R>& new_transition(id_type event_id,
-                                              const SetBasedDiscreteMode<R> &source, 
-                                              const SetBasedDiscreteMode<R> &destination,
-                                              const MapInterface<R> &reset,
-                                              const Geometry::SetInterface<R> &activation);
+  const SetBasedDiscreteTransition<R>& new_transition(System::DiscreteEvent event,
+                                                      const SetBasedDiscreteMode<R>& source, 
+                                                      const SetBasedDiscreteMode<R>& destination,
+                                                      const MapInterface<R>& reset,
+                                                      const Geometry::SetInterface<R>& activation);
   
-  /*! \brief Adds a discrete transition.
-   *
-   * This method creates a new discrete transition from the mode with  mode to the 
-   * destination mode.
-   * \param event_id is the identifier of the discrete transition's event.
-   * \param source_id is the identifier of the discrete transition's source mode.
-   * \param destination_id is the identifier of the discrete transition's destination mode.
-   * \param reset is the discrete transition's reset.
-   * \param activation is the discrete transition's activation region.
-   */
-  const SetBasedDiscreteTransition<R>& new_transition(Base::id_type event_id,
-                                              id_type source_id, 
-                                              id_type destination_id,
-                                              const System::MapInterface<R> &reset,
-                                              const Geometry::SetInterface<R> &activation);
+  //@}
   
-  /*! \brief Test if the hybrid automaton has a discrete mode with key id. */
-  bool has_mode(id_type id) const;
+  //@{ 
+  //! \name Data access and queries. 
+  /*! \brief Returns the hybrid automaton's name. */
+  const std::string& name() const;
+
+  /*! \brief Test if the hybrid automaton has a discrete mode with discrete state \a state. */
+  bool has_mode(Geometry::DiscreteState state) const;
   
   /*! \brief Test if the hybrid automaton has a discrete transition with \a event_id and \a source_id. */
-  bool has_transition(id_type event_id, id_type source_id) const;
+  bool has_transition(System::DiscreteEvent event, Geometry::DiscreteState source) const;
   
+  /*! \brief The discrete mode with given discrete state. */
+  const SetBasedDiscreteMode<R>& mode(Geometry::DiscreteState state) const;
+  
+  /*! \brief The discrete transition with given \a event and \a source location. */
+  const SetBasedDiscreteTransition<R>& transition(System::DiscreteEvent event, Geometry::DiscreteState source) const;
+
   /*! \brief A set giving the dimension of the state space for each location identifier. */
   Geometry::HybridSpace locations() const;
   
   /*! \brief The hybrid set giving the invariant for each discrete location. */
   Geometry::HybridSet<R> invariant() const;
   
-  /*! \brief The set of discrete modes. */
+  /*! \brief The set of discrete modes. (Not available in Python interface) */
   const std::set< SetBasedDiscreteMode<R> >& modes() const;
   
-  /*! \brief The discrete mode with given id. */
-  const SetBasedDiscreteMode<R>& mode(id_type id) const;
-  
-  /*! \brief The set of discrete transitions. */
+  /*! \brief The set of discrete transitions. (Not available in Python interface) */
   const std::set< SetBasedDiscreteTransition<R> >& transitions() const;
   
-  /*! \brief The discrete transition with given \a event_id and \a source id. */
-  const SetBasedDiscreteTransition<R>& transition(id_type event_id, id_type source_id) const;
-  
-  /*! \brief Returns the hybrid automaton's name. */
-  const std::string &name() const;
-  
+  //@}
+ 
+  /* \brief Write to an output stream. */
   std::ostream& write(std::ostream& os) const;
 };
 

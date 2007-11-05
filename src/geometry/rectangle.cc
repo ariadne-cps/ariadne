@@ -38,12 +38,12 @@ namespace Ariadne {
 
 #ifdef ENABLE_FLOAT64
     template class Rectangle<Float64>;
-    template class Rectangle< Interval<Float64> >;
+    template class Rectangle<Interval64>;
 #endif
   
 #ifdef ENABLE_FLOATMP
     template class Rectangle<FloatMP>;
-    template class Rectangle< Interval<FloatMP> >;
+    template class Rectangle<IntervalMP>;
 #endif
 
   }

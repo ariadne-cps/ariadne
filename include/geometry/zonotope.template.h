@@ -23,56 +23,56 @@
  
 
 namespace Ariadne {
-  namespace Geometry {
     
 
-    template<class RC,class RG> template<class R0, class R1>
-    Zonotope<RC,RG>::Zonotope(const Point<R0>& c, 
-                              const LinearAlgebra::Matrix<R1>& g)
-      : _centre(c),
-        _generators(g)
-    {
-      if(c.dimension()!=g.number_of_rows()) { 
-        ARIADNE_THROW(InvalidGenerators,"Zonotope::Zonotope(Point c,Matrix g)","c="<<c<<", g="<<g);
-      }
-    }
-
-    
-    template<class RC,class RG> template<class R0, class R1, class R2>
-    Zonotope<RC,RG>::Zonotope(const Point<R0>& c, 
-                              const LinearAlgebra::Matrix<R1>& g1, 
-                              const LinearAlgebra::Vector<R2>& g2)
-      : _centre(c), 
-        _generators(g1.number_of_rows(),g1.number_of_columns()+1u)
-    { 
-      if(c.dimension()!=g1.number_of_rows() || c.dimension()!=g2.size()) { 
-        ARIADNE_THROW(InvalidGenerators,"Zonotope::Zonotope(Point c, Matrix g1, Vector g2)","c="<<c<<", g1="<<g1<<", g2="<<g2);
-      }
-      dimension_type d=this->dimension();
-      size_type nc=g1.number_of_columns();
-      for(dimension_type i=0; i!=d; ++i) {
-        for(size_type j=0; j!=nc; ++j) {
-          this->_generators(i,j)=g1(i,j);
-        }
-        this->_generators(i,nc)=g2(i);
-      }
-    }
-  
-    
-    template<class RC,class RG> template<class R0, class R1, class R2>
-    Zonotope<RC,RG>::Zonotope(const Point<R0>& c, 
-                              const LinearAlgebra::Matrix<R1>& g1, 
-                              const LinearAlgebra::Matrix<R2>& g2)
-      : _centre(c), 
-        _generators(LinearAlgebra::concatenate_columns(g1,g2))
-    { 
-      if(c.dimension()!=g1.number_of_rows() || c.dimension()!=g2.number_of_rows()) { 
-        ARIADNE_THROW(InvalidGenerators,"Zonotope::Zonotope(Point c, Matrix g1, Matrix g2)","c="<<c<<", g1="<<g1<<", g2="<<g2);
-      }
-    }
-
-
-  
-
+template<class RC,class RG> template<class R0, class R1>
+Geometry::Zonotope<RC,RG>::Zonotope(const Point<R0>& c, 
+                                    const LinearAlgebra::Matrix<R1>& g)
+  : _centre(c),
+    _generators(g)
+{
+  if(c.dimension()!=g.number_of_rows()) { 
+    ARIADNE_THROW(InvalidGenerators,"Zonotope::Zonotope(Point c,Matrix g)","c="<<c<<", g="<<g);
   }
 }
+
+
+template<class RC,class RG> template<class R0, class R1, class R2>
+Geometry::Zonotope<RC,RG>::Zonotope(const Point<R0>& c, 
+                                    const LinearAlgebra::Matrix<R1>& g1, 
+                                    const LinearAlgebra::Vector<R2>& g2)
+  : _centre(c), 
+    _generators(g1.number_of_rows(),g1.number_of_columns()+1u)
+{ 
+  if(c.dimension()!=g1.number_of_rows() || c.dimension()!=g2.size()) { 
+    ARIADNE_THROW(InvalidGenerators,"Zonotope::Zonotope(Point c, Matrix g1, Vector g2)","c="<<c<<", g1="<<g1<<", g2="<<g2);
+  }
+  dimension_type d=this->dimension();
+  size_type nc=g1.number_of_columns();
+  for(dimension_type i=0; i!=d; ++i) {
+    for(size_type j=0; j!=nc; ++j) {
+      this->_generators(i,j)=g1(i,j);
+    }
+    this->_generators(i,nc)=g2(i);
+  }
+}
+
+
+template<class RC,class RG> template<class R0, class R1, class R2>
+Geometry::Zonotope<RC,RG>::Zonotope(const Point<R0>& c, 
+                                    const LinearAlgebra::Matrix<R1>& g1, 
+                                    const LinearAlgebra::Matrix<R2>& g2)
+  : _centre(c), 
+    _generators(LinearAlgebra::concatenate_columns(g1,g2))
+{ 
+  if(c.dimension()!=g1.number_of_rows() || c.dimension()!=g2.number_of_rows()) { 
+    ARIADNE_THROW(InvalidGenerators,"Zonotope::Zonotope(Point c, Matrix g1, Matrix g2)","c="<<c<<", g1="<<g1<<", g2="<<g2);
+  }
+}
+
+
+
+
+
+} // namespace Ariadne
+

@@ -45,12 +45,12 @@ namespace Ariadne {
      *  \brief Interval Newton solver.
      */
     template<class R>
-    class IntervalNewtonSolver : public Solver<R>
+    class IntervalNewtonSolver : public SolverInterface<R>
     {
       typedef typename Numeric::traits<R>::interval_type I;
      public:
       /*! \brief Constructor. */
-      IntervalNewtonSolver(R max_error, uint max_steps) : Solver<R>(max_error,max_steps) { }
+      IntervalNewtonSolver(R max_error, uint max_steps) : SolverInterface<R>(max_error,max_steps) { }
       
       /*! \brief Solve \f$f(x)=0\f$, using the interval Newton method. */
       Geometry::Point<I>

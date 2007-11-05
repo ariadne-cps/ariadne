@@ -34,60 +34,60 @@
 #include "../base/stlio.h"
 
 namespace Ariadne {
-  namespace Geometry {
 
-    template<class R>
-    Point<R>::Point(const std::string& s) : _vector(1)
-    {
-      std::stringstream ss(s);
-      ss >> *this;
-    }
 
-    
-    template<class R>
-    std::ostream& 
-    Point<R>::write(std::ostream& os) const
-    {
-      const Point<R>& pt=*this;
-      os << "(";
-      if(pt.dimension() > 0) {
-        os << pt[0] ;
-        for (size_type i=1; i<pt.dimension(); i++) {
-          os << "," << pt[i];
-        }
-      }
-      os << ")" ;
-
-      return os;
-    }
-
-    template<class R>
-    std::istream& 
-    Point<R>::read(std::istream& is)
-    {
-      Point<R>& pt=*this;
-      static size_type last_size;
-
-      std::vector<R> v;
-      v.reserve(last_size);
-      char c;
-      is >> c;
-      is.putback(c);
-      if(c=='(') {
-        Base::read_vector(is, v, '(', ')');
-      } else if(c=='[') {
-        Base::read_vector(is, v, '[', ']');
-      } else {
-        throw InvalidInput("Invalid point input");
-      }
-      last_size = v.size();
-
-      pt._vector=LinearAlgebra::Vector<R>(v.size());
-      for(size_t i=0; i!=v.size(); ++i) {
-        pt._vector(i)=v[i];
-      }
-      return is;
-    }
-
-  }
+template<class X>
+Geometry::Point<X>::Point(const std::string& s) : _vector(1)
+{
+  std::stringstream ss(s);
+  ss >> *this;
 }
+
+
+template<class X>
+std::ostream& 
+Geometry::Point<X>::write(std::ostream& os) const
+{
+  const Point<X>& pt=*this;
+  os << "(";
+  if(pt.dimension() > 0) {
+    os << pt[0] ;
+    for (size_type i=1; i<pt.dimension(); i++) {
+      os << "," << pt[i];
+    }
+  }
+  os << ")" ;
+  
+  return os;
+}
+
+template<class X>
+std::istream& 
+Geometry::Point<X>::read(std::istream& is)
+{
+  Point<X>& pt=*this;
+  static size_type last_size;
+  
+  std::vector<X> v;
+  v.reserve(last_size);
+  char c;
+  is >> c;
+  is.putback(c);
+  if(c=='(') {
+    Base::read_vector(is, v, '(', ')');
+  } else if(c=='[') {
+    Base::read_vector(is, v, '[', ']');
+  } else {
+    throw InvalidInput("Invalid point input");
+  }
+  last_size = v.size();
+  
+  pt._vector=LinearAlgebra::Vector<X>(v.size());
+  for(size_t i=0; i!=v.size(); ++i) {
+    pt._vector(i)=v[i];
+  }
+  return is;
+}
+
+
+} // namespace Ariadne

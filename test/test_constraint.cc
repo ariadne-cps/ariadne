@@ -58,7 +58,7 @@ int main() {
   
   cout << boolalpha;
   
-  test_constraint<Float>();
+  test_constraint<Flt>();
 }
 
 

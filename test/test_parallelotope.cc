@@ -48,7 +48,7 @@ template<class R> int test_parallelotope();
 
 int main() {
   cout << boolalpha;
-  test_parallelotope<Float>();
+  test_parallelotope<Flt>();
   cerr << "INCOMPLETE ";
   return 0;
 }
@@ -57,6 +57,8 @@ template<class R>
 int
 test_parallelotope()
 { 
+  typedef Numeric::Interval<R> I;
+
   Rectangle<R> r1=Rectangle<R>("[9,11]x[5,11]x[-1,1]");
   Rectangle<R> r2=Rectangle<R>("[4.875,5.125]x[2.875,3.125]x[1.75,2.25]");
   Rectangle<R> r3=Rectangle<R>("[-1,9]x[-1,6]x[0,4]");
@@ -118,9 +120,10 @@ test_parallelotope()
   assert((bool)(!p1.contains(pts[5])));
 
   // Test grid approximation routines
-  Parallelotope< Interval<R> > ip(p1);
-  Parallelotope<R> oap=over_approximation(ip);
-  Parallelotope<R> qoap=orthogonal_over_approximation(ip);
+  Parallelotope<I,I> ip(p1);
+  Parallelotope<I,R> ep=over_approximation(ip);
+  Parallelotope<R,R> oap=over_approximation(ep);
+  Parallelotope<I,I> qoap=orthogonal_over_approximation(ip);
 
   Rectangle<R> r5("[1.125,1.25]x[1.625,1.75]");
   Rectangle<R> r6("[0.875,1.00]x[0.125,0.25]");

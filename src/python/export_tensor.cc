@@ -72,7 +72,7 @@ void export_tensor()
   typedef Tensor<R> Tns;
   
   class_<Tns>(python_name<R>("Tensor").c_str(),init<SizeArray>())
-//    .def(init<std::string>())
+    //.def(init<std::string>())
     .def(init<Tns>())
     .def("__getitem__",&tensor_get_item<R>)
     .def("__setitem__",&tensor_set_item<R,R>)
@@ -90,7 +90,7 @@ void export_tensor<Rational>()
   typedef Tensor<R> Tns;
   
   class_<Tns>(python_name<R>("Tensor").c_str(),init<SizeArray>())
-//    .def(init<std::string>())
+    //.def(init<std::string>())
     .def(init<Tns>())
     .def("__getitem__",&tensor_get_item<R>)
     .def("__setitem__",&tensor_set_item<R,R>)
@@ -115,8 +115,8 @@ void export_interval_tensor()
   typedef Matrix< Interval<R> > IMx;
   typedef Tensor< Interval<R> > ITns;
   
-  class_<ITns>(python_name<R>("IntervalTensor").c_str(),init<SizeArray>())
-//    .def(init<std::string>())
+  class_<ITns>(python_name<R>("FuzzyTensor").c_str(),init<SizeArray>())
+    //.def(init<std::string>())
     .def(init<Tns>())
     .def(init<ITns>())
     .def("__getitem__",&tensor_get_item<I>)

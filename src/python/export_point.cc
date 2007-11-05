@@ -23,6 +23,8 @@
  */
 
 #include "python/python_float.h"
+#include "python/python_utilities.h"
+#include "python/read_scalar.h"
 
 #include "linear_algebra/vector.h"
 
@@ -30,7 +32,6 @@
 #include "geometry/point_list.h"
 #include "geometry/rectangle.h"
 
-#include "python/python_utilities.h"
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
 using namespace Ariadne::LinearAlgebra;
@@ -38,7 +39,42 @@ using namespace Ariadne::Geometry;
 using namespace Ariadne::Python;
 
 #include <boost/python.hpp>
+#include <boost/python/detail/api_placeholder.hpp>
 using namespace boost::python;
+
+template<class X>
+std::string
+__str__(const Point<X>& pt)
+{
+  std::stringstream ss;
+  ss << pt;
+  return ss.str();
+}
+
+template<class X>
+std::string
+__repr__(const Point<X>& pt)
+{
+  std::stringstream ss;
+  ss << "Point(" << pt << ")";
+  return ss.str();
+}
+
+template<class X>  
+Point<X>*
+make_point(const boost::python::object& obj) 
+{
+  // See "Extracting C++ objects" in the Boost Python tutorial
+  typedef typename Numeric::traits<X>::number_type R;
+  tuple elements=extract<tuple>(obj);
+  int n=boost::python::len(elements);
+  Point<X>& pt=*new Point<X>(n);
+  for(int i=0; i!=n; ++i) {
+    pt[i]=read_scalar<X>(elements[i]);
+  }
+  return &pt;
+}
+
 
 template<class R1, class R2> inline 
 void point_setitem(Point<R1>& p, uint i, R2 x) {
@@ -75,9 +111,10 @@ void export_point()
   typedef typename Numeric::traits<R>::arithmetic_type A;
 
   class_< Point<R> >(python_name<R>("Point").c_str(),init<>())
+    .def("__init__", make_constructor(&make_point<R>) )
     .def(init< int >())
     .def(init< Point<R> >())
-    .def(init<std::string>())
+    //.def(init<std::string>())
     .def("dimension", &Point<R>::dimension)
     .def("__len__", &Point<R>::dimension)
     .def("__getitem__", &point_getitem<R>)
@@ -88,7 +125,8 @@ void export_point()
     .def("__add__",(Point<A>(*)(const Point<R>&,const Vector<R>&))&operator+)
     .def("__sub__",(Point<A>(*)(const Point<R>&,const Vector<R>&))&operator-)
     .def("__sub__",(Vector<A>(*)(const Point<R>&,const Point<R>&))&operator-)
-    .def(self_ns::str(self))
+    .def("__str__",&__str__<R>)
+    .def("__repr__",&__repr__<R>)
   ;
 
   def("approximation",(Point<R>(*)(const Point<R>&))&approximation);
@@ -99,12 +137,12 @@ void export_interval_point()
 {
   typedef Interval<R> I;
 
-  class_< Point< Interval<R> > >(python_name<R>("IntervalPoint").c_str(),init<>())
+  class_< Point<I> >(python_name<R>("FuzzyPoint").c_str(),init<>())
+    .def("__init__", make_constructor(&make_point<I>) )
     .def(init< int >())
     .def(init< Point<R> >())
-    .def(init< Point< Interval<R> > >())
+    .def(init< Point<I> >())
     .def(init< Rectangle<R> >())
-    .def(init<std::string>())
     .def("dimension", &Point< Interval<R> >::dimension)
     .def("__len__", &Point< Interval<R> >::dimension)
     .def("__getitem__", &point_getitem< Interval<R> >)
@@ -119,7 +157,8 @@ void export_interval_point()
     .def("__sub__",(Point<I>(*)(const Point<I>&,const Vector<R>&))&operator-)
     .def("__sub__",(Point<I>(*)(const Point<I>&,const Vector<I>&))&operator-)
     .def("__sub__",(Vector<I>(*)(const Point<I>&,const Point<I>&))&operator-)
-    .def(self_ns::str(self))
+    .def("__str__",&__str__<I>)
+    .def("__repr__",&__repr__<I>)
   ;
 
   def("approximation",(Point<R>(*)(const Point<I>&))&approximation);

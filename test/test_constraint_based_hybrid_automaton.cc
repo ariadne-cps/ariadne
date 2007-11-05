@@ -53,7 +53,7 @@ template<class R> int test_constraint_based_hybrid_automaton();
   
 int main() {
   set_system_verbosity(0);
-  return test_constraint_based_hybrid_automaton<Float>();
+  return test_constraint_based_hybrid_automaton<Flt>();
 }
 
 template<class R>
@@ -72,10 +72,10 @@ int test_constraint_based_hybrid_automaton()
   LinearConstraint<R> guard(Vector<R>("[0,1]"),Geometry::greater,R(1));
 
   ConstraintBasedHybridAutomaton<R> automaton("Affine test automaton");
-  id_type mode1_id=1;
-  id_type mode2_id=2;
-  id_type event0_id=1;
-  id_type event3_id=4;
+  DiscreteState mode1_id(1);
+  DiscreteState mode2_id(2);
+  DiscreteEvent event0_id(1);
+  DiscreteEvent event3_id(4);
   const ConstraintBasedDiscreteMode<R>& mode1=automaton.new_mode(mode1_id,dynamic);
   const ConstraintBasedDiscreteMode<R>& mode2=automaton.new_mode(mode2_id,dynamic);
   cout << automaton << endl;
@@ -83,8 +83,8 @@ int test_constraint_based_hybrid_automaton()
   automaton.new_invariant(event3_id,mode1_id,constraint2);
   automaton.new_invariant(event0_id,mode2_id,constraint2);
   cout << automaton << endl;
-  id_type event1_id=2;
-  id_type event2_id=3;
+  DiscreteEvent event1_id(2);
+  DiscreteEvent event2_id(3);
   const ConstraintBasedDiscreteTransition<R>& transition1=automaton.new_unforced_transition(event1_id,mode1_id,mode1_id,reset,activation);
   const ConstraintBasedDiscreteTransition<R>& transition2=automaton.new_forced_transition(event2_id,mode1_id,mode1_id,reset,guard);
   cout << automaton << endl << endl;

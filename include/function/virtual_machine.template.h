@@ -95,42 +95,42 @@ void evaluate(const array<VirtualMachine::ByteCode>& ops, X** args, float_tag)
     case VirtualMachine::POW:
       //std::cerr << "POW"<<std::flush;
       value=(++op_iter)->val;
-      stack[stack.size()-1]=Numeric::pow(stack[stack.size()-1],value);
+      stack[stack.size()-1]=pow(stack[stack.size()-1],value);
       break;
     case VirtualMachine::MIN:
-      stack[stack.size()-2]=Numeric::min(stack[stack.size()-2],stack[stack.size()-1]);
+      stack[stack.size()-2]=min(stack[stack.size()-2],stack[stack.size()-1]);
       stack.pop_back();
       break;
     case VirtualMachine::MAX:
-      stack[stack.size()-2]=Numeric::max(stack[stack.size()-2],stack[stack.size()-1]);
+      stack[stack.size()-2]=max(stack[stack.size()-2],stack[stack.size()-1]);
       stack.pop_back();
       break;
     case VirtualMachine::ABS:
-      stack[stack.size()-1]=Numeric::abs(stack[stack.size()-1]);
+      stack[stack.size()-1]=abs(stack[stack.size()-1]);
       break;
     case VirtualMachine::EXP:
-      stack[stack.size()-1]=Numeric::exp(stack[stack.size()-1]);
+      stack[stack.size()-1]=exp(stack[stack.size()-1]);
       break;
     case VirtualMachine::LOG:
-      stack[stack.size()-1]=Numeric::log(stack[stack.size()-1]);
+      stack[stack.size()-1]=log(stack[stack.size()-1]);
       break;
     case VirtualMachine::SIN:
-      stack[stack.size()-1]=Numeric::sin(stack[stack.size()-1]);
+      stack[stack.size()-1]=sin(stack[stack.size()-1]);
       break;
     case VirtualMachine::COS:
-      stack[stack.size()-1]=Numeric::cos(stack[stack.size()-1]);
+      stack[stack.size()-1]=cos(stack[stack.size()-1]);
       break;
     case VirtualMachine::TAN:
-      stack[stack.size()-1]=Numeric::tan(stack[stack.size()-1]);
+      stack[stack.size()-1]=tan(stack[stack.size()-1]);
       break;
     case VirtualMachine::ASIN:
-      stack[stack.size()-1]=Numeric::asin(stack[stack.size()-1]);
+      stack[stack.size()-1]=asin(stack[stack.size()-1]);
       break;
     case VirtualMachine::ACOS:
-      stack[stack.size()-1]=Numeric::acos(stack[stack.size()-1]);
+      stack[stack.size()-1]=acos(stack[stack.size()-1]);
       break;
     case VirtualMachine::ATAN:
-      stack[stack.size()-1]=Numeric::atan(stack[stack.size()-1]);
+      stack[stack.size()-1]=atan(stack[stack.size()-1]);
       break;
     }
   }
@@ -180,18 +180,18 @@ void evaluate(const array<VirtualMachine::ByteCode>& ops, Q** args, rational_tag
       break;
     case VirtualMachine::POW:
       value=(++op_iter)->val;
-      stack[stack.size()-1]=Numeric::pow(stack[stack.size()-1],value);
+      stack[stack.size()-1]=pow(stack[stack.size()-1],value);
       break;
     case VirtualMachine::MIN:
-      stack[stack.size()-2]=Numeric::min(stack[stack.size()-2],stack[stack.size()-1]);
+      stack[stack.size()-2]=min(stack[stack.size()-2],stack[stack.size()-1]);
       stack.pop_back();
       break;
     case VirtualMachine::MAX:
-      stack[stack.size()-2]=Numeric::max(stack[stack.size()-2],stack[stack.size()-1]);
+      stack[stack.size()-2]=max(stack[stack.size()-2],stack[stack.size()-1]);
       stack.pop_back();
       break;
     case VirtualMachine::ABS:
-      stack[stack.size()-1]=Numeric::abs(stack[stack.size()-1]);
+      stack[stack.size()-1]=abs(stack[stack.size()-1]);
       break;
     default:
       throw std::runtime_error("evaluate: operation not permitted for rational numbers");

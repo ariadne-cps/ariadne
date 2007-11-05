@@ -52,14 +52,25 @@ namespace Ariadne {
     class SetBasedHybridEvolver
     {
       typedef Numeric::Interval<R> I;
-      typedef Geometry::Zonotope<I,R> BS;
      public:
-      /*! \brief Construct from an applicator and an integrator. */
-      SetBasedHybridEvolver(MapEvolver<R>& applicator, VectorFieldEvolver<R>& integrator);
+      //@{
+      //! \name Constructors and destructors
+      /*! \brief Construct from evolution parameters. */
+      SetBasedHybridEvolver(const EvolutionParameters<R>& parameters);
 
-      /*! \brief Virtual destructor. */
+      /*! \brief Construct from evolution parameters, an applicator and an integrator. */
+      template<class BS>
+      SetBasedHybridEvolver(const EvolutionParameters<R>& parameters, const ApplicatorInterface<BS>& applicator, const IntegratorInterface<BS>& integrator);
+
+      /*! \brief Construct from a map evolver and a vector field evolver. */
+      SetBasedHybridEvolver(const MapEvolver<R>& applicator, const VectorFieldEvolver<R>& integrator);
+
+       /*! \brief Copy constructor. */
+      SetBasedHybridEvolver(const SetBasedHybridEvolver<R>& evolver);
+
+     /*! \brief Virtual destructor. */
       virtual ~SetBasedHybridEvolver();
-
+      //@}
 
       //@{
       //! \name Evolution using abstract sets.
@@ -67,21 +78,37 @@ namespace Ariadne {
       Geometry::HybridSet<R> discrete_step(const System::SetBasedHybridAutomaton<R>& automaton, 
                                            const Geometry::HybridSet<R>& initial_set);
      
-      /*! \brief Evolve the hybrid automaton within \a bounding_set starting from the \a initial_set respecting invariants and without using discrete transitions. */
+      /*! \brief Evolve the hybrid automaton starting from the \a initial_set respecting invariants and without using discrete transitions. */
+      Geometry::HybridSet<R> continuous_chainreach(const System::SetBasedHybridAutomaton<R>& automaton, 
+                                                   const Geometry::HybridSet<R>& initial_set);
+     
+      /*! \brief Compute a lower approximation to the reachable set using lower semantics. (Not currently implemented) */
+      Geometry::HybridSet<R> lower_reach(const System::SetBasedHybridAutomaton<R>& automaton, 
+                                         const Geometry::HybridSet<R>& initial_set);
+
+      /*! \brief Compute an over approximation to the chain-reachable set using upper semantics. */
+      Geometry::HybridSet<R> chainreach(const System::SetBasedHybridAutomaton<R>& automaton, 
+                                        const Geometry::HybridSet<R>& initial_set);
+
+
+      //@}
+      
+      //@{
+      //! \name Deprecated methods for evolution using abstract sets.
+      /*! \brief Evolve the hybrid automaton starting from the \a initial_set respecting invariants and without using discrete transitions. (Deprecated; use continuous_chainreach(automaton,initial_set) instead, and set the bounding box in the accuracy parameters.) */
       Geometry::HybridSet<R> continuous_chainreach(const System::SetBasedHybridAutomaton<R>& automaton, 
                                                    const Geometry::HybridSet<R>& initial_set,
                                                    const Geometry::HybridSet<R>& bounding_set);
      
-      /*! \brief Compute an over approximation to the chain-reachable set using upper semantics. */
+      /*! \brief Compute an over approximation to the chain-reachable set using upper semantics. (Deprecated; use continuous_chainreach(automaton,initial_set) instead, and set the bounding box in the accuracy parameters.)  */
       Geometry::HybridSet<R> chainreach(const System::SetBasedHybridAutomaton<R>& automaton, 
                                         const Geometry::HybridSet<R>& initial_set, 
                                         const Geometry::HybridSet<R>& bounding_set);
+      //}
 
-      //@}
-
-     public:
+    public:
       //@{
-      //! \name Evolution using concrete sets.
+      //! \name Evolution using concrete sets. (Not available through Python interface.)
       /*! \brief Make a discrete step of the hybrid automaton, starting from initial set. */
       Geometry::HybridGridMaskSet<R> discrete_step(const System::SetBasedHybridAutomaton<R>& automaton, 
                                                        const Geometry::HybridGridMaskSet<R>& initial_set);
@@ -91,6 +118,10 @@ namespace Ariadne {
                                                            const Geometry::HybridGridMaskSet<R>& bounding_set);
 
      
+      /*! \brief Compute an over approximation to the chain-reachable set using lower semantics. */
+      Geometry::HybridGridCellListSet<R> lower_reach(const System::SetBasedHybridAutomaton<R>& automaton, 
+                                                     const Geometry::HybridGridCellListSet<R>& initial_set);
+
       /*! \brief Compute an over approximation to the chain-reachable set using upper semantics. */
       Geometry::HybridGridMaskSet<R> chainreach(const System::SetBasedHybridAutomaton<R>& automaton, 
                                                 const Geometry::HybridGridMaskSet<R>& initial_set, 
@@ -98,11 +129,19 @@ namespace Ariadne {
 
       //@}
      private:
-      // Evolve the hybrid automaton within \a domains starting from the initial_set without using discrete transitions (no checking). */
+      // Perform one step of the discrete time evolution using lower semantics. (No checking of arguments)
+      Geometry::HybridListSet< Geometry::Rectangle<R> > _discrete_step(const System::SetBasedHybridAutomaton<R>& automaton, 
+                                                                       const Geometry::HybridListSet< Geometry::Rectangle<R> >& initial_set);
+       // Evolve the hybrid automaton starting from the initial_set without using discrete transitions. (No checking of arguments)
+      Geometry::HybridListSet< Geometry::Rectangle<R> > _continuous_reach(const System::SetBasedHybridAutomaton<R>& automaton, 
+                                                                          const Geometry::HybridListSet< Geometry::Rectangle<R> >& initial_set,
+                                                                          const Numeric::Rational& maximum_time);
+
+      // Perform one step of the discrete time evolution using upper semantics. (No checking of arguments)
       Geometry::HybridGridMaskSet<R> _discrete_step(const System::SetBasedHybridAutomaton<R>& automaton, 
                                                     const Geometry::HybridGridMaskSet<R>& initial_set,
                                                     const Geometry::HybridGridMaskSet<R>& domain_set);
-      // Evolve the hybrid automaton within \a domains starting from the initial_set without using discrete transitions (no checking). */
+      // Evolve the hybrid automaton within \a domains starting from the initial_set without using discrete transitions (no checking).
       Geometry::HybridGridMaskSet<R> _continuous_chainreach(const System::SetBasedHybridAutomaton<R>& automaton, 
                                                             const Geometry::HybridGridMaskSet<R>& initial_set,
                                                             const Geometry::HybridGridMaskSet<R>& domain_set);
@@ -114,5 +153,7 @@ namespace Ariadne {
 
   }
 }
+
+#include "set_based_hybrid_evolver.inline.h"
 
 #endif /* ARIADNE_SET_BASED_HYBRID_EVOLVER_H */

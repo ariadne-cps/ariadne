@@ -29,6 +29,8 @@
 #define ARIADNE_INTERVAL_H
 
 #include <iostream>
+#include <sstream>
+#include <string>
 #include <iomanip>
 #include <stdexcept>
 #include <cassert>
@@ -41,6 +43,7 @@
 #include "../numeric/conversion.h"
 #include "../numeric/arithmetic.h"
 #include "../numeric/function.h"
+#include "../numeric/rational.h"
 
 #include "../numeric/interval.class.h"
 
@@ -151,6 +154,9 @@ namespace Ariadne {
     template<class R> Interval<R> abs(const Interval<R>& x);
     template<class R,class N> Interval<R> pow(const Interval<R>& x, const N& n);
   
+    template<class R> Interval<R> neg(const Interval<R>& x);
+    template<class R> Interval<R> rec(const Interval<R>& x);
+
     template<class R> bool equal(const Interval<R>& x1, const Interval<R>& x2);
     template<class R> bool disjoint(const Interval<R>& x1, const Interval<R>& x2);
     template<class R> bool overlap(const Interval<R>& x1, const Interval<R>& x2);

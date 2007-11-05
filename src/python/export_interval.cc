@@ -35,6 +35,29 @@ using namespace Ariadne;
 using namespace Ariadne::Numeric;
 using namespace Ariadne::Python;
 
+template<class R> 
+std::string
+__str__(const Interval<R>& ivl) {
+  std::stringstream ss;
+  //ss << std::fixed;
+  ss << std::setprecision(20);
+  ss << ivl;
+  return ss.str();
+}
+
+template<class R> 
+std::string
+__repr__(const Interval<R>& ivl) {
+  std::stringstream ss;
+  //ss << std::fixed;
+  ss << std::setprecision(20);
+  ss << "FuzzyFloat(" << ivl.lower();
+  if(ivl.lower()!=ivl.upper()) {
+    ss << "," << ivl.upper();
+  }
+  ss << ")";
+  return ss.str();
+}
 
 template<class R>
 void export_interval()
@@ -42,8 +65,10 @@ void export_interval()
   typedef Interval<R> I;
   typedef Integer Z;
 
-  class_< Interval<R> >(python_name<R>("Interval").c_str())
-    //.def(init<std::string>())
+  // FIXME: pow(Interval<R>,Integer) doesn't work 
+
+  class_< Interval<R> >(python_name<R>("FuzzyFloat").c_str())
+    .def(init<std::string>())
     .def(init<int,int>())
     .def(init<double,double>())
     .def(init<R,R>())
@@ -80,7 +105,7 @@ void export_interval()
     .def("__rdiv__", &rdiv<I,I,double,I,R>)
     .def("__rdiv__", &rdiv<I,I,R>)
     .def("__pow__", &pow<I,I,int,I,int>)
-    .def("__pow__", &pow<I,I,Z,I,Z>)
+    //.def("__pow__", &pow<I,I,Z,I,Z>)
     .def("__eq__", &eq<tribool,I,double>)
     .def("__eq__", &eq<tribool,I,R>)
     .def("__eq__", &eq<tribool,I,I>)
@@ -104,7 +129,8 @@ void export_interval()
     .def("midpoint", &Interval<R>::midpoint)
     .def("radius", &Interval<R>::radius)
     .def("width", &Interval<R>::width)
-    .def(self_ns::str(self))    // __self_ns::str__
+    .def("__str__", &__str__<Float>)
+    .def("__repr__", &__repr__<Float>)  
   ;
   
   def("lower", (R(*)(const I&))&lower);
@@ -131,8 +157,8 @@ void export_interval()
   def("pow",&pow<I,R,int,I,int>);
   def("pow",&pow<I,I,int,I,int>);
 
-  def("pow",&pow<I,R,Z,I,Z>);
-  def("pow",&pow<I,I,Z,I,Z>);
+  //def("pow",&pow<I,R,Z,I,Z>);
+  //def("pow",&pow<I,I,Z,I,Z>);
 
   def("sqrt",&sqrt<I,R,I>);
   def("sqrt",&sqrt<I,I,I>);

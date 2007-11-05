@@ -32,11 +32,17 @@ namespace Ariadne {
     using namespace Numeric;
 
 #ifdef ENABLE_FLOAT64
-    template class Applicator<Float64>;
+    template class Applicator< Geometry::Rectangle<Float64> >;
+    template class Applicator< Geometry::Zonotope<Float64,Float64> >;
+    template class Applicator< Geometry::Zonotope<Interval64,Float64> >;
+    template class Applicator< Geometry::Zonotope<Interval64,Interval64> >;
 #endif
   
 #ifdef ENABLE_FLOATMP
-    template class Applicator<FloatMP>;
+    template class Applicator< Geometry::Rectangle<FloatMP> >;
+    template class Applicator< Geometry::Zonotope<FloatMP,FloatMP> >;
+    template class Applicator< Geometry::Zonotope<IntervalMP,FloatMP> >;
+    template class Applicator< Geometry::Zonotope<IntervalMP,IntervalMP> >;
 #endif
 
   }

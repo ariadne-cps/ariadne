@@ -118,6 +118,9 @@ namespace Ariadne {
     template<class R> 
     tribool subset(const Rectangle<R>&, const IrregularGridMaskSet<R>&);
 
+    template<class R> 
+    tribool subset(const ListSet< Rectangle<R> >& rls, const IrregularGridMaskSet<R>& igms);
+
     template<class R> inline
     std::ostream& operator<<(std::ostream& os, const IrregularGridMaskSet<R>& igms)
     {

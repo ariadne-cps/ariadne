@@ -47,6 +47,7 @@ namespace Ariadne {
     struct FunctionVariable : public Variable { enum Type { OUTPUT=0,INPUT=1,INTERMEDIATE=2,CONSTANT=3 }; Type type; int start; };
     std::ostream& operator<<(std::ostream& os, const FunctionVariable& var); 
 
+    class MultiIndex;
 
     /*!\ingroup Function
      * \brief Abstract base class for continuous functionss.
@@ -128,7 +129,7 @@ namespace Ariadne {
       /*! \brief Make a copy (clone) of the function. */
       virtual SmoothFunctionInterface<R>* clone() const = 0;
       /*! \brief Evaluate the derivative of the function. */
-      virtual A derivative(const LinearAlgebra::Vector<A>& x, const size_type& i, const LinearAlgebra::MultiIndex& j) const = 0;
+      virtual A derivative(const LinearAlgebra::Vector<A>& x, const size_type& i, const Function::MultiIndex& j) const = 0;
     };
 
 

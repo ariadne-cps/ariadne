@@ -110,14 +110,14 @@ DifferenceMap<R>::name() const
 
 template<class R> 
 inline
-Solver<R>::~Solver() 
+SolverInterface<R>::~SolverInterface() 
 { 
 }
 
 
 template<class R>
 inline
-Solver<R>::Solver(R max_error, uint max_steps)
+SolverInterface<R>::SolverInterface(R max_error, uint max_steps)
   : _max_error(max_error), _max_steps(max_steps) 
 {
 }
@@ -126,7 +126,7 @@ Solver<R>::Solver(R max_error, uint max_steps)
 template<class R> 
 inline
 const R& 
-Solver<R>::maximum_error() const 
+SolverInterface<R>::maximum_error() const 
 {
   return this->_max_error; 
 }
@@ -135,7 +135,7 @@ Solver<R>::maximum_error() const
 template<class R> 
 inline
 const uint& 
-Solver<R>::maximum_number_of_steps() const 
+SolverInterface<R>::maximum_number_of_steps() const 
 { 
   return this->_max_steps; 
 }
@@ -144,7 +144,7 @@ Solver<R>::maximum_number_of_steps() const
 template<class R> 
 inline
 void 
-Solver<R>::set_maximum_error(R max_error)
+SolverInterface<R>::set_maximum_error(R max_error)
 { 
   this->_max_error=max_error; 
 }
@@ -153,7 +153,7 @@ Solver<R>::set_maximum_error(R max_error)
 template<class R> 
 inline
 void 
-Solver<R>::set_maximum_number_of_steps(uint max_steps) 
+SolverInterface<R>::set_maximum_number_of_steps(uint max_steps) 
 { 
   this->_max_steps=max_steps; 
 }
@@ -161,8 +161,8 @@ Solver<R>::set_maximum_number_of_steps(uint max_steps)
 
 template<class R> 
 inline
-Geometry::Point<typename Solver<R>::I> 
-Solver<R>::fixed_point(const System::MapInterface<R>& f,const Geometry::Point<I>& pt) 
+Geometry::Point<typename SolverInterface<R>::I> 
+SolverInterface<R>::fixed_point(const System::MapInterface<R>& f,const Geometry::Point<I>& pt) 
 {
   return this->solve(System::DifferenceMap<R>(f),pt); 
 }

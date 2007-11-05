@@ -1,8 +1,7 @@
 /***************************************************************************
  *            list_set.h
  *
- *  23 June 2005
- *  Copyright  2005  Alberto Casagrande, Pieter Collins
+ *  Copyright  2005-7  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
 
@@ -203,6 +202,8 @@ namespace Ariadne {
 
       //@{
       //! \name Input/output operators
+      /*! \brief Write a summary to an output stream. */
+      std::ostream& summarize(std::ostream&) const;
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream& os) const;
       /*! \brief Read from an input stream. */
@@ -238,8 +239,21 @@ namespace Ariadne {
 
       /*! \brief The closure of intersection of the interior of \a A with the interior of \a B.
        */
-      friend ListSet<BS> regular_intersection(const ListSet<BS>& A,
-                                              const ListSet<BS>& B);
+      friend ListSet<BS> open_intersection(const ListSet<BS>& A,
+                                           const ListSet<BS>& B);
+      /*! \brief The union of all cells of \a A which can be proved to be subsets of \a B.
+       */
+      friend ListSet<BS> inner_intersection(const ListSet<BS>& A,
+                                            const SetInterface<R>& B);
+      /*! \brief The union of all cells of \a A which can be proved to intersect \a B.
+       */
+      friend ListSet<BS> lower_intersection(const ListSet<BS>& A,
+                                            const SetInterface<R>& B);
+
+      /*! \brief The union of all cells of \a A which have not been proved to be disjoint from \a B.
+       */
+      friend ListSet<BS> outer_intersection(const ListSet<BS>& A,
+                                            const SetInterface<R>& B);
       //@}
 #endif      
      private:
@@ -304,6 +318,21 @@ namespace Ariadne {
     ListSet<BS>
     open_intersection(const ListSet<BS>& A,
                       const ListSet<BS>& B);
+  
+    template<class BS>
+    ListSet<BS>
+    inner_intersection(const ListSet<BS>& A,
+                       const Geometry::SetInterface<typename BS::real_type>& B);
+  
+    template<class BS>
+    ListSet<BS>
+    lower_intersection(const ListSet<BS>& A,
+                       const Geometry::SetInterface<typename BS::real_type>& B);
+  
+    template<class BS>
+    ListSet<BS>
+    outer_intersection(const ListSet<BS>& A,
+                       const Geometry::SetInterface<typename BS::real_type>& B);
   
   }
 }

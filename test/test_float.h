@@ -29,10 +29,10 @@
 
 #if ENABLE_FLOAT64
 #include "numeric/float64.h"
-namespace Ariadne { namespace Numeric { typedef Float64 Float; } }
+namespace Ariadne { namespace Numeric { typedef Float64 Flt; typedef Interval<Float64> Ivl; } }
 #elif ENABLE_FLOATMP
 #include "numeric/mpfloat.h"
-namespace Ariadne { namespace Numeric { typedef MPFloat Float; } }
+namespace Ariadne { namespace Numeric { typedef MPFloat Flt; typedef Interval<FloatMP> Ivl; } } }
 #endif
 /* */
 

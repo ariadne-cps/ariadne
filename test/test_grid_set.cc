@@ -152,8 +152,8 @@ test_irregular_grid_set()
 
 
 int main() {
-  test_grid_set<Float>();
-  test_irregular_grid_set<Float>();
+  test_grid_set<Flt>();
+  test_irregular_grid_set<Flt>();
   cerr << "INCOMPLETE ";
   return 0;
 }

@@ -43,15 +43,23 @@ namespace Ariadne {
   
 
 template<class R>
-System::ConstraintBasedDiscreteMode<R>::ConstraintBasedDiscreteMode(id_type id, 
-                                      const VectorFieldInterface<R>& dynamic)
+System::ConstraintBasedDiscreteMode<R>::ConstraintBasedDiscreteMode(Geometry::DiscreteState id, 
+                                                                    const VectorFieldInterface<R>& dynamic)
   : _id(id), _dynamic(dynamic.clone()), _invariants()
 {
 }
 
 
 template<class R>
-id_type
+Geometry::DiscreteState
+System::ConstraintBasedDiscreteMode<R>::discrete_state() const
+{
+  return this->_id;
+}
+
+
+template<class R>
+Geometry::DiscreteState
 System::ConstraintBasedDiscreteMode<R>::id() const
 {
   return this->_id;
@@ -77,7 +85,7 @@ System::ConstraintBasedDiscreteMode<R>::dynamic() const
 /*
 template<class R>
 const System::ConstraintInterface<R>&
-System::ConstraintBasedDiscreteMode<R>::invariant(id_type event_id) const
+System::ConstraintBasedDiscreteMode<R>::invariant(DiscreteEvent event_id) const
 {
   typename std::map< id_type, constraint_const_pointer >::const_iterator inv_iter=this->_invariants.find(event_id);
   if(inv_iter==this->_invariants.end()) {
@@ -117,7 +125,7 @@ System::ConstraintBasedDiscreteMode<R>::write(std::ostream& os) const
   typedef typename std::set< boost::shared_ptr< const ConstraintInterface<R> > >::const_iterator constraint_iterator;
   os << "ConstraintBasedDiscreteMode( id=" << this->id() 
             << ", dynamic=" << this->dynamic() << ", invariants=\{";
-  for(typename std::map<id_type,constraint_const_pointer>::const_iterator iter=this->_invariants.begin();
+  for(typename std::map<DiscreteEvent,constraint_const_pointer>::const_iterator iter=this->_invariants.begin();
       iter!=this->_invariants.end(); ++iter) 
   {
     os << *iter->second << ","; 
@@ -131,7 +139,7 @@ System::ConstraintBasedDiscreteMode<R>::write(std::ostream& os) const
 
 
 template<class R>
-System::ConstraintBasedDiscreteTransition<R>::ConstraintBasedDiscreteTransition(id_type id, 
+System::ConstraintBasedDiscreteTransition<R>::ConstraintBasedDiscreteTransition(DiscreteEvent id, 
                                                   const ConstraintBasedDiscreteMode<R>& source,
                                                   const ConstraintInterface<R>& invariant)
   : _event_id(id), _source(&source), _destination(), _reset(), _constraint(invariant.clone()), _event_kind(invariant_tag)
@@ -140,7 +148,7 @@ System::ConstraintBasedDiscreteTransition<R>::ConstraintBasedDiscreteTransition(
 
 
 template<class R>
-System::ConstraintBasedDiscreteTransition<R>::ConstraintBasedDiscreteTransition(id_type id, 
+System::ConstraintBasedDiscreteTransition<R>::ConstraintBasedDiscreteTransition(DiscreteEvent id, 
                                                   const ConstraintBasedDiscreteMode<R>& source, 
                                                   const ConstraintBasedDiscreteMode<R>& destination,
                                                   const MapInterface<R>& reset, 
@@ -154,7 +162,14 @@ System::ConstraintBasedDiscreteTransition<R>::ConstraintBasedDiscreteTransition(
 
 
 template<class R>
-id_type
+System::DiscreteEvent
+System::ConstraintBasedDiscreteTransition<R>::event() const
+{
+  return this->_event_id;
+}
+
+template<class R>
+System::DiscreteEvent
 System::ConstraintBasedDiscreteTransition<R>::id() const
 {
   return this->_event_id;
@@ -162,7 +177,7 @@ System::ConstraintBasedDiscreteTransition<R>::id() const
 
 
 template<class R>
-id_type
+Geometry::DiscreteState
 System::ConstraintBasedDiscreteTransition<R>::source_id() const
 {
   return this->_source->id();
@@ -178,7 +193,7 @@ System::ConstraintBasedDiscreteTransition<R>::source() const
 
 
 template<class R>
-id_type
+Geometry::DiscreteState
 System::ConstraintBasedDiscreteTransition<R>::destination_id() const
 {
   return this->_destination->id();
@@ -330,13 +345,13 @@ System::ConstraintBasedHybridAutomaton<R>::new_unforced_transition(id_type event
 
 template<class R>
 const System::ConstraintBasedDiscreteMode<R>& 
-System::ConstraintBasedHybridAutomaton<R>::new_mode(id_type id,
-                                               const VectorFieldInterface<R>& dynamic) 
+System::ConstraintBasedHybridAutomaton<R>::new_mode(Geometry::DiscreteState id,
+                                                    const VectorFieldInterface<R>& dynamic) 
 {
   if(this->has_mode(id)) {
     throw std::runtime_error("The hybrid automaton already has a mode with the given id");
   }
-  std::map< id_type,  boost::shared_ptr< const ConstraintInterface<R> > > invariant;
+  std::map< Geometry::DiscreteState,  boost::shared_ptr< const ConstraintInterface<R> > > invariant;
   this->_modes.insert(mode_type(id,dynamic));
   return this->mode(id);
 }
@@ -345,9 +360,9 @@ System::ConstraintBasedHybridAutomaton<R>::new_mode(id_type id,
 
 template<class R>
 const typename System::ConstraintBasedHybridAutomaton<R>::transition_type& 
-System::ConstraintBasedHybridAutomaton<R>::new_invariant(id_type event_id,
-                                                    id_type mode_id,
-                                                    const ConstraintInterface<R>& constraint) 
+System::ConstraintBasedHybridAutomaton<R>::new_invariant(DiscreteEvent event_id,
+                                                         Geometry::DiscreteState mode_id,
+                                                         const ConstraintInterface<R>& constraint) 
 {
   ARIADNE_LOG(4,"  new_invariant(event_id="<<event_id<<", mode_id="<<mode_id<<", constraint="<<constraint<<"\n");
 
@@ -372,9 +387,9 @@ System::ConstraintBasedHybridAutomaton<R>::new_invariant(id_type event_id,
 
 template<class R>
 const typename System::ConstraintBasedHybridAutomaton<R>::transition_type& 
-System::ConstraintBasedHybridAutomaton<R>::new_transition(id_type event_id,
-                                                     id_type source_id, 
-                                                     id_type destination_id,
+System::ConstraintBasedHybridAutomaton<R>::new_transition(DiscreteEvent event_id,
+                                                     Geometry::DiscreteState source_id, 
+                                                     Geometry::DiscreteState destination_id,
                                                      const MapInterface<R>& reset,
                                                      const ConstraintInterface<R>& constraint,
                                                      bool forced) 
@@ -389,9 +404,9 @@ System::ConstraintBasedHybridAutomaton<R>::new_transition(id_type event_id,
 
 template<class R>
 const typename System::ConstraintBasedHybridAutomaton<R>::transition_type& 
-System::ConstraintBasedHybridAutomaton<R>::new_unforced_transition(id_type event_id,
-                                                              id_type source_id, 
-                                                              id_type destination_id,
+System::ConstraintBasedHybridAutomaton<R>::new_unforced_transition(DiscreteEvent event_id,
+                                                              Geometry::DiscreteState source_id, 
+                                                              Geometry::DiscreteState destination_id,
                                                               const MapInterface<R>& reset,
                                                               const ConstraintInterface<R>& activation) 
 {
@@ -422,9 +437,9 @@ System::ConstraintBasedHybridAutomaton<R>::new_unforced_transition(id_type event
 
 template<class R>
 const typename System::ConstraintBasedHybridAutomaton<R>::transition_type& 
-System::ConstraintBasedHybridAutomaton<R>::new_forced_transition(id_type event_id,
-                                                            id_type source_id, 
-                                                            id_type destination_id,
+System::ConstraintBasedHybridAutomaton<R>::new_forced_transition(DiscreteEvent event_id,
+                                                            Geometry::DiscreteState source_id, 
+                                                            Geometry::DiscreteState destination_id,
                                                             const MapInterface<R>& reset,
                                                             const ConstraintInterface<R>& guard) 
 {
@@ -457,7 +472,7 @@ System::ConstraintBasedHybridAutomaton<R>::new_forced_transition(id_type event_i
 
 template<class R>
 bool
-System::ConstraintBasedHybridAutomaton<R>::has_mode(id_type id) const 
+System::ConstraintBasedHybridAutomaton<R>::has_mode(Geometry::DiscreteState id) const 
 {
   // FIXME: This is a hack since we use std::set which cannot be searched by id.
   for(discrete_mode_iterator mode_iter=this->_modes.begin();
@@ -473,7 +488,7 @@ System::ConstraintBasedHybridAutomaton<R>::has_mode(id_type id) const
 
 template<class R>
 bool 
-System::ConstraintBasedHybridAutomaton<R>::has_transition(id_type event_id, id_type source_id) const 
+System::ConstraintBasedHybridAutomaton<R>::has_transition(DiscreteEvent event_id, Geometry::DiscreteState source_id) const 
 {
   for(discrete_transition_const_iterator transition_iter=this->_transitions.begin();
       transition_iter!=this->_transitions.end(); ++transition_iter) 
@@ -511,7 +526,7 @@ System::ConstraintBasedHybridAutomaton<R>::modes() const
 
 template<class R>
 const typename System::ConstraintBasedHybridAutomaton<R>::mode_type& 
-System::ConstraintBasedHybridAutomaton<R>::mode(id_type id) const 
+System::ConstraintBasedHybridAutomaton<R>::mode(Geometry::DiscreteState id) const 
 {
   // FIXME: This is a hack; we should use a logarithmic time real search to find a mode with the given id.
   for(discrete_mode_const_iterator mode_iter=this->_modes.begin();
@@ -527,7 +542,7 @@ System::ConstraintBasedHybridAutomaton<R>::mode(id_type id) const
 
 template<class R>
 typename System::ConstraintBasedHybridAutomaton<R>::mode_type& 
-System::ConstraintBasedHybridAutomaton<R>::_mode(id_type id) 
+System::ConstraintBasedHybridAutomaton<R>::_mode(Geometry::DiscreteState id) 
 {
   ARIADNE_LOG(6,"ConstraintBasedHybridAutomaton::mode(id="<<id<<")\n");
   // FIXME: This is a hack; we should use a logarithmic time real search to find a mode with the given id.
@@ -552,7 +567,7 @@ System::ConstraintBasedHybridAutomaton<R>::transitions() const
 
 template<class R>
 const typename System::ConstraintBasedHybridAutomaton<R>::transition_type&
-System::ConstraintBasedHybridAutomaton<R>::transition(id_type event_id, id_type source_id) const 
+System::ConstraintBasedHybridAutomaton<R>::transition(DiscreteEvent event_id, Geometry::DiscreteState source_id) const 
 {
   ARIADNE_LOG(6,"ConstraintBasedHybridAutomaton::transition(event_id="<<event_id<<", source_id="<<source_id<<")\n");
   for(discrete_transition_const_iterator transition_iter=this->_transitions.begin();
@@ -568,7 +583,7 @@ System::ConstraintBasedHybridAutomaton<R>::transition(id_type event_id, id_type 
 
 template<class R>
 const reference_set<const typename System::ConstraintBasedHybridAutomaton<R>::transition_type>&
-System::ConstraintBasedHybridAutomaton<R>::transitions(id_type mode_id) const 
+System::ConstraintBasedHybridAutomaton<R>::transitions(Geometry::DiscreteState mode_id) const 
 {
   if(!this->has_mode(mode_id)) {
     ARIADNE_THROW(std::runtime_error,"ConstraintBasedHybridAutomaton::invariants(...)","with mode_id="<<mode_id<<": The automaton does not have a mode with the given id.");

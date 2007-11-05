@@ -45,9 +45,10 @@ namespace Ariadne {
     /*! \brief A class for computing the image of a basic set under a map. 
      *  \ingroup Integrators
      */
-    template<class R>
+    template<class BS>
     class IntegratorInterface
     {
+      typedef typename BS::real_type R;
       typedef Numeric::Interval<R> I;
      public:
       //@{ 
@@ -55,12 +56,52 @@ namespace Ariadne {
       /*! \brief Virtual destructor. */
       virtual ~IntegratorInterface() { }
       /*! \brief Make a dynamically-allocated copy. */
-      virtual IntegratorInterface<R>* clone() const = 0;
+      virtual IntegratorInterface<BS>* clone() const = 0;
       //@}
 
 
       //@{ 
       //! \name Methods for applying a system to a basic set.
+
+      /*! \brief Compute the image of a basic set under a continuous function. */
+      virtual 
+      BS
+      integration_step(const System::VectorFieldInterface<R>& f, 
+                       const BS& s,
+                       const Numeric::Interval<R>& t, 
+                       const Geometry::Rectangle<R>& bb) const = 0; 
+      
+      /*! \brief Compute the image of a basic set under a continuous function. */
+      virtual 
+      BS
+      reachability_step(const System::VectorFieldInterface<R>& f, 
+                        const BS& s,
+                        const Numeric::Interval<R>& t, 
+                        const Geometry::Rectangle<R>& bb) const = 0;
+      //@}
+
+      //@{ 
+      //! \name Input/output operators. */
+      /*! \brief Write to an output stream. */
+      virtual std::ostream& write(std::ostream&) const = 0;
+      //@}
+    };
+
+    template<class BS> std::ostream& operator<<(std::ostream& os, const IntegratorInterface<BS>& i);
+
+
+
+
+    /*! \brief A class for computing the flow of a vector field.
+     *  \ingroup Integrators
+     */
+    template<class R>
+    class FlowerInterface
+    {
+      typedef Numeric::Interval<R> I;
+     public:
+      /*! \brief Make a dynamically-allocated copy. */
+      virtual FlowerInterface<R>* clone() const = 0;
 
       /*! \brief Compute the flow of a point. */
       virtual 
@@ -69,77 +110,29 @@ namespace Ariadne {
                 const Geometry::Point<I>& s, 
                 const Numeric::Interval<R>& t, 
                 const Geometry::Rectangle<R>& bb) const = 0;
-
-      /*! \brief Compute the image of a basic set under a continuous function. */
-      virtual 
-      Geometry::Rectangle<R>
-      integration_step(const System::VectorFieldInterface<R>& f, 
-                       const Geometry::Rectangle<R>& s, 
-                       const Numeric::Interval<R>& t, 
-                       const Geometry::Rectangle<R>& bb) const = 0; 
-      
-      /*! \brief Compute the image of a basic set under a continuous function. */
-      virtual 
-      Geometry::Rectangle<R>
-      reachability_step(const System::VectorFieldInterface<R>& f, 
-                        const Geometry::Rectangle<R>& s, 
-                        const Numeric::Interval<R>& t, 
-                        const Geometry::Rectangle<R>& bb) const = 0;
-      
-      /*! \brief Compute the image of a basic set under a continuous function. */
-      virtual 
-      Geometry::Zonotope<I,R>
-      integration_step(const System::VectorFieldInterface<R>& f, 
-                       const Geometry::Zonotope<I,R>& s, 
-                       const Numeric::Interval<R>& t, 
-                       const Geometry::Rectangle<R>& bb) const = 0; 
-      
-      /*! \brief Compute the image of a basic set under a continuous function. */
-      virtual 
-      Geometry::Zonotope<I,R>
-      reachability_step(const System::VectorFieldInterface<R>& f, 
-                        const Geometry::Zonotope<I,R>& s, 
-                        const Numeric::Interval<R>& t, 
-                        const Geometry::Rectangle<R>& bb) const = 0;
-
-      /*! \brief Compute the image of a basic set under a continuous function. */
-      virtual 
-      Geometry::Zonotope<I,I>
-      integration_step(const System::VectorFieldInterface<R>& f, 
-                       const Geometry::Zonotope<I,I>& s, 
-                       const Numeric::Interval<R>& t, 
-                       const Geometry::Rectangle<R>& bb) const = 0;
-
-      /*! \brief Compute the image of a basic set under a continuous function. */
-      virtual 
-      Geometry::Zonotope<I,I>
-      reachability_step(const System::VectorFieldInterface<R>& f, 
-                        const Geometry::Zonotope<I,I>& s, 
-                        const Numeric::Interval<R>& t, 
-                        const Geometry::Rectangle<R>& bb) const = 0;
-      //@}
     };
 
 
-    /*! \brief A class for computing the image of a basic set under a differentiable map. 
+    /*! \brief A class for computing the flow of a differentiable vector field.
      *  \ingroup Integrators
      */
     template<class R>
-    class DifferentiableIntegratorInterface
-      : public IntegratorInterface<R>
+    class DifferentiableFlowerInterface
+      : public FlowerInterface<R>
     {
       typedef Numeric::Interval<R> I;
      public:
       /*! \brief Make a dynamically-allocated copy. */
-      virtual DifferentiableIntegratorInterface<R>* clone() const = 0;
-      //@{ 
-      //! \name Methods for computing flow Jacobians. 
+      virtual DifferentiableFlowerInterface<R>* clone() const = 0;
       /*! \brief Compute the spacial jacobian over a flow step of time \a t starting at \a p assuming that the flow remains within \a bb. */
       virtual LinearAlgebra::Matrix<I> flow_step_jacobian(const System::VectorFieldInterface<R>& vf,
                                                           const Geometry::Point<I>& p,
                                                           const Numeric::Interval<R>& t,
                                                           const Geometry::Rectangle<R>& bb) const = 0;
     };
+
+    template<class R> std::ostream& operator<<(std::ostream& os, const FlowerInterface<R>& i);
+
 
   }
 }

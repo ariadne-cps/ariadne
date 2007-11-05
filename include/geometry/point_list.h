@@ -39,8 +39,8 @@
 namespace Ariadne {
   namespace Geometry {
 
-    template<class R> class PointListIterator;
-    template<class R> class PointListReference;
+    template<class X> class PointListIterator;
+    template<class X> class PointListReference;
 
     /*!\brief A list of points in Euclidean space. 
      *
@@ -63,29 +63,29 @@ namespace Ariadne {
      * Hence the \a i th element of the \a j th point
      * is stored in the \a (i,j) th element of the matrix.
      */
-    template<class R>
+    template<class X>
     class PointList
     {
-      friend class PointListReference<R>;
-      friend class PointListIterator<R>;
+      friend class PointListReference<X>;
+      friend class PointListIterator<X>;
      public:
-      typedef PointListIterator<R> const_iterator;
-      typedef PointListIterator<R> iterator;
+      typedef PointListIterator<X> const_iterator;
+      typedef PointListIterator<X> iterator;
       
       /*!\brief Construct an empty point list, able to hold points of dimension \a d. */
       explicit PointList(dimension_type d=0);
       /*!\brief Construct a list consisting of \a n copies of the origin in dimension \a d. */
       explicit PointList(dimension_type d, size_type n);
       /*!\brief Construct from a matrix \a G whose columns contain the position vectors of the points padded by a one. */
-      explicit PointList(const LinearAlgebra::Matrix<R>& G);
+      explicit PointList(const LinearAlgebra::Matrix<X>& G);
       
       /*!\brief Convert from a point list with another data type. */
-      template<class Rl> PointList(const PointList<Rl>& ptl);
+      template<class XX> PointList(const PointList<XX>& ptl);
       
       /*!\brief Copy constructor. */
-      PointList(const PointList<R>& ptl);
+      PointList(const PointList<X>& ptl);
       /*!\brief Assignment operator. */
-      PointList& operator=(const PointList<R>& ptl); 
+      PointList& operator=(const PointList<X>& ptl); 
       
       /*!\brief The dimension of the points in the list. */
       dimension_type dimension() const;
@@ -97,25 +97,25 @@ namespace Ariadne {
       void reserve(size_type n);
       
       /*!\brief A matrix expression whose columns are the position vectors of the points. */
-      const LinearAlgebra::Matrix<R>& generators() const;
+      const LinearAlgebra::Matrix<X>& generators() const;
 
 #ifdef DOXYGEN
       /*!\brief The \a j th point in the list. */
-      Point<R> operator[] (const size_type j) const;
+      Point<X> operator[] (const size_type j) const;
       /*!\brief A reference to the \a j th point in the list. */
-      Point<R>& operator[] (const size_type j);
+      Point<X>& operator[] (const size_type j);
 #else
-      Point<R> operator[] (const size_type j) const;
-      PointListReference<R> operator[] (const size_type j);
+      Point<X> operator[] (const size_type j) const;
+      PointListReference<X> operator[] (const size_type j);
 #endif
 
       /*!\brief Adjoin \a pt to the end of the list. */
-      void push_back(const Point<R>& pt);
+      void push_back(const Point<X>& pt);
       /*!\brief Remove the last point from the list. */
       void pop_back();
       
       /*!\brief Adjoin \a pt to the list. */
-      void adjoin(const Point<R>& pt);
+      void adjoin(const Point<X>& pt);
       /*!\brief Remove the last point from the list. */
       void clear();
       
@@ -128,18 +128,18 @@ namespace Ariadne {
       std::ostream& write(std::ostream& os) const;
 
      private:
-      void _set(size_type j, dimension_type i,const R& x);
-      Point<R> _get(size_type j) const;
-      R _get(size_type j, dimension_type i) const;
+      void _set(size_type j, dimension_type i,const X& x);
+      Point<X> _get(size_type j) const;
+      X _get(size_type j, dimension_type i) const;
 
      private:
       size_type _size;
-      LinearAlgebra::Matrix<R> _pts;
+      LinearAlgebra::Matrix<X> _pts;
     };
     
     
-    template<class R> 
-    std::ostream& operator<<(std::ostream& os, const PointList<R>& pts);
+    template<class X> 
+    std::ostream& operator<<(std::ostream& os, const PointList<X>& pts);
     
   }
 }

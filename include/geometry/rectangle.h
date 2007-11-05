@@ -111,6 +111,12 @@ namespace Ariadne {
       /*! \brief Construct a rectangle from a range of interval values. */
       template<class ForwardIterator> explicit Rectangle(ForwardIterator b, ForwardIterator e);
       
+      /*! \brief Construct from a one-dimensional C-style array of the form <code>{ l1,u2, l2,u2, ... , ln,un }</code>. */
+      template<class RR> explicit Rectangle(const dimension_type& d, const RR* ptr);
+      
+      /*! \brief Construct from a two-dimensional C-style array of the form <code>{ {l1,u2}, {l2,u2}, ... , {ln,un} }</code>. */
+      template<class RR> explicit Rectangle(const dimension_type& d, const RR ary[][2]);
+      
       /*! \brief Construct from an array of intervals. */
       explicit Rectangle(const Base::array< Numeric::Interval<R> >& a);
       
@@ -232,7 +238,7 @@ namespace Ariadne {
       //@{
       //! \name Rectangle geometric operations
       /*! \brief The dimension of the Euclidean space the rectangle lies in. */
-      size_type dimension() const;
+      dimension_type dimension() const;
       
       /*! \brief True if the rectangle is empty. A zero-dimensional rectangle is considered empty. */
       tribool empty() const;
@@ -355,6 +361,7 @@ namespace Ariadne {
       template<class E> Rectangle(const RectangleExpression<E>& e);
       template<class E> Rectangle<I>& operator=(const RectangleExpression<E>& e);
       dimension_type dimension() const;
+      tribool empty() const;
       tribool contains(const Point<I>& pt) const;
       const Numeric::Interval<R>& lower_bound(const dimension_type& i) const;
       const Numeric::Interval<R>& upper_bound(const dimension_type& i) const;
@@ -466,6 +473,14 @@ namespace Ariadne {
     Geometry::Rectangle<R> 
     scale(const Geometry::Rectangle<R>& r, const R& scale_factor);
     
+    template<class R>
+    std::istream&
+    operator>>(std::istream& is, Rectangle<R>& r);
+
+    template<class R>
+    std::ostream&
+    operator<<(std::ostream& os, const Rectangle<R>& r);
+
     
   }
 }

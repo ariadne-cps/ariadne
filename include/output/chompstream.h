@@ -24,7 +24,7 @@
 #ifndef ARIADNE_CHOMPFSTREAM_H
 #define ARIADNE_CHOMPFSTREAM_H
 
-/*! \file chompfstream.h
+/*! \file chompstream.h
  *  \brief Output to CHomP computational homology programs
  */
  

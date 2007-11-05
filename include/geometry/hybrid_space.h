@@ -34,12 +34,10 @@
 #include "../base/types.h"
 #include "exceptions.h"
 
+#include "discrete_state.h"
+
 namespace Ariadne {  
   namespace Geometry {
-
-    /*! \brief The type identifying a discrete locatation of a hybrid system. */
-    typedef id_type location_type;
-
 
     /*! \ingroup HybridSet
      *  \brief A location of a hybrid system, with an identifier and a dimension.
@@ -47,11 +45,16 @@ namespace Ariadne {
     class HybridLocation
     {
      public:
+      /*! The type used to represent the discrete state. */
+      typedef DiscreteState discrete_state_type;
+
       /*! \brief Construct from an identifier and a dimension. */
-      HybridLocation(id_type id, dimension_type d)
+      HybridLocation(discrete_state_type id, dimension_type d)
         : _id(id), _dimension(d) { }
       /*! \brief The indentifier of the location. */
-      id_type id() const { return this->_id; }
+      discrete_state_type id() const { return this->_id; }
+      /*! \brief The indentifier of the location. */
+      discrete_state_type discrete_state() const { return this->_id; }
       /*! \brief The dimension of the location. */
       dimension_type dimension() const { return this->_dimension; }
       /*! \brief Equality operator. 
@@ -69,7 +72,7 @@ namespace Ariadne {
         return this->_id<loc._id;
       }
      private:
-      id_type _id;
+      discrete_state_type _id;
       dimension_type _dimension;
     };
 
@@ -83,14 +86,16 @@ namespace Ariadne {
      */
     class HybridSpace
     {
+      /*! The type used to represent the discrete state. */
+      typedef DiscreteState discrete_state_type;
      public:
       typedef std::set<HybridLocation>::const_iterator iterator;
       typedef std::set<HybridLocation>::const_iterator const_iterator;
       /*! \brief Default constructor. */
       HybridSpace() : _locations() { }
       /*! \brief Copy constructor. */
-      HybridSpace(const std::map<id_type,dimension_type>& hyspcmap) : _locations() { 
-        for(std::map<id_type,dimension_type>::const_iterator iter=hyspcmap.begin();
+      HybridSpace(const std::map<discrete_state_type,dimension_type>& hyspcmap) : _locations() { 
+        for(std::map<discrete_state_type,dimension_type>::const_iterator iter=hyspcmap.begin();
             iter!=hyspcmap.end(); ++iter)
         {
           this->_locations.insert(HybridLocation(iter->first,iter->second));
@@ -108,15 +113,15 @@ namespace Ariadne {
       /*! The number of locations. */
       size_type number_of_locations() const { return this->_locations.size(); }
       /*! Add a new location. */
-      void new_location(id_type id, dimension_type d);
+      void new_location(discrete_state_type id, dimension_type d);
       /*! Add a new location. */
       void new_location(const HybridLocation& loc);
       /*! \brief Check if the space has a location. */
-      bool has_location(id_type id) const;
+      bool has_location(discrete_state_type id) const;
       /*! \brief The location with identifier \a id. */
-      HybridLocation operator[](id_type id) const;
+      HybridLocation operator[](discrete_state_type id) const;
       /*! \brief The dimension of the location. */
-      dimension_type dimension(id_type id) const;
+      dimension_type dimension(discrete_state_type id) const;
       /*! \brief The set of locations (returns self). */
       const HybridSpace& locations() const {
         return *this;
@@ -154,25 +159,25 @@ namespace Ariadne {
       this->_locations.insert(loc);
     }
 
-    inline void HybridSpace::new_location(id_type id, dimension_type d) {
-      ARIADNE_CHECK_NEW_LOCATION(*this,id,"void HybridSpace::new_location(id_type id, dimension_type d)");
+    inline void HybridSpace::new_location(discrete_state_type id, dimension_type d) {
+      ARIADNE_CHECK_NEW_LOCATION(*this,id,"void HybridSpace::new_location(discrete_state_type id, dimension_type d)");
       this->_locations.insert(HybridLocation(id,d));
     }
 
-    inline bool HybridSpace::has_location(id_type id) const
+    inline bool HybridSpace::has_location(discrete_state_type id) const
     {
       const_iterator iter=this->_locations.find(HybridLocation(id,0u));
       return iter!=this->_locations.end();
     }
   
-    inline HybridLocation HybridSpace::operator[](id_type id) const {
-      ARIADNE_CHECK_LOCATION(*this,id,"HybridLocation HybridSpace::operator[](id_type id)");
+    inline HybridLocation HybridSpace::operator[](discrete_state_type id) const {
+      ARIADNE_CHECK_LOCATION(*this,id,"HybridLocation HybridSpace::operator[](discrete_state_type id)");
       const_iterator iter=this->_locations.find(HybridLocation(id,0u));
       return *iter;
     }
   
-    inline dimension_type HybridSpace::dimension(id_type id) const {
-      ARIADNE_CHECK_LOCATION(*this,id,"dimension_type HybridSpace::dimension(id_type id)");
+    inline dimension_type HybridSpace::dimension(discrete_state_type id) const {
+      ARIADNE_CHECK_LOCATION(*this,id,"dimension_type HybridSpace::dimension(discrete_state_type id)");
       const_iterator iter=this->_locations.find(HybridLocation(id,0u));
       return iter->dimension();
     }

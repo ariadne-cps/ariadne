@@ -74,12 +74,23 @@ namespace Ariadne {
                                      const Numeric::Rational& integration_time) const;
       
       /*! \brief Computes a bounding box for the flow of \a vector_field starting in \a initial_set remains in \a bound for times up to time \a integration_time. The integration time may be dynamically varied to allow the bounding box to be computed. */
+      virtual Geometry::Rectangle<R> flow_bounds(const System::VectorFieldInterface<R>& vector_field,
+                                                 const Geometry::Rectangle<R>& initial_set,
+                                                 Numeric::Rational& integration_time) const;
+
+      
+      /*! \brief Computes a bounding box for the flow of \a vector_field starting in \a initial_set remains in \a bound for times up to time \a integration_time. */
+      virtual Geometry::Rectangle<R> flow_bounds(const System::VectorFieldInterface<R>& vector_field,
+                                                          const Geometry::Rectangle<R>& initial_set,
+                                                          const Numeric::Rational& integration_time) const;
+
+      /*! \brief Gives an inital estimated bounding box for the flow of \a vector_field starting in \a initial_set remains in \a bound for times up to time \a integration_time. The integration time may be dynamically varied to allow the bounding box to be computed. */
       virtual Geometry::Rectangle<R> estimate_flow_bounds(const System::VectorFieldInterface<R>& vector_field,
                                                           const Geometry::Rectangle<R>& initial_set,
                                                           Numeric::Rational& integration_time) const;
 
       
-      /*! \brief Computes a bounding box for the flow of \a vector_field starting in \a initial_set remains in \a bound for times up to time \a integration_time. */
+      /*! \brief Computes an inital estimated bounding box for the flow of \a vector_field starting in \a initial_set remains in \a bound for times up to time \a integration_time. */
       virtual Geometry::Rectangle<R> estimate_flow_bounds(const System::VectorFieldInterface<R>& vector_field,
                                                           const Geometry::Rectangle<R>& initial_set,
                                                           const Numeric::Rational& integration_time) const;

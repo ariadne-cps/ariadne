@@ -77,7 +77,7 @@ over_approximate_interval_zonotope_list_set(const ListSet< Zonotope<Interval<R> 
   for(typename ListSet< Zonotope<Interval<R> > >::const_iterator iz_iter=izls.begin();
       iz_iter!=izls.end(); ++iz_iter)
   {
-    result.adjoin(orthogonal_over_approximation(*iz_iter));
+    result.adjoin(over_approximation(over_approximation(*iz_iter)));
   }
   return result;
 }
@@ -91,7 +91,7 @@ approximate_interval_zonotope_list_set(const ListSet< Zonotope<Interval<R> > > i
   for(typename ListSet< Zonotope<Interval<R> > >::const_iterator iz_iter=izls.begin();
       iz_iter!=izls.end(); ++iz_iter)
   {
-    result.adjoin(approximation(*iz_iter));
+    result.adjoin(approximation(approximation(*iz_iter)));
   }
   return result;
 }
@@ -204,7 +204,7 @@ void export_list_set()
     .def(self_ns::str(self))    // __self_ns::str__
   ;
 
-  class_<IZonotopeListSet>("IntervalZonotopeListSet",init<int>())
+  class_<IZonotopeListSet>("FuzzyZonotopeListSet",init<int>())
     .def(init<IZonotope>())
     .def(init<RRectangleListSet>())
     .def(init<RZonotopeListSet>())

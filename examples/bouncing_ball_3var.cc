@@ -21,7 +21,7 @@
 #include "system/set_based_hybrid_automaton.h"
 #include "evaluation/map_evolver.h"
 #include "evaluation/vector_field_evolver.h"
-#include "evaluation/applicator_plugin.h"
+#include "evaluation/applicator.h"
 #include "evaluation/lohner_integrator.h"
 #include "evaluation/affine_integrator.h"
 #include "evaluation/set_based_hybrid_evolver.h"
@@ -67,9 +67,9 @@ int bouncing_ball_automaton()
   cout << "reset=" << reset << endl;
   
   SetBasedHybridAutomaton<R> automaton("Bouncing ball automaton");
-  id_type mode1_id=0;
+  DiscreteState mode1_id(0);
   const SetBasedDiscreteMode<R>& mode1=automaton.new_mode(mode1_id,dynamic,invariant);
-  id_type event_id=5;
+  DiscreteEvent event_id(5);
   const SetBasedDiscreteTransition<R>& transition=automaton.new_transition(event_id,mode1_id,mode1_id,reset,activation);
   
   cout << mode1  <<  "\n" << transition << endl;
@@ -85,10 +85,10 @@ int bouncing_ball_automaton()
   parameters.set_maximum_basic_set_radius(0.25);
   parameters.set_grid_length(0.125);
 
-  LohnerIntegrator<R> lohner;
+  C1LohnerIntegrator<R> lohner;
 
-  MapEvolver<BS> map_evolver(parameters);
-  VectorFieldEvolver<BS> vector_field_evolver(parameters,lohner); 
+  MapEvolver<R> map_evolver(parameters);
+  VectorFieldEvolver<R> vector_field_evolver(parameters,lohner); 
   SetBasedHybridEvolver<R> hybrid_evolver(map_evolver,vector_field_evolver);
   
   Grid<R> grid(Vector<R>("[0.25,0.25,1.0]"));

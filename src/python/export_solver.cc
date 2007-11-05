@@ -40,10 +40,10 @@ void export_solver()
   
   class_< IntervalNewtonSolver<R> >("IntervalNewtonSolver",init<R,uint>())
     .def(init<double,uint>())
-    .def("maximum_error",&Solver<R>::maximum_error,copy_const_reference)
-    .def("maximum_number_of_steps",&Solver<R>::maximum_number_of_steps,copy_const_reference)
+    .def("maximum_error",&SolverInterface<R>::maximum_error,copy_const_reference)
+    .def("maximum_number_of_steps",&SolverInterface<R>::maximum_number_of_steps,copy_const_reference)
     .def("solve",&IntervalNewtonSolver<R>::solve)
-    .def("fixed_point",&Solver<R>::fixed_point)
+    .def("fixed_point",&SolverInterface<R>::fixed_point)
   ;
   
 }

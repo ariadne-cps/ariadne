@@ -39,6 +39,7 @@
 #include "../linear_algebra/declarations.h"
 #include "../function/function_interface.h"
 #include "../function/virtual_machine.h"
+#include "../function/multi_index.h"
 
 namespace Ariadne {
   namespace Function {
@@ -82,7 +83,7 @@ namespace Ariadne {
       virtual LinearAlgebra::Vector<A> evaluate(const LinearAlgebra::Vector<A>& x) const;
  
       /*! \brief A bound for the vector field over a set of vectors. */
-      virtual A derivative(const LinearAlgebra::Vector<A>& x, const size_type& i, const LinearAlgebra::MultiIndex& j) const;
+      virtual A derivative(const LinearAlgebra::Vector<A>& x, const size_type& i, const MultiIndex& j) const;
 
       /*! \brief A bound for the vector field over a set of vectors. */
       virtual LinearAlgebra::Matrix<A> jacobian(const LinearAlgebra::Vector<A>& x) const;

@@ -272,38 +272,6 @@ Geometry::GridMaskSet<R>::adjoin_inner_approximation(const BS& bs)
 }
 
 
-template<class R> inline
-void 
-Geometry::GridMaskSet<R>::adjoin_outer_approximation(const SetInterface<R>& s)
-{
-  FiniteGrid<R> fg(this->grid(),this->block());
-  this->adjoin(outer_approximation(s,fg));
-}
-
-template<class R> inline
-void 
-Geometry::GridMaskSet<R>::adjoin_inner_approximation(const SetInterface<R>& s)
-{
-  FiniteGrid<R> fg(this->grid(),this->block());
-  this->adjoin(inner_approximation(s,fg));
-}
-
-template<class R> inline
-void 
-Geometry::GridMaskSet<R>::restrict_outer_approximation(const SetInterface<R>& s)
-{
-  FiniteGrid<R> fg(this->grid(),this->block());
-  this->restrict(outer_approximation(s,fg));
-}
-
-template<class R> inline
-void 
-Geometry::GridMaskSet<R>::restrict_inner_approximation(const SetInterface<R>& s)
-{
-  FiniteGrid<R> fg(this->grid(),this->block());
-  this->restrict(inner_approximation(s,fg));
-}
-
 
 
 

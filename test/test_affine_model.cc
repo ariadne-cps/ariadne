@@ -95,6 +95,6 @@ class TestAffineModel
   
 
 int main() {
-  TestAffineModel<Float>().test();
+  TestAffineModel<Flt>().test();
   return 0;
 }

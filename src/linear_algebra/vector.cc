@@ -40,13 +40,13 @@ namespace Ariadne {
 #ifdef ENABLE_FLOAT64
 #warning "Compiling Float64"
     template class Vector<Float64>;
-    template class Vector< Interval<Float64> >;
+    template class Vector<Interval64>;
 #endif
   
 #ifdef ENABLE_FLOATMP
 #warning "Compiling FloatMP"
     template class Vector<FloatMP>;
-    template class Vector< Interval<FloatMP> >;
+    template class Vector<IntervalMP>;
 #endif
 
   }

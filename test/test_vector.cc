@@ -43,9 +43,9 @@ using namespace Ariadne::LinearAlgebra;
 template<class R> int test_vector();
 
 int main() {
-  test_vector<Float>();
+  test_vector<Flt>();
   //test_vector<Rational>();
-  //test_vector< Interval<Float> >();
+  //test_vector< Interval<Flt> >();
 
   return 0;
 }  
@@ -96,7 +96,7 @@ test_vector()
   cout << vf0 << " = " << v1 << " / " << x << endl;
   cout << endl;
   
-  Vector< Interval<R> > iv1("[[0.99,1.01],[2.25,2.375],[4.0,4.375],[-0.02,0.01]]");
+  Vector< Interval<R> > iv1("[[0.984375,1.015625],[2.25,2.375],[4.0,4.375],[-0.03125,0.015625]]");
   cout << "iv1=" << iv1 << endl;
   cout << "norm(iv1)=" << norm(iv1) << endl;
   cout << "norm(iv1).upper()=" << norm(iv1).upper() << endl;
@@ -159,7 +159,7 @@ test_vector()
   cout << iv0 << " = " << v1 << " / " << ix << endl;
 
   cout << "test_vector_slice" << endl;
-  v1=Vector<R>("[-1.25,0.75,-0.5,-4.25,2.3725]");
+  v1=Vector<R>("[-1.25,0.75,-0.5,-4.25,2.375]");
   cout << v1 << endl;
   VectorSlice<R> vs1(2,v1.begin()+2,2);
   cout << vs1 << endl;

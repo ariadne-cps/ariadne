@@ -24,14 +24,15 @@
 
 #include <utility>  //for std::pair
 
-
-#include "python/python_utilities.h"
-#include "python/python_float.h"
 #include "numeric/rational.h"
 #include "numeric/interval.h"
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
 #include "linear_algebra/matrix_function.h"
+
+#include "python/python_utilities.h"
+#include "python/python_float.h"
+#include "python/read_scalar.h"
 
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
@@ -42,33 +43,55 @@ using namespace Ariadne::Python;
 #include <boost/python/detail/api_placeholder.hpp>
 using namespace boost::python;
 
-template<class R>  
-Matrix<R> 
-extract_matrix(boost::python::object obj) 
+template<class X>
+std::string
+__str__(const Matrix<X>& A)
+{
+  std::stringstream ss;
+  ss << A;
+  return ss.str();
+}
+
+template<class X>
+std::string
+__repr__(const Matrix<X>& A)
+{
+  std::stringstream ss;
+  ss << "Matrix(";
+  for(size_type i=0; i!=A.number_of_rows(); ++i) {
+    ss << (i==0 ? '[' : ',');
+    for(size_type j=0; j!=A.number_of_columns(); ++j) {
+      ss << (j==0 ? '[' : ',') << A(i,j);
+    }
+    ss << ']';
+  }
+  ss << "])";
+  return ss.str();
+}
+
+template<class X>  
+Matrix<X>*
+make_matrix(const boost::python::object& obj) 
 {
   // See "Extracting C++ objects" in the Boost Python tutorial
+  typedef typename Numeric::traits<X>::number_type R;
   boost::python::list elements=extract<list>(obj);
   int m=boost::python::len(elements);
   list row=extract<list>(elements[0]);
   int n=boost::python::len(row);
-  Matrix<R> A(m,n);
+  Matrix<X>& A=*new Matrix<X>(m,n);
   for(int i=0; i!=m; ++i) {
     row=extract<list>(elements[i]);
     if(boost::python::len(row)!=n) {
       throw std::runtime_error("Matrix with rows of different sizes");
     }
     for(int j=0; j!=n; ++j) {
-      extract<double> x(row[j]);
-      if (x.check()) {
-        A(i,j)=static_cast<R>(x);
-      } else {
-        extract<R> x(row[j]);
-        A(i,j)=x;
-      }
+      A(i,j)=read_scalar<X>(row[j]);
     }
   }
-  return A;
+  return &A;
 }
+
 
 template<class R> inline 
 R matrix_get_item(const Matrix<R>& M, boost::python::object obj) {
@@ -115,9 +138,11 @@ void export_matrix()
   typedef Matrix<R> Mx;
   typedef Matrix< Interval<R> > IMx;
 
-  class_<Mx>(python_name<R>("Matrix").c_str(),init<int,int>())
-    .def(init<std::string>())
+  class_< Matrix<R> >(python_name<R>("Matrix").c_str(),no_init)
+    .def("__init__", make_constructor(&make_matrix<R>) )
+    .def(init<int,int>())
     .def(init<Mx>())
+    //.def(init<std::string>())
     .def("__getitem__",&matrix_get_item<R>)
     .def("__setitem__",&matrix_set_item<R,R>)
     .def("__setitem__",&matrix_set_item<R,double>)
@@ -142,15 +167,13 @@ void export_matrix()
     .def("__div__",&div<IMx,Mx,double,Mx,R>)
     .def("__div__",&div<IMx,Mx,R>)
     .def("__div__",&div<IMx,Mx,I>)
-    .def(self_ns::str(self)) 
+    .def("__str__",&__str__<R>)
+    .def("__repr__",&__repr__<R>)
   ;
   def("solve",(Vector<I>(*)(const Matrix<R>&,const Vector<R>&))&solve);
   def("solve",(Vector<I>(*)(const Matrix<R>&,const Vector<I>&))&solve);
   def("transpose",(Matrix<R>(*)(const Matrix<R>&))&transpose);
   def("inverse",(Matrix<I>(*)(const Matrix<R>&))&inverse);
-
-  // Need 'Float' here to extract vector of proper class
-  def("extract_matrix",&extract_matrix<Float>,"Extract an Ariadne matrix from a Python list of lists");
 
 }
 
@@ -162,14 +185,16 @@ void export_matrix<Rational>()
   typedef Vector<R> Vec;
   typedef Matrix<R> Mx;
   
-  class_<Mx>(python_name<R>("Matrix").c_str(),init<int,int>())
-    .def(init<std::string>())
+  class_<Mx>(python_name<R>("Matrix").c_str(),no_init)
+    .def("__init__", make_constructor(&make_matrix<R>) )
+    .def(init<int,int>())
     .def(init<Mx>())
-    /*
+    //.def(init<std::string>())
+
     .def("__getitem__",&matrix_get_item<R>)
     .def("__setitem__",&matrix_set_item<R,R>)
     .def("__setitem__",&matrix_set_item<R,double>)
-    */
+
     .def("__neg__",&neg<Mx,Mx>)
     .def("__add__",&add<Mx,Mx,Mx>)
     .def("__sub__",&sub<Mx,Mx,Mx>)
@@ -184,7 +209,8 @@ void export_matrix<Rational>()
     .def("__div__",&div<Mx,Mx,int,Mx,R>)
     .def("__div__",&div<Mx,Mx,double,Mx,R>)
     .def("__div__",&div<Mx,Mx,R>)
-    .def(self_ns::str(self)) 
+    .def("__str__",&__str__<R>)
+    .def("__repr__",&__repr__<R>)
   ;
   
   def("solve",(Vector<R>(*)(const Matrix<R>&,const Vector<R>&))&solve);
@@ -201,16 +227,18 @@ void export_interval_matrix()
   typedef Vector< Interval<R> > IVec;
   typedef Matrix< Interval<R> > IMx;
   
-  class_<IMx>(python_name<R>("IntervalMatrix").c_str(),init<int,int>())
-    .def(init<std::string>())
+  class_<IMx>(python_name<R>("FuzzyMatrix").c_str(),no_init)
+    .def("__init__", make_constructor(&make_matrix<I>) )
+    .def(init<int,int>())
+    //.def(init<std::string>())
     .def(init<Mx>())
     .def(init<IMx>())
-    /*
+
     .def("__getitem__",&matrix_get_item<I>)
     .def("__setitem__",&matrix_set_item<I,I>)
     .def("__setitem__",&matrix_set_item<I,R>)
     .def("__setitem__",&matrix_set_item<I,double>)
-    */
+
     .def("__neg__",&neg<IMx,IMx>)
     .def("__add__",&add<IMx,IMx,Mx>)
     .def("__add__",&add<IMx,IMx,IMx>)
@@ -232,7 +260,8 @@ void export_interval_matrix()
     .def("__div__",&div<IMx,IMx,double,IMx,R>)
     .def("__div__",&div<IMx,IMx,R>)
     .def("__div__",&div<IMx,IMx,I>)
-    .def(self_ns::str(self))
+    .def("__str__",&__str__<I>)
+    .def("__repr__",&__repr__<I>)
   ;
   
   def("solve",(Vector<I>(*)(const Matrix<R>&,const Vector<I>&))&solve);

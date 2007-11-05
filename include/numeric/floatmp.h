@@ -33,6 +33,7 @@
 // #include <mpf2mpfr.h>
 
 #include <gmpxx.h>
+#include <cassert>
 
 #include "../numeric/numerical_traits.h"
 #include "../numeric/function.h"
@@ -61,6 +62,7 @@ namespace Ariadne {
       FloatMP(const FloatMP& x) { mpfr_init_set(_value,x._value,GMP_RNDN); }
       FloatMP(const mpf_class& x) { mpfr_init_set_f(_value,x.get_mpf_t(),GMP_RNDN); }
       FloatMP(const mpf_t x) { mpfr_init_set_f(_value,x,GMP_RNDN); }
+      FloatMP(const std::string& str);
       FloatMP& operator=(const FloatMP& x) { if(this != &x) { mpfr_set(_value,x._value,GMP_RNDN); } return *this; }
       // FIXME: Use mpfr_class instead
       mpf_class get_base() const { mpf_class result; mpfr_get_f(result.get_mpf_t(),this->get_mpfr_t(),GMP_RNDN); return result; }
@@ -80,13 +82,7 @@ namespace Ariadne {
       int precision() const { return mpfr_get_prec(this->get_mpfr_t()); }
     };
     
-    inline std::ostream& operator<<(std::ostream& os, const FloatMP& x) {
-      return os<<x.get_mpf_class().get_d(); }
-    inline std::istream& operator>>(std::istream& is, FloatMP& x) {
-      //FIXME: Improve this!
-      double dx; is >> dx; x=FloatMP(dx); return is; }
-
-    
+   
     inline int precision(const FloatMP& num) {
       return mpfr_get_prec(num.get_mpfr_t());
     }
@@ -94,7 +90,7 @@ namespace Ariadne {
     
     template<> inline std::string name<Numeric::FloatMP>() { return "FloatMP"; }
     template<> inline std::string name<Numeric::Interval<Numeric::FloatMP> >() { return "Interval<FloatMP>"; }
-    
+  
 
     int mpfr_hypot(mpfr_t y, const __mpfr_struct* x1, const __mpfr_struct* x2, mpfr_rnd_t r);
 
@@ -528,6 +524,13 @@ namespace Ariadne {
     template<> inline FloatMP atanh_up(const FloatMP& x) {
       return invoke_mpfr(x,mpfr_atanh,GMP_RNDU); };
     
+    inline std::ostream& operator<<(std::ostream& os, const FloatMP& x) {
+      return os<<x.get_mpf_class().get_d(); }
+    inline std::istream& operator>>(std::istream& is, FloatMP& x) {
+      Rational q; is >> q; if(conv_approx<FloatMP>(q)!=q) { throw std::runtime_error("Cannot construct FloatMP exactly from string literal."); } x=conv_approx<FloatMP>(q); assert(x==q); return is; }
+    inline FloatMP::FloatMP(const std::string& str) { 
+      mpfr_init(_value); std::stringstream ss(str); ss >> *this; }
+  
     inline FloatMP operator+(const FloatMP& x) { return x; }
     inline FloatMP operator-(const FloatMP& x) { return neg(x); }
 

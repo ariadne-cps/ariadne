@@ -24,7 +24,6 @@
 #include "python/python_float.h"
 
 #include "geometry/rectangle.h"
-#include "geometry/parallelotope.h"
 #include "geometry/zonotope.h"
 #include "geometry/grid_set.h"
 #include "geometry/list_set.h"
@@ -50,23 +49,23 @@ using namespace boost::python;
 template<class R>
 void export_vector_field_evolver() 
 {
+  typedef typename Evaluation::VectorFieldEvolver<R>::basic_set_type BS;
 
-  class_< VectorFieldEvolver<R> >("VectorFieldEvolver",init<const EvolutionParameters<R>&,const IntegratorInterface<R>&>())
-    .def("integrate",(ListSet< Rectangle<R> >(VectorFieldEvolver<R>::*)(const VectorFieldInterface<R>&,const ListSet< Rectangle<R> >&,const time_type&)const)
-                                    (&VectorFieldEvolver<R>::integrate))
-    .def("reach",(ListSet< Rectangle<R> >(VectorFieldEvolver<R>::*)(const VectorFieldInterface<R>&,const ListSet< Rectangle<R> >&,const time_type&)const)
-                                    (&VectorFieldEvolver<R>::reach))
-    .def("integrate",(GridMaskSet<R>(VectorFieldEvolver<R>::*)(const VectorFieldInterface<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&,const time_type&)const)
-                                    (&VectorFieldEvolver<R>::integrate))
-    .def("reach",(GridMaskSet<R>(VectorFieldEvolver<R>::*)(const VectorFieldInterface<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&,const time_type&)const)
-                              (&VectorFieldEvolver<R>::reach))
-    .def("chainreach",(GridMaskSet<R>(VectorFieldEvolver<R>::*)(const VectorFieldInterface<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&)const)
-         (&VectorFieldEvolver<R>::chainreach))
-    .def("viable",(GridMaskSet<R>(VectorFieldEvolver<R>::*)(const VectorFieldInterface<R>&,const GridMaskSet<R>&)const)
-         (&VectorFieldEvolver<R>::viable))
-    .def("verify",(tribool(VectorFieldEvolver<R>::*)(const VectorFieldInterface<R>&,const GridMaskSet<R>&,const GridMaskSet<R>&)const)
-         (&VectorFieldEvolver<R>::verify))
-  ;
+  class_< VectorFieldEvolver<R> > evolver_class("VectorFieldEvolver",init<const EvolutionParameters<R>&,const IntegratorInterface<BS>&>());
+    evolver_class.def(init<const EvolutionParameters<R>&>());
+    evolver_class.def("integrate",(SetInterface<R>*(VectorFieldEvolver<R>::*)(const VectorFieldInterface<R>&,const SetInterface<R>&,const Rational&)const)
+                      (&VectorFieldEvolver<R>::integrate),return_value_policy<manage_new_object>());
+    evolver_class.def("reach",(SetInterface<R>*(VectorFieldEvolver<R>::*)(const VectorFieldInterface<R>&,const SetInterface<R>&,const Rational&)const)
+                      (&VectorFieldEvolver<R>::reach),return_value_policy<manage_new_object>());
+    evolver_class.def("lower_reach",(SetInterface<R>*(VectorFieldEvolver<R>::*)(const VectorFieldInterface<R>&,const SetInterface<R>&)const)
+                      (&VectorFieldEvolver<R>::lower_reach),return_value_policy<manage_new_object>());
+    evolver_class.def("chainreach",(SetInterface<R>*(VectorFieldEvolver<R>::*)(const VectorFieldInterface<R>&,const SetInterface<R>&,const SetInterface<R>&)const)
+                      (&VectorFieldEvolver<R>::chainreach),return_value_policy<manage_new_object>());
+    evolver_class.def("viable",(SetInterface<R>*(VectorFieldEvolver<R>::*)(const VectorFieldInterface<R>&,const SetInterface<R>&)const)
+                      (&VectorFieldEvolver<R>::viable),return_value_policy<manage_new_object>());
+    evolver_class.def("verify",(tribool(VectorFieldEvolver<R>::*)(const VectorFieldInterface<R>&,const SetInterface<R>&,const SetInterface<R>&)const)
+                      (&VectorFieldEvolver<R>::verify));
+  
 
 }
 

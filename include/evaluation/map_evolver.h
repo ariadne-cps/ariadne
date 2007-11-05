@@ -23,6 +23,9 @@
  
 /*! \file map_evolver.h
  *  \brief Methods for computing the images of sets under maps.
+ *
+ * This class works by approximating sets based on grids. 
+ * A System::DiscreteMap class is made using a MapOrbiter which is fed into a ModelChecker which runs the compuations.
  */
 
 #ifndef ARIADNE_MAP_EVOLVER_H
@@ -34,34 +37,45 @@
 #include "../base/declarations.h"
 #include "../geometry/declarations.h"
 #include "../system/declarations.h"
+#include "../evaluation/declarations.h"
 
-#include "../evaluation/evolution_parameters.h"
-#include "../evaluation/applicator_interface.h"
+
+// For templated constructor
+#include "evaluation/applicator_interface.h"
+#include "evaluation/evolution_parameters.h"
+#include "evaluation/map_orbiter.h"
+
 
 namespace Ariadne {
   namespace Evaluation {
 
-    /*! \brief A class for computing the image of a set under a map. 
+    /*! \brief A class for computing the evolution of a discrete-time autonomous system.
      *  \ingroup Applicators
      */
     template<class R>
     class MapEvolver {
       typedef Numeric::Interval<R> I;
-      typedef Geometry::Zonotope<I,R> BS;
      private:
       EvolutionParameters<R>* _parameters;
-      ApplicatorInterface<R>* _applicator;
+      MapOrbiterInterface<R>* _orbiter;
      public:
+      //@{
+      //! \name Constructors and destructors
+
       /*! \brief Default constructor chooses appropriate parameter values for maximum basic set radius and grid size. */
       MapEvolver();
       
       /*! \brief Construct from evolution parameters. */
       MapEvolver(const EvolutionParameters<R>& parameters);
       
+      /*! \brief Construct from evolution parameters and a method for iterating basic sets. */
+      template<class BS>
+      MapEvolver(const EvolutionParameters<R>& parameters, const ApplicatorInterface<BS>& applicator);
+      
       /*! \brief Copy constructor. */
       MapEvolver(const MapEvolver<R>& other);
       
-      /*! \brief Compute the image of a basic set under a continuous function. */
+      /*! \brief Destructor. */
       virtual ~MapEvolver();
 
       /*! \brief Make a dynamically-allocated copy. */
@@ -82,21 +96,121 @@ namespace Ariadne {
       //@}
 
 
+      //@{
+      //! \name Evaluation of maps on abstract sets
+
+      /*! \brief Compute the image of \a set under \a map. */
+      virtual
+      Geometry::SetInterface<R>* 
+      image(const System::MapInterface<R>& map, 
+            const Geometry::SetInterface<R>& set) const;
+    
+      /*! \brief Compute the preimage of \a set under \a map. */
+      virtual
+      Geometry::SetInterface<R>*
+      preimage(const System::MapInterface<R>& map, 
+               const Geometry::SetInterface<R>& set, 
+               const Geometry::SetInterface<R>& bound) const;
+    
+      /*! \brief Compute an approximation to the set obtained by iterating \a steps times \a map starting in \a initial_set. */
+      virtual
+      Geometry::SetInterface<R>*
+      iterate(const System::MapInterface<R>& map, 
+              const Geometry::SetInterface<R>& initial_set,
+              const Numeric::Integer& steps) const;
+    
+      /*! \brief Compute an approximation to the reachable set of \a map starting in \a initial_set iterating at most \a steps times. */
+      virtual
+      Geometry::SetInterface<R>*
+      reach(const System::MapInterface<R>& map, 
+            const Geometry::SetInterface<R>& initial_set,
+            const Numeric::Integer& steps) const;
+    
+      /*! \brief Compute a lower-approximation to the reachable set of \a map starting in \a initial_set. */
+      virtual
+      Geometry::SetInterface<R>*
+      lower_reach(const System::MapInterface<R>& map, 
+                  const Geometry::SetInterface<R>& initial_set) const;
+    
+      /*! \brief Compute an outer-approximation to the chain-reachable set of \a map starting in \a initial_set. */
+      virtual
+      Geometry::SetInterface<R>*
+      chainreach(const System::MapInterface<R>& map, 
+                 const Geometry::SetInterface<R>& initial_set) const;
+    
+      /*! \brief Compute an outer-approximation to the chain-reachable set of \a map starting in \a initial_set while staying within \a bounding_set. */
+      virtual
+      Geometry::SetInterface<R>*
+      chainreach(const System::MapInterface<R>& map, 
+                 const Geometry::SetInterface<R>& initial_set, 
+                 const Geometry::SetInterface<R>& bounding_set) const;
+    
+      /*! \brief Compute an outer-approximation to the viability kernel of \a map within \a bounding_set. */
+      virtual
+      Geometry::SetInterface<R>* 
+      viable(const System::MapInterface<R>& map, 
+             const Geometry::SetInterface<R>& bounding_set) const;
+    
+      /*! \brief Attempt to verify that the reachable set of \a map starting in \a initial_set remains in \a safe_set. */
+      virtual
+      tribool
+      verify(const System::MapInterface<R>& map, 
+             const Geometry::SetInterface<R>& initial_set, 
+             const Geometry::SetInterface<R>& safe_set) const;
+      //@}
+
+
+      //@{
+      //! \name Methods for computing discretizations of maps on grids
+
+      /*! \brief Discretize  \a map for cells in \a domain_set with image discretized in \a range_grid. */
+      virtual 
+      System::GridMultiMap<R> 
+      discretize(const System::MapInterface<R>& map, 
+                 const Geometry::GridMaskSet<R>& domain_set,
+                 const Geometry::Grid<R>& range_grid) const;
+
+      //@}
+
+ 
       //@{ 
-      //! \name Supporting geometric routines.
-      /*! \brief Subdivide a basic set into smaller pieces. */
-      virtual Geometry::ListSet< BS > subdivide(const BS& bs) const;
+      //! \name Methods for applying a system to a basic set and computing orbits.
+
+     public:
+      /*! \brief Compute the image of a rectangle under a continuous function. */
+      virtual 
+      Geometry::Rectangle<R> 
+      apply(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& r) const;
+
+      /*! \brief Compute the image of a grid cell under a continuous self-map. */
+      virtual 
+      Geometry::GridCellListSet<R> 
+      apply(const System::MapInterface<R>& f, const Geometry::GridCell<R>& r) const;
+
+      /*! \brief Compute the image of a grid cell under a continuous function, approximating on grid \a g which may lie in a different space. */
+      virtual 
+      Geometry::GridCellListSet<R> 
+      apply(const System::MapInterface<R>& f, const Geometry::GridCell<R>& r, const Geometry::Grid<R>& g) const;
       //@}
 
 
       //@{ 
-      //! \name Methods for applying a system to a basic set.
+      //! \name Methods for computing orbits.
 
-      /*! \brief Compute the image of a basic set under a continuous function. */
+      /*! \brief Compute the orbit of a rectangle under steps of continuous function. */
       virtual 
-      BS 
-      evaluate(const System::MapInterface<R>& f, const BS& bs) const;
+      Geometry::DiscreteTimeOrbit< Numeric::Integer, Geometry::Rectangle<R> >
+      orbit(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& r, const Numeric::Integer& n) const;
 
+      /*! \brief Compute the orbit of a rectangle under \a n steps of continuous function, until the size reaches \a s. */
+      virtual 
+      Geometry::DiscreteTimeOrbit< Numeric::Integer, Geometry::Rectangle<R> >
+      orbit(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& r, const Numeric::Integer& n, const R& s) const;
+
+      /*! \brief Compute the orbit of a grid cell under steps of continuous function. */
+      virtual 
+      Geometry::DiscreteTimeOrbit< Numeric::Integer, Geometry::GridCellListSet<R> >
+      orbit(const System::MapInterface<R>& f, const Geometry::GridCell<R>& gc, const Numeric::Integer& n) const;
       //@}
 
      public:
@@ -108,11 +222,6 @@ namespace Ariadne {
       Geometry::ListSet< Geometry::Rectangle<R> > 
       image(const System::MapInterface<R>& f, const Geometry::ListSet< Geometry::Rectangle<R> >& ds) const;
        
-      /*! \brief Compute the image of a list set under a map. */
-      virtual 
-      Geometry::ListSet< BS > 
-      image(const System::MapInterface<R>& f, const Geometry::ListSet< BS >& ds) const;
-       
       
       /*! \brief Compute the image of \a map starting in \a initial_set computing the result on \a grid. */
       virtual
@@ -120,15 +229,6 @@ namespace Ariadne {
       image(const System::MapInterface<R>& map, 
             const Geometry::GridCellListSet<R>& initial_set,
             const Geometry::Grid<R>& grid) const;
-
-      /*! \brief Compute the image of \a map starting in \a initial_set computing the result on \a grid. */
-      /*
-      virtual
-      Geometry::GridMaskSet<R> 
-      image(const System::MapInterface<R>& map, 
-            const Geometry::GridMaskSet<R>& initial_set,
-            const Geometry::FiniteGrid<R>& grid) const;
-      */
 
       /*! \brief Compute the image of \a map starting in \a initial_set while remaining in \a bounding_set. */
       virtual
@@ -145,29 +245,37 @@ namespace Ariadne {
                const Geometry::GridMaskSet<R>& set,
                const Geometry::GridMaskSet<R>& bound) const;
 
+      /*! \brief Compute the preimage of \a set under \a map contained in \a bound. */
+      virtual
+      Geometry::PartitionTreeSet<R> 
+      preimage(const System::MapInterface<R>& map, 
+               const Geometry::PartitionTreeSet<R>& set,
+               const Geometry::Rectangle<R>& bound) const;
 
-      /*! \brief Compute the reachable set of \a map starting in \a initial_set. */
+
+      /*! \brief Compute an approximation to the iterated set of \a map starting in \a initial_set, iterating \a steps times. */
+      virtual
+      Geometry::ListSet< Geometry::Rectangle<R> > 
+      iterate(const System::MapInterface<R>& map, 
+              const Geometry::ListSet< Geometry::Rectangle<R> >& initial_set,
+              const Numeric::Integer& steps) const;
+
+      /*! \brief Compute an approximation to the reachable set of \a map starting in \a initial_set, iterating at most \a steps times. */
       virtual
       Geometry::ListSet< Geometry::Rectangle<R> > 
       reach(const System::MapInterface<R>& map, 
-            const Geometry::ListSet< Geometry::Rectangle<R> >& initial_set) const;
+            const Geometry::ListSet< Geometry::Rectangle<R> >& initial_set,
+            const Numeric::Integer& steps) const;
 
-           
-      /*! \brief Compute the reachable set of \a map starting in \a initial_set. */
+      /*! \brief Compute a lower-approximation to the reachable set of \a map starting in \a initial_set. */
       virtual
-      Geometry::ListSet<BS> 
-      reach(const System::MapInterface<R>& map, 
-            const Geometry::ListSet<BS>& initial_set) const;
+      Geometry::ListSet< Geometry::Rectangle<R> > 
+      lower_reach(const System::MapInterface<R>& map, 
+                  const Geometry::ListSet< Geometry::Rectangle<R> >& initial_set) const;
 
-           
-      /*! \brief Compute the reachable set of \a map starting in \a initial_set. */
-      virtual
-      Geometry::GridMaskSet<R> 
-      reach(const System::MapInterface<R>& map, 
-            const Geometry::GridMaskSet<R>& initial_set) const;
-
-            
-      /*! \brief Compute the chain-reachable set of \a map starting in \a initial_set while staying within \a bounding_set. */
+      
+     
+      /*! \brief Compute an outer-approximation to the chain-reachable set of \a map starting in \a initial_set while staying within \a bounding_set. */
       virtual
       Geometry::GridMaskSet<R> 
       chainreach(const System::MapInterface<R>& map, 
@@ -189,65 +297,9 @@ namespace Ariadne {
       //@}
 
       
-      //@{
-      //! \name Evaluation of maps on abstract sets
-
-      /*! \brief Compute the image of \a set under \a map. */
-      virtual
-      Geometry::SetInterface<R>* 
-      image(const System::MapInterface<R>& map, 
-            const Geometry::SetInterface<R>& set) const;
-    
-      /*! \brief Compute the preimage of \a set under \a map. */
-      virtual
-      Geometry::SetInterface<R>*
-      preimage(const System::MapInterface<R>& map, 
-               const Geometry::SetInterface<R>& set, 
-               const Geometry::SetInterface<R>& bound) const;
-    
-      /*! \brief Compute the reachable set of \a map starting in \a initial_set while staying within \a bounding_set. */
-      virtual
-      Geometry::SetInterface<R>*
-      reach(const System::MapInterface<R>& map, 
-            const Geometry::SetInterface<R>& initial_set) const;
-    
-      /*! \brief Compute the chain-reachable set of \a map starting in \a initial_set while staying within \a bounding_set. */
-      virtual
-      Geometry::SetInterface<R>*
-      chainreach(const System::MapInterface<R>& map, 
-                 const Geometry::SetInterface<R>& initial_set, 
-                 const Geometry::SetInterface<R>& bounding_set) const;
-    
-      /*! \brief Compute the viability kernel of \a map within \a bounding_set. */
-      virtual
-      Geometry::SetInterface<R>* 
-      viable(const System::MapInterface<R>& map, 
-             const Geometry::SetInterface<R>& bounding_set) const;
-    
-      /*! \brief Attempt to verify that the reachable set of \a map starting in \a initial_set remains in \a safe_set. */
-      virtual
-      tribool
-      verify(const System::MapInterface<R>& map, 
-             const Geometry::SetInterface<R>& initial_set, 
-             const Geometry::SetInterface<R>& safe_set) const;
-      //@}
-
 
       //@{
-      //! \brief Methods for computing discretizations
-
-      /*! \brief Discretize a system on a grid. */ 
-      virtual 
-      System::GridMultiMap<R> 
-      discretize(const System::MapInterface<R>& f, 
-                 const Geometry::GridMaskSet<R>& dom,
-                 const Geometry::Grid<R>& range_grid) const;
-
-      //@}
-
-
-      //@{
-      //! \brief Methods for control systems
+      //! \name Methods for control systems
 
       /*! \brief Compute a controller for a control-to-target problem. */ 
       virtual 
@@ -262,14 +314,34 @@ namespace Ariadne {
       //@}
 
 
-
-
-       
+     private:
+      // Helper functions
+      Evaluation::EvolutionParameters<R>* default_parameters();
+      Evaluation::MapOrbiterInterface<R>* default_orbiter();
+      Evaluation::ModelChecker<R> model_checker() const;
+      System::DiscreteMap<R> discrete_map(const System::MapInterface<R>& f) const;
+      
     };
 
 
 
   }
 }
+
+
+// Inline functions
+
+namespace Ariadne {
+
+template<class R> template<class BS> inline
+Evaluation::MapEvolver<R>::MapEvolver(const EvolutionParameters<R>& parameters,
+                                      const ApplicatorInterface<BS>& applicator)
+  : _parameters(new EvolutionParameters<R>(parameters)),
+    _orbiter(new MapOrbiter<BS>(parameters,applicator))
+{
+}
+
+}
+
 
 #endif /* ARIADNE_APPLY_H */

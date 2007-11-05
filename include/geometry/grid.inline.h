@@ -23,72 +23,75 @@
  
 
 namespace Ariadne {
-  namespace Geometry {
-
-    template<class R> inline
-    const Grid<R>& 
-    FiniteGrid<R>::grid() const
-    { 
-      return *this->_grid_ptr; 
-    }
-  
-    template<class R> inline
-    const Combinatoric::LatticeBlock& 
-    FiniteGrid<R>::lattice_block() const 
-    {
-      return this->_lattice_block; 
-    }
-     
- 
-    template<class R> inline
-    R 
-    FiniteGrid<R>::subdivision_coordinate(dimension_type d, index_type n) const
-    {
-      return this->_grid_ptr->subdivision_coordinate(d,n);
-    }
-  
-    template<class R> inline
-    index_type 
-    FiniteGrid<R>::subdivision_index(dimension_type d, const real_type& x) const 
-    {
-      return this->_grid_ptr->subdivision_index(d,x);
-    }
-      
-    template<class R> inline
-    index_type 
-    FiniteGrid<R>::subdivision_lower_index(dimension_type d, const real_type& x) const 
-    {
-      return this->_grid_ptr->subdivision_lower_index(d,x);
-    }
-
-    template<class R> inline
-    index_type 
-    FiniteGrid<R>::subdivision_upper_index(dimension_type d, const real_type& x) const 
-    {
-      return this->_grid_ptr->subdivision_upper_index(d,x);
-    }
-  
 
 
-
-
-    template<class R> inline
-    std::istream& operator>>(std::istream& is, Grid<R>& g)
-    {
-      return g.read(is);
-    }
-
-    template<class R> inline
-    std::ostream& operator<<(std::ostream& os, const Grid<R>& g)
-    {
-      return g.write(os);
-    }
-
-    template<class R> inline
-    std::ostream& operator<<(std::ostream& os, const FiniteGrid<R>& fg)
-    {
-      return fg.write(os);
-    }
-
-  }
+template<class R> inline
+const Geometry::Grid<R>& 
+Geometry::FiniteGrid<R>::grid() const
+{ 
+  return *this->_grid_ptr; 
 }
+
+template<class R> inline
+const Combinatoric::LatticeBlock& 
+Geometry::FiniteGrid<R>::lattice_block() const 
+{
+  return this->_lattice_block; 
+}
+
+
+template<class R> inline
+R 
+Geometry::FiniteGrid<R>::subdivision_coordinate(dimension_type d, index_type n) const
+{
+  return this->_grid_ptr->subdivision_coordinate(d,n);
+}
+
+template<class R> inline
+index_type 
+Geometry::FiniteGrid<R>::subdivision_index(dimension_type d, const real_type& x) const 
+{
+  return this->_grid_ptr->subdivision_index(d,x);
+}
+
+template<class R> inline
+index_type 
+Geometry::FiniteGrid<R>::subdivision_lower_index(dimension_type d, const real_type& x) const 
+{
+  return this->_grid_ptr->subdivision_lower_index(d,x);
+}
+
+template<class R> inline
+index_type 
+Geometry::FiniteGrid<R>::subdivision_upper_index(dimension_type d, const real_type& x) const 
+{
+  return this->_grid_ptr->subdivision_upper_index(d,x);
+}
+
+
+
+
+
+template<class R> inline
+std::istream& 
+Geometry::operator>>(std::istream& is, Grid<R>& g)
+{
+  return g.read(is);
+}
+
+template<class R> inline
+std::ostream& 
+Geometry::operator<<(std::ostream& os, const Grid<R>& g)
+{
+  return g.write(os);
+}
+
+template<class R> inline
+std::ostream& 
+Geometry::operator<<(std::ostream& os, const FiniteGrid<R>& fg)
+{
+  return fg.write(os);
+}
+
+
+} // namespace Ariadne

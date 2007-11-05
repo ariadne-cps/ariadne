@@ -44,7 +44,7 @@
 namespace Ariadne {
   
   namespace Geometry { template<class R> class Rectangle; }
-  namespace Output { class texstream; }
+  namespace Output { class latexstream; }
 
 
   namespace Function {
@@ -80,10 +80,11 @@ namespace Ariadne {
     template<class R> Polynomial<typename Numeric::traits<R>::interval_type> truncate(const Polynomial<R>&, const Geometry::Rectangle<typename Numeric::traits<R>::number_type>&, const size_type&, const size_type&);
 
     template<class R> std::ostream& operator<<(std::ostream&, const Polynomial<R>&);
+    template<class R> std::istream& operator>>(std::istream&, Polynomial<R>&);
   
 
     /*! \brief A polynomial with multivalued output, using a den.
-     *  \ingroup DiscreteTime
+     *  \ingroup FunctionTypes
      */
     template<class R>
     class Polynomial {
@@ -147,6 +148,9 @@ namespace Ariadne {
       /*! \brief Compute the derivate of the map at a point. */
       LinearAlgebra::Matrix<F> jacobian(const LinearAlgebra::Vector<F>& s) const;
 
+      /*! \brief Compute the derivate of the function with respect to the \a k<sup>th</sup> variable. */
+      Polynomial<F> derivative(const size_type& k) const;
+
       /*! \brief The zero polynomial with result size \a rs and argument size \a as. */
       static Polynomial<R> zero(const size_type& rs, const size_type& as);
       /*! \brief The unit polynomial with result size 1 and argument size \a as. */
@@ -208,4 +212,4 @@ namespace Ariadne {
 
 #include "polynomial.inline.h"
 
-#endif /* ARIADNE_POLYNOMIAL_MAP_H */
+#endif /* ARIADNE_POLYNOMIAL_H */

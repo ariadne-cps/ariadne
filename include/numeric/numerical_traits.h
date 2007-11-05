@@ -36,13 +36,16 @@
 class __gmpq_value;
 
 namespace Ariadne {
+  namespace Function {
+    template<class X, class V> class FirstDerivative;
+  }
+
   namespace Numeric {
     class Integer;
     class Rational;
     class Float64;
     class FloatMP;
     template<class R> class Interval;
-    template<class X, class V> class Differential;
       
     /* numerical traits */
     /*! \brief Tags a class representing a ring. */
@@ -155,7 +158,7 @@ namespace Ariadne {
       typedef Interval<R> interval_type; 
     };
 
-    template<class X, class V> struct traits< Differential<X,V> > { 
+    template<class X, class V> struct traits< Function::FirstDerivative<X,V> > { 
       typedef typename traits<X>::number_type number_type; 
     };
 

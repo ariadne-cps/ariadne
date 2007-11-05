@@ -62,6 +62,8 @@ void export_evolution_parameters()
     .def("set_argument_grid_length",&EvolutionParameters<R>::set_argument_grid_length)
     .def("set_result_grid_length",&EvolutionParameters<R>::set_result_grid_length)
     .def("set_bounding_domain_size",&EvolutionParameters<R>::set_bounding_domain_size)
+
+    .def(self_ns::str(self))
   ;
  
 }

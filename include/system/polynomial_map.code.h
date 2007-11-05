@@ -45,29 +45,6 @@
 
 namespace Ariadne {
 
-template<class R>
-void
-System::PolynomialMap<R>::_set_argument_dimension(const dimension_type& n) 
-{
-  this->_argument_dimension=n;
-  for(size_type i=0; i!=this->_components.size(); ++i) {
-    this->_components[i]=Function::Polynomial<R>(n);
-  }
-}
-
-template<class R>
-dimension_type
-System::PolynomialMap<R>::_compute_maximum_component_dimension() const
-{
-  size_type result=0;
-  for(size_type i=0; i!=this->_components.size(); ++i) {
-    result=std::max(this->_components[i].argument_size(),result);
-  }
-  return result;
-}
-
-
-
 
 
 
@@ -76,12 +53,7 @@ Geometry::Point<typename System::PolynomialMap<R>::F>
 System::PolynomialMap<R>::image(const Geometry::Point<F>& s) const 
 {
   ARIADNE_CHECK_ARGUMENT_DIMENSION(*this,s,"System::PolynomialMap<R>::apply(Point<R>)");
-  LinearAlgebra::Vector<F> v=s.position_vector();
-  Geometry::Point<F> result(this->result_dimension());
-  for(size_type i=0; i!=this->result_dimension(); ++i) {
-    result[i] = _components[i].evaluate(v);
-  }
-  return result;
+  return Geometry::Point<F>(this->_polynomial.evaluate(s.position_vector()));
 }
 
 
@@ -103,7 +75,7 @@ std::ostream&
 System::PolynomialMap<R>::write(std::ostream& os) const
 {
   const PolynomialMap<R>& pm = *this;
-  return os << pm._components;
+  return os << pm._polynomial;
 }
 
 
@@ -112,10 +84,7 @@ std::istream&
 System::PolynomialMap<R>::read(std::istream& is)
 {
   PolynomialMap<R>& pm=*this;
-  std::vector< Function::Polynomial<R> > vec;
-  is >> vec;
-  pm._components=array< Function::Polynomial<R> >(vec.begin(),vec.end());
-  pm._set_argument_dimension(pm._compute_maximum_component_dimension());
+  is >> pm._polynomial;
   return is;
 }
 

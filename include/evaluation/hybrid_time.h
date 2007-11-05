@@ -39,6 +39,8 @@
 #include "../evaluation/declarations.h"
 #include "../evaluation/time_model.h"
 
+#include "../geometry/discrete_state.h"
+
 namespace Ariadne {  
   namespace Evaluation {
   
@@ -73,11 +75,11 @@ namespace Ariadne {
       typedef typename BS::real_type R;
       typedef Numeric::Interval<R> I;
      public:
-      TimeModelHybridBasicSet(const id_type& q, const BS& bs)
+      TimeModelHybridBasicSet(const Geometry::DiscreteState& q, const BS& bs)
         : Geometry::HybridBasicSet<BS>(q,bs), _time(I(0),LinearAlgebra::Vector<I>(bs.number_of_generators())), _steps(0) { }
-      TimeModelHybridBasicSet(const Numeric::Rational& t, const Numeric::Integer& n, const id_type& q, const BS& bs)
+      TimeModelHybridBasicSet(const Numeric::Rational& t, const Numeric::Integer& n, const Geometry::DiscreteState& q, const BS& bs)
         : Geometry::HybridBasicSet<BS>(q,bs), _time(I(t),LinearAlgebra::Vector<I>(bs.number_of_generators())), _steps(n) { }
-      TimeModelHybridBasicSet(const TimeModel<R>& t, const Numeric::Integer& n, const id_type& q, const BS& bs)
+      TimeModelHybridBasicSet(const TimeModel<R>& t, const Numeric::Integer& n, const Geometry::DiscreteState& q, const BS& bs)
         : Geometry::HybridBasicSet<BS>(q,bs), _time(t), _steps(n) { 
         if(t.number_of_generators()!=bs.number_of_generators()) { std::cerr << "t=" << t << "\nbs=" << bs << std::endl; }
         assert(t.number_of_generators()==bs.number_of_generators()); }

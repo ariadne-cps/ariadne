@@ -62,9 +62,9 @@ static int& verbosity = Evaluation::applicator_verbosity;
 
 template<class R>
 Geometry::Rectangle<R> 
-Evaluation::evaluate(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& r) 
+Evaluation::apply(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& r) 
 {
-  ARIADNE_LOG(6,"Rectangle<Float> evaluate(MapInterface f, Rectangle<Float> r)\n");
+  ARIADNE_LOG(6,"Rectangle<Float> apply(MapInterface f, Rectangle<Float> r)\n");
   ARIADNE_LOG(7,"  r="<<r<<"\n");
   ARIADNE_LOG(8,"  f(r)="<<Geometry::Rectangle<R>(f.image(Geometry::Point< Numeric::Interval<R> >(r)))<<"\n");
   return Geometry::Rectangle<R>(f.image(Geometry::Point< Numeric::Interval<R> >(r)));
@@ -73,9 +73,9 @@ Evaluation::evaluate(const System::MapInterface<R>& f, const Geometry::Rectangle
 
 template<class R>
 Geometry::Zonotope<R> 
-Evaluation::evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope<R>& z)  
+Evaluation::apply(const System::MapInterface<R>& f, const Geometry::Zonotope<R>& z)  
 {
-  ARIADNE_LOG(6,"Zonotope<Float> MapEvolver::evaluate(MapInterface f, Zonotope<Float,Float> z)\n");
+  ARIADNE_LOG(6,"Zonotope<Float> MapEvolver::apply(MapInterface f, Zonotope<Float,Float> z)\n");
   ARIADNE_LOG(7,"  z="<<z<<"\n");
   typedef typename Numeric::traits<R>::arithmetic_type F;
   
@@ -125,9 +125,9 @@ Evaluation::evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope<
 
 template<class R>
 Geometry::Zonotope<Numeric::Interval<R>,R> 
-Evaluation::evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope<Numeric::Interval<R>,R>& z)  
+Evaluation::apply(const System::MapInterface<R>& f, const Geometry::Zonotope<Numeric::Interval<R>,R>& z)  
 {
-  ARIADNE_LOG(6,"Zontope<Interval,Float> MapEvolver::evaluate(MapInterface f, Zonotope<Interval,Float> z)\n");
+  ARIADNE_LOG(6,"Zontope<Interval,Float> MapEvolver::apply(MapInterface f, Zonotope<Interval,Float> z)\n");
   ARIADNE_LOG(7,"  z="<<z<<"\n");
   typedef Numeric::Interval<R> I;
   
@@ -144,9 +144,9 @@ Evaluation::evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope<
 
 template<class R>
 Geometry::Zonotope< Numeric::Interval<R> > 
-Evaluation::evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope< Numeric::Interval<R> >& z)  
+Evaluation::apply(const System::MapInterface<R>& f, const Geometry::Zonotope< Numeric::Interval<R> >& z)  
 {
-  ARIADNE_LOG(6,"Zontope<Interval,Interval> MapEvolver::evaluate(MapInterface f, Zonotope<Interval,Interval> z)\n");
+  ARIADNE_LOG(6,"Zontope<Interval,Interval> MapEvolver::apply(MapInterface f, Zonotope<Interval,Interval> z)\n");
   ARIADNE_LOG(7,"  z="<<z<<"\n");
   typedef Numeric::Interval<R> I;
   
@@ -161,63 +161,35 @@ Evaluation::evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope<
 
 
 
-template<class R>
-Evaluation::Applicator<R>::Applicator() 
+template<class BS>
+Evaluation::Applicator<BS>::Applicator() 
 {
 }
 
 
-template<class R>
-Evaluation::Applicator<R>*
-Evaluation::Applicator<R>::clone() const 
+template<class BS>
+Evaluation::Applicator<BS>*
+Evaluation::Applicator<BS>::clone() const 
 {
-  return new Applicator<R>();
+  return new Applicator<BS>();
 }
 
 
 
-template<class R>
-Geometry::Rectangle<R>
-Evaluation::Applicator<R>::evaluate(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& r) const
+template<class BS>
+BS
+Evaluation::Applicator<BS>::apply(const System::MapInterface<R>& f, const BS& bs) const
 {
-  return Evaluation::evaluate(f,r);
+  return Evaluation::apply(f,bs);
 }
 
-template<class R>
-Geometry::Zonotope<R,R>
-Evaluation::Applicator<R>::evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope<R,R>& z) const
-{
-  return Evaluation::evaluate(f,z);
-}
-
-template<class R>
-Geometry::Zonotope<typename Evaluation::Applicator<R>::I,R>
-Evaluation::Applicator<R>::evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope<I,R>& z) const
-{
-  return Evaluation::evaluate(f,z);
-}
-
-template<class R>
-Geometry::Zonotope<typename Evaluation::Applicator<R>::I>
-Evaluation::Applicator<R>::evaluate(const System::MapInterface<R>& f, const Geometry::Zonotope<I,I>& z) const
-{
-  return Evaluation::evaluate(f,z);
-}
-
-
-template<class R>
+template<class BS>
 void
-Evaluation::Applicator<R>::instantiate()
+Evaluation::Applicator<BS>::instantiate()
 {
-  Geometry::Rectangle<R>* r=0;
-  Geometry::Zonotope<R,R>* z=0;
-  Geometry::Zonotope<I,R>* fz=0;
-  Geometry::Zonotope<I,I>* iz=0;
+  BS* bs=0;
   System::MapInterface<R>* f=0;
-  Evaluation::evaluate(*f,*r);
-  Evaluation::evaluate(*f,*z);
-  Evaluation::evaluate(*f,*fz);
-  Evaluation::evaluate(*f,*iz);
+  Evaluation::apply(*f,*bs);
 }
 
 

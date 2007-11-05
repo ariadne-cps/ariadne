@@ -36,10 +36,28 @@
 #include <map>
 
 
+#include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
 
 namespace Ariadne {
   namespace LinearProgramming {
+
+    //! \ingroup LinearProgramming
+    //! Solve the linear programming problem \f$\max c^Tx\f$ such that \f$Ax=b;\ x\geq0\f$.
+    template<class R> R solve(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b, const LinearAlgebra::Vector<R>& c);
+    //! Solve the linear programming problem \f$\max c^Tx\f$ such that \f$Ax=b;\ l \leq x\leq u\f$.
+    template<class R> R solve(const LinearAlgebra::Matrix<R>& A, 
+                              const LinearAlgebra::Vector<R>& b, const LinearAlgebra::Vector<R>& c,
+                              const LinearAlgebra::Vector<R>& l, const LinearAlgebra::Vector<R>& u);
+
+    //! Tests feasibility of the primal linear programming problem \f$Ax=b;\ x\geq0\f$. 
+    template<class R> tribool feasible(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b);
+    //! Tests feasibility of the constrained primal linear programming problem \f$Ax\leq b;\ l\leq x\leq u\f$. 
+    template<class R> tribool feasible(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b,
+                                       const LinearAlgebra::Vector<R>& l, const LinearAlgebra::Vector<R>& u);
+    //! Tests feasibility of the dual feasibility problem \f$A^Ty\leq c\f$. 
+    template<class R> tribool dual_feasible(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& c);
+
 
     enum Comparison { equal, greater, less, greater_or_equal, less_or_equal };
     

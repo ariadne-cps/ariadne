@@ -21,6 +21,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+/*! \file tribool.h
+ *  \brief Three-state logical variable.
+ */
 #ifndef ARIADNE_TRIBOOL_H
 #define ARIADNE_TRIBOOL_H
 
@@ -31,31 +34,23 @@ namespace Ariadne {
   namespace Base {
 
 #ifdef DOXYGEN
-  /*!\brief Built-in logical type. */
-  class bool { };
-  /*!\brief Built-in integer type. */
-  class int { };
-  /*!\brief Built-in unsigned integer type. */
-  class uint { };
-  /*!\brief Built-in double-precision floating-point type. */
-  class double { };
+    /*!\brief A logic type which can take values \p true, \p false, and \p intermediate. 
+     *
+     * Converting \p intermediate to \c bool yields \p false. 
+     */
+    class tribool { 
+      //! Convertion to a bool.  Returns \c true if and only if the value of \p tb is \c true.
+      operator bool () const;
+      //! Returns \c true if and only if the value of \p tb is \c true.
+      friend bool definitely(tribool tb);
+      //! Returns \c true if and only if the value of \p tb is \c true or \c indeterminate.
+      friend bool possibly(tribool tb);
+      //! Returns \c true if and only if the value of \p tb is \c indeterminate.
+      friend bool indeterminate(bool tb);
+    };
 
+#else
 
-  /*!\brief A logic type which can take values \p true, \p false, and \p intermediate. 
-   *
-   * Converting \a intermediate to \c bool yields \p false. 
-   */
-  class tribool { 
-    //! Convertion to a bool.  Returns \c true if and only if the value of \p tb is \c true.
-    operator bool () const;
-    //! Returns \c true if and only if the value of \p tb is \c true.
-    friend bool definitely(tribool tb);
-    //! Returns \c true if and only if the value of \p tb is \c true or \c indeterminate.
-    friend bool possibly(tribool tb);
-    //! Returns \c true if and only if the value of \p tb is \c indeterminate.
-    friend bool indeterminate(bool tb);
-  };
-#endif
     using boost::logic::tribool;
     using boost::logic::indeterminate;
 
@@ -63,8 +58,10 @@ namespace Ariadne {
     inline bool possibly(tribool tb) { return tb || indeterminate(tb); }
 
     inline tribool operator^(tribool tb1, tribool tb2) { return (tb1&&!tb2)||(!tb1&&tb2); }
+
+#endif
+
   }
-  
 }
 
 #endif /* ARIADNE_TRIBOOL_H */

@@ -201,6 +201,17 @@ Geometry::GridCellListSet<R>::restrict_inner_approximation(const SetInterface<R>
 
 template<class R>
 std::ostream&     
+Geometry::GridCellListSet<R>::summarize(std::ostream& os) const 
+{
+  os << "GridCellListSet("
+     << " grid=" << this->grid() << ","
+     << " size=" << this->size() << ","
+     << " )" << std::endl;
+  return os;
+}
+
+template<class R>
+std::ostream&     
 Geometry::GridCellListSet<R>::write(std::ostream& os) const 
 {
   os << "GridCellListSet("

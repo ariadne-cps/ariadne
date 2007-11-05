@@ -45,7 +45,7 @@ using namespace Ariadne::LinearAlgebra;
 template<class R> int test_matrix();
 
 int main() {
-  test_matrix<Float>();
+  test_matrix<Flt>();
   //test_matrix<Rational>();
   return 0;
 }
@@ -76,8 +76,14 @@ test_matrix()
   
   A1[0][0]=1.0;
   cout << "A1[0][0]= " << A1[0][0] << endl;
+  assert(A1[0][0]==1.0);
   cout << "A2[0][0]= " << A2[0][0] << endl;
   assert(A2==A3);
+  
+  A1(0,0)=2.0;
+  cout << "A1(0,0)= " << A1(0,0) << endl;
+  assert(A1(0,0)==2.0);
+  assert(A1[0][0]==A1(0,0));
   
   A0=Matrix<R>::zero(2,3);
   cout << "A0= " << A0 << endl;

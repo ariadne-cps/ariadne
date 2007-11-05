@@ -61,7 +61,7 @@ int main() {
   
   cout << boolalpha;
   
-  test_polyhedron<Float>();
+  test_polyhedron<Flt>();
   test_polyhedron<Rational>();
    
   cerr << "INCOMPLETE ";
@@ -113,7 +113,7 @@ test_polyhedron()
   assert((bool)(!phd1.contains(pt2)));
   
 
-  Rectangle<R> r1("[-0.06125,0.25]x[0.125,0.375]");
+  Rectangle<R> r1("[-0.0625,0.25]x[0.125,0.375]");
   cout << "r1=" << r1 << endl;
   for(class Rectangle<R>::vertices_const_iterator v_iter=r1.vertices_begin();
       v_iter!=r1.vertices_end(); ++v_iter)
@@ -157,7 +157,8 @@ test_polyhedron()
 
   Polytope<Rational> qpltp2=Polytope<Rational>(Polyhedron<Rational>(phd2));
   cout << "qpltp2=" << qpltp2 << endl << "qpltp2.bounding_box()=" << qpltp2.bounding_box() << endl;
-  Matrix<R>  G=Matrix<R>("[0.889,0.615,-1.600,-2.667;-0.889,-1.231,1.600,5.333]");
+  double a1[8]={0.889,0.615,-1.600,-2.667,-0.889,-1.231,1.600,5.333};
+  Matrix<R>  G=Matrix<R>(2,4,a1);
   G=Matrix<R>("[3.125,1.125,-2.875,-0.875;1.75,-0.25,-2.25,-0.25]");
   cout << "G=" << G << endl;
   Polytope<R> pltp2=Polytope<R>(G);

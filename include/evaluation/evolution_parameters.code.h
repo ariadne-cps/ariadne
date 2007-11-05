@@ -29,6 +29,17 @@ namespace Ariadne {
 
 template<class R>
 Evaluation::EvolutionParameters<R>::EvolutionParameters() 
+  : _maximum_number_of_steps(255),
+    _lock_to_grid_steps(1),
+    _minimum_step_size(0),
+    _maximum_step_size(1),
+    _lock_to_grid_time(1),
+    _minimum_basic_set_radius(0),
+    _maximum_basic_set_radius(1),
+    _grid_length(1),
+    _argument_grid_length(1),
+    _result_grid_length(1),
+    _bounding_domain_size(1)
 {
 }
 
@@ -241,6 +252,29 @@ Evaluation::EvolutionParameters<R>::set_bounding_domain_size(R x)
 }
 
 
+template<class R>
+std::ostream&
+Evaluation::EvolutionParameters<R>::write(std::ostream& os) const
+{
+  os << "EvolutionParameters"
+     << "(\n  maximum_number_of_steps=" << this->_maximum_number_of_steps
+     << ",\n  lock_to_grid_steps=" << this->_lock_to_grid_steps
+
+     << ",\n  minimum_step_size=" << this->_minimum_step_size
+     << ",\n  maximum_step_size=" << this->_maximum_step_size
+     << ",\n  lock_to_grid_time=" << this->_lock_to_grid_time
+
+     << ",\n  minimum_basic_set_radius=" << this->_minimum_basic_set_radius
+     << ",\n  maximum_basic_set_radius=" << this->_maximum_basic_set_radius
+
+     << ",\n  grid_length=" << this->_grid_length
+     << ",\n  argument_grid_length=" << this->_argument_grid_length
+     << ",\n  result_grid_length=" << this->_result_grid_length
+
+     << ",\n  bounding_domain_size=" << this->_bounding_domain_size
+     << "\n)\n";
+  return os;
+}
 
 
 }

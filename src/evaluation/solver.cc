@@ -32,11 +32,11 @@ namespace Ariadne {
     using namespace Numeric;
     
 #ifdef ENABLE_FLOAT64
-    template class Solver<Float64>;
+    template class SolverInterface<Float64>;
 #endif
   
 #ifdef ENABLE_FLOATMP
-    template class Solver<FloatMP>;
+    template class SolverInterface<FloatMP>;
 #endif
 
   }

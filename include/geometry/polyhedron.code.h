@@ -54,698 +54,751 @@
 #include "../output/logging.h"
 
 
-namespace Ariadne {
-  namespace Geometry {
+// Specializations of polyhedral operations
+namespace {
 
-    template<class R> 
-    tribool 
-    empty(const Polyhedron<R>& plhd) 
-    {
-      return empty(Polyhedron<Numeric::Rational>(plhd));
-    }
+using namespace Ariadne;
+using Geometry::verbosity;
 
-  
-    template<class R> 
-    tribool 
-    empty(const Polyhedron< Numeric::Interval<R> >& plhd) 
-    {
-      throw NotImplemented(__PRETTY_FUNCTION__);
-    }
-  
+inline
+void
+assign(Geometry::Polyhedron<Numeric::Rational>& plhd, const Geometry::PointList<Numeric::Rational>& vl)
+{
+  plhd=Geometry::Polyhedron<Numeric::Rational>(Geometry::Polytope<Numeric::Rational>(vl));
+}
 
-    template<> 
-    tribool 
-    empty(const Polyhedron<Numeric::Rational>& plhd) {
-      try {
-        Polytope<Numeric::Rational> pltp(plhd);
-        ARIADNE_LOG(7,"empty(plhd): plhd="<<plhd<<" pltp="<<pltp);
-        return pltp.empty();
-      }
-      catch(UnboundedSet& e) {
-        return false;
-      }
-    }
-  
-      
-    
-    template<class R> 
-    tribool 
-    bounded(const Polyhedron<R>& plhd) 
-    {
-      return bounded(Polyhedron<Numeric::Rational>(plhd));
-    }
-
-  
-    template<class R> 
-    tribool 
-    bounded(const Polyhedron< Numeric::Interval<R> >& plhd) 
-    {
-      throw NotImplemented(__PRETTY_FUNCTION__);
-    }
-  
-
-    template<> 
-    tribool 
-    bounded(const Polyhedron<Numeric::Rational>& plhd)
-    {
-      try {
-        Polytope<Numeric::Rational> pltp(plhd);
-        return pltp.bounded();
-      }
-      catch(UnboundedSet& e) {
-        return false;
-      }
-    }
-
-      
-    
-    template<class R1, class R2, template<class> class BS>
-    tribool 
-    _subset(const BS<R1>& A, const Polyhedron<R2>& B)
-    {
-      tribool result=true;
-      for(typename BS<R1>::vertices_const_iterator v=A.vertices_begin();
-          v!=A.vertices_end(); ++v)
-      {
-        for(typename Polyhedron<R2>::constraints_const_iterator c=B.constraints_begin();
-            c!=B.constraints_end(); ++c)
-        {
-          result=result && (c->satisfied_by(*v));
-          if(!result) { return result; }
-        }
-      }
-      return result;
-    }
-    
-    
-  
-    template<class R>
-    Polyhedron<R>::Polyhedron(const std::string& str)
-    {
-      std::stringstream ss(str);
-      ss >> *this;
-    }
-    
-    
-    template<class R>
-    Polyhedron<R>::Polyhedron(dimension_type d)
-      : _dimension(d), 
-        _number_of_constraints(0), 
-        _data()
-    {
-    }
-    
-    
-    template<class R>
-    Polyhedron<R>::Polyhedron(dimension_type d, size_type nc, const R* data)
-      : _dimension(d), 
-        _number_of_constraints(nc), 
-        _data(data,data+(d+1)*nc)
-    { 
-    }
-   
-   
-    template<class R>
-    Polyhedron<R>::Polyhedron(const LinearAlgebra::Matrix<R>& A,
-                              const LinearAlgebra::Vector<R>& b) 
-      : _dimension(A.number_of_columns()), 
-        _number_of_constraints(A.number_of_rows()), 
-        _data((A.number_of_columns()+1)*A.number_of_rows())
-    {
-      using namespace LinearAlgebra;
-      ARIADNE_CHECK_SIZE(b,A.number_of_rows(),"Polyhedron::Polyhedron(Matrix A, Vector b)");
-      dimension_type d=this->dimension();
-      dimension_type nc=this->number_of_constraints();
-      LinearAlgebra::MatrixSlice<R>(nc,d,this->begin(),d+1u,1u)=-A;
-      LinearAlgebra::VectorSlice<R>(nc,this->begin()+d,d+1u)=b;
-    }
-  
-
-    template<class R>
-    Polyhedron<R>::Polyhedron(const LinearAlgebra::Matrix<R>& C) 
-      : _dimension(C.number_of_columns()-1), 
-        _number_of_constraints(C.number_of_rows()), 
-        _data(C.data())
-    {
-    }
-  
-
-    template<class R>
-    Polyhedron<R>::Polyhedron(const PointList<R>& pts)
-      : _dimension(pts.dimension()), _number_of_constraints(0), _data()
-    {
-      throw NotImplemented(__PRETTY_FUNCTION__);
-    }
-  
-    template<>
-    Polyhedron<Numeric::Rational>::Polyhedron(const PointList<Numeric::Rational>& pts)
-    {
-      (*this)=Polyhedron<Numeric::Rational>(Polytope<Numeric::Rational>(pts));
-    }
-  
-
-    template<class R>
-    void
-    Polyhedron<R>::new_constraint(const PolyhedralConstraint<R>& c)
-    {
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(*this,c,"void Polyhedron::new_constraint(PolyhedralConstraint& c)");
-      dimension_type d=this->_dimension;
-      size_type sz=this->_data.size();
-      this->_data.resize(sz+d+1u);
-      for(dimension_type i=0; i!=d; ++i) {
-        this->_data[sz+i]=c._a[i];
-        this->_data[sz+d]=c._a[d];
-      }
-    }
-
-
-    template<class R>
-    LinearAlgebra::MatrixSlice<R>
-    Polyhedron<R>::_constraints()
-    {
-      return LinearAlgebra::MatrixSlice<R>(this->_number_of_constraints,
-                                           this->_dimension+1u,
-                                           this->begin(),
-                                           this->_dimension+1u,
-                                           1u);
-    }
-
-
-    template<class R>
-    Polyhedron<R>::Polyhedron(const Rectangle<R>& r)
-      : _dimension(r.dimension()), 
-        _number_of_constraints(r.dimension()*2u),
-        _data((r.dimension()+1u)*r.dimension()*2u,static_cast<R>(0))
-    {
-      dimension_type d=r.dimension();
-      LinearAlgebra::MatrixSlice<R> constraints=this->_constraints();
-      for(size_type i=0; i!=d; ++i) {
-        constraints(i,i)=static_cast<R>(1);
-        constraints(i,d)=-r.lower_bound(i);
-        constraints(i+d,i)=static_cast<R>(-1); 
-        constraints(i+d,d)=r.upper_bound(i);
-      }
-    }
-   
-
-    template<class R>
-    Polyhedron<R>&
-    Polyhedron<R>::operator=(const Polyhedron<R>& plhd)
-      
-    {
-      if(this!=&plhd) {
-        this->_dimension=plhd.dimension();
-        this->_number_of_constraints=plhd.number_of_constraints();
-        this->_data=plhd.data();
-      }
-      return *this;
-    }
-    
-    template<class R>
-    typename Polyhedron<R>::constraints_const_iterator
-    Polyhedron<R>::constraints_begin() const
-    {
-      return constraints_const_iterator(*this,0u);
-    }
- 
-    template<class R>
-    typename Polyhedron<R>::constraints_const_iterator
-    Polyhedron<R>::constraints_end() const
-    {
-      return constraints_const_iterator(*this,this->number_of_constraints());
-    }
- 
-    template<class R>
-    dimension_type
-    Polyhedron<R>::dimension() const
-    {
-      return this->_dimension;
-    }
+template<class X> inline
+void
+assign(Geometry::Polyhedron<X>& plhd, const Geometry::PointList<X>& pltp)
+{
+  throw NotImplemented(__PRETTY_FUNCTION__); 
+}
 
 
 
-    template<class R> inline
-    Rectangle<R> 
-    bounding_box(const Polyhedron<R>& plhd)
-    {
-      using Numeric::Rational;
-      Rectangle<Rational> qbb=Polytope<Rational>(Polyhedron<Rational>(plhd)).bounding_box();
-      Rectangle<R> bb(plhd.dimension());
-      for(dimension_type i=0; i!=bb.dimension(); ++i) {
-        bb.set_lower_bound(i,Numeric::conv_down<R>(qbb.lower_bound(i)));
-        bb.set_upper_bound(i,Numeric::conv_up<R>(qbb.upper_bound(i)));
-      }
-      return bb;
-    }
- 
-    template<class R> inline
-    Rectangle< Numeric::Interval<R> > 
-    bounding_box(const Polyhedron< Numeric::Interval<R> >& plhd)
-    {
-      throw NotImplemented(__PRETTY_FUNCTION__);
-    }
-
-    template<class R>
-    Rectangle<R> 
-    Polyhedron<R>::bounding_box() const
-    {
-      return Geometry::bounding_box(*this);
-    }
-
-
-
-    template<class R>
-    tribool 
-    Polyhedron<R>::empty() const
-    {
-      return Geometry::empty(*this);
-    }
-
-    template<class R>
-    tribool 
-    Polyhedron<R>::bounded() const
-    {
-      return Geometry::bounded(*this);
-    }
-
-    template<class R>
-    tribool 
-    Polyhedron<R>::contains(const Point<R>& pt) const
-    {
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(*this,pt,"tribool Polyhedron::contains(Point pt)");
-      tribool result=true;
-      for(constraints_const_iterator i=this->constraints_begin(); 
-          i!=this->constraints_end(); ++i) {
-        result=result && i->satisfied_by(pt); 
-        if(!result) { return result; }
-      }
-      return result;
-    }
-    
-    
-    
-    template<>
-    tribool 
-    disjoint(const Polyhedron<Numeric::Rational>& plhd, const Rectangle<Numeric::Rational>& r)
-    {
-      typedef Numeric::Rational R;
-      typedef Numeric::Rational F;
-
-      if(verbosity>7) { std::clog << "tribool disjoint(Polyhedron<Rational>,Polyhedron<Rational>)" << std::endl; }
-      if(verbosity>8) { std::clog << plhd << " " << r << std::endl; }
-      
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(plhd,r,"tribool disjoint(Polyhedron<Rational> plhd, Rectangle<Rational> r)");
-      dimension_type d=plhd.dimension();
-      size_type nc=plhd.number_of_constraints();
-      size_type nnc=0; // number of negative constraints Ax<=b
-      
-      // Translate x'=x-l;  Ax<=b A(x'+l)<=b Ax'<= b-Al b'=b-Al 
-      LinearAlgebra::Vector<F> u=r.upper_corner()-r.lower_corner();
-      LinearAlgebra::Matrix<R> A=plhd.A();
-      LinearAlgebra::Vector<F> b=plhd.b()-A*r.lower_corner().position_vector();
-      
-      if(verbosity>8) { std::clog << "u'=" << u << " A'=" << A << " b'=" << b << std::endl; }
-
-      // count number of negative constraints
-      for(size_type i=0; i!=nc; ++i) {
-        if(b(i)<0) {
-          ++nnc;
-        }
-      }
-
-      LinearAlgebra::Matrix<F> T(nc+d+1,d+nnc+1);
-      // set up constraints Ax<=b
-      size_type k=0; // negative constraint number
-      for(size_type i=0; i!=nc; ++i) {
-        if(b(i)<0) {
-          for(size_type j=0; j!=d; ++j) {
-            T(i,j)=-A(i,j);
-          }
-          T(i,d+k)=-1;
-          T(i,d+nnc)=-b(i);
-          ++k;
-        } else {
-          for(size_type j=0; j!=d; ++j) {
-            T(i,j)=A(i,j);
-          }
-          T(i,d+nnc)=b(i);
-        }          
-      }
-      //
-      for(size_type i=0; i!=d; ++i) {
-        T(nc+i,i)=1;
-        T(nc+i,d+nnc)=u(i);
-      }
-      
-      // SetInterface value function for feasibility problem
-      k=0;
-      for(size_type i=0; i!=nc; ++i) {
-        if(b(i)<0) {
-          for(size_type j=0; j!=d+nnc; ++j) {
-            T(nc+d,j)-=T(i,j);
-          }
-          T(nc+d,d+nnc)-=T(i,d+nnc);
-        }
-      }
-
-      if(verbosity>8) { std::clog << T << std::endl; }
-
-      LinearProgramming::LinearProgram<F> lp(T);
-      tribool result=!lp.is_feasible();
-      return result;
-    }
-    
-    
-    template<class R>
-    tribool 
-    disjoint(const Polyhedron< Numeric::Interval<R> >& plhd, const Rectangle< Numeric::Interval<R> >& r)
-    {
-      throw NotImplemented(__PRETTY_FUNCTION__);
-    }
-
-    template<class R>
-    tribool 
-    disjoint(const Polyhedron<R>& plhd, const Rectangle<R>& r)
-    {
-      return disjoint(Polyhedron<Numeric::Rational>(plhd),Rectangle<Numeric::Rational>(r));
-    }
-
-
-    template<class R>
-    tribool 
-    disjoint(const Rectangle<R>& r, const Polyhedron<R>& plhd)
-    {
-      return disjoint(plhd,r);
-    }
-    
-    
-    /*!Set up linear programming problem to solve A1*s1 <= b1; A2*s2 <= b2; A1*s1 - A2*s2 ==0 */
-    template<class R>
-    tribool 
-    disjoint(const Polyhedron<R>& plhd1, const Polyhedron<R>& plhd2)
-    {
-      return closed_intersection(plhd1,plhd2).empty();
-    }
-    
-    
-    
-    template<class R>
-    tribool 
-    subset(const Polyhedron< Numeric::Interval<R> >& plhd, const Rectangle< Numeric::Interval<R> >& r)
-    {
-      throw NotImplemented(__PRETTY_FUNCTION__);
-    }
-    
-    template<class R>
-    tribool 
-    subset(const Polyhedron< Numeric::Interval<R> >& plhd1, const Polyhedron< Numeric::Interval<R> >& plhd2)
-    {
-      throw NotImplemented(__PRETTY_FUNCTION__);
-    }
-    
-    template<class R>
-    tribool 
-    subset(const Polyhedron<R>& plhd1, const Polyhedron<R>& plhd2)
-    {
-      return Geometry::subset(Polytope<Numeric::Rational>(Polyhedron<Numeric::Rational>(plhd1)),Polyhedron<Numeric::Rational>(plhd2));
-    }
-    
-    template<class R>
-    tribool 
-    subset(const Polyhedron<R>& plhd, const Rectangle<R>& r)
-    {
-      ARIADNE_LOG(3,"Geometry::subset(plhd,r): ""plhd="<<plhd<<", r="<<r<<"\n");
-      tribool result=true;
-      dimension_type d=plhd.dimension();
-      array<R> data(d+1u);
-      for(size_type i=0; i!=d+1u; ++i) {
-        data[i]=0;
-      }
-      Polyhedron<R> halfspace;
-      ARIADNE_LOG(9,"data="<<data<<"\n");
-     
-      for(size_type j=0; j!=d; ++j) {
-        // Check if disjoint from lower halfspace
-        data[j]=-1;
-        data[d]=r.lower_bound(j);
-        ARIADNE_LOG(9,"data="<<data<<"\n");
-        halfspace=Polyhedron<R>(d,1u,data.begin());
-        ARIADNE_LOG(8,"halfspace="<<halfspace<<"\n");
-        result=result && disjoint(plhd,halfspace);
-        // Check if disjoint from upper halfspace
-        data[j]=1;
-        data[d]=-r.upper_bound(j);
-        halfspace=Polyhedron<R>(d,1u,data.begin());
-        ARIADNE_LOG(8,"halfspace="<<halfspace<<"\n");
-        result=result && disjoint(plhd,halfspace);
-        // Early return
-        if(result==false) {
-          return result;
-        }
-        data[j]=0;
-      }
-      return result;
-    }
-
-    
-    
-    
-    
-    template<class R1,class R2>
-    tribool 
-    subset(const Rectangle<R1>& r, const Polyhedron<R2>& plhd)
-    {
-      return Geometry::_subset(r,plhd);
-    }
-    
-    template<class R1,class R2>
-    tribool 
-    subset(const Zonotope<R1>& z, const Polyhedron<R2>& plhd)
-    {
-      return Geometry::_subset(z,plhd);
-    }
-    
-    template<class R1,class R2>
-    tribool 
-    subset(const Polytope<R1>& pltp, const Polyhedron<R2>& plhd)
-    {
-      return Geometry::_subset(pltp,plhd);
-    }
-    
-    
-    
-    template<class R>
-    tribool 
-    equal(const Polyhedron<R>& plhd1, const Polyhedron<R>& plhd2)
-    {
-      return Geometry::subset(plhd1,plhd2) && Geometry::subset(plhd2,plhd1); 
-    }
-    
-
-    template<class R>
-    Polyhedron<R> 
-    open_intersection(const Polyhedron<R>& plhd1, const Polyhedron<R>& plhd2)
-    {
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(plhd1,plhd2,"Polyhedron open_intersection(Polyhedron plhd1, Polyhedron plhd2)");
-      throw NotImplemented(__PRETTY_FUNCTION__);
-    }
-    
-    
-    template<class R>
-    Polyhedron<R> 
-    closed_intersection(const Polyhedron<R>& plhd1, const Polyhedron<R>& plhd2)
-    {
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(plhd1,plhd2,"Polyhedron closed_intersection(Polyhedron plhd1, Polyhedron plhd2)");
-      dimension_type d=plhd1.dimension();
-      size_type nc1=plhd1.number_of_constraints();
-      size_type nc2=plhd2.number_of_constraints();
-      LinearAlgebra::Matrix<R> A(nc1+nc2,d);
-      LinearAlgebra::MatrixSlice<R>(nc1,d,A.begin(),d,1)=plhd1.A();
-      LinearAlgebra::MatrixSlice<R>(nc2,d,A.begin()+nc1*d,d,1)=plhd2.A();
-      LinearAlgebra::Vector<R> b=direct_sum(plhd1.b(),plhd2.b());
-      return Polyhedron<R>(A,b);
-    }
-          
-    
-    template<class R>
-    Polyhedron<R> 
-    closed_intersection(const Rectangle<R>& r, const Polyhedron<R>& plhd)
-    {
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(r,plhd,"Polyhedron closed_intersection(Rectangle r, Polyhedron plhd)");
-      return closed_intersection(Polyhedron<R>(r),plhd);
-    }
-          
-    
-    template<class R>
-    Polyhedron<R> 
-    closed_intersection(const Polyhedron<R>& plhd, const Rectangle<R>& r)
-    {
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(plhd,r,"Polyhedron closed_intersection(Polyhedron plhd, Rectangle r)");
-      return closed_intersection(plhd,Polyhedron<R>(r));
-    }
-          
-    
-    template<class R>
-    Polyhedron<R> 
-    polyhedron(const Rectangle<R>& r)
-    {
-      return Polyhedron<R>(r);
-    }
-    
-    
-    template<class R>
-    Polyhedron<typename Numeric::traits<R>::arithmetic_type>
-    polyhedron(const Polytope<R>& pltp)
-    {
-      typedef typename Numeric::traits<R>::arithmetic_type F;
-      
-      dimension_type d=pltp.dimension();
-      size_type nv=pltp.number_of_vertices();
-      
-      if(nv==0) {
-        // empty polytope; return empty polyhedron
-        array<F> data(d+1,F(0));
-        data[d]=-1;
-        return Polyhedron<F>(d,1,data.begin());
-      }
-
-      const LinearAlgebra::Matrix<R> G=pltp.generators();
-      
-      std::vector< LinearAlgebra::Vector<F> > result;
-      std::vector< LinearAlgebra::Vector<F> > argument;
-      
-      LinearAlgebra::Vector<F> tmp(d+1);
-      
-      for(size_type j=0; j!=nv; ++j) {
-        for(size_type i=0; i!=d+1u; ++i) {
-          tmp(i)=G(i,j);
-        }
-        argument.push_back(tmp);
-      }
-
-      ddconv(result,argument);     
-      
-      size_type nc=result.size();
-      array<F> data((d+1)*nc);
-      for(size_type i=0; i!=nc; ++i) {
-        for(size_type j=0; j!=d+1u; ++j) {
-          data[i*(d+1u)+j]=result[i](j);
-        }
-      }
-      
-      return Polyhedron<F>(d,nc,data.begin());
-    }
-    
-
-    
-    template<class R>  
-    std::ostream& 
-    PolyhedralConstraint<R>::write(std::ostream& os) const
-    {
-      LinearAlgebra::Vector<R> a=-LinearAlgebra::Vector<R>(this->_d,this->_a);
-      R b=this->_a[this->_d];
-      os << "PolyhedralConstraint(a=" << a << ",b=" << b << ")";
-      return os;
-    }
-    
-    template<class R>
-    std::string
-    Polyhedron<R>::name()
-    {
-      return std::string("Polyhedron")+"<"+Numeric::name<R>()+">";
-    }
-
-    template<class R>  
-    std::ostream& 
-    Polyhedron<R>::write(std::ostream& os) const
-    {
-      //return os << "Polyhedron( A=" << this->A() << ", b=" << this->b() << " )";
-      os << "Polyhedron( constraints=";
-      dimension_type d=this->dimension();
-      size_type nc=this->number_of_constraints();
-      for(size_type i=0; i!=nc; ++i) {
-        os << ( i==0 ? "[" : "," );
-        for(size_type j=0; j!=d; ++j) {
-          os << ( j==0 ? "(" : ",");
-          os << this->_data[i*(d+1)+j]; 
-        }
-        os << ":" << this->_data[i*(d+1)+d] << ")";
-      }
-      os << "] )";
-      return os;
-    }
-    
-    template<class R>  
-    std::istream& 
-    Polyhedron<R>::read(std::istream& is) 
-    {
-      std::vector< std::vector<R> > Alst;
-      std::vector< R > Blst;
-
-      std::vector<R> a;
-      R b;
-
-      char c;
-      is >> c;
-      assert(c=='[');
-
-      c=is.peek();
-      while(c=='[') {
-        // Read constraint ax<=b in form [a_1,a_2,...,a_n;b];
-        Base::read_vector(is,a,'[',';',',');
-        is >> b;
-        is >> c;
-        assert(c==']');
-        Alst.push_back(a);
-        Blst.push_back(b);
-      }
-      
-      size_type m=Alst.size();
-      size_type n=Alst[0].size();
-      LinearAlgebra::Matrix<R> A(m,n);
-      LinearAlgebra::Vector<R> B(m);
-      for(uint i=0; i!=m; ++i) {
-        for(size_type j=0; j!=n; ++j) {
-          A(i,j)=Alst[i][j];
-        }
-        B(i)=Blst[i];
-      }
-      
-      *this=Polyhedron<R>(A,B);
-      
-      return is;
-    }
-
-
-    template<class R>
-    void
-    Polyhedron<R>::_instantiate_geometry_operators() 
-    {
-      Rectangle<R> r;
-      Zonotope<R> z;
-      Polytope<R> c;
-      Polyhedron<R> p;
-      
-      equal(p,p);
-      disjoint(r,p);
-      disjoint(p,r);
-      disjoint(p,p);
-      subset(r,p);
-      subset(z,p);
-      subset(c,p);
-      subset(p,p);
-      subset(p,r);
-  
-      closed_intersection(p,p);
-      closed_intersection(r,p);
-      closed_intersection(p,r);
-      open_intersection(p,p);
-      
-      polyhedron(r);
-      polyhedron(c);
-    }
-
-
+inline
+tribool 
+empty(const Geometry::Polyhedron<Numeric::Rational>& plhd) 
+{
+  try {
+    Geometry::Polytope<Numeric::Rational> pltp(plhd);
+    ARIADNE_LOG(7,"empty(plhd): plhd="<<plhd<<" pltp="<<pltp);
+    return pltp.empty();
+  }
+  catch(Geometry::UnboundedSet& e) {
+    return false;
   }
 }
+
+template<class R> inline
+tribool 
+empty(const Geometry::Polyhedron<R>& plhd) 
+{
+  return empty(Geometry::Polyhedron<Numeric::Rational>(plhd));
+}
+
+template<class R> inline
+tribool 
+empty(const Geometry::Polyhedron< Numeric::Interval<R> >& plhd) 
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+
+
+inline
+tribool 
+bounded(const Geometry::Polyhedron<Numeric::Rational>& plhd)
+{
+  try {
+    Geometry::Polytope<Numeric::Rational> pltp(plhd);
+    return pltp.bounded();
+  }
+  catch(Geometry::UnboundedSet& e) {
+    return false;
+  }
+}
+
+template<class R> inline
+tribool 
+bounded(const Geometry::Polyhedron<R>& plhd) 
+{
+  return bounded(Geometry::Polyhedron<Numeric::Rational>(plhd));
+}
+
+
+template<class R> inline
+tribool 
+bounded(const Geometry::Polyhedron< Numeric::Interval<R> >& plhd) 
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+
+tribool 
+disjoint(const Geometry::Polyhedron<Numeric::Rational>& plhd, const Geometry::Rectangle<Numeric::Rational>& r)
+{
+  typedef Numeric::Rational R;
+  typedef Numeric::Rational F;
+  
+  if(verbosity>7) { std::clog << "tribool disjoint(Polyhedron<Rational>,Polyhedron<Rational>)" << std::endl; }
+  if(verbosity>8) { std::clog << plhd << " " << r << std::endl; }
+  
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(plhd,r,"tribool disjoint(Polyhedron<Rational> plhd, Rectangle<Rational> r)");
+  dimension_type d=plhd.dimension();
+  size_type nc=plhd.number_of_constraints();
+  size_type nnc=0; // number of negative constraints Ax<=b
+  
+  // Translate x'=x-l;  Ax<=b A(x'+l)<=b Ax'<= b-Al b'=b-Al 
+  LinearAlgebra::Vector<F> u=r.upper_corner()-r.lower_corner();
+  LinearAlgebra::Matrix<R> A=plhd.A();
+  LinearAlgebra::Vector<F> b=plhd.b()-A*r.lower_corner().position_vector();
+  
+  if(verbosity>8) { std::clog << "u'=" << u << " A'=" << A << " b'=" << b << std::endl; }
+  
+  // count number of negative constraints
+  for(size_type i=0; i!=nc; ++i) {
+    if(b(i)<0) {
+      ++nnc;
+    }
+  }
+  
+  LinearAlgebra::Matrix<F> T(nc+d+1,d+nnc+1);
+  // set up constraints Ax<=b
+  size_type k=0; // negative constraint number
+  for(size_type i=0; i!=nc; ++i) {
+    if(b(i)<0) {
+      for(size_type j=0; j!=d; ++j) {
+        T(i,j)=-A(i,j);
+      }
+      T(i,d+k)=-1;
+      T(i,d+nnc)=-b(i);
+      ++k;
+    } else {
+      for(size_type j=0; j!=d; ++j) {
+        T(i,j)=A(i,j);
+      }
+      T(i,d+nnc)=b(i);
+    }          
+  }
+  //
+  for(size_type i=0; i!=d; ++i) {
+    T(nc+i,i)=1;
+    T(nc+i,d+nnc)=u(i);
+  }
+  
+  // SetInterface value function for feasibility problem
+  k=0;
+  for(size_type i=0; i!=nc; ++i) {
+    if(b(i)<0) {
+      for(size_type j=0; j!=d+nnc; ++j) {
+        T(nc+d,j)-=T(i,j);
+      }
+      T(nc+d,d+nnc)-=T(i,d+nnc);
+    }
+  }
+  
+  if(verbosity>8) { std::clog << T << std::endl; }
+  
+  LinearProgramming::LinearProgram<F> lp(T);
+  tribool result=!lp.is_feasible();
+  return result;
+}
+
+template<class R>
+tribool 
+disjoint(const Geometry::Polyhedron<R>& plhd, const Geometry::Rectangle<R>& r)
+{
+  return disjoint(Geometry::Polyhedron<Numeric::Rational>(plhd),
+                  Geometry::Rectangle<Numeric::Rational>(r));
+}
+                  
+template<class R>
+tribool 
+disjoint(const Geometry::Polyhedron< Numeric::Interval<R> >& plhd, const Geometry::Rectangle< Numeric::Interval<R> >& r)
+{
+  throw NotImplemented("disjoint(Polyhedron<Fuzzy>,Rectangle<Fuzzy>");
+}
+                  
+
+
+
+template<class R, class BS> inline
+tribool 
+subset(const BS& A, const Geometry::Polyhedron<R>& B)
+{
+  tribool result=true;
+  for(typename BS::vertices_const_iterator v=A.vertices_begin();
+      v!=A.vertices_end(); ++v)
+  {
+    for(typename Geometry::Polyhedron<R>::constraints_const_iterator c=B.constraints_begin();
+        c!=B.constraints_end(); ++c)
+    {
+      result=result && (c->satisfied_by(*v));
+      if(!result) { return result; }
+    }
+  }
+  return result;
+}
+
+
+
+inline
+tribool 
+subset(const Geometry::Polyhedron<Numeric::Rational>& plhd, const Geometry::Rectangle<Numeric::Rational>& r)
+{
+  ARIADNE_LOG(3,"Geometry::subset(plhd,r): ""plhd="<<plhd<<", r="<<r<<"\n");
+  typedef Numeric::Rational Q;
+  tribool result=true;
+  dimension_type d=plhd.dimension();
+  array<Q> data(d+1u);
+  for(size_type i=0; i!=d+1u; ++i) {
+    data[i]=0;
+  }
+  Geometry::Polyhedron<Q> halfspace;
+  ARIADNE_LOG(9,"data="<<data<<"\n");
+  
+  for(size_type j=0; j!=d; ++j) {
+    // Check if disjoint from lower halfspace
+    data[j]=-1;
+    data[d]=r.lower_bound(j);
+    ARIADNE_LOG(9,"data="<<data<<"\n");
+    halfspace=Geometry::Polyhedron<Q>(d,1u,data.begin());
+    ARIADNE_LOG(8,"halfspace="<<halfspace<<"\n");
+    result=result && disjoint(plhd,halfspace);
+    // Check if disjoint from upper halfspace
+    data[j]=1;
+    data[d]=-r.upper_bound(j);
+    halfspace=Geometry::Polyhedron<Q>(d,1u,data.begin());
+    ARIADNE_LOG(8,"halfspace="<<halfspace<<"\n");
+    result=result && disjoint(plhd,halfspace);
+    // Early return
+    if(result==false) {
+      return result;
+    }
+    data[j]=0;
+  }
+  return result;
+}
+
+template<class R>
+inline
+tribool 
+subset(const Geometry::Polyhedron<R>& plhd, const Geometry::Rectangle<R>& r)
+{
+  return subset(Geometry::Polyhedron<Numeric::Rational>(plhd),Geometry::Rectangle<Numeric::Rational>(r));
+}
+
+template<class R>
+inline
+tribool 
+subset(const Geometry::Polyhedron< Numeric::Interval<R> >& plhd, const Geometry::Rectangle< Numeric::Interval<R> >& r)
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+
+inline
+tribool 
+subset(const Geometry::Polyhedron<Numeric::Rational>& plhd1, const Geometry::Polyhedron<Numeric::Rational>& plhd2)
+{
+  return Geometry::subset(Geometry::Polytope<Numeric::Rational>(plhd1),plhd2);
+}
+
+template<class R>
+inline
+tribool 
+subset(const Geometry::Polyhedron<R>& plhd1, const Geometry::Polyhedron<R>& plhd2)
+{
+  return ::subset(Geometry::Polyhedron<Numeric::Rational>(plhd1),Geometry::Polyhedron<Numeric::Rational>(plhd2));
+}
+
+template<class R>
+inline
+tribool 
+subset(const Geometry::Polyhedron< Numeric::Interval<R> >& plhd1, const Geometry::Polyhedron< Numeric::Interval<R> >& plhd2)
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+
+
+
+
+
+inline
+Geometry::Rectangle<Numeric::Rational> 
+bounding_box(const Geometry::Polyhedron<Numeric::Rational>& plhd)
+{
+  return Geometry::Polytope<Numeric::Rational>(plhd).bounding_box();
+}
+
+template<class R> inline
+Geometry::Rectangle<R> 
+bounding_box(const Geometry::Polyhedron<R>& plhd)
+{
+  using Numeric::Rational;
+  Geometry::Rectangle<Numeric::Rational> qbb=bounding_box(Geometry::Polyhedron<Numeric::Rational>(plhd));
+  Geometry::Rectangle<R> bb(plhd.dimension());
+  for(dimension_type i=0; i!=bb.dimension(); ++i) {
+    bb.set_lower_bound(i,Numeric::conv_down<R>(qbb.lower_bound(i)));
+    bb.set_upper_bound(i,Numeric::conv_up<R>(qbb.upper_bound(i)));
+  }
+  return bb;
+}
+
+template<class R> inline
+Geometry::Rectangle<R> 
+bounding_box(const Geometry::Polyhedron< Numeric::Interval<R> >& plhd)
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+
+
+
+} // namespace
+
+  
+
+namespace Ariadne {
+
+template<class X> 
+tribool 
+Geometry::empty(const Polyhedron<X>& plhd) 
+{
+  return ::empty(plhd);
+}
+
+template<class X> 
+tribool 
+Geometry::bounded(const Polyhedron<X>& plhd) 
+{
+  return ::bounded(plhd);
+}
+
+
+
+
+
+
+
+template<class X>
+Geometry::Polyhedron<X>::Polyhedron(const std::string& str)
+{
+  std::stringstream ss(str);
+  ss >> *this;
+}
+
+
+template<class X>
+Geometry::Polyhedron<X>::Polyhedron(dimension_type d)
+  : _dimension(d), 
+    _number_of_constraints(0), 
+    _data()
+{
+}
+
+
+template<class X>
+Geometry::Polyhedron<X>::Polyhedron(dimension_type d, size_type nc, const X* data)
+  : _dimension(d), 
+    _number_of_constraints(nc), 
+    _data(data,data+(d+1)*nc)
+{ 
+}
+
+
+template<class X>
+Geometry::Polyhedron<X>::Polyhedron(const LinearAlgebra::Matrix<X>& A,
+                                    const LinearAlgebra::Vector<X>& b) 
+  : _dimension(A.number_of_columns()), 
+    _number_of_constraints(A.number_of_rows()), 
+    _data((A.number_of_columns()+1)*A.number_of_rows())
+{
+  using namespace LinearAlgebra;
+  ARIADNE_CHECK_SIZE(b,A.number_of_rows(),"Polyhedron::Polyhedron(Matrix A, Vector b)");
+  dimension_type d=this->dimension();
+  dimension_type nc=this->number_of_constraints();
+  LinearAlgebra::MatrixSlice<X>(nc,d,this->begin(),d+1u,1u)=-A;
+  LinearAlgebra::VectorSlice<X>(nc,this->begin()+d,d+1u)=b;
+}
+
+
+template<class X>
+Geometry::Polyhedron<X>::Polyhedron(const LinearAlgebra::Matrix<X>& C) 
+  : _dimension(C.number_of_columns()-1), 
+    _number_of_constraints(C.number_of_rows()), 
+    _data(C.data())
+{
+}
+
+
+template<class X>
+Geometry::Polyhedron<X>::Polyhedron(const PointList<X>& pts)
+  : _dimension(pts.dimension()), _number_of_constraints(0), _data()
+{
+  assign(*this,pts);
+}
+
+
+
+template<class X>
+void
+Geometry::Polyhedron<X>::new_constraint(const PolyhedralConstraint<X>& c)
+{
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(*this,c,"void Polyhedron::new_constraint(PolyhedralConstraint& c)");
+  dimension_type d=this->_dimension;
+  size_type sz=this->_data.size();
+  this->_data.resize(sz+d+1u);
+  for(dimension_type i=0; i!=d; ++i) {
+    this->_data[sz+i]=c._a[i];
+    this->_data[sz+d]=c._a[d];
+  }
+}
+
+
+template<class X>
+LinearAlgebra::MatrixSlice<X>
+Geometry::Polyhedron<X>::_constraints()
+{
+  return LinearAlgebra::MatrixSlice<X>(this->_number_of_constraints,
+                                       this->_dimension+1u,
+                                       this->begin(),
+                                       this->_dimension+1u,
+                                       1u);
+}
+
+
+
+
+template<class X>
+typename Geometry::Polyhedron<X>::constraints_const_iterator
+Geometry::Polyhedron<X>::constraints_begin() const
+{
+  return constraints_const_iterator(*this,0u);
+}
+
+template<class X>
+typename Geometry::Polyhedron<X>::constraints_const_iterator
+Geometry::Polyhedron<X>::constraints_end() const
+{
+  return constraints_const_iterator(*this,this->number_of_constraints());
+}
+
+template<class X>
+dimension_type
+Geometry::Polyhedron<X>::dimension() const
+{
+  return this->_dimension;
+}
+
+
+
+template<class X> 
+Geometry::Rectangle<typename Geometry::Polyhedron<X>::real_type> 
+Geometry::Polyhedron<X>::bounding_box() const
+{
+  return ::bounding_box(*this);
+}
+
+template<class X>
+tribool 
+Geometry::Polyhedron<X>::empty() const
+{
+  return ::empty(*this);
+}
+
+template<class X>
+tribool 
+Geometry::Polyhedron<X>::bounded() const
+{
+  return ::bounded(*this);
+}
+
+
+
+
+template<class X> 
+Geometry::Rectangle<typename Geometry::Polyhedron<X>::real_type> 
+Geometry::bounding_box(const Polyhedron<X>& plhd)
+{
+  return ::bounding_box(plhd);
+}
+
+template<class X>
+tribool 
+Geometry::disjoint(const Polyhedron<X>& plhd, const Rectangle<X>& r)
+{
+  return ::disjoint(plhd,r);
+}
+
+
+template<class X>
+tribool 
+Geometry::disjoint(const Rectangle<X>& r, const Polyhedron<X>& plhd)
+{
+  return ::disjoint(plhd,r);
+}
+
+
+template<class X>
+tribool 
+Geometry::disjoint(const Polyhedron<X>& plhd1, const Polyhedron<X>& plhd2)
+{
+  return closed_intersection(plhd1,plhd2).empty();
+}
+
+template<class X>
+tribool 
+Geometry::subset(const Polyhedron<X>& plhd1, const Polyhedron<X>& plhd2)
+{
+  return ::subset(plhd1,plhd2);
+}
+
+template<class X>
+tribool 
+Geometry::subset(const Polyhedron<X>& plhd, const Rectangle<X>& r)
+{
+  return ::subset(plhd,r);
+}
+
+
+template<class X1,class X2>
+tribool 
+Geometry::subset(const Rectangle<X1>& r, const Polyhedron<X2>& plhd)
+{
+  return ::subset(r,plhd);
+}
+
+template<class X1,class X2>
+tribool 
+Geometry::subset(const Zonotope<X1>& z, const Polyhedron<X2>& plhd)
+{
+  return ::subset(z,plhd);
+}
+
+template<class X1,class X2>
+tribool 
+Geometry::subset(const Polytope<X1>& pltp, const Polyhedron<X2>& plhd)
+{
+  return ::subset(pltp,plhd);
+}
+
+
+
+template<class X>
+tribool 
+Geometry::equal(const Polyhedron<X>& plhd1, const Polyhedron<X>& plhd2)
+{
+  return Geometry::subset(plhd1,plhd2) && Geometry::subset(plhd2,plhd1); 
+}
+
+
+template<class X>
+Geometry::Polyhedron<X> 
+Geometry::open_intersection(const Polyhedron<X>& plhd1, const Polyhedron<X>& plhd2)
+{
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(plhd1,plhd2,"Polyhedron open_intersection(Polyhedron plhd1, Polyhedron plhd2)");
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+
+template<class X>
+Geometry::Polyhedron<X> 
+Geometry::closed_intersection(const Polyhedron<X>& plhd1, const Polyhedron<X>& plhd2)
+{
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(plhd1,plhd2,"Polyhedron closed_intersection(Polyhedron plhd1, Polyhedron plhd2)");
+  dimension_type d=plhd1.dimension();
+  size_type nc1=plhd1.number_of_constraints();
+  size_type nc2=plhd2.number_of_constraints();
+  LinearAlgebra::Matrix<X> A(nc1+nc2,d);
+  LinearAlgebra::MatrixSlice<X>(nc1,d,A.begin(),d,1)=plhd1.A();
+  LinearAlgebra::MatrixSlice<X>(nc2,d,A.begin()+nc1*d,d,1)=plhd2.A();
+  LinearAlgebra::Vector<X> b=direct_sum(plhd1.b(),plhd2.b());
+  return Polyhedron<X>(A,b);
+}
+
+
+template<class X>
+Geometry::Polyhedron<X> 
+Geometry::closed_intersection(const Rectangle<X>& r, const Polyhedron<X>& plhd)
+{
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(r,plhd,"Polyhedron closed_intersection(Rectangle r, Polyhedron plhd)");
+  return closed_intersection(Polyhedron<X>(r),plhd);
+}
+
+
+template<class X>
+Geometry::Polyhedron<X> 
+Geometry::closed_intersection(const Polyhedron<X>& plhd, const Rectangle<X>& r)
+{
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(plhd,r,"Polyhedron closed_intersection(Polyhedron plhd, Rectangle r)");
+  return closed_intersection(plhd,Polyhedron<X>(r));
+}
+
+
+template<class X>
+Geometry::Polyhedron<X> 
+Geometry::polyhedron(const Rectangle<X>& r)
+{
+  return Polyhedron<X>(r);
+}
+
+
+template<class X>
+Geometry::Polyhedron<typename Numeric::traits<X>::arithmetic_type>
+Geometry::polyhedron(const Polytope<X>& pltp)
+{
+  typedef typename Numeric::traits<X>::arithmetic_type F;
+  
+  dimension_type d=pltp.dimension();
+  size_type nv=pltp.number_of_vertices();
+  
+  if(nv==0) {
+    // empty polytope; return empty polyhedron
+    array<F> data(d+1,F(0));
+    data[d]=-1;
+    return Polyhedron<F>(d,1,data.begin());
+  }
+  
+  const LinearAlgebra::Matrix<X> G=pltp.generators();
+  
+  std::vector< LinearAlgebra::Vector<F> > result;
+  std::vector< LinearAlgebra::Vector<F> > argument;
+  
+  LinearAlgebra::Vector<F> tmp(d+1);
+  
+  for(size_type j=0; j!=nv; ++j) {
+    for(size_type i=0; i!=d+1u; ++i) {
+      tmp(i)=G(i,j);
+    }
+    argument.push_back(tmp);
+  }
+  
+  ddconv(result,argument);     
+  
+  size_type nc=result.size();
+  array<F> data((d+1)*nc);
+  for(size_type i=0; i!=nc; ++i) {
+    for(size_type j=0; j!=d+1u; ++j) {
+      data[i*(d+1u)+j]=result[i](j);
+    }
+  }
+  
+  return Polyhedron<F>(d,nc,data.begin());
+}
+
+
+
+template<class X>  
+std::ostream& 
+Geometry::PolyhedralConstraint<X>::write(std::ostream& os) const
+{
+  LinearAlgebra::Vector<X> a=-LinearAlgebra::Vector<X>(this->_d,this->_a);
+  X b=this->_a[this->_d];
+  os << "PolyhedralConstraint(a=" << a << ",b=" << b << ")";
+  return os;
+}
+
+template<class X>
+std::string
+Geometry::Polyhedron<X>::name()
+{
+  return std::string("Polyhedron")+"<"+Numeric::name<X>()+">";
+}
+
+template<class X>  
+std::ostream& 
+Geometry::Polyhedron<X>::write(std::ostream& os) const
+{
+  //return os << "Polyhedron( A=" << this->A() << ", b=" << this->b() << " )";
+  os << "Polyhedron( constraints=";
+  dimension_type d=this->dimension();
+  size_type nc=this->number_of_constraints();
+  for(size_type i=0; i!=nc; ++i) {
+    os << ( i==0 ? "[" : "," );
+    for(size_type j=0; j!=d; ++j) {
+      os << ( j==0 ? "(" : ",");
+      os << this->_data[i*(d+1)+j]; 
+    }
+    os << ":" << this->_data[i*(d+1)+d] << ")";
+  }
+  os << "] )";
+  return os;
+}
+
+template<class X>  
+std::istream& 
+Geometry::Polyhedron<X>::read(std::istream& is) 
+{
+  std::vector< std::vector<X> > Alst;
+  std::vector< X > Blst;
+  
+  std::vector<X> a;
+  R b;
+  
+  char c;
+  is >> c;
+  assert(c=='[');
+  
+  c=is.peek();
+  while(c=='[') {
+    // Read constraint ax<=b in form [a_1,a_2,...,a_n;b];
+    Base::read_vector(is,a,'[',';',',');
+    is >> b;
+    is >> c;
+    assert(c==']');
+    Alst.push_back(a);
+    Blst.push_back(b);
+  }
+  
+  size_type m=Alst.size();
+  size_type n=Alst[0].size();
+  LinearAlgebra::Matrix<X> A(m,n);
+  LinearAlgebra::Vector<X> B(m);
+  for(uint i=0; i!=m; ++i) {
+    for(size_type j=0; j!=n; ++j) {
+      A(i,j)=Alst[i][j];
+    }
+    B(i)=Blst[i];
+  }
+  
+  *this=Polyhedron<X>(A,B);
+  
+  return is;
+}
+
+
+template<class X>
+void
+Geometry::Polyhedron<X>::_instantiate_geometry_operators() 
+{
+  Rectangle<X> r;
+  Zonotope<X> z;
+  Polytope<X> c;
+  Polyhedron<X> p;
+  
+  equal(p,p);
+  disjoint(r,p);
+  disjoint(p,r);
+  disjoint(p,p);
+  subset(r,p);
+  subset(z,p);
+  subset(c,p);
+  subset(p,p);
+  subset(p,r);
+  
+  closed_intersection(p,p);
+  closed_intersection(r,p);
+  closed_intersection(p,r);
+  open_intersection(p,p);
+  
+  polyhedron(r);
+  polyhedron(c);
+}
+
+
+
+} // namespace Ariadne
 

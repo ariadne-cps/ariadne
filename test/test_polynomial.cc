@@ -31,7 +31,7 @@
 #include "test/test.h"
 
 #include "function/polynomial.h"
-#include "output/texstream.h"
+#include "output/latexstream.h"
 
 using namespace std;
 using namespace Ariadne;
@@ -158,12 +158,25 @@ class TestPolynomial
     ARIADNE_CHECK(compose(p2,p3),Polynomial<F>(2,3,2,r23));
   }
 
-  void test_tex_output() {
+  void test_derivative() {
+    std::cout << "test_derivative()\n";
+    double a[40]={1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5,1,2,3,4,5};
+    double r0[12]={3,4,4,6,4,5,9,12,10,2,2,3};
+    double r1[12]={5,1,4,5,2,4,5,1,4,6,12,15};
+    Polynomial<R> p(2,2,3,a);
+    std::cout << "p=" << p << std::endl;
+    std::cout << "derivative(p,0)=" << derivative(p,0) << std::endl;
+    std::cout << "derivative(p,1)=" << derivative(p,1) << std::endl;
+    ARIADNE_CHECK(derivative(p,0),Polynomial<F>(2,2,2,r0));
+    ARIADNE_CHECK(derivative(p,1),Polynomial<F>(2,2,2,r1));
+  }
+
+  void test_latex_output() {
     double a1[30]={1,-1,0,4,5,0,7,8,-9,-1,1,0,13,14,15,16,17,18,19,20,0,-1,23,24,25,26,27,28,29,30};
     Polynomial<R> p1(3,3,2,a1);
     double a2[30]={1.5,0,0,1,-0.375,0,-1,0,0,0,0,0};
     Polynomial<R> p2(2,2,2,a2);
-    texfstream tex; tex.open("test_polynomial.tex","\\usepackage{amsmath}");
+    latexfstream tex; tex.open("test_polynomial.tex","\\usepackage{amsmath}");
     tex << "\\begin{gather}\n" << p1 << "\\end{gather}\n";
     tex << "\\begin{gather}\n" << p2 << "\\end{gather}\n";
   }
@@ -172,13 +185,14 @@ class TestPolynomial
     test_build();
     test_input();
     test_output();
-    test_tex_output();
+    test_latex_output();
     test_evaluate();
     test_component();
     test_add();
     test_mul();
     test_pow();
     test_compose();
+    test_derivative();
   }
 
 };

@@ -265,15 +265,16 @@ std::ostream&
 LinearAlgebra::Matrix<R>::write(std::ostream& os) const
 {
   const Matrix<R>& A=*this;
+  os<<std::fixed<<std::setprecision(6);
   os << "[";
   for(uint i=0; i!=A.number_of_rows(); ++i) {
     for(uint j=0; j!=A.number_of_columns(); ++j) {
-      os << (j==0 ? (i==0 ? " " : "; ") : ",");
+      os << (j==0 ? (i==0 ? "" : "; ") : ",");
       //os << Ariadne::convert_to<double>(A(i,j));
       os << A(i,j);
     }
   }
-  os << " ]";
+  os << " ]\n";
   return os;
 }
 

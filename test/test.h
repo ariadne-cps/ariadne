@@ -52,6 +52,15 @@ ariadne_check(std::ostream& os, const R& r, const ER& er) {
   } \
 
 
+/*! \brief Calls a function */
+#define ARIADNE_CALL(function) \
+{ \
+  std::cout << #function << std::endl; \
+  function; \
+  std::cout << std::endl;          \
+} \
+
+
 /*! \brief Tries to execute \a statement, writing the statement to standard output. Writes a diagnostic report to standard error if an exception is thrown. <br> <b>Important:</b> Use the ARIADNE_CONSTRUCT() macro if \a statement declares a variable and calls a constructor. */
 #define ARIADNE_TRY(statement) \
 { \
@@ -63,6 +72,13 @@ ariadne_check(std::ostream& os, const R& r, const ER& er) {
   ARIADNE_CATCH("Statement `" << #statement << "'")       \
 }\
 
+
+/*! \brief Writes the expression to the output. Does not catch errors. */
+#define ARIADNE_PRINT(expression) \
+{ \
+  std::cout << #expression << " = " << std::flush; \
+  std::cout << (expression) << "\n" << std::endl; \
+}\
 
 /*! \brief Tries to evaluate \a expression, writing the expression and the result to standard ouput. Writes a diagnostic report to standard error if an exception is thrown., prints the result and gives a diagnostic if an exception is thrown. */
 #define ARIADNE_EVALUATE(expression) \
@@ -99,7 +115,7 @@ ariadne_check(std::ostream& os, const R& r, const ER& er) {
     std::cout << "\n" << std::endl; \
   } else { \
     ++ARIADNE_TEST_FAILURES; \
-    std::cout << " (expected: " << #expected << ")\n" << std::endl;        \
+    std::cout << " (expected: " << #expression << " = " << #expected << " = " << (expected) << " )\n" << std::endl; \
     std::cerr << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Check `" << #expression << "==" << #expected << "' failed." << std::endl; \
   } \
 }\

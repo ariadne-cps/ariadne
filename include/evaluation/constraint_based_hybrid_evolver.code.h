@@ -34,6 +34,7 @@
 #include "../evaluation/applicator_interface.h"
 #include "../evaluation/integrator_interface.h"
 #include "../evaluation/detector_interface.h"
+#include "../evaluation/applicator.h"
 #include "../evaluation/lohner_integrator.h"
 #include "../evaluation/detector.h"
 
@@ -88,14 +89,21 @@ Evaluation::ConstraintBasedHybridEvolver<R>::~ConstraintBasedHybridEvolver()
 
 
 template<class R>
-Evaluation::ConstraintBasedHybridEvolver<R>::ConstraintBasedHybridEvolver(const EvolutionParameters<R>& p, const ApplicatorInterface<R>& a, const IntegratorInterface<R>& i)
+Evaluation::ConstraintBasedHybridEvolver<R>::ConstraintBasedHybridEvolver(const EvolutionParameters<R>& p)
+  : _parameters(new EvolutionParameters<R>(p)),
+    _scheduler(new ConstraintBasedHybridScheduler<R>(Applicator<BS>(),C1LohnerIntegrator<R>(),Detector<R>()))
+{
+}
+
+template<class R>
+Evaluation::ConstraintBasedHybridEvolver<R>::ConstraintBasedHybridEvolver(const EvolutionParameters<R>& p, const ApplicatorInterface<BS>& a, const IntegratorInterface<BS>& i)
   : _parameters(new EvolutionParameters<R>(p)),
     _scheduler(new ConstraintBasedHybridScheduler<R>(a,i,Detector<R>()))
 {
 }
 
 template<class R>
-Evaluation::ConstraintBasedHybridEvolver<R>::ConstraintBasedHybridEvolver(const EvolutionParameters<R>& p, const ApplicatorInterface<R>& a, const IntegratorInterface<R>& i, const DetectorInterface<R>& d)
+Evaluation::ConstraintBasedHybridEvolver<R>::ConstraintBasedHybridEvolver(const EvolutionParameters<R>& p, const ApplicatorInterface<BS>& a, const IntegratorInterface<BS>& i, const DetectorInterface<R>& d)
   : _parameters(new EvolutionParameters<R>(p)),
     _scheduler(new ConstraintBasedHybridScheduler<R>(a,i,d))
 {
@@ -181,7 +189,7 @@ Evaluation::ConstraintBasedHybridEvolver<R>::_compute_working_sets(const hybrid_
   for(typename hybrid_list_set_type::locations_const_iterator loc_iter=set.locations_begin();
       loc_iter!=set.locations_end(); ++loc_iter)
   {
-    id_type loc_id=loc_iter->first;
+    discrete_state_type loc_id=loc_iter->first;
     for(typename ListSet<Zonotope<I> >::const_iterator set_iter=loc_iter->second.begin();
         set_iter!=loc_iter->second.end(); ++set_iter)
     {
@@ -345,7 +353,7 @@ Evaluation::ConstraintBasedHybridEvolver<R>::upper_evolve(const System::Constrai
       } else if(working_set.continuous_state_set().radius()>this->maximum_basic_set_radius()) {
         ::append(working_sets,this->_scheduler->subdivide(working_set));
       } else {
-        ::append(working_sets,this->_scheduler->upper_evolution_step(automaton,working_set,evolution_time));
+        ::append(working_sets,this->_scheduler->upper_evolution_step(automaton,working_set,evolution_time,this->maximum_step_size()));
         ::append(this->_trace,this->_scheduler->trace);
       }
     }
@@ -377,7 +385,7 @@ Evaluation::ConstraintBasedHybridEvolver<R>::upper_reach(const System::Constrain
     } else if(working_set.continuous_state_set().radius()>this->maximum_basic_set_radius()) {
       ::append(working_sets,this->_scheduler->subdivide(working_set));
     } else {
-      ::append(working_sets,this->_scheduler->upper_reachability_step(automaton,working_set,evolution_time));
+      ::append(working_sets,this->_scheduler->upper_reachability_step(automaton,working_set,evolution_time,this->maximum_step_size()));
       // A reachability step returns a list whose final element is the continuous reached set
       reached_sets.push_back(working_sets.back()); working_sets.pop_back();
       if(!working_sets.empty()) { std::cout << "evolution step: " << working_sets.back() << std::endl; }

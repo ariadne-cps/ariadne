@@ -57,7 +57,7 @@ template<class R> int test_polytope();
 template<> int test_polytope<Rational>();
 
 int main() {
-  test_polytope<Float>();
+  test_polytope<Flt>();
   test_polytope<Rational>();
  
 

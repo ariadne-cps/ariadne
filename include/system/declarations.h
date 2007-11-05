@@ -31,6 +31,9 @@
 namespace Ariadne { 
   namespace System {
 
+    template<class R> class DiscreteMapInterface;
+    template<class R> class DiscreteMap;
+
     template<class R> class MapInterface;
     template<class R> class AffineMap;
     template<class R, template<class> class BS > class AffineMultiMap;

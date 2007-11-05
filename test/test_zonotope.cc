@@ -52,7 +52,7 @@ using namespace std;
 template<class R> int test_zonotope();
  
 int main() {
-  test_zonotope<Float>();
+  test_zonotope<Flt>();
   
   cerr << "INCOMPLETE ";
   return 0;
@@ -246,6 +246,24 @@ test_zonotope()
 
 
   {
+    cout << "Orthogonal over approximations of Zonotope<I,R>" << endl;
+    // Interval zonotope
+    //Zonotope<I,R> ez(Point<I>("([0.125,0.375],[-0.25,0.0])"),Matrix<R>("[2,1,1;1,-1,1]"));
+    //Zonotope<I,R> ez(Point<I>("([0.125,0.375],[-0.25,0.0])"),Matrix<R>("[2,1,1;1,-1,4]"));
+    Zonotope<I,R> ez(Point<I>("([0.125,0.375],[-0.25,0.0])"),Matrix<R>("[4,1,1,1,1;1,1,3,3,3]"));
+    Zonotope<R,R> oaez(over_approximation(ez));
+    Zonotope<I,R> ooaez(orthogonal_over_approximation(ez));
+    
+    eps.open("test_zonotope-orthogonal.eps",ooaez.bounding_box());
+    eps << fill_colour(white) << ooaez.bounding_box();
+    eps << fill_colour(red) << ooaez;
+    eps << fill_colour(yellow) << oaez;
+    eps << fill_colour(green) << ez;
+    eps.close();
+  }
+ 
+
+  {
     cout << "Outer approximations of Zonotope<I,I>" << endl;
     // Interval zonotope
     Zonotope<R,R> z(Point<R>("(0.25,-0.125)"),Matrix<R>("[2,1,1,0.125,0;1,-1,1,0,0.125]"));
@@ -282,12 +300,13 @@ test_zonotope()
     cout << "contains(z,"<<pt<<")=" << z.contains(pt) << endl;
   }
 
+
   try {
     //Rectangle<R> r("[1,17/16]x[19/16,5/4]");
     //Zonotope<R> z(Point<R>("(1/2, 1/10)"),Matrix<R>("[1,1/2;1/2,3/5]"));
     Rectangle<R> r1("[1,1.0625]x[1.1875,1.25]");
     Zonotope<R> z1(r1);
-    Zonotope<R> z2(Point<R>("(0.5,0.1)"),Matrix<R>("[1.0,0.5;0.5,0.6]"));
+    Zonotope<R> z2(Point<R>("(0.5,0.125)"),Matrix<R>("[1.0,0.5;0.5,0.625]"));
     cout << "r1=" << r1 << "\nz1=" << z1 << "\nz2=" << z2 << endl;
     cout << "disjoint(r1,z2)=" << disjoint(r1,z2) << endl;
     cout << "subset(r1,z2)=" << subset(r1,z2) << endl;

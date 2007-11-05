@@ -35,6 +35,7 @@
 #include "../numeric/declarations.h"
 #include "../numeric/numerical_traits.h"
 #include "../linear_algebra/declarations.h"
+#include "../function/declarations.h"
 #include "../geometry/declarations.h"
 
 
@@ -84,7 +85,7 @@ namespace Ariadne {
       virtual LinearAlgebra::Vector<F> image(const Geometry::Point<F>& x) const = 0;
 
       /*! \brief An approximation to the vector field at a point. */
-      virtual F derivative(const Geometry::Point<F>& x, const size_type& i, const LinearAlgebra::MultiIndex& j) const;
+      virtual F derivative(const Geometry::Point<F>& x, const size_type& i, const Function::MultiIndex& j) const;
 
       /*! \brief An approximation to the Jacobian derivative at a point. */
       virtual LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<F>& x) const;

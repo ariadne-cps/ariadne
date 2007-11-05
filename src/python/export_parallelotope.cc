@@ -65,24 +65,22 @@ void export_parallelotope()
   def("touching_intersection",(RParallelotope(*)(const RParallelotope&,const RRectangle&))(&touching_intersection));
   def("touching_intersection", (RParallelotope(*)(const RParallelotope&,const RParallelotope&))(&touching_intersection));
 
-  class_< RParallelotope, bases<RZonotope> >("Parallelotope",init<int>())
-    .def(init<RPoint,RMatrix>())
-    .def(init<RParallelotope>())
-    .def(init<RRectangle>())
-    .def(init<std::string>())
-    .def("empty", &RParallelotope::empty)
-    .def("contains", &RParallelotope::contains)
-    .def("divide", &RParallelotope::divide)
-    .def("subdivide", &RParallelotope::subdivide)
-    .def(self_ns::str(self))
-  ;
+  class_< RParallelotope, bases<RZonotope> > parallelotope_class("Parallelotope",init<int>());
+  parallelotope_class.def(init<RPoint,RMatrix>());
+  parallelotope_class.def(init<RParallelotope>());
+  parallelotope_class.def(init<RRectangle>());
+  parallelotope_class.def("empty", &RParallelotope::empty);
+  parallelotope_class.def("contains", (tribool(RZonotope::*)(const RPoint&)const) &RZonotope::contains);
+  parallelotope_class.def("divide", &RParallelotope::divide);
+  parallelotope_class.def("subdivide", &RParallelotope::subdivide);
+  parallelotope_class.def(self_ns::str(self));
+  
 /*
   // Can't use Python inheritence as the integration wrappers find Zonotope routine.
   class_<RParallelotope>("Parallelotope",init<int>())
     .def(init<RPoint,RMatrix>())
     .def(init<RParallelotope>())
     .def(init<RRectangle>())
-    .def(init<std::string>())
     .def("centre",&RZonotope::centre)
     .def("generators",&RZonotope::generators, return_value_policy<copy_const_reference>())
     .def("dimension", &RZonotope::dimension)

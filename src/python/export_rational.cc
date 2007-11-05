@@ -32,9 +32,30 @@ using namespace Ariadne::Python;
 #include <boost/python.hpp>
 using namespace boost::python;
 
+std::string
+__str__(const Rational& q)
+{
+  std::stringstream ss;
+  ss << q;
+  return ss.str();
+}
+
+std::string
+__repr__(const Rational& q)
+{
+  std::stringstream ss;
+  ss << "Rational(" << q.numerator();
+  if(q!=q.numerator()) {
+    ss << "," << q.denominator();
+  }
+  ss << ")";
+  return ss.str();
+}
+
 
 void export_rational() {
   class_<Rational>("Rational")
+    .def(init<std::string>())
     .def(init<int,int>())
     .def(init<Integer,Integer>())
     .def(init<int>())
@@ -103,7 +124,8 @@ void export_rational() {
     .def("__ge__", &ge<bool,Rational,double>)
     .def("numerator", &Rational::numerator)
     .def("denominator", &Rational::denominator)
-    .def(self_ns::str(self))
+    .def("__str__", &__str__)
+    .def("__repr__", &__repr__)
   ;
  
   def("max",&Python::max<Rational,Rational,Rational>);

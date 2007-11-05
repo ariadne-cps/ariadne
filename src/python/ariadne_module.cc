@@ -45,14 +45,14 @@ void export_integer();
 void export_rational();
 template<class R> void export_float();
 template<class R> void export_interval();
-template<class R> void export_differential();
-template<class R> void export_derivative();
 
 template<class R> void export_vector();
+template<class R> void export_covector();
 template<class R> void export_matrix();
 template<class R> void export_tensor();
 template<class R> void export_linear_program();
 template<class R> void export_interval_vector();
+template<class R> void export_interval_covector();
 template<class R> void export_interval_matrix();
 template<class R> void export_interval_tensor();
 
@@ -61,7 +61,11 @@ void export_lattice_set();
 void export_lattice_map();
 
 template<class R> void export_function();
+template<class R> void export_first_derivative();
+template<class R> void export_scalar_derivative();
+template<class R> void export_taylor_derivative();
 
+template<class R> void export_geometry_interval();
 template<class R> void export_point();
 template<class R> void export_interval_point();
 template<class R> void export_point_list();
@@ -103,9 +107,9 @@ template<class R> void export_vector_field_evolver();
 template<class R> void export_set_based_hybrid_evolver();
 template<class R> void export_constraint_based_hybrid_evolver();
 
-void export_postscript_output();
 void export_text_output();
-void export_tex_output();
+void export_latex_output();
+void export_postscript_output();
 
 template<class R> void export_henon_map();
 template<class R> void export_duffing_equation();
@@ -118,6 +122,7 @@ using namespace Ariadne::Python;
 
 using Numeric::Integer;
 using Numeric::Rational;
+using Numeric::Interval;
 
 BOOST_PYTHON_MODULE(ariadne)
 {
@@ -137,21 +142,21 @@ BOOST_PYTHON_MODULE(ariadne)
   export_rational();
   export_float<Float>();
   export_interval<Float>();
-  export_differential<Rational>();
-  export_differential<Float>();
-  export_derivative<Rational>();
-  export_derivative<Float>();
 
   export_vector<Float>();
   export_vector<Rational>();
+  export_covector<Float>();
+  export_covector<Rational>();
   export_matrix<Float>();
   export_matrix<Rational>();
   export_tensor<Float>();
   export_tensor<Rational>();
-  export_linear_program<Rational>();
   export_interval_vector<Float>();
+  export_interval_covector<Float>();
   export_interval_matrix<Float>();
   export_interval_tensor<Float>();
+
+  export_linear_program<Rational>();
 
   export_binary_tree();
   export_lattice_set();
@@ -159,7 +164,14 @@ BOOST_PYTHON_MODULE(ariadne)
 
   export_function<Rational>();
   export_function<Float>();
+  export_first_derivative<Rational>();
+  export_first_derivative<Float>();
+  export_scalar_derivative<Rational>();
+  export_scalar_derivative<Float>();
+  export_taylor_derivative<Rational>();
+  export_taylor_derivative<Float>();
 
+  export_geometry_interval<Float>();
   export_set<Float>();
   export_point<Float>();
   export_interval_point<Float>();
@@ -201,9 +213,9 @@ BOOST_PYTHON_MODULE(ariadne)
   export_set_based_hybrid_evolver<Float>();
   export_constraint_based_hybrid_evolver<Float>();
 
-  export_postscript_output();
-  export_tex_output();
   export_text_output();
+  export_latex_output();
+  export_postscript_output();
 
   export_henon_map<Float>();
   export_duffing_equation<Float>();

@@ -31,112 +31,113 @@
 
 
 namespace Ariadne {
-  namespace Geometry {
+
  
       
-    template<class R>
-    Ellipsoid<R>::Ellipsoid(size_type n)
-      : _centre(n), _bilinear_form(LinearAlgebra::Matrix<R>::identity(n))
-    {
-    }
-    
-    template<class R>
-    Ellipsoid<R>::Ellipsoid(const Point<R>& c, const LinearAlgebra::Matrix<R>& A)
-      : _centre(c), _bilinear_form(A)
-    {
-      if(c.dimension()!=A.number_of_rows() && A.number_of_rows()!=A.number_of_columns()) {
-        ARIADNE_THROW(IncompatibleDimensions,"Ellipsoid::Ellipsoid(Point c, Matrix A)","c="<<c<<", A="<<A);
-      }
-    }
-     
-    template<class R>
-    Ellipsoid<R>::Ellipsoid(const std::string& s)
-    {
-      throw NotImplemented(__PRETTY_FUNCTION__);
-    }
-    
-      
-    template<class R>
-    Ellipsoid<R>::Ellipsoid(const Sphere<R>& s)
-      : _centre(s.centre()), _bilinear_form(s.dimension(),s.dimension())
-    { 
-      for(size_type i=0; i!=this->dimension(); ++i) {
-        this->_bilinear_form(i,i) = div_up(R(1),mul_down(s.radius(),s.radius()));
-      }
-    }
-      
-      
-    template<class R>
-    tribool Ellipsoid<R>::contains(const Point<R>& point) const 
-    {
-      LinearAlgebra::Vector<Numeric::Rational> p=point.position_vector();
-      LinearAlgebra::Vector<Numeric::Rational> c=this->centre().position_vector();
-      LinearAlgebra::Vector<Numeric::Rational> d=p-c;
-      LinearAlgebra::Matrix<Numeric::Rational> A=this->bilinear_form();
-      Numeric::Rational r=inner_product(d,LinearAlgebra::Vector<Numeric::Rational>(A*d));
-      if(r<1) { return true; }
-      if(r>1) { return false; }
-      return indeterminate;
-    }
-    
-    
-    template<class R>
-    void
-    Ellipsoid<R>::_instantiate_geometry_operators()
-    {
-      R sf=1.0;
-      Ellipsoid<R>* e=0;
-      *e=scale(*e,sf);
-    }
-    
-    
-    
-    template<class R>
-    Ellipsoid<R> 
-    scale(const Ellipsoid<R>& s, const R& scale_factor) 
-    {
-      const Point<R>& centre=s.centre();
-      const LinearAlgebra::Matrix<R>& bilinear_form=s.bilinear_form();
-      
-      Point<R> new_centre(s.dimension());
-      LinearAlgebra::Matrix<R> new_bilinear_form(s.dimension(),s.dimension());
+template<class R>
+Geometry::Ellipsoid<R>::Ellipsoid(size_type n)
+  : _centre(n), _bilinear_form(LinearAlgebra::Matrix<R>::identity(n))
+{
+}
 
-      for(size_type i=0; i!=s.dimension(); ++i) {
-        new_centre[i]=mul_approx(scale_factor,centre[i]);
-      }
-
-      for(size_type i=0; i!=s.dimension(); ++i) {
-        for(size_type j=0; j!=s.dimension(); ++j) {
-          new_bilinear_form(i,j)=mul_up(scale_factor,bilinear_form(i,j));
-        }
-      }
-      
-      return Ellipsoid<R>(new_centre, new_bilinear_form);
-    }
-    
-    
-    
-    
-    
-    template<class R>
-    std::ostream&
-    Ellipsoid<R>::write(std::ostream& os) const
-    {
-      if(this->empty()) {
-        os << "Empty";
-      }
-      else if(this->dimension() > 0) {
-        os << "Ellipsoid( centre=" << this->centre() << ", axes=" << this->bilinear_form() << " )";
-      }
-      return os;
-    }
-    
-    template<class R>
-    std::istream& 
-    Ellipsoid<R>::read(std::istream& is)
-    {
-      throw NotImplemented(__PRETTY_FUNCTION__);
-        
-    }
+template<class R>
+Geometry::Ellipsoid<R>::Ellipsoid(const Point<R>& c, const LinearAlgebra::Matrix<R>& A)
+  : _centre(c), _bilinear_form(A)
+{
+  if(c.dimension()!=A.number_of_rows() && A.number_of_rows()!=A.number_of_columns()) {
+    ARIADNE_THROW(IncompatibleDimensions,"Ellipsoid::Ellipsoid(Point c, Matrix A)","c="<<c<<", A="<<A);
   }
 }
+
+template<class R>
+Geometry::Ellipsoid<R>::Ellipsoid(const std::string& s)
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+
+template<class R>
+Geometry::Ellipsoid<R>::Ellipsoid(const Sphere<R>& s)
+  : _centre(s.centre()), _bilinear_form(s.dimension(),s.dimension())
+{ 
+  for(size_type i=0; i!=this->dimension(); ++i) {
+    this->_bilinear_form(i,i) = div_up(R(1),mul_down(s.radius(),s.radius()));
+  }
+}
+
+
+template<class R>
+tribool 
+Geometry::Ellipsoid<R>::contains(const Point<R>& point) const 
+{
+  LinearAlgebra::Vector<Numeric::Rational> p=point.position_vector();
+  LinearAlgebra::Vector<Numeric::Rational> c=this->centre().position_vector();
+  LinearAlgebra::Vector<Numeric::Rational> d=p-c;
+  LinearAlgebra::Matrix<Numeric::Rational> A=this->bilinear_form();
+  Numeric::Rational r=inner_product(d,LinearAlgebra::Vector<Numeric::Rational>(A*d));
+  if(r<1) { return true; }
+  if(r>1) { return false; }
+  return indeterminate;
+}
+
+
+template<class R>
+void
+Geometry::Ellipsoid<R>::_instantiate_geometry_operators()
+{
+  R sf=1.0;
+  Ellipsoid<R>* e=0;
+  *e=scale(*e,sf);
+}
+
+
+
+template<class R>
+Geometry::Ellipsoid<R> 
+Geometry::scale(const Ellipsoid<R>& s, const R& scale_factor) 
+{
+  const Point<R>& centre=s.centre();
+  const LinearAlgebra::Matrix<R>& bilinear_form=s.bilinear_form();
+  
+  Point<R> new_centre(s.dimension());
+  LinearAlgebra::Matrix<R> new_bilinear_form(s.dimension(),s.dimension());
+  
+  for(size_type i=0; i!=s.dimension(); ++i) {
+    new_centre[i]=mul_approx(scale_factor,centre[i]);
+  }
+  
+  for(size_type i=0; i!=s.dimension(); ++i) {
+    for(size_type j=0; j!=s.dimension(); ++j) {
+      new_bilinear_form(i,j)=mul_up(scale_factor,bilinear_form(i,j));
+    }
+  }
+  
+  return Ellipsoid<R>(new_centre, new_bilinear_form);
+}
+
+
+
+
+
+template<class R>
+std::ostream&
+Geometry::Ellipsoid<R>::write(std::ostream& os) const
+{
+  if(this->empty()) {
+    os << "Empty";
+  }
+  else if(this->dimension() > 0) {
+    os << "Ellipsoid( centre=" << this->centre() << ", axes=" << this->bilinear_form() << " )";
+  }
+  return os;
+}
+
+template<class R>
+std::istream& 
+Geometry::Ellipsoid<R>::read(std::istream& is)
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+  
+}
+
+} // namespace Ariadne

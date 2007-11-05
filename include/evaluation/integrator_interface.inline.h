@@ -28,6 +28,11 @@
 
 namespace Ariadne {
 
-
+template<class R> inline
+std::ostream&
+Evaluation::operator<<(std::ostream& os, const IntegratorInterface<R>& i) 
+{
+  return i.write(os);
+}
 
 } // namespace Ariadne

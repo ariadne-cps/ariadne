@@ -67,6 +67,11 @@ namespace Ariadne {
     template<class R> inline R neg_down(const R& x);
     template<class R> inline R neg_up(const R& x);
    
+    /*! \brief Reciprocal. */
+    template<class R> inline R rec_approx(const R& x);
+    template<class R> inline R rec_down(const R& x);
+    template<class R> inline R rec_up(const R& x);
+   
     /*! \brief Absolute value. */
     template<class R> inline R abs_exact(const R& x);
     template<class R> inline R abs_approx(const R& x);

@@ -31,14 +31,12 @@
 
 namespace Ariadne { 
   namespace LinearAlgebra {
-    class MultiIndex;
     class Permutation;
       
     template<class R> class Vector;
     template<class R> class VectorSlice;
     template<class R> class Matrix;
     template<class R> class MatrixSlice;
-    template<class R> class Tensor;
   }
 }
 

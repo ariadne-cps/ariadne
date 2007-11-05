@@ -62,6 +62,10 @@ namespace Ariadne {
       Interval(const R& x);
       /*! \brief Construct from lower and upper bounds. */
       Interval(const R& l, const R& u);
+      /*! \brief Construct from a string literal. */
+      Interval(const char* cstr);
+      /*! \brief Construct from a string literal. */
+      Interval(const std::string& str);
       /*! \brief Copy constructor. */
       Interval(const Interval<R>& ivl);
       /*! \brief Assign from a number. */

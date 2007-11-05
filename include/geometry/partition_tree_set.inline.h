@@ -23,7 +23,6 @@
 namespace Ariadne {
   namespace Geometry {
 
-          
     template<class R>
     class PartitionTreeIterator 
       : public boost::iterator_facade<PartitionTreeIterator<R>,
@@ -70,364 +69,373 @@ namespace Ariadne {
       Combinatoric::MaskedBinaryTree::const_iterator _base;
     };
 
-    template<class R>
-    PartitionScheme<R>::PartitionScheme(const Rectangle<R>& bb, const Combinatoric::SubdivisionSequence& sc)
-      : _unit_box(bb), _subdivisions(sc)
-    {
-    }
-
-
-    template<class R>
-    bool 
-    PartitionScheme<R>::operator==(const PartitionScheme<R>& pg) const 
-    {
-      return _unit_box==pg._unit_box && _subdivisions==pg._subdivisions;
-    }
-
-    template<class R> inline
-    bool 
-    PartitionScheme<R>::operator!=(const PartitionScheme<R>& pg) const 
-    {
-      return !(*this==pg); 
-    }
-      
-    template<class R> inline
-    const Rectangle<R>& 
-    PartitionScheme<R>::unit_box() const 
-    {
-      return _unit_box; 
-    }
-
-    template<class R> inline
-    const Combinatoric::SubdivisionSequence& 
-    PartitionScheme<R>::subdivisions() const 
-    {
-      return _subdivisions; 
-    }
-
-    template<class R> inline
-    dimension_type 
-    PartitionScheme<R>::dimension() const 
-    {
-      return _subdivisions.dimension(); 
-    }
-
-
-
-    template<class R> inline
-    PartitionTreeCell<R>::PartitionTreeCell(const Rectangle<R>& r, const Combinatoric::SubdivisionTreeCell& c)
-      : _unit_box(r), _subdivision_cell(c)
-    {
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(r,c,"PartitionTreeCell::PartitionTreeCell(Rectangle r, SubdivisionTreeCell c)");
-    }
-
-    template<class R> inline
-    PartitionTreeCell<R>::PartitionTreeCell(const Rectangle<R>& r, 
-                                            const Combinatoric::SubdivisionSequence& s, 
-                                            const Combinatoric::BinaryWord& w) 
-      : _unit_box(r), _subdivision_cell(s,w) 
-    { 
-    }
-
-    template<class R> inline
-    const Rectangle<R>& 
-    PartitionTreeCell<R>::unit_box() const 
-    {
-      return this->_unit_box; 
-    }
-
-    template<class R> inline
-    const Combinatoric::SubdivisionTreeCell& 
-    PartitionTreeCell<R>::subdivision_cell() const 
-    {
-      return this->_subdivision_cell; 
-    }
-
-    template<class R> inline
-    dimension_type 
-    PartitionTreeCell<R>::dimension() const 
-    {
-      return this->_subdivision_cell.dimension(); 
-    }
-
-    template<class R> inline
-    tribool 
-    PartitionTreeCell<R>::empty() const 
-    {
-      return false; 
-    }
-
-    template<class R> inline
-    tribool 
-    PartitionTreeCell<R>::bounded() const 
-    {
-      return true; 
-    }
+  } // namespace Geometry
+} // namespace Ariadne
 
 
 
 
 
-    template<class R> inline
-    PartitionTree<R>::PartitionTree(const Rectangle<R>& r, 
-                                    const Combinatoric::SubdivisionSequence& s, 
-                                    const Combinatoric::BinaryTree& t)
-      : _unit_box(r), _subdivision_tree(s,t) 
-    {
-    }
+namespace Ariadne {
 
-    template<class R> inline
-    PartitionTree<R>::PartitionTree(const PartitionScheme<R>& ps, const Combinatoric::BinaryTree& t)
-        : _unit_box(ps.unit_box()), _subdivision_tree(ps.subdivisions(),t) 
-    {
-    }
-
-    template<class R> inline
-    const Rectangle<R>& 
-    PartitionTree<R>::unit_box() const 
-    {
-      return _unit_box; 
-    }
-
-    template<class R> inline
-    const Combinatoric::SubdivisionTree& 
-    PartitionTree<R>::subdivision_tree() const 
-    {
-      return _subdivision_tree; 
-    }
-
-    template<class R> inline
-    dimension_type 
-    PartitionTree<R>::dimension() const 
-    {
-      return _subdivision_tree.dimension(); 
-    }
-
-    template<class R> inline
-    const Combinatoric::SubdivisionSequence& 
-    PartitionTree<R>::subdivisions() const 
-    {
-      return _subdivision_tree.subdivisions(); 
-    }
-
-    template<class R> inline
-    const Combinatoric::BinaryTree& 
-    PartitionTree<R>::binary_tree() const 
-    {
-      return _subdivision_tree.binary_tree(); 
-    }
-
-    template<class R> inline
-    size_type 
-    PartitionTree<R>::size() const 
-    {
-      return _subdivision_tree.size(); 
-    }
-
-    template<class R> inline
-    PartitionScheme<R> 
-    PartitionTree<R>::scheme() const 
-    {
-      return  PartitionScheme<R>(unit_box(),subdivisions()); 
-    }
-      
-    template<class R> inline
-    typename PartitionTree<R>::const_iterator 
-    PartitionTree<R>::begin() const 
-    {
-      return const_iterator(_unit_box,_subdivision_tree.begin()); 
-    }
-    template<class R> inline
-    typename PartitionTree<R>::const_iterator 
-    PartitionTree<R>::end() const 
-    {
-      return const_iterator(_unit_box,_subdivision_tree.end()); 
-    }
-
-
-
-
-
-    template<class R> inline
-    PartitionTreeSet<R>::PartitionTreeSet(const PartitionScheme<R>& g)
-      : _unit_box(g.unit_box()), _subdivision_set(g.subdivisions()) 
-    {
-    }
-
-    template<class R> inline
-    PartitionTreeSet<R>::PartitionTreeSet(const PartitionScheme<R>& g, const Combinatoric::BinaryTree& t, const BooleanArray& m)
-      : _unit_box(g.unit_box()), _subdivision_set(g.subdivisions(),t,m) 
-    {
-    }
-
-    template<class R> inline
-    PartitionTreeSet<R>::PartitionTreeSet(const PartitionTree<R>& t, const BooleanArray& m)
-      : _unit_box(t.unit_box()), _subdivision_set(t.subdivisions(),t.binary_tree(),m)
-    {
-    }
-
-    template<class R> inline
-    PartitionTreeSet<R>::PartitionTreeSet(const Rectangle<R>& r, 
-                                          const Combinatoric::SubdivisionSequence& s, 
-                                          const Combinatoric::BinaryTree& t, 
-                                          const BooleanArray& m)
-      : _unit_box(r), _subdivision_set(s,t,m)
-    {
-    }
-
-
-    template<class R> inline
-    Rectangle<R> 
-    PartitionTreeSet<R>::bounding_box() const 
-    {
-      return _unit_box; 
-    }
-
-    template<class R> inline
-    const Rectangle<R>& 
-    PartitionTreeSet<R>::unit_box() const 
-    {
-      return _unit_box; 
-    }
-
-    template<class R> inline
-    const Combinatoric::SubdivisionTreeSet& 
-    PartitionTreeSet<R>::subdivision_set() const 
-    {
-      return _subdivision_set; 
-    }
-
-    template<class R> inline
-    dimension_type 
-    PartitionTreeSet<R>::dimension() const 
-    {
-      return _subdivision_set.dimension(); 
-    }
-
-    template<class R> inline
-    const Combinatoric::SubdivisionSequence& 
-    PartitionTreeSet<R>::subdivisions() const 
-    {
-      return _subdivision_set.subdivisions(); 
-    }
-
-    template<class R> inline
-    const Combinatoric::BinaryTree& 
-    PartitionTreeSet<R>::binary_tree() const 
-    {
-      return _subdivision_set.binary_tree(); 
-    }
-      
-    template<class R> inline
-    const BooleanArray& 
-    PartitionTreeSet<R>::mask() const 
-    {
-      return _subdivision_set.mask(); 
-    }
-
-    template<class R> inline
-    size_type 
-    PartitionTreeSet<R>::capacity() const 
-    {
-      return _subdivision_set.capacity(); 
-    }
-
-    template<class R> inline
-    size_type 
-    PartitionTreeSet<R>::size() const 
-    {
-      return _subdivision_set.size(); 
-    }
-
-    template<class R> inline
-    SizeArray 
-    PartitionTreeSet<R>::depths() const 
-    {
-      return _subdivision_set.depths(); 
-    }
-
-    template<class R> inline
-    size_type 
-    PartitionTreeSet<R>::depth() const 
-    {
-      return _subdivision_set.depth(); 
-    }
-      
-    template<class R> inline
-    PartitionScheme<R> 
-    PartitionTreeSet<R>::scheme() const 
-    {
-      return PartitionScheme<R>(bounding_box(),subdivisions()); 
-    }
-      
-    template<class R> inline
-    PartitionTree<R> 
-    PartitionTreeSet<R>::partition_tree() const 
-    {
-      return PartitionTree<R>(bounding_box(),subdivisions(),binary_tree()); 
-    }
-        
-    template<class R> inline
-    typename PartitionTreeSet<R>::const_iterator 
-    PartitionTreeSet<R>::begin() const 
-    {
-      return const_iterator(_unit_box,_subdivision_set.begin()); 
-    }
-
-    template<class R> inline
-    typename PartitionTreeSet<R>::const_iterator 
-    PartitionTreeSet<R>::end() const 
-    {
-      return const_iterator(_unit_box,_subdivision_set.end()); 
-    }
-      
-    template<class R> inline
-    tribool 
-    PartitionTreeSet<R>::empty() const 
-    {
-      return this->size()==0; 
-    }
-
-    template<class R> inline
-    tribool 
-    PartitionTreeSet<R>::bounded() const 
-    {
-      return true; 
-    }
-   
-
-
-
-
-
-    template<class R> inline
-    std::ostream& 
-    operator<<(std::ostream& os, const PartitionScheme<R>& ps) 
-    { 
-      return ps.write(os);
-    }
-    
-    template<class R> inline
-    std::ostream& 
-    operator<<(std::ostream& os, const PartitionTreeCell<R>& ptc)
-    { 
-      return ptc.write(os);
-    }
-    
-    template<class R> inline
-    std::ostream& 
-    operator<<(std::ostream& os, const PartitionTree<R>& pt) 
-    { 
-      return pt.write(os);
-    }
-    
-    template<class R> inline
-    std::ostream& 
-    operator<<(std::ostream& os, const PartitionTreeSet<R>& pts)
-    { 
-      return pts.write(os);
-    }
-    
-    
-  }
+template<class R>
+Geometry::PartitionScheme<R>::PartitionScheme(const Rectangle<R>& bb, const Combinatoric::SubdivisionSequence& sc)
+  : _unit_box(bb), _subdivisions(sc)
+{
 }
+
+
+template<class R>
+bool 
+Geometry::PartitionScheme<R>::operator==(const PartitionScheme<R>& pg) const 
+{
+  return _unit_box==pg._unit_box && _subdivisions==pg._subdivisions;
+}
+
+template<class R> inline
+bool 
+Geometry::PartitionScheme<R>::operator!=(const PartitionScheme<R>& pg) const 
+{
+  return !(*this==pg); 
+}
+
+template<class R> inline
+const Geometry::Rectangle<R>& 
+Geometry::PartitionScheme<R>::unit_box() const 
+{
+  return _unit_box; 
+}
+
+template<class R> inline
+const Combinatoric::SubdivisionSequence& 
+Geometry::PartitionScheme<R>::subdivisions() const 
+{
+  return _subdivisions; 
+}
+
+template<class R> inline
+dimension_type 
+Geometry::PartitionScheme<R>::dimension() const 
+{
+  return _subdivisions.dimension(); 
+}
+
+
+
+template<class R> inline
+Geometry::PartitionTreeCell<R>::PartitionTreeCell(const Rectangle<R>& r, const Combinatoric::SubdivisionTreeCell& c)
+  : _unit_box(r), _subdivision_cell(c)
+{
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(r,c,"PartitionTreeCell::PartitionTreeCell(Rectangle r, SubdivisionTreeCell c)");
+}
+
+template<class R> inline
+Geometry::PartitionTreeCell<R>::PartitionTreeCell(const Rectangle<R>& r, 
+                                                  const Combinatoric::SubdivisionSequence& s, 
+                                                  const Combinatoric::BinaryWord& w) 
+  : _unit_box(r), _subdivision_cell(s,w) 
+{ 
+}
+
+template<class R> inline
+const Geometry::Rectangle<R>& 
+Geometry::PartitionTreeCell<R>::unit_box() const 
+{
+  return this->_unit_box; 
+}
+
+template<class R> inline
+const Combinatoric::SubdivisionTreeCell& 
+Geometry::PartitionTreeCell<R>::subdivision_cell() const 
+{
+  return this->_subdivision_cell; 
+}
+
+template<class R> inline
+dimension_type 
+Geometry::PartitionTreeCell<R>::dimension() const 
+{
+  return this->_subdivision_cell.dimension(); 
+}
+
+template<class R> inline
+tribool 
+Geometry::PartitionTreeCell<R>::empty() const 
+{
+  return false; 
+}
+
+template<class R> inline
+tribool 
+Geometry::PartitionTreeCell<R>::bounded() const 
+{
+  return true; 
+}
+
+
+
+
+
+template<class R> inline
+Geometry::PartitionTree<R>::PartitionTree(const Rectangle<R>& r, 
+                                          const Combinatoric::SubdivisionSequence& s, 
+                                          const Combinatoric::BinaryTree& t)
+  : _unit_box(r), _subdivision_tree(s,t) 
+{
+}
+
+template<class R> inline
+Geometry::PartitionTree<R>::PartitionTree(const PartitionScheme<R>& ps, const Combinatoric::BinaryTree& t)
+  : _unit_box(ps.unit_box()), _subdivision_tree(ps.subdivisions(),t) 
+{
+}
+
+template<class R> inline
+const Geometry::Rectangle<R>& 
+Geometry::PartitionTree<R>::unit_box() const 
+{
+  return _unit_box; 
+}
+
+template<class R> inline
+const Combinatoric::SubdivisionTree& 
+Geometry::PartitionTree<R>::subdivision_tree() const 
+{
+  return _subdivision_tree; 
+}
+
+template<class R> inline
+dimension_type 
+Geometry::PartitionTree<R>::dimension() const 
+{
+  return _subdivision_tree.dimension(); 
+}
+
+template<class R> inline
+const Combinatoric::SubdivisionSequence& 
+Geometry::PartitionTree<R>::subdivisions() const 
+{
+  return _subdivision_tree.subdivisions(); 
+}
+
+template<class R> inline
+const Combinatoric::BinaryTree& 
+Geometry::PartitionTree<R>::binary_tree() const 
+{
+  return _subdivision_tree.binary_tree(); 
+}
+
+template<class R> inline
+size_type 
+Geometry::PartitionTree<R>::size() const 
+{
+  return _subdivision_tree.size(); 
+}
+
+template<class R> inline
+Geometry::PartitionScheme<R> 
+Geometry::PartitionTree<R>::scheme() const 
+{
+  return  PartitionScheme<R>(unit_box(),subdivisions()); 
+}
+
+template<class R> inline
+typename Geometry::PartitionTree<R>::const_iterator 
+Geometry::PartitionTree<R>::begin() const 
+{
+  return const_iterator(_unit_box,_subdivision_tree.begin()); 
+}
+template<class R> inline
+typename Geometry::PartitionTree<R>::const_iterator 
+Geometry::PartitionTree<R>::end() const 
+{
+  return const_iterator(_unit_box,_subdivision_tree.end()); 
+}
+
+
+
+
+
+template<class R> inline
+Geometry::PartitionTreeSet<R>::PartitionTreeSet(const PartitionScheme<R>& g)
+  : _unit_box(g.unit_box()), _subdivision_set(g.subdivisions()) 
+{
+}
+
+template<class R> inline
+Geometry::PartitionTreeSet<R>::PartitionTreeSet(const PartitionScheme<R>& g, const Combinatoric::BinaryTree& t, const BooleanArray& m)
+  : _unit_box(g.unit_box()), _subdivision_set(g.subdivisions(),t,m) 
+{
+}
+
+template<class R> inline
+Geometry::PartitionTreeSet<R>::PartitionTreeSet(const PartitionTree<R>& t, const BooleanArray& m)
+  : _unit_box(t.unit_box()), _subdivision_set(t.subdivisions(),t.binary_tree(),m)
+{
+}
+
+template<class R> inline
+Geometry::PartitionTreeSet<R>::PartitionTreeSet(const Rectangle<R>& r, 
+                                                const Combinatoric::SubdivisionSequence& s, 
+                                                const Combinatoric::BinaryTree& t, 
+                                                const BooleanArray& m)
+  : _unit_box(r), _subdivision_set(s,t,m)
+{
+}
+
+
+template<class R> inline
+Geometry::Rectangle<R> 
+Geometry::PartitionTreeSet<R>::bounding_box() const 
+{
+  return _unit_box; 
+}
+
+template<class R> inline
+const Geometry::Rectangle<R>& 
+Geometry::PartitionTreeSet<R>::unit_box() const 
+{
+  return _unit_box; 
+}
+
+template<class R> inline
+const Combinatoric::SubdivisionTreeSet& 
+Geometry::PartitionTreeSet<R>::subdivision_set() const 
+{
+  return _subdivision_set; 
+}
+
+template<class R> inline
+dimension_type 
+Geometry::PartitionTreeSet<R>::dimension() const 
+{
+  return _subdivision_set.dimension(); 
+}
+
+template<class R> inline
+const Combinatoric::SubdivisionSequence& 
+Geometry::PartitionTreeSet<R>::subdivisions() const 
+{
+  return _subdivision_set.subdivisions(); 
+}
+
+template<class R> inline
+const Combinatoric::BinaryTree& 
+Geometry::PartitionTreeSet<R>::binary_tree() const 
+{
+  return _subdivision_set.binary_tree(); 
+}
+
+template<class R> inline
+const BooleanArray& 
+Geometry::PartitionTreeSet<R>::mask() const 
+{
+  return _subdivision_set.mask(); 
+}
+
+template<class R> inline
+size_type 
+Geometry::PartitionTreeSet<R>::capacity() const 
+{
+  return _subdivision_set.capacity(); 
+}
+
+template<class R> inline
+size_type 
+Geometry::PartitionTreeSet<R>::size() const 
+{
+  return _subdivision_set.size(); 
+}
+
+template<class R> inline
+SizeArray 
+Geometry::PartitionTreeSet<R>::depths() const 
+{
+  return _subdivision_set.depths(); 
+}
+
+template<class R> inline
+size_type 
+Geometry::PartitionTreeSet<R>::depth() const 
+{
+  return _subdivision_set.depth(); 
+}
+
+template<class R> inline
+Geometry::PartitionScheme<R> 
+Geometry::PartitionTreeSet<R>::scheme() const 
+{
+  return PartitionScheme<R>(bounding_box(),subdivisions()); 
+}
+
+template<class R> inline
+Geometry::PartitionTree<R> 
+Geometry::PartitionTreeSet<R>::partition_tree() const 
+{
+  return PartitionTree<R>(bounding_box(),subdivisions(),binary_tree()); 
+}
+
+template<class R> inline
+typename Geometry::PartitionTreeSet<R>::const_iterator 
+Geometry::PartitionTreeSet<R>::begin() const 
+{
+  return const_iterator(_unit_box,_subdivision_set.begin()); 
+}
+
+template<class R> inline
+typename Geometry::PartitionTreeSet<R>::const_iterator 
+Geometry::PartitionTreeSet<R>::end() const 
+{
+  return const_iterator(_unit_box,_subdivision_set.end()); 
+}
+
+template<class R> inline
+tribool 
+Geometry::PartitionTreeSet<R>::empty() const 
+{
+  return this->size()==0; 
+}
+
+template<class R> inline
+tribool 
+Geometry::PartitionTreeSet<R>::bounded() const 
+{
+  return true; 
+}
+
+
+
+
+
+
+template<class R> inline
+std::ostream& 
+Geometry::operator<<(std::ostream& os, const PartitionScheme<R>& ps) 
+{ 
+  return ps.write(os);
+}
+
+template<class R> inline
+std::ostream& 
+Geometry::operator<<(std::ostream& os, const PartitionTreeCell<R>& ptc)
+{ 
+  return ptc.write(os);
+}
+
+template<class R> inline
+std::ostream& 
+Geometry::operator<<(std::ostream& os, const PartitionTree<R>& pt) 
+{ 
+  return pt.write(os);
+}
+
+template<class R> inline
+std::ostream& 
+Geometry::operator<<(std::ostream& os, const PartitionTreeSet<R>& pts)
+{ 
+  return pts.write(os);
+}
+
+
+} // namespace Ariadne
+

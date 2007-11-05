@@ -56,13 +56,35 @@ namespace Ariadne {
       //@{
       //! \name Constructors and assignment operators
       /*! \brief Default constructor constructs the rational 0/1. */
-      Rational() : mpq_class() { }
+      Rational() : mpq_class(0) { this->mpq_class::canonicalize(); }
+      //Rational() : mpq_class(0) { std::cerr<<"Rational()="<<std::endl; this->mpq_class::canonicalize(); std::cerr<<*this<<std::endl; }
       /*! \brief Construct from a numerator and a denominator. */
       Rational(const Integer& n, const Integer& d)
         : mpq_class(n,d) { this->mpq_class::canonicalize(); }
+      /*! \brief Construct from a built-in integer. */
+      Rational(const int& n)
+        : mpq_class(n) { this->mpq_class::canonicalize(); }
+      //  : mpq_class(n) { std::cerr<<"Rational(n="<<n<<")="<<std::flush; this->mpq_class::canonicalize(); std::cerr<<*this<<std::endl; }
+      /*! \brief Construct from a built-in double-precision floating point object. */
+      Rational(const double& x)
+        : mpq_class(x) { this->mpq_class::canonicalize(); }
+      //  : mpq_class(x) { std::cerr<<"Rational(x="<<n<<")="<<std::flush; this->mpq_class::canonicalize(); std::cerr<<*this<<std::endl; }
+      Rational(const mpz_class& z)
+        : mpq_class(z) { this->mpq_class::canonicalize(); }
+      Rational(const mpq_class& q)
+        : mpq_class(q) { this->mpq_class::canonicalize(); }
+      /*! \brief Construct from an integer. */
+      Rational(const Integer& z)
+        : mpq_class(z) { this->mpq_class::canonicalize(); }
+      //  : mpq_class(z) { std::cerr<<"Rational(z="<<z<<")="<<std::endl; this->mpq_class::canonicalize(); std::cerr<<*this<<std::endl; }
+      /*! \brief Construct from a string literal. */
+      Rational(const char* cstr);
+      /*! \brief Construct from a string literal. */
+      Rational(const std::string& str);
       /*! \brief Copy constructor. */
       Rational(const Rational& q)
-        : mpq_class(q) { this->mpq_class::canonicalize(); }
+        : mpq_class(q) { this->mpq_class::canonicalize();}
+      //  : mpq_class(q) { std::cerr<<"Rational(q="<<q<<")="<<std::endl; this->mpq_class::canonicalize(); std::cerr<<*this<<std::endl; }
       /*! \brief Copy assignment operator. */
       Rational& operator=(const Rational& q) {
         this->mpq_class::operator=(q); return *this; }
@@ -72,9 +94,16 @@ namespace Ariadne {
         : mpq_class(n,d) { this->mpq_class::canonicalize(); }
       /*! \brief Convert from another numerical type. */
       template<class R> Rational(const R& x)
-        : mpq_class(x) { this->mpq_class::canonicalize(); }
+        : mpq_class(x) 
+      { 
+        //std::cerr<<__PRETTY_FUNCTION__<<std::endl; 
+        //std::cerr<<"Rational(R x="<<x<<")="<<std::flush; 
+        this->mpq_class::canonicalize(); 
+        //std::cerr<<*this<<std::endl; 
+      }
       /*! \brief Conversion assignment operator from another numerical type. */
       template<class R> Rational& operator=(const R& x) {
+        //std::cerr<<__PRETTY_FUNCTION__<<std::endl; 
         (*this)=Rational(x); return *this; }
       //@}
       
@@ -149,9 +178,12 @@ namespace Ariadne {
     };
 
 
-    std::istream& 
-    operator>>(std::istream& is, Rational& q);
+    std::ostream& operator<<(std::ostream& os, const Rational& q);
+    std::istream& operator>>(std::istream& is, Rational& q);
       
+    inline Rational::Rational(const char* cstr) { std::stringstream ss(cstr); std::istream& is(ss); is >> *this; }
+    inline Rational::Rational(const std::string& str) { std::stringstream ss(str); std::istream& is(ss); is >> *this; }
+
     inline Integer numerator(const Rational& num){ 
       return num.get_num(); }
   
@@ -167,7 +199,9 @@ namespace Ariadne {
       return (x>=0) ? x : static_cast<Rational>(-x); }
 
     template<> inline Rational neg(const Rational& x) {
-      return -x; }
+      return -x.get_base(); }
+    template<> inline Rational rec(const Rational& x) {
+      return 1/x.get_base(); }
     template<> inline Rational add(const Rational& x1, const Rational& x2) {
       return x1+x2; }
     template<> inline Rational sub(const Rational& x1, const Rational& x2) {
@@ -271,6 +305,10 @@ namespace Ariadne {
     template<> inline Rational div_down(const Rational& x1, const Rational& x2) { return div_exact(x1,x2); }
     template<> inline Rational div_up(const Rational& x1, const Rational& x2) { return div_exact(x1,x2); }
     template<> inline Rational div_approx(const Rational& x1, const Rational& x2) { return div_exact(x1,x2); }
+  
+    template<class N> inline Rational pow_up(const Rational& x, const N& n) { return pow(x,n); }
+    template<class N> inline Rational pow_down(const Rational& x, const N& n) { return pow(x,n); }
+    template<class N> inline Rational pow_approx(const Rational& x, const N& n) { return pow(x,n); }
   
   
   }

@@ -24,26 +24,25 @@
 #include "sphere.h"
 
 namespace Ariadne {
-  namespace Geometry {
 
-    template<class R>
-    std::ostream&
-    Sphere<R>::write(std::ostream& os) const
-    {
-      if(this->empty()) {
-        os << "Empty";
-      }
-      else if(this->dimension() > 0) {
-        os << "Sphere( centre=" << this->centre() << ", radius=" << this->radius() << " )";
-      }
-      return os;
-    }
-    
-    template<class R>
-    std::istream& 
-    Sphere<R>::read(std::istream& is)
-    {
-      throw NotImplemented(__PRETTY_FUNCTION__);
-    }
+template<class R>
+std::ostream&
+Geometry::Sphere<R>::write(std::ostream& os) const
+{
+  if(this->empty()) {
+    os << "Empty";
   }
+  else if(this->dimension() > 0) {
+    os << "Sphere( centre=" << this->centre() << ", radius=" << this->radius() << " )";
+  }
+  return os;
 }
+
+template<class R>
+std::istream& 
+Geometry::Sphere<R>::read(std::istream& is)
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+} // namespace Ariadne

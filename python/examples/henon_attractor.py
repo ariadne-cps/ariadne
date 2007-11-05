@@ -4,6 +4,9 @@
 #            henon_attractor.py
 #
 #  Copyright 2006  Pieter Collins <Pieter.Collins@cwi.nl>
+#
+# Maintainer: Pieter Collins <Pieter.Collins@cwi.nl>
+#
 ##############################################################################
 
 # This program is free software; you can redistribute it and/or modify
@@ -31,43 +34,41 @@ henon_map=HenonMap(a,b)
 print henon_map
 
 
-grid_extent=Rectangle("[-10,6]x[-8,8]") 
-number_of_subdivisions=128
-finite_grid=FiniteGrid(grid_extent,number_of_subdivisions)
-grid=finite_grid.grid()
-initial_guess=IntervalPoint("([0,2],[0,2])") # initial state
-
+# Find a fixed point
+initial_guess=IntervalPoint( (Interval(0,2),Interval(0,2)) ) # initial state
 interval_newton=IntervalNewtonSolver(0.00001,64)
 fixed_point=interval_newton.fixed_point(henon_map,initial_guess)
-fixed_point_cell=outer_approximation(fixed_point,grid)
 print "Found fixed point in",fixed_point
 
-initial_set=GridMaskSet(finite_grid)
-initial_set.adjoin(outer_approximation(fixed_point,grid))
-bounding_set=GridMaskSet(finite_grid)
-bounding_set.adjoin(over_approximation(grid_extent,grid))
+# Construct initial set and bounding set
+initial_set=RectangularSet(fixed_point)
+bounding_set=RectangularSet([[-10,6],[-8,8]])
 
-apply=Applicator();
+# Construct evolver
+parameters=EvolutionParameters()
+parameters.set_grid_length(Float(0.125))
+evolver=MapEvolver(parameters)
 
+# Compute chain-reachable set
 print "Computing chain-reachable set..."
-set_applicator_verbosity(3)
-
-chain_reach_set = apply.chainreach(henon_map,initial_set,bounding_set)
+chain_reach_set = evolver.chainreach(henon_map,initial_set,bounding_set)
 print "Found", chain_reach_set.size(), "cells in grid with", chain_reach_set.capacity(), "cells."
 
+# Reduce chain-reachable set to partition tree set
 chain_reach_tree_set = PartitionTreeSet(chain_reach_set)
-print "Reduced to", chain_reach_tree_set.size()," cells" \
+print "Reduced to", chain_reach_tree_set.size(),"cells " \
     "in partition tree with", chain_reach_tree_set.capacity(),"cells."
 
+# Export to postscript output
 print "Exporting to postscript output...",
-epsbb=Rectangle("[-4.1,4.1]x[-4.1,4.1]") # eps bounding box
+epsbb=Rectangle([[-4.1,4.1],[-4.1,4.1]]) # eps bounding box
 eps=EpsPlot()
 eps.open("henon_attractor-1.eps",epsbb)
 eps.set_line_style(True)
 eps.set_fill_colour("green")
 eps.write(chain_reach_set)
 eps.set_fill_colour("blue")
-eps.write(fixed_point_cell)
+eps.write(initial_set)
 eps.close()
 
 eps.open("henon_attractor-2.eps",epsbb)
@@ -80,6 +81,6 @@ eps.set_fill_style(0)
 eps.write(chain_reach_tree_set.partition_tree())
 eps.set_fill_style(1)
 eps.set_fill_colour("blue")
-eps.write(fixed_point_cell)
+eps.write(initial_set)
 eps.close()
 print " done."

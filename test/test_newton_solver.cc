@@ -47,7 +47,7 @@ using namespace Ariadne::Evaluation;
 template<class R> int test_newton();
 
 int main() {
-  test_newton<Float>();
+  test_newton<Flt>();
   return 0;
 }
 
@@ -80,7 +80,8 @@ test_newton()
   cout << std::setprecision(20);
   cout << fpt << "  " << radius(fpt) << endl;
 
-  Point<R> afpt("(-2.0920128158902654,-2.0920128158902654)");
+  double afptd[2]={-2.0920128158902654,-2.0920128158902654};
+  Point<R> afpt(2,afptd);
   assert(encloses(fpt,afpt));
  
 

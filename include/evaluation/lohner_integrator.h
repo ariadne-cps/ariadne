@@ -48,7 +48,7 @@ namespace Ariadne {
      */
     template<class R>
     class LohnerIntegrator
-      : public IntegratorInterface<R>
+      : public IntegratorInterface< Geometry::Zonotope<Numeric::Interval<R>,R> >
     {
       typedef Numeric::Interval<R> I;
       typedef Geometry::Zonotope<I,R> BS;
@@ -68,18 +68,6 @@ namespace Ariadne {
                                            const Numeric::Interval<R>& t,
                                            const Geometry::Rectangle<R>& bb) const;
      
-      virtual Geometry::Rectangle<R> 
-      integration_step(const System::VectorFieldInterface<R>& vf,
-                       const Geometry::Rectangle<R>& s,
-                       const Numeric::Interval<R>& t,
-                       const Geometry::Rectangle<R>& bb) const;
-
-      virtual Geometry::Rectangle<R> 
-      reachability_step(const System::VectorFieldInterface<R>& vf,
-                        const Geometry::Rectangle<R>& s,
-                        const Numeric::Interval<R>& t,
-                        const Geometry::Rectangle<R>& bb) const;
-
       /*! \brief A C1 algorithm for integrating forward a zonotope.
        */
       virtual Geometry::Zonotope<I,R> 
@@ -104,13 +92,16 @@ namespace Ariadne {
                        const Numeric::Interval<R>& t,
                        const Geometry::Rectangle<R>& bb) const;
 
-      /*! \brief A C1 algorithm for integrating forward a zonotope for a time up to time \a step_size, assuming the set \a bb is a bounding box for the integration. */
+      /*! \brief A C1 algorithm for integrating forward a zonotope.
+       */
       virtual Geometry::Zonotope<I,I> 
       reachability_step(const System::VectorFieldInterface<R>& vf,
-                        const Geometry::Zonotope<I,I>& s,
-                        const Numeric::Interval<R>& t,
-                        const Geometry::Rectangle<R>& bb) const;
+                       const Geometry::Zonotope<I,I>& s,
+                       const Numeric::Interval<R>& t,
+                       const Geometry::Rectangle<R>& bb) const;
 
+      /*! \brief Write to an output stream. */
+      virtual std::ostream& write(std::ostream&) const;
     };
     
       
@@ -127,7 +118,7 @@ namespace Ariadne {
      */
     template<class R>
     class C1LohnerIntegrator
-      : public DifferentiableIntegratorInterface<R> 
+      : public IntegratorInterface< Geometry::Zonotope<Numeric::Interval<R> > > 
     {
       typedef Numeric::Interval<R> I;
       typedef Geometry::Zonotope<I,I> BS;
@@ -153,32 +144,6 @@ namespace Ariadne {
                                                           const Numeric::Interval<R>& t,
                                                           const Geometry::Rectangle<R>& bb) const;
      
-      virtual Geometry::Rectangle<R> 
-      integration_step(const System::VectorFieldInterface<R>& vf,
-                       const Geometry::Rectangle<R>& s,
-                       const Numeric::Interval<R>& t,
-                       const Geometry::Rectangle<R>& bb) const;
-
-
-      virtual Geometry::Rectangle<R> 
-      reachability_step(const System::VectorFieldInterface<R>& vf,
-                        const Geometry::Rectangle<R>& s,
-                        const Numeric::Interval<R>& t,
-                        const Geometry::Rectangle<R>& bb) const;
-
-      virtual Geometry::Zonotope<I,R> 
-      integration_step(const System::VectorFieldInterface<R>& vf,
-                       const Geometry::Zonotope<I,R>& s,
-                       const Numeric::Interval<R>& t,
-                       const Geometry::Rectangle<R>& bb) const;
-
-
-      virtual Geometry::Zonotope<I,R> 
-      reachability_step(const System::VectorFieldInterface<R>& vf,
-                        const Geometry::Zonotope<I,R>& s,
-                        const Numeric::Interval<R>& t,
-                        const Geometry::Rectangle<R>& bb) const;
-
       /*! \brief A C1 algorithm for integrating forward a zonotope.
        */
       virtual Geometry::Zonotope<I,I> 
@@ -196,6 +161,8 @@ namespace Ariadne {
                         const Geometry::Rectangle<R>& bb) const;
 
 
+      /*! \brief Write to an output stream. */
+      virtual std::ostream& write(std::ostream&) const;
     };
     
       

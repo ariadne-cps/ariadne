@@ -43,7 +43,7 @@ using namespace std;
 template<class R> int test_rectangle();
 
 int main() {
-  test_rectangle<Float>();
+  test_rectangle<Flt>();
 }
 
 template<class R>

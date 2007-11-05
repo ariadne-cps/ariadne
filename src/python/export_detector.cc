@@ -46,21 +46,22 @@ using namespace Ariadne::Python;
 using namespace boost::python;
 
 template<class R>
-class DetectorInterfaceWrapper : public DetectorInterface<R>, public wrapper< DetectorInterface<R> >
+class DetectorWrapper : public DetectorInterface<R>, public wrapper< DetectorInterface<R> >
 {
   typedef Interval<R> I;
  public:
-  DetectorInterfaceWrapper() : DetectorInterface<R>() { }
-  DetectorInterfaceWrapper<R>* clone() const { 
-    return new DetectorInterfaceWrapper<R>(*this); }
-  Interval<R> value(const ConstraintInterface<R>& c, BasicSetInterface<R>& bs) const {
+  DetectorWrapper() : DetectorInterface<R>() { }
+  DetectorWrapper<R>* clone() const { 
+    return this->get_override("clone")(); }
+  Interval<R> value(const ConstraintInterface<R>& c, const Rectangle<R>& r) const {
     return this->get_override("value")(); }
-  tribool forces(const ConstraintInterface<R>& c1, const ConstraintInterface<R>& c2, Rectangle<R>& dom) const {
+  tribool forces(const ConstraintInterface<R>& c1, const ConstraintInterface<R>& c2, const Rectangle<R>& r) const {
     return this->get_override("forces")(); }
-  Interval<R> crossing_time(const VectorFieldInterface<R> vf, const ConstraintInterface<R>& c, const Point<I>& pt, const Rectangle<R>& b) const {
+  Interval<R> normal_derivative(const VectorFieldInterface<R>& vf, const DifferentiableConstraintInterface<R>& c, const Point<I>& r) const {
+    return this->get_override("normal_derivative")(); }
+  Interval<R> crossing_time(const VectorFieldInterface<R>& vf, const ConstraintInterface<R>& c, const Point<I>& pt, const Rectangle<R>& bb) const {
     return this->get_override("crossing_time")(); }
-  TimeModel<R> crossing_time(const VectorFieldInterface<R> vf, const ConstraintInterface<R>& c, 
-                             const Rectangle<R>& d, const Rectangle<R>& b) const {
+  TimeModel<R> crossing_time(const VectorFieldInterface<R>& vf, const ConstraintInterface<R>& c, const Rectangle<R>& pt, const Rectangle<R>& bb) const {
     return this->get_override("crossing_time")(); }
 };
   
@@ -70,14 +71,9 @@ void export_detector()
 {
   typedef Interval<R> I;
 
-  /*
-  class_< DetectorInterface<R> >("DetectorInterface",init<>())
-  ;
+  class_< DetectorWrapper<R>, boost::noncopyable >("DetectorInterface",init<>());
 
   class_< Detector<R>, bases<DetectorInterface<R> > >("Detector",init<>())
-  */  
-
-  class_< Detector<R> >("Detector",init<>())
     .def("satisfies",
          (tribool(Detector<R>::*)(const Rectangle<R>&,const ConstraintInterface<R>&)const) &Detector<R>::satisfies)
     .def("satisfies",

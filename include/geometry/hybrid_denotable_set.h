@@ -33,6 +33,8 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "../base/types.h"
+
 #include "../geometry/geometrical_traits.h"
 #include "../geometry/set_interface.h"
 #include "../geometry/grid_cell_list_set.h"
@@ -45,9 +47,6 @@
 
 namespace Ariadne {
   namespace Geometry {
-
-    /*! \brief The type identifying a discrete locatation of a hybrid system. */
-    typedef id_type location_type;
 
     class basic_set_tag;
     class denotable_set_tag;
@@ -65,11 +64,12 @@ namespace Ariadne {
       typedef denotable_set_tag set_category;
       typedef typename DS::real_type real_type;
       typedef typename DS::state_type state_type;
+      typedef DiscreteState discrete_state_type;
       typedef DS continuous_state_set_type;
       typedef typename DS::basic_set_type continuous_basic_set_type;
       typedef HybridBasicSet<typename DS::basic_set_type> basic_set_type;
-      typedef typename std::map<location_type,continuous_state_set_type>::iterator locations_iterator;
-      typedef typename std::map<location_type,continuous_state_set_type>::const_iterator locations_const_iterator;
+      typedef typename std::map<discrete_state_type,continuous_state_set_type>::iterator locations_iterator;
+      typedef typename std::map<discrete_state_type,continuous_state_set_type>::const_iterator locations_const_iterator;
       typedef HybridDenotableSetIterator<DS> const_iterator;
      protected:
       /*! \brief Construct a set with no locations. */
@@ -87,24 +87,26 @@ namespace Ariadne {
       virtual ~HybridDenotableSet();
       
       /*! \brief Create a new location with dimension \a d. */
-      DS& new_location(location_type q, dimension_type d);
+      DS& new_location(discrete_state_type q, dimension_type d);
       /*! \brief Create a new location based on the set \a s. */
-      DS& new_location(location_type q, const DS& s);
+      DS& new_location(discrete_state_type q, const DS& s);
       /*! \brief Create a new location based on the parameter \a t. */
-      template<class T> DS& new_location(location_type q, const T& t);
+      template<class T> DS& new_location(discrete_state_type q, const T& t);
       /*! \brief Create a new location based on the parameters \a t1 and \a t2. */
-      template<class T1, class T2> DS& new_location(location_type q, const T1& t1, const T2& t2);
+      template<class T1, class T2> DS& new_location(discrete_state_type q, const T1& t1, const T2& t2);
 
       /*! \brief The discrete locations of the set. */
       HybridSpace locations() const;
+      /*! \brief The space the set lies in. */
+      HybridSpace space() const;
       /*! \brief The number of discrete locations or components comprising the set. */
-      location_type number_of_locations() const;
+      size_type number_of_locations() const;
       /*! \brief Check if the hybrid set has a component for discrete location \a q. */
-      bool has_location(location_type q) const;
+      bool has_location(discrete_state_type q) const;
       /*! \brief A reference to the state set corresponding to discrete location \a q. */
-      DS& operator[](location_type q);
+      DS& operator[](discrete_state_type q);
       /*! \brief The state set corresponding to discrete location \a q. */
-      const DS& operator[](location_type q) const;
+      const DS& operator[](discrete_state_type q) const;
       
       /*! \brief Clear all discrete locations. */
       void clear();
@@ -117,7 +119,7 @@ namespace Ariadne {
       size_type size() const;
       
       /*! \brief Adjoin the set \a s to location \a q. */
-      template<class S1> void adjoin(location_type q, const S1& s);
+      template<class S1> void adjoin(discrete_state_type q, const S1& s);
       /*! \brief Adjoin the set \a s to location \a q. */
       template<class S1> void adjoin(const HybridBasicSet<S1>& s);
       /*! \brief Adjoin another hybrid set. */
@@ -147,7 +149,7 @@ namespace Ariadne {
       
 
      private:
-      std::map< location_type, continuous_state_set_type > _component_sets;
+      std::map< discrete_state_type, continuous_state_set_type > _component_sets;
     };
 
 
@@ -194,7 +196,8 @@ namespace Ariadne {
     class HybridGrid 
     {
      public:
-      typedef typename std::map< id_type, Grid<R> >::const_iterator locations_const_iterator;
+      typedef DiscreteState discrete_state_type;
+      typedef typename std::map< discrete_state_type, Grid<R> >::const_iterator locations_const_iterator;
 
       /*! \brief */
       HybridGrid() : _grids() { }
@@ -204,16 +207,17 @@ namespace Ariadne {
           this->_grids.insert(std::make_pair(iter->first,iter->second.grid())); }
       }
       /*! \brief */
-      void new_location(id_type q, const Grid<R>& g) {
+      void new_location(DiscreteState q, const Grid<R>& g) {
         this->_grids.insert(std::make_pair(q,g)); }
       /*! \brief */
-      const Grid<R>& operator[](id_type q) {
-        return this->_grids.find(q).second; }
+      const Grid<R>& operator[](DiscreteState q) const {
+        return this->_grids.find(q)->second; }
 
+      HybridSpace locations() const;
       locations_const_iterator locations_begin() const { return this->_grids.begin(); }
       locations_const_iterator locations_end() const { return this->_grids.end(); }
      private:
-      std::map< id_type, Grid<R> > _grids;
+      std::map< discrete_state_type, Grid<R> > _grids;
     };
 
 
@@ -225,6 +229,7 @@ namespace Ariadne {
     class HybridGridCell 
       : public HybridBasicSet< GridCell<R> >
     {
+      typedef DiscreteState discrete_state_type;
      public:
       /*! \brief */
       HybridGridCell(const HybridBasicSet< GridCell<R> >& hbs) : HybridBasicSet< GridCell<R> >(hbs) { }
@@ -240,6 +245,7 @@ namespace Ariadne {
     class HybridGridMaskSet
       : public HybridDenotableSet< GridMaskSet<R> >
     {
+      typedef DiscreteState discrete_state_type;
      public:
       HybridGridMaskSet()
         : HybridDenotableSet< GridMaskSet<R> >() { }
@@ -278,6 +284,10 @@ namespace Ariadne {
         for(typename HDS::const_iterator iter=hds.begin(); iter!=hds.end(); ++iter) { this->adjoin_outer_approximation(*iter); } }
       void unique_sort();
     };
+
+    template<class BS> 
+    HybridGridCellListSet<typename BS::real_type>
+    outer_approximation(const HybridListSet<BS>& hls, const HybridGrid<typename BS::real_type>& hg);
 
     template<class R> 
     HybridGridCellListSet<R>

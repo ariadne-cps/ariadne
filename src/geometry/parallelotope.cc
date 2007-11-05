@@ -31,15 +31,19 @@ namespace Ariadne {
   namespace Geometry {
 
     using namespace Numeric;
+
+    // template class Parallelotope<Rational>;
     
 #ifdef ENABLE_FLOAT64
-    template class Parallelotope<Float64>;
-    template class Parallelotope< Interval<Float64> >;
+    template class Parallelotope<Float64,Float64 >;
+    template class Parallelotope<Interval64,Float64>;
+    template class Parallelotope<Interval64,Interval64>;
 #endif
   
 #ifdef ENABLE_FLOATMP
-    template class Parallelotope<FloatMP>;
-    template class Parallelotope< Interval<FloatMP> >;
+    template class Parallelotope<FloatMP,FloatMP>;
+    template class Parallelotope<IntervalMP,FloatMP>;
+    template class Parallelotope<IntervalMP,IntervalMP>;
 #endif
 
   }

@@ -42,12 +42,12 @@ namespace Ariadne {
 
 #ifdef ENABLE_FLOAT64
     template class Matrix<Float64>;
-    template class Matrix< Interval<Float64> >;
+    template class Matrix<Interval64>;
 #endif
   
 #ifdef ENABLE_FLOATMP
     template class Matrix<FloatMP>;
-    template class Matrix< Interval<FloatMP> >;
+    template class Matrix<IntervalMP>;
 #endif
 
   }

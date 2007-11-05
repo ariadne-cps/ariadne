@@ -37,12 +37,12 @@ namespace Ariadne {
 
 #ifdef ENABLE_FLOAT64
     template class Polytope<Float64>;
-    template class Polytope< Interval<Float64> >;
+    template class Polytope<Interval64>;
 #endif
   
 #ifdef ENABLE_FLOATMP
     template class Polytope<FloatMP>;
-    template class Polytope< Interval<FloatMP> >;
+    template class Polytope<IntervalMP>;
 #endif
 
   }

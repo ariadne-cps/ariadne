@@ -144,8 +144,14 @@ namespace Ariadne {
       /*! \brief Set the size of the region used for computation. */
       void set_bounding_domain_size(R);
 
+      /*! \brief Write to an output stream. */
+      std::ostream& write(std::ostream& os) const;      
     };
 
+    template<class R> inline 
+    std::ostream& operator<<(std::ostream& os, const EvolutionParameters<R>& p) { 
+      return p.write(os);
+    }
 
   }
 }

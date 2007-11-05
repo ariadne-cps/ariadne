@@ -21,6 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+#include <cassert>
+
 #include "system/vector_field_interface.h"
 #include "geometry/constraint_interface.h"
 #include "geometry/basic_set_interface.h"
@@ -177,12 +179,16 @@ Evaluation::Detector<R>::crossing_time(const System::VectorFieldInterface<R>& vf
                                        const Geometry::Point<I>& pt,
                                        const Geometry::Rectangle<R>& bb) const
 {  
+  ARIADNE_LOG(8,"    Detector::crossing_time(VectorField vf, Constraint c, Point p, Rectangle bb)\n");
+  ARIADNE_LOG(9,"      c="<<c<<", pt="<<pt<<", bb="<<bb<<"\n");
+
   const Geometry::DifferentiableConstraintInterface<R>& dc=
     dynamic_cast<const Geometry::DifferentiableConstraintInterface<R>&>(c);
   assert(&dc);
   Geometry::Point<I> bpt=bb;
   I icv = c.value(pt);
   I nd = LinearAlgebra::inner_product(dc.gradient(bpt),vf(pt));
+  ARIADNE_LOG(9,"      normal_derivative="<<nd<<"\n");
   return -icv/nd;
 }
 
@@ -194,7 +200,8 @@ Evaluation::Detector<R>::crossing_time(const System::VectorFieldInterface<R>& vf
                                        const Geometry::Rectangle<R>& d,
                                        const Geometry::Rectangle<R>& bb) const
 {
-  ARIADNE_LOG(8,"    Detector::crossing_time(...)\n");
+  ARIADNE_LOG(8,"    Detector::crossing_time(VectorField vf, Constraint c, Rectangle d, Rectangle bb)\n");
+  ARIADNE_LOG(9,"      c="<<c<<", d="<<d<<", bb="<<bb<<"\n");
   static const int number_of_newton_steps=2;
 
   const System::VectorFieldInterface<R>& dynamic=vf;
@@ -256,6 +263,7 @@ Evaluation::Detector<R>::crossing_time(const System::VectorFieldInterface<R>& vf
     Numeric::Interval<R> centre_crossing_time = constraint.value(centre)/centre_normal_derivative;
     
     // Compute the gradient of the crossing times
+    assert((bool)(normal_derivative!=0));
     LinearAlgebra::Vector<I> spacial_time_gradient = constraint_gradient/normal_derivative;
     
     // Log the crossing time step and return
@@ -276,6 +284,7 @@ Evaluation::Detector<R>::crossing_time(const System::VectorFieldInterface<R>& vf
     Numeric::Interval<R> normal_derivative = -inner_product(constraint_gradient,flow_direction);
     ARIADNE_LOG(9,"    normal_derivative="<<normal_derivative<<"\n");
     
+    assert((bool)(normal_derivative!=0));
     R minimum_crossing_time = (constraint.value(bounding_box)/normal_derivative).lower();
     R maximum_crossing_time = (R(1)/R(0)).upper(); // Should be inf (infinity)
     Numeric::Interval<R> crossing_time(minimum_crossing_time,maximum_crossing_time);

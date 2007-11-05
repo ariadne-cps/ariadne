@@ -157,6 +157,30 @@ namespace Ariadne {
     template<class R> 
     R euclidean_distance_square_up(const Point<R>&,const Point<R>&);
       
+
+    template<class R>  
+    tribool disjoint(const Sphere<R>& A, const Sphere<R>& B);
+  
+    template<class R>  
+    tribool disjoint(const Sphere<R>& A, const Rectangle<R>& B);
+
+    template<class R>  
+    tribool disjoint(const Rectangle<R>& A, const Sphere<R>& B);
+
+
+    template<class R>  
+    tribool subset(const Sphere<R>& A, const Sphere<R>& B);
+
+    template<class R>  
+    tribool subset(const Sphere<R>& A, const Rectangle<R>& B);
+
+    template<class R>  
+    tribool subset(const Rectangle<R>& A, const Sphere<R>& B);
+
+
+    template<class R> 
+    Sphere<R> scale(const Sphere<R>& s, const R& scale_factor);
+  
   }
 }
 

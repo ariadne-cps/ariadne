@@ -26,21 +26,20 @@
 #include "../base/stlio.h"
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
-#include "../linear_algebra/matrix.code.h"
+#include "../linear_algebra/matrix.code.h" // for Matrix<int>::write(ostream&) const;
 #include "../output/logging.h"
 
 namespace Ariadne {
-namespace Geometry {
 
-extern int verbosity;
+extern int Geometry::verbosity;
 
 /*! \param argument is a list of constraints (or generators).
  *  \param result is an output parameter storing a list of generators (or constraints).
  */  
 template<class R>
 void
-ddconv(std::vector< LinearAlgebra::Vector<R> >&  result,
-       const std::vector< LinearAlgebra::Vector<R> >&  argument)
+Geometry::ddconv(std::vector< LinearAlgebra::Vector<R> >&  result,
+                 const std::vector< LinearAlgebra::Vector<R> >&  argument)
 {  
   assert(argument.size()>0);
 
@@ -233,5 +232,5 @@ ddconv(std::vector< LinearAlgebra::Vector<R> >&  result,
   
 }
 
-}
-}
+
+} // namespace Ariadne

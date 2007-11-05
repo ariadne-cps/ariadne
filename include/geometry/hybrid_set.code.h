@@ -38,7 +38,7 @@ Geometry::HybridAbstractSet<S>::write(std::ostream& os) const
   os << "HybridAbstractSet( { \n";
   for(locations_const_iterator iter=this->locations_begin(); iter!=this->locations_end(); ++iter)
   {
-    id_type loc=iter->first;
+    discrete_state_type loc=iter->first;
     const S& set=*iter->second;
     os << "  "<<loc<<": " << set << ",\n";
   }
@@ -56,7 +56,7 @@ Geometry::HybridGridMaskSet<R>::write(std::ostream& os) const
   for(typename HybridGridMaskSet<R>::locations_const_iterator iter=this->locations_begin();
       iter!=this->locations_end(); ++iter)
   {
-    id_type loc=iter->first;
+    DiscreteState loc=iter->first;
     const GridMaskSet<R>& set=iter->second;
     os << "  "<<loc<<": " << Output::summary(set) << ",\n";
   }
@@ -73,7 +73,7 @@ Geometry::HybridListSet<BS>::write(std::ostream& os) const
   for(typename HybridListSet<BS>::locations_const_iterator iter=this->locations_begin();
       iter!=this->locations_end(); ++iter)
   {
-    id_type loc=iter->first;
+    DiscreteState loc=iter->first;
     const ListSet<BS>& set=iter->second;
     os << "  " << loc << ": " << Output::summary(set) << ",\n";
     /*

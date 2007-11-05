@@ -46,21 +46,21 @@ void export_polynomial_map()
   typedef RIntervalMatrix (RPolynomialMap::* PolyMapDerivRectFunc) (const RRectangle&) const;
   typedef const RPolynomialMatrix& (RPolynomialMap::* PolyMapDerivFunc) () const;
  
-  class_<RMonomial>("Monomial",init<std::string>())
+  class_<RMonomial>("Monomial",init<uint>())
     .def(init<Float,SizeArray>())
     .def(self < self)
     .def(self_ns::str(self))
   ;
   
   
-  class_<RPolynomial>("Polynomial",init<std::string>())
+  class_<RPolynomial>("Polynomial",init<uint,uint>())
     .def("apply", PolyApplyPointFunc(&RPolynomial::apply))
     .def("apply", PolyApplyRectFunc(&RPolynomial::apply))
     .def("argument_dimension", &RPolynomial::argument_dimension)
     .def(self_ns::str(self))
   ;
   
-  class_<RPolynomialMap>("PolynomialMap",init<std::string>())
+  class_<RPolynomialMap>("PolynomialMap",init<uint,uint,uint>())
     .def("apply", PolyMapApplyPointFunc(&RPolynomialMap::apply))
     .def("apply", PolyMapApplyRectFunc(&RPolynomialMap::apply))
     .def("derivative", PolyMapDerivPointFunc(&RPolynomialMap::derivative))

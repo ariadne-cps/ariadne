@@ -24,6 +24,8 @@
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
 
+#include "../function/multi_index.h"
+
 #include "../geometry/point.h"
 #include "../geometry/rectangle.h"
 
@@ -39,7 +41,7 @@ namespace Ariadne {
     
     template<class R>
     typename MapInterface<R>::F
-    MapInterface<R>::derivative(const Geometry::Point<F>& r, const size_type& i, const LinearAlgebra::MultiIndex& j) const 
+    MapInterface<R>::derivative(const Geometry::Point<F>& r, const size_type& i, const Function::MultiIndex& j) const 
     {
       throw DeferredImplementation(__PRETTY_FUNCTION__);
     }

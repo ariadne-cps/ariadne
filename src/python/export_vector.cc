@@ -22,14 +22,19 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-
 #include "numeric/rational.h"
 #include "numeric/interval.h"
 
 #include "linear_algebra/vector.h"
 
+// Need these since we can't define v*cv using __rmul__
+#include "linear_algebra/covector.h" 
+#include "linear_algebra/matrix.h"
+
 #include "python/python_utilities.h"
 #include "python/python_float.h"
+#include "python/read_scalar.h"
+
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
 using namespace Ariadne::LinearAlgebra;
@@ -39,26 +44,40 @@ using namespace Ariadne::Python;
 #include <boost/python/detail/api_placeholder.hpp>
 using namespace boost::python;
 
-template<class R>  
-Vector<R> 
-extract_vector(boost::python::object obj) 
+template<class X>
+std::string
+__str__(const Vector<X>& v)
 {
-  // See "Extracting C++ objects" in the Boost Python tutorial
-  list elements=extract<list>(obj);
-  int n=boost::python::len(elements);
-  Vector<R> v(n);
-  for(int i=0; i!=n; ++i) {
-    extract<double> x(elements[i]);
-    if (x.check()) {
-      v(i)=static_cast<R>(x);
-    } else {
-      extract<R> x(elements[i]);
-      v(i)=x;
-    }
-  }
-  return v;
+  std::stringstream ss;
+  ss << v;
+  return ss.str();
 }
 
+template<class X>
+std::string
+__repr__(const Vector<X>& v)
+{
+  std::stringstream ss;
+  ss << "Vector(" << v << ")";
+  return ss.str();
+}
+
+
+
+
+template<class X>
+Vector<X>*
+make_vector(const boost::python::object& obj) 
+{
+  // See "Extracting C++ objects" in the Boost Python tutorial
+  boost::python::list elements=boost::python::extract<boost::python::list>(obj);
+  int n=boost::python::len(elements);
+  Vector<X>& v=*new Vector<X>(n);
+  for(int i=0; i!=n; ++i) {
+    v(i)=read_scalar<X>(elements[i]);
+  }
+  return &v;
+}
 
 template<class R> 
 inline
@@ -95,41 +114,46 @@ void export_vector()
   typedef Interval<R> I;
   typedef Vector<R> Vec;
   typedef Vector< Interval<R> > IVec;
+  typedef Covector<R> Cvec;
+  typedef Covector< Interval<R> > ICvec;
+  typedef Matrix< Interval<R> > IMx;
   
-  class_<Vec>(python_name<R>("Vector").c_str(),init<uint>())
-    .def(init<std::string>())
-    .def(init<Vec>())
-    .def("__len__", &Vec::size)
-    .def("__getitem__",&vector_get_item<R>)
-    .def("__setitem__",&vector_set_item<R,R>)
-    .def("__setitem__",&vector_set_item<R,double>)
-    .def("__neg__",&neg<Vec,Vec>)
-    .def("__add__",&add<IVec,Vec,Vec>)
-    .def("__add__",&add<IVec,Vec,IVec>)
-    .def("__sub__",&sub<IVec,Vec,Vec>)
-    .def("__sub__",&sub<IVec,Vec,IVec>)
-    .def("__rmul__",&mul<IVec,Vec,int,Vec,R>)
-    .def("__rmul__",&mul<IVec,Vec,double,Vec,R>)
-    .def("__rmul__",&mul<IVec,Vec,R>)
-    .def("__rmul__",&mul<IVec,Vec,I>)
-    .def("__mul__",&mul<IVec,Vec,int,Vec,R>)
-    .def("__mul__",&mul<IVec,Vec,double,Vec,R>)
-    .def("__mul__",&mul<IVec,Vec,R>)
-    .def("__mul__",&mul<IVec,Vec,I>)
-    .def("__div__",&div<IVec,Vec,int,Vec,R>)
-    .def("__div__",&div<IVec,Vec,double,Vec,R>)
-    .def("__div__",&div<IVec,Vec,R>)
-    .def("__div__",&div<IVec,Vec,I>)
-    .def(self_ns::str(self))
-  ;
+  class_< Vector<R> > vector_class(python_name<R>("Vector").c_str(),no_init);
+  vector_class.def("__init__", make_constructor(&make_vector<R>));
+  vector_class.def(init<int>());
+  //vector_class.def(init<std::string>());
+  vector_class.def(init<Vec>());
+  vector_class.def("__len__", &Vec::size);
+  vector_class.def("__getitem__",&vector_get_item<R>);
+  vector_class.def("__setitem__",&vector_set_item<R,R>);
+  vector_class.def("__setitem__",&vector_set_item<R,double>);
+  vector_class.def("__neg__",&neg<Vec,Vec>);
+  vector_class.def("__add__",&add<IVec,Vec,Vec>);
+  vector_class.def("__add__",&add<IVec,Vec,IVec>);
+  vector_class.def("__sub__",&sub<IVec,Vec,Vec>);
+  vector_class.def("__sub__",&sub<IVec,Vec,IVec>);
+  vector_class.def("__rmul__",&mul<IVec,Vec,int,Vec,R>);
+  vector_class.def("__rmul__",&mul<IVec,Vec,double,Vec,R>);
+  vector_class.def("__rmul__",&mul<IVec,Vec,R>);
+  vector_class.def("__rmul__",&mul<IVec,Vec,I>);
+  vector_class.def("__mul__",&mul<IVec,Vec,int,Vec,R>);
+  vector_class.def("__mul__",&mul<IVec,Vec,double,Vec,R>);
+  vector_class.def("__mul__",&mul<IVec,Vec,R>);
+  vector_class.def("__mul__",&mul<IVec,Vec,I>);
+  vector_class.def("__mul__",&mul<IMx,Vec,Cvec>);
+  vector_class.def("__mul__",&mul<IMx,Vec,ICvec>);
+  vector_class.def("__div__",&div<IVec,Vec,int,Vec,R>);
+  vector_class.def("__div__",&div<IVec,Vec,double,Vec,R>);
+  vector_class.def("__div__",&div<IVec,Vec,R>);
+  vector_class.def("__div__",&div<IVec,Vec,I>);
+  vector_class.def("__str__",&__str__<R>);
+  vector_class.def("__repr__",&__repr__<R>);
 
   def("zero_vector",&zero_vector<Float>);
   def("unit_vector",&unit_vector<Float>);
 
-  def("sup_norm",&sup_norm<Float>);
-  def("norm",&sup_norm<Float>);
-  // Need 'Float' here to extract vector of proper class
-  def("extract_vector",&extract_vector<Float>,"Extract an Ariadne vector from a Python list");
+  def("sup_norm", (R(*)(const Vec&)) &sup_norm<R>);
+  def("norm", (R(*)(const Vec&)) &sup_norm<R>);
 }
 
 template<>
@@ -137,31 +161,36 @@ void export_vector<Rational>()
 {
   typedef Rational R;
   typedef Vector<R> Vec;
+  typedef Covector<R> Cvec;
+  typedef Matrix<R> Mx;
   
-  class_<Vec>(python_name<R>("Vector").c_str(),init<uint>())
-    .def(init<std::string>())
-    .def(init<Vec>())
-    .def("__len__", &Vec::size)
-    .def("__getitem__",&vector_get_item<R>)
-    .def("__setitem__",&vector_set_item<R,R>)
-    .def("__setitem__",&vector_set_item<R,double>)
-    .def("__neg__",&neg<Vec,Vec>)
-    .def("__add__",&add<Vec,Vec,Vec>)
-    .def("__sub__",&sub<Vec,Vec,Vec>)
-    .def("__rmul__",&mul<Vec,Vec,int,Vec,R>)
-    .def("__rmul__",&mul<Vec,Vec,double,Vec,R>)
-    .def("__rmul__",&mul<Vec,Vec,R,Vec,R>)
-    .def("__mul__",&mul<Vec,Vec,int,Vec,R>)
-    .def("__mul__",&mul<Vec,Vec,double,Vec,R>)
-    .def("__mul__",&mul<Vec,Vec,R,Vec,R>)
-    .def("__div__",&div<Vec,Vec,int,Vec,R>)
-    .def("__div__",&div<Vec,Vec,double,Vec,R>)
-    .def("__div__",&div<Vec,Vec,R,Vec,R>)
-    .def(self_ns::str(self))
-  ;
+  class_< Vector<R> > vector_class(python_name<R>("Vector").c_str(),no_init);
+  vector_class.def("__init__", make_constructor(&make_vector<R>) );
+  vector_class.def(init<int>());
+  //vector_class.def(init<std::string>());
+  vector_class.def(init<Vec>());
+  vector_class.def("__len__", &Vec::size);
+  vector_class.def("__getitem__",&vector_get_item<R>);
+  vector_class.def("__setitem__",&vector_set_item<R,R>);
+  vector_class.def("__setitem__",&vector_set_item<R,double>);
+  vector_class.def("__neg__",&neg<Vec,Vec>);
+  vector_class.def("__add__",&add<Vec,Vec,Vec>);
+  vector_class.def("__sub__",&sub<Vec,Vec,Vec>);
+  vector_class.def("__rmul__",&mul<Vec,Vec,int,Vec,R>);
+  vector_class.def("__rmul__",&mul<Vec,Vec,double,Vec,R>);
+  vector_class.def("__rmul__",&mul<Vec,Vec,R,Vec,R>);
+  vector_class.def("__mul__",&mul<Vec,Vec,int,Vec,R>);
+  vector_class.def("__mul__",&mul<Vec,Vec,double,Vec,R>);
+  vector_class.def("__mul__",&mul<Vec,Vec,R,Vec,R>);
+  vector_class.def("__mul__",&mul<Mx,Vec,Cvec>);
+  vector_class.def("__div__",&div<Vec,Vec,int,Vec,R>);
+  vector_class.def("__div__",&div<Vec,Vec,double,Vec,R>);
+  vector_class.def("__div__",&div<Vec,Vec,R,Vec,R>);
+  vector_class.def("__str__",&__str__<R>);
+  vector_class.def("__repr__",&__repr__<R>);
 
-  def("sup_norm",&sup_norm<Float>);
-  def("norm",&sup_norm<Float>);
+  def("sup_norm", (R(*)(const Vec&)) &sup_norm<R>);
+  def("norm", (R(*)(const Vec&)) &sup_norm<R>);
 }
 
 
@@ -170,38 +199,45 @@ void export_interval_vector() {
   typedef Interval<R> I;
   typedef Vector<R> Vec;
   typedef Vector< Interval<R> > IVec;
+  typedef Covector<R> Cvec;
+  typedef Covector< Interval<R> > ICvec;
+  typedef Matrix< Interval<R> > IMx;
   
-  class_<IVec>(python_name<R>("IntervalVector").c_str(),init<uint>())
-    .def(init<std::string>())
-    .def(init<Vec>())
-    .def(init<IVec>())
-    .def("__len__", &IVec::size)
-    .def("__getitem__",&vector_get_item<I>) 
-    .def("__setitem__",&vector_set_item<I,I>)
-    .def("__setitem__",&vector_set_item<I,R>)
-    .def("__setitem__",&vector_set_item<I,double>)
-    .def("__neg__",&neg<IVec,IVec>)
-    .def("__add__",&add<IVec,IVec,Vec>)
-    .def("__add__",&add<IVec,IVec,IVec>)
-    .def("__sub__",&sub<IVec,IVec,Vec>)
-    .def("__sub__",&sub<IVec,IVec,IVec>)
-    .def("__rmul__",&mul<IVec,IVec,int,IVec,R>)
-    .def("__rmul__",&mul<IVec,IVec,double,IVec,R>)
-    .def("__rmul__",&mul<IVec,IVec,R>)
-    .def("__rmul__",&mul<IVec,IVec,I>)
-    .def("__mul__",&mul<IVec,IVec,int,IVec,R>)
-    .def("__mul__",&mul<IVec,IVec,double,IVec,R>)
-    .def("__mul__",&mul<IVec,IVec,R>)
-    .def("__mul__",&mul<IVec,IVec,I>)
-    .def("__div__",&div<IVec,IVec,int,IVec,R>)
-    .def("__div__",&div<IVec,IVec,double,IVec,R>)
-    .def("__div__",&div<IVec,IVec,R>)
-    .def("__div__",&div<IVec,IVec,I>)
-    .def(self_ns::str(self))
-  ;
+  class_< Vector<I> > vector_class(python_name<R>("FuzzyVector").c_str(),no_init);
+  vector_class.def("__init__", make_constructor(&make_vector<I>) );
+  vector_class.def(init<int>());;
+  //vector_class.def(init<std::string>());;
+  vector_class.def(init<Vec>());
+  vector_class.def(init<IVec>());
+  vector_class.def("__len__", &IVec::size);
+  vector_class.def("__getitem__",&vector_get_item<I>) ;
+  vector_class.def("__setitem__",&vector_set_item<I,I>);
+  vector_class.def("__setitem__",&vector_set_item<I,R>);
+  vector_class.def("__setitem__",&vector_set_item<I,double>);
+  vector_class.def("__neg__",&neg<IVec,IVec>);
+  vector_class.def("__add__",&add<IVec,IVec,Vec>);
+  vector_class.def("__add__",&add<IVec,IVec,IVec>);
+  vector_class.def("__sub__",&sub<IVec,IVec,Vec>);
+  vector_class.def("__sub__",&sub<IVec,IVec,IVec>);
+  vector_class.def("__rmul__",&mul<IVec,IVec,int,IVec,R>);
+  vector_class.def("__rmul__",&mul<IVec,IVec,double,IVec,R>);
+  vector_class.def("__rmul__",&mul<IVec,IVec,R>);
+  vector_class.def("__rmul__",&mul<IVec,IVec,I>);
+  vector_class.def("__mul__",&mul<IVec,IVec,int,IVec,R>);
+  vector_class.def("__mul__",&mul<IVec,IVec,double,IVec,R>);
+  vector_class.def("__mul__",&mul<IVec,IVec,R>);
+  vector_class.def("__mul__",&mul<IVec,IVec,I>);
+  vector_class.def("__mul__",&mul<IMx,IVec,Cvec>);
+  vector_class.def("__mul__",&mul<IMx,IVec,ICvec>);
+  vector_class.def("__div__",&div<IVec,IVec,int,IVec,R>);
+  vector_class.def("__div__",&div<IVec,IVec,double,IVec,R>);
+  vector_class.def("__div__",&div<IVec,IVec,R>);
+  vector_class.def("__div__",&div<IVec,IVec,I>);
+  vector_class.def("__str__",&__str__<I>);
+  vector_class.def("__repr__",&__repr__<I>);
   
-  def("sup_norm",&sup_norm<Float>);
-  def("norm",&sup_norm<Float>);
+  def("sup_norm", (I(*)(const IVec&)) &sup_norm<I>);
+  def("norm", (I(*)(const IVec&)) &sup_norm<I>);
 
   def("midpoint",(Vec(*)(const IVec&))&midpoint);
   def("encloses",(bool(*)(const IVec&,const Vec&))&encloses);

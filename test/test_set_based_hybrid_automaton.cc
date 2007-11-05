@@ -49,7 +49,7 @@ using namespace std;
 template<class R> int test_set_based_hybrid_automaton();
   
 int main() {
-  return test_set_based_hybrid_automaton<Float>();
+  return test_set_based_hybrid_automaton<Flt>();
 }
 
 template<class R>
@@ -73,13 +73,13 @@ int test_set_based_hybrid_automaton()
   cout << endl;
   
   SetBasedHybridAutomaton<R> automaton("Set-based affine test automaton");
-  id_type mode1_id=0;
-  id_type mode2_id=1;
-  const SetBasedDiscreteMode<R>& mode1=automaton.new_mode(mode1_id,dynamic,invariant);
-  const SetBasedDiscreteMode<R>& mode2=automaton.new_mode(mode2_id,dynamic,invariant);
-  id_type event_id=5;
-  const SetBasedDiscreteTransition<R>& transition12=automaton.new_transition(event_id,mode1_id,mode2_id,reset,activation12);
-  const SetBasedDiscreteTransition<R>& transition21=automaton.new_transition(event_id,mode2_id,mode1_id,reset,activation21);
+  DiscreteState dstate1(0);
+  DiscreteState dstate2(1);
+  const SetBasedDiscreteMode<R>& mode1=automaton.new_mode(dstate1,dynamic,invariant);
+  const SetBasedDiscreteMode<R>& mode2=automaton.new_mode(dstate2,dynamic,invariant);
+  DiscreteEvent event(5);
+  const SetBasedDiscreteTransition<R>& transition12=automaton.new_transition(event,dstate1,dstate2,reset,activation12);
+  const SetBasedDiscreteTransition<R>& transition21=automaton.new_transition(event,dstate2,dstate1,reset,activation21);
   
   cout << mode1  <<  "\n" << mode2 << "\n" << transition12 << "\n" << transition21 << endl;
 

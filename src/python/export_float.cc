@@ -71,6 +71,36 @@ template<> uint default_precision<FloatMP>() {
 
 #endif
 
+template<class R> 
+std::string
+__str__(const R& x) {
+  std::stringstream ss;
+  if(x==floor(x)) {
+    ss << x << ".";
+  } else {
+    //ss << std::fixed;
+    ss << std::setprecision(20);
+    ss << x;
+  }
+  return ss.str();
+}
+
+template<class R> 
+std::string
+__repr__(const R& x) {
+  std::stringstream ss;
+  ss << "Float(";
+  if(x==floor(x)) {
+    ss << x;
+  } else {
+    //ss << std::fixed;
+    ss << std::setprecision(20);
+    ss << x;
+  }
+  ss << ")";
+  return ss.str();
+}
+
 template<class R>
 void 
 export_float() 
@@ -81,8 +111,10 @@ export_float()
   def("set_output_precision",(void(*)(uint))&set_output_precision);
 
   class_<Float>("Float")
+    //.def("__init__", make_constructor(&make_float<R>) )
     .def(init<int>())
     .def(init<double>())
+    .def(init<std::string>())
     .def(init<Float>())
     .def("__neg__", &neg<Float,Float>)
     .def("__add__", &add<IFloat,Float,int,Float,Float>)
@@ -106,7 +138,7 @@ export_float()
     .def("__rdiv__", &rdiv<IFloat,Float,int,Float,Float>)
     .def("__rdiv__", &rdiv<IFloat,Float,double,Float,Float>)
     .def("__pow__", &pow<IFloat,Float,int,IFloat,int>)
-    .def("__pow__", &pow<IFloat,Float,Integer,IFloat,Integer>)
+    //.def("__pow__", &pow<IFloat,Float,Integer,IFloat,Integer>)
     .def("__eq__", &eq<bool,Float,double>)
     .def("__eq__", &eq<bool,Float,Float>)
     .def("__ne__", &ne<bool,Float,double>)
@@ -119,9 +151,14 @@ export_float()
     .def("__le__", &le<bool,Float,Float>)
     .def("__ge__", &ge<bool,Float,double>)
     .def("__ge__", &ge<bool,Float,Float>)
-    .def(self_ns::str(self))
+    //.def(self_ns::str(self))
+    .def("__str__", &__str__<Float>)
+    .def("__repr__", &__repr__<Float>)
   ;
   
+  def("floor",&Python::floor<R,R>);
+  def("ceil",&Python::ceil<R,R>);
+
   def("max",&Python::max<R,R,R>);
   def("min",&Python::min<R,R,R>);
   def("abs",&Python::abs<R,R>);

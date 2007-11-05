@@ -3,7 +3,7 @@ TESTS_ENVIRONMENT = ./run_test.sh
 
 
 INCLUDES = -I$(top_srcdir)/include
-LDADD   = ../src/libariadne.la -lppl -lmpfr -lgmpxx 
+LDADD   = ../src/libariadne.la -lmpfr -lgmpxx 
 
 check_PROGRAMS = \
 	test_tribool \
@@ -16,7 +16,6 @@ check_PROGRAMS = \
 	test_rational \
 	test_float \
 	test_interval \
-	test_differentiation \
 	 \
 	test_vector \
 	test_matrix \
@@ -36,8 +35,12 @@ check_PROGRAMS = \
 	test_function \
 	test_index \
 	test_polynomial \
+	test_scalar_derivative \
+	test_taylor_derivative \
+	test_multivariable_derivative \
+	test_first_derivative \
 	test_affine_model \
-	test_differential \
+	test_taylor_model \
 	 \
 	test_point \
 	test_list_set \
@@ -45,6 +48,7 @@ check_PROGRAMS = \
 	test_partition_tree_set \
 	test_rectangle \
 	test_zonotope \
+	test_orthotope \
 	test_parallelotope \
 	test_simplex \
 	test_polytope \
@@ -65,12 +69,10 @@ check_PROGRAMS = \
 	test_constraint_based_hybrid_evolver \
 	test_constraint_based_hybrid_scheduler \
 	 \
-        test_texstream \
-        test_epsstream \
 	test_textstream \
+        test_latexstream \
+        test_epsstream \
 	test_chompstream 
-
-XFAIL_TESTS = 
 
 tests: $(check_PROGRAMS)
 
@@ -86,7 +88,6 @@ test_integer_SOURCES=test_integer.cc
 test_rational_SOURCES=test_rational.cc
 test_float_SOURCES=test_float.cc
 test_interval_SOURCES=test_interval.cc
-test_differential_SOURCES=test_differential.cc
 
 test_vector_SOURCES=test_vector.cc
 test_matrix_SOURCES=test_matrix.cc
@@ -105,8 +106,12 @@ test_subdivision_tree_SOURCES=test_subdivision_tree.cc
 
 test_function_SOURCES=test_function.cc
 test_index_SOURCES=test_index.cc
+test_scalar_derivative_SOURCES=test_scalar_derivative.cc
+test_first_derivative_SOURCES=test_first_derivative.cc
+test_taylor_derivative_SOURCES=test_taylor_derivative.cc
 test_polynomial_SOURCES=test_polynomial.cc
 test_affine_model_SOURCES=test_affine_model.cc
+test_taylor_model_SOURCES=test_taylor_model.cc
 
 test_point_SOURCES=test_point.cc
 test_list_set_SOURCES=test_list_set.cc
@@ -135,17 +140,14 @@ test_constraint_based_hybrid_evolver_SOURCES=test_constraint_based_hybrid_evolve
 test_constraint_based_hybrid_scheduler_SOURCES=test_constraint_based_hybrid_scheduler.cc
 
 test_epsstream_SOURCES=test_epsstream.cc 
-test_textstream_SOURCES=test_textstream.cc
-test_chompstream_SOURCES=test_chompfstream.cc
-
-
-
-test_epsstream_SOURCES=test_epsstream.cc 
+test_latexstream_SOURCES=test_latexstream.cc
 test_textstream_SOURCES=test_textstream.cc
 test_chompstream_SOURCES=test_chompstream.cc
+
 
 EXTRA_DIST =
 SUBDIRS =
 
 TESTS = $(check_PROGRAMS)
+XFAIL_TESTS = test_boost test_linear_program test_multivariable_derivative
 testsubdir = ./

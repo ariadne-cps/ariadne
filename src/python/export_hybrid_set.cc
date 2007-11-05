@@ -25,12 +25,16 @@
 
 #include "python/python_float.h"
 
+#include "base/types.h"
+#include "geometry/discrete_state.h"
 #include "geometry/hybrid_set.h"
 #include "geometry/set_reference.h"
+#include "system/discrete_event.h"
 
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
 using namespace Ariadne::Geometry;
+using namespace Ariadne::System;
 using namespace Ariadne::Python;
 
 #include <boost/python.hpp>
@@ -40,25 +44,25 @@ return_value_policy<copy_const_reference> return_copy_const_reference;
 return_value_policy<manage_new_object> return_manage_new_object;
 
 template<class HS, class T> 
-inline void hybrid_set_new_location(HS& s, location_type q, const T& t) {
+inline void hybrid_set_new_location(HS& s, DiscreteState q, const T& t) {
   s.new_location(q,t);
 }
 
 
 template<class HS, class A> 
-inline void hybrid_set_set_item(HS& hs, location_type id, const A& x) {
+inline void hybrid_set_set_item(HS& hs, DiscreteState id, const A& x) {
   hs[id]=x;
 }
 
 template<class R> inline 
-SetInterface<R>& hybrid_set_get_reference(HybridSet<R>& hs, location_type id) {
+SetInterface<R>& hybrid_set_get_reference(HybridSet<R>& hs, DiscreteState id) {
   //return static_cast<SetInterface<R>&>(hs[id]);
   SetReference<R> hsref=hs[id];
   return static_cast<SetInterface<R>&>(hsref);
 }
 
 template<class R> inline 
-SetInterface<R>* hybrid_set_get_pointer(HybridSet<R>& hs, location_type id) {
+SetInterface<R>* hybrid_set_get_pointer(HybridSet<R>& hs, DiscreteState id) {
   std::cerr << "id="<<id<<std::endl;
   std::cerr << "hs="<<hs<<std::endl;
   SetInterface<R>& hsref=hs[id];
@@ -67,17 +71,17 @@ SetInterface<R>* hybrid_set_get_pointer(HybridSet<R>& hs, location_type id) {
 }
 
 template<class R> inline 
-SetInterface<R>* hybrid_set_get_cloned_pointer(HybridSet<R>& hs, location_type id) {
+SetInterface<R>* hybrid_set_get_cloned_pointer(HybridSet<R>& hs, DiscreteState id) {
   return hs[id].clone();
 }
 
 template<class HS> inline 
-const typename HS::continuous_state_set_type& hybrid_set_get_item(HS& hs, location_type id) {
+const typename HS::continuous_state_set_type& hybrid_set_get_item(HS& hs, DiscreteState id) {
   return hs[id];
 }
 
 template<class HS, class S> inline 
-void hybrid_set_adjoin_set(HS& hs, location_type id, const S& s) {
+void hybrid_set_adjoin_set(HS& hs, DiscreteState id, const S& s) {
   hs.adjoin(id,s);
 }
 
@@ -91,20 +95,28 @@ template<class R>
 void export_hybrid_set() 
 {
  
-  class_< std::map<location_type,dimension_type> >("DiscreteLocations",no_init)
+  class_< std::map<DiscreteState,dimension_type> >("DiscreteLocations",no_init)
     .def(self_ns::str(self))
   ;
 
 
-  class_<HybridLocation>("HybridLocation",init<id_type,dimension_type>())
+  class_<DiscreteState>("DiscreteState",init<id_type>())
+    .def(self_ns::str(self))
+  ;
+
+  class_<DiscreteEvent>("DiscreteEvent",init<id_type>())
+    .def(self_ns::str(self))
+  ;
+
+  class_<HybridLocation>("HybridLocation",init<DiscreteState,dimension_type>())
     .def("id",&HybridLocation::id)
     .def("dimension",&HybridLocation::dimension)
     .def(self_ns::str(self))
   ;
 
   class_<HybridSpace>("HybridSpace",init<>())
-    .def(init< std::map<location_type,dimension_type> >())
-    .def("new_location",(void(HybridSpace::*)(id_type,dimension_type))&HybridSpace::new_location)
+    .def(init< std::map<DiscreteState,dimension_type> >())
+    .def("new_location",(void(HybridSpace::*)(DiscreteState,dimension_type))&HybridSpace::new_location)
     .def("new_location",(void(HybridSpace::*)(const HybridLocation&))&HybridSpace::new_location)
     .def("__len__",&HybridSpace::number_of_locations)
     .def("__getitem__", &HybridSpace::operator[])
@@ -116,6 +128,7 @@ void export_hybrid_set()
   
   class_< HybridSet<R> >("HybridSet",init<>())
     .def("__len__",&HybridSet<R>::number_of_locations)
+    .def("new_location",&hybrid_set_new_location< HybridSet<R>, dimension_type >)
     .def("new_location",&hybrid_set_new_location< HybridSet<R>, Rectangle<R> >)
     .def("new_location",&hybrid_set_new_location< HybridSet<R>, Polyhedron<R> >)
     .def("new_location",&hybrid_set_new_location< HybridSet<R>, SetInterface<R> >)

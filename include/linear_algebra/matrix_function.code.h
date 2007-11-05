@@ -27,43 +27,43 @@
 #include "../linear_algebra/matrix.h"
 
 namespace Ariadne {
-  namespace LinearAlgebra {
-
-    template<class R>
-    Matrix< Numeric::Interval<R> >
-    exp(const Matrix< R >& A) 
-    {
-      return exp(Matrix< Numeric::Interval<R> >(A));
-    }
 
 
-    template<class R>
-    Matrix< Numeric::Interval<R> >
-    exp(const Matrix< Numeric::Interval<R> >& A) 
-    {
-      using Numeric::Interval;
-      
-      ARIADNE_CHECK_SQUARE(A,__PRETTY_FUNCTION__);
-      R err=div_up(norm(A).upper(),R(65536));
-      if(err==0) {
-        err=div_up(norm(A).upper(),R(65536));
-        err=div_up(err,R(65536));
-        err=div_up(err,R(65536));
-      }
-            
-      Matrix< Interval<R> > result=Matrix< Interval<R> >::identity(A.number_of_rows())+A;
-      Matrix< Interval<R> > term=A;
-      unsigned int n=1;
-      while(norm(term).upper()>err) {
-        n=n+1;
-        term=(term*A)/Interval<R>(R(n));
-        result+=term;
-      }
-      term=Interval<R>(-1,1)*term;
-      result+=term;
-      
-      return result;
-    }
-   
-  }
+template<class R>
+LinearAlgebra::Matrix< Numeric::Interval<R> >
+LinearAlgebra::exp(const Matrix< R >& A) 
+{
+  return exp(Matrix< Numeric::Interval<R> >(A));
 }
+
+
+template<class R>
+LinearAlgebra::Matrix< Numeric::Interval<R> >
+LinearAlgebra::exp(const Matrix< Numeric::Interval<R> >& A) 
+{
+  using Numeric::Interval;
+  
+  ARIADNE_CHECK_SQUARE(A,__PRETTY_FUNCTION__);
+  R err=div_up(norm(A).upper(),R(65536));
+  if(err==0) {
+    err=div_up(norm(A).upper(),R(65536));
+    err=div_up(err,R(65536));
+    err=div_up(err,R(65536));
+  }
+  
+  Matrix< Interval<R> > result=Matrix< Interval<R> >::identity(A.number_of_rows())+A;
+  Matrix< Interval<R> > term=A;
+  unsigned int n=1;
+  while(norm(term).upper()>err) {
+    n=n+1;
+    term=(term*A)/Interval<R>(R(n));
+    result+=term;
+  }
+  term=Interval<R>(-1,1)*term;
+  result+=term;
+  
+  return result;
+}
+
+
+} // namespace Ariadne

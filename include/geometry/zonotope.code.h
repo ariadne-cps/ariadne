@@ -48,11 +48,6 @@
 
 #include "../output/logging.h"
 
-#include "../linear_algebra/vector.code.h"
-#include "../linear_algebra/matrix.code.h"
-#include "../linear_programming/linear_program.code.h"
-#include "../geometry/point.code.h"
-#include "../geometry/rectangle.code.h"
 
 
 namespace {
@@ -241,15 +236,17 @@ convert(Polytope< Interval<R> >& p, const Zonotope<RC,RG>& z)
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
-}
+template<class R> int instantiate_zonotope();
+template<> int instantiate_zonotope<Numeric::Rational>();
+
+} // namespace 
+
+
+
 
 
 
 namespace Ariadne {
-namespace Geometry {
-template<class R> int instantiate_zonotope();
-template<> int instantiate_zonotope<Rational>();
-}
 
 extern int Geometry::verbosity;
 
@@ -645,7 +642,40 @@ Geometry::approximation(const Zonotope<R,R>& z)
   return z; 
 }
 
+
 /*
+template<class R> 
+Geometry::Zonotope<Numeric::Interval<R>,R> 
+Geometry::orthogonal_over_approximation(const Zonotope<R,R>& z)
+{
+  // FIXME: Subdivide in zero order as well!
+  static bool warn=true;
+  if(warn) {
+    std::cerr << std::endl << "WARNING: orthogonal_over_approximation(Zonotope<I,R>) does not over-approximate roundoff errors." << std::endl;
+    warn=false;
+  }
+  Zonotope<R,R> oaz=over_approximation(z);
+  
+  QRMatrix< Interval<R> > QR(oaz.generators());
+  Point< Interval<R> > c(oaz.centre());
+  Matrix<R> G(z.dimension(),z.number_of_generators());
+
+  Matrix< Interval<R> > q=QR.Q();
+  Matrix< Interval<R> > r=QR.R();
+  for(uint i=0; i!=z.dimension();++i) {
+    Interval<R> a=0;
+    for(uint j=i; j!=z.number_of_generators(); ++j) {
+      a+=r(i,j);
+    }
+    for(uint k=0; k!=z.dimension(); ++k) {
+      Interval<R> b=q(k,i)*a;
+      G(k,i)=b.midpoint();
+      c[k]+=(b-b.midpoint());
+    }
+  }
+  return Zonotope<R,R>(midpoint(c),G);
+}
+
 template<class R> 
 Geometry::Zonotope<Numeric::Interval<R>,R> 
 Geometry::orthogonal_over_approximation(const Zonotope<Numeric::Interval<R>,R>& z)
@@ -670,6 +700,32 @@ Geometry::orthogonal_over_approximation(const Zonotope<Numeric::Interval<R>,R>& 
     }
   }
   return Zonotope<Interval<R>,R>(c,G);
+}
+
+template<class R> 
+Geometry::Zonotope< Numeric::Interval<R> > 
+Geometry::orthogonal_over_approximation(const Zonotope< Numeric::Interval<R> >& z)
+{
+  Zonotope<R,R> oaz=over_approximation(z);
+  
+  QRMatrix< Interval<R> > QR(oaz.generators());
+  Point< Interval<R> > c(oaz.centre());
+  Matrix<R> G(z.dimension(),z.number_of_generators());
+
+  Matrix< Interval<R> > q=QR.Q();
+  Matrix< Interval<R> > r=QR.R();
+  for(uint i=0; i!=z.dimension();++i) {
+    Interval<R> a=0;
+    for(uint j=i; j!=z.number_of_generators(); ++j) {
+      a+=r(i,j);
+    }
+    for(uint k=0; k!=z.dimension(); ++k) {
+      Interval<R> b=q(k,i)*a;
+      G(k,i)=b.midpoint();
+      c[k]+=(b-b.midpoint());
+    }
+  }
+  return Zonotope< Interval<R> >(c,G);
 }
 */
 
@@ -750,93 +806,6 @@ Geometry::Zonotope<RC,RG>::_instantiate_geometry_operators()
 }
 
 
-template<class R> inline
-int
-Geometry::instantiate_zonotope()
-{
-  typedef Numeric::Interval<R> I;
-  tribool tb;
-  Point<R> pt;
-  Rectangle<R> r;
-  Zonotope<R,R> z;
-  Zonotope<I,R> ez;
-  Zonotope<I,I> iz;
-  tb=Geometry::contains(z,pt);
-  tb=Geometry::contains(ez,pt);
-  tb=Geometry::contains(iz,pt); // Needed for ListSet; throws NotImplemented
-  tb=Geometry::disjoint(r,z);
-  tb=Geometry::disjoint(z,r);
-  tb=Geometry::disjoint(r,ez);
-  tb=Geometry::disjoint(ez,r);
-  tb=Geometry::disjoint(r,iz);
-  tb=Geometry::disjoint(iz,r);
-  tb=Geometry::disjoint(z,z);
-  tb=Geometry::disjoint(ez,ez);
-  tb=Geometry::disjoint(iz,iz);
-  tb=Geometry::subset(r,z);
-  tb=Geometry::subset(r,ez);
-  tb=Geometry::subset(r,iz); // Needed for ListSet; throws NotImplemented
-  tb=Geometry::subset(z,r);
-  tb=Geometry::subset(ez,r);
-  tb=Geometry::subset(iz,r);
-  tb=Geometry::subset(z,z);
-  tb=Geometry::subset(ez,ez);
-  tb=Geometry::subset(iz,iz);
-  Geometry::minkowski_sum(z,z);
-  Geometry::minkowski_difference(z,z);
-  Geometry::minkowski_sum(ez,ez);
-  Geometry::minkowski_difference(ez,ez);
-  Geometry::minkowski_sum(iz,iz);
-  Geometry::minkowski_difference(iz,iz);
-  
-  Geometry::subdivide(z);
-  Geometry::subdivide(ez);
-  Geometry::subdivide(iz);
-  Geometry::divide(z);
-  Geometry::divide(ez);
-  Geometry::divide(iz);
-  
-  Geometry::over_approximation(iz);
-  Geometry::over_approximation(ez);
-  Geometry::over_approximation(z);
-  Geometry::approximation(iz);
-  Geometry::approximation(ez);
-  Geometry::approximation(z);
-
-  return 0;
-}
-
-template<> inline
-int
-Geometry::instantiate_zonotope<Rational>()
-{
-  typedef Rational R;
-  tribool* tb=0;
-  Point<R>* pt=0;
-  Rectangle<R>* r=0;
-  Zonotope<R>* z=0;
-  ListSet< Zonotope<R> >* zls=0;
-  
-  *tb=Geometry::contains(*z,*pt);
-  *tb=Geometry::disjoint(*r,*z);
-  *tb=Geometry::disjoint(*z,*r);
-  *tb=Geometry::disjoint(*z,*z);
-  *tb=Geometry::subset(*r,*z);
-  *tb=Geometry::subset(*z,*r);
-  *tb=Geometry::subset(*z,*z);
-
-  *z=Geometry::minkowski_sum(*z,*z);
-  *z=Geometry::minkowski_difference(*z,*z);
-  
-  *zls=Geometry::subdivide(*z);
-  *zls=Geometry::divide(*z);
-  
-  *z=Geometry::approximation(*z);
-  *z=Geometry::over_approximation(*z);
- 
-  return 0;
-}
-
 
 
 }
@@ -885,7 +854,12 @@ void
 adjoin_subdivision(ListSet< Zonotope<Interval<R>,R> >& ls, const Zonotope<Interval<R>,R>& z) 
 {
   // FIXME: Subdivide in zero order as well!
-  std::cerr << "WARNING: Zonotope<I,R>::subdivision()  does not subdivide the constant terms." << std::endl;
+  static bool warn=true;
+  if(warn) {
+    std::cerr << std::endl << "WARNING: Zonotope<I,R>::subdivision()  does not subdivide the constant terms." << std::endl;
+    warn=false;
+  }
+
   typedef Numeric::Interval<R> I;
   
   R two=2;
@@ -924,7 +898,12 @@ void
 adjoin_subdivision(ListSet< Zonotope< Interval<R> > >& ls, const Zonotope< Interval<R>,Interval<R> >& z) 
 {
   // FIXME: Subdivide in zero order as well!
-  std::cerr << "WARNING: Zonotope<I,I>::subdivision()  does not subdivide the constant terms." << std::endl;
+  static bool warn=true;
+  if(warn) {
+    std::cerr << std::endl << "WARNING: Zonotope<I,I>::subdivision()  does not subdivide the constant terms." << std::endl;
+    warn=false;
+  }
+
   typedef Numeric::Interval<R> I;
   
   dimension_type d=z.dimension();
@@ -1461,6 +1440,98 @@ contains_exact(const Zonotope<Rational,Rational>& z, const Point<Rational>& pt)
   tribool result=lp.is_feasible();
   //std::clog << lp.tableau() << std::endl;
   return result;
+}
+
+template<class R> inline
+int
+instantiate_zonotope()
+{
+  typedef Numeric::Interval<R> I;
+  tribool tb;
+  Geometry::Point<R> pt;
+  Geometry::Rectangle<R> r;
+  Geometry::Zonotope<R,R> z;
+  Geometry::Zonotope<I,R> ez;
+  Geometry::Zonotope<I,I> iz;
+  tb=Geometry::contains(z,pt);
+  tb=Geometry::contains(ez,pt);
+  tb=Geometry::contains(iz,pt); // Needed for ListSet; throws NotImplemented
+  tb=Geometry::disjoint(r,z);
+  tb=Geometry::disjoint(z,r);
+  tb=Geometry::disjoint(r,ez);
+  tb=Geometry::disjoint(ez,r);
+  tb=Geometry::disjoint(r,iz);
+  tb=Geometry::disjoint(iz,r);
+  tb=Geometry::disjoint(z,z);
+  tb=Geometry::disjoint(ez,ez);
+  tb=Geometry::disjoint(iz,iz);
+  tb=Geometry::subset(r,z);
+  tb=Geometry::subset(r,ez);
+  tb=Geometry::subset(r,iz); // Needed for ListSet; throws NotImplemented
+  tb=Geometry::subset(z,r);
+  tb=Geometry::subset(ez,r);
+  tb=Geometry::subset(iz,r);
+  tb=Geometry::subset(z,z);
+  tb=Geometry::subset(ez,ez);
+  tb=Geometry::subset(iz,iz);
+  Geometry::minkowski_sum(z,z);
+  Geometry::minkowski_difference(z,z);
+  Geometry::minkowski_sum(ez,ez);
+  Geometry::minkowski_difference(ez,ez);
+  Geometry::minkowski_sum(iz,iz);
+  Geometry::minkowski_difference(iz,iz);
+  
+  Geometry::subdivide(z);
+  Geometry::subdivide(ez);
+  Geometry::subdivide(iz);
+  Geometry::divide(z);
+  Geometry::divide(ez);
+  Geometry::divide(iz);
+  
+  // The following return Parallelotope<R>
+  Geometry::orthogonal_over_approximation(iz);
+  Geometry::orthogonal_over_approximation(ez);
+  Geometry::orthogonal_over_approximation(z);
+
+  Geometry::over_approximation(iz);
+  Geometry::over_approximation(ez);
+  Geometry::over_approximation(z);
+  Geometry::approximation(iz);
+  Geometry::approximation(ez);
+  Geometry::approximation(z);
+
+  return 0;
+}
+
+template<> inline
+int
+instantiate_zonotope<Rational>()
+{
+  typedef Rational R;
+  tribool* tb=0;
+  Geometry::Point<R>* pt=0;
+  Geometry::Rectangle<R>* r=0;
+  Geometry::Zonotope<R>* z=0;
+  Geometry::ListSet< Zonotope<R> >* zls=0;
+  
+  *tb=Geometry::contains(*z,*pt);
+  *tb=Geometry::disjoint(*r,*z);
+  *tb=Geometry::disjoint(*z,*r);
+  *tb=Geometry::disjoint(*z,*z);
+  *tb=Geometry::subset(*r,*z);
+  *tb=Geometry::subset(*z,*r);
+  *tb=Geometry::subset(*z,*z);
+
+  *z=Geometry::minkowski_sum(*z,*z);
+  *z=Geometry::minkowski_difference(*z,*z);
+  
+  *zls=Geometry::subdivide(*z);
+  *zls=Geometry::divide(*z);
+  
+  *z=Geometry::approximation(*z);
+  *z=Geometry::over_approximation(*z);
+ 
+  return 0;
 }
 
 }

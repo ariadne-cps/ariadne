@@ -30,13 +30,17 @@
 
 namespace Ariadne { 
   namespace Function {
+    class MultiIndex;
+    class SortedIndex;
+    class PositionIndex;
+
     template<class R> class FunctionInterface;
     template<class R> class InterpretedFunction;
      
     template<class R> class Polynomial;
 
     template<class R> class AffineModel;
-    template<class R> class PolynomialModel;
+    template<class R> class TaylorModel;
 
   }
 }

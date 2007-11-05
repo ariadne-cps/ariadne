@@ -27,6 +27,7 @@
 #include <string>
 
 #include "output/logging.h"
+#include "test/test.h"
 #include "test/test_float.h"
 #include "numeric/rational.h"
 #include "linear_algebra/vector.h"
@@ -41,58 +42,86 @@ using namespace Ariadne::Output;
 using namespace std;
 
 template<class R>
-void test_linear_program();
+class TestLinearProgram 
+{
+  Matrix<R> A;
+  Vector<R> b;
+  Vector<R> c;
+ public:
+  TestLinearProgram() 
+    : A("[2, 1; 1, 4; 5, 6]"),
+      b("[30, 64, 110]"),
+      c("[10,10]")
+  { }
+  
+  void test_tableau() const {
+    Matrix<R> T1("[1,0,-1,0,1; 0,1,0,-1,1; 1,1,0,0,3; -1,-1,1,1,-2]");
+    Matrix<R> T2("[1,0,-1,0,1; 0,1,0,-1,1; 1,1,0,0,3/2; -1,-1,1,1,-2]");
+    LinearProgram<R> LP;
+    
+    LP=LinearProgram<R>(T1);
+    cout << LP << endl;
+    cout << "feasible = " << LP.is_feasible() << endl;
+    cout << LP << endl;
+    cout << "feasible_point = " << LP.feasible_point() << endl;
+    cout << "optimal_value = " << LP.optimal_value() <<endl;
+    
+    LP=LinearProgram<R>(T2);
+    cout << LP << endl;
+    cout << "feasible = " << LP.is_feasible() << endl;
+    cout << LP << endl;
+  }
 
-template<class R>
-void test_optimal_value();
+  void
+  test_feasibility() {
+    cout << feasible(A,b);
+  }
 
+  void
+  test_dual_feasibility() {
+    cout << feasible(A,b);
+  }
+
+  void
+  test_solve() {
+    Matrix<R> A("[2, 1; 1, 4; 5, 6]");
+    Vector<R> b("[30, 64, 110]");
+    Vector<R> c1("[10, 10]");
+    Vector<R> c2("[10, 20]");
+    LinearProgram<R> LP;
+    cout << A << endl;
+    cout << b << endl;
+    cout << c1 << endl;
+    cout << c2 << endl;
+    
+    cout << feasible(A,b);
+    cout << solve(A,b,c1);
+    
+    LP=LinearProgram<R>(A, b, c1);
+    cout << LP << endl;
+    cout << LP.is_feasible() << endl;
+    cout << LP.feasible_point() << endl;
+    cout << LP.optimal_value() << endl;
+    cout << LP << endl;
+    
+    cout << solve(A,b,c1);
+  } 
+  
+  void test() {
+    ARIADNE_CALL(test_feasibility());
+    ARIADNE_CALL(test_dual_feasibility());
+    ARIADNE_CALL(test_solve());
+    ARIADNE_CALL(test_tableau());
+  }
+
+};
 
 int main() {
   set_linear_algebra_verbosity(0);
   
-  test_linear_program<Rational>();
-  test_optimal_value<Rational>();
+  TestLinearProgram<Rational>().test();
   cerr << "INCOMPLETE ";
   return 0;
 }
 
-template<class R>
-void
-test_linear_program() {
-  Matrix<R> T1("[1,0,-1,0,1; 0,1,0,-1,1; 1,1,0,0,3; -1,-1,1,1,-2]");
-  Matrix<R> T2("[1,0,-1,0,1; 0,1,0,-1,1; 1,1,0,0,3/2; -1,-1,1,1,-2]");
-  LinearProgram<R> LP;
-  
-  LP=LinearProgram<R>(T1);
-  cout << LP << endl;
-  cout << "feasible = " << LP.is_feasible() << endl;
-  cout << LP << endl;
-  cout << "feasible_point = " << LP.feasible_point() << endl;
-  cout << "optimal_value = " << LP.optimal_value() <<endl;
-  
-  LP=LinearProgram<R>(T2);
-  cout << LP << endl;
-  cout << "feasible = " << LP.is_feasible() << endl;
-  cout << LP << endl;
-}
 
-template<class R>
-void
-test_optimal_value() {
-  Matrix<R> A("[2, 1; 1, 4; 5, 6]");
-  Vector<R> b("[30, 64, 110]");
-  Vector<R> c1("[10, 10]");
-  Vector<R> c2("[10, 20]");
-  LinearProgram<R> LP;
-  cout << A << endl;
-  cout << b << endl;
-  cout << c1 << endl;
-  cout << c2 << endl;
-  
-  LP=LinearProgram<R>(A, b, c1);
-  cout << LP << endl;
-  cout << LP.is_feasible() << endl;
-  cout << LP.feasible_point() << endl;
-  cout << LP.optimal_value() << endl;
-  cout << LP << endl;
-}

@@ -49,29 +49,22 @@ using namespace Ariadne::Python;
 #include <boost/python.hpp>
 using namespace boost::python;
 
-template<class R>
+template<class BS>
 class IntegratorWrapper
-  : public IntegratorInterface<R>,
-    public wrapper< IntegratorInterface<R> >
+  : public IntegratorInterface<BS>,
+    public wrapper< IntegratorInterface<BS> >
 {
+  typedef typename BS::real_type R;
   typedef Interval<R> I;
  public:
   IntegratorWrapper() { }
-  IntegratorWrapper<R>* clone() const { return this->get_override("clone")(); }
-  Point<I> flow_step(const VectorFieldInterface<R>&, const Point<I>&, const I&, const Rectangle<R>&) const {
-    return this->get_override("flow_step")(); }
-  Rectangle<R> integration_step(const VectorFieldInterface<R>&, const Rectangle<R>&, const I&, const Rectangle<R>&) const {
+  IntegratorWrapper<BS>* clone() const { return this->get_override("clone")(); }
+  BS integration_step(const VectorFieldInterface<R>&, const BS&, const I&, const Rectangle<R>&) const {
     return this->get_override("integration_step")(); }
-  Rectangle<R> reachability_step(const VectorFieldInterface<R>&, const Rectangle<R>&, const I&, const Rectangle<R>&) const {
+  BS reachability_step(const VectorFieldInterface<R>&, const BS&, const I&, const Rectangle<R>&) const {
     return this->get_override("reachability_step")(); }
-  Zonotope<I,R> integration_step(const VectorFieldInterface<R>&, const Zonotope<I,R>&, const I&, const Rectangle<R>&) const {
-    return this->get_override("integration_step")(); }
-  Zonotope<I,R> reachability_step(const VectorFieldInterface<R>&, const Zonotope<I,R>&, const I&, const Rectangle<R>&) const {
-    return this->get_override("reachability_step")(); }
-  Zonotope<I,I> integration_step(const VectorFieldInterface<R>&, const Zonotope<I,I>&, const I&, const Rectangle<R>&) const {
-    return this->get_override("integration_step")(); }
-  Zonotope<I,I> reachability_step(const VectorFieldInterface<R>&, const Zonotope<I,I>&, const I&, const Rectangle<R>&) const {
-    return this->get_override("reachability_step")(); }
+  std::ostream& write(std::ostream&) const {
+    return this->get_override("write")(); }
 };
 
 template<class R>
@@ -79,15 +72,19 @@ void export_integrator()
 {
   typedef Interval<R> I;
 
-  class_< IntegratorWrapper<R>, boost::noncopyable >("IntegratorInterface",init<>());
+  class_< IntegratorWrapper< Rectangle<R> >, boost::noncopyable >("RectangleIntegratorInterface",init<>());
+  class_< IntegratorWrapper< Zonotope<I,R> >, boost::noncopyable >("C0ZonotopeIntegratorInterface",init<>());
+  class_< IntegratorWrapper< Zonotope<I,I> >, boost::noncopyable >("C1ZonotopeIntegratorInterface",init<>());
 
-  class_< C1LohnerIntegrator<R>, bases<IntegratorInterface<R> > >("C1LohnerIntegrator",init<>());
+  class_< LohnerIntegrator<R>, bases<IntegratorInterface< Zonotope<I,R> > > >("C0LohnerIntegrator",init<>());
+  class_< C1LohnerIntegrator<R>, bases<IntegratorInterface< Zonotope<I,I> > > >("C1LohnerIntegrator",init<>());
 
-  class_< LohnerIntegrator<R>, bases<IntegratorInterface<R> > >("LohnerIntegrator",init<>());
 
-  class_< AffineIntegrator<R>, bases<IntegratorInterface<R> > >("AffineIntegrator",init<>());
+  //  class_< AffineIntegrator<R>, bases<IntegratorInterface< Zonotope<I,R> > > >("C0AffineIntegrator",init<>());
+  //  class_< AffineIntegrator<R>, bases<IntegratorInterface< Zonotope<I,I> > > >("C1AffineIntegrator",init<>());
+  class_< AffineIntegrator<R>, bases< IntegratorInterface< Zonotope<I,R> >, IntegratorInterface< Zonotope<I,I> > > >("AffineIntegrator",init<>());
 
-  class_< EulerIntegrator<R>, bases<IntegratorInterface<R> > >("EulerIntegrator",init<>());
+  class_< EulerIntegrator<R>, bases<IntegratorInterface< Rectangle<R> > > >("EulerIntegrator",init<>());
 }
 
 template void export_integrator<Float>();

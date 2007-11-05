@@ -40,6 +40,9 @@
 #include "../geometry/declarations.h"
 #include "../system/declarations.h"
 #include "../evaluation/declarations.h"
+
+#include "../geometry/discrete_state.h"
+#include "../system/discrete_event.h"
 #include "../evaluation/hybrid_time.h"
 
 namespace Ariadne {  
@@ -62,6 +65,7 @@ namespace Ariadne {
      public:
       typedef typename System::ConstraintBasedDiscreteMode<R> mode_type;
       typedef typename System::ConstraintBasedDiscreteTransition<R> transition_type;
+      typedef Geometry::DiscreteState discrete_state_type;
       typedef typename Geometry::Zonotope<Numeric::Interval<R> > continuous_basic_set_type;
       typedef Geometry::HybridBasicSet<continuous_basic_set_type> hybrid_basic_set_type;
       //typedef Geometry::HybridTimedBasicSet<continuous_basic_set_type> timed_set_type;
@@ -80,11 +84,14 @@ namespace Ariadne {
       /*! \brief Copy constructor. */
       ConstraintBasedHybridEvolver(const ConstraintBasedHybridEvolver<R>& evolver);
 
+      /*! \brief Construct from parameters using a default integrator. */
+      ConstraintBasedHybridEvolver(const EvolutionParameters<R>& parameters);
+
       /*! \brief Construct from an applicator and an integrator. (Deprecated) */
-      ConstraintBasedHybridEvolver(const EvolutionParameters<R>& parameters, const ApplicatorInterface<R>& applicator, const IntegratorInterface<R>& integrator);
+      ConstraintBasedHybridEvolver(const EvolutionParameters<R>& parameters, const ApplicatorInterface<BS>& applicator, const IntegratorInterface<BS>& integrator);
 
       /*! \brief Construct from an applicator, an integrator and a detector. */
-      ConstraintBasedHybridEvolver(const EvolutionParameters<R>& parameters, const ApplicatorInterface<R>& applicator, const IntegratorInterface<R>& integrator, const DetectorInterface<R>& detector);
+      ConstraintBasedHybridEvolver(const EvolutionParameters<R>& parameters, const ApplicatorInterface<BS>& applicator, const IntegratorInterface<BS>& integrator, const DetectorInterface<R>& detector);
 
       /*! \brief Virtual destructor. */
       virtual ~ConstraintBasedHybridEvolver();

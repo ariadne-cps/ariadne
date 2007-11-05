@@ -30,19 +30,24 @@
 
 namespace Ariadne { 
   namespace Evaluation {
-    template<class R> class Solver;
 
-    template<class R> class MapEvolver;
-    template<class R> class VectorFieldEvolver;
+    template<class R> class SolverInterface;
   
-    template<class R> class ApplicatorInterface;
     template<class R> class BounderInterface;
-    template<class R> class IntegratorInterface;
-    template<class R> class DifferentiableIntegratorInterface;
     template<class R> class DetectorInterface;
 
-    template<class R> class DiscreteTimeEvolver;
-    template<class R> class ContinuousTimeEvolver;
+    template<class BS> class ApproximatorInterface;
+    template<class BS> class ApplicatorInterface;
+    template<class BS> class IntegratorInterface;
+    template<class BS> class DifferentiableIntegratorInterface;
+    template<class BS> class MapOrbiterInterface;
+    template<class BS> class VectorFieldOrbiterInterface;
+
+    template<class R> class EvolutionParameters;
+
+    template<class R> class ModelChecker;
+    template<class R> class MapEvolver;
+    template<class R> class VectorFieldEvolver;
     template<class R> class SetBasedHybridEvolver;
     template<class R> class ConstraintBasedHybridEvolver;
 

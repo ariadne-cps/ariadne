@@ -26,12 +26,21 @@
 
 #include "numeric/rational.h"
 
-namespace Ariadne { namespace Numeric {
+namespace Ariadne { 
 
+std::ostream& 
+Numeric::operator<<(std::ostream& os, const Rational& q) 
+{
+  //std::cerr<<"ostream& operator<<(ostream& os, const Rational& q)"<<std::flush;
+  //std::cerr<<": q="<<std::flush;
+  //std::cerr<<q.get_base()<<std::endl;
+  os << q.get_base();
+  return os;
+}
 
 // FIXME: Allow decimal input without leading zero e.g.  ".25" or "-.25"
 std::istream& 
-operator>>(std::istream& is, Rational& q) 
+Numeric::operator>>(std::istream& is, Rational& q) 
 {
   mpz_class intz;
   char sep;
@@ -81,4 +90,4 @@ operator>>(std::istream& is, Rational& q)
   return is;
 }
 
-}}
+}

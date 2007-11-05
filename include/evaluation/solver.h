@@ -82,15 +82,15 @@ namespace Ariadne {
      * \brief %Base class for solving (nonlinear) equations. 
      */
     template<class R>
-    class Solver
+    class SolverInterface
     {
       typedef typename Numeric::traits<R>::interval_type I;
      public:
       /*! \brief Constructor. */
-      Solver(R max_error, uint max_steps);
+      SolverInterface(R max_error, uint max_steps);
       
       /*! \brief Virtual destructor. */
-      virtual ~Solver();
+      virtual ~SolverInterface();
         
       /*! \brief The maximum permissible error of the solution. */
       const R& maximum_error() const;

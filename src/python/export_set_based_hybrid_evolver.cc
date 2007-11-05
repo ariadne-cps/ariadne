@@ -26,6 +26,9 @@
 #include "geometry/zonotope.h"
 #include "geometry/hybrid_set.h"
 #include "system/set_based_hybrid_automaton.h"
+#include "evaluation/evolution_parameters.h"
+#include "evaluation/applicator_interface.h"
+#include "evaluation/integrator_interface.h"
 #include "evaluation/map_evolver.h"
 #include "evaluation/vector_field_evolver.h"
 #include "evaluation/set_based_hybrid_evolver.h"
@@ -43,17 +46,26 @@ using namespace boost::python;
 template<class R>
 void export_set_based_hybrid_evolver() 
 {
+
   typedef Numeric::Interval<R> I;
+  typedef typename Evaluation::VectorFieldEvolver<R>::basic_set_type BS;
 
-  class_< SetBasedHybridEvolver<R> >("SetBasedHybridEvolver",init<MapEvolver<R>&,VectorFieldEvolver<R>&>()) 
-    .def("discrete_step",(HybridSet<R>(SetBasedHybridEvolver<R>::*)(const SetBasedHybridAutomaton<R>&,const HybridSet<R>&))&SetBasedHybridEvolver<R>::discrete_step)
-    .def("continuous_chainreach",(HybridSet<R>(SetBasedHybridEvolver<R>::*)(const SetBasedHybridAutomaton<R>&,const HybridSet<R>&,const HybridSet<R>&))&SetBasedHybridEvolver<R>::continuous_chainreach)
-    .def("chainreach",(HybridSet<R>(SetBasedHybridEvolver<R>::*)(const SetBasedHybridAutomaton<R>&,const HybridSet<R>&,const HybridSet<R>&))&SetBasedHybridEvolver<R>::chainreach)
+  class_< SetBasedHybridEvolver<R> > evolver_class("SetBasedHybridEvolver",init< EvolutionParameters<R> >());
+  evolver_class.def(init<const EvolutionParameters<R>&,const ApplicatorInterface<BS>&,const IntegratorInterface<BS>&>());
+  evolver_class.def(init<const SetBasedHybridEvolver<R>&>());
+  evolver_class.def("discrete_step",
+                    (HybridSet<R>(SetBasedHybridEvolver<R>::*)(const SetBasedHybridAutomaton<R>&,const HybridSet<R>&))&SetBasedHybridEvolver<R>::discrete_step);
+  evolver_class.def("continuous_chainreach",
+                    (HybridSet<R>(SetBasedHybridEvolver<R>::*)(const SetBasedHybridAutomaton<R>&,const HybridSet<R>&))&SetBasedHybridEvolver<R>::continuous_chainreach);
+  evolver_class.def("chainreach",
+                    (HybridSet<R>(SetBasedHybridEvolver<R>::*)(const SetBasedHybridAutomaton<R>&,const HybridSet<R>&))&SetBasedHybridEvolver<R>::chainreach);
 
-    .def("discrete_step",(HybridGridMaskSet<R>(SetBasedHybridEvolver<R>::*)(const SetBasedHybridAutomaton<R>&,const HybridGridMaskSet<R>&))&SetBasedHybridEvolver<R>::discrete_step)
-    .def("continuous_chainreach",(HybridGridMaskSet<R>(SetBasedHybridEvolver<R>::*)(const SetBasedHybridAutomaton<R>&,const HybridGridMaskSet<R>&,const HybridGridMaskSet<R>&))&SetBasedHybridEvolver<R>::continuous_chainreach)
-    .def("chainreach",(HybridGridMaskSet<R>(SetBasedHybridEvolver<R>::*)(const SetBasedHybridAutomaton<R>&,const HybridGridMaskSet<R>&,const HybridGridMaskSet<R>&))&SetBasedHybridEvolver<R>::chainreach)
-  ;
+
+  evolver_class.def("continuous_chainreach",
+                    (HybridSet<R>(SetBasedHybridEvolver<R>::*)(const SetBasedHybridAutomaton<R>&,const HybridSet<R>&,const HybridSet<R>&))&SetBasedHybridEvolver<R>::continuous_chainreach);
+  evolver_class.def("chainreach",
+                    (HybridSet<R>(SetBasedHybridEvolver<R>::*)(const SetBasedHybridAutomaton<R>&,const HybridSet<R>&,const HybridSet<R>&))&SetBasedHybridEvolver<R>::chainreach);
+  
 }
 
 

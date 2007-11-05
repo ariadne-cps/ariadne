@@ -44,16 +44,16 @@ namespace Ariadne {
 
     {
      public:
-      HybridDenotableSetIterator(const std::map<location_type,DS>&, bool);
+      HybridDenotableSetIterator(const std::map<DiscreteState,DS>&, bool);
       bool equal(const HybridDenotableSetIterator<DS>&) const;
       HBS dereference() const;
       void increment();
       const id_type& discrete_state() const { return loc_iter->first; }
       const typename DS::basic_set_type& continuous_state_set() const { return *bs_iter; }
      private:
-      typename std::map< location_type,DS>::const_iterator loc_begin;
-      typename std::map< location_type,DS>::const_iterator loc_end;
-      typename std::map< location_type,DS>::const_iterator loc_iter;
+      typename std::map< DiscreteState,DS>::const_iterator loc_begin;
+      typename std::map< DiscreteState,DS>::const_iterator loc_end;
+      typename std::map< DiscreteState,DS>::const_iterator loc_iter;
       typename DS::const_iterator bs_iter;
     };
 
@@ -65,7 +65,7 @@ namespace Ariadne {
 namespace Ariadne {
 
 template<class DS, class HBS> inline
-Geometry::HybridDenotableSetIterator<DS,HBS>::HybridDenotableSetIterator(const std::map<location_type,DS>& map, bool end)
+Geometry::HybridDenotableSetIterator<DS,HBS>::HybridDenotableSetIterator(const std::map<DiscreteState,DS>& map, bool end)
   : loc_begin(map.begin()),
     loc_end(map.end()),
     loc_iter(end?loc_end:loc_begin),

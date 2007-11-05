@@ -43,7 +43,7 @@
 #include "../function/sorted_index.h"
 #include "../function/multi_index.h"
 
-#include "../output/texstream.h"
+#include "../output/latexstream.h"
 
 namespace Ariadne {
 
@@ -473,8 +473,26 @@ template<class R0,class R1>
 void
 Function::derivative(Polynomial<R0>& p0, const Polynomial<R1>& p1, const size_type& k)
 {
-  throw NotImplemented(__PRETTY_FUNCTION__);
+  if(p1.degree()==0) {
+    p0=Polynomial<R0>(p1.result_size(),p1.argument_size(),0u);
+    return;
+  }
+    
+  p0.resize(p1.result_size(),p1.argument_size(),p1.degree()-1);
+  
+  MultiIndex dj(p1.argument_size());
+
+  for(size_type i=0; i!=p0.result_size(); ++i) {
+    for(MultiIndex j(p1.argument_size()); j.degree()<=p1.degree(); ++j) {
+      if(j[k]!=0) {
+        dj=j;
+        dj.decrement_index(k);
+        p0.at(i,dj)+=static_cast<int>(j[k])*p1.get(i,j);
+      }
+    }
+  }
 }
+
 
 template<class R>
 LinearAlgebra::Matrix<typename Function::Polynomial<R>::F> 
@@ -505,6 +523,14 @@ Function::Polynomial<R>::write(std::ostream& os) const
 
 
 template<class R>
+std::istream&
+Function::Polynomial<R>::read(std::istream& is)  
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+
+template<class R>
 std::ostream&
 Function::operator<<(std::ostream& os, const Polynomial<R>& p)
 {
@@ -513,8 +539,16 @@ Function::operator<<(std::ostream& os, const Polynomial<R>& p)
 
 
 template<class R>
-Output::texstream&
-Output::operator<<(Output::texstream& texs, const Function::Polynomial<R>& p)
+std::istream&
+Function::operator>>(std::istream& is, Polynomial<R>& p)
+{
+  return p.read(is);
+}
+
+
+template<class R>
+Output::latexstream&
+Output::operator<<(Output::latexstream& texs, const Function::Polynomial<R>& p)
 {
   using namespace Function;
   texs << "%Polynomial\n";
@@ -559,7 +593,8 @@ Function::Polynomial<R>::instantiate()
   R* x=0;
   Polynomial<R>* p=0;
   std::ostream* os = 0;
-  Output::texstream* texs = 0;
+  std::istream* is = 0;
+  Output::latexstream* texs = 0;
 
   Function::operator+(*p,*p);
   Function::operator-(*p,*p);
@@ -571,6 +606,7 @@ Function::Polynomial<R>::instantiate()
   Function::compose(*p,*p);
   Function::derivative(*p,*k);
   *os << *p;
+  *is >> *p;
   *texs << *p;
 }
 

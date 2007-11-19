@@ -37,6 +37,12 @@ const char * tribool_c_str(tribool tb) {
   else { return "Indeterminate"; }
 }
 
+const char * tribool_c_repr(tribool tb) {
+  if(tb==true) { return "tribool(True)"; }
+  else if(tb==false) { return "tribool(False)"; }
+  else { return "tribool(Indeterminate)"; }
+}
+
 tribool tribool_not(tribool tb) {
   return !tb;
 }
@@ -45,7 +51,7 @@ bool tribool_nonzero(tribool tb) {
   return tb==true;
 }
 
-tribool Indeterminate() { return indeterminate; }
+tribool tribool_indeterminate() { return indeterminate; }
 
 void export_tribool() {
 
@@ -64,9 +70,12 @@ void export_tribool() {
     .def("__not__", (tribool(*)(tribool))(&boost::logic::operator!))
     .def("__nonzero__", &tribool_nonzero)
     .def("__str__", &tribool_c_str)
-    //    .def(self_ns::str(self))
+    .def("__repr__", &tribool_c_repr)
   ;
   
-  def("indeterminate",(tribool(*)(void))&Indeterminate);
+  def("indeterminate",(tribool(*)(void))&tribool_indeterminate);
+  // no facility for wrapping C++ constants
+  // def("Indeterminate",tribool_indeterminate_constant);
+
 
 }

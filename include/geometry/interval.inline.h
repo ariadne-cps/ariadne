@@ -25,7 +25,7 @@ namespace Ariadne {
   
 template<class X> inline 
 Geometry::Interval<X>::Interval()
-  : _lower(Numeric::conv_down<X>(0)), _upper(Numeric::conv_up<X>(0)) 
+  : _lower(1), _upper(0) 
 {
 }
 

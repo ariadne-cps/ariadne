@@ -52,7 +52,11 @@ std::string
 __repr__(const Geometry::Interval<X>& ivl)
 {
   std::stringstream ss;
-  ss << "Interval(" << ivl.lower_bound() << "," << ivl.upper_bound() << ")";
+  if(empty(ivl)) {
+    ss << "Interval()";
+  } else {
+    ss << "Interval(" << ivl.lower_bound() << "," << ivl.upper_bound() << ")";
+  }
   return ss.str();
 }
 

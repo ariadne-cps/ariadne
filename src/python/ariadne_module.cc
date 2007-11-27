@@ -61,8 +61,10 @@ void export_lattice_set();
 void export_lattice_map();
 
 template<class R> void export_function();
-template<class R> void export_first_derivative();
-template<class R> void export_scalar_derivative();
+template<class R> void export_affine_variable();
+template<class R> void export_affine_derivative();
+template<class R> void export_taylor_series();
+template<class R> void export_taylor_variable();
 template<class R> void export_taylor_derivative();
 
 template<class R> void export_geometry_interval();
@@ -164,12 +166,16 @@ BOOST_PYTHON_MODULE(ariadne)
 
   export_function<Rational>();
   export_function<Float>();
-  export_first_derivative<Rational>();
-  export_first_derivative<Float>();
-  export_scalar_derivative<Rational>();
-  export_scalar_derivative<Float>();
-  export_taylor_derivative<Rational>();
+  //export_affine_variable<Rational>();
+  //export_affine_variable<Float>();
+  //export_affine_derivative<Rational>();
+  //export_affine_derivative<Float>();
+  export_taylor_series<Float>();
+  export_taylor_variable<Float>();
   export_taylor_derivative<Float>();
+  //export_taylor_series<Rational>();
+  //export_taylor_variable<Rational>();
+  //export_taylor_derivative<Rational>();
 
   export_geometry_interval<Float>();
   export_set<Float>();

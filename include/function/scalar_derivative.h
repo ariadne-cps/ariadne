@@ -73,21 +73,21 @@ namespace Ariadne {
       ScalarDerivative()
         : _data(1u) { }
       /*! \brief The constant zero of degree \a degree. */
-      ScalarDerivative(uint degree)
+      ScalarDerivative(smoothness_type degree)
         : _data(degree+1u) { }
       /*! \brief The constant \a constant of degree \a degree. */
-      ScalarDerivative(uint degree, const X& constant)
+      ScalarDerivative(smoothness_type degree, const X& constant)
         : _data(degree+1u) { this->_data[0]=constant; }
       /*! \brief A scalar derivative of degree \a degree, with value \a value and first derivative \a first_derivative. Higher derivatives are set to zero. */
-      ScalarDerivative(uint degree, const X& value, const X& first_derivative)
+      ScalarDerivative(smoothness_type degree, const X& value, const X& first_derivative)
         : _data(degree+1u) 
       { this->_data[0]=value; this->_data[1]=first_derivative; }
       /*! \brief A scalar derivative of degree \a degree, with value \a value and first derivative \a first_derivative. Higher derivatives are set to zero. */
-      template<class XX> ScalarDerivative(uint degree, const XX* values)
+      template<class XX> ScalarDerivative(smoothness_type degree, const XX* values)
         : _data(values,values+(degree+1u)) 
       { }
       /*! \brief A scalar derivative of degree \a degree, constructed from a list of values. */
-      template<class XX> ScalarDerivative(uint degree, const XX* values, const XX* values2, const XX* values3)
+      template<class XX> ScalarDerivative(smoothness_type degree, const XX* values, const XX* values2, const XX* values3)
         : _data(values,values+(degree+1u)) 
       { }
 
@@ -113,14 +113,14 @@ namespace Ariadne {
         return !(*this==other); }
 
       /*! \brief Construct a constant derivative of degree \a degree and value \a constant. */
-      static ScalarDerivative<X> constant(uint degree, const X& constant) { 
+      static ScalarDerivative<X> constant(smoothness_type degree, const X& constant) { 
         return ScalarDerivative<X>(degree,constant); }
       /*! \brief Construct the derivative of degree \a degree for the indepentent variable at value \a value. */
-      static ScalarDerivative<X> variable(uint degree, const X& value) {
+      static ScalarDerivative<X> variable(smoothness_type degree, const X& value) {
         return ScalarDerivative<X>(degree,value,1); }
 
       /*! \brief The degree (number of derivatives computed). */
-      uint degree() const { 
+      smoothness_type degree() const { 
         return this->_data.size()-1; }
       /*! \brief The array of derivative values. */
       const array<X>& data() const {
@@ -129,16 +129,16 @@ namespace Ariadne {
       array<X>& data() {
         return this->_data; }
       /*! \brief The \a i<sup> th</sup> derivative \f$d^if/dx^i\f$. */
-      const X& derivative(uint i) const { 
+      const X& derivative(smoothness_type i) const { 
         return this->_data[i]; }
       /*! \brief The value of the derived variable. */
       const X& value() const { 
         return this->_data[0]; }
       /*! \brief A reference to the \a i<sup> th</sup> derivative \f$d^if/dx^i\f$. */
-      X& operator[](uint i) { 
+      X& operator[](smoothness_type i) { 
         return this->_data[i]; }
       /*! \brief The \a i<sup> th</sup> derivative \f$d^if/dx^i\f$. */
-      const X& operator[](uint i) const { 
+      const X& operator[](smoothness_type i) const { 
         return this->_data[i]; }
 #ifdef DOXYGEN
     //@{ 

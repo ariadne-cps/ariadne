@@ -67,7 +67,11 @@ henon_chainreach()
   R a=params[0];
   R b=params[1];
 
-  HenonMap<R> h=HenonMap<R>(a,b);
+  HenonMap<R> h=HenonMap<R>(params);
+  Point<R> pt("(3,5)"); smoothness_type s=3;
+  cout << "pt="<<pt<<" s="<<s<<endl;
+  cout << "h.derivative(pt,s)="<<h.derivative(pt,s) << endl; 
+
   Rectangle<R> gbb=Rectangle<R>("[-11.0,5.0]x[-8.0,8.0]") ;
   cout << "gbb=" << gbb << endl;
   FiniteGrid<R> fg=FiniteGrid<R>(gbb,subdivisions); // grid

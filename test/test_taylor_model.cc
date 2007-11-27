@@ -233,6 +233,6 @@ class TestTaylorModel
 
 
 int main() {
-  TestTaylorModel<Rational>().test();
+  //TestTaylorModel<Float>().test();
 }
 

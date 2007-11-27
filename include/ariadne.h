@@ -85,6 +85,10 @@ namespace Input {}
  */
 namespace Output {}
 
+/*! \brief Classes for describing system models. 
+ */
+namespace Models {}
+
 }
 
 

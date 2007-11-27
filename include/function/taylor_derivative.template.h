@@ -21,25 +21,23 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
 
 namespace Ariadne {
 
-template<class X0, class X1, class X2> inline
-void
-Function::compute_product(TaylorDerivative<X0>& x0, const TaylorDerivative<X1>& x1, const TaylorDerivative<X2>& x2)
+template<class X>
+LinearAlgebra::Vector<X>
+Function::TaylorDerivative<X>::value() const
 {
-  assert(x0.argument_size()==x1.argument_size());
-  assert(x0.argument_size()==x2.argument_size());
-  for(MultiIndex i1(x1.argument_size()); i1.degree() <= x1.degree(); ++i1) {
-    for(MultiIndex i2(x2.argument_size()); i2.degree() <= std::min(x2.degree(),x0.degree()-i1.degree()); ++i2) {
-      MultiIndex i0=i1+i2;
-      //std::cout << "i0=" << i0 << ", i1=" << i1 << ", i2=" << i2 << std::endl;
-      // FIXME: Use Integer
-      //Numeric::Integer c=i0.factorial()/(i1.factorial()*i2.factorial());
-      unsigned int c=choose(i0,i1);
-      x0[i0]+=X0(c)*x1[i1]*x2[i2];
-    }
-  }
+  return LinearAlgebra::Vector<X>(this->result_size(),this->data().begin(),this->_increment());
+}
+
+template<class X>
+LinearAlgebra::Matrix<X>
+Function::TaylorDerivative<X>::jacobian() const
+{
+  return LinearAlgebra::Matrix<X>(this->result_size(),this->argument_size(),this->data().begin()+1u,this->_increment(),1u);
 }
 
 template<class X> 
@@ -72,26 +70,32 @@ Function::derivative(TaylorDerivative<X>& x, const size_type& k)
 
 
 
-
+template<class X0, class X1, class X2> 
+void 
+Function::compute_composition(TaylorVariable<X0>& z, const TaylorVariable<X1>& y, const TaylorDerivative<X2>& x)
+{
+  // FIXME: Rewrite this function
+}
 
 template<class X0, class X1, class X2> 
 void 
-Function::compute_composition(TaylorDerivative<X0>& z, const ScalarDerivative<X1>& y, const TaylorDerivative<X2>& x)
+Function::compute_composition(TaylorDerivative<X0>& z, const TaylorDerivative<X1>& y, const TaylorDerivative<X2>& x)
 {
+  // FIXME: Rewrite this function
   //std::cerr << "y=" << y << std::endl;
   //std::cerr << "z=" << z << std::endl;
   assert(z.degree()==x.degree());
   assert(z.degree()==y.degree());
   size_type d=z.degree();
   TaylorDerivative<X2> w=x;
-  w.value()=0;
+  //w.value()=0;
   //std::cerr << "w=" << w << std::endl;
-  TaylorDerivative<X0> t(x.argument_size(),0,y[d]);
+  TaylorDerivative<X0> t(y.result_size(),x.argument_size(),0);
   //std::cerr << "t[0]=" << t << std::endl;
   for(uint n=1; n<=d; ++n) {
-    TaylorDerivative<X0> u(x.argument_size(),n);
-    compute_product(u,t,w);
-    u.value()=y[d-n];
+    TaylorDerivative<X0> u(y.result_size(),x.argument_size(),n);
+    //compute_product(u,t,w);
+    //u.value()=y[d-n];
     t=u;
     //std::cerr << "t[" << n << "]=" << t << std::endl;
   }
@@ -102,17 +106,21 @@ template<class X> inline
 std::ostream& 
 Function::operator<<(std::ostream& os, const TaylorDerivative<X>& x) {
   //  return os << "TaylorDerivative( argument_size=" << x.argument_size() << ", degree=" << x.degree() << ", data=" << x.data() << ")";
-  size_type degree=0;
-  for(MultiIndex i(x.argument_size()); i.degree()<=x.degree(); ++i) {
-    if(i.degree()==0) {
-      os << '[';
-    } else if(i.degree()==degree) {
-      os << ',';
-    } else {
-      degree=i.degree();
-      os << ';';
+  os << '[';
+  for(size_type i=0; i!=x.result_size(); ++i) {
+    size_type degree=0;
+    for(MultiIndex j(x.argument_size()); j.degree()<=x.degree(); ++j) {
+      if(j.degree()==0) {
+        os << '[';
+      } else if(j.degree()==degree) {
+        os << ',';
+      } else {
+        degree=j.degree();
+        os << ';';
+      }
+      os << x.get(i,j);
     }
-    os << x[i];
+    os << ']';
   }
   os << ']';
   return os;

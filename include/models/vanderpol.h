@@ -28,82 +28,38 @@
 #ifndef ARIADNE_VANDERPOL_EQUATION_H
 #define ARIADNE_VANDERPOL_EQUATION_H
 
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
-
-#include "../geometry/point.h"
-#include "../geometry/rectangle.h"
-#include "../geometry/parallelotope.h"
-
-#include "../system/vector_field.h"
+#include "system/build_vector_field.h"
 
 namespace Ariadne {
   namespace System {
+  
 
-    /*! \brief The van der Pol equation. */
-    template<class R>
-    class VanDerPolEquation : public System::VectorFieldInterface<R> 
+    template<class R, class A, class P>
+    void
+    van_der_pol_function(R& r, const A& x, const P& p)
     {
-      typedef typename Numeric::traits<R>::arithmetic_type F;
-     public:
-      /*! \brief Constructor. */
-      explicit VanDerPolEquation(R mu=0.0)
-        : _mu(mu) { }
-      
-      VanDerPolEquation<R>* clone() const { return new VanDerPolEquation<R>(this->_mu); }
-       
-      /*! \brief  The vector field applied to a state. */
-      virtual LinearAlgebra::Vector<F> image(const Geometry::Point<F>& x) const;
-     
-      /*! \brief  The derivative of the map at a point. */
-      virtual LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<F>& x) const;
-            
-      /*! \brief  The parameter \f$\mu\f$. */
-      const R& mu() const { return _mu; }
-      
-      
-      /*! \brief  The dimension of the space. */
-      dimension_type dimension() const { return 2; }
-      
-      /*! \brief  The smoothness of the vector field. */
-      smoothness_type smoothness() const { return std::numeric_limits<smoothness_type>::max(); }
-      
-       /*! \brief  The name of the system. */
-      std::string name() const { return "VanDerPolEquation"; }
+      r[0]=x[1];
+      r[1]=p[0]*(1-x[0]*x[0])*x[1]-x[0];
+    }
 
-     private:
-      R _mu;
-    };
-      
-    template<class R>
-    LinearAlgebra::Vector<typename VanDerPolEquation<R>::F>
-    VanDerPolEquation<R>::image(const Geometry::Point<F>& x) const
-    {
-      LinearAlgebra::Vector<F> result(2); 
-      result(0)=x[1];
-      result(1)=_mu*(R(1.0)-x[0]*x[0])*x[1]-x[0];
-      return result;
-    }
-     
-    template<class R>
-    LinearAlgebra::Matrix<typename VanDerPolEquation<R>::F>
-    VanDerPolEquation<R>::jacobian(const Geometry::Point<F>& x) const
-    {
-      LinearAlgebra::Matrix<F> result(2,2); 
-      result(0,0) = 0.0;
-      result(0,1) = 1.0;
-      result(1,0) = -R(2.0)*_mu*x[0]*x[1]-R(1.0);
-      result(1,1) = _mu*(R(1.0)-x[0]*x[0]);
-      return result;
-    }
-     
-     
+    /*! \class VanDerPolEquation
+     *  \brief The van der Pol equation \f$\ddot{x}=\mu*(1-x^2)*\dot{x}-x\f$.
+     *     Variables:  x, v
+     *     Parameters: mu
+     *     System:     dotx=v
+     *                 dotv=mu*(1-x*x)*v-x
+     */
+
+    ARIADNE_BUILD_VECTOR_FIELD(VanDerPolEquation,van_der_pol_function,3,1,255)
+
     template<class R>
     std::ostream& operator<<(std::ostream& os, const VanDerPolEquation<R>& vdp) {
-      os << "VanDerPolEquation( mu=" << vdp.mu() << " )";
+      os << "VanDerPolEquation( mu=" << vdp.parameter(0) << " )";
       return os;
     }
-    
+
+
+
     
     
   }

@@ -1,8 +1,8 @@
 /***************************************************************************
- *            flow.cc
+ *            taylor_variable.inline.h
  *
- *  Copyright  2007  Pieter Collins
- *  pieter.collins@cwi.nl
+ *  Copyright 2007  Alberto Casagrande, Pieter Collins
+ *  Email casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -20,23 +20,19 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-
-#include "numeric/float.h"
-
-#include "evaluation/flow.h"
-#include "evaluation/flow.code.h"
+ 
+#include "multi_index.h"
+#include "taylor_series.h"
 
 namespace Ariadne {
-  namespace Evaluation {
-    using namespace Numeric;
 
-#ifdef ENABLE_FLOAT64
-    template class Flow<Float64>;
-#endif
-  
-#ifdef ENABLE_FLOATMP
-    template class Flow<FloatMP>;
-#endif
+namespace {
 
-  }
+inline size_type compute_polynomial_data_size(size_type as, smoothness_type d) {
+  return Numeric::choose(d+as,as);
+}
+
+}
+
+
 }

@@ -60,7 +60,7 @@ test_newton()
   uint n=64;
   IntervalNewtonSolver<R> interval_newton(e,n);
 
-  HenonMap<R> h(1.5,0.375);
+  HenonMap<R> h(Point<R>("(1.5,0.375)"));
   Rectangle<R> r("[-2.125,-2]x[-2.125,-2]");
   Point< Interval<R> > pt=r;
   

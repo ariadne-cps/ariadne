@@ -37,7 +37,8 @@ class __gmpq_value;
 
 namespace Ariadne {
   namespace Function {
-    template<class X, class V> class FirstDerivative;
+    template<class X> class AffineVariable;
+    template<class X> class TaylorVariable;
   }
 
   namespace Numeric {
@@ -158,7 +159,11 @@ namespace Ariadne {
       typedef Interval<R> interval_type; 
     };
 
-    template<class X, class V> struct traits< Function::FirstDerivative<X,V> > { 
+    template<class X> struct traits< Function::AffineVariable<X> > { 
+      typedef typename traits<X>::number_type number_type; 
+    };
+
+    template<class X> struct traits< Function::TaylorVariable<X> > { 
       typedef typename traits<X>::number_type number_type; 
     };
 

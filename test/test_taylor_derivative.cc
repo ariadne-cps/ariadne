@@ -31,6 +31,8 @@
 #include "test_float.h"
 #include "numeric/rational.h"
 #include "linear_algebra/vector.h"
+#include "function/taylor_series.h"
+#include "function/taylor_variable.h"
 #include "function/taylor_derivative.h"
 
 #include "test.h"
@@ -49,16 +51,15 @@ class TestTaylorDerivative {
     double a1[15]={ 2.0, 1.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
     double a2[15]={ 3.0, 1.0, 0.0, 0.25, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
     double a3[15]={ 2.0, 1.0, 0.0, 0.125, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-    x1=TaylorDerivative<X>(2,4,a1);
-    x2=TaylorDerivative<X>(2,4,a2);
-    x3=TaylorDerivative<X>(1,4,a3);
+    x1=TaylorDerivative<X>(1,2,4,a1);
+    x2=TaylorDerivative<X>(1,2,4,a2);
+    x3=TaylorDerivative<X>(1,1,4,a3);
     
     ARIADNE_CALL(test_degree());
     ARIADNE_CALL(test_add());
     ARIADNE_CALL(test_sub());
     ARIADNE_CALL(test_mul());
     ARIADNE_CALL(test_div());
-    ARIADNE_CALL(test_pow());
     ARIADNE_CALL(test_compose());
   }
 
@@ -77,28 +78,15 @@ class TestTaylorDerivative {
   }
 
   void test_mul() {
-    cout << x1 << "*" << x2 << " = " << x1*x2 << std::endl;
+    X c=2;
+    cout << x1 << "*" << c << " = " << x1*c << std::endl;
+    cout << c << "*" << x1 << " = " << c*x1 << std::endl;
     //assert((x1*x2)==TaylorDerivative<X>("[2,3,2,0]"));
   }
 
   void test_div() {
-    /*
-    TaylorDerivative<X> x3("[2,3,4]");
-    TaylorDerivative<X> x4("[1,0,0]");
-    cout << x3 << "/" << x4 << " = " << x3/x4 << std::endl;
-    assert((x3/x4)==x3);
-    cout << x4 << "/" << x3 << " = " << x4/x3 << std::endl;
-    assert((x4/x3)==TaylorDerivative<X>("[0.5,-0.75,1.25]"));
-    cout << 1 << "/" << x2 << " = " << 1/x2 << std::endl;
-    assert((1/x2)==TaylorDerivative<X>("[0.5,-0.25,0.25,-0.375]"));
-    cout << x1 << "/" << x2 << " = " << x1/x2 << std::endl;
-    assert((x1/x2)==TaylorDerivative<X>("[0.5,0.25,-0.25,0.375]"));
-    */
-  }
-
-  void test_pow() {
-    cout << x2 << "^5 = " << pow(x2,5) << std::endl;
-    //    assert(pow(x2,5)==TaylorDerivative<X>("[32,80,160,240]"));
+    X c=2;
+    cout << x1 << "/" << c << " = " << x1/c << std::endl;
   }
 
   void test_compose() {
@@ -106,9 +94,9 @@ class TestTaylorDerivative {
     double ax[10] = { 3.0, 1.0, 0.0, 0.0, 0.125, 0.25, 0.0, 0.0, 0.0, 0.0 };
     double ay[4] = { 1.0, -1.0, 0.5, -0.25 };
     double aid[4] = { ax[0], 1.0, 0.0, 0.0 };
-    TaylorDerivative<X> x(2,3,ax);
-    ScalarDerivative<X> y(3,ay);
-    ScalarDerivative<X> id(3,aid);
+    TaylorDerivative<X> x(1,2,3,ax);
+    TaylorVariable<X> y(1,3,ay);
+    TaylorDerivative<X> id(1,1,3,aid);
     cout << "x=" << x << endl;
     cout << "y=" << y << endl;
     cout << "compose(y,x)=" << compose(y,x) << endl;

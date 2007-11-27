@@ -1,5 +1,5 @@
 /***************************************************************************
- *            vector_field_evolver.h
+ *            taylor_integrator.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -20,42 +20,24 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
-/*! \file flow.h
- *  \brief Methods for integrating points and sets under a vector field.
- */
 
-#ifndef ARIADNE_FLOW_H
-#define ARIADNE_FLOW_H
 
-#include "../base/types.h"
-#include "../base/declarations.h"
-#include "../numeric/declarations.h"
-#include "../linear_algebra/declarations.h"
-#include "../geometry/declarations.h"
-#include "../system/declarations.h"
-#include "../evaluation/declarations.h"
+#include "numeric/float.h"
+
+#include "evaluation/taylor_integrator.h"
+#include "evaluation/taylor_integrator.code.h"
 
 namespace Ariadne {
-
   namespace Evaluation {
+    using namespace Numeric;
 
-   
-    /*! \brief %Base class for integration schemes. 
-     *  \ingroup Integrate
-     */
-    template<class R>
-    class Flow {
-      typedef Numeric::Interval<R> I;
-     public:
-      Flow(const VectorFieldEvolver<R>& i, const System::VectorFieldInterface<R>& vf);
-      Geometry::Point<I> evaluate(const Geometry::Point<I>& pt);
-      Geometry::Point<I> jacobian(const Geometry::Point<I>& pt);
-      
-      
-    };
-    
+#ifdef ENABLE_FLOAT64
+    template class TaylorIntegrator<Float64>;
+#endif
+  
+#ifdef ENABLE_FLOATMP
+    template class TaylorIntegrator<FloatMP>;
+#endif
+
   }
 }
-
-#endif /* ARIADNE_FLOW_H */

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            affine_variable.code.h
+ *            affine_variable.template.h
  *
  *  Copyright  2007  Pieter Collins
  *  Pieter.Collins@cwi.nl
@@ -26,94 +26,94 @@
 namespace Ariadne {
 
 
-template<class X, class CV> inline
+template<class X> inline
 void 
-Function::AffineVariable<X,CV>::instantiate()
+Function::AffineVariable<X>::instantiate()
 {
-  AffineVariable<X,CV>* av=0;
+  //AffineVariable<X>* av=0;
 }
 
 
-template<class R0, class R1> inline
+template<class X> inline
 void
-Function::neg(AffineVariable<R0,R1>& rv, const AffineVariable<R0,R1>& av) 
+Function::neg(AffineVariable<X>& rv, const AffineVariable<X>& av) 
 {
   ARIADNE_LOG(3,"neg(AffineVariable av)\n");
   rv._x=-av._x;
   rv._dx=-av._dx;
 }
 
-template<class R0, class R1> inline
+template<class X> inline
 void
-Function::rec(AffineVariable<R0,R1>& rv, const AffineVariable<R0,R1>& av) 
+Function::rec(AffineVariable<X>& rv, const AffineVariable<X>& av) 
 {
   ARIADNE_LOG(3,"rec(AffineVariable av)\n");
   rv._x=1/av._x;
   //rv._dx=-av1._dx;
 }
 
-template<class R0, class R1> inline
+template<class X> inline
 void
-Function::add(AffineVariable<R0,R1>& rv, const AffineVariable<R0,R1>& av1, const AffineVariable<R0,R1>& av2) 
+Function::add(AffineVariable<X>& rv, const AffineVariable<X>& av1, const AffineVariable<X>& av2) 
 {
   ARIADNE_LOG(3,"add(AffineVariable av1, AffineVariable av2)\n");
   rv._x=av1._x+av2._x;
   rv._dx=av1._dx+av2._dx;
 }
 
-template<class R0, class R1> inline
+template<class X> inline
 void
-Function::sub(AffineVariable<R0,R1>& rv, const AffineVariable<R0,R1>& av1, const AffineVariable<R0,R1>& av2) 
+Function::sub(AffineVariable<X>& rv, const AffineVariable<X>& av1, const AffineVariable<X>& av2) 
 {
   ARIADNE_LOG(3,"sub(AffineVariable av1, AffineVariable av2)\n");
   rv._x=av1._x-av2._x;
   rv._dx=av1._dx-av2._dx;
 }
 
-template<class R0, class R1> inline
+template<class X> inline
 void
-Function::mul(AffineVariable<R0,R1>& rv, const AffineVariable<R0,R1>& av1, const AffineVariable<R0,R1>& av2) 
+Function::mul(AffineVariable<X>& rv, const AffineVariable<X>& av1, const AffineVariable<X>& av2) 
 {
   ARIADNE_LOG(3,"mul(AffineVariable av1, AffineVariable av2)\n");
   //  rv._x=av._x-av._dx;
   //  rv._dx=av1._dx-av2._dx;
 }
 
-template<class R0, class R1> inline
+template<class X> inline
 void
-Function::div(AffineVariable<R0,R1>& rv, const AffineVariable<R0,R1>& av1, const AffineVariable<R0,R1>& av2) 
+Function::div(AffineVariable<X>& rv, const AffineVariable<X>& av1, const AffineVariable<X>& av2) 
 {
   ARIADNE_LOG(3,"div(AffineVariable av1, AffineVariable av2)\n");
-  AffineVariable<R0,R1> tv(av2.argument_dimension());
+  AffineVariable<X> tv(av2.argument_dimension());
   rec(tv,av2);
   mul(rv,av1,tv);
 }
 
 
-template<class R0, class R1> inline
+template<class X> inline
 void
-Function::compose(AffineVariable<R0,R1>& rv, const AffineVariable<R0,R1>& av1, const AffineVariable<R0,R1>& av2) 
+Function::compose(AffineVariable<X>& rv, const AffineVariable<X>& av1, const AffineVariable<X>& av2) 
 {
   ARIADNE_LOG(3,"AffineVariable compose(AffineVariable av1, AffineVariable av2)\n");
   //FIXME: Use slices
-  typedef typename AffineVariable<R0,R1>::I I;
+  typedef typename AffineVariable<X>::I I;
   using namespace LinearAlgebra;
   assert(av1._dx.size()==1u);
   rv._x=av1._x+av1._dx[0]*av2._a;
   rv._dx=av1._dx[0]*av2._dx;
 }
 
-template<class R0, class R1> inline
+template<class X> inline
 void
-Function::reduce(AffineVariable<R0,R1>& rv, const AffineVariable<R0,R1>& av, smoothness_type s) 
+Function::reduce(AffineVariable<X>& rv, const AffineVariable<X>& av, smoothness_type s) 
 {
   assert(s<=av._s);
   if(s==av._s) { return av;  }
   
   const dimension_type ad=av._ad;
   
-  AffineVariable<R0,R1> res(ad);
-  typename AffineVariable<R0,R1>::I tmp;
+  AffineVariable<X> res(ad);
+  typename AffineVariable<X>::I tmp;
   res._x=av._x;
   for(size_type j=0; j!=ad; ++j) {
     rv._dx[j]=av._dx[j].midpoint();
@@ -124,9 +124,9 @@ Function::reduce(AffineVariable<R0,R1>& rv, const AffineVariable<R0,R1>& av, smo
 
 
 
-template<class R0, class R1> 
+template<class X>
 std::ostream& 
-Function::operator<<(std::ostream& os, const AffineVariable<R0,R1>& av)
+Function::operator<<(std::ostream& os, const AffineVariable<X>& av)
 {
   return os << "AffineVariable( a0=" << av._x << ", a1=" << av._dx << ")";
 }

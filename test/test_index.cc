@@ -159,8 +159,8 @@ class TestMultiIndex
   }
 
   int test_constructor() {
-    size_type a1[3]={2,0,3};
-    MultiIndex i1(3,a1);
+    uint a1[3]={2,0,3};
+    MultiIndex i1(3u,a1);
     ARIADNE_EVALUATE(i1);
     ARIADNE_TEST_ASSERT(i1.number_of_variables()==3);
     ARIADNE_TEST_ASSERT(i1.degree()==5);
@@ -169,9 +169,9 @@ class TestMultiIndex
   }
 
   int test_comparison() {
-    size_type a1[3]={2,0,3};
-    size_type a2[3]={1,0,4};
-    size_type a3[3]={3,0,1};
+    uint a1[3]={2,0,3};
+    uint a2[3]={1,0,4};
+    uint a3[3]={3,0,1};
     MultiIndex i1(3,a1);
     MultiIndex i2(3,a2);
     MultiIndex i3(3,a3);

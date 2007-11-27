@@ -23,25 +23,25 @@
 
 #include "numeric/rational.h"
 #include "numeric/float.h"
+#include "numeric/interval.h"
 
 #include "linear_algebra/covector.h"
 
 #include "function/affine_variable.h"
-#include "function/affine_variable.code.h"
 
 namespace Ariadne {
   namespace Function {
     using namespace Numeric;
     using namespace LinearAlgebra;
     
+    template class AffineVariable<Rational>;
+
 #ifdef ENABLE_FLOAT64
-    template class AffineVariable< Interval64, Covector<Float64> >;
-    template class AffineVariable< Interval64, Covector<Interval64> >;
+    template class AffineVariable<Interval64>;
 #endif
     
 #ifdef ENABLE_FLOATMP
-    template class AffineVariable< IntervalMP, Covector<FloatMP> >; 
-    template class AffineVariable< IntervalMP, Covector<IntervalMP> >; 
+    template class AffineVariable<IntervalMP>;
 #endif
 
   }

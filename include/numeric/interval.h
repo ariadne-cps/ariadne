@@ -108,26 +108,26 @@ namespace Ariadne {
     template<class R> Interval<R> operator+(const Interval<R>& x1, const Interval<R>& x2);
     template<class R> Interval<R> operator+(const Interval<R>& x1, const R& x2);
     template<class R> Interval<R> operator+(const R& x1, const Interval<R>& x2);
-    template<class R> Interval<R> operator+=(Interval<R>& x1, const Interval<R>& x2);
-    template<class R> Interval<R> operator+=(Interval<R>& x1, const R& x2);
+    template<class R> Interval<R>& operator+=(Interval<R>& x1, const Interval<R>& x2);
+    template<class R> Interval<R>& operator+=(Interval<R>& x1, const R& x2);
 
     template<class R> Interval<R> operator-(const Interval<R>& x1, const Interval<R>& x2);
     template<class R> Interval<R> operator-(const Interval<R>& x1, const R& x2);
     template<class R> Interval<R> operator-(const R& x1, const Interval<R>& x2);
-    template<class R> Interval<R> operator-=(Interval<R>& x1, const Interval<R>& x2);
-    template<class R> Interval<R> operator-=(Interval<R>& x1, const R& x2);
+    template<class R> Interval<R>& operator-=(Interval<R>& x1, const Interval<R>& x2);
+    template<class R> Interval<R>& operator-=(Interval<R>& x1, const R& x2);
 
     template<class R> Interval<R> operator*(const Interval<R>& x1, const Interval<R>& x2);
     template<class R> Interval<R> operator*(const Interval<R>& x1, const R& x2);
     template<class R> Interval<R> operator*(const R& x1, const Interval<R>& x2);
-    template<class R> Interval<R> operator*=(Interval<R>& x1, const Interval<R>& x2);
-    template<class R> Interval<R> operator*=(Interval<R>& x1, const R& x2);
+    template<class R> Interval<R>& operator*=(Interval<R>& x1, const Interval<R>& x2);
+    template<class R> Interval<R>& operator*=(Interval<R>& x1, const R& x2);
 
     template<class R> Interval<R> operator/(const Interval<R>& x1, const Interval<R>& x2);
     template<class R> Interval<R> operator/(const Interval<R>& x1, const R& x2);
     template<class R> Interval<R> operator/(const R& x1, const Interval<R>& x2);
-    template<class R> Interval<R> operator/=(Interval<R>& x1, const Interval<R>& x2);
-    template<class R> Interval<R> operator/=(Interval<R>& x1, const R& x2);
+    template<class R> Interval<R>& operator/=(Interval<R>& x1, const Interval<R>& x2);
+    template<class R> Interval<R>& operator/=(Interval<R>& x1, const R& x2);
 
     template<class R> Interval<R> operator+(const Interval<R>& x1, const int& x2);
     template<class R> Interval<R> operator-(const Interval<R>& x1, const int& x2);
@@ -148,6 +148,11 @@ namespace Ariadne {
     template<class R> Interval<R> operator-(const double& x1, const Interval<R>& x2);
     template<class R> Interval<R> operator*(const double& x1, const Interval<R>& x2);
     template<class R> Interval<R> operator/(const double& x1, const Interval<R>& x2);
+
+    template<class R, class X> Interval<R>& operator+=(Interval<R>& x1, const X& x2);
+    template<class R, class X> Interval<R>& operator-=(Interval<R>& x1, const X& x2);
+    template<class R, class X> Interval<R>& operator*=(Interval<R>& x1, const X& x2);
+    template<class R, class X> Interval<R>& operator/=(Interval<R>& x1, const X& x2);
 
     template<class R> Interval<R> min(const Interval<R>& x1, const Interval<R>& x2);
     template<class R> Interval<R> max(const Interval<R>& x1, const Interval<R>& x2);

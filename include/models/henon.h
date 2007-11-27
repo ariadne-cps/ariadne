@@ -28,174 +28,49 @@
 #ifndef ARIADNE_HENON_MAP_H
 #define ARIADNE_HENON_MAP_H
 
-#include <limits>
-
-#include "../linear_algebra/matrix.h"
-
-#include "../geometry/point.h"
-#include "../geometry/rectangle.h"
-#include "../geometry/parallelotope.h"
-
 #include "../system/map.h"
+#include "../system/build_map.h"
+
+
 
 namespace Ariadne {
   namespace System {
 
-    /*! \brief The Henon map \f$(x,y)\mapsto(a-x^2-by,x)\f$. */
-    template<class R>
-    class HenonMap : public System::MapInterface<R> 
+    template<class R, class A, class P>
+    void henon_function(R& r, const A& x, const P& p) 
     {
-      typedef typename Numeric::traits<R>::arithmetic_type F;
-     public:
-      /*! \brief The real number type. */
-      typedef R real_type;
-      /*! \brief The type of denotable state the system acts on. */
-      typedef Geometry::Point<R> state_type;
-      
-      /*! \brief Construct the Henon map with parameters \a a and \a b. */
-      explicit HenonMap(R a=R(1.5), R b=R(0.3)) : _a(a), _b(b) { }
-      
-      /*! \brief Returns a pointer to a dynamically-allocated copy of the map. */
-      HenonMap<R>* clone() const { return new HenonMap<R>(this->_a,this->_b); }
+      r[0]=p[0]-x[0]*x[0]-p[1]*x[1]; 
+      r[1]=x[0]; 
+    }
+                   
+    template<class R, class A, class P>
+    void henon_inverse_function(R& r, const A& x, const P& p) 
+    {
+      // (x,y)=(z,(a-z*z-w)/b)
+      r[0]=x[1]; 
+      r[1]=(p[0]-x[1]*x[1]-x[0])/p[1];
+    }
+     
+    /*! \class HenonMap
+     *  \brief The Henon map \f$(x,y)\mapsto(a-x^2-by,x)\f$ with inverse \f$(w,z)\mapsto(z,(a-z^2-w)/b)\f$.
+     */
 
-      /*! \brief  The map applied to a state. */
-      virtual Geometry::Point<F> image(const Geometry::Point<F>& x) const;
-      
-      /*! \brief  The derivative of the map at a point. */
-      virtual LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<F>& x) const;
-            
-      /*! \brief  The parameter a. */
-      const R& a() const { return _a; }
-      /*! \brief  The parameter b. */
-      const R& b() const { return _b; }
-      
-      /*! \brief  The dimension of the argument. */
-      smoothness_type smoothness() const { return std::numeric_limits<smoothness_type>::max(); }
-      /*! \brief  The dimension of the argument. */
-      dimension_type argument_dimension() const { return 2; }
-      /*! \brief The dimension of the result. */
-      dimension_type result_dimension() const { return 2; }
-      
-      /*! \brief The Henon map is invertible unless \f$b=0\f$. */
-      bool invertible() const {
-        return _b!=0; }
-        
-      /*! \brief  The name of the system. */
-      virtual std::string name() const { return "HenonMap"; }
-     private:
-      R _a;
-      R _b;
-    };
-      
-    template<class R>
-    Geometry::Point<typename HenonMap<R>::F>
-    HenonMap<R>::image(const Geometry::Point<F>& pt) const
-    {
-      Geometry::Point<F> result(2); 
-      const F& x=pt[0];
-      const F& y=pt[1];
-      result[0]=_a-x*x-_b*y; 
-      result[1]=x; 
-      return result;
-    }
-     
-    template<class R>
-    LinearAlgebra::Matrix<typename HenonMap<R>::F>
-    HenonMap<R>::jacobian(const Geometry::Point<F>& pt) const
-    {
-      LinearAlgebra::Matrix<F> result(2,2); 
-      result(0,0) = F(-2)*pt[0];
-      result(0,1) = F(-_b);
-      result(1,0) = R(1);
-      result(1,1) = R(0);
-      return result;
-    }
-     
-     
+    ARIADNE_BUILD_MAP(HenonMap,henon_function,2,2,2,255);
+
+    ARIADNE_BUILD_MAP(HenonInverseMap,henon_inverse_function,2,2,2,255);
+
+
      
     template<class R>
     std::ostream& operator<<(std::ostream& os, const HenonMap<R>& hm) {
-      os << "HenonMap( a=" << hm.a() << ", b=" << hm.b() << " )";
+      os << "HenonMap( a=" << hm.parameter(0) << ", b=" << hm.parameter(1) << " )";
       return os;
     }
-    
-
-
-    /*! \brief The inverse of the Henon map \f$(x,y)\mapsto(y,(a-y^2-x)/b)\f$. */
-    template<class R>
-    class HenonInverseMap : public System::MapInterface<R> 
-    {
-      typedef typename Numeric::traits<R>::arithmetic_type F;
-     public:
-      /*! \brief The real number type. */
-      typedef R real_type;
-      /*! \brief The type of denotable state the system acts on. */
-      typedef Geometry::Point<R> state_type;
-      
-      /*! \brief Construct the inverse Henon map with parameters \a a and \a b. */
-      explicit HenonInverseMap(R a=R(1.5), R b=R(0.3)) : _a(a), _b(b) { }
-      
-      /*! \brief Returns a pointer to a dynamically-allocated copy of the map. */
-      HenonInverseMap<R>* clone() const { return new HenonInverseMap<R>(this->_a,this->_b); }
-
-      /*! \brief  The map applied to a state. */
-      virtual Geometry::Point<F> image(const Geometry::Point<F>& x) const;
-      
-      /*! \brief  The derivative of the map at a point. */
-      virtual LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<F>& x) const;
-            
-      /*! \brief  The parameter a. */
-      const R& a() const { return _a; }
-      /*! \brief  The parameter b. */
-      const R& b() const { return _b; }
-      
-      /*! \brief  The dimension of the argument. */
-      smoothness_type smoothness() const { return std::numeric_limits<smoothness_type>::max(); }
-      /*! \brief  The dimension of the argument. */
-      dimension_type argument_dimension() const { return 2; }
-      /*! \brief The dimension of the result. */
-      dimension_type result_dimension() const { return 2; }
-      
-      /*! \brief The inverse Henon map is invertible unless \f$b=0\f$. */
-      bool invertible() const {
-        return _b!=0; }
-        
-      /*! \brief  The name of the system. */
-      virtual std::string name() const { return "HenonMap"; }
-     private:
-      R _a;
-      R _b;
-    };
-      
-    template<class R>
-    Geometry::Point<typename HenonInverseMap<R>::F>
-    HenonInverseMap<R>::image(const Geometry::Point<F>& pt) const
-    {
-      Geometry::Point<F> result(2); 
-      const F& x=pt[0];
-      const F& y=pt[1];
-      result[0]=y; 
-      result[1]=(_a-y*y-x)/_b; 
-      return result;
-    }
-     
-    template<class R>
-    LinearAlgebra::Matrix<typename HenonInverseMap<R>::F>
-    HenonInverseMap<R>::jacobian(const Geometry::Point<F>& pt) const
-    {
-      LinearAlgebra::Matrix<F> result(2,2); 
-      result(0,0) = R(0);
-      result(0,1) = R(1);
-      result(1,0) = F(-1)/_b;
-      result(1,1) = F(-2)*pt[1]/_b;
-      return result;
-    }
-     
-     
+  
      
     template<class R>
     std::ostream& operator<<(std::ostream& os, const HenonInverseMap<R>& him) {
-      os << "HenonInverseMap( a=" << him.a() << ", b=" << him.b() << " )";
+      os << "HenonInverseMap( a=" << him.parameter(0) << ", b=" << him.parameter(1) << " )";
       return os;
     }
     

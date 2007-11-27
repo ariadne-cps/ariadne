@@ -1,5 +1,5 @@
 /***************************************************************************
- *            scalar_derivative.h
+ *            scalar_derivative.template.h
  *
  *  Copyright 2007  Alberto Casagrande, Pieter Collins
  *  Email casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
@@ -33,7 +33,7 @@ template<class X>
 Function::ScalarDerivative<X>
 algebraic_inverse(const Function::ScalarDerivative<X>& x, const X& c)
 {
-  uint d=x.degree();
+  smoothness_type d=x.degree();
   Function::ScalarDerivative<X> y(d);
 
   assert(d<=5);
@@ -64,7 +64,7 @@ iterative_inverse(const Function::ScalarDerivative<X>& x, const X& c)
 {
   assert(bool(x[1]!=0));
   
-  uint d=x.degree();
+  smoothness_type d=x.degree();
   X one=1;
   X r=1/x[1];
 
@@ -75,7 +75,7 @@ iterative_inverse(const Function::ScalarDerivative<X>& x, const X& c)
   std::cerr << "x=" << x << std::endl;
   std::cerr << "c=" << c << std::endl;
   std::cerr << "y=" << y << std::endl;
-  for(uint i=0; i!=10; ++i) {
+  for(smoothness_type i=0; i!=10; ++i) {
     y=y-r*(compose(x,y)-id);
     std::cerr << "y=" << y << std::endl;
   }  
@@ -95,7 +95,7 @@ recursive_inverse(const Function::ScalarDerivative<X>& x, const X& c)
 {
   assert(bool(x[1]!=0));
   
-  uint d=x.degree();
+  smoothness_type d=x.degree();
   X one=1;
   X r=one/x[1];
 
@@ -108,7 +108,7 @@ recursive_inverse(const Function::ScalarDerivative<X>& x, const X& c)
   std::cerr << "c=" << c << std::endl;
   std::cerr << "y=" << y << std::endl;
 #endif
-  for(uint i=2; i<=d; ++i) {
+  for(smoothness_type i=2; i<=d; ++i) {
     y=y-r*(compose(x,y)-id);
 #ifdef DEBUG
     std::cerr << "y=" << y << std::endl;

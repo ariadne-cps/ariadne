@@ -87,7 +87,8 @@ test_integrator()
   
   AffineVectorField<R> avf=AffineVectorField<R>(Matrix<R>("[-0.25,-1.0;+1.0,-0.25]"),Vector<R>("[0.25,0.0]"));
   cout << "avf=" << avf << endl;
-  VanDerPolEquation<R> vdp=VanDerPolEquation<R>(R(0.865));
+  R mu=0.865;
+  VanDerPolEquation<R> vdp=VanDerPolEquation<R>(Point<R>(1,&mu));
   cout << "vpd=" << avf << endl;
 
   Rectangle<R> r=Rectangle<R>("[0.98,1.02]x[0.48,0.52]");

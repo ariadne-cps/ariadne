@@ -73,9 +73,10 @@ test_map_evolver()
 
   R a=1.5;
   R b=0.5;
-
-  HenonMap<R> henon=HenonMap<R>(a,b);
-  HenonInverseMap<R> henon_inverse=HenonInverseMap<R>(a,b);
+  R p[2]={a,b};
+  
+  HenonMap<R> henon=HenonMap<R>(Point<R>(2,p));
+  HenonInverseMap<R> henon_inverse=HenonInverseMap<R>(henon.parameters());
   cout << henon << endl << henon_inverse << endl;
 
   Rectangle<R> bounding_box=Rectangle<R>("[-4,4]x[-4,4]") ;

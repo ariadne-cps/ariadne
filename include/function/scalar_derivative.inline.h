@@ -30,7 +30,7 @@ Function::ScalarDerivative<X>
 Function::compose(const ScalarDerivative<X>& y, const ScalarDerivative<X>& x)
 {
   ScalarDerivative<X> result(std::min(x.degree(),y.degree()));
-  for(uint n=0; n<=result.degree(); ++n) { result[n]=y[n]; }
+  for(size_type n=0; n<=result.degree(); ++n) { result[n]=y[n]; }
   compute_composition(result,x);
   return result;
 }
@@ -68,7 +68,7 @@ Function::ScalarDerivative<X>
 Function::neg(const ScalarDerivative<X>& x)
 {
   ScalarDerivative<X> result(x.degree());
-  for(uint n=0; n<=result.degree(); ++n) {
+  for(size_type n=0; n<=result.degree(); ++n) {
     result[n] = -x[n];
   }
   return result;
@@ -90,7 +90,7 @@ Function::inv(const ScalarDerivative<X>& x)
 {
   ScalarDerivative<X> y(x.degree());
   X mr = X(-1)/x[0];
-  for(uint i=0; i<=y.degree(); ++i) {
+  for(size_type i=0; i<=y.degree(); ++i) {
     y[i]=(-Numeric::factorial<int>(i))*pow(mr,i+1);
   }
   //std::cerr << y << std::endl;
@@ -104,7 +104,7 @@ Function::ScalarDerivative<X>
 Function::add(const ScalarDerivative<X>& x, const ScalarDerivative<X>& y)
 {
   ScalarDerivative<X> result(std::min(x.degree(),y.degree()));
-  for(uint n=0; n<=result.degree(); ++n) {
+  for(size_type n=0; n<=result.degree(); ++n) {
     result[n] = x[n]+y[n];
   }
   return result;
@@ -115,7 +115,7 @@ Function::ScalarDerivative<X>
 Function::sub(const ScalarDerivative<X>& x, const ScalarDerivative<X>& y)
 {
   ScalarDerivative<X> result(std::min(x.degree(),y.degree()));
-  for(uint n=0; n<=result.degree(); ++n) {
+  for(size_type n=0; n<=result.degree(); ++n) {
     result[n] = x[n]-y[n];
   }
   return result;
@@ -126,8 +126,8 @@ Function::ScalarDerivative<X>
 Function::mul(const ScalarDerivative<X>& x, const ScalarDerivative<X>& y)
 {
   ScalarDerivative<X> result(std::min(x.degree(),y.degree()));
-  for(uint n=0; n<=result.degree(); ++n) {
-    for(uint i=0; i<=n; ++i) {
+  for(size_type n=0; n<=result.degree(); ++n) {
+    for(size_type i=0; i<=n; ++i) {
       result[n] += Numeric::choose<int>(n,i)*x[i]*y[n-i];
     }
   }
@@ -145,9 +145,9 @@ template<class X, class N> inline
 Function::ScalarDerivative<X> 
 Function::pow(const ScalarDerivative<X>& x, N k)
 {
-  uint n=k;
+  size_type n=k;
   ScalarDerivative<X> result(x.degree());
-  for(uint i=0; i<=std::min(result.degree(),n); ++i) {
+  for(size_type i=0; i<=std::min(size_type(result.degree()),n); ++i) {
     int j=n-i;
     result[i]=(Numeric::factorial<int>(n)/Numeric::factorial<int>(j))*pow(x[0],j);
   }
@@ -162,7 +162,7 @@ Function::sqrt(const ScalarDerivative<X>& x)
   ScalarDerivative<X> y(x.degree());
   y[0]=sqrt(x[0]);
   X mhr=(-0.5)/x[0];
-  for(uint i=1; i<=y.degree(); ++i) {
+  for(size_type i=1; i<=y.degree(); ++i) {
     y[i]=(2*int(i)-3)*mhr*y[i-1];
   }
   compute_composition(y,x);
@@ -175,7 +175,7 @@ Function::exp(const ScalarDerivative<X>& x)
 {
   ScalarDerivative<X> y(x.degree());
   y[0]=exp(x[0]);
-  for(uint i=1; i<=y.degree(); ++i) {
+  for(size_type i=1; i<=y.degree(); ++i) {
     y[i]=y[0];
   }
   compute_composition(y,x);
@@ -189,7 +189,7 @@ Function::log(const ScalarDerivative<X>& x)
   ScalarDerivative<X> y(x.degree());
   y[0]=log(x[0]);
   X mr=(-1)/x[0];
-  for(uint i=1; i!=y.degree();++i) {
+  for(size_type i=1; i!=y.degree();++i) {
     y[i]=(-Numeric::factorial<int>(i-1))*pow(x[0],i);
   }
   compute_composition(y,x);
@@ -200,11 +200,11 @@ template<class X>
 Function::ScalarDerivative<X> 
 Function::sin(const ScalarDerivative<X>& x) 
 {
-  uint d=x.degree();
+  size_type d=x.degree();
   ScalarDerivative<X> y(d);
   y[0]=sin(x[0]);
   y[1]=cos(x[0]);
-  for(uint i=2; i!=d; ++i) {
+  for(size_type i=2; i!=d; ++i) {
     y[i]=-y[i-2];
   }
   compute_composition(y,x);
@@ -215,11 +215,11 @@ template<class X>
 Function::ScalarDerivative<X> 
 Function::cos(const ScalarDerivative<X>& x) 
 {
-  uint d=x.degree();
+  size_type d=x.degree();
   ScalarDerivative<X> y(d);
   y[0]=cos(x[0]);
   y[1]=-sin(x[0]);
-  for(uint i=2; i!=d; ++i) {
+  for(size_type i=2; i!=d; ++i) {
     y[i]=-y[i-2];
   }
   compute_composition(y,x);
@@ -350,7 +350,7 @@ template<class X> inline
 std::ostream& 
 Function::operator<<(std::ostream& os, const ScalarDerivative<X>& x) {
   os << "ScalarDerivative";
-  for(uint i=0; i<=x.degree(); ++i) {
+  for(size_type i=0; i<=x.degree(); ++i) {
     os << (i==0 ? '(' : ',') << x[i]; 
   }
   os << ")";

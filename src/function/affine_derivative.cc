@@ -1,8 +1,8 @@
 /***************************************************************************
- *            flow.code.h
+ *            first_derivative.cc
  *
- *  Copyright  2007  Pieter Collins
- *  pieter.collins@cwi.nl
+ *  Copyright  2007  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -20,9 +20,26 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
-#include "flow.h"
+
+#include "numeric/rational.h"
+#include "numeric/float.h"
+
+#include "linear_algebra/covector.h"
+
+#include "function/affine_derivative.h"
 
 namespace Ariadne {
+  namespace Function {
+    using namespace Numeric;
+    using namespace LinearAlgebra;
+    
+#ifdef ENABLE_FLOAT64
+    template class AffineDerivative< Interval64 >;
+#endif
+    
+#ifdef ENABLE_FLOATMP
+    template class AffineDerivative< IntervalMP >;
+#endif
 
+  }
 }

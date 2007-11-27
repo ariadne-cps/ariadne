@@ -36,20 +36,27 @@
 #include "../base/exceptions.h"
 #include "../base/stlio.h"
 
+#include "../numeric/declarations.h"
+#include "../linear_algebra/declarations.h"
+
 #include "../numeric/exceptions.h"
 #include "../numeric/numerical_traits.h"
 #include "../numeric/conversion.h"
 #include "../numeric/arithmetic.h"
 #include "../numeric/function.h"
 
+
 namespace Ariadne {
   namespace Function {
   
     class MultiIndex;
-    template<class X> class ScalarDerivative;
+    template<class X> class TaylorSeries;
+    template<class X> class TaylorVariable;
+  
+    template<class X> class TaylorVariableReference;
   
     /*!\ingroup Function
-     * \brief A templated class representing a the derivatives of a scalar quantity with respect to a multiple arguments.
+     * \brief A templated class representing a the derivatives of a vector quantity with respect to a multiple arguments.
      */
     template<class X>
     class TaylorDerivative
@@ -60,18 +67,18 @@ namespace Ariadne {
       /*! \brief Default constructor constructs a constant of degree zero. */
       TaylorDerivative();
       /*! \brief The constant zero of degree \a d in \a a arguments. */
-      TaylorDerivative(uint a, uint d);
-      /*! \brief The constant \a x of degree \a d in \a arguments. */
-      TaylorDerivative(uint a, uint d, const X& c);
-      /*! \brief The  \a i<sup>th</sup> variable of \a a, with value \a x and degree \a d. */
-      TaylorDerivative(uint a, uint d, uint i, const X& x);
+      TaylorDerivative(size_type r, size_type a, smoothness_type d);
       /*! \brief A taylor derivative of degree \a d in \a arguments, with values given by the array based at \a ptr. */
-      template<class XX> TaylorDerivative(uint a, uint d, const XX* ptr);
+      template<class XX> TaylorDerivative(size_type r, size_type a, smoothness_type d, const XX* ptr);
 
+      /*! \brief Construct from a univariate Taylor series. */
+      template<class XX> TaylorDerivative(const TaylorSeries<XX>& ts); 
+      /*! \brief Construct from a scalar Taylor variable. */
+      template<class XX> TaylorDerivative(const TaylorVariable<XX>& tv); 
       /*! \brief Copy constructor. */
-      template<class XX> TaylorDerivative(const TaylorDerivative<XX>& other); 
+      template<class XX> TaylorDerivative(const TaylorDerivative<XX>& td); 
       /*! \brief Copy assignment operator. */
-      template<class XX> TaylorDerivative<X>& operator=(const TaylorDerivative<XX>& other);
+      template<class XX> TaylorDerivative<X>& operator=(const TaylorDerivative<XX>& td);
 
       /*! \brief Equality operator. */
       template<class XX> bool operator==(const TaylorDerivative<XX>& other);
@@ -79,26 +86,37 @@ namespace Ariadne {
       template<class XX> bool operator!=(const TaylorDerivative<XX>& other);
 
       /*! \brief Construct a constant derivative of degree \a d with respect to \a as variables and value \a c. */
-      static TaylorDerivative<X> constant(uint as, uint d, const X& c); 
-      /*! \brief Construct the derivative of degree \a d at value \a value with respect to the \a i<sup>th</sup> variable of \a as. */
-      static TaylorDerivative<X> variable(uint as, uint d, uint i, const X& value);
+      template<class V> static TaylorDerivative<X> constant(size_type rs, size_type as, smoothness_type d, const V& c); 
+      /*! \brief Construct the derivative of degree \a d at values \a x. Requires rs==as. */
+      template<class V> static TaylorDerivative<X> variable(size_type rs, size_type as, smoothness_type d, const V& x);
 
       /*! \brief The number of variables of the argument. */
-      uint argument_size() const; 
+      size_type result_size() const; 
+      /*! \brief The number of variables of the argument. */
+      size_type argument_size() const; 
       /*! \brief The degree (number of derivatives computed). */
-      uint degree() const; 
-      /*! \brief The value of the quantity. */
-      const X& value() const;
-      /*! \brief A reference to the value of the quantity. */
-      X& value();
+      smoothness_type degree() const; 
+      /*! \brief The value of the vector quantity. */
+      LinearAlgebra::Vector<X> value() const; 
+      /*! \brief The value of the vector quantity. */
+      LinearAlgebra::Matrix<X> jacobian() const; 
+
+      /*! \brief The derivative of the \a i<sup>th</sup> variable with respect to multi-index \a j. */
+      const X& get(const size_type& i, const MultiIndex& j) const;
+      /*! \brief Set the derivative of the \a i<sup>th</sup> variable with respect to multi-index \a j. */
+      template<class XX> void set(const size_type& i, const MultiIndex& j, const XX& x);
+      /*! \brief The derivative values of the \a i<sup>th</sup> variable. */
+      TaylorVariable<X> get(const size_type& i) const;
+      /*! \brief Set the derivative of the \a i<sup>th</sup> variable. */
+      template<class XX> void set(const size_type& i, const TaylorVariable<XX> tv);
       /*! \brief The array of derivative values. */
       const array<X>& data() const;
       /*! \brief A reference to the array of derivative values. */
       array<X>& data();
-      /*! \brief A reference to the \a i<sup> th</sup> derivative \f$D^af=d^{|a|}f/dx_1^{a_1}\cdots dx_n^{a_n}\f$. */
-      X& operator[](const MultiIndex& a); 
-      /*! \brief The \a i<sup> th</sup> derivative \f$D^af=d^{|a|}f/dx_1^{a_1}\cdots dx_n^{a_n}\f$. */
-      const X& operator[](const MultiIndex& a) const; 
+      /*! \brief A reference to the \a i<sup> th</sup> component. */
+      TaylorVariableReference<X> operator[](const size_type& i); 
+      /*! \brief The \a i<sup> th</sup> component. */
+      TaylorVariable<X> operator[](const size_type& i) const; 
 #ifdef DOXYGEN
     //@{ 
     //! \name Friend operations
@@ -106,102 +124,53 @@ namespace Ariadne {
      *  The composition inductively by
      *  \f$ y^{[n]} = \sum_{i=0}^{n-1} \Bigl(\!\begin{array}{c}n\\i\end{array}\!\Bigr) {\dot{y}}^{[i]} x^{(n-i)} \f$
      */
+    friend TaylorVariable<X> compose(const TaylorVariable<X>& y, const TaylorDerivative<X>& x);
+    /*! \brief The composition of two derivatives computes \f$d^iy/dt^i\f$ from \f$d^iy/dx^i\f$ and \f$d^ix/dt^i\f$. 
+     *  The composition inductively by
+     *  \f$ y^{[n]} = \sum_{i=0}^{n-1} \Bigl(\!\begin{array}{c}n\\i\end{array}\!\Bigr) {\dot{y}}^{[i]} x^{(n-i)} \f$
+     */
     friend TaylorDerivative<X> compose(const TaylorDerivative<X>& y, const TaylorDerivative<X>& x);
     /*! \brief The derivative of the inverse of \f$y\f$ evaluated at \f$x\f$. (Not currently implemented.) */
     friend TaylorDerivative<X> inverse(const TaylorDerivative<X>& y, const X& x);
-    /*! \brief The minimum of two derivatives. Returns the derivative whose zero-th order value is minimal. */
-    friend TaylorDerivative<X> min(const TaylorDerivative<X>& x1, const TaylorDerivative<X>& x2);
-    /*! \brief The maximum of two derivatives. Returns the derivative whose zero-th order value is maximal. */
-    friend TaylorDerivative<X> max(const TaylorDerivative<X>& x1, const TaylorDerivative<X>& x2);
-    /*! \brief The derivatives of \f$+x\f$. Returns a copy. */
-    friend TaylorDerivative<X> pos(const TaylorDerivative<X>& x);
-    /*! \brief The derivatives of \f$-x\f$. */
-    friend TaylorDerivative<X> neg(const TaylorDerivative<X>& x);
-    /*! \brief The derivatives of \f$x+y\f$. */
+   /*! \brief The derivatives of \f$x+y\f$. */
     friend TaylorDerivative<X> add(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y);
     /*! \brief The derivatives of \f$x-y\f$. */
     friend TaylorDerivative<X> sub(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y);
-    /*! \brief The derivatives of \f$x*y\f$. */
-    friend TaylorDerivative<X> mul(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y);
-    /*! \brief The derivatives of \f$x/y\f$. */
-    friend TaylorDerivative<X> div(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y);
-    /*! \brief The derivatives of \f$x^n\f$. */
-    friend TaylorDerivative<X> pow(const TaylorDerivative<X>& x, const Integer& n);
-    /*! \brief The derivatives of \f$\sqrt{x}\f$. */
-    friend TaylorDerivative<X> sqrt(const TaylorDerivative<X>& x);
-    /*! \brief The derivatives of \f$\exp(x)\f$. */
-    friend TaylorDerivative<X> exp(const TaylorDerivative<X>& x);
-    /*! \brief The derivatives of \f$\log(x)\f$. */
-    friend TaylorDerivative<X> log(const TaylorDerivative<X>& x);
-    /*! \brief The derivatives of \f$\sin(x)\f$. */
-    friend TaylorDerivative<X> sin(const TaylorDerivative<X>& x);
-    /*! \brief The derivatives of \f$\cos(x)\f$. */
-    friend TaylorDerivative<X> cos(const TaylorDerivative<X>& x);
-    /*! \brief The derivatives of \f$\tan(x)\f$. */
-    friend TaylorDerivative<X> tan(const TaylorDerivative<X>& x);
-    /*! \brief The derivatives of \f$\sin^{-1}(x)\f$. (Not currently implemented.) */
-    friend TaylorDerivative<X> asin(const TaylorDerivative<X>& x);
-    /*! \brief The derivatives of \f$\cos^{-1}(x)\f$. (Not currently implemented.) */
-    friend TaylorDerivative<X> acos(const TaylorDerivative<X>& x);
-    /*! \brief The derivatives of \f$\tan^{-1}(x)\f$. (Not currently implemented.) */
-    friend TaylorDerivative<X> atan(const TaylorDerivative<X>& x);
 
     /*! \brief The derivatives of \f$x+y\f$. */
     friend TaylorDerivative<X> operator+(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y);
     /*! \brief The derivatives of \f$x-y\f$. */
     friend TaylorDerivative<X> operator-(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y);
-    /*! \brief The derivatives of \f$x*y\f$. */
-    friend TaylorDerivative<X> operator*(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y);
-    /*! \brief The derivatives of \f$x/y\f$. */
-    friend TaylorDerivative<X> operator/(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y);
-
-    /*! \brief The derivatives of \f$c+x\f$ for a constant \f$c\f$. (Other mixed-mode arithmetic is also supported.) */
-    friend TaylorDerivative<X> operator+(const R& c, const TaylorDerivative<X>& x);
 
     /*! \brief Stream output operator. */
     friend std::ostream& operator<<(std::ostream& os, const TaylorDerivative<X>& x);
     //@}
 #endif 
      private:
-      uint _argument_size;
-      uint _degree;
+      size_type _increment() const;
+     private:
+      size_type _result_size;
+      size_type _argument_size;
+      smoothness_type _degree;
       array<X> _data;
     };
 
 
-  template<class X0, class X1, class X2> void compute_product(TaylorDerivative<X0>& x0, const TaylorDerivative<X1>& x1, const TaylorDerivative<X2>& x2);
-  template<class X0, class X1, class X2> void compute_composition(TaylorDerivative<X0>& z, const ScalarDerivative<X1>& y, const TaylorDerivative<X2>& x);
+  template<class X0, class X1, class X2> void compute_composition(TaylorVariable<X0>& z, const TaylorVariable<X1>& y, const TaylorDerivative<X2>& x);
+  template<class X0, class X1, class X2> void compute_composition(TaylorDerivative<X0>& z, const TaylorDerivative<X1>& y, const TaylorDerivative<X2>& x);
 
-  template<class X> TaylorDerivative<X> compose(const ScalarDerivative<X>& y, const TaylorDerivative<X>& x);
+  template<class X> TaylorVariable<X> compose(const TaylorVariable<X>& y, const TaylorDerivative<X>& x);
+  template<class X> TaylorDerivative<X> compose(const TaylorDerivative<X>& y, const TaylorDerivative<X>& x);
   template<class X> TaylorDerivative<X> reduce(const TaylorDerivative<X>& x);
   template<class X> TaylorDerivative<X> derivative(const TaylorDerivative<X>& x, const size_type& k);
-  template<class X> TaylorDerivative<X> min(const TaylorDerivative<X>& x1, const TaylorDerivative<X>& x2); 
-  template<class X> TaylorDerivative<X> max(const TaylorDerivative<X>& x1,const TaylorDerivative<X>& x2); 
-  template<class X> TaylorDerivative<X> pos(const TaylorDerivative<X>& x);
   template<class X> TaylorDerivative<X> neg(const TaylorDerivative<X>& x);
-  template<class X> TaylorDerivative<X> abs(const TaylorDerivative<X>& x);
-  template<class X> TaylorDerivative<X> inv(const TaylorDerivative<X>& x);
   template<class X> TaylorDerivative<X> add(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y);
   template<class X> TaylorDerivative<X> sub(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y);
-  template<class X> TaylorDerivative<X> mul(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y);
-  template<class X> TaylorDerivative<X> div(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y);
-  template<class X, class N> TaylorDerivative<X> pow(const TaylorDerivative<X>& x, N k);
 
-  template<class X> TaylorDerivative<X> sqrt(const TaylorDerivative<X>& x);
-  template<class X> TaylorDerivative<X> exp(const TaylorDerivative<X>& x); 
-  template<class X> TaylorDerivative<X> log(const TaylorDerivative<X>& x); 
-  template<class X> TaylorDerivative<X> sin(const TaylorDerivative<X>& x); 
-  template<class X> TaylorDerivative<X> cos(const TaylorDerivative<X>& x); 
-  template<class X> TaylorDerivative<X> tan(const TaylorDerivative<X>& x); 
-  template<class X> TaylorDerivative<X> asin(const TaylorDerivative<X>& x); 
-  template<class X> TaylorDerivative<X> acos(const TaylorDerivative<X>& x); 
-  template<class X> TaylorDerivative<X> atan(const TaylorDerivative<X>& x); 
-
+  template<class X> TaylorDerivative<X> operator+(const TaylorDerivative<X>& x);
   template<class X> TaylorDerivative<X> operator-(const TaylorDerivative<X>& x);
   template<class X> TaylorDerivative<X> operator+(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y);
   template<class X> TaylorDerivative<X> operator-(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y);
-  template<class X> TaylorDerivative<X> operator*(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y);
-  template<class X> TaylorDerivative<X> operator/(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y);
 
   template<class X, class R> TaylorDerivative<X> operator+(const TaylorDerivative<X>& x, const R& c);
   template<class X, class R> TaylorDerivative<X> operator+(const R& c, const TaylorDerivative<X>& x);

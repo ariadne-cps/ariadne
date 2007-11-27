@@ -279,7 +279,7 @@ Function::TaylorModel<R>::evaluate(const LinearAlgebra::Vector<F>& x) const
   for(MultiIndex j(this->argument_size()); j.degree()<=this->order(); ++j) {
     F xa=1;
     for(size_type k=0; k!=j.number_of_variables(); ++k) {
-      xa*=Numeric::pow(x[k],j[k]);
+      xa*=Numeric::pow(x[k],int(j[k]));
     }
     for(size_type i=0; i!=this->result_size(); ++i) {
       result[i]+=this->get(i,j)*xa;

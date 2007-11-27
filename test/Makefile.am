@@ -35,6 +35,8 @@ check_PROGRAMS = \
 	test_function \
 	test_index \
 	test_polynomial \
+	test_affine_variable \
+	test_taylor_variable \
 	test_scalar_derivative \
 	test_taylor_derivative \
 	test_multivariable_derivative \

@@ -35,8 +35,9 @@ COMBINATORIC_SRC = \
 
 FUNCTION_SRC = \
 	function/interpreted_function.cc \
-	function/affine_variable.cc function/affine_model.cc \
-	function/taylor_model.cc \
+	function/affine_variable.cc function/affine_derivative.cc function/affine_model.cc \
+	function/taylor_series.cc \
+	function/taylor_variable.cc function/taylor_derivative.cc function/taylor_model.cc \
 	function/polynomial.cc
 
 GEOMETRY_SRC = \
@@ -77,6 +78,7 @@ EVALUATION_SRC = \
 	evaluation/euler_integrator.cc \
 	evaluation/affine_integrator.cc \
 	evaluation/lohner_integrator.cc \
+	evaluation/taylor_integrator.cc \
 	evaluation/bounder.cc \
 	evaluation/detector.cc \
 	evaluation/flower.cc \
@@ -102,10 +104,14 @@ OUTPUT_SRC = \
 INPUT_SRC = \
 	input/modelica.cc 
 
+MODELS_SRC = \
+	models/henon.cc \
+	models/duffing.cc
+
 
 noinst_LTLIBRARIES = libbase.la libnumeric.la liblinearalgebra.la liblinearprogramming.la \
 	libcombinatoric.la libfunction.la libgeometry.la libsystem.la libevaluation.la \
-	liboutput.la libinput.la
+	liboutput.la libinput.la libmodels.la
 
 lib_LTLIBRARIES = libariadne.la libgeometric.la 
 libariadne_la_LIBADD = $(noinst_LTLIBRARIES) -lmpfr -lgmpxx
@@ -129,6 +135,7 @@ libsystem_la_SOURCES = $(SYSTEM_SRC)
 libevaluation_la_SOURCES = $(EVALUATION_SRC)
 liboutput_la_SOURCES = $(OUTPUT_SRC)
 libinput_la_SOURCES = $(INPUT_SRC)
+libmodels_la_SOURCES = $(MODELS_SRC)
 
 
 EXTRA_DIST =  

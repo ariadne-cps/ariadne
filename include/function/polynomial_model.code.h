@@ -175,7 +175,7 @@ Function::Monomial<R>::evaluate(const LinearAlgebra::Vector<F>& s) const
   ARIADNE_CHECK_ARGUMENT_SIZE(*this,s,"Monomial<R>::evaluate(Point<R>)");
   result_type result=_coefficient;
   for(size_type k=0; k!=this->argument_size(); ++k) {
-    result *= pow(s[k],_multi_index[k]);
+    result *= pow(s[k],int(_multi_index[k]));
   }
   return result;
 }

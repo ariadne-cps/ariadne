@@ -222,6 +222,14 @@ namespace Ariadne {
       return pow(q,int(n));
     }      
     
+    template<> inline Rational pow(const Rational& q, const short& n) {
+      return pow(q,int(n));
+    }      
+    
+    template<> inline Rational pow(const Rational& q, const unsigned short& n) {
+      return pow(q,int(n));
+    }      
+    
     template<> inline Rational floor(const Rational& x) { 
       return Rational((x.get_num()+x.get_den()-1)/x.get_den()); }
     template<> inline Rational ceil(const Rational& x) { 

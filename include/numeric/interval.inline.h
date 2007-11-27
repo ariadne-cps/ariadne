@@ -387,13 +387,13 @@ namespace Ariadne {
 
 
     template<class R> inline
-    Interval<R> operator+=(Interval<R>& x1, const Interval<R>& x2) {
+    Interval<R>& operator+=(Interval<R>& x1, const Interval<R>& x2) {
       //std::cerr << "operator+=(" << name< Interval<R> >() << "," << name< Interval<R> >() << ")\n";
       return x1=x1+x2;
     }
 
     template<class R> inline
-    Interval<R> operator+=(Interval<R>& x1, const R& x2) {
+    Interval<R>& operator+=(Interval<R>& x1, const R& x2) {
       //std::cerr << "operator+=(" << name< Interval<R> >() << "," << name<R>() << ")\n";
       return x1=x1+x2;
     }
@@ -417,12 +417,12 @@ namespace Ariadne {
     }
 
     template<class R> inline
-    Interval<R> operator-=(Interval<R>& x1, const Interval<R>& x2) {
+    Interval<R>& operator-=(Interval<R>& x1, const Interval<R>& x2) {
       return x1=x1-x2;
     }
 
     template<class R> inline
-    Interval<R> operator-=(Interval<R>& x1, const R& x2) {
+    Interval<R>& operator-=(Interval<R>& x1, const R& x2) {
       return x1=x1-x2;
     }
 
@@ -475,12 +475,12 @@ namespace Ariadne {
     }
 
     template<class R> inline
-    Interval<R> operator*=(Interval<R>& x1, const Interval<R>& x2) {
+    Interval<R>& operator*=(Interval<R>& x1, const Interval<R>& x2) {
       return x1=x1*x2;
     }
 
     template<class R> inline
-    Interval<R> operator*=(Interval<R>& x1, const R& x2) {
+    Interval<R>& operator*=(Interval<R>& x1, const R& x2) {
       return x1=x1*x2;
     }
 
@@ -525,12 +525,12 @@ namespace Ariadne {
     }
 
     template<class R> inline
-    Interval<R> operator/=(Interval<R>& x1, const Interval<R>& x2) {
+    Interval<R>& operator/=(Interval<R>& x1, const Interval<R>& x2) {
       return x1=x1/x2;
     }
 
     template<class R> inline
-    Interval<R> operator/=(Interval<R>& x1, const R& x2) {
+    Interval<R>& operator/=(Interval<R>& x1, const R& x2) {
       return x1=x1/x2;
     }
 
@@ -617,6 +617,28 @@ namespace Ariadne {
     template<class R> inline
     Interval<R> operator/(const double& x1, const Interval<R>& x2) {
       return Interval<R>(x1)/x2; 
+    }
+
+
+
+    template<class R, class X> inline
+    Interval<R>& operator+=(Interval<R>& x1, const X& x2) {
+      return x1=x1+x2;
+    }
+
+    template<class R, class X> inline
+    Interval<R>& operator-=(Interval<R>& x1, const X& x2) {
+      return x1=x1-x2;
+    }
+
+    template<class R, class X> inline
+    Interval<R>& operator*=(Interval<R>& x1, const X& x2) {
+      return x1=x1*x2;
+    }
+
+    template<class R, class X> inline
+    Interval<R>& operator/=(Interval<R>& x1, const X& x2) {
+      return x1=x1/x2;
     }
 
 

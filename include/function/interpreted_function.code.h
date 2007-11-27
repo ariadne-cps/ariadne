@@ -33,7 +33,7 @@
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
 #include "../function/exceptions.h"
-#include "../function/first_derivative.h"
+#include "../function/affine_variable.h"
 #include "../function/virtual_machine.h"
 #include "../input/modelica.h"
 
@@ -157,19 +157,19 @@ template<class R>
 LinearAlgebra::Matrix<typename Function::InterpretedFunction<R>::A>
 Function::InterpretedFunction<R>::jacobian(const LinearAlgebra::Vector<A>& x) const
 {
-  typedef FirstDerivative< A,LinearAlgebra::Vector<A> > FD;
+  typedef AffineVariable<A> FD;
   size_type m=this->result_size();
   size_type n=this->argument_size();
-  FD dx(0.0,n);
+  FD dx=FD::constant(n,0.0);
   array<FD> y(m,dx);
   array<FD> a(n,dx);
   array<FD> t(this->_intermediates_size);
   array<FD> c(this->_constants_size);
   for(size_type i=0; i!=n; ++i) {
-    a[i]=FD(x[i],n,i);
+    a[i]=FD::variable(n,i,x[i]);
   }
   for(size_type i=0; i!=c.size(); ++i) {
-    c[i]=FD(A(this->_constants[i]),n);
+    c[i]=FD::constant(n,this->_constants[i]);
   }
   ARIADNE_LOG(7,"y="<<y<<"  a="<<a<<"  t="<<t<<"  c="<<c);
   FD* args[4]={ y.begin(), a.begin(), t.begin(), c.begin() };

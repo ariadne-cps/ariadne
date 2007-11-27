@@ -53,8 +53,8 @@ ARIADNE_SRC = ariadne_module.cc \
 	export_linear_program.cc \
 	 \
 	export_function.cc \
-	export_first_derivative.cc \
-	export_scalar_derivative.cc \
+	export_taylor_series.cc \
+	export_taylor_variable.cc \
 	export_taylor_derivative.cc \
 	 \
 	export_point.cc \

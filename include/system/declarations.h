@@ -44,6 +44,9 @@ namespace Ariadne {
     template<class R> class VectorFieldInterface;
     template<class R> class AffineVectorField;
 
+    template<class R> class FlowInterface;
+    template<class R> class TaylorFlow;
+
     template<class R> class SetBasedDiscreteMode;
     template<class R> class SetBasedDiscreteTransition;
     template<class R> class SetBasedHybridAutomaton;

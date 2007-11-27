@@ -55,7 +55,8 @@ namespace Ariadne {
       /*! Construct a multi index of degree \a 0 with \a nv variables. */
       explicit MultiIndex(size_type nv);
       /*! Construct a multi index with \a nv variables from the array \a ary. */
-      explicit MultiIndex(size_type nv, const size_type* ary);
+      explicit MultiIndex(size_type nv, const smoothness_type* ary);
+      explicit MultiIndex(size_type nv, const uint* ary);
       /*! Construct a multi index from the sorted index \a a. */
       MultiIndex(const SortedIndex& a);
       /*! Construct a multi index from the positional index \a a. */
@@ -66,11 +67,11 @@ namespace Ariadne {
       MultiIndex& operator=(const MultiIndex& a);
 
       /*! The degree of the multi-index, equal to the sum of the number of occurrences of the variables. */
-      const size_type degree() const;
+      const smoothness_type degree() const;
       /*! The number of variables. */
       const size_type number_of_variables() const;
       /*! The number of occurrences of the \a i th variable. */
-      const size_type& operator[](const size_type& i) const;
+      const smoothness_type& operator[](const size_type& i) const;
      
       /*! Equality operator. */
       bool operator==(const MultiIndex& a) const;
@@ -100,36 +101,42 @@ namespace Ariadne {
       size_type number() const;
       
       /*! Set the value of the \a i th index to \a j. */
-      void set_index(const size_type& i, const size_type j);
+      void set_index(const size_type& i, const smoothness_type j);
       /*! Increment the the \a i th index, thereby increasing the degree. */
       void increment_index(const size_type& i);
       /*! Decrement the the \a i th index, thereby decreasing the degree. */
       void decrement_index(const size_type& i);
       
       /*! Set the value of the \a i th index to \a j. */
-      void set(const size_type& i, const size_type j);
+      void set(const size_type& i, const smoothness_type j);
       friend std::ostream& operator<<(std::ostream&, const MultiIndex&);
      private:
-      size_type _degree;
-      array<size_type> _occurrences;
+      smoothness_type _degree;
+      array<smoothness_type> _occurrences;
     };
       
 
 
     
     inline MultiIndex::MultiIndex(size_type nv)
-      : _degree(0u), _occurrences(nv,0u) 
+      : _degree(0), _occurrences(nv,0) 
     {
     }
 
-    inline MultiIndex::MultiIndex(size_type nv, const size_type* ary)
-      : _degree(0u), _occurrences(nv,0u) 
+    inline MultiIndex::MultiIndex(size_type nv, const smoothness_type* ary)
+      : _degree(0), _occurrences(nv) 
+    {
+      for(size_type i=0; i!=nv; ++i) { this->_occurrences[i]=ary[i]; this->_degree+=ary[i]; }
+    }
+
+    inline MultiIndex::MultiIndex(size_type nv, const uint* ary)
+      : _degree(0), _occurrences(nv) 
     {
       for(size_type i=0; i!=nv; ++i) { this->_occurrences[i]=ary[i]; this->_degree+=ary[i]; }
     }
 
     inline MultiIndex::MultiIndex(const SortedIndex& a)
-      : _degree(0u), _occurrences(a.number_of_variables(),0u)
+      : _degree(0), _occurrences(a.number_of_variables(),0)
     { 
       for(size_type i=0; i!=a.degree(); ++i) { this->increment_index(a[i]); } 
     }
@@ -143,7 +150,7 @@ namespace Ariadne {
       this->_degree=a._degree; this->_occurrences=a._occurrences; return *this; }
 
 
-    inline const size_type MultiIndex::degree() const { 
+    inline const smoothness_type MultiIndex::degree() const { 
       return this->_degree; 
     }
 
@@ -151,7 +158,7 @@ namespace Ariadne {
       return this->_occurrences.size(); 
     }
 
-    inline const size_type& MultiIndex::operator[](const size_type& i) const {
+    inline const smoothness_type& MultiIndex::operator[](const size_type& i) const {
       assert(i<this->number_of_variables()); return this->_occurrences[i]; 
     }
      
@@ -164,7 +171,7 @@ namespace Ariadne {
       return !(*this==a); 
     }
 
-    inline void MultiIndex::set_index(const size_type& i, const size_type j) { 
+    inline void MultiIndex::set_index(const size_type& i, const smoothness_type j) { 
       this->_degree+=(j-this->_occurrences[i]); this->_occurrences[i]=j; 
     }
 
@@ -180,7 +187,7 @@ namespace Ariadne {
       --this->_degree; 
     }
       
-    inline void MultiIndex::set(const size_type& i, const size_type j) { 
+    inline void MultiIndex::set(const size_type& i, const smoothness_type j) { 
       this->set_index(i,j); 
     }
 

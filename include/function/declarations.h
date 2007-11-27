@@ -39,7 +39,13 @@ namespace Ariadne {
      
     template<class R> class Polynomial;
 
+    template<class R> class AffineVariable;
+    template<class R> class AffineDerivative;
     template<class R> class AffineModel;
+
+    template<class R> class TaylorSeries;
+    template<class R> class TaylorVariable;
+    template<class R> class TaylorDerivative;
     template<class R> class TaylorModel;
 
   }

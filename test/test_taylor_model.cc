@@ -96,8 +96,8 @@ class TestTaylorModel
     TaylorModel<R> p(2,2,2,2,a);
     TaylorModel<R> p0(1,2,2,2,a0);
     TaylorModel<R> p1(1,2,2,2,a1);
-    ARIADNE_CHECK(p.component(0),p0);
-    ARIADNE_CHECK(p.component(1),p1);
+    ARIADNE_TEST_CHECK(p.component(0),p0);
+    ARIADNE_TEST_CHECK(p.component(1),p1);
   }
 
   void test_add() {
@@ -157,8 +157,8 @@ class TestTaylorModel
     //std::cout << "p3=" << p3 << std::endl;
     //std::cout << "compose(p1,p2)=" << compose(p1,p2) << std::endl;
     //std::cout << "compose(p2,p3)=" << compose(p2,p3) << std::endl;
-    ARIADNE_CHECK(compose(p1,p2),TaylorModel<F>(1,2,2,2,r12));
-    ARIADNE_CHECK(compose(p2,p3),TaylorModel<F>(2,3,2,2,r23));
+    ARIADNE_TEST_CHECK(compose(p1,p2),TaylorModel<F>(1,2,2,2,r12));
+    ARIADNE_TEST_CHECK(compose(p2,p3),TaylorModel<F>(2,3,2,2,r23));
   }
 
 
@@ -181,13 +181,13 @@ class TestTaylorModel
     Matrix<R> j10(1,2,aj10);
     Matrix<R> j11(1,2,aj11);
     Matrix<R> j12(1,2,aj12);
-    ARIADNE_PRINT(p1);
-    ARIADNE_PRINT(v0);
-    ARIADNE_PRINT(v1);
-    ARIADNE_PRINT(v2);
-    ARIADNE_CHECK(p1.jacobian(v0),j11);
-    ARIADNE_CHECK(p1.jacobian(v1),j11);
-    ARIADNE_CHECK(p1.jacobian(v2),j12);
+    ARIADNE_TEST_PRINT(p1);
+    ARIADNE_TEST_PRINT(v0);
+    ARIADNE_TEST_PRINT(v1);
+    ARIADNE_TEST_PRINT(v2);
+    ARIADNE_TEST_CHECK(p1.jacobian(v0),j11);
+    ARIADNE_TEST_CHECK(p1.jacobian(v1),j11);
+    ARIADNE_TEST_CHECK(p1.jacobian(v2),j12);
   }
 
   void test_inverse() {
@@ -197,11 +197,11 @@ class TestTaylorModel
     Vector<R> v1(2,av1);
     double a1[12]={0,0,2,3,5,7,1,2,3,4,6,8};
     TaylorModel<R> p1(2,2,2,2,a1);
-    ARIADNE_PRINT(p1);
-    ARIADNE_PRINT(v0);
-    ARIADNE_PRINT(v1);
-    ARIADNE_EVALUATE(inverse(p1,v0));
-    //ARIADNE_EVALUATE(inverse(p1,v1));
+    ARIADNE_TEST_PRINT(p1);
+    ARIADNE_TEST_PRINT(v0);
+    ARIADNE_TEST_PRINT(v1);
+    ARIADNE_TEST_EVALUATE(inverse(p1,v0));
+    //ARIADNE_TEST_EVALUATE(inverse(p1,v1));
   }
 
   void test_latex_output() {

@@ -39,8 +39,6 @@ check_PROGRAMS = \
 	test_taylor_variable \
 	test_scalar_derivative \
 	test_taylor_derivative \
-	test_multivariable_derivative \
-	test_first_derivative \
 	test_affine_model \
 	test_taylor_model \
 	 \

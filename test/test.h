@@ -39,7 +39,7 @@ ariadne_check(std::ostream& os, const R& r, const ER& er) {
 }
 
 /*! \brief Catches an exception and writes a diagnostic to standard output and standard error. */
-#define ARIADNE_CATCH(message) \
+#define ARIADNE_TEST_CATCH(message) \
   catch(const std::exception& e) {          \
     ++ARIADNE_TEST_FAILURES;                                            \
     std::cout << "exception: \"" << e.what() << "\"\n" << std::endl;;                     \
@@ -53,7 +53,7 @@ ariadne_check(std::ostream& os, const R& r, const ER& er) {
 
 
 /*! \brief Calls a function */
-#define ARIADNE_CALL(function) \
+#define ARIADNE_TEST_CALL(function) \
 { \
   std::cout << #function << std::endl; \
   function; \
@@ -61,33 +61,33 @@ ariadne_check(std::ostream& os, const R& r, const ER& er) {
 } \
 
 
-/*! \brief Tries to execute \a statement, writing the statement to standard output. Writes a diagnostic report to standard error if an exception is thrown. <br> <b>Important:</b> Use the ARIADNE_CONSTRUCT() macro if \a statement declares a variable and calls a constructor. */
-#define ARIADNE_TRY(statement) \
+/*! \brief Tries to execute \a statement, writing the statement to standard output. Writes a diagnostic report to standard error if an exception is thrown. <br> <b>Important:</b> Use the ARIADNE_TEST_CONSTRUCT() macro if \a statement declares a variable and calls a constructor. */
+#define ARIADNE_TEST_TRY(statement) \
 { \
   std::cout << #statement << ": " << std::flush; \
   try { \
     statement;                      \
     std::cout << " (ok)\n" << std::endl;        \
   } \
-  ARIADNE_CATCH("Statement `" << #statement << "'")       \
+  ARIADNE_TEST_CATCH("Statement `" << #statement << "'")       \
 }\
 
 
 /*! \brief Writes the expression to the output. Does not catch errors. */
-#define ARIADNE_PRINT(expression) \
+#define ARIADNE_TEST_PRINT(expression) \
 { \
   std::cout << #expression << " = " << std::flush; \
   std::cout << (expression) << "\n" << std::endl; \
 }\
 
 /*! \brief Tries to evaluate \a expression, writing the expression and the result to standard ouput. Writes a diagnostic report to standard error if an exception is thrown., prints the result and gives a diagnostic if an exception is thrown. */
-#define ARIADNE_EVALUATE(expression) \
+#define ARIADNE_TEST_EVALUATE(expression) \
 { \
   std::cout << #expression << ": " << std::flush; \
   try { \
     std::cout << (expression) << "\n" << std::endl;      \
   } \
-  ARIADNE_CATCH("Expression `" << #expression << "'")       \
+  ARIADNE_TEST_CATCH("Expression `" << #expression << "'")       \
 }\
 
 /*! \brief Evaluates \a expression in a boolean context and checks if the result is \a true. */
@@ -107,7 +107,7 @@ ariadne_check(std::ostream& os, const R& r, const ER& er) {
 
 
 /*! \brief Evaluates \a expression and checks if the result is equal to \a expected. */
-#define ARIADNE_CHECK(expression,expected) \
+#define ARIADNE_TEST_CHECK(expression,expected) \
 { \
   std::cout << #expression << ": " << std::flush; \
   bool ok = ariadne_check(std::cout,expression,expected); \
@@ -122,32 +122,32 @@ ariadne_check(std::ostream& os, const R& r, const ER& er) {
 
 
 /*! \brief Constructs object \a variable of type \a class from \a expression. */
-#define ARIADNE_CONSTRUCT(class,variable,expression) \
+#define ARIADNE_TEST_CONSTRUCT(class,variable,expression) \
 { \
   std::cout << #class << " " << #variable << "" << #expression << ": " << std::flush; \
   try { \
     class variable expression;                                         \
     std::cout << #variable << "==" << variable << "\n" << std::endl;     \
   }                                       \
-  ARIADNE_CATCH("Constructor `" << #class << "" << #variable << "" << #expression << "'") \
+  ARIADNE_TEST_CATCH("Constructor `" << #class << "" << #variable << "" << #expression << "'") \
 } \
 class variable expression; \
 
 
 /*! \brief Assigns object \a variable from \a expression. */
-#define ARIADNE_ASSIGN(variable, expression) \
+#define ARIADNE_TEST_ASSIGN(variable, expression) \
 { \
   std::cout << #variable << "=" << #expression << ": " << std::flush; \
   try { \
     variable=(expression);                      \
     std::cout << variable << "\n" << std::endl; \
   }                                       \
-  ARIADNE_CATCH("Assignment `" << #variable << "=" << #expression << "'")   \
+  ARIADNE_TEST_CATCH("Assignment `" << #variable << "=" << #expression << "'")   \
 } \
 
 
 /*! \brief Evaluates expression and expects an exception. */
-#define ARIADNE_FAIL(statement) \
+#define ARIADNE_TEST_FAIL(statement) \
 { \
   std::cout << #statement << ": " << std::flush; \
   try { \

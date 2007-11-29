@@ -54,13 +54,13 @@ class TestTaylorVariable {
     x2=TaylorVariable<X>(2,4,a2);
     x3=TaylorVariable<X>(1,4,a3);
     
-    ARIADNE_CALL(test_degree());
-    ARIADNE_CALL(test_add());
-    ARIADNE_CALL(test_sub());
-    ARIADNE_CALL(test_mul());
-    ARIADNE_CALL(test_div());
-    ARIADNE_CALL(test_pow());
-    ARIADNE_CALL(test_compose());
+    ARIADNE_TEST_CALL(test_degree());
+    ARIADNE_TEST_CALL(test_add());
+    ARIADNE_TEST_CALL(test_sub());
+    ARIADNE_TEST_CALL(test_mul());
+    ARIADNE_TEST_CALL(test_div());
+    ARIADNE_TEST_CALL(test_pow());
+    ARIADNE_TEST_CALL(test_compose());
   }
 
   void test_degree() {

@@ -93,8 +93,8 @@ class TestPolynomial
     Polynomial<R> p(2,2,2,a);
     Polynomial<R> p0(1,2,2,a0);
     Polynomial<R> p1(1,2,2,a1);
-    ARIADNE_CHECK(p.component(0),p0);
-    ARIADNE_CHECK(p.component(1),p1);
+    ARIADNE_TEST_CHECK(p.component(0),p0);
+    ARIADNE_TEST_CHECK(p.component(1),p1);
   }
 
   void test_add() {
@@ -154,8 +154,8 @@ class TestPolynomial
     //std::cout << "p3=" << p3 << std::endl;
     //std::cout << "compose(p1,p2)=" << compose(p1,p2) << std::endl;
     //std::cout << "compose(p2,p3)=" << compose(p2,p3) << std::endl;
-    ARIADNE_CHECK(compose(p1,p2),Polynomial<F>(1,2,2,r12));
-    ARIADNE_CHECK(compose(p2,p3),Polynomial<F>(2,3,2,r23));
+    ARIADNE_TEST_CHECK(compose(p1,p2),Polynomial<F>(1,2,2,r12));
+    ARIADNE_TEST_CHECK(compose(p2,p3),Polynomial<F>(2,3,2,r23));
   }
 
   void test_derivative() {
@@ -167,8 +167,8 @@ class TestPolynomial
     std::cout << "p=" << p << std::endl;
     std::cout << "derivative(p,0)=" << derivative(p,0) << std::endl;
     std::cout << "derivative(p,1)=" << derivative(p,1) << std::endl;
-    ARIADNE_CHECK(derivative(p,0),Polynomial<F>(2,2,2,r0));
-    ARIADNE_CHECK(derivative(p,1),Polynomial<F>(2,2,2,r1));
+    ARIADNE_TEST_CHECK(derivative(p,0),Polynomial<F>(2,2,2,r0));
+    ARIADNE_TEST_CHECK(derivative(p,1),Polynomial<F>(2,2,2,r1));
   }
 
   void test_latex_output() {

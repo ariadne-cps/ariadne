@@ -37,9 +37,9 @@ class TestTribool
   TestTribool() : t(true), f(false), i(indeterminate) { std::cout << std::boolalpha; }
   
   void test_not() {
-    ARIADNE_EVALUATE(!t);
-    ARIADNE_EVALUATE(!f);
-    ARIADNE_EVALUATE(!i);
+    ARIADNE_TEST_EVALUATE(!t);
+    ARIADNE_TEST_EVALUATE(!f);
+    ARIADNE_TEST_EVALUATE(!i);
   }
 
   void test_equal() {
@@ -55,7 +55,7 @@ class TestTribool
   }
   
   void test_indeterminate() {
-    ARIADNE_EVALUATE(i==indeterminate);
+    ARIADNE_TEST_EVALUATE(i==indeterminate);
     ARIADNE_TEST_ASSERT(!bool(i==indeterminate));
     ARIADNE_TEST_ASSERT(!bool(i));
     ARIADNE_TEST_ASSERT(!indeterminate(t));

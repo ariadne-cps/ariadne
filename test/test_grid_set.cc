@@ -95,7 +95,7 @@ test_grid_set()
     gms.adjoin_outer_approximation(r);
     GridMaskSet<R>* gms_clone=gms.clone();
     ARIADNE_TEST_ASSERT(gms_clone->size()==gms.size());
-    ARIADNE_EVALUATE(*gms_clone);
+    ARIADNE_TEST_EVALUATE(*gms_clone);
     delete gms_clone;
   }
 

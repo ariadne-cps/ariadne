@@ -53,11 +53,11 @@ class TestMultivariableDerivative {
     x2=MultivariableDerivative<X>(1,2,4,a2);
     x3=MultivariableDerivative<X>(1,1,4,a3);
     
-    ARIADNE_CALL(test_degree());
-    ARIADNE_CALL(test_add());
-    ARIADNE_CALL(test_sub());
-    ARIADNE_CALL(test_compose());
-    ARIADNE_CALL(test_inverse());
+    ARIADNE_TEST_CALL(test_degree());
+    ARIADNE_TEST_CALL(test_add());
+    ARIADNE_TEST_CALL(test_sub());
+    ARIADNE_TEST_CALL(test_compose());
+    ARIADNE_TEST_CALL(test_inverse());
   }
 
   void test_degree() {

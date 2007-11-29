@@ -108,10 +108,10 @@ class TestLinearProgram
   } 
   
   void test() {
-    ARIADNE_CALL(test_feasibility());
-    ARIADNE_CALL(test_dual_feasibility());
-    ARIADNE_CALL(test_solve());
-    ARIADNE_CALL(test_tableau());
+    ARIADNE_TEST_CALL(test_feasibility());
+    ARIADNE_TEST_CALL(test_dual_feasibility());
+    ARIADNE_TEST_CALL(test_solve());
+    ARIADNE_TEST_CALL(test_tableau());
   }
 
 };

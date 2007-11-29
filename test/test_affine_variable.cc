@@ -53,12 +53,12 @@ class TestAffineVariable {
     x2=AffineVariable<X>(2u,a2);
     x3=AffineVariable<X>(1u,a3);
     
-    ARIADNE_CALL(test_degree());
-    ARIADNE_CALL(test_add());
-    ARIADNE_CALL(test_sub());
-    ARIADNE_CALL(test_mul());
-    ARIADNE_CALL(test_div());
-    ARIADNE_CALL(test_pow());
+    ARIADNE_TEST_CALL(test_degree());
+    ARIADNE_TEST_CALL(test_add());
+    ARIADNE_TEST_CALL(test_sub());
+    ARIADNE_TEST_CALL(test_mul());
+    ARIADNE_TEST_CALL(test_div());
+    ARIADNE_TEST_CALL(test_pow());
   }
 
   void test_degree() {

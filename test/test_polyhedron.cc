@@ -193,9 +193,9 @@ test_polyhedron<Rational>()
   cout << "test_polyhedron<" << name<R>() << ">" << endl;
   LinearAlgebra::Matrix<R> A("[1,7/8;-1,9/8;1/8,-9/4]");
   LinearAlgebra::Vector<R> b("[11/8,1/2,1/4]");
-  ARIADNE_CONSTRUCT(Polyhedron<R>,plhd,(A,b));
+  ARIADNE_TEST_CONSTRUCT(Polyhedron<R>,plhd,(A,b));
   ARIADNE_TEST_ASSERT(!plhd.empty());
-  ARIADNE_CONSTRUCT(Polytope<R>,pltp,(plhd));
+  ARIADNE_TEST_CONSTRUCT(Polytope<R>,pltp,(plhd));
   cout << "  Vertices should be (71/128,15/16), (-2/3,-4/7),  (212/151,-5/151)" << endl;
 
   Rectangle<R> r("[-3/4,3]x[-2/3,1]");
@@ -205,11 +205,11 @@ test_polyhedron<Rational>()
   ARIADNE_TEST_ASSERT(!subset(plhd,r));
   
   // Empty polyhedron 
-  ARIADNE_CONSTRUCT(Polyhedron<R>,eplhd,(Matrix<R>("[-1,0;0,-1;1,2]"),Vector<R>("[0,0,-1]")));
+  ARIADNE_TEST_CONSTRUCT(Polyhedron<R>,eplhd,(Matrix<R>("[-1,0;0,-1;1,2]"),Vector<R>("[0,0,-1]")));
   ARIADNE_TEST_ASSERT(eplhd.empty());
 
   // Unbounded polyhedron x,y>=0.
-  ARIADNE_CONSTRUCT(Polyhedron<R>,ubplhd,(Matrix<R>("[-1,0;0,-1]"),Vector<R>("[0,0]")));
+  ARIADNE_TEST_CONSTRUCT(Polyhedron<R>,ubplhd,(Matrix<R>("[-1,0;0,-1]"),Vector<R>("[0,0]")));
   ARIADNE_TEST_ASSERT(!ubplhd.empty());
   ARIADNE_TEST_ASSERT(!subset(ubplhd,r));
 

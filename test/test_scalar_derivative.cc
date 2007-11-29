@@ -50,14 +50,14 @@ class TestScalarDerivative {
     x2=ScalarDerivative<X>(3,2.0,1);
     x3=ScalarDerivative<X>("[2.0,1.0,0.1,0.0]");
     
-    ARIADNE_CALL(test_degree());
-    ARIADNE_CALL(test_add());
-    ARIADNE_CALL(test_sub());
-    ARIADNE_CALL(test_mul());
-    ARIADNE_CALL(test_div());
-    ARIADNE_CALL(test_pow());
-    ARIADNE_CALL(test_compose());
-    ARIADNE_CALL(test_inverse());
+    ARIADNE_TEST_CALL(test_degree());
+    ARIADNE_TEST_CALL(test_add());
+    ARIADNE_TEST_CALL(test_sub());
+    ARIADNE_TEST_CALL(test_mul());
+    ARIADNE_TEST_CALL(test_div());
+    ARIADNE_TEST_CALL(test_pow());
+    ARIADNE_TEST_CALL(test_compose());
+    ARIADNE_TEST_CALL(test_inverse());
   }
 
   void test_degree() {

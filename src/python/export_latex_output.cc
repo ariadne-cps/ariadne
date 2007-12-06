@@ -22,7 +22,7 @@
  */
 
 
-#include "python/python_float.h"
+#include "python/float.h"
 
 #include "numeric/integer.h"
 #include "numeric/rational.h"
@@ -55,11 +55,11 @@ void export_latex_output()
     .def("write",&write< char* >,return_internal_reference<1>())
     .def("write",&write< Integer >,return_internal_reference<1>())
     .def("write",&write< Rational >,return_internal_reference<1>())
-    .def("write",&write< Float >,return_internal_reference<1>())
-    .def("write",&write< Interval<Float> >,return_internal_reference<1>())
-    .def("write",&write< Vector<Float> >,return_internal_reference<1>())
-    .def("write",&write< Matrix<Float> >,return_internal_reference<1>())
-    .def("write",&write< Rectangle<Float> >,return_internal_reference<1>())
+    .def("write",&write< FloatPy >,return_internal_reference<1>())
+    .def("write",&write< Interval<FloatPy> >,return_internal_reference<1>())
+    .def("write",&write< Vector<FloatPy> >,return_internal_reference<1>())
+    .def("write",&write< Matrix<FloatPy> >,return_internal_reference<1>())
+    .def("write",&write< Rectangle<FloatPy> >,return_internal_reference<1>())
   ;
   
 }

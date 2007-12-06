@@ -22,7 +22,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "python/python_float.h"
+#include "python/float.h"
 
 #include "linear_algebra/vector.h"
 
@@ -38,7 +38,7 @@ using namespace Ariadne::Python;
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
 
-#include "python/python_utilities.h"
+#include "python/utilities.h"
 #include "python/read_scalar.h"
 
 using namespace boost::python;
@@ -184,4 +184,4 @@ void export_rectangle()
 
 }
 
-template void export_rectangle<Float>();
+template void export_rectangle<FloatPy>();

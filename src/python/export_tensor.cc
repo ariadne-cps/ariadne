@@ -31,8 +31,8 @@
 #include "linear_algebra/matrix.h"
 #include "linear_algebra/tensor.h"
 
-#include "python/python_utilities.h"
-#include "python/python_float.h"
+#include "python/utilities.h"
+#include "python/float.h"
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
 using namespace Ariadne::LinearAlgebra;
@@ -127,7 +127,7 @@ void export_interval_tensor()
   ;
 }
 
-template void export_tensor<Float>();
+template void export_tensor<FloatPy>();
 template void export_tensor<Rational>();
 
-template void export_interval_tensor<Float>();
+template void export_interval_tensor<FloatPy>();

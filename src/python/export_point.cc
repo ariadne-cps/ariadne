@@ -22,8 +22,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "python/python_float.h"
-#include "python/python_utilities.h"
+#include "python/float.h"
+#include "python/utilities.h"
 #include "python/read_scalar.h"
 
 #include "linear_algebra/vector.h"
@@ -182,6 +182,6 @@ void export_point_list()
 
 
 
-template void export_point<Float>();
-template void export_interval_point<Float>();
-template void export_point_list<Float>();
+template void export_point<FloatPy>();
+template void export_interval_point<FloatPy>();
+template void export_point_list<FloatPy>();

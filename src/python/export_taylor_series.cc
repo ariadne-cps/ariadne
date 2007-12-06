@@ -22,14 +22,14 @@
  */
  
 
-#include "python/python_float.h"
+#include "python/float.h"
 
 #include "numeric/rational.h"
 #include "numeric/interval.h"
 #include "function/taylor_series.h"
 
 #include <boost/python.hpp>
-#include "python/python_utilities.h"
+#include "python/utilities.h"
 
 using namespace boost::python;
 using namespace Ariadne;
@@ -170,4 +170,4 @@ void export_taylor_series<Rational>()
 
 
  //template void export_taylor_series<Rational>();
-template void export_taylor_series<Float>();
+template void export_taylor_series<FloatPy>();

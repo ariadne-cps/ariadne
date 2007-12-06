@@ -25,7 +25,7 @@
 #include "combinatoric/binary_tree.h"
 
 
-#include "python/python_utilities.h"
+#include "python/utilities.h"
 using namespace Ariadne;
 using namespace Ariadne::Combinatoric;
 

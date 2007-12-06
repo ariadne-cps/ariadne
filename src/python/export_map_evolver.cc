@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "python/python_float.h"
+#include "python/float.h"
 
 #include "geometry/rectangle.h"
 #include "geometry/parallelotope.h"
@@ -70,4 +70,4 @@ void export_map_evolver()
 
 }
 
-template void export_map_evolver<Float>();
+template void export_map_evolver<FloatPy>();

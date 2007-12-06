@@ -22,7 +22,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "python/python_float.h"
+#include "python/float.h"
 
 #include "combinatoric/binary_word.h"
 #include "combinatoric/binary_tree.h"
@@ -108,4 +108,4 @@ void export_partition_tree_set()
   ;
 }
 
-template void export_partition_tree_set<Float>();
+template void export_partition_tree_set<FloatPy>();

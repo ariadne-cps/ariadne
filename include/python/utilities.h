@@ -1,9 +1,8 @@
 /***************************************************************************
- *            python/python_utilities.h
+ *            python/utilities.h
  *
- *  16 November 2005
- *  Copyright  2005  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright  2005-7  Alberto Casagrande, Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -22,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file python_utilities.h
+/*! \file python/utilities.h
  *  Commonly used inline methods for the Python interface.
  */
  
@@ -34,11 +33,8 @@
 
 #include "base/types.h"
 
-#include "numeric/float64.h"
-#include "numeric/floatmp.h"
 #include "numeric/rational.h"
-
-#include "python/python_float.h"
+#include "python/float.h"
 
 namespace Ariadne {
 namespace Python {

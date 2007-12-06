@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "python/python_float.h"
+#include "python/float.h"
 
 #include "base/types.h"
 #include "base/declarations.h"
@@ -124,7 +124,8 @@ using namespace Ariadne::Python;
 
 using Numeric::Integer;
 using Numeric::Rational;
-using Numeric::Interval;
+using Python::FloatPy;
+using Python::IntervalPy;
 
 BOOST_PYTHON_MODULE(ariadne)
 {
@@ -138,25 +139,25 @@ BOOST_PYTHON_MODULE(ariadne)
   export_array<size_type>();
   export_array<Integer>();
   export_array<Rational>();
-  export_array<Float>();
+  export_array<FloatPy>();
 
   export_integer();
   export_rational();
-  export_float<Float>();
-  export_interval<Float>();
+  export_float<FloatPy>();
+  export_interval<FloatPy>();
 
-  export_vector<Float>();
+  export_vector<FloatPy>();
   export_vector<Rational>();
-  export_covector<Float>();
+  export_covector<FloatPy>();
   export_covector<Rational>();
-  export_matrix<Float>();
+  export_matrix<FloatPy>();
   export_matrix<Rational>();
-  export_tensor<Float>();
+  export_tensor<FloatPy>();
   export_tensor<Rational>();
-  export_interval_vector<Float>();
-  export_interval_covector<Float>();
-  export_interval_matrix<Float>();
-  export_interval_tensor<Float>();
+  export_interval_vector<FloatPy>();
+  export_interval_covector<FloatPy>();
+  export_interval_matrix<FloatPy>();
+  export_interval_tensor<FloatPy>();
 
   export_linear_program<Rational>();
 
@@ -165,67 +166,67 @@ BOOST_PYTHON_MODULE(ariadne)
   export_lattice_map();
 
   export_function<Rational>();
-  export_function<Float>();
+  export_function<FloatPy>();
   //export_affine_variable<Rational>();
-  //export_affine_variable<Float>();
+  //export_affine_variable<FloatPy>();
   //export_affine_derivative<Rational>();
-  //export_affine_derivative<Float>();
-  export_taylor_series<Float>();
-  export_taylor_variable<Float>();
-  export_taylor_derivative<Float>();
+  //export_affine_derivative<FloatPy>();
+  export_taylor_series<FloatPy>();
+  export_taylor_variable<FloatPy>();
+  export_taylor_derivative<FloatPy>();
   //export_taylor_series<Rational>();
   //export_taylor_variable<Rational>();
   //export_taylor_derivative<Rational>();
 
-  export_geometry_interval<Float>();
-  export_set<Float>();
-  export_point<Float>();
-  export_interval_point<Float>();
-  export_point_list<Float>();
-  export_rectangle<Float>();
-  export_zonotope<Float>();
-  export_interval_zonotope<Float>();
-  export_parallelotope<Float>();
-  export_simplex<Float>();
-  export_polytope<Float>();
-  export_polyhedron<Float>();
-  export_empty_set<Float>();
-  export_rectangular_set<Float>();
-  export_polyhedral_set<Float>();
-  export_list_set<Float>();
-  export_grid<Float>();
-  export_grid_set<Float>();
-  export_partition_tree_set<Float>();
-  export_hybrid_set<Float>();
+  export_geometry_interval<FloatPy>();
+  export_set<FloatPy>();
+  export_point<FloatPy>();
+  export_interval_point<FloatPy>();
+  export_point_list<FloatPy>();
+  export_rectangle<FloatPy>();
+  export_zonotope<FloatPy>();
+  export_interval_zonotope<FloatPy>();
+  export_parallelotope<FloatPy>();
+  export_simplex<FloatPy>();
+  export_polytope<FloatPy>();
+  export_polyhedron<FloatPy>();
+  export_empty_set<FloatPy>();
+  export_rectangular_set<FloatPy>();
+  export_polyhedral_set<FloatPy>();
+  export_list_set<FloatPy>();
+  export_grid<FloatPy>();
+  export_grid_set<FloatPy>();
+  export_partition_tree_set<FloatPy>();
+  export_hybrid_set<FloatPy>();
 
-  export_constraint<Float>();
+  export_constraint<FloatPy>();
 
-  export_map<Float>();
-  export_affine_map<Float>();
-  export_affine_multimap<Float>();
-  export_polynomial_map<Float>();
-  export_vector_field<Float>();
-  export_affine_vector_field<Float>();
-  export_set_based_hybrid_automaton<Float>();
-  export_constraint_based_hybrid_automaton<Float>();
+  export_map<FloatPy>();
+  export_affine_map<FloatPy>();
+  export_affine_multimap<FloatPy>();
+  export_polynomial_map<FloatPy>();
+  export_vector_field<FloatPy>();
+  export_affine_vector_field<FloatPy>();
+  export_set_based_hybrid_automaton<FloatPy>();
+  export_constraint_based_hybrid_automaton<FloatPy>();
 
-  export_evolution_parameters<Float>();
-  export_solver<Float>();
-  export_applicator<Float>();
-  export_integrator<Float>();
-  export_detector<Float>();
-  export_map_evolver<Float>();
-  export_vector_field_evolver<Float>();
-  export_set_based_hybrid_evolver<Float>();
-  export_constraint_based_hybrid_evolver<Float>();
+  export_evolution_parameters<FloatPy>();
+  export_solver<FloatPy>();
+  export_applicator<FloatPy>();
+  export_integrator<FloatPy>();
+  export_detector<FloatPy>();
+  export_map_evolver<FloatPy>();
+  export_vector_field_evolver<FloatPy>();
+  export_set_based_hybrid_evolver<FloatPy>();
+  export_constraint_based_hybrid_evolver<FloatPy>();
 
   export_text_output();
   export_latex_output();
   export_postscript_output();
 
-  export_henon_map<Float>();
-  export_duffing_equation<Float>();
-  export_van_der_pol_equation<Float>();
-  export_lorenz_system<Float>();
+  export_henon_map<FloatPy>();
+  export_duffing_equation<FloatPy>();
+  export_van_der_pol_equation<FloatPy>();
+  export_lorenz_system<FloatPy>();
 
 }

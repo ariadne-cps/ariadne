@@ -22,7 +22,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "python/python_float.h"
+#include "python/float.h"
 
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
@@ -38,7 +38,7 @@ template<class R>
 void export_polynomial_map() 
 {
 /*
-  typedef Float (RPolynomial::* PolyApplyPointFunc) (const RPoint&) const;
+  typedef FloatPy (RPolynomial::* PolyApplyPointFunc) (const RPoint&) const;
   typedef RInterval (RPolynomial::* PolyApplyRectFunc) (const RRectangle&) const;
   typedef RPoint (RPolynomialMap::* PolyMapApplyPointFunc) (const RPoint&) const;
   typedef RRectangle (RPolynomialMap::* PolyMapApplyRectFunc) (const RRectangle&) const;
@@ -47,7 +47,7 @@ void export_polynomial_map()
   typedef const RPolynomialMatrix& (RPolynomialMap::* PolyMapDerivFunc) () const;
  
   class_<RMonomial>("Monomial",init<uint>())
-    .def(init<Float,SizeArray>())
+    .def(init<FloatPy,SizeArray>())
     .def(self < self)
     .def(self_ns::str(self))
   ;
@@ -77,4 +77,4 @@ void export_polynomial_map()
 */
 }
 
-template void export_polynomial_map<Float>();
+template void export_polynomial_map<FloatPy>();

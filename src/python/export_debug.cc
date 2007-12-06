@@ -24,7 +24,7 @@
 
 #include "debug.h"
 
-#include "python/python_utilities.h"
+#include "python/utilities.h"
 using namespace Ariadne;
 
 #include <boost/python.hpp>

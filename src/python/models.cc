@@ -24,7 +24,7 @@
 
 #include <boost/python.hpp>
 
-#include "python/python_float.h"
+#include "python/float.h"
 
 template<class R> void export_henon_map();
 template<class R> void export_duffing_equation();
@@ -33,8 +33,8 @@ template<class R> void export_lorenz_system();
 
 BOOST_PYTHON_MODULE(models)
 {
-  export_henon_map<Ariadne::Float>();
-  export_duffing_equation<Ariadne::Float>();
-  export_van_der_pol_equation<Ariadne::Float>();
-  export_lorenz_system<Ariadne::Float>();
+  export_henon_map<Ariadne::FloatPy>();
+  export_duffing_equation<Ariadne::FloatPy>();
+  export_van_der_pol_equation<Ariadne::FloatPy>();
+  export_lorenz_system<Ariadne::FloatPy>();
 }

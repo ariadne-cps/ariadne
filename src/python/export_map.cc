@@ -22,7 +22,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "python/python_float.h"
+#include "python/float.h"
 
 #include "linear_algebra/matrix.h"
 #include "geometry/point.h"
@@ -79,4 +79,4 @@ void export_map()
   ;
 }
 
-template void export_map<Float>();
+template void export_map<FloatPy>();

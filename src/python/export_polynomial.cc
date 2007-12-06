@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "python/python_float.h"
+#include "python/float.h"
 
 #include "linear_algebra/vector.h"
 #include "function/polynomial.h"
@@ -62,4 +62,4 @@ void export_polynomial()
  
 }
 
-template void export_polynomial<Float>();
+template void export_polynomial<FloatPy>();

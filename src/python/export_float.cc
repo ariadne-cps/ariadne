@@ -25,9 +25,9 @@
 #include <iostream>
 #include <iomanip>
 
-#include "python/python_utilities.h"
+#include "python/utilities.h"
 
-#include "python/python_float.h"
+#include "python/float.h"
 #include "numeric/integer.h"
 #include "numeric/rational.h"
 #include "numeric/interval.h"
@@ -89,7 +89,7 @@ template<class R>
 std::string
 __repr__(const R& x) {
   std::stringstream ss;
-  ss << "Float(";
+  ss << "FloatPy(";
   if(x==floor(x)) {
     ss << x;
   } else {
@@ -105,55 +105,55 @@ template<class R>
 void 
 export_float() 
 {
-  typedef R Float;
+  typedef R FloatPy;
   typedef Interval<R> IFloat;
   
   def("set_output_precision",(void(*)(uint))&set_output_precision);
 
-  class_<Float>("Float")
+  class_<FloatPy>("Float")
     //.def("__init__", make_constructor(&make_float<R>) )
     .def(init<int>())
     .def(init<double>())
     .def(init<std::string>())
-    .def(init<Float>())
-    .def("__neg__", &neg<Float,Float>)
-    .def("__add__", &add<IFloat,Float,int,Float,Float>)
-    .def("__add__", &add<IFloat,Float,double,Float,Float>)
-    .def("__add__", &add<IFloat,Float,Float>)
-    .def("__radd__", &add<IFloat,Float,int,Float,Float>)
-    .def("__radd__", &add<IFloat,Float,double,Float,Float>)
-    .def("__sub__", &sub<IFloat,Float,int,Float,Float>)
-    .def("__sub__", &sub<IFloat,Float,double,Float,Float>)
-    .def("__sub__", &sub<IFloat,Float,Float>)
-    .def("__rsub__", &rsub<IFloat,Float,int,Float,Float>)
-    .def("__rsub__", &rsub<IFloat,Float,double,Float,Float>)
-    .def("__mul__", &mul<IFloat,Float,int,Float,Float>)
-    .def("__mul__", &mul<IFloat,Float,double,Float,Float>)
-    .def("__mul__", &mul<IFloat,Float,Float>)
-    .def("__rmul__", &mul<IFloat,Float,int,Float,Float>)
-    .def("__rmul__", &mul<IFloat,Float,double,Float,Float>)
-    .def("__div__", &div<IFloat,Float,int,Float,Float>)
-    .def("__div__", &div<IFloat,Float,double,Float,Float>)
-    .def("__div__", &div<IFloat,Float,Float>)
-    .def("__rdiv__", &rdiv<IFloat,Float,int,Float,Float>)
-    .def("__rdiv__", &rdiv<IFloat,Float,double,Float,Float>)
-    .def("__pow__", &pow<IFloat,Float,int,IFloat,int>)
-    //.def("__pow__", &pow<IFloat,Float,Integer,IFloat,Integer>)
-    .def("__eq__", &eq<bool,Float,double>)
-    .def("__eq__", &eq<bool,Float,Float>)
-    .def("__ne__", &ne<bool,Float,double>)
-    .def("__ne__", &ne<bool,Float,Float>)
-    .def("__lt__", &lt<bool,Float,double>)
-    .def("__lt__", &lt<bool,Float,Float>)
-    .def("__gt__", &gt<bool,Float,double>)
-    .def("__gt__", &gt<bool,Float,Float>)
-    .def("__le__", &le<bool,Float,double>)
-    .def("__le__", &le<bool,Float,Float>)
-    .def("__ge__", &ge<bool,Float,double>)
-    .def("__ge__", &ge<bool,Float,Float>)
+    .def(init<FloatPy>())
+    .def("__neg__", &neg<FloatPy,FloatPy>)
+    .def("__add__", &add<IFloat,FloatPy,int,FloatPy,FloatPy>)
+    .def("__add__", &add<IFloat,FloatPy,double,FloatPy,FloatPy>)
+    .def("__add__", &add<IFloat,FloatPy,FloatPy>)
+    .def("__radd__", &add<IFloat,FloatPy,int,FloatPy,FloatPy>)
+    .def("__radd__", &add<IFloat,FloatPy,double,FloatPy,FloatPy>)
+    .def("__sub__", &sub<IFloat,FloatPy,int,FloatPy,FloatPy>)
+    .def("__sub__", &sub<IFloat,FloatPy,double,FloatPy,FloatPy>)
+    .def("__sub__", &sub<IFloat,FloatPy,FloatPy>)
+    .def("__rsub__", &rsub<IFloat,FloatPy,int,FloatPy,FloatPy>)
+    .def("__rsub__", &rsub<IFloat,FloatPy,double,FloatPy,FloatPy>)
+    .def("__mul__", &mul<IFloat,FloatPy,int,FloatPy,FloatPy>)
+    .def("__mul__", &mul<IFloat,FloatPy,double,FloatPy,FloatPy>)
+    .def("__mul__", &mul<IFloat,FloatPy,FloatPy>)
+    .def("__rmul__", &mul<IFloat,FloatPy,int,FloatPy,FloatPy>)
+    .def("__rmul__", &mul<IFloat,FloatPy,double,FloatPy,FloatPy>)
+    .def("__div__", &div<IFloat,FloatPy,int,FloatPy,FloatPy>)
+    .def("__div__", &div<IFloat,FloatPy,double,FloatPy,FloatPy>)
+    .def("__div__", &div<IFloat,FloatPy,FloatPy>)
+    .def("__rdiv__", &rdiv<IFloat,FloatPy,int,FloatPy,FloatPy>)
+    .def("__rdiv__", &rdiv<IFloat,FloatPy,double,FloatPy,FloatPy>)
+    .def("__pow__", &pow<IFloat,FloatPy,int,IFloat,int>)
+    //.def("__pow__", &pow<IFloat,FloatPy,Integer,IFloat,Integer>)
+    .def("__eq__", &eq<bool,FloatPy,double>)
+    .def("__eq__", &eq<bool,FloatPy,FloatPy>)
+    .def("__ne__", &ne<bool,FloatPy,double>)
+    .def("__ne__", &ne<bool,FloatPy,FloatPy>)
+    .def("__lt__", &lt<bool,FloatPy,double>)
+    .def("__lt__", &lt<bool,FloatPy,FloatPy>)
+    .def("__gt__", &gt<bool,FloatPy,double>)
+    .def("__gt__", &gt<bool,FloatPy,FloatPy>)
+    .def("__le__", &le<bool,FloatPy,double>)
+    .def("__le__", &le<bool,FloatPy,FloatPy>)
+    .def("__ge__", &ge<bool,FloatPy,double>)
+    .def("__ge__", &ge<bool,FloatPy,FloatPy>)
     //.def(self_ns::str(self))
-    .def("__str__", &__str__<Float>)
-    .def("__repr__", &__repr__<Float>)
+    .def("__str__", &__str__<FloatPy>)
+    .def("__repr__", &__repr__<FloatPy>)
   ;
   
   def("floor",&Python::floor<R,R>);
@@ -167,9 +167,9 @@ export_float()
   def("inf",&Numeric::inf<R>);
   def("infinity",&Numeric::infinity<R>);
 
-  def("set_default_precision",&set_default_precision<Float>);
-  def("default_precision",&default_precision<Float>);
+  def("set_default_precision",&set_default_precision<FloatPy>);
+  def("default_precision",&default_precision<FloatPy>);
 
 }
 
-template void export_float<Float>();
+template void export_float<FloatPy>();

@@ -22,7 +22,7 @@
  */
 
 
-#include "python/python_utilities.h"
+#include "python/utilities.h"
 
 #include "numeric/integer.h"
 

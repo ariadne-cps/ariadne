@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "python/python_float.h"
+#include "python/float.h"
 
 #include "numeric/rational.h"
 #include "linear_algebra/vector.h"
@@ -55,4 +55,4 @@ void export_function()
 }
 
 template void export_function<Rational>();
-template void export_function<Float>();
+template void export_function<FloatPy>();

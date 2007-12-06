@@ -29,8 +29,8 @@
 #include "linear_algebra/covector.h"
 #include "linear_algebra/matrix.h"
 
-#include "python/python_utilities.h"
-#include "python/python_float.h"
+#include "python/utilities.h"
+#include "python/float.h"
 #include "python/read_scalar.h"
 
 using namespace Ariadne;
@@ -152,11 +152,11 @@ export_covector()
   covector_class.def("__str__",&__str__<R>);
   covector_class.def("__repr__",&__repr__<R>);
 
-  def("zero_covector",&zero_covector<Float>);
-  def("unit_covector",&unit_covector<Float>);
+  def("zero_covector",&zero_covector<FloatPy>);
+  def("unit_covector",&unit_covector<FloatPy>);
 
-  //def("sup_norm",&sup_norm<Float>);
-  //def("one_norm",&one_norm<Float>);
+  //def("sup_norm",&sup_norm<FloatPy>);
+  //def("one_norm",&one_norm<FloatPy>);
 }
 
 template<>
@@ -197,8 +197,8 @@ export_covector<Rational>()
   def("zero_covector",&zero_covector<Rational>);
   def("unit_covector",&unit_covector<Rational>);
 
-  //def("sup_norm",&sup_norm<Float>);
-  //def("one_norm",&one_norm<Float>);
+  //def("sup_norm",&sup_norm<FloatPy>);
+  //def("one_norm",&one_norm<FloatPy>);
 
 }
 
@@ -251,15 +251,15 @@ export_interval_covector()
   covector_class.def("__str__",&__str__<I>);
   covector_class.def("__repr__",&__repr__<I>);
  
-  //def("sup_norm",&sup_norm<Float>);
-  //def("one_norm",&one_norm<Float>);
+  //def("sup_norm",&sup_norm<FloatPy>);
+  //def("one_norm",&one_norm<FloatPy>);
 
   //def("midpoint",(Cvec(*)(const ICvec&))&midpoint);
   //def("encloses",(bool(*)(const ICvec&,const Cvec&))&encloses);
   //def("refines",(bool(*)(const ICvec&,const ICvec&))&refines);
 }
 
-template void export_covector<Float>();
+template void export_covector<FloatPy>();
 template void export_covector<Rational>();
 
-template void export_interval_covector<Float>();
+template void export_interval_covector<FloatPy>();

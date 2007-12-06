@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "python/python_float.h"
+#include "python/float.h"
 
 #include "geometry/rectangle.h"
 #include "geometry/parallelotope.h"
@@ -87,4 +87,4 @@ void export_integrator()
   class_< EulerIntegrator<R>, bases<IntegratorInterface< Rectangle<R> > > >("EulerIntegrator",init<>());
 }
 
-template void export_integrator<Float>();
+template void export_integrator<FloatPy>();

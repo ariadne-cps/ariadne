@@ -22,7 +22,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "python/python_float.h"
+#include "python/float.h"
 
 #include "geometry/simplex.h"
 
@@ -43,7 +43,7 @@ void export_simplex()
   typedef Simplex<R> RSimplex;
   
   class_<RSimplex>("Simplex",init< >())
-    .def(init< PointList<Float> >())
+    .def(init< PointList<FloatPy> >())
     .def(init<RSimplex>())
     .def("empty", &RSimplex::empty)
     .def("dimension", &RSimplex::dimension)
@@ -52,4 +52,4 @@ void export_simplex()
   ;
 }
 
-template void export_simplex<Float>();
+template void export_simplex<FloatPy>();

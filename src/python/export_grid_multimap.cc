@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "python/python_float.h"
+#include "python/float.h"
 
 #include "linear_algebra/vector.h"
 
@@ -36,7 +36,7 @@
 #include "system/grid_multimap.h"
 
 
-#include "python/python_utilities.h"
+#include "python/utilities.h"
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
 using namespace Ariadne::LinearAlgebra;
@@ -74,4 +74,4 @@ void export_grid_multimap()
 
 }
 
-template void export_grid_multimap<Float>();
+template void export_grid_multimap<FloatPy>();

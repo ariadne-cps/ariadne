@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "python/python_float.h"
+#include "python/float.h"
 
 #include "geometry/constraint_interface.h"
 #include "system/map_interface.h"
@@ -116,4 +116,4 @@ void export_constraint_based_hybrid_automaton()
   ;
 }
 
-template void export_constraint_based_hybrid_automaton<Float>();
+template void export_constraint_based_hybrid_automaton<FloatPy>();

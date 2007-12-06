@@ -23,7 +23,7 @@
  */
 
 
-#include "python/python_float.h"
+#include "python/float.h"
 
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
@@ -76,11 +76,11 @@ void export_postscript_output()
   ;
     
   class_<epsfstream, boost::noncopyable>("EpsPlot",init<>())
-    .def("open",(void(epsfstream::*)(const char* fn,const Rectangle<Float>&))&epsfstream::open<Float>)
-    .def("open",(void(epsfstream::*)(const char* fn,const Rectangle<Float>&,uint,uint))&epsfstream::open<Float>)
-    .def("open",(void(epsfstream::*)(const char* fn,const Rectangle<Float>&,const PlanarProjectionMap&))&epsfstream::open<Float>)
+    .def("open",(void(epsfstream::*)(const char* fn,const Rectangle<FloatPy>&))&epsfstream::open<FloatPy>)
+    .def("open",(void(epsfstream::*)(const char* fn,const Rectangle<FloatPy>&,uint,uint))&epsfstream::open<FloatPy>)
+    .def("open",(void(epsfstream::*)(const char* fn,const Rectangle<FloatPy>&,const PlanarProjectionMap&))&epsfstream::open<FloatPy>)
     .def("open",(void(epsfstream::*)(const char*,const Rectangle2d&,const PlanarProjectionMap&))&epsfstream::open)
-    .def("open",&epsfstream_open_with_defaults<Float>)
+    .def("open",&epsfstream_open_with_defaults<FloatPy>)
     .def("close",&epsfstream_close)
     .def("set_pen_colour",(void(epsfstream::*)(const char*))&epsfstream::set_pen_colour)
     .def("set_fill_colour",(void(epsfstream::*)(const char*))&epsfstream::set_fill_colour)
@@ -88,27 +88,27 @@ void export_postscript_output()
     .def("set_fill_colour",(void(epsfstream::*)(const Colour&))&epsfstream::set_fill_colour)
     .def("set_line_style",(void(epsfstream::*)(bool))&epsfstream::set_line_style)
     .def("set_fill_style",(void(epsfstream::*)(bool))&epsfstream::set_fill_style)
-    .def("write",&write< Rectangle<Float> >)
-    .def("write",&write< RectangularSet<Float> >)
-    .def("write",&write< Parallelotope<Float> >)
-    .def("write",&write< Zonotope<Float,Float> >)
-    .def("write",&write< Zonotope<Interval<Float>,Float> >)
-    .def("write",&write< Parallelotope<Float> >)
-    .def("write",&write< Polytope<Float> >)
-    .def("write",&write< Polyhedron<Float> >)
-    .def("write",&write< PolyhedralSet<Float> >)
-    .def("write",&write< ListSet< Rectangle<Float> > >)
-    .def("write",&write< ListSet< Parallelotope<Float> > >)
-    .def("write",&write< ListSet< Polytope<Float> > >)
-    .def("write",&write< ListSet< Zonotope<Float,Float> > >)
-    .def("write",&write< ListSet< Zonotope<Interval<Float>,Float> > >)
-    .def("write",&write< GridCell<Float> >)
-    .def("write",&write< GridBlock<Float> >)
-    .def("write",&write< GridCellListSet<Float> >)
-    .def("write",&write< GridMaskSet<Float> >)
-    .def("write",&write< PartitionTreeSet<Float> >)
-    .def("write",&write< FiniteGrid<Float> >)
-    .def("write",&write< PartitionTree<Float> >)
+    .def("write",&write< Rectangle<FloatPy> >)
+    .def("write",&write< RectangularSet<FloatPy> >)
+    .def("write",&write< Parallelotope<FloatPy> >)
+    .def("write",&write< Zonotope<FloatPy,FloatPy> >)
+    .def("write",&write< Zonotope<Interval<FloatPy>,FloatPy> >)
+    .def("write",&write< Parallelotope<FloatPy> >)
+    .def("write",&write< Polytope<FloatPy> >)
+    .def("write",&write< Polyhedron<FloatPy> >)
+    .def("write",&write< PolyhedralSet<FloatPy> >)
+    .def("write",&write< ListSet< Rectangle<FloatPy> > >)
+    .def("write",&write< ListSet< Parallelotope<FloatPy> > >)
+    .def("write",&write< ListSet< Polytope<FloatPy> > >)
+    .def("write",&write< ListSet< Zonotope<FloatPy,FloatPy> > >)
+    .def("write",&write< ListSet< Zonotope<Interval<FloatPy>,FloatPy> > >)
+    .def("write",&write< GridCell<FloatPy> >)
+    .def("write",&write< GridBlock<FloatPy> >)
+    .def("write",&write< GridCellListSet<FloatPy> >)
+    .def("write",&write< GridMaskSet<FloatPy> >)
+    .def("write",&write< PartitionTreeSet<FloatPy> >)
+    .def("write",&write< FiniteGrid<FloatPy> >)
+    .def("write",&write< PartitionTree<FloatPy> >)
   ;
   
 }

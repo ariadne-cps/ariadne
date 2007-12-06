@@ -22,7 +22,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "python/python_float.h"
+#include "python/float.h"
 
 
 #include "linear_algebra/matrix.h"
@@ -34,7 +34,7 @@
 #include "geometry/grid_set.h"
 #include "geometry/partition_tree_set.h"
 
-#include "python/python_utilities.h"
+#include "python/utilities.h"
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
 using namespace Ariadne::LinearAlgebra;
@@ -228,4 +228,4 @@ void export_list_set()
   def("approximation",&approximate_interval_zonotope_list_set<R>);
 }
 
-template void export_list_set<Float>();
+template void export_list_set<FloatPy>();

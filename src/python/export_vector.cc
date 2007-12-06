@@ -31,8 +31,8 @@
 #include "linear_algebra/covector.h" 
 #include "linear_algebra/matrix.h"
 
-#include "python/python_utilities.h"
-#include "python/python_float.h"
+#include "python/utilities.h"
+#include "python/float.h"
 #include "python/read_scalar.h"
 
 using namespace Ariadne;
@@ -149,8 +149,8 @@ void export_vector()
   vector_class.def("__str__",&__str__<R>);
   vector_class.def("__repr__",&__repr__<R>);
 
-  def("zero_vector",&zero_vector<Float>);
-  def("unit_vector",&unit_vector<Float>);
+  def("zero_vector",&zero_vector<FloatPy>);
+  def("unit_vector",&unit_vector<FloatPy>);
 
   def("sup_norm", (R(*)(const Vec&)) &sup_norm<R>);
   def("norm", (R(*)(const Vec&)) &sup_norm<R>);
@@ -244,7 +244,7 @@ void export_interval_vector() {
   def("refines",(bool(*)(const IVec&,const IVec&))&refines);
 }
 
-template void export_vector<Float>();
+template void export_vector<FloatPy>();
 template void export_vector<Rational>();
 
-template void export_interval_vector<Float>();
+template void export_interval_vector<FloatPy>();

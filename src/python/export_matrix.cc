@@ -30,8 +30,8 @@
 #include "linear_algebra/matrix.h"
 #include "linear_algebra/matrix_function.h"
 
-#include "python/python_utilities.h"
-#include "python/python_float.h"
+#include "python/utilities.h"
+#include "python/float.h"
 #include "python/read_scalar.h"
 
 using namespace Ariadne;
@@ -278,7 +278,7 @@ void export_interval_matrix()
 
 }
 
-template void export_matrix<Float>();
+template void export_matrix<FloatPy>();
 template void export_matrix<Rational>();
 
-template void export_interval_matrix<Float>();
+template void export_interval_matrix<FloatPy>();

@@ -30,8 +30,8 @@
 #include "linear_algebra/matrix_function.h"
 #include "linear_algebra/qr_matrix.h"
 
-#include "python/python_utilities.h"
-#include "python/python_float.h"
+#include "python/utilities.h"
+#include "python/float.h"
 #include "python/read_scalar.h"
 
 using namespace Ariadne;
@@ -63,4 +63,4 @@ void export_linear_algebra()
   def("qr",qr<R>);
 }
 
-template void export_linear_algebra<Float>();
+template void export_linear_algebra<FloatPy>();

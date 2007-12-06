@@ -25,8 +25,8 @@
 #include "output/logging.h"
 #include "evaluation/declarations.h"
 
-#include "python/python_utilities.h"
-#include "python/python_float.h"
+#include "python/utilities.h"
+#include "python/float.h"
 using namespace Ariadne;
 using namespace Ariadne::Output;
 

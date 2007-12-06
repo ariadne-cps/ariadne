@@ -22,7 +22,7 @@
  */
 
 
-#include "python/python_float.h"
+#include "python/float.h"
 
 #include "geometry/rectangle.h"
 #include "geometry/parallelotope.h"
@@ -30,7 +30,7 @@
 #include "geometry/orthotope.h"
 #include "geometry/list_set.h"
 
-#include "python/python_utilities.h"
+#include "python/utilities.h"
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
 using namespace Ariadne::LinearAlgebra;
@@ -83,4 +83,4 @@ void export_orthotope()
   ;
 }  
 
-template void export_orthotope<Float>();
+template void export_orthotope<FloatPy>();

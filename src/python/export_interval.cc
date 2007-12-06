@@ -27,8 +27,8 @@
 
 
 #include <boost/python.hpp>
-#include "python/python_utilities.h"
-#include "python/python_float.h"
+#include "python/utilities.h"
+#include "python/float.h"
 
 using namespace boost::python;
 using namespace Ariadne;
@@ -130,8 +130,8 @@ void export_interval()
     .def("midpoint", &Interval<R>::midpoint)
     .def("radius", &Interval<R>::radius)
     .def("width", &Interval<R>::width)
-    .def("__str__", &__str__<Float>)
-    .def("__repr__", &__repr__<Float>)  
+    .def("__str__", &__str__<FloatPy>)
+    .def("__repr__", &__repr__<FloatPy>)  
   ;
   
   def("lower", (R(*)(const I&))&lower);
@@ -184,4 +184,4 @@ void export_interval()
 
 }
 
-template void export_interval<Float>();
+template void export_interval<FloatPy>();

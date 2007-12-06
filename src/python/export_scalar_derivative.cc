@@ -22,14 +22,14 @@
  */
  
 
-#include "python/python_float.h"
+#include "python/float.h"
 
 #include "numeric/rational.h"
 #include "numeric/interval.h"
 #include "function/scalar_derivative.h"
 
 #include <boost/python.hpp>
-#include "python/python_utilities.h"
+#include "python/utilities.h"
 
 using namespace boost::python;
 using namespace Ariadne;
@@ -179,4 +179,4 @@ void export_scalar_derivative<Rational>()
 
 
 template void export_scalar_derivative<Rational>();
-template void export_scalar_derivative<Float>();
+template void export_scalar_derivative<FloatPy>();

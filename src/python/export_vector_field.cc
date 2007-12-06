@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "python/python_float.h"
+#include "python/float.h"
 
 #include "linear_algebra/vector.h"
 #include "system/vector_field.h"
@@ -58,4 +58,4 @@ void export_vector_field()
   ;
 }
 
-template void export_vector_field<Float>();
+template void export_vector_field<FloatPy>();

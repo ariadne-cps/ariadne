@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "python/python_float.h"
+#include "python/float.h"
 
 #include "linear_algebra/vector.h"
 #include "function/taylor_model.h"
@@ -67,4 +67,4 @@ void export_taylor_model()
   def("implicit",(TaylorModel<A>(*)(const TaylorModel<R>&,const Vector<R>&)) &implicit);
 }
 
-template void export_taylor_model<Float>();
+template void export_taylor_model<FloatPy>();

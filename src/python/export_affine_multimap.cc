@@ -22,7 +22,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "python/python_float.h"
+#include "python/float.h"
 
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
@@ -32,7 +32,7 @@
 #include "geometry/polytope.h"
 #include "system/affine_multimap.h"
 #include "system/affine_map.h"
-#include "python/python_utilities.h"
+#include "python/utilities.h"
 
 using namespace Ariadne;
 using namespace Ariadne::LinearAlgebra;
@@ -68,4 +68,4 @@ void export_affine_multimap()
 
 }
 
-template void export_affine_multimap<Float>();
+template void export_affine_multimap<FloatPy>();

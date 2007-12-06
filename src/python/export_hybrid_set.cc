@@ -23,7 +23,7 @@
 
 #include <map>
 
-#include "python/python_float.h"
+#include "python/float.h"
 
 #include "base/types.h"
 #include "geometry/discrete_state.h"
@@ -167,4 +167,4 @@ void export_hybrid_set()
   
 }
 
-template void export_hybrid_set<Float>();
+template void export_hybrid_set<FloatPy>();

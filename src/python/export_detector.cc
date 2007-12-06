@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "python/python_float.h"
+#include "python/float.h"
 
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
@@ -98,4 +98,4 @@ void export_detector()
 
 }
 
-template void export_detector<Float>();
+template void export_detector<FloatPy>();

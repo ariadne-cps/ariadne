@@ -1,5 +1,5 @@
 /***************************************************************************
- *            python/python_float.h
+ *            python/float.h
  *
  *  Copyright  2005  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
@@ -21,8 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file python_utilities.h
- *  Commonly used inline methods for the Python interface.
+/*! \file python/float.h
+ *  Typedef for Python floating-point class.
  */
  
 #ifndef ARIADNE_PYTHON_FLOAT_H
@@ -31,11 +31,24 @@
 #include <config.h>
 
 #if PYTHON_FLOAT == Float64 
+
 #include "numeric/float64.h" 
-namespace Ariadne { namespace Python { typedef Numeric::Float64 Float; } }
+namespace Ariadne { 
+  namespace Python { 
+    typedef Numeric::Float64 FloatPy; 
+    typedef Numeric::Interval<FloatPy> IntervalPy;
+  } 
+}
+
 #elif PYTHON_FLOAT == FloatMP 
 #include "numeric/floatmp.h" 
-namespace Ariadne { namespace Python { typedef Numeric::FloatMP Float; } }
+namespace Ariadne { 
+  namespace Python { 
+    typedef Numeric::FloatMP FloatPy; 
+    typedef Numeric::Interval<FloatPy> IntervalPy;
+  } 
+}
+
 #endif
 
 #endif /* ARIADNE_PYTHON_FLOAT_H */

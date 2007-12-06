@@ -22,7 +22,7 @@
  */
  
 
-#include "python/python_float.h"
+#include "python/float.h"
 
 #include "numeric/rational.h"
 #include "numeric/interval.h"
@@ -30,7 +30,7 @@
 #include "function/affine_variable.h"
 
 #include <boost/python.hpp>
-#include "python/python_utilities.h"
+#include "python/utilities.h"
 
 using namespace boost::python;
 using namespace Ariadne;
@@ -179,4 +179,4 @@ void export_affine_variable<Rational>()
 
 
 template void export_affine_variable<Rational>();
-template void export_affine_variable<Float>();
+template void export_affine_variable<FloatPy>();

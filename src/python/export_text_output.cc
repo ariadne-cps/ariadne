@@ -22,7 +22,7 @@
  */
 
 
-#include "python/python_float.h"
+#include "python/float.h"
 
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
@@ -72,27 +72,27 @@ void export_text_output()
   class_<textfstream, boost::noncopyable>("TextFile",init<>())
     .def("open",(void(textfstream::*)(const char* fn))&textfstream::open)
     .def("close",&textfstream_close)
-		.def("write",&write< Rectangle<Float> >)
-    .def("write",&write< RectangularSet<Float> >)
-    .def("write",&write< Parallelotope<Float> >)
-    .def("write",&write< Zonotope<Float,Float> >)
-    .def("write",&write< Zonotope<Interval<Float>,Float> >)
-    .def("write",&write< Parallelotope<Float> >)
-    .def("write",&write< Polytope<Float> >)
-    .def("write",&write< Polyhedron<Float> >)
-    .def("write",&write< PolyhedralSet<Float> >)
-    .def("write",&write< ListSet< Rectangle<Float> > >)
-    .def("write",&write< ListSet< Parallelotope<Float> > >)
-    .def("write",&write< ListSet< Polytope<Float> > >)
-    .def("write",&write< ListSet< Zonotope<Float,Float> > >)
-    .def("write",&write< ListSet< Zonotope<Interval<Float>,Float> > >)
-    .def("write",&write< GridCell<Float> >)
-    .def("write",&write< GridBlock<Float> >)
-    .def("write",&write< GridCellListSet<Float> >)
-    .def("write",&write< GridMaskSet<Float> >)
-    .def("write",&write< PartitionTreeSet<Float> >)
-    .def("write",&write< FiniteGrid<Float> >)
-    .def("write",&write< PartitionTree<Float> >)
+		.def("write",&write< Rectangle<FloatPy> >)
+    .def("write",&write< RectangularSet<FloatPy> >)
+    .def("write",&write< Parallelotope<FloatPy> >)
+    .def("write",&write< Zonotope<FloatPy,FloatPy> >)
+    .def("write",&write< Zonotope<Interval<FloatPy>,FloatPy> >)
+    .def("write",&write< Parallelotope<FloatPy> >)
+    .def("write",&write< Polytope<FloatPy> >)
+    .def("write",&write< Polyhedron<FloatPy> >)
+    .def("write",&write< PolyhedralSet<FloatPy> >)
+    .def("write",&write< ListSet< Rectangle<FloatPy> > >)
+    .def("write",&write< ListSet< Parallelotope<FloatPy> > >)
+    .def("write",&write< ListSet< Polytope<FloatPy> > >)
+    .def("write",&write< ListSet< Zonotope<FloatPy,FloatPy> > >)
+    .def("write",&write< ListSet< Zonotope<Interval<FloatPy>,FloatPy> > >)
+    .def("write",&write< GridCell<FloatPy> >)
+    .def("write",&write< GridBlock<FloatPy> >)
+    .def("write",&write< GridCellListSet<FloatPy> >)
+    .def("write",&write< GridMaskSet<FloatPy> >)
+    .def("write",&write< PartitionTreeSet<FloatPy> >)
+    .def("write",&write< FiniteGrid<FloatPy> >)
+    .def("write",&write< PartitionTree<FloatPy> >)
   ;
   
 }

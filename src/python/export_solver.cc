@@ -21,10 +21,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "python/python_float.h"
+#include "python/float.h"
 
 #include "evaluation/newton.h"
-#include "python/python_utilities.h"
+#include "python/utilities.h"
 
 using namespace Ariadne;
 using namespace Ariadne::Evaluation;
@@ -48,4 +48,4 @@ void export_solver()
   
 }
 
-template void export_solver<Float>();
+template void export_solver<FloatPy>();

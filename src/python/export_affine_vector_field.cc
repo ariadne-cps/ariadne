@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "python/python_float.h"
+#include "python/float.h"
 
 #include "numeric/interval.h"
 #include "linear_algebra/matrix.h"
@@ -34,7 +34,7 @@
 #include "system/affine_vector_field.h"
 
 
-#include "python/python_utilities.h"
+#include "python/utilities.h"
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
 using namespace Ariadne::LinearAlgebra;
@@ -62,4 +62,4 @@ void export_affine_vector_field()
   ;
 }
 
-template void export_affine_vector_field<Float>();
+template void export_affine_vector_field<FloatPy>();

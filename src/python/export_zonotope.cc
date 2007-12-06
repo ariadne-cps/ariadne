@@ -22,14 +22,14 @@
  */
 
 
-#include "python/python_float.h"
+#include "python/float.h"
 
 #include "geometry/rectangle.h"
 #include "geometry/parallelotope.h"
 #include "geometry/zonotope.h"
 #include "geometry/list_set.h"
 
-#include "python/python_utilities.h"
+#include "python/utilities.h"
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
 using namespace Ariadne::LinearAlgebra;
@@ -165,5 +165,5 @@ void export_interval_zonotope()
 */
 }  
 
-template void export_zonotope<Float>();
-template void export_interval_zonotope<Float>();
+template void export_zonotope<FloatPy>();
+template void export_interval_zonotope<FloatPy>();

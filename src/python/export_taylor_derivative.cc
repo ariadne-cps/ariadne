@@ -22,7 +22,7 @@
  */
  
 
-#include "python/python_float.h"
+#include "python/float.h"
 
 #include "numeric/rational.h"
 #include "numeric/interval.h"
@@ -30,7 +30,7 @@
 #include "function/taylor_derivative.h"
 
 #include <boost/python.hpp>
-#include "python/python_utilities.h"
+#include "python/utilities.h"
 #include "python/read_array.h"
 
 using namespace boost::python;
@@ -138,4 +138,4 @@ void export_taylor_derivative<Rational>()
 
 
 template void export_taylor_derivative<Rational>();
-template void export_taylor_derivative<Float>();
+template void export_taylor_derivative<FloatPy>();

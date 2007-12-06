@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "python/python_float.h"
+#include "python/float.h"
 
 #include "numeric/interval.h"
 #include "geometry/interval.h"
@@ -32,7 +32,7 @@ using namespace Ariadne::Python;
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp>
 
-#include "python/python_utilities.h"
+#include "python/utilities.h"
 #include "python/read_scalar.h"
 
 using namespace boost::python;
@@ -112,4 +112,4 @@ void export_geometry_interval()
   
 }
 
-template void export_geometry_interval<Float>();
+template void export_geometry_interval<FloatPy>();

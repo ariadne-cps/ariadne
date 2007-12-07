@@ -110,7 +110,7 @@ Evaluation::gexp(
     result=result+term;
   }
   
-  R err=mul_up(pow_up((norm(A)*t).upper(),ns),gexp_up((norm(A)*t).upper(),k+ns));
+  R err=mul_up(pow_up(I(norm(A)*t).upper(),ns),gexp_up(I(norm(A)*t).upper(),k+ns));
   I ierr=err*I(-1,1);
   result+=Vector<I>(result.size(),ierr);
   
@@ -148,7 +148,7 @@ Evaluation::gexp(
     result=result+term;
   }
   
-  R err=mul_up(pow_up((norm(A)*t).upper(),ns),gexp_up((norm(A)*t).upper(),k+ns));
+  R err=mul_up(pow_up(I(norm(A)*t).upper(),ns),gexp_up(I(norm(A)*t).upper(),k+ns));
   I ierr=err*I(-1,1);
   result+=Matrix<I>(result.number_of_rows(),result.number_of_columns(),&ierr,0,0);
   
@@ -401,8 +401,8 @@ Evaluation::AffineIntegrator<R>::reachability_step(const System::AffineVectorFie
   Vector<I> Acpb=A*c.position_vector()+b;
   //Acpb=Acpb+b;
   R nrmA=norm(A).upper();
-  R nrmAh=(nrmA*hh).upper();
-  R err=(gexp_up(nrmAh,1)*nrmA*hh*norm(G)+gexp_up(nrmAh,2)*hh*hh*nrmA*norm(Acpb).upper()).upper();
+  R nrmAh=I(nrmA*hh).upper();
+  R err=I(gexp_up(nrmAh,1)*nrmA*hh*norm(G)+gexp_up(nrmAh,2)*hh*hh*nrmA*norm(Acpb).upper()).upper();
   Vector<I> errv=Vector<I>(avf.dimension(),Interval<R>(-err,err));
   iz=Zonotope<I>(c+errv,G,hh*Acpb);
   

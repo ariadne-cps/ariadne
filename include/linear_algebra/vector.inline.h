@@ -371,48 +371,48 @@ LinearAlgebra::operator/=(Vector<R1>& v1, const R2& s2) {
 
 
 template<class E1, class E2> inline
-LinearAlgebra::BinaryVectorVectorExpression<E1,E2,LinearAlgebra::plus> 
+LinearAlgebra::BinaryVectorVectorExpression<Numeric::Add,E1,E2> 
 LinearAlgebra::operator+(const VectorExpression<E1>& e1, const VectorExpression<E2>& e2) {
-  const E1& v1=e1(); const E2& v2=e2();
+  using Numeric::Add; const E1& v1=e1(); const E2& v2=e2();
   if(v1.size()!=v2.size()) {
     ARIADNE_THROW(IncompatibleSizes,"VectorExpression operator+(VectorExpression ve1, VectorExpression ve2)","ve1.size()="<<v1.size()<<", ve2.size()="<<v2.size());
   }
-  return BinaryVectorVectorExpression<E1,E2,plus>(v1,v2,plus());
+  return BinaryVectorVectorExpression<Add,E1,E2>(Add(),v1,v2);
 }
 
 
 template<class E1, class E2> inline
-LinearAlgebra::BinaryVectorVectorExpression<E1,E2,LinearAlgebra::minus> 
+LinearAlgebra::BinaryVectorVectorExpression<Numeric::Sub,E1,E2> 
 LinearAlgebra::operator-(const VectorExpression<E1>& e1, const VectorExpression<E2>& e2) {
-  const E1& v1=e1(); const E2& v2=e2();
+  using Numeric::Sub; const E1& v1=e1(); const E2& v2=e2();
   if(v1.size()!=v2.size()) {
     ARIADNE_THROW(IncompatibleSizes,"VectorExpression operator-(VectorExpression ve1, VectorExpression ve2)","ve1.size()="<<v1.size()<<", ve2.size()="<<v2.size());
   }
-  return BinaryVectorVectorExpression<E1,E2,minus>(v1,v2,minus());
+  return BinaryVectorVectorExpression<Sub,E1,E2>(Sub(),v1,v2);
 }
 
 
 template<class E1, class E2> inline
-LinearAlgebra::BinaryVectorScalarExpression<E1,E2,LinearAlgebra::times> 
+LinearAlgebra::BinaryVectorScalarExpression<Numeric::Mul,E1,E2> 
 LinearAlgebra::operator*(const E2& e2, const VectorExpression<E1>& e1) {
-  const E1& v1=e1(); const E2& s2=e2;
-  return BinaryVectorScalarExpression<E1,E2,times>(v1,s2,times());
+  using Numeric::Mul; const E1& v1=e1(); const E2& s2=e2;
+  return BinaryVectorScalarExpression<Mul,E1,E2>(Mul(),v1,s2);
 }
 
 
 template<class E1, class E2> inline
-LinearAlgebra::BinaryVectorScalarExpression<E1,E2,LinearAlgebra::times> 
+LinearAlgebra::BinaryVectorScalarExpression<Numeric::Mul,E1,E2> 
 LinearAlgebra::operator*(const VectorExpression<E1>& e1, const E2& e2) {
-  const E1& v1=e1(); const E2& s2=e2;
-  return BinaryVectorScalarExpression<E1,E2,times>(v1,s2,times());
+  using Numeric::Mul; const E1& v1=e1(); const E2& s2=e2;
+  return BinaryVectorScalarExpression<Mul,E1,E2>(Mul(),v1,s2);
 }
 
 
 template<class E1, class E2> inline
-LinearAlgebra::BinaryVectorScalarExpression<E1,typename Numeric::traits<E2>::closure_type,LinearAlgebra::divides> 
+LinearAlgebra::BinaryVectorScalarExpression<Numeric::Div,E1,E2> 
 LinearAlgebra::operator/(const VectorExpression<E1>& e1, const E2& e2) {
-  const E1& v1=e1(); const E2& s2=e2;
-  return BinaryVectorScalarExpression<E1,E2,divides>(v1,s2,divides());
+  using Numeric::Div; const E1& v1=e1(); const E2& s2=e2;
+  return BinaryVectorScalarExpression<Div,E1,E2>(Div(),v1,s2);
 }
 
 
@@ -483,7 +483,7 @@ LinearAlgebra::approximation(const Vector<R2>& iv)
 {
   Vector<R1> result(iv.size());
   for(size_type i=0; i!=iv.size(); ++i) {
-    result(i)=Numeric::conv_approx<R1>(iv(i));
+    set(result(i),iv(i),Numeric::round_approx);
   }
   return result;
 }
@@ -589,10 +589,11 @@ template<class R> inline
 LinearAlgebra::Vector<R> 
 LinearAlgebra::add_approx(const Vector<R>& u, const Vector<R>& v) 
 {
+  using namespace Numeric;
   ARIADNE_CHECK_EQUAL_SIZES(u,v,"Vector add_approx(Vector,Vector)");
   Vector<R> result(u.size());
   for(size_type i=0; i!=u.size(); ++i) {
-    result(i)=add_approx(u(i),v(i));
+    result(i)=add<RoundApprox>(u(i),v(i));
   }
   return result;
 }
@@ -602,10 +603,11 @@ template<class R> inline
 LinearAlgebra::Vector<R> 
 LinearAlgebra::sub_approx(const Vector<R>& u, const Vector<R>& v)
 {
+  using namespace Numeric;
   ARIADNE_CHECK_EQUAL_SIZES(u,v,"Vector sub_approx(Vector,Vector)");
   Vector<R> result(u.size());
   for(size_type i=0; i!=u.size(); ++i) {
-    result(i)=sub_approx(u(i),v(i));
+    result(i)=sub<RoundApprox>(u(i),v(i));
   }
   return result;
 }
@@ -615,9 +617,10 @@ template<class R> inline
 LinearAlgebra::Vector<R> 
 LinearAlgebra::mul_approx(const R& s, const Vector<R>& v)
 {
+  using namespace Numeric;
   Vector<R> result(v.size());
   for(size_type i=0; i!=v.size(); ++i) {
-    result(i)=mul_approx(v(i),s);
+    result(i)=mul<RoundApprox>(v(i),s);
   }
   return result;
 }
@@ -626,9 +629,10 @@ LinearAlgebra::mul_approx(const R& s, const Vector<R>& v)
 template<class R> inline
 LinearAlgebra::Vector<R> LinearAlgebra::mul_approx(const Vector<R>& v, const R& s)
 {
+  using namespace Numeric;
   Vector<R> result(v.size());
   for(size_type i=0; i!=v.size(); ++i) {
-    result(i)=mul_approx(v(i),s);
+    result(i)=mul<RoundApprox>(v(i),s);
   }
   return result;
 }
@@ -638,9 +642,10 @@ template<class R> inline
 LinearAlgebra::Vector<R> 
 LinearAlgebra::div_approx(const Vector<R>& v, const R& s)
 {
+  using namespace Numeric;
   Vector<R> result(v.size());
   for(size_type i=0; i!=v.size(); ++i) {
-    result(i)=div_approx(v(i),s);
+    result(i)=div<RoundApprox>(v(i),s);
   }
   return result;
 }
@@ -701,7 +706,7 @@ LinearAlgebra::sup_norm(const Vector<R>& v)
 {
   R result=static_cast<R>(0);
   for(size_type i=0; i!= v.size(); ++i) {
-    result=Numeric::max(Numeric::abs(v(i)),result); }
+    result=Numeric::max(R(Numeric::abs(v(i))),result); }
   return result; 
 }
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            numerical_traits.h
+ *            traits.h
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file numerical_expression.h
+/*! \file expression.h
  *  \brief Numerical expression templates for deferred evaluation.
  */
 

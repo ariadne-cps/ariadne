@@ -212,7 +212,7 @@ test_interval()
     Interval<R> ivlodt=ivlo/ivlt;
     Interval<R> ivloa=ivlodt*ivlt;
     cout << ivlo << " / " << ivlt << " = " << ivlodt << endl;
-    cout << ivlo << " in " << ivlodt * ivlt << endl;
+    cout << ivlo << " in " << Interval<R>(ivlodt * ivlt) << endl;
     assert(ivlodt.lower() < ivlodt.upper());
     assert(ivloa.lower() < ivlo.lower() && ivloa.upper() > ivlo.upper());
     
@@ -222,22 +222,23 @@ test_interval()
     ivlf2=Interval<R>(-3,2);
     ivlf3=Interval<R>(5,11);
     
-    cout << ivlf1 << " * " << ivlf1 << " = " << ivlf1*ivlf1 << endl;
-    cout << ivlf1 << " * " << ivlf2 << " = " << ivlf1*ivlf2 << endl;
-    cout << ivlf1 << " * " << ivlf3 << " = " << ivlf1*ivlf3 << endl;
-    cout << ivlf2 << " * " << ivlf1 << " = " << ivlf2*ivlf1 << endl;
-    cout << ivlf2 << " * " << ivlf2 << " = " << ivlf2*ivlf2 << endl;
-    cout << ivlf2 << " * " << ivlf3 << " = " << ivlf2*ivlf3 << endl;
-    cout << ivlf3 << " * " << ivlf1 << " = " << ivlf3*ivlf1 << endl;
-    cout << ivlf3 << " * " << ivlf2 << " = " << ivlf3*ivlf2 << endl;
-    cout << ivlf3 << " * " << ivlf3 << " = " << ivlf3*ivlf3 << endl;
+    // Fixme: The explicit cast should not be needed in the output
+    cout << ivlf1 << " * " << ivlf1 << " = " << Interval<R>(ivlf1*ivlf1) << endl;
+    cout << ivlf1 << " * " << ivlf2 << " = " << Interval<R>(ivlf1*ivlf2) << endl;
+    cout << ivlf1 << " * " << ivlf3 << " = " << Interval<R>(ivlf1*ivlf3) << endl;
+    cout << ivlf2 << " * " << ivlf1 << " = " << Interval<R>(ivlf2*ivlf1) << endl;
+    cout << ivlf2 << " * " << ivlf2 << " = " << Interval<R>(ivlf2*ivlf2) << endl;
+    cout << ivlf2 << " * " << ivlf3 << " = " << Interval<R>(ivlf2*ivlf3) << endl;
+    cout << ivlf3 << " * " << ivlf1 << " = " << Interval<R>(ivlf3*ivlf1) << endl;
+    cout << ivlf3 << " * " << ivlf2 << " = " << Interval<R>(ivlf3*ivlf2) << endl;
+    cout << ivlf3 << " * " << ivlf3 << " = " << Interval<R>(ivlf3*ivlf3) << endl;
 
-    cout << ivlf1 << " / " << ivlf1 << " = " << ivlf1/ivlf1 << endl;
-    cout << ivlf1 << " / " << ivlf3 << " = " << ivlf1/ivlf3 << endl;
-    cout << ivlf2 << " / " << ivlf1 << " = " << ivlf2/ivlf1 << endl;
-    cout << ivlf2 << " / " << ivlf3 << " = " << ivlf2/ivlf3 << endl;
-    cout << ivlf3 << " / " << ivlf1 << " = " << ivlf3/ivlf1 << endl;
-    cout << ivlf3 << " / " << ivlf3 << " = " << ivlf3/ivlf3 << endl;
+    cout << ivlf1 << " / " << ivlf1 << " = " << Interval<R>(ivlf1/ivlf1) << endl;
+    cout << ivlf1 << " / " << ivlf3 << " = " << Interval<R>(ivlf1/ivlf3) << endl;
+    cout << ivlf2 << " / " << ivlf1 << " = " << Interval<R>(ivlf2/ivlf1) << endl;
+    cout << ivlf2 << " / " << ivlf3 << " = " << Interval<R>(ivlf2/ivlf3) << endl;
+    cout << ivlf3 << " / " << ivlf1 << " = " << Interval<R>(ivlf3/ivlf1) << endl;
+    cout << ivlf3 << " / " << ivlf3 << " = " << Interval<R>(ivlf3/ivlf3) << endl;
 
 
   }

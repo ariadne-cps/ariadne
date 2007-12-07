@@ -1,8 +1,8 @@
 /***************************************************************************
- *            float64.cc
+ *            integer.code.h
  *
- *  Copyright  2006  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright  2004-7  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -20,36 +20,30 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-
-#include "numeric/float64.h"
-#include "numeric/interval.h"
+ 
+#include <sstream>
+#include "integer.h"
 
 namespace Ariadne {
-  namespace Numeric {
-    
-    Interval<Float64> 
-    operator+(const Float64& x1, const Float64& x2) 
-    {
-      return Interval<Float64>(add_down(x1,x2),add_up(x1,x2));
-    }
-    
-    Interval<Float64> 
-    operator-(const Float64& x1, const Float64& x2) 
-    {
-      return Interval<Float64>(sub_down(x1,x2),sub_up(x1,x2));
-    }
 
-    Interval<Float64> 
-    operator*(const Float64& x1, const Float64& x2) 
-    {
-      return Interval<Float64>(mul_down(x1,x2),mul_up(x1,x2));
-    }
+Numeric::Integer::Integer(const std::string& str) {
+  mpz_init(_value); std::stringstream ss(str); ss>>*this; }
 
-    Interval<Float64> 
-    operator/(const Float64& x1, const Float64& x2) 
-    {
-      return Interval<Float64>(div_down(x1,x2),div_up(x1,x2));
-    }
-
-  } 
+std::ostream& 
+Numeric::operator<<(std::ostream& os, const Integer& n)
+{
+  return os << n._value;
 }
+
+std::istream& 
+Numeric::operator>>(std::istream& is, Integer& n) 
+{
+  return is >> n._value;
+}
+
+
+} // namespace Ariadne
+
+
+
+

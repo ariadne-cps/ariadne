@@ -285,8 +285,8 @@ Evaluation::Detector<R>::crossing_time(const System::VectorFieldInterface<R>& vf
     ARIADNE_LOG(9,"    normal_derivative="<<normal_derivative<<"\n");
     
     assert((bool)(normal_derivative!=0));
-    R minimum_crossing_time = (constraint.value(bounding_box)/normal_derivative).lower();
-    R maximum_crossing_time = (R(1)/R(0)).upper(); // Should be inf (infinity)
+    R minimum_crossing_time = I(constraint.value(bounding_box)/normal_derivative).lower();
+    R maximum_crossing_time = Numeric::inf(); // Should be inf (infinity)
     Numeric::Interval<R> crossing_time(minimum_crossing_time,maximum_crossing_time);
     LinearAlgebra::Vector<I> spacial_time_gradient(domain.dimension());
 

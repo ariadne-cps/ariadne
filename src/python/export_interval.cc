@@ -35,6 +35,13 @@ using namespace Ariadne;
 using namespace Ariadne::Numeric;
 using namespace Ariadne::Python;
 
+namespace Ariadne { namespace Python {
+  template<class Res> inline
+  Res pi() {
+    Res r; Numeric::pi_(r); return r; 
+  }
+  }}
+
 template<class R> 
 std::string
 __str__(const Interval<R>& ivl) {
@@ -168,7 +175,7 @@ void export_interval()
   def("exp",&exp<I,I,I>);
   def("log",&log<I,R,I>);
   def("log",&log<I,I,I>);
-  def("pi",&Numeric::pi<R>);
+  def("pi",&Python::pi<I>);
   def("sin",&sin<I,R,I>);
   def("sin",&sin<I,I,I>);
   def("cos",&cos<I,R,I>);

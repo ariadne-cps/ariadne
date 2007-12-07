@@ -42,6 +42,11 @@
 namespace Ariadne {
 
 
+template<class Arg1, class Arg2, class Op> inline 
+std::ostream& operator<<(std::ostream& os, const Numeric::Expression< Numeric::Binary<Op,Arg1,Arg2> >& e) { 
+  return os << e.op << '(' << e.arg1 <<',' << e.arg2 << ')';
+}
+
 
 template<class R> 
 Geometry::Grid<R>::~Grid()
@@ -192,14 +197,14 @@ Geometry::Grid<R>::subdivision_index(dimension_type d, const real_type& x) const
   using namespace Numeric;
   
   R half=0.5;
-  index_type n=int_down<index_type>(add_approx(div_approx(sub_approx(x,this->_origin[d]),this->_lengths[d]),half));
+  index_type n=floor(add_approx(div_approx(sub_approx(x,this->_origin[d]),this->_lengths[d]),half));
   R sc=add_approx(this->_origin[d],mul_approx(this->_lengths[d],n));
-  ARIADNE_LOG(9,std::setprecision(20) << std::boolalpha << "sc=" << sc << " x=" << x << " sc-x=" << (sc-x) << "\n")
+  ARIADNE_LOG(9,std::setprecision(20) << std::boolalpha << "sc=" << sc << " x=" << x << " sc-x=" << Interval<R>(sc-x) << "\n")
     if(sc == x) { 
       return n; 
     } else {
       std::cerr << std::setprecision(20) << std::boolalpha
-                << "sc=" << sc << " x=" << x << " sc-x=" << (sc-x) << "\n"
+                << "sc=" << sc << " x=" << x << " sc-x=" << Interval<R>(sc-x) << "\n"
                 << "sc==x=" << (sc==x) << " sc!=x=" << (sc!=x)
                 << " sc<x=" << (sc<x) << " sc>x=" << (sc>x) << " sc<=x=" << (sc<=x) << " sc>=x=" << (sc>=x) << std::endl; 
       ARIADNE_THROW(InvalidGridPosition,std::setprecision(20)<<"Grid::subdivision_index(dimension_type d,real_type x)","d="<<d<<", x="<<x<<", this->origin[d]="<<this->_origin[d]<<", this->lengths[d]="<<this->_lengths[d]<<" (closest value is "<<sc<<")");
@@ -213,7 +218,7 @@ Geometry::Grid<R>::subdivision_lower_index(dimension_type d, const real_type& x)
 {
   using namespace Numeric;
   
-  index_type n=int_down<index_type>(div_down(sub_down(x,this->_origin[d]),this->_lengths[d]));
+  index_type n=floor(div_down(sub_down(x,this->_origin[d]),this->_lengths[d]));
   if(x>=add_approx(this->_origin[d],mul_approx(this->_lengths[d],(n+1)))) {
     return n+1;
   } else {
@@ -228,7 +233,7 @@ Geometry::Grid<R>::subdivision_upper_index(dimension_type d, const real_type& x)
 {
   using namespace Numeric;
   
-  index_type n=int_up<index_type>(div_up(sub_up(x,this->_origin[d]),this->_lengths[d]));
+  index_type n=ceil(div_up(sub_up(x,this->_origin[d]),this->_lengths[d]));
   if(x<=add_approx(this->_origin[d],mul_approx(this->_lengths[d],(n-1)))) {
     return n-1;
   } else {

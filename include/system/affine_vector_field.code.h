@@ -23,7 +23,7 @@
  
 #include "affine_vector_field.h"
 
-#include "../numeric/numerical_traits.h"
+#include "../numeric/traits.h"
 #include "../linear_algebra/vector.h"
 #include "../linear_algebra/matrix.h"
 

@@ -40,7 +40,7 @@ template<class R>
 void
 LinearAlgebra::Matrix<R>::instantiate() 
 {
-  typedef typename Numeric::traits<R>::interval_type I;
+  typedef typename Numeric::traits<R>::arithmetic_type I;
   typedef typename Numeric::traits<R>::number_type X;
   Matrix<R>* A=0;
   Matrix<I>* iA=0;
@@ -252,8 +252,8 @@ LinearAlgebra::solve(const Matrix<R1>& A, const Vector<R2>& v)
 
 
 template<class R>
-LinearAlgebra::Matrix< Numeric::Interval<R> >
-LinearAlgebra::schulz_inverse(const Matrix< Numeric::Interval<R> >& A) 
+LinearAlgebra::Matrix<typename Numeric::traits<R>::arithmetic_type>
+LinearAlgebra::schulz_inverse(const Matrix<R>& A) 
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }

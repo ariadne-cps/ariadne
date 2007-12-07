@@ -1,8 +1,8 @@
 /***************************************************************************
- *            rational.h
+ *            numeric/rational.h
  *
- *  Copyright  2004-6  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
+ *  Copyright  2004-7  Alberto Casagrande, Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -21,25 +21,54 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file rational.h
+/*! \file numeric/rational.h
  *  \brief Type definitions and conversion operators for rational numbers.
  */
 
-#ifndef ARIADNE_RATIONAL_H
-#define ARIADNE_RATIONAL_H
+#ifndef ARIADNE_NUMERIC_RATIONAL_H
+#define ARIADNE_NUMERIC_RATIONAL_H
 
 #include <gmpxx.h>
 #include <iostream>
 
-#include "../numeric/numerical_traits.h"
-#include "../numeric/conversion.h"
-#include "../numeric/arithmetic.h"
-#include "../numeric/function.h"
+#include "numeric/macros.h"
+#include "numeric/traits.h"
+#include "numeric/expression.h"
+#include "numeric/operators.h"
 
-#include "../numeric/integer.h"
+#include "numeric/integer.h"
+
 
 namespace Ariadne {
   namespace Numeric {
+  
+    class Integer;
+    class Rational;
+    template<class T> class Float;
+  
+    void min_(Rational&, const Rational&, const Rational&);
+    void max_(Rational&, const Rational&, const Rational&);
+    void abs_(Rational&, const Rational&);
+    void pos_(Rational&, const Rational&);
+    void neg_(Rational&, const Rational&);
+    void add_(Rational&, const Rational&, const Rational&);
+    void sub_(Rational&, const Rational&, const Rational&);
+    void mul_(Rational&, const Rational&, const Rational&);
+    void div_(Rational&, const Rational&, const Rational&);
+    void pow_(Rational&, const Rational&, const Integer&);
+
+    // Comparisons
+    ARIADNE_DECLARE_COMPARISONS(bool,Rational,Rational);
+    ARIADNE_DECLARE_COMPARISONS(bool,Rational,int);
+    ARIADNE_DECLARE_COMPARISONS(bool,int,Rational);
+    ARIADNE_DECLARE_COMPARISONS(bool,Rational,double);
+    ARIADNE_DECLARE_COMPARISONS(bool,double,Rational);
+    ARIADNE_DECLARE_COMPARISONS(bool,Rational,Integer);
+    ARIADNE_DECLARE_COMPARISONS(bool,Integer,Rational);
+
+    std::ostream& operator<<(std::ostream&, const Rational&);
+    std::istream& operator>>(std::istream&, const Rational&);
+ 
 
    /*!\ingroup Numeric
     * \brief A rational number.
@@ -50,90 +79,111 @@ namespace Ariadne {
     *
     * Currently implemented using mpq_class from the GNU Multiple Precision library.
     */
-    class Rational : public mpq_class 
+    class Rational
+      : public Value<Rational>
     {
+     public:
+      mpq_t _value;
      public:
       //@{
       //! \name Constructors and assignment operators
+      /*! \brief Destructor. */
+      ~Rational();
       /*! \brief Default constructor constructs the rational 0/1. */
-      Rational() : mpq_class(0) { this->mpq_class::canonicalize(); }
-      //Rational() : mpq_class(0) { std::cerr<<"Rational()="<<std::endl; this->mpq_class::canonicalize(); std::cerr<<*this<<std::endl; }
-      /*! \brief Construct from a numerator and a denominator. */
-      Rational(const Integer& n, const Integer& d)
-        : mpq_class(n,d) { this->mpq_class::canonicalize(); }
-      /*! \brief Construct from a built-in integer. */
-      Rational(const int& n)
-        : mpq_class(n) { this->mpq_class::canonicalize(); }
-      //  : mpq_class(n) { std::cerr<<"Rational(n="<<n<<")="<<std::flush; this->mpq_class::canonicalize(); std::cerr<<*this<<std::endl; }
-      /*! \brief Construct from a built-in double-precision floating point object. */
-      Rational(const double& x)
-        : mpq_class(x) { this->mpq_class::canonicalize(); }
-      //  : mpq_class(x) { std::cerr<<"Rational(x="<<n<<")="<<std::flush; this->mpq_class::canonicalize(); std::cerr<<*this<<std::endl; }
-      Rational(const mpz_class& z)
-        : mpq_class(z) { this->mpq_class::canonicalize(); }
-      Rational(const mpq_class& q)
-        : mpq_class(q) { this->mpq_class::canonicalize(); }
-      /*! \brief Construct from an integer. */
-      Rational(const Integer& z)
-        : mpq_class(z) { this->mpq_class::canonicalize(); }
-      //  : mpq_class(z) { std::cerr<<"Rational(z="<<z<<")="<<std::endl; this->mpq_class::canonicalize(); std::cerr<<*this<<std::endl; }
-      /*! \brief Construct from a string literal. */
-      Rational(const char* cstr);
-      /*! \brief Construct from a string literal. */
-      Rational(const std::string& str);
-      /*! \brief Copy constructor. */
-      Rational(const Rational& q)
-        : mpq_class(q) { this->mpq_class::canonicalize();}
-      //  : mpq_class(q) { std::cerr<<"Rational(q="<<q<<")="<<std::endl; this->mpq_class::canonicalize(); std::cerr<<*this<<std::endl; }
-      /*! \brief Copy assignment operator. */
-      Rational& operator=(const Rational& q) {
-        this->mpq_class::operator=(q); return *this; }
+      Rational();
+#ifdef DOXYGEN
+      /*! \brief Construct from a numerator and a denomin_ator. */
+      template<class N1, class N2> Rational(const N1& n, const N2& d);
+#else
+      Rational(const int& n, const int& d);
+      Rational(const Integer& n, const Integer& d);
+#endif
 
-      /*! \brief Construct from a numerator and a denominator of arbitrary types. */
-      template<class R1,class R2> Rational(const R1& n, const R2& d)
-        : mpq_class(n,d) { this->mpq_class::canonicalize(); }
-      /*! \brief Convert from another numerical type. */
-      template<class R> Rational(const R& x)
-        : mpq_class(x) 
-      { 
-        //std::cerr<<__PRETTY_FUNCTION__<<std::endl; 
-        //std::cerr<<"Rational(R x="<<x<<")="<<std::flush; 
-        this->mpq_class::canonicalize(); 
-        //std::cerr<<*this<<std::endl; 
-      }
-      /*! \brief Conversion assignment operator from another numerical type. */
-      template<class R> Rational& operator=(const R& x) {
-        //std::cerr<<__PRETTY_FUNCTION__<<std::endl; 
-        (*this)=Rational(x); return *this; }
+      /*! \brief Convert from an int. */
+      Rational(const int& n);
+      /*! \brief Convert from an unsigned int. */
+      Rational(const unsigned int& n);
+      /*! \brief Convert from a double. */
+      Rational(const double& x);
+
+      /*! \brief Convert from an integer. */
+      Rational(const Integer& z);
+      /*! \brief Convert from a Float. */
+      template<class T> Rational(const Float<T>& x);
+      /*! \brief Copy constructor. */
+      Rational(const Rational& q);
+
+      /*! \brief Convert from a raw mpz_class. */
+      Rational(const mpz_class& z);
+      /*! \brief Convert from a raw mpf_class. */
+      Rational(const mpf_class& x);
+      /*! \brief Convert from a raw mpq_class. */
+      Rational(const mpq_class& q);
+
+      /*! \brief Construct from a string literal. */
+      explicit Rational(const std::string& n);
+
+      /*! \brief Assign from an int. */
+      Rational& operator=(const int& n);
+      /*! \brief Conversion assignment operator from anunsigned built-in integer. */
+      Rational& operator=(const unsigned int& n);
+      /*! \brief Conversion assignment operator from a double. */
+      Rational& operator=(const double& x);
+      /*! \brief Assign from an integer. */
+      Rational& operator=(const Integer& q);
+      /*! \brief Assign from an float. */
+      template<class T> Rational& operator=(const Float<T>& x);
+      /*! \brief Copy assignment operator. */
+      Rational& operator=(const Rational& q);
+
+      /*! \brief Convert from a numerical expression. */
+      template<class E> Rational(const Expression<E>& e);
+      /*! \brief Assign from a numerical expression. */
+      template<class E> Rational& operator=(const Expression<E>& e);
+
+      // Convert from a numerical expression with a rounding mode. (For convenience only). */
+      template<class E, class Rnd> Rational(const Expression<E>& e, const Rnd& rnd) { *this=e; }
+      template<class X, class Rnd> Rational(const X& e, const Rnd& rnd) { *this=e; }
+
       //@}
       
       //@{
+      //! \name Accessor methods
+      /*! \brief A reference to the internal value. */
+      mpq_ptr value() { return this->_value; }
+      /*! \brief A constant reference to the internal value. */
+      mpq_srcptr value() const { return this->_value; }
+      //@}
+
+      //@{
       //! \name Data access
       /*! \brief The numerator. */
-      Integer numerator() const { return this->get_num(); }
-      /*! \brief The denominator. */
-      Integer denominator() const { return this->get_den();}
+      Integer numerator() const;
+      /*! \brief The denomin_ator. */
+      Integer denominator() const;
+      
+      double get_d() const;
       //@}
      public:
-      mpq_class get_base() const { return *this; }
+      void canonicalize();
 
 #ifdef DOXYGEN
       //@{
       //! \name Arithmetic operations
-      /*! \brief The minimum of q1 and q2. */
-      friend Rational min(const Rational& q1, const Rational& q2);
-      /*! \brief The maximum of q1 and q2. */
-      friend Rational max(const Rational& q1, const Rational& q2);
-      /*! \brief The absolute value \a q. */
-      friend Rational abs(const Rational& q);
+      /*! \brief The min_imum of q1 and q2. */
+      friend Rational min_(const Rational& q1, const Rational& q2);
+      /*! \brief The max_imum of q1 and q2. */
+      friend Rational max_(const Rational& q1, const Rational& q2);
+      /*! \brief The abs_olute value \a q. */
+      friend Rational abs_(const Rational& q);
       
-      /*! \brief In-place addition. */
+      /*! \brief In-place add_ition. */
       friend Rational& operator+=(Rational& q1, const Rational& q2);
-      /*! \brief In-place subtraction of a number. */
+      /*! \brief In-place sub_traction of a number. */
       friend Rational& operator-=(Rational& q1, const Rational& q2);
-      /*! \brief In-place multiplication. */
+      /*! \brief In-place mul_tiplication. */
       friend Rational& operator*=(Rational& q1, const Rational& q2);
-      /*! \brief In-place division. */
+      /*! \brief In-place div_ision. */
       friend Rational& operator/=(Rational& q1, const Rational& q2);
 
       /*! \brief Negation. */
@@ -146,8 +196,8 @@ namespace Ariadne {
       friend Rational operator*(const Rational& q1, const Rational& q2);
       /*! \brief Division. */
       friend Rational operator/(const Rational& q1, const Rational& q2);
-      /*! \brief %Integer power. */
-      friend Rational pow(const Rational& q, const Integer& n);
+      /*! \brief %Integer pow_er. */
+      friend Rational pow_(const Rational& q, const Integer& n);
       //@}
       
       
@@ -177,150 +227,16 @@ namespace Ariadne {
 #endif
     };
 
-
+    // Declare stream i/o operators
     std::ostream& operator<<(std::ostream& os, const Rational& q);
     std::istream& operator>>(std::istream& is, Rational& q);
       
-    inline Rational::Rational(const char* cstr) { std::stringstream ss(cstr); std::istream& is(ss); is >> *this; }
-    inline Rational::Rational(const std::string& str) { std::stringstream ss(str); std::istream& is(ss); is >> *this; }
 
-    inline Integer numerator(const Rational& num){ 
-      return num.get_num(); }
-  
-    inline Integer denominator(const Rational& num){ 
-      return num.get_den();}
-  
-  
-    template<> inline Rational min(const Rational& x1, const Rational& x2) {
-      return (x1<=x2) ? x1 : x2; }
-    template<> inline Rational max(const Rational& x1, const Rational& x2) {
-      return (x1>=x2) ? x1 : x2; }
-    template<> inline Rational abs(const Rational& x) {
-      return (x>=0) ? x : static_cast<Rational>(-x); }
-
-    template<> inline Rational neg(const Rational& x) {
-      return -x.get_base(); }
-    template<> inline Rational rec(const Rational& x) {
-      return 1/x.get_base(); }
-    template<> inline Rational add(const Rational& x1, const Rational& x2) {
-      return x1+x2; }
-    template<> inline Rational sub(const Rational& x1, const Rational& x2) {
-      return x1-x2; }
-    template<> inline Rational mul(const Rational& x1, const Rational& x2) {
-      return x1*x2; }
-    template<> inline Rational div(const Rational& x1, const Rational& x2) {
-      return x1/x2; }
-
-    template<> inline Rational pow(const Rational& q, const int& n) {
-      if(n<0) { return pow(q,-n); }
-      Rational r=1; Rational p=q; uint e=1; uint un=n;
-      while(e<=un) { if(e&un) { r*=p; } p*=p; e*=2; }
-      return r; 
-    }      
-    
-    template<> inline Rational pow(const Rational& q, const uint& n) {
-      return pow(q,int(n));
-    }      
-    
-    template<> inline Rational pow(const Rational& q, const short& n) {
-      return pow(q,int(n));
-    }      
-    
-    template<> inline Rational pow(const Rational& q, const unsigned short& n) {
-      return pow(q,int(n));
-    }      
-    
-    template<> inline Rational floor(const Rational& x) { 
-      return Rational((x.get_num()+x.get_den()-1)/x.get_den()); }
-    template<> inline Rational ceil(const Rational& x) { 
-      return Rational(x.get_num()/x.get_den()); }
-
-    template<> inline Integer int_down(const Rational& x) { 
-      return Integer((x.get_num()+x.get_den()-1)/x.get_den()); }
-    template<> inline Integer int_up(const Rational& x) { 
-      return Integer(x.get_num()/x.get_den()); }
-    template<> inline int int_down(const Rational& x) { 
-      return int_down<Integer>(x).get_si(); }
-    template<> inline int int_up(const Rational& x) { 
-      return int_up<Integer>(x).get_si(); }
-    
-      
-    template<> inline std::string name<Numeric::Rational>() { return "Rational"; }
-    template<> inline std::string name<Numeric::Interval<Numeric::Rational> >() { return "Interval<Rational>"; }
-    
-    template<> inline double conv_approx(const Rational& x) { return x.get_d(); }
- 
-    template<> inline Rational conv_exact(const int& n) { return Rational(n); }
-    template<> inline Rational conv_approx(const int& n) { return conv_exact<Rational>(n); }
-    template<> inline Rational conv_down(const int& n) { return conv_exact<Rational>(n); }
-    template<> inline Rational conv_up(const int& n) { return conv_exact<Rational>(n); }
- 
-    template<> inline Rational conv_exact(const double& x) { return Rational(x); }
-    template<> inline Rational conv_approx(const double& x) { return conv_exact<Rational>(x); }
-    template<> inline Rational conv_down(const double& x) { return conv_exact<Rational>(x); }
-    template<> inline Rational conv_up(const double& x) { return conv_exact<Rational>(x); }
- 
-    template<> inline Rational conv_exact(const Rational& x) { return x; }
-    template<> inline Rational conv_approx(const Rational& x) { return conv_exact<Rational>(x); }
-    template<> inline Rational conv_down(const Rational& x) { return conv_exact<Rational>(x); }
-    template<> inline Rational conv_up(const Rational& x) { return conv_exact<Rational>(x); }
- 
-    template<> inline Rational min_exact(const Rational& x1, const Rational& x2) {
-      return (x1<=x2) ? x1 : x2; }
-    template<> inline Rational min_approx(const Rational& x1, const Rational& x2) { 
-      return min_exact(x1,x2); }
-    template<> inline Rational min_down(const Rational& x1, const Rational& x2) { 
-      return min_exact(x1,x2); }
-    template<> inline Rational min_up(const Rational& x1, const Rational& x2) { 
-      return min_exact(x1,x2); }
-  
-    template<> inline Rational max_exact(const Rational& x1, const Rational& x2) {
-      return (x1>=x2) ? x1 : x2; }
-    template<> inline Rational max_approx(const Rational& x1, const Rational& x2) { 
-      return max_exact(x1,x2); }
-    template<> inline Rational max_down(const Rational& x1, const Rational& x2) { 
-      return max_exact(x1,x2); }
-    template<> inline Rational max_up(const Rational& x1, const Rational& x2) { 
-      return max_exact(x1,x2); }
-  
-    
-    template<> inline Rational neg_exact(const Rational& x) { return neg(x); }
-    template<> inline Rational neg_approx(const Rational& x) { return neg_exact(x); }
-    template<> inline Rational neg_down(const Rational& x) { return neg_exact(x); }
-    template<> inline Rational neg_up(const Rational& x) { return neg_exact(x); }
-    
-    template<> inline Rational abs_exact(const Rational& x) { return abs(x); }
-    template<> inline Rational abs_approx(const Rational& x) { return abs_exact(x); }
-    template<> inline Rational abs_down(const Rational& x) { return abs_exact(x); }
-    template<> inline Rational abs_up(const Rational& x) { return abs_exact(x); }
-    
-    template<> inline Rational add_exact(const Rational& x1, const Rational& x2) { return x1+x2; }
-    template<> inline Rational add_down(const Rational& x1, const Rational& x2) { return add_exact(x1,x2); }
-    template<> inline Rational add_up(const Rational& x1, const Rational& x2) { return add_exact(x1,x2); }
-    template<> inline Rational add_approx(const Rational& x1, const Rational& x2) { return add_exact(x1,x2); }
-
-    template<> inline Rational sub_exact(const Rational& x1, const Rational& x2) { return x1-x2; }
-    template<> inline Rational sub_down(const Rational& x1, const Rational& x2) { return sub_exact(x1,x2); }
-    template<> inline Rational sub_up(const Rational& x1, const Rational& x2) { return sub_exact(x1,x2); }
-    template<> inline Rational sub_approx(const Rational& x1, const Rational& x2) { return sub_exact(x1,x2); }
-    
-    template<> inline Rational mul_exact(const Rational& x1, const Rational& x2) { return x1*x2; }
-    template<> inline Rational mul_down(const Rational& x1, const Rational& x2) { return mul_exact(x1,x2); }
-    template<> inline Rational mul_up(const Rational& x1, const Rational& x2) { return mul_exact(x1,x2); }
-    template<> inline Rational mul_approx(const Rational& x1, const Rational& x2) { return mul_exact(x1,x2); }
-    
-    template<> inline Rational div_exact(const Rational& x1, const Rational& x2) { return x1/x2; }
-    template<> inline Rational div_down(const Rational& x1, const Rational& x2) { return div_exact(x1,x2); }
-    template<> inline Rational div_up(const Rational& x1, const Rational& x2) { return div_exact(x1,x2); }
-    template<> inline Rational div_approx(const Rational& x1, const Rational& x2) { return div_exact(x1,x2); }
-  
-    template<class N> inline Rational pow_up(const Rational& x, const N& n) { return pow(x,n); }
-    template<class N> inline Rational pow_down(const Rational& x, const N& n) { return pow(x,n); }
-    template<class N> inline Rational pow_approx(const Rational& x, const N& n) { return pow(x,n); }
-  
   
   }
 
 }
 
-#endif /* ARIADNE_RATIONAL_H */
+#include "rational.inline.h"
+
+#endif /* ARIADNE_NUMERIC_RATIONAL_H */

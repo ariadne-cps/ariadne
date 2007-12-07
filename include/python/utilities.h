@@ -123,12 +123,12 @@ namespace Python {
 
   template<class Res, class Arg1, class Arg2> inline
   Res min(const Arg1& a1, const Arg2& a2) {
-    return Res(min(Res(a1),Res(a2)));
+    return std::min(Res(a1),Res(a2));
   }
 
   template<class Res, class Arg1, class Arg2> inline
   Res max(const Arg1& a1, const Arg2& a2) {
-    return Res(max(Res(a1),Res(a2)));
+    return std::max(Res(a1),Res(a2));
   }
 
   template<class Res, class Arg> inline

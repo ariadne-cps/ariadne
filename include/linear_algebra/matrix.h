@@ -32,7 +32,7 @@
 
 #include "../base/types.h"
 #include "../base/array.h"
-#include "../numeric/numerical_traits.h"
+#include "../numeric/traits.h"
 #include "../numeric/integer.h"
 #include "../numeric/interval.h"
 
@@ -305,7 +305,7 @@ namespace Ariadne {
     template<class R> std::ostream& operator<<(std::ostream& os, const Matrix<R>& A);
     template<class R> std::istream& operator>>(std::istream& is, Matrix<R>& A);
    
-    template<class R> Matrix< Numeric::Interval<R> > schulz_inverse(const Matrix< Numeric::Interval<R> >& A);
+    template<class R> Matrix<typename Numeric::traits<R>::arithmetic_type> schulz_inverse(const Matrix<R>& A);
 
   }
 }

@@ -821,14 +821,13 @@ template<class R>
 void
 adjoin_subdivision(ListSet< Zonotope<R,R> >& ls, const Zonotope<R,R>& z) 
 {
-  R two=2;
   dimension_type d=z.dimension();
   size_type m=z.number_of_generators();
   
   LinearAlgebra::Matrix<R> new_generators(d,m);
   for(size_type i=0; i!=d; ++i) {
     for(size_type j=0; j!=m; ++j) {
-      new_generators(i,j)=div_up(z.generators()(i,j),two);
+      new_generators(i,j)=div_up(z.generators()(i,j),2);
     }
   }
   
@@ -862,14 +861,13 @@ adjoin_subdivision(ListSet< Zonotope<Interval<R>,R> >& ls, const Zonotope<Interv
 
   typedef Numeric::Interval<R> I;
   
-  R two=2;
   dimension_type d=z.dimension();
   size_type m=z.number_of_generators();
   
   LinearAlgebra::Matrix<R> new_generators(d,m);
   for(size_type i=0; i!=d; ++i) {
     for(size_type j=0; j!=m; ++j) {
-      new_generators(i,j)=div_up(z.generators()(i,j),two);
+      new_generators(i,j)=div_up(z.generators()(i,j),2);
     }
   }
   
@@ -945,7 +943,6 @@ adjoin_division(ListSet< Zonotope<R,R> >& ls, const Zonotope<R,R>& z)
 {
   size_type d=z.dimension();
   size_type m=z.number_of_generators();
-  R two=2;
   
   LinearAlgebra::Matrix<R> new_generators=z.generators();
   
@@ -961,7 +958,7 @@ adjoin_division(ListSet< Zonotope<R,R> >& ls, const Zonotope<R,R>& z)
   
   size_type j=max_column;
   for(size_type i=0; i!=d; ++i) {
-    new_generators(i,j)=div_up(new_generators(i,j),two);
+    new_generators(i,j)=div_up(new_generators(i,j),2);
   }
   
   Point<R> new_centre=sub_approx(z.centre(),LinearAlgebra::Vector<R>(new_generators.column(j)));
@@ -980,7 +977,6 @@ adjoin_division(ListSet< Zonotope<Interval<R>,R> >& ls, const Zonotope<Numeric::
   
   size_type d=z.dimension();
   size_type m=z.number_of_generators();
-  R two=2;
   
   I max_radius=0;
   size_type max_value=0;
@@ -1006,7 +1002,7 @@ adjoin_division(ListSet< Zonotope<Interval<R>,R> >& ls, const Zonotope<Numeric::
     LinearAlgebra::Matrix<R> new_generators=z.generators();
     size_type j=max_column;
     for(size_type i=0; i!=d; ++i) {
-      new_generators(i,j)=div_up(new_generators(i,j),two);
+      new_generators(i,j)=div_up(new_generators(i,j),2);
     }
     
     Vector<R> v=new_generators.column(j);
@@ -1398,7 +1394,7 @@ contains_exact(const Zonotope<Rational,Rational>& z, const Point<Rational>& pt)
   const Geometry::Point<Q>& qc=z.centre();
   const Geometry::Point<Q>& qp=pt;
   const LinearAlgebra::Matrix<Q>& qG=z.generators();
-  const LinearAlgebra::Vector<Q> qo(m,one);
+  const LinearAlgebra::Vector<Q> qo(m,zero);
   const LinearAlgebra::Vector<Q> zv(m,zero);
   const LinearAlgebra::Vector<Q> tv(m,two);
   

@@ -32,7 +32,7 @@
 
 #include "../base/types.h"
 #include "../base/array.h"
-#include "../numeric/numerical_traits.h"
+#include "../numeric/traits.h"
 #include "../numeric/integer.h"
 #include "../numeric/interval.h"
 

@@ -1,8 +1,8 @@
 /***************************************************************************
- *            float.h
+ *            numeric/float.h
  *
- *  Copyright  2007  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
+ *  Copyright  2007 Pieter Collins
+ *  pieter.collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -22,22 +22,20 @@
  */
  
 /*! \file numeric/float.h
- *  \brief Configuration for floating-point numbers.
+ *  \brief Type definitions and conversion operators for floating point numbers.
  */
 
-#ifndef ARIADNE_FLOAT_H
-#define ARIADNE_FLOAT_H
+#ifndef ARIADNE_NUMERIC_FLOAT_H
+#define ARIADNE_NUMERIC_FLOAT_H
 
-#include <config.h>
+#include "config.h"
 
 #ifdef ENABLE_FLOAT64
-#include "float64.h"
-namespace Ariadne { namespace Numeric { template<class R> class Interval; typedef Interval<Float64> Interval64; } }
+  #include "numeric/float64.h"
 #endif
 
 #ifdef ENABLE_FLOATMP
-#include "floatmp.h"
-namespace Ariadne { namespace Numeric { template<class R> class Interval; typedef Interval<FloatMP> IntervalMP; } }
+  #include "numeric/floatmp.h"
 #endif
 
-#endif /* ARIADNE_FLOAT_H */
+#endif /* ARIADNE_NUMERIC_FLOAT_H */

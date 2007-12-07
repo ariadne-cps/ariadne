@@ -1,8 +1,8 @@
 /***************************************************************************
- *            interval.h
+ *            numeric/interval.h
  *
  *  Copyright 2005-7  Alberto Casagrande, Pieter Collins
- *  Email casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ 
  ****************************************************************************/
 
 /*
@@ -21,35 +21,34 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file interval.h
+/*! \file numeric/interval.h
  *  \brief Intervals of real number types (currently implemented using Boost).
  */
  
-#ifndef ARIADNE_INTERVAL_H
-#define ARIADNE_INTERVAL_H
+#ifndef ARIADNE_NUMERIC_INTERVAL_H
+#define ARIADNE_NUMERIC_INTERVAL_H
 
 #include <iostream>
-#include <sstream>
-#include <string>
 #include <iomanip>
 #include <stdexcept>
 #include <cassert>
 
-#include "../base/tribool.h"
-#include "../base/exceptions.h"
+#include "base/tribool.h"
 
-#include "../numeric/exceptions.h"
-#include "../numeric/numerical_traits.h"
-#include "../numeric/conversion.h"
-#include "../numeric/arithmetic.h"
-#include "../numeric/function.h"
-#include "../numeric/rational.h"
+#include "numeric/traits.h"
+#include "numeric/expression.h"
+#include "numeric/operators.h"
 
-#include "../numeric/interval.class.h"
+#include "numeric/interval.class.h"
 
 namespace Ariadne {
   namespace Numeric {
   
+    using Base::tribool;
+    using Base::indeterminate;
+
+    template<class X> std::string name();
+
     /*!\ingroup Numeric
      * \brief A reference to an interval. 
      */
@@ -76,6 +75,7 @@ namespace Ariadne {
     template<class R> R radius(const Interval<R>& x);
     template<class R> R width(const Interval<R>& x);
 
+    template<class R1, class R2> bool same(const Interval<R1>& x1, const Interval<R2>& x2);
     template<class R> bool empty(const Interval<R>& x);
     template<class R> bool singleton(const Interval<R>& x);
     template<class R, class RX> bool encloses(const Interval<R>& ivl, const RX& x);
@@ -102,66 +102,6 @@ namespace Ariadne {
     template<class R1, class R2> tribool operator<=(const R1& x, const Interval<R2>& ivl);
     template<class R1, class R2> tribool operator>=(const R1& x, const Interval<R2>& ivl);
 
-    template<class R> Interval<R> operator+(const Interval<R>& x);
-    template<class R> Interval<R> operator-(const Interval<R>& x);
-    
-    template<class R> Interval<R> operator+(const Interval<R>& x1, const Interval<R>& x2);
-    template<class R> Interval<R> operator+(const Interval<R>& x1, const R& x2);
-    template<class R> Interval<R> operator+(const R& x1, const Interval<R>& x2);
-    template<class R> Interval<R>& operator+=(Interval<R>& x1, const Interval<R>& x2);
-    template<class R> Interval<R>& operator+=(Interval<R>& x1, const R& x2);
-
-    template<class R> Interval<R> operator-(const Interval<R>& x1, const Interval<R>& x2);
-    template<class R> Interval<R> operator-(const Interval<R>& x1, const R& x2);
-    template<class R> Interval<R> operator-(const R& x1, const Interval<R>& x2);
-    template<class R> Interval<R>& operator-=(Interval<R>& x1, const Interval<R>& x2);
-    template<class R> Interval<R>& operator-=(Interval<R>& x1, const R& x2);
-
-    template<class R> Interval<R> operator*(const Interval<R>& x1, const Interval<R>& x2);
-    template<class R> Interval<R> operator*(const Interval<R>& x1, const R& x2);
-    template<class R> Interval<R> operator*(const R& x1, const Interval<R>& x2);
-    template<class R> Interval<R>& operator*=(Interval<R>& x1, const Interval<R>& x2);
-    template<class R> Interval<R>& operator*=(Interval<R>& x1, const R& x2);
-
-    template<class R> Interval<R> operator/(const Interval<R>& x1, const Interval<R>& x2);
-    template<class R> Interval<R> operator/(const Interval<R>& x1, const R& x2);
-    template<class R> Interval<R> operator/(const R& x1, const Interval<R>& x2);
-    template<class R> Interval<R>& operator/=(Interval<R>& x1, const Interval<R>& x2);
-    template<class R> Interval<R>& operator/=(Interval<R>& x1, const R& x2);
-
-    template<class R> Interval<R> operator+(const Interval<R>& x1, const int& x2);
-    template<class R> Interval<R> operator-(const Interval<R>& x1, const int& x2);
-    template<class R> Interval<R> operator*(const Interval<R>& x1, const int& x2);
-    template<class R> Interval<R> operator/(const Interval<R>& x1, const int& x2);
-
-    template<class R> Interval<R> operator+(const int& x1, const Interval<R>& x2);
-    template<class R> Interval<R> operator-(const int& x1, const Interval<R>& x2);
-    template<class R> Interval<R> operator*(const int& x1, const Interval<R>& x2);
-    template<class R> Interval<R> operator/(const int& x1, const Interval<R>& x2);
-    
-    template<class R> Interval<R> operator+(const Interval<R>& x1, const double& x2);
-    template<class R> Interval<R> operator-(const Interval<R>& x1, const double& x2);
-    template<class R> Interval<R> operator*(const Interval<R>& x1, const double& x2);
-    template<class R> Interval<R> operator/(const Interval<R>& x1, const double& x2);
-
-    template<class R> Interval<R> operator+(const double& x1, const Interval<R>& x2);
-    template<class R> Interval<R> operator-(const double& x1, const Interval<R>& x2);
-    template<class R> Interval<R> operator*(const double& x1, const Interval<R>& x2);
-    template<class R> Interval<R> operator/(const double& x1, const Interval<R>& x2);
-
-    template<class R, class X> Interval<R>& operator+=(Interval<R>& x1, const X& x2);
-    template<class R, class X> Interval<R>& operator-=(Interval<R>& x1, const X& x2);
-    template<class R, class X> Interval<R>& operator*=(Interval<R>& x1, const X& x2);
-    template<class R, class X> Interval<R>& operator/=(Interval<R>& x1, const X& x2);
-
-    template<class R> Interval<R> min(const Interval<R>& x1, const Interval<R>& x2);
-    template<class R> Interval<R> max(const Interval<R>& x1, const Interval<R>& x2);
-    template<class R> Interval<R> abs(const Interval<R>& x);
-    template<class R,class N> Interval<R> pow(const Interval<R>& x, const N& n);
-  
-    template<class R> Interval<R> neg(const Interval<R>& x);
-    template<class R> Interval<R> rec(const Interval<R>& x);
-
     template<class R> bool equal(const Interval<R>& x1, const Interval<R>& x2);
     template<class R> bool disjoint(const Interval<R>& x1, const Interval<R>& x2);
     template<class R> bool overlap(const Interval<R>& x1, const Interval<R>& x2);
@@ -185,16 +125,20 @@ namespace Ariadne {
     
     template<class R> std::ostream& operator<<(std::ostream& os, const Interval<R>& x);
     template<class R> std::istream& operator>>(std::istream& is, Interval<R>& x);
+    template<class T> class Float;
+
+
+
     
   } // namespace Numeric
 } // namespace Ariadne
   
 
 namespace TBLAS {
-  template<class real> int iamax (const int N, const real *X, const int incX);
-  template<class real> int iamax (const int N, const Ariadne::Numeric::Interval<real> *X, const int incX);
+  template<class real> int iamax_ (const int N, const real *X, const int incX);
+  template<class real> int iamax_ (const int N, const Ariadne::Numeric::Interval<real> *X, const int incX);
 }
 
 #include "interval.inline.h"
 
-#endif /* ARIADNE_INTERVAL_H */
+#endif /* ARIADNE_NUMERIC_INTERVAL_H */

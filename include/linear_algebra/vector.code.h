@@ -28,7 +28,9 @@
 #include <sstream>
 #include <exception>
 
-#include "../base/stlio.h"
+#include "base/stlio.h"
+
+#include "numeric/interval.code.h"
 
 namespace Ariadne {
 

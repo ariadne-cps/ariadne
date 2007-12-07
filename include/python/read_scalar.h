@@ -28,7 +28,7 @@
 #ifndef ARIADNE_PYTHON_READ_SCALAR_H
 #define ARIADNE_PYTHON_READ_SCALAR_H
 
-#include "numeric/numerical_traits.h"
+#include "numeric/traits.h"
 
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp>

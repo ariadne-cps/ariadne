@@ -203,11 +203,11 @@ namespace Ariadne {
     template<class R1, class R2> Vector<R1>& operator*=(Vector<R1>& v1, const R2& s2);
     template<class R1, class R2> Vector<R1>& operator/=(Vector<R1>& v1, const R2& s2);
 
-    template<class E1, class E2> BinaryVectorVectorExpression<E1,E2,plus> operator+(const VectorExpression<E1>& e1, const VectorExpression<E2>& e2);
-    template<class E1, class E2> BinaryVectorVectorExpression<E1,E2,minus> operator-(const VectorExpression<E1>& e1, const VectorExpression<E2>& e2);
-    template<class E1, class E2> BinaryVectorScalarExpression<E1,E2,times> operator*(const E2& e2, const VectorExpression<E1>& e1);
-    template<class E1, class E2> BinaryVectorScalarExpression<E1,E2,times> operator*(const VectorExpression<E1>& e1, const E2& e2);
-    template<class E1, class E2> BinaryVectorScalarExpression<E1,typename Numeric::traits<E2>::closure_type,divides> operator/(const VectorExpression<E1>& e1, const E2& e2);
+    template<class E1, class E2> BinaryVectorVectorExpression<Numeric::Add,E1,E2> operator+(const VectorExpression<E1>& e1, const VectorExpression<E2>& e2);
+    template<class E1, class E2> BinaryVectorVectorExpression<Numeric::Sub,E1,E2> operator-(const VectorExpression<E1>& e1, const VectorExpression<E2>& e2);
+    template<class E1, class E2> BinaryVectorScalarExpression<Numeric::Mul,E1,E2> operator*(const E2& e2, const VectorExpression<E1>& e1);
+    template<class E1, class E2> BinaryVectorScalarExpression<Numeric::Mul,E1,E2> operator*(const VectorExpression<E1>& e1, const E2& e2);
+    template<class E1, class E2> BinaryVectorScalarExpression<Numeric::Div,E1,E2> operator/(const VectorExpression<E1>& e1, const E2& e2);
 
 
 

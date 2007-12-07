@@ -31,7 +31,10 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "../base/tribool.h"
+#include "base/tribool.h"
+#include "numeric/expression.h"
+
+#include "numeric/rational.h" // For explicit specialization of Rational interval
 
 namespace Ariadne {
   namespace Numeric {
@@ -44,44 +47,49 @@ namespace Ariadne {
      * If \a val of real numbers with endpoints of type \a R.
      * All operations on an interval must be guarenteed to return an interval contining the exact result.
      * If \a T supports exact evaluation of a function, then the exact evaluation must be used.
-     * If \a T is dense in the reals, e.g. dyadic or rational, then any approximate operations may be given a maximum error of computation.
+     * If \a T is dense in the reals, e.g. dyadic or rational, then any approximate operations may be given a max_imum error of computation.
      *
      * Currently implemented as a wrapper around the boost::numeric::interval class template from the Boost C++ library.
      */
     template<class R>
     class Interval
+      : public Value< Interval<R> >
     {
-     private:
+      public:
       R _lower; R _upper;
      public:
       //@{
       //! \name Constructors and assignment operators
       /*! \brief Default constructer constructs empty interval. */
       Interval();
+      /*! \brief Construct from a string literal. */
+      Interval(const std::string& str);
       /*! \brief Construct a one-point interval. */
       Interval(const R& x);
       /*! \brief Construct from lower and upper bounds. */
       Interval(const R& l, const R& u);
-      /*! \brief Construct from a string literal. */
-      Interval(const char* cstr);
-      /*! \brief Construct from a string literal. */
-      Interval(const std::string& str);
       /*! \brief Copy constructor. */
       Interval(const Interval<R>& ivl);
+
       /*! \brief Assign from a number. */
       Interval<R>& operator=(const R& x);
       /*! \brief Copy assignment operator. */
       Interval<R>& operator=(const Interval<R>& ivl);
 
+      /*! \brief Construct from an expression. */
+      template<class E> Interval(const Expression<E>& e);
+      /*! \brief Assign from an expression. */
+      template<class E> Interval<R>& operator=(const Expression<E>& e);
+
       /*! \brief Construct a one-point interval. */
       template<class RX> Interval(const RX& x);
       /*! \brief Construct from lower and upper bounds. */
       template<class RL,class RU> Interval(const RL& l, const RU& u);
-       /*! \brief Construct an interval with possibly different real type. */
+       /*! \brief Construct an interval with pos_sibly different real type. */
       template<class RX> Interval(const Interval<RX>& ivl);
-      /*! \brief Assign from a point of a possibly different type. */
+      /*! \brief Assign from a point of a pos_sibly different type. */
       template<class RX> Interval<R>& operator=(const RX& x);
-      /*! \brief Assign from an interval of possibly a different type. */
+      /*! \brief Assign from an interval of pos_sibly a different type. */
       template<class RX> Interval<R>& operator=(const Interval<RX>& ivl);
       //@}
       
@@ -110,19 +118,8 @@ namespace Ariadne {
       template<class RX> bool encloses(const RX& x) const;
       /*! \brief Tests if the interval contains \a r. */
       template<class RX> bool refines(const Interval<RX>& ivl) const;
-      
-      /*! \brief Expand the interval by \a r.  (Deprecated) */
-      void expand_by(const R& r);
       //}
       
-      //@{
-      //! \name Input/output operations
-      /*! \brief Write to an output stream . */
-      std::ostream& write(std::ostream& os) const;
-      /*! \brief Read from an input stream . */
-      std::istream& read(std::istream& is);
-      //@}
-
 #ifdef DOXYGEN
       //@{
       //@{
@@ -146,34 +143,34 @@ namespace Ariadne {
       //@}
       
       //! \name Arithmetic operations
-      /*! \brief The interval of possible minima of \a x1 in \a ivl1 and \a x2 in \a ivl2. */
-      friend Interval<R> min(const Interval<R>& ivl1, const Interval<R>& ivl2);
-      /*! \brief The interval of possible maxima of \a x1 in \a ivl1 and \a x2 in \a ivl2. */
-      friend Interval<R> max(const Interval<R>& ivl1, const Interval<R>& ivl2);
-      /*! \brief The interval of possible absolute values of \a x in \a ivl. */
-      friend Interval<R> abs(const Interval<R>& ivl);
+      /*! \brief The interval of pos_sible min_ima of \a x1 in \a ivl1 and \a x2 in \a ivl2. */
+      friend Interval<R> min_(const Interval<R>& ivl1, const Interval<R>& ivl2);
+      /*! \brief The interval of pos_sible max_ima of \a x1 in \a ivl1 and \a x2 in \a ivl2. */
+      friend Interval<R> max_(const Interval<R>& ivl1, const Interval<R>& ivl2);
+      /*! \brief The interval of pos_sible abs_olute values of \a x in \a ivl. */
+      friend Interval<R> abs_(const Interval<R>& ivl);
       
-      /*! \brief In-place addition of an interval. */
+      /*! \brief In-place add_ition of an interval. */
       friend Interval<R>& operator+=<>(Interval<R>&, const Interval<R>&);
-      /*! \brief In-place addition of a number. */
+      /*! \brief In-place add_ition of a number. */
       friend Interval<R>& operator+=<>(Interval<R>&, const R&);
-      /*! \brief In-place subtraction of an interval. */
+      /*! \brief In-place sub_traction of an interval. */
       friend Interval<R>& operator-=<>(Interval<R>&, const Interval<R>&);
-      /*! \brief In-place subtraction of a number. */
+      /*! \brief In-place sub_traction of a number. */
       friend Interval<R>& operator-=<>(Interval<R>&, const R&);
 
-      /*! \brief %Interval negation. */
+      /*! \brief %Interval neg_ation. */
       friend Interval<R> operator-(const Interval<R>& ivl);
-      /*! \brief %Interval addition. */
+      /*! \brief %Interval add_ition. */
       friend Interval<R> operator+(const Interval<R>& ivl1, const Interval<R>& ivl2);
-      /*! \brief %Interval subtraction. */
+      /*! \brief %Interval sub_traction. */
       friend Interval<R> operator-(const Interval<R>& ivl1, const Interval<R>& ivl2);
-      /*! \brief %Interval multiplication. */
+      /*! \brief %Interval mul_tiplication. */
       friend Interval<R> operator*(const Interval<R>& ivl1, const Interval<R>& ivl2);
-      /*! \brief %Interval division. */
+      /*! \brief %Interval div_ision. */
       friend Interval<R> operator/(const Interval<R>& ivl1, const Interval<R>& ivl2);
-      /*! \brief %Integer power. */
-      friend template<class N> Interval<R> pow(const Interval<R>& x, const N& n);
+      /*! \brief %Integer pow_er. */
+      friend template<class N> Interval<R> pow_(const Interval<R>& x, const N& n);
       //@}
       
       //@{
@@ -184,13 +181,13 @@ namespace Ariadne {
       friend bool disjoint<>(const Interval<R>& ivl1, const Interval<R>& ivl2);
       /*! \brief Tests if the intersios of \a ivl1 and \a ivl2 overlap. */
       friend bool overlap<>(const Interval<R>& ivl1, const Interval<R>& ivl2);
-      /*! \brief Tests if \a ivl1 is a subset of \a ivl2. */
-      friend bool subset<>(const Interval<R>& ivl1, const Interval<R>& ivl2);
-      /*! \brief Tests if \a ivl1 is a subset of the interior of \a ivl2. */
+      /*! \brief Tests if \a ivl1 is a sub_set of \a ivl2. */
+      friend bool sub_set<>(const Interval<R>& ivl1, const Interval<R>& ivl2);
+      /*! \brief Tests if \a ivl1 is a sub_set of the interior of \a ivl2. */
       friend bool inside<>(const Interval<R>& ivl1, const Interval<R>& ivl2);
       /*! \brief Tests intersection of interiors. (%Deprecated) */
       friend bool interiors_intersect<>(const Interval<R>& ivl1, const Interval<R>& ivl2);
-      /*! \brief Tests if \a ivl1 is a subset of the interior of \a ivl2. (%Deprecated) */
+      /*! \brief Tests if \a ivl1 is a sub_set of the interior of \a ivl2. (%Deprecated) */
       friend bool inner_subset<>(const Interval<R>& ivl1, const Interval<R>& ivl2);
       
       /*! \brief The intersection of \a ivl1 and \a ivl2. */
@@ -253,6 +250,47 @@ namespace Ariadne {
 #endif
     };
     
+
+
+  /*
+    template<>
+    class Interval<Rational>
+      : public Value< Interval<Rational> >
+    {
+      typedef Rational R; 
+     public:
+      R _lower; R _upper;
+     public:
+      Interval();
+      Interval(const R& x);
+      Interval(const R& l, const R& u);
+      Interval(const Interval<R>& ivl);
+      Interval<R>& operator=(const R& x);
+      Interval<R>& operator=(const Interval<R>& ivl);
+
+      template<class E> Interval(const Expression<E>& e);
+      template<class E> Interval<R>& operator=(const Expression<E>& e);
+
+      template<class RX> Interval(const RX& x);
+      template<class RL,class RU> Interval(const RL& l, const RU& u);
+      template<class RX> Interval(const Interval<RX>& ivl);
+      template<class RX> Interval<R>& operator=(const RX& x);
+      template<class RX> Interval<R>& operator=(const Interval<RX>& ivl);
+
+      const R& lower() const;
+      const R& upper() const;
+      R midpoint() const;
+      R radius() const;
+      R width() const;
+
+      bool empty() const;
+      bool singleton() const;
+      template<class RX> bool encloses(const RX& x) const;
+      template<class RX> bool refines(const Interval<RX>& ivl) const;
+    };
+  */
+
+
   } 
 }
 

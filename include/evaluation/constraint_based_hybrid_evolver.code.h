@@ -458,7 +458,7 @@ Evaluation::ConstraintBasedHybridEvolver<R>::upper_evolve(const System::Constrai
   Geometry::HybridGridMultiMap<R> map(initial_set.grid(),initial_set.grid());
   
   time_type lock_to_grid_time = this->lock_to_grid_time();
-  size_type evolution_steps = int_up<int>(time_type(evolution_time/lock_to_grid_time));
+  size_type evolution_steps = int(ceil(time_type(evolution_time/lock_to_grid_time)));
   lock_to_grid_time = evolution_time/evolution_steps;
 
   for(uint i=0; i!=evolution_steps; ++i) {
@@ -496,7 +496,7 @@ Evaluation::ConstraintBasedHybridEvolver<R>::upper_reach(const System::Constrain
 
   Geometry::HybridGridMultiMap<R> map(initial_set.grid(),initial_set.grid());
 
-  size_type evolution_steps = int_up<int>(time_type(evolution_time/this->lock_to_grid_time()));
+  size_type evolution_steps = int(ceil(time_type(evolution_time/this->lock_to_grid_time())));
   time_type lock_to_grid_time = evolution_time/evolution_steps;
 
   for(typename HybridGridMaskSet<R>::const_iterator cell_iter=current_set.begin();

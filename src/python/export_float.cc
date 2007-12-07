@@ -75,7 +75,7 @@ template<class R>
 std::string
 __str__(const R& x) {
   std::stringstream ss;
-  if(x==floor(x)) {
+  if(x==Numeric::floor<R>(x)) {
     ss << x << ".";
   } else {
     //ss << std::fixed;
@@ -90,7 +90,7 @@ std::string
 __repr__(const R& x) {
   std::stringstream ss;
   ss << "FloatPy(";
-  if(x==floor(x)) {
+  if(x==Numeric::floor<R>(x)) {
     ss << x;
   } else {
     //ss << std::fixed;
@@ -165,7 +165,6 @@ export_float()
 
   def("nan",&Numeric::nan<R>);
   def("inf",&Numeric::inf<R>);
-  def("infinity",&Numeric::infinity<R>);
 
   def("set_default_precision",&set_default_precision<FloatPy>);
   def("default_precision",&default_precision<FloatPy>);

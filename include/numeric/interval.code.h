@@ -21,9 +21,85 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-namespace Ariadne {
+#include <sstream>
+#include "numeric/interval.h"
 
-namespace Numeric { template<class R> void instantiate_interval(); }
+namespace Ariadne {
+namespace Numeric { 
+
+
+template<class R>
+Interval<R>::Interval(const std::string& str) {
+  std::stringstream ss(str); ss>>*this; }
+
+template<class R> void instantiate_interval();
+
+
+template<class R, class X> 
+void 
+sin_(Interval<R>& r, const Interval<X>& x) 
+{
+  assert(false);
+}
+
+
+template<class R, class X> 
+void cos_(Interval<R>& r, const Interval<X>& x) 
+{
+  assert(false);
+}
+
+
+template<class R, class X> 
+void tan_(Interval<R>& r, const Interval<X>& x) 
+{
+  assert(false);
+}
+
+
+template<class R, class X> 
+void asin_(Interval<R>& r, const Interval<X>& x) 
+{
+  assert(false);
+}
+
+
+template<class R, class X> 
+void acos_(Interval<R>& r, const Interval<X>& x) 
+{
+  assert(false);
+}
+
+
+template<class R, class X> 
+void atan_(Interval<R>& r, const Interval<X>& x) 
+{
+  assert(false);
+}
+
+
+
+//Fixme: This should not be needed
+template<class R> Interval<R> sqrt(const Interval<R>& x) { 
+  Interval<R> r; sqrt_(r,x); return r; }
+template<class R> Interval<R> exp(const Interval<R>& x) { 
+  Interval<R> r; exp_(r,x); return r; }
+template<class R> Interval<R> log(const Interval<R>& x) { 
+  Interval<R> r; log_(r,x); return r; }
+template<class R> Interval<R> sin(const Interval<R>& x) { 
+  Interval<R> r; sin_(r,x); return r; }
+template<class R> Interval<R> cos(const Interval<R>& x) { 
+  Interval<R> r; cos_(r,x); return r; }
+template<class R> Interval<R> tan(const Interval<R>& x) { 
+  Interval<R> r; tan_(r,x); return r; }
+template<class R> Interval<R> asin(const Interval<R>& x) { 
+  Interval<R> r; asin_(r,x); return r; }
+template<class R> Interval<R> acos(const Interval<R>& x) { 
+  Interval<R> r; acos_(r,x); return r; }
+template<class R> Interval<R> atan(const Interval<R>& x) { 
+  Interval<R> r; atan_(r,x); return r; }
+
+/*
 
 template<typename R>  
 Numeric::Interval<R> 
@@ -47,7 +123,7 @@ Numeric::cos(const Interval<R>& ivl)
   R n=floor(div_down(ivl.lower(),two_pi.lower()));
   //std::cerr << std::setprecision(20);
   //std::cerr << "n=" << n << std::endl;       
-  // l and u are intervals shifted by a multiple of 2*pi.
+  // l and u are intervals shifted by a mul_tiple of 2*pi.
   Interval<R> x=ivl-n*two_pi;
   const R& pl=pi.lower();
   const R& pu=pi.upper();
@@ -70,13 +146,13 @@ Numeric::cos(const Interval<R>& ivl)
       if(u<pl) {
         return Interval<R>(cos_down(u),cos_up(l));
       } else if(u<tpl) {
-        return Interval<R>(static_cast<R>(-1),max(cos_up(l),cos_up(u)));
+        return Interval<R>(static_cast<R>(-1),max_(cos_up(l),cos_up(u)));
       } else {
         return Interval<R>(static_cast<R>(-1),static_cast<R>(1));
       }
     } else if (l<pu) {
       if(u<tpl) {
-        return Interval<R>(static_cast<R>(-1),max(cos_up(l),cos_up(u)));
+        return Interval<R>(static_cast<R>(-1),max_(cos_up(l),cos_up(u)));
       } else {
         return Interval<R>(static_cast<R>(-1),static_cast<R>(1));
       }
@@ -84,13 +160,13 @@ Numeric::cos(const Interval<R>& ivl)
       if(u<tpl) {
         return Interval<R>(cos_down(l),cos_up(u));
       } else if(u<thpl) {
-        return Interval<R>(min(cos_down(l),cos_down(u)),static_cast<R>(1));
+        return Interval<R>(min_(cos_down(l),cos_down(u)),static_cast<R>(1));
       } else {
         return Interval<R>(static_cast<R>(-1),static_cast<R>(1));
       }
     } else { // 2*pi_ < ln < 2*pi^
       if(u<thpl) {
-            return Interval<R>(min(cos_down(l),cos_down(u)),static_cast<R>(1));
+            return Interval<R>(min_(cos_down(l),cos_down(u)),static_cast<R>(1));
       } else {
         return Interval<R>(static_cast<R>(-1),static_cast<R>(1));
       }
@@ -145,18 +221,29 @@ Numeric::atan(const Interval<R>& ivl)
   return Interval<R>(atan_down(ivl.lower()),atan_up(ivl.upper()));
 }
     
+*/
+
+
 template<typename R>  
 void
-Numeric::instantiate_interval()
+instantiate_interval()
 {
   Interval<R>* ivl=0;
+  const Interval<R>* civl=0;
+  sqrt(*ivl);
+  exp(*ivl);
+  log(*ivl);
+  sin_(*ivl,*civl);
   sin(*ivl);
   cos(*ivl);
   tan(*ivl);
   asin(*ivl);
+  acos_(*ivl,*civl);
   acos(*ivl);
   atan(*ivl);
 }
 
+
+} // namespace Numeric
 } // namespace Ariadne
   

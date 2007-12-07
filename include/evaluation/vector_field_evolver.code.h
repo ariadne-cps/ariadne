@@ -568,7 +568,7 @@ Evaluation::VectorFieldEvolver<R>::lower_integrate(const VectorFieldInterface<R>
     
     while(t!=time && bs.radius()<=maximum_set_radius) {
       if(verbosity>5) { 
-        std::clog << "      t=" << conv_approx<double>(t) << "  h=" << conv_approx<double>(h) << "  c=" << bs.centre() 
+        std::clog << "      t=" << approx<double>(t) << "  h=" << approx<double>(h) << "  c=" << bs.centre() 
                   << "  r=" << bs.radius() << std::endl;
       }
       h=min(time_type(time-t),h);
@@ -579,7 +579,7 @@ Evaluation::VectorFieldEvolver<R>::lower_integrate(const VectorFieldInterface<R>
     } 
     
     if(verbosity>5) { 
-      std::clog << "      t=" << conv_approx<double>(t) << "  c=" << bs.centre() 
+      std::clog << "      t=" << approx<double>(t) << "  c=" << bs.centre() 
                 << "  r=" << bs.radius() << std::endl;
     }
     
@@ -635,7 +635,7 @@ Evaluation::VectorFieldEvolver<R>::lower_reach(const VectorFieldInterface<R>& ve
     
     while(t!=time && bs.radius()<=maximum_set_radius) {
       if(verbosity>5) { 
-        std::clog << "      t=" << conv_approx<double>(t) << "  h=" << conv_approx<double>(h) << "  c=" << bs.centre() 
+        std::clog << "      t=" << approx<double>(t) << "  h=" << approx<double>(h) << "  c=" << bs.centre() 
                   << "  r=" << bs.radius() << std::endl;
       }
       h=min(time_type(time-t),h);
@@ -647,7 +647,7 @@ Evaluation::VectorFieldEvolver<R>::lower_reach(const VectorFieldInterface<R>& ve
       h=min(time_type(2*h),step_size);
     } 
     if(verbosity>5) { 
-      std::clog << "      t=" << conv_approx<double>(t) << "  c=" << bs.centre() 
+      std::clog << "      t=" << approx<double>(t) << "  c=" << bs.centre() 
                 << "  r=" << bs.radius() << std::endl;
     }
   }
@@ -699,7 +699,7 @@ Evaluation::VectorFieldEvolver<R>::lower_reach(const VectorFieldInterface<R>& ve
     
     while(t!=time && bs.radius()<=maximum_set_radius) {
       if(verbosity>5) { 
-        std::clog << "      t=" << conv_approx<double>(t) << "  h=" << conv_approx<double>(h) << "  c=" << bs.centre() 
+        std::clog << "      t=" << approx<double>(t) << "  h=" << approx<double>(h) << "  c=" << bs.centre() 
                   << "  r=" << bs.radius() << std::endl;
       }
       h=min(time_type(time-t),h);
@@ -718,7 +718,7 @@ Evaluation::VectorFieldEvolver<R>::lower_reach(const VectorFieldInterface<R>& ve
       }
     } 
     if(verbosity>5) { 
-      std::clog << "      t=" << conv_approx<double>(t) << "  c=" << bs.centre() 
+      std::clog << "      t=" << approx<double>(t) << "  c=" << bs.centre() 
                 << "  r=" << bs.radius() << std::endl;
     }
   }
@@ -793,7 +793,7 @@ Evaluation::VectorFieldEvolver<R>::upper_integrate(const VectorFieldInterface<R>
       if(verbosity>5) { std::clog << "    integrating..." << std::endl; }
       do {
         if(verbosity>5) { 
-          std::clog << "      t=" << conv_approx<double>(t) << "  h=" << conv_approx<double>(h) << "  c=" << bs.centre() 
+          std::clog << "      t=" << approx<double>(t) << "  h=" << approx<double>(h) << "  c=" << bs.centre() 
                     << "  r=" << bs.radius() << std::endl;
         }
         h=min(time_type(time-t),h);
@@ -804,7 +804,7 @@ Evaluation::VectorFieldEvolver<R>::upper_integrate(const VectorFieldInterface<R>
       } while(t!=time && bs.radius()<=maximum_set_radius);
       
       if(verbosity>5) { 
-        std::clog << "      t=" << conv_approx<double>(t) << "  c=" << bs.centre() 
+        std::clog << "      t=" << approx<double>(t) << "  c=" << bs.centre() 
                   << "  r=" << bs.radius() << std::endl;
       }
       
@@ -836,7 +836,7 @@ Evaluation::VectorFieldEvolver<R>::upper_reach(const VectorFieldInterface<R>& ve
   R maximum_set_radius=this->_parameters->maximum_basic_set_radius();
   
   if(verbosity>4) {
-    std::clog << "step_size=" << conv_approx<double>(step_size) << "  maximum_set_radius()=" << maximum_set_radius << std::endl<<std::flush;
+    std::clog << "step_size=" << approx<double>(step_size) << "  maximum_set_radius()=" << maximum_set_radius << std::endl<<std::flush;
   }
   
   time_type t=0;
@@ -871,7 +871,7 @@ Evaluation::VectorFieldEvolver<R>::upper_reach(const VectorFieldInterface<R>& ve
     h=step_size;
     working_sets.pop_back();
     
-    if(verbosity>6) { std::clog << "  t=" << conv_approx<double>(t) << "  bs.centre()=" << bs.centre() << "  bs.radius() = " << bs.radius() << std::endl; }
+    if(verbosity>6) { std::clog << "  t=" << approx<double>(t) << "  bs.centre()=" << bs.centre() << "  bs.radius() = " << bs.radius() << std::endl; }
     
     if(bs.radius()>maximum_set_radius) {
       if(verbosity>5) { std::clog << "  subdividing..." << std::endl; }
@@ -888,7 +888,7 @@ Evaluation::VectorFieldEvolver<R>::upper_reach(const VectorFieldInterface<R>& ve
       
       do {
         if(verbosity>6) {
-          std::clog << "    t=" << conv_approx<double>(t) << "  h=" << conv_approx<double>(h)
+          std::clog << "    t=" << approx<double>(t) << "  h=" << approx<double>(h)
                     << "  bs=" << bs << std::endl;
         }
         
@@ -1106,7 +1106,7 @@ Evaluation::VectorFieldEvolver<R>::bounded_reach(const System::VectorFieldInterf
   GridMaskSet<R> image(result);
   found.adjoin(is);
   
-  int steps=int_up<int>(time_type(time/this->_parameters->lock_to_grid_time()));
+  int steps=ceil(time_type(time/this->_parameters->lock_to_grid_time()));
   if (steps==0) { steps=1; }
   
   time_type time_step=time/steps;

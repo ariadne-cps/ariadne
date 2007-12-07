@@ -31,7 +31,7 @@
 #include "test.h"
 #include "test_float.h"
 
-#include "numeric/numerical_traits.h"
+#include "numeric/traits.h"
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
 #include "geometry/grid_set.h"

@@ -31,6 +31,7 @@
 namespace Ariadne {
   namespace Numeric {
     
+#ifdef DOXYGEN
     //! \name Conversion operations. 
     //@{ 
     //! \ingroup Numeric
@@ -48,6 +49,7 @@ namespace Ariadne {
     /*! \brief Approximate \a x by an integer of type N, rounding up. */
     template<class N,class A> inline N int_up(const A& x);
     //@}
+#endif
 
   }    
 }

@@ -22,6 +22,7 @@
  */
 
 #include "numeric/integer.h"
+#include "numeric/integer.code.h"
 
 namespace Ariadne {
   namespace Numeric {

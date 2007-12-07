@@ -129,8 +129,8 @@ Geometry::Rectangle<R>::Rectangle(const Point<R>& pt1, const Point<R>& pt2)
     ARIADNE_THROW(IncompatibleDimensions,"Rectangle(Point pt1, Point pt2)","pt1=" << pt1 << ", pt2=" << pt2);
   }
   for (size_type i=0; i!=this->dimension(); ++i) {
-    this->set_lower_bound(i,Numeric::min_exact(pt1[i],pt2[i]));
-    this->set_upper_bound(i,Numeric::max_exact(pt1[i],pt2[i]));
+    this->set_lower_bound(i,Numeric::min(pt1[i],pt2[i]));
+    this->set_upper_bound(i,Numeric::max(pt1[i],pt2[i]));
   }
 }
 
@@ -396,18 +396,6 @@ Geometry::Rectangle<R>::expand(const real_type& delta) const
   return result;
 }
 
-template<class R> inline
-Geometry::Rectangle<R> 
-Geometry::Rectangle<R>::neighbourhood(const real_type& delta) const
-{
-  Rectangle<R> result(this->dimension());
-  for (size_type j=0; j!=this->dimension(); ++j) {
-    result.set_lower_bound(j,sub_approx(this->lower_bound(j),delta));
-    result.set_upper_bound(j,add_approx(this->upper_bound(j),delta));
-  }
-  return result;
-}
-
 
 
 // Rectangle geometric operations
@@ -443,7 +431,7 @@ Geometry::Rectangle<R>::centre() const
 {
   Point<R> result(this->dimension());
   for(dimension_type i=0; i!=this->dimension(); ++i) {
-    result[i]=Numeric::div_approx(Numeric::add_approx(this->lower_bound(i),this->upper_bound(i)),R(2));
+    result[i]=this->interval(i).midpoint();
   }
   return result;
 }
@@ -452,20 +440,9 @@ template<class R> inline
 R 
 Geometry::Rectangle<R>::radius() const 
 {
-  R diameter=0;
+  R result=0;
   for(dimension_type i=0; i!=this->dimension(); ++i) {
-    diameter=Numeric::max_up(diameter,Numeric::sub_up(this->upper_bound(i),this->lower_bound(i)));
-  }
-  return div_up(diameter,R(2));
-}
-
-template<class R> inline
-R 
-Geometry::Rectangle<R>::volume() const 
-{
-  R result=1;
-  for(dimension_type i=0; i!=this->dimension(); ++i) {
-    result=mul_approx(result,sub_approx(this->upper_bound(i),this->lower_bound(i)));
+    result=max(this->interval(i).radius(),result);
   }
   return result;
 }

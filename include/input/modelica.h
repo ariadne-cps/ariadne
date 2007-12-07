@@ -34,7 +34,7 @@
 #include <stdexcept>
 
 #include "../base/types.h"
-#include "../numeric/numerical_traits.h"
+#include "../numeric/traits.h"
 #include "../numeric/rational.h"
 #include "../function/interpreted_function.h"
 #include "../function/virtual_machine.h"

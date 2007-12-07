@@ -28,7 +28,7 @@
 #ifndef ARIADNE_BUILD_VECTOR_FIELD_H
 #define ARIADNE_BUILD_VECTOR_FIELD_H
 
-#include "numeric/numerical_traits.h"
+#include "numeric/traits.h"
 
 #include "linear_algebra/vector.h"
 #include "linear_algebra/covector.h"

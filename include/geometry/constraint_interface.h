@@ -33,7 +33,7 @@
 
 #include "../base/tribool.h"
 #include "../base/types.h"
-#include "../numeric/numerical_traits.h"
+#include "../numeric/traits.h"
 #include "../linear_algebra/declarations.h"
 
 namespace Ariadne {

@@ -42,13 +42,13 @@ using Ariadne::Base::array;
 using Ariadne::Function::VirtualMachine;
 
 
-template<class X> inline
-void evaluate(const array<VirtualMachine::ByteCode>& ops, X** args, float_tag)
+template<class T> inline
+void evaluate(const array<VirtualMachine::ByteCode>& ops, Float<T>** args)
 {
-  std::vector<X> stack;
+  std::vector< Float<T> > stack;
   VirtualMachine::Index index;
   int value;
-  X tmp;
+  Float<T> tmp;
   for(array<VirtualMachine::ByteCode>::const_iterator op_iter=ops.begin();
       op_iter!=ops.end(); ++op_iter)
   {
@@ -137,10 +137,10 @@ void evaluate(const array<VirtualMachine::ByteCode>& ops, X** args, float_tag)
 }
 
 
-template<class Q> inline
-void evaluate(const array<VirtualMachine::ByteCode>& ops, Q** args, rational_tag)
+inline
+void evaluate(const array<VirtualMachine::ByteCode>& ops, Rational** args)
 {
-  std::vector<Q> stack;
+  std::vector<Rational> stack;
   VirtualMachine::Index index;
   int value;
   for(array<Function::VirtualMachine::ByteCode>::const_iterator op_iter=ops.begin();
@@ -200,13 +200,11 @@ void evaluate(const array<VirtualMachine::ByteCode>& ops, Q** args, rational_tag
 }
 
 
-template<class X> inline
+template<class X> 
 void 
 evaluate(const array<VirtualMachine::ByteCode>& program, X** arguments) 
 {
-  typedef typename Numeric::traits<X>::number_type number_type;
-  typedef typename Numeric::traits<number_type>::type tag;
-  ::evaluate(program,arguments,tag());
+  ::evaluate(program,arguments);
 }
 
 

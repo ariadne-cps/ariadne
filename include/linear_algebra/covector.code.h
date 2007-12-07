@@ -39,7 +39,7 @@ template<class R>
 void
 LinearAlgebra::Covector<R>::instantiate()
 {
-  typedef typename Numeric::traits<R>::interval_type I;
+  typedef typename Numeric::traits<R>::arithmetic_type I;
   std::ostream* os=0;
   Vector<R>* v=0;
   Vector<I>* iv=0;

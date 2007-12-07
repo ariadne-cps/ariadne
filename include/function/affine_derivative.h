@@ -37,7 +37,7 @@
 #include "../base/stlio.h"
 
 #include "../numeric/exceptions.h"
-#include "../numeric/numerical_traits.h"
+#include "../numeric/traits.h"
 #include "../numeric/conversion.h"
 #include "../numeric/arithmetic.h"
 #include "../numeric/function.h"

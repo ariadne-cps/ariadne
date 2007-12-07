@@ -134,15 +134,15 @@ fuzzy_outer_approximation_of_zonotope(const Geometry::Zonotope<R0,R1>& z, const 
       r=*iter;
       pt=r;
       x=Ainv*(pt-c);
-      Numeric::Interval<R> err(-1,1);
+      I err(-1,1);
       for(size_type i=0; i!=d; ++i) {
-        Numeric::Interval<R> diff=x[i]-e[i];
+        I diff=x[i]-e[i];
         if(Numeric::encloses(y[i],static_cast<R>(0))) {
-          if(!Numeric::encloses(x[i]-y[i]*err,0)) {
-            err=Numeric::Interval<R>(1,0);
+          if(!Numeric::encloses(I(x[i]-y[i]*err),0)) {
+            err=I(1,0);
           }
         } else {
-          err=intersection(err,diff/y[i]);
+          err=intersection(err,I(diff/y[i]));
         }
         if(Numeric::empty(err)) {
           break;

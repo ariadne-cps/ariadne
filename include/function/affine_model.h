@@ -35,7 +35,7 @@
 
 #include "../base/types.h"
 #include "../base/array.h"
-#include "../numeric/numerical_traits.h"
+#include "../numeric/traits.h"
 #include "../linear_algebra/declarations.h"
 #include "../output/logging.h"
 

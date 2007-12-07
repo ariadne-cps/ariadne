@@ -1,8 +1,8 @@
 /***************************************************************************
- *            floatmp.h
+ *            numeric/floatmp.h
  *
- *  Copyright  2004-6  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
+ *  Copyright  2004-7  Alberto Casagrande, Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -22,598 +22,425 @@
  */
  
 /*! \file numeric/floatmp.h
- *  \brief Type definitions and conversion operators for multiple-precision floating-point numbers.
+ *  \brief Type definitions and conversion operators for mul_tiple-precision floating-point numbers.
  */
 
-#ifndef ARIADNE_FLOATMP_H
-#define ARIADNE_FLOATMP_H
+#ifndef ARIADNE_NUMERIC_FLOATMP_H
+#define ARIADNE_NUMERIC_FLOATMP_H
 
 #include <mpfr.h>
 // Don't use mpf2mpfr, since it ignores rounding modes
 // #include <mpf2mpfr.h>
 
 #include <gmpxx.h>
-#include <cassert>
 
-#include "../numeric/numerical_traits.h"
-#include "../numeric/function.h"
-#include "../numeric/rational.h"
+#include "numeric/traits.h"
+
+#include "numeric/conversion.h"
+#include "numeric/arithmetic.h"
+#include "numeric/function.h"
+
+#include "numeric/integer.h"
+#include "numeric/rational.h"
 
 namespace Ariadne {
   namespace Numeric {
 
+    class mpfr;
+    template<class R> class Float;
+    typedef Float<mpfr> FloatMP;
+    typedef Interval<FloatMP> IntervalMP;
+
+
+    template<class Rnd> mp_rnd_t mpfr_rounding_mode();
+    template<> inline mp_rnd_t mpfr_rounding_mode<RoundApprox>() { return GMP_RNDN; }
+    template<> inline mp_rnd_t mpfr_rounding_mode<RoundDown>() { return GMP_RNDD; }
+    template<> inline mp_rnd_t mpfr_rounding_mode<RoundUp>() { return GMP_RNDU; }
+
+
     /*!\ingroup Numeric
-     * \brief A multiple-precision floating-point type.
+     * \brief A mul_tiple-precision floating-point type.
      *  
      * Currently implemented using mpf_class from the GNU Multiple Precision library.
      */
-    class FloatMP {
-     private:
-      mpfr_t _value;
-      typedef __mpfr_struct* pointer;
-      typedef const __mpfr_struct* const_pointer;
+    //class FloatMP {
+    template<> 
+    class Float<mpfr>
+      : public Value< Float<mpfr> >
+    {
      public:
-      FloatMP() { mpfr_init_set_si(_value,0,GMP_RNDN); }
-      FloatMP(int x) { mpfr_init_set_si(_value,x,GMP_RNDN); }
-      FloatMP(long int x) { mpfr_init_set_si(_value,x,GMP_RNDN); }
-      FloatMP(unsigned int x) { mpfr_init_set_ui(_value,x,GMP_RNDN); }
-      FloatMP(long unsigned int x) { mpfr_init_set_ui(_value,x,GMP_RNDN); }
-      FloatMP(double x) { mpfr_init_set_d(_value,x,GMP_RNDN); }
-      FloatMP(const FloatMP& x) { mpfr_init_set(_value,x._value,GMP_RNDN); }
-      FloatMP(const mpf_class& x) { mpfr_init_set_f(_value,x.get_mpf_t(),GMP_RNDN); }
-      FloatMP(const mpf_t x) { mpfr_init_set_f(_value,x,GMP_RNDN); }
-      FloatMP(const std::string& str);
-      FloatMP& operator=(const FloatMP& x) { if(this != &x) { mpfr_set(_value,x._value,GMP_RNDN); } return *this; }
-      // FIXME: Use mpfr_class instead
-      mpf_class get_base() const { mpf_class result; mpfr_get_f(result.get_mpf_t(),this->get_mpfr_t(),GMP_RNDN); return result; }
-      mpfr_srcptr get_mpfr_t() const { return _value; }
-      mpfr_ptr get_mpfr_t() { return _value; }
-      mpf_class get_mpf_class() const { mpf_class result; mpfr_get_f(result.get_mpf_t(),_value,GMP_RNDD); return result; }
-      operator mpf_class () const { mpf_class result; mpfr_get_f(result.get_mpf_t(),_value,GMP_RNDD); return result; }
-      operator const_pointer () const { return _value; }
-      operator pointer () { return _value; }
-      operator Rational () const { 
-        mpf_class f; 
-        mpfr_get_f(f.get_mpf_t(),this->get_mpfr_t(),GMP_RNDN); 
-        return mpq_class(f);
-      }
-      static uint default_precision() { return mpfr_get_default_prec(); }
-      static void set_default_precision(uint p) { mpfr_set_default_prec(p); }
-      int precision() const { return mpfr_get_prec(this->get_mpfr_t()); }
+      mpfr_t _value;
+     public:
+      ~Float();
+      Float();
+      Float(int x);
+      Float(long int x);
+      Float(unsigned int x);
+      Float(long unsigned int x);
+      Float(double x);
+      Float(const FloatMP& x);
+
+      explicit Float(const std::string& x);
+
+      FloatMP& operator=(const int& n);
+      FloatMP& operator=(const double& x);
+      FloatMP& operator=(const FloatMP& x);
+
+      template<class E> Float(const Expression<E>& e);
+      template<class E> FloatMP& operator=(const Expression<E>& e);
+
+      template<class X, class Rnd> Float(const X& x, Rnd rnd);
+      template<class E, class Rnd> Float(const Expression<E>& e, Rnd rnd);
+
+      static uint default_precision();
+      static void set_default_precision(uint p);
+      uint precision() const;
     };
     
-   
+    // Declare input/output operators
+    std::ostream& operator<<(std::ostream& os, const FloatMP& x);
+    std::istream& operator>>(std::istream& is, FloatMP& x);
+
+
+    inline FloatMP::~Float() { 
+      mpfr_clear(this->_value); }
+    inline FloatMP::Float() { 
+      mpfr_init_set_si(this->_value,0,GMP_RNDN); }
+    inline FloatMP::Float(int x) {
+      mpfr_init_set_si(this->_value,x,GMP_RNDN); }
+    inline FloatMP::Float(long int x) { 
+      mpfr_init_set_si(this->_value,x,GMP_RNDN); }
+    inline FloatMP::Float(unsigned int x) { 
+      mpfr_init_set_ui(this->_value,x,GMP_RNDN); }
+    inline FloatMP::Float(long unsigned int x) { 
+      mpfr_init_set_ui(this->_value,x,GMP_RNDN); }
+    inline FloatMP::Float(double x) { 
+      mpfr_init_set_d(this->_value,x,GMP_RNDN); }
+    inline FloatMP::Float(const FloatMP& x) { 
+      mpfr_init_set(this->_value,x._value,GMP_RNDN); }
+
+    inline FloatMP& FloatMP::operator=(const int& n) { 
+      mpfr_set_si(this->_value,n,GMP_RNDN); return *this; }
+    inline FloatMP& FloatMP::operator=(const double& x) { 
+      mpfr_set_d(this->_value,x,GMP_RNDN); return *this; }
+    inline FloatMP& FloatMP::operator=(const FloatMP& x) { 
+      if(this!=&x) { mpfr_set(this->_value,x._value,GMP_RNDN); } return *this; }
+
+    template<class E> inline FloatMP::Float(const Expression<E>& e) { 
+      mpfr_init(_value); e.assign_to(*this); }
+    template<class E> FloatMP& FloatMP::operator=(const Expression<E>& e) { 
+      e.assign_to(*this); return *this; }
+
+    template<class X, class Rnd> inline FloatMP::Float(const X& x, Rnd rnd) { 
+      mpfr_init(_value); set_(*this,x,rnd); }
+    template<class E, class Rnd> inline FloatMP::Float(const Expression<E>& e, Rnd rnd) {
+      mpfr_init(_value); e.assign_to(*this); }
+
+
+    inline uint FloatMP::default_precision() { 
+      return mpfr_get_default_prec(); }
+    inline void FloatMP::set_default_precision(uint p) { 
+      mpfr_set_default_prec(p); }
+    inline uint FloatMP::precision() const { 
+      return mpfr_get_prec(this->_value); }
+
+
     inline int precision(const FloatMP& num) {
-      return mpfr_get_prec(num.get_mpfr_t());
+      return mpfr_get_prec(num._value);
+    }
+  
+    inline void set_precision(FloatMP& num, int p) {
+      mpfr_set_prec(num._value,p);
     }
   
     
+    inline void conv_exact(Rational& q, const FloatMP& x) { 
+      mpf_t f; mpf_init(f); mpfr_get_f(f,x._value,GMP_RNDN); 
+      mpq_set_f(q._value,f); mpq_canonicalize(q._value); 
+    }
+
     template<> inline std::string name<Numeric::FloatMP>() { return "FloatMP"; }
     template<> inline std::string name<Numeric::Interval<Numeric::FloatMP> >() { return "Interval<FloatMP>"; }
-  
-
-    int mpfr_hypot(mpfr_t y, const __mpfr_struct* x1, const __mpfr_struct* x2, mpfr_rnd_t r);
-
-    typedef int mpfr_const(mpfr_t, mp_rnd_t);
-    typedef int mpfr_func(mpfr_t, const __mpfr_struct*, mp_rnd_t);
-    typedef int mpfr_func_rnd(mpfr_t, const __mpfr_struct*);
-    typedef int mpfr_bin_func(mpfr_t, const __mpfr_struct*, const __mpfr_struct*, mp_rnd_t);
-    typedef int mpfr_bin_int_func(mpfr_t, const __mpfr_struct*, long int, mp_rnd_t);
-    typedef int mpfr_bin_uint_func(mpfr_t, const __mpfr_struct*, unsigned long int, mp_rnd_t);
-
-
-    inline void invoke_mpfr(FloatMP& y, mpfr_const f, mp_rnd_t r) {
-      f(y.get_mpfr_t(), r);
-    }     
     
-    inline void invoke_mpfr(FloatMP& y, const FloatMP& x, mpfr_func f, mp_rnd_t r) {
-      f(y.get_mpfr_t(), x.get_mpfr_t(), r);
-    }     
-    
-    inline 
-    void invoke_mpfr(FloatMP& y, const FloatMP& x1, const FloatMP& x2, mpfr_bin_func f, mp_rnd_t r) {
-      f(y.get_mpfr_t(), x1.get_mpfr_t(), x2.get_mpfr_t(), r);
-    }
-
-    inline 
-    void invoke_mpfr(FloatMP& y, const FloatMP& x1, const long int& x2, mpfr_bin_int_func f, mp_rnd_t r) {
-      f(y.get_mpfr_t(), x1.get_mpfr_t(), x2, r);
-    }
-
-    inline 
-    void invoke_mpfr(FloatMP& y, const FloatMP& x1, const unsigned long int& x2, mpfr_bin_uint_func f, mp_rnd_t r) {
-      f(y.get_mpfr_t(), x1.get_mpfr_t(), x2, r);
-    }
-
-    inline 
-    void invoke_mpfr(FloatMP& y, const FloatMP& x1, mpfr_func_rnd f) {
-      f(y.get_mpfr_t(), x1.get_mpfr_t());
-    }
-
-    
-    inline 
-    FloatMP invoke_mpfr(mpfr_const f, mp_rnd_t r) {
-      FloatMP y; invoke_mpfr(y,f,r); return y; 
-    }
-    
-    inline 
-    FloatMP invoke_mpfr(const FloatMP& x, mpfr_func f, mp_rnd_t r) {
-      FloatMP y; invoke_mpfr(y,x,f,r); return y; 
-    }
-    
-    inline 
-    FloatMP invoke_mpfr(const FloatMP& x1, const FloatMP& x2, mpfr_bin_func f, mpfr_rnd_t r) 
-    {
-      FloatMP y; invoke_mpfr(y,x1,x2,f,r); return y; 
-    }
-    
-    inline 
-    FloatMP invoke_mpfr(const FloatMP& x1, const long int& x2, mpfr_bin_int_func f, mpfr_rnd_t r) 
-    {
-      FloatMP y; invoke_mpfr(y,x1,x2,f,r); return y; 
-    }
-    
-    inline 
-    FloatMP invoke_mpfr(const FloatMP& x1, const long int& x2, mpfr_bin_uint_func f, mpfr_rnd_t r) 
-    {
-      FloatMP y; invoke_mpfr(y,x1,x2,f,r); return y; 
-    }
-    
-    inline 
-    FloatMP invoke_mpfr(const FloatMP& x, mpfr_func_rnd f) 
-    {
-      FloatMP y; invoke_mpfr(y,x,f); return y; 
-    }
-    
-  
     inline bool operator==(const FloatMP& x1, const FloatMP& x2) {
-      return mpfr_equal_p(x1.get_mpfr_t(),x2.get_mpfr_t()); }
+      return mpfr_equal_p(x1._value,x2._value); }
     inline bool operator!=(const FloatMP& x1, const FloatMP& x2) {
-      return mpfr_lessgreater_p(x1.get_mpfr_t(),x2.get_mpfr_t()); }
+      return mpfr_lessgreater_p(x1._value,x2._value); }
     inline bool operator<=(const FloatMP& x1, const FloatMP& x2) {
-      return mpfr_lessequal_p(x1.get_mpfr_t(),x2.get_mpfr_t()); }
+      return mpfr_lessequal_p(x1._value,x2._value); }
     inline bool operator>=(const FloatMP& x1, const FloatMP& x2) {
-      return mpfr_greaterequal_p(x1.get_mpfr_t(),x2.get_mpfr_t()); }
+      return mpfr_greaterequal_p(x1._value,x2._value); }
     inline bool operator< (const FloatMP& x1, const FloatMP& x2) {
-      return mpfr_less_p(x1.get_mpfr_t(),x2.get_mpfr_t()); }
+      return mpfr_less_p(x1._value,x2._value); }
     inline bool operator> (const FloatMP& x1, const FloatMP& x2) {
-      return mpfr_greater_p(x1.get_mpfr_t(),x2.get_mpfr_t()); }
+      return mpfr_greater_p(x1._value,x2._value); }
      
-    inline bool operator==(const FloatMP& x1, const int& x2) {
-      return mpfr_cmp_si(x1.get_mpfr_t(),x2)==0; }
-    inline bool operator!=(const FloatMP& x1, const int& x2) {
-      return mpfr_cmp_si(x1.get_mpfr_t(),x2)!=0; }
-    inline bool operator<=(const FloatMP& x1, const int& x2) {
-      return mpfr_cmp_si(x1.get_mpfr_t(),x2)<=0; }
-    inline bool operator>=(const FloatMP& x1, const int& x2) {
-      return mpfr_cmp_si(x1.get_mpfr_t(),x2)>=0; }
-     inline bool operator< (const FloatMP& x1, const int& x2) {
-      return mpfr_cmp_si(x1.get_mpfr_t(),x2)< 0; }
-    inline bool operator> (const FloatMP& x1, const int& x2) {
-      return mpfr_cmp_si(x1.get_mpfr_t(),x2)> 0; }
+    inline int cmp(const FloatMP& x1, const FloatMP& x2) {
+      return mpfr_cmp(x1._value,x2._value); }
+    inline int cmp(const FloatMP& x1, const int& x2) {
+      return mpfr_cmp_si(x1._value,x2); }
+    inline int cmp(const int& x1, const FloatMP& x2) {
+      return -mpfr_cmp_ui(x2._value,x1); }
+    inline int cmp(const FloatMP& x1, const uint& x2) {
+      return mpfr_cmp_d(x1._value,x2); }
+    inline int cmp(const uint& x1, const FloatMP& x2) {
+      return -mpfr_cmp_ui(x2._value,x1); }
+    inline int cmp(const FloatMP& x1, const double& x2) {
+      return mpfr_cmp_d(x1._value,x2); }
+    inline int cmp(const double& x1, const FloatMP& x2) {
+      return -mpfr_cmp_d(x2._value,x1); }
+    inline int cmp(const FloatMP& x1, const Integer& x2) {
+      return mpfr_cmp_z(x1._value,x2._value); }
+    inline int cmp(const Integer& x1, const FloatMP& x2) {
+      return -mpfr_cmp_z(x2._value,x1._value); }
+    inline int cmp(const FloatMP& x1, const Rational& x2) {
+      return mpfr_cmp_q(x1._value,x2._value); }
+    inline int cmp(const Rational& x1, const FloatMP& x2) {
+      return -mpfr_cmp_q(x2._value,x1._value); }
+
+    ARIADNE_MIXED_COMPARISON(bool,FloatMP,int);
+    ARIADNE_MIXED_COMPARISON(bool,FloatMP,double);
+    ARIADNE_MIXED_COMPARISON(bool,FloatMP,Integer);
+    ARIADNE_MIXED_COMPARISON(bool,FloatMP,Rational);
   
-    inline bool operator==(const FloatMP& x1, const double& x2) {
-      return mpfr_cmp_d(x1.get_mpfr_t(),x2)==0; }
-    inline bool operator!=(const FloatMP& x1, const double& x2) {
-      return mpfr_cmp_d(x1.get_mpfr_t(),x2)!=0; }
-    inline bool operator<=(const FloatMP& x1, const double& x2) {
-      return mpfr_cmp_d(x1.get_mpfr_t(),x2)<=0; }
-    inline bool operator>=(const FloatMP& x1, const double& x2) {
-      return mpfr_cmp_d(x1.get_mpfr_t(),x2)>=0; }
-     inline bool operator< (const FloatMP& x1, const double& x2) {
-      return mpfr_cmp_d(x1.get_mpfr_t(),x2)< 0; }
-    inline bool operator> (const FloatMP& x1, const double& x2) {
-      return mpfr_cmp_d(x1.get_mpfr_t(),x2)> 0; }
-  
-    inline bool operator==(const FloatMP& x1, const mpq_class& x2) {
-      return mpfr_cmp_q(x1.get_mpfr_t(),x2.get_mpq_t())==0; }
-    inline bool operator!=(const FloatMP& x1, const mpq_class& x2) {
-      return mpfr_cmp_q(x1.get_mpfr_t(),x2.get_mpq_t())!=0; }
-    inline bool operator<=(const FloatMP& x1, const mpq_class& x2) {
-      return mpfr_cmp_q(x1.get_mpfr_t(),x2.get_mpq_t())<=0; }
-    inline bool operator>=(const FloatMP& x1, const mpq_class& x2) {
-      return mpfr_cmp_q(x1.get_mpfr_t(),x2.get_mpq_t())>=0; }
-     inline bool operator< (const FloatMP& x1, const mpq_class& x2) {
-      return mpfr_cmp_q(x1.get_mpfr_t(),x2.get_mpq_t())< 0; }
-    inline bool operator> (const FloatMP& x1, const mpq_class& x2) {
-      return mpfr_cmp_q(x1.get_mpfr_t(),x2.get_mpq_t())> 0; }
-  
-  
-    template<> inline FloatMP nan() { FloatMP y; mpfr_set_nan(y.get_mpfr_t()); return y; }
-    template<> inline FloatMP inf() { FloatMP y; mpfr_set_inf(y.get_mpfr_t(),+1); return y; }
-    template<> inline FloatMP infinity() { FloatMP y; mpfr_set_inf(y.get_mpfr_t(),+1); return y; }
+    inline void nan_(FloatMP& r) { mpfr_set_nan(r._value); }
+    inline void inf_(FloatMP& r) { mpfr_set_inf(r._value,+1); }
    
-    template<> inline FloatMP next_up(const FloatMP& x) { FloatMP y(x); mpfr_nextabove(y.get_mpfr_t()); return y; }
-    template<> inline FloatMP next_down(const FloatMP& x) { FloatMP y(x); mpfr_nextbelow(y.get_mpfr_t()); return y; }
+    inline void next_(FloatMP& r, const FloatMP& x, RoundUp) { 
+      mpfr_set(r._value,x._value,GMP_RNDU); mpfr_nextabove(r._value); }
+    inline void next_(FloatMP& r, const FloatMP& x, RoundDown) { 
+      mpfr_set(r._value,x._value,GMP_RNDD); mpfr_nextbelow(r._value); }
       
+    inline void next_(FloatMP& r, RoundUp) { 
+      mpfr_nextabove(r._value); }
+    inline void next_(FloatMP& r, RoundDown) { 
+      mpfr_nextbelow(r._value); }
       
-    template<> inline FloatMP min(const FloatMP& x1, const FloatMP& x2) {
-      return invoke_mpfr(x1,x2,mpfr_min,GMP_RNDN); }
-    template<> inline FloatMP max(const FloatMP& x1, const FloatMP& x2) {
-      return invoke_mpfr(x1,x2,mpfr_max,GMP_RNDN); }
-    template<> inline FloatMP neg(const FloatMP& x) {
-      return invoke_mpfr(x,mpfr_neg,GMP_RNDN); }
-    template<> inline FloatMP abs(const FloatMP& x) {
-      return invoke_mpfr(x,mpfr_abs,GMP_RNDN); }
-
-
-
-    template<> inline FloatMP conv_exact(const FloatMP& x) { return x; }
-    template<> inline FloatMP conv_approx(const FloatMP& x) { return conv_exact<FloatMP>(x); }
-    template<> inline FloatMP conv_down(const FloatMP& x) { return conv_exact<FloatMP>(x); }
-    template<> inline FloatMP conv_up(const FloatMP& x) { return conv_exact<FloatMP>(x); }
+  
+      
+    inline void set_(double& r, const FloatMP& x, RoundApprox) { 
+      r=mpfr_get_d(x._value,GMP_RNDN); }
  
+    template<class Rnd> inline void set_(FloatMP& r, const uint& n, Rnd) {
+      mpfr_set_ui(r._value,n,mpfr_rounding_mode<Rnd>()); }
 
-    template<> inline double conv_approx(const FloatMP& x) { return mpfr_get_d(x.get_mpfr_t(),GMP_RNDN); }
+
+    template<class Rnd> inline void set_(FloatMP& r, const int& x, Rnd) {
+      mpfr_set_si(r._value,x,mpfr_rounding_mode<Rnd>()); }
+  
+    template<class Rnd> inline void set_(FloatMP& r, const double& x, Rnd) {
+      mpfr_set_d(r._value,x,mpfr_rounding_mode<Rnd>()); }
+  
+    inline void set_(FloatMP& r, const Integer& x) {
+      mpfr_set_z(r._value,x._value,GMP_RNDN); 
+      assert(mpfr_cmp_z(r._value,x._value)==0); }
+
+    template<class Rnd> inline void set_(FloatMP& r, const Rational& x, Rnd) {
+      mpfr_set_q(r._value,x._value,mpfr_rounding_mode<Rnd>()); 
+    }
+  
+    
+    template<class Rnd> inline void set_(FloatMP& r, const Integer& x, Rnd) {
+      mpfr_set_z(r._value,x._value,mpfr_rounding_mode<Rnd>()); }
+  
+    inline void set_(Rational& r, const FloatMP& x) {
+      mpf_t t; mpf_init(t); mpfr_get_f(t,x._value,GMP_RNDN); 
+      mpq_set_f(r._value,t); assert(mpfr_cmp_q(x._value,r._value)==0);
+    }
+
+    template<class Rnd> inline void set_(mpf_t r, const FloatMP& x, Rnd) {
+      mpfr_get_f(r,x._value,mpfr_rounding_mode<Rnd>()); }
+
  
-    template<> inline FloatMP conv_exact(const int& n) { return FloatMP(n); }
-    template<> inline FloatMP conv_down(const int& n) { return conv_exact<FloatMP>(n); }
-    template<> inline FloatMP conv_up(const int& n) { return conv_exact<FloatMP>(n); }
-    template<> inline FloatMP conv_approx(const int& n) { return conv_exact<FloatMP>(n); }
+    inline void floor_(int& r, const FloatMP& x) { 
+      r=mpfr_get_si(x._value,GMP_RNDD); }
+    inline void floor_(Integer& r, const FloatMP& x) { 
+      mpfr_get_z(r._value,x._value,GMP_RNDD); }
+    inline void floor_(FloatMP& r, const FloatMP& x) { 
+      Integer z; floor_(z,x); set_(r,z); }
 
-    template<> inline FloatMP conv_exact(const double& x) { return FloatMP(x); }
-    template<> inline FloatMP conv_down(const double& x) { return conv_exact<FloatMP>(x); }
-    template<> inline FloatMP conv_up(const double& x) { return conv_exact<FloatMP>(x); }
-    template<> inline FloatMP conv_approx(const double& x) { return conv_exact<FloatMP>(x); }
-   
-    template<> inline FloatMP conv_down(const Rational& x) { 
-      FloatMP r; mpfr_init_set_q(r.get_mpfr_t(),x.get_mpq_t(),GMP_RNDD); return r; }
-    template<> inline FloatMP conv_up(const Rational& x) {
-      FloatMP r; mpfr_init_set_q(r.get_mpfr_t(),x.get_mpq_t(),GMP_RNDU); return r; }
-    template<> inline FloatMP conv_approx(const Rational& x) {
-      FloatMP r; mpfr_init_set_q(r.get_mpfr_t(),x.get_mpq_t(),GMP_RNDD); return r; }
-   
-    template<> inline mpf_class conv_exact(const FloatMP& x) { 
-      mpf_class r; mpfr_get_f(r.get_mpf_t(),x.get_mpfr_t(),GMP_RNDN); return r; }
-    template<> inline mpf_class conv_approx(const FloatMP& x) { 
-      mpf_class r; mpfr_get_f(r.get_mpf_t(),x.get_mpfr_t(),GMP_RNDN); return r; }
-    template<> inline mpf_class conv_down(const FloatMP& x) { 
-      mpf_class r; mpfr_get_f(r.get_mpf_t(),x.get_mpfr_t(),GMP_RNDD); return r; }
-    template<> inline mpf_class conv_up(const FloatMP& x) { 
-      mpf_class r; mpfr_get_f(r.get_mpf_t(),x.get_mpfr_t(),GMP_RNDU); return r; }
-  
-    template<> inline Rational conv_exact(const FloatMP& x) { return Rational(x); }
-    template<> inline Rational conv_approx(const FloatMP& x) { return conv_exact<Rational>(x); }
-    template<> inline Rational conv_down(const FloatMP& x) { return conv_exact<Rational>(x); }
-    template<> inline Rational conv_up(const FloatMP& x) { return conv_exact<Rational>(x); }
- 
-    template<> inline Integer int_down(const FloatMP& x) { 
-      mpz_class z; mpfr_get_z(z.get_mpz_t(),x.get_mpfr_t(),GMP_RNDD); return z; }
-    template<> inline Integer int_up(const FloatMP& x){ 
-      mpz_class z; mpfr_get_z(z.get_mpz_t(),x.get_mpfr_t(),GMP_RNDD); return z; }
-
-    template<> inline int int_down(const FloatMP& x) { return mpfr_get_si(x.get_mpfr_t(),GMP_RNDD); }
-    template<> inline int int_up(const FloatMP& x){ return mpfr_get_si(x.get_mpfr_t(),GMP_RNDU); }
+    inline void ceil_(int& r, const FloatMP& x) { 
+      r=mpfr_get_si(x._value,GMP_RNDU); }
+    inline void ceil_(Integer& r, const FloatMP& x) { 
+      mpfr_get_z(r._value,x._value,GMP_RNDU); }
+    inline void ceil_(FloatMP& r, const FloatMP& x) { 
+      Integer z; ceil_(z,x); set_(r,z); }
 
 
-    template<> inline FloatMP min_exact(const FloatMP& x1, const FloatMP& x2) {
-      return (x1<=x2) ? x1 : x2; }
-    template<> inline FloatMP min_approx(const FloatMP& x1, const FloatMP& x2) {
-      return min_exact(x1,x2); }
-    template<> inline FloatMP min_down(const FloatMP& x1, const FloatMP& x2) {
-      return min_exact(x1,x2); }
-    template<> inline FloatMP min_up(const FloatMP& x1, const FloatMP& x2) {
-      return min_exact(x1,x2); }
-  
-    template<> inline FloatMP max_exact(const FloatMP& x1, const FloatMP& x2) {
-      return (x1>=x2) ? x1 : x2; }
-    template<> inline FloatMP max_approx(const FloatMP& x1, const FloatMP& x2) {
-      return max_exact(x1,x2); }
-    template<> inline FloatMP max_down(const FloatMP& x1, const FloatMP& x2) {
-      return max_exact(x1,x2); }
-    template<> inline FloatMP max_up(const FloatMP& x1, const FloatMP& x2) {
-      return max_exact(x1,x2); }
-  
-  
-  
-    template<> inline FloatMP neg_exact(const FloatMP& x) { return invoke_mpfr(x,mpfr_neg,GMP_RNDN); }
-    template<> inline FloatMP neg_approx(const FloatMP& x) { return neg_exact(x); }
-    template<> inline FloatMP neg_down(const FloatMP& x) { return neg_exact(x); }
-    template<> inline FloatMP neg_up(const FloatMP& x) { return neg_exact(x); }
+    // Operations which may be performed exactly
+    inline void min_(FloatMP& r, const FloatMP& x, const FloatMP& y) {
+      assert(r.precision()>=std::max(x.precision(),y.precision())); r = (x<=y ? x : y); }
+    inline void max_(FloatMP& r, const FloatMP& x, const FloatMP& y) {
+      assert(r.precision()>=std::max(x.precision(),y.precision())); r = (x>=y ? x : y); }
+    inline void pos_(FloatMP& r, const FloatMP& x) {
+      assert(r.precision()>=x.precision()); mpfr_set(r._value,x._value,GMP_RNDN); }
+    inline void neg_(FloatMP& r, const FloatMP& x) {
+      assert(r.precision()>=x.precision()); mpfr_neg(r._value,x._value,GMP_RNDN); }
+    inline void abs_(FloatMP& r, const FloatMP& x) { 
+      assert(r.precision()>=x.precision()); mpfr_abs(r._value,x._value,GMP_RNDN); }
+
+    inline FloatMP abs(const FloatMP& x) { 
+      FloatMP r; abs_(r,x); return r; }
 
 
-    template<> inline FloatMP abs_exact(const FloatMP& x) { return invoke_mpfr(x,mpfr_abs,GMP_RNDN); }
-    template<> inline FloatMP abs_approx(const FloatMP& x) { return abs_exact(x);  }
-    template<> inline FloatMP abs_down(const FloatMP& x) { return abs_exact(x);  }
-    template<> inline FloatMP abs_up(const FloatMP& x) { return abs_exact(x);  }
+    // Rounded operations which may be performed exactly
+    template<class Rnd>
+    inline void min_(FloatMP& r, const FloatMP& x, const FloatMP& y, Rnd) { 
+      mpfr_min(r._value,x._value,y._value,mpfr_rounding_mode<Rnd>()); }
 
-    template<> inline FloatMP add_approx(const FloatMP& x1,const FloatMP& x2) {
-      return invoke_mpfr(x1,x2,mpfr_add,GMP_RNDN); }
-    template<> inline FloatMP add_down(const FloatMP& x1,const FloatMP& x2) {
-      return invoke_mpfr(x1,x2,mpfr_add,GMP_RNDD); }
-    template<> inline FloatMP add_up(const FloatMP& x1,const FloatMP& x2) {
-      return invoke_mpfr(x1,x2,mpfr_add,GMP_RNDU); }
+    template<class Rnd>
+    inline void max_(FloatMP& r, const FloatMP& x, const FloatMP& y, Rnd) { 
+      mpfr_max(r._value,x._value,y._value,mpfr_rounding_mode<Rnd>()); }
+
+    template<class Rnd>
+    inline void pos_(FloatMP& r, const FloatMP& x, Rnd) { 
+      mpfr_set(r._value,x._value,mpfr_rounding_mode<Rnd>()); }
+
+    template<class Rnd>
+    inline void neg_(FloatMP& r, const FloatMP& x, Rnd) { 
+      mpfr_neg(r._value,x._value,mpfr_rounding_mode<Rnd>()); }
+
+    template<class Rnd>
+    inline void abs_(FloatMP& r, const FloatMP& x, Rnd) { 
+      mpfr_abs(r._value,x._value,mpfr_rounding_mode<Rnd>()); }
+
+
+
+    template<class Rnd> inline 
+    void add_(FloatMP& r, const FloatMP& x, const FloatMP& y, Rnd) {
+      mpfr_add(r._value,x._value,y._value,mpfr_rounding_mode<Rnd>()); }
+
+
+    template<class Rnd> inline 
+    void sub_(FloatMP& r, const FloatMP& x, const FloatMP& y, Rnd) {
+      mpfr_sub(r._value,x._value,y._value,mpfr_rounding_mode<Rnd>()); }
+
+
+    template<class Rnd> inline 
+    void mul_(FloatMP& r, const FloatMP& x, const FloatMP& y, Rnd) {
+      mpfr_mul(r._value,x._value,y._value,mpfr_rounding_mode<Rnd>()); }
     
-    template<> inline FloatMP sub_approx(const FloatMP& x1,const FloatMP& x2) {
-      return invoke_mpfr(x1,x2,mpfr_sub,GMP_RNDN); }
-    template<> inline FloatMP sub_down(const FloatMP& x1,const FloatMP& x2) {
-      return invoke_mpfr(x1,x2,mpfr_sub,GMP_RNDD); }
-    template<> inline FloatMP sub_up(const FloatMP& x1,const FloatMP& x2) {
-      return invoke_mpfr(x1,x2,mpfr_sub,GMP_RNDU); }
+    template<class Rnd> inline 
+    void mul_(FloatMP& r, const FloatMP& x, const int& y, Rnd) {
+      mpfr_mul_si(r._value,x._value,y,mpfr_rounding_mode<Rnd>()); }
     
-    template<> inline FloatMP mul_approx(const FloatMP& x1,const FloatMP& x2) {
-      return invoke_mpfr(x1,x2,mpfr_mul,GMP_RNDN); }
-    template<> inline FloatMP mul_down(const FloatMP& x1,const FloatMP& x2) {
-      return invoke_mpfr(x1,x2,mpfr_mul,GMP_RNDD); }
-    template<> inline FloatMP mul_up(const FloatMP& x1,const FloatMP& x2) {
-      return invoke_mpfr(x1,x2,mpfr_mul,GMP_RNDU); }
+    template<class Rnd> inline 
+    void mul_(FloatMP& r, const int& x, const FloatMP& y, Rnd) {
+      mpfr_mul_si(r._value,y._value,x,mpfr_rounding_mode<Rnd>()); }
     
-    template<> inline FloatMP mul_approx(const FloatMP& x1,const int& n2) {
-      return invoke_mpfr(x1,(long int)n2,mpfr_mul_si,GMP_RNDN); }
-    template<> inline FloatMP mul_down(const FloatMP& x1,const int& n2) {
-      return invoke_mpfr(x1,(long int)n2,mpfr_mul_si,GMP_RNDD); }
-    template<> inline FloatMP mul_up(const FloatMP& x1,const int& n2) {
-      return invoke_mpfr(x1,(long int)n2,mpfr_mul_si,GMP_RNDU); }
+    template<class Rnd> inline 
+    void mul_(FloatMP& r, const FloatMP& x, const double& y, Rnd) {
+      mpfr_t t; mpfr_init_set_d(t,y,mpfr_rounding_mode<Rnd>()); 
+      mpfr_mul(r._value,x._value,y,mpfr_rounding_mode<Rnd>()); }
     
-    template<> inline FloatMP div_approx(const FloatMP& x1,const FloatMP& x2) {
-      return invoke_mpfr(x1,x2,mpfr_div,GMP_RNDN); }
-    template<> inline FloatMP div_down(const FloatMP& x1,const FloatMP& x2) {
-      return invoke_mpfr(x1,x2,mpfr_div,GMP_RNDD); }
-    template<> inline FloatMP div_up(const FloatMP& x1,const FloatMP& x2) {
-      return invoke_mpfr(x1,x2,mpfr_div,GMP_RNDU); }
-
-    template<> inline FloatMP div_approx(const FloatMP& x1,const int& n2) {
-      return invoke_mpfr(x1,(long int)n2,mpfr_div_si,GMP_RNDN); }
-    template<> inline FloatMP div_down(const FloatMP& x1,const int& n2) {
-      return invoke_mpfr(x1,(long int)n2,mpfr_div_si,GMP_RNDD); }
-    template<> inline FloatMP div_up(const FloatMP& x1,const int& n2) {
-      return invoke_mpfr(x1,(long int)n2,mpfr_div_si,GMP_RNDU); }
-
-    template<> inline FloatMP pow_approx(const FloatMP& x1, const unsigned int& n2) {
-      return invoke_mpfr(x1,(unsigned long int)n2,mpfr_pow_ui,GMP_RNDN); }
-    template<> inline FloatMP pow_down(const FloatMP& x1,const unsigned int& n2) {
-      return invoke_mpfr(x1,(unsigned long int)n2,mpfr_pow_ui,GMP_RNDD); }
-    template<> inline FloatMP pow_up(const FloatMP& x1,const unsigned int& n2) {
-      return invoke_mpfr(x1,(unsigned long int)n2,mpfr_pow_ui,GMP_RNDU); }
+    template<class Rnd> inline 
+    void mul_(FloatMP& r, const double& x, const FloatMP& y, Rnd) {
+      mpfr_t t; mpfr_init_set_d(t,x,mpfr_rounding_mode<Rnd>()); 
+      mpfr_mul(r._value,y._value,t,mpfr_rounding_mode<Rnd>()); }
     
-    template<> inline FloatMP pow_approx(const FloatMP& x1, const int& n2) {
-      return invoke_mpfr(x1,(long int)n2,mpfr_pow_si,GMP_RNDN); }
-    template<> inline FloatMP pow_down(const FloatMP& x1,const int& n2) {
-      return invoke_mpfr(x1,(long int)n2,mpfr_pow_si,GMP_RNDD); }
-    template<> inline FloatMP pow_up(const FloatMP& x1,const int& n2) {
-      return invoke_mpfr(x1,(long int)n2,mpfr_pow_si,GMP_RNDU); }
+
+    template<class Rnd> inline 
+    void div_(FloatMP& r, const FloatMP& x, const FloatMP& y, Rnd) {
+      mpfr_div(r._value,x._value,y._value,mpfr_rounding_mode<Rnd>()); }
     
-    template<> inline FloatMP pow_approx(const FloatMP& x1, const unsigned long int& n2) {
-      return invoke_mpfr(x1,n2,mpfr_pow_ui,GMP_RNDN); }
-    template<> inline FloatMP pow_down(const FloatMP& x1,const unsigned long int& n2) {
-      return invoke_mpfr(x1,n2,mpfr_pow_ui,GMP_RNDD); }
-    template<> inline FloatMP pow_up(const FloatMP& x1,const unsigned long int& n2) {
-      return invoke_mpfr(x1,n2,mpfr_pow_ui,GMP_RNDU); }
+    template<class Rnd> inline 
+    void div_(FloatMP& r, const FloatMP& x, const int& y, Rnd) {
+      mpfr_div_si(r._value,x._value,y,mpfr_rounding_mode<Rnd>()); }
     
-    template<> inline FloatMP pow_approx(const FloatMP& x1, const long int& n2) {
-      return invoke_mpfr(x1,n2,mpfr_pow_si,GMP_RNDN); }
-    template<> inline FloatMP pow_down(const FloatMP& x1,const long int& n2) {
-      return invoke_mpfr(x1,n2,mpfr_pow_si,GMP_RNDD); }
-    template<> inline FloatMP pow_up(const FloatMP& x1,const long int& n2) {
-      return invoke_mpfr(x1,n2,mpfr_pow_si,GMP_RNDU); }
-     
-    template<> inline FloatMP med_approx(const FloatMP& x1, const FloatMP& x2) {
-      return div_approx(add_approx(x1,x2),FloatMP(2)); }
+    template<class Rnd> inline 
+    void div_(FloatMP& r, const int& x, const FloatMP& y, Rnd) {
+      mpfr_si_div(r._value,x,y._value,mpfr_rounding_mode<Rnd>()); }
     
-    inline FloatMP mul_approx(const int& n, const FloatMP& x) {
-      return invoke_mpfr(x,n,mpfr_mul_si,GMP_RNDN); }
-    inline FloatMP mul_approx(const FloatMP& x, const int& n) {
-      return invoke_mpfr(x,n,mpfr_mul_si,GMP_RNDN); }
-    inline FloatMP div_approx(const FloatMP& x, const int& n) {
-      return invoke_mpfr(x,n,mpfr_div_si,GMP_RNDN); }
 
-    inline FloatMP mul_approx(const long int& n, const FloatMP& x) {
-      return invoke_mpfr(x,n,mpfr_mul_si,GMP_RNDN); }
-    inline FloatMP mul_approx(const FloatMP& x, const long int& n) {
-      return invoke_mpfr(x,n,mpfr_mul_si,GMP_RNDN); }
-    inline FloatMP div_approx(const FloatMP& x, const long int& n) {
-      return invoke_mpfr(x,n,mpfr_div_si,GMP_RNDN); }
+    template<class Rnd> 
+    inline void pow_(FloatMP& r, const FloatMP& x, const uint& n, Rnd) {
+      std::cout << __PRETTY_FUNCTION__ << std::endl; 
+      mpfr_pow_ui(r._value,x._value,n,mpfr_rounding_mode<Rnd>()); }
 
-    inline FloatMP mul_approx(const uint& n, const FloatMP& x) {
-      return invoke_mpfr(x,n,mpfr_mul_ui,GMP_RNDN); }
-    inline FloatMP mul_approx(const FloatMP& x, const unsigned int& n) {
-      return invoke_mpfr(x,n,mpfr_mul_ui,GMP_RNDN); }
-    inline FloatMP div_approx(const FloatMP& x, const unsigned int& n) {
-      return invoke_mpfr(x,n,mpfr_div_ui,GMP_RNDN); }
+    template<class Rnd> 
+    inline void pow_(FloatMP& r, const FloatMP& x, const int& n, Rnd) {
+      std::cout << __PRETTY_FUNCTION__ << std::endl; 
+      mpfr_pow_si(r._value,x._value,n,mpfr_rounding_mode<Rnd>()); }
+
     
-    inline FloatMP mul_approx(const long unsigned int& n, const FloatMP& x) {
-      return invoke_mpfr(x,n,mpfr_mul_ui,GMP_RNDN); }
-    inline FloatMP mul_approx(const FloatMP& x, const long unsigned int& n) {
-      return invoke_mpfr(x,n,mpfr_mul_ui,GMP_RNDN); }
-    inline FloatMP div_approx(const FloatMP& x, const long unsigned int& n) {
-      return invoke_mpfr(x,n,mpfr_div_ui,GMP_RNDN); }
-    
-    inline FloatMP mul_approx(const double& d, const FloatMP& x) {
-      return mul_approx(x,FloatMP(d)); }
-    inline FloatMP mul_approx(const FloatMP& x, const double& d) {
-      return mul_approx(x,FloatMP(d)); }
-      
-      
-    template<> inline FloatMP sqrt_approx(const FloatMP& x) { 
-      return invoke_mpfr(x,mpfr_sqrt,GMP_RNDN); }
-    template<> inline FloatMP sqrt_down(const FloatMP& x) { 
-      return invoke_mpfr(x,mpfr_sqrt,GMP_RNDD); }
-    template<> inline FloatMP sqrt_up(const FloatMP& x) { 
-      return invoke_mpfr(x,mpfr_sqrt,GMP_RNDU); }
-
-    template<> inline FloatMP hypot_approx(const FloatMP& x1,const FloatMP& x2) { 
-      return invoke_mpfr(x1,x2,mpfr_hypot,GMP_RNDN); }
-    template<> inline FloatMP hypot_down(const FloatMP& x1,const FloatMP& x2) {
-      return invoke_mpfr(x1,x2,mpfr_hypot,GMP_RNDD); }
-    template<> inline FloatMP hypot_up(const FloatMP& x1,const FloatMP& x2) {
-      return invoke_mpfr(x1,x2,mpfr_hypot,GMP_RNDU); }
-    
-    template<> inline FloatMP floor(const FloatMP& x) {
-      return invoke_mpfr(x,mpfr_floor); }
-    template<> inline FloatMP ceil(const FloatMP& x) {
-      return invoke_mpfr(x,mpfr_ceil); }
-    
-    template<> inline FloatMP exp_approx(const FloatMP& x) {
-      return invoke_mpfr(x,mpfr_exp,GMP_RNDN); }
-    template<> inline FloatMP exp_down(const FloatMP& x) {
-      return invoke_mpfr(x,mpfr_exp,GMP_RNDD); }
-    template<> inline FloatMP exp_up(const FloatMP& x) {
-      return invoke_mpfr(x,mpfr_exp,GMP_RNDU); };
-
-    template<> inline FloatMP log_approx(const FloatMP& x) {
-      return invoke_mpfr(x,mpfr_log,GMP_RNDN); }
-    template<> inline FloatMP log_down(const FloatMP& x) {
-      return invoke_mpfr(x,mpfr_log,GMP_RNDD); }
-    template<> inline FloatMP log_up(const FloatMP& x) {
-      return invoke_mpfr(x,mpfr_log,GMP_RNDU); };
-
-    template<> inline FloatMP pi_approx() {
-      return invoke_mpfr(mpfr_const_pi,GMP_RNDN); }
-    template<> inline FloatMP pi_down() {
-      return invoke_mpfr(mpfr_const_pi,GMP_RNDD); }
-    template<> inline FloatMP pi_up() {
-      return invoke_mpfr(mpfr_const_pi,GMP_RNDU); };
-
-    template<> inline FloatMP sin_down(const FloatMP& x) {
-      return invoke_mpfr(x,mpfr_sin,GMP_RNDD); }
-    template<> inline FloatMP sin_up(const FloatMP& x) {
-      return invoke_mpfr(x,mpfr_sin,GMP_RNDU); };
-
-    template<> inline FloatMP cos_down(const FloatMP& x) {
-      return invoke_mpfr(x,mpfr_cos,GMP_RNDD); }
-    template<> inline FloatMP cos_up(const FloatMP& x) {
-      return invoke_mpfr(x,mpfr_cos,GMP_RNDU); };
-
-    template<> inline FloatMP tan_down(const FloatMP& x) {
-      return invoke_mpfr(x,mpfr_tan,GMP_RNDD); }
-    template<> inline FloatMP tan_up(const FloatMP& x) {
-      return invoke_mpfr(x,mpfr_tan,GMP_RNDU); };
-
-    template<> inline FloatMP sinh_down(const FloatMP& x) {
-      return invoke_mpfr(x,mpfr_sinh,GMP_RNDD); }
-    template<> inline FloatMP sinh_up(const FloatMP& x) {
-      return invoke_mpfr(x,mpfr_sinh,GMP_RNDU); };
-
-    template<> inline FloatMP cosh_down(const FloatMP& x) {
-      return invoke_mpfr(x,mpfr_cosh,GMP_RNDD); }
-    template<> inline FloatMP cosh_up(const FloatMP& x) {
-      return invoke_mpfr(x,mpfr_cosh,GMP_RNDU); };
-
-    template<> inline FloatMP tanh_down(const FloatMP& x) {
-      return invoke_mpfr(x,mpfr_tanh,GMP_RNDD); }
-    template<> inline FloatMP tanh_up(const FloatMP& x) {
-      return invoke_mpfr(x,mpfr_tanh,GMP_RNDU); };
-
-    template<> inline FloatMP asin_down(const FloatMP& x) {
-      return invoke_mpfr(x,mpfr_asin,GMP_RNDD); }
-    template<> inline FloatMP asin_up(const FloatMP& x) {
-      return invoke_mpfr(x,mpfr_asin,GMP_RNDU); };
-
-    template<> inline FloatMP acos_down(const FloatMP& x) {
-      return invoke_mpfr(x,mpfr_acos,GMP_RNDD); }
-    template<> inline FloatMP acos_up(const FloatMP& x) {
-      return invoke_mpfr(x,mpfr_acos,GMP_RNDU); };
-
-    template<> inline FloatMP atan_down(const FloatMP& x) {
-      return invoke_mpfr(x,mpfr_atan,GMP_RNDD); }
-    template<> inline FloatMP atan_up(const FloatMP& x) {
-      return invoke_mpfr(x,mpfr_atan,GMP_RNDU); };
-
-    template<> inline FloatMP asinh_down(const FloatMP& x) {
-      return invoke_mpfr(x,mpfr_asinh,GMP_RNDD); }
-    template<> inline FloatMP asinh_up(const FloatMP& x) {
-      return invoke_mpfr(x,mpfr_asinh,GMP_RNDU); };
-
-    template<> inline FloatMP acosh_down(const FloatMP& x) {
-      return invoke_mpfr(x,mpfr_acosh,GMP_RNDD); }
-    template<> inline FloatMP acosh_up(const FloatMP& x) {
-      return invoke_mpfr(x,mpfr_acosh,GMP_RNDU); };
-
-    template<> inline FloatMP atanh_down(const FloatMP& x) {
-      return invoke_mpfr(x,mpfr_atanh,GMP_RNDD); }
-    template<> inline FloatMP atanh_up(const FloatMP& x) {
-      return invoke_mpfr(x,mpfr_atanh,GMP_RNDU); };
-    
-    inline std::ostream& operator<<(std::ostream& os, const FloatMP& x) {
-      return os<<x.get_mpf_class().get_d(); }
-    inline std::istream& operator>>(std::istream& is, FloatMP& x) {
-      Rational q; is >> q; if(conv_approx<FloatMP>(q)!=q) { throw std::runtime_error("Cannot construct FloatMP exactly from string literal."); } x=conv_approx<FloatMP>(q); assert(x==q); return is; }
-    inline FloatMP::FloatMP(const std::string& str) { 
-      mpfr_init(_value); std::stringstream ss(str); ss >> *this; }
-  
-    inline FloatMP operator+(const FloatMP& x) { return x; }
-    inline FloatMP operator-(const FloatMP& x) { return neg(x); }
-
-    Interval<FloatMP> operator+(const FloatMP&, const FloatMP&);
-    Interval<FloatMP> operator-(const FloatMP&, const FloatMP&);
-    Interval<FloatMP> operator*(const FloatMP&, const FloatMP&);
-    Interval<FloatMP> operator/(const FloatMP&, const FloatMP&);
-      
+    inline void med_(FloatMP& r, const FloatMP& x, const FloatMP& y, RoundApprox) {
+      FloatMP t; add_(t,x,y,round_approx); div_(r,t,2,round_approx); }
     
     
       
-/*  Expression-templated functions for possible future use.
-      
-    template<class Rnd> inline mpfr_rnd_t mpfr_rounding_mode();
-    template<> inline mpfr_rnd_t mpfr_rounding_mode<approx>() { return GMP_RNDN; }
-    template<> inline mpfr_rnd_t mpfr_rounding_mode<down>() { return GMP_RNDD; }
-    template<> inline mpfr_rnd_t mpfr_rounding_mode<up>() { return GMP_RNDU; }
+    template<class Rnd> inline 
+    void sqrt_(FloatMP& r, const FloatMP& x, Rnd) { 
+      mpfr_sqrt(r._value,x._value,mpfr_rounding_mode<Rnd>()); }
 
-    class MpfrConstantFunction
-      : public ConstantFunction<FloatMP>
-    {
-     public:
-      MpfrConstantFunction(mpfr_const_func ff, const mpfr_rnd_t rr) : f(ff), r(rr) { }
-      void operator() (FloatMP& r) const;
-      FloatMP operator() () const;
-      mpfr_const_func* f; mpfr_rnd_t r;
-    };
+    template<class Rnd> inline 
+    void hypot(FloatMP& r, const FloatMP& x,const FloatMP& y, Rnd) { 
+      mpfr_hypot(r._value,x._value,y._value,mpfr_rounding_mode<Rnd>()); }
+    
+    template<class Rnd> inline 
+    void exp_(FloatMP& r, const FloatMP& x, Rnd) { 
+      mpfr_exp(r._value,x._value,mpfr_rounding_mode<Rnd>()); }
 
-    class MpfrUnaryFunction
-      : public UnaryFunction<FloatMP,FloatMP>
-    {
-     public:
-      MpfrUnaryFunction(mpfr_func ff, const mpfr_rnd_t rr) : f(ff), r(rr) { }
-      void operator() (FloatMP& r, const FloatMP& a) const;
-      FloatMP operator()(const FloatMP& a) const;
-      mpfr_func* f; mpfr_rnd_t r;
-    };
+    template<class Rnd> inline 
+    void log_(FloatMP& r, const FloatMP& x, Rnd) { 
+      mpfr_log(r._value,x._value,mpfr_rounding_mode<Rnd>()); }
 
-    class MpfrBinaryFunction
-      : public BinaryFunction<FloatMP,FloatMP,FloatMP>
-    {
-     public:
-      MpfrBinaryFunction(mpfr_bin_func ff, const mpfr_rnd_t rr) : f(ff), r(rr) { }
-      void operator() (FloatMP& r, const FloatMP& a1, const FloatMP& a2) const;
-      FloatMP operator()(const FloatMP& a1, const FloatMP& a2) const;
-      mpfr_bin_func* f; mpfr_rnd_t r;
-    };
 
-    template<typename A>
-    inline
-    UnaryExpression<A,MpfrUnaryFunction> 
-    mpfr_unary_expression(const A& a, mpfr_func f, mpfr_rnd_t r)
-    {
-      return UnaryExpression<A,MpfrUnaryFunction>(a,MpfrUnaryFunction(f,r));
-    }
+    inline void pi_(FloatMP& r, RoundApprox) {
+      mpfr_const_pi(r._value,GMP_RNDN); }
 
-    template<typename A1, typename A2>
-    inline
-    BinaryExpression<A1,A2,MpfrBinaryFunction> 
-    mpfr_binary_expression(const A1& a1, const A2& a2, mpfr_bin_func f, mpfr_rnd_t r)
-    {
-      return BinaryExpression<A1,A2,MpfrBinaryFunction>(a1,a2,MpfrBinaryFunction(f,r));
-    }
+    inline void sin_(FloatMP& r, const FloatMP& x, RoundApprox) {
+      mpfr_sin(r._value,x._value,GMP_RNDN); }
+    inline void cos_(FloatMP& r, const FloatMP& x, RoundApprox) {
+      mpfr_cos(r._value,x._value,GMP_RNDN); }
+    inline void tan_(FloatMP& r, const FloatMP& x, RoundApprox) {
+      mpfr_tan(r._value,x._value,GMP_RNDN); }
+    inline void asin_(FloatMP& r, const FloatMP& x, RoundApprox) {
+      mpfr_asin(r._value,x._value,GMP_RNDN); }
+    inline void acos_(FloatMP& r, const FloatMP& x, RoundApprox) {
+      mpfr_acos(r._value,x._value,GMP_RNDN); }
+    inline void atan_(FloatMP& r, const FloatMP& x, RoundApprox) {
+      mpfr_atan(r._value,x._value,GMP_RNDN); }
 
-    template<typename A1, typename A2, typename Rnd>
-    inline
-    BinaryExpression<A1,A2,MpfrBinaryFunction> 
-    mpfr_binary_expression(const A1& a1, const A2& a2, mpfr_bin_func f, Rnd)
-    {
-      return BinaryExpression<A1,A2,MpfrBinaryFunction>(a1,a2,MpfrBinaryFunction(f,mpfr_rounding_mode<Rnd>()));
-    }
+    template<class Rnd> 
+    inline void sin_(FloatMP& r, const FloatMP& x, Rnd) {
+      mpfr_sin(r._value,x._value,mpfr_rounding_mode<Rnd>()); }
+    template<class Rnd> 
+    inline void cos_(FloatMP& r, const FloatMP& x, Rnd) {
+      mpfr_cos(r._value,x._value,mpfr_rounding_mode<Rnd>()); }
+    template<class Rnd> 
+    inline void tan_(FloatMP& r, const FloatMP& x, Rnd) {
+      mpfr_tan(r._value,x._value,mpfr_rounding_mode<Rnd>()); }
+    template<class Rnd> 
+    inline void asin_(FloatMP& r, const FloatMP& x, Rnd) {
+      mpfr_asin(r._value,x._value,mpfr_rounding_mode<Rnd>()); }
+    template<class Rnd> 
+    inline void acos_(FloatMP& r, const FloatMP& x, Rnd) {
+      mpfr_acos(r._value,x._value,mpfr_rounding_mode<Rnd>()); }
+    template<class Rnd> 
+    inline void atan_(FloatMP& r, const FloatMP& x, Rnd) {
+      mpfr_atan(r._value,x._value,mpfr_rounding_mode<Rnd>()); }
 
-    template<class E1, class E2> 
-    inline 
-    BinaryExpression<E1,E2,MpfrBinaryFunction> 
-    add_approx(const Expression<FloatMP,E1>& x1, const Expression<FloatMP,E2>&x2) {
-      return mpfr_binary_expression(x1.promote(),x2.promote(),mpfr_add,GMP_RNDN);
-    }
+    template<class Rnd> 
+    inline void sinh_(FloatMP& r, const FloatMP& x, Rnd) {
+      mpfr_sinh(r._value,x._value,mpfr_rounding_mode<Rnd>()); }
+    template<class Rnd> 
+    inline void cosh_(FloatMP& r, const FloatMP& x, Rnd) {
+      mpfr_cosh(r._value,x._value,mpfr_rounding_mode<Rnd>()); }
+    template<class Rnd> 
+    inline void tanh_(FloatMP& r, const FloatMP& x, Rnd) {
+      mpfr_tanh(r._value,x._value,mpfr_rounding_mode<Rnd>()); }
+    template<class Rnd> 
+    inline void asinh_(FloatMP& r, const FloatMP& x, Rnd) {
+      mpfr_asinh(r._value,x._value,mpfr_rounding_mode<Rnd>()); }
+    template<class Rnd> 
+    inline void acosh_(FloatMP& r, const FloatMP& x, Rnd) {
+      mpfr_acosh(r._value,x._value,mpfr_rounding_mode<Rnd>()); }
+    template<class Rnd> 
+    inline void atanh_(FloatMP& r, const FloatMP& x, Rnd) {
+      mpfr_atanh(r._value,x._value,mpfr_rounding_mode<Rnd>()); }
 
-*/
-      
       
   }
 }
 
-#endif /* ARIADNE_MPFLOAT_H */
+#endif /* ARIADNE_NUMERIC_FLOATMP_H */

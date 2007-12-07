@@ -32,7 +32,9 @@
 namespace Ariadne {
   namespace Numeric {
 
-    //! \name Approximate arithmetical operations.
+ #ifdef DOXYGEN
+
+   //! \name Approximate arithmetical operations.
     //@{ 
     //! \ingroup Numeric
 
@@ -61,7 +63,7 @@ namespace Ariadne {
     template<class R> inline R med_approx(const R& x1, const R& x2);
     template<class R> inline R med_exact(const R& x1, const R& x2);
    
-    /*! \brief Unary negation. */
+    /*! \brief Unary neg_ation. */
     template<class R> inline R neg_exact(const R& x);
     template<class R> inline R neg_approx(const R& x);
     template<class R> inline R neg_down(const R& x);
@@ -213,6 +215,8 @@ namespace Ariadne {
     template<class R> inline R atanh_down(const R& x);
     template<class R> inline R atanh_up(const R& x);
   //@}
+
+#endif
 
   }
 }

@@ -32,7 +32,7 @@
 #include <stdexcept>
 #include <string>
 
-#include "../numeric/numerical_traits.h"
+#include "../numeric/traits.h"
 #include "../geometry/declarations.h"
 #include "../system/declarations.h"
 

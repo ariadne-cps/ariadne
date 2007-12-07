@@ -434,7 +434,7 @@ LinearAlgebra::approximation(const Matrix<R2>& im)
   Matrix<R1> result(im.number_of_rows(),im.number_of_columns());
   for(size_type i=0; i!=im.number_of_rows(); ++i) {
     for(size_type j=0; j!=im.number_of_columns(); ++j) {
-      result(i,j)=Numeric::conv_approx<R1>(im(i,j));
+      set_(result(i,j),im(i,j),Numeric::round_approx);
     }
   }
   return result;

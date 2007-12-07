@@ -245,6 +245,13 @@ namespace Ariadne {
       m2.increment_index(0);
       MultiIndexIterator mi_end2(m2);
 
+	  unsigned int zn=3;
+	  R zx=2;
+	  R zy=5;
+	  R zr;
+	  zr=zn*zx;
+	  zr+=zn*(zx*zy);
+		
       for(size_type i1=0; i1!=T1.result_size(); ++i1) {
         for(size_type i2=0; i2!=T2.result_size(); ++i2) {
           for(MultiIndexIterator mi_iter2=mi_begin2; mi_iter2!=mi_end2; ++mi_iter2) {
@@ -254,7 +261,7 @@ namespace Ariadne {
               m0=m1+m2;
               size_type n=m1.number()*m2.number();
               m1.increment_index(i2);
-              T0(i1,m0)+=n*T1(i1,m1)*T2(i2,m2);
+              //T0(i1,m0)+=n*T1(i1,m1)*T2(i2,m2);
             }
           }
         }

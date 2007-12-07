@@ -27,6 +27,7 @@
 
 #include <vector>
 
+#include "../numeric/exceptions.h"
 #include "../numeric/rational.h"
 #include "../numeric/interval.h"
 

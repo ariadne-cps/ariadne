@@ -31,7 +31,7 @@
 #include <iosfwd>
 
 #include "../base/types.h"
-#include "../numeric/numerical_traits.h"
+#include "../numeric/traits.h"
 #include "../numeric/declarations.h"
 #include "../linear_algebra/declarations.h"
 

@@ -182,7 +182,7 @@ Evaluation::Bounder<R>::estimate_flow_bounds(const System::VectorFieldInterface<
     }
   }
   
-  if(verbosity>7) { std::clog << "  h=" << conv_approx<double>(h) << "  b=" << bounds << std::endl; }
+  if(verbosity>7) { std::clog << "  h=" << approx<double>(h) << "  b=" << bounds << std::endl; }
   
   return bounds;
 }

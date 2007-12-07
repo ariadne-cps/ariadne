@@ -35,6 +35,46 @@
 #include "../geometry/point_list.h" 
 #include "../geometry/list_set.h" 
 
+namespace {
+
+using namespace Ariadne;
+
+
+Geometry::Rectangle<Numeric::Rational> 
+neighbourhood(const Geometry::Rectangle<Numeric::Rational>& r, 
+              const Numeric::Rational& delta) 
+{
+  Geometry::Rectangle<Numeric::Rational> result(r.dimension());
+  for (size_type j=0; j!=r.dimension(); ++j) {
+    result.set_lower_bound(j,r.lower_bound(j)-delta);
+    result.set_upper_bound(j,r.upper_bound(j)+delta);
+  }
+  return result;
+}
+
+template<class T>
+Geometry::Rectangle< Numeric::Float<T> > 
+neighbourhood(const Geometry::Rectangle< Numeric::Float<T> >&r, 
+              const Numeric::Float<T>& delta) 
+{
+  Geometry::Rectangle< Numeric::Float<T> > result(r.dimension());
+  for (size_type j=0; j!=r.dimension(); ++j) {
+    result.set_lower_bound(j,sub_down(r.lower_bound(j),delta));
+    result.set_upper_bound(j,add_up(r.upper_bound(j),delta));
+  }
+  return result;
+}
+
+} // namespace
+
+
+
+namespace Ariadne { namespace Numeric {
+
+
+}}
+
+
 namespace Ariadne {
 
 
@@ -47,6 +87,23 @@ Geometry::Rectangle<R>::Rectangle(const std::string& s)
 }
 
 
+
+template<class R> Geometry::Rectangle<R> 
+Geometry::Rectangle<R>::neighbourhood(const R& delta) const
+{
+  return ::neighbourhood(*this,delta);
+}
+
+template<class R> inline
+R
+Geometry::Rectangle<R>::volume() const 
+{
+  R result=1;
+  for(dimension_type i=0; i!=this->dimension(); ++i) {
+    result=mul_approx(result,sub_approx(this->upper_bound(i),this->lower_bound(i)));
+  }
+  return result;
+}
 
 template<class R>
 Geometry::Rectangle<R>

@@ -63,19 +63,19 @@ Geometry::Interval<X>::operator=(const Geometry::Interval<X>& ivl)
 
 template<class X> template<class XL,class XU> inline 
 Geometry::Interval<X>::Interval(const XL& l, const XU& u)
-  : _lower(Numeric::conv_down<X>(l)), _upper(Numeric::conv_up<X>(u)) 
+  : _lower(l), _upper(u)
 {
 }
 
 template<class X> template<class XX> inline 
 Geometry::Interval<X>::Interval(const Interval<XX>& ivl)
-  : _lower(Numeric::conv_down<X>(ivl.lower())), _upper(Numeric::conv_up<X>(ivl.upper())) 
+  : _lower(ivl.lower()), _upper(ivl.upper()) 
 {
 }
 
 template<class X> template<class XX> inline 
 Geometry::Interval<X>::Interval(const XX& x)
-  : _lower(Numeric::conv_down<X>(x)), _upper(Numeric::conv_up<X>(x)) 
+  : _lower(x), _upper(x) 
 {
 }
 
@@ -83,7 +83,7 @@ template<class X> template<class XX> inline
 Geometry::Interval<X>& 
 Geometry::Interval<X>::operator=(const XX& x) 
 {
-  this->_lower=Numeric::conv_down<X>(x); this->_upper=Numeric::conv_up<X>(x); return *this;
+  this->_lower=x; this->_upper=x; return *this;
 }
 
 
@@ -207,9 +207,10 @@ tribool
 Geometry::bounded(const Interval<X>& ivl) 
 {
   X inf=Numeric::inf<X>();
-  if(ivl.lower() > -inf && ivl.upper() < +inf) {
+  X minf=-inf;
+  if(ivl.lower() > minf && ivl.upper() < inf) {
     return true;
-  } else if(ivl.lower() == -inf || ivl.upper() == +inf) {
+  } else if(ivl.lower() == minf || ivl.upper() == inf) {
     return false;
   } else { // May occur if one of the bounds is \a nan or an unbounded interval
     return indeterminate;

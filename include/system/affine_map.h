@@ -32,7 +32,7 @@
 #include "../base/types.h"
 
 #include "../numeric/declarations.h"
-#include "../numeric/numerical_traits.h"
+#include "../numeric/traits.h"
 
 #include "../linear_algebra/declarations.h"
 #include "../linear_algebra/vector.h"

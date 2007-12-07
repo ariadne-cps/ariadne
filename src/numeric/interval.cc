@@ -1,5 +1,5 @@
 /***************************************************************************
- *            float64.cc
+ *            interval.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
@@ -29,10 +29,12 @@ namespace Ariadne {
   namespace Numeric {
 
 #ifdef ENABLE_FLOAT64
+  template class Interval<Float64>;
   template void instantiate_interval<Float64>();
 #endif
   
 #ifdef ENABLE_FLOATMP
+  template class Interval<FloatMP>;
   template void instantiate_interval<FloatMP>();
 #endif
 

@@ -35,7 +35,7 @@
 #include "../base/exceptions.h"
 
 #include "../numeric/exceptions.h"
-#include "../numeric/numerical_traits.h"
+#include "../numeric/traits.h"
 #include "../numeric/conversion.h"
 #include "../numeric/arithmetic.h"
 #include "../numeric/function.h"
@@ -49,7 +49,7 @@ namespace Ariadne {
      * An interval of real numbers with midpoint and radius of type \a R.
      * All operations on an interval must be guarenteed to return an interval contining the exact result.
      * If \a T supports exact evaluation of a function, then the exact evaluation must be used.
-     * If \a T is dense in the reals, e.g. dyadic or rational, then any approximate operations may be given a maximum error of computation.
+     * If \a T is dense in the reals, e.g. dyadic or rational, then any approximate operations may be given a max_imum error of computation.
      */
     template<class R>
     class MidpointRadiusInterval

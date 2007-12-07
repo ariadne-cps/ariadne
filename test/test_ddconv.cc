@@ -26,7 +26,7 @@
 #include <string>
 
 #include "ariadne.h"
-#include "numeric/numerical_traits.h"
+#include "numeric/traits.h"
 #include "numeric/rational.h"
 #include "numeric/float64.h"
 #include "geometry/ddconv.h"

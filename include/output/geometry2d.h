@@ -53,20 +53,6 @@
 #include "../system/affine_map.h"
 #include "../output/colour.h"
 
-// FIXME: This should not be necessary
-namespace Ariadne {
-  namespace Numeric {
-
-    template<> inline double min_exact(const double& x1, const double& x2) {
-      return std::min(x1,x2);
-    }
-    
-    template<> inline double max_exact(const double& x1, const double& x2) {
-      return std::max(x1,x2);
-    }
-    
-  }
-}
 
 namespace Ariadne {
   namespace Output {
@@ -180,8 +166,8 @@ Output::PlanarProjectionMap::operator()(const Geometry::Point<R>& pt) const
 {
   Point2d result(2); 
   ARIADNE_CHECK_DIMENSION(pt,_d,"Point2d PlanarProjectionMap::operator()(Point<R> pt)");
-  result[0]=Numeric::conv_approx<double>(pt[_i]); 
-  result[1]=Numeric::conv_approx<double>(pt[_j]); 
+  result[0]=Numeric::approx<double>(pt[_i]); 
+  result[1]=Numeric::approx<double>(pt[_j]); 
   return result;
 }
 
@@ -206,10 +192,10 @@ Output::PlanarProjectionMap::operator()(const Geometry::RectangleExpression<E>& 
   Rectangle2d result(2); 
   const E& r=re();
   ARIADNE_CHECK_DIMENSION(r,this->_d,"Rectangle2d PlanarProjectionMap::operator()(Rectangle<R> r)");
-  result.lower_bound(0)=Numeric::conv_approx<double>(r.lower_bound(this->_i));
-  result.upper_bound(0)=Numeric::conv_approx<double>(r.upper_bound(this->_i));
-  result.lower_bound(1)=Numeric::conv_approx<double>(r.lower_bound(this->_j));
-  result.upper_bound(1)=Numeric::conv_approx<double>(r.upper_bound(this->_j));
+  result.lower_bound(0)=Numeric::approx<double>(r.lower_bound(this->_i));
+  result.upper_bound(0)=Numeric::approx<double>(r.upper_bound(this->_i));
+  result.lower_bound(1)=Numeric::approx<double>(r.lower_bound(this->_j));
+  result.upper_bound(1)=Numeric::approx<double>(r.upper_bound(this->_j));
   return result;
 }
 

@@ -28,13 +28,20 @@
 #ifndef ARIADNE_NUMERIC_DECLARATIONS_H
 #define ARIADNE_NUMERIC_DECLARATIONS_H
 
+#include "rounding.h"
+
 namespace Ariadne { 
   namespace Numeric {
+
+    class mpfr;
+
     class Integer;
     class Rational;
-    class Float64;
-    class FloatMP;
+    template<class R> class Float;
     template<class R> class Interval;
+
+    typedef Float<double> Float64;
+    typedef Float<mpfr> FloatMP;
   }
   
 }

@@ -34,7 +34,6 @@ namespace Ariadne {
     using namespace Numeric;
   
     template class Covector<Rational>;
-    template class Covector< Interval<Rational> >;
 
 #ifdef ENABLE_FLOAT64
     template class Covector<Float64>;

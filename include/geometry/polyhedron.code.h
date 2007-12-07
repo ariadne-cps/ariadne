@@ -341,8 +341,8 @@ bounding_box(const Geometry::Polyhedron<R>& plhd)
   Geometry::Rectangle<Numeric::Rational> qbb=bounding_box(Geometry::Polyhedron<Numeric::Rational>(plhd));
   Geometry::Rectangle<R> bb(plhd.dimension());
   for(dimension_type i=0; i!=bb.dimension(); ++i) {
-    bb.set_lower_bound(i,Numeric::conv_down<R>(qbb.lower_bound(i)));
-    bb.set_upper_bound(i,Numeric::conv_up<R>(qbb.upper_bound(i)));
+    bb.set_lower_bound(i,R(qbb.lower_bound(i),Numeric::round_down));
+    bb.set_upper_bound(i,R(qbb.upper_bound(i),Numeric::round_up));
   }
   return bb;
 }

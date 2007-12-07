@@ -1,3 +1,5 @@
+all: tests
+
 #TESTS_ENVIRONMENT = (function run_tst { $1 > $1.log; }; run_tst )
 TESTS_ENVIRONMENT = ./run_test.sh
 
@@ -5,33 +7,38 @@ TESTS_ENVIRONMENT = ./run_test.sh
 INCLUDES = -I$(top_srcdir)/include
 LDADD   = ../src/libariadne.la -lmpfr -lgmpxx 
 
-check_PROGRAMS = \
+BASE_TESTS = \
 	test_tribool \
 	test_array \
 	test_ddconv \
 	test_boost \
-	test_mpfr \
-	 \
+	test_mpfr 
+
+NUMERIC_TESTS = \
 	test_integer \
 	test_rational \
 	test_float \
-	test_interval \
-	 \
+	test_interval 
+
+LINEAR_ALGEBRA_TESTS = \
 	test_vector \
 	test_matrix \
 	test_tensor \
-	test_linear_algebra \
-	 \
+	test_linear_algebra
+
+LINEAR_PROGRAMMING_TESTS = \
 	test_linear_program \
 	test_lpslv \
 	test_lpstp \
 	test_lpfsp \
-	test_lptst \
-	 \
+	test_lptst 
+
+COMBINATORIC_TESTS = \
 	test_binary_word \
 	test_lattice \
-	test_subdivision_tree \
-	 \
+	test_subdivision_tree 
+
+FUNCTION_TESTS = \
 	test_function \
 	test_index \
 	test_polynomial \
@@ -39,9 +46,11 @@ check_PROGRAMS = \
 	test_taylor_variable \
 	test_scalar_derivative \
 	test_taylor_derivative \
+	test_multivariable_derivative \
 	test_affine_model \
-	test_taylor_model \
-	 \
+	test_taylor_model 
+
+GEOMETRY_TESTS = \
 	test_point \
 	test_list_set \
 	test_grid_set \
@@ -55,11 +64,13 @@ check_PROGRAMS = \
 	test_polyhedron \
 	test_constraint \
 	test_constraint_set \
-	test_level_set \
-	 \
+	test_level_set 
+
+SYSTEM_TESTS = \
 	test_set_based_hybrid_automaton \
-	test_constraint_based_hybrid_automaton \
-	 \
+	test_constraint_based_hybrid_automaton 
+
+EVALUATION_TESTS = \
 	test_newton_solver \
 	test_lohner_integrator \
 	test_affine_integrator \
@@ -67,14 +78,46 @@ check_PROGRAMS = \
 	test_vector_field_evolver \
 	test_set_based_hybrid_evolver \
 	test_constraint_based_hybrid_evolver \
-	test_constraint_based_hybrid_scheduler \
-	 \
+	test_constraint_based_hybrid_scheduler 
+
+OUTPUT_TESTS = \
 	test_textstream \
         test_latexstream \
         test_epsstream \
 	test_chompstream 
 
+check_PROGRAMS = \
+	$(BASE_TESTS) \
+	$(NUMERIC_TESTS) \
+	$(LINEAR_ALGEBRA_TESTS) \
+	$(LINEAR_PROGRAMMING_TESTS) \
+	$(COMBINATORIC_TESTS) \
+	$(FUNCTION_TESTS) \
+	$(GEOMETRY_TESTS) \
+	$(SYSTEM_TESTS) \
+	$(EVALUATION_TESTS) \
+	$(OUTPUT_TESTS)
+
 tests: $(check_PROGRAMS)
+
+test_integer_LDADD = ../src/libnumeric.la -lmpfr -lgmpxx -lgmp
+test_rational_LDADD = ../src/libnumeric.la -lmpfr -lgmpxx -lgmp
+test_float_LDADD = ../src/libnumeric.la -lmpfr -lgmpxx -lgmp
+test_interval_LDADD = ../src/libnumeric.la -lmpfr -lgmpxx -lgmp
+check_numericdir = ./
+check_numeric_PROGRAMS = $(NUMERIC_TESTS) 
+check_numeric: $(check_numeric_PROGRAMS)
+
+#test_vector_LDADD = ../src/libnumeric.la ../src/liblinearalgebra.la -lmpfr -lgmpxx -lgmp
+#test_matrix_LDADD = ../src/libnumeric.la ../src/liblinearalgebra.la -lmpfr -lgmpxx -lgmp
+#test_tensor_LDADD = ../src/libnumeric.la ../src/liblinearalgebra.la -lmpfr -lgmpxx -lgmp
+#test_linear_algebra_LDADD = ../src/libnumeric.la ../src/liblinearalgebra.la -lmpfr -lgmpxx -lgmp
+check_linear_algebradir = ./
+check_linear_algebra_PROGRAMS = $(LINEAR_ALGEBRA_TESTS) 
+check_linear_algebra: $(check_linear_algebra_PROGRAMS)
+
+
+
 
 # Explicitly list test sources
 # This should not be necessary!!

@@ -31,11 +31,12 @@
 namespace Ariadne {
   namespace Numeric {
 
+#ifdef DOXYGEN
     //! \name Comparison operators. 
     //@{
     //! \ingroup Numeric
     /*! \brief Equal to. */
-    template<class R1, class R2> inline bool operator==(const R1& x1, const R2& x2);
+    template<class E1, class E2> inline bool operator==(const E1& x1, const E2& x2); 
 
     /*! \brief Not equal to. */
     template<class R1, class R2> inline bool operator!=(const R1& x1, const R2& x2);
@@ -53,6 +54,7 @@ namespace Ariadne {
     template<class R1, class R2> inline bool operator>=(const R1& x1, const R2& x2);
     
     //!}
+#endif
 
   }
 }

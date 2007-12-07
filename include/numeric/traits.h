@@ -1,5 +1,5 @@
 /***************************************************************************
- *            numerical_traits.h
+ *            numeric/traits.h
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -21,33 +21,36 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file numerical_traits.h
+/*! \file numeric/traits.h
  *  \brief Traits classes to define properties of numerical types.
  */
 
-#ifndef ARIADNE_NUMERICAL_TRAITS_H
-#define ARIADNE_NUMERICAL_TRAITS_H
+#ifndef ARIADNE_NUMERIC_TRAITS_H
+#define ARIADNE_NUMERIC_TRAITS_H
 
 #include <string>
 #include <gmpxx.h>
 
 // FIXME: WE should not use GMP internals
 // The typedef below  may be needed when using GMP 4.2 or above.
-class __gmpq_value;
+class _gmpq_value;
+
 
 namespace Ariadne {
-  namespace Function {
-    template<class X> class AffineVariable;
-    template<class X> class TaylorVariable;
-  }
+  namespace Function { template<class X, class V> class FirstDerivative; }
 
   namespace Numeric {
+
+    class mpfr;
+
     class Integer;
     class Rational;
-    class Float64;
-    class FloatMP;
+    template<class R> class Float;
     template<class R> class Interval;
       
+    typedef Float<double> Float64;
+    typedef Float<mpfr> FloatMP;
+
     /* numerical traits */
     /*! \brief Tags a class representing a ring. */
     class ring_tag { };
@@ -146,7 +149,7 @@ namespace Ariadne {
 
     // FIXME: WE should not use GMP internals
     // The following is needed for rational expressions in GMP 4.1.x
-    template<class E> struct traits< __gmp_expr<__gmpq_value,E> > { 
+    template<class E> struct traits< __gmp_expr<_gmpq_value,E> > { 
       typedef Rational closure_type; 
     };
   
@@ -159,11 +162,7 @@ namespace Ariadne {
       typedef Interval<R> interval_type; 
     };
 
-    template<class X> struct traits< Function::AffineVariable<X> > { 
-      typedef typename traits<X>::number_type number_type; 
-    };
-
-    template<class X> struct traits< Function::TaylorVariable<X> > { 
+    template<class X, class V> struct traits< Function::FirstDerivative<X,V> > { 
       typedef typename traits<X>::number_type number_type; 
     };
 
@@ -224,8 +223,10 @@ namespace Ariadne {
     /*! \brief Approximate \a x by an element of Res with accuracy \a e. */
     template<class Res, class Arg, class Err> Res approximate(const Arg& x, const Err& e);
     //@}
+
+
   }   
 }
   
 
-#endif /* ARIADNE_NUMERICAL_TRAITS_H */
+#endif /* ARIADNE_NUMERIC_TRAITS_H */

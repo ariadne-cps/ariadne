@@ -25,6 +25,8 @@ s/\,\ unbounded_array<Interval<Rational\ >\,\ std::allocator<Interval<Rational\ 
 s/ >/>/g
 s/basic_ostream<char, std::char_traits<char>>/ostream/g
 
+s/<Float<double>>/<Float64>/g
+s/<Float<mpfr>>/<FloatMP>/g
 s/<Interval<Float64>>/<Interval64>/g
 s/<Interval<FloatMP>>/<IntervalMP>/g
 s/Interval<Float64>/Interval64/g

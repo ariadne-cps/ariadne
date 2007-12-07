@@ -19,40 +19,40 @@ along with the MPFR Library; see the file COPYING.LIB.  If not, write to
 the Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
 MA 02110-1301, USA. */
 
-#ifndef __MPFR_ARRAY_H
-#define __MPFR_ARRAY_H
+#ifndef _MPFR_ARRAY_H
+#define _MPFR_ARRAY_H
 
 #include "gmp.h"
 #include "mpfr.h"
 
-__MPFR_DECLSPEC mpfr_ptr mpfr_array_alloc_init _MPFR_PROTO ((size_t));
-__MPFR_DECLSPEC mpfr_ptr mpfr_array_alloc_init2 _MPFR_PROTO ((size_t, mpfr_prec_t));
-__MPFR_DECLSPEC mpfr_ptr mpfr_array_realloc_set_prec _MPFR_PROTO ((mpfr_ptr, size_t, mpfr_prec_t));
-__MPFR_DECLSPEC void mpfr_array_clear_free _MPFR_PROTO ((mpfr_ptr, size_t));
+_MPFR_DECLSPEC mpfr_ptr mpfr_array_alloc_init _MPFR_PROTO ((size_t));
+_MPFR_DECLSPEC mpfr_ptr mpfr_array_alloc_init2 _MPFR_PROTO ((size_t, mpfr_prec_t));
+_MPFR_DECLSPEC mpfr_ptr mpfr_array_realloc_set_prec _MPFR_PROTO ((mpfr_ptr, size_t, mpfr_prec_t));
+_MPFR_DECLSPEC void mpfr_array_clear_free _MPFR_PROTO ((mpfr_ptr, size_t));
 
-__MPFR_DECLSPEC mpfr_ptr mpfr_array_alloc _MPFR_PROTO ((size_t));
-__MPFR_DECLSPEC void mpfr_array_init _MPFR_PROTO ((mpfr_ptr, size_t));
-__MPFR_DECLSPEC void mpfr_array_init2 _MPFR_PROTO ((mpfr_ptr, size_t, mpfr_prec_t));
-__MPFR_DECLSPEC void mpfr_array_set_prec _MPFR_PROTO ((mpfr_ptr, size_t, mpfr_prec_t));
-__MPFR_DECLSPEC mpfr_prec_t mpfr_array_get_prec _MPFR_PROTO ((mpfr_srcptr, size_t));
-__MPFR_DECLSPEC void mpfr_array_clear _MPFR_PROTO ((mpfr_ptr, size_t));
-__MPFR_DECLSPEC void mpfr_array_free _MPFR_PROTO ((mpfr_ptr, size_t));
+_MPFR_DECLSPEC mpfr_ptr mpfr_array_alloc _MPFR_PROTO ((size_t));
+_MPFR_DECLSPEC void mpfr_array_init _MPFR_PROTO ((mpfr_ptr, size_t));
+_MPFR_DECLSPEC void mpfr_array_init2 _MPFR_PROTO ((mpfr_ptr, size_t, mpfr_prec_t));
+_MPFR_DECLSPEC void mpfr_array_set_prec _MPFR_PROTO ((mpfr_ptr, size_t, mpfr_prec_t));
+_MPFR_DECLSPEC mpfr_prec_t mpfr_array_get_prec _MPFR_PROTO ((mpfr_srcptr, size_t));
+_MPFR_DECLSPEC void mpfr_array_clear _MPFR_PROTO ((mpfr_ptr, size_t));
+_MPFR_DECLSPEC void mpfr_array_free _MPFR_PROTO ((mpfr_ptr, size_t));
 
-__MPFR_DECLSPEC void mpfr_array_init_zero2 _MPFR_PROTO ((mpfr_ptr, size_t, mpfr_prec_t));
+_MPFR_DECLSPEC void mpfr_array_init_zero2 _MPFR_PROTO ((mpfr_ptr, size_t, mpfr_prec_t));
 
-__MPFR_DECLSPEC void mpfr_array_copy _MPFR_PROTO ((mpfr_ptr, size_t, mpfr_srcptr, mp_rnd_t));
-__MPFR_DECLSPEC void mpfr_array_set _MPFR_PROTO ((mpfr_ptr, size_t, mpfr_t, mp_rnd_t));
+_MPFR_DECLSPEC void mpfr_array_copy _MPFR_PROTO ((mpfr_ptr, size_t, mpfr_srcptr, mp_rnd_t));
+_MPFR_DECLSPEC void mpfr_array_set _MPFR_PROTO ((mpfr_ptr, size_t, mpfr_t, mp_rnd_t));
 
-__MPFR_DECLSPEC void mpfr_array_set_ui _MPFR_PROTO ((mpfr_ptr, size_t, unsigned long int, mp_rnd_t));
-__MPFR_DECLSPEC void mpfr_array_set_si _MPFR_PROTO ((mpfr_ptr, size_t, long int, mp_rnd_t));
+_MPFR_DECLSPEC void mpfr_array_set_ui _MPFR_PROTO ((mpfr_ptr, size_t, unsigned long int, mp_rnd_t));
+_MPFR_DECLSPEC void mpfr_array_set_si _MPFR_PROTO ((mpfr_ptr, size_t, long int, mp_rnd_t));
 #ifdef _MPFR_H_HAVE_INTMAX_T
-__MPFR_DECLSPEC void mpfr_array_set_uj _MPFR_PROTO ((mpfr_ptr, size_t, uintmax_t, mp_rnd_t));
-__MPFR_DECLSPEC void mpfr_array_set_sj _MPFR_PROTO ((mpfr_ptr, size_t, intmax_t, mp_rnd_t));
+_MPFR_DECLSPEC void mpfr_array_set_uj _MPFR_PROTO ((mpfr_ptr, size_t, uintmax_t, mp_rnd_t));
+_MPFR_DECLSPEC void mpfr_array_set_sj _MPFR_PROTO ((mpfr_ptr, size_t, intmax_t, mp_rnd_t));
 #endif
-__MPFR_DECLSPEC void mpfr_array_set_d _MPFR_PROTO ((mpfr_ptr, size_t, double, mp_rnd_t));
-__MPFR_DECLSPEC void mpfr_array_set_ld _MPFR_PROTO ((mpfr_ptr, size_t, long double, mp_rnd_t));
-__MPFR_DECLSPEC void mpfr_array_set_z _MPFR_PROTO ((mpfr_ptr, size_t, mpz_t, mp_rnd_t));
-__MPFR_DECLSPEC void mpfr_array_set_q _MPFR_PROTO ((mpfr_ptr, size_t, mpq_t, mp_rnd_t));
-__MPFR_DECLSPEC void mpfr_array_set_f _MPFR_PROTO ((mpfr_ptr, size_t, mpf_t, mp_rnd_t));
+_MPFR_DECLSPEC void mpfr_array_set_d _MPFR_PROTO ((mpfr_ptr, size_t, double, mp_rnd_t));
+_MPFR_DECLSPEC void mpfr_array_set_ld _MPFR_PROTO ((mpfr_ptr, size_t, long double, mp_rnd_t));
+_MPFR_DECLSPEC void mpfr_array_set_z _MPFR_PROTO ((mpfr_ptr, size_t, mpz_t, mp_rnd_t));
+_MPFR_DECLSPEC void mpfr_array_set_q _MPFR_PROTO ((mpfr_ptr, size_t, mpq_t, mp_rnd_t));
+_MPFR_DECLSPEC void mpfr_array_set_f _MPFR_PROTO ((mpfr_ptr, size_t, mpf_t, mp_rnd_t));
 
-#endif /* __MPFR_ARRAY_H */
+#endif /* _MPFR_ARRAY_H */

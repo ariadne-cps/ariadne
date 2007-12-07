@@ -81,37 +81,44 @@ namespace Ariadne {
 
 
     
-    template<class VE1, class VE2, class Op>
+  template<class Op, class VE1, class VE2>
     class BinaryVectorVectorExpression :
-      public VectorExpression< BinaryVectorVectorExpression<VE1,VE2,Op> >
+      public VectorExpression< BinaryVectorVectorExpression<Op,VE1,VE2> >
     {
      public:
-      typedef typename Numeric::traits<typename VE1::value_type, typename VE2::value_type>::arithmetic_type value_type;
-      BinaryVectorVectorExpression(const VE1& v1, const VE2& v2, Op)
-        : _ve1(v1), _ve2(v2), _op() { }
+      //      typedef typename Numeric::traits<typename VE1::value_type, typename VE2::value_type>::arithmetic_type value_type;
+      typedef Numeric::Expression< Numeric::Binary<Op, typename VE1::value_type,typename VE1::value_type> > value_type;
+      BinaryVectorVectorExpression(const Op& o, const VE1& v1, const VE2& v2)
+        : _ve1(v1), _ve2(v2), _op(o) { }
       size_type size() const { return _ve1.size(); }
-      value_type operator()(const size_type& i) const { return _op(_ve1(i),_ve2(i)); }
-      value_type operator[](const size_type& i) const { return _op(_ve1(i),_ve2(i)); }
+      value_type operator()(const size_type& i) const { return value_type(_op,_ve1(i),_ve2(i)); }
+      value_type operator[](const size_type& i) const { return value_type(_op,_ve1(i),_ve2(i)); }
+      //      value_type operator()(const size_type& i) const { return _op(_ve1(i),_ve2(i)); }
+      //      value_type operator[](const size_type& i) const { return _op(_ve1(i),_ve2(i)); }
      private:
       const VE1& _ve1; const VE2& _ve2; Op _op;
     };
     
     
-    template<class VE, class SE, class Op>
+    template<class Op, class VE, class SE>
     class BinaryVectorScalarExpression
-      : public VectorExpression< BinaryVectorScalarExpression<VE,SE,Op> >
+      : public VectorExpression< BinaryVectorScalarExpression<Op,VE,SE> >
     {
       typedef typename VE::value_type vector_value_type;
-      typedef typename Numeric::traits<SE>::closure_type scalar_closure_type;
+      //typedef typename Numeric::traits<SE>::closure_type scalar_closure_type;
      public:
-      typedef typename Numeric::traits<vector_value_type,scalar_closure_type>::arithmetic_type value_type;
-      BinaryVectorScalarExpression(const VE& ve, const SE& se, Op) 
-        : _ve(ve), _se(se), _op() { }
+      //      typedef typename Numeric::traits<vector_value_type,scalar_closure_type>::arithmetic_type value_type;
+      typedef Numeric::Expression< Numeric::Binary<Op, typename VE::value_type,SE> > value_type;
+      BinaryVectorScalarExpression(const Op& o, const VE& ve, const SE& se) 
+        : _ve(ve), _se(se), _op(o) { }
       size_type size() const { return _ve.size(); }
-      value_type operator()(const size_type& i) const { return _op(_ve(i),_se); }
-      value_type operator[](const size_type& i) const { return _op(_ve(i),_se); }
+      value_type operator()(const size_type& i) const { return value_type(_op,_ve(i),_se); }
+      value_type operator[](const size_type& i) const { return value_type(_op,_ve(i),_se); }
      private:
-      const VE& _ve; const scalar_closure_type _se; Op _op;
+      const VE& _ve; 
+      //const scalar_closure_type _se; 
+      const SE& _se;
+      Op _op;
     };
     
 

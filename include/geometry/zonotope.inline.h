@@ -160,8 +160,6 @@ Geometry::Zonotope<RC,RG>::operator=(const RectangleExpression<E>& re)
   typedef typename Zonotope<RC,RG>::real_type R;
   
   this->resize(re().dimension(),re().dimension());
-  R zero=static_cast<R>(0);
-  R two=static_cast<R>(2);
   const E& r=re();
   
   Point<RC>& c=this->_centre;
@@ -169,9 +167,9 @@ Geometry::Zonotope<RC,RG>::operator=(const RectangleExpression<E>& re)
   for(size_type i=0; i!=r.dimension(); ++i) {
     c[i]=med_approx(r.lower_bound(i),r.upper_bound(i));
     for(size_type j=0; j!=r.dimension(); ++j) {
-      g(i,j)=zero;
+      g(i,j)=0;
     }
-    g(i,i)=div_up(sub_up(r.upper_bound(i),r.lower_bound(i)),two);
+    g(i,i)=div_up(sub_up(r.upper_bound(i),r.lower_bound(i)),2);
   }
   return *this;
 }

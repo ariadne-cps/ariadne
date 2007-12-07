@@ -178,7 +178,7 @@ test_map_evolver()
   shared_ptr< SetInterface<R> > image_set_ptr(evolver.image(henon,initial_set));
   cout << "image_set=" << *image_set_ptr << endl;
   cout << "Computing preimage set" << endl;
-  evolver.parameters().set_grid_length((grid_length/2).midpoint());
+  evolver.parameters().set_grid_length(div_approx(grid_length,2));
   shared_ptr< SetInterface<R> > preimage_set_ptr(evolver.preimage(henon,initial_set,bounding_set));
   evolver.parameters().set_grid_length(grid_length);
   cout << "preimage_set=" << *preimage_set_ptr << endl;
@@ -195,7 +195,7 @@ test_map_evolver()
   
 
   cout << "Computing reach set" << endl;
-  evolver.parameters().set_grid_length((0.25*grid_length).midpoint());
+  evolver.parameters().set_grid_length(div_approx(grid_length,4));
   shared_ptr< SetInterface<R> > reach_set_ptr(evolver.lower_reach(henon,initial_set));
   cout << "reach_set=" << *reach_set_ptr << endl;
   evolver.parameters().set_grid_length(grid_length);

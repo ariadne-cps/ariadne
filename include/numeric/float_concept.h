@@ -32,7 +32,7 @@ namespace Ariadne {
     /*!\ingroup Numeric
      * \brief The specification of the floating-point concept.
      *
-     * \internal This specification is not finished; some functions may be added or removed. 
+     * \internal This specification is not finished; some functions may be add_ed or removed. 
      */
     class Float {
      public:
@@ -53,7 +53,7 @@ namespace Ariadne {
       Float& operator=(const int& n);
       /*! \brief Assign from a double-precision number. */
       Float& operator=(const double& x);
-      /*! \brief Assign from another floating-point number. Throws an exception if \a x has higher precision and the assignment cannot be performed exactly. */
+      /*! \brief Assign from another floating-point number. Throws an exception if \a x has higher precision and the assignment cannot be performed_ exactly. */
       Float& operator=(const Float& x);
       //@}
 
@@ -148,89 +148,34 @@ namespace Ariadne {
       /*! \brief . */
       friend Float ceil(const Float& x); 
       
+      /*! \brief . */
+      friend Integer floor(const Float& x); 
+      /*! \brief . */
+      friend Integer ceil(const Float& x); 
       //@}
 
 
       //@{ 
       //! \name Conversion operators
       /*! \brief . */
-      friend double conv_approx(const Float& x);
-
-      /*! \brief . */
-      friend Float conv_exact(const Float& x);
-      /*! \brief . */
-      friend Float conv_approx(const Float& x);
-      /*! \brief . */
-      friend Float conv_down(const Float& x);
-      /*! \brief . */
-      friend Float conv_up(const Float& x);
-
-      /*! \brief . */
-      friend Float conv_exact(const int& n);
-      /*! \brief . */
-      friend Float conv_approx(const int& n);
-      /*! \brief . */
-      friend Float conv_down(const int& n);
-      /*! \brief . */
-      friend Float conv_up(const int& n);
-
-      /*! \brief . */
-      friend Float conv_exact(const double& x);
-      /*! \brief . */
-      friend Float conv_approx(const double& x);
-      /*! \brief . */
-      friend Float conv_down(const double& x);
-      /*! \brief . */
-      friend Float conv_up(const double& x);
-
-      /*! \brief . */
-      friend Float conv_approx(const Rational& x);
-      /*! \brief . */
-      friend Float conv_down(const Rational& x);
-      /*! \brief . */
-      friend Float conv_up(const Rational& x);
-      
-      /*! \brief . */
-      friend int int_down(const Float& x);
-      /*! \brief . */
-      friend int int_up(const Float& x);
-      //@}
+      friend double get(const Float& x);
+      @}
 
 
  
    
       //@{ 
-      //! \name Approximate arithmetic
+      //! \name Approximate and rounded arithmetic arithmetic
       /*! \brief . */
-      friend Float add_down(const Float& x1,const Float& x2); 
+      friend template<class Rnd> Float add<Rnd>(const Float& x1,const Float& x2); 
       /*! \brief . */
-      friend Float add_up(const Float& x1,const Float& x2); 
+      friend template<class Rnd> Float sub<Rnd>(const Float& x1,const Float& x2); 
       /*! \brief . */
-      friend Float add_approx(const Float& x1,const Float& x2); 
-    
+      friend template<class Rnd> Float mul<Rnd>(const Float& x1,const Float& x2); 
       /*! \brief . */
-      friend Float sub_down(const Float& x1,const Float& x2); 
+      friend template<class Rnd> Float div<Rnd>(const Float& x1,const Float& x2); 
       /*! \brief . */
-      friend Float sub_up(const Float& x1,const Float& x2); 
-      /*! \brief . */
-      friend Float sub_approx(const Float& x1,const Float& x2); 
-    
-      /*! \brief . */
-      friend Float mul_down(const Float& x1,const Float& x2); 
-      /*! \brief . */
-      friend Float mul_up(const Float& x1,const Float& x2); 
-      /*! \brief . */
-      friend Float mul_approx(const Float& x1,const Float& x2); 
-    
-      /*! \brief . */
-      friend Float div_down(const Float& x1,const Float& x2); 
-      /*! \brief . */
-      friend Float div_up(const Float& x1,const Float& x2); 
-      /*! \brief . */
-      friend Float div_approx(const Float& x1,const Float& x2); 
-    
-      /*! \brief . */
-      friend Float med_approx(const Float& x1,const Float& x2); 
+      friend template<class Rnd> Float  med<Rnd>(const Float& x1,const Float& x2); 
     
       /*! \brief . */
       friend Float pow_down(const Float& x1,const int& n2);
@@ -311,49 +256,49 @@ namespace Ariadne {
       //@{
       //! \name Interval arithmetic
       /*! \brief . */
-      friend Interval<Float> add(const Float& x1, const Float& x2); 
+      friend Interval<Float> add_(const Float& x1, const Float& x2); 
       /*! \brief . */
-      friend Interval<Float> add(const Float& x1, const Interval<Float>& x2); 
+      friend Interval<Float> add_(const Float& x1, const Interval<Float>& x2); 
       /*! \brief . */
-      friend Interval<Float> add(const Interval<Float>& x1, const Float& x2); 
+      friend Interval<Float> add_(const Interval<Float>& x1, const Float& x2); 
       /*! \brief . */
-      friend Interval<Float> add(const Interval<Float>& x1, const Interval<Float>& x2); 
+      friend Interval<Float> add_(const Interval<Float>& x1, const Interval<Float>& x2); 
       /*! \brief . */
-      friend Interval<Float> sub(const Float& x1, const Float& x2); 
+      friend Interval<Float> sub_(const Float& x1, const Float& x2); 
       /*! \brief . */
-      friend Interval<Float> sub(const Float& x1, const Interval<Float>& x2); 
+      friend Interval<Float> sub_(const Float& x1, const Interval<Float>& x2); 
       /*! \brief . */
-      friend Interval<Float> sub(const Interval<Float>& x1, const Float& x2); 
+      friend Interval<Float> sub_(const Interval<Float>& x1, const Float& x2); 
       /*! \brief . */
-      friend Interval<Float> sub(const Interval<Float>& x1, const Interval<Float>& x2); 
+      friend Interval<Float> sub_(const Interval<Float>& x1, const Interval<Float>& x2); 
       /*! \brief . */
-      friend Interval<Float> mul(const Float& x1, const Float& x2); 
+      friend Interval<Float> mul_(const Float& x1, const Float& x2); 
       /*! \brief . */
-      friend Interval<Float> mul(const Float& x1, const Interval<Float>& x2); 
+      friend Interval<Float> mul_(const Float& x1, const Interval<Float>& x2); 
       /*! \brief . */
-      friend Interval<Float> mul(const Interval<Float>& x1, const Float& x2); 
+      friend Interval<Float> mul_(const Interval<Float>& x1, const Float& x2); 
       /*! \brief . */
-      friend Interval<Float> mul(const Interval<Float>& x1, const Interval<Float>& x2); 
+      friend Interval<Float> mul_(const Interval<Float>& x1, const Interval<Float>& x2); 
       /*! \brief . */
-      friend Interval<Float> div(const Float& x1, const Float& x2); 
+      friend Interval<Float> div_(const Float& x1, const Float& x2); 
       /*! \brief . */
-      friend Interval<Float> div(const Float& x1, const Interval<Float>& x2); 
+      friend Interval<Float> div_(const Float& x1, const Interval<Float>& x2); 
       /*! \brief . */
-      friend Interval<Float> div(const Interval<Float>& x1, const Float& x2); 
+      friend Interval<Float> div_(const Interval<Float>& x1, const Float& x2); 
       /*! \brief . */
-      friend Interval<Float> div(const Interval<Float>& x1, const Interval<Float>& x2); 
+      friend Interval<Float> div_(const Interval<Float>& x1, const Interval<Float>& x2); 
       /*! \brief . */
-      friend Interval<Float> pow(const Float& x1, const int& n2); 
+      friend Interval<Float> pow_(const Float& x1, const int& n2); 
       /*! \brief . */
-      friend Interval<Float> pow(const Interval<Float>& x1, const int& n2); 
+      friend Interval<Float> pow_(const Interval<Float>& x1, const int& n2); 
       //@}
 
       //@{
       //! \name Interval algebraic functions
       /*! \brief . */
-      friend Interval<Float> sqrt(const Float& x); 
+      friend Interval<Float> sqrt_(const Float& x); 
       /*! \brief . */
-      friend Interval<Float> sqrt(const Interval<Float>& x); 
+      friend Interval<Float> sqrt_(const Interval<Float>& x); 
       /*! \brief . */
       friend Interval<Float> hypot(const Float& x1, const Float& x2); 
       /*! \brief . */

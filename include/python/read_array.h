@@ -29,7 +29,7 @@
 #define ARIADNE_PYTHON_READ_ARRAY_H
 
 #include "base/array.h"
-#include "numeric/numerical_traits.h"
+#include "numeric/traits.h"
 #include "python/read_scalar.h"
 
 #include <boost/python.hpp>

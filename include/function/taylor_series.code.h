@@ -53,8 +53,8 @@ compute_composition(Function::TaylorSeries<X>& y, const Function::TaylorSeries<X
       //std::cout<<"y["<<d-i<<"] = 1*y["<<d-i<<"]*x[1]"<<std::flush;
       y[d-i]*=x[1];
       for(int j=1; j<=n-i; ++j) {
-        //std::cout<<" + "<<Numeric::choose(n-i,j)<<"*y["<<d-i-j<<"]*x["<<j+1<<"]"<<std::flush;
-        y[d-i] += Numeric::choose<int>(n-i,j) * y[d-i-j] * x[j+1];
+        //std::cout<<" + "<<Numeric::bin(n-i,j)<<"*y["<<d-i-j<<"]*x["<<j+1<<"]"<<std::flush;
+        y[d-i] += Numeric::bin<int>(n-i,j) * y[d-i-j] * x[j+1];
       }
       //std::cout << std::endl;
     }
@@ -201,7 +201,7 @@ Function::TaylorSeries<X>::rec(smoothness_type d, const X& c)
   TaylorSeries<X> y(d);
   X mr = X(-1)/c;
   for(size_type i=0; i<=y.degree(); ++i) {
-    y[i]=(-Numeric::factorial<int>(i))*Numeric::pow(mr,i+1u);
+    y[i]=(-Numeric::fac<int>(i))*Numeric::pow(mr,i+1u);
   }
   return y;
 }
@@ -215,7 +215,7 @@ Function::TaylorSeries<X>::pow(smoothness_type d, const X& c, const uint& k)
   TaylorSeries<X> y(d);
   for(size_type i=0; i<=std::min(size_type(d),n); ++i) {
     int j=n-i;
-    y[i]=(Numeric::factorial<int>(n)/Numeric::factorial<int>(j))*Numeric::pow(c,j);
+    y[i]=(Numeric::fac<int>(n)/Numeric::fac<int>(j))*Numeric::pow(c,j);
   }
   return y;
 }
@@ -253,7 +253,7 @@ Function::TaylorSeries<X>::log(smoothness_type d, const X& c)
   y[0]=Numeric::log(c);
   X mr=(-1)/c;
   for(size_type i=1; i!=y.degree();++i) {
-    y[i]=(-Numeric::factorial<int>(i-1))*Numeric::pow(c,i);
+    y[i]=(-Numeric::fac<int>(i-1))*Numeric::pow(c,i);
   }
   return y;
 }
@@ -358,7 +358,7 @@ Function::TaylorSeries<Numeric::Rational>::rec(smoothness_type d, const Numeric:
   TaylorSeries<Numeric::Rational> y(d);
   Numeric::Rational mr = Numeric::Rational(-1)/c;
   for(size_type i=0; i<=y.degree(); ++i) {
-    y[i]=(-Numeric::factorial<int>(i))*Numeric::pow(mr,i+1u);
+    y[i]=(-Numeric::fac<int>(i))*Numeric::pow(mr,i+1u);
   }
   return y;
 }
@@ -370,7 +370,7 @@ Function::TaylorSeries<Numeric::Rational>::pow(smoothness_type d, const Numeric:
   TaylorSeries<Numeric::Rational> y(d);
   for(size_type i=0; i<=std::min(size_type(d),n); ++i) {
     int j=n-i;
-    y[i]=(Numeric::factorial<int>(n)/Numeric::factorial<int>(j))*Numeric::pow(c,j);
+    y[i]=(Numeric::fac<int>(n)/Numeric::fac<int>(j))*Numeric::pow(c,j);
   }
   return y;
 }

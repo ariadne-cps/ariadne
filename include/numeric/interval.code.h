@@ -35,6 +35,13 @@ Interval<R>::Interval(const std::string& str) {
 template<class R> void instantiate_interval();
 
 
+template<class R> 
+void 
+pi_(Interval<R>& r) 
+{
+  assert(false);
+}
+
 template<class R, class X> 
 void 
 sin_(Interval<R>& r, const Interval<X>& x) 
@@ -79,25 +86,6 @@ void atan_(Interval<R>& r, const Interval<X>& x)
 
 
 
-//Fixme: This should not be needed
-template<class R> Interval<R> sqrt(const Interval<R>& x) { 
-  Interval<R> r; sqrt_(r,x); return r; }
-template<class R> Interval<R> exp(const Interval<R>& x) { 
-  Interval<R> r; exp_(r,x); return r; }
-template<class R> Interval<R> log(const Interval<R>& x) { 
-  Interval<R> r; log_(r,x); return r; }
-template<class R> Interval<R> sin(const Interval<R>& x) { 
-  Interval<R> r; sin_(r,x); return r; }
-template<class R> Interval<R> cos(const Interval<R>& x) { 
-  Interval<R> r; cos_(r,x); return r; }
-template<class R> Interval<R> tan(const Interval<R>& x) { 
-  Interval<R> r; tan_(r,x); return r; }
-template<class R> Interval<R> asin(const Interval<R>& x) { 
-  Interval<R> r; asin_(r,x); return r; }
-template<class R> Interval<R> acos(const Interval<R>& x) { 
-  Interval<R> r; acos_(r,x); return r; }
-template<class R> Interval<R> atan(const Interval<R>& x) { 
-  Interval<R> r; atan_(r,x); return r; }
 
 /*
 
@@ -233,6 +221,7 @@ instantiate_interval()
   sqrt(*ivl);
   exp(*ivl);
   log(*ivl);
+  pi_(*ivl);
   sin_(*ivl,*civl);
   sin(*ivl);
   cos(*ivl);

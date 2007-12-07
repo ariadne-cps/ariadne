@@ -198,9 +198,9 @@ namespace Ariadne {
     inline
     size_type MultiIndex::number() const
     {
-      size_type result=Numeric::factorial(this->degree());
+      size_type result=Numeric::fac(this->degree());
       for(size_type k=0; k!=this->number_of_variables(); ++k) {
-        result/=Numeric::factorial((*this)[k]);
+        result/=Numeric::fac((*this)[k]);
       }
       return result;
     }
@@ -210,7 +210,7 @@ namespace Ariadne {
     {
       size_type result=1;
       for(size_type k=0; k!=this->number_of_variables(); ++k) {
-        result*=Numeric::factorial((*this)[k]);
+        result*=Numeric::fac((*this)[k]);
       }
       return result;
     }
@@ -220,11 +220,11 @@ namespace Ariadne {
     {
       size_type deg=this->degree()-1;
       size_type nvar=this->number_of_variables();
-      size_type result=Numeric::choose(deg+nvar,nvar);
+      size_type result=Numeric::bin(deg+nvar,nvar);
       for(size_type k=0; k!=this->number_of_variables()-1; ++k) {
         --nvar;
         deg-=(*this)[k];
-        result+=Numeric::choose(deg+nvar,nvar);
+        result+=Numeric::bin(deg+nvar,nvar);
       }
       return result;
     }
@@ -316,9 +316,9 @@ namespace Ariadne {
     size_type 
     number(const MultiIndex& i)
     {
-      size_type result=Numeric::factorial(i.degree());
+      size_type result=Numeric::fac(i.degree());
       for(size_type k=0; k!=i.number_of_variables(); ++k) {
-        result/=Numeric::factorial(i[k]);
+        result/=Numeric::fac(i[k]);
       }
       return result;
     }
@@ -329,7 +329,7 @@ namespace Ariadne {
     {
       size_type result=1;
       for(size_type k=0; k!=i.number_of_variables(); ++k) {
-        result*=Numeric::factorial(i[k]);
+        result*=Numeric::fac(i[k]);
       }
       return result;
     }
@@ -341,7 +341,7 @@ namespace Ariadne {
       assert(n.number_of_variables()==k.number_of_variables());
       size_type result=1;
       for(size_type i=0; i!=n.number_of_variables(); ++i) {
-        result*=Numeric::choose(n[i],k[i]);
+        result*=Numeric::bin(n[i],k[i]);
       }
       return result;
     }

@@ -162,9 +162,9 @@ namespace Ariadne {
     inline
     size_type MultiIndex::number() const
     {
-      size_type result=Numeric::factorial(this->degree());
+      size_type result=Numeric::fac(this->degree());
       for(size_type k=0; k!=this->number_of_variables(); ++k) {
-        result/=Numeric::factorial((*this)[k]);
+        result/=Numeric::fac((*this)[k]);
       }
       //std::cerr << "number(" << (*this) << ")=" << result << " " << std::flush;
       return result;
@@ -179,7 +179,7 @@ namespace Ariadne {
       for(size_type k=0; k!=this->number_of_variables()-1; ++k) {
         --nvar;
         deg-=(*this)[k];
-        result+=Numeric::choose(deg+nvar-1,nvar);
+        result+=Numeric::bin(deg+nvar-1,nvar);
       }
       //std::cerr << "position(" << (*this) << ")=" << result << " " << std::flush;
       return result;

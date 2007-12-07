@@ -1,8 +1,8 @@
 /***************************************************************************
  *            rational.code.h
  *
- *  Copyright  2006  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright  2006-7  Alberto Casagrande, Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -26,19 +26,25 @@
 
 #include "numeric/rational.h"
 
-namespace Ariadne { namespace Numeric {
+namespace Ariadne { 
+namespace Numeric {
 
-// Fixme: Don't use this
 double
-Numeric::Rational::get_d() const
+Rational::get_d() const 
 {
-  return mpq_get_d(_value); 
+  double r; 
+  set_(r,*this,round_approx); 
+  return r;
+}
+  
+
+Rational::Rational(const std::string& str) 
+{
+  mpq_init(_value); 
+  std::stringstream ss(str); 
+  ss>>*this; 
 }
 
-
-
-Numeric::Rational::Rational(const std::string& str) {
-  mpq_init(_value); std::stringstream ss(str); ss>>*this; }
 
 std::ostream& 
 operator<<(std::ostream& os, const Rational& q) 
@@ -98,4 +104,6 @@ operator>>(std::istream& is, Rational& q)
   return is;
 }
 
-}}
+
+} // namespace Numeric
+} // namespace Ariadne

@@ -30,6 +30,8 @@
 
 #include "config.h"
 
+#include "numeric/float.template.h"
+
 #ifdef ENABLE_FLOAT64
   #include "numeric/float64.h"
 #endif
@@ -37,5 +39,7 @@
 #ifdef ENABLE_FLOATMP
   #include "numeric/floatmp.h"
 #endif
+
+#include "numeric/arithmetic.h"
 
 #endif /* ARIADNE_NUMERIC_FLOAT_H */

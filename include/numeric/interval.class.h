@@ -249,46 +249,26 @@ namespace Ariadne {
       //@}
 #endif
     };
+
+    template<class X> std::string name();
+
     
-
-
-  /*
-    template<>
-    class Interval<Rational>
-      : public Value< Interval<Rational> >
-    {
-      typedef Rational R; 
+    // A reference to an interval. 
+    template<class R>
+    class IntervalReference {
      public:
-      R _lower; R _upper;
-     public:
-      Interval();
-      Interval(const R& x);
-      Interval(const R& l, const R& u);
-      Interval(const Interval<R>& ivl);
-      Interval<R>& operator=(const R& x);
-      Interval<R>& operator=(const Interval<R>& ivl);
-
-      template<class E> Interval(const Expression<E>& e);
-      template<class E> Interval<R>& operator=(const Expression<E>& e);
-
-      template<class RX> Interval(const RX& x);
-      template<class RL,class RU> Interval(const RL& l, const RU& u);
-      template<class RX> Interval(const Interval<RX>& ivl);
-      template<class RX> Interval<R>& operator=(const RX& x);
-      template<class RX> Interval<R>& operator=(const Interval<RX>& ivl);
-
-      const R& lower() const;
-      const R& upper() const;
+      IntervalReference(R& l, R& u);
+      IntervalReference(Interval<R>& ivl);
+      void operator=(const Interval<R>& ivl);
+      operator Interval<R> () const;
+      R lower() const;
+      R upper() const;
       R midpoint() const;
       R radius() const;
-      R width() const;
-
-      bool empty() const;
-      bool singleton() const;
-      template<class RX> bool encloses(const RX& x) const;
-      template<class RX> bool refines(const Interval<RX>& ivl) const;
+     private:
+      R* _lower; R* _upper;
     };
-  */
+    
 
 
   } 

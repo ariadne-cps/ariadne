@@ -20,6 +20,8 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+
+#include "numeric/arithmetic.h"
  
 namespace Ariadne {
   
@@ -179,14 +181,14 @@ template<class X>
 X
 Geometry::centre(const Interval<X>& ivl) 
 {
-  return Numeric::div_approx(Numeric::add_approx(ivl.lower(),ivl.upper()),X(2));
+  return Numeric::med_approx(ivl.lower(),ivl.upper());
 }
 
 template<class X>
 X
 Geometry::radius(const Interval<X>& ivl) 
 {
-  return Numeric::div_up(Numeric::sub_up(ivl.upper(),ivl.lower()),X(2)); 
+  return Numeric::rad_up(ivl.lower(),ivl.upper());
 }
 
 template<class X>

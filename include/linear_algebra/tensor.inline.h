@@ -225,7 +225,7 @@ LinearAlgebra::Tensor<R>::compute_strides(const array<size_type>& sz)
     
 template<class R> inline
 LinearAlgebra::SymmetricTensor<R>::SymmetricTensor(size_type n, size_type deg)
-  : _arg_size(n), _degree(deg), _elements(Numeric::choose(n+deg-1,deg))
+  : _arg_size(n), _degree(deg), _elements(Numeric::bin(n+deg-1,deg))
 { 
   //std::cerr << "SymmetricTensor(size_type m, size_type n, size_type deg)" << std::endl;
 }
@@ -233,7 +233,7 @@ LinearAlgebra::SymmetricTensor<R>::SymmetricTensor(size_type n, size_type deg)
 
 template<class R> inline
 LinearAlgebra::SymmetricTensor<R>::SymmetricTensor(size_type n, size_type deg, const R* ptr) 
-  : _arg_size(n), _degree(deg), _elements(Numeric::choose(n+deg-1,deg))
+  : _arg_size(n), _degree(deg), _elements(Numeric::bin(n+deg-1,deg))
 {
   _elements.fill(ptr); 
 }
@@ -306,7 +306,7 @@ template<class R> inline
 size_type
 LinearAlgebra::SymmetricTensor<R>::number_of_independent_elements(const size_type& n, const size_type& d) 
 {
-  return Numeric::choose(n+d-1,d); 
+  return Numeric::bin(n+d-1,d); 
 }
  
         
@@ -531,7 +531,7 @@ template<class R> inline
 size_type
 LinearAlgebra::DerivativeTensor<R>::number_of_independent_elements(const size_type& nr, const size_type& na, const size_type& d)
 { 
-  return nr*Numeric::choose(na+d-1,d);
+  return nr*Numeric::bin(na+d-1,d);
 }
 
 
@@ -544,7 +544,7 @@ LinearAlgebra::DerivativeTensor<R>::position(const size_type& i, const multi_ind
   if(i>=this->_res_size) { throw InvalidIndex(__PRETTY_FUNCTION__); }
   if(j.number_of_variables()!=this->_arg_size) { throw InvalidIndex(__PRETTY_FUNCTION__); }
   if(j.degree()!=this->degree()) { throw InvalidIndex(__PRETTY_FUNCTION__); }
-  return i*choose(this->_arg_size+this->_degree-1,this->_degree)+j.position();
+  return i*bin(this->_arg_size+this->_degree-1,this->_degree)+j.position();
 }
 
 

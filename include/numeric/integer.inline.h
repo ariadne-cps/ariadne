@@ -42,75 +42,43 @@
 namespace Ariadne {
 namespace Numeric {
 	
-// Functions on built-in types
-//inline void add_(uint& r, const uint& x, const uint& y) { r=x+y; } 
-//inline void mul_(uint& r, const uint& x, const uint& y) { r=x*y; } 
-	
-// These functions are not provided by GMP
-inline void mpz_min_(mpz_ptr rop, mpz_srcptr op1, mpz_srcptr op2) { if(mpz_cmp(op1,op2)<=0) { mpz_set(rop,op1); } else { mpz_set(rop,op2); } }
-inline void mpz_max_(mpz_ptr rop, mpz_srcptr op1, mpz_srcptr op2) { if(mpz_cmp(op1,op2)>=0) { mpz_set(rop,op1); } else { mpz_set(rop,op2); } }
-inline void mpz_addsi(mpz_ptr rop, mpz_srcptr op1, long int op2) { if(op2>=0) { mpz_add_ui(rop,op1,op2); } else { mpz_sub_ui(rop,op1,(uint)(-op2)); } }
-inline void mpz_subsi(mpz_ptr rop, mpz_srcptr op1, long int op2) { if(op2>=0) { mpz_sub_ui(rop,op1,op2); } else { mpz_add_ui(rop,op1,(uint)(-op2)); } }
-inline void mpz_si_sub(mpz_ptr rop, long int op1, mpz_srcptr op2) { if(op1>=0) { mpz_ui_sub(rop,op1,op2); } else { mpz_add_ui(rop,op2,-op1); mpz_neg(rop,rop); } }
 
 // Class methods
-inline Integer::~Integer() { mpz_clear(this->_value); }
-inline Integer::Integer() :  _value() { mpz_init_set_si(this->_value,0); }
-inline Integer::Integer(const int& n) : _value() { mpz_init_set_si(this->_value,n); }
-inline Integer::Integer(const unsigned int& n) : _value() { mpz_init_set_ui(this->_value,n); }
-inline Integer::Integer(const mpz_class& z) : _value() { mpz_init_set(this->_value,z.get_mpz_t()); }
-inline Integer::Integer(const Integer& z) :  _value() { mpz_init_set(this->_value,z._value); }
-inline Integer& Integer::operator=(const int& n) { mpz_set_si(this->_value,n); return *this; }
-inline Integer& Integer::operator=(const unsigned int& n) { mpz_set_ui(this->_value,n); return *this; }
-inline Integer& Integer::operator=(const mpz_class& z) { mpz_set(this->_value,z.get_mpz_t()); return *this; }
-inline Integer& Integer::operator=(const Integer& z) { mpz_set(this->_value,z._value); return *this; }
+inline Integer::~Integer() { 
+  mpz_clear(this->_value); }
+inline Integer::Integer() :  _value() {
+  mpz_init_set_si(this->_value,0); }
+inline Integer::Integer(const int& n) : _value() {
+  mpz_init_set_si(this->_value,n); }
+inline Integer::Integer(const unsigned int& n) : _value() {
+  mpz_init_set_ui(this->_value,n); }
+inline Integer::Integer(const mpz_class& z) : _value() {
+  mpz_init_set(this->_value,z.get_mpz_t()); }
+inline Integer::Integer(const Integer& z) :  _value() {
+  mpz_init_set(this->_value,z._value); }
+inline Integer& Integer::operator=(const int& n) {
+  mpz_set_si(this->_value,n); return *this; }
+inline Integer& Integer::operator=(const unsigned int& n) {
+  mpz_set_ui(this->_value,n); return *this; }
+inline Integer& Integer::operator=(const mpz_class& z) {
+  mpz_set(this->_value,z.get_mpz_t()); return *this; }
+inline Integer& Integer::operator=(const Integer& z) {
+  mpz_set(this->_value,z._value); return *this; }
 
-template<class E> inline Integer::Integer(const Expression<E>& e) :  _value() { mpz_init(this->_value); e.assign_to(*this); }
-template<class E> inline Integer& Integer::operator=(const Expression<E>& e) { e.assign_to(*this); return *this; }
+template<class E> inline Integer::Integer(const Expression<E>& e)
+  :  _value() { mpz_init(this->_value); e.assign_to(*this); }
+template<class E> inline Integer& Integer::operator=(const Expression<E>& e) {
+  e.assign_to(*this); return *this; }
 
-// Conversion to built-in types
-inline void conv(int& r, const Integer& x) { r=mpz_get_si(x._value); }
-inline void conv(long& r, const Integer& x) { r=mpz_get_si(x._value); }
-inline Integer::operator int() const { int r=mpz_get_si(this->_value); assert(mpz_cmp_si(_value,r)==0); return r; }
+inline Integer::operator int() const { 
+  ARIADNE_ASSERT(mpz_fits_sint_p(this->_value));
+  return mpz_get_si(this->_value); }
 
-// Minimum and max_imum
-inline void min_(Integer& r, const Integer& x1, const Integer& x2) { mpz_min_(r._value,x1._value,x2._value); }
-inline void max_(Integer& r, const Integer& x1, const Integer& x2) { mpz_max_(r._value,x1._value,x2._value); }
-  
-// Increment and decrement 
-inline void incr(Integer& r, const Integer& x) { mpz_addsi(r._value,x._value,+1); }
-inline void decr(Integer& r, const Integer& x) { mpz_addsi(r._value,x._value,-1); }
 
-// Unary arithmetic operators
-inline void pos_(Integer& r, const Integer& x) { mpz_set(r._value,x._value); }
-inline void neg_(Integer& r, const Integer& x) { mpz_neg(r._value,x._value); }
-inline void abs_(Integer& r, const Integer& x) { mpz_abs(r._value,x._value); }
 
-// Binary arithmetic 
-inline void add_(Integer& r, const Integer& x1, const Integer& x2) { mpz_add(r._value,x1._value,x2._value); }
-inline void sub_(Integer& r, const Integer& x1, const Integer& x2) { mpz_sub(r._value,x1._value,x2._value); }
-inline void mul_(Integer& r, const Integer& x1, const Integer& x2) { mpz_mul(r._value,x1._value,x2._value); }
 
-// Mixed binary arithmetic
-inline void add_(Integer& r, const Integer& x1, const int& x2) { mpz_addsi(r._value,x1._value,x2); }
-inline void sub_(Integer& r, const Integer& x1, const int& x2) { mpz_subsi(r._value,x1._value,x2); }
-inline void mul_(Integer& r, const Integer& x1, const int& x2) { mpz_mul_si(r._value,x1._value,x2); }
-inline void add_(Integer& r, const int& x1, const Integer& x2) { mpz_addsi(r._value,x2._value,x1); }
-inline void sub_(Integer& r, const int& x1, const Integer& x2) { mpz_si_sub(r._value,x1,x2._value); }
-inline void mul_(Integer& r, const int& x1, const Integer& x2) { mpz_mul_si(r._value,x2._value,x1); }
 
-// Arithmetic pow_er functions
-inline void pow_(Integer& r, const Integer& x1, const uint& x2) { mpz_pow_ui(r._value,x1._value,x2); }
-
-// Integer operations
-inline void quot_(Integer& r, const Integer& x1, const Integer& x2) { mpz_tdiv_q(r._value,x1._value,x2._value); }
-inline void rem_(Integer& r, const Integer& x1, const Integer& x2) { mpz_tdiv_r(r._value,x1._value,x2._value); }
-inline void lcm_(Integer& r, const Integer& x1, const Integer& x2) { mpz_lcm(r._value,x1._value,x2._value); }
-inline void gcd_(Integer& r, const Integer& x1, const Integer& x2) { mpz_gcd(r._value,x1._value,x2._value); }
-inline void fac_(Integer& r, unsigned long int x1) { mpz_fac_ui(r._value,x1); }
-inline void bin_(Integer& r, const Integer& x1, unsigned long int x2) { mpz_bin_ui(r._value,x1._value,x2); }
-inline void bin_(Integer& r, unsigned long int x1, unsigned long int x2) { mpz_bin_uiui(r._value,x1,x2); }
-
+// Comparison operators
 inline int cmp(const Integer& x, const Integer& y) {
   return mpz_cmp(x._value,y._value); }
 template<class E> inline int cmp(const Integer& z, const Expression<E>& e) {
@@ -118,7 +86,6 @@ template<class E> inline int cmp(const Integer& z, const Expression<E>& e) {
 template<class E> inline int cmp(const Expression<E>& e, const Integer& z) {
   return cmp(Integer(e),z); }
 
-// Comparison operators
 ARIADNE_DIRECT_COMPARISON(Integer,Integer,mpz_cmp(x1._value,x2._value));
 ARIADNE_DIRECT_COMPARISON(Integer,int,mpz_cmp_si(x1._value,x2));
 ARIADNE_REVERSE_COMPARISON(int,Integer,mpz_cmp_si(x2._value,x1));
@@ -131,114 +98,211 @@ ARIADNE_REVERSE_COMPARISON(ulong,Integer,mpz_cmp_ui(x2._value,x1));
 ARIADNE_DIRECT_COMPARISON(Integer,double,mpz_cmp_d(x1._value,x2));
 ARIADNE_REVERSE_COMPARISON(double,Integer,mpz_cmp_d(x2._value,x1));
 
-template<class E> 
+template<class E>
 inline bool operator==(const Integer& x, const Expression<E>& y) {
-  return x==Integer(y); }
+  return cmp(x,y)==0; }
+template<class E>
+inline bool operator!=(const Integer& x, const Expression<E>& y) {
+  return cmp(x,y)!=0; }
+template<class E>
+inline bool operator>=(const Integer& x, const Expression<E>& y) {
+  return cmp(x,y)>=0; }
+template<class E>
+inline bool operator<=(const Integer& x, const Expression<E>& y) {
+  return cmp(x,y)<=0; }
+template<class E>
+inline bool operator> (const Integer& x, const Expression<E>& y) {
+  return cmp(x,y)> 0; }
+template<class E>
+inline bool operator< (const Integer& x, const Expression<E>& y) {
+  return cmp(x,y)< 0; }
 
-template<class E> 
+template<class E>
 inline bool operator==(const Expression<E>& x, const Integer& y) {
-  return Integer(x)==y; }
+  return cmp(x,y)==0; }
+template<class E>
+inline bool operator!=(const Expression<E>& x, const Integer& y) {
+  return cmp(x,y)!=0; }
+template<class E>
+inline bool operator>=(const Expression<E>& x, const Integer& y) {
+  return cmp(x,y)>=0; }
+template<class E>
+inline bool operator<=(const Expression<E>& x, const Integer& y) {
+  return cmp(x,y)<=0; }
+template<class E>
+inline bool operator> (const Expression<E>& x, const Integer& y) {
+  return cmp(x,y)> 0; }
+template<class E>
+inline bool operator< (const Expression<E>& x, const Integer& y) {
+  return cmp(x,y)< 0; }
 
-inline Integer operator%(const Integer& n1, const Integer& n2) { Integer r; rem_(r,n1,n2); return r; }
-inline Integer& operator++(Integer& n) { add_(n,n,1); return n; }
-inline Integer& operator--(Integer& n) { sub_(n,n,1); return n; }
+
+
+// Conversion to built-in types
+inline void set_(int& r, const Integer& x) { 
+  ARIADNE_ASSERT(mpz_fits_sint_p(x._value));
+  r=mpz_get_si(x._value); }
+
+// Conversion from built-in types
+inline void set_(Integer& r, const int& x) { 
+  mpz_set_si(r._value,x); }
+inline void set_(Integer& r, const uint& x) { 
+  mpz_set_ui(r._value,x); }
+
+
+// Increment and decrement 
+inline void incr_(Integer& r, const Integer& x) { 
+  mpz_add_ui(r._value,x._value,1u); }
+inline void decr_(Integer& r, const Integer& x) { 
+  mpz_sub_ui(r._value,x._value,1u); }
+
+
+// Minimum and maximum
+inline void min_(Integer& r, const Integer& x1, const Integer& x2) { 
+  r=std::min(x1,x2); }
+inline void max_(Integer& r, const Integer& x1, const Integer& x2) { 
+  r=std::max(x1,x2); }
+  
+// Unary arithmetic operators
+inline void pos_(Integer& r, const Integer& x) { 
+  mpz_set(r._value,x._value); }
+inline void neg_(Integer& r, const Integer& x) { 
+  mpz_neg(r._value,x._value); }
+inline void abs_(Integer& r, const Integer& x) { 
+  mpz_abs(r._value,x._value); }
+
+// Binary arithmetic 
+inline void add_(Integer& r, const Integer& x1, const Integer& x2) {
+  mpz_add(r._value,x1._value,x2._value); }
+inline void sub_(Integer& r, const Integer& x1, const Integer& x2) { 
+  mpz_sub(r._value,x1._value,x2._value); }
+inline void mul_(Integer& r, const Integer& x1, const Integer& x2) { 
+  mpz_mul(r._value,x1._value,x2._value); }
+
+// Mixed binary arithmetic
+inline void add_(Integer& r, const Integer& x1, const uint& x2) { 
+  mpz_add_ui(r._value,x1._value,x2); }
+inline void sub_(Integer& r, const Integer& x1, const uint& x2) { 
+  mpz_sub_ui(r._value,x1._value,x2); } 
+inline void mul_(Integer& r, const Integer& x1, const uint& x2) { 
+  mpz_mul_ui(r._value,x1._value,x2); }
+
+inline void add_(Integer& r, const uint& x1, const Integer& x2) { 
+  mpz_add_ui(r._value,x2._value,x1); }
+inline void sub_(Integer& r, const uint& x1, const Integer& x2) { 
+  mpz_ui_sub(r._value,x1,x2._value); }
+inline void mul_(Integer& r, const uint& x1, const Integer& x2) { 
+  mpz_mul_ui(r._value,x2._value,x1); }
+
+inline void add_(Integer& r, const Integer& x1, const int& x2) { 
+  if(x2>=0) { mpz_add_ui(r._value,x1._value,x2); } 
+  else { mpz_sub_ui(r._value,x1._value,-x2); } }
+inline void sub_(Integer& r, const Integer& x1, const int& x2) { 
+  if(x2>=0) { mpz_sub_ui(r._value,x1._value,x2); } 
+  else { mpz_add_ui(r._value,x1._value,-x2); } }
+inline void mul_(Integer& r, const Integer& x1, const int& x2) { 
+  mpz_mul_si(r._value,x1._value,x2); }
+
+inline void add_(Integer& r, const int& x1, const Integer& x2) { 
+  if(x1>=0) { mpz_add_ui(r._value,x2._value,x1); }
+  else { mpz_sub_ui(r._value,x2._value,-x1); } }
+inline void sub_(Integer& r, const int& x1, const Integer& x2) { 
+  if(x1>=0) { mpz_ui_sub(r._value,x1,x2._value); }
+  else { mpz_ui_sub(r._value,-x1,x2._value); } }
+inline void mul_(Integer& r, const int& x1, const Integer& x2) { 
+  mpz_mul_si(r._value,x2._value,x1); }
+
+// Arithmetic power functions
+inline void pow_(Integer& r, const Integer& x1, const uint& x2) { 
+  mpz_pow_ui(r._value,x1._value,x2); }
+
+// Integer operations
+inline void quot_(Integer& r, const Integer& x1, const Integer& x2) { 
+  mpz_tdiv_q(r._value,x1._value,x2._value); }
+inline void rem_(Integer& r, const Integer& x1, const Integer& x2) { 
+  mpz_tdiv_r(r._value,x1._value,x2._value); }
+
+inline void lcm_(Integer& r, const Integer& x1, const Integer& x2) { 
+  mpz_lcm(r._value,x1._value,x2._value); }
+inline void gcd_(Integer& r, const Integer& x1, const Integer& x2) { 
+  mpz_gcd(r._value,x1._value,x2._value); }
+
+inline void fac_(Integer& r, Integer& x) { 
+  ARIADNE_ASSERT(mpz_fits_ulong_p(x._value)); 
+  mpz_fac_ui(r._value,mpz_get_ui(x._value)); } 
+inline void fac_(Integer& r, unsigned long int x1) { 
+  mpz_fac_ui(r._value,x1); }
+
+inline void bin_(Integer& r, const Integer& x1, const Integer& x2) { 
+  ARIADNE_ASSERT(mpz_fits_ulong_p(x2._value)); 
+  mpz_bin_ui(r._value,x1._value,mpz_get_ui(x2._value)); }
+inline void bin_(Integer& r, const Integer& x1, unsigned long int x2) { 
+  mpz_bin_ui(r._value,x1._value,x2); }
+inline void bin_(Integer& r, unsigned long int x1, unsigned long int x2) { 
+  mpz_bin_uiui(r._value,x1,x2); }
+
+
+
+
 
 static uint factorials[13]={ 
-	  1, 1, 2, 6, 
-	  24, 120, 720, 5040, 
-	  40320, 362880, 3628800, 39916800, 
-	  479001600 
+  1, 1, 2, 6, 24, 120, 720, 5040, 
+  40320, 362880, 3628800, 39916800, 479001600 
 };
 
+
 template<class R, class A> inline
-void factorial_(R& r, const A& n) {
-  if(n<=1) { r=1; return; }
-  if(n<=12) { int m(n); r=factorials[m]; return; }
-  A i=n; r=479001600;
-  while(i!=12) { r*=i; --i; }	
-}
+void exp2_(R& r, const A& n) {
+  r = 1<<n; }
+
+template<class R, class N> 
+void fac_(R& r, const N& n);
+
+template<class R, class N1, class N2> 
+void bin_(R& r, const N1& n, const N2& k); 
+
+template<class R, class N1, class N2>  
+void gcd_(R& r, const N1& a, const N2& b);
+
+template<class R, class N1, class N2>  
+void lcm_(R& r, const N1& a, const N2& b);
+
+template<class R, class N> 
+void log2_floor_(R& r, const N& n);
+
+template<class R, class N> 
+  void log2_ceil_(R& r, const N& n);
 
 
-template<class R, class A1, class A2> inline 
-void choose_(R& r, const A1& n, const A2& k) 
-{
-  //std::cerr << "choose(" << n << "," << k << ")=" << std::flush;
-  if(k==0 || k==n) { r=1; return; }
-  if(k<0 || k>n) { r=0; return; }
-  A2 m=(n-k < k) ? k : static_cast<A2>(n-k);
-  R result=1;
-  for(A1 i=n; i!=n-m; --i) { result*=i; }
-  for(A1 i=m; i!=1; --i) { result/=i; }
-  //std::cerr << result << std::endl;
-  r=result;
-}
+inline uint fac(uint n) { 
+  ARIADNE_ASSERT(n<13);
+  return factorials[n]; }
 
-   
-   
+inline uint bin(uint n, uint k) { 
+  if(k>n) { return 0; }
+  if(n<13) { return fac(n)/(fac(k)*fac(uint(n-k))); } 
+  else { uint r; bin_(r,n,k); return r; } }
 
-template<class R, class A1, class A2> inline 
-void gcd_(R& r, const A1& a, const A2& b) {
-  R aa=a; R bb=b; R cc=aa%bb;
-  while(cc!=0) { aa=bb; bb=cc; cc=aa%bb; }
-  return bb;
-}
+inline uint exp2(const uint& n) {
+  ARIADNE_ASSERT(n<32);
+  uint r; exp2_(r,n); return r; }
+inline uint log2_floor(const uint& n) {
+  uint r; log2_floor_(r,n); return r; }
+inline uint log2_ceil(const uint& n) {
+  uint r; log2_ceil_(r,n); return r; }
 
-template<class R, class A1, class A2> inline 
-void lcm_(R& r, const A1& a, const A2& b) {
-  R res; quot(res,a*b,gcd(a,b)); return res;
-}
+template<class R, class N> 
+inline R fac(const N& n) {
+  N r; fac_(r,n); return r; }
+template<class R, class N, class K> 
+inline R bin(const N& n, const K& k) {
+  N r; bin_(r,n,k); return r; }
 
 
-template<class N> inline
-N exp2(const N& n) {
-  return 1<<n;
-}
-
-
-template<class N> inline
-N log2_floor(const N& n) {
-  if(n<1) { throw std::invalid_argument(__PRETTY_FUNCTION__); }
-  N r=0;
-  N y=n;
-  while(y>=n) {
-    y/=2;
-    r+=1;
-  }
-  return r;
-}
-
-template<class N> inline
-N log2_ceil(const N& n) {
-  if(n<1) { throw std::invalid_argument(__PRETTY_FUNCTION__); }
-  N r=0;
-  N y=n;
-  while(y>1) {
-    y/=2;
-    r+=1;
-  }
-  return r;
-}
-
-
-
-
-inline uint factorial(uint n) { 
-	ARIADNE_ASSERT(n<13) 
-	return factorials[n];
-}
-
-inline uint choose(uint n, uint k) { 
-	ARIADNE_ASSERT(n<13);
-	ARIADNE_ASSERT(k<=n);
-	return factorial(n)/(factorial(k)*factorial(uint(n-k)));
-}
-
-inline int choose(int n, int k) { return choose(uint(n),uint(k)); }
-
-template<class N> inline N factorial(uint n) {
-  N r; factorial_(r,n); return r; }
-template<class N> inline N choose(uint n, uint k) {
-  N r; choose_(r,n,k); return r; }
+inline Integer& operator++(Integer& r) {
+  incr_(r,r); return r; }
+inline Integer& operator--(Integer& r) {
+  decr_(r,r); return r; }
 
 
 }}

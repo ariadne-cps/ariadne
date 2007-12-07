@@ -114,9 +114,19 @@
   inline R operator< (const X& x, const Y& y) { return cmp(x,y)< 0; } \
   inline R operator> (const X& x, const Y& y) { return cmp(x,y)> 0; } \
 
-#define ARIADNE_MIXED_COMPARISON(R,X,Y) \
-  ARIADNE_COMPARISON(R,X,Y) \
-  ARIADNE_COMPARISON(R,Y,X) \
+#define ARIADNE_MIXED_FUNCTION_COMPARISON(R,X,Y) \
+  inline R operator==(const X& x, const Y& y) { return cmp(x,y)==0; } \
+  inline R operator!=(const X& x, const Y& y) { return cmp(x,y)!=0; } \
+  inline R operator<=(const X& x, const Y& y) { return cmp(x,y)<=0; } \
+  inline R operator>=(const X& x, const Y& y) { return cmp(x,y)>=0; } \
+  inline R operator< (const X& x, const Y& y) { return cmp(x,y)< 0; } \
+  inline R operator> (const X& x, const Y& y) { return cmp(x,y)> 0; } \
+  inline R operator==(const Y& y, const X& x) { return cmp(x,y)==0; } \
+  inline R operator!=(const Y& y, const X& x) { return cmp(x,y)!=0; } \
+  inline R operator<=(const Y& y, const X& x) { return cmp(x,y)>=0; } \
+  inline R operator>=(const Y& y, const X& x) { return cmp(x,y)<=0; } \
+  inline R operator< (const Y& y, const X& x) { return cmp(x,y)> 0; } \
+  inline R operator> (const Y& y, const X& x) { return cmp(x,y)< 0; } \
 
 namespace Ariadne {
   namespace Numeric {
@@ -138,8 +148,8 @@ namespace Ariadne {
     ARIADNE_BINARY_FUNCTION(Mod,mod,mod,"mod");
     ARIADNE_BINARY_FUNCTION(Rem,rem,rem,"rem");
   
-    ARIADNE_UNARY_FUNCTION(Factorial,factorial,factorial_,"factorial");
-    ARIADNE_BINARY_FUNCTION(Choose,choose,choose_,"choose");
+    ARIADNE_UNARY_FUNCTION(Factorial,fac,fac_,"fac");
+    ARIADNE_BINARY_FUNCTION(Choose,bin,bin_,"bin");
     ARIADNE_BINARY_FUNCTION(LCM,lcm,lcm_,"lcm");
     ARIADNE_BINARY_FUNCTION(GCD,gcd,gcd_,"gcd");
 
@@ -198,6 +208,10 @@ namespace Ariadne {
       X r; med_(r,x,y,Rnd()); return r; }
 
     template<class Rnd, class X>
+    X rad(const X& x, const X& y) {
+      X r; rad_(r,x,y,Rnd()); return r; }
+
+    template<class Rnd, class X>
     X exp(const X& x) {
       X r; exp_(r,x,Rnd()); return r; }
 
@@ -205,133 +219,7 @@ namespace Ariadne {
       R r; set_(r,x,round_approx); return r; }
 
 
-    // Explicit rounding operators
 
-    template<class T> int floor(const Float<T>& x) { 
-      int r; floor_(r,x); return r; }
-    template<class R, class A> R floor(const A& x) { 
-      R r; floor_(r,x); return r; }
-
-    template<class T> int ceil(const Float<T>& x) { 
-      int r; ceil_(r,x); return r; }
-    template<class R, class A> R ceil(const A& x) { 
-      R r; ceil_(r,x); return r; }
-
-    template<class T> inline Float<T> next_up(const Float<T>& x) { 
-      Float<T> r; next_(r,x,round_up); return r; }
-    template<class T> inline Float<T> next_down(const Float<T>& x) { 
-      Float<T> r; next_(r,x,round_down); return r; }
-
-    template<class T> inline Float<T> add_up(const Float<T>& x, const Float<T>& y) { 
-      Float<T> r; add_(r,x,y,round_up); return r; }
-    template<class T> inline Float<T> add_down(const Float<T>& x, const Float<T>& y) { 
-      Float<T> r; add_(r,x,y,round_down); return r; }
-    template<class T> inline Float<T> add_approx(const Float<T>& x, const Float<T>& y) { 
-      Float<T> r; add_(r,x,y,round_approx); return r; }
-  
-    template<class T> inline Float<T> sub_up(const Float<T>& x, const Float<T>& y) { 
-      Float<T> r; sub_(r,x,y,round_up); return r; }
-    template<class T> inline Float<T> sub_down(const Float<T>& x, const Float<T>& y) { 
-      Float<T> r; sub_(r,x,y,round_down); return r; }
-    template<class T> inline Float<T> sub_approx(const Float<T>& x, const Float<T>& y) { 
-      Float<T> r; sub_(r,x,y,round_approx); return r; }
-  
-    template<class T> inline Float<T> mul_up(const Float<T>& x, const Float<T>& y) { 
-      Float<T> r; mul_(r,x,y,round_up); return r; }
-    template<class T> inline Float<T> mul_down(const Float<T>& x, const Float<T>& y) { 
-      Float<T> r; mul_(r,x,y,round_down); return r; }
-    template<class T> inline Float<T> mul_approx(const Float<T>& x, const Float<T>& y) { 
-      Float<T> r; mul_(r,x,y,round_approx); return r; }
-  
-    template<class T> inline Float<T> mul_up(const Float<T>& x, const int& y) { 
-      Float<T> r; mul_(r,x,y,round_up); return r; }
-    template<class T> inline Float<T> mul_down(const Float<T>& x, const int& y) { 
-      Float<T> r; mul_(r,x,y,round_down); return r; }
-    template<class T> inline Float<T> mul_approx(const Float<T>& x, const int& y) { 
-      Float<T> r; mul_(r,x,y,round_approx); return r; }
-  
-    template<class T> inline Float<T> mul_approx(const Float<T>& x, const double& y) { 
-      Float<T> r; mul_(r,x,y,round_approx); return r; }
-    template<class T> inline Float<T> mul_approx(const double& x, const Float<T>& y) { 
-      Float<T> r; mul_(r,x,y,round_approx); return r; }
-  
-
-    template<class T> inline Float<T> div_up(const Float<T>& x, const Float<T>& y) { 
-      Float<T> r; div_(r,x,y,round_up); return r; }
-    template<class T> inline Float<T> div_down(const Float<T>& x, const Float<T>& y) { 
-      Float<T> r; div_(r,x,y,round_down); return r; }
-    template<class T> inline Float<T> div_approx(const Float<T>& x, const Float<T>& y) { 
-      Float<T> r; div_(r,x,y,round_approx); return r; }
-  
-    template<class T> inline Float<T> div_up(const Float<T>& x, const int& y) { 
-      Float<T> r; div_(r,x,y,round_up); return r; }
-    template<class T> inline Float<T> div_down(const Float<T>& x, const int& y) { 
-      Float<T> r; div_(r,x,y,round_down); return r; }
-    template<class T> inline Float<T> div_approx(const Float<T>& x, const int& y) { 
-      Float<T> r; div_(r,x,y,round_approx); return r; }
-  
-    template<class T> inline Float<T> med_approx(const Float<T>& x, const Float<T>& y) { 
-      Float<T> r; med_(r,x,y,round_approx); return r; }
-
-    template<class T, class N> inline Float<T> pow_up(const Float<T>& x, const N& n) { 
-      Float<T> r; pow_(r,x,n,round_up); return r; }
-    template<class T, class N> inline Float<T> pow_down(const Float<T>& x, const N& n) { 
-      Float<T> r; pow_(r,x,n,round_down); return r; }
-    template<class T, class N> inline Float<T> pow_approx(const Float<T>& x, const N& n) { 
-      Float<T> r; pow_(r,x,n,round_approx); return r; }
-
-
-
-
-    template<class T> inline Float<T> sqrt_up(const Float<T>& x) { 
-      Float<T> r; sqrt_(r,x,round_up); return r; }
-    template<class T> inline Float<T> sqrt_down(const Float<T>& x) { 
-      Float<T> r; sqrt_(r,x,round_down); return r; }
-    template<class T> inline Float<T> sqrt_approx(const Float<T>& x) { 
-      Float<T> r; sqrt_(r,x,round_approx); return r; }
-  
-    template<class T> inline Float<T> exp_up(const Float<T>& x) { 
-      Float<T> r; exp_(r,x,round_up); return r; }
-    template<class T> inline Float<T> exp_down(const Float<T>& x) { 
-      Float<T> r; exp_(r,x,round_down); return r; }
-    template<class T> inline Float<T> exp_approx(const Float<T>& x) { 
-      Float<T> r; exp_(r,x,round_approx); return r; }
-  
-    template<class T> inline Float<T> log_up(const Float<T>& x) { 
-      Float<T> r; log_(r,x,round_up); return r; }
-    template<class T> inline Float<T> log_down(const Float<T>& x) { 
-      Float<T> r; log_(r,x,round_down); return r; }
-    template<class T> inline Float<T> log_approx(const Float<T>& x) { 
-      Float<T> r; log_(r,x,round_approx); return r; }
-  
-
-    // Inferior-style rounded operators
-  /*
-    template<class X, class Rnd>
-    X add(const X& x, const X& y, Rnd) {
-      X r; add_(r,x,y,Rnd()); return r; }
-
-    template<class X, class Rnd>
-    X sub(const X& x, const X& y, Rnd) {
-      X r; sub_(r,x,y,Rnd()); return r; }
-
-    template<class X, class Rnd>
-    X mul(const X& x, const X& y, Rnd) {
-      X r; mul_(r,x,y,Rnd()); return r; }
-
-    template<class X, class Rnd>
-    X mul(const X& x, const int& y, Rnd) {
-      X r; mul_(r,x,y,Rnd()); return r; }
-
-    template<class X, class Rnd>
-    X div(const X& x, const int& y, Rnd) {
-      X r; div_(r,x,y,Rnd()); return r; }
-
-    template<class X, class Rnd>
-    X med(const X& x, const X& y, Rnd) {
-      X r; med_(r,x,y,Rnd()); return r; }
-
-  */
 
   }   
 }

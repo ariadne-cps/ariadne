@@ -202,7 +202,7 @@ Function::mul(const TaylorSeries<X>& x, const TaylorSeries<X>& y)
   TaylorSeries<X> result(std::min(x.degree(),y.degree()));
   for(size_type n=0; n<=result.degree(); ++n) {
     for(size_type i=0; i<=n; ++i) {
-      result[n] += Numeric::choose<int>(n,i)*x[i]*y[n-i];
+      result[n] += Numeric::bin<int>(n,i)*x[i]*y[n-i];
     }
   }
   return result;

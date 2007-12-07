@@ -279,7 +279,7 @@ Function::inv(const TaylorVariable<X>& x)
   TaylorSeries<X> y(x.degree());
   X mr = X(-1)/x.value();
   for(size_type i=0; i<=y.degree(); ++i) {
-    y[i]=(-Numeric::factorial<int>(i))*pow(mr,i+1);
+    y[i]=(-Numeric::fac<int>(i))*pow(mr,i+1);
   }
   //std::cerr << y << std::endl;
   return compose(y,x);

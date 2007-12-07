@@ -41,6 +41,8 @@ int main() {
   return 0;
 }
 
+
+
 int test_integer()
 {
   cout << __PRETTY_FUNCTION__ << endl;
@@ -70,7 +72,7 @@ int test_integer()
   assert(Integer(2)*Integer(-5)==Integer(-10));
   assert(pow(Integer(5),3u)==Integer(125));
 
-  assert(factorial(Integer(5))==Integer(120));
+  assert(fac(Integer(5))==Integer(120));
   assert(gcd(Integer(140),Integer(75))==Integer(5));
   assert(lcm(Integer(140),Integer(75))==Integer(2100));
 

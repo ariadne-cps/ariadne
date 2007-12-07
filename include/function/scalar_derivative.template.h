@@ -156,8 +156,8 @@ Function::compute_composition(ScalarDerivative<X>& y, const ScalarDerivative<X>&
       //std::cout<<"y["<<d-i<<"] = 1*y["<<d-i<<"]*x[1]"<<std::flush;
       y[d-i]*=x[1];
       for(int j=1; j<=n-i; ++j) {
-        //std::cout<<" + "<<Numeric::choose(n-i,j)<<"*y["<<d-i-j<<"]*x["<<j+1<<"]"<<std::flush;
-        y[d-i] += Numeric::choose<int>(n-i,j) * y[d-i-j] * x[j+1];
+        //std::cout<<" + "<<Numeric::bin(n-i,j)<<"*y["<<d-i-j<<"]*x["<<j+1<<"]"<<std::flush;
+        y[d-i] += Numeric::bin<int>(n-i,j) * y[d-i-j] * x[j+1];
       }
       //std::cout << std::endl;
     }

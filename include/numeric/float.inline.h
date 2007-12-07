@@ -1,7 +1,7 @@
 /***************************************************************************
- *            numeric/rational.h
+ *            numeric/float.inline.h
  *
- *  Copyright  2004-7  Alberto Casagrande, Pieter Collins
+ *  Copyright 2007  Pieter Collins
  *
  ****************************************************************************/
 
@@ -20,25 +20,12 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
-/*! \file numeric/rational.h
- *  \brief Type definitions and conversion operators for rational numbers.
- */
+  
 
-#ifndef ARIADNE_NUMERIC_RATIONAL_H
-#define ARIADNE_NUMERIC_RATIONAL_H
 
-#include <gmpxx.h>
-#include <iostream>
+namespace Ariadne {
+namespace Numeric {
 
-#include "numeric/macros.h"
-#include "numeric/traits.h"
-#include "numeric/expression.h"
-#include "numeric/operators.h"
 
-#include "numeric/integer.h"
-
-#include "numeric/rational.class.h"
-#include "numeric/rational.inline.h"
-
-#endif /* ARIADNE_NUMERIC_RATIONAL_H */
+} // namespace Ariadne
+} // namespace Numeric

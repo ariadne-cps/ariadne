@@ -42,7 +42,6 @@ operator>>(std::istream& is, mpfr_ptr x)
   is.putback(c);
   std::string str; 
   ss >> str;
-  std::cerr << "Input string = " << str << "\n";
   const char* cstr=str.c_str();
   mpfr_set_str(x,cstr,10,GMP_RNDN);
   return is;

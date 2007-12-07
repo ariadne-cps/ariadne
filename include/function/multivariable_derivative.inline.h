@@ -29,7 +29,7 @@ namespace Ariadne {
 namespace {
 
 inline uint compute_polynomial_data_size(uint rs, uint as, uint d) {
-  return rs*Numeric::choose(d+as,as);
+  return rs*Numeric::bin(d+as,as);
 }
 
 }

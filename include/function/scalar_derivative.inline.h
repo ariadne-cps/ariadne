@@ -91,7 +91,7 @@ Function::inv(const ScalarDerivative<X>& x)
   ScalarDerivative<X> y(x.degree());
   X mr = X(-1)/x[0];
   for(size_type i=0; i<=y.degree(); ++i) {
-    y[i]=(-Numeric::factorial<int>(i))*pow(mr,i+1);
+    y[i]=(-Numeric::fac<int>(i))*pow(mr,i+1);
   }
   //std::cerr << y << std::endl;
   compute_composition(y,x);
@@ -128,7 +128,7 @@ Function::mul(const ScalarDerivative<X>& x, const ScalarDerivative<X>& y)
   ScalarDerivative<X> result(std::min(x.degree(),y.degree()));
   for(size_type n=0; n<=result.degree(); ++n) {
     for(size_type i=0; i<=n; ++i) {
-      result[n] += Numeric::choose<int>(n,i)*x[i]*y[n-i];
+      result[n] += Numeric::bin<int>(n,i)*x[i]*y[n-i];
     }
   }
   return result;
@@ -149,7 +149,7 @@ Function::pow(const ScalarDerivative<X>& x, N k)
   ScalarDerivative<X> result(x.degree());
   for(size_type i=0; i<=std::min(size_type(result.degree()),n); ++i) {
     int j=n-i;
-    result[i]=(Numeric::factorial<int>(n)/Numeric::factorial<int>(j))*pow(x[0],j);
+    result[i]=(Numeric::fac<int>(n)/Numeric::fac<int>(j))*pow(x[0],j);
   }
   compute_composition(result,x);
   return result;
@@ -190,7 +190,7 @@ Function::log(const ScalarDerivative<X>& x)
   y[0]=log(x[0]);
   X mr=(-1)/x[0];
   for(size_type i=1; i!=y.degree();++i) {
-    y[i]=(-Numeric::factorial<int>(i-1))*pow(x[0],i);
+    y[i]=(-Numeric::fac<int>(i-1))*pow(x[0],i);
   }
   compute_composition(y,x);
   return y;

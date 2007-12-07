@@ -248,14 +248,14 @@ Function::SortedIndex::position() const
   const size_type& nv=this->number_of_variables();
   const size_type d=this->degree();
   const size_type* p=&this->_entries[0];
-  long result=Numeric::choose(nv+d,d);
+  long result=Numeric::bin(nv+d,d);
   //std::cerr << "\n"<<*this<<"\n";
-  //std::cerr << "k=-" << " (" << (nv+d) << "," << nv << ")=" << Numeric::choose(nv+d,nv) << " r=" << result << std::endl;
+  //std::cerr << "k=-" << " (" << (nv+d) << "," << nv << ")=" << Numeric::bin(nv+d,nv) << " r=" << result << std::endl;
   for(size_type k=0; k!=d; ++k) {
     int m=d-k;
     int n=nv-p[k]-2;
-    //std::cerr << "k=" << k << " p[k]="<<p[k]<<" ("<< m+n << "," << m << ")=" << Numeric::choose(m+n,m) << " r=" << result << std::endl;
-    result-=Numeric::choose(m+n,m);
+    //std::cerr << "k=" << k << " p[k]="<<p[k]<<" ("<< m+n << "," << m << ")=" << Numeric::bin(m+n,m) << " r=" << result << std::endl;
+    result-=Numeric::bin(m+n,m);
   }
   result-=1;
   //std::cerr << "position(" << (*this) << ")=" << result << " ";

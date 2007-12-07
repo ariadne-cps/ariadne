@@ -29,7 +29,7 @@ Function::Polynomial<R>::Polynomial(const size_type& rs, const size_type& as, co
   : _result_size(rs), 
     _argument_size(as), 
     _degree(d),
-    _data(p,p+rs*Numeric::choose(d+as,as)) 
+    _data(p,p+rs*Numeric::bin(d+as,as)) 
 {
 }
 

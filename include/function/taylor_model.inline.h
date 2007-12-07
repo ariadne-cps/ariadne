@@ -33,7 +33,7 @@ Function::TaylorModel<R>::TaylorModel(const size_type& rs, const size_type& as, 
     _argument_size(as), 
     _order(d),
     _smoothness(s),
-    _data(p,p+rs*Numeric::choose(d+as,as)) 
+    _data(p,p+rs*Numeric::bin(d+as,as)) 
 {
 }
 

@@ -33,8 +33,9 @@
 #include <stdexcept>
 #include <cassert>
 
-#include "../base/tribool.h"
-#include "../base/exceptions.h"
+#include "base/tribool.h"
+#include "base/exceptions.h"
+
 
 
 namespace Ariadne {

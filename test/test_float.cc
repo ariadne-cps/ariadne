@@ -29,8 +29,7 @@
 
 #include "numeric/integer.h"
 #include "numeric/rational.h"
-#include "numeric/float64.h"
-#include "numeric/floatmp.h"
+#include "numeric/float.h"
 #include "numeric/interval.h"
 
 #include "test.h"
@@ -47,24 +46,7 @@ template<class R> int test_comparison();
 template<class R> int test_arithmetic();
 template<class R> int test_function();
 
-namespace Ariadne { namespace Numeric {
 
-  template<class T> Interval< Float<T> >
-  operator/(const Float<T>& x, const Float<T>& y) {
-    Interval< Float<T> > r; div_(r,x,y); return r; }
-  
-
-  /*
-  template<class T> Expression< Binary<Div, Float<T>, Float<T> > >
-  operator/(const Float<T>& x, const Float<T>& y) {
-    return Expression< Binary<Div, Float<T>, Float<T> > >(Div(),x,y); }
-  */
-
-  template<class Op, class Arg1, class Arg2> std::ostream& 
-  operator<<(std::ostream& os, const Expression< Binary<Op,Arg1,Arg2> >& e) {
-    os << Op();
-    return os << '"' << e.arg1 << ','<<e.arg2<<'"'; }
-}}
 
 
 int main() {
@@ -392,8 +374,8 @@ test_arithmetic()
   
   // Conversion to integer types
   int i3,i4;
-  i3=floor<int>(f1);
-  i4=ceil<int>(f1);
+  i3=floor(f1);
+  i4=ceil(f1);
   cout << i3 << " < " << f1 << " < " << i4 << endl;
   assert(i3==1); assert(i4==2);
   i3=floor(f2);
@@ -405,7 +387,7 @@ test_arithmetic()
   R z(0); R o(1); R t(3);
   Interval<R> io(1); Interval<R> it(3);
   
-  cout << "o/t=" << o/t << endl;
+  cout << "o/t=" << Interval<R>(o/t) << endl;
 
   Interval<R> iao=(o/t)*t;
   cout << "(o/t)*t=" << iao << endl;
@@ -413,7 +395,7 @@ test_arithmetic()
 
   cout << div_down(o,t) << " <= 1/3 <= " << div_up(o,t) << endl;
   assert(div_down(o,t)<div_up(o,t));
-  cout << o/t << endl; 
+  cout << Interval<R>(o/t) << endl; 
   assert(encloses(iao,o));
   Interval<R> iaz=iao-io;
   Interval<R> iz=R(1)-R(1);

@@ -156,33 +156,32 @@ namespace Ariadne {
     inline
     PositionIndex::operator SortedIndex () const 
     {
-      using Numeric::choose;
       const size_type& nv=this->_number_of_variables;
       const size_type& p=this->_position;
       
       size_type d=0;
-      while(choose(nv+d,nv)<p) {
+      while(Numeric::bin(nv+d,nv)<p) {
         ++d;
       }
       std::cout << "nv=" << nv << " p=" << p << std::endl;
       std::cout << "d=" << d << std::endl;
       
       array<size_type> a(d,nv);
-      size_type cp=choose(nv+d,nv);
+      size_type cp=Numeric::bin(nv+d,nv);
       for(uint k=0; k!=d; ++k) {
         int m=d-k;
         int l=m+(nv-1);
         int j=nv-1;
-        long c=choose(l-j,m);
+        long c=Numeric::bin(l-j,m);
         //std::cout << "k=" << k <<" j="<<j<<" cp="<<cp<<" ("<<(l-j)<<","<<(m)<<")="<<c<<"\n";
         while(cp-c>p) {
           --j;
-          c=choose(l-j,m);
+          c=Numeric::bin(l-j,m);
           //std::cout << "k=" << k <<" j="<<j<<" cp="<<cp<<" ("<<(l-j)<<","<<(m)<<")="<<c<<"\n";
           assert(j>-2);
         }
         a[k]=j;
-        cp-=choose(l-j-1,m);
+        cp-=Numeric::bin(l-j-1,m);
       }
       SortedIndex r(nv,d,a.begin());
       //std::cout << "r=" << r << " r.position()=" << r.position() << "\n";

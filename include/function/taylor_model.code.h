@@ -76,7 +76,7 @@ Function::TaylorModel<R>::TaylorModel(const size_type& rs, const size_type& as, 
     _argument_size(as), 
     _order(d),
     _smoothness(d),
-    _data(rs*Numeric::choose(d+as,as),static_cast<R>(0)) 
+    _data(rs*Numeric::bin(d+as,as),static_cast<R>(0)) 
 {
 }
 
@@ -87,7 +87,7 @@ Function::TaylorModel<R>::TaylorModel(const size_type& rs, const size_type& as, 
     _argument_size(as), 
     _order(d),
     _smoothness(s),
-    _data(rs*Numeric::choose(d+as,as),static_cast<R>(0)) 
+    _data(rs*Numeric::bin(d+as,as),static_cast<R>(0)) 
 {
 }
 
@@ -100,7 +100,7 @@ Function::TaylorModel<R>::resize(const size_type& rs, const size_type& as, const
   this->_argument_size=as; 
   this->_order=d;
   this->_smoothness=s;
-  this->_data.resize(rs*Numeric::choose(d+as,as));
+  this->_data.resize(rs*Numeric::bin(d+as,as));
 }
 
 

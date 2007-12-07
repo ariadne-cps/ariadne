@@ -69,7 +69,7 @@ Function::Polynomial<R>::Polynomial(const size_type& rs, const size_type& as, co
   : _result_size(rs), 
     _argument_size(as), 
     _degree(d),
-    _data(rs*Numeric::choose(d+as,as),static_cast<R>(0)) 
+    _data(rs*Numeric::bin(d+as,as),static_cast<R>(0)) 
 {
 }
 
@@ -81,7 +81,7 @@ Function::Polynomial<R>::resize(const size_type& rs, const size_type& as, const 
   this->_result_size=rs; 
   this->_argument_size=as; 
   this->_degree=d;
-  this->_data.resize(rs*Numeric::choose(d+as,as));
+  this->_data.resize(rs*Numeric::bin(d+as,as));
 }
 
 

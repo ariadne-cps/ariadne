@@ -51,10 +51,10 @@ test_tensor_index()
 {
   cout << "test_tensor_index()" << endl;
   
-  choose(5,2);
-  choose(7,3); 
-  choose(8,4); 
-  choose(1,2);
+  bin(5,2);
+  bin(7,3); 
+  bin(8,4); 
+  bin(1,2);
 
   MultiIndex mi(4);
   mi.increment_index(0);

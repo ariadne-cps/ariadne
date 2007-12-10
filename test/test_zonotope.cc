@@ -179,16 +179,17 @@ test_zonotope()
   assert(oaz3.size()==372);
   GridCellListSet<R> iaz3=inner_approximation(z3,gr3);
   cout << "inner_approximation(z,gr)="<<iaz3<<std::endl;
-  assert(iaz3.size()==210);
+  cout << "iaz3.size()="<<iaz3.size() << endl;
 
   bbox=z3.bounding_box().expand_by(R(0.5));
   eps.open("test_zonotope-2.eps",bbox);
   eps << fill_colour(white) << bbox3;
-  eps << fill_colour(red) << oaz3;
+  //eps << fill_colour(red) << oaz3;
   eps << fill_colour(green) << z3;
-  eps << fill_colour(yellow) << polyhedron(Zonotope<Rational>(z3));
+  //eps << fill_colour(yellow) << polyhedron(Zonotope<Rational>(z3));
   eps << fill_colour(blue) << iaz3;
   eps.close();
+  assert(iaz3.size()==210);
   
   bbox=z4.bounding_box().expand_by(R(0.5));
   eps.open("test_zonotope-3.eps",bbox);

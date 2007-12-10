@@ -35,6 +35,7 @@
 #include <boost/numeric/interval/hw_rounding.hpp>
 
 #include "numeric/expression.h"
+#include "numeric/integer.class.h"
 
 namespace Ariadne {
   namespace Numeric {
@@ -66,6 +67,7 @@ namespace Ariadne {
       Float(const int& n);
       Float(const uint& n);
       Float(const double& x);
+      Float(const Integer& n);
       Float(const Float64& x);
       
       explicit Float(const std::string& x);
@@ -73,6 +75,7 @@ namespace Ariadne {
       Float64& operator=(const int& n);
       Float64& operator=(const uint& n);
       Float64& operator=(const double& x);
+      Float64& operator=(const Integer& n);
       Float64& operator=(const Float64& x);
       
       template<class E> Float(const Expression<E>& e);

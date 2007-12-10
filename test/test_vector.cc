@@ -27,6 +27,7 @@
 
 
 #include "test/test_float.h"
+#include "test/test.h"
 #include "numeric/rational.h"
 #include "numeric/interval.h"
 #include "linear_algebra/vector.h"
@@ -57,6 +58,7 @@ test_vector()
   std::cout << "\ntest_vector<" << name<R>() << ">()" << endl;
   
   typedef typename Numeric::traits<R>::arithmetic_type F;
+  typedef typename Numeric::traits<R>::interval_type I;
   
   int n=3;
   R vptr[3]={-4.0,3.0,1.0};
@@ -157,6 +159,15 @@ test_vector()
   cout << iv0 << " = " << iv1 << " / " << x << endl;
   iv0=v1/ix;
   cout << iv0 << " = " << v1 << " / " << ix << endl;
+
+  iv0=v1;
+  iv0/=ix;
+  iv0=Vector<I>("[2,1]");
+  iv1=Vector<I>("[0,1]");
+  ARIADNE_TEST_ASSERT( (iv0+=Vector<I>("[0,1]")) == Vector<I>("[2,2]") );
+  ARIADNE_TEST_ASSERT( (iv0-=Vector<I>("[0,1]")) == Vector<I>("[2,1]") );
+  ARIADNE_TEST_ASSERT( (iv0*=2) == Vector<I>("[4,2]") );
+  ARIADNE_TEST_ASSERT( (iv0/=4) == Vector<I>("[1,0.5]") );
 
   cout << "test_vector_slice" << endl;
   v1=Vector<R>("[-1.25,0.75,-0.5,-4.25,2.375]");

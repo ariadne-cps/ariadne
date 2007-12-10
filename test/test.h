@@ -121,6 +121,10 @@ ariadne_check(std::ostream& os, const R& r, const ER& er) {
 }\
 
 
+/*! \brief Evaluates \a expression and checks if the result is equal to \a expected. */
+#define ARIADNE_TEST_EQUAL(expression,expected) \
+  ARIADNE_TEST_CHECK(expression,expected) \
+
 /*! \brief Constructs object \a variable of type \a class from \a expression. */
 #define ARIADNE_TEST_CONSTRUCT(class,variable,expression) \
 { \
@@ -145,6 +149,24 @@ class variable expression; \
   ARIADNE_TEST_CATCH("Assignment `" << #variable << "=" << #expression << "'")   \
 } \
 
+
+/*! \brief Evaluates expression and expects an exception. */
+#define ARIADNE_TEST_THROW(statement,error)          \
+{ \
+  std::cout << #statement << ": " << std::flush; \
+  try { \
+    statement; \
+    ++ARIADNE_TEST_FAILURES; \
+    std::cout << "expected " << #error << "; no exception thrown\n"; \
+  } \
+  catch(const error& e) { \
+    std::cout << "caught " << #error << "(" << e.what() << ") as expected\n" << std::endl; \
+  } \
+  catch(const std::exception& e) {             \
+    ++ARIADNE_TEST_FAILURES; \
+    std::cout << "caught exception " << e.what() << "; expected " << #error << "\n"; \
+  } \
+} \
 
 /*! \brief Evaluates expression and expects an exception. */
 #define ARIADNE_TEST_FAIL(statement) \

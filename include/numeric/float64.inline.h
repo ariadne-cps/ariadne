@@ -56,12 +56,17 @@ inline Float64::Float() : _value() { }
 inline Float64::Float(const int& n) : _value(n) { }
 inline Float64::Float(const uint& n) : _value(n) { }
 inline Float64::Float(const double& x) : _value(x) { }
+inline Float64::Float(const Integer& n) { _value=mpz_get_d(n._value); assert(*this==n); }
 inline Float64::Float(const Float<double>& x) : _value(x._value) { }
 
 inline Float64& Float64::operator=(const int& n) { 
   this->_value=n; return *this; }
+inline Float64& Float64::operator=(const uint& n) { 
+  this->_value=n; return *this; }
 inline Float64& Float64::operator=(const double& x) {
   this->_value=x; return *this; }
+inline Float64& Float64::operator=(const Integer& n) { 
+  _value=mpz_get_d(n._value); assert(*this==n); return *this; }
 inline Float64& Float64::operator=(const Float64& x) { 
   this->_value=x._value; return *this; }
 
@@ -103,6 +108,10 @@ inline void set_(Rational& q, const Float64& x) {
 template<> inline Rational& Rational::operator=(const Float64& x) { 
   set_(*this,x); return *this; }
 
+inline void set_(Float64& r, const int& n) { r._value=n; }
+inline void set_(Float64& r, const uint& n) { r._value=n; }
+inline void set_(Float64& r, const double& x) { r._value=x; }
+inline void set_(Float64& r, const Integer& z) { r._value=mpz_get_d(z._value); assert(r==z); }
 
 inline void set_(Float64& r, const int& n, RoundDown) { r._value=n; }
 inline void set_(Float64& r, const int& n, RoundUp) { r._value=n; }
@@ -203,7 +212,7 @@ inline void med_(Float64& r, const Float64& x1,const Float64& x2, RoundApprox) {
   r._value=(x1._value+x2._value)/2; }
 inline void rad_(Float64& r, const Float64& x1,const Float64& x2, RoundUp) {
   r._value=Float64::rounding().div_up(
-             Float64::rounding().sub_up(x1._value,x2._value),2); }
+             Float64::rounding().sub_up(x2._value,x1._value),2); }
     
 
 	  

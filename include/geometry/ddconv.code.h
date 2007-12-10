@@ -62,8 +62,6 @@ Geometry::ddconv(std::vector< LinearAlgebra::Vector<R> >&  result,
   
   // Constants
   R zero=0;
-  R one=1;
-  R minus_one=0;
   
   //std::cout << "C=" << constraints << "\n\n";
   
@@ -76,7 +74,7 @@ Geometry::ddconv(std::vector< LinearAlgebra::Vector<R> >&  result,
   number_of_lines=dimension;
   for(dimension_type i=0; i!=dimension; ++i) {
     v=LinearAlgebra::Vector<R>::zero(dimension);
-    v(i)=one;
+    v(i)=1;
     generators.push_back(v);
   }
   
@@ -122,13 +120,13 @@ Geometry::ddconv(std::vector< LinearAlgebra::Vector<R> >&  result,
       R pdot=max;
       for(size_type i=0; i!=number_of_lines; ++i) {
         R dot=inner_product(constraints[k],generators[i]);
-        generators[i]-=(dot/pdot)*p;
+        generators[i]-=R(dot/pdot)*p;
       }
      
       // Add linear multiple of 'p' to generating rays to ensure they saturate new constraint
       for(size_type i=number_of_lines+1; i!=generators.size(); ++i) {
         R dot=inner_product(constraints[k],generators[i]);
-        generators[i]-=(dot/pdot)*p;
+        generators[i]-=R(dot/pdot)*p;
       }
      
       //std::cout << "G=" << generators << "\n"; 
@@ -188,7 +186,7 @@ Geometry::ddconv(std::vector< LinearAlgebra::Vector<R> >&  result,
                 ARIADNE_LOG(7,"    js="<<js<<" v=" <<v<<" g="<<generators[js]<<"\n");
                 R dot=inner_product(constraints[k],v);
                 R dots=inner_product(constraints[k],generators[js]);
-                w=v-(dot/dots)*generators[js];
+                w=v-R(dot/dots)*generators[js];
                 new_generators.push_back(w);
               }
             }
@@ -226,8 +224,8 @@ Geometry::ddconv(std::vector< LinearAlgebra::Vector<R> >&  result,
   }
   ARIADNE_LOG(7,"argument="<<constraints<<", result="<<generators<<", saturation_matrix="<<saturation_matrix<<"\n");
   if(unsatisfied_constraints>0) {
-    std::cerr << "Error: argument="<<constraints<<", result="<<generators<<", saturation_matrix="<<saturation_matrix<<std::endl;
-    assert(false);
+    std::cerr << "ERROR: in " << __PRETTY_FUNCTION__ << ":\n  argument="<<constraints<<"\n  result="<<generators<<"\n  saturation_matrix="<<saturation_matrix<<"  unsatisfied_constraints="<<unsatisfied_constraints<<std::endl;
+    assert(unsatisfied_constraints==0);
   }
   
 }

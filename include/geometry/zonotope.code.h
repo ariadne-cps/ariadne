@@ -1115,6 +1115,9 @@ superset_approx(const Zonotope<R,R>& z, const Rectangle<R>& r)
   ARIADNE_LOG(7,"z="<<z<<", r="<<r<<"\n");
   Rectangle<Rational> qr(r);
   Zonotope<Rational> qz(z);
+  assert(qz.centre()==z.centre());
+  assert(qz.generators()==z.generators());
+  assert(qr==r);
   return superset_exact(qz,qr);
 }
 
@@ -1394,7 +1397,7 @@ contains_exact(const Zonotope<Rational,Rational>& z, const Point<Rational>& pt)
   const Geometry::Point<Q>& qc=z.centre();
   const Geometry::Point<Q>& qp=pt;
   const LinearAlgebra::Matrix<Q>& qG=z.generators();
-  const LinearAlgebra::Vector<Q> qo(m,zero);
+  const LinearAlgebra::Vector<Q> qo(m,one);
   const LinearAlgebra::Vector<Q> zv(m,zero);
   const LinearAlgebra::Vector<Q> tv(m,two);
   

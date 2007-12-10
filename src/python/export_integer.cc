@@ -23,12 +23,12 @@
 
 
 #include "python/utilities.h"
-
 #include "numeric/integer.h"
 
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
 using namespace Ariadne::Python;
+using Numeric::Integer;
+using Numeric::Rational;
 
 #include <boost/python.hpp>
 using namespace boost::python;
@@ -55,19 +55,19 @@ void export_integer() {
     .def(init<int>())
     .def(init<std::string>())
     .def(init<Integer>())
-    .def("__neg__", &neg<Integer,Integer>)
-    .def("__add__", &add<Integer,Integer,Integer>)
-    .def("__add__", &add<Integer,Integer,int>)
-    .def("__radd__", &add<Integer,Integer,int>)
-    .def("__sub__", &sub<Integer,Integer,Integer>)
-    .def("__sub__", &sub<Integer,Integer,int>)
-    .def("__rsub__", &rsub<Integer,Integer,int>)
-    .def("__mul__", &mul<Integer,Integer,Integer>)
-    .def("__mul__", &mul<Integer,Integer,int>)
-    .def("__rmul__", &mul<Integer,Integer,int>)
-    .def("__div__", &div<Rational,Integer,Integer,Rational,Rational>)
-    .def("__div__", &div<Rational,Integer,int,Rational,Rational>)
-    .def("__rdiv__", &rdiv<Rational,Integer,int,Rational,Rational>)
+    .def("__neg__", &Python::neg<Integer,Integer>)
+    .def("__add__", &Python::add<Integer,Integer,Integer>)
+    .def("__add__", &Python::add<Integer,Integer,int>)
+    .def("__radd__", &Python::add<Integer,Integer,int>)
+    .def("__sub__", &Python::sub<Integer,Integer,Integer>)
+    .def("__sub__", &Python::sub<Integer,Integer,int>)
+    .def("__rsub__", &Python::rsub<Integer,Integer,int>)
+    .def("__mul__", &Python::mul<Integer,Integer,Integer>)
+    .def("__mul__", &Python::mul<Integer,Integer,int>)
+    .def("__rmul__", &Python::mul<Integer,Integer,int>)
+    .def("__div__", &Python::div<Rational,Integer,Integer,Rational,Rational>)
+    .def("__div__", &Python::div<Rational,Integer,int,Rational,Rational>)
+    .def("__rdiv__", &Python::rdiv<Rational,Integer,int,Rational,Rational>)
     .def("__eq__", &eq<bool,Integer,int>)
     .def("__eq__", &eq<bool,Integer,Integer>)
     .def("__ne__", &ne<bool,Integer,int>)
@@ -84,10 +84,10 @@ void export_integer() {
     .def("__repr__", &__repr__)
   ;
 
-  def("max",&max<Integer,Integer,Integer>);
-  def("min",&min<Integer,Integer,Integer>);
+  def("max",&Python::max<Integer,Integer,Integer>);
+  def("min",&Python::min<Integer,Integer,Integer>);
   def("abs",&Python::abs<Integer,Integer>);
 
-  def("pow",&pow<Integer,Integer,uint>);
+  def("pow",&Python::pow<Integer,Integer,uint>);
   
 }

@@ -27,7 +27,28 @@
 #include "numeric/interval.h"
 
 
+std::istream& 
+operator>>(std::istream& is, mpfr_ptr x)
+{
+  mpf_t f;
+  mpf_init2(f,mpfr_get_prec(x)+64u);
+  is >> f;
+  mpfr_set_f(x,f,GMP_RNDN);
+  return is;
+}
 
+
+std::ostream& 
+operator<<(std::ostream& os, mpfr_srcptr x)
+{
+  mpf_t f;
+  mpf_init2(f,mpfr_get_prec(x)+1);
+  mpfr_get_f(f,x,GMP_RNDN);
+  return os << f;
+}
+
+
+/*
 
 std::istream& 
 operator>>(std::istream& is, mpfr_ptr x) 
@@ -46,6 +67,7 @@ operator>>(std::istream& is, mpfr_ptr x)
   mpfr_set_str(x,cstr,10,GMP_RNDN);
   return is;
 }
+
 
 
 std::ostream& 
@@ -86,13 +108,13 @@ operator<<(std::ostream& os, mpfr_srcptr x)
   
   c = s; // Pointer to current value
 
-  /* for a=3.1416 we have s = "31416" and e = 1 */
+  // for a=3.1416 we have s = "31416" and e = 1 
   
   if (*c == '-')
     os.put(*c++);
   
-  /* outputs mantissa */
-  os.put(*c++); e--; /* leading digit */
+  // outputs mantissa
+  os.put(*c++); e--; // leading digit 
   os.put('.');
   
   // Find the last nonzero digit
@@ -107,7 +129,7 @@ operator<<(std::ostream& os, mpfr_srcptr x)
 
   mpfr_free_str(s);
   
-  /* outputs exponent */
+  // outputs exponent 
   if (e) {
     os << (base <= 10 ? 'e' : '@') << (long) e;
   }
@@ -115,6 +137,7 @@ operator<<(std::ostream& os, mpfr_srcptr x)
   return os;
 }
 
+*/
 
 
 

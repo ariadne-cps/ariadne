@@ -585,6 +585,40 @@ LinearAlgebra::operator/(const Vector<R1>& v, const R2& s)
 
 
 
+template<class R1, class R2> inline
+LinearAlgebra::Vector<typename Numeric::traits<R1,R2>::arithmetic_type> 
+LinearAlgebra::operator*(const R1& s, const VectorSlice<R2>& v) 
+{
+  return v*s;
+}
+
+template<class R1, class R2> inline
+LinearAlgebra::Vector<typename Numeric::traits<R1,R2>::arithmetic_type> 
+LinearAlgebra::operator*(const VectorSlice<R1>& v, const R2& s) 
+{
+  Vector<typename Numeric::traits<R1,R2>::arithmetic_type> result(v.size());
+  for(size_type i=0; i!=result.size(); ++i) {
+    result(i)=v(i)*s;
+  }
+  return result;
+}
+
+template<class R1, class R2> inline
+LinearAlgebra::Vector<typename Numeric::traits<R1,R2>::arithmetic_type> 
+LinearAlgebra::operator/(const VectorSlice<R1>& v, const R2& s) 
+{
+  Vector<typename Numeric::traits<R1,R2>::arithmetic_type> result(v.size());
+  for(size_type i=0; i!=result.size(); ++i) {
+    result(i)=v(i)/s;
+  }
+  return result;
+}
+
+
+
+
+
+
 template<class R> inline
 LinearAlgebra::Vector<R> 
 LinearAlgebra::add_approx(const Vector<R>& u, const Vector<R>& v) 

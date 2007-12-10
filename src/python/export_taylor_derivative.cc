@@ -98,8 +98,8 @@ void export_taylor_derivative()
   taylor_derivative_class.def("__getitem__", &taylor_derivative_get_variable<A>);
   taylor_derivative_class.def("__setitem__",&taylor_derivative_set_variable<A,A>);
   taylor_derivative_class.def("__neg__", &Python::neg<TD,TD>);
-  taylor_derivative_class.def("__add__", &add<TD,TD,TD>);
-  taylor_derivative_class.def("__sub__", &sub<TD,TD,TD>);
+  taylor_derivative_class.def("__add__", &Python::add<TD,TD,TD>);
+  taylor_derivative_class.def("__sub__", &Python::sub<TD,TD,TD>);
   taylor_derivative_class.def(self_ns::str(self));
   
   def("compose",(TV(*)(const TV&,const TD&))&Function::compose);
@@ -124,8 +124,8 @@ void export_taylor_derivative<Rational>()
   taylor_derivative_class.def("__getitem__", &taylor_derivative_get_variable<Q>);
   taylor_derivative_class.def("__setitem__",&taylor_derivative_set_variable<Q,Q>);
   taylor_derivative_class.def("__neg__", &Python::neg<TD,TD>);
-  taylor_derivative_class.def("__add__", &add<TD,TD,TD>);
-  taylor_derivative_class.def("__sub__", &sub<TD,TD,TD>);
+  taylor_derivative_class.def("__add__", &Python::add<TD,TD,TD>);
+  taylor_derivative_class.def("__sub__", &Python::sub<TD,TD,TD>);
   taylor_derivative_class.def(self_ns::str(self));
   
   def("compose",(TV(*)(const TV&,const TD&))&Function::compose);

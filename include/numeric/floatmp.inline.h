@@ -51,12 +51,15 @@ inline FloatMP::~Float() {
   mpfr_clear(this->_value); }
 inline FloatMP::Float() { 
   mpfr_init_set_si(this->_value,0,GMP_RNDN); }
-inline FloatMP::Float(const int& x) {
-  mpfr_init_set_si(this->_value,x,GMP_RNDN); }
-inline FloatMP::Float(const uint& x) { 
-  mpfr_init_set_ui(this->_value,x,GMP_RNDN); }
+inline FloatMP::Float(const int& n) {
+  mpfr_init_set_si(this->_value,n,GMP_RNDN); }
+inline FloatMP::Float(const uint& n) { 
+  mpfr_init_set_ui(this->_value,n,GMP_RNDN); }
 inline FloatMP::Float(const double& x) { 
   mpfr_init_set_d(this->_value,x,GMP_RNDN); }
+inline FloatMP::Float(const Integer& n) { 
+  mpfr_init_set_z(this->_value,n._value,GMP_RNDN); 
+  assert(*this==n); }
 inline FloatMP::Float(const FloatMP& x) { 
   mpfr_init_set(this->_value,x._value,GMP_RNDN); }
 
@@ -66,6 +69,9 @@ inline FloatMP& FloatMP::operator=(const uint& n) {
   mpfr_set_ui(this->_value,n,GMP_RNDN); return *this; }
 inline FloatMP& FloatMP::operator=(const double& x) { 
   mpfr_set_d(this->_value,x,GMP_RNDN); return *this; }
+inline FloatMP& FloatMP::operator=(const Integer& n) { 
+  mpfr_set_z(this->_value,n._value,GMP_RNDN); 
+  assert(*this==n); return *this; }
 inline FloatMP& FloatMP::operator=(const FloatMP& x) { 
   if(this!=&x) { mpfr_set(this->_value,x._value,GMP_RNDN); } return *this; }
 
@@ -133,6 +139,11 @@ inline void set_(Rational& r, const FloatMP& x) {
   mpq_set_f(r._value,f); mpq_canonicalize(r._value);
   mpf_clear(f);
   ARIADNE_ASSERT(mpfr_cmp_q(x._value,r._value)==0); }
+
+inline void set_(FloatMP& r, const int& n) { mpfr_set_si(r._value,n,mpfr_rounding_mode<RoundApprox>()); }
+inline void set_(FloatMP& r, const uint& n) { mpfr_set_ui(r._value,n,mpfr_rounding_mode<RoundApprox>()); }
+inline void set_(FloatMP& r, const double& x) { mpfr_set_d(r._value,x,mpfr_rounding_mode<RoundApprox>()); }
+inline void set_(FloatMP& r, const Integer& n) { mpfr_set_z(r._value,n._value,mpfr_rounding_mode<RoundApprox>()); assert(r==n); }
 
 
 template<class Rnd> inline void set_(FloatMP& r, const int& x, Rnd) {
@@ -275,12 +286,10 @@ void div_(FloatMP& r, const int& x, const FloatMP& y, Rnd) {
 
 template<class Rnd> 
 inline void pow_(FloatMP& r, const FloatMP& x, const uint& n, Rnd) {
-  std::cout << __PRETTY_FUNCTION__ << std::endl; 
   mpfr_pow_ui(r._value,x._value,n,mpfr_rounding_mode<Rnd>()); }
 
 template<class Rnd> 
 inline void pow_(FloatMP& r, const FloatMP& x, const int& n, Rnd) {
-  std::cout << __PRETTY_FUNCTION__ << std::endl; 
   mpfr_pow_si(r._value,x._value,n,mpfr_rounding_mode<Rnd>()); }
 
 

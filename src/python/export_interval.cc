@@ -27,13 +27,17 @@
 
 
 #include <boost/python.hpp>
+using namespace boost::python;
+
 #include "python/utilities.h"
 #include "python/float.h"
 
-using namespace boost::python;
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
 using namespace Ariadne::Python;
+using Numeric::Integer;
+using Numeric::Rational;
+using Numeric::Float;
+using Numeric::Interval;
 
 namespace Ariadne { namespace Python {
   template<class Res> inline
@@ -140,7 +144,9 @@ void export_interval()
     .def("__str__", &__str__<FloatPy>)
     .def("__repr__", &__repr__<FloatPy>)  
   ;
-  
+ 
+  using namespace Numeric;
+
   def("lower", (R(*)(const I&))&lower);
   def("upper", (R(*)(const I&))&upper);
   def("midpoint", (R(*)(const I&))&midpoint);

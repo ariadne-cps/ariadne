@@ -38,17 +38,20 @@ void fac_(R& r, const A& n) {
 template<class R, class A1, class A2>  
 void bin_(R& r, const A1& n, const A2& k) 
 {
-  //std::cerr << "bin(" << n << "," << k << ")=" << std::flush;
   if(k==0 || k==n) { r=1; return; }
   if(k<0 || k>n) { r=0; return; }
-  A2 m=(n-k < k) ? k : static_cast<A2>(n-k);
-  R result=1;
-  for(A1 i=n; i!=n-m; --i) { result*=i; }
-  for(A1 i=m; i!=1; --i) { result/=i; }
-  //std::cerr << result << std::endl;
-  r=result;
+  A1 m=n-k; 
+  m=min(k,m);
+  A1 i=0; A1 j=n;
+  r=1;
+  while(i!=m) {
+    ++i; 
+    r*=j;
+    --j;
+    //r/=i;
+    quot_(r,r,i);
+  }
 }
-
    
    
 

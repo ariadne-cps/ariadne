@@ -72,7 +72,7 @@ Evaluation::gexp_up(const R& x, uint k)
 {
   using namespace Numeric;
   
-  R result=div_up(static_cast<R>(1),static_cast<R>(Numeric::fac(k)));
+  R result=div_up(static_cast<R>(1),R(Numeric::fac<Integer>(k)));
   uint n=k;
   R term=result;
   while(add_down(result,term)==result) {
@@ -102,7 +102,7 @@ Evaluation::gexp(
   
   Matrix<R> id=LinearAlgebra::Matrix<R>::identity(A.number_of_rows());
   
-  Vector<I> result=b/static_cast<R>(Numeric::fac(k));
+  Vector<I> result=b/R(Numeric::fac<Integer>(k));
   Vector<I> term=result;
   
   for(uint n=k+1; n!=k+ns; ++n) {
@@ -139,8 +139,7 @@ Evaluation::gexp(
   int ns=MAX_STEPS;
   
   Matrix<R> id=LinearAlgebra::Matrix<R>::identity(A.number_of_rows());
-  
-  Matrix<I> result=id/static_cast<R>(Numeric::fac(k));
+  Matrix<I> result=id/static_cast<R>(Numeric::fac<Integer>(k));
   Matrix<I> term=result;
   
   for(uint n=k+1; n!=k+ns; ++n) {

@@ -33,8 +33,11 @@
 #include "numeric/interval.h"
 
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
 using namespace Ariadne::Python;
+using Numeric::Integer;
+using Numeric::Rational;
+using Numeric::Float;
+using Numeric::Interval;
 
 #include <boost/python.hpp>
 using namespace boost::python;
@@ -47,6 +50,9 @@ void set_output_precision(uint p) {
   std::cout << std::setprecision(p);
 }
 
+
+using Numeric::Float64;
+
 #if PYTHON_FLOAT == Float64 
 
 template<> void set_default_precision<Float64>(uint p) { 
@@ -57,13 +63,13 @@ template<> uint default_precision<Float64>() {
   return 64;
 }
 
-#elif PYTHON_FLOAT == Float64 
+#elif PYTHON_FLOAT == FloatMP 
 
-template<> void set_default_precision<FloatMP>(uint p) { 
+template<> void set_default_precision<Float64>(uint p) { 
   FloatMP::set_default_precision(p);
 }
 
-template<> uint default_precision<FloatMP>() { 
+template<> uint default_precision<Float64>() { 
   return FloatMP::default_precision();
 }
 

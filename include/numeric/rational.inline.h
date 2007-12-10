@@ -116,7 +116,8 @@ inline Rational::Rational(const Expression<E>& e) {
   mpq_canonicalize(this->_value); }
 template<class E> 
 inline Rational& Rational::operator=(const Expression<E>& e) { 
-  e.assign_to(*this); return *this; }
+  e.assign_to(*this); 
+  return *this; }
 
       
 inline Integer Rational::numerator() const { 
@@ -129,8 +130,9 @@ inline void Rational::canonicalize() {
 
 inline void set_(double& r, const Rational& x, RoundApprox) { 
   r=mpq_get_d(x._value); }
+
 inline void set_(Rational& r, const int& x) { 
-  mpq_set_si(r._value,x,0); }
+  mpq_set_si(r._value,x,1); }
 inline void set_(Rational& r, const uint& x) { 
   mpq_set_ui(r._value,x,1u); }
 inline void set_(Rational& r, const double& x) { 
@@ -139,6 +141,10 @@ inline void set_(Rational& r, const Integer& x) {
   mpq_set_z(r._value,x._value); }
 inline void set_(Rational& r, const Rational& x) { 
   mpq_set(r._value,x._value); }
+
+template<class E>
+inline void set_(Rational& r, const Expression<E>& x) { 
+  x.assign_to(r); }
 
 
 inline void min_(Rational& r, const Rational& x1, const Rational& x2) { 
@@ -168,7 +174,7 @@ inline void mul_(Rational& r, const Rational& x1, const Rational& x2) {
 inline void div_(Rational& r, const Rational& x1, const Rational& x2) { 
   mpq_div(r._value,x1._value,x2._value); }
 inline void med_(Rational& r, const Rational& x1, const Rational& x2) { 
-  mpq_sub(r._value,x2._value,x1._value); 
+  mpq_add(r._value,x1._value,x2._value); 
   mpq_div_2exp(r._value,r._value,1); }
 inline void rad_(Rational& r, const Rational& x1, const Rational& x2) { 
   mpq_sub(r._value,x2._value,x1._value); 
@@ -254,7 +260,10 @@ inline void pow_(Rational& r, const Rational& x1, const int& x2) {
 inline void pow_(Rational& r, const Rational& x1, const Integer& x2) { 
   mpq_pow_z(r._value,x1._value,x2._value); }
 
-
+inline Rational med(const Rational& x1, const Rational& x2) {
+  Rational r; med_(r,x1,x2); return r; }
+inline Rational rad(const Rational& x1, const Rational& x2) {
+  Rational r; rad_(r,x1,x2); return r; }
 
 
 inline void floor_(Rational& r, const Rational& x) { 
@@ -404,6 +413,17 @@ inline bool operator>(const Expression<E>& x1, const Rational& x2) {
 
 
 // Explicit rounding operators for Rational numbers (provided as a convenience)
+
+template<class E, class Rnd> 
+inline Rational::Rational(const Expression<E>& e, Rnd) { 
+  mpq_init(this->_value); set_(*this,e); }
+
+template<class X, class Rnd> 
+inline Rational::Rational(const X& x, Rnd) { 
+  mpq_init(this->_value); set_(*this,x); }
+
+
+
 inline Rational add_approx(const Rational& x, const Rational& y) {
   Rational r; add_(r,x,y); return r; }
 

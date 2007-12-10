@@ -34,7 +34,8 @@
 #include "python/read_scalar.h"
 
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
+using Numeric::Rational;
+using Numeric::Interval;
 using namespace Ariadne::LinearAlgebra;
 using namespace Ariadne::Python;
 

@@ -122,7 +122,7 @@ R Interval<R>::radius() const {
 template<class R> inline
 R Interval<R>::width() const { 
   R r;
-  sub_(r,this->_lower,this->_upper,round_up); 
+  sub_(r,this->_upper,this->_lower,round_up); 
   return r;
 }
 
@@ -179,12 +179,12 @@ R IntervalReference<R>::upper() const {
 
 template<class R> inline 
 R IntervalReference<R>::midpoint() const { 
-  R r; med_(r,*_lower,*upper,round_approx); return r; 
+  R r; med_(r,*_lower,*_upper,round_approx); return r; 
 }
 
 template<class R> inline 
 R IntervalReference<R>::radius() const { 
-  R r; rad_(r,*_lower,*upper,round_approx); return r; 
+  R r; rad_(r,*_lower,*_upper,round_approx); return r; 
 }
 
 
@@ -590,15 +590,17 @@ void max_(Interval<R>& r, const Interval<R>& x1, const Interval<R>& x2) {
 
 template<class R> inline
 void abs_(Interval<R>& r, const Interval<R>& x) {
-  if(x.lower()>=0) { r=x; } 
-  if(x.upper() < 0) { r=-x; } 
-  R nxl; neg_(nxl,x.lower()); r=Interval<R>(R(0),max(nxl,x.upper()));
+  if(x.lower()>=0) { r=x; return; } 
+  if(x.upper() < 0) { r=-x; return; } 
+  R nxl; neg_(nxl,x.lower()); 
+  const R& xu=x.upper();
+  set_(r._lower,0); max_(r._upper,nxl,xu);
 }
 
 template<class R, class X> inline
 void abs_(Interval<R>& r, const Interval<X>& x) {
-  if(x.lower()>=0) { r=x; } 
-  if(x.upper() < 0) { r=-x; } 
+  if(x.lower()>=0) { r=x; return; } 
+  if(x.upper() < 0) { r=-x; return; } 
   R nxl; neg_(nxl,x.lower(),round_up); 
   R xu; pos_(xu,x.upper(),round_up);
   set_(r._lower,0); max_(r._upper,nxl,xu);

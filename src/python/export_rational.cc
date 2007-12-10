@@ -26,8 +26,9 @@
 #include "python/float.h"
 
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
 using namespace Ariadne::Python;
+using Numeric::Integer;
+using Numeric::Rational;
 
 #include <boost/python.hpp>
 using namespace boost::python;
@@ -128,8 +129,8 @@ void export_rational() {
     .def("__repr__", &__repr__)
   ;
  
-  def("max",&Python::max<Rational,Rational,Rational>);
-  def("min",&Python::min<Rational,Rational,Rational>);
+  def("max",&max<Rational,Rational,Rational>);
+  def("min",&min<Rational,Rational,Rational>);
   def("abs",&Python::abs<Rational,Rational>);
     
 }

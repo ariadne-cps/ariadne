@@ -353,8 +353,7 @@ test_arithmetic()
   assert(mul_up(f4,f2)>f1);
   
   // Power (not exact; should catch errors here)
-  cout << "Here" << endl;
-  f3=pow_down(f1,3); cout << "Here" << endl;
+  f3=pow_down(f1,3); 
   f4=pow_up(f1,3);
   cout << f3 << " <= pow(" << f1 << ",3) <= " << f4 << endl;
   assert(f3<=1.953125); assert(f4>=1.953125);
@@ -403,6 +402,9 @@ test_arithmetic()
   assert(encloses(iaz,z)); 
   assert(!bool(!subset(iz,iaz)));
   cout << endl;
+
+  assert(med_approx(R(2),R(3))==2.5);
+  assert(rad_up(R(2),R(3))==0.5);
 
   // The following line should not compile
   // f5=f1+f2;

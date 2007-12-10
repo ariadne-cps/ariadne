@@ -1,8 +1,8 @@
 /***************************************************************************
- *            numeri/operators.h
+ *            numeric/operators.h
  *
  *  Copyright  2007 Pieter Collins
- *  pieter.collins@cwi.nl
+ *
  ****************************************************************************/
 
 /*
@@ -45,12 +45,16 @@
 #define ARIADNE_UNARY_FUNCTION(Fn,fn,ifn,str)                                   \
   class Fn { public: template<class R, class A> void operator()(R& r, const A& a) const { ifn(r,a); } }; \
   inline std::ostream& operator<<(std::ostream& os, const Fn&) { return os << str; } \
+  template<class R, class A> inline R fn(const A& a) { \
+    R r; ifn(r,a); return r; } \
   template<class A> inline Expression< Unary<Fn,A> > fn(const Scalar<A>& a) { \
-    return make_expression(Fn(),static_cast<const A&>(a)); }            \
+    return make_expression(Fn(),static_cast<const A&>(a)); } \
 
 #define ARIADNE_BINARY_FUNCTION(Fn,fn,ifn,str)                          \
   class Fn { public: template<class R, class A1, class A2> void operator()(R& r, const A1& a1, const A2& a2) const { ifn(r,a1,a2); } }; \
   inline std::ostream& operator<<(std::ostream& os, const Fn&) { return os << str; } \
+  template<class R, class A1, class A2> inline R fn(const A1& a1, const A2& a2) {    \
+    R r; ifn(r,a1,a2); return r; }                                        \
   template<class A1,class A2> inline \
   Expression< Binary<Fn,A1,A2> > fn(const Scalar<A1>& a1,const Scalar<A2>& a2) { \
     return make_expression(Fn(),static_cast<const A1&>(a1),static_cast<const A2&>(a2)); } \

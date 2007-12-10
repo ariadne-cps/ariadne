@@ -153,6 +153,14 @@ test_rational()
     cout << q1 << " / " << q2 << " = " << q3 << endl;
     assert(q3==Rational(5,9));
     
+    q3=med(q1,q2);
+    cout << "med( " << q1 << " , " << q2 << ") = " << q3 << endl;
+    assert(q3==Rational(7,4));
+
+    q3=rad(q1,q2);
+    cout << "rad( " << q1 << " , " << q2 << ") = " << q3 << endl;
+    assert(q3==Rational(1,2));
+
     cout << endl;
   }
   

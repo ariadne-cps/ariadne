@@ -39,6 +39,8 @@ namespace Ariadne {
     //@{ \name Exceptions
     /*! \brief A division by zero has occurred. */
     class DivideByZeroException : public std::exception { };
+    /*! \brief An overflow occurred. */
+    class OverflowException : public std::exception { };
     //@}
     
   }

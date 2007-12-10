@@ -29,9 +29,7 @@
 #include <string>
 
 #include "numeric/interval.h"
-
-#include "numeric/float64.h"
-#include "numeric/floatmp.h"
+#include "numeric/float.h"
 #include "numeric/rational.h"
 
 #include "test.h"
@@ -266,9 +264,12 @@ test_interval<Rational>()
   cout << "test_interval<" << name<R>() << ">" << endl;
   
   Interval<R> ivld1(R(1.125),R(2.25));
+  cout << "ivld1=" << ivld1 << endl;
   Interval<R> ivld2;
+  cout << "ivld2=" << ivld2 << endl;
   Interval<R> ivld3(2.1,3.2);
-  
+  cout << "ivld3=" << ivld3 << endl;
+
   Interval<R> ivlq1(1.1,2.2);
   Interval<R> ivlq2(1.125,1.125);
   Interval<R> ivlq3(2.125,3.25);

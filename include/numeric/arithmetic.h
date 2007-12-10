@@ -38,9 +38,6 @@ template<class T> class Float;
 template<class T>
 inline int floor(const Float<T>& x) { 
   int r; floor_(r,x); return r; }
-template<class R, class A>
-inline R floor(const A& x) { 
-  R r; floor_(r,x); return r; }
 
 
 template<class T>

@@ -22,6 +22,7 @@
  */
  
 #include "debug.h"
+#include "numeric/exceptions.h"
 
 #define ARIADNE_DIRECT_COMPARISON(Arg1,Arg2,Cmp)                            \
   inline bool operator==(const Arg1& x1, const Arg2& x2) { return Cmp==0; } \
@@ -42,6 +43,8 @@
 namespace Ariadne {
 namespace Numeric {
 	
+using std::min;
+using std::max;
 
 // Class methods
 inline Integer::~Integer() { 
@@ -52,16 +55,16 @@ inline Integer::Integer(const int& n) : _value() {
   mpz_init_set_si(this->_value,n); }
 inline Integer::Integer(const unsigned int& n) : _value() {
   mpz_init_set_ui(this->_value,n); }
-inline Integer::Integer(const mpz_class& z) : _value() {
-  mpz_init_set(this->_value,z.get_mpz_t()); }
+inline Integer::Integer(mpz_srcptr z) : _value() {
+  mpz_init_set(this->_value,z); }
 inline Integer::Integer(const Integer& z) :  _value() {
   mpz_init_set(this->_value,z._value); }
 inline Integer& Integer::operator=(const int& n) {
   mpz_set_si(this->_value,n); return *this; }
 inline Integer& Integer::operator=(const unsigned int& n) {
   mpz_set_ui(this->_value,n); return *this; }
-inline Integer& Integer::operator=(const mpz_class& z) {
-  mpz_set(this->_value,z.get_mpz_t()); return *this; }
+inline Integer& Integer::operator=(mpz_srcptr z) {
+  mpz_set(this->_value,z); return *this; }
 inline Integer& Integer::operator=(const Integer& z) {
   mpz_set(this->_value,z._value); return *this; }
 
@@ -219,6 +222,14 @@ inline void pow_(Integer& r, const Integer& x1, const uint& x2) {
 // Integer operations
 inline void quot_(Integer& r, const Integer& x1, const Integer& x2) { 
   mpz_tdiv_q(r._value,x1._value,x2._value); }
+inline void quot_(Integer& r, const Integer& x1, const uint& x2) { 
+  mpz_tdiv_q_ui(r._value,x1._value,x2); }
+inline void quot_(Integer& r, const int& x1, const uint& x2) { 
+  r=x1/x2; }
+inline void quot_(uint& r, const uint& x1, const uint& x2) { 
+  r=x1/x2; }
+inline void quot_(int& r, const int& x1, const uint& x2) { 
+  r=x1/x2; }
 inline void rem_(Integer& r, const Integer& x1, const Integer& x2) { 
   mpz_tdiv_r(r._value,x1._value,x2._value); }
 
@@ -274,9 +285,30 @@ template<class R, class N>
   void log2_ceil_(R& r, const N& n);
 
 
+inline int fac(int n) { 
+#ifndef NDEBUG 
+  if(n>=13) { 
+    std::cerr << __FUNCTION__ << " with n="<<n<<std::endl;
+    throw OverflowException(); 
+  }
+#endif
+  return factorials[n]; 
+}
+
 inline uint fac(uint n) { 
-  ARIADNE_ASSERT(n<13);
-  return factorials[n]; }
+#ifndef NDEBUG 
+  if(n>=13) { 
+    std::cerr << __FUNCTION__ << " with n="<<n<<std::endl;
+    throw OverflowException(); 
+  }
+#endif
+  return factorials[n]; 
+}
+
+inline int bin(int n, int k) { 
+  if(k>n) { return 0; }
+  if(n<13) { return fac(n)/(fac(k)*fac(n-k)); } 
+  else { uint r; bin_(r,n,k); return r; } }
 
 inline uint bin(uint n, uint k) { 
   if(k>n) { return 0; }
@@ -290,13 +322,6 @@ inline uint log2_floor(const uint& n) {
   uint r; log2_floor_(r,n); return r; }
 inline uint log2_ceil(const uint& n) {
   uint r; log2_ceil_(r,n); return r; }
-
-template<class R, class N> 
-inline R fac(const N& n) {
-  N r; fac_(r,n); return r; }
-template<class R, class N, class K> 
-inline R bin(const N& n, const K& k) {
-  N r; bin_(r,n,k); return r; }
 
 
 inline Integer& operator++(Integer& r) {

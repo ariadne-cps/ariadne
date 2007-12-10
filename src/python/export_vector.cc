@@ -36,7 +36,8 @@
 #include "python/read_scalar.h"
 
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
+using Numeric::Rational;
+using Numeric::Interval;
 using namespace Ariadne::LinearAlgebra;
 using namespace Ariadne::Python;
 
@@ -111,7 +112,7 @@ vector_set_item(Vector<R>& v, int n, const A& x) {
 template<class R>
 void export_vector()
 {
-  typedef Interval<R> I;
+  typedef Numeric::Interval<R> I;
   typedef Vector<R> Vec;
   typedef Vector< Interval<R> > IVec;
   typedef Covector<R> Cvec;

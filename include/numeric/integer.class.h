@@ -44,7 +44,7 @@ namespace Ariadne {
      * Must allow denotation of any integer, including arbitrarily large values.
      * Integer quotient and remainder must be supported.
      *
-     * Currently implemented using mpz_class from the GNU Multiple Precision Library.
+     * Currently implemented using mpz_t from the GNU Multiple Precision Library.
      */
     class Integer
       : public Value<Integer>
@@ -75,9 +75,9 @@ namespace Ariadne {
       Integer& operator=(const unsigned int& n);
 
       /*! \brief Convert from a GMP integer. */
-      Integer(const mpz_class& z);
+      Integer(mpz_srcptr z);
       /*! \brief Conversion assignment operator from an GMP integer. */
-      Integer& operator=(const mpz_class& z);
+      Integer& operator=(mpz_srcptr z);
 
       /*! \brief Convert from a numerical expression. */
       template<class E> Integer(const Expression<E>& e);

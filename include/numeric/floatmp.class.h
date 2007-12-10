@@ -58,9 +58,10 @@ namespace Ariadne {
      public:
       ~Float();
       Float();
-      Float(const int& x);
-      Float(const uint& x);
+      Float(const int& n);
+      Float(const uint& n);
       Float(const double& x);
+      Float(const Integer& n);
       Float(const FloatMP& x);
 
       explicit Float(const std::string& x);
@@ -68,6 +69,7 @@ namespace Ariadne {
       FloatMP& operator=(const int& n);
       FloatMP& operator=(const uint& n);
       FloatMP& operator=(const double& x);
+      FloatMP& operator=(const Integer& n);
       FloatMP& operator=(const FloatMP& x);
 
       template<class E> Float(const Expression<E>& e);

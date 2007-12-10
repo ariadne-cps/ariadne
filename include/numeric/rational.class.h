@@ -114,8 +114,8 @@ namespace Ariadne {
       template<class E> Rational& operator=(const Expression<E>& e);
 
       // Convert from a numerical expression with a rounding mode. (For convenience only). */
-      template<class E, class Rnd> Rational(const Expression<E>& e, const Rnd& rnd) { *this=e; }
-      template<class X, class Rnd> Rational(const X& e, const Rnd& rnd) { *this=e; }
+      template<class E, class Rnd> Rational(const Expression<E>& e, Rnd);
+      template<class X, class Rnd> Rational(const X& e, Rnd);
 
       //@}
       

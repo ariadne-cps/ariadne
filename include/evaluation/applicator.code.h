@@ -167,29 +167,54 @@ Evaluation::Applicator<BS>::Applicator()
 }
 
 
-template<class BS>
-Evaluation::Applicator<BS>*
-Evaluation::Applicator<BS>::clone() const 
+template<class R>
+Evaluation::Applicator<R>*
+Evaluation::Applicator<R>::clone() const 
 {
-  return new Applicator<BS>();
+  return new Applicator<R>();
 }
 
 
 
-template<class BS>
-BS
-Evaluation::Applicator<BS>::apply(const System::MapInterface<R>& f, const BS& bs) const
+template<class R>
+Geometry::Rectangle<R>
+Evaluation::Applicator<R>::apply(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& r) const
 {
-  return Evaluation::apply(f,bs);
+  return Evaluation::apply(f,r);
 }
 
-template<class BS>
+
+
+template<class R>
+Geometry::Zonotope<R,R>
+Evaluation::Applicator<R>::apply(const System::MapInterface<R>& f, const Geometry::Zonotope<R,R>& z) const
+{
+  return Evaluation::apply(f,z);
+}
+
+template<class R>
+Geometry::Zonotope<Numeric::Interval<R>,R>
+Evaluation::Applicator<R>::apply(const System::MapInterface<R>& f, const Geometry::Zonotope<I,R>& z) const
+{
+  return Evaluation::apply(f,z);
+}
+
+template<class R>
+Geometry::Zonotope< Numeric::Interval<R>, Numeric::Interval<R> >
+Evaluation::Applicator<R>::apply(const System::MapInterface<R>& f, const Geometry::Zonotope<I,I>& z) const
+{
+  return Evaluation::apply(f,z);
+}
+
+template<class R>
 void
-Evaluation::Applicator<BS>::instantiate()
+Evaluation::Applicator<R>::instantiate()
 {
-  BS* bs=0;
+  /*
+  * bs=0;
   System::MapInterface<R>* f=0;
   Evaluation::apply(*f,*bs);
+  */
 }
 
 

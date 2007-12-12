@@ -86,7 +86,7 @@ Evaluation::MapEvolver<R>::default_orbiter()
 {
   typedef Geometry::Zonotope<I,R> BS;
   const EvolutionParameters<R>& parameters=*this->_parameters;
-  Applicator<BS> applicator;
+  Applicator<R> applicator;
   return new MapOrbiter<BS>(parameters,applicator);
 }
 

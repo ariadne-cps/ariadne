@@ -51,11 +51,13 @@ namespace Ariadne {
     /*! \brief A class for computing the image of a basic set under a map. 
      *  \ingroup Applicators
      */
-    template<class BS>
+    template<class R>
     class Applicator
-      : public ApplicatorInterface<BS>
+      : public ApplicatorInterface< Geometry::Rectangle<R> >,
+        public ApplicatorInterface< Geometry::Zonotope<R,R> >,
+        public ApplicatorInterface< Geometry::Zonotope<Numeric::Interval<R>,R> >,
+        public ApplicatorInterface< Geometry::Zonotope< Numeric::Interval<R>, Numeric::Interval<R> > >
     {
-      typedef typename BS::real_type R;
       typedef Numeric::Interval<R> I;
      public:
       //@{ 
@@ -64,7 +66,7 @@ namespace Ariadne {
       Applicator();
 
       /*! \brief Make a dynamically-allocated copy. */
-      Applicator<BS>* clone() const;
+      Applicator<R>* clone() const;
      
       //@}
 
@@ -73,7 +75,13 @@ namespace Ariadne {
       //! \name Methods for applying a system to a basic set.
 
       /*! \brief Compute the image of a rectangle under a continuous function. */
-      virtual BS apply(const System::MapInterface<R>& f, const BS& bs) const;
+      virtual Geometry::Rectangle<R> apply(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& bs) const;
+      /*! \brief Compute the image of a zonotope under a continuous function. */
+      virtual Geometry::Zonotope<R,R> apply(const System::MapInterface<R>& f, const Geometry::Zonotope<R,R>& bs) const;
+      /*! \brief Compute the image of a zonotope under a continuous function. */
+      virtual Geometry::Zonotope<I,R> apply(const System::MapInterface<R>& f, const Geometry::Zonotope<I,R>& bs) const;
+      /*! \brief Compute the image of a zonotope under a continuous function. */
+      virtual Geometry::Zonotope<I,I> apply(const System::MapInterface<R>& f, const Geometry::Zonotope<I,I>& bs) const;
      private:
       static void instantiate();
       //@}

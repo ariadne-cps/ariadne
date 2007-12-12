@@ -3,6 +3,11 @@
 \page tutorial Tutorial (Incomplete)
 
 
+\section creating_functions Creating functions
+
+Currently, user-defined functions cannot be created from Python functions. 
+Instead, user-defined functions 
+
 \section creating_sets Creating sets
 
 The most general way of creating subsets of Euclidean space in Ariadne is as a constraint. 
@@ -24,6 +29,8 @@ set = intersection(join(set1,set2),set3)
 
 
 Built-in abstract sets RectangularSet and PolyhedralSet are provided for convenience.
+
+
 
 
 

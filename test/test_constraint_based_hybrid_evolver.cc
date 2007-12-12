@@ -79,7 +79,7 @@ construct_evolver()
   parameters.set_maximum_basic_set_radius(0.25);
   parameters.set_grid_length(0.125);
   
-  Applicator<BS> applicator;
+  Applicator<R> applicator;
   C1LohnerIntegrator<R> lohner_integrator; 
   const ApplicatorInterface<BS>& applicator_interface=applicator;
   const IntegratorInterface<BS>& integrator_interface=lohner_integrator;

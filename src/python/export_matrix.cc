@@ -228,7 +228,7 @@ void export_interval_matrix()
   typedef Vector< Interval<R> > IVec;
   typedef Matrix< Interval<R> > IMx;
   
-  class_<IMx>(python_name<R>("FuzzyMatrix").c_str(),no_init)
+  class_<IMx>(python_name<R>("IntervalMatrix").c_str(),no_init)
     .def("__init__", make_constructor(&make_matrix<I>) )
     .def(init<int,int>())
     //.def(init<std::string>())

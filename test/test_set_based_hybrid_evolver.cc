@@ -110,11 +110,12 @@ int test_set_based_hybrid_evolver()
   parameters.set_maximum_step_size(maximum_step_size);
   parameters.set_lock_to_grid_time(lock_to_grid_time);
 
-  Applicator<BS> applicator;
+  Applicator<R> applicator;
+  ApplicatorInterface<BS>& applicator_interface=applicator;
   AffineIntegrator<R> affine_integrator;
-  IntegratorInterface<BS>& integrator=affine_integrator;
-  MapEvolver<R> discrete_time_evolver(parameters,applicator);
-  VectorFieldEvolver<R> continuous_time_evolver(parameters,integrator);
+  IntegratorInterface<BS>& integrator_interface=affine_integrator;
+  MapEvolver<R> discrete_time_evolver(parameters,applicator_interface);
+  VectorFieldEvolver<R> continuous_time_evolver(parameters,integrator_interface);
   SetBasedHybridEvolver<R> hybrid_evolver(discrete_time_evolver,continuous_time_evolver);
   
   Grid<R> grid(Vector<R>("[0.25,0.25]"));

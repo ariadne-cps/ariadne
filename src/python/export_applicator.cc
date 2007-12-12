@@ -25,6 +25,7 @@
 
 #include "geometry/rectangle.h"
 #include "geometry/zonotope.h"
+#include "system/map_interface.h"
 #include "evaluation/applicator_interface.h"
 #include "evaluation/applicator.h"
 
@@ -54,32 +55,27 @@ class ApplicatorWrapper
     return this->get_override("write")(); }
 };
 
-template<class R>
-class GeneralApplicator
-  : public Applicator< Rectangle<R> >,
-    public Applicator< Zonotope<Interval<R>,R> >,
-    public Applicator< Zonotope< Interval<R>, Interval<R> > >
-{
-  GeneralApplicator<R>* clone() const { return new GeneralApplicator<R>(*this); }
-};
-
 
 template<class R>
 void export_applicator() 
 {
   typedef Numeric::Interval<R> I;
   class_< ApplicatorWrapper< Rectangle<R> >, boost::noncopyable >("RectangleApplicatorInterface",init<>());
+  class_< ApplicatorWrapper< Zonotope<R,R> >, boost::noncopyable >("ZonotopeApplicatorInterface",init<>());
   class_< ApplicatorWrapper< Zonotope<I,R> >, boost::noncopyable >("C0ZonotopeApplicatorInterface",init<>());
   class_< ApplicatorWrapper< Zonotope<I,I> >, boost::noncopyable >("C1ZonotopeApplicatorInterface",init<>());
 
-  class_< Applicator< Rectangle<R> >, bases<ApplicatorInterface< Rectangle<R> > > >("RectangleApplicator",init<>());
-  class_< Applicator< Zonotope<I,R> >, bases<ApplicatorInterface< Zonotope<I,R> > > >("C0ZonotopeApplicator",init<>());
-  class_< Applicator< Zonotope<I,I> >, bases<ApplicatorInterface< Zonotope<I,I> > > >("C1ZonotopeApplicator",init<>());
+  class_< Applicator<R>, 
+    bases<ApplicatorInterface< Rectangle<R> >,
+          ApplicatorInterface< Zonotope<R,R> >,
+          ApplicatorInterface< Zonotope<I,R> >,
+          ApplicatorInterface< Zonotope<I,I> > > >
+    applicator_class("Applicator",init<>());
+  applicator_class.def("apply",(Rectangle<R>(Applicator<R>::*)(const MapInterface<R>&,const Rectangle<R>&)const)&Applicator<R>::apply);
+  applicator_class.def("apply",(Zonotope<R,R>(Applicator<R>::*)(const MapInterface<R>&,const Zonotope<R,R>&)const)&Applicator<R>::apply);
+  applicator_class.def("apply",(Zonotope<I,R>(Applicator<R>::*)(const MapInterface<R>&,const Zonotope<I,R>&)const)&Applicator<R>::apply);
+  applicator_class.def("apply",(Zonotope<I,I>(Applicator<R>::*)(const MapInterface<R>&,const Zonotope<I,I>&)const)&Applicator<R>::apply);
 
-  class_< GeneralApplicator<R>, 
-        bases<ApplicatorInterface< Rectangle<R> >,
-              ApplicatorInterface< Zonotope<I,R> >,
-              ApplicatorInterface< Zonotope<I,I> > > >("Applicator",init<>());
 
 }
 

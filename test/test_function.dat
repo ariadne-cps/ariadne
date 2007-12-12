@@ -1,4 +1,3 @@
-
 function henon
   output Real[2] h;
   input Real x;

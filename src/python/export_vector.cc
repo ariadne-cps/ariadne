@@ -204,7 +204,7 @@ void export_interval_vector() {
   typedef Covector< Interval<R> > ICvec;
   typedef Matrix< Interval<R> > IMx;
   
-  class_< Vector<I> > vector_class(python_name<R>("FuzzyVector").c_str(),no_init);
+  class_< Vector<I> > vector_class(python_name<R>("IntervalVector").c_str(),no_init);
   vector_class.def("__init__", make_constructor(&make_vector<I>) );
   vector_class.def(init<int>());;
   //vector_class.def(init<std::string>());;

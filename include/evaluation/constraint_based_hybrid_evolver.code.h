@@ -91,7 +91,7 @@ Evaluation::ConstraintBasedHybridEvolver<R>::~ConstraintBasedHybridEvolver()
 template<class R>
 Evaluation::ConstraintBasedHybridEvolver<R>::ConstraintBasedHybridEvolver(const EvolutionParameters<R>& p)
   : _parameters(new EvolutionParameters<R>(p)),
-    _scheduler(new ConstraintBasedHybridScheduler<R>(Applicator<BS>(),C1LohnerIntegrator<R>(),Detector<R>()))
+    _scheduler(new ConstraintBasedHybridScheduler<R>(Applicator<R>(),C1LohnerIntegrator<R>(),Detector<R>()))
 {
 }
 

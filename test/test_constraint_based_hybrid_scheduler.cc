@@ -88,7 +88,7 @@ construct_scheduler()
   typedef Interval<R> I;
   typedef Zonotope<I,I> BS;
 
-  Applicator<BS> applicator;
+  Applicator<R> applicator;
   C1LohnerIntegrator<R> lohner_integrator; 
   Detector<R> detector;
   return ConstraintBasedHybridScheduler<R>(applicator,lohner_integrator,detector);

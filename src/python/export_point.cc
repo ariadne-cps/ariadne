@@ -32,6 +32,8 @@
 #include "geometry/point_list.h"
 #include "geometry/rectangle.h"
 
+
+
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
 using namespace Ariadne::LinearAlgebra;
@@ -56,7 +58,7 @@ std::string
 __repr__(const Point<X>& pt)
 {
   std::stringstream ss;
-  ss << "Point(" << pt << ")";
+  ss << "Point(" << pt.position_vector() << ")";
   return ss.str();
 }
 
@@ -65,8 +67,7 @@ Point<X>*
 make_point(const boost::python::object& obj) 
 {
   // See "Extracting C++ objects" in the Boost Python tutorial
-  typedef typename Numeric::traits<X>::number_type R;
-  tuple elements=extract<tuple>(obj);
+  boost::python::list elements=boost::python::extract<boost::python::list>(obj);
   int n=boost::python::len(elements);
   Point<X>& pt=*new Point<X>(n);
   for(int i=0; i!=n; ++i) {

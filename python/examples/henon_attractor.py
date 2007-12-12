@@ -30,7 +30,7 @@ print "\nAvailable classes and functions\n",dir(),"\n\n"
 
 a=Float(1.5)
 b=Float(0.875)
-henon_map=HenonMap(a,b)
+henon_map=HenonMap(Point([a,b]))
 print henon_map
 
 

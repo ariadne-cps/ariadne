@@ -216,7 +216,7 @@ export_interval_covector()
   typedef Matrix<I> IMx;
   typedef Covector<I> ICvec;
   
-  class_< Covector<I> > covector_class(python_name<R>("FuzzyCovector").c_str(),no_init);
+  class_< Covector<I> > covector_class(python_name<R>("IntervalCovector").c_str(),no_init);
   covector_class.def("__init__", make_constructor(&make_covector<I>) );
   covector_class.def(init<int>());
   covector_class.def(init<Cvec>());

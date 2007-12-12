@@ -53,9 +53,9 @@ __repr__(const Geometry::Interval<X>& ivl)
 {
   std::stringstream ss;
   if(empty(ivl)) {
-    ss << "Interval()";
+    ss << "IntervalSet()";
   } else {
-    ss << "Interval(" << ivl.lower_bound() << "," << ivl.upper_bound() << ")";
+    ss << "IntervalSet(" << ivl.lower_bound() << "," << ivl.upper_bound() << ")";
   }
   return ss.str();
 }
@@ -67,7 +67,7 @@ void export_geometry_interval()
 {
   typedef Numeric::Interval<R> I;
 
-  class_< Geometry::Interval<R> > interval_class("Interval",init<>());
+  class_< Geometry::Interval<R> > interval_class("IntervalSet",init<>());
   interval_class.def(init< double >());
   interval_class.def(init< R >());
   interval_class.def(init< double, double >());
@@ -94,7 +94,7 @@ void export_geometry_interval()
   def("interval_hull", (Geometry::Interval<R>(*)(const Geometry::Interval<R>&, const Geometry::Interval<R>&))(&Geometry::interval_hull));
 
  
-  class_< Geometry::Interval<I> > fuzzy_interval_class("FuzzyInterval",init<>());
+  class_< Geometry::Interval<I> > fuzzy_interval_class("FuzzyIntervalSet",init<>());
   fuzzy_interval_class.def(init< double >());
   fuzzy_interval_class.def(init< R >());
   fuzzy_interval_class.def(init< double, double >());

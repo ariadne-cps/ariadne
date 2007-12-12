@@ -64,7 +64,9 @@ int
 test_interval()
 {
   cout << __PRETTY_FUNCTION__ << endl;
-  
+  typedef Interval<R> I;
+
+
   R zero=0;
   
   // Construct from pair
@@ -191,6 +193,16 @@ test_interval()
     ivlf1 = f2/ivlf3;
     cout << f2 << " / " << ivlf3 << " = " << ivlf1 << endl;
     cout << endl;
+    
+    // Check to make sure aliases are handled correctly
+    ivlf1=ivlf3; ivlf1=ivlf2-ivlf1; assert(equal(ivlf1,I(ivlf2-ivlf3)));
+    ivlf1=ivlf3; ivlf1=ivlf2*ivlf1; assert(equal(ivlf1,I(ivlf2*ivlf3)));
+    ivlf1=ivlf2; ivlf1=ivlf1*ivlf3; assert(equal(ivlf1,I(ivlf2*ivlf3)));
+    ivlf1=ivlf2; ivlf1=ivlf1*f3; assert(equal(ivlf1,I(ivlf2*f3)));
+    ivlf1=ivlf3; ivlf1=f2*ivlf1; assert(equal(ivlf1,I(f2*ivlf3)));
+    ivlf1=ivlf2; ivlf1=ivlf1/ivlf3; assert(equal(ivlf1,I(ivlf2/ivlf3)));
+    ivlf1=ivlf2; ivlf1=ivlf1/f3; assert(equal(ivlf1,I(ivlf2/f3)));
+    ivlf1=ivlf3; ivlf1=f2/ivlf1; assert(equal(ivlf1,I(f2/ivlf3)));
     
 
     ivlq1 = ivlq2+ivlq3;

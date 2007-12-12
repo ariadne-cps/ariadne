@@ -106,6 +106,9 @@ void export_taylor_series()
   def("abs",(TS(*)(const TS&))&Function::abs);
   def("pow",(TS(*)(const TS&, const uint&))&Function::pow);
 
+  def("rec", (TS(*)(const TS&))&Function::rec);
+  def("rec", (TS(*)(smoothness_type, const A&))&TS::rec);
+
   def("sqrt", (TS(*)(const TS&))&Function::sqrt);
   def("exp", (TS(*)(const TS&))&Function::exp);
   def("log", (TS(*)(const TS&))&Function::log);

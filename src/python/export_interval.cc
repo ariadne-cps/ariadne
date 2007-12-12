@@ -62,7 +62,7 @@ __repr__(const Interval<R>& ivl) {
   std::stringstream ss;
   //ss << std::fixed;
   ss << std::setprecision(20);
-  ss << "FuzzyFloat(" << ivl.lower();
+  ss << "Interval(" << ivl.lower();
   if(ivl.lower()!=ivl.upper()) {
     ss << "," << ivl.upper();
   }
@@ -78,7 +78,7 @@ void export_interval()
 
   // FIXME: pow(Interval<R>,Integer) doesn't work 
 
-  class_< Interval<R> >(python_name<R>("FuzzyFloat").c_str())
+  class_< Interval<R> >(python_name<R>("Interval").c_str())
     .def(init<std::string>())
     .def(init<int,int>())
     .def(init<double,double>())

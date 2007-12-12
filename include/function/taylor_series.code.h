@@ -199,10 +199,11 @@ Function::TaylorSeries<X>
 Function::TaylorSeries<X>::rec(smoothness_type d, const X& c) 
 {
   TaylorSeries<X> y(d);
-  X mr = X(-1)/c;
+  X mr = -1/c;
   for(size_type i=0; i<=y.degree(); ++i) {
     y[i]=(-Numeric::fac<int>(i))*Numeric::pow(mr,i+1u);
   }
+  
   return y;
 }
 
@@ -217,6 +218,7 @@ Function::TaylorSeries<X>::pow(smoothness_type d, const X& c, const uint& k)
     int j=n-i;
     y[i]=(Numeric::fac<int>(n)/Numeric::fac<int>(j))*Numeric::pow(c,j);
   }
+  std::cout << "pow("<<d<<","<<c<<","<<k<<")="<<y<<std::endl;
   return y;
 }
 

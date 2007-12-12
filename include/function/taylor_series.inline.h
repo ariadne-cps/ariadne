@@ -219,77 +219,77 @@ template<class X> inline
 Function::TaylorSeries<X> 
 Function::pow(const TaylorSeries<X>& x, const uint& k)
 {
-  return compose(x,TaylorSeries<X>::pow(x.degree(),x.value(),k));
+  return compose(TaylorSeries<X>::pow(x.degree(),x.value(),k),x);
 }
 
 template<class X> inline
 Function::TaylorSeries<X> 
 Function::pow(const TaylorSeries<X>& x, const int& k)
 {
-  return compose(x,TaylorSeries<X>::pow(x.degree(),x.value(),uint(k)));
+  return compose(TaylorSeries<X>::pow(x.degree(),x.value(),uint(k)),x);
 }
 
 template<class X>  
 Function::TaylorSeries<X> 
 Function::sqrt(const TaylorSeries<X>& x) 
 {
-  return compose(x,TaylorSeries<X>::sqrt(x.degree(),x.value()));
+  return compose(TaylorSeries<X>::sqrt(x.degree(),x.value()),x);
 }
 
 template<class X>  
 Function::TaylorSeries<X> 
 Function::exp(const TaylorSeries<X>& x) 
 {
-  return compose(x,TaylorSeries<X>::exp(x.degree(),x.value()));
+  return compose(TaylorSeries<X>::exp(x.degree(),x.value()),x);
 }
 
 template<class X>  
 Function::TaylorSeries<X> 
 Function::log(const TaylorSeries<X>& x) 
 {
-  return compose(x,TaylorSeries<X>::log(x.degree(),x.value()));
+  return compose(TaylorSeries<X>::log(x.degree(),x.value()),x);
 }
 
 template<class X>  
 Function::TaylorSeries<X> 
 Function::sin(const TaylorSeries<X>& x) 
 {
-  return compose(x,TaylorSeries<X>::sin(x.degree(),x.value()));
+  return compose(TaylorSeries<X>::sin(x.degree(),x.value()),x);
 }
 
 template<class X>  
 Function::TaylorSeries<X> 
 Function::cos(const TaylorSeries<X>& x) 
 {
-  return compose(x,TaylorSeries<X>::cos(x.degree(),x.value()));
+  return compose(TaylorSeries<X>::cos(x.degree(),x.value()),x);
 }
 
 template<class X>  
 Function::TaylorSeries<X> 
 Function::tan(const TaylorSeries<X>& x) 
 {
-  return compose(x,TaylorSeries<X>::tan(x.degree(),x.value()));
+  return compose(TaylorSeries<X>::tan(x.degree(),x.value()),x);
 }
 
 template<class X>  
 Function::TaylorSeries<X> 
 Function::asin(const TaylorSeries<X>& x) 
 {
-  return compose(x,TaylorSeries<X>::asin(x.degree(),x.value()));
+  return compose(TaylorSeries<X>::asin(x.degree(),x.value()),x);
 }
 
 template<class X>  
 Function::TaylorSeries<X> 
 Function::acos(const TaylorSeries<X>& x) 
 {
-  return compose(x,TaylorSeries<X>::acos(x.degree(),x.value()));
+  return compose(TaylorSeries<X>::acos(x.degree(),x.value()),x);
 }
 
 template<class X>  
 Function::TaylorSeries<X> 
 Function::atan(const TaylorSeries<X>& x) 
 {
-  return compose(x,TaylorSeries<X>::atan(x.degree(),x.value()));
+  return compose(TaylorSeries<X>::atan(x.degree(),x.value()),x);
 }
 
 

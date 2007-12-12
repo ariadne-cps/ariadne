@@ -95,7 +95,7 @@ template<class R>
 std::string
 __repr__(const R& x) {
   std::stringstream ss;
-  ss << "FloatPy(";
+  ss << "Float(";
   if(x==R(Numeric::floor(x))) {
     ss << x;
   } else {

@@ -437,21 +437,33 @@ void add_(Interval<R>& r, const X& x, const Y& y) {
 
 
 template<class R, class X, class Y> inline
-void sub_(Interval<R>& r, const Interval<X>& x, const Interval<Y>& y) {
+void sub_noalias_(Interval<R>& r, const Interval<X>& x, const Interval<Y>& y) {
   sub_(r._lower,x._lower,y._upper,round_down); 
   sub_(r._upper,x._upper,y._lower,round_up);
+}
+
+template<class R, class X, class Y> inline
+void sub_noalias_(Interval<R>& r, const X& x, const Interval<Y>& y) {
+  sub_(r._lower,x,y._upper,round_down); 
+  sub_(r._upper,x,y._lower,round_up);
+}
+
+template<class R, class X, class Y> inline
+void sub_(Interval<R>& r, const Interval<X>& x, const Interval<Y>& y) {
+  if(&r==&y) { Interval<R> t; sub_noalias_(t,x,y); r=t; }
+  else { sub_noalias_(r,x,y); }
+}
+
+template<class R, class X, class Y> inline
+void sub_(Interval<R>& r, const X& x, const Interval<Y>&  y) {
+  if(&r==&y) { Interval<R> t; sub_noalias_(t,x,y); r=t; }
+  else { sub_noalias_(r,x,y); }
 }
 
 template<class R, class X, class Y> inline
 void sub_(Interval<R>& r, const Interval<X>& x, const Y& y) {
   sub_(r._lower,x._lower,y,round_down); 
   sub_(r._upper,x._upper,y,round_up);
-}
-
-template<class R, class X, class Y> inline
-void sub_(Interval<R>& r, const X& x, const Interval<Y>&  y) {
-  sub_(r._lower,x,y._upper,round_down); 
-  sub_(r._upper,x,y._lower,round_up);
 }
 
 template<class R, class X, class Y> inline
@@ -467,10 +479,8 @@ void sub_(Interval<R>& r, const X& x, const Y& y) {
 
 
 
-
-
 template<class R, class X, class Y> 
-void mul_(Interval<R>& r, const Interval<X>& x, const Interval<Y>& y) {
+void mul_noalias_(Interval<R>& r, const Interval<X>& x, const Interval<Y>& y) {
   R& rl = r._lower;
   R& ru = r._upper;
   const X& xl = x.lower();
@@ -480,6 +490,7 @@ void mul_(Interval<R>& r, const Interval<X>& x, const Interval<Y>& y) {
   RoundDown d;
   RoundUp u;
   
+  //FIXME: Case where &r==&x or &r==&y;
   if (xl>=0) {
     if (yl>=0) {
       mul_(rl,xl,yl,d); mul_(ru,xu,yu,u);
@@ -509,14 +520,46 @@ void mul_(Interval<R>& r, const Interval<X>& x, const Interval<Y>& y) {
   }
 }    
 
-template<class R, class X, class Y> inline
+
+
+template<class R, class X, class Y> 
+void mul_noalias_(Interval<R>& r, const Interval<X>& x, const Y& y) {
+  typedef Interval<R> I;
+  R& rl = r._lower;
+  R& ru = r._upper;
+  const X& xl = x.lower();
+  const X& xu = x.upper();
+  RoundDown d;
+  RoundUp u;
+  
+  if (y>=0) {
+    mul_(rl,xl,y,d); mul_(ru,xu,y,u);
+  } else {
+    mul_(rl,xu,y,d); mul_(ru,xl,y,u);
+  }
+}
+
+template<class R, class X, class Y> 
+void mul_(Interval<R>& r, const Interval<X>& x, const Interval<Y>& y) {
+  if(&r==&x || &r==&y) {
+    Interval<R> t; mul_noalias_(t,x,y); r=t;
+  } else {
+    mul_noalias_(r,x,y);
+  }
+}
+
+template<class R, class X, class Y> 
 void mul_(Interval<R>& r, const Interval<X>& x, const Y& y) {
-  mul_(r,x,Interval<R>(y));
+  if(&r==&x) {
+    Interval<R> t; mul_noalias_(t,x,y); r=t;
+  } else {
+    mul_noalias_(r,x,y);
+  }
 }
 
 template<class R, class X, class Y> inline
 void mul_(Interval<R>& r, const X& x, const Interval<Y>& y) {
-  mul_(r,Interval<R>(x),y);
+  mul_(r,y,x);
 }
 
 template<class R, class X, class Y> inline
@@ -526,7 +569,7 @@ void mul_(Interval<R>& r, const X& x, const Y& y) {
 
 
 template<class R, class X, class Y> 
-void div_(Interval<R>& r, const Interval<X>& x, const Interval<Y>& y) {
+void div_noalias_(Interval<R>& r, const Interval<X>& x, const Interval<Y>& y) {
   typedef Interval<R> I;
   R& rl = r._lower;
   R& ru = r._upper;
@@ -558,9 +601,15 @@ void div_(Interval<R>& r, const Interval<X>& x, const Interval<Y>& y) {
   }
 }
 
+template<class R, class X, class Y> 
+void div_(Interval<R>& r, const Interval<X>& x, const Interval<Y>& y) {
+  if(&r==&x || &r==&y) { Interval<R> t; div_noalias_(t,x,y); r=t; }
+  else { div_noalias_(r,x,y); }
+}
+
 template<class R, class X, class Y> inline
 void div_(Interval<R>& r, const Interval<X>& x, const Y& y) {
-  div_(r,x,Interval<R>(y)); 
+  div_(r,x,Interval<R>(y));
 }
 
 template<class R, class X, class Y> inline
@@ -615,14 +664,31 @@ template<class R> inline
 Interval<R> abs(const Interval<R>& x) {
   Interval<R> r; abs_(r,x); return r; }
 
-template<class R,class N> inline
-void pow_(Interval<R>& r, const Interval<R>& x, const N& n) {
-  Interval<R> result=R(1);
-  for(N i=0; i!=n; ++i) {
-    result*=x;
+template<class R> inline
+void pow_(Interval<R>& r, const Interval<R>& x, const uint& n) {
+  Interval<R> y=x;
+  r=1;
+  for(uint i=0; i!=n; ++i) {
+    r=r*y;
   }
-  r=result;
 }
+
+template<class R> inline
+void pow_(Interval<R>& r, const Interval<R>& x, const int& n) {
+  if(n>=0) { pow_(r,x,uint(n)); }
+  else { pow_(r,Interval<R>(1/x),uint(-n)); }
+}
+
+template<class R> inline
+void pow_(Interval<R>& r, const Interval<R>& x, const Integer& n) {
+  Integer m=abs(n);
+  Interval<R> a = (n>=0) ? x : 1/x;
+  r=1;
+  for(Integer i=0; i!=m; ++i) {
+    r*=a;
+  }
+}
+
 
 
 

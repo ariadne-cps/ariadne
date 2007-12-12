@@ -36,6 +36,10 @@
 namespace Ariadne {
   namespace System {
 
+    const dimension_type henon_dimension=2;
+    const dimension_type henon_number_of_parameters=2;
+    const smoothness_type henon_smoothness=255;
+
     template<class R, class A, class P>
     void henon_function(R& r, const A& x, const P& p) 
     {
@@ -55,9 +59,11 @@ namespace Ariadne {
      *  \brief The Henon map \f$(x,y)\mapsto(a-x^2-by,x)\f$ with inverse \f$(w,z)\mapsto(z,(a-z^2-w)/b)\f$.
      */
 
-    ARIADNE_BUILD_MAP(HenonMap,henon_function,2,2,2,255);
+    ARIADNE_BUILD_MAP(HenonMap,henon_function,
+      henon_dimension,henon_dimension,henon_number_of_parameters,henon_smoothness);
 
-    ARIADNE_BUILD_MAP(HenonInverseMap,henon_inverse_function,2,2,2,255);
+    ARIADNE_BUILD_MAP(HenonInverseMap,henon_inverse_function,
+      henon_dimension,henon_dimension,henon_number_of_parameters,henon_smoothness);
 
 
      

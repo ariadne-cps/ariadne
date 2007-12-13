@@ -77,7 +77,7 @@
       const Geometry::Point<R>& p=this->_p; \
       Function::TaylorDerivative<X> dr(d,d,s);   \
       Function::TaylorDerivative<X> dx(d,d,s);   \
-      for(uint i=0; i!=d; ++i) { dx[i]=Function::TaylorVariable<X>::variable(d,s,i,x[i]); } \
+      for(uint i=0; i!=d; ++i) { dx[i]=Function::TaylorVariable<X>::variable(d,s,x[i],i); } \
       f(dr,dx,p); \
       return dr; \
     } \

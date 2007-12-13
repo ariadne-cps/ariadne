@@ -21,6 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+#include "linear_algebra/vector.h"
 
 namespace Ariadne {
 
@@ -101,7 +102,7 @@ Function::TaylorVariable<X>::constant(size_type a, smoothness_type d, const XX& 
 
 template<class X> template<class XX> 
 Function::TaylorVariable<X> 
-Function::TaylorVariable<X>::variable(size_type a, smoothness_type d, size_type i, const XX& x) 
+Function::TaylorVariable<X>::variable(size_type a, smoothness_type d, const XX& x, size_type i) 
 {
   TaylorVariable<X> result(a,d);
   result._data[0]=x; 
@@ -175,56 +176,59 @@ template<class X, class R>
 Function::TaylorVariable<X> 
 Function::operator+(const TaylorVariable<X>& x, const R& c)
 {
-  throw NotImplemented(__PRETTY_FUNCTION__);
+  TaylorVariable<X> r=x; r.data()[0]+=c; return r;
 }
 
 template<class X, class R> 
 Function::TaylorVariable<X> 
 Function::operator+(const R& c, const TaylorVariable<X>& x)
 {
-  throw NotImplemented(__PRETTY_FUNCTION__);
+  TaylorVariable<X> r=x; r.data()[0]+=c; return r;
 }
 
 template<class X, class R> 
 Function::TaylorVariable<X> 
 Function::operator-(const TaylorVariable<X>& x, const R& c)
 {
-  throw NotImplemented(__PRETTY_FUNCTION__);
+  TaylorVariable<X> r=x; r.data()[0]-=c; return r;
 }
 
 template<class X, class R> 
 Function::TaylorVariable<X> 
 Function::operator-(const R& c, const TaylorVariable<X>& x)
 {
-  throw NotImplemented(__PRETTY_FUNCTION__);
+  TaylorVariable<X> r=-x; r.data()[0]+=c; return r;
 }
 
 template<class X, class R> 
 Function::TaylorVariable<X> 
 Function::operator*(const TaylorVariable<X>& x, const R& c)
 {
-  throw NotImplemented(__PRETTY_FUNCTION__);
+  using LinearAlgebra::Vector;
+  TaylorVariable<X> r(x.argument_size(),x.degree()); 
+  reinterpret_cast<Vector<X>&>(r.data())=c*reinterpret_cast<const Vector<X>&>(x.data());
+  return r;
 }
 
 template<class X, class R> 
 Function::TaylorVariable<X> 
 Function::operator*(const R& c, const TaylorVariable<X>& x)
 {
-  throw NotImplemented(__PRETTY_FUNCTION__);
+  return x*c;
 }
 
 template<class X, class R> 
 Function::TaylorVariable<X> 
 Function::operator/(const TaylorVariable<X>& x, const R& c)
 {
-  throw NotImplemented(__PRETTY_FUNCTION__);
+  return x*X(X(1)/c); // Careful! If R=int then 1/c gives integer division
 }
 
 template<class X, class R> 
 Function::TaylorVariable<X> 
 Function::operator/(const R& c, const TaylorVariable<X>& x)
 {
-  throw NotImplemented(__PRETTY_FUNCTION__);
+  return c*rec(x);
 }
 
 

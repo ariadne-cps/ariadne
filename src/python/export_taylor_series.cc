@@ -95,8 +95,8 @@ void export_taylor_series()
   taylor_series_class.def("__pow__", &Python::pow<TS,TS,int>);
   taylor_series_class.def(self_ns::str(self));
   
-  def("constant",(TS(*)(smoothness_type d, const A&))&Function::TaylorSeries<A>::variable);
-  def("variable",(TS(*)(smoothness_type d, const A&))&Function::TaylorSeries<A>::variable);
+  def("constant",(TS(*)(smoothness_type, const A&))&Function::TaylorSeries<A>::constant);
+  def("variable",(TS(*)(smoothness_type, const A&))&Function::TaylorSeries<A>::variable);
 
   def("compose",(TS(*)(const TS&,const TS&))&Function::compose);
   def("inverse",(TS(*)(const TS&,const A&))&Function::inverse);
@@ -118,6 +118,18 @@ void export_taylor_series()
   def("asin", (TS(*)(const TS&))&Function::asin);
   def("acos", (TS(*)(const TS&))&Function::acos);
   def("atan", (TS(*)(const TS&))&Function::atan);
+
+  def("rec_series", (TS(*)(smoothness_type, const A&))&TS::rec);
+  def("pow_series",(TS(*)(smoothness_type, const A&, const uint&))&TS::pow);
+  def("sqrt_series", (TS(*)(smoothness_type, const A&))&TS::sqrt);
+  def("exp_series", (TS(*)(smoothness_type, const A&))&TS::exp);
+  def("log_series", (TS(*)(smoothness_type, const A&))&TS::log);
+  def("sin_series", (TS(*)(smoothness_type, const A&))&TS::sin);
+  def("cos_series", (TS(*)(smoothness_type, const A&))&TS::cos);
+  def("tan_series", (TS(*)(smoothness_type, const A&))&TS::tan);
+  def("asin_series", (TS(*)(smoothness_type, const A&))&TS::asin);
+  def("acos_series", (TS(*)(smoothness_type, const A&))&TS::acos);
+  def("atan_series", (TS(*)(smoothness_type, const A&))&TS::atan);
 
 }
 

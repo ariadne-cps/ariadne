@@ -82,7 +82,7 @@ namespace Ariadne {
       /*! \brief Construct a constant variable of degree \a d with respect to \a as variables and value \a c. */
       template<class XX> static TaylorVariable<X> constant(size_type as, smoothness_type d, const XX& c); 
       /*! \brief Construct the variable of degree \a d at value \a value with respect to the \a i<sup>th</sup> variable of \a as. */
-      template<class XX> static TaylorVariable<X> variable(size_type as, smoothness_type d, size_type i, const XX& value);
+      template<class XX> static TaylorVariable<X> variable(size_type as, smoothness_type d, const XX& value, size_type i);
 
       /*! \brief The number of variables of the argument. */
       size_type argument_size() const; 
@@ -180,7 +180,7 @@ namespace Ariadne {
   template<class X> TaylorVariable<X> pos(const TaylorVariable<X>& x);
   template<class X> TaylorVariable<X> neg(const TaylorVariable<X>& x);
   template<class X> TaylorVariable<X> abs(const TaylorVariable<X>& x);
-  template<class X> TaylorVariable<X> inv(const TaylorVariable<X>& x);
+  template<class X> TaylorVariable<X> rec(const TaylorVariable<X>& x);
   template<class X> TaylorVariable<X> add(const TaylorVariable<X>& x, const TaylorVariable<X>& y);
   template<class X> TaylorVariable<X> sub(const TaylorVariable<X>& x, const TaylorVariable<X>& y);
   template<class X> TaylorVariable<X> mul(const TaylorVariable<X>& x, const TaylorVariable<X>& y);

@@ -218,7 +218,7 @@ Function::TaylorSeries<X>::pow(smoothness_type d, const X& c, const uint& k)
     int j=n-i;
     y[i]=(Numeric::fac<int>(n)/Numeric::fac<int>(j))*Numeric::pow(c,j);
   }
-  std::cout << "pow("<<d<<","<<c<<","<<k<<")="<<y<<std::endl;
+  //std::cout << "pow("<<d<<","<<c<<","<<k<<")="<<y<<std::endl;
   return y;
 }
 

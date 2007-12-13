@@ -41,7 +41,7 @@ compute_product(Function::TaylorVariable<X0>& x0, const Function::TaylorVariable
       //std::cout << "i0=" << i0 << ", i1=" << i1 << ", i2=" << i2 << std::endl;
       // FIXME: Use Integer
       //Numeric::Integer c=i0.factorial()/(i1.factorial()*i2.factorial());
-      unsigned int c=choose(i0,i1);
+      uint c=choose(i0,i1);
       x0[i0]+=X0(c)*x1[i1]*x2[i2];
     }
   }
@@ -49,7 +49,9 @@ compute_product(Function::TaylorVariable<X0>& x0, const Function::TaylorVariable
 
 template<class X0, class X1, class X2>
 void 
-compute_composition(Function::TaylorVariable<X0>& z, const Function::TaylorSeries<X1>& y, const Function::TaylorVariable<X2>& x)
+compute_composition(Function::TaylorVariable<X0>& z, 
+                    const Function::TaylorSeries<X1>& y, 
+                    const Function::TaylorVariable<X2>& x)
 {
   using namespace Function;
   //std::cerr << "y=" << y << std::endl;
@@ -66,7 +68,8 @@ compute_composition(Function::TaylorVariable<X0>& z, const Function::TaylorSerie
     TaylorVariable<X0> u(x.argument_size(),n);
     compute_product(u,t,w);
     u.value()=y[d-n];
-    t=u;
+    //std::cerr<<"u="<<u<<", n="<<n<<", u/(d+1-n)="<<u/(d+1-n)<<std::endl;
+    t=u/(d+1-n);
     //std::cerr << "t[" << n << "]=" << t << std::endl;
   }
   z=t;
@@ -274,15 +277,9 @@ Function::abs(const TaylorVariable<X>& x)
 
 template<class X> 
 Function::TaylorVariable<X> 
-Function::inv(const TaylorVariable<X>& x)
+Function::rec(const TaylorVariable<X>& x)
 {
-  TaylorSeries<X> y(x.degree());
-  X mr = X(-1)/x.value();
-  for(size_type i=0; i<=y.degree(); ++i) {
-    y[i]=(-Numeric::fac<int>(i))*pow(mr,i+1);
-  }
-  //std::cerr << y << std::endl;
-  return compose(y,x);
+  return compose(TaylorSeries<X>::rec(x.degree(),x.value()),x);
 }
 
 template<class X> 
@@ -322,7 +319,7 @@ template<class X>
 Function::TaylorVariable<X> 
 Function::div(const TaylorVariable<X>& x, const TaylorVariable<X>& y)
 {
-  return mul(x,inv(y));
+  return mul(x,rec(y));
 }
 
 template<class X, class N> 

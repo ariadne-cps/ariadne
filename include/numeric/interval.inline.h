@@ -716,7 +716,7 @@ void hypot_(Interval<R>& r, const R& x, const R& y) {
 template<class R, class X, class Y> inline 
 void hypot_(Interval<R> r, const Interval<X>& x, const Interval<Y>& y) {
   hypot_(r._lower,x._lower,y._lower,round_down); 
-  hypot_(r._upper,x._lower,y._lower,round_up); } 
+  hypot_(r._upper,x._upper,y._upper,round_up); } 
 
 
 template<class R> inline
@@ -727,7 +727,7 @@ void exp_(Interval<R>& r, const R& x) {
 template<class R, class X> inline 
 void exp_(Interval<R>& r, const Interval<X>& x) {
   exp_(r._lower,x._lower,round_down); 
-  exp_(r._upper,x._lower,round_up); } 
+  exp_(r._upper,x._upper,round_up); } 
 
 
 template<class R> inline
@@ -738,7 +738,7 @@ void log_(Interval<R>& r, const R& x) {
 template<class R, class X> inline 
 void log_(Interval<R>& r, const Interval<X>& x) {
   log_(r._lower,x._lower,round_down); 
-  log_(r._upper,x._lower,round_up); } 
+  log_(r._upper,x._upper,round_up); } 
 
 
 // Trigonometric functions for non-interval classes.

@@ -325,7 +325,7 @@ namespace Ariadne {
       
     inline
     size_type 
-    factorial(const MultiIndex& i)
+    fac(const MultiIndex& i)
     {
       size_type result=1;
       for(size_type k=0; k!=i.number_of_variables(); ++k) {
@@ -336,7 +336,7 @@ namespace Ariadne {
       
     inline
     size_type 
-    choose(const MultiIndex& n, const MultiIndex& k)
+    bin(const MultiIndex& n, const MultiIndex& k)
     {
       assert(n.number_of_variables()==k.number_of_variables());
       size_type result=1;

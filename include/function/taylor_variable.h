@@ -106,6 +106,7 @@ namespace Ariadne {
     /*! \brief The composition of two variables computes \f$d^iy/dt^i\f$ from \f$d^iy/dx^i\f$ and \f$d^ix/dt^i\f$. 
      *  The composition inductively by
      *  \f$ y^{[n]} = \sum_{i=0}^{n-1} \Bigl(\!\begin{array}{c}n\\i\end{array}\!\Bigr) {\dot{y}}^{[i]} x^{(n-i)} \f$
+     *  \f$ y = a_0 + x ( a_1 + x ( a_2/2 + x ( a_3/3! + \cdots)))\f$.
      */
     friend TaylorVariable<X> compose(const TaylorVariable<X>& y, const TaylorVariable<X>& x);
     /*! \brief The derivative of the inverse of \f$y\f$ evaluated at \f$x\f$. (Not currently implemented.) */
@@ -173,6 +174,7 @@ namespace Ariadne {
 
 
   template<class X> TaylorVariable<X> compose(const TaylorSeries<X>& y, const TaylorVariable<X>& x);
+  template<class X> TaylorVariable<X> compose(const TaylorVariable<X>& y, const TaylorVariable<X>& x);
   template<class X> TaylorVariable<X> reduce(const TaylorVariable<X>& x);
   template<class X> TaylorVariable<X> derivative(const TaylorVariable<X>& x, const size_type& k);
   template<class X> TaylorVariable<X> min(const TaylorVariable<X>& x1, const TaylorVariable<X>& x2); 
@@ -211,6 +213,8 @@ namespace Ariadne {
   template<class X, class R> TaylorVariable<X> operator*(const R& c, const TaylorVariable<X>& x);
   template<class X, class R> TaylorVariable<X> operator/(const TaylorVariable<X>& x, const R& c);
   template<class X, class R> TaylorVariable<X> operator/(const R& c, const TaylorVariable<X>& x);
+
+  template<class X, class R> TaylorVariable<X> operator/=(const TaylorVariable<X>& x, const R& c);
 
   template<class X> std::ostream& operator<<(std::ostream& os, const TaylorVariable<X>& x);
 

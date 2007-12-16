@@ -59,6 +59,7 @@ class TestTaylorVariable {
     ARIADNE_TEST_CALL(test_sub());
     ARIADNE_TEST_CALL(test_mul());
     ARIADNE_TEST_CALL(test_div());
+    ARIADNE_TEST_CALL(test_rec());
     ARIADNE_TEST_CALL(test_pow());
     ARIADNE_TEST_CALL(test_compose());
   }
@@ -95,6 +96,11 @@ class TestTaylorVariable {
     cout << x1 << "/" << x2 << " = " << x1/x2 << std::endl;
     assert((x1/x2)==TaylorVariable<X>("[0.5,0.25,-0.25,0.375]"));
     */
+  }
+
+  void test_rec() {
+    TaylorVariable<X> x=TaylorVariable<X>::variable(1,5,1.0,0);
+    assert(rec(rec(x))==x);
   }
 
   void test_pow() {

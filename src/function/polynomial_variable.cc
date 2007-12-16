@@ -1,5 +1,5 @@
 /***************************************************************************
- *            polynomial.cc
+ *            polynomial_variable.cc
  *
  *  Copyright  2007  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -22,24 +22,22 @@
  */
 
 #include "numeric/float.h"
-
-#include "function/polynomial.h"
-#include "function/polynomial.code.h"
+#include "numeric/interval.h"
+#include "function/polynomial_variable.h"
+#include "function/polynomial_variable.code.h"
 
 namespace Ariadne {
   namespace Function {
     using namespace Numeric;
     
-    template class Polynomial<Rational>;
+    //template class PolynomialVariable<Rational>;
 
 #ifdef ENABLE_FLOAT64
-    template class Polynomial<Float64>;
-    template class Polynomial< Interval<Float64> >;
+    template class PolynomialVariable<Interval64>;
 #endif
     
 #ifdef ENABLE_FLOATMP
-    template class Polynomial<FloatMP>;
-    template class Polynomial< Interval<FloatMP> >;
+    template class PolynomialVariable<IntervalMP>;
 #endif
 
   }

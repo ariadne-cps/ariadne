@@ -108,7 +108,7 @@ namespace Ariadne {
         return _a.number_of_columns();
       }
       
-      /*! \brief The dimension of the result. */
+      /*! \brief The smoothness of the function. */
       virtual smoothness_type smoothness() const { return std::numeric_limits<smoothness_type>::max(); }
       
       /*! \brief The dimension of the result. */

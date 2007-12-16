@@ -56,10 +56,12 @@ ARIADNE_SRC = ariadne_module.cc \
 	export_taylor_series.cc \
 	export_taylor_variable.cc \
 	export_taylor_derivative.cc \
+	export_polynomial_variable.cc \
 	 \
 	export_point.cc \
+	export_box.cc \
 	export_set.cc \
-	export_geometry_interval.cc \
+	export_interval_set.cc \
 	export_rectangle.cc \
 	export_orthotope.cc \
 	export_zonotope.cc \

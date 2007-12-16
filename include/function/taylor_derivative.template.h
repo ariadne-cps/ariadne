@@ -74,6 +74,7 @@ template<class X0, class X1, class X2>
 void 
 Function::compute_composition(TaylorVariable<X0>& z, const TaylorVariable<X1>& y, const TaylorDerivative<X2>& x)
 {
+  throw NotImplemented(__PRETTY_FUNCTION__);
   // FIXME: Rewrite this function
 }
 
@@ -81,6 +82,7 @@ template<class X0, class X1, class X2>
 void 
 Function::compute_composition(TaylorDerivative<X0>& z, const TaylorDerivative<X1>& y, const TaylorDerivative<X2>& x)
 {
+  throw NotImplemented(__PRETTY_FUNCTION__);
   // FIXME: Rewrite this function
   //std::cerr << "y=" << y << std::endl;
   //std::cerr << "z=" << z << std::endl;

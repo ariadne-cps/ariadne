@@ -78,7 +78,7 @@ template<class X> template<class XX>
 bool 
 Function::TaylorVariable<X>::operator==(const TaylorVariable<XX>& other) 
 {
-  return this->_argument_size==other->_argument_size
+  return this->_argument_size==other._argument_size
     && this->_degree==other._degree
     && this->_data==other._data; 
 }
@@ -151,6 +151,7 @@ template<class X>
 std::ostream& 
 Function::operator<<(std::ostream& os, const TaylorVariable<X>& x) {
   //  return os << "TaylorVariable( argument_size=" << x.argument_size() << ", degree=" << x.degree() << ", data=" << x.data() << ")";
+  os << "TaylorVariable(";
   size_type degree=0;
   for(MultiIndex i(x.argument_size()); i.degree()<=x.degree(); ++i) {
     if(i.degree()==0) {
@@ -164,6 +165,7 @@ Function::operator<<(std::ostream& os, const TaylorVariable<X>& x) {
     os << x[i];
   }
   os << ']';
+  os << ")";
   return os;
 
 //  return os << "TaylorVariable( argument_size=" << x.argument_size() << ", degree=" << x.degree() << ", data=" << x.data() << ")";
@@ -230,6 +232,15 @@ Function::operator/(const R& c, const TaylorVariable<X>& x)
 {
   return c*rec(x);
 }
+
+template<class X,class R>  
+Function::TaylorVariable<X>&
+Function::operator/=(const TaylorVariable<X>& x, const R& c)
+{
+  reinterpret_cast< LinearAlgebra::Vector<X>& >(x.data())/=X(c);
+  return x;
+}
+
 
 
 

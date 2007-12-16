@@ -70,7 +70,8 @@ namespace Ariadne {
      */
     template<class R>
     class FunctionInterface {
-      typedef typename Numeric::traits<R>::arithmetic_type A; 
+      typedef typename Numeric::traits<R>::arithmetic_type F;
+      typedef typename Numeric::traits<R>::interval_type I;
      public:
       /*! \brief The real number type. */
       typedef R real_type;
@@ -85,10 +86,10 @@ namespace Ariadne {
       virtual std::string name() const = 0;
 
       /*! \brief Evaluate the function. */
-      LinearAlgebra::Vector<A> operator() (const LinearAlgebra::Vector<A>& x) const;
+      LinearAlgebra::Vector<F> operator() (const LinearAlgebra::Vector<F>& x) const;
 
       /*! \brief Evaluate the function. */
-      virtual LinearAlgebra::Vector<A> evaluate(const LinearAlgebra::Vector<A>& x) const = 0;
+      virtual LinearAlgebra::Vector<F> evaluate(const LinearAlgebra::Vector<F>& x) const = 0;
 
       /*! \brief The degree of differentiability of the function. */
       virtual smoothness_type smoothness() const = 0;
@@ -108,10 +109,11 @@ namespace Ariadne {
     class DifferentiableFunctionInterface 
       : public FunctionInterface<R>
     {
-      typedef typename Numeric::traits<R>::arithmetic_type A; 
+      typedef typename Numeric::traits<R>::arithmetic_type F; 
+      typedef typename Numeric::traits<R>::interval_type I;
      public:
       /*! \brief Evaluate the Jacobian derivative matrix at the point \a x. */
-      virtual LinearAlgebra::Matrix<A> jacobian(const LinearAlgebra::Vector<A>& x) const = 0;
+      virtual LinearAlgebra::Matrix<F> jacobian(const LinearAlgebra::Vector<F>& x) const = 0;
       /*! \brief Make a copy (clone) of the function. */
       virtual DifferentiableFunctionInterface<R>* clone() const = 0;
      
@@ -124,12 +126,13 @@ namespace Ariadne {
     class SmoothFunctionInterface 
       : public DifferentiableFunctionInterface<R>
     {
-      typedef typename Numeric::traits<R>::arithmetic_type A; 
+      typedef typename Numeric::traits<R>::arithmetic_type F; 
+      typedef typename Numeric::traits<R>::interval_type I;
      public:
       /*! \brief Make a copy (clone) of the function. */
       virtual SmoothFunctionInterface<R>* clone() const = 0;
       /*! \brief Evaluate the derivative of the function. */
-      virtual A derivative(const LinearAlgebra::Vector<A>& x, const size_type& i, const Function::MultiIndex& j) const = 0;
+      virtual F derivative(const LinearAlgebra::Vector<F>& x, const size_type& i, const Function::MultiIndex& j) const = 0;
     };
 
 
@@ -140,8 +143,8 @@ namespace Ariadne {
     }; 
 
     template<class R> inline 
-    LinearAlgebra::Vector<typename FunctionInterface<R>::A>
-    FunctionInterface<R>::operator() (const LinearAlgebra::Vector<A>& x) const {
+    LinearAlgebra::Vector<typename FunctionInterface<R>::F>
+    FunctionInterface<R>::operator() (const LinearAlgebra::Vector<F>& x) const {
       return this->evaluate(x);
     }; 
 

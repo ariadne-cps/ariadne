@@ -122,6 +122,8 @@ void export_taylor_variable()
   def("max",(TV(*)(const TV&,const TV&))&Function::max);
   def("min",(TV(*)(const TV&,const TV&))&Function::min);
   def("abs",(TV(*)(const TV&))&Function::abs);
+  def("neg",(TV(*)(const TV&))&Function::neg);
+  def("rec",(TV(*)(const TV&))&Function::rec);
   def("pow",(TV(*)(const TV&, int))&Function::pow);
 
   def("sqrt", (TV(*)(const TV&))&Function::sqrt);

@@ -36,15 +36,22 @@ COMBINATORIC_SRC = \
 
 FUNCTION_SRC = \
 	function/interpreted_function.cc \
-	function/affine_variable.cc function/affine_model.cc \
+	function/constant_function.cc \
+	function/affine_function.cc \
+	function/polynomial_function.cc \
+	function/affine_variable.cc \
+	function/affine_model.cc \
 	function/taylor_series.cc \
 	function/taylor_variable.cc \
 	function/taylor_derivative.cc \
 	function/taylor_model.cc \
-	function/polynomial.cc
+ 	function/polynomial_variable.cc 
 
 GEOMETRY_SRC = \
-	geometry/point.cc geometry/point_list.cc \
+	geometry/point.cc \
+	geometry/interval_set.cc \
+	geometry/box.cc \
+	geometry/point_list.cc \
 	geometry/rectangle.cc \
 	geometry/polyhedron.cc \
 	geometry/polytope.cc geometry/simplex.cc \

@@ -22,7 +22,7 @@
  */
  
 /*! \file polynomial_model.h
- *  \brief Polynomial models for maps.
+ *  \brief PolynomialFunction models for maps.
  */
 
 #ifndef ARIADNE_POLYNOMIAL_MODEL_H
@@ -39,7 +39,7 @@
 namespace Ariadne {
   namespace Function {
     template<class R> class Monomial;
-    template<class R> class Polynomial;
+    template<class R> class PolynomialFunction;
     template<class R> class PolynomialModel;
 
     /*! \brief Graded lexicographical ordering. */
@@ -47,8 +47,8 @@ namespace Ariadne {
   }
 
   namespace Numeric {
-    template<class R> struct traits< Function::Polynomial<R> > {
-      typedef Function::Polynomial<typename traits<R>::arithmetic_type> arithmetic_type;
+    template<class R> struct traits< Function::PolynomialFunction<R> > {
+      typedef Function::PolynomialFunction<typename traits<R>::arithmetic_type> arithmetic_type;
     };
   }
   
@@ -102,7 +102,7 @@ namespace Ariadne {
       /*! \brief Read from an intput stream. */
       std::istream& read(std::istream& is);
     private:
-      friend class Polynomial<R>;
+      friend class PolynomialFunction<R>;
       friend class PolynomialModel<R>;
      private:
       void _resize(const size_type& n);
@@ -119,7 +119,7 @@ namespace Ariadne {
     
     /*! \brief A polynomial in several variables. */
     template<class R>
-    class Polynomial {
+    class PolynomialFunction {
       typedef typename Numeric::traits<R>::arithmetic_type F;
       typedef typename Numeric::traits<R>::arithmetic_type result_type;
      public:
@@ -127,11 +127,11 @@ namespace Ariadne {
       typedef R real_type;
      public:
       /*! \brief Construct from a string literal. */
-      Polynomial(const std::string &);
+      PolynomialFunction(const std::string &);
       /*! \brief Default constructor. */
-      Polynomial() : _argument_size(0), _terms() { }
+      PolynomialFunction() : _argument_size(0), _terms() { }
       /*! \brief The zero polynomial in \a n variables. */
-      Polynomial(const size_type& m) : _argument_size(m), _terms() { }
+      PolynomialFunction(const size_type& m) : _argument_size(m), _terms() { }
 
       /*! \brief The size of the argument. */
       size_type argument_size() const { return _argument_size; }
@@ -175,16 +175,16 @@ namespace Ariadne {
       PolynomialModel(const std::string& s);
       /*! \brief The zero polynomial map in \a n variables with \a m sizeal image. */
       PolynomialModel(const size_type& m, const size_type& n)
-        : _argument_size(n), _components(m,Polynomial<R>(n)) { }
+        : _argument_size(n), _components(m,PolynomialFunction<R>(n)) { }
       /*! \brief Construct from an array of polynomials. */
-      PolynomialModel(const array< Polynomial<R> >& c) : _components(c) { 
+      PolynomialModel(const array< PolynomialFunction<R> >& c) : _components(c) { 
         this->_set_argument_size(this->_compute_maximum_component_size()); }
       /*! \brief Copy constructor. */
       PolynomialModel(const PolynomialModel<R>& pm)
         : _argument_size(pm._argument_size), _components(pm._components) { }
         
       /*! \brief The \a i th component polynomial. */
-      const Polynomial<R>& component(size_type i) const { return _components[i]; }
+      const PolynomialFunction<R>& component(size_type i) const { return _components[i]; }
       /*! \brief The size of the argument. */
       size_type argument_size() const { return _argument_size; }
       /*! \brief The size of the result. */
@@ -209,7 +209,7 @@ namespace Ariadne {
      private:
       /* Components of the map. */
       size_type _argument_size;
-      array< Polynomial<R> > _components;
+      array< PolynomialFunction<R> > _components;
     };
     
   
@@ -219,7 +219,7 @@ namespace Ariadne {
     }
 
     template<class R> inline
-    std::ostream& operator<<(std::ostream& os, const Polynomial<R>& p) {
+    std::ostream& operator<<(std::ostream& os, const PolynomialFunction<R>& p) {
       return p.write(os);
     }
 
@@ -234,7 +234,7 @@ namespace Ariadne {
     }
 
     template<class R> inline
-    std::istream& operator>>(std::istream& is, Polynomial<R>& p) {
+    std::istream& operator>>(std::istream& is, PolynomialFunction<R>& p) {
       return p.read(is);
     }
 

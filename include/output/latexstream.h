@@ -57,7 +57,7 @@ namespace Ariadne {
     template<class R> latexstream& operator<<(latexstream& txs, const LinearAlgebra::Vector<R>& v);
     template<class R> latexstream& operator<<(latexstream& txs, const LinearAlgebra::Matrix<R>& v);
     template<class R> latexstream& operator<<(latexstream& txs, const Geometry::Rectangle<R>& r);
-    template<class R> latexstream& operator<<(latexstream& txs, const Function::Polynomial<R>& p);
+    template<class R> latexstream& operator<<(latexstream& txs, const Function::PolynomialFunction<R>& p);
     template<class R> latexstream& operator<<(latexstream& txs, const Function::TaylorModel<R>& t);
 
     /*!\brief A stream for output to the TeX or LaTeX typesetting language. */

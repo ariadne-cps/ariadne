@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_function.cc
+ *            test_interpreted_function.cc
  *
  *  Copyright  2007  Alberto Casagrande,  Pieter Collins
  *  Email  casagrande@dimi.uniud.it  Pieter.Collins@cwi.nl
@@ -42,19 +42,19 @@ using namespace Ariadne::Function;
 using namespace Ariadne::Output;
 using namespace std;
 
-template<class R> int test_function();
+template<class R> int test_interpreted_function();
   
 int main() {
-  return test_function<Flt>();
+  return test_interpreted_function<Flt>();
 }
 
 template<class R>
-int test_function() 
+int test_interpreted_function() 
 {
   set_input_verbosity(0);
 
   typedef typename Numeric::traits<R>::arithmetic_type A;
-  ifstream fis("test_function.dat");
+  ifstream fis("test_interpreted_function.dat");
   
   do {
     cout << "Inputting function" << endl;

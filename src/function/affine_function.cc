@@ -1,8 +1,8 @@
 /***************************************************************************
- *            interval.cc
+ *            function/affine_function.cc
  *
- *  Copyright  2007  Pieter Collins
- *  Pieter.Collins@cwi.nl
+ *  Copyright  2007  Alberto Casagrande, Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -21,22 +21,25 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/rational.h"
 #include "numeric/float.h"
 
-#include "geometry/interval.h"
+#include "function/affine_function.h"
+#include "function/affine_function.code.h"
 
 namespace Ariadne {
-  namespace Geometry {
-
-    template class Interval<Numeric::Rational>;
+  namespace Function {
+    using namespace Numeric;
+    
+    template class AffineFunction<Rational>;
 
 #ifdef ENABLE_FLOAT64
-    template class Interval<Numeric::Float64>;
+    template class AffineFunction<Float64>;
+    template class AffineFunction<Interval64>;
 #endif
-  
+    
 #ifdef ENABLE_FLOATMP
-    template class Interval<Numeric::FloatMP>;
+    template class AffineFunction<FloatMP>;
+    template class AffineFunction<IntervalMP>;
 #endif
 
   }

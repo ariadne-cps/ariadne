@@ -28,6 +28,19 @@ namespace {
 
 template<class X> 
 void 
+compute_product(Function::TaylorSeries<X>& z, const Function::TaylorSeries<X>& y, const Function::TaylorSeries<X>& x)
+{
+  for(size_type n=0; n<=z.degree(); ++n) {
+    z[n]=0;
+    for(size_type i=0; i<=n; ++i) {
+      z[n] += Numeric::bin<int>(n,i)*x[i]*y[n-i];
+    }
+  }
+}
+
+
+template<class X> 
+void 
 compute_composition(Function::TaylorSeries<X>& y, const Function::TaylorSeries<X>& x)
 {
   using namespace Function;
@@ -48,6 +61,27 @@ compute_composition(Function::TaylorSeries<X>& y, const Function::TaylorSeries<X
       + 10*y[3]*x[1]*x[1]*x[3] + 10*y[2]*x[2]*x[3] + 5*y[2]*x[1]*x[4] + y[1]*x[5]; }
 #endif
   
+  using namespace std;
+  cerr<<"y="<<y<<"\nx="<<x<<endl;
+  TaylorSeries<X> w=x;
+  w.value()=0;
+  cerr<<"w="<<w<<endl<<endl;
+  TaylorSeries<X> t(d);
+  TaylorSeries<X> u(d);
+  t[0]=y[d];
+  cerr<<"t="<<t<<endl;
+  for(int n=1; n<=d; ++n) {
+    u=t*w;
+    u.value()+=y[d-n];
+    cerr<<"u="<<u<<endl;
+    t=u;
+    cerr<<"t="<<t<<endl;
+  };
+  y=t;
+  cerr<<endl;
+  return;
+
+
   for(int n=0; n<d; ++n) {
     for(int i=0; i<=n; ++i) {
       //std::cout<<"y["<<d-i<<"] = 1*y["<<d-i<<"]*x[1]"<<std::flush;
@@ -58,6 +92,7 @@ compute_composition(Function::TaylorSeries<X>& y, const Function::TaylorSeries<X
       }
       //std::cout << std::endl;
     }
+    cout << y << endl;
   }
 
 #ifdef DEBUG
@@ -173,25 +208,6 @@ recursive_inverse(const Function::TaylorSeries<X>& x, const X& c)
 
 
 
-template<class X> 
-Function::TaylorSeries<X>
-Function::TaylorSeries<X>::constant(smoothness_type d, const X& c)
-{
-  TaylorSeries<X> result(d);
-  result[0]=c;
-  return result;
-}
-
-template<class X> 
-Function::TaylorSeries<X>
-Function::TaylorSeries<X>::variable(smoothness_type d, const X& c)
-{
-  TaylorSeries<X> result(d);
-  result[0]=c;
-  result[1]=1;
-  return result;
-}
-
 
 
 template<class X> 
@@ -254,8 +270,8 @@ Function::TaylorSeries<X>::log(smoothness_type d, const X& c)
   TaylorSeries<X> y(d);
   y[0]=Numeric::log(c);
   X mr=(-1)/c;
-  for(size_type i=1; i!=y.degree();++i) {
-    y[i]=(-Numeric::fac<int>(i-1))*Numeric::pow(c,i);
+  for(size_type i=1; i<=y.degree();++i) {
+    y[i]=(-Numeric::fac<int>(i-1))*Numeric::pow(mr,i);
   }
   return y;
 }

@@ -37,7 +37,9 @@ namespace Ariadne {
     template<class R> class FunctionInterface;
     template<class R> class InterpretedFunction;
      
-    template<class R> class Polynomial;
+    template<class R> class ConstantFunction;
+    template<class R> class AffineFunction;
+    template<class R> class PolynomialFunction;
 
     template<class R> class AffineVariable;
     template<class R> class AffineDerivative;

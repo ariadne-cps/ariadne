@@ -30,7 +30,7 @@ namespace {
 
 template<class X0, class X1, class X2> 
 void
-compute_product(Function::TaylorVariable<X0>& x0, const Function::TaylorVariable<X1>& x1, const Function::TaylorVariable<X2>& x2)
+add_product(Function::TaylorVariable<X0>& x0, const Function::TaylorVariable<X1>& x1, const Function::TaylorVariable<X2>& x2)
 {
   using namespace Function;
   assert(x0.argument_size()==x1.argument_size());
@@ -41,11 +41,13 @@ compute_product(Function::TaylorVariable<X0>& x0, const Function::TaylorVariable
       //std::cout << "i0=" << i0 << ", i1=" << i1 << ", i2=" << i2 << std::endl;
       // FIXME: Use Integer
       //Numeric::Integer c=i0.factorial()/(i1.factorial()*i2.factorial());
-      uint c=choose(i0,i1);
+      uint c=Function::bin(i0,i1);
       x0[i0]+=X0(c)*x1[i1]*x2[i2];
     }
   }
 }
+
+
 
 template<class X0, class X1, class X2>
 void 
@@ -54,25 +56,20 @@ compute_composition(Function::TaylorVariable<X0>& z,
                     const Function::TaylorVariable<X2>& x)
 {
   using namespace Function;
-  //std::cerr << "y=" << y << std::endl;
-  //std::cerr << "z=" << z << std::endl;
-  assert(z.degree()==x.degree());
-  assert(z.degree()==y.degree());
+  size_type as=x.argument_size();
   size_type d=z.degree();
+
   TaylorVariable<X2> w=x;
   w.value()=0;
-  //std::cerr << "w=" << w << std::endl;
-  TaylorVariable<X0> t=TaylorVariable<X0>::constant(x.argument_size(),0,y[d]);
-  //std::cerr << "t[0]=" << t << std::endl;
+  TaylorVariable<X0> t(as,d);
+  t.value()=y.data()[d]/Numeric::fac<Numeric::Integer>(d);
   for(uint n=1; n<=d; ++n) {
-    TaylorVariable<X0> u(x.argument_size(),n);
-    compute_product(u,t,w);
-    u.value()=y[d-n];
-    //std::cerr<<"u="<<u<<", n="<<n<<", u/(d+1-n)="<<u/(d+1-n)<<std::endl;
-    t=u/(d+1-n);
-    //std::cerr << "t[" << n << "]=" << t << std::endl;
-  }
+    TaylorVariable<X0> u(as,d);
+    add_product(u,t,w);
+    t=u+y.data()[d-n]/Numeric::fac<Numeric::Integer>(d-n);
+  };
   z=t;
+  return;
 }
 
 
@@ -219,6 +216,17 @@ Function::TaylorVariable<X>::operator[](const MultiIndex& a) const
 
 template<class X> 
 Function::TaylorVariable<X> 
+Function::compose(const TaylorVariable<X>& y, const TaylorVariable<X>& x)
+{
+  assert(y.argument_size()==1);
+  TaylorSeries<X> t(y.degree(),y.data().begin());
+  TaylorVariable<X> z(x.argument_size(),std::min(x.degree(),t.degree()));
+  compute_composition(z,t,x);
+  return z;
+}
+
+template<class X> 
+Function::TaylorVariable<X> 
 Function::compose(const TaylorSeries<X>& y, const TaylorVariable<X>& x)
 {
   TaylorVariable<X> z(x.argument_size(),std::min(x.degree(),y.degree()));
@@ -311,7 +319,7 @@ Function::TaylorVariable<X>
 Function::mul(const TaylorVariable<X>& x, const TaylorVariable<X>& y)
 {
   TaylorVariable<X> z(x.argument_size(),std::min(x.degree(),y.degree()));
-  compute_product(z,x,y);
+  add_product(z,x,y);
   return z;
 }
 
@@ -427,7 +435,6 @@ Function::operator/(const TaylorVariable<X>& x, const TaylorVariable<X>& y)
 {
   return div(x,y);
 }
-
 
 
 template<class X> 

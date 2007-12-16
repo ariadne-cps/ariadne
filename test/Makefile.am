@@ -39,19 +39,19 @@ COMBINATORIC_TESTS = \
 	test_subdivision_tree 
 
 FUNCTION_TESTS = \
-	test_function \
 	test_index \
-	test_polynomial \
+	test_interpreted_function \
+	test_polynomial_function \
 	test_affine_variable \
 	test_taylor_variable \
 	test_scalar_derivative \
 	test_taylor_derivative \
-	test_multivariable_derivative \
 	test_affine_model \
 	test_taylor_model 
 
 GEOMETRY_TESTS = \
 	test_point \
+	test_box \
 	test_list_set \
 	test_grid_set \
 	test_partition_tree_set \

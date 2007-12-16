@@ -1,8 +1,8 @@
 /***************************************************************************
- *            interval.inline.h
+ *            geometry/interval_set.inline.h
  *
- *  Copyright 2005-7  Alberto Casagrande, Pieter Collins
- *  Email casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright 2007  Pieter Collins
+ *  
  ****************************************************************************/
 
 /*
@@ -26,64 +26,64 @@
 namespace Ariadne {
   
 template<class X> inline 
-Geometry::Interval<X>::Interval()
+Geometry::IntervalSet<X>::IntervalSet()
   : _lower(1), _upper(0) 
 {
 }
 
 template<class X> inline 
-Geometry::Interval<X>::Interval(const X& x)
+Geometry::IntervalSet<X>::IntervalSet(const X& x)
   : _lower(x), _upper(x) 
 {
 }
 
 template<class X> inline 
-Geometry::Interval<X>::Interval(const X& l, const X& u)
+Geometry::IntervalSet<X>::IntervalSet(const X& l, const X& u)
   : _lower(l), _upper(u) 
 {
 }
 
 template<class X> inline 
-Geometry::Interval<X>::Interval(const Geometry::Interval<X>& ivl)
+Geometry::IntervalSet<X>::IntervalSet(const Geometry::IntervalSet<X>& ivl)
   : _lower(ivl._lower), _upper(ivl._upper) 
 {
 }
 
 template<class X> inline 
-Geometry::Interval<X>& 
-Geometry::Interval<X>::operator=(const X& x) 
+Geometry::IntervalSet<X>& 
+Geometry::IntervalSet<X>::operator=(const X& x) 
 {
   this->_lower=x; this->_upper=x; return *this;
 }
 
 template<class X> inline 
-Geometry::Interval<X>& 
-Geometry::Interval<X>::operator=(const Geometry::Interval<X>& ivl) 
+Geometry::IntervalSet<X>& 
+Geometry::IntervalSet<X>::operator=(const Geometry::IntervalSet<X>& ivl) 
 {
   this->_lower=ivl._lower; this->_upper=ivl._upper; return *this;
 }
 
 template<class X> template<class XL,class XU> inline 
-Geometry::Interval<X>::Interval(const XL& l, const XU& u)
+Geometry::IntervalSet<X>::IntervalSet(const XL& l, const XU& u)
   : _lower(l), _upper(u)
 {
 }
 
 template<class X> template<class XX> inline 
-Geometry::Interval<X>::Interval(const Interval<XX>& ivl)
+Geometry::IntervalSet<X>::IntervalSet(const IntervalSet<XX>& ivl)
   : _lower(ivl.lower()), _upper(ivl.upper()) 
 {
 }
 
 template<class X> template<class XX> inline 
-Geometry::Interval<X>::Interval(const XX& x)
+Geometry::IntervalSet<X>::IntervalSet(const XX& x)
   : _lower(x), _upper(x) 
 {
 }
 
 template<class X> template<class XX> inline 
-Geometry::Interval<X>& 
-Geometry::Interval<X>::operator=(const XX& x) 
+Geometry::IntervalSet<X>& 
+Geometry::IntervalSet<X>::operator=(const XX& x) 
 {
   this->_lower=x; this->_upper=x; return *this;
 }
@@ -92,42 +92,42 @@ Geometry::Interval<X>::operator=(const XX& x)
 
 template<class X> inline 
 bool
-Geometry::Interval<X>::operator==(const Interval<X>& ivl) {
+Geometry::IntervalSet<X>::operator==(const IntervalSet<X>& ivl) {
   return this->_lower==ivl._lower && this->_upper==ivl._upper;
 }
 
 
 template<class X> inline 
 bool
-Geometry::Interval<X>::operator!=(const Interval<X>& ivl) {
+Geometry::IntervalSet<X>::operator!=(const IntervalSet<X>& ivl) {
   return !(*this==ivl);
 }
 
 
 template<class X> inline 
 const X& 
-Geometry::Interval<X>::lower() const 
+Geometry::IntervalSet<X>::lower() const 
 { 
   return this->_lower; 
 }
 
 template<class X> inline 
 const X& 
-Geometry::Interval<X>::lower_bound() const 
+Geometry::IntervalSet<X>::lower_bound() const 
 { 
   return this->_lower; 
 }
 
 template<class X> inline 
 const X& 
-Geometry::Interval<X>::upper_bound() const 
+Geometry::IntervalSet<X>::upper_bound() const 
 { 
   return this->_upper; 
 }
 
 template<class X> inline 
 const X& 
-Geometry::Interval<X>::upper() const 
+Geometry::IntervalSet<X>::upper() const 
 { 
   return this->_upper; 
 }
@@ -138,7 +138,7 @@ Geometry::Interval<X>::upper() const
 
 template<class X> 
 std::ostream& 
-Geometry::Interval<X>::write(std::ostream& os) const {
+Geometry::IntervalSet<X>::write(std::ostream& os) const {
   if(this->_lower > this->_upper) {
     return os << "[1,0]";
   }
@@ -150,7 +150,7 @@ Geometry::Interval<X>::write(std::ostream& os) const {
 
 template<class X> 
 std::istream& 
-Geometry::Interval<X>::read(std::istream& is) {
+Geometry::IntervalSet<X>::read(std::istream& is) {
   char c;
   X l;
   X u;
@@ -164,11 +164,11 @@ Geometry::Interval<X>::read(std::istream& is) {
     if(c!=']') {
       is.setstate(std::ios_base::failbit);
     }
-    (*this)=Geometry::Interval<X>(l,u);
+    (*this)=Geometry::IntervalSet<X>(l,u);
   } else {
     is.putback(c);
     is >> l;
-    (*this)=Geometry::Interval<X>(l);
+    (*this)=Geometry::IntervalSet<X>(l);
   }
   return is;
 }
@@ -179,21 +179,21 @@ Geometry::Interval<X>::read(std::istream& is) {
 
 template<class X>
 X
-Geometry::centre(const Interval<X>& ivl) 
+Geometry::centre(const IntervalSet<X>& ivl) 
 {
   return Numeric::med_approx(ivl.lower(),ivl.upper());
 }
 
 template<class X>
 X
-Geometry::radius(const Interval<X>& ivl) 
+Geometry::radius(const IntervalSet<X>& ivl) 
 {
   return Numeric::rad_up(ivl.lower(),ivl.upper());
 }
 
 template<class X>
 tribool
-Geometry::empty(const Interval<X>& ivl) 
+Geometry::empty(const IntervalSet<X>& ivl) 
 {
   if(ivl.lower() < ivl.upper()) {
     return false;
@@ -206,7 +206,7 @@ Geometry::empty(const Interval<X>& ivl)
 
 template<class X>
 tribool
-Geometry::bounded(const Interval<X>& ivl) 
+Geometry::bounded(const IntervalSet<X>& ivl) 
 {
   X inf=Numeric::inf<X>();
   X minf=-inf;
@@ -225,7 +225,7 @@ Geometry::bounded(const Interval<X>& ivl)
 
 template<class X1, class X2> inline
 tribool 
-Geometry::contains(const Interval<X1>& ivl, const X2& x)  
+Geometry::contains(const IntervalSet<X1>& ivl, const X2& x)  
 { 
   if(ivl.lower() < x && x < ivl.upper()) {
     return true;
@@ -238,7 +238,7 @@ Geometry::contains(const Interval<X1>& ivl, const X2& x)
 
 template<class X1, class X2> inline
 tribool 
-Geometry::disjoint(const Interval<X1>& ivl1, const Interval<X2>& ivl2)  
+Geometry::disjoint(const IntervalSet<X1>& ivl1, const IntervalSet<X2>& ivl2)  
 { 
   if(ivl1.lower() > ivl2.upper() || ivl1.upper() < ivl2.lower()) {
     return true;
@@ -251,14 +251,14 @@ Geometry::disjoint(const Interval<X1>& ivl1, const Interval<X2>& ivl2)
 
 template<class X1, class X2> inline
 tribool 
-Geometry::intersect(const Interval<X1>& ivl1, const Interval<X2>& ivl2)  
+Geometry::intersect(const IntervalSet<X1>& ivl1, const IntervalSet<X2>& ivl2)  
 { 
   return !Geometry::disjoint(ivl1,ivl2);
 }
 
 template<class X1, class X2> inline
 tribool 
-Geometry::subset(const Interval<X1>& ivl1, const Interval<X2>& ivl2)  
+Geometry::subset(const IntervalSet<X1>& ivl1, const IntervalSet<X2>& ivl2)  
 { 
   if(ivl1.lower() > ivl2.lower() && ivl1.upper() < ivl2.upper()) {
     return true;
@@ -271,50 +271,50 @@ Geometry::subset(const Interval<X1>& ivl1, const Interval<X2>& ivl2)
 
 template<class X1, class X2> inline
 tribool 
-Geometry::superset(const Interval<X1>& ivl1, const Interval<X2>& ivl2)  
+Geometry::superset(const IntervalSet<X1>& ivl1, const IntervalSet<X2>& ivl2)  
 { 
   return Geometry::subset(ivl2,ivl1);
 }
 
 template<class X> inline
-Geometry::Interval<X>
-Geometry::closed_intersection(const Interval<X>& ivl1, const Interval<X>& ivl2)  
+Geometry::IntervalSet<X>
+Geometry::closed_intersection(const IntervalSet<X>& ivl1, const IntervalSet<X>& ivl2)  
 { 
   if(disjoint(ivl1,ivl2)) {
-    return Interval<X>(1,0);
+    return IntervalSet<X>(1,0);
   }
-  return Interval<X>(Numeric::max(ivl1.lower(),ivl2.lower()),Numeric::min(ivl1.upper(),ivl2.upper()));
+  return IntervalSet<X>(Numeric::max(ivl1.lower(),ivl2.lower()),Numeric::min(ivl1.upper(),ivl2.upper()));
 }
 
 template<class X> inline
-Geometry::Interval<X>
-Geometry::open_intersection(const Interval<X>& ivl1, const Interval<X>& ivl2)  
+Geometry::IntervalSet<X>
+Geometry::open_intersection(const IntervalSet<X>& ivl1, const IntervalSet<X>& ivl2)  
 { 
   if(possibly(disjoint(ivl1,ivl2))) {
-    return Interval<X>(1,0);
+    return IntervalSet<X>(1,0);
   }
-  return Interval<X>(Numeric::max(ivl1.lower(),ivl2.lower()),Numeric::min(ivl1.upper(),ivl2.upper()));
+  return IntervalSet<X>(Numeric::max(ivl1.lower(),ivl2.lower()),Numeric::min(ivl1.upper(),ivl2.upper()));
 }
 
 template<class X> inline
-Geometry::Interval<X>
-Geometry::interval_hull(const Interval<X>& ivl1, const Interval<X>& ivl2)  
+Geometry::IntervalSet<X>
+Geometry::interval_hull(const IntervalSet<X>& ivl1, const IntervalSet<X>& ivl2)  
 { 
-  return Interval<X>(Numeric::min(ivl1.lower(),ivl2.lower()),Numeric::max(ivl1.upper(),ivl2.upper()));
+  return IntervalSet<X>(Numeric::min(ivl1.lower(),ivl2.lower()),Numeric::max(ivl1.upper(),ivl2.upper()));
 }
 
 
 
 template<class X> inline
 std::ostream& 
-Geometry::operator<<(std::ostream& os, const Interval<X>& x) {
+Geometry::operator<<(std::ostream& os, const IntervalSet<X>& x) {
   return x.write(os);
 }
 
 
 template<class X> inline
 std::istream& 
-Geometry::operator>>(std::istream& is, Interval<X>& x) {
+Geometry::operator>>(std::istream& is, IntervalSet<X>& x) {
   return x.read(is);
 }
 

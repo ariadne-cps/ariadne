@@ -95,8 +95,10 @@ void export_taylor_series()
   taylor_series_class.def("__pow__", &Python::pow<TS,TS,int>);
   taylor_series_class.def(self_ns::str(self));
   
-  def("constant",(TS(*)(smoothness_type, const A&))&Function::TaylorSeries<A>::constant);
-  def("variable",(TS(*)(smoothness_type, const A&))&Function::TaylorSeries<A>::variable);
+  def("constant",(TS(*)(smoothness_type, const A&))&TS::constant);
+  def("constant",(TS(*)(smoothness_type, const double&))&TS::constant);
+  def("variable",(TS(*)(smoothness_type, const A&))&TS::variable);
+  def("variable",(TS(*)(smoothness_type, const double&))&TS::variable);
 
   def("compose",(TS(*)(const TS&,const TS&))&Function::compose);
   def("inverse",(TS(*)(const TS&,const A&))&Function::inverse);

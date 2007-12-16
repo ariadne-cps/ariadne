@@ -1,8 +1,8 @@
 /***************************************************************************
- *            interval.h
+ *            geometry/interval_set.h
  *
- *  Copyright 2005-7  Alberto Casagrande, Pieter Collins
- *  Email casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright 2007  Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file interval.h
+/*! \file geometry/interval_set.h
  *  \brief Intervals representing sets of real numbers.
  */
  
-#ifndef ARIADNE_GEOMETRY_INTERVAL_H
-#define ARIADNE_GEOMETRY_INTERVAL_H
+#ifndef ARIADNE_GEOMETRY_INTERVAL_SET_H
+#define ARIADNE_GEOMETRY_INTERVAL_SET_H
 
 #include <iostream>
 #include <iomanip>
@@ -48,7 +48,7 @@ namespace Ariadne {
      * The interval is specified by the lower and upper endpoints, and must be binary compatible with the Numeric::FuzzyFloat class.
      */
     template<class X>
-    class Interval
+    class IntervalSet
     {
      private:
       X _lower; X _upper;
@@ -56,36 +56,36 @@ namespace Ariadne {
       //@{
       //! \name Constructors and assignment operators
       /*! \brief Default constructer constructs empty interval. */
-      Interval();
+      IntervalSet();
       /*! \brief Construct a singleton set based on the point \a x. */
-      Interval(const X& x);
+      IntervalSet(const X& x);
       /*! \brief Construct from lower and upper bounds. */
-      Interval(const X& l, const X& u);
+      IntervalSet(const X& l, const X& u);
       /*! \brief Copy constructor. */
-      Interval(const Interval<X>& ivl);
+      IntervalSet(const IntervalSet<X>& ivl);
       /*! \brief Assign from a number. */
-      Interval<X>& operator=(const X& x);
+      IntervalSet<X>& operator=(const X& x);
       /*! \brief Copy assignment operator. */
-      Interval<X>& operator=(const Interval<X>& ivl);
+      IntervalSet<X>& operator=(const IntervalSet<X>& ivl);
  
       /*! \brief Construct a one-point interval. */
-      template<class XR> Interval(const XR& x);
+      template<class XR> IntervalSet(const XR& x);
       /*! \brief Construct from lower and upper bounds. */
-      template<class XL,class XU> Interval(const XL& l, const XU& u);
+      template<class XL,class XU> IntervalSet(const XL& l, const XU& u);
        /*! \brief Construct an interval with possibly different real type. */
-      template<class XR> Interval(const Interval<XR>& ivl);
+      template<class XR> IntervalSet(const IntervalSet<XR>& ivl);
       /*! \brief Assign from a value of a possibly different type. */
-      template<class XR> Interval<X>& operator=(const XR& x);
+      template<class XR> IntervalSet<X>& operator=(const XR& x);
       /*! \brief Assign from an interval of possibly a different type. */
-      template<class XR> Interval<X>& operator=(const Interval<XR>& ivl);
+      template<class XR> IntervalSet<X>& operator=(const IntervalSet<XR>& ivl);
       //@}
       
       //@{
       //! \name Comparison operators
       /*! \brief Equality operator tests exact equality of representation. */
-      bool operator==(const Interval<X>& ivl);
+      bool operator==(const IntervalSet<X>& ivl);
       /*! \brief Inequality operator compares equality of representation. */
-      bool operator!=(const Interval<X>& ivl);
+      bool operator!=(const IntervalSet<X>& ivl);
       //@}
       
       //@{
@@ -113,66 +113,66 @@ namespace Ariadne {
       //@{
       //! \name Geometric operations
       /*! \brief The approximate centre of the interval \a ivl. */
-      friend X centre<>(const Interval<X>& ivl);
+      friend X centre<>(const IntervalSet<X>& ivl);
       /*! \brief An upper bound for the radius of \a ivl. */
-      friend X radius<>(const Interval<X>& ivl);
+      friend X radius<>(const IntervalSet<X>& ivl);
       /*! \brief Tests if \a ivl is empty. */
-      friend tribool empty<>(const Interval<X>& ivl);
+      friend tribool empty<>(const IntervalSet<X>& ivl);
       /*! \brief Tests if \a ivl is bounded. */
-      friend tribool bounded<>(const Interval<X>& ivl);
+      friend tribool bounded<>(const IntervalSet<X>& ivl);
       /*! \brief Tests if \a ivl1 contains the point \a x. */
-      friend tribool contains<>(const Interval<X>& ivl, const X& x);
+      friend tribool contains<>(const IntervalSet<X>& ivl, const X& x);
       /*! \brief Tests if \a ivl1 and \a ivl2 are disjoint. */
-      friend tribool disjoint<>(const Interval<X>& ivl1, const Interval<X>& ivl2);
+      friend tribool disjoint<>(const IntervalSet<X>& ivl1, const IntervalSet<X>& ivl2);
       /*! \brief Tests if \a ivl1 and \a ivl2 intersect. */
-      friend tribool intersect<>(const Interval<X>& ivl1, const Interval<X>& ivl2);
+      friend tribool intersect<>(const IntervalSet<X>& ivl1, const IntervalSet<X>& ivl2);
       /*! \brief Tests if \a ivl1 is a subset of \a ivl2. */
-      friend tribool subset<>(const Interval<X>& ivl1, const Interval<X>& ivl2);
+      friend tribool subset<>(const IntervalSet<X>& ivl1, const IntervalSet<X>& ivl2);
       /*! \brief Tests if \a ivl1 is a superset of \a ivl2. */
-      friend tribool superset<>(const Interval<X>& ivl1, const Interval<X>& ivl2);
+      friend tribool superset<>(const IntervalSet<X>& ivl1, const IntervalSet<X>& ivl2);
       
       /*! \brief The intersection of \a ivl1 and \a ivl2. */
-      friend Interval<X> closed_intersection<>(const Interval<X>& ivl1, const Interval<X>& ivl2);
+      friend IntervalSet<X> closed_intersection<>(const IntervalSet<X>& ivl1, const IntervalSet<X>& ivl2);
       /*! \brief The closure of the intersection of the interiors of \a ivl1 and \a ivl2. (%Deprecated) */
-      friend Interval<X> open_intersection<>(const Interval<X>& ivl1, const Interval<X>& ivl2);
+      friend IntervalSet<X> open_intersection<>(const IntervalSet<X>& ivl1, const IntervalSet<X>& ivl2);
       /*! \brief The smallest interval containing \a ivl1 and \a ivl2. */
-      friend Interval<X> interval_hull<>(const Interval<X>& ivl1, const Interval<X>& ivl2);
+      friend IntervalSet<X> interval_hull<>(const IntervalSet<X>& ivl1, const IntervalSet<X>& ivl2);
       //@}
       
       //@{
       //! \name Input/output operators.
       /*! \brief Stream insertion operator. */
-      friend std::ostream& operator<<(std::ostream& os, const Interval<X>& ivl);
+      friend std::ostream& operator<<(std::ostream& os, const IntervalSet<X>& ivl);
       /*! \brief Stream extraction operator. */
-      friend std::istream& operator>>(std::istream& is, Interval<X>& ivl);
+      friend std::istream& operator>>(std::istream& is, IntervalSet<X>& ivl);
       //@}
 #endif
     };
     
 
-    template<class X> X lower(const Interval<X>& x);
-    template<class X> X upper(const Interval<X>& x);
-    template<class X> X centre(const Interval<X>& x);
-    template<class X> X radius(const Interval<X>& x);
+    template<class X> X lower(const IntervalSet<X>& x);
+    template<class X> X upper(const IntervalSet<X>& x);
+    template<class X> X centre(const IntervalSet<X>& x);
+    template<class X> X radius(const IntervalSet<X>& x);
 
-    template<class X> tribool empty(const Interval<X>& x);
-    template<class X> tribool bounded(const Interval<X>& x);
+    template<class X> tribool empty(const IntervalSet<X>& x);
+    template<class X> tribool bounded(const IntervalSet<X>& x);
 
-    template<class X1, class X2> tribool contains(const Interval<X1>& x1, const X2& x2);
-    template<class X1, class X2> tribool disjoint(const Interval<X1>& x1, const Interval<X2>& x2);
-    template<class X1, class X2> tribool intersect(const Interval<X1>& x1, const Interval<X2>& x2);
-    template<class X1, class X2> tribool subset(const Interval<X1>& x1, const Interval<X2>& x2);
-    template<class X1, class X2> tribool superset(const Interval<X1>& x1, const Interval<X2>& x2);
-    template<class X> Interval<X> closed_intersection(const Interval<X>& x1, const Interval<X>& x2);
-    template<class X> Interval<X> open_intersection(const Interval<X>& x1, const Interval<X>& x2);
-    template<class X> Interval<X> interval_hull(const Interval<X>& x1, const Interval<X>& x2);
+    template<class X1, class X2> tribool contains(const IntervalSet<X1>& x1, const X2& x2);
+    template<class X1, class X2> tribool disjoint(const IntervalSet<X1>& x1, const IntervalSet<X2>& x2);
+    template<class X1, class X2> tribool intersect(const IntervalSet<X1>& x1, const IntervalSet<X2>& x2);
+    template<class X1, class X2> tribool subset(const IntervalSet<X1>& x1, const IntervalSet<X2>& x2);
+    template<class X1, class X2> tribool superset(const IntervalSet<X1>& x1, const IntervalSet<X2>& x2);
+    template<class X> IntervalSet<X> closed_intersection(const IntervalSet<X>& x1, const IntervalSet<X>& x2);
+    template<class X> IntervalSet<X> open_intersection(const IntervalSet<X>& x1, const IntervalSet<X>& x2);
+    template<class X> IntervalSet<X> interval_hull(const IntervalSet<X>& x1, const IntervalSet<X>& x2);
     
-    template<class X> std::ostream& operator<<(std::ostream& os, const Interval<X>& x);
-    template<class X> std::istream& operator>>(std::istream& is, Interval<X>& x);
+    template<class X> std::ostream& operator<<(std::ostream& os, const IntervalSet<X>& x);
+    template<class X> std::istream& operator>>(std::istream& is, IntervalSet<X>& x);
     
   } // namespace Geometry
 } // namespace Ariadne
 
-#include "interval.inline.h"
+#include "interval_set.inline.h"
 
-#endif /* ARIADNE_GEOMETRY_INTERVAL_H */
+#endif /* ARIADNE_GEOMETRY_INTERVAL_SET_H */

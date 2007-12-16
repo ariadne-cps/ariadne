@@ -66,12 +66,14 @@ template<class R> void export_affine_derivative();
 template<class R> void export_taylor_series();
 template<class R> void export_taylor_variable();
 template<class R> void export_taylor_derivative();
+template<class R> void export_polynomial_variable();
 
-template<class R> void export_geometry_interval();
 template<class R> void export_point();
+template<class R> void export_box();
 template<class R> void export_interval_point();
 template<class R> void export_point_list();
 template<class R> void export_set();
+template<class R> void export_interval_set();
 template<class R> void export_rectangle();
 template<class R> void export_parallelotope();
 template<class R> void export_simplex();
@@ -174,15 +176,17 @@ BOOST_PYTHON_MODULE(ariadne)
   export_taylor_series<FloatPy>();
   export_taylor_variable<FloatPy>();
   export_taylor_derivative<FloatPy>();
+  export_polynomial_variable<FloatPy>();
   //export_taylor_series<Rational>();
   //export_taylor_variable<Rational>();
   //export_taylor_derivative<Rational>();
 
-  export_geometry_interval<FloatPy>();
   export_set<FloatPy>();
   export_point<FloatPy>();
   export_interval_point<FloatPy>();
   export_point_list<FloatPy>();
+  export_interval_set<FloatPy>();
+  export_box<FloatPy>();
   export_rectangle<FloatPy>();
   export_zonotope<FloatPy>();
   export_interval_zonotope<FloatPy>();

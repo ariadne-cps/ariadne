@@ -21,6 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+#include "linear_algebra/vector.h"
 
 namespace Ariadne {
 
@@ -383,6 +384,15 @@ Function::operator/(const R& c, const TaylorSeries<X>& x)
 {
   return div(TaylorSeries<X>::constant(x.degree(),c),x);
 }
+
+template<class X, class R>  
+Function::TaylorSeries<X>&
+Function::operator/=(TaylorSeries<X>& x, const R& c)
+{
+  reinterpret_cast< LinearAlgebra::Vector<X>& >(x.data())/=X(c);
+  return x;
+}
+
 
 
 

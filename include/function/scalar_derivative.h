@@ -47,7 +47,7 @@ namespace Ariadne {
 
 
     /*!\ingroup Function
-     * \brief A templated class representing a the derivatives of a scalar quantity with respect to a scalar argument.
+     * \brief \deprecated A templated class representing a the derivatives of a scalar quantity with respect to a scalar argument. (%Deprecated; use TaylorVariable instead)
      *
      * A scalar derivative is an array \f$(x,\dot{x},\ddot{x},\ldots)\f$ where \f$x\f$ is the value of the quantity,
      * and \f$\dot{x}\f$ is the variation with respect to some independent variable, \f$\ddot{x}\f$ is the second variation etc. 

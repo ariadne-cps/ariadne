@@ -35,7 +35,7 @@
 
 #include "../base/array.h"
 #include "../linear_algebra/matrix.h"
-#include "../function/polynomial.h"
+#include "../function/polynomial_function.h"
 #include "../system/map.h"
 
 namespace Ariadne {
@@ -61,7 +61,7 @@ namespace Ariadne {
       PolynomialMap(const dimension_type& m, const dimension_type& n)
         : _polynomial(m,n,0) { }
       /*! \brief Construct from an array of polynomials. */
-      PolynomialMap(const Function::Polynomial<R>& p) : _polynomial(p) { }
+      PolynomialMap(const Function::PolynomialFunction<R>& p) : _polynomial(p) { }
       /*! \brief Copy constructor. */
       PolynomialMap(const PolynomialMap<R>& pm)
         : _polynomial(pm._polynomial) { }
@@ -70,7 +70,7 @@ namespace Ariadne {
       virtual PolynomialMap<R>* clone() const { return new PolynomialMap<R>(*this); }
       
       /*! \brief The \a i th component polynomial. */
-      Function::Polynomial<R> component(size_type i) const { return _polynomial.component(i); }
+      Function::PolynomialFunction<R> component(size_type i) const { return _polynomial.component(i); }
       /*! \brief The dimension of the argument. */
       virtual dimension_type argument_dimension() const { return _polynomial.argument_size(); }
       /*! \brief The dimension of the result. */
@@ -93,7 +93,7 @@ namespace Ariadne {
       virtual std::istream& read(std::istream& is);
      private:
       /* Components of the map. */
-      Function::Polynomial<R> _polynomial;
+      Function::PolynomialFunction<R> _polynomial;
     };
     
 

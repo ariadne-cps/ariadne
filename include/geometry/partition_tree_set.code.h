@@ -25,12 +25,12 @@
 
 #include "partition_tree_set.h"
 
-#include "../base/stlio.h"
+#include "base/stlio.h"
 
-#include "../geometry/rectangle.h"
-#include "../geometry/list_set.h"
-#include "../geometry/grid_mask_set.h"
-#include "../output/logging.h"
+#include "geometry/rectangle.h"
+#include "geometry/list_set.h"
+#include "geometry/grid_mask_set.h"
+#include "output/logging.h"
 
 #include <vector>
 

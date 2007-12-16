@@ -36,12 +36,12 @@
 #include <cassert>
 #include <map>
 
-#include "../base/tribool.h"
-#include "../linear_algebra/matrix.h"
-#include "../linear_algebra/permutation.h"
-#include "../linear_algebra/exceptions.h"
-#include "../output/logging.h"
-#include "../numeric/float64.h"
+#include "base/tribool.h"
+#include "linear_algebra/matrix.h"
+#include "linear_algebra/permutation.h"
+#include "linear_algebra/exceptions.h"
+#include "output/logging.h"
+#include "numeric/float64.h"
 
 #include "exceptions.h"
 #include "lputil.h"

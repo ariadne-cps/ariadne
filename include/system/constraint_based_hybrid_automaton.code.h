@@ -27,14 +27,14 @@
 #include <iostream>
 #include <fstream>
 
-#include "../base/stlio.h"
-#include "../geometry/set_interface.h"
-#include "../geometry/set_reference.h"
-#include "../geometry/set_constraint.h"
-#include "../geometry/hybrid_set.h"
-#include "../system/map_interface.h"
-#include "../system/vector_field_interface.h"
-#include "../output/logging.h"
+#include "base/stlio.h"
+#include "geometry/set_interface.h"
+#include "geometry/set_reference.h"
+#include "geometry/set_constraint.h"
+#include "geometry/hybrid_set.h"
+#include "system/map_interface.h"
+#include "system/vector_field_interface.h"
+#include "output/logging.h"
 
 #include "constraint_based_hybrid_automaton.h"
 

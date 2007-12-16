@@ -28,18 +28,18 @@
 #include "taylor_set.h"
 
 #include "exceptions.h"
-#include "../base/array.h"
+#include "base/array.h"
 
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
-#include "../linear_algebra/tensor.h"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
+#include "linear_algebra/tensor.h"
 
-#include "../geometry/point.h"
-#include "../geometry/rectangle.h"
-#include "../geometry/zonotope.h"
-#include "../geometry/list_set.h"
+#include "geometry/point.h"
+#include "geometry/rectangle.h"
+#include "geometry/zonotope.h"
+#include "geometry/list_set.h"
 
-#include "../output/logging.h"
+#include "output/logging.h"
 
 namespace Ariadne {
     

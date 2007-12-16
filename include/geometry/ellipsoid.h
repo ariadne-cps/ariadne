@@ -30,9 +30,9 @@
 
 #include <iosfwd>
 
-#include "../base/array.h"
-#include "../linear_algebra/matrix.h"
-#include "../geometry/point.h"
+#include "base/array.h"
+#include "linear_algebra/matrix.h"
+#include "geometry/point.h"
 
 namespace Ariadne {
   namespace Geometry {

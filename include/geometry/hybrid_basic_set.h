@@ -27,9 +27,9 @@
 #include <string>
 #include <iostream>
 
-#include "../geometry/declarations.h"
-#include "../geometry/discrete_state.h"
-#include "../geometry/hybrid_space.h"
+#include "geometry/declarations.h"
+#include "geometry/discrete_state.h"
+#include "geometry/hybrid_space.h"
 
 namespace Ariadne {
   namespace Geometry {

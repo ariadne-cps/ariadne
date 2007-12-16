@@ -31,7 +31,7 @@
 #include <stdexcept>
 #include <iosfwd>
 
-#include "../linear_algebra/exceptions.h"
+#include "linear_algebra/exceptions.h"
 
 namespace Ariadne {
   namespace Function {

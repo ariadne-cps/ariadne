@@ -30,7 +30,7 @@
 
 #include <iosfwd>
 
-#include "../numeric/declarations.h"
+#include "numeric/declarations.h"
 
 namespace Ariadne {
   namespace LinearAlgebra {

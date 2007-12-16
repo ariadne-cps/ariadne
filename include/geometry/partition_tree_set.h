@@ -30,16 +30,16 @@
 
 #include <iosfwd>
 
-#include "../base/iterator.h"
-#include "../base/tribool.h"
+#include "base/iterator.h"
+#include "base/tribool.h"
 
-#include "../combinatoric/binary_word.h"
-#include "../combinatoric/binary_tree.h"
-#include "../combinatoric/subdivision_tree_set.h"
+#include "combinatoric/binary_word.h"
+#include "combinatoric/binary_tree.h"
+#include "combinatoric/subdivision_tree_set.h"
 
-#include "../geometry/declarations.h"
-#include "../geometry/set_interface.h"
-#include "../geometry/rectangle_expression.h"
+#include "geometry/declarations.h"
+#include "geometry/set_interface.h"
+#include "geometry/rectangle_expression.h"
 
 
 namespace Ariadne {

@@ -30,8 +30,8 @@
  
 #include <iosfwd>
 
-#include "../combinatoric/lattice_set.h"
-#include "../combinatoric/lattice_map.h"
+#include "combinatoric/lattice_set.h"
+#include "combinatoric/lattice_map.h"
 
 namespace Ariadne {
   namespace Output {

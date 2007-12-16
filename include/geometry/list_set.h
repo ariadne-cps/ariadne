@@ -35,10 +35,10 @@
 
 #include <vector>
 
-#include "../linear_algebra/declarations.h"
-#include "../base/utility.h"
-#include "../base/tribool.h"
-#include "../geometry/set_interface.h"
+#include "linear_algebra/declarations.h"
+#include "base/utility.h"
+#include "base/tribool.h"
+#include "geometry/set_interface.h"
 
 namespace Ariadne {
   namespace Geometry {

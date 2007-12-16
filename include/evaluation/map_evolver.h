@@ -33,11 +33,11 @@
 
 #include <boost/smart_ptr.hpp>
 
-#include "../base/types.h"
-#include "../base/declarations.h"
-#include "../geometry/declarations.h"
-#include "../system/declarations.h"
-#include "../evaluation/declarations.h"
+#include "base/types.h"
+#include "base/declarations.h"
+#include "geometry/declarations.h"
+#include "system/declarations.h"
+#include "evaluation/declarations.h"
 
 
 // For templated constructor

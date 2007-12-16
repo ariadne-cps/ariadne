@@ -31,8 +31,8 @@
 #include <stdexcept>
 #include <iosfwd>
 
-#include "../throw.h"
-#include "../base/types.h"
+#include "macros/throw.h"
+#include "base/types.h"
 
 namespace Ariadne {
 

@@ -21,7 +21,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "vector.h"
 
 #include <iostream>
 #include <string>
@@ -31,6 +30,7 @@
 #include "base/stlio.h"
 
 #include "numeric/interval.code.h"
+#include "linear_algebra/vector.h"
 
 namespace Ariadne {
 

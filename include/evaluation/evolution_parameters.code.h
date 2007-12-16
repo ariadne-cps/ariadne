@@ -21,9 +21,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "../linear_algebra/vector.h"
-#include "../geometry/rectangle.h"
-#include "../geometry/grid.h"
+#include "linear_algebra/vector.h"
+#include "geometry/rectangle.h"
+#include "geometry/grid.h"
 
 namespace Ariadne {
 

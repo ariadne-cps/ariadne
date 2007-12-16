@@ -30,15 +30,15 @@
 
 #include <iosfwd>
 
-#include "../base/types.h"
-#include "../base/array.h"
-#include "../numeric/traits.h"
-#include "../numeric/integer.h"
-#include "../numeric/interval.h"
+#include "base/types.h"
+#include "base/array.h"
+#include "numeric/traits.h"
+#include "numeric/integer.h"
+#include "numeric/interval.h"
 
-#include "../linear_algebra/exceptions.h"
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix_expression.h"
+#include "linear_algebra/exceptions.h"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix_expression.h"
 
 namespace Ariadne {
   namespace LinearAlgebra {

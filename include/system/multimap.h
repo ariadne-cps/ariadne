@@ -30,7 +30,7 @@
 
 #include <string>
 
-#include "../base/types.h"
+#include "base/types.h"
 
 namespace Ariadne {
   namespace System {

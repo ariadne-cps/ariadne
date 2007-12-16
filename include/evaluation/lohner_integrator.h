@@ -28,9 +28,9 @@
 #ifndef ARIADNE_LOHNER_INTEGRATOR_H
 #define ARIADNE_LOHNER_INTEGRATOR_H
 
-#include "../numeric/declarations.h"
-#include "../geometry/declarations.h"
-#include "../evaluation/integrator_interface.h"
+#include "numeric/declarations.h"
+#include "geometry/declarations.h"
+#include "evaluation/integrator_interface.h"
 
 namespace Ariadne {
   namespace Evaluation {

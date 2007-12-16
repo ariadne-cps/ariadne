@@ -22,7 +22,7 @@
  */
 
 #include <cassert>
-#include "../linear_algebra/exceptions.h"
+#include "linear_algebra/exceptions.h"
 
 #include "lputil.h"
 #include "lpfsp.h"

@@ -28,10 +28,10 @@
 #ifndef ARIADNE_TAYLOR_INTEGRATOR_H
 #define ARIADNE_TAYLOR_INTEGRATOR_H
 
-#include "../numeric/declarations.h"
-#include "../geometry/declarations.h"
-#include "../system/taylor_flow.h"
-#include "../evaluation/integrator_interface.h"
+#include "numeric/declarations.h"
+#include "geometry/declarations.h"
+#include "system/taylor_flow.h"
+#include "evaluation/integrator_interface.h"
 
 namespace Ariadne {
   namespace Evaluation {

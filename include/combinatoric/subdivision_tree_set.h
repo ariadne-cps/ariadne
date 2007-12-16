@@ -30,12 +30,12 @@
 
 #include <iosfwd>
 
-#include "../base/array.h"
-#include "../base/sequence.h"
-#include "../base/iterator.h"
+#include "base/array.h"
+#include "base/sequence.h"
+#include "base/iterator.h"
 
-#include "../combinatoric/binary_word.h"
-#include "../combinatoric/binary_tree.h"
+#include "combinatoric/binary_word.h"
+#include "combinatoric/binary_tree.h"
 
 namespace Ariadne {
   namespace Combinatoric {

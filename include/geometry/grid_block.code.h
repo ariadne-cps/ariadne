@@ -25,13 +25,13 @@
 
 #include <ostream>
 
-#include "../base/stlio.h"
+#include "base/stlio.h"
 
-#include "../combinatoric/array_operations.h"
+#include "combinatoric/array_operations.h"
 
-#include "../geometry/rectangle.h"
+#include "geometry/rectangle.h"
 
-#include "../output/logging.h"
+#include "output/logging.h"
 
 
 

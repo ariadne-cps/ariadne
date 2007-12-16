@@ -26,7 +26,7 @@
  */
  
 #include <vector>
-#include "../linear_algebra/vector.h"
+#include "linear_algebra/vector.h"
 
 namespace Ariadne {
   namespace Geometry {

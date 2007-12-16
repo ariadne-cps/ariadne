@@ -30,16 +30,16 @@
 
 #include <boost/smart_ptr.hpp>
 
-#include "../base/types.h"
-#include "../base/declarations.h"
-#include "../geometry/declarations.h"
-#include "../system/declarations.h"
+#include "base/types.h"
+#include "base/declarations.h"
+#include "geometry/declarations.h"
+#include "system/declarations.h"
 
-#include "../system/discrete_map.h"
+#include "system/discrete_map.h"
 
-#include "../evaluation/evolution_parameters.h"
-#include "../evaluation/applicator_interface.h"
-#include "../evaluation/orbiter_interface.h"
+#include "evaluation/evolution_parameters.h"
+#include "evaluation/applicator_interface.h"
+#include "evaluation/orbiter_interface.h"
 
 namespace Ariadne {
   namespace Evaluation {

@@ -31,16 +31,16 @@
 #include <iosfwd>
 #include <vector>
 
-#include "../base/tribool.h"
-#include "../base/iterator.h"
+#include "base/tribool.h"
+#include "base/iterator.h"
 
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
 
-#include "../geometry/point.h"
-#include "../geometry/point_list.h"
-#include "../geometry/rectangle.h"
-#include "../geometry/zonotope.decl.h"
+#include "geometry/point.h"
+#include "geometry/point_list.h"
+#include "geometry/rectangle.h"
+#include "geometry/zonotope.decl.h"
 
 namespace Ariadne {  
   namespace Geometry {

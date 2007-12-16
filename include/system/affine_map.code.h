@@ -24,16 +24,16 @@
 
 #include "affine_map.h"
 
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
 
-#include "../geometry/point.h"
-#include "../geometry/rectangle.h"
-#include "../geometry/parallelotope.h"
-#include "../geometry/zonotope.h"
-#include "../geometry/polytope.h"
+#include "geometry/point.h"
+#include "geometry/rectangle.h"
+#include "geometry/parallelotope.h"
+#include "geometry/zonotope.h"
+#include "geometry/polytope.h"
 
-#include "../system/exceptions.h"
+#include "system/exceptions.h"
 
 
 

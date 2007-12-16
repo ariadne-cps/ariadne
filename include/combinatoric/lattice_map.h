@@ -30,7 +30,7 @@
 
 #include <map>
 
-#include "../combinatoric/lattice_set.h"
+#include "combinatoric/lattice_set.h"
 
 
 namespace Ariadne {

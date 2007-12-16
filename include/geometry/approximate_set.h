@@ -25,10 +25,10 @@
 #ifndef ARIADNE_APPROXIMATE_SET_H
 #define ARIADNE_APPROXIMATE_SET_H
 
-#include "../geometry/approx_type.h"
-#include "../geometry/denotable_set.h"
-#include "../geometry/point.h"
-#include "../geometry/classes.h"
+#include "geometry/approx_type.h"
+#include "geometry/denotable_set.h"
+#include "geometry/point.h"
+#include "geometry/classes.h"
 
 namespace Ariadne {
 

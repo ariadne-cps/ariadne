@@ -21,10 +21,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "../base/stlio.h"
-#include "../geometry/empty_set.h"
-#include "../geometry/rectangular_set.h"
-#include "../geometry/polyhedral_set.h"
+#include "base/stlio.h"
+#include "geometry/empty_set.h"
+#include "geometry/rectangular_set.h"
+#include "geometry/polyhedral_set.h"
 
 namespace Ariadne { 
 

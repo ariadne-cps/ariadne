@@ -30,10 +30,10 @@
 
 #include <iosfwd>
 
-#include "../base/array.h"
-#include "../geometry/point.h"
-#include "../geometry/point_list.h"
-#include "../geometry/polytope.h"
+#include "base/array.h"
+#include "geometry/point.h"
+#include "geometry/point_list.h"
+#include "geometry/polytope.h"
 
 namespace Ariadne {
   namespace Geometry {

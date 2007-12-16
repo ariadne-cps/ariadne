@@ -32,7 +32,7 @@
 #ifndef ARIADNE_LPSLV_H
 #define ARIADNE_LPSLV_H
 
-#include "../linear_algebra/declarations.h"
+#include "linear_algebra/declarations.h"
 
 namespace Ariadne { 
 

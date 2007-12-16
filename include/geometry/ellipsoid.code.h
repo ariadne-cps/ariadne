@@ -23,11 +23,11 @@
  
 #include <stdexcept>
 
-#include "../numeric/rational.h"
+#include "numeric/rational.h"
 #include "ellipsoid.h"
 
-#include "../geometry/exceptions.h"
-#include "../geometry/sphere.h"
+#include "geometry/exceptions.h"
+#include "geometry/sphere.h"
 
 
 namespace Ariadne {

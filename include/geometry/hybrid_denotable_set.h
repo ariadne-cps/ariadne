@@ -33,15 +33,15 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "../base/types.h"
+#include "base/types.h"
 
-#include "../geometry/geometrical_traits.h"
-#include "../geometry/set_interface.h"
-#include "../geometry/grid_cell_list_set.h"
-#include "../geometry/grid_mask_set.h"
-#include "../geometry/hybrid_space.h"
-#include "../geometry/hybrid_set_iterator.h"
-#include "../geometry/hybrid_basic_set.h"
+#include "geometry/geometrical_traits.h"
+#include "geometry/set_interface.h"
+#include "geometry/grid_cell_list_set.h"
+#include "geometry/grid_mask_set.h"
+#include "geometry/hybrid_space.h"
+#include "geometry/hybrid_set_iterator.h"
+#include "geometry/hybrid_basic_set.h"
 
 
 

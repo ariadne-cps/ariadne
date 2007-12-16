@@ -27,9 +27,9 @@
 #include <iostream>
 #include <fstream>
 
-#include "../base/stlio.h"
-#include "../geometry/set_reference.h"
-#include "../geometry/hybrid_set.h"
+#include "base/stlio.h"
+#include "geometry/set_reference.h"
+#include "geometry/hybrid_set.h"
 
 #include "set_based_hybrid_automaton.h"
 

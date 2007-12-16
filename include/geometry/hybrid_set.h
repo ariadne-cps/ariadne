@@ -24,14 +24,14 @@
 #ifndef ARIADNE_HYBRID_SET_H
 #define ARIADNE_HYBRID_SET_H
 
-#include "../geometry/declarations.h"
-#include "../geometry/geometrical_traits.h"
+#include "geometry/declarations.h"
+#include "geometry/geometrical_traits.h"
 
-#include "../geometry/hybrid_space.h"
-#include "../geometry/hybrid_set_iterator.h"
+#include "geometry/hybrid_space.h"
+#include "geometry/hybrid_set_iterator.h"
 
-#include "../geometry/hybrid_basic_set.h"
-#include "../geometry/hybrid_denotable_set.h"
-#include "../geometry/hybrid_abstract_set.h"
+#include "geometry/hybrid_basic_set.h"
+#include "geometry/hybrid_denotable_set.h"
+#include "geometry/hybrid_abstract_set.h"
 
 #endif /* ARIADNE_HYBRID_SET_H */

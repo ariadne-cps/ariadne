@@ -28,9 +28,9 @@
 #include "lp.h"
 #include "linear_program.h"
 
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
-#include "../base/stlio.h"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
+#include "base/stlio.h"
 
 namespace Ariadne {
 

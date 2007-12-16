@@ -23,25 +23,25 @@
  
 #include <vector>
 
-#include "../geometry/rectangle_expression.h"
-#include "../geometry/set_interface.h"
-#include "../geometry/hybrid_set.h"
-#include "../geometry/timed_set.h"
-#include "../system/map.h"
-#include "../system/vector_field.h"
-#include "../system/constraint_based_hybrid_automaton.h"
-#include "../evaluation/evolution_parameters.h"
-#include "../evaluation/applicator_interface.h"
-#include "../evaluation/integrator_interface.h"
-#include "../evaluation/detector_interface.h"
-#include "../evaluation/applicator.h"
-#include "../evaluation/lohner_integrator.h"
-#include "../evaluation/detector.h"
+#include "geometry/rectangle_expression.h"
+#include "geometry/set_interface.h"
+#include "geometry/hybrid_set.h"
+#include "geometry/timed_set.h"
+#include "system/map.h"
+#include "system/vector_field.h"
+#include "system/constraint_based_hybrid_automaton.h"
+#include "evaluation/evolution_parameters.h"
+#include "evaluation/applicator_interface.h"
+#include "evaluation/integrator_interface.h"
+#include "evaluation/detector_interface.h"
+#include "evaluation/applicator.h"
+#include "evaluation/lohner_integrator.h"
+#include "evaluation/detector.h"
 
-#include "../evaluation/constraint_based_hybrid_scheduler.h"
+#include "evaluation/constraint_based_hybrid_scheduler.h"
 
-#include "../output/epsstream.h"
-#include "../output/logging.h"
+#include "output/epsstream.h"
+#include "output/logging.h"
 
 #include "constraint_based_hybrid_evolver.h"
 

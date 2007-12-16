@@ -28,14 +28,14 @@
 #ifndef ARIADNE_DETECTOR_INTERFACE_H
 #define ARIADNE_DETECTOR_INTERFACE_H
 
-#include "../base/types.h"
-#include "../base/declarations.h"
-#include "../numeric/declarations.h"
-#include "../linear_algebra/declarations.h"
-#include "../geometry/declarations.h"
-#include "../system/declarations.h"
+#include "base/types.h"
+#include "base/declarations.h"
+#include "numeric/declarations.h"
+#include "linear_algebra/declarations.h"
+#include "geometry/declarations.h"
+#include "system/declarations.h"
 
-#include "../evaluation/time_model.h"
+#include "evaluation/time_model.h"
 
 namespace Ariadne {
   namespace Evaluation {

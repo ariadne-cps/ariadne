@@ -32,18 +32,18 @@
 
 #include <boost/iterator/iterator_adaptor.hpp>
 
-#include "../base/tribool.h"
-#include "../base/array.h"
+#include "base/tribool.h"
+#include "base/array.h"
 
-#include "../combinatoric/lattice_map.h"
+#include "combinatoric/lattice_map.h"
 
-#include "../geometry/exceptions.h"
-#include "../geometry/rectangle_expression.h"
-#include "../geometry/grid.h"
-#include "../geometry/grid_cell.h"
-#include "../geometry/grid_block.h"
-#include "../geometry/grid_cell_list_set.h"
-#include "../geometry/grid_mask_set.h"
+#include "geometry/exceptions.h"
+#include "geometry/rectangle_expression.h"
+#include "geometry/grid.h"
+#include "geometry/grid_cell.h"
+#include "geometry/grid_block.h"
+#include "geometry/grid_cell_list_set.h"
+#include "geometry/grid_mask_set.h"
 
 #include "exceptions.h"
 

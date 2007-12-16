@@ -32,7 +32,7 @@
 #ifndef ARIADNE_LPFSP_H
 #define ARIADNE_LPFSP_H
 
-#include "../linear_algebra/declarations.h"
+#include "linear_algebra/declarations.h"
 
 namespace Ariadne {
   namespace LinearProgramming {

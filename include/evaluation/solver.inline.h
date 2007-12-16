@@ -26,12 +26,12 @@
 #include <stdexcept>
 #include <string>
 
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
-#include "../geometry/point.h"
-#include "../geometry/rectangle.h"
-#include "../system/vector_field.h"
-#include "../system/map.h"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
+#include "geometry/point.h"
+#include "geometry/rectangle.h"
+#include "system/vector_field.h"
+#include "system/map.h"
 
 namespace Ariadne {
 namespace System {

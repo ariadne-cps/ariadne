@@ -32,26 +32,26 @@
 
 #include "polyhedron.h"
 
-#include "../debug.h"
+#include "macros/assert.h"
 
-#include "../base/stlio.h"
+#include "base/stlio.h"
 
-#include "../numeric/interval.h"
-#include "../numeric/arithmetic.h"
+#include "numeric/interval.h"
+#include "numeric/arithmetic.h"
 
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
-#include "../linear_programming/linear_program.h"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
+#include "linear_programming/linear_program.h"
 
-#include "../geometry/ddconv.h"
-#include "../geometry/ddconv.code.h"
-#include "../geometry/point.h"
-#include "../geometry/point_list.h"
-#include "../geometry/rectangle.h"
-#include "../geometry/zonotope.h"
-#include "../geometry/polytope.h"
+#include "geometry/ddconv.h"
+#include "geometry/ddconv.code.h"
+#include "geometry/point.h"
+#include "geometry/point_list.h"
+#include "geometry/rectangle.h"
+#include "geometry/zonotope.h"
+#include "geometry/polytope.h"
 
-#include "../output/logging.h"
+#include "output/logging.h"
 
 
 // Specializations of polyhedral operations

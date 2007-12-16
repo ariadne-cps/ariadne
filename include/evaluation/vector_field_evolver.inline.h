@@ -22,7 +22,7 @@
  */
  
 
-#include "../evaluation/bounder.h"
+#include "evaluation/bounder.h"
 
 namespace Ariadne {
     

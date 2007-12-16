@@ -28,17 +28,17 @@
 #ifndef ARIADNE_TAYLOR_FLOW_H
 #define ARIADNE_TAYLOR_FLOW_H
 
-#include "../base/types.h"
-#include "../base/declarations.h"
-#include "../numeric/declarations.h"
-#include "../linear_algebra/declarations.h"
-#include "../function/declarations.h"
-#include "../geometry/declarations.h"
-#include "../system/declarations.h"
+#include "base/types.h"
+#include "base/declarations.h"
+#include "numeric/declarations.h"
+#include "linear_algebra/declarations.h"
+#include "function/declarations.h"
+#include "geometry/declarations.h"
+#include "system/declarations.h"
 
-#include "../function/affine_variable.h"
-#include "../function/taylor_series.h"
-#include "../system/flow_interface.h"
+#include "function/affine_variable.h"
+#include "function/taylor_series.h"
+#include "system/flow_interface.h"
 
 namespace Ariadne {
   namespace System {

@@ -28,9 +28,9 @@
 #ifndef ARIADNE_MULTI_INDEX_H
 #define ARIADNE_MULTI_INDEX_H
 
-#include "../base/iterator.h"
-#include "../base/array.h"
-#include "../base/stlio.h"
+#include "base/iterator.h"
+#include "base/array.h"
+#include "base/stlio.h"
 
 namespace Ariadne {
   namespace LinearAlgebra {

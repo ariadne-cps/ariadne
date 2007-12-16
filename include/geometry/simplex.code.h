@@ -26,7 +26,7 @@
 #include <iostream>
 #include <vector>
 
-#include "../base/stlio.h"
+#include "base/stlio.h"
 
 namespace Ariadne {
 

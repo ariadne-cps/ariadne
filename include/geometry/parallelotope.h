@@ -31,14 +31,14 @@
 
 #include <iosfwd>
 
-#include "../numeric/interval.h"
+#include "numeric/interval.h"
 
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
 
-#include "../geometry/exceptions.h"
-#include "../geometry/point.h"
-#include "../geometry/zonotope.h"
+#include "geometry/exceptions.h"
+#include "geometry/point.h"
+#include "geometry/zonotope.h"
 
 namespace Ariadne {
   namespace Geometry {

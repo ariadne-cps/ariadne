@@ -1,7 +1,7 @@
 /***************************************************************************
- *            throw.h
+ *            macros/macros/throw.h
  *
- *  Copyright  2004-6  Alberto Casagrande, Pieter Collins
+ *  Copyright  2004-7  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
@@ -21,8 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef _ARIADNE_THROW_H
-#define _ARIADNE_THROW_H
+#ifndef ARIADNE_MACROS_THROW_H
+#define ARIADNE_MACROS_THROW_H
 
 #include <sstream>
 
@@ -35,4 +35,4 @@
 } \
 
 
-#endif // _ARIADNE_THROW_H
+#endif // ARIADNE_MACROS_THROW_H

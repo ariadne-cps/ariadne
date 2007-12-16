@@ -27,25 +27,25 @@
 #include <sstream>
 #include <string>
 
-#include "../base/stlio.h"
+#include "base/stlio.h"
 
-#include "../combinatoric/array_operations.h"
+#include "combinatoric/array_operations.h"
 
-#include "../geometry/rectangle.h"
-#include "../geometry/zonotope.h"
-#include "../geometry/polytope.h"
-#include "../geometry/polyhedron.h"
+#include "geometry/rectangle.h"
+#include "geometry/zonotope.h"
+#include "geometry/polytope.h"
+#include "geometry/polyhedron.h"
 
-#include "../geometry/grid_cell.h"
-#include "../geometry/grid_block.h"
-#include "../geometry/grid_cell_list_set.h"
+#include "geometry/grid_cell.h"
+#include "geometry/grid_block.h"
+#include "geometry/grid_cell_list_set.h"
 
-#include "../geometry/list_set.h"
-#include "../geometry/partition_tree_set.h"
+#include "geometry/list_set.h"
+#include "geometry/partition_tree_set.h"
 
-#include "../geometry/set_interface.h"
+#include "geometry/set_interface.h"
 
-#include "../output/logging.h"
+#include "output/logging.h"
 
 
 

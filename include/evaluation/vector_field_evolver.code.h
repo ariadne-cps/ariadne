@@ -35,31 +35,31 @@
 #include <vector>
 #include <valarray>
 
-#include "../base/array.h"
+#include "base/array.h"
 
-#include "../numeric/rational.h"
-#include "../numeric/interval.h"
+#include "numeric/rational.h"
+#include "numeric/interval.h"
 
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
 
-#include "../geometry/rectangle.h"
-#include "../geometry/parallelotope.h"
-#include "../geometry/zonotope.h"
-#include "../geometry/list_set.h"
-#include "../geometry/grid.h"
-#include "../geometry/grid_set.h"
-#include "../geometry/rectangular_set.h"
+#include "geometry/rectangle.h"
+#include "geometry/parallelotope.h"
+#include "geometry/zonotope.h"
+#include "geometry/list_set.h"
+#include "geometry/grid.h"
+#include "geometry/grid_set.h"
+#include "geometry/rectangular_set.h"
 
-#include "../system/vector_field.h"
-#include "../system/affine_vector_field.h"
+#include "system/vector_field.h"
+#include "system/affine_vector_field.h"
 
-#include "../evaluation/evolution_parameters.h"
-#include "../evaluation/bounder.h"
-#include "../evaluation/integrator_interface.h"
-#include "../evaluation/lohner_integrator.h"
+#include "evaluation/evolution_parameters.h"
+#include "evaluation/bounder.h"
+#include "evaluation/integrator_interface.h"
+#include "evaluation/lohner_integrator.h"
 
-#include "../output/logging.h"
+#include "output/logging.h"
 
 #include "vector_field_evolver.h"
 

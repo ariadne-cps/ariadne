@@ -28,16 +28,16 @@
 #include <algorithm>
 
 #include "exceptions.h"
-#include "../base/stlio.h"
+#include "base/stlio.h"
 
-#include "../numeric/arithmetic.h"
+#include "numeric/arithmetic.h"
 
-#include "../geometry/rectangle.h"
-#include "../geometry/list_set.h"
+#include "geometry/rectangle.h"
+#include "geometry/list_set.h"
 
-#include "../geometry/grid_block.h" // for GridBlock<R>
-#include "../geometry/grid_approximation.h"
-#include "../output/logging.h"
+#include "geometry/grid_block.h" // for GridBlock<R>
+#include "geometry/grid_approximation.h"
+#include "output/logging.h"
 
 namespace Ariadne {
 

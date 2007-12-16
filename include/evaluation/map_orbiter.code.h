@@ -33,32 +33,32 @@
 #include <vector>
 #include <valarray>
 
-#include "../numeric/interval.h"
+#include "numeric/interval.h"
 
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
 
-#include "../combinatoric/lattice_set.h"
+#include "combinatoric/lattice_set.h"
 
-#include "../geometry/rectangle.h"
-#include "../geometry/zonotope.h"
-#include "../geometry/list_set.h"
-#include "../geometry/grid.h"
-#include "../geometry/grid_set.h"
-#include "../geometry/partition_tree_set.h"
-#include "../geometry/grid_approximation.h"
-#include "../geometry/rectangular_set.h"
-#include "../geometry/orbit.h"
+#include "geometry/rectangle.h"
+#include "geometry/zonotope.h"
+#include "geometry/list_set.h"
+#include "geometry/grid.h"
+#include "geometry/grid_set.h"
+#include "geometry/partition_tree_set.h"
+#include "geometry/grid_approximation.h"
+#include "geometry/rectangular_set.h"
+#include "geometry/orbit.h"
 
-#include "../system/grid_multimap.h"
+#include "system/grid_multimap.h"
 
 
-#include "../system/map.h"
-#include "../system/discrete_time_system.h"
+#include "system/map.h"
+#include "system/discrete_time_system.h"
 
-#include "../evaluation/applicator.h"
+#include "evaluation/applicator.h"
 
-#include "../output/logging.h"
+#include "output/logging.h"
 
 namespace Ariadne {
   

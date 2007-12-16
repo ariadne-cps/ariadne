@@ -31,17 +31,17 @@
 
 #include <boost/smart_ptr.hpp>
 
-#include "../base/types.h"
-#include "../base/pointer.h"
-#include "../base/clonable_container.h"
-#include "../base/reference_container.h"
-#include "../geometry/constraint_interface.h"
-#include "../geometry/set_interface.h"
-#include "../geometry/hybrid_space.h"
-#include "../system/declarations.h"
+#include "base/types.h"
+#include "base/pointer.h"
+#include "base/clonable_container.h"
+#include "base/reference_container.h"
+#include "geometry/constraint_interface.h"
+#include "geometry/set_interface.h"
+#include "geometry/hybrid_space.h"
+#include "system/declarations.h"
 
-#include "../geometry/discrete_state.h"
-#include "../system/discrete_event.h"
+#include "geometry/discrete_state.h"
+#include "system/discrete_event.h"
 
 namespace Ariadne {  
 

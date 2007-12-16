@@ -32,9 +32,9 @@
 #include <tblas/geset.hpp>
 #include <tlapack/gesvd.hpp>
 
-#include "../base/array.h"
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
+#include "base/array.h"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
 
 namespace Ariadne {
   namespace LinearAlgebra {

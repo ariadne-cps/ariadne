@@ -22,7 +22,7 @@
  */
 
 
-#include "../base/stlio.h"
+#include "base/stlio.h"
 
 #include "rectangle.h"
 #include "list_set.h"

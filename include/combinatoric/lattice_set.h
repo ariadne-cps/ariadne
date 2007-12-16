@@ -34,14 +34,14 @@
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/iterator/iterator_adaptor.hpp>
 
-#include "../base/stlio.h"
-#include "../base/array.h"
-#include "../base/iterator.h"
-#include "../base/types.h"
+#include "base/stlio.h"
+#include "base/array.h"
+#include "base/iterator.h"
+#include "base/types.h"
 
-#include "../numeric/interval.h"
-#include "../combinatoric/array_operations.h"
-#include "../combinatoric/exceptions.h"
+#include "numeric/interval.h"
+#include "combinatoric/array_operations.h"
+#include "combinatoric/exceptions.h"
 
 namespace Ariadne {
   namespace Combinatoric {

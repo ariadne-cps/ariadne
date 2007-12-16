@@ -1,8 +1,8 @@
 /***************************************************************************
- *            debug.h
+ *            macros/assert.h
  *
- *  Copyright  2004-6  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright  2004-7  Alberto Casagrande, Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -21,8 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef ARIADNE_DEBUG_H
-#define ARIADNE_DEBUG_H
+#ifndef ARIADNE_MACROS_ASSERT_H
+#define ARIADNE_MACROS_ASSERT_H
 
 #include <iostream>
 #include <cassert>
@@ -37,8 +37,4 @@
   } \
 } \
 
-namespace Ariadne {
-
-} // namespace Ariadne
-
-#endif // ARIADNE_DEBUG_H
+#endif // ARIADNE_MACROS_ASSERT_H

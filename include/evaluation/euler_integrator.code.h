@@ -36,19 +36,19 @@
 
 #include "euler_integrator.h"
 
-#include "../base/array.h"
-#include "../numeric/arithmetic.h"
-#include "../numeric/interval.h"
+#include "base/array.h"
+#include "numeric/arithmetic.h"
+#include "numeric/interval.h"
 
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
 
-#include "../geometry/rectangle.h"
-#include "../geometry/zonotope.h"
+#include "geometry/rectangle.h"
+#include "geometry/zonotope.h"
 
-#include "../system/vector_field.h"
+#include "system/vector_field.h"
 
-#include "../output/logging.h"
+#include "output/logging.h"
 
 namespace Ariadne {
     

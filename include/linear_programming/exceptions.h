@@ -31,10 +31,10 @@
 #include <stdexcept>
 #include <iosfwd>
 
-#include "../throw.h"
-#include "../base/types.h"
-#include "../base/exceptions.h"
-#include "../linear_algebra/exceptions.h"
+#include "macros/throw.h"
+#include "base/types.h"
+#include "base/exceptions.h"
+#include "linear_algebra/exceptions.h"
 
 namespace Ariadne {
   namespace LinearProgramming {

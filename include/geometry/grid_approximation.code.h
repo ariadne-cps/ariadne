@@ -40,7 +40,7 @@
 
 #include "grid_approximation.h"
 
-#include "../output/logging.h"
+#include "output/logging.h"
 
 
 

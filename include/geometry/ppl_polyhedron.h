@@ -36,7 +36,7 @@
 #include <iosfwd>
 #include <vector>
 
-#include "../linear_algebra/linear_algebra.decls.h"
+#include "linear_algebra/linear_algebra.decls.h"
 
 namespace Parma_Polyhedra_Library {
   class Polyhedron;

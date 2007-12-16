@@ -32,23 +32,23 @@
 
 #include "polytope.h"
 
-#include "../base/stlio.h"
+#include "base/stlio.h"
 
-#include "../numeric/interval.h"
-#include "../numeric/arithmetic.h"
+#include "numeric/interval.h"
+#include "numeric/arithmetic.h"
 
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
 
-#include "../linear_programming/linear_program.h"
+#include "linear_programming/linear_program.h"
 
-#include "../geometry/ddconv.h"
-#include "../geometry/point.h"
-#include "../geometry/point_list.h"
-#include "../geometry/rectangle.h"
-#include "../geometry/polyhedron.h"
+#include "geometry/ddconv.h"
+#include "geometry/point.h"
+#include "geometry/point_list.h"
+#include "geometry/rectangle.h"
+#include "geometry/polyhedron.h"
 
-#include "../output/logging.h"
+#include "output/logging.h"
 
 
 

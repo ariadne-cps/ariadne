@@ -36,8 +36,8 @@
 #include <tlapack/geqrf.hpp>
 #include <tlapack/orgqr.hpp>
 
-#include "../base/array.h"
-#include "../linear_algebra/matrix.h"
+#include "base/array.h"
+#include "linear_algebra/matrix.h"
 
 namespace Ariadne {
   namespace LinearAlgebra {

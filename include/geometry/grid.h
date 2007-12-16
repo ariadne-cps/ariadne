@@ -31,10 +31,10 @@
 #include <iosfwd>
 #include <boost/shared_ptr.hpp>
 
-#include "../base/array.h"
-#include "../numeric/arithmetic.h"
-#include "../linear_algebra/vector.h"
-#include "../combinatoric/lattice_set.h"
+#include "base/array.h"
+#include "numeric/arithmetic.h"
+#include "linear_algebra/vector.h"
+#include "combinatoric/lattice_set.h"
 
 namespace Ariadne {
   namespace Geometry {

@@ -31,11 +31,11 @@
 #include <iosfwd>
 #include <fstream>
 
-#include "../base/types.h"
-#include "../numeric/declarations.h"
-#include "../linear_algebra/declarations.h"
-#include "../function/declarations.h"
-#include "../geometry/declarations.h"
+#include "base/types.h"
+#include "numeric/declarations.h"
+#include "linear_algebra/declarations.h"
+#include "function/declarations.h"
+#include "geometry/declarations.h"
 
 namespace Ariadne {
   namespace Output {

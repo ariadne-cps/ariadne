@@ -28,18 +28,18 @@
 #ifndef ARIADNE_AFFINE_FUNCTION_H
 #define ARIADNE_AFFINE_FUNCTION_H
 
-#include "../base/types.h"
+#include "base/types.h"
 
-#include "../numeric/declarations.h"
-#include "../numeric/traits.h"
+#include "numeric/declarations.h"
+#include "numeric/traits.h"
 
-#include "../linear_algebra/declarations.h"
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
+#include "linear_algebra/declarations.h"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
 
-#include "../geometry/declarations.h"
+#include "geometry/declarations.h"
 
-#include "../function/function_interface.h"
+#include "function/function_interface.h"
 
 
 namespace Ariadne {

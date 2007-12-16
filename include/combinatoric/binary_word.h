@@ -74,9 +74,9 @@
 #include <iosfwd>
 #include <stdexcept>
 
-#include "../base/types.h"
+#include "base/types.h"
 
-#include "../throw.h"
+#include "macros/throw.h"
 #include "exceptions.h"
 
 namespace Ariadne {

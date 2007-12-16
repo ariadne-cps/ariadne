@@ -32,15 +32,15 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
 
-#include "../base/types.h"
-#include "../numeric/declarations.h"
-#include "../numeric/traits.h"
-#include "../linear_algebra/declarations.h"
-#include "../function/declarations.h"
-#include "../geometry/declarations.h"
-#include "../system/map.h"
+#include "base/types.h"
+#include "numeric/declarations.h"
+#include "numeric/traits.h"
+#include "linear_algebra/declarations.h"
+#include "function/declarations.h"
+#include "geometry/declarations.h"
+#include "system/map.h"
 
-#include "../function/function_interface.h"
+#include "function/function_interface.h"
 
 namespace Ariadne {
   namespace System {

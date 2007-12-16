@@ -30,11 +30,11 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "../base/types.h"
-#include "../base/declarations.h"
-#include "../linear_algebra/declarations.h"
-#include "../geometry/declarations.h"
-#include "../system/declarations.h"
+#include "base/types.h"
+#include "base/declarations.h"
+#include "linear_algebra/declarations.h"
+#include "geometry/declarations.h"
+#include "system/declarations.h"
 
 #include "applicator_interface.h"
 

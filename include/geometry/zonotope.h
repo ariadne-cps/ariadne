@@ -30,13 +30,13 @@
 
 #include <iosfwd>
 
-#include "../base/iterator.h"
-#include "../base/tribool.h"
+#include "base/iterator.h"
+#include "base/tribool.h"
 
-#include "../numeric/declarations.h"
+#include "numeric/declarations.h"
 
-#include "../linear_algebra/declarations.h"
-#include "../linear_algebra/matrix.h"
+#include "linear_algebra/declarations.h"
+#include "linear_algebra/matrix.h"
 
 #include "zonotope.decl.h"
 

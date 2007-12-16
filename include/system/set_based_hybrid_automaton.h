@@ -31,16 +31,16 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "../geometry/declarations.h"
-#include "../system/declarations.h"
+#include "geometry/declarations.h"
+#include "system/declarations.h"
 
-#include "../base/stlio.h"
-#include "../geometry/exceptions.h"
-#include "../geometry/discrete_state.h"
-#include "../geometry/set_interface.h"
-#include "../system/exceptions.h"
-#include "../system/map_interface.h"
-#include "../system/vector_field_interface.h"
+#include "base/stlio.h"
+#include "geometry/exceptions.h"
+#include "geometry/discrete_state.h"
+#include "geometry/set_interface.h"
+#include "system/exceptions.h"
+#include "system/map_interface.h"
+#include "system/vector_field_interface.h"
 
 #include "discrete_event.h"
 

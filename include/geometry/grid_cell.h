@@ -32,14 +32,14 @@
 
 #include <boost/iterator/iterator_adaptor.hpp>
 
-#include "../base/array.h"
-#include "../base/tribool.h"
-#include "../base/pointer.h"
+#include "base/array.h"
+#include "base/tribool.h"
+#include "base/pointer.h"
 
-#include "../combinatoric/lattice_set.h"
+#include "combinatoric/lattice_set.h"
 
-#include "../geometry/declarations.h"
-#include "../geometry/grid.h"
+#include "geometry/declarations.h"
+#include "geometry/grid.h"
 
 namespace Ariadne {
   namespace Geometry {

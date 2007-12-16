@@ -28,7 +28,7 @@
 #ifndef ARIADNE_IRREGULAR_GRID_SET_H
 #define ARIADNE_IRREGULAR_GRID_SET_H
 
-#include "../combinatoric/lattice_set.h"
+#include "combinatoric/lattice_set.h"
 
 #include "irregular_grid.h"
 

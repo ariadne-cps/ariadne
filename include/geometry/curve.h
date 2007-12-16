@@ -28,7 +28,7 @@
 #ifndef ARIADNE_CURVE_H
 #define ARIADNE_CURVE_H
 
-#include "../function/function_interface.h"
+#include "function/function_interface.h"
 #include "curve_interface.h"
 
 namespace Ariadne {

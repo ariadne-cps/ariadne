@@ -31,7 +31,7 @@
 #include <stdexcept>
 #include <iosfwd>
 
-#include "../geometry/exceptions.h"
+#include "geometry/exceptions.h"
 
 namespace Ariadne {
   namespace System {

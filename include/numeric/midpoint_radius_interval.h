@@ -31,14 +31,14 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "../base/tribool.h"
-#include "../base/exceptions.h"
+#include "base/tribool.h"
+#include "base/exceptions.h"
 
-#include "../numeric/exceptions.h"
-#include "../numeric/traits.h"
-#include "../numeric/conversion.h"
-#include "../numeric/arithmetic.h"
-#include "../numeric/function.h"
+#include "numeric/exceptions.h"
+#include "numeric/traits.h"
+#include "numeric/conversion.h"
+#include "numeric/arithmetic.h"
+#include "numeric/function.h"
 
 namespace Ariadne {
   namespace Numeric {

@@ -30,10 +30,10 @@
 
 #include <iosfwd>
 
-#include "../declarations.h"
-#include "../numeric/integer.h"
-#include "../numeric/interval.h"
-#include "../linear_algebra/matrix.h"
+#include "declarations.h"
+#include "numeric/integer.h"
+#include "numeric/interval.h"
+#include "linear_algebra/matrix.h"
 
 namespace Ariadne {
   namespace LinearAlgebra {

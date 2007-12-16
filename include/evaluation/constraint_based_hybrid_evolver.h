@@ -35,15 +35,15 @@
 
 #include <boost/smart_ptr.hpp>
 
-#include "../base/types.h"
-#include "../base/tribool.h"
-#include "../geometry/declarations.h"
-#include "../system/declarations.h"
-#include "../evaluation/declarations.h"
+#include "base/types.h"
+#include "base/tribool.h"
+#include "geometry/declarations.h"
+#include "system/declarations.h"
+#include "evaluation/declarations.h"
 
-#include "../geometry/discrete_state.h"
-#include "../system/discrete_event.h"
-#include "../evaluation/hybrid_time.h"
+#include "geometry/discrete_state.h"
+#include "system/discrete_event.h"
+#include "evaluation/hybrid_time.h"
 
 namespace Ariadne {  
   namespace Evaluation {

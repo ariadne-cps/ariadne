@@ -36,27 +36,27 @@
 
 #include "taylor_integrator.h"
 
-#include "../base/array.h"
-#include "../base/exceptions.h"
-#include "../numeric/arithmetic.h"
-#include "../numeric/interval.h"
+#include "base/array.h"
+#include "base/exceptions.h"
+#include "numeric/arithmetic.h"
+#include "numeric/interval.h"
 
-#include "../linear_algebra/vector.h"
+#include "linear_algebra/vector.h"
 
-#include "../linear_algebra/matrix.h"
-#include "../linear_algebra/matrix_function.h"
+#include "linear_algebra/matrix.h"
+#include "linear_algebra/matrix_function.h"
 
-#include "../geometry/rectangle.h"
-#include "../geometry/parallelotope.h"
-#include "../geometry/zonotope.h"
-#include "../geometry/list_set.h"
-#include "../geometry/grid.h"
-#include "../geometry/grid_set.h"
+#include "geometry/rectangle.h"
+#include "geometry/parallelotope.h"
+#include "geometry/zonotope.h"
+#include "geometry/list_set.h"
+#include "geometry/grid.h"
+#include "geometry/grid_set.h"
 
-#include "../system/vector_field.h"
-#include "../system/affine_vector_field.h"
+#include "system/vector_field.h"
+#include "system/affine_vector_field.h"
 
-#include "../output/logging.h"
+#include "output/logging.h"
 
 
 namespace Ariadne { 

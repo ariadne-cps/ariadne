@@ -32,8 +32,8 @@
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/iterator/iterator_adaptor.hpp>
 
-#include "../base/array.h"
-#include "../base/types.h"
+#include "base/array.h"
+#include "base/types.h"
 
 namespace Ariadne {
   namespace Base {

@@ -31,7 +31,7 @@
 #include <sstream>
 #include <exception>
 
-#include "../base/stlio.h"
+#include "base/stlio.h"
 
 namespace Ariadne {
 

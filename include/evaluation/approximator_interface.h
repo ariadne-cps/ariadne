@@ -28,11 +28,11 @@
 #ifndef ARIADNE_APPROXIMATOR_INTERFACE_H
 #define ARIADNE_APPROXIMATOR_INTERFACE_H
 
-#include "../base/types.h"
-#include "../base/declarations.h"
-#include "../numeric/declarations.h"
-#include "../linear_algebra/declarations.h"
-#include "../geometry/declarations.h"
+#include "base/types.h"
+#include "base/declarations.h"
+#include "numeric/declarations.h"
+#include "linear_algebra/declarations.h"
+#include "geometry/declarations.h"
 
 namespace Ariadne {
   namespace Evaluation {

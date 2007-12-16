@@ -32,9 +32,9 @@
 #include <stdexcept>
 #include <string>
 
-#include "../numeric/traits.h"
-#include "../geometry/declarations.h"
-#include "../system/declarations.h"
+#include "numeric/traits.h"
+#include "geometry/declarations.h"
+#include "system/declarations.h"
 
 #include "solver.h"
 

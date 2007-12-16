@@ -33,28 +33,28 @@
 #include <vector>
 #include <valarray>
 
-#include "../numeric/interval.h"
+#include "numeric/interval.h"
 
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
 
-#include "../combinatoric/lattice_set.h"
+#include "combinatoric/lattice_set.h"
 
-#include "../geometry/rectangle.h"
-#include "../geometry/zonotope.h"
-#include "../geometry/basic_set_adaptor.h"
-#include "../geometry/list_set.h"
-#include "../geometry/grid.h"
-#include "../geometry/grid_set.h"
-#include "../geometry/rectangular_set.h"
+#include "geometry/rectangle.h"
+#include "geometry/zonotope.h"
+#include "geometry/basic_set_adaptor.h"
+#include "geometry/list_set.h"
+#include "geometry/grid.h"
+#include "geometry/grid_set.h"
+#include "geometry/rectangular_set.h"
 
-#include "../system/grid_multimap.h"
+#include "system/grid_multimap.h"
 
 
-#include "../system/map.h"
-#include "../system/discrete_time_system.h"
+#include "system/map.h"
+#include "system/discrete_time_system.h"
 
-#include "../output/logging.h"
+#include "output/logging.h"
 
 namespace Ariadne {
 

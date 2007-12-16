@@ -32,16 +32,16 @@
 
 #include <boost/iterator/iterator_adaptor.hpp>
 
-#include "../base/array.h"
-#include "../base/tribool.h"
-#include "../base/pointer.h"
+#include "base/array.h"
+#include "base/tribool.h"
+#include "base/pointer.h"
 
-#include "../combinatoric/lattice_set.h"
+#include "combinatoric/lattice_set.h"
 
-#include "../geometry/declarations.h"
-#include "../geometry/set_interface.h"
-#include "../geometry/grid.h"
-#include "../geometry/grid_cell.h"
+#include "geometry/declarations.h"
+#include "geometry/set_interface.h"
+#include "geometry/grid.h"
+#include "geometry/grid_cell.h"
 
 /*TODO: Unify bounds in FiniteGrid, and make GridMaskSet use only finite grid bounds*/
 

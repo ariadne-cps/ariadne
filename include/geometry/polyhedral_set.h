@@ -30,10 +30,10 @@
 
 #include <iosfwd>
 
-#include "../base/tribool.h"
+#include "base/tribool.h"
 
-#include "../geometry/set_interface.h"
-#include "../geometry/polyhedron.h"
+#include "geometry/set_interface.h"
+#include "geometry/polyhedron.h"
 
 namespace Ariadne {
   namespace Geometry {

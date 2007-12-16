@@ -36,22 +36,22 @@
 #include <cassert>
 #include <cstring>
 
-#include "../base/stlio.h"
-#include "../numeric/conversion.h"
-#include "../linear_algebra/matrix.h"
-#include "../geometry/exceptions.h"
-#include "../geometry/point.h"
-#include "../geometry/rectangle.h"
-#include "../geometry/rectangular_set.h"
-#include "../geometry/list_set.h"
-#include "../geometry/grid_set.h"
-#include "../geometry/parallelotope.h"
-#include "../geometry/zonotope.h"
-#include "../geometry/polytope.h"
-#include "../geometry/polyhedral_set.h"
-#include "../geometry/partition_tree_set.h"
-#include "../system/affine_map.h"
-#include "../output/colour.h"
+#include "base/stlio.h"
+#include "numeric/conversion.h"
+#include "linear_algebra/matrix.h"
+#include "geometry/exceptions.h"
+#include "geometry/point.h"
+#include "geometry/rectangle.h"
+#include "geometry/rectangular_set.h"
+#include "geometry/list_set.h"
+#include "geometry/grid_set.h"
+#include "geometry/parallelotope.h"
+#include "geometry/zonotope.h"
+#include "geometry/polytope.h"
+#include "geometry/polyhedral_set.h"
+#include "geometry/partition_tree_set.h"
+#include "system/affine_map.h"
+#include "output/colour.h"
 
 
 

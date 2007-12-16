@@ -32,15 +32,15 @@
 #include <stdexcept>
 #include <cassert>
 
-#include "../base/tribool.h"
-#include "../base/exceptions.h"
-#include "../base/stlio.h"
+#include "base/tribool.h"
+#include "base/exceptions.h"
+#include "base/stlio.h"
 
-#include "../numeric/exceptions.h"
-#include "../numeric/traits.h"
-#include "../numeric/conversion.h"
-#include "../numeric/arithmetic.h"
-#include "../numeric/function.h"
+#include "numeric/exceptions.h"
+#include "numeric/traits.h"
+#include "numeric/conversion.h"
+#include "numeric/arithmetic.h"
+#include "numeric/function.h"
 
 namespace Ariadne {
   namespace Function {

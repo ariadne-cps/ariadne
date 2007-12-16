@@ -23,19 +23,19 @@
  
 #include "affine_multimap.h"
 
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
 
-#include "../geometry/point.h"
-#include "../geometry/rectangle.h"
-#include "../geometry/list_set.h"
-#include "../geometry/parallelotope.h"
-#include "../geometry/zonotope.h"
-#include "../geometry/simplex.h"
-#include "../geometry/polyhedron.h"
+#include "geometry/point.h"
+#include "geometry/rectangle.h"
+#include "geometry/list_set.h"
+#include "geometry/parallelotope.h"
+#include "geometry/zonotope.h"
+#include "geometry/simplex.h"
+#include "geometry/polyhedron.h"
 
-#include "../system/exceptions.h"
-#include "../system/affine_map.h"
+#include "system/exceptions.h"
+#include "system/affine_map.h"
 
 namespace Ariadne {
   namespace System {

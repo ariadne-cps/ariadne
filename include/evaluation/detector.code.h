@@ -33,7 +33,7 @@
 #include "geometry/constraint.h"
 
 #include "evaluation/exceptions.h"
-#include "../evaluation/time_model.h"
+#include "evaluation/time_model.h"
 #include "evaluation/bounder.h"
 #include "evaluation/lohner_integrator.h"
 

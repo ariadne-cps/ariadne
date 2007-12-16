@@ -22,7 +22,7 @@
  */
 
 
-#include "debug.h"
+#include "macros/assert.h"
 
 #include "python/utilities.h"
 using namespace Ariadne;

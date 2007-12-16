@@ -33,10 +33,10 @@
 #include <string>
 #include <sstream>
 
-#include "../base/array.h"
-#include "../linear_algebra/matrix.h"
-#include "../function/polynomial_function.h"
-#include "../system/map.h"
+#include "base/array.h"
+#include "linear_algebra/matrix.h"
+#include "function/polynomial_function.h"
+#include "system/map.h"
 
 namespace Ariadne {
   namespace System {

@@ -30,10 +30,10 @@
 
 #include <iosfwd>
 
-#include "../base/array.h"
-#include "../numeric/traits.h"
-#include "../linear_algebra/exceptions.h"
-#include "../linear_algebra/multi_index.h"
+#include "base/array.h"
+#include "numeric/traits.h"
+#include "linear_algebra/exceptions.h"
+#include "linear_algebra/multi_index.h"
 
 
 namespace Ariadne {

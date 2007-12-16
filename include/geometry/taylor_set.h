@@ -30,14 +30,14 @@
 
 #include <iosfwd>
 
-#include "../base/iterator.h"
-#include "../base/tribool.h"
+#include "base/iterator.h"
+#include "base/tribool.h"
 
-#include "../numeric/interval.h"
+#include "numeric/interval.h"
 
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
-#include "../linear_algebra/tensor.h"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
+#include "linear_algebra/tensor.h"
 
 namespace Ariadne {
   namespace Geometry {

@@ -32,18 +32,18 @@
 #include <vector>
 #include <valarray>
 
-#include "../base/stlio.h"
-#include "../base/array.h"
-#include "../numeric/interval.h"
+#include "base/stlio.h"
+#include "base/array.h"
+#include "numeric/interval.h"
 
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
 
-#include "../function/position_index.h"
-#include "../function/sorted_index.h"
-#include "../function/multi_index.h"
+#include "function/position_index.h"
+#include "function/sorted_index.h"
+#include "function/multi_index.h"
 
-#include "../output/latexstream.h"
+#include "output/latexstream.h"
 
 namespace Ariadne {
 

@@ -22,7 +22,7 @@
  */
  
 #include <sstream>
-#include "integer.h"
+#include "numeric/integer.h"
 
 namespace Ariadne {
 

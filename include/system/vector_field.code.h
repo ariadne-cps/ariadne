@@ -22,11 +22,11 @@
  
 #include "vector_field.h"
 
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
 
-#include "../geometry/point.h"
-#include "../geometry/rectangle.h"
+#include "geometry/point.h"
+#include "geometry/rectangle.h"
 
 
 

@@ -30,8 +30,8 @@
 
 #include <iosfwd>
 
-#include "../base/types.h"
-#include "../base/tribool.h"
+#include "base/types.h"
+#include "base/tribool.h"
 
 
 namespace Ariadne {

@@ -39,9 +39,9 @@
 #include <tlapack/getrf.hpp>
 #include <tlapack/getrs.hpp>
 
-#include "../base/array.h"
-#include "../linear_algebra/exceptions.h"
-#include "../linear_algebra/matrix.h"
+#include "base/array.h"
+#include "linear_algebra/exceptions.h"
+#include "linear_algebra/matrix.h"
 
 namespace Ariadne {
   namespace LinearAlgebra {

@@ -21,11 +21,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
-#include "../geometry/rectangle.h"
-#include "../system/vector_field_interface.h"
-#include "../output/logging.h"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
+#include "geometry/rectangle.h"
+#include "system/vector_field_interface.h"
+#include "output/logging.h"
 
 #include "bounder_interface.h"
 #include "bounder.h"

@@ -30,11 +30,11 @@
 
 #include <cassert>
 
-#include "../base/iterator.h"
-#include "../base/array.h"
-#include "../base/stlio.h"
+#include "base/iterator.h"
+#include "base/array.h"
+#include "base/stlio.h"
 
-#include "../numeric/integer.h"
+#include "numeric/integer.h"
 
 #include "sorted_index.h"
 #include "multi_index.h"

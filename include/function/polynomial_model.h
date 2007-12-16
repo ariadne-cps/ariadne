@@ -32,9 +32,9 @@
 #include <string>
 #include <sstream>
 
-#include "../base/array.h"
-#include "../base/types.h"
-#include "../linear_algebra/declarations.h"
+#include "base/array.h"
+#include "base/types.h"
+#include "linear_algebra/declarations.h"
 
 namespace Ariadne {
   namespace Function {

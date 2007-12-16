@@ -31,12 +31,12 @@
 
 #include <string>
 
-#include "../base/types.h"
-#include "../numeric/declarations.h"
-#include "../numeric/traits.h"
-#include "../linear_algebra/declarations.h"
-#include "../function/declarations.h"
-#include "../geometry/declarations.h"
+#include "base/types.h"
+#include "numeric/declarations.h"
+#include "numeric/traits.h"
+#include "linear_algebra/declarations.h"
+#include "function/declarations.h"
+#include "geometry/declarations.h"
 
 
 namespace Ariadne {

@@ -31,7 +31,7 @@
 #include <iostream>
 #include <sstream>
 
-#include "../base/types.h"
+#include "base/types.h"
 #include "exceptions.h"
 
 #include "discrete_state.h"

@@ -22,9 +22,9 @@
  */
  
 #include "constraint_set.h"
-#include "../linear_algebra/vector.h"
-#include "../geometry/point.h"
-#include "../geometry/rectangle.h"
+#include "linear_algebra/vector.h"
+#include "geometry/point.h"
+#include "geometry/rectangle.h"
 
 namespace {
 

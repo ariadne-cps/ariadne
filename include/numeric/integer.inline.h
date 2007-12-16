@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "debug.h"
+#include "macros/assert.h"
 #include "numeric/exceptions.h"
 
 #define ARIADNE_DIRECT_COMPARISON(Arg1,Arg2,Cmp)                            \

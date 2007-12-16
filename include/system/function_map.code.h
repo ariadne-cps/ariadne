@@ -21,19 +21,19 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
 
-#include "../function/function_interface.h"
-#include "../function/interpreted_function.h"
-#include "../function/multi_index.h"
+#include "function/function_interface.h"
+#include "function/interpreted_function.h"
+#include "function/multi_index.h"
 
-#include "../geometry/point.h"
-#include "../geometry/rectangle.h"
+#include "geometry/point.h"
+#include "geometry/rectangle.h"
 
-#include "../system/map.h"
+#include "system/map.h"
 
-#include "../output/logging.h"
+#include "output/logging.h"
 
 namespace Ariadne {
 

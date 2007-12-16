@@ -30,8 +30,8 @@
 
 #include <boost/smart_ptr.hpp>
 
-#include "../base/types.h"
-#include "../geometry/declarations.h"
+#include "base/types.h"
+#include "geometry/declarations.h"
 
 namespace Ariadne {
   namespace Evaluation {

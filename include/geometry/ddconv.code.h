@@ -23,11 +23,11 @@
  
 #include <cassert>
 
-#include "../base/stlio.h"
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
-#include "../linear_algebra/matrix.code.h" // for Matrix<int>::write(ostream&) const;
-#include "../output/logging.h"
+#include "base/stlio.h"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
+#include "linear_algebra/matrix.code.h" // for Matrix<int>::write(ostream&) const;
+#include "output/logging.h"
 
 namespace Ariadne {
 

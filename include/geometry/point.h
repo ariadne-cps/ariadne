@@ -31,9 +31,9 @@
 #include <iosfwd>
 #include <stdexcept>
 
-#include "../base/array.h"
-#include "../linear_algebra/declarations.h"
-#include "../linear_algebra/vector.h"
+#include "base/array.h"
+#include "linear_algebra/declarations.h"
+#include "linear_algebra/vector.h"
 
 #include "exceptions.h"
 

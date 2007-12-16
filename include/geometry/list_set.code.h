@@ -24,9 +24,9 @@
 #include <iostream>
 
 #include "list_set.h"
-#include "../base/stlio.h"
-#include "../geometry/rectangle.h"
-#include "../geometry/irregular_grid_set.h"
+#include "base/stlio.h"
+#include "geometry/rectangle.h"
+#include "geometry/irregular_grid_set.h"
 
 namespace Ariadne {
 

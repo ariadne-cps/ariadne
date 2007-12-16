@@ -28,17 +28,17 @@
 #ifndef ARIADNE_GEOMETRY_H
 #define ARIADNE_GEOMETRY_H
 
-#include "../geometry/geometry_declarations.h"
+#include "geometry/geometry_declarations.h"
 
-#include "../geometry/point.h"
-#include "../geometry/rectangle.h"
-#include "../geometry/parallelopiped.h"
-#include "../geometry/zonotope.h"
-#include "../geometry/simplex.h"
-#include "../geometry/polyhedron.h"
+#include "geometry/point.h"
+#include "geometry/rectangle.h"
+#include "geometry/parallelopiped.h"
+#include "geometry/zonotope.h"
+#include "geometry/simplex.h"
+#include "geometry/polyhedron.h"
 
-#include "../geometry/list_set.h"
-#include "../geometry/grid_set.h"
-#include "../geometry/partition_tree_set.h"
+#include "geometry/list_set.h"
+#include "geometry/grid_set.h"
+#include "geometry/partition_tree_set.h"
 
 #endif /* ARIADNE_GEOMETRY_H */

@@ -37,20 +37,20 @@
 
 #include <boost/smart_ptr.hpp>
 
-#include "../numeric/float64.h"
+#include "numeric/float64.h"
 
-#include "../base/types.h"
-#include "../base/tribool.h"
-#include "../base/reference_container.h"
-#include "../geometry/declarations.h"
-#include "../geometry/declarations.h"
-#include "../system/declarations.h"
-#include "../evaluation/declarations.h"
-#include "../evaluation/exceptions.h"
+#include "base/types.h"
+#include "base/tribool.h"
+#include "base/reference_container.h"
+#include "geometry/declarations.h"
+#include "geometry/declarations.h"
+#include "system/declarations.h"
+#include "evaluation/declarations.h"
+#include "evaluation/exceptions.h"
 
-#include "../geometry/discrete_state.h"
-#include "../system/discrete_event.h"
-#include "../evaluation/hybrid_time.h"
+#include "geometry/discrete_state.h"
+#include "system/discrete_event.h"
+#include "evaluation/hybrid_time.h"
 
 namespace Ariadne {  
   namespace Evaluation {

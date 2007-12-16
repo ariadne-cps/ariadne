@@ -31,17 +31,17 @@
 #include <vector>
 #include <valarray>
 
-#include "../base/stlio.h"
-#include "../base/array.h"
-#include "../numeric/interval.h"
+#include "base/stlio.h"
+#include "base/array.h"
+#include "numeric/interval.h"
 
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
 
-#include "../geometry/point.h"
-#include "../geometry/rectangle.h"
+#include "geometry/point.h"
+#include "geometry/rectangle.h"
 
-#include "../system/exceptions.h"
+#include "system/exceptions.h"
 
 namespace Ariadne {
 

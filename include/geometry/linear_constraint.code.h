@@ -24,11 +24,11 @@
 #include <limits>
 
 #include "constraint.h"
-#include "../numeric/interval.h"
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
-#include "../geometry/point.h"
-#include "../geometry/rectangle.h"
+#include "numeric/interval.h"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
+#include "geometry/point.h"
+#include "geometry/rectangle.h"
 
 
 namespace Ariadne {

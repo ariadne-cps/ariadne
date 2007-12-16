@@ -30,10 +30,10 @@
 
 #include <iosfwd>
 
-#include "../base/types.h"
+#include "base/types.h"
 
-#include "../geometry/declarations.h"
-#include "../system/declarations.h"
+#include "geometry/declarations.h"
+#include "system/declarations.h"
 
 namespace Ariadne {
   namespace Geometry {

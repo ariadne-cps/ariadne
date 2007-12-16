@@ -21,17 +21,16 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "matrix.h"
-
 #include <algorithm>
-#include "../base/array.h"
 
-#include "../numeric/integer.h"
-#include "../numeric/arithmetic.h"
+#include "base/array.h"
 
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
-#include "../linear_algebra/lu_matrix.h"
+#include "numeric/integer.h"
+#include "numeric/arithmetic.h"
+
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
+#include "linear_algebra/lu_matrix.h"
 
 namespace Ariadne {
 

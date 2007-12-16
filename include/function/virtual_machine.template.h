@@ -26,12 +26,12 @@
 #include <cassert>
 #include <cstring>
 
-#include "../base/array.h"
-#include "../base/stlio.h"
-#include "../base/exceptions.h"
-#include "../numeric/rational.h"
-#include "../function/virtual_machine.h"
-#include "../output/logging.h"
+#include "base/array.h"
+#include "base/stlio.h"
+#include "base/exceptions.h"
+#include "numeric/rational.h"
+#include "function/virtual_machine.h"
+#include "output/logging.h"
 
 
 namespace {

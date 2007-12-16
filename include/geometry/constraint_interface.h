@@ -31,10 +31,10 @@
 #include <iosfwd>
 #include <boost/shared_ptr.hpp>
 
-#include "../base/tribool.h"
-#include "../base/types.h"
-#include "../numeric/traits.h"
-#include "../linear_algebra/declarations.h"
+#include "base/tribool.h"
+#include "base/types.h"
+#include "numeric/traits.h"
+#include "linear_algebra/declarations.h"
 
 namespace Ariadne {
   namespace Geometry {

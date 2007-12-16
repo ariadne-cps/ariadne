@@ -33,14 +33,14 @@
 #include <exception>
 #include <stdexcept>
 
-#include "../base/types.h"
-#include "../base/array.h"
-#include "../numeric/traits.h"
-#include "../linear_algebra/declarations.h"
-#include "../output/logging.h"
+#include "base/types.h"
+#include "base/array.h"
+#include "numeric/traits.h"
+#include "linear_algebra/declarations.h"
+#include "output/logging.h"
 
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
 
 namespace Ariadne {
   namespace Function {

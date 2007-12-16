@@ -27,17 +27,17 @@
 #include <cassert>
 #include <cstring>
 
-#include "../base/stlio.h"
-#include "../base/exceptions.h"
-#include "../numeric/rational.h"
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
-#include "../function/exceptions.h"
-#include "../function/affine_variable.h"
-#include "../function/virtual_machine.h"
-#include "../input/modelica.h"
+#include "base/stlio.h"
+#include "base/exceptions.h"
+#include "numeric/rational.h"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
+#include "function/exceptions.h"
+#include "function/affine_variable.h"
+#include "function/virtual_machine.h"
+#include "input/modelica.h"
 
-#include "../function/virtual_machine.template.h"
+#include "function/virtual_machine.template.h"
 
 #include "interpreted_function.h"
 

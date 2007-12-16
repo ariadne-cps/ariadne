@@ -31,9 +31,9 @@
 #include <iosfwd>
 #include <boost/shared_ptr.hpp>
 
-#include "../base/tribool.h"
+#include "base/tribool.h"
 
-#include "../function/function_interface.h"
+#include "function/function_interface.h"
 #include "constraint_interface.h"
 
 namespace Ariadne {

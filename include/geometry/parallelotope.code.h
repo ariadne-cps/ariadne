@@ -27,27 +27,27 @@
 
 #include <vector>
 
-#include "../numeric/exceptions.h"
-#include "../numeric/rational.h"
-#include "../numeric/interval.h"
+#include "numeric/exceptions.h"
+#include "numeric/rational.h"
+#include "numeric/interval.h"
 
-#include "../base/stlio.h"
+#include "base/stlio.h"
 
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
-#include "../linear_algebra/qr_matrix.h"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
+#include "linear_algebra/qr_matrix.h"
 
-#include "../linear_programming/linear_program.h"
+#include "linear_programming/linear_program.h"
 
-#include "../geometry/point.h"
-#include "../geometry/point_list.h"
-#include "../geometry/rectangle.h"
-#include "../geometry/list_set.h"
-#include "../geometry/zonotope.h"
-#include "../geometry/polyhedron.h"
-#include "../geometry/polytope.h"
+#include "geometry/point.h"
+#include "geometry/point_list.h"
+#include "geometry/rectangle.h"
+#include "geometry/list_set.h"
+#include "geometry/zonotope.h"
+#include "geometry/polyhedron.h"
+#include "geometry/polytope.h"
 
-#include "../output/logging.h"
+#include "output/logging.h"
 
 #include "parallelotope.h"
 

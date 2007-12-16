@@ -29,7 +29,7 @@
 #ifndef ARIADNE_LINEAR_ALGEBRA_H
 #define ARIADNE_LINEAR_ALGEBRA_H
 
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
 
 #endif /* ARIADNE_LINEAR_ALGEBRA_H */

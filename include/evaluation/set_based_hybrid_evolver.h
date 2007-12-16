@@ -33,13 +33,13 @@
 #include <list>
 #include <iostream>
 
-#include "../base/types.h"
-#include "../base/tribool.h"
-#include "../geometry/declarations.h"
-#include "../system/declarations.h"
-#include "../evaluation/declarations.h"
+#include "base/types.h"
+#include "base/tribool.h"
+#include "geometry/declarations.h"
+#include "system/declarations.h"
+#include "evaluation/declarations.h"
 
-#include "../system/set_based_hybrid_automaton.h"
+#include "system/set_based_hybrid_automaton.h"
 
 namespace Ariadne {  
   namespace Evaluation {

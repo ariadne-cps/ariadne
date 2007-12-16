@@ -28,8 +28,8 @@
 #ifndef ARIADNE_HENON_MAP_H
 #define ARIADNE_HENON_MAP_H
 
-#include "../system/map.h"
-#include "../system/build_map.h"
+#include "system/map.h"
+#include "system/build_map.h"
 
 
 

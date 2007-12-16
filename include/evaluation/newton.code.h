@@ -23,12 +23,12 @@
  
 #include "newton.h"
 
-#include "../output/logging.h"
-#include "../geometry/point.h"
+#include "output/logging.h"
+#include "geometry/point.h"
 
-#include "../system/vector_field.h"
+#include "system/vector_field.h"
 
-#include "../evaluation/exceptions.h"
+#include "evaluation/exceptions.h"
 
 namespace Ariadne {
 

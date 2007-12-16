@@ -32,10 +32,10 @@
 #include <string>
 #include <sstream>
 
-#include "../base/types.h"
-#include "../base/array.h"
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
+#include "base/types.h"
+#include "base/array.h"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
 
 #include "sorted_index.h"
 #include "multi_index.h"

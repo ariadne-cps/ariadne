@@ -28,7 +28,7 @@
 #ifndef ARIADNE_IRREGULAR_GRID_H
 #define ARIADNE_IRREGULAR_GRID_H
 
-#include "../combinatoric/lattice_set.h"
+#include "combinatoric/lattice_set.h"
 
 namespace Ariadne {
   namespace Geometry {

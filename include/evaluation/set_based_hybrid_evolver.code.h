@@ -21,19 +21,19 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "../geometry/rectangle_expression.h"
-#include "../geometry/set_interface.h"
-#include "../geometry/hybrid_set.h"
-#include "../system/set_based_hybrid_automaton.h"
-#include "../evaluation/evolution_parameters.h"
-#include "../evaluation/map_evolver.h"
-#include "../evaluation/vector_field_evolver.h"
+#include "geometry/rectangle_expression.h"
+#include "geometry/set_interface.h"
+#include "geometry/hybrid_set.h"
+#include "system/set_based_hybrid_automaton.h"
+#include "evaluation/evolution_parameters.h"
+#include "evaluation/map_evolver.h"
+#include "evaluation/vector_field_evolver.h"
 
-#include "../evaluation/applicator.h"
-#include "../evaluation/lohner_integrator.h"
+#include "evaluation/applicator.h"
+#include "evaluation/lohner_integrator.h"
 
-#include "../output/epsstream.h"
-#include "../output/logging.h"
+#include "output/epsstream.h"
+#include "output/logging.h"
 
 #include "set_based_hybrid_evolver.h"
 

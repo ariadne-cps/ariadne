@@ -29,10 +29,10 @@
 #ifndef ARIADNE_AFFINE_VECTOR_FIELD_H
 #define ARIADNE_AFFINE_VECTOR_FIELD_H
 
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
 
-#include "../system/vector_field.h"
+#include "system/vector_field.h"
 
 namespace Ariadne {
   namespace System {

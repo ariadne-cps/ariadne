@@ -36,8 +36,8 @@
 #include <cassert>
 #include <cstring>
 
-#include "../system/set_based_hybrid_automaton.h"
-#include "../system/constraint_based_hybrid_automaton.h"
+#include "system/set_based_hybrid_automaton.h"
+#include "system/constraint_based_hybrid_automaton.h"
 
 namespace Ariadne {
   namespace Output {

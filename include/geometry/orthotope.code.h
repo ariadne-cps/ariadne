@@ -27,26 +27,26 @@
 
 #include "orthotope.h"
 
-#include "../base/array.h"
+#include "base/array.h"
 #include "exceptions.h"
-#include "../numeric/conversion.h"
+#include "numeric/conversion.h"
 
-#include "../linear_algebra/vector.h"
-#include "../linear_algebra/matrix.h"
-#include "../linear_algebra/lu_matrix.h"
-#include "../linear_algebra/qr_matrix.h"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
+#include "linear_algebra/lu_matrix.h"
+#include "linear_algebra/qr_matrix.h"
 
-#include "../linear_programming/linear_program.h"
+#include "linear_programming/linear_program.h"
 
-#include "../geometry/point.h"
-#include "../geometry/point_list.h"
-#include "../geometry/rectangle.h"
-#include "../geometry/polytope.h"
-#include "../geometry/polyhedron.h"
-#include "../geometry/parallelotope.h"
-#include "../geometry/list_set.h"
+#include "geometry/point.h"
+#include "geometry/point_list.h"
+#include "geometry/rectangle.h"
+#include "geometry/polytope.h"
+#include "geometry/polyhedron.h"
+#include "geometry/parallelotope.h"
+#include "geometry/list_set.h"
 
-#include "../output/logging.h"
+#include "output/logging.h"
 
 
 

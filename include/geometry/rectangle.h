@@ -31,21 +31,21 @@
 
 #include <iosfwd>
 
-#include "../base/array.h"
-#include "../base/iterator.h"
-#include "../base/tribool.h"
+#include "base/array.h"
+#include "base/iterator.h"
+#include "base/tribool.h"
 
-#include "../numeric/arithmetic.h"
-#include "../numeric/function.h"
-#include "../numeric/interval.h"
+#include "numeric/arithmetic.h"
+#include "numeric/function.h"
+#include "numeric/interval.h"
 
-#include "../linear_algebra/vector.h"
+#include "linear_algebra/vector.h"
 
-#include "../combinatoric/declarations.h"
+#include "combinatoric/declarations.h"
 
-#include "../geometry/exceptions.h"
-#include "../geometry/point.h"
-#include "../geometry/rectangle_expression.h"
+#include "geometry/exceptions.h"
+#include "geometry/point.h"
+#include "geometry/rectangle_expression.h"
 
 namespace Ariadne {
   namespace Geometry {

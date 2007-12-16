@@ -28,10 +28,10 @@
 #ifndef ARIADNE_AFFINE_INTEGRATOR_H
 #define ARIADNE_AFFINE_INTEGRATOR_H
 
-#include "../linear_algebra/declarations.h"
-#include "../geometry/declarations.h"
-#include "../system/declarations.h"
-#include "../evaluation/integrator_interface.h"
+#include "linear_algebra/declarations.h"
+#include "geometry/declarations.h"
+#include "system/declarations.h"
+#include "evaluation/integrator_interface.h"
 
 namespace Ariadne {
   namespace Evaluation {

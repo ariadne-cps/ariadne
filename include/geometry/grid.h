@@ -94,6 +94,9 @@ namespace Ariadne {
       /*! \brief The coordinate of the \a n th subdivision point in dimension \a d. */
       real_type subdivision_coordinate(dimension_type d, index_type n) const;
 
+      /*! \brief The coordinate of the \a subdivision point \a x in dimension \a d. */
+      real_type subdivision_coordinate(dimension_type d, dyadic_type x) const;
+
       /*! \brief The index in dimension \a d of the subdivision 
        * point \a x. Throws an exception if \a x is not a subdivision point. */
       index_type subdivision_index(dimension_type d, const real_type& x) const;

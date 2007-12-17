@@ -55,6 +55,9 @@ namespace Ariadne {
     typedef unsigned short dimension_type;
     /*! \brief An integral type used to represent the smoothness of a map. */
     typedef unsigned short smoothness_type;
+    /*! \brief The type used to represent dyadic numbers internally. */
+    typedef double dyadic_type;
+
     /*! \brief The type used to describe evolution time for discrete time systems. */
     typedef Numeric::Integer discrete_time_type;
     /*! \brief The type used to describe evolution time. */

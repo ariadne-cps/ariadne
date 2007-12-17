@@ -447,6 +447,17 @@ LinearAlgebra::midpoint(const Vector< Numeric::Interval<R> >& iv)
   return result;
 }
 
+template<class T> inline 
+LinearAlgebra::Vector< Numeric::ErrorFloat<T> >
+LinearAlgebra::radius(const Vector< Numeric::Interval< Numeric::Float<T> > >& iv) 
+{
+  Vector< Numeric::ErrorFloat<T> > result(iv.size());
+  for(size_type i=0; i!=iv.size(); ++i) {
+    result(i) = rad(iv(i));
+  }
+  return result;
+}
+
 
 
 template<class R> inline

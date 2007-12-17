@@ -220,6 +220,16 @@ test_zonotope()
     eps.close();
   }    
 
+  // over approximations
+  {
+    Zonotope<I> fz(Point<I>("([1.99,2.01],2)"),Matrix<I>("[[2,2.25],1;1,1]"));
+    Zonotope<R> z;
+    over_approximate_(z,fz);
+    cout << "fz="<<fz<<endl;
+    cout << "over_approximation(fz)=" << z << endl;
+  }
+
+
   // Uniform error zonotope
   {
     cout << "Inner and outer approximations of Zonotope<I,R>" << endl;

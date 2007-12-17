@@ -184,6 +184,13 @@ Geometry::Grid<R>::lengths() const
 
 template<class R>
 R
+Geometry::Grid<R>::subdivision_coordinate(dimension_type d, dyadic_type x) const 
+{
+  return add_approx(this->_origin[d],mul_approx(this->_lengths[d],x));
+}
+
+template<class R>
+R
 Geometry::Grid<R>::subdivision_coordinate(dimension_type d, index_type n) const 
 {
   return add_approx(this->_origin[d],mul_approx(this->_lengths[d],n));

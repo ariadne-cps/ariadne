@@ -99,7 +99,7 @@ inline void nan_(Float64& r) { r=std::numeric_limits<double>::quiet_NaN(); }
 inline void inf_(Float64& r) { r=std::numeric_limits<double>::infinity(); }
 
 template<class Rnd> 
-inline void set_(double& r, const Float64& x, Rnd) { 
+inline void get_(double& r, const Float64& x, Rnd) { 
   set_rounding_mode<Rnd>(); r=x._value; }
 
 inline void set_(Rational& q, const Float64& x) { 
@@ -147,8 +147,6 @@ inline void neg_(Float64& r, const Float64& x) {
 inline void abs_(Float64& r, const Float64& x) { 
   if(x>=0) { r._value=x._value; } else { r._value=-x._value; } }
 
-inline Float64 abs(const Float64& x) { 
-  if(x>=0) { return x; } else { return -x; } }
 	  
 
 

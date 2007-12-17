@@ -25,27 +25,61 @@
 
 #include "base/array.h"
 
+#include "numeric/declarations.h"
 #include "numeric/integer.h"
 #include "numeric/arithmetic.h"
+#include "numeric/approximate_float.h"
 
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
 #include "linear_algebra/lu_matrix.h"
+#include "linear_algebra/qr_matrix.h"
 
 namespace Ariadne {
 
 
+namespace {
+
 template<class R>
 void
-LinearAlgebra::Matrix<R>::instantiate() 
+instantiate_matrix_approx() 
 {
-  typedef typename Numeric::traits<R>::arithmetic_type I;
   typedef typename Numeric::traits<R>::number_type X;
+  LinearAlgebra::Matrix<X>* nA=0;
+  LinearAlgebra::Vector<X>* nv=0;
+
+  LinearAlgebra::solve_approx(*nA,*nv);
+  LinearAlgebra::inverse_approx(*nA);
+  LinearAlgebra::qr_approx(*nA);
+}
+
+template<>
+void
+instantiate_matrix_approx<Numeric::Rational>() 
+{
+}
+
+template<>
+void
+instantiate_matrix_approx< Numeric::Interval<Numeric::Rational> >() 
+{
+}
+
+} // namespace
+
+
+template<class R>
+void
+LinearAlgebra::Matrix<R>::instantiate()
+{
+  typedef typename Numeric::traits<R>::number_type X;
+  typedef typename Numeric::traits<R>::interval_type I;
+
   Matrix<R>* A=0;
-  Matrix<I>* iA=0;
   Vector<R>* v=0;
   Vector<X>* nv=0;
   Vector<I>* iv=0;
+
   sup_norm(*A);
   log_norm(*A);
   singular(*A);
@@ -60,10 +94,9 @@ LinearAlgebra::Matrix<R>::instantiate()
   concatenate_rows(*A,*v);
   concatenate_columns(*A,*A);
   concatenate_columns(*A,*v);
-  
-  schulz_inverse(*iA);
-}
 
+  instantiate_matrix_approx<R>();
+}
 
 template<class R>
 LinearAlgebra::Matrix<R>::Matrix(const std::string& s)
@@ -242,6 +275,19 @@ LinearAlgebra::inverse(const Matrix<R>& A)
 }
 
 
+
+template<class T>
+LinearAlgebra::Vector< Numeric::Float<T> >
+LinearAlgebra::solve_approx(const Matrix< Numeric::Float<T> >& A,
+                            const Vector< Numeric::Float<T> >& b)
+{
+  typedef Numeric::Float<T> F;
+  typedef Numeric::ApproximateFloat<T> AF;
+  Vector<F> r;
+  reinterpret_cast<Vector<AF>&>(r)=solve(reinterpret_cast<Matrix<AF>const&>(A),reinterpret_cast<Vector<AF>const&>(b));
+  return r;
+}
+
 template<class R1, class R2>
 LinearAlgebra::Vector<typename Numeric::traits<R1,R2>::arithmetic_type>
 LinearAlgebra::solve(const Matrix<R1>& A, const Vector<R2>& v) 
@@ -249,6 +295,34 @@ LinearAlgebra::solve(const Matrix<R1>& A, const Vector<R2>& v)
   return inverse(A)*v;
 }
 
+
+template<class T>
+LinearAlgebra::Matrix< Numeric::Float<T> >
+LinearAlgebra::inverse_approx(const Matrix< Numeric::Float<T> >& A)
+{
+  typedef Numeric::Float<T> F;
+  typedef Numeric::ApproximateFloat<T> AF;
+  Matrix<F> r;
+  reinterpret_cast<Matrix<AF>&>(r)=inverse(reinterpret_cast<Matrix<AF>const&>(A));
+  return r;
+}
+
+template<class T>
+std::pair< LinearAlgebra::Matrix< Numeric::Float<T> >, 
+           LinearAlgebra::Matrix< Numeric::Float<T> > >
+LinearAlgebra::qr_approx(const Matrix< Numeric::Float<T> >& A)
+{
+  typedef Numeric::Float<T> F;
+  typedef Numeric::ApproximateFloat<T> AF;
+  QRMatrix<AF> qr(reinterpret_cast<Matrix<AF>const&>(A));
+  Matrix<F> Q;
+  Matrix<F> R;
+  Matrix<AF>& AQ=reinterpret_cast<Matrix<AF>&>(Q);
+  Matrix<AF>& AR=reinterpret_cast<Matrix<AF>&>(R);
+  AQ=qr.Q();
+  AR=qr.R();
+  return std::pair< Matrix<F>, Matrix<F> >(Q,R);
+}
 
 template<class R>
 LinearAlgebra::Matrix<typename Numeric::traits<R>::arithmetic_type>

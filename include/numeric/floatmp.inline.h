@@ -125,14 +125,9 @@ inline void next_(FloatMP& r, const FloatMP& x, RoundUp) {
 inline void next_(FloatMP& r, const FloatMP& x, RoundDown) { 
   mpfr_set(r._value,x._value,GMP_RNDD); mpfr_nextbelow(r._value); }
 
-inline void next_(FloatMP& r, RoundUp) { 
-  mpfr_nextabove(r._value); }
-inline void next_(FloatMP& r, RoundDown) { 
-  mpfr_nextbelow(r._value); }
 
 
-
-inline void set_(double& r, const FloatMP& x, RoundApprox) { 
+inline void get_(double& r, const FloatMP& x, RoundApprox) { 
   r=mpfr_get_d(x._value,GMP_RNDN); }
 inline void set_(Rational& r, const FloatMP& x) { 
   mpf_t f; mpf_init(f); mpfr_get_f(f,x._value,GMP_RNDN); 
@@ -174,10 +169,6 @@ inline void ceil_(Integer& r, const FloatMP& x) {
 inline void ceil_(FloatMP& r, const FloatMP& x) { 
   mpfr_ceil(r._value,x._value); }
 
-inline int floor(const FloatMP& x) {
-  int r; floor_(r,x); return r; }
-inline int ceil(const FloatMP& x) {
-  int r; ceil_(r,x); return r; }
 
 	  
 
@@ -198,8 +189,6 @@ inline void abs_(FloatMP& r, const FloatMP& x) {
   assert(r.precision()>=x.precision()); 
   mpfr_abs(r._value,x._value,GMP_RNDN); }
 
-inline FloatMP abs(const FloatMP& x) { 
-  FloatMP r; abs_(r,x); return r; }
 
 
 
@@ -267,7 +256,7 @@ void mul_(FloatMP& r, const int& x, const FloatMP& y, Rnd) {
 template<class Rnd> inline 
 void mul_(FloatMP& r, const FloatMP& x, const double& y, Rnd) {
   mpfr_t t; mpfr_init_set_d(t,y,mpfr_rounding_mode<Rnd>()); 
-  mpfr_mul(r._value,x._value,y,mpfr_rounding_mode<Rnd>()); }
+  mpfr_mul(r._value,x._value,t,mpfr_rounding_mode<Rnd>()); }
 
 template<class Rnd> inline 
 void mul_(FloatMP& r, const double& x, const FloatMP& y, Rnd) {

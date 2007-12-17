@@ -1,9 +1,9 @@
 /***************************************************************************
- *            rectangle.h
+ *            geometry/rectangle_expression.h
  *
- *  Mon 2 May 2005
- *  Copyright 2005  Alberto Casagrande, Pieter Collins
- *  Email casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  
+ *  Copyright 2005-6  Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -22,12 +22,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file rectangle_expression.h
+/*! \file geometry/rectangle_expression.h
  *  \brief Base class for rectangle expression templates.
  */
 
-#ifndef ARIADNE_RECTANGLE_EXPRESSION_H
-#define ARIADNE_RECTANGLE_EXPRESSION_H
+#ifndef ARIADNE_GEOMETRY_RECTANGLE_EXPRESSION_H
+#define ARIADNE_GEOMETRY_RECTANGLE_EXPRESSION_H
 
 namespace Ariadne {
   namespace Geometry {
@@ -50,4 +50,4 @@ namespace Ariadne {
   }
 }
 
-#endif /* ARIADNE_RECTANGLE_EXPRESSION_H */
+#endif /* ARIADNE_GEOMETRY_RECTANGLE_EXPRESSION_H */

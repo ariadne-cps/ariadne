@@ -28,10 +28,12 @@
 #include <string>
 
 #include "test/test_float.h"
+#include "base/stlio.h"
 #include "numeric/rational.h"
 
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
+#include "linear_algebra/matrix.code.h"
 #include "linear_algebra/lu_matrix.h"
 #include "linear_algebra/qr_matrix.h"
 #include "linear_algebra/svd_matrix.h"
@@ -114,9 +116,10 @@ test_linear_algebra()
 
   cout << "Testing real QR\n";
   Matrix<Rl> A(Ar);
-  QRMatrix<F> QR(A);
+  QRMatrix<F> QR(A); 
   Matrix<F> Q=QR.Q();
   Matrix<F> R=QR.R();
+  cout << "qr_approx(A)=" << qr_approx(A) << "\n";
   cout << "A=" << A << "\n";
   cout << "Q=" << Q << "\n";
   //cout << "Q^T=" << Q.transpose() << "\n";

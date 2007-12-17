@@ -44,6 +44,13 @@ using namespace Ariadne::Python;
 #include <boost/python/detail/api_placeholder.hpp>
 using namespace boost::python;
 
+template<class T1, class T2>
+boost::python::tuple
+make_tuple(const std::pair<T1,T2>& p)
+{
+  return make_tuple(p.first,p.second);
+}
+
 template<class X>
 std::string
 __str__(const Matrix<X>& A)
@@ -128,6 +135,12 @@ template<class R> inline
 Matrix<R> 
 matrix_transpose(const Matrix<R>& A) {
   return  LinearAlgebra::transpose(A);
+}
+
+template<class R> inline 
+boost::python::tuple
+matrix_qr_approx(const Matrix<R>& A) {
+  return make_tuple(qr_approx(A));
 }
 
 template<class R>
@@ -272,6 +285,10 @@ void export_interval_matrix()
   def("inverse",(Matrix<I>(*)(const Matrix<I>&))&inverse);
   def("exp",(Matrix<I>(*)(const Matrix<R>&))&exp);
   def("exp",(Matrix<I>(*)(const Matrix<I>&))&exp);
+
+  def("solve_approx",(Vector<R>(*)(const Matrix<R>&,const Vector<R>&))&solve_approx);
+  def("inverse_approx",(Matrix<R>(*)(const Matrix<R>&))&inverse_approx);
+  def("qr_approx",&matrix_qr_approx<R>);
 
   def("midpoint",(Mx(*)(const IMx&))&midpoint);
   def("encloses",(bool(*)(const IMx&,const Mx&))&encloses);

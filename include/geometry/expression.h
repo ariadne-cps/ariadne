@@ -1,8 +1,8 @@
 /***************************************************************************
- *            numeric/declarations.h
+ *            geometry/expression.h
  *
- *  Copyright  2006  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright 2007  Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -21,32 +21,25 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file numeric/declarations.h
- *  \brief Forward declarations of classes in the Numeric module.
+/*! \file geometry/expression.h
+ *  \brief Base class for rectangle expression templates.
  */
 
-#ifndef ARIADNE_NUMERIC_DECLARATIONS_H
-#define ARIADNE_NUMERIC_DECLARATIONS_H
+#ifndef ARIADNE_GEOMETRY_EXPRESSION_H
+#define ARIADNE_GEOMETRY_EXPRESSION_H
 
-#include "rounding.h"
+namespace Ariadne {
+  namespace Geometry {
 
-namespace Ariadne { 
-  namespace Numeric {
+    class OverApproximate 
+    {
+     public:
+      template<class R, class A> void operator() (R& r, const A& a) {
+        over_approximate_(r,a);
+      }
+    };
 
-    class mpfr;
-
-    class Integer;
-    class Rational;
-    template<class T> class Float;
-    template<class T> class ApproximateFloat;
-    template<class T> class ErrorFloat;
-    template<class R> class Interval;
-
-    typedef Float<double> Float64;
-    typedef Float<mpfr> FloatMP;
   }
-  
 }
 
-
-#endif /* ARIADNE_NUMERIC_DECLARATIONS_H */
+#endif /* ARIADNE_GEOMETRY_EXPRESSION_H */

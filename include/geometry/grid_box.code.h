@@ -1,8 +1,8 @@
 /***************************************************************************
- *            numeric/declarations.h
+ *            grid_box.code.h
  *
- *  Copyright  2006  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright  2005-7  Alberto Casagrande, Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -18,35 +18,25 @@
  *
  *  You should have received a copy of the GNU General Public License
  *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- */
- 
-/*! \file numeric/declarations.h
- *  \brief Forward declarations of classes in the Numeric module.
+ *  Foundation, Inc., 59 Templece Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef ARIADNE_NUMERIC_DECLARATIONS_H
-#define ARIADNE_NUMERIC_DECLARATIONS_H
+#include <ostream>
 
-#include "rounding.h"
+#include "geometry/rectangle.h"
+#include "geometry/grid_box.h"
+#include "geometry/grid_block.h"
 
-namespace Ariadne { 
-  namespace Numeric {
+namespace Ariadne {
 
-    class mpfr;
 
-    class Integer;
-    class Rational;
-    template<class T> class Float;
-    template<class T> class ApproximateFloat;
-    template<class T> class ErrorFloat;
-    template<class R> class Interval;
 
-    typedef Float<double> Float64;
-    typedef Float<mpfr> FloatMP;
-  }
-  
+template<class R>
+std::ostream&
+Geometry::GridBox<R>::write(std::ostream& os) const 
+{
+  return os << Rectangle<R>(*this);
 }
 
 
-#endif /* ARIADNE_NUMERIC_DECLARATIONS_H */
+}

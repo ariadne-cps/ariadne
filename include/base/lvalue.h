@@ -1,8 +1,8 @@
 /***************************************************************************
- *            numeric/declarations.h
+ *            lvalue.h
  *
- *  Copyright  2006  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright  2006-7  Pieter Collins
+ *  
  ****************************************************************************/
 
 /*
@@ -21,32 +21,33 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file numeric/declarations.h
- *  \brief Forward declarations of classes in the Numeric module.
+/*! \file lvalue.h
+ *  \brief Pair and tuple types to be used as lvalues in assignments.
  */
 
-#ifndef ARIADNE_NUMERIC_DECLARATIONS_H
-#define ARIADNE_NUMERIC_DECLARATIONS_H
+#ifndef ARIADNE_LVALUE_H
+#define ARIADNE_LVALUE_H
 
-#include "rounding.h"
 
 namespace Ariadne { 
-  namespace Numeric {
 
-    class mpfr;
-
-    class Integer;
-    class Rational;
-    template<class T> class Float;
-    template<class T> class ApproximateFloat;
-    template<class T> class ErrorFloat;
-    template<class R> class Interval;
-
-    typedef Float<double> Float64;
-    typedef Float<mpfr> FloatMP;
-  }
+  namespace Base {
+    /*! \brief A pair of references, suitable as use as an lvalue for a function returning a pair. */
+    template<class T1, class T2>
+    struct lpair 
+    {
+      inline lpair(T1& t1, T2& t2) : first(t1), second(t2) { }
+      inline lpair<T1,T2> operator=(const std::pair<T1,T2>& rv) { 
+        this-first=rv.first; this->second=rv.second; return *this; }
+      T1& first; T2& second;
+    };
   
+    template<class T1,class T2> inline
+    lpair<T1,T2> make_lpair(T1& t1, T2& t2) {
+      return lpair<T1,T>(t1,t2);
+    }
+  
+  }
 }
 
-
-#endif /* ARIADNE_NUMERIC_DECLARATIONS_H */
+#endif /* ARIADNE_LVALUE_H */

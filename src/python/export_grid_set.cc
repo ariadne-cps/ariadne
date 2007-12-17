@@ -67,7 +67,8 @@ void export_grid()
   grid_class.def(init<RVector>());
   grid_class.def(init<RRectangle,LatticeBlock>());
   grid_class.def("dimension", &RGrid::dimension);
-  grid_class.def("subdivision_coordinate", &RGrid::subdivision_coordinate);
+  grid_class.def("subdivision_coordinate",(R(RGrid::*)(dimension_type,index_type)const) &RGrid::subdivision_coordinate);
+  grid_class.def("subdivision_coordinate",(R(RGrid::*)(dimension_type,dyadic_type)const) &RGrid::subdivision_coordinate);
   grid_class.def("subdivision_index", &RGrid::subdivision_index);
   grid_class.def("subdivision_lower_index", &RGrid::subdivision_lower_index);
   grid_class.def("subdivision_upper_index", &RGrid::subdivision_upper_index);

@@ -33,6 +33,7 @@
 
 #include "base/types.h"
 #include "base/array.h"
+#include "numeric/declarations.h"
 #include "numeric/integer.h"
 #include "numeric/arithmetic.h"
 #include "numeric/interval.h"
@@ -237,6 +238,8 @@ namespace Ariadne {
 	
 	
   template<class R> Vector<R> midpoint(const Vector< Numeric::Interval<R> >& iv); 
+  template<class T> Vector< Numeric::Float<T> > radius(const Vector< Numeric::Interval< Numeric::Float<T> > >& iv); 
+
   template<class R> bool encloses(const Vector< Numeric::Interval<R> >& iv,const Vector<R>& v); 
   template<class R> bool refines(const Vector< Numeric::Interval<R> >& iv1, const Vector< Numeric::Interval<R> >& iv2); 
 

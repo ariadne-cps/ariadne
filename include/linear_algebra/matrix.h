@@ -32,6 +32,7 @@
 
 #include "base/types.h"
 #include "base/array.h"
+#include "numeric/declarations.h"
 #include "numeric/traits.h"
 #include "numeric/integer.h"
 #include "numeric/interval.h"
@@ -177,6 +178,13 @@ namespace Ariadne {
       /*! \brief Solve the linear system \f$Ax=b\f$. */
       friend Matrix<AT> solve<>(const Matrix<R>& A, const Vector<R>& b);
 
+      /*! \brief Compute an approximate solution to the linear system \f$Ax=b\f$. */
+      friend Matrix<R> solve_approx(const Matrix<R>& A, const Vector<R>& b);
+      /*! \brief Compute an approximate inverse to the matrix \f$A\f$. */
+      friend Matrix<R> inverse_approx(const Matrix<R>& A);
+      /*! \brief Compute an approximate QR factorisation of the matrix \f$A\f$. */
+      friend std::pair< Matrix<R>,Matrix<R> > qr_approx(const Matrix<R>& A);
+
       /*! \brief Catenate the rows of \a A with the row vector \a v. */
       friend Matrix<AT> concatenate_rows<>(const Matrix<R>& A, const Vector<R>& v);
       /*! \brief Catenate the rows of \a A1 with those of \a A2. */
@@ -290,6 +298,10 @@ namespace Ariadne {
     template<class R> Matrix<typename Numeric::traits<R>::arithmetic_type> inverse(const Matrix<R>& A);
     template<class R1, class R2> Vector<typename Numeric::traits<R1,R2>::arithmetic_type> solve(const Matrix<R1>& A, const Vector<R2>& v);
     
+    template<class T> Vector< Numeric::Float<T> > solve_approx(const Matrix< Numeric::Float<T> >& A, const Vector< Numeric::Float<T> >& v);
+    template<class T> Matrix< Numeric::Float<T> > inverse_approx(const Matrix< Numeric::Float<T> >& A);
+    template<class T> std::pair<Matrix<Numeric::Float<T> >,Matrix<Numeric::Float<T> > > qr_approx(const Matrix< Numeric::Float<T> >& A);
+
     template<class R> Matrix<R> direct_sum(const Matrix<R>& A1, const Matrix<R>& A2);
 
     template<class R> Matrix<R> concatenate(const Matrix<R>& A1, const Matrix<R>& A2);

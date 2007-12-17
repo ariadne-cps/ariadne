@@ -41,5 +41,6 @@
 #endif
 
 #include "numeric/arithmetic.h"
+#include "numeric/float.inline.h"
 
 #endif /* ARIADNE_NUMERIC_FLOAT_H */

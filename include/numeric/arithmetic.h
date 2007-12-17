@@ -39,6 +39,34 @@ template<class T>
 inline int floor(const Float<T>& x) { 
   int r; floor_(r,x); return r; }
 
+template<class T>
+inline int ceil(const Float<T>& x) { 
+  int r; ceil_(r,x); return r; }
+
+
+template<class T> inline
+void
+decr(Float<T>& x) {
+  next_(x,x,round_up);
+}
+
+template<class T> inline
+void
+incr(Float<T>& x) {
+  next_(x,x,round_up);
+}
+
+template<class T> inline
+Float<T>
+prec(const Float<T>& x) {
+  return next(x,round_down);
+}
+
+template<class T> inline
+Float<T>
+succ(const Float<T>& x) {
+  return next(x,round_up);
+}
 
 template<class T>
 inline Float<T> next_up(const Float<T>& x) { 
@@ -46,6 +74,15 @@ inline Float<T> next_up(const Float<T>& x) {
 template<class T>
 inline Float<T> next_down(const Float<T>& x) { 
   Float<T> r; next_(r,x,round_down); return r; }
+
+
+template<class T> inline
+Float<T>
+abs(const Float<T>& x) {
+  Float<T> r; abs_(r,x); return r;
+}
+
+
 
 template<class T> 
 inline Float<T> add_up(const Float<T>& x, const Float<T>& y) { 

@@ -30,6 +30,7 @@
 #include "base/array.h"
 #include "exceptions.h"
 #include "numeric/conversion.h"
+#include "numeric/error_float.h"
 
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
@@ -605,6 +606,78 @@ Geometry::over_approximation(const Zonotope<Numeric::Interval<R>, R>& ez)
   return Zonotope<R,R>(c,g);
 }
 
+
+template<class R> 
+void 
+Geometry::over_approximate_(Zonotope<R>& r, 
+                            const Zonotope< Numeric::Interval<R> >& z)
+{
+  assert(z.dimension()==z.number_of_generators());
+  typedef Numeric::Interval<R> I;
+  typedef Numeric::ErrorFloat<R> F;
+  const dimension_type& d=z.dimension();
+  const size_type& ng=z.number_of_generators();
+  const Point<I>& c=z.centre();
+  const Matrix<I>& G=z.generators();
+  const Vector<I> e(ng,I(-1,1));
+  Point<R> ac=midpoint(c);
+  Matrix<R> aG=midpoint(z.generators());
+  Matrix<I> aGinv=inverse(aG);
+  Vector<I> nd=aGinv*(c-ac)+(aGinv*G)*e;
+  for(size_type j=0; j!=ng; ++j) {
+    R sf=Numeric::next_up(Numeric::next_up(nd[j].upper()));
+    sf=add_approx(sf,R(0.00000000001));
+    for(size_type i=0; i!=z.dimension(); ++i) {
+      aG(i,j)=mul_approx(aG(i,j),sf);
+    }
+  }
+  
+  // Check result
+  using namespace std;
+  aGinv=inverse(aG);
+  nd=aGinv*(c-ac)+(aGinv*G)*e;
+  Vector<I> ue(d,I(-1,1));
+  cout << "G="<<G <<"\nnG="<<aG<<"\nnGinv="<<aGinv<<"\nnGinv*G="<<aGinv*G<<endl;
+  cout <<"nGinv*G*e"<<(aGinv*G)*ue<<endl;
+  std::cerr<<"nd="<<nd<<std::endl;
+  std::cerr<<"ue="<<ue<<std::endl;
+  assert(LinearAlgebra::refines(nd,ue));
+  assert(false);
+  r=Zonotope<R>(ac,aG);
+}  
+
+template<class R> 
+void 
+Geometry::orthogonal_over_approximate_(Zonotope<R>& r, 
+                                       const Zonotope< Numeric::Interval<R> >& z)
+{
+  assert(z.dimension()==z.number_of_generators());
+  typedef Numeric::Interval<R> I;
+  typedef Numeric::ErrorFloat<R> F;
+  const dimension_type& d=z.dimension();
+  const size_type& ng=z.number_of_generators();
+  const Point<I>& c=z.centre();
+  const Matrix<I>& G=z.generators();
+  const Vector<I> e(ng,I(-1,1));
+  Point<R> ac=midpoint(c);
+  Matrix<R> aG=midpoint(z.generators());
+  Matrix<R> aQ=qr_approx(aG).first;
+  Matrix<I> aQinv=inverse(aQ);
+  Vector<I> nd=aQinv*(c-ac)+(aQinv*G)*e;
+  for(size_type j=0; j!=ng; ++j) {
+    R sf=Numeric::next_up(Numeric::next_up(nd[j].upper()));
+    for(size_type i=0; i!=z.dimension(); ++i) {
+      aQ(i,j)=mul_approx(aQ(i,j),sf);
+    }
+  }
+  
+  // Check result
+  aQinv=inverse(aQ);
+  nd=aQinv*(c-ac)+(aQinv*G)*e;
+  assert(LinearAlgebra::refines(nd,Vector<I>(d,I(-1,1))));
+
+  r=Zonotope<R>(ac,aQ);
+}  
 
 
 template<class R> 
@@ -1491,6 +1564,8 @@ instantiate_zonotope()
   Geometry::orthogonal_over_approximation(iz);
   Geometry::orthogonal_over_approximation(ez);
   Geometry::orthogonal_over_approximation(z);
+
+  Geometry::over_approximate_(z,iz);
 
   Geometry::over_approximation(iz);
   Geometry::over_approximation(ez);

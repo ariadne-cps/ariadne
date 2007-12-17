@@ -45,7 +45,8 @@ namespace Ariadne {
 
     class Integer;
     class Rational;
-    template<class R> class Float;
+    template<class T> class Float;
+    template<class T> class ApproximateFloat;
     template<class R> class Interval;
       
     typedef Float<double> Float64;
@@ -114,6 +115,24 @@ namespace Ariadne {
       typedef Interval<FloatMP> interval_type; 
     };
     
+    template<class T> struct traits< ApproximateFloat<T> > { 
+      typedef float_tag type;
+      typedef Float<T> number_type; 
+      typedef ApproximateFloat<T> approximate_arithmetic_type; 
+      typedef Float<T> closure_type; 
+      typedef ApproximateFloat<T> arithmetic_type; 
+      typedef Interval< Float<T> > interval_type;
+    };
+
+    template<class T> struct traits< Float<T> > { 
+      typedef float_tag type;
+      typedef Float<T> number_type; 
+      typedef ApproximateFloat<T> approximate_arithmetic_type; 
+      typedef Float<T> closure_type; 
+      typedef Interval< Float<T> > arithmetic_type; 
+      typedef Interval< Float<T> > interval_type;
+    };
+
     template<> struct traits< Float64 > { 
       typedef float_tag type;
       typedef Float64 number_type; 
@@ -123,14 +142,6 @@ namespace Ariadne {
       typedef Interval<Float64> interval_type;
     };
     
-    template<> struct traits< FloatMP > { 
-      typedef float_tag type;
-      typedef FloatMP number_type; 
-      typedef mpf_class approximate_arithmetic_type; 
-      typedef FloatMP closure_type; 
-      typedef Interval<FloatMP> arithmetic_type; 
-      typedef Interval<FloatMP> interval_type; 
-    };
     
     template<> struct traits< Rational > { 
       typedef rational_tag type;

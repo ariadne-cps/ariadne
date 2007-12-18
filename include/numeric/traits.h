@@ -166,11 +166,20 @@ namespace Ariadne {
   
 
 
-    template<class R> struct traits< Interval<R> > { 
-      typedef R number_type; 
-      typedef Interval<typename traits<R>::closure_type> closure_type; 
-      typedef Interval<typename traits<R>::closure_type> arithmetic_type; 
-      typedef Interval<R> interval_type; 
+    template<class T> struct traits< Interval< Float<T> > > { 
+      typedef float_tag type;
+      typedef Float<T> number_type; 
+      typedef Interval< Float<T> > closure_type; 
+      typedef Interval< Float<T> > arithmetic_type; 
+      typedef Interval< Float<T> > interval_type; 
+    };
+
+    template<> struct traits< Interval<Rational> > { 
+      typedef rational_tag type;
+      typedef Rational number_type; 
+      typedef Interval<Rational> closure_type; 
+      typedef Interval<Rational> arithmetic_type; 
+      typedef Interval<Rational> interval_type; 
     };
 
     template<class X, class V> struct traits< Function::FirstDerivative<X,V> > { 

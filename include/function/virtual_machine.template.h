@@ -37,22 +37,19 @@
 namespace {
 
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
 using Ariadne::Base::array;
 using Ariadne::Function::VirtualMachine;
 
-
-template<class T> inline
-void evaluate(const array<VirtualMachine::ByteCode>& ops, Float<T>** args)
+template<class X> inline
+void evaluate(const array<VirtualMachine::ByteCode>& ops, X** args, Numeric::float_tag)
 {
-  std::vector< Float<T> > stack;
+  std::vector<X> stack;
   VirtualMachine::Index index;
   int value;
-  Float<T> tmp;
+  X tmp;
   for(array<VirtualMachine::ByteCode>::const_iterator op_iter=ops.begin();
       op_iter!=ops.end(); ++op_iter)
   {
-    ARIADNE_LOG(7,op_iter->op);
     switch(op_iter->op) {
     case VirtualMachine::PUSH:
       index=(++op_iter)->ind;
@@ -137,10 +134,10 @@ void evaluate(const array<VirtualMachine::ByteCode>& ops, Float<T>** args)
 }
 
 
-inline
-void evaluate(const array<VirtualMachine::ByteCode>& ops, Rational** args)
+template<class Q> inline
+void evaluate(const array<VirtualMachine::ByteCode>& ops, Q** args, Numeric::rational_tag)
 {
-  std::vector<Rational> stack;
+  std::vector<Q> stack;
   VirtualMachine::Index index;
   int value;
   for(array<Function::VirtualMachine::ByteCode>::const_iterator op_iter=ops.begin();
@@ -200,11 +197,25 @@ void evaluate(const array<VirtualMachine::ByteCode>& ops, Rational** args)
 }
 
 
-template<class X> 
+void 
+evaluate(const array<VirtualMachine::ByteCode>& program, Numeric::Rational** arguments) 
+{
+  ::evaluate(program,arguments,Numeric::rational_tag());
+}
+
+template<class T> inline
+void 
+evaluate(const array<VirtualMachine::ByteCode>& program, Numeric::Interval< Numeric::Float<T> >** arguments) 
+{
+  ::evaluate(program,arguments,Numeric::float_tag());
+}
+
+template<class X> inline
 void 
 evaluate(const array<VirtualMachine::ByteCode>& program, X** arguments) 
 {
-  ::evaluate(program,arguments);
+  typedef typename Numeric::traits<typename X::value_type>::type tag;
+  ::evaluate(program,arguments,tag());
 }
 
 

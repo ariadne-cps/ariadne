@@ -55,6 +55,7 @@ namespace Ariadne {
     class TaylorVariable
     {
      public:
+      /*! The type used to represent numbers. */
       typedef X value_type;
 
       /*! \brief Default constructor constructs a constant of degree zero. */

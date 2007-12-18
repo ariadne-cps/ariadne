@@ -71,6 +71,9 @@ namespace Ariadne {
     class AffineVariable
     {
      public:
+      /*! The type used to represent numbers. */
+      typedef X value_type;
+
       /*! \brief Destructor. */
       ~AffineVariable();
      

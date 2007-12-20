@@ -44,14 +44,17 @@ namespace Ariadne {
      * where \f$B\f$ is a bound for \f$\Phi(c,[0,t])\f$.
      * Subdivision is performed using orthogonal over-approximation.
      *
+     * The update rule for an integration step for an interval zonotope is 
+     * \f[  \Phi(x,t) \subset c+tf(c)+\frac{t^2}{2}\,Df(B_c)\,f(B_c) + \bigl(I+t\,Df(B)\,W\bigr)\cdot(x-c) \f]
+     * where \f$B_c\f$ is a bound for \f$\Phi(c,[0,t])\f$, \f$B\f$ is a bound for \f$\Phi(X,[0,t])\f$ and \f$W\f$ is a bound for \f$D\Phi(X,[0,t])\f$.
+     * Subdivision is performed using orthogonal over-approximation.
      * See the section on the \ref c1lohnerintegrator for details.
      */
     template<class R>
     class LohnerIntegrator
-      : public IntegratorInterface< Geometry::Zonotope<Numeric::Interval<R>,R> >
+      : public IntegratorInterface< Geometry::Zonotope<R,Geometry::UniformErrorTag> >
     {
       typedef Numeric::Interval<R> I;
-      typedef Geometry::Zonotope<I,R> BS;
      public:
       
       /*! \brief Constructor. */
@@ -68,98 +71,43 @@ namespace Ariadne {
                                            const Numeric::Interval<R>& t,
                                            const Geometry::Rectangle<R>& bb) const;
      
-      /*! \brief A C1 algorithm for integrating forward a zonotope.
-       */
-      virtual Geometry::Zonotope<I,R> 
-      integration_step(const System::VectorFieldInterface<R>& vf,
-                       const Geometry::Zonotope<I,R>& s,
-                       const Numeric::Interval<R>& t,
-                       const Geometry::Rectangle<R>& bb) const;
-
-      /*! \brief A C1 algorithm for integrating forward a zonotope for a time up to time \a step_size, assuming the set \a bb is a bounding box for the integration. */
-      virtual Geometry::Zonotope<I,R> 
-      reachability_step(const System::VectorFieldInterface<R>& vf,
-                        const Geometry::Zonotope<I,R>& s,
-                        const Numeric::Interval<R>& t,
-                        const Geometry::Rectangle<R>& bb) const;
-
-
-      /*! \brief A C1 algorithm for integrating forward a zonotope.
-       */
-      virtual Geometry::Zonotope<I,I> 
-      integration_step(const System::VectorFieldInterface<R>& vf,
-                       const Geometry::Zonotope<I,I>& s,
-                       const Numeric::Interval<R>& t,
-                       const Geometry::Rectangle<R>& bb) const;
-
-      /*! \brief A C1 algorithm for integrating forward a zonotope.
-       */
-      virtual Geometry::Zonotope<I,I> 
-      reachability_step(const System::VectorFieldInterface<R>& vf,
-                       const Geometry::Zonotope<I,I>& s,
-                       const Numeric::Interval<R>& t,
-                       const Geometry::Rectangle<R>& bb) const;
-
-      /*! \brief Write to an output stream. */
-      virtual std::ostream& write(std::ostream&) const;
-    };
-    
-      
-    
-    /*!\ingroup Integrate
-     * \brief An integrator based on the C<sup>1</sup>-Lohner algorithm on zonotopes. 
-     *
-     * The update rule for an integration step is 
-     * \f[  \Phi(x,t) \subset c+tf(c)+\frac{t^2}{2}\,Df(B_c)\,f(B_c) + \bigl(I+t\,Df(B)\,W\bigr)\cdot(x-c) \f]
-     * where \f$B_c\f$ is a bound for \f$\Phi(c,[0,t])\f$, \f$B\f$ is a bound for \f$\Phi(X,[0,t])\f$ and \f$W\f$ is a bound for \f$D\Phi(X,[0,t])\f$.
-     * Subdivision is performed using orthogonal over-approximation.
-     *
-     * See the section \ref c1lohnerintegrator for details.
-     */
-    template<class R>
-    class C1LohnerIntegrator
-      : public IntegratorInterface< Geometry::Zonotope<Numeric::Interval<R> > > 
-    {
-      typedef Numeric::Interval<R> I;
-      typedef Geometry::Zonotope<I,I> BS;
-     public:
-      /*! \brief Constructor. */
-      C1LohnerIntegrator();
-
-      /*! \brief Cloning operator. */
-      virtual C1LohnerIntegrator<R>* clone() const;
-
-     public:
-      
-      /*! \brief Integrate a basic set for within a bounding set. */
-      virtual Geometry::Point<I> flow_step(const System::VectorFieldInterface<R>& vf,
-                                           const Geometry::Point<I>& p,
-                                           const Numeric::Interval<R>& t,
-                                           const Geometry::Rectangle<R>& bb) const;
-     
-
       /*! \brief Integrate a basic set for within a bounding set. */
       virtual LinearAlgebra::Matrix<I> flow_step_jacobian(const System::VectorFieldInterface<R>& vf,
                                                           const Geometry::Point<I>& p,
                                                           const Numeric::Interval<R>& t,
                                                           const Geometry::Rectangle<R>& bb) const;
-     
+ 
+
       /*! \brief A C1 algorithm for integrating forward a zonotope.
        */
-      virtual Geometry::Zonotope<I,I> 
+      virtual Geometry::Zonotope<R,Geometry::UniformErrorTag> 
       integration_step(const System::VectorFieldInterface<R>& vf,
-                       const Geometry::Zonotope<I,I>& s,
+                       const Geometry::Zonotope<R,Geometry::UniformErrorTag>& s,
                        const Numeric::Interval<R>& t,
                        const Geometry::Rectangle<R>& bb) const;
 
-
       /*! \brief A C1 algorithm for integrating forward a zonotope for a time up to time \a step_size, assuming the set \a bb is a bounding box for the integration. */
-      virtual Geometry::Zonotope<I,I> 
+      virtual Geometry::Zonotope<R,Geometry::UniformErrorTag> 
       reachability_step(const System::VectorFieldInterface<R>& vf,
-                        const Geometry::Zonotope<I,I>& s,
+                        const Geometry::Zonotope<R,Geometry::UniformErrorTag>& s,
                         const Numeric::Interval<R>& t,
                         const Geometry::Rectangle<R>& bb) const;
 
+     private:
+      /*! \brief A C1 algorithm for integrating forward a zonotope.
+       */
+      Geometry::Zonotope<R,Geometry::IntervalTag> 
+      integration_step(const System::VectorFieldInterface<R>& vf,
+                       const Geometry::Zonotope<R,Geometry::IntervalTag>& s,
+                       const Numeric::Interval<R>& t,
+                       const Geometry::Rectangle<R>& bb) const;
+
+      /*! \brief A C1 algorithm for integrating forward a zonotope for a time up to time \a step_size, assuming the set \a bb is a bounding box for the integration. */
+      Geometry::Zonotope<R,Geometry::IntervalTag> 
+      reachability_step(const System::VectorFieldInterface<R>& vf,
+                        const Geometry::Zonotope<R,Geometry::IntervalTag>& s,
+                        const Numeric::Interval<R>& t,
+                        const Geometry::Rectangle<R>& bb) const;
 
       /*! \brief Write to an output stream. */
       virtual std::ostream& write(std::ostream&) const;

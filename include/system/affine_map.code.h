@@ -29,9 +29,6 @@
 
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
-#include "geometry/parallelotope.h"
-#include "geometry/zonotope.h"
-#include "geometry/polytope.h"
 
 #include "system/exceptions.h"
 
@@ -49,28 +46,6 @@ namespace Ariadne {
       return Geometry::Point<F>(image);
     }
     
-    
-    template<class R>
-    Geometry::Zonotope<typename AffineMap<R>::F>
-    AffineMap<R>::image(const Geometry::Zonotope<F>& z) const
-    {
-      ARIADNE_CHECK_ARGUMENT_DIMENSION(*this,z,"Zonotope AffineMap::image(Zonotope)");
-      Geometry::Point<F> c=z.centre();
-      LinearAlgebra::Matrix<F> G=z.generators();
-      const LinearAlgebra::Matrix<R>& A=this->A();
-      const LinearAlgebra::Vector<R>& b=this->b();
-      
-      return Geometry::Zonotope<F>(
-        Geometry::Point<F>(A*c.position_vector()+b),A*G
-      );
-    }   
-    
-    template<class R>
-    Geometry::Polytope<typename AffineMap<R>::F>
-    AffineMap<R>::image(const Geometry::Polytope<F>& p) const
-    {
-      throw NotImplemented(__PRETTY_FUNCTION__);
-    }   
     
     template<class R>
     LinearAlgebra::Matrix<typename AffineMap<R>::F>

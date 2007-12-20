@@ -25,6 +25,7 @@
 #include "numeric/float.h"
 #include "numeric/interval.h"
 
+#include "geometry/zonotope.h"
 #include "geometry/hybrid_set.h"
 #include "geometry/hybrid_set.code.h"
 
@@ -39,7 +40,7 @@ namespace Ariadne {
     template class HybridGridCellListSet<Float64>;
     template class HybridGridMaskSet<Float64>;
     template class HybridListSet< Rectangle<Float64> >;
-    template class HybridListSet< Zonotope< Interval<Float64> > >;
+    template class HybridListSet< Zonotope<Float64,UniformErrorTag> >;
 #endif
   
 #ifdef ENABLE_FLOATMP
@@ -48,7 +49,7 @@ namespace Ariadne {
     template class HybridGridCellListSet<FloatMP>;
     template class HybridGridMaskSet<FloatMP>;
     template class HybridListSet< Rectangle<FloatMP> >;
-    template class HybridListSet< Zonotope< Interval<FloatMP> > >;
+    template class HybridListSet< Zonotope<FloatMP,UniformErrorTag> >;
 #endif
 
   }

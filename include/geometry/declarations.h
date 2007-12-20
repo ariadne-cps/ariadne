@@ -28,19 +28,22 @@
 #ifndef ARIADNE_GEOMETRY_DECLARATIONS_H
 #define ARIADNE_GEOMETRY_DECLARATIONS_H
 
-#include "orthotope.decl.h"
-#include "zonotope.decl.h"
+#include <iosfwd>
 
 namespace Ariadne { 
   namespace Geometry {
-    template<class R> class Point;
+    
+    class ExactTag;
+    class UniformErrorTag;
+    class IntervalTag;
+
+    template<class X> class Point;
+    template<class R> class Box;
     template<class R> class PointList;
 
     template<class E> class RectangleExpression;
     template<class R> class Rectangle;
-    template<class RC,class RG> class Parallelotope;
-    template<class RC,class RG> class Orthotope;
-    template<class RC,class RG> class Zonotope;
+    template<class R, class Tag> class Zonotope;
     template<class R> class Simplex;
     template<class R> class Constraint;
     template<class R> class Polyhedron;
@@ -93,6 +96,8 @@ namespace Ariadne {
 
     class basic_set_tag;
     class denotable_set_tag;
+
+    template<class BS> std::string name();
 
   }
 }

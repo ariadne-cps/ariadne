@@ -85,7 +85,7 @@ int bouncing_ball_automaton()
   parameters.set_maximum_basic_set_radius(0.25);
   parameters.set_grid_length(0.125);
 
-  C1LohnerIntegrator<R> lohner;
+  LohnerIntegrator<R> lohner;
 
   MapEvolver<R> map_evolver(parameters);
   VectorFieldEvolver<R> vector_field_evolver(parameters,lohner); 

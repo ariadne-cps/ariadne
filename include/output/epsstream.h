@@ -45,14 +45,13 @@
 #include "geometry/rectangular_set.h"
 #include "geometry/list_set.h"
 #include "geometry/grid_set.h"
-#include "geometry/parallelotope.h"
 #include "geometry/zonotope.h"
 #include "geometry/polytope.h"
 #include "geometry/polyhedral_set.h"
 #include "geometry/partition_tree_set.h"
 #include "system/affine_map.h"
 #include "output/colour.h"
-#include "output/planar_geometry.h"
+#include "output/geometry2d.h"
 
 namespace Ariadne {
   namespace Output {
@@ -135,16 +134,20 @@ namespace Ariadne {
 
       void trace(const Point2d& pt);
       void trace(const Rectangle2d& r);
+      void trace(const Zonotope2d& z);
       void trace(const Polygon2d& p);
 
       void draw(const Point2d& pt);
       void draw(const Rectangle2d& r);
+      void draw(const Zonotope2d& z);
       void draw(const Polygon2d& p);
 
       void draw(std::vector<Rectangle2d>& rls);
 
       void fill();
       void stroke();
+     private:
+      static void _instantiate();
      public:     
       epsstream(const epsstream&); // no copy constructor
     };
@@ -184,10 +187,7 @@ namespace Ariadne {
 
     template<class R> epsstream& operator<<(epsstream&, const Geometry::Point<R>&); 
     template<class R> epsstream& operator<<(epsstream&, const Geometry::Rectangle<R>&);
-    template<class R> epsstream& operator<<(epsstream&, const Geometry::Parallelotope<R>&);
-    template<class R> epsstream& operator<<(epsstream&, const Geometry::Zonotope<R,R>&);
-    template<class R> epsstream& operator<<(epsstream&, const Geometry::Zonotope<Numeric::Interval<R>,R>&);
-    template<class R> epsstream& operator<<(epsstream&, const Geometry::Zonotope< Numeric::Interval<R>,Numeric::Interval<R> >&);
+    template<class R, class Tag> epsstream& operator<<(epsstream&, const Geometry::Zonotope<R,Tag>&);
     template<class R> epsstream& operator<<(epsstream&, const Geometry::Polytope<R>&); 
     template<class R> epsstream& operator<<(epsstream&, const Geometry::Polyhedron<R>&); 
     template<class R> epsstream& operator<<(epsstream&, const Geometry::RectangularSet<R>&);

@@ -189,7 +189,7 @@ namespace Ariadne {
     {
       friend class ConstraintBasedHybridEvolver<R>;
       typedef Numeric::Interval<R> I;
-      typedef Geometry::Zonotope<I> BS;
+      typedef Geometry::Zonotope<R,Geometry::IntervalTag> BS;
      public:
       /*! \brief The type used for real numbers. */
       typedef R real_type;
@@ -204,7 +204,7 @@ namespace Ariadne {
       /*! \brief . */
       typedef typename Geometry::DiscreteState discrete_state_type;
       /*! \brief . */
-      typedef typename Geometry::Zonotope<Numeric::Interval<R> > continuous_basic_set_type;
+      typedef typename Geometry::Zonotope<R,Geometry::IntervalTag> continuous_basic_set_type;
       /*! \brief . */
       typedef Geometry::HybridBasicSet<continuous_basic_set_type> hybrid_basic_set_type;
       /*! \brief . */

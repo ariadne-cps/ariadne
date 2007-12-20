@@ -48,7 +48,6 @@
 #include "geometry/point.h"
 #include "geometry/point_list.h"
 #include "geometry/rectangle.h"
-#include "geometry/zonotope.h"
 #include "geometry/polytope.h"
 
 #include "output/logging.h"
@@ -571,12 +570,6 @@ Geometry::subset(const Rectangle<X1>& r, const Polyhedron<X2>& plhd)
   return ::subset(r,plhd);
 }
 
-template<class X1,class X2>
-tribool 
-Geometry::subset(const Zonotope<X1>& z, const Polyhedron<X2>& plhd)
-{
-  return ::subset(z,plhd);
-}
 
 template<class X1,class X2>
 tribool 
@@ -775,7 +768,6 @@ void
 Geometry::Polyhedron<X>::_instantiate_geometry_operators() 
 {
   Rectangle<X> r;
-  Zonotope<X> z;
   Polytope<X> c;
   Polyhedron<X> p;
   
@@ -784,7 +776,6 @@ Geometry::Polyhedron<X>::_instantiate_geometry_operators()
   disjoint(p,r);
   disjoint(p,p);
   subset(r,p);
-  subset(z,p);
   subset(c,p);
   subset(p,p);
   subset(p,r);

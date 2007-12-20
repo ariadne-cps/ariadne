@@ -40,7 +40,6 @@
 #include "geometry/point.h"
 #include "geometry/point_list.h"
 #include "geometry/rectangle.h"
-#include "geometry/zonotope.decl.h"
 
 namespace Ariadne {  
   namespace Geometry {
@@ -296,9 +295,6 @@ namespace Ariadne {
 
     template<class X1,class X2> 
     tribool subset(const Rectangle<X1>& r, const Polyhedron<X2>& plhd);
-
-    template<class X1,class X2> 
-    tribool subset(const Zonotope<X1>& z, const Polyhedron<X2>& plhd);
 
     template<class X1,class X2> 
     tribool subset(const Polytope<X1>& pltp, const Polyhedron<X2>& plhd);

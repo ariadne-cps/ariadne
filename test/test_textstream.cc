@@ -71,7 +71,6 @@ int main() {
   cout << z3 << "\n" << p4 << endl;
   cout << r1.vertices() << endl;
   cout << r2.vertices() << endl;
-  cout << z3.vertices() << endl;
   cout << p4.vertices() << endl;
   cout << endl;
   

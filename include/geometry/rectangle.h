@@ -150,6 +150,8 @@ namespace Ariadne {
 
       /*! \brief Assign from a rectangle expression. */
       template<class E> Rectangle<R>& operator=(const RectangleExpression<E>& r);
+      /*! \brief Make a unit box. */
+      static Rectangle<R> unit_box(dimension_type d);
     
       //@}
       
@@ -409,11 +411,15 @@ namespace Ariadne {
     
     
     
+    template<class R> tribool contains(const Rectangle<R>& A, const Point<R>& B);
+
     template<class R> tribool equal(const Rectangle<R>& A, const Rectangle<R>& B);
       
     template<class R> tribool disjoint(const Rectangle<R>& A, const Rectangle<R>& B);
       
     template<class R> tribool subset(const Rectangle<R>& A, const Rectangle<R>& B);
+    
+    template<class R> tribool superset(const Rectangle<R>& A, const Rectangle<R>& B);
     
     template<class R> Rectangle<R> closed_intersection(const Rectangle<R>& A, const Rectangle<R>& B);
       

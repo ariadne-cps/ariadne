@@ -64,22 +64,22 @@ int main() {
   Zonotope<Flt> z3(r3);
   Polytope<Flt> p4(r4);
   
-  cout << bbox << "\n";
-  cout << r1 << " " << r2 << endl;
-  cout << r3 << " " << r4 << endl;
-  cout << z3 << " " << p4 << endl;
-  cout << p4.vertices() << endl;
-  cout << z3.vertices() << endl;
-  
+  cout << "bbox=" << bbox << "\n";
+
   
   // Test output of basic sets
   epsfstream eps;
-  eps.open("test_epsfstream-1.eps",bbox);
+  eps.open("test_epsstream-1.eps",bbox);
+  cout << "r1=" << r1 << endl;
   eps << r1;
   eps << fill_colour(blue);
+  cout << "r2=" << r2 << endl;
   eps << r2;
   eps << fill_colour(red);
-  eps << z3<< p4;
+  cout << "z3=" << z3 << endl;
+  eps << z3;
+  cout << "p4=" << p4 << endl;
+  eps << p4;
   eps.close();
   eps << pt;
 
@@ -92,7 +92,7 @@ int main() {
   Rectangle<Flt> r("[0.33,0.66]x[0.125,0.375]x[0.25,0.75]");
   gms.adjoin_outer_approximation(r);
   cout << "gms.size()=" << gms.size() << endl;
-  eps.open("test_epsfstream-2.eps",bb.neighbourhood(0.125));
+  eps.open("test_epsstream-2.eps",bb.neighbourhood(0.125));
   eps << gms;
   eps.close();
   

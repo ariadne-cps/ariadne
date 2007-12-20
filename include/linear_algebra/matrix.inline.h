@@ -426,21 +426,6 @@ LinearAlgebra::MatrixSlice<R>::write(std::ostream& os) const
 
 
 
-
-template<class R1,class R2> inline 
-LinearAlgebra::Matrix<R1>
-LinearAlgebra::approximation(const Matrix<R2>& im) 
-{
-  Matrix<R1> result(im.number_of_rows(),im.number_of_columns());
-  for(size_type i=0; i!=im.number_of_rows(); ++i) {
-    for(size_type j=0; j!=im.number_of_columns(); ++j) {
-      set_(result(i,j),im(i,j),Numeric::round_approx);
-    }
-  }
-  return result;
-}
-
-
 template<class R> inline 
 LinearAlgebra::Matrix<R>
 LinearAlgebra::midpoint(const Matrix< Numeric::Interval<R> >& im) 
@@ -454,6 +439,19 @@ LinearAlgebra::midpoint(const Matrix< Numeric::Interval<R> >& im)
   return result;
 }
 
+template<class R> inline 
+LinearAlgebra::Matrix<R>
+LinearAlgebra::approximation(const Matrix<R>& A) 
+{
+  return A;
+}
+
+template<class R> inline 
+LinearAlgebra::Matrix<R>
+LinearAlgebra::approximation(const Matrix< Numeric::Interval<R> >& iA) 
+{
+  return midpoint(iA);
+}
 
 template<class R> inline 
 bool

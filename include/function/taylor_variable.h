@@ -47,6 +47,8 @@ namespace Ariadne {
   
     class MultiIndex;
     template<class X> class TaylorSeries;
+    template<class X> class TaylorVariable;
+    template<class X> class TaylorDerivative;
   
     /*!\ingroup Function
      * \brief A templated class representing a the derivatives of a scalar quantity with respect to a multiple arguments.
@@ -54,6 +56,7 @@ namespace Ariadne {
     template<class X>
     class TaylorVariable
     {
+      friend class TaylorDerivative<X>;
      public:
       /*! The type used to represent numbers. */
       typedef X value_type;

@@ -66,7 +66,7 @@ int test_set_based_hybrid_evolver()
 {  
   //set_hybrid_evolver_verbosity(4);
 
-  typedef Zonotope< Interval<R> > BS;
+  typedef Zonotope<R,UniformErrorTag> BS;
 
   PolyhedralSet<R> space(Rectangle<R>("[-7.5,7.5]x[-7.5,7.5]"));
   AffineMap<R> identity(Matrix<R>("[1,0;0,-1]"),Vector<R>("[0,0]"));

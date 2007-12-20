@@ -36,11 +36,6 @@ namespace Ariadne {
     }
 
     template<class R> inline
-    tribool contains(const Rectangle<R>& r, const Point<R>& pt) {
-      return r.contains(pt);
-    }
-
-    template<class R> inline
     Rectangle<R> bounding_box(const Rectangle<R>& r) {
       return r;
     }

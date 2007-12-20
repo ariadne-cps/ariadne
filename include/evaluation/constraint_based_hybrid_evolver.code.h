@@ -91,7 +91,7 @@ Evaluation::ConstraintBasedHybridEvolver<R>::~ConstraintBasedHybridEvolver()
 template<class R>
 Evaluation::ConstraintBasedHybridEvolver<R>::ConstraintBasedHybridEvolver(const EvolutionParameters<R>& p)
   : _parameters(new EvolutionParameters<R>(p)),
-    _scheduler(new ConstraintBasedHybridScheduler<R>(Applicator<R>(),C1LohnerIntegrator<R>(),Detector<R>()))
+    _scheduler(new ConstraintBasedHybridScheduler<R>(Applicator<R>(),LohnerIntegrator<R>(),Detector<R>()))
 {
 }
 
@@ -190,7 +190,7 @@ Evaluation::ConstraintBasedHybridEvolver<R>::_compute_working_sets(const hybrid_
       loc_iter!=set.locations_end(); ++loc_iter)
   {
     discrete_state_type loc_id=loc_iter->first;
-    for(typename ListSet<Zonotope<I> >::const_iterator set_iter=loc_iter->second.begin();
+    for(typename ListSet<BS>::const_iterator set_iter=loc_iter->second.begin();
         set_iter!=loc_iter->second.end(); ++set_iter)
     {
       const continuous_basic_set_type& bs=*set_iter;
@@ -409,7 +409,7 @@ Evaluation::ConstraintBasedHybridEvolver<R>::upper_evolve(const System::Constrai
 {
   HybridGridCellListSet<R> final_set(hybrid_grid);
   
-  HybridListSet< Zonotope<I> > list_set(automaton.locations());
+  HybridListSet<BS> list_set(automaton.locations());
   list_set.adjoin(initial_set);
   
   list_set=this->upper_evolve(automaton,list_set,evolution_time,maximum_number_of_events);
@@ -431,7 +431,7 @@ Evaluation::ConstraintBasedHybridEvolver<R>::upper_reach(const System::Constrain
   ARIADNE_LOG(2,"ConstraintBasedHybridEvolver::upper_reach(ConstraintBasedHybridAutomaton, HybridGridCell, HybridGrid, Time, Integer)\n");
   HybridGridCellListSet<R> final_set(hybrid_grid);
   
-  HybridListSet< Zonotope<I> > list_set(automaton.locations());
+  HybridListSet<BS> list_set(automaton.locations());
   list_set.adjoin(initial_set);
   
   list_set=this->upper_reach(automaton,list_set,evolution_time,maximum_number_of_events);

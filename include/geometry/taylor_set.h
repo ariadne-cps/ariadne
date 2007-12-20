@@ -44,9 +44,12 @@ namespace Ariadne {
 
     template<class R> class Point;
     template<class R> class Rectangle;
-    template<class RC,class RG> class Zonotope;
+    template<class R,class Tag> class Zonotope;
     template<class BS> class ListSet;
 
+    class ExactTag;
+    class UniformErrorTag;
+ 
     /*!\ingroup BasicSet
      * \brief The image of a cuboid under a polynomial.
      *
@@ -88,7 +91,7 @@ namespace Ariadne {
       TaylorSet<R>& operator=(const Rectangle<R>& r);
       
       /*! \brief Assign from a Zonotope. */
-      TaylorSet<R>& operator=(const Zonotope<R,R>& z);
+      TaylorSet<R>& operator=(const Zonotope<R,ExactTag>& z);
       
       /*! \brief Copy assignment operator. */
       TaylorSet<R>& operator=(const TaylorSet<R>& ts);
@@ -148,7 +151,7 @@ namespace Ariadne {
       static void _instantiate_geometry_operators();
     };
   
-    template<class R> Zonotope<Numeric::Interval<R>,R> over_approximation(const TaylorSet<R>&);
+    template<class R> Zonotope<R,UniformErrorTag> over_approximation(const TaylorSet<R>&);
  
     template<class R>
     std::ostream& operator<<(std::ostream& os, const TaylorSet<R>& z);

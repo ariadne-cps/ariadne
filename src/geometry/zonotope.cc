@@ -33,21 +33,18 @@ namespace Ariadne {
 
     using namespace Numeric;
     
-    template class Zonotope<Rational>;
-    template class ZonotopeVerticesIterator<Rational>;
+    template class Zonotope<Rational,ExactTag>;
 
 #ifdef ENABLE_FLOAT64
-    template class Zonotope<Float64,Float64>;
-    template class Zonotope<Interval64,Float64>;
-    template class Zonotope<Interval64,Interval64>;
-    template class ZonotopeVerticesIterator<Float64,Float64>;
+    template class Zonotope<Float64,ExactTag>;
+    template class Zonotope<Float64,UniformErrorTag>;
+    template class Zonotope<Float64,IntervalTag>;
 #endif
   
 #ifdef ENABLE_FLOATMP
-    template class Zonotope<FloatMP,FloatMP>;
-    template class Zonotope<IntervalMP,FloatMP>;
-    template class Zonotope<IntervalMP,IntervalMP>;
-    template class ZonotopeVerticesIterator<FloatMP,FloatMP>;
+    template class Zonotope<FloatMP,ExactTag>;
+    template class Zonotope<FloatMP,UniformErrorTag>;
+    template class Zonotope<FloatMP,IntervalTag>;
 #endif
 
   }

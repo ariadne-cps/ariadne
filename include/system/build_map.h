@@ -75,7 +75,7 @@
       Function::TaylorDerivative<X> dx(ad,ad,s); \
       Function::TaylorDerivative<X> dr(rd,ad,s); \
       for(uint i=0; i!=ad; ++i) { dx[i]=x[i]; } \
-      f(dr,dx,p); \
+      f(dr,dx,p);      \
       return dr; \
     } \
     dimension_type result_dimension() const { return rd; } \

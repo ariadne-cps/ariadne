@@ -109,8 +109,10 @@ namespace Ariadne {
       size_type argument_size() const;
       /*! \brief The degree of the derivative map. Returns the constant one. */
       smoothness_type degree() const;
-      /*! \brief The value of the variable. */
+      /*! \brief The data describing the values and derivatives. */
       const array<X>& data() const;
+      /*! \brief A reference to the data describing the values and derivatives. */
+      array<X>& data();
       /*! \brief The value of the variable. */
       const X& value(size_type i) const;
       /*! \brief The differential of the variable with respect to the \a j th indepenent variable. (Deprecated)  */

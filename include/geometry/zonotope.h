@@ -38,23 +38,45 @@
 #include "linear_algebra/declarations.h"
 #include "linear_algebra/matrix.h"
 
-#include "zonotope.decl.h"
 
 namespace Ariadne {
   namespace Geometry {
-
+    
     class basic_set_tag;
     template<class X> class Point;
-    template<class X> class PointList;
     template<class E> class RectangleExpression;
     template<class X> class Rectangle;
-    template<class XC, class XG> class Parallelotope;
-    template<class X> class Polytope;
     template<class X> class Polyhedron;
     template<class BS> class ListSet;
-      
-    template<class XC,class XG=XC> class ZonotopeVerticesIterator;
-      
+  
+    class ExactTag;    
+    class UniformErrorTag;    
+    class IntervalTag;    
+    class DomainTag;    
+    template<class R,class Type=ExactTag> class Zonotope;
+  
+
+    template<class S>
+    class OverApproximation 
+    {
+     public:
+      const S& _s;
+      OverApproximation(const S& s) : _s(s) { }
+      template<class R> operator R() const { R r; over_approximate(r,_s); return r; }
+    };
+  
+    template<class S> inline
+    OverApproximation<S> over_approximation(const S& s) {
+      return OverApproximation<S>(s); 
+    }
+        
+    template<class R, class S> inline
+    R over_approximation(const S& s) {
+      R r; over_approximate(r,s); return r;
+    }
+     
+
+#ifdef DOXYGEN
     /*!\ingroup BasicSet
      * \brief A zonotope of arbitrary dimension.
      * 
@@ -77,313 +99,321 @@ namespace Ariadne {
      * ith element, and the ith component of the kth generator is given by the
      * (kd+i)th element.
      */
-    template<class XC, class XG>
+    template<class R, class Tag>
     class Zonotope {
-      typedef typename Numeric::traits<XC>::number_type R; 
-      typedef typename Numeric::traits<XC,XG>::arithmetic_type F; 
-      typedef typename Numeric::traits<F>::interval_type I; 
-     public:
-      /*! \brief A tag describing the type of set. */
-      typedef basic_set_tag set_category;
-      /*! \brief The type used for to represent the zonotope. */
-      typedef XC value_type;
-      /*! \brief The real number type. */
-      typedef typename Numeric::traits<R>::number_type real_type;
-      /*! \brief The type of denotable point contained by the zonotope. */
-      typedef Point<R> state_type;
-      /*! \brief An iterator through the (possible) vertices of the zonotope. */
-      typedef ZonotopeVerticesIterator<XC,XG> vertices_const_iterator;
-     private:
-      Point<XC> _centre;
-      LinearAlgebra::Matrix<XG> _generators;
-     protected:
-      void resize(dimension_type d, size_type m);
      public:
       //@{
+      //! \name Typedefs 
+      /*! \brief The type of real number used to describe the zonotope. */
+      typedef R real_type;
+      //@}
+
+      //@{
       //! \name Constructors
-      /*! \brief Default constructor constructs an empty zonotope. */
+      /*! \brief Default constructor yields a zonotope with dimension zero and no generators. */
       explicit Zonotope();
-     
-      /*! \brief Construct a zonotope of dimension \a n with centre at the origin and no generators. */
+      /*! \brief Construct a zonotope of dimension \a d with no generators. */
       explicit Zonotope(dimension_type d);
-     
       /*! \brief Construct a zonotope of dimension \a n with centre at the origin and \a m generators. */
       explicit Zonotope(dimension_type d, size_type m);
      
       /*! \brief Construct from centre and directions. */
-      template<class X0, class X1> 
-      explicit Zonotope(const Point<X0>& c, const LinearAlgebra::Matrix<X1>& g);
-
-      /*! \brief Construct from centre directions given by two matrices. */
-      template<class X0, class X1, class X2> 
-      Zonotope(const Point<X0>& c, const LinearAlgebra::Matrix<X1>& g1, const LinearAlgebra::Vector<X2>& g2);
-      
-      /*! \brief Construct from centre directions given by a matrix and a vector. */
-      template<class X0, class X1, class X2> 
-      Zonotope(const Point<X0>& c, const LinearAlgebra::Matrix<X1>& g1, const LinearAlgebra::Matrix<X2>& g2);
-
-      /*! \brief Construct from a string literal. */
-      explicit Zonotope(const std::string& s);
-      
+      template<class XC, class XG> 
+      explicit Zonotope(const Point<XC>& c, const LinearAlgebra::Matrix<XG>& g);
       /*! \brief Copy constructor. */
-      Zonotope(const Zonotope<XC,XG>& z);
-      
+      Zonotope(const Zonotope<R,Tag>& z);
+
       /*! \brief Copy assignment operator. */
-      Zonotope<XC,XG>& operator=(const Zonotope<XC,XG>& z);
-
-      /*! \brief Type conversion copy constructor operator. */
-      template<class X0,class X1> explicit Zonotope(const Zonotope<X0,X1>& z);
-
-      /*! \brief Type conversion assignment operator. */
-      template<class X0,class X1> Zonotope<XC,XG>& operator=(const Zonotope<X0,X1>& z);
-
+      Zonotope<R>& operator=(const Zonotope<R,Tag>& z);
+      /*! \brief Assign from a box. */
+      Zonotope<R,Tag>& operator=(const Rectangle<R>& r);
       //@}
-      
-      
       
       //@{ 
       //! \name Data access
-      /*! \brief The ith component of the centre point. */
-      const XC& centre(size_type i) const;
+      /*! \brief The dimension of the zonotope. */
+      dimension_type dimension() const;
 
-      /*! \brief The (i,j)-th component of the matrix of principle directions. */
-      const XG& generators(size_type i, size_type j) const;
-     
-      /*! \brief The centre. */
-      const Point<XC>& centre() const;
-
-      /*! \brief The matrix of principle directions. */
-      const LinearAlgebra::Matrix<XG>& generators() const;
-     
       /*! \brief The number of generators of the zonotope. */
       size_type number_of_generators() const;
 
-      /*! \brief The \a n th of principle direction. */
-      LinearAlgebra::Vector<XG> generator(size_type n) const;
-      //@}
-      
-      
-      //@{
-      //! \name Conversion and approximation operators
-      /*! \brief Construct from a rectangle. */
-      template<class E> explicit Zonotope(const RectangleExpression<E>& re);
-      
-      /*! \brief Assign from a rectangle expression. */
-      template<class E> Zonotope<XC,XG>& operator=(const RectangleExpression<E>& re);
+      /*! \brief The domain. */
+      Rectangle<R> domain() const;
+
+      /*! \brief The centre. */
+      Point<R> centre() const;
+
+      /*! \brief The matrix of principle directions. */
+      LinearAlgebra::Matrix<R> generators() const;
      
-      /*! \brief Type conversion assignment operator. */
-      template<class X0, class X1> Zonotope<XC,XG>& operator=(const Parallelotope<X0,X1>& p);
-
-      /*! \brief Convert to a polytope. */
-      operator Polytope<typename Numeric::traits<XC,XG>::arithmetic_type> () const;
-      
-      /*! \brief Convert to a polyhedron. */
-      operator Polyhedron<typename Numeric::traits<XC,XG>::arithmetic_type> () const;
       //@}
       
-
-      //@{
-      //! \name Geometric operations.
-      /*! \brief The dimension of the Euclidean space the zonotope lies in. */
-      dimension_type dimension() const;
       
-      /*! \brief True if the zonotope is empty. */
-      tribool empty() const;
-      
-      /*! \brief Checks for boundedness. */
-      tribool bounded() const;
-      
-      /*! \brief The radius of the zonotope. */
-      R radius() const;
-      
-      /*! \brief Tests if the zonotope contains point. */
-      template<class X> tribool contains(const Point<X>& point) const;
-
-      /*! \brief The vertices of the zonotope. */
-      PointList<typename Numeric::traits<XC,XG>::arithmetic_type> vertices() const;
-      
-      /*! \brief An iterator to the beginning of the (possible) vertices. */
-      vertices_const_iterator vertices_begin() const;
-      
-      /*! \brief An iterator to the end of the (possible) vertices. */
-      vertices_const_iterator vertices_end() const;
-      
-      /*! \brief Subdivide into two smaller pieces. */
-      ListSet< Zonotope<XC,XG> > divide() const;
-      
-      /*! \brief Subdivide into smaller pieces in each dimension. */
-      ListSet< Zonotope<XC,XG> > subdivide() const;
-      
-      /*! \brief A rectangle containing the given zonotope. */
-      Rectangle<R> bounding_box() const;
-      
-      //@}
-      
-#ifdef DOXYGEN
       //@{
       //! \name Geometric binary predicates
-      /*! \brief Tests equality */
-      friend tribool equal(const Zonotope<XC,XG>& A, const Zonotope<XC,XG>& B);
-      /*! \brief Tests disjointness */
-      friend tribool disjoint(const Zonotope<XC,XG>& A, const Zonotope<XC,XG>& B);
-      /*! \brief Tests disjointness */
-      friend tribool disjoint(const Rectangle<XC,XG>& A, const Zonotope<XC,XG>& B);
-      /*! \brief Tests disjointness */
-      friend tribool disjoint(const Zonotope<XC,XG>& A, const Rectangle<XC,XG>& B);
-      /*! \brief Tests inclusion of \a A in \a B. */
-      friend tribool subset(const Zonotope<XC,XG>& A, const Zonotope<XC,XG>& B);
-      /*! \brief Tests inclusion of \a A in \a B. */
-      friend tribool subset(const Rectangle<XC,XG>& A, const Zonotope<XC,XG>& B);
-      /*! \brief Tests inclusion of \a A in \a B. */
-      friend tribool subset(const Zonotope<XC,XG>& A, const Rectangle<XC,XG>& B);
+      /*! \brief Tests disjointness of \a z and \a r. */
+      friend tribool disjoint(const Zonotope<R>& z, const Rectangle<R>& r);
+      /*! \brief Tests inclusion of \a r in \a z. */
+      friend tribool superset(const Zonotope<R>& z, const Rectangle<R>& r);
+      /*! \brief Tests inclusion of \a r in \a z. */
+      friend tribool subset(const Rectangle<R>& z, const Zonotope<R>& r);
+      /*! \brief Tests inclusion of \a z in \a r. */
+      friend tribool subset(const Zonotope<R>& z, const Rectangle<R>& r);
+      /*! \brief Tests inclusion of \a z in \a p. */
+      friend tribool subset(const Zonotope<R>& z, const Polyhedron<R>& p);
       //@}
-      
-      //@{
-      //! \name Geometric binary operations
-      /*! \brief The Minkoswi sum of two zonotopes */
-      friend Zonotope<F> minkowski_sum(const Zonotope<XC,XG>& A, const Zonotope<XC,XG>& B);
-      /*! \brief The Minkoswi sum of a zonotope and a rectangle. */
-      friend Zonotope<F> minkowski_sum(const Rectangle<XC,XG>& A, const Zonotope<XC,XG>& B);
-      /*! \brief The Minkoswi sum of a rectangle and a zonotope. */
-      friend Zonotope<F> minkowski_sum(const Zonotope<XC,XG>& A, const Rectangle<XC,XG>& B);
-      /*! \brief The Minkoswi difference of two zonotopes */
-      friend Zonotope<F> minkowski_difference(const Zonotope<XC,XG>& A, const Zonotope<XC,XG>& B);
-      /*! \brief The Minkoswi difference of a rectangle and a zonotope. */
-      friend Zonotope<F> minkowski_difference(const Rectangle<XC,XG>& A, const Zonotope<XC,XG>& B);
-      /*! \brief The Minkoswi difference of a zonotope and a rectangle. */
-      friend Zonotope<F> minkowski_difference(const Zonotope<XC,XG>& A, const Rectangle<XC,XG>& B);
-
-      /*! \brief Adjoin generators to a zonotope. */
-      friend Zonotope<XC,XG> operator+(const Zonotope<XC,XG>& z, const LinearAlgebra::Matrix<RG>& G);
-      //@}
-#endif
-
-      //@{ 
-      //! \name Input/output operations
-      /*! \brief The name of the class. */
-      static std::string name();
-      /*! \brief Write to an output stream. */
-      std::ostream& write(std::ostream& os) const;
-      /*! \brief Read from an input stream. */
-      std::istream& read(std::istream& is);
-      //@}
-     private:
-      static void _instantiate_geometry_operators();
-     private:
-      // Minimize the generator Matrix
-      void minimize_generators(void);
-      
-      // Order the generator Matrix by norm.
-      void sort_generators(void);
-      
-      // A possible vertex is the image of a vertex of the cube in 
-      // generator space under the affine transformation
-      std::vector< Point<F> > _possible_vertices() const ;
-
-      // A possible vertex is the image of a vertex of the cube in 
-      // generator space under the affine transformation
-      std::vector< Point<R> > _approximate_possible_vertices() const ;
     };
+#endif
   
 
-    template<class XC,class XG> Rectangle<typename Zonotope<XC,XG>::real_type> bounding_box(const Zonotope<XC,XG>& z);
+    template<class R, class Tag>
+    tribool empty(const Zonotope<R,Tag>& z);
+
+    template<class R, class Tag>
+    tribool bounded(const Zonotope<R,Tag>& z);
+
+    template<class R, class Tag> 
+    R radius(const Zonotope<R,Tag>&);
     
-    template<class X,class XC,class XG> tribool contains(const Zonotope<XC,XG>& z,const Point<X>& pt);
+    template<class R, class Tag> 
+    Rectangle<R> bounding_box(const Zonotope<R,Tag>& z);
+    
+    template<class R, class Tag> 
+    tribool subset(const Rectangle<R>& z, const Zonotope<R,Tag>& r);
+    
+    template<class R, class Tag> 
+    tribool disjoint(const Rectangle<R>& r, const Zonotope<R,Tag>& z);
+    
 
 
-    template<class X,class XC,class XG> tribool disjoint(const Rectangle<X>& A, const Zonotope<XC,XG>& B);
-    template<class X,class XC,class XG> tribool disjoint(const Zonotope<XC,XG>& A, const Rectangle<X>& B);
-    template<class XC,class XG> tribool disjoint(const Zonotope<XC,XG>& A, const Zonotope<XC,XG>& B);
+    template<class R, class Tag> 
+    tribool subset(const Zonotope<R,Tag>& z, const Rectangle<R>& r);
     
-
-    template<class X,class XC,class XG> tribool subset(const Rectangle<X>& A, const Zonotope<XC,XG>& B);
-    template<class X,class XC,class XG> tribool subset(const Zonotope<XC,XG>& A, const Rectangle<X>& B);
-    template<class XC,class XG> tribool subset(const Zonotope<XC,XG>& A, const Zonotope<XC,XG>& B);
+    template<class R, class Tag> 
+    tribool subset(const Zonotope<R,Tag>& z, const Polyhedron<R>& p);
 
 
-    template<class R> Zonotope<Numeric::Interval<R>,R> over_approximation(const Zonotope< Numeric::Interval<R>, Numeric::Interval<R> >&);
-    template<class R> Zonotope<R,R> over_approximation(const Zonotope< Numeric::Interval<R>, R >&);
-    template<class R> Zonotope<R,R> over_approximation(const Zonotope<R,R>&);
-     
-    template<class R> Zonotope<R> approximation(const Zonotope< Numeric::Interval<R> >&);
-    template<class R> Zonotope<R> approximation(const Zonotope< Numeric::Interval<R>, R >&);
-    template<class R> Zonotope<R> approximation(const Zonotope<R>&);
 
-    template<class R> void over_approximate_(Zonotope<R>& , const Zonotope< Numeric::Interval<R> >&);
-    
-    template<class R> void orthogonal_over_approximate_(Zonotope<R>& , const Zonotope< Numeric::Interval<R> >&);
-    
-    template<class XC,class XG> 
-    Zonotope<typename Numeric::traits<XC>::arithmetic_type,XG>
-    minkowski_sum(const Zonotope<XC,XG>& A, const Zonotope<XC,XG>& B);
-    
-    template<class XC,class XG> 
-    Zonotope<typename Numeric::traits<XC>::arithmetic_type,XG>
-    minkowski_difference(const Zonotope<XC,XG>& A, const Zonotope<XC,XG>& B);
-    
-    
-    
-    template<class X,class XC,class XG>
-    Zonotope<typename Numeric::traits<X,XG>::arithmetic_type,typename Numeric::traits<X,XG>::arithmetic_type> 
-    minkowski_sum(const Rectangle<X>& A, const Zonotope<XC,XG>& B);
-    
-    template<class X,class XC,class XG>
-    Zonotope<typename Numeric::traits<X,XC>::arithmetic_type,typename Numeric::traits<X,XG>::arithmetic_type> 
-    minkowski_sum(const Zonotope<XC,XG>& A, const Rectangle<X>& B);
-    
-    template<class X,class XC,class XG>
-    Zonotope<typename Numeric::traits<X,XG>::arithmetic_type,typename Numeric::traits<X,XG>::arithmetic_type> 
-    minkowski_difference(const Rectangle<X>& A, const Zonotope<XC,XG>& B);
-    
-    template<class X,class XC,class XG>
-    Zonotope<typename Numeric::traits<X,XC>::arithmetic_type,typename Numeric::traits<X,XG>::arithmetic_type> 
-    minkowski_difference(const Zonotope<XC,XG>& A, const Rectangle<X>& B);
+    template<class R> 
+    tribool contains(const Zonotope<R,ExactTag>& z, const Point<R>& pt);
 
-    
-    template<class XC,class XG> 
-    ListSet< Zonotope<XC,XG> >
-    subdivide(const Zonotope<XC,XG>& z);
-    
-    template<class XC,class XG> 
-    ListSet< Zonotope<XC,XG> >
-    divide(const Zonotope<XC,XG>& z);
-    
-    
-    template<class X> 
-    Zonotope<typename Numeric::traits<X>::arithmetic_type> 
-    zonotope(const Rectangle<X>& r);
-    
-    template<class XC,class XG> 
-    Polytope<typename Numeric::traits<XC,XG>::arithmetic_type> 
-    polytope(const Zonotope<XC,XG>& r);
-    
-    template<class XC,class XG> 
-    Polyhedron<typename Numeric::traits<XC,XG>::arithmetic_type> 
-    polyhedron(const Zonotope<XC,XG>& r);
-    
-    
-    template<class XC,class XG> 
-    Zonotope<XC,XG> 
-    operator+(const Zonotope<XC,XG>& z, const LinearAlgebra::Matrix<XG>& A);
-    
-    template<class XC,class XG>  
-    std::ostream& operator<<(std::ostream& os, const Zonotope<XC,XG>& z);
-    
-    template<class XC,class XG> 
-    std::istream& operator>>(std::istream& is, Zonotope<XC,XG>& z);
+    template<class R> 
+    tribool disjoint(const Zonotope<R,ExactTag>& z, const Rectangle<R>& r);
 
-    
-    
-    
-    template<class XC,class XG> class ZonotopeVerticesIterator;
-      
-    template<class XC,class XG> 
-    std::ostream& operator<<(std::ostream& os, const ZonotopeVerticesIterator<XC,XG>& iter);
+    template<class R> 
+    tribool superset(const Zonotope<R,ExactTag>& r, const Rectangle<R>& z);
+
+    template<class R, class ExactTag> 
+    ListSet< Zonotope<R,ExactTag> >
+    subdivide(const Zonotope<R,ExactTag>& z);
+
+
+    template<class R> 
+    tribool contains(const Zonotope<R,UniformErrorTag>& z, const Point<R>& pt);
+
+    template<class R> 
+    tribool disjoint(const Zonotope<R,UniformErrorTag>& z, const Rectangle<R>& r);
+
+    template<class R> 
+    tribool superset(const Zonotope<R,UniformErrorTag>& r, const Rectangle<R>& z);
+
+    template<class R, class UniformErrorTag> 
+    ListSet< Zonotope<R,UniformErrorTag> >
+    subdivide(const Zonotope<R,UniformErrorTag>& z);
 
 
 
     
-  
+
+    template<class R, class Tag> 
+    void over_approximate(Zonotope<R,Tag>&, const Rectangle<R>&);
+
+
+    template<class R, class Tag> 
+    void approximate(Zonotope<R,ExactTag>&, const Zonotope<R,Tag>&);
+
+
+    template<class R> 
+    void over_approximate(Zonotope<R,ExactTag>&, const Zonotope<R,IntervalTag>&);
+
+    template<class R> 
+    void over_approximate(Zonotope<R,ExactTag>&, const Zonotope<R,UniformErrorTag>&);
+
+    template<class R> 
+    void over_approximate(Zonotope<R,ExactTag>&, const Zonotope<R,ExactTag>&);
+
+    template<class R> 
+    void over_approximate(Zonotope<R,UniformErrorTag>&, const Zonotope<R,UniformErrorTag>&);
+
+    template<class R> 
+    void over_approximate(Zonotope<R,UniformErrorTag>&, const Zonotope<R,IntervalTag>&);
+
+
+    template<class R> 
+    void orthogonal_over_approximate(Zonotope<R,UniformErrorTag>&, const Zonotope<R,UniformErrorTag>&);
+    
+    template<class R> 
+    void orthogonal_over_approximate(Zonotope<R,UniformErrorTag>&, const Zonotope<R,IntervalTag>&);
+    
+    template<class R> 
+    void orthogonal_over_approximate(Zonotope<R,IntervalTag>&, const Zonotope<R,IntervalTag>&);
+
+    
+    template<class R> 
+    void
+    nonsingular_over_approximate(Zonotope<R,ExactTag>&, const Zonotope<R,IntervalTag>&);
+
+
+        
+    template<class R, class Tag> inline
+    Zonotope<R> approximation(const Zonotope<R,Tag>& z) {
+      Zonotope<R> r; approximate(r,z); return r;
+    }
+        
+    template<class R, class Tag> inline
+    Zonotope<R,Tag> orthogonal_over_approximation(const Zonotope<R,Tag>& s) {
+      Zonotope<R,Tag> r; orthogonal_over_approximate(r,s); return r;
+    }
+
+
+    template<class R, class Tag>  
+    std::ostream& operator<<(std::ostream& os, const Zonotope<R,Tag>& z);
+    
+    template<class R, class Tag> 
+    std::istream& operator>>(std::istream& is, Zonotope<R,Tag>& z);
+
+ 
+
+
+
+
+
+
+
+   
+    
+
+    template<class R>
+    class Zonotope<R,ExactTag>
+    {
+      typedef Numeric::Interval<R> I;
+     public:
+      typedef basic_set_tag set_category;
+      typedef R real_type;
+      Zonotope(const dimension_type& d=0)
+        : _centre(d), _generators(d,0) { }
+      Zonotope(const Point<R>& c, const LinearAlgebra::Matrix<R>& G)
+        : _centre(c), _generators(G) { }
+      Zonotope(const Rectangle<R>& r);
+      Zonotope(const Zonotope<R,UniformErrorTag>& z);
+      template<class RR> Zonotope(const Zonotope<RR>& z);
+      dimension_type dimension() const { 
+        return _centre.dimension(); }
+      size_type number_of_generators() const { 
+        return _generators.number_of_columns(); }
+      Rectangle<R> domain() const { 
+        return Rectangle<R>::unit_box(this->number_of_generators()); }
+      const Point<R>& centre() const { 
+        return this->_centre; }
+      const LinearAlgebra::Matrix<R>& generators() const { 
+        return this->_generators; }
+      R radius() const {
+        return Geometry::radius(*this); }
+      tribool empty() const {
+        return false; }
+      tribool bounded() const {
+        return true; }
+      tribool contains(const Point<R>& pt) const {
+        return Geometry::contains(*this,pt); }
+      Rectangle<R> bounding_box() const {
+        return Geometry::bounding_box(*this); }
+     private:
+      static void _instantiate();
+     private:
+      Point<R> _centre;
+      LinearAlgebra::Matrix<R> _generators;
+    };
+
+    template<class R>
+    class Zonotope<R,UniformErrorTag>
+    {
+      typedef Numeric::Interval<R> I;
+     public:
+      typedef basic_set_tag set_category;
+      typedef R real_type;
+      Zonotope(const dimension_type& d=0)
+        : _centre(d), _generators(d,0) { }
+      Zonotope(const Point<I>& c, const LinearAlgebra::Matrix<R>& G)
+        : _centre(c), _generators(G) { }
+      Zonotope(const Zonotope<R,ExactTag>& z)
+        : _centre(z.centre()), _generators(z.generators()) { }
+      Zonotope(const Rectangle<R>& r);
+      Zonotope<R,UniformErrorTag>& operator=(const Rectangle<R>& r);
+      dimension_type dimension() const { 
+        return _centre.dimension(); }
+      size_type number_of_generators() const { 
+        return _generators.number_of_columns(); }
+      Rectangle<R> domain() const { 
+        return Rectangle<R>::unit_box(this->number_of_generators()); }
+      const Point<I>& centre() const { 
+        return this->_centre; }
+      const LinearAlgebra::Matrix<R>& generators() const { 
+        return this->_generators; }
+      R radius() const {
+        return Geometry::radius(*this); }
+      tribool empty() const {
+        return false; }
+      tribool bounded() const {
+        return true; }
+      tribool contains(const Point<R>& pt) const {
+        return Geometry::contains(*this,pt); }
+      Rectangle<R> bounding_box() const {
+        return Geometry::bounding_box(*this); }
+     private:
+      static void _instantiate();
+     private:
+      Point<I> _centre;
+      LinearAlgebra::Matrix<R> _generators;
+    };
+
+    template<class R>
+    class Zonotope<R,IntervalTag>
+    {
+      typedef Numeric::Interval<R> I;
+     public:
+      typedef basic_set_tag set_category;
+      typedef R real_type;
+      Zonotope(const dimension_type& d=0)
+        : _centre(d), _generators(d,0) { }
+      Zonotope(const Point<I>& c, const LinearAlgebra::Matrix<I>& G)
+        : _centre(c), _generators(G) { }
+      Zonotope(const Zonotope<R,ExactTag>& z) 
+        : _centre(z.centre()), _generators(z.generators()) { }
+      Zonotope(const Zonotope<R,UniformErrorTag>& z) 
+        : _centre(z.centre()), _generators(z.generators()) { }
+      dimension_type dimension() const { 
+        return _centre.dimension(); }
+      size_type number_of_generators() const { 
+        return _generators.number_of_columns(); }
+      Rectangle<R> domain() const { 
+        return Rectangle<R>::unit_box(this->number_of_generators()); }
+      const Point<I>& centre() const { 
+        return this->_centre; }
+      const LinearAlgebra::Matrix<I>& generators() const { 
+        return this->_generators; }
+      R radius() const {
+        return Geometry::radius(*this); }
+      tribool empty() const {
+        return false; }
+      tribool bounded() const {
+        return true; }
+      Rectangle<R> bounding_box() const {
+        return Geometry::bounding_box(*this); }
+     private:
+      Point<I> _centre;
+      LinearAlgebra::Matrix<I> _generators;
+    };
+
 
   }
 }

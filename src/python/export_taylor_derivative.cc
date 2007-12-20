@@ -44,36 +44,37 @@ template<class X>
 TaylorDerivative<X>*
 make_taylor_derivative(const uint& rs, const uint& as, const uint& d, const boost::python::object& obj) 
 {
-  TaylorDerivative<X>* result=new TaylorDerivative<X>(rs,as,d);
-  read_array(result->data(),obj);
-  assert(result->data().size()==compute_polynomial_data_size(rs,as,d));
+  array<X> data;
+  read_array(data,obj);
+  assert(data.size()==compute_polynomial_data_size(rs,as,d));
+  TaylorDerivative<X>* result=new TaylorDerivative<X>(rs,as,d,data.begin());
   return result;
 }
 
-template<class R1, class R2> inline 
-void taylor_derivative_set_variable(TaylorDerivative<R1>& td, const size_type& i, TaylorVariable<R2> x) {
+template<class X1, class X2> inline 
+void taylor_derivative_set_variable(TaylorDerivative<X1>& td, const size_type& i, TaylorVariable<X2> x) {
   assert(i==td.result_size()); 
   assert(x.argument_size()==td.argument_size()); 
   assert(x.degree()<=td.degree()); 
   td[i]=x;
 }
 
-template<class R> inline 
-TaylorVariable<R> taylor_derivative_get_variable(const TaylorDerivative<R>& td, const size_type& i) {
+template<class X> inline 
+TaylorVariable<X> taylor_derivative_get_variable(const TaylorDerivative<X>& td, const size_type& i) {
   assert(i==td.result_size()); 
   return td[i];
 }
 
-template<class R1, class R2> inline 
-void taylor_derivative_set_item(TaylorDerivative<R1>& td, const size_type& i, const MultiIndex& j, R2 x) {
+template<class X, class XX> inline 
+void taylor_derivative_set_item(TaylorDerivative<X>& td, const size_type& i, const MultiIndex& j, const XX& x) {
   assert(i==td.result_size()); 
   assert(j.number_of_variables()==td.argument_size()); 
   assert(j.degree()<=td.degree()); 
   td.set(i,j,x);
 }
 
-template<class R> inline 
-R taylor_derivative_get_item(const TaylorDerivative<R>& td, const size_type& i, const MultiIndex& j) {
+template<class X> inline 
+X taylor_derivative_get_item(const TaylorDerivative<X>& td, const size_type& i, const MultiIndex& j) {
   assert(i==td.result_size()); 
   assert(j.number_of_variables()==td.argument_size()); 
   assert(j.degree()<=td.degree()); 
@@ -89,7 +90,7 @@ void export_taylor_derivative()
   typedef TaylorDerivative<A> TD;
 
   class_<TD> taylor_derivative_class(python_name<R>("TaylorDerivative").c_str());
-  taylor_derivative_class.def("__init__", make_constructor(&make_taylor_derivative<R>) );
+  taylor_derivative_class.def("__init__", make_constructor(&make_taylor_derivative<A>) );
   taylor_derivative_class.def( init< uint, uint, uint >());
   taylor_derivative_class.def("__getitem__", &taylor_derivative_get_item<A>);
   taylor_derivative_class.def("__setitem__",&taylor_derivative_set_item<A,double>);

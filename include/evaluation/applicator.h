@@ -42,9 +42,8 @@ namespace Ariadne {
 
 
     template<class R> Geometry::Rectangle<R> apply(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& r); 
-    template<class R> Geometry::Zonotope<R> apply(const System::MapInterface<R>& f, const Geometry::Zonotope<R>& z); 
-    template<class R> Geometry::Zonotope<Numeric::Interval<R>,R> apply(const System::MapInterface<R>& f, const Geometry::Zonotope<Numeric::Interval<R>,R>& z); 
-    template<class R> Geometry::Zonotope< Numeric::Interval<R> > apply(const System::MapInterface<R>& f, const Geometry::Zonotope< Numeric::Interval<R> >& z); 
+  template<class R> Geometry::Zonotope<R,Geometry::ExactTag> apply(const System::MapInterface<R>& f, const Geometry::Zonotope<R,Geometry::ExactTag>& z); 
+  template<class R> Geometry::Zonotope<R,Geometry::UniformErrorTag> apply(const System::MapInterface<R>& f, const Geometry::Zonotope<R,Geometry::UniformErrorTag>& z); 
 
 
   
@@ -54,9 +53,8 @@ namespace Ariadne {
     template<class R>
     class Applicator
       : public ApplicatorInterface< Geometry::Rectangle<R> >,
-        public ApplicatorInterface< Geometry::Zonotope<R,R> >,
-        public ApplicatorInterface< Geometry::Zonotope<Numeric::Interval<R>,R> >,
-        public ApplicatorInterface< Geometry::Zonotope< Numeric::Interval<R>, Numeric::Interval<R> > >
+        public ApplicatorInterface< Geometry::Zonotope<R,Geometry::ExactTag> >,
+        public ApplicatorInterface< Geometry::Zonotope<R,Geometry::UniformErrorTag> >
     {
       typedef Numeric::Interval<R> I;
      public:
@@ -77,11 +75,9 @@ namespace Ariadne {
       /*! \brief Compute the image of a rectangle under a continuous function. */
       virtual Geometry::Rectangle<R> apply(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& bs) const;
       /*! \brief Compute the image of a zonotope under a continuous function. */
-      virtual Geometry::Zonotope<R,R> apply(const System::MapInterface<R>& f, const Geometry::Zonotope<R,R>& bs) const;
+      virtual Geometry::Zonotope<R,Geometry::ExactTag> apply(const System::MapInterface<R>& f, const Geometry::Zonotope<R,Geometry::ExactTag>& bs) const;
       /*! \brief Compute the image of a zonotope under a continuous function. */
-      virtual Geometry::Zonotope<I,R> apply(const System::MapInterface<R>& f, const Geometry::Zonotope<I,R>& bs) const;
-      /*! \brief Compute the image of a zonotope under a continuous function. */
-      virtual Geometry::Zonotope<I,I> apply(const System::MapInterface<R>& f, const Geometry::Zonotope<I,I>& bs) const;
+      virtual Geometry::Zonotope<R,Geometry::UniformErrorTag> apply(const System::MapInterface<R>& f, const Geometry::Zonotope<R,Geometry::UniformErrorTag>& bs) const;
      private:
       static void instantiate();
       //@}

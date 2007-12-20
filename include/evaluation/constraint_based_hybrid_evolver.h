@@ -61,12 +61,12 @@ namespace Ariadne {
     class ConstraintBasedHybridEvolver
     {
       typedef Numeric::Interval<R> I;
-      typedef Geometry::Zonotope<I,I> BS;
+      typedef Geometry::Zonotope<R,Geometry::IntervalTag> BS;
      public:
-      typedef typename System::ConstraintBasedDiscreteMode<R> mode_type;
-      typedef typename System::ConstraintBasedDiscreteTransition<R> transition_type;
+      typedef System::ConstraintBasedDiscreteMode<R> mode_type;
+      typedef System::ConstraintBasedDiscreteTransition<R> transition_type;
       typedef Geometry::DiscreteState discrete_state_type;
-      typedef typename Geometry::Zonotope<Numeric::Interval<R> > continuous_basic_set_type;
+      typedef Geometry::Zonotope<R,Geometry::IntervalTag> continuous_basic_set_type;
       typedef Geometry::HybridBasicSet<continuous_basic_set_type> hybrid_basic_set_type;
       //typedef Geometry::HybridTimedBasicSet<continuous_basic_set_type> timed_set_type;
       typedef TimeModelHybridBasicSet<continuous_basic_set_type> timed_set_type;

@@ -73,16 +73,12 @@ void export_integrator()
   typedef Interval<R> I;
 
   class_< IntegratorWrapper< Rectangle<R> >, boost::noncopyable >("RectangleIntegratorInterface",init<>());
-  class_< IntegratorWrapper< Zonotope<I,R> >, boost::noncopyable >("C0ZonotopeIntegratorInterface",init<>());
-  class_< IntegratorWrapper< Zonotope<I,I> >, boost::noncopyable >("C1ZonotopeIntegratorInterface",init<>());
+  class_< IntegratorWrapper< Zonotope<R,UniformErrorTag> >, boost::noncopyable >("C0ZonotopeIntegratorInterface",init<>());
+  class_< IntegratorWrapper< Zonotope<R,IntervalTag> >, boost::noncopyable >("C1ZonotopeIntegratorInterface",init<>());
 
-  class_< LohnerIntegrator<R>, bases<IntegratorInterface< Zonotope<I,R> > > >("C0LohnerIntegrator",init<>());
-  class_< C1LohnerIntegrator<R>, bases<IntegratorInterface< Zonotope<I,I> > > >("C1LohnerIntegrator",init<>());
+  class_< LohnerIntegrator<R>, bases<IntegratorInterface< Zonotope<R,UniformErrorTag> >, IntegratorInterface< Zonotope<R,IntervalTag> > > >("LohnerIntegrator",init<>());
 
-
-  //  class_< AffineIntegrator<R>, bases<IntegratorInterface< Zonotope<I,R> > > >("C0AffineIntegrator",init<>());
-  //  class_< AffineIntegrator<R>, bases<IntegratorInterface< Zonotope<I,I> > > >("C1AffineIntegrator",init<>());
-  class_< AffineIntegrator<R>, bases< IntegratorInterface< Zonotope<I,R> >, IntegratorInterface< Zonotope<I,I> > > >("AffineIntegrator",init<>());
+  class_< AffineIntegrator<R>, bases< IntegratorInterface< Zonotope<R,UniformErrorTag> >, IntegratorInterface< Zonotope<R,IntervalTag> > > >("AffineIntegrator",init<>());
 
   class_< EulerIntegrator<R>, bases<IntegratorInterface< Rectangle<R> > > >("EulerIntegrator",init<>());
 }

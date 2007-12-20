@@ -84,39 +84,41 @@ test_affine_integrator()
   AffineVectorField<R> avf(A,b);
   Rectangle<R> bb("[-4,0]x[-2,2]");
   Rectangle<R> r("[-3.125,-2.875]x[-0.125,0.125]");
-  Zonotope<I> iz; iz=r;
-  Zonotope<I> iz0=iz;
+  cout << "r0=" << r << endl;
+  Zonotope<R,UniformErrorTag> iz; iz=r;
+  cout << "iz=" << iz << endl;
+  Zonotope<R,UniformErrorTag> iz0=iz;
   cout << "iz0=" << iz0 << endl;
   
-  Zonotope<I> iz1=affine.integration_step(avf,iz0,h);
+  Zonotope<R,UniformErrorTag> iz1=affine.integration_step(avf,iz0,h);
   cout << "iz1=" << iz1 << endl;
-  Zonotope<I> iz2=affine.integration_step(avf,iz1,h);
+  Zonotope<R,UniformErrorTag> iz2=affine.integration_step(avf,iz1,h);
   cout << "iz2=" << iz2 << endl;
-  Zonotope<I> iz3=affine.integration_step(avf,iz2,h);
+  Zonotope<R,UniformErrorTag> iz3=affine.integration_step(avf,iz2,h);
   cout << "iz3=" << iz3 << endl;
-  Zonotope<I> iz4=affine.integration_step(avf,iz3,h);
+  Zonotope<R,UniformErrorTag> iz4=affine.integration_step(avf,iz3,h);
   cout << "iz4=" << iz4 << endl;
-  Zonotope<I> hiz1=affine.integration_step(avf,iz0,hh);
-  Zonotope<I> hiz2=affine.integration_step(avf,iz1,hh);
-  Zonotope<I> hiz3=affine.integration_step(avf,iz2,hh);
-  Zonotope<I> hiz4=affine.integration_step(avf,iz3,hh);
+  Zonotope<R,UniformErrorTag> hiz1=affine.integration_step(avf,iz0,hh);
+  Zonotope<R,UniformErrorTag> hiz2=affine.integration_step(avf,iz1,hh);
+  Zonotope<R,UniformErrorTag> hiz3=affine.integration_step(avf,iz2,hh);
+  Zonotope<R,UniformErrorTag> hiz4=affine.integration_step(avf,iz3,hh);
   cout << "hiz4=" << hiz4 << endl;
-  Zonotope<I> riz1=affine.reachability_step(avf,iz0,h);
+  Zonotope<R,UniformErrorTag> riz1=affine.reachability_step(avf,iz0,h);
   cout << "riz1=" << riz1 << endl;
-  Zonotope<I> riz2=affine.reachability_step(avf,iz1,h);
-  Zonotope<I> riz3=affine.reachability_step(avf,iz2,h);
-  Zonotope<I> riz4=affine.reachability_step(avf,iz3,h);
+  Zonotope<R,UniformErrorTag> riz2=affine.reachability_step(avf,iz1,h);
+  Zonotope<R,UniformErrorTag> riz3=affine.reachability_step(avf,iz2,h);
+  Zonotope<R,UniformErrorTag> riz4=affine.reachability_step(avf,iz3,h);
   cout << "riz4=" << riz4 << endl;
   
   if(h!=0.125) { cout << "h changed from 0.125 to " << h << endl; }
   
   epsfstream eps;
   eps.open("test_affine_integrator.eps",bb);
-  eps << fill_colour(red) << over_approximation(riz1) << over_approximation(riz2) << over_approximation(riz3) << over_approximation(riz4);
-  eps << fill_colour(green) << approximation(riz1) << approximation(riz2) << approximation(riz3) << approximation(riz4);
-  eps << fill_colour(magenta) << approximation(hiz1) << approximation(hiz2) << approximation(hiz3) << approximation(hiz4);
-  eps << fill_colour(blue) << approximation(iz1) << approximation(iz2) << approximation(iz3) << approximation(iz4);
-  eps << fill_colour(yellow) << over_approximation(iz);
+  eps << fill_colour(red) << riz1 << riz2 << riz3 << riz4;
+  eps << fill_colour(green) << riz1 << riz2 << riz3 << riz4;
+  eps << fill_colour(magenta) << hiz1 << hiz2 << hiz3 << hiz4;
+  eps << fill_colour(blue) << iz1 << iz2 << iz3 << iz4;
+  eps << fill_colour(yellow) << iz;
   eps.close();
   
   cout << endl;

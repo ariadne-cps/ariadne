@@ -81,7 +81,7 @@ Evaluation::Detector<R>::value(const Geometry::ConstraintInterface<R>& c,
 template<class R>
 Numeric::Interval<R> 
 Evaluation::Detector<R>::value(const Geometry::ConstraintInterface<R>& c, 
-                               const Geometry::Zonotope<R,R>& z) const
+                               const Geometry::Zonotope<R,Geometry::ExactTag>& z) const
 {
   const Geometry::DifferentiableConstraintInterface<R>& dc=dynamic_cast<const Geometry::DifferentiableConstraintInterface<R>&>(c);
   if(&dc) {
@@ -100,7 +100,7 @@ Evaluation::Detector<R>::value(const Geometry::ConstraintInterface<R>& c,
 template<class R>
 Numeric::Interval<R> 
 Evaluation::Detector<R>::value(const Geometry::ConstraintInterface<R>& c, 
-                               const Geometry::Zonotope<I,R>& z) const
+                               const Geometry::Zonotope<R,Geometry::UniformErrorTag>& z) const
 {
   const Geometry::DifferentiableConstraintInterface<R>& dc=dynamic_cast<const Geometry::DifferentiableConstraintInterface<R>&>(c);
   if(&dc) {
@@ -119,7 +119,7 @@ Evaluation::Detector<R>::value(const Geometry::ConstraintInterface<R>& c,
 template<class R>
 Numeric::Interval<R> 
 Evaluation::Detector<R>::value(const Geometry::ConstraintInterface<R>& c, 
-                               const Geometry::Zonotope<I,I>& z) const
+                               const Geometry::Zonotope<R,Geometry::IntervalTag>& z) const
 {
   const Geometry::DifferentiableConstraintInterface<R>& dc=dynamic_cast<const Geometry::DifferentiableConstraintInterface<R>&>(c);
   if(&dc) {

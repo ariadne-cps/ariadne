@@ -48,6 +48,8 @@ instantiate_matrix_approx()
   LinearAlgebra::Matrix<X>* nA=0;
   LinearAlgebra::Vector<X>* nv=0;
 
+  LinearAlgebra::mul_approx(*nA,*nv);
+  LinearAlgebra::mul_approx(*nA,*nA);
   LinearAlgebra::solve_approx(*nA,*nv);
   LinearAlgebra::inverse_approx(*nA);
   LinearAlgebra::qr_approx(*nA);
@@ -272,6 +274,32 @@ LinearAlgebra::Matrix<typename Numeric::traits<R>::arithmetic_type>
 LinearAlgebra::inverse(const Matrix<R>& A) 
 {
   return LUMatrix<typename Numeric::traits<R>::arithmetic_type>(A).inverse();
+}
+
+
+
+template<class T>
+LinearAlgebra::Vector< Numeric::Float<T> >
+LinearAlgebra::mul_approx(const Matrix< Numeric::Float<T> >& A,
+                          const Vector< Numeric::Float<T> >& b)
+{
+  typedef Numeric::Float<T> F;
+  typedef Numeric::ApproximateFloat<T> AF;
+  Vector<F> r;
+  reinterpret_cast<Vector<AF>&>(r)=reinterpret_cast<Matrix<AF>const&>(A) * reinterpret_cast<Vector<AF>const&>(b);
+  return r;
+}
+
+template<class T>
+LinearAlgebra::Matrix< Numeric::Float<T> >
+LinearAlgebra::mul_approx(const Matrix< Numeric::Float<T> >& A,
+                          const Matrix< Numeric::Float<T> >& B)
+{
+  typedef Numeric::Float<T> F;
+  typedef Numeric::ApproximateFloat<T> AF;
+  Matrix<F> C;
+  reinterpret_cast<Vector<AF>&>(C)=reinterpret_cast<Matrix<AF>const&>(A) * reinterpret_cast<Vector<AF>const&>(A);
+  return C;
 }
 
 

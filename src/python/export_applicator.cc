@@ -59,22 +59,20 @@ class ApplicatorWrapper
 template<class R>
 void export_applicator() 
 {
-  typedef Numeric::Interval<R> I;
-  class_< ApplicatorWrapper< Rectangle<R> >, boost::noncopyable >("RectangleApplicatorInterface",init<>());
-  class_< ApplicatorWrapper< Zonotope<R,R> >, boost::noncopyable >("ZonotopeApplicatorInterface",init<>());
-  class_< ApplicatorWrapper< Zonotope<I,R> >, boost::noncopyable >("C0ZonotopeApplicatorInterface",init<>());
-  class_< ApplicatorWrapper< Zonotope<I,I> >, boost::noncopyable >("C1ZonotopeApplicatorInterface",init<>());
+  class_< ApplicatorWrapper<Rectangle<R> >, boost::noncopyable >("RectangleApplicatorInterface",init<>());
+  class_< ApplicatorWrapper<Zonotope<R,ExactTag> >, boost::noncopyable >("ZonotopeApplicatorInterface",init<>());
+  class_< ApplicatorWrapper<Zonotope<R,UniformErrorTag> >, boost::noncopyable >("C0ZonotopeApplicatorInterface",init<>());
+  class_< ApplicatorWrapper<Zonotope<R,IntervalTag> >, boost::noncopyable >("C1ZonotopeApplicatorInterface",init<>());
 
   class_< Applicator<R>, 
     bases<ApplicatorInterface< Rectangle<R> >,
-          ApplicatorInterface< Zonotope<R,R> >,
-          ApplicatorInterface< Zonotope<I,R> >,
-          ApplicatorInterface< Zonotope<I,I> > > >
+          ApplicatorInterface< Zonotope<R,ExactTag> >,
+          ApplicatorInterface< Zonotope<R,UniformErrorTag> >,
+          ApplicatorInterface< Zonotope<R,IntervalTag> > > >
     applicator_class("Applicator",init<>());
   applicator_class.def("apply",(Rectangle<R>(Applicator<R>::*)(const MapInterface<R>&,const Rectangle<R>&)const)&Applicator<R>::apply);
-  applicator_class.def("apply",(Zonotope<R,R>(Applicator<R>::*)(const MapInterface<R>&,const Zonotope<R,R>&)const)&Applicator<R>::apply);
-  applicator_class.def("apply",(Zonotope<I,R>(Applicator<R>::*)(const MapInterface<R>&,const Zonotope<I,R>&)const)&Applicator<R>::apply);
-  applicator_class.def("apply",(Zonotope<I,I>(Applicator<R>::*)(const MapInterface<R>&,const Zonotope<I,I>&)const)&Applicator<R>::apply);
+  applicator_class.def("apply",(Zonotope<R,ExactTag>(Applicator<R>::*)(const MapInterface<R>&,const Zonotope<R,ExactTag>&)const)&Applicator<R>::apply);
+  applicator_class.def("apply",(Zonotope<R,UniformErrorTag>(Applicator<R>::*)(const MapInterface<R>&,const Zonotope<R,UniformErrorTag>&)const)&Applicator<R>::apply);
 
 
 }

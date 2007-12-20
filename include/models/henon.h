@@ -43,8 +43,12 @@ namespace Ariadne {
     template<class R, class A, class P>
     void henon_function(R& r, const A& x, const P& p) 
     {
+      //std::cerr << __PRETTY_FUNCTION__<<std::endl;
+      //std::cerr << "p=" << p <<std::endl;
+      //std::cerr << "x=" << x <<std::endl;
       r[0]=p[0]-x[0]*x[0]-p[1]*x[1]; 
       r[1]=x[0]; 
+      //std::cerr << "r=" << r <<std::endl;
     }
                    
     template<class R, class A, class P>

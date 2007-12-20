@@ -38,13 +38,13 @@ namespace Ariadne {
     {
       inline lpair(T1& t1, T2& t2) : first(t1), second(t2) { }
       inline lpair<T1,T2> operator=(const std::pair<T1,T2>& rv) { 
-        this-first=rv.first; this->second=rv.second; return *this; }
+        this->first=rv.first; this->second=rv.second; return *this; }
       T1& first; T2& second;
     };
   
     template<class T1,class T2> inline
     lpair<T1,T2> make_lpair(T1& t1, T2& t2) {
-      return lpair<T1,T>(t1,t2);
+      return lpair<T1,T2>(t1,t2);
     }
   
   }

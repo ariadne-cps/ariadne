@@ -2,7 +2,7 @@
  *            test_zonotope.cc
  *
  *  Copyright  2006  Pieter Collins
- *  Email Pieter.Collins@cwi.nl, casagrande@dimi.uniud.it
+ *
  ****************************************************************************/
 
 /*
@@ -33,7 +33,6 @@
 #include "base/utility.h"
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
-#include "geometry/parallelotope.h"
 #include "geometry/zonotope.h"
 #include "geometry/polyhedron.h"
 
@@ -58,11 +57,26 @@ int main() {
   return 0;
 }
 
+#include "base/stlio.h"
 
 template<class R>
 int 
 test_zonotope()
 {
+  array<R,3u> a1(3);
+  a1[0]=2;
+  a1[1]=3;
+  a1[2]=5;
+  //cout << "a1="<<'['<<a1[0]<<','<<a1[1]<<']'<<endl;
+  cout << "a1="<<'['<<a1[0]<<','<<a1[1]<<','<<a1[2]<<']'<<endl;
+  array<R,3> a2=a1;
+  //cout << "a2="<<'['<<a2[0]<<','<<a2[1]<<']'<<endl;
+  cout << "a2="<<'['<<a2[0]<<','<<a2[1]<<','<<a2[2]<<']'<<endl;
+  array<R,3> a3;
+  a3=a1;
+  cout << "a3="<<'['<<a3[0]<<','<<a3[1]<<','<<a3[2]<<']'<<endl;
+
+
   typedef typename Numeric::traits<R>::arithmetic_type F;
   typedef Interval<R> I;
 
@@ -76,16 +90,13 @@ test_zonotope()
   Rectangle<R> r2=Rectangle<R>("[5,6]x[3,4]x[-0.5,0.5]");
   cout << "r1=" << r1 << "\nr2=" << r2 << endl;
 
-  Parallelotope<R> p2=Parallelotope<R>(r2);
-  cout << "p2=" << p2 << endl;
-  
   Point<R> pt;
   cout << pt << endl;
   Rectangle<R> r;
   cout << r << endl;
   Zonotope<R> z;
   cout << z << endl;
-  Zonotope<F> iz;
+  Zonotope<R,IntervalTag> iz;
   cout << iz << endl;
   
   Zonotope<R> z1=Zonotope<R>(r1);
@@ -98,49 +109,23 @@ test_zonotope()
   cout << "z4=" << z4 << endl;
   cout << endl;
 
-  // construct from a string literal
-  Zonotope<R> zs("{(0,1),[1,2,3;4,5,6]}");
-  cout << "zs=" << zs << endl;
   
   cout << "z2.dimension()=" << z2.dimension() << endl;
   cout << "z2.number_of_generators()=" << z2.number_of_generators() << endl;
   cout << "z2.centre()=" << z2.centre() << endl;
   for(size_type i=0; i!=z2.number_of_generators(); ++i) {
-    cout << "z2.generator(" << i << ")=" << z2.generator(i) << endl;
-  }
-  cout << "z2.vertices()=" << z2.vertices() << endl;
-  cout << endl;
-
-  typename Zonotope<R>::vertices_const_iterator vend=z2.vertices_end();
-  typename Zonotope<R>::vertices_const_iterator vi=z2.vertices_begin();
-  while(vi!=vend) {
-    cout << vi << flush;
-    cout << "  " << *vi << endl;
-    ++vi;
+    Vector<R> g=z2.generators().column(i);
+    cout << "z2.generator(" << i << ")=" << g << endl;
   }
   cout << endl;
-  
-  cout << "z3.vertices()=" << z3.vertices() << endl;
-  cout << "z4.vertices()=" << z4.vertices() << endl;
 
-  // Minkowski sum
-  cout << "z1=" << z1 << "\nz2=" << z2 << endl;
-  iz=minkowski_sum(z1,z2);
-  cout << "minkowski_sum(z1,z2)=" << iz << endl;
-  iz=minkowski_difference(z1,z2);
-  cout << "minkowski_difference(z1,z2)=" << iz << endl;
-  cout << endl;
+  Zonotope<R,UniformErrorTag> ez2=z2;
+  ListSet< Zonotope<R,UniformErrorTag> > ezls;
+  cout << "ez2=" << ez2 << std::endl;
   
-  ListSet< Zonotope<R> > zls;
-  cout << "z2=" << z2 << std::endl;
-  
-  zls.clear();
-  zls=z2.subdivide();
-  cout << "z2.subdivide()=" << zls << std::endl;
-  
-  zls.clear();
-  zls=z2.divide();
-  cout << "z2.divide()=" << zls << std::endl;
+  ezls.clear();
+  ezls=subdivide(ez2);
+  cout << "ez2.subdivide()=" << ezls << std::endl;
   
   
   Point<R> pts[6];
@@ -198,9 +183,9 @@ test_zonotope()
 
   // Approximations of real zonotope
   {
-    cout << "Inner and outer approximations of Zonotope<R,R>" << endl;
-    //Zonotope<R,R> z(Point<R>("(0.25,-0.125)"),Matrix<R>("[2,1,1;1,-1,1]"));
-    Zonotope<R,R> z(Point<R>("(0.25,-0.125)"),Matrix<R>("[2,1;1,-1]"));
+    cout << "Inner and outer approximations of Zonotope<R>" << endl;
+    //Zonotope<R> z(Point<R>("(0.25,-0.125)"),Matrix<R>("[2,1,1;1,-1,1]"));
+    Zonotope<R> z(Point<R>("(0.25,-0.125)"),Matrix<R>("[2,1;1,-1]"));
     
     Grid<R> gr(2,0.5);
     GridCellListSet<R> foaz=fuzzy_outer_approximation(z,gr);
@@ -210,33 +195,41 @@ test_zonotope()
     ARIADNE_TEST_ASSERT(subset(oaz,foaz));
     r=Rectangle<R>("[-2.5,-2.0]x[0.0,0.5]");
     pt=Point<R>("(-2.5,0.5)");
+    cout<<"z="<<z<<"\nz.bounding_box()="<<z.bounding_box()<<endl;
     bbox=z.bounding_box().expand_by(R(0.5));
+    cout<<"bbox="<<bbox<<endl;
     eps.open("test_zonotope-real.eps",bbox);
+    cout<<"z.bounding_box()="<<z.bounding_box()<<endl;
     eps << fill_colour(white) << z.bounding_box();
+    cout<<"foaz.size()="<<foaz.size()<<endl;
     eps << fill_colour(red) << foaz;
+    cout<<"oaz.size()="<<oaz.size()<<endl;
     eps << fill_colour(yellow) << oaz;
+    cout<<"iaz.size()="<<iaz.size()<<endl;
     eps << fill_colour(blue) << iaz;
+    cout<<"z="<<z<<endl;
     eps << fill_colour(transparant) << z;
     eps.close();
   }    
 
   // over approximations
   {
-    Zonotope<I> fz(Point<I>("([1.99,2.01],2)"),Matrix<I>("[[2,2.25],1;1,1]"));
+    Zonotope<R,IntervalTag> fz(Point<I>("([1.99,2.01],2)"),Matrix<I>("[[2,2.25],1;1,1]"));
     Zonotope<R> z;
-    over_approximate_(z,fz);
+    over_approximate(z,fz);
     cout << "fz="<<fz<<endl;
-    cout << "over_approximation(fz)=" << z << endl;
+    cout << "over_approximation(fz)=" << z << endl << endl;
   }
 
 
   // Uniform error zonotope
   {
-    cout << "Inner and outer approximations of Zonotope<I,R>" << endl;
-    Zonotope<R,R> z(Point<R>("(0.25,-0.125)"),Matrix<R>("[2,1,1,0.125,0;1,-1,1,0,0.125]"));
-    Zonotope<I,R> ez(Point<I>("([0.125,0.375],[-0.25,0.0])"),Matrix<R>("[2,1,1;1,-1,1]"));
-    Zonotope<R,R> aez=over_approximation(ez);
-    
+    cout << "Inner and outer approximations of Zonotope<R,UniformErrorTag>" << endl;
+    Zonotope<R,ExactTag> z(Point<R>("(0.25,-0.125)"),Matrix<R>("[2,1,1,0.125,0;1,-1,1,0,0.125]"));
+    Zonotope<R,UniformErrorTag> ez(Point<I>("([0.125,0.375],[-0.25,0.0])"),Matrix<R>("[2,1,1;1,-1,1]"));
+    Zonotope<R,UniformErrorTag> aez=over_approximation(ez);
+    cout << "ez="<<ez<<"\naez="<<aez<<std::endl;
+
     Grid<R> gr(2,0.5);
     GridCellListSet<R> foaez=fuzzy_outer_approximation(ez,gr);
     GridCellListSet<R> oaez=outer_approximation(ez,gr);
@@ -245,26 +238,36 @@ test_zonotope()
     ARIADNE_TEST_ASSERT(subset(oaez,foaez));
     r=Rectangle<R>("[-2.5,-2.0]x[0.0,0.5]");
     pt=Point<R>("(-2.5,0.5)");
+    cout << "z="<<z<<endl;
+    cout << "z.domain()="<<z.domain()<<endl;
+    cout << "z.bounding_box()="<<z.bounding_box()<<endl;
     bbox=z.bounding_box().expand_by(R(0.5));
+    cout << "bbox="<<bbox<<endl;
+    cout << "Here"<<endl;
     eps.open("test_zonotope-uniform.eps",bbox);
     eps << fill_colour(white) << ez.bounding_box();
+    cout << "foaez.size()="<<foaez.size()<<endl;
     eps << fill_colour(red) << foaez;
+    cout << "oaez.size()="<<oaez.size()<<endl;
     eps << fill_colour(yellow) << oaez;
+    cout << "iaez.size()="<<iaez.size()<<endl;
     eps << fill_colour(blue) << iaez;
+    cout << "ez="<<ez<<endl;
     eps << fill_colour(transparant) << ez;
     eps.close();
   }    
-
+  cout << "Here"<<endl;
 
   {
-    cout << "Orthogonal over approximations of Zonotope<I,R>" << endl;
+    cout << "Orthogonal over approximations of zonotopes" << endl;
     // Interval zonotope
-    //Zonotope<I,R> ez(Point<I>("([0.125,0.375],[-0.25,0.0])"),Matrix<R>("[2,1,1;1,-1,1]"));
-    //Zonotope<I,R> ez(Point<I>("([0.125,0.375],[-0.25,0.0])"),Matrix<R>("[2,1,1;1,-1,4]"));
-    Zonotope<I,R> ez(Point<I>("([0.125,0.375],[-0.25,0.0])"),Matrix<R>("[4,1,1,1,1;1,1,3,3,3]"));
-    Zonotope<R,R> oaez(over_approximation(ez));
-    Zonotope<I,R> ooaez(orthogonal_over_approximation(ez));
-    
+    Zonotope<R,UniformErrorTag> ez(Point<I>("([0.125,0.375],[-0.25,0.0])"),Matrix<R>("[4,1,1,1,1;1,1,3,3,3]"));
+    cout << "ez="<<ez<<endl;
+    Zonotope<R,UniformErrorTag> oaez=over_approximation(ez);
+    cout << "oaez="<<oaez<<endl;
+    Zonotope<R,UniformErrorTag> ooaez=orthogonal_over_approximation(ez);
+    cout << "ooaez="<<ooaez<<endl;
+
     eps.open("test_zonotope-orthogonal.eps",ooaez.bounding_box());
     eps << fill_colour(white) << ooaez.bounding_box();
     eps << fill_colour(red) << ooaez;
@@ -275,11 +278,11 @@ test_zonotope()
  
 
   {
-    cout << "Outer approximations of Zonotope<I,I>" << endl;
+    cout << "Outer approximations of zonotopes" << endl;
     // Interval zonotope
-    Zonotope<R,R> z(Point<R>("(0.25,-0.125)"),Matrix<R>("[2,1,1,0.125,0;1,-1,1,0,0.125]"));
-    Zonotope<I,I> iz(Point<I>("([0.125,0.375],[-0.25,0.0])"),Matrix<R>("[2,1,1;1,-1,1]"));
-    Zonotope<I,R> ez=over_approximation(iz);
+    Zonotope<R,ExactTag> z(Point<R>("(0.25,-0.125)"),Matrix<R>("[2,1,1,0.125,0;1,-1,1,0,0.125]"));
+    Zonotope<R,UniformErrorTag> iz(Point<I>("([0.125,0.375],[-0.25,0.0])"),Matrix<R>("[2,1,1;1,-1,1]"));
+    Zonotope<R,UniformErrorTag> ez=over_approximation(iz);
     
     Grid<R> gr(2,0.5);
     GridCellListSet<R> oaz=outer_approximation(iz,gr);
@@ -322,8 +325,6 @@ test_zonotope()
     cout << "disjoint(r1,z2)=" << disjoint(r1,z2) << endl;
     cout << "subset(r1,z2)=" << subset(r1,z2) << endl;
     cout << "subset(z2,r1)=" << subset(z2,r1) << endl;
-    cout << "disjoint(z1,z2)=" << disjoint(z1,z2) << endl;
-    cout << "subset(z1,z2)=" << subset(z1,z2) << endl;
     assert((bool)(disjoint(r1,z2)));
   }
   catch(NotImplemented e) {

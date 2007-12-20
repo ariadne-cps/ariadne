@@ -49,13 +49,13 @@ template<class R>
 void
 Geometry::TaylorSet<R>::_instantiate_geometry_operators() 
 {
-  Zonotope<Numeric::Interval<R>,R>* z=0;
+  Zonotope<R,UniformErrorTag>* z=0;
   TaylorSet<R>* ts=0;
   *z=over_approximation(*ts);
 }
     
 template<class R> 
-Geometry::Zonotope<Numeric::Interval<R>,R> 
+Geometry::Zonotope<R,Geometry::UniformErrorTag> 
 Geometry::over_approximation(const TaylorSet<R>&) 
 {
   throw NotImplemented(__PRETTY_FUNCTION__);

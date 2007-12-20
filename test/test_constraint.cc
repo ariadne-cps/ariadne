@@ -67,7 +67,7 @@ template<class R>
 int 
 test_constraint() 
 {
-  cout << "test_constraint<" << name<R>() << ">" << endl;
+  cout << "test_constraint<" << Numeric::name<R>() << ">" << endl;
 
   InterpretedFunction<R> f("function disc output Real y; input Real[2] x; algorithm y=1-(x[0]^2+x[1]^2); end disc;");
 
@@ -75,19 +75,19 @@ test_constraint()
   Detector<R> d;
 
   Rectangle<R> r;
-  Zonotope<Interval<R>,R> z;
+  Zonotope<R,UniformErrorTag> z;
   
   
   // satisfies
   r=Rectangle<R>("[0.4,0.5]x[0.45,0.65]");
   ARIADNE_TEST_ASSERT(d.satisfies(r,c));
-  z=Zonotope<Interval<R>,R>(r);
+  z=Zonotope<R,UniformErrorTag>(r);
   ARIADNE_TEST_ASSERT(d.satisfies(z,c));
 
   // does not satisfy
   r=Rectangle<R>("[0.8,0.9]x[0.95,0.95]");
   ARIADNE_TEST_ASSERT(!d.satisfies(r,c));
-  z=Zonotope<Interval<R>,R>(r);
+  z=Zonotope<R,UniformErrorTag>(r);
   ARIADNE_TEST_ASSERT(!d.satisfies(z,c));
 
   

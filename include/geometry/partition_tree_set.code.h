@@ -190,7 +190,7 @@ Geometry::disjoint(const PartitionTreeSet<R>& pts, const Rectangle<R>& r)
       pts_iter!=pts.end(); ++pts_iter)
     {
       cell=*pts_iter;
-      result = result && Geometry::disjoint(cell,r);
+      result = result && Geometry::disjoint(r,cell);
       if(result==false) {
         return result;
       }
@@ -280,7 +280,7 @@ Geometry::outer_approximation(const S& s, const PartitionScheme<R>& ps, const ui
       mask.push_back(true);
       Combinatoric::BinaryTree::advance(word);
     }  
-    else if(disjoint(cell,s)) {
+    else if(disjoint(s,cell)) {
       tree.push_back(Combinatoric::BinaryTree::leaf);
       mask.push_back(false);
       Combinatoric::BinaryTree::advance(word);
@@ -307,12 +307,12 @@ Geometry::inner_approximation(const S& s, const PartitionScheme<R>& ps, const ui
   
   do {
     Rectangle<R> cell=Rectangle<R>(PartitionTreeCell<R>(unit_box,subdivisions,word));
-    if(word.size()==depth+1 || disjoint(cell,s)) {
+    if(word.size()==depth+1 || disjoint(s,cell)) {
       tree.push_back(Combinatoric::BinaryTree::leaf);
       mask.push_back(false);
       Combinatoric::BinaryTree::advance(word);
     }  
-    else if(subset(cell,s)) {
+    else if(superset(s,cell)) {
       tree.push_back(Combinatoric::BinaryTree::leaf);
       mask.push_back(true);
       Combinatoric::BinaryTree::advance(word);
@@ -340,12 +340,12 @@ Geometry::under_approximation(const S& s, const PartitionScheme<R>& ps, const ui
   
   do {
     Rectangle<R> cell=Rectangle<R>(PartitionTreeCell<R>(unit_box,subdivisions,word));
-    if(word.size()==depth+1 || disjoint(cell,s)) {
+    if(word.size()==depth+1 || disjoint(s,cell)) {
       tree.push_back(Combinatoric::BinaryTree::leaf);
       mask.push_back(false);
       Combinatoric::BinaryTree::advance(word);
     }  
-    else if(subset(cell,s)) {
+    else if(superset(s,cell)) {
       tree.push_back(Combinatoric::BinaryTree::leaf);
       mask.push_back(true);
       Combinatoric::BinaryTree::advance(word);

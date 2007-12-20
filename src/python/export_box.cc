@@ -1,9 +1,9 @@
 /***************************************************************************
  *            python/export_box.cc
  *
- *  21 October 2005
+ *
  *  Copyright  2005  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *
  ****************************************************************************/
 
 /*
@@ -114,43 +114,36 @@ void export_box()
 {
   typedef Interval<R> I;
   
-  class_< Box<R> >("Box",init<int>())
-    .def("__init__", make_constructor(&make_box<R>) )
-    .def(init< int >())
-    .def(init< Point<R>,Point<R> >())
-    .def(init< Box<R> >())
-    .def(init< Vector<I> >())
-    .def(init< Point<I> >())
-    //.def(init<std::string>())
-    .def("empty", &Box<R>::empty)
-    .def("dimension", &Box<R>::dimension)
-    .def("contains", &Box<R>::contains)
-    .def("centre", &Box<R>::centre)
-    .def("radius", &Box<R>::radius)
-    .def("__getitem__", &Box<R>::interval, return_value_policy<copy_const_reference>())
-    .def("__setitem__", &Box<R>::set_interval)
-    .def("set_lower_bound", &Box<R>::set_lower_bound)
-    .def("set_upper_bound", &Box<R>::set_upper_bound)
-    .def("bounding_box", &Box<R>::bounding_box)
-    .def("lower_corner", &Box<R>::lower_corner)
-    .def("upper_corner", &Box<R>::upper_corner)
-    .def("lower_bound", (const R&(Box<R>::*)(dimension_type)const)(&Box<R>::lower_bound), return_value_policy<copy_const_reference>())
-    .def("upper_bound", (const R&(Box<R>::*)(dimension_type)const)(&Box<R>::upper_bound), return_value_policy<copy_const_reference>())
-    .def("neighbourhood", &Box<R>::neighbourhood)
-    .def("__str__",&__str__<R>)
-    .def("__repr__",&__repr__<R>)
-  ;
+  class_< Box<R> > box_class("Box",init<int>());
+  box_class.def("__init__", make_constructor(&make_box<R>) );
+  box_class.def(init< int >());
+  box_class.def(init< Point<R>,Point<R> >());
+  box_class.def(init< Box<R> >());
+  box_class.def(init< Vector<I> >());
+  box_class.def(init< Point<I> >());
+    //box_class.def(init<std::string>());
+  box_class.def("dimension", &Box<R>::dimension);
+  box_class.def("contains", (tribool(*)(const Box<R>&,const Point<R>&)) &Geometry::contains);
+  box_class.def("centre", &Box<R>::centre);
+  box_class.def("radius", &Box<R>::radius);
+  box_class.def("__getitem__", &Box<R>::interval, return_value_policy<copy_const_reference>());
+  box_class.def("__setitem__", &Box<R>::set_interval);
+  box_class.def("set_lower_bound", &Box<R>::set_lower_bound);
+  box_class.def("set_upper_bound", &Box<R>::set_upper_bound);
+  box_class.def("lower_corner", &Box<R>::lower_corner);
+  box_class.def("upper_corner", &Box<R>::upper_corner);
+  box_class.def("lower_bound", (const R&(Box<R>::*)(dimension_type)const)(&Box<R>::lower_bound), return_value_policy<copy_const_reference>());
+  box_class.def("upper_bound", (const R&(Box<R>::*)(dimension_type)const)(&Box<R>::upper_bound), return_value_policy<copy_const_reference>());
+  box_class.def("neighbourhood", &Box<R>::neighbourhood);
+  box_class.def("__str__",&__str__<R>);
+  box_class.def("__repr__",&__repr__<R>);
 
   def("rectangular_hull", (Box<R>(*)(const Box<R>&, const Box<R>&))(&rectangular_hull));
   def("open_intersection", (Box<R>(*)(const Box<R>&, const Box<R>&))(&open_intersection));
   def("closed_intersection", (Box<R>(*)(const Box<R>&, const Box<R>&))(&closed_intersection));
+  def("contains", (tribool(*)(const Box<R>&, const Point<R>&))(&contains));
   def("disjoint", (tribool(*)(const Box<R>&, const Box<R>&))(&disjoint));
   def("subset", (tribool(*)(const Box<R>&, const Box<R>&))(&subset));
-  def("equal", (tribool(*)(const Box<R>&, const Box<R>&))(&equal));
-
-
-
-
 
 }
 

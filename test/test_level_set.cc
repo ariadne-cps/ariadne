@@ -65,7 +65,7 @@ template<class R>
 int 
 test_level_set() 
 {
-  cout << "test_level_set<" << name<R>() << ">" << endl;
+  cout << "test_level_set<" << Numeric::name<R>() << ">" << endl;
   typedef typename Numeric::traits<R>::arithmetic_type A;
 
   InterpretedFunction<R> f("function disc output Real y; input Real[2] x; algorithm y=1-(x[0]^2+x[1]^2); end disc;");

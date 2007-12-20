@@ -1,9 +1,8 @@
 /***************************************************************************
  *            python/export_list_set.cc
  *
- *  21 October 2005
- *  Copyright  2005  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright  2005-7  Alberto Casagrande, Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -44,13 +43,6 @@ using namespace Ariadne::Python;
 #include <boost/python.hpp>
 using namespace boost::python;
 
-template<class R>
-inline 
-bool interiors_intersect(const ListSet< Zonotope<R> >& A, const Parallelotope<R>& B) 
-{
-  return interiors_intersect(A,ListSet< Zonotope<R> >(Zonotope<R>(B)));
-}
-
 template<class BS1, class BS2>
 inline
 ListSet<BS1> 
@@ -71,13 +63,15 @@ touching_intersection(const ListSet<BS1>& ls, const BS2& bs)
 template<class R>
 inline
 ListSet< Zonotope<R> >
-over_approximate_interval_zonotope_list_set(const ListSet< Zonotope<Interval<R> > >& izls)
+over_approximate_interval_zonotope_list_set(const ListSet< Zonotope<R,IntervalTag> >& izls)
 {
   ListSet< Zonotope<R> > result(izls.dimension());
-  for(typename ListSet< Zonotope<Interval<R> > >::const_iterator iz_iter=izls.begin();
+  Zonotope<R> z;
+  for(typename ListSet< Zonotope<R,IntervalTag> >::const_iterator iz_iter=izls.begin();
       iz_iter!=izls.end(); ++iz_iter)
   {
-    result.adjoin(over_approximation(over_approximation(*iz_iter)));
+    z=over_approximation(*iz_iter);
+    result.adjoin(z);
   }
   return result;
 }
@@ -85,13 +79,15 @@ over_approximate_interval_zonotope_list_set(const ListSet< Zonotope<Interval<R> 
 template<class R>
 inline
 ListSet< Zonotope<R> >
-approximate_interval_zonotope_list_set(const ListSet< Zonotope<Interval<R> > > izls)
+approximate_interval_zonotope_list_set(const ListSet< Zonotope<R,IntervalTag> > izls)
 {
   ListSet< Zonotope<R> > result(izls.dimension());
-  for(typename ListSet< Zonotope<Interval<R> > >::const_iterator iz_iter=izls.begin();
+  Zonotope<R> z;
+  for(typename ListSet< Zonotope<R,IntervalTag> >::const_iterator iz_iter=izls.begin();
       iz_iter!=izls.end(); ++iz_iter)
   {
-    result.adjoin(approximation(approximation(*iz_iter)));
+    z=approximation(*iz_iter);
+    result.adjoin(z);
   }
   return result;
 }
@@ -104,17 +100,13 @@ void export_list_set()
   
   typedef Rectangle<R> RRectangle;
   typedef Polytope<R> RPolytope;
-  typedef Parallelotope<R> RParallelotope;
-  typedef Zonotope<R,R> RZonotope;
-  typedef Zonotope<I,R> EZonotope;
-  typedef Zonotope<I,I> IZonotope;
+  typedef Zonotope<R,ExactTag> RZonotope;
+  typedef Zonotope<R,UniformErrorTag> EZonotope;
 
-  typedef ListSet< Rectangle<R> > RRectangleListSet;
-  typedef ListSet< Polytope<R> > RPolytopeListSet;
-  typedef ListSet< Parallelotope<R> > RParallelotopeListSet;
-  typedef ListSet< Zonotope<R,R> > RZonotopeListSet;
-  typedef ListSet< Zonotope<I,R> > EZonotopeListSet;
-  typedef ListSet< Zonotope<I,I> > IZonotopeListSet;
+  typedef ListSet<RRectangle> RRectangleListSet;
+  typedef ListSet<RPolytope> RPolytopeListSet;
+  typedef ListSet<RZonotope> RZonotopeListSet;
+  typedef ListSet<EZonotope> EZonotopeListSet;
 
   typedef GridCellListSet<R> RGridCellListSet;
   typedef GridMaskSet<R> RGridMaskSet;
@@ -122,13 +114,7 @@ void export_list_set()
   
   def("open_intersection",(RRectangleListSet(*)(const RRectangleListSet&,const RRectangleListSet&))(&open_intersection));
   def("disjoint",(tribool(*)(const RRectangleListSet&,const RRectangleListSet&))(&disjoint));
-  def("disjoint",(tribool(*)(const RZonotopeListSet&,const RZonotopeListSet&))(&disjoint));
   def("subset", (tribool(*)(const RRectangleListSet&,const RRectangleListSet&))(&subset));
-
-  def("touching_intersection",(RRectangleListSet(*)(const RRectangleListSet&,const RRectangle&))(&touching_intersection));
-  def("touching_intersection",(RRectangleListSet(*)(const RRectangleListSet&,const RZonotope&))(&touching_intersection));
-  def("touching_intersection",(RZonotopeListSet(*)(const RZonotopeListSet&,const RRectangle&))(&touching_intersection));
-  def("touching_intersection",(RZonotopeListSet(*)(const RZonotopeListSet&,const RZonotope&))(&touching_intersection));
 
 
   class_<RRectangleListSet>("RectangleListSet",init<int>())
@@ -150,28 +136,10 @@ void export_list_set()
     .def(self_ns::str(self))    // __self_ns::str__
   ;
   
-  class_<RParallelotopeListSet>("ParallelotopeListSet",init<int>())
-    .def(init<RParallelotope>())
-    .def(init<RRectangleListSet>())
-    .def(init<RParallelotopeListSet>())
-    .def("dimension", &RParallelotopeListSet::dimension)
-    .def("push_back", &RParallelotopeListSet::push_back)
-    .def("adjoin", (void(RParallelotopeListSet::*)(const RParallelotope&))(&RParallelotopeListSet::adjoin))
-    .def("adjoin", (void(RParallelotopeListSet::*)(const RParallelotopeListSet&))(&RParallelotopeListSet::adjoin))
-    .def("size", &RParallelotopeListSet::size)
-    .def("empty", &RParallelotopeListSet::empty)
-    .def("__len__", &RParallelotopeListSet::size)
-//    .def("__getitem__", &RParallelotopeListSet::get, return_value_policy<copy_const_reference>())
-    .def("__getitem__", &get_item<RParallelotopeListSet>)
-//    .def("__setitem__", &set_item<RParallelotopeListSet>)
-    .def("__iter__", iterator<RParallelotopeListSet>())
-    .def(self_ns::str(self))    // __self_ns::str__
-  ;
   
   class_<RZonotopeListSet>("ZonotopeListSet",init<int>())
     .def(init<RZonotope>())
     .def(init<RRectangleListSet>())
-    .def(init<RParallelotopeListSet>())
     .def(init<RZonotopeListSet>())
     .def("dimension", &RZonotopeListSet::dimension)
     .def("push_back", &RZonotopeListSet::push_back)
@@ -180,9 +148,7 @@ void export_list_set()
     .def("size", &RZonotopeListSet::size)
     .def("empty", &RZonotopeListSet::empty)
     .def("__len__", &RZonotopeListSet::size)
-//    .def("__getitem__", &RParallelotopeListSet::get, return_value_policy<copy_const_reference>())
     .def("__getitem__", &get_item<RZonotopeListSet>)
-//    .def("__setitem__", &set_item<RZonotopeListSet>)
     .def("__iter__", iterator<RZonotopeListSet>())
     .def(self_ns::str(self))    // __self_ns::str__
   ;
@@ -204,28 +170,6 @@ void export_list_set()
     .def(self_ns::str(self))    // __self_ns::str__
   ;
 
-  class_<IZonotopeListSet>("FuzzyZonotopeListSet",init<int>())
-    .def(init<IZonotope>())
-    .def(init<RRectangleListSet>())
-    .def(init<RZonotopeListSet>())
-    .def(init<EZonotopeListSet>())
-    .def(init<IZonotopeListSet>())
-    .def("dimension", &IZonotopeListSet::dimension)
-    .def("push_back", &IZonotopeListSet::push_back)
-    .def("adjoin", (void(IZonotopeListSet::*)(const IZonotope&))(&IZonotopeListSet::adjoin))
-    .def("adjoin", (void(IZonotopeListSet::*)(const IZonotopeListSet&))(&IZonotopeListSet::adjoin))
-    .def("size", &IZonotopeListSet::size)
-    .def("empty", &IZonotopeListSet::empty)
-    .def("__len__", &IZonotopeListSet::size)
-//    .def("__getitem__", &RParallelotopeListSet::get, return_value_policy<copy_const_reference>())
-    .def("__getitem__", &get_item<IZonotopeListSet>)
-//    .def("__setitem__", &set_item<IZonotopeListSet>)
-    .def("__iter__", iterator<IZonotopeListSet>())
-    .def(self_ns::str(self))    // __self_ns::str__
-  ;
-
-  def("over_approximation",&over_approximate_interval_zonotope_list_set<R>);
-  def("approximation",&approximate_interval_zonotope_list_set<R>);
 }
 
 template void export_list_set<FloatPy>();

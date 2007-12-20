@@ -26,9 +26,8 @@
 
 #include "geometry/rectangle.h"
 #include "geometry/parallelotope.h"
-#include "geometry/zonotope.h"
-#include "geometry/orthotope.h"
 #include "geometry/polytope.h"
+#include "geometry/zonotope.h"
 
 #include "geometry/list_set.h"
 #include "geometry/list_set.code.h"
@@ -44,21 +43,15 @@ namespace Ariadne {
 #ifdef ENABLE_FLOAT64
     template class ListSet< Rectangle<Float64> >;
     template class ListSet< Polytope<Float64> >;
-    template class ListSet< Parallelotope<Float64,Float64> >;
-    template class ListSet< Parallelotope<Interval64,Float64> >;
-    template class ListSet< Parallelotope<Interval64,Interval64> >;
-    template class ListSet< Orthotope<Interval64,Float64> >;
-    template class ListSet< Zonotope<Float64,Float64> >;
-    template class ListSet< Zonotope<Interval64,Float64> >;
-    template class ListSet< Zonotope<Interval64,Interval64 > >;
+    template class ListSet< Zonotope<Float64,ExactTag> >;
+    template class ListSet< Zonotope<Float64,UniformErrorTag> >;
 
     // The following are not defined for all types,
     // so we can't instantiate them in ListSet<R,BS>::_instantiate_geometry_operators()
-    template  ListSet< Rectangle<Float64> >::operator ListSet< Zonotope<Interval64,Interval64> >() const;
-    template  ListSet< Rectangle<Float64> >::operator ListSet< Zonotope<Float64,Float64> >() const;
+    template ListSet< Rectangle<Float64> >::operator ListSet< Zonotope<Float64> >() const;
+    template ListSet< Rectangle<Float64> >::operator ListSet< Zonotope<Float64,UniformErrorTag> >() const;
     
     template tribool disjoint(const ListSet< Rectangle<Float64> >&, const ListSet< Rectangle<Float64> >&);
-    template tribool disjoint(const ListSet< Zonotope<Float64> >&, const ListSet< Zonotope<Float64> >&);
 
     template tribool subset(const ListSet< Rectangle<Float64> >&, const ListSet< Rectangle<Float64> >&);
     template ListSet< Rectangle<Float64> > open_intersection(const ListSet< Rectangle<Float64> >&, const ListSet< Rectangle<Float64> >&);
@@ -70,21 +63,15 @@ namespace Ariadne {
 #ifdef ENABLE_FLOATMP
     template class ListSet< Rectangle<FloatMP> >;
     template class ListSet< Polytope<FloatMP> >;
-    template class ListSet< Parallelotope<FloatMP,FloatMP> >;
-    template class ListSet< Parallelotope<IntervalMP,FloatMP> >;
-    template class ListSet< Parallelotope<IntervalMP,IntervalMP> >;
-    template class ListSet< Orthotope<IntervalMP,FloatMP> >;
-    template class ListSet< Zonotope<FloatMP,FloatMP> >;
-    template class ListSet< Zonotope<IntervalMP,FloatMP> >;
-    template class ListSet< Zonotope<IntervalMP,IntervalMP > >;
+    template class ListSet< Zonotope<FloatMP,ExactTag> >;
+    template class ListSet< Zonotope<FloatMP,UniformErrorTag> >;
 
     // The following are not defined for all types,
     // so we can't instantiate them in ListSet<R,BS>::_instantiate_geometry_operators()
-    template  ListSet< Rectangle<FloatMP> >::operator  ListSet< Zonotope<IntervalMP,IntervalMP> >() const;
-    template  ListSet< Rectangle<FloatMP> >::operator  ListSet< Zonotope<FloatMP,FloatMP> >() const;
+    template  ListSet< Rectangle<FloatMP> >::operator  ListSet< Zonotope<FloatMP> >() const;
+    template  ListSet< Rectangle<FloatMP> >::operator  ListSet< Zonotope<FloatMP,UniformErrorTag> >() const;
     
     template tribool disjoint(const ListSet< Rectangle<FloatMP> >&, const ListSet< Rectangle<FloatMP> >&);
-    template tribool disjoint(const ListSet< Zonotope<FloatMP> >&, const ListSet< Zonotope<FloatMP> >&);
 
     template tribool subset(const ListSet< Rectangle<FloatMP> >&, const ListSet< Rectangle<FloatMP> >&);
     template ListSet< Rectangle<FloatMP> > open_intersection(const ListSet< Rectangle<FloatMP> >&, const ListSet< Rectangle<FloatMP> >&);

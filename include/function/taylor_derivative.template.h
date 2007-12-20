@@ -30,14 +30,28 @@ template<class X>
 LinearAlgebra::Vector<X>
 Function::TaylorDerivative<X>::value() const
 {
-  return LinearAlgebra::Vector<X>(this->result_size(),this->data().begin(),this->_increment());
+  const size_type& rs=this->_result_size;
+  LinearAlgebra::Vector<X> result(rs);
+  for(uint i=0; i!=rs; ++i) {
+    result[i]=this->_variables[i].value();
+  }
+  return result;
 }
 
 template<class X>
 LinearAlgebra::Matrix<X>
 Function::TaylorDerivative<X>::jacobian() const
 {
-  return LinearAlgebra::Matrix<X>(this->result_size(),this->argument_size(),this->data().begin()+1u,this->_increment(),1u);
+  const size_type& rs=this->_result_size;
+  const size_type& as=this->_argument_size;
+  LinearAlgebra::Matrix<X> result(rs,as);
+  for(uint i=0; i!=rs; ++i) {
+    for(uint j=0; j!=as; ++j) {
+      result(i,j)=this->_variables[i].data()[j+1u];
+    }
+  }
+  return result;
+  //return LinearAlgebra::Matrix<X>(this->result_size(),this->argument_size(),this->data().begin()+1u,this->_increment(),1u);
 }
 
 template<class X> 

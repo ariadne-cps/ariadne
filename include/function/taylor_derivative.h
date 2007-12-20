@@ -106,17 +106,17 @@ namespace Ariadne {
       /*! \brief Set the derivative of the \a i<sup>th</sup> variable with respect to multi-index \a j. */
       template<class XX> void set(const size_type& i, const MultiIndex& j, const XX& x);
       /*! \brief The derivative values of the \a i<sup>th</sup> variable. */
-      TaylorVariable<X> get(const size_type& i) const;
+      const TaylorVariable<X>& get(const size_type& i) const;
       /*! \brief Set the derivative of the \a i<sup>th</sup> variable. */
-      template<class XX> void set(const size_type& i, const TaylorVariable<XX> tv);
+      template<class XX> void set(const size_type& i, const TaylorVariable<XX>& tv);
       /*! \brief The array of derivative values. */
-      const array<X>& data() const;
+      //const array<X>& data() const;
       /*! \brief A reference to the array of derivative values. */
-      array<X>& data();
+      //array<X>& data();
       /*! \brief A reference to the \a i<sup> th</sup> component. */
-      TaylorVariableReference<X> operator[](const size_type& i); 
+      TaylorVariable<X>& operator[](const size_type& i); 
       /*! \brief The \a i<sup> th</sup> component. */
-      TaylorVariable<X> operator[](const size_type& i) const; 
+      const TaylorVariable<X>& operator[](const size_type& i) const; 
 #ifdef DOXYGEN
     //@{ 
     //! \name Friend operations
@@ -152,7 +152,7 @@ namespace Ariadne {
       size_type _result_size;
       size_type _argument_size;
       smoothness_type _degree;
-      array<X> _data;
+      array< TaylorVariable<X> > _variables;
     };
 
 

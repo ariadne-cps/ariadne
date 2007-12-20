@@ -142,10 +142,10 @@ namespace Ariadne {
     
     
       /*! \brief Copy constructor. */
-      Box(const Box<R>& r);
+      Box(const Box<R>& bx);
     
       /*! \brief Copy assignment operator. */
-      Box<R>& operator=(const Box<R>& r);
+      Box<R>& operator=(const Box<R>& bx);
 
       /*! \brief Assign from a box expression. */
       template<class E> Box<R>& operator=(const RectangleExpression<E>& r);
@@ -163,10 +163,10 @@ namespace Ariadne {
       //{@
       //! \name Comparison operators
       /*! \brief The equality operator */
-      bool operator==(const Box<R>& A) const;
+      bool operator==(const Box<R>& bx) const;
       
       /*! \brief The inequality operator */
-      bool operator!=(const Box<R>& A) const;
+      bool operator!=(const Box<R>& bx) const;
       //@}
       
 
@@ -224,11 +224,6 @@ namespace Ariadne {
       /*! \brief Sets the upper bound of the \a i th coordinate to \a u. */
       void set_upper_bound(dimension_type i, const R& u);
 
-      /*! \brief Expand the %Box by \a delta in each direction. (Deprecated, use neighbourhood(...) instead) */
-      Box<R>& expand_by(const R& delta);
-
-      /*! \brief Return a copy of the %Box expanded by \a delta in each direction. (Deprecated, use neighbourhood(...) instead) */
-      Box<R> expand(const R& delta) const;
       /*! \brief Return a copy of the %Box expanded by \a delta in each direction. */
       Box<R> neighbourhood(const R& delta) const;
       //@}
@@ -239,9 +234,6 @@ namespace Ariadne {
       /*! \brief The dimension of the Euclidean space the box lies in. */
       dimension_type dimension() const;
       
-      /*! \brief True if the box is empty. A zero-dimensional box is considered empty. */
-      tribool empty() const;
-      
       /*! \brief The centre. */
       Point<R> centre() const;
       
@@ -251,6 +243,9 @@ namespace Ariadne {
       /*! \brief An approximation to the volume. */
       R volume() const;
       
+      /*! \brief Determines whether the box is empty. */
+      tribool empty() const;
+      
       /*! \brief Compute a quadrant of the Box determined by \a q.
        *  \a q is a binary word such that the ith bit of q is 0 if the lower half
        *  of the box in the ith coordinate is used, and 1 if the upper
@@ -258,84 +253,48 @@ namespace Ariadne {
        */
       Box<R> quadrant(const Combinatoric::BinaryWord& q) const;
       
-      /*! \brief The vertices of the box. */
-      PointList<R> vertices() const;
+      /*! \brief The number of vertices. */
+      size_type number_of_vertices() const;
+      /*! \brief The \a i th vertex. */
+      Point<R> vertex(size_type i) const;
 
       /*! \brief An iterator to the first vertex of the box. */
       vertices_const_iterator vertices_begin() const;
       /*! \brief An iterator to the end vertex of the box. */
       vertices_const_iterator vertices_end() const;
 
-      /*! \brief The number of vertices. */
-      size_type number_of_vertices() const;
-        
-      /*! \brief The \a i th vertex. */
-      Point<R> vertex(size_type i) const;
-        
-      /*! \brief Tests if \a point is included into a box. */
-      tribool contains(const Point<R>& pt) const;
-      
-      /*! \brief Checks for boundedness. */
-      tribool bounded() const;
-      
-      /*! \brief A box containing the given box; returns a copy. */
-      Box bounding_box() const;
+ 
       //@}
       
 #ifdef DOXYGEN
       //@{ 
       //! \name Binary geometric predicates
-      /*! \brief SetInterface equality operator. */
-      friend tribool equal(const Box<R>& A, const Box<R>& B) const;
-      /*! \brief Tests disjointness with \a r. */
-      friend tribool disjoint(const Box<R>& A, const Box<R>& B) const;
-      /*! \brief Tests if the box is a subset of another box \a r. */
-      friend tribool subset(const Box<R>& A, const Box<R>& B) const;
+      /*! \brief Tests if box \a bx contains point \a pt. */
+      friend tribool contains(const Box<R>& bx, const Point<R>& pt) const;
+
+      /*! \brief Tests disjointness of \a bx1 and \a bx2. */
+      friend tribool disjoint(const Box<R>& bx1, const Box<R>& bx2) const;
+      /*! \brief Tests if box \a bx1 is a subset of another box \a bx2. */
+      friend tribool subset(const Box<R>& bx1, const Box<R>& bx2) const;
       //@}
 
       //@{ 
       //! \name Binary geometric operations
-      /*! \brief The intersection of \a A and \a B. */
-      friend Box<R> intersection(const Box<R>& A, const Box<R>& B); 
-      /*! \brief The closure of the intersection of the interiors of \a A and \a B. */
-      friend Box<R> regular_intersection(const Box<R>& A, const Box<R>& B); 
+      /*! \brief The intersection of \a bx1 and \a bx2. */
+      friend Box<R> closed_intersection(const Box<R>& bx1, const Box<R>& bx2); 
+      /*! \brief The closure of the intersection of the interiors of \a bx1 and \a bx2. */
+      friend Box<R> open_intersection(const Box<R>& bx1, const Box<R>& bx2); 
 
-      /*! \brief The smallest box containing \a A and \a B. */
-      friend Box<R> rectangular_hull(const Box<R>& A, const Box<R>& B); 
-      /*! \brief The smallest box containing \a A and \a B. */
-      friend Box<R> rectangular_hull(const Box<R>& A, const Point<R>& B); 
-      /*! \brief The smallest box containing \a A and \a B. */
-      friend Box<R> rectangular_hull(const Point<R>& A, const Box<R>& B); 
-      /*! \brief The smallest box containing \a A and \a B. */
-      friend Box<R> rectangular_hull(const Point<R>& A, const Point<R>& B); 
-
-      /*! \brief The componentwise sum of rectangles \a A and \a B. */
-      friend Box<R> minkowski_sum(const Box<R>& A, const Box<R>& B); 
-      /*! \brief The componentwise difference of rectangles \a A and \a B. */
-      friend Box<R> minkowski_difference(const Box<R>& A, const Box<R>& B); 
-      
-      /*! \brief The difference between two rectangles. */
-      friend LinearAlgebra::Vector< Numeric::Interval<R> > operator-(const Box<R>& A, const Box& B);
-      /*! \brief Adds a vector to a box. */
-      friend Box<R> operator+(const Box<R>& r, const LinearAlgebra::Vector<R>& v);
-      /*! \brief Adds an interval vector to a box. */
-      friend Box<R> operator+(const Box<R>& r, const LinearAlgebra::Vector< Numeric::Interval<R> >& v);
-      /*! \brief Subtracts a vector from a box. */
-      friend Box<R> operator-(const Box<R>& r, const LinearAlgebra::Vector<R>& v);
-      /*! \brief Subtracts an interval vector from a box. */
-      friend Box<R> operator-(const Box<R>& r, const LinearAlgebra::Vector< Numeric::Interval<R> >& v);
-      //@}
-#endif
-      
+      /*! \brief The smallest box containing \a bx1 and \a bx2. */
+      friend Box<R> rectangular_hull(const Box<R>& bx1, const Box<R>& bx2); 
       //@{ 
       //! \name Input/output operations
-      /*! \brief The name of the class. */
-      static std::string name();
       /*! \brief Write to an output stream. */
-      std::ostream& write(std::ostream& os) const;
+      friend std::ostream& operator<<(std::ostream& os, const Box<R>&);
       /*! \brief Read from an input stream. */
-      std::istream& read(std::istream& is);
+      friend std::istream& operator>>(std::istream& is, const Box<R>&);
       //@}
+#endif
     };
     
     
@@ -350,12 +309,12 @@ namespace Ariadne {
                                      >
     {
      public:
-      BoxVerticesIterator(const Box<R>& r, const bool end);
+      BoxVerticesIterator(const Box<R>& bx, const bool end);
       bool equal(const BoxVerticesIterator<R>& other) const;
       const Point<R>& dereference() const;
       void increment();
      private:
-      const Box<R>* _r; 
+      const Box<R>* _bx; 
       long unsigned int _i; 
       bool _parity; 
       Point<R> _pt;
@@ -365,37 +324,15 @@ namespace Ariadne {
     
     
     
-    template<class R> tribool equal(const Box<R>& A, const Box<R>& B);
+    template<class R> tribool contains (const Box<R>& bx, const Point<R>& pt);
+    template<class R> tribool disjoint(const Box<R>& bx1, const Box<R>& bx2);
+    template<class R> tribool subset(const Box<R>& bx1, const Box<R>& bx2);
+    template<class R> Box<R> closed_intersection(const Box<R>& bx1, const Box<R>& bx2);
+    template<class R> Box<R> open_intersection(const Box<R>& bx1, const Box<R>& bx2);
+    template<class R> Box<R> rectangular_hull(const Box<R>& bx1, const Box<R>& bx2);
       
-    template<class R> tribool disjoint(const Box<R>& A, const Box<R>& B);
-      
-    template<class R> tribool subset(const Box<R>& A, const Box<R>& B);
-    
-    template<class R> Box<R> closed_intersection(const Box<R>& A, const Box<R>& B);
-      
-    template<class R> Box<R> open_intersection(const Box<R>& A, const Box<R>& B);
-      
-    template<class R> Box<R> rectangular_hull(const Box<R>& A, const Box<R>& B);
-      
-    
-    
-    template<class R>
-    Geometry::Box<R> 
-    operator+(const Geometry::Box<R>& r, 
-              const LinearAlgebra::Vector<R>& v);
-    
-    template<class R>
-    Geometry::Box<R> 
-    operator-(const Geometry::Box<R>& r, 
-              const LinearAlgebra::Vector<R>& v);
-    
-    template<class R>
-    std::istream&
-    operator>>(std::istream& is, Box<R>& r);
-
-    template<class R>
-    std::ostream&
-    operator<<(std::ostream& os, const Box<R>& r);
+    template<class R> std::istream& operator>>(std::istream& is, Box<R>& bx);
+    template<class R> std::ostream& operator<<(std::ostream& os, const Box<R>& bx);
 
     
   }

@@ -45,7 +45,6 @@
 #include "geometry/rectangular_set.h"
 #include "geometry/list_set.h"
 #include "geometry/grid_set.h"
-#include "geometry/parallelotope.h"
 #include "geometry/zonotope.h"
 #include "geometry/polytope.h"
 #include "geometry/polyhedral_set.h"
@@ -56,28 +55,27 @@
 
 namespace Ariadne {
   namespace Output {
-    
-    class Point2d {
-     private:
-      double _coordinates[2];
-     public:
-      Point2d(dimension_type d=2) { assert(d==2); }
-      Point2d(double x, double y) { _coordinates[0]=x; _coordinates[1]=y; }
-      dimension_type dimension() const { return 2; }
-      const double& operator[](dimension_type i) const { return _coordinates[i]; }
-      double& operator[](dimension_type i) { return _coordinates[i]; }
-    };
+
+    struct Vector2d : array<double,2u> { Vector2d() : array<double,2u>(2u) { } };
+    struct Point2d : array<double,2u> { Point2d() : array<double,2u>(2u) { } };
+      
 
     std::ostream& operator<<(std::ostream&, const Point2d&);
 
-    inline 
-    bool operator==(const Point2d& pt1, const Point2d& pt2) {
-      return pt1[0]==pt2[0] && pt1[1]==pt2[1];
+    inline bool operator==(const Point2d& pt1, const Point2d& pt2) {
+      return (pt1[0]==pt2[0]) &&  (pt1[1]==pt2[1]) ;
     }
 
-    inline 
-    bool operator<(const Point2d& pt1, const Point2d& pt2) {
+    inline bool operator<(const Point2d& pt1, const Point2d& pt2) {
       return (pt1[0]<pt2[0]) || ( (pt1[0]==pt2[0]) && (pt1[1]<pt2[1]) );
+    }
+
+    inline Point2d& operator+=(Point2d& pt, const Vector2d& v) {
+      pt[0]+=v[0]; pt[1]+=v[1]; return pt;
+    }
+
+    inline Point2d& operator-=(Point2d& pt, const Vector2d& v) {
+      pt[0]-=v[0]; pt[1]-=v[1]; return pt;
     }
 
     class Rectangle2d {
@@ -85,7 +83,7 @@ namespace Ariadne {
       Point2d _lower_corner;
       Point2d _upper_corner;
      public:
-      Rectangle2d(dimension_type d=2) { assert(d==2); }
+      Rectangle2d() { }
       Rectangle2d(const Point2d& l, const Point2d& u) : _lower_corner(l), _upper_corner(u) { }
       dimension_type dimension() const { return 2; }
       const double& lower_bound(dimension_type i) const { return _lower_corner[i]; }
@@ -106,6 +104,7 @@ namespace Ariadne {
 
     inline 
     bool operator<(const Rectangle2d& r1, const Rectangle2d& r2) {
+      //std::cerr<<__PRETTY_FUNCTION__<<std::endl;
       return r1._lower_corner<r2._lower_corner 
         || r1._lower_corner==r2._lower_corner && r1._upper_corner<r2._upper_corner; 
     }
@@ -113,10 +112,10 @@ namespace Ariadne {
     std::ostream& operator<<(std::ostream&, const Rectangle2d&);
 
 
-    class Polygon2d {
-     private:
+
+    struct Polygon2d {
       std::vector<Point2d> _vertices;
-     public:
+
       Polygon2d(dimension_type d=2) { assert(d==2); }
       Polygon2d(dimension_type d,size_type nv) { assert(d==2); _vertices.resize(nv); }
       dimension_type dimension() const { return 2; }
@@ -132,6 +131,13 @@ namespace Ariadne {
     };
 
 
+    struct Zonotope2d {
+      Point2d centre;
+      std::vector<Vector2d> generators;
+
+      operator Polygon2d() const;
+    };
+
 
     class PlanarProjectionMap;
     std::ostream& operator<<(std::ostream&, const PlanarProjectionMap&); 
@@ -141,10 +147,10 @@ namespace Ariadne {
      public:
       PlanarProjectionMap();
       PlanarProjectionMap(dimension_type d, dimension_type i, dimension_type j);
+      template<class R> Vector2d operator() (const LinearAlgebra::Vector<R>& v) const;
       template<class R> Point2d operator() (const Geometry::Point<R>& pt) const;
-      template<class R> Polygon2d operator() (const Geometry::PointList<R>& ptl) const;
       template<class E> Rectangle2d operator() (const Geometry::RectangleExpression<E>& re) const;
-      template<class RC,class RG> Polygon2d operator() (const Geometry::Zonotope<RC,RG>& z) const;
+      template<class R> Zonotope2d operator() (const Geometry::Zonotope<R>& z) const;
       template<class R> Polygon2d operator() (const Geometry::Polytope<R>& p) const;
      private:
       friend std::ostream& operator<<(std::ostream&,const PlanarProjectionMap&);
@@ -161,10 +167,21 @@ namespace Ariadne {
 namespace Ariadne {
 
 template<class R>
+Output::Vector2d
+Output::PlanarProjectionMap::operator()(const LinearAlgebra::Vector<R>& v) const 
+{
+  Vector2d result; 
+  ARIADNE_CHECK_SIZE(v,_d,"Point2d PlanarProjectionMap::operator()(Vector<R> v)");
+  result[0]=Numeric::approx<double>(v[_i]); 
+  result[1]=Numeric::approx<double>(v[_j]); 
+  return result;
+}
+
+template<class R>
 Output::Point2d
 Output::PlanarProjectionMap::operator()(const Geometry::Point<R>& pt) const 
 {
-  Point2d result(2); 
+  Point2d result; 
   ARIADNE_CHECK_DIMENSION(pt,_d,"Point2d PlanarProjectionMap::operator()(Point<R> pt)");
   result[0]=Numeric::approx<double>(pt[_i]); 
   result[1]=Numeric::approx<double>(pt[_j]); 
@@ -172,24 +189,13 @@ Output::PlanarProjectionMap::operator()(const Geometry::Point<R>& pt) const
 }
 
 
-template<class R> 
-Output::Polygon2d 
-Output::PlanarProjectionMap::operator()(const Geometry::PointList<R>& ptl) const
-{
-  Polygon2d result(2);
-  for(size_type i=0; i!=ptl.size(); ++i) { 
-    result.new_vertex(this->operator()(ptl[i]));
-  }
-  result.reduce();
-  return result;
-}
 
 
 template<class E> 
 Output::Rectangle2d 
 Output::PlanarProjectionMap::operator()(const Geometry::RectangleExpression<E>& re) const 
 {
-  Rectangle2d result(2); 
+  Rectangle2d result; 
   const E& r=re();
   ARIADNE_CHECK_DIMENSION(r,this->_d,"Rectangle2d PlanarProjectionMap::operator()(Rectangle<R> r)");
   result.lower_bound(0)=Numeric::approx<double>(r.lower_bound(this->_i));
@@ -200,13 +206,19 @@ Output::PlanarProjectionMap::operator()(const Geometry::RectangleExpression<E>& 
 }
 
 
-template<class RC,class RG> 
-Output::Polygon2d 
-Output::PlanarProjectionMap::operator() (const Geometry::Zonotope<RC,RG>& z) const 
+template<class R> 
+Output::Zonotope2d 
+Output::PlanarProjectionMap::operator() (const Geometry::Zonotope<R>& z) const 
 {
-  Geometry::Point<Numeric::Rational> c=Geometry::approximation(z.centre());
-  LinearAlgebra::Matrix<Numeric::Rational> G=LinearAlgebra::approximation<Numeric::Rational>(z.generators());
-  return this->operator()(Geometry::Zonotope<Numeric::Rational>(c,G).vertices());
+  //std::cerr<<__PRETTY_FUNCTION__<<std::endl;
+  const PlanarProjectionMap& map=*this;
+  Zonotope2d result;
+  result.centre=map(z.centre());
+  for(size_type i=0; i!=z.number_of_generators(); ++i) {
+    LinearAlgebra::Vector<R> v=z.generators().column(i);
+    result.generators.push_back(map(v));
+  }
+  return result;  
 }
 
 
@@ -214,7 +226,13 @@ template<class R>
 Output::Polygon2d 
 Output::PlanarProjectionMap::operator() (const Geometry::Polytope<R>& p) const 
 {
-  return this->operator()(p.vertices());
+  Polygon2d result;
+  for(size_type i=0; i!=p.number_of_vertices(); ++i) {
+    Geometry::Point<R> v=p.vertex(i);
+    Point2d pt=(*this)(v);
+    result.new_vertex(pt);
+  }
+  return result;
 }
 
 

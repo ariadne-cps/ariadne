@@ -111,7 +111,7 @@ template<class R>
 Evaluation::ConstraintBasedHybridScheduler<R>::ConstraintBasedHybridScheduler(const ApplicatorInterface<BS>& a, const IntegratorInterface<BS>& i, const DetectorInterface<R>& d)
   : _applicator(a.clone()), 
     _bounder(new Bounder<R>()),
-    _integrator(dynamic_cast<C1LohnerIntegrator<R>*>(i.clone())),
+    _integrator(dynamic_cast<LohnerIntegrator<R>*>(i.clone())),
     _detector(d.clone())
 {
   if(!this->_integrator) {
@@ -149,7 +149,7 @@ Evaluation::ConstraintBasedHybridScheduler<R>::regularize(const timed_set_type& 
   return timed_set;
   //if(Geometry::Rectangle<R>(timed_set.centre()).radius()*2>timed_set.radius()) {
   if(true) {
-    Zonotope<I> z=orthogonal_over_approximation(timed_set.continuous_state_set());
+    Zonotope<R,IntervalTag> z=orthogonal_over_approximation(timed_set.continuous_state_set());
     time_model_type t(timed_set.time().average(),LinearAlgebra::Vector<I>(z.number_of_generators()));
     std::cerr << t << "\n" << z << std::endl;
     assert(t.number_of_generators()==z.number_of_generators());
@@ -171,7 +171,7 @@ Evaluation::ConstraintBasedHybridScheduler<R>::subdivide(const timed_set_type& t
   ARIADNE_LOG(9,"  bounding_box="<<timed_set.continuous_state_set().bounding_box()<<"\n");
   ARIADNE_LOG(9,"  set="<<timed_set<<"\n");
   std::vector<timed_set_type> result;
-  const Zonotope<I,I>& z=timed_set.continuous_state_set();
+  const Zonotope<R,IntervalTag>& z=timed_set.continuous_state_set();
   const TimeModel<R>& t=timed_set.time();
   assert(t.number_of_generators()==z.number_of_generators());
 
@@ -180,15 +180,14 @@ Evaluation::ConstraintBasedHybridScheduler<R>::subdivide(const timed_set_type& t
   
   // Combine generators and time
   
-  Zonotope<I,I> combined_set(Point<I>(concatenate(z.centre().position_vector(),t.average())),concatenate_rows(z.generators(),t.gradient()));
+  Zonotope<R,IntervalTag> combined_set(Point<I>(concatenate(z.centre().position_vector(),t.average())),concatenate_rows(z.generators(),t.gradient()));
   
-  ListSet< Zonotope<I,I> > subdivisions=Geometry::divide(combined_set);
-  //ListSet< Zonotope<I,R> > subdivisions=Geometry::subdivide(orthogonal_approximation);
-  for(typename ListSet< Zonotope<I,I> >::const_iterator iter=subdivisions.begin();
+  ListSet< Zonotope<R,IntervalTag> > subdivisions=Geometry::subdivide(combined_set);
+  for(typename ListSet< Zonotope<R,IntervalTag> >::const_iterator iter=subdivisions.begin();
       iter!=subdivisions.end(); ++iter)
   {
-    Zonotope<I,I> combined_set=*iter;
-    Zonotope<I,I> continuous_state_set(Point<I>(VectorSlice<const I>(dimension,combined_set.centre().position_vector().begin())),
+    Zonotope<R,IntervalTag> combined_set=*iter;
+    Zonotope<R,IntervalTag> continuous_state_set(Point<I>(VectorSlice<const I>(dimension,combined_set.centre().position_vector().begin())),
                                        Matrix<I>(MatrixSlice<const I>(dimension,number_of_generators,combined_set.generators().begin())));
     TimeModel<R> time_model(combined_set.centre()[dimension],combined_set.generators().row(dimension));
     
@@ -710,7 +709,7 @@ Evaluation::ConstraintBasedHybridScheduler<R>::continuous_reachability_step(cons
   R time_interval_radius=time_interval.radius();
 
   Vector<I> new_generator=time_interval_radius*(mode.dynamic().image(bounding_box));
-  Geometry::Zonotope<I> reach_continuous_state_set(continuous_state_set.centre(),continuous_state_set.generators(),new_generator);
+  Zonotope<R,IntervalTag> reach_continuous_state_set(continuous_state_set.centre(),concatenate_columns(continuous_state_set.generators(),new_generator));
 
   time_model_type reach_time(initial_set.time()+average_time_step);
   reach_time=time_model_type(reach_time.average(),reach_time.gradient(),time_interval_radius);
@@ -819,7 +818,7 @@ Evaluation::ConstraintBasedHybridScheduler<R>::evolution_step(const System::Cons
   ARIADNE_LOG(3,"  evolution_semantics="<<(evolution_semantics==lower_semantics?"lower":"upper"));
   ARIADNE_LOG(3,", evolution_kind="<<(evolution_kind==compute_evolved_set?"evolve":"reach")<<"\n");  
   ARIADNE_LOG(3,"  initial_steps="<<initial_set.steps()<<"  initial_mode="<<initial_set.discrete_state()<<"\n")
-  ARIADNE_LOG(3,"  initial_set="<<Geometry::over_approximation(initial_set.continuous_state_set())<<"\n");  
+  ARIADNE_LOG(3,"  initial_set="<<initial_set.continuous_state_set()<<"\n");  
   ARIADNE_LOG(3,"  initial_time="<<initial_set.time()<<"\n\n");  
 
   std::vector<timed_set_type> result;

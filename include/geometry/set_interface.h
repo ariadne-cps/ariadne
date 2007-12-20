@@ -116,6 +116,10 @@ namespace Ariadne {
       return s.disjoint(r);
     }
     
+    template<class R> inline tribool superset(const SetInterface<R>& s, const Rectangle<R>& r) {
+      return s.superset(r);
+    }
+    
     template<class R> inline tribool subset(const Rectangle<R>& r, const SetInterface<R>& s) {
       return s.superset(r);
     }

@@ -33,12 +33,10 @@ namespace Ariadne {
 
 #ifdef ENABLE_FLOAT64
     template class LohnerIntegrator<Float64>;
-    template class C1LohnerIntegrator<Float64>;
 #endif
   
 #ifdef ENABLE_FLOATMP
     template class LohnerIntegrator<FloatMP>;
-    template class C1LohnerIntegrator<FloatMP>;
 #endif
 
   }

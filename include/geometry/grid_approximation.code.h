@@ -54,13 +54,14 @@ inline
 Geometry::GridCellListSet<R>
 outer_approximation_of_basic_set(const BS& bs, const Geometry::Grid<R>& g) 
 {
+  //std::cout << __PRETTY_FUNCTION__ << std::endl;
   Geometry::GridCellListSet<R> gcls(g);
   Geometry::GridBlock<R> gbb=outer_approximation(bs.bounding_box(),g);
   Geometry::Rectangle<R> r(bs.dimension());
   //std::cerr << "bs="<<bs<<" bb="<<bs.bounding_box()<<" gbb="<<gbb<<std::endl;
   for(typename Geometry::GridBlock<R>::const_iterator iter=gbb.begin(); iter!=gbb.end(); ++iter) {
     r=*iter;
-    if(disjoint(r,bs)) {
+    if(disjoint(bs,r)) {
       //std::cerr << "disjoint("<<r<<","<<bs<<")\n";
     } else {
       //std::cerr << "adjoining "<<*iter<<"\n";
@@ -90,10 +91,10 @@ inner_approximation_of_basic_set(const BS& bs, const Geometry::Grid<R>& g)
 }
 
 
-template<class R, class R0, class R1>
+template<class R, class Tag>
 inline
 Geometry::GridCellListSet<R>
-fuzzy_outer_approximation_of_zonotope(const Geometry::Zonotope<R0,R1>& z, const Geometry::Grid<R>& g) 
+fuzzy_outer_approximation_of_zonotope(const Geometry::Zonotope<R,Tag>& z, const Geometry::Grid<R>& g) 
 {
   typedef Numeric::Interval<R> I;
 
@@ -107,7 +108,7 @@ fuzzy_outer_approximation_of_zonotope(const Geometry::Zonotope<R0,R1>& z, const 
 
   if(z.dimension()==z.number_of_generators()) {
     LinearAlgebra::Matrix<I> Ginv=LinearAlgebra::inverse(z.generators());
-    const Geometry::Point<R0>& c=z.centre();
+    const Geometry::Point<I> c=z.centre();
     LinearAlgebra::Vector<I> e(z.dimension(),I(-1,1));
     Geometry::GridBlock<R> gbb=outer_approximation(z.bounding_box(),g);
     for(typename Geometry::GridBlock<R>::const_iterator iter=gbb.begin(); iter!=gbb.end(); ++iter) {
@@ -122,10 +123,10 @@ fuzzy_outer_approximation_of_zonotope(const Geometry::Zonotope<R0,R1>& z, const 
   } else if(z.dimension()+1u==z.number_of_generators()) {
     LinearAlgebra::Vector<I> e(d+1,I(-1,1));
     LinearAlgebra::Vector<I> x(d);
-    const Geometry::Point<R0>& c=z.centre();
-    const LinearAlgebra::Matrix<R1>& G=z.generators();
-    LinearAlgebra::Matrix<R1> A=LinearAlgebra::MatrixSlice<const R1>(d,d,G.begin(),G.row_increment(),G.column_increment());
-    LinearAlgebra::Vector<R1> b=G.column(d);
+    const Geometry::Point<I> c=z.centre();
+    const LinearAlgebra::Matrix<I> G=z.generators();
+    LinearAlgebra::Matrix<I> A=LinearAlgebra::MatrixSlice<const I>(d,d,G.begin(),G.row_increment(),G.column_increment());
+    LinearAlgebra::Vector<I> b=G.column(d);
     LinearAlgebra::Matrix<I> Ainv=LinearAlgebra::inverse(A);
     LinearAlgebra::Vector<I> y=Ainv*b;
     
@@ -177,9 +178,9 @@ Geometry::instantiate_grid_approximation()
   tribool tb;
   Point<I>* ipt=0;
   Rectangle<R>* r=0;
-  Zonotope<R,R>* z=0;
-  Zonotope<I,R>* ez=0;
-  Zonotope<I,I>* iz=0;
+  Zonotope<R,ExactTag>* z=0;
+  Zonotope<R,UniformErrorTag>* ez=0;
+  //Zonotope<R,IntervalTag>* iz=0;
   Polytope<R>* pltp=0;
   Polyhedron<R>* plhd=0;
   SetInterface<R>* set=0;
@@ -191,9 +192,8 @@ Geometry::instantiate_grid_approximation()
   GridMaskSet<R>* gms=0;
 
   ListSet< Rectangle<R> >* rls=0;
-  ListSet< Zonotope<R,R> >* zls=0;
-  ListSet< Zonotope<I,R> >* ezls=0;
-  ListSet< Zonotope<I,I> >* izls=0;
+  ListSet< Zonotope<R,ExactTag> >* zls=0;
+  ListSet< Zonotope<R,UniformErrorTag> >* ezls=0;
   
   *gb=outer_approximation(*ipt,*g);
   
@@ -207,27 +207,23 @@ Geometry::instantiate_grid_approximation()
   *gcls=outer_approximation(*plhd,*g);
   *gcls=outer_approximation(*z,*g);
   *gcls=outer_approximation(*ez,*g);
-  *gcls=outer_approximation(*iz,*g);
   *gcls=outer_approximation(*set,*g);
   
   //  *gcls=fuzzy_outer_approximation(*pltp,*g);
   //  *gcls=fuzzy_outer_approximation(*plhd,*g);
   *gcls=fuzzy_outer_approximation(*z,*g);
   *gcls=fuzzy_outer_approximation(*ez,*g);
-  *gcls=fuzzy_outer_approximation(*iz,*g);
   
   *gcls=inner_approximation(*pltp,*g);
   *gcls=inner_approximation(*plhd,*g);
   *gcls=inner_approximation(*z,*g);
   *gcls=inner_approximation(*ez,*g);
-  *gcls=inner_approximation(*iz,*g);
   *gcls=inner_approximation(*set,*g);
   
 
   *gms=outer_approximation(*rls,*fg);
   *gms=outer_approximation(*zls,*fg);
   *gms=outer_approximation(*ezls,*fg);
-  *gms=outer_approximation(*izls,*fg);
   
   *gms=outer_approximation(*set,*fg);
   *gms=inner_approximation(*set,*fg);
@@ -350,16 +346,16 @@ Geometry::inner_approximation(const Polytope<R>& p, const Grid<R>& g)
 }
 
 
-template<class R,class R0,class R1>
+template<class R,class Tag>
 Geometry::GridCellListSet<R>
-Geometry::outer_approximation(const Zonotope<R0,R1>& z, const Grid<R>& g) 
+Geometry::outer_approximation(const Zonotope<R,Tag>& z, const Grid<R>& g) 
 {
   return ::outer_approximation_of_basic_set(z,g);
 }
 
-template<class R,class R0,class R1>
+template<class R,class Tag>
 Geometry::GridCellListSet<R>
-Geometry::inner_approximation(const Zonotope<R0,R1>& z, const Grid<R>& g) 
+Geometry::inner_approximation(const Zonotope<R,Tag>& z, const Grid<R>& g) 
 {
   return ::inner_approximation_of_basic_set(z,g);
 }
@@ -407,9 +403,9 @@ Geometry::inner_approximation(const SetInterface<R>& set, const Grid<R>& g)
 }
 
 
-template<class R,class R0,class R1>
+template<class R,class Tag>
 Geometry::GridCellListSet<R>
-Geometry::fuzzy_outer_approximation(const Zonotope<R0,R1>& z, const Grid<R>& g) 
+Geometry::fuzzy_outer_approximation(const Zonotope<R,Tag>& z, const Grid<R>& g) 
 {
   return ::fuzzy_outer_approximation_of_zonotope(z,g);
 }

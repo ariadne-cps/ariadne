@@ -27,10 +27,6 @@
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
 #include "geometry/list_set.h"
-#include "geometry/parallelotope.h"
-#include "geometry/zonotope.h"
-#include "geometry/simplex.h"
-#include "geometry/polyhedron.h"
 
 #include "system/discrete_time_system.h"
 

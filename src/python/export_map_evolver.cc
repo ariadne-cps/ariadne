@@ -46,7 +46,7 @@ template<class R>
 void export_map_evolver() 
 {
   typedef Interval<R> I;
-  typedef Zonotope<I,R> BS;
+  typedef Zonotope<R,UniformErrorTag> BS;
 
   class_< MapEvolver<R> > evolver_class("MapEvolver",init< EvolutionParameters<R> >());
   evolver_class.def(init<const EvolutionParameters<R>&,const ApplicatorInterface<BS>&>());

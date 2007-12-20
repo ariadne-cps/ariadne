@@ -75,15 +75,15 @@ namespace Ariadne {
 
       /*! \brief Compute the value of a constraint over a zonotope. */
       Numeric::Interval<R> value(const Geometry::ConstraintInterface<R>& c, 
-                                 const Geometry::Zonotope<R,R>& z) const;
+                                 const Geometry::Zonotope<R,Geometry::ExactTag>& z) const;
 
       /*! \brief Compute the value of a constraint over a zonotope. */
       Numeric::Interval<R> value(const Geometry::ConstraintInterface<R>& c, 
-                                 const Geometry::Zonotope<I,R>& z) const;
+                                 const Geometry::Zonotope<R,Geometry::UniformErrorTag>& z) const;
 
       /*! \brief Compute the value of a constraint over a zonotope. */
       Numeric::Interval<R> value(const Geometry::ConstraintInterface<R>& c, 
-                                 const Geometry::Zonotope<I,I>& z) const;
+                                 const Geometry::Zonotope<R,Geometry::IntervalTag>& z) const;
 
       /*! \brief Determine whether constraint \a c1 forces constraint \a c2 within \a dom.
        */

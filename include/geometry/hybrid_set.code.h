@@ -69,7 +69,7 @@ template<class BS>
 std::ostream& 
 Geometry::HybridListSet<BS>::write(std::ostream& os) const
 { 
-  os << "HybridListSet<"<<BS::name()<<">( { \n";
+  os << "HybridListSet<"<<Geometry::name<BS>()<<">( { \n";
   for(typename HybridListSet<BS>::locations_const_iterator iter=this->locations_begin();
       iter!=this->locations_end(); ++iter)
   {

@@ -26,6 +26,27 @@
 
 namespace Ariadne { 
 
+Output::Zonotope2d::operator Polygon2d() const
+{
+  //std::cerr<<__PRETTY_FUNCTION__<<std::endl;
+  Polygon2d res;
+  size_type ng=this->generators.size();
+  size_type nv=1<<ng;
+  for(size_type i=0; i!=nv; ++i) {
+    Point2d pt=this->centre;
+    for(size_type j=0; j!=ng; ++j) {
+      if(i & 1<<j) {
+        pt+=this->generators[j];
+      } else {
+        pt-=this->generators[j]; 
+      }
+    }
+    res.new_vertex(pt);
+  }
+  return res;
+}
+
+
 Output::Polygon2d& 
 Output::Polygon2d::reduce() 
 {
@@ -115,7 +136,7 @@ Output::Point2d
 Output::Polygon2d::baricentre() const
 {
   const Polygon2d& vertices=*this;
-  Point2d baricentre(2);
+  Point2d baricentre;
   
   for (size_type j=0; j!=vertices.size(); ++j) {
     for (size_type i=0; i<2; i++) {

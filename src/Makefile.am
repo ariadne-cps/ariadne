@@ -55,7 +55,7 @@ GEOMETRY_SRC = \
 	geometry/rectangle.cc \
 	geometry/polyhedron.cc \
 	geometry/polytope.cc geometry/simplex.cc \
-	geometry/zonotope.cc geometry/orthotope.cc geometry/parallelotope.cc \
+	geometry/zonotope.cc \
 	geometry/ellipsoid.cc geometry/sphere.cc \
 	geometry/taylor_set.cc \
 	geometry/list_set.cc \
@@ -96,9 +96,9 @@ EVALUATION_SRC = \
 	evaluation/map_evolver.cc \
 	evaluation/vector_field_orbiter.cc \
 	evaluation/vector_field_evolver.cc \
-	evaluation/set_based_hybrid_evolver.cc \
-	evaluation/constraint_based_hybrid_evolver.cc \
-	evaluation/constraint_based_hybrid_scheduler.cc 
+	evaluation/set_based_hybrid_evolver.cc 
+#	evaluation/constraint_based_hybrid_evolver.cc \
+#	evaluation/constraint_based_hybrid_scheduler.cc 
 
 OUTPUT_SRC = \
 	output/logging.cc \

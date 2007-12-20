@@ -87,16 +87,14 @@ test_map_evolver()
   FiniteGrid<R> finite_grid=FiniteGrid<R>(grid,bounding_box); // grid
 
   Rectangle<R> r=Rectangle<R>("[1.499,1.501]x[0.499,0.501]"); // initial state
-  Zonotope<R,R> z=Zonotope<R,R>(Rectangle<R>("[1.499,1.501]x[0.499,0.501]")); // initial state
-  Zonotope<I,R> ez=Zonotope<I,R>(Rectangle<R>("[1.499,1.501]x[0.499,0.501]")); // initial state
-  Zonotope<I,I> iz=Zonotope<I,I>(Rectangle<R>("[1.499,1.501]x[0.499,0.501]")); // initial state
+  Zonotope<R> z=Zonotope<R>(Rectangle<R>("[1.499,1.501]x[0.499,0.501]")); // initial state
+  Zonotope<R,UniformErrorTag> ez=Zonotope<R,UniformErrorTag>(Rectangle<R>("[1.499,1.501]x[0.499,0.501]")); // initial state
   Polytope<R> pl=Polytope<R>(Rectangle<R>("[1.499,1.501]x[0.499,0.501]")); // initial state
   
   //Test evaluation on different classes of sets
   Rectangle<R> fr=apply(henon,r);
-  Zonotope<R,R> fz=apply(henon,z);
-  Zonotope<I,R> fez=apply(henon,ez);
-  Zonotope<I,I> fiz=apply(henon,iz);
+  Zonotope<R> fz=apply(henon,z);
+  Zonotope<R,UniformErrorTag> fez=apply(henon,ez);
 
   EvolutionParameters<R> parameters;
   parameters.set_maximum_basic_set_radius(maximum_basic_set_radius);
@@ -106,7 +104,7 @@ test_map_evolver()
   MapEvolver<R> evolver(parameters);
   Rectangle<R> pfr=apply(henon_inverse,fr);
   cout << "r=" << r << " fr=" << fr << " pfr="<< pfr << endl;
-  Zonotope<I,R> pfez=apply(henon_inverse,fez);
+  Zonotope<R,UniformErrorTag> pfez=apply(henon_inverse,fez);
   cout << "ez=" << ez << " fez=" << fez << " pfez="<< pfez << endl;
   
   RectangularSet<R> bounding_set(bounding_box);

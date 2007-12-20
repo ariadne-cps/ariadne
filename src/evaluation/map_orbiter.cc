@@ -35,14 +35,12 @@ namespace Ariadne {
 
 #ifdef ENABLE_FLOAT64
     template class MapOrbiterInterface<Float64>;
-    template class MapOrbiter< Zonotope<Interval<Float64>,Float64> >;
-    template class MapOrbiter< Zonotope< Interval<Float64>, Interval<Float64> > >;
+    template class MapOrbiter<Zonotope<Float64,UniformErrorTag> >;
 #endif
   
 #ifdef ENABLE_FLOATMP
     template class MapOrbiterInterface<FloatMP>;
-    template class MapOrbiter< Zonotope<Interval<FloatMP>,FloatMP> >;
-    template class MapOrbiter< Zonotope< Interval<FloatMP>, Interval<FloatMP> > >;
+    template class MapOrbiter< Zonotope<FloatMP,UniformErrorTag> >;
 #endif
 
   }

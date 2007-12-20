@@ -60,7 +60,7 @@ namespace Ariadne {
     class VectorFieldEvolver {
      private:
       typedef Numeric::Interval<R> I;
-      typedef Geometry::Zonotope<I,I> BS;
+      typedef Geometry::Zonotope<R,Geometry::UniformErrorTag> BS;
 
       EvolutionParameters<R>* _parameters;
       BounderInterface<R>* _bounder;

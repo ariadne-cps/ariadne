@@ -73,28 +73,17 @@ void export_detector()
 
   class_< DetectorWrapper<R>, boost::noncopyable >("DetectorInterface",init<>());
 
-  class_< Detector<R>, bases<DetectorInterface<R> > >("Detector",init<>())
-    .def("satisfies",
-         (tribool(Detector<R>::*)(const Rectangle<R>&,const ConstraintInterface<R>&)const) &Detector<R>::satisfies)
-    .def("satisfies",
-         (tribool(Detector<R>::*)(const Zonotope<I,R>&,const ConstraintInterface<R>&)const) &Detector<R>::satisfies)
-    .def("satisfies",
-         (tribool(Detector<R>::*)(const Zonotope<I,I>&,const ConstraintInterface<R>&)const) &Detector<R>::satisfies)
-    .def("value",
-         (Interval<R>(Detector<R>::*)(const ConstraintInterface<R>&,const Rectangle<R>&)const) &Detector<R>::value)
-    .def("value",
-         (Interval<R>(Detector<R>::*)(const ConstraintInterface<R>&,const Zonotope<I,R>&)const) &Detector<R>::value)
-    .def("value",
-         (Interval<R>(Detector<R>::*)(const ConstraintInterface<R>&,const Zonotope<I,I>&)const) &Detector<R>::value)
-    .def("forces",
-         (tribool(Detector<R>::*)(const ConstraintInterface<R>&,const ConstraintInterface<R>&,const Rectangle<R>&)const) &Detector<R>::forces)
-    .def("normal_derivative",
-         (Interval<R>(Detector<R>::*)(const VectorFieldInterface<R>&,const DifferentiableConstraintInterface<R>&,const Point<I>&)const) &Detector<R>::normal_derivative)
-    .def("crossing_time",
-         (Interval<R>(Detector<R>::*)(const VectorFieldInterface<R>&,const ConstraintInterface<R>&,const Point<I>&,const Rectangle<R>&)const) &Detector<R>::crossing_time)
-    .def("crossing_time",
-         (TimeModel<R>(Detector<R>::*)(const VectorFieldInterface<R>&,const ConstraintInterface<R>&,const Rectangle<R>&,const Rectangle<R>&)const) &Detector<R>::crossing_time)
-   ;
+  class_< Detector<R>, bases<DetectorInterface<R> > > detector_class("Detector",init<>());
+  detector_class.def("satisfies", (tribool(Detector<R>::*)(const Rectangle<R>&,const ConstraintInterface<R>&)const) &Detector<R>::satisfies);
+  detector_class.def("satisfies", (tribool(Detector<R>::*)(const Zonotope<R,UniformErrorTag>&,const ConstraintInterface<R>&)const) &Detector<R>::satisfies);
+  detector_class.def("satisfies", (tribool(Detector<R>::*)(const Zonotope<R,IntervalTag>&,const ConstraintInterface<R>&)const) &Detector<R>::satisfies);
+  detector_class.def("value", (Interval<R>(Detector<R>::*)(const ConstraintInterface<R>&,const Rectangle<R>&)const) &Detector<R>::value);
+  detector_class.def("value", (Interval<R>(Detector<R>::*)(const ConstraintInterface<R>&,const Zonotope<R,UniformErrorTag>&)const) &Detector<R>::value);
+  detector_class.def("value", (Interval<R>(Detector<R>::*)(const ConstraintInterface<R>&,const Zonotope<R,IntervalTag>&)const) &Detector<R>::value);
+  detector_class.def("forces", (tribool(Detector<R>::*)(const ConstraintInterface<R>&,const ConstraintInterface<R>&,const Rectangle<R>&)const) &Detector<R>::forces);
+  detector_class.def("normal_derivative", (Interval<R>(Detector<R>::*)(const VectorFieldInterface<R>&,const DifferentiableConstraintInterface<R>&,const Point<I>&)const) &Detector<R>::normal_derivative);
+  detector_class.def("crossing_time", (Interval<R>(Detector<R>::*)(const VectorFieldInterface<R>&,const ConstraintInterface<R>&,const Point<I>&,const Rectangle<R>&)const) &Detector<R>::crossing_time);
+  detector_class.def("crossing_time", (TimeModel<R>(Detector<R>::*)(const VectorFieldInterface<R>&,const ConstraintInterface<R>&,const Rectangle<R>&,const Rectangle<R>&)const) &Detector<R>::crossing_time);
 
 }
 

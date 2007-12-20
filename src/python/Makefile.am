@@ -63,9 +63,7 @@ ARIADNE_SRC = ariadne_module.cc \
 	export_set.cc \
 	export_interval_set.cc \
 	export_rectangle.cc \
-	export_orthotope.cc \
 	export_zonotope.cc \
-	export_parallelotope.cc \
 	export_polytope.cc \
 	export_simplex.cc \
 	export_polyhedron.cc \
@@ -98,10 +96,14 @@ ARIADNE_SRC = ariadne_module.cc \
 	export_map_evolver.cc \
 	export_vector_field_evolver.cc \
 	export_set_based_hybrid_evolver.cc \
-	export_constraint_based_hybrid_evolver.cc \
 	 \
 	export_text_output.cc \
 	export_latex_output.cc \
 	export_postscript_output.cc \
 	 \
 	export_models.cc
+
+
+
+#	export_constraint_based_hybrid_evolver.cc 
+

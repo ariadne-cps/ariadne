@@ -186,6 +186,21 @@ Geometry::Rectangle<R>::operator=(const RectangleExpression<E>& original)
 }
 
 
+template<class R> inline
+Geometry::Rectangle<R> 
+Geometry::Rectangle<R>::unit_box(dimension_type d)
+{
+  Rectangle<R> r(d);
+  for(dimension_type i=0; i!=d; ++i) {
+    r.set_lower_bound(i,-1);
+    r.set_upper_bound(i,+1);
+  }
+  return r;
+}
+
+
+
+
 // Conversion operators
 template<class R> inline
 Geometry::Rectangle<R>::operator Point< Numeric::Interval<R> >() const 
@@ -642,6 +657,23 @@ Geometry::under_approximation(const Rectangle< Numeric::Interval<R> >& ir)
 
 template<class R> inline
 tribool 
+Geometry::contains(const Rectangle<R>& r, const Point<R>& pt)
+{
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(r,pt,"contains(Rectangle r, Point pt)");
+  tribool result=true;
+  for(size_type i=0; i!=r.dimension(); ++i) {
+    if(r.lower_bound(i)>pt[i] || r.upper_bound(i)<pt[i]) {
+      return false;
+    }
+    if(r.lower_bound(i)==pt[i] || r.upper_bound(i)==pt[i]) {
+      result=indeterminate;
+    }
+  }
+  return result;
+}
+
+template<class R> inline
+tribool 
 Geometry::equal(const Rectangle<R>& r1, const Rectangle<R>& r2)
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(r1,r2,"equal(Rectangle r1, Rectangle r2)")
@@ -686,6 +718,14 @@ Geometry::subset(const Rectangle<R>& r1, const Rectangle<R>& r2)
     }
   }
   return result;
+}
+
+
+template<class R> inline
+tribool 
+Geometry::superset(const Rectangle<R>& r1, const Rectangle<R>& r2)
+{
+  return Geometry::subset(r2,r1);
 }
 
 

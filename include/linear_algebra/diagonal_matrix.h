@@ -31,6 +31,7 @@
 #include <iosfwd>
 
 #include "declarations.h"
+#include "base/stlio.h"
 #include "numeric/integer.h"
 #include "numeric/interval.h"
 #include "linear_algebra/matrix.h"
@@ -46,26 +47,35 @@ namespace Ariadne {
      * this is clearest and best English.
      */
     template<class R>
-    class DiagonalMatrix : public MatrixExpression< DiagonalMatrix<R> >
+    class DiagonalMatrix
+      : public MatrixExpression< DiagonalMatrix<R> >
     {
-      public:
+      typedef typename Numeric::traits<R>::arithmetic_type F;
+     private:
+      array<R> _data;
+     public:
       /*! \brief Construct a 0 by 0 matrix. */
       DiagonalMatrix() { }
       /*! \brief Construct an \a r by \a c matrix, all of whose entries are zero. */
-      DiagonalMatrix(const size_type& n);
+      DiagonalMatrix(const size_type& n) : _data(n) { }
       /*! \brief Construct an \a r by \a c matrix from the array beginning at \a ptr, 
        *  incrementing the input row elements by \a ri and input columns by \a ci. */
-      DiagonalMatrix(const size_type& n, const R* ptr, const size_type& i);
+      DiagonalMatrix(const size_type& n, const R* ptr, const size_type& i=1) : _data(n) {
+        for(size_type k=0; k!=n; ++k) { _data[k]=ptr[k*i]; } }
       /*! \brief Construct an \a r by \a c matrix from a vector expression. */
       template<class E> DiagonalMatrix(const VectorExpression<E>& ve);
 
       /*! \brief The number of rows of the matrix. */
-      size_type number_of_rows() const;
+      size_type number_of_rows() const { return this->_data.size(); }
       /*! \brief The number of columns of the matrix. */
-      size_type number_of_columns() const;
+      size_type number_of_columns() const { return this->_data.size(); };
       
+      /*! \brief The data array of the matrix. */
+      array<R>& data() { return this->_data; }
+      /*! \brief A constant reference to the data array of the matrix. */
+      const array<R>& data() const { return this->_data; }
       /*! \brief A constant reference to \a i,\a j th element. */
-      const R& operator() (const size_type& i, const size_type& j);
+      const R& operator() (const size_type& i, const size_type& j) const;
       /*! \brief A reference to \a i,\a j th element. */
       R& operator() (const size_type& i, const size_type& j);
       
@@ -110,8 +120,50 @@ namespace Ariadne {
       std::ostream& write(std::ostream& os) const;
       /*! \brief Read from an input stream . */
       std::istream& read(std::istream& is);
-
     };
+
+    template<class R> template<class E> inline
+    DiagonalMatrix<R>::DiagonalMatrix(const VectorExpression<E>& ve) 
+      : _data(ve().size())
+    {
+      for(size_type i=0; i!=ve().size(); ++i) {
+        this->_data[i]=ve()[i];
+      }
+    }
+
+    template<class X1, class X2>
+    Matrix<typename Numeric::traits<X1,X2>::arithmetic_type>
+    operator*(const Matrix<X1>& A, const DiagonalMatrix<X2>& D)
+    {
+      typedef typename Numeric::traits<X1,X2>::arithmetic_type X0;
+      assert(A.number_of_columns()==D.number_of_rows());
+      Matrix<X0> R(A.number_of_rows(),D.number_of_columns());
+      for(size_type i=0; i!=A.number_of_rows(); ++i) {
+        for(size_type j=0; j!=A.number_of_columns(); ++j) {
+          R(i,j)=A(i,j)*D.data()[j];
+        }
+      }
+      return R;
+    }
+
+    template<class T>
+    Matrix< Numeric::Float<T> >
+    mul_approx(const Matrix< Numeric::Float<T> >& A, const DiagonalMatrix< Numeric::Float<T> >& D)
+    {
+      assert(A.number_of_columns()==D.number_of_rows());
+      Matrix< Numeric::Float<T> > R(A.number_of_rows(),D.number_of_columns());
+      for(size_type i=0; i!=A.number_of_rows(); ++i) {
+        for(size_type j=0; j!=A.number_of_columns(); ++j) {
+          R(i,j)=mul_approx(A(i,j),D.data()[j]);
+        }
+      }
+      return R;
+    }
+
+    template<class R>
+    std::ostream& operator<<(std::ostream& os, const DiagonalMatrix<R>& D) {
+      return os <<"DiagonalMatrix("<<D.data()<<")";
+    }
 
   }
 }

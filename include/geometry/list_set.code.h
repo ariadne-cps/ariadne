@@ -26,10 +26,10 @@
 #include "list_set.h"
 #include "base/stlio.h"
 #include "geometry/rectangle.h"
+#include "geometry/name.h"
 #include "geometry/irregular_grid_set.h"
 
 namespace Ariadne {
-
 
 template<class BS>
 Geometry::ListSet<BS>*
@@ -234,7 +234,7 @@ std::ostream&
 Geometry::ListSet<BS>::summarize(std::ostream& os) const
 {
   const ListSet<BS>& ls=*this;
-  os << "ListSet<"<<BS::name()<<">( size="<<ls.size()<<", dimension="<<ls.dimension()<<" )";
+  os << "ListSet<"<<Geometry::name<BS>()<<">( size="<<ls.size()<<", dimension="<<ls.dimension()<<" )";
   return os;
 }
 
@@ -243,7 +243,7 @@ std::ostream&
 Geometry::ListSet<BS>::write(std::ostream& os) const
 {
   const ListSet<BS>& ls=*this;
-  os << "ListSet<"<<BS::name()<<">(\n size="<<ls.size()<<",\n";
+  os << "ListSet<"<<Geometry::name<BS>()<<">(\n size="<<ls.size()<<",\n";
   os << "  [ ";
   if (ls.size() >0 ) {
     os << ls[0];

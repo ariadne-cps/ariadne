@@ -35,48 +35,8 @@
 #include "geometry/point_list.h" 
 #include "geometry/list_set.h" 
 
-namespace {
-
-using namespace Ariadne;
-
-
-Geometry::Box<Numeric::Rational> 
-neighbourhood(const Geometry::Box<Numeric::Rational>& r, 
-              const Numeric::Rational& delta) 
-{
-  Geometry::Box<Numeric::Rational> result(r.dimension());
-  for (size_type j=0; j!=r.dimension(); ++j) {
-    result.set_lower_bound(j,r.lower_bound(j)-delta);
-    result.set_upper_bound(j,r.upper_bound(j)+delta);
-  }
-  return result;
-}
-
-template<class T>
-Geometry::Box< Numeric::Float<T> > 
-neighbourhood(const Geometry::Box< Numeric::Float<T> >&r, 
-              const Numeric::Float<T>& delta) 
-{
-  Geometry::Box< Numeric::Float<T> > result(r.dimension());
-  for (size_type j=0; j!=r.dimension(); ++j) {
-    result.set_lower_bound(j,sub_down(r.lower_bound(j),delta));
-    result.set_upper_bound(j,add_up(r.upper_bound(j),delta));
-  }
-  return result;
-}
-
-} // namespace
-
-
-
-namespace Ariadne { namespace Numeric {
-
-
-}}
-
 
 namespace Ariadne {
-
 
 template<class R>
 Geometry::Box<R>::Box(const std::string& s)
@@ -87,13 +47,6 @@ Geometry::Box<R>::Box(const std::string& s)
 }
 
 
-
-template<class R> 
-Geometry::Box<R> 
-Geometry::Box<R>::neighbourhood(const R& delta) const
-{
-  return ::neighbourhood(*this,delta);
-}
 
 template<class R> 
 R
@@ -124,29 +77,6 @@ Geometry::Box<R>::quadrant(const Combinatoric::BinaryWord& w) const
   return quadrant;
 }
 
-
-
-template<class R>
-Geometry::PointList<R>
-Geometry::Box<R>::vertices() const
-{
-  size_type number_of_vertices=(1<<this->dimension());
-  PointList<R> result(this->dimension(),number_of_vertices);
-  Point<R> vertex(this->dimension());
-  
-  for (size_type i=0; i<number_of_vertices; ++i) {
-    for (size_type j=0; j<this->dimension(); ++j) {
-      if ((1<<j)&(i)) {
-        vertex[j]=this->upper_bound(j);
-      } 
-      else {
-        vertex[j]=this->lower_bound(j);
-      }
-    }
-    result[i]=vertex;
-  }
-  return result;   
-}
 
 
 template<class R>
@@ -199,26 +129,18 @@ Geometry::Box<R>::vertices_end() const
 
 
 
-template<class R>
-std::string
-Geometry::Box<R>::name()
-{
-  return std::string("Box")+"<"+Numeric::name<R>()+">";
-}
-
 
 template<class R>
 std::ostream&
-Geometry::Box<R>::write(std::ostream& os) const 
+Geometry::operator<<(std::ostream& os, const Box<R>& bx)
 {
-  const Box<R>& self=*this;
-  if(self.dimension()==0) {
+  if(bx.dimension()==0) {
     os << "EmptyBoxe";
   }
   else {
-    os << "[" << self.lower_bound(0) << "," << self.upper_bound(0) << "]";
-    for(dimension_type i=1; i!=self.dimension(); ++i) {
-      os << "x[" << self.lower_bound(i) << "," << self.upper_bound(i) << "]";
+    os << "[" << bx.lower_bound(0) << "," << bx.upper_bound(0) << "]";
+    for(dimension_type i=1; i!=bx.dimension(); ++i) {
+      os << "x[" << bx.lower_bound(i) << "," << bx.upper_bound(i) << "]";
     }
   }
   return os;
@@ -227,7 +149,7 @@ Geometry::Box<R>::write(std::ostream& os) const
 
 template<class R>
 std::istream& 
-Geometry::Box<R>::read(std::istream& is)
+Geometry::operator>>(std::istream& is, Box<R>& bx)
 {
   
   char c;
@@ -249,7 +171,7 @@ Geometry::Box<R>::read(std::istream& is)
     if(is) {
       is.putback(c);
     }
-    (*this)=Box<R>(v.begin(),v.end());
+    bx=Box<R>(v.begin(),v.end());
   }
   else {
     /* representation as lower and upper corners */

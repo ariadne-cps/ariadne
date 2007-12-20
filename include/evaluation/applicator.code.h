@@ -58,51 +58,60 @@
 
 namespace Ariadne {
 
+
+using namespace Numeric;
+using namespace LinearAlgebra;
+using namespace Geometry;
+using namespace System;
+
 static int& verbosity = Evaluation::applicator_verbosity; 
 
+
 template<class R>
-Geometry::Rectangle<R> 
-Evaluation::apply(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& r) 
+Rectangle<R> 
+Evaluation::apply(const MapInterface<R>& f, const Rectangle<R>& r) 
 {
+  static int& verbosity = Evaluation::applicator_verbosity; 
   ARIADNE_LOG(6,"Rectangle<Float> apply(MapInterface f, Rectangle<Float> r)\n");
   ARIADNE_LOG(7,"  r="<<r<<"\n");
-  ARIADNE_LOG(8,"  f(r)="<<Geometry::Rectangle<R>(f.image(Geometry::Point< Numeric::Interval<R> >(r)))<<"\n");
-  return Geometry::Rectangle<R>(f.image(Geometry::Point< Numeric::Interval<R> >(r)));
+  ARIADNE_LOG(8,"  f(r)="<<Rectangle<R>(f.image(Point< Interval<R> >(r)))<<"\n");
+  return Rectangle<R>(f.image(Point< Interval<R> >(r)));
 }
 
 
 template<class R>
-Geometry::Zonotope<R> 
-Evaluation::apply(const System::MapInterface<R>& f, const Geometry::Zonotope<R>& z)  
+Zonotope<R> 
+Evaluation::apply(const MapInterface<R>& f, const Zonotope<R>& z)  
 {
+  static int& verbosity = Evaluation::applicator_verbosity; 
   ARIADNE_LOG(6,"Zonotope<Float> MapEvolver::apply(MapInterface f, Zonotope<Float,Float> z)\n");
   ARIADNE_LOG(7,"  z="<<z<<"\n");
-  typedef typename Numeric::traits<R>::arithmetic_type F;
+  typedef typename traits<R>::arithmetic_type F;
   
   const size_type m=z.dimension();
   const size_type n=z.dimension();
   
-  LinearAlgebra::Vector< Numeric::Interval<R> > cuboid_vector(m);
-  const Numeric::Interval<R> unit_interval(-1,1);
+  Vector< Interval<R> > cuboid_vector(m);
+  const Interval<R> unit_interval(-1,1);
   for(size_type i=0; i!=cuboid_vector.size(); ++i) {
-    cuboid_vector(i)=Numeric::Interval<R>(-1,1);
+    cuboid_vector(i)=Interval<R>(-1,1);
   }
   
-  const Geometry::Point<R>& c=z.centre();
-  const LinearAlgebra::Matrix<R>& g=z.generators();
+  const Point<R>& c=z.centre();
+  const Matrix<R>& g=z.generators();
   
-  Geometry::Point< Numeric::Interval<R> > img_centre=f(c);
-  LinearAlgebra::Matrix< Numeric::Interval<R> > df_on_set = f.jacobian(z.bounding_box());
-  LinearAlgebra::Matrix< Numeric::Interval<R> > df_at_centre = f.jacobian(c);
+  Point< Interval<R> > img_centre=f(c);
+  Matrix< Interval<R> > df_on_set = f.jacobian(z.bounding_box());
+  Matrix< Interval<R> > df_at_centre = f.jacobian(c);
   
-  LinearAlgebra::Matrix< Numeric::Interval<R> > img_generators = df_at_centre*g;
+  Matrix< Interval<R> > img_generators = df_at_centre*g;
   
-  LinearAlgebra::Matrix< Numeric::Interval<R> > img_generators_inverse = LinearAlgebra::inverse(LinearAlgebra::Matrix< Numeric::Interval<R> >(img_generators));
+  Matrix< Interval<R> > img_generators_inverse = inverse(Matrix< Interval<R> >(img_generators));
   
-  LinearAlgebra::Matrix< Numeric::Interval<R> > img_generators_on_set = df_on_set * g;
-  LinearAlgebra::Matrix< Numeric::Interval<R> > cuboid_transform = img_generators_inverse * img_generators_on_set;
+  Matrix< Interval<R> > img_generators_on_set = df_on_set * g;
+  Matrix< Interval<R> > cuboid_transform = img_generators_inverse * img_generators_on_set;
   
-  LinearAlgebra::Vector< Numeric::Interval<R> > new_cuboid = cuboid_transform * cuboid_vector;
+  Vector< Interval<R> > new_cuboid = cuboid_transform * cuboid_vector;
   
   R new_cuboid_sup(0);
   for(size_type j=0; j!=n; ++j) {
@@ -111,10 +120,10 @@ Evaluation::apply(const System::MapInterface<R>& f, const Geometry::Zonotope<R>&
   }
   
   // FIXME: This is incorrect; need over-approximations
-  Geometry::Point<R> nc=Geometry::midpoint(img_centre);
-  LinearAlgebra::Matrix<R> ng=midpoint(img_generators);
+  Point<R> nc=midpoint(img_centre);
+  Matrix<R> ng=midpoint(img_generators);
   
-  Geometry::Zonotope<R> result(nc,ng);
+  Zonotope<R> result(nc,ng);
   ARIADNE_LOG(8,"  f(z)="<<result<<"\n");
   return result;
 }
@@ -124,40 +133,25 @@ Evaluation::apply(const System::MapInterface<R>& f, const Geometry::Zonotope<R>&
 
 
 template<class R>
-Geometry::Zonotope<Numeric::Interval<R>,R> 
-Evaluation::apply(const System::MapInterface<R>& f, const Geometry::Zonotope<Numeric::Interval<R>,R>& z)  
+Zonotope<R,UniformErrorTag> 
+Evaluation::apply(const MapInterface<R>& f, const Zonotope<R,UniformErrorTag>& z)  
 {
-  ARIADNE_LOG(6,"Zontope<Interval,Float> MapEvolver::apply(MapInterface f, Zonotope<Interval,Float> z)\n");
+  static int& verbosity = Evaluation::applicator_verbosity; 
+  ARIADNE_LOG(6,"Zontope<R,UniformErrorTag> MapEvolver::apply(MapInterface f, Zonotope<R,UniformErrorTag> z)\n");
   ARIADNE_LOG(7,"  z="<<z<<"\n");
-  typedef Numeric::Interval<R> I;
+  typedef Interval<R> I;
   
-  Geometry::Point<I> img_centre=f(z.centre());
-  LinearAlgebra::Matrix<I> df_on_set = f.jacobian(over_approximation(z.bounding_box()));
-  LinearAlgebra::Matrix<I> img_generators = df_on_set*z.generators();
-  Geometry::Zonotope<I,I> interval_zonotope(img_centre,img_generators);
-  Geometry::Zonotope<I,R> result(over_approximation(interval_zonotope));
+  Point<I> img_centre=f(z.centre());
+  Matrix<I> df_on_set = f.jacobian(over_approximation(z.bounding_box()));
+  Matrix<I> img_generators = df_on_set*z.generators();
+  Zonotope<R,IntervalTag> interval_zonotope(img_centre,img_generators);
+  Zonotope<R,UniformErrorTag> result;
+  Geometry::over_approximate(result,interval_zonotope);
   ARIADNE_LOG(8,"  f(z)="<<result<<"\n");
   return result;
 }
 
 
-
-template<class R>
-Geometry::Zonotope< Numeric::Interval<R> > 
-Evaluation::apply(const System::MapInterface<R>& f, const Geometry::Zonotope< Numeric::Interval<R> >& z)  
-{
-  ARIADNE_LOG(6,"Zontope<Interval,Interval> MapEvolver::apply(MapInterface f, Zonotope<Interval,Interval> z)\n");
-  ARIADNE_LOG(7,"  z="<<z<<"\n");
-  typedef Numeric::Interval<R> I;
-  
-  Geometry::Point<I> img_centre=f(z.centre());
-  LinearAlgebra::Matrix<I> df_on_set = f.jacobian(over_approximation(z.bounding_box()));
-  LinearAlgebra::Matrix<I> img_generators = df_on_set*z.generators();
-  
-  Geometry::Zonotope<I> result(img_centre,img_generators);
-  ARIADNE_LOG(8,"  f(z)="<<result<<"\n");
-  return result;
-}
 
 
 
@@ -177,8 +171,8 @@ Evaluation::Applicator<R>::clone() const
 
 
 template<class R>
-Geometry::Rectangle<R>
-Evaluation::Applicator<R>::apply(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& r) const
+Rectangle<R>
+Evaluation::Applicator<R>::apply(const MapInterface<R>& f, const Rectangle<R>& r) const
 {
   return Evaluation::apply(f,r);
 }
@@ -186,22 +180,15 @@ Evaluation::Applicator<R>::apply(const System::MapInterface<R>& f, const Geometr
 
 
 template<class R>
-Geometry::Zonotope<R,R>
-Evaluation::Applicator<R>::apply(const System::MapInterface<R>& f, const Geometry::Zonotope<R,R>& z) const
+Zonotope<R,ExactTag>
+Evaluation::Applicator<R>::apply(const MapInterface<R>& f, const Zonotope<R,ExactTag>& z) const
 {
   return Evaluation::apply(f,z);
 }
 
 template<class R>
-Geometry::Zonotope<Numeric::Interval<R>,R>
-Evaluation::Applicator<R>::apply(const System::MapInterface<R>& f, const Geometry::Zonotope<I,R>& z) const
-{
-  return Evaluation::apply(f,z);
-}
-
-template<class R>
-Geometry::Zonotope< Numeric::Interval<R>, Numeric::Interval<R> >
-Evaluation::Applicator<R>::apply(const System::MapInterface<R>& f, const Geometry::Zonotope<I,I>& z) const
+Zonotope<R,UniformErrorTag>
+Evaluation::Applicator<R>::apply(const MapInterface<R>& f, const Zonotope<R,UniformErrorTag>& z) const
 {
   return Evaluation::apply(f,z);
 }
@@ -212,7 +199,7 @@ Evaluation::Applicator<R>::instantiate()
 {
   /*
   * bs=0;
-  System::MapInterface<R>* f=0;
+  MapInterface<R>* f=0;
   Evaluation::apply(*f,*bs);
   */
 }

@@ -57,8 +57,6 @@ GEOMETRY_TESTS = \
 	test_partition_tree_set \
 	test_rectangle \
 	test_zonotope \
-	test_orthotope \
-	test_parallelotope \
 	test_simplex \
 	test_polytope \
 	test_polyhedron \
@@ -76,9 +74,9 @@ EVALUATION_TESTS = \
 	test_affine_integrator \
 	test_map_evolver \
 	test_vector_field_evolver \
-	test_set_based_hybrid_evolver \
-	test_constraint_based_hybrid_evolver \
-	test_constraint_based_hybrid_scheduler 
+	test_set_based_hybrid_evolver 
+#	test_constraint_based_hybrid_evolver \
+#	test_constraint_based_hybrid_scheduler 
 
 OUTPUT_TESTS = \
 	test_textstream \

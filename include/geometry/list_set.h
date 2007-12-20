@@ -44,7 +44,7 @@ namespace Ariadne {
   namespace Geometry {
 
     template<class R> class Rectangle;
-      
+    
     class basic_set_tag;
     class denotable_set_tag;
   
@@ -72,8 +72,7 @@ namespace Ariadne {
       : public SetInterface<typename BS::real_type>
     {
      private:
-      typedef typename BS::value_type V;
-      typedef typename Numeric::traits<V>::number_type R;
+      typedef typename BS::real_type R;
 
       /* List of basic sets. Note that std::vector provides a
        * reserve(size_type) method to increase the capacity.
@@ -87,7 +86,7 @@ namespace Ariadne {
       /*!\brief The type of denotable real number used to represent points in the space. */
       typedef R real_type;
       /*!\brief The type of point contained by the set. */
-      typedef typename BS::state_type state_type;
+      typedef Point<R> state_type;
       /*!\brief The type of basic set making up the denotable set. */
       typedef BS basic_set_type;
       /*!\brief The type of basic set in the list of sets. */

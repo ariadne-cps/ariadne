@@ -57,9 +57,7 @@ namespace Ariadne {
      */
     template<class R>
     class AffineIntegrator
-      : public IntegratorInterface< Geometry::Zonotope<Numeric::Interval<R>,R> >,
-        public IntegratorInterface< Geometry::Zonotope< Numeric::Interval<R> > >
-      
+      : public IntegratorInterface< Geometry::Zonotope<R,Geometry::UniformErrorTag> >      
     {
       typedef Numeric::Interval<R> I;
      public:
@@ -84,58 +82,42 @@ namespace Ariadne {
                                                           const Geometry::Rectangle<R>& bb) const;
      
 
-      virtual Geometry::Zonotope<I,R> integration_step(const System::VectorFieldInterface<R>& vector_field,
-                                                     const Geometry::Zonotope<I,R>& initial_set,
-                                                     const Numeric::Interval<R>& step_size,
-                                                     const Geometry::Rectangle<R>& bounding_set) const;
+      virtual Geometry::Zonotope<R,Geometry::UniformErrorTag> 
+      integration_step(const System::VectorFieldInterface<R>& vector_field,
+                       const Geometry::Zonotope<R,Geometry::UniformErrorTag>& initial_set,
+                       const Numeric::Interval<R>& step_size,
+                       const Geometry::Rectangle<R>& bounding_set) const;
       
-      virtual Geometry::Zonotope<I,R> reachability_step(const System::VectorFieldInterface<R>& affine_vector_field,
-                                                        const Geometry::Zonotope<I,R>& initial_set,
-                                                      const Numeric::Interval<R>& step_size,
-                                                      const Geometry::Rectangle<R>& bounding_set) const;
+      virtual Geometry::Zonotope<R,Geometry::UniformErrorTag> 
+      reachability_step(const System::VectorFieldInterface<R>& affine_vector_field,
+                        const Geometry::Zonotope<R,Geometry::UniformErrorTag>& initial_set,
+                        const Numeric::Interval<R>& step_size,
+                        const Geometry::Rectangle<R>& bounding_set) const;
 
-      /*! \brief A \f$C^\infty\f$ algorithm for integrating forward a zonotope. */
-      virtual Geometry::Zonotope<I,I> integration_step(const System::VectorFieldInterface<R>& vector_field,
-                                                       const Geometry::Zonotope<I,I>& initial_set,
-                                                       const Numeric::Interval<R>& step_size,
-                                                       const Geometry::Rectangle<R>& bounding_set) const;
-      
-      /*! \brief A \f$C^\infty\f$ algorithm for integrating forward a zonotope for a time up to time \a step_size. */
-      virtual Geometry::Zonotope<I,I> reachability_step(const System::VectorFieldInterface<R>& affine_vector_field,
-                                                        const Geometry::Zonotope<I,I>& initial_set,
-                                                        const Numeric::Interval<R>& step_size,
-                                                        const Geometry::Rectangle<R>& bounding_set) const;
      public:
       /*! \brief Integrate \a initial point for time \a step_size. */
-      Geometry::Point<I> flow_step(const System::AffineVectorField<R>& affine_vector_field,
-                                              const Geometry::Point<I>& initial_point,
-                                              const Numeric::Interval<R>& step_size) const;
+      Geometry::Point<I> 
+      flow_step(const System::AffineVectorField<R>& affine_vector_field,
+                const Geometry::Point<I>& initial_point,
+                const Numeric::Interval<R>& step_size) const;
 
       /*! \brief Comput the spacial Jacobian derivative at \a initial point for time \a step_size. */
-      LinearAlgebra::Matrix<I> flow_step_jacobian(const System::AffineVectorField<R>& vector_field,
-                                                   const Geometry::Point<I>& affine_initial_point,
-                                                   const Numeric::Interval<R>& step_size) const;
+      LinearAlgebra::Matrix<I> 
+      flow_step_jacobian(const System::AffineVectorField<R>& vector_field,
+                         const Geometry::Point<I>& affine_initial_point,
+                         const Numeric::Interval<R>& step_size) const;
 
       /*! \brief A \f$C^\infty\f$ algorithm for integrating forward a zonotope for a time up to time \a step_size. */
-      Geometry::Zonotope<I,R> integration_step(const System::AffineVectorField<R>& affine_vector_field,
-                                               const Geometry::Zonotope<I,R>& initial_set,
-                                               const Numeric::Interval<R>& step_size) const;
+      Geometry::Zonotope<R,Geometry::UniformErrorTag> 
+      integration_step(const System::AffineVectorField<R>& affine_vector_field,
+                       const Geometry::Zonotope<R,Geometry::UniformErrorTag>& initial_set,
+                       const Numeric::Interval<R>& step_size) const;
 
       /*! \brief A \f$C^\infty\f$ algorithm for integrating forward a zonotope for a time up to time \a step_size. */
-     Geometry::Zonotope<I,R> reachability_step(const System::AffineVectorField<R>& affine_vector_field,
-                                               const Geometry::Zonotope<I,R>& initial_set,
-                                               const Numeric::Interval<R>& step_size) const;
-
-      /*! \brief A \f$C^\infty\f$ algorithm for integrating forward a zonotope for a time up to time \a step_size. */
-      Geometry::Zonotope<I> integration_step(const System::AffineVectorField<R>& affine_vector_field,
-                                             const Geometry::Zonotope<I,I>& initial_set,
-                                             const Numeric::Interval<R>& step_size) const;
-
-      /*! \brief A \f$C^\infty\f$ algorithm for integrating forward a zonotope for a time up to time \a step_size. */
-     Geometry::Zonotope<I> reachability_step(const System::AffineVectorField<R>& affine_vector_field,
-                                             const Geometry::Zonotope<I,I>& initial_set,
-                                             const Numeric::Interval<R>& step_size) const;
-
+      Geometry::Zonotope<R,Geometry::UniformErrorTag> 
+      reachability_step(const System::AffineVectorField<R>& affine_vector_field,
+                        const Geometry::Zonotope<R,Geometry::UniformErrorTag>& initial_set,
+                        const Numeric::Interval<R>& step_size) const;
 
       /*! \brief Write to an output stream. */
       virtual std::ostream& write(std::ostream&) const;

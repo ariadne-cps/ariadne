@@ -248,7 +248,8 @@ namespace Ariadne {
     
 
 
-    template<class R1,class R2> Matrix<R1> approximation(const Matrix<R2>& im); 
+    template<class R> Matrix<R> approximation(const Matrix<R>& v);
+    template<class R> Matrix<R> approximation(const Matrix< Numeric::Interval<R> >& v);
 
     template<class R> Matrix<R> midpoint(const Matrix< Numeric::Interval<R> >& iA); 
     template<class R> bool encloses(const Matrix< Numeric::Interval<R> >& iA, const Matrix<R>& A); 
@@ -274,6 +275,7 @@ namespace Ariadne {
     template<class R1, class R2> Vector<typename Numeric::traits<R1,R2>::arithmetic_type> operator*(const Vector<R1>& v, const Matrix<R2>& A); 
     template<class R1, class R2> Matrix<typename Numeric::traits<R1,R2>::arithmetic_type> operator*(const Matrix<R1>& A1, const Matrix<R2>& A2); 
 
+
     template<class R> Matrix<R> operator-(const MatrixSlice<R>& A);
     template<class R1, class R2> Matrix<typename Numeric::traits<R1,R2>::arithmetic_type> operator*(const MatrixSlice<R1>& A1, const Matrix<R2>& A2); 
     template<class R1, class R2> Matrix<typename Numeric::traits<R1,R2>::arithmetic_type> operator*(const MatrixSlice<R1>& A1, const MatrixSlice<R2>& A2); 
@@ -298,6 +300,8 @@ namespace Ariadne {
     template<class R> Matrix<typename Numeric::traits<R>::arithmetic_type> inverse(const Matrix<R>& A);
     template<class R1, class R2> Vector<typename Numeric::traits<R1,R2>::arithmetic_type> solve(const Matrix<R1>& A, const Vector<R2>& v);
     
+    template<class T> Vector< Numeric::Float<T> > mul_approx(const Matrix< Numeric::Float<T> >& A, const Vector< Numeric::Float<T> >& v);
+    template<class T> Matrix< Numeric::Float<T> > mul_approx(const Matrix< Numeric::Float<T> >& A, const Matrix< Numeric::Float<T> >& B);
     template<class T> Vector< Numeric::Float<T> > solve_approx(const Matrix< Numeric::Float<T> >& A, const Vector< Numeric::Float<T> >& v);
     template<class T> Matrix< Numeric::Float<T> > inverse_approx(const Matrix< Numeric::Float<T> >& A);
     template<class T> std::pair<Matrix<Numeric::Float<T> >,Matrix<Numeric::Float<T> > > qr_approx(const Matrix< Numeric::Float<T> >& A);

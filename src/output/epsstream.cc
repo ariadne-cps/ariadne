@@ -299,6 +299,12 @@ Output::epsstream::trace(const Rectangle2d& r)
 }
 
 void
+Output::epsstream::trace(const Zonotope2d& z)
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+void
 Output::epsstream::trace(const Polygon2d& vertices)
 {
   std::ostream& os=this->ostream();
@@ -344,15 +350,21 @@ Output::epsstream::draw(const Rectangle2d& r)
 }
 
 void
-Output::epsstream::draw(const Polygon2d& vertices)
+Output::epsstream::draw(const Zonotope2d& z)
+{
+  draw(Polygon2d(z));
+}
+
+void
+Output::epsstream::draw(const Polygon2d& p)
 {
   epsstream& eps=*this;
   if(eps.fill_style) {
-    eps.trace(vertices);
+    eps.trace(p);
     eps.fill();
   }
   if(eps.line_style) {
-    eps.trace(vertices);
+    eps.trace(p);
     eps.stroke();
   }
 }
@@ -361,6 +373,7 @@ Output::epsstream::draw(const Polygon2d& vertices)
 void
 Output::epsstream::draw(std::vector<Rectangle2d>& rl)
 {
+  //std::cerr<<__PRETTY_FUNCTION__<<std::endl;
   epsstream& eps=*this;
   std::sort(rl.begin(),rl.end());
   rl.resize(std::unique(rl.begin(),rl.end())-rl.begin());
@@ -394,5 +407,8 @@ Output::epsstream::stroke()
   os << this->line_colour.name() << " stroke\n";
 }
 
+void 
+Output::epsstream::_instantiate() {
+}
 
 }

@@ -339,6 +339,7 @@ LinearAlgebra::VectorSlice<R>::write(std::ostream& os) const
 }
 
 
+
 template<class R1, class E2> inline
 LinearAlgebra::Vector<R1>&
 LinearAlgebra::operator+=(Vector<R1>& v1, const VectorExpression<E2>& e2) {
@@ -448,12 +449,12 @@ LinearAlgebra::midpoint(const Vector< Numeric::Interval<R> >& iv)
 }
 
 template<class T> inline 
-LinearAlgebra::Vector< Numeric::ErrorFloat<T> >
+LinearAlgebra::Vector< Numeric::Float<T> >
 LinearAlgebra::radius(const Vector< Numeric::Interval< Numeric::Float<T> > >& iv) 
 {
-  Vector< Numeric::ErrorFloat<T> > result(iv.size());
+  Vector< Numeric::Float<T> > result(iv.size());
   for(size_type i=0; i!=iv.size(); ++i) {
-    result(i) = rad(iv(i));
+    result(i) = iv(i).radius();
   }
   return result;
 }
@@ -488,16 +489,51 @@ LinearAlgebra::refines(const Vector< Numeric::Interval<R> >& iv1, const  Vector<
 }
 
 
-template<class R1,class R2> inline 
-LinearAlgebra::Vector<R1>
-LinearAlgebra::approximation(const Vector<R2>& iv) 
+template<class R> inline 
+LinearAlgebra::Vector<R>
+LinearAlgebra::approximation(const Vector<R>& v) 
 {
-  Vector<R1> result(iv.size());
-  for(size_type i=0; i!=iv.size(); ++i) {
-    set(result(i),iv(i),Numeric::round_approx);
+  return v;
+}
+
+template<class R> inline 
+LinearAlgebra::Vector<R>
+LinearAlgebra::approximation(const Vector< Numeric::Interval<R> >& iv) 
+{
+  return midpoint(iv);
+}
+
+template<class R> inline 
+bool
+LinearAlgebra::operator==(const Vector<R>& v, int n) 
+{
+  assert(n==0);
+  for(size_type i=0; i!=v.size(); ++i) {
+    if(v[i]!=n) {
+      return false;
+    }
+  }
+  return true;
+}
+
+template<class R> inline 
+tribool
+LinearAlgebra::operator>=(const Vector< Numeric::Interval<R> >& v, int n) 
+{
+  tribool result=true;
+  for(size_type i=0; i!=v.size(); ++i) {
+    if(v[i].upper()<n) {
+      return false;
+    }
+    if(v[i].lower()<=n) {
+      result=indeterminate;
+    }
   }
   return result;
 }
+
+
+
 
 
 template<class R> inline

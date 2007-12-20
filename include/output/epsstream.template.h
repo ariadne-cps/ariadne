@@ -51,28 +51,16 @@ Output::operator<<(epsstream& eps, const Geometry::RectangularSet<R>& rs)
 }
 
 
-template<class R> 
+template<class R, class Tag> 
 Output::epsstream&
-Output::operator<<(epsstream& eps, const Geometry::Zonotope< Numeric::Interval<R>,Numeric::Interval<R> >& iz)
+Output::operator<<(epsstream& eps, const Geometry::Zonotope<R,Tag>& z)
 { 
-  Geometry::Zonotope<Numeric::Interval<R>,R> ez=Geometry::over_approximation(iz);
-  Geometry::Zonotope<R> z=Geometry::over_approximation(ez);
-  Geometry::Zonotope<Numeric::Rational> qz(z);
-  Polygon2d vertices=eps.projection_map()(qz);      
-  eps.draw(vertices);
+  Geometry::Zonotope<R> qz=over_approximation(z);
+  Zonotope2d pz=eps.projection_map()(qz);      
+  eps.draw(pz);
   return eps;
 }
 
-template<class R> 
-Output::epsstream&
-Output::operator<<(epsstream& eps, const Geometry::Zonotope<Numeric::Interval<R>,R>& ez)
-{ 
-  Geometry::Zonotope<R> z=Geometry::over_approximation(ez);
-  Geometry::Zonotope<Numeric::Rational> qz(z);
-  Polygon2d vertices=eps.projection_map()(qz);      
-  eps.draw(vertices);
-  return eps;
-}
 
 template<class R> 
 Output::epsstream&
@@ -84,19 +72,12 @@ Output::operator<<(epsstream& eps, const Geometry::Zonotope<R>& z)
   return eps;
 }
 
-template<class R> 
-Output::epsstream&
-Output::operator<<(epsstream& eps, const Geometry::Parallelotope<R>& p)
-{
-  const Geometry::Zonotope<R>& z=p;
-  return eps << z;
-}
 
 template<class R> 
 Output::epsstream&
 Output::operator<<(epsstream& eps, const Geometry::Polytope<R>& p)
 {
-  eps.draw(eps.projection_map()(p.vertices()));
+  eps.draw(eps.projection_map()(p));
   return eps;
 }
 
@@ -204,12 +185,10 @@ Output::operator<<(epsstream& eps, const Geometry::SetInterface<R>& set)
     return eps << dynamic_cast<const PolyhedralSet<R>&>(set);
   } else if(dynamic_cast<const ListSet< Rectangle<R> >*>(&set)) {
     return eps << dynamic_cast<const ListSet< Rectangle<R> >&>(set);
-  } else if(dynamic_cast<const ListSet< Zonotope<R,R> >*>(&set)) {
-    return eps << dynamic_cast<const ListSet< Zonotope<R,R> >&>(set);
-  } else if(dynamic_cast<const ListSet< Zonotope<I,R> >*>(&set)) {
-    return eps << dynamic_cast<const ListSet< Zonotope<I,R> >&>(set);
-  } else if(dynamic_cast<const ListSet< Zonotope<I,I> >*>(&set)) {
-    return eps << dynamic_cast<const ListSet< Zonotope<I,I> >&>(set);
+  } else if(dynamic_cast<const ListSet< Zonotope<R,ExactTag> >*>(&set)) {
+    return eps << dynamic_cast<const ListSet< Zonotope<R,ExactTag> >&>(set);
+  } else if(dynamic_cast<const ListSet< Zonotope<R,UniformErrorTag> >*>(&set)) {
+    return eps << dynamic_cast<const ListSet< Zonotope<R,UniformErrorTag> >&>(set);
   } else if(dynamic_cast<const GridCellListSet<R>*>(&set)) {
     return eps << dynamic_cast<const GridCellListSet<R>&>(set);
   } else if(dynamic_cast<const GridMaskSet<R>*>(&set)) {

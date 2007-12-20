@@ -35,12 +35,12 @@ namespace Ariadne {
 
 #ifdef ENABLE_FLOAT64
     template class VectorFieldOrbiterInterface<Float64>;
-    template class VectorFieldOrbiter< Zonotope<Interval<Float64>,Float64> >;
+    template class VectorFieldOrbiter< Zonotope<Float64,Geometry::UniformErrorTag> >;
 #endif
   
 #ifdef ENABLE_FLOATMP
     template class VectorFieldOrbiterInterface<FloatMP>;
-    template class VectorFieldOrbiter< Zonotope<Interval<FloatMP>,FloatMP> >;
+    template class VectorFieldOrbiter< Zonotope<FloatMP,Geometry::UniformErrorTag> >;
 #endif
 
   }

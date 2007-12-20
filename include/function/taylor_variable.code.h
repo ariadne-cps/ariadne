@@ -267,7 +267,7 @@ Function::TaylorVariable<X>
 Function::neg(const TaylorVariable<X>& x)
 {
   TaylorVariable<X> y(x.argument_size(),x.degree());
-  for(size_type n=0; n<=y.data().size(); ++n) {
+  for(size_type n=0; n<y.data().size(); ++n) {
     y.data()[n] = -x.data()[n];
   }
   return y;

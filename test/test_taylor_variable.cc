@@ -44,17 +44,20 @@ using namespace std;
 template<class X>
 class TestTaylorVariable {
  private:
+  X c1;
   TaylorVariable<X> x1,x2,x3;
  public:
   TestTaylorVariable() {
     double a1[15]={ 2.0, 1.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
     double a2[15]={ 3.0, 1.0, 0.0, 0.25, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
     double a3[15]={ 2.0, 1.0, 0.0, 0.125, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+    c1=3.0;
     x1=TaylorVariable<X>(2,4,a1);
     x2=TaylorVariable<X>(2,4,a2);
     x3=TaylorVariable<X>(1,4,a3);
     
     ARIADNE_TEST_CALL(test_degree());
+    ARIADNE_TEST_CALL(test_neg());
     ARIADNE_TEST_CALL(test_add());
     ARIADNE_TEST_CALL(test_sub());
     ARIADNE_TEST_CALL(test_mul());
@@ -68,22 +71,39 @@ class TestTaylorVariable {
     ARIADNE_TEST_ASSERT(x1.degree()==4);
   }
 
+  void test_neg() {
+    cout << -x1 << " = " << -x1 << std::endl;
+    //assert((x1+x2)==TaylorVariable<X>("[3,2,0,0]"));
+  }
+
   void test_add() {
     cout << x1 << "+" << x2 << " = " << x1+x2 << std::endl;
+    ARIADNE_TEST_EVALUATE(x1+x2);
+    ARIADNE_TEST_EVALUATE(x1+c1);
+    ARIADNE_TEST_EVALUATE(c1+x1);
     //assert((x1+x2)==TaylorVariable<X>("[3,2,0,0]"));
   }
 
   void test_sub() {
     cout << x1 << "-" << x2 << " = " << x1-x2 << std::endl;
+    ARIADNE_TEST_EVALUATE(x1-x2);
+    ARIADNE_TEST_EVALUATE(x1-c1);
+    ARIADNE_TEST_EVALUATE(c1-x1);
     //assert((x1-x2)==TaylorVariable<X>("[-1,0,0,0]"));
   }
 
   void test_mul() {
     cout << x1 << "*" << x2 << " = " << x1*x2 << std::endl;
+    ARIADNE_TEST_EVALUATE(x1*x2);
+    ARIADNE_TEST_EVALUATE(x1*c1);
+    ARIADNE_TEST_EVALUATE(c1*x1);
     //assert((x1*x2)==TaylorVariable<X>("[2,3,2,0]"));
   }
 
   void test_div() {
+    ARIADNE_TEST_EVALUATE(x1/x2);
+    ARIADNE_TEST_EVALUATE(x1/c1);
+    ARIADNE_TEST_EVALUATE(c1/x1);
     /*
     TaylorVariable<X> x3("[2,3,4]");
     TaylorVariable<X> x4("[1,0,0]");

@@ -84,7 +84,7 @@ template<class R> inline
 Evaluation::MapOrbiterInterface<R>*
 Evaluation::MapEvolver<R>::default_orbiter() 
 {
-  typedef Geometry::Zonotope<I,R> BS;
+  typedef Geometry::Zonotope<R,Geometry::UniformErrorTag> BS;
   const EvolutionParameters<R>& parameters=*this->_parameters;
   Applicator<R> applicator;
   return new MapOrbiter<BS>(parameters,applicator);

@@ -149,7 +149,7 @@ Geometry::ListSet<BS>::contains(const Point<R>& p) const
 {
   tribool result=false;
   for (typename ListSet<BS>::const_iterator i=this->begin(); i!=this->end(); ++i) {
-    result=result || i->contains(p);
+    result=result || Geometry::contains(*i,p);
     if(result) { return result; }
   }
   return result;
@@ -173,7 +173,7 @@ Geometry::ListSet<BS>::bounded() const
 {
   tribool result=true;
   for (typename ListSet<BS>::const_iterator i=this->begin(); i!=this->end(); ++i) {
-    result = result && i->bounded();
+    result = result && i->bounding_box().bounded();
     if(!result) { return result; }
   }
   return result;

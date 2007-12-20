@@ -75,10 +75,8 @@ template<class R> void export_point_list();
 template<class R> void export_set();
 template<class R> void export_interval_set();
 template<class R> void export_rectangle();
-template<class R> void export_parallelotope();
 template<class R> void export_simplex();
 template<class R> void export_zonotope();
-template<class R> void export_interval_zonotope();
 template<class R> void export_polytope();
 template<class R> void export_polyhedron();
 template<class R> void export_empty_set();
@@ -109,7 +107,7 @@ template<class R> void export_detector();
 template<class R> void export_map_evolver();
 template<class R> void export_vector_field_evolver();
 template<class R> void export_set_based_hybrid_evolver();
-template<class R> void export_constraint_based_hybrid_evolver();
+//template<class R> void export_constraint_based_hybrid_evolver();
 
 void export_text_output();
 void export_latex_output();
@@ -189,8 +187,6 @@ BOOST_PYTHON_MODULE(ariadne)
   export_box<FloatPy>();
   export_rectangle<FloatPy>();
   export_zonotope<FloatPy>();
-  export_interval_zonotope<FloatPy>();
-  export_parallelotope<FloatPy>();
   export_simplex<FloatPy>();
   export_polytope<FloatPy>();
   export_polyhedron<FloatPy>();
@@ -222,7 +218,7 @@ BOOST_PYTHON_MODULE(ariadne)
   export_map_evolver<FloatPy>();
   export_vector_field_evolver<FloatPy>();
   export_set_based_hybrid_evolver<FloatPy>();
-  export_constraint_based_hybrid_evolver<FloatPy>();
+  //export_constraint_based_hybrid_evolver<FloatPy>();
 
   export_text_output();
   export_latex_output();

@@ -29,10 +29,6 @@
 
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
-#include "geometry/zonotope.h"
-#include "geometry/parallelotope.h"
-#include "geometry/simplex.h"
-#include "geometry/polyhedron.h"
 
 namespace Ariadne {
   namespace System {

@@ -243,16 +243,12 @@ namespace Ariadne {
         if(n>N) { throw std::length_error("array<T,N>::array(size_type)"); } fill(val); }
       /*! \brief Constructs an array from the range \a first to \a last. */
       template<class In> array(In first, In last) : _size(distance(first,last)) { 
-        if(_size>N) { _size=N; throw std::length_error("array<T,N>::array(size_type)"); } fill(first); }
+        if(_size>N) { _size=N; throw std::length_error("array<T,N>::array(size_type)"); } _fill_iter(first); }
       /*! \brief Copy constructor. */
-      array(const array& a) : _size(a.size()) { fill(a.begin()); }
+      array(const array<T,N>& a) : _size(a.size()) { _fill_iter(a.begin()); }
       /*! \brief Copy assignment. */ 
-      array& operator=(const array& a) { _size=a.size(); fill(a.begin()); return *this; }
+      array<T,N>& operator=(const array<T,N>& a) { _size=a.size(); _fill_iter(a.begin()); return *this; }
       
-      /*! \brief Construct an array of size 1. */ 
-      explicit array(const value_type& x) : _size(1) { 
-        if(N<1) { throw std::length_error("array<T,N>::array(value_type)"); }
-        _ptr[0]=x;}
       /*! \brief Construct an array of size 2. */ 
       array(const value_type& x, const value_type& y) : _size(2) { 
         if(N<2) { throw std::length_error("array<T,N>::array(value_type,value_type)"); }
@@ -320,20 +316,20 @@ namespace Ariadne {
         for(size_type i=0; i!=_size; ++i) { _ptr[i]=val; } }
       /*! \brief Fills the array from the sequence starting at \a first. */
       template<class In> void fill(In iter) { 
-        _assign_iter(iter); }
+        _fill_iter(iter); }
       /*! \brief Assigns the sequence from \a first to \a last. */
       template<class In> void assign(In first, In last) { 
         if(distance(first,last)!=_size) { throw std::length_error("array<T,N>::assign(In,In)"); }
-        _assign_iter(first); }
+        _fill_iter(first); }
      private:
-      template<class InputIterator> inline void _assign_iter(InputIterator);
+      template<class InputIterator> inline void _fill_iter(InputIterator);
      private:
       size_type _size;
       value_type _ptr[N];
     };
     
     template<class T, unsigned short int N> template<class InputIterator> inline
-    void array<T,N>::_assign_iter(InputIterator iter)
+    void array<T,N>::_fill_iter(InputIterator iter)
     { 
       if(_size==1) { 
         *_ptr=*iter; }

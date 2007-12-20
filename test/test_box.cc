@@ -79,7 +79,6 @@ test_box()
     assert(encloses(Interval<R>(1.74,1.76),r2.volume()));
     
     assert(r1==r7);
-    assert(indeterminate(equal(r1,r7)));
     cout << "centre(r2)=" << r2.centre() << endl;
     assert(r2.centre()==Point<R>("(0.5,0.0625)"));
     
@@ -97,9 +96,9 @@ test_box()
     assert((bool)(!disjoint(r1,r1)));
     assert(indeterminate(subset(r1,r1)));
     cout << "r1=" << r1 << ", s1=" << s1 << ", s3=" << s3 << ", s5=" << s5 << endl;
-    assert(indeterminate(r1.contains(s1)));
-    assert((bool)(!r1.contains(s3)));
-    assert((bool)(r1.contains(s5)));
+    assert(indeterminate(contains(r1,s1)));
+    assert((bool)(!contains(r1,s3)));
+    assert((bool)(contains(r1,s5)));
     //assert(!subset_of_interior(r1,r1));
     //assert(subset_of_open_cover(r1,cover1));
     //assert(!subset_of_open_cover(r1,cover2));

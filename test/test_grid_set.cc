@@ -1,9 +1,9 @@
 /***************************************************************************
  *            test_grid.cc
  *
- *  9 May 2005
+ *
  *  Copyright  2005  Pieter Collins
- *  Email Pieter.Collins@cwi.nl, casagrande@dimi.uniud.it
+ *
  ****************************************************************************/
 
 /*
@@ -32,7 +32,6 @@
 #include "combinatoric/binary_word.h"
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
-#include "geometry/parallelotope.h"
 #include "geometry/zonotope.h"
 #include "geometry/list_set.h"
 #include "geometry/grid_set.h"
@@ -63,25 +62,20 @@ test_grid_set()
 
   // Test outer-approximations
   Rectangle<R> r("[-0.125,0.5]x[0.1,0.3]");
-  Parallelotope<R> p(r);
   Zonotope<R> z(r);
-  cout << "\n" << r << "\n" << z << "\n" << std::endl;
+  cout << "\nr=" << r << "\nz=" << z << "\n" << std::endl;
 
   GridBlock<R> rova=over_approximation(r,gr);
 
   // Test outer-approximations
   GridBlock<R> roa=outer_approximation(r,gr);
   cout << "roa=" << roa << std::endl;
-  GridCellListSet<R> poa=outer_approximation(p,gr);
-  cout << "poa=" << poa << std::endl;
   GridCellListSet<R> zoa=outer_approximation(z,gr);
   cout << "zoa=" << zoa << std::endl;
 
   // Test inner-approximations
   GridBlock<R> rua=inner_approximation(r,gr);
   cout << "rua=" << rua << std::endl;
-  GridCellListSet<R> pua=inner_approximation(p,gr);
-  cout << "pua=" << pua << std::endl;
   GridCellListSet<R> zua=inner_approximation(z,gr);
   cout << "zua=" << zua << std::endl;
 

@@ -81,8 +81,8 @@ test_integrator()
   parameters.set_maximum_step_size(0.125);
   
   // Test constructor/destructor
-  C1LohnerIntegrator<R>* lohner_ptr;
-  lohner_ptr=new C1LohnerIntegrator<R>();
+  LohnerIntegrator<R>* lohner_ptr;
+  lohner_ptr=new LohnerIntegrator<R>();
   delete lohner_ptr;
   
   AffineVectorField<R> avf=AffineVectorField<R>(Matrix<R>("[-0.25,-1.0;+1.0,-0.25]"),Vector<R>("[0.25,0.0]"));
@@ -93,25 +93,17 @@ test_integrator()
 
   Rectangle<R> r=Rectangle<R>("[0.98,1.02]x[0.48,0.52]");
   cout << "r=" << r << endl;
-  Zonotope<I,R> ez=Zonotope<I,R>(r);
+  Zonotope<R,UniformErrorTag> ez=Zonotope<R,UniformErrorTag>(r);
   cout << "ez=" << ez << endl;
-  Zonotope<I,I> iz=Zonotope<I,I>(r);
-  cout << "iz=" << iz << endl;
 
-  ListSet< Zonotope<I,R> > ezls=ListSet< Zonotope<I,R> >(ez);
+  ListSet< Zonotope<R,UniformErrorTag> > ezls=ListSet< Zonotope<R,UniformErrorTag> >(ez);
   ezls.adjoin(Zonotope<R>(Rectangle<R>("[1.02,1.06]x[0.48,0.52]")));
   cout << "ezls.size()=" << ezls.size() << endl;
   
-  ListSet< Zonotope<I,I> > izls=ListSet< Zonotope<I> >(iz);
-  izls.adjoin(Zonotope<I,I>(Rectangle<R>("[1.02,1.06]x[0.48,0.52]")));
-  cout << "izls.size()=" << izls.size() << endl;
-  
   Geometry::Rectangle<R> nr;
   Geometry::Zonotope<R> nz;
-  Geometry::Zonotope<I,R> nez;
-  Geometry::Zonotope<I> niz;
-  Geometry::ListSet< Zonotope<I,R> > nezls;
-  Geometry::ListSet< Zonotope<I,I> > nizls;
+  Geometry::Zonotope<R,UniformErrorTag> nez;
+  Geometry::ListSet< Zonotope<R,UniformErrorTag> > nezls;
   
   Flt x0=0;
   Flt x1=0.4;
@@ -132,24 +124,24 @@ test_integrator()
   // Integration step
   //nr=lohner.integration_step(vdp,r,h);
   //cout << nr << endl;
-  C1LohnerIntegrator<R> plugin;
+  LohnerIntegrator<R> plugin;
   VectorFieldEvolver<R> evolver(parameters,plugin);
-  niz=evolver.integration_step(vdp,iz,h);
+  nez=evolver.integration_step(vdp,ez,h);
   cout << nez << endl << endl;
   cout << endl << endl;
   
 
   
-  nizls=evolver.lower_integrate(vdp,izls,t);
+  nezls=evolver.lower_integrate(vdp,ezls,t);
   cout << nezls << endl << endl;
   
-  nizls=evolver.lower_reach(vdp,izls,t);
+  nezls=evolver.lower_reach(vdp,ezls,t);
   cout << nezls << endl << endl;
   
   // Affine vector field
   VectorFieldInterface<R>& avfr=avf;
   //AffineVectorField<R>& avfr=avf;
-  niz=evolver.integration_step(avfr,iz,h);
+  nez=evolver.integration_step(avfr,ez,h);
   cout << nz << endl;
   cout << endl;
   
@@ -172,7 +164,7 @@ test_vector_field_evolver()
   parameters.set_grid_length(0.125);
   
   AffineIntegrator<R> affine_integrator;
-  C1LohnerIntegrator<R> lohner_integrator;
+  LohnerIntegrator<R> lohner_integrator;
   VectorFieldEvolver<R> evolver(parameters,lohner_integrator);
 
   AffineVectorField<R> affine_vector_field(Matrix<R>("[-2,-1;1,-2]"),Vector<R>("[0.125,0.25]"));
@@ -254,15 +246,15 @@ test_vector_field_evolver()
   cout << rectangle_list_reach_set << endl;
   cout << endl;
 
-  ListSet< Zonotope<I,I> > zonotope_list_initial_set=point_approximation(polyhedral_initial_set,fine_grid);
-  ListSet< Zonotope<I,I> > zonotope_list_integrate_set=zonotope_list_initial_set;
-  ListSet< Zonotope<I,I> > zonotope_list_found_set=zonotope_list_initial_set;
+  ListSet< Zonotope<R,UniformErrorTag> > zonotope_list_initial_set=point_approximation(polyhedral_initial_set,fine_grid);
+  ListSet< Zonotope<R,UniformErrorTag> > zonotope_list_integrate_set=zonotope_list_initial_set;
+  ListSet< Zonotope<R,UniformErrorTag> > zonotope_list_found_set=zonotope_list_initial_set;
   for(uint i=0; i!=n; ++i) {
     zonotope_list_found_set=evolver.lower_integrate(affine_vector_field,zonotope_list_found_set,time_type(integration_time/n));
     zonotope_list_integrate_set.adjoin(zonotope_list_found_set);
   }
-  ListSet< Zonotope<I,I> > zonotope_list_final_set=evolver.lower_integrate(affine_vector_field,zonotope_list_initial_set,integration_time);
-  ListSet< Zonotope<I,I> > zonotope_list_reach_set=evolver.lower_reach(affine_vector_field,zonotope_list_initial_set,integration_time);
+  ListSet< Zonotope<R,UniformErrorTag> > zonotope_list_final_set=evolver.lower_integrate(affine_vector_field,zonotope_list_initial_set,integration_time);
+  ListSet< Zonotope<R,UniformErrorTag> > zonotope_list_reach_set=evolver.lower_reach(affine_vector_field,zonotope_list_initial_set,integration_time);
    
   cout << zonotope_list_initial_set << endl;
   cout << zonotope_list_integrate_set << endl;

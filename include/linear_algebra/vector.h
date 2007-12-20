@@ -243,7 +243,12 @@ namespace Ariadne {
   template<class R> bool encloses(const Vector< Numeric::Interval<R> >& iv,const Vector<R>& v); 
   template<class R> bool refines(const Vector< Numeric::Interval<R> >& iv1, const Vector< Numeric::Interval<R> >& iv2); 
 
-  template<class R1, class R2> Vector<R1> approximation(const Vector<R2>& v);
+  template<class R> Vector<R> approximation(const Vector<R>& v);
+  template<class R> Vector<R> approximation(const Vector< Numeric::Interval<R> >& v);
+
+  template<class R> bool operator==(const Vector<R>& v, int n);
+  template<class R> tribool operator>=(const Vector< Numeric::Interval<R> >& iv, int n);
+
 
   template<class R> std::ostream& operator<<(std::ostream& os, const Vector<R>& v);
   template<class R> std::istream& operator>>(std::istream& is, Vector<R>& v);

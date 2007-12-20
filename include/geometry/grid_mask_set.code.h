@@ -32,9 +32,6 @@
 #include "combinatoric/array_operations.h"
 
 #include "geometry/rectangle.h"
-#include "geometry/zonotope.h"
-#include "geometry/polytope.h"
-#include "geometry/polyhedron.h"
 
 #include "geometry/grid_cell.h"
 #include "geometry/grid_block.h"
@@ -231,6 +228,7 @@ Geometry::GridMaskSet<R>::_instantiate_geometry_operators()
   
   tb=Geometry::subset(*r,*gms);
   tb=Geometry::subset(*gms,*r);
+  tb=Geometry::superset(*gms,*r);
   tb=Geometry::disjoint(*r,*gms);
   tb=Geometry::disjoint(*gms,*r);
   
@@ -393,6 +391,17 @@ Geometry::subset(const GridMaskSet<R>& gms1, const GridMaskSet<R>& gms2)
   return subset(gms1.lattice_set(),gms2.lattice_set());
 }
 
+
+template<class R>
+tribool
+Geometry::superset(const GridMaskSet<R>& gms, const Rectangle<R>& r)
+{
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(r,gms,"tribool superset(GridMaskSet gms, Rectangle r)");
+  if(!subset(r,gms.bounding_box())) {
+    return false;
+  }
+  return subset(outer_approximation(r,gms.grid()),gms);
+}
 
 
 

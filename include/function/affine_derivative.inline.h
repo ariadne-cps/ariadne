@@ -107,6 +107,20 @@ Function::AffineDerivative<X>::degree() const
 }
 
 template<class X> inline
+const array<X>&
+Function::AffineDerivative<X>::data() const
+{
+  return this->_data;
+}
+
+template<class X> inline
+array<X>&
+Function::AffineDerivative<X>::data() 
+{
+  return this->_data;
+}
+
+template<class X> inline
 Function::AffineVariable<X>
 Function::AffineDerivative<X>::operator[](size_type i) const
 {

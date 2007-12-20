@@ -199,7 +199,10 @@ template<class X, class R>
 Function::TaylorVariable<X> 
 Function::operator-(const R& c, const TaylorVariable<X>& x)
 {
-  TaylorVariable<X> r=-x; r.data()[0]+=c; return r;
+
+  TaylorVariable<X> r=-x; 
+  r.data()[0]+=c; 
+  return r;
 }
 
 template<class X, class R> 

@@ -199,8 +199,6 @@ template<class R> inline
 bool 
 Geometry::Box<R>::operator==(const Box<R>& A) const
 {
-  if (A.empty() && this->empty()) { return true; }
-  if (A.empty() || this->empty()) { return false; }
   if(this->dimension()!=A.dimension()) { return false; }
   for(dimension_type i=0; i!=this->dimension(); ++i) {
     if (this->lower_bound(i)!=A.lower_bound(i)) { return false; }
@@ -336,6 +334,25 @@ Geometry::Box<R>::position_vectors() const
 }
 
 
+template<class R> inline
+tribool 
+Geometry::Box<R>::empty() const
+{
+  tribool result=false;
+  if(this->dimension()==0) {
+    return true;
+  }
+  for(dimension_type i=0; i!=this->dimension(); ++i) {
+    if(this->lower_bound(i) > this->upper_bound(i)) {
+      return true;
+    }
+    if(this->lower_bound(i)== this->upper_bound(i)) {
+      result=indeterminate;
+    }
+  }
+  return result;
+}
+
 // Modifying operations
 template<class R> inline
 void 
@@ -376,25 +393,17 @@ void Geometry::Box<R>::set_upper_bound(dimension_type i, const R& u)
 }
 
 template<class R> inline
-Geometry::Box<R>& 
-Geometry::Box<R>::expand_by(const real_type& delta) 
+Geometry::Box<R> 
+Geometry::Box<R>::neighbourhood(const R& delta) const 
 {
+  Box<R> result;
   Numeric::Interval<R> expand(-delta,delta);
   for (size_type j=0; j< this->dimension(); ++j) {
-    (*this)[j]+=expand;
+    result[j]=(*this)[j]+expand;
   }
-  
-  return *this;
-}
-
-template<class R> inline
-Geometry::Box<R> 
-Geometry::Box<R>::expand(const real_type& delta) const
-{
-  Box<R> result(*this);
-  result.expand_by(delta);
   return result;
 }
+
 
 
 
@@ -406,24 +415,6 @@ Geometry::Box<R>::dimension() const
   return this->_data.size()/2;
 }
 
-template<class R> inline
-tribool
-Geometry::Box<R>::empty() const 
-{
-  tribool result=false;
-  if(this->dimension()==0) {
-    return true;
-  }
-  for(dimension_type i=0; i!=this->dimension(); ++i) {
-    if(this->lower_bound(i) > this->upper_bound(i)) {
-      return true;
-    }
-    if(this->lower_bound(i)== this->upper_bound(i)) {
-      result=indeterminate;
-    }
-  }
-  return result;
-}
 
 template<class R> inline
 Geometry::Point<R> 
@@ -450,54 +441,19 @@ Geometry::Box<R>::radius() const
 
 template<class R> inline
 tribool 
-Geometry::Box<R>::contains(const Point<R>& pt) const 
+Geometry::contains(const Box<R>& bx, const Point<R>& pt)
 {
-  ARIADNE_CHECK_EQUAL_DIMENSIONS(*this,pt,"Box::contains(Point pt)");
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(bx,pt,"contains(Box bx, Point pt)");
   tribool result=true;
-  const Box<R>& self=*this;
-  for (size_type i=0; i!=self.dimension(); ++i) {
-    if(self.lower_bound(i)>pt[i] || pt[i]>self.upper_bound(i)) {
+  for (size_type i=0; i!=bx.dimension(); ++i) {
+    if(bx.lower_bound(i)>pt[i] || pt[i]>bx.upper_bound(i)) {
       return false;
     }
-    if(self.lower_bound(i)==pt[i] || pt[i]==self.upper_bound(i)) { 
+    if(bx.lower_bound(i)==pt[i] || pt[i]==bx.upper_bound(i)) { 
       result=indeterminate;
     }
   }
   return result;
-}
-
-
-template<class R> inline
-tribool 
-Geometry::Box<R>::bounded() const 
-{ 
-  return true; 
-}
-
-template<class R> inline
-Geometry::Box<R> 
-Geometry::Box<R>::bounding_box() const 
-{
-  return *this;
-}
-
-
-
-
-
-
-
-template<class R> inline
-tribool 
-Geometry::equal(const Box<R>& r1, const Box<R>& r2)
-{
-  ARIADNE_CHECK_EQUAL_DIMENSIONS(r1,r2,"equal(Box r1, Box r2)")
-    for(size_type i=0; i!=r1.dimension(); ++i) {
-      if(r1.lower_bound(i)!=r2.lower_bound(i) || r1.upper_bound(i)!=r2.upper_bound(i)) {
-        return false;
-      }
-    }
-  return indeterminate;
 }
 
 template<class R> inline
@@ -657,11 +613,11 @@ Geometry::operator-(const Geometry::Box<R>& r,
 
 template<class R> inline
 Geometry::BoxVerticesIterator<R>::BoxVerticesIterator(const Box<R>& r, const bool end)
-  : _r(&r), _i(end==true ? (1<<(r.dimension()-1))*3 : 0), _parity(0), _pt(r.lower_corner()) { }
+  : _bx(&r), _i(end==true ? (1<<(r.dimension()-1))*3 : 0), _parity(0), _pt(r.lower_corner()) { }
 
 template<class R> inline
 bool Geometry::BoxVerticesIterator<R>::equal(const BoxVerticesIterator<R>& other) const {
-  return this->_i==other._i && this->_r==other._r; }
+  return this->_i==other._i && this->_bx==other._bx; }
 
 template<class R> inline
 const Geometry::Point<R>& Geometry::BoxVerticesIterator<R>::dereference() const { 
@@ -671,26 +627,12 @@ template<class R> inline
 void Geometry::BoxVerticesIterator<R>::increment() { 
   uint j=0; uint m=1; if(this->_parity) { while(!(m&(this->_i))) { ++j; m*=2u; } ++j; m*=2u; }
   this->_parity=!this->_parity;
-  if(j==this->_r->dimension()) { this->_i+=m; return; }
-  if(m&(this->_i)) { this->_pt[j]=this->_r->lower_bound(j); this->_i-=m; }
-  else { this->_pt[j]=this->_r->upper_bound(j); this->_i+=m; }
+  if(j==this->_bx->dimension()) { this->_i+=m; return; }
+  if(m&(this->_i)) { this->_pt[j]=this->_bx->lower_bound(j); this->_i-=m; }
+  else { this->_pt[j]=this->_bx->upper_bound(j); this->_i+=m; }
 }
 
 
-
-template<class R> inline 
-std::ostream& 
-Geometry::operator<<(std::ostream& os, const Box<R>& r) 
-{
-  return r.write(os);
-}
-
-template<class R> inline
-std::istream& 
-Geometry::operator>>(std::istream& is, Box<R>& r) 
-{
-  return r.read(is);
-}
 
 
 } // namespace Ariadne

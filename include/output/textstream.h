@@ -46,7 +46,6 @@
 #include "geometry/rectangular_set.h"
 #include "geometry/list_set.h"
 #include "geometry/grid_set.h"
-#include "geometry/parallelotope.h"
 #include "geometry/zonotope.h"
 #include "geometry/polytope.h"
 #include "geometry/polyhedral_set.h"
@@ -75,7 +74,7 @@ namespace Ariadne {
       textstream();
       textstream(std::ostream& os);
       void redirect(std::ostream& os);
-      
+      std::ostream& ostream();
       void writenl();
  			
       template <class R> void write(const Geometry::Point<R>& pt);
@@ -106,6 +105,13 @@ namespace Ariadne {
 
 
 
+    inline
+    std::ostream& 
+    textstream::ostream()
+    {
+      return *this->_os_ptr; 
+    }
+						 
     template<class R> inline
     void 
     textstream::write(const Geometry::Point<R>& pt) 
@@ -125,9 +131,7 @@ namespace Ariadne {
     template<class R> textstream& operator<<(textstream&, const Geometry::Point<R>&); 
     template<class R> textstream& operator<<(textstream&, const Geometry::PointList<R>&); 
     template<class R> textstream& operator<<(textstream&, const Geometry::Rectangle<R>&);
-    template<class R> textstream& operator<<(textstream&, const Geometry::Zonotope<R,R>&);
-    template<class R> textstream& operator<<(textstream&, const Geometry::Zonotope<Numeric::Interval<R>,R>&);
-    template<class R> textstream& operator<<(textstream&, const Geometry::Zonotope< Numeric::Interval<R>,Numeric::Interval<R> >&);
+    template<class R, class Tag> textstream& operator<<(textstream&, const Geometry::Zonotope<R,Tag>&);
     template<class R> textstream& operator<<(textstream&, const Geometry::Polytope<R>&); 
     template<class R> textstream& operator<<(textstream&, const Geometry::Polyhedron<R>&); 
     template<class R> textstream& operator<<(textstream&, const Geometry::RectangularSet<R>&);
@@ -200,21 +204,15 @@ namespace Ariadne {
     }
       
  
-    template<class R> inline
+    template<class R, class Tag> inline
     textstream&
-    operator<<(textstream& txt, const Geometry::Zonotope<R>& z)
+    operator<<(textstream& txt, const Geometry::Zonotope<R,Tag>& z)
     {  
-      return txt << z.vertices();
+      txt.ostream() << z;
+      return txt;
     }
 
        
-    template<class R> inline
-    textstream&
-    operator<<(textstream& txt, const Geometry::Parallelotope<R>& p)
-    {
-      return txt << p.vertices();
-    }
-
        
     template<class R> inline
     textstream&

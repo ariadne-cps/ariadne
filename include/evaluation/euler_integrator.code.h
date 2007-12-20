@@ -44,7 +44,6 @@
 #include "linear_algebra/matrix.h"
 
 #include "geometry/rectangle.h"
-#include "geometry/zonotope.h"
 
 #include "system/vector_field.h"
 

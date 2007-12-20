@@ -57,7 +57,7 @@ namespace Ariadne {
                        const Numeric::Interval<R>&,
                        const Geometry::Rectangle<R>&) const;
 
-      /*! \brief A C0 algorithm for integrating forward a zonotope up to a certain time. */
+      /*! \brief A C0 algorithm for integrating forward a rectangle up to a certain time. */
       virtual Geometry::Rectangle<R> 
       reachability_step(const System::VectorFieldInterface<R>&,
                         const Geometry::Rectangle<R>&,

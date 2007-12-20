@@ -67,7 +67,6 @@ test_lohner_integrator()
 
   Bounder<R> bounder;
   LohnerIntegrator<R> lohner=LohnerIntegrator<R>();
-  C1LohnerIntegrator<R> c1lohner=C1LohnerIntegrator<R>();
   AffineIntegrator<R> affine=AffineIntegrator<R>();
 
   Rectangle<R> bb=Rectangle<R>("[0.25,1.25]x[0.00,1.00]");
@@ -91,8 +90,8 @@ test_lohner_integrator()
   const VectorFieldInterface<R>& vf=avf;
 
   Rectangle<R> bb0,bb1,bb2,bb3,bb4;
-  Zonotope<I,I> z0,z1,z2,z3,z4,zr1,zr2,zr3,zr4;
-  Zonotope<I,I> c0z, c1z,afz;
+  Zonotope<R,UniformErrorTag> z0,z1,z2,z3,z4,zr1,zr2,zr3,zr4;
+  Zonotope<R,UniformErrorTag> c0z, c1z,afz;
   z0=z;
 
   bb0=bounder.estimate_flow_bounds(avf,z0.bounding_box(),qh);
@@ -117,45 +116,25 @@ test_lohner_integrator()
   epsfstream eps;
   eps.open("test_lohner_integrator-1.eps",bb);
   eps << fill_colour(green)
-      << over_approximation(zr1) << over_approximation(zr2)
-      << over_approximation(zr3) << over_approximation(zr4);
+      << zr1 << zr2
+      << zr3 << zr4;
   eps << fill_colour(blue)
-      << over_approximation(z1) << over_approximation(z2)
-      << over_approximation(z3) << over_approximation(z4);
+      << z1<< z2
+      << z3 << z4;
   eps << fill_colour(yellow)
-      << over_approximation(z0);
+      << z0;
   eps.close();
 
 
-  cout << "\nC1LohnerIntegrator\n";
-  bb0=bounder.estimate_flow_bounds(avf,z0.bounding_box(),qh);
-  z1=c1lohner.integration_step(avf,z0,h,bb0);
-  bb1=bounder.estimate_flow_bounds(avf,z1.bounding_box(),qh);
-  z2=c1lohner.integration_step(avf,z1,h,bb1);
-  bb2=bounder.estimate_flow_bounds(avf,z2.bounding_box(),qh);
-  z3=c1lohner.integration_step(avf,z2,h,bb2);
-  bb3=bounder.estimate_flow_bounds(avf,z3.bounding_box(),qh);
-  z4=c1lohner.integration_step(avf,z3,h,bb3);
-  cout << "z0=" << z0 << "\n"
-       << "z1=" << z1 << "\nz4=" << z2 << "\n"
-       << "z3=" << z3 << "\nz4=" << z4 << endl;
-  zr1=c1lohner.reachability_step(avf,z0,h,bb0);
-  zr2=c1lohner.reachability_step(avf,z1,h,bb1);
-  zr3=c1lohner.reachability_step(avf,z2,h,bb2);
-  zr4=c1lohner.reachability_step(avf,z3,h,bb3);
-  cout << "zr1=" << zr1 << "\nzr2=" << zr2 << "\n"
-       << "zr3=" << zr3 << "\nzr4=" << zr4 << "\n" << endl;
-  c1z=z4;
-  
   Point<I> pt0 = z0.centre();
   bb0=bounder.estimate_flow_bounds(avf,Rectangle<R>(pt0),qh);
   Rectangle<R> rbb0=bounder.refine_flow_bounds(avf,Rectangle<R>(pt0),bb0,qh);
   Rectangle<R> rrbb0=bounder.refine_flow_bounds(avf,Rectangle<R>(pt0),rbb0,qh);
-  Point<I> pt1 = c1lohner.flow_step(avf,pt0,h,bb0);
-  Point<I> rpt1 = c1lohner.flow_step(avf,pt0,h,rbb0);
-  Point<I> rrpt1 = c1lohner.flow_step(avf,pt0,h,rrbb0);
-  Matrix<I> mx1 = c1lohner.flow_step_jacobian(avf,pt0,h,bb0);
-  Matrix<I> rmx1 = c1lohner.flow_step_jacobian(avf,pt0,h,rbb0);
+  Point<I> pt1 = lohner.flow_step(avf,pt0,h,bb0);
+  Point<I> rpt1 = lohner.flow_step(avf,pt0,h,rbb0);
+  Point<I> rrpt1 = lohner.flow_step(avf,pt0,h,rrbb0);
+  Matrix<I> mx1 = lohner.flow_step_jacobian(avf,pt0,h,bb0);
+  Matrix<I> rmx1 = lohner.flow_step_jacobian(avf,pt0,h,rbb0);
   cout << "pt0=" << pt0 << "\n"
        << "bb0=" << bb0 << ", rbb0=" << rbb0 << ", rrbb0=" << rrbb0 << "\n"
        << "pt1=" << pt1 << ", rpt1=" << rpt1 << ", rrpt1=" << rrpt1 << "\n"
@@ -163,13 +142,13 @@ test_lohner_integrator()
   
   eps.open("test_lohner_integrator-2.eps",bb);
   eps << fill_colour(green)
-      << over_approximation(zr1) << over_approximation(zr2)
-      << over_approximation(zr3) << over_approximation(zr4);
+      << zr1 << zr2
+      << zr3 << zr4;
   eps << fill_colour(blue)
-      << over_approximation(z1) << over_approximation(z2)
-      << over_approximation(z3) << over_approximation(z4);
+      << z1 << z2
+      << z3 << z4;
   eps << fill_colour(yellow)
-      << over_approximation(z0);
+      << z0;
   eps.close();
   
   cout << "\nAffineIntegrator\n";
@@ -190,13 +169,13 @@ test_lohner_integrator()
   
   eps.open("test_lohner_integrator-3.eps",bb);
   eps << fill_colour(green)
-      << over_approximation(zr1) << over_approximation(zr2)
-      << over_approximation(zr3) << over_approximation(zr4);
+      << zr1 << zr2
+      << zr3 << zr4;
   eps << fill_colour(blue)
-      << over_approximation(z1) << over_approximation(z2)
-      << over_approximation(z3) << over_approximation(z4);
+      << z1 << z2
+      << z3 << z4;
   eps << fill_colour(yellow)
-      << over_approximation(z0);
+      << z0;
   eps.close();
   
   cout << endl;

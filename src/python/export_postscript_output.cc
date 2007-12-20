@@ -1,9 +1,8 @@
 /***************************************************************************
  *            python/export_postscript_output.cc
  *
- *  21 October 2005
- *  Copyright  2005  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright  2005-7  Alberto Casagrande, Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -27,7 +26,6 @@
 
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
-#include "geometry/parallelotope.h"
 #include "geometry/zonotope.h"
 #include "geometry/polytope.h"
 #include "geometry/polyhedron.h"
@@ -50,8 +48,7 @@ using namespace boost::python;
 template<class S> inline void write(epsfstream& eps, const S& s) { eps << s; }
 template<class R> inline void write_rectangle(epsfstream& eps, const Rectangle<R>& r) { eps << r; }
 template<class R> inline void write_rectangular_set(epsfstream& eps, const RectangularSet<R>& r) { eps << r; }
-template<class R> inline void write_parallelotope(epsfstream& eps, const Parallelotope<R>& p) { eps << p; }
-template<class R0,class R1> inline void write_zonotope(epsfstream& eps, const Zonotope<R0,R1>& z) { eps << z; }
+template<class R,class Tag> inline void write_zonotope(epsfstream& eps, const Zonotope<R,Tag>& z) { eps << z; }
 template<class R> inline void write_polytope(epsfstream& eps, const Polytope<R>& p) { eps << p; }
 template<class R> inline void write_polyhedron(epsfstream& eps, const Polyhedron<R>& p) { eps << p; }
 template<class R> inline void write_polyhedral_set(epsfstream& eps, const PolyhedralSet<R>& p) { eps << p; }
@@ -90,18 +87,15 @@ void export_postscript_output()
     .def("set_fill_style",(void(epsfstream::*)(bool))&epsfstream::set_fill_style)
     .def("write",&write< Rectangle<FloatPy> >)
     .def("write",&write< RectangularSet<FloatPy> >)
-    .def("write",&write< Parallelotope<FloatPy> >)
-    .def("write",&write< Zonotope<FloatPy,FloatPy> >)
-    .def("write",&write< Zonotope<Interval<FloatPy>,FloatPy> >)
-    .def("write",&write< Parallelotope<FloatPy> >)
+    .def("write",&write< Zonotope<FloatPy,ExactTag> >)
+    .def("write",&write< Zonotope<FloatPy,UniformErrorTag> >)
     .def("write",&write< Polytope<FloatPy> >)
     .def("write",&write< Polyhedron<FloatPy> >)
     .def("write",&write< PolyhedralSet<FloatPy> >)
     .def("write",&write< ListSet< Rectangle<FloatPy> > >)
-    .def("write",&write< ListSet< Parallelotope<FloatPy> > >)
     .def("write",&write< ListSet< Polytope<FloatPy> > >)
-    .def("write",&write< ListSet< Zonotope<FloatPy,FloatPy> > >)
-    .def("write",&write< ListSet< Zonotope<Interval<FloatPy>,FloatPy> > >)
+    .def("write",&write< ListSet< Zonotope<FloatPy,ExactTag> > >)
+    .def("write",&write< ListSet< Zonotope<FloatPy,UniformErrorTag> > >)
     .def("write",&write< GridCell<FloatPy> >)
     .def("write",&write< GridBlock<FloatPy> >)
     .def("write",&write< GridCellListSet<FloatPy> >)

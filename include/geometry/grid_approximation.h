@@ -48,15 +48,15 @@ namespace Ariadne {
     template<class R> GridCellListSet<R> outer_approximation(const Polyhedron<R>& pltp, const Grid<R>& g);
     template<class R> GridCellListSet<R> inner_approximation(const Polyhedron<R>& pltp, const Grid<R>& g);
  
-    template<class R, class R0, class R1> GridCellListSet<R> outer_approximation(const Zonotope<R0,R1>& z, const Grid<R>& g);
-    template<class R, class R0, class R1> GridCellListSet<R> inner_approximation(const Zonotope<R0,R1>& z, const Grid<R>& g);
+    template<class R, class Tag> GridCellListSet<R> outer_approximation(const Zonotope<R,Tag>& z, const Grid<R>& g);
+    template<class R, class Tag> GridCellListSet<R> inner_approximation(const Zonotope<R,Tag>& z, const Grid<R>& g);
  
     template<class R> GridCellListSet<R> outer_approximation(const SetInterface<R>& set, const Grid<R>& g);
     template<class R> GridCellListSet<R> inner_approximation(const SetInterface<R>& set, const Grid<R>& g);
 
     template<class R> GridCellListSet<R> fuzzy_outer_approximation(const Polyhedron<R>& p, const Grid<R>& g);
     template<class R> GridCellListSet<R> fuzzy_outer_approximation(const Polytope<R>& p, const Grid<R>& g);
-    template<class R, class R0, class R1> GridCellListSet<R> fuzzy_outer_approximation(const Zonotope<R0,R1>& r, const Grid<R>& g);
+    template<class R, class Tag> GridCellListSet<R> fuzzy_outer_approximation(const Zonotope<R,Tag>& r, const Grid<R>& g);
   
     template<class R, class BS> GridMaskSet<R> outer_approximation(const ListSet<BS>& ls, const FiniteGrid<R>& fg);
  

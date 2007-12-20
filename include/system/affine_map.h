@@ -84,20 +84,6 @@ namespace Ariadne {
       /*! \brief  An approximation to the image of an approximate point. */
       Geometry::Point<F> image(const Geometry::Point<F>& A) const;
       
-      /*! \brief  The map applied to a zonotope. */
-      Geometry::Zonotope<F> image(const Geometry::Zonotope<F>& A) const;
-
-      /*! \brief  The map applied to a polytope. */
-      Geometry::Polytope<F> image(const Geometry::Polytope<F>& A) const;
-
-      /*! \brief  The map applied to a zonotope basic set. */
-      Geometry::Zonotope<F> operator() (const Geometry::Zonotope<F>& A) const {
-        return this->image(A); }
-              
-      /*! \brief  The map applied to a polytopic basic set. */
-      Geometry::Polytope<F> operator() (const Geometry::Polytope<R>& A) const{
-        return this->image(A); };
-              
       /*! \brief  The linear transformation of the map. */
       const LinearAlgebra::Matrix<R>& A() const { return _a; }
       /*! \brief  The offset vector of the map. */

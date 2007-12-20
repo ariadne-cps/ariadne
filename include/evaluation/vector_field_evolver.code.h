@@ -44,7 +44,6 @@
 #include "linear_algebra/matrix.h"
 
 #include "geometry/rectangle.h"
-#include "geometry/parallelotope.h"
 #include "geometry/zonotope.h"
 #include "geometry/list_set.h"
 #include "geometry/grid.h"
@@ -134,7 +133,7 @@ template<class R>
 Evaluation::VectorFieldEvolver<R>::VectorFieldEvolver(const EvolutionParameters<R>& parameters)
   : _parameters(new EvolutionParameters<R>(parameters)),
     _bounder(new Bounder<R>()),
-    _integrator(new C1LohnerIntegrator<R>())
+    _integrator(new LohnerIntegrator<R>())
 {
 }
 
@@ -165,7 +164,7 @@ Evaluation::VectorFieldEvolver<R>::subdivide(const basic_set_type& set) const
   ARIADNE_LOG(2,"VectorFieldEvolver::subdivide(BasicSet set)\n");
   ARIADNE_LOG(3,"  set="<<set<<"\n");
   ARIADNE_LOG(3,"  radius="<<set.radius()<<"\n");
-  basic_set_type regularised_set(Geometry::orthogonal_over_approximation(set));
+  basic_set_type regularised_set=Geometry::orthogonal_over_approximation(set);
   ARIADNE_LOG(3,"  regularised_set="<<regularised_set<<"\n");
   list_set_type subdivided_set=Geometry::subdivide(regularised_set);
   ARIADNE_LOG(3,"  subdivided_set="<<subdivided_set<<"\n");
@@ -221,7 +220,7 @@ Evaluation::VectorFieldEvolver<R>::integration_step(const vector_field_type& vec
                                                     const basic_set_type& initial_set, 
                                                     time_type& step_size) const
 {
-  ARIADNE_LOG(2,"BasicSet VectorFieldEvolver::integration_step(VectorFieldInterface,BasicSet,Time&,Zonotope)\n");
+  ARIADNE_LOG(2,"BasicSet VectorFieldEvolver::integration_step(VectorFieldInterface,BasicSet,Time&)\n");
   bounding_set_type bounding_set=this->_bounder->flow_bounds(vector_field,initial_set.bounding_box(),step_size);
   return this->_integrator->integration_step(vector_field,initial_set,step_size,bounding_set);
 }
@@ -233,7 +232,7 @@ Evaluation::VectorFieldEvolver<R>::reachability_step(const vector_field_type& ve
                                                      const basic_set_type& initial_set, 
                                                      time_type& step_size) const
 {
-  ARIADNE_LOG(2,"BasicSet VectorFieldEvolver::reachability_step(VectorFieldInterface,BasicSet,Time&,Zonotope)\n");
+  ARIADNE_LOG(2,"BasicSet VectorFieldEvolver::reachability_step(VectorFieldInterface,BasicSet,Time&)\n");
   bounding_set_type bounding_set=this->_bounder->flow_bounds(vector_field,initial_set.bounding_box(),step_size);
   return this->_integrator->reachability_step(vector_field,initial_set,step_size,bounding_set);
 }
@@ -566,10 +565,10 @@ Evaluation::VectorFieldEvolver<R>::lower_integrate(const VectorFieldInterface<R>
     bs=*bs_iter;
     h=step_size;
     
-    while(t!=time && bs.radius()<=maximum_set_radius) {
+    while(t!=time && radius(bs)<=maximum_set_radius) {
       if(verbosity>5) { 
         std::clog << "      t=" << approx<double>(t) << "  h=" << approx<double>(h) << "  c=" << bs.centre() 
-                  << "  r=" << bs.radius() << std::endl;
+                  << "  r=" << radius(bs) << std::endl;
       }
       h=min(time_type(time-t),h);
       bb=this->flow_bounds(vf,bs,h);
@@ -580,7 +579,7 @@ Evaluation::VectorFieldEvolver<R>::lower_integrate(const VectorFieldInterface<R>
     
     if(verbosity>5) { 
       std::clog << "      t=" << approx<double>(t) << "  c=" << bs.centre() 
-                << "  r=" << bs.radius() << std::endl;
+                << "  r=" << radius(bs) << std::endl;
     }
     
     if(t==time) {
@@ -633,10 +632,10 @@ Evaluation::VectorFieldEvolver<R>::lower_reach(const VectorFieldInterface<R>& ve
     bs=*bs_iter;
     h=step_size;
     
-    while(t!=time && bs.radius()<=maximum_set_radius) {
+    while(t!=time && radius(bs)<=maximum_set_radius) {
       if(verbosity>5) { 
         std::clog << "      t=" << approx<double>(t) << "  h=" << approx<double>(h) << "  c=" << bs.centre() 
-                  << "  r=" << bs.radius() << std::endl;
+                  << "  r=" << radius(bs) << std::endl;
       }
       h=min(time_type(time-t),h);
       bb=this->flow_bounds(vf,bs,h);
@@ -648,7 +647,7 @@ Evaluation::VectorFieldEvolver<R>::lower_reach(const VectorFieldInterface<R>& ve
     } 
     if(verbosity>5) { 
       std::clog << "      t=" << approx<double>(t) << "  c=" << bs.centre() 
-                << "  r=" << bs.radius() << std::endl;
+                << "  r=" << radius(bs) << std::endl;
     }
   }
   if(verbosity>6) { std::clog << "  final_set=" << final_set << std::endl; }
@@ -697,10 +696,10 @@ Evaluation::VectorFieldEvolver<R>::lower_reach(const VectorFieldInterface<R>& ve
     bs=*bs_iter;
     h=step_size;
     
-    while(t!=time && bs.radius()<=maximum_set_radius) {
+    while(t!=time && radius(bs)<=maximum_set_radius) {
       if(verbosity>5) { 
         std::clog << "      t=" << approx<double>(t) << "  h=" << approx<double>(h) << "  c=" << bs.centre() 
-                  << "  r=" << bs.radius() << std::endl;
+                  << "  r=" << radius(bs) << std::endl;
       }
       h=min(time_type(time-t),h);
       bb=this->flow_bounds(vf,bs,h);
@@ -719,7 +718,7 @@ Evaluation::VectorFieldEvolver<R>::lower_reach(const VectorFieldInterface<R>& ve
     } 
     if(verbosity>5) { 
       std::clog << "      t=" << approx<double>(t) << "  c=" << bs.centre() 
-                << "  r=" << bs.radius() << std::endl;
+                << "  r=" << radius(bs) << std::endl;
     }
   }
   if(verbosity>6) { std::clog << "  final_set=" << final_set << std::endl; }
@@ -778,7 +777,7 @@ Evaluation::VectorFieldEvolver<R>::upper_integrate(const VectorFieldInterface<R>
     working_sets.pop_back();
     
     if(verbosity>5) { std::clog << "  t=" << t << "  bs=" << bs << std::endl; }
-    if(bs.radius()>maximum_set_radius) {
+    if(radius(bs)>maximum_set_radius) {
       if(verbosity>5) { std::clog << "    subdividing..." << std::flush; }
       ListSet<BS> subdivisions=this->subdivide(bs);
       if(verbosity>5) { std::clog << "    subdivisions.size() =" << subdivisions.size() << std::endl; }
@@ -794,18 +793,18 @@ Evaluation::VectorFieldEvolver<R>::upper_integrate(const VectorFieldInterface<R>
       do {
         if(verbosity>5) { 
           std::clog << "      t=" << approx<double>(t) << "  h=" << approx<double>(h) << "  c=" << bs.centre() 
-                    << "  r=" << bs.radius() << std::endl;
+                    << "  r=" << radius(bs) << std::endl;
         }
         h=min(time_type(time-t),h);
         bb=this->flow_bounds(vf,bs,h);
         bs=this->integration_step(vf,bs,h,bb);
         t=t+h;  // t is the time remaining!
         h=min(time_type(2*h),step_size);
-      } while(t!=time && bs.radius()<=maximum_set_radius);
+      } while(t!=time && radius(bs)<=maximum_set_radius);
       
       if(verbosity>5) { 
         std::clog << "      t=" << approx<double>(t) << "  c=" << bs.centre() 
-                  << "  r=" << bs.radius() << std::endl;
+                  << "  r=" << radius(bs) << std::endl;
       }
       
       if(t==time) {
@@ -871,9 +870,9 @@ Evaluation::VectorFieldEvolver<R>::upper_reach(const VectorFieldInterface<R>& ve
     h=step_size;
     working_sets.pop_back();
     
-    if(verbosity>6) { std::clog << "  t=" << approx<double>(t) << "  bs.centre()=" << bs.centre() << "  bs.radius() = " << bs.radius() << std::endl; }
+    if(verbosity>6) { std::clog << "  t=" << approx<double>(t) << "  bs.centre()=" << bs.centre() << "  radius(bs) = " << radius(bs) << std::endl; }
     
-    if(bs.radius()>maximum_set_radius) {
+    if(radius(bs)>maximum_set_radius) {
       if(verbosity>5) { std::clog << "  subdividing..." << std::endl; }
       ListSet<BS> subdivisions=this->subdivide(bs);
       if(verbosity>5) { std::clog << "    subdivisions.size() =" << subdivisions.size() << std::endl; }
@@ -901,7 +900,7 @@ Evaluation::VectorFieldEvolver<R>::upper_reach(const VectorFieldInterface<R>& ve
           bs=integration_step(vf,bs,h,bb);
           t=t+h;
         }
-      } while(t!=time && bs.radius()<=maximum_set_radius);
+      } while(t!=time && radius(bs)<=maximum_set_radius);
       
       if(t<time) {
         working_sets.push_back(timed_set_type(t,bs));
@@ -1046,8 +1045,8 @@ Evaluation::VectorFieldEvolver<R>::bounded_integrate(const System::VectorFieldIn
     mask_set.clear();
     for(typename ListSet<BS>::const_iterator iter=finish_set.begin(); iter!=finish_set.end(); ++iter) {
       const BS& p=*iter;
-      if(p.radius()>spacial_tolerance) {
-        if(verbosity > 6) { std::clog << "Splitting, radius=" << p.radius() << "\n" << p << "\n"; }
+      if(radius(p)>spacial_tolerance) {
+        if(verbosity > 6) { std::clog << "Splitting, radius=" << radius(p) << "\n" << p << "\n"; }
         mask_set.adjoin_outer_approximation(p);
       }
       else {

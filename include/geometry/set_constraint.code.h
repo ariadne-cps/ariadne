@@ -76,7 +76,7 @@ template<class R>
 typename Geometry::SetConstraint<R>::A 
 Geometry::SetConstraint<R>::value(const Point<A>& pt) const
 {
-  Rectangle<R> r(pt);
+  Box<R> r(pt);
   tribool inside=this->_set_ptr->superset(r);
   tribool outside=this->_set_ptr->disjoint(r);
   if(inside==true) {

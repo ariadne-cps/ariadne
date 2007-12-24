@@ -91,10 +91,10 @@ namespace Ariadne {
       SetInterface<R>* clone() const { return this->_ptr->clone(); }
       dimension_type dimension() const { return this->_ptr->dimension(); }
       tribool contains(const Point<R>& pt) const { return this->_ptr->contains(pt); }
-      tribool disjoint(const Rectangle<R>& r) const { return this->_ptr->disjoint(r); }
-      tribool superset(const Rectangle<R>& r) const { return this->_ptr->superset(r); }
-      tribool subset(const Rectangle<R>& r) const { return this->_ptr->subset(r); }
-      Rectangle<R> bounding_box() const { return this->_ptr->bounding_box(); }
+      tribool disjoint(const Box<R>& r) const { return this->_ptr->disjoint(r); }
+      tribool superset(const Box<R>& r) const { return this->_ptr->superset(r); }
+      tribool subset(const Box<R>& r) const { return this->_ptr->subset(r); }
+      Box<R> bounding_box() const { return this->_ptr->bounding_box(); }
       std::ostream& write(std::ostream& os) const { return this->_ptr->write(os); }
      private:
       int* _ref_count;
@@ -143,10 +143,10 @@ namespace Ariadne {
         return *this; 
       }
 
-      //! \brief Construct by making a copy of a Rectangle. 
-      SetReference(const Rectangle<R>& r) : _ptr(new RectangularSet<R>(r)) { }
+      //! \brief Construct by making a copy of a Box. 
+      SetReference(const Box<R>& r) : _ptr(new RectangularSet<R>(r)) { }
 
-      //! \brief Construct by making a copy of a Rectangle. 
+      //! \brief Construct by making a copy of a Box. 
       SetReference(const Polyhedron<R>& p) : _ptr(new PolyhedralSet<R>(p)) { }
 
       //! \brief Convert to an ordinary reference. 
@@ -161,12 +161,12 @@ namespace Ariadne {
       SetInterface<R>* clone() const { return this->_ptr->clone(); }
       dimension_type dimension() const { return this->_ptr->dimension(); }
       tribool contains(const Point<R>& pt) const { return this->_ptr->contains(pt); }
-      tribool superset(const Rectangle<R>& r) const { return this->_ptr->superset(r); }
-      tribool intersects(const Rectangle<R>& r) const { return this->_ptr->intersects(r); }
-      tribool disjoint(const Rectangle<R>& r) const { return this->_ptr->disjoint(r); }
-      tribool subset(const Rectangle<R>& r) const { return this->_ptr->subset(r); }
+      tribool superset(const Box<R>& r) const { return this->_ptr->superset(r); }
+      tribool intersects(const Box<R>& r) const { return this->_ptr->intersects(r); }
+      tribool disjoint(const Box<R>& r) const { return this->_ptr->disjoint(r); }
+      tribool subset(const Box<R>& r) const { return this->_ptr->subset(r); }
       tribool bounded() const { return this->_ptr->bounded(); }
-      Rectangle<R> bounding_box() const { return this->_ptr->bounding_box(); }
+      Box<R> bounding_box() const { return this->_ptr->bounding_box(); }
       std::ostream& write(std::ostream& os) const { return this->_ptr->write(os); }
     };
 

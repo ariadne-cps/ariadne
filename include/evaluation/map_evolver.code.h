@@ -176,10 +176,10 @@ Evaluation::MapEvolver<R>::parameters()
 
 
 template<class R>
-Geometry::Rectangle<R>
-Evaluation::MapEvolver<R>::apply(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& r) const
+Geometry::Box<R>
+Evaluation::MapEvolver<R>::apply(const System::MapInterface<R>& f, const Geometry::Box<R>& r) const
 {
-  ARIADNE_LOG(4,"BS MapEvolver::apply(MapInterface,Rectangle)\n");
+  ARIADNE_LOG(4,"BS MapEvolver::apply(MapInterface,Box)\n");
   return this->_orbiter->apply(f,r);
 }
 
@@ -203,18 +203,18 @@ Evaluation::MapEvolver<R>::apply(const System::MapInterface<R>& f, const Geometr
 
 
 template<class R>
-Geometry::DiscreteTimeOrbit< Numeric::Integer, Geometry::Rectangle<R> >
-Evaluation::MapEvolver<R>::orbit(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& r, const Numeric::Integer& n) const
+Geometry::DiscreteTimeOrbit< Numeric::Integer, Geometry::Box<R> >
+Evaluation::MapEvolver<R>::orbit(const System::MapInterface<R>& f, const Geometry::Box<R>& r, const Numeric::Integer& n) const
 {
-  ARIADNE_LOG(4,"DiscreteTimeOrbit<Integer,Rectangle> MapEvolver::orbit(MapInterface,RectangleRectangle)\n");
+  ARIADNE_LOG(4,"DiscreteTimeOrbit<Integer,Box> MapEvolver::orbit(MapInterface,BoxBox)\n");
   return this->_orbiter->orbit(f,r,n,Numeric::inf<R>());
 }
 
 template<class R>
-Geometry::DiscreteTimeOrbit< Numeric::Integer, Geometry::Rectangle<R> >
-Evaluation::MapEvolver<R>::orbit(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& r, const Numeric::Integer& n, const R& mbsr) const
+Geometry::DiscreteTimeOrbit< Numeric::Integer, Geometry::Box<R> >
+Evaluation::MapEvolver<R>::orbit(const System::MapInterface<R>& f, const Geometry::Box<R>& r, const Numeric::Integer& n, const R& mbsr) const
 {
-  ARIADNE_LOG(4,"DiscreteTimeOrbit<Integer,Rectangle> MapEvolver::orbit(MapInterface,Rectangle,Integer,Float)\n");
+  ARIADNE_LOG(4,"DiscreteTimeOrbit<Integer,Box> MapEvolver::orbit(MapInterface,Box,Integer,Float)\n");
   return this->_orbiter->orbit(f,r,n,mbsr);
 }
 
@@ -234,10 +234,10 @@ Evaluation::MapEvolver<R>::orbit(const System::MapInterface<R>& f, const Geometr
 
 
 template<class R>
-Geometry::ListSet< Geometry::Rectangle<R> >
-Evaluation::MapEvolver<R>::image(const System::MapInterface<R>& f, const Geometry::ListSet< Geometry::Rectangle<R> >& initial_set) const 
+Geometry::ListSet< Geometry::Box<R> >
+Evaluation::MapEvolver<R>::image(const System::MapInterface<R>& f, const Geometry::ListSet< Geometry::Box<R> >& initial_set) const 
 {
-  ARIADNE_LOG(2,"GridMaskSet MapEvolver::image(MapInterface map, ListSet< Rectangle<Float> > initial_set)\n");
+  ARIADNE_LOG(2,"GridMaskSet MapEvolver::image(MapInterface map, ListSet< Box<Float> > initial_set)\n");
   return this->model_checker().image(this->discrete_map(f),initial_set);
 }
 
@@ -261,7 +261,7 @@ Evaluation::MapEvolver<R>::image(const System::MapInterface<R>& f,
                                  const Geometry::GridMaskSet<R>& initial_set, 
                                  const Geometry::GridMaskSet<R>& bounding_set) const 
 {
-  ARIADNE_LOG(2,"GridMaskSet MapEvolver::preimage(MapInterface,PartitionTreeSet,Rectangle)\n");
+  ARIADNE_LOG(2,"GridMaskSet MapEvolver::preimage(MapInterface,PartitionTreeSet,Box)\n");
   return this->model_checker().image(this->discrete_map(f),initial_set,bounding_set);
 }
 
@@ -283,41 +283,41 @@ template<class R>
 Geometry::PartitionTreeSet<R> 
 Evaluation::MapEvolver<R>::preimage(const System::MapInterface<R>& f, 
                                     const Geometry::PartitionTreeSet<R>& set, 
-                                    const Geometry::Rectangle<R>& bound) const 
+                                    const Geometry::Box<R>& bound) const 
 {
-  ARIADNE_LOG(2,"GridMaskSet MapEvolver::preimage(MapInterface,PartitionTreeSet,Rectangle)\n");
+  ARIADNE_LOG(2,"GridMaskSet MapEvolver::preimage(MapInterface,PartitionTreeSet,Box)\n");
   return this->model_checker().preimage(this->discrete_map(f),set,bound);
 }
 
 
 
 template<class R>
-Geometry::ListSet< Geometry::Rectangle<R> >
+Geometry::ListSet< Geometry::Box<R> >
 Evaluation::MapEvolver<R>::iterate(const System::MapInterface<R>& f, 
-                                   const Geometry::ListSet< Geometry::Rectangle<R> >& initial_set,
+                                   const Geometry::ListSet< Geometry::Box<R> >& initial_set,
                                    const Numeric::Integer& steps) const 
 {
-  ARIADNE_LOG(2,"ListSet<Rectangle> MapEvolver::initial(MapInterface,ListSet<Rectangle>,Integer)\n");
+  ARIADNE_LOG(2,"ListSet<Box> MapEvolver::initial(MapInterface,ListSet<Box>,Integer)\n");
   return this->model_checker().iterate(this->discrete_map(f),initial_set,steps);
 }
 
 template<class R>
-Geometry::ListSet< Geometry::Rectangle<R> >
+Geometry::ListSet< Geometry::Box<R> >
 Evaluation::MapEvolver<R>::reach(const System::MapInterface<R>& f, 
-                                 const Geometry::ListSet< Geometry::Rectangle<R> >& initial_set,
+                                 const Geometry::ListSet< Geometry::Box<R> >& initial_set,
                                  const Numeric::Integer& steps) const 
 {
-  ARIADNE_LOG(2,"ListSet<Rectangle> MapEvolver::reach(MapInterface,ListSet<Rectangle>,Integer)\n");
+  ARIADNE_LOG(2,"ListSet<Box> MapEvolver::reach(MapInterface,ListSet<Box>,Integer)\n");
   return this->model_checker().reach(this->discrete_map(f),initial_set,steps);
 }
 
 
 template<class R>
-Geometry::ListSet< Geometry::Rectangle<R> >
+Geometry::ListSet< Geometry::Box<R> >
 Evaluation::MapEvolver<R>::lower_reach(const System::MapInterface<R>& f, 
-                                       const Geometry::ListSet< Geometry::Rectangle<R> >& initial_set) const 
+                                       const Geometry::ListSet< Geometry::Box<R> >& initial_set) const 
 {
-  ARIADNE_LOG(2,"ListSet<Rectangle> MapEvolver::(MapInterface map, ListSet<Rectangle> initial_set\n");
+  ARIADNE_LOG(2,"ListSet<Box> MapEvolver::(MapInterface map, ListSet<Box> initial_set\n");
   return this->model_checker().lower_reach(this->discrete_map(f),initial_set);
 }
 
@@ -363,13 +363,13 @@ Evaluation::MapEvolver<R>::verify(const System::MapInterface<R>& f,
   
   const Grid<R>& g=initial_set.grid();
   Combinatoric::LatticeBlock bd=safe_set.block();
-  Rectangle<R> bb=safe_set.bounding_box();
+  Box<R> bb=safe_set.bounding_box();
   GridMaskSet<R> reach(g,bd);
   GridCellListSet<R> found(g);
   GridCellListSet<R> cell_image(g);
   GridCellListSet<R> image(g);
   
-  Rectangle<R> r(g.dimension());
+  Box<R> r(g.dimension());
   
   found=initial_set;
   while(!subset(found,reach)) {
@@ -425,7 +425,7 @@ Evaluation::MapEvolver<R>::preimage(const System::MapInterface<R>& map,
   using namespace Geometry;
   ARIADNE_LOG(2,"SetInterface* MapEvolver::preimage(MapInterface map, SetInterface set)\n");
   ARIADNE_LOG(3,"set="<<set<<"\n");
-  Rectangle<R> preimage_bounding_box=bound.bounding_box();
+  Box<R> preimage_bounding_box=bound.bounding_box();
   Grid<R> preimage_grid(map.argument_dimension(),this->parameters().grid_length());
   Grid<R> image_grid(map.result_dimension(),this->parameters().grid_length());
   GridMaskSet<R> grid_image_set(image_grid,set.bounding_box());
@@ -448,27 +448,27 @@ Evaluation::MapEvolver<R>::iterate(const System::MapInterface<R>& f,
   ARIADNE_LOG(2,"SetInterface* MapEvolver::iterate(MapInterface,SetInterface,Integer)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   ARIADNE_LOG(3,"steps="<<steps<<"\n");
-  const ListSet< Rectangle<R> >* list_initial_set_ptr=dynamic_cast<const ListSet< Rectangle<R> >*>(&initial_set);
+  const ListSet< Box<R> >* list_initial_set_ptr=dynamic_cast<const ListSet< Box<R> >*>(&initial_set);
   ARIADNE_LOG(4,"list_initial_set_ptr="<<list_initial_set_ptr<<"\n");
   if(list_initial_set_ptr) {
-    return new ListSet< Rectangle<R> >(this->iterate(f,*list_initial_set_ptr,steps));
+    return new ListSet< Box<R> >(this->iterate(f,*list_initial_set_ptr,steps));
   }
   
   ARIADNE_CHECK_BOUNDED(initial_set,"SetInterface* MapEvolver::iterate(MapInterface,SetInterface,Integer)");
   
-  ListSet< Rectangle<R> > list_initial_set;
+  ListSet< Box<R> > list_initial_set;
   if(dynamic_cast<const RectangularSet<R>*>(&initial_set)) {
     ARIADNE_LOG(4,"Cast to RectangularSet<R>\n");
   }
   
   Grid<R> grid(initial_set.dimension(),this->parameters().grid_length());
-  Rectangle<R> bounding_box=initial_set.bounding_box();
+  Box<R> bounding_box=initial_set.bounding_box();
   GridMaskSet<R> gms(grid,bounding_box);
   gms.adjoin_inner_approximation(initial_set);
   ARIADNE_LOG(4,"gms="<<gms);
-  list_initial_set=ListSet< Rectangle<R> >(gms);
+  list_initial_set=ListSet< Box<R> >(gms);
   
-  return new ListSet< Rectangle<R> >(this->iterate(f,list_initial_set,steps));      
+  return new ListSet< Box<R> >(this->iterate(f,list_initial_set,steps));      
 }
 
 template<class R>
@@ -482,27 +482,27 @@ Evaluation::MapEvolver<R>::reach(const System::MapInterface<R>& f,
   ARIADNE_LOG(2,"SetInterface* MapEvolver::reach(MapInterface,SetInterface,Integer)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   ARIADNE_LOG(3,"steps="<<steps<<"\n");
-  const ListSet< Rectangle<R> >* list_initial_set_ptr=dynamic_cast<const ListSet< Rectangle<R> >*>(&initial_set);
+  const ListSet< Box<R> >* list_initial_set_ptr=dynamic_cast<const ListSet< Box<R> >*>(&initial_set);
   ARIADNE_LOG(4,"list_initial_set_ptr="<<list_initial_set_ptr<<"\n");
   if(list_initial_set_ptr) {
-    return new ListSet< Rectangle<R> >(this->reach(f,*list_initial_set_ptr,steps));
+    return new ListSet< Box<R> >(this->reach(f,*list_initial_set_ptr,steps));
   }
   
   ARIADNE_CHECK_BOUNDED(initial_set,"SetInterface* MapEvolver::reach(MapInterface,SetInterface,Integer)");
   
-  ListSet< Rectangle<R> > list_initial_set;
+  ListSet< Box<R> > list_initial_set;
   if(dynamic_cast<const RectangularSet<R>*>(&initial_set)) {
     ARIADNE_LOG(4,"Cast to RectangularSet<R>\n");
   }
   
   Grid<R> grid(initial_set.dimension(),this->parameters().grid_length());
-  Rectangle<R> bounding_box=initial_set.bounding_box();
+  Box<R> bounding_box=initial_set.bounding_box();
   GridMaskSet<R> gms(grid,bounding_box);
   gms.adjoin_inner_approximation(initial_set);
   ARIADNE_LOG(4,"gms="<<gms);
-  list_initial_set=ListSet< Rectangle<R> >(gms);
+  list_initial_set=ListSet< Box<R> >(gms);
   
-  return new ListSet< Rectangle<R> >(this->reach(f,list_initial_set,steps));      
+  return new ListSet< Box<R> >(this->reach(f,list_initial_set,steps));      
 }
 
 
@@ -516,24 +516,24 @@ Evaluation::MapEvolver<R>::lower_reach(const System::MapInterface<R>& f,
   ARIADNE_LOG(2,"SetInterface* MapEvolver::lower_reach(MapInterface,SetInterface)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   
-  const ListSet< Rectangle<R> >* rectangle_list_initial_set_ptr=dynamic_cast<const ListSet< Rectangle<R> >*>(&initial_set);
+  const ListSet< Box<R> >* rectangle_list_initial_set_ptr=dynamic_cast<const ListSet< Box<R> >*>(&initial_set);
   ARIADNE_LOG(4,"rectangle_list_initial_set_ptr="<<rectangle_list_initial_set_ptr<<"\n");
   if(rectangle_list_initial_set_ptr) {
-    return new ListSet< Rectangle<R> >(this->lower_reach(f,*rectangle_list_initial_set_ptr));
+    return new ListSet< Box<R> >(this->lower_reach(f,*rectangle_list_initial_set_ptr));
   }
   
   ARIADNE_CHECK_BOUNDED(initial_set,"SetInterface* MapEvolver::lower_reach(MapInterface,SetInterface)");
   
-  ListSet< Rectangle<R> > list_initial_set;
+  ListSet< Box<R> > list_initial_set;
   if(dynamic_cast<const RectangularSet<R>*>(&initial_set)) {
     ARIADNE_LOG(4,"Cast to RectangularSet<R>\n");
   }
   
   Grid<R> grid(initial_set.dimension(),this->parameters().grid_length());
-  ListSet< Rectangle<R> > rls=Geometry::point_approximation(initial_set,grid);
+  ListSet< Box<R> > rls=Geometry::point_approximation(initial_set,grid);
   ARIADNE_LOG(4,"rls="<<rls);
   
-  return new ListSet< Rectangle<R> >(this->lower_reach(f,rls));      
+  return new ListSet< Box<R> >(this->lower_reach(f,rls));      
 }
 
 
@@ -543,7 +543,7 @@ Geometry::SetInterface<R>*
 Evaluation::MapEvolver<R>::chainreach(const System::MapInterface<R>& map, 
                                       const Geometry::SetInterface<R>& initial_set) const
 {
-  Geometry::RectangularSet<R> bounding_set(this->_parameters->bounding_box(map.argument_dimension()));
+  Geometry::Box<R> bounding_set(this->_parameters->bounding_box(map.argument_dimension()));
   return this->chainreach(map,initial_set,bounding_set);
 }
 
@@ -552,18 +552,17 @@ template<class R>
 Geometry::SetInterface<R>*
 Evaluation::MapEvolver<R>::chainreach(const System::MapInterface<R>& map, 
                                       const Geometry::SetInterface<R>& initial_set, 
-                                      const Geometry::SetInterface<R>& bounding_set) const
+                                      const Geometry::Box<R>& bounding_set) const
 {
   using namespace Geometry;
   ARIADNE_LOG(2,"SetInterface* MapEvolver::chainreach(MapInterface,SetInterface,SetInterface)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n"<<"bounding_set="<<bounding_set<<"\n");
   
   ARIADNE_CHECK_BOUNDED(bounding_set,"SetInterface* MapEvolver::chainreach(MapInterface map, SetInterface initial_set, SetInterface bounding_set)");
-  Rectangle<R> bounding_box=bounding_set.bounding_box();
   Grid<R> grid(bounding_set.dimension(),this->parameters().grid_length());
-  FiniteGrid<R> finite_grid(grid,bounding_box);
+  FiniteGrid<R> finite_grid(grid,bounding_set);
   GridMaskSet<R> grid_bounding_set(finite_grid);
-  grid_bounding_set.adjoin_outer_approximation(bounding_set);
+  grid_bounding_set.adjoin_over_approximation(bounding_set);
   GridMaskSet<R> grid_initial_set(finite_grid);
   grid_initial_set.adjoin_outer_approximation(initial_set);
   
@@ -582,7 +581,7 @@ Evaluation::MapEvolver<R>::viable(const System::MapInterface<R>& map,
   ARIADNE_LOG(2,"SetInterface* MapEvolver::viable(MapInterface,SetInterface)\n");
   ARIADNE_LOG(3,"bounding_set="<<bounding_set<<"\n");
   ARIADNE_CHECK_BOUNDED(bounding_set,"SetInterface* MapEvolver::viable(MapInterface map, SetInterface bounding_set)");
-  Rectangle<R> bounding_box=bounding_set.bounding_box();
+  Box<R> bounding_box=bounding_set.bounding_box();
   Grid<R> grid(bounding_set.dimension(),this->parameters().grid_length());
   GridMaskSet<R> grid_bounding_set(grid,bounding_box);
   grid_bounding_set.adjoin_outer_approximation(bounding_set);
@@ -601,7 +600,7 @@ Evaluation::MapEvolver<R>::verify(const System::MapInterface<R>& f,
   ARIADNE_LOG(2,"triboolEvaluation::MapEvolver::verify(MapInterface,SetInterface,SetInterface)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n"<<"safe_set="<<safe_set<<"\n");
   ARIADNE_CHECK_BOUNDED(safe_set,"SetInterface* MapEvolver::verify(MapInterface map, SetInterface initial_set, SetInterface safe_set)");
-  Rectangle<R> bounding_box=safe_set.bounding_box();
+  Box<R> bounding_box=safe_set.bounding_box();
   Grid<R> grid(safe_set.dimension(),this->parameters().grid_length());
   FiniteGrid<R> finite_grid(grid,bounding_box);
   GridMaskSet<R> grid_inner_safe_set(finite_grid);
@@ -667,7 +666,7 @@ Evaluation::MapEvolver<R>::control_synthesis(const System::DiscreteTimeSystem<R>
   for(typename GridMaskSet<R>::const_iterator state_iter=state_bounding_set.begin();
       state_iter!=state_bounding_set.end(); ++state_iter)
     {
-      Point<I> state=static_cast< Rectangle<R> >(*state_iter);
+      Point<I> state=static_cast< Box<R> >(*state_iter);
       
       for(typename GridMaskSet<R>::const_iterator input_iter=input_bounding_set.begin();
           input_iter!=input_bounding_set.end(); ++input_iter)
@@ -675,12 +674,12 @@ Evaluation::MapEvolver<R>::control_synthesis(const System::DiscreteTimeSystem<R>
           std::pair<LatticeCell,LatticeCell> control = std::make_pair(state_iter->lattice_set(),input_iter->lattice_set());
           discretization.insert(std::make_pair(control,LatticeCellListSet(state_space_dimension)));
           
-          Point<I> input = static_cast< Rectangle<R> >(*input_iter);
+          Point<I> input = static_cast< Box<R> >(*input_iter);
           
           for(typename GridMaskSet<R>::const_iterator noise_iter=noise_bounding_set.begin();
               noise_iter!=noise_bounding_set.end(); ++noise_iter)
             {
-              Point<I> noise = static_cast< Rectangle<R> >(*noise_iter);
+              Point<I> noise = static_cast< Box<R> >(*noise_iter);
               
               Point<I> image = f.image(state,input,noise);
               

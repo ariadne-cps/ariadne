@@ -38,7 +38,7 @@ namespace Ariadne {
   namespace Geometry {
 
     template<class R> class Point;
-    template<class R> class Rectangle;
+    template<class R> class Box;
       
     //! \ingroup SetInterface
     /*! \brief An abstract base class for general sets. */
@@ -60,18 +60,18 @@ namespace Ariadne {
       virtual tribool contains(const Point<R>&) const = 0;
      
       /*! \brief Tests if the set is a superset of a rectangle. */
-      virtual tribool superset(const Rectangle<R>&) const = 0;
+      virtual tribool superset(const Box<R>&) const = 0;
       /*! \brief Tests if the set intersects a rectangle. */
-      virtual tribool intersects(const Rectangle<R>&) const = 0;
+      virtual tribool intersects(const Box<R>&) const = 0;
       /*! \brief Tests if the set is disjoint from a rectangle. */
-      virtual tribool disjoint(const Rectangle<R>&) const = 0;
+      virtual tribool disjoint(const Box<R>&) const = 0;
       /*! \brief Tests if the set is a subset of a rectangle. */
-      virtual tribool subset(const Rectangle<R>&) const = 0;
+      virtual tribool subset(const Box<R>&) const = 0;
       
       /*! \brief Tests if the set is bounded. */
       virtual tribool bounded() const = 0;
       /*! \brief A rectangle containing the set. Throws Geometry::UnboundedSet exception if the set is unbounded. */
-      virtual Rectangle<R> bounding_box() const = 0;
+      virtual Box<R> bounding_box() const = 0;
 
       /*! \brief Write to an output stream. 
        *  Called by operator<<(std::ostream&, const SetInterface<R>&) to dynamically dispatch stream output. 
@@ -82,15 +82,15 @@ namespace Ariadne {
       //@{ 
       //! \name Binary geometric predicates
       /*! \brief Tests if the set \a s is disjoint from the rectangle \a r. */
-      friend tribool disjoint(const SetInterface<R>& s, const Rectangle<R>& r);
+      friend tribool disjoint(const SetInterface<R>& s, const Box<R>& r);
       /*! \brief Tests if the rectangle \a r is disjoint from the set \a s. */
-      friend tribool disjoint(const Rectangle<R>& r, const SetInterface<R>& s);
+      friend tribool disjoint(const Box<R>& r, const SetInterface<R>& s);
     
       /*! \brief Tests if the rectangle \a r is a subset of the set \a s. */
-      friend tribool subset(const Rectangle<R>& r, const SetInterface<R>& s);
+      friend tribool subset(const Box<R>& r, const SetInterface<R>& s);
     
       /*! \brief Tests if the set \a s is a subset of the rectangle \a r. */
-      friend tribool subset(const SetInterface<R>& s, const Rectangle<R>& r);
+      friend tribool subset(const SetInterface<R>& s, const Box<R>& r);
       //@}
 
       //@{ 
@@ -108,23 +108,23 @@ namespace Ariadne {
     }
 
 
-    template<class R> inline tribool disjoint(const SetInterface<R>& s, const Rectangle<R>& r) {
+    template<class R> inline tribool disjoint(const SetInterface<R>& s, const Box<R>& r) {
       return s.disjoint(r);
     }
     
-    template<class R> inline tribool disjoint(const Rectangle<R>& r, const SetInterface<R>& s) {
+    template<class R> inline tribool disjoint(const Box<R>& r, const SetInterface<R>& s) {
       return s.disjoint(r);
     }
     
-    template<class R> inline tribool superset(const SetInterface<R>& s, const Rectangle<R>& r) {
+    template<class R> inline tribool superset(const SetInterface<R>& s, const Box<R>& r) {
       return s.superset(r);
     }
     
-    template<class R> inline tribool subset(const Rectangle<R>& r, const SetInterface<R>& s) {
+    template<class R> inline tribool subset(const Box<R>& r, const SetInterface<R>& s) {
       return s.superset(r);
     }
     
-    template<class R> inline tribool subset(const SetInterface<R>& s, const Rectangle<R>& r) {
+    template<class R> inline tribool subset(const SetInterface<R>& s, const Box<R>& r) {
       return s.subset(r);
     }
     

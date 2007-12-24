@@ -49,7 +49,7 @@ namespace Ariadne {
     template<class R> class GridTreeCell;
 
     /* External class declarations. */
-    template<class R> class Rectangle;
+    template<class R> class Box;
 
 
 
@@ -57,7 +57,7 @@ namespace Ariadne {
      * \ingroup GridTree
      * \brief A rectangular cell in a grid tree.
      *
-     * Defined as a SubdivisionTreeCell within a base cell given as a Rectangle<R>.
+     * Defined as a SubdivisionTreeCell within a base cell given as a Box<R>.
      *
      * Satisfies the requirements of a RectangleExpression.
      */
@@ -102,7 +102,7 @@ namespace Ariadne {
     
     
     template<class R>
-    GridTreeCell<R> over_approximation(const Rectangle<R>& r, const Grid<R>& g, uint depth);
+    GridTreeCell<R> over_approximation(const Box<R>& r, const Grid<R>& g, uint depth);
     
     
     template<class R> 

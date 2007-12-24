@@ -25,6 +25,7 @@
 #include "python/float.h"
 
 #include "geometry/point.h"
+#include "geometry/box.h"
 #include "geometry/rectangle.h"
 #include "geometry/zonotope.h"
 #include "geometry/polytope.h"
@@ -46,6 +47,7 @@ using namespace Ariadne::Python;
 using namespace boost::python;
 
 template<class S> inline void write(epsfstream& eps, const S& s) { eps << s; }
+template<class R> inline void write_box(epsfstream& eps, const Box<R>& r) { eps << r; }
 template<class R> inline void write_rectangle(epsfstream& eps, const Rectangle<R>& r) { eps << r; }
 template<class R> inline void write_rectangular_set(epsfstream& eps, const RectangularSet<R>& r) { eps << r; }
 template<class R,class Tag> inline void write_zonotope(epsfstream& eps, const Zonotope<R,Tag>& z) { eps << z; }
@@ -54,15 +56,15 @@ template<class R> inline void write_polyhedron(epsfstream& eps, const Polyhedron
 template<class R> inline void write_polyhedral_set(epsfstream& eps, const PolyhedralSet<R>& p) { eps << p; }
 template<class BS> inline void write_list_set(epsfstream& eps, const ListSet<BS>& ls) { eps << ls; }
 template<class R> inline void write_polytope_list_set(epsfstream& eps, const ListSet< Polytope<R> >& s) { eps << s; }
-template<class R> inline void write_grid_cell(epsfstream& eps, const GridCell<R>& r) { eps << Rectangle<R>(r); }
-template<class R> inline void write_grid_block(epsfstream& eps, const GridBlock<R>& r) { eps << Rectangle<R>(r); }
+template<class R> inline void write_grid_cell(epsfstream& eps, const GridCell<R>& r) { eps << Box<R>(r); }
+template<class R> inline void write_grid_block(epsfstream& eps, const GridBlock<R>& r) { eps << Box<R>(r); }
 template<class R> inline void write_grid_cell_list_set(epsfstream& eps, const GridCellListSet<R>& s) { eps << s; }
 template<class R> inline void write_grid_mask_set(epsfstream& eps, const GridMaskSet<R>& s) { eps << s; }
 template<class R> inline void write_partition_tree_set(epsfstream& eps, const PartitionTreeSet<R>& s) { eps << s; }
 template<class R> inline void write_finite_grid(epsfstream& eps, const FiniteGrid<R>& fg) { eps << fg; }
 template<class R> inline void write_partition_tree(epsfstream& eps, const PartitionTree<R>& s) { eps << s; }
-template<class R> inline void epsfstream_open(epsfstream& eps, const Ariadne::Geometry::Rectangle<R>& bbox, int ix, int iy) { eps.open("Ariadne",bbox,ix,iy); }
-template<class R> inline void epsfstream_open_with_defaults(epsfstream& eps, const Ariadne::Geometry::Rectangle<R>& bbox) { eps.open("Ariadne",bbox); }
+template<class R> inline void epsfstream_open(epsfstream& eps, const Ariadne::Geometry::Box<R>& bbox, int ix, int iy) { eps.open("Ariadne",bbox,ix,iy); }
+template<class R> inline void epsfstream_open_with_defaults(epsfstream& eps, const Ariadne::Geometry::Box<R>& bbox) { eps.open("Ariadne",bbox); }
 inline void epsfstream_close(epsfstream& eps) { eps.close(); }
 
 void export_postscript_output()
@@ -73,9 +75,9 @@ void export_postscript_output()
   ;
     
   class_<epsfstream, boost::noncopyable>("EpsPlot",init<>())
-    .def("open",(void(epsfstream::*)(const char* fn,const Rectangle<FloatPy>&))&epsfstream::open<FloatPy>)
-    .def("open",(void(epsfstream::*)(const char* fn,const Rectangle<FloatPy>&,uint,uint))&epsfstream::open<FloatPy>)
-    .def("open",(void(epsfstream::*)(const char* fn,const Rectangle<FloatPy>&,const PlanarProjectionMap&))&epsfstream::open<FloatPy>)
+    .def("open",(void(epsfstream::*)(const char* fn,const Box<FloatPy>&))&epsfstream::open<FloatPy>)
+    .def("open",(void(epsfstream::*)(const char* fn,const Box<FloatPy>&,uint,uint))&epsfstream::open<FloatPy>)
+    .def("open",(void(epsfstream::*)(const char* fn,const Box<FloatPy>&,const PlanarProjectionMap&))&epsfstream::open<FloatPy>)
     .def("open",(void(epsfstream::*)(const char*,const Rectangle2d&,const PlanarProjectionMap&))&epsfstream::open)
     .def("open",&epsfstream_open_with_defaults<FloatPy>)
     .def("close",&epsfstream_close)
@@ -85,14 +87,14 @@ void export_postscript_output()
     .def("set_fill_colour",(void(epsfstream::*)(const Colour&))&epsfstream::set_fill_colour)
     .def("set_line_style",(void(epsfstream::*)(bool))&epsfstream::set_line_style)
     .def("set_fill_style",(void(epsfstream::*)(bool))&epsfstream::set_fill_style)
-    .def("write",&write< Rectangle<FloatPy> >)
+    .def("write",&write< Box<FloatPy> >)
     .def("write",&write< RectangularSet<FloatPy> >)
     .def("write",&write< Zonotope<FloatPy,ExactTag> >)
     .def("write",&write< Zonotope<FloatPy,UniformErrorTag> >)
     .def("write",&write< Polytope<FloatPy> >)
     .def("write",&write< Polyhedron<FloatPy> >)
     .def("write",&write< PolyhedralSet<FloatPy> >)
-    .def("write",&write< ListSet< Rectangle<FloatPy> > >)
+    .def("write",&write< ListSet< Box<FloatPy> > >)
     .def("write",&write< ListSet< Polytope<FloatPy> > >)
     .def("write",&write< ListSet< Zonotope<FloatPy,ExactTag> > >)
     .def("write",&write< ListSet< Zonotope<FloatPy,UniformErrorTag> > >)

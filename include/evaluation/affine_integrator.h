@@ -73,26 +73,26 @@ namespace Ariadne {
       virtual Geometry::Point<I> flow_step(const System::VectorFieldInterface<R>& vf,
                                            const Geometry::Point<I>& p,
                                            const Numeric::Interval<R>& t,
-                                           const Geometry::Rectangle<R>& bb) const;
+                                           const Geometry::Box<R>& bb) const;
      
       /*! \brief Integrate a basic set for within a bounding set. */
       virtual LinearAlgebra::Matrix<I> flow_step_jacobian(const System::VectorFieldInterface<R>& vf,
                                                           const Geometry::Point<I>& p,
                                                           const Numeric::Interval<R>& r,
-                                                          const Geometry::Rectangle<R>& bb) const;
+                                                          const Geometry::Box<R>& bb) const;
      
 
       virtual Geometry::Zonotope<R,Geometry::UniformErrorTag> 
       integration_step(const System::VectorFieldInterface<R>& vector_field,
                        const Geometry::Zonotope<R,Geometry::UniformErrorTag>& initial_set,
                        const Numeric::Interval<R>& step_size,
-                       const Geometry::Rectangle<R>& bounding_set) const;
+                       const Geometry::Box<R>& bounding_set) const;
       
       virtual Geometry::Zonotope<R,Geometry::UniformErrorTag> 
       reachability_step(const System::VectorFieldInterface<R>& affine_vector_field,
                         const Geometry::Zonotope<R,Geometry::UniformErrorTag>& initial_set,
                         const Numeric::Interval<R>& step_size,
-                        const Geometry::Rectangle<R>& bounding_set) const;
+                        const Geometry::Box<R>& bounding_set) const;
 
      public:
       /*! \brief Integrate \a initial point for time \a step_size. */

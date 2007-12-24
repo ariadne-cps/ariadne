@@ -115,7 +115,7 @@ namespace Ariadne {
       const BS& continuous_state_set() const { return this->_continuous_state_set; } 
 
       /*! \brief */
-      Rectangle<R> bounding_box() const { return this->_continuous_state_set.bounding_box(); }
+      Box<R> bounding_box() const { return this->_continuous_state_set.bounding_box(); }
 
       /*! \brief */
       bool operator==(const HybridTimedBasicSet<BS>& other) const { 

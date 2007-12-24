@@ -80,8 +80,8 @@ Evaluation::ModelChecker<R>::parameters() const
 
 
 template<class R> inline
-Geometry::Rectangle<R> 
-Evaluation::ModelChecker<R>::apply(const System::DiscreteMapInterface<R>& f, const Geometry::Rectangle<R>& r) const
+Geometry::Box<R> 
+Evaluation::ModelChecker<R>::apply(const System::DiscreteMapInterface<R>& f, const Geometry::Box<R>& r) const
 {
   return f.apply(r);
 }
@@ -101,15 +101,15 @@ Evaluation::ModelChecker<R>::apply(const System::DiscreteMapInterface<R>& f, con
 }
 
 template<class R> inline
-Geometry::DiscreteTimeOrbit< Numeric::Integer,Geometry::Rectangle<R> > 
-Evaluation::ModelChecker<R>::orbit(const System::DiscreteMapInterface<R>& f, const Geometry::Rectangle<R>& r, const Numeric::Integer& n) const
+Geometry::DiscreteTimeOrbit< Numeric::Integer,Geometry::Box<R> > 
+Evaluation::ModelChecker<R>::orbit(const System::DiscreteMapInterface<R>& f, const Geometry::Box<R>& r, const Numeric::Integer& n) const
 {
   return f.orbit(r,n,Numeric::inf<R>());
 }
 
 template<class R> inline
-Geometry::DiscreteTimeOrbit< Numeric::Integer,Geometry::Rectangle<R> > 
-Evaluation::ModelChecker<R>::orbit(const System::DiscreteMapInterface<R>& f, const Geometry::Rectangle<R>& r, const Numeric::Integer& n, const R& s) const
+Geometry::DiscreteTimeOrbit< Numeric::Integer,Geometry::Box<R> > 
+Evaluation::ModelChecker<R>::orbit(const System::DiscreteMapInterface<R>& f, const Geometry::Box<R>& r, const Numeric::Integer& n, const R& s) const
 {
   return f.orbit(r,n,s);
 }
@@ -174,14 +174,14 @@ Evaluation::ModelChecker<R>::clone() const
 
 
 template<class R>
-Geometry::ListSet< Geometry::Rectangle<R> >
-Evaluation::ModelChecker<R>::image(const System::DiscreteMapInterface<R>& f, const Geometry::ListSet< Geometry::Rectangle<R> >& ds) const 
+Geometry::ListSet< Geometry::Box<R> >
+Evaluation::ModelChecker<R>::image(const System::DiscreteMapInterface<R>& f, const Geometry::ListSet< Geometry::Box<R> >& ds) const 
 {
-  ARIADNE_LOG(2,"GridMaskSet ModelChecker::image(DiscreteMapInterface map, ListSet< Rectangle<Float> > initial_set)\n");
+  ARIADNE_LOG(2,"GridMaskSet ModelChecker::image(DiscreteMapInterface map, ListSet< Box<Float> > initial_set)\n");
   ARIADNE_LOG(3,"initial_set="<<ds<<"\n");
-  Geometry::ListSet< Geometry::Rectangle<R> > result(f.result_dimension());
-  Geometry::Rectangle<R> r,fr;
-  for(typename Geometry::ListSet< Geometry::Rectangle<R> >::const_iterator iter=ds.begin(); iter!=ds.end(); ++iter) {
+  Geometry::ListSet< Geometry::Box<R> > result(f.result_dimension());
+  Geometry::Box<R> r,fr;
+  for(typename Geometry::ListSet< Geometry::Box<R> >::const_iterator iter=ds.begin(); iter!=ds.end(); ++iter) {
     result.push_back(this->apply(f,*iter));
   }
   return result;
@@ -280,9 +280,9 @@ template<class R>
 Geometry::PartitionTreeSet<R> 
 Evaluation::ModelChecker<R>::preimage(const System::DiscreteMapInterface<R>& f, 
                                     const Geometry::PartitionTreeSet<R>& set, 
-                                    const Geometry::Rectangle<R>& bound) const 
+                                    const Geometry::Box<R>& bound) const 
 {
-  ARIADNE_LOG(2,"GridMaskSet ModelChecker::preimage(DiscreteMapInterface,PartitionTreeSet,Rectangle)\n");
+  ARIADNE_LOG(2,"GridMaskSet ModelChecker::preimage(DiscreteMapInterface,PartitionTreeSet,Box)\n");
   ARIADNE_LOG(3,"set="<<set<<"\nbounding_set="<<bound);
   using namespace Numeric;
   using namespace Geometry;
@@ -294,48 +294,48 @@ Evaluation::ModelChecker<R>::preimage(const System::DiscreteMapInterface<R>& f,
 
 
 template<class R>
-Geometry::ListSet< Geometry::Rectangle<R> >
+Geometry::ListSet< Geometry::Box<R> >
 Evaluation::ModelChecker<R>::iterate(const System::DiscreteMapInterface<R>& f, 
-                                   const Geometry::ListSet< Geometry::Rectangle<R> >& initial_set,
+                                   const Geometry::ListSet< Geometry::Box<R> >& initial_set,
                                    const Numeric::Integer& steps) const 
 {
   using namespace Numeric;
   using namespace Geometry;
   typedef Numeric::Interval<R> I;
-  ARIADNE_LOG(2,"ListSet<Rectangle> ModelChecker::reach(DiscreteMapInterface,ListSet<Rectangle>\n");
+  ARIADNE_LOG(2,"ListSet<Box> ModelChecker::reach(DiscreteMapInterface,ListSet<Box>\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
-  ListSet< Rectangle<R> > result;
+  ListSet< Box<R> > result;
   R mbsr=inf<R>();
-  Rectangle<R> r;
-  for(typename ListSet< Rectangle<R> >::const_iterator r_iter=initial_set.begin();
+  Box<R> r;
+  for(typename ListSet< Box<R> >::const_iterator r_iter=initial_set.begin();
       r_iter!=initial_set.end(); ++r_iter)
   {
     ARIADNE_LOG(6,"  computing iterate for r="<<*r_iter);
     r=*r_iter;
-    DiscreteTimeOrbit< Integer,Rectangle<R> > orbit=this->orbit(f,r,steps);
+    DiscreteTimeOrbit< Integer,Box<R> > orbit=this->orbit(f,r,steps);
     result.adjoin(orbit.final().set());
   }
   return result;
 }
 
 template<class R>
-Geometry::ListSet< Geometry::Rectangle<R> >
+Geometry::ListSet< Geometry::Box<R> >
 Evaluation::ModelChecker<R>::reach(const System::DiscreteMapInterface<R>& f, 
-                                 const Geometry::ListSet< Geometry::Rectangle<R> >& initial_set,
+                                 const Geometry::ListSet< Geometry::Box<R> >& initial_set,
                                  const Numeric::Integer& steps) const 
 {
   using namespace Numeric;
   using namespace Geometry;
   typedef Numeric::Interval<R> I;
-  ARIADNE_LOG(2,"ListSet<Rectangle> ModelChecker::reach(DiscreteMapInterface,ListSet<Rectangle>\n");
+  ARIADNE_LOG(2,"ListSet<Box> ModelChecker::reach(DiscreteMapInterface,ListSet<Box>\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
-  ListSet< Rectangle<R> > result; 
-  Rectangle<R> r;
-  for(typename ListSet< Rectangle<R> >::const_iterator r_iter=initial_set.begin();
+  ListSet< Box<R> > result; 
+  Box<R> r;
+  for(typename ListSet< Box<R> >::const_iterator r_iter=initial_set.begin();
       r_iter!=initial_set.end(); ++r_iter)
   {
     r=*r_iter;
-    DiscreteTimeOrbit< Integer,Rectangle<R> > orbit=this->orbit(f,r,steps);
+    DiscreteTimeOrbit< Integer,Box<R> > orbit=this->orbit(f,r,steps);
     result.adjoin(orbit.final().set());
   }
   return result;
@@ -343,24 +343,24 @@ Evaluation::ModelChecker<R>::reach(const System::DiscreteMapInterface<R>& f,
 
 
 template<class R>
-Geometry::ListSet< Geometry::Rectangle<R> >
+Geometry::ListSet< Geometry::Box<R> >
 Evaluation::ModelChecker<R>::lower_reach(const System::DiscreteMapInterface<R>& f, 
-                                       const Geometry::ListSet< Geometry::Rectangle<R> >& initial_set) const 
+                                       const Geometry::ListSet< Geometry::Box<R> >& initial_set) const 
 {
   using namespace Numeric;
   using namespace Geometry;
   typedef Numeric::Interval<R> I;
-  ARIADNE_LOG(2,"ListSet<Rectangle> ModelChecker::lower_reach(DiscreteMapInterface,ListSet<Rectangle>\n");
+  ARIADNE_LOG(2,"ListSet<Box> ModelChecker::lower_reach(DiscreteMapInterface,ListSet<Box>\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   size_type n=this->_parameters->maximum_number_of_steps();
   R mbsr=this->parameters().maximum_basic_set_radius();
-  ListSet< Rectangle<R> > result;
-  for(typename ListSet< Rectangle<R> >::const_iterator r_iter=initial_set.begin();
+  ListSet< Box<R> > result;
+  for(typename ListSet< Box<R> >::const_iterator r_iter=initial_set.begin();
       r_iter!=initial_set.end(); ++r_iter)
   {
     ARIADNE_LOG(6,"  computing reach for r="<<*r_iter);
-    Rectangle<R> r=*r_iter;
-    DiscreteTimeOrbit< Integer,Rectangle<R> > orbit=this->orbit(f,r,n,mbsr);
+    Box<R> r=*r_iter;
+    DiscreteTimeOrbit< Integer,Box<R> > orbit=this->orbit(f,r,n,mbsr);
     ARIADNE_LOG(6,"  iterated "<<orbit.steps()<<" time steps");
     result.adjoin(orbit.reach());
   }
@@ -391,7 +391,7 @@ Evaluation::ModelChecker<R>::chainreach(const System::DiscreteMapInterface<R>& f
   GridCellListSet<R> found(g);
   GridCellListSet<R> image(g);
   
-  Rectangle<R> r(g.dimension());
+  Box<R> r(g.dimension());
   
   uint step=0;
   found=initial_set;
@@ -432,8 +432,8 @@ Evaluation::ModelChecker<R>::viable(const System::DiscreteMapInterface<R>& f,
   GridMaskSet<R> result(g,bd);
   GridCellListSet<R> unsafe(g);
   
-  Rectangle<R> r(g.dimension());
-  Rectangle<R> fr(g.dimension());
+  Box<R> r(g.dimension());
+  Box<R> fr(g.dimension());
   GridBlock<R> fgb(g);
   Zonotope<R> z(g.dimension());
   Zonotope<R> fz(g.dimension());
@@ -478,13 +478,13 @@ Evaluation::ModelChecker<R>::verify(const System::DiscreteMapInterface<R>& f,
   
   const Grid<R>& g=initial_set.grid();
   Combinatoric::LatticeBlock bd=safe_set.block();
-  Rectangle<R> bb=safe_set.bounding_box();
+  Box<R> bb=safe_set.bounding_box();
   GridMaskSet<R> reach(g,bd);
   GridCellListSet<R> found(g);
   GridCellListSet<R> cell_image(g);
   GridCellListSet<R> image(g);
   
-  Rectangle<R> r(g.dimension());
+  Box<R> r(g.dimension());
   
   found=initial_set;
   while(!subset(found,reach)) {
@@ -560,7 +560,7 @@ Evaluation::ModelChecker<R>::control_synthesis(const System::DiscreteTimeSystem<
   for(typename GridMaskSet<R>::const_iterator state_iter=state_bounding_set.begin();
       state_iter!=state_bounding_set.end(); ++state_iter)
     {
-      Point<I> state=static_cast< Rectangle<R> >(*state_iter);
+      Point<I> state=static_cast< Box<R> >(*state_iter);
       
       for(typename GridMaskSet<R>::const_iterator input_iter=input_bounding_set.begin();
           input_iter!=input_bounding_set.end(); ++input_iter)
@@ -568,12 +568,12 @@ Evaluation::ModelChecker<R>::control_synthesis(const System::DiscreteTimeSystem<
           std::pair<LatticeCell,LatticeCell> control = std::make_pair(state_iter->lattice_set(),input_iter->lattice_set());
           discretization.insert(std::make_pair(control,LatticeCellListSet(state_space_dimension)));
           
-          Point<I> input = static_cast< Rectangle<R> >(*input_iter);
+          Point<I> input = static_cast< Box<R> >(*input_iter);
           
           for(typename GridMaskSet<R>::const_iterator noise_iter=noise_bounding_set.begin();
               noise_iter!=noise_bounding_set.end(); ++noise_iter)
             {
-              Point<I> noise = static_cast< Rectangle<R> >(*noise_iter);
+              Point<I> noise = static_cast< Box<R> >(*noise_iter);
               
               Point<I> image = f.image(state,input,noise);
               

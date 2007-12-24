@@ -108,7 +108,7 @@ Geometry::LevelSet<R>::contains(const Point<R>& pt) const
 
 template<class R>
 tribool 
-Geometry::LevelSet<R>::superset(const Rectangle<R>& r) const 
+Geometry::LevelSet<R>::superset(const Box<R>& r) const 
 {
   return false;
 }
@@ -116,7 +116,7 @@ Geometry::LevelSet<R>::superset(const Rectangle<R>& r) const
 
 template<class R>
 tribool 
-Geometry::LevelSet<R>::intersects(const Rectangle<R>& r) const 
+Geometry::LevelSet<R>::intersects(const Box<R>& r) const 
 {
   return !this->disjoint(r);
 }
@@ -124,7 +124,7 @@ Geometry::LevelSet<R>::intersects(const Rectangle<R>& r) const
 
 template<class R>
 tribool 
-Geometry::LevelSet<R>::disjoint(const Rectangle<R>& r) const 
+Geometry::LevelSet<R>::disjoint(const Box<R>& r) const 
 {
   const Function::FunctionInterface<R>& f=*this->_function_ptr;
   LinearAlgebra::Vector<A> v=r.position_vectors();
@@ -135,7 +135,7 @@ Geometry::LevelSet<R>::disjoint(const Rectangle<R>& r) const
 
 template<class R>
 tribool 
-Geometry::LevelSet<R>::subset(const Rectangle<R>& r) const 
+Geometry::LevelSet<R>::subset(const Box<R>& r) const 
 {
   return indeterminate;
 }
@@ -148,7 +148,7 @@ Geometry::LevelSet<R>::bounded() const
 }      
 
 template<class R>
-Geometry::Rectangle<R> 
+Geometry::Box<R> 
 Geometry::LevelSet<R>::bounding_box() const 
 {
   throw UnboundedSet("LevelSet::bounding_box(): cannot be computed in general case");

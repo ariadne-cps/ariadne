@@ -69,7 +69,7 @@ namespace Ariadne {
       tribool contains(const state_type& pt) const;
       
       /*! \brief A rectangle containing the given rectangle; returns a copy. */
-      Rectangle bounding_box() const;
+      Box bounding_box() const;
       //@}
 
       //@{
@@ -108,11 +108,11 @@ namespace Ariadne {
       /*! \brief Tests if the set contains a point. */
       friend tribool contains(const BasicSetConcept& bs, const state_type>& pt);
       /*! \brief Tests disjointness with a rectangle. */
-      friend tribool disjoint(const BasicSetConcept& bs, const Rectangle<real_type>& r);
+      friend tribool disjoint(const BasicSetConcept& bs, const Box<real_type>& r);
       /*! \brief Tests if the basic set is a subset of a rectangle. */
-      friend tribool subset(const BasicSetConcept& bs, const Rectangle<real_type>& r);
+      friend tribool subset(const BasicSetConcept& bs, const Box<real_type>& r);
       /*! \brief Tests if a rectangle is a subset of the basic set. */
-      friend tribool subset(const Rectangle<real_type>& s, const BasicSetConcept& bs);
+      friend tribool subset(const Box<real_type>& s, const BasicSetConcept& bs);
       //@}
 
       //@{ 

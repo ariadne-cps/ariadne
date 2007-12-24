@@ -39,11 +39,11 @@ void export_polynomial_map()
 {
 /*
   typedef FloatPy (RPolynomial::* PolyApplyPointFunc) (const RPoint&) const;
-  typedef RInterval (RPolynomial::* PolyApplyRectFunc) (const RRectangle&) const;
+  typedef RInterval (RPolynomial::* PolyApplyRectFunc) (const RBox&) const;
   typedef RPoint (RPolynomialMap::* PolyMapApplyPointFunc) (const RPoint&) const;
-  typedef RRectangle (RPolynomialMap::* PolyMapApplyRectFunc) (const RRectangle&) const;
+  typedef RBox (RPolynomialMap::* PolyMapApplyRectFunc) (const RBox&) const;
   typedef RMatrix (RPolynomialMap::* PolyMapDerivPointFunc) (const RPoint&) const;
-  typedef RIntervalMatrix (RPolynomialMap::* PolyMapDerivRectFunc) (const RRectangle&) const;
+  typedef RIntervalMatrix (RPolynomialMap::* PolyMapDerivRectFunc) (const RBox&) const;
   typedef const RPolynomialMatrix& (RPolynomialMap::* PolyMapDerivFunc) () const;
  
   class_<RMonomial>("Monomial",init<uint>())

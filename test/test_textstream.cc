@@ -48,7 +48,7 @@ using namespace std;
 
 int main() {
 
-  Rectangle<Flt> bbox(2);
+  Box<Flt> bbox(2);
 
   Point<Flt> pt("(0.0,0.0)");
 
@@ -87,10 +87,10 @@ int main() {
   cout << endl;
 
   // Test output of grid mask set
-  Rectangle<Flt> bb("[0,1]x[0,1]x[0,1]");
+  Box<Flt> bb("[0,1]x[0,1]x[0,1]");
   Grid<Flt> g(Vector<Flt>("[0.25,0.25,0.25]"));
   GridMaskSet<Flt> gms(g,bb);
-  Rectangle<Flt> r("[0.33,0.66]x[0.125,0.375]x[0.25,0.75]");
+  Box<Flt> r("[0.33,0.66]x[0.125,0.375]x[0.25,0.75]");
   cout << "gms.size()=" << gms.size() << endl;
   gms.adjoin_outer_approximation(r);
   cout << "gms.size()=" << gms.size() << endl;

@@ -54,7 +54,7 @@ namespace Ariadne {
       PolyhedralSet(const std::string& str)
         : SetInterface<R>(), _polyhedron(str) { }
       /*! \brief */
-      PolyhedralSet(const Rectangle<R>& r)
+      PolyhedralSet(const Box<R>& r)
         : SetInterface<R>(), _polyhedron(r) { }
       /*! \brief */
       PolyhedralSet(const Polytope<R>& p)
@@ -77,21 +77,21 @@ namespace Ariadne {
       /*! \brief */
       virtual tribool contains(const Point<R>& pt) const { return this->_polyhedron.contains(pt); }
       /*! \brief */
-      virtual tribool superset(const Rectangle<R>& r) const { 
+      virtual tribool superset(const Box<R>& r) const { 
         return Geometry::subset(r,this->_polyhedron); }
       /*! \brief */
-      virtual tribool intersects(const Rectangle<R>& r) const { 
+      virtual tribool intersects(const Box<R>& r) const { 
         return !Geometry::disjoint(r,this->_polyhedron); }
       /*! \brief */
-      virtual tribool disjoint(const Rectangle<R>& r) const { 
+      virtual tribool disjoint(const Box<R>& r) const { 
         return Geometry::disjoint(r,this->_polyhedron); }
       /*! \brief */
-      virtual tribool subset(const Rectangle<R>& r) const { 
+      virtual tribool subset(const Box<R>& r) const { 
         return Geometry::subset(this->_polyhedron,r); }
       /*! \brief */
       virtual tribool bounded() const { return this->_polyhedron.bounded(); }      
       /*! \brief */
-      virtual Rectangle<R> bounding_box() const { return this->_polyhedron.bounding_box(); }      
+      virtual Box<R> bounding_box() const { return this->_polyhedron.bounding_box(); }      
       /*! \brief */
       virtual std::ostream& write(std::ostream& os) const {
         return this->_polyhedron.write(os);

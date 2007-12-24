@@ -125,7 +125,7 @@ Geometry::GridCellListSet<R>::adjoin(const GridCellListSet<R>& cls)
 
 template<class R> inline
 void 
-Geometry::GridCellListSet<R>::adjoin_over_approximation(const Rectangle<R>& r) 
+Geometry::GridCellListSet<R>::adjoin_over_approximation(const Box<R>& r) 
 {
   this->adjoin(over_approximation(r,this->grid()));
 }

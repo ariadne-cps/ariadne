@@ -197,7 +197,7 @@ Output::PlanarProjectionMap::operator()(const Geometry::RectangleExpression<E>& 
 {
   Rectangle2d result; 
   const E& r=re();
-  ARIADNE_CHECK_DIMENSION(r,this->_d,"Rectangle2d PlanarProjectionMap::operator()(Rectangle<R> r)");
+  ARIADNE_CHECK_DIMENSION(r,this->_d,"Rectangle2d PlanarProjectionMap::operator()(Box<R> r)");
   result.lower_bound(0)=Numeric::approx<double>(r.lower_bound(this->_i));
   result.upper_bound(0)=Numeric::approx<double>(r.upper_bound(this->_i));
   result.lower_bound(1)=Numeric::approx<double>(r.lower_bound(this->_j));

@@ -106,7 +106,7 @@ test_polytope()
   
   cout << endl;
   
-  Rectangle<R> bbox=p.bounding_box();
+  Box<R> bbox=p.bounding_box();
   cout << "p.bounding_box()=" << bbox << endl;
   
   epsfstream eps;
@@ -116,7 +116,7 @@ test_polytope()
   
   cout << endl;
   
-  Rectangle<R> r("[-0.125,0.25]x[0.125,0.75]");
+  Box<R> r("[-0.125,0.25]x[0.125,0.75]");
   cout << "r=" << r << endl;
   p=Polytope<R>(r);
   cout << "Polytope(r)=" << p << endl;
@@ -146,7 +146,7 @@ test_polytope()
 
   cout << "oap2.size()=" << oap2.size() << endl;
   cout << "uap2.size()=" << uap2.size() << endl;
-  Rectangle<R> bbox2=pltp2.bounding_box().expand_by(0.25);
+  Box<R> bbox2=pltp2.bounding_box().neighbourhood(0.25);
   eps.open("test_polytope-2.eps",bbox2);
   eps << fill_colour(white) << pltp2.bounding_box();
   eps << fill_colour(cyan) << oap2;
@@ -192,7 +192,7 @@ test_polytope<Rational>()
   cout << "eplhd=" << eplhd << endl;
   
   // Test Polyhedron to Polytope conversion for degenerate case
-  Polyhedron<R> plhd(Rectangle<R>("[0,1]x[-1,2]x[-1,3]"));
+  Polyhedron<R> plhd(Box<R>("[0,1]x[-1,2]x[-1,3]"));
   Polytope<R> pltp(plhd);
   cout << "pltp=" << pltp << endl;
 

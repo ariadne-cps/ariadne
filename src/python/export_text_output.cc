@@ -46,7 +46,7 @@ using namespace Ariadne::Python;
 using namespace boost::python;
 
 template<class S> inline void write(textfstream& txt, const S& s) { txt << s; }
-template<class R> inline void write_rectangle(textfstream& txt, const Rectangle<R>& r) { txt << r; }
+template<class R> inline void write_rectangle(textfstream& txt, const Box<R>& r) { txt << r; }
 template<class R> inline void write_rectangular_set(textfstream& txt, const RectangularSet<R>& r) { txt << r; }
 template<class R,class Tag> inline void write_zonotope(textfstream& txt, const Zonotope<R,Tag>& z) { txt << z; }
 template<class R> inline void write_polytope(textfstream& txt, const Polytope<R>& p) { txt << p; }
@@ -54,8 +54,8 @@ template<class R> inline void write_polyhedron(textfstream& txt, const Polyhedro
 template<class R> inline void write_polyhedral_set(textfstream& txt, const PolyhedralSet<R>& p) { txt << p; }
 template<class BS> inline void write_list_set(textfstream& txt, const ListSet<BS>& ls) { txt << ls; }
 template<class R> inline void write_polytope_list_set(textfstream& txt, const ListSet< Polytope<R> >& s) { txt << s; }
-template<class R> inline void write_grid_cell(textfstream& txt, const GridCell<R>& r) { txt << Rectangle<R>(r); }
-template<class R> inline void write_grid_block(textfstream& txt, const GridBlock<R>& r) { txt << Rectangle<R>(r); }
+template<class R> inline void write_grid_cell(textfstream& txt, const GridCell<R>& r) { txt << Box<R>(r); }
+template<class R> inline void write_grid_block(textfstream& txt, const GridBlock<R>& r) { txt << Box<R>(r); }
 template<class R> inline void write_grid_cell_list_set(textfstream& txt, const GridCellListSet<R>& s) { txt << s; }
 template<class R> inline void write_grid_mask_set(textfstream& txt, const GridMaskSet<R>& s) { txt << s; }
 template<class R> inline void write_partition_tree_set(textfstream& txt, const PartitionTreeSet<R>& s) { txt << s; }
@@ -70,7 +70,7 @@ void export_text_output()
   class_<textfstream, boost::noncopyable>("TextFile",init<>())
     .def("open",(void(textfstream::*)(const char* fn))&textfstream::open)
     .def("close",&textfstream_close)
-		.def("write",&write< Rectangle<FloatPy> >)
+		.def("write",&write< Box<FloatPy> >)
     .def("write",&write< RectangularSet<FloatPy> >)
     .def("write",&write< Zonotope<FloatPy,ExactTag> >)
     .def("write",&write< Zonotope<FloatPy,UniformErrorTag> >)
@@ -78,7 +78,7 @@ void export_text_output()
     .def("write",&write< Polytope<FloatPy> >)
     .def("write",&write< Polyhedron<FloatPy> >)
     .def("write",&write< PolyhedralSet<FloatPy> >)
-    .def("write",&write< ListSet< Rectangle<FloatPy> > >)
+    .def("write",&write< ListSet< Box<FloatPy> > >)
     .def("write",&write< ListSet< Polytope<FloatPy> > >)
     .def("write",&write< ListSet< Zonotope<FloatPy,ExactTag> > >)
     .def("write",&write< ListSet< Zonotope<FloatPy,UniformErrorTag> > >)

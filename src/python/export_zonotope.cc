@@ -47,7 +47,7 @@ void export_zonotope()
   typedef Matrix<I> IMatrix;
   typedef Point<R> RPoint;
   typedef Point<I> IPoint;
-  typedef Rectangle<R> RRectangle;
+  typedef Box<R> RBox;
   typedef Zonotope<R,ExactTag> RZonotope;
   typedef Zonotope<R,UniformErrorTag> EZonotope;
   typedef Zonotope<R,IntervalTag> IZonotope;
@@ -56,7 +56,7 @@ void export_zonotope()
   class_<RZonotope> rzonotope_class("Zonotope",init<int>());
   rzonotope_class.def(init<RPoint,RMatrix>());
   rzonotope_class.def(init<RZonotope>());
-  rzonotope_class.def(init<RRectangle>());
+  rzonotope_class.def(init<RBox>());
   rzonotope_class.def("centre",(const RPoint&(RZonotope::*)()const)&RZonotope::centre,return_value_policy<copy_const_reference>());
   rzonotope_class.def("generators",(const RMatrix&(RZonotope::*)()const)&RZonotope::generators,return_value_policy<copy_const_reference>());
   rzonotope_class.def("dimension", &RZonotope::dimension);
@@ -66,16 +66,16 @@ void export_zonotope()
   rzonotope_class.def(self_ns::str(self));
  
   def("contains", (tribool(*)(const RZonotope&,const RPoint&))(&contains));
-  def("disjoint", (tribool(*)(const RZonotope&,const RRectangle&))(&disjoint));
-  def("subset", (tribool(*)(const RZonotope&,const RRectangle&))(&subset));
-  def("superset", (tribool(*)(const RZonotope&,const RRectangle&))(&superset));
-  def("subset", (tribool(*)(const RRectangle&,const RZonotope&))(&subset));
+  def("disjoint", (tribool(*)(const RZonotope&,const RBox&))(&disjoint));
+  def("subset", (tribool(*)(const RZonotope&,const RBox&))(&subset));
+  def("superset", (tribool(*)(const RZonotope&,const RBox&))(&superset));
+  def("subset", (tribool(*)(const RBox&,const RZonotope&))(&subset));
 
 
   class_<EZonotope> ezonotope_class("ErrorZonotope",init<int>());
   ezonotope_class.def(init<EZonotope>());
   ezonotope_class.def(init<RZonotope>());
-  ezonotope_class.def(init<RRectangle>());
+  ezonotope_class.def(init<RBox>());
   ezonotope_class.def("centre",(const IPoint&(EZonotope::*)()const)&EZonotope::centre,return_value_policy<copy_const_reference>());
   ezonotope_class.def("generators",(const RMatrix&(EZonotope::*)()const)&EZonotope::generators,return_value_policy<copy_const_reference>());
   ezonotope_class.def("dimension", &EZonotope::dimension);
@@ -111,13 +111,13 @@ void export_zonotope<Rational>()
   
   typedef Matrix<Q> QMatrix;
   typedef Point<Q> QPoint;
-  typedef Rectangle<Q> QRectangle;
+  typedef Box<Q> QBox;
   typedef Zonotope<Q> QZonotope;
   
   class_<QZonotope> zonotope_class("Zonotope",init<int>());
   zonotope_class.def(init<QPoint,QMatrix>());
   zonotope_class.def(init<QZonotope>());
-  zonotope_class.def(init<QRectangle>());
+  zonotope_class.def(init<QBox>());
   zonotope_class.def("centre",&QZonotope::centre,return_value_policy<copy_const_reference>());
   zonotope_class.def("generators",&QZonotope::generators,return_value_policy<copy_const_reference>());
   zonotope_class.def("dimension", &QZonotope::dimension);
@@ -128,10 +128,10 @@ void export_zonotope<Rational>()
   zonotope_class.def(self_ns::str(self));
 
   def("contains", (tribool(*)(const QZonotope&,const QPoint&))(&contains));
-  def("disjoint", (tribool(*)(const QZonotope&,const QRectangle&))(&disjoint));
-  def("subset", (tribool(*)(const QZonotope&,const QRectangle&))(&subset));
-  def("superset", (tribool(*)(const QZonotope&,const QRectangle&))(&superset));
-  def("subset", (tribool(*)(const QRectangle&,const QZonotope&))(&subset));
+  def("disjoint", (tribool(*)(const QZonotope&,const QBox&))(&disjoint));
+  def("subset", (tribool(*)(const QZonotope&,const QBox&))(&subset));
+  def("superset", (tribool(*)(const QZonotope&,const QBox&))(&superset));
+  def("subset", (tribool(*)(const QBox&,const QZonotope&))(&subset));
 
 }
 

@@ -32,7 +32,7 @@ namespace Ariadne {
     {
       friend class PartitionTree<R>;
      public:
-      PartitionTreeIterator(const Rectangle<R>& bb, 
+      PartitionTreeIterator(const Box<R>& bb, 
                             const Combinatoric::SubdivisionSequence& ss, 
                             Combinatoric::BinaryTree::const_iterator i)
         : _bounding_box(bb), _subdivisions(ss), _base(i) { }
@@ -43,7 +43,7 @@ namespace Ariadne {
       PartitionTreeCell<R> dereference() const { 
         return PartitionTreeCell<R>(_bounding_box,_subdivisions,*_base); }
      private:
-      const Rectangle<R> _bounding_box;
+      const Box<R> _bounding_box;
       const Combinatoric::SubdivisionSequence _subdivisions;
       Combinatoric::BinaryTree::const_iterator _base;
     };
@@ -64,7 +64,7 @@ namespace Ariadne {
       PartitionTreeCell<R> dereference() const { 
         return PartitionTreeCell<R>(_bounding_box,_subdivisions,*_base); }
      private:
-      const Rectangle<R> _bounding_box;
+      const Box<R> _bounding_box;
       const Combinatoric::SubdivisionSequence _subdivisions;
       Combinatoric::MaskedBinaryTree::const_iterator _base;
     };
@@ -79,7 +79,7 @@ namespace Ariadne {
 namespace Ariadne {
 
 template<class R>
-Geometry::PartitionScheme<R>::PartitionScheme(const Rectangle<R>& bb, const Combinatoric::SubdivisionSequence& sc)
+Geometry::PartitionScheme<R>::PartitionScheme(const Box<R>& bb, const Combinatoric::SubdivisionSequence& sc)
   : _unit_box(bb), _subdivisions(sc)
 {
 }
@@ -100,7 +100,7 @@ Geometry::PartitionScheme<R>::operator!=(const PartitionScheme<R>& pg) const
 }
 
 template<class R> inline
-const Geometry::Rectangle<R>& 
+const Geometry::Box<R>& 
 Geometry::PartitionScheme<R>::unit_box() const 
 {
   return _unit_box; 
@@ -123,14 +123,14 @@ Geometry::PartitionScheme<R>::dimension() const
 
 
 template<class R> inline
-Geometry::PartitionTreeCell<R>::PartitionTreeCell(const Rectangle<R>& r, const Combinatoric::SubdivisionTreeCell& c)
+Geometry::PartitionTreeCell<R>::PartitionTreeCell(const Box<R>& r, const Combinatoric::SubdivisionTreeCell& c)
   : _unit_box(r), _subdivision_cell(c)
 {
-  ARIADNE_CHECK_EQUAL_DIMENSIONS(r,c,"PartitionTreeCell::PartitionTreeCell(Rectangle r, SubdivisionTreeCell c)");
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(r,c,"PartitionTreeCell::PartitionTreeCell(Box r, SubdivisionTreeCell c)");
 }
 
 template<class R> inline
-Geometry::PartitionTreeCell<R>::PartitionTreeCell(const Rectangle<R>& r, 
+Geometry::PartitionTreeCell<R>::PartitionTreeCell(const Box<R>& r, 
                                                   const Combinatoric::SubdivisionSequence& s, 
                                                   const Combinatoric::BinaryWord& w) 
   : _unit_box(r), _subdivision_cell(s,w) 
@@ -138,7 +138,7 @@ Geometry::PartitionTreeCell<R>::PartitionTreeCell(const Rectangle<R>& r,
 }
 
 template<class R> inline
-const Geometry::Rectangle<R>& 
+const Geometry::Box<R>& 
 Geometry::PartitionTreeCell<R>::unit_box() const 
 {
   return this->_unit_box; 
@@ -177,7 +177,7 @@ Geometry::PartitionTreeCell<R>::bounded() const
 
 
 template<class R> inline
-Geometry::PartitionTree<R>::PartitionTree(const Rectangle<R>& r, 
+Geometry::PartitionTree<R>::PartitionTree(const Box<R>& r, 
                                           const Combinatoric::SubdivisionSequence& s, 
                                           const Combinatoric::BinaryTree& t)
   : _unit_box(r), _subdivision_tree(s,t) 
@@ -191,7 +191,7 @@ Geometry::PartitionTree<R>::PartitionTree(const PartitionScheme<R>& ps, const Co
 }
 
 template<class R> inline
-const Geometry::Rectangle<R>& 
+const Geometry::Box<R>& 
 Geometry::PartitionTree<R>::unit_box() const 
 {
   return _unit_box; 
@@ -275,7 +275,7 @@ Geometry::PartitionTreeSet<R>::PartitionTreeSet(const PartitionTree<R>& t, const
 }
 
 template<class R> inline
-Geometry::PartitionTreeSet<R>::PartitionTreeSet(const Rectangle<R>& r, 
+Geometry::PartitionTreeSet<R>::PartitionTreeSet(const Box<R>& r, 
                                                 const Combinatoric::SubdivisionSequence& s, 
                                                 const Combinatoric::BinaryTree& t, 
                                                 const BooleanArray& m)
@@ -285,14 +285,14 @@ Geometry::PartitionTreeSet<R>::PartitionTreeSet(const Rectangle<R>& r,
 
 
 template<class R> inline
-Geometry::Rectangle<R> 
+Geometry::Box<R> 
 Geometry::PartitionTreeSet<R>::bounding_box() const 
 {
   return _unit_box; 
 }
 
 template<class R> inline
-const Geometry::Rectangle<R>& 
+const Geometry::Box<R>& 
 Geometry::PartitionTreeSet<R>::unit_box() const 
 {
   return _unit_box; 

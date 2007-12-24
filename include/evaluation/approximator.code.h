@@ -58,7 +58,7 @@ Evaluation::Approximator<BS>::clone() const
 
 template<class BS>
 BS
-Evaluation::Approximator<BS>::over_approximation(const Geometry::Rectangle<R>& r) const
+Evaluation::Approximator<BS>::over_approximation(const Geometry::Box<R>& r) const
 {
   return BS(r);
 }
@@ -82,7 +82,7 @@ Evaluation::Approximator< Geometry::Rectangle<R> >::clone() const
 
 template<class R>
 Geometry::Rectangle<R> 
-Evaluation::Approximator< Geometry::Rectangle<R> >::over_approximation(const Geometry::Rectangle<R>& r) const
+Evaluation::Approximator< Geometry::Rectangle<R> >::over_approximation(const Geometry::Box<R>& r) const
 {
   return r;
 }
@@ -124,7 +124,7 @@ Evaluation::FastApproximator<BS>::clone() const
 
 template<class BS>
 BS
-Evaluation::FastApproximator<BS>::over_approximation(const Geometry::Rectangle<R>& r) const
+Evaluation::FastApproximator<BS>::over_approximation(const Geometry::Box<R>& r) const
 {
   return BS(r);
 }

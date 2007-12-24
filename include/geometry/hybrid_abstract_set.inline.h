@@ -298,7 +298,7 @@ template<class S> inline
 S&
 Geometry::HybridAbstractSet<S>::new_location(discrete_state_type q, const Geometry::Rectangle<real_type>& r)
 {
-  ARIADNE_CHECK_NEW_LOCATION(*this,q,"HybridAbstractSet<S>::new_location(discrete_state_type q, Rectangle<R> r)");
+  ARIADNE_CHECK_NEW_LOCATION(*this,q,"HybridAbstractSet<S>::new_location(discrete_state_type q, Box<R> r)");
   RectangularSet<real_type> rs(r);
   HybridAbstractSet<S>::new_location(q,static_cast<const S&>(rs));
 

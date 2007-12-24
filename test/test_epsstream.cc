@@ -47,11 +47,11 @@ using namespace std;
 
 int main() {
 
-  Rectangle<Flt> bbox(2);
+  Box<Flt> bbox(2);
 
   Point<Flt> pt("(0.0,0.0)");
 
-  Rectangle<Flt> r1,r2,r3,r4;
+  Box<Flt> r1,r2,r3,r4;
   string input("[-0.125,1.125]x[-0.25, 3.25] "
                "[ 0.0125,1.0]x[0.0,2.0] "
                "[ 0.5,1.0]x[1.0,3.0] "
@@ -86,10 +86,10 @@ int main() {
   cout << endl;
 
   // Test output of grid mask set
-  Rectangle<Flt> bb("[0,1]x[0,1]x[0,1]");
+  Box<Flt> bb("[0,1]x[0,1]x[0,1]");
   Grid<Flt> g(Vector<Flt>("[0.25,0.25,0.25]"));
   GridMaskSet<Flt> gms(g,bb);
-  Rectangle<Flt> r("[0.33,0.66]x[0.125,0.375]x[0.25,0.75]");
+  Box<Flt> r("[0.33,0.66]x[0.125,0.375]x[0.25,0.75]");
   gms.adjoin_outer_approximation(r);
   cout << "gms.size()=" << gms.size() << endl;
   eps.open("test_epsstream-2.eps",bb.neighbourhood(0.125));

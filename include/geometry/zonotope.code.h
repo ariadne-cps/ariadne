@@ -104,9 +104,9 @@ template<class R, class Tag>
 Zonotope<Rational> rational_zonotope(const Zonotope<R,Tag>& z);
 
 tribool contains(const Zonotope<Rational>& z, const Point<Rational>& r);
-tribool disjoint(const Zonotope<Rational>& z, const Rectangle<Rational>& r);
-tribool superset(const Zonotope<Rational>& z, const Rectangle<Rational>& r);
-tribool subset(const Zonotope<Rational>& z, const Rectangle<Rational>& r);
+tribool disjoint(const Zonotope<Rational>& z, const Box<Rational>& r);
+tribool superset(const Zonotope<Rational>& z, const Box<Rational>& r);
+tribool subset(const Zonotope<Rational>& z, const Box<Rational>& r);
 
 ListSet< Zonotope<Rational> > subdivide(const Zonotope<Rational>&);
 
@@ -147,7 +147,7 @@ rational_zonotope(const Zonotope<R,UniformErrorTag>& z)
 
 template<class R> inline
 void
-convert(Zonotope<R>& z, const Rectangle<R>& r) {
+convert(Zonotope<R>& z, const Box<R>& r) {
   z=r;
 }
 
@@ -169,13 +169,13 @@ extern int Geometry::verbosity;
 
 
 template<class R, class Tag>
-Geometry::Rectangle<R>
+Geometry::Box<R>
 Geometry::bounding_box(const Zonotope<R,Tag>& z)
 {
   typedef Numeric::Interval<R> I;
   LinearAlgebra::Vector<I> v=z.domain().position_vectors();
   LinearAlgebra::Vector< Interval<R> > b=z.centre().position_vector()+z.generators()*v;
-  return Rectangle<R>(b);
+  return Box<R>(b);
 }
 
 
@@ -184,7 +184,7 @@ Geometry::bounding_box(const Zonotope<R,Tag>& z)
 
 
 template<class R>       
-Geometry::Zonotope<R,ExactTag>::Zonotope(const Rectangle<R>& r) 
+Geometry::Zonotope<R,ExactTag>::Zonotope(const Box<R>& r) 
   : _centre(r.dimension()), _generators(r.dimension(),r.dimension())
 {
   dimension_type d=r.dimension();
@@ -200,7 +200,7 @@ Geometry::Zonotope<R,ExactTag>::Zonotope(const Rectangle<R>& r)
 }
 
 template<class R>       
-Geometry::Zonotope<R,UniformErrorTag>::Zonotope(const Rectangle<R>& r) 
+Geometry::Zonotope<R,UniformErrorTag>::Zonotope(const Box<R>& r) 
   : _centre(r.dimension()), _generators(r.dimension(),r.dimension())
 {
   *this=r;
@@ -209,7 +209,7 @@ Geometry::Zonotope<R,UniformErrorTag>::Zonotope(const Rectangle<R>& r)
 
 template<class R>       
 Geometry::Zonotope<R,UniformErrorTag>&
-Geometry::Zonotope<R,UniformErrorTag>::operator=(const Rectangle<R>& r) 
+Geometry::Zonotope<R,UniformErrorTag>::operator=(const Box<R>& r) 
 {
   dimension_type d=r.dimension();
   Point<I>& c=this->_centre;
@@ -247,38 +247,38 @@ Geometry::contains(const Zonotope<R,UniformErrorTag>& z, const Point<R>& pt)
 
 template<class R>
 tribool
-Geometry::disjoint(const Zonotope<R,ExactTag>& z, const Rectangle<R>& r)
+Geometry::disjoint(const Zonotope<R,ExactTag>& z, const Box<R>& r)
 {
-  return ::disjoint(::rational_zonotope(z),Rectangle<Rational>(r));
+  return ::disjoint(::rational_zonotope(z),Box<Rational>(r));
 }
 
 template<class R>
 tribool
-Geometry::disjoint(const Zonotope<R,UniformErrorTag>& z, const Rectangle<R>& r)
+Geometry::disjoint(const Zonotope<R,UniformErrorTag>& z, const Box<R>& r)
 {
-  return ::disjoint(::rational_zonotope(z),Rectangle<Rational>(r));
+  return ::disjoint(::rational_zonotope(z),Box<Rational>(r));
 }
 
 
 template<class R>
 tribool
-Geometry::superset(const Zonotope<R,ExactTag>& z, const Rectangle<R>& r)
+Geometry::superset(const Zonotope<R,ExactTag>& z, const Box<R>& r)
 {
-  return ::superset(::rational_zonotope(z),Rectangle<Rational>(r));
+  return ::superset(::rational_zonotope(z),Box<Rational>(r));
 }
 
 template<class R>
 tribool
-Geometry::superset(const Zonotope<R,UniformErrorTag>& z, const Rectangle<R>& r)
+Geometry::superset(const Zonotope<R,UniformErrorTag>& z, const Box<R>& r)
 {
-  return ::superset(::rational_zonotope(z),Rectangle<Rational>(r));
+  return ::superset(::rational_zonotope(z),Box<Rational>(r));
 }
 
 
 
 template<class R, class Tag>
 tribool
-Geometry::subset(const Zonotope<R,Tag>& z, const Rectangle<R>& r)
+Geometry::subset(const Zonotope<R,Tag>& z, const Box<R>& r)
 {
   return Geometry::subset(bounding_box(z),r);
 }
@@ -308,7 +308,7 @@ Geometry::approximate(Zonotope<R>& r, const Zonotope<R,Tag>& z)
 
 template<class R,class Tag>
 void 
-Geometry::over_approximate(Zonotope<R,Tag>& z, const Rectangle<R>& r) 
+Geometry::over_approximate(Zonotope<R,Tag>& z, const Box<R>& r) 
 {
   typedef Numeric::Interval<R> I;
   dimension_type d=r.dimension();
@@ -690,10 +690,10 @@ adjoin_subdivision(ListSet< Zonotope<R,Tag> >& ls, const Zonotope<R,Tag>& z)
 
 /* Test vertices individually. Highly inefficient!! */
 tribool 
-superset(const Zonotope<Rational>& z, const Rectangle<Rational>& r)
+superset(const Zonotope<Rational>& z, const Box<Rational>& r)
 {
   tribool result=true;
-  for(Rectangle<Rational>::vertices_const_iterator rv_iter=r.vertices_begin(); 
+  for(Box<Rational>::vertices_const_iterator rv_iter=r.vertices_begin(); 
       rv_iter!=r.vertices_end(); ++rv_iter) 
   {
     const Point<Rational>& pt=*rv_iter;
@@ -720,17 +720,17 @@ superset(const Zonotope<Rational>& z, const Rectangle<Rational>& r)
  * 
  */
 tribool
-disjoint(const Zonotope<Rational,ExactTag>& z, const Rectangle<Rational>& r)
+disjoint(const Zonotope<Rational,ExactTag>& z, const Box<Rational>& r)
 {
-  ARIADNE_LOG(8,"disjoint(Zonotope<Rational> q, Rectangle<Rational> r)\n");
+  ARIADNE_LOG(8,"disjoint(Zonotope<Rational> q, Box<Rational> r)\n");
   ARIADNE_LOG(9,"z="<<z<<", r="<<r<<"\n");
   
-  ARIADNE_CHECK_EQUAL_DIMENSIONS(z,r,"tribool disjoint(Zonotope<Rational> z, Rectangle<Rational> r)");
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(z,r,"tribool disjoint(Zonotope<Rational> z, Box<Rational> r)");
   dimension_type d=z.dimension();
   size_type m=z.number_of_generators();
   
   // Construct tableau for testing intersection of zonotope and rectangle
-  // Rectangle  l<=x<=u
+  // Box  l<=x<=u
   // Zonotope  x==c+Ge,  -1<=e<=1
   // 
   // Translate x'=x-l,  e'=e+1
@@ -1052,7 +1052,7 @@ instantiate_zonotope()
 {
   tribool tb;
   Geometry::Point<R> pt;
-  Geometry::Rectangle<R> r;
+  Geometry::Box<R> r;
   Geometry::Polyhedron<R> p;
   Geometry::Zonotope<R,ExactTag> z;
   Geometry::Zonotope<R,UniformErrorTag> ez;
@@ -1108,7 +1108,7 @@ instantiate_zonotope<Rational>()
   std::ostream* os=0;
   std::istream* is=0;
   Geometry::Point<R>* pt=0;
-  Geometry::Rectangle<R>* r=0;
+  Geometry::Box<R>* r=0;
   Geometry::Zonotope<R>* z=0;
   Geometry::ListSet< Zonotope<R> >* zls=0;
   

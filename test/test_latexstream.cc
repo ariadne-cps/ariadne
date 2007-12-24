@@ -53,7 +53,7 @@ int main() {
 
   Vector<Flt> v("[-1,2,0.5]");
   Matrix<Flt> A("[-1,2,0.5;0.5,-1.0,2.0]");
-  Rectangle<Flt> r("[-1,1]x[0.5,1.5]");
+  Box<Flt> r("[-1,1]x[0.5,1.5]");
 
   latexfstream tex;
   tex.open("test_latexstream-1.tex");

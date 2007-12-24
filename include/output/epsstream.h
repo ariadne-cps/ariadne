@@ -41,6 +41,7 @@
 #include "linear_algebra/matrix.h"
 #include "geometry/exceptions.h"
 #include "geometry/point.h"
+#include "geometry/box.h"
 #include "geometry/rectangle.h"
 #include "geometry/rectangular_set.h"
 #include "geometry/list_set.h"
@@ -89,7 +90,7 @@ namespace Ariadne {
       void write_header();
       void write_trailer();
 
-      template<class R> void set_bounding_box(const Geometry::Rectangle<R>& bbox) {
+      template<class R> void set_bounding_box(const Geometry::Box<R>& bbox) {
         this->bbox=this->p_map(bbox); }
 
       void set_bounding_box(const Rectangle2d& bbox) {
@@ -163,9 +164,9 @@ namespace Ariadne {
       ~epsfstream();
       epsfstream();
       
-      template<class R> void open(const char* fn, const Geometry::Rectangle<R>& bbox);
-      template<class R> void open(const char* fn, const Geometry::Rectangle<R>& bbox, unsigned int ix,  unsigned int iy);
-      template<class R> void open(const char* fn, const Geometry::Rectangle<R>& bbox, const PlanarProjectionMap& p_map);
+      template<class R> void open(const char* fn, const Geometry::Box<R>& bbox);
+      template<class R> void open(const char* fn, const Geometry::Box<R>& bbox, unsigned int ix,  unsigned int iy);
+      template<class R> void open(const char* fn, const Geometry::Box<R>& bbox, const PlanarProjectionMap& p_map);
       void open(const char* fn, const Rectangle2d& bbox, const PlanarProjectionMap& p_map);
       void close();
      private:
@@ -186,6 +187,7 @@ namespace Ariadne {
     epsstream& operator<<(epsstream&, const char* s);
 
     template<class R> epsstream& operator<<(epsstream&, const Geometry::Point<R>&); 
+    template<class R> epsstream& operator<<(epsstream&, const Geometry::Box<R>&);
     template<class R> epsstream& operator<<(epsstream&, const Geometry::Rectangle<R>&);
     template<class R, class Tag> epsstream& operator<<(epsstream&, const Geometry::Zonotope<R,Tag>&);
     template<class R> epsstream& operator<<(epsstream&, const Geometry::Polytope<R>&); 

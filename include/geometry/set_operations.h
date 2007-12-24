@@ -38,7 +38,7 @@ namespace Ariadne {
   namespace Geometry {
 
     template<class R> class Point;
-    template<class R> class Rectangle;
+    template<class R> class Box;
       
     //! \ingroup SetInterface
     /*! \brief An class representing the intersection of two sets. */
@@ -61,16 +61,16 @@ namespace Ariadne {
       virtual tribool contains(const Point<R>&) const;
      
       /*! \brief Tests if the set is a superset of a rectangle. */
-      virtual tribool superset(const Rectangle<R>&) const;
+      virtual tribool superset(const Box<R>&) const;
       /*! \brief Tests if the set intersects a rectangle. */
-      virtual tribool intersects(const Rectangle<R>&) const;
+      virtual tribool intersects(const Box<R>&) const;
       /*! \brief Tests if the set is disjoint from a rectangle. */
-      virtual tribool disjoint(const Rectangle<R>&) const;
+      virtual tribool disjoint(const Box<R>&) const;
       /*! \brief Tests if the set is a subset of a rectangle. */
-      virtual tribool subset(const Rectangle<R>&) const;
+      virtual tribool subset(const Box<R>&) const;
       
       /*! \brief A rectangle containing the set. Throws Geometry::UnboundedSet exception if the set is unbounded. */
-      virtual Rectangle<R> bounding_box() const;
+      virtual Box<R> bounding_box() const;
 
       /*! \brief Write to an output stream. 
        *  Called by operator<<(std::ostream&, const SetInterface<R>&) to dynamically dispatch stream output. 
@@ -105,16 +105,16 @@ namespace Ariadne {
       virtual tribool contains(const Point<R>&) const;
      
       /*! \brief Tests if the set is a superset of a rectangle. */
-      virtual tribool superset(const Rectangle<R>&) const;
+      virtual tribool superset(const Box<R>&) const;
       /*! \brief Tests if the set intersects a rectangle. */
-      virtual tribool intersects(const Rectangle<R>&) const;
+      virtual tribool intersects(const Box<R>&) const;
       /*! \brief Tests if the set is disjoint from a rectangle. */
-      virtual tribool disjoint(const Rectangle<R>&) const;
+      virtual tribool disjoint(const Box<R>&) const;
       /*! \brief Tests if the set is a subset of a rectangle. */
-      virtual tribool subset(const Rectangle<R>&) const;
+      virtual tribool subset(const Box<R>&) const;
       
       /*! \brief A rectangle containing the set. Throws Geometry::UnboundedSet exception if the set is unbounded. */
-      virtual Rectangle<R> bounding_box() const;
+      virtual Box<R> bounding_box() const;
 
       /*! \brief Write to an output stream. 
        *  Called by operator<<(std::ostream&, const SetInterface<R>&) to dynamically dispatch stream output. 
@@ -150,16 +150,16 @@ namespace Ariadne {
       virtual tribool contains(const Point<R>&) const;
      
       /*! \brief Tests if the set is a superset of a rectangle. */
-      virtual tribool superset(const Rectangle<R>&) const;
+      virtual tribool superset(const Box<R>&) const;
       /*! \brief Tests if the set intersects a rectangle. */
-      virtual tribool intersects(const Rectangle<R>&) const;
+      virtual tribool intersects(const Box<R>&) const;
       /*! \brief Tests if the set is disjoint from a rectangle. */
-      virtual tribool disjoint(const Rectangle<R>&) const;
+      virtual tribool disjoint(const Box<R>&) const;
       /*! \brief Tests if the set is a subset of a rectangle. */
-      virtual tribool subset(const Rectangle<R>&) const;
+      virtual tribool subset(const Box<R>&) const;
       
       /*! \brief A rectangle containing the set. Throws Geometry::UnboundedSet exception if the set is unbounded. */
-      virtual Rectangle<R> bounding_box() const;
+      virtual Box<R> bounding_box() const;
 
       /*! \brief Write to an output stream. 
        *  Called by operator<<(std::ostream&, const SetInterface<R>&) to dynamically dispatch stream output. 
@@ -217,13 +217,13 @@ Geometry::IntersectionSet<R>::contains(const Point<R>& x) const {
 
 template<class R>
 tribool
-Geometry::IntersectionSet<R>::superset(const Rectangle<R>& x) const {
+Geometry::IntersectionSet<R>::superset(const Box<R>& x) const {
   return this->_set1->superset(x) && this->_set2->superset(x); 
 }
 
 template<class R>
 tribool
-Geometry::IntersectionSet<R>::disjoint(const Rectangle<R>& x) const {
+Geometry::IntersectionSet<R>::disjoint(const Box<R>& x) const {
   if(this->_set1->disjoint(x) || this->_set2->disjoint(x)) {
     return true;
   } else {
@@ -233,12 +233,12 @@ Geometry::IntersectionSet<R>::disjoint(const Rectangle<R>& x) const {
 
 template<class R>
 tribool
-Geometry::IntersectionSet<R>::intersects(const Rectangle<R>& x) const {
+Geometry::IntersectionSet<R>::intersects(const Box<R>& x) const {
   return !this->disjoint(x); 
 }
 
 template<class R>
-Geometry::Rectangle<R>
+Geometry::Box<R>
 Geometry::IntersectionSet<R>::bounding_box() const {
   return Geometry::intersection(this->_set1->bounding_box(),this->_set2->bounding_box());
 }
@@ -273,7 +273,7 @@ Geometry::UnionSet<R>::contains(const Point<R>& x) const {
 
 template<class R>
 tribool
-Geometry::UnionSet<R>::superset(const Rectangle<R>& x) const {
+Geometry::UnionSet<R>::superset(const Box<R>& x) const {
   if(this->_set1->superset(x) || this->_set2->superset(x)) {
     return true;
   } else {
@@ -283,18 +283,18 @@ Geometry::UnionSet<R>::superset(const Rectangle<R>& x) const {
 
 template<class R>
 tribool
-Geometry::UnionSet<R>::disjoint(const Rectangle<R>& x) const {
+Geometry::UnionSet<R>::disjoint(const Box<R>& x) const {
   return this->_set1->disjoint(x) && this->_set2->disjoint(x);
 }
 
 template<class R>
 tribool
-Geometry::UnionSet<R>::intersects(const Rectangle<R>& x) const {
+Geometry::UnionSet<R>::intersects(const Box<R>& x) const {
   return !this->disjoint(x); 
 }
 
 template<class R>
-Geometry::Rectangle<R>
+Geometry::Box<R>
 Geometry::UnionSet<R>::bounding_box() const {
   return Geometry::rectangular_hull(this->_set1->bounding_box(),this->_set2->bounding_box());
 }
@@ -334,27 +334,27 @@ Geometry::ComplementSet<R>::contains(const Point<R>& x) const {
 
 template<class R>
 tribool
-Geometry::ComplementSet<R>::superset(const Rectangle<R>& x) const {
+Geometry::ComplementSet<R>::superset(const Box<R>& x) const {
   return this->_set->disjoint(x); 
 }
 
 template<class R>
 tribool
-Geometry::ComplementSet<R>::disjoint(const Rectangle<R>& x) const {
+Geometry::ComplementSet<R>::disjoint(const Box<R>& x) const {
   return this->_set->superset();
 }
 
 template<class R>
 tribool
-Geometry::ComplementSet<R>::intersects(const Rectangle<R>& x) const {
+Geometry::ComplementSet<R>::intersects(const Box<R>& x) const {
   return !this->disjoint(x); 
 }
 
 template<class R>
-Geometry::Rectangle<R>
+Geometry::Box<R>
 Geometry::ComplementSet<R>::bounding_box() const {
   Numeric::Interval<R> r(-inf<R>(),inf<R>());
-  return Geometry::Rectangle(this->dimension(),r);
+  return Geometry::Box(this->dimension(),r);
 }
 
 

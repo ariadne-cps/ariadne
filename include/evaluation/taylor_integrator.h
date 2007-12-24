@@ -59,13 +59,13 @@ namespace Ariadne {
       
       /*! \brief Compute the flow map of a vector field. */
       virtual System::TaylorFlow<I> flow(const System::VectorFieldInterface<R>& vf, 
-                                         const Geometry::Rectangle<R>& bb) const;
+                                         const Geometry::Box<R>& bb) const;
 
       /*! \brief Integrate a basic set for time \a t within a bounding set. */
       virtual Geometry::Point<I> flow_step(const System::VectorFieldInterface<R>& vf,
                                            const Geometry::Point<I>& p,
                                            const Numeric::Interval<R>& t,
-                                           const Geometry::Rectangle<R>& bb) const;
+                                           const Geometry::Box<R>& bb) const;
      
       /*! \brief An algorithm for integrating forward a zonotope.
        */
@@ -73,14 +73,14 @@ namespace Ariadne {
       integration_step(const System::VectorFieldInterface<R>& vf,
                        const Geometry::Zonotope<I,I>& s,
                        const Numeric::Interval<R>& t,
-                       const Geometry::Rectangle<R>& bb) const;
+                       const Geometry::Box<R>& bb) const;
 
       /*! \brief An algorithm for integrating forward a zonotope for a time up to time \a step_size, assuming the set \a bb is a bounding box for the integration. */
       virtual Geometry::Zonotope<I,I> 
       reachability_step(const System::VectorFieldInterface<R>& vf,
                         const Geometry::Zonotope<I,I>& s,
                         const Numeric::Interval<R>& t,
-                        const Geometry::Rectangle<R>& bb) const;
+                        const Geometry::Box<R>& bb) const;
 
 
       /*! \brief Write to an output stream. */

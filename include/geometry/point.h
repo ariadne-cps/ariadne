@@ -40,7 +40,7 @@
 namespace Ariadne {
   namespace Geometry {
    
-    template<class> class Rectangle;
+    template<class> class Box;
     template<class> class Sphere;
     template<class> class Ellipsoid;
 

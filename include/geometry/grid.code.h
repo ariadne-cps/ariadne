@@ -86,7 +86,7 @@ Geometry::Grid<R>::Grid(const Point<R>& pt, const LinearAlgebra::Vector<R>& v)
 
 
 template<class R> 
-Geometry::Grid<R>::Grid(const Rectangle<R>& r, const Combinatoric::LatticeBlock& lb)
+Geometry::Grid<R>::Grid(const Box<R>& r, const Combinatoric::LatticeBlock& lb)
   : _origin(r.dimension()),
     _lengths(r.dimension())
 {
@@ -284,7 +284,7 @@ Geometry::Grid<R>::index(const Point<R>& s) const
 
 template<class R>
 IndexArray  
-Geometry::Grid<R>::lower_index(const Rectangle<R>& r) const {
+Geometry::Grid<R>::lower_index(const Box<R>& r) const {
   IndexArray res(r.dimension());
   for(size_type i=0; i!=res.size(); ++i) {
     res[i]=subdivision_lower_index(i,r.lower_bound(i));
@@ -295,7 +295,7 @@ Geometry::Grid<R>::lower_index(const Rectangle<R>& r) const {
 
 template<class R>
 IndexArray  
-Geometry::Grid<R>::upper_index(const Rectangle<R>& r) const {
+Geometry::Grid<R>::upper_index(const Box<R>& r) const {
   IndexArray res(r.dimension());
   for(size_type i=0; i!=res.size(); ++i) {
     res[i]=subdivision_upper_index(i,r.upper_bound(i));
@@ -306,7 +306,7 @@ Geometry::Grid<R>::upper_index(const Rectangle<R>& r) const {
 
 template<class R>
 Combinatoric::LatticeBlock  
-Geometry::Grid<R>::index_block(const Rectangle<R>& r) const {
+Geometry::Grid<R>::index_block(const Box<R>& r) const {
   Combinatoric::LatticeBlock res(r.dimension());
   for(size_type i=0; i!=res.dimension(); ++i) {
     res.set_lower_bound(i,this->subdivision_lower_index(i,r.lower_bound(i)));
@@ -329,10 +329,10 @@ Geometry::Grid<R>::point(const IndexArray& a) const
 
 
 template<class R>
-Geometry::Rectangle<R> 
+Geometry::Box<R> 
 Geometry::Grid<R>::rectangle(const Combinatoric::LatticeBlock& lb) const
 {
-  Rectangle<R> res(lb.dimension());
+  Box<R> res(lb.dimension());
   for(size_type i=0; i!=res.dimension(); ++i) {
     res.set_lower_bound(i,this->subdivision_coordinate(i,lb.lower_bound(i)));
     res.set_upper_bound(i,this->subdivision_coordinate(i,lb.upper_bound(i)));
@@ -384,13 +384,13 @@ Geometry::FiniteGrid<R>::FiniteGrid(const Grid<R>& g, const Combinatoric::Lattic
 }
 
 template<class R> inline
-Geometry::FiniteGrid<R>::FiniteGrid(const Grid<R>& g, const Rectangle<R>& bb) 
+Geometry::FiniteGrid<R>::FiniteGrid(const Grid<R>& g, const Box<R>& bb) 
   : _own_ptr(0), _grid_ptr(&g), _lattice_block(over_approximation(bb,g).lattice_set())
 { 
 }
 
 template<class R>
-Geometry::FiniteGrid<R>::FiniteGrid(const Rectangle<R>& bb, const size_type& s)
+Geometry::FiniteGrid<R>::FiniteGrid(const Box<R>& bb, const size_type& s)
   : _own_ptr(1), _grid_ptr(0), _lattice_block(bb.dimension())
 {
   dimension_type d=bb.dimension();
@@ -412,7 +412,7 @@ Geometry::FiniteGrid<R>::dimension() const
 
 
 template<class R>
-Geometry::Rectangle<R>
+Geometry::Box<R>
 Geometry::FiniteGrid<R>::extent() const
 {
   return this->_grid_ptr->rectangle(this->_lattice_block);

@@ -82,7 +82,6 @@ ARIADNE_SRC = ariadne_module.cc \
 	export_map.cc \
 	export_affine_map.cc \
 	export_polynomial_map.cc \
-	export_affine_multimap.cc \
 	export_vector_field.cc \
 	export_affine_vector_field.cc \
 	export_set_based_hybrid_automaton.cc \

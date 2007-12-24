@@ -22,7 +22,7 @@
  */
  
 /*! \file rectangular.h
- *  \brief Wrapper for %Rectangle class conforming to the set interface.
+ *  \brief Wrapper for %Box class conforming to the set interface.
  */
 
 #ifndef ARIADNE_RECTANGULAR_SET_H
@@ -40,7 +40,7 @@ namespace Ariadne {
  
     
     //! \ingroup ExactSet
-    /*! \brief An adaptor for the Rectangle class conforming to the SetInterface interface. */
+    /*! \brief An adaptor for the Box class conforming to the SetInterface interface. */
     template<class R>
     class RectangularSet : public SetInterface<R>
     {
@@ -54,6 +54,9 @@ namespace Ariadne {
       /*! \brief */
       template<class R1> RectangularSet(const Point<R1>& pt)
         : SetInterface<R>(), _rectangle(pt) { }
+      /*! \brief */
+      template<class R1> RectangularSet(const Box<R1>& bx)
+        : SetInterface<R>(), _rectangle(bx) { }
       /*! \brief */
       template<class R1> RectangularSet(const Rectangle<R1>& r)
         : SetInterface<R>(), _rectangle(r) { }
@@ -72,21 +75,21 @@ namespace Ariadne {
       /*! \brief */
       virtual tribool contains(const Point<R>& pt) const { return this->_rectangle.contains(pt); }
       /*! \brief */
-      virtual tribool superset(const Rectangle<R>& r) const { 
-        return Geometry::subset(r,this->_rectangle); }
+      virtual tribool superset(const Box<R>& r) const { 
+        return Geometry::superset(this->_rectangle,r); }
       /*! \brief */
-      virtual tribool intersects(const Rectangle<R>& r) const { 
-        return !Geometry::disjoint(r,this->_rectangle); }
+      virtual tribool intersects(const Box<R>& r) const { 
+        return !Geometry::disjoint(this->_rectangle,r); }
       /*! \brief */
-      virtual tribool disjoint(const Rectangle<R>& r) const { 
-        return Geometry::disjoint(r,this->_rectangle); }
+      virtual tribool disjoint(const Box<R>& r) const { 
+        return Geometry::disjoint(this->_rectangle,r); }
       /*! \brief */
-      virtual tribool subset(const Rectangle<R>& r) const { 
+      virtual tribool subset(const Box<R>& r) const { 
         return Geometry::subset(this->_rectangle,r); }
       /*! \brief */
       virtual tribool bounded() const { return this->_rectangle.bounded(); }      
       /*! \brief */
-      virtual Rectangle<R> bounding_box() const { return this->_rectangle.bounding_box(); }      
+      virtual Box<R> bounding_box() const { return this->_rectangle.bounding_box(); }      
       /*! \brief */
       virtual std::ostream& write(std::ostream& os) const {
         return os << "RectangularSet(\"" << this->_rectangle << "\")";

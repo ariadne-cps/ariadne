@@ -71,7 +71,7 @@ namespace Ariadne {
 
       /*! \brief Compute the value of a constraint over a rectangle. */
       Numeric::Interval<R> value(const Geometry::ConstraintInterface<R>& c, 
-                                 const Geometry::Rectangle<R>& r) const;
+                                 const Geometry::Box<R>& r) const;
 
       /*! \brief Compute the value of a constraint over a zonotope. */
       Numeric::Interval<R> value(const Geometry::ConstraintInterface<R>& c, 
@@ -89,7 +89,7 @@ namespace Ariadne {
        */
       virtual tribool forces(const Geometry::ConstraintInterface<R>& c1,
                              const Geometry::ConstraintInterface<R>& c2,
-                             const Geometry::Rectangle<R>& dom) const;
+                             const Geometry::Box<R>& dom) const;
 
       /*! \brief Compute the normal derivative to of the vector field \a vf to the constraint \a c at the point \a pt.
        */
@@ -103,15 +103,15 @@ namespace Ariadne {
       virtual Numeric::Interval<R> crossing_time(const System::VectorFieldInterface<R>& vf, 
                                                  const Geometry::ConstraintInterface<R>& c, 
                                                  const Geometry::Point<I>& pt, 
-                                                 const Geometry::Rectangle<R>& bb) const;
+                                                 const Geometry::Box<R>& bb) const;
 
       /*! \brief Compute the time needed for points in the domain rectangle \a dom to reach constraint \a c under vector field \a vf,
        *  assuming that the flow remains in \a bb. The integrator \a i is used to integrate the flow.
        */
       virtual Evaluation::TimeModel<R> crossing_time(const System::VectorFieldInterface<R>& vf, 
                                                      const Geometry::ConstraintInterface<R>& c, 
-                                                     const Geometry::Rectangle<R>& dom, 
-                                                     const Geometry::Rectangle<R>& bb) const;
+                                                     const Geometry::Box<R>& dom, 
+                                                     const Geometry::Box<R>& bb) const;
 
     };
 

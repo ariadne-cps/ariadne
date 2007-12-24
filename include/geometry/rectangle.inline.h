@@ -186,19 +186,6 @@ Geometry::Rectangle<R>::operator=(const RectangleExpression<E>& original)
 }
 
 
-template<class R> inline
-Geometry::Rectangle<R> 
-Geometry::Rectangle<R>::unit_box(dimension_type d)
-{
-  Rectangle<R> r(d);
-  for(dimension_type i=0; i!=d; ++i) {
-    r.set_lower_bound(i,-1);
-    r.set_upper_bound(i,+1);
-  }
-  return r;
-}
-
-
 
 
 // Conversion operators
@@ -700,6 +687,28 @@ Geometry::disjoint(const Rectangle<R>& r1, const Rectangle<R>& r2)
     }
   }
   return result;
+}
+
+
+template<class X, class R> inline
+tribool 
+Geometry::disjoint(const Rectangle<X>& r, const Box<R>& bx)
+{
+  return disjoint(r,Rectangle<R>(bx));
+}
+
+template<class X, class R> inline
+tribool 
+Geometry::subset(const Rectangle<X>& r, const Box<R>& bx)
+{
+  return subset(r,Rectangle<R>(bx));
+}
+
+template<class X, class R> inline
+tribool 
+Geometry::superset(const Rectangle<X>& r, const Box<R>& bx)
+{
+  return subset(Rectangle<R>(bx),r);
 }
 
 

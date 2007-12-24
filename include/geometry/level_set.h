@@ -62,17 +62,17 @@ namespace Ariadne {
       /*! \brief */
       virtual tribool contains(const Point<R>& pt) const;
       /*! \brief */
-      virtual tribool superset(const Rectangle<R>& r) const;
+      virtual tribool superset(const Box<R>& r) const;
       /*! \brief */
-      virtual tribool intersects(const Rectangle<R>& r) const;
+      virtual tribool intersects(const Box<R>& r) const;
       /*! \brief */
-      virtual tribool disjoint(const Rectangle<R>& r) const;
+      virtual tribool disjoint(const Box<R>& r) const;
       /*! \brief */
-      virtual tribool subset(const Rectangle<R>& r) const;
+      virtual tribool subset(const Box<R>& r) const;
       /*! \brief */
       virtual tribool bounded() const;
       /*! \brief */
-      virtual Rectangle<R> bounding_box() const;
+      virtual Box<R> bounding_box() const;
       /*! \brief */
       virtual std::ostream& write(std::ostream& os) const;
 

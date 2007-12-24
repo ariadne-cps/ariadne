@@ -33,7 +33,7 @@
 namespace Ariadne {
   namespace Geometry {
 
-    template<class R> class Rectangle;
+    template<class R> class Box;
     template<class BS> class ListSet;
   
     /*! \brief A finite, nonuniform grid of rectangles in Euclidean space. 
@@ -50,7 +50,7 @@ namespace Ariadne {
       explicit IrregularGrid(const array< std::vector<R> >& sp);
 
       /*! \brief Construct from a list of rectangles giving the grid points. */
-      explicit IrregularGrid(const ListSet< Rectangle<R> >& ls);
+      explicit IrregularGrid(const ListSet< Box<R> >& ls);
 
       /*! \brief Join two irregular grids. */
       IrregularGrid(const IrregularGrid& g1,IrregularGrid& g2);
@@ -73,16 +73,16 @@ namespace Ariadne {
 
       /*! \brief Tests whether the grid contains the given lattice rectangle 
        * within its extent. */
-      bool encloses(const Rectangle<R>& r) const;
+      bool encloses(const Box<R>& r) const;
 
       /*! \brief The rectangle bounding the grid. */
-      Rectangle<R> extent() const;
+      Box<R> extent() const;
       
       /*! \brief The block of cells enclosing a rectangle. */
-      Combinatoric::LatticeBlock index_block(const Rectangle<R>& r) const;
+      Combinatoric::LatticeBlock index_block(const Box<R>& r) const;
 
       /*! \brief A rectangle corresponding to a block of cells. */
-      Rectangle<R> rectangle(const Combinatoric::LatticeBlock& lb) const;
+      Box<R> rectangle(const Combinatoric::LatticeBlock& lb) const;
 
 
       /*! \brief The block of valid lattice cells. */

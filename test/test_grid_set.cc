@@ -50,10 +50,10 @@ template<class R>
 int
 test_grid_set()
 {
-  Grid<R> gr1(Rectangle<R>("[0,1]x[0,1]x[0,1]"),LatticeBlock("[1,5]x[-1,3]x[-6,-2]"));
+  Grid<R> gr1(Box<R>("[0,1]x[0,1]x[0,1]"),LatticeBlock("[1,5]x[-1,3]x[-6,-2]"));
   cout << "gr1=" << gr1 << endl;
 
-  Grid<R> gr2(Rectangle<R>("[0,1]x[0,1]x[0,1]"),LatticeBlock("[1,4]x[-1,2]x[-6,-3]"));
+  Grid<R> gr2(Box<R>("[0,1]x[0,1]x[0,1]"),LatticeBlock("[1,4]x[-1,2]x[-6,-3]"));
   cout << "gr2=" << gr2 << endl;
 
 
@@ -61,11 +61,12 @@ test_grid_set()
   cout << "gr=" << gr << endl;
 
   // Test outer-approximations
-  Rectangle<R> r("[-0.125,0.5]x[0.1,0.3]");
-  Zonotope<R> z(r);
+  Box<R> bx("[-0.125,0.5]x[0.1,0.3]");
+  Box<R> r(bx);
+  Zonotope<R> z(bx);
   cout << "\nr=" << r << "\nz=" << z << "\n" << std::endl;
 
-  GridBlock<R> rova=over_approximation(r,gr);
+  GridBlock<R> rova=over_approximation(bx,gr);
 
   // Test outer-approximations
   GridBlock<R> roa=outer_approximation(r,gr);
@@ -82,8 +83,8 @@ test_grid_set()
   // test GridMaskSet clone
   {
     Grid<R> g(Vector<R>("[0.25,0.25]"));
-    Rectangle<R> bb("[-2,2]x[-2,2]");
-    Rectangle<R> r("[-1.375,0.625]x[0.5,1.375]");
+    Box<R> bb("[-2,2]x[-2,2]");
+    Box<R> r("[-1.375,0.625]x[0.5,1.375]");
     
     GridMaskSet<R> gms(g,bb);
     gms.adjoin_outer_approximation(r);
@@ -103,8 +104,8 @@ test_irregular_grid_set()
   string input("[0,0.75]x[0,0.625]  [0.625,1]x[1,1.25]  [1.25,1.5]x[1.25,2.5] ");
   stringstream is(input);
 
-  ListSet< Rectangle<R> > ls;
-  Rectangle< R > r;
+  ListSet< Box<R> > ls;
+  Box< R > r;
   for (int i=0; i< 3; i++) {
     is >> r;
     cout << "r=" << r << endl;
@@ -116,9 +117,9 @@ test_irregular_grid_set()
   IrregularGridMaskSet<R> igms(ls);
   cout << "igms=" << flush << igms << endl;
 
-  cout << ListSet< Rectangle<R> >(igms) << endl;
+  cout << ListSet< Box<R> >(igms) << endl;
 
-  ListSet< Rectangle<R> > ls1,ls2;
+  ListSet< Box<R> > ls1,ls2;
   ls1.push_back(ls[0]);
   ls1.push_back(ls[2]);
   ls2.push_back(ls[1]);

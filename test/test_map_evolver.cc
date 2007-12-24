@@ -79,17 +79,18 @@ test_map_evolver()
   HenonInverseMap<R> henon_inverse=HenonInverseMap<R>(henon.parameters());
   cout << henon << endl << henon_inverse << endl;
 
-  Rectangle<R> bounding_box=Rectangle<R>("[-4,4]x[-4,4]") ;
-  Rectangle<R> eps_bounding_box=bounding_box.neighbourhood(0.1);
+  Box<R> bounding_box=Box<R>("[-4,4]x[-4,4]") ;
+  Box<R> eps_bounding_box=bounding_box.neighbourhood(0.1);
   
   Grid<R> grid(2,grid_length);
   Grid<R> fine_grid(2,fine_grid_length);
   FiniteGrid<R> finite_grid=FiniteGrid<R>(grid,bounding_box); // grid
 
-  Rectangle<R> r=Rectangle<R>("[1.499,1.501]x[0.499,0.501]"); // initial state
-  Zonotope<R> z=Zonotope<R>(Rectangle<R>("[1.499,1.501]x[0.499,0.501]")); // initial state
-  Zonotope<R,UniformErrorTag> ez=Zonotope<R,UniformErrorTag>(Rectangle<R>("[1.499,1.501]x[0.499,0.501]")); // initial state
-  Polytope<R> pl=Polytope<R>(Rectangle<R>("[1.499,1.501]x[0.499,0.501]")); // initial state
+  Box<R> bx=Box<R>("[1.499,1.501]x[0.499,0.501]");
+  Rectangle<R> r(bx); // initial state
+  Zonotope<R> z(bx);
+  Zonotope<R,UniformErrorTag> ez(bx);
+  Polytope<R> pl(bx);
   
   //Test evaluation on different classes of sets
   Rectangle<R> fr=apply(henon,r);
@@ -112,10 +113,10 @@ test_map_evolver()
   
 
   // Test evaluation on concrete sets
-  GridMaskSet<R> grid_initial_set(grid,initial_set);
+  GridMaskSet<R> grid_initial_set(grid,bounding_box);
   grid_initial_set.adjoin_over_approximation(Rectangle<R>(initial_set));
   cout << "grid_initial_set=" << grid_initial_set << endl;
-  GridMaskSet<R> grid_bounding_set(grid,bounding_set);
+  GridMaskSet<R> grid_bounding_set(grid,bounding_box);
   grid_bounding_set.adjoin_over_approximation(Rectangle<R>(bounding_set));
   cout << "grid_bounding_set=" << grid_bounding_set << endl;
 
@@ -133,11 +134,11 @@ test_map_evolver()
   cout << "grid_chainreach_set=" << grid_chainreach_set << endl;
 
   RectangularSet<R> non_fixed_initial_set("[-0.5,-0.25]x[-0.625,-0.375]");
-  ListSet< Rectangle<R> > list_initial_set=Geometry::point_approximation(non_fixed_initial_set,fine_grid);
+  ListSet< Box<R> > list_initial_set=Geometry::point_approximation(non_fixed_initial_set,fine_grid);
   cout << "list_initial_set=" << list_initial_set << endl;
-  ListSet< Rectangle<R> > list_reach_set=evolver.lower_reach(henon,list_initial_set);
+  ListSet< Box<R> > list_reach_set=evolver.lower_reach(henon,list_initial_set);
   cout << "list_reach_set=" << list_reach_set << endl;
-  GridMaskSet<R> list_grid_reach_set(grid,bounding_set);
+  GridMaskSet<R> list_grid_reach_set(grid,bounding_box);
   list_grid_reach_set.adjoin_outer_approximation(list_reach_set);
   cout << "list_grid_reach_set=" << list_grid_reach_set << endl;
 
@@ -198,7 +199,7 @@ test_map_evolver()
   cout << "reach_set=" << *reach_set_ptr << endl;
   evolver.parameters().set_grid_length(grid_length);
   cout << "Computing chainreach set" << endl;
-  shared_ptr< SetInterface<R> > chainreach_set_ptr(evolver.chainreach(henon,initial_set,bounding_set));
+  shared_ptr< SetInterface<R> > chainreach_set_ptr(evolver.chainreach(henon,initial_set,bounding_box));
   cout << "chainreach_set=" << *chainreach_set_ptr << endl;
 
   eps.open("test_map_evolver-abstract_reach.eps",eps_bounding_box);

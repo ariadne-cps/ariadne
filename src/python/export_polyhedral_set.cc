@@ -39,7 +39,7 @@ void export_polyhedral_set()
 {
   class_< PolyhedralSet<R>, bases< SetInterface<R> > >("PolyhedralSet",init< Polyhedron<R> >())
     .def(init< Matrix<R>,Vector<R> >())
-    .def(init< Rectangle<R> >())
+    .def(init< Box<R> >())
     .def(init< Polyhedron<R> >())
     .def("polyhedron", &PolyhedralSet<R>::operator const Polyhedron<R>&,return_value_policy<copy_const_reference>())
     .def("dimension", &PolyhedralSet<R>::dimension)

@@ -49,15 +49,15 @@ Evaluation::Bounder<R>::clone() const
 
 
 template<class R>
-Geometry::Rectangle<R>
+Geometry::Box<R>
 Evaluation::Bounder<R>::flow_bounds(const System::VectorFieldInterface<R>& vf,
-                                    const Geometry::Rectangle<R>& r,
+                                    const Geometry::Box<R>& r,
                                     Numeric::Rational& h) const
 {
   Numeric::Rational oldh=h;
   ARIADNE_LOG(5,"Bounder::flow_bounds(VectorField vf, Recangle R, Time h)\n");
   ARIADNE_LOG(6,"  h="<<h.get_d()<<", r="<<r<<"\n");
-  Geometry::Rectangle<R> bb=this->estimate_flow_bounds(vf,r,h);
+  Geometry::Box<R> bb=this->estimate_flow_bounds(vf,r,h);
   bb=this->refine_flow_bounds(vf,r,bb,h);
   bb=this->refine_flow_bounds(vf,r,bb,h);
   ARIADNE_LOG(6,"  h="<<h.get_d()<<", bb="<<bb<<"\n");
@@ -66,12 +66,12 @@ Evaluation::Bounder<R>::flow_bounds(const System::VectorFieldInterface<R>& vf,
 }
 
 template<class R>
-Geometry::Rectangle<R>
+Geometry::Box<R>
 Evaluation::Bounder<R>::flow_bounds(const System::VectorFieldInterface<R>& vf,
-                                    const Geometry::Rectangle<R>& r,
+                                    const Geometry::Box<R>& r,
                                     const Numeric::Rational& h) const
 {
-  Geometry::Rectangle<R> bb=this->estimate_flow_bounds(vf,r,h);
+  Geometry::Box<R> bb=this->estimate_flow_bounds(vf,r,h);
   bb=this->refine_flow_bounds(vf,r,bb,h);
   bb=this->refine_flow_bounds(vf,r,bb,h);
   return bb;
@@ -81,8 +81,8 @@ Evaluation::Bounder<R>::flow_bounds(const System::VectorFieldInterface<R>& vf,
 template<class R>
 bool
 Evaluation::Bounder<R>::check_flow_bounds(const System::VectorFieldInterface<R>& vf,
-                                             const Geometry::Rectangle<R>& r,
-                                             const Geometry::Rectangle<R>& b,
+                                             const Geometry::Box<R>& r,
+                                             const Geometry::Box<R>& b,
                                              const Numeric::Rational& h) const
 {
   if(verbosity>6) { std::clog << "Bounder::check_flow_bounds" << std::endl; }
@@ -94,9 +94,9 @@ Evaluation::Bounder<R>::check_flow_bounds(const System::VectorFieldInterface<R>&
 
 
 template<class R>
-Geometry::Rectangle<R>
+Geometry::Box<R>
 Evaluation::Bounder<R>::estimate_flow_bounds(const System::VectorFieldInterface<R>& vf,
-                                                   const Geometry::Rectangle<R>& r,
+                                                   const Geometry::Box<R>& r,
                                                    const Numeric::Rational& h) const
 {
   return this->estimate_flow_bounds(vf,r,h,12);
@@ -104,24 +104,24 @@ Evaluation::Bounder<R>::estimate_flow_bounds(const System::VectorFieldInterface<
 
   
 template<class R>
-Geometry::Rectangle<R>
+Geometry::Box<R>
 Evaluation::Bounder<R>::estimate_flow_bounds(const System::VectorFieldInterface<R>& vf,
-                                                   const Geometry::Rectangle<R>& r,
+                                                   const Geometry::Box<R>& r,
                                                    const Numeric::Rational& h,
                                                    const unsigned int& maximum_iterations) const
 {
   using namespace Geometry;
   using namespace Numeric;
   
-  ARIADNE_LOG(8,"Bounder::estimate_flow_bounds" << " (VectorField vf, Rectangle r, Time t, int n)\n");
+  ARIADNE_LOG(8,"Bounder::estimate_flow_bounds" << " (VectorField vf, Box r, Time t, int n)\n");
   ARIADNE_LOG(9,"  h="<<h<<", r="<<r<<", n="<<maximum_iterations<<"\n");
   
   typedef typename Numeric::traits<R>::arithmetic_type F;
   uint iteration=0;
   R multiplier=1.125;
   time_type t=h;
-  Rectangle<R> reach(vf.dimension());
-  Rectangle<R> bounds(vf.dimension());
+  Box<R> reach(vf.dimension());
+  Box<R> bounds(vf.dimension());
   reach=r;
   
   while(t>0) {
@@ -152,9 +152,9 @@ Evaluation::Bounder<R>::estimate_flow_bounds(const System::VectorFieldInterface<
 
 
 template<class R>
-Geometry::Rectangle<R>
+Geometry::Box<R>
 Evaluation::Bounder<R>::estimate_flow_bounds(const System::VectorFieldInterface<R>& vf,
-                                                const Geometry::Rectangle<R>& r,
+                                                const Geometry::Box<R>& r,
                                                 Numeric::Rational& h) const
 {
   using namespace Geometry;
@@ -167,7 +167,7 @@ Evaluation::Bounder<R>::estimate_flow_bounds(const System::VectorFieldInterface<
   unsigned int max_iterations=12;
   unsigned int remaining_tries=max_tries;
   
-  Rectangle<R> bounds(vf.dimension());
+  Box<R> bounds(vf.dimension());
   while(bounds.empty()) {
     try {
       bounds=estimate_flow_bounds(vf,r,h,max_iterations);
@@ -190,13 +190,13 @@ Evaluation::Bounder<R>::estimate_flow_bounds(const System::VectorFieldInterface<
 
 
 template<class R>
-Geometry::Rectangle<R>
+Geometry::Box<R>
 Evaluation::Bounder<R>::refine_flow_bounds(const System::VectorFieldInterface<R>& vector_field,
-                                              const Geometry::Rectangle<R>& initial_set,
-                                              const Geometry::Rectangle<R>& estimated_bounds,
+                                              const Geometry::Box<R>& initial_set,
+                                              const Geometry::Box<R>& estimated_bounds,
                                               const Numeric::Rational& step_size) const
 {
-  ARIADNE_LOG(6,"Bounder::refine_flow_bounds(VectorField vf, Rectangle r, Rectangle bb, Time t)\n");
+  ARIADNE_LOG(6,"Bounder::refine_flow_bounds(VectorField vf, Box r, Box bb, Time t)\n");
   ARIADNE_LOG(7,"  h="<<step_size.get_d()<<", r="<<initial_set<<", bb="<<estimated_bounds<<", ");
   
   using namespace System;
@@ -204,12 +204,12 @@ Evaluation::Bounder<R>::refine_flow_bounds(const System::VectorFieldInterface<R>
   using namespace LinearAlgebra;
   using namespace Numeric;
   const VectorFieldInterface<R>& vf=vector_field;
-  Rectangle<R> rx=initial_set;
-  Rectangle<R> b=estimated_bounds;
+  Box<R> rx=initial_set;
+  Box<R> b=estimated_bounds;
   Interval<R> h=Interval<R>(0,step_size);
   
-  Rectangle<R> xb=rx+h*vf(b);
-  Rectangle<R> xxb=rx+h*vf(xb);
+  Box<R> xb=rx+h*vf(b);
+  Box<R> xxb=rx+h*vf(xb);
   
   ARIADNE_LOG(7,"  nbb="<<xxb<<"\n");
 
@@ -219,25 +219,25 @@ Evaluation::Bounder<R>::refine_flow_bounds(const System::VectorFieldInterface<R>
 
 
 template<class R>
-Geometry::Rectangle<R>
+Geometry::Box<R>
 Evaluation::Bounder<R>::refine_flow_bounds(const System::VectorFieldInterface<R>& vector_field,
                                               const Geometry::Point<I>& initial_point,
-                                              const Geometry::Rectangle<R>& estimated_bounds,
+                                              const Geometry::Box<R>& estimated_bounds,
                                               const Numeric::Rational& step_size) const
 {
-  if(verbosity>6) { std::clog << "Bounder::refine_flow_bounds(VectorField,Point,Rectangle,Time)" << std::endl; }
+  if(verbosity>6) { std::clog << "Bounder::refine_flow_bounds(VectorField,Point,Box,Time)" << std::endl; }
   
   using namespace System;
   using namespace Geometry;
   using namespace LinearAlgebra;
   using namespace Numeric;
   const VectorFieldInterface<R>& vf=vector_field;
-  Rectangle<R> rx(initial_point);
-  Rectangle<R> b=estimated_bounds;
+  Box<R> rx(initial_point);
+  Box<R> b=estimated_bounds;
   Interval<R> h=Interval<R>(0,step_size);
   
-  Rectangle<R> xb=rx+h*vf(b);
-  Rectangle<R> xxb=rx+h*vf(xb);
+  Box<R> xb=rx+h*vf(b);
+  Box<R> xxb=rx+h*vf(xb);
   
   if(verbosity>7) { std::clog << "new_bounds " << xxb << "," << xb << " vs old_bounds " << b << "  " << subset(xb,b) << std::endl; }
   
@@ -246,9 +246,9 @@ Evaluation::Bounder<R>::refine_flow_bounds(const System::VectorFieldInterface<R>
 
 
 template<class R>
-Geometry::Rectangle<R>
+Geometry::Box<R>
 Evaluation::Bounder<R>::estimate_interval_flow_bounds(const System::VectorFieldInterface<R>& vector_field,
-                                                         const Geometry::Rectangle<R>& initial_set,
+                                                         const Geometry::Box<R>& initial_set,
                                                          Numeric::Interval<R>& step_size) const
 {
   if(verbosity>6) { std::clog << "Bounder::estimate_flow_bounds(VectorField,Point,TimeInterval)" << std::endl; }
@@ -257,7 +257,7 @@ Evaluation::Bounder<R>::estimate_interval_flow_bounds(const System::VectorFieldI
   Numeric::Rational forwards_step_size=step_size.upper();
   
   assert(backwards_step_size==0);
-  Geometry::Rectangle<R> estimated_bounds=estimate_flow_bounds(vector_field,initial_set,forwards_step_size);
+  Geometry::Box<R> estimated_bounds=estimate_flow_bounds(vector_field,initial_set,forwards_step_size);
 
   // FIXME: need to round inwards here...
   step_size=Numeric::Interval<R>(backwards_step_size,forwards_step_size);
@@ -269,25 +269,25 @@ Evaluation::Bounder<R>::estimate_interval_flow_bounds(const System::VectorFieldI
 
 
 template<class R>
-Geometry::Rectangle<R>
+Geometry::Box<R>
 Evaluation::Bounder<R>::refine_interval_flow_bounds(const System::VectorFieldInterface<R>& vector_field,
-                                                       const Geometry::Rectangle<R>& initial_set,
-                                                       const Geometry::Rectangle<R>& estimated_bounds,
+                                                       const Geometry::Box<R>& initial_set,
+                                                       const Geometry::Box<R>& estimated_bounds,
                                                        const Numeric::Interval<R>& step_size) const
 {
-  if(verbosity>6) { std::clog << "Bounder::refine_flow_bounds(VectorField,Point,Rectangle,TimeInterval)" << std::endl; }
+  if(verbosity>6) { std::clog << "Bounder::refine_flow_bounds(VectorField,Point,Box,TimeInterval)" << std::endl; }
   
   using namespace System;
   using namespace Geometry;
   using namespace LinearAlgebra;
   using namespace Numeric;
   const VectorFieldInterface<R>& vf=vector_field;
-  const Rectangle<R>& rx(initial_set);
-  Rectangle<R> b=estimated_bounds;
+  const Box<R>& rx(initial_set);
+  Box<R> b=estimated_bounds;
   const Interval<R>& h=step_size;
   
-  Rectangle<R> xb=rx+h*vf(b);
-  Rectangle<R> xxb=rx+h*vf(xb);
+  Box<R> xb=rx+h*vf(b);
+  Box<R> xxb=rx+h*vf(xb);
   
   if(verbosity>7) { std::clog << "new_bounds " << xxb << "," << xb << " vs old_bounds " << b << "  " << subset(xb,b) << std::endl; }
   
@@ -301,7 +301,7 @@ Evaluation::Bounder<R>::refine_interval_flow_bounds(const System::VectorFieldInt
 template<class R>
 LinearAlgebra::Matrix< Numeric::Interval<R> >
 Evaluation::Bounder<R>::estimate_flow_jacobian_bounds(const System::VectorFieldInterface<R>& vf,
-                                                      const Geometry::Rectangle<R>& b,
+                                                      const Geometry::Box<R>& b,
                                                       const Numeric::Rational& h) const
 {
   dimension_type d=vf.dimension();

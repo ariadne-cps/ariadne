@@ -94,7 +94,7 @@ namespace Ariadne {
       GridCellListSet<R>& operator=(const GridCellListSet<R>& gcls);
 
       /*!\brief Convert to a ListSet of Rectangles. */
-      operator ListSet< Rectangle<R> >() const;
+      operator ListSet< Box<R> >() const;
 
       /*! \brief The underlying grid. */
       const Grid<R>& grid() const;
@@ -112,20 +112,20 @@ namespace Ariadne {
       /*!\brief Checks if a denotable set includes a point. */
       virtual tribool contains(const Point<R>& p) const;
 
-      /*! \brief Tests for superset of a Rectangle. */ 
-      virtual tribool superset(const Rectangle<R>& r) const;
+      /*! \brief Tests for superset of a Box. */ 
+      virtual tribool superset(const Box<R>& r) const;
 
-      /*! \brief Tests for intersection with a Rectangle. */
-      virtual tribool intersects(const Rectangle<R>& r) const;
+      /*! \brief Tests for intersection with a Box. */
+      virtual tribool intersects(const Box<R>& r) const;
 
-      /*! \brief Tests for disjointness with a Rectangle. */
-      virtual tribool disjoint(const Rectangle<R>& r) const;
+      /*! \brief Tests for disjointness with a Box. */
+      virtual tribool disjoint(const Box<R>& r) const;
 
-      /*! \brief Tests for subset of a Rectangle. */
-      virtual tribool subset(const Rectangle<R>& r) const;
+      /*! \brief Tests for subset of a Box. */
+      virtual tribool subset(const Box<R>& r) const;
 
       /*! \brief The rectangle bounding the region of the mask. */
-      virtual Rectangle<R> bounding_box() const;
+      virtual Box<R> bounding_box() const;
       //@}
 
 
@@ -164,7 +164,7 @@ namespace Ariadne {
       void adjoin(const GridCellListSet<R>& cls);
 
       /*! \brief Adjoins an over-approximation of the rectangle \a r. */
-      void adjoin_over_approximation(const Rectangle<R>& r);
+      void adjoin_over_approximation(const Box<R>& r);
 
       /*! \brief Adjoins an outer-approximation of the set \a s. */
       template<class S>

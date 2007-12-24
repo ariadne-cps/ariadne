@@ -84,7 +84,7 @@ namespace Ariadne {
       /*!\brief Construct from a grid and two integer arrays giving the corners. */
       GridBlock(const Grid<R>& g, const IndexArray& l, const IndexArray& u);
       /*!\brief Construct from a grid and an ordinary rectangle. */
-      GridBlock(const Grid<R>& g, const Rectangle<R>& r);
+      GridBlock(const Grid<R>& g, const Box<R>& r);
       /*!\brief Construct from a GridCell. */
       GridBlock(const GridCell<R>& gc);
       
@@ -115,7 +115,7 @@ namespace Ariadne {
       tribool bounded() const;
 
       /*!\brief A rectangle containing the grid rectangle. */
-      Rectangle<R> bounding_box() const;
+      Box<R> bounding_box() const;
 
       /*!\brief The one-box neighbourhood of the block. */
       GridBlock<R> neighbourhood() const;
@@ -137,7 +137,7 @@ namespace Ariadne {
     };
 
     
-    template<class R> tribool subset(const Rectangle<R>&, const GridBlock<R>&);
+    template<class R> tribool subset(const Box<R>&, const GridBlock<R>&);
    
     template<class R> tribool overlap(const GridBlock<R>&, const GridBlock<R>&);
     

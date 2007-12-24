@@ -56,7 +56,7 @@ template<class R>
 int test_set_based_hybrid_automaton() 
 {
   
-  Rectangle<R> r("[-1,1]x[-1,1]");
+  Box<R> r("[-1,1]x[-1,1]");
   cout << "r=" << r << endl;
 
   AffineVectorField<R> dynamic(Matrix<R>("[-0.25,-1.00;1.00,-0.25]"),Vector<R>("[0.00,0.00]"));
@@ -66,8 +66,8 @@ int test_set_based_hybrid_automaton()
   
   PolyhedralSet<R> invariant(r);
   cout << "invariant=" << invariant << endl;
-  PolyhedralSet<R> activation12(Rectangle<R>("[-0.20,0.00]x[-0.20,0.00]"));
-  PolyhedralSet<R> activation21(Rectangle<R>("[0.00,0.20]x[0.00,0.20]"));
+  PolyhedralSet<R> activation12(Box<R>("[-0.20,0.00]x[-0.20,0.00]"));
+  PolyhedralSet<R> activation21(Box<R>("[0.00,0.20]x[0.00,0.20]"));
   cout << "activation12=" << activation12 << endl;
   cout << "activation21=" << activation21 << endl;
   cout << endl;

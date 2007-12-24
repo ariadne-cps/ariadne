@@ -47,9 +47,9 @@ namespace Ariadne {
       virtual DiscreteMapInterface<R>* clone() const = 0;
       virtual size_type argument_dimension() const = 0;
       virtual size_type result_dimension() const = 0;
-      virtual Geometry::Rectangle<R> apply(const Geometry::Rectangle<R>&) const = 0;
+      virtual Geometry::Box<R> apply(const Geometry::Box<R>&) const = 0;
       virtual Geometry::GridCellListSet<R> apply(const Geometry::GridCell<R>&, const Geometry::Grid<R>& g) const = 0;
-      virtual Geometry::DiscreteTimeOrbit<Numeric::Integer,Geometry::Rectangle<R> > orbit(const Geometry::Rectangle<R>&, const Numeric::Integer&, const R& s) const = 0;
+      virtual Geometry::DiscreteTimeOrbit<Numeric::Integer,Geometry::Box<R> > orbit(const Geometry::Box<R>&, const Numeric::Integer&, const R& s) const = 0;
       virtual Geometry::DiscreteTimeOrbit<Numeric::Integer,Geometry::GridCellListSet<R> > orbit(const Geometry::GridCell<R>&, const Numeric::Integer&) const = 0;
     };
 
@@ -63,9 +63,9 @@ namespace Ariadne {
       virtual DiscreteMap<R>* clone() const;
       virtual size_type argument_dimension() const;
       virtual size_type result_dimension() const;
-      virtual Geometry::Rectangle<R> apply(const Geometry::Rectangle<R>&) const;
+      virtual Geometry::Box<R> apply(const Geometry::Box<R>&) const;
       virtual Geometry::GridCellListSet<R> apply(const Geometry::GridCell<R>&, const Geometry::Grid<R>& g) const;
-      virtual Geometry::DiscreteTimeOrbit<Numeric::Integer,Geometry::Rectangle<R> > orbit(const Geometry::Rectangle<R>&, const Numeric::Integer&, const R& s) const;
+      virtual Geometry::DiscreteTimeOrbit<Numeric::Integer,Geometry::Box<R> > orbit(const Geometry::Box<R>&, const Numeric::Integer&, const R& s) const;
       virtual Geometry::DiscreteTimeOrbit<Numeric::Integer,Geometry::GridCellListSet<R> > orbit(const Geometry::GridCell<R>&, const Numeric::Integer&) const;
      private:
       System::MapInterface<R>* _map;
@@ -84,7 +84,7 @@ namespace Ariadne {
       virtual DiscretizedVectorField<R>* clone() const;
       virtual size_type argument_dimension() const;
       virtual size_type result_dimension() const;
-      virtual Geometry::DiscreteTimeOrbit<Numeric::Integer,Geometry::Rectangle<R> > orbit(const Geometry::Rectangle<R>&, const Numeric::Integer&, const R& s) const;
+      virtual Geometry::DiscreteTimeOrbit<Numeric::Integer,Geometry::Box<R> > orbit(const Geometry::Box<R>&, const Numeric::Integer&, const R& s) const;
       virtual Geometry::DiscreteTimeOrbit<Numeric::Integer,Geometry::GridCellListSet<R> > orbit(const Geometry::GridCell<R>&, const Numeric::Integer&) const;
      private:
       System::VectorFieldInterface<R>* _map;
@@ -144,8 +144,8 @@ System::DiscreteMap<R>::result_dimension() const
 
 
 template<class R>
-Geometry::Rectangle<R> 
-System::DiscreteMap<R>::apply(const Geometry::Rectangle<R>& r) const  
+Geometry::Box<R> 
+System::DiscreteMap<R>::apply(const Geometry::Box<R>& r) const  
 {
   return this->_orbiter->apply(this->map(),r); 
 }
@@ -159,8 +159,8 @@ System::DiscreteMap<R>::apply(const Geometry::GridCell<R>& gc, const Geometry::G
 
 
 template<class R>
-Geometry::DiscreteTimeOrbit<Numeric::Integer,Geometry::Rectangle<R> > 
-System::DiscreteMap<R>::orbit(const Geometry::Rectangle<R>& r, const Numeric::Integer& n, const R& s) const  
+Geometry::DiscreteTimeOrbit<Numeric::Integer,Geometry::Box<R> > 
+System::DiscreteMap<R>::orbit(const Geometry::Box<R>& r, const Numeric::Integer& n, const R& s) const  
 {
   return this->_orbiter->orbit(this->map(),r,n,s); 
 }

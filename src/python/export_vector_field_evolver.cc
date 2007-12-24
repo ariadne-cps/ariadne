@@ -59,7 +59,7 @@ void export_vector_field_evolver()
                       (&VectorFieldEvolver<R>::reach),return_value_policy<manage_new_object>());
     evolver_class.def("lower_reach",(SetInterface<R>*(VectorFieldEvolver<R>::*)(const VectorFieldInterface<R>&,const SetInterface<R>&)const)
                       (&VectorFieldEvolver<R>::lower_reach),return_value_policy<manage_new_object>());
-    evolver_class.def("chainreach",(SetInterface<R>*(VectorFieldEvolver<R>::*)(const VectorFieldInterface<R>&,const SetInterface<R>&,const SetInterface<R>&)const)
+    evolver_class.def("chainreach",(SetInterface<R>*(VectorFieldEvolver<R>::*)(const VectorFieldInterface<R>&,const SetInterface<R>&,const Box<R>&)const)
                       (&VectorFieldEvolver<R>::chainreach),return_value_policy<manage_new_object>());
     evolver_class.def("viable",(SetInterface<R>*(VectorFieldEvolver<R>::*)(const VectorFieldInterface<R>&,const SetInterface<R>&)const)
                       (&VectorFieldEvolver<R>::viable),return_value_policy<manage_new_object>());

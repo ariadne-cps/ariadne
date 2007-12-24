@@ -53,7 +53,7 @@ make_rectangular_set(boost::python::object obj)
       extract<list> extract_list(elements[i]);
       boost::python::list pair=extract_list();
       if(boost::python::len(pair)!=2) {
-        throw std::runtime_error("Rectangle must be list of pairs representing intervals");
+        throw std::runtime_error("Box must be list of pairs representing intervals");
       }
       extract<double> l(pair[0]);
       if (l.check()) {

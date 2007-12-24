@@ -66,7 +66,7 @@ namespace Evaluation { static int& verbosity = integrator_verbosity; }
 
 using Numeric::Interval;
 using Geometry::Point;
-using Geometry::Rectangle;
+using Geometry::Box;
 using Geometry::Zonotope;
 using Geometry::UniformErrorTag;
 using Geometry::IntervalTag;
@@ -186,7 +186,7 @@ Point< Numeric::Interval<R> >
 Evaluation::AffineIntegrator<R>::flow_step(const System::VectorFieldInterface<R>& vf,
                                            const Point<I>& p,
                                            const Numeric::Interval<R>& h,
-                                           const Rectangle<R>& bb) const
+                                           const Box<R>& bb) const
 {
   const System::AffineVectorField<R> avf=dynamic_cast<const System::AffineVectorField<R>&>(vf);
   if(!&avf) {
@@ -201,7 +201,7 @@ LinearAlgebra::Matrix< Numeric::Interval<R> >
 Evaluation::AffineIntegrator<R>::flow_step_jacobian(const System::VectorFieldInterface<R>& vf,
                                                     const Point<I>& p,
                                                     const Numeric::Interval<R>& h,
-                                                    const Rectangle<R>& bb) const
+                                                    const Box<R>& bb) const
 {
   const System::AffineVectorField<R> avf=dynamic_cast<const System::AffineVectorField<R>&>(vf);
   if(!&avf) {
@@ -318,7 +318,7 @@ Zonotope<R,UniformErrorTag>
 Evaluation::AffineIntegrator<R>::integration_step(const System::VectorFieldInterface<R>& vector_field, 
                                                    const Zonotope<R,UniformErrorTag>& initial_set, 
                                                    const Numeric::Interval<R>& step_size, 
-                                                   const Rectangle<R>& bounding_set) const
+                                                   const Box<R>& bounding_set) const
 {
   const System::AffineVectorField<R> affine_vector_field=dynamic_cast<const System::AffineVectorField<R>&>(vector_field);
   if(!&affine_vector_field) {
@@ -332,7 +332,7 @@ Zonotope<R,UniformErrorTag>
 Evaluation::AffineIntegrator<R>::reachability_step(const System::VectorFieldInterface<R>& vector_field, 
                                                    const Zonotope<R,UniformErrorTag>& initial_set, 
                                                    const Numeric::Interval<R>& step_size, 
-                                                   const Rectangle<R>& bounding_set) const
+                                                   const Box<R>& bounding_set) const
 {
   const System::AffineVectorField<R> affine_vector_field=dynamic_cast<const System::AffineVectorField<R>&>(vector_field);
   if(!&affine_vector_field) {

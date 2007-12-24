@@ -98,12 +98,12 @@ void export_list_set()
 {
   typedef Interval<R> I;
   
-  typedef Rectangle<R> RRectangle;
+  typedef Box<R> RBox;
   typedef Polytope<R> RPolytope;
   typedef Zonotope<R,ExactTag> RZonotope;
   typedef Zonotope<R,UniformErrorTag> EZonotope;
 
-  typedef ListSet<RRectangle> RRectangleListSet;
+  typedef ListSet<RBox> RBoxListSet;
   typedef ListSet<RPolytope> RPolytopeListSet;
   typedef ListSet<RZonotope> RZonotopeListSet;
   typedef ListSet<EZonotope> EZonotopeListSet;
@@ -112,34 +112,34 @@ void export_list_set()
   typedef GridMaskSet<R> RGridMaskSet;
   typedef PartitionTreeSet<R> RPartitionTreeSet;
   
-  def("open_intersection",(RRectangleListSet(*)(const RRectangleListSet&,const RRectangleListSet&))(&open_intersection));
-  def("disjoint",(tribool(*)(const RRectangleListSet&,const RRectangleListSet&))(&disjoint));
-  def("subset", (tribool(*)(const RRectangleListSet&,const RRectangleListSet&))(&subset));
+  def("open_intersection",(RBoxListSet(*)(const RBoxListSet&,const RBoxListSet&))(&open_intersection));
+  def("disjoint",(tribool(*)(const RBoxListSet&,const RBoxListSet&))(&disjoint));
+  def("subset", (tribool(*)(const RBoxListSet&,const RBoxListSet&))(&subset));
 
 
-  class_<RRectangleListSet>("RectangleListSet",init<int>())
-    .def(init<RRectangle>())
-    .def(init<RRectangleListSet>())
+  class_<RBoxListSet>("BoxListSet",init<int>())
+    .def(init<RBox>())
+    .def(init<RBoxListSet>())
     .def(init<RGridCellListSet>())
     .def(init<RGridMaskSet>())
     .def(init<RPartitionTreeSet>())
-    .def("dimension", &RRectangleListSet::dimension)
-    .def("adjoin", (void(RRectangleListSet::*)(const RRectangle&))&RRectangleListSet::adjoin)
-    .def("adjoin", (void(RRectangleListSet::*)(const RRectangleListSet&))&RRectangleListSet::adjoin)
-    .def("push_back", &RRectangleListSet::push_back)
-    .def("size", &RRectangleListSet::size)
-    .def("empty", &RRectangleListSet::empty)
-    .def("__len__", &RRectangleListSet::size)
-    .def("__getitem__", &get_item<RRectangleListSet>)
-//    .def("__setitem__", &set_item<RRectangleListSet>)
-    .def("__iter__", iterator<RRectangleListSet>())
+    .def("dimension", &RBoxListSet::dimension)
+    .def("adjoin", (void(RBoxListSet::*)(const RBox&))&RBoxListSet::adjoin)
+    .def("adjoin", (void(RBoxListSet::*)(const RBoxListSet&))&RBoxListSet::adjoin)
+    .def("push_back", &RBoxListSet::push_back)
+    .def("size", &RBoxListSet::size)
+    .def("empty", &RBoxListSet::empty)
+    .def("__len__", &RBoxListSet::size)
+    .def("__getitem__", &get_item<RBoxListSet>)
+//    .def("__setitem__", &set_item<RBoxListSet>)
+    .def("__iter__", iterator<RBoxListSet>())
     .def(self_ns::str(self))    // __self_ns::str__
   ;
   
   
   class_<RZonotopeListSet>("ZonotopeListSet",init<int>())
     .def(init<RZonotope>())
-    .def(init<RRectangleListSet>())
+    .def(init<RBoxListSet>())
     .def(init<RZonotopeListSet>())
     .def("dimension", &RZonotopeListSet::dimension)
     .def("push_back", &RZonotopeListSet::push_back)
@@ -155,7 +155,7 @@ void export_list_set()
 
   class_<EZonotopeListSet>("ErrorZonotopeListSet",init<int>())
     .def(init<EZonotope>())
-    .def(init<RRectangleListSet>())
+    .def(init<RBoxListSet>())
     .def(init<RZonotopeListSet>())
     .def(init<EZonotopeListSet>())
     .def("dimension", &EZonotopeListSet::dimension)

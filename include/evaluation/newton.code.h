@@ -43,7 +43,7 @@ Evaluation::IntervalNewtonSolver<R>::solve(const System::VectorFieldInterface<R>
   uint n=this->maximum_number_of_steps();
   if(verbosity>1) { std::clog << "verbosity=" << verbosity << "\n"; }
   Geometry::Point<I> x=ix;
-  Geometry::Rectangle<R> r(x);
+  Geometry::Box<R> r(x);
   while(n>0) {
     if(verbosity>1) { std::clog << "Testing for root in " << x << "\n"; }
     if(verbosity>1) { std::clog << "  e=" << Geometry::radius(x) << "  x=" << x << std::endl; }
@@ -60,7 +60,7 @@ Evaluation::IntervalNewtonSolver<R>::solve(const System::VectorFieldInterface<R>
     if(verbosity>1) { std::clog << "  dx=" << dx << std::endl; }
     Geometry::Point<I> nx= m - dx;
     if(verbosity>1) { std::clog << "  nx=" << nx << std::endl; } 
-    Geometry::Rectangle<R> nr(nx);
+    Geometry::Box<R> nr(nx);
     if(verbosity>1) { std::clog << "  nr=" << nr << std::endl; } 
 
     if(verbosity>1) {

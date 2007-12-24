@@ -39,6 +39,7 @@ namespace Ariadne {
     template class HybridSet<Float64>;
     template class HybridGridCellListSet<Float64>;
     template class HybridGridMaskSet<Float64>;
+    template class HybridListSet< Box<Float64> >;
     template class HybridListSet< Rectangle<Float64> >;
     template class HybridListSet< Zonotope<Float64,UniformErrorTag> >;
 #endif
@@ -48,6 +49,7 @@ namespace Ariadne {
     template class HybridSet<FloatMP>;
     template class HybridGridCellListSet<FloatMP>;
     template class HybridGridMaskSet<FloatMP>;
+    template class HybridListSet< Box<FloatMP> >;
     template class HybridListSet< Rectangle<FloatMP> >;
     template class HybridListSet< Zonotope<FloatMP,UniformErrorTag> >;
 #endif

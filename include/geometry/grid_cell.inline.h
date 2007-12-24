@@ -53,7 +53,7 @@ Geometry::GridCell<R>::bounded() const {
 }
 
 template<class R> inline
-Geometry::Rectangle<R> 
+Geometry::Box<R> 
 Geometry::GridCell<R>::bounding_box() const 
 {
   return *this; 

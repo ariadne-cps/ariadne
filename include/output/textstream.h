@@ -42,6 +42,7 @@
 #include "linear_algebra/matrix.h"
 #include "geometry/exceptions.h"
 #include "geometry/point.h"
+#include "geometry/box.h"
 #include "geometry/rectangle.h"
 #include "geometry/rectangular_set.h"
 #include "geometry/list_set.h"
@@ -130,7 +131,7 @@ namespace Ariadne {
       
     template<class R> textstream& operator<<(textstream&, const Geometry::Point<R>&); 
     template<class R> textstream& operator<<(textstream&, const Geometry::PointList<R>&); 
-    template<class R> textstream& operator<<(textstream&, const Geometry::Rectangle<R>&);
+    template<class R> textstream& operator<<(textstream&, const Geometry::Box<R>&);
     template<class R, class Tag> textstream& operator<<(textstream&, const Geometry::Zonotope<R,Tag>&);
     template<class R> textstream& operator<<(textstream&, const Geometry::Polytope<R>&); 
     template<class R> textstream& operator<<(textstream&, const Geometry::Polyhedron<R>&); 
@@ -174,44 +175,39 @@ namespace Ariadne {
 
     template<class R> inline
     textstream&
-    operator<<(textstream& txt, const Geometry::Rectangle<R>& r) 
+    operator<<(textstream& txt, const Geometry::Box<R>& bx) 
     {
-      return txt << r.vertices();
+      txt.ostream() << bx;
+      return txt;
     }
     
+
+    template<class R> inline
+    textstream&
+    operator<<(textstream& txt, const Geometry::Rectangle<R>& r)
+    {
+      txt.ostream() << r;
+      return txt;
+    }
 
     template<class R> inline
     textstream&
     operator<<(textstream& txt, const Geometry::RectangularSet<R>& rs)
     {
-      return txt << Geometry::Rectangle<R>(rs);
-    }
-
-    
-    template<class R> inline
-    textstream&
-    operator<<(textstream& txt, const Geometry::Zonotope< Numeric::Interval<R>,Numeric::Interval<R> >& iz)
-    { 
-      return txt << iz.vertices();
-    }
-
-       
-    template<class R> inline
-    textstream&
-    operator<<(textstream& txt, const Geometry::Zonotope<Numeric::Interval<R>,R>& ez)
-    { 
-      return txt << ez.vertices();
-    }
-      
- 
-    template<class R, class Tag> inline
-    textstream&
-    operator<<(textstream& txt, const Geometry::Zonotope<R,Tag>& z)
-    {  
-      txt.ostream() << z;
+      txt.ostream() << Geometry::Rectangle<R>(rs);
       return txt;
     }
 
+    
+    template<class R,class Tag> inline
+    textstream&
+    operator<<(textstream& txt, const Geometry::Zonotope<R,Tag>& z)
+    { 
+      txt.ostream()<< z;
+      return txt;
+    }
+
+       
        
        
     template<class R> inline
@@ -255,7 +251,7 @@ namespace Ariadne {
     textstream&
     operator<<(textstream& txt, const Geometry::GridCell<R>& bs)
     {
-      return txt << Geometry::Rectangle<R>(bs);
+      return txt << Geometry::Box<R>(bs);
     }
     
 
@@ -263,7 +259,7 @@ namespace Ariadne {
     textstream&
     operator<<(textstream& txt, const Geometry::GridBlock<R>& bs)
     {
-      return txt << Geometry::Rectangle<R>(bs);
+      return txt << Geometry::Box<R>(bs);
     }
     
 
@@ -298,7 +294,7 @@ namespace Ariadne {
     {
       typedef typename Geometry::PartitionTreeSet<R>::const_iterator const_iterator;
       for(const_iterator set_iter=ds.begin(); set_iter!=ds.end(); ++set_iter) {
-        txt << Geometry::Rectangle<R>(*set_iter);
+        txt << Geometry::Box<R>(*set_iter);
       }
       return txt;
     }
@@ -315,8 +311,8 @@ namespace Ariadne {
         return txt << dynamic_cast<const RectangularSet<R>&>(set);
       } else if(dynamic_cast<const PolyhedralSet<R>*>(&set)) {
         return txt << dynamic_cast<const PolyhedralSet<R>&>(set);
-      } else if(dynamic_cast<const ListSet< Rectangle<R> >*>(&set)) {
-        return txt << dynamic_cast<const ListSet< Rectangle<R> >&>(set);
+      } else if(dynamic_cast<const ListSet< Box<R> >*>(&set)) {
+        return txt << dynamic_cast<const ListSet< Box<R> >&>(set);
       } else if(dynamic_cast<const ListSet< Zonotope<R,R> >*>(&set)) {
         return txt << dynamic_cast<const ListSet< Zonotope<R,R> >&>(set);
       } else if(dynamic_cast<const ListSet< Zonotope<I,R> >*>(&set)) {
@@ -330,7 +326,7 @@ namespace Ariadne {
       } else if(dynamic_cast<const PartitionTreeSet<R>*>(&set)) {
         return txt << dynamic_cast<const PartitionTreeSet<R>&>(set);
       }  else {
-        Rectangle<R> bb;
+        Box<R> bb;
         try {
           bb=set.bounding_box();
         } 
@@ -361,7 +357,7 @@ namespace Ariadne {
     operator<<(textstream& txt, const Geometry::PartitionTree<R>& pt)
     {
       for(typename Geometry::PartitionTree<R>::const_iterator iter = pt.begin(); iter!=pt.end(); ++iter) {
-        txt << Geometry::Rectangle<R>(*iter);
+        txt << Geometry::Box<R>(*iter);
       }
       return txt;
     }

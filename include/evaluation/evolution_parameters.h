@@ -105,7 +105,7 @@ namespace Ariadne {
       R bounding_domain_size() const;
 
       /*! \brief A grid of dimension \a d with the default spacing. */
-      Geometry::Rectangle<R> bounding_box(dimension_type d) const;
+      Geometry::Box<R> bounding_box(dimension_type d) const;
 
       /*! \brief A grid of dimension \a d with the default spacing. */
       Geometry::Grid<R> grid(dimension_type d) const;

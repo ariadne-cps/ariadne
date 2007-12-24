@@ -68,7 +68,7 @@ int test_set_based_hybrid_evolver()
 
   typedef Zonotope<R,UniformErrorTag> BS;
 
-  PolyhedralSet<R> space(Rectangle<R>("[-7.5,7.5]x[-7.5,7.5]"));
+  PolyhedralSet<R> space(Box<R>("[-7.5,7.5]x[-7.5,7.5]"));
   AffineMap<R> identity(Matrix<R>("[1,0;0,-1]"),Vector<R>("[0,0]"));
 
   PolyhedralSet<R> invariant1(space);
@@ -76,9 +76,9 @@ int test_set_based_hybrid_evolver()
   AffineVectorField<R> dynamic1(Matrix<R>("[-2,-1;1,-2]"),Vector<R>("[-1,0]"));
   AffineVectorField<R> dynamic2(Matrix<R>("[-2,-1; 1,-2]"),Vector<R>("[1,0]"));
   //AffineVectorField<R> dynamic2(Matrix<R>("[0,0;0,0]"),Vector<R>("[-1,-2]"));
-  PolyhedralSet<R> activation11(Rectangle<R>("[-7.5,7.5]x[-3,-2]"));
-  PolyhedralSet<R> activation21(Rectangle<R>("[-7.5,7.5]x[-7,-6]"));
-  PolyhedralSet<R> activation12(Rectangle<R>("[-7.5,7.5]x[6,7]"));
+  PolyhedralSet<R> activation11(Box<R>("[-7.5,7.5]x[-3,-2]"));
+  PolyhedralSet<R> activation21(Box<R>("[-7.5,7.5]x[-7,-6]"));
+  PolyhedralSet<R> activation12(Box<R>("[-7.5,7.5]x[6,7]"));
   AffineMap<R> reset11(Matrix<R>("[1,0;0,-1]"),Vector<R>("[0,0]"));
   AffineMap<R> reset21(Matrix<R>("[1,0;0,-1]"),Vector<R>("[0,0]"));
   AffineMap<R> reset12(Matrix<R>("[1,0;0,-1]"),Vector<R>("[0,0]"));
@@ -120,15 +120,16 @@ int test_set_based_hybrid_evolver()
   
   Grid<R> grid(Vector<R>("[0.25,0.25]"));
   FiniteGrid<R> finite_grid(grid,LatticeBlock("[-32,32]x[-32,32]"));
-  Rectangle<R> bounding_box=finite_grid.extent();
+  Box<R> bounding_box=finite_grid.extent();
+  RectangularSet<R> bounding_rectangle(bounding_box);
   
-  Rectangle<R> initial_rectangle1("[-6.96875,-6.9375]x[-6.96875,-6.9375]");
-  Rectangle<R> initial_rectangle2("[6.9375,6.96875]x[6.9375,6.96875]");
+  RectangularSet<R> initial_rectangle1("[-6.96875,-6.9375]x[-6.96875,-6.9375]");
+  RectangularSet<R> initial_rectangle2("[6.9375,6.96875]x[6.9375,6.96875]");
   HybridGridMaskSet<R> initial_set;
   initial_set.new_location(mode1_id,finite_grid);
   initial_set.new_location(mode2_id,finite_grid);
-  initial_set[mode1_id].adjoin_over_approximation(initial_rectangle1);
-  //initial_set[mode2_id].adjoin_over_approximation(initial_rectangle2);
+  initial_set[mode1_id].adjoin_outer_approximation(initial_rectangle1);
+  //initial_set[mode2_id].adjoin_outer_approximation(initial_rectangle2);
   cout << "initial_set=" << initial_set << endl;
 
   HybridGridMaskSet<R> bounding_set;
@@ -148,7 +149,7 @@ int test_set_based_hybrid_evolver()
        << " by continuous evolution" << endl << endl;
   
   epsfstream eps;
-  eps.open("test_hybrid_evolver-1.eps",bounding_box.expand(0.5));
+  eps.open("test_hybrid_evolver-1.eps",bounding_box.neighbourhood(0.5));
   eps << fill_colour(white) << bounding_box;
   eps << fill_colour(cyan) << automaton.mode(mode1_id).invariant();
   //eps << invariant1;
@@ -163,14 +164,14 @@ int test_set_based_hybrid_evolver()
   initial_activated_set.new_location(mode1_id,finite_grid);
   initial_activated_set.new_location(mode2_id,finite_grid);
   cout << "empty initial_activated_set=" << initial_activated_set << endl;
-  initial_activated_set[mode1_id].adjoin(over_approximation(Rectangle<R>("[-6,-5]x[-3.5,-1.0]"),grid));
+  initial_activated_set[mode1_id].adjoin(over_approximation(Box<R>("[-6,-5]x[-3.5,-1.0]"),grid));
   cout << "initial_activated_set=" << initial_activated_set << endl;
   cout << "initial_activated_set[mode1_id].size()=" << initial_activated_set[mode1_id].size() << " cells" << endl << endl;
   cout << "Computing single discrete step" << endl;
   HybridGridMaskSet<R> discrete_reach=hybrid_evolver.discrete_step(automaton,initial_activated_set);
   cout << "Reached " << discrete_reach[mode2_id].size() << " cells by discrete step" << endl << endl;
   
-  eps.open("test_hybrid_evolver-2.eps",bounding_box.expand(0.5));
+  eps.open("test_hybrid_evolver-2.eps",bounding_box.neighbourhood(0.5));
   eps << fill_colour(white) << bounding_box;
   eps << fill_colour(cyan);
   eps << static_cast<const Polyhedron<R>&>(activation11);
@@ -196,7 +197,7 @@ int test_set_based_hybrid_evolver()
        << "out of (" << chainreach[mode1_id].capacity() << "," << chainreach[mode1_id].capacity() << ") "
        << endl << endl;
   
-  eps.open("test_hybrid_evolver-3.eps",bounding_box.expand(0.5));
+  eps.open("test_hybrid_evolver-3.eps",bounding_box.neighbourhood(0.5));
   eps << fill_colour(white) << bounding_box;
   eps << fill_colour(cyan) << activation11 << activation21;
   eps << fill_colour(magenta) << activation12;
@@ -216,8 +217,8 @@ int test_set_based_hybrid_evolver()
   cout << "initial_set[mode21_id]=" << initial_set[mode2_id] << endl;
 
   HybridSet<R> bounding_set;
-  bounding_set.new_location(mode1_id,bounding_box);
-  bounding_set.new_location(mode2_id,bounding_box);
+  bounding_set.new_location(mode1_id,bounding_rectangle);
+  bounding_set.new_location(mode2_id,bounding_rectangle);
   cout << "bounding_set.discrete_locations()=" << bounding_set.locations() << endl;
   cout << "bounding_set[mode1_id]=" << bounding_set[mode1_id] << endl;
   cout << "bounding_set[mode21_id]=" << bounding_set[mode2_id] << endl;

@@ -1,9 +1,9 @@
 /***************************************************************************
  *            python/export_grid_set.cc
  *
- *  21 October 2005
- *  Copyright  2005  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *
+ *  Copyright  2005-7  Alberto Casagrande, Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -55,8 +55,9 @@ void export_grid()
 {
   typedef Vector<R> RVector;
   typedef Point<R> RPoint;
+  typedef Box<R> RBox;
   typedef Rectangle<R> RRectangle;
-  typedef ListSet< Rectangle<R> > RRectangleListSet;
+  typedef ListSet< Box<R> > RBoxListSet;
   typedef SetInterface<R> RSetInterface;
 
   typedef Grid<R> RGrid;
@@ -65,7 +66,7 @@ void export_grid()
   class_< RGrid > grid_class("Grid",init<uint,R>());
   grid_class.def(init<RPoint,RVector>());
   grid_class.def(init<RVector>());
-  grid_class.def(init<RRectangle,LatticeBlock>());
+  grid_class.def(init<RBox,LatticeBlock>());
   grid_class.def("dimension", &RGrid::dimension);
   grid_class.def("subdivision_coordinate",(R(RGrid::*)(dimension_type,index_type)const) &RGrid::subdivision_coordinate);
   grid_class.def("subdivision_coordinate",(R(RGrid::*)(dimension_type,dyadic_type)const) &RGrid::subdivision_coordinate);
@@ -76,8 +77,8 @@ void export_grid()
 
 
   class_< RFiniteGrid> finite_grid_class("FiniteGrid",init<const RGrid&,LatticeBlock>());
-  finite_grid_class.def(init<RRectangle,size_type>());
-  finite_grid_class.def(init<const RGrid&,RRectangle>());
+  finite_grid_class.def(init<RBox,size_type>());
+  finite_grid_class.def(init<const RGrid&,RBox>());
   finite_grid_class.def("dimension", &RFiniteGrid::dimension);
   finite_grid_class.def("subdivision_coordinate", &RFiniteGrid::subdivision_coordinate);
   finite_grid_class.def("subdivision_lower_index", &RFiniteGrid::subdivision_lower_index);
@@ -107,12 +108,13 @@ void export_grid_set()
   typedef Point<I> IPoint;
 
   typedef SetInterface<R> RSetInterface;
+  typedef Box<R> RBox;
   typedef Rectangle<R> RRectangle;
   typedef Polyhedron<R> RPolyhedron;
   typedef Polytope<R> RPolytope;
   typedef Zonotope<R,ExactTag> RZonotope;
   typedef Zonotope<R,UniformErrorTag> EZonotope;
-  typedef ListSet<RRectangle> RRectangleListSet;
+  typedef ListSet<RBox> RBoxListSet;
   typedef ListSet<RZonotope> RZonotopeListSet;
   typedef ListSet<EZonotope> EZonotopeListSet;
   typedef PartitionTreeSet<R> RPartitionTreeSet;
@@ -141,7 +143,7 @@ void export_grid_set()
   grid_cell_list_set_class.def("adjoin", (void(RGridCellListSet::*)(const RGridBlock&))(&RGridCellListSet::adjoin));
   grid_cell_list_set_class.def("adjoin", (void(RGridCellListSet::*)(const RGridCellListSet&))(&RGridCellListSet::adjoin));
   grid_cell_list_set_class.def("adjoin_over_approximation", &RGridCellListSet::adjoin_over_approximation);
-  grid_cell_list_set_class.def("adjoin_outer_approximation", (void(RGridCellListSet::*)(const RRectangle&))(&RGridCellListSet::adjoin_outer_approximation));
+  grid_cell_list_set_class.def("adjoin_outer_approximation", (void(RGridCellListSet::*)(const RBox&))(&RGridCellListSet::adjoin_outer_approximation));
   grid_cell_list_set_class.def("adjoin_outer_approximation", (void(RGridCellListSet::*)(const RPolyhedron&))(&RGridCellListSet::adjoin_outer_approximation));
   grid_cell_list_set_class.def("adjoin_outer_approximation", (void(RGridCellListSet::*)(const RPolytope&))(&RGridCellListSet::adjoin_outer_approximation));
   grid_cell_list_set_class.def("adjoin_outer_approximation", (void(RGridCellListSet::*)(const RZonotope&))(&RGridCellListSet::adjoin_outer_approximation));
@@ -156,7 +158,7 @@ void export_grid_set()
  
   class_<RGridMaskSet, bases<RSetInterface> > grid_mask_set_class("GridMaskSet",init<const RFiniteGrid&>());
   grid_mask_set_class.def(init<const RGrid&,LatticeBlock>());
-  grid_mask_set_class.def(init<const RGrid&,RRectangle>());
+  grid_mask_set_class.def(init<const RGrid&,RBox>());
   grid_mask_set_class.def(init<RGridMaskSet>());
   grid_mask_set_class.def("bounding_box", &RGridMaskSet::bounding_box);
   grid_mask_set_class.def("empty", &RGridMaskSet::empty);
@@ -171,7 +173,7 @@ void export_grid_set()
   grid_mask_set_class.def("restrict", (void(RGridMaskSet::*)(const RGridCellListSet&))(&RGridMaskSet::restrict));
   grid_mask_set_class.def("restrict", (void(RGridMaskSet::*)(const RGridMaskSet&))(&RGridMaskSet::restrict));
   grid_mask_set_class.def("adjoin_over_approximation", &RGridMaskSet::adjoin_over_approximation);
-  grid_mask_set_class.def("adjoin_outer_approximation", (void(RGridMaskSet::*)(const RRectangle&))(&RGridMaskSet::adjoin_outer_approximation));
+  grid_mask_set_class.def("adjoin_outer_approximation", (void(RGridMaskSet::*)(const RBox&))(&RGridMaskSet::adjoin_outer_approximation));
   grid_mask_set_class.def("adjoin_outer_approximation", (void(RGridMaskSet::*)(const RPolyhedron&))(&RGridMaskSet::adjoin_outer_approximation));
   grid_mask_set_class.def("adjoin_outer_approximation", (void(RGridMaskSet::*)(const RPolytope&))(&RGridMaskSet::adjoin_outer_approximation));
   grid_mask_set_class.def("adjoin_outer_approximation", (void(RGridMaskSet::*)(const RZonotope&))(&RGridMaskSet::adjoin_outer_approximation));
@@ -197,20 +199,22 @@ void export_grid_set()
 
   def("outer_approximation",(RGridBlock(*)(const IPoint&,const RGrid&))(&Geometry::outer_approximation));
 
-  def("over_approximation",(RGridBlock(*)(const RRectangle&,const RGrid&))(&Geometry::over_approximation));
-  def("under_approximation",(RGridBlock(*)(const RRectangle&,const RGrid&))(&Geometry::under_approximation));
-  def("outer_approximation",(RGridBlock(*)(const RRectangle&,const RGrid&))(&Geometry::outer_approximation));
-  def("inner_approximation",(RGridBlock(*)(const RRectangle&,const RGrid&))(&Geometry::inner_approximation));
+  def("over_approximation",(RGridBlock(*)(const RBox&,const RGrid&))(&Geometry::over_approximation));
+  def("under_approximation",(RGridBlock(*)(const RBox&,const RGrid&))(&Geometry::under_approximation));
+  def("outer_approximation",(RGridBlock(*)(const RBox&,const RGrid&))(&Geometry::outer_approximation));
 
+
+  def("outer_approximation",(RGridBlock(*)(const RRectangle&,const RGrid&))(&Geometry::outer_approximation));
   def("outer_approximation",(RGridCellListSet(*)(const RPolyhedron&,const RGrid&))(&Geometry::outer_approximation));
   def("outer_approximation",(RGridCellListSet(*)(const RPolytope&,const RGrid&))(&Geometry::outer_approximation));
   def("outer_approximation",(RGridCellListSet(*)(const RZonotope&,const RGrid&))(&Geometry::outer_approximation));
   def("outer_approximation",(RGridCellListSet(*)(const EZonotope&,const RGrid&))(&Geometry::outer_approximation));
-  def("outer_approximation",(RGridMaskSet(*)(const RRectangleListSet&,const RFiniteGrid&))(&Geometry::outer_approximation));
+  def("outer_approximation",(RGridMaskSet(*)(const RBoxListSet&,const RFiniteGrid&))(&Geometry::outer_approximation));
   def("outer_approximation",(RGridMaskSet(*)(const RZonotopeListSet&,const RFiniteGrid&))(&Geometry::outer_approximation));
   def("outer_approximation",(RGridMaskSet(*)(const EZonotopeListSet&,const RFiniteGrid&))(&Geometry::outer_approximation));
   def("outer_approximation",(RGridMaskSet(*)(const RSetInterface&,const RFiniteGrid&))(&Geometry::outer_approximation));
 
+  def("inner_approximation",(RGridBlock(*)(const RRectangle&,const RGrid&))(&Geometry::inner_approximation));
   def("inner_approximation",(RGridCellListSet(*)(const RPolytope&,const RGrid&))(&Geometry::inner_approximation));
   def("inner_approximation",(RGridCellListSet(*)(const RPolyhedron&,const RGrid&))(&Geometry::inner_approximation));
   def("inner_approximation",(RGridCellListSet(*)(const RZonotope&,const RGrid&))(&Geometry::inner_approximation));

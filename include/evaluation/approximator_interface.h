@@ -50,7 +50,7 @@ namespace Ariadne {
       virtual ApproximatorInterface<BS>* clone() const = 0;
 
       /*! \brief Computets and over-approximation of a set from a rectangle. */
-      virtual BS over_approximation(const Geometry::Rectangle<R>& r) const = 0;
+      virtual BS over_approximation(const Geometry::Box<R>& r) const = 0;
 
       /*! \brief Computets and over-approximation of a set from a rectangle. */
       virtual Geometry::GridCellListSet<R> outer_approximation(const BS& bs, const Geometry::Grid<R>& g) const = 0;

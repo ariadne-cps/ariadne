@@ -141,10 +141,10 @@ Evaluation::EvolutionParameters<R>::bounding_domain_size() const
 
 
 template<class R>
-Geometry::Rectangle<R>
+Geometry::Box<R>
 Evaluation::EvolutionParameters<R>::bounding_box(dimension_type d) const 
 {
-  return Geometry::Rectangle<R>(LinearAlgebra::Vector< Numeric::Interval<R> >(d,Numeric::Interval<R>(-1,1)*this->bounding_domain_size()));
+  return Geometry::Box<R>(LinearAlgebra::Vector< Numeric::Interval<R> >(d,Numeric::Interval<R>(-1,1)*this->bounding_domain_size()));
 }
 
 

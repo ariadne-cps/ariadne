@@ -42,7 +42,7 @@ namespace Ariadne {
     //! \ingroup ExactSet
     /*! \brief A set defined by the conditions \f$f(x)\geq0\f$ for some function \f$f\f$. 
      *   Satisfies the conditions of the RegularSetInterface, 
-     *   which means that only superset(Rectangle) and disjoint(Rectangle) need be meaningfully defined, 
+     *   which means that only superset(Box) and disjoint(Box) need be meaningfully defined, 
      *   and only outer- and inner-approximations can be computed.
      */
     template<class R>
@@ -63,17 +63,17 @@ namespace Ariadne {
       /*! \brief Test if the set contains a point. */
       virtual tribool contains(const Point<R>& pt) const;
       /*! \brief */
-      virtual tribool superset(const Rectangle<R>& r) const;
+      virtual tribool superset(const Box<R>& r) const;
       /*! \brief */
-      virtual tribool intersects(const Rectangle<R>& r) const;
+      virtual tribool intersects(const Box<R>& r) const;
       /*! \brief */
-      virtual tribool disjoint(const Rectangle<R>& r) const;
+      virtual tribool disjoint(const Box<R>& r) const;
       /*! \brief */
-      virtual tribool subset(const Rectangle<R>& r) const;
+      virtual tribool subset(const Box<R>& r) const;
       /*! \brief */
       virtual tribool bounded() const;
       /*! \brief */
-      virtual Rectangle<R> bounding_box() const;
+      virtual Box<R> bounding_box() const;
       /*! \brief */
       virtual std::ostream& write(std::ostream& os) const;
 

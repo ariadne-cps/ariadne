@@ -70,20 +70,20 @@ test_constraint_set()
 
   ConstraintSet<R> s(f);
 
-  Rectangle<R> r;
+  Box<R> r;
   
   // superset
-  r=Rectangle<R>("[0.4,0.5]x[0.45,0.65]");
+  r=Box<R>("[0.4,0.5]x[0.45,0.65]");
   ARIADNE_TEST_ASSERT(s.superset(r));
 
   // disjoint
-  r=Rectangle<R>("[0.8,0.9]x[0.95,0.95]");
+  r=Box<R>("[0.8,0.9]x[0.95,0.95]");
   ARIADNE_TEST_ASSERT(s.disjoint(r));
 
 
   // approximations
   Grid<R> g(Vector<R>("[0.1875,0.125]"));
-  Rectangle<R> bb("[-1.01,1.01]x[-1.01,1.01]");
+  Box<R> bb("[-1.01,1.01]x[-1.01,1.01]");
   FiniteGrid<R> fg(g,bb);
   GridMaskSet<R> gmsia(fg); 
   GridMaskSet<R> gmsoa(fg); 

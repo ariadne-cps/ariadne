@@ -40,8 +40,8 @@ using namespace Ariadne::Python;
 using namespace boost::python;
 
 template<class R> inline
-Rectangle<R> convert_to_rectangle(const PartitionTreeCell<R>& ptc) {
-  return Rectangle<R>(ptc);
+Box<R> convert_to_rectangle(const PartitionTreeCell<R>& ptc) {
+  return Box<R>(ptc);
 }
 
 template<class R>
@@ -53,7 +53,7 @@ void export_partition_tree_set()
   typedef PartitionTreeSet<R> RPartitionTreeSet;
  
   typedef SetInterface<R> RSetInterface;
-  typedef Rectangle<R> RRectangle;
+  typedef Box<R> RBox;
   typedef GridMaskSet<R> RGridMaskSet;
   
   class_<SubdivisionSequence>("SubdivisionSequence",init<unsigned int>())
@@ -62,15 +62,15 @@ void export_partition_tree_set()
     .def(self_ns::str(self))    // __self_ns::str__
   ;
 
-  class_<RPartitionScheme>("PartitionScheme",init<RRectangle,SubdivisionSequence>())
-    .def(init<RRectangle>())
+  class_<RPartitionScheme>("PartitionScheme",init<RBox,SubdivisionSequence>())
+    .def(init<RBox>())
     .def("dimension", &RPartitionScheme::dimension)
     .def("unit_box", &RPartitionScheme::unit_box, return_value_policy<copy_const_reference>())
     .def("subdivisions", &RPartitionScheme::subdivisions, return_value_policy<copy_const_reference>())
     .def(self_ns::str(self))    // __self_ns::str__
   ;
 
-  class_<RPartitionTree>("PartitionTree",init<RRectangle,SubdivisionSequence,BinaryTree>())
+  class_<RPartitionTree>("PartitionTree",init<RBox,SubdivisionSequence,BinaryTree>())
     .def(init<RPartitionScheme,BinaryTree>())
     .def("dimension", &RPartitionTree::dimension)
     .def("unit_box", &RPartitionTree::unit_box, return_value_policy<copy_const_reference>())
@@ -82,7 +82,7 @@ void export_partition_tree_set()
     .def(self_ns::str(self))    // __self_ns::str__
   ;
 
-  class_<RPartitionTreeSet, bases<RSetInterface> >("PartitionTreeSet",init<RRectangle,SubdivisionSequence,BinaryTree,BooleanArray>())
+  class_<RPartitionTreeSet, bases<RSetInterface> >("PartitionTreeSet",init<RBox,SubdivisionSequence,BinaryTree,BooleanArray>())
     .def(init<RPartitionTree,BooleanArray>())
     .def(init<RPartitionScheme>())
     .def(init<RGridMaskSet>())
@@ -102,7 +102,7 @@ void export_partition_tree_set()
     .def(self_ns::str(self))    // __self_ns::str__
   ;
 
-  class_<RPartitionTreeCell>("PartitionTreeCell",init<RRectangle,SubdivisionSequence,BinaryWord>())
+  class_<RPartitionTreeCell>("PartitionTreeCell",init<RBox,SubdivisionSequence,BinaryWord>())
     .def("dimension", &RPartitionTreeCell::dimension)
     .def(self_ns::str(self))    // __self_ns::str__
   ;

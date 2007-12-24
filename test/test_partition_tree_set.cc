@@ -1,9 +1,8 @@
 /***************************************************************************
  *            test_partition_tree.cc
  *
- *  1 July 2005
- *  Copyright  2005  Pieter Collins
- *  Email Pieter.Collins@cwi.nl, casagrande@dimi.uniud.it
+ *  Copyright  2005-7  Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -57,7 +56,7 @@ int main() {
 
   std::vector<Ariadne::dimension_type> seqa;
 
-  Rectangle<Flt> bb("[0,1]x[0,3]");
+  Box<Flt> bb("[0,1]x[0,3]");
   SubdivisionSequence seq(2);
   BinaryWord bnw;
   BooleanArray bna;
@@ -80,7 +79,7 @@ int main() {
   PartitionScheme<Flt> pg(bb,seq);
   PartitionTree<Flt> pt(pg,bnt);
   PartitionTreeSet<Flt> pts(pg,bnt,bla);
-  ListSet< Rectangle<Flt> > rls(pts);
+  ListSet< Box<Flt> > rls(pts);
 
   PartitionTree<Flt>::const_iterator ptree_iter=pt.begin();
   PartitionTree<Flt>::const_iterator ptree_end=pt.end();
@@ -93,8 +92,8 @@ int main() {
   iv[1]=Interval<Flt>(-0.5,0.5);
   Point<Flt> c("(0.125,0.25)");
   Matrix<Flt> A("[2,1;0.5,1]");
-  bb=Rectangle<Flt>("[-4,4]x[-4,4]");
-  Rectangle<Flt> rect("[-1.5,2.5]x[0.875,2.25]");
+  bb=Box<Flt>("[-4,4]x[-4,4]");
+  Box<Flt> bx("[-1.5,2.5]x[0.875,2.25]");
   Zonotope<Flt> z(c,A);
   cout << "z=" << z << endl << "bb=" << bb << endl;
 
@@ -108,12 +107,12 @@ int main() {
   
   cout << "pt=" << pt << endl;
   cout << "pts=" << pts << endl;
-  cout << "rect=" << rect << endl;
+  cout << "bx=" << bx << endl;
   cout << "z=" << z << endl;
   cout << "rls=" << rls << endl;
   pg=PartitionScheme<Flt>(bb,seq);
   uint dpth=8;
-  PartitionTreeCell<Flt> ptcrova=over_approximation(rect,pg);
+  PartitionTreeCell<Flt> ptcrova=over_approximation(bx,pg);
   cout << "over_approximation(rect,pg,dpth)=" << ptcrova << endl; 
 
   PartitionTreeSet<Flt> ptsina=inner_approximation(z,pg,dpth);
@@ -123,7 +122,7 @@ int main() {
 
   Grid<Flt> g(2,Flt(0.125));
   FiniteGrid<Flt> fg(g,bb);
-  ListSet< Rectangle<Flt> > lsina=ptsina;
+  ListSet< Box<Flt> > lsina=ptsina;
   cout << "lsina=" << lsina << endl;
   cout << "ptsina.size()=" << ptsina.size() << ", lsina.size()=" << lsina.size() << endl;
   // Under approximation of partition tree sets not currently implemented

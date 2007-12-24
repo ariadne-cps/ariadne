@@ -48,7 +48,7 @@ namespace Ariadne {
     class DetectorInterface 
     {
       typedef Numeric::Interval<R> I;
-      typedef typename Geometry::Rectangle<R> BS;
+      typedef typename Geometry::Box<R> BS;
      public:
       /*! \brief Virtual destructor. */
       virtual ~DetectorInterface() { };
@@ -58,13 +58,13 @@ namespace Ariadne {
 
       /*! \brief Compute the value of a constraint over a set. */
       virtual Numeric::Interval<R> value(const Geometry::ConstraintInterface<R>& c, 
-                                         const Geometry::Rectangle<R>& r) const = 0;
+                                         const Geometry::Box<R>& r) const = 0;
 
       /*! \brief Determine whether constraint \a c1 forces constraint \a c2 within \a dom.
        */
       virtual tribool forces(const Geometry::ConstraintInterface<R>& c1,
                              const Geometry::ConstraintInterface<R>& c2,
-                             const Geometry::Rectangle<R>& dom) const = 0;
+                             const Geometry::Box<R>& dom) const = 0;
 
       /*! \brief Compute the normal derivative to of the vector field \a vf to the constraint \a c at the point \a pt.
        */
@@ -76,13 +76,13 @@ namespace Ariadne {
       virtual Numeric::Interval<R> crossing_time(const System::VectorFieldInterface<R>& vf, 
                                                  const Geometry::ConstraintInterface<R>& c, 
                                                  const Geometry::Point<I>& pt, 
-                                                 const Geometry::Rectangle<R>& b) const = 0;
+                                                 const Geometry::Box<R>& b) const = 0;
 
       /*! \brief Compute the value of the crossing time over a set. */
       virtual Evaluation::TimeModel<R> crossing_time(const System::VectorFieldInterface<R>& vf, 
                                                      const Geometry::ConstraintInterface<R>& c, 
-                                                     const Geometry::Rectangle<R>& d, 
-                                                     const Geometry::Rectangle<R>& b) const = 0;
+                                                     const Geometry::Box<R>& d, 
+                                                     const Geometry::Box<R>& b) const = 0;
 
     };
 

@@ -72,7 +72,7 @@ namespace Ariadne {
      
       typedef Geometry::Point<I> point_type;
 
-      typedef Geometry::Rectangle<R> bounding_set_type;
+      typedef Geometry::Box<R> bounding_set_type;
 
       typedef BS basic_set_type;
 
@@ -157,7 +157,7 @@ namespace Ariadne {
        */
       virtual Geometry::SetInterface<R>* chainreach(const System::VectorFieldInterface<R>& vector_field,
                                                    const Geometry::SetInterface<R>& initial_set,
-                                                   const Geometry::SetInterface<R>& bounding_set) const;
+                                                   const Geometry::Box<R>& bounding_box) const;
 
       /*! \brief Computes the set of points which remain in \a bounding_set under evolution of \a vector_field.
        */
@@ -211,22 +211,22 @@ namespace Ariadne {
       //! \name Integration of concrete sets. 
 
       /*! \brief Integrating a list set (computes a lower-approximation). */
-      Geometry::ListSet< Geometry::Rectangle<R> >
+      Geometry::ListSet< Geometry::Box<R> >
       lower_integrate(const System::VectorFieldInterface<R>& vector_field, 
-                      const Geometry::ListSet< Geometry::Rectangle<R> >& initial_set, 
+                      const Geometry::ListSet< Geometry::Box<R> >& initial_set, 
                       const time_type& time) const;
       
       
       /*! \brief Computing the timed reachable set from a list set (computes a lower-approximation). */
-      Geometry::ListSet< Geometry::Rectangle<R> >
+      Geometry::ListSet< Geometry::Box<R> >
       lower_reach(const System::VectorFieldInterface<R>& vector_field, 
-                  const Geometry::ListSet< Geometry::Rectangle<R> >& initial_set, 
+                  const Geometry::ListSet< Geometry::Box<R> >& initial_set, 
                   const time_type& time) const;
 
       /*! \brief Computing the timed reachable set from a list set (computes a lower-approximation). */
-      Geometry::ListSet< Geometry::Rectangle<R> >
+      Geometry::ListSet< Geometry::Box<R> >
       lower_reach(const System::VectorFieldInterface<R>& vector_field, 
-                  const Geometry::ListSet< Geometry::Rectangle<R> >& initial_set, 
+                  const Geometry::ListSet< Geometry::Box<R> >& initial_set, 
                   const Geometry::SetInterface<R>& bounding_set, 
                   const time_type& time) const;
 

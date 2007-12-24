@@ -147,7 +147,7 @@ Evaluation::ConstraintBasedHybridScheduler<R>::regularize(const timed_set_type& 
     return timed_set;
   }
   return timed_set;
-  //if(Geometry::Rectangle<R>(timed_set.centre()).radius()*2>timed_set.radius()) {
+  //if(Geometry::Box<R>(timed_set.centre()).radius()*2>timed_set.radius()) {
   if(true) {
     Zonotope<R,IntervalTag> z=orthogonal_over_approximation(timed_set.continuous_state_set());
     time_model_type t(timed_set.time().average(),LinearAlgebra::Vector<I>(z.number_of_generators()));
@@ -203,7 +203,7 @@ Evaluation::ConstraintBasedHybridScheduler<R>::subdivide(const timed_set_type& t
 
 
 template<class R>
-Geometry::Rectangle<R>
+Geometry::Box<R>
 Evaluation::ConstraintBasedHybridScheduler<R>::flow_bounds(const mode_type& mode, 
                                                            const timed_set_type& initial_set,
                                                            time_type& maximum_step_size) const
@@ -211,7 +211,7 @@ Evaluation::ConstraintBasedHybridScheduler<R>::flow_bounds(const mode_type& mode
   verbosity=9;
   ARIADNE_LOG(8,"ConstraintBasedHybridScheduler::flow_bounds(DiscreteMode, TimedSet, Time)");
   ARIADNE_LOG(9,"  maximum_step_size="<<maximum_step_size<<", initial_set="<<initial_set);
-  Rectangle<R> bounding_set=this->_bounder->flow_bounds(mode.dynamic(),initial_set.bounding_box(),maximum_step_size);
+  Box<R> bounding_set=this->_bounder->flow_bounds(mode.dynamic(),initial_set.bounding_box(),maximum_step_size);
   time_type& step_size=maximum_step_size;
   ARIADNE_LOG(9,"  step_size="<<step_size<<", bounding_set="<<bounding_set);
   return bounding_set;
@@ -297,7 +297,7 @@ Evaluation::ConstraintBasedHybridScheduler<R>::compute_crossing_time_step(const 
   ARIADNE_LOG(8,"    ConstraintBasedHybridScheduler::compute_crossing_time_step(...)\n");
   const System::VectorFieldInterface<R>& dynamic=transition.source().dynamic();
   const Geometry::ConstraintInterface<R>& constraint=transition.constraint();
-  const Geometry::Rectangle<R> domain=initial_set.bounding_box();
+  const Geometry::Box<R> domain=initial_set.bounding_box();
 
   TimeModel<R> spacial_crossing_time_step=this->_detector->crossing_time(dynamic,constraint,domain,bounding_box);
   ARIADNE_LOG(9,"    spacial_crossing_time_step="<<spacial_crossing_time_step<<"\n");
@@ -841,7 +841,7 @@ Evaluation::ConstraintBasedHybridScheduler<R>::evolution_step(const System::Cons
   // Compute rough bounding box
   time_type time_step_size=(final_time-initial_set.time()).bound().upper();
   time_step_size=std::min(time_step_size,maximum_step_size);
-  Rectangle<R> bounding_box=this->_bounder->flow_bounds(dynamic,basic_set.bounding_box(),time_step_size);
+  Box<R> bounding_box=this->_bounder->flow_bounds(dynamic,basic_set.bounding_box(),time_step_size);
   ARIADNE_LOG(6,"  maximum_time_step_size="<<time_step_size.get_d()<<"\n");
   ARIADNE_LOG(6,"  bounding_box="<<bounding_box<<"\n");
 

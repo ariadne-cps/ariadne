@@ -83,7 +83,7 @@ namespace Ariadne {
       template<class RC,class RG> explicit Parallelotope(const Point<RC>& c, const LinearAlgebra::Matrix<RG>& m);
        
       /*! \brief Construct from a rectangle. */
-      template<class RR> explicit Parallelotope(const Rectangle<RR>& r);
+      template<class RR> explicit Parallelotope(const Box<RR>& r);
       
       /*! \brief Construct from a string literal. */
       explicit Parallelotope(const std::string& str);
@@ -96,7 +96,7 @@ namespace Ariadne {
       template<class RC,class RG> Parallelotope(const Parallelotope<RC,RG>& original);
 
       /*! \brief Assign from a rectangle. */
-      template<class RR> Parallelotope<XC,XG>& operator=(const Rectangle<RR>& r);
+      template<class RR> Parallelotope<XC,XG>& operator=(const Box<RR>& r);
       //@}
       
       
@@ -123,7 +123,7 @@ namespace Ariadne {
      private:
       static tribool _instantiate();
      private:
-      static LinearAlgebra::Matrix<R> compute_generators(const Rectangle<R>& r);
+      static LinearAlgebra::Matrix<R> compute_generators(const Box<R>& r);
       static void compute_linear_inequalities(LinearAlgebra::Matrix<R>&, LinearAlgebra::Vector<R>&, LinearAlgebra::Vector<R>&);
       LinearAlgebra::Vector<F> coordinates(const Point<R>& s) const;
       void _compute_generators_inverse() const;

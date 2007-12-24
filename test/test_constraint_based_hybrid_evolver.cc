@@ -157,7 +157,7 @@ class TestConstraintBasedHybridEvolver
     
     cout << endl;
 
-    Rectangle<R> bounding_box("[-3,3]x[-3,3]");
+    Box<R> bounding_box("[-3,3]x[-3,3]");
     Polyhedron<R> bounding_polyhedron(bounding_box);
     Polyhedron<R> guard_polyhedron("[[-1,0;-2]]");
     Polyhedron<R> activation_polyhedron("[[0,-1;-2]]");

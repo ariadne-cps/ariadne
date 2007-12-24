@@ -40,7 +40,7 @@ namespace Ariadne {
   namespace Geometry {
     
     template<class R> class Point;
-    template<class R> class Rectangle;
+    template<class R> class Box;
     template<class R0,class R1> class Zonotope;
     template<class R> class Polyhedron;
 
@@ -92,7 +92,7 @@ namespace Ariadne {
       //      friend bool opposite<>(const Constraint<R>& c1, const Constraint<R>& c2);
 #ifdef DOXYGEN
       /*! \brief Test if the constraint is satisfied over a rectangle. */
-      friend tribool satisfies(const Rectangle<R>& r, const Constraint<R>& c);
+      friend tribool satisfies(const Box<R>& r, const Constraint<R>& c);
       /*! \brief Test if the constraint is satisfied over a zonotope. */
       friend tribool satisfies(const Zonotope<R,R>& z), const Constraint<R>& c);
       /*! \brief Test if the constraint is satisfied over a zonotope. */
@@ -111,7 +111,7 @@ namespace Ariadne {
     template<class R> bool equal(const DifferentiableConstraint<R>& c1, const DifferentiableConstraint<R>& c2);
     template<class R> bool opposite(const DifferentiableConstraint<R>& c1, const DifferentiableConstraint<R>& c2);
 
-    template<class R> tribool satisfies(const Rectangle<R>& r, const DifferentiableConstraint<R>& c);
+    template<class R> tribool satisfies(const Box<R>& r, const DifferentiableConstraint<R>& c);
     template<class R> tribool satisfies(const Zonotope<R,R>& z, const DifferentiableConstraint<R>& c);
     template<class R> tribool satisfies(const Zonotope<Numeric::Interval<R>,R>& z, const DifferentiableConstraint<R>& c);
     template<class R> tribool satisfies(const Zonotope< Numeric::Interval<R>,Numeric::Interval<R> >& z, const DifferentiableConstraint<R>& c);

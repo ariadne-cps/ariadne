@@ -122,15 +122,15 @@ namespace Ariadne {
       /*! \brief Tests disjointness */
       friend tribool disjoint(const Sphere<R>& A, const Sphere<R>& B);
       /*! \brief Tests disjointness */
-      friend tribool disjoint(const Rectangle<R>& A, const Sphere<R>& B);
+      friend tribool disjoint(const Box<R>& A, const Sphere<R>& B);
       /*! \brief Tests disjointness */
-      friend tribool disjoint(const Sphere<R>& A, const Rectangle<R>& B);
+      friend tribool disjoint(const Sphere<R>& A, const Box<R>& B);
       /*! \brief Tests inclusion of \a A in \a B. */
       friend tribool subset(const Sphere<R>& A, const Sphere<R>& B);
       /*! \brief Tests inclusion of \a A in \a B. */
-      friend tribool subset(const Rectangle<R>& A, const Sphere<R>& B);
+      friend tribool subset(const Box<R>& A, const Sphere<R>& B);
       /*! \brief Tests inclusion of \a A in \a B. */
-      friend tribool subset(const Sphere<R>& A, const Rectangle<R>& B);
+      friend tribool subset(const Sphere<R>& A, const Box<R>& B);
       //@}
       
       //@{
@@ -162,20 +162,20 @@ namespace Ariadne {
     tribool disjoint(const Sphere<R>& A, const Sphere<R>& B);
   
     template<class R>  
-    tribool disjoint(const Sphere<R>& A, const Rectangle<R>& B);
+    tribool disjoint(const Sphere<R>& A, const Box<R>& B);
 
     template<class R>  
-    tribool disjoint(const Rectangle<R>& A, const Sphere<R>& B);
+    tribool disjoint(const Box<R>& A, const Sphere<R>& B);
 
 
     template<class R>  
     tribool subset(const Sphere<R>& A, const Sphere<R>& B);
 
     template<class R>  
-    tribool subset(const Sphere<R>& A, const Rectangle<R>& B);
+    tribool subset(const Sphere<R>& A, const Box<R>& B);
 
     template<class R>  
-    tribool subset(const Rectangle<R>& A, const Sphere<R>& B);
+    tribool subset(const Box<R>& A, const Sphere<R>& B);
 
 
     template<class R> 

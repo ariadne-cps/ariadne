@@ -68,8 +68,8 @@ namespace Ariadne {
 
       /*! \brief Compute the image of a rectangle under a continuous function. */
       virtual 
-      Geometry::Rectangle<R> 
-      apply(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& r) const;
+      Geometry::Box<R> 
+      apply(const System::MapInterface<R>& f, const Geometry::Box<R>& r) const;
 
       /*! \brief Compute the image of a grid cell under a continuous self-map. */
       virtual 
@@ -85,13 +85,13 @@ namespace Ariadne {
 
       /*! \brief Compute the orbit of a rectangle under \a n steps of continuous function. */
       virtual 
-      Geometry::DiscreteTimeOrbit< Numeric::Integer, Geometry::Rectangle<R> >
-      orbit(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& r, const Numeric::Integer& n) const;
+      Geometry::DiscreteTimeOrbit< Numeric::Integer, Geometry::Box<R> >
+      orbit(const System::MapInterface<R>& f, const Geometry::Box<R>& r, const Numeric::Integer& n) const;
 
       /*! \brief Compute the orbit of a rectangle under at most \a n steps of continuous function, until the size reaches \a s. */
       virtual 
-      Geometry::DiscreteTimeOrbit< Numeric::Integer, Geometry::Rectangle<R> >
-      orbit(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& r, const Numeric::Integer& n, const R& s) const;
+      Geometry::DiscreteTimeOrbit< Numeric::Integer, Geometry::Box<R> >
+      orbit(const System::MapInterface<R>& f, const Geometry::Box<R>& r, const Numeric::Integer& n, const R& s) const;
 
       /*! \brief Compute the orbit of a grid cell under steps of continuous function. */
       virtual 

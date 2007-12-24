@@ -82,8 +82,8 @@ test_affine_integrator()
   time_type th=h*2;
   AffineIntegrator<R> affine;
   AffineVectorField<R> avf(A,b);
-  Rectangle<R> bb("[-4,0]x[-2,2]");
-  Rectangle<R> r("[-3.125,-2.875]x[-0.125,0.125]");
+  Box<R> bb("[-4,0]x[-2,2]");
+  Box<R> r("[-3.125,-2.875]x[-0.125,0.125]");
   cout << "r0=" << r << endl;
   Zonotope<R,UniformErrorTag> iz; iz=r;
   cout << "iz=" << iz << endl;

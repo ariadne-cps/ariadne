@@ -41,7 +41,7 @@ Geometry::ListSet<BS>::clone() const
 
 template<class BS> 
 tribool
-Geometry::ListSet<BS>::intersects(const Rectangle<R>& r) const
+Geometry::ListSet<BS>::intersects(const Box<R>& r) const
 {
   return !Geometry::disjoint(*this,r);
 }
@@ -49,7 +49,7 @@ Geometry::ListSet<BS>::intersects(const Rectangle<R>& r) const
 
 template<class BS> 
 tribool
-Geometry::ListSet<BS>::disjoint(const Rectangle<R>& r) const
+Geometry::ListSet<BS>::disjoint(const Box<R>& r) const
 {
   return Geometry::disjoint(*this,r);
 }
@@ -57,10 +57,10 @@ Geometry::ListSet<BS>::disjoint(const Rectangle<R>& r) const
 
 template<class BS>
 tribool
-Geometry::ListSet<BS>::superset(const Rectangle<R>& r) const
+Geometry::ListSet<BS>::superset(const Box<R>& r) const
 {
-  const ListSet< Rectangle<R> >* rls=
-    dynamic_cast< const ListSet< Rectangle<R> > * >(this);
+  const ListSet< Box<R> >* rls=
+    dynamic_cast< const ListSet< Box<R> > * >(this);
   if(rls) {
     return Geometry::subset(r,IrregularGridMaskSet<R>(*rls));
   } else {
@@ -71,21 +71,21 @@ Geometry::ListSet<BS>::superset(const Rectangle<R>& r) const
 
 template<class BS>
 tribool
-Geometry::ListSet<BS>::subset(const Rectangle<R>& r) const
+Geometry::ListSet<BS>::subset(const Box<R>& r) const
 {
   return Geometry::subset(*this,r);
 }
 
 
-template<class BS>
+template<class BS1, class BS2>
 tribool
-Geometry::disjoint(const ListSet<BS>& ls1,
-                   const ListSet<BS>& ls2)
+Geometry::disjoint(const ListSet<BS1>& ls1,
+                   const ListSet<BS2>& ls2)
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(ls1,ls2,"tribool disjoint(ListSet<BS> ls1, ListSet<BS> ls2)");
   tribool result=true;
-  for (typename ListSet<BS>::const_iterator i=ls1.begin(); i!=ls1.end(); ++i) {
-    for (typename ListSet<BS>::const_iterator j=ls2.begin(); j!=ls2.end(); ++j) {
+  for (typename ListSet<BS1>::const_iterator i=ls1.begin(); i!=ls1.end(); ++i) {
+    for (typename ListSet<BS2>::const_iterator j=ls2.begin(); j!=ls2.end(); ++j) {
       result = result && disjoint(*i,*j);
       if(!result) { return result; }
     }
@@ -94,44 +94,26 @@ Geometry::disjoint(const ListSet<BS>& ls1,
 }
 
 
+
 template<class R>
 tribool
-Geometry::subset(const ListSet< Rectangle<R> >& rls1,
-                 const ListSet< Rectangle<R> >& rls2)
+Geometry::subset(const ListSet< Geometry::Rectangle<R> >& rls1,
+                 const ListSet< Geometry::Rectangle<R> >& rls2)
 {
-  ARIADNE_CHECK_EQUAL_DIMENSIONS(rls1,rls2,"tribool subset(ListSet<Rectangle> rls1, ListSet<Rectangle> rls2)");
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
 
-template<class R, class BS>
+template<class BS1, class BS2>
 tribool
-Geometry::disjoint(const ListSet< BS >& ls,
-                   const Rectangle<R>& r)
+Geometry::subset(const ListSet< BS1 >& ls,
+                 const BS2& bs)
 {
   tribool result=true;
-  for(typename ListSet< BS >::const_iterator ls_iter=ls.begin();
+  for(typename ListSet< BS1 >::const_iterator ls_iter=ls.begin();
       ls_iter!=ls.end(); ++ls_iter)
     {
-      result = result && Geometry::disjoint(*ls_iter,r);
-      if(result==false) {
-        return result;
-      }
-    }
-  return result;
-}
-
-
-template<class R, class BS>
-tribool
-Geometry::subset(const ListSet< BS >& ls,
-                 const Rectangle<R>& r)
-{
-  tribool result=true;
-  for(typename ListSet< BS >::const_iterator ls_iter=ls.begin();
-      ls_iter!=ls.end(); ++ls_iter)
-    {
-      result = result && Geometry::subset(*ls_iter,r);
+      result = result && Geometry::subset(*ls_iter,bs);
       if(result==false) {
         return result;
       }
@@ -223,7 +205,7 @@ template<class BS>
 void
 Geometry::ListSet<BS>::_instantiate_geometry_operators()
 {
-  //Rectangle<R>* r=0;
+  //Box<R>* r=0;
   //ListSet<BS>* ls=0;
   //disjoint(*ls,*r);
 }

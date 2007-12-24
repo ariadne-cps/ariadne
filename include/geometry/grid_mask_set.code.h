@@ -66,7 +66,7 @@ Geometry::GridMaskSet<R>::GridMaskSet(const FiniteGrid<R>& fg, const BooleanArra
 
 
 template<class R>
-Geometry::GridMaskSet<R>::GridMaskSet(const Grid<R>& g, const Rectangle<R>& bb)
+Geometry::GridMaskSet<R>::GridMaskSet(const Grid<R>& g, const Box<R>& bb)
   : _grid_ptr(new Grid<R>(g)), _lattice_set(g.index_block(bb)) 
 { 
 }
@@ -129,7 +129,7 @@ Geometry::GridMaskSet<R>::finite_grid() const
 
 
 template<class R>
-Geometry::Rectangle<R>
+Geometry::Box<R>
 Geometry::GridMaskSet<R>::extent() const
 {
   return this->bounds();
@@ -158,13 +158,13 @@ template<class R>
 tribool
 Geometry::GridMaskSet<R>::contains(const Point<R>& pt) const
 {
-  return !Geometry::disjoint(*this,Rectangle<R>(pt));
+  return !Geometry::disjoint(*this,Box<R>(pt));
 }
 
 
 template<class R>
 tribool
-Geometry::GridMaskSet<R>::superset(const Rectangle<R>& r) const
+Geometry::GridMaskSet<R>::superset(const Box<R>& r) const
 {
   return Geometry::subset(r,*this);
 }
@@ -172,7 +172,7 @@ Geometry::GridMaskSet<R>::superset(const Rectangle<R>& r) const
 
 template<class R>
 tribool
-Geometry::GridMaskSet<R>::intersects(const Rectangle<R>& r) const
+Geometry::GridMaskSet<R>::intersects(const Box<R>& r) const
 {
   return !Geometry::disjoint(*this,r);
 }
@@ -180,7 +180,7 @@ Geometry::GridMaskSet<R>::intersects(const Rectangle<R>& r) const
 
 template<class R>
 tribool
-Geometry::GridMaskSet<R>::disjoint(const Rectangle<R>& r) const
+Geometry::GridMaskSet<R>::disjoint(const Box<R>& r) const
 {
   return Geometry::disjoint(*this,r);
 }
@@ -188,14 +188,14 @@ Geometry::GridMaskSet<R>::disjoint(const Rectangle<R>& r) const
 
 template<class R>
 tribool
-Geometry::GridMaskSet<R>::subset(const Rectangle<R>& r) const
+Geometry::GridMaskSet<R>::subset(const Box<R>& r) const
 {
   return Geometry::subset(*this,r);
 }
 
 
 template<class R> 
-Geometry::Rectangle<R> 
+Geometry::Box<R> 
 Geometry::GridMaskSet<R>::bounding_box() const 
 {
   return GridBlock<R>(grid(),bounds()); 
@@ -218,7 +218,7 @@ Geometry::GridMaskSet<R>::_instantiate_geometry_operators()
 {
   typedef Numeric::Interval<R> I;
   tribool tb;
-  Rectangle<R>* r=0;
+  Box<R>* r=0;
   
   FiniteGrid<R>* fg=0;
   GridCell<R>* gc=0;
@@ -287,10 +287,10 @@ Geometry::disjoint(const GridMaskSet<R>& gms1, const GridMaskSet<R>& gms2)
 
 template<class R>
 tribool
-Geometry::disjoint(const Rectangle<R>& r, const GridMaskSet<R>& gms) 
+Geometry::disjoint(const Box<R>& r, const GridMaskSet<R>& gms) 
 {
-  ARIADNE_CHECK_EQUAL_DIMENSIONS(r,gms,"tribool disjoint(Rectangle r, GridMaskSet gms)");
-  Rectangle<R> br=closed_intersection(r,Rectangle<R>(gms.bounding_box()));
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(r,gms,"tribool disjoint(Box r, GridMaskSet gms)");
+  Box<R> br=closed_intersection(r,Box<R>(gms.bounding_box()));
   GridBlock<R> gb=outer_approximation(br,gms.grid());
   return !overlap(gb,gms);
 }
@@ -298,7 +298,7 @@ Geometry::disjoint(const Rectangle<R>& r, const GridMaskSet<R>& gms)
 
 template<class R>
 tribool
-Geometry::disjoint(const GridMaskSet<R>& gms, const Rectangle<R>& r) {
+Geometry::disjoint(const GridMaskSet<R>& gms, const Box<R>& r) {
   return disjoint(r,gms);
 }
 
@@ -394,9 +394,9 @@ Geometry::subset(const GridMaskSet<R>& gms1, const GridMaskSet<R>& gms2)
 
 template<class R>
 tribool
-Geometry::superset(const GridMaskSet<R>& gms, const Rectangle<R>& r)
+Geometry::superset(const GridMaskSet<R>& gms, const Box<R>& r)
 {
-  ARIADNE_CHECK_EQUAL_DIMENSIONS(r,gms,"tribool superset(GridMaskSet gms, Rectangle r)");
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(r,gms,"tribool superset(GridMaskSet gms, Box r)");
   if(!subset(r,gms.bounding_box())) {
     return false;
   }
@@ -407,9 +407,9 @@ Geometry::superset(const GridMaskSet<R>& gms, const Rectangle<R>& r)
 
 template<class R>
 tribool
-Geometry::subset(const Rectangle<R>& r, const GridMaskSet<R>& gms)
+Geometry::subset(const Box<R>& r, const GridMaskSet<R>& gms)
 {
-  ARIADNE_CHECK_EQUAL_DIMENSIONS(r,gms,"tribool subset(Rectangle r, GridMaskSet gms)");
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(r,gms,"tribool subset(Box r, GridMaskSet gms)");
   if(!subset(r,gms.bounding_box())) {
     return false;
   }
@@ -419,9 +419,9 @@ Geometry::subset(const Rectangle<R>& r, const GridMaskSet<R>& gms)
 
 template<class R>
 tribool
-Geometry::subset(const GridMaskSet<R>& gms, const Rectangle<R>& r)
+Geometry::subset(const GridMaskSet<R>& gms, const Box<R>& r)
 {
-  ARIADNE_CHECK_EQUAL_DIMENSIONS(gms,r,"tribool subset(GridMaskSet gms, Rectangle r)");
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(gms,r,"tribool subset(GridMaskSet gms, Box r)");
   if(!subset(gms,r.bounding_box())) {
     return false;
   }
@@ -520,28 +520,8 @@ Geometry::difference(const GridCellListSet<R>& gcls, const GridMaskSet<R>& gms)
 }
 
 
-template<class R>
-Geometry::GridMaskSet<R>::operator ListSet< Rectangle<R> >() const
-{
-  ARIADNE_CHECK_BOUNDED(*this,"GridMaskSet::operator ListSet<Rectangle>()");
-  ListSet< Rectangle<R> > result(this->dimension());
-  for(typename GridMaskSet::const_iterator riter=begin(); riter!=end(); ++riter) {
-    Rectangle<R> r(*riter);
-    result.push_back(r);
-  }
-  return result;
-}
 
 
-
-template<class R> 
-void 
-Geometry::GridMaskSet<R>::adjoin_outer_approximation(const ListSet< Rectangle<R> >& rls)
-{
-  for(size_type i=0; i!=rls.size(); ++i) {
-    this->adjoin_outer_approximation(rls[i]);
-  }
-}
 
 template<class R> 
 void 
@@ -587,7 +567,7 @@ Geometry::GridMaskSet<R>::summarize(std::ostream& os) const
   os << "GridMaskSet( " << std::flush;
   os << " grid=" << this->grid() << ",";
   os << " block=" << this->block() << ",";
-  os << " extent=" << Rectangle<R>(this->bounds()) << ",";
+  os << " extent=" << Box<R>(this->bounds()) << ",";
   os << " size=" << this->size() << ",";
   os << " capacity=" << this->capacity() << ",";
   os << " )";
@@ -601,7 +581,7 @@ Geometry::GridMaskSet<R>::write(std::ostream& os) const
   os << "GridMaskSet( " << std::flush;
   os << " grid=" << this->grid() << ",";
   os << " block=" << this->block() << ",";
-  os << " extent=" << Rectangle<R>(this->bounds()) << ",";
+  os << " extent=" << Box<R>(this->bounds()) << ",";
   os << " size=" << this->size() << ",";
   os << " capacity=" << this->capacity() << ",";
   os << " mask=" << this->mask() << std::endl;

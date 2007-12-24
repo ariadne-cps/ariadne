@@ -43,7 +43,7 @@ Geometry::Parallelotope<XC,XG>::Parallelotope(const Point<RC>& c, const LinearAl
 
 
 template<class XC,class XG> template<class RR> inline 
-Geometry::Parallelotope<XC,XG>::Parallelotope(const Rectangle<RR>& r)
+Geometry::Parallelotope<XC,XG>::Parallelotope(const Box<RR>& r)
   : Zonotope<XC,XG>(r) 
 { 
 }
@@ -77,7 +77,7 @@ Geometry::Parallelotope<XC,XG>::Parallelotope(const Parallelotope<RC,RG>& origin
 
 template<class XC, class XG> template<class RR> inline 
 Geometry::Parallelotope<XC,XG>& 
-Geometry::Parallelotope<XC,XG>::operator=(const Rectangle<RR>& r)
+Geometry::Parallelotope<XC,XG>::operator=(const Box<RR>& r)
 {
   Zonotope<XC,XG>& z=*this; z=r; return *this;
 }

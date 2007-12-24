@@ -67,8 +67,8 @@ namespace Ariadne {
 
       /*! \brief Compute the orbit of a rectangle for at most time \a t. */
       virtual 
-      Geometry::ContinuousTimeOrbit< Numeric::Rational, Geometry::Rectangle<R>, Geometry::Rectangle<R>  >
-      orbit(const System::VectorFieldInterface<R>& f, const Geometry::Rectangle<R>& r, const Numeric::Rational& t) const;
+      Geometry::ContinuousTimeOrbit< Numeric::Rational, Geometry::Box<R>, Geometry::Box<R>  >
+      orbit(const System::VectorFieldInterface<R>& f, const Geometry::Box<R>& r, const Numeric::Rational& t) const;
 
       /*! \brief Compute the orbit of a grid cell for time \a t under a vector field. */
       virtual 

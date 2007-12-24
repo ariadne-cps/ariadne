@@ -32,7 +32,7 @@ namespace Ariadne {
 
 
 template<class R>
-Geometry::IrregularGrid<R>::IrregularGrid(const ListSet< Rectangle<R> >& ls)
+Geometry::IrregularGrid<R>::IrregularGrid(const ListSet< Box<R> >& ls)
   : _subdivision_coordinates(ls.dimension()),
     _centre_positions(ls.dimension(),0u)
 {
@@ -41,7 +41,7 @@ Geometry::IrregularGrid<R>::IrregularGrid(const ListSet< Rectangle<R> >& ls)
   
   std::vector<R>* rectangle_bounds=new std::vector<R>[d];
   
-  for(typename ListSet< Rectangle<R> >::const_iterator riter=ls.begin(); riter!=ls.end(); ++riter) {
+  for(typename ListSet< Box<R> >::const_iterator riter=ls.begin(); riter!=ls.end(); ++riter) {
     for(dimension_type i=0; i!=d; ++i) {
       rectangle_bounds[i].push_back(riter->lower_bound(i));
       rectangle_bounds[i].push_back(riter->upper_bound(i));
@@ -158,7 +158,7 @@ Geometry::IrregularGrid<R>::subdivision_upper_index(dimension_type d, const real
 
 template<class R> inline 
 Combinatoric::LatticeBlock
-Geometry::IrregularGrid<R>::index_block(const Rectangle<R>& r) const 
+Geometry::IrregularGrid<R>::index_block(const Box<R>& r) const 
 { 
   Combinatoric::LatticeBlock result(this->dimension());
   for(dimension_type i=0; i!=this->dimension(); ++i) {
@@ -170,10 +170,10 @@ Geometry::IrregularGrid<R>::index_block(const Rectangle<R>& r) const
 
 
 template<class R> inline 
-Geometry::Rectangle<R>
+Geometry::Box<R>
 Geometry::IrregularGrid<R>::rectangle(const Combinatoric::LatticeBlock& lb) const 
 { 
-  Rectangle<R> result(this->dimension());
+  Box<R> result(this->dimension());
   for(dimension_type i=0; i!=this->dimension(); ++i) {
     result.set_lower_bound(i,this->subdivision_coordinate(i,lb.lower_bound(i)));
     result.set_upper_bound(i,this->subdivision_coordinate(i,lb.upper_bound(i)));

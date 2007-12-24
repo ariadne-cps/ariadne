@@ -137,7 +137,7 @@ class TestConstraintBasedHybridScheduler
   ConstraintBasedHybridAutomaton<R> automaton;
   ConstraintBasedHybridScheduler<R> scheduler;
   EvolutionParameters<R> parameters;
-  Rectangle<R> bounding_box;
+  Box<R> bounding_box;
     
 
   TestConstraintBasedHybridScheduler()
@@ -148,10 +148,10 @@ class TestConstraintBasedHybridScheduler
   { }
 
   epsfstream& write_invariants(epsfstream& eps) const {
-    Rectangle<R> guard3_rectangle("[2,3]x[-3,3]");
-    Rectangle<R> guard4_rectangle("[-3,3]x[-3,-2]");
-    Rectangle<R> activation5_rectangle("[-3,3]x[2,3]");
-    Rectangle<R> invariant6_rectangle("[-3,3]x[2.5,3]");
+    Box<R> guard3_rectangle("[2,3]x[-3,3]");
+    Box<R> guard4_rectangle("[-3,3]x[-3,-2]");
+    Box<R> activation5_rectangle("[-3,3]x[2,3]");
+    Box<R> invariant6_rectangle("[-3,3]x[2.5,3]");
     eps << fill_colour(cyan) << activation5_rectangle;
     eps << fill_colour(black) << invariant6_rectangle;
     eps << fill_colour(magenta) << guard4_rectangle;
@@ -202,7 +202,7 @@ class TestConstraintBasedHybridScheduler
   int test_activation_step() {
     cout << "\n" << __FUNCTION__ << "\n";
     time_type step_size=0.25;
-    timed_set_type initial_set(mode1_id,Zonotope<I,I>(Rectangle<R>("[-1.45,-1.35]x[2.05,2.15]")));
+    timed_set_type initial_set(mode1_id,Zonotope<I,I>(Box<R>("[-1.45,-1.35]x[2.05,2.15]")));
     std::vector<timed_set_type> reach_set=scheduler.evolution_step(automaton,initial_set,step_size,step_size,upper_semantics,compute_reachable_set);
     cout << "\nreach_set=" << reach_set << endl;
     plot("activation",initial_set,reach_set);
@@ -212,7 +212,7 @@ class TestConstraintBasedHybridScheduler
   int test_invariant_step() {
     cout << "\n" << __FUNCTION__ << "\n";
     time_type step_size=0.25;
-    TimeModelHybridBasicSet< Zonotope<I,I> > initial_set(mode1_id,Zonotope<I,I>(Rectangle<R>("[1.35,1.45]x[2.35,2.45]")));
+    TimeModelHybridBasicSet< Zonotope<I,I> > initial_set(mode1_id,Zonotope<I,I>(Box<R>("[1.35,1.45]x[2.35,2.45]")));
     std::vector<timed_set_type> reach_set=scheduler.evolution_step(automaton,initial_set,step_size,step_size,upper_semantics,compute_reachable_set);
     cout << "\nreach_set=" << reach_set << endl;
     plot("invariant",initial_set,reach_set);
@@ -222,7 +222,7 @@ class TestConstraintBasedHybridScheduler
   int test_initial_guard_step() {
     cout << "\n" << __FUNCTION__ << "\n";
     time_type step_size=0.25;
-    TimeModelHybridBasicSet< Zonotope<I,I> > initial_set(mode1_id,Zonotope<I,I>(Rectangle<R>("[1.95,2.05]x[1.35,1.45]")));
+    TimeModelHybridBasicSet< Zonotope<I,I> > initial_set(mode1_id,Zonotope<I,I>(Box<R>("[1.95,2.05]x[1.35,1.45]")));
     std::vector<timed_set_type> reach_set=scheduler.evolution_step(automaton,initial_set,step_size,step_size,upper_semantics,compute_reachable_set);
     cout << "\nreach_set=" << reach_set << endl;
     plot("initial_guard",initial_set,reach_set);
@@ -232,7 +232,7 @@ class TestConstraintBasedHybridScheduler
   int test_corner_collision_step() {
     cout << "\n" << __FUNCTION__ << "\n";
     time_type step_size=0.25;
-    TimeModelHybridBasicSet< Zonotope<I,I> > initial_set(mode1_id,Zonotope<I,I>(Rectangle<R>("[1.65,1.75]x[2.35,2.45]")));
+    TimeModelHybridBasicSet< Zonotope<I,I> > initial_set(mode1_id,Zonotope<I,I>(Box<R>("[1.65,1.75]x[2.35,2.45]")));
     std::vector<timed_set_type> subdivided_set=scheduler.evolution_step(automaton,initial_set,step_size,step_size,upper_semantics,compute_reachable_set);
     std::vector<timed_set_type> reach_set;
     cout << "\nsubdivided_set=" << subdivided_set << endl;

@@ -72,7 +72,7 @@ test_level_set()
 
   LevelSet<R> s(f);
 
-  Rectangle<R> r;
+  Box<R> r;
   Point<A> pt1,pt2;
   
   // separates
@@ -83,15 +83,15 @@ test_level_set()
   ARIADNE_TEST_ASSERT(s.separates(pt1,pt2));
 
   // disjoint
-  r=Rectangle<R>("[0.8,0.9]x[0.95,0.95]");
+  r=Box<R>("[0.8,0.9]x[0.95,0.95]");
   ARIADNE_TEST_ASSERT(s.disjoint(r));
-  r=Rectangle<R>("[0.59,0.61]x[-0.81,-0.79]");
+  r=Box<R>("[0.59,0.61]x[-0.81,-0.79]");
   ARIADNE_TEST_ASSERT(!bool(s.disjoint(r)));
 
 
   // approximations
   Grid<R> g(Vector<R>("[0.1875,0.125]"));
-  Rectangle<R> bb("[-1.01,1.01]x[-1.01,1.01]");
+  Box<R> bb("[-1.01,1.01]x[-1.01,1.01]");
   FiniteGrid<R> fg(g,bb);
   GridMaskSet<R> gmsia(fg); 
   GridMaskSet<R> gmsoa(fg); 

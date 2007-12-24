@@ -59,16 +59,16 @@ int test_list_set()
   Point<R> s3("(1.5,1.5)");
   cout << s0 << " " << s1 << " " << s2 << " " << s3 << endl;
   
-  Rectangle<R> r0(s0,s1);
-  Rectangle<R> r1(s1,s2);
-  Rectangle<R> r2(s2,s3);
-  Rectangle<R> r3(s3,s3);
+  Box<R> r0(s0,s1);
+  Box<R> r1(s1,s2);
+  Box<R> r2(s2,s3);
+  Box<R> r3(s3,s3);
   cout << r0 << " " << r1 << " " << r2 << endl;
   
   Zonotope<R> z0(r0);
   Zonotope<R> z1(r1);
   
-  ListSet< Rectangle<R> > ds1;
+  ListSet< Box<R> > ds1;
   ds1.adjoin(r0);
   ds1.adjoin(r1);
   ds1.adjoin(r2);
@@ -85,7 +85,7 @@ int test_list_set()
   string input("[ [0,1]x[0,1], [1,1.375]x[1,1.375], [1.375,1.5]x[1.375,1.5] ]");
   stringstream is(input);
   
-  ListSet< Rectangle<R> > ds2;
+  ListSet< Box<R> > ds2;
   is >> ds2;
   cout << ds2 << endl;
   assert(ds2.size()==3);

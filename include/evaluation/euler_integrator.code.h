@@ -77,10 +77,10 @@ Geometry::Rectangle<R>
 Evaluation::EulerIntegrator<R>::integration_step(const System::VectorFieldInterface<R>& vector_field, 
                                                          const Geometry::Rectangle<R>& initial_set, 
                                                          const Numeric::Interval<R>& step_size, 
-                                                         const Geometry::Rectangle<R>& bounding_set) const
+                                                         const Geometry::Box<R>& bounding_set) const
 {
-  ARIADNE_LOG(6,"EulerIntegrator::integration_step(VectorFieldInterface,Rectangle,Interval,Rectangle) const\n");
-  ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set,"EulerIntegrator::integration_step(VectorFieldInterface,Rectangle,Interval,Rectangle) const");
+  ARIADNE_LOG(6,"EulerIntegrator::integration_step(VectorFieldInterface,Rectangle,Interval,Box) const\n");
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set,"EulerIntegrator::integration_step(VectorFieldInterface,Rectangle,Interval,Box) const");
 
   return initial_set + I(step_size) * vector_field(bounding_set);
 }
@@ -92,7 +92,7 @@ Geometry::Rectangle<R>
 Evaluation::EulerIntegrator<R>::reachability_step(const System::VectorFieldInterface<R>& vector_field, 
                                                           const Geometry::Rectangle<R>& initial_set, 
                                                           const Numeric::Interval<R>& step_size, 
-                                                          const Geometry::Rectangle<R>& bounding_set) const
+                                                          const Geometry::Box<R>& bounding_set) const
 {
   ARIADNE_LOG(6,"EulerIntegrator::reachability_step(VectorFieldInterface,Rectangle,Numeric::Interval<R>) const\n");
   

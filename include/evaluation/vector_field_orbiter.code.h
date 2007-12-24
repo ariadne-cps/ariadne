@@ -98,13 +98,13 @@ Evaluation::VectorFieldOrbiter<BS>::clone() const
 
 
 template<class BS>
-Geometry::ContinuousTimeOrbit< Numeric::Rational, Geometry::Rectangle<typename BS::real_type>, Geometry::Rectangle<typename BS::real_type> >
-Evaluation::VectorFieldOrbiter<BS>::orbit(const System::VectorFieldInterface<R>& vf, const Geometry::Rectangle<R>& r, const Numeric::Rational& t) const
+Geometry::ContinuousTimeOrbit< Numeric::Rational, Geometry::Box<typename BS::real_type>, Geometry::Box<typename BS::real_type> >
+Evaluation::VectorFieldOrbiter<BS>::orbit(const System::VectorFieldInterface<R>& vf, const Geometry::Box<R>& r, const Numeric::Rational& t) const
 {
-  ARIADNE_LOG(4,"ContinuousTimeOrbit<Rational,Rectangle> VectorFieldOrbiter::orbit(VectorFieldInterface,Rectangle,Rational)\n");
+  ARIADNE_LOG(4,"ContinuousTimeOrbit<Rational,Box> VectorFieldOrbiter::orbit(VectorFieldInterface,Box,Rational)\n");
   assert(t>=0);
-  Geometry::ContinuousTimeOrbit<Numeric::Rational, Geometry::Rectangle<R>, Geometry::Rectangle<R> > orbit(r);
-  Geometry::Rectangle<R> bb;
+  Geometry::ContinuousTimeOrbit<Numeric::Rational, Geometry::Box<R>, Geometry::Box<R> > orbit(r);
+  Geometry::Box<R> bb;
   BS bs(r);
   BS rs(bs);
   const Numeric::Rational& maxh=this->_parameters->maximum_step_size();
@@ -127,14 +127,14 @@ template<class BS>
 Geometry::ContinuousTimeOrbit< Numeric::Rational, Geometry::GridCellListSet<typename BS::real_type>, Geometry::GridCellListSet<typename BS::real_type> >
 Evaluation::VectorFieldOrbiter<BS>::orbit(const System::VectorFieldInterface<R>& vf, const Geometry::GridCell<R>& gc, const Numeric::Rational& t) const
 {
-  ARIADNE_LOG(4,"ContinuousTimeOrbit<Rational,Rectangle> VectorFieldOrbiter::orbit(VectorFieldInterface,Rectangle,Rational)\n");
+  ARIADNE_LOG(4,"ContinuousTimeOrbit<Rational,Box> VectorFieldOrbiter::orbit(VectorFieldInterface,Box,Rational)\n");
   assert(t>=0);
   const Geometry::Grid<R>& g(gc.grid());
   Geometry::GridCellListSet<R> rgcls(g);
   Geometry::GridCellListSet<R> egcls(g);
   egcls.adjoin(gc);
   Geometry::ContinuousTimeOrbit<Numeric::Rational, Geometry::GridCellListSet<R>, Geometry::GridCellListSet<R> > orbit(egcls);
-  Geometry::Rectangle<R> bb;
+  Geometry::Box<R> bb;
   BS es(gc);
   BS rs(es);
   const Numeric::Rational& maxh=this->_parameters->maximum_step_size();

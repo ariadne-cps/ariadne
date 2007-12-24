@@ -80,17 +80,17 @@ class IntegrationStepBound {
   typedef typename BS::real_type R;
  public:
   /*!\ brief Constructor. */
-  IntegrationStepBound(const Geometry::Rectangle<R>& bound, const BS& integration_time) 
+  IntegrationStepBound(const Geometry::Box<R>& bound, const BS& integration_time) 
     : _bound(bound), _integration_time(integration_time) { }
   /*!\ brief Constructor. */
-  IntegrationStepBound(const Geometry::Rectangle<R>& bound, const Numeric::Interval<BS>& integration_time) 
+  IntegrationStepBound(const Geometry::Box<R>& bound, const Numeric::Interval<BS>& integration_time) 
     : _bound(bound), _integration_time(integration_time.upper()) { }
   /*! The spacial bound for the integrations step. */
-  const Geometry::Rectangle<R>& bound() const { return _bound; }
+  const Geometry::Box<R>& bound() const { return _bound; }
   /*! The step size in time of the integrations step. */
   const BS& integration_time() const { return _integration_time; }
  private:
-  Geometry::Rectangle<R> _bound;
+  Geometry::Box<R> _bound;
   BS _integration_time;
 };
 
@@ -178,7 +178,7 @@ Evaluation::VectorFieldEvolver<R>::flow_bounds(const vector_field_type& vector_f
                                                const basic_set_type& initial_set, 
                                                time_type& step_size) const
 {
-  ARIADNE_LOG(2,"Rectangle VectorFieldEvolver::flow_bounds(VectorFieldInterface,BasicSet,Time&)\n");
+  ARIADNE_LOG(2,"Box VectorFieldEvolver::flow_bounds(VectorFieldInterface,BasicSet,Time&)\n");
   bounding_set_type bounding_set=this->_bounder->flow_bounds(vector_field,initial_set.bounding_box(),step_size);
   ARIADNE_LOG(3,"  initial_set="<<initial_set<<"\n");
   ARIADNE_LOG(3,"  step_size="<<step_size<<"\n");
@@ -193,7 +193,7 @@ Evaluation::VectorFieldEvolver<R>::integration_step(const vector_field_type& vec
                                                     const time_type& step_size, 
                                                     const bounding_set_type& bounding_set) const
 {
-  ARIADNE_LOG(2,"BasicSet VectorFieldEvolver::integration_step(VectorFieldInterface,BasicSet,Time&,Rectangle)\n");
+  ARIADNE_LOG(2,"BasicSet VectorFieldEvolver::integration_step(VectorFieldInterface,BasicSet,Time&,Box)\n");
   basic_set_type integrated_set=this->_integrator->integration_step(vector_field,initial_set,step_size,bounding_set);
   ARIADNE_LOG(3,"  integrated_set="<<integrated_set<<std::endl);
   return integrated_set;
@@ -207,7 +207,7 @@ Evaluation::VectorFieldEvolver<R>::reachability_step(const vector_field_type& ve
                                                      const time_type& step_size, 
                                                      const bounding_set_type& bounding_set) const
 {
-  ARIADNE_LOG(2,"BasicSet VectorFieldEvolver::reachability_step(VectorFieldInterface,BasicSet,Time&,Rectangle)\n");
+  ARIADNE_LOG(2,"BasicSet VectorFieldEvolver::reachability_step(VectorFieldInterface,BasicSet,Time&,Box)\n");
   basic_set_type reached_set=this->_integrator->reachability_step(vector_field,initial_set,step_size,bounding_set);
   ARIADNE_LOG(3,"  reached_set="<<reached_set<<std::endl);
   return reached_set;
@@ -251,9 +251,9 @@ Evaluation::VectorFieldEvolver<R>::integrate(const System::VectorFieldInterface<
   ARIADNE_LOG(2,"SetInterface* VectorFieldEvolver::integrate(VectorFieldInterface,SetInterface>,Time)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   const VectorFieldInterface<R>& cast_vector_field=vector_field;
-  Rectangle<R> bb=initial_set.bounding_box();
+  Box<R> bb=initial_set.bounding_box();
   Grid<R> grid(vector_field.dimension(),this->_parameters->grid_length());
-  ListSet< Rectangle<R> > rectangle_list_initial_set=lower_approximation(initial_set,grid);
+  ListSet< Box<R> > rectangle_list_initial_set=lower_approximation(initial_set,grid);
   ARIADNE_LOG(3,"rectangle_list_initial_set="<<rectangle_list_initial_set);
   ListSet<BS> list_initial_set(rectangle_list_initial_set);
   ARIADNE_LOG(3,"list_initial_set="<<list_initial_set);
@@ -274,7 +274,7 @@ Evaluation::VectorFieldEvolver<R>::integrate(const System::VectorFieldInterface<
   using namespace Geometry;
   const System::VectorFieldInterface<R>& vf=vector_field;
   
-  Rectangle<R> bb;
+  Box<R> bb;
   try {
     bb=bounding_set.bounding_box();
   }
@@ -304,9 +304,9 @@ Evaluation::VectorFieldEvolver<R>::reach(const System::VectorFieldInterface<R>& 
   ARIADNE_LOG(2,"SetInterface* VectorFieldEvolver::reach(VectorFile,SetInterface,Time)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   const VectorFieldInterface<R>& cast_vector_field=vector_field;
-  Rectangle<R> bb=initial_set.bounding_box();
+  Box<R> bb=initial_set.bounding_box();
   Grid<R> grid(vector_field.dimension(),this->_parameters->grid_length());
-  ListSet< Rectangle<R> > rectangle_list_initial_set=point_approximation(initial_set,grid);
+  ListSet< Box<R> > rectangle_list_initial_set=point_approximation(initial_set,grid);
   ListSet<BS> list_initial_set(rectangle_list_initial_set);
   ListSet<BS> list_reach_set=this->lower_reach(cast_vector_field,list_initial_set,time);
   return new ListSet<BS>(list_reach_set);
@@ -323,7 +323,7 @@ Evaluation::VectorFieldEvolver<R>::reach(const System::VectorFieldInterface<R>& 
   using namespace Geometry;
   const System::VectorFieldInterface<R>& vf=vector_field;
   
-  Rectangle<R> bb;
+  Box<R> bb;
   try {
     bb=bounding_set.bounding_box();
   }
@@ -367,8 +367,8 @@ Geometry::SetInterface<R>*
 Evaluation::VectorFieldEvolver<R>::chainreach(const System::VectorFieldInterface<R>& vector_field, 
                                               const Geometry::SetInterface<R>& initial_set) const
 {
-  Geometry::RectangularSet<R> bounding_set(this->_parameters->bounding_box(vector_field.dimension()));
-  return this->chainreach(vector_field,initial_set,bounding_set);
+  Geometry::Box<R> bounding_box(this->_parameters->bounding_box(vector_field.dimension()));
+  return this->chainreach(vector_field,initial_set,bounding_box);
 }
 
 
@@ -376,22 +376,16 @@ template<class R>
 Geometry::SetInterface<R>*
 Evaluation::VectorFieldEvolver<R>::chainreach(const System::VectorFieldInterface<R>& vector_field,
                                       const Geometry::SetInterface<R>& initial_set,
-                                      const Geometry::SetInterface<R>& bounding_set) const
+                                      const Geometry::Box<R>& bounding_box) const
 {
   using namespace Geometry;
   const System::VectorFieldInterface<R>& vf=vector_field;
   
-  Rectangle<R> bb;
-  try {
-    bb=bounding_set.bounding_box();
-  }
-  catch(UnboundedSet&) {
-    throw UnboundedSet("chainreach(Map,Set,Set): bounding_set unbounded");
-  }
-  Grid<R> g(bounding_set.dimension(),this->_parameters->grid_length());
+  const Box<R>& bb=bounding_box;
+  Grid<R> g(bb.dimension(),this->_parameters->grid_length());
   FiniteGrid<R> fg(g,bb);
   GridMaskSet<R> gbs(fg);
-  gbs.adjoin_outer_approximation(bounding_set);
+  gbs.adjoin_outer_approximation(bounding_box);
   GridMaskSet<R> gis(fg);
   gis.adjoin_outer_approximation(initial_set);
   
@@ -409,7 +403,7 @@ Evaluation::VectorFieldEvolver<R>::viable(const System::VectorFieldInterface<R>&
   ARIADNE_LOG(2,"SetInterface* MapEvolver::viable(VectorFieldInterface,SetInterface)\n");
   ARIADNE_LOG(3,"bounding_set="<<bounding_set<<"\n");
   ARIADNE_CHECK_BOUNDED(bounding_set,"SetInterface* VectorFieldEvolver::viable(VectorFieldInterface vector_field, SetInterface bounding_set)");
-  Rectangle<R> bounding_box=bounding_set.bounding_box();
+  Box<R> bounding_box=bounding_set.bounding_box();
   Grid<R> grid(bounding_set.dimension(),this->_parameters->grid_length());
   GridMaskSet<R> grid_bounding_set(grid,bounding_box);
   grid_bounding_set.adjoin_outer_approximation(bounding_set);
@@ -426,7 +420,7 @@ Evaluation::VectorFieldEvolver<R>::verify(const System::VectorFieldInterface<R>&
   using namespace Geometry;
   const System::VectorFieldInterface<R>& vf=vector_field;
   
-  Rectangle<R> bb;
+  Box<R> bb;
   try {
     bb=safe_set.bounding_box();
   }
@@ -467,7 +461,7 @@ Evaluation::VectorFieldEvolver<R>::integrate(const VectorFieldInterface<R>& vect
   
   const VectorFieldInterface<R>& vf=vector_field;
   BS bs=initial_set;
-  Geometry::Rectangle<R> bb;
+  Geometry::Box<R> bb;
   time_type t=0;
   time_type h=this->_parameters->maximum_step_size();
   while(t<time) {
@@ -503,7 +497,7 @@ Evaluation::VectorFieldEvolver<R>::reach(const VectorFieldInterface<R>& vector_f
   time_type minimum_step_size=this->_parameters->minimum_step_size();
 
   const VectorFieldInterface<R>& vf=vector_field;
-  Rectangle<R> bb(initial_set.dimension());
+  Box<R> bb(initial_set.dimension());
   BS bs=initial_set;
   BS rbs=bs;
   time_type t=0;
@@ -533,7 +527,7 @@ Evaluation::VectorFieldEvolver<R>::lower_integrate(const VectorFieldInterface<R>
                                                    const ListSet<BS>& initial_set, 
                                                    const time_type& time) const
 {
-  ARIADNE_LOG(2,"ListSet< Rectangle<R> > VectorFieldEvolver::lower_integrate(VectorFieldInterface vector_field, ListSet< Rectangle<R> > initial_set, Time time)\n");
+  ARIADNE_LOG(2,"ListSet< Box<R> > VectorFieldEvolver::lower_integrate(VectorFieldInterface vector_field, ListSet< Box<R> > initial_set, Time time)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   using namespace Numeric;
   
@@ -549,7 +543,7 @@ Evaluation::VectorFieldEvolver<R>::lower_integrate(const VectorFieldInterface<R>
   
   time_type t=0; // t is the time elapsed!
   time_type h=step_size;
-  Rectangle<R> bb(initial_set.dimension());
+  Box<R> bb(initial_set.dimension());
   BS bs(initial_set.dimension());
   
   typedef std::pair< time_type, BS> timed_set_type;
@@ -598,7 +592,7 @@ Evaluation::VectorFieldEvolver<R>::lower_reach(const VectorFieldInterface<R>& ve
                                                const ListSet<BS>& initial_set, 
                                                const time_type& time) const
 {
-  ARIADNE_LOG(2,"ListSet< Rectangle<R> > VectorFieldEvolver::lower_reach(VectorFieldInterface vector_field, ListSet< Rectangle<R> > initial_set, Time time)\n");
+  ARIADNE_LOG(2,"ListSet< Box<R> > VectorFieldEvolver::lower_reach(VectorFieldInterface vector_field, ListSet< Box<R> > initial_set, Time time)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   using namespace Numeric;
   
@@ -615,7 +609,7 @@ Evaluation::VectorFieldEvolver<R>::lower_reach(const VectorFieldInterface<R>& ve
   
   time_type t=0; // t is the time elapsed!
   time_type h=step_size;
-  Rectangle<R> bb(initial_set.dimension());
+  Box<R> bb(initial_set.dimension());
   BS bs(initial_set.dimension());
   BS rbs(initial_set.dimension());
   
@@ -662,7 +656,7 @@ Evaluation::VectorFieldEvolver<R>::lower_reach(const VectorFieldInterface<R>& ve
                                                const SetInterface<R>& bounding_set, 
                                                const time_type& time) const
 {
-  ARIADNE_LOG(2,"ListSet< Rectangle<R> > VectorFieldEvolver::lower_reach(VectorFieldInterface vector_field, ListSet<Rectangle> initial_set, SetInterface bounding_set, Time time)\n");
+  ARIADNE_LOG(2,"ListSet< Box<R> > VectorFieldEvolver::lower_reach(VectorFieldInterface vector_field, ListSet<Box> initial_set, SetInterface bounding_set, Time time)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   using namespace Numeric;
   
@@ -679,7 +673,7 @@ Evaluation::VectorFieldEvolver<R>::lower_reach(const VectorFieldInterface<R>& ve
   
   time_type t=0; // t is the time elapsed!
   time_type h=step_size;
-  Rectangle<R> bb(initial_set.dimension());
+  Box<R> bb(initial_set.dimension());
   BS bs(initial_set.dimension());
   BS rbs(initial_set.dimension());
   
@@ -734,11 +728,11 @@ Evaluation::VectorFieldEvolver<R>::upper_integrate(const VectorFieldInterface<R>
                                                    const ListSet<BS>& initial_set, 
                                                    const time_type& time) const
 {
-  ARIADNE_LOG(2,"ListSet< Rectangle<R> > VectorFieldEvolver::upper_integrate(VectorFieldInterface vector_field, ListSet< Rectangle<R> > initial_set, Time time)\n");
+  ARIADNE_LOG(2,"ListSet< Box<R> > VectorFieldEvolver::upper_integrate(VectorFieldInterface vector_field, ListSet< Box<R> > initial_set, Time time)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   using namespace Numeric;
   
-  if(verbosity>4) { std::clog << "ListSet< Rectangle<R> > VectorFieldEvolver::integrate(VectorFieldInterface,ListSet< Rectangle<R> >,Time)" << std::endl; } 
+  if(verbosity>4) { std::clog << "ListSet< Box<R> > VectorFieldEvolver::integrate(VectorFieldInterface,ListSet< Box<R> >,Time)" << std::endl; } 
   
   if(time==0) { 
     return initial_set;
@@ -753,7 +747,7 @@ Evaluation::VectorFieldEvolver<R>::upper_integrate(const VectorFieldInterface<R>
   time_type t=0; // t is the time elapsed!
   time_type h=step_size;
   BS bs(initial_set.dimension());
-  Rectangle<R> bb(initial_set.dimension());
+  Box<R> bb(initial_set.dimension());
  
   typedef std::pair< time_type, BS> timed_set_type;
   
@@ -840,7 +834,7 @@ Evaluation::VectorFieldEvolver<R>::upper_reach(const VectorFieldInterface<R>& ve
   
   time_type t=0;
   time_type h=step_size;
-  Rectangle<R> bb(initial_set.dimension());
+  Box<R> bb(initial_set.dimension());
   BS bs(initial_set.dimension());
   BS rs(initial_set.dimension());
   
@@ -921,14 +915,14 @@ Evaluation::VectorFieldEvolver<R>::upper_reach(const VectorFieldInterface<R>& ve
 
 
 template<class R>
-Geometry::ListSet< Rectangle<R> >
+Geometry::ListSet< Box<R> >
 Evaluation::VectorFieldEvolver<R>::lower_integrate(const System::VectorFieldInterface<R>& vector_field, 
-                                                   const Geometry::ListSet< Rectangle<R> >& initial_set,
+                                                   const Geometry::ListSet< Box<R> >& initial_set,
                                                    const time_type& time) const
 {
-  ARIADNE_LOG(2,"ListSet<Rectangle> VectorFieldEvolver::integrate(VectorFieldInterface vector_field, ListSet<Rectangle> initial_set, Time time)\n");
+  ARIADNE_LOG(2,"ListSet<Box> VectorFieldEvolver::integrate(VectorFieldInterface vector_field, ListSet<Box> initial_set, Time time)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
-  ListSet< Rectangle<R> > result;
+  ListSet< Box<R> > result;
   const VectorFieldInterface<R>& vf=vector_field;
   ListSet<BS> ils=initial_set;
   ListSet<BS> fls=this->lower_integrate(vf,ils,time);
@@ -943,15 +937,15 @@ Evaluation::VectorFieldEvolver<R>::lower_integrate(const System::VectorFieldInte
 
 
 template<class R>
-Geometry::ListSet< Rectangle<R> >
+Geometry::ListSet< Box<R> >
 Evaluation::VectorFieldEvolver<R>::lower_reach(const System::VectorFieldInterface<R>& vector_field, 
-                                               const Geometry::ListSet< Rectangle<R> >& initial_set,
+                                               const Geometry::ListSet< Box<R> >& initial_set,
                                                const time_type& time) const
 {
-  ARIADNE_LOG(2,"ListSet<Rectangle> VectorFieldEvolver::integrate(VectorFieldInterface vector_field, ListSet<Rectangle> initial_set, Time time)\n");
+  ARIADNE_LOG(2,"ListSet<Box> VectorFieldEvolver::integrate(VectorFieldInterface vector_field, ListSet<Box> initial_set, Time time)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
 
-  ListSet< Rectangle<R> > result;
+  ListSet< Box<R> > result;
   const VectorFieldInterface<R>& vf=vector_field;
   ListSet<BS> ils=initial_set;
   ListSet<BS> rls=this->lower_reach(vf,ils,time);
@@ -964,16 +958,16 @@ Evaluation::VectorFieldEvolver<R>::lower_reach(const System::VectorFieldInterfac
 }
 
 template<class R>
-Geometry::ListSet< Rectangle<R> >
+Geometry::ListSet< Box<R> >
 Evaluation::VectorFieldEvolver<R>::lower_reach(const System::VectorFieldInterface<R>& vector_field, 
-                                               const Geometry::ListSet< Rectangle<R> >& initial_set, 
+                                               const Geometry::ListSet< Box<R> >& initial_set, 
                                                const Geometry::SetInterface<R>& bounding_set,
                                                const time_type& time) const
 {
-  ARIADNE_LOG(2,"ListSet<Rectangle> VectorFieldEvolver::lower_reach(VectorFieldInterface vector_field, ListSet<Rectangle> initial_set, SetInterface bounding_set, Time time)\n");
+  ARIADNE_LOG(2,"ListSet<Box> VectorFieldEvolver::lower_reach(VectorFieldInterface vector_field, ListSet<Box> initial_set, SetInterface bounding_set, Time time)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
 
-  ListSet< Rectangle<R> > result;
+  ListSet< Box<R> > result;
   const VectorFieldInterface<R>& vf=vector_field;
   ListSet<BS> ils=initial_set;
   ListSet<BS> rls=this->lower_reach(vf,ils,bounding_set,time);
@@ -1009,12 +1003,12 @@ Evaluation::VectorFieldEvolver<R>::bounded_integrate(const System::VectorFieldIn
   
   time_type step_size=this->_parameters->maximum_step_size();
   
-  Rectangle<R> bb=bounding_set.bounding_box();
+  Box<R> bb=bounding_set.bounding_box();
   
   GridMaskSet<R> result(bounding_set);
   result.clear();
   
-  Rectangle<R> tmp_rectangle;
+  Box<R> tmp_rectangle;
   BS tmp_basic_set;
   
   time_type t=time;
@@ -1095,7 +1089,7 @@ Evaluation::VectorFieldEvolver<R>::bounded_reach(const System::VectorFieldInterf
   }
   
   const GridMaskSet<R>& is=initial_set;
-  const Rectangle<R> bb=bounding_set.bounding_box();
+  const Box<R> bb=bounding_set.bounding_box();
   
   GridMaskSet<R> result(bounding_set);
   result.clear();
@@ -1121,7 +1115,7 @@ Evaluation::VectorFieldEvolver<R>::bounded_reach(const System::VectorFieldInterf
   ListSet<BS> input_list;
   ListSet<BS> output_list;
   for(gms_const_iterator iter=stored.begin(); iter!=stored.end(); ++iter) {
-    input_list.adjoin(BS(Rectangle<R>(*iter)));
+    input_list.adjoin(BS(Box<R>(*iter)));
   }
   output_list=this->upper_reach(vf,input_list,time_step);
   for(ls_const_iterator iter=output_list.begin(); iter!=output_list.end(); ++iter) {
@@ -1154,7 +1148,7 @@ Evaluation::VectorFieldEvolver<R>::chainreach(const System::VectorFieldInterface
   }
   
   const GridMaskSet<R>& is=initial_set;
-  const Rectangle<R> bb=bounding_set.bounding_box();
+  const Box<R> bb=bounding_set.bounding_box();
   
   GridMaskSet<R> result(initial_set);
   ARIADNE_LOG(3,"result.grid()="<<result.finite_grid()<<"\n");
@@ -1180,7 +1174,7 @@ Evaluation::VectorFieldEvolver<R>::chainreach(const System::VectorFieldInterface
     ListSet<BS> basic_set_list;
     for(gcls_const_iterator iter=found.begin(); iter!=found.end(); ++iter) {
       ++size;
-      Rectangle<R> r=*iter;
+      Box<R> r=*iter;
       BS z(r);
       basic_set_list.adjoin(z);
     }
@@ -1200,7 +1194,7 @@ Evaluation::VectorFieldEvolver<R>::chainreach(const System::VectorFieldInterface
   if(verbosity>4) { std::clog << "Beginning reachability phase" << std::endl; }
   ListSet<BS> reach_basic_set_list;
   for(gms_const_iterator iter=result.begin(); iter!=result.end(); ++iter) {
-    Rectangle<R> r=*iter;
+    Box<R> r=*iter;
     BS z(r);
     reach_basic_set_list.adjoin(z);
   }
@@ -1238,10 +1232,10 @@ Evaluation::VectorFieldEvolver<R>::viable(const System::VectorFieldInterface<R>&
   GridMaskSet<R> result(g,bd);
   GridCellListSet<R> unsafe=bounding_set;
   
-  Rectangle<R> r(g.dimension());
-  Rectangle<R> fr(g.dimension());
+  Box<R> r(g.dimension());
+  Box<R> fr(g.dimension());
   GridBlock<R> fgb(g);
-  Rectangle<R> bb(g.dimension());
+  Box<R> bb(g.dimension());
   BS bs(g.dimension());
   BS fbs(g.dimension());
   GridCellListSet<R> fgcls(g);
@@ -1300,7 +1294,7 @@ Evaluation::VectorFieldEvolver<R>::verify(const System::VectorFieldInterface<R>&
   }
   
   const GridMaskSet<R>& is=initial_set;
-  const Rectangle<R> bb=safe_set.bounding_box();
+  const Box<R> bb=safe_set.bounding_box();
   
   GridMaskSet<R> chainreach(is);
   GridCellListSet<R> found(is.grid());
@@ -1319,7 +1313,7 @@ Evaluation::VectorFieldEvolver<R>::verify(const System::VectorFieldInterface<R>&
     ListSet<BS> basic_set_list;
     for(gcls_const_iterator iter=found.begin(); iter!=found.end(); ++iter) {
       ++size;
-      Rectangle<R> r=*iter;
+      Box<R> r=*iter;
       BS pp(r);
       basic_set_list.adjoin(pp);
     }

@@ -58,7 +58,7 @@ namespace Ariadne {
     template<class R> std::ostream& operator<<(std::ostream&, const PartitionTreeSet<R>&);
 
     /* External class declarations. */
-    template<class R> class Rectangle;
+    template<class R> class Box;
     template<class BS> class ListSet;
 
     template<class R> class PartitionTreeIterator;
@@ -76,10 +76,10 @@ namespace Ariadne {
       typedef Point<R> state_type;
 
       /*! \brief Construct from a bounding box \a bb with default subdivision coordinates. */
-      PartitionScheme(const Rectangle<R>& bb);
+      PartitionScheme(const Box<R>& bb);
 
       /*! \brief Construct from a bounding box \a bb and a sequence of subdivision coordinates \a sc. */
-      PartitionScheme(const Rectangle<R>& bb, const Combinatoric::SubdivisionSequence& sc);
+      PartitionScheme(const Box<R>& bb, const Combinatoric::SubdivisionSequence& sc);
 
       /*! \brief Equality. */
       bool operator==(const PartitionScheme<R>& pg) const;
@@ -88,7 +88,7 @@ namespace Ariadne {
       bool operator!=(const PartitionScheme<R>& pg) const;
       
       /*! \brief The base unit box of the partition scheme. */
-      const Rectangle<R>& unit_box() const;
+      const Box<R>& unit_box() const;
 
       /*! \brief The sequence of subdivision coordinates. */
       const Combinatoric::SubdivisionSequence& subdivisions() const;
@@ -99,7 +99,7 @@ namespace Ariadne {
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream&) const;
      private:
-      Rectangle<R> _unit_box;
+      Box<R> _unit_box;
       Combinatoric::SubdivisionSequence _subdivisions;
     };
 
@@ -109,7 +109,7 @@ namespace Ariadne {
      * \ingroup PartitionTree
      * \brief A rectangular cell in a partition tree.
      *
-     * Defined as a SubdivisionTreeCell within a base cell given as a Rectangle<R>.
+     * Defined as a SubdivisionTreeCell within a base cell given as a Box<R>.
      *
      * Satisfies the requirements of a RectangleExpression.
      */
@@ -126,15 +126,15 @@ namespace Ariadne {
       typedef Point<R> state_type;
 
       /*!\brief Construct from a rectangle, and a unit partition tree cell. */
-      PartitionTreeCell(const Rectangle<R>& r, const Combinatoric::SubdivisionTreeCell& c);
+      PartitionTreeCell(const Box<R>& r, const Combinatoric::SubdivisionTreeCell& c);
 
       /*!\brief Construct from a rectangle, the subdivision_coordinates and a binary word. */
-      PartitionTreeCell(const Rectangle<R>& r, 
+      PartitionTreeCell(const Box<R>& r, 
                         const Combinatoric::SubdivisionSequence& s, 
                         const Combinatoric::BinaryWord& w);
 
       /*!\brief The cell in a unit box. */
-      const Rectangle<R>& unit_box() const;
+      const Box<R>& unit_box() const;
 
       /*!\brief The cell in a unit box. */
       const Combinatoric::SubdivisionTreeCell& subdivision_cell() const;
@@ -160,7 +160,7 @@ namespace Ariadne {
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream&) const;
      private:
-      Rectangle<R> _unit_box;
+      Box<R> _unit_box;
       Combinatoric::SubdivisionTreeCell _subdivision_cell;
     };
 
@@ -169,7 +169,7 @@ namespace Ariadne {
     /*!\ingroup PartitionTree
      * \brief A tree structure following a PartitionScheme.
      *
-     * Defined as a SubdivisionTree within a base cell given as a Rectangle<R>.
+     * Defined as a SubdivisionTree within a base cell given as a Box<R>.
      */
     template<class R>
     class PartitionTree {
@@ -177,7 +177,7 @@ namespace Ariadne {
      public:
       typedef binary_constructor_iterator< Combinatoric::SubdivisionTree::const_iterator,
                                            PartitionTreeCell<R>,
-                                           Rectangle<R> > const_iterator;
+                                           Box<R> > const_iterator;
       typedef const_iterator iterator;
 
       /*! \brief The type of denotable real number used for the cell vertices. */
@@ -186,7 +186,7 @@ namespace Ariadne {
       typedef Point<R> state_type;
 
       /*! \brief Construct a tree from a rectangle, a subdivision sequence and a binary tree. */
-      explicit PartitionTree(const Rectangle<R>& r, 
+      explicit PartitionTree(const Box<R>& r, 
                              const Combinatoric::SubdivisionSequence& s, 
                              const Combinatoric::BinaryTree& t);
 
@@ -194,7 +194,7 @@ namespace Ariadne {
       explicit PartitionTree(const PartitionScheme<R>& ps, const Combinatoric::BinaryTree& t);
 
       /*! \brief The unit box of the partition scheme. */
-      const Rectangle<R>& unit_box() const;
+      const Box<R>& unit_box() const;
 
       /*! \brief The underlying subdivision tree. */
       const Combinatoric::SubdivisionTree& subdivision_tree() const;
@@ -222,7 +222,7 @@ namespace Ariadne {
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream&) const;
      private:
-      Rectangle<R> _unit_box;
+      Box<R> _unit_box;
       Combinatoric::SubdivisionTree _subdivision_tree;
     };
 
@@ -239,7 +239,7 @@ namespace Ariadne {
      * cell also takes unit time, which means that a LatticeMaskSet may be
      * preferable if these operations are common.
      *
-     * Defined as a SubdivisionTree within a base cell given as a Rectangle<R>.
+     * Defined as a SubdivisionTree within a base cell given as a Box<R>.
      */
     template<class R>
     class PartitionTreeSet 
@@ -250,7 +250,7 @@ namespace Ariadne {
       //      typedef PartitionTreeSetIterator<R> const_iterator;
       typedef binary_constructor_iterator< Combinatoric::SubdivisionTreeSet::const_iterator,
                                            PartitionTreeCell<R>,
-                                           Rectangle<R> > const_iterator;         
+                                           Box<R> > const_iterator;         
       typedef const_iterator iterator;
 
       /*! \brief A tag describing the type of set. */
@@ -269,7 +269,7 @@ namespace Ariadne {
       PartitionTreeSet(const PartitionTree<R>& t, const BooleanArray& m);
 
       /*! \brief Construct a set based on a bounding box, a subdivision sequence, a binary tree and a mask. */
-      PartitionTreeSet(const Rectangle<R>& r, const Combinatoric::SubdivisionSequence& s, const Combinatoric::BinaryTree& t, const BooleanArray& m);
+      PartitionTreeSet(const Box<R>& r, const Combinatoric::SubdivisionSequence& s, const Combinatoric::BinaryTree& t, const BooleanArray& m);
 
       /*! \brief Convert from a GridMaskSet.
        *
@@ -280,7 +280,7 @@ namespace Ariadne {
 
       //@{
       //! \name SetInterface methods
-      /*! \brief Tests for disjointness with a Rectangle. */
+      /*! \brief Tests for disjointness with a Box. */
       virtual PartitionTreeSet<R>* clone() const;
 
       /*! \brief The space dimension of the set. */
@@ -289,27 +289,27 @@ namespace Ariadne {
       /*!\brief Checks if a denotable set includes a point. */
       virtual tribool contains(const Point<R>& p) const;
 
-      /*! \brief Tests for superset of a Rectangle. */ 
-      virtual tribool superset(const Rectangle<R>& r) const;
+      /*! \brief Tests for superset of a Box. */ 
+      virtual tribool superset(const Box<R>& r) const;
 
-      /*! \brief Tests for intersection with a Rectangle. */
-      virtual tribool intersects(const Rectangle<R>& r) const;
+      /*! \brief Tests for intersection with a Box. */
+      virtual tribool intersects(const Box<R>& r) const;
 
-      /*! \brief Tests for disjointness with a Rectangle. */
-      virtual tribool disjoint(const Rectangle<R>& r) const;
+      /*! \brief Tests for disjointness with a Box. */
+      virtual tribool disjoint(const Box<R>& r) const;
 
-      /*! \brief Tests for subset of a Rectangle. */
-      virtual tribool subset(const Rectangle<R>& r) const;
+      /*! \brief Tests for subset of a Box. */
+      virtual tribool subset(const Box<R>& r) const;
 
       /*!\brief A rectangle containing the grid cell. */
-      virtual Rectangle<R> bounding_box() const;
+      virtual Box<R> bounding_box() const;
       //@}
 
-      /*! \brief Convert to a ListSet of Rectangle. */
-      operator ListSet< Rectangle<R> > () const;
+      /*! \brief Convert to a ListSet of Box. */
+      operator ListSet< Box<R> > () const;
 
       /*! \brief The unit box containing the partition tree set. */
-      const Rectangle<R>& unit_box() const;
+      const Box<R>& unit_box() const;
 
       /*! \brief The underlying subdivision set. */
       const Combinatoric::SubdivisionTreeSet& subdivision_set() const;
@@ -358,7 +358,7 @@ namespace Ariadne {
 #ifdef DOXYGEN
       /*! \brief Compute an over approximation to a rectangle \a r based on the partition scheme \a ps. */
       friend template<class R>
-      PartitionTreeCell<R> over_approximation(const Rectangle<R>& r, const PartitionScheme<R>& ps);
+      PartitionTreeCell<R> over_approximation(const Box<R>& r, const PartitionScheme<R>& ps);
 
       /*! \brief Compute an outer approximation to set \a s based on the partition scheme \a ps to depth a d. */
       friend template<class SetInterface>
@@ -376,7 +376,7 @@ namespace Ariadne {
      private:
       static void _instantiate_geometry_operators();
      private:
-      Rectangle<R> _unit_box;
+      Box<R> _unit_box;
       Combinatoric::SubdivisionTreeSet _subdivision_set;
     };
 
@@ -385,17 +385,17 @@ namespace Ariadne {
     tribool contains(const PartitionTreeSet<R>&, const Point<R>&);
 
     template<class R>
-    tribool disjoint(const PartitionTreeSet<R>&, const Rectangle<R>&);
+    tribool disjoint(const PartitionTreeSet<R>&, const Box<R>&);
 
     template<class R>
-    tribool subset(const PartitionTreeSet<R>&, const Rectangle<R>&);
+    tribool subset(const PartitionTreeSet<R>&, const Box<R>&);
 
     template<class R>
-    tribool subset(const Rectangle<R>&, const PartitionTreeSet<R>&);
+    tribool subset(const Box<R>&, const PartitionTreeSet<R>&);
 
     
     template<class R>
-    PartitionTreeCell<R> over_approximation(const Rectangle<R>& r, const PartitionScheme<R>& ps);
+    PartitionTreeCell<R> over_approximation(const Box<R>& r, const PartitionScheme<R>& ps);
     
     template<class R, class S>
     PartitionTreeSet<R> outer_approximation(const S& s, const PartitionScheme<R>& ps, const uint depth);

@@ -190,5 +190,5 @@ EXTRA_DIST =
 SUBDIRS =
 
 TESTS = $(check_PROGRAMS)
-XFAIL_TESTS = test_boost test_linear_program test_multivariable_derivative
+XFAIL_TESTS = test_boost test_linear_program test_taylor_derivative
 testsubdir = ./

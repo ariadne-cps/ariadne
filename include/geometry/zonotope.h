@@ -44,6 +44,7 @@ namespace Ariadne {
     
     class basic_set_tag;
     template<class X> class Point;
+    template<class R> class Box;
     template<class E> class RectangleExpression;
     template<class X> class Rectangle;
     template<class X> class Polyhedron;
@@ -126,7 +127,7 @@ namespace Ariadne {
       /*! \brief Copy assignment operator. */
       Zonotope<R>& operator=(const Zonotope<R,Tag>& z);
       /*! \brief Assign from a box. */
-      Zonotope<R,Tag>& operator=(const Rectangle<R>& r);
+      Zonotope<R,Tag>& operator=(const Box<R>& r);
       //@}
       
       //@{ 
@@ -138,7 +139,7 @@ namespace Ariadne {
       size_type number_of_generators() const;
 
       /*! \brief The domain. */
-      Rectangle<R> domain() const;
+      Box<R> domain() const;
 
       /*! \brief The centre. */
       Point<R> centre() const;
@@ -152,13 +153,13 @@ namespace Ariadne {
       //@{
       //! \name Geometric binary predicates
       /*! \brief Tests disjointness of \a z and \a r. */
-      friend tribool disjoint(const Zonotope<R>& z, const Rectangle<R>& r);
+      friend tribool disjoint(const Zonotope<R>& z, const Box<R>& r);
       /*! \brief Tests inclusion of \a r in \a z. */
-      friend tribool superset(const Zonotope<R>& z, const Rectangle<R>& r);
+      friend tribool superset(const Zonotope<R>& z, const Box<R>& r);
       /*! \brief Tests inclusion of \a r in \a z. */
-      friend tribool subset(const Rectangle<R>& z, const Zonotope<R>& r);
+      friend tribool subset(const Box<R>& z, const Zonotope<R>& r);
       /*! \brief Tests inclusion of \a z in \a r. */
-      friend tribool subset(const Zonotope<R>& z, const Rectangle<R>& r);
+      friend tribool subset(const Zonotope<R>& z, const Box<R>& r);
       /*! \brief Tests inclusion of \a z in \a p. */
       friend tribool subset(const Zonotope<R>& z, const Polyhedron<R>& p);
       //@}
@@ -176,18 +177,18 @@ namespace Ariadne {
     R radius(const Zonotope<R,Tag>&);
     
     template<class R, class Tag> 
-    Rectangle<R> bounding_box(const Zonotope<R,Tag>& z);
+    Box<R> bounding_box(const Zonotope<R,Tag>& z);
     
     template<class R, class Tag> 
-    tribool subset(const Rectangle<R>& z, const Zonotope<R,Tag>& r);
+    tribool subset(const Box<R>& z, const Zonotope<R,Tag>& r);
     
     template<class R, class Tag> 
-    tribool disjoint(const Rectangle<R>& r, const Zonotope<R,Tag>& z);
+    tribool disjoint(const Box<R>& r, const Zonotope<R,Tag>& z);
     
 
 
     template<class R, class Tag> 
-    tribool subset(const Zonotope<R,Tag>& z, const Rectangle<R>& r);
+    tribool subset(const Zonotope<R,Tag>& z, const Box<R>& r);
     
     template<class R, class Tag> 
     tribool subset(const Zonotope<R,Tag>& z, const Polyhedron<R>& p);
@@ -198,10 +199,10 @@ namespace Ariadne {
     tribool contains(const Zonotope<R,ExactTag>& z, const Point<R>& pt);
 
     template<class R> 
-    tribool disjoint(const Zonotope<R,ExactTag>& z, const Rectangle<R>& r);
+    tribool disjoint(const Zonotope<R,ExactTag>& z, const Box<R>& r);
 
     template<class R> 
-    tribool superset(const Zonotope<R,ExactTag>& r, const Rectangle<R>& z);
+    tribool superset(const Zonotope<R,ExactTag>& r, const Box<R>& z);
 
     template<class R, class ExactTag> 
     ListSet< Zonotope<R,ExactTag> >
@@ -212,10 +213,10 @@ namespace Ariadne {
     tribool contains(const Zonotope<R,UniformErrorTag>& z, const Point<R>& pt);
 
     template<class R> 
-    tribool disjoint(const Zonotope<R,UniformErrorTag>& z, const Rectangle<R>& r);
+    tribool disjoint(const Zonotope<R,UniformErrorTag>& z, const Box<R>& r);
 
     template<class R> 
-    tribool superset(const Zonotope<R,UniformErrorTag>& r, const Rectangle<R>& z);
+    tribool superset(const Zonotope<R,UniformErrorTag>& r, const Box<R>& z);
 
     template<class R, class UniformErrorTag> 
     ListSet< Zonotope<R,UniformErrorTag> >
@@ -226,7 +227,7 @@ namespace Ariadne {
     
 
     template<class R, class Tag> 
-    void over_approximate(Zonotope<R,Tag>&, const Rectangle<R>&);
+    void over_approximate(Zonotope<R,Tag>&, const Box<R>&);
 
 
     template<class R, class Tag> 
@@ -304,15 +305,15 @@ namespace Ariadne {
         : _centre(d), _generators(d,0) { }
       Zonotope(const Point<R>& c, const LinearAlgebra::Matrix<R>& G)
         : _centre(c), _generators(G) { }
-      Zonotope(const Rectangle<R>& r);
+      Zonotope(const Box<R>& r);
       Zonotope(const Zonotope<R,UniformErrorTag>& z);
       template<class RR> Zonotope(const Zonotope<RR>& z);
       dimension_type dimension() const { 
         return _centre.dimension(); }
       size_type number_of_generators() const { 
         return _generators.number_of_columns(); }
-      Rectangle<R> domain() const { 
-        return Rectangle<R>::unit_box(this->number_of_generators()); }
+      Box<R> domain() const { 
+        return Box<R>::unit_box(this->number_of_generators()); }
       const Point<R>& centre() const { 
         return this->_centre; }
       const LinearAlgebra::Matrix<R>& generators() const { 
@@ -325,7 +326,7 @@ namespace Ariadne {
         return true; }
       tribool contains(const Point<R>& pt) const {
         return Geometry::contains(*this,pt); }
-      Rectangle<R> bounding_box() const {
+      Box<R> bounding_box() const {
         return Geometry::bounding_box(*this); }
      private:
       static void _instantiate();
@@ -347,14 +348,14 @@ namespace Ariadne {
         : _centre(c), _generators(G) { }
       Zonotope(const Zonotope<R,ExactTag>& z)
         : _centre(z.centre()), _generators(z.generators()) { }
-      Zonotope(const Rectangle<R>& r);
-      Zonotope<R,UniformErrorTag>& operator=(const Rectangle<R>& r);
+      Zonotope(const Box<R>& r);
+      Zonotope<R,UniformErrorTag>& operator=(const Box<R>& r);
       dimension_type dimension() const { 
         return _centre.dimension(); }
       size_type number_of_generators() const { 
         return _generators.number_of_columns(); }
-      Rectangle<R> domain() const { 
-        return Rectangle<R>::unit_box(this->number_of_generators()); }
+      Box<R> domain() const { 
+        return Box<R>::unit_box(this->number_of_generators()); }
       const Point<I>& centre() const { 
         return this->_centre; }
       const LinearAlgebra::Matrix<R>& generators() const { 
@@ -367,7 +368,7 @@ namespace Ariadne {
         return true; }
       tribool contains(const Point<R>& pt) const {
         return Geometry::contains(*this,pt); }
-      Rectangle<R> bounding_box() const {
+      Box<R> bounding_box() const {
         return Geometry::bounding_box(*this); }
      private:
       static void _instantiate();
@@ -395,8 +396,8 @@ namespace Ariadne {
         return _centre.dimension(); }
       size_type number_of_generators() const { 
         return _generators.number_of_columns(); }
-      Rectangle<R> domain() const { 
-        return Rectangle<R>::unit_box(this->number_of_generators()); }
+      Box<R> domain() const { 
+        return Box<R>::unit_box(this->number_of_generators()); }
       const Point<I>& centre() const { 
         return this->_centre; }
       const LinearAlgebra::Matrix<I>& generators() const { 
@@ -407,7 +408,7 @@ namespace Ariadne {
         return false; }
       tribool bounded() const {
         return true; }
-      Rectangle<R> bounding_box() const {
+      Box<R> bounding_box() const {
         return Geometry::bounding_box(*this); }
      private:
       Point<I> _centre;

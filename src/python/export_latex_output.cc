@@ -59,7 +59,7 @@ void export_latex_output()
     .def("write",&write< Interval<FloatPy> >,return_internal_reference<1>())
     .def("write",&write< Vector<FloatPy> >,return_internal_reference<1>())
     .def("write",&write< Matrix<FloatPy> >,return_internal_reference<1>())
-    .def("write",&write< Rectangle<FloatPy> >,return_internal_reference<1>())
+    .def("write",&write< Box<FloatPy> >,return_internal_reference<1>())
   ;
   
 }

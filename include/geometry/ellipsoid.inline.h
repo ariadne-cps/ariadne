@@ -103,14 +103,14 @@ Geometry::disjoint(const Ellipsoid<R>& A, const Ellipsoid<R>& B)
 
 template<class R> inline 
 tribool 
-Geometry::disjoint(const Ellipsoid<R>& A, const Rectangle<R>& B) 
+Geometry::disjoint(const Ellipsoid<R>& A, const Box<R>& B) 
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
 template<class R> inline 
 tribool 
-Geometry::disjoint(const Rectangle<R>& A, const Ellipsoid<R>& B) 
+Geometry::disjoint(const Box<R>& A, const Ellipsoid<R>& B) 
 {
   return disjoint(B,A);
 }
@@ -126,17 +126,17 @@ Geometry::subset(const Ellipsoid<R>& A, const Ellipsoid<R>& B)
 
 template<class R> inline
 tribool 
-Geometry::subset(const Ellipsoid<R>& A, const Rectangle<R>& B) 
+Geometry::subset(const Ellipsoid<R>& A, const Box<R>& B) 
 {
   return subset(A.bounding_box(),B);
 }
 
 template<class R> inline
 tribool 
-Geometry::subset(const Rectangle<R>& A, const Ellipsoid<R>& B) 
+Geometry::subset(const Box<R>& A, const Ellipsoid<R>& B) 
 {
   array< Point<R> > vertices=A.vertices();
-  for(typename Rectangle<R>::vertex_iterator vertex_iter=vertices.begin(); vertex_iter!=vertices.end(); ++vertex_iter) {
+  for(typename Box<R>::vertex_iterator vertex_iter=vertices.begin(); vertex_iter!=vertices.end(); ++vertex_iter) {
     if(! B.contains(*vertex_iter) ) {
       return false;
     }

@@ -35,7 +35,7 @@ template<class R>
 std::ostream&
 Geometry::GridBox<R>::write(std::ostream& os) const 
 {
-  return os << Rectangle<R>(*this);
+  return os << Box<R>(*this);
 }
 
 

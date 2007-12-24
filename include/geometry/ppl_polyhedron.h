@@ -76,7 +76,7 @@ namespace Ariadne {
  
  
     Parma_Polyhedra_Library::C_Polyhedron 
-    ppl_polyhedron(const Rectangle<Rational>& p);
+    ppl_polyhedron(const Box<Rational>& p);
  
     Parma_Polyhedra_Library::C_Polyhedron 
     ppl_polyhedron(const Zonotope<Rational>& p);

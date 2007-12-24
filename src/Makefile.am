@@ -74,7 +74,6 @@ GEOMETRY_SRC = \
 SYSTEM_SRC = \
 	system/map.cc system/function_map.cc system/affine_map.cc system/polynomial_map.cc \
 	system/vector_field.cc system/affine_vector_field.cc \
-	system/multimap.cc system/affine_multimap.cc \
 	system/set_based_hybrid_automaton.cc system/constraint_based_hybrid_automaton.cc \
 	system/discrete_map.cc system/grid_multimap.cc 
 
@@ -97,6 +96,7 @@ EVALUATION_SRC = \
 	evaluation/vector_field_orbiter.cc \
 	evaluation/vector_field_evolver.cc \
 	evaluation/set_based_hybrid_evolver.cc 
+
 #	evaluation/constraint_based_hybrid_evolver.cc \
 #	evaluation/constraint_based_hybrid_scheduler.cc 
 

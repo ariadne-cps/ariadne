@@ -104,6 +104,9 @@ namespace Ariadne {
       /*! \brief Construct from a list of points. */
       explicit Polyhedron(const PointList<X>& pts);
             
+      /*! \brief Convert from a box. */
+      explicit Polyhedron(const Box<R>& bx);
+            
       /*! \brief Convert from a rectangle. */
       template<class XX> explicit Polyhedron(const Rectangle<XX>& rect);
             
@@ -168,7 +171,7 @@ namespace Ariadne {
       template<class XX> tribool contains(const Point<XX>& point) const;
 
       /*! \brief A rectangle containing the polyhedron. */
-      Rectangle<R> bounding_box() const;
+      Box<R> bounding_box() const;
       
       /*! \brief An over-approximation of the polyhedron governed by the parameter \a delta.
        *
@@ -193,10 +196,10 @@ namespace Ariadne {
         
       /*! \brief Tests disjointness. */
       friend tribool Geometry::disjoint<>(const Polyhedron<X>& A, 
-                                          const Rectangle<X>& B);
+                                          const Box<X>& B);
         
       /*! \brief Tests inclusion of \a A in \a B. */
-      friend tribool Geometry::subset<>(const Rectangle<X>& A, 
+      friend tribool Geometry::subset<>(const Box<X>& A, 
                                         const Polyhedron<X>& B);
     
       /*! \brief Tests inclusion of \a A in \a B. */
@@ -205,7 +208,7 @@ namespace Ariadne {
     
       /*! \brief Tests inclusion of \a A in \a B. */
       friend tribool Geometry::subset<>(const Polyhedron<X>& A, 
-                                        const Rectangle<X>& B);
+                                        const Box<X>& B);
     
       /*! \brief The generators of a polyhedron. (Deprecated) */
       friend Matrix<X> Geometry::generators<>(const Polyhedron<X>& A);
@@ -235,7 +238,7 @@ namespace Ariadne {
       std::istream& read(std::istream& is);
       //@}
      private:
-      static void _instantiate_geometry_operators();
+      static void _instantiate();
     };
     
     
@@ -269,7 +272,7 @@ namespace Ariadne {
     tribool bounded(const Polyhedron<X>& plhd);
 
     template<class X> 
-    Rectangle<typename Polyhedron<X>::real_type> bounding_box(const Polyhedron<X>& plhd);
+    Box<typename Polyhedron<X>::real_type> bounding_box(const Polyhedron<X>& plhd);
 
 
     template<class X> 
@@ -279,22 +282,21 @@ namespace Ariadne {
     template<class X> 
     tribool disjoint(const Polyhedron<X>& plhd1, const Polyhedron<X>& plhd2);
     
-    template<class X> 
-    tribool disjoint(const Polyhedron<X>& plhd1, const Rectangle<X>& plhd2);
+    template<class X, class R> 
+    tribool disjoint(const Polyhedron<X>& plhd, const Box<R>& bx);
     
-    template<class X> 
-    tribool disjoint(const Rectangle<X>& plhd1, const Polyhedron<X>& plhd2);
+    template<class X, class R> 
+    tribool disjoint(const Box<R>& bx, const Polyhedron<X>& plhd);
     
     
     template<class X> 
     tribool subset(const Polyhedron<X>& plhd1, const Polyhedron<X>& plhd2);
 
-    template<class X> 
-    tribool subset(const Polyhedron<X>& plhd1, const Rectangle<X>& plhd2);
+    template<class X, class R> 
+    tribool subset(const Polyhedron<X>& plhd, const Box<R>& bx);
 
-
-    template<class X1,class X2> 
-    tribool subset(const Rectangle<X1>& r, const Polyhedron<X2>& plhd);
+    template<class X,class R> 
+    tribool subset(const Box<R>& r, const Polyhedron<X>& plhd);
 
     template<class X1,class X2> 
     tribool subset(const Polytope<X1>& pltp, const Polyhedron<X2>& plhd);

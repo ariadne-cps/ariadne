@@ -44,7 +44,7 @@ inline Output::epsfstream::epsfstream()
 
 template<class R> inline 
 void 
-Output::epsfstream::open(const char* fn, const Geometry::Rectangle<R>& bbox) 
+Output::epsfstream::open(const char* fn, const Geometry::Box<R>& bbox) 
 {
   PlanarProjectionMap p_map(bbox.dimension(),0,1);
   Rectangle2d bbox2d=p_map(bbox);
@@ -53,7 +53,7 @@ Output::epsfstream::open(const char* fn, const Geometry::Rectangle<R>& bbox)
 
 template<class R> inline 
 void 
-Output::epsfstream::open(const char* fn, const Geometry::Rectangle<R>& bbox, uint ix, uint iy) 
+Output::epsfstream::open(const char* fn, const Geometry::Box<R>& bbox, uint ix, uint iy) 
 {
   PlanarProjectionMap p_map(bbox.dimension(),ix,iy);
   Rectangle2d bbox2d=p_map(bbox);
@@ -62,7 +62,7 @@ Output::epsfstream::open(const char* fn, const Geometry::Rectangle<R>& bbox, uin
 
 template<class R> inline 
 void 
-Output::epsfstream::open(const char* fn, const Geometry::Rectangle<R>& bbox, 
+Output::epsfstream::open(const char* fn, const Geometry::Box<R>& bbox, 
                          const PlanarProjectionMap& p_map)
 {
   Rectangle2d bbox2d=p_map(bbox);

@@ -13,7 +13,7 @@
 #include "geometry/set_interface.h"
 #include "geometry/set_reference.h"
 #include "geometry/hybrid_set.h"
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "geometry/polyhedron.h"
 #include "geometry/polyhedral_set.h"
 #include "system/affine_map.h"
@@ -52,7 +52,7 @@ int bouncing_ball_automaton()
   
   set_hybrid_evolver_verbosity(4);
 
-  Rectangle<R> domain("[0,15]x[-20,20]x[0,10]");
+  Box<R> domain("[0,15]x[-20,20]x[0,10]");
   cout << "domain=" << domain << endl;
 
   AffineVectorField<R> dynamic(Matrix<R>("[0,1,0;0,0,0;0,0,0]"),Vector<R>("[0,-9.8,1.0]"));
@@ -92,13 +92,13 @@ int bouncing_ball_automaton()
   SetBasedHybridEvolver<R> hybrid_evolver(map_evolver,vector_field_evolver);
   
   Grid<R> grid(Vector<R>("[0.25,0.25,1.0]"));
-  Rectangle<R> bounding_box(domain.neighbourhood(1));
+  Box<R> bounding_box(domain.neighbourhood(1));
   FiniteGrid<R> finite_grid(grid,bounding_box);
   
-  Rectangle<R> initial_rectangle("[10,10.1]x[0,0.1]x[0,0.1]");
+  Box<R> initial_box("[10,10.1]x[0,0.1]x[0,0.1]");
   HybridGridMaskSet<R> initial_set;
   initial_set.new_location(mode1_id,finite_grid);
-  initial_set[mode1_id].adjoin_over_approximation(initial_rectangle);
+  initial_set[mode1_id].adjoin_over_approximation(initial_box);
   cout << "initial_set.discrete_locations()=" << initial_set.locations() << endl;
   cout << "initial_set[mode1_id].size()=" << initial_set[mode1_id].size() << " cells out of " << initial_set[mode1_id].capacity() << endl;
   

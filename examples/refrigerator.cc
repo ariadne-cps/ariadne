@@ -17,7 +17,7 @@
 #include "geometry/set_interface.h"
 #include "geometry/set_reference.h"
 #include "geometry/hybrid_set.h"
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "geometry/polyhedron.h"
 #include "geometry/polyhedral_set.h"
 #include "geometry/constraint_set.h"
@@ -64,7 +64,7 @@ int refrig()
   Rational q1(1); cout<<"q1="<<q1<<endl;
   Rational q2(Integer(2)); cout<<"q2="<<q2<<endl;
   
-  Rectangle<R> domain("[-1,1]x[-1,1]"); //Setup domain
+  Box<R> domain("[-1,1]x[-1,1]"); //Setup domain
   cout << "domain=" << domain << endl;
 
   AffineVectorField<R> dynamic1(Matrix<R>("[0,0;0,0]"),Vector<R>("[1,1]")); //First dyn
@@ -147,9 +147,9 @@ int refrig()
   RectangularSet<R> bounding_box(domain.neighbourhood(1));
   cout << "bounding_box=" << bounding_box << endl;
   
-  RectangularSet<R> initial_rectangle("[5,5.1]x[4,4.1]");
+  RectangularSet<R> initial_box("[5,5.1]x[4,4.1]");
   HybridSet<R> initial_set;
-  initial_set.new_location(state1,initial_rectangle);
+  initial_set.new_location(state1,initial_box);
   initial_set.new_location(state2, EmptySet<R>(2));
   initial_set.new_location(state3, EmptySet<R>(2));
   initial_set.new_location(state4, EmptySet<R>(2));

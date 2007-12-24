@@ -51,7 +51,7 @@ namespace Ariadne {
     template<class R> class GridTreeSetIterator;
 
     /* External class declarations. */
-    template<class R> class Rectangle;
+    template<class R> class Box;
     template<class BS> class ListSet;
 
 
@@ -59,7 +59,7 @@ namespace Ariadne {
      * \ingroup GridTree
      * \brief A rectangular cell in a grid tree.
      *
-     * Defined as a SubdivisionTreeCell within a base cell given as a Rectangle<R>.
+     * Defined as a SubdivisionTreeCell within a base cell given as a Box<R>.
      *
      * Satisfies the requirements of a RectangleExpression.
      */
@@ -76,15 +76,15 @@ namespace Ariadne {
       typedef Point<R> state_type;
 
       /*!\brief Construct from a rectangle, and a unit grid tree cell. */
-      GridTreeCell(const Rectangle<R>& r, const Combinatoric::SubdivisionTreeCell& c);
+      GridTreeCell(const Box<R>& r, const Combinatoric::SubdivisionTreeCell& c);
 
       /*!\brief Construct from a rectangle, the subdivision_coordinates and a binary word. */
-      GridTreeCell(const Rectangle<R>& r, 
+      GridTreeCell(const Box<R>& r, 
                         const Combinatoric::SubdivisionSequence& s, 
                         const Combinatoric::BinaryWord& w);
 
       /*!\brief The cell in a unit box. */
-      const Rectangle<R>& unit_box() const;
+      const Box<R>& unit_box() const;
 
       /*!\brief The cell in a unit box. */
       const Combinatoric::SubdivisionTreeCell& subdivision_cell() const;
@@ -110,7 +110,7 @@ namespace Ariadne {
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream&) const;
      private:
-      Rectangle<R> _unit_box;
+      Box<R> _unit_box;
       Combinatoric::SubdivisionTreeCell _subdivision_cell;
     };
 
@@ -130,7 +130,7 @@ namespace Ariadne {
      * cell also takes unit time, which means that a LatticeMaskSet may be
      * preferable if these operations are common.
      *
-     * Defined as a SubdivisionTree within a base cell given as a Rectangle<R>.
+     * Defined as a SubdivisionTree within a base cell given as a Box<R>.
      */
     template<class R>
     class GridTreeSet 
@@ -141,7 +141,7 @@ namespace Ariadne {
       //      typedef GridTreeSetIterator<R> const_iterator;
       typedef binary_constructor_iterator< Combinatoric::SubdivisionTreeSet::const_iterator,
                                            GridTreeCell<R>,
-                                           Rectangle<R> > const_iterator;         
+                                           Box<R> > const_iterator;         
       typedef const_iterator iterator;
 
       /*! \brief A tag describing the type of set. */
@@ -165,7 +165,7 @@ namespace Ariadne {
 
       //@{
       //! \name SetInterface methods
-      /*! \brief Tests for disjointness with a Rectangle. */
+      /*! \brief Tests for disjointness with a Box. */
       virtual GridTreeSet<R>* clone() const;
 
       /*! \brief The space dimension of the set. */
@@ -174,24 +174,24 @@ namespace Ariadne {
       /*!\brief Checks if a denotable set includes a point. */
       virtual tribool contains(const Point<R>& p) const;
 
-      /*! \brief Tests for superset of a Rectangle. */ 
-      virtual tribool superset(const Rectangle<R>& r) const;
+      /*! \brief Tests for superset of a Box. */ 
+      virtual tribool superset(const Box<R>& r) const;
 
-      /*! \brief Tests for intersection with a Rectangle. */
-      virtual tribool intersects(const Rectangle<R>& r) const;
+      /*! \brief Tests for intersection with a Box. */
+      virtual tribool intersects(const Box<R>& r) const;
 
-      /*! \brief Tests for disjointness with a Rectangle. */
-      virtual tribool disjoint(const Rectangle<R>& r) const;
+      /*! \brief Tests for disjointness with a Box. */
+      virtual tribool disjoint(const Box<R>& r) const;
 
-      /*! \brief Tests for subset of a Rectangle. */
-      virtual tribool subset(const Rectangle<R>& r) const;
+      /*! \brief Tests for subset of a Box. */
+      virtual tribool subset(const Box<R>& r) const;
 
       /*!\brief A rectangle containing the grid cell. */
-      virtual Rectangle<R> bounding_box() const;
+      virtual Box<R> bounding_box() const;
       //@}
 
-      /*! \brief Convert to a ListSet of Rectangle. */
-      operator ListSet< Rectangle<R> > () const;
+      /*! \brief Convert to a ListSet of Box. */
+      operator ListSet< Box<R> > () const;
 
       /*! \brief The underlying grid. */
       const Grid<R>& grid() const;
@@ -234,7 +234,7 @@ namespace Ariadne {
 #ifdef DOXYGEN
       /*! \brief Compute an over approximation to a rectangle \a r based on the grid \a g. */
       friend template<class R>
-      GridTreeCell<R> over_approximation(const Rectangle<R>& r, const Grid<R>& g, const uint depth);
+      GridTreeCell<R> over_approximation(const Box<R>& r, const Grid<R>& g, const uint depth);
 
       /*! \brief Compute an outer approximation to set \a s based on the grid scheme \a ps to depth a d. */
       friend template<class SetInterface>
@@ -262,17 +262,17 @@ namespace Ariadne {
     tribool contains(const GridTreeSet<R>&, const Point<R>&);
 
     template<class R>
-    tribool disjoint(const GridTreeSet<R>&, const Rectangle<R>&);
+    tribool disjoint(const GridTreeSet<R>&, const Box<R>&);
 
     template<class R>
-    tribool subset(const GridTreeSet<R>&, const Rectangle<R>&);
+    tribool subset(const GridTreeSet<R>&, const Box<R>&);
 
     template<class R>
-    tribool subset(const Rectangle<R>&, const GridTreeSet<R>&);
+    tribool subset(const Box<R>&, const GridTreeSet<R>&);
 
     
     template<class R>
-    GridTreeCell<R> over_approximation(const Rectangle<R>& r, const Grid<R>& g, const uint& d);
+    GridTreeCell<R> over_approximation(const Box<R>& r, const Grid<R>& g, const uint& d);
     
     template<class R, class S>
     GridTreeSet<R> outer_approximation(const S& s, const Grid<R>& g, const uint depth);

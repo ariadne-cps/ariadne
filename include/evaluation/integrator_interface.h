@@ -69,7 +69,7 @@ namespace Ariadne {
       integration_step(const System::VectorFieldInterface<R>& f, 
                        const BS& s,
                        const Numeric::Interval<R>& t, 
-                       const Geometry::Rectangle<R>& bb) const = 0; 
+                       const Geometry::Box<R>& bb) const = 0; 
       
       /*! \brief Compute the image of a basic set under a continuous function. */
       virtual 
@@ -77,7 +77,7 @@ namespace Ariadne {
       reachability_step(const System::VectorFieldInterface<R>& f, 
                         const BS& s,
                         const Numeric::Interval<R>& t, 
-                        const Geometry::Rectangle<R>& bb) const = 0;
+                        const Geometry::Box<R>& bb) const = 0;
       //@}
 
       //@{ 
@@ -109,7 +109,7 @@ namespace Ariadne {
       flow_step(const System::VectorFieldInterface<R>& f, 
                 const Geometry::Point<I>& s, 
                 const Numeric::Interval<R>& t, 
-                const Geometry::Rectangle<R>& bb) const = 0;
+                const Geometry::Box<R>& bb) const = 0;
     };
 
 
@@ -128,7 +128,7 @@ namespace Ariadne {
       virtual LinearAlgebra::Matrix<I> flow_step_jacobian(const System::VectorFieldInterface<R>& vf,
                                                           const Geometry::Point<I>& p,
                                                           const Numeric::Interval<R>& t,
-                                                          const Geometry::Rectangle<R>& bb) const = 0;
+                                                          const Geometry::Box<R>& bb) const = 0;
     };
 
     template<class R> std::ostream& operator<<(std::ostream& os, const FlowerInterface<R>& i);

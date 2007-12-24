@@ -83,7 +83,7 @@ Evaluation::TaylorIntegrator<R>::TaylorIntegrator()
 template<class R>
 System::TaylorFlow<typename Evaluation::TaylorIntegrator<R>::I>
 Evaluation::TaylorIntegrator<R>::flow(const System::VectorFieldInterface<R>& vector_field, 
-                                      const Geometry::Rectangle<R>& bounding_box) const
+                                      const Geometry::Box<R>& bounding_box) const
 {
 }
 
@@ -94,7 +94,7 @@ Geometry::Point<typename Evaluation::TaylorIntegrator<R>::I>
 Evaluation::TaylorIntegrator<R>::flow_step(const System::VectorFieldInterface<R>& vector_field, 
                                            const Geometry::Point<I>& initial_point, 
                                            const Numeric::Interval<R>& step_size, 
-                                           const Geometry::Rectangle<R>& bounding_box) const
+                                           const Geometry::Box<R>& bounding_box) const
 {
 }
 
@@ -106,7 +106,7 @@ Geometry::Zonotope<typename Evaluation::TaylorIntegrator<R>::I>
 Evaluation::TaylorIntegrator<R>::integration_step(const System::VectorFieldInterface<R>& vector_field, 
                                                   const Geometry::Zonotope<I,I>& initial_set, 
                                                   const Numeric::Interval<R>& step_size, 
-                                                  const Geometry::Rectangle<R>& bounding_box) const
+                                                  const Geometry::Box<R>& bounding_box) const
 {
 }
 
@@ -116,7 +116,7 @@ Geometry::Zonotope<typename Evaluation::TaylorIntegrator<R>::I>
 Evaluation::TaylorIntegrator<R>::reachability_step(const System::VectorFieldInterface<R>& vector_field, 
                                                    const Geometry::Zonotope<I,I>& initial_set, 
                                                    const Numeric::Interval<R>& step_size, 
-                                                   const Geometry::Rectangle<R>& bounding_box) const
+                                                   const Geometry::Box<R>& bounding_box) const
 {
 }
 

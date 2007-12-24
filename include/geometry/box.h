@@ -1,9 +1,8 @@
 /***************************************************************************
  *            box.h
  *
- *  Mon 2 May 2005
- *  Copyright 2005  Alberto Casagrande, Pieter Collins
- *  Email casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright 2005-7  Alberto Casagrande, Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -23,11 +22,11 @@
  */
  
 /*! \file box.h
- *  \brief Rectangles and cuboids.
+ *  \brief Boxes in Euclidean space.
  */
 
-#ifndef ARIADNE_RECTANGLE_H
-#define ARIADNE_RECTANGLE_H
+#ifndef ARIADNE_GEOMETRY_BOX_H
+#define ARIADNE_GEOMETRY_BOX_H
 
 #include <iosfwd>
 
@@ -64,7 +63,7 @@ namespace Ariadne {
      * Boxes sets require little data to describe, and are used as cells in grid-based and lattice based sets,
      * making them ubiquitous in storage-representations.
      * Further, boxes are easily and exactly convertible to the other major polyhedral
-     * set representations, namely, Rectangle, Zonotope,  Polytope and Polyhedron.
+     * set representations, namely, Box, Zonotope,  Polytope and Polyhedron.
      * 
      * Boxes are decribed by the lower and upper bounds in each of their
      * dimensions, as accessed by the lower_bound(dimension_type) const and upper_bound(dimension_type) const methods. 
@@ -150,6 +149,10 @@ namespace Ariadne {
       /*! \brief Assign from a box expression. */
       template<class E> Box<R>& operator=(const RectangleExpression<E>& r);
     
+
+      /*! \brief Make a unit box. */
+      static Box<R> unit_box(dimension_type d);
+
       //@}
       
       
@@ -246,6 +249,15 @@ namespace Ariadne {
       /*! \brief Determines whether the box is empty. */
       tribool empty() const;
       
+      /*! \brief Determines whether the box is bounded. */
+      tribool bounded() const;
+      
+      /*! \brief A bounding box for the box; returns the identity. */
+      const Box<R>& bounding_box() const;
+      
+      /*! \brief Determines whether the box contains a point. */
+      template<class X> tribool contains(const Point<X>& pt) const;
+      
       /*! \brief Compute a quadrant of the Box determined by \a q.
        *  \a q is a binary word such that the ith bit of q is 0 if the lower half
        *  of the box in the ith coordinate is used, and 1 if the upper
@@ -324,13 +336,15 @@ namespace Ariadne {
     
     
     
-    template<class R> tribool contains (const Box<R>& bx, const Point<R>& pt);
+    template<class R, class X> tribool contains (const Box<R>& bx, const Point<X>& pt);
     template<class R> tribool disjoint(const Box<R>& bx1, const Box<R>& bx2);
     template<class R> tribool subset(const Box<R>& bx1, const Box<R>& bx2);
     template<class R> Box<R> closed_intersection(const Box<R>& bx1, const Box<R>& bx2);
     template<class R> Box<R> open_intersection(const Box<R>& bx1, const Box<R>& bx2);
     template<class R> Box<R> rectangular_hull(const Box<R>& bx1, const Box<R>& bx2);
       
+    template<class R> Box<R> operator+(const Box<R>& bx, const LinearAlgebra::Vector< Numeric::Interval<R> >& iv);
+ 
     template<class R> std::istream& operator>>(std::istream& is, Box<R>& bx);
     template<class R> std::ostream& operator<<(std::ostream& os, const Box<R>& bx);
 

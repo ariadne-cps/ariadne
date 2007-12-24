@@ -102,7 +102,7 @@ Geometry::ConstraintSet<R>::contains(const Point<A>& pt) const
 
 template<class R>
 tribool 
-Geometry::ConstraintSet<R>::superset(const Rectangle<R>& r) const 
+Geometry::ConstraintSet<R>::superset(const Box<R>& r) const 
 {
   const Function::FunctionInterface<R>& f=*this->_function_ptr;
   LinearAlgebra::Vector<A> v=r.position_vectors();
@@ -114,7 +114,7 @@ Geometry::ConstraintSet<R>::superset(const Rectangle<R>& r) const
 
 template<class R>
 tribool 
-Geometry::ConstraintSet<R>::intersects(const Rectangle<R>& r) const 
+Geometry::ConstraintSet<R>::intersects(const Box<R>& r) const 
 {
   return !this->disjoint(r);
 }
@@ -122,7 +122,7 @@ Geometry::ConstraintSet<R>::intersects(const Rectangle<R>& r) const
 
 template<class R>
 tribool 
-Geometry::ConstraintSet<R>::disjoint(const Rectangle<R>& r) const 
+Geometry::ConstraintSet<R>::disjoint(const Box<R>& r) const 
 {
   const Function::FunctionInterface<R>& f=*this->_function_ptr;
   LinearAlgebra::Vector<A> v=r.position_vectors();
@@ -133,7 +133,7 @@ Geometry::ConstraintSet<R>::disjoint(const Rectangle<R>& r) const
 
 template<class R>
 tribool 
-Geometry::ConstraintSet<R>::subset(const Rectangle<R>& r) const 
+Geometry::ConstraintSet<R>::subset(const Box<R>& r) const 
 {
   return indeterminate;
 }
@@ -148,7 +148,7 @@ Geometry::ConstraintSet<R>::bounded() const
 
 
 template<class R>
-Geometry::Rectangle<R> 
+Geometry::Box<R> 
 Geometry::ConstraintSet<R>::bounding_box() const 
 {
   throw UnboundedSet("ConstraintSet::bounding_box(): cannot be computed in general case");

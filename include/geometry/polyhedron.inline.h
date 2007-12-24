@@ -51,7 +51,9 @@ namespace Ariadne {
 
 namespace Ariadne {
 
-template<class X> template<class XX> inline
+
+
+template<class X> template<class XX>
 Geometry::Polyhedron<X>::Polyhedron(const Rectangle<XX>& r)
   : _dimension(r.dimension()), 
     _number_of_constraints(r.dimension()*2u),
@@ -67,13 +69,14 @@ Geometry::Polyhedron<X>::Polyhedron(const Rectangle<XX>& r)
   }
 }
 
-template<class X> template<class XX> inline 
+
+template<class X> template<class XX>  
 Geometry::Polyhedron<X>::Polyhedron(const Polytope<XX>& p)
 { 
   (*this)=polyhedron(p);
 }
 
-template<class X> template<class XX> inline 
+template<class X> template<class XX>  
 Geometry::Polyhedron<X>::Polyhedron(const Polyhedron<XX>& p)
   : _dimension(p.dimension()), 
     _number_of_constraints(p.number_of_constraints()), 
@@ -86,7 +89,7 @@ Geometry::Polyhedron<X>&
 Geometry::Polyhedron<X>::operator=(const Polyhedron<XX>& plhd)
   
 {
-  if(this!=&plhd) {
+  if(this!=(void*)&plhd) {
     this->_dimension=plhd.dimension();
     this->_number_of_constraints=plhd.number_of_constraints();
     this->_data=plhd.data();

@@ -51,7 +51,7 @@ namespace Ariadne {
      public:
       typedef R real_type;
       typedef Point<R> state_type;
-      typedef Rectangle<R> basic_set_type;
+      typedef Box<R> basic_set_type;
      
       /*! \brief An empty set in \a d dimensions. */
       EmptySet(dimension_type d) : _dimension(d) { }
@@ -66,18 +66,18 @@ namespace Ariadne {
       virtual tribool contains(const Point<R>& pt) const { return false; }
      
       /*! \brief Tests if the set is a superset of a rectangle. */
-      virtual tribool superset(const Rectangle<R>& r) const { return r.empty(); }
+      virtual tribool superset(const Box<R>& r) const { return r.empty(); }
       /*! \brief Tests if the set intersects a rectangle. */
-      virtual tribool intersects(const Rectangle<R>&) const { return false; }
+      virtual tribool intersects(const Box<R>&) const { return false; }
       /*! \brief Tests if the set is disjoint from a rectangle. */
-      virtual tribool disjoint(const Rectangle<R>&) const { return true; }
+      virtual tribool disjoint(const Box<R>&) const { return true; }
       /*! \brief Tests if the set is a subset of a rectangle. */
-      virtual tribool subset(const Rectangle<R>&) const { return true; }
+      virtual tribool subset(const Box<R>&) const { return true; }
       
       /*! \brief A rectangle containing the set. Returns the default rectangle of the given dimension. */
       virtual tribool bounded() const { return true; }
       /*! \brief A rectangle containing the set. Returns the default rectangle of the given dimension. */
-      virtual Rectangle<R> bounding_box() const { return Rectangle<R>(array< Numeric::Interval<R> >(this->dimension())); }
+      virtual Box<R> bounding_box() const { return Box<R>(array< Numeric::Interval<R> >(this->dimension())); }
 
 
       /*! \brief Write to an output stream. 

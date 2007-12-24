@@ -143,7 +143,7 @@ namespace Ariadne {
       Geometry::SetInterface<R>*
       chainreach(const System::MapInterface<R>& map, 
                  const Geometry::SetInterface<R>& initial_set, 
-                 const Geometry::SetInterface<R>& bounding_set) const;
+                 const Geometry::Box<R>& bounding_set) const;
     
       /*! \brief Compute an outer-approximation to the viability kernel of \a map within \a bounding_set. */
       virtual
@@ -179,8 +179,8 @@ namespace Ariadne {
      public:
       /*! \brief Compute the image of a rectangle under a continuous function. */
       virtual 
-      Geometry::Rectangle<R> 
-      apply(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& r) const;
+      Geometry::Box<R> 
+      apply(const System::MapInterface<R>& f, const Geometry::Box<R>& r) const;
 
       /*! \brief Compute the image of a grid cell under a continuous self-map. */
       virtual 
@@ -199,13 +199,13 @@ namespace Ariadne {
 
       /*! \brief Compute the orbit of a rectangle under steps of continuous function. */
       virtual 
-      Geometry::DiscreteTimeOrbit< Numeric::Integer, Geometry::Rectangle<R> >
-      orbit(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& r, const Numeric::Integer& n) const;
+      Geometry::DiscreteTimeOrbit< Numeric::Integer, Geometry::Box<R> >
+      orbit(const System::MapInterface<R>& f, const Geometry::Box<R>& r, const Numeric::Integer& n) const;
 
       /*! \brief Compute the orbit of a rectangle under \a n steps of continuous function, until the size reaches \a s. */
       virtual 
-      Geometry::DiscreteTimeOrbit< Numeric::Integer, Geometry::Rectangle<R> >
-      orbit(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& r, const Numeric::Integer& n, const R& s) const;
+      Geometry::DiscreteTimeOrbit< Numeric::Integer, Geometry::Box<R> >
+      orbit(const System::MapInterface<R>& f, const Geometry::Box<R>& r, const Numeric::Integer& n, const R& s) const;
 
       /*! \brief Compute the orbit of a grid cell under steps of continuous function. */
       virtual 
@@ -219,8 +219,8 @@ namespace Ariadne {
 
       /*! \brief Compute the image of a list set under a map. */
       virtual 
-      Geometry::ListSet< Geometry::Rectangle<R> > 
-      image(const System::MapInterface<R>& f, const Geometry::ListSet< Geometry::Rectangle<R> >& ds) const;
+      Geometry::ListSet< Geometry::Box<R> > 
+      image(const System::MapInterface<R>& f, const Geometry::ListSet< Geometry::Box<R> >& ds) const;
        
       
       /*! \brief Compute the image of \a map starting in \a initial_set computing the result on \a grid. */
@@ -250,28 +250,28 @@ namespace Ariadne {
       Geometry::PartitionTreeSet<R> 
       preimage(const System::MapInterface<R>& map, 
                const Geometry::PartitionTreeSet<R>& set,
-               const Geometry::Rectangle<R>& bound) const;
+               const Geometry::Box<R>& bound) const;
 
 
       /*! \brief Compute an approximation to the iterated set of \a map starting in \a initial_set, iterating \a steps times. */
       virtual
-      Geometry::ListSet< Geometry::Rectangle<R> > 
+      Geometry::ListSet< Geometry::Box<R> > 
       iterate(const System::MapInterface<R>& map, 
-              const Geometry::ListSet< Geometry::Rectangle<R> >& initial_set,
+              const Geometry::ListSet< Geometry::Box<R> >& initial_set,
               const Numeric::Integer& steps) const;
 
       /*! \brief Compute an approximation to the reachable set of \a map starting in \a initial_set, iterating at most \a steps times. */
       virtual
-      Geometry::ListSet< Geometry::Rectangle<R> > 
+      Geometry::ListSet< Geometry::Box<R> > 
       reach(const System::MapInterface<R>& map, 
-            const Geometry::ListSet< Geometry::Rectangle<R> >& initial_set,
+            const Geometry::ListSet< Geometry::Box<R> >& initial_set,
             const Numeric::Integer& steps) const;
 
       /*! \brief Compute a lower-approximation to the reachable set of \a map starting in \a initial_set. */
       virtual
-      Geometry::ListSet< Geometry::Rectangle<R> > 
+      Geometry::ListSet< Geometry::Box<R> > 
       lower_reach(const System::MapInterface<R>& map, 
-                  const Geometry::ListSet< Geometry::Rectangle<R> >& initial_set) const;
+                  const Geometry::ListSet< Geometry::Box<R> >& initial_set) const;
 
       
      

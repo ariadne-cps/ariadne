@@ -32,11 +32,11 @@ namespace Ariadne {
 
 
 template<class R>
-Geometry::IrregularGridMaskSet<R>::IrregularGridMaskSet(const ListSet< Rectangle<R> >& rls) 
+Geometry::IrregularGridMaskSet<R>::IrregularGridMaskSet(const ListSet< Box<R> >& rls) 
   : _grid(IrregularGrid<R>(rls)), 
     _lattice_set(_grid.block())
 {
-  for(typename ListSet< Rectangle<R> >::const_iterator r_iter=rls.begin(); 
+  for(typename ListSet< Box<R> >::const_iterator r_iter=rls.begin(); 
       r_iter!=rls.end(); ++r_iter) 
     {
       this->_lattice_set.adjoin(this->_grid.index_block(*r_iter));
@@ -71,9 +71,9 @@ Geometry::IrregularGridMaskSet<R>::lattice_set() const
 
 
 template<class R>
-Geometry::IrregularGridMaskSet<R>::operator ListSet< Rectangle<R> > () const
+Geometry::IrregularGridMaskSet<R>::operator ListSet< Box<R> > () const
 {
-  ListSet< Rectangle<R> > result(this->dimension());
+  ListSet< Box<R> > result(this->dimension());
   for(Combinatoric::LatticeMaskSet::const_iterator lms_iter=this->_lattice_set.begin(); 
       lms_iter!=this->_lattice_set.end(); ++lms_iter) 
     {
@@ -84,7 +84,7 @@ Geometry::IrregularGridMaskSet<R>::operator ListSet< Rectangle<R> > () const
 
 template<class R> 
 tribool
-Geometry::subset(const Rectangle<R>& r, const IrregularGridMaskSet<R>& igms)
+Geometry::subset(const Box<R>& r, const IrregularGridMaskSet<R>& igms)
 {
   return Combinatoric::subset(igms.grid().index_block(r),igms.lattice_set());
 }
@@ -92,9 +92,9 @@ Geometry::subset(const Rectangle<R>& r, const IrregularGridMaskSet<R>& igms)
 
 template<class R> 
 tribool
-Geometry::subset(const ListSet< Rectangle<R> >& rls, const IrregularGridMaskSet<R>& igms)
+Geometry::subset(const ListSet< Box<R> >& rls, const IrregularGridMaskSet<R>& igms)
 {
-  for(typename ListSet< Rectangle<R> >::const_iterator rls_iter=rls.begin();
+  for(typename ListSet< Box<R> >::const_iterator rls_iter=rls.begin();
       rls_iter!=rls.end(); ++rls_iter)
     {        
       if(!subset(*rls_iter,igms)) {
@@ -119,8 +119,8 @@ template<class R>
 void
 Geometry::IrregularGridMaskSet<R>::_instantiate() 
 {
-  Rectangle<R>* r=0;
-  ListSet< Rectangle<R> >* rls=0;
+  Box<R>* r=0;
+  ListSet< Box<R> >* rls=0;
   IrregularGridMaskSet<R>* igms=0;
   subset(*r,*igms);
   subset(*rls,*igms);

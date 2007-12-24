@@ -59,9 +59,9 @@ class IntegratorWrapper
  public:
   IntegratorWrapper() { }
   IntegratorWrapper<BS>* clone() const { return this->get_override("clone")(); }
-  BS integration_step(const VectorFieldInterface<R>&, const BS&, const I&, const Rectangle<R>&) const {
+  BS integration_step(const VectorFieldInterface<R>&, const BS&, const I&, const Box<R>&) const {
     return this->get_override("integration_step")(); }
-  BS reachability_step(const VectorFieldInterface<R>&, const BS&, const I&, const Rectangle<R>&) const {
+  BS reachability_step(const VectorFieldInterface<R>&, const BS&, const I&, const Box<R>&) const {
     return this->get_override("reachability_step")(); }
   std::ostream& write(std::ostream&) const {
     return this->get_override("write")(); }
@@ -72,7 +72,7 @@ void export_integrator()
 {
   typedef Interval<R> I;
 
-  class_< IntegratorWrapper< Rectangle<R> >, boost::noncopyable >("RectangleIntegratorInterface",init<>());
+  class_< IntegratorWrapper< Box<R> >, boost::noncopyable >("BoxIntegratorInterface",init<>());
   class_< IntegratorWrapper< Zonotope<R,UniformErrorTag> >, boost::noncopyable >("C0ZonotopeIntegratorInterface",init<>());
   class_< IntegratorWrapper< Zonotope<R,IntervalTag> >, boost::noncopyable >("C1ZonotopeIntegratorInterface",init<>());
 
@@ -80,7 +80,7 @@ void export_integrator()
 
   class_< AffineIntegrator<R>, bases< IntegratorInterface< Zonotope<R,UniformErrorTag> >, IntegratorInterface< Zonotope<R,IntervalTag> > > >("AffineIntegrator",init<>());
 
-  class_< EulerIntegrator<R>, bases<IntegratorInterface< Rectangle<R> > > >("EulerIntegrator",init<>());
+  class_< EulerIntegrator<R>, bases<IntegratorInterface< Box<R> > > >("EulerIntegrator",init<>());
 }
 
 template void export_integrator<FloatPy>();

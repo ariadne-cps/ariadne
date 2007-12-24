@@ -151,14 +151,14 @@ Geometry::disjoint(const Sphere<R>& A, const Sphere<R>& B)
 
 template<class R> inline 
 tribool 
-Geometry::disjoint(const Sphere<R>& A, const Rectangle<R>& B) 
+Geometry::disjoint(const Sphere<R>& A, const Box<R>& B) 
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
 template<class R> inline 
 tribool 
-Geometry::disjoint(const Rectangle<R>& A, const Sphere<R>& B) 
+Geometry::disjoint(const Box<R>& A, const Sphere<R>& B) 
 {
   return disjoint(B,A);
 }
@@ -175,7 +175,7 @@ Geometry::subset(const Sphere<R>& A, const Sphere<R>& B)
 
 template<class R> inline 
 tribool 
-Geometry::subset(const Sphere<R>& A, const Rectangle<R>& B) 
+Geometry::subset(const Sphere<R>& A, const Box<R>& B) 
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
   //return subset(A.bounding_box(),B);
@@ -183,11 +183,11 @@ Geometry::subset(const Sphere<R>& A, const Rectangle<R>& B)
 
 template<class R> inline 
 tribool 
-Geometry::subset(const Rectangle<R>& A, const Sphere<R>& B) 
+Geometry::subset(const Box<R>& A, const Sphere<R>& B) 
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
   //array< Point<R> > vertices=A.vertices();
-  //for(class Rectangle<R>::vertex_iterator vertex_iter=vertices.begin(); vertex_iter!=vertices.end(); ++vertex_iter) {
+  //for(class Box<R>::vertex_iterator vertex_iter=vertices.begin(); vertex_iter!=vertices.end(); ++vertex_iter) {
   //  if(! B.contains(*vertex_iter) ) {
   //    return false;
   //  }

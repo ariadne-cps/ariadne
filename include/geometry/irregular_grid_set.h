@@ -36,12 +36,12 @@ namespace Ariadne {
   namespace Geometry {
 
     template<class R> class Point;
-    template<class R> class Rectangle;
+    template<class R> class Box;
     template<class R> class GridMaskSet;
 
     /*! \brief A denotable set on an irregular finite grid, defined using a mask over a block of cells.
      *  
-     *  An %IrregularGridMaskSet is useful for computing geometric predicates on ListSet<Rectangle>.
+     *  An %IrregularGridMaskSet is useful for computing geometric predicates on ListSet<Box>.
      *
      *  \ingroup DenotableSet
      *  \ingroup Grid
@@ -63,10 +63,10 @@ namespace Ariadne {
       IrregularGridMaskSet<R>& operator=(const GridMaskSet<R>& gms);
 
       /*!\brief Construct from a list set of rectangles. */
-      explicit IrregularGridMaskSet(const ListSet< Rectangle<R> >& rls);
+      explicit IrregularGridMaskSet(const ListSet< Box<R> >& rls);
 
       /*!\brief Convert to a list set of rectangles. */
-      operator ListSet< Rectangle<R> > () const;
+      operator ListSet< Box<R> > () const;
 
       //@{
       //! \name Set methods
@@ -77,7 +77,7 @@ namespace Ariadne {
       tribool contains(const Point<R>& p) const;
 
       /*! \brief The rectangle bounding the region of the mask. */
-      Rectangle<R> bounding_box() const;
+      Box<R> bounding_box() const;
       //@}
 
       /*! \brief The underlying grid. */
@@ -102,8 +102,8 @@ namespace Ariadne {
       std::ostream& write(std::ostream&) const;
 
 #ifdef DOXYGEN
-      friend tribool subset<> (const Rectangle<R>&, const IrregularGridMaskSet<R>&);
-      friend tribool subset<> (const ListSet< Rectangle<R> >&, const IrregularGridMaskSet<R>&);
+      friend tribool subset<> (const Box<R>&, const IrregularGridMaskSet<R>&);
+      friend tribool subset<> (const ListSet< Box<R> >&, const IrregularGridMaskSet<R>&);
       friend IrregularGridMaskSet<R> join<> (const IrregularGridMaskSet<R>&, const IrregularGridMaskSet<R>&);
       friend IrregularGridMaskSet<R> regular_intersection<> (const IrregularGridMaskSet<R>&, const IrregularGridMaskSet<R>&);
       friend IrregularGridMaskSet<R> difference<> (const IrregularGridMaskSet<R>&, const IrregularGridMaskSet<R>&);
@@ -116,10 +116,10 @@ namespace Ariadne {
     };
  
     template<class R> 
-    tribool subset(const Rectangle<R>&, const IrregularGridMaskSet<R>&);
+    tribool subset(const Box<R>&, const IrregularGridMaskSet<R>&);
 
     template<class R> 
-    tribool subset(const ListSet< Rectangle<R> >& rls, const IrregularGridMaskSet<R>& igms);
+    tribool subset(const ListSet< Box<R> >& rls, const IrregularGridMaskSet<R>& igms);
 
     template<class R> inline
     std::ostream& operator<<(std::ostream& os, const IrregularGridMaskSet<R>& igms)

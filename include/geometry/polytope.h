@@ -101,8 +101,11 @@ namespace Ariadne {
       /*! \brief Construct from a list of vertices. */
       explicit Polytope(const PointList<X>& v);
      
+      /*! \brief Construct from a box. */
+      explicit Polytope(const Box<R>& bx);
+            
       /*! \brief Construct from a rectangle. */
-      explicit Polytope(const Rectangle<X>& rect);
+      template<class XX> explicit Polytope(const Rectangle<XX>& r);
             
       /*! \brief Construct from a polyhedron. */
       template<class XX> explicit Polytope(const Polyhedron<XX>& p);
@@ -170,7 +173,7 @@ namespace Ariadne {
       tribool contains(const Point<X>& point) const;
            
       /*! \brief A rectangle containing the polytope. */
-      Rectangle<R> bounding_box() const;
+      Box<R> bounding_box() const;
       
 #ifdef DOXYGEN
       //@{
@@ -184,7 +187,7 @@ namespace Ariadne {
         
       /*! \brief Tests inclusion of \a A in \a B. */
       friend tribool Geometry::subset<>(const Polytope<X>& A, 
-                                        const Rectangle<X>& B);
+                                        const Box<X>& B);
     
       /*! \brief Tests inclusion of \a A in \a B. */
       friend tribool Geometry::subset<>(const Polytope<X>& A, 
@@ -216,7 +219,7 @@ namespace Ariadne {
       //@}
  #else
      private:
-      static void _instantiate_geometry_operators();
+      static void _instantiate();
      public:
 #endif
 
@@ -240,7 +243,7 @@ namespace Ariadne {
     
 
     template<class X>  
-    Rectangle<typename Polytope<X>::real_type> bounding_box(const Polytope<X>& pltp);
+    Box<typename Polytope<X>::real_type> bounding_box(const Polytope<X>& pltp);
 
     
     template<class X> 
@@ -253,21 +256,21 @@ namespace Ariadne {
     template<class X>  
     tribool disjoint(const Polytope<X>& pltp1, const Polytope<X>& pltp2);
     
-    template<class X>
-    tribool disjoint(const Polytope<X>& pltp, const Rectangle<X>& r);
+    template<class X, class R>
+    tribool disjoint(const Polytope<X>& pltp, const Box<R>& bx);
     
-    template<class X> 
-    tribool disjoint(const Rectangle<X>& r, const Polytope<X>& pltp);
+    template<class X, class R> 
+    tribool disjoint(const Box<R>& bx, const Polytope<X>& pltp);
     
       
     template<class X> 
     tribool subset(const Polytope<X>& pltp2, const Polytope<X>& pltp2);
 
-    template<class X> 
-    tribool subset(const Polytope<X>& pltp2, const Rectangle<X>& r);
+    template<class X, class R> 
+    tribool subset(const Polytope<X>& pltp2, const Box<R>& bx);
 
-    template<class X> 
-    tribool subset(const Rectangle<X>& r, const Polytope<X>& pltp);
+    template<class X, class R> 
+    tribool subset(const Box<R>& bx, const Polytope<X>& pltp);
 
 
     template<class X> 

@@ -43,7 +43,7 @@ namespace Ariadne {
   namespace Geometry {
 
     template<class R> class Point;
-    template<class R> class Rectangle;
+    template<class R> class Box;
     template<class R,class Tag> class Zonotope;
     template<class BS> class ListSet;
 
@@ -87,8 +87,8 @@ namespace Ariadne {
       template<class R1> 
       TaylorSet(const TaylorSet<R1>& ts);
       
-      /*! \brief Assign from a Rectangle. */
-      TaylorSet<R>& operator=(const Rectangle<R>& r);
+      /*! \brief Assign from a Box. */
+      TaylorSet<R>& operator=(const Box<R>& r);
       
       /*! \brief Assign from a Zonotope. */
       TaylorSet<R>& operator=(const Zonotope<R,ExactTag>& z);
@@ -128,7 +128,7 @@ namespace Ariadne {
       ListSet< TaylorSet<R> > subdivide() const;
       
       /*! \brief A rectangle containing the given Taylor set. */
-      Rectangle<R> bounding_box() const;
+      Box<R> bounding_box() const;
       
       //@}
       

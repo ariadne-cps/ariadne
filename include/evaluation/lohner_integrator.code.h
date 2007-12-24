@@ -105,7 +105,7 @@ Geometry::Point<typename Evaluation::LohnerIntegrator<R>::I>
 Evaluation::LohnerIntegrator<R>::flow_step(const System::VectorFieldInterface<R>& vector_field, 
                                            const Geometry::Point<I>& initial_point, 
                                            const Numeric::Interval<R>& step_size, 
-                                           const Geometry::Rectangle<R>& bounding_box) const
+                                           const Geometry::Box<R>& bounding_box) const
 {
   // Use second order formula \f$ \Phi(t,p) = p + tf(p) + t^2/2 Df(B)f(B) \f$
   const System::VectorFieldInterface<R>& vf=vector_field;
@@ -122,7 +122,7 @@ LinearAlgebra::Matrix<typename Evaluation::LohnerIntegrator<R>::I>
 Evaluation::LohnerIntegrator<R>::flow_step_jacobian(const System::VectorFieldInterface<R>& vector_field, 
                                                       const Geometry::Point<I>& initial_point, 
                                                       const Numeric::Interval<R>& step_size, 
-                                                      const Geometry::Rectangle<R>& bounding_box) const
+                                                      const Geometry::Box<R>& bounding_box) const
 {
   // Use first order formula \f$ D\Phi(t,p) = I + t Df(B) W \f$ where W is a bound for D\Phi([0,h],p)
   // Use ||W-I|| < e^{Lh}-1, where L is the  norm of Df
@@ -159,9 +159,9 @@ Geometry::Zonotope<R,Geometry::UniformErrorTag>
 Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorFieldInterface<R>& vector_field, 
                                                   const Geometry::Zonotope<R,Geometry::UniformErrorTag>& initial_set, 
                                                   const Numeric::Interval<R>& step_size, 
-                                                  const Geometry::Rectangle<R>& bounding_box) const
+                                                  const Geometry::Box<R>& bounding_box) const
 {
-  ARIADNE_LOG(2,"LohnerIntegrator::integration_step(VectorField,Zonotope<Geometry::UniformErrorTag>,Time,Rectangle)\n");
+  ARIADNE_LOG(2,"LohnerIntegrator::integration_step(VectorField,Zonotope<Geometry::UniformErrorTag>,Time,Box)\n");
   return Geometry::over_approximation(this->integration_step(vector_field,Geometry::Zonotope<R,Geometry::IntervalTag>(initial_set),step_size,bounding_box));
 }
 
@@ -170,7 +170,7 @@ Geometry::Zonotope<R,Geometry::UniformErrorTag>
 Evaluation::LohnerIntegrator<R>::reachability_step(const System::VectorFieldInterface<R>& vector_field, 
                                                    const Geometry::Zonotope<R,Geometry::UniformErrorTag>& initial_set, 
                                                    const Numeric::Interval<R>& step_size, 
-                                                   const Geometry::Rectangle<R>& bounding_box) const
+                                                   const Geometry::Box<R>& bounding_box) const
 {
   return Geometry::over_approximation(this->reachability_step(vector_field,Geometry::Zonotope<R,Geometry::IntervalTag>(initial_set),step_size,bounding_box));
 }
@@ -190,9 +190,9 @@ Geometry::Zonotope<R,Geometry::IntervalTag>
 Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorFieldInterface<R>& vector_field, 
                                                     const Geometry::Zonotope<R,Geometry::IntervalTag>& initial_set, 
                                                     const Numeric::Interval<R>& step_size, 
-                                                    const Geometry::Rectangle<R>& bounding_box) const
+                                                    const Geometry::Box<R>& bounding_box) const
 {
-  ARIADNE_LOG(2,"LohnerIntegrator::integration_step(VectorField,Zonotope<R,Geometry::IntervalTag>,Time,Rectangle)\n");
+  ARIADNE_LOG(2,"LohnerIntegrator::integration_step(VectorField,Zonotope<R,Geometry::IntervalTag>,Time,Box)\n");
   using namespace Numeric;
   using namespace LinearAlgebra;
   using namespace Geometry;
@@ -203,7 +203,7 @@ Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorFieldInter
   const Matrix<I>& G=z.generators();
 
   const VectorFieldInterface<R>& vf=vector_field;
-  const Rectangle<R>& bb=bounding_box;
+  const Box<R>& bb=bounding_box;
   const Interval<R>& h=step_size;
   
   Matrix<I> Dphi=flow_step_jacobian(vf,c,h,bb);
@@ -225,22 +225,22 @@ Geometry::Zonotope<R,Geometry::IntervalTag>
 Evaluation::LohnerIntegrator<R>::reachability_step(const System::VectorFieldInterface<R>& vector_field, 
                                                      const Geometry::Zonotope<R,Geometry::IntervalTag>& initial_set,
                                                      const Numeric::Interval<R>& step_size,
-                                                     const Geometry::Rectangle<R>& bounding_box) const
+                                                     const Geometry::Box<R>& bounding_box) const
 {
   using namespace Numeric;
   using namespace LinearAlgebra;
   using namespace Geometry;
   using namespace System;
   
-  ARIADNE_LOG(6,"LohnerIntegrator::reachability_step(VectorFieldInterface,Zonotope<Interval>,Interval,Rectangle) const\n");
+  ARIADNE_LOG(6,"LohnerIntegrator::reachability_step(VectorFieldInterface,Zonotope<Interval>,Interval,Box) const\n");
   
-  ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set,"LohnerIntegrator::reachability_step(VectorFieldInterface,Zonotope<Interval>,Interval,Rectangle)");
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set,"LohnerIntegrator::reachability_step(VectorFieldInterface,Zonotope<Interval>,Interval,Box)");
   
   const VectorFieldInterface<R>& vf(vector_field);
   const Zonotope<R,IntervalTag>& z=initial_set;
   const Point<I>& c=z.centre();
   const Matrix<I>& G=z.generators();
-  const Rectangle<R>& bb=bounding_box;
+  const Box<R>& bb=bounding_box;
   const Interval<R>& h=step_size;
   
   const dimension_type d=vf.dimension();

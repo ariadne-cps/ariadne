@@ -25,7 +25,7 @@
 
 #include "numeric/float.h"
 #include "geometry/point.h"
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "geometry/grid.h"
 #include "geometry/grid_set.h"
 #include "geometry/partition_tree_set.h"
@@ -75,17 +75,17 @@ henon_chainreach()
   cout << "h.jacobian(pt)="<<h.jacobian(pt) << endl; 
   cout << "h.derivative(pt,s)="<<h.derivative(pt,s) << endl; 
 
-  Rectangle<R> gbb=Rectangle<R>("[-11.0,5.0]x[-8.0,8.0]") ;
+  Box<R> gbb=Box<R>("[-11.0,5.0]x[-8.0,8.0]") ;
   cout << "gbb=" << gbb << endl;
   FiniteGrid<R> fg=FiniteGrid<R>(gbb,subdivisions); // grid
   cout << "fg=" << fg << endl;
   const Grid<R>& g=fg.grid(); // grid
-  Rectangle<R> ir=Rectangle<R>("[1.499,1.501]x[0.499,0.501]"); // initial state
-  Rectangle<R> cb=Rectangle<R>("[-4,4]x[-4,4]"); // cutoff box
-  Rectangle<R> epsbb=Rectangle<R>("[-4.1,4.1]x[-4.1,4.1]"); // eps bounding box
+  Box<R> ir=Box<R>("[1.499,1.501]x[0.499,0.501]"); // initial state
+  Box<R> cb=Box<R>("[-4,4]x[-4,4]"); // cutoff box
+  Box<R> epsbb=Box<R>("[-4.1,4.1]x[-4.1,4.1]"); // eps bounding box
   
-  cb=Rectangle<R>(gbb); // cutoff box
-  epsbb=Rectangle<R>(gbb); // eps bounding box
+  cb=Box<R>(gbb); // cutoff box
+  epsbb=Box<R>(gbb); // eps bounding box
   
   GridMaskSet<R> in=GridMaskSet<R>(fg);
   GridMaskSet<R> bd=GridMaskSet<R>(fg);
@@ -134,7 +134,7 @@ henon_chainreach()
   eps << fill_colour(green) << gmcr;
   eps.close();
 
-  epsbb=Rectangle<R>("[-4.1,4.1]x[-4.1,4.1]"); // eps bounding box
+  epsbb=Box<R>("[-4.1,4.1]x[-4.1,4.1]"); // eps bounding box
   eps.open("henon_chainreach-3.eps",epsbb);
   eps << line_style(false);
   eps << fill_colour(green) << gmcr;

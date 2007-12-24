@@ -142,7 +142,7 @@ Evaluation::apply(const MapInterface<R>& f, const Zonotope<R,UniformErrorTag>& z
   typedef Interval<R> I;
   
   Point<I> img_centre=f(z.centre());
-  Matrix<I> df_on_set = f.jacobian(over_approximation(z.bounding_box()));
+  Matrix<I> df_on_set = f.jacobian(Point<I>(z.bounding_box()));
   Matrix<I> img_generators = df_on_set*z.generators();
   Zonotope<R,IntervalTag> interval_zonotope(img_centre,img_generators);
   Zonotope<R,UniformErrorTag> result;

@@ -83,9 +83,9 @@ Geometry::GridCellListSet<R>::operator=(const GridCellListSet<R>& gcls)
 
 
 template<class R>
-Geometry::GridCellListSet<R>::operator ListSet< Rectangle<R> >() const
+Geometry::GridCellListSet<R>::operator ListSet< Box<R> >() const
 {
-  ListSet< Rectangle<R> > result(dimension());
+  ListSet< Box<R> > result(dimension());
   for(size_type i=0; i!=size(); ++i) {
     result.push_back((*this)[i]);
   }
@@ -105,13 +105,13 @@ template<class R>
 tribool
 Geometry::GridCellListSet<R>::contains(const Point<R>& pt) const
 {
-  return !Geometry::disjoint(*this,Rectangle<R>(pt));
+  return !Geometry::disjoint(*this,Box<R>(pt));
 }
 
 
 template<class R>
 tribool
-Geometry::GridCellListSet<R>::superset(const Rectangle<R>& r) const
+Geometry::GridCellListSet<R>::superset(const Box<R>& r) const
 {
   return Geometry::subset(r,*this);
 }
@@ -119,7 +119,7 @@ Geometry::GridCellListSet<R>::superset(const Rectangle<R>& r) const
 
 template<class R>
 tribool
-Geometry::GridCellListSet<R>::intersects(const Rectangle<R>& r) const
+Geometry::GridCellListSet<R>::intersects(const Box<R>& r) const
 {
   return !Geometry::disjoint(*this,r);
 }
@@ -127,7 +127,7 @@ Geometry::GridCellListSet<R>::intersects(const Rectangle<R>& r) const
 
 template<class R>
 tribool
-Geometry::GridCellListSet<R>::disjoint(const Rectangle<R>& r) const
+Geometry::GridCellListSet<R>::disjoint(const Box<R>& r) const
 {
   return Geometry::disjoint(*this,r);
 }
@@ -135,14 +135,14 @@ Geometry::GridCellListSet<R>::disjoint(const Rectangle<R>& r) const
 
 template<class R>
 tribool
-Geometry::GridCellListSet<R>::subset(const Rectangle<R>& r) const
+Geometry::GridCellListSet<R>::subset(const Box<R>& r) const
 {
   return Geometry::subset(*this,r);
 }
 
 
 template<class R> 
-Geometry::Rectangle<R> 
+Geometry::Box<R> 
 Geometry::GridCellListSet<R>::bounding_box() const 
 {
   return GridBlock<R>(this->grid(),this->lattice_set().bounding_block()); 
@@ -165,7 +165,7 @@ void
 Geometry::GridCellListSet<R>::restrict_outer_approximation(const SetInterface<R>& s)
 {
   Geometry::GridCellListSet<R> result(this->grid());
-  Rectangle<R> cell(this->dimension());
+  Box<R> cell(this->dimension());
   for(typename GridCellListSet<R>::const_iterator cell_iter=this->begin();
       cell_iter!=this->end(); ++cell_iter)
   {
@@ -183,7 +183,7 @@ void
 Geometry::GridCellListSet<R>::restrict_inner_approximation(const SetInterface<R>& s)
 {
   Geometry::GridCellListSet<R> result(this->grid());
-  Rectangle<R> cell(this->dimension());
+  Box<R> cell(this->dimension());
   for(typename GridCellListSet<R>::const_iterator cell_iter=this->begin();
       cell_iter!=this->end(); ++cell_iter)
   {

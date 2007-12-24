@@ -69,8 +69,8 @@ test_lohner_integrator()
   LohnerIntegrator<R> lohner=LohnerIntegrator<R>();
   AffineIntegrator<R> affine=AffineIntegrator<R>();
 
-  Rectangle<R> bb=Rectangle<R>("[0.25,1.25]x[0.00,1.00]");
-  Rectangle<R> r=Rectangle<R>("[0.96,1.04]x[0.46,0.54]");
+  Box<R> bb=Box<R>("[0.25,1.25]x[0.00,1.00]");
+  Box<R> r=Box<R>("[0.96,1.04]x[0.46,0.54]");
   cout << "r=" << r << endl;
   Zonotope<R> z(r);
   cout << "z=" << z << endl;
@@ -89,7 +89,7 @@ test_lohner_integrator()
 
   const VectorFieldInterface<R>& vf=avf;
 
-  Rectangle<R> bb0,bb1,bb2,bb3,bb4;
+  Box<R> bb0,bb1,bb2,bb3,bb4;
   Zonotope<R,UniformErrorTag> z0,z1,z2,z3,z4,zr1,zr2,zr3,zr4;
   Zonotope<R,UniformErrorTag> c0z, c1z,afz;
   z0=z;
@@ -127,9 +127,9 @@ test_lohner_integrator()
 
 
   Point<I> pt0 = z0.centre();
-  bb0=bounder.estimate_flow_bounds(avf,Rectangle<R>(pt0),qh);
-  Rectangle<R> rbb0=bounder.refine_flow_bounds(avf,Rectangle<R>(pt0),bb0,qh);
-  Rectangle<R> rrbb0=bounder.refine_flow_bounds(avf,Rectangle<R>(pt0),rbb0,qh);
+  bb0=bounder.estimate_flow_bounds(avf,Box<R>(pt0),qh);
+  Box<R> rbb0=bounder.refine_flow_bounds(avf,Box<R>(pt0),bb0,qh);
+  Box<R> rrbb0=bounder.refine_flow_bounds(avf,Box<R>(pt0),rbb0,qh);
   Point<I> pt1 = lohner.flow_step(avf,pt0,h,bb0);
   Point<I> rpt1 = lohner.flow_step(avf,pt0,h,rbb0);
   Point<I> rrpt1 = lohner.flow_step(avf,pt0,h,rrbb0);

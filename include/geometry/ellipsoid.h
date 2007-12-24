@@ -110,7 +110,7 @@ namespace Ariadne {
       bool empty_interior() const;
 
       /*! \brief A rectangle containing the ellipsoid. */
-      Rectangle<R> bounding_box() const;
+      Box<R> bounding_box() const;
       
       /*! \brief Tests if \a point is contained in the ellipsoid. */
       tribool contains(const Point<R>& pt) const;
@@ -122,15 +122,15 @@ namespace Ariadne {
       /*! \brief Tests disjointness */
       friend tribool disjoint(const Ellipsoid<R>& A, const Ellipsoid<R>& B);
       /*! \brief Tests disjointness */
-      friend tribool disjoint(const Rectangle<R>& A, const Ellipsoid<R>& B);
+      friend tribool disjoint(const Box<R>& A, const Ellipsoid<R>& B);
       /*! \brief Tests disjointness */
-      friend tribool disjoint(const Ellipsoid<R>& A, const Rectangle<R>& B);
+      friend tribool disjoint(const Ellipsoid<R>& A, const Box<R>& B);
       /*! \brief Tests inclusion of \a A in \a B. */
       friend tribool subset(const Ellipsoid<R>& A, const Ellipsoid<R>& B);
       /*! \brief Tests inclusion of \a A in \a B. */
-      friend tribool subset(const Rectangle<R>& A, const Ellipsoid<R>& B);
+      friend tribool subset(const Box<R>& A, const Ellipsoid<R>& B);
       /*! \brief Tests inclusion of \a A in \a B. */
-      friend tribool subset(const Ellipsoid<R>& A, const Rectangle<R>& B);
+      friend tribool subset(const Ellipsoid<R>& A, const Box<R>& B);
       //@}
       
       //@{
@@ -158,20 +158,20 @@ namespace Ariadne {
     tribool disjoint(const Ellipsoid<R>& A, const Ellipsoid<R>& B); 
     
     template<class R>  
-    tribool disjoint(const Ellipsoid<R>& A, const Rectangle<R>& B); 
+    tribool disjoint(const Ellipsoid<R>& A, const Box<R>& B); 
     
     template<class R>  
-    tribool disjoint(const Rectangle<R>& A, const Ellipsoid<R>& B); 
+    tribool disjoint(const Box<R>& A, const Ellipsoid<R>& B); 
 
    
     template<class R> 
     tribool subset(const Ellipsoid<R>& A, const Ellipsoid<R>& B); 
 
     template<class R> 
-    tribool subset(const Ellipsoid<R>& A, const Rectangle<R>& B); 
+    tribool subset(const Ellipsoid<R>& A, const Box<R>& B); 
     
     template<class R> 
-    tribool subset(const Rectangle<R>& A, const Ellipsoid<R>& B); 
+    tribool subset(const Box<R>& A, const Ellipsoid<R>& B); 
     
 
     template<class R>

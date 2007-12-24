@@ -97,7 +97,7 @@ namespace Ariadne {
       tribool bounded() const;
 
       /*!\brief A rectangle containing the grid cell. */
-      Rectangle<R> bounding_box() const;
+      Box<R> bounding_box() const;
 
       /*!\brief The one-box neighbourhood of the cell. */
       GridBlock<R> neighbourhood() const;

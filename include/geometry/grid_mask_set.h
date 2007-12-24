@@ -105,7 +105,7 @@ namespace Ariadne {
       explicit GridMaskSet(const FiniteGrid<R>& g, const BooleanArray& m);
 
       /*!\brief Construct an empty set based on grid \a g such that the restricted grid covers bounding box \a bb as tightly as possible. */
-      explicit GridMaskSet(const Grid<R>& g, const Rectangle<R>& bb);
+      explicit GridMaskSet(const Grid<R>& g, const Box<R>& bb);
      
       /*!\brief Construct an empty set based on grid \a g and with cells in the block \a b. */
       explicit GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeBlock& b);
@@ -136,25 +136,24 @@ namespace Ariadne {
       /*!\brief Checks if a denotable set includes a point. */
       virtual tribool contains(const Point<R>& p) const;
 
-      /*! \brief Tests for superset of a Rectangle. */ 
-      virtual tribool superset(const Rectangle<R>& r) const;
+      /*! \brief Tests for superset of a Box. */ 
+      virtual tribool superset(const Box<R>& r) const;
 
-      /*! \brief Tests for intersection with a Rectangle. */
-      virtual tribool intersects(const Rectangle<R>& r) const;
+      /*! \brief Tests for intersection with a Box. */
+      virtual tribool intersects(const Box<R>& r) const;
 
-      /*! \brief Tests for disjointness with a Rectangle. */
-      virtual tribool disjoint(const Rectangle<R>& r) const;
+      /*! \brief Tests for disjointness with a Box. */
+      virtual tribool disjoint(const Box<R>& r) const;
 
-      /*! \brief Tests for subset of a Rectangle. */
-      virtual tribool subset(const Rectangle<R>& r) const;
+      /*! \brief Tests for subset of a Box. */
+      virtual tribool subset(const Box<R>& r) const;
 
       /*! \brief The rectangle bounding the region of the mask. */
-      virtual Rectangle<R> bounding_box() const;
+      virtual Box<R> bounding_box() const;
       //@}
 
       /*!\brief Convert to a %ListSet of BS. */
       template<class BS> operator ListSet<BS> () const;
-      operator ListSet< Rectangle<R> > () const;
       
       /*!\brief Equality operator. (Deprecated)
        *
@@ -181,7 +180,7 @@ namespace Ariadne {
       GridBlock<R> bounds() const;
 
       /*! \brief The extent of the elements in the grid. */
-      Rectangle<R> extent() const;
+      Box<R> extent() const;
 
       /*! \brief The number of elements in the mask. */
       size_type capacity() const;
@@ -252,10 +251,10 @@ namespace Ariadne {
       GridMaskSet adjoining() const;
 
       /*! \brief Adjoins an over-approximation of the rectangle \a r. */
-      void adjoin_over_approximation(const Rectangle<R>& r);
+      void adjoin_over_approximation(const Box<R>& r);
 
       /*! \brief Adjoins an under-approximation of the rectangle \a r. */
-      void adjoin_under_approximation(const Rectangle<R>& r);
+      void adjoin_under_approximation(const Box<R>& r);
 
       /*! \brief Adjoins an outer-approximation of the basic set \a bs. */
       template<class BS>
@@ -265,8 +264,9 @@ namespace Ariadne {
       template<class BS>
       void adjoin_inner_approximation(const BS& bs);
 
-      /*! \brief Adjoins an outer-approximation of the rectangle list set \a rls. */
-      void adjoin_outer_approximation(const ListSet< Rectangle<R> >& rls);
+      /*! \brief Adjoins an outer-approximation of a list set \a ls. */
+      template<class BS>
+      void adjoin_outer_approximation(const ListSet<BS>& ls);
 
       /*! \brief Adjoins an outer-approximation of the set \a s. */
       void adjoin_outer_approximation(const SetInterface<R>& s);
@@ -307,11 +307,11 @@ namespace Ariadne {
     };
     
     
-    template<class R> tribool disjoint(const Rectangle<R>&, const GridMaskSet<R>&);
-    template<class R> tribool disjoint(const GridMaskSet<R>& gm, const Rectangle<R>& r);
-    template<class R> tribool superset(const GridMaskSet<R>&, const Rectangle<R>&);
-    template<class R> tribool subset(const Rectangle<R>&, const GridMaskSet<R>&);
-    template<class R> tribool subset(const GridMaskSet<R>&, const Rectangle<R>&);
+    template<class R> tribool disjoint(const Box<R>&, const GridMaskSet<R>&);
+    template<class R> tribool disjoint(const GridMaskSet<R>& gm, const Box<R>& r);
+    template<class R> tribool superset(const GridMaskSet<R>&, const Box<R>&);
+    template<class R> tribool subset(const Box<R>&, const GridMaskSet<R>&);
+    template<class R> tribool subset(const GridMaskSet<R>&, const Box<R>&);
    
     template<class R> tribool overlap(const GridBlock<R>&, const GridMaskSet<R>&);
     template<class R> tribool overlap(const GridMaskSet<R>&, const GridBlock<R>&);

@@ -1,9 +1,9 @@
 /***************************************************************************
  *            rectangle.h
  *
- *  Mon 2 May 2005
- *  Copyright 2005  Alberto Casagrande, Pieter Collins
- *  Email casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *
+ *  Copyright 2005-7  Alberto Casagrande, Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -45,6 +45,7 @@
 
 #include "geometry/exceptions.h"
 #include "geometry/point.h"
+#include "geometry/box.h"
 #include "geometry/rectangle_expression.h"
 
 namespace Ariadne {
@@ -150,8 +151,6 @@ namespace Ariadne {
 
       /*! \brief Assign from a rectangle expression. */
       template<class E> Rectangle<R>& operator=(const RectangleExpression<E>& r);
-      /*! \brief Make a unit box. */
-      static Rectangle<R> unit_box(dimension_type d);
     
       //@}
       
@@ -407,6 +406,10 @@ namespace Ariadne {
       Point<R> _pt;
     };
     
+    
+    template<class X, class R> tribool disjoint(const Rectangle<X>& r, const Box<R>& bx);
+    template<class X, class R> tribool subset(const Rectangle<X>& r, const Box<R>& bx);
+    template<class X, class R> tribool superset(const Rectangle<X>& r, const Box<R>& bx);
     
     
     

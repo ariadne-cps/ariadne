@@ -1,9 +1,8 @@
 /***************************************************************************
  *            python/export_point.cc
  *
- *  21 October 2005
- *  Copyright  2005-6  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright  2005-7  Alberto Casagrande, Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -96,8 +95,8 @@ R point_getitem(const Point<R>& p, uint i) {
 //}
 
 template<class R> inline 
-Rectangle<R> rectangle_expanded(const Point<R>& p, const R& r) {
-  return Rectangle<R>(p).expand_by(r);
+Box<R> rectangle_expanded(const Point<R>& p, const R& r) {
+  return Box<R>(p).expand_by(r);
 }
 
 template<class R> inline 
@@ -143,7 +142,7 @@ void export_interval_point()
     .def(init< int >())
     .def(init< Point<R> >())
     .def(init< Point<I> >())
-    .def(init< Rectangle<R> >())
+    .def(init< Box<R> >())
     .def("dimension", &Point< Interval<R> >::dimension)
     .def("__len__", &Point< Interval<R> >::dimension)
     .def("__getitem__", &point_getitem< Interval<R> >)

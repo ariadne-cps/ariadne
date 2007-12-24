@@ -59,10 +59,10 @@ test_parallelotope()
 { 
   typedef Numeric::Interval<R> I;
 
-  Rectangle<R> r1=Rectangle<R>("[9,11]x[5,11]x[-1,1]");
-  Rectangle<R> r2=Rectangle<R>("[4.875,5.125]x[2.875,3.125]x[1.75,2.25]");
-  Rectangle<R> r3=Rectangle<R>("[-1,9]x[-1,6]x[0,4]");
-  Rectangle<R> r4=Rectangle<R>("[-1,9]x[-1,6]x[1,4]");
+  Box<R> r1=Box<R>("[9,11]x[5,11]x[-1,1]");
+  Box<R> r2=Box<R>("[4.875,5.125]x[2.875,3.125]x[1.75,2.25]");
+  Box<R> r3=Box<R>("[-1,9]x[-1,6]x[0,4]");
+  Box<R> r4=Box<R>("[-1,9]x[-1,6]x[1,4]");
 
   Point<R> c2("(5,3,2)");
   Matrix<R> G2("[2,1,0;1,1,0;0,0,1]");
@@ -80,7 +80,7 @@ test_parallelotope()
   cout << "p1.empty()=" << p1.empty() << endl;
 //  cout << "disjoint(p1,p2)=" << disjoint(p1,p2) << endl;
 //  cout << "subset(p1,p2)=" << subset(p1,p2) << endl;
-  for(typename Rectangle<R>::vertices_const_iterator v_iter=r3.vertices_begin();
+  for(typename Box<R>::vertices_const_iterator v_iter=r3.vertices_begin();
       v_iter!=r3.vertices_end(); ++v_iter)
   {
     cout << "p2.contains(" << *v_iter << ")=" << p2.contains(*v_iter) << endl;
@@ -125,12 +125,12 @@ test_parallelotope()
   Parallelotope<R,R> oap=over_approximation(ep);
   Parallelotope<I,I> qoap=orthogonal_over_approximation(ip);
 
-  Rectangle<R> r5("[1.125,1.25]x[1.625,1.75]");
-  Rectangle<R> r6("[0.875,1.00]x[0.125,0.25]");
+  Box<R> r5("[1.125,1.25]x[1.625,1.75]");
+  Box<R> r6("[0.875,1.00]x[0.125,0.25]");
   assert((bool)(!disjoint(p3,r6)));
   assert((bool)(disjoint(p3,r5)));
  
-  Rectangle<R> bbox3=p3.bounding_box().expand_by(0.25);
+  Box<R> bbox3=p3.bounding_box().neighbourhood(0.25);
   Grid<R> gr3(2,0.125);
   
   GridCellListSet<R> oap3=outer_approximation(p3,gr3);

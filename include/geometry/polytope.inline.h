@@ -54,6 +54,14 @@ namespace Ariadne {
 
 namespace Ariadne {  
 
+ 
+template<class X> template<class XX> inline
+Geometry::Polytope<X>::Polytope(const Rectangle<XX>& r)
+  : _dimension(r.dimension()), _number_of_vertices(r.number_of_vertices()), _data()
+{   
+  (*this)=Geometry::polytope(Rectangle<X>(r));
+}
+
 template<class X> template<class XX> inline
 Geometry::Polytope<X>::Polytope(const Polyhedron<XX>& p)
   : _dimension(p.dimension()), _number_of_vertices(), _data()
@@ -71,17 +79,17 @@ template<class X> template<class XX> inline
 Geometry::Polytope<X>&
 Geometry::Polytope<X>::operator=(const Polytope<XX>& p)
 {
-  if(this!=&p) { 
-    this->_dimension=p._dimension;
-    this->_number_of_vertices=p._number_of_vertices;
-    this->_data=p._data;
+  if(this!=(void*)&p) { 
+    this->_dimension=p.dimension();
+    this->_number_of_vertices=p.number_of_vertices();
+    this->_data=p.data();
   }
   return *this;
 }
 
 
 template<class X> inline
-Geometry::Rectangle<typename Geometry::Polytope<X>::real_type> 
+Geometry::Box<typename Geometry::Polytope<X>::real_type> 
 Geometry::bounding_box(const Polytope<X>& p)  
 {
   return p.bounding_box();

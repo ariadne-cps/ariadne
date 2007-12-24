@@ -200,7 +200,7 @@ tribool
 Geometry::Parallelotope<XC,XG>::_instantiate() 
 {
   //Parallelotope<XC,XG>(*goa)(const Parallelotope< Interval<R> >&) = &Geometry::over_approximation<R>;
-  Rectangle<R> r;
+  Box<R> r;
   Parallelotope<XC,XG> p;
   Zonotope<XC,XG> z;
   Geometry::subset(r,p);

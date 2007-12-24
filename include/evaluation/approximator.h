@@ -62,7 +62,7 @@ namespace Ariadne {
       virtual Approximator<BS>* clone() const;
 
       /*! \brief Computets and over-approximation of a set from a rectangle. */
-      virtual BS over_approximation(const Geometry::Rectangle<R>& r) const;
+      virtual BS over_approximation(const Geometry::Box<R>& r) const;
 
       /*! \brief Computets and over-approximation of a set from a rectangle. */
       Geometry::GridCellListSet<R> outer_approximation(const BS& bs, const Geometry::Grid<R>& g) const;
@@ -70,7 +70,7 @@ namespace Ariadne {
     };
 
 
-    // Need a specialisation for Rectangle since outer_approximation returns a GridBlock
+    // Need a specialisation for Box since outer_approximation returns a GridBlock
     template<class R>
     class Approximator< Geometry::Rectangle<R> >
       : public ApproximatorInterface< Geometry::Rectangle<R> >
@@ -79,7 +79,7 @@ namespace Ariadne {
       typedef Geometry::Rectangle<R> BS;
      public:
       virtual Approximator<BS>* clone() const;
-      virtual BS over_approximation(const Geometry::Rectangle<R>& r) const;
+      virtual BS over_approximation(const Geometry::Box<R>& r) const;
       Geometry::GridCellListSet<R> outer_approximation(const BS& bs, const Geometry::Grid<R>& g) const;
     };
 
@@ -107,7 +107,7 @@ namespace Ariadne {
       virtual FastApproximator<BS>* clone() const;
 
       /*! \brief Computets and over-approximation of a set from a rectangle. */
-      virtual BS over_approximation(const Geometry::Rectangle<R>& r) const;
+      virtual BS over_approximation(const Geometry::Box<R>&  bx) const;
 
       /*! \brief Computets and over-approximation of a set from a rectangle. */
       Geometry::GridCellListSet<R> outer_approximation(const BS& bs, const Geometry::Grid<R>& g) const;

@@ -99,10 +99,10 @@ Evaluation::MapOrbiter<BS>::clone() const
 
 
 template<class BS>
-Geometry::Rectangle<typename BS::real_type>
-Evaluation::MapOrbiter<BS>::apply(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& r) const 
+Geometry::Box<typename BS::real_type>
+Evaluation::MapOrbiter<BS>::apply(const System::MapInterface<R>& f, const Geometry::Box<R>& r) const 
 {
-  ARIADNE_LOG(4,"Rectangle MapOrbiter::apply(MapInterface,Rectangle)\n");
+  ARIADNE_LOG(4,"Box MapOrbiter::apply(MapInterface,Box)\n");
   return this->_applicator->apply(f,BS(r)).bounding_box();
 }
 
@@ -127,12 +127,12 @@ Evaluation::MapOrbiter<BS>::apply(const System::MapInterface<R>& f, const Geomet
 
 
 template<class BS>
-Geometry::DiscreteTimeOrbit< Numeric::Integer, Geometry::Rectangle<typename BS::real_type> >
-Evaluation::MapOrbiter<BS>::orbit(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& r, const Numeric::Integer& n) const
+Geometry::DiscreteTimeOrbit< Numeric::Integer, Geometry::Box<typename BS::real_type> >
+Evaluation::MapOrbiter<BS>::orbit(const System::MapInterface<R>& f, const Geometry::Box<R>& r, const Numeric::Integer& n) const
 {
-  ARIADNE_LOG(4,"DiscreteTimeOrbit<Integer,Rectangle> MapOrbiter::orbit(MapInterface,RectangleRectangle)\n");
+  ARIADNE_LOG(4,"DiscreteTimeOrbit<Integer,Box> MapOrbiter::orbit(MapInterface,RectangleRectangle)\n");
   assert(n>=0);
-  Geometry::DiscreteTimeOrbit<Numeric::Integer, Geometry::Rectangle<R> > orbit(r);
+  Geometry::DiscreteTimeOrbit<Numeric::Integer, Geometry::Box<R> > orbit(r);
   BS bs(r);
   for(Numeric::Integer i=0; i!=n; ++i) {
     bs=this->_applicator->apply(f,bs);
@@ -143,12 +143,12 @@ Evaluation::MapOrbiter<BS>::orbit(const System::MapInterface<R>& f, const Geomet
 
 
 template<class BS>
-Geometry::DiscreteTimeOrbit< Numeric::Integer, Geometry::Rectangle<typename BS::real_type> >
-Evaluation::MapOrbiter<BS>::orbit(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& r, const Numeric::Integer& n, const R& mbsr) const
+Geometry::DiscreteTimeOrbit< Numeric::Integer, Geometry::Box<typename BS::real_type> >
+Evaluation::MapOrbiter<BS>::orbit(const System::MapInterface<R>& f, const Geometry::Box<R>& r, const Numeric::Integer& n, const R& mbsr) const
 {
-  ARIADNE_LOG(4,"DiscreteTimeOrbit<Integer,Rectangle> MapOrbiter::orbit(MapInterface,Rectangle,Integer,Float)\n");
+  ARIADNE_LOG(4,"DiscreteTimeOrbit<Integer,Box> MapOrbiter::orbit(MapInterface,Box,Integer,Float)\n");
   assert(n>=0);
-  Geometry::DiscreteTimeOrbit<Numeric::Integer, Geometry::Rectangle<R> > orbit(r);
+  Geometry::DiscreteTimeOrbit<Numeric::Integer, Geometry::Box<R> > orbit(r);
   BS bs(r);
   size_type i=0;
   while(i!=n && orbit.final().set().radius()<mbsr) {

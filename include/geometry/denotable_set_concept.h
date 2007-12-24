@@ -72,7 +72,7 @@ namespace Ariadne {
       tribool contains(const state_type& pt) const;
       
       /*! \brief A rectangle containing the denotable set. */
-      Rectangle bounding_box() const;
+      Box bounding_box() const;
       //@}
 
       //@{
@@ -114,9 +114,9 @@ namespace Ariadne {
       /*! \brief Tests if a denotable set contains a point. */
       friend tribool contains(const DenotableSetConcept& ds, const state_type>& pt);
       /*! \brief Tests if a denotable set is disjoint from a rectangle. */
-      friend tribool disjoint(const DenotableSetConcept& ds, const Rectangle<real_type>& r);
+      friend tribool disjoint(const DenotableSetConcept& ds, const Box<real_type>& r);
       /*! \brief Tests if a denotable set is a subset of a rectangle. */
-      friend tribool subset(const DenotableSetConcept& ds, const Rectangle<real_type>& r);
+      friend tribool subset(const DenotableSetConcept& ds, const Box<real_type>& r);
       /*! \brief The union of a denotable set and a basic set. (Note that union is a reserved word in C++) */
       friend DenotableSetConcept join(const DenotableSetConcept& ds, const basic_set_type& r);
       /*! \brief The union of two denotable sets. (Note that union is a reserved word in C++) */
@@ -126,7 +126,7 @@ namespace Ariadne {
       //@{ 
       //! \name Optional binary geometric predicates and operations
       /*! \brief Tests if a rectangle is a subset of the basic set. (Optional) */
-      friend tribool subset(const Rectangle<real_type>& s, const DenotableSetConcept& ds);
+      friend tribool subset(const Box<real_type>& s, const DenotableSetConcept& ds);
       /*! \brief The intersection of \a ds1 and \a ds2. (Optional) */
       friend DenotableSetConcept intersection(const DenotableSetConcept& ds1, const DenotableSetConcept& ds2); 
       /*! \brief The closure of the intersection of the interiors of \a ds1 and \a ds2. (Optional) */

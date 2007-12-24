@@ -186,6 +186,19 @@ Geometry::Box<R>::operator=(const RectangleExpression<E>& original)
 }
 
 
+template<class R> inline
+Geometry::Box<R> 
+Geometry::Box<R>::unit_box(dimension_type d)
+{
+  Box<R> r(d);
+  for(dimension_type i=0; i!=d; ++i) {
+    r.set_lower_bound(i,-1);
+    r.set_upper_bound(i,+1);
+  }
+  return r;
+}
+
+
 // Conversion operators
 template<class R> inline
 Geometry::Box<R>::operator Point< Numeric::Interval<R> >() const 
@@ -353,6 +366,29 @@ Geometry::Box<R>::empty() const
   return result;
 }
 
+template<class R> inline
+tribool 
+Geometry::Box<R>::bounded() const
+{
+  R pos_inf=Numeric::inf();
+  R neg_inf=-pos_inf;
+  
+  tribool result=true;
+  for(dimension_type i=0; i!=this->dimension(); ++i) {
+    if(this->lower_bound(i) == neg_inf || this->upper_bound(i)== pos_inf) {
+      return false;
+    }
+  }
+  return result;
+}
+
+template<class R> inline
+const Geometry::Box<R>&
+Geometry::Box<R>::bounding_box() const
+{
+  return *this;
+}
+
 // Modifying operations
 template<class R> inline
 void 
@@ -396,7 +432,7 @@ template<class R> inline
 Geometry::Box<R> 
 Geometry::Box<R>::neighbourhood(const R& delta) const 
 {
-  Box<R> result;
+  Box<R> result(this->dimension());
   Numeric::Interval<R> expand(-delta,delta);
   for (size_type j=0; j< this->dimension(); ++j) {
     result[j]=(*this)[j]+expand;
@@ -439,9 +475,16 @@ Geometry::Box<R>::radius() const
 }
 
 
-template<class R> inline
+template<class R> template<class X> inline
 tribool 
-Geometry::contains(const Box<R>& bx, const Point<R>& pt)
+Geometry::Box<R>::contains(const Point<X>& pt) const {
+  return Geometry::contains(*this,pt);
+}
+
+
+template<class R, class X> inline
+tribool 
+Geometry::contains(const Box<R>& bx, const Point<X>& pt)
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(bx,pt,"contains(Box bx, Point pt)");
   tribool result=true;
@@ -584,30 +627,18 @@ Geometry::minkowski_difference(const Box<R1>& r1, const Box<R2>& r2)
 template<class R> inline
 Geometry::Box<R> 
 Geometry::operator+(const Geometry::Box<R>& r, 
-                    const LinearAlgebra::Vector<R>& v)
+                    const LinearAlgebra::Vector< Numeric::Interval<R> >& iv)
 {
   Geometry::Box<R> result(r.dimension());
-  ARIADNE_CHECK_DIMENSION_EQUALS_SIZE(r,v,"Vector operator+(Box r, Vector v)");
+  ARIADNE_CHECK_DIMENSION_EQUALS_SIZE(r,iv,"Vector operator+(Box r, IntervalVector iv)");
   
   for(size_type i=0; i!=result.dimension(); ++i) {
-    result.set_interval(i,r[i]+v(i));
+    result.set_interval(i,r[i]+iv(i));
   }
   return result;
 }
 
-template<class R> inline
-Geometry::Box<R> 
-Geometry::operator-(const Geometry::Box<R>& r, 
-                    const LinearAlgebra::Vector<R>& v)
-{
-  Geometry::Box<R> result(r.dimension());
-  ARIADNE_CHECK_DIMENSION_EQUALS_SIZE(r,v,"Vector operator-(Box r, Vector v)");
-  
-  for(size_type i=0; i!=result.dimension(); ++i) {
-    result.set_interval(i,r[i]-v(i));
-  }
-  return result;
-}
+
 
 
 

@@ -91,7 +91,7 @@ Output::operator<<(latexstream& txs, const LinearAlgebra::Matrix<R>& A)
 
 template<class R> 
 Output::latexstream& 
-Output::operator<<(latexstream& txs, const Geometry::Rectangle<R>& r) 
+Output::operator<<(latexstream& txs, const Geometry::Box<R>& r) 
 {
   for(size_type i=0; i!=r.dimension(); ++i) {
     if(i!=0) { txs << "\\times"; }

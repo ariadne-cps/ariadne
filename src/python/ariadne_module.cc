@@ -92,7 +92,6 @@ template<class R> void export_constraint();
 
 template<class R> void export_map();
 template<class R> void export_affine_map();
-template<class R> void export_affine_multimap();
 template<class R> void export_polynomial_map();
 template<class R> void export_vector_field();
 template<class R> void export_affine_vector_field();
@@ -203,7 +202,6 @@ BOOST_PYTHON_MODULE(ariadne)
 
   export_map<FloatPy>();
   export_affine_map<FloatPy>();
-  export_affine_multimap<FloatPy>();
   export_polynomial_map<FloatPy>();
   export_vector_field<FloatPy>();
   export_affine_vector_field<FloatPy>();

@@ -52,7 +52,7 @@ Geometry::bounded(const Zonotope<R,Tag>& z)
 
 template<class R, class Tag> inline      
 tribool
-Geometry::subset(const Rectangle<R>& r, const Zonotope<R,Tag>& z) 
+Geometry::subset(const Box<R>& r, const Zonotope<R,Tag>& z) 
 {
   return superset(z,r);
 }
@@ -68,14 +68,14 @@ Geometry::radius(const Zonotope<R,Tag>& z)
 
 template<class R, class Tag> inline      
 tribool
-Geometry::disjoint(const Rectangle<R>& r, Zonotope<R,Tag>& z) 
+Geometry::disjoint(const Box<R>& r, Zonotope<R,Tag>& z) 
 {
   return disjoint(z,r);
 }
 
 template<class R, class Tag> inline      
 tribool
-Geometry::subset(const Rectangle<R>& r, Zonotope<R,Tag>& z) 
+Geometry::subset(const Box<R>& r, Zonotope<R,Tag>& z) 
 {
   return superset(z,r);
 }

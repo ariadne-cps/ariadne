@@ -113,9 +113,9 @@ test_polyhedron()
   assert((bool)(!phd1.contains(pt2)));
   
 
-  Rectangle<R> r1("[-0.0625,0.25]x[0.125,0.375]");
+  Box<R> r1("[-0.0625,0.25]x[0.125,0.375]");
   cout << "r1=" << r1 << endl;
-  for(class Rectangle<R>::vertices_const_iterator v_iter=r1.vertices_begin();
+  for(class Box<R>::vertices_const_iterator v_iter=r1.vertices_begin();
       v_iter!=r1.vertices_end(); ++v_iter)
   {
     for(typename Polyhedron<R>::constraints_const_iterator c_iter=phd1.constraints_begin();
@@ -127,7 +127,7 @@ test_polyhedron()
   cout << "subset(r1,phd1)=" << subset(r1,phd1) << endl;
   assert((bool)(subset(r1,phd1)));
   
-  Rectangle<R> r2("[-0.125,0.25]x[0.125,0.75]");
+  Box<R> r2("[-0.125,0.25]x[0.125,0.75]");
   cout << "r2=" << r2 << endl;
   cout << "subset(r2,phd1)=" << subset(r2,phd1) << endl;
   assert((bool)(!subset(r2,phd1)));
@@ -164,8 +164,8 @@ test_polyhedron()
   Polytope<R> pltp2=Polytope<R>(G);
   cout << "pltp2=" << pltp2 << endl << "pltp2.bounding_box()=" << pltp2.bounding_box() << endl;
 
-  Rectangle<R> bbox2=phd2.bounding_box().expand_by(0.25);
-  bbox2=Rectangle<R>("[-4,4]x[-4,4]");
+  Box<R> bbox2=phd2.bounding_box().neighbourhood(0.25);
+  bbox2=Box<R>("[-4,4]x[-4,4]");
   Grid<R> gr2(2,0.125);
   GridCellListSet<R> uap2=inner_approximation(phd2,gr2);
   GridCellListSet<R> oap2=outer_approximation(phd2,gr2);
@@ -198,10 +198,10 @@ test_polyhedron<Rational>()
   ARIADNE_TEST_CONSTRUCT(Polytope<R>,pltp,(plhd));
   cout << "  Vertices should be (71/128,15/16), (-2/3,-4/7),  (212/151,-5/151)" << endl;
 
-  Rectangle<R> r("[-3/4,3]x[-2/3,1]");
+  Box<R> r("[-3/4,3]x[-2/3,1]");
   cout << "r=" << r << endl;
   ARIADNE_TEST_ASSERT(subset(plhd,r));
-  r=Rectangle<R>("[-1/4,3]x[-2/3,1]");
+  r=Box<R>("[-1/4,3]x[-2/3,1]");
   ARIADNE_TEST_ASSERT(!subset(plhd,r));
   
   // Empty polyhedron 
@@ -217,11 +217,11 @@ test_polyhedron<Rational>()
   cout << "Polyhedron(Polytope(phd))=" << plhd2 << endl;
   cout << endl;
  
-  Rectangle<R> r1("[7/8,8/8]x[6/8,7/8]");
-  Rectangle<R> r2("[2/8,3/8]x[5/8,6/8]");
-  Rectangle<R> r3("[3/8,4/8]x[4/8,5/8]");
+  Box<R> r1("[7/8,8/8]x[6/8,7/8]");
+  Box<R> r2("[2/8,3/8]x[5/8,6/8]");
+  Box<R> r3("[3/8,4/8]x[4/8,5/8]");
 
-  Rectangle<R> bbox=plhd.bounding_box().expand_by(R(0.5));
+  Box<R> bbox=plhd.bounding_box().neighbourhood(R(0.5));
 
   epsfstream eps;
   eps.open("test_polyhedron-2.eps",bbox);

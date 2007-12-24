@@ -91,16 +91,16 @@ test_integrator()
   VanDerPolEquation<R> vdp=VanDerPolEquation<R>(Point<R>(1,&mu));
   cout << "vpd=" << avf << endl;
 
-  Rectangle<R> r=Rectangle<R>("[0.98,1.02]x[0.48,0.52]");
+  Box<R> r=Box<R>("[0.98,1.02]x[0.48,0.52]");
   cout << "r=" << r << endl;
   Zonotope<R,UniformErrorTag> ez=Zonotope<R,UniformErrorTag>(r);
   cout << "ez=" << ez << endl;
 
   ListSet< Zonotope<R,UniformErrorTag> > ezls=ListSet< Zonotope<R,UniformErrorTag> >(ez);
-  ezls.adjoin(Zonotope<R>(Rectangle<R>("[1.02,1.06]x[0.48,0.52]")));
+  ezls.adjoin(Zonotope<R>(Box<R>("[1.02,1.06]x[0.48,0.52]")));
   cout << "ezls.size()=" << ezls.size() << endl;
   
-  Geometry::Rectangle<R> nr;
+  Geometry::Box<R> nr;
   Geometry::Zonotope<R> nz;
   Geometry::Zonotope<R,UniformErrorTag> nez;
   Geometry::ListSet< Zonotope<R,UniformErrorTag> > nezls;
@@ -169,8 +169,8 @@ test_vector_field_evolver()
 
   AffineVectorField<R> affine_vector_field(Matrix<R>("[-2,-1;1,-2]"),Vector<R>("[0.125,0.25]"));
   
-  Rectangle<R> bb("[-4,4]x[-4,4]");
-  Rectangle<R> r("[-3.125,-2.875]x[-0.125,0.125]");
+  Box<R> bb("[-4,4]x[-4,4]");
+  Box<R> r("[-3.125,-2.875]x[-0.125,0.125]");
   FiniteGrid<R> fg(bb,128);
   //FiniteGrid<R> fg(bb,64);
   //FiniteGrid<R> fg(bb,32);
@@ -186,8 +186,7 @@ test_vector_field_evolver()
 
   //PolyhedralSet<R> polyhedral_initial_set=PolyhedralSet<R>(Matrix<R>("[-2,0;0,-1;1,1]"),Vector<R>("[-1,-1,3]"));
   PolyhedralSet<R> polyhedral_initial_set=PolyhedralSet<R>(r);
-  RectangularSet<R> rectangular_bounding_set=RectangularSet<R>(bb);
-  SetInterface<R>* abstract_bounding_set_ptr=&rectangular_bounding_set;
+  Box<R> bounding_box=bb;
   SetInterface<R>* abstract_initial_set_ptr=&polyhedral_initial_set;
   cout << "abstract_initial_set=" << *abstract_initial_set_ptr << endl;
   SetInterface<R>* abstract_integrate_set_ptr=evolver.integrate(affine_vector_field,*abstract_initial_set_ptr,time_type(integration_time/n));
@@ -195,7 +194,7 @@ test_vector_field_evolver()
   SetInterface<R>* abstract_final_set_ptr=evolver.integrate(affine_vector_field,*abstract_initial_set_ptr,integration_time);
   SetInterface<R>* abstract_reach_set_ptr=evolver.reach(affine_vector_field,*abstract_initial_set_ptr,integration_time);
   cout << "abstract_reach_set=" << *abstract_reach_set_ptr << endl;
-  SetInterface<R>* abstract_chainreach_set_ptr=evolver.chainreach(affine_vector_field,*abstract_initial_set_ptr,*abstract_bounding_set_ptr);
+  SetInterface<R>* abstract_chainreach_set_ptr=evolver.chainreach(affine_vector_field,*abstract_initial_set_ptr,bounding_box);
   cout << "abstract_chainreach_set=" << *abstract_reach_set_ptr << endl;
   cout << endl;
 
@@ -226,18 +225,18 @@ test_vector_field_evolver()
 
 
   //Grid<R> grid(Vector<R>("[0.125,0.125]"));
-  ListSet< Rectangle<R> > rectangle_list_initial_set=point_approximation(polyhedral_initial_set,fine_grid);
+  ListSet< Box<R> > rectangle_list_initial_set=point_approximation(polyhedral_initial_set,fine_grid);
   cout << "rectangle_list_initial_set.size()=" << rectangle_list_initial_set.size() << endl;
-  ListSet< Rectangle<R> > rectangle_list_integrate_set=rectangle_list_initial_set;
+  ListSet< Box<R> > rectangle_list_integrate_set=rectangle_list_initial_set;
   cout << "rectangle_list_integrate_set.size()=" << rectangle_list_integrate_set << endl;
-  ListSet< Rectangle<R> > rectangle_list_found_set=rectangle_list_initial_set;
+  ListSet< Box<R> > rectangle_list_found_set=rectangle_list_initial_set;
   for(uint i=0; i!=n; ++i) {
     rectangle_list_found_set=evolver.lower_integrate(affine_vector_field,rectangle_list_found_set,time_type(integration_time/n));
     rectangle_list_integrate_set.adjoin(rectangle_list_found_set);
   }
-  ListSet< Rectangle<R> > rectangle_list_final_set=evolver.lower_integrate(affine_vector_field,rectangle_list_initial_set,integration_time);
+  ListSet< Box<R> > rectangle_list_final_set=evolver.lower_integrate(affine_vector_field,rectangle_list_initial_set,integration_time);
   cout << "rectangle_list_final_set.size()=" << rectangle_list_final_set.size() << endl;
-  ListSet< Rectangle<R> > rectangle_list_reach_set=evolver.lower_reach(affine_vector_field,rectangle_list_initial_set,integration_time);
+  ListSet< Box<R> > rectangle_list_reach_set=evolver.lower_reach(affine_vector_field,rectangle_list_initial_set,integration_time);
   cout << "rectangle_list_reach_set.size()=" << rectangle_list_reach_set.size() << endl;
 
   cout << rectangle_list_initial_set << endl;

@@ -53,22 +53,22 @@ namespace Ariadne {
       virtual dimension_type dimension() const = 0;
 
       /*!\brief A rectangle containing the given set */
-      virtual Rectangle<R> bounding_box() const = 0;
+      virtual Box<R> bounding_box() const = 0;
 
       /*!\brief Tests if a point is an element of the set. */
       virtual tribool contains(const Point<R>& pt) const = 0;
       
       /*!\brief Tests if a rectangle is disjoint from the set. */
-      virtual tribool disjoint(const Rectangle<R>& r) const = 0;
+      virtual tribool disjoint(const Box<R>& r) const = 0;
       
       /*!\brief Tests if a point is an element of the set. */
-      virtual tribool intersects(const Rectangle<R>& r) const = 0;
+      virtual tribool intersects(const Box<R>& r) const = 0;
       
       /*!\brief Tests if a point is an element of the set. */
-      virtual tribool subset(const Rectangle<R>& r) const = 0;
+      virtual tribool subset(const Box<R>& r) const = 0;
       
       /*!\brief Tests if a point is an element of the set. */
-      virtual tribool superset(const Rectangle<R>& r) const = 0;
+      virtual tribool superset(const Box<R>& r) const = 0;
       
       //!\name Input/output operations
       /*!\brief Write to an output stream. */

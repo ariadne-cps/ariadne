@@ -74,18 +74,18 @@ test_constraint()
   DifferentiableConstraint<R> c(f);
   Detector<R> d;
 
-  Rectangle<R> r;
+  Box<R> r;
   Zonotope<R,UniformErrorTag> z;
   
   
   // satisfies
-  r=Rectangle<R>("[0.4,0.5]x[0.45,0.65]");
+  r=Box<R>("[0.4,0.5]x[0.45,0.65]");
   ARIADNE_TEST_ASSERT(d.satisfies(r,c));
   z=Zonotope<R,UniformErrorTag>(r);
   ARIADNE_TEST_ASSERT(d.satisfies(z,c));
 
   // does not satisfy
-  r=Rectangle<R>("[0.8,0.9]x[0.95,0.95]");
+  r=Box<R>("[0.8,0.9]x[0.95,0.95]");
   ARIADNE_TEST_ASSERT(!d.satisfies(r,c));
   z=Zonotope<R,UniformErrorTag>(r);
   ARIADNE_TEST_ASSERT(!d.satisfies(z,c));

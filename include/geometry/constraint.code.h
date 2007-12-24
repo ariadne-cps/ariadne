@@ -129,7 +129,7 @@ Geometry::DifferentiableConstraint<R>::instantiate()
 {
   /*
   typedef Numeric::Interval<R> I;
-  Rectangle<R>* r=0;
+  Box<R>* r=0;
   Zonotope<R,R>* z=0;
   Zonotope<I,R>* ez=0;
   Zonotope<I,I>* iz=0;
@@ -154,7 +154,7 @@ Geometry::DifferentiableConstraint<R>::instantiate()
 
 template<class R>
 Numeric::Interval<R> 
-Geometry::value(const DifferentiableConstraintInterface<R>& c, const Rectangle<R>& r)
+Geometry::value(const DifferentiableConstraintInterface<R>& c, const Box<R>& r)
 {
   typedef typename Numeric::traits<R>::interval_type I;
   return c.value(Point<I>(r));
@@ -174,7 +174,7 @@ Geometry::value(const DifferentiableConstraintInterface<R>& c, const Zonotope< N
 
 template<class R>
 tribool 
-Geometry::satisfies(const Rectangle<R>& r, const DifferentiableConstraintInterface<R>& c)
+Geometry::satisfies(const Box<R>& r, const DifferentiableConstraintInterface<R>& c)
 {
   typedef typename Numeric::traits<R>::interval_type I;
   Point<I> pt(r);
@@ -184,7 +184,7 @@ Geometry::satisfies(const Rectangle<R>& r, const DifferentiableConstraintInterfa
 
 template<class R>
 tribool 
-Geometry::satisfies(const Rectangle<R>& r, const DifferentiableConstraint<R>& c)
+Geometry::satisfies(const Box<R>& r, const DifferentiableConstraint<R>& c)
 {
   typedef typename Numeric::traits<R>::interval_type I;
   Point<I> pt(r);
@@ -200,7 +200,7 @@ Geometry::satisfies(const Zonotope<R,R>& z, const DifferentiableConstraint<R>& c
   LinearAlgebra::Vector<I> e(z.number_of_generators(),I(-1,1));
   const Point<R>& zc=z.centre();
   const LinearAlgebra::Matrix<R>& zG=z.generators();
-  Rectangle<R> bb=z.bounding_box();
+  Box<R> bb=z.bounding_box();
   Point<I> bpt(bb);
   Numeric::Interval<R> v=c.value(zc)+LinearAlgebra::inner_product(c.gradient(bb)*zG,e);
   return ::compare_zero(v,c.comparison());
@@ -214,7 +214,7 @@ Geometry::satisfies(const Zonotope<Numeric::Interval<R>,R>& z, const Differentia
   LinearAlgebra::Vector<I> e(z.number_of_generators(),I(-1,1));
   const Point<I>& zc=z.centre();
   const LinearAlgebra::Matrix<R>& zG=z.generators();
-  Rectangle<R> bb=z.bounding_box();
+  Box<R> bb=z.bounding_box();
   Point<I> bpt(bb);
   Numeric::Interval<R> v=c.value(zc)+LinearAlgebra::inner_product(c.gradient(bb)*zG,e);
   return ::compare_zero(v,c.comparison());
@@ -230,7 +230,7 @@ Geometry::satisfies(const Zonotope< Numeric::Interval<R>, Numeric::Interval<R> >
   LinearAlgebra::Vector<I> e(z.number_of_generators(),I(-1,1));
   const Point<I>& zc=z.centre();
   const LinearAlgebra::Matrix<I>& zG=z.generators();
-  Rectangle<R> bb=z.bounding_box();
+  Box<R> bb=z.bounding_box();
   Point<I> bpt(bb);
   Numeric::Interval<R> v=c.value(zc)+LinearAlgebra::inner_product(c.gradient(bb)*zG,e);
   return ::compare_zero(v,c.comparison());

@@ -43,7 +43,8 @@
 namespace Ariadne {
   namespace Geometry {
 
-    template<class R> class Rectangle;
+    template<class R> class Box;
+    template<class X> class Rectangle;
     
     class basic_set_tag;
     class denotable_set_tag;
@@ -148,24 +149,24 @@ namespace Ariadne {
       /*!\brief Checks if a denotable set includes a point. */
       virtual tribool contains(const Point<R>& p) const;
 
-      /*! \brief Tests for superset of a Rectangle. 
+      /*! \brief Tests for superset of a Box. 
        *
        * Currently always returns \a indeterminate, since the 
        * test is difficult for general list sets. 
        */
-      virtual tribool superset(const Rectangle<R>& r) const;
+      virtual tribool superset(const Box<R>& r) const;
 
-      /*! \brief Tests for intersection with a Rectangle. */
-      virtual tribool intersects(const Rectangle<R>& r) const;
+      /*! \brief Tests for intersection with a Box. */
+      virtual tribool intersects(const Box<R>& r) const;
 
-      /*! \brief Tests for disjointness with a Rectangle. */
-      virtual tribool disjoint(const Rectangle<R>& r) const;
+      /*! \brief Tests for disjointness with a Box. */
+      virtual tribool disjoint(const Box<R>& r) const;
 
-      /*! \brief Tests for subset of a Rectangle. */
-      virtual tribool subset(const Rectangle<R>& r) const;
+      /*! \brief Tests for subset of a Box. */
+      virtual tribool subset(const Box<R>& r) const;
 
       /*! \brief Return a rectangle containing the set. */
-      virtual Rectangle<R> bounding_box() const;
+      virtual Box<R> bounding_box() const;
         
       //@}
 
@@ -283,10 +284,10 @@ namespace Ariadne {
   
 
 
-    template<class BS>
+    template<class BS1, class BS2>
     tribool
-    disjoint(const ListSet<BS>& A,
-             const ListSet<BS>& B);
+    disjoint(const ListSet<BS1>& A,
+             const ListSet<BS2>& B);
 
 
     template<class R>
@@ -295,16 +296,11 @@ namespace Ariadne {
            const ListSet< Rectangle<R> >& B);
     
     
-    template<class R, class BS>
+    template<class BS1, class BS2>
     tribool
-    disjoint(const ListSet< BS >& A,
-             const Rectangle<R>& B);
+    subset(const ListSet< BS1 >& A,
+           const BS2& B);
     
-    
-    template<class R, class BS>
-    tribool
-    subset(const ListSet< BS >& A,
-           const Rectangle<R>& B);
     
     
     template<class BS>

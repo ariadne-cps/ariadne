@@ -36,6 +36,15 @@ Output::operator<<(epsstream& eps, const Geometry::Point<R>& pt)
 
 template<class R> 
 Output::epsstream&
+Output::operator<<(epsstream& eps, const Geometry::Box<R>& r) 
+{
+  Rectangle2d dr=eps.projection_map()(r);
+  eps.draw(dr);
+  return eps;
+}
+
+template<class R> 
+Output::epsstream&
 Output::operator<<(epsstream& eps, const Geometry::Rectangle<R>& r) 
 {
   Rectangle2d dr=eps.projection_map()(r);
@@ -127,7 +136,7 @@ template<class R>
 Output::epsstream&
 Output::operator<<(epsstream& eps, const Geometry::GridCell<R>& bs)
 {
-  return eps << Geometry::Rectangle<R>(bs);
+  return eps << Geometry::Box<R>(bs);
 }
 
 
@@ -135,7 +144,7 @@ template<class R>
 Output::epsstream&
 Output::operator<<(epsstream& eps, const Geometry::GridBlock<R>& bs)
 {
-  return eps << Geometry::Rectangle<R>(bs);
+  return eps << Geometry::Box<R>(bs);
 }
 
 
@@ -183,8 +192,8 @@ Output::operator<<(epsstream& eps, const Geometry::SetInterface<R>& set)
     return eps << dynamic_cast<const RectangularSet<R>&>(set);
   } else if(dynamic_cast<const PolyhedralSet<R>*>(&set)) {
     return eps << dynamic_cast<const PolyhedralSet<R>&>(set);
-  } else if(dynamic_cast<const ListSet< Rectangle<R> >*>(&set)) {
-    return eps << dynamic_cast<const ListSet< Rectangle<R> >&>(set);
+  } else if(dynamic_cast<const ListSet< Box<R> >*>(&set)) {
+    return eps << dynamic_cast<const ListSet< Box<R> >&>(set);
   } else if(dynamic_cast<const ListSet< Zonotope<R,ExactTag> >*>(&set)) {
     return eps << dynamic_cast<const ListSet< Zonotope<R,ExactTag> >&>(set);
   } else if(dynamic_cast<const ListSet< Zonotope<R,UniformErrorTag> >*>(&set)) {
@@ -196,14 +205,14 @@ Output::operator<<(epsstream& eps, const Geometry::SetInterface<R>& set)
   } else if(dynamic_cast<const PartitionTreeSet<R>*>(&set)) {
     return eps << dynamic_cast<const PartitionTreeSet<R>&>(set);
   }  else {
-    Rectangle<R> bb;
+    Box<R> bb;
     try {
       bb=set.bounding_box();
     } 
     catch(Geometry::UnboundedSet& e) {
       if(set.dimension()==2) {
         Rectangle2d bbox=eps.bounding_box();
-        bb=Geometry::Rectangle<R>(2);
+        bb=Geometry::Box<R>(2);
         bb.set_lower_bound(0,bbox.lower_bound(0));
         bb.set_upper_bound(0,bbox.upper_bound(0));
         bb.set_lower_bound(1,bbox.lower_bound(1));
@@ -240,7 +249,7 @@ Output::operator<<(epsstream& eps, const Geometry::PartitionTree<R>& pt)
   bool fill_style=eps.fill_style;
   if(fill_style) { eps.fill_style=false; }
   for(typename Geometry::PartitionTree<R>::const_iterator iter = pt.begin(); iter!=pt.end(); ++iter) {
-    eps << Geometry::Rectangle<R>(*iter);
+    eps << Geometry::Box<R>(*iter);
   }
   if(fill_style) { eps.fill_style=true; }
   return eps;

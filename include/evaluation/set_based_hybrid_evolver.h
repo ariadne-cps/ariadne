@@ -130,11 +130,11 @@ namespace Ariadne {
       //@}
      private:
       // Perform one step of the discrete time evolution using lower semantics. (No checking of arguments)
-      Geometry::HybridListSet< Geometry::Rectangle<R> > _discrete_step(const System::SetBasedHybridAutomaton<R>& automaton, 
-                                                                       const Geometry::HybridListSet< Geometry::Rectangle<R> >& initial_set);
+      Geometry::HybridListSet< Geometry::Box<R> > _discrete_step(const System::SetBasedHybridAutomaton<R>& automaton, 
+                                                                       const Geometry::HybridListSet< Geometry::Box<R> >& initial_set);
        // Evolve the hybrid automaton starting from the initial_set without using discrete transitions. (No checking of arguments)
-      Geometry::HybridListSet< Geometry::Rectangle<R> > _continuous_reach(const System::SetBasedHybridAutomaton<R>& automaton, 
-                                                                          const Geometry::HybridListSet< Geometry::Rectangle<R> >& initial_set,
+      Geometry::HybridListSet< Geometry::Box<R> > _continuous_reach(const System::SetBasedHybridAutomaton<R>& automaton, 
+                                                                          const Geometry::HybridListSet< Geometry::Box<R> >& initial_set,
                                                                           const Numeric::Rational& maximum_time);
 
       // Perform one step of the discrete time evolution using upper semantics. (No checking of arguments)

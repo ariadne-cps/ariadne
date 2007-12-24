@@ -229,7 +229,7 @@ template<class R> template<class BS> inline
 Geometry::GridMaskSet<R>::operator ListSet<BS> () const 
 {
   ListSet<BS> result(this->dimension());
-  Rectangle<R> r(this->dimension());
+  Box<R> r(this->dimension());
   BS bs(this->dimension());
   for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
     r=*iter;
@@ -239,18 +239,26 @@ Geometry::GridMaskSet<R>::operator ListSet<BS> () const
   return result;
 }
 
+template<class R> template<class BS>
+void 
+Geometry::GridMaskSet<R>::adjoin_outer_approximation(const ListSet<BS>& ls)
+{
+  for(size_type i=0; i!=ls.size(); ++i) {
+    this->adjoin_outer_approximation(ls[i]);
+  }
+}
 
 
 template<class R> inline
 void 
-Geometry::GridMaskSet<R>::adjoin_over_approximation(const Rectangle<R>& r)
+Geometry::GridMaskSet<R>::adjoin_over_approximation(const Box<R>& r)
 {
   this->adjoin(over_approximation(r,this->grid()));
 }
 
 template<class R> inline
 void 
-Geometry::GridMaskSet<R>::adjoin_under_approximation(const Rectangle<R>& r)
+Geometry::GridMaskSet<R>::adjoin_under_approximation(const Box<R>& r)
 {
   this->adjoin(under_approximation(r,this->grid()));
 }

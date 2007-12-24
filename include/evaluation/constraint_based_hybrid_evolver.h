@@ -72,7 +72,7 @@ namespace Ariadne {
       typedef TimeModelHybridBasicSet<continuous_basic_set_type> timed_set_type;
       typedef Geometry::HybridListSet<continuous_basic_set_type> hybrid_list_set_type;
       typedef Geometry::ConstraintInterface<R> constraint_type;
-      typedef Geometry::Rectangle<R> bounding_box_type;
+      typedef Geometry::Box<R> bounding_box_type;
       typedef TimeModel<R> time_model_type;
 
       typedef boost::shared_ptr< const Geometry::ConstraintInterface<R> > constraint_const_pointer;

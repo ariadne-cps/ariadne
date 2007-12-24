@@ -216,7 +216,7 @@ namespace Ariadne {
       /*! \brief . */
       typedef Geometry::DifferentiableConstraintInterface<R> differentiable_constraint_type;
       /*! \brief . */
-      typedef Geometry::Rectangle<R> bounding_box_type;
+      typedef Geometry::Box<R> bounding_box_type;
       /*! \brief . */
       typedef System::MapInterface<R> map_type;
       /*! \brief . */
@@ -420,7 +420,7 @@ namespace Ariadne {
       //! \name Utility functions
 
       /*! \brief Compute the crossing times for a set of modes. */
-      Geometry::Rectangle<R> 
+      Geometry::Box<R> 
       flow_bounds(const mode_type& mode, 
                   const timed_set_type& initial_set,
                   time_type& maximum_step_size) const;

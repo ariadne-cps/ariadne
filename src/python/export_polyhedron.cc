@@ -49,13 +49,13 @@ void export_polyhedron()
   typedef Matrix<R> RMatrix;
   typedef SetInterface<R> RSetInterface;
   typedef Polyhedron<R> RPolyhedron;
-  typedef Rectangle<R> RRectangle;
+  typedef Box<R> RBox;
   typedef Polytope<R> RPolytope;
   
-  def("disjoint", (tribool(*)(const RPolyhedron&, const RRectangle&))(&disjoint));
-  def("disjoint", (tribool(*)(const RRectangle&, const RPolyhedron&))(&disjoint));
+  def("disjoint", (tribool(*)(const RPolyhedron&, const RBox&))(&disjoint));
+  def("disjoint", (tribool(*)(const RBox&, const RPolyhedron&))(&disjoint));
   def("disjoint", (tribool(*)(const RPolyhedron&, const RPolyhedron&))(&disjoint));
-  def("subset", (tribool(*)(const RRectangle&, const RPolyhedron&))(&subset));
+  def("subset", (tribool(*)(const RBox&, const RPolyhedron&))(&subset));
   def("subset", (tribool(*)(const RPolytope&, const RPolyhedron&))(&subset));
   def("subset", (tribool(*)(const RPolyhedron&, const RPolyhedron&))(&subset));
   def("closed_intersection", (RPolyhedron(*)(const RPolyhedron&, const RPolyhedron&))(&closed_intersection));
@@ -64,7 +64,7 @@ void export_polyhedron()
   class_< RPolyhedron >("Polyhedron",init<int>())
     .def(init<RMatrix,RVector>())
     .def(init<RPolyhedron>())
-    .def(init<RRectangle>())
+    .def(init<RBox>())
     .def("dimension", &RPolyhedron::dimension)
     .def(self_ns::str(self))
   ;

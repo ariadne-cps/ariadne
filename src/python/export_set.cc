@@ -43,12 +43,12 @@ class SetWrapper
   SetInterface<R>* clone() const { return this->get_override("clone")(); }
   dimension_type dimension() const { return this->get_override("dimension")(); }
   tribool contains(const Point<R>& pt) const { return this->get_override("contains")(); }
-  tribool superset(const Rectangle<R>& r) const { return this->get_override("superset")(); }
-  tribool intersects(const Rectangle<R>& r) const { return this->get_override("intersects")(); }
-  tribool disjoint(const Rectangle<R>& r) const { return this->get_override("disjoint")(); }
-  tribool subset(const Rectangle<R>& r) const { return this->get_override("subset")(); }
+  tribool superset(const Box<R>& r) const { return this->get_override("superset")(); }
+  tribool intersects(const Box<R>& r) const { return this->get_override("intersects")(); }
+  tribool disjoint(const Box<R>& r) const { return this->get_override("disjoint")(); }
+  tribool subset(const Box<R>& r) const { return this->get_override("subset")(); }
   tribool bounded() const { return this->get_override("bounded")(); }
-  Rectangle<R> bounding_box() const { return this->get_override("bounding_box")(); }
+  Box<R> bounding_box() const { return this->get_override("bounding_box")(); }
   std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
 };
 

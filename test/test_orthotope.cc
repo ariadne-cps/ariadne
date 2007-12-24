@@ -72,13 +72,13 @@ test_orthotope()
   
   cout << "c=" << c << "\nv=" << v << "\na=" << a << endl;
   
-  Rectangle<R> r1=Rectangle<R>("[9,11]x[5,11]x[0,0]");
-  Rectangle<R> r2=Rectangle<R>("[5,6]x[3,4]x[-0.5,0.5]");
+  Box<R> r1=Box<R>("[9,11]x[5,11]x[0,0]");
+  Box<R> r2=Box<R>("[5,6]x[3,4]x[-0.5,0.5]");
   cout << "r1=" << r1 << "\nr2=" << r2 << endl;
 
   Point<R> pt;
   cout << pt << endl;
-  Rectangle<R> r;
+  Box<R> r;
   cout << r << endl;
   
   Orthotope<F,R> o1=Orthotope<F,R>(r1);

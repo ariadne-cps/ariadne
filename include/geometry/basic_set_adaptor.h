@@ -31,12 +31,12 @@ namespace Ariadne {
   namespace Geometry {
 
     template<class R> inline
-    dimension_type dimension(const Rectangle<R>& r) {
+    dimension_type dimension(const Box<R>& r) {
       return r.dimension();
     }
 
     template<class R> inline
-    Rectangle<R> bounding_box(const Rectangle<R>& r) {
+    Box<R> bounding_box(const Box<R>& r) {
       return r;
     }
 
@@ -46,7 +46,7 @@ namespace Ariadne {
     }
 
     template<class R0, class R1> inline
-    Rectangle<typename Zonotope<R0,R1>::real_type> bounding_box(const Zonotope<R0,R1>& z) {
+    Box<typename Zonotope<R0,R1>::real_type> bounding_box(const Zonotope<R0,R1>& z) {
       return z.bounding_box();
     }
 
@@ -95,22 +95,22 @@ namespace Ariadne {
       virtual dimension_type dimension() const { return Geometry::dimension(*this); }
       
       /*! \brief A rectangle containing the given set */
-      virtual Rectangle<R> bounding_box() const { return Geometry::bounding_box(*this); };
+      virtual Box<R> bounding_box() const { return Geometry::bounding_box(*this); };
 
       /*! \brief Tests if a point is an element of the set. */
       virtual tribool contains(const state_type& pt) const { return Geometry::contains(*this,pt); }
       
       /*! \brief Tests if a rectangle is disjoint from the set. */
-      virtual tribool disjoint(const Rectangle<R>& r) const { return Geometry::disjoint(*this,r); }
+      virtual tribool disjoint(const Box<R>& r) const { return Geometry::disjoint(*this,r); }
       
       /*! \brief Tests if a point is an element of the set. */
-      virtual tribool intersects(const Rectangle<R>& r) const { return !Geometry::disjoint(*this,r); }
+      virtual tribool intersects(const Box<R>& r) const { return !Geometry::disjoint(*this,r); }
       
       /*! \brief Tests if a point is an element of the set. */
-      virtual tribool subset(const Rectangle<R>& r) const { return Geometry::subset(*this,r); }
+      virtual tribool subset(const Box<R>& r) const { return Geometry::subset(*this,r); }
       
       /*! \brief Tests if a point is an element of the set. */
-      virtual tribool superset(const Rectangle<R>& r) const { return Geometry::subset(r,*this); }
+      virtual tribool superset(const Box<R>& r) const { return Geometry::subset(r,*this); }
       
       //@}
       //@{ 

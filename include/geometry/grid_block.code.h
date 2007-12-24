@@ -65,10 +65,10 @@ Geometry::GridBlock<R>::GridBlock(const Grid<R>& g, const IndexArray& l, const I
 
 
 template<class R>
-Geometry::GridBlock<R>::GridBlock(const Grid<R>& g, const Rectangle<R>& r)
+Geometry::GridBlock<R>::GridBlock(const Grid<R>& g, const Box<R>& r)
   : _grid_ptr(&g), _lattice_set(g.dimension())
 {
-  ARIADNE_CHECK_EQUAL_DIMENSIONS(g,r,"GridBlock::GridBlock(Grid g,Rectangle r)");
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(g,r,"GridBlock::GridBlock(Grid g,Box r)");
   for(dimension_type i=0; i!=dimension(); ++i) {
     /* TODO: Catch and rethrow exceptions */
     _lattice_set.set_lower_bound(i,g.subdivision_index(i,r.lower_bound(i)));
@@ -132,7 +132,7 @@ Geometry::GridBlock<R>::_instantiate_geometry_operators()
 {
   typedef Numeric::Interval<R> I;
   tribool tb;
-  Rectangle<R>* r=0;
+  Box<R>* r=0;
   Grid<R>* g=0;
   GridCell<R>* gc=0;
   GridBlock<R>* gb=0;
@@ -181,7 +181,7 @@ Geometry::subset(const GridCell<R>& gc, const GridBlock<R>& gb)
   if(gc.grid()==gb.grid()) {
     return subset(gc.lattice_set(),gb.lattice_set());
   }
-  return subset(Rectangle<R>(gc),Rectangle<R>(gb));
+  return subset(Box<R>(gc),Box<R>(gb));
 }
 
 template<class R>
@@ -192,16 +192,16 @@ Geometry::subset(const GridBlock<R>& gb1, const GridBlock<R>& gb2)
   if(gb1.grid()==gb2.grid()) {
     return subset(gb1.lattice_set(),gb2.lattice_set());
   }
-  return subset(Rectangle<R>(gb1),Rectangle<R>(gb2));
+  return subset(Box<R>(gb1),Box<R>(gb2));
 }
 
 
 template<class R>
 tribool
-Geometry::subset(const Rectangle<R>& r, const GridBlock<R>& gb)
+Geometry::subset(const Box<R>& r, const GridBlock<R>& gb)
 {
-  ARIADNE_CHECK_EQUAL_DIMENSIONS(r,gb,"tribool subset(Rectangle r, GridBlock gb)");
-  return subset(r,Rectangle<R>(gb));
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(r,gb,"tribool subset(Box r, GridBlock gb)");
+  return subset(r,Box<R>(gb));
 }
 
 
@@ -226,7 +226,7 @@ Geometry::GridBlock<R>::write(std::ostream& os) const
   os << "  grid=" << this->grid() << ",\n";
   os << "  size=" << this->lattice_set().size() << ",\n";
   os << "  lattice_set=" << this->lattice_set();
-  os << "  rectangle=" << Rectangle<R>(*this);
+  os << "  rectangle=" << Box<R>(*this);
   os << ")" << std::endl;
   return os;
 }

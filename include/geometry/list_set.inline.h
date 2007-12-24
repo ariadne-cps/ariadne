@@ -180,13 +180,13 @@ Geometry::ListSet<BS>::bounded() const
 }
 
 template<class BS> inline
-Geometry::Rectangle<typename Geometry::ListSet<BS>::real_type> 
+Geometry::Box<typename Geometry::ListSet<BS>::real_type> 
 Geometry::ListSet<BS>::bounding_box() const 
 {
-  if(this->empty()) { return Rectangle<R>(this->dimension()); }
-  Rectangle<R> result=(*this)[0].bounding_box();
+  if(this->empty()) { return Box<R>(this->dimension()); }
+  Box<R> result=(*this)[0].bounding_box();
   for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
-    Rectangle<R> bb=iter->bounding_box();
+    Box<R> bb=iter->bounding_box();
     for(size_type i=0; i!=result.dimension(); ++i) {
       if(bb.lower_bound(i) < result.lower_bound(i)) {
         result.set_lower_bound(i,bb.lower_bound(i));

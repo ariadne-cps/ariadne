@@ -57,7 +57,7 @@ outer_approximation_of_basic_set(const BS& bs, const Geometry::Grid<R>& g)
   //std::cout << __PRETTY_FUNCTION__ << std::endl;
   Geometry::GridCellListSet<R> gcls(g);
   Geometry::GridBlock<R> gbb=outer_approximation(bs.bounding_box(),g);
-  Geometry::Rectangle<R> r(bs.dimension());
+  Geometry::Box<R> r(bs.dimension());
   //std::cerr << "bs="<<bs<<" bb="<<bs.bounding_box()<<" gbb="<<gbb<<std::endl;
   for(typename Geometry::GridBlock<R>::const_iterator iter=gbb.begin(); iter!=gbb.end(); ++iter) {
     r=*iter;
@@ -79,7 +79,7 @@ inner_approximation_of_basic_set(const BS& bs, const Geometry::Grid<R>& g)
 {
   Geometry::GridCellListSet<R> gcls(g);
   Geometry::GridBlock<R> gbb=outer_approximation(bs.bounding_box(),g);
-  Geometry::Rectangle<R> r(bs.dimension());
+  Geometry::Box<R> r(bs.dimension());
   
   for(typename Geometry::GridBlock<R>::const_iterator iter=gbb.begin(); iter!=gbb.end(); ++iter) {
     r=*iter;
@@ -102,7 +102,7 @@ fuzzy_outer_approximation_of_zonotope(const Geometry::Zonotope<R,Tag>& z, const 
 
   LinearAlgebra::Vector<I> ze;
   Geometry::Point<I> pt;
-  Geometry::Rectangle<R> r;
+  Geometry::Box<R> r;
 
   dimension_type d=z.dimension();
 
@@ -177,6 +177,7 @@ Geometry::instantiate_grid_approximation()
   typedef Numeric::Interval<R> I;
   tribool tb;
   Point<I>* ipt=0;
+  Box<R>* bx=0;
   Rectangle<R>* r=0;
   Zonotope<R,ExactTag>* z=0;
   Zonotope<R,UniformErrorTag>* ez=0;
@@ -191,14 +192,16 @@ Geometry::instantiate_grid_approximation()
   GridCellListSet<R>* gcls=0;
   GridMaskSet<R>* gms=0;
 
-  ListSet< Rectangle<R> >* rls=0;
+  ListSet< Box<R> >* rls=0;
   ListSet< Zonotope<R,ExactTag> >* zls=0;
   ListSet< Zonotope<R,UniformErrorTag> >* ezls=0;
   
   *gb=outer_approximation(*ipt,*g);
   
-  *gb=over_approximation(*r,*g);
-  *gb=under_approximation(*r,*g);
+  *gb=over_approximation(*bx,*g);
+  *gb=under_approximation(*bx,*g);
+  *gb=outer_approximation(*bx,*g);
+  *gb=inner_approximation(*bx,*g);
   
   *gb=outer_approximation(*r,*g);
   *gb=inner_approximation(*r,*g);
@@ -240,18 +243,20 @@ Geometry::instantiate_grid_approximation()
 // Approximations of rectangles ------------------------------------------
 
 
+
+
 template<class R>
 Geometry::GridBlock<R>
-Geometry::over_approximation(const Rectangle<R>& r, const Grid<R>& g) 
+Geometry::over_approximation(const Box<R>& bx, const Grid<R>& g) 
 {
-  IndexArray lower(r.dimension());
-  IndexArray upper(r.dimension());
-  for(size_type i=0; i!=r.dimension(); ++i) {
-    if(r.lower_bound(i)==r.upper_bound(i)) {
-      ARIADNE_THROW(EmptyInterior,"GridBlock over_approximation(Rectangle r, Grid g)"," with r="<<r<<" (use outer_approximation(r,g) instead)");
+  IndexArray lower(bx.dimension());
+  IndexArray upper(bx.dimension());
+  for(size_type i=0; i!=bx.dimension(); ++i) {
+    if(bx.lower_bound(i)==bx.upper_bound(i)) {
+      ARIADNE_THROW(EmptyInterior,"GridBlock over_approximation(Box bx, Grid g)"," with bx="<<bx<<" (use outer_approximation(r,g) instead)");
     }
-    lower[i]=g.subdivision_lower_index(i,r.lower_bound(i));
-    upper[i]=g.subdivision_upper_index(i,r.upper_bound(i));
+    lower[i]=g.subdivision_lower_index(i,bx.lower_bound(i));
+    upper[i]=g.subdivision_upper_index(i,bx.upper_bound(i));
   }
   return GridBlock<R>(g,lower,upper);
 }
@@ -259,20 +264,52 @@ Geometry::over_approximation(const Rectangle<R>& r, const Grid<R>& g)
 
 template<class R>
 Geometry::GridBlock<R>
-Geometry::under_approximation(const Rectangle<R>& r, const Grid<R>& g) 
+Geometry::under_approximation(const Box<R>& bx, const Grid<R>& g) 
 {
-  IndexArray lower(r.dimension());
-  IndexArray upper(r.dimension());
-  for(size_type i=0; i!=r.dimension(); ++i) {
-    if(r.lower_bound(i)==r.upper_bound(i)) {
-      ARIADNE_THROW(EmptyInterior,"GridBlock under_approximation(Rectangle r, Grid g)"," with r="<<r<<" (use outer_approximation(r,g) instead)");
+  IndexArray lower(bx.dimension());
+  IndexArray upper(bx.dimension());
+  for(size_type i=0; i!=bx.dimension(); ++i) {
+    if(bx.lower_bound(i)==bx.upper_bound(i)) {
+      ARIADNE_THROW(EmptyInterior,"GridBlock under_approximation(Box r, Grid g)"," with bx="<<bx<<" (use outer_approximation(r,g) instead)");
     }
-    lower[i]=g.subdivision_upper_index(i,r.lower_bound(i));
-    upper[i]=g.subdivision_lower_index(i,r.upper_bound(i));
+    lower[i]=g.subdivision_upper_index(i,bx.lower_bound(i));
+    upper[i]=g.subdivision_lower_index(i,bx.upper_bound(i));
   }
   return GridBlock<R>(g,lower,upper);
 }
 
+
+template<class R>
+Geometry::GridBlock<R>
+Geometry::outer_approximation(const Box<R>& bx, const Grid<R>& g) 
+{
+  if(bx.empty()) {
+    return GridBlock<R>(g);
+  }
+  IndexArray lower(bx.dimension());
+  IndexArray upper(bx.dimension());
+  for(size_type i=0; i!=bx.dimension(); ++i) {
+    lower[i]=g.subdivision_upper_index(i,bx.lower_bound(i))-1;
+    upper[i]=g.subdivision_lower_index(i,bx.upper_bound(i))+1;
+  }
+  return GridBlock<R>(g,lower,upper);
+}
+
+template<class R>
+Geometry::GridBlock<R>
+Geometry::inner_approximation(const Box<R>& bx, const Grid<R>& g) 
+{
+  if(bx.empty()) {
+    return GridBlock<R>(g);
+  }
+  IndexArray lower(bx.dimension());
+  IndexArray upper(bx.dimension());
+  for(size_type i=0; i!=bx.dimension(); ++i) {
+    lower[i]=g.subdivision_lower_index(i,bx.lower_bound(i))+1;
+    upper[i]=g.subdivision_upper_index(i,bx.upper_bound(i))-1;
+  }
+  return GridBlock<R>(g,lower,upper);
+}
 
 
 
@@ -281,6 +318,13 @@ Geometry::GridBlock<R>
 Geometry::outer_approximation(const Point< Numeric::Interval<R> >& ipt, const Grid<R>& g) 
 {
   return outer_approximation(Rectangle<R>(ipt),g);
+}
+
+template<class R>
+Geometry::GridBlock<R>
+Geometry::inner_approximation(const Point< Numeric::Interval<R> >& ipt, const Grid<R>& g) 
+{
+  return inner_approximation(Rectangle<R>(ipt),g);
 }
 
 template<class R>
@@ -371,7 +415,7 @@ Geometry::outer_approximation(const SetInterface<R>& set, const Grid<R>& g)
   ARIADNE_CHECK_BOUNDED(set,"outer_approximation(SetInterface<R>,Grid<R>)");
   
   const GridBlock<R> gb=outer_approximation(set.bounding_box(),g);
-  Rectangle<R> r(g.dimension());
+  Box<R> r(g.dimension());
   for(typename GridBlock<R>::const_iterator iter=gb.begin(); iter!=gb.end(); ++iter) {
     r=*iter;
     if(!bool(set.disjoint(r))) {
@@ -391,8 +435,8 @@ Geometry::inner_approximation(const SetInterface<R>& set, const Grid<R>& g)
   ARIADNE_CHECK_EQUAL_DIMENSIONS(set,g,"inner_approximation(SetInterface<R>,Grid<R>)\n");
   ARIADNE_CHECK_BOUNDED(set,"inner_approximation(SetInterface<R>,Grid<R>)");
   
-  const GridBlock<R> gb=outer_approximation(set.bounding_box(),g);
-  Rectangle<R> r(g.dimension());
+  const GridBlock<R> gb=outer_approximation(Rectangle<R>(set.bounding_box()),g);
+  Box<R> r(g.dimension());
   for(typename GridBlock<R>::const_iterator iter=gb.begin(); iter!=gb.end(); ++iter) {
     r=*iter;
     if((set.superset(r))) {
@@ -456,7 +500,7 @@ Geometry::outer_approximation(const SetInterface<R>& set, const FiniteGrid<R>& f
   
   for(typename Combinatoric::LatticeBlock::const_iterator iter=lb.begin(); iter!=lb.end(); ++iter) {
     GridCell<R> gc(g,*iter);
-    if(!bool(set.disjoint(Rectangle<R>(gc)))) {
+    if(!bool(set.disjoint(Box<R>(gc)))) {
       result.adjoin(gc);
     }
   }
@@ -473,7 +517,7 @@ Geometry::inner_approximation(const SetInterface<R>& s, const FiniteGrid<R>& fg)
   ARIADNE_LOG(4,"GridMaskSet inner_approximation(SetInterface s, FiniteGrid fg)\n");
   GridMaskSet<R> result(fg);
   GridBlock<R> gb(fg.grid(),fg.lattice_block());
-  Rectangle<R> r;
+  Box<R> r;
   ARIADNE_LOG(5,"  testing cells in "<<gb<<"\n");
   for(typename GridBlock<R>::const_iterator gb_iter=gb.begin();
       gb_iter!=gb.end(); ++gb_iter)

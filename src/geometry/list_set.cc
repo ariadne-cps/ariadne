@@ -37,10 +37,12 @@ namespace Ariadne {
  
     using namespace Numeric;
     
+    template class ListSet< Box<Rational> >;
     template class ListSet< Rectangle<Rational> >;
     template class ListSet< Zonotope<Rational> >;
     
 #ifdef ENABLE_FLOAT64
+    template class ListSet< Box<Float64> >;
     template class ListSet< Rectangle<Float64> >;
     template class ListSet< Polytope<Float64> >;
     template class ListSet< Zonotope<Float64,ExactTag> >;
@@ -48,19 +50,21 @@ namespace Ariadne {
 
     // The following are not defined for all types,
     // so we can't instantiate them in ListSet<R,BS>::_instantiate_geometry_operators()
-    template ListSet< Rectangle<Float64> >::operator ListSet< Zonotope<Float64> >() const;
-    template ListSet< Rectangle<Float64> >::operator ListSet< Zonotope<Float64,UniformErrorTag> >() const;
+    template  ListSet< Box<Float64> >::operator  ListSet< Rectangle<Float64> >() const;
+    template  ListSet< Box<Float64> >::operator  ListSet< Zonotope<Float64> >() const;
+    template  ListSet< Box<Float64> >::operator  ListSet< Zonotope<Float64,UniformErrorTag> >() const;
     
-    template tribool disjoint(const ListSet< Rectangle<Float64> >&, const ListSet< Rectangle<Float64> >&);
+    template tribool disjoint(const ListSet< Box<Float64> >&, const ListSet< Box<Float64> >&);
+    template tribool subset(const ListSet< Box<Float64> >&, const ListSet< Box<Float64> >&);
 
-    template tribool subset(const ListSet< Rectangle<Float64> >&, const ListSet< Rectangle<Float64> >&);
-    template ListSet< Rectangle<Float64> > open_intersection(const ListSet< Rectangle<Float64> >&, const ListSet< Rectangle<Float64> >&);
-    template ListSet< Rectangle<Float64> > inner_intersection(const ListSet< Rectangle<Float64> >&, const SetInterface<Float64>&);
-    template ListSet< Rectangle<Float64> > lower_intersection(const ListSet< Rectangle<Float64> >&, const SetInterface<Float64>&);
-    template ListSet< Rectangle<Float64> > outer_intersection(const ListSet< Rectangle<Float64> >&, const SetInterface<Float64>&);
+    template ListSet< Box<Float64> > open_intersection(const ListSet< Box<Float64> >&, const ListSet< Box<Float64> >&);
+    template ListSet< Box<Float64> > inner_intersection(const ListSet< Box<Float64> >&, const SetInterface<Float64>&);
+    template ListSet< Box<Float64> > lower_intersection(const ListSet< Box<Float64> >&, const SetInterface<Float64>&);
+    template ListSet< Box<Float64> > outer_intersection(const ListSet< Box<Float64> >&, const SetInterface<Float64>&);
 #endif
    
 #ifdef ENABLE_FLOATMP
+    template class ListSet< Box<FloatMP> >;
     template class ListSet< Rectangle<FloatMP> >;
     template class ListSet< Polytope<FloatMP> >;
     template class ListSet< Zonotope<FloatMP,ExactTag> >;
@@ -68,16 +72,17 @@ namespace Ariadne {
 
     // The following are not defined for all types,
     // so we can't instantiate them in ListSet<R,BS>::_instantiate_geometry_operators()
-    template  ListSet< Rectangle<FloatMP> >::operator  ListSet< Zonotope<FloatMP> >() const;
-    template  ListSet< Rectangle<FloatMP> >::operator  ListSet< Zonotope<FloatMP,UniformErrorTag> >() const;
+    template  ListSet< Box<FloatMP> >::operator  ListSet< Rectangle<FloatMP> >() const;
+    template  ListSet< Box<FloatMP> >::operator  ListSet< Zonotope<FloatMP> >() const;
+    template  ListSet< Box<FloatMP> >::operator  ListSet< Zonotope<FloatMP,UniformErrorTag> >() const;
     
-    template tribool disjoint(const ListSet< Rectangle<FloatMP> >&, const ListSet< Rectangle<FloatMP> >&);
+    template tribool disjoint(const ListSet< Box<FloatMP> >&, const ListSet< Box<FloatMP> >&);
+    template tribool subset(const ListSet< Box<FloatMP> >&, const ListSet< Box<FloatMP> >&);
 
-    template tribool subset(const ListSet< Rectangle<FloatMP> >&, const ListSet< Rectangle<FloatMP> >&);
-    template ListSet< Rectangle<FloatMP> > open_intersection(const ListSet< Rectangle<FloatMP> >&, const ListSet< Rectangle<FloatMP> >&);
-    template ListSet< Rectangle<FloatMP> > inner_intersection(const ListSet< Rectangle<FloatMP> >&, const SetInterface<FloatMP>&);
-    template ListSet< Rectangle<FloatMP> > lower_intersection(const ListSet< Rectangle<FloatMP> >&, const SetInterface<FloatMP>&);
-    template ListSet< Rectangle<FloatMP> > outer_intersection(const ListSet< Rectangle<FloatMP> >&, const SetInterface<FloatMP>&);
+    template ListSet< Box<FloatMP> > open_intersection(const ListSet< Box<FloatMP> >&, const ListSet< Box<FloatMP> >&);
+    template ListSet< Box<FloatMP> > inner_intersection(const ListSet< Box<FloatMP> >&, const SetInterface<FloatMP>&);
+    template ListSet< Box<FloatMP> > lower_intersection(const ListSet< Box<FloatMP> >&, const SetInterface<FloatMP>&);
+    template ListSet< Box<FloatMP> > outer_intersection(const ListSet< Box<FloatMP> >&, const SetInterface<FloatMP>&);
 #endif
    
   }

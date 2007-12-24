@@ -36,8 +36,11 @@ namespace Ariadne {
     
     template<class R> GridBlock<R> outer_approximation(const Point< Numeric::Interval<R> >& ipt, const Grid<R>& g);
 
-    template<class R> GridBlock<R> over_approximation(const Rectangle<R>& r, const Grid<R>& g);
-    template<class R> GridBlock<R> under_approximation(const Rectangle<R>& r, const Grid<R>& g);
+    template<class R> GridBlock<R> over_approximation(const Box<R>& bx, const Grid<R>& g);
+    template<class R> GridBlock<R> under_approximation(const Box<R>& bx, const Grid<R>& g);
+    template<class R> GridBlock<R> outer_approximation(const Box<R>& bx, const Grid<R>& g);
+    template<class R> GridBlock<R> inner_approximation(const Box<R>& bx, const Grid<R>& g);
+
 
     template<class R> GridBlock<R> outer_approximation(const Rectangle<R>& r, const Grid<R>& g);
     template<class R> GridBlock<R> inner_approximation(const Rectangle<R>& r, const Grid<R>& g);

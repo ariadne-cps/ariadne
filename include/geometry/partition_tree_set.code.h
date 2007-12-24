@@ -40,7 +40,7 @@ namespace Ariadne {
     
     
 template<class R>
-Geometry::PartitionScheme<R>::PartitionScheme(const Rectangle<R>& bb) 
+Geometry::PartitionScheme<R>::PartitionScheme(const Box<R>& bb) 
   : _unit_box(bb), 
     _subdivisions(bb.dimension()) 
 { }
@@ -96,7 +96,7 @@ Geometry::PartitionTreeSet<R>::contains(const Point<R>& pt) const
 
 template<class R>
 tribool
-Geometry::PartitionTreeSet<R>::intersects(const Rectangle<R>& r) const
+Geometry::PartitionTreeSet<R>::intersects(const Box<R>& r) const
 {
   return !Geometry::disjoint(*this,r);
 }
@@ -104,7 +104,7 @@ Geometry::PartitionTreeSet<R>::intersects(const Rectangle<R>& r) const
 
 template<class R>
 tribool
-Geometry::PartitionTreeSet<R>::disjoint(const Rectangle<R>& r) const
+Geometry::PartitionTreeSet<R>::disjoint(const Box<R>& r) const
 {
   return Geometry::disjoint(*this,r);
 }
@@ -112,7 +112,7 @@ Geometry::PartitionTreeSet<R>::disjoint(const Rectangle<R>& r) const
 
 template<class R>
 tribool
-Geometry::PartitionTreeSet<R>::superset(const Rectangle<R>& r) const
+Geometry::PartitionTreeSet<R>::superset(const Box<R>& r) const
 {
   return Geometry::subset(r,*this);
 }
@@ -120,7 +120,7 @@ Geometry::PartitionTreeSet<R>::superset(const Rectangle<R>& r) const
 
 template<class R>
 tribool
-Geometry::PartitionTreeSet<R>::subset(const Rectangle<R>& r) const
+Geometry::PartitionTreeSet<R>::subset(const Box<R>& r) const
 {
   return Geometry::subset(*this,r);
 }
@@ -132,11 +132,11 @@ Geometry::PartitionTreeSet<R>::subset(const Rectangle<R>& r) const
 
 
 template<class R>
-Geometry::PartitionTreeSet<R>::operator ListSet< Rectangle<R> >() const 
+Geometry::PartitionTreeSet<R>::operator ListSet< Box<R> >() const 
 {
-  ListSet< Rectangle<R> > res(this->dimension());
+  ListSet< Box<R> > res(this->dimension());
   for(const_iterator iter=begin(); iter!=end(); ++iter) {
-    res.push_back(Rectangle<R>(*iter));
+    res.push_back(Box<R>(*iter));
   }
   return res;
 }
@@ -148,6 +148,7 @@ void
 Geometry::PartitionTreeSet<R>::_instantiate_geometry_operators()
 {
   uint d=0;
+  Box<R>* bx=0;
   Rectangle<R>* r=0;
   Zonotope<R>* z=0;
   SetInterface<R>* s=0;
@@ -156,7 +157,7 @@ Geometry::PartitionTreeSet<R>::_instantiate_geometry_operators()
   PartitionTreeCell<R>* ptc=0;
   PartitionTreeSet<R>* pts=0;
   
-  *ptc=over_approximation(*r,*ps);
+  *ptc=over_approximation(*bx,*ps);
   
   *pts=outer_approximation(*r,*ps,d);
   *pts=inner_approximation(*r,*ps,d);
@@ -176,16 +177,16 @@ template<class R>
 tribool
 Geometry::contains(const PartitionTreeSet<R>& pts, const Point<R>& pt)
 {
-  return subset(Rectangle<R>(pt),pts);
+  return subset(Box<R>(pt),pts);
 }
 
 
 template<class R>
 tribool
-Geometry::disjoint(const PartitionTreeSet<R>& pts, const Rectangle<R>& r)
+Geometry::disjoint(const PartitionTreeSet<R>& pts, const Box<R>& r)
 {
   tribool result=true;
-  Rectangle<R> cell(pts.dimension());
+  Box<R> cell(pts.dimension());
   for(typename PartitionTreeSet<R>::const_iterator pts_iter=pts.begin();
       pts_iter!=pts.end(); ++pts_iter)
     {
@@ -201,10 +202,10 @@ Geometry::disjoint(const PartitionTreeSet<R>& pts, const Rectangle<R>& r)
 
 template<class R>
 tribool
-Geometry::subset(const PartitionTreeSet<R>& pts, const Rectangle<R>& r)
+Geometry::subset(const PartitionTreeSet<R>& pts, const Box<R>& r)
 {
   tribool result=true;
-  Rectangle<R> cell(pts.dimension());
+  Box<R> cell(pts.dimension());
   for(typename PartitionTreeSet<R>::const_iterator pts_iter=pts.begin();
       pts_iter!=pts.end(); ++pts_iter)
     {
@@ -220,9 +221,9 @@ Geometry::subset(const PartitionTreeSet<R>& pts, const Rectangle<R>& r)
 
 template<class R>
 tribool
-Geometry::subset(const Rectangle<R>& r, const PartitionTreeSet<R>& pts)
+Geometry::subset(const Box<R>& r, const PartitionTreeSet<R>& pts)
 {
-  return subset(r,ListSet< Rectangle<R> >(pts));
+  return subset(r,ListSet< Box<R> >(pts));
 }
 
 
@@ -230,17 +231,17 @@ Geometry::subset(const Rectangle<R>& r, const PartitionTreeSet<R>& pts)
 
 template<class R>
 Geometry::PartitionTreeCell<R>
-Geometry::over_approximation(const Rectangle<R>& r, const PartitionScheme<R>& ps)
+Geometry::over_approximation(const Box<R>& r, const PartitionScheme<R>& ps)
 {
   if(possibly(r.empty())) {
-    ARIADNE_THROW(EmptyInterior,"PartitionTreeCell<R> over_approximation(const Rectangle<R>& r, const PartitionScheme<R>& ps)"," with r="<<r);
+    ARIADNE_THROW(EmptyInterior,"PartitionTreeCell<R> over_approximation(const Box<R>& r, const PartitionScheme<R>& ps)"," with r="<<r);
   }
   
   if(!subset(r,ps.unit_box())) {
-    ARIADNE_THROW(std::runtime_error,"ParttitionTreeCell over_approximation(Rectangle r, PartitionScheme ps, uint d)"," with r="<<r<<", ps="<<ps<<": r is not a subset of ps.unit_box()");
+    ARIADNE_THROW(std::runtime_error,"ParttitionTreeCell over_approximation(Box r, PartitionScheme ps, uint d)"," with r="<<r<<", ps="<<ps<<": r is not a subset of ps.unit_box()");
   }
   
-  const Rectangle<R>& unit_box=ps.unit_box();
+  const Box<R>& unit_box=ps.unit_box();
   const Combinatoric::SubdivisionSequence& subdivisions=ps.subdivisions();
   
   Combinatoric::BinaryWord word;
@@ -249,10 +250,10 @@ Geometry::over_approximation(const Rectangle<R>& r, const PartitionScheme<R>& ps
   while(true) {
     new_word=word;
     new_word.push_back(Combinatoric::BinaryTree::leaf);
-    if(!subset(r,Rectangle<R>(PartitionTreeCell<R>(unit_box,subdivisions,new_word)))) {
+    if(!subset(r,Box<R>(PartitionTreeCell<R>(unit_box,subdivisions,new_word)))) {
       new_word.pop_back();
       word.push_back(Combinatoric::BinaryTree::right);
-      if(!subset(r,Rectangle<R>(PartitionTreeCell<R>(unit_box,subdivisions,word)))) {
+      if(!subset(r,Box<R>(PartitionTreeCell<R>(unit_box,subdivisions,word)))) {
         break;
       }
     }
@@ -266,7 +267,7 @@ Geometry::PartitionTreeSet<R>
 Geometry::outer_approximation(const S& s, const PartitionScheme<R>& ps, const uint depth)
 {
   ARIADNE_LOG(4,"outer_approximation(S set, PartitionScheme ps, uint depth");
-  const Rectangle<R>& bounding_box=ps.unit_box();
+  const Box<R>& bounding_box=ps.unit_box();
   const Combinatoric::SubdivisionSequence& subdivisions=ps.subdivisions();
   std::vector<bool> tree;
   std::vector<bool> mask;
@@ -274,8 +275,8 @@ Geometry::outer_approximation(const S& s, const PartitionScheme<R>& ps, const ui
   Combinatoric::BinaryWord word;
   
   do {
-    Rectangle<R> cell=Rectangle<R>(PartitionTreeCell<R>(bounding_box,subdivisions,word));
-    if(word.size()==depth+1 || subset(cell,s)) {
+    Box<R> cell=Box<R>(PartitionTreeCell<R>(bounding_box,subdivisions,word));
+    if(word.size()==depth+1 || superset(s,cell)) {
       tree.push_back(Combinatoric::BinaryTree::leaf);
       mask.push_back(true);
       Combinatoric::BinaryTree::advance(word);
@@ -298,7 +299,7 @@ template<class R, class S>
 Geometry::PartitionTreeSet<R>
 Geometry::inner_approximation(const S& s, const PartitionScheme<R>& ps, const uint depth)
 {
-  const Rectangle<R>& unit_box=ps.unit_box();
+  const Box<R>& unit_box=ps.unit_box();
   const Combinatoric::SubdivisionSequence& subdivisions=ps.subdivisions();
   std::vector<bool> tree;
   std::vector<bool> mask;
@@ -306,7 +307,7 @@ Geometry::inner_approximation(const S& s, const PartitionScheme<R>& ps, const ui
   Combinatoric::BinaryWord word;
   
   do {
-    Rectangle<R> cell=Rectangle<R>(PartitionTreeCell<R>(unit_box,subdivisions,word));
+    Box<R> cell=Box<R>(PartitionTreeCell<R>(unit_box,subdivisions,word));
     if(word.size()==depth+1 || disjoint(s,cell)) {
       tree.push_back(Combinatoric::BinaryTree::leaf);
       mask.push_back(false);
@@ -331,7 +332,7 @@ template<class R, class S>
 Geometry::PartitionTreeSet<R>
 Geometry::under_approximation(const S& s, const PartitionScheme<R>& ps, const uint depth)
 {
-  const Rectangle<R>& unit_box=ps.unit_box();
+  const Box<R>& unit_box=ps.unit_box();
   const Combinatoric::SubdivisionSequence& subdivisions=ps.subdivisions();
   std::vector<bool> tree;
   std::vector<bool> mask;
@@ -339,7 +340,7 @@ Geometry::under_approximation(const S& s, const PartitionScheme<R>& ps, const ui
   Combinatoric::BinaryWord word;
   
   do {
-    Rectangle<R> cell=Rectangle<R>(PartitionTreeCell<R>(unit_box,subdivisions,word));
+    Box<R> cell=Box<R>(PartitionTreeCell<R>(unit_box,subdivisions,word));
     if(word.size()==depth+1 || disjoint(s,cell)) {
       tree.push_back(Combinatoric::BinaryTree::leaf);
       mask.push_back(false);
@@ -378,7 +379,7 @@ Geometry::PartitionTreeCell<R>::write(std::ostream& os) const
 {
   os << "PartitionTreeCell<" << Numeric::name<R>() << ">(\n";
   os << "  bounds=" << this->subdivision_cell() << ",\n";
-  os << "  rectangle=" << Rectangle<R>(*this) << "\n";
+  os << "  rectangle=" << Box<R>(*this) << "\n";
   os << ")\n";
   return os;
 }

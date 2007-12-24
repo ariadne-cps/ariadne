@@ -1,8 +1,7 @@
 /***************************************************************************
  *            python/export_affine_map.cc
  *
- *  6 February 2006
- *  Copyright  2005  Alberto Casagrande, Pieter Collins
+ *  Copyright  2005-7  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
@@ -48,15 +47,18 @@ template<class R>
 void export_affine_map() 
 {
   typedef typename Numeric::traits<R>::arithmetic_type F;
-  typedef Interval<R> I;
+  typedef Point<F> FPoint;
+  typedef Zonotope<R,ExactTag> RZonotope;
+  typedef Zonotope<R,UniformErrorTag> EZonotope;
+  typedef Polytope<F> FPolytope;
   
   class_< AffineMap<R>, bases< MapInterface<R> > >("AffineMap",init< Matrix<R>, Vector<R> >())
     .def("argument_dimension",&AffineMap<R>::argument_dimension)
     .def("result_dimension",&AffineMap<R>::result_dimension)
     .def("smoothness",&AffineMap<R>::smoothness)
-    .def("__call__",(Point<F>(AffineMap<R>::*)(const Point<F>&)const)(&AffineMap<R>::image))
-    .def("__call__",(Zonotope<F>(AffineMap<R>::*)(const Zonotope<F>&)const)(&AffineMap<R>::image))
-    .def("__call__",(Polytope<F>(AffineMap<R>::*)(const Polytope<F>&)const)(&AffineMap<R>::image))
+    .def("__call__",(FPoint(AffineMap<R>::*)(const FPoint&)const)(&AffineMap<R>::image))
+    .def("__call__",(RZonotope(AffineMap<R>::*)(const RZonotope&)const)(&AffineMap<R>::image))
+    .def("__call__",(FPolytope(AffineMap<R>::*)(const FPolytope&)const)(&AffineMap<R>::image))
     .def(self_ns::str(self))
   ;
 }

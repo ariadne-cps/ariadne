@@ -39,7 +39,7 @@ namespace Ariadne {
   namespace Geometry {
     
     template<class R> class Point;
-    template<class R> class Rectangle;
+    template<class R> class Box;
     template<class R> class Polyhedron;
     template<class R0,class R1> class Zonotope;
 

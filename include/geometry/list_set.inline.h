@@ -21,7 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "geometrical_traits.h"
+#include "geometry/geometrical_traits.h"
+#include "base/exceptions.h"
 
 namespace Ariadne {
 

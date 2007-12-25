@@ -38,9 +38,13 @@ using namespace Ariadne;
 using namespace Ariadne::Numeric;
 using namespace std;
 
-template class Interval<Float64>;
-template class Interval<FloatMP>;
 template class Interval<Rational>;
+#ifdef ENABLE_FLOAT64
+template class Interval<Float64>;
+#endif
+#ifdef ENABLE_FLOATMP
+template class Interval<FloatMP>;
+#endif
 
 template<class R> int test_interval();
 template<> int test_interval<Rational>();
@@ -49,10 +53,16 @@ int main() {
   cout << setprecision(20);
   mpf_set_default_prec (8);
 
-  test_interval<Float64>();
-  test_interval<FloatMP>();
   test_interval<Rational>();
-  
+
+#ifdef ENABLE_FLOAT64
+  test_interval<Float64>();
+#endif
+   
+#ifdef ENABLE_FLOATMP
+  test_interval<FloatMP>();
+#endif
+   
   cerr << "INCOMPLETE ";
   return 0;
 }

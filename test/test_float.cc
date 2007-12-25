@@ -39,6 +39,7 @@ using namespace Ariadne;
 using namespace Ariadne::Numeric;
 
 
+template<class R> int test_float();
 template<class R> int test_class();
 template<class R> int test_conversion();
 template<class R> int test_stream();
@@ -54,30 +55,33 @@ int main() {
   cout << setprecision(20);
   mpf_set_default_prec (8);
 
-  test_class<FloatMP>();
-  test_class<Float64>();
+#ifdef ENABLE_FLOAT64
+  test_float<Float64>();
   cout << endl;
-  
-  test_conversion<FloatMP>();
-  test_conversion<Float64>();
-  cout << endl;
+#endif
 
-  test_stream<FloatMP>();
-  test_stream<Float64>();
+#ifdef ENABLE_FLOATMP
+  test_float<FloatMP>();
   cout << endl;
-  
-  test_comparison<FloatMP>();
-  test_comparison<Float64>();
-  cout << endl;
-  
-  test_arithmetic<FloatMP>();
-  test_arithmetic<Float64>();
- 
-  test_function<FloatMP>();
-  test_function<Float64>();
- 
+#endif
+
   return 0;
 }
+
+
+template<class R>
+int
+test_float() {
+  test_class<R>();
+  test_conversion<R>();
+  test_stream<R>();
+  test_comparison<R>();
+  test_arithmetic<R>();
+  test_function<R>();
+  return 0;
+}
+
+ 
 
 
 

@@ -38,6 +38,7 @@
 #include "linear_algebra/declarations.h"
 #include "base/utility.h"
 #include "base/tribool.h"
+#include "geometry/box.h"
 #include "geometry/set_interface.h"
 
 namespace Ariadne {
@@ -149,20 +150,20 @@ namespace Ariadne {
       /*!\brief Checks if a denotable set includes a point. */
       virtual tribool contains(const Point<R>& p) const;
 
-      /*! \brief Tests for superset of a Box. 
+      /*! \brief Tests for superset of a box. 
        *
        * Currently always returns \a indeterminate, since the 
        * test is difficult for general list sets. 
        */
       virtual tribool superset(const Box<R>& r) const;
 
-      /*! \brief Tests for intersection with a Box. */
+      /*! \brief Tests for intersection with a box. */
       virtual tribool intersects(const Box<R>& r) const;
 
-      /*! \brief Tests for disjointness with a Box. */
+      /*! \brief Tests for disjointness with a box. */
       virtual tribool disjoint(const Box<R>& r) const;
 
-      /*! \brief Tests for subset of a Box. */
+      /*! \brief Tests for subset of a box. */
       virtual tribool subset(const Box<R>& r) const;
 
       /*! \brief Return a rectangle containing the set. */
@@ -261,7 +262,7 @@ namespace Ariadne {
       template<class DS> void adjoin(const DS& ds, denotable_set_tag);
 
      private:
-      static void _instantiate_geometry_operators();
+      static void _instantiate();
 
     };
 
@@ -333,5 +334,6 @@ namespace Ariadne {
 }
 
 #include "list_set.inline.h"
+#include "list_set.template.h"
 
 #endif /* ARIADNE_LIST_SET_H */

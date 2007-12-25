@@ -50,8 +50,6 @@ namespace Ariadne {
   namespace Geometry {
 
     class basic_set_tag;
-    template<class R> class PointList;
-    template<class BS> class ListSet;
     template<class R> class BoxVerticesIterator;
     
     /*! \brief A box of arbitrary dimension.

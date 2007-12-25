@@ -1,5 +1,5 @@
 /***************************************************************************
- *            list_set.code.h
+ *            list_set.template.h
  *
  *  Copyright  2005-7  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -97,8 +97,8 @@ Geometry::disjoint(const ListSet<BS1>& ls1,
 
 template<class R>
 tribool
-Geometry::subset(const ListSet< Geometry::Rectangle<R> >& rls1,
-                 const ListSet< Geometry::Rectangle<R> >& rls2)
+Geometry::subset(const ListSet< Geometry::Box<R> >& bxls1,
+                 const ListSet< Geometry::Box<R> >& bxls2)
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
@@ -203,11 +203,8 @@ Geometry::outer_intersection(const ListSet<BS>& ls,
 
 template<class BS>
 void
-Geometry::ListSet<BS>::_instantiate_geometry_operators()
+Geometry::ListSet<BS>::_instantiate()
 {
-  //Box<R>* r=0;
-  //ListSet<BS>* ls=0;
-  //disjoint(*ls,*r);
 }
 
 

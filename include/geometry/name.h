@@ -28,6 +28,7 @@
 #include <iostream>
 
 #include "numeric/declarations.h"
+#include "geometry/declarations.h"
 
 namespace Ariadne {
 

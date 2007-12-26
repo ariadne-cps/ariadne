@@ -1,8 +1,8 @@
 /***************************************************************************
  *            model_checker.code.h
  *
- *  Copyright  2007  Pieter Collins
- *  pieter.collins@cwi.nl
+ *  Copyright  2006-7  Alberto Casagrande, Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -41,7 +41,7 @@
 
 #include "combinatoric/lattice_set.h"
 
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "geometry/zonotope.h"
 #include "geometry/list_set.h"
 #include "geometry/grid.h"
@@ -56,8 +56,6 @@
 
 #include "system/map.h"
 #include "system/discrete_time_system.h"
-
-#include "evaluation/applicator.h"
 
 #include "output/logging.h"
 
@@ -79,47 +77,7 @@ Evaluation::ModelChecker<R>::parameters() const
 }
 
 
-template<class R> inline
-Geometry::Box<R> 
-Evaluation::ModelChecker<R>::apply(const System::DiscreteMapInterface<R>& f, const Geometry::Box<R>& r) const
-{
-  return f.apply(r);
-}
 
-template<class R> inline
-Geometry::GridCellListSet<R> 
-Evaluation::ModelChecker<R>::apply(const System::DiscreteMapInterface<R>& f, const Geometry::GridCell<R>& gc) const
-{
-  return f.apply(gc,gc.grid());
-}
-
-template<class R> inline
-Geometry::GridCellListSet<R> 
-Evaluation::ModelChecker<R>::apply(const System::DiscreteMapInterface<R>& f, const Geometry::GridCell<R>& gc, const Geometry::Grid<R>& g) const
-{
-  return f.apply(gc,g);
-}
-
-template<class R> inline
-Geometry::DiscreteTimeOrbit< Numeric::Integer,Geometry::Box<R> > 
-Evaluation::ModelChecker<R>::orbit(const System::DiscreteMapInterface<R>& f, const Geometry::Box<R>& r, const Numeric::Integer& n) const
-{
-  return f.orbit(r,n,Numeric::inf<R>());
-}
-
-template<class R> inline
-Geometry::DiscreteTimeOrbit< Numeric::Integer,Geometry::Box<R> > 
-Evaluation::ModelChecker<R>::orbit(const System::DiscreteMapInterface<R>& f, const Geometry::Box<R>& r, const Numeric::Integer& n, const R& s) const
-{
-  return f.orbit(r,n,s);
-}
-
-template<class R> inline
-Geometry::DiscreteTimeOrbit< Numeric::Integer,Geometry::GridCellListSet<R> > 
-Evaluation::ModelChecker<R>::orbit(const System::DiscreteMapInterface<R>& f, const Geometry::GridCell<R>& gc, const Numeric::Integer& n) const
-{
-  return f.orbit(gc,n);
-}
 
 
 
@@ -173,136 +131,21 @@ Evaluation::ModelChecker<R>::clone() const
 
 
 
-template<class R>
-Geometry::ListSet< Geometry::Box<R> >
-Evaluation::ModelChecker<R>::image(const System::DiscreteMapInterface<R>& f, const Geometry::ListSet< Geometry::Box<R> >& ds) const 
-{
-  ARIADNE_LOG(2,"GridMaskSet ModelChecker::image(DiscreteMapInterface map, ListSet< Box<Float> > initial_set)\n");
-  ARIADNE_LOG(3,"initial_set="<<ds<<"\n");
-  Geometry::ListSet< Geometry::Box<R> > result(f.result_dimension());
-  Geometry::Box<R> r,fr;
-  for(typename Geometry::ListSet< Geometry::Box<R> >::const_iterator iter=ds.begin(); iter!=ds.end(); ++iter) {
-    result.push_back(this->apply(f,*iter));
-  }
-  return result;
-}
 
 
-template<class R>
-Geometry::GridCellListSet<R> 
-Evaluation::ModelChecker<R>::image(const System::DiscreteMapInterface<R>& f, 
-                                 const Geometry::GridCellListSet<R>& initial_set, 
-                                 const Geometry::Grid<R>& image_grid) const 
-{
-  using namespace Geometry;
-  typedef Numeric::Interval<R> I;
-  typedef typename GridCellListSet<R>::const_iterator gcls_const_iterator;
-  ARIADNE_LOG(2,"GridMaskSet ModelChecker::image(DiscreteMapInterface map, GridCellListSet initial_set, Grid image_grid)\n");
-  ARIADNE_LOG(3,"initial_set="<<initial_set<<"\nimage_grid="<<image_grid<<"\n");
-  
-  GridCellListSet<R> image(image_grid);
-  
-  for(gcls_const_iterator iter=initial_set.begin(); iter!=initial_set.end(); ++iter) {
-    image.adjoin(this->apply(f,*iter));
-  }
-  return image;
-}
-
-
-
-
-template<class R>
-Geometry::GridMaskSet<R> 
-Evaluation::ModelChecker<R>::image(const System::DiscreteMapInterface<R>& f, 
-                                 const Geometry::GridMaskSet<R>& initial_set, 
-                                 const Geometry::GridMaskSet<R>& bounding_set) const 
-{
-  using namespace Geometry;
-  typedef Numeric::Interval<R> I;
-  typedef typename GridMaskSet<R>::const_iterator gms_const_iterator;
-  ARIADNE_LOG(2,"GridMaskSet ModelChecker::image(DiscreteMapInterface f, GridMaskSet initial_set, GridMaskSet bounding_set)\n");
-  ARIADNE_LOG(3,"initial_set="<<initial_set<<"\nbounding_set="<<bounding_set);
-  ARIADNE_CHECK_BOUNDED(initial_set,"GridMaskSet ModelChecker<R>::image(DiscreteMapInterface,GridMaskSet,GridMaskSet)");
-  ARIADNE_CHECK_BOUNDED(bounding_set,"ModelChecker<R>::image(DiscreteMapInterface,GridMaskSet,GridMaskSet)");
-  
-  const Grid<R>& g=initial_set.grid();
-  Combinatoric::LatticeBlock bd=bounding_set.block();
-  GridMaskSet<R> image(g,bd);
-  GridCellListSet<R> fgc(g);
-  
-  for(gms_const_iterator iter=initial_set.begin(); iter!=initial_set.end(); ++iter) {
-    const GridCell<R>& gc=*iter;
-    fgc=this->apply(f,gc);
-    ARIADNE_LOG(7,"gc="<<gc<<", fbs="<<fgc<<"\n");
-    image.adjoin(fgc);
-    ARIADNE_LOG(9,"image.size()="<<image.size()<<"\n");
-  }
-  return regular_intersection(image,bounding_set);
-}
-
-
-
-
-
-template<class R>
-Geometry::GridMaskSet<R> 
-Evaluation::ModelChecker<R>::preimage(const System::DiscreteMapInterface<R>& f, 
-                                    const Geometry::GridMaskSet<R>& set, 
-                                    const Geometry::GridMaskSet<R>& bounding_set) const 
-{
-  ARIADNE_LOG(2,"GridMaskSet ModelChecker::preimage(DiscreteMapInterface,GridMaskSet,GridMaskSet)\n");
-  ARIADNE_LOG(3,"set="<<set<<"\nbounding_set="<<bounding_set);
-  using namespace Numeric;
-  using namespace Geometry;
-  typedef typename GridMaskSet<R>::const_iterator basic_set_iterator;
-  GridMaskSet<R> result(bounding_set.finite_grid());
-  GridCellListSet<R> fgcls(set.grid());
-  ARIADNE_LOG(7,"Preimage testing "<<bounding_set.size()<<" cells\n");
-  size_type tested=0;
-  for(typename GridMaskSet<R>::const_iterator bnd_iter=bounding_set.begin(); 
-      bnd_iter!=bounding_set.end(); ++bnd_iter)
-    {
-      if(tested%256==0 && tested!=0) {
-        ARIADNE_LOG(7,"Preimage tested "<<tested<<" cells; found "<<result.size()<<" cells in preimage\n");
-      }
-      ++tested;
-      fgcls.clear();
-      const GridCell<R>& gc=*bnd_iter;
-      fgcls=this->apply(f,gc);
-      if(subset(fgcls,set)) {
-        result.adjoin(*bnd_iter);
-      }
-    }
-  return result;
-}
-
-template<class R>
-Geometry::PartitionTreeSet<R> 
-Evaluation::ModelChecker<R>::preimage(const System::DiscreteMapInterface<R>& f, 
-                                    const Geometry::PartitionTreeSet<R>& set, 
-                                    const Geometry::Box<R>& bound) const 
-{
-  ARIADNE_LOG(2,"GridMaskSet ModelChecker::preimage(DiscreteMapInterface,PartitionTreeSet,Box)\n");
-  ARIADNE_LOG(3,"set="<<set<<"\nbounding_set="<<bound);
-  using namespace Numeric;
-  using namespace Geometry;
-  typedef typename PartitionTreeSet<R>::const_iterator basic_set_iterator;
-  PartitionTreeSet<R> result(bound);
-  throw NotImplemented(__PRETTY_FUNCTION__);
-}
 
 
 
 template<class R>
 Geometry::ListSet< Geometry::Box<R> >
-Evaluation::ModelChecker<R>::iterate(const System::DiscreteMapInterface<R>& f, 
-                                   const Geometry::ListSet< Geometry::Box<R> >& initial_set,
-                                   const Numeric::Integer& steps) const 
+Evaluation::ModelChecker<R>::evolve(const System::TransitionSystemInterface<R>& f, 
+                                    const Geometry::ListSet< Geometry::Box<R> >& initial_set,
+                                    const Numeric::Integer& steps) const 
 {
   using namespace Numeric;
   using namespace Geometry;
   typedef Numeric::Interval<R> I;
-  ARIADNE_LOG(2,"ListSet<Box> ModelChecker::reach(DiscreteMapInterface,ListSet<Box>\n");
+  ARIADNE_LOG(2,"ListSet<Box> ModelChecker::reach(TransitionSystemInterface,ListSet<Box>\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   ListSet< Box<R> > result;
   R mbsr=inf<R>();
@@ -312,22 +155,21 @@ Evaluation::ModelChecker<R>::iterate(const System::DiscreteMapInterface<R>& f,
   {
     ARIADNE_LOG(6,"  computing iterate for r="<<*r_iter);
     r=*r_iter;
-    DiscreteTimeOrbit< Integer,Box<R> > orbit=this->orbit(f,r,steps);
-    result.adjoin(orbit.final().set());
+    result.adjoin(f.lower_reach(r));
   }
   return result;
 }
 
 template<class R>
 Geometry::ListSet< Geometry::Box<R> >
-Evaluation::ModelChecker<R>::reach(const System::DiscreteMapInterface<R>& f, 
-                                 const Geometry::ListSet< Geometry::Box<R> >& initial_set,
-                                 const Numeric::Integer& steps) const 
+Evaluation::ModelChecker<R>::reach(const System::TransitionSystemInterface<R>& f, 
+                                   const Geometry::ListSet< Geometry::Box<R> >& initial_set,
+                                   const Numeric::Integer& steps) const 
 {
   using namespace Numeric;
   using namespace Geometry;
   typedef Numeric::Interval<R> I;
-  ARIADNE_LOG(2,"ListSet<Box> ModelChecker::reach(DiscreteMapInterface,ListSet<Box>\n");
+  ARIADNE_LOG(2,"ListSet<Box> ModelChecker::reach(TransitionSystemInterface,ListSet<Box>\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   ListSet< Box<R> > result; 
   Box<R> r;
@@ -335,8 +177,7 @@ Evaluation::ModelChecker<R>::reach(const System::DiscreteMapInterface<R>& f,
       r_iter!=initial_set.end(); ++r_iter)
   {
     r=*r_iter;
-    DiscreteTimeOrbit< Integer,Box<R> > orbit=this->orbit(f,r,steps);
-    result.adjoin(orbit.final().set());
+    result.adjoin(f.lower_reach(r));
   }
   return result;
 }
@@ -344,13 +185,13 @@ Evaluation::ModelChecker<R>::reach(const System::DiscreteMapInterface<R>& f,
 
 template<class R>
 Geometry::ListSet< Geometry::Box<R> >
-Evaluation::ModelChecker<R>::lower_reach(const System::DiscreteMapInterface<R>& f, 
+Evaluation::ModelChecker<R>::lower_reach(const System::TransitionSystemInterface<R>& f, 
                                        const Geometry::ListSet< Geometry::Box<R> >& initial_set) const 
 {
   using namespace Numeric;
   using namespace Geometry;
   typedef Numeric::Interval<R> I;
-  ARIADNE_LOG(2,"ListSet<Box> ModelChecker::lower_reach(DiscreteMapInterface,ListSet<Box>\n");
+  ARIADNE_LOG(2,"ListSet<Box> ModelChecker::lower_reach(TransitionSystemInterface,ListSet<Box>\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   size_type n=this->_parameters->maximum_number_of_steps();
   R mbsr=this->parameters().maximum_basic_set_radius();
@@ -360,9 +201,7 @@ Evaluation::ModelChecker<R>::lower_reach(const System::DiscreteMapInterface<R>& 
   {
     ARIADNE_LOG(6,"  computing reach for r="<<*r_iter);
     Box<R> r=*r_iter;
-    DiscreteTimeOrbit< Integer,Box<R> > orbit=this->orbit(f,r,n,mbsr);
-    ARIADNE_LOG(6,"  iterated "<<orbit.steps()<<" time steps");
-    result.adjoin(orbit.reach());
+    result.adjoin(f.lower_reach(r));
   }
   return result;
 }
@@ -372,22 +211,21 @@ Evaluation::ModelChecker<R>::lower_reach(const System::DiscreteMapInterface<R>& 
 
 template<class R>
 Geometry::GridMaskSet<R> 
-Evaluation::ModelChecker<R>::chainreach(const System::DiscreteMapInterface<R>& f, 
+Evaluation::ModelChecker<R>::chainreach(const System::TransitionSystemInterface<R>& f, 
                                       const Geometry::GridMaskSet<R>& initial_set, 
-                                      const Geometry::GridMaskSet<R>& bounding_set) const
+                                      const Geometry::Box<R>& bounding_set) const
 {
   using namespace Geometry;
   typedef Numeric::Interval<R> I;
   typedef typename Geometry::GridCellListSet<R>::const_iterator gcls_const_iterator;
-  ARIADNE_LOG(2,"GridMaskSet ModelChecker::chainreach(DiscreteMapInterface map, GridMaskSet initial_set, GridMaskSet bounding_set)\n");
+  ARIADNE_LOG(2,"GridMaskSet ModelChecker::chainreach(TransitionSystemInterface map, GridMaskSet initial_set, GridMaskSet bounding_set)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\nbounding_set="<<bounding_set<<"\n");
-  ARIADNE_CHECK_BOUNDED(initial_set,"GridMaskSet ModelChecker<R>::chainreach(DiscreteMapInterface,GridMaskSet,GridMaskSet)");
-  ARIADNE_CHECK_BOUNDED(bounding_set,"GridMaskSet ModelChecker<R>::chainreach(DiscreteMapInterface,GridMaskSet,GridMaskSet)");
+  ARIADNE_CHECK_BOUNDED(initial_set,"GridMaskSet ModelChecker<R>::chainreach(TransitionSystemInterface,GridMaskSet,GridMaskSet)");
+  ARIADNE_CHECK_BOUNDED(bounding_set,"GridMaskSet ModelChecker<R>::chainreach(TransitionSystemInterface,GridMaskSet,GridMaskSet)");
   
-  const Grid<R>& g=bounding_set.grid();
-  Combinatoric::LatticeBlock bd=bounding_set.block();
-  GridBlock<R> bb(g,bd);
-  GridMaskSet<R> result(g,bd);
+  const Grid<R>& g=initial_set.grid();
+  GridBlock<R> bb=over_approximation(bounding_set,g);
+  GridMaskSet<R> result(g,bb.lattice_set());
   GridCellListSet<R> found(g);
   GridCellListSet<R> image(g);
   
@@ -403,10 +241,10 @@ Evaluation::ModelChecker<R>::chainreach(const System::DiscreteMapInterface<R>& f
     result.adjoin(found);
     image.clear(); 
     for(gcls_const_iterator iter=found.begin(); iter!=found.end(); ++iter) {
-      image.adjoin(this->apply(f,*iter));
+      image.adjoin(f.upper_evolve(*iter));
     }
     image.unique_sort();
-    found=regular_intersection(image,bounding_set);
+    found.restrict(bb);
     ++step;
   }
   return result;
@@ -416,15 +254,15 @@ Evaluation::ModelChecker<R>::chainreach(const System::DiscreteMapInterface<R>& f
 
 template<class R>
 Geometry::GridMaskSet<R>
-Evaluation::ModelChecker<R>::viable(const System::DiscreteMapInterface<R>& f, 
+Evaluation::ModelChecker<R>::viable(const System::TransitionSystemInterface<R>& f, 
                                   const Geometry::GridMaskSet<R>& bounding_set) const
 {
   using namespace Geometry;
   typedef Numeric::Interval<R> I;
   typedef typename Geometry::GridMaskSet<R>::const_iterator gms_const_iterator;
-  ARIADNE_LOG(2,"GridMaskSet ModelChecker::viable(DiscreteMapInterface map, GridMaskSet bounding_set)\n");
+  ARIADNE_LOG(2,"GridMaskSet ModelChecker::viable(TransitionSystemInterface map, GridMaskSet bounding_set)\n");
   ARIADNE_LOG(3,"bounding_set="<<bounding_set<<"\n");
-  ARIADNE_CHECK_BOUNDED(bounding_set,"ModelChecker<R>::viable(DiscreteMapInterface,GridMaskSet)");
+  ARIADNE_CHECK_BOUNDED(bounding_set,"ModelChecker<R>::viable(TransitionSystemInterface,GridMaskSet)");
   
   const Grid<R>& g=bounding_set.grid();
   Combinatoric::LatticeBlock bd=bounding_set.block();
@@ -464,11 +302,11 @@ Evaluation::ModelChecker<R>::viable(const System::DiscreteMapInterface<R>& f,
 
 template<class R>
 tribool
-Evaluation::ModelChecker<R>::verify(const System::DiscreteMapInterface<R>& f, 
+Evaluation::ModelChecker<R>::verify(const System::TransitionSystemInterface<R>& f, 
                                   const Geometry::GridMaskSet<R>& initial_set, 
                                   const Geometry::GridMaskSet<R>& safe_set) const
 {
-  ARIADNE_LOG(2,"triboolEvaluation::ModelChecker::verify(DiscreteMapInterface map, GridMaskSet initial_set,GridMaskSet  safe_set)\n");
+  ARIADNE_LOG(2,"triboolEvaluation::ModelChecker::verify(TransitionSystemInterface map, GridMaskSet initial_set,GridMaskSet  safe_set)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n"<<"safe_set="<<safe_set);
   typedef Numeric::Interval<R> I;
   using namespace Geometry;
@@ -492,7 +330,7 @@ Evaluation::ModelChecker<R>::verify(const System::DiscreteMapInterface<R>& f,
     reach.adjoin(found);
     image.clear();
     for(gcls_const_iterator iter=found.begin(); iter!=found.end(); ++iter) {
-      cell_image=this->apply(f,*iter);
+      cell_image=f.upper_reach(*iter);
       if(!subset(cell_image,safe_set)) {
         return false;
       }
@@ -510,11 +348,11 @@ Evaluation::ModelChecker<R>::verify(const System::DiscreteMapInterface<R>& f,
 
 template<class R>
 System::GridMultiMap<R> 
-Evaluation::ModelChecker<R>::discretize(const System::DiscreteMapInterface<R>& f, 
+Evaluation::ModelChecker<R>::discretize(const System::TransitionSystemInterface<R>& f, 
                                       const Geometry::GridMaskSet<R>& domain,
                                       const Geometry::Grid<R>& range_grid) const
 {
-  ARIADNE_LOG(2,"GridMultiMap*Evaluation::ModelChecker::discretize(DiscreteMapInterface map, GridMaskSet domain, Grid range_grid)\n");
+  ARIADNE_LOG(2,"GridMultiMap*Evaluation::ModelChecker::discretize(TransitionSystemInterface map, GridMaskSet domain, Grid range_grid)\n");
   ARIADNE_LOG(3,"domain="<<domain<<"\n"<<"range_grid="<<range_grid);
   using namespace Geometry;
   typedef Numeric::Interval<R> I;
@@ -523,13 +361,14 @@ Evaluation::ModelChecker<R>::discretize(const System::DiscreteMapInterface<R>& f
       dom_iter!=domain.end(); ++dom_iter)
     {
       const GridCell<R>& gc=*dom_iter;
-      GridCellListSet<R> gcls=this->apply(f,gc,range_grid);
+      GridCellListSet<R> gcls=f.upper_reach(gc);
       result.adjoin_to_image(gc,gcls);
     }
   return result;
 }
 
 
+/*
 
 template<class R>
 System::GridMultiMap<R> 
@@ -628,7 +467,7 @@ Evaluation::ModelChecker<R>::control_synthesis(const System::DiscreteTimeSystem<
   return result;      
 }
 
-
+*/
 
 
 

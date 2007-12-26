@@ -39,57 +39,6 @@
 namespace Ariadne {
   namespace Evaluation {
 
-    /*! \brief A class for computing the evolution of a discrete-time autonomous system.
-     *  \ingroup Applicators
-     */
-    template<class R>
-    class MapOrbiterInterface 
-    {
-     public:
-      /*! \brief Destructor. */
-     virtual ~MapOrbiterInterface();
-
-      /*! \brief Make a dynamically-allocated copy. */
-      virtual MapOrbiterInterface<R>* clone() const = 0;
-
-      /*! \brief Compute the image of a rectangle under a continuous function. */
-      virtual 
-      Geometry::Box<R> 
-      apply(const System::MapInterface<R>& f, const Geometry::Box<R>& r) const = 0;
-
-      /*! \brief Compute the image of a grid cell under a continuous self-map. */
-      virtual 
-      Geometry::GridCellListSet<R> 
-      apply(const System::MapInterface<R>& f, const Geometry::GridCell<R>& r) const = 0;
-
-      /*! \brief Compute the image of a grid cell under a continuous function, approximating on grid \a g which may lie in a different space. */
-      virtual 
-      Geometry::GridCellListSet<R> 
-      apply(const System::MapInterface<R>& f, const Geometry::GridCell<R>& r, const Geometry::Grid<R>& g) const = 0;
-
-
-
-      /*! \brief Compute the orbit of a rectangle under \a n steps of continuous function. */
-      virtual 
-      Geometry::DiscreteTimeOrbit< Numeric::Integer, Geometry::Box<R> >
-      orbit(const System::MapInterface<R>& f, const Geometry::Box<R>& r, const Numeric::Integer& n) const = 0;
-
-      /*! \brief Compute the orbit of a rectangle under at most \a n steps of continuous function, until the size reaches \a s. */
-      virtual 
-      Geometry::DiscreteTimeOrbit< Numeric::Integer, Geometry::Box<R> >
-      orbit(const System::MapInterface<R>& f, const Geometry::Box<R>& r, const Numeric::Integer& n, const R& s) const = 0;
-
-      /*! \brief Compute the orbit of a grid cell under steps of continuous function. */
-      virtual 
-      Geometry::DiscreteTimeOrbit< Numeric::Integer, Geometry::GridCellListSet<R> >
-      orbit(const System::MapInterface<R>& f, const Geometry::GridCell<R>& gc, const Numeric::Integer& n) const = 0;
-
-       
-    };
-
-    template<class R> MapOrbiterInterface<R>::~MapOrbiterInterface() { }
-
-
 
     /*! \brief A class for computing the evolution of a continuous-time autonomous system.
      *  \ingroup Integrators
@@ -104,17 +53,10 @@ namespace Ariadne {
       /*! \brief Make a dynamically-allocated copy. */
       virtual VectorFieldOrbiterInterface<R>* clone() const = 0;
 
-
-
-      /*! \brief Compute the orbit of a rectangle under time \a t of a vector field. */
+      /*! \brief Compute the orbit of a box under time \a t of a vector field. */
       virtual 
-      Geometry::ContinuousTimeOrbit< Numeric::Rational, Geometry::Box<R>, Geometry::Box<R> >
-      orbit(const System::VectorFieldInterface<R>& vf, const Geometry::Box<R>& r, const Numeric::Rational& t) const = 0;
-
-      /*! \brief Compute the orbit of a grid cell under time \a t of a vector field. */
-      virtual 
-      Geometry::ContinuousTimeOrbit< Numeric::Rational, Geometry::GridCellListSet<R>, Geometry::GridCellListSet<R> >
-      orbit(const System::VectorFieldInterface<R>& vf, const Geometry::GridCell<R>& gc, const Numeric::Rational& t) const = 0;
+      Geometry::OrbitInterface<Numeric::Rational>*
+      orbit(const System::VectorFieldInterface<R>& vf, const Geometry::Box<R>& bx, const Numeric::Rational& t) const = 0;
 
        
     };

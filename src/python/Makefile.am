@@ -75,6 +75,7 @@ ARIADNE_SRC = ariadne_module.cc \
 	export_partition_tree_set.cc \
 	export_constraint_set.cc \
 	export_level_set.cc \
+	export_orbit.cc \
 	export_hybrid_set.cc \
 	 \
 	export_constraint.cc \
@@ -92,6 +93,7 @@ ARIADNE_SRC = ariadne_module.cc \
 	export_applicator.cc \
 	export_integrator.cc \
 	export_detector.cc \
+	export_orbiter.cc \
 	export_map_evolver.cc \
 	export_vector_field_evolver.cc \
 	export_set_based_hybrid_evolver.cc \

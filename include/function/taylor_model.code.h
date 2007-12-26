@@ -43,7 +43,7 @@
 #include "function/sorted_index.h"
 #include "function/multi_index.h"
 
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 
 #include "evaluation/newton.h"
 

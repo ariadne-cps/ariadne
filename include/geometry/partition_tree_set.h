@@ -2,7 +2,7 @@
  *            partition_tree_set.h
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *
  ****************************************************************************/
 
 /*

@@ -39,7 +39,7 @@
 #include "linear_algebra/matrix.h"
 
 #include "geometry/point.h"
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 
 #include "system/exceptions.h"
 

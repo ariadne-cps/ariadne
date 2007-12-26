@@ -33,7 +33,7 @@
 #include "base/tribool.h"
 #include "numeric/interval.h"
 #include "geometry/set_interface.h"
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 
 
 namespace Ariadne {

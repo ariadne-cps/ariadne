@@ -25,7 +25,7 @@
 
 #include "geometry/set_interface.h"
 #include "geometry/point.h"
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 
 using namespace Ariadne;
 using namespace Ariadne::LinearAlgebra;

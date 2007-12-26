@@ -22,7 +22,7 @@
  */
 
 #include "hybrid_set.h"
-#include "rectangle.h"
+#include "box.h"
 #include "zonotope.h"
 #include "list_set.h"
 

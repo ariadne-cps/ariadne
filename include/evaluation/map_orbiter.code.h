@@ -33,6 +33,8 @@
 #include <vector>
 #include <valarray>
 
+#include "base/tuple.h"
+
 #include "numeric/interval.h"
 
 #include "linear_algebra/vector.h"
@@ -40,7 +42,7 @@
 
 #include "combinatoric/lattice_set.h"
 
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "geometry/zonotope.h"
 #include "geometry/list_set.h"
 #include "geometry/grid.h"
@@ -56,7 +58,7 @@
 #include "system/map.h"
 #include "system/discrete_time_system.h"
 
-#include "evaluation/applicator.h"
+#include "evaluation/standard_applicator.h"
 
 #include "output/logging.h"
 
@@ -66,26 +68,23 @@ namespace Evaluation { static int& verbosity = applicator_verbosity; }
 
 
 
-template<class BS> inline
-BS
-Evaluation::MapOrbiter<BS>::apply(const System::MapInterface<R>& f, const BS& bs) const
-{
-  return this->_applicator->apply(f,bs);
-}
-
 
 
 
 template<class BS>
-Evaluation::MapOrbiter<BS>::MapOrbiter(const EvolutionParameters<R>& parameters, const ApplicatorInterface<BS>& applicator)
-  : _applicator(applicator.clone())
+Evaluation::MapOrbiter<BS>::MapOrbiter(const EvolutionParameters<R>& parameters, 
+                                       const ApplicatorInterface<BS>& applicator, 
+                                       const ApproximatorInterface<BS>& approximator)
+  : _applicator(applicator.clone()),
+    _approximator(approximator.clone())
 {
 }
 
 
 template<class BS>
 Evaluation::MapOrbiter<BS>::MapOrbiter(const MapOrbiter<BS>& orbiter)
-  : _applicator(orbiter._applicator->clone())
+  : _applicator(orbiter._applicator->clone()),
+    _approximator(orbiter._approximator->clone())
 {
 }
 
@@ -99,84 +98,124 @@ Evaluation::MapOrbiter<BS>::clone() const
 
 
 template<class BS>
-Geometry::Box<typename BS::real_type>
-Evaluation::MapOrbiter<BS>::apply(const System::MapInterface<R>& f, const Geometry::Box<R>& r) const 
+typename BS::real_type
+Evaluation::MapOrbiter<BS>::maximum_basic_set_radius() const 
 {
-  ARIADNE_LOG(4,"Box MapOrbiter::apply(MapInterface,Box)\n");
-  return this->_applicator->apply(f,BS(r)).bounding_box();
+  return 1.0;
+}
+
+template<class BS>
+Geometry::Grid<typename BS::real_type>
+Evaluation::MapOrbiter<BS>::grid(dimension_type d) const 
+{
+  return Geometry::Grid<R>(d,0.125);
 }
 
 
 template<class BS>
-Geometry::GridCellListSet<typename BS::real_type>
-Evaluation::MapOrbiter<BS>::apply(const System::MapInterface<R>& f, const Geometry::GridCell<R>& gc) const
+Geometry::GridCellListSet<typename BS::real_type> 
+Evaluation::MapOrbiter<BS>::upper_evolve(const System::MapInterface<R>& f, 
+                                         const Geometry::Box<R>& bx, 
+                                         const Numeric::Integer& n) const
 {
-  ARIADNE_LOG(4,"GridCellListSet MapOrbiter::apply(MapInterface,GridCell)\n");
-  return fuzzy_outer_approximation(this->_applicator->apply(f,BS(gc)),gc.grid());
-}
-
-
-template<class BS>
-Geometry::GridCellListSet<typename BS::real_type>
-Evaluation::MapOrbiter<BS>::apply(const System::MapInterface<R>& f, const Geometry::GridCell<R>& gc, const Geometry::Grid<R>& g) const
-{
-  ARIADNE_LOG(4,"GridCellListSet MapOrbiter::apply(MapInterface,GridCell)\n");
-  return fuzzy_outer_approximation(this->_applicator->apply(f,BS(gc)),g);
-}
-
-
-
-template<class BS>
-Geometry::DiscreteTimeOrbit< Numeric::Integer, Geometry::Box<typename BS::real_type> >
-Evaluation::MapOrbiter<BS>::orbit(const System::MapInterface<R>& f, const Geometry::Box<R>& r, const Numeric::Integer& n) const
-{
-  ARIADNE_LOG(4,"DiscreteTimeOrbit<Integer,Box> MapOrbiter::orbit(MapInterface,RectangleRectangle)\n");
-  assert(n>=0);
-  Geometry::DiscreteTimeOrbit<Numeric::Integer, Geometry::Box<R> > orbit(r);
-  BS bs(r);
+  const Geometry::Grid<R> grid=this->grid(bx.dimension());
+  BS bs=this->_approximator->over_approximation(bx);
   for(Numeric::Integer i=0; i!=n; ++i) {
     bs=this->_applicator->apply(f,bs);
-    orbit.push_back(i,bs.bounding_box());
+  }
+  return this->_approximator->outer_approximation(bs,grid);
+}
+
+template<class BS>
+Geometry::GridCellListSet<typename BS::real_type> 
+Evaluation::MapOrbiter<BS>::upper_reach(const System::MapInterface<R>& f, 
+                                        const Geometry::Box<R>& bx, 
+                                        const Numeric::Integer& n) const
+{
+  const Geometry::Grid<R> grid=this->grid(bx.dimension());
+  Geometry::GridCellListSet<R> gcls(grid);
+  BS bs=this->_approximator->over_approximation(bx);
+  gcls.adjoin(this->_approximator->outer_approximation(bs,grid));
+  for(Numeric::Integer i=0; i!=n; ++i) {
+    bs=this->_applicator->apply(f,bs);
+    gcls.adjoin(this->_approximator->outer_approximation(bs,grid));
+  }
+  return gcls;
+}
+
+
+template<class BS>
+Geometry::ListSet< Geometry::Box<typename BS::real_type> >
+Evaluation::MapOrbiter<BS>::lower_evolve(const System::MapInterface<R>& f, 
+                                             const Geometry::Box<R>& bx, 
+                                             const Numeric::Integer& n) const
+{
+  Geometry::ListSet< Geometry::Box<R> > result;
+  std::vector< std::pair<T, BS> > stack;
+  T t=0;
+  BS bs=this->_approximator->over_approximation(bx);
+  stack.push_back(std::make_pair(t,bs));
+  while(!stack.empty()) {
+    make_lpair(t,bs)=stack.back();
+    stack.pop_back();
+    do {
+      bs=this->_applicator->apply(f,bs);
+      t+=1;
+    } while(t!=n && bs.radius()<this->maximum_basic_set_radius());
+    if(t==n) {
+      result.adjoin(this->_approximator->bounding_box(bs));
+    } else {
+      std::pair<BS,BS> split=this->_approximator->subdivide(bs);
+      stack.push_back(std::make_pair(t,split.first));
+      stack.push_back(std::make_pair(t,split.second));
+    }
+  }
+  return result;
+}
+
+template<class BS>
+Geometry::ListSet< Geometry::Box<typename BS::real_type> >
+Evaluation::MapOrbiter<BS>::lower_reach(const System::MapInterface<R>& f, 
+                                            const Geometry::Box<R>& s, 
+                                            const Numeric::Integer& n) const
+{
+  Geometry::ListSet< Geometry::Box<R> > ls;
+  BS bs=this->_approximator->over_approximation(s);
+  ls.adjoin(this->_approximator->bounding_box(bs));
+  for(Numeric::Integer i=0; i!=n; ++i) {
+    bs=this->_applicator->apply(f,bs);
+    ls.adjoin(this->_approximator->bounding_box(bs));
+  }
+  return ls;
+}
+
+
+
+
+
+template<class BS>
+Geometry::Orbit< Numeric::Integer, BS >
+Evaluation::MapOrbiter<BS>::orbit(const System::MapInterface<R>& f, const BS& bs, const Numeric::Integer& n) const
+{
+  assert(n>=0);
+  Geometry::Orbit<Numeric::Integer, BS >  orbit(bs);
+  BS es=bs;
+  for(Numeric::Integer i=0; i!=n; ++i) {
+    es=this->_applicator->apply(f,es);
+    orbit.push_back(i,es.bounding_box());
   }
   return orbit;
 }
 
 
 template<class BS>
-Geometry::DiscreteTimeOrbit< Numeric::Integer, Geometry::Box<typename BS::real_type> >
-Evaluation::MapOrbiter<BS>::orbit(const System::MapInterface<R>& f, const Geometry::Box<R>& r, const Numeric::Integer& n, const R& mbsr) const
+Geometry::Orbit< Numeric::Integer, BS>*
+Evaluation::MapOrbiter<BS>::orbit(const System::MapInterface<R>& f, const Geometry::Box<R>& bx, const Numeric::Integer& n) const
 {
-  ARIADNE_LOG(4,"DiscreteTimeOrbit<Integer,Box> MapOrbiter::orbit(MapInterface,Box,Integer,Float)\n");
-  assert(n>=0);
-  Geometry::DiscreteTimeOrbit<Numeric::Integer, Geometry::Box<R> > orbit(r);
-  BS bs(r);
-  size_type i=0;
-  while(i!=n && orbit.final().set().radius()<mbsr) {
-    bs=this->_applicator->apply(f,bs);
-    orbit.push_back(i,bs.bounding_box());
-  }
-  return orbit;
+  BS bs=this->_approximator->over_approximation(bx);
+  return new Geometry::Orbit<T,BS>(this->orbit(f,bs,n));
 }
 
-
-template<class BS>
-Geometry::DiscreteTimeOrbit< Numeric::Integer, Geometry::GridCellListSet<typename BS::real_type> >
-Evaluation::MapOrbiter<BS>::orbit(const System::MapInterface<R>& f, const Geometry::GridCell<R>& gc, const Numeric::Integer& n) const
-{
-  ARIADNE_LOG(4,"DiscreteTimeOrbit<Integer,GridCellListSet> MapOrbiter::orbit(MapInterface,GridCell,Integer)\n");
-  assert(n>=0);
-  Geometry::GridCellListSet<R> gcls(gc.grid());
-  gcls.adjoin(gc);
-  Geometry::DiscreteTimeOrbit<Numeric::Integer, Geometry::GridCellListSet<R> > orbit(gcls);
-  const Geometry::Grid<R>& g(gc.grid());
-  BS bs(gc);
-  for(int i=0; i!=n; ++i) {
-    bs=this->_applicator->apply(f,bs);
-    gcls=fuzzy_outer_approximation(bs,g);
-    orbit.push_back(i,gcls);
-  }
-  return orbit;
-}
 
 
 

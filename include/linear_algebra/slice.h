@@ -1,8 +1,8 @@
 /***************************************************************************
- *            lvalue.h
+ *            slice.h
  *
- *  Copyright  2006-7  Pieter Collins
- *  
+ *  Copyright  2004-7  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -21,33 +21,35 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file lvalue.h
- *  \brief Pair and tuple types to be used as lvalues in assignments.
- */
+/*! \file vector.h
+ *  \brief Vector types and vector operations.
+  */
 
-#ifndef ARIADNE_LVALUE_H
-#define ARIADNE_LVALUE_H
+#ifndef ARIADNE_SLICE_H
+#define ARIADNE_SLICE_H 
 
-
-namespace Ariadne { 
-
-  namespace Base {
-    /*! \brief A pair of references, suitable as use as an lvalue for a function returning a pair. */
-    template<class T1, class T2>
-    struct lpair 
+namespace Ariadne {
+  namespace LinearAlgebra {
+    
+    class Slice 
     {
-      inline lpair(T1& t1, T2& t2) : first(t1), second(t2) { }
-      inline lpair<T1,T2> operator=(const std::pair<T1,T2>& rv) { 
-        this->first=rv.first; this->second=rv.second; return *this; }
-      T1& first; T2& second;
+     public:
+      Slice(size_type start, size_type size, size_type stride=1u)
+        : _start(start), _size(size), _stride(stride) { }
+      size_type start() const { return this->_start; }
+      size_type size() const { return this->_size; }
+      size_type stride() const { return this->_stride; }
+     private:
+      size_type _start;
+      size_type _size;
+      size_type _stride;
     };
-  
-    template<class T1,class T2> inline
-    lpair<T1,T2> make_lpair(T1& t1, T2& t2) {
-      return lpair<T1,T2>(t1,t2);
-    }
-  
+
+    inline Slice slice(size_type start, size_type size, size_type stride=1u) {
+      return Slice(start,size,stride); }
+
   }
 }
 
-#endif /* ARIADNE_LVALUE_H */
+
+#endif /* ARIADNE_SLICE_H */

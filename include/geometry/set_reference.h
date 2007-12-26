@@ -32,7 +32,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "set_interface.h"
-#include "rectangle.h"
+#include "box.h"
 #include "rectangular_set.h"
 #include "polyhedral_set.h"
 

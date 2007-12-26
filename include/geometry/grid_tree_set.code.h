@@ -27,7 +27,7 @@
 
 #include "base/stlio.h"
 
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "geometry/list_set.h"
 #include "geometry/grid_mask_set.h"
 #include "output/logging.h"

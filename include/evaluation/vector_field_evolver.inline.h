@@ -26,11 +26,12 @@
 
 namespace Ariadne {
     
-template<class R> template<class BST> inline
-Evaluation::VectorFieldEvolver<R>::VectorFieldEvolver(const EvolutionParameters<R>& parameters, const IntegratorInterface<BST>& plugin)
+template<class R> template<class BS> inline
+Evaluation::VectorFieldEvolver<R>::VectorFieldEvolver(const EvolutionParameters<R>& parameters, 
+                                                      const IntegratorInterface<BS>& integrator,
+                                                      const ApproximatorInterface<BS>& approximator)
   : _parameters(new EvolutionParameters<R>(parameters)),
-    _bounder(new Bounder<R>()),
-    _integrator(plugin.clone())
+    _orbiter(integrator,approximator)
 {
 }
 

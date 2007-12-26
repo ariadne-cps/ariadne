@@ -44,7 +44,10 @@
 namespace Ariadne {
   namespace LinearAlgebra {
 
-    
+    class Slice;
+    template<class R> class Matrix;
+    template<class R> class MatrixSlice;
+
     /*!\ingroup LinearAlgebra
      * \brief A matrix over \a R. 
      *
@@ -116,6 +119,11 @@ namespace Ariadne {
       /*! \brief A reference to \a i,\a j th element. */
       R& operator() (const size_type& i, const size_type& j);
       
+      /*! \brief A constant slice through the matrix. */
+      MatrixSlice<const R> operator() (const Slice& i, const Slice& j) const;
+      /*! \brief A slice through the matrix. */
+      MatrixSlice<R> operator() (const Slice& i, const Slice& j);
+      
       /*! \brief Subscripting operator; A[i][j] returns a reference to the (i,j)th element. */
       MatrixRow< Matrix<R> > operator[](const size_type& i);
         
@@ -137,6 +145,11 @@ namespace Ariadne {
       /*! \brief The \a j th column. */
       VectorSlice<const R> column(const size_type& j) const;
         
+      /*! \brief The \a i th row. */
+      VectorSlice<R> row(const size_type& i);
+      /*! \brief The \a j th column. */
+      VectorSlice<R> column(const size_type& j);
+        
       /*! \brief A pointer to the first element of the array of values. */
       R* begin();
       /*! \brief A constant pointer to the first element of the array of values. */
@@ -155,28 +168,28 @@ namespace Ariadne {
 #ifdef DOXYGEN
       typedef Numeric::traits<R>::arithmetic_type AT;
       /*! \brief The additive inverse of the matrix \a A. */
-      friend Matrix<AT> operator-<>(const Matrix<R>& A);
+      friend Matrix<R> operator-(const Matrix<R>& A);
       /*! \brief The sum of \a A1 and \a A2. */
-      friend Matrix<AT> operator+<>(const Matrix<R>& A1, const Matrix<R>& A2);
+      friend Matrix<AT> operator+(const Matrix<R>& A1, const Matrix<R>& A2);
       /*! \brief The difference of \a A1 and \a A2. */
-      friend Matrix<AT> operator-<>(const Matrix<R>& A1, const Matrix<R>& A2);
+      friend Matrix<AT> operator-(const Matrix<R>& A1, const Matrix<R>& A2);
       /*! \brief The scalar product of \a A by \a s. */
-      friend Matrix<AT> operator*<>(const R& s, const Matrix<R>& A);
+      friend Matrix<AT> operator*(const R& s, const Matrix<R>& A);
       /*! \brief The scalar product of \a A by \a s. */
-      friend Matrix<AT> operator*<>(const Matrix<R>& A, const R& s);
+      friend Matrix<AT> operator*(const Matrix<R>& A, const R& s);
       /*! \brief The scalar product of \a A by the reciprocal of \a s. */
-      friend Matrix<RAT> operator/<>(const Matrix<R>& A, const R& s);
+      friend Matrix<RAT> operator/(const Matrix<R>& A, const R& s);
       /*! \brief The product of matrix \a A1 with matrix \a A2. */
-      friend Matrix<AT> operator*<>(const Matrix<R>& A1, const Matrix<R>& A2);
+      friend Matrix<AT> operator*(const Matrix<R>& A1, const Matrix<R>& A2);
       /*! \brief The product of matrix \a A with vector \a v. */
-      friend Vector<AT> operator*<>(const Matrix<R>& A, const Vector<R>& v);
+      friend Vector<AT> operator*(const Matrix<R>& A, const Vector<R>& v);
       /*! \brief The product of vector \a v with matrix \a A. */
-      friend Vector<AT> operator*<>(const Vector<R>& v, const Matrix<R>& A);
+      friend Vector<AT> operator*(const Vector<R>& v, const Matrix<R>& A);
 
       /*! \brief The inverse of \a A. */
-      friend Matrix<AT> inverse<>(const Matrix<R>& A);
+      friend Matrix<AT> inverse(const Matrix<R>& A);
       /*! \brief Solve the linear system \f$Ax=b\f$. */
-      friend Matrix<AT> solve<>(const Matrix<R>& A, const Vector<R>& b);
+      friend Matrix<AT> solve(const Matrix<R>& A, const Vector<R>& b);
 
       /*! \brief Compute an approximate solution to the linear system \f$Ax=b\f$. */
       friend Matrix<R> solve_approx(const Matrix<R>& A, const Vector<R>& b);
@@ -186,66 +199,19 @@ namespace Ariadne {
       friend std::pair< Matrix<R>,Matrix<R> > qr_approx(const Matrix<R>& A);
 
       /*! \brief Catenate the rows of \a A with the row vector \a v. */
-      friend Matrix<AT> concatenate_rows<>(const Matrix<R>& A, const Vector<R>& v);
+      friend Matrix<R> concatenate_rows(const Matrix<R>& A, const Vector<R>& v);
       /*! \brief Catenate the rows of \a A1 with those of \a A2. */
-      friend Matrix<AT> concatenate_rows<>(const Matrix<R>& A1, const Matrix<R>& A2);
+      friend Matrix<R> concatenate_rows(const Matrix<R>& A1, const Matrix<R>& A2);
       /*! \brief Catenate the rows of \a A with the row vector \a v. */
-      friend Matrix<AT> concatenate_columns<>(const Matrix<R>& A, const Vector<R>& v);
+      friend Matrix<R> concatenate_columns(const Matrix<R>& A, const Vector<R>& v);
       /*! \brief Catenate the columns of \a A1 with those of \a A2. */
-      friend Matrix<AT> concatenate_columns<>(const Matrix<R>& A1, const Matrix<R>& A2);
-      /*! \brief Checks if the matrices have the same dimensions. */
-      friend bool have_same_dimensions<>(const Matrix<R>& A1, const Matrix<R>& A2);
+      friend Matrix<R> concatenate_columns(const Matrix<R>& A1, const Matrix<R>& A2);
 #endif 
      private:
       static void instantiate();
 
     };
   
-
-
-    /*!\ingroup LinearAlgebra
-     * \brief A slice through a matrix with equally spaced row and column increments. 
-     */
-    template<class R>
-    class MatrixSlice : public MatrixExpression< MatrixSlice<R> >
-    {
-      typedef typename Numeric::traits<R>::arithmetic_type F;
-     public:
-      typedef R value_type;
-
-      MatrixSlice(const size_type& nr, const size_type& nc, R* ptr, const size_type& rinc, const size_type& cinc=1u);
-      MatrixSlice(const size_type& nr, const size_type& nc, R* ptr);
-      MatrixSlice(const Matrix<R>& m);
-
-      size_type number_of_rows() const;
-      size_type number_of_columns() const;
-      array<size_type,2u> size() const;
-      const R* begin() const;
-      R* begin();
-      size_type row_increment() const;
-      size_type column_increment() const;
-     
-      const R& operator() (const size_type& i, const size_type& j) const;
-      R& operator() (const size_type& i, const size_type& j);
-     
-      VectorSlice<const R> row(const size_type& j) const;
-      VectorSlice<const R> column(const size_type& j) const;
-        
-      MatrixSlice<R>& operator=(const R& x);
-
-      template<class E> MatrixSlice<R>& operator=(const MatrixExpression< E >& m);
-
-      std::ostream& write(std::ostream& os) const;
-     private:
-      static void instantiate();
-     private:
-      size_type _number_of_rows;
-      size_type _number_of_columns;
-      R* _begin;
-      size_type _row_increment;
-      size_type _column_increment;
-    };
-    
 
 
     template<class R> Matrix<R> approximation(const Matrix<R>& v);
@@ -317,7 +283,6 @@ namespace Ariadne {
     
     template<class R> Matrix<R> over_approximation(const Matrix< Numeric::Interval<R> >& A);
 
-    template<class R> std::ostream& operator<<(std::ostream& os, const MatrixSlice<R>& A);
     template<class R> std::ostream& operator<<(std::ostream& os, const Matrix<R>& A);
     template<class R> std::istream& operator>>(std::istream& is, Matrix<R>& A);
    
@@ -326,6 +291,7 @@ namespace Ariadne {
   }
 }
 
+#include "matrix_slice.h"
 #include "matrix.inline.h"
 #include "matrix.template.h"
 

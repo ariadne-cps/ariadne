@@ -124,8 +124,8 @@ test_zonotope()
   cout << "ez2=" << ez2 << std::endl;
   
   ezls.clear();
-  ezls=subdivide(ez2);
-  cout << "ez2.subdivide()=" << ezls << std::endl;
+  std::pair< Zonotope<R,UniformErrorTag>,Zonotope<R,UniformErrorTag> > ezp=subdivide(ez2);
+  cout << "ez2.subdivide()=" << ezp << std::endl;
   
   
   Point<R> pts[6];

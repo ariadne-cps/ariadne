@@ -26,7 +26,7 @@
 
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "geometry/polytope.h"
 #include "geometry/polyhedron.h"
 #include "geometry/set_interface.h"

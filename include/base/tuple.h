@@ -1,7 +1,8 @@
 /***************************************************************************
- *            discrete_map.code.h
- *  Copyright  2006-7  Pieter Collins
- *  Pieter.Collins@cwi.nl
+ *            tuple.h
+ *
+ *  Copyright  2007  Pieter Collins
+ *  
  ****************************************************************************/
 
 /*
@@ -20,13 +21,37 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "discrete_map.h"
+/*! \file tuple.h
+ *  \brief Pair and tuple types, and types to be used as lvalues in assignments.
+ */
 
+#ifndef ARIADNE_TUPLE_H
+#define ARIADNE_TUPLE_H
 
-namespace Ariadne {
-  namespace System {
+#include <boost/tuple/tuple.hpp>
 
+namespace Ariadne { 
+
+  namespace Base {
+    using std::pair;
+    using boost::tuple;
+
+    /*! \brief A pair of references, suitable as use as an lvalue for a function returning a pair. */
+    template<class T1, class T2>
+    struct lpair 
+    {
+      inline lpair(T1& t1, T2& t2) : first(t1), second(t2) { }
+      inline lpair<T1,T2> operator=(const std::pair<T1,T2>& rv) { 
+        this->first=rv.first; this->second=rv.second; return *this; }
+      T1& first; T2& second;
+    };
   
-    
+    template<class T1,class T2> inline
+    lpair<T1,T2> make_lpair(T1& t1, T2& t2) {
+      return lpair<T1,T2>(t1,t2);
+    }
+  
   }
 }
+
+#endif /* ARIADNE_TUPLE_H */

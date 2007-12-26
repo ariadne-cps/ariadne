@@ -75,7 +75,7 @@ SYSTEM_SRC = \
 	system/map.cc system/function_map.cc system/affine_map.cc system/polynomial_map.cc \
 	system/vector_field.cc system/affine_vector_field.cc \
 	system/set_based_hybrid_automaton.cc system/constraint_based_hybrid_automaton.cc \
-	system/discrete_map.cc system/grid_multimap.cc 
+	#system/transition_system.cc system/grid_multimap.cc 
 
 
 EVALUATION_SRC = \
@@ -84,18 +84,19 @@ EVALUATION_SRC = \
 	evaluation/newton_solver.cc \
 	evaluation/approximator.cc \
 	evaluation/applicator.cc \
+	evaluation/kuhn_applicator.cc \
 	evaluation/euler_integrator.cc \
 	evaluation/affine_integrator.cc \
 	evaluation/lohner_integrator.cc \
 	evaluation/bounder.cc \
 	evaluation/detector.cc \
 	evaluation/flower.cc \
-	evaluation/model_checker.cc \
 	evaluation/map_orbiter.cc \
 	evaluation/map_evolver.cc \
-	evaluation/vector_field_orbiter.cc \
-	evaluation/vector_field_evolver.cc \
-	evaluation/set_based_hybrid_evolver.cc 
+	evaluation/model_checker.cc \
+	#evaluation/vector_field_orbiter.cc \
+	#evaluation/vector_field_evolver.cc \
+	#evaluation/set_based_hybrid_evolver.cc 
 
 #	evaluation/constraint_based_hybrid_evolver.cc \
 #	evaluation/constraint_based_hybrid_scheduler.cc 

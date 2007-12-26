@@ -1,9 +1,8 @@
 /***************************************************************************
  *            partition_tree_set.code.h
  *
- *  1 July 2005
- *  Copyright  2005  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright  2005-7  Alberto Casagrande, Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -27,7 +26,7 @@
 
 #include "base/stlio.h"
 
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "geometry/list_set.h"
 #include "geometry/grid_mask_set.h"
 #include "output/logging.h"

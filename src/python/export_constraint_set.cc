@@ -24,7 +24,7 @@
 #include "python/float.h"
 
 #include "geometry/point.h"
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "geometry/constraint_set.h"
 
 using namespace Ariadne;

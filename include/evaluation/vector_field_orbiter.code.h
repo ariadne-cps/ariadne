@@ -40,7 +40,7 @@
 
 #include "combinatoric/lattice_set.h"
 
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "geometry/zonotope.h"
 #include "geometry/list_set.h"
 #include "geometry/grid.h"
@@ -69,9 +69,10 @@ namespace Evaluation { static int& verbosity = applicator_verbosity; }
 
 
 template<class BS>
-Evaluation::VectorFieldOrbiter<BS>::VectorFieldOrbiter(const EvolutionParameters<R>& parameters, const IntegratorInterface<BS>& integrator)
+Evaluation::VectorFieldOrbiter<BS>::VectorFieldOrbiter(const EvolutionParameters<R>& parameters, const IntegratorInterface<BS>& integrator, const ApproximatorInterface<BS>& approximator)
   : _bounder(new Bounder<R>()),
     _integrator(integrator.clone()),
+    _approximator(approximator.clone()),
     _parameters(parameters.clone())
 {
 }
@@ -98,63 +99,30 @@ Evaluation::VectorFieldOrbiter<BS>::clone() const
 
 
 template<class BS>
-Geometry::ContinuousTimeOrbit< Numeric::Rational, Geometry::Box<typename BS::real_type>, Geometry::Box<typename BS::real_type> >
-Evaluation::VectorFieldOrbiter<BS>::orbit(const System::VectorFieldInterface<R>& vf, const Geometry::Box<R>& r, const Numeric::Rational& t) const
+Geometry::Orbit<Numeric::Rational,BS,BS>*
+Evaluation::VectorFieldOrbiter<BS>::orbit(const System::VectorFieldInterface<R>& vf, 
+                                          const Geometry::Box<R>& is, 
+                                          const Numeric::Rational& t) const
 {
-  ARIADNE_LOG(4,"ContinuousTimeOrbit<Rational,Box> VectorFieldOrbiter::orbit(VectorFieldInterface,Box,Rational)\n");
+  ARIADNE_LOG(4,"Orbit<Rational,Box> VectorFieldOrbiter::orbit(VectorFieldInterface,Box,Rational)\n");
   assert(t>=0);
-  Geometry::ContinuousTimeOrbit<Numeric::Rational, Geometry::Box<R>, Geometry::Box<R> > orbit(r);
-  Geometry::Box<R> bb;
-  BS bs(r);
-  BS rs(bs);
-  const Numeric::Rational& maxh=this->_parameters->maximum_step_size();
-  Numeric::Rational h=maxh;
-  Numeric::Rational s=0;
-  while(s<t) {
-    bb=this->_bounder->flow_bounds(vf,bs.bounding_box(),h);
-    if(s+h>t) { h=t-s; }
-    rs=this->_integrator->reachability_step(vf,bs,h,bb);
-    bs=this->_integrator->integration_step(vf,bs,h,bb);
-    s=s+h;
-    orbit.push_back(s,rs.bounding_box(),bs.bounding_box());
-  }
-  return orbit;
-}
-
-
-
-template<class BS>
-Geometry::ContinuousTimeOrbit< Numeric::Rational, Geometry::GridCellListSet<typename BS::real_type>, Geometry::GridCellListSet<typename BS::real_type> >
-Evaluation::VectorFieldOrbiter<BS>::orbit(const System::VectorFieldInterface<R>& vf, const Geometry::GridCell<R>& gc, const Numeric::Rational& t) const
-{
-  ARIADNE_LOG(4,"ContinuousTimeOrbit<Rational,Box> VectorFieldOrbiter::orbit(VectorFieldInterface,Box,Rational)\n");
-  assert(t>=0);
-  const Geometry::Grid<R>& g(gc.grid());
-  Geometry::GridCellListSet<R> rgcls(g);
-  Geometry::GridCellListSet<R> egcls(g);
-  egcls.adjoin(gc);
-  Geometry::ContinuousTimeOrbit<Numeric::Rational, Geometry::GridCellListSet<R>, Geometry::GridCellListSet<R> > orbit(egcls);
-  Geometry::Box<R> bb;
-  BS es(gc);
+  BS es(is);
   BS rs(es);
+  Geometry::Orbit<Numeric::Rational,BS,BS>* orbit=new Geometry::Orbit<Numeric::Rational,BS,BS>(es);
+  Geometry::Box<R> bb;
   const Numeric::Rational& maxh=this->_parameters->maximum_step_size();
   Numeric::Rational h=maxh;
   Numeric::Rational s=0;
   while(s<t) {
-    h=maxh;
     bb=this->_bounder->flow_bounds(vf,es.bounding_box(),h);
     if(s+h>t) { h=t-s; }
     rs=this->_integrator->reachability_step(vf,es,h,bb);
     es=this->_integrator->integration_step(vf,es,h,bb);
-    rgcls=this->_approximator->outer_approximation(rs,g);
-    egcls=this->_approximator->outer_approximation(es,g);
     s=s+h;
-    orbit.push_back(s,rgcls,egcls);
+    orbit->push_back(s,rs,es);
   }
   return orbit;
 }
-
-
 
 
 

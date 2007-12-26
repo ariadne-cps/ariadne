@@ -2,7 +2,7 @@
  *            applicator.cc
  *
  *  Copyright  2007  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
+ *
  ****************************************************************************/
 
 /*
@@ -22,21 +22,23 @@
  */
 
 #include "numeric/float.h"
+
+#include "geometry/rectangle.h"
 #include "geometry/zonotope.h"
 
-#include "evaluation/applicator.h"
-#include "evaluation/applicator.code.h"
+#include "evaluation/standard_applicator.h"
+#include "evaluation/standard_applicator.code.h"
 
 namespace Ariadne {
   namespace Evaluation {
     using namespace Numeric;
 
 #ifdef ENABLE_FLOAT64
-    template class Applicator<Float64>;
+    template class StandardApplicator<Float64>;
 #endif
   
 #ifdef ENABLE_FLOATMP
-    template class Applicator<FloatMP>;
+    template class StandardApplicator<FloatMP>;
 #endif
 
   }

@@ -1,8 +1,8 @@
 /***************************************************************************
  *            approximator_interface.h
  *
- *  Copyright  2007  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
+ *  Copyright  2007  Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -44,16 +44,22 @@ namespace Ariadne {
       typedef Numeric::Interval<R> I;
      public:
       /*! \brief Virtual destructor. */
-      virtual ~ApproximatorInterface() { };
+      virtual ~ApproximatorInterface() { }
 
-      /*! \brief Make a dynamically-allocated copy. */
+      /*! \brief Create a dynamically-allocated copy. */
       virtual ApproximatorInterface<BS>* clone() const = 0;
 
-      /*! \brief Computets and over-approximation of a set from a rectangle. */
+      /*! \brief Computes an over-approximation of a set from a rectangle. */
       virtual BS over_approximation(const Geometry::Box<R>& r) const = 0;
 
-      /*! \brief Computets and over-approximation of a set from a rectangle. */
+      /*! \brief Computes a bounding box for the set. */
+      virtual Geometry::Box<R> bounding_box(const BS& bs) const = 0;
+
+      /*! \brief Computes and over-approximation of a set from a rectangle. */
       virtual Geometry::GridCellListSet<R> outer_approximation(const BS& bs, const Geometry::Grid<R>& g) const = 0;
+
+      /*! \brief Computes and over-approximation of a set from a rectangle. */
+      virtual std::pair<BS,BS> subdivide(const BS& bs) const = 0;
 
       /*! \brief Adjoins an outer approximation to a basic set to a grid mask set. */
       void adjoin_outer_approximation(Geometry::GridMaskSet<R>& gms, const BS& bs) const;

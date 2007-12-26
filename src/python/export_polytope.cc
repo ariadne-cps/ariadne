@@ -23,7 +23,7 @@
 
 #include "python/float.h"
 
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "geometry/polytope.h"
 
 using namespace Ariadne;

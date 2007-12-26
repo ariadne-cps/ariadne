@@ -25,6 +25,7 @@
 #include "numeric/float.h"
 #include "numeric/interval.h"
 
+#include "geometry/rectangle.h"
 #include "geometry/zonotope.h"
 #include "geometry/hybrid_set.h"
 #include "geometry/hybrid_set.code.h"

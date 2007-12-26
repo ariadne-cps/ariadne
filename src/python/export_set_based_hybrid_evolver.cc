@@ -48,7 +48,8 @@ void export_set_based_hybrid_evolver()
 {
 
   typedef Numeric::Interval<R> I;
-  typedef typename Evaluation::VectorFieldEvolver<R>::basic_set_type BS;
+  typedef Zonotope<R,UniformErrorTag> BS;
+
 
   class_< SetBasedHybridEvolver<R> > evolver_class("SetBasedHybridEvolver",init< EvolutionParameters<R> >());
   evolver_class.def(init<const EvolutionParameters<R>&,const ApplicatorInterface<BS>&,const IntegratorInterface<BS>&>());
@@ -69,4 +70,4 @@ void export_set_based_hybrid_evolver()
 }
 
 
-template void export_set_based_hybrid_evolver<FloatPy>();
+//template void export_set_based_hybrid_evolver<FloatPy>();

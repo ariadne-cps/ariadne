@@ -205,7 +205,7 @@ namespace Ariadne {
     tribool superset(const Zonotope<R,ExactTag>& r, const Box<R>& z);
 
     template<class R, class ExactTag> 
-    ListSet< Zonotope<R,ExactTag> >
+    std::pair< Zonotope<R,ExactTag>, Zonotope<R,ExactTag> >
     subdivide(const Zonotope<R,ExactTag>& z);
 
 
@@ -219,11 +219,11 @@ namespace Ariadne {
     tribool superset(const Zonotope<R,UniformErrorTag>& r, const Box<R>& z);
 
     template<class R, class UniformErrorTag> 
-    ListSet< Zonotope<R,UniformErrorTag> >
+    std::pair< Zonotope<R,UniformErrorTag>, Zonotope<R,UniformErrorTag> >
     subdivide(const Zonotope<R,UniformErrorTag>& z);
 
-
-
+    template<class R>
+    Zonotope<R,ExactTag> cascade_reduce(const Zonotope<R,ExactTag>& z, size_type maximum_number_of_blocks);
     
 
     template<class R, class Tag> 

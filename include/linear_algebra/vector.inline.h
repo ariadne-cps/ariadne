@@ -21,6 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+#include "linear_algebra/slice.h"
 
 namespace Ariadne {
     
@@ -199,6 +200,23 @@ LinearAlgebra::Vector<R>::increment() const
 
 
 template<class R> inline
+LinearAlgebra::VectorSlice<const R> 
+LinearAlgebra::Vector<R>::operator() (const Slice& i) const
+{
+  return VectorSlice<const R>(i.size(),this->_array.begin()+i.start(),i.stride());
+}
+
+template<class R> inline
+LinearAlgebra::VectorSlice<R> 
+LinearAlgebra::Vector<R>::operator() (const Slice& i) 
+{
+  return VectorSlice<R>(i.size(),this->_array.begin()+i.start(),i.stride());
+}
+
+
+
+
+template<class R> inline
 R& 
 LinearAlgebra::Vector<R>::operator() (const size_type& i) 
 {
@@ -232,111 +250,7 @@ LinearAlgebra::Vector<R>::operator[] (const size_type& i) const
 
 
 
-template<class R> inline
-LinearAlgebra::VectorSlice<R>::VectorSlice(const size_type& size, R* begin, const size_type& increment)
-  : _size(size), _begin(begin), _increment(increment) 
-{
-}
 
-
-template<class R> inline
-LinearAlgebra::VectorSlice<R>::VectorSlice(const Vector<R>& v)
-  : _size(v.size()), _begin(v.begin()), _increment(v.increment())
-{
-}
-
-
-template<class R> inline
-LinearAlgebra::VectorSlice<R>::VectorSlice(const array<R>& a)
-  : _size(a.size()), _begin(a.begin()), _increment(1u)
-{
-}
-
-
-template<class R> inline
-size_type 
-LinearAlgebra::VectorSlice<R>::size() const 
-{
-  return this->_size; 
-}
-
-
-template<class R> inline
-const R*
-LinearAlgebra::VectorSlice<R>::begin() const 
-{
-  return this->_begin; 
-}
-
-
-template<class R> inline
-const R*
-LinearAlgebra::VectorSlice<R>::end() const 
-{
-  return this->_begin+this->_size*this->_increment; 
-}
-
-
-template<class R> inline
-size_type 
-LinearAlgebra::VectorSlice<R>::increment() const 
-{
-  return this->_increment; 
-}
-
-
-
-template<class R> inline     
-const R&
-LinearAlgebra::VectorSlice<R>::operator() (const size_type& i) const 
-{
-  return this->_begin[i*this->_increment]; 
-}
-
-
-template<class R> inline    
-R& 
-LinearAlgebra::VectorSlice<R>::operator() (const size_type& i) 
-{
-  return this->_begin[i*this->_increment]; 
-}
-
-
-template<class R> inline     
-const R&
-LinearAlgebra::VectorSlice<R>::operator[] (const size_type& i) const 
-{
-  return this->_begin[i*this->_increment]; 
-}
-
-
-template<class R> inline   
-R&
-LinearAlgebra::VectorSlice<R>::operator[] (const size_type& i) 
-{
-  return this->_begin[i*this->_increment]; 
-}
-
-
-template<class R> template<class E> inline
-LinearAlgebra::VectorSlice<R>&
-LinearAlgebra::VectorSlice<R>::operator=(const VectorExpression< E >& v) 
-{
-  const E& e=v(); 
-  ARIADNE_CHECK_EQUAL_SIZES(*this,e,"VectorSlice& VectorSlice::operator=(VectorExcpression)");
-  for(size_type i=0; i!=e.size(); ++i) {
-    this->_begin[i*this->_increment]=e(i); 
-  }
-  return *this;
-}
-
-
-template<class R> inline     
-std::ostream& 
-LinearAlgebra::VectorSlice<R>::write(std::ostream& os) const 
-{ 
-  return Vector<R>(*this).write(os); 
-}
 
 
 
@@ -548,13 +462,6 @@ std::istream&
 LinearAlgebra::operator>>(std::istream& is, Vector<R>& v)
 {
   return v.read(is);
-}
-
-template<class R> inline
-std::ostream&
-LinearAlgebra::operator<<(std::ostream& os, const VectorSlice<R>& vs)
-{
-  return vs.write(os);
 }
 
 

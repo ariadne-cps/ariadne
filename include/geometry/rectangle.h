@@ -370,7 +370,7 @@ namespace Ariadne {
       void set_upper_bound(const dimension_type& i, const Numeric::Interval<R>& x);
       Point<I> lower_corner() const;
       Point<I> upper_corner() const;
-      Rectangle<R> bounding_box() const;
+      //Rectangle<R> bounding_box() const;
       size_type number_of_vertices() const;
       RectangleVerticesIterator<I> vertices_begin() const;
       RectangleVerticesIterator<I> vertices_end() const;
@@ -406,11 +406,11 @@ namespace Ariadne {
       Point<R> _pt;
     };
     
-    
+    template<class X> std::pair< Rectangle<X>, Rectangle<X> > subdivide(const Rectangle<X>&);
+    template<class X> Box<typename Rectangle<X>::real_type> bounding_box(const Rectangle<X>& r);
     template<class X, class R> tribool disjoint(const Rectangle<X>& r, const Box<R>& bx);
     template<class X, class R> tribool subset(const Rectangle<X>& r, const Box<R>& bx);
     template<class X, class R> tribool superset(const Rectangle<X>& r, const Box<R>& bx);
-    
     
     
     

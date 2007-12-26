@@ -82,6 +82,11 @@ LinearAlgebra::Matrix<R>::instantiate()
   Vector<X>* nv=0;
   Vector<I>* iv=0;
 
+  MatrixSlice<R>* slA=0;
+  MatrixSlice<const R>* cslA=0;
+  sup_norm(*cslA);
+  sup_norm(*slA);
+
   sup_norm(*A);
   log_norm(*A);
   singular(*A);
@@ -111,6 +116,22 @@ LinearAlgebra::Matrix<R>::Matrix(const std::string& s)
 template<class R>
 typename Numeric::traits<R>::arithmetic_type
 LinearAlgebra::sup_norm(const Matrix<R>& A)
+{
+  typedef typename Numeric::traits<R>::arithmetic_type F;
+  F result=0;
+  for(size_type i=0; i!=A.number_of_rows(); ++i) {
+    F row_sum=0;
+    for(size_type j=0; j!=A.number_of_columns(); ++j) {
+      row_sum+=abs(A(i,j));
+    }
+    result=Numeric::max(result,row_sum);
+  }
+  return result;
+}
+
+template<class R>
+typename Numeric::traits<R>::arithmetic_type
+LinearAlgebra::sup_norm(const MatrixSlice<R>& A)
 {
   typedef typename Numeric::traits<R>::arithmetic_type F;
   F result=0;

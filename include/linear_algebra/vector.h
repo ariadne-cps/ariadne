@@ -44,7 +44,8 @@
 namespace Ariadne {
   namespace LinearAlgebra {
     
-    
+    class Slice;
+    template<class R> class VectorSlice;
 
     /*! \ingroup LinearAlgebra
      *  \brief A vector over \a R. 
@@ -117,6 +118,11 @@ namespace Ariadne {
       /*! \brief The increment between elements in the storage array. */
       size_type increment() const;
 
+      /*! \brief A slice through the vector. */
+      VectorSlice<R> operator() (const Slice& i);
+      /*! \brief A constant slice through the vector. */
+      VectorSlice<const R> operator() (const Slice& i) const;
+
       /*! \brief A reference to the \a i th element. */
       R& operator() (const size_type& i);
       /*! \brief A constant reference to the \a i th element. */
@@ -130,30 +136,30 @@ namespace Ariadne {
             
 #ifdef DOXYGEN
       /*! \brief The additive inverse of the vector \a v. */
-      friend Vector<R> operator-<>(const Vector<R>& v);
+      friend Vector<R> operator-(const Vector<R>& v);
       /*! \brief The vector sum of \a v1 and \a v2. */
-      friend Vector<R> operator+<>(const Vector<R>& v1, const Vector<R>& v2);
+      friend Vector<R> operator+(const Vector<R>& v1, const Vector<R>& v2);
       /*! \brief The vector difference of \a v1 and \a v2. */
-      friend Vector<R> operator-<>(const Vector<R>& v1, const Vector<R>& v2);
+      friend Vector<R> operator-(const Vector<R>& v1, const Vector<R>& v2);
       /*! \brief The scalar product of \a v by \a s. */
-      friend Vector<R> operator*<>(const R& s, const Vector<R>& v);
+      friend Vector<R> operator*(const R& s, const Vector<R>& v);
       /*! \brief The scalar product of \a v by \a s. */
-      friend Vector<R> operator*<>(const Vector<R>& v, const R& s);
+      friend Vector<R> operator*(const Vector<R>& v, const R& s);
       /*! \brief The scalar product of \a v by the reciprocal of \a s. */
-      friend Vector<R> operator/<>(const Vector<R>& v, const R& s);
+      friend Vector<R> operator/(const Vector<R>& v, const R& s);
 
       /*! \brief The inner product of \a v1 and \a v2. */
-      friend R inner_product<>(const Vector<R>& v1, const Vector<R>& v2);
+      friend R inner_product(const Vector<R>& v1, const Vector<R>& v2);
       /*! \brief The supremum norm of \a v. */
-      friend R LinearAlgebra::sup_norm<>(const Vector<R>& v);
+      friend R LinearAlgebra::sup_norm(const Vector<R>& v);
       /*! \brief The supremum norm of \a v. */
-      friend R LinearAlgebra::norm<>(const Vector<R>& v);
+      friend R LinearAlgebra::norm(const Vector<R>& v);
       /*! \brief The direct sum (concatentation) of v1 and v2. */
-      friend Vector<R> direct_sum<R>(const Vector<R>& v1, const Vector<R>& v2);
+      friend Vector<R> direct_sum(const Vector<R>& v1, const Vector<R>& v2);
       /*! \brief The concatentation of v1 and v2. */
-      friend Vector<R> concatenate<R>(const Vector<R>& v1, const Vector<R>& v2);
+      friend Vector<R> concatenate(const Vector<R>& v1, const Vector<R>& v2);
       /*! \brief The concatentation of v and s. */
-      friend Vector<R> concatenate<R>(const Vector<R>& v1, R& s);
+      friend Vector<R> concatenate(const Vector<R>& v1, R& s);
 #endif 
 
       /*! \brief Write to an output stream . */
@@ -161,43 +167,6 @@ namespace Ariadne {
       /*! \brief Read from an input stream . */
       std::istream& read(std::istream& is);
     };
-    
-    
-
-    /*! \ingroup LinearAlgebra
-     *  \brief A slice through an array or vector, with equally spaces increments. 
-     */
-    template<class R>
-    class VectorSlice : public VectorExpression< VectorSlice<R> >
-    {
-     public:
-      typedef R value_type;
-     
-      explicit VectorSlice(const size_type& size, R* begin, const size_type& increment=1u);
-      VectorSlice(const Vector<R>& v);
-      VectorSlice(const array<R>& a);
-      
-      size_type size() const;
-      const R* begin() const;
-      const R* end() const;
-      size_type increment() const;
-      
-      const R& operator() (const size_type& i) const;
-      R& operator() (const size_type& i);
-     
-      const R& operator[] (const size_type& i) const;
-      R& operator[] (const size_type& i);
-     
-      template<class E> VectorSlice<R>& operator=(const VectorExpression< E >& v);
-      
-      /*! \brief Write to an output stream . */
-      std::ostream& write(std::ostream& os) const;
-     private:
-      size_type _size;
-      R* _begin;
-      size_type _increment;
-    };
-    
     
     template<class R1, class E2> Vector<R1>& operator+=(Vector<R1>& v1, const VectorExpression<E2>& e2);
     template<class R1, class E2> Vector<R1>& operator-=(Vector<R1>& v1, const VectorExpression<E2>& e2);
@@ -253,7 +222,7 @@ namespace Ariadne {
   template<class R> std::ostream& operator<<(std::ostream& os, const Vector<R>& v);
   template<class R> std::istream& operator>>(std::istream& is, Vector<R>& v);
   template<class R> std::ostream& operator<<(std::ostream& os, const VectorSlice<R>& vs);
-    
+   
     
     
     
@@ -269,6 +238,7 @@ namespace Ariadne {
   }
 }
 
+#include "vector_slice.h"
 #include "vector.inline.h"
 
 #endif /* ARIADNE_VECTOR_H */

@@ -79,8 +79,8 @@ namespace Ariadne {
     template<class R> class ConstraintInterface;
     template<class R> class DifferentiableConstraintInterface;
   
-    template<class T, class BS> class DiscreteTimeOrbit;
-    template<class T, class ES, class RS> class ContinuousTimeOrbit;
+    template<class T> class OrbitInterface;
+    template<class T, class ES, class RS=ES> class Orbit;
 
     class HybridSpace;
     template<class S> class HybridSet;

@@ -27,7 +27,7 @@
 
 #include "zonotope.h"
 
-#include "base/lvalue.h"
+#include "base/tuple.h"
 #include "base/array.h"
 #include "exceptions.h"
 #include "numeric/traits.h"
@@ -43,7 +43,7 @@
 
 #include "geometry/point.h"
 #include "geometry/point_list.h"
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "geometry/polyhedron.h"
 #include "geometry/list_set.h"
 
@@ -67,18 +67,6 @@ accumulate(R& value, R& error, uint n, const R* aptr, const R* bptr) {
   }
   value=v.midpoint();
   error=add_up(error,v.radius());
-}
-
-template<class R>
-void
-write_vector_slice(std::ostream& os, const LinearAlgebra::VectorSlice<R>& vs) {
-  os << LinearAlgebra::Vector<R>(vs);
-}
-
-template<class R>
-void
-write_vector_slice(std::ostream& os, const LinearAlgebra::VectorSlice<const R>& vs) {
-  os << LinearAlgebra::Vector<R>(vs);
 }
 
 
@@ -108,13 +96,17 @@ tribool disjoint(const Zonotope<Rational>& z, const Box<Rational>& r);
 tribool superset(const Zonotope<Rational>& z, const Box<Rational>& r);
 tribool subset(const Zonotope<Rational>& z, const Box<Rational>& r);
 
-ListSet< Zonotope<Rational> > subdivide(const Zonotope<Rational>&);
+std::pair< Zonotope<Rational>, Zonotope<Rational> > 
+subdivide(const Zonotope<Rational>&);
 
 template<class R>
-ListSet< Zonotope<R,UniformErrorTag> > subdivide(const Zonotope<R,UniformErrorTag>&);
+std::pair< Zonotope<R,ExactTag>, Zonotope<R,ExactTag> > 
+subdivide(const Zonotope<R,ExactTag>&);
 
-//template<class R>
-//ListSet< Zonotope<R,ExactTag> > subdivide(const Zonotope<R,ExactTag>&);
+template<class R>
+std::pair< Zonotope<R,UniformErrorTag>, Zonotope<R,UniformErrorTag> > 
+subdivide(const Zonotope<R,UniformErrorTag>&);
+
 
 
 template<class R> inline
@@ -292,7 +284,7 @@ Geometry::subset(const Zonotope<R,Tag>& z, const Polyhedron<R>& p)
 }
 
 template<class R,class Tag>
-Geometry::ListSet< Geometry::Zonotope<R,Tag> >
+std::pair< Geometry::Zonotope<R,Tag>, Geometry::Zonotope<R,Tag> >
 Geometry::subdivide(const Zonotope<R,Tag>& z)
 {
   return ::subdivide(z);
@@ -304,6 +296,7 @@ Geometry::approximate(Zonotope<R>& r, const Zonotope<R,Tag>& z)
 {
   r=Zonotope<R>(approximation(z.centre()),LinearAlgebra::approximation<R>(z.generators()));
 }
+
 
 
 template<class R,class Tag>
@@ -624,7 +617,7 @@ Geometry::operator<<(std::ostream& os, const Zonotope<R,Tag>& z)
   os << "["<<z.centre();
   for(size_type j=0; j!=z.number_of_generators(); ++j) {
     os << ";";
-    ::write_vector_slice(os,z.generators().column(j));
+    os << z.generators().column(j);
   }
   os << "]";
   return os;
@@ -946,7 +939,7 @@ contains(const Zonotope<Rational>& z, const Point<Rational>& pt)
 
 
 
-ListSet< Zonotope<Rational,ExactTag> > inline
+std::pair< Zonotope<Rational,ExactTag>, Zonotope<Rational,ExactTag> > inline
 subdivide(const Zonotope<Rational,ExactTag>& z)
 {
   typedef Numeric::Rational Q;
@@ -975,11 +968,11 @@ subdivide(const Zonotope<Rational,ExactTag>& z)
   }
   Vector<Q> v=new_generators.column(j);
   Point<Q> new_centre=c-v;
-  result.adjoin(Zonotope<Q>(new_centre,new_generators));
+  Zonotope<Q> z1(Zonotope<Q>(new_centre,new_generators));
   new_centre=c+v;
-  result.adjoin(Zonotope<Q>(new_centre,new_generators));
+  Zonotope<Q> z2(Zonotope<Q>(new_centre,new_generators));
 
-  return result;
+  return std::make_pair(z1,z2);
 
 }
 
@@ -987,13 +980,21 @@ subdivide(const Zonotope<Rational,ExactTag>& z)
 
 
 template<class R> inline
-ListSet< Zonotope<R,UniformErrorTag> >
+std::pair< Zonotope<R,ExactTag>, Zonotope<R,ExactTag> >
+subdivide(const Zonotope<R,ExactTag>& z)
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+  
+template<class R> inline
+std::pair< Zonotope<R,UniformErrorTag>, Zonotope<R,UniformErrorTag> >
 subdivide(const Zonotope<R,UniformErrorTag>& z)
 {
   typedef Numeric::Interval<R> I;
   using namespace LinearAlgebra;
   
-  ListSet< Zonotope<R,UniformErrorTag> > result;
+  std::pair< Zonotope<R,UniformErrorTag>, Zonotope<R,UniformErrorTag> > result;
   
   size_type d=z.dimension();
   size_type m=z.number_of_generators();
@@ -1028,17 +1029,17 @@ subdivide(const Zonotope<R,UniformErrorTag>& z)
     
     Vector<R> v=new_generators.column(j);
     Point<I> new_centre=c-v;
-    result.adjoin(Zonotope<R,UniformErrorTag>(new_centre,new_generators));
+    result.first=Zonotope<R,UniformErrorTag>(new_centre,new_generators);
     new_centre=c+v;
-    result.adjoin(Zonotope<R,UniformErrorTag>(new_centre,new_generators));
+    result.second=Zonotope<R,UniformErrorTag>(new_centre,new_generators);
  } else {
     const I& cmv=z.centre()[max_value];
     Point<I> new_centre = z.centre();
     const Matrix<R>& new_generators = z.generators();
     new_centre[max_value]=I(cmv.lower(),cmv.midpoint());
-    result.adjoin(Zonotope<R,UniformErrorTag>(new_centre,new_generators));
+    result.first=(Zonotope<R,UniformErrorTag>(new_centre,new_generators));
     new_centre[max_value]=I(cmv.midpoint(),cmv.upper());
-    result.adjoin(Zonotope<R,UniformErrorTag>(new_centre,new_generators));
+    result.second=(Zonotope<R,UniformErrorTag>(new_centre,new_generators));
   }
   return result;
 }
@@ -1073,9 +1074,10 @@ instantiate_zonotope()
   tb=Geometry::subset(ez,p);
   tb=Geometry::subset(iz,p);
   
-  //Geometry::subdivide(z);
+  Geometry::subdivide(z);
   Geometry::subdivide(ez);
-  
+//Geometry::subdivide(iz);
+
   Geometry::orthogonal_over_approximate(ez,iz);
   Geometry::orthogonal_over_approximate(ez,ez);
 
@@ -1110,14 +1112,14 @@ instantiate_zonotope<Rational>()
   Geometry::Point<R>* pt=0;
   Geometry::Box<R>* r=0;
   Geometry::Zonotope<R>* z=0;
-  Geometry::ListSet< Zonotope<R> >* zls=0;
+  std::pair< Zonotope<R>, Zonotope<R> >* zpr=0;
   
   *tb=Geometry::contains(*z,*pt);
   *tb=Geometry::disjoint(*z,*r);
   *tb=Geometry::superset(*z,*r);
   *tb=Geometry::subset(*z,*r);
 
-  *zls=Geometry::subdivide(*z);
+  *zpr=Geometry::subdivide(*z);
   
   Geometry::approximate(*z,*z);
 

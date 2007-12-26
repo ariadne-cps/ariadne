@@ -1,8 +1,8 @@
 /***************************************************************************
- *            discrete_map.cc
+ *            transition_system.code.h
  *
- *  Copyright  2006-7 Pieter Collins
- *  pieter.collins@cwi.nl
+ *  Copyright  2006-7  Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -20,23 +20,14 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+ 
+#include "transition_system.h"
 
-#include "numeric/float.h"
-
-#include "system/discrete_map.h"
-#include "system/discrete_map.code.h"
 
 namespace Ariadne {
   namespace System {
-    using namespace Numeric;
 
-#ifdef ENABLE_FLOAT64
-    template class DiscreteMap<Float64>;
-#endif
   
-#ifdef ENABLE_FLOATMP
-    template class DiscreteMap<FloatMP>;
-#endif
-
+    
   }
 }

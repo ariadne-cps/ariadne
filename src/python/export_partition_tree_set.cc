@@ -27,7 +27,7 @@
 #include "combinatoric/binary_word.h"
 #include "combinatoric/binary_tree.h"
 
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "geometry/grid_set.h"
 #include "geometry/partition_tree_set.h"
 

@@ -33,6 +33,7 @@
 #include "base/tribool.h"
 
 #include "geometry/set_interface.h"
+#include "geometry/box.h"
 #include "geometry/rectangle.h"
 
 namespace Ariadne {
@@ -40,7 +41,7 @@ namespace Ariadne {
  
     
     //! \ingroup ExactSet
-    /*! \brief An adaptor for the Box class conforming to the SetInterface interface. */
+    /*! \brief An adaptor for the Rectangle class conforming to the SetInterface interface. */
     template<class R>
     class RectangularSet : public SetInterface<R>
     {

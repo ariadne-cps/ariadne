@@ -29,7 +29,10 @@
 #include "evaluation/map_evolver.h"
 #include "evaluation/vector_field_evolver.h"
 
-#include "evaluation/applicator.h"
+#include "evaluation/approximator_interface.h"
+#include "evaluation/applicator_interface.h"
+#include "evaluation/integrator_interface.h"
+
 #include "evaluation/lohner_integrator.h"
 
 #include "output/epsstream.h"
@@ -81,11 +84,6 @@ Evaluation::SetBasedHybridEvolver<R>::SetBasedHybridEvolver(const EvolutionParam
 {
 }
 
-template<class R>
-Evaluation::SetBasedHybridEvolver<R>::SetBasedHybridEvolver(const MapEvolver<R>& a, const VectorFieldEvolver<R>& i)
-  : _applicator(new MapEvolver<R>(a)), _integrator(new VectorFieldEvolver<R>(i))
-{
-}
 
 template<class R>
 Evaluation::SetBasedHybridEvolver<R>::SetBasedHybridEvolver(const SetBasedHybridEvolver<R>& e)

@@ -45,7 +45,6 @@ namespace Ariadne {
   namespace Geometry {
 
     template<class R> class Box;
-    template<class X> class Rectangle;
     
     class basic_set_tag;
     class denotable_set_tag;
@@ -293,8 +292,8 @@ namespace Ariadne {
 
     template<class R>
     tribool
-    subset(const ListSet< Rectangle<R> >& A,
-           const ListSet< Rectangle<R> >& B);
+    subset(const ListSet< Box<R> >& A,
+           const ListSet< Box<R> >& B);
     
     
     template<class BS1, class BS2>

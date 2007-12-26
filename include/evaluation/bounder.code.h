@@ -23,7 +23,7 @@
  
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "system/vector_field_interface.h"
 #include "output/logging.h"
 

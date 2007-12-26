@@ -47,7 +47,7 @@
 #include "linear_algebra/matrix.h"
 #include "linear_algebra/matrix_function.h"
 
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "geometry/parallelotope.h"
 #include "geometry/zonotope.h"
 #include "geometry/list_set.h"

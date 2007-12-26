@@ -24,7 +24,7 @@
 #include "numeric/arithmetic.h"
 
 #include "geometry/rectangle_expression.h"
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 
 
 namespace Ariadne {

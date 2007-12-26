@@ -43,6 +43,7 @@ Output::Zonotope2d::operator Polygon2d() const
     }
     res.new_vertex(pt);
   }
+  res.reduce();
   return res;
 }
 
@@ -115,6 +116,12 @@ std::ostream&
 Output::operator<<(std::ostream& os, const Point2d& pt) 
 {
   return os << "(" << pt[0] << "," << pt[1] << ")";
+}
+
+std::ostream& 
+Output::operator<<(std::ostream& os, const Vector2d& v) 
+{
+  return os << "[" << v[0] << "," << v[1] << "]";
 }
 
 std::ostream& 

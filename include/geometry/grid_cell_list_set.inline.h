@@ -125,6 +125,13 @@ Geometry::GridCellListSet<R>::adjoin(const GridCellListSet<R>& cls)
 
 template<class R> inline
 void 
+Geometry::GridCellListSet<R>::restrict(const GridBlock<R>& bl) 
+{
+  _lattice_set.restrict(bl.lattice_set()); 
+}
+
+template<class R> inline
+void 
 Geometry::GridCellListSet<R>::adjoin_over_approximation(const Box<R>& r) 
 {
   this->adjoin(over_approximation(r,this->grid()));

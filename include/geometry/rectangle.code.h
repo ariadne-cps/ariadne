@@ -1,9 +1,8 @@
 /***************************************************************************
  *            rectangle.code.h
  *
- *  Mon 2 May 2005
- *  Copyright 2005  Alberto Casagrande, Pieter Collins
- *  Email casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright 2005-7  Alberto Casagrande, Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -122,6 +121,8 @@ Geometry::Rectangle<R>::quadrant(const Combinatoric::BinaryWord& w) const
   }
   return quadrant;
 }
+
+
 
 template<class R>
 Geometry::ListSet< Geometry::Rectangle<R> >

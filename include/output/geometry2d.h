@@ -41,7 +41,7 @@
 #include "linear_algebra/matrix.h"
 #include "geometry/exceptions.h"
 #include "geometry/point.h"
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "geometry/rectangular_set.h"
 #include "geometry/list_set.h"
 #include "geometry/grid_set.h"
@@ -61,6 +61,7 @@ namespace Ariadne {
       
 
     std::ostream& operator<<(std::ostream&, const Point2d&);
+    std::ostream& operator<<(std::ostream&, const Vector2d&);
 
     inline bool operator==(const Point2d& pt1, const Point2d& pt2) {
       return (pt1[0]==pt2[0]) &&  (pt1[1]==pt2[1]) ;

@@ -25,7 +25,7 @@
 
 #include "linear_algebra/vector.h"
 #include "function/polynomial.h"
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 
 using namespace Ariadne;
 using namespace Ariadne::LinearAlgebra;

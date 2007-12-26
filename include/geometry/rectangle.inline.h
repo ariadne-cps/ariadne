@@ -577,14 +577,14 @@ Geometry::Rectangle< Numeric::Interval<R> >::set_upper_bound(const dimension_typ
   _data[2*i+1]=x; 
 }
 
-template<class R> inline
-Geometry::Rectangle<R> 
-Geometry::Rectangle< Numeric::Interval<R> >::bounding_box() const
+template<class X> inline
+Geometry::Box<typename Geometry::Rectangle<X>::real_type> 
+Geometry::bounding_box(const Rectangle<X>& r) 
 { 
-  Rectangle<R> result(this->dimension());
+  Box<typename Rectangle<X>::real_type> result(r.dimension());
   for(dimension_type i=0; i!=result.dimension(); ++i) {
-    result.set_lower_bound(i,this->lower_bound(i).lower());
-    result.set_upper_bound(i,this->upper_bound(i).upper());
+    result.set_lower_bound(i,r.lower_bound(i));
+    result.set_upper_bound(i,r.upper_bound(i));
   }
   return result;
 }
@@ -686,6 +686,29 @@ Geometry::disjoint(const Rectangle<R>& r1, const Rectangle<R>& r2)
       result=indeterminate;
     }
   }
+  return result;
+}
+
+
+template<class R> inline
+std::pair< Geometry::Rectangle<R>, Geometry::Rectangle<R> >
+Geometry::subdivide(const Rectangle<R>& r)  
+{
+  size_type d=r.dimension();
+  R mr=0;
+  size_type mi=0;
+  for(size_type i=0; i!=d; ++i) {
+    R ir=r[i].radius();
+    if(ir>mr) {
+      mr=ir;
+      mi=i;
+    }
+  }
+  R c=r[mi].midpoint();
+
+  std::pair<Rectangle<R>, Rectangle<R> > result(r,r);
+  result.first.set_upper_bound(mi,c);
+  result.second.set_lower_bound(mi,c);
   return result;
 }
 

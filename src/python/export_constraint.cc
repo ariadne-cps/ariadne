@@ -25,7 +25,7 @@
 
 #include "function/function_interface.h"
 
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "geometry/zonotope.h"
 
 #include "geometry/constraint_interface.h"

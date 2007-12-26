@@ -86,6 +86,9 @@ namespace Ariadne {
         return this->image(pt); }
         
       /*! \brief An over-approximation to the image of a point. */
+      virtual Geometry::Point<F> evaluate(const Geometry::Point<F>& pt) const {
+        return this->image(pt); }
+      /*! \brief An over-approximation to the image of a point. */
       virtual Geometry::Point<F> image(const Geometry::Point<F>& pt) const = 0;
       /*! \brief The derivative of the \a i th component with respect to the multi-index j. */
       virtual F derivative(const Geometry::Point<F>& r, const size_type& i, const Function::MultiIndex& j) const;

@@ -32,7 +32,7 @@
 
 #include "numeric/arithmetic.h"
 
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "geometry/list_set.h"
 
 #include "geometry/grid_block.h" // for GridBlock<R>

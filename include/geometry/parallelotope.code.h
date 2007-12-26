@@ -41,7 +41,7 @@
 
 #include "geometry/point.h"
 #include "geometry/point_list.h"
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "geometry/list_set.h"
 #include "geometry/zonotope.h"
 #include "geometry/polyhedron.h"

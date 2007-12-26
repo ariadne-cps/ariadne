@@ -28,7 +28,7 @@
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
 #include "geometry/point.h"
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "geometry/polyhedron.h"
 #include "geometry/zonotope.h"
 

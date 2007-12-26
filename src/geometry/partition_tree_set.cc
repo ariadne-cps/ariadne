@@ -1,9 +1,8 @@
 /***************************************************************************
  *            partition_tree_set.cc
  *
- *  1 July 2006
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *
  ****************************************************************************/
 
 /*
@@ -22,7 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "geometry/parallelotope.h"
+#include "geometry/rectangle.h"
+#include "geometry/zonotope.h"
 #include "geometry/partition_tree_set.h"
 #include "geometry/partition_tree_set.code.h"
 

@@ -29,7 +29,7 @@
 
 #include "combinatoric/array_operations.h"
 
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 
 #include "output/logging.h"
 

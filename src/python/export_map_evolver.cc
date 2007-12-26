@@ -23,8 +23,8 @@
 
 #include "python/float.h"
 
-#include "geometry/rectangle.h"
-#include "geometry/parallelotope.h"
+#include "geometry/box.h"
+#include "geometry/orbit.h"
 #include "geometry/list_set.h"
 #include "geometry/grid_set.h"
 
@@ -49,17 +49,15 @@ void export_map_evolver()
   typedef Zonotope<R,UniformErrorTag> BS;
 
   class_< MapEvolver<R> > evolver_class("MapEvolver",init< EvolutionParameters<R> >());
-  evolver_class.def(init<const EvolutionParameters<R>&,const ApplicatorInterface<BS>&>());
-  evolver_class.def("image",(SetInterface<R>*(MapEvolver<R>::*)(const MapInterface<R>&,const SetInterface<R>&)const)
-                    (&MapEvolver<R>::image),return_value_policy<manage_new_object>(),"Compute the image of a set under a map" );
-  evolver_class.def("preimage",(SetInterface<R>*(MapEvolver<R>::*)(const MapInterface<R>&,const SetInterface<R>&,const SetInterface<R>&)const)
-                    (&MapEvolver<R>::preimage),return_value_policy<manage_new_object>(),"Compute the preimage of a set under a map" );
-  evolver_class.def("iterate",(SetInterface<R>*(MapEvolver<R>::*)(const MapInterface<R>&,const SetInterface<R>&,const Integer&)const)
-                    (&MapEvolver<R>::iterate),return_value_policy<manage_new_object>(),"Compute an approximation to the iterate of a set under a map" );
-  evolver_class.def("reach",(SetInterface<R>*(MapEvolver<R>::*)(const MapInterface<R>&,const SetInterface<R>&,const Integer&)const)
-                    (&MapEvolver<R>::reach),return_value_policy<manage_new_object>(),"Compute an approximation to the timed reachable set under a map" );
-  evolver_class.def("lower_reach",(SetInterface<R>*(MapEvolver<R>::*)(const MapInterface<R>&,const SetInterface<R>&)const)
+  evolver_class.def(init<const EvolutionParameters<R>&,const ApplicatorInterface<BS>&,const ApproximatorInterface<BS>&>());
+  evolver_class.def("lower_evolve",(SetInterface<R>*(MapEvolver<R>::*)(const MapInterface<R>&,const SetInterface<R>&,const Integer&)const)
+                    (&MapEvolver<R>::lower_evolve),return_value_policy<manage_new_object>(),"Compute a lower-approximation to the reachable set under a map" );
+  evolver_class.def("lower_reach",(SetInterface<R>*(MapEvolver<R>::*)(const MapInterface<R>&,const SetInterface<R>&,const Integer&)const)
                     (&MapEvolver<R>::lower_reach),return_value_policy<manage_new_object>(),"Compute a lower-approximation to the reachable set under a map" );
+  evolver_class.def("upper_evolve",(SetInterface<R>*(MapEvolver<R>::*)(const MapInterface<R>&,const SetInterface<R>&,const Integer&)const)
+                    (&MapEvolver<R>::upper_evolve),return_value_policy<manage_new_object>(),"Compute an approximation to the iterate of a set under a map" );
+  evolver_class.def("upper_reach",(SetInterface<R>*(MapEvolver<R>::*)(const MapInterface<R>&,const SetInterface<R>&,const Integer&)const)
+                    (&MapEvolver<R>::upper_reach),return_value_policy<manage_new_object>(),"Compute an approximation to the timed reachable set under a map" );
   evolver_class.def("chainreach",(SetInterface<R>*(MapEvolver<R>::*)(const MapInterface<R>&,const SetInterface<R>&,const Box<R>&)const)
                     (&MapEvolver<R>::chainreach),return_value_policy<manage_new_object>(), "Compute an outer-approximation to the chain reachable set");
   evolver_class.def("viable",(SetInterface<R>*(MapEvolver<R>::*)(const MapInterface<R>&,const SetInterface<R>&)const)

@@ -22,6 +22,8 @@
  */
 
 #include "numeric/float.h"
+
+#include "geometry/rectangle.h"
 #include "geometry/zonotope.h"
 
 #include "evaluation/map_evolver.h"

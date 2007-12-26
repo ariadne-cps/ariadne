@@ -48,7 +48,7 @@
  * using a binary tree representation. 
  *
  * The main intended use of these classes in Ariadne is to represent 
- * sets as unions of rectangles on a grid. See the file grid_rectangle.h
+ * sets as unions of rectangles on a grid. See the file grid_box.h
  * for the implementation of this representation. 
  * The basic idea is that a subset of Euclidean space contained in some 
  * cuboid R can be represented by a union of sets obtained by repeatedly

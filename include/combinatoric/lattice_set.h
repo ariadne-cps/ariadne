@@ -400,6 +400,9 @@ namespace Ariadne {
       /*! \brief Adjoins a LatticeMaskSet to the set. */
       void adjoin(const LatticeMaskSet& ms);
       
+      /*! \brief Restricts to cells in a block. */
+      void restrict(const LatticeBlock& r);
+
       /*! \brief Empties the set. */
       void clear();
 

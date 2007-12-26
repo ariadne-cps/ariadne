@@ -23,7 +23,7 @@
 
 #include <ostream>
 
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "geometry/grid_box.h"
 #include "geometry/grid_block.h"
 

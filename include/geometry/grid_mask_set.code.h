@@ -31,7 +31,7 @@
 
 #include "combinatoric/array_operations.h"
 
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 
 #include "geometry/grid_cell.h"
 #include "geometry/grid_block.h"

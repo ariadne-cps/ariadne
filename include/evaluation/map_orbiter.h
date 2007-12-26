@@ -1,8 +1,8 @@
 /***************************************************************************
  *            map_orbiter.h
  *
- *  Copyright  2007  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
+ *  Copyright  2007  Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -38,7 +38,7 @@
 #include "evaluation/evolution_parameters.h"
 #include "evaluation/applicator_interface.h"
 #include "evaluation/approximator_interface.h"
-#include "evaluation/orbiter_interface.h"
+#include "evaluation/map_orbiter_interface.h"
 
 namespace Ariadne {
   namespace Evaluation {
@@ -51,13 +51,16 @@ namespace Ariadne {
     class MapOrbiter 
       : public MapOrbiterInterface<typename BS::real_type>
     {
+      typedef Numeric::Integer T;
       typedef typename BS::real_type R;
      public:
       /*! \brief Default construnctor. */
       //MapOrbiter();
 
       /*! \brief Construct from the evolution parameters and an applicator. */
-      MapOrbiter(const EvolutionParameters<R>&, const ApplicatorInterface<BS>&);
+      MapOrbiter(const EvolutionParameters<R>&, 
+                 const ApplicatorInterface<BS>&, 
+                 const ApproximatorInterface<BS>&);
 
       /*! \brief Copy constructor. */
       MapOrbiter(const MapOrbiter<BS>&);
@@ -65,44 +68,44 @@ namespace Ariadne {
       /*! \brief Make a dynamically-allocated copy. */
       MapOrbiter<BS>* clone() const;
 
+      /*! \brief The maximum allowable radius of a basic set. */
+      R maximum_basic_set_radius() const;
 
-      /*! \brief Compute the image of a rectangle under a continuous function. */
-      virtual 
-      Geometry::Box<R> 
-      apply(const System::MapInterface<R>& f, const Geometry::Box<R>& r) const;
+      /*! \brief The grid used to define the accuracy. */
+      Geometry::Grid<R> grid(dimension_type d) const;
 
-      /*! \brief Compute the image of a grid cell under a continuous self-map. */
-      virtual 
+      /*! \brief Compute the evolved set under a map. */
+      virtual
       Geometry::GridCellListSet<R> 
-      apply(const System::MapInterface<R>& f, const Geometry::GridCell<R>& r) const;
+      upper_evolve(const System::MapInterface<R>& f, const Geometry::Box<R>& s, const Numeric::Integer& n) const;
 
-      /*! \brief Compute the image of a grid cell under a continuous function, approximating on grid \a g which may lie in a different space. */
-      virtual 
+      /*! \brief Compute the reach set under a map. */
+      virtual
       Geometry::GridCellListSet<R> 
-      apply(const System::MapInterface<R>& f, const Geometry::GridCell<R>& r, const Geometry::Grid<R>& g) const;
+      upper_reach(const System::MapInterface<R>& f, const Geometry::Box<R>& s, const Numeric::Integer& n) const;
 
+      /*! \brief Compute the evolved set under a map. */
+      virtual
+      Geometry::ListSet< Geometry::Box<R> > 
+      lower_evolve(const System::MapInterface<R>& f, const Geometry::Box<R>& s, const Numeric::Integer& n) const;
 
+      /*! \brief Compute the reach set under a map. */
+      virtual
+      Geometry::ListSet< Geometry::Box<R> > 
+      lower_reach(const System::MapInterface<R>& f, const Geometry::Box<R>& s, const Numeric::Integer& n) const;
 
-      /*! \brief Compute the orbit of a rectangle under \a n steps of continuous function. */
+      /*! \brief Compute the orbit of a basic set under \a n steps of continuous function. */
       virtual 
-      Geometry::DiscreteTimeOrbit< Numeric::Integer, Geometry::Box<R> >
+      Geometry::Orbit<Numeric::Integer,BS>*
       orbit(const System::MapInterface<R>& f, const Geometry::Box<R>& r, const Numeric::Integer& n) const;
 
-      /*! \brief Compute the orbit of a rectangle under at most \a n steps of continuous function, until the size reaches \a s. */
-      virtual 
-      Geometry::DiscreteTimeOrbit< Numeric::Integer, Geometry::Box<R> >
-      orbit(const System::MapInterface<R>& f, const Geometry::Box<R>& r, const Numeric::Integer& n, const R& s) const;
+      /*! \brief Compute the orbit of a basic set under \a n steps of continuous function. */
+      Geometry::Orbit<T,BS>
+      orbit(const System::MapInterface<R>& f, const BS& bs, const T& n) const;
 
-      /*! \brief Compute the orbit of a grid cell under steps of continuous function. */
-      virtual 
-      Geometry::DiscreteTimeOrbit< Numeric::Integer, Geometry::GridCellListSet<R> >
-      orbit(const System::MapInterface<R>& f, const Geometry::GridCell<R>& gc, const Numeric::Integer& n) const;
-
-     private:
-      // Convenience wrapper for applicator services
-      BS apply(const System::MapInterface<R>& f, const BS& bs) const;
      private:
       boost::shared_ptr< ApplicatorInterface<BS> > _applicator;
+      boost::shared_ptr< ApproximatorInterface<BS> > _approximator;
     };
 
   }

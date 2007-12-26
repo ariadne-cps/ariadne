@@ -1,8 +1,8 @@
 /***************************************************************************
- *            applicator.h
+ *            standard_applicator.h
  *
  *  Copyright  2006-7  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
+ *
  ****************************************************************************/
 
 /*
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file applicator.h
+/*! \file standard_applicator.h
  *  \brief Class for computing the image of a basic set under a map.
  */
 
-#ifndef ARIADNE_APPLICATOR_H
-#define ARIADNE_APPLICATOR_H
+#ifndef ARIADNE_STANDARD_APPLICATOR_H
+#define ARIADNE_STANDARD_APPLICATOR_H
 
 #include <boost/shared_ptr.hpp>
 
@@ -41,17 +41,12 @@ namespace Ariadne {
   namespace Evaluation {
 
 
-    template<class R> Geometry::Rectangle<R> apply(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& r); 
-  template<class R> Geometry::Zonotope<R,Geometry::ExactTag> apply(const System::MapInterface<R>& f, const Geometry::Zonotope<R,Geometry::ExactTag>& z); 
-  template<class R> Geometry::Zonotope<R,Geometry::UniformErrorTag> apply(const System::MapInterface<R>& f, const Geometry::Zonotope<R,Geometry::UniformErrorTag>& z); 
-
-
   
     /*! \brief A class for computing the image of a basic set under a map. 
      *  \ingroup Applicators
      */
     template<class R>
-    class Applicator
+    class StandardApplicator
       : public ApplicatorInterface< Geometry::Rectangle<R> >,
         public ApplicatorInterface< Geometry::Zonotope<R,Geometry::ExactTag> >,
         public ApplicatorInterface< Geometry::Zonotope<R,Geometry::UniformErrorTag> >
@@ -61,29 +56,24 @@ namespace Ariadne {
       //@{ 
       //! \name Constructors and cloning operations.
       /*! \brief Default constructor. */
-      Applicator();
-
+      StandardApplicator() { }
       /*! \brief Make a dynamically-allocated copy. */
-      Applicator<R>* clone() const;
-     
+      StandardApplicator<R>* clone() const { return new StandardApplicator<R>(*this); }
       //@}
-
 
       //@{ 
       //! \name Methods for applying a system to a basic set.
-
+      
       /*! \brief Compute the image of a rectangle under a continuous function. */
       virtual Geometry::Rectangle<R> apply(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& bs) const;
       /*! \brief Compute the image of a zonotope under a continuous function. */
       virtual Geometry::Zonotope<R,Geometry::ExactTag> apply(const System::MapInterface<R>& f, const Geometry::Zonotope<R,Geometry::ExactTag>& bs) const;
       /*! \brief Compute the image of a zonotope under a continuous function. */
       virtual Geometry::Zonotope<R,Geometry::UniformErrorTag> apply(const System::MapInterface<R>& f, const Geometry::Zonotope<R,Geometry::UniformErrorTag>& bs) const;
-     private:
-      static void instantiate();
       //@}
     };
 
   }
 }
 
-#endif /* ARIADNE_APPLICATOR_H */
+#endif /* ARIADNE_STANDARD_APPLICATOR_H */

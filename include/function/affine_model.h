@@ -507,11 +507,11 @@ namespace Ariadne {
     template<class R> inline
     std::ostream& AffineModel<R>::write(std::ostream& os) const
     {
-      os << "AffineModel( a0=" << LinearAlgebra::VectorSlice<I>(this->_rd,this->_iptr,1) << ", a1=";
+      os << "AffineModel( a0=" << LinearAlgebra::VectorSlice<const I>(this->_rd,this->_iptr,1) << ", a1=";
       if(this->_s==0) {
-        os  << LinearAlgebra::MatrixSlice<R>(this->_rd,this->_ad,this->_rptr+this->_rd,1,this->_rd);
+        os  << LinearAlgebra::MatrixSlice<const R>(this->_rd,this->_ad,this->_rptr+this->_rd,1,this->_rd);
       } else {
-        os << LinearAlgebra::MatrixSlice<I>(this->_rd,this->_ad,this->_iptr+this->_rd,1,this->_rd);
+        os << LinearAlgebra::MatrixSlice<const I>(this->_rd,this->_ad,this->_iptr+this->_rd,1,this->_rd);
       }
       return os << " )";
     }

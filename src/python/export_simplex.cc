@@ -26,7 +26,7 @@
 
 #include "geometry/simplex.h"
 
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "geometry/polyhedron.h"
 
 using namespace Ariadne;

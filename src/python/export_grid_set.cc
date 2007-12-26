@@ -26,8 +26,8 @@
 
 #include "linear_algebra/vector.h"
 
+#include "geometry/box.h"
 #include "geometry/rectangle.h"
-#include "geometry/parallelotope.h"
 #include "geometry/zonotope.h"
 #include "geometry/polytope.h"
 #include "geometry/polyhedron.h"
@@ -202,9 +202,10 @@ void export_grid_set()
   def("over_approximation",(RGridBlock(*)(const RBox&,const RGrid&))(&Geometry::over_approximation));
   def("under_approximation",(RGridBlock(*)(const RBox&,const RGrid&))(&Geometry::under_approximation));
   def("outer_approximation",(RGridBlock(*)(const RBox&,const RGrid&))(&Geometry::outer_approximation));
+  def("inner_approximation",(RGridBlock(*)(const RBox&,const RGrid&))(&Geometry::inner_approximation));
 
 
-  def("outer_approximation",(RGridBlock(*)(const RRectangle&,const RGrid&))(&Geometry::outer_approximation));
+  def("outer_approximation",(RGridCellListSet(*)(const RRectangle&,const RGrid&))(&Geometry::outer_approximation));
   def("outer_approximation",(RGridCellListSet(*)(const RPolyhedron&,const RGrid&))(&Geometry::outer_approximation));
   def("outer_approximation",(RGridCellListSet(*)(const RPolytope&,const RGrid&))(&Geometry::outer_approximation));
   def("outer_approximation",(RGridCellListSet(*)(const RZonotope&,const RGrid&))(&Geometry::outer_approximation));
@@ -214,7 +215,7 @@ void export_grid_set()
   def("outer_approximation",(RGridMaskSet(*)(const EZonotopeListSet&,const RFiniteGrid&))(&Geometry::outer_approximation));
   def("outer_approximation",(RGridMaskSet(*)(const RSetInterface&,const RFiniteGrid&))(&Geometry::outer_approximation));
 
-  def("inner_approximation",(RGridBlock(*)(const RRectangle&,const RGrid&))(&Geometry::inner_approximation));
+  def("inner_approximation",(RGridCellListSet(*)(const RRectangle&,const RGrid&))(&Geometry::inner_approximation));
   def("inner_approximation",(RGridCellListSet(*)(const RPolytope&,const RGrid&))(&Geometry::inner_approximation));
   def("inner_approximation",(RGridCellListSet(*)(const RPolyhedron&,const RGrid&))(&Geometry::inner_approximation));
   def("inner_approximation",(RGridCellListSet(*)(const RZonotope&,const RGrid&))(&Geometry::inner_approximation));

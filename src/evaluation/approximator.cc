@@ -1,8 +1,8 @@
 /***************************************************************************
  *            approximator.cc
  *
- *  Copyright  2007  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
+ *  Copyright  2007  Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -22,10 +22,15 @@
  */
 
 #include "numeric/float.h"
+
+#include "geometry/rectangle.h"
 #include "geometry/zonotope.h"
 
-#include "evaluation/approximator.h"
-#include "evaluation/approximator.code.h"
+#include "evaluation/standard_approximator.h"
+#include "evaluation/standard_approximator.code.h"
+
+#include "evaluation/fast_approximator.h"
+#include "evaluation/fast_approximator.code.h"
 
 namespace Ariadne {
   namespace Evaluation {
@@ -33,14 +38,18 @@ namespace Ariadne {
     using namespace Geometry;
 
 #ifdef ENABLE_FLOAT64
-    template class Approximator< Rectangle<Float64> >;
-    template class Approximator< Zonotope<Float64,UniformErrorTag> >;
+    template class StandardApproximator< Rectangle<Float64> >;
+    template class StandardApproximator< Zonotope<Float64,ExactTag> >;
+    template class StandardApproximator< Zonotope<Float64,UniformErrorTag> >;
+    template class FastApproximator< Zonotope<Float64,ExactTag> >;
     template class FastApproximator< Zonotope<Float64,UniformErrorTag> >;
 #endif
   
 #ifdef ENABLE_FLOATMP
-    template class Approximator< Rectangle<FloatMP> >;
-    template class Approximator< Zonotope<FloatMP,UniformErrorTag> >;
+    template class StandardApproximator< Rectangle<FloatMP> >;
+    template class StandardApproximator< Zonotope<FloatMP,ExactTag> >;
+    template class StandardApproximator< Zonotope<FloatMP,UniformErrorTag> >;
+    template class FastApproximator< Zonotope<FloatMP,ExactTag> >;
     template class FastApproximator< Zonotope<FloatMP,UniformErrorTag> >;
 #endif
 

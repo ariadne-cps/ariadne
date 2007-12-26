@@ -266,6 +266,19 @@ namespace Ariadne {
       }
     }
 
+    void 
+    LatticeCellListSet::restrict(const LatticeBlock& lb) 
+    { 
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(*this,lb,"void LatticeCellListSet::restrict(LatticeBlock)");
+      LatticeCellListSet result(this->dimension());
+      for(LatticeCellListSet::const_iterator i=this->begin(); i!=this->end(); ++i) {
+        if(subset(*i,lb)) {
+          result.adjoin(*i);
+        }
+      }
+      *this=result;
+    }
+
     void
     LatticeCellListSet::clear()
     {

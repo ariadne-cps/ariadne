@@ -29,7 +29,7 @@
 
 #include "geometry/point.h"
 #include "geometry/point_list.h"
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 
 
 

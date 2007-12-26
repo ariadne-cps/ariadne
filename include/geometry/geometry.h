@@ -31,7 +31,7 @@
 #include "geometry/geometry_declarations.h"
 
 #include "geometry/point.h"
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "geometry/parallelopiped.h"
 #include "geometry/zonotope.h"
 #include "geometry/simplex.h"

@@ -186,13 +186,32 @@ LinearAlgebra::Matrix<R>::size() const
 }
 
 
+
+template<class R> inline
+LinearAlgebra::MatrixSlice<R>
+LinearAlgebra::Matrix<R>::operator() (const Slice& i, const Slice& j)  
+{ 
+  R* begin=this->_array.begin()+this->row_increment()*i.start()+this->column_increment()*j.start();
+  return MatrixSlice<R>(i.size(),j.size(),begin,
+                        this->row_increment()*i.stride(), this->column_increment()*j.stride());
+}
+
+template<class R> inline
+LinearAlgebra::MatrixSlice<const R> 
+LinearAlgebra::Matrix<R>::operator() (const Slice& i, const Slice& j) const
+{ 
+  const R* begin=this->_array.begin()+this->row_increment()*i.start()+this->column_increment()*j.start();
+  return MatrixSlice<const R>(i.size(),j.size(),begin,
+                              this->row_increment()*i.stride(), this->column_increment()*j.stride());
+}
+
+
 template<class R> inline
 const R& 
 LinearAlgebra::Matrix<R>::operator() (const size_type& i, const size_type& j) const 
 { 
   return this->_array[i*this->_nc+j]; 
 }
-
 
 template<class R> inline
 R& 
@@ -242,7 +261,7 @@ template<class R> inline
 LinearAlgebra::VectorSlice<const R>
 LinearAlgebra::Matrix<R>::row(const size_type& i) const 
 {
-  return VectorSlice<const R>(this->_nc,this->begin()+i*_nc,1u); 
+  return VectorSlice<const R>(this->number_of_columns(),this->begin()+i*this->row_increment(),this->column_increment()); 
 }
 
 
@@ -250,7 +269,22 @@ template<class R> inline
 LinearAlgebra::VectorSlice<const R> 
 LinearAlgebra::Matrix<R>::column(const size_type& j) const 
 {
-  return VectorSlice<const R>(this->_nr,this->begin()+j,this->_nc); 
+  return VectorSlice<const R>(this->number_of_rows(),this->begin()+j*this->column_increment(),this->row_increment());
+}
+
+template<class R> inline
+LinearAlgebra::VectorSlice<R>
+LinearAlgebra::Matrix<R>::row(const size_type& i)  
+{
+  return VectorSlice<R>(this->number_of_columns(),this->begin()+i*this->row_increment(),this->column_increment()); 
+}
+
+
+template<class R> inline
+LinearAlgebra::VectorSlice<R> 
+LinearAlgebra::Matrix<R>::column(const size_type& j)  
+{
+  return VectorSlice<R>(this->number_of_rows(),this->begin()+j*this->column_increment(),this->row_increment());
 }
 
 
@@ -290,139 +324,6 @@ LinearAlgebra::Matrix<R>::column_increment() const
 
 
 
-template<class R> inline
-LinearAlgebra::MatrixSlice<R>::MatrixSlice(const size_type& nr, const size_type& nc, R* ptr, const size_type& rinc, const size_type& cinc)
-  
-  : _number_of_rows(nr), _number_of_columns(nc), _begin(ptr), _row_increment(rinc), _column_increment(cinc) 
-{ 
-}
-
-
-template<class R> inline
-LinearAlgebra::MatrixSlice<R>::MatrixSlice(const size_type& nr, const size_type& nc, R* ptr)
-  
-  : _number_of_rows(nr), _number_of_columns(nc), _begin(ptr), _row_increment(nc), _column_increment(1u) 
-{ 
-}
-
-
-template<class R> inline
-LinearAlgebra::MatrixSlice<R>::MatrixSlice(const Matrix<R>& m)
-  
-  : _number_of_rows(m.number_of_rows()), _number_of_columns(m.number_of_constraints()), _begin(m.begin()),
-    _row_increment(m.row_increment()), _column_increment(m.column_increment()) 
-{ 
-}
-
-
-template<class R> inline
-size_type
-LinearAlgebra::MatrixSlice<R>::number_of_rows() const 
-{
-  return this->_number_of_rows;
-}
-
-template<class R> inline
-size_type
-LinearAlgebra::MatrixSlice<R>::number_of_columns() const { 
-  return this->_number_of_columns;
-}
-
-
-template<class R> inline
-array<size_type,2u>
-LinearAlgebra::MatrixSlice<R>::size() const 
-{
-  return array<size_type,2>(this->_nr,this->_nc); }
-template<class R> inline
-const R*
-LinearAlgebra::MatrixSlice<R>::begin() const 
-{
-  return this->_begin;
-}
-
-
-template<class R> inline
-R*
-LinearAlgebra::MatrixSlice<R>::begin() 
-{
-  return this->_begin;
-}
-
-
-template<class R> inline
-size_type
-LinearAlgebra::MatrixSlice<R>::row_increment() const 
-{
-  return this->_row_increment;
-}
-
-
-template<class R> inline
-size_type
-LinearAlgebra::MatrixSlice<R>::column_increment() const 
-{
-  return this->_column_increment;
-}
-
-template<class R> inline
-const R&
-LinearAlgebra::MatrixSlice<R>::operator() (const size_type& i, const size_type& j) const 
-{
-  return this->_begin[i*this->_row_increment+j*this->_column_increment];
-}
-
-
-template<class R> inline
-R&
-LinearAlgebra::MatrixSlice<R>::operator() (const size_type& i, const size_type& j) 
-{
-  return this->_begin[i*this->_row_increment+j*this->_column_increment]; 
-}
-
-
-template<class R> inline
-LinearAlgebra::VectorSlice<const R>
-LinearAlgebra::MatrixSlice<R>::column(const size_type& j) const 
-{
-  return VectorSlice<const R>(this->number_of_rows(),this->begin()+j*this->column_increment(),this->row_increment());
-}
-
-
-template<class R> inline
-LinearAlgebra::MatrixSlice<R>&
-LinearAlgebra::MatrixSlice<R>::operator=(const R& x) 
-{
-  for(size_type i=0; i!=this->number_of_rows(); ++i) { 
-    for(size_type j=0; j!=this->number_of_columns(); ++j) { 
-      (*this)(i,j)=x;
-    } 
-  }
-  return *this;
-}
-
-
-template<class R> template<class E> inline
-LinearAlgebra::MatrixSlice<R>&
-LinearAlgebra::MatrixSlice<R>::operator=(const MatrixExpression< E >& m) 
-{
-  ARIADNE_CHECK_MATRIX_EQUAL_SIZES(*this,m(),"MatrixSlice& MatrixSlice::operator=(MatrixExpression)");
-  const E& e=m(); 
-  for(size_type i=0; i!=this->number_of_rows(); ++i) { 
-    for(size_type j=0; j!=this->number_of_columns(); ++j) { 
-      (*this)(i,j)=e(i,j);
-    }
-  }
-  return *this;
-}
-
-
-template<class R> inline
-std::ostream&
-LinearAlgebra::MatrixSlice<R>::write(std::ostream& os) const 
-{
-  return Matrix<R>(*this).write(os);
-}
 
 
 
@@ -784,12 +685,6 @@ LinearAlgebra::concatenate_columns(const MatrixSlice<R>& A1, const MatrixSlice<R
 
 template<class R> inline
 std::ostream&
-LinearAlgebra::operator<<(std::ostream& os, const MatrixSlice<R>& A) {
-  return A.write(os);
-}
-
-template<class R> inline
-std::ostream&
 LinearAlgebra::operator<<(std::ostream& os, const Matrix<R>& A) {
   return A.write(os);
 }
@@ -799,6 +694,7 @@ std::istream&
 LinearAlgebra::operator>>(std::istream& is, Matrix<R>& A) {
   return A.read(is); 
 }
+
 
 
 } // namespace Ariadne

@@ -25,7 +25,7 @@
 #include "python/float.h"
 
 #include "geometry/point.h"
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "system/polynomial_map.h"
 
 using namespace Ariadne;

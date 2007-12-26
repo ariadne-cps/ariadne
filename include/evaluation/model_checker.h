@@ -1,8 +1,8 @@
 /***************************************************************************
  *            model_checker.h
  *
- *  Copyright  2006  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
+ *  Copyright  2006-7  Alberto Casagrande, Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -35,7 +35,7 @@
 #include "geometry/declarations.h"
 #include "system/declarations.h"
 
-#include "system/discrete_map.h"
+#include "system/transition_system.h"
 
 #include "evaluation/evolution_parameters.h"
 #include "evaluation/applicator_interface.h"
@@ -81,60 +81,24 @@ namespace Ariadne {
       //@{ 
       //! \name Evaluation of discretized maps on concrete sets
 
-      /*! \brief Compute the image of a list set under a map. */
-      virtual 
-      Geometry::ListSet< Geometry::Box<R> > 
-      image(const System::DiscreteMapInterface<R>& map, const Geometry::ListSet< Geometry::Box<R> >& initial_set) const;
-       
-      
-      /*! \brief Compute the image of \a map starting in \a initial_set computing the result on \a grid. */
-      virtual
-      Geometry::GridCellListSet<R> 
-      image(const System::DiscreteMapInterface<R>& map, 
-            const Geometry::GridCellListSet<R>& initial_set,
-            const Geometry::Grid<R>& grid) const;
-
-      /*! \brief Compute the image of \a map starting in \a initial_set while remaining in \a bounding_set. */
-      virtual
-      Geometry::GridMaskSet<R> 
-      image(const System::DiscreteMapInterface<R>& map, 
-            const Geometry::GridMaskSet<R>& initial_set,
-            const Geometry::GridMaskSet<R>& bounding_set) const;
-
-
-      /*! \brief Compute the preimage of \a set under \a map contained in \a bound. */
-      virtual
-      Geometry::GridMaskSet<R> 
-      preimage(const System::DiscreteMapInterface<R>& map, 
-               const Geometry::GridMaskSet<R>& set,
-               const Geometry::GridMaskSet<R>& bound) const;
-
-      /*! \brief Compute the preimage of \a set under \a map contained in \a bound. */
-      virtual
-      Geometry::PartitionTreeSet<R> 
-      preimage(const System::DiscreteMapInterface<R>& map, 
-               const Geometry::PartitionTreeSet<R>& set,
-               const Geometry::Box<R>& bound) const;
-
-
       /*! \brief Compute an approximation to the iterated set of \a map starting in \a initial_set, iterating \a steps times. */
       virtual
       Geometry::ListSet< Geometry::Box<R> > 
-      iterate(const System::DiscreteMapInterface<R>& map, 
-              const Geometry::ListSet< Geometry::Box<R> >& initial_set,
-              const Numeric::Integer& steps) const;
+      evolve(const System::TransitionSystemInterface<R>& map, 
+             const Geometry::ListSet< Geometry::Box<R> >& initial_set,
+             const Numeric::Integer& steps) const;
 
       /*! \brief Compute an approximation to the reachable set of \a map starting in \a initial_set, iterating at most \a steps times. */
       virtual
       Geometry::ListSet< Geometry::Box<R> > 
-      reach(const System::DiscreteMapInterface<R>& map, 
+      reach(const System::TransitionSystemInterface<R>& map, 
             const Geometry::ListSet< Geometry::Box<R> >& initial_set,
             const Numeric::Integer& steps) const;
 
       /*! \brief Compute a lower-approximation to the reachable set of \a map starting in \a initial_set. */
       virtual
       Geometry::ListSet< Geometry::Box<R> > 
-      lower_reach(const System::DiscreteMapInterface<R>& map, 
+      lower_reach(const System::TransitionSystemInterface<R>& map, 
                   const Geometry::ListSet< Geometry::Box<R> >& initial_set) const;
 
       
@@ -142,48 +106,34 @@ namespace Ariadne {
       /*! \brief Compute an outer-approximation to the chain-reachable set of \a map starting in \a initial_set while staying within \a bounding_set. */
       virtual
       Geometry::GridMaskSet<R> 
-      chainreach(const System::DiscreteMapInterface<R>& map, 
+      chainreach(const System::TransitionSystemInterface<R>& map, 
                  const Geometry::GridMaskSet<R>& initial_set, 
-                 const Geometry::GridMaskSet<R>& bounding_set) const;
+                 const Geometry::Box<R>& bounding_box) const;
     
       /*! \brief Compute the viability kernel of \a map within \a bounding_set. */
       virtual
       Geometry::GridMaskSet<R> 
-      viable(const System::DiscreteMapInterface<R>& map, 
+      viable(const System::TransitionSystemInterface<R>& map, 
              const Geometry::GridMaskSet<R>& bounding_set) const;
     
       /*! \brief Attempt to verify that the reachable set of \a map starting in \a initial_set remains in \a safe_set. */
       virtual
       tribool
-      verify(const System::DiscreteMapInterface<R>& map, 
+      verify(const System::TransitionSystemInterface<R>& map, 
              const Geometry::GridMaskSet<R>& initial_set, 
              const Geometry::GridMaskSet<R>& safe_set) const;
       //@}
 
       
 
-      //@{
-      //! \brief Methods for control systems
-
-      /*! \brief Compute a controller for a control-to-target problem. */ 
-      virtual 
-      System::GridMultiMap<R> 
-      control_synthesis(const System::DiscreteTimeSystem<R>& f, 
-                        const Geometry::SetInterface<R>& initial_set,
-                        const Geometry::SetInterface<R>& target_set,
-                        const Geometry::GridMaskSet<R>& state_bounding_set,
-                        const Geometry::GridMaskSet<R>& control_set,
-                        const Geometry::GridMaskSet<R>& noise_set) const;
-     
-      //@}
-
+ 
       //@{
       //! \name Methods for computing discretizations
 
       /*! \brief Discretize a system on a grid. */ 
       virtual 
       System::GridMultiMap<R> 
-      discretize(const System::DiscreteMapInterface<R>& f, 
+      discretize(const System::TransitionSystemInterface<R>& f, 
                  const Geometry::GridMaskSet<R>& dom,
                  const Geometry::Grid<R>& range_grid) const;
 
@@ -191,27 +141,11 @@ namespace Ariadne {
 
      private:
       const EvolutionParameters<R>& parameters() const;
-
-      Geometry::Box<R> apply(const System::DiscreteMapInterface<R>&, const Geometry::Box<R>&) const;
-
-      Geometry::GridCellListSet<R> apply(const System::DiscreteMapInterface<R>&, const Geometry::GridCell<R>&) const;     
-      
-      Geometry::GridCellListSet<R> apply(const System::DiscreteMapInterface<R>&, const Geometry::GridCell<R>&, const Geometry::Grid<R>& g) const;     
-      
-      Geometry::DiscreteTimeOrbit< Numeric::Integer,Geometry::Box<R> > 
-      orbit(const System::DiscreteMapInterface<R>&, const Geometry::Box<R>&, const Numeric::Integer&) const;
-      
-      Geometry::DiscreteTimeOrbit< Numeric::Integer,Geometry::Box<R> > 
-      orbit(const System::DiscreteMapInterface<R>&, const Geometry::Box<R>&, const Numeric::Integer&, const R&) const;
-      
-      Geometry::DiscreteTimeOrbit< Numeric::Integer,Geometry::GridCellListSet<R> > 
-      orbit(const System::DiscreteMapInterface<R>&, const Geometry::GridCell<R>&, const Numeric::Integer&) const;
-
-    };
+   };
 
 
 
   }
 }
 
-#endif /* ARIADNE_APPLY_H */
+#endif /* ARIADNE_MODEL_CHECKER_H */

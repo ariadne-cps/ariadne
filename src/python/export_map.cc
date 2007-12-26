@@ -26,7 +26,7 @@
 
 #include "linear_algebra/matrix.h"
 #include "geometry/point.h"
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "function/interpreted_function.h"
 #include "system/map.h"
 #include "system/function_map.h"

@@ -24,7 +24,7 @@
 
 #include "base/stlio.h"
 
-#include "rectangle.h"
+#include "box.h"
 #include "list_set.h"
 
 namespace Ariadne {

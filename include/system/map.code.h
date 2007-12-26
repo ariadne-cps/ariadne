@@ -27,7 +27,7 @@
 #include "function/multi_index.h"
 
 #include "geometry/point.h"
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 
 #include "system/map.h"
 

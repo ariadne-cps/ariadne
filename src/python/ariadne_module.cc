@@ -90,6 +90,8 @@ template<class R> void export_hybrid_set();
 
 template<class R> void export_constraint();
 
+template<class R> void export_orbit();
+
 template<class R> void export_map();
 template<class R> void export_affine_map();
 template<class R> void export_polynomial_map();
@@ -103,6 +105,8 @@ template<class R> void export_solver();
 template<class R> void export_applicator();
 template<class R> void export_integrator();
 template<class R> void export_detector();
+template<class R> void export_orbiter();
+template<class R> void export_discretiser();
 template<class R> void export_map_evolver();
 template<class R> void export_vector_field_evolver();
 template<class R> void export_set_based_hybrid_evolver();
@@ -200,6 +204,8 @@ BOOST_PYTHON_MODULE(ariadne)
 
   export_constraint<FloatPy>();
 
+  export_orbit<FloatPy>();
+
   export_map<FloatPy>();
   export_affine_map<FloatPy>();
   export_polynomial_map<FloatPy>();
@@ -213,9 +219,11 @@ BOOST_PYTHON_MODULE(ariadne)
   export_applicator<FloatPy>();
   export_integrator<FloatPy>();
   export_detector<FloatPy>();
+  export_orbiter<FloatPy>();
+  //export_discretiser<FloatPy>();
   export_map_evolver<FloatPy>();
   export_vector_field_evolver<FloatPy>();
-  export_set_based_hybrid_evolver<FloatPy>();
+  //export_set_based_hybrid_evolver<FloatPy>();
   //export_constraint_based_hybrid_evolver<FloatPy>();
 
   export_text_output();

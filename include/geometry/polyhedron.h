@@ -39,14 +39,16 @@
 
 #include "geometry/point.h"
 #include "geometry/point_list.h"
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 
 namespace Ariadne {  
   namespace Geometry {
 
     class basic_set_tag;
-    template<class R> class PolyhedralConstraint;
+    template<class R> class Rectangle;
     template<class R> class Polytope;
+
+    template<class R> class PolyhedralConstraint;
     template<class R> class PolyhedronConstraintsIterator;
     
     /*! \ingroup BasicSet

@@ -2,7 +2,7 @@
  *            applicator_interface.h
  *
  *  Copyright  2006-7  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
+ *
  ****************************************************************************/
 
 /*

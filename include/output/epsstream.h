@@ -42,7 +42,7 @@
 #include "geometry/exceptions.h"
 #include "geometry/point.h"
 #include "geometry/box.h"
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "geometry/rectangular_set.h"
 #include "geometry/list_set.h"
 #include "geometry/grid_set.h"

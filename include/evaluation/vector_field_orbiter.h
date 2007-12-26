@@ -52,10 +52,13 @@ namespace Ariadne {
     class VectorFieldOrbiter 
       : public VectorFieldOrbiterInterface<typename BS::real_type>
     {
+      typedef Numeric::Rational T;
       typedef typename BS::real_type R;
      public:
       /*! \brief Construct from evolution parameters and an integrator. */
-      VectorFieldOrbiter<BS>(const EvolutionParameters<R>&, const IntegratorInterface<BS>&);
+      VectorFieldOrbiter<BS>(const EvolutionParameters<R>&, 
+                             const IntegratorInterface<BS>&, 
+                             const ApproximatorInterface<BS>&);
 
       /*! \brief Copy constructor. */
       VectorFieldOrbiter<BS>(const VectorFieldOrbiter<BS>&);
@@ -63,17 +66,10 @@ namespace Ariadne {
       /*! \brief Make a dynamically-allocated copy. */
       VectorFieldOrbiter<BS>* clone() const;
 
-
-
       /*! \brief Compute the orbit of a rectangle for at most time \a t. */
       virtual 
-      Geometry::ContinuousTimeOrbit< Numeric::Rational, Geometry::Box<R>, Geometry::Box<R>  >
+      Geometry::Orbit<T,BS,BS>*
       orbit(const System::VectorFieldInterface<R>& f, const Geometry::Box<R>& r, const Numeric::Rational& t) const;
-
-      /*! \brief Compute the orbit of a grid cell for time \a t under a vector field. */
-      virtual 
-      Geometry::ContinuousTimeOrbit< Numeric::Rational, Geometry::GridCellListSet<R>, Geometry::GridCellListSet<R> >
-      orbit(const System::VectorFieldInterface<R>& vf, const Geometry::GridCell<R>& gc, const Numeric::Rational& t) const;
 
      private:
       // Convenience wrapper for integrator services

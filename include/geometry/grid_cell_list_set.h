@@ -163,6 +163,9 @@ namespace Ariadne {
       /*!\brief Append a GridCellListSet to the list. */
       void adjoin(const GridCellListSet<R>& cls);
 
+      /*!\brief Restricts to cells contained in \a bl. */
+      void restrict(const GridBlock<R>& bl);
+
       /*! \brief Adjoins an over-approximation of the rectangle \a r. */
       void adjoin_over_approximation(const Box<R>& r);
 

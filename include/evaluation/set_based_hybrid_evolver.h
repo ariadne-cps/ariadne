@@ -60,15 +60,14 @@ namespace Ariadne {
 
       /*! \brief Construct from evolution parameters, an applicator and an integrator. */
       template<class BS>
-      SetBasedHybridEvolver(const EvolutionParameters<R>& parameters, const ApplicatorInterface<BS>& applicator, const IntegratorInterface<BS>& integrator);
+      SetBasedHybridEvolver(const EvolutionParameters<R>& parameters, 
+                            const ApplicatorInterface<BS>& applicator, 
+                            const IntegratorInterface<BS>& integrator);
 
-      /*! \brief Construct from a map evolver and a vector field evolver. */
-      SetBasedHybridEvolver(const MapEvolver<R>& applicator, const VectorFieldEvolver<R>& integrator);
-
-       /*! \brief Copy constructor. */
+      /*! \brief Copy constructor. */
       SetBasedHybridEvolver(const SetBasedHybridEvolver<R>& evolver);
 
-     /*! \brief Virtual destructor. */
+      /*! \brief Virtual destructor. */
       virtual ~SetBasedHybridEvolver();
       //@}
 

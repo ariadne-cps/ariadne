@@ -23,8 +23,9 @@
 
 
 #include "python/float.h"
+#include "python/read_array.h"
 
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "geometry/zonotope.h"
 #include "geometry/list_set.h"
 
@@ -38,6 +39,25 @@ using namespace Ariadne::Python;
 #include <boost/python.hpp>
 using namespace boost::python;
 
+template<class R>  
+Zonotope<R>* 
+make_zonotope(const boost::python::object& obj) 
+{
+  // See "Extracting C++ objects" in the Boost Python tutorial
+  boost::python::list elements=extract<list>(obj);
+  int ng=boost::python::len(elements)-1;
+  array<R> ary;
+  Point<R> c;
+  read_tuple_array(const_cast<array<R>&>(c.data()),elements[0]);
+  int d=c.dimension();
+  Matrix<R> G(d,ng);
+  Vector<R> g(d);
+  for(int j=0; j!=ng; ++j) {
+    read_array(g.data(),elements[j+1]);
+    G.column(j)=g;
+  }
+  return new Zonotope<R>(c,G);
+}
 
 template<class R>
 void export_zonotope() 
@@ -54,6 +74,7 @@ void export_zonotope()
     
 
   class_<RZonotope> rzonotope_class("Zonotope",init<int>());
+  rzonotope_class.def("__init__", make_constructor(&make_zonotope<R>) );
   rzonotope_class.def(init<RPoint,RMatrix>());
   rzonotope_class.def(init<RZonotope>());
   rzonotope_class.def(init<RBox>());
@@ -71,6 +92,7 @@ void export_zonotope()
   def("superset", (tribool(*)(const RZonotope&,const RBox&))(&superset));
   def("subset", (tribool(*)(const RBox&,const RZonotope&))(&subset));
 
+  def("cascade_reduce",(Zonotope<R,ExactTag>(*)(const Zonotope<R,ExactTag>&,size_type)) &cascade_reduce);
 
   class_<EZonotope> ezonotope_class("ErrorZonotope",init<int>());
   ezonotope_class.def(init<EZonotope>());
@@ -80,9 +102,9 @@ void export_zonotope()
   ezonotope_class.def("generators",(const RMatrix&(EZonotope::*)()const)&EZonotope::generators,return_value_policy<copy_const_reference>());
   ezonotope_class.def("dimension", &EZonotope::dimension);
   ezonotope_class.def("empty", &EZonotope::empty);
-  rzonotope_class.def("contains", (tribool(*)(const EZonotope&,const RPoint&))&Geometry::contains);
+  ezonotope_class.def("contains", (tribool(*)(const EZonotope&,const RPoint&))&Geometry::contains);
   ezonotope_class.def("bounding_box", &EZonotope::bounding_box);
-  ezonotope_class.def("subdivide", (ListSet<EZonotope>(*)(const EZonotope&)) &Geometry::subdivide);
+  ezonotope_class.def("subdivide", (std::pair<EZonotope,EZonotope>(*)(const EZonotope&)) &Geometry::subdivide);
   ezonotope_class.def(self_ns::str(self));
 
   def("contains", (tribool(*)(const EZonotope&,const RPoint&))(&contains));
@@ -124,7 +146,7 @@ void export_zonotope<Rational>()
   zonotope_class.def("empty", &QZonotope::empty);
   zonotope_class.def("contains", (tribool(QZonotope::*)(const QPoint&)const)&QZonotope::contains);
   zonotope_class.def("bounding_box", &QZonotope::bounding_box);
-  zonotope_class.def("subdivide", (ListSet<QZonotope>(*)(const QZonotope&))&Geometry::subdivide);
+  zonotope_class.def("subdivide", (std::pair<QZonotope,QZonotope>(*)(const QZonotope&))&Geometry::subdivide);
   zonotope_class.def(self_ns::str(self));
 
   def("contains", (tribool(*)(const QZonotope&,const QPoint&))(&contains));

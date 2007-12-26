@@ -22,7 +22,7 @@
  */
  
 #include "linear_algebra/vector.h"
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "geometry/grid.h"
 
 namespace Ariadne {

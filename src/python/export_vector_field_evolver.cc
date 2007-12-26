@@ -23,7 +23,7 @@
 
 #include "python/float.h"
 
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "geometry/zonotope.h"
 #include "geometry/grid_set.h"
 #include "geometry/list_set.h"
@@ -49,12 +49,13 @@ using namespace boost::python;
 template<class R>
 void export_vector_field_evolver() 
 {
-  typedef typename Evaluation::VectorFieldEvolver<R>::basic_set_type BS;
+  typedef Zonotope<R,UniformErrorTag> BS;
 
+  /*
   class_< VectorFieldEvolver<R> > evolver_class("VectorFieldEvolver",init<const EvolutionParameters<R>&,const IntegratorInterface<BS>&>());
     evolver_class.def(init<const EvolutionParameters<R>&>());
     evolver_class.def("integrate",(SetInterface<R>*(VectorFieldEvolver<R>::*)(const VectorFieldInterface<R>&,const SetInterface<R>&,const Rational&)const)
-                      (&VectorFieldEvolver<R>::integrate),return_value_policy<manage_new_object>());
+                      (&VectorFieldEvolver<R>::evolve),return_value_policy<manage_new_object>());
     evolver_class.def("reach",(SetInterface<R>*(VectorFieldEvolver<R>::*)(const VectorFieldInterface<R>&,const SetInterface<R>&,const Rational&)const)
                       (&VectorFieldEvolver<R>::reach),return_value_policy<manage_new_object>());
     evolver_class.def("lower_reach",(SetInterface<R>*(VectorFieldEvolver<R>::*)(const VectorFieldInterface<R>&,const SetInterface<R>&)const)
@@ -66,7 +67,7 @@ void export_vector_field_evolver()
     evolver_class.def("verify",(tribool(VectorFieldEvolver<R>::*)(const VectorFieldInterface<R>&,const SetInterface<R>&,const SetInterface<R>&)const)
                       (&VectorFieldEvolver<R>::verify));
   
-
+  */
 }
 
 template void export_vector_field_evolver<FloatPy>();

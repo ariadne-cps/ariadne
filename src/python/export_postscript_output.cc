@@ -26,7 +26,7 @@
 
 #include "geometry/point.h"
 #include "geometry/box.h"
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "geometry/zonotope.h"
 #include "geometry/polytope.h"
 #include "geometry/polyhedron.h"
@@ -35,6 +35,7 @@
 #include "geometry/grid_set.h"
 #include "geometry/partition_tree_set.h"
 
+#include "geometry/orbit.h"
 #include "output/epsstream.h"
 
 using namespace Ariadne;
@@ -63,6 +64,7 @@ template<class R> inline void write_grid_mask_set(epsfstream& eps, const GridMas
 template<class R> inline void write_partition_tree_set(epsfstream& eps, const PartitionTreeSet<R>& s) { eps << s; }
 template<class R> inline void write_finite_grid(epsfstream& eps, const FiniteGrid<R>& fg) { eps << fg; }
 template<class R> inline void write_partition_tree(epsfstream& eps, const PartitionTree<R>& s) { eps << s; }
+template<class T> inline void write_orbit(epsfstream& eps, const OrbitInterface<T>& o) { eps << o; }
 template<class R> inline void epsfstream_open(epsfstream& eps, const Ariadne::Geometry::Box<R>& bbox, int ix, int iy) { eps.open("Ariadne",bbox,ix,iy); }
 template<class R> inline void epsfstream_open_with_defaults(epsfstream& eps, const Ariadne::Geometry::Box<R>& bbox) { eps.open("Ariadne",bbox); }
 inline void epsfstream_close(epsfstream& eps) { eps.close(); }
@@ -105,6 +107,8 @@ void export_postscript_output()
     .def("write",&write< PartitionTreeSet<FloatPy> >)
     .def("write",&write< FiniteGrid<FloatPy> >)
     .def("write",&write< PartitionTree<FloatPy> >)
-  ;
+    .def("write",&write< OrbitInterface<Numeric::Integer> >)
+    .def("write",&write< OrbitInterface<Numeric::Rational> >)
+    .def("write",&write<Orbit<Numeric::Integer,Zonotope<FloatPy,UniformErrorTag> > >);
   
 }

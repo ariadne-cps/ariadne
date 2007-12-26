@@ -27,7 +27,8 @@
 #include "geometry/zonotope.h"
 #include "system/map_interface.h"
 #include "evaluation/applicator_interface.h"
-#include "evaluation/applicator.h"
+#include "evaluation/standard_applicator.h"
+#include "evaluation/kuhn_applicator.h"
 
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
@@ -47,34 +48,32 @@ class ApplicatorWrapper
   typedef typename BS::real_type R;
   typedef Interval<R> I;
  public:
-  ApplicatorWrapper() { }
   ApplicatorWrapper<BS>* clone() const { return this->get_override("clone")(); }
   BS apply(const MapInterface<R>&, const BS&) const {
     return this->get_override("apply")(); }
-  std::ostream& write(std::ostream&) const {
-    return this->get_override("write")(); }
 };
 
 
 template<class R>
 void export_applicator() 
 {
+  
   class_< ApplicatorWrapper<Rectangle<R> >, boost::noncopyable >("RectangleApplicatorInterface",init<>());
   class_< ApplicatorWrapper<Zonotope<R,ExactTag> >, boost::noncopyable >("ZonotopeApplicatorInterface",init<>());
-  class_< ApplicatorWrapper<Zonotope<R,UniformErrorTag> >, boost::noncopyable >("C0ZonotopeApplicatorInterface",init<>());
-  class_< ApplicatorWrapper<Zonotope<R,IntervalTag> >, boost::noncopyable >("C1ZonotopeApplicatorInterface",init<>());
+  class_< ApplicatorWrapper<Zonotope<R,UniformErrorTag> >, boost::noncopyable >("ErrorZonotopeApplicatorInterface",init<>());
 
-  class_< Applicator<R>, 
+  class_< StandardApplicator<R>, 
     bases<ApplicatorInterface< Rectangle<R> >,
           ApplicatorInterface< Zonotope<R,ExactTag> >,
-          ApplicatorInterface< Zonotope<R,UniformErrorTag> >,
-          ApplicatorInterface< Zonotope<R,IntervalTag> > > >
-    applicator_class("Applicator",init<>());
-  applicator_class.def("apply",(Rectangle<R>(Applicator<R>::*)(const MapInterface<R>&,const Rectangle<R>&)const)&Applicator<R>::apply);
-  applicator_class.def("apply",(Zonotope<R,ExactTag>(Applicator<R>::*)(const MapInterface<R>&,const Zonotope<R,ExactTag>&)const)&Applicator<R>::apply);
-  applicator_class.def("apply",(Zonotope<R,UniformErrorTag>(Applicator<R>::*)(const MapInterface<R>&,const Zonotope<R,UniformErrorTag>&)const)&Applicator<R>::apply);
+          ApplicatorInterface< Zonotope<R,UniformErrorTag> > > >
+    applicator_class("StandardApplicator",init<>());
+  applicator_class.def("__call__",(Rectangle<R>(StandardApplicator<R>::*)(const MapInterface<R>&,const Rectangle<R>&)const)&StandardApplicator<R>::apply);
+  applicator_class.def("__call__",(Zonotope<R,ExactTag>(StandardApplicator<R>::*)(const MapInterface<R>&,const Zonotope<R,ExactTag>&)const)&StandardApplicator<R>::apply);
+  applicator_class.def("__call__",(Zonotope<R,UniformErrorTag>(StandardApplicator<R>::*)(const MapInterface<R>&,const Zonotope<R,UniformErrorTag>&)const)&StandardApplicator<R>::apply);
 
-
+  class_< KuhnApplicator<R>, bases< ApplicatorInterface< Zonotope<R> > > > kuhn_applicator_class("KuhnApplicator",init<size_type>());
+  kuhn_applicator_class.def("__call__",&KuhnApplicator<R>::apply);
+  
 }
 
 template void export_applicator<FloatPy>();

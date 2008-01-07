@@ -34,13 +34,20 @@
 
 %Ariadne is a C++ package for set-based analysis of dynamical and control systems, including reachability analysis and verification.
 
+\section Documentation
+
+Look at the <a href="tutorial.html">Tutorial</a> for a guide on how to use %Ariadne to perform reachability analysis of dynamic systems using the Python interface to %Ariadne. 
+A more detailed description of %Ariadne's capabilities can be found in the documentation for the individual <a href="modules.html">Modules</a>.
+Some information on the mathematical foundations of %Ariadne can be found in the <a href="pages.html">Related Pages</a>.
+
+
 \section Download
 
-The homepage of %Ariadne is <a href="http://fsv.dimi.uniud.it/ariadne/">http://fsv.dimi.uniud.it/ariadne/</a>.
+The homepage of %Ariadne is <a href="http://ariadne.parades.rm.cnr.it/">http://ariadne.parades.rm.cnr.it/</a>.
 
 You can check out the latest version on the Subversion repository by typing:
 
-  \code svn checkout https://fsv.dimi.uniud.it/svn/ariadne ariadne \endcode
+  \code svn checkout http://svn.parades.rm.cnr.it/ariadne/ \endcode
 
 To make the code documentation, change to the ariadne/trunk/ directory and type:
 

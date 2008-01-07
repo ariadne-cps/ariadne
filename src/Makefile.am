@@ -102,13 +102,11 @@ EVALUATION_SRC = \
 	evaluation/flower.cc \
 	evaluation/map_evolver.cc \
 	evaluation/model_checker.cc \
-	evaluation/vector_field_evolver.cc \ 
+	evaluation/vector_field_evolver.cc \
 	evaluation/set_based_hybrid_evolver.cc
 
 
-#	evaluation/map_orbiter.cc \
-#	evaluation/constraint_based_hybrid_evolver.cc \
-#	evaluation/constraint_based_hybrid_scheduler.cc 
+#	evaluation/constraint_based_hybrid_evolver.cc  
 
 OUTPUT_SRC = \
 	output/logging.cc \

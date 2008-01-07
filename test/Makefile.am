@@ -75,8 +75,6 @@ EVALUATION_TESTS = \
 	test_map_evolver \
 	test_vector_field_evolver \
 	test_set_based_hybrid_evolver 
-#	test_constraint_based_hybrid_evolver \
-#	test_constraint_based_hybrid_scheduler 
 
 OUTPUT_TESTS = \
 	test_textstream \
@@ -145,12 +143,11 @@ test_binary_word_SOURCES=test_binary_word.cc
 test_lattice_SOURCES=test_lattice.cc
 test_subdivision_tree_SOURCES=test_subdivision_tree.cc
 
-test_function_SOURCES=test_function.cc
+test_interpreted_function_SOURCES=test_interpreted_function.cc
+test_polynomial_function_SOURCES=test_polynomial_function.cc
 test_index_SOURCES=test_index.cc
 test_scalar_derivative_SOURCES=test_scalar_derivative.cc
-test_first_derivative_SOURCES=test_first_derivative.cc
 test_taylor_derivative_SOURCES=test_taylor_derivative.cc
-test_polynomial_SOURCES=test_polynomial.cc
 test_affine_model_SOURCES=test_affine_model.cc
 test_taylor_model_SOURCES=test_taylor_model.cc
 
@@ -160,7 +157,6 @@ test_grid_set_SOURCES=test_grid_set.cc
 test_partition_tree_set_SOURCES=test_partition_tree_set.cc
 test_rectangle_SOURCES=test_rectangle.cc
 test_zonotope_SOURCES=test_zonotope.cc
-test_parallelotope_SOURCES=test_parallelotope.cc
 test_simplex_SOURCES=test_simplex.cc
 test_polytope_SOURCES=test_polytope.cc
 test_polyhedron_SOURCES=test_polyhedron.cc
@@ -177,8 +173,6 @@ test_affine_integrator_SOURCES=test_affine_integrator.cc
 test_map_evolver_SOURCES=test_map_evolver.cc
 test_vector_field_evolver_SOURCES=test_vector_field_evolver.cc
 test_set_based_hybrid_evolver_SOURCES=test_set_based_hybrid_evolver.cc
-test_constraint_based_hybrid_evolver_SOURCES=test_constraint_based_hybrid_evolver.cc
-test_constraint_based_hybrid_scheduler_SOURCES=test_constraint_based_hybrid_scheduler.cc
 
 test_epsstream_SOURCES=test_epsstream.cc 
 test_latexstream_SOURCES=test_latexstream.cc

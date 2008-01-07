@@ -33,7 +33,8 @@
 #include "linear_algebra/matrix.h"
 #include "linear_algebra/vector.h"
 #include "geometry/point.h"
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
+#include "geometry/box_list_set.h"
 #include "geometry/zonotope.h"
 #include "geometry/list_set.h"
 #include "geometry/partition_tree_set.h"
@@ -79,7 +80,7 @@ int main() {
   PartitionScheme<Flt> pg(bb,seq);
   PartitionTree<Flt> pt(pg,bnt);
   PartitionTreeSet<Flt> pts(pg,bnt,bla);
-  ListSet< Box<Flt> > rls(pts);
+  BoxListSet<Flt> rls(pts);
 
   PartitionTree<Flt>::const_iterator ptree_iter=pt.begin();
   PartitionTree<Flt>::const_iterator ptree_end=pt.end();
@@ -122,7 +123,7 @@ int main() {
 
   Grid<Flt> g(2,Flt(0.125));
   FiniteGrid<Flt> fg(g,bb);
-  ListSet< Box<Flt> > lsina=ptsina;
+  BoxListSet<Flt> lsina=ptsina;
   cout << "lsina=" << lsina << endl;
   cout << "ptsina.size()=" << ptsina.size() << ", lsina.size()=" << lsina.size() << endl;
   // Under approximation of partition tree sets not currently implemented

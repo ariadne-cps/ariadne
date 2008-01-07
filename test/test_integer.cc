@@ -91,6 +91,7 @@ class TestInteger {
     ARIADNE_TEST_ASSERT(fac(12)==479001600);
     ARIADNE_TEST_ASSERT(Integer(fac(Integer(12)))==479001600);
     ARIADNE_TEST_FAIL(fac(13));
+    ARIADNE_TEST_THROW(fac(20),OverflowException);
     ARIADNE_TEST_ASSERT(fac<Integer>(13)==Integer("6227020800"));
     ARIADNE_TEST_ASSERT(fac(Integer(13))==Integer("6227020800"));
   }
@@ -135,6 +136,6 @@ class TestInteger {
 
 int main() {
   TestInteger().test();
-  //  return ARIADNE_TEST_FAILURES;
+  return ARIADNE_TEST_FAILURES;
 }
 

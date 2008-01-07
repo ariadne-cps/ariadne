@@ -200,5 +200,6 @@ class TestPolynomialFunction
 
 int main() {
   TestPolynomialFunction<Rational>().test();
+  return ARIADNE_TEST_FAILURES;
 }
 

@@ -208,8 +208,6 @@ Output::operator<<(epsstream& eps, const Geometry::SetInterface<R>& set)
     return eps << dynamic_cast<const RectangularSet<R>&>(set);
   } else if(dynamic_cast<const PolyhedralSet<R>*>(&set)) {
     return eps << dynamic_cast<const PolyhedralSet<R>&>(set);
-  } else if(dynamic_cast<const BoxListSet<R>*>(&set)) {
-    return eps << dynamic_cast<const BoxListSet<R>&>(set);
   } else if(dynamic_cast<const ListSet< Zonotope<R> >*>(&set)) {
     return eps << dynamic_cast<const ListSet< Zonotope<R> >&>(set);
   } else if(dynamic_cast<const GridCellListSet<R>*>(&set)) {

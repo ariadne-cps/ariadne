@@ -44,11 +44,16 @@ namespace Ariadne {
       char c;
       std::vector<bool> v;
       is >> c;
-      while(is && (c=='0' || c=='1')) {
-        v.push_back( c=='0' ? 0 : 1);
-        is.get(c);
+      if(c=='[') {
+        is.putback(c);
+        is >> v;
+      } else {
+        while(is && (c=='0' || c=='1')) {
+          v.push_back( c=='0' ? 0 : 1);
+          is.get(c);
+        }
+        is.putback(c);
       }
-      is.putback(c);
       b=BinaryWord(v);
       return is;
     }

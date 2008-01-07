@@ -109,7 +109,7 @@ test_irregular_grid_set()
   for (int i=0; i< 3; i++) {
     is >> r;
     cout << "r=" << r << endl;
-    ls.push_back(r);
+    ls.adjoin(r);
   }
   cout << "ls=" << ls << endl;
 

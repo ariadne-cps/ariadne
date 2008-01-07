@@ -42,12 +42,12 @@ namespace Ariadne {
     template<class R> class FunctionInterface;
   
     template<class R> class AffineModel;
-    //template<class R> AffineModel<R> operator+(const AffineModel<R>&);
-    //template<class R> AffineModel<R> operator-(const AffineModel<R>&);
-    //template<class R> AffineModel<R> operator+(const AffineModel<R>&, const AffineModel<R>&);
-    //template<class R> AffineModel<R> operator-(const AffineModel<R>&, const AffineModel<R>&);
-    //template<class R> AffineModel<R> operator*(const AffineModel<R>&, const AffineModel<R>&);
-    //template<class R> AffineModel<R> operator/(const AffineModel<R>&, const AffineModel<R>&);
+    template<class R> AffineModel<R> operator+(const AffineModel<R>&);
+    template<class R> AffineModel<R> operator-(const AffineModel<R>&);
+    template<class R> AffineModel<R> operator+(const AffineModel<R>&, const AffineModel<R>&);
+    template<class R> AffineModel<R> operator-(const AffineModel<R>&, const AffineModel<R>&);
+    template<class R> AffineModel<R> operator*(const AffineModel<R>&, const AffineModel<R>&);
+    template<class R> AffineModel<R> operator/(const AffineModel<R>&, const AffineModel<R>&);
     template<class R> AffineModel<R> restrict(const AffineModel<R>&, const Geometry::Box<R>& bx);
     template<class R> AffineModel<R> reduce(const AffineModel<R>&, size_type);
     template<class R> AffineModel<R> compose(const AffineModel<R>&, const AffineModel<R>&);

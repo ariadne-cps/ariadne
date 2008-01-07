@@ -68,23 +68,22 @@ class TestZonotope
   }
 
   void test_subdivide() {
-    Flt r=div_approx(z2d5g.radius(),1.75);
+    Flt r=mul_approx(z2d5g.radius(),0.75);
     cout << "z.radius()="<<z2d5g.radius()<<",  r="<<r<<endl;
     ListSet< Zonotope<R> > working(z2d5g);
     ListSet< Zonotope<R> > subdivide;
-    while(!working.empty()) {
+    while(working.size()!=0) {
       Zonotope<R> z=working.pop();
       cout << "z="<<z<<" r="<<z.radius()<<endl;
       if(z.radius()<r) {
         subdivide.adjoin(z);
       } else {
-        working.adjoin(Geometry::subdivide(z));
+        working.adjoin(Geometry::split(z));
       }
     }
     ARIADNE_TEST_PRINT(z2d5g);
     ARIADNE_TEST_PRINT(subdivide);
     ARIADNE_TEST_ASSERT(subdivide.size()<32);
-    assert(false);
   }
 
 
@@ -105,8 +104,6 @@ class TestZonotope
     cout << r << endl;
     Zonotope<R> z;
     cout << z << endl;
-    Zonotope<R,IntervalTag> iz;
-    cout << iz << endl;
     
     Zonotope<R> z1=Zonotope<R>(r1);
     cout << "z1=" << z1 << endl;
@@ -128,13 +125,12 @@ class TestZonotope
     }
     cout << endl;
     
-    Zonotope<R,UniformErrorTag> ez2=z2;
-    ListSet< Zonotope<R,UniformErrorTag> > ezls;
-    cout << "ez2=" << ez2 << std::endl;
+    ListSet< Zonotope<R> > zls;
+    cout << "z2=" << z2 << std::endl;
     
-    ezls.clear();
-    ezls=subdivide(ez2);
-    cout << "ez2.subdivide()=" << ezls << std::endl;
+    zls.clear();
+    zls=subdivide(z2,mul_approx(z2.radius(),0.75));
+    cout << "z2.subdivide()=" << zls << std::endl;
     
     
     Point<R> pts[6];
@@ -224,9 +220,13 @@ class TestZonotope
     
     // over approximations
     {
-      Zonotope<R,IntervalTag> fz(Point<I>("([1.99,2.01],2)"),Matrix<I>("[[2,2.25],1;1,1]"));
+      cout << "here" << endl;
+      cout << Point<I>("([1.99,2.01],2)")<<endl;
+      cout << Matrix<I>("[[2,2.25],1;1,1]")<<endl;
+      Zonotope<R> fz(Point<I>("([1.99,2.01],2)"),Matrix<I>("[[2,2.25],1;1,1]"));
+      cout << "fz="<<fz << endl;
       Zonotope<R> z;
-      over_approximate(z,fz);
+      z=over_approximation(fz);
       cout << "fz="<<fz<<endl;
       cout << "over_approximation(fz)=" << z << endl << endl;
     }
@@ -234,10 +234,10 @@ class TestZonotope
     
     // Uniform error zonotope
     {
-      cout << "Inner and outer approximations of Zonotope<R,UniformErrorTag>" << endl;
-      Zonotope<R,ExactTag> z(Point<R>("(0.25,-0.125)"),Matrix<R>("[2,1,1,0.125,0;1,-1,1,0,0.125]"));
-      Zonotope<R,UniformErrorTag> ez(Point<I>("([0.125,0.375],[-0.25,0.0])"),Matrix<R>("[2,1,1;1,-1,1]"));
-      Zonotope<R,UniformErrorTag> aez=over_approximation(ez);
+      cout << "Inner and outer approximations of Zonotope<R>" << endl;
+      Zonotope<R> z(Point<R>("(0.25,-0.125)"),Matrix<R>("[2,1,1,0.125,0;1,-1,1,0,0.125]"));
+      Zonotope<R> ez(Point<I>("([0.125,0.375],[-0.25,0.0])"),Matrix<R>("[2,1,1;1,-1,1]"));
+      Zonotope<R> aez=over_approximation(ez);
       cout << "ez="<<ez<<"\naez="<<aez<<std::endl;
       
       Grid<R> gr(2,0.5);
@@ -271,11 +271,11 @@ class TestZonotope
     {
       cout << "Orthogonal over approximations of zonotopes" << endl;
       // Interval zonotope
-      Zonotope<R,UniformErrorTag> ez(Point<I>("([0.125,0.375],[-0.25,0.0])"),Matrix<R>("[4,1,1,1,1;1,1,3,3,3]"));
+      Zonotope<R> ez(Point<I>("([0.125,0.375],[-0.25,0.0])"),Matrix<R>("[4,1,1,1,1;1,1,3,3,3]"));
       cout << "ez="<<ez<<endl;
-      Zonotope<R,UniformErrorTag> oaez=over_approximation(ez);
+      Zonotope<R> oaez=over_approximation(ez);
       cout << "oaez="<<oaez<<endl;
-      Zonotope<R,UniformErrorTag> ooaez=orthogonal_over_approximation(ez);
+      Zonotope<R> ooaez=orthogonal_over_approximation(ez);
       cout << "ooaez="<<ooaez<<endl;
       
       eps.open("test_zonotope-orthogonal.eps",ooaez.bounding_box());
@@ -290,9 +290,9 @@ class TestZonotope
     {
       cout << "Outer approximations of zonotopes" << endl;
       // Interval zonotope
-      Zonotope<R,ExactTag> z(Point<R>("(0.25,-0.125)"),Matrix<R>("[2,1,1,0.125,0;1,-1,1,0,0.125]"));
-      Zonotope<R,UniformErrorTag> iz(Point<I>("([0.125,0.375],[-0.25,0.0])"),Matrix<R>("[2,1,1;1,-1,1]"));
-      Zonotope<R,UniformErrorTag> ez=over_approximation(iz);
+      Zonotope<R> z(Point<R>("(0.25,-0.125)"),Matrix<R>("[2,1,1,0.125,0;1,-1,1,0,0.125]"));
+      Zonotope<R> iz(Point<I>("([0.125,0.375],[-0.25,0.0])"),Matrix<R>("[2,1,1;1,-1,1]"));
+      Zonotope<R> ez=over_approximation(iz);
       
       Grid<R> gr(2,0.5);
       GridCellListSet<R> oaz=outer_approximation(iz,gr);
@@ -311,7 +311,7 @@ class TestZonotope
       cout << "r=" << r << endl;
       cout << "pt=" << pt << endl;
       cout << "z.bounding_box()=" << z.bounding_box() << endl;
-      cout << "disjoint(z,r)=" << disjoint(r,z) << endl;
+      cout << "disjoint(z,r)=" << disjoint(z,r) << endl;
       cout << "subset(r,z)=" << subset(r,z) << endl;
       cout << "contains(z,pt)=" << z.contains(pt) << endl;
       pt=Point<R>("(-2.0,0.0)");
@@ -332,10 +332,10 @@ class TestZonotope
       Zonotope<R> z1(r1);
       Zonotope<R> z2(Point<R>("(0.5,0.125)"),Matrix<R>("[1.0,0.5;0.5,0.625]"));
       cout << "r1=" << r1 << "\nz1=" << z1 << "\nz2=" << z2 << endl;
-      cout << "disjoint(r1,z2)=" << disjoint(r1,z2) << endl;
-      cout << "subset(r1,z2)=" << subset(r1,z2) << endl;
+      cout << "disjoint(r1,z2)=" << disjoint(z2,r1) << endl;
+      cout << "subset(r1,z2)=" << subset(z2,r1) << endl;
       cout << "subset(z2,r1)=" << subset(z2,r1) << endl;
-      assert((bool)(disjoint(r1,z2)));
+      assert((bool)(disjoint(z2,r1)));
     }
     catch(NotImplemented e) {
       cerr << "Warning: " << e.what() << " not implemented\n";

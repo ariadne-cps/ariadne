@@ -62,7 +62,7 @@ class TestAffineVariable {
   }
 
   void test_degree() {
-    ARIADNE_TEST_ASSERT(x1.degree()==4);
+    ARIADNE_TEST_ASSERT(x1.degree()==1);
   }
 
   void test_add() {
@@ -108,5 +108,5 @@ class TestAffineVariable {
 int main() {
   TestAffineVariable<Rational> t1;
   cout << "INCOMPLETE " << flush;
-  return 0;
+  return ARIADNE_TEST_FAILURES;
 }

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_polynomial.cc
+ *            test_index.cc
  *
  *  Copyright  2007  Pieter Collins
  *  Email Pieter.Collins@cwi.nl
@@ -233,7 +233,6 @@ class TestMultiIndex
 int main() {
   TestSortedIndex().test();
   TestMultiIndex().test();
-  cout << ARIADNE_TEST_FAILURES << " failures\n";
-  return 0;
+  return ARIADNE_TEST_FAILURES;
 }
 

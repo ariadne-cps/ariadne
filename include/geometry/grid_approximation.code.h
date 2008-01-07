@@ -134,7 +134,6 @@ Geometry::GridCellListSet<R>
 fuzzy_outer_approximation_of_zonotope(const Geometry::Zonotope<R>& z, const Geometry::Grid<R>& g) 
 {
   typedef Numeric::Interval<R> I;
-  ARIADNE_ASSERT(z.error()==0);
   Geometry::GridCellListSet<R> gcls(g);
 
   LinearAlgebra::Vector<I> ze;
@@ -145,7 +144,7 @@ fuzzy_outer_approximation_of_zonotope(const Geometry::Zonotope<R>& z, const Geom
 
   if(z.dimension()==z.number_of_generators()) {
     LinearAlgebra::Matrix<I> Ginv=LinearAlgebra::inverse(z.generators());
-    const Geometry::Point<I> c=z.centre();
+    const Geometry::Point<I> c=z.centre()+I(-1,1)*z.error();
     LinearAlgebra::Vector<I> e(z.dimension(),I(-1,1));
     Geometry::GridBlock<R> gbb=outer_approximation(Geometry::bounding_box(z),g);
     for(typename Geometry::GridBlock<R>::const_iterator iter=gbb.begin(); iter!=gbb.end(); ++iter) {

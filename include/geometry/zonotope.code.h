@@ -133,7 +133,7 @@ row_errors(const Point< Interval<R> >& pt, const Matrix< Interval<R> >& A)
   Vector<R> result(pt.dimension());
   for(size_type i=0; i!=A.number_of_rows(); ++i) {
     result[i]=pt[i].width();
-    for(size_type j=0; i!=A.number_of_columns(); ++j) {
+    for(size_type j=0; j!=A.number_of_columns(); ++j) {
       result[i]=add_up(result[i],A(i,j).width());
     }
     result[i]=div_up(result[i],2);

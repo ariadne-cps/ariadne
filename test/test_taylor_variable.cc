@@ -150,5 +150,5 @@ class TestTaylorVariable {
 int main() {
   TestTaylorVariable<Rational> t1;
   cout << "INCOMPLETE " << flush;
-  return 0;
+  return ARIADNE_TEST_FAILURES;
 }

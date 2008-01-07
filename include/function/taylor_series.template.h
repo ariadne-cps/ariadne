@@ -85,23 +85,23 @@ compute_composition(Function::TaylorSeries<X>& y, const Function::TaylorSeries<X
 #endif
   
   using namespace std;
-  cerr<<"y="<<y<<"\nx="<<x<<endl;
+  //cerr<<"y="<<y<<"\nx="<<x<<endl;
   TaylorSeries<X> w=x;
   w.value()=0;
-  cerr<<"w="<<w<<endl<<endl;
+  //cerr<<"w="<<w<<endl<<endl;
   TaylorSeries<X> t(d);
   TaylorSeries<X> u(d);
-  t[0]=y[d];
-  cerr<<"t="<<t<<endl;
+  t[0]=y[d]/Numeric::fac<Numeric::Integer>(d);;
+  //cerr<<"t="<<t<<endl;
   for(int n=1; n<=d; ++n) {
     u=t*w;
-    u.value()+=y[d-n];
-    cerr<<"u="<<u<<endl;
+    u.value()+=y[d-n]/Numeric::fac<Numeric::Integer>(d-n);
+    //cerr<<"u="<<u<<endl;
     t=u;
-    cerr<<"t="<<t<<endl;
+    //cerr<<"t="<<t<<endl;
   };
   y=t;
-  cerr<<endl;
+  //cerr<<endl;
   return;
 
 

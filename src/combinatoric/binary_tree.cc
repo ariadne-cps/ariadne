@@ -85,6 +85,7 @@ namespace Ariadne {
           ends-=1;
         }
       }
+      if(ends!=0) { std::cout << *this << std::endl; }
       assert(ends==0);
     }
     

@@ -234,5 +234,6 @@ class TestTaylorModel
 
 int main() {
   //TestTaylorModel<Float>().test();
+  return ARIADNE_TEST_FAILURES;
 }
 

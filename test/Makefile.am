@@ -43,10 +43,10 @@ FUNCTION_TESTS = \
 	test_interpreted_function \
 	test_polynomial_function \
 	test_affine_variable \
-	test_taylor_variable \
-	test_scalar_derivative \
-	test_taylor_derivative \
 	test_affine_model \
+	test_taylor_series \
+	test_taylor_variable \
+	test_taylor_derivative \
 	test_taylor_model 
 
 GEOMETRY_TESTS = \
@@ -184,5 +184,5 @@ EXTRA_DIST =
 SUBDIRS =
 
 TESTS = $(check_PROGRAMS)
-XFAIL_TESTS = test_boost test_linear_program test_taylor_derivative
+XFAIL_TESTS = test_boost test_linear_program 
 testsubdir = ./

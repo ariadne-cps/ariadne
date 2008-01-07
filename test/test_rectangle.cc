@@ -94,13 +94,13 @@ test_rectangle()
     cout << endl;
     
     ListSet< Rectangle<R> > cover1,cover2;
-    cover1.push_back(r2);
-    cover1.push_back(r3);
-    cover1.push_back(r4);
+    cover1.adjoin(r2);
+    cover1.adjoin(r3);
+    cover1.adjoin(r4);
 
-    cover2.push_back(r2);
-    cover2.push_back(r3);
-    cover2.push_back(r5);
+    cover2.adjoin(r2);
+    cover2.adjoin(r3);
+    cover2.adjoin(r5);
 
     cout << "r0=" << r0 << ", r0.dimension()=" << r0.dimension()
          << ", r0.empty()=" << r0.empty() << endl;

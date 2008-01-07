@@ -28,6 +28,7 @@
 #include "ariadne.h"
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
+#include "geometry/box.h"
 #include "function/affine_model.h"
 
 #include "test.h"
@@ -47,54 +48,52 @@ class TestAffineModel
  public:
   typedef Interval<R> I;
   
-  AffineModel<R> c0model;
-  AffineModel<R> c1model;
-  AffineModel<R> c1model2;
-  // AffineModel<R> exmodel;
+  AffineModel<R> am1;
+  AffineModel<R> am2;
+  AffineModel<R> am3;
 
   TestAffineModel()
-    : c0model(Vector<I>("[[-0.125,0.125],[0.875,1.125]]"),Matrix<R>("[1,2,3;4,5,6]"))
-    , c1model(Vector<I>("[[-0.125,0.125],[0.875,1.125]]"),Matrix<I>("[[1,1.1],2,[3,3.1];4,[5,5.5],6]"))
-    , c1model2(Vector<I>("[[-0.125,0.125],[0.875,1.125]]"),Matrix<I>("[[1,1.1],2;[4,4.1],[5,5.5]]"))
-        { }
+    : am1(Box<R>("[-1,1]x[-1,1]x[-1,1]"),Point<R>("(0,0,0)"),Point<I>("[[-0.125,0.125],[0.875,1.125]]"),Matrix<R>("[1,2,3;4,5,6]"))
+    , am2(Box<R>("[-1,1]x[-1,1]x[-1,1]"),Point<R>("(0,0,0)"),Point<I>("[[-0.125,0.125],[0.875,1.125]]"),Matrix<I>("[[1,1.1],2,[3,3.1];4,[5,5.5],6]"))
+    , am3(Box<R>("[-8,8]x[-24,24]"),Point<R>("(0,0)"),Point<I>("[[-0.125,0.125],[0.875,1.125]]"),Matrix<I>("[[1,1.1],2;[3,3.1],4]"))
+  { }
 
   void test_copy_constructor() {
-    AffineModel<R> am(c0model);
+    AffineModel<R> am(am1);
     cout << am << endl;
-    am=c1model;
+    am=am2;
     cout << am << endl;
   }
 
   void test_reduce() {
-    cout << reduce(c1model,0) << endl;
+    cout << reduce(am1,0) << endl;
   }
 
   void test_add() {
-    cout << c0model+c0model << endl;
-    cout << c1model+c1model << endl;
+    cout << AffineModel<R>(am1+am2) << endl;
   }
 
   void test_compose() {
-    cout << compose(c1model2,c0model) << endl;
+    cout << compose(am3,am2) << endl;
   }
 
   void test_write() {
-    cout << c0model << endl;
-    cout << c1model << endl;
+    cout << am2 << endl;
   }
 
 
   void test() {
     test_copy_constructor();
-    test_reduce();
+    //test_reduce();
     test_compose();
     test_write();
-    test_add();
+    //test_add();
   }
 };
   
 
 int main() {
   TestAffineModel<Flt>().test();
-  return 0;
+  return ARIADNE_TEST_FAILURES;
 }
+          

@@ -22,6 +22,7 @@
  */
  
 #include "macros/assert.h"
+#include "macros/throw.h"
 #include "numeric/exceptions.h"
 
 #define ARIADNE_DIRECT_COMPARISON(Arg1,Arg2,Cmp)                            \
@@ -287,9 +288,9 @@ template<class R, class N>
 
 inline int fac(int n) { 
 #ifndef NDEBUG 
-  if(n>=13) { 
-    std::cerr << __FUNCTION__ << " with n="<<n<<std::endl;
-    throw OverflowException(); 
+  if(n>=13) {     
+    throw OverflowException();
+    //ARIADNE_THROW(OverflowException,__FUNCTION__," with n="<<n);
   }
 #endif
   return factorials[n]; 
@@ -298,8 +299,8 @@ inline int fac(int n) {
 inline uint fac(uint n) { 
 #ifndef NDEBUG 
   if(n>=13) { 
-    std::cerr << __FUNCTION__ << " with n="<<n<<std::endl;
-    throw OverflowException(); 
+    throw OverflowException();
+    //ARIADNE_THROW(OverflowException,__FUNCTION__," with n="<<n);
   }
 #endif
   return factorials[n]; 

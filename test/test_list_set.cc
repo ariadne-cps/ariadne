@@ -93,8 +93,7 @@ int test_list_set()
   
 
   ListSet< Zonotope<R> > zds;
-  cout << "z0.empty()=" << z0.empty() << endl;
-  zds.push_back(z0);
+  zds.adjoin(z0);
   assert(zds.size()==1);
   zds.adjoin(z1);
   assert(zds.size()==2);

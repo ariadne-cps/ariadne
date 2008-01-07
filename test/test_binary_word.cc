@@ -1,7 +1,6 @@
 /***************************************************************************
  *            test_binary_word.cc
  *
- *  9 May 2005
  *  Copyright  2005  Pieter Collins
  *  Email Pieter.Collins@cwi.nl, casagrande@dimi.uniud.it
  ****************************************************************************/
@@ -53,10 +52,10 @@ int main() {
 int test_binary_word() {
   cout << __PRETTY_FUNCTION__ << endl;
   
-  string istr = "[0,1,1,0,1,0] [0,1,1,0,1,0] [0,1,1] [1,1,0,1] [1,1,1] [1,0,1,0] ";
+  string istr = "[0,1,1,0,1,0] [0,1,1,0,1,0] 011010 011 1101 111 1010 ";
   stringstream iss(istr);
 
-  BinaryWord bw1,bw2,bw3,bw4,bw5,bw6;
+  BinaryWord bw0,bw1,bw2,bw3,bw4,bw5,bw6;
   BinaryWordList bwl;
   BinaryWordFixedSizeList bwfsl(12);
   BinaryTree bwt;
@@ -64,29 +63,31 @@ int test_binary_word() {
   vector<bool> v;
 
   iss >> v;
-  bw1=BinaryWord(v);
+  bw0=BinaryWord(v);
   
-  iss >> bw2 >> bw3 >> bw4 >> bw5 >> bw6;
+  iss >> bw1 >> bw2 >> bw3 >> bw4 >> bw5 >> bw6;
   
-  assert(bw1.size()==6);
+  ARIADNE_TEST_ASSERT(bw1.size()==6);
   
-  assert(bw1==bw2);
-  assert(bw1.is_prefix(bw1));
-  assert(bw1.is_subword(bw1));
-  assert(bw3!=bw1);
-  assert(bw3.is_prefix(bw1));
-  assert(bw3.is_subword(bw1));
-  assert(bw4!=bw1);
-  assert(!bw4.is_prefix(bw1));
-  assert(bw4.is_subword(bw1));
-  assert(!bw5.is_subword(bw1));
-  assert(!bw1.is_subword(bw5));
-  assert(bw6.is_subword(bw1));
+  cout << bw0 << " "  << bw1 << " " << bw2 << endl;
+  ARIADNE_TEST_ASSERT(bw0==bw1);
+  ARIADNE_TEST_ASSERT(bw1==bw2);
+  ARIADNE_TEST_ASSERT(bw1.is_prefix(bw1));
+  ARIADNE_TEST_ASSERT(bw1.is_subword(bw1));
+  ARIADNE_TEST_ASSERT(bw3!=bw1);
+  ARIADNE_TEST_ASSERT(bw3.is_prefix(bw1));
+  ARIADNE_TEST_ASSERT(bw3.is_subword(bw1));
+  ARIADNE_TEST_ASSERT(bw4!=bw1);
+  ARIADNE_TEST_ASSERT(!bw4.is_prefix(bw1));
+  ARIADNE_TEST_ASSERT(bw4.is_subword(bw1));
+  ARIADNE_TEST_ASSERT(!bw5.is_subword(bw1));
+  ARIADNE_TEST_ASSERT(!bw1.is_subword(bw5));
+  ARIADNE_TEST_ASSERT(bw6.is_subword(bw1));
   
   bw5=bw4;
-  assert(bw5==bw4);
-  bw5=BinaryWord("[0,1,1,0,1,0]");
-  assert(bw5==bw1);
+  ARIADNE_TEST_ASSERT(bw5==bw4);
+  bw5=BinaryWord("011010");
+  ARIADNE_TEST_ASSERT(bw5==bw1);
 
-  return 0;
+  return ARIADNE_TEST_FAILURES;
 }

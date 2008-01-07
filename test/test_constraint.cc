@@ -75,19 +75,19 @@ test_constraint()
   Detector<R> d;
 
   Box<R> r;
-  Zonotope<R,UniformErrorTag> z;
+  Zonotope<R> z;
   
   
   // satisfies
   r=Box<R>("[0.4,0.5]x[0.45,0.65]");
   ARIADNE_TEST_ASSERT(d.satisfies(r,c));
-  z=Zonotope<R,UniformErrorTag>(r);
+  z=Zonotope<R>(r);
   ARIADNE_TEST_ASSERT(d.satisfies(z,c));
 
   // does not satisfy
   r=Box<R>("[0.8,0.9]x[0.95,0.95]");
   ARIADNE_TEST_ASSERT(!d.satisfies(r,c));
-  z=Zonotope<R,UniformErrorTag>(r);
+  z=Zonotope<R>(r);
   ARIADNE_TEST_ASSERT(!d.satisfies(z,c));
 
   

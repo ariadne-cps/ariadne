@@ -58,7 +58,7 @@ Geometry::HybridGridMaskSet<R>::write(std::ostream& os) const
   {
     DiscreteState loc=iter->first;
     const GridMaskSet<R>& set=iter->second;
-    os << "  "<<loc<<": " << Output::summary(set) << ",\n";
+    os << "  "<<loc<<": " << set.summary() << ",\n";
   }
   os << "} )";
   return os;
@@ -75,7 +75,7 @@ Geometry::HybridListSet<BS>::write(std::ostream& os) const
   {
     DiscreteState loc=iter->first;
     const ListSet<BS>& set=iter->second;
-    os << "  " << loc << ": " << Output::summary(set) << ",\n";
+    os << "  " << loc << ": " << set.summary() << ",\n";
     /*
     os << "  " << loc << ": { size=" << set.size();
     if(!set.empty()) {

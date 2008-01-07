@@ -39,18 +39,14 @@ namespace Ariadne {
 
 #ifdef ENABLE_FLOAT64
     template class StandardApproximator< Rectangle<Float64> >;
-    template class StandardApproximator< Zonotope<Float64,ExactTag> >;
-    template class StandardApproximator< Zonotope<Float64,UniformErrorTag> >;
-    template class FastApproximator< Zonotope<Float64,ExactTag> >;
-    template class FastApproximator< Zonotope<Float64,UniformErrorTag> >;
+    template class StandardApproximator< Zonotope<Float64> >;
+    template class FastApproximator< Zonotope<Float64> >;
 #endif
   
 #ifdef ENABLE_FLOATMP
     template class StandardApproximator< Rectangle<FloatMP> >;
-    template class StandardApproximator< Zonotope<FloatMP,ExactTag> >;
-    template class StandardApproximator< Zonotope<FloatMP,UniformErrorTag> >;
-    template class FastApproximator< Zonotope<FloatMP,ExactTag> >;
-    template class FastApproximator< Zonotope<FloatMP,UniformErrorTag> >;
+    template class StandardApproximator< Zonotope<FloatMP> >;
+    template class FastApproximator< Zonotope<FloatMP> >;
 #endif
 
   }

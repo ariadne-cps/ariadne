@@ -34,10 +34,11 @@ namespace Ariadne {
      public:
       /*! \brief The type used to record the time. */
       typedef T time_type;
-      
       /*! \brief The type used for the set. */
       typedef S set_category;
-      
+      /*! \brief The type used for real numbers. */
+      typedef typename S::real_type real_type;
+
       /*! \brief Constructor. */
       TimedSet(const S& s)
         : _time(0), _set(s) { }
@@ -56,6 +57,8 @@ namespace Ariadne {
       const T& time() const { return this->_time; }
       /*! \brief The untimed set. */
       const S& set() const { return this->_set; } 
+      /*! \brief The untimed set. */
+      dimension_type dimension() const { return this->_set.dimension(); } 
       
       /*! \brief Equality operator. */
       bool operator==(const TimedSet<T,S>& other) const { 
@@ -69,6 +72,10 @@ namespace Ariadne {
       S _set;
     };
   
+    template<class T, class S> 
+    std::ostream& operator<<(std::ostream& os, const TimedSet<T,S>& ts) {
+      return os << "{ " << ts.time() << " : " << ts.set() << " }";
+    }
    
   }
 }

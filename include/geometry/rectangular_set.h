@@ -32,7 +32,8 @@
 
 #include "base/tribool.h"
 
-#include "geometry/set_interface.h"
+#include "function/identity_function.h"
+#include "geometry/constraint_set.h"
 #include "geometry/box.h"
 #include "geometry/rectangle.h"
 
@@ -41,69 +42,62 @@ namespace Ariadne {
  
     
     //! \ingroup ExactSet
-    /*! \brief An adaptor for the Rectangle class conforming to the SetInterface interface. */
+    /*! \brief A adaptor for the Rectangle class conforming to the SetInterface interface. */
     template<class R>
-    class RectangularSet : public SetInterface<R>
+    class RectangularSet
+      : public ConstraintSet<R>
     {
      public:
       /*! \brief */
-      RectangularSet(const std::string& str)
-        : SetInterface<R>(), _rectangle(str) { }
+      RectangularSet(const std::string& str) {
+        Box<R> codomain(str); 
+        *this=ConstraintSet<R>(Function::IdentityFunction<R>(codomain.dimension()),codomain); }
       /*! \brief */
       template<class R1> RectangularSet(const dimension_type& d, const R1 a[][2])
-        : SetInterface<R>(), _rectangle(d,a) { }
+        : ConstraintSet<R>(Function::IdentityFunction<R>(d),Box<R>(d,a)) { }
       /*! \brief */
       template<class R1> RectangularSet(const Point<R1>& pt)
-        : SetInterface<R>(), _rectangle(pt) { }
+        : ConstraintSet<R>(Function::IdentityFunction<R>(pt.dimension()),Box<R>(pt)) { }
       /*! \brief */
       template<class R1> RectangularSet(const Box<R1>& bx)
-        : SetInterface<R>(), _rectangle(bx) { }
+        : ConstraintSet<R>(Function::IdentityFunction<R>(bx.dimension()),Box<R>(bx)) { }
       /*! \brief */
       template<class R1> RectangularSet(const Rectangle<R1>& r)
-        : SetInterface<R>(), _rectangle(r) { }
+        : ConstraintSet<R>(Function::IdentityFunction<R>(r.dimension()),Box<R>(r)) { }
       /*! \brief */
-      template<class R1> RectangularSet(const RectangularSet<R>& rs)
-        : SetInterface<R>(), _rectangle(static_cast<const Rectangle<R1>&>(rs)) { }
-      /*! \brief */
-      operator const Rectangle<R>& () const { return this->_rectangle; }
+      operator Geometry::Box<R> () const { return this->codomain(); }      
 
       /*! \brief */
       virtual ~RectangularSet<R>() { }
       /*! \brief */
-      virtual RectangularSet<R>* clone() const { return new RectangularSet<R>(this->_rectangle); }
+      virtual RectangularSet<R>* clone() const { return new RectangularSet<R>(*this); }
       /*! \brief */
-      virtual dimension_type dimension() const { return this->_rectangle.dimension(); }
+      virtual dimension_type dimension() const { return this->codomain().dimension(); }
       /*! \brief */
-      virtual tribool contains(const Point<R>& pt) const { return this->_rectangle.contains(pt); }
+      virtual tribool contains(const Point<R>& pt) const { return this->codomain().contains(pt); }
       /*! \brief */
       virtual tribool superset(const Box<R>& r) const { 
-        return Geometry::superset(this->_rectangle,r); }
+        return Geometry::superset(this->codomain(),r); }
       /*! \brief */
       virtual tribool intersects(const Box<R>& r) const { 
-        return !Geometry::disjoint(this->_rectangle,r); }
+        return Geometry::intersect(this->codomain(),r); }
       /*! \brief */
       virtual tribool disjoint(const Box<R>& r) const { 
-        return Geometry::disjoint(this->_rectangle,r); }
+        return Geometry::disjoint(this->codomain(),r); }
       /*! \brief */
       virtual tribool subset(const Box<R>& r) const { 
-        return Geometry::subset(this->_rectangle,r); }
+        return Geometry::subset(this->codomain(),r); }
       /*! \brief */
-      virtual tribool bounded() const { return this->_rectangle.bounded(); }      
+      virtual tribool bounded() const { return this->codomain().bounded(); }      
       /*! \brief */
-      virtual Box<R> bounding_box() const { return this->_rectangle.bounding_box(); }      
+      virtual Box<R> bounding_box() const { return this->codomain(); }      
       /*! \brief */
       virtual std::ostream& write(std::ostream& os) const {
-        return os << "RectangularSet(\"" << this->_rectangle << "\")";
+        return os << "RectangularSet(\"" << this->codomain() << "\")";
       }
-     private:
-      Rectangle<R> _rectangle;
     };
     
-    template<class R> inline
-    std::ostream& operator<<(std::ostream& os, const RectangularSet<R>& rset) {
-      return rset.write(os);
-    }
-    
+
   }
 }
 

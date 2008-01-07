@@ -24,20 +24,19 @@
 #include "numeric/float.h"
 #include "numeric/interval.h"
 #include "function/taylor_series.h"
-#include "function/taylor_series.code.h"
 
 namespace Ariadne {
   namespace Function {
     using namespace Numeric;
    
-    template class TaylorSeries<Rational>;
+  //template class TaylorSeries<Rational>;
 
 #ifdef ENABLE_FLOAT64
-    template class TaylorSeries<Interval64>;
+  //template class TaylorSeries<Interval64>;
 #endif
     
 #ifdef ENABLE_FLOATMP
-    template class TaylorSeries<IntervalMP>;
+  //template class TaylorSeries<IntervalMP>;
 #endif
 
   }

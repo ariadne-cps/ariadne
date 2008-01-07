@@ -47,16 +47,16 @@ namespace Ariadne {
       : public TransitionSystemInterface<R>
     {
      public:
-      TransitionSystem(const System::MapInterface<R>& map, const Evaluation::MapOrbiterInterface<R>& orbiter, const Numeric::Integer& steps);
-      const MapInterface<R>& map() const;
+      TransitionSystem(const System::Map<R>& map, const Evaluation::MapEvolverInterface<R>& evolver, const Numeric::Integer& steps);
+      const Map<R>& map() const;
       virtual TransitionSystem<R>* clone() const;
       virtual size_type dimension() const;
-      virtual Geometry::Box<R> lower_evolve(const Geometry::Box<R>&) const;
-      virtual Geometry::ListSet< Geometry::Box<R> > lower_reach(const Geometry::Box<R>&) const;
+      virtual std::pair< Numeric::Integer, Geometry::Box<R> > lower_evolve(const Geometry::Box<R>&) const;
+      virtual Geometry::BoxListSet<R> lower_reach(const Geometry::Box<R>&) const;
       virtual Geometry::GridCellListSet<R> upper_evolve(const Geometry::GridCell<R>&) const;
       virtual Geometry::GridCellListSet<R> upper_reach(const Geometry::GridCell<R>&) const;
      private:
-      System::MapInterface<R>* _map;
+      System::Map<R>* _map;
       Evaluation::MapOrbiterInterface<R>* _orbiter;
       Numeric::Integer _steps;
     };
@@ -66,15 +66,14 @@ namespace Ariadne {
       : public TransitionSystemInterface<R>
     {
      public:
-      DiscretizedVectorField(
-                             const System::VectorFieldInterface<R>& vf, 
+      DiscretizedVectorField(const System::VectorField<R>& vf, 
                              const Evaluation::VectorFieldOrbiterInterface<R>& orbiter);
-      const MapInterface<R>& map() const;
+      const Map<R>& map() const;
       virtual DiscretizedVectorField<R>* clone() const;
       virtual size_type argument_dimension() const;
       virtual size_type result_dimension() const;
      private:
-      System::VectorFieldInterface<R>* _map;
+      System::VectorField<R>* _vf;
       Evaluation::VectorFieldOrbiterInterface<R>* _orbiter;
     };
 
@@ -82,19 +81,20 @@ namespace Ariadne {
 }
 
 
+#include "geometry/box_list_set.h"
 #include "geometry/orbit.h"
 #include "geometry/rectangle.h"
 #include "geometry/grid_cell.h"
 #include "geometry/grid_cell_list_set.h"
-#include "system/map_interface.h"
-#include "evaluation/orbiter_interface.h"
+#include "system/map.h"
+#include "evaluation/map_orbiter_interface.h"
 
 
 
 namespace Ariadne {
 
 template<class R>
-System::TransitionSystem<R>::TransitionSystem(const System::MapInterface<R>& map, 
+System::TransitionSystem<R>::TransitionSystem(const System::Map<R>& map, 
                                               const Evaluation::MapOrbiterInterface<R>& orbiter,
                                               const Numeric::Integer& steps)
   : _map(map.clone()), _orbiter(orbiter.clone()) , _steps(steps)
@@ -102,7 +102,7 @@ System::TransitionSystem<R>::TransitionSystem(const System::MapInterface<R>& map
 }
 
 template<class R>
-const System::MapInterface<R>&
+const System::Map<R>&
 System::TransitionSystem<R>::map() const 
 {
   return *this->_map;
@@ -126,14 +126,14 @@ System::TransitionSystem<R>::dimension() const
 
 
 template<class R>
-Geometry::Box<R> 
+std::pair< Numeric::Integer, Geometry::Box<R> >
 System::TransitionSystem<R>::lower_evolve(const Geometry::Box<R>& bx) const 
 {
-  return this->_orbiter->lower_evolve(this->map(),bx,this->_steps).bounding_box(); 
+  return this->_orbiter->lower_evolve(this->map(),bx,this->_steps); 
 }
 
 template<class R>
-Geometry::ListSet< Geometry::Box<R> >
+Geometry::BoxListSet<R>
 System::TransitionSystem<R>::lower_reach(const Geometry::Box<R>& bx) const 
 {
   return this->_orbiter->lower_reach(this->map(),bx,this->_steps); 

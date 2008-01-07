@@ -690,28 +690,6 @@ Geometry::disjoint(const Rectangle<R>& r1, const Rectangle<R>& r2)
 }
 
 
-template<class R> inline
-std::pair< Geometry::Rectangle<R>, Geometry::Rectangle<R> >
-Geometry::subdivide(const Rectangle<R>& r)  
-{
-  size_type d=r.dimension();
-  R mr=0;
-  size_type mi=0;
-  for(size_type i=0; i!=d; ++i) {
-    R ir=r[i].radius();
-    if(ir>mr) {
-      mr=ir;
-      mi=i;
-    }
-  }
-  R c=r[mi].midpoint();
-
-  std::pair<Rectangle<R>, Rectangle<R> > result(r,r);
-  result.first.set_upper_bound(mi,c);
-  result.second.set_lower_bound(mi,c);
-  return result;
-}
-
 
 template<class X, class R> inline
 tribool 

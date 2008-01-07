@@ -2,7 +2,7 @@
  *            taylor_series.h
  *
  *  Copyright 2007  Pieter Collins
- *  Email Pieter.Collins@cwi.nl
+ *
  ****************************************************************************/
 
 /*
@@ -90,73 +90,13 @@ namespace Ariadne {
       X& operator[](const smoothness_type& d); 
       /*! \brief The \a i<sup> th</sup> derivative \f$D^af=d^{|a|}f/dx_1^{a_1}\cdots dx_n^{a_n}\f$. */
       const X& operator[](const smoothness_type& a) const; 
-
-      /*! \brief Construct the Taylor series of the reciprocal function. */
-      static TaylorSeries<X> rec(smoothness_type d, const X& c); 
-      /*! \brief Construct the Taylor series of the \a n<sup>th</sup> power function. */
-      static TaylorSeries<X> pow(smoothness_type d, const X& c, const uint& k); 
-      /*! \brief Construct the Taylor series of the square-root function. */
-      static TaylorSeries<X> sqrt(smoothness_type d, const X& c); 
-      /*! \brief Construct the Taylor series of the exponential function. */
-      static TaylorSeries<X> exp(smoothness_type d, const X& c); 
-      /*! \brief Construct the Taylor series of the logarithm function. */
-      static TaylorSeries<X> log(smoothness_type d, const X& c); 
-      /*! \brief Construct the Taylor series of the sine function. */
-      static TaylorSeries<X> sin(smoothness_type d, const X& c); 
-      /*! \brief Construct the Taylor series of the cosine function. */
-      static TaylorSeries<X> cos(smoothness_type d, const X& c); 
-      /*! \brief Construct the Taylor series of the tangent function. */
-      static TaylorSeries<X> tan(smoothness_type d, const X& c); 
-      /*! \brief Construct the Taylor series of the inverse sine function. */
-      static TaylorSeries<X> asin(smoothness_type d, const X& c); 
-      /*! \brief Construct the Taylor series of the inversecosine function. */
-      static TaylorSeries<X> acos(smoothness_type d, const X& c); 
-      /*! \brief Construct the Taylor series of the inversetangent function. */
-      static TaylorSeries<X> atan(smoothness_type d, const X& c); 
-     private:
-      static void instantiate();
     };
 
 
   
-    template<>
-    class TaylorSeries<Numeric::Rational>
-    {
-      typedef Numeric::Rational X;
-     private:
-      array<X> _data;
-     public:
-      typedef X value_type;
-
-      TaylorSeries();
-      TaylorSeries(smoothness_type d);
-      template<class XX> TaylorSeries(smoothness_type d, const XX* ptr);
-
-      template<class XX> TaylorSeries(const TaylorSeries<XX>& ts); 
-      template<class XX> TaylorSeries<X>& operator=(const TaylorSeries<XX>& ts);
-
-      template<class XX> TaylorSeries<X>& operator=(const XX& c);
-
-      static TaylorSeries<X> constant(smoothness_type d, const X& c); 
-      static TaylorSeries<X> variable(smoothness_type d, const X& x);
-
-      smoothness_type degree() const; 
-      const X& value() const;
-      X& value();
-      const array<X>& data() const;
-      array<X>& data();
-      X& operator[](const smoothness_type& d); 
-      const X& operator[](const smoothness_type& a) const; 
-
-      static TaylorSeries<X> rec(smoothness_type d, const X& c); 
-      static TaylorSeries<X> pow(smoothness_type d, const X& c, const uint& k); 
-     private:
-      static void instantiate();
-    };
-
-
     template<class X> TaylorSeries<X> compose(const TaylorSeries<X>& ts1, const TaylorSeries<X>& ts2);
     template<class X> TaylorSeries<X> inverse(const TaylorSeries<X>& ts, const X& c);
+    template<class X> TaylorSeries<X> antiderivative(const TaylorSeries<X>& ts, const X& c);
 
     template<class X> TaylorSeries<X> min(const TaylorSeries<X>& ts1, const TaylorSeries<X>& ts2);
     template<class X> TaylorSeries<X> max(const TaylorSeries<X>& ts1, const TaylorSeries<X>& ts2);

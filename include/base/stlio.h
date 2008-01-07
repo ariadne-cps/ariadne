@@ -37,187 +37,10 @@
 #include <valarray>
 #include <set>
 #include <map>
-
 #include "array.h"
-#include "reference_container.h"
-#include "clonable_container.h"
 
-namespace Ariadne {
-  namespace Base { 
+#include "sequence_io.h"
 
-    template<class InputIterator>
-    inline
-    std::ostream&
-    write_sequence(std::ostream& os, InputIterator first, InputIterator last, 
-                   char opening='[', char closing=']', char separator=',') 
-    {
-      os << opening;
-      while(first!=last) {
-        os << (*first);
-        ++first;
-        if(first!=last) {
-          os << separator;
-        }
-      }
-      os << closing;
-      return os;
-    }
-    
-
-    template<class InputIterator>
-    inline
-    std::ostream&
-    write_pointer_sequence(std::ostream& os, InputIterator first, InputIterator last, 
-                           char opening='[', char closing=']', char separator=',') 
-    {
-      os << opening;
-      while(first!=last) {
-        os << (**first);
-        ++first;
-        if(first!=last) {
-          os << separator;
-        }
-      }
-      os << closing;
-      return os;
-    }
-    
-
-    template<class InputIterator>
-    inline
-    std::ostream&
-    write_map_sequence(std::ostream& os, InputIterator first, InputIterator last, 
-                       char opening='{', char closing='}', char separator=',', char descriptor=':')
-    {
-      os << opening;
-      while(first!=last) {
-        os << first->first << descriptor << first->second;
-        ++first;
-        if(first != last) {
-          os << separator;
-        }
-      }
-      os << closing;
-      return os;
-    }
-    
-    template<class InputIterator>
-    inline
-    std::ostream&
-    write_ariadne_map_sequence(std::ostream& os, InputIterator first, InputIterator last, 
-                               char opening='{', char closing='}', char separator=',', char descriptor=':') 
-    {
-      os << opening;
-      while(first!=last) {
-        os << first->key() << descriptor << first->data();
-        ++first;
-        if(first != last) {
-          os << separator;
-        }
-      }
-      os << closing;
-      return os;
-    }
-    
-    template<class T>
-    inline
-    std::istream&
-    read_vector(std::istream& is, std::vector<T>& v, 
-                char opening='[', char closing=']', char separator=',') 
-    {
-      T x;
-      char c;
-      
-      v.clear();
-      std::streampos pos = is.tellg();
-      
-      try {
-        is >> c;
-        if(c != opening) {
-          throw std::ios_base::failure("Ariadne::Base::read_vector: Input must begin with "+opening);
-        }
-        
-        /* Handle case of empty list */
-        is >> c;
-        if(c != closing) {
-          is.putback(c);
-          c=separator;
-        }
-        
-        while(c != closing) {
-          if(is.eof()) {
-            throw std::ios_base::failure("Ariadne::Base::read_vector: End-of-file reached");
-          }
-          if(c!=separator) {
-            throw std::ios_base::failure("Ariadne::Base::read_vector: Items in list must be separated by "+separator);
-          }
-          is >> x;
-          if(is.fail()) {
-            throw std::ios_base::failure("Ariadne::Base::read_vector: Error inputting value in list");
-          }
-          v.push_back(x);
-          is >> c;
-        }
-      }
-      catch(...) {
-        // is.seekg(pos);
-        throw; 
-      }
-      
-      return is;
-    }
-
-    template<class T>
-    inline
-    std::istream&
-    read_array(std::istream& is, Base::array<T>& a, 
-               char opening='[', char closing=']', char separator=',') 
-    {
-      T x;
-      char c;
-      
-      a.reallocate(0);
-      std::streampos pos = is.tellg();
-      
-      try {
-        is >> c;
-        if(c != opening) {
-          throw std::ios_base::failure("Ariadne::Base::read_array: Input must begin with "+opening);
-        }
-        
-        /* Handle case of empty list */
-        is >> c;
-        if(c != closing) {
-          is.putback(c);
-          c=separator;
-        }
-        
-        while(c != closing) {
-          if(is.eof()) {
-            throw std::ios_base::failure("Ariadne::Base::read_array: End-of-file reached");
-          }
-          if(c!=separator) {
-            throw std::ios_base::failure("Ariadne::Base::read_array: Items in list must be separated by "+separator);
-          }
-          is >> x;
-          if(is.fail()) {
-            throw std::ios_base::failure("Ariadne::Base::read_array: Error inputting value in list");
-          }
-          a.resize(a.size()+1);
-          a[a.size()-1]=x;
-          is >> c;
-        }
-      }
-      catch(...) {
-        // is.seekg(pos);
-        throw; 
-      }
-      
-      return is;
-    }
-    
-  }
-}
 
 namespace Ariadne {
   namespace Base { 
@@ -225,8 +48,7 @@ namespace Ariadne {
     template<class Iter> inline
     std::ostream&
     operator<<(std::ostream& os, const range<Iter>& a) {
-      Base::write_sequence(os,a.begin(),a.end());
-      return os;
+      return Base::write_sequence(os,a.begin(),a.end());
     }
     
     template<class T> inline
@@ -251,33 +73,12 @@ namespace Ariadne {
     }
 
     template<class T> inline
-    std::ostream&
-    operator<<(std::ostream& os, const reference_vector<T>& v) {
-      return Base::write_sequence(os,v.begin(),v.end(),'[',']',',');
-    }
-
-    template<class T> inline
-    std::ostream&
-    operator<<(std::ostream& os, const reference_set<T>& s) {
-      return Base::write_sequence(os,s.begin(),s.end(),'{','}',',');
-    }
-
-    template<class K, class D, class C> inline
-    std::ostream&
-    operator<<(std::ostream& os, const reference_key_map<K,D,C>& m) {
-      return Base::write_ariadne_map_sequence(os,m.begin(),m.end(),'{','}',',',':');
-    }
-
-    template<class K, class D, class C> inline
-    std::ostream&
-    operator<<(std::ostream& os, const reference_data_map<K,D,C>& m) {
-      return Base::write_ariadne_map_sequence(os,m.begin(),m.end(),'{','}',',',':');
-    }
-
-    template<class T> inline
     std::istream&
     operator>>(std::istream& is, array<T>& a) {
-      return Base::read_array(is,a);
+      std::vector<T> v;
+      read_sequence(is,v);
+      a=array<T>(v.begin(),v.end());
+      return is;
     }
     
   } // namespace Base
@@ -290,6 +91,7 @@ namespace Ariadne {
    any namespace using operator<<.
 */
 namespace std {
+
   template<class S, class T> 
   inline 
   std::ostream& 
@@ -345,12 +147,14 @@ namespace std {
     return Ariadne::Base::write_map_sequence(os,m.begin(), m.end(), '{', '}');
   }
   
+
   template<class T> 
   inline
   istream& 
   operator>> (std::istream &is, std::vector<T>& v) {
-    return Ariadne::Base::read_vector(is,v);
+    return Ariadne::Base::read_sequence(is,v);
   }
+
 } // namespace std
 
 

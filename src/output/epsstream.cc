@@ -47,7 +47,7 @@ Output::epsfstream::open(const char* fn,
   this->write_header();
   this->ostream() << "black\n";
   this->trace(bbox);
-  this->ostream() << " stroke\n\n";
+  this->ostream() << "clip stroke\n\n";
 }
 
 
@@ -135,6 +135,12 @@ void
 Output::epsstream::write_trailer() 
 {
   std::ostream& os=this->ostream();
+
+  // redraw the bounding box
+  os << "black\n";
+  this->trace(this->bounding_box());
+  os << "stroke\n";
+
   os << "grestore showpage\n"
     "%%Trailer\n";
 }
@@ -295,7 +301,8 @@ Output::epsstream::trace(const Rectangle2d& r)
      << ux << ' ' << ly << " lineto\n"
      << ux << ' ' << uy << " lineto\n"
      << lx << ' ' << uy << " lineto\n"
-     << lx << ' ' << ly << " lineto\n";
+    //<< lx << ' ' << ly << " lineto\n";
+     << "closepath\n";
 }
 
 void

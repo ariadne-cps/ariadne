@@ -93,8 +93,8 @@ namespace Ariadne {
       /*!\brief Copy assignment. */
       GridCellListSet<R>& operator=(const GridCellListSet<R>& gcls);
 
-      /*!\brief Convert to a ListSet of Rectangles. */
-      operator ListSet< Box<R> >() const;
+      /*!\brief Convert to a list of ordinary boxes. */
+      operator BoxListSet<R>() const;
 
       /*! \brief The underlying grid. */
       const Grid<R>& grid() const;
@@ -166,6 +166,16 @@ namespace Ariadne {
       /*!\brief Restricts to cells contained in \a bl. */
       void restrict(const GridBlock<R>& bl);
 
+      /*!\brief Restricts to cells contained in \a gcls. */
+      void restrict(const GridCellListSet<R>& gcls);
+      /*!\brief Removes cells contained in \a bl. */
+      void remove(const GridCellListSet<R>& gcls);
+
+      /*!\brief Restricts to cells contained in \a gms. */
+      void restrict(const GridMaskSet<R>& gms);
+      /*!\brief Removes cells contained in \a bl. */
+      void remove(const GridMaskSet<R>& gms);
+
       /*! \brief Adjoins an over-approximation of the rectangle \a r. */
       void adjoin_over_approximation(const Box<R>& r);
 
@@ -183,14 +193,14 @@ namespace Ariadne {
       /*! \brief Restricts to the inner-approximation of the set \a s. */
       void restrict_inner_approximation(const SetInterface<R>& s);
 
-      /*! \brief Write a summary to an output stream. */
-      std::ostream& summarize(std::ostream&) const;
+      /*! \brief Returns a summary. */
+      std::string summary() const;
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream&) const;
      private: 
       static void _instantiate();
      private:
-      Base::shared_ptr< Grid<R> > _grid_ptr;
+      Grid<R>  _grid;
       Combinatoric::LatticeCellListSet _lattice_set;
     };
 

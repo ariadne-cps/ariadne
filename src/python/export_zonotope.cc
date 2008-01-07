@@ -25,6 +25,8 @@
 #include "python/float.h"
 #include "python/read_array.h"
 
+#include "function/affine_model.h"
+
 #include "geometry/box.h"
 #include "geometry/zonotope.h"
 #include "geometry/list_set.h"
@@ -33,11 +35,30 @@
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
 using namespace Ariadne::LinearAlgebra;
+using namespace Ariadne::Function;
 using namespace Ariadne::Geometry;
 using namespace Ariadne::Python;
 
 #include <boost/python.hpp>
 using namespace boost::python;
+
+template<class R>
+std::string
+__str__(const Zonotope<R>& z)
+{
+  std::stringstream ss;
+  ss << z;
+  return ss.str();
+}
+
+template<class R>
+std::string
+__repr__(const Zonotope<R>& z)
+{
+  std::stringstream ss;
+  ss << "Zonotope(" << z << ")";
+  return ss.str();
+}
 
 template<class R>  
 Zonotope<R>* 
@@ -68,61 +89,44 @@ void export_zonotope()
   typedef Point<R> RPoint;
   typedef Point<I> IPoint;
   typedef Box<R> RBox;
-  typedef Zonotope<R,ExactTag> RZonotope;
-  typedef Zonotope<R,UniformErrorTag> EZonotope;
-  typedef Zonotope<R,IntervalTag> IZonotope;
-    
+  typedef Zonotope<R> RZonotope;
+  typedef ListSet< Zonotope<R> > RZonotopeListSet;
+  typedef AffineModel<R> RAffineModel;
 
-  class_<RZonotope> rzonotope_class("Zonotope",init<int>());
-  rzonotope_class.def("__init__", make_constructor(&make_zonotope<R>) );
-  rzonotope_class.def(init<RPoint,RMatrix>());
-  rzonotope_class.def(init<RZonotope>());
-  rzonotope_class.def(init<RBox>());
-  rzonotope_class.def("centre",(const RPoint&(RZonotope::*)()const)&RZonotope::centre,return_value_policy<copy_const_reference>());
-  rzonotope_class.def("generators",(const RMatrix&(RZonotope::*)()const)&RZonotope::generators,return_value_policy<copy_const_reference>());
-  rzonotope_class.def("dimension", &RZonotope::dimension);
-  rzonotope_class.def("empty", &RZonotope::empty);
-  rzonotope_class.def("contains", (tribool(*)(const RZonotope&,const RPoint&))&Geometry::contains);
-  rzonotope_class.def("bounding_box", &RZonotope::bounding_box);
-  rzonotope_class.def(self_ns::str(self));
+  class_<RZonotope> zonotope_class("Zonotope",init<int>());
+  zonotope_class.def("__init__", make_constructor(&make_zonotope<R>) );
+  zonotope_class.def(init<RPoint,RMatrix>());
+  zonotope_class.def(init<RZonotope>());
+  zonotope_class.def(init<RBox>());
+  zonotope_class.def("centre",&RZonotope::centre,return_value_policy<copy_const_reference>());
+  zonotope_class.def("generators",&RZonotope::generators,return_value_policy<copy_const_reference>());
+  zonotope_class.def("error",&RZonotope::error,return_value_policy<copy_const_reference>());
+  zonotope_class.def("dimension", &RZonotope::dimension);
+  zonotope_class.def("contains", &RZonotope::contains);
+  zonotope_class.def("bounding_box", &RZonotope::bounding_box);
+  zonotope_class.def("radius", &RZonotope::radius);
+  zonotope_class.def("__str__", (std::string(*)(const RZonotope&))&__str__);
+  zonotope_class.def("__repr__", (std::string(*)(const RZonotope&))&__repr__);
  
+  def("radius", (R(*)(const RZonotope&))(&radius));
+  def("bounding_box", (RBox(*)(const RZonotope&))(&bounding_box));
+
   def("contains", (tribool(*)(const RZonotope&,const RPoint&))(&contains));
   def("disjoint", (tribool(*)(const RZonotope&,const RBox&))(&disjoint));
   def("subset", (tribool(*)(const RZonotope&,const RBox&))(&subset));
   def("superset", (tribool(*)(const RZonotope&,const RBox&))(&superset));
   def("subset", (tribool(*)(const RBox&,const RZonotope&))(&subset));
 
-  def("cascade_reduce",(Zonotope<R,ExactTag>(*)(const Zonotope<R,ExactTag>&,size_type)) &cascade_reduce);
+  def("approximation", (RZonotope(*)(const RZonotope&))(&approximation));
+  def("over_approximation", (RZonotope(*)(const RZonotope&))(&over_approximation));
+  def("error_free_over_approximation", (RZonotope(*)(const RZonotope&))(&error_free_over_approximation));
+  def("orthogonal_over_approximation", (RZonotope(*)(const RZonotope&))(&orthogonal_over_approximation));
+  def("nonsingular_over_approximation", (RZonotope(*)(const RZonotope&))(&nonsingular_over_approximation));
+  def("cascade_over_approximation",(RZonotope(*)(const RZonotope&,size_type)) &cascade_over_approximation);
 
-  class_<EZonotope> ezonotope_class("ErrorZonotope",init<int>());
-  ezonotope_class.def(init<EZonotope>());
-  ezonotope_class.def(init<RZonotope>());
-  ezonotope_class.def(init<RBox>());
-  ezonotope_class.def("centre",(const IPoint&(EZonotope::*)()const)&EZonotope::centre,return_value_policy<copy_const_reference>());
-  ezonotope_class.def("generators",(const RMatrix&(EZonotope::*)()const)&EZonotope::generators,return_value_policy<copy_const_reference>());
-  ezonotope_class.def("dimension", &EZonotope::dimension);
-  ezonotope_class.def("empty", &EZonotope::empty);
-  ezonotope_class.def("contains", (tribool(*)(const EZonotope&,const RPoint&))&Geometry::contains);
-  ezonotope_class.def("bounding_box", &EZonotope::bounding_box);
-  ezonotope_class.def("subdivide", (std::pair<EZonotope,EZonotope>(*)(const EZonotope&)) &Geometry::subdivide);
-  ezonotope_class.def(self_ns::str(self));
+  def("split", (RZonotopeListSet(*)(const RZonotope&))(&::split));
 
-  def("contains", (tribool(*)(const EZonotope&,const RPoint&))(&contains));
-
-
-  class_<IZonotope> izonotope_class("IntervalZonotope",init<int>());
-  izonotope_class.def("centre",(const IPoint&(IZonotope::*)()const)&IZonotope::centre,return_value_policy<copy_const_reference>());
-  izonotope_class.def("generators",(const IMatrix&(IZonotope::*)()const)&IZonotope::generators,return_value_policy<copy_const_reference>());
-  izonotope_class.def("dimension", &IZonotope::dimension);
-  izonotope_class.def(self_ns::str(self));
-
-
-  def("approximation", (RZonotope(*)(const IZonotope&))(&::approximation));
-  def("approximation", (RZonotope(*)(const EZonotope&))(&::approximation));
-  def("over_approximation", (RZonotope(*)(const EZonotope&))(&::approximation));
-  def("over_approximation", (EZonotope(*)(const IZonotope&))(&::over_approximation));
-
-
+  def("apply", (RZonotope(*)(const RAffineModel&, const RZonotope&))(&apply));
 }  
 
 
@@ -143,11 +147,10 @@ void export_zonotope<Rational>()
   zonotope_class.def("centre",&QZonotope::centre,return_value_policy<copy_const_reference>());
   zonotope_class.def("generators",&QZonotope::generators,return_value_policy<copy_const_reference>());
   zonotope_class.def("dimension", &QZonotope::dimension);
-  zonotope_class.def("empty", &QZonotope::empty);
   zonotope_class.def("contains", (tribool(QZonotope::*)(const QPoint&)const)&QZonotope::contains);
   zonotope_class.def("bounding_box", &QZonotope::bounding_box);
-  zonotope_class.def("subdivide", (std::pair<QZonotope,QZonotope>(*)(const QZonotope&))&Geometry::subdivide);
-  zonotope_class.def(self_ns::str(self));
+  zonotope_class.def("__str__", (std::string(*)(const QZonotope&)) &__str__);
+  zonotope_class.def("__repr__", (std::string(*)(const QZonotope&)) &__repr__);
 
   def("contains", (tribool(*)(const QZonotope&,const QPoint&))(&contains));
   def("disjoint", (tribool(*)(const QZonotope&,const QBox&))(&disjoint));

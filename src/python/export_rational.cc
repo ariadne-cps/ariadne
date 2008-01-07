@@ -22,7 +22,7 @@
  */
 
 
-#include "python/utilities.h"
+#include "python/operators.h"
 #include "python/float.h"
 
 using namespace Ariadne;
@@ -132,5 +132,7 @@ void export_rational() {
   def("max",&max<Rational,Rational,Rational>);
   def("min",&min<Rational,Rational,Rational>);
   def("abs",&Python::abs<Rational,Rational>);
+  def("floor",&Python::floor<Integer,Rational>);
+  def("ceil",&Python::ceil<Integer,Rational>);
     
 }

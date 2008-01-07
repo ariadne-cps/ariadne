@@ -33,10 +33,14 @@ namespace Ariadne {
     
     
     template class TaylorDerivative<Rational>;
+    template void compute_composition(TaylorDerivative<Rational>&,const TaylorDerivative<Rational>&,const TaylorDerivative<Rational>&);
+    template void compute_composition(TaylorVariable<Rational>&,const TaylorVariable<Rational>&,const TaylorDerivative<Rational>&);
 
 #ifdef ENABLE_FLOAT64
     //template class TaylorDerivative<Float64>;
     template class TaylorDerivative<Interval64>;
+    template void compute_composition(TaylorDerivative<Interval64>&,const TaylorDerivative<Interval64>&,const TaylorDerivative<Interval64>&);
+    template void compute_composition(TaylorVariable<Interval64>&,TaylorVariable<Interval64>const&,TaylorDerivative<Interval64>const&);
 #endif
     
 #ifdef ENABLE_FLOATMP

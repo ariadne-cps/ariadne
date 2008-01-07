@@ -32,8 +32,6 @@
 #include "combinatoric/binary_word.h" 
 #include "base/array.h" 
 #include "geometry/point.h" 
-#include "geometry/point_list.h" 
-#include "geometry/list_set.h" 
 
 
 namespace Ariadne {

@@ -24,9 +24,34 @@
 #include<iostream>
 
 #include "constant_function.h"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
+#include "function/taylor_derivative.h"
 
 
 namespace Ariadne {
+
+template<class R>
+LinearAlgebra::Vector<typename Function::ConstantFunction<R>::F> 
+Function::ConstantFunction<R>::evaluate(const LinearAlgebra::Vector<F>& x) const 
+{ 
+  return this->_c; 
+}
+
+
+template<class R>
+LinearAlgebra::Matrix<typename Function::ConstantFunction<R>::F> 
+Function::ConstantFunction<R>::jacobian(const LinearAlgebra::Vector<F>& x) const 
+{ 
+  return LinearAlgebra::Matrix<F>(this->result_size(),this->argument_size()); 
+}
+
+template<class R>
+Function::TaylorDerivative<typename Function::ConstantFunction<R>::F> 
+Function::ConstantFunction<R>::derivative(const LinearAlgebra::Vector<F>& x, const smoothness_type& s) const 
+{
+  return TaylorDerivative<F>::constant(this->result_size(),this->argument_size(),s,this->c());
+}
 
 
 template<class R>

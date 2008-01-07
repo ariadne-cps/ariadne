@@ -63,10 +63,10 @@ namespace Ariadne {
      *  \brief The Henon map \f$(x,y)\mapsto(a-x^2-by,x)\f$ with inverse \f$(w,z)\mapsto(z,(a-z^2-w)/b)\f$.
      */
 
-    ARIADNE_BUILD_MAP(HenonMap,henon_function,
+    ARIADNE_BUILD_MAP(Henon,henon_function,
       henon_dimension,henon_dimension,henon_number_of_parameters,henon_smoothness);
 
-    ARIADNE_BUILD_MAP(HenonInverseMap,henon_inverse_function,
+    ARIADNE_BUILD_MAP(HenonInverse,henon_inverse_function,
       henon_dimension,henon_dimension,henon_number_of_parameters,henon_smoothness);
 
 

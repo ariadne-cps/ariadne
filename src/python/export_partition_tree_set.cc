@@ -1,7 +1,6 @@
 /***************************************************************************
  *            python/export_partition_tree_set.cc
  *
- *  21 October 2005
  *  Copyright  2005  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
@@ -31,6 +30,8 @@
 #include "geometry/grid_set.h"
 #include "geometry/partition_tree_set.h"
 
+#include "geometry/zonotope.h"
+
 using namespace Ariadne;
 using namespace Ariadne::Combinatoric;
 using namespace Ariadne::Geometry;
@@ -54,6 +55,7 @@ void export_partition_tree_set()
  
   typedef SetInterface<R> RSetInterface;
   typedef Box<R> RBox;
+  typedef Zonotope<R> RZonotope;
   typedef GridMaskSet<R> RGridMaskSet;
   
   class_<SubdivisionSequence>("SubdivisionSequence",init<unsigned int>())
@@ -106,6 +108,10 @@ void export_partition_tree_set()
     .def("dimension", &RPartitionTreeCell::dimension)
     .def(self_ns::str(self))    // __self_ns::str__
   ;
+
+  def("outer_approximation",(RPartitionTreeSet(*)(const RZonotope&,const RPartitionScheme&,const uint))&outer_approximation);
+  def("boundary_approximation",(RPartitionTreeSet(*)(const RZonotope&,const RPartitionScheme&,const uint))&boundary_approximation);
+  def("inner_approximation",(RPartitionTreeSet(*)(const RZonotope&,const RPartitionScheme&,const uint))&inner_approximation);
 }
 
 template void export_partition_tree_set<FloatPy>();

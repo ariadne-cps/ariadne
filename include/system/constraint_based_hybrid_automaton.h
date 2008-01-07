@@ -47,13 +47,12 @@ namespace Ariadne {
 
   namespace System {
   
-    template<class R> class MapInterface;
-    template<class R> class VectorFieldInterface;
+    template<class R> class Map;
+    template<class R> class VectorField;
     template<class R> class ConstraintBasedDiscreteMode;
     template<class R> class ConstraintBasedDiscreteTransition;
     template<class R> class ConstraintBasedHybridAutomaton;
   
-    using Geometry::ConstraintInterface;
     using Geometry::Constraint;
   
     enum EventKind { invariant_tag, guard_tag, activation_tag };
@@ -63,23 +62,23 @@ namespace Ariadne {
     template<class R>
     class ConstraintBasedDiscreteMode {
       friend class ConstraintBasedHybridAutomaton<R>;
-      typedef shared_ptr< const Geometry::ConstraintInterface<R> > constraint_const_pointer;
+      typedef shared_ptr< const Geometry::Constraint<R> > constraint_const_pointer;
      public:
       Geometry::DiscreteState id() const;
       Geometry::DiscreteState discrete_state() const;
       dimension_type dimension() const;
-      const VectorFieldInterface<R>& dynamic() const;
+      const VectorField<R>& dynamic() const;
       const ConstraintBasedDiscreteTransition<R>& transition(DiscreteEvent event_id) const;
       const reference_set< const ConstraintBasedDiscreteTransition<R> >& transitions() const;
       std::ostream& write(std::ostream& os) const;
      private:
-      ConstraintBasedDiscreteMode(Geometry::DiscreteState id, const VectorFieldInterface<R>& dynamic);
+      ConstraintBasedDiscreteMode(Geometry::DiscreteState id, const VectorField<R>& dynamic);
       Geometry::DiscreteState _id;
-      shared_ptr< const VectorFieldInterface<R> > _dynamic;
-      std::map< DiscreteEvent, shared_ptr< const Geometry::ConstraintInterface<R> > > _invariants;
-      std::map< DiscreteEvent, shared_ptr< const Geometry::ConstraintInterface<R> > > _guards;
-      std::map< DiscreteEvent, shared_ptr< const Geometry::ConstraintInterface<R> > > _activations;
-      reference_data_map< DiscreteEvent, const Geometry::ConstraintInterface<R> > _constraints;
+      shared_ptr< const VectorField<R> > _dynamic;
+      std::map< DiscreteEvent, shared_ptr< const Geometry::Constraint<R> > > _invariants;
+      std::map< DiscreteEvent, shared_ptr< const Geometry::Constraint<R> > > _guards;
+      std::map< DiscreteEvent, shared_ptr< const Geometry::Constraint<R> > > _activations;
+      reference_data_map< DiscreteEvent, const Geometry::Constraint<R> > _constraints;
       reference_set< const ConstraintBasedDiscreteTransition<R> > _transitions;
     };
       
@@ -92,7 +91,7 @@ namespace Ariadne {
     template<class R>
     class ConstraintBasedDiscreteTransition {
       friend class ConstraintBasedHybridAutomaton<R>;
-      typedef shared_ptr< const Geometry::ConstraintInterface<R> > constraint_const_pointer;
+      typedef shared_ptr< const Geometry::Constraint<R> > constraint_const_pointer;
      public:
       DiscreteEvent id() const;
       DiscreteEvent event() const;
@@ -100,20 +99,20 @@ namespace Ariadne {
       Geometry::DiscreteState destination_id() const;
       const ConstraintBasedDiscreteMode<R>& source() const;   
       const ConstraintBasedDiscreteMode<R>& destination() const;
-      const System::MapInterface<R>& reset() const;
-      const Geometry::ConstraintInterface<R>& constraint() const;
+      const System::Map<R>& reset() const;
+      const Geometry::Constraint<R>& constraint() const;
       EventKind kind() const;
       bool forced() const;
       std::ostream& write(std::ostream& os) const;
     private:
-      ConstraintBasedDiscreteTransition(DiscreteEvent id, const ConstraintBasedDiscreteMode<R>& source, const Geometry::ConstraintInterface<R>& activation);
+      ConstraintBasedDiscreteTransition(DiscreteEvent id, const ConstraintBasedDiscreteMode<R>& source, const Geometry::Constraint<R>& activation);
       ConstraintBasedDiscreteTransition(DiscreteEvent id, const ConstraintBasedDiscreteMode<R>& source, const ConstraintBasedDiscreteMode<R>& destination,
-                                        const System::MapInterface<R>& reset, const Geometry::ConstraintInterface<R>& activation, bool forced);
+                                        const System::Map<R>& reset, const Geometry::Constraint<R>& activation, bool forced);
       DiscreteEvent _event_id;
       const ConstraintBasedDiscreteMode<R>* _source;   
       const ConstraintBasedDiscreteMode<R>* _destination;
-      shared_ptr< const System::MapInterface<R> > _reset;  
-      shared_ptr< const Geometry::ConstraintInterface<R> > _constraint;
+      shared_ptr< const System::Map<R> > _reset;  
+      shared_ptr< const Geometry::Constraint<R> > _constraint;
       EventKind _event_kind;
     };
     
@@ -135,7 +134,7 @@ namespace Ariadne {
      * each discrete state.
      *
      * For each %ConstraintBasedDiscreteMode, the dynamics is given by a 
-     * %VectorFieldInterface describing the continuous dynamics,
+     * %VectorField describing the continuous dynamics,
      * and a %Set giving an invariant which must be satisified at
      * all times.
      *
@@ -158,10 +157,10 @@ namespace Ariadne {
       typedef typename std::set< mode_type >::const_iterator discrete_mode_const_iterator;
       typedef typename std::set< transition_type >::const_iterator discrete_transition_const_iterator;
       
-      typedef shared_ptr< const Geometry::ConstraintInterface<R> > constraint_const_pointer;
-      typedef shared_ptr< const System::MapInterface<R> > map_const_pointer;
-      typedef shared_ptr< const System::VectorFieldInterface<R> > vector_field_const_pointer;
-      typedef const Geometry::ConstraintInterface<R>& constraint_const_reference;
+      typedef shared_ptr< const Geometry::Constraint<R> > constraint_const_pointer;
+      typedef shared_ptr< const System::Map<R> > map_const_pointer;
+      typedef shared_ptr< const System::VectorField<R> > vector_field_const_pointer;
+      typedef const Geometry::Constraint<R>& constraint_const_reference;
   
      private:
       /*! \brief The name of the hybrid automaton. */
@@ -198,17 +197,17 @@ namespace Ariadne {
       /*! \brief Adds a new dynamic to the automaton.
        * This method does not introduce a new discrete mode.
        */
-     const System::VectorFieldInterface<R>&  new_dynamic(id_type id, const System::VectorFieldInterface<R>& dynamic);
+     const System::VectorField<R>&  new_dynamic(id_type id, const System::VectorField<R>& dynamic);
       
       /*! \brief Adds a new reset function to the automaton.
        * This method does not introduce a new discrete transition.
        */
-      const System::MapInterface<R>& new_reset(id_type id, const System::MapInterface<R>& reset);
+      const System::Map<R>& new_reset(id_type id, const System::Map<R>& reset);
       
       /*! \brief Adds a new reset function to the automaton.
        * This method does not introduce a new discrete transition.
        */
-      const Geometry::ConstraintInterface<R>& new_constraint(id_type id, const Geometry::ConstraintInterface<R>& constraint);
+      const Geometry::Constraint<R>& new_constraint(id_type id, const Geometry::Constraint<R>& constraint);
 
       //@}
       
@@ -236,7 +235,7 @@ namespace Ariadne {
        * \param dynamic is the discrete mode's vector field.
        */
       const mode_type& new_mode(Geometry::DiscreteState location,
-                                const System::VectorFieldInterface<R>& dynamic);
+                                const System::VectorField<R>& dynamic);
       
       /*! \brief Adds an invariant to a discrete mode.
        *
@@ -247,7 +246,7 @@ namespace Ariadne {
        */
       const transition_type& new_invariant(DiscreteEvent event,
                                            Geometry::DiscreteState location, 
-                                           const Geometry::ConstraintInterface<R>& constraint);
+                                           const Geometry::Constraint<R>& constraint);
       
       
     
@@ -265,8 +264,8 @@ namespace Ariadne {
       const transition_type& new_transition(DiscreteEvent event,
                                             Geometry::DiscreteState source, 
                                             Geometry::DiscreteState destination,
-                                            const System::MapInterface<R>& reset,
-                                            const Geometry::ConstraintInterface<R>& constraint,
+                                            const System::Map<R>& reset,
+                                            const Geometry::Constraint<R>& constraint,
                                             bool forced);
       
       /*! \brief Adds a discrete-time reset with a given event, source mode and destination mode..
@@ -282,8 +281,8 @@ namespace Ariadne {
       const transition_type& new_unforced_transition(DiscreteEvent event,
                                                      Geometry::DiscreteState source, 
                                                      Geometry::DiscreteState destination,
-                                                     const System::MapInterface<R>& reset,
-                                                     const Geometry::ConstraintInterface<R>& activation);
+                                                     const System::Map<R>& reset,
+                                                     const Geometry::Constraint<R>& activation);
 
       /*! \brief Adds a discrete-time reset with a given event, source mode and destination mode..
        *
@@ -298,8 +297,8 @@ namespace Ariadne {
       const transition_type& new_forced_transition(DiscreteEvent event,
                                                    Geometry::DiscreteState source, 
                                                    Geometry::DiscreteState destination,
-                                                   const System::MapInterface<R>& reset,
-                                                   const Geometry::ConstraintInterface<R>& guard);
+                                                   const System::Map<R>& reset,
+                                                   const Geometry::Constraint<R>& guard);
       
       //@}
       
@@ -313,7 +312,7 @@ namespace Ariadne {
        * \param dynamic is the discrete mode's vector field.
        */
       const mode_type& new_mode(Geometry::DiscreteState state,
-                                shared_ptr< const System::VectorFieldInterface<R> > dynamic);
+                                shared_ptr< const System::VectorField<R> > dynamic);
       
       /*! \brief Adds an invariant to a discrete mode.
        *
@@ -324,7 +323,7 @@ namespace Ariadne {
        */
       const transition_type& new_invariant(DiscreteEvent event,
                                            Geometry::DiscreteState state, 
-                                           shared_ptr< const Geometry::ConstraintInterface<R> > constraint);
+                                           shared_ptr< const Geometry::Constraint<R> > constraint);
       
       
       /*! \brief Adds a discrete-time reset with a given event, source mode and destination mode.
@@ -341,8 +340,8 @@ namespace Ariadne {
       const transition_type& new_transition(DiscreteEvent event,
                                             Geometry::DiscreteState source, 
                                             Geometry::DiscreteState destination,
-                                            shared_ptr< const System::MapInterface<R> > reset,
-                                            shared_ptr< const Geometry::ConstraintInterface<R> > constraint,
+                                            shared_ptr< const System::Map<R> > reset,
+                                            shared_ptr< const Geometry::Constraint<R> > constraint,
                                             bool forced);
       
       /*! \brief Adds a discrete-time reset with a given event, source mode and destination mode..
@@ -358,8 +357,8 @@ namespace Ariadne {
       const transition_type& new_unforced_transition(DiscreteEvent event,
                                                      Geometry::DiscreteState source, 
                                                      Geometry::DiscreteState destination,
-                                                     shared_ptr< const System::MapInterface<R> > reset,
-                                                     shared_ptr< const Geometry::ConstraintInterface<R> > activation);
+                                                     shared_ptr< const System::Map<R> > reset,
+                                                     shared_ptr< const Geometry::Constraint<R> > activation);
 
       /*! \brief Adds a discrete-time reset with a given event, source mode and destination mode..
        *
@@ -374,8 +373,8 @@ namespace Ariadne {
       const transition_type& new_forced_transition(DiscreteEvent event,
                                                    Geometry::DiscreteState source, 
                                                    Geometry::DiscreteState destination,
-                                                   shared_ptr< const System::MapInterface<R> > reset,
-                                                   shared_ptr< const Geometry::ConstraintInterface<R> > guard);
+                                                   shared_ptr< const System::Map<R> > reset,
+                                                   shared_ptr< const Geometry::Constraint<R> > guard);
       
       //@}
       

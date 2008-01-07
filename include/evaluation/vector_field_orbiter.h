@@ -39,7 +39,7 @@
 #include "evaluation/bounder_interface.h"
 #include "evaluation/integrator_interface.h"
 #include "evaluation/approximator_interface.h"
-#include "evaluation/orbiter_interface.h"
+#include "evaluation/vector_field_orbiter_interface.h"
 
 namespace Ariadne {
   namespace Evaluation {
@@ -60,19 +60,52 @@ namespace Ariadne {
                              const IntegratorInterface<BS>&, 
                              const ApproximatorInterface<BS>&);
 
-      /*! \brief Copy constructor. */
-      VectorFieldOrbiter<BS>(const VectorFieldOrbiter<BS>&);
-
-      /*! \brief Make a dynamically-allocated copy. */
       VectorFieldOrbiter<BS>* clone() const;
 
-      /*! \brief Compute the orbit of a rectangle for at most time \a t. */
+      virtual 
+      Geometry::GridCellListSet<R>
+      upper_evolve(const System::VectorField<R>& vf, const Geometry::GridCell<R>& bx, const Numeric::Rational& t) const;
+
+      virtual 
+      Geometry::GridCellListSet<R>
+      upper_reach(const System::VectorField<R>& vf, const Geometry::GridCell<R>& bx, const Numeric::Rational& t) const;
+
+      virtual 
+      Geometry::Box<R>
+      lower_evolve(const System::VectorField<R>& vf, const Geometry::Box<R>& bx, const Numeric::Rational& t) const;
+
+      virtual 
+      Geometry::BoxListSet<R>
+      lower_reach(const System::VectorField<R>& vf, const Geometry::Box<R>& bx, const Numeric::Rational& t) const;
+
+
+      /*
       virtual 
       Geometry::Orbit<T,BS,BS>*
-      orbit(const System::VectorFieldInterface<R>& f, const Geometry::Box<R>& r, const Numeric::Rational& t) const;
+      orbit(const System::VectorField<R>& f, const Geometry::Box<R>& r, const Numeric::Rational& t) const;
+      */
 
      private:
       // Convenience wrapper for integrator services
+      typedef Geometry::ListSet<BS> BSL;
+      typedef Geometry::Box<R> Bx;
+      typedef Geometry::Grid<R> G;
+      typedef Geometry::GridCellListSet<R> GCLS;
+      typedef System::VectorField<R> VF;
+      std::pair<T, Bx > flow_bounds(const VF& vf, const Bx& bx) {
+        return this->_bounder->flow_bounds(vf,bx); }
+      BS integration_step(const VF& vf, const BS& bs, const T& t, const Bx& bb) const {
+        return this->_integrator->integration_step(vf,bs,t,bb); }
+      BS reachability_step(const VF& vf, const BS& bs, const T& t, const Bx& bb) const {
+        return this->_integrator->reachability_step(vf,bs,t,bb); }
+      BSL subdivide(const BS& bs) const {
+        return this->_approximator->subdivide(bs); }
+      BS over_approximation(const Bx& bx) const {
+        return this->_approximator->over_approximation(bx); }
+      Bx bounding_box(const BS& bs) const {
+        return this->_approximator->bounding_box(bs); }
+      GCLS outer_approximation(const BS& bs, const G& g) const {
+        return this->_approximator->outer_approximation(bs,g); }
      private:
       boost::shared_ptr< BounderInterface<R> > _bounder;
       boost::shared_ptr< IntegratorInterface<BS> > _integrator;

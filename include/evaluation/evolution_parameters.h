@@ -55,6 +55,8 @@ namespace Ariadne {
       R _result_grid_length;
 
       R _bounding_domain_size;
+
+      uint _verbosity;
      public:
       /*! \brief Default constructor. */
       EvolutionParameters();
@@ -104,16 +106,20 @@ namespace Ariadne {
       /*! \brief Set the size of the region used for computation. Increasing this value reduces the risk of error due to missing orbits which leave the bounding domain. */
       R bounding_domain_size() const;
 
-      /*! \brief A grid of dimension \a d with the default spacing. */
-      Geometry::Box<R> bounding_box(dimension_type d) const;
+      /*! \brief A bounding domain for the evolution. */
+      Geometry::Box<R> bounding_domain(dimension_type d) const;
 
       /*! \brief A grid of dimension \a d with the default spacing. */
       Geometry::Grid<R> grid(dimension_type d) const;
 
+      /*! \brief A grid for a hybrid system with the default spacing. */
+      Geometry::HybridGrid<R> hybrid_grid(const Geometry::HybridSpace& loc) const;
+
       /*! \brief A grid of dimension \a d with the default spacing and bounds. */
       Geometry::FiniteGrid<R> finite_grid(dimension_type d) const;
 
-
+      /*! \brief The verbosity of the output. */
+      uint verbosity() const;
 
       /*! \brief Set the maximum number of steps for an iterative algorithm. */
       void set_maximum_number_of_steps(size_type);
@@ -143,6 +149,9 @@ namespace Ariadne {
 
       /*! \brief Set the size of the region used for computation. */
       void set_bounding_domain_size(R);
+
+      /*! \brief Set the verbosity of the output. */
+      void set_verbosity(uint);
 
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream& os) const;      

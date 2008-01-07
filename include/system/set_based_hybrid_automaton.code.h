@@ -52,8 +52,8 @@ System::SetBasedHybridAutomaton<R>::~SetBasedHybridAutomaton() {
 template<class R>
 const System::SetBasedDiscreteMode<R>& 
 System::SetBasedHybridAutomaton<R>::new_mode(Geometry::DiscreteState id,
-         const VectorFieldInterface<R>& dynamic,
-         const Geometry::SetInterface<R>& invariant) 
+         const VectorField<R>& dynamic,
+         const Geometry::ConstraintSet<R>& invariant) 
 {
   if(this->has_mode(id)) {
     throw std::runtime_error("The hybrid automaton already has a mode with the given id");
@@ -68,8 +68,8 @@ const System::SetBasedDiscreteTransition<R>&
 System::SetBasedHybridAutomaton<R>::new_transition(DiscreteEvent event,
                const SetBasedDiscreteMode<R> &source, 
                const SetBasedDiscreteMode<R> &destination,
-               const MapInterface<R> &reset,
-               const Geometry::SetInterface<R> &activation) 
+               const Map<R> &reset,
+               const Geometry::ConstraintSet<R> &activation) 
 {
   System::DiscreteEvent event_id=event;
   Geometry::DiscreteState source_id=source.discrete_state();
@@ -103,8 +103,8 @@ const System::SetBasedDiscreteTransition<R>&
 System::SetBasedHybridAutomaton<R>::new_transition(DiscreteEvent event,
                Geometry::DiscreteState source, 
                Geometry::DiscreteState destination,
-               const MapInterface<R> &reset,
-               const Geometry::SetInterface<R> &activation) 
+               const Map<R> &reset,
+               const Geometry::ConstraintSet<R> &activation) 
 {
   if(this->has_transition(event,source)) {
     throw std::runtime_error("The automaton already has a transition with the given id and source id.");
@@ -212,6 +212,22 @@ const std::set< System::SetBasedDiscreteTransition<R> >&
 System::SetBasedHybridAutomaton<R>::transitions() const 
 {
   return this->_transitions;
+}
+
+
+template<class R>
+reference_vector< const System::SetBasedDiscreteTransition<R> >
+System::SetBasedHybridAutomaton<R>::transitions(Geometry::DiscreteState source) const
+{
+  reference_vector< const SetBasedDiscreteTransition<R> > result;
+  for(discrete_transition_const_iterator transition_iter=this->_transitions.begin();
+      transition_iter!=this->_transitions.end(); ++transition_iter) 
+  {
+    if(transition_iter->source().discrete_state()==source) {
+      result.push_back(*transition_iter);
+    }
+  }
+  return result;
 }
 
 

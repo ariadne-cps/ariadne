@@ -1,7 +1,6 @@
 /***************************************************************************
  *            binary_word.h
  *
- *  18 January 2005
  *  Copyright  2004,2005  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
@@ -128,6 +127,12 @@ namespace Ariadne {
       
       /*! Inequality operator. */
       bool operator!=(const BinaryWord& w) const { return this->_rep!=w._rep; }
+      
+      /*! Comparison operator. */
+      bool operator<(const BinaryWord& w) const { 
+        for(size_type i=0; i!=std::min(this->size(),w.size()); ++i) {
+          if((*this)[i]!=w[i]) { return (*this)[i]<w[i]; } }
+        return this->size() < w.size(); }
       
       /*! \brief Is the word empty. */
       bool empty() const { return _rep.empty(); }

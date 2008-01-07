@@ -31,11 +31,11 @@ namespace Ariadne {
     using namespace Numeric;
     
 #ifdef ENABLE_FLOAT64
-    template class VectorFieldInterface<Float64>;
+    template class VectorField<Float64>;
 #endif
     
 #ifdef ENABLE_FLOATMP
-    template class VectorFieldInterface<FloatMP>;
+    template class VectorField<FloatMP>;
 #endif
     
   }

@@ -55,19 +55,17 @@ namespace Ariadne {
     template<class R>
     class Grid
     { 
+      struct Data { array<R> _origin; array<R> _lengths; };
      public:
       /*! \brief The type of real number defining the vertices and cells of the grid. */
       typedef R real_type;
       
      public:
-      /*! \brief \deprecated */
-      index_type subdivision_interval(dimension_type d, const real_type& x) const { return subdivision_lower_index(d,x); }
-      /*! \brief \deprecated */
-      bool encloses(const Box<R>& r) const { return true; }
-      
-     public:
       /*! \brief Destructor. */
       ~Grid();
+      
+      /*! \brief Default constructor constructs a grid from a null pointer. Needed for some iterators. */
+      explicit Grid();
       
       /*! \brief Construct a regular grid in dimension \a n with subdivision lengths \a l in every direction. */
       explicit Grid(const dimension_type& n, const R& l);
@@ -96,6 +94,9 @@ namespace Ariadne {
 
       /*! \brief The coordinate of the \a subdivision point \a x in dimension \a d. */
       real_type subdivision_coordinate(dimension_type d, dyadic_type x) const;
+
+      /*! \brief The coordinate of the \a subdivision point \a x in dimension \a d. */
+      real_type coordinate(dimension_type d, dyadic_type x) const;
 
       /*! \brief The index in dimension \a d of the subdivision 
        * point \a x. Throws an exception if \a x is not a subdivision point. */
@@ -134,10 +135,9 @@ namespace Ariadne {
       std::istream& read(std::istream& is);
      private:
       /*! Create cached data used to speed up computations. */
-      void create();
+      void create(const array<R>& origin, const array<R>& lengths);
      private:
-      array<R> _origin;
-      array<R> _lengths;
+      boost::shared_ptr< Data > _data;
     };
 
 
@@ -200,11 +200,8 @@ namespace Ariadne {
       /*!\brief Write to an output stream. */
       std::ostream& write(std::ostream& os) const;
      private:
-      // true if the class 'owns' the _grid_ptr, which means that the class is
-      // responsible for deleting the Grid
-      bool _own_ptr;
-      // A pointer to an inifinite grid
-      const Grid<R>* _grid_ptr;
+      // A an inifinite grid
+      Grid<R> _grid;
       // The integer indices of the bounds of the cells covered by the grid.
       Combinatoric::LatticeBlock _lattice_block;
     };

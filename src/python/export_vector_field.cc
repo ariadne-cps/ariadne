@@ -24,10 +24,15 @@
 #include "python/float.h"
 
 #include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
+#include "function/taylor_derivative.h"
+#include "geometry/point.h"
 #include "system/vector_field.h"
+#include "system/affine_vector_field.h"
 
 using namespace Ariadne;
 using namespace Ariadne::LinearAlgebra;
+using namespace Ariadne::Function;
 using namespace Ariadne::Geometry;
 using namespace Ariadne::System;
 using namespace Ariadne::Python;
@@ -35,27 +40,19 @@ using namespace Ariadne::Python;
 #include <boost/python.hpp>
 using namespace boost::python;
 
-template<class R>
-class VectorFieldWrapper
-  : public VectorFieldInterface<R>, public wrapper< VectorFieldInterface<R> >
-{
-  typedef typename VectorFieldInterface<R>::F F;
- public: 
-  VectorFieldInterface<R>* clone() const { return this->get_override("clone")(); }
-  Vector<F> image(const Point<F>&) const { return this->get_override("image")(); }
-  dimension_type dimension() const { return this->get_override("dimension")(); }
-  smoothness_type smoothness() const { return this->get_override("smoothness")(); }
-  std::string name() const { return this->get_override("name")(); }
-};
 
 template<class R>
 void export_vector_field() 
 {
-  class_<VectorFieldWrapper<R>, boost::noncopyable>("VectorFieldInterface")
-    .def("dimension", pure_virtual(&VectorFieldInterface<R>::dimension))
-    .def("smoothness", pure_virtual(&VectorFieldInterface<R>::smoothness))
-    .def("name", pure_virtual(&VectorFieldInterface<R>::name))
+  class_<VectorField<R> >("VectorField", init<const FunctionInterface<R>&>())
+    .def("dimension", &VectorField<R>::dimension)
+    .def("smoothness", &VectorField<R>::smoothness)
+    .def("evaluate", &VectorField<R>::evaluate)
+    .def("jacobian", &VectorField<R>::jacobian)
   ;
+ 
+  class_< AffineVectorField<R>, bases< VectorField<R> > >("AffineVectorField", init<const Matrix<R>&,const Vector<R>&>())
+    .def(self_ns::str(self));
 }
 
 template void export_vector_field<FloatPy>();

@@ -40,13 +40,13 @@ namespace Ariadne {
       return r;
     }
 
-    template<class R0, class R1> inline
-    dimension_type dimension(const Zonotope<R0,R1>& z) {
+    template<class R> inline
+    dimension_type dimension(const Zonotope<R>& z) {
       return z.dimension();
     }
 
-    template<class R0, class R1> inline
-    Box<typename Zonotope<R0,R1>::real_type> bounding_box(const Zonotope<R0,R1>& z) {
+    template<class R> inline
+    Box<R> bounding_box(const Zonotope<R>& z) {
       return z.bounding_box();
     }
 

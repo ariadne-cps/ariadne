@@ -38,12 +38,15 @@ namespace Ariadne {
     { 
      public:
       typedef typename Value::real_type real_type;
+      // Default constructor needed for some lists of lists. 
+      GridSetIterator() 
+        : GridSetIterator::iterator_adaptor_(), _grid() { }
       GridSetIterator(const Grid<real_type>& g, Base i) 
-        : GridSetIterator::iterator_adaptor_(i), _grid_ptr(&g) { }
+        : GridSetIterator::iterator_adaptor_(i), _grid(g) { }
      private:
       friend class boost::iterator_core_access;
-      Value dereference() const { return Value(*_grid_ptr,*this->base_reference()); }
-      const Grid<real_type>* _grid_ptr;
+      Value dereference() const { return Value(_grid,*this->base_reference()); }
+      Grid<real_type> _grid;
     };
 
   }

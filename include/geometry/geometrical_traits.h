@@ -35,6 +35,7 @@ namespace Ariadne {
     class basic_set_tag { };
     class denotable_set_tag { };
     class list_set_tag : public denotable_set_tag { };
+    class abstract_set_tag { };
 
     template<class S> class geometrical_traits;
 

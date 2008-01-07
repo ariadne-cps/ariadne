@@ -21,19 +21,19 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+#include "base/tuple.h"
 #include "geometry/rectangle_expression.h"
+#include "geometry/box_list_set.h"
 #include "geometry/set_interface.h"
 #include "geometry/hybrid_set.h"
 #include "system/set_based_hybrid_automaton.h"
+#include "evaluation/hybrid_time.h"
 #include "evaluation/evolution_parameters.h"
 #include "evaluation/map_evolver.h"
 #include "evaluation/vector_field_evolver.h"
 
-#include "evaluation/approximator_interface.h"
 #include "evaluation/applicator_interface.h"
 #include "evaluation/integrator_interface.h"
-
-#include "evaluation/lohner_integrator.h"
 
 #include "output/epsstream.h"
 #include "output/logging.h"
@@ -42,502 +42,504 @@
 
 namespace Ariadne {
  
-namespace Evaluation { static int& verbosity = hybrid_evolver_verbosity; }
+typedef Numeric::Rational Q;
 
-namespace Evaluation {
 
-  template<class SetInterface> 
-  class HybridTimedSet 
-  {
-   public:
-    HybridTimedSet(const time_type& t, const Geometry::DiscreteState& id, const SetInterface& s)
-      : _time(t), _discrete_state(id), _continuous_state_set(s) { }
-    const time_type& time() const { return _time; }
-    const Geometry::DiscreteState& discrete_state() const { return _discrete_state; }
-    const SetInterface& continuous_state_set() const { return _continuous_state_set; } 
-    
-    bool operator==(const HybridTimedSet& other) const { 
-      return this->_time == other._time 
-        && this->_discrete_state==other._discrete_state 
-        && this->_continuous_state_set==other._continuous_state_set; }
-    bool operator!=(const HybridTimedSet& other) const { return !(*this==other); }
-    bool operator<=(const HybridTimedSet& other) const { return this->_time <= other._time; }
-   private:
-    time_type _time;
-    Geometry::DiscreteState _discrete_state;
-    SetInterface _continuous_state_set;
-  };
-
+namespace Evaluation { 
+const uint BISECTION_STEPS=8;
+static int& verbosity = hybrid_evolver_verbosity; 
 }
 
 
-template<class R>
-Evaluation::SetBasedHybridEvolver<R>::~SetBasedHybridEvolver()
-{
-  delete this->_applicator;
-  delete this->_integrator;
-}
-
-template<class R>
-Evaluation::SetBasedHybridEvolver<R>::SetBasedHybridEvolver(const EvolutionParameters<R>& p)
-  : _applicator(new MapEvolver<R>(p)), _integrator(new VectorFieldEvolver<R>(p))
+template<class BS> 
+Evaluation::SetBasedHybridEvolver<BS>::SetBasedHybridEvolver(const EvolutionParameters<R>& parameters, 
+                                                             const ApplicatorInterface<BS>& applicator, 
+                                                             const IntegratorInterface<BS>& integrator)
+  : _parameters(parameters.clone()),
+    _applicator(applicator.clone()), 
+    _integrator(integrator.clone()),
+    verbosity(parameters.verbosity())
 {
 }
 
 
-template<class R>
-Evaluation::SetBasedHybridEvolver<R>::SetBasedHybridEvolver(const SetBasedHybridEvolver<R>& e)
-  : _applicator(e._applicator->clone()), _integrator(e._integrator->clone())
+template<class BS>
+bool
+Evaluation::SetBasedHybridEvolver<BS>::_satisfies(const BS& bs,
+                                                  const CS& inv, 
+                                                  const Semantics semantics) const
 {
-}
-
-
-
-
-
-template<class R>
-Geometry::HybridSet<R> 
-Evaluation::SetBasedHybridEvolver<R>::discrete_step(const System::SetBasedHybridAutomaton<R>& automaton, 
-                                                    const Geometry::HybridSet<R>& initial_set)
-{
-  ARIADNE_LOG(2,"HybridSet SetBasedHybridEvolver::discrete_step(SetBasedHybridAutomaton automaton, HybridSet initial_set)\n");
-  ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
-  if(automaton.locations()!=initial_set.locations()) {
-    throw std::runtime_error("SetBasedHybridEvolver::discrete_step(SetBasedHybridAutomaton,HybridSet): initial_set locations do not match hybrid_automaton modes");
+  if(semantics==upper_semantics) {
+    return not definitely(disjoint(bs,inv));
+  } else { 
+    return definitely(subset(bs,inv));
   }
-  ARIADNE_CHECK_BOUNDED(initial_set,"SetBasedHybridEvolver::discrete_step(SetBasedHybridAutomaton automaton, HybridSet initial_set)");
-
-  typedef Geometry::HybridSpace::const_iterator locations_iterator;
-
-  Geometry::HybridSpace locations=automaton.locations();
-  R grid_separation=this->_applicator->parameters().grid_length();
-
-  Geometry::HybridGridMaskSet<R> grid_initial_set;
-  for(locations_iterator loc_iter=locations.begin(); loc_iter!=locations.end(); ++loc_iter) {
-    Geometry::DiscreteState id=loc_iter->discrete_state();
-    dimension_type dim=loc_iter->dimension();
-    Geometry::Grid<R> grid(LinearAlgebra::Vector<R>(dim,grid_separation));
-    Geometry::Box<R> bounding_box=initial_set[id].bounding_box();
-    Geometry::FiniteGrid<R> finite_grid(grid,bounding_box);
-    grid_initial_set.new_location(id,finite_grid);
-    grid_initial_set[id].adjoin_outer_approximation(initial_set[id]);
-  }
-  Geometry::HybridGridMaskSet<R> grid_result=discrete_step(automaton,grid_initial_set);
-  Geometry::HybridDenotableSet< Geometry::GridMaskSet<R> >& grid_base_result(grid_result);
-  Geometry::HybridSet<R> result(grid_base_result);
-  return result;
-}
-
-
-template<class R>
-Geometry::HybridSet<R> 
-Evaluation::SetBasedHybridEvolver<R>::continuous_chainreach(const System::SetBasedHybridAutomaton<R>& automaton, 
-                                                            const Geometry::HybridSet<R>& initial_set)
-{
-  throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
 
 
-template<class R>
-Geometry::HybridSet<R> 
-Evaluation::SetBasedHybridEvolver<R>::lower_reach(const System::SetBasedHybridAutomaton<R>& automaton, 
-                                                  const Geometry::HybridSet<R>& initial_set)
+template<class BS>
+Q
+Evaluation::SetBasedHybridEvolver<BS>::_initial_activation_time(const VF& vf, 
+                                                                 const CS& inv, 
+                                                                 const BS& bs,
+                                                                 const Q& maximum_time,
+                                                                 const Bx& bb,
+                                                                 const Semantics semantics) const 
 {
-  ARIADNE_LOG(2,"HybridSet SetBasedHybridEvolver::lower_reach(SetBasedHybridAutomaton automaton, HybridSet initial_set)\n");
-  ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
+  // Compute the set of times for which inv is satisfied.
+  // Assume that the set is connected and nonempty
+  Q initial_time=0;
+  Q initial_activation_time=0;
 
-  typedef Geometry::HybridSpace::const_iterator locations_iterator;
-
-  Geometry::HybridSpace locations=automaton.locations();
-  R grid_separation=this->_applicator->parameters().grid_length();
-
-  Geometry::HybridGridCellListSet<R> grid_initial_set;
-  for(locations_iterator loc_iter=locations.begin(); loc_iter!=locations.end(); ++loc_iter) {
-    Geometry::DiscreteState id=loc_iter->discrete_state();
-    dimension_type dim=loc_iter->dimension();
-    Geometry::Grid<R> grid(LinearAlgebra::Vector<R>(dim,grid_separation));
-    grid_initial_set.new_location(id,grid);
-    grid_initial_set[id].adjoin_outer_approximation(initial_set[id]);
-  }
-  Geometry::HybridGridCellListSet<R> grid_result=lower_reach(automaton,grid_initial_set);
-  Geometry::HybridDenotableSet< Geometry::GridCellListSet<R> >& grid_base_result(grid_result);
-  Geometry::HybridSet<R> result(grid_base_result);
-  return result;
-}
-
-
-
-template<class R>
-Geometry::HybridSet<R> 
-Evaluation::SetBasedHybridEvolver<R>::chainreach(const System::SetBasedHybridAutomaton<R>& automaton, 
-                                                 const Geometry::HybridSet<R>& initial_set)
-{
-  throw NotImplemented(__PRETTY_FUNCTION__);
-}
-
-
-
-
-
-template<class R>
-Geometry::HybridSet<R> 
-Evaluation::SetBasedHybridEvolver<R>::continuous_chainreach(const System::SetBasedHybridAutomaton<R>& automaton, 
-                                                            const Geometry::HybridSet<R>& initial_set,
-                                                            const Geometry::HybridSet<R>& bounding_set)
-{
-  ARIADNE_LOG(2,"HybridSet SetBasedHybridEvolver::continuous_chainreach(SetBasedHybridAutomaton automaton, HybridSet initial_set, HybridSet bounding_set)\n");
-  ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n"<<"bounding_set="<<bounding_set<<"\n");
-  ARIADNE_CHECK_BOUNDED(initial_set,"SetBasedHybridEvolver::discrete_step(SetBasedHybridAutomaton automaton, HybridSet initial_set)");
-
-  typedef Geometry::HybridSpace::const_iterator locations_iterator;
-
-  Geometry::HybridSpace locations=automaton.locations();
-  R grid_separation=this->_applicator->parameters().grid_length();
-
-  Geometry::HybridGridMaskSet<R> grid_initial_set;
-  Geometry::HybridGridMaskSet<R> grid_bounding_set;
-  for(locations_iterator loc_iter=locations.begin(); loc_iter!=locations.end(); ++loc_iter) {
-    Geometry::DiscreteState id=loc_iter->discrete_state();
-    dimension_type dim=loc_iter->dimension();
-    Geometry::Grid<R> grid(LinearAlgebra::Vector<R>(dim,grid_separation));
-    Geometry::Box<R> bounding_box=initial_set[id].bounding_box();
-    Geometry::FiniteGrid<R> finite_grid(grid,bounding_box);
-    grid_initial_set.new_location(id,finite_grid);
-    grid_initial_set[id].adjoin_outer_approximation(initial_set[id]);
-    grid_bounding_set.new_location(id,finite_grid);
-    grid_bounding_set[id].adjoin_outer_approximation(bounding_set[id]);
-  }
-  Geometry::HybridGridMaskSet<R> grid_result=continuous_chainreach(automaton,grid_initial_set,grid_bounding_set);
-  Geometry::HybridDenotableSet< Geometry::GridMaskSet<R> >& grid_base_result(grid_result);
-  Geometry::HybridSet<R> result(grid_base_result);
-  return result;
-}
-
-
-
-template<class R>
-Geometry::HybridSet<R> 
-Evaluation::SetBasedHybridEvolver<R>::chainreach(const System::SetBasedHybridAutomaton<R>& automaton, 
-                                                 const Geometry::HybridSet<R>& initial_set, 
-                                                 const Geometry::HybridSet<R>& bounding_set)
-{
-  using namespace Geometry;
-  ARIADNE_LOG(1,"SetBasedHybridEvolver::chainreach(SetBasedHybridAutomaton,HybridSet,HybridSet)"<<std::endl);
-  ARIADNE_LOG(2,"  initial_set="<<initial_set<<"\n  bounding_set="<<bounding_set<<std::endl);
-
-  ARIADNE_CHECK_SAME_LOCATIONS(automaton,initial_set,"SetBasedHybridEvolver::chainreach(SetBasedHybridAutomaton,HybridSet,HybridSet)");
-  ARIADNE_CHECK_SAME_LOCATIONS(automaton,bounding_set,"SetBasedHybridEvolver::chainreach(SetBasedHybridAutomaton,HybridSet,HybridSet)");
-  ARIADNE_CHECK_BOUNDED(bounding_set,"SetBasedHybridEvolver::chainreach(SetBasedHybridAutomaton,HybridSet,HybridSet): bounding_set");
-  ARIADNE_LOG(5,"Checked input"<<std::endl);
-  
-  HybridGridMaskSet<R> grid_bounding_set;
-  HybridGridMaskSet<R> grid_initial_set;
-  
-  for(typename Geometry::HybridSet<R>::locations_const_iterator bs_iter=bounding_set.locations_begin();
-      bs_iter!=bounding_set.locations_end(); ++bs_iter)
-  {
-    Geometry::DiscreteState id=bs_iter->first;
-    Grid<R> grid(bs_iter->second->dimension(),this->_applicator->parameters().grid_length());
-    FiniteGrid<R> fgrid(grid,bs_iter->second->bounding_box());
-    ARIADNE_LOG(5,"Made grid"<<std::endl);
-    grid_bounding_set.new_location(id,fgrid);
-    grid_initial_set.new_location(id,fgrid);
-    grid_bounding_set[id].adjoin_outer_approximation(*bs_iter->second);
-    grid_bounding_set[id].restrict_outer_approximation(automaton.mode(id).invariant());
-    grid_initial_set[id].adjoin_outer_approximation(*bs_iter->second);
-    grid_initial_set[id].restrict_outer_approximation(initial_set[id]);
-  }
-  ARIADNE_LOG(5,"Made cells"<<std::endl);
-
-
-  ARIADNE_LOG(2,"  grid_initial_set="<<grid_initial_set<<"\n  grid_bounding_set="<<grid_bounding_set<<std::endl);
-  HybridGridMaskSet<R> grid_chainreach_set=this->chainreach(automaton,grid_initial_set,grid_bounding_set);
-  ARIADNE_LOG(2,"  grid_chainreach_set="<<grid_chainreach_set<<std::endl);
-  HybridSet<R> chainreach_set(grid_chainreach_set);
-  ARIADNE_LOG(2,"  chainreach_set="<<chainreach_set<<std::endl);
-  return chainreach_set;
-}
-
-
-
-
-template<class R>
-Geometry::HybridListSet< Geometry::Box<R> > 
-Evaluation::SetBasedHybridEvolver<R>::_discrete_step(const System::SetBasedHybridAutomaton<R>& hybrid_automaton, 
-                                                     const Geometry::HybridListSet< Geometry::Box<R> >& initial_set)
-{
-  typedef typename System::SetBasedHybridAutomaton<R>::discrete_transition_const_iterator discrete_transition_const_iterator;
-
-  Geometry::HybridListSet< Geometry::Box<R> > result_set(initial_set.space());
-
-  for(discrete_transition_const_iterator dt_iter=hybrid_automaton.transitions().begin();
-      dt_iter!=hybrid_automaton.transitions().end(); ++dt_iter)
-  {
-    const System::SetBasedDiscreteTransition<R>& dt = *dt_iter;
-    const Geometry::ListSet< Geometry::Box<R> >& initial=initial_set[dt.source().discrete_state()];
-    Geometry::ListSet< Geometry::Box<R> >& destination=result_set[dt.destination().discrete_state()];
-    Geometry::ListSet< Geometry::Box<R> > active=Geometry::inner_intersection(initial,dt.activation());
-    Geometry::ListSet< Geometry::Box<R> > image=this->_applicator->image(dt.reset(),active);
-    ARIADNE_LOG(4,", "<<image.size()<<" boxes in image\n");
-    destination.adjoin(image);
-  }
-  return result_set;
-}
-
-
-template<class R>
-Geometry::HybridListSet< Geometry::Box<R> > 
-Evaluation::SetBasedHybridEvolver<R>::_continuous_reach(const System::SetBasedHybridAutomaton<R>& hybrid_automaton, 
-                                                        const Geometry::HybridListSet< Geometry::Box<R> >& initial_set,
-                                                        const Numeric::Rational& maximum_time)
-{
-  typedef typename System::SetBasedHybridAutomaton<R>::discrete_mode_const_iterator discrete_mode_const_iterator;
-
-  Geometry::HybridListSet< Geometry::Box<R> > result_set(initial_set.space());
-
-  for(discrete_mode_const_iterator dm_iter=hybrid_automaton.modes().begin();
-      dm_iter!=hybrid_automaton.modes().end(); ++dm_iter)
-  {
-    const System::SetBasedDiscreteMode<R>& dm = *dm_iter;
-    const Geometry::ListSet< Geometry::Box<R> >& initial=initial_set[dm.discrete_state()];
-    Geometry::ListSet< Geometry::Box<R> >& reach=result_set[dm.discrete_state()];
-    ARIADNE_LOG(4,"continuous_reach in mode "<<dm.discrete_state()<<":\n");
-    reach=this->_integrator->lower_reach(dm.dynamic(),initial,dm.invariant(),maximum_time);
-    ARIADNE_LOG(4,", "<<reach.size()<<" boxes in reached set\n");
-  }
-  return result_set;
-}
-
-
-
-
-template<class R>
-Geometry::HybridGridMaskSet<R> 
-Evaluation::SetBasedHybridEvolver<R>::_discrete_step(const System::SetBasedHybridAutomaton<R>& hybrid_automaton, 
-                                                     const Geometry::HybridGridMaskSet<R>& initial_set, 
-                                                     const Geometry::HybridGridMaskSet<R>& domain_set)
-{
-  Geometry::HybridGridMaskSet<R> result_set(initial_set);
-  result_set.clear();
-  
-  typedef typename System::SetBasedHybridAutomaton<R>::discrete_transition_const_iterator discrete_transition_const_iterator;
-  
-  for(discrete_transition_const_iterator dt_iter=hybrid_automaton.transitions().begin();
-      dt_iter!=hybrid_automaton.transitions().end(); ++dt_iter)
-  {
-    const System::SetBasedDiscreteTransition<R>& dt = *dt_iter;
-    const Geometry::GridMaskSet<R>& initial=initial_set[dt.source().discrete_state()];
-    Geometry::GridMaskSet<R>& destination=result_set[dt.destination().discrete_state()];
-    Geometry::GridCellListSet<R> active=initial;
-    active.restrict_outer_approximation(dt.activation());
-    ARIADNE_LOG(4,"discrete_step of transition "<<dt.discrete_event()<<" from mode "<<dt.source().discrete_state()<<" to mode "<<dt.destination().discrete_state()<<":\n");
-    ARIADNE_LOG(4,"  "<<active.size()<<" activated cells");
-    Geometry::GridCellListSet<R> image=this->_applicator->image(dt.reset(),active,destination.grid());
-    image.unique_sort();
-    ARIADNE_LOG(4,", "<<image.size()<<" cells in image\n");
-    destination.adjoin(image);
-  }
-  return result_set;
-}
-
-
-template<class R>
-Geometry::HybridGridMaskSet<R> 
-Evaluation::SetBasedHybridEvolver<R>::_continuous_chainreach(const System::SetBasedHybridAutomaton<R>& hybrid_automaton, 
-                                                             const Geometry::HybridGridMaskSet<R>& initial_set,
-                                                             const Geometry::HybridGridMaskSet<R>& domain_set)
-{
-  Geometry::HybridGridMaskSet<R> result_set(initial_set);
-  
-  typedef typename System::SetBasedHybridAutomaton<R>::discrete_mode_const_iterator discrete_mode_const_iterator;
-  result_set.clear();
-  
-  for(discrete_mode_const_iterator dm_iter=hybrid_automaton.modes().begin();
-      dm_iter!=hybrid_automaton.modes().end(); ++dm_iter)
-  {
-    const System::SetBasedDiscreteMode<R>& dm = *dm_iter;
-    const System::VectorFieldInterface<R>& vf = dm.dynamic();
-    const Geometry::GridMaskSet<R>& domain=domain_set[dm.discrete_state()];
-    const Geometry::GridMaskSet<R>& initial=initial_set[dm.discrete_state()];
-    Geometry::GridMaskSet<R> start=regular_intersection(initial,domain);
-    ARIADNE_LOG(4,"continuous_chainreach in mode "<<dm.discrete_state()<<":\n  "<<start.size()<<" initial cells,");
-    result_set[dm.discrete_state()].adjoin(this->_integrator->chainreach(vf,start,domain));
-    result_set[dm.discrete_state()].restrict(domain);
-    ARIADNE_LOG(4," reached "<<result_set[dm.discrete_state()].size()<<" cells\n");
-  }
-  return result_set;
-}
-
-
-template<class R>
-Geometry::HybridGridMaskSet<R> 
-Evaluation::SetBasedHybridEvolver<R>::discrete_step(const System::SetBasedHybridAutomaton<R>& hybrid_automaton, 
-                                                    const Geometry::HybridGridMaskSet<R>& initial_set)
-{
-  ARIADNE_LOG(2,"HybridGridMaskSet SetBasedHybridEvolver::discrete_step(SetBasedHybridAutomaton automaton, HybridGridMaskSet initial_set)\n");
-  ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
-  ARIADNE_CHECK_SAME_LOCATIONS(hybrid_automaton,initial_set,"SetBasedHybridEvolver::discrete_step(SetBasedHybridAutomaton,HybridGridMaskSet)");
-
-  Geometry::HybridGridMaskSet<R> result_set(initial_set);
-  result_set.clear();
-  
-  typedef typename System::SetBasedHybridAutomaton<R>::discrete_transition_const_iterator discrete_transition_const_iterator;
-  
-  for(discrete_transition_const_iterator dt_iter=hybrid_automaton.transitions().begin();
-      dt_iter!=hybrid_automaton.transitions().end(); ++dt_iter)
-  {
-    ARIADNE_LOG(4,"  transition="<<*dt_iter<<"\n");
-    const System::SetBasedDiscreteTransition<R>& dt = *dt_iter;
-    const Geometry::GridMaskSet<R>& source_set=initial_set[dt.source().discrete_state()];
-    Geometry::GridMaskSet<R>& destination_set=result_set[dt.destination().discrete_state()];
-    Geometry::GridMaskSet<R> active_cells=source_set;
-    active_cells.restrict_outer_approximation(dt.activation());
-    ARIADNE_LOG(4,"discrete_step of transition "<<dt.discrete_event()<<" from mode "<<dt.source().discrete_state()<<" to mode "<<dt.destination().discrete_state()<<":\n")
-    ARIADNE_LOG(4,"  "<<active_cells.size()<<" activated cells");
-    const Geometry::GridCellListSet<R> image_cells=this->_applicator->image(dt.reset(),active_cells,destination_set.grid());
-    ARIADNE_LOG(4,", "<<image_cells.size()<<" cells in image\n");
-    destination_set.adjoin(image_cells);
-
-  }
-  
-  return result_set;
-}
-
-
-template<class R>
-Geometry::HybridGridMaskSet<R> 
-Evaluation::SetBasedHybridEvolver<R>::continuous_chainreach(const System::SetBasedHybridAutomaton<R>& hybrid_automaton, 
-                                                            const Geometry::HybridGridMaskSet<R>& initial_set,
-                                                            const Geometry::HybridGridMaskSet<R>& bounding_set)
-{
-  ARIADNE_LOG(2,"HybridGridMaskSet SetBasedHybridEvolver::continuous_chainreach(SetBasedHybridAutomaton automaton, HybridGridMaskSet initial_set, HybridGridMaskSet bounding_set)\n");
-  ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n"<<"bounding_set="<<bounding_set<<"\n");
-  ARIADNE_LOG(3,"checking input... ");
-  ARIADNE_CHECK_SAME_LOCATIONS(hybrid_automaton,initial_set,"SetBasedHybridEvolver::continuous_chainreach(SetBasedHybridAutomaton,HybridGridMaskSet,HybridGridMaskSet)");
-  ARIADNE_CHECK_SAME_LOCATIONS(hybrid_automaton,bounding_set,"SetBasedHybridEvolver::continuous_chainreach(SetBasedHybridAutomaton,HybridGridMaskSet,HybridGridMaskSet)");
-  
-  ARIADNE_CHECK_BOUNDED(bounding_set,"SetBasedHybridEvolver::continuous_chainreach(SetBasedHybridAutomaton,HybridGridMaskSet,HybridGridMaskSet): bounding_set");
-  
-  ARIADNE_LOG(3,"successful\n");
-
-  typedef typename System::SetBasedHybridAutomaton<R>::discrete_mode_const_iterator discrete_mode_const_iterator;
-  
-  Geometry::HybridGridMaskSet<R> domain_set(bounding_set);
-  for(discrete_mode_const_iterator dm_iter=hybrid_automaton.modes().begin();
-      dm_iter!=hybrid_automaton.modes().end(); ++dm_iter)
-  {
-    ARIADNE_LOG(3,"computing domain set in mode "<<dm_iter->discrete_state()<<"... invariant="<<dm_iter->invariant()<<"\n");
-    domain_set[dm_iter->discrete_state()].restrict_outer_approximation(dm_iter->invariant());
-  }
-  ARIADNE_LOG(3,"domain_set="<<domain_set<<"\n");
-
-  ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n"<<"domain_set="<<domain_set<<"\n");
-  return _continuous_chainreach(hybrid_automaton,initial_set,domain_set);
-}
-
-
-
-template<class R>
-Geometry::HybridGridCellListSet<R> 
-Evaluation::SetBasedHybridEvolver<R>::lower_reach(const System::SetBasedHybridAutomaton<R>& hybrid_automaton, 
-                                                  const Geometry::HybridGridCellListSet<R>& initial_set)
-{
-  using namespace Geometry;
-  ARIADNE_LOG(2,"HybridGridCellListSet SetBasedHybridEvolver::lower_reach(SetBasedHybridAutomaton automaton, HybridGridCellListSet initial_set)\n");
-  ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
-  ARIADNE_CHECK_SAME_LOCATIONS(hybrid_automaton,initial_set,"SetBasedHybridEvolver::chainreach(SetBasedHybridAutomaton,HybridGridMaskSet,HybridGridMaskSet)");
-
-  typedef typename System::SetBasedHybridAutomaton<R>::discrete_transition_const_iterator discrete_transition_const_iterator;
-  typedef typename System::SetBasedHybridAutomaton<R>::discrete_mode_const_iterator discrete_mode_const_iterator;
-
-  const Geometry::HybridGrid<R>& grid=initial_set.grid();
-  Geometry::HybridListSet< Box<R> > reach_set(initial_set.space());
-  Geometry::HybridListSet< Box<R> > integrated_set(initial_set.space());
-  Geometry::HybridListSet< Box<R> > found_set(initial_set.space());
-  found_set.adjoin(initial_set);
-
-  ARIADNE_LOG(4,found_set.size()<<" cells in initial set\n");
-  uint step=0;
-  // FIXME: Use correct size;
-  uint maximum_steps=16;
-  Numeric::Rational maximum_integration_time=16;
-  while(step<maximum_steps && !!found_set.empty()) {
-    integrated_set=this->_continuous_reach(hybrid_automaton,found_set,maximum_integration_time);
-    ARIADNE_LOG(4,"\nintegration found "<<integrated_set.size()<<" boxes by continuous evolution, \n"<<std::endl);
-    found_set=this->_discrete_step(hybrid_automaton,integrated_set);
-    ARIADNE_LOG(4,"\nreset found "<<found_set.size()<<" boxes by discrete step, \n"<<std::endl);
-    reach_set.adjoin(found_set);
-    if(verbosity>=4) {
-      std::stringstream filename;
-      filename << "hybrid_lower_reach-"<<step<<".eps";
-      Output::epsfstream eps;
+  // Compute initial activation time
+  if(!_satisfies(bs,inv,semantics)) {
+    Q lower_bound=initial_time;
+    Q upper_bound=maximum_time;
+    for(uint i=0; i!=BISECTION_STEPS; ++i) {
+      Q approx=med(lower_bound,upper_bound);
+      BS rs=continuous_evolution_step(vf,bs,lower_bound,approx,bb);
+      if(_satisfies(rs,inv,semantics)) {
+        upper_bound=approx;
+      } else {
+        lower_bound=approx;
+      }
+    }
+    if(semantics==upper_semantics) {
+      initial_activation_time=lower_bound;
+    } else {
+      initial_activation_time=upper_bound;
     }
   }
-
-  return Geometry::outer_approximation(reach_set,grid);
+  return initial_activation_time;
 }
 
 
-template<class R>
-Geometry::HybridGridMaskSet<R> 
-Evaluation::SetBasedHybridEvolver<R>::chainreach(const System::SetBasedHybridAutomaton<R>& hybrid_automaton, 
-                                                 const Geometry::HybridGridMaskSet<R>& initial_set, 
-                                                 const Geometry::HybridGridMaskSet<R>& bounding_set)
+
+template<class BS>
+Q
+Evaluation::SetBasedHybridEvolver<BS>::
+_final_activation_time(const VF& vf, const CS& inv, const BS& bs, 
+                       const Q& maximum_time, const Bx& bb, const Semantics semantics) const 
 {
-  using namespace Geometry;
-  ARIADNE_LOG(2,"HybridGridMaskSet SetBasedHybridEvolver::chainreach(SetBasedHybridAutomaton automaton, HybridGridMaskSet initial_set, HybridGridMaskSet bounding_set)\n");
-  ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n"<<"bounding_set="<<bounding_set<<"\n");
-  ARIADNE_CHECK_SAME_LOCATIONS(hybrid_automaton,initial_set,"SetBasedHybridEvolver::chainreach(SetBasedHybridAutomaton,HybridGridMaskSet,HybridGridMaskSet)");
-  ARIADNE_CHECK_SAME_LOCATIONS(hybrid_automaton,bounding_set,"SetBasedHybridEvolver::chainreach(SetBasedHybridAutomaton,HybridGridMaskSet,HybridGridMaskSet)");
-  
-  ARIADNE_CHECK_BOUNDED(bounding_set,"SetBasedHybridEvolver::chainreach(SetBasedHybridAutomaton,HybridGridMaskSet,HybridGridMaskSet): bounding_set");
-
-  typedef typename System::SetBasedHybridAutomaton<R>::discrete_transition_const_iterator discrete_transition_const_iterator;
-  typedef typename System::SetBasedHybridAutomaton<R>::discrete_mode_const_iterator discrete_mode_const_iterator;
-  
-  // Compute restricted invariant domains as GridMaskSets
-  Geometry::HybridGridMaskSet<R> domain_set(bounding_set);
-  for(discrete_mode_const_iterator dm_iter=hybrid_automaton.modes().begin();
-      dm_iter!=hybrid_automaton.modes().end(); ++dm_iter)
-  {
-    domain_set[dm_iter->discrete_state()].restrict_outer_approximation(dm_iter->invariant());
+  // Compute final activation time
+  BS es=continuous_integration_step(vf,bs,maximum_time,bb);
+  if(_satisfies(es,inv,semantics)) {
+    return maximum_time;
   }
 
-  HybridGridMaskSet<R> result_set=domain_set;
-  HybridGridMaskSet<R> integrated_set=domain_set;
-  integrated_set.clear();
-  result_set.restrict(initial_set);
-  ARIADNE_LOG(4,result_set.size()<<" cells in initial set\n");
-  HybridGridMaskSet<R> found_set=result_set;
-  uint step=0;
-  while(!found_set.empty()) {
-    integrated_set=this->_continuous_chainreach(hybrid_automaton,found_set,domain_set);
-    ARIADNE_LOG(4,"\nchainreach found "<<integrated_set.size()<<" cell by continuous evolution, \n"<<std::endl);
-    if(verbosity>=4) {
-      std::stringstream filename;
-      filename << "hybrid_chainreach-"<<step<<".eps";
-      const GridMaskSet<R>& dom=domain_set.locations_begin()->second;
-      const GridMaskSet<R>& res=result_set.locations_begin()->second;
-      const GridMaskSet<R>& fnd=found_set.locations_begin()->second;
-      Output::epsfstream eps;
-      eps.open(filename.str().c_str(),dom.bounding_box());
-      eps << fill_colour(Output::green) << dom.extent();
-      eps << fill_colour(Output::green) << res;
-      eps << fill_colour(Output::red) << fnd;
-      eps.close();
+  Q final_activation_time=maximum_time;
+  Q lower_bound=0;
+  Q upper_bound=maximum_time;
+  for(uint i=0; i!=BISECTION_STEPS; ++i) {
+    Q approx=med(lower_bound,upper_bound);
+    BS rs=continuous_evolution_step(vf,bs,approx,upper_bound,bb);
+    if(_satisfies(rs,inv,semantics)) {
+      lower_bound=approx;
+    } else {
+      upper_bound=approx;
     }
-    found_set=this->_discrete_step(hybrid_automaton,integrated_set,domain_set);
-    ARIADNE_LOG(4,"\nchainreach found "<<found_set.size()<<" cells by discrete step");
-    found_set.remove(result_set);
-    ARIADNE_LOG(4," of which "<<found_set.size()<<" are new; ");
-    result_set.adjoin(integrated_set);
-    result_set.adjoin(found_set);
-    ARIADNE_LOG(4,"reached "<<result_set.size()<< " cells in total.\n" << std::endl);
-    ++step;
   }
-  return result_set;
+  if(semantics==upper_semantics) {
+    final_activation_time=upper_bound;
+  } else {
+    final_activation_time=lower_bound;
+  }
+  return final_activation_time;
 }
+
+
+
+template<class BS>
+tuple<Q, Q>
+Evaluation::SetBasedHybridEvolver<BS>::_activation_times(const VF& vf, 
+                                                         const CS& inv, 
+                                                         const BS& bs,
+                                                         const Q& maxt,
+                                                         const Bx& bb,
+                                                         const Semantics sem) const 
+{
+  return make_tuple(_initial_activation_time(vf,inv,bs,maxt,bb,sem),
+                    _final_activation_time(vf,inv,bs,maxt,bb,sem));
+}
+
+
+
+
+template<class BS>
+tuple<Q,BS>
+Evaluation::SetBasedHybridEvolver<BS>::_saltation_map(const VF& vf1, 
+                                                      const VF& vf2, 
+                                                      const Mp& rm, 
+                                                      const CS& inv, 
+                                                      const BS& bs,
+                                                      const Q& maxt,
+                                                      const Bx& bb,
+                                                      const Semantics sem) const
+{
+  // Compute activation times up to the given time and apply the saltation map 
+  Q h1=_initial_activation_time(vf1,inv,bs,maxt,bb,sem);
+  Q h2=_final_activation_time(vf1,inv,bs,maxt,bb,sem);
+  std::cerr << "    h1="<<h1.get_d()<<", h2="<<h2.get_d()<<"\n";
+  return _saltation_map(vf1,vf2,rm,inv,bs,h1,h2,bb,sem);
+}
+
+template<class BS>
+tuple<Q,BS>
+Evaluation::SetBasedHybridEvolver<BS>::
+_saltation_map(const VF& vf1, const VF& vf2, const Mp& rm, const CS& inv, 
+               const BS& bs, const Q& h1, const Q& h2, const Bx& bb, const Semantics sem) const
+{
+  ARIADNE_ASSERT(h1<=h2);
+  if(sem==upper_semantics) {
+    BS rs=continuous_evolution_step(vf1,bs,h1,h2,bb);
+    return make_tuple(h1,apply(rm,rs));  } 
+  else {
+    Q hmed=med(h1,h2);
+    BS rs=continuous_integration_step(vf1,bs,hmed,bb);
+    return make_tuple(hmed,apply(rm,rs));  
+  }
+}
+
+
+
+
+template<class BS>
+BS
+Evaluation::SetBasedHybridEvolver<BS>::_continuous_reachability_step(const VF& vf, 
+                                                                     const CS& inv, 
+                                                                     const BS& bs,
+                                                                     const Q& maximum_time,
+                                                                     const Bx& bb,
+                                                                     const Semantics semantics) const
+{
+  Q h=_final_activation_time(vf,inv,bs,maximum_time,bb,semantics);
+  return this->continuous_reachability_step(vf,bs,h,bb);
+}
+
+
+
+template<class BS>
+void
+Evaluation::SetBasedHybridEvolver<BS>::_step(HBSL& evolve,
+                                             HBSL& reach,
+                                             THBSL& working,
+                                             const HA& automaton, 
+                                             const Q& time,
+                                             const Semantics semantics) const
+{
+  int verbosity=9;
+
+  ARIADNE_LOG(6,"\nBasedHybridEvolver<BS>::_step\n");
+  ARIADNE_ASSERT(!working.empty());
+  ARIADNE_LOG(9," evolution_time="<<time<<"\n");
+  ARIADNE_LOG(9," working.size()="<<working.size()<<"\n");
+  ARIADNE_LOG(9," evolve.size()="<<evolve.size()<<"\n");
+  ARIADNE_LOG(9," reach.size()="<<reach.size()<<"\n");
+  //ARIADNE_ASSERT(working.size()<32)
+  //THBS thbs=working.back();
+  //ARIADNE_LOG(7,"  t="<<thbs.time()<<", n="<<thbs.steps()<<", ds="<<thbs.state()<<"\n");
+  //ARIADNE_LOG(7,"  bs="<<thbs.set()<<"\n");
+  
+
+  Q t; Z n; DS ds(0); BS bs;
+  make_ltuple(t,n,ds,bs)=working.pop();
+  ARIADNE_LOG(7,"  t="<<t<<", n="<<n<<", ds="<<ds);
+  ARIADNE_LOG(7,(semantics==upper_semantics?", upper_semantics\n":", lower_semantics\n"));
+  ARIADNE_LOG(7,"  bs="<<bs<<"\n");
+
+  if(t==time) {
+    ARIADNE_LOG(7," reached end time\n");
+    evolve.adjoin(HBS(ds,bs));
+  } else if(bs.radius()>this->maximum_basic_set_radius()) {
+    ARIADNE_LOG(7," subdivide\n");
+    ARIADNE_LOG(7,"  r="<<bs.radius()<<"; max_r="<<this->maximum_basic_set_radius()<<"\n");
+    this->append_subdivision(working,THBS(t,n,ds,bs));
+  } else {
+    ARIADNE_LOG(7," time step\n");
+    const DM& mode=automaton.mode(ds);
+    reference_vector<const DT> transitions=automaton.transitions(ds);
+    const VF& vf=mode.dynamic();
+    const CS& inv=mode.invariant();
+
+    // Compute continous evolve and reach sets
+    Q h; Bx bb;
+    make_lpair(h,bb)=this->flow_bounds(vf,this->bounding_box(bs));
+    if(Q(t+h)>time) { h=time-t; }
+    ARIADNE_LOG(7,"  h="<<h<<", bb="<<bb<<"\n");
+    BS ebs=this->continuous_integration_step(vf,bs,h,bb);
+    ARIADNE_LOG(7,"  ebs="<<ebs<<"\n");
+    Q rh=this->_final_activation_time(vf,inv,bs,h,bb,semantics);
+    BS rbs=this->continuous_reachability_step(vf,bs,rh,bb);
+    ARIADNE_LOG(7,"  rh="<<rh<<", rbs="<<rbs<<"\n");
+    BSL rbsl(rbs);
+
+    // Process evolved set
+    ARIADNE_LOG(9,"  i="<<this->intersect(ebs,mode.invariant()));
+    ARIADNE_LOG(9,", s="<<this->subset(ebs,mode.invariant()));
+    ARIADNE_LOG(9,", inv="<<mode.invariant().bounding_box()<<"\n");
+    if(rh==h) {
+      working.push(THBS(Q(t+h),n,ds,ebs));
+    }
+  
+    // Process reach set
+    for(typename BSL::const_iterator rbs_iter=rbsl.begin(); rbs_iter!=rbsl.end(); ++rbs_iter) {
+      reach.adjoin(make_pair(ds,*rbs_iter));
+    }
+
+    // Process transitions
+    for(transitions_const_iterator transition_iter=transitions.begin();
+        transition_iter!=transitions.end(); ++transition_iter)
+    {
+      Z imn=n+1;
+      const DT& transition=*transition_iter;
+      DS imds=transition.destination().discrete_state();
+      ARIADNE_LOG(9,"  i="<<this->intersect(ebs,transition.activation()));
+      ARIADNE_LOG(9,", s="<<this->subset(ebs,transition.activation()));
+      ARIADNE_LOG(9,", act="<<transition.activation().bounding_box()<<"\n");
+      for(typename BSL::const_iterator rbs_iter=rbsl.begin(); rbs_iter!=rbsl.end(); ++rbs_iter) {
+        const BS& rbs=*rbs_iter;
+        const CS& act=transition.activation();
+        // Always for activation by looking for possibility of intersection, which corresponds to upper semantics
+        if(_satisfies(rbs,act,upper_semantics)) { 
+          Q h1=_initial_activation_time(vf,act,bs,rh,bb,semantics);
+          Q h2=_final_activation_time(vf,act,bs,rh,bb,semantics);
+          ARIADNE_LOG(9,"    t=["<<h1.get_d()<<","<<h2.get_d()<<"]\n");
+          if(h1>h2) {
+            // Can't prove that a transition occurs
+          } else {
+            Q imt; DS imds=transition.destination().discrete_state(); BS imbs;
+            make_ltuple(imt,imbs)=this->_saltation_map(vf,transition.destination().dynamic(),transition.reset(),transition.activation(),
+                                                       bs,h1,h2,bb,semantics);
+            ARIADNE_LOG(9,"    imbs="<<imbs<<"\n");
+            working.push(THBS(imt,imn,imds,imbs));
+          }
+        }
+      }
+    }
+
+  }  // done step
+  ARIADNE_LOG(9," done step\n")
+  ARIADNE_LOG(9,"  working.size()="<<working.size()<<"\n");
+  ARIADNE_LOG(9,"  evolve.size()="<<evolve.size()<<"\n");
+  ARIADNE_LOG(9,"  reach.size()="<<reach.size()<<"\n\n");
+}
+
+
+
+
+template<class BS>
+void
+Evaluation::SetBasedHybridEvolver<BS>::_evolve(HBSL& evolve, 
+                                               HBSL& reach, 
+                                               const HBSL& initial, 
+                                               const HA& ha,
+                                               const Q& time, 
+                                               const Semantics semantics) const
+{
+  uint verbosity=this->_parameters->verbosity();
+  THBSL working=initial;
+  ARIADNE_LOG(5,initial<<"\n");
+  ARIADNE_LOG(5,working<<"\n");
+  while(working.size()!=0) {
+    _step(evolve,reach,working,ha,time,semantics);
+  }
+}
+
+template<class BS>
+typename Evaluation::SetBasedHybridEvolver<BS>::HBSL
+Evaluation::SetBasedHybridEvolver<BS>::basic_set_evolve(const HA& automaton, 
+                                                        const HBSL& sets,
+                                                        const Q& time,
+                                                        const Semantics semantics) const
+{
+  HBSL reach(automaton.locations());
+  HBSL evolve(automaton.locations());
+  THBSL working(sets);
+  while(!working.empty()) {
+    this->_step(evolve,reach,working,automaton,time,semantics);
+  }
+  return evolve;
+}
+
+
+template<class BS>
+typename Evaluation::SetBasedHybridEvolver<BS>::HBSL
+Evaluation::SetBasedHybridEvolver<BS>::basic_set_reach(const HA& automaton, 
+                                                       const HBSL& sets,
+                                                       const Q& time,
+                                                       const Semantics semantics) const
+{
+  ARIADNE_LOG(1,"SetBasedHybridEvolver::basic_set_reach(...)\n");
+  ARIADNE_LOG(1,"sets="<<sets<<"\n")
+
+  HBSL reach(automaton.locations());
+  HBSL evolve(automaton.locations());
+  THBSL working(sets);
+  while(!working.empty()) {
+    this->_step(evolve,reach,working,automaton,time,semantics);
+  }
+  return reach;
+}
+
+
+template<class BS>
+void
+Evaluation::SetBasedHybridEvolver<BS>::_upper_evolve(HGCLS& result, const HA& ha, const HGCLS& initial_set, const T& t) const
+{
+  ARIADNE_LOG(4,"SetBasedHybridEvolver::_upper_evolve(result,automaton,grid_set,time)\n");
+  HBSL reach(ha.locations());
+  HBSL evolve(ha.locations());
+  HBSL initial=this->basic_set_list(initial_set);
+  this->_evolve(evolve,reach,initial,ha,t.time(),upper_semantics);
+  result=this->outer_approximation(evolve,initial_set.grid());
+}
+
+template<class BS>
+void
+Evaluation::SetBasedHybridEvolver<BS>::_upper_reach(HGCLS& result, const HA& ha, const HGCLS& initial_set, const T& t) const
+{
+  ARIADNE_LOG(4,"SetBasedHybridEvolver::_upper_reach(result,automaton,grid_set,time)\n");
+  HBSL reach(ha.locations());
+  HBSL evolve(ha.locations());
+  HBSL initial=this->basic_set_list(initial_set);
+  ARIADNE_LOG(4,"initial_working="<<initial<<")\n");
+  this->_evolve(evolve,reach,initial,ha,t.time(),upper_semantics);
+  result=this->outer_approximation(reach,initial_set.grid());
+}
+
+
+template<class BS>
+typename Evaluation::SetBasedHybridEvolver<BS>::HGCLS
+Evaluation::SetBasedHybridEvolver<BS>::_upper_evolve(const HA& ha, const HGCLS& initial_set, const T& t) const
+{
+  ARIADNE_LOG(4,"SetBasedHybridEvolver::_upper_evolve(automaton,grid_set,time)\n");
+  HBSL reach(ha.locations());
+  HBSL evolve(ha.locations());
+  HBSL initial=this->basic_set_list(initial_set);
+  this->_evolve(evolve,reach,initial,ha,t.time(),upper_semantics);
+  return this->outer_approximation(evolve,initial_set.grid());
+}
+
+template<class BS>
+typename Evaluation::SetBasedHybridEvolver<BS>::HGCLS
+Evaluation::SetBasedHybridEvolver<BS>::_upper_reach(const HA& ha, const HGCLS& initial_set, const T& t) const
+{
+  ARIADNE_LOG(4,"SetBasedHybridEvolver::_upper_reach(automaton,grid_set,time)\n");
+  ARIADNE_LOG(5,"initial_set="<<initial_set<<"\n");
+  HBSL reach(ha.locations());
+  HBSL evolve(ha.locations());
+  ARIADNE_LOG(5,"empty="<<evolve<<"\n");
+  HBSL initial=this->basic_set_list(initial_set);
+  ARIADNE_LOG(5,"initial_basic_sets="<<initial<<"\n");
+  this->_evolve(evolve,reach,initial,ha,t.time(),upper_semantics);
+  return this->outer_approximation(reach,initial_set.grid());
+}
+
+
+template<class BS>
+Geometry::HybridGridMaskSet<typename BS::real_type> 
+Evaluation::SetBasedHybridEvolver<BS>::lower_evolve(const System::SetBasedHybridAutomaton<R>& automaton, 
+                                                    const Geometry::HybridSet<R>& initial_set,
+                                                    const Numeric::Rational& time) const
+{
+  HBSL reach, evolve;
+  THBSL working=this->timed_basic_set_list(this->lower_approximation(initial_set,this->grid(automaton.locations())));
+  while(working.size()!=0) { 
+    this->_step(evolve,reach,working,automaton,time,lower_semantics);
+  }
+  HGCLS result=this->outer_approximation(evolve,this->grid(automaton.locations()));
+  return HGMS(result);
+}
+
+template<class BS>
+Geometry::HybridGridMaskSet<typename BS::real_type> 
+Evaluation::SetBasedHybridEvolver<BS>::lower_reach(const System::SetBasedHybridAutomaton<R>& automaton, 
+                                                   const Geometry::HybridSet<R>& initial_set,
+                                                   const Numeric::Rational& time) const
+{
+  HBSL reach, evolve;
+  THBSL working=this->timed_basic_set_list(this->lower_approximation(initial_set,this->grid(automaton.locations())));
+  while(working.size()!=0) { 
+    this->_step(evolve,reach,working,automaton,time,lower_semantics);
+  }
+  HGCLS result=this->outer_approximation(reach,this->grid(automaton.locations()));
+  return HGMS(result);
+}
+
+template<class BS>
+Geometry::HybridGridMaskSet<typename BS::real_type> 
+Evaluation::SetBasedHybridEvolver<BS>::upper_evolve(const System::SetBasedHybridAutomaton<R>& automaton, 
+                                                    const Geometry::HybridSet<R>& initial_set,
+                                                    const Numeric::Rational& time) const
+{
+  hybrid_evolver_verbosity=7; 
+  ARIADNE_LOG(2,"SetBasedHybridEvolver::upper_evolve(automaton,set,time)\n");
+  ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n\n");
+  HGCLS evolve=this->outer_approximation(initial_set,this->grid(automaton.locations()));
+  ARIADNE_LOG(3,"working_set="<<evolve<<"\n\n");
+  HGCLS reach=evolve;
+  Q lock_time=this->lock_to_grid_time();
+  Z steps=floor(Q(time/lock_time));
+  Q last_time=time-steps*lock_time;
+  for(size_type i=0; i!=steps; ++i) {
+    ARIADNE_LOG(5,"step i="<<i<<",  time="<<lock_time<<"\n");
+    evolve=this->_upper_evolve(automaton,evolve,lock_time);
+    ARIADNE_LOG(5,"working_set="<<evolve<<"\n\n");
+  }
+  evolve=this->_upper_evolve(automaton,evolve,lock_time);
+  return HGMS(evolve);
+}
+
+template<class BS>
+Geometry::HybridGridMaskSet<typename BS::real_type> 
+Evaluation::SetBasedHybridEvolver<BS>::upper_reach(const System::SetBasedHybridAutomaton<R>& automaton, 
+                                                   const Geometry::HybridSet<R>& initial_set,
+                                                   const Numeric::Rational& time) const
+{
+  ARIADNE_LOG(2,"SetBasedHybridEvolver::upper_reach(automaton,set,time)\n");
+  ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n\n");
+  HGr grid=this->grid(automaton.locations());
+  ARIADNE_LOG(3,"grid="<<grid<<"\n");
+  HGCLS evolve=this->outer_approximation(initial_set,grid);
+  ARIADNE_LOG(3,"working_set="<<evolve<<"\n\n");
+  HGCLS reach=evolve;
+  Q lock_time=this->lock_to_grid_time();
+  Z steps=floor(Q(time/lock_time));
+  Q last_time=time-steps*lock_time;
+  for(size_type i=0; i!=steps; ++i) {
+    ARIADNE_LOG(5,"step i="<<i<<",  time="<<lock_time<<"\n");
+    reach.adjoin(this->_upper_reach(automaton,evolve,lock_time));
+    evolve=this->_upper_evolve(automaton,evolve,lock_time);
+    ARIADNE_LOG(5,"working_set="<<evolve<<"\n\n");
+  }
+  reach.adjoin(this->_upper_evolve(automaton,evolve,lock_time));
+  return HGMS(reach);
+}
+
+
+template<class BS>
+Geometry::HybridGridMaskSet<typename BS::real_type> 
+Evaluation::SetBasedHybridEvolver<BS>::chainreach(const System::SetBasedHybridAutomaton<R>& automaton, 
+                                                  const Geometry::HybridSet<R>& initial_set) const
+{
+  hybrid_evolver_verbosity=7; 
+  HGr grid=this->grid(automaton.locations());
+  HGCLS result(grid);
+  T time=this->lock_to_grid_time();
+  HGCLS found=this->outer_approximation(initial_set,grid);
+  this->_upper_reach(found,automaton,found,time);
+  while(!found.empty()) {
+    result.adjoin(found);
+    this->_upper_evolve(found,automaton,found,time);
+    found.remove(result);
+  }
+  return HGMS(result);
+}
+
+
+
+
 
 
 }

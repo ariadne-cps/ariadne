@@ -30,9 +30,6 @@
 
 #include <config.h>
 
-#include "numeric/float.template.h"
-#include "numeric/float.inline.h"
-
 #if PYTHON_FLOAT == Float64 
 
 #include "numeric/float64.h" 

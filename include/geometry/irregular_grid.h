@@ -34,7 +34,7 @@ namespace Ariadne {
   namespace Geometry {
 
     template<class R> class Box;
-    template<class BS> class ListSet;
+    template<class R> class BoxListSet;
   
     /*! \brief A finite, nonuniform grid of rectangles in Euclidean space. 
      *  \ingroup Grid
@@ -50,7 +50,7 @@ namespace Ariadne {
       explicit IrregularGrid(const array< std::vector<R> >& sp);
 
       /*! \brief Construct from a list of rectangles giving the grid points. */
-      explicit IrregularGrid(const ListSet< Box<R> >& ls);
+      explicit IrregularGrid(const BoxListSet<R>& ls);
 
       /*! \brief Join two irregular grids. */
       IrregularGrid(const IrregularGrid& g1,IrregularGrid& g2);

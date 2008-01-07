@@ -68,15 +68,19 @@ neighbourhood(const Geometry::Rectangle< Numeric::Float<T> >&r,
 
 
 
-namespace Ariadne { namespace Numeric {
-
-
-}}
 
 
 namespace Ariadne {
 
-
+template<class R>
+void
+Geometry::Rectangle<R>::_instantiate()
+{
+  Rectangle<R>* r=0;
+  ListSet< Rectangle<R> >* rls=0;
+  *rls = Geometry::subdivide(*r);
+}
+  
 template<class R>
 Geometry::Rectangle<R>::Rectangle(const std::string& s)
   : _data()
@@ -123,7 +127,34 @@ Geometry::Rectangle<R>::quadrant(const Combinatoric::BinaryWord& w) const
 }
 
 
+template<class R> 
+Geometry::ListSet< Geometry::Rectangle<R> >
+Geometry::subdivide(const Rectangle<R>& r)  
+{
+  size_type d=r.dimension();
+  R mr=0;
+  size_type mi=0;
+  for(size_type i=0; i!=d; ++i) {
+    R ir=r[i].radius();
+    if(ir>mr) {
+      mr=ir;
+      mi=i;
+    }
+  }
+  R c=r[mi].midpoint();
 
+  Rectangle<R> nr(r);
+  ListSet< Geometry::Rectangle<R> > result;
+  nr.set_upper_bound(mi,c);
+  result.adjoin(nr);
+  nr.set_upper_bound(mi,r.upper_bound(mi));
+  nr.set_lower_bound(mi,c);
+  result.adjoin(nr);
+  return result;
+}
+
+
+/*
 template<class R>
 Geometry::ListSet< Geometry::Rectangle<R> >
 Geometry::Rectangle<R>::subdivide() const 
@@ -152,6 +183,8 @@ Geometry::Rectangle<R>::subdivide() const
   }
   return result;
 }
+*/
+
 
 
 template<class R>

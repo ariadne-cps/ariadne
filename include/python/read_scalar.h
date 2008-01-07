@@ -28,98 +28,22 @@
 #ifndef ARIADNE_PYTHON_READ_SCALAR_H
 #define ARIADNE_PYTHON_READ_SCALAR_H
 
-#include "numeric/traits.h"
-
+#include "numeric/declarations.h"
 #include <boost/python.hpp>
-#include <boost/python/detail/api_placeholder.hpp>
 
 namespace Ariadne {
-namespace Python {
+  namespace Python {
 
-
-template<class X> 
-X read_scalar(const boost::python::object& obj);
-
-
-// Read a scalar variable of type X from a Python object
-template<class R> inline
-void
-read_scalar(R& x, const boost::python::object& obj)
-{
-  boost::python::extract<std::string> sx(obj);
-  boost::python::extract<double> dx(obj);
-  boost::python::extract<R> rx(obj);
-  if(sx.check()) {
-    x=static_cast<R>(sx());
-  } else if(dx.check()) {
-    x=static_cast<R>(dx());
-  } else {
-    x=rx();
+    void read_scalar(bool&, const boost::python::object&);
+    void read_scalar(int&, const boost::python::object&);
+    void read_scalar(uint&, const boost::python::object&);
+    void read_scalar(double&, const boost::python::object&);
+    void read_scalar(Numeric::Integer&, const boost::python::object&);
+    void read_scalar(Numeric::Rational&, const boost::python::object&);
+    template<class T> void read_scalar(Numeric::Float<T>&, const boost::python::object&);
+    template<class R> void read_scalar(Numeric::Interval<R>&, const boost::python::object&);
+    
   }
-}
- 
-template<class R> inline
-Numeric::Interval<R>
-read_interval(const boost::python::list& pair)
-{
-  if(boost::python::len(pair)!=2) {
-    throw std::runtime_error("Interval must be list of pairs representing intervals");
-  }
-  R l=read_scalar<R>(pair[0]);
-  R u=read_scalar<R>(pair[1]);
-  return Numeric::Interval<R>(l,u);
-}
-
-template<class R> inline
-Numeric::Interval<R>
-read_interval(const boost::python::tuple& pair)
-{
-  if(boost::python::len(pair)!=2) {
-    throw std::runtime_error("Interval must be list of pairs representing intervals");
-  }
-  R l=read_scalar<R>(pair[0]);
-  R u=read_scalar<R>(pair[1]);
-  return Numeric::Interval<R>(l,u);
-}
-
-template<class R> inline
-void
-read_scalar(Numeric::Interval<R>& x, const boost::python::object& obj)
-{
-  typedef Numeric::Interval<R> I;
-  boost::python::extract<std::string> sx(obj);
-  boost::python::extract<boost::python::list> lx(obj);
-  boost::python::extract<boost::python::tuple> tx(obj);
-  boost::python::extract<double> dx(obj);
-  boost::python::extract<R> rx(obj);
-  boost::python::extract<I> ix(obj);
-  if(sx.check()) {
-    x=static_cast<I>(sx());
-  } else if(lx.check()) {
-    x=read_interval<R>(lx());
-  } else if(tx.check()) {
-    x=read_interval<R>(tx());
-  } else if(dx.check()) {
-    x=static_cast<I>(dx());
-  } else if(rx.check()) {
-    x=static_cast<I>(rx());
-  } else {
-    x=ix();
-  }
-}
-
-// Read a scalar variable of type X from a Python object
-template<class X>
-X
-read_scalar(const boost::python::object& obj)
-{
-  X x;
-  read_scalar(x,obj);
-  return x;
-}
-
-
-}
 }
 
 #endif /* ARIADNE_PYTHON_READ_SCALAR_H */

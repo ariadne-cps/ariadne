@@ -43,12 +43,13 @@ namespace Ariadne {
     }
       
     /*! \class LorenzSystem
-     *  \brief The Lorenz system \f$(\dot{x},\dot{y},\dot{z}) = (\sigma(y-x),\rho x-y-xz,-\beta z+xy)\f$.
+     *  \brief The Lorenz system \f$(\dot{x},\dot{y},\dot{z}) = (\sigma(y-x),\rho x-y-xz,-\beta z+xy)\f$. 
      *     Variables: x, y, z
      *     Parameters: beta, rho, sigma
      *     System: dotx=sigma*(y-x)
      *             doty=rho*x-y-x*z
      *             dotz=-beta*z+x*y
+     *  The standard parameters for the Lorenz attractos are \f$\sigma=10\f$, \f$\beta = 8/3\f$ and \f$\rho=28\f$.
      */
     ARIADNE_BUILD_VECTOR_FIELD(LorenzSystem,lorenz_function,3,3,255);
 

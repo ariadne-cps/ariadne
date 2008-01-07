@@ -353,7 +353,7 @@ Evaluation::ConstraintBasedHybridEvolver<R>::upper_evolve(const System::Constrai
       } else if(working_set.continuous_state_set().radius()>this->maximum_basic_set_radius()) {
         ::append(working_sets,this->_scheduler->subdivide(working_set));
       } else {
-        ::append(working_sets,this->_scheduler->upper_evolution_step(automaton,working_set,evolution_time,this->maximum_step_size()));
+        ::append(working_sets,this->_scheduler->upper_integration_step(automaton,working_set,evolution_time,this->maximum_step_size()));
         ::append(this->_trace,this->_scheduler->trace);
       }
     }
@@ -458,10 +458,10 @@ Evaluation::ConstraintBasedHybridEvolver<R>::upper_evolve(const System::Constrai
   Geometry::HybridGridMultiMap<R> map(initial_set.grid(),initial_set.grid());
   
   time_type lock_to_grid_time = this->lock_to_grid_time();
-  size_type evolution_steps = int(ceil(time_type(evolution_time/lock_to_grid_time)));
-  lock_to_grid_time = evolution_time/evolution_steps;
+  size_type integration_steps = int(ceil(time_type(evolution_time/lock_to_grid_time)));
+  lock_to_grid_time = evolution_time/integration_steps;
 
-  for(uint i=0; i!=evolution_steps; ++i) {
+  for(uint i=0; i!=integration_steps; ++i) {
     for(typename HybridGridMaskSet<R>::const_iterator cell_iter=current_set.begin();
         cell_iter!=current_set.end(); ++cell_iter)
     {
@@ -496,8 +496,8 @@ Evaluation::ConstraintBasedHybridEvolver<R>::upper_reach(const System::Constrain
 
   Geometry::HybridGridMultiMap<R> map(initial_set.grid(),initial_set.grid());
 
-  size_type evolution_steps = int(ceil(time_type(evolution_time/this->lock_to_grid_time())));
-  time_type lock_to_grid_time = evolution_time/evolution_steps;
+  size_type integration_steps = int(ceil(time_type(evolution_time/this->lock_to_grid_time())));
+  time_type lock_to_grid_time = evolution_time/integration_steps;
 
   for(typename HybridGridMaskSet<R>::const_iterator cell_iter=current_set.begin();
       cell_iter!=current_set.end(); ++cell_iter)
@@ -508,7 +508,7 @@ Evaluation::ConstraintBasedHybridEvolver<R>::upper_reach(const System::Constrain
   current_set=next_set;
   next_set.clear();
 
-  for(uint i=0; i!=evolution_steps-1; ++i) {
+  for(uint i=0; i!=integration_steps-1; ++i) {
     for(typename HybridGridMaskSet<R>::const_iterator cell_iter=current_set.begin();
         cell_iter!=current_set.end(); ++cell_iter)
     {

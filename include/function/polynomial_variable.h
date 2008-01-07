@@ -22,7 +22,7 @@
  */
  
 /*! \file polynomial_variable.h
- *  \brief Derivatives of scalar functions of many variables.
+ *  \brief A scalar quantity represented as a polynomial in several variables.
  */
  
 #ifndef ARIADNE_POLYNOMIAL_VARIABLE_H
@@ -185,8 +185,6 @@ namespace Ariadne {
     friend std::ostream& operator<<(std::ostream& os, const PolynomialVariable<X>& x);
     //@}
 #endif 
-     private:
-      static void instantiate();
      private:
       size_type _argument_size;
       smoothness_type _degree;
@@ -357,6 +355,7 @@ Function::operator/(const PolynomialVariable<X>& x, const R& c)
 
 } // namespace Ariadne
 
+#include "polynomial_variable.template.h"
 
 
 

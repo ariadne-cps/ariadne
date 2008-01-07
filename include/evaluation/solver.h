@@ -36,39 +36,47 @@
 #include "base/declarations.h"
 #include "numeric/declarations.h"
 #include "linear_algebra/declarations.h"
+#include "function/declarations.h"
 #include "geometry/declarations.h"
 #include "system/declarations.h"
 
+#include "function/function_interface.h"
 
 namespace Ariadne {
-  namespace System {
+  namespace Function {
 
     /*!
-     * \brief A class representing the difference of a Map and the identity.
+     * \brief A class representing the difference of a function and the identity.
      *
      * Useful for computing fixed points.
      */
-    template<class R> class DifferenceMap
-      : public VectorFieldInterface<R>
+    template<class R> class DifferenceFunction
+      : public FunctionInterface<R>
     {
       typedef typename Numeric::traits<R>::arithmetic_type F;
      public:
       /*!\brief Construct from a map \a f, which must have the same argument dimension as result dimension. */
-      DifferenceMap(const MapInterface<R>& f);
+      DifferenceFunction(const FunctionInterface<R>& f);
       /*! \brief Make a copy (clone) of the vector field. */
-      DifferenceMap<R>* clone() const;
+      DifferenceFunction<R>* clone() const;
       /*!\brief The dimension of the space the map acts on. */
       virtual smoothness_type smoothness() const;
       /*!\brief The dimension of the space the map acts on. */
-      virtual dimension_type dimension() const;
+      virtual size_type result_size() const;
+      /*!\brief The dimension of the space the map acts on. */
+      virtual size_type argument_size() const;
       /*!\brief Evaluate the function \f$f(x)-x\f$, where \f$f\f$ is the map used to construct the difference map. */
-      virtual LinearAlgebra::Vector<F> image(const Geometry::Point<F>& p) const;
+      virtual LinearAlgebra::Vector<F> evaluate(const LinearAlgebra::Vector<F>& p) const;
       /*!\brief Evaluate the derivative of function \f$f(x)-x\f$, which is \f$Df(x)-I\f$. */
-      virtual LinearAlgebra::Matrix< Numeric::Interval<R> > jacobian(const Geometry::Point<F>& p) const;
+      virtual LinearAlgebra::Matrix<F> jacobian(const LinearAlgebra::Vector<F>& p) const;
+      /*!\brief Evaluate the derivative of function \f$f(x)-x\f$, which is \f$Df(x)-I\f$. */
+      virtual Function::TaylorDerivative<F> derivative(const LinearAlgebra::Vector<F>& p, const smoothness_type& s) const;
       /*!\brief The name of the class. */
       virtual std::string name() const;
+      /*!\brief Write to an output stream. */
+      virtual std::ostream& write(std::ostream&) const;
      private:
-      const MapInterface<R>& _base;
+      const FunctionInterface<R>& _base;
     };
   }
 }
@@ -103,9 +111,9 @@ namespace Ariadne {
       void set_maximum_number_of_steps(uint max_steps);
       
       /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
-      virtual Geometry::Point<I> solve(const System::VectorFieldInterface<R>& f,const Geometry::Point<I>& pt) = 0;
+      virtual Geometry::Point<I> solve(const Function::FunctionInterface<R>& f,const Geometry::Point<I>& pt) = 0;
       /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
-      virtual Geometry::Point<I> fixed_point(const System::MapInterface<R>& f,const Geometry::Point<I>& pt);
+      virtual Geometry::Point<I> fixed_point(const System::Map<R>& f,const Geometry::Point<I>& pt);
       
      private:
       R _max_error;

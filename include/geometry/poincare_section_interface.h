@@ -32,8 +32,7 @@
 
 #include "base/types.h"
 
-#include "geometry/declarations.h"
-#include "system/declarations.h"
+#include "function/declarations.h"
 
 namespace Ariadne {
   namespace Geometry {
@@ -62,11 +61,11 @@ namespace Ariadne {
       virtual std::ostream& write(std::ostream& os) const = 0;
 
       /*! \brief The map used to define the inclusion of the section in state space. */
-      virtual const System::MapInterface<R>& inclusion_map() const = 0;
+      virtual const Function::FunctionInterface<R>& inclusion_map() const = 0;
       /*! \brief The map used to define the (local) projection of state space to the section. */
-      virtual const System::MapInterface<R>& projection_map() const = 0;
+      virtual const Function::FunctionInterface<R>& projection_map() const = 0;
       /*! \brief A function whose zero set is the section. */
-      virtual const ConstraintInterface<R>& crossing_condition() const = 0;
+      virtual const Function::FunctionInterface<R>& crossing_condition() const = 0;
     };
     
     template<class R> inline std::ostream& operator<<(std::ostream& os, const PoincareSectionInterface<R>& ps) {

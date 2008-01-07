@@ -72,6 +72,9 @@ namespace Ariadne {
       /*! \brief The type of denotable point contained by the set. */
       typedef Point<R> state_type;
       
+      /*!\brief Construct the unit cell of the grid. */
+      GridCell(const Grid<R>& g);
+
       /*!\brief Construct from a grid and an unit grid cell. */
       GridCell(const Grid<R>& g, const Combinatoric::LatticeCell& pos);
 
@@ -105,7 +108,7 @@ namespace Ariadne {
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream&) const;
      private:
-      const Grid<R>* _grid_ptr;
+      Grid<R> _grid;
       Combinatoric::LatticeCell _lattice_set;
     };
 

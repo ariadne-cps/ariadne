@@ -58,25 +58,10 @@ class ConstraintWrapper
   std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
   
   A value(const Point<A>& pt) const { return this->get_override("value")(); }
-};
-  
-template<class R>
-class DifferentiableConstraintWrapper 
-  : public DifferentiableConstraintInterface<R>, 
-    public wrapper< DifferentiableConstraintInterface<R> >
-{
-  typedef typename Numeric::traits<R>::arithmetic_type A;
- public:
-  DifferentiableConstraintWrapper() { }
-  DifferentiableConstraintWrapper<R>* clone() const { return this->get_override("clone")(); }
-  dimension_type dimension() const { return this->get_override("dimension")(); }
-  Comparison comparison() const { return this->get_override("comparison")(); }
-  smoothness_type smoothness() const { return this->get_override("smoothness")(); }
-  std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
-  
-  A value(const Point<A>& pt) const { return this->get_override("value")(); }
   LinearAlgebra::Vector<A> gradient(const Point<A>& pt) const { return this->get_override("gradient")(); }
 };
+  
+
 
 
 template<class R>
@@ -95,15 +80,11 @@ void export_constraint()
     .def("comparison",&ConstraintWrapper<R>::comparison)
     .def("smoothness",&ConstraintWrapper<R>::smoothness)
     .def("value",&ConstraintWrapper<R>::value)
-  ;
-
-  class_< DifferentiableConstraintWrapper<R>, boost::noncopyable >
-   ("DifferentiableConstraintInterface",init<>())
-    .def("gradient",&DifferentiableConstraintWrapper<R>::gradient)
+    .def("gradient",&ConstraintWrapper<R>::gradient)
   ;
 
   class_< LinearConstraint<R>, 
-    bases< ConstraintInterface<R>, DifferentiableConstraintInterface<R> > >
+    bases< ConstraintInterface<R> > >
       ("LinearConstraint",init<Vector<R>,R>())
     .def(init< Vector<R>,Comparison,R >())
     .def("dimension",&LinearConstraint<R>::dimension)
@@ -115,15 +96,15 @@ void export_constraint()
     .def(self_ns::str(self))
   ;
 
-  class_< DifferentiableConstraint<R>, 
-    bases< ConstraintInterface<R>, DifferentiableConstraintInterface<R> > >
-      ("DifferentiableConstraint",init<const DifferentiableFunctionInterface<R>&>())
-    .def("dimension",&DifferentiableConstraint<R>::dimension)
-    .def("dimension",&DifferentiableConstraint<R>::dimension)
-    .def("comparison",&DifferentiableConstraint<R>::comparison)
-    .def("smoothness",&DifferentiableConstraint<R>::smoothness)
-    .def("value",&DifferentiableConstraint<R>::value)
-    .def("gradient",&DifferentiableConstraint<R>::gradient)
+  class_< Constraint<R>, 
+    bases< ConstraintInterface<R> > >
+      ("Constraint",init<const FunctionInterface<R>&>())
+    .def("dimension",&Constraint<R>::dimension)
+    .def("dimension",&Constraint<R>::dimension)
+    .def("comparison",&Constraint<R>::comparison)
+    .def("smoothness",&Constraint<R>::smoothness)
+    .def("value",&Constraint<R>::value)
+    .def("gradient",&Constraint<R>::gradient)
     .def(self_ns::str(self))
   ;
 

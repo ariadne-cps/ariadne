@@ -30,6 +30,9 @@
 
 #include <iosfwd>
 
+#include "macros/precondition.h"
+
+#include "base/types.h"
 #include "base/array.h"
 #include "base/sequence.h"
 #include "base/iterator.h"
@@ -39,20 +42,37 @@
 
 namespace Ariadne {
   namespace Combinatoric {
+
+    typedef BinaryWord word_type;
+
     class SubdivisionSequence;
-    class SubdivisionTreeCell;
+    class SubdivisionCell;
+    class SubdivisionBox;
     class SubdivisionTree;
+    class SubdivisionCellListSet;
+    class SubdivisionMaskSet;
     class SubdivisionTreeSet;
-    
-    std::ostream& operator<<(std::ostream&, const SubdivisionTreeCell&);
+ 
+    class SubdivisionCellListSetIterator;
+    class SubdivisionMaskSetIterator;
+    class SubdivisionTreeSetIterator;
+   
+    std::ostream& operator<<(std::ostream&, const SubdivisionCell&);
+    std::ostream& operator<<(std::ostream&, const SubdivisionBox&);
+    std::ostream& operator<<(std::ostream&, const SubdivisionCellListSet&);
+    std::ostream& operator<<(std::ostream&, const SubdivisionMaskSet&);
+    std::ostream& operator<<(std::ostream&, const SubdivisionTreeSet&);
     std::ostream& operator<<(std::ostream&, const SubdivisionSequence&);
-    std::istream& operator>>(std::istream&, SubdivisionSequence&);
     
     class LatticeMaskSet;
     class LatticeBlock;
       
-
-    
+    struct dyadic_interval { double lower, upper; };
+    inline bool operator==(const dyadic_interval& ivl1, const dyadic_interval& ivl2) {
+      return ivl1.lower==ivl2.lower && ivl1.upper==ivl2.upper; }
+    inline bool operator!=(const dyadic_interval& ivl1, const dyadic_interval& ivl2) {
+      return ivl1.lower!=ivl2.lower || ivl1.upper!=ivl2.upper; }
+ 
     /*!\ingroup SubdivisionTree
      * \brief A binary tree with a boolean labelling on the leaves. */
     class MaskedBinaryTree {
@@ -97,6 +117,8 @@ namespace Ariadne {
       BooleanArray _mask;
     };
 
+
+
     /*!\ingroup SubdivisionTree
      * \brief A sequence of coordinates giving axes of subdivision for a subdivision tree. 
      */
@@ -117,12 +139,11 @@ namespace Ariadne {
         : _sequence(b,tb,te), _dimension(_compute_dimension())
       { }
 
-      /*!\brief Construct from a string literal of the for,
+      /* \brief Construct from a string literal of the for,
        * "\f$[a_1,a_2,\ldots,a_{k-1};b_1,\ldots,b_{l-1}]\f$", where
        * the values before the ';' denote the body of the sequence and the values
        * after denote the periodic tail.
        */
-      SubdivisionSequence(const std::string& str);
        
       /*!\brief Equality operator. */
       bool operator==(const SubdivisionSequence& ss) const {
@@ -146,16 +167,18 @@ namespace Ariadne {
       sequence<dimension_type> _default(dimension_type n);
       
       friend std::ostream& operator<<(std::ostream&, const SubdivisionSequence&);
-      friend std::istream& operator>>(std::istream&, SubdivisionSequence&);
      private:
       sequence<dimension_type> _sequence;
       dimension_type _dimension;
     };
 
+
+
+
     /*!\ingroup SubdivisionTree
      * \brief A cell in a subdivision tree. 
      *
-     * A %SubdivisionTreeCell is defined by a BinaryWord \a w and a SubdivisionSequence \a ss.
+     * A %SubdivisionCell is defined by a BinaryWord \a w and a SubdivisionSequence \a ss.
      * Start with a unit cell \f$[0,1]^d\f$ in \f$\mathbb{R}^d\f$ and successively partition.
      * At the \a i th step, we subdivide in coordinate \a k=ss[i]. 
      * If \f$bw[i]=0\f$, then the \a k th coordinate \f$[a_k,b_k]\f$ becomes \f$[a_k,c_k]\f$, 
@@ -166,50 +189,130 @@ namespace Ariadne {
      * they can be exactly computed and represented by double-precision floating point
      * numbers up to about 50 subdivisions.         
      */
-    class SubdivisionTreeCell {
+    class SubdivisionCell {
+      friend class SubdivisionBox;
+      friend class SubdivisionTreeSet;
      public:
       /*!\brief The type used to represent the dyadic numbers giving the upper
        * and lower bounds of the cell. */
-      typedef double dyadic_type;
 
       /*!\brief Construct from a sequence giving the subdivision dimensions, 
        * and a binary word giving the cell to be chosen at each subdivision. */
-      SubdivisionTreeCell(const SubdivisionSequence& ss, 
+      SubdivisionCell(const SubdivisionSequence& ss, 
                           const BinaryWord& bw);
 
+      /*!\brief Construct from a dimension, a depth and an integer giving the position among cells of that depth. */
+      SubdivisionCell(const dimension_type& dim, const depth_type& dpth, const size_type& pos); 
+
+      /*!\brief Construct from a dimension, and a word giving the subdivisions. */
+      SubdivisionCell(const dimension_type& dim, const word_type& word); 
+
       /*!\brief Equality operator. */
-      bool operator==(const SubdivisionTreeCell& other) const {
+      bool operator==(const SubdivisionCell& other) const {
         return this->_bounds==other._bounds; }
 
       /*!\brief Inequality operator. */
-      bool operator!=(const SubdivisionTreeCell& other) const {
+      bool operator!=(const SubdivisionCell& other) const {
         return !(*this==other); }
         
       /*!\brief The dimension of the cell. */
       dimension_type dimension() const { 
-        return _bounds.size()/2; }
+        return this->_bounds.size(); }
+
+      /*!\brief The depth of the cell in the tree. */
+      size_type depth() const { 
+        return this->_subdivisions.size(); }
+
+      /*!\brief The subdivisions needed to get to the cell. */
+      BinaryWord subdivisions() const { 
+        return this->_subdivisions; }
+
+      /*!\brief The box represented by the cell. */
+      SubdivisionBox box() const;
+
+      /*!\brief Split the cell. */
+      SubdivisionCell split(bool lr) const { 
+        SubdivisionCell result=*this; result._split(lr); return result; }
 
       /*!\brief The lower bound in the \a i th dimension. */
       const dyadic_type& lower_bound(dimension_type i) const {
-        return _bounds[2*i]; }
+        return this->_bounds[i].lower; }
+
       /*!\brief The upper bound in the \a i th dimension. */
       const dyadic_type& upper_bound(dimension_type i) const {
-        return _bounds[2*i+1]; }
+        return this->_bounds[i].upper; }
         
       /*! The volume of the cell as a fraction of the unit cell. */
-      dyadic_type volume() const {
-        dyadic_type result=1;
-        for(dimension_type i=0; i!=this->dimension(); ++i) {
-          result*=(this->upper_bound(i)-this->lower_bound(i));
-        }
-        return result;
-      }
+      dyadic_type volume() const { return 1<<this->depth(); }
      private:
+      void _split(bool lr);
+     private:
+      void _compute_word(const depth_type& dpth, const size_type& pos);
       void _compute_bounds(const SubdivisionSequence& ss, const BinaryWord& bw);
+      void _compute_bounds(const dimension_type& dim, const word_type& bw);
      private:
-      Base::array<dyadic_type> _bounds;
+      word_type _subdivisions;
+      Base::array<dyadic_interval> _bounds;
     };
     
+
+
+    /*!\ingroup SubdivisionTree
+     * \brief A box in a subdivision tree. 
+     *
+     * A %SubdivisionBox is defined by an array of intervals with dyadic coefficients. 
+     */
+    class SubdivisionBox {
+      friend SubdivisionBox hull(const SubdivisionBox& sbx1, const SubdivisionBox& sbx2);
+     public:
+      SubdivisionBox(const dimension_type& dim) : _depth(0), _bounds(dim) { 
+        for(dimension_type i=0; i!=dim; ++i) { this->_bounds[i].lower=0; this->_bounds[i].upper=1; } }
+      SubdivisionBox(const SubdivisionCell& c) : _depth(c.depth()), _bounds(c._bounds) { }
+      dimension_type dimension() const { return this->_bounds.size(); }
+      depth_type depth() const { return this->_depth; }
+      dyadic_type lower_bound(dimension_type i) const { return this->_bounds[i].lower; }
+      dyadic_type upper_bound(dimension_type i) const { return this->_bounds[i].upper; }
+      dyadic_type volume() const;
+     private:
+      depth_type _depth;
+      Base::array<dyadic_interval> _bounds;
+    };
+
+    SubdivisionBox hull(const SubdivisionBox& sbx1, const SubdivisionBox& sbx2);
+
+
+    /*!\ingroup SubdivisionCellListSet
+     * \brief A list of subdivision cells.
+     *
+     * A %SubdivisionCellListSet represents a list of subdivision cells of the 
+     * same dimension using efficient arrayed storage. 
+     */
+    class SubdivisionCellListSet
+    {
+     public:
+      typedef SubdivisionCellListSetIterator const_iterator;
+      typedef SubdivisionCellListSetIterator iterator;
+      SubdivisionCellListSet() : _dimension() { }
+      SubdivisionCellListSet(dimension_type d) : _dimension(d) { }
+      dimension_type dimension() const { return this->_dimension; }
+      size_type size() const { return this->_words.size(); }
+      SubdivisionCell pop() { 
+        const word_type& word=this->_words.back();
+        this->_words.pop_back(); 
+        return SubdivisionCell(this->_dimension,word); }
+      void adjoin(const SubdivisionCell& c) {
+        if(this->_words.empty()) { this->_dimension=c.dimension(); }
+        ARIADNE_PRECONDITION(this->_dimension==c.dimension());
+        _words.push_back(c.subdivisions()); }
+      void unique_sort();
+      const_iterator begin() const;
+      const_iterator end() const;
+     private:
+      friend std::ostream& operator<<(std::ostream&, const SubdivisionCellListSet&);
+     private:
+      dimension_type _dimension;
+      std::vector<word_type> _words;
+    };
 
 
     /*!\ingroup SubdivisionTree
@@ -224,7 +327,7 @@ namespace Ariadne {
     class SubdivisionTree {
      public:
       typedef binary_constructor_iterator<BinaryTree::const_iterator, 
-                                          SubdivisionTreeCell, 
+                                          SubdivisionCell, 
                                           SubdivisionSequence> const_iterator;
       typedef const_iterator iterator;
      
@@ -261,33 +364,69 @@ namespace Ariadne {
       BinaryTree _tree;
     };
     
-    class SubdivisionTreeSetIterator 
-      : public boost::iterator_adaptor<SubdivisionTreeSetIterator,
-                                       mask_iterator<BinaryTree::const_iterator, BooleanArray::const_iterator>,
-                                       SubdivisionTreeCell,
-                                       boost::use_default,
-                                       SubdivisionTreeCell>
-      
-    {
-      typedef mask_iterator<BinaryTree::const_iterator, BooleanArray::const_iterator> Base;
+
+    /*!\ingroup SubdivisionMaskSet
+     * \brief A subset of the unit hypercube described by a subdivision structure with constant depth. 
+     *
+     * The \em depth of the set is the maximum number of subdivisions needed to specify the smallest cell.
+     *
+     * The operations of intersection, union and set difference can all be performed in
+     * linear time on the capacity (NOT the size) of the two operands. This makes a the set slow for describing
+     * very sparse sets. However, adjoining and removing cells and testing for inclusing only require constant time. 
+     * 
+     * A %SubdivisionMaskSet defined on a depth-n partition uses \f$2^n\f$ bits of data.
+     */
+    class SubdivisionMaskSet {
      public:
-      SubdivisionTreeSetIterator(const SubdivisionSequence& ss,
-                                   BinaryTree::const_iterator ti, 
-                                   BooleanArray::const_iterator mi, 
-                                   BooleanArray::const_iterator me) 
-      //        : SubdivisionTreeSetIterator::iterator_adaptor_(mask_iterator<BinaryTree::const_iterator, BooleanArray::const_iterator>(ti,mi,me)),
-        : SubdivisionTreeSetIterator::iterator_adaptor_(Base(ti,mi,me)),
-          _subdivisions(ss)
-      { }
+      typedef SubdivisionMaskSetIterator iterator;
+      typedef SubdivisionMaskSetIterator const_iterator;
+
+      /*!\brief Construct an empty set with the given dimension and depth. */
+      SubdivisionMaskSet(const dimension_type& dim, const depth_type& depth);
+
+      /*! \brief The space dimension of the tree. */
+      dimension_type dimension() const { return this->_dimension; }
+
+      /*! \brief The depth of the smallest cell in the set. */
+      size_type depth() const { return this->_depth; }
+
+      /*! \brief The array describing the tree. */
+      const array<bool>& mask() const { return _mask; }
+
+      /*! \brief The number of cells in the tree. */
+      size_type capacity() const { return _mask.size(); }
+
+      /*! \brief The number of cells in the SubdivisionTreeSet. */
+      size_type size() const { return std::count(_mask.begin(),_mask.end(),true); }
+      
+      /*! \brief The volume of the set. */
+      dyadic_type volume() const { return this->size() / this->capacity(); }
+
+      /*! \brief Adjoin a cell. */
+      void adjoin(const SubdivisionCell& c) {
+        if(c.depth()==this->depth()) { this->_mask[this->_position(c)]=true; }
+        else { this->_adjoin_block(c); } }
+      
+      /*! \brief Remove a cell. */
+      void remove(const SubdivisionCell& c) {
+        if(c.depth()==this->depth()) { this->_mask[this->_position(c)]=false; }
+        else { this->_remove_block(c); } }
+      
+      /*! \brief Constant iterator to the beginning of the cells in the tree. */
+      const_iterator begin() const;
+      /*! \brief Constant iterator to the end of the cells in the tree. */
+      const_iterator end() const;
      private:
-      friend class boost::iterator_core_access;
-      SubdivisionTreeCell dereference() const { 
-        return SubdivisionTreeCell(_subdivisions,*this->base_reference()); 
-      }
+      size_type _position(const SubdivisionCell& c) const;
+      void _adjoin_block(const SubdivisionCell& c);
+      void _remove_block(const SubdivisionCell& c);
+      void _restrict_block(const SubdivisionCell& c);
      private:
-      SubdivisionSequence _subdivisions;
+      uint _dimension;
+      uint _depth; // store depth for quick access
+      BooleanArray _mask;
     };
-  
+    
     /*!\ingroup SubdivisionTree
      * \brief A subset of the unit hypercube described by a subdivision structure. 
      *
@@ -307,7 +446,7 @@ namespace Ariadne {
     class SubdivisionTreeSet {
      public:
       typedef binary_constructor_iterator<MaskedBinaryTree::const_iterator,
-                                          SubdivisionTreeCell,
+                                          SubdivisionCell,
                                           SubdivisionSequence> const_iterator;
       typedef const_iterator iterator;
      
@@ -380,12 +519,21 @@ namespace Ariadne {
                      const LatticeBlock& r);
       
     LatticeBlock 
-    compute_block(const SubdivisionTreeCell& c, 
+    compute_block(const SubdivisionCell& c, 
                   const LatticeBlock& r);
 
+
+    inline 
+    SubdivisionBox 
+    SubdivisionCell::box() const {
+      return SubdivisionBox(*this); 
+    }
+
+
   }
-  
-  
 }
+
+
+#include "subdivision_tree_set_iterators.h"
 
 #endif /* ARIADNE_SUBDIVISION_TREE_SET_H */

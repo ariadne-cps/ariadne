@@ -65,17 +65,17 @@ void export_set_based_hybrid_automaton()
 
 
   class_< SetBasedHybridAutomaton<R> >("SetBasedHybridAutomaton",hybrid_automaton_init)
-    .def("new_mode",(const SetBasedDiscreteMode<R>&(SetBasedHybridAutomaton<R>::*)(DiscreteState, const VectorFieldInterface<R>&,const Geometry::SetInterface<R>&))
+    .def("new_mode",(const SetBasedDiscreteMode<R>&(SetBasedHybridAutomaton<R>::*)(DiscreteState, const VectorField<R>&,const Geometry::ConstraintSet<R>&))
            (&SetBasedHybridAutomaton<R>::new_mode),
          return_reference_existing_object())
     .def("new_transition",
          (const SetBasedDiscreteTransition<R>&(SetBasedHybridAutomaton<R>::*)
-             (DiscreteEvent,const SetBasedDiscreteMode<R>&,const SetBasedDiscreteMode<R>&,const MapInterface<R>&,const Geometry::SetInterface<R>&))
+             (DiscreteEvent,const SetBasedDiscreteMode<R>&,const SetBasedDiscreteMode<R>&,const Map<R>&,const Geometry::ConstraintSet<R>&))
            (&SetBasedHybridAutomaton<R>::new_transition),
          return_reference_existing_object())
     .def("new_transition",
          (const SetBasedDiscreteTransition<R>&(SetBasedHybridAutomaton<R>::*)
-             (DiscreteEvent,DiscreteState,DiscreteState,const MapInterface<R>&,const Geometry::SetInterface<R>&))
+             (DiscreteEvent,DiscreteState,DiscreteState,const Map<R>&,const Geometry::ConstraintSet<R>&))
            (&SetBasedHybridAutomaton<R>::new_transition),
          return_reference_existing_object())
     .def("name",&SetBasedHybridAutomaton<R>::name,return_copy_const_reference())

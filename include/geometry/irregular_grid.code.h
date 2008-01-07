@@ -25,14 +25,14 @@
 #include "base/stlio.h"
 
 #include "box.h"
-#include "list_set.h"
+#include "box_list_set.h"
 
 namespace Ariadne {
 
 
 
 template<class R>
-Geometry::IrregularGrid<R>::IrregularGrid(const ListSet< Box<R> >& ls)
+Geometry::IrregularGrid<R>::IrregularGrid(const BoxListSet<R>& ls)
   : _subdivision_coordinates(ls.dimension()),
     _centre_positions(ls.dimension(),0u)
 {
@@ -41,7 +41,7 @@ Geometry::IrregularGrid<R>::IrregularGrid(const ListSet< Box<R> >& ls)
   
   std::vector<R>* rectangle_bounds=new std::vector<R>[d];
   
-  for(typename ListSet< Box<R> >::const_iterator riter=ls.begin(); riter!=ls.end(); ++riter) {
+  for(typename BoxListSet<R>::const_iterator riter=ls.begin(); riter!=ls.end(); ++riter) {
     for(dimension_type i=0; i!=d; ++i) {
       rectangle_bounds[i].push_back(riter->lower_bound(i));
       rectangle_bounds[i].push_back(riter->upper_bound(i));

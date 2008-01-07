@@ -39,7 +39,7 @@ void export_logging();
 void export_exceptions();
 
 void export_tribool();
-template<class T> void export_array();
+void export_arrays();
 
 void export_integer();
 void export_rational();
@@ -59,8 +59,12 @@ template<class R> void export_interval_tensor();
 void export_binary_tree();
 void export_lattice_set();
 void export_lattice_map();
+void export_subdivision_set();
 
-template<class R> void export_function();
+template<class R> void export_function_interface();
+template<class R> void export_interpreted_function();
+template<class R> void export_python_function();
+template<class R> void export_affine_function();
 template<class R> void export_affine_variable();
 template<class R> void export_affine_derivative();
 template<class R> void export_taylor_series();
@@ -69,9 +73,10 @@ template<class R> void export_taylor_derivative();
 template<class R> void export_polynomial_variable();
 
 template<class R> void export_point();
-template<class R> void export_box();
 template<class R> void export_interval_point();
 template<class R> void export_point_list();
+template<class R> void export_box();
+template<class R> void export_box_list_set();
 template<class R> void export_set();
 template<class R> void export_interval_set();
 template<class R> void export_rectangle();
@@ -80,23 +85,23 @@ template<class R> void export_zonotope();
 template<class R> void export_polytope();
 template<class R> void export_polyhedron();
 template<class R> void export_empty_set();
-template<class R> void export_rectangular_set();
-template<class R> void export_polyhedral_set();
 template<class R> void export_list_set();
 template<class R> void export_grid();
 template<class R> void export_grid_set();
 template<class R> void export_partition_tree_set();
+template<class R> void export_constraint_set();
+template<class R> void export_rectangular_set();
+template<class R> void export_polyhedral_set();
 template<class R> void export_hybrid_set();
 
 template<class R> void export_constraint();
 
 template<class R> void export_orbit();
 
+template<class R> void export_approximator();
+
 template<class R> void export_map();
-template<class R> void export_affine_map();
-template<class R> void export_polynomial_map();
 template<class R> void export_vector_field();
-template<class R> void export_affine_vector_field();
 template<class R> void export_set_based_hybrid_automaton();
 template<class R> void export_constraint_based_hybrid_automaton();
 
@@ -105,7 +110,6 @@ template<class R> void export_solver();
 template<class R> void export_applicator();
 template<class R> void export_integrator();
 template<class R> void export_detector();
-template<class R> void export_orbiter();
 template<class R> void export_discretiser();
 template<class R> void export_map_evolver();
 template<class R> void export_vector_field_evolver();
@@ -137,12 +141,7 @@ BOOST_PYTHON_MODULE(ariadne)
   export_exceptions();
 
   export_tribool();
-  export_array<bool>();
-  export_array<index_type>();
-  export_array<size_type>();
-  export_array<Integer>();
-  export_array<Rational>();
-  export_array<FloatPy>();
+  export_arrays();
 
   export_integer();
   export_rational();
@@ -167,9 +166,16 @@ BOOST_PYTHON_MODULE(ariadne)
   export_binary_tree();
   export_lattice_set();
   export_lattice_map();
+  export_subdivision_set();
 
-  export_function<Rational>();
-  export_function<FloatPy>();
+  export_function_interface<Rational>();
+  export_function_interface<FloatPy>();
+  export_interpreted_function<Rational>();
+  export_interpreted_function<FloatPy>();
+  export_python_function<Rational>();
+  export_python_function<FloatPy>();
+  export_affine_function<Rational>();
+  export_affine_function<FloatPy>();
   //export_affine_variable<Rational>();
   //export_affine_variable<FloatPy>();
   //export_affine_derivative<Rational>();
@@ -188,12 +194,14 @@ BOOST_PYTHON_MODULE(ariadne)
   export_point_list<FloatPy>();
   export_interval_set<FloatPy>();
   export_box<FloatPy>();
+  export_box_list_set<FloatPy>();
   export_rectangle<FloatPy>();
   export_zonotope<FloatPy>();
   export_simplex<FloatPy>();
   export_polytope<FloatPy>();
   export_polyhedron<FloatPy>();
   export_empty_set<FloatPy>();
+  export_constraint_set<FloatPy>();
   export_rectangular_set<FloatPy>();
   export_polyhedral_set<FloatPy>();
   export_list_set<FloatPy>();
@@ -206,11 +214,10 @@ BOOST_PYTHON_MODULE(ariadne)
 
   export_orbit<FloatPy>();
 
+  export_approximator<FloatPy>();
+
   export_map<FloatPy>();
-  export_affine_map<FloatPy>();
-  export_polynomial_map<FloatPy>();
   export_vector_field<FloatPy>();
-  export_affine_vector_field<FloatPy>();
   export_set_based_hybrid_automaton<FloatPy>();
   export_constraint_based_hybrid_automaton<FloatPy>();
 
@@ -219,11 +226,10 @@ BOOST_PYTHON_MODULE(ariadne)
   export_applicator<FloatPy>();
   export_integrator<FloatPy>();
   export_detector<FloatPy>();
-  export_orbiter<FloatPy>();
   //export_discretiser<FloatPy>();
   export_map_evolver<FloatPy>();
   export_vector_field_evolver<FloatPy>();
-  //export_set_based_hybrid_evolver<FloatPy>();
+  export_set_based_hybrid_evolver<FloatPy>();
   //export_constraint_based_hybrid_evolver<FloatPy>();
 
   export_text_output();

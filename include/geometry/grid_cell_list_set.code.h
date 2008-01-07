@@ -1,5 +1,5 @@
 /***************************************************************************
- *            grid_approximation.code.h
+ *            grid_cell_list_set.code.h
  *
  *  Copyright  2005-7  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Templece Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "list_set.h"
+#include "box_list_set.h"
 #include "grid_cell.h"
 #include "grid_block.h"
 #include "grid_mask_set.h"
@@ -41,7 +41,7 @@ namespace Ariadne {
 
 template<class R>
 Geometry::GridCellListSet<R>::GridCellListSet(const Grid<R>& g)
-  : _grid_ptr(new Grid<R>(g)), _lattice_set(g.dimension())
+  : _grid(g), _lattice_set(g.dimension())
 {
 }
 
@@ -49,7 +49,7 @@ Geometry::GridCellListSet<R>::GridCellListSet(const Grid<R>& g)
 template<class R>
 Geometry::GridCellListSet<R>::GridCellListSet(const Grid<R>& g, 
                                     const Combinatoric::LatticeCellListSet& lcls)
-  : _grid_ptr(new Grid<R>(g)), _lattice_set(lcls)
+  : _grid(g), _lattice_set(lcls)
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(g,lcls,"GridCellListSet::GridCellListSet(Grid g, LatticeCellListSet lcls)");
 }
@@ -57,7 +57,7 @@ Geometry::GridCellListSet<R>::GridCellListSet(const Grid<R>& g,
 
 template<class R>
 Geometry::GridCellListSet<R>::GridCellListSet(const GridMaskSet<R>& gms)
-  : _grid_ptr(gms._grid_ptr), _lattice_set(gms.dimension())
+  : _grid(gms._grid), _lattice_set(gms.dimension())
 {
   this->_lattice_set.adjoin(gms._lattice_set);
 }
@@ -65,7 +65,7 @@ Geometry::GridCellListSet<R>::GridCellListSet(const GridMaskSet<R>& gms)
 
 template<class R>
 Geometry::GridCellListSet<R>::GridCellListSet(const GridCellListSet<R>& gcls)
-  : _grid_ptr(gcls._grid_ptr), _lattice_set(gcls._lattice_set)
+  : _grid(gcls._grid), _lattice_set(gcls._lattice_set)
 {
 }
 
@@ -74,7 +74,7 @@ Geometry::GridCellListSet<R>&
 Geometry::GridCellListSet<R>::operator=(const GridCellListSet<R>& gcls)
 {
   if(this!=&gcls) {
-    this->_grid_ptr = gcls._grid_ptr;
+    this->_grid = gcls._grid;
     this->_lattice_set=gcls._lattice_set;
   }
   return *this;
@@ -83,9 +83,9 @@ Geometry::GridCellListSet<R>::operator=(const GridCellListSet<R>& gcls)
 
 
 template<class R>
-Geometry::GridCellListSet<R>::operator ListSet< Box<R> >() const
+Geometry::GridCellListSet<R>::operator BoxListSet<R>() const
 {
-  ListSet< Box<R> > result(dimension());
+  BoxListSet<R> result(dimension());
   for(size_type i=0; i!=size(); ++i) {
     result.push_back((*this)[i]);
   }
@@ -160,7 +160,7 @@ Geometry::GridCellListSet<R>::clear()
 
 
 
-template<class R> inline
+template<class R> 
 void 
 Geometry::GridCellListSet<R>::restrict_outer_approximation(const SetInterface<R>& s)
 {
@@ -178,7 +178,7 @@ Geometry::GridCellListSet<R>::restrict_outer_approximation(const SetInterface<R>
 }
 
 
-template<class R> inline
+template<class R> 
 void 
 Geometry::GridCellListSet<R>::restrict_inner_approximation(const SetInterface<R>& s)
 {
@@ -200,14 +200,15 @@ Geometry::GridCellListSet<R>::restrict_inner_approximation(const SetInterface<R>
 
 
 template<class R>
-std::ostream&     
-Geometry::GridCellListSet<R>::summarize(std::ostream& os) const 
+std::string     
+Geometry::GridCellListSet<R>::summary() const 
 {
-  os << "GridCellListSet("
+  std::stringstream ss;
+  ss << "GridCellListSet("
      << " grid=" << this->grid() << ","
      << " size=" << this->size() << ","
      << " )" << std::endl;
-  return os;
+  return ss.str();
 }
 
 template<class R>

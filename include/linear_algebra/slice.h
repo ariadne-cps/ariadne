@@ -48,6 +48,9 @@ namespace Ariadne {
     inline Slice slice(size_type start, size_type size, size_type stride=1u) {
       return Slice(start,size,stride); }
 
+    inline Slice range(size_type start, size_type finish, size_type stride=1u) {
+      return Slice(start,(finish-start-1)/stride+1,stride); }
+
   }
 }
 

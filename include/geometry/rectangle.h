@@ -340,6 +340,8 @@ namespace Ariadne {
       /*! \brief Read from an input stream. */
       std::istream& read(std::istream& is);
       //@}
+     private:
+      static void _instantiate();
     };
     
     
@@ -406,7 +408,7 @@ namespace Ariadne {
       Point<R> _pt;
     };
     
-    template<class X> std::pair< Rectangle<X>, Rectangle<X> > subdivide(const Rectangle<X>&);
+    template<class X> ListSet< Rectangle<X> > subdivide(const Rectangle<X>&);
     template<class X> Box<typename Rectangle<X>::real_type> bounding_box(const Rectangle<X>& r);
     template<class X, class R> tribool disjoint(const Rectangle<X>& r, const Box<R>& bx);
     template<class X, class R> tribool subset(const Rectangle<X>& r, const Box<R>& bx);

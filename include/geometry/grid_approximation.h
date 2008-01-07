@@ -51,26 +51,30 @@ namespace Ariadne {
     template<class R> GridCellListSet<R> outer_approximation(const Polyhedron<R>& pltp, const Grid<R>& g);
     template<class R> GridCellListSet<R> inner_approximation(const Polyhedron<R>& pltp, const Grid<R>& g);
  
-    template<class R, class Tag> GridCellListSet<R> outer_approximation(const Zonotope<R,Tag>& z, const Grid<R>& g);
-    template<class R, class Tag> GridCellListSet<R> inner_approximation(const Zonotope<R,Tag>& z, const Grid<R>& g);
+    template<class R> GridCellListSet<R> outer_approximation(const Zonotope<R>& z, const Grid<R>& g);
+    template<class R> GridCellListSet<R> inner_approximation(const Zonotope<R>& z, const Grid<R>& g);
  
     template<class R> GridCellListSet<R> outer_approximation(const SetInterface<R>& set, const Grid<R>& g);
     template<class R> GridCellListSet<R> inner_approximation(const SetInterface<R>& set, const Grid<R>& g);
 
     template<class R> GridCellListSet<R> fuzzy_outer_approximation(const Polyhedron<R>& p, const Grid<R>& g);
     template<class R> GridCellListSet<R> fuzzy_outer_approximation(const Polytope<R>& p, const Grid<R>& g);
-    template<class R, class Tag> GridCellListSet<R> fuzzy_outer_approximation(const Zonotope<R,Tag>& r, const Grid<R>& g);
+    template<class R> GridCellListSet<R> fuzzy_outer_approximation(const Zonotope<R>& r, const Grid<R>& g);
   
+    template<class R> GridCellListSet<R> outer_approximation(const BoxListSet<R>& ls, const Grid<R>& g);
+    template<class R> GridMaskSet<R> outer_approximation(const BoxListSet<R>& ls, const FiniteGrid<R>& fg);
+
+    template<class R, class BS> GridCellListSet<R> outer_approximation(const ListSet<BS>& ls, const Grid<R>& g);
     template<class R, class BS> GridMaskSet<R> outer_approximation(const ListSet<BS>& ls, const FiniteGrid<R>& fg);
  
     template<class R> GridMaskSet<R> outer_approximation(const SetInterface<R>& set, const FiniteGrid<R>& fg);
     template<class R> GridMaskSet<R> inner_approximation(const SetInterface<R>& set, const FiniteGrid<R>& fg);
 
-    template<class R> ListSet< Box<R> > lower_approximation(const SetInterface<R>& set, const Grid<R>& fg);
-    template<class R> ListSet< Box<R> > lower_approximation(const SetInterface<R>& set, const FiniteGrid<R>& fg);
+    template<class R> BoxListSet<R> lower_approximation(const SetInterface<R>& set, const Grid<R>& fg);
+    template<class R> BoxListSet<R> lower_approximation(const SetInterface<R>& set, const FiniteGrid<R>& fg);
  
-    template<class R> ListSet< Box<R> > point_approximation(const SetInterface<R>& set, const Grid<R>& fg);
-    template<class R> ListSet< Box<R> > point_approximation(const SetInterface<R>& set, const FiniteGrid<R>& fg);
+    template<class R> BoxListSet<R> point_approximation(const SetInterface<R>& set, const Grid<R>& fg);
+    template<class R> BoxListSet<R> point_approximation(const SetInterface<R>& set, const FiniteGrid<R>& fg);
  
     template<class R> void instantiate_grid_approximation();
   }

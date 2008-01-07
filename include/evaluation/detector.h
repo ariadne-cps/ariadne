@@ -75,15 +75,7 @@ namespace Ariadne {
 
       /*! \brief Compute the value of a constraint over a zonotope. */
       Numeric::Interval<R> value(const Geometry::ConstraintInterface<R>& c, 
-                                 const Geometry::Zonotope<R,Geometry::ExactTag>& z) const;
-
-      /*! \brief Compute the value of a constraint over a zonotope. */
-      Numeric::Interval<R> value(const Geometry::ConstraintInterface<R>& c, 
-                                 const Geometry::Zonotope<R,Geometry::UniformErrorTag>& z) const;
-
-      /*! \brief Compute the value of a constraint over a zonotope. */
-      Numeric::Interval<R> value(const Geometry::ConstraintInterface<R>& c, 
-                                 const Geometry::Zonotope<R,Geometry::IntervalTag>& z) const;
+                                 const Geometry::Zonotope<R>& z) const;
 
       /*! \brief Determine whether constraint \a c1 forces constraint \a c2 within \a dom.
        */
@@ -93,14 +85,14 @@ namespace Ariadne {
 
       /*! \brief Compute the normal derivative to of the vector field \a vf to the constraint \a c at the point \a pt.
        */
-      virtual Numeric::Interval<R> normal_derivative(const System::VectorFieldInterface<R>& vf, 
-                                                     const Geometry::DifferentiableConstraintInterface<R>& c, 
+      virtual Numeric::Interval<R> normal_derivative(const System::VectorField<R>& vf, 
+                                                     const Geometry::ConstraintInterface<R>& c, 
                                                      const Geometry::Point<I>& pt) const;
 
       /*! \brief Estimate the time needed for the point \a pt to reach constraint \a c under vector field \a vf,
        *  assuming that the flow remains in \a bb. 
        */
-      virtual Numeric::Interval<R> crossing_time(const System::VectorFieldInterface<R>& vf, 
+      virtual Numeric::Interval<R> crossing_time(const System::VectorField<R>& vf, 
                                                  const Geometry::ConstraintInterface<R>& c, 
                                                  const Geometry::Point<I>& pt, 
                                                  const Geometry::Box<R>& bb) const;
@@ -108,7 +100,7 @@ namespace Ariadne {
       /*! \brief Compute the time needed for points in the domain rectangle \a dom to reach constraint \a c under vector field \a vf,
        *  assuming that the flow remains in \a bb. The integrator \a i is used to integrate the flow.
        */
-      virtual Evaluation::TimeModel<R> crossing_time(const System::VectorFieldInterface<R>& vf, 
+      virtual Evaluation::TimeModel<R> crossing_time(const System::VectorField<R>& vf, 
                                                      const Geometry::ConstraintInterface<R>& c, 
                                                      const Geometry::Box<R>& dom, 
                                                      const Geometry::Box<R>& bb) const;

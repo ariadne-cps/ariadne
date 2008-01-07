@@ -34,13 +34,15 @@
 #include "geometry/declarations.h"
 #include "system/declarations.h"
 
+#include "base/reference_container.h"
 #include "base/stlio.h"
+#include "function/function_interface.h"
 #include "geometry/exceptions.h"
 #include "geometry/discrete_state.h"
 #include "geometry/set_interface.h"
 #include "system/exceptions.h"
-#include "system/map_interface.h"
-#include "system/vector_field_interface.h"
+#include "system/map.h"
+#include "system/vector_field.h"
 
 #include "discrete_event.h"
 
@@ -58,7 +60,7 @@ template<class R> class SetBasedHybridAutomaton;
 
 /*!
  * \brief A discrete mode of a SetBasedHybridAutomaton, comprising continuous evolution given by a VectorField
- * within and invariant Geometry::SetInterface. 
+ * within and invariant Geometry::ConstraintSet. 
  *
  * A %SetBasedDiscreteMode can only be created using the new_mode() method in
  * the %SetBasedHybridAutomaton class.
@@ -76,10 +78,10 @@ class SetBasedDiscreteMode {
     Geometry::DiscreteState _state;
   
     // The discrete mode's vector field.
-    boost::shared_ptr< const VectorFieldInterface<R> > _dynamic;
+    boost::shared_ptr< const VectorField<R> > _dynamic;
   
     // The discrete mode's invariant.
-    boost::shared_ptr< const Geometry::SetInterface<R> > _invariant;
+    boost::shared_ptr< const Geometry::ConstraintSet<R> > _invariant;
   
   public:
     /*! \brief Copy constructor. */
@@ -108,12 +110,12 @@ class SetBasedDiscreteMode {
     }
     
     /*! \brief The discrete mode's dynamic (a vector field). */
-    const VectorFieldInterface<R>& dynamic() const {
+    const VectorField<R>& dynamic() const {
       return *this->_dynamic;  
     }
     
     /*! \brief The discrete mode's invariant. */
-    const Geometry::SetInterface<R>& invariant() const{
+    const Geometry::ConstraintSet<R>& invariant() const{
       return *this->_invariant;  
     }
     
@@ -131,8 +133,8 @@ class SetBasedDiscreteMode {
      * \param invariant is the mode's invariant.
      */
     SetBasedDiscreteMode(Geometry::DiscreteState state,
-                 const VectorFieldInterface<R>& dynamic, 
-                 const Geometry::SetInterface<R>& invariant)
+                 const VectorField<R>& dynamic, 
+                 const Geometry::ConstraintSet<R>& invariant)
       :  _state(state), _dynamic(dynamic.clone()), _invariant(invariant.clone()) 
     {
       ARIADNE_CHECK_EQUAL_DIMENSIONS(dynamic,invariant,"SetBasedDiscreteMode::SetBasedDiscreteMode(...)");
@@ -140,8 +142,8 @@ class SetBasedDiscreteMode {
     
     /* Construct from objects managed by shared pointers (for internal use) */
     SetBasedDiscreteMode(Geometry::DiscreteState state,
-                 const boost::shared_ptr< VectorFieldInterface<R> > dynamic, 
-                 const boost::shared_ptr< Geometry::SetInterface<R> > invariant)
+                 const boost::shared_ptr< VectorField<R> > dynamic, 
+                 const boost::shared_ptr< Geometry::ConstraintSet<R> > invariant)
       :  _state(state), _dynamic(dynamic), _invariant(invariant) 
     {
       ARIADNE_CHECK_EQUAL_DIMENSIONS(*dynamic,*invariant,"SetBasedDiscreteMode::SetBasedDiscreteMode(...)");
@@ -176,7 +178,7 @@ bool operator<(const SetBasedDiscreteMode<R>& mode1, const SetBasedDiscreteMode<
 
 /*!
  * \brief A discrete transition of a SetBasedHybridAutomaton, representing an instantaneous
- * jump from one SetBasedDiscreteMode to another, governed by an activation Geometry::SetInterface and a reset MapInterface.
+ * jump from one SetBasedDiscreteMode to another, governed by an activation Geometry::ConstraintSet and a reset MapInterface.
  *
  * A %SetBasedDiscreteTransition can only be created using the new_transition() method in
  * the %SetBasedHybridAutomaton class.
@@ -196,10 +198,10 @@ class SetBasedDiscreteTransition
     const SetBasedDiscreteMode<R>* _destination;   
   
     // \brief The activation region of the discrete transition.
-    boost::shared_ptr< const Geometry::SetInterface<R> > _activation; 
+    boost::shared_ptr< const Geometry::ConstraintSet<R> > _activation; 
 
     // \brief The reset of the discrete transition.
-    boost::shared_ptr< const MapInterface<R> > _reset;  
+    boost::shared_ptr< const Map<R> > _reset;  
     
   public:
     /*! \brief Copy constructor. */
@@ -239,12 +241,12 @@ class SetBasedDiscreteTransition
     }
   
     /*! \brief The activation region of the discrete transition. */
-    const Geometry::SetInterface<R>& activation() const { 
+    const Geometry::ConstraintSet<R>& activation() const { 
       return *this->_activation;
     }
 
     /*! \brief The reset map of the discrete transition. */
-    const MapInterface<R>& reset() const { 
+    const Map<R>& reset() const { 
       return *this->_reset;
     }
     
@@ -268,8 +270,8 @@ class SetBasedDiscreteTransition
     SetBasedDiscreteTransition(DiscreteEvent event, 
                                const SetBasedDiscreteMode<R>& source, 
                                const SetBasedDiscreteMode<R>& destination,
-                               const MapInterface<R>& reset,
-                               const Geometry::SetInterface<R>& activation)
+                               const Map<R>& reset,
+                               const Geometry::ConstraintSet<R>& activation)
       : _event(event), _source(&source), _destination(&destination), 
         _activation(activation.clone()), _reset(reset.clone()) 
     { 
@@ -282,8 +284,8 @@ class SetBasedDiscreteTransition
     SetBasedDiscreteTransition(DiscreteEvent event,
                        const SetBasedDiscreteMode<R>& source, 
                        const SetBasedDiscreteMode<R>& destination,
-                       const boost::shared_ptr< MapInterface<R> > reset,
-                       const boost::shared_ptr< Geometry::SetInterface<R> > activation) 
+                       const boost::shared_ptr< Map<R> > reset,
+                       const boost::shared_ptr< Geometry::ConstraintSet<R> > activation) 
       : _event(event), _source(&source), _destination(&destination), 
         _activation(activation), _reset(reset) 
     { 
@@ -296,8 +298,8 @@ class SetBasedDiscreteTransition
     SetBasedDiscreteTransition(DiscreteEvent event,
                        const boost::shared_ptr< SetBasedDiscreteMode<R> > source, 
                        const boost::shared_ptr< SetBasedDiscreteMode<R> > destination,
-                       const boost::shared_ptr< MapInterface<R> > reset,
-                       const boost::shared_ptr< Geometry::SetInterface<R> > activation) 
+                       const boost::shared_ptr< Map<R> > reset,
+                       const boost::shared_ptr< Geometry::ConstraintSet<R> > activation) 
       : _event(event), _source(&*source), _destination(&*destination), 
         _activation(activation), _reset(reset) 
     { 
@@ -409,8 +411,8 @@ class SetBasedHybridAutomaton
    * \param invariant is the mode's invariant.
    */
   const SetBasedDiscreteMode<R>& new_mode(Geometry::DiscreteState state,
-                                          const System::VectorFieldInterface<R>& dynamic,
-                                          const Geometry::SetInterface<R>& invariant);
+                                          const System::VectorField<R>& dynamic,
+                                          const Geometry::ConstraintSet<R>& invariant);
     
   /*! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and destination modes.
    *
@@ -423,8 +425,8 @@ class SetBasedHybridAutomaton
   const SetBasedDiscreteTransition<R>& new_transition(System::DiscreteEvent event,
                                                       Geometry::DiscreteState source, 
                                                       Geometry::DiscreteState destination,
-                                                      const System::MapInterface<R>& reset,
-                                                      const Geometry::SetInterface<R>& activation);
+                                                      const System::Map<R>& reset,
+                                                      const Geometry::ConstraintSet<R>& activation);
 
   /*! \brief Adds a discrete transition to the automaton using the discrete modes to specify the source and destination.
    *
@@ -437,8 +439,8 @@ class SetBasedHybridAutomaton
   const SetBasedDiscreteTransition<R>& new_transition(System::DiscreteEvent event,
                                                       const SetBasedDiscreteMode<R>& source, 
                                                       const SetBasedDiscreteMode<R>& destination,
-                                                      const MapInterface<R>& reset,
-                                                      const Geometry::SetInterface<R>& activation);
+                                                      const Map<R>& reset,
+                                                      const Geometry::ConstraintSet<R>& activation);
   
   //@}
   
@@ -458,6 +460,9 @@ class SetBasedHybridAutomaton
   
   /*! \brief The discrete transition with given \a event and \a source location. */
   const SetBasedDiscreteTransition<R>& transition(System::DiscreteEvent event, Geometry::DiscreteState source) const;
+
+  /*! \brief The discrete transitions from location \a source. */
+  reference_vector< const SetBasedDiscreteTransition<R> > transitions(Geometry::DiscreteState source) const;
 
   /*! \brief A set giving the dimension of the state space for each location identifier. */
   Geometry::HybridSpace locations() const;

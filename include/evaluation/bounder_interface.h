@@ -60,44 +60,37 @@ namespace Ariadne {
 
 
       //@{ 
-      //! \name Methods for applying a system to a basic set.
+      //! \name Methods for computing bounding boxes for a flow.
 
-      /*! \brief Verifies that the flow of \a vector_field starting in \a initial_set remains in \a bound for times up to time \a integration_time. 
-       *
-       *  This method may return \a false even if the flow remains in \a bound. 
-       */
-      virtual bool check_flow_bounds(const System::VectorFieldInterface<R>& vector_field,
-                                     const Geometry::Box<R>& initial_set,
-                                     const Geometry::Box<R>& bound,
-                                     const Numeric::Rational& integration_time) const = 0;
-      
-      /*! \brief Computes a bounding box for the flow of \a vector_field starting in \a initial_set remains in \a bound for times up to time \a integration_time. The integration time may be dynamically varied to allow the bounding box to be computed. */
-      virtual Geometry::Box<R> flow_bounds(const System::VectorFieldInterface<R>& vector_field,
-                                                 const Geometry::Box<R>& initial_set,
-                                                 Numeric::Rational& integration_time) const = 0;
+      /*! \brief Computes a step size and bounding box for the flow of \a vector_field starting in \a initial_set remains in the bound for times up to the step size. The step size must be less than \a maximum_step_size. */
+      virtual std::pair< Numeric::Rational, Geometry::Box<R> >
+      flow_bounds(const System::VectorField<R>& vector_field,
+                  const Geometry::Box<R>& initial_set,
+                  const Numeric::Rational& maximum_step_size) const = 0;
 
-      /*! \brief Computes a bounding box for the flow of \a vector_field starting in \a initial_set remains in \a bound for times up to time \a integration_time.  */
-      virtual Geometry::Box<R> flow_bounds(const System::VectorFieldInterface<R>& vector_field,
-                                                 const Geometry::Box<R>& initial_set,
-                                                 const Numeric::Rational& integration_time) const = 0;
+      /*! \brief Computes a flow time and bounding box for the flow of \a vector_field starting in \a initial_set.  */
+      virtual 
+      std::pair< Numeric::Rational, Geometry::Box<R> >
+      flow_bounds(const System::VectorField<R>& vector_field,
+                  const Geometry::Box<R>& initial_set) const = 0;
 
       
 
 
 
       /*! \brief Compute a bound for the Jacobian of the flow over the time interval [-h,h], assuming that the flow remains inside the set \a b. */
-      virtual LinearAlgebra::Matrix<I> estimate_flow_jacobian_bounds(const System::VectorFieldInterface<R>& vf,
+      virtual LinearAlgebra::Matrix<I> estimate_flow_jacobian_bounds(const System::VectorField<R>& vf,
                                                                      const Geometry::Box<R>& b,
                                                                      const Numeric::Rational& h) const = 0;
 
 
       /*! \brief Computes a bounding box for the flow of \a vector_field starting in \a initial_set remains in \a bound for times up to time \a integration_time. The integration time may be dynamically varied to allow the bounding box to be computed. */
-      virtual Geometry::Box<R> estimate_interval_flow_bounds(const System::VectorFieldInterface<R>& vector_field,
+      virtual Geometry::Box<R> estimate_interval_flow_bounds(const System::VectorField<R>& vector_field,
                                                                    const Geometry::Box<R>& initial_set,
                                                                    Numeric::Interval<R>& integration_time) const = 0;
 
       /*! \brief Computes a bounding box for the flow of \a vector_field starting in \a initial_set remains in \a bound for times up to time \a integration_time. The integration time may be dynamically varied to allow the bounding box to be computed. */
-      virtual Geometry::Box<R> refine_interval_flow_bounds(const System::VectorFieldInterface<R>& vector_field,
+      virtual Geometry::Box<R> refine_interval_flow_bounds(const System::VectorField<R>& vector_field,
                                                                  const Geometry::Box<R>& initial_set,
                                                                  const Geometry::Box<R>& estimated_bound,
                                                                  const Numeric::Interval<R>& integration_time) const = 0;

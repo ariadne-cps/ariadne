@@ -42,148 +42,72 @@
 #include "combinatoric/lattice_set.h"
 
 #include "geometry/box.h"
+#include "geometry/box_list_set.h"
 #include "geometry/list_set.h"
-#include "geometry/grid.h"
 #include "geometry/grid_set.h"
 #include "geometry/partition_tree_set.h"
 #include "geometry/grid_approximation.h"
-#include "geometry/orbit.h"
-
-#include "system/grid_multimap.h"
 
 
-#include "system/map_interface.h"
-#include "system/transition_system.h"
+#include "system/map.h"
 
 #include "evaluation/standard_applicator.h"
 #include "evaluation/standard_approximator.h"
-#include "evaluation/model_checker.h"
+#include "evaluation/standard_subdivider.h"
 
 #include "output/logging.h"
 
 namespace Ariadne {
   
 namespace Evaluation { 
-static int& verbosity = applicator_verbosity; 
 static const double DEFAULT_MAXIMUM_BASIC_SET_RADIUS=0.25;
 static const double DEFAULT_GRID_LENGTH=0.125;
 }
 
 
-
-template<class R> 
-Evaluation::EvolutionParameters<R>*
-Evaluation::MapEvolver<R>::default_parameters() 
+template<class BS>
+Evaluation::MapEvolver<BS>::MapEvolver(const EvolutionParameters<R>& parameters)
+  : _parameters(parameters.clone()),
+    _applicator(new StandardApplicator<R>),
+    _approximator(new StandardApproximator<BS>)
 {
-  return new EvolutionParameters<R>();
 }
 
-template<class R> 
-Evaluation::MapOrbiterInterface<R>*
-Evaluation::MapEvolver<R>::default_orbiter() 
+template<class BS> 
+Evaluation::MapEvolver<BS>::MapEvolver(const EvolutionParameters<R>& parameters,
+                                       const ApplicatorInterface<BS>& applicator)
+  : _parameters(parameters.clone()),
+    _applicator(applicator.clone()),
+    _approximator(new StandardApproximator<BS>),
+    _subdivider(new StandardSubdivider<BS>)
 {
-  typedef Geometry::Zonotope<R,Geometry::UniformErrorTag> BS;
-  const EvolutionParameters<R>& parameters=*this->_parameters;
-  StandardApplicator<R> applicator;
-  StandardApproximator<BS> approximator;
-  return new MapOrbiter<BS>(parameters,applicator,approximator);
 }
 
-template<class R> 
-Evaluation::ModelChecker<R>
-Evaluation::MapEvolver<R>::model_checker() const
-{
-  return ModelChecker<R>();
-}
-
-template<class R> 
-System::TransitionSystem<R>
-Evaluation::MapEvolver<R>::discrete_map(const System::MapInterface<R>& map) const
-{
-  return System::TransitionSystem<R>(map,*this->_orbiter,1u);
-}
-
-
-template<class R> 
-Geometry::GridMaskSet<R>
-Evaluation::MapEvolver<R>::outer_approximation(const Geometry::SetInterface<R>& set) const
-{
-  Geometry::FiniteGrid<R> grid=this->_parameters->finite_grid(set.dimension());
-  return Geometry::outer_approximation(set,grid);
-}
-
-template<class R> 
-Geometry::GridMaskSet<R>
-Evaluation::MapEvolver<R>::inner_approximation(const Geometry::SetInterface<R>& set) const
-{
-  Geometry::FiniteGrid<R> grid(this->_parameters->finite_grid(set.dimension()));
-  return Geometry::inner_approximation(set,grid);
-}
-
-template<class R> 
-Geometry::ListSet< Geometry::Box<R> >
-Evaluation::MapEvolver<R>::lower_approximation(const Geometry::SetInterface<R>& set) const
-{
-  return Geometry::point_approximation(set,this->_parameters->grid(set.dimension()));
-}
-
-template<class R>
-Evaluation::MapEvolver<R>::MapEvolver() 
-  : _parameters(default_parameters()),
-    _orbiter(default_orbiter())
-{
-  _parameters->set_maximum_basic_set_radius(DEFAULT_MAXIMUM_BASIC_SET_RADIUS);
-  _parameters->set_grid_length(DEFAULT_GRID_LENGTH);
-}
-
-
-template<class R>
-Evaluation::MapEvolver<R>::MapEvolver(const EvolutionParameters<R>& parameters)
-  : _parameters(new EvolutionParameters<R>(parameters)),
-    _orbiter(default_orbiter())
+template<class BS> 
+Evaluation::MapEvolver<BS>::MapEvolver(const EvolutionParameters<R>& parameters,
+                                       const ApplicatorInterface<BS>& applicator,
+                                       const ApproximatorInterface<BS>& approximator,
+                                       const SubdividerInterface<BS>& subdivider)
+  : _parameters(parameters.clone()),
+    _applicator(applicator.clone()),
+    _approximator(approximator.clone()),
+    _subdivider(subdivider.clone())
 {
 }
 
 
 
-template<class R>
-Evaluation::MapEvolver<R>::MapEvolver(const MapEvolver<R>& other) 
-  : _parameters(new EvolutionParameters<R>(other.parameters())),
-    _orbiter(other._orbiter->clone())
-{
-}
-
-
-
-template<class R>
-Evaluation::MapEvolver<R>::~MapEvolver() 
-{
-  delete this->_parameters;
-  delete this->_orbiter;
-}
-
-
-template<class R>
-Evaluation::MapEvolver<R>*
-Evaluation::MapEvolver<R>::clone() const 
-{
-  return new MapEvolver<R>(*this);
-}
-
-
-
-
-template<class R>
-const Evaluation::EvolutionParameters<R>&
-Evaluation::MapEvolver<R>::parameters() const
+template<class BS>
+const Evaluation::EvolutionParameters<typename BS::real_type>&
+Evaluation::MapEvolver<BS>::parameters() const
 {
   return *this->_parameters;
 }
 
 
-template<class R>
-Evaluation::EvolutionParameters<R>&
-Evaluation::MapEvolver<R>::parameters() 
+template<class BS>
+Evaluation::EvolutionParameters<typename BS::real_type>&
+Evaluation::MapEvolver<BS>::parameters() 
 {
   return *this->_parameters;
 }
@@ -194,121 +118,222 @@ Evaluation::MapEvolver<R>::parameters()
 
 
 
-
-
-template<class R>
-Geometry::OrbitInterface< Numeric::Integer >*
-Evaluation::MapEvolver<R>::orbit(const System::MapInterface<R>& map, const Geometry::Box<R>& set, const Numeric::Integer& time) const
+template<class BS>
+void
+Evaluation::MapEvolver<BS>::_step(BSL& evolve,
+                                  BSL& reach, 
+                                  TBSL& working,
+                                  const Mp& map,
+                                  const T& time,
+                                  Semantics semantics) const
 {
-  ARIADNE_LOG(4,"Orbit<Integer,Box> MapEvolver::orbit(MapInterface,BoxBox)\n");
-  return this->_orbiter->orbit(map,set,time);
-}
-
-
-
-template<class R>
-Geometry::SetInterface<R>*
-Evaluation::MapEvolver<R>::lower_evolve(const System::MapInterface<R>& map, 
-                                        const Geometry::SetInterface<R>& initial_set,
-                                        const Numeric::Integer& steps) const
-{
-  throw NotImplemented(__PRETTY_FUNCTION__);
-  //return this->model_checker().evolve(this->discrete_map(map),lower_approximation(initial_set),steps);
-}
-
-template<class R>
-Geometry::SetInterface<R>*
-Evaluation::MapEvolver<R>::lower_reach(const System::MapInterface<R>& map, 
-                                       const Geometry::SetInterface<R>& initial_set,
-                                       const Numeric::Integer& steps) const
-{
-  throw NotImplemented(__PRETTY_FUNCTION__);
-  //return this->model_checker().lower_reach(this->discrete_map(map),lower_approximation(initial_set),steps);
-}
-
-template<class R>
-Geometry::SetInterface<R>*
-Evaluation::MapEvolver<R>::upper_evolve(const System::MapInterface<R>& map, 
-                                        const Geometry::SetInterface<R>& initial_set,
-                                        const Numeric::Integer& steps) const
-{
-  return this->model_checker().evolve(this->discrete_map(map),outer_approximation(initial_set),steps).clone();
-}
-
-template<class R>
-Geometry::SetInterface<R>*
-Evaluation::MapEvolver<R>::upper_reach(const System::MapInterface<R>& map, 
-                                       const Geometry::SetInterface<R>& initial_set,
-                                       const Numeric::Integer& steps) const
-{
-  return this->model_checker().reach(this->discrete_map(map),outer_approximation(initial_set),steps).clone();
-}
-
-
-
-template<class R>
-Geometry::SetInterface<R>*
-Evaluation::MapEvolver<R>::chainreach(const System::MapInterface<R>& map, 
-                                      const Geometry::SetInterface<R>& initial_set) const
-{
-  throw NotImplemented(__PRETTY_FUNCTION__);
-}
-
-
-template<class R>
-Geometry::SetInterface<R>*
-Evaluation::MapEvolver<R>::chainreach(const System::MapInterface<R>& map, 
-                                      const Geometry::SetInterface<R>& initial_set, 
-                                      const Geometry::Box<R>& bounding_box) const
-{
-  return this->model_checker().chainreach(this->discrete_map(map),this->outer_approximation(initial_set),bounding_box).clone();
-}
-
-
-
-
-template<class R>
-Geometry::SetInterface<R>*
-Evaluation::MapEvolver<R>::viable(const System::MapInterface<R>& map, 
-                                  const Geometry::SetInterface<R>& bounding_set) const
-{
-  return this->model_checker().viable(this->discrete_map(map),this->inner_approximation(bounding_set)).clone();
-}
-
-
-
-template<class R>
-tribool
-Evaluation::MapEvolver<R>::verify(const System::MapInterface<R>& map, 
-                                  const Geometry::SetInterface<R>& initial_set, 
-                                  const Geometry::SetInterface<R>& safe_set) const
-{
-  return this->model_checker().verify(this->discrete_map(map),this->outer_approximation(initial_set),this->inner_approximation(safe_set));
-}
-
-
-
-
-template<class R>
-System::GridMultiMap<R> 
-Evaluation::MapEvolver<R>::discretize(const System::MapInterface<R>& f, 
-                                      const Geometry::GridMaskSet<R>& domain,
-                                      const Geometry::Grid<R>& range_grid) const
-{
-  ARIADNE_LOG(2,"GridMultiMap*Evaluation::MapEvolver::discretize(MapInterface map, GridMaskSet domain, Grid range_grid)\n");
-  ARIADNE_LOG(3,"domain="<<domain<<"\n"<<"range_grid="<<range_grid);
-  using namespace Geometry;
-  typedef Numeric::Interval<R> I;
-  System::GridMultiMap<R> result(domain.grid(),range_grid);
-  for(typename GridMaskSet<R>::const_iterator dom_iter=domain.begin();
-      dom_iter!=domain.end(); ++dom_iter)
-    {
-      const GridCell<R>& gc=*dom_iter;
-      GridCellListSet<R> gcls=this->_orbiter->upper_evolve(f,gc,1);
-      result.adjoin_to_image(gc,gcls);
+  uint verbosity=this->_parameters->verbosity();
+  ARIADNE_LOG(5,"  working.size()="<<working.size()<<"\n");
+  TBS tbs=working.pop();
+  ARIADNE_LOG(5,"  tbs="<<tbs<<", r="<<this->radius(tbs)<<"\n");
+  assert(tbs.time()<20);
+  if(this->radius(tbs) > this->maximum_basic_set_radius()) {
+    if(semantics==upper_semantics) {
+      ARIADNE_LOG(5,"    subdivide...\n");
+      //ARIADNE_LOG(7,"      "<<this->subdivide(tbs)<<"\n");
+      working.adjoin(this->subdivide(tbs));
+    } else if(semantics==lower_semantics) {
+      ARIADNE_LOG(5,"    blocking...\n");
     }
+  } else if(tbs.time()==time) {
+      ARIADNE_LOG(5,"    end...\n");
+    evolve.adjoin(tbs.set());
+  } else {
+    ARIADNE_LOG(5,"  apply... ");
+    tbs=this->apply(map,tbs);
+    ARIADNE_LOG(7,tbs);
+    ARIADNE_LOG(5,"\n");
+    reach.adjoin(tbs.set());
+    working.adjoin(tbs);
+  }
+}
+  
+
+
+template<class BS>
+Geometry::GridCellListSet<typename BS::real_type>
+Evaluation::MapEvolver<BS>::_upper_evolve(const System::Map<R>& map, 
+                                          const Geometry::GridCellListSet<R>& initial_set,
+                                          const Numeric::Integer& time) const
+{
+  BSL reach, evolve;
+  reach=this->basic_set_list(initial_set);
+  TBSL working=this->timed_basic_set_list(initial_set);
+  while(working.size()!=0) { 
+    this->_step(evolve,reach,working,map,time,upper_semantics);
+  }
+  return this->outer_approximation(evolve,initial_set.grid());
+}
+
+template<class BS>
+Geometry::GridCellListSet<typename BS::real_type>
+Evaluation::MapEvolver<BS>::_upper_reach(const System::Map<R>& map, 
+                                         const Geometry::GridCellListSet<R>& initial_set,
+                                         const Numeric::Integer& time) const
+{
+  BSL reach, evolve;
+  TBSL working=this->timed_basic_set_list(initial_set);
+  while(working.size()!=0) { 
+    this->_step(evolve,reach,working,map,time,upper_semantics);
+  }
+  return this->outer_approximation(reach,initial_set.grid());
+}
+
+    
+
+template<class BS>
+Geometry::SetInterface<typename BS::real_type>*
+Evaluation::MapEvolver<BS>::lower_evolve(const System::Map<R>& map, 
+                                         const Geometry::SetInterface<R>& initial_set,
+                                         const Numeric::Interval<Numeric::Integer>& steps) const
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+template<class BS>
+Geometry::SetInterface<typename BS::real_type>*
+Evaluation::MapEvolver<BS>::upper_evolve(const System::Map<R>& map, 
+                                         const Geometry::SetInterface<R>& initial_set,
+                                         const Numeric::Interval<Numeric::Integer>& steps) const
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+
+template<class BS>
+Geometry::SetInterface<typename BS::real_type>*
+Evaluation::MapEvolver<BS>::lower_evolve(const System::Map<R>& map, 
+                                         const Geometry::SetInterface<R>& initial_set,
+                                         const Numeric::Integer& steps) const
+{
+  BSL reach, evolve;
+  TBSL working=this->timed_basic_set_list(this->lower_approximation(initial_set));
+  while(working.size()!=0) { 
+    this->_step(evolve,reach,working,map,steps,lower_semantics);
+  }
+  return new GMS(this->outer_approximation(reach,this->grid(map.dimension())));
+}
+
+template<class BS>
+Geometry::SetInterface<typename BS::real_type>*
+Evaluation::MapEvolver<BS>::lower_reach(const System::Map<R>& map, 
+                                       const Geometry::SetInterface<R>& initial_set,
+                                       const Numeric::Integer& steps) const
+{
+  uint verbosity=this->_parameters->verbosity();
+  BSL reach, evolve;
+  ARIADNE_LOG(2,"MapEvolver::lower_reach(map,set,steps)\n");
+  ARIADNE_LOG(3,"intial_set="<<initial_set<<"\n");
+  BxLS initial_cells=this->lower_approximation(initial_set);
+  ARIADNE_LOG(3,"intial_cells="<<initial_cells<<"\n");
+  reach=this->basic_set_list(initial_cells);
+  TBSL working=this->timed_basic_set_list(initial_cells);
+  ARIADNE_LOG(3,"intial_working_sets="<<working<<"\n");
+  while(working.size()!=0) { 
+    this->_step(evolve,reach,working,map,steps,lower_semantics);
+  }
+  ARIADNE_LOG(3,"evolve="<<evolve<<"\n");
+  ARIADNE_LOG(3,"reach="<<reach<<"\n");
+  //GMS* result=new GMS(this->lower_approximation(evolve,this->grid(map.dimension())));
+  Gr grid=this->grid(map.dimension());
+  ARIADNE_LOG(3,"grid="<<grid<<"\n");
+  GCLS approx=this->outer_approximation(reach,grid);
+  ARIADNE_LOG(3,"approx="<<approx.summary()<<"\n");
+  GMS* result=new GMS(approx);
+  ARIADNE_LOG(3,"result="<<result->summary()<<"\n");
   return result;
 }
+
+template<class BS>
+Geometry::SetInterface<typename BS::real_type>*
+Evaluation::MapEvolver<BS>::upper_evolve(const System::Map<R>& map, 
+                                         const Geometry::SetInterface<R>& initial_set,
+                                         const Numeric::Integer& steps) const
+{
+  GCLS evolve=this->outer_approximation(initial_set);
+  T quotient=quot(steps,this->lock_to_grid_steps());
+  T remainder=rem(steps,this->lock_to_grid_steps());
+  for(size_type i=0; i!=quotient; ++i) {
+    evolve=this->_upper_evolve(map,evolve,this->lock_to_grid_steps());
+  }
+  evolve=this->_upper_evolve(map,evolve,remainder);
+  return new GMS(evolve);
+}
+
+
+template<class BS>
+Geometry::SetInterface<typename BS::real_type>*
+Evaluation::MapEvolver<BS>::upper_reach(const System::Map<R>& map, 
+                                       const Geometry::SetInterface<R>& initial_set,
+                                       const Numeric::Integer& steps) const
+{
+  uint verbosity=this->_parameters->verbosity();
+  ARIADNE_LOG(2,"MapEvolver::upper_reach(map,set,steps)\n");
+  ARIADNE_LOG(3,"intial_set="<<initial_set<<"\n");
+  GCLS evolve=this->outer_approximation(initial_set);
+  GCLS reach=evolve;
+  T quotient=quot(steps,this->lock_to_grid_steps());
+  T remainder=rem(steps,this->lock_to_grid_steps());
+  for(size_type i=0; i!=quotient; ++i) {
+    evolve=this->_upper_evolve(map,evolve,this->lock_to_grid_steps());
+    reach.adjoin(this->_upper_reach(map,evolve,this->lock_to_grid_steps()));
+  }
+  reach.adjoin(this->_upper_reach(map,evolve,remainder));
+  return new GMS(reach);
+}
+
+
+
+
+template<class BS>
+Geometry::SetInterface<typename BS::real_type>*
+Evaluation::MapEvolver<BS>::chainreach(const System::Map<R>& map, 
+                                       const Geometry::SetInterface<R>& initial_set) const
+{
+  Bx bb=this->bounding_domain(map);
+  Gr grid=this->grid(map.dimension());
+  T time=this->lock_to_grid_steps();
+  GMS* result=new GMS(grid,bb);
+  GCLS found=this->outer_approximation(initial_set);
+  found=this->_upper_reach(map,found,time);
+  while(!found.empty()) {
+    result->adjoin(found);
+    found=this->_upper_evolve(map,found,time);
+    found.remove(*result);
+  }
+  return result;
+}
+
+
+
+
+template<class BS>
+Geometry::SetInterface<typename BS::real_type>*
+Evaluation::MapEvolver<BS>::viable(const System::Map<R>& map, 
+                                   const Geometry::SetInterface<R>& bounding_set) const
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+
+
+template<class BS>
+tribool
+Evaluation::MapEvolver<BS>::verify(const System::Map<R>& map, 
+                                   const Geometry::SetInterface<R>& initial_set, 
+                                   const Geometry::SetInterface<R>& safe_set) const
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+
+
+
 
 
 

@@ -46,7 +46,7 @@ template<class R> std::istream& operator>>(std::istream& is, Interval<R>& x);
 template<class R> 
 std::ostream& operator<<(std::ostream& os, const Interval<R>& ivl) 
 {
-  if(ivl.empty()&&false) {
+  if(ivl.lower()>ivl.upper()&&false) {
     return os << "[1:0]";
   }
   else {

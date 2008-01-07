@@ -1,9 +1,8 @@
 /***************************************************************************
  *            affine_map.h
  *
- *  Wed Feb  2 18:52:36 2005
- *  Copyright  2005  Alberto Casagrande
- *  casagrande@dimi.uniud.it
+ *  Copyright  2005-7  Alberto Casagrande Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -50,73 +49,13 @@ namespace Ariadne {
      *  \ingroup DiscreteTime
      */
     template<class R>
-    class AffineMap : public MapInterface<R> 
+    class AffineMap
+      : public Map<R> 
     {
-      typedef typename Numeric::traits<R>::arithmetic_type F;
-      typedef typename MapInterface<R>::I I;
      public:
-      /*! \brief The type of denotable real number used to describe the system. */
-      typedef R real_type;
-      /*! \brief The type of denotable state the system acts on. */
-      typedef Geometry::Point<R> state_type;
-      
-      /*! \brief Default constructor constructs a map on a zero-dimensional space. */
-      explicit AffineMap() {}
       /*! \brief Construct from the matrix \f$A\f$ and the vector \f$b\f$. */
       explicit AffineMap(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b)
-        : _a(A), _b(b) { }
-      /*! \brief Construct a linear map from the matrix \f$A\f$. */
-      explicit AffineMap(const LinearAlgebra::Matrix<R>& A)
-        : _a(A), _b(A.number_of_rows()) { }
-      /*! \brief Construct a translation from the vector \f$b\f$. */
-      explicit AffineMap(const LinearAlgebra::Vector<R>& b)
-        : _a(LinearAlgebra::Matrix<R>::identity(b.size())), _b(b) { }
-      
-      /*! \brief Copy constructor. */
-      AffineMap(const AffineMap<R>& T) : _a(T._a), _b(T._b) { }
-      /*! \brief Assignment operator. */
-      AffineMap<R>& operator=(const AffineMap<R>& T) {
-        this->_a=T._a; this->_b=T._b; return *this; }
-      /*! \brief Returns a pointer to a dynamically-allocated copy of the map. */
-      virtual AffineMap<R>* clone() const { return new AffineMap<R>(*this); }
-
-      
-      /*! \brief  An approximation to the image of an approximate point. */
-      Geometry::Point<F> image(const Geometry::Point<F>& A) const;
-      
-      /*! \brief  The linear transformation of the map. */
-      const LinearAlgebra::Matrix<R>& A() const { return _a; }
-      /*! \brief  The offset vector of the map. */
-      const LinearAlgebra::Vector<R>& b() const { return _b; }
-      
-      /*! \brief  The dimension of the argument. */
-      virtual dimension_type argument_dimension() const {
-        return _a.number_of_columns();
-      }
-      
-      /*! \brief The smoothness of the function. */
-      virtual smoothness_type smoothness() const { return std::numeric_limits<smoothness_type>::max(); }
-      
-      /*! \brief The dimension of the result. */
-      virtual dimension_type result_dimension() const {
-        return _b.size();
-      }
-      
-      /*! \brief The Jacobian derivative matrix at a point. */
-      virtual LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<F>& pt) const;
-
-      /*! \brief True if the map is invertible, which is equivalent to invertiblity of
-       *  the matrix A. */
-      bool invertible() const { throw NotImplemented("bool AffineMap<R>::invertible() const"); }
-  
-      /*! \brief  The name of the system. */
-      std::string name() const { return "AffineMap"; }
-      
-      /*! \brief Write to an output stream. */
-      virtual std::ostream& write(std::ostream& os) const;
-     protected:
-      LinearAlgebra::Matrix<R> _a;
-      LinearAlgebra::Vector<R> _b;
+        : Map<R>(Function::AffineFunction<R>(A,b)) { }
     };
 
 

@@ -37,6 +37,8 @@
 
 #include "geometry/geometrical_traits.h"
 #include "geometry/set_interface.h"
+#include "geometry/list_set.h"
+#include "geometry/box_list_set.h"
 #include "geometry/grid_cell_list_set.h"
 #include "geometry/grid_mask_set.h"
 #include "geometry/hybrid_space.h"
@@ -70,6 +72,7 @@ namespace Ariadne {
       typedef HybridBasicSet<typename DS::basic_set_type> basic_set_type;
       typedef typename std::map<discrete_state_type,continuous_state_set_type>::iterator locations_iterator;
       typedef typename std::map<discrete_state_type,continuous_state_set_type>::const_iterator locations_const_iterator;
+      typedef HybridDenotableSetIterator<DS> iterator;
       typedef HybridDenotableSetIterator<DS> const_iterator;
      protected:
       /*! \brief Construct a set with no locations. */
@@ -119,8 +122,10 @@ namespace Ariadne {
       size_type size() const;
       
       /*! \brief Adjoin the set \a s to location \a q. */
-      template<class S1> void adjoin(discrete_state_type q, const S1& s);
-      /*! \brief Adjoin the set \a s to location \a q. */
+      template<class S1> void adjoin(DiscreteState, const S1& s);
+      /*! \brief Adjoin the pair (q,s) to the set. */
+      template<class S1> void adjoin(const std::pair<DiscreteState,S1>& hsp);
+      /*! \brief Adjoin the basic hybrid set. */
       template<class S1> void adjoin(const HybridBasicSet<S1>& s);
       /*! \brief Adjoin another hybrid set. */
       template<class S1> void adjoin(const HybridDenotableSet<S1>& hs);
@@ -171,20 +176,38 @@ namespace Ariadne {
      */
     template< class BS >
     class HybridListSet
-      : public HybridDenotableSet< ListSet<BS> >
+      : public HybridDenotableSet< ListSet<BS> > 
     {
-      typedef typename BS::real_type R;
      public:
+      typedef BS basic_set_type;
       typedef list_set_tag set_category;
       HybridListSet()
         : HybridDenotableSet< ListSet<BS> >() { }
       HybridListSet(const HybridSpace& hspc)
         : HybridDenotableSet< ListSet<BS> >(hspc) { }
+      HybridListSet(const HybridSpace& hspc, const HybridBasicSet<BS>& hbs)
+        : HybridDenotableSet< ListSet<BS> >(hspc) { this->adjoin(hbs); }
       HybridListSet(const HybridListSet<BS>& hls)
         : HybridDenotableSet< ListSet<BS> >(hls) { }
-      template<class HBS> void adjoin_over_approximation(const HBS& hbs) {
-        this->adjoin(hbs.discrete_state(),over_approximation(hbs)); }
       virtual std::ostream& write(std::ostream&) const;
+    };
+
+
+    /*! \ingroup HybridSet
+     *  \brief A hybrid set comprising of a BoxListSet for every component.
+     */
+    template< class R >
+    class HybridBoxListSet
+      : public HybridDenotableSet< BoxListSet<R> >
+    {
+     public:
+      typedef list_set_tag set_category;
+      HybridBoxListSet()
+        : HybridDenotableSet< BoxListSet<R> >() { }
+      HybridBoxListSet(const HybridSpace& hspc)
+        : HybridDenotableSet< BoxListSet<R> >(hspc) { }
+      HybridBoxListSet(const HybridBoxListSet<R>& hls)
+        : HybridDenotableSet< BoxListSet<R> >(hls) { }
     };
 
 
@@ -201,6 +224,11 @@ namespace Ariadne {
 
       /*! \brief */
       HybridGrid() : _grids() { }
+      /*! \brief */
+      HybridGrid(const HybridSpace& loc, const R& gl) : _grids() { 
+        for(typename HybridSpace::const_iterator iter=loc.begin(); iter!=loc.end(); ++iter) {
+          this->_grids.insert(std::make_pair(iter->discrete_state(),Grid<R>(iter->dimension(),gl))); }
+      }
       /*! \brief */
       template<class GS> HybridGrid(const GS& gs) : _grids() { 
         for(typename GS::locations_const_iterator iter=gs.locations_begin(); iter!=gs.locations_end(); ++iter) {
@@ -219,6 +247,9 @@ namespace Ariadne {
      private:
       std::map< discrete_state_type, Grid<R> > _grids;
     };
+
+    template<class R> 
+    std::ostream& operator<<(std::ostream& os, const HybridGrid<R>& hgr);
 
 
 
@@ -251,6 +282,8 @@ namespace Ariadne {
         : HybridDenotableSet< GridMaskSet<R> >() { }
       HybridGridMaskSet(const HybridGridMaskSet<R>& hgms)
         : HybridDenotableSet< GridMaskSet<R> >(hgms) { }
+      HybridGridMaskSet(const HybridGridCellListSet<R>& hgcls)
+        : HybridDenotableSet< GridMaskSet<R> >(hgcls) { }
       HybridGrid<R> grid() const { return HybridGrid<R>(*this); }
       template<class HBS> void adjoin_outer_approximation(const HBS& hbs) {
         this->operator[](hbs.discrete_state()).adjoin_outer_approximation(hbs.continuous_state_set()); }
@@ -282,6 +315,16 @@ namespace Ariadne {
         this->operator[](hbs.discrete_state()).adjoin_outer_approximation(hbs.continuous_state_set()); }
       template<class HDS> void adjoin_outer_approximation(const HDS& hds,denotable_set_tag) {
         for(typename HDS::const_iterator iter=hds.begin(); iter!=hds.end(); ++iter) { this->adjoin_outer_approximation(*iter); } }
+      template<class HAS> void adjoin_outer_approximation(const HAS& has,abstract_set_tag) {
+        std::cout << "gcls.adjoin_outer_approximation(const HAS& has,abstract_set_tag)"<<std::endl;
+        for(typename HAS::locations_const_iterator iter=has.locations_begin(); iter!=has.locations_end(); ++iter) { 
+          std::cout << iter->first << ": " << (*this)[iter->first].grid() << "\n " << *iter->second << std::endl;
+          //(*this)[iter->first].adjoin(outer_approximation(*iter->second,(*this)[iter->first].grid())); 
+          GridCellListSet<R>& gcls=(*this)[iter->first];
+          const SetInterface<R>& set=*iter->second;
+          std::cout << gcls << " " << set << std::endl;
+          gcls.adjoin_outer_approximation(*iter->second); 
+          std::cout<<"Done"<<std::endl; } }
       void unique_sort();
     };
 

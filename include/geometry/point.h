@@ -67,13 +67,17 @@ namespace Ariadne {
       /*! \brief The origin in dimension \a dim. */
       explicit Point(dimension_type d);
 
+      /*! \brief Construct a point from an array of data. */
+      template<class XX>
+      explicit Point(const array<XX>& ary);
+      
       /*! \brief Construct a point a strided array of data. */
       template<class XX>
-      Point(dimension_type d, const XX* data, size_type inc=1);
+      explicit Point(dimension_type d, const XX* data, size_type inc=1);
       
       /*! \brief Construct a point from a range of values. */
       template<class ForwardIterator>
-      Point(ForwardIterator b, ForwardIterator e);
+      explicit Point(ForwardIterator b, ForwardIterator e);
 
       /*! \brief Construct a point from a position vector. */
       explicit Point(const LinearAlgebra::Vector<X>& position);

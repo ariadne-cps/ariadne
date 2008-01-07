@@ -33,6 +33,7 @@
 #include "numeric/rational.h"
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
+#include "function/variable.h"
 #include "output/logging.h"
 
 

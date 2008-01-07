@@ -50,16 +50,22 @@ namespace Ariadne {
       virtual ApproximatorInterface<BS>* clone() const = 0;
 
       /*! \brief Computes an over-approximation of a set from a rectangle. */
-      virtual BS over_approximation(const Geometry::Box<R>& r) const = 0;
+      virtual BS basic_set(const Geometry::Box<R>& r) const = 0;
 
-      /*! \brief Computes a bounding box for the set. */
+      /*! \brief Computes the radius of a basic set. */
+      virtual R radius(const BS& bs) const = 0;
+
+      /*! \brief Computes a bounding box for a set. */
       virtual Geometry::Box<R> bounding_box(const BS& bs) const = 0;
 
-      /*! \brief Computes and over-approximation of a set from a rectangle. */
+      /*! \brief Computes an outer-approximation of a set on a grid. */
       virtual Geometry::GridCellListSet<R> outer_approximation(const BS& bs, const Geometry::Grid<R>& g) const = 0;
 
-      /*! \brief Computes and over-approximation of a set from a rectangle. */
-      virtual std::pair<BS,BS> subdivide(const BS& bs) const = 0;
+      /*! \brief Computes a bounding box for a set. */
+      Geometry::Box<R> bounding_box(const Geometry::ListSet<BS>& bs) const;
+
+      /*! \brief Computes and outer-approximation of a set on a grid. */
+      Geometry::GridCellListSet<R> outer_approximation(const Geometry::ListSet<BS>& bs, const Geometry::Grid<R>& g) const;
 
       /*! \brief Adjoins an outer approximation to a basic set to a grid mask set. */
       void adjoin_outer_approximation(Geometry::GridMaskSet<R>& gms, const BS& bs) const;

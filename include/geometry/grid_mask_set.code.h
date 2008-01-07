@@ -53,48 +53,48 @@ namespace Ariadne {
 
 template<class R>
 Geometry::GridMaskSet<R>::GridMaskSet(const FiniteGrid<R>& fg)
-  : _grid_ptr(new Grid<R>(fg.grid())), _lattice_set(fg.lattice_block()) 
+  : _grid(fg.grid()), _lattice_set(fg.lattice_block()) 
 { 
 }
 
 
 template<class R>
 Geometry::GridMaskSet<R>::GridMaskSet(const FiniteGrid<R>& fg, const BooleanArray& m)
-  : _grid_ptr(new Grid<R>(fg.grid())), _lattice_set(fg.lattice_block(),m)
+  : _grid(fg.grid()), _lattice_set(fg.lattice_block(),m)
 {
 }
 
 
 template<class R>
 Geometry::GridMaskSet<R>::GridMaskSet(const Grid<R>& g, const Box<R>& bb)
-  : _grid_ptr(new Grid<R>(g)), _lattice_set(g.index_block(bb)) 
+  : _grid(g), _lattice_set(g.index_block(bb)) 
 { 
 }
 
 template<class R>
 Geometry::GridMaskSet<R>::GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeBlock& b)
-  : _grid_ptr(new Grid<R>(g)), _lattice_set(b) 
+  : _grid(g), _lattice_set(b) 
 { 
 }
 
 
 template<class R>
 Geometry::GridMaskSet<R>::GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeBlock& b, const BooleanArray& m)
-  : _grid_ptr(new Grid<R>(g)), _lattice_set(b,m)
+  : _grid(g), _lattice_set(b,m)
 {
 }
 
 
 template<class R>
 Geometry::GridMaskSet<R>::GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeMaskSet& ms)
-  : _grid_ptr(new Grid<R>(g)), _lattice_set(ms)
+  : _grid(g), _lattice_set(ms)
 {
 }
 
 
 template<class R>
 Geometry::GridMaskSet<R>::GridMaskSet(const GridMaskSet<R>& gms) 
-  : _grid_ptr(gms._grid_ptr), _lattice_set(gms._lattice_set)
+  : _grid(gms._grid), _lattice_set(gms._lattice_set)
 {
 }
 
@@ -104,7 +104,7 @@ Geometry::GridMaskSet<R>&
 Geometry::GridMaskSet<R>::operator=(const GridMaskSet<R>& gms) 
 {
   if(this!=&gms) {
-    this->_grid_ptr=gms._grid_ptr;
+    this->_grid=gms._grid;
     this->_lattice_set=gms._lattice_set;
   }
   return *this;
@@ -113,7 +113,7 @@ Geometry::GridMaskSet<R>::operator=(const GridMaskSet<R>& gms)
 
 template<class R>
 Geometry::GridMaskSet<R>::GridMaskSet(const GridCellListSet<R>& gcls)
-  : _grid_ptr(gcls._grid_ptr),
+  : _grid(gcls._grid),
     _lattice_set(gcls.lattice_set())
 {
 }
@@ -140,7 +140,7 @@ template<class R> inline
 Geometry::GridBlock<R> 
 Geometry::GridMaskSet<R>::bounds() const 
 {
-  return GridBlock<R>(*this->_grid_ptr,_lattice_set.block()); 
+  return GridBlock<R>(this->_grid,_lattice_set.block()); 
 }
 
 
@@ -220,7 +220,7 @@ Geometry::GridMaskSet<R>::_instantiate_geometry_operators()
   tribool tb;
   Box<R>* r=0;
   
-  FiniteGrid<R>* fg=0;
+  //FiniteGrid<R>* fg=0;
   GridCell<R>* gc=0;
   GridBlock<R>* gb=0;
   GridCellListSet<R>* gcls=0;
@@ -561,17 +561,18 @@ Geometry::GridMaskSet<R>::restrict_inner_approximation(const SetInterface<R>& s)
 
 
 template<class R>
-std::ostream& 
-Geometry::GridMaskSet<R>::summarize(std::ostream& os) const 
+std::string 
+Geometry::GridMaskSet<R>::summary() const 
 {
-  os << "GridMaskSet( " << std::flush;
-  os << " grid=" << this->grid() << ",";
-  os << " block=" << this->block() << ",";
-  os << " extent=" << Box<R>(this->bounds()) << ",";
-  os << " size=" << this->size() << ",";
-  os << " capacity=" << this->capacity() << ",";
-  os << " )";
-  return os;
+  std::stringstream ss;
+  ss << "GridMaskSet( "
+     << " grid=" << this->grid() << ","
+     << " block=" << this->block() << ","
+     << " extent=" << Box<R>(this->bounds()) << ","
+     << " size=" << this->size() << ","
+     << " capacity=" << this->capacity() << ","
+     << " )";
+  return ss.str();
 }
 
 template<class R>

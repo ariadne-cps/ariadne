@@ -40,7 +40,7 @@ namespace Ariadne {
     
 template<class R>
 Geometry::GridBlock<R>::GridBlock(const Grid<R>& g)
-  : _grid_ptr(&g), _lattice_set(g.dimension())
+  : _grid(g), _lattice_set(g.dimension())
 { 
   _lattice_set.set_lower_bound(0,1);
   //_lattice_set.set_lower_bound(0,0);
@@ -48,17 +48,11 @@ Geometry::GridBlock<R>::GridBlock(const Grid<R>& g)
 }
 
 
-template<class R>
-Geometry::GridBlock<R>::GridBlock(const Grid<R>& g, const Combinatoric::LatticeBlock& lb)
-  : _grid_ptr(&g), _lattice_set(lb)
-{
-  ARIADNE_CHECK_EQUAL_DIMENSIONS(g,lb,"GridBlock::GridBlock(Grid g, LatticeBlock lb)");
-}
 
 
 template<class R>
 Geometry::GridBlock<R>::GridBlock(const Grid<R>& g, const IndexArray& l, const IndexArray& u)
-  : _grid_ptr(&g), _lattice_set(l,u)
+  : _grid(g), _lattice_set(l,u)
 {
   ARIADNE_CHECK_DIMENSION(g,l.size(),"GridBlock::GridBlock(Grid g, IndexArray l, IndexArray u)");
 }
@@ -66,7 +60,7 @@ Geometry::GridBlock<R>::GridBlock(const Grid<R>& g, const IndexArray& l, const I
 
 template<class R>
 Geometry::GridBlock<R>::GridBlock(const Grid<R>& g, const Box<R>& r)
-  : _grid_ptr(&g), _lattice_set(g.dimension())
+  : _grid(g), _lattice_set(g.dimension())
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(g,r,"GridBlock::GridBlock(Grid g,Box r)");
   for(dimension_type i=0; i!=dimension(); ++i) {
@@ -79,14 +73,14 @@ Geometry::GridBlock<R>::GridBlock(const Grid<R>& g, const Box<R>& r)
 
 template<class R>
 Geometry::GridBlock<R>::GridBlock(const GridCell<R>& gc)
-  : _grid_ptr(gc._grid_ptr), _lattice_set(gc.lattice_set())
+  : _grid(gc._grid), _lattice_set(gc.lattice_set())
 {
 }
 
 
 template<class R>
 Geometry::GridBlock<R>::GridBlock(const GridBlock<R>& gb)
-  : _grid_ptr(gb._grid_ptr), _lattice_set(gb.lattice_set())
+  : _grid(gb._grid), _lattice_set(gb.lattice_set())
 {
 }
 
@@ -96,7 +90,7 @@ Geometry::GridBlock<R>&
 Geometry::GridBlock<R>::operator=(const GridBlock<R>& gb)
 {
   if(this!=&gb) {
-    this->_grid_ptr = gb._grid_ptr;
+    this->_grid = gb._grid;
     this->_lattice_set=gb._lattice_set;
   }
   return *this;
@@ -107,7 +101,7 @@ template<class R>
 R
 Geometry::GridBlock<R>::lower_bound(dimension_type i) const 
 {
-  return _grid_ptr->subdivision_coordinate(i,_lattice_set.lower_bound(i));
+  return _grid.subdivision_coordinate(i,_lattice_set.lower_bound(i));
 }
 
 
@@ -115,14 +109,14 @@ template<class R>
 R
 Geometry::GridBlock<R>::upper_bound(dimension_type i) const 
 {
-  return _grid_ptr->subdivision_coordinate(i,_lattice_set.upper_bound(i));
+  return _grid.subdivision_coordinate(i,_lattice_set.upper_bound(i));
 }
 
 template<class R>
 Geometry::GridBlock<R>
 Geometry::GridBlock<R>::neighbourhood() const 
 {
-  return GridBlock<R>(this->_grid_ptr,this->_lattice_set.neighbourhood());
+  return GridBlock<R>(this->_grid,this->_lattice_set.neighbourhood());
 }
 
 
@@ -133,7 +127,7 @@ Geometry::GridBlock<R>::_instantiate_geometry_operators()
   typedef Numeric::Interval<R> I;
   tribool tb;
   Box<R>* r=0;
-  Grid<R>* g=0;
+  //Grid<R>* g=0;
   GridCell<R>* gc=0;
   GridBlock<R>* gb=0;
   

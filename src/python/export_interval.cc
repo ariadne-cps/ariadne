@@ -1,7 +1,6 @@
 /***************************************************************************
  *            python/export_interval.cc
  *
- *  21 October 2005
  *  Copyright  2005  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
@@ -29,8 +28,10 @@
 #include <boost/python.hpp>
 using namespace boost::python;
 
-#include "python/utilities.h"
 #include "python/float.h"
+#include "python/name.h"
+#include "python/operators.h"
+#include "python/read_scalar.h"
 
 using namespace Ariadne;
 using namespace Ariadne::Python;
@@ -71,6 +72,15 @@ __repr__(const Interval<R>& ivl) {
 }
 
 template<class R>
+Interval<R>*
+make_interval(const boost::python::object& obj) 
+{
+  Interval<R>* ivl=new Interval<R>;
+  read_scalar(*ivl,obj);
+  return ivl;
+}
+
+template<class R>
 void export_interval()
 {
   typedef Interval<R> I;
@@ -79,12 +89,14 @@ void export_interval()
   // FIXME: pow(Interval<R>,Integer) doesn't work 
 
   class_< Interval<R> >(python_name<R>("Interval").c_str())
+    .def("__init__", make_constructor(&make_interval<R>))
     .def(init<std::string>())
     .def(init<int,int>())
     .def(init<double,double>())
     .def(init<R,R>())
     .def(init<int>())
     .def(init<double>())
+    .def(init< Rational >())
     .def(init<R>())
     .def(init< Interval<R> >())
     .def("__neg__", &neg<I,I>)

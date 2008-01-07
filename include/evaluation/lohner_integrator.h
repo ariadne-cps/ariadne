@@ -30,6 +30,8 @@
 
 #include "numeric/declarations.h"
 #include "geometry/declarations.h"
+#include "system/declarations.h"
+
 #include "evaluation/integrator_interface.h"
 
 namespace Ariadne {
@@ -52,7 +54,7 @@ namespace Ariadne {
      */
     template<class R>
     class LohnerIntegrator
-      : public IntegratorInterface< Geometry::Zonotope<R,Geometry::UniformErrorTag> >
+      : public IntegratorInterface< Geometry::Zonotope<R> >
     {
       typedef Numeric::Interval<R> I;
      public:
@@ -65,14 +67,21 @@ namespace Ariadne {
 
      public:
       
+      /*! \brief Compute an integration time and a bounding box, given a bounding box for the intitial set, and a maximum allowable flow time. */
+      virtual 
+      std::pair< Numeric::Rational, Geometry::Box<R> >
+      flow_bounds(const System::VectorField<R>& f, 
+                  const Geometry::Box<R>& bx,
+                  const Numeric::Rational& t) const; 
+
       /*! \brief Integrate a basic set for time \a t within a bounding set. */
-      virtual Geometry::Point<I> flow_step(const System::VectorFieldInterface<R>& vf,
+      virtual Geometry::Point<I> flow_step(const System::VectorField<R>& vf,
                                            const Geometry::Point<I>& p,
                                            const Numeric::Interval<R>& t,
                                            const Geometry::Box<R>& bb) const;
      
       /*! \brief Integrate a basic set for within a bounding set. */
-      virtual LinearAlgebra::Matrix<I> flow_step_jacobian(const System::VectorFieldInterface<R>& vf,
+      virtual LinearAlgebra::Matrix<I> flow_step_jacobian(const System::VectorField<R>& vf,
                                                           const Geometry::Point<I>& p,
                                                           const Numeric::Interval<R>& t,
                                                           const Geometry::Box<R>& bb) const;
@@ -80,34 +89,19 @@ namespace Ariadne {
 
       /*! \brief A C1 algorithm for integrating forward a zonotope.
        */
-      virtual Geometry::Zonotope<R,Geometry::UniformErrorTag> 
-      integration_step(const System::VectorFieldInterface<R>& vf,
-                       const Geometry::Zonotope<R,Geometry::UniformErrorTag>& s,
+      virtual Geometry::Zonotope<R> 
+      integration_step(const System::VectorField<R>& vf,
+                       const Geometry::Zonotope<R>& s,
                        const Numeric::Interval<R>& t,
                        const Geometry::Box<R>& bb) const;
 
       /*! \brief A C1 algorithm for integrating forward a zonotope for a time up to time \a step_size, assuming the set \a bb is a bounding box for the integration. */
-      virtual Geometry::Zonotope<R,Geometry::UniformErrorTag> 
-      reachability_step(const System::VectorFieldInterface<R>& vf,
-                        const Geometry::Zonotope<R,Geometry::UniformErrorTag>& s,
+      virtual Geometry::Zonotope<R> 
+      reachability_step(const System::VectorField<R>& vf,
+                        const Geometry::Zonotope<R>& s,
                         const Numeric::Interval<R>& t,
                         const Geometry::Box<R>& bb) const;
 
-     private:
-      /*! \brief A C1 algorithm for integrating forward a zonotope.
-       */
-      Geometry::Zonotope<R,Geometry::IntervalTag> 
-      integration_step(const System::VectorFieldInterface<R>& vf,
-                       const Geometry::Zonotope<R,Geometry::IntervalTag>& s,
-                       const Numeric::Interval<R>& t,
-                       const Geometry::Box<R>& bb) const;
-
-      /*! \brief A C1 algorithm for integrating forward a zonotope for a time up to time \a step_size, assuming the set \a bb is a bounding box for the integration. */
-      Geometry::Zonotope<R,Geometry::IntervalTag> 
-      reachability_step(const System::VectorFieldInterface<R>& vf,
-                        const Geometry::Zonotope<R,Geometry::IntervalTag>& s,
-                        const Numeric::Interval<R>& t,
-                        const Geometry::Box<R>& bb) const;
 
       /*! \brief Write to an output stream. */
       virtual std::ostream& write(std::ostream&) const;

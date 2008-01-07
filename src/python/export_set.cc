@@ -62,7 +62,6 @@ void export_set()
     .def("intersects", pure_virtual(&SetInterface<R>::intersects))
     .def("disjoint", pure_virtual(&SetInterface<R>::disjoint))
     .def("subset", pure_virtual(&SetInterface<R>::subset))
-    .def("bounded", pure_virtual(&SetInterface<R>::bounded))
     .def("bounding_box", pure_virtual(&SetInterface<R>::bounding_box))
     .def(self_ns::str(self))
   ;

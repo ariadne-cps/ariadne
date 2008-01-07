@@ -99,6 +99,9 @@ namespace Ariadne {
       /*! \brief Type conversion copy assignment. */
       template<class XX> AffineDerivative<X>& operator=(const AffineDerivative<XX>& fd);
 
+      /*! \brief Construct a variable with the value \a x */
+      static AffineDerivative<X> variable(const LinearAlgebra::Vector<X>& x);
+      
       //@}
 
       //@{
@@ -109,12 +112,16 @@ namespace Ariadne {
       size_type argument_size() const;
       /*! \brief The degree of the derivative map. Returns the constant one. */
       smoothness_type degree() const;
+      /*! \brief Resize to hold the derivatives of a function with result size \a rs and argument size \a as. */
+      void resize(const size_type& rs, const size_type& as);
       /*! \brief The data describing the values and derivatives. */
       const array<X>& data() const;
       /*! \brief A reference to the data describing the values and derivatives. */
       array<X>& data();
       /*! \brief The value of the variable. */
       const X& value(size_type i) const;
+      /*! \brief The jacobian derivative. */
+      LinearAlgebra::Matrix<X> jacobian() const;
       /*! \brief The differential of the variable with respect to the \a j th indepenent variable. (Deprecated)  */
       const X& derivative(size_type i, size_type j) const;
       /*! \brief A reference to the \a i<sup>th</sup> component. */

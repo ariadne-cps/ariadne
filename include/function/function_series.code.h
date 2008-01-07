@@ -1,0 +1,149 @@
+/***************************************************************************
+ *            function_series.template.h
+ *
+ *  Copyright 2007  Pieter Collins
+ *  
+ ****************************************************************************/
+
+/*
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
+ 
+#include "function/taylor_series.h"
+#include "function/function_series.h"
+
+namespace Ariadne {
+
+template<class X> 
+Function::TaylorSeries<X> 
+Function::ArithmeticSeries<X>::rec(smoothness_type d, const X& c) 
+{
+  TaylorSeries<X> y(d);
+  X mr = -1/c;
+  for(size_type i=0; i<=y.degree(); ++i) {
+    y[i]=(-Numeric::fac<int>(i))*Numeric::pow(mr,i+1u);
+  }
+  return y;
+}
+
+
+template<class X> 
+Function::TaylorSeries<X> 
+Function::ArithmeticSeries<X>::pow(smoothness_type d, const X& c, const uint& k)
+{
+  size_type n=k;
+  TaylorSeries<X> y(d);
+  for(size_type i=0; i<=std::min(size_type(d),n); ++i) {
+    int j=n-i;
+    y[i]=(Numeric::fac<int>(n)/Numeric::fac<int>(j))*Numeric::pow(c,j);
+  }
+  //std::cout << "pow("<<d<<","<<c<<","<<k<<")="<<y<<std::endl;
+  return y;
+}
+
+template<class X> 
+Function::TaylorSeries<X> 
+Function::TranscendentalSeries<X>::sqrt(smoothness_type d, const X& c)
+{
+TaylorSeries<X> y(d);
+  y[0]=Numeric::sqrt(c);
+  X mhr=(-0.5)/c;
+  for(size_type i=1; i<=y.degree(); ++i) {
+    y[i]=(2*int(i)-3)*mhr*y[i-1];
+  }
+  return y;
+}
+
+template<class X> 
+Function::TaylorSeries<X> 
+Function::TranscendentalSeries<X>::exp(smoothness_type d, const X& c)
+{
+TaylorSeries<X> y(d);
+  y[0]=Numeric::exp(c);
+  for(size_type i=1; i<=y.degree(); ++i) {
+    y[i]=y[0];
+  }
+  return y;
+}
+
+template<class X>  
+Function::TaylorSeries<X> 
+Function::TranscendentalSeries<X>::log(smoothness_type d, const X& c)
+{
+TaylorSeries<X> y(d);
+  y[0]=Numeric::log(c);
+  X mr=(-1)/c;
+  for(size_type i=1; i<=y.degree();++i) {
+    y[i]=(-Numeric::fac<int>(i-1))*Numeric::pow(mr,i);
+  }
+  return y;
+}
+
+template<class X> 
+Function::TaylorSeries<X> 
+Function::TranscendentalSeries<X>::sin(smoothness_type d, const X& c)
+{
+TaylorSeries<X> y(d);
+  y[0]=Numeric::sin(c);
+  y[1]=Numeric::cos(c);
+  for(size_type i=2; i!=d; ++i) {
+    y[i]=-y[i-2];
+  }
+  return y;
+}
+
+template<class X> 
+Function::TaylorSeries<X> 
+Function::TranscendentalSeries<X>::cos(smoothness_type d, const X& c)
+{
+  TaylorSeries<X> y(d);
+  y[0]=Numeric::cos(c);
+  y[1]=-Numeric::sin(c);
+  for(size_type i=2; i!=d; ++i) {
+    y[i]=-y[i-2];
+  }
+  return y;
+}
+
+template<class X> 
+Function::TaylorSeries<X> 
+Function::TranscendentalSeries<X>::tan(smoothness_type d, const X& c)
+{
+  return sin(d,c)/cos(d,c);
+}
+
+template<class X>  
+Function::TaylorSeries<X> 
+Function::TranscendentalSeries<X>::asin(smoothness_type d, const X& c)
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+template<class X>  
+Function::TaylorSeries<X> 
+Function::TranscendentalSeries<X>::acos(smoothness_type d, const X& c)
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+template<class X>  
+Function::TaylorSeries<X> 
+Function::TranscendentalSeries<X>::atan(smoothness_type d, const X& c)
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+
+}

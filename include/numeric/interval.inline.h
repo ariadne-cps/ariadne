@@ -665,6 +665,22 @@ Interval<R> abs(const Interval<R>& x) {
   Interval<R> r; abs_(r,x); return r; }
 
 template<class R> inline
+R mag(const Interval<R>& x) {
+  return max(abs(x._lower),abs(x._upper));
+}
+
+template<class R> inline
+R mig(const Interval<R>& x) {
+  if(x._lower>0) {
+    return x._lower;
+  } else if(x._upper<0) {
+    return -x._upper;
+  } else { 
+    return 0;
+  }
+}
+
+template<class R> inline
 void pow_(Interval<R>& r, const Interval<R>& x, const uint& n) {
   Interval<R> y=x;
   r=1;

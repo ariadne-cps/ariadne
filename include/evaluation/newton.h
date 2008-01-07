@@ -33,8 +33,8 @@
 #include <string>
 
 #include "numeric/traits.h"
+#include "function/declarations.h"
 #include "geometry/declarations.h"
-#include "system/declarations.h"
 
 #include "solver.h"
 
@@ -54,7 +54,7 @@ namespace Ariadne {
       
       /*! \brief Solve \f$f(x)=0\f$, using the interval Newton method. */
       Geometry::Point<I>
-      solve(const System::VectorFieldInterface<R>& f, 
+      solve(const Function::FunctionInterface<R>& f, 
             const Geometry::Point<I>& pt); 
     };            
     

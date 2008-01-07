@@ -22,18 +22,11 @@
  */
  
 
-#include "evaluation/bounder.h"
+#include "evaluation/standard_bounder.h"
 
 namespace Ariadne {
     
-template<class R> template<class BS> inline
-Evaluation::VectorFieldEvolver<R>::VectorFieldEvolver(const EvolutionParameters<R>& parameters, 
-                                                      const IntegratorInterface<BS>& integrator,
-                                                      const ApproximatorInterface<BS>& approximator)
-  : _parameters(new EvolutionParameters<R>(parameters)),
-    _orbiter(integrator,approximator)
-{
-}
+
 
 }
 

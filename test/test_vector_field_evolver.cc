@@ -38,6 +38,7 @@
 #include "evaluation/vector_field_evolver.h"
 #include "evaluation/lohner_integrator.h"
 #include "evaluation/affine_integrator.h"
+#include "evaluation/standard_approximator.h"
 #include "models/vanderpol.h"
 #include "output/epsstream.h"
 #include "output/logging.h"
@@ -117,16 +118,19 @@ test_integrator()
   cout << endl;
 
   //Function evaluation sanity check
-  cout << "vdp.image(" << r << ") = " << vdp.image(r) << endl;
+  cout << "vdp.evaluate(" << r << ") = " << vdp.evaluate(r) << endl;
   cout << "vdp.jacobian(" << r << ") = " << vdp.jacobian(r) << endl;
   cout << endl;
   
   // Integration step
   //nr=lohner.integration_step(vdp,r,h);
   //cout << nr << endl;
-  LohnerIntegrator<R> plugin;
-  VectorFieldEvolver<R> evolver(parameters,plugin);
-  nez=evolver.integration_step(vdp,ez,h);
+  StandardApproximator< Zonotope<R,UniformErrorTag> > approximator;
+  StandardBounder<R> bounder;
+  LohnerIntegrator<R> integrator;
+  VectorFieldEvolver<R> evolver(parameters,integrator,approximator);
+  Box<R> bb=bounder.flow_bounds(vdp,ez.bounding_box(),h);
+  nez=integrator.integration_step(vdp,ez,h,bb);
   cout << nez << endl << endl;
   cout << endl << endl;
   
@@ -139,7 +143,7 @@ test_integrator()
   cout << nezls << endl << endl;
   
   // Affine vector field
-  VectorFieldInterface<R>& avfr=avf;
+  VectorField<R>& avfr=avf;
   //AffineVectorField<R>& avfr=avf;
   nez=evolver.integration_step(avfr,ez,h);
   cout << nz << endl;
@@ -216,7 +220,7 @@ test_vector_field_evolver()
   GridMaskSet<R> grid_final_set=grid_initial_set;
   grid_final_set=evolver.bounded_integrate(affine_vector_field,grid_initial_set,grid_bounding_set,integration_time/2);
   cout << "grid_final_set.size()=" << grid_final_set.size() << endl;
-  cerr << "WARNING: VectorFieldEvolver::bounded_integrate(VectorFieldInterface,GridMaskSet,GridMaskSet,Rational) may have accuracy problems.\n";
+  cerr << "WARNING: VectorFieldEvolver::bounded_integrate(VectorField,GridMaskSet,GridMaskSet,Rational) may have accuracy problems.\n";
   GridMaskSet<R> grid_reach_set=evolver.bounded_reach(affine_vector_field,grid_initial_set,grid_bounding_set,integration_time);
   cout << "grid_reach_set.size()=" << grid_reach_set.size() << endl;
   GridMaskSet<R> grid_chainreach_set=evolver.chainreach(affine_vector_field,grid_initial_set,grid_bounding_set);

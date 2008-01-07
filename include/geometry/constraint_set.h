@@ -51,8 +51,10 @@ namespace Ariadne {
     {
       typedef typename Numeric::traits<R>::arithmetic_type A;
      public:
-      /*! \brief Construct the set \f$f(x)\geq0\f$ from the function \f$f\f$. */
-      ConstraintSet(const Function::FunctionInterface<R>& f);
+      /*! \brief Construct the set \f$x\in D\f$ from the function \f$f\f$ and the box \a D. */
+      ConstraintSet(const Geometry::Box<R>& D);
+      /*! \brief Construct the set \f$f(x)\in D\f$ from the function \f$f\f$ and the box \a D. */
+      ConstraintSet(const Function::FunctionInterface<R>& f, const Geometry::Box<R>& D);
 
       /*! \brief Destructor. */
       virtual ~ConstraintSet();
@@ -79,15 +81,16 @@ namespace Ariadne {
 
       /*! \brief The number of independed inequality constraints used to define the set. */
       size_type number_of_constraints() const;
+      /*! \brief The codomain given the allowable values of the constraint function. */
+      const Geometry::Box<R>& codomain() const;
       /*! \brief The function describing the constraints. */
       const Function::FunctionInterface<R>& function() const;
-      /*! \brief The function value over a point described approximately. */
-      Point<A> function(const Point<A>& pt) const;
 
       /*! \brief Test if the set contains a point described approximately. */
       tribool contains(const Point<A>& pt) const;
      private:
       boost::shared_ptr< const Function::FunctionInterface<R> > _function_ptr;
+      Geometry::Box<R> _codomain;
     };
     
     template<class R> inline

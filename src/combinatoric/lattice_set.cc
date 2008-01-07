@@ -28,7 +28,7 @@
 
 #include <algorithm>
 
-#include "base/stlio.h"
+#include "base/sequence_io.h"
 
 #include "combinatoric/array_operations.h"
 #include "combinatoric/lattice_set.h"
@@ -276,7 +276,65 @@ namespace Ariadne {
           result.adjoin(*i);
         }
       }
-      *this=result;
+      this->swap(result);
+    }
+
+
+
+    void 
+    LatticeCellListSet::restrict(LatticeCellListSet& lcl) 
+    { 
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(*this,lcl,"void LatticeCellListSet::restrict(LatticeBlock)");
+      lcl.unique_sort();
+      LatticeCellListSet result(this->dimension());
+      for(LatticeCellListSet::const_iterator i=this->begin(); i!=this->end(); ++i) {
+        if(std::binary_search(lcl.begin(),lcl.end(),*i)) {
+          result.adjoin(*i);
+        }
+      }
+      this->swap(result);
+    }
+
+    void 
+    LatticeCellListSet::remove(LatticeCellListSet& lcl) 
+    { 
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(*this,lcl,"void LatticeCellListSet::restrict(LatticeBlock)");
+      lcl.unique_sort();
+      LatticeCellListSet result(this->dimension());
+      for(LatticeCellListSet::const_iterator i=this->begin(); i!=this->end(); ++i) {
+        if(!std::binary_search(lcl.begin(),lcl.end(),*i)) {
+          result.adjoin(*i);
+        }
+      }
+      this->swap(result);
+    }
+
+    void 
+    LatticeCellListSet::restrict(const LatticeMaskSet& lms) 
+    { 
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(*this,lms,"void LatticeCellListSet::restrict(LatticeBlock)");
+      this->unique_sort();
+      LatticeCellListSet result(this->dimension());
+      for(LatticeCellListSet::const_iterator i=this->begin(); i!=this->end(); ++i) {
+        if(subset(*i,lms)) {
+          result.adjoin(*i);
+        }
+      }
+      this->swap(result);
+    }
+
+    void 
+    LatticeCellListSet::remove(const LatticeMaskSet& lms) 
+    { 
+      ARIADNE_CHECK_EQUAL_DIMENSIONS(*this,lms,"void LatticeCellListSet::restrict(LatticeBlock)");
+      this->unique_sort();
+      LatticeCellListSet result(this->dimension());
+      for(LatticeCellListSet::const_iterator i=this->begin(); i!=this->end(); ++i) {
+        if(!subset(*i,lms)) {
+          result.adjoin(*i);
+        }
+      }
+      this->swap(result);
     }
 
     void
@@ -758,6 +816,12 @@ namespace Ariadne {
       return true;
     }
 
+    bool
+    subset(const LatticeCell& lc, const LatticeCellListSet& lcls)
+    {
+      return std::find(lcls.begin(),lcls.end(),lc)!=lcls.end();
+    }
+     
     bool 
     subset(const LatticeCellListSet& lcls, const LatticeBlock& lb) 
     {
@@ -882,7 +946,7 @@ namespace Ariadne {
     operator>>(std::istream& is, LatticePoint& lpt)
     {
       std::vector<int> v;
-      Base::read_vector(is, v, '(', ')');
+      Base::read_sequence(is, v, '(', ')');
       lpt=LatticePoint(v.size());
       for(dimension_type i=0; i!=lpt.dimension(); ++i) {
         lpt[i]=v[i];
@@ -895,7 +959,7 @@ namespace Ariadne {
     {
       /* Representation as a literal (l1,l2,...,ln) */
       std::vector<int> v;
-      Base::read_vector(is, v, '(', ')');
+      Base::read_sequence(is, v, '(', ')');
       IndexArray l(v.size());
       for(size_type i=0; i!=v.size(); ++i) {
         l[i]=v[i];

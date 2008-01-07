@@ -26,9 +26,9 @@ namespace Ariadne {
 
 
 template<class R> inline
-Geometry::GridTreeCell<R>::GridTreeCell(const Grid<R>& r, 
+Geometry::GridTreeCell<R>::GridTreeCell(const Grid<R>& g, 
                                         const Combinatoric::BinaryWord& nw)
-  : _grid_ptr(*r), _word(bw)
+  : _grid(r), _word(bw)
 {
 }
 
@@ -37,7 +37,7 @@ template<class R> inline
 const Geometry::Grid<R>& 
 Geometry::GridTreeCell<R>::grid() const 
 {
-  return *this->_grid_ptr
+  return *this->_grid
 }
 
 
@@ -46,7 +46,7 @@ template<class R> inline
 dimension_type 
 Geometry::GridTreeCell<R>::dimension() const 
 {
-  return this->_grid_ptr->dimension(); 
+  return this->_grid.dimension(); 
 }
 
 template<class R>

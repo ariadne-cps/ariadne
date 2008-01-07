@@ -58,11 +58,11 @@ namespace Ariadne {
       
       
       /*! \brief Compute the flow map of a vector field. */
-      virtual System::TaylorFlow<I> flow(const System::VectorFieldInterface<R>& vf, 
+      virtual System::TaylorFlow<I> flow(const System::VectorField<R>& vf, 
                                          const Geometry::Box<R>& bb) const;
 
       /*! \brief Integrate a basic set for time \a t within a bounding set. */
-      virtual Geometry::Point<I> flow_step(const System::VectorFieldInterface<R>& vf,
+      virtual Geometry::Point<I> flow_step(const System::VectorField<R>& vf,
                                            const Geometry::Point<I>& p,
                                            const Numeric::Interval<R>& t,
                                            const Geometry::Box<R>& bb) const;
@@ -70,14 +70,14 @@ namespace Ariadne {
       /*! \brief An algorithm for integrating forward a zonotope.
        */
       virtual Geometry::Zonotope<I,I> 
-      integration_step(const System::VectorFieldInterface<R>& vf,
+      integration_step(const System::VectorField<R>& vf,
                        const Geometry::Zonotope<I,I>& s,
                        const Numeric::Interval<R>& t,
                        const Geometry::Box<R>& bb) const;
 
       /*! \brief An algorithm for integrating forward a zonotope for a time up to time \a step_size, assuming the set \a bb is a bounding box for the integration. */
       virtual Geometry::Zonotope<I,I> 
-      reachability_step(const System::VectorFieldInterface<R>& vf,
+      reachability_step(const System::VectorField<R>& vf,
                         const Geometry::Zonotope<I,I>& s,
                         const Numeric::Interval<R>& t,
                         const Geometry::Box<R>& bb) const;

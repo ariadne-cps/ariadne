@@ -127,7 +127,6 @@ Function::TaylorDerivative<X>
 Function::TaylorDerivative<X>::constant(size_type r, size_type a, smoothness_type d, const V& c) 
 {
   TaylorDerivative<X> result(r,a,d);
-  size_type inc=compute_polynomial_data_size(1u,a,d);
   for(size_type i=0; i!=r; ++i) {
     result._variables[i].value()=c[i];
   }
@@ -140,7 +139,7 @@ Function::TaylorDerivative<X>::variable(size_type r, size_type a, smoothness_typ
 {
   assert(r==a);
   TaylorDerivative<X> result(r,a,d);
-  size_type inc=compute_polynomial_data_size(1u,a,d);
+  //size_type inc=compute_polynomial_data_size(1u,a,d);
   for(size_type i=0; i!=r; ++i) {
     result._variables[i].value()=x[i];
     result._variables[i].data()[i+1u]=1;
@@ -395,21 +394,35 @@ template<class X, class R> inline
 Function::TaylorDerivative<X> 
 Function::operator*(const TaylorDerivative<X>& x, const R& c)
 {
-  throw NotImplemented(__PRETTY_FUNCTION__);
+  TaylorDerivative<X> y=x;
+  X m(c);
+  for(uint i=0; i!=y.result_size(); ++i) {
+    y[i]*=m;
+  }
+  return y;
 }
 
 template<class X, class R> inline
 Function::TaylorDerivative<X> 
 Function::operator*(const R& c, const TaylorDerivative<X>& x)
 {
-  throw NotImplemented(__PRETTY_FUNCTION__);
+  TaylorDerivative<X> y=x;
+  X m(c);
+  for(uint i=0; i!=y.result_size(); ++i) {
+    y[i]*=m;
+  }
+  return y;
 }
 
 template<class X, class R> inline
 Function::TaylorDerivative<X> 
 Function::operator/(const TaylorDerivative<X>& x, const R& c)
 {
-  throw NotImplemented(__PRETTY_FUNCTION__);
+  TaylorDerivative<X> y=x;
+  for(uint i=0; i!=y.result_size(); ++i) {
+    y[i]/=c;
+  }
+  return y;
 }
 
 

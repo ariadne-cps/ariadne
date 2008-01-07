@@ -36,8 +36,8 @@ namespace Evaluation { static int& verbosity = hybrid_evolver_verbosity; }
 
 template<class R>
 Geometry::Point<typename Evaluation::IntervalNewtonSolver<R>::I>
-Evaluation::IntervalNewtonSolver<R>::solve(const System::VectorFieldInterface<R>& f, 
-                                                    const Geometry::Point<I>& ix)
+Evaluation::IntervalNewtonSolver<R>::solve(const Function::FunctionInterface<R>& f, 
+                                           const Geometry::Point<I>& ix)
 {
   const R& e=this->maximum_error();
   uint n=this->maximum_number_of_steps();
@@ -50,9 +50,9 @@ Evaluation::IntervalNewtonSolver<R>::solve(const System::VectorFieldInterface<R>
     Geometry::Point<R> m=midpoint(x);
     if(verbosity>1) { std::clog << "  m=" << m << std::endl; }
     Geometry::Point<I> im(m);
-    LinearAlgebra::Vector<I> w=f(im);
+    LinearAlgebra::Vector<I> w=f(im.position_vector());
     if(verbosity>1) { std::clog << "  f(m)=" << w << std::endl; }
-    LinearAlgebra::Matrix<I> A=f.jacobian(x);
+    LinearAlgebra::Matrix<I> A=f.jacobian(x.position_vector());
     if(verbosity>1) { std::clog << "  Df(r)=" << A << std::endl; }
     LinearAlgebra::Matrix<I> Ainv=LinearAlgebra::inverse(A);
     if(verbosity>1) { std::clog << "  inverse(Df(r))=" << Ainv << std::endl; }
@@ -64,8 +64,8 @@ Evaluation::IntervalNewtonSolver<R>::solve(const System::VectorFieldInterface<R>
     if(verbosity>1) { std::clog << "  nr=" << nr << std::endl; } 
 
     if(verbosity>1) {
-      std::clog << "  f(x)=" << f(x) << std::flush;
-      std::clog << "  f(m)=" << midpoint(f(im)) << std::flush;
+      std::clog << "  f(x)=" << f(x.position_vector()) << std::flush;
+      std::clog << "  f(m)=" << midpoint(f(im.position_vector())) << std::flush;
       std::clog << "  Df(x) =" << A << "  inv=" << inverse(A) << "  I=" << A*inverse(A) << std::flush;
       std::clog << "  nx =" << nx << "\n" << std::flush;
       std::clog << "  nr =" << nr << "\n" << std::flush;

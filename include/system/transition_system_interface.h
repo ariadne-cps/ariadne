@@ -46,8 +46,8 @@ namespace Ariadne {
       virtual ~TransitionSystemInterface<R>() { }
       virtual TransitionSystemInterface<R>* clone() const = 0;
       virtual size_type dimension() const = 0;
-      virtual Geometry::Box<R> lower_evolve(const Geometry::Box<R>&) const = 0;
-      virtual Geometry::ListSet< Geometry::Box<R> > lower_reach(const Geometry::Box<R>&) const = 0;
+      virtual std::pair< Numeric::Integer, Geometry::Box<R> > lower_evolve(const Geometry::Box<R>&) const = 0;
+      virtual Geometry::BoxListSet<R> lower_reach(const Geometry::Box<R>&) const = 0;
       virtual Geometry::GridCellListSet<R> upper_evolve(const Geometry::GridCell<R>&) const = 0;
       virtual Geometry::GridCellListSet<R> upper_reach(const Geometry::GridCell<R>&) const = 0;
     };

@@ -34,6 +34,7 @@
 #include "linear_algebra/matrix.h"
 #include "function/exceptions.h"
 #include "function/affine_variable.h"
+#include "function/taylor_derivative.h"
 #include "function/virtual_machine.h"
 #include "input/modelica.h"
 
@@ -59,17 +60,16 @@ std::ostream&
 Function::operator<<(std::ostream& os, const FunctionVariable& var) 
 {
   switch(var.type) {
-  case FunctionVariable::OUTPUT: os << "output "; break;
-  case FunctionVariable::INPUT: os << "input "; break;
-  case FunctionVariable::INTERMEDIATE: os << ""; break;
-  case FunctionVariable::CONSTANT: os << "input "; break;
+    case FunctionVariable::OUTPUT: os << "output "; break;
+    case FunctionVariable::INPUT: os << "input "; break;
+    case FunctionVariable::INTERMEDIATE: os << ""; break;
+    case FunctionVariable::CONSTANT: os << "input "; break;
   }
   os << "Real";
   if(var.array_flag==true) { os << "[" << var.size << "]"; }
   os << " " << var.name;
   return os;
 }
-
 
 
 template<class R>
@@ -146,8 +146,8 @@ Function::InterpretedFunction<R>::evaluate(const LinearAlgebra::Vector<A>& x) co
 
 
 template<class R>
-typename Function::InterpretedFunction<R>::A
-Function::InterpretedFunction<R>::derivative(const LinearAlgebra::Vector<A>& x, const size_type& i, const MultiIndex& j) const
+typename Function::TaylorDerivative<typename Function::InterpretedFunction<R>::A>
+Function::InterpretedFunction<R>::derivative(const LinearAlgebra::Vector<A>& x, const smoothness_type& s) const
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
@@ -166,7 +166,7 @@ Function::InterpretedFunction<R>::jacobian(const LinearAlgebra::Vector<A>& x) co
   array<FD> t(this->_intermediates_size);
   array<FD> c(this->_constants_size);
   for(size_type i=0; i!=n; ++i) {
-    a[i]=FD::variable(n,i,x[i]);
+    a[i]=FD::variable(n,x[i],i);
   }
   for(size_type i=0; i!=c.size(); ++i) {
     c[i]=FD::constant(n,this->_constants[i]);

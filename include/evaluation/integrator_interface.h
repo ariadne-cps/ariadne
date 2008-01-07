@@ -36,8 +36,6 @@
 #include "geometry/declarations.h"
 #include "system/declarations.h"
 
-#include "applicator_interface.h"
-
 namespace Ariadne {
   namespace Evaluation {
 
@@ -48,6 +46,7 @@ namespace Ariadne {
     template<class BS>
     class IntegratorInterface
     {
+      typedef Numeric::Rational T;
       typedef typename BS::real_type R;
       typedef Numeric::Interval<R> I;
      public:
@@ -63,10 +62,32 @@ namespace Ariadne {
       //@{ 
       //! \name Methods for applying a system to a basic set.
 
+      /*! \brief Compute an integration time and a bounding box. */
+      virtual 
+      std::pair< Numeric::Rational, Geometry::Box<R> >
+      flow_bounds(const System::VectorField<R>& f, 
+                  const Geometry::Box<R>& s,
+                  const Numeric::Rational& t) const = 0; 
+      
+      /*! \brief Compute the evolution of a basic set for times in the range [t1,t2]. */
+      virtual 
+      BS
+      evolution_step(const System::VectorField<R>& f, 
+                     const BS& s,
+                     const Numeric::Interval<R>& t1, 
+                     const Numeric::Interval<R>& t2, 
+                     const Geometry::Box<R>& bb) const
+      {
+        ARIADNE_ASSERT(t2>=t1);
+        BS es=this->integration_step(f,s,t1,bb); 
+        if(t1==t2) { return es; }
+        else { return this->reachability_step(f,es,Numeric::Interval<R>(t2-t1),bb); }
+      }
+          
       /*! \brief Compute the image of a basic set under a continuous function. */
       virtual 
       BS
-      integration_step(const System::VectorFieldInterface<R>& f, 
+      integration_step(const System::VectorField<R>& f, 
                        const BS& s,
                        const Numeric::Interval<R>& t, 
                        const Geometry::Box<R>& bb) const = 0; 
@@ -74,7 +95,7 @@ namespace Ariadne {
       /*! \brief Compute the image of a basic set under a continuous function. */
       virtual 
       BS
-      reachability_step(const System::VectorFieldInterface<R>& f, 
+      reachability_step(const System::VectorField<R>& f, 
                         const BS& s,
                         const Numeric::Interval<R>& t, 
                         const Geometry::Box<R>& bb) const = 0;
@@ -106,7 +127,7 @@ namespace Ariadne {
       /*! \brief Compute the flow of a point. */
       virtual 
       Geometry::Point<I> 
-      flow_step(const System::VectorFieldInterface<R>& f, 
+      flow_step(const System::VectorField<R>& f, 
                 const Geometry::Point<I>& s, 
                 const Numeric::Interval<R>& t, 
                 const Geometry::Box<R>& bb) const = 0;
@@ -125,7 +146,7 @@ namespace Ariadne {
       /*! \brief Make a dynamically-allocated copy. */
       virtual DifferentiableFlowerInterface<R>* clone() const = 0;
       /*! \brief Compute the spacial jacobian over a flow step of time \a t starting at \a p assuming that the flow remains within \a bb. */
-      virtual LinearAlgebra::Matrix<I> flow_step_jacobian(const System::VectorFieldInterface<R>& vf,
+      virtual LinearAlgebra::Matrix<I> flow_step_jacobian(const System::VectorField<R>& vf,
                                                           const Geometry::Point<I>& p,
                                                           const Numeric::Interval<R>& t,
                                                           const Geometry::Box<R>& bb) const = 0;

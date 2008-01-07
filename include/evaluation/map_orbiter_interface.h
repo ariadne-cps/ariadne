@@ -46,8 +46,13 @@ namespace Ariadne {
     class MapOrbiterInterface 
     {
      public:
+      /*! \brief The type used to denote time. */
+      typedef Numeric::Integer time_type;
+      /*! \brief The type used to represent space. */
+      typedef R real_type;
+     public:
       /*! \brief Destructor. */
-     virtual ~MapOrbiterInterface();
+      virtual ~MapOrbiterInterface();
 
       /*! \brief Make a dynamically-allocated copy. */
       virtual MapOrbiterInterface<R>* clone() const = 0;
@@ -55,41 +60,48 @@ namespace Ariadne {
       /*! \brief Compute the evolved set under a continuous function. */
       virtual 
       Geometry::GridCellListSet<R> 
-      upper_evolve(const System::MapInterface<R>& f, 
-                   const Geometry::Box<R>& s, 
+      upper_evolve(const System::Map<R>& f, 
+                   const Geometry::GridCell<R>& s, 
                    const Numeric::Integer& n) const = 0;
 
       /*! \brief Compute the reach set under a continuous function. */
       virtual 
       Geometry::GridCellListSet<R> 
-      upper_reach(const System::MapInterface<R>& f, const 
-                  Geometry::Box<R>& s, 
+      upper_reach(const System::Map<R>& f, const 
+                  Geometry::GridCell<R>& s, 
                   const Numeric::Integer& n) const = 0;
 
       /*! \brief Compute the evolved set under a continuous function. */
       virtual 
-      Geometry::ListSet< Geometry::Box<R> > 
-      lower_evolve(const System::MapInterface<R>& f, 
+      std::pair< Numeric::Integer, Geometry::Box<R> >
+      lower_evolve(const System::Map<R>& f, 
                    const Geometry::Box<R>& s, 
                    const Numeric::Integer& n) const = 0;
 
       /*! \brief Compute the reach set under a continuous function. */
       virtual  
-      Geometry::ListSet< Geometry::Box<R> > 
-      lower_reach(const System::MapInterface<R>& f, 
+      Geometry::BoxListSet<R>
+      lower_reach(const System::Map<R>& f, 
                   const Geometry::Box<R>& s, 
                   const Numeric::Integer& n) const = 0;
 
       /*! \brief Compute an orbit under a continuous function. */
       virtual
       Geometry::OrbitInterface<Numeric::Integer>*
-      orbit(const System::MapInterface<R>& f, 
+      orbit(const System::Map<R>& f, 
             const Geometry::Box<R>& s, 
             const Numeric::Integer& n) const = 0;
   
+      /*! \brief Write to an output stream. */
+      virtual std::ostream& write(std::ostream& os) const = 0;
     };
 
     template<class R> MapOrbiterInterface<R>::~MapOrbiterInterface() { }
+  
+    template<class R> inline 
+    std::ostream& operator<<(std::ostream& os, const MapOrbiterInterface<R>& orb) {
+      return orb.write(os);
+    }
 
 
   }

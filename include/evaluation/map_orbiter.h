@@ -34,6 +34,7 @@
 #include "base/declarations.h"
 #include "geometry/declarations.h"
 #include "system/declarations.h"
+#include "evaluation/declarations.h"
 
 #include "evaluation/evolution_parameters.h"
 #include "evaluation/applicator_interface.h"
@@ -43,7 +44,7 @@
 namespace Ariadne {
   namespace Evaluation {
 
-      
+
     /*! \brief A class for computing the evolution of a discrete-time autonomous system.
      *  \ingroup Applicators
      */
@@ -68,42 +69,68 @@ namespace Ariadne {
       /*! \brief Make a dynamically-allocated copy. */
       MapOrbiter<BS>* clone() const;
 
-      /*! \brief The maximum allowable radius of a basic set. */
-      R maximum_basic_set_radius() const;
-
-      /*! \brief The grid used to define the accuracy. */
-      Geometry::Grid<R> grid(dimension_type d) const;
+      /*! \brief The maximum radius of a basic set. */
+      virtual R maximum_basic_set_radius() const;
 
       /*! \brief Compute the evolved set under a map. */
       virtual
       Geometry::GridCellListSet<R> 
-      upper_evolve(const System::MapInterface<R>& f, const Geometry::Box<R>& s, const Numeric::Integer& n) const;
+      upper_evolve(const System::Map<R>& f, const Geometry::GridCell<R>& gc, const Numeric::Integer& n) const;
 
       /*! \brief Compute the reach set under a map. */
       virtual
       Geometry::GridCellListSet<R> 
-      upper_reach(const System::MapInterface<R>& f, const Geometry::Box<R>& s, const Numeric::Integer& n) const;
+      upper_reach(const System::Map<R>& f, const Geometry::GridCell<R>& gc, const Numeric::Integer& n) const;
 
-      /*! \brief Compute the evolved set under a map. */
+      /*! \brief Compute the evolved set under a map for at most \a n steps and a maximum radius of \a mr. Returns the number of steps as well as the evolved set. */
       virtual
-      Geometry::ListSet< Geometry::Box<R> > 
-      lower_evolve(const System::MapInterface<R>& f, const Geometry::Box<R>& s, const Numeric::Integer& n) const;
+      std::pair<Numeric::Integer, Geometry::Box<R> >
+      lower_evolve(const System::Map<R>& f, const Geometry::Box<R>& s, const Numeric::Integer& n) const;
 
       /*! \brief Compute the reach set under a map. */
       virtual
-      Geometry::ListSet< Geometry::Box<R> > 
-      lower_reach(const System::MapInterface<R>& f, const Geometry::Box<R>& s, const Numeric::Integer& n) const;
+      Geometry::BoxListSet<R> 
+      lower_reach(const System::Map<R>& f, const Geometry::Box<R>& s, const Numeric::Integer& n) const;
 
       /*! \brief Compute the orbit of a basic set under \a n steps of continuous function. */
       virtual 
       Geometry::Orbit<Numeric::Integer,BS>*
-      orbit(const System::MapInterface<R>& f, const Geometry::Box<R>& r, const Numeric::Integer& n) const;
+      orbit(const System::Map<R>& f, const Geometry::Box<R>& r, const Numeric::Integer& n) const;
 
       /*! \brief Compute the orbit of a basic set under \a n steps of continuous function. */
       Geometry::Orbit<T,BS>
-      orbit(const System::MapInterface<R>& f, const BS& bs, const T& n) const;
+      orbit(const System::Map<R>& f, const BS& bs, const T& n) const;
+
+      virtual std::ostream& write(std::ostream& os) const;
 
      private:
+      // Intermediate computations
+      std::vector< Geometry::ListSet<BS> > _orbit(const System::Map<R>& f, const BS& bs, const Numeric::Integer& n, Semantics s) const;
+     private:
+      // Functions used by the orbiter to compute the result
+      typedef Geometry::ListSet<BS> BSL;
+      typedef Geometry::Box<R> Bx;
+      typedef Geometry::Grid<R> G;
+      typedef Geometry::GridCellListSet<R> GCLS;
+      typedef System::Map<R> Mp;
+      BS apply(const Mp& f, const BS& bs) const {
+        return this->_applicator->apply(f,bs); }
+      BSL subdivide(const BS& bs) const {
+        if(bs.radius()>this->maximum_basic_set_radius()) {
+          return this->_approximator->subdivide(bs); }
+        else { return bs; } }
+      BS over_approximation(const Bx& bx) const {
+        return this->_approximator->over_approximation(bx); }
+      Bx bounding_box(const BS& bs) const {
+        return this->_approximator->bounding_box(bs); }
+      GCLS outer_approximation(const BS& bs, const G& g) const {
+        return this->_approximator->outer_approximation(bs,g); }
+      Bx bounding_box(const BSL& bsl) const {
+        return this->_approximator->bounding_box(bsl); }
+      GCLS outer_approximation(const BSL& bsl, const G& g) const {
+        return this->_approximator->outer_approximation(bsl,g); }
+     private:
+      R _maximum_basic_set_radius;
       boost::shared_ptr< ApplicatorInterface<BS> > _applicator;
       boost::shared_ptr< ApproximatorInterface<BS> > _approximator;
     };

@@ -148,8 +148,14 @@ namespace Ariadne {
       template<class E> Box<R>& operator=(const RectangleExpression<E>& r);
     
 
+      /*! \brief Make an empty box. */
+      static Box<R> empty_box(dimension_type d);
       /*! \brief Make a unit box. */
       static Box<R> unit_box(dimension_type d);
+      /*! \brief Make the positive orthant in \f$\mathbb{R}^d\f$. */
+      static Box<R> positive_orthant(dimension_type d);
+      /*! \brief Make entire Euclidean space. */
+      static Box<R> entire_space(dimension_type d);
 
       //@}
       
@@ -256,6 +262,18 @@ namespace Ariadne {
       /*! \brief Determines whether the box contains a point. */
       template<class X> tribool contains(const Point<X>& pt) const;
       
+      /*! \brief Determines whether the box is disjoint from another box. */
+      tribool disjoint(const Box<R>& bx) const;
+      
+      /*! \brief Determines whether the box intersects another box. */
+      tribool intersects(const Box<R>& bx) const;
+      
+      /*! \brief Determines whether the box is a subset of another box. */
+      tribool subset(const Box<R>& bx) const;
+      
+      /*! \brief Determines whether the box is a superset of another box. */
+      tribool superset(const Box<R>& bx) const;
+      
       /*! \brief Compute a quadrant of the Box determined by \a q.
        *  \a q is a binary word such that the ith bit of q is 0 if the lower half
        *  of the box in the ith coordinate is used, and 1 if the upper
@@ -280,12 +298,16 @@ namespace Ariadne {
       //@{ 
       //! \name Binary geometric predicates
       /*! \brief Tests if box \a bx contains point \a pt. */
-      friend tribool contains(const Box<R>& bx, const Point<R>& pt) const;
+      friend tribool contains(const Box<R>& bx, const Point<R>& pt);
 
       /*! \brief Tests disjointness of \a bx1 and \a bx2. */
-      friend tribool disjoint(const Box<R>& bx1, const Box<R>& bx2) const;
+      friend tribool disjoint(const Box<R>& bx1, const Box<R>& bx2);
+      /*! \brief Tests if \a bx1 and \a bx2 intersect. */
+      friend tribool intersect(const Box<R>& bx1, const Box<R>& bx2);
       /*! \brief Tests if box \a bx1 is a subset of another box \a bx2. */
-      friend tribool subset(const Box<R>& bx1, const Box<R>& bx2) const;
+      friend tribool subset(const Box<R>& bx1, const Box<R>& bx2);
+      /*! \brief Tests if box \a bx1 is a superset of another box \a bx2. */
+      friend tribool superset(const Box<R>& bx1, const Box<R>& bx2);
       //@}
 
       //@{ 
@@ -336,7 +358,9 @@ namespace Ariadne {
     
     template<class R, class X> tribool contains (const Box<R>& bx, const Point<X>& pt);
     template<class R> tribool disjoint(const Box<R>& bx1, const Box<R>& bx2);
+    template<class R> tribool intersect(const Box<R>& bx1, const Box<R>& bx2);
     template<class R> tribool subset(const Box<R>& bx1, const Box<R>& bx2);
+    template<class R> tribool superset(const Box<R>& bx1, const Box<R>& bx2);
     template<class R> Box<R> closed_intersection(const Box<R>& bx1, const Box<R>& bx2);
     template<class R> Box<R> open_intersection(const Box<R>& bx1, const Box<R>& bx2);
     template<class R> Box<R> rectangular_hull(const Box<R>& bx1, const Box<R>& bx2);

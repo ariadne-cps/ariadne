@@ -30,11 +30,17 @@
 namespace Ariadne {
 
 
-template<class R> inline
+template<class R> 
+Geometry::GridCell<R>::GridCell(const Grid<R>& g)  
+  : _grid(g), _lattice_set(g.dimension())
+{
+}
+
+template<class R> 
 Geometry::GridBlock<R>
 Geometry::GridCell<R>::neighbourhood() const 
 {
-  return GridBlock<R>(this->_grid_ptr,this->_lattice_set.neighbourhood());
+  return GridBlock<R>(this->_grid,this->_lattice_set.neighbourhood());
 }
 
 

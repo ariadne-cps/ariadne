@@ -33,26 +33,38 @@ Geometry::ListSet<BS>::ListSet()
 }
 
 template<class BS> inline
-Geometry::ListSet<BS>::ListSet(size_type n) 
+Geometry::ListSet<BS>::ListSet(dimension_type n) 
   : _dimension(n), _vector() 
 {
 }
 
 template<class BS> inline
-Geometry::ListSet<BS>::ListSet(const BS& A)
-  : _dimension(A.dimension()), _vector()
+Geometry::ListSet<BS>::ListSet(const BS& bs)
+  : _dimension(bs.dimension()), _vector()
 {
-  if (A.empty()) {
-    return;
-  }
-  _vector.push_back(A);
+  _vector.push_back(bs);
 }
 
-template<class BS> inline
-Geometry::ListSet<BS>::ListSet(const ListSet<BS>& A)
-  : _dimension(A.dimension()), _vector(A._vector) 
+template<class BS> template<class BST> inline
+Geometry::ListSet<BS>::ListSet(const ListSet<BST>& ls)
+  : _dimension(ls.dimension()), _vector() 
 {
+  _vector.reserve(ls.size());
+  for(typename ListSet<BST>::const_iterator bst_iter=ls.begin();
+      bst_iter!=ls.end(); ++bst_iter) {
+    this->_vector.push_back(BS(*bst_iter));
+  }
 }
+
+template<class BS> template<class Iter> inline
+Geometry::ListSet<BS>::ListSet(Iter curr, Iter end)
+  : _vector(curr,end) 
+{
+  if(!_vector.empty()) {
+    this->_dimension=_vector.front().dimension();
+  }
+}
+
 
 template<class BS> inline
 Geometry::ListSet<BS>::~ListSet() 
@@ -69,45 +81,23 @@ Geometry::ListSet<BS>::size() const
 }
 
 template<class BS> inline
-void 
-Geometry::ListSet<BS>::push_back(const BS& bs) 
-{
-  if (this->dimension()==0) { this->_dimension=bs.dimension(); }
-  ARIADNE_CHECK_EQUAL_DIMENSIONS(*this,bs,"void ListSet<BS>::push_back(BS bs)");
-  this->_vector.push_back(bs);
-}
-
-template<class BS> inline
-void 
-Geometry::ListSet<BS>::pop_back() 
+BS 
+Geometry::ListSet<BS>::pop() 
 {
   if (this->_vector.empty()) { 
     ARIADNE_THROW(LengthError,"void ListSet<BS>::pop_back()"," empty list");
   }
+  BS result=this->_vector.back();
   this->_vector.pop_back();
+  return result;
 }
+
 
 template<class BS> inline
 dimension_type 
 Geometry::ListSet<BS>::dimension() const 
 {
   return this->_dimension;
-}
-
-template<class BS> inline
-const BS& 
-Geometry::ListSet<BS>::get(size_type index) const 
-{
-  ARIADNE_CHECK_ARRAY_INDEX(*this,index,"BS ListSet<BS>::get(size_type index)");
-  return this->_vector[index];
-}
-
-template<class BS> inline
-void 
-Geometry::ListSet<BS>::set(size_type index, const BS& set) 
-{
-  ARIADNE_CHECK_ARRAY_INDEX(*this,index,"void ListSet<BS>::set(size_type index, BS set)");
-  this->_vector[index]=set;
 }
 
 template<class BS> inline
@@ -119,86 +109,6 @@ Geometry::ListSet<BS>::operator[](size_type index) const
 }
 
 
-template<class BS> inline
-const Geometry::ListSet<BS>& 
-Geometry::ListSet<BS>::operator=(const ListSet<BS>& A) 
-{
-  if(this !=& A) {
-    this->_dimension = A._dimension;
-    this->_vector = A._vector;
-  }
-  return *this;
-}
-
-template<class BS> 
-template<class BSt> 
-inline
-Geometry::ListSet<BS>::operator ListSet<BSt> () const 
-{
-  ListSet<BSt> result(this->dimension());
-  BSt bs(this->dimension());
-  for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
-    bs=BSt(*iter);
-    result.push_back(bs);
-  }
-  return result;
-}
-
-template<class BS> inline
-tribool 
-Geometry::ListSet<BS>::contains(const Point<R>& p) const 
-{
-  tribool result=false;
-  for (typename ListSet<BS>::const_iterator i=this->begin(); i!=this->end(); ++i) {
-    result=result || Geometry::contains(*i,p);
-    if(result) { return result; }
-  }
-  return result;
-}
-
-template<class BS> inline
-tribool 
-Geometry::ListSet<BS>::empty() const 
-{
-  tribool result=true;
-  for (typename ListSet<BS>::const_iterator i=this->begin(); i!=this->end(); ++i) {
-    result = result && i->empty();
-    if(!result) { return result; }
-  }
-  return result;
-}
-
-template<class BS> inline
-tribool 
-Geometry::ListSet<BS>::bounded() const 
-{
-  tribool result=true;
-  for (typename ListSet<BS>::const_iterator i=this->begin(); i!=this->end(); ++i) {
-    result = result && i->bounding_box().bounded();
-    if(!result) { return result; }
-  }
-  return result;
-}
-
-template<class BS> inline
-Geometry::Box<typename Geometry::ListSet<BS>::real_type> 
-Geometry::ListSet<BS>::bounding_box() const 
-{
-  if(this->empty()) { return Box<R>(this->dimension()); }
-  Box<R> result=(*this)[0].bounding_box();
-  for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
-    Box<R> bb=iter->bounding_box();
-    for(size_type i=0; i!=result.dimension(); ++i) {
-      if(bb.lower_bound(i) < result.lower_bound(i)) {
-        result.set_lower_bound(i,bb.lower_bound(i));
-      }
-      if(bb.upper_bound(i) > result.upper_bound(i)) {
-        result.set_upper_bound(i,bb.upper_bound(i));
-      }
-    }
-  }
-  return result;
-}
 
 template<class BS> inline
 void 
@@ -207,19 +117,6 @@ Geometry::ListSet<BS>::clear()
   this->_vector.clear();
 }
 
-template<class BS> inline
-typename Geometry::ListSet<BS>::iterator 
-Geometry::ListSet<BS>::begin() 
-{
-  return _vector.begin();
-}
-
-template<class BS> inline
-typename Geometry::ListSet<BS>::iterator 
-Geometry::ListSet<BS>::end() 
-{
-  return _vector.end();
-}
 
 template<class BS> inline
 typename Geometry::ListSet<BS>::const_iterator 
@@ -239,12 +136,8 @@ template<class BS> inline
 void 
 Geometry::ListSet<BS>::adjoin(const ListSet<BS>& ls) 
 {
-  if(ls.empty()) {
-    return;
-  }
-  if(this->dimension()==0) { 
-    this->_dimension=ls.dimension(); 
-  }
+  if(ls.size()==0) { return; }
+  if(this->dimension()==0) { this->_dimension=ls.dimension(); }
   ARIADNE_CHECK_EQUAL_DIMENSIONS(*this,ls,"void ListSet<BS>::adjoin(Geometry::ListSet<BS> ls)");
   this->_vector.reserve(ls.size());
   for(typename ListSet<BS>::const_iterator iter=ls.begin(); iter!=ls.end(); ++iter) {
@@ -260,10 +153,7 @@ Geometry::ListSet<BS>::adjoin(const BS& bs)
     this->_dimension=bs.dimension(); 
   }
   ARIADNE_CHECK_EQUAL_DIMENSIONS(*this,bs,"void ListSet<BS>::adjoin(BS bs)");
-  if(bs.empty()) {
-  } else {
-    this->_vector.push_back(bs);
-  }
+  this->_vector.push_back(bs);
 }
 
 

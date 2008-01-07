@@ -56,26 +56,17 @@ template<class R>
 Output::epsstream&
 Output::operator<<(epsstream& eps, const Geometry::RectangularSet<R>& rs)
 {
-  return eps << Geometry::Rectangle<R>(rs);
+  return eps << Geometry::Box<R>(rs);
 }
 
 
-template<class R, class Tag> 
-Output::epsstream&
-Output::operator<<(epsstream& eps, const Geometry::Zonotope<R,Tag>& z)
-{ 
-  Geometry::Zonotope<R> qz=over_approximation(z);
-  Zonotope2d pz=eps.projection_map()(qz);      
-  eps.draw(pz);
-  return eps;
-}
 
 
 template<class R> 
 Output::epsstream&
 Output::operator<<(epsstream& eps, const Geometry::Zonotope<R>& z)
 { 
-  Geometry::Zonotope<Numeric::Rational> qz(z);
+  Geometry::Zonotope<Numeric::Rational> qz(error_free_over_approximation(z));
   Polygon2d vertices=eps.projection_map()(qz);      
   eps.draw(vertices);
   return eps;
@@ -104,6 +95,31 @@ Output::operator<<(epsstream& eps, const Geometry::PolyhedralSet<R>& ps)
   return eps << Geometry::Polyhedron<R>(ps);
 }
 
+
+template<class R> 
+Output::epsstream&
+Output::operator<<(epsstream& eps, const Geometry::BoxListSet<R>& ds)
+{
+  typedef typename Geometry::BoxListSet<R>::const_iterator const_iterator;
+  if(eps.fill_style) {
+    // draw without lines
+    bool line_style=eps.line_style; 
+    eps.line_style=false;
+    for(const_iterator set_iter=ds.begin(); set_iter!=ds.end(); ++set_iter) {
+      eps << *set_iter;
+    }
+    eps.line_style=line_style;
+  }
+  if(eps.line_style) {
+    bool fill_style=eps.fill_style; 
+    eps.fill_style=false;
+    for(const_iterator set_iter=ds.begin(); set_iter!=ds.end(); ++set_iter) {
+      eps << *set_iter;
+    }
+    eps.fill_style=fill_style;
+  }
+  return eps;
+}
 
 template<class BS> 
 Output::epsstream&
@@ -192,12 +208,10 @@ Output::operator<<(epsstream& eps, const Geometry::SetInterface<R>& set)
     return eps << dynamic_cast<const RectangularSet<R>&>(set);
   } else if(dynamic_cast<const PolyhedralSet<R>*>(&set)) {
     return eps << dynamic_cast<const PolyhedralSet<R>&>(set);
-  } else if(dynamic_cast<const ListSet< Box<R> >*>(&set)) {
-    return eps << dynamic_cast<const ListSet< Box<R> >&>(set);
-  } else if(dynamic_cast<const ListSet< Zonotope<R,ExactTag> >*>(&set)) {
-    return eps << dynamic_cast<const ListSet< Zonotope<R,ExactTag> >&>(set);
-  } else if(dynamic_cast<const ListSet< Zonotope<R,UniformErrorTag> >*>(&set)) {
-    return eps << dynamic_cast<const ListSet< Zonotope<R,UniformErrorTag> >&>(set);
+  } else if(dynamic_cast<const BoxListSet<R>*>(&set)) {
+    return eps << dynamic_cast<const BoxListSet<R>&>(set);
+  } else if(dynamic_cast<const ListSet< Zonotope<R> >*>(&set)) {
+    return eps << dynamic_cast<const ListSet< Zonotope<R> >&>(set);
   } else if(dynamic_cast<const GridCellListSet<R>*>(&set)) {
     return eps << dynamic_cast<const GridCellListSet<R>&>(set);
   } else if(dynamic_cast<const GridMaskSet<R>*>(&set)) {

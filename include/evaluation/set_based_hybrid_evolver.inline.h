@@ -24,13 +24,7 @@
 namespace Ariadne {
  
 
-template<class R> template<class BS> inline
-Evaluation::SetBasedHybridEvolver<R>::SetBasedHybridEvolver(const EvolutionParameters<R>& p, 
-                                                            const ApplicatorInterface<BS>& a, 
-                                                            const IntegratorInterface<BS>& i)
-  : _applicator(new MapEvolver<R>(p,a)), _integrator(new VectorFieldEvolver<R>(p,i))
-{
-}
+
 
 
 }

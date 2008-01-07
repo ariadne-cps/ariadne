@@ -21,6 +21,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+#ifndef ARIADNE_GEOMETRY_NAME_H
+#define ARIADNE_GEOMETRY_NAME_H
+
 /*! \file name.h
  *  \brief Names of basic sets.
  */
@@ -48,7 +51,7 @@ namespace Ariadne {
       static std::string string() { return "Rectangle"; }
     };
 
-    template<class R, class Tag> struct Name< Zonotope<R,Tag> > {
+    template<class R> struct Name< Zonotope<R> > {
       static std::string string() { return "Zonotope"; }
     };
   
@@ -61,11 +64,17 @@ namespace Ariadne {
     };
   
 
+    template<class T, class BS> struct Name< TimedSet<T,BS> > {
+      static std::string string() { return std::string("Timed")+Name<BS>().string(); }
+    };
+
     template<class BS> 
     std::string name() {
       return Name<BS>::string();
     }
 
 
-  }
+    }
 }
+
+#endif /* ARIADNE_GEOMETRY_NAME_H */

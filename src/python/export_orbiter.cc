@@ -23,10 +23,12 @@
 
 #include "python/float.h"
 
+#include "geometry/box.h"
+#include "geometry/box_list_set.h"
 #include "geometry/rectangle.h"
 #include "geometry/zonotope.h"
 #include "geometry/orbit.h"
-#include "system/map_interface.h"
+#include "system/map.h"
 #include "evaluation/evolution_parameters.h"
 #include "evaluation/standard_applicator.h"
 #include "evaluation/standard_approximator.h"
@@ -43,12 +45,26 @@ using namespace Ariadne::Python;
 using namespace boost::python;
 
 template<class BS>
-MapOrbiter<BS> make_orbiter() {
+MapOrbiter<BS> make_orbiter(double mbsr) {
   typedef typename BS::real_type R;
   EvolutionParameters<R> parameters;
+  parameters.set_maximum_basic_set_radius(mbsr);
   StandardApplicator<R> applicator;
   StandardApproximator<BS> approximator;
   return MapOrbiter<BS>(parameters,applicator,approximator);
+}
+
+template<class T1, class T2>
+boost::python::tuple
+make_tuple(const std::pair<T1,T2>& p)
+{
+  return make_tuple(p.first,p.second);
+}
+
+template<class BS, class R>
+boost::python::tuple
+lower_evolve(const MapOrbiter<BS>& orb, const Map<R>& f, const Box<R>& bx, const Integer& n) {
+  return make_tuple(orb.lower_evolve(f,bx,n));
 }
 
 
@@ -58,22 +74,23 @@ void export_orbiter()
   typedef Numeric::Integer N;
   typedef Zonotope<R,ExactTag> ZBS;
   typedef Zonotope<R,UniformErrorTag> EZBS;
-  typedef MapInterface<R> F;
+  typedef Map<R> F;
 
   def("zonotope_orbiter",&make_orbiter<ZBS>);
   def("parallelotope_orbiter",&make_orbiter<EZBS>);
 
   class_< MapOrbiter<ZBS> > orbiter_class("ZonotopeOrbiter",no_init);
-  orbiter_class.def("lower_evolve",&MapOrbiter<ZBS>::lower_evolve);
+  orbiter_class.def("lower_evolve",&lower_evolve<ZBS,R>);
   orbiter_class.def("lower_reach",&MapOrbiter<ZBS>::lower_reach);
   orbiter_class.def("upper_evolve",&MapOrbiter<ZBS>::upper_evolve);
   orbiter_class.def("upper_reach",&MapOrbiter<ZBS>::upper_reach);
   orbiter_class.def("orbit",(Orbit<N,ZBS>*(MapOrbiter<ZBS>::*)(const F&,const Box<R>&,const N&)const) &MapOrbiter<ZBS>::orbit,
                     return_value_policy<manage_new_object>());
+  orbiter_class.def(self_ns::str(self));
 
   {
     class_< MapOrbiter<EZBS> > orbiter_class("ParallelotopeOrbiter",no_init);
-    orbiter_class.def("lower_evolve",&MapOrbiter<EZBS>::lower_evolve);
+    orbiter_class.def("lower_evolve",&lower_evolve<EZBS,R>);
     orbiter_class.def("lower_reach",&MapOrbiter<EZBS>::lower_reach);
     orbiter_class.def("upper_evolve",&MapOrbiter<EZBS>::upper_evolve);
     orbiter_class.def("upper_reach",&MapOrbiter<EZBS>::upper_reach);

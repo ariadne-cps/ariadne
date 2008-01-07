@@ -53,10 +53,10 @@ namespace Ariadne {
       StandardApproximator();
       StandardApproximator(const StandardApproximator<BS>& approx);
       virtual StandardApproximator<BS>* clone() const;
-      virtual BS over_approximation(const Geometry::Box<R>& r) const;
+      virtual BS basic_set(const Geometry::Box<R>& r) const;
+      virtual R radius(const BS& bs) const;
       virtual Geometry::Box<R> bounding_box(const BS& bs) const;
       virtual Geometry::GridCellListSet<R> outer_approximation(const BS& bs, const Geometry::Grid<R>& g) const;
-      virtual std::pair<BS,BS> subdivide(const BS&) const;
     };
 
 

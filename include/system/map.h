@@ -1,9 +1,8 @@
 /***************************************************************************
  *            map.h
  *
- *  Wed Feb  2 18:33:10 2005
- *  Copyright  2005, 2006  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it
+ *  Copyright  2005-7  Alberto Casagrande, Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -21,10 +20,6 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
-/*! \file map.h
- *  \brief MapInterface interface.
- */
 
 #ifndef ARIADNE_MAP_H
 #define ARIADNE_MAP_H
@@ -38,13 +33,20 @@
 #include "function/declarations.h"
 #include "geometry/declarations.h"
 
+#include <boost/shared_ptr.hpp>
+
+/*! \file map.h
+ *  \brief MapInterface interface.
+ */
+
+
 
 namespace Ariadne {
   namespace System {
 
     /*!\ingroup System
      * \ingroup DiscreteTime
-     * \brief Abstract base class for (differentiable) functions.
+     * \brief A discrete-time dynamical system, defined by a function.
      * 
      * The system is specified by the method operator()(const Geometry::Point<F>& A) const.
      * This method should compute a basic set \f$\overline{f}(A)\f$ with the
@@ -62,10 +64,15 @@ namespace Ariadne {
      * The method derivative(const Geometry::Point<F>& A) const computes the \a i th component of the derivative over the set \a A 
      * with respect to the variables in the multi-index \a j.
      */
+    /*!\ingroup System
+     * \ingroup DiscreteTime
+     * \brief A map (discrete-time dynamical system) described by an object satisfying the FunctionInterface.
+     */
     template<class R>
-    class MapInterface {
+    class Map
+    {
      protected:
-      typedef typename Numeric::traits<R>::arithmetic_type F; 
+      typedef typename Numeric::traits<R>::arithmetic_type A; 
       typedef typename Numeric::traits<R>::interval_type I; 
      public:
       /*! \brief The real number type. */
@@ -73,47 +80,43 @@ namespace Ariadne {
       /*! \brief The type of denotable state the system acts on. */
       typedef Geometry::Point<R> state_type;
       /*! \brief The type obtained by applying the map to a state. */
-      typedef Geometry::Point<F> result_type;
+      typedef Geometry::Point<A> result_type;
       
-      /*! \brief Virtual destructor. */
-      virtual ~MapInterface();
-      
-      /*! \brief Make a copy (clone) of the map. */
-      virtual MapInterface<R>* clone() const = 0;
+      /*! \brief Construct from a function interface. */
+      Map(const Function::FunctionInterface<R>& f);
+      /*! \brief Construct a dynamically-allocated copy. */
+      Map<R>* clone() const { return new Map<R>(*this); }
+      /*! \brief The defining function. */
+      const Function::FunctionInterface<R>& function() const;
 
       /*! \brief An over-approximation to the image of a point. */
-      Geometry::Point<F> operator() (const Geometry::Point<F>& pt) const {
-        return this->image(pt); }
-        
+      Geometry::Point<A> operator() (const Geometry::Point<A>& pt) const;
       /*! \brief An over-approximation to the image of a point. */
-      virtual Geometry::Point<F> evaluate(const Geometry::Point<F>& pt) const {
-        return this->image(pt); }
-      /*! \brief An over-approximation to the image of a point. */
-      virtual Geometry::Point<F> image(const Geometry::Point<F>& pt) const = 0;
-      /*! \brief The derivative of the \a i th component with respect to the multi-index j. */
-      virtual F derivative(const Geometry::Point<F>& r, const size_type& i, const Function::MultiIndex& j) const;
+      Geometry::Point<A> image(const Geometry::Point<A>& pt) const;
       /*! \brief The Jacobian derivative matrix over a rectangle. */
-      virtual LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<F>& r) const;
+      LinearAlgebra::Matrix<A> jacobian(const Geometry::Point<A>& x) const;
+      /*! \brief The derivatives up to order \a s. */
+      Function::TaylorDerivative<A> derivative(const Geometry::Point<A>& x, const smoothness_type& s) const;
         
+      /*! \brief The dimension of the space of a self-map. */
+      dimension_type dimension() const;
       /*! \brief The degree of differentiability of the map. */
-      virtual smoothness_type smoothness() const = 0;
+      smoothness_type smoothness() const;
       /*! \brief The dimension of the domain space. */
-      virtual dimension_type argument_dimension() const = 0;
+      dimension_type argument_dimension() const;
       /*! \brief The dimension of the range space. */
-      virtual dimension_type result_dimension() const = 0;
+      dimension_type result_dimension() const;
     
-      /*! \brief The name of the map. */
-      virtual std::string name() const = 0;
-
       /*! \brief Write to an output stream. */
-      virtual std::ostream& write(std::ostream& os) const;
+      std::ostream& write(std::ostream& os) const;
+     private:
+      boost::shared_ptr< Function::FunctionInterface<R> > _function_ptr;
     };
    
-    template<class R> inline 
-    std::ostream& operator<<(std::ostream& os, const MapInterface<R>& f) {
-      return f.write(os);
-    }  
-    
+    template<class R>
+    std::ostream& operator<<(std::ostream& os, const Map<R>& f) {
+      return f.write(os); }
+
   }
 }
 

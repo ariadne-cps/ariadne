@@ -29,7 +29,7 @@ template<class R> inline
 const Geometry::Grid<R>& 
 Geometry::FiniteGrid<R>::grid() const
 { 
-  return *this->_grid_ptr; 
+  return this->_grid; 
 }
 
 template<class R> inline
@@ -44,28 +44,28 @@ template<class R> inline
 R 
 Geometry::FiniteGrid<R>::subdivision_coordinate(dimension_type d, index_type n) const
 {
-  return this->_grid_ptr->subdivision_coordinate(d,n);
+  return this->_grid.subdivision_coordinate(d,n);
 }
 
 template<class R> inline
 index_type 
 Geometry::FiniteGrid<R>::subdivision_index(dimension_type d, const real_type& x) const 
 {
-  return this->_grid_ptr->subdivision_index(d,x);
+  return this->_grid.subdivision_index(d,x);
 }
 
 template<class R> inline
 index_type 
 Geometry::FiniteGrid<R>::subdivision_lower_index(dimension_type d, const real_type& x) const 
 {
-  return this->_grid_ptr->subdivision_lower_index(d,x);
+  return this->_grid.subdivision_lower_index(d,x);
 }
 
 template<class R> inline
 index_type 
 Geometry::FiniteGrid<R>::subdivision_upper_index(dimension_type d, const real_type& x) const 
 {
-  return this->_grid_ptr->subdivision_upper_index(d,x);
+  return this->_grid.subdivision_upper_index(d,x);
 }
 
 

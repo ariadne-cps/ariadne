@@ -1,7 +1,6 @@
 /***************************************************************************
  *            python/export_map.cc
  *
- *  13 February 2006
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
@@ -24,12 +23,16 @@
 
 #include "python/float.h"
 
+#include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
+#include "function/taylor_derivative.h"
+#include "function/function_interface.h"
+#include "function/affine_function.h"
 #include "geometry/point.h"
 #include "geometry/box.h"
-#include "function/interpreted_function.h"
+
 #include "system/map.h"
-#include "system/function_map.h"
+#include "system/affine_map.h"
 
 using namespace Ariadne;
 using namespace Ariadne::LinearAlgebra;
@@ -41,42 +44,30 @@ using namespace Ariadne::Python;
 #include <boost/python.hpp>
 using namespace boost::python;
 
-template<class R>
-class MapWrapper : public MapInterface<R>, public wrapper< MapInterface<R> >
-{
-  typedef typename MapInterface<R>::F F;
- public:
-  MapInterface<R>* clone() const { return this->get_override("clone")(); }
-  Point<F> image(const Point<F>&) const { return this->get_override("clone")(); }
-  dimension_type argument_dimension() const { return this->get_override("argument_dimension")(); }
-  dimension_type result_dimension() const { return this->get_override("result_dimension")(); }
-  smoothness_type smoothness() const { return this->get_override("smoothness")(); }
-  std::string name() const { return this->get_override("name")(); }
-};
 
 template<class R>
 void export_map() 
 {
   typedef typename Numeric::traits<R>::arithmetic_type A;
 
-  class_<MapWrapper<R>, boost::noncopyable>("MapInterface")
-    .def("argument_dimension", pure_virtual(&MapWrapper<R>::argument_dimension))
-    .def("result_dimension", pure_virtual(&MapWrapper<R>::result_dimension))
-    .def("smoothness", pure_virtual(&MapWrapper<R>::smoothness))
-  ;
 
-  class_< FunctionMap<R>, bases< MapInterface<R> > >("FunctionMap", init< const InterpretedFunction<R>&, Point<A> >())
-    .def("argument_dimension", &FunctionMap<R>::argument_dimension)
-    .def("result_dimension", &FunctionMap<R>::result_dimension)
-    .def("number_of_parameters", &FunctionMap<R>::number_of_parameters)
-    .def("smoothness", &FunctionMap<R>::smoothness)
-    .def("parameters", &FunctionMap<R>::parameters, return_value_policy<copy_const_reference>())
-    .def("set_parameters", &FunctionMap<R>::set_parameters)
-    .def("__call__",(Point<A>(FunctionMap<R>::*)(const Point<A>&)const)(&FunctionMap<R>::image))
-    .def("image",(Point<A>(FunctionMap<R>::*)(const Point<A>&)const)(&FunctionMap<R>::image))
-    .def("jacobian",(Matrix<A>(FunctionMap<R>::*)(const Point<A>&)const)(&FunctionMap<R>::jacobian))
+  class_< Map<R> >("Map", init< const FunctionInterface<R>& >())
+    .def("argument_dimension", &Map<R>::argument_dimension)
+    .def("result_dimension", &Map<R>::result_dimension)
+    .def("smoothness", &Map<R>::smoothness)
+    //.def("number_of_parameters", &Map<R>::number_of_parameters)
+    //.def("parameters", &Map<R>::parameters, return_value_policy<copy_const_reference>())
+    .def("__call__",(Point<A>(Map<R>::*)(const Point<A>&)const)(&Map<R>::image))
+    .def("image",(Point<A>(Map<R>::*)(const Point<A>&)const)(&Map<R>::image))
+    .def("jacobian",(Matrix<A>(Map<R>::*)(const Point<A>&)const)(&Map<R>::jacobian))
+    .def("derivative",(TaylorDerivative<A>(Map<R>::*)(const Point<A>&,const smoothness_type&)const)(&Map<R>::derivative))
     .def(self_ns::str(self))
   ;
+
+  class_< AffineMap<R>, bases< Map<R> > >("AffineMap", init<const Matrix<R>&,const Vector<R>&>())
+    .def(self_ns::str(self));
+
+
 }
 
 template void export_map<FloatPy>();

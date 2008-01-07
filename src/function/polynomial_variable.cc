@@ -24,7 +24,6 @@
 #include "numeric/float.h"
 #include "numeric/interval.h"
 #include "function/polynomial_variable.h"
-#include "function/polynomial_variable.code.h"
 
 namespace Ariadne {
   namespace Function {
@@ -33,11 +32,11 @@ namespace Ariadne {
     //template class PolynomialVariable<Rational>;
 
 #ifdef ENABLE_FLOAT64
-    template class PolynomialVariable<Interval64>;
+  //template class PolynomialVariable<Interval64>;
 #endif
     
 #ifdef ENABLE_FLOATMP
-    template class PolynomialVariable<IntervalMP>;
+  //template class PolynomialVariable<IntervalMP>;
 #endif
 
   }

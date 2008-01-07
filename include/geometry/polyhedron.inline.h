@@ -184,6 +184,12 @@ Geometry::Polyhedron<X>::number_of_constraints() const
 }
 
 
+template<class X> inline
+Geometry::Box<typename Geometry::Polyhedron<X>::real_type> 
+Geometry::bounding_box(const Polyhedron<X>& plhd)
+{
+  return plhd.bounding_box();
+}
 
 
 

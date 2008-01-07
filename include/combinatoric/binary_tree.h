@@ -1,7 +1,6 @@
 /***************************************************************************
  *            binary_tree.h
  *
- *  1 July 2005
  *  Copyright  2005  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/

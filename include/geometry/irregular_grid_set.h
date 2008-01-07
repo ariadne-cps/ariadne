@@ -36,12 +36,13 @@ namespace Ariadne {
   namespace Geometry {
 
     template<class R> class Point;
-    template<class R> class Box;
+    template<class R> class Box; 
+    template<class R> class BoxListSet;
     template<class R> class GridMaskSet;
 
     /*! \brief A denotable set on an irregular finite grid, defined using a mask over a block of cells.
      *  
-     *  An %IrregularGridMaskSet is useful for computing geometric predicates on ListSet<Box>.
+     *  An %IrregularGridMaskSet is useful for computing geometric predicates on BoxListSet.
      *
      *  \ingroup DenotableSet
      *  \ingroup Grid
@@ -63,10 +64,10 @@ namespace Ariadne {
       IrregularGridMaskSet<R>& operator=(const GridMaskSet<R>& gms);
 
       /*!\brief Construct from a list set of rectangles. */
-      explicit IrregularGridMaskSet(const ListSet< Box<R> >& rls);
+      explicit IrregularGridMaskSet(const BoxListSet<R>& rls);
 
       /*!\brief Convert to a list set of rectangles. */
-      operator ListSet< Box<R> > () const;
+      operator BoxListSet<R> () const;
 
       //@{
       //! \name Set methods
@@ -103,7 +104,7 @@ namespace Ariadne {
 
 #ifdef DOXYGEN
       friend tribool subset<> (const Box<R>&, const IrregularGridMaskSet<R>&);
-      friend tribool subset<> (const ListSet< Box<R> >&, const IrregularGridMaskSet<R>&);
+      friend tribool subset<> (const BoxListSet<R>&, const IrregularGridMaskSet<R>&);
       friend IrregularGridMaskSet<R> join<> (const IrregularGridMaskSet<R>&, const IrregularGridMaskSet<R>&);
       friend IrregularGridMaskSet<R> regular_intersection<> (const IrregularGridMaskSet<R>&, const IrregularGridMaskSet<R>&);
       friend IrregularGridMaskSet<R> difference<> (const IrregularGridMaskSet<R>&, const IrregularGridMaskSet<R>&);
@@ -119,7 +120,7 @@ namespace Ariadne {
     tribool subset(const Box<R>&, const IrregularGridMaskSet<R>&);
 
     template<class R> 
-    tribool subset(const ListSet< Box<R> >& rls, const IrregularGridMaskSet<R>& igms);
+    tribool subset(const BoxListSet<R>& rls, const IrregularGridMaskSet<R>& igms);
 
     template<class R> inline
     std::ostream& operator<<(std::ostream& os, const IrregularGridMaskSet<R>& igms)

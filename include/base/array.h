@@ -98,6 +98,8 @@ namespace Ariadne {
         delete[] _ptr; _size=n; _ptr=_new_ptr; } }
       /*! \brief Reallocates the array to hold \a n elements. The new elements are uninitialised. */
       void reallocate(size_type n) { if(size()!=n) { delete[] _ptr; _size=n; _ptr=new value_type[_size]; } }
+      /*! \brief Efficiently swap two arrays.  */
+      void swap(array<T>& a) { std::swap(_size,a._size); std::swap(_ptr,a._ptr); }
       
       /*! \brief The \a n th element. */
       reference operator[](size_type i) { return _ptr[i]; } 
@@ -179,7 +181,8 @@ namespace Ariadne {
       size_type max_size() const { return  _vector.max_size(); }
       void resize(size_type n) { _vector.resize(n); }
       void reallocate(size_type n) { _vector.resize(n); }
-      
+      void swap(array<bool>& a) { _vector.swap(a._vector); }
+ 
       reference operator[](size_type i) { return _vector[i]; }
       const_reference operator[](size_type i) const { return _vector[i]; }
       reference at(size_type i) { if(i<size()) { return _vector[i]; } else { throw std::out_of_range("array::index out-of-range"); } } 
@@ -688,6 +691,7 @@ namespace Ariadne {
       size_type _array_size;
       element_iterator _curr;
      public:
+      _array_vector_iterator() { }
       _array_vector_iterator(size_type n, element_iterator ptr)
         : _array_size(n), _curr(ptr) { }
       template<class B> _array_vector_iterator(const _array_vector_iterator<B>& iter) 
@@ -753,6 +757,10 @@ namespace Ariadne {
       /*!\brief The size of each array word in the list. */
       void clear() { _elements.clear(); }
       
+      /*!\brief Efficiently swap two array vectors.  */
+      void swap(array_vector<T>& other) {
+        std::swap(_array_size,other._array_size); _elements.swap(other._elements); }
+        
       /*!\brief Insert an element at the back of the vector. */
       void push_back(const array<T>& a) { 
         if(a.size()!=array_size()) { throw std::length_error("array_vector<T>::push_back(array<T> const&)"); }
@@ -794,10 +802,6 @@ namespace Ariadne {
         if(i<size()) { return this->operator[](i); } else { throw std::out_of_range("array index out-of-range"); }
       }
       
-      /*!\brief Efficiently swap two array vectors.  */
-      void swap(array_vector<T>& other) {
-        std::swap(_array_size,other._array_size); _elements.swap(other._elements); }
-        
       /*!\brief A random-access constant iterator pointing to the beginning of the vector of arrays.  */
       const_iterator begin() const { return const_iterator(array_size(),_elements.begin()); }
       

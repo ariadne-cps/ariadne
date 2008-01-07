@@ -30,36 +30,37 @@
 #include "linear_algebra/matrix.h"
 #include "geometry/point.h"
 #include "geometry/box.h"
-#include "system/vector_field.h"
+
+#include "function/taylor_derivative.h"
 #include "system/map.h"
 
 namespace Ariadne {
-namespace System {
+namespace Function {
 
 template<class R> 
 inline
-DifferenceMap<R>::DifferenceMap(const MapInterface<R>& f)
+DifferenceFunction<R>::DifferenceFunction(const FunctionInterface<R>& f)
   : _base(f)
 { 
-  if(f.argument_dimension()!=f.result_dimension()) { 
-    throw Geometry::IncompatibleDimensions("DifferenceMap::DifferenceMap(Map f): The argument dimension must equal the result dimension"); 
+  if(f.argument_size()!=f.result_size()) { 
+    throw Geometry::IncompatibleDimensions("DifferenceFunction::DifferenceFunction(Map f): The argument dimension must equal the result dimension"); 
   } 
 }
 
 
 template<class R> 
 inline
-DifferenceMap<R>* 
-DifferenceMap<R>::clone() const 
+DifferenceFunction<R>* 
+DifferenceFunction<R>::clone() const 
 { 
-  return new DifferenceMap<R>(this->_base); 
+  return new DifferenceFunction<R>(this->_base); 
 }
 
 
 template<class R> 
 inline
 smoothness_type 
-DifferenceMap<R>::smoothness() const 
+DifferenceFunction<R>::smoothness() const 
 { 
   return _base.smoothness(); 
 }
@@ -67,39 +68,63 @@ DifferenceMap<R>::smoothness() const
 
 template<class R> 
 inline
-dimension_type 
-DifferenceMap<R>::dimension() const 
+size_type 
+DifferenceFunction<R>::argument_size() const 
 { 
-  return _base.argument_dimension(); 
+  return _base.argument_size(); 
+}
+
+template<class R> 
+inline
+size_type 
+DifferenceFunction<R>::result_size() const 
+{ 
+  return _base.result_size(); 
 }
 
 
 template<class R> 
 inline
-LinearAlgebra::Vector<typename DifferenceMap<R>::F> 
-DifferenceMap<R>::image(const Geometry::Point<F>& p) const 
+LinearAlgebra::Vector<typename DifferenceFunction<R>::F> 
+DifferenceFunction<R>::evaluate(const LinearAlgebra::Vector<F>& p) const 
 {
-  return _base.image(p)-p; 
+  return _base.evaluate(p)-p; 
 }
 
 
 template<class R> 
 inline
-LinearAlgebra::Matrix< Numeric::Interval<R> > 
-DifferenceMap<R>::jacobian(const Geometry::Point<F>& p) const 
+LinearAlgebra::Matrix<typename Function::DifferenceFunction<R>::F>
+DifferenceFunction<R>::jacobian(const LinearAlgebra::Vector<F>& p) const 
 {
   LinearAlgebra::Matrix<F> d=_base.jacobian(p);
-  LinearAlgebra::Matrix<F> i=LinearAlgebra::Matrix< Numeric::Interval<R> >::identity(this->dimension());
+  LinearAlgebra::Matrix<F> i=LinearAlgebra::Matrix< Numeric::Interval<R> >::identity(this->result_size());
   return d-i; 
+}
+
+template<class R> 
+inline
+Function::TaylorDerivative<typename Function::DifferenceFunction<R>::F>
+DifferenceFunction<R>::derivative(const LinearAlgebra::Vector<F>& p, const smoothness_type& s) const 
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
 
 template<class R> 
 inline
 std::string 
-DifferenceMap<R>::name() const 
+DifferenceFunction<R>::name() const 
 { 
-  return "DifferenceMap"; 
+  return "DifferenceFunction"; 
+}
+
+template<class R> 
+inline
+std::ostream&
+DifferenceFunction<R>::write(std::ostream& os) const 
+{ 
+  return os << "DifferenceFunction"; 
 }
 
 
@@ -162,9 +187,9 @@ SolverInterface<R>::set_maximum_number_of_steps(uint max_steps)
 template<class R> 
 inline
 Geometry::Point<typename SolverInterface<R>::I> 
-SolverInterface<R>::fixed_point(const System::MapInterface<R>& f,const Geometry::Point<I>& pt) 
+SolverInterface<R>::fixed_point(const System::Map<R>& f,const Geometry::Point<I>& pt) 
 {
-  return this->solve(System::DifferenceMap<R>(f),pt); 
+  return this->solve(Function::DifferenceFunction<R>(f.function()),pt); 
 }
 
 

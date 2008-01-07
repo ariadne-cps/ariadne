@@ -25,30 +25,46 @@
 #include "combinatoric/array_operations.h"
 #include "base/stlio.h"
 
-#include "python/utilities.h"
-#include "python/float.h"
+#include "python/subscripting.h"
+#include "python/read_array.h"
+
 using namespace Ariadne;
 using namespace Ariadne::Base;
 using namespace Ariadne::Numeric;
 using namespace Ariadne::Python;
 
 #include <boost/python.hpp>
+#include <boost/python/detail/api_placeholder.hpp>
 using namespace boost::python;
 
-template<class T>
-void export_array() {
-  class_< array<T> >(python_name<T>("Array").c_str(),init<uint>())
-    .def(init< array<T> >())
-    .def("__len__", &array<T>::size)
-    .def("__getitem__", &get_item< array<T> >)
-    .def("__setitem__", &set_item< array<T> >)
-    .def(self_ns::str(self))    // __self_ns::str__
-  ;
+template<class X> inline
+array<X>*
+make_array(const boost::python::object& obj)
+{
+  array<X>* ary=new array<X>();
+  read_array(*ary,obj);
+  return ary;
 }
 
-template void export_array<bool>();
-template void export_array<index_type>();
-template void export_array<size_type>();
-template void export_array<Integer>();
-template void export_array<Rational>();
-template void export_array<FloatPy>();
+template<class T>
+void export_array(const char* name) {
+
+  class_< array<T> > array_class(name,init<uint>());
+  array_class.def("__init__", make_constructor(&make_array<T>));
+  array_class.def(init< array<T> >());
+  array_class.def("__len__", &array<T>::size);
+  array_class.def("__getitem__", &__getitem__< array<T> >);
+  array_class.def("__setitem__", &__setitem__< array<T>, T >);
+  array_class.def(self_ns::str(self));    // __self_ns::str__
+
+}
+
+void export_arrays() {
+  export_array<bool>("BooleanArray");
+  export_array<index_type>("IndexArray");
+  export_array<size_type>("SizeArray");
+  export_array<Integer>("IntegerArray");
+  export_array<Rational>("RationalArray");
+  export_array<FloatPy>("FloatArray");
+}
+

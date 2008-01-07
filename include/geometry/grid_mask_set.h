@@ -280,8 +280,8 @@ namespace Ariadne {
       /*! \brief Restricts to an inner-approximation of the set \a s. */
       void restrict_inner_approximation(const SetInterface<R>& s);
 
-      /*! \brief Write a summary to an output stream. */
-      std::ostream& summarize(std::ostream&) const;
+      /*! \brief Writes a summary of the set. */
+      std::string summary() const;
 
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream&) const;
@@ -302,7 +302,7 @@ namespace Ariadne {
      private: 
       static void _instantiate_geometry_operators();
      private:
-      Base::shared_ptr< Grid<R> > _grid_ptr;
+      Grid<R>  _grid;
       Combinatoric::LatticeMaskSet _lattice_set;
     };
     

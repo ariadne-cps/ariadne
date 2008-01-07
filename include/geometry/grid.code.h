@@ -56,50 +56,60 @@ Geometry::Grid<R>::~Grid()
 
 
 template<class R> 
-Geometry::Grid<R>::Grid(const dimension_type& d, const R& l)
-  : _origin(d,static_cast<R>(0)),
-    _lengths(d,l)
+Geometry::Grid<R>::Grid()
+  : _data()
 {
-  this->create();
+}
+
+
+template<class R> 
+Geometry::Grid<R>::Grid(const dimension_type& d, const R& l)
+  : _data(new Data())
+{
+  array<R> origin(d,R(0));
+  array<R> lengths(d,l);
+  this->create(origin,lengths);
 }
 
 
 template<class R> 
 Geometry::Grid<R>::Grid(const LinearAlgebra::Vector<R>& v)
-  : _origin(v.size(),static_cast<R>(0)),
-    _lengths(v.data())
+  : _data(new Data())
 {
-  this->create();
+  array<R> origin(v.size(),0);
+  const array<R> lengths=v.data();
+  this->create(origin,lengths);
 }
 
 
 template<class R> 
 Geometry::Grid<R>::Grid(const Point<R>& pt, const LinearAlgebra::Vector<R>& v)
-  : _origin(pt.data()),
-    _lengths(v.data())
+  : _data(new Data())
 {
   if(pt.dimension() != v.size()) {
     throw IncompatibleDimensions(__PRETTY_FUNCTION__);
   }
-  this->create();
+  this->create(pt.data(),v.data());
 }
 
 
 template<class R> 
 Geometry::Grid<R>::Grid(const Box<R>& r, const Combinatoric::LatticeBlock& lb)
-  : _origin(r.dimension()),
-    _lengths(r.dimension())
+  : _data(new Data())
 {
   if(r.dimension() != lb.dimension()) {
     throw IncompatibleDimensions(__PRETTY_FUNCTION__);
   }
-  for(dimension_type i=0; i!=r.dimension(); ++i) {
+  dimension_type d=r.dimension();
+  array<R> origin(d);
+  array<R> lengths(d);
+  for(dimension_type i=0; i!=d; ++i) {
     const R& l=r.lower_bound(i);
     const R& u=r.upper_bound(i);
     const index_type& a=lb.lower_bound(i);
     const index_type& b=lb.upper_bound(i);
-    R& o=this->_origin[i];
-    R& s=this->_lengths[i];
+    R& o=origin[i];
+    R& s=lengths[i];
     
     //std::cerr << "a=" << a << ", b=" << b << ";  l=" << l << ", u=" << u << ";  "  << std::flush;
     
@@ -138,7 +148,7 @@ Geometry::Grid<R>::Grid(const Box<R>& r, const Combinatoric::LatticeBlock& lb)
     assert(add_approx(o,mul_approx(s,b)) >= u);
   }
   
-  this->create();
+  this->create(origin,lengths);
 }
 
 
@@ -149,8 +159,10 @@ Geometry::Grid<R>::Grid(const Box<R>& r, const Combinatoric::LatticeBlock& lb)
 
 template<class R>
 void
-Geometry::Grid<R>::create() 
+Geometry::Grid<R>::create(const array<R>& origin, const array<R>& lengths) 
 {
+  this->_data->_origin=origin;
+  this->_data->_lengths=lengths;
 }
 
 
@@ -159,7 +171,7 @@ template<class R>
 dimension_type
 Geometry::Grid<R>::dimension() const
 {
-  return this->_lengths.size();
+  return this->_data->_lengths.size();
 }
 
 
@@ -168,7 +180,7 @@ template<class R>
 Geometry::Point<R>
 Geometry::Grid<R>::origin() const
 {
-  return Point<R>(LinearAlgebra::Vector<R>(this->_origin));
+  return Point<R>(reinterpret_cast<const LinearAlgebra::Vector<R>&>(this->_data->_origin));
 }
 
 
@@ -176,7 +188,7 @@ template<class R>
 LinearAlgebra::Vector<R>
 Geometry::Grid<R>::lengths() const
 {
-  return LinearAlgebra::Vector<R>(this->_lengths);
+  return LinearAlgebra::Vector<R>(this->_data->_lengths);
 }
 
 
@@ -184,16 +196,23 @@ Geometry::Grid<R>::lengths() const
 
 template<class R>
 R
+Geometry::Grid<R>::coordinate(dimension_type d, dyadic_type x) const 
+{
+  return add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],x));
+}
+
+template<class R>
+R
 Geometry::Grid<R>::subdivision_coordinate(dimension_type d, dyadic_type x) const 
 {
-  return add_approx(this->_origin[d],mul_approx(this->_lengths[d],x));
+  return add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],x));
 }
 
 template<class R>
 R
 Geometry::Grid<R>::subdivision_coordinate(dimension_type d, index_type n) const 
 {
-  return add_approx(this->_origin[d],mul_approx(this->_lengths[d],n));
+  return add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],n));
 }
 
 
@@ -204,8 +223,8 @@ Geometry::Grid<R>::subdivision_index(dimension_type d, const real_type& x) const
   using namespace Numeric;
   
   R half=0.5;
-  index_type n=floor(add_approx(div_approx(sub_approx(x,this->_origin[d]),this->_lengths[d]),half));
-  R sc=add_approx(this->_origin[d],mul_approx(this->_lengths[d],n));
+  index_type n=floor(add_approx(div_approx(sub_approx(x,this->_data->_origin[d]),this->_data->_lengths[d]),half));
+  R sc=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],n));
   ARIADNE_LOG(9,std::setprecision(20) << std::boolalpha << "sc=" << sc << " x=" << x << " sc-x=" << Interval<R>(sc-x) << "\n")
     if(sc == x) { 
       return n; 
@@ -214,7 +233,7 @@ Geometry::Grid<R>::subdivision_index(dimension_type d, const real_type& x) const
                 << "sc=" << sc << " x=" << x << " sc-x=" << Interval<R>(sc-x) << "\n"
                 << "sc==x=" << (sc==x) << " sc!=x=" << (sc!=x)
                 << " sc<x=" << (sc<x) << " sc>x=" << (sc>x) << " sc<=x=" << (sc<=x) << " sc>=x=" << (sc>=x) << std::endl; 
-      ARIADNE_THROW(InvalidGridPosition,std::setprecision(20)<<"Grid::subdivision_index(dimension_type d,real_type x)","d="<<d<<", x="<<x<<", this->origin[d]="<<this->_origin[d]<<", this->lengths[d]="<<this->_lengths[d]<<" (closest value is "<<sc<<")");
+      ARIADNE_THROW(InvalidGridPosition,std::setprecision(20)<<"Grid::subdivision_index(dimension_type d,real_type x)","d="<<d<<", x="<<x<<", this->origin[d]="<<this->_data->_origin[d]<<", this->lengths[d]="<<this->_data->_lengths[d]<<" (closest value is "<<sc<<")");
     }
 }
 
@@ -225,8 +244,8 @@ Geometry::Grid<R>::subdivision_lower_index(dimension_type d, const real_type& x)
 {
   using namespace Numeric;
   
-  index_type n=floor(div_down(sub_down(x,this->_origin[d]),this->_lengths[d]));
-  if(x>=add_approx(this->_origin[d],mul_approx(this->_lengths[d],(n+1)))) {
+  index_type n=floor(div_down(sub_down(x,this->_data->_origin[d]),this->_data->_lengths[d]));
+  if(x>=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],(n+1)))) {
     return n+1;
   } else {
     return n;
@@ -240,8 +259,8 @@ Geometry::Grid<R>::subdivision_upper_index(dimension_type d, const real_type& x)
 {
   using namespace Numeric;
   
-  index_type n=ceil(div_up(sub_up(x,this->_origin[d]),this->_lengths[d]));
-  if(x<=add_approx(this->_origin[d],mul_approx(this->_lengths[d],(n-1)))) {
+  index_type n=ceil(div_up(sub_up(x,this->_data->_origin[d]),this->_data->_lengths[d]));
+  if(x<=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],(n-1)))) {
     return n-1;
   } else {
     return n;
@@ -254,10 +273,10 @@ template<class R>
 bool 
 Geometry::Grid<R>::operator==(const Grid<R>& g) const
 {
-  if(this==&g) { 
+  if(this->_data==g._data) { 
     return true; 
   } else {
-    return this->_origin==g._origin && this->_lengths==g._lengths;
+    return this->_data->_origin==g._data->_origin && this->_data->_lengths==g._data->_lengths;
   }
 }
 
@@ -346,10 +365,10 @@ std::ostream&
 Geometry::Grid<R>::write(std::ostream& os) const
 {
   os << "Grid( ";
-  if(this->_origin!=array<R>(this->dimension(),0)) {
-    os << "origin=" << this->_origin << ", ";
+  if(this->_data->_origin!=array<R>(this->dimension(),R(0))) {
+    os << "origin=" << this->_data->_origin << ", ";
   }
-  os  << "lengths=" << this->_lengths << " )";
+  os  << "lengths=" << this->_data->_lengths << " )";
   return os;
 }
 
@@ -365,40 +384,34 @@ Geometry::Grid<R>::read(std::istream& is)
 
 
 
-
-
-
 template<class R>
 Geometry::FiniteGrid<R>::~FiniteGrid() 
 {
-  if(this->_own_ptr) {
-    delete this->_grid_ptr;
-  }
 }
 
 
-template<class R> inline
+template<class R> 
 Geometry::FiniteGrid<R>::FiniteGrid(const Grid<R>& g, const Combinatoric::LatticeBlock& b) 
-  : _own_ptr(0), _grid_ptr(&g), _lattice_block(b)
+  :  _grid(g), _lattice_block(b)
 { 
 }
 
-template<class R> inline
+template<class R> 
 Geometry::FiniteGrid<R>::FiniteGrid(const Grid<R>& g, const Box<R>& bb) 
-  : _own_ptr(0), _grid_ptr(&g), _lattice_block(over_approximation(bb,g).lattice_set())
+  : _grid(g), _lattice_block(over_approximation(bb,g).lattice_set())
 { 
 }
 
 template<class R>
 Geometry::FiniteGrid<R>::FiniteGrid(const Box<R>& bb, const size_type& s)
-  : _own_ptr(1), _grid_ptr(0), _lattice_block(bb.dimension())
+  : _grid(bb.dimension(),1.0), _lattice_block(bb.dimension())
 {
   dimension_type d=bb.dimension();
   array<R> subdivision_lengths(bb.dimension());
   for(dimension_type i=0; i!=bb.dimension(); ++i) {
     subdivision_lengths[i]=div_up(bb[i].width(),R(s));
   }
-  this->_grid_ptr=new Grid<R>(LinearAlgebra::Vector<R>(d,subdivision_lengths.begin()));
+  this->_grid=Grid<R>(LinearAlgebra::Vector<R>(d,subdivision_lengths.begin()));
   this->_lattice_block=this->grid().index_block(bb);
 }
 
@@ -407,7 +420,7 @@ template<class R>
 dimension_type 
 Geometry::FiniteGrid<R>::dimension() const 
 {
-  return this->_grid_ptr->dimension();
+  return this->_grid.dimension();
 }
 
 
@@ -415,7 +428,7 @@ template<class R>
 Geometry::Box<R>
 Geometry::FiniteGrid<R>::extent() const
 {
-  return this->_grid_ptr->rectangle(this->_lattice_block);
+  return this->_grid.rectangle(this->_lattice_block);
 }
 
 
@@ -425,6 +438,8 @@ Geometry::FiniteGrid<R>::write(std::ostream& os) const
 {
   return os << "FiniteGrid(grid=" << this->grid() << ", lattice_block=" << this->lattice_block() << ")";
 }
+
+
 
 
 

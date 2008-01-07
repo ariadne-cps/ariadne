@@ -31,7 +31,8 @@
 #include "linear_algebra/matrix.h"
 #include "linear_algebra/tensor.h"
 
-#include "python/utilities.h"
+#include "python/name.h"
+#include "python/operators.h"
 #include "python/float.h"
 using namespace Ariadne;
 using namespace Ariadne::Numeric;

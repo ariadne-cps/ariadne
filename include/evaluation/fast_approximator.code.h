@@ -52,9 +52,16 @@ Evaluation::FastApproximator<BS>::clone() const
 
 template<class BS>
 BS
-Evaluation::FastApproximator<BS>::over_approximation(const Geometry::Box<R>& r) const
+Evaluation::FastApproximator<BS>::basic_set(const Geometry::Box<R>& r) const
 {
   return BS(r);
+}
+
+template<class BS>
+typename BS::real_type
+Evaluation::FastApproximator<BS>::radius(const BS& bs) const
+{
+  return Geometry::bounding_box(bs).radius();
 }
 
 template<class BS>
@@ -69,16 +76,6 @@ Geometry::GridCellListSet<typename BS::real_type>
 Evaluation::FastApproximator<BS>::outer_approximation(const BS& bs, const Geometry::Grid<R>& g) const
 {
   return Geometry::fuzzy_outer_approximation(bs,g);
-}
-
-template<class BS>
-std::pair<BS,BS>
-Evaluation::FastApproximator<BS>::subdivide(const BS& bs) const
-{
-  return Geometry::subdivide(bs);
-  // Geometry::ListSet<BS> ls=Geometry::subdivide(bs);
-  // assert(ls.size()==2);
-  // return std::make_pair(ls[0],ls[1]);
 }
 
 

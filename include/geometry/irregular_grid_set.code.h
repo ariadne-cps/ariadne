@@ -25,18 +25,18 @@
 #include "base/stlio.h"
 
 #include "box.h"
-#include "list_set.h"
+#include "box_list_set.h"
 
 namespace Ariadne {
 
 
 
 template<class R>
-Geometry::IrregularGridMaskSet<R>::IrregularGridMaskSet(const ListSet< Box<R> >& rls) 
+Geometry::IrregularGridMaskSet<R>::IrregularGridMaskSet(const BoxListSet<R>& rls) 
   : _grid(IrregularGrid<R>(rls)), 
     _lattice_set(_grid.block())
 {
-  for(typename ListSet< Box<R> >::const_iterator r_iter=rls.begin(); 
+  for(typename BoxListSet<R>::const_iterator r_iter=rls.begin(); 
       r_iter!=rls.end(); ++r_iter) 
     {
       this->_lattice_set.adjoin(this->_grid.index_block(*r_iter));
@@ -71,9 +71,9 @@ Geometry::IrregularGridMaskSet<R>::lattice_set() const
 
 
 template<class R>
-Geometry::IrregularGridMaskSet<R>::operator ListSet< Box<R> > () const
+Geometry::IrregularGridMaskSet<R>::operator BoxListSet<R> () const
 {
-  ListSet< Box<R> > result(this->dimension());
+  BoxListSet<R> result(this->dimension());
   for(Combinatoric::LatticeMaskSet::const_iterator lms_iter=this->_lattice_set.begin(); 
       lms_iter!=this->_lattice_set.end(); ++lms_iter) 
     {
@@ -92,9 +92,9 @@ Geometry::subset(const Box<R>& r, const IrregularGridMaskSet<R>& igms)
 
 template<class R> 
 tribool
-Geometry::subset(const ListSet< Box<R> >& rls, const IrregularGridMaskSet<R>& igms)
+Geometry::subset(const BoxListSet<R>& rls, const IrregularGridMaskSet<R>& igms)
 {
-  for(typename ListSet< Box<R> >::const_iterator rls_iter=rls.begin();
+  for(typename BoxListSet<R>::const_iterator rls_iter=rls.begin();
       rls_iter!=rls.end(); ++rls_iter)
     {        
       if(!subset(*rls_iter,igms)) {
@@ -120,7 +120,7 @@ void
 Geometry::IrregularGridMaskSet<R>::_instantiate() 
 {
   Box<R>* r=0;
-  ListSet< Box<R> >* rls=0;
+  BoxListSet<R>* rls=0;
   IrregularGridMaskSet<R>* igms=0;
   subset(*r,*igms);
   subset(*rls,*igms);

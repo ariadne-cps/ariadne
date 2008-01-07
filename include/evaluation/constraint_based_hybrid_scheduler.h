@@ -218,9 +218,9 @@ namespace Ariadne {
       /*! \brief . */
       typedef Geometry::Box<R> bounding_box_type;
       /*! \brief . */
-      typedef System::MapInterface<R> map_type;
+      typedef System::Map<R> map_type;
       /*! \brief . */
-      typedef System::VectorFieldInterface<R> vector_field_type;
+      typedef System::VectorField<R> vector_field_type;
       /*! \brief . */
       typedef Evaluation::TimeModel<R> time_model_type;
       /*! \brief . */
@@ -247,7 +247,7 @@ namespace Ariadne {
        * the remaining sets should be continued as working sets.
        */
       std::vector<timed_set_type>
-      evolution_step(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
+      integration_step(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
                      const timed_set_type& initial_set,
                      const time_type& maximum_time_step,
                      const time_type& maximum_time_step_size,
@@ -256,14 +256,14 @@ namespace Ariadne {
 
       /*! \brief Compute a lower-approximation to the evolution of a timed basic set using lower semantics. */
       std::vector<timed_set_type>
-      lower_evolution_step(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
+      lower_integration_step(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
                            const timed_set_type& initial_set,
                            const time_type& maximum_time,
                            const time_type& maximum_time_step_size) const;
 
       /*! \brief Compute the an over-approximation to the evolution of a timed basic set using upper semantics. */
       std::vector<timed_set_type>
-      upper_evolution_step(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
+      upper_integration_step(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
                            const timed_set_type& initial_set,
                            const time_type& maximum_time,
                            const time_type& maximum_time_step_size) const;
@@ -309,7 +309,7 @@ namespace Ariadne {
 
       /*! \brief Compute the possible states reached by an integration step with time given by time_step, given that the flow remains in \a bounding_box. */
       timed_set_type
-      continuous_evolution_step(const mode_type& mode,
+      continuous_integration_step(const mode_type& mode,
                                 const timed_set_type& initial_set,
                                 const time_model_type& time_step,
                                 const bounding_box_type& bounding_box) const;
@@ -325,7 +325,7 @@ namespace Ariadne {
 
       /*! \brief Compute the possible states reached by continuous evolution at the time \a final_time, given that the flow remains in \a bounding_box. */
       timed_set_type
-      final_continuous_evolution_step(const mode_type& mode,
+      final_continuous_integration_step(const mode_type& mode,
                                       const timed_set_type& initial_set,
                                       const time_type& final_time,
                                       const bounding_box_type& bounding_box) const;

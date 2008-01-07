@@ -105,7 +105,7 @@ namespace Ariadne {
       /*! \brief Construct a constant variable with respect to \a as variables and value \a c. */
       static AffineVariable<X> constant(uint as, const X& c); 
       /*! \brief Construct the variable of degree \a d at value \a value with respect to the \a i<sup>th</sup> variable of \a as. */
-      static AffineVariable<X> variable(uint as, uint i, const X& value);
+      static AffineVariable<X> variable(uint as, const X& value, uint i);
 
       //@{
       //! \name Data access
@@ -134,6 +134,12 @@ namespace Ariadne {
       //@}
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream& os) const;
+
+      //@{
+      //! \name Inplace arithmetic operations
+      AffineVariable<X>& operator+=(const AffineVariable<X>&);
+      //! \name Inplace arithmetic operations
+      AffineVariable<X>& operator*=(const X&);
 
  #ifdef DOXYGEN
       //@{
@@ -210,9 +216,6 @@ namespace Ariadne {
       friend void compose<>(AffineVariable<X>&, const AffineVariable<X>&, const AffineVariable<X>&);
       friend std::ostream& operator<< <>(std::ostream&, const AffineVariable<X>&);
      private:
-      static void instantiate();
-
-     private:
       X _x;
       LinearAlgebra::Covector<X> _dx;
     };
@@ -237,6 +240,8 @@ namespace Ariadne {
     template<class C, class X> AffineVariable<X> operator*(const AffineVariable<X>& x, const C& c); 
     template<class C, class X> AffineVariable<X> operator/(const C& c, const AffineVariable<X>& x); 
     template<class C, class X> AffineVariable<X> operator/(const AffineVariable<X>& x, const C& c); 
+
+    template<class X> AffineVariable<X> operator/(const AffineVariable<X>& x, const X& c); 
 
     template<class X> AffineVariable<X> min(const AffineVariable<X>& x1,const AffineVariable<X>& x2); 
     template<class X> AffineVariable<X> max(const AffineVariable<X>& x1,const AffineVariable<X>& x2); 

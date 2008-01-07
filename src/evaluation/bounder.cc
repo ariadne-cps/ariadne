@@ -23,20 +23,19 @@
 
 #include "numeric/float.h"
 
-#include "evaluation/bounder_interface.h"
-#include "evaluation/bounder.h"
-#include "evaluation/bounder.code.h"
+#include "evaluation/standard_bounder.h"
+#include "evaluation/standard_bounder.code.h"
 
 namespace Ariadne {
   namespace Evaluation {
     using namespace Numeric;
 
 #ifdef ENABLE_FLOAT64
-    template class Bounder<Float64>;
+    template class StandardBounder<Float64>;
 #endif
   
 #ifdef ENABLE_FLOATMP
-    template class Bounder<FloatMP>;
+    template class StandardBounder<FloatMP>;
 #endif
 
   }

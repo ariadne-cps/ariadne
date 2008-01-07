@@ -1,8 +1,8 @@
 /***************************************************************************
  *            taylor_variable.h
  *
- *  Copyright 2007  Alberto Casagrande, Pieter Collins
- *  Email casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright 2007  Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -104,6 +104,13 @@ namespace Ariadne {
       X& operator[](const MultiIndex& a); 
       /*! \brief The \a i<sup> th</sup> derivative \f$D^af=d^{|a|}f/dx_1^{a_1}\cdots dx_n^{a_n}\f$. */
       const X& operator[](const MultiIndex& a) const; 
+
+      /*! \brief Inplace addition. */
+      TaylorVariable<X>& operator+=(const TaylorVariable<X>& x);
+      /*! \brief Inplace multiplication. */
+      TaylorVariable<X>& operator*=(const X& x);
+      /*! \brief Inplace division. */
+      TaylorVariable<X>& operator/=(const X& x);
 #ifdef DOXYGEN
     //@{ 
     //! \name Friend operations

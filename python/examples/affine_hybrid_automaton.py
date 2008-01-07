@@ -16,7 +16,7 @@
 
 from ariadne import *
 
-#print dir()
+print dir()
 
 space=PolyhedralSet(Rectangle("[-7.5,7.5]x[-7.5,7.5]"))
 identity=AffineMap(Matrix("[1,0;0,1]"),Vector("[0,0]"))

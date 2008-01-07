@@ -131,7 +131,7 @@ test_rectangle()
     cout << " r1=" << r1 << endl;
     
     r1=Rectangle<R>("[0,1]x[-1,1]x[-1,0]");
-    cout << "r1.subdivide()=" << r1.subdivide() << endl;
+    cout << "r1.subdivide()=" << Geometry::subdivide(r1) << endl;
 
     try {
         string input("[ ]  [ [0,2] ]  [ [0,1], [3/4,4/3], [1,3/2] ] "

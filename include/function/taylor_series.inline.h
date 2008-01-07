@@ -21,7 +21,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+#include "numeric/rational.h"
 #include "linear_algebra/vector.h"
+#include "function/function_series.h"
 
 namespace Ariadne {
 
@@ -169,7 +171,7 @@ template<class X> inline
 Function::TaylorSeries<X> 
 Function::rec(const TaylorSeries<X>& x)
 {
-  return compose(TaylorSeries<X>::rec(x.degree(),x.value()),x);
+  return compose(FunctionSeries<X>::rec(x.degree(),x.value()),x);
 }
 
 
@@ -220,77 +222,77 @@ template<class X> inline
 Function::TaylorSeries<X> 
 Function::pow(const TaylorSeries<X>& x, const uint& k)
 {
-  return compose(TaylorSeries<X>::pow(x.degree(),x.value(),k),x);
+  return compose(FunctionSeries<X>::pow(x.degree(),x.value(),k),x);
 }
 
 template<class X> inline
 Function::TaylorSeries<X> 
 Function::pow(const TaylorSeries<X>& x, const int& k)
 {
-  return compose(TaylorSeries<X>::pow(x.degree(),x.value(),uint(k)),x);
+  return compose(FunctionSeries<X>::pow(x.degree(),x.value(),uint(k)),x);
 }
 
 template<class X>  
 Function::TaylorSeries<X> 
 Function::sqrt(const TaylorSeries<X>& x) 
 {
-  return compose(TaylorSeries<X>::sqrt(x.degree(),x.value()),x);
+  return compose(FunctionSeries<X>::sqrt(x.degree(),x.value()),x);
 }
 
 template<class X>  
 Function::TaylorSeries<X> 
 Function::exp(const TaylorSeries<X>& x) 
 {
-  return compose(TaylorSeries<X>::exp(x.degree(),x.value()),x);
+  return compose(FunctionSeries<X>::exp(x.degree(),x.value()),x);
 }
 
 template<class X>  
 Function::TaylorSeries<X> 
 Function::log(const TaylorSeries<X>& x) 
 {
-  return compose(TaylorSeries<X>::log(x.degree(),x.value()),x);
+  return compose(FunctionSeries<X>::log(x.degree(),x.value()),x);
 }
 
 template<class X>  
 Function::TaylorSeries<X> 
 Function::sin(const TaylorSeries<X>& x) 
 {
-  return compose(TaylorSeries<X>::sin(x.degree(),x.value()),x);
+  return compose(FunctionSeries<X>::sin(x.degree(),x.value()),x);
 }
 
 template<class X>  
 Function::TaylorSeries<X> 
 Function::cos(const TaylorSeries<X>& x) 
 {
-  return compose(TaylorSeries<X>::cos(x.degree(),x.value()),x);
+  return compose(FunctionSeries<X>::cos(x.degree(),x.value()),x);
 }
 
 template<class X>  
 Function::TaylorSeries<X> 
 Function::tan(const TaylorSeries<X>& x) 
 {
-  return compose(TaylorSeries<X>::tan(x.degree(),x.value()),x);
+  return compose(FunctionSeries<X>::tan(x.degree(),x.value()),x);
 }
 
 template<class X>  
 Function::TaylorSeries<X> 
 Function::asin(const TaylorSeries<X>& x) 
 {
-  return compose(TaylorSeries<X>::asin(x.degree(),x.value()),x);
+  return compose(FunctionSeries<X>::asin(x.degree(),x.value()),x);
 }
 
 template<class X>  
 Function::TaylorSeries<X> 
 Function::acos(const TaylorSeries<X>& x) 
 {
-  return compose(TaylorSeries<X>::acos(x.degree(),x.value()),x);
+  return compose(FunctionSeries<X>::acos(x.degree(),x.value()),x);
 }
 
 template<class X>  
 Function::TaylorSeries<X> 
 Function::atan(const TaylorSeries<X>& x) 
 {
-  return compose(TaylorSeries<X>::atan(x.degree(),x.value()),x);
+  return compose(FunctionSeries<X>::atan(x.degree(),x.value()),x);
 }
 
 
@@ -395,117 +397,6 @@ Function::operator/=(TaylorSeries<X>& x, const R& c)
 
 
 
-
-
-
-
-inline
-Function::TaylorSeries<Numeric::Rational>::TaylorSeries() 
-  : _data(1u)
-{
-}
-
-inline
-Function::TaylorSeries<Numeric::Rational>::TaylorSeries(smoothness_type d) 
-  : _data(d+1u)
-{
-}
-
-template<class XX> inline
-Function::TaylorSeries<Numeric::Rational>::TaylorSeries(smoothness_type d, const XX* ptr) 
-  : _data(ptr,ptr+d+1)
-{
-}
-
-template<class XX> inline
-Function::TaylorSeries<Numeric::Rational>::TaylorSeries(const TaylorSeries<XX>& ts) 
-  : _data(ts.data())
-{
-}
-
-template<class XX> inline
-Function::TaylorSeries<Numeric::Rational>&
-Function::TaylorSeries<Numeric::Rational>::operator=(const TaylorSeries<XX>& ts) 
-{
-  this->_data=ts.data();
-  return *this;
-}
-
-template<class XX> inline
-Function::TaylorSeries<Numeric::Rational>&
-Function::TaylorSeries<Numeric::Rational>::operator=(const XX& c) 
-{
-  this->_data[0]=c;
-  return *this;
-}
-
-inline
-smoothness_type 
-Function::TaylorSeries<Numeric::Rational>::degree() const 
-{
-  return this->_data.size()-1;
-}
-
-inline 
-const Numeric::Rational& 
-Function::TaylorSeries<Numeric::Rational>::value() const
-{
-  return this->_data[0];
-}
-
-inline 
-Numeric::Rational& 
-Function::TaylorSeries<Numeric::Rational>::value() 
-{
-  return this->_data[0];
-}
-
-inline
-const array<Numeric::Rational>& 
-Function::TaylorSeries<Numeric::Rational>::data() const
-{
-  return this->_data;
-}
-
-inline
-array<Numeric::Rational>& 
-Function::TaylorSeries<Numeric::Rational>::data() 
-{
-  return this->_data;
-}
-
-inline 
-const Numeric::Rational& 
-Function::TaylorSeries<Numeric::Rational>::operator[](const smoothness_type& j) const
-{
-  return this->_data[j];
-}
-
-inline
-Numeric::Rational& 
-Function::TaylorSeries<Numeric::Rational>::operator[](const smoothness_type& j)
-{
-  return this->_data[j];
-}
-
-inline
-Function::TaylorSeries<Numeric::Rational>
-Function::TaylorSeries<Numeric::Rational>::constant(smoothness_type d, const Numeric::Rational& c)
-{
-  TaylorSeries<Numeric::Rational> result(d);
-  result[0]=c;
-  return result;
-}
-
-inline
-Function::TaylorSeries<Numeric::Rational>
-Function::TaylorSeries<Numeric::Rational>::variable(smoothness_type d, const Numeric::Rational& c)
-{
-  TaylorSeries<Numeric::Rational> result(d);
-  result[0]=c;
-  result[1]=1;
-  return result;
-}
 
 
 

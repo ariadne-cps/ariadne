@@ -53,8 +53,7 @@ std::ostream& operator<<(std::ostream& os, const OrbitWrapper<T,R>& orbit) {
 template<class R>
 void export_orbit() 
 {
-  typedef Zonotope<R,UniformErrorTag> ZBS;
-  //class_< OrbitWrapper<Numeric::Integer,R>, boost::noncopyable > orbit_class("Orbit",init<>());
+  typedef Zonotope<R> ZBS;
   class_< Orbit<Numeric::Integer,ZBS>, boost::noncopyable > orbit_class("Orbit",init<>());
   orbit_class.def(self_ns::str(self));
 }

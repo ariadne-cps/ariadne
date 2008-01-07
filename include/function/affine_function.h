@@ -35,7 +35,6 @@
 
 #include "linear_algebra/declarations.h"
 #include "linear_algebra/vector.h"
-#include "linear_algebra/matrix.h"
 
 #include "geometry/declarations.h"
 
@@ -63,18 +62,15 @@ namespace Ariadne {
       /*! \brief Default constructor constructs a function on a zero-dimensional space. */
       explicit AffineFunction() {}
       /*! \brief Construct from the matrix \f$A\f$ and the vector \f$b\f$. */
-      explicit AffineFunction(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b)
+      explicit AffineFunction(const LinearAlgebra::Matrix<F>& A, const LinearAlgebra::Vector<F>& b)
         : _a(A), _b(b) { }
       /*! \brief Construct a linear function from the matrix \f$A\f$. */
-      explicit AffineFunction(const LinearAlgebra::Matrix<R>& A)
+      explicit AffineFunction(const LinearAlgebra::Matrix<F>& A)
         : _a(A), _b(A.number_of_rows()) { }
       /*! \brief Construct a translation from the vector \f$b\f$. */
-      explicit AffineFunction(const LinearAlgebra::Vector<R>& b)
+      explicit AffineFunction(const LinearAlgebra::Vector<F>& b)
         : _a(LinearAlgebra::Matrix<R>::identity(b.size())), _b(b) { }
       
-      /*! \brief Type conversion constructor. */
-      template<class RR> AffineFunction(const AffineFunction<RR>& f) : _a(f._a), _b(f._b) { }
-
       /*! \brief Copy constructor. */
       AffineFunction(const AffineFunction<R>& f)
         : _a(f._a), _b(f._b) { }
@@ -82,22 +78,21 @@ namespace Ariadne {
       AffineFunction<R>& operator=(const AffineFunction<R>& f) {
         this->_a=f._a; this->_b=f._b; return *this; }
       /*! \brief Returns a pointer to a dynamically-allocated copy of the function. */
-      AffineFunction<R>* clone() const { 
-        return new AffineFunction<R>(*this); }
+      AffineFunction<R>* clone() const { return new AffineFunction<R>(*this); }
 
       
       /*! \brief  An approximation to the image of an approximate point. */
-      LinearAlgebra::Vector<F> evaluate(const LinearAlgebra::Vector<F>& x) const { 
-        return _a*x+_b; }
+      LinearAlgebra::Vector<F> evaluate(const LinearAlgebra::Vector<F>& x) const;
       /*! \brief The Jacobian derivative matrix at a point. */
-      LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<F>& pt) const { 
-        return _a; }
+      LinearAlgebra::Matrix<F> jacobian(const LinearAlgebra::Vector<F>& x) const;
+      /*! \brief The Jacobian derivative matrix at a point. */
+      TaylorDerivative<F> derivative(const LinearAlgebra::Vector<F>& x, const smoothness_type& s) const;
 
            
       /*! \brief  The linear transformation of the function. */
-      const LinearAlgebra::Matrix<R>& A() const { return _a; }
+      const LinearAlgebra::Matrix<F>& A() const { return _a; }
       /*! \brief  The offset vector of the function. */
-      const LinearAlgebra::Vector<R>& b() const { return _b; }
+      const LinearAlgebra::Vector<F>& b() const { return _b; }
       
       /*! \brief The size of the result. */
       virtual size_type result_size() const {
@@ -118,8 +113,8 @@ namespace Ariadne {
       /*! \brief Write to an output stream. */
       virtual std::ostream& write(std::ostream& os) const;
      protected:
-      LinearAlgebra::Matrix<R> _a;
-      LinearAlgebra::Vector<R> _b;
+      LinearAlgebra::Matrix<F> _a;
+      LinearAlgebra::Vector<F> _b;
     };
 
 

@@ -41,13 +41,11 @@
 #include "combinatoric/lattice_set.h"
 
 #include "geometry/box.h"
-#include "geometry/zonotope.h"
-#include "geometry/list_set.h"
+#include "geometry/box_list_set.h"
 #include "geometry/grid.h"
 #include "geometry/grid_set.h"
 #include "geometry/partition_tree_set.h"
 #include "geometry/grid_approximation.h"
-#include "geometry/rectangular_set.h"
 #include "geometry/orbit.h"
 
 #include "system/grid_multimap.h"
@@ -57,8 +55,9 @@
 
 #include "evaluation/bounder_interface.h"
 #include "evaluation/integrator_interface.h"
+
+#include "evaluation/standard_bounder.h"
 #include "evaluation/lohner_integrator.h"
-#include "evaluation/bounder.h"
 
 #include "output/logging.h"
 
@@ -70,19 +69,10 @@ namespace Evaluation { static int& verbosity = applicator_verbosity; }
 
 template<class BS>
 Evaluation::VectorFieldOrbiter<BS>::VectorFieldOrbiter(const EvolutionParameters<R>& parameters, const IntegratorInterface<BS>& integrator, const ApproximatorInterface<BS>& approximator)
-  : _bounder(new Bounder<R>()),
+  : _bounder(new StandardBounder<R>()),
     _integrator(integrator.clone()),
     _approximator(approximator.clone()),
     _parameters(parameters.clone())
-{
-}
-
-
-template<class BS>
-Evaluation::VectorFieldOrbiter<BS>::VectorFieldOrbiter(const VectorFieldOrbiter<BS>& orbiter)
-  : _bounder(orbiter._bounder->clone()),
-    _integrator(orbiter._integrator->clone()),
-    _parameters(orbiter._parameters->clone())
 {
 }
 
@@ -99,12 +89,86 @@ Evaluation::VectorFieldOrbiter<BS>::clone() const
 
 
 template<class BS>
+Geometry::GridCellListSet<typename BS::real_type> 
+Evaluation::VectorFieldOrbiter<BS>::upper_evolve(const System::VectorField<R>& f, 
+                                                 const Geometry::GridCell<R>& gc, 
+                                                 const Numeric::Rational& t) const
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+  /*
+  const Geometry::Grid<R>& grid=gc.grid();
+  BS bs=this->over_approximation(Geometry::Box<R>(gc));
+  std::vector<BSL> orbit=this->_orbit(f,bs,n);
+  GCLS result=this->outer_approximation(orbit[n],grid);
+  return result;
+  */
+}
+
+template<class BS>
+Geometry::GridCellListSet<typename BS::real_type> 
+Evaluation::VectorFieldOrbiter<BS>::upper_reach(const System::VectorField<R>& f, 
+                                                const Geometry::GridCell<R>& gc, 
+                                                const Numeric::Rational& t) const
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+  /*
+  const Geometry::Grid<R>& grid=gc.grid();
+  BS bs=this->over_approximation(Geometry::Box<R>(gc));
+  std::vector<BSL> orbit=this->_orbit(f,bs,n);
+  GCLS result(grid);
+  for(size_type i=0; i!=orbit.size(); ++i) {
+    result.adjoin(this->outer_approximation(orbit[n],grid));
+  }
+  result.unique_sort();
+  return result;
+  */
+}
+
+
+template<class BS>
+Geometry::Box<typename BS::real_type>
+Evaluation::VectorFieldOrbiter<BS>::lower_evolve(const System::VectorField<R>& f, 
+                                         const Geometry::Box<R>& bx, 
+                                         const Numeric::Rational& t) const
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+  /*
+  BS bs=this->over_approximation(bx);
+  std::vector<BSL> orbit=this->_orbit(f,bs,n);
+  return this->bounding_box(orbit[n]);
+  */
+}
+
+
+template<class BS>
+Geometry::BoxListSet<typename BS::real_type>
+Evaluation::VectorFieldOrbiter<BS>::lower_reach(const System::VectorField<R>& f, 
+                                        const Geometry::Box<R>& bx, 
+                                        const Numeric::Rational& t) const
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+  /*
+  BS bs=this->over_approximation(bx);
+  std::vector<BSL> orbit=this->_orbit(f,bs,n);
+  Geometry::BoxListSet<R> result;
+  for(size_type i=0; i!=orbit.size(); ++i) {
+    result.adjoin(this->bounding_box(orbit[i]));
+  }
+  return result;
+  */
+} 
+
+
+
+/*
+
+template<class BS>
 Geometry::Orbit<Numeric::Rational,BS,BS>*
-Evaluation::VectorFieldOrbiter<BS>::orbit(const System::VectorFieldInterface<R>& vf, 
+Evaluation::VectorFieldOrbiter<BS>::orbit(const System::VectorField<R>& vf, 
                                           const Geometry::Box<R>& is, 
                                           const Numeric::Rational& t) const
 {
-  ARIADNE_LOG(4,"Orbit<Rational,Box> VectorFieldOrbiter::orbit(VectorFieldInterface,Box,Rational)\n");
+  ARIADNE_LOG(4,"Orbit<Rational,Box> VectorFieldOrbiter::orbit(VectorField,Box,Rational)\n");
   assert(t>=0);
   BS es(is);
   BS rs(es);
@@ -124,6 +188,6 @@ Evaluation::VectorFieldOrbiter<BS>::orbit(const System::VectorFieldInterface<R>&
   return orbit;
 }
 
-
+*/
 
 }

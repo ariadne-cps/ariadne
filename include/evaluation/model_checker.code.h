@@ -22,7 +22,6 @@
  */
  
 #include "model_checker.h"
-#include "orbiter_interface.h"
 
 #include <iosfwd>
 #include <string>
@@ -42,6 +41,7 @@
 #include "combinatoric/lattice_set.h"
 
 #include "geometry/box.h"
+#include "geometry/box_list_set.h"
 #include "geometry/zonotope.h"
 #include "geometry/list_set.h"
 #include "geometry/grid.h"
@@ -137,9 +137,9 @@ Evaluation::ModelChecker<R>::clone() const
 
 
 template<class R>
-Geometry::ListSet< Geometry::Box<R> >
+Geometry:: BoxListSet<R>
 Evaluation::ModelChecker<R>::evolve(const System::TransitionSystemInterface<R>& f, 
-                                    const Geometry::ListSet< Geometry::Box<R> >& initial_set,
+                                    const Geometry::BoxListSet<R>& initial_set,
                                     const Numeric::Integer& steps) const 
 {
   using namespace Numeric;
@@ -147,10 +147,10 @@ Evaluation::ModelChecker<R>::evolve(const System::TransitionSystemInterface<R>& 
   typedef Numeric::Interval<R> I;
   ARIADNE_LOG(2,"ListSet<Box> ModelChecker::reach(TransitionSystemInterface,ListSet<Box>\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
-  ListSet< Box<R> > result;
+  BoxListSet<R> result;
   R mbsr=inf<R>();
   Box<R> r;
-  for(typename ListSet< Box<R> >::const_iterator r_iter=initial_set.begin();
+  for(typename BoxListSet<R>::const_iterator r_iter=initial_set.begin();
       r_iter!=initial_set.end(); ++r_iter)
   {
     ARIADNE_LOG(6,"  computing iterate for r="<<*r_iter);
@@ -161,9 +161,9 @@ Evaluation::ModelChecker<R>::evolve(const System::TransitionSystemInterface<R>& 
 }
 
 template<class R>
-Geometry::ListSet< Geometry::Box<R> >
+Geometry::BoxListSet<R>
 Evaluation::ModelChecker<R>::reach(const System::TransitionSystemInterface<R>& f, 
-                                   const Geometry::ListSet< Geometry::Box<R> >& initial_set,
+                                   const Geometry::BoxListSet<R>& initial_set,
                                    const Numeric::Integer& steps) const 
 {
   using namespace Numeric;
@@ -171,9 +171,9 @@ Evaluation::ModelChecker<R>::reach(const System::TransitionSystemInterface<R>& f
   typedef Numeric::Interval<R> I;
   ARIADNE_LOG(2,"ListSet<Box> ModelChecker::reach(TransitionSystemInterface,ListSet<Box>\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
-  ListSet< Box<R> > result; 
+  BoxListSet<R> result; 
   Box<R> r;
-  for(typename ListSet< Box<R> >::const_iterator r_iter=initial_set.begin();
+  for(typename BoxListSet<R>::const_iterator r_iter=initial_set.begin();
       r_iter!=initial_set.end(); ++r_iter)
   {
     r=*r_iter;
@@ -184,9 +184,9 @@ Evaluation::ModelChecker<R>::reach(const System::TransitionSystemInterface<R>& f
 
 
 template<class R>
-Geometry::ListSet< Geometry::Box<R> >
+Geometry::BoxListSet<R>
 Evaluation::ModelChecker<R>::lower_reach(const System::TransitionSystemInterface<R>& f, 
-                                       const Geometry::ListSet< Geometry::Box<R> >& initial_set) const 
+                                       const Geometry::BoxListSet<R>& initial_set) const 
 {
   using namespace Numeric;
   using namespace Geometry;
@@ -195,8 +195,8 @@ Evaluation::ModelChecker<R>::lower_reach(const System::TransitionSystemInterface
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   size_type n=this->_parameters->maximum_number_of_steps();
   R mbsr=this->parameters().maximum_basic_set_radius();
-  ListSet< Box<R> > result;
-  for(typename ListSet< Box<R> >::const_iterator r_iter=initial_set.begin();
+  BoxListSet<R> result;
+  for(typename BoxListSet<R>::const_iterator r_iter=initial_set.begin();
       r_iter!=initial_set.end(); ++r_iter)
   {
     ARIADNE_LOG(6,"  computing reach for r="<<*r_iter);

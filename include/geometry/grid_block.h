@@ -130,9 +130,7 @@ namespace Ariadne {
      private: 
       static void _instantiate_geometry_operators();
      private:
-      GridBlock(const Grid<R>* gptr, const Combinatoric::LatticeBlock& lc);
-     private:
-      const Grid<R>* _grid_ptr;
+      Grid<R> _grid;
       Combinatoric::LatticeBlock _lattice_set;
     };
 

@@ -27,8 +27,10 @@
 #include "base/stlio.h"
 
 #include "geometry/box.h"
-#include "geometry/list_set.h"
+#include "geometry/box_list_set.h"
+#include "geometry/grid_cell_list_set.h"
 #include "geometry/grid_mask_set.h"
+#include "geometry/list_set.h"
 #include "output/logging.h"
 
 #include <vector>
@@ -131,9 +133,9 @@ Geometry::PartitionTreeSet<R>::subset(const Box<R>& r) const
 
 
 template<class R>
-Geometry::PartitionTreeSet<R>::operator ListSet< Box<R> >() const 
+Geometry::PartitionTreeSet<R>::operator BoxListSet<R>() const 
 {
-  ListSet< Box<R> > res(this->dimension());
+  BoxListSet<R> res(this->dimension());
   for(const_iterator iter=begin(); iter!=end(); ++iter) {
     res.push_back(Box<R>(*iter));
   }
@@ -162,6 +164,7 @@ Geometry::PartitionTreeSet<R>::_instantiate_geometry_operators()
   *pts=inner_approximation(*r,*ps,d);
   
   *pts=outer_approximation(*z,*ps,d);
+  *pts=boundary_approximation(*z,*ps,d);
   *pts=inner_approximation(*z,*ps,d);
   
   *pts=outer_approximation(*gms,*ps,d);
@@ -222,7 +225,7 @@ template<class R>
 tribool
 Geometry::subset(const Box<R>& r, const PartitionTreeSet<R>& pts)
 {
-  return subset(r,ListSet< Box<R> >(pts));
+  return subset(r,BoxListSet<R>(pts));
 }
 
 
@@ -281,6 +284,39 @@ Geometry::outer_approximation(const S& s, const PartitionScheme<R>& ps, const ui
       Combinatoric::BinaryTree::advance(word);
     }  
     else if(disjoint(s,cell)) {
+      tree.push_back(Combinatoric::BinaryTree::leaf);
+      mask.push_back(false);
+      Combinatoric::BinaryTree::advance(word);
+    }
+    else {
+      tree.push_back(Combinatoric::BinaryTree::branch);
+      word.push_back(Combinatoric::BinaryTree::left);
+    }
+  } while(!word.empty());
+  
+  return PartitionTreeSet<R>(bounding_box,subdivisions,Combinatoric::BinaryTree(tree),BooleanArray(mask));
+}
+
+template<class R, class S>
+Geometry::PartitionTreeSet<R>
+Geometry:: boundary_approximation(const S& s, const PartitionScheme<R>& ps, const uint depth)
+{
+  ARIADNE_LOG(4,"boundary_approximation(S set, PartitionScheme ps, uint depth");
+  const Box<R>& bounding_box=ps.unit_box();
+  const Combinatoric::SubdivisionSequence& subdivisions=ps.subdivisions();
+  std::vector<bool> tree;
+  std::vector<bool> mask;
+  
+  Combinatoric::BinaryWord word;
+  
+  do {
+    Box<R> cell=Box<R>(PartitionTreeCell<R>(bounding_box,subdivisions,word));
+    if(word.size()==depth+1) {
+      tree.push_back(Combinatoric::BinaryTree::leaf);
+      mask.push_back(true);
+      Combinatoric::BinaryTree::advance(word);
+    }  
+    else if(disjoint(s,cell) || superset(s,cell)) {
       tree.push_back(Combinatoric::BinaryTree::leaf);
       mask.push_back(false);
       Combinatoric::BinaryTree::advance(word);

@@ -34,6 +34,7 @@ using namespace boost::python;
   
 void export_binary_tree() {
   class_<BinaryWord>("BinaryWord",init<>())
+    .def(init<std::string>())
     .def(init<BinaryWord>())
     .def("back", &BinaryWord::back)
     .def("set_back", &BinaryWord::set_back)

@@ -31,13 +31,14 @@
 namespace Ariadne {
   namespace Evaluation {
     using namespace Numeric;
+    using namespace Geometry;
 
 #ifdef ENABLE_FLOAT64
-    template class VectorFieldEvolver<Float64>;
+    template class VectorFieldEvolver< Zonotope<Float64> >;
 #endif
   
 #ifdef ENABLE_FLOATMP
-    template class VectorFieldEvolver<FloatMP>;
+    template class VectorFieldEvolver< Zonotope<FloatMP> >;
 #endif
 
   }

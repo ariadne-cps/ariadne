@@ -29,7 +29,7 @@ template<class R> inline
 const Geometry::Grid<R>& 
 Geometry::GridCellListSet<R>::grid() const 
 {
-  return *this->_grid_ptr; 
+  return this->_grid; 
 }
 
 template<class R> inline
@@ -79,7 +79,7 @@ template<class R> inline
 typename Geometry::GridCellListSet<R>::const_iterator 
 Geometry::GridCellListSet<R>::begin() const 
 {
-  return const_iterator(*this->_grid_ptr,_lattice_set.begin()); 
+  return const_iterator(this->_grid,_lattice_set.begin()); 
 }
 
 
@@ -87,7 +87,7 @@ template<class R> inline
 typename Geometry::GridCellListSet<R>::const_iterator 
 Geometry::GridCellListSet<R>::end() const 
 {
-  return const_iterator(*this->_grid_ptr,_lattice_set.end()); 
+  return const_iterator(this->_grid,_lattice_set.end()); 
 }
 
 
@@ -128,6 +128,34 @@ void
 Geometry::GridCellListSet<R>::restrict(const GridBlock<R>& bl) 
 {
   _lattice_set.restrict(bl.lattice_set()); 
+}
+
+template<class R> inline
+void 
+Geometry::GridCellListSet<R>::restrict(const GridMaskSet<R>& gms) 
+{
+  _lattice_set.restrict(gms.lattice_set()); 
+}
+
+template<class R> inline
+void 
+Geometry::GridCellListSet<R>::remove(const GridCellListSet<R>& gcls) 
+{
+  _lattice_set.remove(gcls.lattice_set()); 
+}
+
+template<class R> inline
+void 
+Geometry::GridCellListSet<R>::restrict(const GridCellListSet<R>& gcls) 
+{
+  _lattice_set.restrict(gcls.lattice_set()); 
+}
+
+template<class R> inline
+void 
+Geometry::GridCellListSet<R>::remove(const GridMaskSet<R>& gms) 
+{
+  _lattice_set.remove(gms.lattice_set()); 
 }
 
 template<class R> inline

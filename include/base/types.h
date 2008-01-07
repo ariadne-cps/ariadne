@@ -55,6 +55,8 @@ namespace Ariadne {
     typedef unsigned short dimension_type;
     /*! \brief An integral type used to represent the smoothness of a map. */
     typedef unsigned short smoothness_type;
+    /*! \brief An unsigned integral type used to represent the depth of a tree structure. */
+    typedef unsigned short depth_type;
     /*! \brief The type used to represent dyadic numbers internally. */
     typedef double dyadic_type;
 

@@ -29,6 +29,34 @@
 
 namespace Ariadne {
 
+template<class BS>
+Geometry::Box<typename Evaluation::ApproximatorInterface<BS>::R> 
+Evaluation::ApproximatorInterface<BS>::bounding_box(const Geometry::ListSet<BS>& bs) const
+{
+  if(bs.size()==0) { 
+    return Geometry::Box<R>::empty_box(bs.dimension()); 
+  } 
+  
+  Geometry::Box<R> bb=this->bounding_box(bs[0]);
+  for(size_type i=1; i!=bs.size(); ++i) {
+    bb=rectangular_hull(bb,this->bounding_box(bs[i]));
+  }
+  return bb;
+}
+
+template<class BS>
+Geometry::GridCellListSet<typename Evaluation::ApproximatorInterface<BS>::R> 
+Evaluation::ApproximatorInterface<BS>::outer_approximation(const Geometry::ListSet<BS>& bsl, const Geometry::Grid<R>& g) const
+{
+  Geometry::GridCellListSet<R> gcls(g);
+  for(size_type i=0; i!=bsl.size(); ++i) {
+    gcls.adjoin(this->outer_approximation(bsl[i],g));
+  }
+  gcls.unique_sort();
+  return gcls;
+}
+
+  
 template<class BS> 
 void
 Evaluation::ApproximatorInterface<BS>::adjoin_outer_approximation(Geometry::GridMaskSet<R>& gms, 

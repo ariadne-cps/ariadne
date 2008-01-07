@@ -23,19 +23,22 @@
 
 #include "numeric/float.h"
 
+#include "geometry/zonotope.h"
+
 #include "evaluation/set_based_hybrid_evolver.h"
 #include "evaluation/set_based_hybrid_evolver.code.h"
 
 namespace Ariadne {
   namespace Evaluation {
     using namespace Numeric;
+    using namespace Geometry;
 
 #ifdef ENABLE_FLOAT64
-    template class SetBasedHybridEvolver<Float64>;
+    template class SetBasedHybridEvolver< Zonotope<Float64> >;
 #endif
   
 #ifdef ENABLE_FLOATMP
-    template class SetBasedHybridEvolver<FloatMP>;
+    template class SetBasedHybridEvolver< Zonotope<FloatMP> >;
 #endif
 
       

@@ -1,8 +1,8 @@
 /***************************************************************************
  *            taylor_variable.inline.h
  *
- *  Copyright 2007  Alberto Casagrande, Pieter Collins
- *  Email casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright 2007  Pieter Collins
+ *  
  ****************************************************************************/
 
 /*

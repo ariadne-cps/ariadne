@@ -23,7 +23,7 @@
 
 #include "python/float.h"
 #include "python/utilities.h"
-#include "python/read_scalar.h"
+#include "python/read_array.h"
 
 #include "linear_algebra/vector.h"
 
@@ -65,16 +65,10 @@ template<class X>
 Point<X>*
 make_point(const boost::python::object& obj) 
 {
-  // See "Extracting C++ objects" in the Boost Python tutorial
-  boost::python::list elements=boost::python::extract<boost::python::list>(obj);
-  int n=boost::python::len(elements);
-  Point<X>& pt=*new Point<X>(n);
-  for(int i=0; i!=n; ++i) {
-    pt[i]=read_scalar<X>(elements[i]);
-  }
-  return &pt;
+  array<X> ary;
+  read_array(ary,obj);
+  return new Point<X>(ary);
 }
-
 
 template<class R1, class R2> inline 
 void point_setitem(Point<R1>& p, uint i, R2 x) {

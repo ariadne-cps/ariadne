@@ -31,7 +31,7 @@
 #include <sstream>
 #include <exception>
 
-#include "base/stlio.h"
+#include "base/sequence_io.h"
 
 namespace Ariadne {
 
@@ -74,9 +74,9 @@ Geometry::Point<X>::read(std::istream& is)
   is >> c;
   is.putback(c);
   if(c=='(') {
-    Base::read_vector(is, v, '(', ')');
+    Base::read_sequence(is, v, '(', ')');
   } else if(c=='[') {
-    Base::read_vector(is, v, '[', ']');
+    Base::read_sequence(is, v, '[', ']');
   } else {
     throw InvalidInput("Invalid point input");
   }

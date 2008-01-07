@@ -252,6 +252,13 @@ inline void div_(Float64& r, const Float64& x,const int& n, RoundUp) {
 inline void div_(Float64& r, const Float64& x,const int& n, RoundApprox) {
   r._value=x._value/n; }
 
+inline void div_(Float64& r, const Float64& x,const double& y, RoundDown) {
+  r._value=Float64::rounding().div_down(x._value,y); }
+inline void div_(Float64& r, const Float64& x,const double& y, RoundUp) {
+  r._value=Float64::rounding().div_up(x._value,y); }
+inline void div_(Float64& r, const Float64& x,const double& y, RoundApprox) {
+  r._value=x._value/y; }
+
 
 inline void next_(Float64& r, const Float64& x, RoundDown) { 
   Float64 min=std::numeric_limits<double>::min();

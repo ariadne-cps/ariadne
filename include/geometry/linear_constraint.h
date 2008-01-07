@@ -41,7 +41,7 @@ namespace Ariadne {
     
     template<class R> class Point;
     template<class R> class Box;
-    template<class R0,class R1> class Zonotope;
+    template<class R> class Zonotope;
     template<class R> class Polyhedron;
 
   
@@ -49,7 +49,7 @@ namespace Ariadne {
     /*! \brief A linear inequality constraint. */
     template<class R>
     class LinearConstraint
-      : public DifferentiableConstraintInterface<R>
+      : public ConstraintInterface<R>
     {
       typedef typename Numeric::traits<R>::arithmetic_type A;
       typedef typename Numeric::traits<R>::interval_type I;

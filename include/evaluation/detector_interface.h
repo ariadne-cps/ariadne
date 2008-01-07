@@ -68,18 +68,18 @@ namespace Ariadne {
 
       /*! \brief Compute the normal derivative to of the vector field \a vf to the constraint \a c at the point \a pt.
        */
-      virtual Numeric::Interval<R> normal_derivative(const System::VectorFieldInterface<R>& vf, 
-                                                     const Geometry::DifferentiableConstraintInterface<R>& c, 
+      virtual Numeric::Interval<R> normal_derivative(const System::VectorField<R>& vf, 
+                                                     const Geometry::ConstraintInterface<R>& c, 
                                                      const Geometry::Point<I>& pt) const = 0;
 
       /*! \brief Estimate the time needed to cross a constraint. */
-      virtual Numeric::Interval<R> crossing_time(const System::VectorFieldInterface<R>& vf, 
+      virtual Numeric::Interval<R> crossing_time(const System::VectorField<R>& vf, 
                                                  const Geometry::ConstraintInterface<R>& c, 
                                                  const Geometry::Point<I>& pt, 
                                                  const Geometry::Box<R>& b) const = 0;
 
       /*! \brief Compute the value of the crossing time over a set. */
-      virtual Evaluation::TimeModel<R> crossing_time(const System::VectorFieldInterface<R>& vf, 
+      virtual Evaluation::TimeModel<R> crossing_time(const System::VectorField<R>& vf, 
                                                      const Geometry::ConstraintInterface<R>& c, 
                                                      const Geometry::Box<R>& d, 
                                                      const Geometry::Box<R>& b) const = 0;

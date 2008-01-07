@@ -50,7 +50,7 @@ namespace Ariadne {
      *                 dotv=mu*(1-x*x)*v-x
      */
 
-    ARIADNE_BUILD_VECTOR_FIELD(VanDerPolEquation,van_der_pol_function,3,1,255)
+    ARIADNE_BUILD_VECTOR_FIELD(VanDerPolEquation,van_der_pol_function,3,1,255);
 
     template<class R>
     std::ostream& operator<<(std::ostream& os, const VanDerPolEquation<R>& vdp) {

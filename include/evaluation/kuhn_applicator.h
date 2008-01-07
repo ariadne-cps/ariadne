@@ -56,7 +56,7 @@ namespace Ariadne {
       virtual KuhnApplicator<R>* clone() const { return new KuhnApplicator<R>(*this); }
 
       /*! \brief Compute the image of a zonotope set under a differentiable function. */
-      virtual Geometry::Zonotope<R> apply(const System::MapInterface<R>& f, const Geometry::Zonotope<R>& s) const;
+      virtual Geometry::Zonotope<R> apply(const System::Map<R>& f, const Geometry::Zonotope<R>& s) const;
      private:
       size_type _cascade_size;
     };

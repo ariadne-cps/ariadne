@@ -47,11 +47,7 @@
 #include "linear_algebra/matrix_function.h"
 
 #include "geometry/box.h"
-#include "geometry/parallelotope.h"
 #include "geometry/zonotope.h"
-#include "geometry/list_set.h"
-#include "geometry/grid.h"
-#include "geometry/grid_set.h"
 
 #include "system/vector_field.h"
 #include "system/affine_vector_field.h"
@@ -82,7 +78,7 @@ Evaluation::TaylorIntegrator<R>::TaylorIntegrator()
 
 template<class R>
 System::TaylorFlow<typename Evaluation::TaylorIntegrator<R>::I>
-Evaluation::TaylorIntegrator<R>::flow(const System::VectorFieldInterface<R>& vector_field, 
+Evaluation::TaylorIntegrator<R>::flow(const System::VectorField<R>& vector_field, 
                                       const Geometry::Box<R>& bounding_box) const
 {
 }
@@ -91,7 +87,7 @@ Evaluation::TaylorIntegrator<R>::flow(const System::VectorFieldInterface<R>& vec
 
 template<class R>
 Geometry::Point<typename Evaluation::TaylorIntegrator<R>::I>
-Evaluation::TaylorIntegrator<R>::flow_step(const System::VectorFieldInterface<R>& vector_field, 
+Evaluation::TaylorIntegrator<R>::flow_step(const System::VectorField<R>& vector_field, 
                                            const Geometry::Point<I>& initial_point, 
                                            const Numeric::Interval<R>& step_size, 
                                            const Geometry::Box<R>& bounding_box) const
@@ -103,7 +99,7 @@ Evaluation::TaylorIntegrator<R>::flow_step(const System::VectorFieldInterface<R>
 
 template<class R>
 Geometry::Zonotope<typename Evaluation::TaylorIntegrator<R>::I>
-Evaluation::TaylorIntegrator<R>::integration_step(const System::VectorFieldInterface<R>& vector_field, 
+Evaluation::TaylorIntegrator<R>::integration_step(const System::VectorField<R>& vector_field, 
                                                   const Geometry::Zonotope<I,I>& initial_set, 
                                                   const Numeric::Interval<R>& step_size, 
                                                   const Geometry::Box<R>& bounding_box) const
@@ -113,7 +109,7 @@ Evaluation::TaylorIntegrator<R>::integration_step(const System::VectorFieldInter
 
 template<class R>
 Geometry::Zonotope<typename Evaluation::TaylorIntegrator<R>::I>
-Evaluation::TaylorIntegrator<R>::reachability_step(const System::VectorFieldInterface<R>& vector_field, 
+Evaluation::TaylorIntegrator<R>::reachability_step(const System::VectorField<R>& vector_field, 
                                                    const Geometry::Zonotope<I,I>& initial_set, 
                                                    const Numeric::Interval<R>& step_size, 
                                                    const Geometry::Box<R>& bounding_box) const

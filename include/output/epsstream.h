@@ -189,11 +189,12 @@ namespace Ariadne {
     template<class R> epsstream& operator<<(epsstream&, const Geometry::Point<R>&); 
     template<class R> epsstream& operator<<(epsstream&, const Geometry::Box<R>&);
     template<class R> epsstream& operator<<(epsstream&, const Geometry::Rectangle<R>&);
-    template<class R, class Tag> epsstream& operator<<(epsstream&, const Geometry::Zonotope<R,Tag>&);
+    template<class R> epsstream& operator<<(epsstream&, const Geometry::Zonotope<R>&);
     template<class R> epsstream& operator<<(epsstream&, const Geometry::Polytope<R>&); 
     template<class R> epsstream& operator<<(epsstream&, const Geometry::Polyhedron<R>&); 
     template<class R> epsstream& operator<<(epsstream&, const Geometry::RectangularSet<R>&);
     template<class R> epsstream& operator<<(epsstream&, const Geometry::PolyhedralSet<R>&);
+    template<class R> epsstream& operator<<(epsstream&, const Geometry::BoxListSet<R>&); 
     template<class BS> epsstream& operator<<(epsstream&, const Geometry::ListSet<BS>&); 
     template<class R> epsstream& operator<<(epsstream&, const Geometry::GridCell<R>&); 
     template<class R> epsstream& operator<<(epsstream&, const Geometry::GridCellListSet<R>&); 

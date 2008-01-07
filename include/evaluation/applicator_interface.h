@@ -60,7 +60,11 @@ namespace Ariadne {
       //! \name Methods for applying a system to a basic set.
 
       /*! \brief Compute the image of a basic set under a continuous function. */
-      virtual BS apply(const System::MapInterface<R>& f, const BS& s) const = 0;
+      virtual BS apply(const System::Map<R>& f, const BS& bs) const = 0;
+
+      /*! \brief Compute the image of a basic set under a continuous function. */
+      BS operator() (const System::Map<R>& f, const BS& bs) const {
+        return this->apply(f,bs); }
 
       //@}
       

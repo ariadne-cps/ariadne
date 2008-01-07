@@ -68,7 +68,7 @@ Geometry::HybridDenotableSet<S>::HybridDenotableSet(const HybridSpace& locations
   for(HybridSpace::const_iterator loc_iter=locations.begin();
       loc_iter!=locations.end(); ++loc_iter)
   {
-    discrete_state_type q=loc_iter->id();
+    DiscreteState q=loc_iter->id();
     dimension_type d=loc_iter->dimension();
     this->new_location(q,d);
   }
@@ -82,7 +82,7 @@ Geometry::HybridDenotableSet<S>::HybridDenotableSet(const HybridDenotableSet<S>&
   for(typename HybridDenotableSet<S>::locations_const_iterator loc_iter=hs.locations_begin();
       loc_iter!=hs.locations_end(); ++loc_iter)
   {
-    discrete_state_type q=loc_iter->first;
+    DiscreteState q=loc_iter->first;
     const S& s=loc_iter->second;
     this->new_location(q,s);
   }
@@ -98,7 +98,7 @@ Geometry::HybridDenotableSet<S>::operator=(const HybridDenotableSet<S>& hs)
     for(locations_const_iterator loc_iter=hs.locations_begin();
         loc_iter!=hs.locations_end(); ++loc_iter)
     {
-      discrete_state_type q=loc_iter->first;
+      DiscreteState q=loc_iter->first;
       const S& s=loc_iter->second;
       this->new_location(q,s);
     }
@@ -114,7 +114,7 @@ Geometry::HybridDenotableSet<S>::HybridDenotableSet(const HybridDenotableSet<S1>
   for(typename HybridDenotableSet<S1>::locations_const_iterator loc_iter=hs.locations_begin();
       loc_iter!=hs.locations_end(); ++loc_iter)
   {
-    discrete_state_type q=loc_iter->first;
+    DiscreteState q=loc_iter->first;
     const S1& s=loc_iter->second;
     this->new_location(q,s);
   }
@@ -124,9 +124,9 @@ Geometry::HybridDenotableSet<S>::HybridDenotableSet(const HybridDenotableSet<S1>
 
 template<class DS> inline
 DS&
-Geometry::HybridDenotableSet<DS>::new_location(discrete_state_type q, dimension_type d)
+Geometry::HybridDenotableSet<DS>::new_location(DiscreteState q, dimension_type d)
 {
-  ARIADNE_CHECK_NEW_LOCATION(*this,q,"DS& HybridDenotableSet<DS>::new_location(discrete_state_type q, dimension_type d)");
+  ARIADNE_CHECK_NEW_LOCATION(*this,q,"DS& HybridDenotableSet<DS>::new_location(DiscreteState q, dimension_type d)");
   this->_component_sets.insert(std::make_pair(q,DS(d)));
   return (*this)[q];
 }
@@ -134,9 +134,9 @@ Geometry::HybridDenotableSet<DS>::new_location(discrete_state_type q, dimension_
 
 template<class DS> inline
 DS&
-Geometry::HybridDenotableSet<DS>::new_location(discrete_state_type q, const DS& s)
+Geometry::HybridDenotableSet<DS>::new_location(DiscreteState q, const DS& s)
 {
-  ARIADNE_CHECK_NEW_LOCATION(*this,q,"DS& HybridDenotableSet<DS>::new_location(discrete_state_type q, S t)");
+  ARIADNE_CHECK_NEW_LOCATION(*this,q,"DS& HybridDenotableSet<DS>::new_location(DiscreteState q, S t)");
   this->_component_sets.insert(std::make_pair(q,s));
   return (*this)[q];
 }
@@ -145,9 +145,9 @@ Geometry::HybridDenotableSet<DS>::new_location(discrete_state_type q, const DS& 
 
 template<class DS> template<class T> inline
 DS&
-Geometry::HybridDenotableSet<DS>::new_location(discrete_state_type q, const T& t)
+Geometry::HybridDenotableSet<DS>::new_location(DiscreteState q, const T& t)
 {
-  ARIADNE_CHECK_NEW_LOCATION(*this,q,"DS& HybridDenotableSet<DS>::new_location<T>(discrete_state_type q, T t)");
+  ARIADNE_CHECK_NEW_LOCATION(*this,q,"DS& HybridDenotableSet<DS>::new_location<T>(DiscreteState q, T t)");
   this->_component_sets.insert(std::make_pair(q,static_cast<DS>(t)));
 
   return (*this)[q];
@@ -156,9 +156,9 @@ Geometry::HybridDenotableSet<DS>::new_location(discrete_state_type q, const T& t
 
 template<class DS> template<class T1, class T2> inline
 DS&
-Geometry::HybridDenotableSet<DS>::new_location(discrete_state_type q, const T1& t1, const T2& t2)
+Geometry::HybridDenotableSet<DS>::new_location(DiscreteState q, const T1& t1, const T2& t2)
 {
-  ARIADNE_CHECK_NEW_LOCATION(*this,q,"DS& HybridDenotableSet<DS>::new_location<T>(discrete_state_type q, T1 t1, T2 t2)");
+  ARIADNE_CHECK_NEW_LOCATION(*this,q,"DS& HybridDenotableSet<DS>::new_location<T>(DiscreteState q, T1 t1, T2 t2)");
   this->_component_sets.insert(std::make_pair(q,static_cast<DS>(t1,t2)));
 
   return (*this)[q];
@@ -200,7 +200,7 @@ Geometry::HybridDenotableSet<DS>::number_of_locations() const
 
 template<class DS> inline
 bool 
-Geometry::HybridDenotableSet<DS>::has_location(discrete_state_type q) const
+Geometry::HybridDenotableSet<DS>::has_location(DiscreteState q) const
 { 
   return this->_component_sets.find(q)!=this->_component_sets.end();
 }
@@ -208,10 +208,10 @@ Geometry::HybridDenotableSet<DS>::has_location(discrete_state_type q) const
 
 template<class DS> inline
 DS& 
-Geometry::HybridDenotableSet<DS>::operator[](discrete_state_type q)
+Geometry::HybridDenotableSet<DS>::operator[](DiscreteState q)
 { 
   if(!this->has_location(q)) {
-    ARIADNE_THROW(InvalidLocation,"DS& HybridDenotableSet::operator[](discrete_state_type q)","this->locations()="<<this->locations()<<", q="<<q);
+    ARIADNE_THROW(InvalidLocation,"DS& HybridDenotableSet::operator[](DiscreteState q)","this->locations()="<<this->locations()<<", q="<<q);
   }
   return this->_component_sets.find(q)->second;
 }
@@ -219,10 +219,10 @@ Geometry::HybridDenotableSet<DS>::operator[](discrete_state_type q)
 
 template<class DS> inline  
 const DS& 
-Geometry::HybridDenotableSet<DS>::operator[](discrete_state_type q) const 
+Geometry::HybridDenotableSet<DS>::operator[](DiscreteState q) const 
 { 
   if(!this->has_location(q)) {
-    ARIADNE_THROW(InvalidLocation,"DS HybridDenotableSet::operator[](discrete_state_type q) const","this->locations()="<<this->locations()<<", q="<<q);
+    ARIADNE_THROW(InvalidLocation,"DS HybridDenotableSet::operator[](DiscreteState q) const","this->locations()="<<this->locations()<<", q="<<q);
   }
   return this->_component_sets.find(q)->second;
 }
@@ -286,10 +286,18 @@ Geometry::HybridDenotableSet<DS>::bounded() const
 
 template<class DS> template<class T> inline  
 void 
-Geometry::HybridDenotableSet<DS>::adjoin(discrete_state_type q, const T& t) 
+Geometry::HybridDenotableSet<DS>::adjoin(DiscreteState q, const T& t) 
 {
-  ARIADNE_CHECK_LOCATION(*this,q,"HybridDenotableSet<DS>::adjoin<T>(discrete_state_type q, T t)");
+  ARIADNE_CHECK_LOCATION(*this,q,"HybridDenotableSet<DS>::adjoin<T>(DiscreteState q, T t)");
   (*this)[q].adjoin(t);
+}
+
+template<class DS> template<class T> inline  
+void 
+Geometry::HybridDenotableSet<DS>::adjoin(const std::pair<DiscreteState,T>& pair)
+{
+  ARIADNE_CHECK_LOCATION(*this,pair.first,"HybridDenotableSet<DS>::adjoin<T>(pair<DS,T>)")
+  (*this)[pair.first].adjoin(pair.second);
 }
 
 
@@ -313,8 +321,8 @@ template<class DS> template<class T> inline
 void 
 Geometry::HybridDenotableSet<DS>::adjoin(const HybridBasicSet<T>& hbs) 
 {
-  ARIADNE_CHECK_LOCATION(*this,hbs.discrete_state(),"HybridDenotableSet<S>::adjoin<T>(discrete_state_type q, T t)");
-  (*this)[hbs.discrete_state()].adjoin(hbs.continuous_state_set());
+  ARIADNE_CHECK_LOCATION(*this,hbs.state(),"HybridDenotableSet<S>::adjoin<T>(DiscreteState q, T t)");
+  (*this)[hbs.state()].adjoin(hbs.set());
 }
 
 
@@ -327,7 +335,7 @@ Geometry::HybridDenotableSet<DS>::adjoin(const HybridDenotableSet<DSA>& hs)
   for(typename HybridDenotableSet<DSA>::locations_const_iterator loc_iter=hs.locations_begin();
       loc_iter!=hs.locations_end(); ++loc_iter)
   {
-    discrete_state_type q=loc_iter->first;
+    DiscreteState q=loc_iter->first;
     const DSA& s=loc_iter->second;
     (*this)[q].adjoin(s);
   }
@@ -343,7 +351,7 @@ Geometry::HybridDenotableSet<DS>::restrict(const HybridDenotableSet<DSA>& hs)
   for(typename HybridDenotableSet<DSA>::locations_const_iterator loc_iter=hs.locations_begin();
       loc_iter!=hs.locations_end(); ++loc_iter)
   {
-    discrete_state_type q=loc_iter->first;
+    DiscreteState q=loc_iter->first;
     const DSA s=loc_iter->second;
     (*this)[q].restrict(s);
   }
@@ -359,7 +367,7 @@ Geometry::HybridDenotableSet<DS>::remove(const HybridDenotableSet<DSA>& hs)
   for(typename HybridDenotableSet<DSA>::locations_const_iterator loc_iter=hs.locations_begin();
       loc_iter!=hs.locations_end(); ++loc_iter)
   {
-    discrete_state_type q=loc_iter->first;
+    DiscreteState q=loc_iter->first;
     const DSA& s=loc_iter->second;
     (*this)[q].remove(s);
   }
@@ -435,6 +443,13 @@ Geometry::HybridDenotableSet<DS>::write(std::ostream& os) const
   return os;
 }
 
+
+template<class R> inline
+std::ostream& 
+Geometry::operator<<(std::ostream& os, const HybridGrid<R>& hs)
+{ 
+  return os << "HybridGrid(...)";
+}
 
 template<class DS> inline
 std::ostream& 

@@ -43,16 +43,13 @@
 #include "geometry/exceptions.h"
 #include "geometry/point.h"
 #include "geometry/box.h"
-#include "geometry/box.h"
-#include "geometry/rectangular_set.h"
-#include "geometry/list_set.h"
+#include "geometry/box_list_set.h"
 #include "geometry/grid_set.h"
+#include "geometry/partition_tree_set.h"
+#include "geometry/rectangle.h"
 #include "geometry/zonotope.h"
 #include "geometry/polytope.h"
-#include "geometry/polyhedral_set.h"
-#include "geometry/partition_tree_set.h"
-#include "system/affine_map.h"
- 
+#include "geometry/list_set.h"
 
 
 namespace Ariadne {
@@ -61,12 +58,6 @@ namespace Ariadne {
     class textstream;
     class textfstream;
     
-    template<class BS> std::string summary(const Geometry::ListSet<BS>& ls);
-    template<class R> std::string summary(const Geometry::GridCellListSet<R>& gcls);
-    template<class R> std::string summary(const Geometry::GridMaskSet<R>& gms);
-
-
-
     /*!\brief A stream for readable textual output. */
     class textstream
     {
@@ -130,17 +121,20 @@ namespace Ariadne {
     }
       
     template<class R> textstream& operator<<(textstream&, const Geometry::Point<R>&); 
-    template<class R> textstream& operator<<(textstream&, const Geometry::PointList<R>&); 
     template<class R> textstream& operator<<(textstream&, const Geometry::Box<R>&);
-    template<class R, class Tag> textstream& operator<<(textstream&, const Geometry::Zonotope<R,Tag>&);
-    template<class R> textstream& operator<<(textstream&, const Geometry::Polytope<R>&); 
-    template<class R> textstream& operator<<(textstream&, const Geometry::Polyhedron<R>&); 
-    template<class R> textstream& operator<<(textstream&, const Geometry::RectangularSet<R>&);
-    template<class R> textstream& operator<<(textstream&, const Geometry::PolyhedralSet<R>&);
-    template<class BS> textstream& operator<<(textstream&, const Geometry::ListSet<BS>&); 
+    template<class R> textstream& operator<<(textstream&, const Geometry::GridCell<R>&);
+
+    template<class R> textstream& operator<<(textstream&, const Geometry::PointList<R>&);
+    template<class R> textstream& operator<<(textstream&, const Geometry::BoxListSet<R>&);
     template<class R> textstream& operator<<(textstream&, const Geometry::GridCellListSet<R>&); 
     template<class R> textstream& operator<<(textstream&, const Geometry::GridMaskSet<R>&); 
     template<class R> textstream& operator<<(textstream&, const Geometry::PartitionTreeSet<R>&); 
+
+    template<class R> textstream& operator<<(textstream&, const Geometry::Zonotope<R>&);
+    template<class R> textstream& operator<<(textstream&, const Geometry::Polytope<R>&); 
+    template<class R> textstream& operator<<(textstream&, const Geometry::Polyhedron<R>&); 
+    template<class BS> textstream& operator<<(textstream&, const Geometry::ListSet<BS>&); 
+
     template<class R> textstream& operator<<(textstream&, const Geometry::SetInterface<R>&); 
 
     template<class R> textstream& operator<<(textstream&, const Geometry::FiniteGrid<R>&); 
@@ -161,20 +155,6 @@ namespace Ariadne {
 
     template<class R> inline
     textstream&
-    operator<<(textstream& txt, const Geometry::PointList<R>& pl)
-    {
-      if(pl.size() > 0) {
-        for (size_type i=0; i<pl.size(); i++) {
-          txt.write(pl[i]);			
-        }
-        txt.writenl();
-      }
-      return txt;
-    }
-
-
-    template<class R> inline
-    textstream&
     operator<<(textstream& txt, const Geometry::Box<R>& bx) 
     {
       txt.ostream() << bx;
@@ -184,67 +164,25 @@ namespace Ariadne {
 
     template<class R> inline
     textstream&
-    operator<<(textstream& txt, const Geometry::Rectangle<R>& r)
+    operator<<(textstream& txt, const Geometry::PointList<R>& pl)
     {
-      txt.ostream() << r;
-      return txt;
-    }
-
-    template<class R> inline
-    textstream&
-    operator<<(textstream& txt, const Geometry::RectangularSet<R>& rs)
-    {
-      txt.ostream() << Geometry::Rectangle<R>(rs);
-      return txt;
-    }
-
-    
-    template<class R,class Tag> inline
-    textstream&
-    operator<<(textstream& txt, const Geometry::Zonotope<R,Tag>& z)
-    { 
-      txt.ostream()<< z;
-      return txt;
-    }
-
-       
-       
-       
-    template<class R> inline
-    textstream&
-    operator<<(textstream& txt, const Geometry::Polytope<R>& p)
-    {
-      return txt << p.vertices();
-    }
-
-    
-    template<class R> inline
-    textstream&
-    operator<<(textstream& txt, const Geometry::Polyhedron<R>& p)
-    {
-      return txt << Geometry::Polytope<Numeric::Rational>(p);
-    }
-
-
-    template<class R> inline
-    textstream&
-    operator<<(textstream& txt, const Geometry::PolyhedralSet<R>& ps)
-    {
-      return txt << Geometry::Polyhedron<R>(ps);
-    }
-
-    
-    template<class BS> inline
-    textstream&
-    operator<<(textstream& txt, const Geometry::ListSet<BS>& ds)
-    {
-      typedef typename Geometry::ListSet<BS>::const_iterator const_iterator;
-      for(const_iterator set_iter=ds.begin(); set_iter!=ds.end(); ++set_iter) {
-        txt << *set_iter;
+      if(pl.size() > 0) {
+        for (size_type i=0; i<pl.size(); i++) {
+          txt.write(pl[i]);			
+        }
       }
       return txt;
     }
+
+    template<class R> inline
+    textstream&
+    operator<<(textstream& txt, const Geometry::BoxListSet<R>& bxls) 
+    {
+      txt.ostream() << bxls;
+      return txt;
+    }
     
+
 
  
     template<class R> inline
@@ -302,100 +240,59 @@ namespace Ariadne {
 
     template<class R> inline
     textstream&
-    operator<<(textstream& txt, const Geometry::SetInterface<R>& set)
+    operator<<(textstream& txt, const Geometry::Rectangle<R>& r)
     {
-      using namespace Geometry;
-      typedef Numeric::Interval<R> I;
-      
-      if(dynamic_cast<const RectangularSet<R>*>(&set)) {
-        return txt << dynamic_cast<const RectangularSet<R>&>(set);
-      } else if(dynamic_cast<const PolyhedralSet<R>*>(&set)) {
-        return txt << dynamic_cast<const PolyhedralSet<R>&>(set);
-      } else if(dynamic_cast<const ListSet< Box<R> >*>(&set)) {
-        return txt << dynamic_cast<const ListSet< Box<R> >&>(set);
-      } else if(dynamic_cast<const ListSet< Zonotope<R,R> >*>(&set)) {
-        return txt << dynamic_cast<const ListSet< Zonotope<R,R> >&>(set);
-      } else if(dynamic_cast<const ListSet< Zonotope<I,R> >*>(&set)) {
-        return txt << dynamic_cast<const ListSet< Zonotope<I,R> >&>(set);
-      } else if(dynamic_cast<const ListSet< Zonotope<I,I> >*>(&set)) {
-        return txt << dynamic_cast<const ListSet< Zonotope<I,I> >&>(set);
-      } else if(dynamic_cast<const GridCellListSet<R>*>(&set)) {
-        return txt << dynamic_cast<const GridCellListSet<R>&>(set);
-      } else if(dynamic_cast<const GridMaskSet<R>*>(&set)) {
-        return txt << dynamic_cast<const GridMaskSet<R>&>(set);
-      } else if(dynamic_cast<const PartitionTreeSet<R>*>(&set)) {
-        return txt << dynamic_cast<const PartitionTreeSet<R>&>(set);
-      }  else {
-        Box<R> bb;
-        try {
-          bb=set.bounding_box();
-        } 
-        catch(Geometry::UnboundedSet& e) {
-            throw e;
-          }
-        Geometry::PartitionScheme<R> ps(bb);
-        int depth=16;
-        Geometry::PartitionTreeSet<R> pts=Geometry::outer_approximation(set,ps,depth);
-        return txt << pts;
-      }
-    }
-
-
-    template<class R> inline
-    textstream&
-    operator<<(textstream& txt, const Geometry::FiniteGrid<R>& fg)
-    {
-      Geometry::GridCellListSet<R> gcls(fg.grid());
-      gcls.adjoin(Geometry::GridBlock<R>(fg.grid(),fg.lattice_block()));
-      txt << gcls;
+      txt.ostream() << r;
       return txt;
     }
 
-
+    
     template<class R> inline
     textstream&
-    operator<<(textstream& txt, const Geometry::PartitionTree<R>& pt)
+    operator<<(textstream& txt, const Geometry::Zonotope<R>& z)
+    { 
+      txt.ostream()<< z;
+      return txt;
+    }
+
+       
+    template<class R> inline
+    textstream&
+    operator<<(textstream& txt, const Geometry::Polytope<R>& p)
     {
-      for(typename Geometry::PartitionTree<R>::const_iterator iter = pt.begin(); iter!=pt.end(); ++iter) {
-        txt << Geometry::Box<R>(*iter);
+      return txt << p.vertices();
+    }
+
+    
+    template<class R> inline
+    textstream&
+    operator<<(textstream& txt, const Geometry::Polyhedron<R>& p)
+    {
+      return txt << Geometry::Polytope<Numeric::Rational>(p);
+    }
+
+
+    
+    template<class BS> inline
+    textstream&
+    operator<<(textstream& txt, const Geometry::ListSet<BS>& ds)
+    {
+      typedef typename Geometry::ListSet<BS>::const_iterator const_iterator;
+      for(const_iterator set_iter=ds.begin(); set_iter!=ds.end(); ++set_iter) {
+        txt << *set_iter;
       }
       return txt;
     }
     
 
-    template<class BS> inline
-    std::string
-    summary(const Geometry::ListSet<BS>& ls) {
-      std::stringstream ss;
-      ss << "ListSet( size=" << ls.size() << " )";
-      return ss.str();
+    template<class R> inline
+    textstream&
+    operator<<(textstream& txt, const Geometry::SetInterface<R>& set)
+    {
+      return txt.ostream() << set;
     }
 
-    template<class R> inline
-    std::string
-    summary(const Geometry::GridCellListSet<R>& gcls) {
-      std::stringstream ss;
-      ss << "GridCellListSet( grid=" << gcls.grid() << ", size=" << gcls.size() << " )";
-      return ss.str();
-    }
 
-    template<class R> inline
-    std::string
-    summary(const Geometry::GridMaskSet<R>& gms) {
-      std::stringstream ss;
-      ss << "GridMaskSet( grid=" << gms.grid() << ", extent=" << gms.extent() << ", block=" << gms.block()
-         << ", size=" << gms.size() << ", capacity=" << gms.capacity() << " )";
-      return ss.str();
-    }
-
-    template<class R> inline
-    std::string
-    summary(const Geometry::PartitionTreeSet<R>& pts) {
-      std::stringstream ss;
-      ss << "PartitionTreeSet( unit_box" << pts.unit_box() << ", subdivisions=" << pts.subdivisions()
-         << ", size=" << pts.size() << ", capacity=" << pts.capacity() << " )";
-      return ss.str();
-    }
 
   }
 }

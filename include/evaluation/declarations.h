@@ -31,17 +31,20 @@
 namespace Ariadne { 
   namespace Evaluation {
 
+    enum Semantics { lower_semantics, upper_semantics }; 
+    enum EvolutionType { evolve, reach };
+
+
     template<class R> class SolverInterface;
   
     template<class R> class BounderInterface;
     template<class R> class DetectorInterface;
 
     template<class BS> class ApproximatorInterface;
+    template<class BS> class SubdividerInterface;
+    template<class BS> class SatisfierInterface;
     template<class BS> class ApplicatorInterface;
     template<class BS> class IntegratorInterface;
-    template<class BS> class DifferentiableIntegratorInterface;
-    template<class BS> class MapOrbiterInterface;
-    template<class BS> class VectorFieldOrbiterInterface;
 
     template<class R> class EvolutionParameters;
 

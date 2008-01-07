@@ -33,6 +33,7 @@
 
 #include "base/exceptions.h"
 #include "geometry/declarations.h"
+#include "geometry/timed_set.h"
 
 namespace Ariadne {
 
@@ -45,18 +46,6 @@ namespace Ariadne {
 
     template<class T, class ES, class RS> class Orbit;
 
-
-    template<class T, class S> 
-    class TimedSet 
-    {
-     public:
-      template<class TT, class SS> TimedSet(const TT& t, const SS& s) : _t(t), _s(s) { }
-      const T& time() const { return this->_t; }
-      const S& set() const { return this->_s; }
-     private:
-      T _t;
-      S _s;
-    };
 
     template<class T, class ES, class RS=ES> 
     class dSet 
@@ -173,13 +162,6 @@ namespace Ariadne {
       //@}
     };
 
-    
-    template<class T, class BS>
-    std::ostream& 
-    operator<<(std::ostream& os, const TimedSet<T,BS> ts) 
-    {
-      return os<<ts.time()<<":"<<ts.set();
-    }
     
     template<class BS>
     std::ostream& 

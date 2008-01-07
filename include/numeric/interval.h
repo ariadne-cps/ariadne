@@ -41,6 +41,8 @@
 
 #include "numeric/interval.class.h"
 
+#include "numeric/interval_integer.h" // For explicit specialization of Integer interval
+//#include "numeric/interval_rational.h" // For explicit specialization of Rational interval
 
 namespace TBLAS {
   template<class real> int iamax_ (const int N, const real *X, const int incX);

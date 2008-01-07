@@ -45,7 +45,7 @@ template<class R> inline
 const Geometry::Grid<R>& 
 Geometry::GridMaskSet<R>::grid() const 
 {
-  return *this->_grid_ptr; 
+  return this->_grid; 
 }
 
 template<class R> inline
@@ -111,20 +111,20 @@ template<class R> inline
 Geometry::GridCell<R> 
 Geometry::GridMaskSet<R>::operator[](size_type i) const 
 {
-  return GridCell<R>(*this->_grid_ptr,_lattice_set[i]); 
+  return GridCell<R>(this->_grid,_lattice_set[i]); 
 }
 
 template<class R> inline
 typename Geometry::GridMaskSet<R>::const_iterator 
 Geometry::GridMaskSet<R>::begin() const 
 {
-  return const_iterator(*this->_grid_ptr,this->_lattice_set.begin()); 
+  return const_iterator(this->_grid,this->_lattice_set.begin()); 
 }
 template<class R> inline
 typename Geometry::GridMaskSet<R>::const_iterator 
 Geometry::GridMaskSet<R>::end() const 
 {
-  return const_iterator(*this->_grid_ptr,this->_lattice_set.end()); 
+  return const_iterator(this->_grid,this->_lattice_set.end()); 
 }
 
 

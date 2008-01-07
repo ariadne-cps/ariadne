@@ -29,9 +29,11 @@
 #include "linear_algebra/covector.h"
 #include "linear_algebra/matrix.h"
 
-#include "python/utilities.h"
+#include "python/name.h"
+#include "python/subscripting.h"
+#include "python/operators.h"
 #include "python/float.h"
-#include "python/read_scalar.h"
+#include "python/read_array.h"
 
 using namespace Ariadne;
 using Numeric::Rational;
@@ -65,15 +67,9 @@ template<class X>
 Covector<X>*
 make_covector(const boost::python::object& obj) 
 {
-  // See "Extracting C++ objects" in the Boost Python tutorial
-  typedef typename Numeric::traits<X>::number_type R;
-  boost::python::list elements=boost::python::extract<boost::python::list>(obj);
-  int n=boost::python::len(elements);
-  Covector<X>& cv=*new Covector<X>(n);
-  for(int i=0; i!=n; ++i) {
-    cv(i)=read_scalar<X>(elements[i]);
-  }
-  return &cv;
+  Covector<X>* cv=new Covector<X>;
+  read_array(cv->data(),obj);
+  return cv;
 }
 
 

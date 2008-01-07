@@ -31,11 +31,11 @@ namespace Ariadne {
     using namespace Numeric;
     
 #ifdef ENABLE_FLOAT64
-    template class MapInterface<Float64>;
+    template class Map<Float64>;
 #endif
     
 #ifdef ENABLE_FLOATMP
-    template class MapInterface<FloatMP>;
+    template class Map<FloatMP>;
 #endif
     
   }

@@ -109,7 +109,7 @@ namespace Ariadne {
      * \ingroup PartitionTree
      * \brief A rectangular cell in a partition tree.
      *
-     * Defined as a SubdivisionTreeCell within a base cell given as a Box<R>.
+     * Defined as a SubdivisionCell within a base cell given as a Box<R>.
      *
      * Satisfies the requirements of a RectangleExpression.
      */
@@ -126,7 +126,7 @@ namespace Ariadne {
       typedef Point<R> state_type;
 
       /*!\brief Construct from a rectangle, and a unit partition tree cell. */
-      PartitionTreeCell(const Box<R>& r, const Combinatoric::SubdivisionTreeCell& c);
+      PartitionTreeCell(const Box<R>& r, const Combinatoric::SubdivisionCell& c);
 
       /*!\brief Construct from a rectangle, the subdivision_coordinates and a binary word. */
       PartitionTreeCell(const Box<R>& r, 
@@ -137,7 +137,7 @@ namespace Ariadne {
       const Box<R>& unit_box() const;
 
       /*!\brief The cell in a unit box. */
-      const Combinatoric::SubdivisionTreeCell& subdivision_cell() const;
+      const Combinatoric::SubdivisionCell& subdivision_cell() const;
 
       /*!\brief The dimension of the cell. */
       dimension_type dimension() const;
@@ -161,7 +161,7 @@ namespace Ariadne {
       std::ostream& write(std::ostream&) const;
      private:
       Box<R> _unit_box;
-      Combinatoric::SubdivisionTreeCell _subdivision_cell;
+      Combinatoric::SubdivisionCell _subdivision_cell;
     };
 
 
@@ -305,8 +305,8 @@ namespace Ariadne {
       virtual Box<R> bounding_box() const;
       //@}
 
-      /*! \brief Convert to a ListSet of Box. */
-      operator ListSet< Box<R> > () const;
+      /*! \brief Convert to a BoxListSet. */
+      operator BoxListSet<R> () const;
 
       /*! \brief The unit box containing the partition tree set. */
       const Box<R>& unit_box() const;
@@ -364,6 +364,10 @@ namespace Ariadne {
       friend template<class SetInterface>
       PartitionTreeSet<R> outer_approximation(const SetInterface& s, const PartitionScheme<R>& ps, const uint depth);
 
+      /*! \brief Compute an outer approximation to the boundary of set \a s based on the partition scheme \a ps to depth a d. */
+      friend template<class SetInterface>
+      PartitionTreeSet<R> boundary_approximation(const SetInterface& s, const PartitionScheme<R>& ps, const uint depth);
+
       /*! \brief Compute an inner approximation to set \a s based on the partition scheme \a ps to depth a d. */
       friend template<class SetInterface>
       PartitionTreeSet<R> inner_approximation(const SetInterface& s, const PartitionScheme<R>& ps, const uint depth);
@@ -399,6 +403,9 @@ namespace Ariadne {
     
     template<class R, class S>
     PartitionTreeSet<R> outer_approximation(const S& s, const PartitionScheme<R>& ps, const uint depth);
+    
+    template<class R, class S>
+    PartitionTreeSet<R> boundary_approximation(const S& s, const PartitionScheme<R>& ps, const uint depth);
     
     template<class R, class S>
     PartitionTreeSet<R> inner_approximation(const S& s, const PartitionScheme<R>& ps, const uint depth);

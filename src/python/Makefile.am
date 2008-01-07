@@ -30,16 +30,19 @@ ariadne_la_SOURCES=$(ARIADNE_SRC)
 ariadne_la_LIBADD = ../libariadne.la
 
 ARIADNE_SRC = ariadne_module.cc \
+	read_scalar.cc \
+	 \
 	export_debug.cc \
 	export_logging.cc \
 	export_exceptions.cc \
-	\
+	 \
 	export_tribool.cc \
 	export_array.cc \
 	 \
 	export_binary_tree.cc \
 	export_lattice_set.cc \
 	export_lattice_map.cc \
+	export_subdivision_set.cc \
 	 \
 	export_integer.cc \
 	export_rational.cc \
@@ -52,11 +55,14 @@ ARIADNE_SRC = ariadne_module.cc \
 	export_tensor.cc \
 	export_linear_program.cc \
 	 \
-	export_function.cc \
 	export_taylor_series.cc \
 	export_taylor_variable.cc \
 	export_taylor_derivative.cc \
 	export_polynomial_variable.cc \
+	export_function_interface.cc \
+	export_affine_function.cc \
+	export_interpreted_function.cc \
+	export_python_function.cc \
 	 \
 	export_point.cc \
 	export_box.cc \
@@ -70,6 +76,7 @@ ARIADNE_SRC = ariadne_module.cc \
 	export_empty_set.cc \
 	export_rectangular_set.cc \
 	export_polyhedral_set.cc \
+	export_box_list_set.cc \
 	export_list_set.cc \
 	export_grid_set.cc \
 	export_partition_tree_set.cc \
@@ -81,10 +88,7 @@ ARIADNE_SRC = ariadne_module.cc \
 	export_constraint.cc \
 	 \
 	export_map.cc \
-	export_affine_map.cc \
-	export_polynomial_map.cc \
 	export_vector_field.cc \
-	export_affine_vector_field.cc \
 	export_set_based_hybrid_automaton.cc \
 	export_constraint_based_hybrid_automaton.cc \
 	 \
@@ -92,8 +96,8 @@ ARIADNE_SRC = ariadne_module.cc \
 	export_solver.cc \
 	export_applicator.cc \
 	export_integrator.cc \
+	export_approximator.cc \
 	export_detector.cc \
-	export_orbiter.cc \
 	export_map_evolver.cc \
 	export_vector_field_evolver.cc \
 	export_set_based_hybrid_evolver.cc \

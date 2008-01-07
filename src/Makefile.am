@@ -37,20 +37,25 @@ COMBINATORIC_SRC = \
 FUNCTION_SRC = \
 	function/interpreted_function.cc \
 	function/constant_function.cc \
+	function/identity_function.cc \
 	function/affine_function.cc \
 	function/polynomial_function.cc \
-	function/affine_variable.cc \
-	function/affine_model.cc \
-	function/taylor_series.cc \
-	function/taylor_variable.cc \
+	function/function_series.cc \
 	function/taylor_derivative.cc \
-	function/taylor_model.cc \
- 	function/polynomial_variable.cc 
+	function/affine_model.cc \
+	function/taylor_model.cc 
+
+
+
+#	function/affine_variable.cc \
+#	function/taylor_variable.cc \
+# 	function/polynomial_variable.cc 
 
 GEOMETRY_SRC = \
 	geometry/point.cc \
 	geometry/interval_set.cc \
 	geometry/box.cc \
+	geometry/box_list_set.cc \
 	geometry/point_list.cc \
 	geometry/rectangle.cc \
 	geometry/polyhedron.cc \
@@ -72,10 +77,12 @@ GEOMETRY_SRC = \
 	geometry/ppl_polyhedron.cc
 
 SYSTEM_SRC = \
-	system/map.cc system/function_map.cc system/affine_map.cc system/polynomial_map.cc \
-	system/vector_field.cc system/affine_vector_field.cc \
-	system/set_based_hybrid_automaton.cc system/constraint_based_hybrid_automaton.cc \
-	#system/transition_system.cc system/grid_multimap.cc 
+	system/map.cc \
+	system/vector_field.cc \
+	system/set_based_hybrid_automaton.cc \
+	system/constraint_based_hybrid_automaton.cc \
+	#system/transition_system.cc \
+	#system/grid_multimap.cc 
 
 
 EVALUATION_SRC = \
@@ -84,20 +91,22 @@ EVALUATION_SRC = \
 	evaluation/newton_solver.cc \
 	evaluation/approximator.cc \
 	evaluation/applicator.cc \
+	evaluation/integrator.cc \
 	evaluation/kuhn_applicator.cc \
 	evaluation/euler_integrator.cc \
 	evaluation/affine_integrator.cc \
 	evaluation/lohner_integrator.cc \
+	evaluation/kuhn_integrator.cc \
 	evaluation/bounder.cc \
 	evaluation/detector.cc \
 	evaluation/flower.cc \
-	evaluation/map_orbiter.cc \
 	evaluation/map_evolver.cc \
 	evaluation/model_checker.cc \
-	#evaluation/vector_field_orbiter.cc \
-	#evaluation/vector_field_evolver.cc \
-	#evaluation/set_based_hybrid_evolver.cc 
+	evaluation/vector_field_evolver.cc \ 
+	evaluation/set_based_hybrid_evolver.cc
 
+
+#	evaluation/map_orbiter.cc \
 #	evaluation/constraint_based_hybrid_evolver.cc \
 #	evaluation/constraint_based_hybrid_scheduler.cc 
 

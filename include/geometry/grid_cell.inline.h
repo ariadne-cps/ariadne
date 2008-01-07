@@ -29,7 +29,7 @@ template<class R> inline
 const Geometry::Grid<R>& 
 Geometry::GridCell<R>::grid() const 
 { 
-  return *this->_grid_ptr; 
+  return this->_grid; 
 }
 
 template<class R> inline
@@ -62,7 +62,7 @@ Geometry::GridCell<R>::bounding_box() const
 
 template<class R> inline
 Geometry::GridCell<R>::GridCell(const Grid<R>& g, const Combinatoric::LatticeCell& pos)
-  : _grid_ptr(&g), _lattice_set(pos)
+  : _grid(g), _lattice_set(pos)
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(g,pos,"GridCell<R>::GridCell(Grid<R>,LatticeCell");
 }
@@ -70,7 +70,7 @@ Geometry::GridCell<R>::GridCell(const Grid<R>& g, const Combinatoric::LatticeCel
 
 template<class R> inline
 Geometry::GridCell<R>::GridCell(const Grid<R>& g, const IndexArray& pos)
-  : _grid_ptr(&g), _lattice_set(pos)
+  : _grid(g), _lattice_set(pos)
 {
   ARIADNE_CHECK_DIMENSION(g,pos.size(),"GridCell::GridCell(Grid,IndexArray)");
 }
@@ -80,7 +80,7 @@ template<class R> inline
 R
 Geometry::GridCell<R>::lower_bound(dimension_type i) const 
 {
-  return _grid_ptr->subdivision_coordinate(i,_lattice_set.lower_bound(i));
+  return _grid.subdivision_coordinate(i,_lattice_set.lower_bound(i));
 }
 
 
@@ -88,7 +88,7 @@ template<class R> inline
 R
 Geometry::GridCell<R>::upper_bound(dimension_type i) const 
 {
-  return _grid_ptr->subdivision_coordinate(i,_lattice_set.upper_bound(i));
+  return _grid.subdivision_coordinate(i,_lattice_set.upper_bound(i));
 }
 
 

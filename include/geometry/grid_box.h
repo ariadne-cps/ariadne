@@ -90,7 +90,7 @@ namespace Ariadne {
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream&) const;
      private:
-      const Grid<R>* _grid_ptr;
+      const Grid<R> _grid;
       array<dyadic_type> _coordinates;
     };
 

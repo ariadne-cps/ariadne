@@ -1,9 +1,8 @@
 /***************************************************************************
  *            vector_field.h
  *
- *  Thu Feb  3 21:06:54 2005
- *  Copyright  2005  Alberto Casagrande
- *  casagrande@dimi.uniud.it
+ *  Copyright  2005-7  Alberto Casagrande, Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -38,8 +37,17 @@
 #include "function/declarations.h"
 #include "geometry/declarations.h"
 
+#include <boost/shared_ptr.hpp>
+#include "function/function_interface.h"
+
 
 namespace Ariadne {
+
+  namespace Function { 
+    template<class X> class TaylorSeriesAffineVariable; 
+    template<class X> class TaylorSeriesTaylorVariable; 
+  }
+
   namespace System {
 
     /*!\ingroup System
@@ -62,7 +70,7 @@ namespace Ariadne {
      * The method jacobian(const Geometry::Point<F>& pt) const computes the derivative matrix at/over the point \a pt.
      */
     template<class R>
-    class VectorFieldInterface {
+    class VectorField {
      protected:
       typedef typename Numeric::traits<R>::arithmetic_type F; 
       typedef typename Numeric::traits<R>::interval_type I; 
@@ -72,38 +80,47 @@ namespace Ariadne {
       /*! \brief The type of denotable state the system acts on. */
       typedef Geometry::Point<R> state_type;
       
-      /*! \brief Virtual destructor. */
-      virtual ~VectorFieldInterface();
-     
+      /*! \brief Destructor. */
+      ~VectorField();
+
+      /*! \brief Construct from a function interface and parameters. */
+      VectorField(const Function::FunctionInterface<R>& f);
       /*! \brief Make a copy (clone) of the vector field. */
-      virtual VectorFieldInterface<R>* clone() const = 0;
+      VectorField<R>* clone() const { return new VectorField<R>(*this); }
      
-      /*! \brief An approximation to the vector field at a point. */
-      LinearAlgebra::Vector<F> operator() (const Geometry::Point<F>& x) const { return this->image(x); }
+      /*! \brief The function defining the vector field. */
+      Function::FunctionInterface<R>& function() const { return *this->_function_ptr; }
 
       /*! \brief An approximation to the vector field at a point. */
-      virtual LinearAlgebra::Vector<F> image(const Geometry::Point<F>& x) const = 0;
+      LinearAlgebra::Vector<F> operator() (const Geometry::Point<F>& x) const { return this->evaluate(x); }
 
       /*! \brief An approximation to the vector field at a point. */
-      virtual F derivative(const Geometry::Point<F>& x, const size_type& i, const Function::MultiIndex& j) const;
+      LinearAlgebra::Vector<F> evaluate(const Geometry::Point<F>& x) const;
 
       /*! \brief An approximation to the Jacobian derivative at a point. */
-      virtual LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<F>& x) const;
+      LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<F>& x) const;
     
-      /*! \brief The degree of differentiability of the map. */
-      virtual smoothness_type smoothness() const = 0;
-      /*! \brief The dimension of the space the vector field lives in. */
-      virtual dimension_type dimension() const = 0;
+       /*! \brief An approximation to the vector field at a point. */
+      Function::TaylorDerivative<F> derivative(const Geometry::Point<F>& x, const smoothness_type& s) const;
 
-      /*! \brief The name of the system. */
-      virtual std::string name() const = 0;
+      // Used in integration method
+      void compute(Function::TaylorSeriesAffineVariable<F>*, const Function::TaylorSeriesAffineVariable<F>* x) const { };
+      // Used in integration method
+      void compute(Function::TaylorSeriesTaylorVariable<F>*, const Function::TaylorSeriesTaylorVariable<F>* x) const { };
+
+      /*! \brief The degree of differentiability of the vector field. */
+      smoothness_type smoothness() const { return this->_function_ptr->smoothness(); }
+      /*! \brief The dimension of the space the vector field lives in. */
+      dimension_type dimension() const { return this->_function_ptr->result_size(); }
 
       /*! \brief Write to an output stream. */
-      virtual std::ostream& write(std::ostream& os) const;
+      std::ostream& write(std::ostream& os) const;
+     private:
+      boost::shared_ptr< Function::FunctionInterface<R> > _function_ptr;
     };
    
     template<class R> inline 
-    std::ostream& operator<<(std::ostream& os, const VectorFieldInterface<R>& vf) {
+    std::ostream& operator<<(std::ostream& os, const VectorField<R>& vf) {
       return vf.write(os);
     }
     

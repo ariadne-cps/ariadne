@@ -32,13 +32,14 @@
 namespace Ariadne {
   namespace Evaluation {
     using namespace Numeric;
+    using namespace Geometry;
 
 #ifdef ENABLE_FLOAT64
-    template class MapEvolver<Float64>;
+    template class MapEvolver< Zonotope<Float64> >;
 #endif
   
 #ifdef ENABLE_FLOATMP
-    template class MapEvolver<FloatMP>;
+    template class MapEvolver< Zonotope<FloatMP> >;
 #endif
 
   }

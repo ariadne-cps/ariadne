@@ -26,6 +26,11 @@
 
 namespace Ariadne {
 
+namespace Function {
+  template<class X> void compute_composition(TaylorVariable<X>& z, const TaylorVariable<X>& y, const TaylorDerivative<X>& x);
+  template<class X> void compute_composition(TaylorDerivative<X>& z, const TaylorDerivative<X>& y, const TaylorDerivative<X>& x);
+}
+
 template<class X>
 LinearAlgebra::Vector<X>
 Function::TaylorDerivative<X>::value() const
@@ -84,46 +89,34 @@ Function::derivative(TaylorDerivative<X>& x, const size_type& k)
 
 
 
+
 template<class X0, class X1, class X2> 
 void 
 Function::compute_composition(TaylorVariable<X0>& z, const TaylorVariable<X1>& y, const TaylorDerivative<X2>& x)
 {
-  throw NotImplemented(__PRETTY_FUNCTION__);
-  // FIXME: Rewrite this function
+  TaylorVariable<X0> yy=y;
+  TaylorDerivative<X0> xx=x;
+  compute_composition(z,y,x);
 }
+
+
 
 template<class X0, class X1, class X2> 
 void 
 Function::compute_composition(TaylorDerivative<X0>& z, const TaylorDerivative<X1>& y, const TaylorDerivative<X2>& x)
 {
-  throw NotImplemented(__PRETTY_FUNCTION__);
-  // FIXME: Rewrite this function
-  //std::cerr << "y=" << y << std::endl;
-  //std::cerr << "z=" << z << std::endl;
-  assert(z.degree()==x.degree());
-  assert(z.degree()==y.degree());
-  size_type d=z.degree();
-  TaylorDerivative<X2> w=x;
-  //w.value()=0;
-  //std::cerr << "w=" << w << std::endl;
-  TaylorDerivative<X0> t(y.result_size(),x.argument_size(),0);
-  //std::cerr << "t[0]=" << t << std::endl;
-  for(uint n=1; n<=d; ++n) {
-    TaylorDerivative<X0> u(y.result_size(),x.argument_size(),n);
-    //compute_product(u,t,w);
-    //u.value()=y[d-n];
-    t=u;
-    //std::cerr << "t[" << n << "]=" << t << std::endl;
-  }
-  z=t;
+  TaylorDerivative<X0> yy=y;
+  TaylorDerivative<X0> xx=x;
+  compute_composition(z,y,x);
 }
+
 
 template<class X> inline
 std::ostream& 
 Function::operator<<(std::ostream& os, const TaylorDerivative<X>& x) {
   //  return os << "TaylorDerivative( argument_size=" << x.argument_size() << ", degree=" << x.degree() << ", data=" << x.data() << ")";
-  os << '[';
   for(size_type i=0; i!=x.result_size(); ++i) {
+    if(i==0) { os << "\n["; } else { os << ",\n "; }
     size_type degree=0;
     for(MultiIndex j(x.argument_size()); j.degree()<=x.degree(); ++j) {
       if(j.degree()==0) {
@@ -138,7 +131,7 @@ Function::operator<<(std::ostream& os, const TaylorDerivative<X>& x) {
     }
     os << ']';
   }
-  os << ']';
+  os << "]\n";
   return os;
 
 //  return os << "TaylorDerivative( argument_size=" << x.argument_size() << ", degree=" << x.degree() << ", data=" << x.data() << ")";

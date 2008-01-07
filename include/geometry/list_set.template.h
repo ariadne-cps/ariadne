@@ -32,50 +32,62 @@
 namespace Ariadne {
 
 template<class BS>
-Geometry::ListSet<BS>*
-Geometry::ListSet<BS>::clone() const
+void
+Geometry::ListSet<BS>::_instantiate()
 {
-  return new ListSet<BS>(*this);
 }
 
 
-template<class BS> 
-tribool
-Geometry::ListSet<BS>::intersects(const Box<R>& r) const
+template<class BS, class R> 
+tribool 
+Geometry::contains(const ListSet<BS>& ls, const Point<R>& p) 
 {
-  return !Geometry::disjoint(*this,r);
-}
-
-
-template<class BS> 
-tribool
-Geometry::ListSet<BS>::disjoint(const Box<R>& r) const
-{
-  return Geometry::disjoint(*this,r);
-}
-
-
-template<class BS>
-tribool
-Geometry::ListSet<BS>::superset(const Box<R>& r) const
-{
-  const ListSet< Box<R> >* rls=
-    dynamic_cast< const ListSet< Box<R> > * >(this);
-  if(rls) {
-    return Geometry::subset(r,IrregularGridMaskSet<R>(*rls));
-  } else {
-    return indeterminate;
+  tribool result=false;
+  for (typename ListSet<BS>::const_iterator i=ls.begin(); i!=ls.end(); ++i) {
+    //result=result || i->contains(p);
+    result=result || Geometry::contains(*i,p);
+    if(result) { return result; }
   }
+  return result;
 }
 
-
-template<class BS>
-tribool
-Geometry::ListSet<BS>::subset(const Box<R>& r) const
+template<class BS> 
+Geometry::Box<typename BS::real_type> 
+Geometry::bounding_box(const ListSet<BS>& ls)  
 {
-  return Geometry::subset(*this,r);
+  typedef typename ListSet<BS>::real_type R;
+  if(ls.size()==0) { return Box<R>(ls.dimension()); }
+  //Box<R> result=(*this)[0].bounding_box();
+  Box<R> result=Geometry::bounding_box(ls[0]);
+  for(typename ListSet<BS>::const_iterator iter=ls.begin(); iter!=ls.end(); ++iter) {
+    //Box<R> bb=iter->bounding_box();
+    Box<R> bb=Geometry::bounding_box(*iter);
+    for(size_type i=0; i!=result.dimension(); ++i) {
+      if(bb.lower_bound(i) < result.lower_bound(i)) {
+        result.set_lower_bound(i,bb.lower_bound(i));
+      }
+      if(bb.upper_bound(i) > result.upper_bound(i)) {
+        result.set_upper_bound(i,bb.upper_bound(i));
+      }
+    }
+  }
+  return result;
 }
 
+
+template<class BS, class R>
+tribool
+Geometry::disjoint(const ListSet<BS>& ls,
+                   const Box<R>& bx)
+{
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(ls,bx,"tribool disjoint(ListSet<BS> ls, Box bx)");
+  tribool result=true;
+  for (typename ListSet<BS>::const_iterator i=ls.begin(); i!=ls.end(); ++i) {
+    result = result && disjoint(*i,bx);
+    if(!result) { return result; }
+  }
+  return result;
+}
 
 template<class BS1, class BS2>
 tribool
@@ -93,15 +105,6 @@ Geometry::disjoint(const ListSet<BS1>& ls1,
   return result;
 }
 
-
-
-template<class R>
-tribool
-Geometry::subset(const ListSet< Geometry::Box<R> >& bxls1,
-                 const ListSet< Geometry::Box<R> >& bxls2)
-{
-  throw NotImplemented(__PRETTY_FUNCTION__);
-}
 
 
 template<class BS1, class BS2>
@@ -152,69 +155,15 @@ Geometry::open_intersection(const ListSet<BS>& ls1,
   return ds_inter;
 }
 
-template<class BS>
-Geometry::ListSet<BS>
-Geometry::inner_intersection(const ListSet<BS>& ls,
-                             const SetInterface<typename BS::real_type>& ops)
-{
-  ARIADNE_CHECK_EQUAL_DIMENSIONS(ls,ops,"ListSet<BS> inner_intersection(ListSet<BS> ls, ListSet<BS> ops)");
-  ListSet<BS> ds(ls.dimension());
-  for (size_type i=0; i<ls.size(); i++) {
-    if(ops.subset(ls[i].bounding_box())) {
-      ds.push_back(ls[i]);
-    }
-  }
-  return ds;
-}
-
-template<class BS>
-Geometry::ListSet<BS>
-Geometry::lower_intersection(const ListSet<BS>& ls,
-                             const SetInterface<typename BS::real_type>& cls)
-{
-  ARIADNE_CHECK_EQUAL_DIMENSIONS(ls,cls,"ListSet<BS> inner_intersection(ListSet<BS> ls, ListSet<BS> cls)");
-  ListSet<BS> ds(ls.dimension());
-  for (size_type i=0; i<ls.size(); i++) {
-    if(cls.intersects(ls[i].bounding_box())) {
-      ds.push_back(ls[i]);
-    }
-  }
-  return ds;
-}
-
-template<class BS>
-Geometry::ListSet<BS>
-Geometry::outer_intersection(const ListSet<BS>& ls,
-                             const SetInterface<typename BS::real_type>& cps)
-{
-  ARIADNE_CHECK_EQUAL_DIMENSIONS(ls,cps,"ListSet<BS> inner_intersection(ListSet<BS> ls, ListSet<BS> cps)");
-  ListSet<BS> ds(ls.dimension());
-  for (size_type i=0; i<ls.size(); i++) {
-    if(cps.disjoint(ls[i].bounding_box())) {
-    } else {
-      ds.push_back(ls[i]);
-    }
-  }
-  return ds;
-}
-
-
 
 
 template<class BS>
-void
-Geometry::ListSet<BS>::_instantiate()
+std::string 
+Geometry::ListSet<BS>::summary() const
 {
-}
-
-
-template<class BS>
-std::ostream& 
-Geometry::ListSet<BS>::summarize(std::ostream& os) const
-{
-  const ListSet<BS>& ls=*this;
-  os << "ListSet<"<<Geometry::name<BS>()<<">( size="<<ls.size()<<", dimension="<<ls.dimension()<<" )";
-  return os;
+  std::stringstream ss;
+  ss << "ListSet<"<<Geometry::name<BS>()<<">( size="<<this->size()<<", dimension="<<this->dimension()<<" )";
+  return ss.str();
 }
 
 template<class BS>

@@ -443,8 +443,6 @@ inline Rational div_up(const Rational& x, const int& y) {
      
 template<> inline std::string name<Numeric::Rational>() { 
   return "Rational"; }
-template<> inline std::string name<Numeric::Interval<Numeric::Rational> >() { 
-  return "Interval<Rational>"; }
     
 
   }

@@ -68,26 +68,13 @@ namespace Ariadne {
 
       /*! \brief The point on the curve at a parameter value. */
       virtual Point<A> value(const A& s) const = 0;
+      /*! \brief The tangent vector to the curve at a parameter value. */
+      virtual LinearAlgebra::Vector<A> tangent(const A& s) const = 0;
 
       /*! \brief Write to an output stream. */
       virtual std::ostream& write(std::ostream& os) const = 0;
     };
     
-    //! \ingroup SetInterface
-    /*! \brief A differentiable curve in Euclidean space
-     */
-    template<class R>
-    class DifferentiableCurveInterface
-      : public CurveInterface<R>
-    {
-      typedef typename Numeric::traits<R>::arithmetic_type A;
-      typedef typename Numeric::traits<R>::interval_type I;
-     public:
-      /*! \brief Return a new dynamically-allocated copy of the curve. */
-      virtual DifferentiableCurveInterface<R>* clone() const = 0;
-      /*! \brief The tangent vector to the curve at a parameter value. */
-      virtual LinearAlgebra::Vector<A> tangent(const A& s) const = 0;
-    };
 
     template<class R> CurveInterface<R>::~CurveInterface() {
     }

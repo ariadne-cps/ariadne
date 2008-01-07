@@ -35,11 +35,11 @@
 #include "geometry/declarations.h"
 #include "system/declarations.h"
 
-#include "system/transition_system.h"
+#include "system/transition_system_interface.h"
 
 #include "evaluation/evolution_parameters.h"
 #include "evaluation/applicator_interface.h"
-#include "evaluation/orbiter_interface.h"
+#include "evaluation/map_orbiter_interface.h"
 
 namespace Ariadne {
   namespace Evaluation {
@@ -83,23 +83,23 @@ namespace Ariadne {
 
       /*! \brief Compute an approximation to the iterated set of \a map starting in \a initial_set, iterating \a steps times. */
       virtual
-      Geometry::ListSet< Geometry::Box<R> > 
+      Geometry::BoxListSet<R> 
       evolve(const System::TransitionSystemInterface<R>& map, 
-             const Geometry::ListSet< Geometry::Box<R> >& initial_set,
+             const Geometry::BoxListSet<R>& initial_set,
              const Numeric::Integer& steps) const;
 
       /*! \brief Compute an approximation to the reachable set of \a map starting in \a initial_set, iterating at most \a steps times. */
       virtual
-      Geometry::ListSet< Geometry::Box<R> > 
+      Geometry::BoxListSet<R> 
       reach(const System::TransitionSystemInterface<R>& map, 
-            const Geometry::ListSet< Geometry::Box<R> >& initial_set,
+            const Geometry::BoxListSet<R>& initial_set,
             const Numeric::Integer& steps) const;
 
       /*! \brief Compute a lower-approximation to the reachable set of \a map starting in \a initial_set. */
       virtual
-      Geometry::ListSet< Geometry::Box<R> > 
+      Geometry::BoxListSet<R> 
       lower_reach(const System::TransitionSystemInterface<R>& map, 
-                  const Geometry::ListSet< Geometry::Box<R> >& initial_set) const;
+                  const Geometry::BoxListSet<R>& initial_set) const;
 
       
      

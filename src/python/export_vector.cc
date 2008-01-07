@@ -1,8 +1,7 @@
 /***************************************************************************
  *            python/export_vector.cc
  *
- *  17 November 2005
- *  Copyright  2005  Alberto Casagrande, Pieter Collins
+ *  Copyright  2005-7  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
@@ -31,9 +30,11 @@
 #include "linear_algebra/covector.h" 
 #include "linear_algebra/matrix.h"
 
-#include "python/utilities.h"
 #include "python/float.h"
-#include "python/read_scalar.h"
+#include "python/name.h"
+#include "python/subscripting.h"
+#include "python/operators.h"
+#include "python/read_array.h"
 
 using namespace Ariadne;
 using Numeric::Rational;
@@ -64,48 +65,15 @@ __repr__(const Vector<X>& v)
 }
 
 
-
-
 template<class X>
 Vector<X>*
 make_vector(const boost::python::object& obj) 
 {
-  // See "Extracting C++ objects" in the Boost Python tutorial
-  boost::python::list elements=boost::python::extract<boost::python::list>(obj);
-  int n=boost::python::len(elements);
-  Vector<X>& v=*new Vector<X>(n);
-  for(int i=0; i!=n; ++i) {
-    v(i)=read_scalar<X>(elements[i]);
-  }
-  return &v;
+  Vector<X>* v=new Vector<X>;
+  read_array(v->data(),obj);
+  return v;
 }
 
-template<class R> 
-inline
-R
-vector_get_item(const Vector<R>& v, int n) {
-  if(n<0) {
-    n+=v.size();
-  }
-  assert(0<=n);
-  size_t m=size_t(n);
-  assert(m<v.size());
-  return v(m);
-}
-
-template<class R, class A> 
-inline
-void
-vector_set_item(Vector<R>& v, int n, const A& x) {
-  if(n<0) {
-    n+=v.size();
-  }
-  assert(0<=n);
-  size_t m=size_t(n);
-  assert(m<v.size());
-  R& r=v(m);
-  r=R(x);
-}
 
 
 
@@ -125,9 +93,9 @@ void export_vector()
   //vector_class.def(init<std::string>());
   vector_class.def(init<Vec>());
   vector_class.def("__len__", &Vec::size);
-  vector_class.def("__getitem__",&vector_get_item<R>);
-  vector_class.def("__setitem__",&vector_set_item<R,R>);
-  vector_class.def("__setitem__",&vector_set_item<R,double>);
+  vector_class.def("__getitem__",&__getitem__<Vec>);
+  vector_class.def("__setitem__",&__setitem__<Vec,R>);
+  vector_class.def("__setitem__",&__setitem__<Vec,double>);
   vector_class.def("__neg__",&neg<Vec,Vec>);
   vector_class.def("__add__",&add<IVec,Vec,Vec>);
   vector_class.def("__add__",&add<IVec,Vec,IVec>);
@@ -171,9 +139,9 @@ void export_vector<Rational>()
   //vector_class.def(init<std::string>());
   vector_class.def(init<Vec>());
   vector_class.def("__len__", &Vec::size);
-  vector_class.def("__getitem__",&vector_get_item<R>);
-  vector_class.def("__setitem__",&vector_set_item<R,R>);
-  vector_class.def("__setitem__",&vector_set_item<R,double>);
+  vector_class.def("__getitem__",&__getitem__<Vec>);
+  vector_class.def("__setitem__",&__setitem__<Vec,R>);
+  vector_class.def("__setitem__",&__setitem__<Vec,double>);
   vector_class.def("__neg__",&neg<Vec,Vec>);
   vector_class.def("__add__",&add<Vec,Vec,Vec>);
   vector_class.def("__sub__",&sub<Vec,Vec,Vec>);
@@ -211,10 +179,10 @@ void export_interval_vector() {
   vector_class.def(init<Vec>());
   vector_class.def(init<IVec>());
   vector_class.def("__len__", &IVec::size);
-  vector_class.def("__getitem__",&vector_get_item<I>) ;
-  vector_class.def("__setitem__",&vector_set_item<I,I>);
-  vector_class.def("__setitem__",&vector_set_item<I,R>);
-  vector_class.def("__setitem__",&vector_set_item<I,double>);
+  vector_class.def("__getitem__",&__getitem__<IVec>) ;
+  vector_class.def("__setitem__",&__setitem__<IVec,I>);
+  vector_class.def("__setitem__",&__setitem__<IVec,R>);
+  vector_class.def("__setitem__",&__setitem__<IVec,double>);
   vector_class.def("__neg__",&neg<IVec,IVec>);
   vector_class.def("__add__",&add<IVec,IVec,Vec>);
   vector_class.def("__add__",&add<IVec,IVec,IVec>);

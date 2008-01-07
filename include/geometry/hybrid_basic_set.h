@@ -44,6 +44,42 @@ namespace Ariadne {
 
     
     /*! \ingroup HybridSet
+     *  \brief A hybrid set comprising of a single box in a discrete mode.
+     */
+    template<class R> 
+    class HybridBox
+    {
+     public:
+      /*! \brief */
+      typedef R real_type;
+      /*! \brief */
+      typedef Box<R> continuous_set_type;
+      /*! \brief */
+      typedef DiscreteState discrete_state_type;
+      /*! \brief */
+      typedef basic_set_tag set_category;
+
+      /*! \brief */
+      HybridBox(const DiscreteState& q, const Box<R>& bx) : _state(q), _box(bx) { }
+      /*! \brief */
+      const DiscreteState& state() const { return this->_state; }
+      /*! \brief */
+      const Box<R>& set() const { return this->_box; }
+    
+      /*! \brief */
+      bool operator==(const HybridBox<R>& other) const { 
+        return this->_state==other._state && this->_box==other._box; }
+      /*! \brief */
+      bool operator!=(const HybridBox<R>& other) const { return !(*this==other); }
+      /*! \brief */
+      bool operator<(const HybridBox<R>& other) const { return this->_state<other->_state; }
+     private:
+      DiscreteState _state;
+      Box<R> _box;
+    };
+  
+
+    /*! \ingroup HybridSet
      *  \brief A hybrid set comprising of a single basic set for in a discrete mode.
      */
     template<class BS> 
@@ -61,31 +97,27 @@ namespace Ariadne {
       // No default constructor as original set need not have default constructor
       // HybridBasicSet() : BS(), _discrete_state() { }
       /*! \brief */
-      template<class A> HybridBasicSet(const discrete_state_type& q, const A& a) : BS(a), _discrete_state(q) { }
+      template<class S> HybridBasicSet(const DiscreteState& q, const S& s) : BS(s), _state(q) { }
       /*! \brief */
-      HybridBasicSet(const HybridBasicSet<BS>& hbs) : BS(hbs.continuous_state_set()), _discrete_state(hbs.discrete_state()) { }
+      const DiscreteState& state() const { return this->_state; }
       /*! \brief */
-      const discrete_state_type& discrete_state() const { return this->_discrete_state; }
-      /*! \brief */
-      const BS& continuous_state_set() const { return *this; }
+      const BS& set() const { return *this; }
     
       /*! \brief */
       bool operator==(const HybridBasicSet<BS>& other) const { 
-        return this->discrete_state()==other.discrete_state()
-          && this->continuous_state_set()==other.continuous_state_set(); }
+        return this->_state()==other.state() && this->set()==other.set(); }
       /*! \brief */
       bool operator!=(const HybridBasicSet<BS>& other) const { return !(*this==other); }
       /*! \brief */
-      bool operator<(const HybridBasicSet<BS>& other) const { return this->_discrete_state<other->_discrete_state; }
+      bool operator<(const HybridBasicSet<BS>& other) const { return this->_state < other->_state; }
      private:
-      discrete_state_type _discrete_state;
+      discrete_state_type _state;
     };
   
 
     template<class BS> inline 
     std::ostream& operator<<(std::ostream& os, const HybridBasicSet<BS>& hs) {
-      return os << ", q=" << hs.discrete_state() << ", s=" << hs.continuous_state_set() 
-                << "}";
+      return os << ", q=" << hs.state() << ", s=" << hs.set() << "}";
     }
 
 

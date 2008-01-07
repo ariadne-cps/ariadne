@@ -21,12 +21,17 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "numeric/integer.h"
+#include "numeric/rational.h"
 #include "numeric/float.h"
 #include "numeric/interval.h"
 #include "numeric/interval.code.h"
 
 namespace Ariadne {
   namespace Numeric {
+
+  template class Interval<Integer>;
+  template class Interval<Rational>;
 
 #ifdef ENABLE_FLOAT64
   template class Interval<Float64>;

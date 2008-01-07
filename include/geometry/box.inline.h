@@ -188,12 +188,50 @@ Geometry::Box<R>::operator=(const RectangleExpression<E>& original)
 
 template<class R> inline
 Geometry::Box<R> 
+Geometry::Box<R>::empty_box(dimension_type d)
+{
+  Box<R> r(d);
+  r.set_lower_bound(0,+1);
+  r.set_upper_bound(0,0);
+  return r;
+}
+
+
+template<class R> inline
+Geometry::Box<R> 
 Geometry::Box<R>::unit_box(dimension_type d)
 {
   Box<R> r(d);
   for(dimension_type i=0; i!=d; ++i) {
     r.set_lower_bound(i,-1);
     r.set_upper_bound(i,+1);
+  }
+  return r;
+}
+
+template<class R> inline
+Geometry::Box<R> 
+Geometry::Box<R>::positive_orthant(dimension_type d)
+{
+  Box<R> r(d);
+  R inf=Numeric::inf();
+  for(dimension_type i=0; i!=d; ++i) {
+    r.set_lower_bound(i,0);
+    r.set_upper_bound(i,inf);
+  }
+  return r;
+}
+
+template<class R> inline
+Geometry::Box<R> 
+Geometry::Box<R>::entire_space(dimension_type d)
+{
+  Box<R> r(d);
+  R pinf=Numeric::inf();
+  R minf=-pinf;
+  for(dimension_type i=0; i!=d; ++i) {
+    r.set_lower_bound(i,minf);
+    r.set_upper_bound(i,pinf);
   }
   return r;
 }
@@ -478,14 +516,7 @@ Geometry::Box<R>::radius() const
 template<class R> template<class X> inline
 tribool 
 Geometry::Box<R>::contains(const Point<X>& pt) const {
-  return Geometry::contains(*this,pt);
-}
-
-
-template<class R, class X> inline
-tribool 
-Geometry::contains(const Box<R>& bx, const Point<X>& pt)
-{
+  const Box<R>& bx=*this;
   ARIADNE_CHECK_EQUAL_DIMENSIONS(bx,pt,"contains(Box bx, Point pt)");
   tribool result=true;
   for (size_type i=0; i!=bx.dimension(); ++i) {
@@ -499,10 +530,12 @@ Geometry::contains(const Box<R>& bx, const Point<X>& pt)
   return result;
 }
 
+
 template<class R> inline
 tribool 
-Geometry::disjoint(const Box<R>& r1, const Box<R>& r2)
+Geometry::Box<R>::disjoint(const Box<R>& r2) const
 {
+  const Box<R>& r1=*this;
   ARIADNE_CHECK_EQUAL_DIMENSIONS(r1,r2,"disjoint(Box r1, Box r2)")
     tribool result=false;
   for(size_type i=0; i!=r1.dimension(); ++i) {
@@ -519,8 +552,9 @@ Geometry::disjoint(const Box<R>& r1, const Box<R>& r2)
 
 template<class R> inline
 tribool 
-Geometry::subset(const Box<R>& r1, const Box<R>& r2)
+Geometry::Box<R>::subset(const Box<R>& r2) const
 {
+  const Box<R>& r1=*this;
   ARIADNE_CHECK_EQUAL_DIMENSIONS(r1,r2,"subset(Box r1, Box r2)")
     tribool result=true;
   for (size_type i=0; i!=r1.dimension(); ++i) {
@@ -532,6 +566,57 @@ Geometry::subset(const Box<R>& r1, const Box<R>& r2)
     }
   }
   return result;
+}
+
+
+template<class R> inline
+tribool 
+Geometry::Box<R>::intersects(const Box<R>& r) const
+{
+  return !this->disjoint(r);
+}
+
+template<class R> inline
+tribool 
+Geometry::Box<R>::superset(const Box<R>& r) const
+{
+  return r.subset(*this);
+}
+
+template<class R, class X> inline
+tribool 
+Geometry::contains(const Box<R>& bx, const Point<X>& pt)
+{
+  return bx.contains(pt);
+}
+
+template<class R> inline
+tribool 
+Geometry::disjoint(const Box<R>& r1, const Box<R>& r2)
+{
+  return r1.disjoint(r2);
+}
+
+template<class R> inline
+tribool 
+Geometry::intersect(const Box<R>& r1, const Box<R>& r2)
+{
+  return !r1.disjoint(r2);
+}
+
+
+template<class R> inline
+tribool 
+Geometry::subset(const Box<R>& r1, const Box<R>& r2)
+{
+  return r1.subset(r2);
+}
+
+template<class R> inline
+tribool 
+Geometry::superset(const Box<R>& r1, const Box<R>& r2)
+{
+  return r2.subset(r1);
 }
 
 

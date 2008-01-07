@@ -88,6 +88,8 @@ namespace Ariadne {
                                        Value>
     {
      public:
+      conversion_iterator()
+        : conversion_iterator::iterator_adaptor_() { }
       conversion_iterator(Base i)
         : conversion_iterator::iterator_adaptor_(i) { }
      private:

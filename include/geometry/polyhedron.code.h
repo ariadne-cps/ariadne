@@ -34,7 +34,7 @@
 
 #include "macros/assert.h"
 
-#include "base/stlio.h"
+#include "base/sequence_io.h"
 
 #include "numeric/interval.h"
 #include "numeric/arithmetic.h"
@@ -541,13 +541,6 @@ Geometry::Polyhedron<X>::bounded() const
 
 
 
-template<class X> 
-Geometry::Box<typename Geometry::Polyhedron<X>::real_type> 
-Geometry::bounding_box(const Polyhedron<X>& plhd)
-{
-  return ::bounding_box(plhd);
-}
-
 template<class X, class R>
 tribool 
 Geometry::disjoint(const Polyhedron<X>& plhd, const Box<R>& r)
@@ -761,7 +754,7 @@ Geometry::Polyhedron<X>::read(std::istream& is)
   c=is.peek();
   while(c=='[') {
     // Read constraint ax<=b in form [a_1,a_2,...,a_n;b];
-    Base::read_vector(is,a,'[',';',',');
+    Base::read_sequence(is,a,'[',';',',');
     is >> b;
     is >> c;
     assert(c==']');

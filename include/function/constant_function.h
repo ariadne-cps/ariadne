@@ -35,7 +35,6 @@
 
 #include "linear_algebra/declarations.h"
 #include "linear_algebra/vector.h"
-#include "linear_algebra/matrix.h"
 
 #include "geometry/declarations.h"
 
@@ -56,7 +55,7 @@ namespace Ariadne {
       typedef typename Numeric::traits<R>::interval_type I;
      private:
       size_type _as;
-      LinearAlgebra::Vector<R> _c;
+      LinearAlgebra::Vector<F> _c;
      public:
       /*! \brief The type of denotable real number used to describe the system. */
       typedef R real_type;
@@ -69,9 +68,6 @@ namespace Ariadne {
       template<class RR> explicit ConstantFunction(size_type rs, size_type as, const RR* ptr) 
         : _as(as), _c(rs,ptr) { }
       
-      /*! \brief Type conversion constructor. */
-      template<class RR> ConstantFunction(const ConstantFunction<RR>& f) : _as(f.argument_size()), _c(f.c()) { }
-
       /*! \brief Copy constructor. */
       ConstantFunction(const ConstantFunction<R>& f)
         : _as(f._as), _c(f._c) { }
@@ -84,15 +80,15 @@ namespace Ariadne {
 
       
       /*! \brief  An approximation to the image of an approximate point. */
-      LinearAlgebra::Vector<F> evaluate(const LinearAlgebra::Vector<F>& x) const { 
-        return _c; }
+      LinearAlgebra::Vector<F> evaluate(const LinearAlgebra::Vector<F>& x) const;
       /*! \brief The Jacobian derivative matrix at a point. */
-      LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<F>& pt) const { 
-        return LinearAlgebra::Matrix<F>(this->result_size(),this->argument_size()); }
+      LinearAlgebra::Matrix<F> jacobian(const LinearAlgebra::Vector<F>& x) const;
+      /*! \brief All the derivative values up to degree \a s. */
+      TaylorDerivative<F> derivative(const LinearAlgebra::Vector<F>& x, const smoothness_type& s) const;
 
            
       /*! \brief  The linear transformation of the function. */
-      const LinearAlgebra::Vector<R>& c() const { return _c; }
+      const LinearAlgebra::Vector<F>& c() const { return _c; }
       
       /*! \brief The size of the result. */
       virtual size_type result_size() const {

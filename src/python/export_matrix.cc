@@ -1,7 +1,6 @@
 /***************************************************************************
  *            python/export_matrix.cc
  *
- *  17 November 2005
  *  Copyright  2005  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
@@ -30,9 +29,10 @@
 #include "linear_algebra/matrix.h"
 #include "linear_algebra/matrix_function.h"
 
-#include "python/utilities.h"
+#include "python/name.h"
+#include "python/operators.h"
 #include "python/float.h"
-#include "python/read_scalar.h"
+#include "python/read_matrix.h"
 
 using namespace Ariadne;
 using Numeric::Rational;
@@ -77,44 +77,33 @@ __repr__(const Matrix<X>& A)
   return ss.str();
 }
 
+
 template<class X>  
 Matrix<X>*
 make_matrix(const boost::python::object& obj) 
 {
-  // See "Extracting C++ objects" in the Boost Python tutorial
-  typedef typename Numeric::traits<X>::number_type R;
-  boost::python::list elements=extract<list>(obj);
-  int m=boost::python::len(elements);
-  list row=extract<list>(elements[0]);
-  int n=boost::python::len(row);
-  Matrix<X>& A=*new Matrix<X>(m,n);
-  for(int i=0; i!=m; ++i) {
-    row=extract<list>(elements[i]);
-    if(boost::python::len(row)!=n) {
-      throw std::runtime_error("Matrix with rows of different sizes");
-    }
-    for(int j=0; j!=n; ++j) {
-      A(i,j)=read_scalar<X>(row[j]);
-    }
-  }
-  return &A;
+  Matrix<X>* A=new Matrix<X>;
+  read_matrix(*A,obj);
+  return A;
 }
 
 
-template<class R> inline 
-R matrix_get_item(const Matrix<R>& M, boost::python::object obj) {
+template<class Mx>  
+typename Mx::value_type
+__getitem__(const Mx& M, boost::python::object obj) 
+{
   tuple index=extract<tuple>(obj);
   int i=extract<int>(index[0]);
   int j=extract<int>(index[1]);
   return M(i,j);
 }
 
-template<class R, class A> inline 
-void matrix_set_item(Matrix<R>& M, boost::python::object obj, const A& x) {
+template<class Mx, class A>  
+void __setitem__(Mx& M, boost::python::object obj, const A& x) {
   tuple index=extract<tuple>(obj);
   int i=extract<int>(index[0]);
   int j=extract<int>(index[1]);
-  M(i,j)=R(x);
+  M(i,j)=x;
 }
 
 
@@ -157,9 +146,9 @@ void export_matrix()
     .def(init<int,int>())
     .def(init<Mx>())
     //.def(init<std::string>())
-    .def("__getitem__",&matrix_get_item<R>)
-    .def("__setitem__",&matrix_set_item<R,R>)
-    .def("__setitem__",&matrix_set_item<R,double>)
+    .def("__getitem__",&__getitem__<Mx>)
+    .def("__setitem__",&__setitem__<Mx,R>)
+    .def("__setitem__",&__setitem__<Mx,double>)
     .def("__neg__",&neg<Mx,Mx>)
     .def("__add__",&add<IMx,Mx,Mx>)
     .def("__add__",&add<IMx,Mx,IMx>)
@@ -205,9 +194,9 @@ void export_matrix<Rational>()
     .def(init<Mx>())
     //.def(init<std::string>())
 
-    .def("__getitem__",&matrix_get_item<R>)
-    .def("__setitem__",&matrix_set_item<R,R>)
-    .def("__setitem__",&matrix_set_item<R,double>)
+    .def("__getitem__",&__getitem__<Mx>)
+    .def("__setitem__",&__setitem__<Mx,R>)
+    .def("__setitem__",&__setitem__<Mx,double>)
 
     .def("__neg__",&neg<Mx,Mx>)
     .def("__add__",&add<Mx,Mx,Mx>)
@@ -248,10 +237,10 @@ void export_interval_matrix()
     .def(init<Mx>())
     .def(init<IMx>())
 
-    .def("__getitem__",&matrix_get_item<I>)
-    .def("__setitem__",&matrix_set_item<I,I>)
-    .def("__setitem__",&matrix_set_item<I,R>)
-    .def("__setitem__",&matrix_set_item<I,double>)
+    .def("__getitem__",&__getitem__<IMx>)
+    .def("__setitem__",&__setitem__<IMx,I>)
+    .def("__setitem__",&__setitem__<IMx,R>)
+    .def("__setitem__",&__setitem__<IMx,double>)
 
     .def("__neg__",&neg<IMx,IMx>)
     .def("__add__",&add<IMx,IMx,Mx>)

@@ -50,16 +50,23 @@ namespace Ariadne {
       /*! \brief Cloning operator. */
       virtual EulerIntegrator<R>* clone() const;
 
+      /*! \brief Compute an integration time and a bounding box, given a bounding box for the intitial set, and a maximum allowable flow time. */
+      virtual 
+      std::pair< Numeric::Rational, Geometry::Box<R> >
+      flow_bounds(const System::VectorField<R>& f, 
+                  const Geometry::Box<R>& bx,
+                  const Numeric::Rational& t) const; 
+
       /*! \brief A C0 algorithm for integrating forward a rectangle. */
       virtual Geometry::Rectangle<R> 
-      integration_step(const System::VectorFieldInterface<R>&,
+      integration_step(const System::VectorField<R>&,
                        const Geometry::Rectangle<R>&,
                        const Numeric::Interval<R>&,
                        const Geometry::Box<R>&) const;
 
       /*! \brief A C0 algorithm for integrating forward a rectangle up to a certain time. */
       virtual Geometry::Rectangle<R> 
-      reachability_step(const System::VectorFieldInterface<R>&,
+      reachability_step(const System::VectorField<R>&,
                         const Geometry::Rectangle<R>&,
                         const Numeric::Interval<R>&,
                         const Geometry::Box<R>&) const;
@@ -71,5 +78,6 @@ namespace Ariadne {
     
   }
 }
+
 
 #endif /* ARIADNE_EULER_INTEGRATOR_H */

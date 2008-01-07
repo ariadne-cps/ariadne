@@ -1,8 +1,8 @@
 /***************************************************************************
- *            taylor_derivative.template.h
+ *            taylor_variable.template.h
  *
- *  Copyright 2007  Alberto Casagrande, Pieter Collins
- *  Email casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright 2007  Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -25,6 +25,395 @@
 
 namespace Ariadne {
 
+namespace {
+
+template<class X0, class X1, class X2> 
+void
+add_product(Function::TaylorVariable<X0>& x0, const Function::TaylorVariable<X1>& x1, const Function::TaylorVariable<X2>& x2)
+{
+  using namespace Function;
+  assert(x0.argument_size()==x1.argument_size());
+  assert(x0.argument_size()==x2.argument_size());
+  for(MultiIndex i1(x1.argument_size()); i1.degree() <= x1.degree(); ++i1) {
+    for(MultiIndex i2(x2.argument_size()); i2.degree() <= std::min(x2.degree(),smoothness_type(x0.degree()-i1.degree())); ++i2) {
+      MultiIndex i0=i1+i2;
+      //std::cout << "i0=" << i0 << ", i1=" << i1 << ", i2=" << i2 << std::endl;
+      // FIXME: Use Integer
+      //Numeric::Integer c=i0.factorial()/(i1.factorial()*i2.factorial());
+      uint c=Function::bin(i0,i1);
+      x0[i0]+=X0(c)*x1[i1]*x2[i2];
+    }
+  }
+}
+
+
+
+template<class X0, class X1, class X2>
+void 
+compute_composition(Function::TaylorVariable<X0>& z, 
+                    const Function::TaylorSeries<X1>& y, 
+                    const Function::TaylorVariable<X2>& x)
+{
+  using namespace Function;
+  size_type as=x.argument_size();
+  size_type d=z.degree();
+
+  TaylorVariable<X2> w=x;
+  w.value()=0;
+  TaylorVariable<X0> t(as,d);
+  t.value()=y.data()[d]/Numeric::fac<Numeric::Integer>(d);
+  for(uint n=1; n<=d; ++n) {
+    TaylorVariable<X0> u(as,d);
+    add_product(u,t,w);
+    t=u+y.data()[d-n]/Numeric::fac<Numeric::Integer>(d-n);
+  };
+  z=t;
+  return;
+}
+
+} // namespace
+
+
+
+
+template<class X> 
+Function::TaylorVariable<X>::TaylorVariable()
+  : _argument_size(1), _degree(0), _data(1u,X(0)) 
+{
+}
+
+template<class X> 
+Function::TaylorVariable<X>::TaylorVariable(size_type a, smoothness_type d)
+  : _argument_size(a), _degree(d), _data(compute_polynomial_data_size(a,d),X(0))
+{
+}
+
+
+
+template<class X> 
+size_type 
+Function::TaylorVariable<X>::argument_size() const 
+{ 
+  return this->_argument_size;
+}
+
+template<class X> 
+smoothness_type 
+Function::TaylorVariable<X>::degree() const 
+{ 
+  return this->_degree;
+}
+
+template<class X> 
+const X&
+Function::TaylorVariable<X>::value() const 
+{ 
+  return this->_data[0];
+}
+
+template<class X> 
+X&
+Function::TaylorVariable<X>::value()  
+{ 
+  return this->_data[0];
+}
+
+template<class X> 
+array<X>& 
+Function::TaylorVariable<X>::data()
+{
+  return this->_data; 
+}
+
+template<class X> 
+const array<X>& 
+Function::TaylorVariable<X>::data() const 
+{
+  return this->_data; 
+}
+
+
+template<class X> 
+X& 
+Function::TaylorVariable<X>::operator[](const MultiIndex& a) 
+{ 
+  return this->_data[a.position()]; 
+}
+
+template<class X> 
+const X& 
+Function::TaylorVariable<X>::operator[](const MultiIndex& a) const 
+{ 
+  return this->_data[a.position()]; 
+}
+
+template<class X> 
+Function::TaylorVariable<X>&
+Function::TaylorVariable<X>::operator+=(const TaylorVariable<X>& x)
+{
+  ARIADNE_ASSERT(this->argument_size()==x.argument_size());
+  ARIADNE_ASSERT(this->degree()==x.degree());
+  for(uint i=0; i!=this->_data.size(); ++i) {
+    this->_data[i]+=x._data[i];
+  }
+  //reinterpret_cast<LinearAlgebra::Vector<X>&>(this->_data)
+  //  += reinterpret_cast<LinearAlgebra::Vector<X>const&>(x._data);
+  return *this;
+}
+
+template<class X> 
+Function::TaylorVariable<X>&
+Function::TaylorVariable<X>::operator*=(const X& x)
+{
+  LinearAlgebra::Vector<X>& v=reinterpret_cast<LinearAlgebra::Vector<X>&>(this->_data);
+  v *= x;
+  return *this;
+}
+
+template<class X> 
+Function::TaylorVariable<X>&
+Function::TaylorVariable<X>::operator/=(const X& x)
+{
+  LinearAlgebra::Vector<X>& v=reinterpret_cast<LinearAlgebra::Vector<X>&>(this->_data);
+  v /= x;
+  return *this;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+template<class X> 
+Function::TaylorVariable<X> 
+Function::compose(const TaylorVariable<X>& y, const TaylorVariable<X>& x)
+{
+  assert(y.argument_size()==1);
+  TaylorSeries<X> t(y.degree(),y.data().begin());
+  TaylorVariable<X> z(x.argument_size(),std::min(x.degree(),t.degree()));
+  compute_composition(z,t,x);
+  return z;
+}
+
+template<class X> 
+Function::TaylorVariable<X> 
+Function::compose(const TaylorSeries<X>& y, const TaylorVariable<X>& x)
+{
+  TaylorVariable<X> z(x.argument_size(),std::min(x.degree(),y.degree()));
+  compute_composition(z,y,x);
+  return z;
+}
+
+
+template<class X>  
+Function::TaylorVariable<X> 
+Function::min(const TaylorVariable<X>& x1, const TaylorVariable<X>& x2) 
+{
+  if(x1.value()==x2.value()) {
+    ARIADNE_THROW(std::runtime_error,"min(TaylorVariable x1, TaylorVariable x2)","x1[0]==x2[0]");
+  }
+  return x1.value()<x2.value() ? x1 : x2;
+}
+
+template<class X>  
+Function::TaylorVariable<X> 
+Function::max(const TaylorVariable<X>& x1,const TaylorVariable<X>& x2) 
+{
+  if(x1.value()==x2.value()) { 
+    ARIADNE_THROW(std::runtime_error,"max(TaylorVariable x1, TaylorVariable x2)","x1[0]==x2[0]"); 
+  }
+  return x1.value()>x2.value() ? x1 : x2;
+}
+
+template<class X> 
+Function::TaylorVariable<X> 
+Function::pos(const TaylorVariable<X>& x)
+{
+  return x;
+}
+
+template<class X> 
+Function::TaylorVariable<X> 
+Function::neg(const TaylorVariable<X>& x)
+{
+  TaylorVariable<X> y(x.argument_size(),x.degree());
+  for(size_type n=0; n<y.data().size(); ++n) {
+    y.data()[n] = -x.data()[n];
+  }
+  return y;
+}
+
+template<class X>  
+Function::TaylorVariable<X> 
+Function::abs(const TaylorVariable<X>& x) 
+{
+  if(x.value()==0) { 
+    ARIADNE_THROW(std::runtime_error,"abs(TaylorVariable x)","x[0]==0"); 
+  }
+  return x.value()>0 ? pos(x) : neg(x); 
+}
+
+template<class X> 
+Function::TaylorVariable<X> 
+Function::add(const TaylorVariable<X>& x, const TaylorVariable<X>& y)
+{
+  assert(x.argument_size()==y.argument_size());
+  TaylorVariable<X> z(x.argument_size(),std::min(x.degree(),y.degree()));
+  for(size_type n=0; n<z.data().size(); ++n) {
+    z.data()[n] = x.data()[n]+y.data()[n];
+  }
+  return z;
+}
+
+template<class X> 
+Function::TaylorVariable<X> 
+Function::sub(const TaylorVariable<X>& x, const TaylorVariable<X>& y)
+{
+  assert(x.argument_size()==y.argument_size());
+  TaylorVariable<X> z(x.argument_size(),std::min(x.degree(),y.degree()));
+  for(size_type n=0; n<z.data().size(); ++n) {
+    z.data()[n] = x.data()[n]-y.data()[n];
+  }
+  return z;
+}
+
+template<class X> 
+Function::TaylorVariable<X> 
+Function::mul(const TaylorVariable<X>& x, const TaylorVariable<X>& y)
+{
+  assert(x.argument_size()==y.argument_size());
+  TaylorVariable<X> z(x.argument_size(),std::min(x.degree(),y.degree()));
+  add_product(z,x,y);
+  return z;
+}
+
+template<class X> 
+Function::TaylorVariable<X> 
+Function::div(const TaylorVariable<X>& x, const TaylorVariable<X>& y)
+{
+  return mul(x,rec(y));
+}
+
+template<class X> 
+Function::TaylorVariable<X> 
+Function::rec(const TaylorVariable<X>& x)
+{
+  return compose(FunctionSeries<X>::rec(x.degree(),x.value()),x);
+}
+
+template<class X, class N> 
+Function::TaylorVariable<X> 
+Function::pow(const TaylorVariable<X>& x, N k)
+{
+  return compose(FunctionSeries<X>::pow(x.degree(),x.value(),k),x);
+}
+
+template<class X>  
+Function::TaylorVariable<X> 
+Function::sqrt(const TaylorVariable<X>& x) 
+{
+  return compose(FunctionSeries<X>::sqrt(x.degree(),x.value()),x);
+}
+
+template<class X>  
+Function::TaylorVariable<X> 
+Function::exp(const TaylorVariable<X>& x) 
+{
+  return compose(FunctionSeries<X>::exp(x.degree(),x.value()),x);
+}
+
+template<class X>  
+Function::TaylorVariable<X> 
+Function::log(const TaylorVariable<X>& x) 
+{
+  return compose(FunctionSeries<X>::log(x.degree(),x.value()),x);
+}
+
+template<class X> 
+Function::TaylorVariable<X> 
+Function::sin(const TaylorVariable<X>& x)
+{
+  return compose(FunctionSeries<X>::sin(x.degree(),x.value()),x);
+}
+
+template<class X>  
+Function::TaylorVariable<X> 
+Function::cos(const TaylorVariable<X>& x) 
+{
+  return compose(FunctionSeries<X>::cos(x.degree(),x.value()),x);
+}
+
+template<class X>  
+Function::TaylorVariable<X> 
+Function::tan(const TaylorVariable<X>& x) 
+{
+  return compose(FunctionSeries<X>::tan(x.degree(),x.value()),x);
+}
+
+template<class X>  
+Function::TaylorVariable<X> 
+Function::asin(const TaylorVariable<X>& x) 
+{
+  return compose(FunctionSeries<X>::asin(x.degree(),x.value()),x);
+}
+
+template<class X>  
+Function::TaylorVariable<X> 
+Function::acos(const TaylorVariable<X>& x) 
+{
+  return compose(FunctionSeries<X>::acos(x.degree(),x.value()),x);
+}
+
+template<class X>  
+Function::TaylorVariable<X> 
+Function::atan(const TaylorVariable<X>& x) 
+{
+  return compose(FunctionSeries<X>::atan(x.degree(),x.value()),x);
+}
+
+
+template<class X> 
+Function::TaylorVariable<X> 
+Function::operator-(const TaylorVariable<X>& x)
+{
+  return neg(x);
+}
+
+template<class X> 
+Function::TaylorVariable<X> 
+Function::operator+(const TaylorVariable<X>& x, const TaylorVariable<X>& y)
+{
+  return add(x,y);
+}
+
+template<class X> 
+Function::TaylorVariable<X> 
+Function::operator-(const TaylorVariable<X>& x, const TaylorVariable<X>& y)
+{
+  return sub(x,y);
+}
+
+template<class X> 
+Function::TaylorVariable<X> 
+Function::operator*(const TaylorVariable<X>& x, const TaylorVariable<X>& y)
+{
+  return mul(x,y);
+}
+
+template<class X> 
+Function::TaylorVariable<X> 
+Function::operator/(const TaylorVariable<X>& x, const TaylorVariable<X>& y)
+{
+  return div(x,y);
+}
 
 
 

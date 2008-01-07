@@ -151,6 +151,9 @@ inline Float<T> div_down(const Float<T>& x, const int& y) {
 template<class T> 
 inline Float<T> div_approx(const Float<T>& x, const int& y) { 
   Float<T> r; div_(r,x,y,round_approx); return r; }
+template<class T> 
+inline Float<T> div_approx(const Float<T>& x, const double& y) { 
+  Float<T> r; div_(r,x,y,round_approx); return r; }
 
 template<class T> 
 inline Float<T> med_approx(const Float<T>& x, const Float<T>& y) { 

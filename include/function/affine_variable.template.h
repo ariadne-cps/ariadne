@@ -27,14 +27,6 @@ namespace Ariadne {
 
 
 template<class X> inline
-void 
-Function::AffineVariable<X>::instantiate()
-{
-  //AffineVariable<X>* av=0;
-}
-
-
-template<class X> inline
 void
 Function::neg(AffineVariable<X>& rv, const AffineVariable<X>& av) 
 {

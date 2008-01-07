@@ -61,13 +61,13 @@ void taylor_derivative_set_variable(TaylorDerivative<X1>& td, const size_type& i
 
 template<class X> inline 
 TaylorVariable<X> taylor_derivative_get_variable(const TaylorDerivative<X>& td, const size_type& i) {
-  assert(i==td.result_size()); 
+  assert(i<td.result_size()); 
   return td[i];
 }
 
 template<class X, class XX> inline 
 void taylor_derivative_set_item(TaylorDerivative<X>& td, const size_type& i, const MultiIndex& j, const XX& x) {
-  assert(i==td.result_size()); 
+  assert(i<td.result_size()); 
   assert(j.number_of_variables()==td.argument_size()); 
   assert(j.degree()<=td.degree()); 
   td.set(i,j,x);

@@ -36,6 +36,7 @@
 #include <valarray>
 
 #include "base/array.h"
+#include "base/tuple.h"
 
 #include "numeric/rational.h"
 #include "numeric/interval.h"
@@ -44,23 +45,20 @@
 #include "linear_algebra/matrix.h"
 
 #include "geometry/box.h"
-#include "geometry/zonotope.h"
+#include "geometry/box_list_set.h"
 #include "geometry/list_set.h"
-#include "geometry/grid.h"
 #include "geometry/grid_set.h"
-#include "geometry/rectangular_set.h"
 
 #include "system/vector_field.h"
-#include "system/affine_vector_field.h"
 
 #include "evaluation/evolution_parameters.h"
-#include "evaluation/bounder.h"
 #include "evaluation/integrator_interface.h"
-#include "evaluation/lohner_integrator.h"
+#include "evaluation/approximator_interface.h"
+
+#include "evaluation/standard_approximator.h"
 
 #include "output/logging.h"
 
-#include "vector_field_orbiter_interface.h"
 #include "vector_field_evolver.h"
 
 namespace {
@@ -106,156 +104,232 @@ namespace Evaluation { static int& verbosity = integrator_verbosity; }
 using namespace Geometry;
 using namespace System;
 
-template<class R>
-Evaluation::VectorFieldEvolver<R>::~VectorFieldEvolver()
+template<class BS>
+Evaluation::VectorFieldEvolver<BS>::~VectorFieldEvolver()
 {
 }
 
-template<class R>
-Evaluation::VectorFieldEvolver<R>::VectorFieldEvolver(const VectorFieldEvolver<R>& i)
-  : _parameters(i._parameters->clone()),
-    _orbiter(i._orbiter->clone())
+template<class BS> 
+Evaluation::VectorFieldEvolver<BS>::VectorFieldEvolver(const EvolutionParameters<R>& parameters, 
+                                                      const IntegratorInterface<BS>& integrator)
+  : _parameters(parameters.clone()),
+    _integrator(integrator.clone()),
+    _approximator(new StandardApproximator<BS>())
+{
+}
+
+template<class BS> 
+Evaluation::VectorFieldEvolver<BS>::VectorFieldEvolver(const EvolutionParameters<R>& parameters, 
+                                                      const IntegratorInterface<BS>& integrator,
+                                                      const ApproximatorInterface<BS>& approximator)
+  : _parameters(parameters.clone()),
+    _integrator(integrator.clone()),
+    _approximator(approximator.clone())
 {
 }
 
 
-template<class R>
-Evaluation::VectorFieldEvolver<R>*
-Evaluation::VectorFieldEvolver<R>::clone() const
+template<class BS>
+Evaluation::VectorFieldEvolver<BS>*
+Evaluation::VectorFieldEvolver<BS>::clone() const
 {
-  return new VectorFieldEvolver<R>(*this);
-}
-
-template<class R>
-Evaluation::VectorFieldEvolver<R>::VectorFieldEvolver(const EvolutionParameters<R>& parameters)
-  : _parameters(new EvolutionParameters<R>(parameters)),
-    _orbiter()
-{
+  return new VectorFieldEvolver<BS>(*this);
 }
 
 
 
 
-template<class R>
-Evaluation::EvolutionParameters<R>&
-Evaluation::VectorFieldEvolver<R>::parameters() 
-{
-  return *this->_parameters;
-}
-
-template<class R>
-const Evaluation::EvolutionParameters<R>&
-Evaluation::VectorFieldEvolver<R>::parameters() const
+template<class BS>
+Evaluation::EvolutionParameters<typename BS::real_type>&
+Evaluation::VectorFieldEvolver<BS>::parameters() 
 {
   return *this->_parameters;
 }
 
-
-
-
-
-
-template<class R> inline
-Geometry::GridCellListSet<R>
-Evaluation::VectorFieldEvolver<R>::evolve(const System::VectorFieldInterface<R>& vector_field, 
-                                          const Geometry::GridCell<R>& initial_set, 
-                                          const Numeric::Rational& time) const
+template<class BS>
+const Evaluation::EvolutionParameters<typename BS::real_type>&
+Evaluation::VectorFieldEvolver<BS>::parameters() const
 {
-  return this->_orbiter->evolve(vector_field,initial_set,time);
+  return *this->_parameters;
 }
 
-template<class R> inline
-Geometry::GridCellListSet<R>
-Evaluation::VectorFieldEvolver<R>::reach(const System::VectorFieldInterface<R>& vector_field, 
-                                         const Geometry::GridCell<R>& initial_set, 
+
+
+
+
+template<class BS>
+void
+Evaluation::VectorFieldEvolver<BS>::_step(BSL& evolve,
+                                          BSL& reach, 
+                                          TBSL& working,
+                                          const VF& vf,
+                                          const T& time,
+                                          Semantics semantics) const
+{
+  TBS tbs=working.pop();
+  BS const& bs=tbs.set();
+  if(tbs.time()==time) {
+    evolve.adjoin(bs);
+  } else if(radius(bs) > maximum_basic_set_radius()) {
+    if(semantics==upper_semantics) {
+      working.adjoin(this->subdivide(tbs));
+    } 
+  } else {
+    Bx bb; T h; BS rbs; 
+    make_lpair(h,bb)=this->flow_bounds(vf,this->bounding_box(bs));
+    tbs=this->integration_step(vf,tbs,h,bb);
+    {
+      rbs=this->reachability_step(vf,bs,h,bb);
+      reach.adjoin(rbs);
+    }
+    working.adjoin(tbs);
+  }
+}
+
+
+
+template<class BS>
+Geometry::GridCellListSet<typename BS::real_type>
+Evaluation::VectorFieldEvolver<BS>::_upper_evolve(const System::VectorField<R>& vector_field, 
+                                                  const Geometry::GridCellListSet<R>& initial_set,
+                                                  const Numeric::Rational& time) const
+{
+  BSL reach, evolve;
+  TBSL working=this->timed_basic_set_list(initial_set);
+  while(working.size()!=0) { 
+    this->_step(evolve,reach,working,vector_field,time,upper_semantics);
+  }
+  return this->outer_approximation(evolve,initial_set.grid());
+}
+
+
+template<class BS>
+Geometry::GridCellListSet<typename BS::real_type>
+Evaluation::VectorFieldEvolver<BS>::_upper_reach(const System::VectorField<R>& vector_field, 
+                                         const Geometry::GridCellListSet<R>& initial_set,
                                          const Numeric::Rational& time) const
 {
-  return this->_orbiter->reach(vector_field,initial_set,time);
-}
-
-
-
-
-template<class R>
-Geometry::SetInterface<R>*
-Evaluation::VectorFieldEvolver<R>::evolve(const System::VectorFieldInterface<R>& vector_field, 
-                                          const Geometry::SetInterface<R>& initial_set, 
-                                          const Numeric::Rational& time) const
-{
-  Geometry::Grid<R> grid=this->grid();
-  Geometry::GridMaskSet<R> result(grid);
-  Geometry::GridMaskSet<R> initial(grid);
-  for(typename GridMaskSet<R>::const_iterator cell_iter=initial.begin(); cell_iter!=initial.end(); ++cell_iter) {
-    result.adjoin(this->evolve(vector_field,*cell_iter,time));
+  BSL reach, evolve;
+  TBSL working=this->timed_basic_set_list(initial_set);
+  while(working.size()!=0) { 
+    this->_step(evolve,reach,working,vector_field,time,upper_semantics);
   }
-  return new GridMaskSet<R>(result);
+  return this->outer_approximation(reach,initial_set.grid());
 }
 
 
-template<class R>
-Geometry::SetInterface<R>*
-Evaluation::VectorFieldEvolver<R>::bounded_evolve(const System::VectorFieldInterface<R>& vector_field,
-                                                  const Geometry::SetInterface<R>& initial_set,
-                                                  const Geometry::SetInterface<R>& bounding_set,
-                                                  const time_type& time) const
+
+
+
+
+
+
+template<class BS>
+Geometry::SetInterface<typename BS::real_type>*
+Evaluation::VectorFieldEvolver<BS>::upper_evolve(const System::VectorField<R>& vector_field, 
+                                                 const Geometry::SetInterface<R>& initial_set, 
+                                                 const Numeric::Rational& time) const
 {
+  BSL reach, evolve;
+  TBSL working=this->timed_basic_set_list(this->outer_approximation(initial_set));
+  while(working.size()!=0) { 
+    this->_step(evolve,reach,working,vector_field,time,upper_semantics);
+  }
+  return new GMS(this->outer_approximation(evolve,this->grid(vector_field.dimension())));
 }
 
-
-template<class R>
-Geometry::SetInterface<R>*
-Evaluation::VectorFieldEvolver<R>::bounded_reach(const System::VectorFieldInterface<R>& vector_field,
-                                                 const Geometry::SetInterface<R>& initial_set,
-                                                 const Geometry::SetInterface<R>& bounding_set,
-                                                 const time_type& time) const
-{
-}
-
-
-
-
-template<class R>
-Geometry::SetInterface<R>*
-Evaluation::VectorFieldEvolver<R>::lower_reach(const System::VectorFieldInterface<R>& vector_field,
+template<class BS>
+Geometry::SetInterface<typename BS::real_type>* 
+Evaluation::VectorFieldEvolver<BS>::upper_reach(const System::VectorField<R>& vector_field,
                                                const Geometry::SetInterface<R>& initial_set,
-                                               const Geometry::SetInterface<R>& bounding_set) const
+                                               const Numeric::Rational& time) const
+{
+  BSL reach, evolve;
+  TBSL working=this->timed_basic_set_list(this->outer_approximation(initial_set));
+  while(working.size()!=0) { 
+    this->_step(evolve,reach,working,vector_field,time,upper_semantics);
+  }
+  return new GMS(this->outer_approximation(reach,this->grid(vector_field.dimension())));
+}
+
+
+template<class BS>
+Geometry::SetInterface<typename BS::real_type>*
+Evaluation::VectorFieldEvolver<BS>::lower_evolve(const System::VectorField<R>& vector_field,
+                                                 const Geometry::SetInterface<R>& initial_set,
+                                                 const Numeric::Rational& time) const
+{
+  BSL reach, evolve;
+  TBSL working=this->timed_basic_set_list(this->lower_approximation(initial_set));
+  while(working.size()!=0) { 
+    this->_step(evolve,reach,working,vector_field,time,lower_semantics);
+  }
+  return new GMS(this->lower_approximation(evolve,this->grid(vector_field.dimension())));
+}
+
+template<class BS>
+Geometry::SetInterface<typename BS::real_type>*
+Evaluation::VectorFieldEvolver<BS>::lower_reach(const System::VectorField<R>& vector_field,
+                                               const Geometry::SetInterface<R>& initial_set,
+                                               const Numeric::Rational& time) const
+{
+  BSL reach, evolve;
+  TBSL working=this->timed_basic_set_list(this->lower_approximation(initial_set));
+  while(working.size()!=0) { 
+    this->_step(evolve,reach,working,vector_field,time,lower_semantics);
+  }
+  return new GMS(this->lower_approximation(reach,this->grid(vector_field.dimension())));
+}
+
+
+
+
+
+template<class BS>
+Geometry::SetInterface<typename BS::real_type>*
+Evaluation::VectorFieldEvolver<BS>::lower_reach(const System::VectorField<R>& vector_field,
+                                               const Geometry::SetInterface<R>& initial_sete) const
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
 
-
-template<class R>
-Geometry::SetInterface<R>*
-Evaluation::VectorFieldEvolver<R>::chainreach(const System::VectorFieldInterface<R>& vector_field, 
-                                              const Geometry::SetInterface<R>& initial_set) const
+template<class BS>
+Geometry::SetInterface<typename BS::real_type>*
+Evaluation::VectorFieldEvolver<BS>::chainreach(const System::VectorField<R>& vector_field,
+                                               const Geometry::SetInterface<R>& initial_set) const
 {
+  Bx bb=this->bounding_domain(vector_field);
+  Gr grid=this->grid(vector_field.dimension());
+  T time=this->lock_to_grid_time();
+  GMS* result=new GMS(grid,bb);
+  GCLS found=this->outer_approximation(initial_set);
+  found=this->_upper_reach(vector_field,found,time);
+  while(!found.empty()) {
+    result->adjoin(found);
+    found=this->_upper_evolve(vector_field,found,time);
+    found.remove(*result);
+  }
+  return result;
 }
 
 
-template<class R>
-Geometry::SetInterface<R>*
-Evaluation::VectorFieldEvolver<R>::chainreach(const System::VectorFieldInterface<R>& vector_field,
-                                      const Geometry::SetInterface<R>& initial_set,
-                                      const Geometry::Box<R>& bounding_box) const
-{
-}
-
-
-template<class R>
-Geometry::SetInterface<R>*
-Evaluation::VectorFieldEvolver<R>::viable(const System::VectorFieldInterface<R>& vector_field,
+template<class BS>
+Geometry::SetInterface<typename BS::real_type>*
+Evaluation::VectorFieldEvolver<BS>::viable(const System::VectorField<R>& vector_field,
                                           const Geometry::SetInterface<R>& bounding_set) const
 {
+  throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
 
-template<class R>
+template<class BS>
 tribool
-Evaluation::VectorFieldEvolver<R>::verify(const System::VectorFieldInterface<R>& vector_field,
-                                  const Geometry::SetInterface<R>& initial_set,
-                                  const Geometry::SetInterface<R>& safe_set) const
+Evaluation::VectorFieldEvolver<BS>::verify(const System::VectorField<R>& vector_field,
+                                          const Geometry::SetInterface<R>& initial_set,
+                                          const Geometry::SetInterface<R>& safe_set) const
 {
+  throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
 

@@ -43,6 +43,12 @@ Geometry::Point<X>::Point(dimension_type d)
 }
 
 template<class X> template<class XX> inline
+Geometry::Point<X>::Point(const array<XX>& ary)
+  : _vector(ary) 
+{ 
+}
+
+template<class X> template<class XX> inline
 Geometry::Point<X>::Point(dimension_type d, const XX* data, size_type inc)
   : _vector(d,data,inc) 
 { 

@@ -26,8 +26,8 @@ namespace Ariadne {
 
 
 template<class R> inline
-Geometry::GridBlock<R>::GridBlock(const Grid<R>* gptr, const Combinatoric::LatticeBlock& lc)
-  : _grid_ptr(gptr), _lattice_set(lc)
+Geometry::GridBlock<R>::GridBlock(const Grid<R>& g, const Combinatoric::LatticeBlock& lc)
+  : _grid(g), _lattice_set(lc)
 {
 }
 
@@ -36,7 +36,7 @@ template<class R> inline
 const Geometry::Grid<R>& 
 Geometry::GridBlock<R>::grid() const 
 {
-  return *this->_grid_ptr; 
+  return this->_grid; 
 }
 
 
@@ -85,7 +85,7 @@ template<class R> inline
 typename Geometry::GridBlock<R>::const_iterator 
 Geometry::GridBlock<R>::begin() const 
 {
-  return const_iterator(*this->_grid_ptr,_lattice_set.begin()); 
+  return const_iterator(this->_grid,_lattice_set.begin()); 
 }
 
 
@@ -93,7 +93,7 @@ template<class R> inline
 typename Geometry::GridBlock<R>::const_iterator 
 Geometry::GridBlock<R>::end() const 
 {
-  return const_iterator(*this->_grid_ptr,_lattice_set.end()); 
+  return const_iterator(this->_grid,_lattice_set.end()); 
 }
 
 

@@ -25,7 +25,7 @@
 #include <iostream>
 #include <iomanip>
 
-#include "python/utilities.h"
+#include "python/operators.h"
 
 #include "python/float.h"
 #include "numeric/integer.h"
@@ -116,7 +116,7 @@ export_float()
   
   def("set_output_precision",(void(*)(uint))&set_output_precision);
 
-  class_<FloatPy>("Float")
+  class_<FloatPy>("Float",init<>())
     //.def("__init__", make_constructor(&make_float<R>) )
     .def(init<int>())
     .def(init<double>())

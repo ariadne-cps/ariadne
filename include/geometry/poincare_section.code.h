@@ -21,8 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "geometry/constraint_interface.h"
-#include "system/map.h"
+#include "function/function_interface.h"
 
 
 namespace Ariadne {
@@ -36,17 +35,18 @@ Geometry::PoincareSection<R>::~PoincareSection()
 }
 
 template<class R> inline
-Geometry::PoincareSection<R>::PoincareSection(const System::MapInterface<R>& im, 
-                                              const System::MapInterface<R>& pm, 
-                                              const Geometry::ConstraintInterface<R>& c) 
+Geometry::PoincareSection<R>::PoincareSection(const Function::FunctionInterface<R>& im, 
+                                              const Function::FunctionInterface<R>& pm, 
+                                              const Function::FunctionInterface<R>& c) 
   :  _inclusion_map_ptr(im.clone()),
      _projection_map_ptr(pm.clone()),
      _constraint_ptr(c.clone())
 {
-  assert(im.argument_dimension()+1u==c.dimension());
-  assert(im.result_dimension()==c.dimension());
-  assert(pm.argument_dimension()==c.dimension());
-  assert(pm.result_dimension()+1u==c.dimension());
+  assert(c.result_size()==1u);
+  assert(im.argument_size()+1u==c.argument_size());
+  assert(im.result_size()==c.argument_size());
+  assert(pm.argument_size()==c.argument_size());
+  assert(pm.result_size()+1u==c.argument_size());
 }
 
 template<class R> inline
@@ -68,7 +68,7 @@ template<class R> inline
 dimension_type
 Geometry::PoincareSection<R>::dimension() const
 {
-  return this->_inclusion_map_ptr->argument_dimension();
+  return this->_inclusion_map_ptr->argument_size();
 }
 
 template<class R> inline
@@ -80,21 +80,21 @@ Geometry::PoincareSection<R>::smoothness() const
 }
 
 template<class R> inline
-const System::MapInterface<R>&
+const Function::FunctionInterface<R>&
 Geometry::PoincareSection<R>::inclusion_map() const
 {
   return *this->_inclusion_map_ptr;
 }
 
 template<class R> inline
-const System::MapInterface<R>&
+const Function::FunctionInterface<R>&
 Geometry::PoincareSection<R>::projection_map() const
 {
   return *this->_projection_map_ptr;
 }
 
 template<class R> inline
-const Geometry::ConstraintInterface<R>&
+const Function::FunctionInterface<R>&
 Geometry::PoincareSection<R>::crossing_condition() const
 {
   return *this->_constraint_ptr;

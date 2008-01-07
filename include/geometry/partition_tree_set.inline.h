@@ -123,10 +123,10 @@ Geometry::PartitionScheme<R>::dimension() const
 
 
 template<class R> inline
-Geometry::PartitionTreeCell<R>::PartitionTreeCell(const Box<R>& r, const Combinatoric::SubdivisionTreeCell& c)
+Geometry::PartitionTreeCell<R>::PartitionTreeCell(const Box<R>& r, const Combinatoric::SubdivisionCell& c)
   : _unit_box(r), _subdivision_cell(c)
 {
-  ARIADNE_CHECK_EQUAL_DIMENSIONS(r,c,"PartitionTreeCell::PartitionTreeCell(Box r, SubdivisionTreeCell c)");
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(r,c,"PartitionTreeCell::PartitionTreeCell(Box r, SubdivisionCell c)");
 }
 
 template<class R> inline
@@ -145,7 +145,7 @@ Geometry::PartitionTreeCell<R>::unit_box() const
 }
 
 template<class R> inline
-const Combinatoric::SubdivisionTreeCell& 
+const Combinatoric::SubdivisionCell& 
 Geometry::PartitionTreeCell<R>::subdivision_cell() const 
 {
   return this->_subdivision_cell; 

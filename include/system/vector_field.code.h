@@ -25,41 +25,57 @@
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
 
+#include "function/taylor_derivative.h"
+#include "function/function_interface.h"
+
 #include "geometry/point.h"
 #include "geometry/box.h"
 
 
 
 namespace Ariadne {
-  namespace System {
 
-    template<class R>
-    VectorFieldInterface<R>::~VectorFieldInterface() 
-    {
-    }
+template<class R>
+System::VectorField<R>::~VectorField() 
+{
+}
      
-    template<class R>
-    typename VectorFieldInterface<R>::F 
-    VectorFieldInterface<R>::derivative(const Geometry::Point<F>& x, const size_type& i, const Function::MultiIndex& j) const
-    {
-      throw DeferredImplementation(__PRETTY_FUNCTION__);
-    }
-   
+template<class R>
+System::VectorField<R>::VectorField(const Function::FunctionInterface<R>& f) 
+  : _function_ptr(f.clone())
+{
+  assert(f.argument_size()==f.result_size());
+}
+     
 
-    template<class R>
-    LinearAlgebra::Matrix<typename VectorFieldInterface<R>::F> 
-    VectorFieldInterface<R>::jacobian(const Geometry::Point<F>& x) const 
-    {
-      throw DeferredImplementation(__PRETTY_FUNCTION__);
-    }
+template<class R>
+LinearAlgebra::Vector<typename System::VectorField<R>::F> 
+System::VectorField<R>::evaluate(const Geometry::Point<F>& x) const 
+{
+  return this->_function_ptr->evaluate(x.position_vector());
+}
+
+template<class R>
+LinearAlgebra::Matrix<typename System::VectorField<R>::F> 
+System::VectorField<R>::jacobian(const Geometry::Point<F>& x) const 
+{
+  return this->_function_ptr->jacobian(x.position_vector());
+}
+
+template<class R>
+Function::TaylorDerivative<typename System::VectorField<R>::F>
+System::VectorField<R>::derivative(const Geometry::Point<F>& x, const smoothness_type& s) const
+{
+  return this->_function_ptr->derivative(x.position_vector(),s);
+}
+   
+template<class R>
+std::ostream&
+System::VectorField<R>::write(std::ostream& os) const 
+{
+  return os << "VectorField( function=" << *this->_function_ptr << " )";
+}
+
     
-    template<class R>
-    std::ostream&
-    VectorFieldInterface<R>::write(std::ostream& os) const 
-    {
-      return os << "VectorFieldInterface()";
-    }
-    
-    
-  }
+
 }

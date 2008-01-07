@@ -48,8 +48,7 @@ namespace Ariadne {
     template<class R>
     class StandardApplicator
       : public ApplicatorInterface< Geometry::Rectangle<R> >,
-        public ApplicatorInterface< Geometry::Zonotope<R,Geometry::ExactTag> >,
-        public ApplicatorInterface< Geometry::Zonotope<R,Geometry::UniformErrorTag> >
+        public ApplicatorInterface< Geometry::Zonotope<R> >
     {
       typedef Numeric::Interval<R> I;
      public:
@@ -65,11 +64,9 @@ namespace Ariadne {
       //! \name Methods for applying a system to a basic set.
       
       /*! \brief Compute the image of a rectangle under a continuous function. */
-      virtual Geometry::Rectangle<R> apply(const System::MapInterface<R>& f, const Geometry::Rectangle<R>& bs) const;
+      virtual Geometry::Rectangle<R> apply(const System::Map<R>& f, const Geometry::Rectangle<R>& bs) const;
       /*! \brief Compute the image of a zonotope under a continuous function. */
-      virtual Geometry::Zonotope<R,Geometry::ExactTag> apply(const System::MapInterface<R>& f, const Geometry::Zonotope<R,Geometry::ExactTag>& bs) const;
-      /*! \brief Compute the image of a zonotope under a continuous function. */
-      virtual Geometry::Zonotope<R,Geometry::UniformErrorTag> apply(const System::MapInterface<R>& f, const Geometry::Zonotope<R,Geometry::UniformErrorTag>& bs) const;
+      virtual Geometry::Zonotope<R> apply(const System::Map<R>& f, const Geometry::Zonotope<R>& bs) const;
       //@}
     };
 

@@ -22,7 +22,7 @@
  */
 
 
-#include "python/utilities.h"
+#include "python/operators.h"
 #include "numeric/integer.h"
 
 using namespace Ariadne;

@@ -62,16 +62,16 @@ test_affine_integrator()
   typedef Interval<R> I;
 
   {
-    Matrix<R> T("[2]");
-    Matrix<R> I("[1]");
-    Vector<R> u("[1]");
-    Matrix<R> A("[-2,-1;1,-2]");
-    Vector<R> b("[0.125,0.25]");
+    Matrix<I> T("[2]");
+    Matrix<I> Id("[1]");
+    Vector<I> u("[1]");
+    Matrix<I> A("[-2,-1;1,-2]");
+    Vector<I> b("[0.125,0.25]");
     time_type h=0.125;
     uint k=1;
     std::cout << gexp(T,u,Interval<R>(0.5),0u) << endl;
-    std::cout << gexp(I,u,Interval<R>(1),1u) << endl;
-    std::cout << gexp(I,u,Interval<R>(1),2u) << endl;
+    std::cout << gexp(Id,u,Interval<R>(1),1u) << endl;
+    std::cout << gexp(Id,u,Interval<R>(1),2u) << endl;
     std::cout << gexp(A,b,Interval<R>(h),k) << endl;
   }
   

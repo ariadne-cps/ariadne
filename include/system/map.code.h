@@ -1,7 +1,7 @@
 /***************************************************************************
  *            map.code.h
  *
- *  Copyright  2005, 2006  Alberto Casagrande, Pieter Collins
+ *  Copyright  2005-7  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it,  Pieter.Collins@cwi.nl
  ****************************************************************************/
 
@@ -25,41 +25,103 @@
 #include "linear_algebra/matrix.h"
 
 #include "function/multi_index.h"
+#include "function/taylor_derivative.h"
+#include "function/function_interface.h"
 
 #include "geometry/point.h"
 #include "geometry/box.h"
 
 #include "system/map.h"
 
-namespace Ariadne {
-  namespace System {
+#include "output/logging.h"
 
-    template<class R>
-    MapInterface<R>::~MapInterface() 
-    {
-    }
-    
-    template<class R>
-    typename MapInterface<R>::F
-    MapInterface<R>::derivative(const Geometry::Point<F>& r, const size_type& i, const Function::MultiIndex& j) const 
-    {
-      throw DeferredImplementation(__PRETTY_FUNCTION__);
-    }
-    
-    template<class R>
-    LinearAlgebra::Matrix<typename MapInterface<R>::F>
-    MapInterface<R>::jacobian(const Geometry::Point<F>& r) const 
-    {
-      throw DeferredImplementation(__PRETTY_FUNCTION__);
-    }
-    
-    template<class R>
-    std::ostream&
-    MapInterface<R>::write(std::ostream& os) const 
-    {
-      return os << "MapInterface()";
-    }
-    
-   
-  }
+namespace Ariadne {
+
+template<class R>
+System::Map<R>::Map(const Function::FunctionInterface<R>& f)
+  : _function_ptr(f.clone())
+{
+}
+
+
+
+template<class R>
+const Function::FunctionInterface<R>&
+System::Map<R>::function() const
+{
+  return *this->_function_ptr;
+}
+
+template<class R>
+dimension_type 
+System::Map<R>::dimension() const
+{
+  ARIADNE_ASSERT(this->_function_ptr->argument_size()==this->_function_ptr->result_size());
+  return this->_function_ptr->result_size();
+}
+
+template<class R>
+smoothness_type 
+System::Map<R>::smoothness() const
+{
+  return this->_function_ptr->smoothness();
+}
+
+template<class R>
+dimension_type 
+System::Map<R>::result_dimension() const
+{
+  return this->_function_ptr->result_size();
+}
+
+template<class R>
+dimension_type 
+System::Map<R>::argument_dimension() const
+{
+  return this->_function_ptr->argument_size();
+}
+
+
+
+
+
+template<class R>
+Geometry::Point<typename System::Map<R>::A>
+System::Map<R>::operator() (const Geometry::Point<A>& x) const 
+{
+  ARIADNE_LOG(8,"Map::operator() (Point x) with x="<<x);
+  return this->image(x);
+}
+
+template<class R>
+Geometry::Point<typename System::Map<R>::A>
+System::Map<R>::image(const Geometry::Point<A>& x) const 
+{
+  ARIADNE_LOG(8,"Map::image(Point x) with x="<<x);
+  return Geometry::Point<A>(this->_function_ptr->evaluate(x.position_vector()));
+}
+
+
+template<class R>
+LinearAlgebra::Matrix<typename System::Map<R>::A>
+System::Map<R>::jacobian(const Geometry::Point<A>& x) const 
+{
+  return this->_function_ptr->jacobian(x.position_vector());
+}
+
+template<class R>
+Function::TaylorDerivative<typename System::Map<R>::A>
+System::Map<R>::derivative(const Geometry::Point<A>& x, const smoothness_type& s) const 
+{
+  return this->_function_ptr->derivative(x.position_vector(),s);
+}
+
+template<class R>
+std::ostream&
+System::Map<R>::write(std::ostream& os) const 
+{
+  return os << "Map( \nfunction="<<*this->_function_ptr<<"\n)";
+}
+
+
 }

@@ -59,10 +59,10 @@ namespace Ariadne {
     {
       typedef typename S::real_type R;
      public:
+      typedef abstract_set_tag set_category;
       typedef DiscreteState discrete_state_type;
       typedef boost::shared_ptr<S> pointer_type;
       typedef typename S::real_type real_type;
-      typedef typename S::state_type state_type;
       typedef S set_type;
       typedef typename std::map<discrete_state_type,pointer_type>::iterator locations_iterator;
       typedef typename std::map<discrete_state_type,pointer_type>::const_iterator locations_const_iterator;

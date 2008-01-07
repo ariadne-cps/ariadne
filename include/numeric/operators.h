@@ -149,8 +149,9 @@ namespace Ariadne {
     ARIADNE_BINARY_FUNCTION(Mul,mul,mul_,"mul");
     ARIADNE_BINARY_FUNCTION(Div,div,div_,"div");
     ARIADNE_BINARY_FUNCTION(Pow,pow,pow_,"pow");
-    ARIADNE_BINARY_FUNCTION(Mod,mod,mod,"mod");
-    ARIADNE_BINARY_FUNCTION(Rem,rem,rem,"rem");
+    ARIADNE_BINARY_FUNCTION(Mod,mod,mod_,"mod");
+    ARIADNE_BINARY_FUNCTION(Quot,quot,quot_,"quot");
+    ARIADNE_BINARY_FUNCTION(Rem,rem,rem_,"rem");
   
     ARIADNE_UNARY_FUNCTION(Factorial,fac,fac_,"fac");
     ARIADNE_BINARY_FUNCTION(Choose,bin,bin_,"bin");

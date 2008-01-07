@@ -40,29 +40,29 @@ namespace Ariadne {
 
 
 template<class R>
-Geometry::DifferentiableConstraint<R>::DifferentiableConstraint(const Function::DifferentiableFunctionInterface<R>& f, Comparison cmp)
+Geometry::Constraint<R>::Constraint(const Function::FunctionInterface<R>& f, Comparison cmp)
   : _function_ptr(f.clone()), _comparison(cmp)
 { 
 }
 
 
 template<class R>
-Geometry::DifferentiableConstraint<R>::~DifferentiableConstraint() 
+Geometry::Constraint<R>::~Constraint() 
 { 
 }
 
 
 template<class R>
-Geometry::DifferentiableConstraint<R>* 
-Geometry::DifferentiableConstraint<R>::clone() const 
+Geometry::Constraint<R>* 
+Geometry::Constraint<R>::clone() const 
 {
-  return new DifferentiableConstraint<R>(*this->_function_ptr); 
+  return new Constraint<R>(*this->_function_ptr); 
 }
 
 
 template<class R>
 dimension_type 
-Geometry::DifferentiableConstraint<R>::dimension() const 
+Geometry::Constraint<R>::dimension() const 
 {
   return this->_function_ptr->argument_size(); 
 }
@@ -70,7 +70,7 @@ Geometry::DifferentiableConstraint<R>::dimension() const
 
 template<class R>
 smoothness_type 
-Geometry::DifferentiableConstraint<R>::smoothness() const 
+Geometry::Constraint<R>::smoothness() const 
 {
   return this->_function_ptr->smoothness(); 
 }
@@ -81,41 +81,41 @@ Geometry::DifferentiableConstraint<R>::smoothness() const
 
 template<class R>
 std::ostream& 
-Geometry::DifferentiableConstraint<R>::write(std::ostream& os) const 
+Geometry::Constraint<R>::write(std::ostream& os) const 
 {
-  return os << "DifferentiableConstraint( ... )";
-  return os << "DifferentiableConstraint( function=" << *this->_function_ptr << ", comparison=" << (this->_comparison==less ? "<" : ">") << " )";
+  return os << "Constraint( ... )";
+  return os << "Constraint( function=" << *this->_function_ptr << ", comparison=" << (this->_comparison==less ? "<" : ">") << " )";
 }
 
 
 
 template<class R>
 Geometry::Comparison
-Geometry::DifferentiableConstraint<R>::comparison() const 
+Geometry::Constraint<R>::comparison() const 
 {
   return this->_comparison;
 }
 
 
 template<class R>
-const Function::DifferentiableFunctionInterface<R>&
-Geometry::DifferentiableConstraint<R>::function() const 
+const Function::FunctionInterface<R>&
+Geometry::Constraint<R>::function() const 
 {
   return *this->_function_ptr;
 }
 
 
 template<class R>
-typename Geometry::DifferentiableConstraint<R>::A 
-Geometry::DifferentiableConstraint<R>::value(const Point<A>& pt) const
+typename Geometry::Constraint<R>::A 
+Geometry::Constraint<R>::value(const Point<A>& pt) const
 {
   return this->_function_ptr->operator()(pt.position_vector())[0];
 }
 
 
 template<class R>
-LinearAlgebra::Vector<typename Geometry::DifferentiableConstraint<R>::A>
-Geometry::DifferentiableConstraint<R>::gradient(const Point<A>& pt) const
+LinearAlgebra::Vector<typename Geometry::Constraint<R>::A>
+Geometry::Constraint<R>::gradient(const Point<A>& pt) const
 {
   return LinearAlgebra::Vector<A>(this->dimension(),this->_function_ptr->jacobian(pt.position_vector()).begin());
 }
@@ -125,7 +125,7 @@ Geometry::DifferentiableConstraint<R>::gradient(const Point<A>& pt) const
 
 template<class R>
 void
-Geometry::DifferentiableConstraint<R>::instantiate() 
+Geometry::Constraint<R>::instantiate() 
 {
   /*
   typedef Numeric::Interval<R> I;
@@ -134,7 +134,7 @@ Geometry::DifferentiableConstraint<R>::instantiate()
   Zonotope<I,R>* ez=0;
   Zonotope<I,I>* iz=0;
   ConstraintInterface<R>* ci=0;
-  DifferentiableConstraint<R>* c=0;
+  Constraint<R>* c=0;
   
   satisfies(*r,*c);
   satisfies(*z,*c);
@@ -154,7 +154,7 @@ Geometry::DifferentiableConstraint<R>::instantiate()
 
 template<class R>
 Numeric::Interval<R> 
-Geometry::value(const DifferentiableConstraintInterface<R>& c, const Box<R>& r)
+Geometry::value(const ConstraintInterface<R>& c, const Box<R>& r)
 {
   typedef typename Numeric::traits<R>::interval_type I;
   return c.value(Point<I>(r));
@@ -163,7 +163,7 @@ Geometry::value(const DifferentiableConstraintInterface<R>& c, const Box<R>& r)
 
 template<class R>
 Numeric::Interval<R> 
-Geometry::value(const DifferentiableConstraintInterface<R>& c, const Zonotope< Numeric::Interval<R> >& z)
+Geometry::value(const ConstraintInterface<R>& c, const Zonotope< Numeric::Interval<R> >& z)
 {
   typedef typename Numeric::traits<R>::interval_type I;
   LinearAlgebra::Vector<I> e(z.number_of_generators(),I(-1,1));
@@ -174,7 +174,7 @@ Geometry::value(const DifferentiableConstraintInterface<R>& c, const Zonotope< N
 
 template<class R>
 tribool 
-Geometry::satisfies(const Box<R>& r, const DifferentiableConstraintInterface<R>& c)
+Geometry::satisfies(const Box<R>& r, const ConstraintInterface<R>& c)
 {
   typedef typename Numeric::traits<R>::interval_type I;
   Point<I> pt(r);
@@ -184,7 +184,7 @@ Geometry::satisfies(const Box<R>& r, const DifferentiableConstraintInterface<R>&
 
 template<class R>
 tribool 
-Geometry::satisfies(const Box<R>& r, const DifferentiableConstraint<R>& c)
+Geometry::satisfies(const Box<R>& r, const Constraint<R>& c)
 {
   typedef typename Numeric::traits<R>::interval_type I;
   Point<I> pt(r);
@@ -194,7 +194,7 @@ Geometry::satisfies(const Box<R>& r, const DifferentiableConstraint<R>& c)
 
 template<class R>
 tribool 
-Geometry::satisfies(const Zonotope<R,R>& z, const DifferentiableConstraint<R>& c)
+Geometry::satisfies(const Zonotope<R,R>& z, const Constraint<R>& c)
 {
   typedef Numeric::Interval<R> I;
   LinearAlgebra::Vector<I> e(z.number_of_generators(),I(-1,1));
@@ -208,7 +208,7 @@ Geometry::satisfies(const Zonotope<R,R>& z, const DifferentiableConstraint<R>& c
       
 template<class R>
 tribool 
-Geometry::satisfies(const Zonotope<Numeric::Interval<R>,R>& z, const DifferentiableConstraint<R>& c)
+Geometry::satisfies(const Zonotope<Numeric::Interval<R>,R>& z, const Constraint<R>& c)
 {
   typedef Numeric::Interval<R> I;
   LinearAlgebra::Vector<I> e(z.number_of_generators(),I(-1,1));
@@ -224,7 +224,7 @@ Geometry::satisfies(const Zonotope<Numeric::Interval<R>,R>& z, const Differentia
 template<class R>
 tribool 
 Geometry::satisfies(const Zonotope< Numeric::Interval<R>, Numeric::Interval<R> >& z, 
-                    const DifferentiableConstraintInterface<R>& c)
+                    const ConstraintInterface<R>& c)
 {
   typedef Numeric::Interval<R> I;
   LinearAlgebra::Vector<I> e(z.number_of_generators(),I(-1,1));

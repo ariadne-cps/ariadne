@@ -23,15 +23,15 @@
 
 #include "python/float.h"
 
+#include "geometry/box.h"
 #include "geometry/rectangle.h"
 #include "geometry/zonotope.h"
-#include "geometry/grid_set.h"
-#include "geometry/list_set.h"
 
 #include "system/vector_field.h"
 #include "system/affine_vector_field.h"
 
 #include "evaluation/integrator_interface.h"
+#include "evaluation/kuhn_integrator.h"
 #include "evaluation/lohner_integrator.h"
 #include "evaluation/affine_integrator.h"
 #include "evaluation/euler_integrator.h"
@@ -48,19 +48,30 @@ using namespace Ariadne::Python;
 #include <boost/python.hpp>
 using namespace boost::python;
 
+template<class Integrator, class R>
+tuple
+flow_bounds(const Integrator& i, const VectorField<R>& vf, const Box<R>& bb, const Rational& t)
+{
+  std::pair< Rational, Box<R> > result=i.flow_bounds(vf,bb,t);
+  return boost::python::make_tuple(result.first,result.second);
+}
+
 template<class BS>
 class IntegratorWrapper
   : public IntegratorInterface<BS>,
     public wrapper< IntegratorInterface<BS> >
 {
+  typedef Numeric::Rational T;
   typedef typename BS::real_type R;
   typedef Interval<R> I;
  public:
   IntegratorWrapper() { }
   IntegratorWrapper<BS>* clone() const { return this->get_override("clone")(); }
-  BS integration_step(const VectorFieldInterface<R>&, const BS&, const I&, const Box<R>&) const {
+  std::pair< T,Box<R> > flow_bounds(const VectorField<R>&, const Box<R>&, const T&) const {
+    return this->get_override("flow_bounds")(); }
+  BS integration_step(const VectorField<R>&, const BS&, const I&, const Box<R>&) const {
     return this->get_override("integration_step")(); }
-  BS reachability_step(const VectorFieldInterface<R>&, const BS&, const I&, const Box<R>&) const {
+  BS reachability_step(const VectorField<R>&, const BS&, const I&, const Box<R>&) const {
     return this->get_override("reachability_step")(); }
   std::ostream& write(std::ostream&) const {
     return this->get_override("write")(); }
@@ -72,12 +83,24 @@ void export_integrator()
   typedef Interval<R> I;
 
   class_< IntegratorWrapper< Box<R> >, boost::noncopyable >("BoxIntegratorInterface",init<>());
-  class_< IntegratorWrapper< Zonotope<R,UniformErrorTag> >, boost::noncopyable >("C0ZonotopeIntegratorInterface",init<>());
-  class_< IntegratorWrapper< Zonotope<R,IntervalTag> >, boost::noncopyable >("C1ZonotopeIntegratorInterface",init<>());
+  class_< IntegratorWrapper< Zonotope<R> >, boost::noncopyable >("ZonotopeIntegratorInterface",init<>());
 
-  class_< LohnerIntegrator<R>, bases<IntegratorInterface< Zonotope<R,UniformErrorTag> >, IntegratorInterface< Zonotope<R,IntervalTag> > > >("LohnerIntegrator",init<>());
+  class_< KuhnIntegrator<R>, bases<IntegratorInterface< Zonotope<R> > > > kuhn_integrator_class("KuhnIntegrator",init<uint>());
+  kuhn_integrator_class.def("flow_bounds",&flow_bounds<KuhnIntegrator<R>,R>);
+  kuhn_integrator_class.def("integration_step",&KuhnIntegrator<R>::integration_step);
+  kuhn_integrator_class.def("reachability_step",&KuhnIntegrator<R>::reachability_step);
 
-  class_< AffineIntegrator<R>, bases< IntegratorInterface< Zonotope<R,UniformErrorTag> >, IntegratorInterface< Zonotope<R,IntervalTag> > > >("AffineIntegrator",init<>());
+  class_< LohnerIntegrator<R>, bases<IntegratorInterface< Zonotope<R> > > >
+    lohner_integrator_class("LohnerIntegrator",init<>());
+  lohner_integrator_class.def("flow_bounds",&flow_bounds<LohnerIntegrator<R>,R>);
+  lohner_integrator_class.def("integration_step",&LohnerIntegrator<R>::integration_step);
+  lohner_integrator_class.def("reachability_step",&LohnerIntegrator<R>::reachability_step);
+
+  class_< AffineIntegrator<R>, bases< IntegratorInterface< Zonotope<R> > > >
+    affine_integrator_class("AffineIntegrator",init<>());
+  affine_integrator_class.def("flow_bounds",&flow_bounds<AffineIntegrator<R>,R>);
+  affine_integrator_class.def("integration_step",(Zonotope<R>(AffineIntegrator<R>::*)(const VectorField<R>&,const Zonotope<R>&,const Interval<R>&,const Box<R>&)const) &AffineIntegrator<R>::integration_step);
+  affine_integrator_class.def("reachability_step",(Zonotope<R>(AffineIntegrator<R>::*)(const VectorField<R>&,const Zonotope<R>&,const Interval<R>&,const Box<R>&)const) &AffineIntegrator<R>::reachability_step);
 
   class_< EulerIntegrator<R>, bases<IntegratorInterface< Box<R> > > >("EulerIntegrator",init<>());
 }

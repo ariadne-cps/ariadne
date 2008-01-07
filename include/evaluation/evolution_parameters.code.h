@@ -24,6 +24,7 @@
 #include "linear_algebra/vector.h"
 #include "geometry/box.h"
 #include "geometry/grid.h"
+#include "geometry/hybrid_denotable_set.h"
 
 namespace Ariadne {
 
@@ -137,12 +138,19 @@ Evaluation::EvolutionParameters<R>::bounding_domain_size() const
   return this->_bounding_domain_size;
 }
 
+template<class R>
+uint
+Evaluation::EvolutionParameters<R>::verbosity() const 
+{
+  return this->_verbosity;
+}
+
 
 
 
 template<class R>
 Geometry::Box<R>
-Evaluation::EvolutionParameters<R>::bounding_box(dimension_type d) const 
+Evaluation::EvolutionParameters<R>::bounding_domain(dimension_type d) const 
 {
   return Geometry::Box<R>(LinearAlgebra::Vector< Numeric::Interval<R> >(d,Numeric::Interval<R>(-1,1)*this->bounding_domain_size()));
 }
@@ -160,7 +168,14 @@ template<class R>
 Geometry::FiniteGrid<R>
 Evaluation::EvolutionParameters<R>::finite_grid(dimension_type d) const 
 {
-  return Geometry::FiniteGrid<R>(this->grid(d),this->bounding_box(d));
+  return Geometry::FiniteGrid<R>(this->grid(d),this->bounding_domain(d));
+}
+
+template<class R>
+Geometry::HybridGrid<R>
+Evaluation::EvolutionParameters<R>::hybrid_grid(const Geometry::HybridSpace& loc) const 
+{
+  return Geometry::HybridGrid<R>(loc,this->_grid_length);
 }
 
 
@@ -251,6 +266,13 @@ Evaluation::EvolutionParameters<R>::set_bounding_domain_size(R x)
   this->_bounding_domain_size=x;
 }
 
+template<class R>
+void
+Evaluation::EvolutionParameters<R>::set_verbosity(uint v)  
+{
+  this->_verbosity=v;
+}
+
 
 template<class R>
 std::ostream&
@@ -272,6 +294,7 @@ Evaluation::EvolutionParameters<R>::write(std::ostream& os) const
      << ",\n  result_grid_length=" << this->_result_grid_length
 
      << ",\n  bounding_domain_size=" << this->_bounding_domain_size
+     << ",\n  verbosity=" << this->_verbosity
      << "\n)\n";
   return os;
 }

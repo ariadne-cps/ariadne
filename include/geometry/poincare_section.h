@@ -46,7 +46,9 @@ namespace Ariadne {
       /*! \brief Destructor. */
       virtual ~PoincareSection();
       /*! \brief Constructor. */
-      PoincareSection(const System::MapInterface<R>& im, const System::MapInterface<R>& pm, const ConstraintInterface<R>& c);
+      PoincareSection(const Function::FunctionInterface<R>& im, 
+                      const Function::FunctionInterface<R>& pm, 
+                      const Function::FunctionInterface<R>& c);
       /*! \brief Copy constructor. */
       PoincareSection(const PoincareSection<R>& s);
       /*! \brief Return a new dynamically-allocated copy of the constraint. */
@@ -58,13 +60,13 @@ namespace Ariadne {
       /*! \brief Write to an output stream. */
       virtual std::ostream& write(std::ostream& os) const;
 
-      virtual const System::MapInterface<R>& inclusion_map() const;
-      virtual const System::MapInterface<R>& projection_map() const;
-      virtual const Geometry::ConstraintInterface<R>& crossing_condition() const;
+      virtual const Function::FunctionInterface<R>& inclusion_map() const;
+      virtual const Function::FunctionInterface<R>& projection_map() const;
+      virtual const Function::FunctionInterface<R>& crossing_condition() const;
      private:
-      System::MapInterface<R>* _inclusion_map_ptr;
-      System::MapInterface<R>* _projection_map_ptr;
-      Geometry::ConstraintInterface<R>* _constraint_ptr;
+      Function::FunctionInterface<R>* _inclusion_map_ptr;
+      Function::FunctionInterface<R>* _projection_map_ptr;
+      Function::FunctionInterface<R>* _constraint_ptr;
     };
     
 

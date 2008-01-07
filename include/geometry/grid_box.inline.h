@@ -29,7 +29,7 @@ template<class R> inline
 const Geometry::Grid<R>& 
 Geometry::GridBox<R>::grid() const 
 { 
-  return *this->_grid_ptr; 
+  return *this->_grid; 
 }
 
 template<class R> inline
@@ -45,7 +45,7 @@ template<class R> inline
 R
 Geometry::GridBox<R>::lower_bound(dimension_type i) const 
 {
-  return _grid_ptr->subdivision_coordinate(i,_coordinates[2*i]);
+  return _grid.subdivision_coordinate(i,_coordinates[2*i]);
 }
 
 
@@ -53,7 +53,7 @@ template<class R> inline
 R
 Geometry::GridBox<R>::upper_bound(dimension_type i) const 
 {
-  return _grid_ptr->subdivision_coordinate(i,_coordinates[2*i+1]);
+  return _grid.subdivision_coordinate(i,_coordinates[2*i+1]);
 }
 
 template<class R> inline

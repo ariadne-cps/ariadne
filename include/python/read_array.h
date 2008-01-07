@@ -39,15 +39,6 @@ namespace Ariadne {
 namespace Python {
 
 
-template<class X> 
-array<X>*
-read_array(const boost::python::object& obj);
-
-template<class X> 
-void
-read_array(array<X>&, const boost::python::object& obj);
-
-
 // Read a array variable of type X from a Python object
 template<class X> 
 void
@@ -58,7 +49,24 @@ read_array(array<X>& ary, const boost::python::object& obj)
   int n=boost::python::len(elements);
   ary.resize(n);
   for(int i=0; i!=n; ++i) {
-    ary[i]=read_scalar<X>(elements[i]);
+    read_scalar(ary[i], elements[i]);
+  }
+}
+
+// Read a boolean array variable from a Python object
+// Must be inline to avoid multiple instantiations
+template<> inline
+void
+read_array(array<bool>& ary, const boost::python::object& obj)
+{
+  // See "Extracting C++ objects" in the Boost Python tutorial
+  boost::python::list elements=boost::python::extract<boost::python::list>(obj);
+  int n=boost::python::len(elements);
+  bool value;
+  ary.resize(n);
+  for(int i=0; i!=n; ++i) {
+    read_scalar(value, elements[i]);
+    ary[i]=value;
   }
 }
 
@@ -71,21 +79,8 @@ read_tuple_array(array<X>& ary, const boost::python::object& obj)
   int n=boost::python::len(elements);
   ary.resize(n);
   for(int i=0; i!=n; ++i) {
-    ary[i]=read_scalar<X>(elements[i]);
+    read_scalar(ary[i],elements[i]);
   }
-}
-
-template<class X> inline
-array<X>*
-read_array(const boost::python::object& obj)
-{
-  boost::python::list elements=boost::python::extract<boost::python::list>(obj);
-  int n=boost::python::len(elements);
-  array<X>& ary=*new array<X>(n);
-  for(int i=0; i!=n; ++i) {
-    ary[i]=read_scalar<X>(elements[i]);
-  }
-  return &ary;
 }
 
 

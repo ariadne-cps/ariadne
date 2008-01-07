@@ -41,7 +41,7 @@ namespace Ariadne {
     
     template<class R> class Point;
     template<class R> class Box;
-    template<class R0,class R1> class Zonotope;
+    template<class R> class Zonotope;
     template<class R> class Polyhedron;
 
   
@@ -72,6 +72,8 @@ namespace Ariadne {
       virtual dimension_type dimension() const = 0;
       /*! \brief The operation used for comparison. */
       virtual Comparison comparison() const = 0;
+      /*! \brief The gradient of the constraint function at a point. */
+      virtual LinearAlgebra::Vector<A> gradient(const Point<A>& pt) const = 0;
       /*! \brief The smoothness of the constraint function. */
       virtual smoothness_type smoothness() const = 0;
       /*! \brief Write to an output stream. */
@@ -81,20 +83,6 @@ namespace Ariadne {
       virtual A value(const Point<A>& pt) const = 0;
     };
     
-    //! \ingroup SetInterface
-    /*! \brief A differentiable constraint on the state
-     */
-    template<class R>
-    class DifferentiableConstraintInterface
-      : public ConstraintInterface<R>
-    {
-      typedef typename Numeric::traits<R>::arithmetic_type A;
-     public:
-      /*! \brief Return a new dynamically-allocated copy of the constraint. */
-      virtual DifferentiableConstraintInterface<R>* clone() const = 0;
-      /*! \brief The gradient of the constraint function at a point. */
-      virtual LinearAlgebra::Vector<A> gradient(const Point<A>& pt) const = 0;
-    };
 
 
     template<class R> ConstraintInterface<R>::~ConstraintInterface() { 

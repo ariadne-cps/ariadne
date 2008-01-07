@@ -26,7 +26,6 @@
 
 #include <sstream>
 
-
 #define ARIADNE_THROW(except,func,msg)          \
 { \
   std::stringstream ss; \

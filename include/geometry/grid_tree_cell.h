@@ -95,7 +95,7 @@ namespace Ariadne {
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream&) const;
      private:
-      Grid<R>* _grid_ptr;
+      Grid<R> _grid;
       Combinatoric::BinaryWord _word;
     };
 

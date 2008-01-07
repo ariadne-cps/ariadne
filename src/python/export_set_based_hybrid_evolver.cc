@@ -46,28 +46,27 @@ using namespace boost::python;
 template<class R>
 void export_set_based_hybrid_evolver() 
 {
-
   typedef Numeric::Interval<R> I;
-  typedef Zonotope<R,UniformErrorTag> BS;
+  typedef Zonotope<R> ZBS;
 
+  class_< SetBasedHybridEvolver<ZBS> > evolver_class("SetBasedHybridEvolver",no_init);
+  evolver_class.def(init<const EvolutionParameters<R>&,const ApplicatorInterface<ZBS>&,const IntegratorInterface<ZBS>&>());
+  evolver_class.def("evolve",&SetBasedHybridEvolver<ZBS>::basic_set_evolve);
+  evolver_class.def("reach",&SetBasedHybridEvolver<ZBS>::basic_set_reach);
+  evolver_class.def("evolve",&SetBasedHybridEvolver<ZBS>::grid_set_evolve);
+  evolver_class.def("reach",&SetBasedHybridEvolver<ZBS>::grid_set_reach);
+  evolver_class.def("lower_evolve",&SetBasedHybridEvolver<ZBS>::lower_evolve);
+  evolver_class.def("lower_reach",&SetBasedHybridEvolver<ZBS>::lower_reach);
+  evolver_class.def("upper_evolve",&SetBasedHybridEvolver<ZBS>::upper_evolve);
+  evolver_class.def("upper_reach",&SetBasedHybridEvolver<ZBS>::upper_reach);
+  evolver_class.def("chain_reach",&SetBasedHybridEvolver<ZBS>::chainreach);
+  evolver_class.def("chainreach",&SetBasedHybridEvolver<ZBS>::chainreach);
 
-  class_< SetBasedHybridEvolver<R> > evolver_class("SetBasedHybridEvolver",init< EvolutionParameters<R> >());
-  evolver_class.def(init<const EvolutionParameters<R>&,const ApplicatorInterface<BS>&,const IntegratorInterface<BS>&>());
-  evolver_class.def(init<const SetBasedHybridEvolver<R>&>());
-  evolver_class.def("discrete_step",
-                    (HybridSet<R>(SetBasedHybridEvolver<R>::*)(const SetBasedHybridAutomaton<R>&,const HybridSet<R>&))&SetBasedHybridEvolver<R>::discrete_step);
-  evolver_class.def("continuous_chainreach",
-                    (HybridSet<R>(SetBasedHybridEvolver<R>::*)(const SetBasedHybridAutomaton<R>&,const HybridSet<R>&))&SetBasedHybridEvolver<R>::continuous_chainreach);
-  evolver_class.def("chainreach",
-                    (HybridSet<R>(SetBasedHybridEvolver<R>::*)(const SetBasedHybridAutomaton<R>&,const HybridSet<R>&))&SetBasedHybridEvolver<R>::chainreach);
-
-
-  evolver_class.def("continuous_chainreach",
-                    (HybridSet<R>(SetBasedHybridEvolver<R>::*)(const SetBasedHybridAutomaton<R>&,const HybridSet<R>&,const HybridSet<R>&))&SetBasedHybridEvolver<R>::continuous_chainreach);
-  evolver_class.def("chainreach",
-                    (HybridSet<R>(SetBasedHybridEvolver<R>::*)(const SetBasedHybridAutomaton<R>&,const HybridSet<R>&,const HybridSet<R>&))&SetBasedHybridEvolver<R>::chainreach);
-  
+  enum_<Semantics>("Semantics")
+    .value("lower",lower_semantics)
+    .value("upper",upper_semantics)
+  ;
 }
 
 
-//template void export_set_based_hybrid_evolver<FloatPy>();
+template void export_set_based_hybrid_evolver<FloatPy>();

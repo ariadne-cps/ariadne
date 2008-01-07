@@ -41,7 +41,7 @@ namespace Ariadne {
     
     template<class R> class Point;
     template<class R> class Box;
-    template<class R0,class R1> class Zonotope;
+    template<class R> class Zonotope;
     template<class R> class Polyhedron;
 
   
@@ -57,19 +57,19 @@ namespace Ariadne {
     /*! \brief A constraint on the state
      */
     template<class R>
-    class DifferentiableConstraint
-      : public DifferentiableConstraintInterface<R>
+    class Constraint
+      : public ConstraintInterface<R>
     {
       typedef typename Numeric::traits<R>::arithmetic_type A;
       typedef typename Numeric::traits<R>::interval_type I;
      public:
       /*! \brief Construct the set \f$f(x) \lessgtr 0\f$ from the function \f$f\f$. */
-      DifferentiableConstraint(const Function::DifferentiableFunctionInterface<R>& f, const Comparison cmp=greater);
+      Constraint(const Function::FunctionInterface<R>& f, const Comparison cmp=greater);
 
       /*! \brief Destructor. */
-      virtual ~DifferentiableConstraint();
+      virtual ~Constraint();
       /*! \brief Return a new dynamically-allocated copy of the constraint. */
-      virtual DifferentiableConstraint<R>* clone() const;
+      virtual Constraint<R>* clone() const;
       /*! \brief The dimension of the set. */
       virtual dimension_type dimension() const;
       /*! \brief The smoothness of the constraint function. */
@@ -80,7 +80,7 @@ namespace Ariadne {
       virtual std::ostream& write(std::ostream& os) const;
 
       /*! \brief The function defining the constraint. */
-      const Function::DifferentiableFunctionInterface<R>& function() const;
+      const Function::FunctionInterface<R>& function() const;
       /*! \brief The value at a point. */
       A value(const Point<A>& pt) const;
       /*! \brief The gradient at a point. */
@@ -103,18 +103,23 @@ namespace Ariadne {
      private:
       static void instantiate();
      private:
-      boost::shared_ptr< const Function::DifferentiableFunctionInterface<R> > _function_ptr;
+      boost::shared_ptr< const Function::FunctionInterface<R> > _function_ptr;
       Comparison _comparison;
     };
     
-/*
-    template<class R> bool equal(const DifferentiableConstraint<R>& c1, const DifferentiableConstraint<R>& c2);
-    template<class R> bool opposite(const DifferentiableConstraint<R>& c1, const DifferentiableConstraint<R>& c2);
+    template<class R> inline
+    std::ostream& operator<<(std::ostream& os, const Constraint<R>& c) {
+      return c.write(os); 
+    }
 
-    template<class R> tribool satisfies(const Box<R>& r, const DifferentiableConstraint<R>& c);
-    template<class R> tribool satisfies(const Zonotope<R,R>& z, const DifferentiableConstraint<R>& c);
-    template<class R> tribool satisfies(const Zonotope<Numeric::Interval<R>,R>& z, const DifferentiableConstraint<R>& c);
-    template<class R> tribool satisfies(const Zonotope< Numeric::Interval<R>,Numeric::Interval<R> >& z, const DifferentiableConstraint<R>& c);
+/*
+    template<class R> bool equal(const Constraint<R>& c1, const Constraint<R>& c2);
+    template<class R> bool opposite(const Constraint<R>& c1, const Constraint<R>& c2);
+
+    template<class R> tribool satisfies(const Box<R>& r, const Constraint<R>& c);
+    template<class R> tribool satisfies(const Zonotope<R,R>& z, const Constraint<R>& c);
+    template<class R> tribool satisfies(const Zonotope<Numeric::Interval<R>,R>& z, const Constraint<R>& c);
+    template<class R> tribool satisfies(const Zonotope< Numeric::Interval<R>,Numeric::Interval<R> >& z, const Constraint<R>& c);
 */
   }
 }

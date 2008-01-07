@@ -86,6 +86,19 @@ Function::AffineDerivative<X>::operator=(const AffineDerivative<XX>& other)
 
 
 template<class X> inline
+Function::AffineDerivative<X>
+Function::AffineDerivative<X>::variable(const LinearAlgebra::Vector<X>& x)
+{
+  const size_type& n=x.size();
+  AffineDerivative<X> result(n,n);
+  for(size_type i=0; i!=n; ++i) {
+    result._data[i*(n+1)]=x[i];
+    result._data[i*(n+2)+1]=1;
+  }
+  return result;
+}
+
+template<class X> inline
 size_type
 Function::AffineDerivative<X>::result_size() const
 {
@@ -104,6 +117,15 @@ smoothness_type
 Function::AffineDerivative<X>::degree() const
 {
   return 1;
+}
+
+template<class X> inline
+void
+Function::AffineDerivative<X>::resize(const size_type& rs, const size_type& as) 
+{
+  this->_result_size=rs;
+  this->_argument_size=as;
+  this->_data.resize(rs*(as+1u));
 }
 
 template<class X> inline
@@ -134,6 +156,13 @@ Function::AffineDerivative<X>::operator[](size_type i)
   return AffineVariableReference<X>(*this,i);
 }
 
+
+template<class X> inline
+LinearAlgebra::Matrix<X>
+Function::AffineDerivative<X>::jacobian() const
+{
+  return LinearAlgebra::MatrixSlice<const X>(this->_result_size,this->_argument_size,this->_data.begin()+1u,this->_argument_size+1u,1u);
+}
 
 template<class X1, class X2> inline
 bool

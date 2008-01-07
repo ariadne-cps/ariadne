@@ -48,7 +48,7 @@ namespace Ariadne {
     class Flower {
       typedef Numeric::Interval<R> I;
      public:
-      Flower(const VectorFieldEvolver<R>& i, const System::VectorFieldInterface<R>& vf);
+      Flower(const VectorFieldEvolver<R>& i, const System::VectorField<R>& vf);
       Geometry::Point<I> evaluate(const Geometry::Point<I>& pt);
       Geometry::Point<I> jacobian(const Geometry::Point<I>& pt);
       

@@ -23,9 +23,9 @@
 
 #include "python/float.h"
 
-#include "geometry/constraint_interface.h"
-#include "system/map_interface.h"
-#include "system/vector_field_interface.h"
+#include "geometry/constraint.h"
+#include "system/map.h"
+#include "system/vector_field.h"
 
 #include "geometry/hybrid_set.h"
 #include "system/constraint_based_hybrid_automaton.h"
@@ -62,13 +62,13 @@ void export_constraint_based_hybrid_automaton()
   class_< ConstraintBasedHybridAutomaton<R> >("ConstraintBasedHybridAutomaton",init<const std::string&>())
     /*
     .def("new_dynamic",
-         (const VectorFieldInterface<R>&(ConstraintBasedHybridAutomaton<R>::*)(id_type, const VectorFieldInterface<R>&)) &ConstraintBasedHybridAutomaton<R>::new_dynamic,
+         (const VectorField<R>&(ConstraintBasedHybridAutomaton<R>::*)(id_type, const VectorField<R>&)) &ConstraintBasedHybridAutomaton<R>::new_dynamic,
          return_reference_existing_object())
     .def("new_reset",
-         (const MapInterface<R>&(ConstraintBasedHybridAutomaton<R>::*)(id_type, const MapInterface<R>&)) &ConstraintBasedHybridAutomaton<R>::new_dynamic,
+         (const Map<R>&(ConstraintBasedHybridAutomaton<R>::*)(id_type, const Map<R>&)) &ConstraintBasedHybridAutomaton<R>::new_dynamic,
          return_reference_existing_object())
     .def("new_constraint",
-         (const ConstraintInterface<R>&(ConstraintBasedHybridAutomaton<R>::*)(id_type, const ConstraintInterface<R>&))&ConstraintBasedHybridAutomaton<R>::new_dynamic,
+         (const Constraint<R>&(ConstraintBasedHybridAutomaton<R>::*)(id_type, const Constraint<R>&))&ConstraintBasedHybridAutomaton<R>::new_dynamic,
          return_reference_existing_object())
 
     .def("new_mode",
@@ -88,22 +88,22 @@ void export_constraint_based_hybrid_automaton()
           return_reference_existing_object())
     */
 
-    .def("new_mode",(const ConstraintBasedDiscreteMode<R>&(ConstraintBasedHybridAutomaton<R>::*)(DiscreteState,const VectorFieldInterface<R>&))
+    .def("new_mode",(const ConstraintBasedDiscreteMode<R>&(ConstraintBasedHybridAutomaton<R>::*)(DiscreteState,const VectorField<R>&))
            (&ConstraintBasedHybridAutomaton<R>::new_mode),
          return_reference_existing_object())
-    .def("new_invariant",(const ConstraintBasedDiscreteTransition<R>&(ConstraintBasedHybridAutomaton<R>::*)(DiscreteEvent,DiscreteState,const ConstraintInterface<R>&))
+    .def("new_invariant",(const ConstraintBasedDiscreteTransition<R>&(ConstraintBasedHybridAutomaton<R>::*)(DiscreteEvent,DiscreteState,const Constraint<R>&))
            (&ConstraintBasedHybridAutomaton<R>::new_invariant),
          return_reference_existing_object())
      .def("new_transition",
-         (const ConstraintBasedDiscreteTransition<R>&(ConstraintBasedHybridAutomaton<R>::*)(DiscreteEvent,DiscreteState,DiscreteState,const MapInterface<R>&,const ConstraintInterface<R>&,bool))
+         (const ConstraintBasedDiscreteTransition<R>&(ConstraintBasedHybridAutomaton<R>::*)(DiscreteEvent,DiscreteState,DiscreteState,const Map<R>&,const Constraint<R>&,bool))
            (&ConstraintBasedHybridAutomaton<R>::new_transition),
          return_reference_existing_object())
     .def("new_forced_transition",
-         (const ConstraintBasedDiscreteTransition<R>&(ConstraintBasedHybridAutomaton<R>::*)(DiscreteEvent,DiscreteState,DiscreteState,const MapInterface<R>&,const ConstraintInterface<R>&))
+         (const ConstraintBasedDiscreteTransition<R>&(ConstraintBasedHybridAutomaton<R>::*)(DiscreteEvent,DiscreteState,DiscreteState,const Map<R>&,const Constraint<R>&))
            (&ConstraintBasedHybridAutomaton<R>::new_forced_transition),
          return_reference_existing_object())
     .def("new_unforced_transition",
-         (const ConstraintBasedDiscreteTransition<R>&(ConstraintBasedHybridAutomaton<R>::*)(DiscreteEvent,DiscreteState,DiscreteState,const MapInterface<R>&,const ConstraintInterface<R>&))
+         (const ConstraintBasedDiscreteTransition<R>&(ConstraintBasedHybridAutomaton<R>::*)(DiscreteEvent,DiscreteState,DiscreteState,const Map<R>&,const Constraint<R>&))
            (&ConstraintBasedHybridAutomaton<R>::new_unforced_transition),
          return_reference_existing_object())
 

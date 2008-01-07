@@ -26,6 +26,8 @@
 #include "geometry/point.h"
 #include "geometry/box.h"
 
+#include "function/identity_function.h"
+
 namespace {
 
 using namespace Ariadne;
@@ -47,8 +49,17 @@ tribool less(const LinearAlgebra::Vector<X1>& v1, const LinearAlgebra::Vector<X2
 namespace Ariadne {
     
 template<class R>
-Geometry::ConstraintSet<R>::ConstraintSet(const Function::FunctionInterface<R>& f)
-  : SetInterface<R>(), _function_ptr(f.clone()) 
+Geometry::ConstraintSet<R>::ConstraintSet(const Geometry::Box<R>& bx)
+  : _function_ptr(new Function::IdentityFunction<R>(bx.dimension()))
+  , _codomain(bx) 
+{ 
+}
+
+template<class R>
+Geometry::ConstraintSet<R>::ConstraintSet(const Function::FunctionInterface<R>& f, 
+                                          const Geometry::Box<R>& bx)
+  : _function_ptr(f.clone())
+  , _codomain(bx) 
 { 
 }
 
@@ -63,7 +74,7 @@ template<class R>
 Geometry::ConstraintSet<R>* 
 Geometry::ConstraintSet<R>::clone() const 
 {
-  return new ConstraintSet<R>(*this->_function_ptr); 
+  return new ConstraintSet<R>(*this->_function_ptr,this->_codomain); 
 }
 
 
@@ -80,11 +91,9 @@ template<class R>
 tribool 
 Geometry::ConstraintSet<R>::contains(const Point<R>& pt) const 
 {
+  const Box<R>& dom=this->_codomain;
   const Function::FunctionInterface<R>& f=*this->_function_ptr;
-  LinearAlgebra::Vector<A> v=pt.position_vector();
-  LinearAlgebra::Vector<R> z=LinearAlgebra::Vector<R>::zero(this->number_of_constraints());
-  LinearAlgebra::Vector<A> r=f(v);
-  return ::less(z,r);
+  return dom.contains(Point<A>(f(pt.position_vector())));
 }
 
 
@@ -92,48 +101,43 @@ template<class R>
 tribool 
 Geometry::ConstraintSet<R>::contains(const Point<A>& pt) const 
 {
+  const Box<R>& dom=this->_codomain;
   const Function::FunctionInterface<R>& f=*this->_function_ptr;
-  LinearAlgebra::Vector<A> v=pt.position_vector();
-  LinearAlgebra::Vector<R> z=LinearAlgebra::Vector<R>::zero(this->number_of_constraints());
-  LinearAlgebra::Vector<A> r=f(v);
-  return ::less(z,r);
+  return dom.contains(Point<A>(f(pt.position_vector())));
 }
 
 
 template<class R>
 tribool 
-Geometry::ConstraintSet<R>::superset(const Box<R>& r) const 
+Geometry::ConstraintSet<R>::superset(const Box<R>& bx) const 
 {
+  const Box<R>& dom=this->_codomain;
   const Function::FunctionInterface<R>& f=*this->_function_ptr;
-  LinearAlgebra::Vector<A> v=r.position_vectors();
-  LinearAlgebra::Vector<R> z=LinearAlgebra::Vector<R>::zero(this->number_of_constraints());
-  LinearAlgebra::Vector<A> fv=f(v);
-  return ::less(z,fv);
+  return Geometry::subset(Box<R>(f(bx.position_vectors())),dom);
 }
 
 
 template<class R>
 tribool 
-Geometry::ConstraintSet<R>::intersects(const Box<R>& r) const 
+Geometry::ConstraintSet<R>::intersects(const Box<R>& bx) const 
 {
-  return !this->disjoint(r);
+  return !this->disjoint(bx);
 }
 
 
 template<class R>
 tribool 
-Geometry::ConstraintSet<R>::disjoint(const Box<R>& r) const 
+Geometry::ConstraintSet<R>::disjoint(const Box<R>& bx) const 
 {
+  const Box<R>& dom=this->_codomain;
   const Function::FunctionInterface<R>& f=*this->_function_ptr;
-  LinearAlgebra::Vector<A> v=r.position_vectors();
-  LinearAlgebra::Vector<R> z=LinearAlgebra::Vector<R>::zero(this->number_of_constraints());
-  return ::less(f(v),z);
+  return Geometry::disjoint(dom,Box<R>(f(bx.position_vectors())));
 }
 
 
 template<class R>
 tribool 
-Geometry::ConstraintSet<R>::subset(const Box<R>& r) const 
+Geometry::ConstraintSet<R>::subset(const Box<R>& bx) const 
 {
   return indeterminate;
 }
@@ -159,7 +163,8 @@ template<class R>
 std::ostream& 
 Geometry::ConstraintSet<R>::write(std::ostream& os) const 
 {
-  return os << "ConstraintSet( function=" << *this->_function_ptr << " )";
+  return os << "ConstraintSet( function=" << *this->_function_ptr
+            << ", codomain=" << this->_codomain << ")";
 }
 
 
@@ -179,14 +184,13 @@ Geometry::ConstraintSet<R>::function() const
   return *this->_function_ptr;
 }
 
-
 template<class R>
-Geometry::Point<typename Geometry::ConstraintSet<R>::A> 
-Geometry::ConstraintSet<R>::function(const Point<A>& pt) const 
+const Geometry::Box<R>&
+Geometry::ConstraintSet<R>::codomain() const 
 {
-  const Function::FunctionInterface<R>& f=*this->_function_ptr;
-  LinearAlgebra::Vector<A> v=pt.position_vector();
-  return Point<A>(f(v));
+  return this->_codomain;
 }
+
+
 
 }

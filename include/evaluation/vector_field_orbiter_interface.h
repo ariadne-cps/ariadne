@@ -47,8 +47,9 @@ namespace Ariadne {
     template<class R>
     class VectorFieldOrbiterInterface 
     {
-     public:
-      typedef Numeric::Rational time_type;
+      /*! \brief The type used to denote time. */
+      typedef Numeric::Integer time_type;
+      /*! \brief The type used to represent space. */
       typedef R real_type;
      public:
       /*! \brief Destructor. */
@@ -57,10 +58,33 @@ namespace Ariadne {
       /*! \brief Make a dynamically-allocated copy. */
       virtual VectorFieldOrbiterInterface<R>* clone() const = 0;
 
-      /*! \brief Compute the orbit of a rectangle under time \a t of a vector field. */
+      /*! \brief Compute an over-approximation to the time \a t evolution of the grid cell \a gc. */
       virtual 
-      Geometry::OrbitInterface<Numeric::Rational>*
-      orbit(const System::VectorFieldInterface<R>& vf, const Geometry::Box<R>& bx, const Numeric::Rational& t) const = 0;
+      Geometry::GridCellListSet<R>
+      upper_evolve(const System::VectorField<R>& vf, const Geometry::GridCell<R>& bx, const Numeric::Rational& t) const = 0;
+
+      /*! \brief Compute an over-approximation to the time \a t reachable set of the grid cell \a gc. */
+      virtual 
+      Geometry::GridCellListSet<R>
+      upper_reach(const System::VectorField<R>& vf, const Geometry::GridCell<R>& bx, const Numeric::Rational& t) const = 0;
+
+      /*! \brief Compute a lower-approximation to the time \a t evolution of the box \a bx. */
+      virtual 
+      Geometry::Box<R>
+      lower_evolve(const System::VectorField<R>& vf, const Geometry::Box<R>& bx, const Numeric::Rational& t) const = 0;
+
+      /*! \brief Compute a lower-approximation to the time \a t reachable set of the box \a bx. */
+      virtual 
+      Geometry::BoxListSet<R>
+      lower_reach(const System::VectorField<R>& vf, const Geometry::Box<R>& bx, const Numeric::Rational& t) const = 0;
+
+      
+
+
+      // /*! \brief Compute the orbit of a rectangle under time \a t of a vector field. */
+      //virtual 
+      //Geometry::OrbitInterface<Numeric::Rational>*
+      //orbit(const System::VectorField<R>& vf, const Geometry::Box<R>& bx, const Numeric::Rational& t) const = 0;
 
        
     };

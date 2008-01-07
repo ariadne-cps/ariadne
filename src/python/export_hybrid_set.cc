@@ -31,6 +31,8 @@
 #include "geometry/set_reference.h"
 #include "system/discrete_event.h"
 
+#include "geometry/zonotope.h"
+
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
 using namespace Ariadne::Geometry;
@@ -138,6 +140,10 @@ void export_hybrid_set()
     .def(self_ns::str(self))
   ;
   
+  class_< HybridGrid<R> >("HybridGrid",init<HybridSpace,R>())
+    .def(self_ns::str(self))
+  ;
+
   class_< HybridGridMaskSet<R> >("HybridGridMaskSet",init<>())
     .def(init< HybridGridMaskSet<R> >())
     .def("__len__",&HybridGridMaskSet<R>::number_of_locations)
@@ -151,7 +157,7 @@ void export_hybrid_set()
     .def(self_ns::str(self))
   ;
   
-  class_< HybridGridCellListSet<R> >("HybridGridCellListSet",init<>())
+  class_< HybridGridCellListSet<R> >("HybridGridCellListSet",init< HybridGrid<R> >())
     .def(init< HybridGridMaskSet<R> >())
     .def(init< HybridGridCellListSet<R> >())
     .def("__len__",&HybridGridCellListSet<R>::number_of_locations)
@@ -165,6 +171,23 @@ void export_hybrid_set()
     .def(self_ns::str(self))
   ;
   
+
+
+  class_< HybridBasicSet< Zonotope<R> > >("HybridZonotope",init< DiscreteState, Zonotope<R> >())
+    .def("state",&HybridBasicSet< Zonotope<R> >::state, return_reference_existing_object)
+    .def("set",&HybridBasicSet< Zonotope<R> >::set, return_reference_existing_object)
+    .def(self_ns::str(self))
+  ;
+
+  class_< HybridListSet< Zonotope<R> > >("HybridZonotopeListSet", init<HybridSpace>())
+    .def(init< HybridSpace, HybridBasicSet< Zonotope<R> > >())
+    .def("__getitem__",&hybrid_set_get_item< HybridListSet< Zonotope<R> >  >, return_reference_existing_object)
+    .def("__iter__",iterator< HybridListSet< Zonotope<R> > >())
+    .def(self_ns::str(self))
+  ;
+
+
+
 }
 
 template void export_hybrid_set<FloatPy>();

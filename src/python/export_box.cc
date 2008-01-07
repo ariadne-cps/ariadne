@@ -29,17 +29,17 @@
 #include "geometry/box.h"
 #include "geometry/list_set.h"
 
+#include <boost/python.hpp>
+#include <boost/python/detail/api_placeholder.hpp>
+
+#include "python/utilities.h"
+#include "python/read_box.h"
+
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
 using namespace Ariadne::LinearAlgebra;
 using namespace Ariadne::Geometry;
 using namespace Ariadne::Python;
-
-#include <boost/python.hpp>
-#include <boost/python/detail/api_placeholder.hpp>
-
-#include "python/utilities.h"
-#include "python/read_scalar.h"
 
 using namespace boost::python;
 
@@ -71,41 +71,15 @@ __repr__(const Box<X>& r)
   return ss.str();
 }
 
-template<class R>  
-Box<R>* 
-make_box(const boost::python::object& obj) 
+template<class R>
+Box<R>*
+make_box(const boost::python::object& obj)
 {
-  // See "Extracting C++ objects" in the Boost Python tutorial
-  boost::python::list elements=extract<list>(obj);
-  int d=boost::python::len(elements);
-  Box<R>& r=*new Box<R>(d);
-  for(int i=0; i!=d; ++i) {
-    extract<list> extract_list(elements[i]);
-    if(extract_list.check()) {
-      boost::python::list pair=extract_list();
-      if(boost::python::len(pair)!=2) {
-        throw std::runtime_error("Box must be list of pairs representing intervals");
-      }
-      R l=read_scalar<R>(pair[0]);
-      R u=read_scalar<R>(pair[1]);
-      r.set_lower_bound(i,static_cast<R>(l));
-      r.set_upper_bound(i,static_cast<R>(u));
-    } else {
-      extract<std::string> extract_string(elements[i]);
-      if(extract_string.check()) {
-        Interval<R> interval(extract_string());
-        r.set_lower_bound(i,interval.lower());
-        r.set_upper_bound(i,interval.upper());
-      } else {
-        extract< Interval<R> > extract_interval(elements[i]);
-        Interval<R> interval=extract_interval();
-        r.set_lower_bound(i,interval.lower());
-        r.set_upper_bound(i,interval.upper());
-      } 
-    }
-  }
-  return &r;
+  Box<R>* bx=new Box<R>;
+  read_box(*bx,obj);
+  return bx;
 }
+
 
 
 

@@ -31,7 +31,7 @@
 #include "geometry/rectangle.h"
 #include "geometry/parallelotope.h"
 #include "system/affine_vector_field.h"
-#include "evaluation/bounder.h"
+#include "evaluation/standard_bounder.h"
 #include "evaluation/lohner_integrator.h"
 #include "evaluation/affine_integrator.h"
 #include "output/epsstream.h"
@@ -65,7 +65,8 @@ test_lohner_integrator()
   cout << __PRETTY_FUNCTION__ << endl;
   typedef Interval<R> I;
 
-  Bounder<R> bounder;
+  R maximum_step_size=0.125;
+  StandardBounder<R> bounder(maximum_step_size);
   LohnerIntegrator<R> lohner=LohnerIntegrator<R>();
   AffineIntegrator<R> affine=AffineIntegrator<R>();
 
@@ -87,7 +88,7 @@ test_lohner_integrator()
   cout << "h=" << h << endl;
   cout << "z.generators().norm()=" << norm(z.generators()) << endl;
 
-  const VectorFieldInterface<R>& vf=avf;
+  const VectorField<R>& vf=avf;
 
   Box<R> bb0,bb1,bb2,bb3,bb4;
   Zonotope<R,UniformErrorTag> z0,z1,z2,z3,z4,zr1,zr2,zr3,zr4;

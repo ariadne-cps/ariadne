@@ -269,6 +269,10 @@ void div_(FloatMP& r, const FloatMP& x, const int& y, Rnd) {
   mpfr_div_si(r._value,x._value,y,mpfr_rounding_mode<Rnd>()); }
 
 template<class Rnd> inline 
+void div_(FloatMP& r, const FloatMP& x, const double& y, Rnd) {
+  mpfr_div_d(r._value,x._value,y,mpfr_rounding_mode<Rnd>()); }
+
+template<class Rnd> inline 
 void div_(FloatMP& r, const int& x, const FloatMP& y, Rnd) {
   mpfr_si_div(r._value,x,y._value,mpfr_rounding_mode<Rnd>()); }
 

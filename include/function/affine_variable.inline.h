@@ -121,7 +121,7 @@ Function::AffineVariable<X>::constant(uint as, const X& c)
 
 template<class X> inline
 Function::AffineVariable<X>
-Function::AffineVariable<X>::variable(uint as, uint i, const X& c) 
+Function::AffineVariable<X>::variable(uint as, const X& c, uint i) 
 {
   AffineVariable<X> result;
   result._x=c;
@@ -232,6 +232,13 @@ Function::operator/(const C& c, const AffineVariable<X>& x)
 template<class C, class X> inline 
 Function::AffineVariable<X>
 Function::operator/(const AffineVariable<X>& x, const C& c) 
+{
+  return x/X(c);
+}
+
+template<class X> inline 
+Function::AffineVariable<X>
+Function::operator/(const AffineVariable<X>& x, const X& c) 
 {
   return AffineVariable<X>(x.value()/c,x.derivative()/c);
 }
@@ -390,6 +397,14 @@ Function::atan(const AffineVariable<X>& x)
 }
 
 
+
+template<class X> inline 
+Function::AffineVariable<X>&
+Function::AffineVariable<X>::operator+=(const AffineVariable<X>& x) 
+{
+  this->_x+=x._x;
+  this->_dx+=x._dx;
+}
 
 template<class X> inline 
 Function::AffineVariable<X>

@@ -295,7 +295,7 @@ Evaluation::ConstraintBasedHybridScheduler<R>::compute_crossing_time_step(const 
                                                                const bounding_box_type& bounding_box) const
 {
   ARIADNE_LOG(8,"    ConstraintBasedHybridScheduler::compute_crossing_time_step(...)\n");
-  const System::VectorFieldInterface<R>& dynamic=transition.source().dynamic();
+  const System::VectorField<R>& dynamic=transition.source().dynamic();
   const Geometry::ConstraintInterface<R>& constraint=transition.constraint();
   const Geometry::Box<R> domain=initial_set.bounding_box();
 
@@ -646,17 +646,17 @@ Evaluation::ConstraintBasedHybridScheduler<R>::compute_enabled_activation_times(
 
 template<class R>
 typename Evaluation::ConstraintBasedHybridScheduler<R>::timed_set_type
-Evaluation::ConstraintBasedHybridScheduler<R>::final_continuous_evolution_step(const mode_type& mode,
+Evaluation::ConstraintBasedHybridScheduler<R>::final_continuous_integration_step(const mode_type& mode,
                                                                               const timed_set_type& initial_set,
                                                                               const time_type& final_time,
                                                                               const bounding_box_type& bounding_box) const
 {
-  ARIADNE_LOG(7," ConstraintBasedHybridScheduler::final_continuous_evolution_step(...)\n");
+  ARIADNE_LOG(7," ConstraintBasedHybridScheduler::final_continuous_integration_step(...)\n");
   ARIADNE_LOG(8,"    dynamic="<<mode.dynamic()<<"\n    initial_set="<<initial_set<<"\n    final_time="<<final_time<<"\n    bounding_box="<<bounding_box<<"\n");
   time_model_type zero_time_model(I(0),LinearAlgebra::Vector<I>(initial_set.number_of_generators()));
   time_model_type final_time_model=final_time+zero_time_model;
   time_model_type time_step=final_time-initial_set.time();
-  timed_set_type final_set=this->continuous_evolution_step(mode,initial_set,time_step,bounding_box);
+  timed_set_type final_set=this->continuous_integration_step(mode,initial_set,time_step,bounding_box);
   return timed_set_type(final_time_model,final_set.steps(),final_set.discrete_state(),final_set.continuous_state_set());
 }
 
@@ -664,12 +664,12 @@ Evaluation::ConstraintBasedHybridScheduler<R>::final_continuous_evolution_step(c
 
 template<class R>
 typename Evaluation::ConstraintBasedHybridScheduler<R>::timed_set_type
-Evaluation::ConstraintBasedHybridScheduler<R>::continuous_evolution_step(const mode_type& mode,
+Evaluation::ConstraintBasedHybridScheduler<R>::continuous_integration_step(const mode_type& mode,
                                                                         const timed_set_type& initial_set,
                                                                         const time_model_type& time_step,
                                                                         const bounding_box_type& bounding_box) const
 {
-  ARIADNE_LOG(7," ConstraintBasedHybridScheduler::continuous_evolution_step(...)\n");
+  ARIADNE_LOG(7," ConstraintBasedHybridScheduler::continuous_integration_step(...)\n");
   ARIADNE_LOG(8,"    dynamic="<<mode.dynamic()<<"\n    initial_set="<<initial_set<<"\n    time_step="<<time_step<<"\n    bounding_box="<<bounding_box<<"\n");
   assert(mode.id()==initial_set.discrete_state());
   I average_time_step = time_step.average();
@@ -753,7 +753,7 @@ Evaluation::ConstraintBasedHybridScheduler<R>::forced_jump_step(const transition
   ARIADNE_LOG(8,"  crossing_time="<<crossing_time<<"\n");
   ARIADNE_LOG(8,"  bounding_box="<<bounding_box<<"\n");
   
-  timed_set_type flowed_set = this->continuous_evolution_step(transition.source(),initial_set,crossing_time,bounding_box);
+  timed_set_type flowed_set = this->continuous_integration_step(transition.source(),initial_set,crossing_time,bounding_box);
   timed_set_type mapped_set = this->discrete_event_step(transition,flowed_set);
   return mapped_set;
 }
@@ -795,7 +795,7 @@ Evaluation::ConstraintBasedHybridScheduler<R>::unforced_jump_step(const transiti
 
 template<class R>
 std::vector<typename Evaluation::ConstraintBasedHybridScheduler<R>::timed_set_type>
-Evaluation::ConstraintBasedHybridScheduler<R>::evolution_step(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
+Evaluation::ConstraintBasedHybridScheduler<R>::integration_step(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
                                                               const timed_set_type& initial_set,
                                                               const time_type& final_time,
                                                               const time_type& maximum_step_size,
@@ -814,7 +814,7 @@ Evaluation::ConstraintBasedHybridScheduler<R>::evolution_step(const System::Cons
 
   this->trace.clear();
 
-  ARIADNE_LOG(2,"\nConstraintBasedHybridEvolver::evolution_step(...)\n");
+  ARIADNE_LOG(2,"\nConstraintBasedHybridEvolver::integration_step(...)\n");
   ARIADNE_LOG(3,"  evolution_semantics="<<(evolution_semantics==lower_semantics?"lower":"upper"));
   ARIADNE_LOG(3,", evolution_kind="<<(evolution_kind==compute_evolved_set?"evolve":"reach")<<"\n");  
   ARIADNE_LOG(3,"  initial_steps="<<initial_set.steps()<<"  initial_mode="<<initial_set.discrete_state()<<"\n")
@@ -829,7 +829,7 @@ Evaluation::ConstraintBasedHybridScheduler<R>::evolution_step(const System::Cons
   //const discrete_time_type& initial_steps = initial_set.steps();
 
   const mode_type& mode = automaton.mode(discrete_state);
-  const System::VectorFieldInterface<R>& dynamic=mode.dynamic();
+  const System::VectorField<R>& dynamic=mode.dynamic();
   const reference_set<const transition_type>& transitions=mode.transitions();
 
   ARIADNE_LOG(6,"  transitions="<<transitions<<"\n\n");
@@ -854,7 +854,7 @@ Evaluation::ConstraintBasedHybridScheduler<R>::evolution_step(const System::Cons
   time_model_type integration_time_step = zero_time_step + time_step_size;
   time_type integration_time_step_size = time_step_size;
   // Compute the evolved set after the maximum evolution time
-  timed_set_type integrated_set = this->continuous_evolution_step(mode,initial_set,integration_time_step,bounding_box);
+  timed_set_type integrated_set = this->continuous_integration_step(mode,initial_set,integration_time_step,bounding_box);
   ARIADNE_LOG(6,"  integrated_set="<<integrated_set<<"\n\n");
 
   // Schedule events bounding the evolution time
@@ -942,20 +942,20 @@ Evaluation::ConstraintBasedHybridScheduler<R>::evolution_step(const System::Cons
 
       if(terminating_event==time_step_event) {
         // The terminating event is time passing
-        timed_set_type continuous_evolved_set=this->continuous_evolution_step(mode,initial_set,terminating_time_step,bounding_box);
+        timed_set_type continuous_evolved_set=this->continuous_integration_step(mode,initial_set,terminating_time_step,bounding_box);
         result.push_back(continuous_evolved_set);
         this->trace.push_back(continuous_evolved_set);
         ARIADNE_LOG(6,"  continuous_evolved_set="<<continuous_evolved_set<<"\n");
       } else if(terminating_event==final_time_event) {
         // The terminating event is reaching the requested integration time
-        timed_set_type continuous_evolved_set=this->final_continuous_evolution_step(mode,initial_set,final_time,bounding_box);
+        timed_set_type continuous_evolved_set=this->final_continuous_integration_step(mode,initial_set,final_time,bounding_box);
         result.push_back(continuous_evolved_set);
         this->trace.push_back(continuous_evolved_set);
         ARIADNE_LOG(6,"  continuous_evolved_set="<<continuous_evolved_set<<"\n");
       } else if(terminating_event==regularizing_time_event) {
         // The terminating event is reaching the requested integration time
         time_type regularizing_time=(initial_set.time()+terminating_time_step).average().midpoint();
-        timed_set_type continuous_evolved_set=this->final_continuous_evolution_step(mode,initial_set,regularizing_time,bounding_box);
+        timed_set_type continuous_evolved_set=this->final_continuous_integration_step(mode,initial_set,regularizing_time,bounding_box);
         result.push_back(continuous_evolved_set);
         this->trace.push_back(continuous_evolved_set);
         ARIADNE_LOG(6,"  continuous_evolved_set="<<continuous_evolved_set<<"\n");
@@ -991,7 +991,7 @@ Evaluation::ConstraintBasedHybridScheduler<R>::evolution_step(const System::Cons
   } else {
   }
 
-  ARIADNE_LOG(6,"\n  evolution_step::result="<<result<<"\n\n");
+  ARIADNE_LOG(6,"\n  integration_step::result="<<result<<"\n\n");
   return result;
 }
 
@@ -1009,24 +1009,24 @@ Evaluation::ConstraintBasedHybridScheduler<R>::evolution_step(const System::Cons
 
 template<class R>
 std::vector<typename Evaluation::ConstraintBasedHybridScheduler<R>::timed_set_type> 
-Evaluation::ConstraintBasedHybridScheduler<R>::lower_evolution_step(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
+Evaluation::ConstraintBasedHybridScheduler<R>::lower_integration_step(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
                                                                     const timed_set_type& initial_set,
                                                                     const time_type& maximum_time,
                                                                     const time_type& maximum_time_step_size) const
 {
-  return this->evolution_step(automaton, initial_set, maximum_time, maximum_time_step_size, lower_semantics, compute_evolved_set);
+  return this->integration_step(automaton, initial_set, maximum_time, maximum_time_step_size, lower_semantics, compute_evolved_set);
 }
 
 
 template<class R>
 std::vector<typename Evaluation::ConstraintBasedHybridScheduler<R>::timed_set_type> 
-Evaluation::ConstraintBasedHybridScheduler<R>::upper_evolution_step(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
+Evaluation::ConstraintBasedHybridScheduler<R>::upper_integration_step(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
                                                                     const timed_set_type& initial_set,
                                                                     const time_type& maximum_time,
                                                                     const time_type& maximum_time_step_size) const
 {
-  ARIADNE_LOG(2,"\nConstraintBasedHybridEvolver::upper_evolution_step(...)\n");
-  return this->evolution_step(automaton, initial_set, maximum_time, maximum_time_step_size, upper_semantics, compute_evolved_set);
+  ARIADNE_LOG(2,"\nConstraintBasedHybridEvolver::upper_integration_step(...)\n");
+  return this->integration_step(automaton, initial_set, maximum_time, maximum_time_step_size, upper_semantics, compute_evolved_set);
 }
 
 
@@ -1037,7 +1037,7 @@ Evaluation::ConstraintBasedHybridScheduler<R>::lower_reachability_step(const Sys
                                                                        const time_type& maximum_time,
                                                                        const time_type& maximum_time_step_size) const
 {
-  return this->evolution_step(automaton, initial_set, maximum_time, maximum_time_step_size, lower_semantics, compute_reachable_set);
+  return this->integration_step(automaton, initial_set, maximum_time, maximum_time_step_size, lower_semantics, compute_reachable_set);
 }
 
 
@@ -1049,7 +1049,7 @@ Evaluation::ConstraintBasedHybridScheduler<R>::upper_reachability_step(const Sys
                                                                        const time_type& maximum_time_step_size) const
 {
   ARIADNE_LOG(2,"\nConstraintBasedHybridEvolver::upper_reachability_step(...)\n");
-  return this->evolution_step(automaton, initial_set, maximum_time, maximum_time_step_size, upper_semantics, compute_reachable_set);
+  return this->integration_step(automaton, initial_set, maximum_time, maximum_time_step_size, upper_semantics, compute_reachable_set);
 }
 
 } // namespace Ariadne

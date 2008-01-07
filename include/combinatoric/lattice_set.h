@@ -69,6 +69,7 @@ namespace Ariadne {
     bool subset(const LatticeBlock&, const LatticeBlock&);
     bool subset(const LatticeCellListSet&, const LatticeBlock&);
     bool subset(const LatticeMaskSet&, const LatticeBlock&);
+    bool subset(const LatticeCell&, const LatticeCellListSet&);
     bool subset(const LatticeCell&, const LatticeMaskSet&);
     bool subset(const LatticeBlock&, const LatticeMaskSet&);
     bool subset(const LatticeCellListSet&, const LatticeMaskSet&);
@@ -385,6 +386,12 @@ namespace Ariadne {
       /*!\brief The \a i th cell in the list. */
       LatticeCell operator[] (size_type i) const { return LatticeCell(_list[i]); }
       
+      /*!\brief Test if the list contains a cell. */
+      bool contains(const LatticeCell& c);
+
+      /*!\brief Test if a sorted list contains a cell. */
+      bool sorted_contains(const LatticeCell& c);
+
       /*!\brief A rectangular block containing all cells in the list. */
       LatticeBlock bounding_block() const;
 
@@ -402,6 +409,14 @@ namespace Ariadne {
       
       /*! \brief Restricts to cells in a block. */
       void restrict(const LatticeBlock& r);
+      /*! \brief Restricts to cells in another set. */
+      void restrict(LatticeCellListSet& cls);
+      /*! \brief Removes cells in another set. */
+      void remove(LatticeCellListSet& cls);
+      /*! \brief Restricts to cells in another set. */
+      void restrict(const LatticeMaskSet& ms);
+      /*! \brief Removes cells in another set. */
+      void remove(const LatticeMaskSet& ms);
 
       /*! \brief Empties the set. */
       void clear();
@@ -413,6 +428,8 @@ namespace Ariadne {
       
       /*! \brief Sorts the cells lexicographically, removing duplicates. */
       void unique_sort(); 
+      /*! \brief Efficiently swaps with another lattice set. */
+      void swap(LatticeCellListSet& lcls) { _list.swap(lcls._list); } 
 
       /*! \brief Write to an output stream */
       std::ostream& write(std::ostream& os) const;

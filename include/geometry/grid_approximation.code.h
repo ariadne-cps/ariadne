@@ -36,6 +36,7 @@
 #include "zonotope.h"
 #include "polytope.h"
 #include "polyhedron.h"
+#include "box_list_set.h"
 #include "list_set.h"
 
 #include "set_interface.h"
@@ -58,7 +59,7 @@ outer_approximation_of_basic_set(const BS& bs, const Geometry::Grid<R>& g)
 {
   //std::cout << __PRETTY_FUNCTION__ << std::endl;
   Geometry::GridCellListSet<R> gcls(g);
-  Geometry::GridBlock<R> gbb=outer_approximation(bs.bounding_box(),g);
+  Geometry::GridBlock<R> gbb=outer_approximation(Geometry::bounding_box(bs),g);
   Geometry::Box<R> r(bs.dimension());
   //std::cerr << "bs="<<bs<<" bb="<<bs.bounding_box()<<" gbb="<<gbb<<std::endl;
   for(typename Geometry::GridBlock<R>::const_iterator iter=gbb.begin(); iter!=gbb.end(); ++iter) {
@@ -80,7 +81,7 @@ Geometry::GridCellListSet<R>
 inner_approximation_of_basic_set(const BS& bs, const Geometry::Grid<R>& g) 
 {
   Geometry::GridCellListSet<R> gcls(g);
-  Geometry::GridBlock<R> gbb=outer_approximation(bs.bounding_box(),g);
+  Geometry::GridBlock<R> gbb=outer_approximation(Geometry::bounding_box(bs),g);
   Geometry::Box<R> r(bs.dimension());
   
   for(typename Geometry::GridBlock<R>::const_iterator iter=gbb.begin(); iter!=gbb.end(); ++iter) {
@@ -93,13 +94,47 @@ inner_approximation_of_basic_set(const BS& bs, const Geometry::Grid<R>& g)
 }
 
 
-template<class R, class Tag>
+template<class R, class DS>
 inline
 Geometry::GridCellListSet<R>
-fuzzy_outer_approximation_of_zonotope(const Geometry::Zonotope<R,Tag>& z, const Geometry::Grid<R>& g) 
+outer_approximation_of_denotable_set(const DS& ds, const Geometry::Grid<R>& g) 
+{
+  //std::cout << __PRETTY_FUNCTION__ << std::endl;
+  Geometry::GridCellListSet<R> gcls(g);
+  for(typename DS::const_iterator iter=ds.begin(); iter!=ds.end(); ++iter) {
+    gcls.adjoin(outer_approximation(*iter,g));
+  }
+  gcls.unique_sort();
+  return gcls;
+}
+
+template<class R, class DS>
+inline
+Geometry::GridMaskSet<R>
+outer_approximation_of_denotable_set(const DS& ds, const Geometry::FiniteGrid<R>& fg) 
+{
+  //std::cout << __PRETTY_FUNCTION__ << std::endl;
+  Geometry::GridMaskSet<R> gms(fg);
+  Geometry::Box<R> r(ds.dimension());
+  for(typename DS::const_iterator bs_iter=ds.begin(); bs_iter!=ds.end(); ++bs_iter) {
+    Geometry::GridBlock<R> gbb=outer_approximation(bs_iter->bounding_box(),fg.grid());
+    for(typename Geometry::GridBlock<R>::const_iterator gc_iter=gbb.begin(); gc_iter!=gbb.end(); ++gc_iter) {
+      r=*gc_iter;
+      if(not subset(*gc_iter,gms) && possibly(not disjoint(*bs_iter,r))) {
+        gms.adjoin(*gc_iter);
+      }
+    }
+  }
+  return gms;
+}
+
+template<class R>
+inline
+Geometry::GridCellListSet<R>
+fuzzy_outer_approximation_of_zonotope(const Geometry::Zonotope<R>& z, const Geometry::Grid<R>& g) 
 {
   typedef Numeric::Interval<R> I;
-
+  ARIADNE_ASSERT(z.error()==0);
   Geometry::GridCellListSet<R> gcls(g);
 
   LinearAlgebra::Vector<I> ze;
@@ -112,7 +147,7 @@ fuzzy_outer_approximation_of_zonotope(const Geometry::Zonotope<R,Tag>& z, const 
     LinearAlgebra::Matrix<I> Ginv=LinearAlgebra::inverse(z.generators());
     const Geometry::Point<I> c=z.centre();
     LinearAlgebra::Vector<I> e(z.dimension(),I(-1,1));
-    Geometry::GridBlock<R> gbb=outer_approximation(z.bounding_box(),g);
+    Geometry::GridBlock<R> gbb=outer_approximation(Geometry::bounding_box(z),g);
     for(typename Geometry::GridBlock<R>::const_iterator iter=gbb.begin(); iter!=gbb.end(); ++iter) {
       r=*iter;
       pt=r;
@@ -132,7 +167,7 @@ fuzzy_outer_approximation_of_zonotope(const Geometry::Zonotope<R,Tag>& z, const 
     LinearAlgebra::Matrix<I> Ainv=LinearAlgebra::inverse(A);
     LinearAlgebra::Vector<I> y=Ainv*b;
     
-    Geometry::GridBlock<R> gbb=outer_approximation(z.bounding_box(),g);
+    Geometry::GridBlock<R> gbb=outer_approximation(Geometry::bounding_box(z),g);
     for(typename Geometry::GridBlock<R>::const_iterator iter=gbb.begin(); iter!=gbb.end(); ++iter) {
       r=*iter;
       pt=r;
@@ -181,9 +216,7 @@ Geometry::instantiate_grid_approximation()
   Point<I>* ipt=0;
   Box<R>* bx=0;
   Rectangle<R>* r=0;
-  Zonotope<R,ExactTag>* z=0;
-  Zonotope<R,UniformErrorTag>* ez=0;
-  //Zonotope<R,IntervalTag>* iz=0;
+  Zonotope<R>* z=0;
   Polytope<R>* pltp=0;
   Polyhedron<R>* plhd=0;
   SetInterface<R>* set=0;
@@ -193,11 +226,10 @@ Geometry::instantiate_grid_approximation()
   GridBlock<R>* gb=0;
   GridCellListSet<R>* gcls=0;
   GridMaskSet<R>* gms=0;
+  BoxListSet<R>* bxls=0;
 
-  ListSet< Box<R> >* bxls=0;
   ListSet< Rectangle<R> >* rls=0;
-  ListSet< Zonotope<R,ExactTag> >* zls=0;
-  ListSet< Zonotope<R,UniformErrorTag> >* ezls=0;
+  ListSet< Zonotope<R> >* zls=0;
   
   *gb=outer_approximation(*ipt,*g);
   
@@ -212,25 +244,23 @@ Geometry::instantiate_grid_approximation()
   *gcls=outer_approximation(*pltp,*g);
   *gcls=outer_approximation(*plhd,*g);
   *gcls=outer_approximation(*z,*g);
-  *gcls=outer_approximation(*ez,*g);
   *gcls=outer_approximation(*set,*g);
   
   //  *gcls=fuzzy_outer_approximation(*pltp,*g);
   //  *gcls=fuzzy_outer_approximation(*plhd,*g);
   *gcls=fuzzy_outer_approximation(*z,*g);
-  *gcls=fuzzy_outer_approximation(*ez,*g);
   
   *gcls=inner_approximation(*pltp,*g);
   *gcls=inner_approximation(*plhd,*g);
   *gcls=inner_approximation(*z,*g);
-  *gcls=inner_approximation(*ez,*g);
   *gcls=inner_approximation(*set,*g);
-  
 
+  *gcls=outer_approximation(*bxls,*g);
   *gms=outer_approximation(*bxls,*fg);
+  
   *gms=outer_approximation(*rls,*fg);
   *gms=outer_approximation(*zls,*fg);
-  *gms=outer_approximation(*ezls,*fg);
+  *gcls=outer_approximation(*zls,*g);
   
   *gms=outer_approximation(*set,*fg);
   *gms=inner_approximation(*set,*fg);
@@ -380,16 +410,16 @@ Geometry::inner_approximation(const Polytope<R>& p, const Grid<R>& g)
 }
 
 
-template<class R,class Tag>
+template<class R>
 Geometry::GridCellListSet<R>
-Geometry::outer_approximation(const Zonotope<R,Tag>& z, const Grid<R>& g) 
+Geometry::outer_approximation(const Zonotope<R>& z, const Grid<R>& g) 
 {
   return ::outer_approximation_of_basic_set(z,g);
 }
 
-template<class R,class Tag>
+template<class R>
 Geometry::GridCellListSet<R>
-Geometry::inner_approximation(const Zonotope<R,Tag>& z, const Grid<R>& g) 
+Geometry::inner_approximation(const Zonotope<R>& z, const Grid<R>& g) 
 {
   return ::inner_approximation_of_basic_set(z,g);
 }
@@ -397,16 +427,35 @@ Geometry::inner_approximation(const Zonotope<R,Tag>& z, const Grid<R>& g)
 
 template<class R>
 Geometry::GridCellListSet<R>
+Geometry::outer_approximation(const BoxListSet<R>& bxls, const Grid<R>& g) 
+{
+  return ::outer_approximation_of_denotable_set(bxls,g);
+}
+
+template<class R>
+Geometry::GridMaskSet<R>
+Geometry::outer_approximation(const BoxListSet<R>& bxls, const FiniteGrid<R>& fg) 
+{
+  return ::outer_approximation_of_denotable_set(bxls,fg);
+}
+
+template<class R>
+Geometry::GridCellListSet<R>
 Geometry::outer_approximation(const SetInterface<R>& set, const Grid<R>& g) 
 {
+  verbosity=4;
   ARIADNE_LOG(4,"GridCellListSet outer_approximation(SetInterface, Grid)\n");
   GridCellListSet<R> result(g);
   ARIADNE_CHECK_EQUAL_DIMENSIONS(set,g,"outer_approximation(SetInterface<R>,Grid<R>)");
-  ARIADNE_CHECK_BOUNDED(set,"outer_approximation(SetInterface<R>,Grid<R>)");
-  
+  ARIADNE_ASSERT(set.bounding_box().bounded());
+  ARIADNE_LOG(4,"bb="<<set.bounding_box()<<"\n");
+
   const GridBlock<R> gb=outer_approximation(set.bounding_box(),g);
+  ARIADNE_LOG(4,"gb="<<gb<<"\n");
   Box<R> r(g.dimension());
+  uint i=0;
   for(typename GridBlock<R>::const_iterator iter=gb.begin(); iter!=gb.end(); ++iter) {
+    ARIADNE_LOG(4,*iter<<"\n");
     r=*iter;
     if(!bool(set.disjoint(r))) {
       result.adjoin(*iter);
@@ -423,7 +472,6 @@ Geometry::inner_approximation(const SetInterface<R>& set, const Grid<R>& g)
   ARIADNE_LOG(4,"GridCellListSet inner_approximation(SetInterface, Grid)\n");
   GridCellListSet<R> result(g);
   ARIADNE_CHECK_EQUAL_DIMENSIONS(set,g,"inner_approximation(SetInterface<R>,Grid<R>)\n");
-  ARIADNE_CHECK_BOUNDED(set,"inner_approximation(SetInterface<R>,Grid<R>)");
   
   const GridBlock<R> gb=outer_approximation(set.bounding_box(),g);
   Box<R> r(g.dimension());
@@ -437,15 +485,15 @@ Geometry::inner_approximation(const SetInterface<R>& set, const Grid<R>& g)
 }
 
 
-template<class R,class Tag>
+template<class R>
 Geometry::GridCellListSet<R>
-Geometry::fuzzy_outer_approximation(const Zonotope<R,Tag>& z, const Grid<R>& g) 
+Geometry::fuzzy_outer_approximation(const Zonotope<R>& z, const Grid<R>& g) 
 {
   return ::fuzzy_outer_approximation_of_zonotope(z,g);
 }
 
 template<class R>
-Geometry::ListSet< Geometry::Box<R> >
+Geometry::BoxListSet<R>
 Geometry::lower_approximation(const SetInterface<R>& s, const Grid<R>& g) 
 {
   ARIADNE_LOG(4,"ListSet<Rectangle> lower_approximation(SetInterface s, Grid fg)\n");
@@ -454,7 +502,7 @@ Geometry::lower_approximation(const SetInterface<R>& s, const Grid<R>& g)
 }
 
 template<class R>
-Geometry::ListSet< Geometry::Box<R> >
+Geometry::BoxListSet<R>
 Geometry::point_approximation(const SetInterface<R>& s, const Grid<R>& g) 
 {
   ARIADNE_LOG(4,"ListSet<Rectangle> point_approximation(SetInterface s, Grid fg)\n");
@@ -469,6 +517,19 @@ Geometry::outer_approximation(const ListSet<BS>& ls, const FiniteGrid<R>& fg)
 {
   GridMaskSet<R> result(fg);
   ARIADNE_CHECK_EQUAL_DIMENSIONS(ls,fg,"outer_approximation(ListSet<BS> ls, FiniteGrid<R> fg)\n");
+  
+  for(typename ListSet<BS>::const_iterator bs_iter=ls.begin(); bs_iter!=ls.end(); ++bs_iter) {
+    result.adjoin_outer_approximation(*bs_iter);
+  }
+  return result;
+}
+
+template<class R, class BS>
+Geometry::GridCellListSet<R>
+Geometry::outer_approximation(const ListSet<BS>& ls, const Grid<R>& g) 
+{
+  GridCellListSet<R> result(g);
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(ls,g,"outer_approximation(ListSet<BS> ls, Grid<R> g)\n");
   
   for(typename ListSet<BS>::const_iterator bs_iter=ls.begin(); bs_iter!=ls.end(); ++bs_iter) {
     result.adjoin_outer_approximation(*bs_iter);
@@ -526,11 +587,11 @@ Geometry::inner_approximation(const SetInterface<R>& s, const FiniteGrid<R>& fg)
 
 
 template<class R>  
-Geometry::ListSet< Geometry::Box<R> >
+Geometry::BoxListSet<R>
 Geometry::lower_approximation(const SetInterface<R>& s, const FiniteGrid<R>& fg) 
 {
   ARIADNE_LOG(4,"ListSet<Box> lower_approximation(SetInterface s, FiniteGrid fg)\n"); 
-  ListSet< Box<R> > result;
+  BoxListSet<R> result;
   GridBlock<R> gb(fg.grid(),fg.lattice_block());
   Box<R> r;
   Box<R> nr;
@@ -552,12 +613,12 @@ Geometry::lower_approximation(const SetInterface<R>& s, const FiniteGrid<R>& fg)
 
 
 template<class R>  
-Geometry::ListSet< Geometry::Box<R> >
+Geometry::BoxListSet<R>
 Geometry::point_approximation(const SetInterface<R>& s, const FiniteGrid<R>& fg) 
 {
   typedef Numeric::Interval<R> I;
   ARIADNE_LOG(4,"ListSet<Box> point_approximation(SetInterface s, FiniteGrid fg)\n"); 
-  ListSet< Box<R> > result;
+  BoxListSet<R> result;
   GridBlock<R> gb(fg.grid(),fg.lattice_block());
   Box<R> r;
   Box<R> cr;

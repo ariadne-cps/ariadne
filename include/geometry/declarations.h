@@ -38,14 +38,14 @@ namespace Ariadne {
     class IntervalTag;
 
     template<class X> class Point;
-    template<class R> class Box;
     template<class R> class PointList;
+    template<class R> class Box;
+    template<class R> class BoxListSet;
 
     template<class E> class RectangleExpression;
     template<class R> class Rectangle;
-    template<class R, class Tag> class Zonotope;
+    template<class R> class Zonotope;
     template<class R> class Simplex;
-    template<class R> class Constraint;
     template<class R> class Polyhedron;
     template<class R> class Polytope;
     template<class R> class Sphere;
@@ -75,10 +75,11 @@ namespace Ariadne {
     template<class R> class SetReference;
 
     template<class R> class CurveInterface;
-    template<class R> class DifferentiableCurveInterface;
     template<class R> class ConstraintInterface;
-    template<class R> class DifferentiableConstraintInterface;
   
+    template<class R> class ImageSet;
+    template<class R> class ConstraintSet;
+
     template<class T> class OrbitInterface;
     template<class T, class ES, class RS=ES> class Orbit;
 
@@ -88,9 +89,9 @@ namespace Ariadne {
     template<class R> class HybridGridCell;
     template<class R> class HybridGridMaskSet;
     template<class R> class HybridGridCellListSet;
+    template<class R> class HybridBox;
+    template<class R> class HybridBoxListSet;
     template<class BS> class HybridListSet;
-    template<class BS> class HybridBasicSet;
-    template<class BS> class HybridTimedBasicSet;
 
     template<class T, class BS> class TimedSet;
 

@@ -39,13 +39,13 @@ using namespace Ariadne::Python;
 
 
 template<class R1, class R2> inline 
-void taylor_series_set_item(TaylorSeries<R1>& sd, uint i, R2 x) {
+void set_item(TaylorSeries<R1>& sd, uint i, R2 x) {
   assert(i<=sd.degree()); 
   sd[i]=x;
 }
 
 template<class R> inline 
-R taylor_series_get_item(const TaylorSeries<R>& sd, uint i) {
+R get_item(const TaylorSeries<R>& sd, uint i) {
   assert(i<=sd.degree()); 
   return sd[i];
 }
@@ -59,10 +59,10 @@ void export_taylor_series()
 
   class_<TS> taylor_series_class(python_name<R>("TaylorSeries").c_str());
   taylor_series_class.def( init< uint >());
-  taylor_series_class.def("__getitem__", &taylor_series_get_item<A>);
-  taylor_series_class.def("__setitem__",&taylor_series_set_item<A,double>);
-  taylor_series_class.def("__setitem__",&taylor_series_set_item<A,R>);
-  taylor_series_class.def("__setitem__",&taylor_series_set_item<A,A>);
+  taylor_series_class.def("__getitem__", &get_item<A>);
+  taylor_series_class.def("__setitem__",&set_item<A,double>);
+  taylor_series_class.def("__setitem__",&set_item<A,R>);
+  taylor_series_class.def("__setitem__",&set_item<A,A>);
   taylor_series_class.def("__neg__", &Python::neg<TS,TS>);
   taylor_series_class.def("__add__", &Python::add<TS,TS,TS>);
   taylor_series_class.def("__add__", &Python::add<TS,TS,double>);
@@ -109,7 +109,6 @@ void export_taylor_series()
   def("pow",(TS(*)(const TS&, const uint&))&Function::pow);
 
   def("rec", (TS(*)(const TS&))&Function::rec);
-  def("rec", (TS(*)(smoothness_type, const A&))&TS::rec);
 
   def("sqrt", (TS(*)(const TS&))&Function::sqrt);
   def("exp", (TS(*)(const TS&))&Function::exp);
@@ -121,6 +120,7 @@ void export_taylor_series()
   def("acos", (TS(*)(const TS&))&Function::acos);
   def("atan", (TS(*)(const TS&))&Function::atan);
 
+  /*
   def("rec_series", (TS(*)(smoothness_type, const A&))&TS::rec);
   def("pow_series",(TS(*)(smoothness_type, const A&, const uint&))&TS::pow);
   def("sqrt_series", (TS(*)(smoothness_type, const A&))&TS::sqrt);
@@ -132,6 +132,7 @@ void export_taylor_series()
   def("asin_series", (TS(*)(smoothness_type, const A&))&TS::asin);
   def("acos_series", (TS(*)(smoothness_type, const A&))&TS::acos);
   def("atan_series", (TS(*)(smoothness_type, const A&))&TS::atan);
+  */
 
 }
 

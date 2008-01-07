@@ -34,15 +34,11 @@ namespace Ariadne {
     template<class R> class TransitionSystemInterface;
     template<class R> class TransitionSystem;
 
-    template<class R> class MapInterface;
-    template<class R> class AffineMap;
-    template<class R, template<class> class BS > class AffineMultiMap;
+    template<class R> class Map;
     template<class R> class GridMultiMap;
-    template<class R> class PolynomialMap;
     template<class R> class DiscreteTimeSystem;
 
-    template<class R> class VectorFieldInterface;
-    template<class R> class AffineVectorField;
+    template<class R> class VectorField;
 
     template<class R> class FlowInterface;
     template<class R> class TaylorFlow;

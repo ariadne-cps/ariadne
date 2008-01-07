@@ -34,12 +34,14 @@ namespace Ariadne {
 #ifdef ENABLE_FLOAT64
    template Float64 gexp_up(const Float64& x, uint k);
 
-    template LinearAlgebra::Vector< Numeric::Interval<Float64> > 
-    gexp(const LinearAlgebra::Matrix<Float64>& A, const LinearAlgebra::Vector<Float64>& b, 
-         const Numeric::Interval<Float64>& t, const uint& k);
+    template LinearAlgebra::Vector<Interval64> 
+    gexp(const LinearAlgebra::Matrix<Interval64>& A, 
+         const LinearAlgebra::Vector<Interval64>& b, 
+         const Interval64& t, 
+         const uint& k);
     
-    template LinearAlgebra::Matrix< Numeric::Interval<Float64> > 
-    gexp(const LinearAlgebra::Matrix<Float64>& A, const Numeric::Interval<Float64>& t, const uint& k);
+    template LinearAlgebra::Matrix<Interval64>
+    gexp(const LinearAlgebra::Matrix<Interval64>& A, const Interval64& t, const uint& k);
     
     template class AffineIntegrator<Float64>;
 #endif
@@ -47,12 +49,14 @@ namespace Ariadne {
 #ifdef ENABLE_FLOATMP
    template FloatMP gexp_up(const FloatMP& x, uint k);
 
-    template LinearAlgebra::Vector< Numeric::Interval<FloatMP> > 
-    gexp(const LinearAlgebra::Matrix<FloatMP>& A, const LinearAlgebra::Vector<FloatMP>& b, 
-         const Numeric::Interval<FloatMP>& t, const uint& k);
+    template LinearAlgebra::Vector<IntervalMP> 
+    gexp(const LinearAlgebra::Matrix<IntervalMP>& A, 
+         const LinearAlgebra::Vector<IntervalMP>& b, 
+         const IntervalMP& t, const uint& k);
     
-    template LinearAlgebra::Matrix< Numeric::Interval<FloatMP> > 
-    gexp(const LinearAlgebra::Matrix<FloatMP>& A, const Numeric::Interval<FloatMP>& t, const uint& k);
+    template LinearAlgebra::Matrix<IntervalMP> 
+    gexp(const LinearAlgebra::Matrix<IntervalMP>& A, 
+         const IntervalMP& t, const uint& k);
     
     template class AffineIntegrator<FloatMP>;
 #endif

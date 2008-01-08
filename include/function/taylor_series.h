@@ -28,19 +28,7 @@
 #ifndef ARIADNE_TAYLOR_SERIES_H
 #define ARIADNE_TAYLOR_SERIES_H
 
-#include <iostream>
-#include <stdexcept>
-#include <cassert>
-
-#include "base/tribool.h"
-#include "base/exceptions.h"
-#include "base/stlio.h"
-
-#include "numeric/exceptions.h"
-#include "numeric/traits.h"
-#include "numeric/conversion.h"
-#include "numeric/arithmetic.h"
-#include "numeric/function.h"
+#include "base/array.h"
 
 namespace Ariadne {
   namespace Function {
@@ -89,13 +77,16 @@ namespace Ariadne {
       /*! \brief A reference to the \a i<sup> th</sup> derivative \f$D^af=d^{|a|}f/dx_1^{a_1}\cdots dx_n^{a_n}\f$. */
       X& operator[](const smoothness_type& d); 
       /*! \brief The \a i<sup> th</sup> derivative \f$D^af=d^{|a|}f/dx_1^{a_1}\cdots dx_n^{a_n}\f$. */
-      const X& operator[](const smoothness_type& a) const; 
+      const X& operator[](const smoothness_type& a) const;
+     private:
+      static void instantiate();
     };
 
 
   
     template<class X> TaylorSeries<X> compose(const TaylorSeries<X>& ts1, const TaylorSeries<X>& ts2);
     template<class X> TaylorSeries<X> inverse(const TaylorSeries<X>& ts, const X& c);
+    template<class X> TaylorSeries<X> derivative(const TaylorSeries<X>& ts);
     template<class X> TaylorSeries<X> antiderivative(const TaylorSeries<X>& ts, const X& c);
 
     template<class X> TaylorSeries<X> min(const TaylorSeries<X>& ts1, const TaylorSeries<X>& ts2);

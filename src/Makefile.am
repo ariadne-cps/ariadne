@@ -35,15 +35,18 @@ COMBINATORIC_SRC = \
 	combinatoric/subdivision_tree_set.cc 
 
 FUNCTION_SRC = \
+	function/function_series.cc \
+	function/taylor_series.cc \
+	function/affine_variable.cc \
+	function/taylor_variable.cc \
+	function/taylor_derivative.cc \
+	function/affine_model.cc \
+	function/taylor_model.cc  \
 	function/interpreted_function.cc \
 	function/constant_function.cc \
 	function/identity_function.cc \
 	function/affine_function.cc \
-	function/polynomial_function.cc \
-	function/function_series.cc \
-	function/taylor_derivative.cc \
-	function/affine_model.cc \
-	function/taylor_model.cc 
+	function/polynomial_function.cc
 
 
 

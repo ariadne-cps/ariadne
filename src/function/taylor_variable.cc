@@ -21,22 +21,25 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "numeric/rational.h"
 #include "numeric/float.h"
 #include "numeric/interval.h"
+
 #include "function/taylor_variable.h"
+#include "function/taylor_variable.code.h"
 
 namespace Ariadne {
   namespace Function {
     using namespace Numeric;
     
-  //template class TaylorVariable<Rational>;
+    template class TaylorVariable<Rational>;
 
 #ifdef ENABLE_FLOAT64
-  //template class TaylorVariable<Interval64>;
+    template class TaylorVariable<Interval64>;
 #endif
     
 #ifdef ENABLE_FLOATMP
-  //template class TaylorVariable<IntervalMP>;
+    template class TaylorVariable<IntervalMP>;
 #endif
 
   }

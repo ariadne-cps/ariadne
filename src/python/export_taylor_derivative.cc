@@ -24,6 +24,7 @@
 
 #include "python/float.h"
 
+#include "macros/assert.h"
 #include "numeric/rational.h"
 #include "numeric/interval.h"
 #include "function/multi_index.h"
@@ -36,6 +37,7 @@
 using namespace boost::python;
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
+using namespace Ariadne::LinearAlgebra;
 using namespace Ariadne::Function;
 using namespace Ariadne::Python;
 
@@ -46,38 +48,38 @@ make_taylor_derivative(const uint& rs, const uint& as, const uint& d, const boos
 {
   array<X> data;
   read_array(data,obj);
-  assert(data.size()==compute_polynomial_data_size(rs,as,d));
+  ARIADNE_ASSERT(data.size()==compute_polynomial_data_size(rs,as,d));
   TaylorDerivative<X>* result=new TaylorDerivative<X>(rs,as,d,data.begin());
   return result;
 }
 
 template<class X1, class X2> inline 
 void taylor_derivative_set_variable(TaylorDerivative<X1>& td, const size_type& i, TaylorVariable<X2> x) {
-  assert(i==td.result_size()); 
-  assert(x.argument_size()==td.argument_size()); 
-  assert(x.degree()<=td.degree()); 
+  ARIADNE_ASSERT(i<td.result_size()); 
+  ARIADNE_ASSERT(x.argument_size()==td.argument_size()); 
+  ARIADNE_ASSERT(x.degree()<=td.degree()); 
   td[i]=x;
 }
 
 template<class X> inline 
 TaylorVariable<X> taylor_derivative_get_variable(const TaylorDerivative<X>& td, const size_type& i) {
-  assert(i<td.result_size()); 
+  ARIADNE_ASSERT(i<td.result_size()); 
   return td[i];
 }
 
 template<class X, class XX> inline 
 void taylor_derivative_set_item(TaylorDerivative<X>& td, const size_type& i, const MultiIndex& j, const XX& x) {
-  assert(i<td.result_size()); 
-  assert(j.number_of_variables()==td.argument_size()); 
-  assert(j.degree()<=td.degree()); 
+  ARIADNE_ASSERT(i<td.result_size()); 
+  ARIADNE_ASSERT(j.number_of_variables()==td.argument_size()); 
+  ARIADNE_ASSERT(j.degree()<=td.degree()); 
   td.set(i,j,x);
 }
 
 template<class X> inline 
 X taylor_derivative_get_item(const TaylorDerivative<X>& td, const size_type& i, const MultiIndex& j) {
-  assert(i==td.result_size()); 
-  assert(j.number_of_variables()==td.argument_size()); 
-  assert(j.degree()<=td.degree()); 
+  ARIADNE_ASSERT(i==td.result_size()); 
+  ARIADNE_ASSERT(j.number_of_variables()==td.argument_size()); 
+  ARIADNE_ASSERT(j.degree()<=td.degree()); 
   return td.get(i,j);
   ;
 }
@@ -86,6 +88,7 @@ template<class R>
 void export_taylor_derivative()
 {
   typedef typename Numeric::traits<R>::arithmetic_type A;
+  typedef Vector<A> Vec;
   typedef TaylorVariable<A> TV;
   typedef TaylorDerivative<A> TD;
 
@@ -105,6 +108,8 @@ void export_taylor_derivative()
   
   def("compose",(TV(*)(const TV&,const TD&))&Function::compose);
   def("compose",(TD(*)(const TD&,const TD&))&Function::compose);
+  def("inverse",(TD(*)(const TD&,const Vec&))&Function::inverse);
+  def("implicit",(TD(*)(const TD&,const Vec&))&Function::implicit);
 
 }
 
@@ -113,6 +118,7 @@ template<>
 void export_taylor_derivative<Rational>()
 {
   typedef Rational Q;
+  typedef Vector<Q> Vec;
   typedef TaylorVariable<Q> TV;
   typedef TaylorDerivative<Q> TD;
 
@@ -131,8 +137,10 @@ void export_taylor_derivative<Rational>()
   
   def("compose",(TV(*)(const TV&,const TD&))&Function::compose);
   def("compose",(TD(*)(const TD&,const TD&))&Function::compose);
+  def("inverse",(TD(*)(const TD&,const Vec&))&Function::inverse);
+  def("implicit",(TD(*)(const TD&,const Vec&))&Function::implicit);
 
-
+  
 }
 
 

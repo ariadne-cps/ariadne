@@ -28,20 +28,20 @@
 #include "linear_algebra/covector.h"
 
 #include "function/affine_variable.h"
+#include "function/affine_variable.code.h"
 
 namespace Ariadne {
   namespace Function {
     using namespace Numeric;
-    using namespace LinearAlgebra;
     
-  //template class AffineVariable<Rational>;
+    template class AffineVariable<Rational>;
 
 #ifdef ENABLE_FLOAT64
-  //template class AffineVariable<Interval64>;
+    template class AffineVariable<Interval64>;
 #endif
     
 #ifdef ENABLE_FLOATMP
-  //template class AffineVariable<IntervalMP>;
+    template class AffineVariable<IntervalMP>;
 #endif
 
   }

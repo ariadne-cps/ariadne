@@ -28,19 +28,6 @@
 #ifndef ARIADNE_TAYLOR_VARIABLE_H
 #define ARIADNE_TAYLOR_VARIABLE_H
 
-#include <iostream>
-#include <stdexcept>
-#include <cassert>
-
-#include "base/tribool.h"
-#include "base/exceptions.h"
-#include "base/stlio.h"
-
-#include "numeric/exceptions.h"
-#include "numeric/traits.h"
-#include "numeric/conversion.h"
-#include "numeric/arithmetic.h"
-#include "numeric/function.h"
 
 namespace Ariadne {
   namespace Function {
@@ -79,9 +66,9 @@ namespace Ariadne {
       template<class XX> TaylorVariable<X>& operator=(const XX& c);
 
       /*! \brief Equality operator. */
-      template<class XX> bool operator==(const TaylorVariable<XX>& other);
+      template<class XX> bool operator==(const TaylorVariable<XX>& other) const;
       /*! \brief Inequality operator. */
-      template<class XX> bool operator!=(const TaylorVariable<XX>& other);
+      template<class XX> bool operator!=(const TaylorVariable<XX>& other) const;
 
       /*! \brief Construct a constant variable of degree \a d with respect to \a as variables and value \a c. */
       template<class XX> static TaylorVariable<X> constant(size_type as, smoothness_type d, const XX& c); 
@@ -112,68 +99,70 @@ namespace Ariadne {
       /*! \brief Inplace division. */
       TaylorVariable<X>& operator/=(const X& x);
 #ifdef DOXYGEN
-    //@{ 
-    //! \name Friend operations
-    /*! \brief The composition of two variables computes \f$d^iy/dt^i\f$ from \f$d^iy/dx^i\f$ and \f$d^ix/dt^i\f$. 
-     *  The composition inductively by
-     *  \f$ y^{[n]} = \sum_{i=0}^{n-1} \Bigl(\!\begin{array}{c}n\\i\end{array}\!\Bigr) {\dot{y}}^{[i]} x^{(n-i)} \f$
-     *  \f$ y = a_0 + x ( a_1 + x ( a_2/2 + x ( a_3/3! + \cdots)))\f$.
-     */
-    friend TaylorVariable<X> compose(const TaylorVariable<X>& y, const TaylorVariable<X>& x);
-    /*! \brief The derivative of the inverse of \f$y\f$ evaluated at \f$x\f$. (Not currently implemented.) */
-    friend TaylorVariable<X> inverse(const TaylorVariable<X>& y, const X& x);
-    /*! \brief The minimum of two variables. Returns the variable whose zero-th order value is minimal. */
-    friend TaylorVariable<X> min(const TaylorVariable<X>& x1, const TaylorVariable<X>& x2);
-    /*! \brief The maximum of two variables. Returns the variable whose zero-th order value is maximal. */
-    friend TaylorVariable<X> max(const TaylorVariable<X>& x1, const TaylorVariable<X>& x2);
-    /*! \brief The derivatives of \f$+x\f$. Returns a copy. */
-    friend TaylorVariable<X> pos(const TaylorVariable<X>& x);
-    /*! \brief The derivatives of \f$-x\f$. */
-    friend TaylorVariable<X> neg(const TaylorVariable<X>& x);
-    /*! \brief The derivatives of \f$x+y\f$. */
-    friend TaylorVariable<X> add(const TaylorVariable<X>& x, const TaylorVariable<X>& y);
-    /*! \brief The derivatives of \f$x-y\f$. */
-    friend TaylorVariable<X> sub(const TaylorVariable<X>& x, const TaylorVariable<X>& y);
-    /*! \brief The derivatives of \f$x*y\f$. */
-    friend TaylorVariable<X> mul(const TaylorVariable<X>& x, const TaylorVariable<X>& y);
-    /*! \brief The derivatives of \f$x/y\f$. */
-    friend TaylorVariable<X> div(const TaylorVariable<X>& x, const TaylorVariable<X>& y);
-    /*! \brief The derivatives of \f$x^n\f$. */
-    friend TaylorVariable<X> pow(const TaylorVariable<X>& x, const Integer& n);
-    /*! \brief The derivatives of \f$\sqrt{x}\f$. */
-    friend TaylorVariable<X> sqrt(const TaylorVariable<X>& x);
-    /*! \brief The derivatives of \f$\exp(x)\f$. */
-    friend TaylorVariable<X> exp(const TaylorVariable<X>& x);
-    /*! \brief The derivatives of \f$\log(x)\f$. */
-    friend TaylorVariable<X> log(const TaylorVariable<X>& x);
-    /*! \brief The derivatives of \f$\sin(x)\f$. */
-    friend TaylorVariable<X> sin(const TaylorVariable<X>& x);
-    /*! \brief The derivatives of \f$\cos(x)\f$. */
-    friend TaylorVariable<X> cos(const TaylorVariable<X>& x);
-    /*! \brief The derivatives of \f$\tan(x)\f$. */
-    friend TaylorVariable<X> tan(const TaylorVariable<X>& x);
-    /*! \brief The derivatives of \f$\sin^{-1}(x)\f$. (Not currently implemented.) */
-    friend TaylorVariable<X> asin(const TaylorVariable<X>& x);
-    /*! \brief The derivatives of \f$\cos^{-1}(x)\f$. (Not currently implemented.) */
-    friend TaylorVariable<X> acos(const TaylorVariable<X>& x);
-    /*! \brief The derivatives of \f$\tan^{-1}(x)\f$. (Not currently implemented.) */
-    friend TaylorVariable<X> atan(const TaylorVariable<X>& x);
+      //@{ 
+      //! \name Friend operations
+      /*! \brief The composition of two variables computes \f$d^iy/dt^i\f$ from \f$d^iy/dx^i\f$ and \f$d^ix/dt^i\f$. 
+       *  The composition inductively by
+       *  \f$ y^{[n]} = \sum_{i=0}^{n-1} \Bigl(\!\begin{array}{c}n\\i\end{array}\!\Bigr) {\dot{y}}^{[i]} x^{(n-i)} \f$
+       *  \f$ y = a_0 + x ( a_1 + x ( a_2/2 + x ( a_3/3! + \cdots)))\f$.
+       */
+      friend TaylorVariable<X> compose(const TaylorVariable<X>& y, const TaylorVariable<X>& x);
+      /*! \brief The derivatives of the inverse of \f$y\f$ evaluated at \f$x\f$. (Not currently implemented.) */
+      friend TaylorVariable<X> inverse(const TaylorVariable<X>& y, const X& x);
+      /*! \brief The derivative of \f$x\f$ with respect to the variable \a k .*/
+      friend TaylorVariable<X> derivative(const TaylorVariable<x>& x, const size_type& k);
+      /*! \brief The minimum of two variables. Returns the variable whose zero-th order value is minimal. */
+      friend TaylorVariable<X> min(const TaylorVariable<X>& x1, const TaylorVariable<X>& x2);
+      /*! \brief The maximum of two variables. Returns the variable whose zero-th order value is maximal. */
+      friend TaylorVariable<X> max(const TaylorVariable<X>& x1, const TaylorVariable<X>& x2);
+      /*! \brief The derivatives of \f$+x\f$. Returns a copy. */
+      friend TaylorVariable<X> pos(const TaylorVariable<X>& x);
+      /*! \brief The derivatives of \f$-x\f$. */
+      friend TaylorVariable<X> neg(const TaylorVariable<X>& x);
+      /*! \brief The derivatives of \f$x+y\f$. */
+      friend TaylorVariable<X> add(const TaylorVariable<X>& x, const TaylorVariable<X>& y);
+      /*! \brief The derivatives of \f$x-y\f$. */
+      friend TaylorVariable<X> sub(const TaylorVariable<X>& x, const TaylorVariable<X>& y);
+      /*! \brief The derivatives of \f$x*y\f$. */
+      friend TaylorVariable<X> mul(const TaylorVariable<X>& x, const TaylorVariable<X>& y);
+      /*! \brief The derivatives of \f$x/y\f$. */
+      friend TaylorVariable<X> div(const TaylorVariable<X>& x, const TaylorVariable<X>& y);
+      /*! \brief The derivatives of \f$x^n\f$. */
+      friend TaylorVariable<X> pow(const TaylorVariable<X>& x, const Integer& n);
+      /*! \brief The derivatives of \f$\sqrt{x}\f$. */
+      friend TaylorVariable<X> sqrt(const TaylorVariable<X>& x);
+      /*! \brief The derivatives of \f$\exp(x)\f$. */
+      friend TaylorVariable<X> exp(const TaylorVariable<X>& x);
+      /*! \brief The derivatives of \f$\log(x)\f$. */
+      friend TaylorVariable<X> log(const TaylorVariable<X>& x);
+      /*! \brief The derivatives of \f$\sin(x)\f$. */
+      friend TaylorVariable<X> sin(const TaylorVariable<X>& x);
+      /*! \brief The derivatives of \f$\cos(x)\f$. */
+      friend TaylorVariable<X> cos(const TaylorVariable<X>& x);
+      /*! \brief The derivatives of \f$\tan(x)\f$. */
+      friend TaylorVariable<X> tan(const TaylorVariable<X>& x);
+      /*! \brief The derivatives of \f$\sin^{-1}(x)\f$. (Not currently implemented.) */
+      friend TaylorVariable<X> asin(const TaylorVariable<X>& x);
+      /*! \brief The derivatives of \f$\cos^{-1}(x)\f$. (Not currently implemented.) */
+      friend TaylorVariable<X> acos(const TaylorVariable<X>& x);
+      /*! \brief The derivatives of \f$\tan^{-1}(x)\f$. (Not currently implemented.) */
+      friend TaylorVariable<X> atan(const TaylorVariable<X>& x);
 
-    /*! \brief The derivatives of \f$x+y\f$. */
-    friend TaylorVariable<X> operator+(const TaylorVariable<X>& x, const TaylorVariable<X>& y);
-    /*! \brief The derivatives of \f$x-y\f$. */
-    friend TaylorVariable<X> operator-(const TaylorVariable<X>& x, const TaylorVariable<X>& y);
-    /*! \brief The derivatives of \f$x*y\f$. */
-    friend TaylorVariable<X> operator*(const TaylorVariable<X>& x, const TaylorVariable<X>& y);
-    /*! \brief The derivatives of \f$x/y\f$. */
-    friend TaylorVariable<X> operator/(const TaylorVariable<X>& x, const TaylorVariable<X>& y);
+      /*! \brief The derivatives of \f$x+y\f$. */
+      friend TaylorVariable<X> operator+(const TaylorVariable<X>& x, const TaylorVariable<X>& y);
+      /*! \brief The derivatives of \f$x-y\f$. */
+      friend TaylorVariable<X> operator-(const TaylorVariable<X>& x, const TaylorVariable<X>& y);
+      /*! \brief The derivatives of \f$x*y\f$. */
+      friend TaylorVariable<X> operator*(const TaylorVariable<X>& x, const TaylorVariable<X>& y);
+      /*! \brief The derivatives of \f$x/y\f$. */
+      friend TaylorVariable<X> operator/(const TaylorVariable<X>& x, const TaylorVariable<X>& y);
 
-    /*! \brief The derivatives of \f$c+x\f$ for a constant \f$c\f$. (Other mixed-mode arithmetic is also supported.) */
-    friend TaylorVariable<X> operator+(const R& c, const TaylorVariable<X>& x);
+      /*! \brief The derivatives of \f$c+x\f$ for a constant \f$c\f$. (Other mixed-mode arithmetic is also supported.) */
+      friend TaylorVariable<X> operator+(const R& c, const TaylorVariable<X>& x);
 
-    /*! \brief Stream output operator. */
-    friend std::ostream& operator<<(std::ostream& os, const TaylorVariable<X>& x);
-    //@}
+      /*! \brief Stream output operator. */
+      friend std::ostream& operator<<(std::ostream& os, const TaylorVariable<X>& x);
+      //@}
 #endif 
      private:
       static void instantiate();
@@ -210,6 +199,7 @@ namespace Ariadne {
   template<class X> TaylorVariable<X> acos(const TaylorVariable<X>& x); 
   template<class X> TaylorVariable<X> atan(const TaylorVariable<X>& x); 
 
+  template<class X> TaylorVariable<X> operator+(const TaylorVariable<X>& x);
   template<class X> TaylorVariable<X> operator-(const TaylorVariable<X>& x);
   template<class X> TaylorVariable<X> operator+(const TaylorVariable<X>& x, const TaylorVariable<X>& y);
   template<class X> TaylorVariable<X> operator-(const TaylorVariable<X>& x, const TaylorVariable<X>& y);

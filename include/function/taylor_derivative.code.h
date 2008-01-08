@@ -21,67 +21,105 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
+
 namespace Ariadne {
 
-template<class X> 
-void 
-Function::compute_composition(TaylorVariable<X>& z, const TaylorVariable<X>& y, const TaylorDerivative<X>& x)
+template<class X>
+LinearAlgebra::Vector<X>
+Function::TaylorDerivative<X>::value() const
 {
-  using namespace std;
-  //std::cerr << "y=" << y << std::endl;
-  //std::cerr << "x=" << x << std::endl;
-
-  assert(z.degree()==x.degree());
-  assert(z.degree()==y.degree());
-  assert(y.argument_size()==x.result_size());
-  size_type d=z.degree();
-  size_type ms=x.result_size();
-  size_type as=x.argument_size();
-  
-  TaylorDerivative<X> w=x;
-  for(uint i=0; i!=ms; ++i) {
-    w[i].value()=0;
+  size_type rs=this->result_size();
+  LinearAlgebra::Vector<X> result(rs);
+  for(uint i=0; i!=rs; ++i) {
+    result[i]=this->_variables[i].value();
   }
+  return result;
+}
 
-  TaylorVariable<X> r(as,d);
-  TaylorVariable<X> t(as,d);
 
-  // Use inefficient brute-force approach with lots of storage...
-  array< array< TaylorVariable<X> > > val(ms, array< TaylorVariable<X> >(d+1));
-  for(uint j=0; j!=ms; ++j) {
-    val[j][0]=TaylorVariable<X>::constant(as,d,1.0);
-    for(uint k=1; k<=d; ++k) {
-      val[j][k]=val[j][k-1]*w[j];
+template<class X>
+LinearAlgebra::Matrix<X>
+Function::TaylorDerivative<X>::jacobian() const
+{
+  size_type rs=this->result_size();
+  size_type as=this->argument_size();
+  LinearAlgebra::Matrix<X> result(rs,as);
+  for(uint i=0; i!=rs; ++i) {
+    for(uint j=0; j!=as; ++j) {
+      result(i,j)=this->_variables[i]._data[j+1u];
     }
   }
-  for(MultiIndex i(ms); i.degree()<=d; ++i) {
-    t=y[i];
-    for(uint j=0; j!=ms; ++j) {
-      t=t*val[j][i[j]];
-    }
-    r+=t;
+  return result;
+}
+
+
+template<class X>
+void
+Function::TaylorDerivative<X>::set_value(const LinearAlgebra::Vector<X>& v)
+{
+  ARIADNE_ASSERT(this->result_size()==v.size());
+  size_type rs=this->result_size();
+  for(uint i=0; i!=rs; ++i) {
+    this->_variables[i]._data[0]=v[i];
   }
+}
 
-  z=r;
 
-  //std::cerr << "z=" << z << std::endl;
+template<class X>
+void
+Function::TaylorDerivative<X>::set_jacobian(const LinearAlgebra::Matrix<X>& A)
+{
+  ARIADNE_ASSERT(this->result_size()==A.number_of_rows());
+  ARIADNE_ASSERT(this->argument_size()==A.number_of_columns());
+  size_type rs=this->result_size();
+  size_type as=this->argument_size();
+  for(uint i=0; i!=rs; ++i) {
+    for(uint j=0; j!=as; ++j) {
+      this->_variables[i]._data[j+1u]=A(i,j);
+    }
+  }
+}
+
+
+template<class X>
+Function::TaylorDerivative<X>
+Function::operator*(const LinearAlgebra::Matrix<X>& A, const Function::TaylorDerivative<X>& x)
+{
+  ARIADNE_ASSERT(A.number_of_columns()==x.result_size());
+  TaylorDerivative<X> y(A.number_of_rows(),x.argument_size(),x.degree());
+  for(size_type i=0; i!=A.number_of_rows(); ++i) {
+    for(size_type j=0; j!=A.number_of_columns(); ++j) {
+      y[i]+=A(i,j)*x[j];
+    }
+  }
+  return y;
+}
+
+
+template<class X> 
+Function::TaylorVariable<X>
+Function::compose(const TaylorVariable<X>& y, const TaylorDerivative<X>& x)
+{
+  TaylorDerivative<X> z(1u,y.argument_size(),y.degree());
+  z[0]=y;
+  return compose(z,x)[0];
 }
 
 
 
 
 template<class X> 
-void 
-Function::compute_composition(TaylorDerivative<X>& z, const TaylorDerivative<X>& y, const TaylorDerivative<X>& x)
+Function::TaylorDerivative<X>
+Function::compose(const TaylorDerivative<X>& y, const TaylorDerivative<X>& x)
 {
   using namespace std;
+  ARIADNE_ASSERT(y.argument_size()==x.result_size());
   //std::cerr << "y=" << y << std::endl;
   //std::cerr << "x=" << x << std::endl;
 
-  assert(z.degree()==x.degree());
-  assert(z.degree()==y.degree());
-  assert(y.argument_size()==x.result_size());
-  size_type d=z.degree();
+  size_type d=std::min(x.degree(),y.degree());
   size_type rs=y.result_size();
   size_type ms=x.result_size();
   size_type as=x.argument_size();
@@ -103,27 +141,181 @@ Function::compute_composition(TaylorDerivative<X>& z, const TaylorDerivative<X>&
     }
   }
   for(MultiIndex j(ms); j.degree()<=d; ++j) {
+    X sf=Function::fac(j);
     t=TaylorVariable<X>::constant(as,d,1.0);
     for(uint k=0; k!=ms; ++k) {
       t=t*val[k][j[k]];
     }
     for(uint i=0; i!=rs; ++i) {
-      r[i]+=y[i][j]*t;
+      r[i]+=X(y[i][j]/sf)*t;
     }
   }
-  z=r;
+  return r;
 
-  //std::cerr << "z=" << z << std::endl;
+}
 
-  //TaylorDerivative<X> t(y.result_size(),x.argument_size(),0);
-  //for(uint n=1; n<=d; ++n) {
-    //TaylorDerivative<X> u(y.result_size(),x.argument_size(),n);
-    //compute_product(u,t,w);
-    //u.value()=y[d-n];
-    //t=u;
-    //std::cerr << "t[" << n << "]=" << t << std::endl;
-  //}
-  //z=t;
+
+
+template<class X> 
+Function::TaylorDerivative<X> 
+Function::concatenate(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y)
+{
+  ARIADNE_ASSERT(x.argument_size()==y.argument_size());
+  ARIADNE_ASSERT(x.degree()==y.degree());
+  Function::TaylorDerivative<X> r(x.result_size()+y.result_size(),x.argument_size(),x.degree());
+  for(size_type i=0; i!=x.result_size(); ++i) {
+    r[i]=x[i];
+  }
+  for(size_type i=0; i!=y.result_size(); ++i) {
+    r[i+x.result_size()]=y[i];
+  }
+  return r;
+}
+
+template<class X> 
+Function::TaylorDerivative<X> 
+Function::reduce(const TaylorDerivative<X>& x, const size_type& d)
+{
+  ARIADNE_ASSERT(x.degree()>=d);
+  Function::TaylorDerivative<X> r(x.argument_size(),d);
+  for(MultiIndex i(x.argument_size()); i.degree() <= x.degree(); ++i) {
+    r[i]=x[i];
+  }
+}
+
+
+template<class X> 
+Function::TaylorDerivative<X> 
+Function::derivative(const TaylorDerivative<X>& x, const size_type& k)
+{
+  TaylorDerivative<X> r( x.result_size(), x.argument_size(), ( x.degree()==0 ? 0u : x.degree()-1 ) );
+  for(uint i=0; i!=x.result_size(); ++i) {
+    r[i]=derivative(x[i],k);
+  }
+  return r;
+}
+
+
+
+template<class X> 
+Function::TaylorDerivative<X> 
+Function::inverse(const TaylorDerivative<X>& x, const LinearAlgebra::Vector<X>& c)
+{
+  using namespace std;
+  ARIADNE_ASSERT(x.result_size()==x.argument_size());
+  //std::cerr << "x=" << x << std::endl;
+  size_type n=x.result_size();
+  smoothness_type d=x.degree();
+  LinearAlgebra::Vector<X> z(n,0);
+  LinearAlgebra::Matrix<X> J=inverse(x.jacobian());
+
+  TaylorDerivative<X> y(n,n,d);
+  TaylorDerivative<X> id=TaylorDerivative<X>::variable(n,n,d,z);
+  
+  y.set_value(c);
+  y.set_jacobian(J);
+  for(smoothness_type i=2; i<=d; ++i) {
+    y=y-J*(compose(x,y)-id);
+  }
+  return y;
+}
+
+template<class X> 
+Function::TaylorDerivative<X> 
+Function::implicit(const TaylorDerivative<X>& x, const LinearAlgebra::Vector<X>& c)
+{
+  using namespace std;
+  using namespace LinearAlgebra;
+  ARIADNE_ASSERT(x.result_size()<=x.argument_size());
+  ARIADNE_ASSERT(c.size()==x.result_size());
+  //std::cerr << "x=" << x << std::endl;
+  
+  size_type rs=x.result_size();
+  size_type as=x.argument_size()-x.result_size();
+  smoothness_type d=x.degree();
+
+  LinearAlgebra::Matrix<X> A1(as,rs);
+  for(size_type i=0; i!=as; ++i) {
+    for(size_type j=0; j!=rs; ++j) {
+      A1(i,j)=x[i].data()[1u+j];
+    }
+  }
+  
+  LinearAlgebra::Matrix<X> A2(rs,rs);
+  for(size_type i=0; i!=rs; ++i) {
+    for(size_type j=0; j!=rs; ++j) {
+      A2(i,j)=x[i].data()[1u+as+j];
+    }
+  }
+  
+  Matrix<X> J(as+rs,rs);
+  J(slice(as,rs),slice(0,rs))=inverse(A2);
+
+  TaylorDerivative<X> y(as+rs,as,d);
+  for(size_type i=0; i!=as; ++i) {
+    y[i]=TaylorVariable<X>::variable(as,d,1.0,i);
+  }
+  for(size_type i=0; i!=rs; ++i) {
+    // y[as+i]=TaylorVariable<X>::constant(as,d,0.0);
+  }
+
+  for(smoothness_type i=0; i!=d; ++i) {
+    TaylorDerivative<X> z=compose(x,y);
+    y=y-J*z;
+  }
+
+  TaylorDerivative<X> r(rs,as,d);
+  for(size_type i=0; i!=rs; ++i) {
+    r[i]=y[as+i];
+  }
+  return r;
+}
+
+
+template<class X> 
+std::ostream& 
+Function::operator<<(std::ostream& os, const TaylorDerivative<X>& x) {
+  //  return os << "TaylorDerivative( argument_size=" << x.argument_size() << ", degree=" << x.degree() << ", data=" << x.data() << ")";
+  for(size_type i=0; i!=x.result_size(); ++i) {
+    if(i==0) { os << "\n["; } else { os << ",\n "; }
+    size_type degree=0;
+    for(MultiIndex j(x.argument_size()); j.degree()<=x.degree(); ++j) {
+      if(j.degree()==0) {
+        os << "[ ";
+      } else if(j.degree()==degree) {
+        os << ",";
+      } else {
+        degree=j.degree();
+        os << "; ";
+      }
+      os << x.get(i,j);
+    }
+    os << " ]";
+  }
+  os << "]\n";
+  return os;
+
+//  return os << "TaylorDerivative( argument_size=" << x.argument_size() << ", degree=" << x.degree() << ", data=" << x.data() << ")";
+}
+
+
+template<class X> 
+void
+Function::TaylorDerivative<X>::instantiate() 
+{
+  LinearAlgebra::Vector<X>* v=0;
+  TaylorVariable<X>* tv=0;
+  TaylorDerivative<X>* td=0;
+  std::ostream* os = 0;
+
+  compose(*tv,*td);
+  compose(*td,*td);
+  inverse(*td,*v);
+  implicit(*td,*v);
+  derivative(*td,0u);
+  concatenate(*td,*td);
+
+  operator<<(*os,*td);
 }
 
 

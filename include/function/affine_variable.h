@@ -216,6 +216,8 @@ namespace Ariadne {
       friend void compose<>(AffineVariable<X>&, const AffineVariable<X>&, const AffineVariable<X>&);
       friend std::ostream& operator<< <>(std::ostream&, const AffineVariable<X>&);
      private:
+      static void instantiate();
+     private:
       X _x;
       LinearAlgebra::Covector<X> _dx;
     };
@@ -268,6 +270,5 @@ namespace Ariadne {
 }
 
 #include "affine_variable.inline.h"
-#include "affine_variable.template.h"
 
 #endif /* ARIADNE_AFFINE_VARIABLE_H */

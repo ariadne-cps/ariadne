@@ -57,6 +57,7 @@
 
 #include "output/logging.h"
 
+#include "function/taylor_series.code.h"
 
 namespace Ariadne { 
 

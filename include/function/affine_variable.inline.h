@@ -404,6 +404,7 @@ Function::AffineVariable<X>::operator+=(const AffineVariable<X>& x)
 {
   this->_x+=x._x;
   this->_dx+=x._dx;
+  return *this;
 }
 
 template<class X> inline 

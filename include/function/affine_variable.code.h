@@ -1,5 +1,5 @@
 /***************************************************************************
- *            affine_variable.template.h
+ *            affine_variable.code.h
  *
  *  Copyright  2007  Pieter Collins
  *  Pieter.Collins@cwi.nl
@@ -124,5 +124,14 @@ Function::operator<<(std::ostream& os, const AffineVariable<X>& av)
 }
 
 
+template<class X>
+void
+Function::AffineVariable<X>::instantiate()
+{
+  AffineVariable<X>* av=0;
+  std::ostream* os=0;
+
+  operator<<(*os,*av);
+}
 
 }

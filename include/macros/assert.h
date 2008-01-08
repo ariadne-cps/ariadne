@@ -26,14 +26,16 @@
 
 #include <iostream>
 #include <cassert>
+#include <exception>
+
+#include "macros/throw.h"
 
 /*! \brief Evaluates \a expression in a boolean context and checks if the result is \a true. */
 #define ARIADNE_ASSERT(expression) \
 { \
   bool result = (expression); \
   if(!result) { \
-    std::cerr << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Assertion `" << #expression << "' failed.\n" << std::endl; \
-    exit(1); \
+    ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<__PRETTY_FUNCTION__,"Assertion `" << #expression << "' failed.\n"); \
   } \
 } \
 

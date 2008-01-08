@@ -39,6 +39,7 @@
 
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
+using namespace Ariadne::LinearAlgebra;
 using namespace Ariadne::Function;
 using namespace std;
 
@@ -61,6 +62,8 @@ class TestTaylorDerivative {
     ARIADNE_TEST_CALL(test_mul());
     ARIADNE_TEST_CALL(test_div());
     ARIADNE_TEST_CALL(test_compose());
+    ARIADNE_TEST_CALL(test_inverse());
+    ARIADNE_TEST_CALL(test_implicit());
   }
 
   void test_degree() {
@@ -102,9 +105,39 @@ class TestTaylorDerivative {
     cout << "compose(y,x)=" << compose(y,x) << endl;
     cout << "compose(id,x)=" << compose(id,x) << endl;
     cout << "compose(id,x)-x=" << compose(id,x)-x << endl;
+    
   }
 
+  void test_inverse() {
+    double ax[12]={ 0.0, 2.0, 1.0, 3.0, 4.0, 5.0,   0.0, 1.0, 1.0, 2.0, 3.0, 4.0 };
+    Vector<X> c(2);
+    TaylorDerivative<X> id=TaylorDerivative<X>::variable(2,2,2,c);
+    TaylorDerivative<X> x(2,2,2,ax);
+    ARIADNE_TEST_PRINT(c);
+    ARIADNE_TEST_PRINT(x);
+    ARIADNE_TEST_PRINT(inverse(x,c));
+    ARIADNE_TEST_EQUAL(compose(x,inverse(x,c)),id);
+    ARIADNE_TEST_EQUAL(compose(inverse(x,c),x),id);
+    ARIADNE_TEST_EQUAL(inverse(inverse(x,c),c),x);
+  }
 
+  void test_implicit() {
+    double ax[30]={ 0.0,  2.0,1.0,3.0,1.0, 4.0,5.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+                    0.0,  1.0,1.0,2.0,1.0, 3.0,4.0,0.0,6.0,0.0,7.0,0.0,0.0,0.0,0.0 };
+    Vector<X> c(2);
+    TaylorDerivative<X> id1=TaylorDerivative<X>::variable(1,1,2,Vector<X>(1));
+    TaylorDerivative<X> id2=TaylorDerivative<X>::variable(2,2,2,Vector<X>(2));
+    TaylorDerivative<X> id3=TaylorDerivative<X>::variable(3,3,2,Vector<X>(3));
+    ARIADNE_TEST_PRINT(id3);
+    TaylorDerivative<X> x(2,4,2,ax);
+    ARIADNE_TEST_PRINT(x);
+    ARIADNE_TEST_PRINT(implicit(x,c));
+    TaylorDerivative<X> y=implicit(x,c);
+    TaylorDerivative<X> z=concatenate(TaylorDerivative<X>::variable(2,2,2,Vector<X>(2)),y);
+    ARIADNE_TEST_PRINT(z);
+    ARIADNE_TEST_EQUAL(compose(x,z),TaylorDerivative<X>::constant(2,2,2,Vector<X>(2)));
+    
+  }
 };
 
 

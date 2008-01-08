@@ -28,9 +28,13 @@
 #ifndef ARIADNE_FUNCTION_SERIES_H
 #define ARIADNE_FUNCTION_SERIES_H
 
-#include "numeric/declarations.h"
 
 namespace Ariadne {
+
+  namespace Numeric { 
+    class Rational; 
+  }
+
   namespace Function {
   
     template<class X> class TaylorSeries;

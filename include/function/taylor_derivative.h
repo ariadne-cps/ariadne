@@ -28,23 +28,7 @@
 #ifndef ARIADNE_TAYLOR_DERIVATIVE_H
 #define ARIADNE_TAYLOR_DERIVATIVE_H
 
-#include <iostream>
-#include <stdexcept>
-#include <cassert>
-
-#include "base/tribool.h"
-#include "base/exceptions.h"
-#include "base/stlio.h"
-
-#include "numeric/declarations.h"
 #include "linear_algebra/declarations.h"
-
-#include "numeric/exceptions.h"
-#include "numeric/traits.h"
-#include "numeric/conversion.h"
-#include "numeric/arithmetic.h"
-#include "numeric/function.h"
-
 
 namespace Ariadne {
   namespace Function {
@@ -52,8 +36,6 @@ namespace Ariadne {
     class MultiIndex;
     template<class X> class TaylorSeries;
     template<class X> class TaylorVariable;
-  
-    template<class X> class TaylorVariableReference;
   
     /*!\ingroup Function
      * \brief A templated class representing a the derivatives of a vector quantity with respect to a multiple arguments.
@@ -81,9 +63,9 @@ namespace Ariadne {
       template<class XX> TaylorDerivative<X>& operator=(const TaylorDerivative<XX>& td);
 
       /*! \brief Equality operator. */
-      template<class XX> bool operator==(const TaylorDerivative<XX>& other);
+      template<class XX> bool operator==(const TaylorDerivative<XX>& other) const;
       /*! \brief Inequality operator. */
-      template<class XX> bool operator!=(const TaylorDerivative<XX>& other);
+      template<class XX> bool operator!=(const TaylorDerivative<XX>& other) const;
 
       /*! \brief Construct a constant derivative of degree \a d with respect to \a as variables and value \a c. */
       template<class V> static TaylorDerivative<X> constant(size_type rs, size_type as, smoothness_type d, const V& c); 
@@ -100,6 +82,11 @@ namespace Ariadne {
       LinearAlgebra::Vector<X> value() const; 
       /*! \brief The value of the vector quantity. */
       LinearAlgebra::Matrix<X> jacobian() const; 
+
+      /*! \brief Set the value of the quantity. */
+      void set_value(const LinearAlgebra::Vector<X>&); 
+      /*! \brief Set the Jacobian matrix of the quantity. */
+      void set_jacobian(const LinearAlgebra::Matrix<X>&); 
 
       /*! \brief The derivative of the \a i<sup>th</sup> variable with respect to multi-index \a j. */
       const X& get(const size_type& i, const MultiIndex& j) const;
@@ -130,9 +117,11 @@ namespace Ariadne {
      *  \f$ y^{[n]} = \sum_{i=0}^{n-1} \Bigl(\!\begin{array}{c}n\\i\end{array}\!\Bigr) {\dot{y}}^{[i]} x^{(n-i)} \f$
      */
     friend TaylorDerivative<X> compose(const TaylorDerivative<X>& y, const TaylorDerivative<X>& x);
-    /*! \brief The derivative of the inverse of \f$y\f$ evaluated at \f$x\f$. (Not currently implemented.) */
-    friend TaylorDerivative<X> inverse(const TaylorDerivative<X>& y, const X& x);
-   /*! \brief The derivatives of \f$x+y\f$. */
+    /*! \brief The derivative of the inverse of \f$y\f$, assuming \f$c\f$ is the centre of the approximation. */
+    friend TaylorDerivative<X> inverse(const TaylorDerivative<X>& y, const Vector<X>& c);
+    /*! \brief The taylor derivatives of the function \f$z:\R^m\rightarrow\R^n\f$ defined by \f$y(x,z(x))=\text{const}\f$. The value of \f$z(x)\f$ is set to be \f$c\f$. */
+    friend TaylorDerivative<X> implicit(const TaylorDerivative<X>& y, const Vector<X>& c);
+    /*! \brief The derivatives of \f$x+y\f$. */
     friend TaylorDerivative<X> add(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y);
     /*! \brief The derivatives of \f$x-y\f$. */
     friend TaylorDerivative<X> sub(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y);
@@ -148,6 +137,7 @@ namespace Ariadne {
 #endif 
      private:
       size_type _increment() const;
+      static void instantiate();
      private:
       size_type _result_size;
       size_type _argument_size;
@@ -161,8 +151,12 @@ namespace Ariadne {
 
   template<class X> TaylorVariable<X> compose(const TaylorVariable<X>& y, const TaylorDerivative<X>& x);
   template<class X> TaylorDerivative<X> compose(const TaylorDerivative<X>& y, const TaylorDerivative<X>& x);
+  template<class X> TaylorDerivative<X> inverse(const TaylorDerivative<X>& x, const LinearAlgebra::Vector<X>& c);
+  template<class X> TaylorDerivative<X> implicit(const TaylorDerivative<X>& x, const LinearAlgebra::Vector<X>& c);
+  template<class X> TaylorDerivative<X> concatenate(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y);
   template<class X> TaylorDerivative<X> reduce(const TaylorDerivative<X>& x);
   template<class X> TaylorDerivative<X> derivative(const TaylorDerivative<X>& x, const size_type& k);
+
   template<class X> TaylorDerivative<X> neg(const TaylorDerivative<X>& x);
   template<class X> TaylorDerivative<X> add(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y);
   template<class X> TaylorDerivative<X> sub(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y);
@@ -171,6 +165,8 @@ namespace Ariadne {
   template<class X> TaylorDerivative<X> operator-(const TaylorDerivative<X>& x);
   template<class X> TaylorDerivative<X> operator+(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y);
   template<class X> TaylorDerivative<X> operator-(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y);
+
+  template<class X> TaylorDerivative<X> operator*(const LinearAlgebra::Matrix<X>& A, const TaylorDerivative<X>& x);
 
   template<class X, class R> TaylorDerivative<X> operator+(const TaylorDerivative<X>& x, const R& c);
   template<class X, class R> TaylorDerivative<X> operator+(const R& c, const TaylorDerivative<X>& x);

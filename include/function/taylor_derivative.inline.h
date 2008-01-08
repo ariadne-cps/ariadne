@@ -107,16 +107,16 @@ Function::TaylorDerivative<X>::operator=(const TaylorDerivative<XX>& other)
 
 template<class X> template<class XX> inline
 bool 
-Function::TaylorDerivative<X>::operator==(const TaylorDerivative<XX>& other) 
+Function::TaylorDerivative<X>::operator==(const TaylorDerivative<XX>& other) const
 {
-  return this->_argument_size==other->_argument_size
+  return this->_argument_size==other._argument_size
     && this->_degree==other._degree
     && this->_variables==other._variables; 
 }
 
 template<class X> template<class XX> inline
 bool 
-Function::TaylorDerivative<X>::operator!=(const TaylorDerivative<XX>& other) 
+Function::TaylorDerivative<X>::operator!=(const TaylorDerivative<XX>& other) const
 {
   return !(*this==other); 
 }
@@ -127,6 +127,7 @@ Function::TaylorDerivative<X>
 Function::TaylorDerivative<X>::constant(size_type r, size_type a, smoothness_type d, const V& c) 
 {
   TaylorDerivative<X> result(r,a,d);
+  ARIADNE_ASSERT(c.size()==r);
   for(size_type i=0; i!=r; ++i) {
     result._variables[i].value()=c[i];
   }
@@ -137,7 +138,8 @@ template<class X> template<class V> inline
 Function::TaylorDerivative<X> 
 Function::TaylorDerivative<X>::variable(size_type r, size_type a, smoothness_type d, const V& x) 
 {
-  assert(r==a);
+  ARIADNE_ASSERT(a==r);
+  ARIADNE_ASSERT(x.size()==r);
   TaylorDerivative<X> result(r,a,d);
   //size_type inc=compute_polynomial_data_size(1u,a,d);
   for(size_type i=0; i!=r; ++i) {
@@ -252,26 +254,6 @@ Function::TaylorDerivative<X>::operator[](const size_type& i) const
 
 
 
-
-template<class X> inline
-Function::TaylorVariable<X> 
-Function::compose(const TaylorVariable<X>& y, const TaylorDerivative<X>& x)
-{
-  assert(y.argument_size()==x.result_size());
-  TaylorVariable<X> z(x.argument_size(),std::min(x.degree(),y.degree()));
-  compute_composition(z,y,x);
-  return z;
-}
-
-template<class X> inline
-Function::TaylorDerivative<X> 
-Function::compose(const TaylorDerivative<X>& y, const TaylorDerivative<X>& x)
-{
-  assert(y.argument_size()==x.result_size());
-  TaylorDerivative<X> z(y.result_size(),x.argument_size(),std::min(x.degree(),y.degree()));
-  compute_composition(z,y,x);
-  return z;
-}
 
 
 template<class X> inline 

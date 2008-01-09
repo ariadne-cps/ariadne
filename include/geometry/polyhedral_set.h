@@ -34,6 +34,8 @@
 
 #include "geometry/set_interface.h"
 #include "geometry/polyhedron.h"
+#include "geometry/constraint_set.h"
+#include "function/affine_function.h"
 
 namespace Ariadne {
   namespace Geometry {
@@ -44,27 +46,27 @@ namespace Ariadne {
     /*! \brief An adaptor for the Polyhedron class conforming to the SetInterface interface. */
     template<class R>
     class PolyhedralSet
-      : public SetInterface<R>
+      : public ConstraintSet<R>
     {
      public:
       /*! \brief */
       PolyhedralSet(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b)
-        : SetInterface<R>(), _polyhedron(A,b) { }
+        : ConstraintSet<R>(make_constraint_set(Polyhedron<R>(A,b))), _polyhedron(A,b) { }
       /*! \brief */
       PolyhedralSet(const std::string& str)
-        : SetInterface<R>(), _polyhedron(str) { }
+        : ConstraintSet<R>(make_constraint_set(Polyhedron<R>(str))), _polyhedron(str) { }
       /*! \brief */
       PolyhedralSet(const Box<R>& r)
-        : SetInterface<R>(), _polyhedron(r) { }
+        : ConstraintSet<R>(make_constraint_set(Polyhedron<R>(r))), _polyhedron(r) { }
       /*! \brief */
       PolyhedralSet(const Polytope<R>& p)
-        : SetInterface<R>(), _polyhedron(p) { }
+        : ConstraintSet<R>(make_constraint_set(Polyhedron<R>(p))), _polyhedron(p) { }
       /*! \brief */
       PolyhedralSet(const Polyhedron<R>& ph)
-        : SetInterface<R>(), _polyhedron(ph) { }
+        : ConstraintSet<R>(make_constraint_set(ph)), _polyhedron(ph) { }
       /*! \brief */
       PolyhedralSet(const PolyhedralSet<R>& ph)
-        : SetInterface<R>(), _polyhedron(static_cast<const Polyhedron<R>&>(ph)) { }
+        : ConstraintSet<R>(ph), _polyhedron(static_cast<const Polyhedron<R>&>(ph)) { }
       /*! \brief */
       operator const Polyhedron<R>& () const { return this->_polyhedron; }
 
@@ -96,6 +98,9 @@ namespace Ariadne {
       virtual std::ostream& write(std::ostream& os) const {
         return this->_polyhedron.write(os);
       }
+     private:
+      static ConstraintSet<R> make_constraint_set(const Polyhedron<R>& ply) {
+        return ConstraintSet<R>(Function::AffineFunction<R>(-ply.A(),ply.b()),Box<R>::positive_orthant(ply.dimension())); }
      private:
       Polyhedron<R> _polyhedron;
     };

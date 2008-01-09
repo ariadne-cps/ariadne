@@ -62,28 +62,28 @@ namespace Ariadne {
       /*! \brief Compute an over-approximation to the time \a t evolution of the grid cell \a gc. */
       virtual 
       Geometry::HybridGridCellListSet<R>
-      upper_evolve(const System::SetBasedHybridAutomaton<R>& ha, 
+      upper_evolve(const System::HybridAutomaton<R>& ha, 
                    const Geometry::HybridGridCell<R>& gc, 
                    const Numeric::Rational& t) const = 0;
 
       /*! \brief Compute an over-approximation to the time \a t reachable set of the grid cell \a gc. */
       virtual 
       Geometry::HybridGridCellListSet<R>
-      upper_reach(const System::SetBasedHybridAutomaton<R>& vf, 
+      upper_reach(const System::HybridAutomaton<R>& vf, 
                   const Geometry::HybridGridCell<R>& bx, 
                   const Numeric::Rational& t) const = 0;
 
       /*! \brief Compute a lower-approximation to the time \a t evolution of the box \a bx. */
       virtual 
       Geometry::HybridBox<R>
-      lower_evolve(const System::SetBasedHybridAutomaton<R>& vf, 
+      lower_evolve(const System::HybridAutomaton<R>& vf, 
                    const Geometry::HybridBox<R>& bx, 
                    const Numeric::Rational& t) const = 0;
 
       /*! \brief Compute a lower-approximation to the time \a t reachable set of the box \a bx. */
       virtual 
       Geometry::HybridBoxListSet<R>
-      lower_reach(const System::SetBasedHybridAutomaton<R>& vf, 
+      lower_reach(const System::HybridAutomaton<R>& vf, 
                   const Geometry::HybridBox<R>& bx, 
                   const Numeric::Rational& t) const = 0;
 

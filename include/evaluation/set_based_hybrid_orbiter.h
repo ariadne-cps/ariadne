@@ -70,7 +70,7 @@ namespace Ariadne {
 
       virtual 
       Geometry::HybridListSet<BS>
-      evolution(const System::SetBasedHybridAutomaton<R>& vf, 
+      evolution(const System::HybridAutomaton<R>& vf, 
                 const Geometry::HybridListSet<BS>& bx, 
                 const Numeric::Rational& t,
                 const Semantics semantics,
@@ -78,25 +78,25 @@ namespace Ariadne {
 
       virtual 
       Geometry::HybridGridCellListSet<R>
-      upper_evolve(const System::SetBasedHybridAutomaton<R>& vf, 
+      upper_evolve(const System::HybridAutomaton<R>& vf, 
                    const Geometry::HybridGridCell<R>& bx, 
                    const Numeric::Rational& t) const;
 
       virtual 
       Geometry::HybridGridCellListSet<R>
-      upper_reach(const System::SetBasedHybridAutomaton<R>& vf, 
+      upper_reach(const System::HybridAutomaton<R>& vf, 
                   const Geometry::HybridGridCell<R>& bx, 
                   const Numeric::Rational& t) const;
 
       virtual 
       Geometry::HybridBox<R>
-      lower_evolve(const System::SetBasedHybridAutomaton<R>& vf, 
+      lower_evolve(const System::HybridAutomaton<R>& vf, 
                    const Geometry::HybridBox<R>& bx, 
                    const Numeric::Rational& t) const;
 
       virtual 
       Geometry::HybridBoxListSet<R>
-      lower_reach(const System::SetBasedHybridAutomaton<R>& vf, 
+      lower_reach(const System::HybridAutomaton<R>& vf, 
                   const Geometry::HybridBox<R>& bx, 
                   const Numeric::Rational& t) const;
 

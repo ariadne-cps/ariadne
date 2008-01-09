@@ -103,7 +103,7 @@ template<class R> void export_approximator();
 
 template<class R> void export_map();
 template<class R> void export_vector_field();
-template<class R> void export_set_based_hybrid_automaton();
+template<class R> void export_hybrid_automaton();
 template<class R> void export_constraint_based_hybrid_automaton();
 
 template<class R> void export_evolution_parameters();
@@ -115,7 +115,7 @@ template<class R> void export_discretiser();
 template<class R> void export_map_evolver();
 template<class R> void export_vector_field_evolver();
 template<class R> void export_set_based_hybrid_evolver();
-//template<class R> void export_constraint_based_hybrid_evolver();
+template<class R> void export_constraint_based_hybrid_evolver();
 
 void export_text_output();
 void export_latex_output();
@@ -220,8 +220,8 @@ BOOST_PYTHON_MODULE(ariadne)
 
   export_map<FloatPy>();
   export_vector_field<FloatPy>();
-  export_set_based_hybrid_automaton<FloatPy>();
-  export_constraint_based_hybrid_automaton<FloatPy>();
+  export_hybrid_automaton<FloatPy>();
+  //export_constraint_based_hybrid_automaton<FloatPy>();
 
   export_evolution_parameters<FloatPy>();
   export_solver<FloatPy>();

@@ -90,8 +90,7 @@ ARIADNE_SRC = ariadne_module.cc \
 	 \
 	export_map.cc \
 	export_vector_field.cc \
-	export_set_based_hybrid_automaton.cc \
-	export_constraint_based_hybrid_automaton.cc \
+	export_hybrid_automaton.cc \
 	 \
 	export_evolution_parameters.cc \
 	export_solver.cc \
@@ -111,5 +110,6 @@ ARIADNE_SRC = ariadne_module.cc \
 
 
 
+#	export_constraint_based_hybrid_automaton.cc \
 #	export_constraint_based_hybrid_evolver.cc 
 

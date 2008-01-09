@@ -45,7 +45,7 @@ namespace Ariadne {
 
     template<class R> class SetBasedDiscreteMode;
     template<class R> class SetBasedDiscreteTransition;
-    template<class R> class SetBasedHybridAutomaton;
+    template<class R> class HybridAutomaton;
 
     template<class R> class ConstraintBasedDiscreteMode;
     template<class R> class ConstraintBasedDiscreteTransition;

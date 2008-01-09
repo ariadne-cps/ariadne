@@ -26,7 +26,7 @@
 #include "geometry/box_list_set.h"
 #include "geometry/set_interface.h"
 #include "geometry/hybrid_set.h"
-#include "system/set_based_hybrid_automaton.h"
+#include "system/hybrid_automaton.h"
 #include "evaluation/hybrid_time.h"
 #include "evaluation/evolution_parameters.h"
 #include "evaluation/map_evolver.h"
@@ -439,7 +439,7 @@ Evaluation::SetBasedHybridEvolver<BS>::_upper_reach(const HA& ha, const HGCLS& i
 
 template<class BS>
 Geometry::HybridGridMaskSet<typename BS::real_type> 
-Evaluation::SetBasedHybridEvolver<BS>::lower_evolve(const System::SetBasedHybridAutomaton<R>& automaton, 
+Evaluation::SetBasedHybridEvolver<BS>::lower_evolve(const System::HybridAutomaton<R>& automaton, 
                                                     const Geometry::HybridSet<R>& initial_set,
                                                     const Numeric::Rational& time) const
 {
@@ -454,7 +454,7 @@ Evaluation::SetBasedHybridEvolver<BS>::lower_evolve(const System::SetBasedHybrid
 
 template<class BS>
 Geometry::HybridGridMaskSet<typename BS::real_type> 
-Evaluation::SetBasedHybridEvolver<BS>::lower_reach(const System::SetBasedHybridAutomaton<R>& automaton, 
+Evaluation::SetBasedHybridEvolver<BS>::lower_reach(const System::HybridAutomaton<R>& automaton, 
                                                    const Geometry::HybridSet<R>& initial_set,
                                                    const Numeric::Rational& time) const
 {
@@ -469,7 +469,7 @@ Evaluation::SetBasedHybridEvolver<BS>::lower_reach(const System::SetBasedHybridA
 
 template<class BS>
 Geometry::HybridGridMaskSet<typename BS::real_type> 
-Evaluation::SetBasedHybridEvolver<BS>::upper_evolve(const System::SetBasedHybridAutomaton<R>& automaton, 
+Evaluation::SetBasedHybridEvolver<BS>::upper_evolve(const System::HybridAutomaton<R>& automaton, 
                                                     const Geometry::HybridSet<R>& initial_set,
                                                     const Numeric::Rational& time) const
 {
@@ -493,7 +493,7 @@ Evaluation::SetBasedHybridEvolver<BS>::upper_evolve(const System::SetBasedHybrid
 
 template<class BS>
 Geometry::HybridGridMaskSet<typename BS::real_type> 
-Evaluation::SetBasedHybridEvolver<BS>::upper_reach(const System::SetBasedHybridAutomaton<R>& automaton, 
+Evaluation::SetBasedHybridEvolver<BS>::upper_reach(const System::HybridAutomaton<R>& automaton, 
                                                    const Geometry::HybridSet<R>& initial_set,
                                                    const Numeric::Rational& time) const
 {
@@ -520,7 +520,7 @@ Evaluation::SetBasedHybridEvolver<BS>::upper_reach(const System::SetBasedHybridA
 
 template<class BS>
 Geometry::HybridGridMaskSet<typename BS::real_type> 
-Evaluation::SetBasedHybridEvolver<BS>::chainreach(const System::SetBasedHybridAutomaton<R>& automaton, 
+Evaluation::SetBasedHybridEvolver<BS>::chainreach(const System::HybridAutomaton<R>& automaton, 
                                                   const Geometry::HybridSet<R>& initial_set) const
 {
   hybrid_evolver_verbosity=7; 

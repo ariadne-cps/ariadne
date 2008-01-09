@@ -82,10 +82,11 @@ GEOMETRY_SRC = \
 SYSTEM_SRC = \
 	system/map.cc \
 	system/vector_field.cc \
-	system/set_based_hybrid_automaton.cc \
-	system/constraint_based_hybrid_automaton.cc \
-	#system/transition_system.cc \
-	#system/grid_multimap.cc 
+	system/hybrid_automaton.cc
+
+#	system/constraint_based_hybrid_automaton.cc \
+#	system/transition_system.cc \
+#	system/grid_multimap.cc 
 
 
 EVALUATION_SRC = \

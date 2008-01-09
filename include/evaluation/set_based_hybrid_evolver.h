@@ -47,7 +47,7 @@
 #include "geometry/hybrid_space.h"
 #include "geometry/hybrid_set.h"
 #include "geometry/hybrid_timed_set.h"
-#include "system/set_based_hybrid_automaton.h"
+#include "system/hybrid_automaton.h"
 #include "evaluation/hybrid_time.h"
 
 #include "evaluation/approximator_interface.h"
@@ -83,33 +83,33 @@ namespace Ariadne {
       //! \name Evolution using abstract sets.
      
       /*! \brief Compute a lower approximation to the evolution up to time \a time using lower semantics. */
-      Geometry::HybridGridMaskSet<R> lower_evolve(const System::SetBasedHybridAutomaton<R>& automaton, 
+      Geometry::HybridGridMaskSet<R> lower_evolve(const System::HybridAutomaton<R>& automaton, 
                                                   const Geometry::HybridSet<R>& initial_set,
                                                   const Numeric::Rational& time) const;
 
       /*! \brief Compute a lower approximation to the reachable set up to \a time using lower semantics. */
-      Geometry::HybridGridMaskSet<R> lower_reach(const System::SetBasedHybridAutomaton<R>& automaton, 
+      Geometry::HybridGridMaskSet<R> lower_reach(const System::HybridAutomaton<R>& automaton, 
                                                  const Geometry::HybridSet<R>& initial_set,
                                                  const Numeric::Rational& time) const;
 
       /*! \brief Compute an over approximation to the evolution up to time \a time using lower semantics. */
-      Geometry::HybridGridMaskSet<R> upper_evolve(const System::SetBasedHybridAutomaton<R>& automaton, 
+      Geometry::HybridGridMaskSet<R> upper_evolve(const System::HybridAutomaton<R>& automaton, 
                                                   const Geometry::HybridSet<R>& initial_set,
                                                   const Numeric::Rational& time) const;
 
       /*! \brief Compute an over approximation to the reachable set up to \a time using lower semantics. */
-      Geometry::HybridGridMaskSet<R> upper_reach(const System::SetBasedHybridAutomaton<R>& automaton, 
+      Geometry::HybridGridMaskSet<R> upper_reach(const System::HybridAutomaton<R>& automaton, 
                                                  const Geometry::HybridSet<R>& initial_set,
                                                  const Numeric::Rational& time) const;
 
 /*
       //! \brief Compute a lower approximation to the reachable set using lower semantics. (Not currently implemented) 
-      Geometry::HybridGridMaskSet<R> lower_reach(const System::SetBasedHybridAutomaton<R>& automaton, 
+      Geometry::HybridGridMaskSet<R> lower_reach(const System::HybridAutomaton<R>& automaton, 
                                                  const Geometry::HybridSet<R>& initial_set) const;
 */
 
       /*! \brief Compute an over approximation to the chain-reachable set using upper semantics. */
-      Geometry::HybridGridMaskSet<R> chainreach(const System::SetBasedHybridAutomaton<R>& automaton, 
+      Geometry::HybridGridMaskSet<R> chainreach(const System::HybridAutomaton<R>& automaton, 
                                                 const Geometry::HybridSet<R>& initial_set) const;
 
 
@@ -140,9 +140,9 @@ namespace Ariadne {
       typedef Geometry::HybridGridMaskSet<R> HGMS;
       typedef Geometry::HybridTimedSet<BS> THBS;
       typedef Base::stack<THBS> THBSL;
-      typedef System::SetBasedHybridAutomaton<R> HA;
-      typedef System::SetBasedDiscreteMode<R> DM;
-      typedef System::SetBasedDiscreteTransition<R> DT;
+      typedef System::HybridAutomaton<R> HA;
+      typedef System::DiscreteMode<R> DM;
+      typedef System::DiscreteTransition<R> DT;
      private:
       // Services provided by other classes
       std::pair<Q,Bx> flow_bounds(const VF& vf, const Bx& bx) const {

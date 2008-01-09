@@ -47,7 +47,7 @@
 #include "geometry/list_set.h"
 #include "geometry/hybrid_set.h"
 
-#include "system/set_based_hybrid_automaton.h"
+#include "system/hybrid_automaton.h"
 
 #include "evaluation/bounder_interface.h"
 #include "evaluation/integrator_interface.h"
@@ -111,7 +111,7 @@ template<class BS>
 Geometry::HybridListSet<BS> 
 Evaluation::SetBasedHybridOrbiter<BS>::evolution(Geometry::HybridListSet<BS>& result,
                                                  std::vector< tuple<Q,Z,DS,BS> >& working,
-                                                 const System::SetBasedHybridAutomaton<R>& automaton, 
+                                                 const System::HybridAutomaton<R>& automaton, 
                                                  const Geometry::HybridListSet<BS>& initial_set, 
                                                  const Numeric::Rational& time,
                                                  const Semantics semantics,
@@ -200,7 +200,7 @@ Evaluation::SetBasedHybridOrbiter<BS>::evolution(Geometry::HybridListSet<BS>& re
 
 template<class BS>
 Geometry::HybridGridCellListSet<typename BS::real_type> 
-Evaluation::SetBasedHybridOrbiter<BS>::upper_evolve(const System::SetBasedHybridAutomaton<R>& f, 
+Evaluation::SetBasedHybridOrbiter<BS>::upper_evolve(const System::HybridAutomaton<R>& f, 
                                                     const Geometry::HybridGridCell<R>& hgc, 
                                                     const Numeric::Rational& t) const
 {
@@ -217,7 +217,7 @@ Evaluation::SetBasedHybridOrbiter<BS>::upper_evolve(const System::SetBasedHybrid
 
 template<class BS>
 Geometry::HybridGridCellListSet<typename BS::real_type> 
-Evaluation::SetBasedHybridOrbiter<BS>::upper_reach(const System::SetBasedHybridAutomaton<R>& f, 
+Evaluation::SetBasedHybridOrbiter<BS>::upper_reach(const System::HybridAutomaton<R>& f, 
                                                 const Geometry::HybridGridCell<R>& gc, 
                                                 const Numeric::Rational& t) const
 {
@@ -238,7 +238,7 @@ Evaluation::SetBasedHybridOrbiter<BS>::upper_reach(const System::SetBasedHybridA
 
 template<class BS>
 Geometry::HybridBox<typename BS::real_type>
-Evaluation::SetBasedHybridOrbiter<BS>::lower_evolve(const System::SetBasedHybridAutomaton<R>& f, 
+Evaluation::SetBasedHybridOrbiter<BS>::lower_evolve(const System::HybridAutomaton<R>& f, 
                                          const Geometry::HybridBox<R>& bx, 
                                          const Numeric::Rational& t) const
 {
@@ -253,7 +253,7 @@ Evaluation::SetBasedHybridOrbiter<BS>::lower_evolve(const System::SetBasedHybrid
 
 template<class BS>
 Geometry::HybridBoxListSet<typename BS::real_type>
-Evaluation::SetBasedHybridOrbiter<BS>::lower_reach(const System::SetBasedHybridAutomaton<R>& f, 
+Evaluation::SetBasedHybridOrbiter<BS>::lower_reach(const System::HybridAutomaton<R>& f, 
                                         const Geometry::HybridBox<R>& bx, 
                                         const Numeric::Rational& t) const
 {

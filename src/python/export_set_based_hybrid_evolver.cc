@@ -25,7 +25,7 @@
 
 #include "geometry/zonotope.h"
 #include "geometry/hybrid_set.h"
-#include "system/set_based_hybrid_automaton.h"
+#include "system/hybrid_automaton.h"
 #include "evaluation/evolution_parameters.h"
 #include "evaluation/applicator_interface.h"
 #include "evaluation/integrator_interface.h"

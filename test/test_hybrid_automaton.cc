@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_set_based_hybrid_automaton.cc
+ *            test_hybrid_automaton.cc
  *
  *  Copyright  2006-7  Alberto Casagrande,  Pieter Collins
  *  Email  casagrande@dimi.uniud.it  Pieter.Collins@cwi.nl
@@ -25,7 +25,6 @@
 #include <fstream>
 #include <string>
 
-#include "ariadne.h"
 #include "test_float.h"
 #include "geometry/set_interface.h"
 #include "geometry/set_reference.h"
@@ -35,7 +34,7 @@
 #include "geometry/polyhedral_set.h"
 #include "system/affine_map.h"
 #include "system/affine_vector_field.h"
-#include "system/set_based_hybrid_automaton.h"
+#include "system/hybrid_automaton.h"
 
 #include "test.h"
 
@@ -46,14 +45,14 @@ using namespace Ariadne::Geometry;
 using namespace Ariadne::System;
 using namespace std;
 
-template<class R> int test_set_based_hybrid_automaton();
+template<class R> int test_hybrid_automaton();
   
 int main() {
-  return test_set_based_hybrid_automaton<Flt>();
+  return test_hybrid_automaton<Flt>();
 }
 
 template<class R>
-int test_set_based_hybrid_automaton() 
+int test_hybrid_automaton() 
 {
   
   Box<R> r("[-1,1]x[-1,1]");
@@ -72,14 +71,14 @@ int test_set_based_hybrid_automaton()
   cout << "activation21=" << activation21 << endl;
   cout << endl;
   
-  SetBasedHybridAutomaton<R> automaton("Set-based affine test automaton");
+  HybridAutomaton<R> automaton("Set-based affine test automaton");
   DiscreteState dstate1(0);
   DiscreteState dstate2(1);
-  const SetBasedDiscreteMode<R>& mode1=automaton.new_mode(dstate1,dynamic,invariant);
-  const SetBasedDiscreteMode<R>& mode2=automaton.new_mode(dstate2,dynamic,invariant);
+  const DiscreteMode<R>& mode1=automaton.new_mode(dstate1,dynamic,invariant);
+  const DiscreteMode<R>& mode2=automaton.new_mode(dstate2,dynamic,invariant);
   DiscreteEvent event(5);
-  const SetBasedDiscreteTransition<R>& transition12=automaton.new_transition(event,dstate1,dstate2,reset,activation12);
-  const SetBasedDiscreteTransition<R>& transition21=automaton.new_transition(event,dstate2,dstate1,reset,activation21);
+  const DiscreteTransition<R>& transition12=automaton.new_transition(event,dstate1,dstate2,reset,activation12);
+  const DiscreteTransition<R>& transition21=automaton.new_transition(event,dstate2,dstate1,reset,activation21);
   
   cout << mode1  <<  "\n" << mode2 << "\n" << transition12 << "\n" << transition21 << endl;
 

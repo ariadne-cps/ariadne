@@ -65,8 +65,7 @@ GEOMETRY_TESTS = \
 	test_level_set 
 
 SYSTEM_TESTS = \
-	test_set_based_hybrid_automaton \
-	test_constraint_based_hybrid_automaton 
+	test_hybrid_automaton 
 
 EVALUATION_TESTS = \
 	test_newton_solver \
@@ -164,8 +163,7 @@ test_constraint_SOURCES=test_constraint.cc
 test_constraint_set_SOURCES=test_constraint_set.cc
 test_level_set_SOURCES=test_level_set.cc
 
-test_set_based_hybrid_automaton_SOURCES=test_set_based_hybrid_automaton.cc
-test_constraint_based_hybrid_automaton_SOURCES=test_constraint_based_hybrid_automaton.cc
+test_based_hybrid_automaton_SOURCES=test_hybrid_automaton.cc
 
 test_newton_solver_SOURCES=test_newton_solver.cc
 test_lohner_integrator_SOURCES=test_lohner_integrator.cc

@@ -55,6 +55,7 @@ ARIADNE_SRC = ariadne_module.cc \
 	export_tensor.cc \
 	export_linear_program.cc \
 	 \
+	export_multi_index.cc \
 	export_taylor_series.cc \
 	export_taylor_variable.cc \
 	export_taylor_derivative.cc \

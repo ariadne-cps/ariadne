@@ -56,6 +56,7 @@ template<class R> void export_interval_covector();
 template<class R> void export_interval_matrix();
 template<class R> void export_interval_tensor();
 
+void export_multi_index();
 void export_binary_tree();
 void export_lattice_set();
 void export_lattice_map();
@@ -163,6 +164,7 @@ BOOST_PYTHON_MODULE(ariadne)
 
   export_linear_program<Rational>();
 
+  export_multi_index();
   export_binary_tree();
   export_lattice_set();
   export_lattice_map();

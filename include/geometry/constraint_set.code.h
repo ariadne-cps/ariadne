@@ -155,7 +155,11 @@ template<class R>
 Geometry::Box<R> 
 Geometry::ConstraintSet<R>::bounding_box() const 
 {
-  throw UnboundedSet("ConstraintSet::bounding_box(): cannot be computed in general case");
+  if(dynamic_cast<const Function::IdentityFunction<R>*>(&*this->_function_ptr)) {
+    return this->_codomain;
+  } else {
+    throw UnboundedSet("ConstraintSet::bounding_box(): cannot be computed in general case");
+  }
 }      
 
 

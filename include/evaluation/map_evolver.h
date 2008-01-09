@@ -198,7 +198,6 @@ namespace Ariadne {
       GCLS outer_approximation(const BS& bs, const Gr& g) const {
         return this->_approximator->outer_approximation(bs,g); }
       GCLS outer_approximation(const BSL& bsl, const Gr& g) const {
-        std::cout << "Here"<<std::endl;
         return this->_approximator->outer_approximation(bsl,g); }
       GCLS lower_approximation(const BSL& bsl, const Gr& g) const {
         return this->_approximator->outer_approximation(bsl,g); }

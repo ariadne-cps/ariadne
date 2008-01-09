@@ -69,7 +69,8 @@ template<class BS>
 Evaluation::MapEvolver<BS>::MapEvolver(const EvolutionParameters<R>& parameters)
   : _parameters(parameters.clone()),
     _applicator(new StandardApplicator<R>),
-    _approximator(new StandardApproximator<BS>)
+    _approximator(new StandardApproximator<BS>),
+    _subdivider(new StandardSubdivider<BS>)
 {
 }
 

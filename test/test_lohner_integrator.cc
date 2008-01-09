@@ -28,8 +28,6 @@
 #include "ariadne.h"
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
-#include "geometry/rectangle.h"
-#include "geometry/parallelotope.h"
 #include "system/affine_vector_field.h"
 #include "evaluation/standard_bounder.h"
 #include "evaluation/lohner_integrator.h"
@@ -91,8 +89,8 @@ test_lohner_integrator()
   const VectorField<R>& vf=avf;
 
   Box<R> bb0,bb1,bb2,bb3,bb4;
-  Zonotope<R,UniformErrorTag> z0,z1,z2,z3,z4,zr1,zr2,zr3,zr4;
-  Zonotope<R,UniformErrorTag> c0z, c1z,afz;
+  Zonotope<R> z0,z1,z2,z3,z4,zr1,zr2,zr3,zr4;
+  Zonotope<R> c0z, c1z,afz;
   z0=z;
 
   bb0=bounder.estimate_flow_bounds(avf,z0.bounding_box(),qh);

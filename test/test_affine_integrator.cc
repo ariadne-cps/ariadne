@@ -28,8 +28,7 @@
 #include "ariadne.h"
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
-#include "geometry/rectangle.h"
-#include "geometry/parallelotope.h"
+#include "geometry/zonotope.h"
 #include "system/affine_vector_field.h"
 #include "evaluation/lohner_integrator.h"
 #include "evaluation/affine_integrator.h"
@@ -85,29 +84,29 @@ test_affine_integrator()
   Box<R> bb("[-4,0]x[-2,2]");
   Box<R> r("[-3.125,-2.875]x[-0.125,0.125]");
   cout << "r0=" << r << endl;
-  Zonotope<R,UniformErrorTag> iz; iz=r;
+  Zonotope<R> iz; iz=r;
   cout << "iz=" << iz << endl;
-  Zonotope<R,UniformErrorTag> iz0=iz;
+  Zonotope<R> iz0=iz;
   cout << "iz0=" << iz0 << endl;
   
-  Zonotope<R,UniformErrorTag> iz1=affine.integration_step(avf,iz0,h);
+  Zonotope<R> iz1=affine.integration_step(avf,iz0,h);
   cout << "iz1=" << iz1 << endl;
-  Zonotope<R,UniformErrorTag> iz2=affine.integration_step(avf,iz1,h);
+  Zonotope<R> iz2=affine.integration_step(avf,iz1,h);
   cout << "iz2=" << iz2 << endl;
-  Zonotope<R,UniformErrorTag> iz3=affine.integration_step(avf,iz2,h);
+  Zonotope<R> iz3=affine.integration_step(avf,iz2,h);
   cout << "iz3=" << iz3 << endl;
-  Zonotope<R,UniformErrorTag> iz4=affine.integration_step(avf,iz3,h);
+  Zonotope<R> iz4=affine.integration_step(avf,iz3,h);
   cout << "iz4=" << iz4 << endl;
-  Zonotope<R,UniformErrorTag> hiz1=affine.integration_step(avf,iz0,hh);
-  Zonotope<R,UniformErrorTag> hiz2=affine.integration_step(avf,iz1,hh);
-  Zonotope<R,UniformErrorTag> hiz3=affine.integration_step(avf,iz2,hh);
-  Zonotope<R,UniformErrorTag> hiz4=affine.integration_step(avf,iz3,hh);
+  Zonotope<R> hiz1=affine.integration_step(avf,iz0,hh);
+  Zonotope<R> hiz2=affine.integration_step(avf,iz1,hh);
+  Zonotope<R> hiz3=affine.integration_step(avf,iz2,hh);
+  Zonotope<R> hiz4=affine.integration_step(avf,iz3,hh);
   cout << "hiz4=" << hiz4 << endl;
-  Zonotope<R,UniformErrorTag> riz1=affine.reachability_step(avf,iz0,h);
+  Zonotope<R> riz1=affine.reachability_step(avf,iz0,h);
   cout << "riz1=" << riz1 << endl;
-  Zonotope<R,UniformErrorTag> riz2=affine.reachability_step(avf,iz1,h);
-  Zonotope<R,UniformErrorTag> riz3=affine.reachability_step(avf,iz2,h);
-  Zonotope<R,UniformErrorTag> riz4=affine.reachability_step(avf,iz3,h);
+  Zonotope<R> riz2=affine.reachability_step(avf,iz1,h);
+  Zonotope<R> riz3=affine.reachability_step(avf,iz2,h);
+  Zonotope<R> riz4=affine.reachability_step(avf,iz3,h);
   cout << "riz4=" << riz4 << endl;
   
   if(h!=0.125) { cout << "h changed from 0.125 to " << h << endl; }

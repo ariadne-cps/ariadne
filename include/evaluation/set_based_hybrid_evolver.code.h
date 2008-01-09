@@ -228,8 +228,6 @@ Evaluation::SetBasedHybridEvolver<BS>::_step(HBSL& evolve,
                                              const Q& time,
                                              const Semantics semantics) const
 {
-  int verbosity=9;
-
   ARIADNE_LOG(6,"\nBasedHybridEvolver<BS>::_step\n");
   ARIADNE_ASSERT(!working.empty());
   ARIADNE_LOG(9," evolution_time="<<time<<"\n");
@@ -473,7 +471,6 @@ Evaluation::SetBasedHybridEvolver<BS>::upper_evolve(const System::HybridAutomato
                                                     const Geometry::HybridSet<R>& initial_set,
                                                     const Numeric::Rational& time) const
 {
-  hybrid_evolver_verbosity=7; 
   ARIADNE_LOG(2,"SetBasedHybridEvolver::upper_evolve(automaton,set,time)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n\n");
   HGCLS evolve=this->outer_approximation(initial_set,this->grid(automaton.locations()));
@@ -523,7 +520,6 @@ Geometry::HybridGridMaskSet<typename BS::real_type>
 Evaluation::SetBasedHybridEvolver<BS>::chainreach(const System::HybridAutomaton<R>& automaton, 
                                                   const Geometry::HybridSet<R>& initial_set) const
 {
-  hybrid_evolver_verbosity=7; 
   HGr grid=this->grid(automaton.locations());
   HGCLS result(grid);
   T time=this->lock_to_grid_time();

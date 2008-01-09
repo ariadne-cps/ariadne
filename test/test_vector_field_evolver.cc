@@ -26,10 +26,9 @@
 #include "test_float.h"
 
 #include "ariadne.h"
+#include "base/tuple.h"
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
-#include "geometry/rectangle.h"
-#include "geometry/parallelotope.h"
 #include "geometry/zonotope.h"
 #include "geometry/list_set.h"
 #include "geometry/empty_set.h"
@@ -94,17 +93,13 @@ test_integrator()
 
   Box<R> r=Box<R>("[0.98,1.02]x[0.48,0.52]");
   cout << "r=" << r << endl;
-  Zonotope<R,UniformErrorTag> ez=Zonotope<R,UniformErrorTag>(r);
-  cout << "ez=" << ez << endl;
+  Zonotope<R> z(r);
+  cout << "z=" << z << endl;
+  ConstraintSet<R> initial_set(r);
+  cout << "initial_set=" << initial_set << endl;
 
-  ListSet< Zonotope<R,UniformErrorTag> > ezls=ListSet< Zonotope<R,UniformErrorTag> >(ez);
-  ezls.adjoin(Zonotope<R>(Box<R>("[1.02,1.06]x[0.48,0.52]")));
-  cout << "ezls.size()=" << ezls.size() << endl;
-  
+ 
   Geometry::Box<R> nr;
-  Geometry::Zonotope<R> nz;
-  Geometry::Zonotope<R,UniformErrorTag> nez;
-  Geometry::ListSet< Zonotope<R,UniformErrorTag> > nezls;
   
   Flt x0=0;
   Flt x1=0.4;
@@ -125,27 +120,29 @@ test_integrator()
   // Integration step
   //nr=lohner.integration_step(vdp,r,h);
   //cout << nr << endl;
-  StandardApproximator< Zonotope<R,UniformErrorTag> > approximator;
+  StandardApproximator< Zonotope<R> > approximator;
   StandardBounder<R> bounder;
   LohnerIntegrator<R> integrator;
-  VectorFieldEvolver<R> evolver(parameters,integrator,approximator);
-  Box<R> bb=bounder.flow_bounds(vdp,ez.bounding_box(),h);
-  nez=integrator.integration_step(vdp,ez,h,bb);
-  cout << nez << endl << endl;
+  AffineIntegrator<R> affine_integrator;
+  VectorFieldEvolver< Zonotope<R> > evolver(parameters,integrator,approximator);
+  Box<R> bb;
+  make_lpair(h,bb)=bounder.flow_bounds(vdp,z.bounding_box(),h);
+  Zonotope<R> nz=integrator.integration_step(vdp,z,h,bb);
+  cout << nz << endl << endl;
   cout << endl << endl;
   
 
   
-  nezls=evolver.lower_integrate(vdp,ezls,t);
-  cout << nezls << endl << endl;
+  SetInterface<R>* evolve_ptr=evolver.lower_evolve(vdp,initial_set,t);
+  cout << *evolve_ptr << endl << endl;
   
-  nezls=evolver.lower_reach(vdp,ezls,t);
-  cout << nezls << endl << endl;
+  SetInterface<R>* reach_ptr=evolver.lower_reach(vdp,initial_set,t);
+  cout << *reach_ptr << endl << endl;
   
   // Affine vector field
   VectorField<R>& avfr=avf;
   //AffineVectorField<R>& avfr=avf;
-  nez=evolver.integration_step(avfr,ez,h);
+  nz=affine_integrator.integration_step(avfr,z,h,bb);
   cout << nz << endl;
   cout << endl;
   
@@ -159,6 +156,7 @@ test_vector_field_evolver()
 {
 
   typedef Interval<R> I;
+  typedef Zonotope<R> BS;
   cout << __PRETTY_FUNCTION__ << endl;
   
   EvolutionParameters<R> parameters;
@@ -169,7 +167,7 @@ test_vector_field_evolver()
   
   AffineIntegrator<R> affine_integrator;
   LohnerIntegrator<R> lohner_integrator;
-  VectorFieldEvolver<R> evolver(parameters,lohner_integrator);
+  VectorFieldEvolver<BS> evolver(parameters,lohner_integrator);
 
   AffineVectorField<R> affine_vector_field(Matrix<R>("[-2,-1;1,-2]"),Vector<R>("[0.125,0.25]"));
   
@@ -193,76 +191,16 @@ test_vector_field_evolver()
   Box<R> bounding_box=bb;
   SetInterface<R>* abstract_initial_set_ptr=&polyhedral_initial_set;
   cout << "abstract_initial_set=" << *abstract_initial_set_ptr << endl;
-  SetInterface<R>* abstract_integrate_set_ptr=evolver.integrate(affine_vector_field,*abstract_initial_set_ptr,time_type(integration_time/n));
+  SetInterface<R>* abstract_integrate_set_ptr=evolver.upper_evolve(affine_vector_field,*abstract_initial_set_ptr,time_type(integration_time/n));
   cout << "abstract_integrate_set=" << *abstract_integrate_set_ptr << endl;
-  SetInterface<R>* abstract_final_set_ptr=evolver.integrate(affine_vector_field,*abstract_initial_set_ptr,integration_time);
-  SetInterface<R>* abstract_reach_set_ptr=evolver.reach(affine_vector_field,*abstract_initial_set_ptr,integration_time);
+  SetInterface<R>* abstract_final_set_ptr=evolver.upper_evolve(affine_vector_field,*abstract_initial_set_ptr,integration_time);
+  SetInterface<R>* abstract_reach_set_ptr=evolver.upper_reach(affine_vector_field,*abstract_initial_set_ptr,integration_time);
   cout << "abstract_reach_set=" << *abstract_reach_set_ptr << endl;
-  SetInterface<R>* abstract_chainreach_set_ptr=evolver.chainreach(affine_vector_field,*abstract_initial_set_ptr,bounding_box);
+  SetInterface<R>* abstract_chainreach_set_ptr=evolver.chainreach(affine_vector_field,*abstract_initial_set_ptr);
   cout << "abstract_chainreach_set=" << *abstract_reach_set_ptr << endl;
   cout << endl;
 
 
-
-  GridMaskSet<R> grid_initial_set(fg);
-  grid_initial_set.adjoin(outer_approximation(polyhedral_initial_set,g));
-  cout << "grid_initial_set.size()=" << grid_initial_set.size() << endl;
-  GridMaskSet<R> grid_bounding_set(fg);
-  grid_bounding_set.adjoin(over_approximation(bb,g));
-  cout << "grid_bounding_set.size()=" << grid_bounding_set.size() << endl;
-  GridMaskSet<R> grid_integrate_set=grid_initial_set;
-  GridMaskSet<R> grid_found_set=grid_initial_set;
-  for(uint i=0; i!=n; ++i) {
-    grid_found_set=evolver.bounded_integrate(affine_vector_field,grid_found_set,grid_bounding_set,time_type(integration_time/n));
-    grid_integrate_set.adjoin(grid_found_set);
-  }
-  cout << "grid_integrate_set.size()=" << grid_integrate_set.size() << endl;
-  GridMaskSet<R> grid_final_set=grid_initial_set;
-  grid_final_set=evolver.bounded_integrate(affine_vector_field,grid_initial_set,grid_bounding_set,integration_time/2);
-  cout << "grid_final_set.size()=" << grid_final_set.size() << endl;
-  cerr << "WARNING: VectorFieldEvolver::bounded_integrate(VectorField,GridMaskSet,GridMaskSet,Rational) may have accuracy problems.\n";
-  GridMaskSet<R> grid_reach_set=evolver.bounded_reach(affine_vector_field,grid_initial_set,grid_bounding_set,integration_time);
-  cout << "grid_reach_set.size()=" << grid_reach_set.size() << endl;
-  GridMaskSet<R> grid_chainreach_set=evolver.chainreach(affine_vector_field,grid_initial_set,grid_bounding_set);
-  cout << "grid_chainreach_set.size()=" << grid_chainreach_set.size() << endl;
-
-
-
-  //Grid<R> grid(Vector<R>("[0.125,0.125]"));
-  ListSet< Box<R> > rectangle_list_initial_set=point_approximation(polyhedral_initial_set,fine_grid);
-  cout << "rectangle_list_initial_set.size()=" << rectangle_list_initial_set.size() << endl;
-  ListSet< Box<R> > rectangle_list_integrate_set=rectangle_list_initial_set;
-  cout << "rectangle_list_integrate_set.size()=" << rectangle_list_integrate_set << endl;
-  ListSet< Box<R> > rectangle_list_found_set=rectangle_list_initial_set;
-  for(uint i=0; i!=n; ++i) {
-    rectangle_list_found_set=evolver.lower_integrate(affine_vector_field,rectangle_list_found_set,time_type(integration_time/n));
-    rectangle_list_integrate_set.adjoin(rectangle_list_found_set);
-  }
-  ListSet< Box<R> > rectangle_list_final_set=evolver.lower_integrate(affine_vector_field,rectangle_list_initial_set,integration_time);
-  cout << "rectangle_list_final_set.size()=" << rectangle_list_final_set.size() << endl;
-  ListSet< Box<R> > rectangle_list_reach_set=evolver.lower_reach(affine_vector_field,rectangle_list_initial_set,integration_time);
-  cout << "rectangle_list_reach_set.size()=" << rectangle_list_reach_set.size() << endl;
-
-  cout << rectangle_list_initial_set << endl;
-  cout << rectangle_list_final_set << endl;
-  cout << rectangle_list_integrate_set << endl;
-  cout << rectangle_list_reach_set << endl;
-  cout << endl;
-
-  ListSet< Zonotope<R,UniformErrorTag> > zonotope_list_initial_set=point_approximation(polyhedral_initial_set,fine_grid);
-  ListSet< Zonotope<R,UniformErrorTag> > zonotope_list_integrate_set=zonotope_list_initial_set;
-  ListSet< Zonotope<R,UniformErrorTag> > zonotope_list_found_set=zonotope_list_initial_set;
-  for(uint i=0; i!=n; ++i) {
-    zonotope_list_found_set=evolver.lower_integrate(affine_vector_field,zonotope_list_found_set,time_type(integration_time/n));
-    zonotope_list_integrate_set.adjoin(zonotope_list_found_set);
-  }
-  ListSet< Zonotope<R,UniformErrorTag> > zonotope_list_final_set=evolver.lower_integrate(affine_vector_field,zonotope_list_initial_set,integration_time);
-  ListSet< Zonotope<R,UniformErrorTag> > zonotope_list_reach_set=evolver.lower_reach(affine_vector_field,zonotope_list_initial_set,integration_time);
-   
-  cout << zonotope_list_initial_set << endl;
-  cout << zonotope_list_integrate_set << endl;
-  cout << zonotope_list_reach_set << endl;
-  cout << endl;
 
   epsfstream eps;
 
@@ -274,34 +212,6 @@ test_vector_field_evolver()
   eps << fill_colour(cyan) << *abstract_integrate_set_ptr;
   eps << fill_colour(yellow) << *abstract_final_set_ptr;
   eps << fill_colour(blue) << *abstract_initial_set_ptr;
-  eps << fill_colour(transparant) << polyhedral_initial_set;
-  eps.close();
-  
-  eps.open("test_vector_field_evolver-grid.eps",bb);
-  eps << fill_colour(red) << grid_chainreach_set;
-  eps << fill_colour(green) << grid_reach_set;
-  eps << fill_colour(cyan) << grid_integrate_set;
-  eps << fill_colour(yellow) << grid_final_set;
-  eps << fill_colour(blue) << grid_initial_set;
-  eps.close();
-
-  eps.open("test_vector_field_evolver-rlist.eps",bb);
-  eps << line_style(false);
-  eps << fill_colour(green) << rectangle_list_reach_set;
-  eps << line_style(true);
-  eps << fill_colour(cyan) << rectangle_list_integrate_set;
-  eps << fill_colour(yellow) << rectangle_list_final_set;
-  eps << fill_colour(blue) << rectangle_list_initial_set;
-  eps << fill_colour(transparant) << polyhedral_initial_set;
-  eps.close();
-  
-  eps.open("test_vector_field_evolver-zlist.eps",bb);
-  eps << line_style(false);
-  eps << fill_colour(green) << zonotope_list_reach_set;
-  eps << line_style(true);
-  eps << fill_colour(cyan) << zonotope_list_integrate_set;
-  eps << fill_colour(yellow) << zonotope_list_final_set;
-  eps << fill_colour(blue) << zonotope_list_initial_set;
   eps << fill_colour(transparant) << polyhedral_initial_set;
   eps.close();
   

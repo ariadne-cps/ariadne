@@ -134,7 +134,6 @@ Evaluation::MapOrbiter<BS>::upper_reach(const System::Map<R>& f,
   BS bs=this->over_approximation(Geometry::Box<R>(gc));
   std::vector<BSL> orbit=this->_orbit(f,bs,n,upper_semantics);
   GCLS result(grid);
-  cout << "Here\n"<<endl;
   for(size_type i=0; i!=orbit.size(); ++i) {
     cout << "i="<<i<<endl;
     cout << "grid="<<grid<<endl;

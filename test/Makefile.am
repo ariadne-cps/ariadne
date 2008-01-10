@@ -145,7 +145,7 @@ test_subdivision_tree_SOURCES=test_subdivision_tree.cc
 test_interpreted_function_SOURCES=test_interpreted_function.cc
 test_polynomial_function_SOURCES=test_polynomial_function.cc
 test_index_SOURCES=test_index.cc
-test_scalar_derivative_SOURCES=test_scalar_derivative.cc
+test_taylor_series_SOURCES=test_scalar_series.cc
 test_taylor_derivative_SOURCES=test_taylor_derivative.cc
 test_affine_model_SOURCES=test_affine_model.cc
 test_taylor_model_SOURCES=test_taylor_model.cc
@@ -163,7 +163,7 @@ test_constraint_SOURCES=test_constraint.cc
 test_constraint_set_SOURCES=test_constraint_set.cc
 test_level_set_SOURCES=test_level_set.cc
 
-test_based_hybrid_automaton_SOURCES=test_hybrid_automaton.cc
+test_hybrid_automaton_SOURCES=test_hybrid_automaton.cc
 
 test_newton_solver_SOURCES=test_newton_solver.cc
 test_lohner_integrator_SOURCES=test_lohner_integrator.cc

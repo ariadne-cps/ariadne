@@ -54,55 +54,49 @@ namespace Ariadne {
 
 template<class R>
 Function::TaylorModel<R>::TaylorModel() 
-  : _result_size(0), 
-    _argument_size(0), 
-    _order(0),
-    _smoothness(0),
-    _data() 
+  : _domain(), 
+    _centre(),
+    _smoothness(),
+    _derivatives() 
 {
 }
 
-
 template<class R>
-Function::TaylorModel<R>::TaylorModel(const std::string& s) 
-{
-  throw NotImplemented(__PRETTY_FUNCTION__);
-}
-
-
-template<class R>
-Function::TaylorModel<R>::TaylorModel(const size_type& rs, const size_type& as, const size_type& d)
-  : _result_size(rs), 
-    _argument_size(as), 
-    _order(d),
-    _smoothness(d),
-    _data(rs*Numeric::bin(d+as,as),static_cast<R>(0)) 
-{
-}
-
-
-template<class R>
-Function::TaylorModel<R>::TaylorModel(const size_type& rs, const size_type& as, const size_type& d, const size_type& s)
-  : _result_size(rs), 
-    _argument_size(as), 
-    _order(d),
+Function::TaylorModel<R>::TaylorModel(const size_type& rs, const size_type& as, const size_type& d, const size_type& s) 
+  : _domain(Geometry::Box<R>::entire_space(as)),
+    _centre(LinearAlgebra::Vector<R>(as)),
     _smoothness(s),
-    _data(rs*Numeric::bin(d+as,as),static_cast<R>(0)) 
+    _derivatives(rs,as,d)
 {
 }
 
+template<class R>
+Function::TaylorModel<R>::TaylorModel(const Geometry::Box<R>& d, const LinearAlgebra::Vector<R>& c, const TaylorDerivative<I>& td)
+  : _domain(d),
+    _centre(c),
+    _smoothness(td.degree()),
+    _derivatives(td)
+{
+}
 
+template<class R>
+Function::TaylorModel<R>::TaylorModel(const Geometry::Box<R>& d, const LinearAlgebra::Vector<R>& c, const smoothness_type& s, const TaylorDerivative<I>& td)
+  : _domain(d),
+    _centre(c),
+    _smoothness(s),
+    _derivatives(td)
+{
+}
+
+/*
 template<class R>
 void
 Function::TaylorModel<R>::resize(const size_type& rs, const size_type& as, const size_type& d, const size_type& s)
 {
-  this->_result_size=rs; 
-  this->_argument_size=as; 
-  this->_order=d;
   this->_smoothness=s;
-  this->_data.resize(rs*Numeric::bin(d+as,as));
+  //this->_derivatives.resize(rs,as,d);
 }
-
+*/
 
 template<class R>
 Function::TaylorModel<R>
@@ -116,8 +110,7 @@ template<class R>
 Function::TaylorModel<R>
 Function::TaylorModel<R>::one(const size_type& as)  
 {
-  R o=1;
-  return TaylorModel<R>(1u,as,0,0,&o);
+  throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
 
@@ -125,43 +118,16 @@ template<class R>
 Function::TaylorModel<R>
 Function::TaylorModel<R>::constant(const size_type& as, const R& c)  
 {
-  return TaylorModel<R>(1u,as,0,0,&c);
+  throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
 
 template<class R>
 bool
-Function::TaylorModel<R>::operator==(const TaylorModel<R>& p2) const
+Function::TaylorModel<R>::operator==(const TaylorModel<R>& tm) const
 {
-  const TaylorModel<R>& p1=*this;
-  if(p1._result_size!=p2._result_size || p1._argument_size!=p2._argument_size) {
-    return false;
-  }
-  if(p1._order==p2._order) {
-    return p1._data==p2._data;
-  } else {
-    size_type smin=std::min(p1._data.size(),p2._data.size());
-    size_type smax=std::max(p1._data.size(),p2._data.size());
-    for(size_type i=0; i!=smin; ++i) {
-      if(p1._data[i]!=p2._data[i]) {
-        return false;
-      }
-    } 
-    if(p1._data.size()>p2._data.size()) {
-      for(size_type i=smin; i!=smax; ++i) {
-        if(p1._data[i]!=0) {
-          return false;
-        }
-      } 
-    } else {
-      for(size_type i=smin; i!=smax; ++i) {
-        if(p2._data[i]!=0) {
-          return false;
-        }
-      } 
-    }
-    return true;
-  }
+  return this->_centre==tm._centre
+    && this->_derivatives==tm._derivatives;
 }
 
 
@@ -174,92 +140,100 @@ Function::TaylorModel<R>::operator!=(const TaylorModel<R>& p2) const
 
 
 template<class R>
+Geometry::Box<R>
+Function::TaylorModel<R>::domain() const
+{ 
+  return this->_domain; 
+}
+
+template<class R>
+LinearAlgebra::Vector<R>
+Function::TaylorModel<R>::centre() const
+{ 
+  return this->_centre; 
+}
+
+template<class R>
+const Function::TaylorDerivative<typename Function::TaylorModel<R>::I>&
+Function::TaylorModel<R>::derivatives() const
+{ 
+  return this->_derivatives; 
+}
+
+template<class R>
 size_type 
 Function::TaylorModel<R>::argument_size() const
 { 
-  return this->_argument_size; 
+  return this->_derivatives.argument_size(); 
 }
 
 template<class R>
 size_type 
 Function::TaylorModel<R>::result_size() const 
 { 
-  return this->_result_size;
+  return this->_derivatives.result_size();
 }
 
 template<class R>
 size_type 
 Function::TaylorModel<R>::order() const 
 {
-  return this->_order; 
+  return this->_derivatives.degree();
 }
       
 template<class R>
 size_type 
 Function::TaylorModel<R>::smoothness() const 
 { 
-  return (size_type) -1; 
+  return this->_smoothness;
 }
       
-template<class R>
-const array<R>&
-Function::TaylorModel<R>::data() const 
-{ 
-  return this->_data;
-}
-      
+
 
 template<class R>
 void
 Function::TaylorModel<R>::set(const size_type& i, const MultiIndex& j, const R& x) 
 { 
-  assert(i<this->result_size());
-  assert(j.degree()<=this->order());
-  this->_data[this->result_size()*j.position()+i]=x;
+  this->_derivatives.set(i,j,x);
 }
       
 template<class R>
-R&
-Function::TaylorModel<R>::at(const size_type& i, const MultiIndex& j)
+void
+Function::TaylorModel<R>::set(const size_type& i, const MultiIndex& j, const I& x) 
 { 
-  assert(i<this->result_size());
-  assert(j.degree()<=this->order());
-  return this->_data[this->result_size()*j.position()+i];
-}
-      
-template<class R>
-const R&
-Function::TaylorModel<R>::get(const size_type& i, const MultiIndex& j) const 
-{ 
-  assert(i<this->result_size());
-  assert(j.degree()<=this->order());
-  return this->_data[this->result_size()*j.position()+i];
+  this->_derivatives.set(i,j,x);
 }
       
 
+template<class R>
+const typename Function::TaylorModel<R>::I&
+Function::TaylorModel<R>::get(const size_type& i, const MultiIndex& j) const 
+{ 
+  return this->_derivatives.get(i,j);
+}
+      
+
+
+
+
+
+
+
+
+
+/*
 
 template<class R>
 Function::TaylorModel<R> 
 Function::TaylorModel<R>::component(const size_type& i) const
 {
-  TaylorModel<R> result(1u,this->argument_size(),this->order());
-  R* rptr=result._data.begin();
-  R* eptr=result._data.end();
-  const R* aptr=this->_data.begin()+i;
-  const size_type& inc=this->result_size();
-  while(rptr!=eptr) {
-    *rptr=*aptr;
-    rptr+=1;
-    aptr+=inc;
-  }
-  return result;
 }
 
-
+*/
 
 template<class R>
-Function::TaylorModel<typename Function::TaylorModel<R>::I> 
-Function::TaylorModel<R>::truncate(const size_type& order, const size_type& smoothness, const Geometry::Rectangle<R>& domain) const
+Function::TaylorModel<R> 
+Function::TaylorModel<R>::truncate(const size_type& order, const size_type& smoothness, const Geometry::Box<R>& domain) const
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
@@ -267,17 +241,25 @@ Function::TaylorModel<R>::truncate(const size_type& order, const size_type& smoo
 
 
 template<class R>
-LinearAlgebra::Vector<typename Function::TaylorModel<R>::F> 
-Function::TaylorModel<R>::evaluate(const LinearAlgebra::Vector<F>& x) const
+LinearAlgebra::Vector<typename Function::TaylorModel<R>::I> 
+Function::TaylorModel<R>::evaluate(const LinearAlgebra::Vector<R>& x) const
+{
+  return this->evaluate(LinearAlgebra::Vector<I>(x));
+}
+
+
+template<class R>
+LinearAlgebra::Vector<typename Function::TaylorModel<R>::I> 
+Function::TaylorModel<R>::evaluate(const LinearAlgebra::Vector<I>& x) const
 {
   if(this->argument_size()!=x.size()) {
     ARIADNE_THROW(IncompatibleSizes,"TaylorModel::evaluate(Vector)","Incompatible argument size");
   }
 
   // TODO: Make this more efficient
-  LinearAlgebra::Vector<F> result(this->result_size());
+  LinearAlgebra::Vector<I> result(this->result_size());
   for(MultiIndex j(this->argument_size()); j.degree()<=this->order(); ++j) {
-    F xa=1;
+    I xa=1;
     for(size_type k=0; k!=j.number_of_variables(); ++k) {
       xa*=Numeric::pow(x[k],int(j[k]));
     }
@@ -289,84 +271,62 @@ Function::TaylorModel<R>::evaluate(const LinearAlgebra::Vector<F>& x) const
 }
 
 
-
-template<class R0, class R1, class R2>
-void
-Function::add(TaylorModel<R0>& p0, const TaylorModel<R1>& p1, const TaylorModel<R2>& p2)
+template<class R>
+Function::TaylorModel<R>
+Function::recentre(const TaylorModel<R>& tm, const Geometry::Box<R>& bx, const Geometry::Point<R>& pt)
 {
-  if(p1.result_size()!=p2.result_size()) {
-    ARIADNE_THROW(IncompatibleSizes,"add(TaylorModel,TaylorModel)","Incompatible result sizes");
-  }
-  if(p1.argument_size()!=p2.argument_size()) {
-    ARIADNE_THROW(IncompatibleSizes,"add(TaylorModel,TaylorModel)","Incompatible argument sizes");
-  }
-  size_type rs=p1.result_size();
-  size_type as=p1.argument_size();
-  size_type d1=p1.order();
-  size_type d2=p2.order();
-  size_type d=std::max(d1,d2);
-  size_type s1=p1.smoothness();
-  size_type s2=p2.smoothness();
-  size_type s=std::max(s1,s2);
+  ARIADNE_ASSERT(bx.subset(tm.domain()));
+  ARIADNE_ASSERT(bx.contains(pt));
+  typedef typename TaylorModel<R>::I I;
 
-  p0.resize(rs,as,d,s);
-  size_type kmin=std::min(p1._data.size(),p2._data.size());
-  size_type kmax=p0._data.size();
-  for(size_type i=0; i!=kmin; ++i) {
-    p0._data[i]=p1._data[i]+p2._data[i];
-  }
-  if(d1>d2) {
-    for(size_type i=kmin; i!=kmax; ++i) {
-      p0._data[i]=p1._data[i];
-    }
+  TaylorDerivative<I> tr=TaylorDerivative<I>::variable(tm.argument_size(),tm.argument_size().tm.degree(),pt.position_vectors());
+  
+  return TaylorModel<R>(bx,pt,tm.smoothness(),evaluate(tm,tr));
+
+}
+
+
+template<class R>
+Function::TaylorModel<R>
+Function::add(const TaylorModel<R>& p1, const TaylorModel<R>& p2)
+{
+  ARIADNE_ASSERT(!open_intersection(p1.domain(),p2.domain()).empty());
+  if(p1.centre()==p2.centre()) {
+    return TaylorModel<R>(closed_intersection(p1.domain(),p2.domain()),p1.centre(),p1.derivatives()+p2.derivatives());
   } else {
-    for(size_type i=kmin; i!=kmax; ++i) {
-      p0._data[i]=p2._data[i];
-    }
+    Geometry::Box<R> new_domain=closed_intersection(p1.domain(),p2.domain());
+    Geometry::Point<R> new_centre=new_domain.centre();
+    return add(recentre(p1,new_domain,new_centre),recentre(p2,new_domain,new_centre));
+  }
+}
+
+template<class R>
+Function::TaylorModel<R>
+Function::sub(const TaylorModel<R>& p1, const TaylorModel<R>& p2)
+{
+  ARIADNE_ASSERT(!open_intersection(p1.domain(),p2.domain()).empty());
+  if(p1.centre()==p2.centre()) {
+    return TaylorModel<R>(closed_intersection(p1.domain(),p2.domain()),p1.centre(),p1.derivatives()-p2.derivatives());
+  } else {
+    Geometry::Box<R> new_domain=closed_intersection(p1.domain(),p2.domain());
+    Geometry::Point<R> new_centre=new_domain.centre();
+    return add(recentre(p1,new_domain,new_centre),recentre(p2,new_domain,new_centre));
   }
 }
 
 
-template<class R0, class R1, class R2>
-void
-Function::sub(TaylorModel<R0>& p0, const TaylorModel<R1>& p1, const TaylorModel<R2>& p2)
-{
-  if(p1.result_size()!=p2.result_size()) {
-    ARIADNE_THROW(IncompatibleSizes,"add(TaylorModel,TaylorModel)","Incompatible result sizes");
-  }
-  if(p1.argument_size()!=p2.argument_size()) {
-    ARIADNE_THROW(IncompatibleSizes,"add(TaylorModel,TaylorModel)","Incompatible argument sizes");
-  }
-  size_type rs=p1.result_size();
-  size_type as=p1.argument_size();
-  size_type d1=p1.order();
-  size_type d2=p2.order();
-  size_type d=std::max(d1,d2);
-  size_type s1=p1.smoothness();
-  size_type s2=p2.smoothness();
-  size_type s=std::max(s1,s2);
 
-  p0.resize(rs,as,d,s);
-  size_type kmin=std::min(p1._data.size(),p2._data.size());
-  size_type kmax=p0._data.size();
-  for(size_type i=0; i!=kmin; ++i) {
-    p0._data[i]=p1._data[i]-p2._data[i];
-  }
-  if(d1>d2) {
-    for(size_type i=kmin; i!=kmax; ++i) {
-      p0._data[i]=p1._data[i];
-    }
-  } else {
-    for(size_type i=kmin; i!=kmax; ++i) {
-      p0._data[i]=-p2._data[i];
-    }
-  }
+template<class R>
+Function::TaylorModel<R>
+Function::mul(const TaylorModel<R>& tm, const R& x)
+{
+  return TaylorModel<R>(tm.domain(),tm.centre(),tm.smoothness(),tm.derivatives()*x);
 }
 
 
-template<class R0, class R1, class R2>
+template<class R>
 void
-Function::mul(TaylorModel<R0>& p0, const TaylorModel<R1>& p1, const TaylorModel<R2>& p2)
+Function::mul(TaylorModel<R>& p0, const TaylorModel<R>& p1, const TaylorModel<R>& p2)
 {
   if(p1.result_size()!=1u) {
     ARIADNE_THROW(IncompatibleSizes,"mul(TaylorModel,TaylorModel)","p1.result_size()="<<p1.result_size());
@@ -390,9 +350,9 @@ Function::mul(TaylorModel<R0>& p0, const TaylorModel<R1>& p1, const TaylorModel<
   p0.resize(rs,as,d,s);
   MultiIndex j0(as);
   for(MultiIndex j1(as); j1.degree()<=d1; ++j1) {
-    const R1& x1=p1.get(0u,j1);
+    const R& x1=p1.get(0u,j1);
     for(MultiIndex j2(as); j2.degree()<=d2; ++j2) {
-      const R2& x2=p2.get(0u,j2);
+      const R& x2=p2.get(0u,j2);
       j0=j1+j2;
       p0.at(0u,j0)+=x1*x2;
     }
@@ -401,9 +361,9 @@ Function::mul(TaylorModel<R0>& p0, const TaylorModel<R1>& p1, const TaylorModel<
 
 
 
-template<class R0,class R1>
+template<class R>
 void
-Function::pow(TaylorModel<R0>& p0, const TaylorModel<R1>& p1, const unsigned int& n)
+Function::pow(TaylorModel<R>& p0, const TaylorModel<R>& p1, const unsigned int& n)
 {
   assert(p1.result_size()==1);
 
@@ -412,13 +372,13 @@ Function::pow(TaylorModel<R0>& p0, const TaylorModel<R1>& p1, const unsigned int
     return;
   }
 
-  R0 one=1;
-  p0=TaylorModel<R0>::one(p1.argument_size());
+  R one=1;
+  p0=TaylorModel<R>::one(p1.argument_size());
   if(n==0) {
     return;
   }
 
-  TaylorModel<R0> tmp(p1);
+  TaylorModel<R> tmp(p1);
   for(uint i=1; i<=n; i*=2) {
     if(i&n) {
       p0=tmp*p0;
@@ -429,19 +389,36 @@ Function::pow(TaylorModel<R0>& p0, const TaylorModel<R1>& p1, const unsigned int
 
 
 
-template<class R0,class R1>
-void
-Function::scale(TaylorModel<R0>& p0, const R1& x1)
+template<class R>
+Function::TaylorModel<R>&
+Function::operator*=(TaylorModel<R>& p0, const R& x1)
 {
   for(size_type i=0; i!=p0._data.size(); ++i) {
     p0._data[i]*=x1;
   }
+  return p0;
 }
 
 
-template<class R0, class R1, class R2>
+template<class R>
+Function::TaylorModel<R>
+Function::compose(const TaylorModel<R>& p1, const TaylorModel<R>& p2)
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+
+template<class R>
+Function::TaylorModel<R>
+Function::derivative(const TaylorModel<R>& tm, const size_type& k) 
+{
+  return TaylorModel<R>(tm.domain(),tm.centre(),tm.smoothness()-1,Function::derivative(tm.derivatives(),k));
+}
+
+
+template<class R>
 void
-Function::compose(TaylorModel<R0>& p0, const TaylorModel<R1>& p1, const TaylorModel<R2>& p2)
+Function::compose(TaylorModel<R>& p0, const TaylorModel<R>& p1, const TaylorModel<R>& p2)
 {
   // TODO: Improve this algorithm as it's critical!!
   if(p1.argument_size()!=p2.result_size()) {
@@ -449,20 +426,20 @@ Function::compose(TaylorModel<R0>& p0, const TaylorModel<R1>& p1, const TaylorMo
   }
 
   if(p1.order()==0) { 
-    p0=static_cast< TaylorModel<R0> >(p1); 
+    p0=static_cast< TaylorModel<R> >(p1); 
     return;
   }
 
   p0.resize(p1.result_size(),p2.argument_size(),p1.order()*p2.order(),std::max(p1.smoothness(),p2.smoothness()));
   
-  TaylorModel<R0>* all_powers=new TaylorModel<R0>[p2.result_size()*(p1.order()+1)];
-  TaylorModel<R0>* powers[p2.result_size()];
+  TaylorModel<R>* all_powers=new TaylorModel<R>[p2.result_size()*(p1.order()+1)];
+  TaylorModel<R>* powers[p2.result_size()];
   for(size_type i=0; i!=p2.result_size(); ++i) {
     powers[i]=all_powers+i*(p1.order()+1);
   }
 
   for(size_type i=0; i!=p2.result_size(); ++i) {
-    powers[i][0]=TaylorModel<R0>::one(p2.argument_size());
+    powers[i][0]=TaylorModel<R>::one(p2.argument_size());
     powers[i][1]=p2.component(i);
     if(p1.order()>=2) {
       powers[i][2]=Function::pow(powers[i][1],2);
@@ -472,14 +449,14 @@ Function::compose(TaylorModel<R0>& p0, const TaylorModel<R1>& p1, const TaylorMo
     }
   }
   
-  TaylorModel<R0>* results=new TaylorModel<R0>[p1.result_size()];
+  TaylorModel<R>* results=new TaylorModel<R>[p1.result_size()];
   for(size_type i=0; i!=p1.result_size(); ++i) {
-    results[i]=TaylorModel<R0>::zero(1u,p2.argument_size());
+    results[i]=TaylorModel<R>::zero(1u,p2.argument_size());
   }
 
   for(size_type i=0; i!=p1.result_size(); ++i) {
     for(MultiIndex j(p1.argument_size()); j.degree()<=p1.order(); ++j) {
-      TaylorModel<R0> t=TaylorModel<R0>::constant(p2.argument_size(),p1.get(i,j));
+      TaylorModel<R> t=TaylorModel<R>::constant(p2.argument_size(),p1.get(i,j));
       for(size_type k=0; k!=p1.argument_size(); ++k) {
         t=t*powers[k][j[k]];
       }
@@ -498,9 +475,9 @@ Function::compose(TaylorModel<R0>& p0, const TaylorModel<R1>& p1, const TaylorMo
 }
 
 
-template<class R0,class R1>
+template<class R>
 void
-Function::derivative(TaylorModel<R0>& p0, const TaylorModel<R1>& p1, const size_type& k)
+Function::derivative(TaylorModel<R>& p0, const TaylorModel<R>& p1, const size_type& k)
 {
   if(p1.smoothness()==0) {
     ARIADNE_THROW(std::runtime_error,"derivative(TaylorModel,uint)"," model has smoothness 0");
@@ -522,14 +499,11 @@ Function::derivative(TaylorModel<R0>& p0, const TaylorModel<R1>& p1, const size_
 }
 
 template<class R>
-LinearAlgebra::Matrix<typename Function::TaylorModel<R>::F> 
-Function::TaylorModel<R>::jacobian(const LinearAlgebra::Vector<F>& s) const
+LinearAlgebra::Matrix<typename Function::TaylorModel<R>::I> 
+Function::TaylorModel<R>::jacobian(const LinearAlgebra::Vector<I>& s) const
 {
-  typedef typename Function::TaylorModel<R>::F R0;
-  typedef R R1;
-
-  LinearAlgebra::Matrix<R0> J(this->result_size(),this->argument_size());
-  array< array<R0> > powers=this->_powers(s);
+  LinearAlgebra::Matrix<I> J(this->result_size(),this->argument_size());
+  array< array<I> > powers=this->_powers(s);
   
   for(size_type j=0; j!=this->argument_size(); ++j) {
     for(MultiIndex m(this->argument_size()); m.degree()<=this->order(); ++m) {
@@ -537,7 +511,7 @@ Function::TaylorModel<R>::jacobian(const LinearAlgebra::Vector<F>& s) const
       int c=n[j];
       if(c!=0) {
         n.decrement_index(j);
-        R0 a=c;
+        I a=c;
         for(size_type k=0; k!=this->argument_size(); ++k) {
           a*=powers[k][n[k]];
         }
@@ -553,40 +527,38 @@ Function::TaylorModel<R>::jacobian(const LinearAlgebra::Vector<F>& s) const
 
 
 
-template<class R1, class R2> 
-Function::TaylorModel<typename Numeric::traits<R1>::arithmetic_type> 
-Function::inverse(const TaylorModel<R1>& p, const LinearAlgebra::Vector<R2>& v)
+template<class R> 
+Function::TaylorModel<R> 
+Function::inverse(const TaylorModel<R>& p, const LinearAlgebra::Vector<R>& v)
 {
   assert(p.result_size()==p.argument_size());
   assert(p.argument_size()==v.size());
 
   // The following are only to simplfy testing.
-  assert(v==LinearAlgebra::Vector<R2>(v.size(),0));
-  assert(p.evaluate(v)==LinearAlgebra::Vector<R2>(p.result_size(),0));
-  typedef typename Numeric::traits<R1>::arithmetic_type F0;
-  typedef typename Numeric::traits<F0>::number_type R0;
-  typedef typename Numeric::traits<F0>::interval_type I0;
+  assert(v==LinearAlgebra::Vector<R>(v.size(),0));
+  assert(p.evaluate(v)==LinearAlgebra::Vector<R>(p.result_size(),0));
+  typedef typename Numeric::traits<R>::interval_type I;
 
   ARIADNE_LOG(2,"inverse(TaylorModel p, Vector v)\n");
   ARIADNE_LOG(3,"  p="<<p<<"\n  v="<<v<<"\n");
-  LinearAlgebra::Vector<R0> c=midpoint(LinearAlgebra::Vector<I0>(p.evaluate(v)));
-  LinearAlgebra::Matrix<F0> J=p.jacobian(v);
+  LinearAlgebra::Vector<R> c=midpoint(LinearAlgebra::Vector<I>(p.evaluate(v)));
+  LinearAlgebra::Matrix<I> J=p.jacobian(v);
   
-  LinearAlgebra::Matrix<F0> invJ=inverse(J);
+  LinearAlgebra::Matrix<I> invJ=inverse(J);
 
   // FIXME: Need to re-solve for image of centre. What should initial set be? Different code needed for Rational?
-  LinearAlgebra::Vector<F0> invf=v;
+  LinearAlgebra::Vector<I> invf=v;
 
-  TaylorModel<F0> result(p.argument_size(),p.result_size(),p.order(),p.smoothness());
+  TaylorModel<R> result(p.argument_size(),p.result_size(),p.order(),p.smoothness());
 
   for(MultiIndex m(p.result_size()); m.degree()<=p.order(); ++m) {
     if(m.degree()==0) {
       for(size_type i=0; i!=p.argument_size(); ++i) {
-        result.at(i,m)=v(i);
+        result.set(i,m, v(i));
       }
     } else if(m.degree()==1) {
       for(size_type i=0; i!=p.argument_size(); ++i) {
-        result.at(i,m)=invJ(i,m.position()-1);
+        result.set(i,m, invJ(i,m.position()-1));
       }
     } else {
       // FIXME: Add code for higher indices
@@ -596,13 +568,13 @@ Function::inverse(const TaylorModel<R1>& p, const LinearAlgebra::Vector<R2>& v)
 }
 
 
-template<class R> template<class RR> 
-Base::array< Base::array<typename Function::TaylorModel<R>::F> >
-Function::TaylorModel<R>::_powers(const LinearAlgebra::Vector<RR>& v) const
+template<class R>
+Base::array< Base::array<typename Function::TaylorModel<R>::I> >
+Function::TaylorModel<R>::_powers(const LinearAlgebra::Vector<I>& v) const
 {
-  array< array<F> > powers(this->argument_size(), array<F>(this->order()+1));
+  array< array<I> > powers(this->argument_size(), array<I>(this->order()+1));
   for(size_type i=0; i!=this->argument_size(); ++i) {
-    powers[i][0]=static_cast<F>(1);
+    powers[i][0]=1;
     if(this->order()>=1) {
       powers[i][1]=v(i);
       if(this->order()>=2) {
@@ -657,7 +629,7 @@ Output::operator<<(Output::latexstream& texs, const Function::TaylorModel<R>& p)
     bool first = true;
     if(i!=0) { texs << "\\\\"; }
     for(MultiIndex j(p.argument_size()); j.degree()<=p.order(); ++j) {
-      const R& a=p.get(i,j);
+      const Numeric::Interval<R>& a=p.get(i,j);
       if(a!=0) {
         if(first) { first=false; }
         else { if(a>0) { texs << '+'; } }
@@ -694,13 +666,6 @@ Function::TaylorModel<R>::instantiate()
   std::ostream* os = 0;
   Output::latexstream* texs = 0;
 
-  Function::operator+(*p,*p);
-  Function::operator-(*p,*p);
-  Function::operator*(*p,*p);
-  Function::operator*(*x,*p);
-  Function::operator*(*p,*x);
-  Function::operator/(*p,*x);
-  Function::pow(*p,0u);
   Function::compose(*p,*p);
   Function::derivative(*p,*k);
   Function::inverse(*p,*v);

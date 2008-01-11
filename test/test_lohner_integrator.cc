@@ -26,6 +26,7 @@
 #include "test_float.h"
 
 #include "ariadne.h"
+#include "base/tuple.h"
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
 #include "system/affine_vector_field.h"
@@ -82,19 +83,26 @@ test_lohner_integrator()
   cout << "avf=" << avf << endl;
 
   Rational qh(0.125);
-  Interval<R> h(0.125);
+  Interval<R> ih(0.125);
+  Rational h=qh;
   cout << "h=" << h << endl;
   cout << "z.generators().norm()=" << norm(z.generators()) << endl;
 
+
   const VectorField<R>& vf=avf;
 
+  Rational h0,h1,h2,h3,h4;
   Box<R> bb0,bb1,bb2,bb3,bb4;
   Zonotope<R> z0,z1,z2,z3,z4,zr1,zr2,zr3,zr4;
   Zonotope<R> c0z, c1z,afz;
   z0=z;
 
-  bb0=bounder.estimate_flow_bounds(avf,z0.bounding_box(),qh);
+  make_lpair(h0,bb0)=lohner.flow_bounds(avf,z0.bounding_box(),qh);
   z1=lohner.integration_step(avf,z0,h,bb0);
+  cout << "z0=" << z0 << "\n"
+       << "h0=" << h0 << ", bb0=" << bb0 << "\n"
+       << "z1=" << z1 << endl;
+
   bb1=bounder.estimate_flow_bounds(avf,z1.bounding_box(),qh);
   z2=lohner.integration_step(avf,z1,h,bb1);
   bb2=bounder.estimate_flow_bounds(avf,z2.bounding_box(),qh);
@@ -111,6 +119,7 @@ test_lohner_integrator()
   cout << "zr1=" << zr1 << "\nzr2=" << zr2 << "\n"
        << "zr3=" << zr3 << "\nzr4=" << zr4 << "\n" << endl;
   c0z=z4;
+
 
   epsfstream eps;
   eps.open("test_lohner_integrator-1.eps",bb);
@@ -129,16 +138,7 @@ test_lohner_integrator()
   bb0=bounder.estimate_flow_bounds(avf,Box<R>(pt0),qh);
   Box<R> rbb0=bounder.refine_flow_bounds(avf,Box<R>(pt0),bb0,qh);
   Box<R> rrbb0=bounder.refine_flow_bounds(avf,Box<R>(pt0),rbb0,qh);
-  Point<I> pt1 = lohner.flow_step(avf,pt0,h,bb0);
-  Point<I> rpt1 = lohner.flow_step(avf,pt0,h,rbb0);
-  Point<I> rrpt1 = lohner.flow_step(avf,pt0,h,rrbb0);
-  Matrix<I> mx1 = lohner.flow_step_jacobian(avf,pt0,h,bb0);
-  Matrix<I> rmx1 = lohner.flow_step_jacobian(avf,pt0,h,rbb0);
-  cout << "pt0=" << pt0 << "\n"
-       << "bb0=" << bb0 << ", rbb0=" << rbb0 << ", rrbb0=" << rrbb0 << "\n"
-       << "pt1=" << pt1 << ", rpt1=" << rpt1 << ", rrpt1=" << rrpt1 << "\n"
-       << "mx1=" << mx1 << ", rmx1=" << rmx1 << "\n" << endl;
-  
+
   eps.open("test_lohner_integrator-2.eps",bb);
   eps << fill_colour(green)
       << zr1 << zr2

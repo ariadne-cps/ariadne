@@ -72,7 +72,6 @@ test_constraint()
   InterpretedFunction<R> f("function disc output Real y; input Real[2] x; algorithm y=1-(x[0]^2+x[1]^2); end disc;");
 
   Constraint<R> c(f);
-  Detector<R> d;
 
   Box<R> r;
   Zonotope<R> z;

@@ -34,30 +34,30 @@
 #include "geometry/declarations.h"
 #include "system/declarations.h"
 
-#include "evaluation/integrator_interface.h"
-
 namespace Ariadne {
   namespace Evaluation {
    
-
     /*!\ingroup Integrate
      * \brief A first order in space integration scheme.
      */
     template<class R>
-    class Integrator
-    //      : public IntegratorInterface< Geometry::Zonotope<R> >
+    class IntegratorBase
     {
       typedef Numeric::Interval<R> I;
      public:
+
       /*! \brief Virtual destructor. */
-      virtual ~Integrator() { }
+      virtual ~IntegratorBase() { }
+
       /*! \brief Constructor. */
-      Integrator(smoothness_type temporal_order, smoothness_type spacial_order)
+      IntegratorBase(smoothness_type temporal_order, smoothness_type spacial_order)
         : _temporal_order(temporal_order), _spacial_order() { }
+
       /*! \brief The order of the temporal model used. */
       smoothness_type temporal_order() const { return this->_temporal_order; }
       /*! \brief The order of the spacial model used. */
       smoothness_type spacial_order() const { return this->_spacial_order; }
+
     public:
       /*! \brief Compute an integration time and a bounding box, given a bounding box for the intitial set, and a maximum allowable flow time. */
       virtual 
@@ -67,17 +67,21 @@ namespace Ariadne {
                   const Numeric::Rational& t) const; 
 
       /*! \brief A model for the flow at time \a t with centre \a c, given that the flow remains in \a bb. */
-      virtual Function::AffineModel<R> affine_flow_model(const System::VectorField<R>& vf,
-                                                         const Geometry::Point<R>& c,
-                                                         const Numeric::Rational& t,
-                                                         const Geometry::Box<R>& bb) const;
+      virtual 
+      Function::AffineModel<R> 
+      affine_flow_model(const System::VectorField<R>& vf,
+                        const Geometry::Point<R>& c,
+                        const Numeric::Rational& t,
+                        const Geometry::Box<R>& bb) const;
      
       /*! \brief A model for the flow at time \a t with centre \a c, given that the flow remains in \a bb. */
-      virtual Function::TaylorModel<R> flow_model(const System::VectorField<R>& vf,
-                                                  const Geometry::Point<R>& c,
-                                                  const Numeric::Rational& t,
-                                                  const Geometry::Box<R>& bb) const;
-     
+      virtual 
+      Function::TaylorModel<R> 
+      taylor_flow_model(const System::VectorField<R>& vf,
+                        const Geometry::Point<R>& c,
+                        const Numeric::Rational& t,
+                        const Geometry::Box<R>& bb) const;
+      
      private:
       smoothness_type _temporal_order;
       smoothness_type _spacial_order;

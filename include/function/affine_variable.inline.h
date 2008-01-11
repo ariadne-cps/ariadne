@@ -407,6 +407,32 @@ Function::AffineVariable<X>::operator+=(const AffineVariable<X>& x)
   return *this;
 }
 
+template<class X> inline
+Function::AffineVariable<X>&
+Function::AffineVariable<X>::operator+=(const X& c) 
+{
+  this->_x+=c;
+  return *this;
+}
+
+template<class X> inline
+Function::AffineVariable<X>&
+Function::AffineVariable<X>::operator+=(const double& c) 
+{
+  this->_x+=c;
+  return *this;
+}
+
+template<class X> inline
+Function::AffineVariable<X>&
+Function::AffineVariable<X>::operator*=(const X& c) 
+{
+  this->_x*=c;
+  this->_dx*=c;
+  return *this;
+}
+
+
 template<class X> inline 
 Function::AffineVariable<X>
 Function::operator+(const AffineVariable<X>& x) 

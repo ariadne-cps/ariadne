@@ -58,6 +58,10 @@
 #include "output/logging.h"
 
 #include "function/taylor_series.code.h"
+#include "function/affine_variable.code.h"
+
+
+using namespace std;
 
 namespace Ariadne { 
 
@@ -73,7 +77,24 @@ class TaylorSeriesAffineVariable
   TaylorSeriesAffineVariable() : TaylorSeries< AffineVariable<X> >() { }
   TaylorSeriesAffineVariable(const TaylorSeries< AffineVariable<X> >& x)
     : TaylorSeries< AffineVariable<X> >(x) { }
+  static TaylorSeriesAffineVariable<X> constant(uint n, uint d, X v) {
+    TaylorSeries< AffineVariable<X> > x(d);
+    x[0]=AffineVariable<X>::constant(n,v);
+    for(uint j=1; j<=d; ++j) {
+      x[j]=AffineVariable<X>::constant(n,0.0); 
+    }
+    return x;
+  }
+  static TaylorSeriesAffineVariable<X> constant_variable(uint n, uint d, X v, uint i) {
+    TaylorSeries< AffineVariable<X> > x(d);
+    x[0]=AffineVariable<X>::variable(n,v,i);
+    for(uint j=1; j<=d; ++j) {
+      x[j]=AffineVariable<X>::constant(n,0.0); 
+    }
+    return x;
+  }
   static TaylorSeriesAffineVariable<X> variable(uint n, uint d, X v, uint i) {
+    ARIADNE_ASSERT(d>=1);
     TaylorSeries< AffineVariable<X> > x(d);
     x[0]=AffineVariable<X>::variable(n,v,i);
     x[1]=AffineVariable<X>::variable(n,1.0,i);
@@ -104,6 +125,46 @@ class TaylorSeriesTaylorVariable
   }
 };
 
+template<class R>
+AffineVariable<R> midpoint(const Function::AffineVariable< Numeric::Interval<R> >& iav)
+{
+  R v=midpoint(iav.value());
+  LinearAlgebra::Covector<R> cv=midpoint(iav.derivative());
+  return AffineVariable<R>(v,cv);
+}
+
+
+
+template<class X> 
+array< TaylorSeriesAffineVariable<X> >
+integrate(const TaylorDerivative<X>& vf, const Geometry::Point<X> x)
+{
+  dimension_type n=x.dimension();
+  smoothness_type d=vf.degree();
+  array< TaylorSeriesAffineVariable<X> > y(x.dimension());
+  for(size_type i=0; i!=n; ++i) {
+    //y[i]=TaylorSeriesAffineVariable<X>::variable(n,1,x[i],i);
+    y[i]=TaylorSeriesAffineVariable<X>::constant_variable(n,0,x[i],i);
+  }
+  cout << "y="<<y<<endl;
+
+  array< TaylorSeriesAffineVariable<X> > yp(n);
+  for(uint j=0; j<d; ++j) {
+    cout << "j="<<j<<"\ny=\n"<<y<<endl;
+    yp=compose(vf,y);
+    for(uint i=0; i!=n; ++i) {  
+      y[i]=antiderivative(yp[i],y[i][0]);
+    }
+  } 
+  return y;
+}
+
+
+
+
+
+
+
 
 } // namespace Function
 
@@ -111,7 +172,7 @@ class TaylorSeriesTaylorVariable
 
 template<class R> inline
 std::pair< Numeric::Rational, Geometry::Box<R> >
-Evaluation::Integrator<R>::flow_bounds(const System::VectorField<R>& vf, 
+Evaluation::IntegratorBase<R>::flow_bounds(const System::VectorField<R>& vf, 
                                              const Geometry::Box<R>& bx,
                                              const Numeric::Rational& t) const
 {
@@ -119,57 +180,77 @@ Evaluation::Integrator<R>::flow_bounds(const System::VectorField<R>& vf,
 }
 
 
+
 template<class R>
 Function::AffineModel<R>
-Evaluation::Integrator<R>::affine_flow_model(const System::VectorField<R>& vector_field, 
-                                             const Geometry::Point<R>& initial_point, 
-                                             const Numeric::Rational& step_size, 
-                                             const Geometry::Box<R>& bounding_box) const
+Evaluation::IntegratorBase<R>::affine_flow_model(const System::VectorField<R>& vector_field, 
+                                                 const Geometry::Point<R>& initial_point, 
+                                                 const Numeric::Rational& step_size, 
+                                                 const Geometry::Box<R>& bounding_box) const
 {
   using namespace Function;
+  typedef Numeric::Interval<R> I;
+
+  uint to=this->temporal_order();
   dimension_type n=initial_point.dimension();
-  smoothness_type d=this->temporal_order();
-  const array<R>& x=initial_point.data();
-  array< TaylorSeriesAffineVariable<I> > y(n);
+  I h=step_size;
+  
+  // Make dvf contain the vector field derivatives at the centre of the initial set,
+  // except for the highest-order term, which contains the derivatives over the entire set.
+  TaylorDerivative<I> dvf=vector_field.derivative(Geometry::Point<I>(bounding_box),to);
+  TaylorDerivative<I> cvf=vector_field.derivative(initial_point,to-1);
   for(uint i=0; i!=n; ++i) {
-    y[i]=TaylorSeriesAffineVariable<I>::variable(n,d,x[i],i);
+    dvf[i].assign(cvf[i]);
   }
-  std::cout << "y="<<y<<std::endl;
+ 
+  // Set up array of flow derivative values
+  // Each component is a constant in time and a variable in space.
+  array< TaylorSeriesAffineVariable<I> > y(n);
+  for(size_type i=0; i!=n; ++i) {
+    y[i]=TaylorSeriesAffineVariable<I>::constant_variable(n,0,initial_point[i],i);
+  }
+
+  // Compute the Taylor series of the state and first variation
   array< TaylorSeriesAffineVariable<I> > yp(n);
-  for(uint j=0; j<d; ++j) {
-    vector_field.compute(yp.begin(),y.begin());
+  for(uint j=0; j<to; ++j) {
+    yp=evaluate(dvf,y);
     for(uint i=0; i!=n; ++i) {  
       y[i]=antiderivative(yp[i],y[i][0]);
     }
-  }
+  } 
 
-  Geometry::Point<I> r(n);
-  I t=step_size;
+  //for(uint j=0; j<=to; ++j) { cout << "y["<<j<<"]=\n"; for(uint i=0; i!=n; ++i) { cout << " " << midpoint(y[i][j]) << endl; } }
+
+  // Compute the state and first variation at the final time
+  array< AffineVariable<I> > r(n);
+  for(uint i=0; i!=n; ++i) {
+    r[i]=y[i][0];
+  }
   I c=1;
-  for(uint j=0; j<=d; ++j) {
+  for(uint j=1; j<=to; ++j) {
+    c*=h/=j;
     for(uint i=0; i!=n; ++i) {
-      r[i]+=y[i][j].value()*c;
+      r[i] += y[i][j]*c;
     }
-    c*=t;
   }
-  std::cout << r << std::endl;
 
-  // Return function model
+  return AffineModel<R>(bounding_box,initial_point,r);
 }
 
 
 
 template<class R>
 Function::TaylorModel<R>
-Evaluation::Integrator<R>::flow_model(const System::VectorField<R>& vector_field, 
-                                      const Geometry::Point<R>& initial_point, 
-                                      const Numeric::Rational& step_size, 
-                                      const Geometry::Box<R>& bounding_box) const
+Evaluation::IntegratorBase<R>::taylor_flow_model(const System::VectorField<R>& vector_field, 
+                                                 const Geometry::Point<R>& initial_point, 
+                                                 const Numeric::Rational& step_size, 
+                                                 const Geometry::Box<R>& bounding_box) const
 {
   using namespace Function;
   dimension_type n=initial_point.dimension();
   smoothness_type ot=this->temporal_order();
   smoothness_type ox=this->spacial_order();
+  Numeric::Interval<R> h=step_size;
 
   const array<R>& x=initial_point.data();
   array< TaylorSeriesTaylorVariable<I> > y(n);
@@ -189,6 +270,7 @@ Evaluation::Integrator<R>::flow_model(const System::VectorField<R>& vector_field
   I t=step_size;
   I c=1;
   for(uint j=0; j<=ot; ++j) {
+    I hpj=pow(h,j);
     for(uint i=0; i!=n; ++i) {
       r[i]+=y[i][j].value()*c;
     }

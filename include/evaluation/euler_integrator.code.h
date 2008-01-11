@@ -89,7 +89,7 @@ template<class R>
 Geometry::Rectangle<R> 
 Evaluation::EulerIntegrator<R>::integration_step(const System::VectorField<R>& vector_field, 
                                                          const Geometry::Rectangle<R>& initial_set, 
-                                                         const Numeric::Interval<R>& step_size, 
+                                                         const Numeric::Rational& step_size, 
                                                          const Geometry::Box<R>& bounding_set) const
 {
   ARIADNE_LOG(6,"EulerIntegrator::integration_step(VectorField,Rectangle,Interval,Box) const\n");
@@ -104,14 +104,14 @@ template<class R>
 Geometry::Rectangle<R> 
 Evaluation::EulerIntegrator<R>::reachability_step(const System::VectorField<R>& vector_field, 
                                                           const Geometry::Rectangle<R>& initial_set, 
-                                                          const Numeric::Interval<R>& step_size, 
+                                                          const Numeric::Rational& step_size, 
                                                           const Geometry::Box<R>& bounding_set) const
 {
-  ARIADNE_LOG(6,"EulerIntegrator::reachability_step(VectorField,Rectangle,Numeric::Interval<R>) const\n");
+  ARIADNE_LOG(6,"EulerIntegrator::reachability_step(VectorField,Rectangle,Numeric::Rational) const\n");
   
-  ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set(),"EulerIntegrator::reachability_step(VectorField,Rectangle,Numeric::Interval<R>) const");
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set(),"EulerIntegrator::reachability_step(VectorField,Rectangle,Numeric::Rational) const");
   
-  return initial_set + I(0,step_size.upper()) * vector_field(bounding_set);
+  return initial_set + I(0,step_size) * vector_field(bounding_set);
 }
 
 

@@ -121,16 +121,40 @@ namespace Ariadne {
     template<class X> TaylorSeries<X> operator*(const TaylorSeries<X>& ts1, const TaylorSeries<X>& ts2);
     template<class X> TaylorSeries<X> operator/(const TaylorSeries<X>& ts1, const TaylorSeries<X>& ts2);
 
-    template<class X, class R> TaylorSeries<X> operator+(const TaylorSeries<X>& ts, const R& c);
-    template<class X, class R> TaylorSeries<X> operator-(const TaylorSeries<X>& ts, const R& c);
-    template<class X, class R> TaylorSeries<X> operator*(const TaylorSeries<X>& ts, const R& c);
-    template<class X, class R> TaylorSeries<X> operator/(const TaylorSeries<X>& ts, const R& c);
-    template<class X, class R> TaylorSeries<X>& operator/=(TaylorSeries<X>& ts, const R& c);
+    template<class X> TaylorSeries<X>& operator+=(TaylorSeries<X>& ts1, const TaylorSeries<X>& ts2);
 
-    template<class X, class R> TaylorSeries<X> operator+(const R& c, const TaylorSeries<X>& ts);
-    template<class X, class R> TaylorSeries<X> operator-(const R& c, const TaylorSeries<X>& ts);
-    template<class X, class R> TaylorSeries<X> operator*(const R& c, const TaylorSeries<X>& ts);
-    template<class X, class R> TaylorSeries<X> operator/(const R& c, const TaylorSeries<X>& ts);
+    template<class X> TaylorSeries<X> operator+(const TaylorSeries<X>& ts, const X& c);
+    template<class X> TaylorSeries<X> operator-(const TaylorSeries<X>& ts, const X& c);
+    template<class X> TaylorSeries<X> operator*(const TaylorSeries<X>& ts, const X& c);
+    template<class X> TaylorSeries<X> operator/(const TaylorSeries<X>& ts, const X& c);
+
+    template<class X> TaylorSeries<X> operator+(const X& c, const TaylorSeries<X>& ts);
+    template<class X> TaylorSeries<X> operator-(const X& c, const TaylorSeries<X>& ts);
+    template<class X> TaylorSeries<X> operator*(const X& c, const TaylorSeries<X>& ts);
+    template<class X> TaylorSeries<X> operator/(const X& c, const TaylorSeries<X>& ts);
+
+    template<class X> TaylorSeries<X> operator+(const TaylorSeries<X>& ts, const double& c);
+    template<class X> TaylorSeries<X> operator-(const TaylorSeries<X>& ts, const double& c);
+    template<class X> TaylorSeries<X> operator*(const TaylorSeries<X>& ts, const double& c);
+    template<class X> TaylorSeries<X> operator/(const TaylorSeries<X>& ts, const double& c);
+
+    template<class X> TaylorSeries<X> operator+(const double& c, const TaylorSeries<X>& ts);
+    template<class X> TaylorSeries<X> operator-(const double& c, const TaylorSeries<X>& ts);
+    template<class X> TaylorSeries<X> operator*(const double& c, const TaylorSeries<X>& ts);
+    template<class X> TaylorSeries<X> operator/(const double& c, const TaylorSeries<X>& ts);
+
+    template<class X> TaylorSeries<X>& operator+=(TaylorSeries<X>& ts, const X& c);
+    template<class X> TaylorSeries<X>& operator-=(TaylorSeries<X>& ts, const X& c);
+    template<class X> TaylorSeries<X>& operator*=(TaylorSeries<X>& ts, const X& c);
+    template<class X> TaylorSeries<X>& operator/=(TaylorSeries<X>& ts, const X& c);
+
+    template<class X> TaylorSeries<X>& operator+=(TaylorSeries<X>& ts, const double& c);
+    template<class X> TaylorSeries<X>& operator-=(TaylorSeries<X>& ts, const double& c);
+    template<class X> TaylorSeries<X>& operator*=(TaylorSeries<X>& ts, const double& c);
+    template<class X> TaylorSeries<X>& operator/=(TaylorSeries<X>& ts, const double& c);
+
+    template<class X, class R> TaylorSeries<X>& operator*=(TaylorSeries<X>& ts, const R& c);
+
 
     template<class X> std::ostream& operator<<(std::ostream& os, const TaylorSeries<X>& ts);
   }

@@ -40,6 +40,7 @@ namespace Ariadne {
   namespace Function {
     
     template<class R> class FunctionInterface;
+    template<class R> class AffineVariable;
   
     template<class R> class AffineModel;
     template<class R> AffineModel<R> operator+(const AffineModel<R>&);
@@ -48,6 +49,7 @@ namespace Ariadne {
     template<class R> AffineModel<R> operator-(const AffineModel<R>&, const AffineModel<R>&);
     template<class R> AffineModel<R> operator*(const AffineModel<R>&, const AffineModel<R>&);
     template<class R> AffineModel<R> operator/(const AffineModel<R>&, const AffineModel<R>&);
+    template<class R> AffineModel<R> translate(const AffineModel<R>&, const Geometry::Point<R>& c);
     template<class R> AffineModel<R> restrict(const AffineModel<R>&, const Geometry::Box<R>& bx);
     template<class R> AffineModel<R> reduce(const AffineModel<R>&, size_type);
     template<class R> AffineModel<R> compose(const AffineModel<R>&, const AffineModel<R>&);
@@ -76,6 +78,11 @@ namespace Ariadne {
                   const Geometry::Point<I>& v, 
                   const LinearAlgebra::Matrix<I>& j);
      
+      /*! \brief Constructor. */
+      AffineModel(const Geometry::Box<R>& d,
+                  const Geometry::Point<R>& c, 
+                  const array< AffineVariable<I> >& av);
+
       /*! \brief Constructor. */
       AffineModel(const Geometry::Box<R>& d,
                   const Geometry::Point<R>& c,

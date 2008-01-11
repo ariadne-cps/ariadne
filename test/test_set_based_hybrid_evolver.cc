@@ -65,7 +65,8 @@ namespace Ariadne { namespace Evaluation { extern int verbosity; } }
 template<class R>
 int test_set_based_hybrid_evolver() 
 {  
-  //set_hybrid_evolver_verbosity(4);
+  hybrid_evolver_verbosity = 0;
+  integrator_verbosity = 0;
 
   typedef Zonotope<R> BS;
 
@@ -110,6 +111,7 @@ int test_set_based_hybrid_evolver()
   parameters.set_grid_length(grid_length);
   parameters.set_maximum_step_size(maximum_step_size);
   parameters.set_lock_to_grid_time(lock_to_grid_time);
+  parameters.set_verbosity(0);
 
   StandardApplicator<R> applicator;
   ApplicatorInterface<BS>& applicator_interface=applicator;
@@ -200,6 +202,6 @@ int main(int nargs, const char* args[])
   set_integrator_verbosity(integrator_verbosity);
   test_set_based_hybrid_evolver<Flt>();
   cerr << "INCOMPLETE ";
-  return 0;
+  return ARIADNE_TEST_FAILURES;
 }
 

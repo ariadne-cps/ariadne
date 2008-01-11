@@ -113,6 +113,43 @@ Function::TaylorVariable<X>::variable(size_type a, smoothness_type d, const XX& 
 }
 
 
+template<class X, class XX> 
+XX
+Function::evaluate(const TaylorVariable<X>& y, const array<XX>& x)
+{
+  using namespace std;
+  ARIADNE_ASSERT(y.argument_size()==x.size());
+  //std::cerr << "y=" << y << std::endl;
+  //std::cerr << "x=" << x << std::endl;
+  size_type d=y.degree();
+  size_type ms=x.size();
+  assert(d>=1);
+
+  XX zero = x[0]; zero*=0;
+  XX one = zero; one+=1;
+
+  // Use inefficient brute-force approach with lots of storage...
+  array< array< XX > > val(ms, array< XX >(d+1));
+  for(uint j=0; j!=ms; ++j) {
+    val[j][0]=one;
+    val[j][1]=x[j];
+    for(uint k=2; k<=d; ++k) {
+      val[j][k]=val[j][k-1]*x[j];
+    }
+  }
+
+  XX r(zero);
+  for(MultiIndex j(ms); j.degree()<=d; ++j) {
+    X sf=Function::fac(j);
+    XX t=one;
+    for(uint k=0; k!=ms; ++k) {
+      t=t*val[k][j[k]];
+    }
+    t*=X(y[j]/sf);
+    r+=t;
+  }
+  return r;
+}
 
 
 
@@ -383,9 +420,35 @@ Function::operator/(const R& c, const TaylorVariable<X>& x)
   return c*rec(x);
 }
 
+
+
 template<class X,class R>  
 Function::TaylorVariable<X>&
-Function::operator/=(const TaylorVariable<X>& x, const R& c)
+Function::operator+=(TaylorVariable<X>& x, const R& c)
+{
+  x.value()+=c; 
+  return x;
+}
+
+template<class X,class R>  
+Function::TaylorVariable<X>&
+Function::operator-=(TaylorVariable<X>& x, const R& c)
+{
+  x.value()-=c; 
+  return x;
+}
+
+template<class X,class R>  
+Function::TaylorVariable<X>&
+Function::operator*=(TaylorVariable<X>& x, const R& c)
+{
+  reinterpret_cast< LinearAlgebra::Vector<X>& >(x.data())*=X(c);
+  return x;
+}
+
+template<class X,class R>  
+Function::TaylorVariable<X>&
+Function::operator/=(TaylorVariable<X>& x, const R& c)
 {
   reinterpret_cast< LinearAlgebra::Vector<X>& >(x.data())/=X(c);
   return x;

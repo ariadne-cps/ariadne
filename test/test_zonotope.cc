@@ -367,6 +367,6 @@ int main() {
   TestZonotope<Flt>().test();
   
   cerr << "INCOMPLETE ";
-  return 0;
+  return ARIADNE_TEST_FAILURES;
 }
 

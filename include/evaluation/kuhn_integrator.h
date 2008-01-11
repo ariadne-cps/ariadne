@@ -69,14 +69,14 @@ namespace Ariadne {
       virtual Geometry::Zonotope<R> 
       integration_step(const System::VectorField<R>& vf,
                        const Geometry::Zonotope<R>& s,
-                       const Numeric::Interval<R>& t,
+                       const Numeric::Rational& t,
                        const Geometry::Box<R>& bb) const;
 
       /*! \brief A C1 algorithm for integrating forward a zonotope for a time up to time \a step_size, assuming the set \a bb is a bounding box for the integration. */
       virtual Geometry::Zonotope<R> 
       reachability_step(const System::VectorField<R>& vf,
                         const Geometry::Zonotope<R>& s,
-                        const Numeric::Interval<R>& t,
+                        const Numeric::Rational& t,
                         const Geometry::Box<R>& bb) const;
 
       /*! \brief Write to an output stream. */

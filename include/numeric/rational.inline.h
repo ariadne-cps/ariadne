@@ -423,6 +423,12 @@ inline Rational::Rational(const X& x, Rnd) {
   mpq_init(this->_value); set_(*this,x); }
 
 
+inline Rational& operator+=(Rational& q, const int& x) {
+  add_(q,q,x); return q; }
+
+inline Rational& operator+=(Rational& q, const double& x) {
+  add_(q,q,x); return q; }
+
 
 inline Rational add_approx(const Rational& x, const Rational& y) {
   Rational r; add_(r,x,y); return r; }

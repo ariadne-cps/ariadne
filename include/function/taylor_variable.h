@@ -92,12 +92,8 @@ namespace Ariadne {
       /*! \brief The \a i<sup> th</sup> derivative \f$D^af=d^{|a|}f/dx_1^{a_1}\cdots dx_n^{a_n}\f$. */
       const X& operator[](const MultiIndex& a) const; 
 
-      /*! \brief Inplace addition. */
-      TaylorVariable<X>& operator+=(const TaylorVariable<X>& x);
-      /*! \brief Inplace multiplication. */
-      TaylorVariable<X>& operator*=(const X& x);
-      /*! \brief Inplace division. */
-      TaylorVariable<X>& operator/=(const X& x);
+      /*! \brief Assign all elements of degree less than the degree of \a x to those of \a x . */
+      TaylorVariable<X>& assign(const TaylorVariable<X>& x);
 #ifdef DOXYGEN
       //@{ 
       //! \name Friend operations
@@ -173,6 +169,8 @@ namespace Ariadne {
     };
 
 
+  template<class X, class R> R evaluate(const TaylorVariable<X>& y, const array<R>& x);
+
   template<class X> TaylorVariable<X> compose(const TaylorSeries<X>& y, const TaylorVariable<X>& x);
   template<class X> TaylorVariable<X> compose(const TaylorVariable<X>& y, const TaylorVariable<X>& x);
   template<class X> TaylorVariable<X> reduce(const TaylorVariable<X>& x);
@@ -215,7 +213,12 @@ namespace Ariadne {
   template<class X, class R> TaylorVariable<X> operator/(const TaylorVariable<X>& x, const R& c);
   template<class X, class R> TaylorVariable<X> operator/(const R& c, const TaylorVariable<X>& x);
 
-  template<class X, class R> TaylorVariable<X> operator/=(const TaylorVariable<X>& x, const R& c);
+  template<class X> TaylorVariable<X>& operator+=(TaylorVariable<X>& r, const TaylorVariable<X>& x);
+
+  template<class X, class R> TaylorVariable<X>& operator+=(TaylorVariable<X>& x, const R& c);
+  template<class X, class R> TaylorVariable<X>& operator-=(TaylorVariable<X>& x, const R& c);
+  template<class X, class R> TaylorVariable<X>& operator*=(TaylorVariable<X>& x, const R& c);
+  template<class X, class R> TaylorVariable<X>& operator/=(TaylorVariable<X>& x, const R& c);
 
   template<class X> std::ostream& operator<<(std::ostream& os, const TaylorVariable<X>& x);
 

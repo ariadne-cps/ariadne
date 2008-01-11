@@ -88,7 +88,8 @@ template<class R>
 void export_taylor_derivative()
 {
   typedef typename Numeric::traits<R>::arithmetic_type A;
-  typedef Vector<A> Vec;
+  typedef Vector<R> RVec;
+  typedef Vector<A> IVec;
   typedef TaylorVariable<A> TV;
   typedef TaylorDerivative<A> TD;
 
@@ -106,10 +107,16 @@ void export_taylor_derivative()
   taylor_derivative_class.def("__sub__", &Python::sub<TD,TD,TD>);
   taylor_derivative_class.def(self_ns::str(self));
   
+  def("variable",(TD(*)(const RVec&,smoothness_type))&TD::variable);
+  def("variable",(TD(*)(const IVec&,smoothness_type))&TD::variable);
+
+  def("evaluate",(IVec(*)(const TD&,const IVec&))&Function::evaluate);
+  def("evaluate",(TV(*)(const TV&,const TD&))&Function::evaluate);
+  def("evaluate",(TD(*)(const TD&,const TD&))&Function::evaluate);
   def("compose",(TV(*)(const TV&,const TD&))&Function::compose);
   def("compose",(TD(*)(const TD&,const TD&))&Function::compose);
-  def("inverse",(TD(*)(const TD&,const Vec&))&Function::inverse);
-  def("implicit",(TD(*)(const TD&,const Vec&))&Function::implicit);
+  def("inverse",(TD(*)(const TD&,const IVec&))&Function::inverse);
+  def("implicit",(TD(*)(const TD&,const IVec&))&Function::implicit);
 
 }
 
@@ -135,6 +142,12 @@ void export_taylor_derivative<Rational>()
   taylor_derivative_class.def("__sub__", &Python::sub<TD,TD,TD>);
   taylor_derivative_class.def(self_ns::str(self));
   
+  def("constant",(TD(*)(size_type,size_type,smoothness_type,const Vec&))&TD::constant);
+  def("variable",(TD(*)(size_type,size_type,smoothness_type,const Vec&))&TD::variable);
+  def("variable",(TD(*)(const Vec&,smoothness_type))&TD::variable);
+
+  def("evaluate",(TV(*)(const TV&,const TD&))&Function::evaluate);
+  def("evaluate",(TD(*)(const TD&,const TD&))&Function::evaluate);
   def("compose",(TV(*)(const TV&,const TD&))&Function::compose);
   def("compose",(TD(*)(const TD&,const TD&))&Function::compose);
   def("inverse",(TD(*)(const TD&,const Vec&))&Function::inverse);

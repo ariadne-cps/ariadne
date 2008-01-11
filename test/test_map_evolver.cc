@@ -150,5 +150,5 @@ test_map_evolver()
   eps << fill_colour(magenta) << *viability_kernel_ptr;
   eps.close();
 
-  return 0;
+  return ARIADNE_TEST_FAILURES;
 }

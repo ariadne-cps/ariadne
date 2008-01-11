@@ -204,7 +204,7 @@ template<class R>
 Point< Numeric::Interval<R> > 
 Evaluation::AffineIntegrator<R>::flow_step(const System::VectorField<R>& vf,
                                            const Point<I>& p,
-                                           const Numeric::Interval<R>& h,
+                                           const Numeric::Rational& h,
                                            const Box<R>& bb) const
 {
   const System::AffineVectorField<R>* avf=this->cast(&vf);
@@ -219,7 +219,7 @@ template<class R>
 LinearAlgebra::Matrix< Numeric::Interval<R> > 
 Evaluation::AffineIntegrator<R>::flow_step_jacobian(const System::VectorField<R>& vf,
                                                     const Point<I>& p,
-                                                    const Numeric::Interval<R>& h,
+                                                    const Numeric::Rational& h,
                                                     const Box<R>& bb) const
 {
   const System::AffineVectorField<R>* avf=this->cast(&vf);
@@ -235,7 +235,7 @@ template<class R>
 Zonotope<R>
 Evaluation::AffineIntegrator<R>::integration_step(const System::AffineVectorField<R>& affine_vector_field, 
                                                   const Geometry::Zonotope<R>& initial_set, 
-                                                  const Numeric::Interval<R>& step_size) const
+                                                  const Numeric::Rational& step_size) const
 {
   ARIADNE_LOG(6,"AffineIntegrator::integration_step(AffineVectorField,Zonotope<Interval>,Time) const\n");
   
@@ -281,7 +281,7 @@ template<class R>
 Zonotope<R> 
 Evaluation::AffineIntegrator<R>::reachability_step(const System::AffineVectorField<R>& vector_field, 
                                                    const Zonotope<R>& initial_set, 
-                                                   const Numeric::Interval<R>& step_size) const
+                                                   const Numeric::Rational& step_size) const
 {
   using namespace Numeric;
   using namespace LinearAlgebra;
@@ -296,9 +296,9 @@ Evaluation::AffineIntegrator<R>::reachability_step(const System::AffineVectorFie
   Zonotope<R> ez=initial_set;
   const size_type n=vector_field.dimension();
   const Matrix<R> id=Matrix<R>::identity(n);
-  const I hc=step_size/2;
+  const Rational hc=step_size/2;
   // FIXME: There should be no need to convert to time_type / Rational
-  Interval<R> hh(step_size/2);
+  Rational hh(step_size/2);
   
   const Matrix<I>& A=avf.A();
   const Vector<I>& b=avf.b();
@@ -309,15 +309,16 @@ Evaluation::AffineIntegrator<R>::reachability_step(const System::AffineVectorFie
   /* Use centre c, generators G and t*(Ac+b), and error (exp(At)-I)Ge+inv(A)(exp(At)-I-At)(Ac+b)
    * 
    */
+  const I ihh=hh;
   const Point<I>& c=ez.centre();
   const Matrix<R>& G=ez.generators();
   Vector<I> Acpb=A*c.position_vector()+b;
   //Acpb=Acpb+b;
   R nrmA=norm(A).upper();
-  R nrmAh=I(nrmA*hh).upper();
-  R err=I(gexp_up(nrmAh,1)*nrmA*hh*norm(G)+gexp_up(nrmAh,2)*hh*hh*nrmA*norm(Acpb).upper()).upper();
+  R nrmAh=I(nrmA*ihh).upper();
+  R err=I(gexp_up(nrmAh,1)*nrmA*ihh*norm(G)+gexp_up(nrmAh,2)*ihh*ihh*nrmA*norm(Acpb).upper()).upper();
   Vector<I> errv=Vector<I>(avf.dimension(),Interval<R>(-err,err));
-  Vector<I> itg=hh*Acpb;
+  Vector<I> itg=ihh*Acpb;
   Vector<R> tg=midpoint(itg);
   Point<I> nc=c+errv+(itg-tg);
   return Zonotope<R>(nc,concatenate_columns(G,tg));
@@ -329,7 +330,7 @@ template<class R>
 Zonotope<R> 
 Evaluation::AffineIntegrator<R>::integration_step(const System::VectorField<R>& vector_field, 
                                                    const Zonotope<R>& initial_set, 
-                                                   const Numeric::Interval<R>& step_size, 
+                                                   const Numeric::Rational& step_size, 
                                                    const Box<R>& bounding_set) const
 {
   const System::AffineVectorField<R>* affine_vector_field=this->cast(&vector_field);
@@ -343,7 +344,7 @@ template<class R>
 Zonotope<R> 
 Evaluation::AffineIntegrator<R>::reachability_step(const System::VectorField<R>& vector_field, 
                                                    const Zonotope<R>& initial_set, 
-                                                   const Numeric::Interval<R>& step_size, 
+                                                   const Numeric::Rational& step_size, 
                                                    const Box<R>& bounding_set) const
 {
   const System::AffineVectorField<R>* affine_vector_field=this->cast(&vector_field);
@@ -362,12 +363,12 @@ template<class R>
 Point< Numeric::Interval<R> > 
 Evaluation::AffineIntegrator<R>::flow_step(const System::AffineVectorField<R>& avf,
                                            const Point<I>& p,
-                                           const Numeric::Interval<R>& h) const
+                                           const Numeric::Rational& h) const
 {
   ARIADNE_LOG(6,"AffineIntegrator::flow_step(AffineVectorField,Point<Interval>,Time) const\n");
   const LinearAlgebra::Matrix<I>& A=avf.A();
   const LinearAlgebra::Vector<I>& b=avf.b();
-  return Point<I>(gexp(A,h,0)*p.position_vector() + gexp(A,h,1)*b);
+  return Point<I>(gexp(A,I(h),0)*p.position_vector() + gexp(A,I(h),1)*b);
 }
      
  
@@ -375,11 +376,11 @@ template<class R>
 LinearAlgebra::Matrix< Numeric::Interval<R> > 
 Evaluation::AffineIntegrator<R>::flow_step_jacobian(const System::AffineVectorField<R>& avf,
                                                      const Point<I>& p,
-                                                     const Numeric::Interval<R>& h) const
+                                                     const Numeric::Rational& h) const
 {
   ARIADNE_LOG(6,"AffineIntegrator::flow_step_jacobian(AffineVectorField,Point<Interval>,Time) const\n");
   const LinearAlgebra::Matrix<I>& A=avf.A();
-  return gexp(A,h,0);
+  return gexp(A,I(h),0);
 }
 
 

@@ -69,9 +69,9 @@ class IntegratorWrapper
   IntegratorWrapper<BS>* clone() const { return this->get_override("clone")(); }
   std::pair< T,Box<R> > flow_bounds(const VectorField<R>&, const Box<R>&, const T&) const {
     return this->get_override("flow_bounds")(); }
-  BS integration_step(const VectorField<R>&, const BS&, const I&, const Box<R>&) const {
+  BS integration_step(const VectorField<R>&, const BS&, const T&, const Box<R>&) const {
     return this->get_override("integration_step")(); }
-  BS reachability_step(const VectorField<R>&, const BS&, const I&, const Box<R>&) const {
+  BS reachability_step(const VectorField<R>&, const BS&, const T&, const Box<R>&) const {
     return this->get_override("reachability_step")(); }
   std::ostream& write(std::ostream&) const {
     return this->get_override("write")(); }
@@ -99,8 +99,8 @@ void export_integrator()
   class_< AffineIntegrator<R>, bases< IntegratorInterface< Zonotope<R> > > >
     affine_integrator_class("AffineIntegrator",init<>());
   affine_integrator_class.def("flow_bounds",&flow_bounds<AffineIntegrator<R>,R>);
-  affine_integrator_class.def("integration_step",(Zonotope<R>(AffineIntegrator<R>::*)(const VectorField<R>&,const Zonotope<R>&,const Interval<R>&,const Box<R>&)const) &AffineIntegrator<R>::integration_step);
-  affine_integrator_class.def("reachability_step",(Zonotope<R>(AffineIntegrator<R>::*)(const VectorField<R>&,const Zonotope<R>&,const Interval<R>&,const Box<R>&)const) &AffineIntegrator<R>::reachability_step);
+  affine_integrator_class.def("integration_step",(Zonotope<R>(AffineIntegrator<R>::*)(const VectorField<R>&,const Zonotope<R>&,const Rational&,const Box<R>&)const) &AffineIntegrator<R>::integration_step);
+  affine_integrator_class.def("reachability_step",(Zonotope<R>(AffineIntegrator<R>::*)(const VectorField<R>&,const Zonotope<R>&,const Rational&,const Box<R>&)const) &AffineIntegrator<R>::reachability_step);
 
   class_< EulerIntegrator<R>, bases<IntegratorInterface< Box<R> > > >("EulerIntegrator",init<>());
 }

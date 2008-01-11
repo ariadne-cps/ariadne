@@ -203,7 +203,8 @@ Function::mul(const TaylorSeries<X>& x, const TaylorSeries<X>& y)
 {
   TaylorSeries<X> result(std::min(x.degree(),y.degree()));
   for(size_type n=0; n<=result.degree(); ++n) {
-    for(size_type i=0; i<=n; ++i) {
+    result[n]=x[0]*y[n];
+    for(size_type i=1; i<=n; ++i) {
       result[n] += Numeric::bin<int>(n,i)*x[i]*y[n-i];
     }
   }
@@ -330,70 +331,156 @@ Function::operator/(const TaylorSeries<X>& x, const TaylorSeries<X>& y)
   return div(x,y);
 }
 
-template<class X, class R> inline
+
+template<class X> inline
+Function::TaylorSeries<X>& 
+Function::operator+=(TaylorSeries<X>& x, const TaylorSeries<X>& y)
+{
+  for(size_type n=0; n<=std::min(x.degree(),y.degree()); ++n) {
+    x[n] += y[n];
+  }
+  return x;
+}
+
+
+
+template<class X> inline
 Function::TaylorSeries<X> 
-Function::operator+(const TaylorSeries<X>& x, const R& c)
+Function::operator+(const TaylorSeries<X>& x, const X& c)
 {
   return add(x,TaylorSeries<X>::constant(x.degree(),c));
 }
 
-template<class X, class R> inline
+template<class X> inline
 Function::TaylorSeries<X> 
-Function::operator+(const R& c, const TaylorSeries<X>& x)
+Function::operator+(const X& c, const TaylorSeries<X>& x)
 {
   return add(TaylorSeries<X>::constant(x.degree(),c),x);
 }
 
-template<class X, class R> inline
+template<class X> inline
 Function::TaylorSeries<X> 
-Function::operator-(const TaylorSeries<X>& x, const R& c)
+Function::operator-(const TaylorSeries<X>& x, const X& c)
 {
   return sub(x,TaylorSeries<X>::constant(x.degree(),c));
 }
 
-template<class X, class R> inline
+template<class X> inline
 Function::TaylorSeries<X> 
-Function::operator-(const R& c, const TaylorSeries<X>& x)
+Function::operator-(const X& c, const TaylorSeries<X>& x)
 {
   return sub(TaylorSeries<X>::constant(x.degree(),c),x);
 }
 
-template<class X, class R> inline
+template<class X> inline
 Function::TaylorSeries<X> 
-Function::operator*(const TaylorSeries<X>& x, const R& c)
+Function::operator*(const TaylorSeries<X>& x, const X& c)
 {
   return mul(x,TaylorSeries<X>::constant(x.degree(),c));
 }
 
-template<class X, class R> inline
+template<class X> inline
 Function::TaylorSeries<X> 
-Function::operator*(const R& c, const TaylorSeries<X>& x)
+Function::operator*(const X& c, const TaylorSeries<X>& x)
 {
   return mul(TaylorSeries<X>::constant(x.degree(),c),x);
 }
 
-template<class X, class R> inline
+template<class X> inline
 Function::TaylorSeries<X> 
-Function::operator/(const TaylorSeries<X>& x, const R& c)
+Function::operator/(const TaylorSeries<X>& x, const X& c)
 {
   return div(x,TaylorSeries<X>::constant(x.degree(),c));
 }
 
-template<class X, class R> inline
+template<class X> inline
 Function::TaylorSeries<X> 
-Function::operator/(const R& c, const TaylorSeries<X>& x)
+Function::operator/(const X& c, const TaylorSeries<X>& x)
 {
   return div(TaylorSeries<X>::constant(x.degree(),c),x);
 }
 
-template<class X, class R>  
-Function::TaylorSeries<X>&
-Function::operator/=(TaylorSeries<X>& x, const R& c)
+template<class X> inline
+Function::TaylorSeries<X> 
+Function::operator/(const double& c, const TaylorSeries<X>& x)
 {
-  reinterpret_cast< LinearAlgebra::Vector<X>& >(x.data())/=X(c);
+  return X(c)/x;
+}
+
+template<class X>  
+Function::TaylorSeries<X>&
+Function::operator+=(TaylorSeries<X>& x, const X& c)
+{
+  x[0]+=c;
   return x;
 }
 
+template<class X>  
+Function::TaylorSeries<X>&
+Function::operator-=(TaylorSeries<X>& x, const X& c)
+{
+  x[0]-=c;
+  return x;
+}
+
+template<class X>  
+Function::TaylorSeries<X>&
+Function::operator*=(TaylorSeries<X>& x, const X& c)
+{
+  reinterpret_cast< LinearAlgebra::Vector<X>& >(x.data())*=c;
+  return x;
+}
+
+template<class X>  
+Function::TaylorSeries<X>&
+Function::operator/=(TaylorSeries<X>& x, const X& c)
+{
+  reinterpret_cast< LinearAlgebra::Vector<X>& >(x.data())/=c;
+  return x;
+}
+
+
+template<class X>  
+Function::TaylorSeries<X>&
+Function::operator+=(TaylorSeries<X>& x, const double& c)
+{
+  X& v=x[0];
+  v+=c;
+  return x;
+}
+
+template<class X>  
+Function::TaylorSeries<X>&
+Function::operator-=(TaylorSeries<X>& x, const double& c)
+{
+  x[0]-=c;
+  return x;
+}
+
+template<class X>  
+Function::TaylorSeries<X>&
+Function::operator*=(TaylorSeries<X>& x, const double& c)
+{
+  reinterpret_cast< LinearAlgebra::Vector<X>& >(x.data())*=c;
+  return x;
+}
+
+template<class X>  
+Function::TaylorSeries<X>&
+Function::operator/=(TaylorSeries<X>& x, const double& c)
+{
+  reinterpret_cast< LinearAlgebra::Vector<X>& >(x.data())/=c;
+  return x;
+}
+
+
+template<class X, class R>  
+Function::TaylorSeries<X>&
+Function::operator*=(TaylorSeries<X>& x, const R& c)
+{
+  reinterpret_cast< LinearAlgebra::Vector<X>& >(x.data())*=c;
+  return x;
+}
 
 
 

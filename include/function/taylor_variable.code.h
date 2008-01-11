@@ -165,35 +165,34 @@ Function::mul(const TaylorVariable<X>& x, const TaylorVariable<X>& y)
 
 template<class X> 
 Function::TaylorVariable<X>&
-Function::TaylorVariable<X>::operator+=(const TaylorVariable<X>& x)
+Function::TaylorVariable<X>::assign(const TaylorVariable<X>& x)
 {
   ARIADNE_ASSERT(this->argument_size()==x.argument_size());
-  ARIADNE_ASSERT(this->degree()==x.degree());
-  for(uint i=0; i!=this->_data.size(); ++i) {
-    this->_data[i]+=x._data[i];
+  ARIADNE_ASSERT(this->degree()>=x.degree());
+  for(uint i=0; i!=x.data().size(); ++i) {
+    this->_data[i]=x.data()[i]; 
   }
-  //reinterpret_cast<LinearAlgebra::Vector<X>&>(this->_data)
+  return *this;
+}
+
+
+template<class X> 
+Function::TaylorVariable<X>&
+Function::operator+=(TaylorVariable<X>& r, const TaylorVariable<X>& x)
+{
+  ARIADNE_ASSERT(r.argument_size()==x.argument_size());
+  ARIADNE_ASSERT(r.degree()==x.degree());
+  for(uint i=0; i!=r.data().size(); ++i) {
+    r.data()[i]+=x.data()[i];
+  }
+  //reinterpret_cast<LinearAlgebra::Vector<X>&>(r._data)
   //  += reinterpret_cast<LinearAlgebra::Vector<X>const&>(x._data);
-  return *this;
+  return r;
 }
 
-template<class X> 
-Function::TaylorVariable<X>&
-Function::TaylorVariable<X>::operator*=(const X& x)
-{
-  LinearAlgebra::Vector<X>& v=reinterpret_cast<LinearAlgebra::Vector<X>&>(this->_data);
-  v *= x;
-  return *this;
-}
 
-template<class X> 
-Function::TaylorVariable<X>&
-Function::TaylorVariable<X>::operator/=(const X& x)
-{
-  LinearAlgebra::Vector<X>& v=reinterpret_cast<LinearAlgebra::Vector<X>&>(this->_data);
-  v /= x;
-  return *this;
-}
+
+
 
 
 
@@ -307,10 +306,14 @@ template<class X>
 void
 Function::TaylorVariable<X>::instantiate() 
 {
+  const int* n=0;
+  X* x=0;
+  LinearAlgebra::Vector<X>* v=0;
   TaylorSeries<X>* ts=0;
   TaylorVariable<X>* tv=0;
   std::ostream* os = 0;
 
+  evaluate(*tv,v->data());
   mul(*tv,*tv);
   compose(*ts,*tv);
   derivative(*tv,0u);
@@ -320,8 +323,16 @@ Function::TaylorVariable<X>::instantiate()
   *tv - *tv;
   *tv / *tv;
   *tv * *tv;
+
   
-  operator<<(*os,*tv);
+  Function::operator+=(*tv,*tv);
+
+  Function::operator+=(*tv,*n);
+  Function::operator*=(*tv,*n);
+  Function::operator+=(*tv,*x);
+  Function::operator*=(*tv,*x);
+  
+  Function::operator<<(*os,*tv);
 }
 
 

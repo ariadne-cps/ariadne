@@ -61,14 +61,14 @@ namespace Ariadne {
       virtual Geometry::Rectangle<R> 
       integration_step(const System::VectorField<R>&,
                        const Geometry::Rectangle<R>&,
-                       const Numeric::Interval<R>&,
+                       const Numeric::Rational&,
                        const Geometry::Box<R>&) const;
 
       /*! \brief A C0 algorithm for integrating forward a rectangle up to a certain time. */
       virtual Geometry::Rectangle<R> 
       reachability_step(const System::VectorField<R>&,
                         const Geometry::Rectangle<R>&,
-                        const Numeric::Interval<R>&,
+                        const Numeric::Rational&,
                         const Geometry::Box<R>&) const;
 
       /*! \brief Write to an output stream. */

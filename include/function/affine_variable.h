@@ -137,8 +137,12 @@ namespace Ariadne {
 
       //@{
       //! \name Inplace arithmetic operations
+      //! \brief Inplace addition.
       AffineVariable<X>& operator+=(const AffineVariable<X>&);
-      //! \name Inplace arithmetic operations
+      //! \brief Inplace addition of a constant.
+      AffineVariable<X>& operator+=(const X&);
+      AffineVariable<X>& operator+=(const double&);
+      //! \name Addition multiplication by a constant.
       AffineVariable<X>& operator*=(const X&);
 
  #ifdef DOXYGEN

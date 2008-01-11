@@ -442,7 +442,6 @@ template<class R>
 Geometry::GridCellListSet<R>
 Geometry::outer_approximation(const SetInterface<R>& set, const Grid<R>& g) 
 {
-  verbosity=4;
   ARIADNE_LOG(4,"GridCellListSet outer_approximation(SetInterface, Grid)\n");
   GridCellListSet<R> result(g);
   ARIADNE_CHECK_EQUAL_DIMENSIONS(set,g,"outer_approximation(SetInterface<R>,Grid<R>)");

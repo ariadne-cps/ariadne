@@ -216,5 +216,5 @@ test_vector_field_evolver()
   eps.close();
   
 
-  return 0;
+  return ARIADNE_TEST_FAILURES;
 }

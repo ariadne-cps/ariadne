@@ -82,6 +82,8 @@ Function::div(AffineVariable<X>& rv, const AffineVariable<X>& av1, const AffineV
 }
 
 
+
+
 template<class X> inline
 void
 Function::compose(AffineVariable<X>& rv, const AffineVariable<X>& av1, const AffineVariable<X>& av2) 
@@ -120,7 +122,12 @@ template<class X>
 std::ostream& 
 Function::operator<<(std::ostream& os, const AffineVariable<X>& av)
 {
-  return os << "AffineVariable( a0=" << av._x << ", a1=" << av._dx << ")";
+  os << "[" << av._x;
+  for(uint i=0; i!=av._dx.size(); ++i) {
+    os << (i==0?";":",") << av._dx[i]; 
+  }
+  return os << "]";
+  //return os << "AffineVariable( a0=" << av._x << ", a1=" << av._dx << ")";
 }
 
 

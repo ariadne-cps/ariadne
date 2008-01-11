@@ -33,7 +33,7 @@ void
 compute_product(Function::TaylorSeries<X>& z, const Function::TaylorSeries<X>& y, const Function::TaylorSeries<X>& x)
 {
   for(size_type n=0; n<=z.degree(); ++n) {
-    z[n]=0;
+    z[n]*=0;
     for(size_type i=0; i<=n; ++i) {
       z[n] += Numeric::bin<int>(n,i)*x[i]*y[n-i];
     }

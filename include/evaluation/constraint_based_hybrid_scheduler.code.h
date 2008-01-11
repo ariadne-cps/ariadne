@@ -208,7 +208,6 @@ Evaluation::ConstraintBasedHybridScheduler<R>::flow_bounds(const mode_type& mode
                                                            const timed_set_type& initial_set,
                                                            time_type& maximum_step_size) const
 {
-  verbosity=9;
   ARIADNE_LOG(8,"ConstraintBasedHybridScheduler::flow_bounds(DiscreteMode, TimedSet, Time)");
   ARIADNE_LOG(9,"  maximum_step_size="<<maximum_step_size<<", initial_set="<<initial_set);
   Box<R> bounding_set=this->_bounder->flow_bounds(mode.dynamic(),initial_set.bounding_box(),maximum_step_size);

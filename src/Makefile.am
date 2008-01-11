@@ -102,7 +102,6 @@ EVALUATION_SRC = \
 	evaluation/lohner_integrator.cc \
 	evaluation/kuhn_integrator.cc \
 	evaluation/bounder.cc \
-	evaluation/detector.cc \
 	evaluation/flower.cc \
 	evaluation/map_evolver.cc \
 	evaluation/model_checker.cc \

@@ -36,6 +36,7 @@
 
 #include "lohner_integrator.h"
 
+#include "base/stlio.h"
 #include "base/array.h"
 #include "base/exceptions.h"
 #include "numeric/arithmetic.h"
@@ -51,6 +52,7 @@
 
 #include "system/vector_field.h"
 
+#include "evaluation/integrator.h"
 #include "evaluation/standard_integrator.h"
 
 #include "output/logging.h"
@@ -85,12 +87,13 @@ template<class R>
 Evaluation::LohnerIntegrator<R>*
 Evaluation::LohnerIntegrator<R>::clone() const
 {
-  return new LohnerIntegrator<R>();
+  return new LohnerIntegrator<R>(*this);
 }
 
 
 template<class R>
-Evaluation::LohnerIntegrator<R>::LohnerIntegrator()
+Evaluation::LohnerIntegrator<R>::LohnerIntegrator(smoothness_type temporal_order)
+  : _integrator(new IntegratorBase<R>(temporal_order, 1u))
 {
 }
 
@@ -102,91 +105,32 @@ Evaluation::LohnerIntegrator<R>::flow_bounds(const System::VectorField<R>& vf,
                                              const Geometry::Box<R>& bx,
                                              const Numeric::Rational& t) const
 {
-  return Evaluation::standard_flow_bounds(vf,bx,t);
+  return this->_integrator->flow_bounds(vf,bx,t);
 }
-
-
-template<class R>
-Geometry::Point<typename Evaluation::LohnerIntegrator<R>::I>
-Evaluation::LohnerIntegrator<R>::flow_step(const System::VectorField<R>& vector_field, 
-                                           const Geometry::Point<I>& initial_point, 
-                                           const Numeric::Interval<R>& step_size, 
-                                           const Geometry::Box<R>& bounding_box) const
-{
-  // Use second order formula \f$ \Phi(t,p) = p + tf(p) + t^2/2 Df(B)f(B) \f$
-  const System::VectorField<R>& vf=vector_field;
-  const Geometry::Point<I>& p=initial_point;
-  Geometry::Point<I> b=bounding_box;
-  I h=step_size;
-
-  
-  return p + h * ( vf(p) + (h/2) * ( vf.jacobian(b) * vf(b) ) );
-}
-
-template<class R>
-LinearAlgebra::Matrix<typename Evaluation::LohnerIntegrator<R>::I>
-Evaluation::LohnerIntegrator<R>::flow_step_jacobian(const System::VectorField<R>& vector_field, 
-                                                      const Geometry::Point<I>& initial_point, 
-                                                      const Numeric::Interval<R>& step_size, 
-                                                      const Geometry::Box<R>& bounding_box) const
-{
-  // Use first order formula \f$ D\Phi(t,p) = I + t Df(B) W \f$ where W is a bound for D\Phi([0,h],p)
-  // Use ||W-I|| < e^{Lh}-1, where L is the  norm of Df
-  const dimension_type d=vector_field.dimension();
-  const System::VectorField<R>& vf=vector_field;
-  //const Geometry::Point<I>& pr=initial_point;
-  Geometry::Point<I> b=bounding_box;
-  I h=step_size;
-
-  LinearAlgebra::Matrix<I> Id = LinearAlgebra::Matrix<I>::identity(d);
-
-  LinearAlgebra::Matrix<I> Df = vf.jacobian(b);
-  R l = LinearAlgebra::norm(Df).upper();
-  I e = Numeric::sub_up(Numeric::exp_up(mul_up(h.upper(),l)),R(1))*I(-1,1);
-
-  LinearAlgebra::Matrix<I> W = LinearAlgebra::Matrix<I>::identity(d)+e*LinearAlgebra::Matrix<I>::one(d,d);
-
-  ARIADNE_LOG(7,"Df="<<Df<<"\nW="<<W<<"\n");
-
-  // Perform a couple of steps
-  ARIADNE_LOG(7,"  W0="<<W<<"\n");
-  W=Id + I(0,h.upper()) * (Df * W);
-  ARIADNE_LOG(7,"  W1="<<W<<"\n");
-  W=Id + h * (Df * W);
-  ARIADNE_LOG(7,"  DPhi="<<W<<"\n");
-  return W;
-}
-
-
-
 
 
 template<class R>
 Geometry::Zonotope<R>
 Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorField<R>& vector_field, 
-                                                    const Geometry::Zonotope<R>& initial_set, 
-                                                    const Numeric::Interval<R>& step_size, 
-                                                    const Geometry::Box<R>& bounding_box) const
+                                                  const Geometry::Zonotope<R>& initial_set, 
+                                                  const Numeric::Rational& step_size, 
+                                                  const Geometry::Box<R>& bounding_box) const
 {
   ARIADNE_LOG(2,"LohnerIntegrator::integration_step(VectorField,Zonotope,Time,Box)\n");
   using namespace Numeric;
   using namespace LinearAlgebra;
+  using namespace Function;
   using namespace Geometry;
   using namespace System;
   
-  const Zonotope<R>& z=initial_set;
-  const Point<R>& c=z.centre();
-
-  const VectorField<R>& vf=vector_field;
-  const Box<R>& bb=bounding_box;
-  const Interval<R>& h=step_size;
-  
-  Point<I> phic=flow_step(vf,z.centre(),h,bb);
-  Matrix<I> Dphi=flow_step_jacobian(vf,z.bounding_box(),h,bb);
-
-  Function::AffineModel<R> model(z.bounding_box(),z.centre(),phic,Dphi);
-  
-  return orthogonal_over_approximation(Geometry::apply(model,z));
+  ARIADNE_LOG(5,"LohnerIntegrator::integration_step(VectorField,Zonotope,Time,Box)\n");
+  ARIADNE_LOG(6,"bounding_box="<<bounding_box<<"\n");
+  ARIADNE_LOG(6,"initial_set="<<initial_set<<"\n");
+  AffineModel<R> flow_model=this->_integrator->affine_flow_model(vector_field,initial_set.centre(),step_size,bounding_box);
+  ARIADNE_LOG(6,"flow_model="<<flow_model<<"\n");
+  Zonotope<R> flow_set=Geometry::apply(flow_model,initial_set);
+  ARIADNE_LOG(6,"flow_set="<<flow_set<<"\n");
+  return Geometry::orthogonal_over_approximation(flow_set);
 }
 
 
@@ -196,44 +140,26 @@ template<class R>
 Geometry::Zonotope<R> 
 Evaluation::LohnerIntegrator<R>::reachability_step(const System::VectorField<R>& vector_field, 
                                                    const Geometry::Zonotope<R>& initial_set,
-                                                   const Numeric::Interval<R>& step_size,
+                                                   const Numeric::Rational& step_size,
                                                    const Geometry::Box<R>& bounding_box) const
 {
   using namespace Numeric;
   using namespace LinearAlgebra;
+  using namespace Function;
   using namespace Geometry;
   using namespace System;
   
   ARIADNE_LOG(6,"LohnerIntegrator::reachability_step(VectorField,Zonotope<Interval>,Interval,Box) const\n");
-  
-  ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set,"LohnerIntegrator::reachability_step(VectorField,Zonotope<Interval>,Interval,Box)");
-  
-  const VectorField<R>& vf(vector_field);
-  const Zonotope<R>& z=initial_set;
-  const Box<R>& bb=bounding_box;
-  const Interval<R>& h=step_size;
-  
-  const dimension_type d=vf.dimension();
-  const Matrix<I> id=Matrix<I>::identity(d);
+  Rational half_step_size=step_size/2;
 
-  Point<I> phic=this->flow_step(vf,z.centre(),h/2,bb);
-  Matrix<I> Dphi=this->flow_step_jacobian(vf,z.bounding_box(),h/2,bb);
-  Matrix<I> gen=Dphi*z.generators();
-  Vector<I> hhf=(h/2)*vf(bb);
-  Vector<I> err=Dphi*(I(-1,1)*z.error());
+  AffineModel<R> flow_model=this->_integrator->affine_flow_model(vector_field,initial_set.centre(),half_step_size,bounding_box);
+  Point<I> phic=flow_model.value();
+  Matrix<I> Dphi=flow_model.jacobian();
+  Matrix<I> gen=Dphi*initial_set.generators();
+  Vector<I> hhf=I(half_step_size)*vector_field(bounding_box);
+  Vector<I> err=Dphi*(I(-1,1)*initial_set.error());
 
   Zonotope<R> result(phic+err,concatenate_columns(gen,hhf));
-  
-  
-  ARIADNE_LOG(7,"h="<<h.midpoint()<<"\n");
-  ARIADNE_LOG(7,"B="<<bb<<"\n");
-    
-  ARIADNE_LOG(7,"c="<< z.centre() <<"\n");
-  ARIADNE_LOG(7,"Phi(c,h/2)="<<phic<<"\n");
-  ARIADNE_LOG(7,"DPhi(c,h/2)="<<Dphi<<"\n");
-  ARIADNE_LOG(7,"(h/2)f(B)="<<hhf<<"\n");
-    
-  ARIADNE_LOG(7,"z="<<result);
 
   return result;
 }
@@ -244,7 +170,7 @@ template<class R>
 std::ostream&
 Evaluation::LohnerIntegrator<R>::write(std::ostream& os) const
 {
-  return os << "LohnerIntegrator( )";
+  return os << "LohnerIntegrator( temporal_order=" << this->_integrator->temporal_order() <<" )";
 }
 
 

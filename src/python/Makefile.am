@@ -97,7 +97,6 @@ ARIADNE_SRC = ariadne_module.cc \
 	export_applicator.cc \
 	export_integrator.cc \
 	export_approximator.cc \
-	export_detector.cc \
 	export_map_evolver.cc \
 	export_vector_field_evolver.cc \
 	export_set_based_hybrid_evolver.cc \

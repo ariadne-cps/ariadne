@@ -180,7 +180,6 @@ Evaluation::SetBasedHybridEvolver<BS>::_saltation_map(const VF& vf1,
   // Compute activation times up to the given time and apply the saltation map 
   Q h1=_initial_activation_time(vf1,inv,bs,maxt,bb,sem);
   Q h2=_final_activation_time(vf1,inv,bs,maxt,bb,sem);
-  std::cerr << "    h1="<<h1.get_d()<<", h2="<<h2.get_d()<<"\n";
   return _saltation_map(vf1,vf2,rm,inv,bs,h1,h2,bb,sem);
 }
 
@@ -228,7 +227,7 @@ Evaluation::SetBasedHybridEvolver<BS>::_step(HBSL& evolve,
                                              const Q& time,
                                              const Semantics semantics) const
 {
-  ARIADNE_LOG(6,"\nBasedHybridEvolver<BS>::_step\n");
+  ARIADNE_LOG(6,"\nSetBasedHybridEvolver<BS>::_step\n");
   ARIADNE_ASSERT(!working.empty());
   ARIADNE_LOG(9," evolution_time="<<time<<"\n");
   ARIADNE_LOG(9," working.size()="<<working.size()<<"\n");

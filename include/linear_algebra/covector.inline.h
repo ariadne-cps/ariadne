@@ -339,7 +339,7 @@ LinearAlgebra::approximation(const Covector<R2>& iv)
 {
   Covector<R1> result(iv.size());
   for(size_type i=0; i!=iv.size(); ++i) {
-    set(result(i),iv(i),Numeric::round_approx);
+    set_(result(i),iv(i),Numeric::round_approx);
   }
   return result;
 }

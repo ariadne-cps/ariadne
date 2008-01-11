@@ -227,7 +227,7 @@ BOOST_PYTHON_MODULE(ariadne)
   export_solver<FloatPy>();
   export_applicator<FloatPy>();
   export_integrator<FloatPy>();
-  export_detector<FloatPy>();
+  //export_detector<FloatPy>();
   //export_discretiser<FloatPy>();
   export_map_evolver<FloatPy>();
   export_vector_field_evolver<FloatPy>();

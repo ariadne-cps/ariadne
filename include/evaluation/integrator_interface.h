@@ -74,14 +74,14 @@ namespace Ariadne {
       BS
       evolution_step(const System::VectorField<R>& f, 
                      const BS& s,
-                     const Numeric::Interval<R>& t1, 
-                     const Numeric::Interval<R>& t2, 
+                     const Numeric::Rational& t1, 
+                     const Numeric::Rational& t2, 
                      const Geometry::Box<R>& bb) const
       {
         ARIADNE_ASSERT(t2>=t1);
         BS es=this->integration_step(f,s,t1,bb); 
         if(t1==t2) { return es; }
-        else { return this->reachability_step(f,es,Numeric::Interval<R>(t2-t1),bb); }
+        else { return this->reachability_step(f,es,Numeric::Rational(t2-t1),bb); }
       }
           
       /*! \brief Compute the image of a basic set under a continuous function. */
@@ -89,7 +89,7 @@ namespace Ariadne {
       BS
       integration_step(const System::VectorField<R>& f, 
                        const BS& s,
-                       const Numeric::Interval<R>& t, 
+                       const Numeric::Rational& t, 
                        const Geometry::Box<R>& bb) const = 0; 
       
       /*! \brief Compute the image of a basic set under a continuous function. */
@@ -97,7 +97,7 @@ namespace Ariadne {
       BS
       reachability_step(const System::VectorField<R>& f, 
                         const BS& s,
-                        const Numeric::Interval<R>& t, 
+                        const Numeric::Rational& t, 
                         const Geometry::Box<R>& bb) const = 0;
       //@}
 
@@ -129,7 +129,7 @@ namespace Ariadne {
       Geometry::Point<I> 
       flow_step(const System::VectorField<R>& f, 
                 const Geometry::Point<I>& s, 
-                const Numeric::Interval<R>& t, 
+                const Numeric::Rational& t, 
                 const Geometry::Box<R>& bb) const = 0;
     };
 
@@ -148,7 +148,7 @@ namespace Ariadne {
       /*! \brief Compute the spacial jacobian over a flow step of time \a t starting at \a p assuming that the flow remains within \a bb. */
       virtual LinearAlgebra::Matrix<I> flow_step_jacobian(const System::VectorField<R>& vf,
                                                           const Geometry::Point<I>& p,
-                                                          const Numeric::Interval<R>& t,
+                                                          const Numeric::Rational& t,
                                                           const Geometry::Box<R>& bb) const = 0;
     };
 

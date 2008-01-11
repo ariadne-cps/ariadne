@@ -76,7 +76,7 @@ template<class R>
 Geometry::Zonotope<R>
 Evaluation::KuhnIntegrator<R>::integration_step(const System::VectorField<R>& vector_field, 
                                                 const Geometry::Zonotope<R>& initial_set, 
-                                                const Numeric::Interval<R>& step_size, 
+                                                const Numeric::Rational& step_size, 
                                                 const Geometry::Box<R>& flow_bounding_box) const
 {
   ARIADNE_LOG(2,"KuhnIntegrator::integration_step(VectorField,Zonotope,Time,Box)\n");
@@ -84,8 +84,8 @@ Evaluation::KuhnIntegrator<R>::integration_step(const System::VectorField<R>& ve
   using namespace LinearAlgebra;
   using namespace Geometry;
 
-  Point<I> nic=Evaluation::standard_flow_step(vector_field,Point<I>(initial_set.centre()),step_size,flow_bounding_box);
-  Matrix<I> dPhi=Evaluation::standard_flow_step_jacobian(vector_field,Point<I>(initial_set.bounding_box()),step_size,flow_bounding_box);
+  Point<I> nic=Evaluation::standard_flow_step(vector_field,Point<I>(initial_set.centre()),I(step_size),flow_bounding_box);
+  Matrix<I> dPhi=Evaluation::standard_flow_step_jacobian(vector_field,Point<I>(initial_set.bounding_box()),I(step_size),flow_bounding_box);
   Matrix<I> niG=dPhi*initial_set.generators();
   
   dimension_type d=initial_set.dimension();
@@ -109,7 +109,7 @@ template<class R>
 Geometry::Zonotope<R>
 Evaluation::KuhnIntegrator<R>::reachability_step(const System::VectorField<R>& vector_field, 
                                                  const Geometry::Zonotope<R>& initial_set, 
-                                                 const Numeric::Interval<R>& step_size, 
+                                                 const Numeric::Rational& step_size, 
                                                  const Geometry::Box<R>& flow_bounding_box) const
 {
   using namespace Numeric;
@@ -124,12 +124,13 @@ Evaluation::KuhnIntegrator<R>::reachability_step(const System::VectorField<R>& v
   const Matrix<R>& G=z.generators();
   const Point<I> ibpt=z.bounding_box();
   const Box<R>& fbb=flow_bounding_box;
-  const Interval<R>& h=step_size;
-  const Interval<R> hh=h/2;
+  const Rational& h=step_size;
+  const Rational hh=h/2;
+  const Interval<R> ihh=hh;
 
-  Point<I> nic=Evaluation::standard_flow_step(vf,ic,hh,fbb);
-  Matrix<I> dPhi=Evaluation::standard_flow_step_jacobian(vf,ibpt,hh,fbb);
-  Vector<I> nif=hh*vf.evaluate(fbb);
+  Point<I> nic=Evaluation::standard_flow_step(vf,ic,ihh,fbb);
+  Matrix<I> dPhi=Evaluation::standard_flow_step_jacobian(vf,ibpt,ihh,fbb);
+  Vector<I> nif=ihh*vf.evaluate(fbb);
   Matrix<I> niG=dPhi*G;
 
   dimension_type d=initial_set.dimension();

@@ -27,6 +27,14 @@
 namespace Ariadne {
 
 template<class X>
+const array< Function::TaylorVariable<X> >&
+Function::TaylorDerivative<X>::variables() const
+{
+  return this->_variables;
+}
+
+
+template<class X>
 LinearAlgebra::Vector<X>
 Function::TaylorDerivative<X>::value() const
 {
@@ -99,6 +107,31 @@ Function::operator*(const LinearAlgebra::Matrix<X>& A, const Function::TaylorDer
 
 
 template<class X> 
+X
+Function::evaluate(const TaylorVariable<X>& y, const LinearAlgebra::Vector<X>& x)
+{
+  return y.evaluate(x);
+}
+
+template<class X> 
+Function::TaylorVariable<X>
+Function::evaluate(const TaylorVariable<X>& y, const TaylorDerivative<X>& x)
+{
+  return Function::evaluate(y,x.variables());
+}
+
+template<class X> 
+LinearAlgebra::Vector<X>
+Function::evaluate(const TaylorDerivative<X>& y, const LinearAlgebra::Vector<X>& x)
+{
+  LinearAlgebra::Vector<X> r;
+  r.data()=evaluate(y,x.data());
+  return r;
+}
+
+
+
+template<class X> 
 Function::TaylorVariable<X>
 Function::compose(const TaylorVariable<X>& y, const TaylorDerivative<X>& x)
 {
@@ -110,9 +143,10 @@ Function::compose(const TaylorVariable<X>& y, const TaylorDerivative<X>& x)
 
 
 
+
 template<class X> 
 Function::TaylorDerivative<X>
-Function::compose(const TaylorDerivative<X>& y, const TaylorDerivative<X>& x)
+Function::evaluate(const TaylorDerivative<X>& y, const TaylorDerivative<X>& x)
 {
   using namespace std;
   ARIADNE_ASSERT(y.argument_size()==x.result_size());
@@ -124,11 +158,6 @@ Function::compose(const TaylorDerivative<X>& y, const TaylorDerivative<X>& x)
   size_type ms=x.result_size();
   size_type as=x.argument_size();
   
-  TaylorDerivative<X> w=x;
-  for(uint i=0; i!=ms; ++i) {
-    w[i].value()=0;
-  }
-
   TaylorDerivative<X> r(rs,as,d);
   TaylorVariable<X> t(as,d);
 
@@ -137,7 +166,7 @@ Function::compose(const TaylorDerivative<X>& y, const TaylorDerivative<X>& x)
   for(uint j=0; j!=ms; ++j) {
     val[j][0]=TaylorVariable<X>::constant(as,d,1.0);
     for(uint k=1; k<=d; ++k) {
-      val[j][k]=val[j][k-1]*w[j];
+      val[j][k]=val[j][k-1]*x[j];
     }
   }
   for(MultiIndex j(ms); j.degree()<=d; ++j) {
@@ -151,7 +180,25 @@ Function::compose(const TaylorDerivative<X>& y, const TaylorDerivative<X>& x)
     }
   }
   return r;
+}
 
+
+template<class X> 
+Function::TaylorDerivative<X>
+Function::compose(const TaylorDerivative<X>& y, const TaylorDerivative<X>& x)
+{
+  using namespace std;
+  ARIADNE_ASSERT(y.argument_size()==x.result_size());
+  size_type ms=x.result_size();
+  //std::cerr << "y=" << y << std::endl;
+  //std::cerr << "x=" << x << std::endl;
+  
+  TaylorDerivative<X> w=x;
+  for(uint i=0; i!=ms; ++i) {
+    w[i].value()=0;
+  }
+
+  return evaluate(y,w);
 }
 
 
@@ -308,7 +355,11 @@ Function::TaylorDerivative<X>::instantiate()
   TaylorDerivative<X>* td=0;
   std::ostream* os = 0;
 
+  evaluate(*tv,*td);
   compose(*tv,*td);
+
+  evaluate(*td,*v);
+  evaluate(*td,*td);
   compose(*td,*td);
   inverse(*td,*v);
   implicit(*td,*v);

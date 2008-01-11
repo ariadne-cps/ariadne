@@ -133,7 +133,7 @@ std::ostream&
 Geometry::operator<<(std::ostream& os, const Box<R>& bx)
 {
   if(bx.dimension()==0) {
-    os << "EmptyBoxe";
+    os << "EmptyBox";
   }
   else {
     os << "[" << bx.lower_bound(0) << "," << bx.upper_bound(0) << "]";

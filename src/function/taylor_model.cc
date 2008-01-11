@@ -30,16 +30,13 @@ namespace Ariadne {
   namespace Function {
     using namespace Numeric;
     
-  //template class TaylorModel<Rational>;
 
 #ifdef ENABLE_FLOAT64
-  //template class TaylorModel<Float64>;
-    template class TaylorModel<Interval64>;
+    template class TaylorModel<Float64>;
 #endif
     
 #ifdef ENABLE_FLOATMP
-  //template class TaylorModel<FloatMP>;
-    template class TaylorModel<IntervalMP>;
+    template class TaylorModel<FloatMP>;
 #endif
 
   }

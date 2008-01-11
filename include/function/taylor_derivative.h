@@ -71,6 +71,7 @@ namespace Ariadne {
       template<class V> static TaylorDerivative<X> constant(size_type rs, size_type as, smoothness_type d, const V& c); 
       /*! \brief Construct the derivative of degree \a d at values \a x. Requires rs==as. */
       template<class V> static TaylorDerivative<X> variable(size_type rs, size_type as, smoothness_type d, const V& x);
+      template<class V> static TaylorDerivative<X> variable(const V& x, smoothness_type d);
 
       /*! \brief The number of variables of the argument. */
       size_type result_size() const; 
@@ -96,6 +97,8 @@ namespace Ariadne {
       const TaylorVariable<X>& get(const size_type& i) const;
       /*! \brief Set the derivative of the \a i<sup>th</sup> variable. */
       template<class XX> void set(const size_type& i, const TaylorVariable<XX>& tv);
+      /*! \brief The array of Taylor variables. */
+      const array< TaylorVariable<X> >& variables() const;
       /*! \brief The array of derivative values. */
       //const array<X>& data() const;
       /*! \brief A reference to the array of derivative values. */
@@ -145,11 +148,16 @@ namespace Ariadne {
       array< TaylorVariable<X> > _variables;
     };
 
+  template<class X, class R> array<R> evaluate(const TaylorDerivative<X>& y, const array<R>& x);
 
   template<class X0, class X1, class X2> void compute_composition(TaylorVariable<X0>& z, const TaylorVariable<X1>& y, const TaylorDerivative<X2>& x);
   template<class X0, class X1, class X2> void compute_composition(TaylorDerivative<X0>& z, const TaylorDerivative<X1>& y, const TaylorDerivative<X2>& x);
 
+  template<class X> TaylorVariable<X> evaluate(const TaylorVariable<X>& y, const TaylorDerivative<X>& x);
   template<class X> TaylorVariable<X> compose(const TaylorVariable<X>& y, const TaylorDerivative<X>& x);
+
+  template<class X> LinearAlgebra::Vector<X> evaluate(const TaylorDerivative<X>& y, const LinearAlgebra::Vector<X>& x);
+  template<class X> TaylorDerivative<X> evaluate(const TaylorDerivative<X>& y, const TaylorDerivative<X>& x);
   template<class X> TaylorDerivative<X> compose(const TaylorDerivative<X>& y, const TaylorDerivative<X>& x);
   template<class X> TaylorDerivative<X> inverse(const TaylorDerivative<X>& x, const LinearAlgebra::Vector<X>& c);
   template<class X> TaylorDerivative<X> implicit(const TaylorDerivative<X>& x, const LinearAlgebra::Vector<X>& c);

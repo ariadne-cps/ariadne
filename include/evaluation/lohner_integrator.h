@@ -37,6 +37,7 @@
 namespace Ariadne {
   namespace Evaluation {
    
+    template<class R> class IntegratorBase;
 
     /*!\ingroup Integrate
      * \brief An integrator based on the Lohner algorithm.
@@ -59,8 +60,8 @@ namespace Ariadne {
       typedef Numeric::Interval<R> I;
      public:
       
-      /*! \brief Constructor. */
-      LohnerIntegrator();
+      /*! \brief Construct and integrator with a given temporal order. */
+      LohnerIntegrator(smoothness_type order=4);
 
       /*! \brief Cloning operator. */
       virtual LohnerIntegrator<R>* clone() const;
@@ -74,37 +75,24 @@ namespace Ariadne {
                   const Geometry::Box<R>& bx,
                   const Numeric::Rational& t) const; 
 
-      /*! \brief Integrate a basic set for time \a t within a bounding set. */
-      virtual Geometry::Point<I> flow_step(const System::VectorField<R>& vf,
-                                           const Geometry::Point<I>& p,
-                                           const Numeric::Interval<R>& t,
-                                           const Geometry::Box<R>& bb) const;
-     
-      /*! \brief Integrate a basic set for within a bounding set. */
-      virtual LinearAlgebra::Matrix<I> flow_step_jacobian(const System::VectorField<R>& vf,
-                                                          const Geometry::Point<I>& p,
-                                                          const Numeric::Interval<R>& t,
-                                                          const Geometry::Box<R>& bb) const;
- 
-
-      /*! \brief A C1 algorithm for integrating forward a zonotope.
-       */
+      /*! \brief An algorithm for integrating forward a zonotope.  */
       virtual Geometry::Zonotope<R> 
       integration_step(const System::VectorField<R>& vf,
                        const Geometry::Zonotope<R>& s,
-                       const Numeric::Interval<R>& t,
+                       const Numeric::Rational& t,
                        const Geometry::Box<R>& bb) const;
 
-      /*! \brief A C1 algorithm for integrating forward a zonotope for a time up to time \a step_size, assuming the set \a bb is a bounding box for the integration. */
+      /*! \brief An algorithm for integrating forward a zonotope for a time up to time \a step_size, assuming the set \a bb is a bounding box for the integration. */
       virtual Geometry::Zonotope<R> 
       reachability_step(const System::VectorField<R>& vf,
                         const Geometry::Zonotope<R>& s,
-                        const Numeric::Interval<R>& t,
+                        const Numeric::Rational& t,
                         const Geometry::Box<R>& bb) const;
-
 
       /*! \brief Write to an output stream. */
       virtual std::ostream& write(std::ostream&) const;
+     private:
+      boost::shared_ptr< IntegratorBase<R> > _integrator;
     };
     
       

@@ -60,7 +60,6 @@ GEOMETRY_TESTS = \
 	test_simplex \
 	test_polytope \
 	test_polyhedron \
-	test_constraint \
 	test_constraint_set \
 	test_level_set 
 
@@ -145,7 +144,8 @@ test_subdivision_tree_SOURCES=test_subdivision_tree.cc
 test_interpreted_function_SOURCES=test_interpreted_function.cc
 test_polynomial_function_SOURCES=test_polynomial_function.cc
 test_index_SOURCES=test_index.cc
-test_taylor_series_SOURCES=test_scalar_series.cc
+test_taylor_series_SOURCES=test_taylor_series.cc
+test_taylor_variable_SOURCES=test_taylor_variable.cc
 test_taylor_derivative_SOURCES=test_taylor_derivative.cc
 test_affine_model_SOURCES=test_affine_model.cc
 test_taylor_model_SOURCES=test_taylor_model.cc
@@ -159,7 +159,6 @@ test_zonotope_SOURCES=test_zonotope.cc
 test_simplex_SOURCES=test_simplex.cc
 test_polytope_SOURCES=test_polytope.cc
 test_polyhedron_SOURCES=test_polyhedron.cc
-test_constraint_SOURCES=test_constraint.cc
 test_constraint_set_SOURCES=test_constraint_set.cc
 test_level_set_SOURCES=test_level_set.cc
 

@@ -21,6 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+#include "affine_variable.h"
 #include "affine_model.h"
 
 #include "function/function_interface.h"
@@ -49,6 +50,22 @@ Function::AffineModel<R>::AffineModel(const Geometry::Box<R>& d,
   ARIADNE_ASSERT(v.dimension()==j.number_of_rows());
   ARIADNE_ASSERT(c.dimension()==j.number_of_columns());
 }
+
+template<class R> 
+Function::AffineModel<R>::AffineModel(const Geometry::Box<R>& d,
+                                      const Geometry::Point<R>& c, 
+                                      const array<Function::AffineVariable<I> >& av)
+  : _domain(d), _centre(c), _value(av.size()), _jacobian(av.size(),c.dimension())
+{
+  ARIADNE_ASSERT(c.dimension()==d.dimension());
+  for(uint i=0; i!=av.size(); ++i) {
+    _value[i]=av[i].value();
+    for(uint j=0; j!=c.dimension(); ++j) {
+      _jacobian(i,j)=av[i].derivative(j);
+    }
+  }
+}
+
 
 
 template<class R> 
@@ -121,6 +138,17 @@ Function::operator-(const Function::AffineModel<R>& am1, const Function::AffineM
 
 */
 
+
+template<class R> 
+Function::AffineModel<R>
+Function::translate(const Function::AffineModel<R>& am, const Geometry::Point<R>& nc) 
+{
+  typedef Numeric::Interval<R> I;
+  Geometry::Box<R> nd=am.domain();
+  Geometry::Point<I> nv=am.evaluate(nc);
+  const LinearAlgebra::Matrix<I> & nj=am.jacobian();
+  return AffineModel<R>(nd,nc,nv,nj);
+}
 
 template<class R> 
 Function::AffineModel<R>

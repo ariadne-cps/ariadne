@@ -122,33 +122,6 @@ Function::TaylorDerivative<X>::operator!=(const TaylorDerivative<XX>& other) con
 }
 
 
-template<class X> template<class V> inline
-Function::TaylorDerivative<X> 
-Function::TaylorDerivative<X>::constant(size_type r, size_type a, smoothness_type d, const V& c) 
-{
-  TaylorDerivative<X> result(r,a,d);
-  ARIADNE_ASSERT(c.size()==r);
-  for(size_type i=0; i!=r; ++i) {
-    result._variables[i].value()=c[i];
-  }
-  return result;
-}
-
-template<class X> template<class V> inline
-Function::TaylorDerivative<X> 
-Function::TaylorDerivative<X>::variable(size_type r, size_type a, smoothness_type d, const V& x) 
-{
-  ARIADNE_ASSERT(a==r);
-  ARIADNE_ASSERT(x.size()==r);
-  TaylorDerivative<X> result(r,a,d);
-  //size_type inc=compute_polynomial_data_size(1u,a,d);
-  for(size_type i=0; i!=r; ++i) {
-    result._variables[i].value()=x[i];
-    result._variables[i].data()[i+1u]=1;
-  }
-  return result;
-}
-
 
 
 template<class X> inline

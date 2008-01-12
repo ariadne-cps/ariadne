@@ -228,6 +228,13 @@ LinearAlgebra::Matrix<R>::operator[](const size_type& i)
   return MatrixRow< Matrix<R> >(*this,i); 
 }        
 
+template<class R> inline
+LinearAlgebra::MatrixRow< const LinearAlgebra::Matrix<R> > 
+LinearAlgebra::Matrix<R>::operator[](const size_type& i) const
+{
+  return MatrixRow< const Matrix<R> >(*this,i); 
+}        
+
 
 template<class R> inline
 LinearAlgebra::Matrix<R>

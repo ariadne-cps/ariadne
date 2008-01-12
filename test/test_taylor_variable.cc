@@ -93,11 +93,18 @@ class TestTaylorVariable {
   }
 
   void test_mul() {
-    cout << x1 << "*" << x2 << " = " << x1*x2 << std::endl;
-    ARIADNE_TEST_EVALUATE(x1*x2);
-    ARIADNE_TEST_EVALUATE(x1*c1);
-    ARIADNE_TEST_EVALUATE(c1*x1);
-    //assert((x1*x2)==TaylorVariable<X>("[2,3,2,0]"));
+    double a1[6]={ 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 };
+    double a2[6]={ 2.0, 3.0, 5.0, 7.0, 11.0, 13.0 };
+    double a1m2[6]={ 2.0, 7.0, 11.0, 21.0, 40.0, 40.0 };
+    double acm2[6]={ 10.0, 15.0, 25.0, 35.0, 55.0, 65.0 };
+    TaylorVariable<X> x1(2,2,a1);
+    TaylorVariable<X> x2(2,2,a2);
+    TaylorVariable<X> x1mx2(2,2,a1m2);
+    TaylorVariable<X> cmx2(2,2,acm2);
+    X c=5;
+    ARIADNE_TEST_EQUAL(x1*x2,x1mx2);
+    ARIADNE_TEST_EQUAL(c*x2,cmx2);
+    ARIADNE_TEST_EQUAL(x2*c,cmx2);
   }
 
   void test_div() {
@@ -119,8 +126,9 @@ class TestTaylorVariable {
   }
 
   void test_rec() {
-    TaylorVariable<X> x=TaylorVariable<X>::variable(1,5,1.0,0);
-    assert(rec(rec(x))==x);
+    double a1[6]={ 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 };
+    ARIADNE_TEST_CONSTRUCT(TaylorVariable<X>,x1,(2,2,a1));
+    ARIADNE_TEST_EQUAL(rec(rec(x1)),x1);
   }
 
   void test_pow() {
@@ -130,17 +138,15 @@ class TestTaylorVariable {
 
   void test_compose() {
     //double ax[10] = { 3.0, 1.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-    double ax[10] = { 3.0, 1.0, 0.0, 0.0, 0.125, 0.25, 0.0, 0.0, 0.0, 0.0 };
-    double ay[4] = { 1.0, -1.0, 0.5, -0.25 };
+    double ax[10] = { 3.0,  1.0, 2.0,  1.0, 0.5, 2.0,  0.0, 0.0, 0.0, 0.0 };
+    double ay[4] = { 1.0, 2.0, -3.0, 5.0 };
+    double ayx[10] = { 1.0,  2.0, 4.0,  -1.0, -11.0, -8.0,  -1.0, 15.0, 42.0, 16.0 };
     double aid[4] = { ax[0], 1.0, 0.0, 0.0 };
-    TaylorVariable<X> x(2,3,ax);
-    TaylorSeries<X> y(3,ay);
-    TaylorSeries<X> id(3,aid);
-    cout << "x=" << x << endl;
-    cout << "y=" << y << endl;
-    cout << "compose(y,x)=" << compose(y,x) << endl;
-    cout << "compose(id,x)=" << compose(id,x) << endl;
-    cout << "compose(id,x)-x=" << compose(id,x)-x << endl;
+    ARIADNE_TEST_CONSTRUCT(TaylorVariable<X>,x,(2,3,ax));
+    ARIADNE_TEST_CONSTRUCT(TaylorSeries<X>,y,(3,ay));
+    ARIADNE_TEST_CONSTRUCT(TaylorSeries<X>,id,(3,aid));
+    ARIADNE_TEST_EQUAL(compose(y,x),TaylorVariable<X>(2,3,ayx));
+    ARIADNE_TEST_EQUAL(compose(id,x),x);
   }
 
 

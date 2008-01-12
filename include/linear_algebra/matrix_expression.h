@@ -66,6 +66,17 @@ namespace Ariadne {
       Mx& _mx; const size_type _i;
     };
     
+    /* Proxy for a matrix row in operator[] */
+    template<class Mx>
+    class MatrixRow<const Mx>
+    {
+     public:
+      MatrixRow(const Mx& A, const size_type& i) : _mx(A), _i(i) { }
+      const typename Mx::value_type& operator[](const size_type& j) const { return _mx(_i,j); }
+     private:
+      const Mx& _mx; const size_type _i;
+    };
+    
 
   }
 }

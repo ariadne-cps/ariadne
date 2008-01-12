@@ -40,10 +40,7 @@ add_product(Function::TaylorVariable<X>& x0, const Function::TaylorVariable<X>& 
     for(MultiIndex i2(x2.argument_size()); i2.degree() <= std::min(x2.degree(),smoothness_type(x0.degree()-i1.degree())); ++i2) {
       MultiIndex i0=i1+i2;
       //std::cout << "i0=" << i0 << ", i1=" << i1 << ", i2=" << i2 << std::endl;
-      // FIXME: Use Integer
-      //Numeric::Integer c=i0.factorial()/(i1.factorial()*i2.factorial());
-      uint c=Function::bin(i0,i1);
-      x0[i0]+=X(c)*x1[i1]*x2[i2];
+      x0[i0]+=x1[i1]*x2[i2];
     }
   }
 }
@@ -63,12 +60,12 @@ compute_composition(Function::TaylorVariable<X>& z,
   TaylorVariable<X> w=x;
   w.value()=0;
   TaylorVariable<X> t(as,d);
-  t.value()=y.data()[d]/Numeric::fac<Numeric::Integer>(d);
+  t.value()=y.data()[d];
   for(uint n=1; n<=d; ++n) {
     TaylorVariable<X> u(as,d);
     add_product(u,t,w);
-    t=u+y.data()[d-n]/Numeric::fac<Numeric::Integer>(d-n);
-  };
+    t=u+y.data()[d-n];
+  }
   z=t;
   return;
 }
@@ -235,7 +232,7 @@ Function::derivative(const TaylorVariable<X>& x, const size_type& k)
   MultiIndex e(x.argument_size());
   e.set(k,1);
   for(MultiIndex j(r.argument_size()); j.degree() <= r.degree(); ++j) {
-    r[j]=x[j+e];
+    r[j]=(j[k]+1)*x[j+e];
   }
   return r;
 }
@@ -255,21 +252,6 @@ Function::reduce(const TaylorVariable<X>& x, const size_type& d)
   }
 }
 
-
-template<class X> 
-Function::TaylorVariable<X> 
-Function::derivative(TaylorVariable<X>& x, const size_type& k)
-{
-  if(x.degree()==0) {
-    return TaylorVariable<X>(x.argument_size(),0);
-  } 
-  TaylorVariable<X> r(x.argument_size(),x.degree()-1);
-  MultiIndex e(x.argument_size());
-  e.set(k,1);
-  for(MultiIndex j(r.argument_size()); j.degree() <= r.degree(); ++j) {
-    r[j]=x[j+e];
-  }
-}
 
 
 

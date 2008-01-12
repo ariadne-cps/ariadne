@@ -197,19 +197,6 @@ Function::sub(const TaylorSeries<X>& x, const TaylorSeries<X>& y)
   return result;
 }
 
-template<class X> inline
-Function::TaylorSeries<X> 
-Function::mul(const TaylorSeries<X>& x, const TaylorSeries<X>& y)
-{
-  TaylorSeries<X> result(std::min(x.degree(),y.degree()));
-  for(size_type n=0; n<=result.degree(); ++n) {
-    result[n]=x[0]*y[n];
-    for(size_type i=1; i<=n; ++i) {
-      result[n] += Numeric::bin<int>(n,i)*x[i]*y[n-i];
-    }
-  }
-  return result;
-}
 
 template<class X> inline
 Function::TaylorSeries<X> 

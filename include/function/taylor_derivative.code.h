@@ -56,7 +56,7 @@ Function::TaylorDerivative<X>::jacobian() const
   LinearAlgebra::Matrix<X> result(rs,as);
   for(uint i=0; i!=rs; ++i) {
     for(uint j=0; j!=as; ++j) {
-      result(i,j)=this->_variables[i]._data[j+1u];
+      result[i][j]=this->_variables[i]._data[j+1u];
     }
   }
   return result;
@@ -85,7 +85,7 @@ Function::TaylorDerivative<X>::set_jacobian(const LinearAlgebra::Matrix<X>& A)
   size_type as=this->argument_size();
   for(uint i=0; i!=rs; ++i) {
     for(uint j=0; j!=as; ++j) {
-      this->_variables[i]._data[j+1u]=A(i,j);
+      this->_variables[i]._data[j+1u]=A[i][j];
     }
   }
 }
@@ -170,13 +170,12 @@ Function::evaluate(const TaylorDerivative<X>& y, const TaylorDerivative<X>& x)
     }
   }
   for(MultiIndex j(ms); j.degree()<=d; ++j) {
-    X sf=Function::fac(j);
     t=TaylorVariable<X>::constant(as,d,1.0);
     for(uint k=0; k!=ms; ++k) {
       t=t*val[k][j[k]];
     }
     for(uint i=0; i!=rs; ++i) {
-      r[i]+=X(y[i][j]/sf)*t;
+      r[i]+=y[i][j]*t;
     }
   }
   return r;

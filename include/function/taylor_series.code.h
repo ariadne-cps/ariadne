@@ -35,7 +35,7 @@ compute_product(Function::TaylorSeries<X>& z, const Function::TaylorSeries<X>& y
   for(size_type n=0; n<=z.degree(); ++n) {
     z[n]*=0;
     for(size_type i=0; i<=n; ++i) {
-      z[n] += Numeric::bin<int>(n,i)*x[i]*y[n-i];
+      z[n] += x[i]*y[n-i];
     }
   }
 }
@@ -48,20 +48,6 @@ compute_composition(Function::TaylorSeries<X>& y, const Function::TaylorSeries<X
   using namespace Function;
 
   int d=std::min(x.degree(),y.degree());
-
-#ifdef DEBUG
-  // Compute using explicit formula
-  TaylorSeries<X> t(y);
-  TaylorSeries<X> z(std::min(d,5));
-  if(d>=0) { z[0] = y[0]; }
-  if(d>=1) { z[1] = y[1]*x[1]; }
-  if(d>=2) { z[2] = y[2]*x[1]*x[1] + y[1]*x[2]; }
-  if(d>=3) { z[3] = y[3]*x[1]*x[1]*x[1] + 3*y[2]*x[1]*x[2] + y[1]*x[3]; }
-  if(d>=4) { z[4] = y[4]*x[1]*x[1]*x[1]*x[1] + 6*y[3]*x[1]*x[1]*x[2] + 4*y[2]*x[1]*x[3] + 3*y[2]*x[2]*x[2] + y[1]*x[4]; }
-  if(d>=5) { z[5] = y[5]*x[1]*x[1]*x[1]*x[1]*x[1] + 10*y[4]*x[1]*x[1]*x[1]*x[2] + 15*y[3]*x[1]*x[2]*x[2] 
-      + 10*y[3]*x[1]*x[1]*x[3] + 10*y[2]*x[2]*x[3] + 5*y[2]*x[1]*x[4] + y[1]*x[5]; }
-#endif
-  
   using namespace std;
   //cerr<<"y="<<y<<"\nx="<<x<<endl;
   TaylorSeries<X> w=x;
@@ -69,11 +55,11 @@ compute_composition(Function::TaylorSeries<X>& y, const Function::TaylorSeries<X
   //cerr<<"w="<<w<<endl<<endl;
   TaylorSeries<X> t(d);
   TaylorSeries<X> u(d);
-  t[0]=y[d]/Numeric::fac<Numeric::Integer>(d);
+  t[0]=y[d];
   //cerr<<"t="<<t<<endl;
   for(int n=1; n<=d; ++n) {
     u=t*w;
-    u.value()+=y[d-n]/Numeric::fac<Numeric::Integer>(d-n);
+    u.value()+=y[d-n];
     //cerr<<"u="<<u<<endl;
     t=u;
     //cerr<<"t="<<t<<endl;
@@ -82,18 +68,17 @@ compute_composition(Function::TaylorSeries<X>& y, const Function::TaylorSeries<X
   //cerr<<endl;
   return;
 
-
   for(int n=0; n<d; ++n) {
     for(int i=0; i<=n; ++i) {
       //std::cout<<"y["<<d-i<<"] = 1*y["<<d-i<<"]*x[1]"<<std::flush;
       y[d-i]*=x[1];
       for(int j=1; j<=n-i; ++j) {
         //std::cout<<" + "<<Numeric::bin(n-i,j)<<"*y["<<d-i-j<<"]*x["<<j+1<<"]"<<std::flush;
-        y[d-i] += Numeric::bin<int>(n-i,j) * y[d-i-j] * x[j+1];
+        y[d-i] += y[d-i-j] * x[j+1];
       }
       //std::cout << std::endl;
     }
-    cout << y << endl;
+    //std::cout << y << std::endl;
   }
 
 #ifdef DEBUG
@@ -215,6 +200,74 @@ recursive_inverse(const Function::TaylorSeries<X>& x, const X& c)
 
 
 template<class X> 
+Function::TaylorSeries<X> 
+Function::mul(const TaylorSeries<X>& x, const TaylorSeries<X>& y)
+{
+  TaylorSeries<X> result(std::min(x.degree(),y.degree()));
+  for(size_type n=0; n<=result.degree(); ++n) {
+    result[n]=x[0]*y[n];
+    for(size_type i=1; i<=n; ++i) {
+      result[n] += x[i]*y[n-i];
+    }
+  }
+  return result;
+}
+
+
+template<class X> 
+Function::TaylorSeries<X> 
+Function::derivative(const TaylorSeries<X>& x)
+{
+  TaylorSeries<X> result(x.degree()-1);
+  for(size_type n=1; n<=x.degree(); ++n) { result[n-1]=X(n)*x[n]; }
+  return result;
+}
+
+template<class X> 
+Function::TaylorSeries<X> 
+Function::antiderivative(const TaylorSeries<X>& x, const X& c)
+{
+  TaylorSeries<X> result(x.degree()+1);
+  for(size_type n=1; n<=x.degree(); ++n) { result[n]=x[n-1]/n; }
+  result[0]=c;
+  return result;
+}
+
+template<class X> 
+Function::TaylorSeries<X> 
+Function::compose(const TaylorSeries<X>& y, const TaylorSeries<X>& x)
+{
+  using namespace std;
+
+  size_type d=std::min(x.degree(),y.degree());
+  TaylorSeries<X> r(d);
+
+  //cerr<<"y="<<y<<"\nx="<<x<<endl;
+  TaylorSeries<X> w=x;
+  w.value()=0;
+  //cerr<<"w="<<w<<endl<<endl;
+  TaylorSeries<X> t(d);
+  r[0]=y[d];
+  //cerr<<"t="<<t<<endl;
+  for(int n=1; n<=d; ++n) {
+    t=r*w;
+    t.value()+=y[d-n];
+    //cerr<<"u="<<u<<endl;
+    r=t;
+    //cerr<<"t="<<t<<endl;
+  };
+  return r;
+}
+
+template<class X>
+Function::TaylorSeries<X>
+Function::inverse(const TaylorSeries<X>& x, const X& c)
+{
+  return recursive_inverse(x,c);
+}
+
+
+template<class X> 
 std::ostream& 
 Function::operator<<(std::ostream& os, const TaylorSeries<X>& x) {
   os << "TaylorSeries";
@@ -227,43 +280,6 @@ Function::operator<<(std::ostream& os, const TaylorSeries<X>& x) {
 
 
 template<class X> 
-Function::TaylorSeries<X> 
-Function::derivative(const TaylorSeries<X>& x)
-{
-  TaylorSeries<X> result(x.degree()-1);
-  for(size_type n=0; n<x.degree(); ++n) { result[n]=x[n+1]; }
-  return result;
-}
-
-template<class X> 
-Function::TaylorSeries<X> 
-Function::antiderivative(const TaylorSeries<X>& x, const X& c)
-{
-  TaylorSeries<X> result(x.degree()+1);
-  for(size_type n=0; n<=x.degree(); ++n) { result[n+1]=x[n]; }
-  result[0]=c;
-  return result;
-}
-
-template<class X> 
-Function::TaylorSeries<X> 
-Function::compose(const TaylorSeries<X>& y, const TaylorSeries<X>& x)
-{
-  TaylorSeries<X> result(std::min(x.degree(),y.degree()));
-  for(size_type n=0; n<=result.degree(); ++n) { result[n]=y[n]; }
-  compute_composition(result,x);
-  return result;
-}
-
-template<class X>
-Function::TaylorSeries<X>
-Function::inverse(const TaylorSeries<X>& x, const X& c)
-{
-  return recursive_inverse(x,c);
-}
-
-
-template<class X> 
 void
 Function::TaylorSeries<X>::instantiate() 
 {
@@ -271,6 +287,7 @@ Function::TaylorSeries<X>::instantiate()
   TaylorSeries<X>* ts=0;
   std::ostream* os = 0;
 
+  mul(*ts,*ts);
   compose(*ts,*ts);
   inverse(*ts,*x);
   derivative(*ts);

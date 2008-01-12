@@ -254,6 +254,14 @@ void mul_(FloatMP& r, const int& x, const FloatMP& y, Rnd) {
   mpfr_mul_si(r._value,y._value,x,mpfr_rounding_mode<Rnd>()); }
 
 template<class Rnd> inline 
+void mul_(FloatMP& r, const FloatMP& x, const uint& y, Rnd) {
+  mpfr_mul_ui(r._value,x._value,y,mpfr_rounding_mode<Rnd>()); }
+
+template<class Rnd> inline 
+void mul_(FloatMP& r, const uint& x, const FloatMP& y, Rnd) {
+  mpfr_mul_ui(r._value,y._value,x,mpfr_rounding_mode<Rnd>()); }
+
+template<class Rnd> inline 
 void mul_(FloatMP& r, const FloatMP& x, const double& y, Rnd) {
   mpfr_t t; mpfr_init_set_d(t,y,mpfr_rounding_mode<Rnd>()); 
   mpfr_mul(r._value,x._value,t,mpfr_rounding_mode<Rnd>()); }

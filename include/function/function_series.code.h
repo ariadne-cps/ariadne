@@ -33,7 +33,7 @@ Function::ArithmeticSeries<X>::rec(smoothness_type d, const X& c)
   TaylorSeries<X> y(d);
   X mr = -1/c;
   for(size_type i=0; i<=y.degree(); ++i) {
-    y[i]=(-Numeric::fac<int>(i))*Numeric::pow(mr,i+1u);
+    y[i]=-Numeric::pow(mr,i+1u);
   }
   return y;
 }
@@ -46,8 +46,8 @@ Function::ArithmeticSeries<X>::pow(smoothness_type d, const X& c, const uint& k)
   size_type n=k;
   TaylorSeries<X> y(d);
   for(size_type i=0; i<=std::min(size_type(d),n); ++i) {
-    int j=n-i;
-    y[i]=(Numeric::fac<int>(n)/Numeric::fac<int>(j))*Numeric::pow(c,j);
+    uint j=n-i;
+    y[i]=X(Numeric::bin<Numeric::Integer>(n,j))*Numeric::pow(c,j);
   }
   //std::cout << "pow("<<d<<","<<c<<","<<k<<")="<<y<<std::endl;
   return y;
@@ -59,9 +59,9 @@ Function::TranscendentalSeries<X>::sqrt(smoothness_type d, const X& c)
 {
 TaylorSeries<X> y(d);
   y[0]=Numeric::sqrt(c);
-  X mhr=(-0.5)/c;
+  X mhr=-0.5/c;
   for(size_type i=1; i<=y.degree(); ++i) {
-    y[i]=(2*int(i)-3)*mhr*y[i-1];
+    y[i]=((2*i-3)*mhr)/i*y[i-1];
   }
   return y;
 }
@@ -73,7 +73,7 @@ Function::TranscendentalSeries<X>::exp(smoothness_type d, const X& c)
 TaylorSeries<X> y(d);
   y[0]=Numeric::exp(c);
   for(size_type i=1; i<=y.degree(); ++i) {
-    y[i]=y[0];
+    y[i]=y[i-1]/i;
   }
   return y;
 }
@@ -86,7 +86,7 @@ TaylorSeries<X> y(d);
   y[0]=Numeric::log(c);
   X mr=(-1)/c;
   for(size_type i=1; i<=y.degree();++i) {
-    y[i]=(-Numeric::fac<int>(i-1))*Numeric::pow(mr,i);
+    y[i]=-Numeric::pow(mr,i)/i;
   }
   return y;
 }
@@ -99,7 +99,7 @@ TaylorSeries<X> y(d);
   y[0]=Numeric::sin(c);
   y[1]=Numeric::cos(c);
   for(size_type i=2; i!=d; ++i) {
-    y[i]=-y[i-2];
+    y[i]=-y[i-2]/(i*(i-1));
   }
   return y;
 }
@@ -112,7 +112,7 @@ Function::TranscendentalSeries<X>::cos(smoothness_type d, const X& c)
   y[0]=Numeric::cos(c);
   y[1]=-Numeric::sin(c);
   for(size_type i=2; i!=d; ++i) {
-    y[i]=-y[i-2];
+    y[i]=-y[i-2]/(i*(i-1));
   }
   return y;
 }

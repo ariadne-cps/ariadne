@@ -230,6 +230,20 @@ inline void mul_(Float64& r, const int& n, const Float64& x, RoundUp) {
 inline void mul_(Float64& r, const int& n, const Float64& x, RoundApprox) {
   r._value=x._value*n; }
 
+inline void mul_(Float64& r, const Float64& x, const uint& n, RoundDown) {
+  r._value=Float64::rounding().mul_down(x._value,n); }
+inline void mul_(Float64& r, const Float64& x,const uint& n, RoundUp) {
+  r._value=Float64::rounding().mul_up(x._value,n); }
+inline void mul_(Float64& r, const Float64& x, const uint& n, RoundApprox) {
+  r._value=x._value*n; }
+     
+inline void mul_(Float64& r, const uint& n, const Float64& x, RoundDown) {
+  r._value=Float64::rounding().mul_down(x._value,n); }
+inline void mul_(Float64& r, const uint& n, const Float64& x, RoundUp) {
+  r._value=Float64::rounding().mul_up(x._value,n); }
+inline void mul_(Float64& r, const uint& n, const Float64& x, RoundApprox) {
+  r._value=x._value*n; }
+
 inline void mul_(Float64& r, const Float64& x, const double& d, RoundDown) {
   r._value=Float64::rounding().mul_down(x._value,d); }
 inline void mul_(Float64& r, const Float64& x,const double& d, RoundUp) {

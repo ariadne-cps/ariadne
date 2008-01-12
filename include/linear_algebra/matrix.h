@@ -128,8 +128,7 @@ namespace Ariadne {
       MatrixRow< Matrix<R> > operator[](const size_type& i);
         
       /*! \brief Constant subscripting operator; A[i][j] returns the (i,j)th element. */
-      //MatrixRow< const Matrix<R> > operator[](const size_type& i) const {
-      //  return MatrixRow< const Matrix<R> >(*this,i); }
+      MatrixRow< const Matrix<R> > operator[](const size_type& i) const;
         
       /*! \brief An \a r by \a c matrix, all of whose entries are zero. */
       static Matrix<R> zero(const size_type r, const size_type c);

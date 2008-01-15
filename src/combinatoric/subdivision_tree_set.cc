@@ -162,12 +162,11 @@ SubdivisionCell::_compute_bounds(const dimension_type& d,
     dyadic_type c=(_bounds[i].lower+_bounds[i].upper)/2;
     if(w[j]==left) {
       _bounds[i].upper=c;
+    } else {
+      _bounds[i].lower=c;
     }
-        else {
-          _bounds[i].lower=c;
-        }
-      }
-    }
+  }
+}
 
 void
 SubdivisionCell::_compute_bounds(const SubdivisionSequence& ss,
@@ -179,7 +178,7 @@ SubdivisionCell::_compute_bounds(const SubdivisionSequence& ss,
   }
   for(size_type j=0; j!=w.size(); ++j) {
     dimension_type i=ss[j];
-    dyadic_type c=(_bounds[2].lower+_bounds[i].upper)/2;
+    dyadic_type c=(_bounds[i].lower+_bounds[i].upper)/2;
     if(w[j]==left) {
       _bounds[i].upper=c;
     }
@@ -283,7 +282,6 @@ SubdivisionTreeSet::SubdivisionTreeSet(const SubdivisionTreeSet& sts)
 SubdivisionTreeSet::SubdivisionTreeSet(const LatticeMaskSet& ms) 
   : _subdivisions(ms.dimension()), _words()
 {      
-  
   dimension_type n=ms.dimension();
   
   LatticeBlock block=ms.block();
@@ -329,7 +327,7 @@ SubdivisionTreeSet::SubdivisionTreeSet(const LatticeMaskSet& ms)
   std::vector<bool> tree;
   std::vector<bool> mask;
   BinaryWord word;
-  
+ 
   do {
     //TODO: Construct full tree, then reduce
     SubdivisionCell c(subdivisions,word);
@@ -362,7 +360,7 @@ SubdivisionTreeSet::SubdivisionTreeSet(const LatticeMaskSet& ms)
   this->_subdivisions=subdivisions;
   this->_words=MaskedBinaryTree(BinaryTree(tree),mask);
   
-  this->reduce();
+  this->reduce();  
 }
 
 SizeArray

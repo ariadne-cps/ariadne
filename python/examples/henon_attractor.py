@@ -3,7 +3,7 @@
 ##############################################################################
 #            henon_attractor.py
 #
-#  Copyright 2006  Pieter Collins <Pieter.Collins@cwi.nl>
+#  Copyright 2006  Pieter Collins
 #
 # Maintainer: Pieter Collins <Pieter.Collins@cwi.nl>
 #
@@ -29,13 +29,13 @@ import sys
 print "\nAvailable classes and functions\n",dir(),"\n\n"
 
 a=Float(1.5)
-b=Float(0.875)
+b=Float(-0.375)
 henon_map=HenonMap(Point([a,b]))
 print henon_map
-
+#henon_map=Map(henon_map)
 
 # Find a fixed point
-initial_guess=IntervalPoint( (Interval(0,2),Interval(0,2)) ) # initial state
+initial_guess=IntervalPoint( [Interval(0,2),Interval(0,2)] ) # initial state
 interval_newton=IntervalNewtonSolver(0.00001,64)
 fixed_point=interval_newton.fixed_point(henon_map,initial_guess)
 print "Found fixed point in",fixed_point
@@ -46,24 +46,26 @@ bounding_set=RectangularSet([[-10,6],[-8,8]])
 
 # Construct evolver
 parameters=EvolutionParameters()
-parameters.set_grid_length(Float(0.125))
+parameters.set_grid_length(0.125)
+parameters.set_bounding_domain_size(4.0)
 evolver=MapEvolver(parameters)
 
 # Compute chain-reachable set
 print "Computing chain-reachable set..."
-chain_reach_set = evolver.chainreach(henon_map,initial_set,bounding_set)
+chain_reach_set = evolver.chain_reach(henon_map,ConstraintSet(initial_set))
 print "Found", chain_reach_set.size(), "cells in grid with", chain_reach_set.capacity(), "cells."
 
 # Reduce chain-reachable set to partition tree set
+print "Computing tree representation of chain-reachable set..."
 chain_reach_tree_set = PartitionTreeSet(chain_reach_set)
 print "Reduced to", chain_reach_tree_set.size(),"cells " \
     "in partition tree with", chain_reach_tree_set.capacity(),"cells."
 
 # Export to postscript output
 print "Exporting to postscript output...",
-epsbb=Rectangle([[-4.1,4.1],[-4.1,4.1]]) # eps bounding box
+epsbb=Box([[-4.1,4.1],[-4.1,4.1]]) # eps bounding box
 eps=EpsPlot()
-eps.open("henon_attractor-1.eps",epsbb)
+eps.open("henon_attractor-mask_set.eps",epsbb)
 eps.set_line_style(True)
 eps.set_fill_colour("green")
 eps.write(chain_reach_set)
@@ -71,7 +73,7 @@ eps.set_fill_colour("blue")
 eps.write(initial_set)
 eps.close()
 
-eps.open("henon_attractor-2.eps",epsbb)
+eps.open("henon_attractor-tree_set.eps",epsbb)
 eps.set_pen_colour("black")
 eps.set_fill_colour("green")
 eps.set_line_style(0)

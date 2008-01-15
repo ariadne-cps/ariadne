@@ -52,6 +52,7 @@ namespace Ariadne {
       bool _transparant;
     };
 
+    std::ostream& operator<<(std::ostream& os, const Colour& c);
 
     extern const Colour transparant;
 

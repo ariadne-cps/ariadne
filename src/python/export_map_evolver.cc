@@ -74,7 +74,9 @@ void export_map_evolver()
   evolver_class.def("upper_reach",(SetInterface<R>*(MapEvolver<BS>::*)(const Map<R>&,const SetInterface<R>&,const Integer&)const)
                     (&MapEvolver<BS>::upper_reach),return_value_policy<manage_new_object>(),"Compute an approximation to the timed reachable set under a map" );
 
-  evolver_class.def("chainreach",(SetInterface<R>*(MapEvolver<BS>::*)(const Map<R>&,const SetInterface<R>&,const Box<R>&)const)
+  evolver_class.def("chainreach",(SetInterface<R>*(MapEvolver<BS>::*)(const Map<R>&,const SetInterface<R>&)const)
+                    (&MapEvolver<BS>::chainreach),return_value_policy<manage_new_object>(), "Compute an outer-approximation to the chain reachable set");
+  evolver_class.def("chain_reach",(SetInterface<R>*(MapEvolver<BS>::*)(const Map<R>&,const SetInterface<R>&)const)
                     (&MapEvolver<BS>::chainreach),return_value_policy<manage_new_object>(), "Compute an outer-approximation to the chain reachable set");
   evolver_class.def("viable",(SetInterface<R>*(MapEvolver<BS>::*)(const Map<R>&,const SetInterface<R>&)const)
                     (&MapEvolver<BS>::viable),return_value_policy<manage_new_object>(), "Compute the viability kernel");

@@ -21,9 +21,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <iostream>
+
 #include "output/colour.h"
 
 namespace Ariadne {
+
+std::ostream& 
+Output::operator<<(std::ostream& os, const Colour& c) 
+{
+  return os << "Colour( name=" << c.name() << ", r=" << c.red() << ", g=" << c.green() << ", b=" << c.blue() << " )";
+}
+
 
 const Output::Colour Output::transparant=Colour();
 

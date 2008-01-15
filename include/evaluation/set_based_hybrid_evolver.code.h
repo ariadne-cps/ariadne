@@ -40,6 +40,10 @@
 
 #include "set_based_hybrid_evolver.h"
 
+// For default applicator/integrator
+#include "kuhn_applicator.h"
+#include "kuhn_integrator.h"
+
 namespace Ariadne {
  
 typedef Numeric::Rational Q;
@@ -52,11 +56,21 @@ static int& verbosity = hybrid_evolver_verbosity;
 
 
 template<class BS> 
+Evaluation::SetBasedHybridEvolver<BS>::SetBasedHybridEvolver(const EvolutionParameters<R>& parameters)
+  : _parameters(parameters.clone()),
+    _applicator(new KuhnApplicator<typename BS::real_type>(3)),
+    _integrator(new KuhnIntegrator<typename BS::real_type>(3)),
+    verbosity(parameters.verbosity())
+{
+}
+
+
+template<class BS> 
 Evaluation::SetBasedHybridEvolver<BS>::SetBasedHybridEvolver(const EvolutionParameters<R>& parameters, 
                                                              const ApplicatorInterface<BS>& applicator, 
                                                              const IntegratorInterface<BS>& integrator)
   : _parameters(parameters.clone()),
-    _applicator(applicator.clone()), 
+    _applicator(applicator.clone()),
     _integrator(integrator.clone()),
     verbosity(parameters.verbosity())
 {
@@ -455,7 +469,7 @@ Evaluation::SetBasedHybridEvolver<BS>::lower_reach(const System::HybridAutomaton
                                                    const Geometry::HybridSet<R>& initial_set,
                                                    const Numeric::Rational& time) const
 {
-  HBSL reach, evolve;
+  HBSL reach(automaton.locations()), evolve(automaton.locations());
   THBSL working=this->timed_basic_set_list(this->lower_approximation(initial_set,this->grid(automaton.locations())));
   while(working.size()!=0) { 
     this->_step(evolve,reach,working,automaton,time,lower_semantics);

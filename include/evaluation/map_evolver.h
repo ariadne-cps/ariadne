@@ -176,6 +176,7 @@ namespace Ariadne {
       typedef Geometry::Box<R> Bx;
       typedef Geometry::BoxListSet<R> BxLS;
       typedef Geometry::Grid<R> Gr;
+      typedef Geometry::GridBlock<R> GB;
       typedef Geometry::GridCellListSet<R> GCLS;
       typedef Geometry::GridMaskSet<R> GMS;
       typedef System::Map<R> Mp;

@@ -37,6 +37,7 @@
 #include "geometry/partition_tree_set.h"
 
 #include "geometry/orbit.h"
+#include "output/colour.h"
 #include "output/epsstream.h"
 
 using namespace Ariadne;
@@ -56,6 +57,10 @@ inline void epsfstream_close(epsfstream& eps) { eps.close(); }
 void export_postscript_output()
 {
 
+  class_<Colour>("Colour",init<const char*,unsigned char,unsigned char,unsigned char>())
+    .def(self_ns::str(self))
+  ;
+  
   class_<PlanarProjectionMap>("PlanarProjectionMap",init<dimension_type, dimension_type, dimension_type>())
     .def(self_ns::str(self))
   ;

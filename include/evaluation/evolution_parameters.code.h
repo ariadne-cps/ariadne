@@ -204,10 +204,16 @@ Evaluation::EvolutionParameters<R>::set_minimum_step_size(time_type x)
   this->_minimum_step_size=x;
 }
 
+template<class R>
+void
+Evaluation::EvolutionParameters<R>::set_minimum_step_size(double x) 
+{
+  this->_minimum_step_size=x;
+}
 
 template<class R>
 void
-Evaluation::EvolutionParameters<R>::set_maximum_step_size(time_type x)  
+Evaluation::EvolutionParameters<R>::set_maximum_step_size(double x)  
 {
   this->_maximum_step_size=x;
 }
@@ -220,10 +226,24 @@ Evaluation::EvolutionParameters<R>::set_lock_to_grid_time(time_type x)
   this->_lock_to_grid_time=x;
 }
 
+template<class R>
+void
+Evaluation::EvolutionParameters<R>::set_lock_to_grid_time(double x)  
+{
+  this->_lock_to_grid_time=x;
+}
+
 
 template<class R>
 void
 Evaluation::EvolutionParameters<R>::set_minimum_basic_set_radius(R x) 
+{
+  this->_minimum_basic_set_radius=x;
+}
+
+template<class R>
+void
+Evaluation::EvolutionParameters<R>::set_minimum_basic_set_radius(double x) 
 {
   this->_minimum_basic_set_radius=x;
 }
@@ -236,6 +256,20 @@ Evaluation::EvolutionParameters<R>::set_maximum_basic_set_radius(R x)
   this->_maximum_basic_set_radius=x;
 }
 
+template<class R>
+void
+Evaluation::EvolutionParameters<R>::set_maximum_basic_set_radius(double x)  
+{
+  this->_maximum_basic_set_radius=x;
+}
+
+
+template<class R>
+void
+Evaluation::EvolutionParameters<R>::set_grid_length(double x)  
+{
+  this->_grid_length=x;
+}
 
 template<class R>
 void
@@ -254,6 +288,14 @@ Evaluation::EvolutionParameters<R>::set_argument_grid_length(R x)
 
 template<class R>
 void
+Evaluation::EvolutionParameters<R>::set_argument_grid_length(double x)  
+{
+  this->_argument_grid_length=x;
+}
+
+
+template<class R>
+void
 Evaluation::EvolutionParameters<R>::set_result_grid_length(R x) 
 {
   this->_result_grid_length=x;
@@ -261,10 +303,27 @@ Evaluation::EvolutionParameters<R>::set_result_grid_length(R x)
 
 template<class R>
 void
+Evaluation::EvolutionParameters<R>::set_result_grid_length(double x) 
+{
+  this->_result_grid_length=x;
+}
+
+
+template<class R> 
+void
 Evaluation::EvolutionParameters<R>::set_bounding_domain_size(R x)  
 {
   this->_bounding_domain_size=x;
 }
+
+template<class R>
+void
+Evaluation::EvolutionParameters<R>::set_bounding_domain_size(double x)  
+{
+  this->_bounding_domain_size=x;
+}
+
+
 
 template<class R>
 void

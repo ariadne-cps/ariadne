@@ -36,7 +36,12 @@
 namespace Ariadne {
   namespace Evaluation {
 
-    /*! \brief Parameters for controlling the accuracy of evolution methods. */
+    /*! \brief Parameters for controlling the accuracy of evolution methods. 
+     *
+     * \internal This class is an abomination. Parameter specification should be
+     * delegated to the class implementing the method that needs it. Currently
+     * used to present a semi-stable interface to users.
+     */
     template<class R>
     class EvolutionParameters {
      private:
@@ -129,26 +134,35 @@ namespace Ariadne {
 
       /*! \brief Set the suggested minimum step size for integration. */
       void set_minimum_step_size(time_type);
+      void set_minimum_step_size(double);
       /*! \brief Set the suggested maximum allowable step size for integration. */
       void set_maximum_step_size(time_type);
+      void set_maximum_step_size(double);
       
       /*! \brief Set the minimum radius of a basic set after a subdivision. */
       void set_minimum_basic_set_radius(R);
+      void set_minimum_basic_set_radius(double);
       /*! \brief Set the maximum radius of a basic set after a subdivision. */
       void set_maximum_basic_set_radius(R);
+      void set_maximum_basic_set_radius(double);
 
       /*! \brief Set the time after which an integrator may approximate computed sets on a grid. */
       void set_lock_to_grid_time(time_type);
+      void set_lock_to_grid_time(double);
 
       /*! \brief Set the length of the approximation grid. */
       void set_grid_length(R);
+      void set_grid_length(double);
       /*! \brief Set the length of the approximation grid for the argument of a function. */
       void set_argument_grid_length(R);
+      void set_argument_grid_length(double);
       /*! \brief Set the length of the approximation grid for the result of a function. */
       void set_result_grid_length(R);
+      void set_result_grid_length(double);
 
       /*! \brief Set the size of the region used for computation. */
       void set_bounding_domain_size(R);
+      void set_bounding_domain_size(double);
 
       /*! \brief Set the verbosity of the output. */
       void set_verbosity(uint);

@@ -117,7 +117,7 @@ namespace Ariadne {
 
     template<class BS> inline 
     std::ostream& operator<<(std::ostream& os, const HybridBasicSet<BS>& hs) {
-      return os << ", q=" << hs.state() << ", s=" << hs.set() << "}";
+      return os << "{ q=" << hs.state() << ", s=" << hs.set() << " }";
     }
 
 

@@ -45,13 +45,14 @@ template<class R>
 void export_vector_field() 
 {
   class_<VectorField<R> >("VectorField", init<const FunctionInterface<R>&>())
+    .def(init<const VectorField<R>&>())
     .def("dimension", &VectorField<R>::dimension)
     .def("smoothness", &VectorField<R>::smoothness)
     .def("evaluate", &VectorField<R>::evaluate)
     .def("jacobian", &VectorField<R>::jacobian)
   ;
  
-  class_< AffineVectorField<R>, bases< VectorField<R> > >("AffineVectorField", init<const Matrix<R>&,const Vector<R>&>())
+  class_< AffineVectorField<R>, bases< VectorField<R> > >("AffineVectorField", init<const Matrix<R>&, const Vector<R>&>())
     .def(self_ns::str(self));
 }
 

@@ -72,6 +72,9 @@ namespace Ariadne {
       //@{
       //! \name Constructors and destructors
 
+      /*! \brief Construct from evolution parameters, using a default applicator and integrator. */
+      SetBasedHybridEvolver(const EvolutionParameters<R>& parameters);
+
       /*! \brief Construct from evolution parameters, an applicator and an integrator. */
       SetBasedHybridEvolver(const EvolutionParameters<R>& parameters, 
                             const ApplicatorInterface<BS>& applicator, 
@@ -184,9 +187,7 @@ namespace Ariadne {
       HBSL basic_set_list(const HGCLS& hgcls) const {
         HBSL result(hgcls.locations()); 
         uint i=0;
-        std::cout << hgcls << std::endl;
         for(typename HGCLS::const_iterator iter=hgcls.begin(); iter!=hgcls.end(); ++iter) { 
-          std::cout << i++ << " " << *iter << std::endl;
           assert(i<=hgcls.size()+1);
           result.adjoin(HBS(iter->state(),this->basic_set(iter->set()))); }
         return result; }

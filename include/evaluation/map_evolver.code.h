@@ -300,12 +300,14 @@ Evaluation::MapEvolver<BS>::chainreach(const System::Map<R>& map,
   Gr grid=this->grid(map.dimension());
   T time=this->lock_to_grid_steps();
   GMS* result=new GMS(grid,bb);
+  GB bounds=result->bounds();
   GCLS found=this->outer_approximation(initial_set);
   found=this->_upper_reach(map,found,time);
   while(!found.empty()) {
     result->adjoin(found);
     found=this->_upper_evolve(map,found,time);
     found.remove(*result);
+    found.restrict(bounds);
   }
   return result;
 }

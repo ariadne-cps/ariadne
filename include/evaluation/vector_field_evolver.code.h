@@ -56,6 +56,7 @@
 #include "evaluation/approximator_interface.h"
 
 #include "evaluation/standard_approximator.h"
+#include "evaluation/standard_subdivider.h"
 
 #include "output/logging.h"
 
@@ -114,7 +115,8 @@ Evaluation::VectorFieldEvolver<BS>::VectorFieldEvolver(const EvolutionParameters
                                                       const IntegratorInterface<BS>& integrator)
   : _parameters(parameters.clone()),
     _integrator(integrator.clone()),
-    _approximator(new StandardApproximator<BS>())
+    _approximator(new StandardApproximator<BS>()),
+    _subdivider(new StandardSubdivider<BS>)
 {
 }
 
@@ -124,7 +126,8 @@ Evaluation::VectorFieldEvolver<BS>::VectorFieldEvolver(const EvolutionParameters
                                                       const ApproximatorInterface<BS>& approximator)
   : _parameters(parameters.clone()),
     _integrator(integrator.clone()),
-    _approximator(approximator.clone())
+    _approximator(approximator.clone()),
+    _subdivider(new StandardSubdivider<BS>)
 {
 }
 
@@ -206,8 +209,8 @@ Evaluation::VectorFieldEvolver<BS>::_upper_evolve(const System::VectorField<R>& 
 template<class BS>
 Geometry::GridCellListSet<typename BS::real_type>
 Evaluation::VectorFieldEvolver<BS>::_upper_reach(const System::VectorField<R>& vector_field, 
-                                         const Geometry::GridCellListSet<R>& initial_set,
-                                         const Numeric::Rational& time) const
+                                                 const Geometry::GridCellListSet<R>& initial_set,
+                                                 const Numeric::Rational& time) const
 {
   BSL reach, evolve;
   TBSL working=this->timed_basic_set_list(initial_set);
@@ -244,11 +247,15 @@ Evaluation::VectorFieldEvolver<BS>::upper_reach(const System::VectorField<R>& ve
                                                const Geometry::SetInterface<R>& initial_set,
                                                const Numeric::Rational& time) const
 {
+  std::cerr<<__FUNCTION__<<std::endl;
   BSL reach, evolve;
+  std::cerr<<"outer_approximation(initial_set)="<<this->outer_approximation(initial_set)<<std::endl;
   TBSL working=this->timed_basic_set_list(this->outer_approximation(initial_set));
+  std::cerr<<"working="<<working<<std::endl;
   while(working.size()!=0) { 
     this->_step(evolve,reach,working,vector_field,time,upper_semantics);
   }
+  std::cerr << "reach="<<reach<<"\nevolve="<<evolve<<std::endl;
   return new GMS(this->outer_approximation(reach,this->grid(vector_field.dimension())));
 }
 

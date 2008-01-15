@@ -51,23 +51,30 @@ void export_vector_field_evolver()
 {
   typedef Zonotope<R> BS;
 
-  /*
-  class_< VectorFieldEvolver<R> > evolver_class("VectorFieldEvolver",init<const EvolutionParameters<R>&,const IntegratorInterface<BS>&>());
-    evolver_class.def(init<const EvolutionParameters<R>&>());
-    evolver_class.def("integrate",(SetInterface<R>*(VectorFieldEvolver<R>::*)(const VectorField<R>&,const SetInterface<R>&,const Rational&)const)
-                      (&VectorFieldEvolver<R>::evolve),return_value_policy<manage_new_object>());
-    evolver_class.def("reach",(SetInterface<R>*(VectorFieldEvolver<R>::*)(const VectorField<R>&,const SetInterface<R>&,const Rational&)const)
-                      (&VectorFieldEvolver<R>::reach),return_value_policy<manage_new_object>());
-    evolver_class.def("lower_reach",(SetInterface<R>*(VectorFieldEvolver<R>::*)(const VectorField<R>&,const SetInterface<R>&)const)
-                      (&VectorFieldEvolver<R>::lower_reach),return_value_policy<manage_new_object>());
-    evolver_class.def("chainreach",(SetInterface<R>*(VectorFieldEvolver<R>::*)(const VectorField<R>&,const SetInterface<R>&,const Box<R>&)const)
-                      (&VectorFieldEvolver<R>::chainreach),return_value_policy<manage_new_object>());
-    evolver_class.def("viable",(SetInterface<R>*(VectorFieldEvolver<R>::*)(const VectorField<R>&,const SetInterface<R>&)const)
-                      (&VectorFieldEvolver<R>::viable),return_value_policy<manage_new_object>());
-    evolver_class.def("verify",(tribool(VectorFieldEvolver<R>::*)(const VectorField<R>&,const SetInterface<R>&,const SetInterface<R>&)const)
-                      (&VectorFieldEvolver<R>::verify));
+  class_< VectorFieldEvolver<BS> > evolver_class("VectorFieldEvolver",init<const EvolutionParameters<R>&,const IntegratorInterface<BS>&>());
+    //evolver_class.def(init<const EvolutionParameters<R>&>());
+    //evolver_class.def("integrate",(SetInterface<R>*(VectorFieldEvolver<BS>::*)(const VectorField<R>&,const SetInterface<R>&,const Rational&)const)
+    //                  (&VectorFieldEvolver<BS>::evolve),return_value_policy<manage_new_object>());
+    //evolver_class.def("reach",(SetInterface<R>*(VectorFieldEvolver<BS>::*)(const VectorField<R>&,const SetInterface<R>&,const Rational&)const)
+    //                  (&VectorFieldEvolver<BS>::reach),return_value_policy<manage_new_object>());
+    evolver_class.def("lower_evolve",(SetInterface<R>*(VectorFieldEvolver<BS>::*)(const VectorField<R>&,const SetInterface<R>&,const Rational&)const)
+                      (&VectorFieldEvolver<BS>::lower_evolve),return_value_policy<manage_new_object>());
+    evolver_class.def("upper_evolve",(SetInterface<R>*(VectorFieldEvolver<BS>::*)(const VectorField<R>&,const SetInterface<R>&,const Rational&)const)
+                      (&VectorFieldEvolver<BS>::lower_evolve),return_value_policy<manage_new_object>());
+    evolver_class.def("lower_reach",(SetInterface<R>*(VectorFieldEvolver<BS>::*)(const VectorField<R>&,const SetInterface<R>&,const Rational&)const)
+                      (&VectorFieldEvolver<BS>::lower_reach),return_value_policy<manage_new_object>());
+    evolver_class.def("upper_reach",(SetInterface<R>*(VectorFieldEvolver<BS>::*)(const VectorField<R>&,const SetInterface<R>&,const Rational&)const)
+                      (&VectorFieldEvolver<BS>::upper_reach),return_value_policy<manage_new_object>());
+    evolver_class.def("chainreach",(SetInterface<R>*(VectorFieldEvolver<BS>::*)(const VectorField<R>&,const SetInterface<R>&,const Box<R>&)const)
+                      (&VectorFieldEvolver<BS>::chainreach),return_value_policy<manage_new_object>());
+    evolver_class.def("chain_reach",(SetInterface<R>*(VectorFieldEvolver<BS>::*)(const VectorField<R>&,const SetInterface<R>&,const Box<R>&)const)
+                      (&VectorFieldEvolver<BS>::chainreach),return_value_policy<manage_new_object>());
+    evolver_class.def("viable",(SetInterface<R>*(VectorFieldEvolver<BS>::*)(const VectorField<R>&,const SetInterface<R>&)const)
+                      (&VectorFieldEvolver<BS>::viable),return_value_policy<manage_new_object>());
+    evolver_class.def("verify",(tribool(VectorFieldEvolver<BS>::*)(const VectorField<R>&,const SetInterface<R>&,const SetInterface<R>&)const)
+                      (&VectorFieldEvolver<BS>::verify));
   
-  */
+
 }
 
 template void export_vector_field_evolver<FloatPy>();

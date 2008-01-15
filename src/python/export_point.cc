@@ -131,7 +131,7 @@ void export_interval_point()
 {
   typedef Interval<R> I;
 
-  class_< Point<I> >(python_name<R>("FuzzyPoint").c_str(),init<>())
+  class_< Point<I> >(python_name<R>("IntervalPoint").c_str(),init<>())
     .def("__init__", make_constructor(&make_point<I>) )
     .def(init< int >())
     .def(init< Point<R> >())

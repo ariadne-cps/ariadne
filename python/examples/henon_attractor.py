@@ -28,11 +28,30 @@ import sys
 
 print "\nAvailable classes and functions\n",dir(),"\n\n"
 
+#Set parameters for Henon attractor
 a=Float(1.5)
 b=Float(-0.375)
-henon_map=HenonMap(Point([a,b]))
-print henon_map
-#henon_map=Map(henon_map)
+
+#Construct Python-based Henon map.
+print "Constructing and evaluating Henon map defined in Python"
+def henon_function(x):
+    return [ a-x[0]*x[0]-b*x[1], x[0] ]
+henon_function.result_size=2
+henon_function.argument_size=2
+henon_function=AriadneFunction(henon_function)
+print "henon_function =",henon_function
+python_henon_map=Map(henon_function)
+pt=IntervalPoint([1.2,1.2])
+print python_henon_map(pt)
+
+#Construct built-in Henon map
+print "Constructing built-in Henon map"
+builtin_henon_map=HenonMap(Point([a,b]))
+print builtin_henon_map
+
+#Select which version of the Henon map to use
+#henon_map=python_henon_map
+henon_map=builtin_henon_map
 
 # Find a fixed point
 initial_guess=IntervalPoint( [Interval(0,2),Interval(0,2)] ) # initial state
@@ -46,7 +65,8 @@ bounding_set=RectangularSet([[-10,6],[-8,8]])
 
 # Construct evolver
 parameters=EvolutionParameters()
-parameters.set_grid_length(0.125)
+#parameters.set_grid_length(0.125)
+parameters.set_grid_length(0.0625)
 parameters.set_bounding_domain_size(4.0)
 evolver=MapEvolver(parameters)
 

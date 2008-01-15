@@ -91,42 +91,11 @@ namespace Ariadne {
                                      const Numeric::Rational& integration_time,
                                      const Geometry::Box<R>& bound) const;
       
-
-       /*! \brief Computes the flow bounds. */
-      virtual Geometry::Box<R> compute_flow_bounds(const System::VectorField<R>& vector_field,
-                                                   const Geometry::Box<R>& initial_set,
-                                                   Numeric::Rational& integration_time) const;
-
-       /*! \brief Gives an inital estimated bounding box for the flow of \a vector_field starting in \a initial_set remains in \a bound for times up to time \a integration_time. The integration time may be dynamically varied to allow the bounding box to be computed. */
-      virtual Geometry::Box<R> estimate_flow_bounds(const System::VectorField<R>& vector_field,
-                                                    const Geometry::Box<R>& initial_set,
-                                                    Numeric::Rational& integration_time) const;
-
-      
-      /*! \brief Computes an inital estimated bounding box for the flow of \a vector_field starting in \a initial_set remains in \a bound for times up to time \a integration_time. */
-      virtual Geometry::Box<R> estimate_flow_bounds(const System::VectorField<R>& vector_field,
-                                                          const Geometry::Box<R>& initial_set,
-                                                          const Numeric::Rational& integration_time) const;
-
-      /*! \brief Computes a bounding box for the flow of \a vector_field starting in \a initial_set remains in \a bound for times up to time \a integration_time. */
-      virtual Geometry::Box<R> estimate_flow_bounds(const System::VectorField<R>& vector_field,
-                                                          const Geometry::Box<R>& initial_set,
-                                                          const Numeric::Rational& integration_time,
-                                                          const unsigned int& maximum_iterations) const;
-
       /*! \brief Compute a set \a bound such that the flow of \a vector_field starting in \a initial_set remains in \a bound for times up to \a integration_time, given a bound \a estimated_bound. */
       virtual Geometry::Box<R> refine_flow_bounds(const System::VectorField<R>& vector_field,
                                                         const Geometry::Box<R>& initial_set,
                                                         const Geometry::Box<R>& estimated_bound,
                                                         const Numeric::Rational& integration_time) const;
-
-      /*! \brief Compute a set \a bound such that the flow of \a vector_field starting at \a initial_point remains in \a bound for times up to \a integration_time, given a bound \a estimated_bound. */
-      virtual Geometry::Box<R> refine_flow_bounds(const System::VectorField<R>& vector_field,
-                                                        const Geometry::Point<I>& initial_point,
-                                                        const Geometry::Box<R>& estimated_bound,
-                                                        const Numeric::Rational& integration_time) const;
-
-
 
 
 
@@ -136,16 +105,6 @@ namespace Ariadne {
                                                                      const Numeric::Rational& h) const;
 
 
-      /*! \brief Computes a bounding box for the flow of \a vector_field starting in \a initial_set remains in \a bound for times up to time \a integration_time. The integration time may be dynamically varied to allow the bounding box to be computed. */
-      virtual Geometry::Box<R> estimate_interval_flow_bounds(const System::VectorField<R>& vector_field,
-                                                                   const Geometry::Box<R>& initial_set,
-                                                                   Numeric::Interval<R>& integration_time) const;
-
-      /*! \brief Computes a bounding box for the flow of \a vector_field starting in \a initial_set remains in \a bound for times up to time \a integration_time. The integration time may be dynamically varied to allow the bounding box to be computed. */
-      virtual Geometry::Box<R> refine_interval_flow_bounds(const System::VectorField<R>& vector_field,
-                                                                 const Geometry::Box<R>& initial_set,
-                                                                 const Geometry::Box<R>& estimated_bound,
-                                                                 const Numeric::Interval<R>& integration_time) const;
      private:
       Numeric::Rational _maximum_step_size;
     };

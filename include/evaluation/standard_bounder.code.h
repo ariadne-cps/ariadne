@@ -73,9 +73,7 @@ std::pair<Numeric::Rational, Geometry::Box<R> >
 Evaluation::StandardBounder<R>::flow_bounds(const System::VectorField<R>& vf,
                                             const Geometry::Box<R>& r) const
 {
-  Numeric::Rational t=this->maximum_step_size();
-  Geometry::Box<R> bb=this->compute_flow_bounds(vf,r,t);
-  return std::make_pair(t,bb);
+  return flow_bounds(vf,r,this->maximum_step_size());
 }
 
 template<class R>
@@ -84,27 +82,55 @@ Evaluation::StandardBounder<R>::flow_bounds(const System::VectorField<R>& vf,
                                             const Geometry::Box<R>& r,
                                             const Numeric::Rational& hmax) const
 {
+  // Try to find a time h and a set b such that subset(r+Interval<R>(0,h)*vf(b),b) holds
+  ARIADNE_LOG(6,"flow_bounds(VectorField,Box,Time hmax)\n");
+  ARIADNE_LOG(7,"  r="<<r<<" hmax="<<hmax<<"\n");
+  
+  ARIADNE_ASSERT(vf.dimension()==r.dimension());
+
+  // Set up constants of the method.
+  // TODO: Better estimates of constants
+  const R INITIAL_MULTIPLIER=2;
+  const R MULTIPLIER=0.125;
+  const R BOX_RADIUS_MULTIPLIER=0.125;
+  const uint EXPANSION_STEPS=4;
+  const uint REFINEMENT_STEPS=4;
+  Geometry::Box<R> b,nb;
+  LinearAlgebra::Vector<I> e=(r.position_vectors()-midpoint(r.position_vectors()))*BOX_RADIUS_MULTIPLIER;
+
   Numeric::Rational h=hmax;
-  Geometry::Box<R> bb=this->compute_flow_bounds(vf,r,h);
-  return std::make_pair(h,bb);
-}
+  bool success=false;
+  while(!success) {
+    ARIADNE_ASSERT(h>0.0000001);
+    Numeric::Interval<R> ih(0,h);
+    b=r+INITIAL_MULTIPLIER*ih*vf(r)+e;
+    for(uint i=0; i!=EXPANSION_STEPS; ++i) {
+      LinearAlgebra::Vector<I> df=vf(b);
+      nb=r+ih*df;
+      if(subset(nb,b)) {
+        success=true;
+        break;
+      } else {
+        b=r+MULTIPLIER*ih*df;
+      }
+    }
+    h/=2;
+  }
 
-
-template<class R>
-Geometry::Box<R>
-Evaluation::StandardBounder<R>::compute_flow_bounds(const System::VectorField<R>& vf,
-                                                    const Geometry::Box<R>& r,
-                                                    Numeric::Rational& h) const
-{
-  Numeric::Rational oldh=h;
-  ARIADNE_LOG(5,"StandardBounder::flow_bounds(VectorField vf, Recangle R, Time h)\n");
-  ARIADNE_LOG(6,"  h="<<h.get_d()<<", r="<<r<<"\n");
-  Geometry::Box<R> bb=this->estimate_flow_bounds(vf,r,h);
-  bb=this->refine_flow_bounds(vf,r,bb,h);
-  bb=this->refine_flow_bounds(vf,r,bb,h);
-  ARIADNE_LOG(6,"  h="<<h.get_d()<<", bb="<<bb<<"\n");
-  assert(h==oldh);
-  return bb;
+  ARIADNE_ASSERT(subset(nb,b));
+  b=nb;
+  
+  Numeric::Interval<R> ih(0,h);
+  for(uint i=0; i!=REFINEMENT_STEPS; ++i) {
+     b=r+ih*vf(b);
+  }
+  
+  // Check result of operation
+  // We use "possibly" here since the bound may touch 
+  ARIADNE_ASSERT(possibly(subset(r+ih*vf(b),b)));
+  
+  ARIADNE_LOG(7,"  h="<<h<<" b="<<b<<" r+[0,h]*f(b)="<<r+ih*vf(b)<<"\n");
+  return std::make_pair(h,b);
 }
 
 
@@ -117,7 +143,7 @@ Evaluation::StandardBounder<R>::check_flow_bounds(const System::VectorField<R>& 
                                                   const Numeric::Rational& h,
                                                   const Geometry::Box<R>& b) const
 {
-  if(verbosity>6) { std::clog << "StandardBounder::check_flow_bounds" << std::endl; }
+  ARIADNE_LOG(6,"StandardBounder::check_flow_bounds");
   using namespace Geometry;
   using namespace Numeric;
   return subset(r+Interval<R>(0,h)*vf(b),b);
@@ -125,99 +151,6 @@ Evaluation::StandardBounder<R>::check_flow_bounds(const System::VectorField<R>& 
 
 
 
-template<class R>
-Geometry::Box<R>
-Evaluation::StandardBounder<R>::estimate_flow_bounds(const System::VectorField<R>& vf,
-                                                     const Geometry::Box<R>& r,
-                                                     const Numeric::Rational& h) const
-{
-  return this->estimate_flow_bounds(vf,r,h,12);
-}
-
-  
-template<class R>
-Geometry::Box<R>
-Evaluation::StandardBounder<R>::estimate_flow_bounds(const System::VectorField<R>& vf,
-                                                     const Geometry::Box<R>& r,
-                                                     const Numeric::Rational& h,
-                                                     const unsigned int& maximum_iterations) const
-{
-  using namespace Geometry;
-  using namespace Numeric;
-  
-  ARIADNE_LOG(8,"StandardBounder::estimate_flow_bounds" << " (VectorField vf, Box r, Time t, int n)\n");
-  ARIADNE_LOG(9,"  h="<<h<<", r="<<r<<", n="<<maximum_iterations<<"\n");
-  
-  typedef typename Numeric::traits<R>::arithmetic_type F;
-  uint iteration=0;
-  R multiplier=1.125;
-  time_type t=h;
-  Box<R> reach(vf.dimension());
-  Box<R> bounds(vf.dimension());
-  reach=r;
-  
-  while(t>0) {
-    bounds=reach+multiplier*Numeric::Interval<R>(0,h)*vf(reach);
-    LinearAlgebra::Vector< Interval<R> > df=vf(bounds);
-    
-    time_type dt=t;
-    for(dimension_type i=0; i!=vf.dimension(); ++i) {
-      if(df(i).upper()>0) {
-        dt=min(dt,time_type(div_up(sub_up(bounds[i].upper(),reach[i].upper()),df(i).upper())));
-      }
-      if(df(i).lower()<0) {
-        dt=min(dt,time_type(div_up(sub_up(bounds[i].lower(),reach[i].lower()),df(i).lower())));
-      }
-    }
-    reach=bounds;
-    t-=dt;
-    
-    ++iteration;
-    if(iteration==maximum_iterations) {
-      throw std::runtime_error(std::string(__FUNCTION__)+": Cannot find bounding box for flow");
-    }
-  }
-  ARIADNE_LOG(9,"  bounds="<<bounds<<"\n");
-  return reach;
-}
-
-
-
-template<class R>
-Geometry::Box<R>
-Evaluation::StandardBounder<R>::estimate_flow_bounds(const System::VectorField<R>& vf,
-                                                const Geometry::Box<R>& r,
-                                                Numeric::Rational& h) const
-{
-  using namespace Geometry;
-  using namespace Numeric;
-  
-  if(verbosity>6) { std::clog << "StandardBounder::estimate_flow_bounds" << std::endl; }
-  
-  static const unsigned int max_tries=12;
-  
-  unsigned int max_iterations=12;
-  unsigned int remaining_tries=max_tries;
-  
-  Box<R> bounds(vf.dimension());
-  while(bounds.empty()) {
-    try {
-      bounds=estimate_flow_bounds(vf,r,h,max_iterations);
-    }
-    catch(std::runtime_error) { 
-      h/=2;
-      max_iterations+=1;
-      --remaining_tries;
-      if(remaining_tries==0) {
-        throw std::runtime_error(std::string(__FUNCTION__)+": cannnot find bounding box for flow");
-      }
-    }
-  }
-  
-  if(verbosity>7) { std::clog << "  h=" << approx<double>(h) << "  b=" << bounds << std::endl; }
-  
-  return bounds;
-}
 
 
 
@@ -249,82 +182,7 @@ Evaluation::StandardBounder<R>::refine_flow_bounds(const System::VectorField<R>&
   return xb;
 }
 
-
-template<class R>
-Geometry::Box<R>
-Evaluation::StandardBounder<R>::refine_flow_bounds(const System::VectorField<R>& vector_field,
-                                              const Geometry::Point<I>& initial_point,
-                                              const Geometry::Box<R>& estimated_bounds,
-                                              const Numeric::Rational& step_size) const
-{
-  if(verbosity>6) { std::clog << "StandardBounder::refine_flow_bounds(VectorField,Point,Box,Time)" << std::endl; }
-  
-  using namespace System;
-  using namespace Geometry;
-  using namespace LinearAlgebra;
-  using namespace Numeric;
-  const VectorField<R>& vf=vector_field;
-  Box<R> rx(initial_point);
-  Box<R> b=estimated_bounds;
-  Interval<R> h=Interval<R>(0,step_size);
-  
-  Box<R> xb=rx+h*vf(b);
-  Box<R> xxb=rx+h*vf(xb);
-  
-  if(verbosity>7) { std::clog << "new_bounds " << xxb << "," << xb << " vs old_bounds " << b << "  " << subset(xb,b) << std::endl; }
-  
-  return xb;
-}
-
-
-template<class R>
-Geometry::Box<R>
-Evaluation::StandardBounder<R>::estimate_interval_flow_bounds(const System::VectorField<R>& vector_field,
-                                                         const Geometry::Box<R>& initial_set,
-                                                         Numeric::Interval<R>& step_size) const
-{
-  if(verbosity>6) { std::clog << "StandardBounder::estimate_flow_bounds(VectorField,Point,TimeInterval)" << std::endl; }
-  
-  Numeric::Rational backwards_step_size=step_size.lower();
-  Numeric::Rational forwards_step_size=step_size.upper();
-  
-  assert(backwards_step_size==0);
-  Geometry::Box<R> estimated_bounds=estimate_flow_bounds(vector_field,initial_set,forwards_step_size);
-
-  // FIXME: need to round inwards here...
-  step_size=Numeric::Interval<R>(backwards_step_size,forwards_step_size);
-  assert(step_size.lower()>=backwards_step_size);
-  assert(step_size.upper()>=forwards_step_size);
-
-  return estimated_bounds;
-}
-
-
-template<class R>
-Geometry::Box<R>
-Evaluation::StandardBounder<R>::refine_interval_flow_bounds(const System::VectorField<R>& vector_field,
-                                                       const Geometry::Box<R>& initial_set,
-                                                       const Geometry::Box<R>& estimated_bounds,
-                                                       const Numeric::Interval<R>& step_size) const
-{
-  if(verbosity>6) { std::clog << "StandardBounder::refine_flow_bounds(VectorField,Point,Box,TimeInterval)" << std::endl; }
-  
-  using namespace System;
-  using namespace Geometry;
-  using namespace LinearAlgebra;
-  using namespace Numeric;
-  const VectorField<R>& vf=vector_field;
-  const Box<R>& rx(initial_set);
-  Box<R> b=estimated_bounds;
-  const Interval<R>& h=step_size;
-  
-  Box<R> xb=rx+h*vf(b);
-  Box<R> xxb=rx+h*vf(xb);
-  
-  if(verbosity>7) { std::clog << "new_bounds " << xxb << "," << xb << " vs old_bounds " << b << "  " << subset(xb,b) << std::endl; }
-  
-  return xb;
-}
+ 
 
 
 
@@ -333,8 +191,8 @@ Evaluation::StandardBounder<R>::refine_interval_flow_bounds(const System::Vector
 template<class R>
 LinearAlgebra::Matrix< Numeric::Interval<R> >
 Evaluation::StandardBounder<R>::estimate_flow_jacobian_bounds(const System::VectorField<R>& vf,
-                                                      const Geometry::Box<R>& b,
-                                                      const Numeric::Rational& h) const
+                                                              const Geometry::Box<R>& b,
+                                                              const Numeric::Rational& h) const
 {
   dimension_type d=vf.dimension();
   LinearAlgebra::Matrix<I> Df = vf.jacobian(b);

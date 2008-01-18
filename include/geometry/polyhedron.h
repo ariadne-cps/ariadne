@@ -290,6 +290,12 @@ namespace Ariadne {
     template<class X, class R> 
     tribool disjoint(const Box<R>& bx, const Polyhedron<X>& plhd);
     
+    template<class X> 
+    tribool disjoint(const Polyhedron<X>& plhd, const Polytope<X>& pltp);
+    
+    template<class X>
+    tribool disjoint(const Polytope<X>& pltp, const Polyhedron<X>& plhd);
+    
     
     template<class X> 
     tribool subset(const Polyhedron<X>& plhd1, const Polyhedron<X>& plhd2);

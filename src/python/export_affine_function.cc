@@ -25,9 +25,13 @@
 
 #include "numeric/rational.h"
 #include "linear_algebra/vector.h"
+#include "linear_algebra/covector.h"
 #include "linear_algebra/matrix.h"
 #include "function/affine_function.h"
 #include "function/identity_function.h"
+
+#include "geometry/polyhedron.h"
+#include "geometry/polytope.h"
 
 #include <boost/python.hpp>
 using namespace boost::python;
@@ -36,7 +40,48 @@ using namespace Ariadne;
 using namespace Ariadne::Numeric;
 using namespace Ariadne::LinearAlgebra;
 using namespace Ariadne::Function;
+using namespace Ariadne::Geometry;
 using namespace Ariadne::Python;
+
+
+//FIXME: This code should go elsewhere
+template<class X>
+Polyhedron<typename Numeric::traits<X>::arithmetic_type> 
+preimage(const Function::AffineFunction<X>& af, const Polyhedron<X>& plhd)
+{
+  // Function f(x) = Ax+b = y
+  const Matrix<X>& fA=af.A();
+  const Vector<X>& fb=af.b();
+
+  // Polyhedron Ay<=b
+  const Matrix<X>& pA=plhd.A();
+  const Vector<X>& pb=plhd.b();
+
+  // Preimage is polyhedron pA fA x + pA fb <= pb
+  return Polyhedron<typename Numeric::traits<X>::arithmetic_type>(pA*fA,pb-pA*fb);
+}
+
+
+template<class X>
+Polytope<typename Numeric::traits<X>::arithmetic_type> 
+image(const Function::AffineFunction<X>& af, const Polytope<X>& pltp)\
+{
+  // Function f(x) = Ax+b
+  const Matrix<X>& fA=af.A();
+  const Vector<X>& fb=af.b();
+
+  // Construct the transformation on rays
+  Matrix<X> fT(fA.number_of_rows()+1, fA.number_of_columns()+1);
+  fT(slice(0,fA.number_of_rows()),slice(0,fA.number_of_columns()))=fA;
+  for(size_type i=0; i!=fb.size(); ++i) { fT(i,fA.number_of_columns())=fb[i]; }
+  fT(fA.number_of_rows(),fA.number_of_columns())=1;
+     
+  // Polytope Vs
+  const Matrix<X>& pV=pltp.generators();              
+
+  // Preimage is polyhedron AV+o^T 
+  return Polytope<X>(fT*pV);
+}
 
 template<class R>
 void export_affine_function() 
@@ -53,8 +98,26 @@ void export_affine_function()
   affine_function_class.def("jacobian",(Matrix<A>(AffineFunction<R>::*)(const Vector<A>&)const)(&AffineFunction<R>::jacobian));
   affine_function_class.def(self_ns::str(self));
 
-  class_< IdentityFunction<R>, bases< FunctionInterface<R> > > indentity_function_class("IdentityFunction",init<uint>());
-  indentity_function_class.def(self_ns::str(self));
+  class_< IdentityFunction<R>, bases< FunctionInterface<R> > > identity_function_class("IdentityFunction",init<uint>());
+  identity_function_class.def(self_ns::str(self));
+}
+
+template<>
+void export_affine_function<Rational>() 
+{
+  typedef Rational Q;
+
+  class_< AffineFunction<Q>, bases< FunctionInterface<Q> > > affine_function_class("QAffineFunction",init< Matrix<Q>,Vector<Q> >());
+  affine_function_class.def(init< Matrix<Q>,Vector<Q> >());
+  affine_function_class.def("argument_size", &AffineFunction<Q>::argument_size);
+  affine_function_class.def("result_size", &AffineFunction<Q>::result_size);
+  affine_function_class.def("smoothness", &AffineFunction<Q>::smoothness);
+  affine_function_class.def("evaluate",(Vector<Q>(AffineFunction<Q>::*)(const Vector<Q>&)const)(&AffineFunction<Q>::evaluate));
+  affine_function_class.def("jacobian",(Matrix<Q>(AffineFunction<Q>::*)(const Vector<Q>&)const)(&AffineFunction<Q>::jacobian));
+  affine_function_class.def(self_ns::str(self));
+
+  def("image",(Polytope<Q>(*)(const AffineFunction<Q>&,const Polytope<Q>&))&image);
+  def("preimage",(Polyhedron<Q>(*)(const AffineFunction<Q>&,const Polyhedron<Q>&))&preimage);
 }
 
 template void export_affine_function<Rational>();

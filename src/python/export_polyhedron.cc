@@ -45,30 +45,48 @@ using namespace boost::python;
 template<class R>
 void export_polyhedron() 
 {
-  typedef Vector<R> RVector;
-  typedef Matrix<R> RMatrix;
-  typedef SetInterface<R> RSetInterface;
-  typedef Polyhedron<R> RPolyhedron;
-  typedef Box<R> RBox;
-  typedef Polytope<R> RPolytope;
-  
-  def("disjoint", (tribool(*)(const RPolyhedron&, const RBox&))(&disjoint));
-  def("disjoint", (tribool(*)(const RBox&, const RPolyhedron&))(&disjoint));
-  def("disjoint", (tribool(*)(const RPolyhedron&, const RPolyhedron&))(&disjoint));
-  def("subset", (tribool(*)(const RBox&, const RPolyhedron&))(&subset));
-  def("subset", (tribool(*)(const RPolytope&, const RPolyhedron&))(&subset));
-  def("subset", (tribool(*)(const RPolyhedron&, const RPolyhedron&))(&subset));
-  def("closed_intersection", (RPolyhedron(*)(const RPolyhedron&, const RPolyhedron&))(&closed_intersection));
+  def("disjoint", (tribool(*)(const Polyhedron<R>&, const Box<R>&))(&disjoint));
+  def("disjoint", (tribool(*)(const Box<R>&, const Polyhedron<R>&))(&disjoint));
+  def("disjoint", (tribool(*)(const Polyhedron<R>&, const Polytope<R>&))(&disjoint));
+  def("disjoint", (tribool(*)(const Polytope<R>&, const Polyhedron<R>&))(&disjoint));
+  def("disjoint", (tribool(*)(const Polyhedron<R>&, const Polyhedron<R>&))(&disjoint));
+  def("subset", (tribool(*)(const Box<R>&, const Polyhedron<R>&))(&subset));
+  def("subset", (tribool(*)(const Polytope<R>&, const Polyhedron<R>&))(&subset));
+  def("subset", (tribool(*)(const Polyhedron<R>&, const Polyhedron<R>&))(&subset));
+  def("closed_intersection", (Polyhedron<R>(*)(const Polyhedron<R>&, const Polyhedron<R>&))(&closed_intersection));
 
-  //class_< RPolyhedron,bases<RSet> >("Polyhedron",init<int>())
-  class_< RPolyhedron >("Polyhedron",init<int>())
-    .def(init<RMatrix,RVector>())
-    .def(init<RPolyhedron>())
-    .def(init<RBox>())
-    .def("dimension", &RPolyhedron::dimension)
+  class_< Polyhedron<R> >(python_name<R>("Polyhedron").c_str(),init<int>())
+    .def(init< Matrix<R>, Vector<R> >())
+    .def(init< Polyhedron<R> >())
+    .def(init< Box<R> >())
+    .def("dimension", &Polyhedron<R>::dimension)
+    .def(self_ns::str(self))
+  ;
+  
+}
+
+template<>
+void export_polyhedron<Rational>() 
+{
+  typedef Rational Q;
+  
+  def("disjoint", (tribool(*)(const Polyhedron<Q>&, const Polyhedron<Q>&))(&disjoint));
+  def("disjoint", (tribool(*)(const Polyhedron<Q>&, const Polytope<Q>&))(&disjoint));
+  def("disjoint", (tribool(*)(const Polytope<Q>&, const Polyhedron<Q>&))(&disjoint));
+  def("subset", (tribool(*)(const Polytope<Q>&, const Polyhedron<Q>&))(&subset));
+  def("subset", (tribool(*)(const Polyhedron<Q>&, const Polyhedron<Q>&))(&subset));
+  def("closed_intersection", (Polyhedron<Q>(*)(const Polyhedron<Q>&, const Polyhedron<Q>&))(&closed_intersection));
+
+  class_< Polyhedron<Q> >(python_name<Q>("Polyhedron").c_str(),init<int>())
+    .def(init< Matrix<Q>, Vector<Q> >())
+    .def(init< Polytope<Q> >())
+    .def(init< Polyhedron<Q> >())
+    .def(init< Box<Q> >())
+    .def("dimension", &Polyhedron<Q>::dimension)
     .def(self_ns::str(self))
   ;
   
 }
 
 template void export_polyhedron<FloatPy>();
+template void export_polyhedron<Rational>();

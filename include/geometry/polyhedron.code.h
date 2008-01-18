@@ -216,11 +216,35 @@ disjoint(const Geometry::Polyhedron< Numeric::Float<T> >& plhd,
                   
 template<class R>
 tribool 
-disjoint(const Geometry::Polyhedron< Numeric::Interval<R> >& plhd, const Geometry::Box<R>& r)
+disjoint(const Geometry::Polyhedron< Numeric::Interval<R> >& plhd, const Geometry::Box<R>& bx)
 {
   throw NotImplemented("disjoint(Polyhedron<Fuzzy>,Box<Fuzzy>");
 }
                   
+
+tribool 
+disjoint(const Geometry::Polyhedron<Numeric::Rational>& plhd, const Geometry::Polytope<Numeric::Rational>& pltp)
+{
+  return disjoint(plhd,Geometry::Polyhedron<Numeric::Rational>(pltp));
+}
+
+template<class T>
+tribool 
+disjoint(const Geometry::Polyhedron< Numeric::Float<T> >& plhd, 
+         const Geometry::Polytope< Numeric::Float<T> >& pltp)
+{
+  return ::disjoint(Geometry::Polyhedron<Numeric::Rational>(plhd),
+                    Geometry::Polytope<Numeric::Rational>(pltp));
+}
+                  
+template<class R>
+tribool 
+disjoint(const Geometry::Polyhedron< Numeric::Interval<R> >& plhd, const Geometry::Polytope< Numeric::Interval<R> >& pltp)
+{
+  throw NotImplemented("disjoint(Polyhedron<Fuzzy>,Polytope<Fuzzy>");
+}
+                  
+
 
 
 
@@ -543,9 +567,9 @@ Geometry::Polyhedron<X>::bounded() const
 
 template<class X, class R>
 tribool 
-Geometry::disjoint(const Polyhedron<X>& plhd, const Box<R>& r)
+Geometry::disjoint(const Polyhedron<X>& plhd, const Box<R>& bx)
 {
-  return ::disjoint(plhd,r);
+  return ::disjoint(plhd,bx);
 }
 
 
@@ -555,6 +579,24 @@ Geometry::disjoint(const Box<R>& bx, const Polyhedron<X>& plhd)
 {
   return ::disjoint(plhd,bx);
 }
+
+
+
+template<class X>
+tribool 
+Geometry::disjoint(const Polyhedron<X>& plhd, const Polytope<X>& pltp)
+{
+  return ::disjoint(plhd,pltp);
+}
+
+
+template<class X>
+tribool 
+Geometry::disjoint(const Polytope<X>& pltp, const Polyhedron<X>& plhd)
+{
+  return ::disjoint(plhd,pltp);
+}
+
 
 
 template<class X>
@@ -799,6 +841,8 @@ Geometry::Polyhedron<X>::_instantiate()
   tb=equal(p,p);
   tb=disjoint(bx,p);
   tb=disjoint(p,bx);
+  tb=disjoint(c,p);
+  tb=disjoint(p,c);
   tb=disjoint(p,p);
   tb=subset(bx,p);
   tb=subset(c,p);

@@ -36,8 +36,6 @@
 #include "linear_algebra/declarations.h"
 #include "linear_algebra/vector.h"
 
-#include "geometry/declarations.h"
-
 #include "function/function_interface.h"
 
 
@@ -56,8 +54,6 @@ namespace Ariadne {
      public:
       /*! \brief The type of denotable real number used to describe the system. */
       typedef R real_type;
-      /*! \brief The type of denotable state the system acts on. */
-      typedef Geometry::Point<R> state_type;
       
       /*! \brief Constructor constructs a function on a \a d-dimensional space. */
       explicit IdentityFunction(size_type d) : _dimension(d) { }

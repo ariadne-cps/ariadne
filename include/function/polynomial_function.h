@@ -43,7 +43,6 @@
 
 namespace Ariadne {
   
-  namespace Geometry { template<class R> class Rectangle; }
   namespace Output { class latexstream; }
 
 
@@ -63,8 +62,6 @@ namespace Ariadne {
     template<class R0, class R1, class R2> void combine(PolynomialFunction<R0>&, const PolynomialFunction<R1>&, const PolynomialFunction<R2>&);
     template<class R0, class R1, class R2> void join(PolynomialFunction<R0>&, const PolynomialFunction<R1>&, const PolynomialFunction<R2>&);
 
-    template<class R0, class R1, class R2> void truncate(PolynomialFunction<R0>&, const PolynomialFunction<R1>&, const Geometry::Rectangle<R1>&, const size_type&, const size_type&);
-
 
     template<class R1, class R2> PolynomialFunction<typename Numeric::traits<R1,R2>::arithmetic_type> operator+(const PolynomialFunction<R1>&, const PolynomialFunction<R2>&);
     template<class R1, class R2> PolynomialFunction<typename Numeric::traits<R1,R2>::arithmetic_type> operator-(const PolynomialFunction<R1>&, const PolynomialFunction<R2>&);
@@ -77,7 +74,6 @@ namespace Ariadne {
     template<class R1, class R2> PolynomialFunction<typename Numeric::traits<R1,R2>::arithmetic_type> compose(const PolynomialFunction<R1>&, const PolynomialFunction<R2>&);
     template<class R> PolynomialFunction<typename Numeric::traits<R>::arithmetic_type> pow(const PolynomialFunction<R>& p, const unsigned int& n);
     template<class R> PolynomialFunction<typename Numeric::traits<R>::arithmetic_type> derivative(const PolynomialFunction<R>&, const size_type& k);
-    template<class R> PolynomialFunction<typename Numeric::traits<R>::interval_type> truncate(const PolynomialFunction<R>&, const Geometry::Rectangle<typename Numeric::traits<R>::number_type>&, const size_type&, const size_type&);
 
     template<class R> std::ostream& operator<<(std::ostream&, const PolynomialFunction<R>&);
     template<class R> std::istream& operator>>(std::istream&, PolynomialFunction<R>&);
@@ -139,9 +135,6 @@ namespace Ariadne {
       /*! \brief The \a i th component polynomial. */
       PolynomialFunction<R> component(const size_type& i) const;
 
-      /*! \brief Truncate the polynomial to a polynomial of degree \a d and smoothness \a s within the domain \a domain. */
-      PolynomialFunction<I> truncate(const size_type& degree, const size_type& smoothness, const Geometry::Rectangle<R>& domain) const;
-
       /*! \brief Evaluate the polynomial at the point \a x. */
       LinearAlgebra::Vector<F> evaluate(const LinearAlgebra::Vector<F>& x) const;
       
@@ -184,9 +177,8 @@ namespace Ariadne {
       friend template<class R> PolynomialFunction<typename Numeric::traits<R>::arithmetic_type> pow(const PolynomialFunction<R>& p, const unsigned int& n);
       /*! \brief Derivative with respect to variable \a k. */
       friend template<class R> PolynomialFunction<typename Numeric::traits<R>::arithmetic_type> derivative(const PolynomialFunction<R>&, const size_type& k);
-      /*! \brief Truncate within \a r to a polynomial of degree at most \a d, putting the error into terms of degree \a s. */
-      friend template<class R> PolynomialFunction<typename Numeric::traits<R>::arithmetic_type> truncate(const PolynomialFunction<R>& p, const Rectangle<R>& bb, const size_type& d, const size_type& s);
 #endif
+
      private:
       static void instantiate();
       void _compute_jacobian() const;

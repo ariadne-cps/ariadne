@@ -108,7 +108,7 @@ namespace Ariadne {
       /*! \brief The centre of the  of validity of the model. */
       Geometry::Point<R> centre() const { return this->_centre; }
       /*! \brief The image of the domain. */
-      Geometry::Box<R> range() const { return this->_range; }
+      Geometry::Box<R> range() const;
 
       /*! \brief Evaluate at a point. */
       Geometry::Point<I> evaluate(const Geometry::Point<I>& pt) const;
@@ -126,7 +126,6 @@ namespace Ariadne {
      private:
       Geometry::Box<R> _domain;
       Geometry::Point<R> _centre;
-      Geometry::Box<R> _range;
       Geometry::Point<I> _value;
       LinearAlgebra::Matrix<I> _jacobian;
     };

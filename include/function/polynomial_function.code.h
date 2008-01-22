@@ -238,12 +238,6 @@ Function::PolynomialFunction<R>::component(const size_type& i) const
 
 
 
-template<class R>
-Function::PolynomialFunction<typename Function::PolynomialFunction<R>::I> 
-Function::PolynomialFunction<R>::truncate(const size_type& degree, const size_type& smoothness, const Geometry::Rectangle<R>& domain) const
-{
-  throw NotImplemented(__PRETTY_FUNCTION__);
-}
 
 
 

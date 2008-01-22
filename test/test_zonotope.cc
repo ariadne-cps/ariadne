@@ -246,6 +246,7 @@ class TestZonotope
       GridCellListSet<R> iaez=inner_approximation(ez,gr);
       ARIADNE_TEST_ASSERT(subset(iaez,oaez));
       ARIADNE_TEST_ASSERT(subset(oaez,foaez));
+      cout<<oaez<<endl<<foaez<<endl;
       r=Box<R>("[-2.5,-2.0]x[0.0,0.5]");
       pt=Point<R>("(-2.5,0.5)");
       cout << "z="<<z<<endl;
@@ -253,7 +254,7 @@ class TestZonotope
       cout << "z.bounding_box()="<<z.bounding_box()<<endl;
       bbox=z.bounding_box().neighbourhood(R(0.5));
       cout << "bbox="<<bbox<<endl;
-      cout << "Here"<<endl;
+
       eps.open("test_zonotope-uniform.eps",bbox);
       eps << fill_colour(white) << ez.bounding_box();
       cout << "foaez.size()="<<foaez.size()<<endl;
@@ -261,13 +262,12 @@ class TestZonotope
       cout << "oaez.size()="<<oaez.size()<<endl;
       eps << fill_colour(yellow) << oaez;
       cout << "iaez.size()="<<iaez.size()<<endl;
-      eps << fill_colour(blue) << iaez;
+      //eps << fill_colour(blue) << iaez;
       cout << "ez="<<ez<<endl;
       eps << fill_colour(transparant) << ez;
       eps.close();
     }    
-    cout << "Here"<<endl;
-    
+
     {
       cout << "Orthogonal over approximations of zonotopes" << endl;
       // Interval zonotope

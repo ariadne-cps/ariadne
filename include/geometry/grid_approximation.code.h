@@ -159,7 +159,7 @@ fuzzy_outer_approximation_of_zonotope(const Geometry::Zonotope<R>& z, const Geom
   } else if(z.dimension()+1u==z.number_of_generators()) {
     LinearAlgebra::Vector<I> e(d+1,I(-1,1));
     LinearAlgebra::Vector<I> x(d);
-    const Geometry::Point<I> c=z.centre();
+    const Geometry::Point<I> c=z.centre()+I(-1,1)*z.error();
     const LinearAlgebra::Matrix<I> G=z.generators();
     LinearAlgebra::Matrix<I> A=LinearAlgebra::MatrixSlice<const I>(d,d,G.begin(),G.row_increment(),G.column_increment());
     LinearAlgebra::Vector<I> b=G.column(d);

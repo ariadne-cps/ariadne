@@ -65,6 +65,10 @@ class TestAffineModel
     cout << am << endl;
   }
 
+  void test_range() {
+    ARIADNE_ASSERT(subset(am1.range(),Geometry::Box<R>("[-7,7]x[-16,17]")))
+  }
+
   void test_reduce() {
     cout << reduce(am1,0) << endl;
   }
@@ -74,6 +78,8 @@ class TestAffineModel
   }
 
   void test_compose() {
+    cout << "am3="<<am3<<"\nam2="<<am2<<endl;
+    cout << "am2.range()="<<am2.range()<<endl;
     cout << compose(am3,am2) << endl;
   }
 
@@ -83,11 +89,12 @@ class TestAffineModel
 
 
   void test() {
-    test_copy_constructor();
-    //test_reduce();
-    test_compose();
-    test_write();
-    //test_add();
+    ARIADNE_TEST_CALL(test_copy_constructor());
+    ARIADNE_TEST_CALL(test_range());
+    //ARIADNE_TEST_CALL(test_reduce());
+    ARIADNE_TEST_CALL(test_compose());
+    ARIADNE_TEST_CALL(test_write());
+    //ARIADNE_TEST_CALL(test_add());
   }
 };
   

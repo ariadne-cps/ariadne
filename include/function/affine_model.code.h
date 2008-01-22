@@ -133,6 +133,14 @@ Function::operator-(const Function::AffineModel<R>& am1, const Function::AffineM
 
 
 template<class R> 
+Geometry::Box<R>
+Function::AffineModel<R>::range() const
+{
+  return Geometry::Box<R>(this->evaluate(Geometry::Point<I>(this->_domain.position_vectors())));
+}
+
+
+template<class R> 
 Function::AffineModel<R>
 Function::translate(const Function::AffineModel<R>& am, const Geometry::Point<R>& nc) 
 {

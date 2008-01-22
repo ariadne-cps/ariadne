@@ -21,56 +21,36 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-namespace Ariadne {
-namespace Function {
-
-template<class X>
-class AffineVariableReference
-{
- public:
-  AffineVariableReference(AffineDerivative<X>& ad, const size_type& i) : _ad(ad), _i(i) { }
-  const X& value() const { return _ad._data[_i*(_ad.argument_size()+1u)]; }
-  const X& derivative(uint j) const { return _ad._data[_i*(_ad.argument_size()+1u)+j+1u]; }
-  void operator=(const AffineVariable<X>& av) { 
-    assert(av.argument_size()==_ad.argument_size());
-    size_type as=_ad.argument_size();
-    _ad._data[_i*(as+1u)]=av.value();
-    for(size_type j=0; j!=as; ++j) {
-      _ad._data[_i*(as+1u)+j+1u]=av.derivative(j);
-    }
-  }
-private:
-  AffineDerivative<X>& _ad; const size_type _i;
-};
-
-}
-}
-
-
 
 namespace Ariadne {
     
 template<class X> inline
 Function::AffineDerivative<X>::AffineDerivative()
-  : _result_size(0), _argument_size(0), _data()
+  : _result_size(0), _argument_size(0), _variables()
 {
 }
 
 template<class X> inline
 Function::AffineDerivative<X>::AffineDerivative(const uint& rs, const uint& as)
-  : _result_size(rs), _argument_size(as), _data(rs*(as+1),0)
+  : _result_size(rs), _argument_size(as), _variables(rs,AffineVariable<X>(as))
 {
 }
 
 template<class X> template<class XX> inline
 Function::AffineDerivative<X>::AffineDerivative(const uint& rs, const uint& as, const XX* ptr)
-  : _result_size(rs), _argument_size(as), _data(rs*(as+1),ptr)
+  : _result_size(rs), _argument_size(as), _variables(rs,AffineVariable<X>(as))
 {
+  for(size_type i=0; i!=rs; ++i) {
+    _variables[i].data()[0]=*(ptr++);
+    for(size_type j=0; j!=as; ++j) {
+      _variables[i].data()[j+1u]=*(ptr++);
+    }
+  }
 }
 
 template<class X> template<class XX> inline
 Function::AffineDerivative<X>::AffineDerivative(const AffineDerivative<XX>& other)
-  : _result_size(other.result_size()), _argument_size(other.argument_size()), _data(other.data())
+  : _result_size(other.result_size()), _argument_size(other.argument_size()), _variables(other.variables())
 {
 }
 
@@ -80,10 +60,22 @@ Function::AffineDerivative<X>::operator=(const AffineDerivative<XX>& other)
 {
   this->_result_size=other.result_size();
   this->_argument_size=other.argument_size();
-  this->_data=other.data();
+  this->_variables=other.variables();
   return *this;
 }
 
+
+template<class X> inline
+Function::AffineDerivative<X>
+Function::AffineDerivative<X>::constant(size_type as, const LinearAlgebra::Vector<X>& x)
+{
+  const size_type& rs=x.size();
+  AffineDerivative<X> result(rs,as);
+  for(size_type i=0; i!=rs; ++i) {
+    result[i].data()[0]=x[i];
+  }
+  return result;
+}
 
 template<class X> inline
 Function::AffineDerivative<X>
@@ -92,8 +84,8 @@ Function::AffineDerivative<X>::variable(const LinearAlgebra::Vector<X>& x)
   const size_type& n=x.size();
   AffineDerivative<X> result(n,n);
   for(size_type i=0; i!=n; ++i) {
-    result._data[i*(n+1)]=x[i];
-    result._data[i*(n+2)+1]=1;
+    result[i].data()[0]=x[i];
+    result[i].data()[i+1u]=1;
   }
   return result;
 }
@@ -129,46 +121,57 @@ Function::AffineDerivative<X>::resize(const size_type& rs, const size_type& as)
 }
 
 template<class X> inline
-const array<X>&
-Function::AffineDerivative<X>::data() const
+const array< Function::AffineVariable<X> >&
+Function::AffineDerivative<X>::variables() const
 {
-  return this->_data;
+  return this->_variables;
 }
 
-template<class X> inline
-array<X>&
-Function::AffineDerivative<X>::data() 
-{
-  return this->_data;
-}
 
 template<class X> inline
-Function::AffineVariable<X>
+const Function::AffineVariable<X>&
 Function::AffineDerivative<X>::operator[](size_type i) const
 {
-  return AffineVariable<X>(this->_argument_size,this->_data.begin()+i*(this->_argument_size+1));
+  return this->_variables[i]; 
 }
 
 template<class X> inline
-Function::AffineVariableReference<X>
+Function::AffineVariable<X>&
 Function::AffineDerivative<X>::operator[](size_type i) 
 {
-  return AffineVariableReference<X>(*this,i);
+  return this->_variables[i]; 
 }
 
+
+template<class X> inline
+LinearAlgebra::Vector<X>
+Function::AffineDerivative<X>::value() const
+{
+  LinearAlgebra::Vector<const X> result(this->_result_size);
+  for(size_type i=0; i!=this->_result_size; ++i) {
+    result[i]=this->_variables[i].value(); 
+  }
+  return result;
+}
 
 template<class X> inline
 LinearAlgebra::Matrix<X>
 Function::AffineDerivative<X>::jacobian() const
 {
-  return LinearAlgebra::MatrixSlice<const X>(this->_result_size,this->_argument_size,this->_data.begin()+1u,this->_argument_size+1u,1u);
+  LinearAlgebra::Matrix<const X> result(this->_result_size,this->_argument_size);
+  for(size_type i=0; i!=this->_result_size; ++i) {
+    for(size_type j=0; i!=this->_argument_size; ++j) {
+      result[i][j]=this->_variables[i].gradient(j);
+    }
+  }
+  return result;
 }
 
 template<class X1, class X2> inline
 bool
 Function::operator==(const AffineDerivative<X1>& x1, const AffineDerivative<X2>& x2) 
 {
-  return x1.argument_size()==x2.argument() && x1.data()==x2.data();
+  return x1.variables()==x2.variables();
 }
 
 template<class X1, class X2> inline
@@ -182,7 +185,7 @@ template<class X> inline
 std::ostream& 
 Function::operator<<(std::ostream& os, const AffineDerivative<X>& x) 
 {
-  return os << "AffineDerivative("<<x.result_size()<<","<<x.argument_size()<<","<<x.data()<<")";
+  return os << "AffineDerivative("<<x.result_size()<<","<<x.argument_size()<<","<<x.variables()<<")";
 }
 
 

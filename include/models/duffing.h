@@ -40,7 +40,7 @@ namespace Ariadne {
     {
       r[0]=x[1];
       r[1]=-p[0]*x[1]-x[0]*(p[2]+p[1]*x[0]*x[0])+p[3]*cos(p[4]*x[2]+p[5]);
-      r[2]=1;
+      r[2]=1.0;
     }
 
     /*! \class DuffingEquation

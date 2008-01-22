@@ -27,6 +27,7 @@
 #include "numeric/rational.h"
 #include "numeric/interval.h"
 #include "function/taylor_series.h"
+#include "function/taylor_variable.h"
 
 #include <boost/python.hpp>
 #include "python/utilities.h"
@@ -55,10 +56,13 @@ void export_taylor_series()
 {
   typedef typename Numeric::traits<R>::arithmetic_type A;
   typedef TaylorSeries<A> TS;
+  typedef TaylorVariable<A> TV;
 
 
   class_<TS> taylor_series_class(python_name<R>("TaylorSeries").c_str());
   taylor_series_class.def( init< uint >());
+  taylor_series_class.def( init< TV >());
+  taylor_series_class.def("degree", &TS::degree);
   taylor_series_class.def("__getitem__", &get_item<A>);
   taylor_series_class.def("__setitem__",&set_item<A,double>);
   taylor_series_class.def("__setitem__",&set_item<A,R>);

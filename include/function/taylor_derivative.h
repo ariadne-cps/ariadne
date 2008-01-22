@@ -37,8 +37,21 @@ namespace Ariadne {
     template<class X> class TaylorSeries;
     template<class X> class TaylorVariable;
   
+    // Base template algorithm for evaluating a polynomial
+    template<class P, class M> void evaluate_polynomial(M& r, const P& p, const M& x);
+
     /*!\ingroup Function
      * \brief A templated class representing a the derivatives of a vector quantity with respect to a multiple arguments.
+     *
+     * Formally, a Taylor variable \f$y\f$ is a member of a differential algebra over some field, denoted by the template variable X. 
+     * A Taylor variable therefore supports addition, subtraction and multiplication, and also division, as long as the division has a
+     * non-zero \em value. 
+     * We can think of \f$y\f$ as denoting a quiantity and it's first \f$d\f$ derivatives 
+     * with respect to independent variables \f$x_1,\ldots,x_n\f$, 
+     * 
+     * In the current implementation, we store the coefficients of the power series expansion \f$y=\sum a_\alpha x^\alpha\f$ rather than
+     * the derivative values \f$d^\alpha y/dx^\alpha$, as the former are more convenient to work with.
+     *
      */
     template<class X>
     class TaylorDerivative
@@ -75,6 +88,8 @@ namespace Ariadne {
 
       /*! \brief The number of variables of the argument. */
       size_type result_size() const; 
+      // Synonym for result size; needed by template algorithm
+      size_type size() const; 
       /*! \brief The number of variables of the argument. */
       size_type argument_size() const; 
       /*! \brief The degree (number of derivatives computed). */
@@ -164,6 +179,11 @@ namespace Ariadne {
   template<class X> TaylorDerivative<X> concatenate(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y);
   template<class X> TaylorDerivative<X> reduce(const TaylorDerivative<X>& x);
   template<class X> TaylorDerivative<X> derivative(const TaylorDerivative<X>& x, const size_type& k);
+  
+  template<class X>
+  array< TaylorSeries< TaylorVariable<X> > > 
+  integrate(const array<TaylorVariable<X> >& y, const array<TaylorVariable<X> >& x);
+
 
   template<class X> TaylorDerivative<X> neg(const TaylorDerivative<X>& x);
   template<class X> TaylorDerivative<X> add(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y);
@@ -176,14 +196,13 @@ namespace Ariadne {
 
   template<class X> TaylorDerivative<X> operator*(const LinearAlgebra::Matrix<X>& A, const TaylorDerivative<X>& x);
 
-  template<class X, class R> TaylorDerivative<X> operator+(const TaylorDerivative<X>& x, const R& c);
-  template<class X, class R> TaylorDerivative<X> operator+(const R& c, const TaylorDerivative<X>& x);
-  template<class X, class R> TaylorDerivative<X> operator-(const TaylorDerivative<X>& x, const R& c);
-  template<class X, class R> TaylorDerivative<X> operator-(const R& c, const TaylorDerivative<X>& x);
-  template<class X, class R> TaylorDerivative<X> operator*(const TaylorDerivative<X>& x, const R& c);
-  template<class X, class R> TaylorDerivative<X> operator*(const R& c, const TaylorDerivative<X>& x);
-  template<class X, class R> TaylorDerivative<X> operator/(const TaylorDerivative<X>& x, const R& c);
-  template<class X, class R> TaylorDerivative<X> operator/(const R& c, const TaylorDerivative<X>& x);
+  template<class X> TaylorDerivative<X>& operator-=(TaylorDerivative<X>& x, const LinearAlgebra::Vector<X>& v);
+  template<class X> TaylorDerivative<X> operator-(const TaylorDerivative<X>& x, const LinearAlgebra::Vector<X>& v);
+
+  template<class X> TaylorDerivative<X>& operator*=(TaylorDerivative<X>& x, const X& c);
+  template<class X> TaylorDerivative<X> operator*(const X& c, const TaylorDerivative<X>& x);
+  template<class X> TaylorDerivative<X> operator*(const TaylorDerivative<X>& x, const X& c);
+
 
   template<class X> std::ostream& operator<<(std::ostream& os, const TaylorDerivative<X>& x);
 

@@ -27,17 +27,6 @@
 namespace Ariadne {
 
 
-template<class R> template<class RR> inline
-Function::TaylorModel<R>::TaylorModel(const TaylorModel<RR>& p)
-  : _domain(p.domain()),
-    _centre(p.centre()),
-    _smoothness(p.smoothness()),
-    _derivatives(p.derivatives())
-{
-}
-        
-
-
 
 
 } // namespace Ariadne

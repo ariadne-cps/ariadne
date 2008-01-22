@@ -59,7 +59,7 @@ template<class BS>
 Evaluation::SetBasedHybridEvolver<BS>::SetBasedHybridEvolver(const EvolutionParameters<R>& parameters)
   : _parameters(parameters.clone()),
     _applicator(new KuhnApplicator<typename BS::real_type>(3)),
-    _integrator(new KuhnIntegrator<typename BS::real_type>(3)),
+    _integrator(new KuhnIntegrator<typename BS::real_type>(4,3)), // 4th order, casacade size 3
     verbosity(parameters.verbosity())
 {
 }

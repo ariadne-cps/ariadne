@@ -114,6 +114,14 @@ class TaylorSeriesTaylorVariable
   TaylorSeriesTaylorVariable() : TaylorSeries< TaylorVariable<X> >() { }
   TaylorSeriesTaylorVariable(const TaylorSeries< TaylorVariable<X> >& x)
     : TaylorSeries< TaylorVariable<X> >(x) { }
+  static TaylorSeriesTaylorVariable<X> constant_variable(uint n, uint ot, uint ox, X v, uint i) {
+    TaylorSeries< TaylorVariable<X> > x(ot);
+    x[0]=TaylorVariable<X>::variable(n,ox,v,i);
+    for(uint j=1; j<=ot; ++j) {
+      x[j]=TaylorVariable<X>::constant(n,ox,0.0); 
+    }
+    return x;
+  }
   static TaylorSeriesTaylorVariable<X> variable(uint n, uint ot, uint ox, X v, uint i) {
     TaylorSeries< TaylorVariable<X> > x(ot);
     x[0]=TaylorVariable<X>::variable(n,ox,v,i);
@@ -136,22 +144,47 @@ AffineVariable<R> midpoint(const Function::AffineVariable< Numeric::Interval<R> 
 
 
 template<class X> 
-array< TaylorSeriesAffineVariable<X> >
+array< TaylorSeries< AffineVariable<X> > >
 integrate(const TaylorDerivative<X>& vf, const Geometry::Point<X> x)
 {
+  ARIADNE_ASSERT(vf.result_size()==vf.argument_size());
+  ARIADNE_ASSERT(vf.argument_size()==x.dimension());
   dimension_type n=x.dimension();
   smoothness_type d=vf.degree();
-  array< TaylorSeriesAffineVariable<X> > y(x.dimension());
+  array< TaylorSeries< AffineVariable<X> > > y(n);
+  array< TaylorSeries< AffineVariable<X> > > yp(n);
   for(size_type i=0; i!=n; ++i) {
-    //y[i]=TaylorSeriesAffineVariable<X>::variable(n,1,x[i],i);
-    y[i]=TaylorSeriesAffineVariable<X>::constant_variable(n,0,x[i],i);
+    y[i]=TaylorSeries< TaylorVariable<X> >(0);
+    y[i][0]=AffineVariable<X>::variable(n,x[i],i);
   }
-  cout << "y="<<y<<endl;
-
-  array< TaylorSeriesAffineVariable<X> > yp(n);
   for(uint j=0; j<d; ++j) {
-    cout << "j="<<j<<"\ny=\n"<<y<<endl;
-    yp=compose(vf,y);
+    yp=evaluate(vf,y);
+    //cout << "j="<<j<<"\n y="<<y<<"\n yp="<<yp<<endl;
+    for(uint i=0; i!=n; ++i) {  
+      y[i]=antiderivative(yp[i],y[i][0]);
+    }
+  } 
+  return y;
+}
+
+
+template<class X> 
+array< TaylorSeries< TaylorVariable<X> > >
+integrate(const TaylorDerivative<X>& vf, const Geometry::Point<X> x, smoothness_type ox)
+{
+  ARIADNE_ASSERT(vf.result_size()==vf.argument_size());
+  ARIADNE_ASSERT(vf.argument_size()==x.dimension());
+  dimension_type n=x.dimension();
+  smoothness_type ot=vf.degree();
+  array< TaylorSeries< TaylorVariable<X> > > y(n);
+  array< TaylorSeries< TaylorVariable<X> > > yp(n);
+  for(size_type i=0; i!=n; ++i) {
+    y[i]=TaylorSeries< TaylorVariable<X> >(0);
+    y[i][0]=TaylorVariable<X>::variable(n,ox,x[i],i);
+  }
+  for(uint j=0; j<ot; ++j) {
+    yp=evaluate(vf,y);
+    //cout << "j="<<j<<"\n y="<<y<<"\n yp="<<yp<<endl;
     for(uint i=0; i!=n; ++i) {  
       y[i]=antiderivative(yp[i],y[i][0]);
     }
@@ -177,6 +210,27 @@ Evaluation::IntegratorBase<R>::flow_bounds(const System::VectorField<R>& vf,
                                              const Numeric::Rational& t) const
 {
   return Evaluation::standard_flow_bounds(vf,bx,t);
+}
+
+template<class R> inline
+std::pair< Numeric::Rational, Function::TaylorDerivative<Numeric::Interval<R> > >
+Evaluation::IntegratorBase<R>::variation_flow_bounds(const System::VectorField<R>& vf, 
+                                                     const Geometry::Box<R>& bx,
+                                                     const Numeric::Rational& t,
+                                                     smoothness_type o) const
+{
+  Numeric::Rational h=t;
+  I hi=I(t)*I(0,1);
+  Function::TaylorDerivative<I> d=Function::TaylorDerivative<I>::variable(bx.position_vectors(),o);
+  while(false) {   // expand flow bounds
+    Function::TaylorDerivative<I> vfd=vf.derivative(Geometry::Point<I>(d.value()),1);
+    Function::TaylorDerivative<I> nd=bx+compose(vfd,d)*I(2*hi);
+    d=nd;
+  }
+  while(true) {
+    d=bx+compose(vf.derivative(Geometry::Point<I>(d.value()),1),d)*I(2*hi);
+  }
+  return make_pair(h,d);
 }
 
 
@@ -228,7 +282,7 @@ Evaluation::IntegratorBase<R>::affine_flow_model(const System::VectorField<R>& v
   }
   I c=1;
   for(uint j=1; j<=to; ++j) {
-    c*=h/=j;
+    c*=h; c/=j;
     for(uint i=0; i!=n; ++i) {
       r[i] += y[i][j]*c;
     }
@@ -278,6 +332,7 @@ Evaluation::IntegratorBase<R>::taylor_flow_model(const System::VectorField<R>& v
   }
   std::cout << r << std::endl;
 
+  assert(false); // Not implemented
   // Return function model
 }
 

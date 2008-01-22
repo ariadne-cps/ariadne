@@ -1,7 +1,7 @@
 /***************************************************************************
  *            taylor_model.code.h
  *
- *  Copyright  2007  Alberto Casagrande
+ *  Copyright  2007  Pieter Collins
  *  pieter.collins@cwi.nl
  ****************************************************************************/
 
@@ -56,42 +56,76 @@ template<class R>
 Function::TaylorModel<R>::TaylorModel() 
   : _domain(), 
     _centre(),
-    _smoothness(),
-    _derivatives() 
+    _centre_derivatives(),
+    _domain_derivatives() 
 {
 }
 
 template<class R>
-Function::TaylorModel<R>::TaylorModel(const size_type& rs, const size_type& as, const size_type& d, const size_type& s) 
+Function::TaylorModel<R>::TaylorModel(size_type rs, size_type as, smoothness_type o, smoothness_type s) 
   : _domain(Geometry::Box<R>::entire_space(as)),
     _centre(LinearAlgebra::Vector<R>(as)),
-    _smoothness(s),
-    _derivatives(rs,as,d)
+    _centre_derivatives(rs,as,o),
+    _domain_derivatives(rs,as,o) 
 {
 }
 
 template<class R>
-Function::TaylorModel<R>::TaylorModel(const Geometry::Box<R>& d, const LinearAlgebra::Vector<R>& c, const TaylorDerivative<I>& td)
+Function::TaylorModel<R>::TaylorModel(const Geometry::Box<R>& d, const LinearAlgebra::Vector<R>& c, 
+                                      const TaylorDerivative<I>& cd, const TaylorDerivative<I>& dd)
   : _domain(d),
     _centre(c),
-    _smoothness(td.degree()),
-    _derivatives(td)
+    _centre_derivatives(cd),
+    _domain_derivatives(dd)
 {
 }
 
 template<class R>
-Function::TaylorModel<R>::TaylorModel(const Geometry::Box<R>& d, const LinearAlgebra::Vector<R>& c, const smoothness_type& s, const TaylorDerivative<I>& td)
+Function::TaylorModel<R>::TaylorModel(const Geometry::Box<R>& d, const Geometry::Point<R>& c, 
+                                      const TaylorDerivative<I>& cd, const TaylorDerivative<I>& dd)
+  : _domain(d),
+    _centre(c.position_vector()),
+    _centre_derivatives(cd),
+    _domain_derivatives(dd)
+{
+}
+
+template<class R>
+Function::TaylorModel<R>::TaylorModel(const LinearAlgebra::Vector<I>& d, const LinearAlgebra::Vector<R>& c,
+                                      const TaylorDerivative<I>& cd, const TaylorDerivative<I>& dd)
   : _domain(d),
     _centre(c),
-    _smoothness(s),
-    _derivatives(td)
+    _centre_derivatives(cd),
+    _domain_derivatives(dd)
+{
+}
+
+template<class R>
+Function::TaylorModel<R>::TaylorModel(const Geometry::Box<R>& d, const Geometry::Point<R>& c, 
+                                      smoothness_type o, smoothness_type s,
+                                      const Function::FunctionInterface<R>& f)
+  : _domain(d),
+    _centre(c.position_vector()),
+    _centre_derivatives(f.derivative(LinearAlgebra::Vector<I>(c.position_vector()),o)),
+    _domain_derivatives(f.derivative(d.position_vectors(),o))
+{
+}
+
+template<class R>
+Function::TaylorModel<R>::TaylorModel(const LinearAlgebra::Vector<I>& d, const LinearAlgebra::Vector<R>& c, 
+                                      smoothness_type o, smoothness_type s, 
+                                      const Function::FunctionInterface<R>& f)
+  : _domain(d),
+    _centre(c),
+    _centre_derivatives(f.derivative(LinearAlgebra::Vector<I>(c),o)),
+    _domain_derivatives(f.derivative(d,o))
 {
 }
 
 /*
 template<class R>
 void
-Function::TaylorModel<R>::resize(const size_type& rs, const size_type& as, const size_type& d, const size_type& s)
+Function::TaylorModel<R>::resize(size_type rs, size_type as, size_type d, size_type s)
 {
   this->_smoothness=s;
   //this->_derivatives.resize(rs,as,d);
@@ -100,7 +134,7 @@ Function::TaylorModel<R>::resize(const size_type& rs, const size_type& as, const
 
 template<class R>
 Function::TaylorModel<R>
-Function::TaylorModel<R>::zero(const size_type& rs, const size_type& as)  
+Function::TaylorModel<R>::zero(size_type rs, size_type as)  
 {
   return TaylorModel<R>(rs,as,0,0);
 }
@@ -108,7 +142,7 @@ Function::TaylorModel<R>::zero(const size_type& rs, const size_type& as)
 
 template<class R>
 Function::TaylorModel<R>
-Function::TaylorModel<R>::one(const size_type& as)  
+Function::TaylorModel<R>::one(size_type as)  
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
@@ -116,7 +150,7 @@ Function::TaylorModel<R>::one(const size_type& as)
 
 template<class R>
 Function::TaylorModel<R>
-Function::TaylorModel<R>::constant(const size_type& as, const R& c)  
+Function::TaylorModel<R>::constant(size_type as, const R& c)  
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
@@ -127,7 +161,7 @@ bool
 Function::TaylorModel<R>::operator==(const TaylorModel<R>& tm) const
 {
   return this->_centre==tm._centre
-    && this->_derivatives==tm._derivatives;
+    && this->_centre_derivatives==tm._centre_derivatives;
 }
 
 
@@ -154,62 +188,53 @@ Function::TaylorModel<R>::centre() const
 }
 
 template<class R>
-const Function::TaylorDerivative<typename Function::TaylorModel<R>::I>&
-Function::TaylorModel<R>::derivatives() const
+Geometry::Box<R>
+Function::TaylorModel<R>::range() const
 { 
-  return this->_derivatives; 
+  return Geometry::Box<R>(this->_domain_derivatives.value());
+}
+
+
+template<class R>
+const Function::TaylorDerivative<typename Function::TaylorModel<R>::I>&
+Function::TaylorModel<R>::centre_derivatives() const
+{ 
+  return this->_centre_derivatives; 
+}
+
+template<class R>
+const Function::TaylorDerivative<typename Function::TaylorModel<R>::I>&
+Function::TaylorModel<R>::domain_derivatives() const
+{ 
+  return this->_domain_derivatives; 
 }
 
 template<class R>
 size_type 
 Function::TaylorModel<R>::argument_size() const
 { 
-  return this->_derivatives.argument_size(); 
+  return this->_centre_derivatives.argument_size(); 
 }
 
 template<class R>
 size_type 
 Function::TaylorModel<R>::result_size() const 
 { 
-  return this->_derivatives.result_size();
+  return this->_centre_derivatives.result_size();
 }
 
 template<class R>
-size_type 
+smoothness_type 
 Function::TaylorModel<R>::order() const 
 {
-  return this->_derivatives.degree();
+  return this->_centre_derivatives.degree();
 }
       
 template<class R>
-size_type 
+smoothness_type 
 Function::TaylorModel<R>::smoothness() const 
 { 
-  return this->_smoothness;
-}
-      
-
-
-template<class R>
-void
-Function::TaylorModel<R>::set(const size_type& i, const MultiIndex& j, const R& x) 
-{ 
-  this->_derivatives.set(i,j,x);
-}
-      
-template<class R>
-void
-Function::TaylorModel<R>::set(const size_type& i, const MultiIndex& j, const I& x) 
-{ 
-  this->_derivatives.set(i,j,x);
-}
-      
-
-template<class R>
-const typename Function::TaylorModel<R>::I&
-Function::TaylorModel<R>::get(const size_type& i, const MultiIndex& j) const 
-{ 
-  return this->_derivatives.get(i,j);
+  return this->_domain_derivatives.degree();
 }
       
 
@@ -221,19 +246,18 @@ Function::TaylorModel<R>::get(const size_type& i, const MultiIndex& j) const
 
 
 
-/*
+
+
+
+
+
+
+
 
 template<class R>
 Function::TaylorModel<R> 
-Function::TaylorModel<R>::component(const size_type& i) const
-{
-}
-
-*/
-
-template<class R>
-Function::TaylorModel<R> 
-Function::TaylorModel<R>::truncate(const size_type& order, const size_type& smoothness, const Geometry::Box<R>& domain) const
+Function::TaylorModel<R>::truncate(const Geometry::Box<R>& domain, const LinearAlgebra::Vector<R>& centre,
+                                   smoothness_type order, smoothness_type smoothness) const
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
@@ -257,14 +281,24 @@ Function::TaylorModel<R>::evaluate(const LinearAlgebra::Vector<I>& x) const
   }
 
   // TODO: Make this more efficient
+  LinearAlgebra::Vector<I> w=x-this->centre();
   LinearAlgebra::Vector<I> result(this->result_size());
-  for(MultiIndex j(this->argument_size()); j.degree()<=this->order(); ++j) {
-    I xa=1;
+  for(MultiIndex j(this->argument_size()); j.degree()<this->order(); ++j) {
+    I wa=1;
     for(size_type k=0; k!=j.number_of_variables(); ++k) {
-      xa*=Numeric::pow(x[k],int(j[k]));
+      wa*=Numeric::pow(w[k],int(j[k]));
     }
     for(size_type i=0; i!=this->result_size(); ++i) {
-      result[i]+=this->get(i,j)*xa;
+      result[i]+=this->_centre_derivatives[i][j]*wa;
+    }
+  }
+  for(MultiIndex j(this->argument_size(),this->order()); j.degree()<=this->order(); ++j) {
+    I wa=1;
+    for(size_type k=0; k!=j.number_of_variables(); ++k) {
+      wa*=Numeric::pow(w[k],int(j[k]));
+    }
+    for(size_type i=0; i!=this->result_size(); ++i) {
+      result[i]+=this->_domain_derivatives[i][j]*wa;
     }
   }
   return result;
@@ -273,16 +307,19 @@ Function::TaylorModel<R>::evaluate(const LinearAlgebra::Vector<I>& x) const
 
 template<class R>
 Function::TaylorModel<R>
-Function::recentre(const TaylorModel<R>& tm, const Geometry::Box<R>& bx, const Geometry::Point<R>& pt)
+Function::recentre(const TaylorModel<R>& tm, const Geometry::Box<R>& bx, const LinearAlgebra::Vector<R>& c)
 {
   ARIADNE_ASSERT(bx.subset(tm.domain()));
-  ARIADNE_ASSERT(bx.contains(pt));
-  typedef typename TaylorModel<R>::I I;
+  ARIADNE_ASSERT(bx.contains(Geometry::Point<R>(c)));
+  typedef Numeric::Interval<R> I;
 
-  TaylorDerivative<I> tr=TaylorDerivative<I>::variable(tm.argument_size(),tm.argument_size().tm.degree(),pt.position_vectors());
+  TaylorDerivative<I> translation=TaylorDerivative<I>::variable(tm.argument_size(),tm.argument_size(),tm.order(),c);
   
-  return TaylorModel<R>(bx,pt,tm.smoothness(),evaluate(tm,tr));
+  //FIXME: This is incorrect...
+  TaylorDerivative<I> new_centre_derivatives=compose(tm.centre_derivatives(),translation);
+  TaylorDerivative<I> new_domain_derivatives=compose(tm.domain_derivatives(),translation);
 
+  return TaylorModel<R>(bx,c,new_centre_derivatives,new_domain_derivatives);
 }
 
 
@@ -292,10 +329,13 @@ Function::add(const TaylorModel<R>& p1, const TaylorModel<R>& p2)
 {
   ARIADNE_ASSERT(!open_intersection(p1.domain(),p2.domain()).empty());
   if(p1.centre()==p2.centre()) {
-    return TaylorModel<R>(closed_intersection(p1.domain(),p2.domain()),p1.centre(),p1.derivatives()+p2.derivatives());
+    return TaylorModel<R>(closed_intersection(p1.domain(),p2.domain()),
+                          p1.centre(),
+                          p1.centre_derivatives()+p2.centre_derivatives(),
+                          p1.domain_derivatives()+p2.domain_derivatives());
   } else {
     Geometry::Box<R> new_domain=closed_intersection(p1.domain(),p2.domain());
-    Geometry::Point<R> new_centre=new_domain.centre();
+    LinearAlgebra::Vector<R> new_centre=new_domain.centre().position_vector();
     return add(recentre(p1,new_domain,new_centre),recentre(p2,new_domain,new_centre));
   }
 }
@@ -306,10 +346,14 @@ Function::sub(const TaylorModel<R>& p1, const TaylorModel<R>& p2)
 {
   ARIADNE_ASSERT(!open_intersection(p1.domain(),p2.domain()).empty());
   if(p1.centre()==p2.centre()) {
-    return TaylorModel<R>(closed_intersection(p1.domain(),p2.domain()),p1.centre(),p1.derivatives()-p2.derivatives());
+    return TaylorModel<R>(closed_intersection(p1.domain(),p2.domain()),
+                          p1.centre(),
+                          p1.centre_derivatives()-p2.centre_derivatives(),
+                          p1.domain_derivatives()-p2.domain_derivatives());
   } else {
     Geometry::Box<R> new_domain=closed_intersection(p1.domain(),p2.domain());
-    Geometry::Point<R> new_centre=new_domain.centre();
+    //Geometry::Point<R> new_centre=new_domain.centre();
+    LinearAlgebra::Vector<R> new_centre=new_domain.centre().position_vector();
     return add(recentre(p1,new_domain,new_centre),recentre(p2,new_domain,new_centre));
   }
 }
@@ -402,17 +446,28 @@ Function::operator*=(TaylorModel<R>& p0, const R& x1)
 
 template<class R>
 Function::TaylorModel<R>
-Function::compose(const TaylorModel<R>& p1, const TaylorModel<R>& p2)
+Function::compose(const TaylorModel<R>& p2, const TaylorModel<R>& p1)
 {
-  throw NotImplemented(__PRETTY_FUNCTION__);
+  typedef Numeric::Interval<R> I;
+  ARIADNE_ASSERT(p2.centre()==p1.centre_derivatives().value());
+  ARIADNE_ASSERT(subset(p1.range(),p2.domain()));
+  Geometry::Box<R> new_domain=p1.domain();
+  LinearAlgebra::Vector<R> new_centre=p1.centre();
+  TaylorDerivative<I> new_centre_derivatives=compose(p1.centre_derivatives(),p2.centre_derivatives());
+  TaylorDerivative<I> new_domain_derivatives=compose(p1.domain_derivatives(),p2.domain_derivatives());
+
+  return TaylorModel<R>(new_domain,new_centre,new_centre_derivatives,new_domain_derivatives);
 }
 
 
 template<class R>
 Function::TaylorModel<R>
-Function::derivative(const TaylorModel<R>& tm, const size_type& k) 
+Function::derivative(const TaylorModel<R>& tm, size_type k) 
 {
-  return TaylorModel<R>(tm.domain(),tm.centre(),tm.smoothness()-1,Function::derivative(tm.derivatives(),k));
+  return TaylorModel<R>(tm.domain(),
+                        tm.centre(),
+                        derivative(tm.centre_derivatives(),k),
+                        derivative(tm.domain_derivatives(),k));
 }
 
 
@@ -477,7 +532,7 @@ Function::compose(TaylorModel<R>& p0, const TaylorModel<R>& p1, const TaylorMode
 
 template<class R>
 void
-Function::derivative(TaylorModel<R>& p0, const TaylorModel<R>& p1, const size_type& k)
+Function::derivative(TaylorModel<R>& p0, const TaylorModel<R>& p1, size_type k)
 {
   if(p1.smoothness()==0) {
     ARIADNE_THROW(std::runtime_error,"derivative(TaylorModel,uint)"," model has smoothness 0");
@@ -500,13 +555,21 @@ Function::derivative(TaylorModel<R>& p0, const TaylorModel<R>& p1, const size_ty
 
 template<class R>
 LinearAlgebra::Matrix<typename Function::TaylorModel<R>::I> 
-Function::TaylorModel<R>::jacobian(const LinearAlgebra::Vector<I>& s) const
+Function::TaylorModel<R>::jacobian(const LinearAlgebra::Vector<R>& s) const
+{
+  return this->jacobian(LinearAlgebra::Vector<I>(s));
+}
+
+template<class R>
+LinearAlgebra::Matrix<typename Function::TaylorModel<R>::I> 
+Function::TaylorModel<R>::jacobian(const LinearAlgebra::Vector<I>& x) const
 {
   LinearAlgebra::Matrix<I> J(this->result_size(),this->argument_size());
-  array< array<I> > powers=this->_powers(s);
-  
+  LinearAlgebra::Vector<I> w=x-this->centre();
+  array< array<I> > powers=this->_powers(w);
+
   for(size_type j=0; j!=this->argument_size(); ++j) {
-    for(MultiIndex m(this->argument_size()); m.degree()<=this->order(); ++m) {
+    for(MultiIndex m(this->argument_size()); m.degree()<this->order(); ++m) {
       MultiIndex n=m;
       int c=n[j];
       if(c!=0) {
@@ -516,7 +579,21 @@ Function::TaylorModel<R>::jacobian(const LinearAlgebra::Vector<I>& s) const
           a*=powers[k][n[k]];
         }
         for(size_type i=0; i!=this->result_size(); ++i) {
-          J(i,j)+=a*this->get(i,m);
+          J[i][j]+=a*this->_centre_derivatives[i][m];
+        }
+      }
+    }
+    for(MultiIndex m(this->argument_size(),this->order()); m.degree()<=this->order(); ++m) {
+      MultiIndex n=m;
+      int c=n[j];
+      if(c!=0) {
+        n.decrement_index(j);
+        I a=c;
+        for(size_type k=0; k!=this->argument_size(); ++k) {
+          a*=powers[k][n[k]];
+        }
+        for(size_type i=0; i!=this->result_size(); ++i) {
+          J[i][j]+=a*this->_domain_derivatives[i][m];
         }
       }
     }
@@ -554,11 +631,11 @@ Function::inverse(const TaylorModel<R>& p, const LinearAlgebra::Vector<R>& v)
   for(MultiIndex m(p.result_size()); m.degree()<=p.order(); ++m) {
     if(m.degree()==0) {
       for(size_type i=0; i!=p.argument_size(); ++i) {
-        result.set(i,m, v(i));
+        result._centre_derivatives[i][m]=v[i];
       }
     } else if(m.degree()==1) {
       for(size_type i=0; i!=p.argument_size(); ++i) {
-        result.set(i,m, invJ(i,m.position()-1));
+        result._centre_derivatives[i][m]=invJ[i][m.position()-1];
       }
     } else {
       // FIXME: Add code for higher indices
@@ -567,6 +644,13 @@ Function::inverse(const TaylorModel<R>& p, const LinearAlgebra::Vector<R>& v)
   return result;
 }
 
+
+template<class R> 
+Function::TaylorModel<R> 
+Function::implicit(const TaylorModel<R>& p, const LinearAlgebra::Vector<R>& v)
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
 
 template<class R>
 Base::array< Base::array<typename Function::TaylorModel<R>::I> >
@@ -595,15 +679,13 @@ Function::TaylorModel<R>::write(std::ostream& os) const
 {
   os << "TaylorModel(\n";
   for(uint i=0; i!=this->result_size(); ++i) {
-    os << "  " << i << ": " << std::flush;
-    bool first=true;
-    for(MultiIndex j(this->argument_size()); j.degree()<=this->order(); ++j) {
-      if(first) { first=false; } else { os << ", "; } 
-      os << j << ":" << j.position() << ":"  << std::flush; os << this->get(i,j) << std::flush;
-    }
-    os << ";\n";
+    os << "  domain=" << this->domain() << ",\n" << std::flush;
+    os << "  centre=" << this->centre() << ",\n" << std::flush;
+    os << "  range=" << this->range() << ",\n" << std::flush;
+    os << "  expansion=" << this->_centre_derivatives << ",\n" << std::flush;
+    os << "  bounds=" << this->_domain_derivatives << ",\n" << std::flush;
   }
-  os << ")";
+  os << ")\n";
   return os;
 }
 
@@ -629,7 +711,7 @@ Output::operator<<(Output::latexstream& texs, const Function::TaylorModel<R>& p)
     bool first = true;
     if(i!=0) { texs << "\\\\"; }
     for(MultiIndex j(p.argument_size()); j.degree()<=p.order(); ++j) {
-      const Numeric::Interval<R>& a=p.get(i,j);
+      const Numeric::Interval<R>& a=p.centre_derivatives()[i][j];
       if(a!=0) {
         if(first) { first=false; }
         else { if(a>0) { texs << '+'; } }
@@ -660,17 +742,23 @@ Function::TaylorModel<R>::instantiate()
 {
   typedef typename Numeric::traits<R>::arithmetic_type I;
   size_type* k=0;
-  R* x=0;
+  //R* x=0;
   LinearAlgebra::Vector<R>* v=0;
-  TaylorModel<R>* p=0;
+  //Geometry::Point<R>* pt=0;
+  Geometry::Box<R>* bx=0;
+  TaylorModel<R>* tm=0;
   std::ostream* os = 0;
   Output::latexstream* texs = 0;
 
-  Function::compose(*p,*p);
-  Function::derivative(*p,*k);
-  Function::inverse(*p,*v);
-  *os << *p;
-  *texs << *p;
+  Function::recentre(*tm,*bx,*v);
+  Function::add(*tm,*tm);
+  Function::sub(*tm,*tm);
+  Function::compose(*tm,*tm);
+  Function::derivative(*tm,*k);
+  Function::inverse(*tm,*v);
+  Function::implicit(*tm,*v);
+  *os << *tm;
+  *texs << *tm;
 }
 
 

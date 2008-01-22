@@ -92,7 +92,7 @@ Evaluation::StandardBounder<R>::flow_bounds(const System::VectorField<R>& vf,
   // TODO: Better estimates of constants
   const R INITIAL_MULTIPLIER=2;
   const R MULTIPLIER=0.125;
-  const R BOX_RADIUS_MULTIPLIER=0.125;
+  const R BOX_RADIUS_MULTIPLIER=0.03125;
   const uint EXPANSION_STEPS=4;
   const uint REFINEMENT_STEPS=4;
   Geometry::Box<R> b,nb;

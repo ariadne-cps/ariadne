@@ -132,7 +132,6 @@ Evaluation::MapEvolver<BS>::_step(BSL& evolve,
   ARIADNE_LOG(5,"  working.size()="<<working.size()<<"\n");
   TBS tbs=working.pop();
   ARIADNE_LOG(5,"  tbs="<<tbs<<", r="<<this->radius(tbs)<<"\n");
-  assert(tbs.time()<20);
   if(this->radius(tbs) > this->maximum_basic_set_radius()) {
     if(semantics==upper_semantics) {
       ARIADNE_LOG(5,"    subdivide...\n");

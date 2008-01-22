@@ -139,7 +139,7 @@ test_map_evolver()
   eps << bounding_set;
   eps.close();
   
-
+ /*
   cout << "Computing viability kernel" << endl;
   evolver.parameters().set_grid_length(grid_length);
   shared_ptr< SetInterface<R> > viability_kernel_ptr(evolver.viable(henon,bounding_set));
@@ -149,6 +149,7 @@ test_map_evolver()
   eps << fill_colour(cyan) << bounding_set;
   eps << fill_colour(magenta) << *viability_kernel_ptr;
   eps.close();
+ */
 
   return ARIADNE_TEST_FAILURES;
 }

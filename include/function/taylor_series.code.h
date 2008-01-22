@@ -21,6 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+#include "taylor_variable.h"
+
 
 namespace Ariadne {
 
@@ -196,7 +198,12 @@ recursive_inverse(const Function::TaylorSeries<X>& x, const X& c)
 
 
 
-
+template<class X> 
+Function::TaylorSeries<X>::TaylorSeries(const TaylorVariable<X>& x)
+  : _data(x.data())
+{
+  ARIADNE_ASSERT(x.argument_size()==1);
+}  
 
 
 template<class X> 
@@ -228,7 +235,7 @@ Function::TaylorSeries<X>
 Function::antiderivative(const TaylorSeries<X>& x, const X& c)
 {
   TaylorSeries<X> result(x.degree()+1);
-  for(size_type n=1; n<=x.degree(); ++n) { result[n]=x[n-1]/n; }
+  for(size_type n=1; n<=x.degree()+1u; ++n) { result[n]=x[n-1]/n; }
   result[0]=c;
   return result;
 }
@@ -249,7 +256,7 @@ Function::compose(const TaylorSeries<X>& y, const TaylorSeries<X>& x)
   TaylorSeries<X> t(d);
   r[0]=y[d];
   //cerr<<"t="<<t<<endl;
-  for(int n=1; n<=d; ++n) {
+  for(uint n=1; n<=d; ++n) {
     t=r*w;
     t.value()+=y[d-n];
     //cerr<<"u="<<u<<endl;
@@ -270,7 +277,7 @@ Function::inverse(const TaylorSeries<X>& x, const X& c)
 template<class X> 
 std::ostream& 
 Function::operator<<(std::ostream& os, const TaylorSeries<X>& x) {
-  os << "TaylorSeries";
+  os << "S";
   for(size_type i=0; i<=x.degree(); ++i) {
     os << (i==0 ? '(' : ',') << x[i]; 
   }

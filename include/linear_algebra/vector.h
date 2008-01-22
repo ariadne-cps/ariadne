@@ -83,12 +83,6 @@ namespace Ariadne {
       /*! \brief Copy assignment operator. */
       Vector<R>& operator=(const Vector<R>& v);
       
-      /*! \brief The equality operator. */
-      bool operator==(const Vector<R>& v) const;
-        
-      /*! \brief The inequality operator. */
-      bool operator!=(const Vector<R>& v) const;
-      
       /*! \brief Returns the zero vector of size \a n. */
       static Vector<R> zero(const size_type& n);
       /*! \brief Returns the vector of size \a n whose elements are all 1. */
@@ -135,6 +129,11 @@ namespace Ariadne {
 
             
 #ifdef DOXYGEN
+      /*! \brief The equality operator. */
+      bool operator==(const Vector<R>& v1, const Vector<R>& v2);
+      /*! \brief The inequality operator. */
+      bool operator!=(const Vector<R>& v1, const Vector<R>& v2);
+
       /*! \brief The additive inverse of the vector \a v. */
       friend Vector<R> operator-(const Vector<R>& v);
       /*! \brief The vector sum of \a v1 and \a v2. */
@@ -215,6 +214,8 @@ namespace Ariadne {
   template<class R> Vector<R> approximation(const Vector<R>& v);
   template<class R> Vector<R> approximation(const Vector< Numeric::Interval<R> >& v);
 
+  template<class R1, class R2> bool operator==(const Vector<R1>& v1, const Vector<R2>& v2);
+  template<class R1, class R2> bool operator!=(const Vector<R1>& v1, const Vector<R2>& v2);
   template<class R> bool operator==(const Vector<R>& v, int n);
   template<class R> tribool operator>=(const Vector< Numeric::Interval<R> >& iv, int n);
 

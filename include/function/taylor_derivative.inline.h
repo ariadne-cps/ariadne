@@ -68,7 +68,8 @@ Function::TaylorDerivative<X>::TaylorDerivative(size_type r, size_type a, smooth
 {
   for(size_type i=0; i!=r; ++i) {
     array<X>& tvd=this->_variables[i].data();
-    for(size_type j=0; j!=compute_polynomial_data_size(a,d); ++j) {
+    assert(tvd.size()==compute_polynomial_data_size(a,d));
+    for(size_type j=0; j!=tvd.size(); ++j) {
       tvd[j]=*ptr;
       ++ptr;
     }
@@ -90,7 +91,7 @@ Function::TaylorDerivative<X>::TaylorDerivative(const TaylorVariable<XX>& tv)
   
 template<class X> template<class XX> inline
 Function::TaylorDerivative<X>::TaylorDerivative(const TaylorDerivative<XX>& other) 
-  :  _result_size(other._result_size), _argument_size(other._argument_size), _degree(other._degree), _variables(other._variables) 
+  :  _result_size(other.result_size()), _argument_size(other.argument_size()), _degree(other.degree()), _variables(other.variables()) 
 {
 }
   
@@ -129,6 +130,14 @@ size_type
 Function::TaylorDerivative<X>::_increment() const 
 { 
   return compute_polynomial_data_size(1u,this->_argument_size,this->_degree); 
+}
+
+// Synonym for "result_size" for templated evaluate function
+template<class X> inline
+size_type 
+Function::TaylorDerivative<X>::size() const 
+{ 
+  return this->_result_size;
 }
 
 template<class X> inline

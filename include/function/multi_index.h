@@ -54,6 +54,8 @@ namespace Ariadne {
      
       /*! Construct a multi index of degree \a 0 with \a nv variables. */
       explicit MultiIndex(size_type nv);
+      /*! Construct the first multi index of degree \a d with \a nv variables. */
+      explicit MultiIndex(size_type nv, smoothness_type d);
       /*! Construct a multi index with \a nv variables from the array \a ary. */
       explicit MultiIndex(size_type nv, const smoothness_type* ary);
       explicit MultiIndex(size_type nv, const uint* ary);
@@ -121,6 +123,13 @@ namespace Ariadne {
     inline MultiIndex::MultiIndex(size_type nv)
       : _degree(0), _occurrences(nv,0) 
     {
+    }
+
+    inline MultiIndex::MultiIndex(size_type nv, smoothness_type d)
+      : _degree(0), _occurrences(nv,0) 
+    {
+      this->_occurrences[0]=d;
+      this->_degree=d;
     }
 
     inline MultiIndex::MultiIndex(size_type nv, const smoothness_type* ary)

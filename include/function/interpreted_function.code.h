@@ -179,7 +179,7 @@ Function::InterpretedFunction<R>::jacobian(const LinearAlgebra::Vector<A>& x) co
   LinearAlgebra::Matrix<A> result(m,n);
   for(size_type i=0; i!=m; ++i) {
     for(size_type j=0; j!=n; ++j) {
-      result(i,j)=y[i].derivative(j);
+      result(i,j)=y[i].gradient(j);
     }
   }
   return result;

@@ -87,23 +87,23 @@ LinearAlgebra::Vector<R>::operator=(const Vector<R>& v)
   if(this!=&v) { this->_array=v._array; } return *this; }
 
 
-template<class R> inline
+template<class R1, class R2> inline
 bool 
-LinearAlgebra::Vector<R>::operator==(const Vector<R>& v) const 
+LinearAlgebra::operator==(const Vector<R1>& v1, const Vector<R2>& v2)  
 {
-  if(this->size()!=v.size()) { return false; }
-  for(size_type i=0; i!=this->size(); ++i) { 
-    if((*this)(i)!=v(i)) { return false; } 
+  if(v1.size()!=v2.size()) { return false; }
+  for(size_type i=0; i!=v1.size(); ++i) { 
+    if(v1(i)!=v2(i)) { return false; } 
   }
   return true; 
 }
 
 
-template<class R> inline
+template<class R1, class R2> inline
 bool 
-LinearAlgebra::Vector<R>::operator!=(const Vector<R>& v) const 
+LinearAlgebra::operator!=(const Vector<R1>& v1, const Vector<R2>& v2)  
 {
-  return !(*this==v); 
+  return !(v1==v2); 
 }
 
 

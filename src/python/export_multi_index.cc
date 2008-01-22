@@ -49,7 +49,8 @@ void export_multi_index()
   
   class_<MultiIndex> multi_index_class("MultiIndex",no_init);
   multi_index_class.def("__init__", make_constructor(&make_multi_index));
-  multi_index_class.def(init<int>());
+  multi_index_class.def(init<size_type>());
+  multi_index_class.def(init<size_type,smoothness_type>());
   multi_index_class.def(init<MultiIndex>());
   multi_index_class.def("degree",&MultiIndex::degree);
   multi_index_class.def("increment",&MultiIndex::operator++,return_value_policy<reference_existing_object>());

@@ -114,19 +114,18 @@ Geometry::Zonotope<R>
 Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorField<R>& vector_field, 
                                                   const Geometry::Zonotope<R>& initial_set, 
                                                   const Numeric::Rational& step_size, 
-                                                  const Geometry::Box<R>& bounding_box) const
+                                                  const Geometry::Box<R>& flow_bounding_box) const
 {
-  ARIADNE_LOG(2,"LohnerIntegrator::integration_step(VectorField,Zonotope,Time,Box)\n");
   using namespace Numeric;
   using namespace LinearAlgebra;
   using namespace Function;
   using namespace Geometry;
   using namespace System;
-  
+
   ARIADNE_LOG(5,"LohnerIntegrator::integration_step(VectorField,Zonotope,Time,Box)\n");
-  ARIADNE_LOG(6,"bounding_box="<<bounding_box<<"\n");
+  ARIADNE_LOG(6,"flow_bounding_box="<<flow_bounding_box<<"\n");
   ARIADNE_LOG(6,"initial_set="<<initial_set<<"\n");
-  AffineModel<R> flow_model=this->_integrator->affine_flow_model(vector_field,initial_set.centre(),step_size,bounding_box);
+  AffineModel<R> flow_model=this->_integrator->affine_flow_model(vector_field,initial_set.centre(),step_size,flow_bounding_box);
   ARIADNE_LOG(6,"flow_model="<<flow_model<<"\n");
   Zonotope<R> flow_set=Geometry::apply(flow_model,initial_set);
   ARIADNE_LOG(6,"flow_set="<<flow_set<<"\n");

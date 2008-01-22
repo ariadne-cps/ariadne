@@ -135,27 +135,6 @@ void export_rectangle()
 
 
 
-  class_< Rectangle<I> >("FuzzyRectangle",init<int>())
-    .def(init< Point<I>, Point<I> >())
-    .def(init< Rectangle<R> >())
-    .def(init< Rectangle<I> >())
-    //.def(init<std::string>())
-    .def("dimension", &Rectangle<I>::dimension)
-    .def("contains", &Rectangle<I>::contains)
-    .def("set_lower_bound", &Rectangle<I>::set_lower_bound)
-    .def("set_upper_bound", &Rectangle<I>::set_upper_bound)
-    //.def("bounding_box", &Rectangle<I>::bounding_box)
-    .def("lower_corner", &Rectangle<I>::lower_corner)
-    .def("upper_corner", &Rectangle<I>::upper_corner)
-    .def("lower_bound", &Rectangle<I>::lower_bound, return_value_policy<copy_const_reference>())
-    .def("upper_bound", &Rectangle<I>::upper_bound, return_value_policy<copy_const_reference>())
-    .def("__str__",&__str__<I>)
-    .def("__repr__",&__repr__<I>)
-  ;
-
-  def("under_approximation", (Rectangle<R>(*)(const Rectangle<I>&))(&under_approximation));
-  def("over_approximation", (Rectangle<R>(*)(const Rectangle<I>&))(&over_approximation));
-
 
 }
 

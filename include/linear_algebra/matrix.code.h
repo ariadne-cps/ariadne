@@ -396,7 +396,7 @@ LinearAlgebra::Matrix<R>::write(std::ostream& os) const
       os << A(i,j);
     }
   }
-  os << " ]\n";
+  os << "]";
   return os;
 }
 

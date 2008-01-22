@@ -29,6 +29,7 @@
 #define ARIADNE_GEOMETRY_BOX_H
 
 #include <iosfwd>
+#include <boost/concept_check.hpp>
 
 #include "base/array.h"
 #include "base/iterator.h"
@@ -44,6 +45,7 @@
 
 #include "geometry/exceptions.h"
 #include "geometry/point.h"
+#include "geometry/basic_set_concept.h"
 #include "geometry/rectangle_expression.h"
 
 namespace Ariadne {
@@ -83,6 +85,8 @@ namespace Ariadne {
     class Box 
       : public RectangleExpression< Box<R> >
     {
+      typedef Box<R> Self;
+      BOOST_CLASS_REQUIRE(Self,Ariadne::Geometry,BasicSetConcept);
       typedef typename Numeric::traits<R>::interval_type I;
       typedef typename Numeric::traits<R>::arithmetic_type A;
      private:

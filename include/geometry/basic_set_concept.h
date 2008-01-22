@@ -40,8 +40,17 @@ namespace Ariadne {
      *
      *  See also the DenotableSetConcept and the SetInterface interface.
      */
+    template<class BS>
     class BasicSetConcept 
     {
+     public:
+      void constraints() {
+        subset(bs,bs);
+        intersect(bs,bs);
+        disjoint(bs,bs);
+      }
+      BS const& bs;
+#ifdef DOXYGEN
      public:
       /*! \brief The type of real number used to describle the set. */
       typedef RealConcept real_type;
@@ -102,7 +111,6 @@ namespace Ariadne {
       //@}
       //@}
      
-#ifdef DOXYGEN
       //@{ 
       //! \name Required geometric predicates and operations
       /*! \brief Tests if the set contains a point. */
@@ -133,7 +141,6 @@ namespace Ariadne {
       /*! \brief The componentwise difference of basic sets \a bs1 and \a bs2. (Optional) */
       friend BasicSetConcept minkowski_difference(const BasicSetConcept& bs2, const BasicSetConcept& bs2); 
       //@}
-#endif
       
       //@{ 
       //! \name Input/output operations
@@ -142,6 +149,7 @@ namespace Ariadne {
       /*! \brief Read from an input stream. (Optional) */
       std::istream& read(std::istream& is);
       //@}
+#endif
     };
   }
 }

@@ -38,7 +38,7 @@ namespace Ariadne {
     template<class X> class TaylorDerivative;
   
     /*!\ingroup Function
-     * \brief A templated class representing a the derivatives of a scalar quantity with respect to a multiple arguments.
+     * \brief A templated class representing a the derivatives of a scalar quantity with respect to a multiple arguments. 
      */
     template<class X>
     class TaylorVariable
@@ -83,6 +83,8 @@ namespace Ariadne {
       const X& value() const;
       /*! \brief A reference to the value of the quantity. */
       X& value();
+      /*! \brief The variation of the quantity with respect to the \a j<sup>th</sup> argument. */
+      const X& gradient(size_type j) const;
       /*! \brief The array of derivative values. */
       const array<X>& data() const;
       /*! \brief A reference to the array of derivative values. */
@@ -106,7 +108,7 @@ namespace Ariadne {
       /*! \brief The derivatives of the inverse of \f$y\f$ evaluated at \f$x\f$. (Not currently implemented.) */
       friend TaylorVariable<X> inverse(const TaylorVariable<X>& y, const X& x);
       /*! \brief The derivative of \f$x\f$ with respect to the variable \a k .*/
-      friend TaylorVariable<X> derivative(const TaylorVariable<x>& x, const size_type& k);
+      friend TaylorVariable<X> derivative(const TaylorVariable<x>& x, size_type k);
       /*! \brief The minimum of two variables. Returns the variable whose zero-th order value is minimal. */
       friend TaylorVariable<X> min(const TaylorVariable<X>& x1, const TaylorVariable<X>& x2);
       /*! \brief The maximum of two variables. Returns the variable whose zero-th order value is maximal. */
@@ -168,13 +170,15 @@ namespace Ariadne {
       array<X> _data;
     };
 
+  template<class X> bool operator<(const TaylorVariable<X>& x1, const TaylorVariable<X>& x2);
 
   template<class X, class R> R evaluate(const TaylorVariable<X>& y, const array<R>& x);
 
   template<class X> TaylorVariable<X> compose(const TaylorSeries<X>& y, const TaylorVariable<X>& x);
   template<class X> TaylorVariable<X> compose(const TaylorVariable<X>& y, const TaylorVariable<X>& x);
   template<class X> TaylorVariable<X> reduce(const TaylorVariable<X>& x);
-  template<class X> TaylorVariable<X> derivative(const TaylorVariable<X>& x, const size_type& k);
+  template<class X> TaylorVariable<X> derivative(const TaylorVariable<X>& x, size_type k);
+
   template<class X> TaylorVariable<X> min(const TaylorVariable<X>& x1, const TaylorVariable<X>& x2); 
   template<class X> TaylorVariable<X> max(const TaylorVariable<X>& x1,const TaylorVariable<X>& x2); 
   template<class X> TaylorVariable<X> pos(const TaylorVariable<X>& x);
@@ -186,6 +190,9 @@ namespace Ariadne {
   template<class X> TaylorVariable<X> mul(const TaylorVariable<X>& x, const TaylorVariable<X>& y);
   template<class X> TaylorVariable<X> div(const TaylorVariable<X>& x, const TaylorVariable<X>& y);
   template<class X, class N> TaylorVariable<X> pow(const TaylorVariable<X>& x, N k);
+
+  template<class X> TaylorVariable<X>& acc(TaylorVariable<X>& r, const TaylorVariable<X>& x, const TaylorVariable<X>& y);
+  template<class X> TaylorVariable<X>& acc(TaylorVariable<X>& r, const X& c, const TaylorVariable<X>& x);
 
   template<class X> TaylorVariable<X> sqrt(const TaylorVariable<X>& x);
   template<class X> TaylorVariable<X> exp(const TaylorVariable<X>& x); 
@@ -213,7 +220,28 @@ namespace Ariadne {
   template<class X, class R> TaylorVariable<X> operator/(const TaylorVariable<X>& x, const R& c);
   template<class X, class R> TaylorVariable<X> operator/(const R& c, const TaylorVariable<X>& x);
 
+  /*
+  template<class X> TaylorVariable<X> operator+(const TaylorVariable<X>& x, const X& c);
+  template<class X> TaylorVariable<X> operator+(const X& c, const TaylorVariable<X>& x);
+  template<class X> TaylorVariable<X> operator-(const TaylorVariable<X>& x, const X& c);
+  template<class X> TaylorVariable<X> operator-(const X& c, const TaylorVariable<X>& x);
+  template<class X> TaylorVariable<X> operator*(const TaylorVariable<X>& x, const X& c);
+  template<class X> TaylorVariable<X> operator*(const X& c, const TaylorVariable<X>& x);
+  template<class X> TaylorVariable<X> operator/(const TaylorVariable<X>& x, const X& c);
+  template<class X> TaylorVariable<X> operator/(const X& c, const TaylorVariable<X>& x);
+
+  template<class X> TaylorVariable<X> operator+(const TaylorVariable<X>& x, const double& c);
+  template<class X> TaylorVariable<X> operator+(const double& c, const TaylorVariable<X>& x);
+  template<class X> TaylorVariable<X> operator-(const TaylorVariable<X>& x, const double& c);
+  template<class X> TaylorVariable<X> operator-(const double& c, const TaylorVariable<X>& x);
+  template<class X> TaylorVariable<X> operator*(const TaylorVariable<X>& x, const double& c);
+  template<class X> TaylorVariable<X> operator*(const double& c, const TaylorVariable<X>& x);
+  template<class X> TaylorVariable<X> operator/(const TaylorVariable<X>& x, const double& c);
+  template<class X> TaylorVariable<X> operator/(const double& c, const TaylorVariable<X>& x);
+  */
+
   template<class X> TaylorVariable<X>& operator+=(TaylorVariable<X>& r, const TaylorVariable<X>& x);
+  template<class X> TaylorVariable<X>& operator-=(TaylorVariable<X>& r, const TaylorVariable<X>& x);
 
   template<class X, class R> TaylorVariable<X>& operator+=(TaylorVariable<X>& x, const R& c);
   template<class X, class R> TaylorVariable<X>& operator-=(TaylorVariable<X>& x, const R& c);

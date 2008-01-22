@@ -33,6 +33,8 @@
 namespace Ariadne {
   namespace Function {
   
+    template<class X> class TaylorVariable;
+
     /*!\ingroup Function
      * \brief A templated class representing a the derivatives of a scalar quantity with respect to a multiple arguments.
      */
@@ -50,6 +52,9 @@ namespace Ariadne {
       TaylorSeries(smoothness_type d);
       /*! \brief A taylor variable of degree \a d in \a arguments, with values given by the array based at \a ptr. */
       template<class XX> TaylorSeries(smoothness_type d, const XX* ptr);
+
+      /*! \brief Convert from a TaylorVariable. */
+      explicit TaylorSeries(const TaylorVariable<X>& tv);
 
       /*! \brief Copy constructor. */
       template<class XX> TaylorSeries(const TaylorSeries<XX>& ts); 

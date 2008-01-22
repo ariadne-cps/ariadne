@@ -33,6 +33,7 @@
 #include "system/declarations.h"
 
 #include "evaluation/integrator_interface.h"
+#include "evaluation/integrator.h"
 
 namespace Ariadne {
   namespace Evaluation {
@@ -49,7 +50,9 @@ namespace Ariadne {
      public:
       
       /*! \brief Constructor. */
-      KuhnIntegrator(uint cascade_size) : _cascade_size(cascade_size) { }
+      KuhnIntegrator(smoothness_type temporal_order, uint cascade_size)
+        : _integrator(new IntegratorBase<R>(temporal_order, 1u))
+        , _cascade_size(cascade_size) { }
 
       /*! \brief Cloning operator. */
       virtual KuhnIntegrator<R>* clone() const { return new KuhnIntegrator<R>(*this); }
@@ -82,6 +85,7 @@ namespace Ariadne {
       /*! \brief Write to an output stream. */
       virtual std::ostream& write(std::ostream&) const;
      private:
+      boost::shared_ptr< IntegratorBase<R> > _integrator;
       size_type _cascade_size;
     };
     

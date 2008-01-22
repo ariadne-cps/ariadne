@@ -55,9 +55,9 @@ template<class X> template<class XX>
 Function::TaylorVariable<X>& 
 Function::TaylorVariable<X>::operator=(const TaylorVariable<XX>& other) 
 {
-  this->_argument_size=other._argument_size;
-  this->_degree=other._degree;
-  this->_data=other._data;
+  this->_argument_size=other.argument_size();
+  this->_degree=other.degree();
+  this->_data=other.data();
   return *this;
 }
 
@@ -78,9 +78,9 @@ template<class X> template<class XX>
 bool 
 Function::TaylorVariable<X>::operator==(const TaylorVariable<XX>& other) const
 {
-  return this->_argument_size==other._argument_size
-    && this->_degree==other._degree
-    && this->_data==other._data; 
+  return this->_argument_size==other.argument_size()
+    && this->_degree==other.degree()
+    && this->_data==other.data(); 
 }
 
 
@@ -224,6 +224,16 @@ Function::sub(const TaylorVariable<X>& x, const TaylorVariable<X>& y)
   for(size_type n=0; n<z.data().size(); ++n) {
     z.data()[n] = x.data()[n]-y.data()[n];
   }
+  return z;
+}
+
+template<class X> 
+Function::TaylorVariable<X> 
+Function::mul(const TaylorVariable<X>& x, const TaylorVariable<X>& y)
+{
+  assert(x.argument_size()==y.argument_size());
+  TaylorVariable<X> z(x.argument_size(),std::min(x.degree(),y.degree()));
+  acc(z,x,y);
   return z;
 }
 

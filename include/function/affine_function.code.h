@@ -52,9 +52,10 @@ Function::TaylorDerivative<typename Function::AffineFunction<R>::F>
 Function::AffineFunction<R>::derivative(const LinearAlgebra::Vector<F>& x, const smoothness_type& s) const
 {
   TaylorDerivative<F> result(this->result_size(),this->argument_size(),s);
+  LinearAlgebra::Vector<F> value=this->evaluate(x);
   for(size_type i=0; i!=this->result_size(); ++i) {
     array<F>& data=result[i].data();
-    data[0]=this->_b(i);
+    data[0]=value[i];
     if(s>0) {
       for(size_type j=0; j!=this->argument_size(); ++j) {
         data[j+1u]=this->_a(i,j);

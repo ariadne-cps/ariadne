@@ -88,6 +88,7 @@ template<class R>
 void export_taylor_derivative()
 {
   typedef typename Numeric::traits<R>::arithmetic_type A;
+  typedef typename Numeric::traits<R>::interval_type I;
   typedef Vector<R> RVec;
   typedef Vector<A> IVec;
   typedef TaylorVariable<A> TV;
@@ -105,6 +106,10 @@ void export_taylor_derivative()
   taylor_derivative_class.def("__neg__", &Python::neg<TD,TD>);
   taylor_derivative_class.def("__add__", &Python::add<TD,TD,TD>);
   taylor_derivative_class.def("__sub__", &Python::sub<TD,TD,TD>);
+  taylor_derivative_class.def("__sub__", &Python::sub<TD,TD,IVec>);
+  taylor_derivative_class.def("__mul__", &Python::mul<TD,TD,I>);
+  taylor_derivative_class.def("value", &TD::value);
+  taylor_derivative_class.def("jacobian", &TD::jacobian);
   taylor_derivative_class.def(self_ns::str(self));
   
   def("variable",(TD(*)(const RVec&,smoothness_type))&TD::variable);

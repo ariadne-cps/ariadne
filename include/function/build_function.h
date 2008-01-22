@@ -61,7 +61,7 @@
       f(dr,dx,p); \
       for(uint i=0; i!=rs; ++i) { \
         for(uint j=0; j!=as; ++j) { \
-          r(i,j)=dr[i].derivative(j); \
+          r(i,j)=dr[i].gradient(j); \
         } \
       }  \
       return r; \

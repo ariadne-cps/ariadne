@@ -29,24 +29,6 @@ namespace Ariadne {
 
 namespace {
 
-template<class X> 
-void
-add_product(Function::TaylorVariable<X>& x0, const Function::TaylorVariable<X>& x1, const Function::TaylorVariable<X>& x2)
-{
-  using namespace Function;
-  assert(x0.argument_size()==x1.argument_size());
-  assert(x0.argument_size()==x2.argument_size());
-  for(MultiIndex i1(x1.argument_size()); i1.degree() <= x1.degree(); ++i1) {
-    for(MultiIndex i2(x2.argument_size()); i2.degree() <= std::min(x2.degree(),smoothness_type(x0.degree()-i1.degree())); ++i2) {
-      MultiIndex i0=i1+i2;
-      //std::cout << "i0=" << i0 << ", i1=" << i1 << ", i2=" << i2 << std::endl;
-      x0[i0]+=x1[i1]*x2[i2];
-    }
-  }
-}
-
-
-
 template<class X>
 void 
 compute_composition(Function::TaylorVariable<X>& z, 
@@ -63,7 +45,7 @@ compute_composition(Function::TaylorVariable<X>& z,
   t.value()=y.data()[d];
   for(uint n=1; n<=d; ++n) {
     TaylorVariable<X> u(as,d);
-    add_product(u,t,w);
+    acc(u,t,w);
     t=u+y.data()[d-n];
   }
   z=t;
@@ -118,6 +100,13 @@ Function::TaylorVariable<X>::value()
 }
 
 template<class X> 
+const X&
+Function::TaylorVariable<X>::gradient(size_type j) const 
+{ 
+  return this->_data[j+1u];
+}
+
+template<class X> 
 array<X>& 
 Function::TaylorVariable<X>::data()
 {
@@ -146,18 +135,39 @@ Function::TaylorVariable<X>::operator[](const MultiIndex& a) const
   return this->_data[a.position()]; 
 }
 
-
-
 template<class X> 
-Function::TaylorVariable<X> 
-Function::mul(const TaylorVariable<X>& x, const TaylorVariable<X>& y)
+bool
+Function::operator<(const TaylorVariable<X>& x1, const TaylorVariable<X>& x2)
 {
-  assert(x.argument_size()==y.argument_size());
-  TaylorVariable<X> z(x.argument_size(),std::min(x.degree(),y.degree()));
-  add_product(z,x,y);
-  return z;
+  return x1.value() < x2.value();
 }
 
+template<class X> 
+Function::TaylorVariable<X>&
+Function::acc(TaylorVariable<X>& r, const TaylorVariable<X>& x1, const TaylorVariable<X>& x2)
+{
+  ARIADNE_ASSERT(r.argument_size()==x1.argument_size());
+  ARIADNE_ASSERT(r.argument_size()==x2.argument_size());
+  for(MultiIndex i1(x1.argument_size()); i1.degree() <= std::min(r.degree(),x1.degree()); ++i1) {
+    for(MultiIndex i2(x2.argument_size()); i2.degree() <= std::min(x2.degree(),smoothness_type(r.degree()-i1.degree())); ++i2) {
+      MultiIndex i0=i1+i2;
+      r[i0]+=x1[i1]*x2[i2];
+    }
+  }
+  return r;
+}
+
+template<class X> 
+Function::TaylorVariable<X>&
+Function::acc(TaylorVariable<X>& r, const X& c, const TaylorVariable<X>& x)
+{
+  ARIADNE_ASSERT(r.argument_size()==x.argument_size());
+  size_type n=std::max(r.data().size(),x.data().size());
+  for(size_type i=0; i!=n; ++i) {
+    r.data()[i]+=c*x.data()[i];
+  }
+  return r;
+}
 
 
 template<class X> 
@@ -226,7 +236,7 @@ Function::compose(const TaylorSeries<X>& y, const TaylorVariable<X>& x)
 
 template<class X> 
 Function::TaylorVariable<X> 
-Function::derivative(const TaylorVariable<X>& x, const size_type& k)
+Function::derivative(const TaylorVariable<X>& x, size_type k)
 {
   TaylorVariable<X> r(x.argument_size(),x.degree()-1);
   MultiIndex e(x.argument_size());
@@ -263,7 +273,8 @@ template<class X>
 std::ostream& 
 Function::operator<<(std::ostream& os, const TaylorVariable<X>& x) {
   //  return os << "TaylorVariable( argument_size=" << x.argument_size() << ", degree=" << x.degree() << ", data=" << x.data() << ")";
-  os << "TaylorVariable(";
+  //os << "TaylorVariable(";
+  os << "V";
   size_type degree=0;
   for(MultiIndex i(x.argument_size()); i.degree()<=x.degree(); ++i) {
     if(i.degree()==0) {
@@ -277,7 +288,7 @@ Function::operator<<(std::ostream& os, const TaylorVariable<X>& x) {
     os << x[i];
   }
   os << ']';
-  os << ")";
+  //os << ")";
   return os;
 
 //  return os << "TaylorVariable( argument_size=" << x.argument_size() << ", degree=" << x.degree() << ", data=" << x.data() << ")";
@@ -295,20 +306,23 @@ Function::TaylorVariable<X>::instantiate()
   TaylorVariable<X>* tv=0;
   std::ostream* os = 0;
 
+  acc(*tv,*x,*tv);
+  acc(*tv,*tv,*tv);
+
   evaluate(*tv,v->data());
-  mul(*tv,*tv);
   compose(*ts,*tv);
   derivative(*tv,0u);
-  + *tv;
-  - *tv;
-  *tv + *tv;
-  *tv - *tv;
-  *tv / *tv;
-  *tv * *tv;
+ 
+  Function::operator<(*tv,*tv);
 
-  
+  Function::operator+(*tv);
+  Function::operator-(*tv);
+  Function::operator+(*tv,*tv);
+  Function::operator-(*tv,*tv);
+  Function::operator*(*tv,*tv);
+  Function::operator/(*tv,*tv);
+
   Function::operator+=(*tv,*tv);
-
   Function::operator+=(*tv,*n);
   Function::operator*=(*tv,*n);
   Function::operator+=(*tv,*x);

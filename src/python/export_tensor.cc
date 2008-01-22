@@ -116,7 +116,7 @@ void export_interval_tensor()
   typedef Matrix< Interval<R> > IMx;
   typedef Tensor< Interval<R> > ITns;
   
-  class_<ITns>(python_name<R>("FuzzyTensor").c_str(),init<SizeArray>())
+  class_<ITns>(python_name<R>("IntervalTensor").c_str(),init<SizeArray>())
     //.def(init<std::string>())
     .def(init<Tns>())
     .def(init<ITns>())

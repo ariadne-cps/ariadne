@@ -1,8 +1,7 @@
 /***************************************************************************
- *            python/export_polynomial_map.cc
+ *            python/export_affine_model.cc
  *
- *  21 October 2005
- *  Copyright  2005  Alberto Casagrande, Pieter Collins
+ *  Copyright  2007  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
@@ -26,16 +25,17 @@
 
 #include "geometry/point.h"
 #include "geometry/box.h"
-#include "system/polynomial_map.h"
+#include "function/affine_model.h"
 
 using namespace Ariadne;
+using namespace Ariadne::Function;
 using namespace Ariadne::Python;
 
 #include <boost/python.hpp>
 using namespace boost::python;
 
 template<class R>
-void export_polynomial_map() 
+void export_affine_model() 
 {
 /*
   typedef FloatPy (RPolynomial::* PolyApplyPointFunc) (const RPoint&) const;
@@ -74,4 +74,4 @@ void export_polynomial_map()
 */
 }
 
-template void export_polynomial_map<FloatPy>();
+template void export_affine_model<FloatPy>();

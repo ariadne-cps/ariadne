@@ -65,7 +65,7 @@ void evaluate(const array<VirtualMachine::ByteCode>& ops, X** args, Numeric::flo
       // We use the "copy and assign" idiom to prevent raw 
       // construction of differentials.
       stack.push_back(args[0][0]); 
-      stack.back()=value;
+      stack.back()*=0; stack.back()+=value;
       break;
     case VirtualMachine::POS:
       stack[stack.size()-1]=(+stack[stack.size()-1]);

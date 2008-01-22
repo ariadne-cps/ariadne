@@ -1,8 +1,8 @@
 /***************************************************************************
- *            affine_variable.inline.h
+ *            flow.h
  *
  *  Copyright  2007  Pieter Collins
- *  Pieter.Collins@cwi.nl
+ *  pieter.collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -21,9 +21,34 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "linear_algebra/vector.h"
-#include "linear_algebra/matrix.h"
+/*! \file flow.h
+ *  \brief A flow in Euclidean space. 
+ */
+
+#ifndef ARIADNE_FLOW_H
+#define ARIADNE_FLOW_H
+
+#include "base/types.h"
+#include "base/declarations.h"
+#include "numeric/declarations.h"
+#include "linear_algebra/declarations.h"
+#include "geometry/declarations.h"
+#include "system/declarations.h"
 
 namespace Ariadne {
 
+  namespace System {
+
+   
+    /* \ingroup System
+     * \ingroup ContinuousTime
+     * \brief Not currently implemented since we would need binary functions.
+     */
+    template<class R>
+    class Flow {
+    };
+    
+  }
 }
+
+#endif /* ARIADNE_FLOW_H */

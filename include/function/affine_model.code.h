@@ -61,7 +61,7 @@ Function::AffineModel<R>::AffineModel(const Geometry::Box<R>& d,
   for(uint i=0; i!=av.size(); ++i) {
     _value[i]=av[i].value();
     for(uint j=0; j!=c.dimension(); ++j) {
-      _jacobian(i,j)=av[i].derivative(j);
+      _jacobian(i,j)=av[i].gradient(j);
     }
   }
 }
@@ -82,13 +82,6 @@ Geometry::Point<typename Numeric::traits<R>::interval_type>
 Function::AffineModel<R>::evaluate(const Geometry::Point<I>& pt) const
 {
   return this->_value+this->_jacobian*(pt-this->_centre);
-}
-
-template<class R>
-Geometry::Box<R>
-Function::AffineModel<R>::range() const
-{
-  return Geometry::Box<R>(this->_value+this->_jacobian*(this->_domain.position_vectors()-this->_centre.position_vector()));
 }
 
 

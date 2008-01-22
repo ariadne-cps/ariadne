@@ -92,6 +92,25 @@ Function::TaylorDerivative<X>::set_jacobian(const LinearAlgebra::Matrix<X>& A)
 
 
 template<class X>
+Function::TaylorDerivative<X>&
+Function::operator-=(TaylorDerivative<X>& x, const LinearAlgebra::Vector<X>& v)
+{
+  ARIADNE_ASSERT(x.result_size()==v.size());
+  for(size_type i=0; i!=v.size(); ++i) {
+    x[i]-=v[i];
+  }
+  return x;
+}
+
+template<class X>
+Function::TaylorDerivative<X>
+Function::operator-(const TaylorDerivative<X>& x, const LinearAlgebra::Vector<X>& v)
+{
+  Function::TaylorDerivative<X> r(x);
+  return r-=v;
+}
+
+template<class X>
 Function::TaylorDerivative<X>
 Function::operator*(const LinearAlgebra::Matrix<X>& A, const Function::TaylorDerivative<X>& x)
 {
@@ -103,6 +122,33 @@ Function::operator*(const LinearAlgebra::Matrix<X>& A, const Function::TaylorDer
     }
   }
   return y;
+}
+
+
+template<class X>
+Function::TaylorDerivative<X>&
+Function::operator*=(Function::TaylorDerivative<X>& x, const X& c)
+{
+  for(size_type i=0; i!=x.result_size(); ++i) {
+    x[i]*=c;
+  }
+  return x;
+}
+
+template<class X>
+Function::TaylorDerivative<X>
+Function::operator*(const X& c, const Function::TaylorDerivative<X>& x)
+{
+  TaylorDerivative<X> y(x);
+  return y*=c;
+}
+
+template<class X>
+Function::TaylorDerivative<X>
+Function::operator*(const Function::TaylorDerivative<X>& x, const X& c)
+{
+  TaylorDerivative<X> y(x);
+  return y*=c;
 }
 
 
@@ -318,10 +364,32 @@ Function::implicit(const TaylorDerivative<X>& x, const LinearAlgebra::Vector<X>&
 }
 
 
+
+template<class X> 
+array< Function::TaylorSeries< Function::TaylorVariable<X> > >
+Function::integrate(const array< TaylorVariable<X> >& f, const array< TaylorVariable<X> >& x)
+{
+  size_type n=x.size();
+  smoothness_type d=std::max(f[0].degree(),x[0].degree());
+
+  array< TaylorSeries< TaylorVariable<X> > > y = x;
+  array< TaylorSeries< TaylorVariable<X> > > yp(n);
+  for(uint j=0; j<d; ++j) {
+    yp=compose(f,y);
+    for(uint i=0; i!=n; ++i) {  
+      y[i]=antiderivative(yp[i],y[i][0]);
+    }
+  } 
+  return y;
+}
+
+
+
 template<class X> 
 std::ostream& 
 Function::operator<<(std::ostream& os, const TaylorDerivative<X>& x) {
   //  return os << "TaylorDerivative( argument_size=" << x.argument_size() << ", degree=" << x.degree() << ", data=" << x.data() << ")";
+  if(x.result_size()==1) { return os << "[" << x[0] << "]"; }
   for(size_type i=0; i!=x.result_size(); ++i) {
     if(i==0) { os << "\n["; } else { os << ",\n "; }
     size_type degree=0;
@@ -349,10 +417,18 @@ template<class X>
 void
 Function::TaylorDerivative<X>::instantiate() 
 {
+  X* c=0;
   LinearAlgebra::Vector<X>* v=0;
   TaylorVariable<X>* tv=0;
   TaylorDerivative<X>* td=0;
   std::ostream* os = 0;
+
+  operator-=(*td,*v);
+  operator-(*td,*v);
+
+  operator*=(*td,*c);
+  operator*(*td,*c);
+  operator*(*c,*td);
 
   evaluate(*tv,*td);
   compose(*tv,*td);

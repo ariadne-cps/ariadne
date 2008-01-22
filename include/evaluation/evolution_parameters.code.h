@@ -40,7 +40,8 @@ Evaluation::EvolutionParameters<R>::EvolutionParameters()
     _grid_length(1),
     _argument_grid_length(1),
     _result_grid_length(1),
-    _bounding_domain_size(1)
+    _bounding_domain_size(1),
+    _verbosity(0)
 {
 }
 
@@ -209,6 +210,13 @@ void
 Evaluation::EvolutionParameters<R>::set_minimum_step_size(double x) 
 {
   this->_minimum_step_size=x;
+}
+
+template<class R>
+void
+Evaluation::EvolutionParameters<R>::set_maximum_step_size(Numeric::Rational x)  
+{
+  this->_maximum_step_size=x;
 }
 
 template<class R>

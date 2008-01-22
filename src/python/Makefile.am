@@ -59,6 +59,9 @@ ARIADNE_SRC = ariadne_module.cc \
 	export_taylor_series.cc \
 	export_taylor_variable.cc \
 	export_taylor_derivative.cc \
+	export_affine_model.cc \
+	export_taylor_model.cc \
+	export_flow_model.cc \
 	export_polynomial_variable.cc \
 	export_function_interface.cc \
 	export_affine_function.cc \

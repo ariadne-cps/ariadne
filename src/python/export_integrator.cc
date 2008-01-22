@@ -85,7 +85,7 @@ void export_integrator()
   class_< IntegratorWrapper< Box<R> >, boost::noncopyable >("BoxIntegratorInterface",init<>());
   class_< IntegratorWrapper< Zonotope<R> >, boost::noncopyable >("ZonotopeIntegratorInterface",init<>());
 
-  class_< KuhnIntegrator<R>, bases<IntegratorInterface< Zonotope<R> > > > kuhn_integrator_class("KuhnIntegrator",init<uint>());
+  class_< KuhnIntegrator<R>, bases<IntegratorInterface< Zonotope<R> > > > kuhn_integrator_class("KuhnIntegrator",init<uint,uint>());
   kuhn_integrator_class.def("flow_bounds",&flow_bounds<KuhnIntegrator<R>,R>);
   kuhn_integrator_class.def("integration_step",&KuhnIntegrator<R>::integration_step);
   kuhn_integrator_class.def("reachability_step",&KuhnIntegrator<R>::reachability_step);

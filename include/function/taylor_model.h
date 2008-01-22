@@ -45,11 +45,23 @@ namespace Ariadne {
   namespace Function {
   
     class MultiIndex;
+    template<class R> class FunctionInterface;
     template<class R> class TaylorVariable;
     template<class R> class TaylorDerivative;
+
     template<class R> class TaylorModel;
 
+    template<class R> TaylorModel<R> recentre(const TaylorModel<R>&, const Geometry::Box<R>& bx, const LinearAlgebra::Vector<R>& pt);
+    template<class R> TaylorModel<R> truncate(const TaylorModel<R>&, const Geometry::Box<R>&, size_type, size_type);
+
+    template<class R> TaylorModel<R> compose(const TaylorModel<R>&, const TaylorModel<R>&);
+    template<class R> TaylorModel<R> inverse(const TaylorModel<R>&, const LinearAlgebra::Vector<R>&);
+    template<class R> TaylorModel<R> implicit(const TaylorModel<R>&, const LinearAlgebra::Vector<R>&);
+    template<class R> TaylorModel<R> derivative(const TaylorModel<R>&, size_type);
+
  
+
+
     /*! \brief A taylor_model with multivalued output, using a den.
      *  \ingroup FunctionModel
      */
@@ -62,77 +74,75 @@ namespace Ariadne {
      public:
       /*! \brief Default constructor constructs a Taylor model of order zero with no arguments and no result variables. */
       TaylorModel();
-      /*! \brief Construct from a domain, centre, and derivative expansion. */
-      TaylorModel(const Geometry::Box<R>& domain, const LinearAlgebra::Vector<R>& centre, const TaylorDerivative<I>& td);
-      /*! \brief Construct from a domain, centre, smoothness and derivative expansion. */
-      TaylorModel(const Geometry::Box<R>& domain, const LinearAlgebra::Vector<R>& centre, const smoothness_type& s, const TaylorDerivative<I>& td);
-      /*! \brief The zero Taylor model in \a as variables with size \a rs image, order \a d and smoothness \a d, defined on the whole space with centre at the origin. */
-      TaylorModel(const size_type& rs, const size_type& as, const size_type& d, const size_type& s);
-      /*! \brief Copy constructor. */
-      TaylorModel(const TaylorModel<R>& p);
-      /*! \brief Copy assignment. */
-      TaylorModel<R>& operator=(const TaylorModel<R>& p);
-      /*! \brief Conversion constructor. */
-      template<class RR> explicit TaylorModel(const TaylorModel<RR>& p);
-      /*! \brief Conversion assignment. */
-      template<class RR> TaylorModel<R>& operator=(const TaylorModel<RR>& p);
-        
+      /*! \brief The zero Taylor model in \a as variables with size \a rs image, order \a o and smoothness \a s, defined on the whole space with centre at the origin. */
+      TaylorModel(size_type rs, size_type as, smoothness_type o, smoothness_type s);
+
+      /*! \brief Construct from a domain, centre, and two derivative expansions, one for the centre and one over the entire domain. */
+      TaylorModel(const Geometry::Box<R>& domain, const Geometry::Point<R>& centre, 
+                  const TaylorDerivative<I>& centre_derivatives, const TaylorDerivative<I>& domain_derivatives);
+      TaylorModel(const Geometry::Box<R>& domain, const LinearAlgebra::Vector<R>& centre, 
+                  const TaylorDerivative<I>& centre_derivatives, const TaylorDerivative<I>& domain_derivatives);
+      TaylorModel(const LinearAlgebra::Vector<I>& domain, const LinearAlgebra::Vector<R>& centre, 
+                  const TaylorDerivative<I>& centre_derivatives, const TaylorDerivative<I>& domain_derivatives);
+
+      /*! \brief Construct from a domain, centre, an order and a function. */
+      TaylorModel(const Geometry::Box<R>& domain, const Geometry::Point<R>& centre,
+                  smoothness_type order, smoothness_type smoothness,
+                  const Function::FunctionInterface<R>& function);
+      TaylorModel(const LinearAlgebra::Vector<I>& domain, const LinearAlgebra::Vector<R>& centre,
+                  smoothness_type order, smoothness_type smoothness,
+                  const Function::FunctionInterface<R>& function);
+
+       
       /*! \brief Equality operator. */
       bool operator==(const TaylorModel<R>& p) const;
       /*! \brief Inequality operator. */
       bool operator!=(const TaylorModel<R>& p) const;
 
+      // Data access
+      /*! \brief The data used to define the centre of the Taylor model. */
+      const TaylorDerivative<I>& centre_derivatives() const;
+      /*! \brief The bounds on the derivative values over the domain of the Taylor model. */
+      const TaylorDerivative<I>& domain_derivatives() const;
+
+      // Data access
+      /*! \brief The order of the Taylor model. */
+      smoothness_type order() const;
+      /*! \brief The smoothness of the function. */
+      smoothness_type smoothness() const;
       /*! \brief The size of the argument. */
       size_type argument_size() const;
       /*! \brief The size of the result. */
       size_type result_size() const;
-      /*! \brief The order of the Taylor model. */
-      size_type order() const;
-      /*! \brief The smoothness of the function. */
-      size_type smoothness() const;
-      /*! \brief The data used to define the Taylor model. */
-      const TaylorDerivative<I>& derivatives() const;
 
+      /*! \brief The domain of validity of the Taylor model. */
+      Geometry::Box<R> domain() const;
       /*! \brief The centre of the derivative expansion. */
       LinearAlgebra::Vector<R> centre() const;
+      /*! \brief The range of values the Taylor model can take. */
+      Geometry::Box<R> range() const;
      
-      /*! \brief Set the \a j th value of the \a i th component to \a x. */
-      void set(const size_type& i, const MultiIndex& j, const I& x); 
-      void set(const size_type& i, const MultiIndex& j, const R& x); 
-      /*! \brief The \a j th value of the i th component. */
-      const I& get(const size_type& i, const MultiIndex& j) const;
-      /*! \brief Resize to a Taylor model in \a as variables with size \a rs image, order \a d and smoothness \a s. */
-      void resize(const size_type& rs, const size_type& as, const size_type& d, const size_type& s);
-
-      /*! \brief The \a i th component Taylor model. */
-      TaylorModel<R> component(const size_type& i) const;
-
-      /*! \brief Truncate the Taylor model to a Taylor model of order \a d and smoothness \a s within the domain \a domain. */
-      TaylorModel<R> truncate(const size_type& order, const size_type& smoothness, const Geometry::Box<R>& domain) const;
-
-      /*! \brief Evaluate the Taylor model at the point \a x. */
-      LinearAlgebra::Vector<I> evaluate(const LinearAlgebra::Vector<R>& x) const;
-      
       /*! \brief Evaluate the Taylor model at the point \a x. */
       LinearAlgebra::Vector<I> evaluate(const LinearAlgebra::Vector<I>& x) const;
+      LinearAlgebra::Vector<I> evaluate(const LinearAlgebra::Vector<R>& x) const;
       
       /*! \brief Compute the derivate of the map at a point. */
       LinearAlgebra::Matrix<I> jacobian(const LinearAlgebra::Vector<I>& s) const;
+      LinearAlgebra::Matrix<I> jacobian(const LinearAlgebra::Vector<R>& s) const;
 
-       /*! \brief The domain of validity of the Taylor model. */
-      Geometry::Box<R> domain() const;
+      /*! \brief Truncate to a model of lower order and/or smoothness, possibly on a different domain. */
+      TaylorModel<R> truncate(const Geometry::Box<R>& domain, const LinearAlgebra::Vector<R>& centre, 
+                              smoothness_type order, smoothness_type smoothness) const;
 
       /*! \brief The zero Taylor model with result size \a rs and argument size \a as. */
-      static TaylorModel<R> zero(const size_type& rs, const size_type& as);
+      static TaylorModel<R> zero(size_type rs, size_type as);
       /*! \brief The unit Taylor model with result size 1 and argument size \a as. */
-      static TaylorModel<R> one(const size_type& as);
+      static TaylorModel<R> one(size_type as);
       /*! \brief The constant Taylor model with result size 1 and argument size \a as. */
-      static TaylorModel<R> constant(const size_type& as, const R& c);
+      static TaylorModel<R> constant(size_type as, const R& c);
 
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream& os) const;
-      /*! \brief Read from an input stream. */
-      std::istream& read(std::istream& is);
 
 #ifdef DOXYGEN
       /*! \brief Addition. */
@@ -154,17 +164,19 @@ namespace Ariadne {
       /*! \brief Power of a scalar Taylor model. */
       friend template<class R> TaylorModel<R> pow(const TaylorModel<R>& p, const unsigned int& n);
       /*! \brief Derivative with respect to variable \a k. */
-      friend template<class R> TaylorModel<R> derivative(const TaylorModel<R>&, const size_type& k);
+      friend template<class R> TaylorModel<R> derivative(const TaylorModel<R>&, size_type k);
       /*! \brief Truncate within \a r to a Taylor model of order at most \a d, putting the error into terms of order \a s. */
-      friend template<class R> TaylorModel<R> truncate(const TaylorModel<R>& p, const Rectangle<R>& bb, const size_type& d, const size_type& s);
+      friend template<class R> TaylorModel<R> truncate(const TaylorModel<R>& p, const Rectangle<R>& bb, size_type d, size_type s);
 #endif
      private:
       static void instantiate();
       array< array<I> > _powers(const LinearAlgebra::Vector<I>&) const;
       void _compute_jacobian() const;
-      void _set_argument_size(const size_type& n);
+      void _set_argument_size(size_type n);
       size_type _compute_maximum_component_size() const;
      private:
+      friend TaylorModel<R> recentre<>(const TaylorModel<R>&, const Geometry::Box<R>& bx, const LinearAlgebra::Vector<R>&);
+      friend TaylorModel<R> inverse<>(const TaylorModel<R>&, const LinearAlgebra::Vector<R>&);
       //template<class R> friend void add(TaylorModel<R>&,const TaylorModel<R>&,const TaylorModel<R>&);
       //template<class R> friend void sub(TaylorModel<R>&,const TaylorModel<R>&,const TaylorModel<R>&);
       //template<class R> friend void mul(TaylorModel<R>&,const TaylorModel<R>&,const TaylorModel<R>&);
@@ -177,36 +189,20 @@ namespace Ariadne {
       /* The centre of the derivative expansion. */
       LinearAlgebra::Vector<R> _centre;
       size_type _smoothness; 
-      Function::TaylorDerivative<I> _derivatives;
-    };
+      Function::TaylorDerivative<I> _centre_derivatives;
+      Function::TaylorDerivative<I> _domain_derivatives;
+   };
     
-    template<class R> TaylorModel<R> recentre(const TaylorModel<R>, const Geometry::Box<R>& bx, const Geometry::Point<R>& pt);
 
     template<class R> TaylorModel<R> add(const TaylorModel<R>&, const TaylorModel<R>&);
     template<class R> TaylorModel<R> sub(const TaylorModel<R>&, const TaylorModel<R>&);
 
-  //template<class R> TaylorModel<R> mul(const TaylorModel<R>&, const R&);
-  //template<class R> TaylorModel<R> div(const TaylorModel<R>&, const R&);
-
-    template<class R> TaylorModel<R> derivative(const TaylorModel<R>&, const size_type&);
-    template<class R> TaylorModel<R> compose(const TaylorModel<R>&, const TaylorModel<R>&);
-    template<class R> TaylorModel<R> inverse(const TaylorModel<R>&, const LinearAlgebra::Vector<R>&);
-    template<class R> TaylorModel<R> implicit(const TaylorModel<R>&, const LinearAlgebra::Vector<R>&);
     template<class R> TaylorModel<R> combine(const TaylorModel<R>&, const TaylorModel<R>&);
     template<class R> TaylorModel<R> join(const TaylorModel<R>&, const TaylorModel<R>&);
 
-    template<class R> TaylorModel<R> truncate(const TaylorModel<R>&, const Geometry::Box<R>&, const size_type&, const size_type&);
-
-    template<class R> TaylorModel<R> compose(const TaylorModel<R>&, const TaylorModel<R>&);
-    template<class R> TaylorModel<R> inverse(const TaylorModel<R>&, const LinearAlgebra::Vector<R>&);
-    template<class R> TaylorModel<R> implicit(const TaylorModel<R>&, const LinearAlgebra::Vector<R>&);
-    template<class R> TaylorModel<R> derivative(const TaylorModel<R>&, const size_type& k);
-    template<class R> TaylorModel<R> truncate(const TaylorModel<R>&, const Geometry::Box<R>&, const size_type&, const size_type&);
 
     template<class R> std::ostream& operator<<(std::ostream&, const TaylorModel<R>&);
   
-
-
 
   }
 }

@@ -474,6 +474,9 @@ Geometry::apply(const Function::AffineModel<R>& am,
   typedef Interval<R> I;
   
   ARIADNE_ASSERT(z.centre()==am.centre());
+  if(!subset(z,am.domain())) {
+    std::cerr<<"z="<<z<<"\nz.bounding_box()="<<z.bounding_box()<<"\nam.domain()="<<am.domain()<<std::endl;
+  }
   ARIADNE_ASSERT(possibly(subset(z,am.domain())));
   
   dimension_type d=z.dimension();

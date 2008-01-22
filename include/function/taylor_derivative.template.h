@@ -68,10 +68,62 @@ Function::TaylorDerivative<X>::variable(const V& x, smoothness_type d)
 
 
 
+template<class P, class M> 
+void
+Function::evaluate_polynomial(M& r, const P& p, const M& x)
+{
+  ARIADNE_ASSERT(p.argument_size()==x.size());
+  ARIADNE_ASSERT(p.result_size()==r.size());
 
-template<class X, class XX> 
-array<XX>
-Function::evaluate(const TaylorDerivative<X>& y, const array<XX>& x)
+  typedef typename M::value_type R;
+  //std::cerr << "y=" << y << std::endl;
+  //std::cerr << "x=" << x << std::endl;
+  size_type d=p.degree();
+  size_type rs=r.size();
+  size_type ms=x.size();
+  assert(d>=1);
+
+  R zero = x[0]; zero*=0;
+  R one = zero; one+=1;
+
+  // Use inefficient brute-force approach with lots of storage...
+
+  // Set up an array of powers of elements
+  array< array< R > > val(ms, array< R >(d+1));
+  for(uint j=0; j!=ms; ++j) {
+    val[j][0]=one;
+    if(d>=1) {
+      val[j][1]=x[j];
+      if(d>=2) {
+        val[j][1]=pow(x[j],2);
+        for(uint k=3; k<=d; ++k) {
+          val[j][k]=val[j][k-2]*val[j][2];
+        }
+      }
+    }
+  }
+
+  // Set all elements of the result to zero
+  for(uint i=0; i!=rs; ++i) { r[i]=zero; }
+
+  // Add powers of the argument to the result
+  for(MultiIndex j(ms); j.degree()<=d; ++j) {
+    R t=one;
+    for(uint k=0; k!=ms; ++k) {
+      t=t*val[k][j[k]];
+    }
+    for(uint i=0; i!=rs; ++i) {
+      R tf=t; tf*=x[i][j];
+      r[i]+=tf;
+    }
+  }
+  return r;
+}
+
+
+template<class X, class R> 
+array<R>
+Function::evaluate(const TaylorDerivative<X>& y, const array<R>& x)
 {
   using namespace std;
   ARIADNE_ASSERT(y.argument_size()==x.size());
@@ -82,11 +134,11 @@ Function::evaluate(const TaylorDerivative<X>& y, const array<XX>& x)
   size_type ms=x.size();
   assert(d>=1);
 
-  XX zero = x[0]; zero*=0;
-  XX one = zero; one+=1;
+  R zero = x[0]; zero*=0;
+  R one = zero; one+=1;
 
   // Use inefficient brute-force approach with lots of storage...
-  array< array< XX > > val(ms, array< XX >(d+1));
+  array< array< R > > val(ms, array< R >(d+1));
   for(uint j=0; j!=ms; ++j) {
     val[j][0]=one;
     val[j][1]=x[j];
@@ -95,15 +147,14 @@ Function::evaluate(const TaylorDerivative<X>& y, const array<XX>& x)
     }
   }
 
-  array<XX> r(rs,zero);
+  array<R> r(rs,zero);
   for(MultiIndex j(ms); j.degree()<=d; ++j) {
-    X sf=Function::fac(j);
-    XX t=one;
+    R t=one;
     for(uint k=0; k!=ms; ++k) {
       t=t*val[k][j[k]];
     }
     for(uint i=0; i!=rs; ++i) {
-      XX tf=t; tf*=X(y[i][j]/sf);
+      R tf=t; tf*=y[i][j];
       r[i]+=tf;
     }
   }

@@ -44,6 +44,8 @@
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
 
+#include "function/affine_model.h"
+
 #include "geometry/box.h"
 #include "geometry/zonotope.h"
 
@@ -77,32 +79,22 @@ Geometry::Zonotope<R>
 Evaluation::KuhnIntegrator<R>::integration_step(const System::VectorField<R>& vector_field, 
                                                 const Geometry::Zonotope<R>& initial_set, 
                                                 const Numeric::Rational& step_size, 
-                                                const Geometry::Box<R>& flow_bounding_box) const
+                                                const Geometry::Box<R>& bounding_box) const
 {
   ARIADNE_LOG(2,"KuhnIntegrator::integration_step(VectorField,Zonotope,Time,Box)\n");
 
   using namespace LinearAlgebra;
+  using namespace Function;
   using namespace Geometry;
 
-  Point<I> nic=Evaluation::standard_flow_step(vector_field,Point<I>(initial_set.centre()),I(step_size),flow_bounding_box);
-  Matrix<I> dPhi=Evaluation::standard_flow_step_jacobian(vector_field,Point<I>(initial_set.bounding_box()),I(step_size),flow_bounding_box);
-  Matrix<I> niG=dPhi*initial_set.generators();
-  
-  dimension_type d=initial_set.dimension();
-  size_type ng=initial_set.number_of_generators();
-  Point<R> nc=midpoint(nic);
-  Matrix<R> nG(d,ng+d);
-  nG(slice(0,d),slice(0,ng))=midpoint(niG);
-
-  for(size_type i=0; i!=d; ++i) {
-    R& err=nG(i,ng+i);
-    err=radius(nic[i]);
-    for(size_type j=0; j!=ng; ++j) {
-      err=add_up(err,midpoint(niG(i,j)));
-    }
-  }
-  
-  return Geometry::cascade_over_approximation(Zonotope<R>(nc,nG),this->_cascade_size);
+  ARIADNE_LOG(5,"KuhnIntegrator::integration_step(VectorField,Zonotope,Time,Box)\n");
+  ARIADNE_LOG(6,"bounding_box="<<bounding_box<<"\n");
+  ARIADNE_LOG(6,"initial_set="<<initial_set<<"\n");
+  AffineModel<R> flow_model=this->_integrator->affine_flow_model(vector_field,initial_set.centre(),step_size,bounding_box);
+  ARIADNE_LOG(6,"flow_model="<<flow_model<<"\n");
+  Zonotope<R> flow_set=Geometry::apply(flow_model,initial_set);
+  ARIADNE_LOG(6,"flow_set="<<flow_set<<"\n");
+  return Geometry::cascade_over_approximation(flow_set,this->_cascade_size);
 }
 
 template<class R>
@@ -110,47 +102,27 @@ Geometry::Zonotope<R>
 Evaluation::KuhnIntegrator<R>::reachability_step(const System::VectorField<R>& vector_field, 
                                                  const Geometry::Zonotope<R>& initial_set, 
                                                  const Numeric::Rational& step_size, 
-                                                 const Geometry::Box<R>& flow_bounding_box) const
+                                                 const Geometry::Box<R>& bounding_box) const
 {
   using namespace Numeric;
   using namespace LinearAlgebra;
+  using namespace Function;
   using namespace Geometry;
   using namespace System;
 
-  const VectorField<R>& vf=vector_field;
-  const Zonotope<R>& z=initial_set;
-  const Point<R>& c=z.centre();
-  const Point<I> ic(c);
-  const Matrix<R>& G=z.generators();
-  const Point<I> ibpt=z.bounding_box();
-  const Box<R>& fbb=flow_bounding_box;
-  const Rational& h=step_size;
-  const Rational hh=h/2;
-  const Interval<R> ihh=hh;
+  ARIADNE_LOG(6,"LohnerIntegrator::reachability_step(VectorField,Zonotope<Interval>,Interval,Box) const\n");
+  Rational half_step_size=step_size/2;
 
-  Point<I> nic=Evaluation::standard_flow_step(vf,ic,ihh,fbb);
-  Matrix<I> dPhi=Evaluation::standard_flow_step_jacobian(vf,ibpt,ihh,fbb);
-  Vector<I> nif=ihh*vf.evaluate(fbb);
-  Matrix<I> niG=dPhi*G;
+  AffineModel<R> flow_model=this->_integrator->affine_flow_model(vector_field,initial_set.centre(),half_step_size,bounding_box);
+  Point<I> phic=flow_model.value();
+  Matrix<I> Dphi=flow_model.jacobian();
+  Matrix<I> gen=Dphi*initial_set.generators();
+  Vector<I> hhf=I(half_step_size)*vector_field(bounding_box);
+  Vector<I> err=Dphi*(I(-1,1)*initial_set.error());
 
-  dimension_type d=initial_set.dimension();
-  size_type ng=initial_set.number_of_generators();
-  Point<R> nc=midpoint(nic);
-  Matrix<R> nG(d,ng+1u+d);
-  nG(slice(0,d),slice(0,ng))=midpoint(niG);
-  nG.column(ng)=midpoint(nif);
+  Zonotope<R> result(phic+err,concatenate_columns(gen,hhf));
 
-  for(size_type i=0; i!=d; ++i) {
-    R& err=nG(i,ng+1u+i);
-    err=radius(nic[i]);
-    for(size_type j=0; j!=ng; ++j) {
-      err=add_up(err,midpoint(niG(i,j)));
-    }
-    err=add_up(err,midpoint(nif(i)));
-  }
-  
-  return Zonotope<R>(nc,nG);
-  
+  return result;
 }
 
 

@@ -103,11 +103,11 @@ test_lohner_integrator()
        << "h0=" << h0 << ", bb0=" << bb0 << "\n"
        << "z1=" << z1 << endl;
 
-  bb1=bounder.estimate_flow_bounds(avf,z1.bounding_box(),qh);
+  make_lpair(h,bb1)=bounder.flow_bounds(avf,z1.bounding_box(),qh);
   z2=lohner.integration_step(avf,z1,h,bb1);
-  bb2=bounder.estimate_flow_bounds(avf,z2.bounding_box(),qh);
+  make_lpair(h,bb2)=bounder.flow_bounds(avf,z2.bounding_box(),qh);
   z3=lohner.integration_step(avf,z2,h,bb2);
-  bb3=bounder.estimate_flow_bounds(avf,z3.bounding_box(),qh);
+  make_lpair(h,bb3)=bounder.flow_bounds(avf,z3.bounding_box(),qh);
   z4=lohner.integration_step(avf,z3,h,bb3);
   cout << "z0=" << z0 << "\n"
        << "z1=" << z1 << "\nz4=" << z2 << "\n"
@@ -135,7 +135,7 @@ test_lohner_integrator()
 
 
   Point<I> pt0 = z0.centre();
-  bb0=bounder.estimate_flow_bounds(avf,Box<R>(pt0),qh);
+  make_lpair(h,bb0)=bounder.flow_bounds(avf,Box<R>(pt0),qh);
   Box<R> rbb0=bounder.refine_flow_bounds(avf,Box<R>(pt0),bb0,qh);
   Box<R> rrbb0=bounder.refine_flow_bounds(avf,Box<R>(pt0),rbb0,qh);
 

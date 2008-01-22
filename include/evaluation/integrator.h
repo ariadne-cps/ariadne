@@ -39,6 +39,14 @@ namespace Ariadne {
    
     /*!\ingroup Integrate
      * \brief A first order in space integration scheme.
+     *
+     * To compute an enclosure for the solution \f$\xi\f$, 
+     * we use the criterion that if \f$B\f$ is the initial condition and \f$D\f$ is a bound, then
+     *   \f[ B + [0,h] f(D) \subset D . \f]
+     * To compute an enclosure for the solution \f$\xi\f$ and its spacial derivatives up to order \a n, we use the same formula, 
+     * but on the variation of the flow. Explicitly, if \f$W\f$ is to be a bound on the first variation \a V, we have
+     *   \f[ I + [0,h] Df(D) W \subset W . \f$
+     *
      */
     template<class R>
     class IntegratorBase
@@ -65,6 +73,14 @@ namespace Ariadne {
       flow_bounds(const System::VectorField<R>& f, 
                   const Geometry::Box<R>& bx,
                   const Numeric::Rational& t) const; 
+
+      /*! \brief Compute an integration time and bounds for both the flow and its derivatives up to order \a o. */
+      virtual 
+      std::pair< Numeric::Rational, Function::TaylorDerivative<I> >
+      variation_flow_bounds(const System::VectorField<R>& f, 
+                            const Geometry::Box<R>& bx,
+                            const Numeric::Rational& t,
+                            smoothness_type o) const; 
 
       /*! \brief A model for the flow at time \a t with centre \a c, given that the flow remains in \a bb. */
       virtual 

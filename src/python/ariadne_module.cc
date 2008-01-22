@@ -71,6 +71,8 @@ template<class R> void export_affine_derivative();
 template<class R> void export_taylor_series();
 template<class R> void export_taylor_variable();
 template<class R> void export_taylor_derivative();
+template<class R> void export_flow_model();
+template<class R> void export_taylor_model();
 template<class R> void export_polynomial_variable();
 
 template<class R> void export_point();
@@ -185,7 +187,9 @@ BOOST_PYTHON_MODULE(ariadne)
   export_taylor_series<FloatPy>();
   export_taylor_variable<FloatPy>();
   export_taylor_derivative<FloatPy>();
+  export_taylor_model<FloatPy>();
   export_polynomial_variable<FloatPy>();
+  export_flow_model<FloatPy>();
   //export_taylor_series<Rational>();
   //export_taylor_variable<Rational>();
   //export_taylor_derivative<Rational>();

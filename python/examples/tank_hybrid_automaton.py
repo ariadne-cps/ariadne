@@ -27,7 +27,6 @@
 from ariadne import *
 
 #Use the set-based hybrid system framework
-HybridAutomaton=SetBasedHybridAutomaton
 HybridEvolver=SetBasedHybridEvolver
 
 #Create hybrid automaton object
@@ -72,7 +71,6 @@ initial_set.new_location(q2,EmptySet(2))
 print initial_set
 
 print "\nCreating bounding hybrid set"
-bounding_box=Rectangle("[-0.1,3.4]x[-0.1,42]");
 bounding_box=Rectangle([[-0.1,3.4],[-0.1,42]]);
 bounding_set=HybridSet()
 bounding_set.new_location(q1,bounding_box)
@@ -81,21 +79,21 @@ print bounding_set
 
 print "\nCreating evolution parameters"
 params=EvolutionParameters()
-params.set_lock_to_grid_time(Rational(0.5))
-params.set_grid_length(Float(0.5))
+params.set_lock_to_grid_time(0.5)
+params.set_grid_length(0.5)
 print params
 
 print "\nCreating hybrid evolver"
-applicator=Applicator()
+applicator=StandardApplicator()
 integrator=AffineIntegrator()
 hybrid_evolver=HybridEvolver(params,applicator,integrator);
 
 print "\nComputing chain reachable set"
-res=hybrid_evolver.chainreach(automaton,initial_set,bounding_set)
+res=hybrid_evolver.chainreach(automaton,initial_set)
 
 print "\nExporting to postscript output...",
 #
-epsbb=Rectangle("[0,5]x[0,50]") # eps bounding box
+epsbb=Box([[0,5],[0,50]]) # eps bounding box
 eps=EpsPlot()
 eps.open("affine_hybrid_automaton-1.eps",epsbb)
 eps.set_line_style(True)

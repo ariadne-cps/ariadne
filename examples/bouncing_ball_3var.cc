@@ -18,10 +18,11 @@
 #include "geometry/polyhedral_set.h"
 #include "system/affine_map.h"
 #include "system/affine_vector_field.h"
-#include "system/set_based_hybrid_automaton.h"
+#include "system/hybrid_automaton.h"
+#include "evaluation/evolution_parameters.h"
+#include "evaluation/standard_applicator.h"
 #include "evaluation/map_evolver.h"
 #include "evaluation/vector_field_evolver.h"
-#include "evaluation/applicator.h"
 #include "evaluation/lohner_integrator.h"
 #include "evaluation/affine_integrator.h"
 #include "evaluation/set_based_hybrid_evolver.h"
@@ -47,8 +48,7 @@ int main() {
 template<class R>
 int bouncing_ball_automaton() 
 {
-  typedef Interval<R> I;
-  typedef Zonotope<I> BS;
+  typedef Zonotope<R> BS;
   
   set_hybrid_evolver_verbosity(4);
 
@@ -60,17 +60,17 @@ int bouncing_ball_automaton()
   RectangularSet<R> invariant(domain);
   cout << "invariant=" << invariant << endl;
 
-  RectangularSet<R> activation("[0.0,0.01]x[-20,20]x[0,10]");
+  RectangularSet<R> activation(Box<R>("[0.0,0.01]x[-20,20]x[0,10]"));
   cout << "activation=" << activation << endl;
 
   AffineMap<R> reset(Matrix<R>("[1,0,0;0,-1,0;0,0,1]"),Vector<R>("[0,0,0]"));
   cout << "reset=" << reset << endl;
   
-  SetBasedHybridAutomaton<R> automaton("Bouncing ball automaton");
+  HybridAutomaton<R> automaton("Bouncing ball automaton");
   DiscreteState mode1_id(0);
-  const SetBasedDiscreteMode<R>& mode1=automaton.new_mode(mode1_id,dynamic,invariant);
+  const DiscreteMode<R>& mode1=automaton.new_mode(mode1_id,dynamic,invariant);
   DiscreteEvent event_id(5);
-  const SetBasedDiscreteTransition<R>& transition=automaton.new_transition(event_id,mode1_id,mode1_id,reset,activation);
+  const DiscreteTransition<R>& transition=automaton.new_transition(event_id,mode1_id,mode1_id,reset,activation);
   
   cout << mode1  <<  "\n" << transition << endl;
 
@@ -85,11 +85,9 @@ int bouncing_ball_automaton()
   parameters.set_maximum_basic_set_radius(0.25);
   parameters.set_grid_length(0.125);
 
-  LohnerIntegrator<R> lohner;
-
-  MapEvolver<R> map_evolver(parameters);
-  VectorFieldEvolver<R> vector_field_evolver(parameters,lohner); 
-  SetBasedHybridEvolver<R> hybrid_evolver(map_evolver,vector_field_evolver);
+  StandardApplicator<R> applicator;
+	LohnerIntegrator<R> lohner;
+  SetBasedHybridEvolver<BS> hybrid_evolver(parameters,applicator,lohner);
   
   Grid<R> grid(Vector<R>("[0.25,0.25,1.0]"));
   Box<R> bounding_box(domain.neighbourhood(1));
@@ -102,18 +100,9 @@ int bouncing_ball_automaton()
   cout << "initial_set.discrete_locations()=" << initial_set.locations() << endl;
   cout << "initial_set[mode1_id].size()=" << initial_set[mode1_id].size() << " cells out of " << initial_set[mode1_id].capacity() << endl;
   
-  HybridGridMaskSet<R> bounding_set;
-  bounding_set.new_location(mode1_id,finite_grid);
-  bounding_set[mode1_id].adjoin_over_approximation(bounding_box);
-  cout << "bounding_set.discrete_locations()=" << bounding_set.locations() << endl;
-  cout << "bounding_set[mode1_id].size()=" << bounding_set[mode1_id].size() << " cells out of " << bounding_set[mode1_id].capacity() << endl;
-  cout << endl;
-
-  assert((bool)(subset(initial_set[mode1_id],bounding_set[mode1_id])));
-
   cout << "Computing chainreachable set..." << endl;
 
-  HybridGridMaskSet<R> chainreach=hybrid_evolver.chainreach(automaton,initial_set,bounding_set);
+  HybridGridMaskSet<R> chainreach=hybrid_evolver.chainreach(automaton,initial_set);
   cout << "Reached (" << chainreach[mode1_id].size() << ") cells "
        << "out of (" << chainreach[mode1_id].capacity() << ") "
        << endl << endl;

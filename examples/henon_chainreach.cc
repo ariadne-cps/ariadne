@@ -30,7 +30,9 @@
 #include "geometry/grid_set.h"
 #include "geometry/partition_tree_set.h"
 #include "geometry/rectangular_set.h"
+#include "evaluation/evolution_parameters.h"
 #include "evaluation/map_evolver.h"
+#include "evaluation/standard_applicator.h"
 #include "output/epsstream.h"
 #include "output/logging.h"
 #include "models/henon.h"
@@ -55,8 +57,7 @@ henon_chainreach()
 {
   set_applicator_verbosity(0);
   
-  typedef Numeric::Interval<R> I;
-  typedef Geometry::Zonotope<I,R> BS;
+  typedef Zonotope<R> BS;
 
   double maximum_basic_set_radius=0.25;
   double grid_length=0.125;
@@ -96,10 +97,11 @@ henon_chainreach()
   parameters.set_maximum_basic_set_radius(maximum_basic_set_radius);
   parameters.set_grid_length(grid_length);
   
-  MapEvolver<R> evolver(parameters);
+  MapEvolver<BS> evolver(parameters);
   evolver.parameters().set_grid_length(16.0/subdivisions);
 
-  GridMaskSet<R> gmcr=evolver.chainreach(h,in,bd);
+  SetInterface<R>* cr=evolver.chainreach(h,in);
+	GridMaskSet<R>& gmcr=*dynamic_cast<GridMaskSet<R>*>(cr);
   PartitionTreeSet<R> ptcr=PartitionTreeSet<R>(gmcr);
 
   cout << gmcr <<endl;
@@ -111,7 +113,7 @@ henon_chainreach()
 
   RectangularSet<R> ins(ir);
   RectangularSet<R> cbs(cb);
-  SetInterface<R>* crs=evolver.chainreach(h,ins,cbs);
+  SetInterface<R>* crs=evolver.chainreach(h,ins);
   cout << "*crs=" << *crs <<endl;
   GridMaskSet<R>& gmcrs=*dynamic_cast<GridMaskSet<R>*>(crs);
   cout << "gmcrs=" << gmcrs <<endl;

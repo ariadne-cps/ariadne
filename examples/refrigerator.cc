@@ -24,10 +24,10 @@
 #include "function/function_interface.h"
 #include "system/affine_map.h"
 #include "system/affine_vector_field.h"
-#include "system/set_based_hybrid_automaton.h"
+#include "system/hybrid_automaton.h"
 //#include "system/constraint_based_hybrid_automaton.h"
 #include "evaluation/evolution_parameters.h"
-#include "evaluation/applicator.h"
+#include "evaluation/standard_applicator.h"
 #include "evaluation/lohner_integrator.h"
 #include "evaluation/affine_integrator.h"
 #include "evaluation/set_based_hybrid_evolver.h"
@@ -58,11 +58,7 @@ template<class R>
 int refrig() 
 {
   set_hybrid_evolver_verbosity(4);
-  typedef Numeric::Interval<R> I;
-
-  Rational q0; cout<<"q0="<<q0<<endl;
-  Rational q1(1); cout<<"q1="<<q1<<endl;
-  Rational q2(Integer(2)); cout<<"q2="<<q2<<endl;
+  typedef Zonotope<R> BS;
   
   Box<R> domain("[-1,1]x[-1,1]"); //Setup domain
   cout << "domain=" << domain << endl;
@@ -71,38 +67,28 @@ int refrig()
   cout << "1st dynamic=" << dynamic1 << endl;
 
   double A[4]={-2*alpha1,0,-2*alpha2,0};
-  double AA[2][2]={{-2*alpha1,0},{-2*alpha2,0}};
   double v[2]={-1,1};
-  //Vector<R> vv(2,{-1,1});
   AffineVectorField<R> dynamic2(Matrix<R>(2,2,A),Vector<R>(2,v));
-
-  //AffineVectorField<R> dynamic2(Matrix<R>("[-2*alpha1,0;-2*alpha2,0]"),Vector<R>("[-1,1]")); //Second dyn
   cout << "2nd dynamic=" << dynamic2 << endl;
 
-  AffineVectorField<R> dynamic3(Matrix<R>("[0,-2*alpha1;0,-2*alpha2]"),Vector<R>("[1,-1]")); //Third dyn
+	double B[4]={0,-2*alpha1,0,-2*alpha2};
+  AffineVectorField<R> dynamic3(Matrix<R>(2,2,B),Vector<R>("[1,-1]")); //Third dyn
 
-  AffineVectorField<R> dynamic4(Matrix<R>("[-2*alpha1,-2*alpha2;-2*alpha1,-2*alpha2]"),Vector<R>("[-1,-1]")); //Fourth dyn
+	double C[4]={-2*alpha1,-2*alpha2,-2*alpha1,-2*alpha2};
+  AffineVectorField<R> dynamic4(Matrix<R>(2,2,C),Vector<R>("[-1,-1]")); //Fourth dyn
 
   Vector<R> e1=Vector<R>::unit(2,1);
-  Vector<R> e2=Vector<R>::unit(2,2);
-  //Vector<R> e3=Vector<R>::unit(2,1);
-  //Vector<R> e4=Vector<R>::unit(2,2);
-  //  cout << e1 << " " << e2 << " " << -e3 << " " << e4 << endl;
-  // const FunctionInterface<R>& fcn_left();
-  //  ConstraintSet<R> constraint_left(fcn_left);
   LinearConstraint<R> constraint1(e1,1);
-  RectangularSet<R> inv("[-1,1]x[-1,1]"); // All sets have the same invariants.
+  RectangularSet<R> inv(Box<R>("[-1,1]x[-1,1]")); // All sets have the same invariants.
 
-/*
-  RectangularSet<R> invariant(domain);
-  cout << "invariant=" << invariant << endl;
-*/
-  RectangularSet<R> guard("[0,0]x[1,1]");
+  cout << "invariant=" << inv << endl;
+
+  RectangularSet<R> guard(Box<R>("[0,0]x[1,1]"));
 
   AffineMap<R> reset(Matrix<R>("[1,0;0,1]"),Vector<R>("[0,0]"));
   cout << "reset=" << reset << endl;
   
-  SetBasedHybridAutomaton<R> automaton("Refridguration desyncronization");
+  HybridAutomaton<R> automaton("Refridguration desyncronization");
   // Building continues modes
   DiscreteState state1(1);
   DiscreteState state2(2);
@@ -111,10 +97,10 @@ int refrig()
   cout << "states={" << state1 << " " << state2 << " " << state3 << " " << state4 << "}" << endl;
 
   //  DiscretState state1=mode1_id;
-  const SetBasedDiscreteMode<R>& mode1=automaton.new_mode(state1,dynamic1,inv);
-  const SetBasedDiscreteMode<R>& mode2=automaton.new_mode(state2,dynamic2,inv);
-  const SetBasedDiscreteMode<R>& mode3=automaton.new_mode(state3,dynamic3,inv);
-  const SetBasedDiscreteMode<R>& mode4=automaton.new_mode(state4,dynamic4,inv);
+  const DiscreteMode<R>& mode1=automaton.new_mode(state1,dynamic1,inv);
+  const DiscreteMode<R>& mode2=automaton.new_mode(state2,dynamic2,inv);
+  const DiscreteMode<R>& mode3=automaton.new_mode(state3,dynamic3,inv);
+  const DiscreteMode<R>& mode4=automaton.new_mode(state4,dynamic4,inv);
   cout << "modes={" << mode1 << " " << mode2 << " " << mode3 << " " << mode4 << "}" << endl;
 
   // Form the forced transitions 
@@ -130,7 +116,7 @@ int refrig()
 
   PolyhedralSet<R> invariant1(constraint1.polyhedron());
   cout << "invariant1=" << invariant1 << endl;
-  const SetBasedDiscreteTransition<R>& transition1=automaton.new_transition(event1,state1,state2,reset,invariant1);
+  const DiscreteTransition<R>& transition1=automaton.new_transition(event1,state1,state2,reset,invariant1);
   cout << "transition1=" << transition1 << endl;
 
   EvolutionParameters<R> parameters;
@@ -142,12 +128,12 @@ int refrig()
   cout << "parameters=" << parameters << endl;
 
 
-  SetBasedHybridEvolver<R> hybrid_evolver(parameters);
+  SetBasedHybridEvolver<BS> hybrid_evolver(parameters);
   
   RectangularSet<R> bounding_box(domain.neighbourhood(1));
   cout << "bounding_box=" << bounding_box << endl;
   
-  RectangularSet<R> initial_box("[5,5.1]x[4,4.1]");
+  RectangularSet<R> initial_box(Box<R>("[5,5.1]x[4,4.1]"));
   HybridSet<R> initial_set;
   initial_set.new_location(state1,initial_box);
   initial_set.new_location(state2, EmptySet<R>(2));
@@ -156,47 +142,41 @@ int refrig()
   cout << "initial_set.discrete_locations()=" << initial_set.locations() << endl;
   cout << "initial_set=" << initial_set << endl;
   
-  HybridSet<R> bounding_set;
-  bounding_set.new_location(state1,bounding_box);
-  bounding_set.new_location(state2,bounding_box);
-  bounding_set.new_location(state3,bounding_box);
-  bounding_set.new_location(state4,bounding_box);
-  cout << "bounding_set.discrete_locations()=" << bounding_set.locations() << endl;
-  cout << "bounding_set=" << bounding_set << endl;
-  cout << endl;
+//  HybridSet<R> bounding_set;
+//  bounding_set.new_location(state1,bounding_box);
+//  bounding_set.new_location(state2,bounding_box);
+//  bounding_set.new_location(state3,bounding_box);
+//  bounding_set.new_location(state4,bounding_box);
+//  cout << "bounding_set.discrete_locations()=" << bounding_set.locations() << endl;
+//  cout << "bounding_set=" << bounding_set << endl;
+//  cout << endl;
 
   cout << "Computing chainreachable set..." << endl;
 
-  HybridSet<R> chainreach=hybrid_evolver.chainreach(automaton,initial_set,bounding_set);
+  HybridSet<R> chainreach=hybrid_evolver.chainreach(automaton,initial_set);
   cout << "Reached " << chainreach
        << endl << endl;
 
-  /*
   epsfstream eps; 
 
-  eps.open("two_tank1-xv.eps",bounding_box);
-  eps << fill_colour(white) << bounding_box;
+  eps.open("two_tank1-xv.eps",domain);
   //  eps << fill_colour(cyan) << activation;
   eps << line_style(true) << fill_colour(yellow) << chainreach[state1];
   eps << fill_colour(blue) << initial_set[state1];
   eps.close();
 
-  eps.open("two_tank2-xv.eps",bounding_box);
-  eps << fill_colour(white) << bounding_box;
+  eps.open("two_tank2-xv.eps",domain);
   //  eps << fill_colour(cyan) << activation;
   eps << line_style(true) << fill_colour(yellow) << chainreach[state2];
   eps << fill_colour(blue) << initial_set[state2];
   eps.close();
 
   
-  eps.open("two_tank1.eps",bounding_box,PlanarProjectionMap(3,2,0));
-  eps << fill_colour(white) << bounding_box;
+  eps.open("two_tank1.eps",domain,PlanarProjectionMap(3,2,0));
   //  eps << fill_colour(cyan) << activation;
   eps << line_style(true) << fill_colour(yellow) << chainreach[state1];
   eps << fill_colour(blue) << initial_set[state1];
   eps.close();
-
-  */
   
   return 0;
 }

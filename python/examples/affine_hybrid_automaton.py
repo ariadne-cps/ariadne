@@ -79,7 +79,7 @@ print "initial_set.locations() =",initial_set.locations()
 
 parameters=EvolutionParameters()
 #parameters.set_grid_length(0.125)
-parameters.set_grid_length(0.25)
+parameters.set_grid_length(0.05)
 parameters.set_lock_to_grid_time(0.25);
 parameters.set_maximum_step_size(0.125)
 #parameters.set_maximum_enclosure_radius(0.25);

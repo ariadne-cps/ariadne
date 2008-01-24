@@ -41,6 +41,36 @@ using namespace Ariadne::Python;
 #include <boost/python.hpp>
 using namespace boost::python;
 
+template<class X>
+std::string
+__str__(const Polyhedron<X>& p)
+{
+  //return os << "Polyhedron( A=" << this->A() << ", b=" << this->b() << " )";
+  std::stringstream ss;
+  dimension_type d=p.dimension();
+  size_type nc=p.number_of_constraints();
+  const array<X>& data=p.data();
+  for(size_type i=0; i!=nc; ++i) {
+    ss << ( i==0 ? "[" : "," );
+    for(size_type j=0; j!=d; ++j) {
+      ss << ( j==0 ? "(" : ",");
+      ss << data[i*(d+1)+j].get_d(); 
+    }
+    ss << ":" << data[i*(d+1)+d].get_d() << ")";
+  }
+  ss << "]";
+  return ss.str();
+}
+
+template<class X>
+std::string
+__repr__(const Polyhedron<X>& p)
+{
+  std::stringstream ss;
+  ss << p;
+  return ss.str();
+}
+
 
 template<class R>
 void export_polyhedron() 
@@ -55,14 +85,18 @@ void export_polyhedron()
   def("subset", (tribool(*)(const Polyhedron<R>&, const Polyhedron<R>&))(&subset));
   def("closed_intersection", (Polyhedron<R>(*)(const Polyhedron<R>&, const Polyhedron<R>&))(&closed_intersection));
 
-  class_< Polyhedron<R> >(python_name<R>("Polyhedron").c_str(),init<int>())
-    .def(init< Matrix<R>, Vector<R> >())
-    .def(init< Polyhedron<R> >())
-    .def(init< Box<R> >())
-    .def("dimension", &Polyhedron<R>::dimension)
-    .def(self_ns::str(self))
-  ;
-  
+  class_< Halfspace<R> >  halfspace_class(python_name<R>("Halfspace").c_str(),init<int>());
+  halfspace_class.def(self_ns::str(self));
+
+  class_< Polyhedron<R> > polyhedron_class(python_name<R>("Polyhedron").c_str(),init<int>());
+  polyhedron_class.def(init< Matrix<R>, Vector<R> >());
+  polyhedron_class.def(init< Polyhedron<R> >());
+  polyhedron_class.def(init< Box<R> >());
+  polyhedron_class.def("dimension", &Polyhedron<R>::dimension);
+  polyhedron_class.def("empty", &Polyhedron<R>::empty);
+  polyhedron_class.def("__str__", &__str__<R>);;
+  polyhedron_class.def("__repr__", &__repr__<R>);;
+
 }
 
 template<>
@@ -70,21 +104,28 @@ void export_polyhedron<Rational>()
 {
   typedef Rational Q;
   
+  def("polyhedron", (Polyhedron<Q>(*)(const Polytope<Q>&))(&polyhedron));
   def("disjoint", (tribool(*)(const Polyhedron<Q>&, const Polyhedron<Q>&))(&disjoint));
   def("disjoint", (tribool(*)(const Polyhedron<Q>&, const Polytope<Q>&))(&disjoint));
   def("disjoint", (tribool(*)(const Polytope<Q>&, const Polyhedron<Q>&))(&disjoint));
   def("subset", (tribool(*)(const Polytope<Q>&, const Polyhedron<Q>&))(&subset));
   def("subset", (tribool(*)(const Polyhedron<Q>&, const Polyhedron<Q>&))(&subset));
+  def("intersection", (Polyhedron<Q>(*)(const Polyhedron<Q>&, const Polyhedron<Q>&))(&closed_intersection));
+
   def("closed_intersection", (Polyhedron<Q>(*)(const Polyhedron<Q>&, const Polyhedron<Q>&))(&closed_intersection));
 
-  class_< Polyhedron<Q> >(python_name<Q>("Polyhedron").c_str(),init<int>())
-    .def(init< Matrix<Q>, Vector<Q> >())
-    .def(init< Polytope<Q> >())
-    .def(init< Polyhedron<Q> >())
-    .def(init< Box<Q> >())
-    .def("dimension", &Polyhedron<Q>::dimension)
-    .def(self_ns::str(self))
-  ;
+  class_< Halfspace<Q> >  halfspace_class(python_name<Q>("Halfspace").c_str(),init<int>());
+  halfspace_class.def(self_ns::str(self));
+
+  class_< Polyhedron<Q> >  polyhedron_class(python_name<Q>("Polyhedron").c_str(),init<int>());
+  polyhedron_class.def(init< Matrix<Q>, Vector<Q> >());
+  polyhedron_class.def(init< Polytope<Q> >());
+  polyhedron_class.def(init< Polyhedron<Q> >());
+  polyhedron_class.def(init< Box<Q> >());
+  polyhedron_class.def("dimension", &Polyhedron<Q>::dimension);
+  polyhedron_class.def("empty", &Polyhedron<Q>::empty);
+  polyhedron_class.def("__str__", &__str__<Q>);
+  polyhedron_class.def("__repr__", &__repr__<Q>);
   
 }
 

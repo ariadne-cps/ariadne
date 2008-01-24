@@ -99,6 +99,8 @@ inline uint FloatMP::precision() const {
 inline void FloatMP::set_precision(uint p) { 
   mpfr_set_prec(this->_value,p); }
 
+inline double FloatMP::get_d() const {
+  return mpfr_get_d(this->_value, GMP_RNDN); }
 
 inline uint precision(const FloatMP& x) {
   return mpfr_get_prec(x._value); }

@@ -34,22 +34,17 @@
 #include "base/tribool.h"
 #include "base/iterator.h"
 
-#include "linear_algebra/vector.h"
-#include "linear_algebra/matrix.h"
+#include "linear_algebra/declarations.h"
+#include "geometry/declarations.h"
 
-#include "geometry/point.h"
-#include "geometry/point_list.h"
-#include "geometry/box.h"
 
 namespace Ariadne {  
   namespace Geometry {
 
     class basic_set_tag;
-    template<class R> class Rectangle;
-    template<class R> class Polytope;
 
-    template<class R> class PolyhedralConstraint;
-    template<class R> class PolyhedronConstraintsIterator;
+    template<class X> class Polyhedron;
+    template<class X> class PolyhedronConstraintsIterator;
     
     /*! \ingroup BasicSet
      *  \brief A polyhedron (not necessarily bounded polyhedral set) described by a system of linear inequalities.
@@ -62,7 +57,6 @@ namespace Ariadne {
     class Polyhedron {
       typedef typename Numeric::traits<X>::number_type R;
       typedef typename Numeric::traits<X>::arithmetic_type F;
-      typedef typename Numeric::traits<X>::interval_type I;
      private:
       dimension_type _dimension;
       size_type _number_of_constraints;
@@ -133,6 +127,8 @@ namespace Ariadne {
       LinearAlgebra::Vector<X> b() const;
       /*! \brief An iterator to the beginning of the constraints. */
       size_type number_of_constraints() const;
+      /*! \brief The \a i<sup>th</sup> constraint. */
+      Halfspace<X> constraint(size_type i) const;
       /*! \brief An iterator to the beginning of the constraints. */
       constraints_const_iterator constraints_begin() const;
       /*! \brief An iterator to the end of the constraints. */
@@ -150,7 +146,7 @@ namespace Ariadne {
 
       //@{
       //! \name Modifying operations
-      void new_constraint(const PolyhedralConstraint<X>& c);
+      void new_constraint(const Halfspace<X>& c);
       //@}
 
 
@@ -247,25 +243,7 @@ namespace Ariadne {
     
  
     
-    /*! \brief A linear inequality constraint. */
-    template<class X>
-    class PolyhedralConstraint
-    {
-      friend class Polyhedron<X>;
-      friend class PolyhedronConstraintsIterator<X>;
-     public:
-      /*! \brief The dimension of the constraint. */
-      dimension_type dimension() const;
-      /*! \brief Tests if the constraint is satisfied by a point. */
-      template<class XV> tribool satisfied_by(const Point<XV>& pt) const;
-      /*! \brief Write to an output stream. */
-      std::ostream& write(std::ostream& os) const;
-     private:
-      PolyhedralConstraint(const dimension_type d, const X* a);
-      dimension_type _d; const X* _a;
-    };
-    
-    
+
     
     template<class X> 
     tribool empty(const Polyhedron<X>& plhd);
@@ -336,12 +314,7 @@ namespace Ariadne {
     Polyhedron<typename Numeric::traits<X>::arithmetic_type> 
     polyhedron(const Polytope<X>& A) ;
 
-
-
-    
-    template<class X>
-    std::ostream& operator<<(std::ostream& os, const PolyhedralConstraint<X>& c);
-    
+ 
     template<class X>
     std::ostream& operator<<(std::ostream& os, const Polyhedron<X>& p);
     

@@ -21,26 +21,31 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "geometry/halfspace.h"
+
 namespace Ariadne {  
   namespace Geometry {
+
     template<class X>
     class PolyhedronConstraintsIterator
       : public boost::iterator_facade<PolyhedronConstraintsIterator<X>,
-                                      PolyhedralConstraint<X>,
+                                      Halfspace<X>,
                                       boost::forward_traversal_tag,
-                                      const PolyhedralConstraint<X>&,
-                                      const PolyhedralConstraint<X>*
+                                      const Halfspace<X>&,
+                                      const Halfspace<X>*
                                       >
     {
      public:
-      PolyhedronConstraintsIterator(const Polyhedron<X>& ply, const size_type& n)
-        : _c(ply.dimension(),ply.constraints().begin()+n*(ply.dimension()+1)) { }
+      PolyhedronConstraintsIterator(const Polyhedron<X>& ply, const size_type& i)
+        : _p(&ply), _i(i), _c(ply.dimension()) { }
       bool equal(const PolyhedronConstraintsIterator<X>& other) const { 
-        return this->_c._a==other._c._a; }
-      const PolyhedralConstraint<X>& dereference() const { return _c; }
-      void increment() { _c._a+=_c._d+1u; ; }
+        return this->_i==other._i && this->_p ==other._p; }
+      void increment() { 
+        ++this->_i; }
+      const Halfspace<X>& dereference() const { 
+        this->_c=this->_p->constraint(this->_i); return this->_c; }
      private:
-      PolyhedralConstraint<X> _c;
+      const Polyhedron<X>* _p; size_type _i; mutable Halfspace<X> _c;
     };
   
   } // namespace Geometry
@@ -105,7 +110,7 @@ Geometry::Polyhedron<X>::contains(const Point<XX>& pt) const
   tribool result=true;
   for(constraints_const_iterator i=this->constraints_begin(); 
       i!=this->constraints_end(); ++i) {
-    result=result && i->satisfied_by(pt); 
+    result=result && satisfies(pt,*i); 
     if(!result) { return result; }
   }
   return result;
@@ -191,52 +196,6 @@ Geometry::bounding_box(const Polyhedron<X>& plhd)
   return plhd.bounding_box();
 }
 
-
-
-template<class X> inline
-Geometry::PolyhedralConstraint<X>::PolyhedralConstraint(const dimension_type d, const X* a)
-  : _d(d), _a(a) 
-{ 
-}
-
-
-template<class X> inline
-dimension_type
-Geometry::PolyhedralConstraint<X>::dimension() const
-{ 
-  return this->_d;
-}
-
-
-template<class X1> template<class X2> inline 
-tribool 
-Geometry::PolyhedralConstraint<X1>::satisfied_by(const Point<X2>& pt) const
-{
-  typedef typename Numeric::traits<X1,X2>::arithmetic_type F;
-  F prod=0;
-  for(dimension_type i=0; i!=pt.dimension(); ++i) {
-    prod+=this->_a[i]*pt[i]; 
-  }
-  prod+=this->_a[pt.dimension()]; 
-  return prod>=0;
-}
-
-
-
-
-
-
-
-
-
-
-
-template<class X> inline
-std::ostream& 
-Geometry::operator<<(std::ostream& os, const PolyhedralConstraint<X>& c) 
-{
-  return c.write(os); 
-}
 
 
 template<class X> inline

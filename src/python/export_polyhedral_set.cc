@@ -23,6 +23,7 @@
 
 #include "python/float.h"
 
+#include "geometry/box.h"
 #include "geometry/polyhedral_set.h"
 
 using namespace Ariadne;

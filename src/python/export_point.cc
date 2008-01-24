@@ -176,6 +176,7 @@ void export_point_list()
 
 
 
+template void export_point<Rational>();
 template void export_point<FloatPy>();
 template void export_interval_point<FloatPy>();
 template void export_point_list<FloatPy>();

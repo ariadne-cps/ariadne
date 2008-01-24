@@ -40,6 +40,34 @@ using namespace Ariadne::Python;
 #include <boost/python.hpp>
 using namespace boost::python;
 
+
+template<class X>
+std::string
+__str__(const Polytope<X>& p)
+{
+  std::stringstream ss;
+  for(size_type i=0; i!=p.number_of_vertices(); ++i) {
+    ss << (i==0?"[":",");
+    Point<X> v=p.vertex(i);
+    for(size_type j=0; j!=v.dimension(); ++j) {
+      ss << (j==0?"(":",") << v[j].get_d();
+    }
+    ss << ")";
+  }
+  ss << "]";
+  return ss.str();
+}
+
+template<class X>
+std::string
+__repr__(const Polytope<X>& p)
+{
+  std::stringstream ss;
+  ss << p;
+  return ss.str();
+}
+
+
 template<class R>  
 void
 read_polytope(Geometry::Polytope<R>& pltp, const boost::python::object& obj) 
@@ -72,16 +100,15 @@ void export_polytope()
   def("subset", (tribool(*)(const Polytope<R>&, const Polytope<R>&))(&subset));
   def("convex_hull", (Polytope<R>(*)(const Polytope<R>&, const Polytope<R>&))(&convex_hull));
 
-  class_< Polytope<R> >(python_name<R>("Polytope").c_str(),init<int>())
-    .def("__init__", make_constructor(&make_polytope<R>) )
-    .def(init< PointList<R> >())
-    .def(init< Polytope<R> >())
-    .def(init< Box<R> >())
-    .def("dimension", &Polytope<R>::dimension)
-    .def("vertices", &Polytope<R>::vertices)
-    .def("bounding_box", &Polytope<R>::bounding_box)
-    .def(self_ns::str(self))
-  ;
+  class_< Polytope<R> > polytope_class(python_name<R>("Polytope").c_str(),init<int>());
+  polytope_class.def("__init__", make_constructor(&make_polytope<R>) );
+  polytope_class.def(init< PointList<R> >());
+  polytope_class.def(init< Polytope<R> >());
+  polytope_class.def(init< Box<R> >());
+  polytope_class.def("dimension", &Polytope<R>::dimension);
+  polytope_class.def("vertices", &Polytope<R>::vertices);
+  polytope_class.def("bounding_box", &Polytope<R>::bounding_box);
+  polytope_class.def(self_ns::str(self));
 
 }
 
@@ -90,22 +117,29 @@ void export_polytope<Rational>()
 {
   typedef Rational Q;
 
+  def("polytope", (Polytope<Q>(*)(const Polyhedron<Q>&))(&polytope));
   def("disjoint", (tribool(*)(const Polytope<Q>&, const Polytope<Q>&))(&disjoint));
   def("subset", (tribool(*)(const Polytope<Q>&, const Polytope<Q>&))(&subset));
   def("convex_hull", (Polytope<Q>(*)(const Polytope<Q>&, const Polytope<Q>&))(&convex_hull));
 
-  class_< Polytope<Q> >(python_name<Q>("Polytope").c_str(),init<int>())
-    .def("__init__", make_constructor(&make_polytope<Q>) )
-    .def(init< Polyhedron<Q> >())
-    .def(init< Polytope<Q> >())
-    .def(init< Box<Q> >())
-    .def("dimension", &Polytope<Q>::dimension)
-    .def("vertices", &Polytope<Q>::vertices)
-    .def("bounding_box", &Polytope<Q>::bounding_box)
-    .def(self_ns::str(self))
-  ;
+  class_< PointList<Q> > point_list_class(python_name<Q>("PointList").c_str(),init<int>());
+  point_list_class.def("__getitem__", (Point<Q>(PointList<Q>::*)(size_type)const)&PointList<Q>::operator[]);
+  point_list_class.def(self_ns::str(self));
+
+  class_< Polytope<Q> > polytope_class(python_name<Q>("Polytope").c_str(),init<int>());
+  polytope_class.def("__init__", make_constructor(&make_polytope<Q>) );
+  polytope_class.def(init< Polyhedron<Q> >());
+  polytope_class.def(init< Polytope<Q> >());
+  polytope_class.def(init< Box<Q> >());
+  polytope_class.def("dimension", &Polytope<Q>::dimension);
+  polytope_class.def("vertices", &Polytope<Q>::vertices);
+  polytope_class.def("vertex", &Polytope<Q>::vertex);
+  polytope_class.def("bounding_box", &Polytope<Q>::bounding_box);
+  polytope_class.def("__str__", &__str__<Q>);
+  polytope_class.def("__repr__", &__repr__<Q>);
 
 }
+
 
 
 

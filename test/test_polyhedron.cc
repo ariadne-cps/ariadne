@@ -91,9 +91,9 @@ test_polyhedron()
   for(typename Polyhedron<R>::constraints_const_iterator c_iter=phd1.constraints_begin();
       c_iter!=phd1.constraints_end(); ++c_iter)
   {
-    const PolyhedralConstraint<R>& c=*c_iter;
+    const Halfspace<R>& c=*c_iter;
     cout << c << flush;
-    cout << "  " << c.satisfied_by(pt1) << endl;
+    cout << "  " << satisfies(pt1,c) << endl;
   }
   
   ARIADNE_TEST_ASSERT(phd1.contains(pt1));
@@ -105,9 +105,9 @@ test_polyhedron()
   for(typename Polyhedron<R>::constraints_const_iterator c_iter=phd1.constraints_begin();
       c_iter!=phd1.constraints_end(); ++c_iter)
   {
-    const PolyhedralConstraint<R>& c=*c_iter;
+    const Halfspace<R>& c=*c_iter;
     cout << c << flush;
-    cout << "  " << c.satisfied_by(pt2) << endl;
+    cout << "  " << satisfies(pt2,c) << endl;
   }
   cout << "phd1.contains(pt2)=" << flush; cout << phd1.contains(pt2) << endl;
   assert((bool)(!phd1.contains(pt2)));
@@ -121,7 +121,7 @@ test_polyhedron()
     for(typename Polyhedron<R>::constraints_const_iterator c_iter=phd1.constraints_begin();
         c_iter!=phd1.constraints_end(); ++c_iter)
     {
-      cout << *c_iter << ".satisfied_by" << *v_iter << "=" << c_iter->satisfied_by(*v_iter) << endl;
+      cout << "satisfies(" << *c_iter << "," << *v_iter << ") =" << satisfies(*v_iter,*c_iter) << endl;
     }
   }
   cout << "subset(r1,phd1)=" << subset(r1,phd1) << endl;

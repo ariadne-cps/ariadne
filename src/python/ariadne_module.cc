@@ -194,6 +194,7 @@ BOOST_PYTHON_MODULE(ariadne)
   //export_taylor_variable<Rational>();
   //export_taylor_derivative<Rational>();
 
+  export_point<Rational>();
   export_polytope<Rational>();
   export_polyhedron<Rational>();
 

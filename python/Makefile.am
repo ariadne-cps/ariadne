@@ -7,6 +7,6 @@ TESTS_ENVIRONMENT = export PYTHONPATH=$PYTHONPATH:$(top_srcdir)/src/python/.libs
 
 pkgpython_DATA = 
 
-check_SCRIPTS = test/test_import.py test/test_numeric.py test/test_linear_algebra.py
+check_SCRIPTS = test/test_import.py test/test_numeric.py test/test_linear_algebra.py test/test_geometry_rational.py
 
 TESTS = $(check_SCRIPTS)

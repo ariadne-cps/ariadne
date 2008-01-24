@@ -93,5 +93,8 @@ void export_postscript_output()
     .def("write",&write< ListSet< Zonotope<FloatPy> > >)
     .def("write",&write< BoxListSet<FloatPy> >)
     .def("write",&write< RectangularSet<FloatPy> >)
+    .def("write",&write< Box<Rational> >)
+    .def("write",&write< Polytope<Rational> >)
+    .def("write",&write< Polyhedron<Rational> >)
     ;
 }

@@ -83,6 +83,8 @@ namespace Ariadne {
 
       template<class X, class Rnd> Float(const X& x, Rnd rnd);
       template<class E, class Rnd> Float(const Expression<E>& x, Rnd rnd);
+
+      double get_d() const;
      public:
       double _value;
     };

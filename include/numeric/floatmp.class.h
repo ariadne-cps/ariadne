@@ -82,6 +82,8 @@ namespace Ariadne {
       static void set_default_precision(uint p);
       void set_precision(uint p);
       uint precision() const;
+
+      double get_d() const;
      public:
       mpfr_t _value;
     };

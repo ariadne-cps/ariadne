@@ -54,7 +54,6 @@ namespace Ariadne {
     class Point {
       typedef typename Numeric::traits<X>::number_type R;
       typedef typename Numeric::traits<X>::arithmetic_type F;
-      typedef typename Numeric::traits<X>::interval_type I;
      public:
       /*!\brief The type of denotable real number giving the point's values. */
       typedef R real_type;

@@ -259,7 +259,7 @@ subset(const BS& A, const Geometry::Polyhedron<R>& B)
     for(typename Geometry::Polyhedron<R>::constraints_const_iterator c=B.constraints_begin();
         c!=B.constraints_end(); ++c)
     {
-      result=result && (c->satisfied_by(*v));
+      result=result && (satisfies(*v,*c));
       if(!result) { return result; }
     }
   }
@@ -491,16 +491,25 @@ Geometry::Polyhedron<X>::Polyhedron(const PointList<X>& pts)
 
 template<class X>
 void
-Geometry::Polyhedron<X>::new_constraint(const PolyhedralConstraint<X>& c)
+Geometry::Polyhedron<X>::new_constraint(const Halfspace<X>& c)
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(*this,c,"void Polyhedron::new_constraint(PolyhedralConstraint& c)");
   dimension_type d=this->_dimension;
   size_type sz=this->_data.size();
   this->_data.resize(sz+d+1u);
   for(dimension_type i=0; i!=d; ++i) {
-    this->_data[sz+i]=c._a[i];
-    this->_data[sz+d]=c._a[d];
+    this->_data[sz+i]=c.data()[i];
+    this->_data[sz+d]=c.data()[d];
   }
+}
+
+
+template<class X>
+Geometry::Halfspace<X>
+Geometry::Polyhedron<X>::constraint(size_type i) const
+{
+  ARIADNE_ASSERT(i<this->_number_of_constraints);
+  return Halfspace<X>(this->_dimension,this->_data.begin()+i*(this->_dimension+1u));
 }
 
 
@@ -741,16 +750,6 @@ Geometry::polyhedron(const Polytope<X>& pltp)
 }
 
 
-
-template<class X>  
-std::ostream& 
-Geometry::PolyhedralConstraint<X>::write(std::ostream& os) const
-{
-  LinearAlgebra::Vector<X> a=-LinearAlgebra::Vector<X>(this->_d,this->_a);
-  X b=this->_a[this->_d];
-  os << "PolyhedralConstraint(a=" << a << ",b=" << b << ")";
-  return os;
-}
 
 template<class X>
 std::string

@@ -66,7 +66,6 @@ namespace Ariadne {
     class Polytope {
       typedef typename Numeric::traits<X>::number_type R;
       typedef typename Numeric::traits<X>::arithmetic_type A;
-      typedef typename Numeric::traits<X>::interval_type I;
      private:    
       dimension_type _dimension;
       size_type _number_of_vertices;

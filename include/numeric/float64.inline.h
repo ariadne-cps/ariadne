@@ -84,6 +84,9 @@ template<class E, class Rnd>
 inline Float64::Float(const Expression<E>& e, Rnd rnd) {
   e.assign_to(*this); }
 
+inline double Float64::get_d() const {
+  return this->_value; }
+
 template<> 
 inline std::string name<Float64>() { 
   return "Float64"; }

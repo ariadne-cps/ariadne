@@ -93,6 +93,7 @@ void export_polyhedron()
   polyhedron_class.def(init< Polyhedron<R> >());
   polyhedron_class.def(init< Box<R> >());
   polyhedron_class.def("dimension", &Polyhedron<R>::dimension);
+  polyhedron_class.def("number_of_constraints", &Polyhedron<R>::number_of_constraints);
   polyhedron_class.def("empty", &Polyhedron<R>::empty);
   polyhedron_class.def("__str__", &__str__<R>);;
   polyhedron_class.def("__repr__", &__repr__<R>);;
@@ -123,6 +124,7 @@ void export_polyhedron<Rational>()
   polyhedron_class.def(init< Polyhedron<Q> >());
   polyhedron_class.def(init< Box<Q> >());
   polyhedron_class.def("dimension", &Polyhedron<Q>::dimension);
+  polyhedron_class.def("number_of_constraints", &Polyhedron<Q>::number_of_constraints);
   polyhedron_class.def("empty", &Polyhedron<Q>::empty);
   polyhedron_class.def("__str__", &__str__<Q>);
   polyhedron_class.def("__repr__", &__repr__<Q>);

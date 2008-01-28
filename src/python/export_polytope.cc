@@ -106,6 +106,8 @@ void export_polytope()
   polytope_class.def(init< Polytope<R> >());
   polytope_class.def(init< Box<R> >());
   polytope_class.def("dimension", &Polytope<R>::dimension);
+  polytope_class.def("number_of_vertices", &Polytope<R>::number_of_vertices);
+  polytope_class.def("empty", &Polytope<R>::empty);
   polytope_class.def("vertices", &Polytope<R>::vertices);
   polytope_class.def("bounding_box", &Polytope<R>::bounding_box);
   polytope_class.def(self_ns::str(self));
@@ -132,6 +134,8 @@ void export_polytope<Rational>()
   polytope_class.def(init< Polytope<Q> >());
   polytope_class.def(init< Box<Q> >());
   polytope_class.def("dimension", &Polytope<Q>::dimension);
+  polytope_class.def("number_of_vertices", &Polytope<Q>::number_of_vertices);
+  polytope_class.def("empty", &Polytope<Q>::empty);
   polytope_class.def("vertices", &Polytope<Q>::vertices);
   polytope_class.def("vertex", &Polytope<Q>::vertex);
   polytope_class.def("bounding_box", &Polytope<Q>::bounding_box);

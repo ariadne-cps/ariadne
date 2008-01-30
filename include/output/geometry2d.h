@@ -233,6 +233,7 @@ Output::PlanarProjectionMap::operator() (const Geometry::Polytope<R>& p) const
     Point2d pt=(*this)(v);
     result.new_vertex(pt);
   }
+  result.reduce();
   return result;
 }
 

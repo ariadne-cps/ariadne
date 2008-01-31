@@ -53,6 +53,8 @@ namespace Ariadne {
 
     /*!\ingroup FunctionVariable
      * \brief Concrete class for functions.
+     *
+     * \deprecated This class has unknown bugs, and is deprecated in favour of TaylorVariable.
      */
     template<class X>
     class AffineVariable

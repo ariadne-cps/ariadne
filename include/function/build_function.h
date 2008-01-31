@@ -55,16 +55,10 @@
     virtual LinearAlgebra::Matrix<X> jacobian(const LinearAlgebra::Vector<X>& x) const { \
       LinearAlgebra::Matrix<X> r(rs,as); \
       const LinearAlgebra::Vector<X>& p=this->_p; \
-      Function::AffineDerivative<X> dr(as,as); \
-      Function::AffineDerivative<X> dx(rs,as);                           \
-      for(uint i=0; i!=as; ++i) { dx[i]=Function::AffineVariable<X>::variable(as,x[i],i); } \
+      Function::TaylorDerivative<X> dr(as,as,1u); \
+      Function::TaylorDerivative<X> dx=Function::TaylorDerivative<X>::variable(x,1u); \
       f(dr,dx,p); \
-      for(uint i=0; i!=rs; ++i) { \
-        for(uint j=0; j!=as; ++j) { \
-          r(i,j)=dr[i].gradient(j); \
-        } \
-      }  \
-      return r; \
+      return dr.jacobian(); \
     } \
     virtual Function::TaylorDerivative<X> derivative(const LinearAlgebra::Vector<X>& x, const smoothness_type& s) const { \
       const LinearAlgebra::Vector<X>& p=this->_p; \

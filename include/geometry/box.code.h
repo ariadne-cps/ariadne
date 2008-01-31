@@ -76,6 +76,79 @@ Geometry::Box<R>::quadrant(const Combinatoric::BinaryWord& w) const
 }
 
 
+template<class R> 
+tribool 
+Geometry::Box<R>::contains(const Point<R>& pt) const {
+  const Box<R>& bx=*this;
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(bx,pt,"contains(Box bx, Point pt)");
+  tribool result=true;
+  for (size_type i=0; i!=bx.dimension(); ++i) {
+    if(bx.lower_bound(i)>pt[i] || pt[i]>bx.upper_bound(i)) {
+      return false;
+    }
+    if(bx.lower_bound(i)==pt[i] || pt[i]==bx.upper_bound(i)) { 
+      result=indeterminate;
+    }
+  }
+  return result;
+}
+
+
+template<class R> 
+tribool 
+Geometry::Box<R>::contains(const Point<I>& pt) const {
+  const Box<R>& bx=*this;
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(bx,pt,"contains(Box bx, Point pt)");
+  tribool result=true;
+  for (size_type i=0; i!=bx.dimension(); ++i) {
+    if(bx.lower_bound(i)>pt[i] || pt[i]>bx.upper_bound(i)) {
+      return false;
+    }
+    if(bx.lower_bound(i)==pt[i] || pt[i]==bx.upper_bound(i)) { 
+      result=indeterminate;
+    }
+  }
+  return result;
+}
+
+
+template<class R> 
+tribool 
+Geometry::Box<R>::disjoint(const Box<R>& r2) const
+{
+  const Box<R>& r1=*this;
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(r1,r2,"disjoint(Box r1, Box r2)");
+  tribool result=false;
+  for(size_type i=0; i!=r1.dimension(); ++i) {
+    if(r1.lower_bound(i)>r2.upper_bound(i) || r1.upper_bound(i)<r2.lower_bound(i)) {
+      return true;
+    }
+    if(r1.lower_bound(i)==r2.upper_bound(i) || r1.upper_bound(i)==r2.lower_bound(i)) {
+      result=indeterminate;
+    }
+  }
+  return result;
+}
+
+
+template<class R> 
+tribool 
+Geometry::Box<R>::subset(const Box<R>& r2) const
+{
+  const Box<R>& r1=*this;
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(r1,r2,"subset(Box r1, Box r2)")
+    tribool result=true;
+  for (size_type i=0; i!=r1.dimension(); ++i) {
+    if(r1.lower_bound(i)<r2.lower_bound(i) || r1.upper_bound(i)>r2.upper_bound(i)) {
+      return false;
+    }
+    if(r1.lower_bound(i)==r2.lower_bound(i) || r1.upper_bound(i)==r2.upper_bound(i)) {
+      result=indeterminate;
+    }
+  }
+  return result;
+}
+
 
 template<class R>
 size_type 

@@ -33,6 +33,7 @@ namespace Ariadne {
     
     using namespace Numeric;
     
+    #warning "Compiling Rational"
     template class Vector<Rational>;
     template class Vector< Interval<Rational> >;
 

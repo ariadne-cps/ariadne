@@ -55,15 +55,25 @@ template<class R>
 int 
 test_newton()
 {
-
   R e=1e-10;
   uint n=64;
   IntervalNewtonSolver<R> interval_newton(e,n);
 
   HenonMap<R> h(Point<R>("(1.5,0.375)"));
-  Box<R> r("[-2.125,-2]x[-2.125,-2]");
+  //Box<R> r("[-2.125,-2]x[-2.125,-2]");
+  Box<R> r("[-2.25,-2]x[-2.25,-2]");
+ 
+  Point<R> m("(-2,-2)");
+  cout << "h.evaluate" << m << "=" << h(m) << endl;
+  cout << "h.jacobian" << m << "=" << h.jacobian(m) << endl;
+ 
   Point< Interval<R> > pt=r;
   
+
+  double afptd[2]={-2.0920128158902654,-2.0920128158902654};
+  Point<R> afpt(2,afptd);
+  cout << "h" << afpt << "=" << h(afpt) << endl;
+
   cout << "e=" << e << " n=" << n << endl;
   
   cout << "h=" << h << "\nr=" << r << "\npt=" << pt << endl;
@@ -80,8 +90,6 @@ test_newton()
   cout << std::setprecision(20);
   cout << fpt << "  " << radius(fpt) << endl;
 
-  double afptd[2]={-2.0920128158902654,-2.0920128158902654};
-  Point<R> afpt(2,afptd);
   assert(encloses(fpt,afpt));
  
 

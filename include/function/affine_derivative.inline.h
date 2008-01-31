@@ -158,9 +158,9 @@ template<class X> inline
 LinearAlgebra::Matrix<X>
 Function::AffineDerivative<X>::jacobian() const
 {
-  LinearAlgebra::Matrix<const X> result(this->_result_size,this->_argument_size);
+  LinearAlgebra::Matrix<X> result(this->_result_size,this->_argument_size);
   for(size_type i=0; i!=this->_result_size; ++i) {
-    for(size_type j=0; i!=this->_argument_size; ++j) {
+    for(size_type j=0; j!=this->_argument_size; ++j) {
       result[i][j]=this->_variables[i].gradient(j);
     }
   }

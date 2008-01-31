@@ -41,38 +41,28 @@ Evaluation::IntervalNewtonSolver<R>::solve(const Function::FunctionInterface<R>&
 {
   const R& e=this->maximum_error();
   uint n=this->maximum_number_of_steps();
-  if(verbosity>1) { std::clog << "verbosity=" << verbosity << "\n"; }
+  ARIADNE_LOG(1,"verbosity="<<verbosity<<"\n");
   Geometry::Point<I> x=ix;
   Geometry::Box<R> r(x);
   while(n>0) {
-    if(verbosity>1) { std::clog << "Testing for root in " << x << "\n"; }
-    if(verbosity>1) { std::clog << "  e=" << Geometry::radius(x) << "  x=" << x << std::endl; }
+    ARIADNE_LOG(4,"Testing for root in "<<x<<"\n");
+    ARIADNE_LOG(5,"  e="<<Geometry::radius(x)<<"  x="<<x<<"\n");
     Geometry::Point<R> m=midpoint(x);
-    if(verbosity>1) { std::clog << "  m=" << m << std::endl; }
+    ARIADNE_LOG(5,"  m="<<m<<"\n");
     Geometry::Point<I> im(m);
     LinearAlgebra::Vector<I> w=f(im.position_vector());
-    if(verbosity>1) { std::clog << "  f(m)=" << w << std::endl; }
+    ARIADNE_LOG(5,"  f(m)="<<w<<"\n");
     LinearAlgebra::Matrix<I> A=f.jacobian(x.position_vector());
-    if(verbosity>1) { std::clog << "  Df(r)=" << A << std::endl; }
+    ARIADNE_LOG(5,"  Df(r)="<<A<<"\n");
     LinearAlgebra::Matrix<I> Ainv=LinearAlgebra::inverse(A);
-    if(verbosity>1) { std::clog << "  inverse(Df(r))=" << Ainv << std::endl; }
+    ARIADNE_LOG(5,"  inverse(Df(r))="<<Ainv<<"\n");
     LinearAlgebra::Vector<I> dx=Ainv * w;
-    if(verbosity>1) { std::clog << "  dx=" << dx << std::endl; }
+    ARIADNE_LOG(5,"  dx="<<dx<<"\n");
     Geometry::Point<I> nx= m - dx;
-    if(verbosity>1) { std::clog << "  nx=" << nx << std::endl; } 
+    ARIADNE_LOG(5,"  nx="<<nx<<"\n");
     Geometry::Box<R> nr(nx);
-    if(verbosity>1) { std::clog << "  nr=" << nr << std::endl; } 
+    ARIADNE_LOG(5,"  nr="<<nr<<"\n");
 
-    if(verbosity>1) {
-      std::clog << "  f(x)=" << f(x.position_vector()) << std::flush;
-      std::clog << "  f(m)=" << midpoint(f(im.position_vector())) << std::flush;
-      std::clog << "  Df(x) =" << A << "  inv=" << inverse(A) << "  I=" << A*inverse(A) << std::flush;
-      std::clog << "  nx =" << nx << "\n" << std::flush;
-      std::clog << "  nr =" << nr << "\n" << std::flush;
-      std::clog << "\n";
-      std::clog << radius(nx) << " < " << e << " ? " << (radius(nx) < e) << "\n\n";
-    }
-    
     if(Geometry::subset(nr,r) && Geometry::radius(nx) < e) {
       return nr;
     }

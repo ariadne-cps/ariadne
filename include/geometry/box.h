@@ -264,7 +264,8 @@ namespace Ariadne {
       const Box<R>& bounding_box() const;
       
       /*! \brief Determines whether the box contains a point. */
-      template<class X> tribool contains(const Point<X>& pt) const;
+      tribool contains(const Point<R>& pt) const;
+      tribool contains(const Point<I>& pt) const;
       
       /*! \brief Determines whether the box is disjoint from another box. */
       tribool disjoint(const Box<R>& bx) const;

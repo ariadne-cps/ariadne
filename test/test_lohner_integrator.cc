@@ -64,7 +64,8 @@ test_lohner_integrator()
   cout << __PRETTY_FUNCTION__ << endl;
   typedef Interval<R> I;
 
-  R maximum_step_size=0.125;
+  // R maximum_step_size=0.125;
+  R maximum_step_size=0.0625;
   StandardBounder<R> bounder(maximum_step_size);
   LohnerIntegrator<R> lohner=LohnerIntegrator<R>();
   AffineIntegrator<R> affine=AffineIntegrator<R>();
@@ -91,27 +92,32 @@ test_lohner_integrator()
 
   const VectorField<R>& vf=avf;
 
+  Rational t0,t1,t2,t3,t4;
   Rational h0,h1,h2,h3,h4;
   Box<R> bb0,bb1,bb2,bb3,bb4;
   Zonotope<R> z0,z1,z2,z3,z4,zr1,zr2,zr3,zr4;
   Zonotope<R> c0z, c1z,afz;
+  t0=0;
   z0=z;
 
-  make_lpair(h0,bb0)=lohner.flow_bounds(avf,z0.bounding_box(),qh);
+  make_lpair(h,bb0)=lohner.flow_bounds(avf,z0.bounding_box(),qh);
+  t1=t0+h;
   z1=lohner.integration_step(avf,z0,h,bb0);
-  cout << "z0=" << z0 << "\n"
-       << "h0=" << h0 << ", bb0=" << bb0 << "\n"
-       << "z1=" << z1 << endl;
-
   make_lpair(h,bb1)=bounder.flow_bounds(avf,z1.bounding_box(),qh);
+  t2=t1+h;
   z2=lohner.integration_step(avf,z1,h,bb1);
   make_lpair(h,bb2)=bounder.flow_bounds(avf,z2.bounding_box(),qh);
+  t3=t2+h;
   z3=lohner.integration_step(avf,z2,h,bb2);
   make_lpair(h,bb3)=bounder.flow_bounds(avf,z3.bounding_box(),qh);
+  t4=t3+h;
   z4=lohner.integration_step(avf,z3,h,bb3);
-  cout << "z0=" << z0 << "\n"
-       << "z1=" << z1 << "\nz4=" << z2 << "\n"
-       << "z3=" << z3 << "\nz4=" << z4 << endl;
+  cout << "t0=" << t0 << " z0=" << z0 << "\n"
+       << "t1=" << t1 << " z1=" << z1 << "\n"
+       << "t2=" << t2 << " z2=" << z2 << "\n"
+       << "t3=" << t3 << " z3=" << z3 << "\n"
+       << "t4=" << t4 << " z4=" << z4 << "\n"
+       << endl;
   zr1=lohner.reachability_step(avf,z0,h,bb0);
   zr2=lohner.reachability_step(avf,z1,h,bb1);
   zr3=lohner.reachability_step(avf,z2,h,bb2);
@@ -136,6 +142,7 @@ test_lohner_integrator()
 
   Point<I> pt0 = z0.centre();
   make_lpair(h,bb0)=bounder.flow_bounds(avf,Box<R>(pt0),qh);
+
   Box<R> rbb0=bounder.refine_flow_bounds(avf,Box<R>(pt0),bb0,qh);
   Box<R> rrbb0=bounder.refine_flow_bounds(avf,Box<R>(pt0),rbb0,qh);
 

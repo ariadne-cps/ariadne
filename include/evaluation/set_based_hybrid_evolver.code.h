@@ -83,6 +83,8 @@ Evaluation::SetBasedHybridEvolver<BS>::_satisfies(const BS& bs,
                                                   const CS& inv, 
                                                   const Semantics semantics) const
 {
+  ARIADNE_LOG(8,"  SetBasedHybridEvolver::_satisfies(...)\n");
+  ARIADNE_LOG(9,"    bs="<<bs<<"\n    inv="<<inv<<"\n");
   if(semantics==upper_semantics) {
     return not definitely(disjoint(bs,inv));
   } else { 
@@ -136,8 +138,10 @@ Evaluation::SetBasedHybridEvolver<BS>::
 _final_activation_time(const VF& vf, const CS& inv, const BS& bs, 
                        const Q& maximum_time, const Bx& bb, const Semantics semantics) const 
 {
+  ARIADNE_LOG(8,"  SetBasedHybridEvolver<BS>::_final_activation_time\n");
   // Compute final activation time
   BS es=continuous_integration_step(vf,bs,maximum_time,bb);
+  ARIADNE_LOG(9,"    es="<<es<<"\n");
   if(_satisfies(es,inv,semantics)) {
     return maximum_time;
   }
@@ -241,6 +245,7 @@ Evaluation::SetBasedHybridEvolver<BS>::_step(HBSL& evolve,
                                              const Q& time,
                                              const Semantics semantics) const
 {
+  //const_cast<SetBasedHybridEvolver<BS>*>(this)->verbosity=9;
   ARIADNE_LOG(6,"\nSetBasedHybridEvolver<BS>::_step\n");
   ARIADNE_ASSERT(!working.empty());
   ARIADNE_LOG(9," evolution_time="<<time<<"\n");
@@ -258,6 +263,7 @@ Evaluation::SetBasedHybridEvolver<BS>::_step(HBSL& evolve,
   ARIADNE_LOG(7,"  t="<<t<<", n="<<n<<", ds="<<ds);
   ARIADNE_LOG(7,(semantics==upper_semantics?", upper_semantics\n":", lower_semantics\n"));
   ARIADNE_LOG(7,"  bs="<<bs<<"\n");
+  ARIADNE_ASSERT(t<=time);
 
   if(t==time) {
     ARIADNE_LOG(7," reached end time\n");
@@ -268,6 +274,7 @@ Evaluation::SetBasedHybridEvolver<BS>::_step(HBSL& evolve,
     this->append_subdivision(working,THBS(t,n,ds,bs));
   } else {
     ARIADNE_LOG(7," time step\n");
+    ARIADNE_LOG(9," integrator="<<*this->_integrator<<"\n");
     const DM& mode=automaton.mode(ds);
     reference_vector<const DT> transitions=automaton.transitions(ds);
     const VF& vf=mode.dynamic();
@@ -348,10 +355,11 @@ Evaluation::SetBasedHybridEvolver<BS>::_evolve(HBSL& evolve,
                                                const Q& time, 
                                                const Semantics semantics) const
 {
-  uint verbosity=this->_parameters->verbosity();
+  //const_cast<SetBasedHybridEvolver<BS>*>(this)->verbosity=6;
+  ARIADNE_LOG(5,"SetBasedHybridEvolver::_evolve(...)\n");
   THBSL working=initial;
-  ARIADNE_LOG(5,initial<<"\n");
-  ARIADNE_LOG(5,working<<"\n");
+  ARIADNE_LOG(5,"initial="<<initial<<"\n");
+  ARIADNE_LOG(5,"working="<<working<<"\n");
   while(working.size()!=0) {
     _step(evolve,reach,working,ha,time,semantics);
   }
@@ -416,6 +424,8 @@ Evaluation::SetBasedHybridEvolver<BS>::_upper_reach(HGCLS& result, const HA& ha,
   HBSL initial=this->basic_set_list(initial_set);
   ARIADNE_LOG(4,"initial_working="<<initial<<")\n");
   this->_evolve(evolve,reach,initial,ha,t.time(),upper_semantics);
+  ARIADNE_LOG(4,"evolve="<<evolve<<")\n");
+  ARIADNE_LOG(4,"reach="<<reach<<")\n");
   result=this->outer_approximation(reach,initial_set.grid());
 }
 
@@ -533,11 +543,15 @@ Geometry::HybridGridMaskSet<typename BS::real_type>
 Evaluation::SetBasedHybridEvolver<BS>::chainreach(const System::HybridAutomaton<R>& automaton, 
                                                   const Geometry::HybridSet<R>& initial_set) const
 {
+  //const_cast<SetBasedHybridEvolver<BS>*>(this)->verbosity=5;
+  ARIADNE_LOG(2,"SetBasedHybridEvolver::chainreach(...)\n");
   HGr grid=this->grid(automaton.locations());
   HGCLS result(grid);
   T time=this->lock_to_grid_time();
   HGCLS found=this->outer_approximation(initial_set,grid);
+  ARIADNE_LOG(3,"found.size()="<<found.size()<<"\n");
   this->_upper_reach(found,automaton,found,time);
+  ARIADNE_LOG(3,"found.size()="<<found.size()<<"\n");
   while(!found.empty()) {
     result.adjoin(found);
     this->_upper_evolve(found,automaton,found,time);

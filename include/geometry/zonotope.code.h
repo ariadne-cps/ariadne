@@ -676,21 +676,31 @@ template<class R>
 tribool
 Geometry::disjoint(const Zonotope<R>& z, const ConstraintSet<R>& cs)
 {
-  return disjoint(apply(Function::AffineModel<R>(z.bounding_box(),z.centre(),cs.function()),z),cs.codomain());
+  //TODO: Change disjoint(Zonotope,Box) to accept unbounded boxes.
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(z,cs,"disjoint(Zonotope,ConstraintSet)");
+  Zonotope<R> fz=apply(Function::AffineModel<R>(z.bounding_box(),z.centre(),cs.function()),z);
+  Box<R> bcd=closed_intersection(cs.codomain(),fz.bounding_box());
+  return disjoint(fz,bcd);
 }
 
 template<class R>
 tribool
 Geometry::subset(const Zonotope<R>& z, const ConstraintSet<R>& cs)
 {
-  return subset(apply(Function::AffineModel<R>(z.bounding_box(),z.centre(),cs.function()),z),cs.codomain());
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(z,cs,"disjoint(Zonotope,ConstraintSet)");
+  Zonotope<R> fz=apply(Function::AffineModel<R>(z.bounding_box(),z.centre(),cs.function()),z);
+  Box<R> bcd=closed_intersection(cs.codomain(),fz.bounding_box());
+  return subset(fz,bcd);
 }
 
 template<class R>
 tribool
 Geometry::intersects(const Zonotope<R>& z, const ConstraintSet<R>& cs)
 {
-  return intersects(apply(Function::AffineModel<R>(z.bounding_box(),z.centre(),cs.function()),z),cs.codomain());
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(z,cs,"disjoint(Zonotope,ConstraintSet)");
+  Zonotope<R> fz=apply(Function::AffineModel<R>(z.bounding_box(),z.centre(),cs.function()),z);
+  Box<R> bcd=closed_intersection(cs.codomain(),fz.bounding_box());
+  return intersects(fz,bcd);
 }
 
 

@@ -90,7 +90,7 @@ Evaluation::KuhnIntegrator<R>::integration_step(const System::VectorField<R>& ve
   ARIADNE_LOG(5,"KuhnIntegrator::integration_step(VectorField,Zonotope,Time,Box)\n");
   ARIADNE_LOG(6,"bounding_box="<<bounding_box<<"\n");
   ARIADNE_LOG(6,"initial_set="<<initial_set<<"\n");
-  AffineModel<R> flow_model=this->_integrator->affine_flow_model(vector_field,initial_set.centre(),step_size,bounding_box);
+  AffineModel<R> flow_model=this->_integrator->affine_flow_model(vector_field,initial_set.centre(),initial_set.bounding_box(),step_size,bounding_box);
   ARIADNE_LOG(6,"flow_model="<<flow_model<<"\n");
   Zonotope<R> flow_set=Geometry::apply(flow_model,initial_set);
   ARIADNE_LOG(6,"flow_set="<<flow_set<<"\n");
@@ -113,7 +113,7 @@ Evaluation::KuhnIntegrator<R>::reachability_step(const System::VectorField<R>& v
   ARIADNE_LOG(6,"LohnerIntegrator::reachability_step(VectorField,Zonotope<Interval>,Interval,Box) const\n");
   Rational half_step_size=step_size/2;
 
-  AffineModel<R> flow_model=this->_integrator->affine_flow_model(vector_field,initial_set.centre(),half_step_size,bounding_box);
+  AffineModel<R> flow_model=this->_integrator->affine_flow_model(vector_field,initial_set.centre(),initial_set.bounding_box(),half_step_size,bounding_box);
   Point<I> phic=flow_model.value();
   Matrix<I> Dphi=flow_model.jacobian();
   Matrix<I> gen=Dphi*initial_set.generators();

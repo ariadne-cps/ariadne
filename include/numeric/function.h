@@ -38,9 +38,10 @@ namespace Ariadne {
     //@{ 
     //! \ingroup Numeric
 
-    /*! \brief Infinity and NotAnyNumber. */
+    /*! \brief Infinity, machine Epsilon and NotAnyNumber. */
     template<class R> inline R nan();
     template<class R> inline R inf();
+    template<class R> inline R eps();
     template<class R> inline R infinity();
 
     /*! \brief Rounding. */

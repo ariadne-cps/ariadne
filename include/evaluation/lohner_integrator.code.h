@@ -46,6 +46,7 @@
 #include "linear_algebra/matrix.h"
 
 #include "function/affine_model.h"
+#include "function/taylor_model.h"
 
 #include "geometry/box.h"
 #include "geometry/zonotope.h"
@@ -123,12 +124,24 @@ Evaluation::LohnerIntegrator<R>::integration_step(const System::VectorField<R>& 
   using namespace System;
 
   ARIADNE_LOG(5,"LohnerIntegrator::integration_step(VectorField,Zonotope,Time,Box)\n");
+  ARIADNE_LOG(8,"spacial_order="<<this->_integrator->spacial_order()<<"\n");
+  ARIADNE_LOG(6,"temporal_order="<<this->_integrator->temporal_order()<<"\n");
   ARIADNE_LOG(6,"flow_bounding_box="<<flow_bounding_box<<"\n");
   ARIADNE_LOG(6,"initial_set="<<initial_set<<"\n");
-  AffineModel<R> flow_model=this->_integrator->affine_flow_model(vector_field,initial_set.centre(),step_size,flow_bounding_box);
-  ARIADNE_LOG(6,"flow_model="<<flow_model<<"\n");
-  Zonotope<R> flow_set=Geometry::apply(flow_model,initial_set);
+  AffineModel<R> affine_flow_model=this->_integrator->affine_flow_model(vector_field,initial_set.centre(),initial_set.bounding_box(),step_size,flow_bounding_box);
+  TaylorModel<R> taylor_flow_model=this->_integrator->taylor_flow_model(vector_field,initial_set.centre(),initial_set.bounding_box(),step_size,flow_bounding_box);
+  ARIADNE_LOG(6,"affine_flow_model="<<affine_flow_model<<"\n");
+  ARIADNE_LOG(6,"taylor_flow_model="<<taylor_flow_model<<"\n");
+  /*
+  affine_flow_model=AffineModel<R>(Geometry::Box<R>(taylor_flow_model.domain()),
+                                   Geometry::Point<R>(taylor_flow_model.centre()),
+                                   Geometry::Point<I>(taylor_flow_model.evaluate(taylor_flow_model.centre())),
+                                   LinearAlgebra::Matrix<I>(taylor_flow_model.jacobian(taylor_flow_model.domain().position_vectors())));
+  */
+  ARIADNE_LOG(6,"affine_flow_model="<<affine_flow_model<<"\n");
+  Zonotope<R> flow_set=Geometry::apply(affine_flow_model,initial_set);
   ARIADNE_LOG(6,"flow_set="<<flow_set<<"\n");
+
   return Geometry::orthogonal_over_approximation(flow_set);
 }
 
@@ -151,7 +164,7 @@ Evaluation::LohnerIntegrator<R>::reachability_step(const System::VectorField<R>&
   ARIADNE_LOG(6,"LohnerIntegrator::reachability_step(VectorField,Zonotope<Interval>,Interval,Box) const\n");
   Rational half_step_size=step_size/2;
 
-  AffineModel<R> flow_model=this->_integrator->affine_flow_model(vector_field,initial_set.centre(),half_step_size,bounding_box);
+  AffineModel<R> flow_model=this->_integrator->affine_flow_model(vector_field,initial_set.centre(),initial_set.bounding_box(),half_step_size,bounding_box);
   Point<I> phic=flow_model.value();
   Matrix<I> Dphi=flow_model.jacobian();
   Matrix<I> gen=Dphi*initial_set.generators();

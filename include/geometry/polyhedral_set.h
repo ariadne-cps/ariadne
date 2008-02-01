@@ -100,7 +100,7 @@ namespace Ariadne {
       }
      private:
       static ConstraintSet<R> make_constraint_set(const Polyhedron<R>& ply) {
-        return ConstraintSet<R>(Function::AffineFunction<R>(-ply.A(),ply.b()),Box<R>::positive_orthant(ply.dimension())); }
+        return ConstraintSet<R>(Function::AffineFunction<R>(-ply.A(),ply.b()),Box<R>::positive_orthant(ply.number_of_constraints())); }
      private:
       Polyhedron<R> _polyhedron;
     };

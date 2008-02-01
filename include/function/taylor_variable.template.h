@@ -106,6 +106,7 @@ template<class X> template<class XX>
 Function::TaylorVariable<X> 
 Function::TaylorVariable<X>::variable(size_type a, smoothness_type d, const XX& x, size_type i) 
 {
+  ARIADNE_ASSERT(d>=1);
   TaylorVariable<X> result(a,d);
   result._data[0]=x; 
   result._data[i+1u]=1; 

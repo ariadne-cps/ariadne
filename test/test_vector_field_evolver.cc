@@ -132,12 +132,13 @@ test_integrator()
   cout << endl << endl;
   
 
-  
+  /*  
   SetInterface<R>* evolve_ptr=evolver.lower_evolve(vdp,initial_set,t);
   cout << *evolve_ptr << endl << endl;
   
   SetInterface<R>* reach_ptr=evolver.lower_reach(vdp,initial_set,t);
   cout << *reach_ptr << endl << endl;
+  */
   
   // Affine vector field
   VectorField<R>& avfr=avf;
@@ -173,8 +174,8 @@ test_vector_field_evolver()
   
   Box<R> bb("[-4,4]x[-4,4]");
   Box<R> r("[-3.125,-2.875]x[-0.125,0.125]");
-  FiniteGrid<R> fg(bb,128);
-  //FiniteGrid<R> fg(bb,64);
+  //FiniteGrid<R> fg(bb,128);
+  FiniteGrid<R> fg(bb,64);
   //FiniteGrid<R> fg(bb,32);
   const Grid<R>& g(fg.grid());
   Grid<R> fine_grid(Vector<R>("[0.0625,0.0625]"));
@@ -183,6 +184,7 @@ test_vector_field_evolver()
   uint n=12;
 
   evolver.parameters().set_grid_length(0.0625);
+  evolver.parameters().set_grid_length(0.125);
 
 
 

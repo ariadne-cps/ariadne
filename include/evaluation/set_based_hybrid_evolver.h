@@ -160,6 +160,8 @@ namespace Ariadne {
         return this->_integrator->reachability_step(vf,bs,h,bb); }
       BS continuous_evolution_step(const VF& vf, const BS& bs, const Q& h1, const Q& h2, const Bx& bb) const {
         return this->_integrator->evolution_step(vf,bs,h1,h2,bb); }
+      tribool disjoint(const BS& bs, const CS& cs) const {
+        return Geometry::disjoint(bs,cs); }
       tribool subset(const BS& bs, const CS& cs) const {
         return Geometry::subset(bs,cs); }
       tribool intersect(const BS& bs, const CS& cs) const {

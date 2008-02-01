@@ -138,6 +138,7 @@ namespace Ariadne {
 
     ARIADNE_NULLARY_FUNCTION(NaN,nan,nan_,"nan");
     ARIADNE_NULLARY_FUNCTION(Inf,inf,inf_,"inf");
+    ARIADNE_NULLARY_FUNCTION(Eps,eps,eps_,"eps");
 
     ARIADNE_BINARY_FUNCTION(Max,max,max_,"max");
     ARIADNE_BINARY_FUNCTION(Min,min,min_,"min");

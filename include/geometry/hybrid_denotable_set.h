@@ -316,15 +316,13 @@ namespace Ariadne {
       template<class HDS> void adjoin_outer_approximation(const HDS& hds,denotable_set_tag) {
         for(typename HDS::const_iterator iter=hds.begin(); iter!=hds.end(); ++iter) { this->adjoin_outer_approximation(*iter); } }
       template<class HAS> void adjoin_outer_approximation(const HAS& has,abstract_set_tag) {
-        std::cout << "gcls.adjoin_outer_approximation(const HAS& has,abstract_set_tag)"<<std::endl;
         for(typename HAS::locations_const_iterator iter=has.locations_begin(); iter!=has.locations_end(); ++iter) { 
-          std::cout << iter->first << ": " << (*this)[iter->first].grid() << "\n " << *iter->second << std::endl;
           //(*this)[iter->first].adjoin(outer_approximation(*iter->second,(*this)[iter->first].grid())); 
           GridCellListSet<R>& gcls=(*this)[iter->first];
           const SetInterface<R>& set=*iter->second;
-          std::cout << gcls << " " << set << std::endl;
           gcls.adjoin_outer_approximation(*iter->second); 
-          std::cout<<"Done"<<std::endl; } }
+        } 
+      }
       void unique_sort();
     };
 

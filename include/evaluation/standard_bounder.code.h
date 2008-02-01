@@ -91,33 +91,40 @@ Evaluation::StandardBounder<R>::flow_bounds(const System::VectorField<R>& vf,
   // Set up constants of the method.
   // TODO: Better estimates of constants
   const R INITIAL_MULTIPLIER=2;
-  const R MULTIPLIER=0.125;
-  const R BOX_RADIUS_MULTIPLIER=0.03125;
-  const uint EXPANSION_STEPS=4;
+  const R MULTIPLIER=1.125;
+  const R BOX_RADIUS_MULTIPLIER=1.03125;
+  const uint EXPANSION_STEPS=8;
+  const uint REDUCTION_STEPS=8;
   const uint REFINEMENT_STEPS=4;
   Geometry::Box<R> b,nb;
-  LinearAlgebra::Vector<I> e=(r.position_vectors()-midpoint(r.position_vectors()))*BOX_RADIUS_MULTIPLIER;
-
+  LinearAlgebra::Vector<I> eps(r.dimension(),I(-Numeric::eps<R>(),Numeric::eps<R>()));
+  LinearAlgebra::Vector<I> delta=r.position_vectors()-r.centre().position_vector();
+  
   Numeric::Rational h=hmax;
+  Numeric::Rational hmin=hmax/pow(2,REDUCTION_STEPS);
   bool success=false;
   while(!success) {
-    ARIADNE_ASSERT(h>0.0000001);
+    ARIADNE_ASSERT(h>hmin);
     Numeric::Interval<R> ih(0,h);
-    b=r+INITIAL_MULTIPLIER*ih*vf(r)+e;
+    b=r+INITIAL_MULTIPLIER*ih*vf(r)+delta;
     for(uint i=0; i!=EXPANSION_STEPS; ++i) {
       LinearAlgebra::Vector<I> df=vf(b);
       nb=r+ih*df;
-      if(subset(nb,b)) {
+      ARIADNE_LOG(9,"  h="<<h<<" b="<<b<<" vf="<<vf(b)<<" nb="<<nb<<"\n");
+      if(possibly(subset(nb,b))) {
+        if(subset(nb,b)) { } else { std::cerr<<"WARNING: bounding box is not strict subset"<<std::endl; }
         success=true;
         break;
       } else {
-        b=r+MULTIPLIER*ih*df;
+        b=r+MULTIPLIER*ih*df+delta;
       }
     }
-    h/=2;
+    if(!success) {
+      h/=2;
+    }
   }
 
-  ARIADNE_ASSERT(subset(nb,b));
+  ARIADNE_ASSERT(possibly(subset(nb,b)));
   b=nb;
   
   Numeric::Interval<R> ih(0,h);
@@ -130,6 +137,7 @@ Evaluation::StandardBounder<R>::flow_bounds(const System::VectorField<R>& vf,
   ARIADNE_ASSERT(possibly(subset(r+ih*vf(b),b)));
   
   ARIADNE_LOG(7,"  h="<<h<<" b="<<b<<" r+[0,h]*f(b)="<<r+ih*vf(b)<<"\n");
+
   return std::make_pair(h,b);
 }
 

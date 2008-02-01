@@ -100,6 +100,7 @@ inline std::string name< Interval<Float64> >() {
 
 inline void nan_(Float64& r) { r=std::numeric_limits<double>::quiet_NaN(); }
 inline void inf_(Float64& r) { r=std::numeric_limits<double>::infinity(); }
+inline void eps_(Float64& r) { r=std::numeric_limits<double>::min(); }
 
 template<class Rnd> 
 inline void get_(double& r, const Float64& x, Rnd) { 

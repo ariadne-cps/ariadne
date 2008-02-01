@@ -239,11 +239,19 @@ template<class R>
 Function::AffineModel<R>
 Evaluation::IntegratorBase<R>::affine_flow_model(const System::VectorField<R>& vector_field, 
                                                  const Geometry::Point<R>& initial_point, 
+                                                 const Geometry::Box<R>& initial_domain, 
                                                  const Numeric::Rational& step_size, 
                                                  const Geometry::Box<R>& bounding_box) const
 {
+  // Convert from Taylor flow model
   using namespace Function;
   typedef Numeric::Interval<R> I;
+
+  TaylorModel<R> taylor_flow_model=this->taylor_flow_model(vector_field,initial_point,initial_domain,step_size,bounding_box);
+  return AffineModel<R>(Geometry::Box<R>(taylor_flow_model.domain()),
+                        Geometry::Point<R>(taylor_flow_model.centre()),
+                        Geometry::Point<I>(taylor_flow_model.evaluate(taylor_flow_model.centre())),
+                        LinearAlgebra::Matrix<I>(taylor_flow_model.jacobian(taylor_flow_model.domain().position_vectors())));
 
   uint to=this->temporal_order();
   dimension_type n=initial_point.dimension();
@@ -297,43 +305,51 @@ template<class R>
 Function::TaylorModel<R>
 Evaluation::IntegratorBase<R>::taylor_flow_model(const System::VectorField<R>& vector_field, 
                                                  const Geometry::Point<R>& initial_point, 
+                                                 const Geometry::Box<R>& initial_domain, 
                                                  const Numeric::Rational& step_size, 
                                                  const Geometry::Box<R>& bounding_box) const
 {
+  ARIADNE_LOG(6,"taylor_flow_model(...)\n");
   using namespace Function;
   dimension_type n=initial_point.dimension();
   smoothness_type ot=this->temporal_order();
   smoothness_type ox=this->spacial_order();
   Numeric::Interval<R> h=step_size;
 
+  TaylorDerivative<I> vfc=vector_field.derivative(initial_point,ot);
+  TaylorDerivative<I> vfb=vector_field.derivative(bounding_box,ot);
+
   const array<R>& x=initial_point.data();
-  array< TaylorSeriesTaylorVariable<I> > y(n);
+  array< TaylorSeries< TaylorVariable<I> > > y(n);
   for(uint i=0; i!=n; ++i) {
-    y[i]=TaylorSeriesTaylorVariable<I>::variable(n,ot,ox,x[i],i);
+    // y[i][0]=TaylorVariable<I>::variable(n,ox,x[i],i);
+    y[i][0]=TaylorVariable<I>::variable(n,ox,0.0,i);
   }
-  std::cout << "y="<<y<<std::endl;
-  array< TaylorSeriesTaylorVariable<I> > yp(n);
-  for(uint j=0; j<ot; ++j) {
-    vector_field.compute(yp.begin(),y.begin());
+  ARIADNE_LOG(7,"y="<<y<<"\n");
+  array< TaylorSeries< TaylorVariable<I> > > yp(n);
+  for(uint j=0; j<=ot; ++j) {
+    yp=Function::evaluate(vfc,y);
     for(uint i=0; i!=n; ++i) {  
       y[i]=antiderivative(yp[i],y[i][0]);
     }
+    ARIADNE_LOG(7,"yp="<<yp<<"\ny="<<y<<"\n");
   }
 
-  Geometry::Point<I> r(n);
-  I t=step_size;
-  I c=1;
+  for(uint i=0; i!=n; ++i) {  
+    y[i][0].value()=x[i];
+  }
+  ARIADNE_LOG(7,"\ny="<<y<<"\n\n");
+
+  TaylorDerivative<I> phi(n,n,ox);
   for(uint j=0; j<=ot; ++j) {
-    I hpj=pow(h,j);
     for(uint i=0; i!=n; ++i) {
-      r[i]+=y[i][j].value()*c;
+      phi[i]+=y[i][j]*Numeric::pow(h,j);
     }
-    c*=t;
+    ARIADNE_LOG(7,"phi="<<phi<<"\n");
   }
-  std::cout << r << std::endl;
 
-  assert(false); // Not implemented
-  // Return function model
+  //FIXME: Put rigorous error bounds in flow model
+  return Function::TaylorModel<R>(initial_domain,initial_point,phi,phi);
 }
 
 

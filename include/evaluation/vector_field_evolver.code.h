@@ -169,8 +169,11 @@ Evaluation::VectorFieldEvolver<BS>::_step(BSL& evolve,
                                           const T& time,
                                           Semantics semantics) const
 {
+  ARIADNE_LOG(7,"VectorFieldEvolver::_step(...)\n");
   TBS tbs=working.pop();
+  ARIADNE_LOG(7,"  tbs="<<tbs<<"\n");
   BS const& bs=tbs.set();
+  ARIADNE_ASSERT(tbs.time()<=time);
   if(tbs.time()==time) {
     evolve.adjoin(bs);
   } else if(radius(bs) > maximum_basic_set_radius()) {
@@ -180,6 +183,7 @@ Evaluation::VectorFieldEvolver<BS>::_step(BSL& evolve,
   } else {
     Bx bb; T h; BS rbs; 
     make_lpair(h,bb)=this->flow_bounds(vf,this->bounding_box(bs));
+    h=std::min(h,T(time-tbs.time()));
     tbs=this->integration_step(vf,tbs,h,bb);
     {
       rbs=this->reachability_step(vf,bs,h,bb);
@@ -233,8 +237,10 @@ Evaluation::VectorFieldEvolver<BS>::upper_evolve(const System::VectorField<R>& v
                                                  const Geometry::SetInterface<R>& initial_set, 
                                                  const Numeric::Rational& time) const
 {
+  ARIADNE_LOG(2,"VectorFieldEvolver::upper_evolve(...)\n");
   BSL reach, evolve;
   TBSL working=this->timed_basic_set_list(this->outer_approximation(initial_set));
+  ARIADNE_LOG(3,"initial="<<working<<"\n");
   while(working.size()!=0) { 
     this->_step(evolve,reach,working,vector_field,time,upper_semantics);
   }
@@ -247,15 +253,14 @@ Evaluation::VectorFieldEvolver<BS>::upper_reach(const System::VectorField<R>& ve
                                                const Geometry::SetInterface<R>& initial_set,
                                                const Numeric::Rational& time) const
 {
-  std::cerr<<__FUNCTION__<<std::endl;
+  ARIADNE_LOG(2,"VectorFieldEvolver::upper_reach(...)\n");
   BSL reach, evolve;
-  std::cerr<<"outer_approximation(initial_set)="<<this->outer_approximation(initial_set)<<std::endl;
   TBSL working=this->timed_basic_set_list(this->outer_approximation(initial_set));
-  std::cerr<<"working="<<working<<std::endl;
+  ARIADNE_LOG(3,"initial="<<working<<"\n");
   while(working.size()!=0) { 
     this->_step(evolve,reach,working,vector_field,time,upper_semantics);
   }
-  std::cerr << "reach="<<reach<<"\nevolve="<<evolve<<std::endl;
+  ARIADNE_LOG(3,"reach="<<reach<<"\nevolve="<<evolve<<"\n");
   return new GMS(this->outer_approximation(reach,this->grid(vector_field.dimension())));
 }
 
@@ -266,8 +271,10 @@ Evaluation::VectorFieldEvolver<BS>::lower_evolve(const System::VectorField<R>& v
                                                  const Geometry::SetInterface<R>& initial_set,
                                                  const Numeric::Rational& time) const
 {
+  ARIADNE_LOG(2,"VectorFieldEvolver::lower_evolve(...)\n");
   BSL reach, evolve;
   TBSL working=this->timed_basic_set_list(this->lower_approximation(initial_set));
+  ARIADNE_LOG(3,"initial="<<working<<"\n");
   while(working.size()!=0) { 
     this->_step(evolve,reach,working,vector_field,time,lower_semantics);
   }
@@ -280,8 +287,10 @@ Evaluation::VectorFieldEvolver<BS>::lower_reach(const System::VectorField<R>& ve
                                                const Geometry::SetInterface<R>& initial_set,
                                                const Numeric::Rational& time) const
 {
+  ARIADNE_LOG(2,"VectorFieldEvolver::lower_reach(...)\n");
   BSL reach, evolve;
   TBSL working=this->timed_basic_set_list(this->lower_approximation(initial_set));
+  ARIADNE_LOG(3,"initial="<<working<<"\n");
   while(working.size()!=0) { 
     this->_step(evolve,reach,working,vector_field,time,lower_semantics);
   }
@@ -306,6 +315,7 @@ Geometry::SetInterface<typename BS::real_type>*
 Evaluation::VectorFieldEvolver<BS>::chainreach(const System::VectorField<R>& vector_field,
                                                const Geometry::SetInterface<R>& initial_set) const
 {
+  ARIADNE_LOG(2,"VectorFieldEvolver::chainreach(...)\n");
   Bx bb=this->bounding_domain(vector_field);
   Gr grid=this->grid(vector_field.dimension());
   T time=this->lock_to_grid_time();

@@ -59,7 +59,7 @@ namespace Ariadne {
 
       /*! \brief Constructor. */
       IntegratorBase(smoothness_type temporal_order, smoothness_type spacial_order)
-        : _temporal_order(temporal_order), _spacial_order() { }
+        : _temporal_order(temporal_order), _spacial_order(spacial_order) { }
 
       /*! \brief The order of the temporal model used. */
       smoothness_type temporal_order() const { return this->_temporal_order; }
@@ -87,6 +87,7 @@ namespace Ariadne {
       Function::AffineModel<R> 
       affine_flow_model(const System::VectorField<R>& vf,
                         const Geometry::Point<R>& c,
+                        const Geometry::Box<R>& d,
                         const Numeric::Rational& t,
                         const Geometry::Box<R>& bb) const;
      
@@ -95,6 +96,7 @@ namespace Ariadne {
       Function::TaylorModel<R> 
       taylor_flow_model(const System::VectorField<R>& vf,
                         const Geometry::Point<R>& c,
+                        const Geometry::Box<R>& d,
                         const Numeric::Rational& t,
                         const Geometry::Box<R>& bb) const;
       

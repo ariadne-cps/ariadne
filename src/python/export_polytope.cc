@@ -111,7 +111,6 @@ void export_polytope()
   polytope_class.def("vertices", &Polytope<R>::vertices);
   polytope_class.def("bounding_box", &Polytope<R>::bounding_box);
   polytope_class.def(self_ns::str(self));
-
 }
 
 template<>
@@ -122,10 +121,13 @@ void export_polytope<Rational>()
   def("polytope", (Polytope<Q>(*)(const Polyhedron<Q>&))(&polytope));
   def("disjoint", (tribool(*)(const Polytope<Q>&, const Polytope<Q>&))(&disjoint));
   def("subset", (tribool(*)(const Polytope<Q>&, const Polytope<Q>&))(&subset));
+  //def("equal", (tribool(*)(const Polytope<Q>&, const Polytope<Q>&))(&equal));
   def("convex_hull", (Polytope<Q>(*)(const Polytope<Q>&, const Polytope<Q>&))(&convex_hull));
 
   class_< PointList<Q> > point_list_class(python_name<Q>("PointList").c_str(),init<int>());
+  point_list_class.def("__len__", (size_type(PointList<Q>::*)()const)&PointList<Q>::size);
   point_list_class.def("__getitem__", (Point<Q>(PointList<Q>::*)(size_type)const)&PointList<Q>::operator[]);
+  point_list_class.def("__iter__", iterator< PointList<Q> >());
   point_list_class.def(self_ns::str(self));
 
   class_< Polytope<Q> > polytope_class(python_name<Q>("Polytope").c_str(),init<int>());

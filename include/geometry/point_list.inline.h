@@ -21,22 +21,28 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "base/iterator.h"
+
 namespace Ariadne {
   namespace Geometry {
 
     template<class X>
     class PointListIterator
+      : public boost::iterator_facade<PointListIterator<X>,
+                                      Point<X>,
+                                      boost::forward_traversal_tag,
+                                      Point<X> const,
+                                      Point<X> const*
+                                     >
     {
      public:
-      PointListIterator(const LinearAlgebra::Matrix<X>& A, size_type j) : _mx(A), _j(j) { }
-      Point<X> operator*() const { return Point<X>(column(_mx,_j)); }
-      void operator++() { ++_j; }
-      bool operator==(const PointListIterator& other) { 
-        return (this->_j==other._j) && (&(this->_mx)==&(other._mx)); }
-      bool operator!=(const PointListIterator& other) { 
-        return !(*this==other); }
+      PointListIterator(const PointList<X>* ptl, size_type j) : _ptl(ptl), _j(j) { }
+      const Point<X> dereference() const { return (*_ptl)[_j]; }
+      void increment() { ++_j; }
+      bool equal(const PointListIterator& other) const { 
+        return (this->_j==other._j) && (this->_ptl==other._ptl); }
      private:
-      const LinearAlgebra::Matrix<X>& _mx;
+      const PointList<X>* _ptl;
       size_type _j;
     };
 
@@ -168,14 +174,14 @@ template<class X> inline
 typename Geometry::PointList<X>::const_iterator 
 Geometry::PointList<X>::begin() const
 {
-  return const_iterator(this->_pts,0); 
+  return const_iterator(this,0); 
 }
 
 template<class X> inline
 typename Geometry::PointList<X>::const_iterator 
 Geometry::PointList<X>::end() const
 {
-  return const_iterator(this->_pts,this->_size); 
+  return const_iterator(this,this->_size); 
 }
 
 

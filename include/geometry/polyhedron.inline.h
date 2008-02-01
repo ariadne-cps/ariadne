@@ -132,20 +132,6 @@ Geometry::Polyhedron<X>::data() const
 }
 
 
-template<class X> inline 
-X* 
-Geometry::Polyhedron<X>::begin() 
-{
-  return this->_data.begin(); 
-}
-
-
-template<class X> inline 
-const X* 
-Geometry::Polyhedron<X>::begin() const 
-{
-  return this->_data.begin(); 
-}
 
 
 
@@ -155,7 +141,7 @@ Geometry::Polyhedron<X>::constraints() const
 { 
   return LinearAlgebra::MatrixSlice<X>(this->_number_of_constraints,
                                        this->_dimension+1u,
-                                       const_cast<X*>(this->begin()),
+                                       const_cast<X*>(this->data().begin()),
                                        this->_dimension+1u,
                                        1u);
 }
@@ -167,7 +153,7 @@ Geometry::Polyhedron<X>::A() const
 { 
   return -LinearAlgebra::MatrixSlice<X>(this->number_of_constraints(),
                                         this->dimension(),
-                                        const_cast<X*>(this->begin()),
+                                        const_cast<X*>(this->data().begin()),
                                         this->dimension()+1,1u);
 }
 
@@ -176,7 +162,7 @@ LinearAlgebra::Vector<X>
 Geometry::Polyhedron<X>::b() const 
 { 
   return LinearAlgebra::VectorSlice<X>(this->number_of_constraints(),
-                                       const_cast<X*>(this->begin()+this->dimension()),
+                                       const_cast<X*>(this->data().begin()+this->dimension()),
                                        this->dimension()+1u);
 }
 

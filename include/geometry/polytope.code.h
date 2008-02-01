@@ -59,6 +59,32 @@ using namespace Ariadne;
 
 inline
 tribool 
+contains(const Geometry::Polytope<Numeric::Rational>& ply, const Geometry::Point<Numeric::Rational>& pt) 
+{
+  return Geometry::contains(Geometry::Polyhedron<Numeric::Rational>(ply),pt);
+}
+
+template<class T>
+inline
+tribool 
+contains(const Geometry::Polytope< Numeric::Float<T> >& ply, 
+         const Geometry::Point< Numeric::Float<T> >& pt) 
+{
+  return ::contains(Geometry::Polytope<Numeric::Rational>(ply),Geometry::Point<Numeric::Rational>(pt));
+}
+
+template<class R>
+inline
+tribool 
+contains(const Geometry::Polytope< Numeric::Interval<R> >& ply, const Geometry::Point<R>& pt) 
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+
+
+inline
+tribool 
 disjoint(const Geometry::Polytope<Numeric::Rational>& ply, const Geometry::Box<Numeric::Rational>& bx) 
 {
   return Geometry::disjoint(Geometry::Polyhedron<Numeric::Rational>(ply),bx);
@@ -396,43 +422,34 @@ Geometry::Polytope<X>::bounded() const
   return result;
 }
 
-/*!Set up linear programming problem
- * Try to simultaneously solve A*x=p where A is the extended vertex matrix
- * d+1 auxiliary variables, d+1 equations
- */
-template<class X>
-tribool 
-Geometry::contains(const Polytope<X>& ply, const Point<X>& pt)
-{
-  throw NotImplemented(__PRETTY_FUNCTION__);
-}
-
-template<class X>
-tribool 
-Geometry::contains(const Polytope< Numeric::Interval<X> >& ply, const Point< Numeric::Interval<X> >& pt)
-{
-  throw NotImplemented(__PRETTY_FUNCTION__);
-}
 
 
 template<class X>
 tribool 
-Geometry::Polytope<X>::contains(const Point<X>& pt) const
+Geometry::Polytope<X>::contains(const Point<R>& pt) const
 {
-  return Geometry::contains(*this,pt);
+  return ::contains(*this,pt);
 }
 
-template<class X, class R>
+template<class X>
 tribool 
-Geometry::disjoint(const Polytope<X>& ply, const Box<R>& bx)
+Geometry::contains(const Polytope<X>& ply, const Point<typename Polytope<X>::real_type>& pt) 
+{
+  return ::contains(ply,pt);
+}
+
+
+template<class X>
+tribool 
+Geometry::disjoint(const Polytope<X>& ply, const Box<typename Polytope<X>::real_type>& bx)
 {
   return ::disjoint(ply,bx);
 }
 
 
-template<class X, class R>
+template<class X>
 tribool 
-Geometry::disjoint(const Box<R>& bx, const Polytope<X>& ply)
+Geometry::disjoint(const Box<typename Polytope<X>::real_type>& bx, const Polytope<X>& ply)
 { 
   return ::disjoint(ply,bx);
 }
@@ -451,16 +468,16 @@ Geometry::subset(const Polytope<X>& ply1, const Polytope<X>& ply2)
   return ::subset(ply1,ply2);
 }
 
-template<class X, class R>
+template<class X>
 tribool 
-Geometry::subset(const Box<R>& bx, const Polytope<X>& ply)
+Geometry::subset(const Box<typename Polytope<X>::real_type>& bx, const Polytope<X>& ply)
 {
   return ::subset(bx,ply);
 }
 
-template<class X, class R>
+template<class X>
 tribool 
-Geometry::subset(const Polytope<X>& ply, const Box<R>& bx)
+Geometry::subset(const Polytope<X>& ply, const Box<typename Polytope<X>::real_type>& bx)
 {
   tribool result=true;
   for(typename Polytope<X>::vertices_const_iterator v=ply.vertices_begin(); v!=ply.vertices_end(); ++v) {
@@ -513,6 +530,7 @@ Geometry::Polytope<X>::_instantiate()
   typedef typename Numeric::traits<X>::arithmetic_type I;
 
   tribool tb;
+  Point<R>* pt=0;
   Box<R>* bx=0;
   Rectangle<X>* r=0;
   Polytope<X>* p=0;
@@ -521,6 +539,7 @@ Geometry::Polytope<X>::_instantiate()
   Polytope<I>* ip=0;
   Polyhedron<I>* ih=0;
 
+  tb=Geometry::contains(*p,*pt);
   tb=Geometry::disjoint(*bx,*p);
   Geometry::disjoint(*p,*bx);
   Geometry::disjoint(*p,*p);

@@ -43,9 +43,40 @@ namespace Ariadne {
 
     class basic_set_tag;
 
+    template<class R> class Box;
+    template<class X> class Polytope;
     template<class X> class Polyhedron;
     template<class X> class PolyhedronConstraintsIterator;
     
+
+    template<class X> tribool empty(const Polyhedron<X>& plhd);
+    template<class X> tribool bounded(const Polyhedron<X>& plhd);
+    template<class X> tribool contains(const Polyhedron<X>& plhd, const Point<typename Polyhedron<X>::real_type>& pt);
+    template<class X> tribool disjoint(const Polyhedron<X>& plhd1, const Polyhedron<X>& plhd2);
+    template<class X> tribool disjoint(const Polyhedron<X>& plhd, const Box<typename Polyhedron<X>::real_type>& bx);
+    template<class X> tribool disjoint(const Box<typename Polyhedron<X>::real_type>& bx, const Polyhedron<X>& plhd);
+    template<class X> tribool disjoint(const Polyhedron<X>& plhd, const Polytope<X>& pltp);
+    template<class X> tribool disjoint(const Polytope<X>& pltp, const Polyhedron<X>& plhd);
+    template<class X> tribool subset(const Polyhedron<X>& plhd1, const Polyhedron<X>& plhd2);
+    template<class X> tribool subset(const Polyhedron<X>& plhd, const Box<typename Polyhedron<X>::real_type>& bx);
+    template<class X> tribool subset(const Box<typename Polyhedron<X>::real_type>& r, const Polyhedron<X>& plhd);
+    template<class X1,class X2> tribool subset(const Polytope<X1>& pltp, const Polyhedron<X2>& plhd);
+
+    template<class X> Box<typename Polyhedron<X>::real_type> bounding_box(const Polyhedron<X>& plhd);
+    template<class X> Polyhedron<X> open_intersection(const Polyhedron<X>& plhd1, const Polyhedron<X>& plhd2);
+    template<class X> Polyhedron<X> closed_intersection(const Polyhedron<X>& plhd1, const Polyhedron<X>& plhd2) ;
+    template<class X> Polyhedron<X> closed_intersection(const Polyhedron<X>& plhd, const Rectangle<X>& r) ;
+    template<class X> Polyhedron<X> closed_intersection(const Rectangle<X>& r, const Polyhedron<X>& plhd) ;
+
+    template<class X> Polyhedron<X> polyhedron(const Rectangle<X>& A) ;
+    template<class X> Polyhedron<typename Numeric::traits<X>::arithmetic_type> polyhedron(const Polytope<X>& A) ;
+
+    template<class X> std::ostream& operator<<(std::ostream& os, const Polyhedron<X>& p);
+    template<class X> std::istream& operator>>(std::istream& os, Polyhedron<X>& p);
+
+
+
+
     /*! \ingroup BasicSet
      *  \brief A polyhedron (not necessarily bounded polyhedral set) described by a system of linear inequalities.
      *
@@ -119,33 +150,32 @@ namespace Ariadne {
       
       //@{
       //! \name Data access
-      /*! \brief The matrix of constraints \f$C\f$ in the inequalities \f$C\left(\begin{array}{c}x\\1\end{array}\right)\geq 0\f$. */
-      const LinearAlgebra::MatrixSlice<X> constraints() const;
+      /*! \brief A reference to the array of real data. */
+      array<X>& data();
+      /*! \brief A constant reference to the array of real data. */
+      const array<X>& data() const;
+
       /*! \brief The matrix \f$A\f$ in the inequalities \f$Ax\leq b\f$. */
       LinearAlgebra::Matrix<X> A() const;
       /*! \brief The vector \f$b\f$ in the inequalities \f$Ax\leq b\f$. */
       LinearAlgebra::Vector<X> b() const;
+
       /*! \brief An iterator to the beginning of the constraints. */
       size_type number_of_constraints() const;
+      /*! \brief The matrix of constraints \f$C\f$ in the inequalities \f$C\left(\begin{array}{c}x\\1\end{array}\right)\geq 0\f$. */
+      const LinearAlgebra::MatrixSlice<X> constraints() const;
       /*! \brief The \a i<sup>th</sup> constraint. */
       Halfspace<X> constraint(size_type i) const;
       /*! \brief An iterator to the beginning of the constraints. */
       constraints_const_iterator constraints_begin() const;
       /*! \brief An iterator to the end of the constraints. */
       constraints_const_iterator constraints_end() const;
-      /*! A reference to the array of real data. */
-      array<X>& data();
-      /*! A constant reference to the array of real data. */
-      const array<X>& data() const;
-      /*! A pointer to the beginning of the array of real data. */
-      X* begin();
-      /*! A constant pointer to the beginning of the array of real data. */
-      const X* begin() const;
       //@}
 
 
       //@{
       //! \name Modifying operations
+      /*! \brief Introduce a new constraint to the polyhedron. */
       void new_constraint(const Halfspace<X>& c);
       //@}
 
@@ -182,35 +212,48 @@ namespace Ariadne {
       //! \name Conversion operations
       //@}
 
-#ifdef DOXYGEN
       //@{
       //! \name Geometric binary predicates
-      /*! \brief Tests equality. */
-      friend tribool Geometry::equal<>(const Polyhedron<X>& A, 
-                                       const Polyhedron<X>& B);
+      /*! \brief Tests if a polyhedron contains a point. */
+      friend tribool Geometry::contains<>(const Polyhedron<X>& A, 
+                                          const Point<R>& B);
+        
       /*! \brief Tests disjointness. */
       friend tribool Geometry::disjoint<>(const Polyhedron<X>& A, 
                                           const Polyhedron<X>& B);
         
       /*! \brief Tests disjointness. */
+      friend tribool Geometry::disjoint<>(const Box<R>& A,
+                                          const Polyhedron<X>& B);
+        
+      /*! \brief Tests disjointness. */
       friend tribool Geometry::disjoint<>(const Polyhedron<X>& A, 
-                                          const Box<X>& B);
+                                          const Box<R>& B);
+        
+      /*! \brief Tests disjointness. */
+      friend tribool Geometry::disjoint<>(const Polytope<X>& A,
+                                          const Polyhedron<X>& B);
+        
+      /*! \brief Tests disjointness. */
+      friend tribool Geometry::disjoint<>(const Polyhedron<X>& A, 
+                                          const Polytope<X>& B);
         
       /*! \brief Tests inclusion of \a A in \a B. */
-      friend tribool Geometry::subset<>(const Box<X>& A, 
-                                        const Polyhedron<X>& B);
-    
-      /*! \brief Tests inclusion of \a A in \a B. */
       friend tribool Geometry::subset<>(const Polyhedron<X>& A, 
                                         const Polyhedron<X>& B);
     
       /*! \brief Tests inclusion of \a A in \a B. */
+      friend tribool Geometry::subset<>(const Box<R>& A, 
+                                        const Polyhedron<X>& B);
+    
+      /*! \brief Tests inclusion of \a A in \a B. */
       friend tribool Geometry::subset<>(const Polyhedron<X>& A, 
-                                        const Box<X>& B);
+                                        const Box<R>& B);
     
-      /*! \brief The generators of a polyhedron. (Deprecated) */
-      friend Matrix<X> Geometry::generators<>(const Polyhedron<X>& A);
-    
+      /*! \brief Tests disjointness. */
+      friend tribool Geometry::subset<>(const Polytope<X>& A, 
+                                        const Polyhedron<X>& B);
+        
       //@}
       
 
@@ -218,14 +261,14 @@ namespace Ariadne {
       //! \name Geometric binary operations
       /*! \brief The intersection of two polyhedra. */
       friend Polyhedron<X> closed_intersection<>(const Polyhedron<X>& A, 
-                                          const Polyhedron<X>& B);
+                                                 const Polyhedron<X>& B);
     
       /*! \brief The closure of the intersection of the interiors of two polyhedra. */
       friend Polyhedron<X> open_intersection<>(const Polyhedron<X>& A, 
-                                                  const Polyhedron<X>& B);
+                                               const Polyhedron<X>& B);
     
       //@}
-#endif
+
       //@{ 
       //! \name Input/output operations
       /*! \brief The name of the class. */
@@ -245,82 +288,6 @@ namespace Ariadne {
     
 
     
-    template<class X> 
-    tribool empty(const Polyhedron<X>& plhd);
-
-    template<class X> 
-    tribool bounded(const Polyhedron<X>& plhd);
-
-    template<class X> 
-    Box<typename Polyhedron<X>::real_type> bounding_box(const Polyhedron<X>& plhd);
-
-
-    template<class X> 
-    tribool equal(const Polyhedron<X>& plhd1, const Polyhedron<X>& plhd2);
-
-   
-    template<class X> 
-    tribool disjoint(const Polyhedron<X>& plhd1, const Polyhedron<X>& plhd2);
-    
-    template<class X, class R> 
-    tribool disjoint(const Polyhedron<X>& plhd, const Box<R>& bx);
-    
-    template<class X, class R> 
-    tribool disjoint(const Box<R>& bx, const Polyhedron<X>& plhd);
-    
-    template<class X> 
-    tribool disjoint(const Polyhedron<X>& plhd, const Polytope<X>& pltp);
-    
-    template<class X>
-    tribool disjoint(const Polytope<X>& pltp, const Polyhedron<X>& plhd);
-    
-    
-    template<class X> 
-    tribool subset(const Polyhedron<X>& plhd1, const Polyhedron<X>& plhd2);
-
-    template<class X, class R> 
-    tribool subset(const Polyhedron<X>& plhd, const Box<R>& bx);
-
-    template<class X,class R> 
-    tribool subset(const Box<R>& r, const Polyhedron<X>& plhd);
-
-    template<class X1,class X2> 
-    tribool subset(const Polytope<X1>& pltp, const Polyhedron<X2>& plhd);
-
-
-
-    template<class X> 
-    Polyhedron<X> 
-    open_intersection(const Polyhedron<X>& plhd1, const Polyhedron<X>& plhd2);
-
-    template<class X> 
-    Polyhedron<X> 
-    closed_intersection(const Polyhedron<X>& plhd1, const Polyhedron<X>& plhd2) ;
-
-    template<class X> 
-    Polyhedron<X> 
-    closed_intersection(const Polyhedron<X>& plhd, const Rectangle<X>& r) ;
-
-    template<class X> 
-    Polyhedron<X> 
-    closed_intersection(const Rectangle<X>& r, const Polyhedron<X>& plhd) ;
-
-    
-    template<class X> 
-    Polyhedron<X> 
-    polyhedron(const Rectangle<X>& A) ;
-
-    template<class X> 
-    Polyhedron<typename Numeric::traits<X>::arithmetic_type> 
-    polyhedron(const Polytope<X>& A) ;
-
- 
-    template<class X>
-    std::ostream& operator<<(std::ostream& os, const Polyhedron<X>& p);
-    
-    template<class X>
-    std::istream& operator>>(std::istream& os, Polyhedron<X>& p);
-
 
 
   }

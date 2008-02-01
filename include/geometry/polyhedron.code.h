@@ -211,7 +211,7 @@ disjoint(const Geometry::Polyhedron< Numeric::Float<T> >& plhd,
          const Geometry::Box< Numeric::Float<T> >& r)
 {
   return ::disjoint(Geometry::Polyhedron<Numeric::Rational>(plhd),
-                  Geometry::Box<Numeric::Rational>(r));
+                    Geometry::Box<Numeric::Rational>(r));
 }
                   
 template<class R>
@@ -466,8 +466,8 @@ Geometry::Polyhedron<X>::Polyhedron(const LinearAlgebra::Matrix<X>& A,
   ARIADNE_CHECK_SIZE(b,A.number_of_rows(),"Polyhedron::Polyhedron(Matrix A, Vector b)");
   dimension_type d=this->dimension();
   dimension_type nc=this->number_of_constraints();
-  LinearAlgebra::MatrixSlice<X>(nc,d,this->begin(),d+1u,1u)=-A;
-  LinearAlgebra::VectorSlice<X>(nc,this->begin()+d,d+1u)=b;
+  LinearAlgebra::MatrixSlice<X>(nc,d,this->data().begin(),d+1u,1u)=-A;
+  LinearAlgebra::VectorSlice<X>(nc,this->data().begin()+d,d+1u)=b;
 }
 
 
@@ -519,7 +519,7 @@ Geometry::Polyhedron<X>::_constraints()
 {
   return LinearAlgebra::MatrixSlice<X>(this->_number_of_constraints,
                                        this->_dimension+1u,
-                                       this->begin(),
+                                       this->data().begin(),
                                        this->_dimension+1u,
                                        1u);
 }
@@ -574,17 +574,24 @@ Geometry::Polyhedron<X>::bounded() const
 
 
 
-template<class X, class R>
+template<class X>
 tribool 
-Geometry::disjoint(const Polyhedron<X>& plhd, const Box<R>& bx)
+Geometry::contains(const Polyhedron<X>& plhd, const Point<typename Polyhedron<X>::real_type>& pt)
+{
+  return plhd.contains(pt);
+}
+
+template<class X>
+tribool 
+Geometry::disjoint(const Polyhedron<X>& plhd, const Box<typename Polyhedron<X>::real_type>& bx)
 {
   return ::disjoint(plhd,bx);
 }
 
 
-template<class X, class R>
+template<class X>
 tribool 
-Geometry::disjoint(const Box<R>& bx, const Polyhedron<X>& plhd)
+Geometry::disjoint(const Box<typename Polyhedron<X>::real_type>& bx, const Polyhedron<X>& plhd)
 {
   return ::disjoint(plhd,bx);
 }
@@ -622,17 +629,17 @@ Geometry::subset(const Polyhedron<X>& plhd1, const Polyhedron<X>& plhd2)
   return ::subset(plhd1,plhd2);
 }
 
-template<class X,class R>
+template<class X>
 tribool 
-Geometry::subset(const Polyhedron<X>& plhd, const Box<R>& r)
+Geometry::subset(const Polyhedron<X>& plhd, const Box<typename Polyhedron<X>::real_type>& r)
 {
   return ::subset(plhd,r);
 }
 
 
-template<class X,class R>
+template<class X>
 tribool 
-Geometry::subset(const Box<R>& r, const Polyhedron<X>& plhd)
+Geometry::subset(const Box<typename Polyhedron<X>::real_type>& r, const Polyhedron<X>& plhd)
 {
   return ::subset(r,plhd);
 }
@@ -646,13 +653,6 @@ Geometry::subset(const Polytope<X1>& pltp, const Polyhedron<X2>& plhd)
 }
 
 
-
-template<class X>
-tribool 
-Geometry::equal(const Polyhedron<X>& plhd1, const Polyhedron<X>& plhd2)
-{
-  return Geometry::subset(plhd1,plhd2) && Geometry::subset(plhd2,plhd1); 
-}
 
 
 template<class X>
@@ -827,6 +827,7 @@ Geometry::Polyhedron<X>::_instantiate()
   typedef typename Numeric::traits<X>::number_type R;
   typedef typename Numeric::traits<X>::arithmetic_type F;
   tribool tb;
+  Point<R> pt;
   Box<R> bx;
   Rectangle<X> r;
   Polytope<X> c;
@@ -837,7 +838,7 @@ Geometry::Polyhedron<X>::_instantiate()
   p=Polyhedron<X>(p);
   ip=Polyhedron<F>(c);
   
-  tb=equal(p,p);
+  tb=Geometry::contains(p,pt);
   tb=disjoint(bx,p);
   tb=disjoint(p,bx);
   tb=disjoint(c,p);

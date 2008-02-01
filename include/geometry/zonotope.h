@@ -56,6 +56,42 @@ namespace Ariadne {
   
 
 
+    template<class R> tribool empty(const Zonotope<R>& z);
+    template<class R> tribool bounded(const Zonotope<R>& z);
+    template<class R> R radius(const Zonotope<R>&);
+    template<class R> Box<R> bounding_box(const Zonotope<R>& z);
+    
+
+    template<class R> tribool contains(const Zonotope<R>& z, const Point<R>& pt);
+    template<class R> tribool disjoint(const Zonotope<R>& z, const Box<R>& r);
+    template<class R> tribool intersects(const Zonotope<R>& z, const Box<R>& r);
+    template<class R> tribool superset(const Zonotope<R>& r, const Box<R>& z);
+    template<class R> tribool subset(const Zonotope<R>& z, const Box<R>& r);
+    
+    template<class R> tribool subset(const Box<R>& z, const Zonotope<R>& r);
+    template<class R> tribool disjoint(const Box<R>& r, const Zonotope<R>& z);
+
+    template<class R> tribool subset(const Zonotope<R>& z, const Polyhedron<R>& p);
+
+    template<class R> ListSet< Zonotope<R> > split(const Zonotope<R>& z);
+
+    template<class R> Zonotope<R> approximation(const Zonotope<R>& z);
+    template<class R> Zonotope<R> over_approximation(const Zonotope<R>& z);
+    template<class R> Zonotope<R> error_free_over_approximation(const Zonotope<R>&);
+    template<class R> Zonotope<R> orthogonal_over_approximation(const Zonotope<R>&);
+    template<class R> Zonotope<R> nonsingular_over_approximation(const Zonotope<R>&);
+    template<class R>Zonotope<R> cascade_over_approximation(const Zonotope<R>& z, size_type maximum_number_of_blocks);
+    
+    template<class R> tribool subset(const Zonotope<R>& z, const ConstraintSet<R>& cs);
+    template<class R> tribool disjoint(const Zonotope<R>& z, const ConstraintSet<R>& cs);
+    template<class R> tribool intersects(const Zonotope<R>& z, const ConstraintSet<R>& cs);
+    
+    template<class R> Zonotope<R> apply(const Function::AffineModel<R>& am, const Zonotope<R>& z);
+        
+    template<class R> std::ostream& operator<<(std::ostream& os, const Zonotope<R>& z);
+    template<class R> std::istream& operator>>(std::istream& is, Zonotope<R>& z);
+
+
     /*!\ingroup BasicSet
      * \brief A zonotope of arbitrary dimension.
      * 
@@ -160,116 +196,58 @@ namespace Ariadne {
       //@}
       
       
-#ifdef DOXYGEN
       //@{
       //! \name Geometric binary predicates
       /*! \brief Tests disjointness of \a z and \a r. */
-      friend tribool disjoint(const Zonotope<R>& z, const Box<R>& r);
+      friend tribool disjoint<>(const Zonotope<R>& z, const Box<R>& r);
+      /*! \brief Tests if \a z and \a r intersect. */
+      friend tribool intersects<>(const Zonotope<R>& z, const Box<R>& r);
       /*! \brief Tests inclusion of \a r in \a z. */
-      friend tribool superset(const Zonotope<R>& z, const Box<R>& r);
-      /*! \brief Tests inclusion of \a r in \a z. */
-      friend tribool subset(const Box<R>& z, const Zonotope<R>& r);
+      friend tribool superset<>(const Zonotope<R>& z, const Box<R>& r);
       /*! \brief Tests inclusion of \a z in \a r. */
-      friend tribool subset(const Zonotope<R>& z, const Box<R>& r);
+      friend tribool subset<>(const Zonotope<R>& z, const Box<R>& r);
+      /*! \brief Tests disjointness of \a r and \a z. */
+      friend tribool disjoint<>(const Box<R>& z, const Zonotope<R>& r);
+      /*! \brief Tests inclusion of \a r in \a z. */
+      friend tribool subset<>(const Box<R>& z, const Zonotope<R>& r);
+
       /*! \brief Tests inclusion of \a z in \a p. */
-      friend tribool subset(const Zonotope<R>& z, const Polyhedron<R>& p);
+      friend tribool subset<>(const Zonotope<R>& z, const Polyhedron<R>& p);
+
+      /*! \brief Tests disjointness of \a z and \a cs. */
+      friend tribool disjoint<>(const Zonotope<R>& z, const ConstraintSet<R>& cs);
+      /*! \brief Tests intersection of \a z and \a cs. */
+      friend tribool intersects<>(const Zonotope<R>& z, const ConstraintSet<R>& cs);
+      /*! \brief Tests inclusion of \a z and \a cs. */
+      friend tribool subset<>(const Zonotope<R>& z, const ConstraintSet<R>& cs);
       //@}
-#endif
+
+      //@{
+      //! \name Approximation operations.
+      /*! \brief Compute an simplified approximation of the zonotope \a z. */
+      friend Zonotope<R> approximation<>(const Zonotope<R>& z);
+      /*! \brief Compute an over-approximation of the zonotope \a z. */
+      friend Zonotope<R> over_approximation<>(const Zonotope<R>& z);
+      /*! \brief Compute an over-approximation of the zonotope \a z without a uniform error term. */
+      friend Zonotope<R> error_free_over_approximation<>(const Zonotope<R>&);
+      /*! \brief Compute an over-approximation of the zonotope \a z by a non-coordinate aligned orthotope. */
+      friend Zonotope<R> orthogonal_over_approximation<>(const Zonotope<R>&);
+      /*! \brief Compute an over-approximation of a zonotope \a z with nonsingular generator matrix. */
+      friend Zonotope<R> nonsingular_over_approximation<>(const Zonotope<R>&);
+      /*! \brief Compute a cascade-over-approximation of the zonotope \a z with \a maximum_number_of_blocks blocks of \a d generators. */
+      friend Zonotope<R> cascade_over_approximation<>(const Zonotope<R>& z, size_type maximum_number_of_blocks);
+      //@}
+   
+      //@{
+      //! \name Function operations.
+      /*! \brief Compute the image of \a z under a function given by the concrete model \a am. */
+      friend Zonotope<R> apply<>(const Function::AffineModel<R>& am, const Zonotope<R>& z);
+      //@}
      private:
       static void _instantiate();
     };
   
 
-    template<class R>
-    tribool empty(const Zonotope<R>& z);
-
-    template<class R>
-    tribool bounded(const Zonotope<R>& z);
-
-    template<class R> 
-    R radius(const Zonotope<R>&);
-    
-    template<class R> 
-    Box<R> bounding_box(const Zonotope<R>& z);
-    
-
-    template<class R> 
-    tribool contains(const Zonotope<R>& z, const Point<R>& pt);
-
-    template<class R> 
-    tribool disjoint(const Zonotope<R>& z, const Box<R>& r);
-
-    template<class R> 
-    tribool intersects(const Zonotope<R>& z, const Box<R>& r);
-
-    template<class R> 
-    tribool superset(const Zonotope<R>& r, const Box<R>& z);
-
-    template<class R> 
-    tribool subset(const Zonotope<R>& z, const Box<R>& r);
-    
-
-
-
-
-
-    template<class R> 
-    tribool subset(const Box<R>& z, const Zonotope<R>& r);
-    
-    template<class R> 
-    tribool disjoint(const Box<R>& r, const Zonotope<R>& z);
-    
-
-
-    template<class R> 
-    tribool subset(const Zonotope<R>& z, const Polyhedron<R>& p);
-
-
-    template<class R> 
-    ListSet< Zonotope<R> > split(const Zonotope<R>& z);
-
-
-
-    template<class R>
-    Zonotope<R> approximation(const Zonotope<R>& z);
-
-    template<class R>
-    Zonotope<R> over_approximation(const Zonotope<R>& z);
-
-    template<class R> 
-    Zonotope<R> error_free_over_approximation(const Zonotope<R>&);
-    
-    template<class R> 
-    Zonotope<R> orthogonal_over_approximation(const Zonotope<R>&);
-    
-    template<class R> 
-    Zonotope<R> nonsingular_over_approximation(const Zonotope<R>&);
-
-    template<class R>
-    Zonotope<R> cascade_over_approximation(const Zonotope<R>& z, size_type maximum_number_of_blocks);
-    
-
-    template<class R>
-    Zonotope<R> apply(const Function::AffineModel<R>& am, const Zonotope<R>& z);
-        
-   
-
-    template<class R> 
-    tribool subset(const Zonotope<R>& z, const ConstraintSet<R>& cs);
-    
-    template<class R> 
-    tribool disjoint(const Zonotope<R>& z, const ConstraintSet<R>& cs);
-    
-    template<class R> 
-    tribool intersects(const Zonotope<R>& z, const ConstraintSet<R>& cs);
-    
-
-
-    template<class R>  
-    std::ostream& operator<<(std::ostream& os, const Zonotope<R>& z);
-    
-    template<class R> 
-    std::istream& operator>>(std::istream& is, Zonotope<R>& z);
 
  
   }

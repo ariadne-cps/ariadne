@@ -517,7 +517,7 @@ Geometry::Polytope<X>::_instantiate()
   Rectangle<X>* r=0;
   Polytope<X>* p=0;
   Polyhedron<X>* h=0;
-  Rectangle<I>* ir=0;
+  //Rectangle<I>* ir=0;
   Polytope<I>* ip=0;
   Polyhedron<I>* ih=0;
 

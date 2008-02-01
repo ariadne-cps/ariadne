@@ -32,7 +32,6 @@
 
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
-#include "linear_algebra/tensor.h"
 
 #include "geometry/point.h"
 #include "geometry/box.h"

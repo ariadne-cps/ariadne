@@ -28,7 +28,7 @@
 #ifndef ARIADNE_NUMERIC_RATIONAL_H
 #define ARIADNE_NUMERIC_RATIONAL_H
 
-#include <gmpxx.h>
+#include <gmp.h>
 #include <iostream>
 
 #include "numeric/macros.h"

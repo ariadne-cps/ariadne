@@ -50,13 +50,12 @@ namespace Ariadne {
      */
     class PositionIndex {
      public:
-      typedef Ariadne::Base::size_type size_type;
-      typedef size_type value_type;
+      typedef uint value_type;
      
       /*! Construct a multi index of degree \a 0 with \a nv variables. */
-      explicit PositionIndex(size_type nv);
+      explicit PositionIndex(uint nv);
       /*! Construct a multi index with \a nv variables from the array \a ary. */
-      explicit PositionIndex(size_type nv, const size_type pos);
+      explicit PositionIndex(uint nv, const uint pos);
       /*! Construct a multi index from the tensor index \a a. */
       explicit PositionIndex(const SortedIndex& a);
       /*! Construct a multi index from the tensor index \a a. */
@@ -67,11 +66,11 @@ namespace Ariadne {
       PositionIndex& operator=(const PositionIndex& a);
 
       /*! The degree of the multi-index, equal to the sum of the number of occurrences of the variables. */
-      const size_type degree() const;
+      const uint degree() const;
       /*! The number of variables. */
-      const size_type& number_of_variables() const;
+      const uint& number_of_variables() const;
       /*! The number of occurrences of the \a i th variable. */
-      const size_type& position() const;
+      const uint& position() const;
      
       /*! Equality operator. */
       bool operator==(const PositionIndex& a) const;
@@ -90,19 +89,19 @@ namespace Ariadne {
      
       friend std::ostream& operator<<(std::ostream&, const PositionIndex&);
      private:
-      size_type _number_of_variables;
-      size_type _position;
+      uint _number_of_variables;
+      uint _position;
     };
       
 
 
     
-    inline PositionIndex::PositionIndex(size_type nv)
+    inline PositionIndex::PositionIndex(uint nv)
       : _number_of_variables(nv), _position(0)
     {
     }
 
-    inline PositionIndex::PositionIndex(size_type nv, size_type pos)
+    inline PositionIndex::PositionIndex(uint nv, uint pos)
       : _number_of_variables(nv), _position(pos)
     {
     }
@@ -126,16 +125,16 @@ namespace Ariadne {
     }
 
 
-    inline const size_type PositionIndex::degree() const { 
+    inline const uint PositionIndex::degree() const { 
       return SortedIndex(*this).degree();
     }
 
-    inline const size_type& PositionIndex::number_of_variables() const { 
+    inline const uint& PositionIndex::number_of_variables() const { 
       return this->_number_of_variables;
     }
 
     inline
-    const size_type& PositionIndex::position() const
+    const uint& PositionIndex::position() const
     {
       return this->_position;
     }
@@ -156,18 +155,18 @@ namespace Ariadne {
     inline
     PositionIndex::operator SortedIndex () const 
     {
-      const size_type& nv=this->_number_of_variables;
-      const size_type& p=this->_position;
+      const uint& nv=this->_number_of_variables;
+      const uint& p=this->_position;
       
-      size_type d=0;
+      uint d=0;
       while(Numeric::bin(nv+d,nv)<p) {
         ++d;
       }
       std::cout << "nv=" << nv << " p=" << p << std::endl;
       std::cout << "d=" << d << std::endl;
       
-      array<size_type> a(d,nv);
-      size_type cp=Numeric::bin(nv+d,nv);
+      array<uint> a(d);
+      uint cp=Numeric::bin(nv+d,nv);
       for(uint k=0; k!=d; ++k) {
         int m=d-k;
         int l=m+(nv-1);
@@ -194,7 +193,7 @@ namespace Ariadne {
       //std::cerr << "PositionIndex::operator MultiIndex() const\n";
       //std::cerr << "nv=" << this->number_of_variables() << " p="<<this->position() << "\n";
       MultiIndex r(this->number_of_variables());
-      const size_type& p=this->position();
+      const uint& p=this->position();
       while(r.position()<=p) {
         //std::cerr << r << " " << r.position() << std::endl;
         r.increment_index(0);

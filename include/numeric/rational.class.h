@@ -29,6 +29,7 @@
 #define ARIADNE_NUMERIC_RATIONAL_CLASS_H
 
 #include <gmp.h>
+#include <gmpxx.h>
 
 
 namespace Ariadne {
@@ -73,8 +74,10 @@ namespace Ariadne {
 
       /*! \brief Convert from an int. */
       Rational(const int& n);
+      Rational(const long int& n);
       /*! \brief Convert from an unsigned int. */
       Rational(const unsigned int& n);
+      Rational(const unsigned long int& n);
       /*! \brief Convert from a double. */
       Rational(const double& x);
 
@@ -97,8 +100,10 @@ namespace Ariadne {
 
       /*! \brief Assign from an int. */
       Rational& operator=(const int& n);
+      Rational& operator=(const long int& n);
       /*! \brief Conversion assignment operator from anunsigned built-in integer. */
       Rational& operator=(const unsigned int& n);
+      Rational& operator=(const unsigned long int& n);
       /*! \brief Conversion assignment operator from a double. */
       Rational& operator=(const double& x);
       /*! \brief Assign from an integer. */

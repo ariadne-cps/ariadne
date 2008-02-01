@@ -59,7 +59,7 @@ namespace Ariadne {
       ~Float();
       Float();
       Float(const int& n);
-      Float(const uint& n);
+      Float(const unsigned int& n);
       Float(const double& x);
       Float(const Integer& n);
       Float(const FloatMP& x);
@@ -67,7 +67,7 @@ namespace Ariadne {
       explicit Float(const std::string& x);
 
       FloatMP& operator=(const int& n);
-      FloatMP& operator=(const uint& n);
+      FloatMP& operator=(const unsigned int& n);
       FloatMP& operator=(const double& x);
       FloatMP& operator=(const Integer& n);
       FloatMP& operator=(const FloatMP& x);

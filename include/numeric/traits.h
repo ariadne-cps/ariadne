@@ -29,11 +29,12 @@
 #define ARIADNE_NUMERIC_TRAITS_H
 
 #include <string>
-#include <gmpxx.h>
+//#include <gmpxx.h>
 
 // FIXME: WE should not use GMP internals
 // The typedef below  may be needed when using GMP 4.2 or above.
-class _gmpq_value;
+//class _gmpq_value;
+//class mpf_class;
 
 
 namespace Ariadne {
@@ -107,6 +108,7 @@ namespace Ariadne {
       typedef Interval<double> interval_type;
     };
   
+  /*
     template<> struct traits< mpf_class > { 
       typedef mpf_class number_type; 
       typedef mpf_class approximate_arithmetic_type; 
@@ -114,6 +116,7 @@ namespace Ariadne {
       typedef mpf_class arithmetic_type; 
       typedef Interval<FloatMP> interval_type; 
     };
+  */
     
     template<class T> struct traits< ApproximateFloat<T> > { 
       typedef float_tag type;
@@ -152,6 +155,7 @@ namespace Ariadne {
       typedef Interval<Rational> interval_type; 
     };
 
+  /*
     // FIXME: WE should not use GMP internals
     // The following is needed for rational expressions in GMP 4.2.x
     template<class E> struct traits< __gmp_expr<mpq_t,E> > { 
@@ -163,7 +167,7 @@ namespace Ariadne {
     template<class E> struct traits< __gmp_expr<_gmpq_value,E> > { 
       typedef Rational closure_type; 
     };
-  
+  */  
 
 
     template<class T> struct traits< Interval< Float<T> > > { 

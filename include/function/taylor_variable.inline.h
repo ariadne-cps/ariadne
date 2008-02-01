@@ -25,7 +25,7 @@ namespace Ariadne {
 
 namespace {
 
-inline size_type compute_polynomial_data_size(size_type as, smoothness_type d) {
+inline size_type compute_polynomial_data_size(uint as, smoothness_type d) {
   return Numeric::bin(d+as,as);
 }
 

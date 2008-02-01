@@ -194,7 +194,7 @@ Function::PolynomialVariable<X>::rec(smoothness_type d, const X& c)
 {
   PolynomialVariable<X> y(1u,d);
   X mr = -1/c;
-  for(size_type i=0; i<=y.degree(); ++i) {
+  for(uint i=0; i<=y.degree(); ++i) {
     y.data()[i]=-Numeric::pow(mr,i+1u);
   }
   
@@ -206,9 +206,9 @@ template<class X>
 Function::PolynomialVariable<X> 
 Function::PolynomialVariable<X>::pow(smoothness_type d, const X& c, const uint& k)
 {
-  size_type n=k;
+  uint n=k;
   PolynomialVariable<X> y(1u,d);
-  for(size_type i=0; i<=std::min(size_type(d),n); ++i) {
+  for(uint i=0; i<=std::min(uint(d),n); ++i) {
     int j=n-i;
     y.data()[i]=Numeric::bin<int>(n,i)*Numeric::pow(c,j);
   }
@@ -223,7 +223,7 @@ Function::PolynomialVariable<X>::sqrt(smoothness_type d, const X& c)
   PolynomialVariable<X> y(1u,d);
   y.data()[0]=Numeric::sqrt(c);
   X mhr=(-0.5)/c;
-  for(size_type i=1; i<=y.degree(); ++i) {
+  for(uint i=1; i<=y.degree(); ++i) {
     y.data()[i]=(2*int(i)-3)*mhr*y.data()[i-1]/Numeric::fac< Numeric::Integer>(i);
   }
   return y;
@@ -235,7 +235,7 @@ Function::PolynomialVariable<X>::exp(smoothness_type d, const X& c)
 {
   PolynomialVariable<X> y(1u,d);
   y.data()[0]=Numeric::exp(c);
-  for(size_type i=1; i<=y.degree(); ++i) {
+  for(uint i=1; i<=y.degree(); ++i) {
     y.data()[i]=y.data()[0]/Numeric::fac< Numeric::Integer>(i);
   }
   return y;
@@ -248,7 +248,7 @@ Function::PolynomialVariable<X>::log(smoothness_type d, const X& c)
   PolynomialVariable<X> y(1u,d);
   y.data()[0]=Numeric::log(c);
   X mr=(-1)/c;
-  for(size_type i=1; i<=y.degree();++i) {
+  for(uint i=1; i<=y.degree();++i) {
     y.data()[i]=-Numeric::pow(mr,i)/i;
   }
   return y;
@@ -261,7 +261,7 @@ Function::PolynomialVariable<X>::sin(smoothness_type d, const X& c)
   PolynomialVariable<X> y(1u,d);
   y.data()[0]=Numeric::sin(c);
   y.data()[1]=Numeric::cos(c);
-  for(size_type i=2; i!=d; ++i) {
+  for(uint i=2; i!=d; ++i) {
     y.data()[i]=-y.data()[i-2]/Numeric::fac< Numeric::Integer>(i);
   }
   return y;
@@ -274,7 +274,7 @@ Function::PolynomialVariable<X>::cos(smoothness_type d, const X& c)
   PolynomialVariable<X> y(1u,d);
   y.data()[0]=Numeric::cos(c);
   y.data()[1]=-Numeric::sin(c);
-  for(size_type i=2; i!=d; ++i) {
+  for(uint i=2; i!=d; ++i) {
     y.data()[i]=-y.data()[i-2]/Numeric::fac< Numeric::Integer>(i);
   }
   return y;
@@ -368,7 +368,7 @@ Function::PolynomialVariable<X>
 Function::neg(const PolynomialVariable<X>& x)
 {
   PolynomialVariable<X> y(x.argument_size(),x.degree());
-  for(size_type n=0; n<=y.data().size(); ++n) {
+  for(uint n=0; n<=y.data().size(); ++n) {
     y.data()[n] = -x.data()[n];
   }
   return y;
@@ -397,7 +397,7 @@ Function::add(const PolynomialVariable<X>& x, const PolynomialVariable<X>& y)
 {
   assert(x.argument_size()==y.argument_size());
   PolynomialVariable<X> z(x.argument_size(),std::min(x.degree(),y.degree()));
-  for(size_type n=0; n<z.data().size(); ++n) {
+  for(uint n=0; n<z.data().size(); ++n) {
     z.data()[n] = x.data()[n]+y.data()[n];
   }
   return z;
@@ -409,7 +409,7 @@ Function::sub(const PolynomialVariable<X>& x, const PolynomialVariable<X>& y)
 {
   assert(x.argument_size()==y.argument_size());
   PolynomialVariable<X> z(x.argument_size(),std::min(x.degree(),y.degree()));
-  for(size_type n=0; n<z.data().size(); ++n) {
+  for(uint n=0; n<z.data().size(); ++n) {
     z.data()[n] = x.data()[n]-y.data()[n];
   }
   return z;
@@ -550,7 +550,7 @@ std::ostream&
 Function::operator<<(std::ostream& os, const PolynomialVariable<X>& x) {
   //  return os << "PolynomialVariable( argument_size=" << x.argument_size() << ", degree=" << x.degree() << ", data=" << x.data() << ")";
   os << "PolynomialVariable(";
-  size_type degree=0;
+  uint degree=0;
   for(MultiIndex i(x.argument_size()); i.degree()<=x.degree(); ++i) {
     if(i.degree()==0) {
       os << '[';

@@ -67,12 +67,16 @@ namespace Ariadne {
       explicit Integer(const std::string& n);
       /*! \brief Convert from a built-in integer. */
       Integer(const int& n);
+      Integer(const long int& n);
       /*! \brief Convert from an unsigned built-in integer. */
       Integer(const unsigned int& n);
+      Integer(const unsigned long int& n);
       /*! \brief Conversion assignment operator from a built-in integer. */
       Integer& operator=(const int& n);
+      Integer& operator=(const long int& n);
       /*! \brief Conversion assignment operator from an unsigned built-in  integer. */
       Integer& operator=(const unsigned int& n);
+      Integer& operator=(const unsigned long int& n);
 
       /*! \brief Convert from a GMP integer. */
       Integer(mpz_srcptr z);
@@ -92,7 +96,7 @@ namespace Ariadne {
       /*! \brief A constant reference to the internal value. */
       mpz_srcptr value() const { return this->_value; }
       /*! \brief Convert to an built-in integer value. A check is performed to ensure that the conversion is be performed exactly. */
-      operator int() const;
+      operator long int() const;
       //@}
 
 #ifdef DOXYGEN

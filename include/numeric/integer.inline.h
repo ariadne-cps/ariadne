@@ -54,7 +54,11 @@ inline Integer::Integer() :  _value() {
   mpz_init_set_si(this->_value,0); }
 inline Integer::Integer(const int& n) : _value() {
   mpz_init_set_si(this->_value,n); }
+inline Integer::Integer(const long int& n) : _value() {
+  mpz_init_set_si(this->_value,n); }
 inline Integer::Integer(const unsigned int& n) : _value() {
+  mpz_init_set_ui(this->_value,n); }
+inline Integer::Integer(const unsigned long int& n) : _value() {
   mpz_init_set_ui(this->_value,n); }
 inline Integer::Integer(mpz_srcptr z) : _value() {
   mpz_init_set(this->_value,z); }
@@ -62,7 +66,11 @@ inline Integer::Integer(const Integer& z) :  _value() {
   mpz_init_set(this->_value,z._value); }
 inline Integer& Integer::operator=(const int& n) {
   mpz_set_si(this->_value,n); return *this; }
+inline Integer& Integer::operator=(const long int& n) {
+  mpz_set_si(this->_value,n); return *this; }
 inline Integer& Integer::operator=(const unsigned int& n) {
+  mpz_set_ui(this->_value,n); return *this; }
+inline Integer& Integer::operator=(const unsigned long int& n) {
   mpz_set_ui(this->_value,n); return *this; }
 inline Integer& Integer::operator=(mpz_srcptr z) {
   mpz_set(this->_value,z); return *this; }
@@ -74,7 +82,7 @@ template<class E> inline Integer::Integer(const Expression<E>& e)
 template<class E> inline Integer& Integer::operator=(const Expression<E>& e) {
   e.assign_to(*this); return *this; }
 
-inline Integer::operator int() const { 
+inline Integer::operator long int() const { 
   ARIADNE_ASSERT(mpz_fits_sint_p(this->_value));
   return mpz_get_si(this->_value); }
 
@@ -223,13 +231,17 @@ inline void pow_(Integer& r, const Integer& x1, const uint& x2) {
 // Integer operations
 inline void quot_(Integer& r, const Integer& x1, const Integer& x2) { 
   mpz_tdiv_q(r._value,x1._value,x2._value); }
-inline void quot_(Integer& r, const Integer& x1, const uint& x2) { 
+inline void quot_(Integer& r, const Integer& x1, const unsigned long int& x2) { 
   mpz_tdiv_q_ui(r._value,x1._value,x2); }
-inline void quot_(Integer& r, const int& x1, const uint& x2) { 
+inline void quot_(Integer& r, const long int& x1, const unsigned long int& x2) { 
   r=x1/x2; }
-inline void quot_(uint& r, const uint& x1, const uint& x2) { 
+inline void quot_(int& r, const int& x1, const int& x2) { 
   r=x1/x2; }
-inline void quot_(int& r, const int& x1, const uint& x2) { 
+inline void quot_(long int& r, const long int& x1, const long int& x2) { 
+  r=x1/x2; }
+inline void quot_(unsigned int& r, const unsigned int& x1, const unsigned int& x2) { 
+  r=x1/x2; }
+inline void quot_(unsigned long int& r, const unsigned long int& x1, const unsigned long int& x2) { 
   r=x1/x2; }
 inline void rem_(Integer& r, const Integer& x1, const Integer& x2) { 
   mpz_tdiv_r(r._value,x1._value,x2._value); }
@@ -306,15 +318,30 @@ inline uint fac(uint n) {
   return factorials[n]; 
 }
 
+inline unsigned long int fac(unsigned long int n) { 
+#ifndef NDEBUG 
+  if(n>=13) { 
+    throw OverflowException();
+    //ARIADNE_THROW(OverflowException,__FUNCTION__," with n="<<n);
+  }
+#endif
+  return factorials[n]; 
+}
+
 inline int bin(int n, int k) { 
   if(k>n) { return 0; }
   if(n<13) { return fac(n)/(fac(k)*fac(n-k)); } 
   else { uint r; bin_(r,n,k); return r; } }
 
-inline uint bin(uint n, uint k) { 
+inline uint bin(unsigned int n, unsigned int k) { 
   if(k>n) { return 0; }
   if(n<13) { return fac(n)/(fac(k)*fac(uint(n-k))); } 
   else { uint r; bin_(r,n,k); return r; } }
+
+inline long unsigned int bin(long unsigned int n, long unsigned int k) { 
+  if(k>n) { return 0; }
+  if(n<13) { return fac(n)/(fac(k)*fac(uint(n-k))); } 
+  else { long unsigned int r; bin_(r,n,k); return r; } }
 
 inline uint exp2(const uint& n) {
   ARIADNE_ASSERT(n<32);

@@ -22,7 +22,6 @@ NUMERIC_SRC = \
 LINEAR_ALGEBRA_SRC = \
 	linear_algebra/vector.cc linear_algebra/covector.cc \
 	linear_algebra/matrix.cc \
-	linear_algebra/tensor.cc \
 	linear_algebra/matrix_function.cc 
 
 LINEAR_PROGRAMMING_SRC = \

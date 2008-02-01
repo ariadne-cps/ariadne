@@ -226,7 +226,7 @@ Function::TaylorSeries<X>
 Function::derivative(const TaylorSeries<X>& x)
 {
   TaylorSeries<X> result(x.degree()-1);
-  for(size_type n=1; n<=x.degree(); ++n) { result[n-1]=X(n)*x[n]; }
+  for(uint n=1; n<=x.degree(); ++n) { result[n-1]=X(n)*x[n]; }
   return result;
 }
 
@@ -235,7 +235,7 @@ Function::TaylorSeries<X>
 Function::antiderivative(const TaylorSeries<X>& x, const X& c)
 {
   TaylorSeries<X> result(x.degree()+1);
-  for(size_type n=1; n<=x.degree()+1u; ++n) { result[n]=x[n-1]/n; }
+  for(uint n=1; n<=x.degree()+1u; ++n) { result[n]=x[n-1]/n; }
   result[0]=c;
   return result;
 }

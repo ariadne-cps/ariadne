@@ -43,12 +43,12 @@ ariadne_check(std::ostream& os, const R& r, const ER& er) {
   catch(const std::exception& e) {          \
     ++ARIADNE_TEST_FAILURES;                                            \
     std::cout << "exception: \"" << e.what() << "\"\n" << std::endl;;                     \
-    std::cerr << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": " << message << " throwed \"" << e.what() << "\"." << std::endl; \
+    std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": " << message << " throwed \"" << e.what() << "\"." << std::endl; \
   }                                                                     \
   catch(...) { \
     ++ARIADNE_TEST_FAILURES;                \
     std::cout << "unknown exception\n" << std::endl; \
-    std::cerr << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": " << message << " throwed an unknown exception." << std::endl; \
+    std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": " << message << " throwed an unknown exception." << std::endl; \
   } \
 
 
@@ -100,7 +100,7 @@ ariadne_check(std::ostream& os, const R& r, const ER& er) {
   } else { \
     ++ARIADNE_TEST_FAILURES; \
     std::cout << "false" << std::endl; \
-    std::cerr << __FILE__ << ":" << __LINE__ << ": " << __FUNCTION__ << ": Assertion `" << #expression << "' failed.\n" << std::endl; \
+    std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __FUNCTION__ << ": Assertion `" << #expression << "' failed.\n" << std::endl; \
   } \
 }\
 
@@ -116,7 +116,7 @@ ariadne_check(std::ostream& os, const R& r, const ER& er) {
   } else { \
     ++ARIADNE_TEST_FAILURES; \
     std::cout << " (expected: " << #expression << " = " << #expected << " = " << (expected) << " )\n" << std::endl; \
-    std::cerr << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Check `" << #expression << "==" << #expected << "' failed." << std::endl; \
+    std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Check `" << #expression << "==" << #expected << "' failed." << std::endl; \
   } \
 }\
 
@@ -158,6 +158,7 @@ class variable expression; \
     statement; \
     ++ARIADNE_TEST_FAILURES; \
     std::cout << "expected " << #error << "; no exception thrown\n"; \
+    std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": expected " << #error << "; no exception thrown." << std::endl; \
   } \
   catch(const error& e) { \
     std::cout << "caught " << #error << "(" << e.what() << ") as expected\n" << std::endl; \
@@ -165,6 +166,7 @@ class variable expression; \
   catch(const std::exception& e) {             \
     ++ARIADNE_TEST_FAILURES; \
     std::cout << "caught exception " << e.what() << "; expected " << #error << "\n"; \
+    std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": caught exception " << e.what() << "; expected " << #error << std::endl; \
   } \
 } \
 
@@ -176,6 +178,7 @@ class variable expression; \
     statement; \
     ++ARIADNE_TEST_FAILURES; \
     std::cout << "expected exception; none thrown\n"; \
+    std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": expected exception; no exception thrown." << std::endl; \
   } \
   catch(...) { \
     std::cout << "caught exception as expected\n" << std::endl; \

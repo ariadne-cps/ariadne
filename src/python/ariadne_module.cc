@@ -49,12 +49,10 @@ template<class R> void export_interval();
 template<class R> void export_vector();
 template<class R> void export_covector();
 template<class R> void export_matrix();
-template<class R> void export_tensor();
 template<class R> void export_linear_program();
 template<class R> void export_interval_vector();
 template<class R> void export_interval_covector();
 template<class R> void export_interval_matrix();
-template<class R> void export_interval_tensor();
 
 void export_multi_index();
 void export_binary_tree();
@@ -157,12 +155,9 @@ BOOST_PYTHON_MODULE(ariadne)
   export_covector<Rational>();
   export_matrix<FloatPy>();
   export_matrix<Rational>();
-  export_tensor<FloatPy>();
-  export_tensor<Rational>();
   export_interval_vector<FloatPy>();
   export_interval_covector<FloatPy>();
   export_interval_matrix<FloatPy>();
-  export_interval_tensor<FloatPy>();
 
   export_linear_program<Rational>();
 

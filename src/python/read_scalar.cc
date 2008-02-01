@@ -53,11 +53,23 @@ read_scalar(int& n, const boost::python::object& obj)
   n=boost::python::extract<int>(obj);
 }
 
+void
+read_scalar(long int& n, const boost::python::object& obj)
+{
+  n=boost::python::extract<long int>(obj);
+}
+
 // Read a scalar variable of type X from a Python object
 void
-read_scalar(uint& n, const boost::python::object& obj)
+read_scalar(unsigned int& n, const boost::python::object& obj)
 {
-  n=boost::python::extract<uint>(obj);
+  n=boost::python::extract<unsigned int>(obj);
+}
+
+void
+read_scalar(unsigned long int& n, const boost::python::object& obj)
+{
+  n=boost::python::extract<unsigned long int>(obj);
 }
 
 void

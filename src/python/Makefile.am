@@ -52,7 +52,7 @@ ARIADNE_SRC = ariadne_module.cc \
 	export_vector.cc \
 	export_covector.cc \
 	export_matrix.cc \
-	export_tensor.cc \
+         \
 	export_linear_program.cc \
 	 \
 	export_multi_index.cc \

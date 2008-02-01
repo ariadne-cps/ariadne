@@ -45,7 +45,9 @@ inline Output::latexfstream::~latexfstream() {
 inline Output::latexstream& Output::operator<<(latexstream& txs, const char& c) { *txs._os_ptr << c; return txs; }
 inline Output::latexstream& Output::operator<<(latexstream& txs, const char* s) { *txs._os_ptr << s; return txs; }
 inline Output::latexstream& Output::operator<<(latexstream& txs, const int& n) { *txs._os_ptr << n; return txs; }
-inline Output::latexstream& Output::operator<<(latexstream& txs, const uint& n) { *txs._os_ptr << n; return txs; }
+inline Output::latexstream& Output::operator<<(latexstream& txs, const long int& n) { *txs._os_ptr << n; return txs; }
+inline Output::latexstream& Output::operator<<(latexstream& txs, const unsigned int& n) { *txs._os_ptr << n; return txs; }
+inline Output::latexstream& Output::operator<<(latexstream& txs, const unsigned long int& n) { *txs._os_ptr << n; return txs; }
 inline Output::latexstream& Output::operator<<(latexstream& txs, const double& x) { *txs._os_ptr << x; return txs; }
 
 inline Output::latexstream& Output::operator<<(latexstream& txs, const Numeric::Integer& z) { *txs._os_ptr << z; return txs; }

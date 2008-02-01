@@ -97,7 +97,7 @@ namespace Ariadne {
     {
       SizeArray result(this->dimension());
       for(dimension_type i=0; i!=this->dimension(); ++i) {
-        result[i]=std::max(0,this->_upper[i]-this->_lower[i]);
+        result[i]=std::max((index_type)0,this->_upper[i]-this->_lower[i]);
       }
       return result;
     }
@@ -108,7 +108,7 @@ namespace Ariadne {
       SizeArray result(this->dimension()+1);
       result[0]=1;
       for(dimension_type i=0; i!=this->dimension(); ++i) {
-        result[i+1]=std::max(0,this->_upper[i]-this->_lower[i])*result[i];
+        result[i+1]=std::max((index_type)0,this->_upper[i]-this->_lower[i])*result[i];
       }
       return result;
     }
@@ -118,7 +118,7 @@ namespace Ariadne {
     {
       size_type result=1;
       for(dimension_type i=0; i!=this->dimension(); ++i) {
-        result*=std::max(0,this->_upper[i]-this->_lower[i]);
+        result*=std::max((index_type)0,this->_upper[i]-this->_lower[i]);
       }
       return result;
     }

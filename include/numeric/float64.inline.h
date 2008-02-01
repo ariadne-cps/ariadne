@@ -54,14 +54,14 @@ template<> inline void set_rounding_mode<RoundApprox>() { }
 inline Float64::~Float() { }
 inline Float64::Float() : _value() { }
 inline Float64::Float(const int& n) : _value(n) { }
-inline Float64::Float(const uint& n) : _value(n) { }
+inline Float64::Float(const unsigned int& n) : _value(n) { }
 inline Float64::Float(const double& x) : _value(x) { }
 inline Float64::Float(const Integer& n) { _value=mpz_get_d(n._value); assert(*this==n); }
 inline Float64::Float(const Float<double>& x) : _value(x._value) { }
 
 inline Float64& Float64::operator=(const int& n) { 
   this->_value=n; return *this; }
-inline Float64& Float64::operator=(const uint& n) { 
+inline Float64& Float64::operator=(const unsigned int& n) { 
   this->_value=n; return *this; }
 inline Float64& Float64::operator=(const double& x) {
   this->_value=x; return *this; }
@@ -113,17 +113,26 @@ template<> inline Rational& Rational::operator=(const Float64& x) {
   set_(*this,x); return *this; }
 
 inline void set_(Float64& r, const int& n) { r._value=n; }
-inline void set_(Float64& r, const uint& n) { r._value=n; }
+inline void set_(Float64& r, const unsigned int& n) { r._value=n; }
 inline void set_(Float64& r, const double& x) { r._value=x; }
 inline void set_(Float64& r, const Integer& z) { r._value=mpz_get_d(z._value); assert(r==z); }
 
+// Conversion from any integer type should be able to be performed exactly
 inline void set_(Float64& r, const int& n, RoundDown) { r._value=n; }
 inline void set_(Float64& r, const int& n, RoundUp) { r._value=n; }
 inline void set_(Float64& r, const int& n, RoundApprox) { r._value=n; }
 
+inline void set_(Float64& r, const long int& n, RoundDown) { r._value=n; }
+inline void set_(Float64& r, const long int& n, RoundUp) { r._value=n; }
+inline void set_(Float64& r, const long int& n, RoundApprox) { r._value=n; }
+
 inline void set_(Float64& r, const unsigned int& n, RoundDown) { r._value=n; }
 inline void set_(Float64& r, const unsigned int& n, RoundUp) { r._value=n; }
 inline void set_(Float64& r, const unsigned int& n, RoundApprox) { r._value=n; }
+
+inline void set_(Float64& r, const unsigned long int& n, RoundDown) { r._value=n; }
+inline void set_(Float64& r, const unsigned long int& n, RoundUp) { r._value=n; }
+inline void set_(Float64& r, const unsigned long int& n, RoundApprox) { r._value=n; }
 
 inline void set_(Float64& r, const double& x, RoundDown) { r._value=x; }
 inline void set_(Float64& r, const double& n, RoundUp) { r._value=n; }
@@ -158,21 +167,21 @@ inline void abs_(Float64& r, const Float64& x) {
 inline void floor_(Float64& r, const Float64& x) {
   r=std::floor(x._value); }
 inline void floor_(Integer& r, const Float64& x) {
-  r=int(std::floor(x._value)); }
-inline void floor_(int& r, const Float64& x) {
-  r=int(std::floor(x._value)); }
+  r=(long int)(std::floor(x._value)); }
+inline void floor_(long int& r, const Float64& x) {
+  r=(long int)(std::floor(x._value)); }
 
 inline void ceil_(Float64& r, const Float64& x) {
   r=std::ceil(x._value); }
 inline void ceil_(Integer& r, const Float64& x) {
-  r=int(std::ceil(x._value)); }
-inline void ceil_(int& r, const Float64& x) {
-  r=int(std::ceil(x._value)); }
+  r=(long int)(std::ceil(x._value)); }
+inline void ceil_(long int& r, const Float64& x) {
+  r=(long int)(std::ceil(x._value)); }
 	  
-inline int floor(const Float64& x) {
-  int r; floor_(r,x); return r; }
-inline int ceil(const Float64& x) {
-  int r; ceil_(r,x); return r; }
+inline long int floor(const Float64& x) {
+  long int r; floor_(r,x); return r; }
+inline long int ceil(const Float64& x) {
+  long int r; ceil_(r,x); return r; }
 
 
 
@@ -234,18 +243,46 @@ inline void mul_(Float64& r, const int& n, const Float64& x, RoundUp) {
 inline void mul_(Float64& r, const int& n, const Float64& x, RoundApprox) {
   r._value=x._value*n; }
 
-inline void mul_(Float64& r, const Float64& x, const uint& n, RoundDown) {
+inline void mul_(Float64& r, const Float64& x, const long int& n, RoundDown) {
   r._value=Float64::rounding().mul_down(x._value,n); }
-inline void mul_(Float64& r, const Float64& x,const uint& n, RoundUp) {
+inline void mul_(Float64& r, const Float64& x,const long int& n, RoundUp) {
   r._value=Float64::rounding().mul_up(x._value,n); }
-inline void mul_(Float64& r, const Float64& x, const uint& n, RoundApprox) {
+inline void mul_(Float64& r, const Float64& x, const long int& n, RoundApprox) {
   r._value=x._value*n; }
      
-inline void mul_(Float64& r, const uint& n, const Float64& x, RoundDown) {
+inline void mul_(Float64& r, const long int& n, const Float64& x, RoundDown) {
   r._value=Float64::rounding().mul_down(x._value,n); }
-inline void mul_(Float64& r, const uint& n, const Float64& x, RoundUp) {
+inline void mul_(Float64& r, const long int& n, const Float64& x, RoundUp) {
   r._value=Float64::rounding().mul_up(x._value,n); }
-inline void mul_(Float64& r, const uint& n, const Float64& x, RoundApprox) {
+inline void mul_(Float64& r, const long int& n, const Float64& x, RoundApprox) {
+  r._value=x._value*n; }
+
+inline void mul_(Float64& r, const Float64& x, const unsigned int& n, RoundDown) {
+  r._value=Float64::rounding().mul_down(x._value,n); }
+inline void mul_(Float64& r, const Float64& x,const unsigned int& n, RoundUp) {
+  r._value=Float64::rounding().mul_up(x._value,n); }
+inline void mul_(Float64& r, const Float64& x, const unsigned int& n, RoundApprox) {
+  r._value=x._value*n; }
+     
+inline void mul_(Float64& r, const unsigned int& n, const Float64& x, RoundDown) {
+  r._value=Float64::rounding().mul_down(x._value,n); }
+inline void mul_(Float64& r, const unsigned int& n, const Float64& x, RoundUp) {
+  r._value=Float64::rounding().mul_up(x._value,n); }
+inline void mul_(Float64& r, const unsigned int& n, const Float64& x, RoundApprox) {
+  r._value=x._value*n; }
+
+inline void mul_(Float64& r, const Float64& x, const unsigned long int& n, RoundDown) {
+  r._value=Float64::rounding().mul_down(x._value,n); }
+inline void mul_(Float64& r, const Float64& x,const unsigned long int& n, RoundUp) {
+  r._value=Float64::rounding().mul_up(x._value,n); }
+inline void mul_(Float64& r, const Float64& x, const unsigned long int& n, RoundApprox) {
+  r._value=x._value*n; }
+     
+inline void mul_(Float64& r, const unsigned long int& n, const Float64& x, RoundDown) {
+  r._value=Float64::rounding().mul_down(x._value,n); }
+inline void mul_(Float64& r, const unsigned long int& n, const Float64& x, RoundUp) {
+  r._value=Float64::rounding().mul_up(x._value,n); }
+inline void mul_(Float64& r, const unsigned long int& n, const Float64& x, RoundApprox) {
   r._value=x._value*n; }
 
 inline void mul_(Float64& r, const Float64& x, const double& d, RoundDown) {
@@ -268,6 +305,13 @@ inline void div_(Float64& r, const Float64& x,const int& n, RoundDown) {
 inline void div_(Float64& r, const Float64& x,const int& n, RoundUp) {
   r._value=Float64::rounding().div_up(x._value,n); }
 inline void div_(Float64& r, const Float64& x,const int& n, RoundApprox) {
+  r._value=x._value/n; }
+
+inline void div_(Float64& r, const Float64& x,const long int& n, RoundDown) {
+  r._value=Float64::rounding().div_down(x._value,n); }
+inline void div_(Float64& r, const Float64& x,const long int& n, RoundUp) {
+  r._value=Float64::rounding().div_up(x._value,n); }
+inline void div_(Float64& r, const Float64& x,const long int& n, RoundApprox) {
   r._value=x._value/n; }
 
 inline void div_(Float64& r, const Float64& x,const double& y, RoundDown) {
@@ -363,20 +407,6 @@ void atan_(Interval64& r, Interval64& x);
 
 
 
-// Comparison functions
-inline int cmp(const Float64& x1, const Float64& x2) {
-  return (x1==x2) ? 0 : (x1>x2) ? +1 : -1; }
-inline int cmp(const Float64& x1, const int& x2) {
-  return (x1==x2) ? 0 : (x1>x2) ? +1 : -1; }
-inline int cmp(const Float64& x1, const uint& x2) {
-  return (x1==x2) ? 0 : (x1>x2) ? +1 : -1; }
-inline int cmp(const Float64& x1, const double& x2) {
-  return (x1==x2) ? 0 : (x1>x2) ? +1 : -1; }
-inline int cmp(const Float64& x1, const Integer& x2) {
-  return -mpz_cmp_d(x2._value,x1._value); }
-inline int cmp(const Float64& x1, const Rational& x2) {
-  return cmp(Rational(x1),x2); }
-
 
 // Comparison operators
 inline bool operator==(const Float64& x1, const Float64& x2) {
@@ -418,30 +448,82 @@ inline bool operator< (const int& x1, const Float64& x2) {
 inline bool operator> (const int& x1, const Float64& x2) {
   return x1> x2._value; }
 
-inline bool operator==(const Float64& x1, const uint& x2) {
+inline bool operator==(const Float64& x1, const long int& x2) {
   return x1._value==x2; }
-inline bool operator!=(const Float64& x1, const uint& x2) {
+inline bool operator!=(const Float64& x1, const long int& x2) {
   return x1._value!=x2; }
-inline bool operator<=(const Float64& x1, const uint& x2) {
+inline bool operator<=(const Float64& x1, const long int& x2) {
   return x1._value<=x2; }
-inline bool operator>=(const Float64& x1, const uint& x2) {
+inline bool operator>=(const Float64& x1, const long int& x2) {
   return x1._value>=x2; }
-inline bool operator< (const Float64& x1, const uint& x2) {
+inline bool operator< (const Float64& x1, const long int& x2) {
   return x1._value< x2; }
-inline bool operator> (const Float64& x1, const uint& x2) {
+inline bool operator> (const Float64& x1, const long int& x2) {
   return x1._value> x2; }    
 
-inline bool operator==(const uint& x1, const Float64& x2) {
+inline bool operator==(const long int& x1, const Float64& x2) {
   return x1==x2._value; }
-inline bool operator!=(const uint& x1, const Float64& x2) {
+inline bool operator!=(const long int& x1, const Float64& x2) {
   return x1!=x2._value; }
-inline bool operator<=(const uint& x1, const Float64& x2) {
+inline bool operator<=(const long int& x1, const Float64& x2) {
   return x1<=x2._value; }
-inline bool operator>=(const uint& x1, const Float64& x2) {
+inline bool operator>=(const long int& x1, const Float64& x2) {
   return x1>=x2._value; }
-inline bool operator< (const uint& x1, const Float64& x2) {
+inline bool operator< (const long int& x1, const Float64& x2) {
   return x1< x2._value; }
-inline bool operator> (const uint& x1, const Float64& x2) {
+inline bool operator> (const long int& x1, const Float64& x2) {
+  return x1> x2._value; }
+
+inline bool operator==(const Float64& x1, const unsigned int& x2) {
+  return x1._value==x2; }
+inline bool operator!=(const Float64& x1, const unsigned int& x2) {
+  return x1._value!=x2; }
+inline bool operator<=(const Float64& x1, const unsigned int& x2) {
+  return x1._value<=x2; }
+inline bool operator>=(const Float64& x1, const unsigned int& x2) {
+  return x1._value>=x2; }
+inline bool operator< (const Float64& x1, const unsigned int& x2) {
+  return x1._value< x2; }
+inline bool operator> (const Float64& x1, const unsigned int& x2) {
+  return x1._value> x2; }    
+
+inline bool operator==(const unsigned int& x1, const Float64& x2) {
+  return x1==x2._value; }
+inline bool operator!=(const unsigned int& x1, const Float64& x2) {
+  return x1!=x2._value; }
+inline bool operator<=(const unsigned int& x1, const Float64& x2) {
+  return x1<=x2._value; }
+inline bool operator>=(const unsigned int& x1, const Float64& x2) {
+  return x1>=x2._value; }
+inline bool operator< (const unsigned int& x1, const Float64& x2) {
+  return x1< x2._value; }
+inline bool operator> (const unsigned int& x1, const Float64& x2) {
+  return x1> x2._value; }
+
+inline bool operator==(const Float64& x1, const unsigned long int& x2) {
+  return x1._value==x2; }
+inline bool operator!=(const Float64& x1, const unsigned long int& x2) {
+  return x1._value!=x2; }
+inline bool operator<=(const Float64& x1, const unsigned long int& x2) {
+  return x1._value<=x2; }
+inline bool operator>=(const Float64& x1, const unsigned long int& x2) {
+  return x1._value>=x2; }
+inline bool operator< (const Float64& x1, const unsigned long int& x2) {
+  return x1._value< x2; }
+inline bool operator> (const Float64& x1, const unsigned long int& x2) {
+  return x1._value> x2; }    
+
+inline bool operator==(const unsigned long int& x1, const Float64& x2) {
+  return x1==x2._value; }
+inline bool operator!=(const unsigned long int& x1, const Float64& x2) {
+  return x1!=x2._value; }
+inline bool operator<=(const unsigned long int& x1, const Float64& x2) {
+  return x1<=x2._value; }
+inline bool operator>=(const unsigned long int& x1, const Float64& x2) {
+  return x1>=x2._value; }
+inline bool operator< (const unsigned long int& x1, const Float64& x2) {
+  return x1< x2._value; }
+inline bool operator> (const unsigned long int& x1, const Float64& x2) {
   return x1> x2._value; }
 
 inline bool operator==(const Float64& x1, const double& x2) {
@@ -522,6 +604,24 @@ inline bool operator< (const Rational& x1, const Float64& x2) {
 inline bool operator> (const Rational& x1, const Float64& x2) {
   return x1> Rational(x2); }    
 
+
+// Comparison functions
+inline int cmp(const Float64& x1, const Float64& x2) {
+  return (x1==x2) ? 0 : (x1>x2) ? +1 : -1; }
+inline int cmp(const Float64& x1, const int& x2) {
+  return (x1==x2) ? 0 : (x1>x2) ? +1 : -1; }
+inline int cmp(const Float64& x1, const long int& x2) {
+  return (x1==x2) ? 0 : (x1>x2) ? +1 : -1; }
+inline int cmp(const Float64& x1, const unsigned int& x2) {
+  return (x1==x2) ? 0 : (x1>x2) ? +1 : -1; }
+inline int cmp(const Float64& x1, const unsigned long int& x2) {
+  return (x1==x2) ? 0 : (x1>x2) ? +1 : -1; }
+inline int cmp(const Float64& x1, const double& x2) {
+  return (x1==x2) ? 0 : (x1>x2) ? +1 : -1; }
+inline int cmp(const Float64& x1, const Integer& x2) {
+  return -mpz_cmp_d(x2._value,x1._value); }
+inline int cmp(const Float64& x1, const Rational& x2) {
+  return cmp(Rational(x1),x2); }
 
 
 

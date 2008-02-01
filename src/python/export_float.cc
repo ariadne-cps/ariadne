@@ -81,7 +81,7 @@ template<class R>
 std::string
 __str__(const R& x) {
   std::stringstream ss;
-  if(x==R(Numeric::floor(x))) {
+  if(x==Numeric::floor(x)) {
     ss << x << ".";
   } else {
     //ss << std::fixed;
@@ -96,7 +96,7 @@ std::string
 __repr__(const R& x) {
   std::stringstream ss;
   ss << "Float(";
-  if(x==R(Numeric::floor(x))) {
+  if(x==Numeric::floor(x)) {
     ss << x;
   } else {
     //ss << std::fixed;

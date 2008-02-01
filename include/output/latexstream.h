@@ -71,7 +71,9 @@ namespace Ariadne {
       friend latexstream& operator<<(latexstream&, const char&);
       friend latexstream& operator<<(latexstream&, const char*);
       friend latexstream& operator<<(latexstream&, const int&);
-      friend latexstream& operator<<(latexstream&, const uint&);
+      friend latexstream& operator<<(latexstream&, const long int&);
+      friend latexstream& operator<<(latexstream&, const unsigned int&);
+      friend latexstream& operator<<(latexstream&, const unsigned long int&);
       friend latexstream& operator<<(latexstream&, const double&);
       friend latexstream& operator<<(latexstream&, const Numeric::Integer&);
       friend latexstream& operator<<(latexstream&, const Numeric::Rational&);

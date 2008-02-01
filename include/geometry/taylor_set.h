@@ -37,7 +37,6 @@
 
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
-#include "linear_algebra/tensor.h"
 
 namespace Ariadne {
   namespace Geometry {

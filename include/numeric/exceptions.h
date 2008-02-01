@@ -41,6 +41,8 @@ namespace Ariadne {
     class DivideByZeroException : public std::exception { };
     /*! \brief An overflow occurred. */
     class OverflowException : public std::exception { };
+    /*! \brief A conversion could not be performed exactly. */
+    class ConversionException : public std::exception { };
     //@}
     
   }

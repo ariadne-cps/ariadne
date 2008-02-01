@@ -206,6 +206,10 @@ namespace Ariadne {
       X r; div_(r,x,y,Rnd()); return r; }
 
     template<class Rnd, class X>
+    X div(const X& x, const long int& y) {
+      X r; div_(r,x,y,Rnd()); return r; }
+
+    template<class Rnd, class X>
     X div(const X& x, const X& y) {
       X r; div_(r,x,y,Rnd()); return r; }
 

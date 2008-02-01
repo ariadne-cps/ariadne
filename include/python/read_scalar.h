@@ -36,7 +36,9 @@ namespace Ariadne {
 
     void read_scalar(bool&, const boost::python::object&);
     void read_scalar(int&, const boost::python::object&);
-    void read_scalar(uint&, const boost::python::object&);
+    void read_scalar(long int&, const boost::python::object&);
+    void read_scalar(unsigned int&, const boost::python::object&);
+    void read_scalar(unsigned long int&, const boost::python::object&);
     void read_scalar(double&, const boost::python::object&);
     void read_scalar(Numeric::Integer&, const boost::python::object&);
     void read_scalar(Numeric::Rational&, const boost::python::object&);

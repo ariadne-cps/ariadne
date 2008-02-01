@@ -47,15 +47,15 @@ namespace Ariadne {
     class SortedIndex {
       friend class MultiIndex;
      public:
-      explicit SortedIndex(size_type nv);
-      explicit SortedIndex(size_type nv, size_type d);
-      SortedIndex(size_type nv, size_type d, const size_type* ary);
+      explicit SortedIndex(uint nv);
+      explicit SortedIndex(uint nv, uint d);
+      SortedIndex(uint nv, uint d, const uint* ary);
       SortedIndex(const SortedIndex& a);
       SortedIndex& operator=(const SortedIndex& a);
 
-      const size_type degree() const;
-      const size_type number_of_variables() const;
-      const size_type& operator[](const size_type& i) const;
+      const uint degree() const;
+      const uint number_of_variables() const;
+      const uint& operator[](const uint& i) const;
      
       bool operator==(const SortedIndex& a) const;
       bool operator!=(const SortedIndex& a) const;
@@ -65,18 +65,18 @@ namespace Ariadne {
       SortedIndex& operator+=(const SortedIndex& a);
       SortedIndex operator+(const SortedIndex& a) const;
 
-      size_type position() const;
+      uint position() const;
       
        /*! Increment the the \a i th index, thereby increasing the degree. */
-      void increment_index(const size_type& i);
+      void increment_index(const uint& i);
       /*! Decrement the the \a i th index, thereby decreasing the degree. */
-      void decrement_index(const size_type& i);
+      void decrement_index(const uint& i);
 
       void sort();
       friend std::ostream& operator<<(std::ostream&, const SortedIndex&);
      private:
-      size_type _number_of_variables;
-      std::vector<size_type> _entries;
+      uint _number_of_variables;
+      std::vector<uint> _entries;
     };
     
   }
@@ -85,13 +85,13 @@ namespace Ariadne {
 namespace Ariadne {
 
 inline 
-Function::SortedIndex::SortedIndex(size_type nv) : _number_of_variables(nv), _entries(0u) { }
+Function::SortedIndex::SortedIndex(uint nv) : _number_of_variables(nv), _entries(0u) { }
 
 inline 
-Function::SortedIndex::SortedIndex(size_type nv, size_type d) : _number_of_variables(nv), _entries(d) { }
+Function::SortedIndex::SortedIndex(uint nv, uint d) : _number_of_variables(nv), _entries(d) { }
 
 inline 
-Function::SortedIndex::SortedIndex(size_type nv, size_type d, const size_type* ary) : _number_of_variables(nv), _entries(ary,ary+d) { this->sort(); }
+Function::SortedIndex::SortedIndex(uint nv, uint d, const uint* ary) : _number_of_variables(nv), _entries(ary,ary+d) { this->sort(); }
 
 inline 
 Function::SortedIndex::SortedIndex(const SortedIndex& a)
@@ -105,20 +105,20 @@ Function::SortedIndex::operator=(const SortedIndex& a)
 }
 
 inline
-const size_type 
+const uint 
 Function::SortedIndex::degree() const { 
   return this->_entries.size(); 
 }
 
 inline
-const size_type 
+const uint 
 Function::SortedIndex::number_of_variables() const { 
   return this->_number_of_variables; 
 }
  
 inline     
-const size_type& 
-Function::SortedIndex::operator[](const size_type& i) const { 
+const uint& 
+Function::SortedIndex::operator[](const uint& i) const { 
   return this->_entries[i]; 
 }
      
@@ -158,7 +158,7 @@ Function::SortedIndex::operator++()
     this->_entries.push_back(this->_number_of_variables);
     this->_entries[i]=0;
   }
-  size_type n=this->_entries[i];
+  uint n=this->_entries[i];
   ++i;
   while(i!=this->degree()) {
     this->_entries[i]=n;
@@ -176,7 +176,7 @@ Function::SortedIndex::operator+=(const SortedIndex& a2)
   if(a1._number_of_variables!=a2._number_of_variables) {
     throw std::runtime_error("operator<(SortedIndex,SortedIndex): number of variables must match");
   }
-  size_type a1d=a1.degree();
+  uint a1d=a1.degree();
   a1._entries.resize(a1.degree()+a2.degree());
   std::copy(a2._entries.begin(),a2._entries.end(),a1._entries.begin()+a1d);
   std::inplace_merge(a1._entries.begin(),a1._entries.begin()+a1d,a1._entries.end());
@@ -206,7 +206,7 @@ Function::SortedIndex::operator<(const SortedIndex& a) const {
   }
 
   if(this->_entries.size()==a._entries.size()) {
-    for(size_type i=0; i!=this->_entries.size(); ++i) {
+    for(uint i=0; i!=this->_entries.size(); ++i) {
       if(this->_entries[i]!=a._entries[i]) {
         return this->_entries[i]<a._entries[i];
       }
@@ -219,15 +219,15 @@ Function::SortedIndex::operator<(const SortedIndex& a) const {
 
      
 inline 
-void Function::SortedIndex::increment_index(const size_type& i) { 
+void Function::SortedIndex::increment_index(const uint& i) { 
   this->_entries.push_back(i); 
   std::inplace_merge(this->_entries.begin(),this->_entries.end()-1,this->_entries.end());
 }
 
 inline
-void Function::SortedIndex::decrement_index(const size_type& i) 
+void Function::SortedIndex::decrement_index(const uint& i) 
 { 
-  std::vector<size_type>::iterator pos=std::lower_bound(this->_entries.begin(),this->_entries.end(),i);
+  std::vector<uint>::iterator pos=std::lower_bound(this->_entries.begin(),this->_entries.end(),i);
   if(pos==this->_entries.end()) {
     throw std::runtime_error("SortedIndex::decrement_index(uint i): the number of occurence of the index must be positive"); 
   } else {
@@ -242,16 +242,16 @@ Function::SortedIndex::sort() {
 }
     
 inline
-size_type 
+uint 
 Function::SortedIndex::position() const
 {
-  const size_type& nv=this->number_of_variables();
-  const size_type d=this->degree();
-  const size_type* p=&this->_entries[0];
+  const uint& nv=this->number_of_variables();
+  const uint d=this->degree();
+  const uint* p=&this->_entries[0];
   long result=Numeric::bin(nv+d,d);
   //std::cerr << "\n"<<*this<<"\n";
   //std::cerr << "k=-" << " (" << (nv+d) << "," << nv << ")=" << Numeric::bin(nv+d,nv) << " r=" << result << std::endl;
-  for(size_type k=0; k!=d; ++k) {
+  for(uint k=0; k!=d; ++k) {
     int m=d-k;
     int n=nv-p[k]-2;
     //std::cerr << "k=" << k << " p[k]="<<p[k]<<" ("<< m+n << "," << m << ")=" << Numeric::bin(m+n,m) << " r=" << result << std::endl;

@@ -204,8 +204,8 @@ class TestMultiIndex
   }
 
   int test_conversion() {
-    size_type a1[6]={3,0,2,0,0,2};
-    size_type a2[4]={3,0,2,1};
+    uint a1[6]={3,0,2,0,0,2};
+    uint a2[4]={3,0,2,1};
     
     ARIADNE_TEST_CONSTRUCT(SortedIndex,s1,(4,6,a1));
     ARIADNE_TEST_CONSTRUCT(MultiIndex,i1,(4,a2));

@@ -36,12 +36,12 @@ namespace Numeric {
 template<class T> class Float;
 
 template<class T>
-inline int floor(const Float<T>& x) { 
-  int r; floor_(r,x); return r; }
+inline long int floor(const Float<T>& x) { 
+  long int r; floor_(r,x); return r; }
 
 template<class T>
-inline int ceil(const Float<T>& x) { 
-  int r; ceil_(r,x); return r; }
+inline long int ceil(const Float<T>& x) { 
+  long int r; ceil_(r,x); return r; }
 
 
 template<class T> inline
@@ -125,6 +125,16 @@ inline Float<T> mul_approx(const Float<T>& x, const int& y) {
   Float<T> r; mul_(r,x,y,round_approx); return r; }
 
 template<class T> 
+inline Float<T> mul_up(const Float<T>& x, const long int& y) { 
+  Float<T> r; mul_(r,x,y,round_up); return r; }
+template<class T> 
+inline Float<T> mul_down(const Float<T>& x, const long int& y) { 
+  Float<T> r; mul_(r,x,y,round_down); return r; }
+template<class T> 
+inline Float<T> mul_approx(const Float<T>& x, const long int& y) { 
+  Float<T> r; mul_(r,x,y,round_approx); return r; }
+
+template<class T> 
 inline Float<T> mul_approx(const Float<T>& x, const double& y) { 
   Float<T> r; mul_(r,x,y,round_approx); return r; }
 template<class T> 
@@ -150,6 +160,15 @@ inline Float<T> div_down(const Float<T>& x, const int& y) {
   Float<T> r; div_(r,x,y,round_down); return r; }
 template<class T> 
 inline Float<T> div_approx(const Float<T>& x, const int& y) { 
+  Float<T> r; div_(r,x,y,round_approx); return r; }
+template<class T> 
+inline Float<T> div_up(const Float<T>& x, const long int& y) { 
+  Float<T> r; div_(r,x,y,round_up); return r; }
+template<class T> 
+inline Float<T> div_down(const Float<T>& x, const long int& y) { 
+  Float<T> r; div_(r,x,y,round_down); return r; }
+template<class T> 
+inline Float<T> div_approx(const Float<T>& x, const long int& y) { 
   Float<T> r; div_(r,x,y,round_approx); return r; }
 template<class T> 
 inline Float<T> div_approx(const Float<T>& x, const double& y) { 

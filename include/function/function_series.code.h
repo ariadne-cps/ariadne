@@ -32,7 +32,7 @@ Function::ArithmeticSeries<X>::rec(smoothness_type d, const X& c)
 {
   TaylorSeries<X> y(d);
   X mr = -1/c;
-  for(size_type i=0; i<=y.degree(); ++i) {
+  for(uint i=0; i<=y.degree(); ++i) {
     y[i]=-Numeric::pow(mr,i+1u);
   }
   return y;
@@ -43,9 +43,9 @@ template<class X>
 Function::TaylorSeries<X> 
 Function::ArithmeticSeries<X>::pow(smoothness_type d, const X& c, const uint& k)
 {
-  size_type n=k;
+  uint n=k;
   TaylorSeries<X> y(d);
-  for(size_type i=0; i<=std::min(size_type(d),n); ++i) {
+  for(uint i=0; i<=std::min(uint(d),n); ++i) {
     uint j=n-i;
     y[i]=X(Numeric::bin<Numeric::Integer>(n,j))*Numeric::pow(c,j);
   }
@@ -60,7 +60,7 @@ Function::TranscendentalSeries<X>::sqrt(smoothness_type d, const X& c)
 TaylorSeries<X> y(d);
   y[0]=Numeric::sqrt(c);
   X mhr=-0.5/c;
-  for(size_type i=1; i<=y.degree(); ++i) {
+  for(uint i=1; i<=y.degree(); ++i) {
     y[i]=((2*i-3)*mhr)/i*y[i-1];
   }
   return y;
@@ -72,7 +72,7 @@ Function::TranscendentalSeries<X>::exp(smoothness_type d, const X& c)
 {
 TaylorSeries<X> y(d);
   y[0]=Numeric::exp(c);
-  for(size_type i=1; i<=y.degree(); ++i) {
+  for(uint i=1; i<=y.degree(); ++i) {
     y[i]=y[i-1]/i;
   }
   return y;
@@ -85,7 +85,7 @@ Function::TranscendentalSeries<X>::log(smoothness_type d, const X& c)
 TaylorSeries<X> y(d);
   y[0]=Numeric::log(c);
   X mr=(-1)/c;
-  for(size_type i=1; i<=y.degree();++i) {
+  for(uint i=1; i<=y.degree();++i) {
     y[i]=-Numeric::pow(mr,i)/i;
   }
   return y;
@@ -98,7 +98,7 @@ Function::TranscendentalSeries<X>::sin(smoothness_type d, const X& c)
 TaylorSeries<X> y(d);
   y[0]=Numeric::sin(c);
   y[1]=Numeric::cos(c);
-  for(size_type i=2; i!=d; ++i) {
+  for(uint i=2; i!=d; ++i) {
     y[i]=-y[i-2]/(i*(i-1));
   }
   return y;
@@ -111,7 +111,7 @@ Function::TranscendentalSeries<X>::cos(smoothness_type d, const X& c)
   TaylorSeries<X> y(d);
   y[0]=Numeric::cos(c);
   y[1]=-Numeric::sin(c);
-  for(size_type i=2; i!=d; ++i) {
+  for(uint i=2; i!=d; ++i) {
     y[i]=-y[i-2]/(i*(i-1));
   }
   return y;

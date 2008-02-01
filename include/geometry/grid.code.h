@@ -403,7 +403,7 @@ Geometry::FiniteGrid<R>::FiniteGrid(const Grid<R>& g, const Box<R>& bb)
 }
 
 template<class R>
-Geometry::FiniteGrid<R>::FiniteGrid(const Box<R>& bb, const size_type& s)
+Geometry::FiniteGrid<R>::FiniteGrid(const Box<R>& bb, const uint& s)
   : _grid(bb.dimension(),1.0), _lattice_block(bb.dimension())
 {
   dimension_type d=bb.dimension();

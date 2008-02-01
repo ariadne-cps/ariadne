@@ -53,9 +53,9 @@ namespace Ariadne {
         : _variables(atstv) { }
       TaylorDerivative<I> evaluate(const I& t) const {
         TaylorDerivative<I> result(this->_variables.size(),this->_variables[0][0].argument_size(),this->_variables[0][0].degree());
-        for(size_type i=0; i!=this->_variables.size(); ++i) {
+        for(uint i=0; i!=this->_variables.size(); ++i) {
           result[i]=this->_variables[i][0]; 
-          for(size_type j=1; j<=_variables[i].degree(); ++j) {
+          for(uint j=1; j<=_variables[i].degree(); ++j) {
             result[i]+=this->_variables[i][j]*pow(t,j); } }
         return result; }
       const array< TaylorSeries< TaylorVariable<I> > >& variables() const {

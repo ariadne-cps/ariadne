@@ -52,12 +52,12 @@ namespace Python {
 
   template<class Res, class Arg> inline
   Res floor(const Arg& a) {
-    return Res(floor(a));
+    Res r; floor_(r,a); return r;
   }
 
   template<class Res, class Arg> inline
   Res ceil(const Arg& a) {
-    return Res(ceil(a));
+    Res r; ceil_(r,a); return r;
   }
 
   template<class Res, class Arg1, class Arg2> inline

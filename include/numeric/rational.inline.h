@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include <gmpxx.h>
+#include <gmp.h>
 #include <iostream>
 #include <cassert>
 
@@ -69,7 +69,13 @@ inline Rational::Rational(const Integer& n, const Integer& d) {
 inline Rational::Rational(const int& n) { 
   mpq_init(this->_value); 
   mpq_set_si(this->_value,n,1); }
+inline Rational::Rational(const long int& n) { 
+  mpq_init(this->_value); 
+  mpq_set_si(this->_value,n,1); }
 inline Rational::Rational(const unsigned int& n) { 
+  mpq_init(this->_value); 
+  mpq_set_ui(this->_value,n,1u); }
+inline Rational::Rational(const unsigned long int& n) { 
   mpq_init(this->_value); 
   mpq_set_ui(this->_value,n,1u); }
 inline Rational::Rational(const double& x) { 
@@ -97,7 +103,11 @@ inline Rational::Rational(const Float<T>& x) {
 
 inline Rational& Rational::operator=(const int& n) { 
   mpq_set_si(this->_value,n,1); return *this; }
+inline Rational& Rational::operator=(const long int& n) { 
+  mpq_set_si(this->_value,n,1); return *this; }
 inline Rational& Rational::operator=(const unsigned int& n) { 
+  mpq_set_ui(this->_value,n,1u); return *this; }
+inline Rational& Rational::operator=(const unsigned long int& n) { 
   mpq_set_ui(this->_value,n,1u); return *this; }
 inline Rational& Rational::operator=(const double& x) { 
   mpq_set_d(this->_value,x); return *this; }
@@ -180,7 +190,7 @@ inline void rad_(Rational& r, const Rational& x1, const Rational& x2) {
   mpq_sub(r._value,x2._value,x1._value); 
   mpq_div_2exp(r._value,r._value,1); }
 
-// Mixed-mode arithmetic with int, double and Integer
+// Mixed-mode arithmetic with int, long int, unsigned int, long unsigned int, double and Integer
 inline void add_(Rational& r, const Rational& x1, const int& x2) {
   add_(r,x1,Rational(x2)); }
 inline void sub_(Rational& r, const Rational& x1, const int& x2) {
@@ -199,22 +209,58 @@ inline void mul_(Rational& r, const int& x1, const Rational& x2) {
 inline void div_(Rational& r, const int& x1, const Rational& x2) {
   div_(r,Rational(x1),x2); }
 
-inline void add_(Rational& r, const Rational& x1, const uint& x2) {
+inline void add_(Rational& r, const Rational& x1, const long int& x2) {
   add_(r,x1,Rational(x2)); }
-inline void sub_(Rational& r, const Rational& x1, const uint& x2) {
+inline void sub_(Rational& r, const Rational& x1, const long int& x2) {
   sub_(r,x1,Rational(x2)); }
-inline void mul_(Rational& r, const Rational& x1, const uint& x2) {
+inline void mul_(Rational& r, const Rational& x1, const long int& x2) {
   mul_(r,x1,Rational(x2)); }
-inline void div_(Rational& r, const Rational& x1, const uint& x2) {
+inline void div_(Rational& r, const Rational& x1, const long int& x2) {
   div_(r,x1,Rational(x2)); }
 
-inline void add_(Rational& r, const uint& x1, const Rational& x2) {
+inline void add_(Rational& r, const long int& x1, const Rational& x2) {
   add_(r,Rational(x1),x2); }
-inline void sub_(Rational& r, const uint& x1, const Rational& x2) {
+inline void sub_(Rational& r, const long int& x1, const Rational& x2) {
   sub_(r,Rational(x1),x2); }
-inline void mul_(Rational& r, const uint& x1, const Rational& x2) {
+inline void mul_(Rational& r, const long int& x1, const Rational& x2) {
   mul_(r,Rational(x1),x2); }
-inline void div_(Rational& r, const uint& x1, const Rational& x2) {
+inline void div_(Rational& r, const long int& x1, const Rational& x2) {
+  div_(r,Rational(x1),x2); }
+
+inline void add_(Rational& r, const Rational& x1, const unsigned int& x2) {
+  add_(r,x1,Rational(x2)); }
+inline void sub_(Rational& r, const Rational& x1, const unsigned int& x2) {
+  sub_(r,x1,Rational(x2)); }
+inline void mul_(Rational& r, const Rational& x1, const unsigned int& x2) {
+  mul_(r,x1,Rational(x2)); }
+inline void div_(Rational& r, const Rational& x1, const unsigned int& x2) {
+  div_(r,x1,Rational(x2)); }
+
+inline void add_(Rational& r, const unsigned int& x1, const Rational& x2) {
+  add_(r,Rational(x1),x2); }
+inline void sub_(Rational& r, const unsigned int& x1, const Rational& x2) {
+  sub_(r,Rational(x1),x2); }
+inline void mul_(Rational& r, const unsigned int& x1, const Rational& x2) {
+  mul_(r,Rational(x1),x2); }
+inline void div_(Rational& r, const unsigned int& x1, const Rational& x2) {
+  div_(r,Rational(x1),x2); }
+
+inline void add_(Rational& r, const Rational& x1, const unsigned long int& x2) {
+  add_(r,x1,Rational(x2)); }
+inline void sub_(Rational& r, const Rational& x1, const unsigned long int& x2) {
+  sub_(r,x1,Rational(x2)); }
+inline void mul_(Rational& r, const Rational& x1, const unsigned long int& x2) {
+  mul_(r,x1,Rational(x2)); }
+inline void div_(Rational& r, const Rational& x1, const unsigned long int& x2) {
+  div_(r,x1,Rational(x2)); }
+
+inline void add_(Rational& r, const unsigned long int& x1, const Rational& x2) {
+  add_(r,Rational(x1),x2); }
+inline void sub_(Rational& r, const unsigned long int& x1, const Rational& x2) {
+  sub_(r,Rational(x1),x2); }
+inline void mul_(Rational& r, const unsigned long int& x1, const Rational& x2) {
+  mul_(r,Rational(x1),x2); }
+inline void div_(Rational& r, const unsigned long int& x1, const Rational& x2) {
   div_(r,Rational(x1),x2); }
 
 inline void add_(Rational& r, const Rational& x1, const double& x2) {
@@ -280,23 +326,23 @@ inline void floor_(Integer& r, const Rational& x) {
 inline void ceil_(Integer& r, const Rational& x) { 
   mpz_fdiv_q(r._value,mpq_numref(x._value),mpq_denref(x._value)); }
 
-inline void floor_(int& r, const Rational& x) { 
+inline void floor_(long int& r, const Rational& x) { 
   mpz_t tmp; 
   mpz_init(tmp); 
   mpz_fdiv_q(tmp,mpq_numref(x._value),mpq_denref(x._value)); 
   r=mpz_get_si(tmp); 
   mpz_clear(tmp); }
-inline void ceil_(int& r, const Rational& x) { 
+inline void ceil_(long int& r, const Rational& x) { 
   mpz_t tmp; 
   mpz_init(tmp); 
   mpz_cdiv_q(tmp,mpq_numref(x._value),mpq_denref(x._value)); 
   r=mpz_get_si(tmp); 
   mpz_clear(tmp); }
 
-inline int floor(const Rational& x) {
-  int r; floor_(r,x); return r; }
-inline int ceil(const Rational& x) {
-  int r; ceil_(r,x); return r; }
+inline long int floor(const Rational& x) {
+  long int r; floor_(r,x); return r; }
+inline long int ceil(const Rational& x) {
+  long int r; ceil_(r,x); return r; }
 
 
 
@@ -426,6 +472,9 @@ inline Rational::Rational(const X& x, Rnd) {
 inline Rational& operator+=(Rational& q, const int& x) {
   add_(q,q,x); return q; }
 
+inline Rational& operator+=(Rational& q, const long int& x) {
+  add_(q,q,x); return q; }
+
 inline Rational& operator+=(Rational& q, const double& x) {
   add_(q,q,x); return q; }
 
@@ -442,7 +491,7 @@ inline Rational mul_approx(const Rational& x, const Rational& y) {
 inline Rational div_approx(const Rational& x, const Rational& y) {
   Rational r; div_(r,x,y); return r; }
 
-inline Rational div_up(const Rational& x, const int& y) {
+inline Rational div_up(const Rational& x, const long int& y) {
   Rational r; div_(r,x,y); return r; }
 
 

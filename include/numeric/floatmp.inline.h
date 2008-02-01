@@ -53,7 +53,7 @@ inline FloatMP::Float() {
   mpfr_init_set_si(this->_value,0,GMP_RNDN); }
 inline FloatMP::Float(const int& n) {
   mpfr_init_set_si(this->_value,n,GMP_RNDN); }
-inline FloatMP::Float(const uint& n) { 
+inline FloatMP::Float(const unsigned int& n) { 
   mpfr_init_set_ui(this->_value,n,GMP_RNDN); }
 inline FloatMP::Float(const double& x) { 
   mpfr_init_set_d(this->_value,x,GMP_RNDN); }
@@ -65,7 +65,7 @@ inline FloatMP::Float(const FloatMP& x) {
 
 inline FloatMP& FloatMP::operator=(const int& n) { 
   mpfr_set_si(this->_value,n,GMP_RNDN); return *this; }
-inline FloatMP& FloatMP::operator=(const uint& n) { 
+inline FloatMP& FloatMP::operator=(const unsigned int& n) { 
   mpfr_set_ui(this->_value,n,GMP_RNDN); return *this; }
 inline FloatMP& FloatMP::operator=(const double& x) { 
   mpfr_set_d(this->_value,x,GMP_RNDN); return *this; }
@@ -90,21 +90,21 @@ inline FloatMP::Float(const Expression<E>& e, Rnd rnd) {
   mpfr_init(_value); e.assign_to(*this); }
 
 
-inline uint FloatMP::default_precision() { 
+inline unsigned int FloatMP::default_precision() { 
   return mpfr_get_default_prec(); }
-inline void FloatMP::set_default_precision(uint p) { 
+inline void FloatMP::set_default_precision(unsigned int p) { 
   mpfr_set_default_prec(p); }
-inline uint FloatMP::precision() const { 
+inline unsigned int FloatMP::precision() const { 
   return mpfr_get_prec(this->_value); }
-inline void FloatMP::set_precision(uint p) { 
+inline void FloatMP::set_precision(unsigned int p) { 
   mpfr_set_prec(this->_value,p); }
 
 inline double FloatMP::get_d() const {
   return mpfr_get_d(this->_value, GMP_RNDN); }
 
-inline uint precision(const FloatMP& x) {
+inline unsigned int precision(const FloatMP& x) {
   return mpfr_get_prec(x._value); }
-inline void set_precision(FloatMP& x, uint p) { 
+inline void set_precision(FloatMP& x, unsigned int p) { 
   mpfr_set_prec(x._value,p); }
 
   
@@ -121,6 +121,7 @@ inline std::string name< Interval<FloatMP> >() {
 
 inline void nan_(FloatMP& r) { mpfr_set_nan(r._value); }
 inline void inf_(FloatMP& r) { mpfr_set_inf(r._value,+1); }
+inline void eps_(FloatMP& r) { mpfr_set_si(r._value,0,GMP_RNDN); mpfr_nextabove(r._value); }
 
 inline void next_(FloatMP& r, const FloatMP& x, RoundUp) { 
   mpfr_set(r._value,x._value,GMP_RNDU); mpfr_nextabove(r._value); }
@@ -137,15 +138,19 @@ inline void set_(Rational& r, const FloatMP& x) {
   mpf_clear(f);
   ARIADNE_ASSERT(mpfr_cmp_q(x._value,r._value)==0); }
 
-inline void set_(FloatMP& r, const int& n) { mpfr_set_si(r._value,n,mpfr_rounding_mode<RoundApprox>()); }
-inline void set_(FloatMP& r, const uint& n) { mpfr_set_ui(r._value,n,mpfr_rounding_mode<RoundApprox>()); }
-inline void set_(FloatMP& r, const double& x) { mpfr_set_d(r._value,x,mpfr_rounding_mode<RoundApprox>()); }
-inline void set_(FloatMP& r, const Integer& n) { mpfr_set_z(r._value,n._value,mpfr_rounding_mode<RoundApprox>()); assert(r==n); }
+inline void set_(FloatMP& r, const int& n) { mpfr_set_si(r._value,n,GMP_RNDN); }
+inline void set_(FloatMP& r, const unsigned int& n) { mpfr_set_ui(r._value,n,GMP_RNDN); }
+inline void set_(FloatMP& r, const double& x) { mpfr_set_d(r._value,x,GMP_RNDN); }
+inline void set_(FloatMP& r, const Integer& n) { mpfr_set_z(r._value,n._value,GMP_RNDN); assert(r==n); }
 
 
 template<class Rnd> inline void set_(FloatMP& r, const int& x, Rnd) {
   mpfr_set_si(r._value,x,mpfr_rounding_mode<Rnd>()); }
-template<class Rnd> inline void set_(FloatMP& r, const uint& n, Rnd) {
+template<class Rnd> inline void set_(FloatMP& r, const long int& x, Rnd) {
+  mpfr_set_si(r._value,x,mpfr_rounding_mode<Rnd>()); }
+template<class Rnd> inline void set_(FloatMP& r, const unsigned int& n, Rnd) {
+  mpfr_set_ui(r._value,n,mpfr_rounding_mode<Rnd>()); }
+template<class Rnd> inline void set_(FloatMP& r, const unsigned long int& n, Rnd) {
   mpfr_set_ui(r._value,n,mpfr_rounding_mode<Rnd>()); }
 template<class Rnd> inline void set_(FloatMP& r, const double& x, Rnd) {
   mpfr_set_d(r._value,x,mpfr_rounding_mode<Rnd>()); }
@@ -159,12 +164,16 @@ template<class Rnd> inline void set_(FloatMP& r, const Rational& x, Rnd) {
 
 inline void floor_(int& r, const FloatMP& x) { 
   r=mpfr_get_si(x._value,GMP_RNDD); }
+inline void floor_(long int& r, const FloatMP& x) { 
+  r=mpfr_get_si(x._value,GMP_RNDD); }
 inline void floor_(Integer& r, const FloatMP& x) { 
   mpfr_get_z(r._value,x._value,GMP_RNDD); }
 inline void floor_(FloatMP& r, const FloatMP& x) { 
   mpfr_floor(r._value,x._value); }
 
 inline void ceil_(int& r, const FloatMP& x) { 
+  r=mpfr_get_si(x._value,GMP_RNDU); }
+inline void ceil_(long int& r, const FloatMP& x) { 
   r=mpfr_get_si(x._value,GMP_RNDU); }
 inline void ceil_(Integer& r, const FloatMP& x) { 
   mpfr_get_z(r._value,x._value,GMP_RNDU); }
@@ -256,11 +265,27 @@ void mul_(FloatMP& r, const int& x, const FloatMP& y, Rnd) {
   mpfr_mul_si(r._value,y._value,x,mpfr_rounding_mode<Rnd>()); }
 
 template<class Rnd> inline 
-void mul_(FloatMP& r, const FloatMP& x, const uint& y, Rnd) {
+void mul_(FloatMP& r, const FloatMP& x, const long int& y, Rnd) {
+  mpfr_mul_si(r._value,x._value,y,mpfr_rounding_mode<Rnd>()); }
+
+template<class Rnd> inline 
+void mul_(FloatMP& r, const long int& x, const FloatMP& y, Rnd) {
+  mpfr_mul_si(r._value,y._value,x,mpfr_rounding_mode<Rnd>()); }
+
+template<class Rnd> inline 
+void mul_(FloatMP& r, const FloatMP& x, const unsigned int& y, Rnd) {
   mpfr_mul_ui(r._value,x._value,y,mpfr_rounding_mode<Rnd>()); }
 
 template<class Rnd> inline 
-void mul_(FloatMP& r, const uint& x, const FloatMP& y, Rnd) {
+void mul_(FloatMP& r, const unsigned int& x, const FloatMP& y, Rnd) {
+  mpfr_mul_ui(r._value,y._value,x,mpfr_rounding_mode<Rnd>()); }
+
+template<class Rnd> inline 
+void mul_(FloatMP& r, const FloatMP& x, const unsigned long int& y, Rnd) {
+  mpfr_mul_ui(r._value,x._value,y,mpfr_rounding_mode<Rnd>()); }
+
+template<class Rnd> inline 
+void mul_(FloatMP& r, const unsigned long int& x, const FloatMP& y, Rnd) {
   mpfr_mul_ui(r._value,y._value,x,mpfr_rounding_mode<Rnd>()); }
 
 template<class Rnd> inline 
@@ -279,6 +304,18 @@ void div_(FloatMP& r, const FloatMP& x, const int& y, Rnd) {
   mpfr_div_si(r._value,x._value,y,mpfr_rounding_mode<Rnd>()); }
 
 template<class Rnd> inline 
+void div_(FloatMP& r, const FloatMP& x, const long int& y, Rnd) {
+  mpfr_div_si(r._value,x._value,y,mpfr_rounding_mode<Rnd>()); }
+
+template<class Rnd> inline 
+void div_(FloatMP& r, const FloatMP& x, const unsigned int& y, Rnd) {
+  mpfr_div_ui(r._value,x._value,y,mpfr_rounding_mode<Rnd>()); }
+
+template<class Rnd> inline 
+void div_(FloatMP& r, const FloatMP& x, const unsigned long int& y, Rnd) {
+  mpfr_div_ui(r._value,x._value,y,mpfr_rounding_mode<Rnd>()); }
+
+template<class Rnd> inline 
 void div_(FloatMP& r, const FloatMP& x, const double& y, Rnd) {
   mpfr_div_d(r._value,x._value,y,mpfr_rounding_mode<Rnd>()); }
 
@@ -288,7 +325,7 @@ void div_(FloatMP& r, const int& x, const FloatMP& y, Rnd) {
 
 
 template<class Rnd> 
-inline void pow_(FloatMP& r, const FloatMP& x, const uint& n, Rnd) {
+inline void pow_(FloatMP& r, const FloatMP& x, const unsigned int& n, Rnd) {
   mpfr_pow_ui(r._value,x._value,n,mpfr_rounding_mode<Rnd>()); }
 
 template<class Rnd> 
@@ -380,7 +417,11 @@ inline int cmp(const FloatMP& x1, const FloatMP& x2) {
   return mpfr_cmp(x1._value,x2._value); }
 inline int cmp(const FloatMP& x1, const int& x2) {
   return mpfr_cmp_si(x1._value,x2); }
-inline int cmp(const FloatMP& x1, const uint& x2) {
+inline int cmp(const FloatMP& x1, const long int& x2) {
+  return mpfr_cmp_si(x1._value,x2); }
+inline int cmp(const FloatMP& x1, const unsigned int& x2) {
+  return mpfr_cmp_ui(x1._value,x2); }
+inline int cmp(const FloatMP& x1, const unsigned long int& x2) {
   return mpfr_cmp_ui(x1._value,x2); }
 inline int cmp(const FloatMP& x1, const double& x2) {
   return mpfr_cmp_d(x1._value,x2); }
@@ -406,6 +447,9 @@ inline bool operator> (const FloatMP& x1, const FloatMP& x2) {
   return mpfr_greater_p(x1._value,x2._value); }
 
 ARIADNE_MIXED_FUNCTION_COMPARISON(bool,FloatMP,int);
+ARIADNE_MIXED_FUNCTION_COMPARISON(bool,FloatMP,long int);
+ARIADNE_MIXED_FUNCTION_COMPARISON(bool,FloatMP,unsigned int);
+ARIADNE_MIXED_FUNCTION_COMPARISON(bool,FloatMP,unsigned long int);
 ARIADNE_MIXED_FUNCTION_COMPARISON(bool,FloatMP,double);
 ARIADNE_MIXED_FUNCTION_COMPARISON(bool,FloatMP,Integer);
 ARIADNE_MIXED_FUNCTION_COMPARISON(bool,FloatMP,Rational);

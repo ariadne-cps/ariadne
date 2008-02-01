@@ -23,7 +23,6 @@ NUMERIC_TESTS = \
 LINEAR_ALGEBRA_TESTS = \
 	test_vector \
 	test_matrix \
-	test_tensor \
 	test_linear_algebra
 
 LINEAR_PROGRAMMING_TESTS = \

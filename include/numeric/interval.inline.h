@@ -729,8 +729,8 @@ void hypot_(Interval<R>& r, const R& x, const R& y) {
   hypot_(r._lower,x,y,round_down); 
   hypot_(r._upper,x,y,round_up); } 
 
-template<class R, class X, class Y> inline 
-void hypot_(Interval<R> r, const Interval<X>& x, const Interval<Y>& y) {
+template<class R> inline 
+void hypot_(Interval<R> r, const Interval<R>& x, const Interval<R>& y) {
   hypot_(r._lower,x._lower,y._lower,round_down); 
   hypot_(r._upper,x._upper,y._upper,round_up); } 
 
@@ -740,8 +740,8 @@ void exp_(Interval<R>& r, const R& x) {
   exp_(r._lower,x,round_down); 
   exp_(r._upper,x,round_up); } 
 
-template<class R, class X> inline 
-void exp_(Interval<R>& r, const Interval<X>& x) {
+template<class R> inline 
+void exp_(Interval<R>& r, const Interval<R>& x) {
   exp_(r._lower,x._lower,round_down); 
   exp_(r._upper,x._upper,round_up); } 
 
@@ -751,35 +751,35 @@ void log_(Interval<R>& r, const R& x) {
   log_(r._lower,x,round_down); 
   log_(r._upper,x,round_up); } 
 
-template<class R, class X> inline 
-void log_(Interval<R>& r, const Interval<X>& x) {
+template<class R> inline 
+void log_(Interval<R>& r, const Interval<R>& x) {
   log_(r._lower,x._lower,round_down); 
   log_(r._upper,x._upper,round_up); } 
 
 
 // Trigonometric functions for non-interval classes.
-template<class R, class X> inline
-void sin_(Interval<R>& r, const X& x) {
+template<class R> inline
+void sin_(Interval<R>& r, const R& x) {
   sin_(r,Interval<R>(x)); }
 
-template<class R, class X> inline
-void cos_(Interval<R>& r, const X& x) {
+template<class R> inline
+void cos_(Interval<R>& r, const R& x) {
   cos_(r,Interval<R>(x)); }
 
-template<class R, class X> inline
-void tan_(Interval<R>& r, const X& x) {
+template<class R> inline
+void tan_(Interval<R>& r, const R& x) {
   tan_(r,Interval<R>(x)); }
 
-template<class R, class X> inline
-void asin_(Interval<R>& r, const X& x) {
+template<class R> inline
+void asin_(Interval<R>& r, const R& x) {
   asin_(r,Interval<R>(x)); }
 
-template<class R, class X> inline
-void acos_(Interval<R>& r, const X& x) {
+template<class R> inline
+void acos_(Interval<R>& r, const R& x) {
   acos_(r,Interval<R>(x)); }
 
-template<class R, class X> inline
-void atan_(Interval<R>& r, const X& x) {
+template<class R> inline
+void atan_(Interval<R>& r, const R& x) {
   atan_(r,Interval<R>(x)); }
 
 

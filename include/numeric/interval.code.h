@@ -34,81 +34,72 @@ Interval<R>::Interval(const std::string& str) {
 
 template<class R> void instantiate_interval();
 
+template<typename R> void cos_(Interval<R>& res, const Interval<R>& ivl);
+
+
 
 template<class R> 
 void 
 pi_(Interval<R>& r) 
 {
-  assert(false);
+  pi_(r._lower,round_down);
+  pi_(r._upper,round_up);
 }
 
-template<class R, class X> 
+template<class R> 
 void 
-sin_(Interval<R>& r, const Interval<X>& x) 
+sin_(Interval<R>& r, const Interval<R>& x) 
 {
-  assert(false);
-}
-
-
-template<class R, class X> 
-void cos_(Interval<R>& r, const Interval<X>& x) 
-{
-  assert(false);
-}
-
-
-template<class R, class X> 
-void tan_(Interval<R>& r, const Interval<X>& x) 
-{
-  assert(false);
-}
-
-
-template<class R, class X> 
-void asin_(Interval<R>& r, const Interval<X>& x) 
-{
-  assert(false);
-}
-
-
-template<class R, class X> 
-void acos_(Interval<R>& r, const Interval<X>& x) 
-{
-  assert(false);
-}
-
-
-template<class R, class X> 
-void atan_(Interval<R>& r, const Interval<X>& x) 
-{
-  assert(false);
+  Interval<R> y=x-pi< Interval<R> >()/2;
+  cos_(r,y);
 }
 
 
 
+template<class R> 
+void tan_(Interval<R>& r, const Interval<R>& x) 
+{
+  tan_(r._lower,x._lower,round_down);
+  tan_(r._upper,x._upper,round_up);
+}
 
-/*
+
+template<class R> 
+void asin_(Interval<R>& r, const Interval<R>& x) 
+{
+  asin_(r._lower,x._lower,round_down);
+  asin_(r._upper,x._upper,round_up);
+}
+
+
+template<class R> 
+void acos_(Interval<R>& r, const Interval<R>& x) 
+{
+  // Need to consider case r=x;
+  Interval<R> t(x);
+  acos_(r._lower,t._upper,round_down);
+  acos_(r._upper,t._lower,round_up);
+}
+
+
+template<class R> 
+void atan_(Interval<R>& r, const Interval<R>& x) 
+{
+  atan_(r._lower,x._lower,round_down);
+  atan_(r._upper,x._upper,round_up);
+}
+
+
+
 
 template<typename R>  
-Numeric::Interval<R> 
-Numeric::sin(const Interval<R>& ivl) 
-{
-  if(ivl.lower()>-1.5 && ivl.upper()<+1.5) {
-    return Interval<R>(sin_down(ivl.lower()),sin_up(ivl.upper()));
-  } else {
-    return cos(ivl-pi<R>()/2);
-  }
-}
-    
-
-template<typename R>  
-Numeric::Interval<R> 
-Numeric::cos(const Interval<R>& ivl) 
+void
+cos_(Interval<R>& res, const Interval<R>& ivl) 
 {
   assert(ivl.lower()<=ivl.upper());
-  Interval<R> pi=Numeric::pi<R>();
+  Interval<R> pi=Numeric::pi< Interval<R> >();
   Interval<R> two_pi=2*pi;
-  R n=floor(div_down(ivl.lower(),two_pi.lower()));
+  R n=floor<R>(div_down(ivl.lower(),two_pi.lower()));
   //std::cerr << std::setprecision(20);
   //std::cerr << "n=" << n << std::endl;       
   // l and u are intervals shifted by a mul_tiple of 2*pi.
@@ -120,10 +111,15 @@ Numeric::cos(const Interval<R>& ivl)
   const R  thpl=mul_down(pi.lower(),3);
   const R& l=x.lower();
   const R& u=x.upper();
+  Interval<R>& r=res;
+  //R& rl=r._lower;
+  //R& ru=r._upper;
   //std::cerr << "l=" << l << ", u=" << u << std::endl;       
   if(sub_down(u,l)>=tpu) {
     // There is a full period in [l,u]
-    return Interval<R>(static_cast<R>(-1),static_cast<R>(1));
+    set_(r._lower,-1);
+    set_(r._upper,+1);
+    return;
   } else {
     // Check values are reasonable
     //if(!(l>=0 && l<=tpu)) {
@@ -131,49 +127,79 @@ Numeric::cos(const Interval<R>& ivl)
     //}
     assert(l>=-0 && l<=tpu);
     if(l<pl) {
-      if(u<pl) {
-        return Interval<R>(cos_down(u),cos_up(l));
+      if(u<pl) { 
+        //Interval<R>(cos_down(u),cos_up(l));
+        cos_(r._lower,x._lower,round_up);
+        cos_(r._upper,x._upper,round_down);
+        std::swap(r._lower,r._upper);
       } else if(u<tpl) {
-        return Interval<R>(static_cast<R>(-1),max_(cos_up(l),cos_up(u)));
+        //Interval<R>(-1,max(cos_up(l),cos_up(u)));
+        cos_(r._lower,x._lower,round_up);
+        cos_(r._upper,x._upper,round_up);
+        max_(r._upper,r._lower,r._upper);
+        set_(r._lower,-1);
       } else {
-        return Interval<R>(static_cast<R>(-1),static_cast<R>(1));
+        //Interval<R>(-1,1);
+        set_(r._lower,-1);
+        set_(r._upper,+1);
       }
     } else if (l<pu) {
       if(u<tpl) {
-        return Interval<R>(static_cast<R>(-1),max_(cos_up(l),cos_up(u)));
+        //Interval<R>(static_cast<R>(-1),max(cos_up(l),cos_up(u)));
+        cos_(r._upper,x._upper,round_up);
+        cos_(r._lower,x._lower,round_up);
+        max_(r._upper,r._lower,r._upper);
+        set_(r._lower,-1);
       } else {
-        return Interval<R>(static_cast<R>(-1),static_cast<R>(1));
+        //Interval<R>(static_cast<R>(-1),static_cast<R>(1));
+        set_(r._lower,-1);
+        set_(r._upper,+1);
       }
     } else if (l<tpl) {
       if(u<tpl) {
-        return Interval<R>(cos_down(l),cos_up(u));
+        //Interval<R>(cos_down(l),cos_up(u));
+        cos_(r._lower,x._lower,round_down);
+        cos_(r._upper,x._upper,round_up);
       } else if(u<thpl) {
-        return Interval<R>(min_(cos_down(l),cos_down(u)),static_cast<R>(1));
+        //Interval<R>(min(cos_down(l),cos_down(u)),+1);
+        cos_(r._lower,x._lower,round_down);
+        cos_(r._upper,x._upper,round_down);
+        min_(r._lower,r._lower,r._upper);
+        set_(r._upper,+1);
       } else {
-        return Interval<R>(static_cast<R>(-1),static_cast<R>(1));
+        //Interval<R>(-1,+1);
+        set_(r._lower,-1);
+        set_(r._upper,+1);
       }
     } else { // 2*pi_ < ln < 2*pi^
       if(u<thpl) {
-            return Interval<R>(min_(cos_down(l),cos_down(u)),static_cast<R>(1));
+        //Interval<R>(min(cos_down(l),cos_down(u)),+1);
+        cos_(r._lower,x._lower,round_down);
+        cos_(r._upper,x._upper,round_down);
+        min_(r._lower,r._lower,r._upper);
+        set_(r._upper,+1);
       } else {
-        return Interval<R>(static_cast<R>(-1),static_cast<R>(1));
+        //Interval<R>(-1,+1);
+        set_(r._lower,-1);
+        set_(r._upper,+1);
       }
     }
   }
 }
     
+/*
 
 template<typename R>  
-Numeric::Interval<R> 
-Numeric::tan(const Interval<R>& ivl) 
+Interval<R> 
+tan(const Interval<R>& ivl) 
 {
   return sin(ivl)/cos(ivl);
 }
     
 
 template<typename R>  
-Numeric::Interval<R> 
-Numeric::asin(const Interval<R>& ivl) 
+Interval<R> 
+asin(const Interval<R>& ivl) 
 {
   static bool warn=true;
   if(warn) {
@@ -185,8 +211,8 @@ Numeric::asin(const Interval<R>& ivl)
 
 
 template<typename R>
-Numeric::Interval<R> 
-Numeric::acos(const Interval<R>& ivl) 
+Interval<R> 
+acos(const Interval<R>& ivl) 
 {
   static bool warn=true;
   if(warn) {
@@ -198,8 +224,8 @@ Numeric::acos(const Interval<R>& ivl)
    
  
 template<typename R>  
-Numeric::Interval<R> 
-Numeric::atan(const Interval<R>& ivl) 
+Interval<R> 
+atan(const Interval<R>& ivl) 
 {
   static bool warn=true;
   if(warn) {
@@ -210,7 +236,6 @@ Numeric::atan(const Interval<R>& ivl)
 }
     
 */
-
 
 template<typename R>  
 void
@@ -224,6 +249,7 @@ instantiate_interval()
   pi_(*ivl);
   sin_(*ivl,*civl);
   sin(*ivl);
+  cos_(*ivl,*civl);
   cos(*ivl);
   tan(*ivl);
   asin(*ivl);
@@ -231,6 +257,7 @@ instantiate_interval()
   acos(*ivl);
   atan(*ivl);
 }
+
 
 
 } // namespace Numeric

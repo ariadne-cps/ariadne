@@ -380,29 +380,47 @@ inline void pi_(Float64& r, RoundDown) {
 inline void pi_(Float64& r, RoundUp) {
   r._value=3.1415926535897934; }
 
-inline void sin_(Float64& r, Float64& x, RoundApprox) {
+inline void sin_(Float64& r, const Float64& x, RoundApprox) {
   r._value=std::sin(x._value); }
-void sin_(Interval64& r, Interval64& x);
+inline void sin_(Float64& r, const Float64& x, RoundDown) {
+  r._value=Float64::rounding().sin_down(x._value); }
+inline void sin_(Float64& r, const Float64& x, RoundUp) {
+  r._value=Float64::rounding().sin_up(x._value); }
 
-inline void cos_(Float64& r, Float64& x, RoundApprox) {
+inline void cos_(Float64& r, const Float64& x, RoundApprox) {
   r._value=std::cos(x._value); }
-void cos_(Interval64& r, Interval64& x);
+inline void cos_(Float64& r, const Float64& x, RoundDown) {
+  r._value=Float64::rounding().cos_down(x._value); }
+inline void cos_(Float64& r, const Float64& x, RoundUp) {
+  r._value=Float64::rounding().cos_up(x._value); }
 
-inline void tan_(Float64& r, Float64& x, RoundApprox) {
+inline void tan_(Float64& r, const Float64& x, RoundApprox) {
   r._value=std::tan(x._value); }
-void tan_(Interval64& r, Interval64& x);
+inline void tan_(Float64& r, const Float64& x, RoundDown) {
+  r._value=Float64::rounding().tan_down(x._value); }
+inline void tan_(Float64& r, const Float64& x, RoundUp) {
+  r._value=Float64::rounding().tan_up(x._value); }
 
-inline void asin_(Float64& r, Float64& x, RoundApprox) {
+inline void asin_(Float64& r, const Float64& x, RoundApprox) {
   r._value=std::asin(x._value); }
-void asin_(Interval64& r, Interval64& x);
+inline void asin_(Float64& r, const Float64& x, RoundDown) {
+  r._value=Float64::rounding().asin_down(x._value); }
+inline void asin_(Float64& r, const Float64& x, RoundUp) {
+  r._value=Float64::rounding().asin_up(x._value); }
 
-inline void acos_(Float64& r, Float64& x, RoundApprox) {
+inline void acos_(Float64& r, const Float64& x, RoundApprox) {
   r._value=std::acos(x._value); }
-void acos_(Interval64& r, Interval64& x);
+inline void acos_(Float64& r, const Float64& x, RoundDown) {
+  r._value=Float64::rounding().acos_down(x._value); }
+inline void acos_(Float64& r, const Float64& x, RoundUp) {
+  r._value=Float64::rounding().acos_up(x._value); }
 
-inline void atan_(Float64& r, Float64& x, RoundApprox) {
+inline void atan_(Float64& r, const Float64& x, RoundApprox) {
   r._value=std::atan(x._value); }
-void atan_(Interval64& r, Interval64& x);
+inline void atan_(Float64& r, const Float64& x, RoundDown) {
+  r._value=Float64::rounding().atan_down(x._value); }
+inline void atan_(Float64& r, const Float64& x, RoundUp) {
+  r._value=Float64::rounding().atan_up(x._value); }
 
 
 

@@ -25,18 +25,18 @@
 namespace Ariadne {
 namespace Numeric {
 
-template<class R, class X> void sqrt_(Interval<R>& r, const Interval<X>& x);
-template<class R, class X, class Y> void hypot_(Interval<R>& r, const Interval<X>& x, const Interval<Y>& y);
+template<class R> void sqrt_(Interval<R>& r, const Interval<R>& x);
+template<class R> void hypot_(Interval<R>& r, const Interval<R>& x, const Interval<R>& y);
 
-template<class R, class X> void exp_(Interval<R>& r, const Interval<X>& x);
-template<class R, class X> void log_(Interval<R>& r, const Interval<X>& x);
+template<class R> void exp_(Interval<R>& r, const Interval<R>& x);
+template<class R> void log_(Interval<R>& r, const Interval<R>& x);
 template<class R> void pi_(Interval<R>& r);
-template<class R, class X> void sin_(Interval<R>& r, const Interval<X>& x);
-template<class R, class X> void cos_(Interval<R>& r, const Interval<X>& x);
-template<class R, class X> void tan_(Interval<R>& r, const Interval<X>& x);
-template<class R, class X> void asin_(Interval<R>& r, const Interval<X>& x);
-template<class R, class X> void acos_(Interval<R>& r, const Interval<X>& x);
-template<class R, class X> void atan_(Interval<R>& r, const Interval<X>& x);
+template<class R> void sin_(Interval<R>& r, const Interval<R>& x);
+template<class R> void cos_(Interval<R>& r, const Interval<R>& x);
+template<class R> void tan_(Interval<R>& r, const Interval<R>& x);
+template<class R> void asin_(Interval<R>& r, const Interval<R>& x);
+template<class R> void acos_(Interval<R>& r, const Interval<R>& x);
+template<class R> void atan_(Interval<R>& r, const Interval<R>& x);
 
 template<class R> std::ostream& operator<<(std::ostream& os, const Interval<R>& x);
 template<class R> std::istream& operator>>(std::istream& is, Interval<R>& x);

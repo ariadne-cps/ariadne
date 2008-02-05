@@ -30,8 +30,6 @@ disjoint(plt,plh)
 disjoint(plh,plt)
 disjoint(plh,plh)
 intersection(plh,plh)
-#assert(equal(plt,plt))
-assert(equal(plh,plh))
 
 eps=EpsPlot()
 eps.open("geometry-rational.eps",Box([[-5,5],[-5,5]]))

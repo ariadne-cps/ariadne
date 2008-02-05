@@ -352,23 +352,10 @@ inline void log_(FloatMP& r, const FloatMP& x, Rnd) {
 
 
 
-inline void pi_(FloatMP& r, RoundApprox) {
-  mpfr_const_pi(r._value,GMP_RNDN); }
 
-inline void sin_(FloatMP& r, const FloatMP& x, RoundApprox) {
-  mpfr_sin(r._value,x._value,GMP_RNDN); }
-inline void cos_(FloatMP& r, const FloatMP& x, RoundApprox) {
-  mpfr_cos(r._value,x._value,GMP_RNDN); }
-inline void tan_(FloatMP& r, const FloatMP& x, RoundApprox) {
-  mpfr_tan(r._value,x._value,GMP_RNDN); }
-inline void asin_(FloatMP& r, const FloatMP& x, RoundApprox) {
-  mpfr_asin(r._value,x._value,GMP_RNDN); }
-inline void acos_(FloatMP& r, const FloatMP& x, RoundApprox) {
-  mpfr_acos(r._value,x._value,GMP_RNDN); }
-inline void atan_(FloatMP& r, const FloatMP& x, RoundApprox) {
-  mpfr_atan(r._value,x._value,GMP_RNDN); }
-
-
+template<class Rnd> 
+inline void pi_(FloatMP& r, Rnd) {
+  mpfr_const_pi(r._value,mpfr_rounding_mode<Rnd>()); }
 template<class Rnd> 
 inline void sin_(FloatMP& r, const FloatMP& x, Rnd) {
   mpfr_sin(r._value,x._value,mpfr_rounding_mode<Rnd>()); }

@@ -24,6 +24,7 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 from ariadne import *
+import sys 
 
 print dir()
 
@@ -52,23 +53,16 @@ mode1=automaton.new_mode(mode1_id,dynamic1,invariant1)
 mode2=automaton.new_mode(mode2_id,dynamic2,invariant2)
 event1_id=DiscreteEvent(5)
 event2_id=DiscreteEvent(7)
-transition=automaton.new_transition(event1_id,mode1_id,mode1_id,reset11,activation11)
-transition=automaton.new_transition(event2_id,mode1_id,mode2_id,reset12,activation12)
-transition=automaton.new_transition(event1_id,mode2_id,mode1_id,reset21,activation21)
+#transition=automaton.new_transition(event1_id,mode1_id,mode1_id,reset11,activation11)
+#transition=automaton.new_transition(event2_id,mode1_id,mode2_id,reset12,activation12)
+#transition=automaton.new_transition(event1_id,mode2_id,mode1_id,reset21,activation21)
 print automaton
 #print automaton.invariant()
 
-initial_rectangle1=Rectangle([[-6.96875,-6.9375],[-6.96875,-6.9375]]);
-initial_rectangle2=Rectangle([[6.9375,6.96875],[6.9375,6.96875]])
+initial_rectangle1=RectangularSet([[-6.96875,-6.9375],[-6.96875,-6.9375]]);
+initial_rectangle2=RectangularSet([[6.9375,6.96875],[6.9375,6.96875]])
 bounding_box=Box([[-8,8],[-8,8]])
 
-
-v = Vector(2);
-v[0] = 1.0/32;
-v[1] = 1.0/32;
-grid=Grid(v)
-fgrid=FiniteGrid(grid,bounding_box)
-print fgrid
 
 print "Creating initial hybrid set"
 initial_set=HybridSet()
@@ -83,8 +77,9 @@ parameters.set_grid_length(0.05)
 parameters.set_lock_to_grid_time(0.25);
 parameters.set_maximum_step_size(0.125)
 #parameters.set_maximum_enclosure_radius(0.25);
-parameters.set_maximum_enclosure_radius(0.5);
-parameters.set_verbosity(0);
+parameters.set_maximum_enclosure_radius(2.5);
+parameters.set_verbosity(9);
+parameters.set_bounding_domain_size(8);
 print parameters
 applicator=KuhnApplicator(3)
 integrator=AffineIntegrator();
@@ -110,6 +105,8 @@ eps.write(initial_set[mode1_id])
 eps.write(initial_set[mode2_id])
 eps.close()
 print
+
+#sys.exit(0)
 
 print "Computing upper reach set"
 upper_reach_set=hybrid_evolver.upper_reach(automaton,initial_set,time)

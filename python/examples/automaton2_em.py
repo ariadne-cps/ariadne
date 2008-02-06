@@ -3,10 +3,6 @@
 from ariadne import *
 
 #print dir()
-
-space=Rectangle([[-5,30],[-5,30]])
-
-#locazione 1
 invariant1=RectangularSet([[0,8],[0,30]])
 dynamic1=AffineVectorField(Matrix([[0,0],[0,-1]]),Vector([1,25]))
 
@@ -32,7 +28,7 @@ transition=automaton.new_transition(event1_id,mode1_id,mode2_id,reset12,activati
 print automaton
 
 #definizione condizioni iniziali
-initial_rectangle1=Rectangle([[2,2.01],[5,5.01]]);
+initial_rectangle1=Rectangle([[7,7.01],[22,22.01]]);
 initial_rectangle2=Rectangle([[12,12.01],[10,10.01]]);
 
 #definizione spazio di lavoro e griglia.
@@ -49,14 +45,20 @@ initial_set=HybridSet()
 
 initial_set.new_location(mode1_id,initial_rectangle1)
 initial_set.new_location(mode2_id,initial_rectangle2)
+#initial_set.new_location(mode2_id,EmptySet(2))
 print "initial_set.locations() =",initial_set.locations()
 
 
 # set evolution parameters
 par=EvolutionParameters()
-par.set_maximum_step_size(0.05);
+par.set_maximum_enclosure_radius(0.25);
+par.set_maximum_step_size(0.5);
 par.set_lock_to_grid_time(1.5);
-par.set_grid_length(0.15)
+par.set_grid_length(0.25)
+par.set_argument_grid_length(0.25)
+par.set_result_grid_length(0.25)
+
+print par
 
 apply=StandardApplicator()
 #integrator=AffineIntegrator(maximum_step_size,lock_to_grid_time,maximum_set_radius);
@@ -67,8 +69,8 @@ hybrid_evolver=SetBasedHybridEvolver(par,apply,integrator);
 
 #print "Computing continuous chainreach set"
 #set_applicator_verbosity(4)
-set_integrator_verbosity(6)
-set_hybrid_evolver_verbosity(4)
+set_integrator_verbosity(0)
+set_hybrid_evolver_verbosity(0)
 #continuous_chainreach_set=hybrid_evolver.continuous_chainreach(automaton,initial_set,bounding_set)
 print
 
@@ -76,14 +78,17 @@ print
 #discrete_step_set=hybrid_evolver.discrete_step(automaton,initial_set)
 print
 
+print "Computing lower reach set for 2 seconds..."
+chainreach_set=hybrid_evolver.lower_reach(automaton,initial_set,Rational(2))
 
-print "Computing chainreach set..."
-chainreach_set=hybrid_evolver.chainreach(automaton,initial_set)
+print "Sizes of the computed regions:"
+print "Mode 1:",chainreach_set[mode1_id].size()
+print "Mode 2:",chainreach_set[mode2_id].size()
 
 print "Exporting to postscript output...",
-epsbb=space # eps bounding box
+epsbb=Box([[-5,30],[-5,30]]) # eps bounding box
 eps=EpsPlot()
-eps.open("automaton2_em.eps",epsbb)
+eps.open("automaton2_em_lower.eps",epsbb)
 eps.set_line_style(True)
 eps.set_fill_colour("red")
 eps.write(invariant1)
@@ -93,10 +98,42 @@ eps.set_fill_colour("green")
 eps.write(chainreach_set[mode1_id])
 eps.set_fill_colour("blue")
 eps.write(initial_set[mode1_id])
-eps.set_fill_colour("brown")
+eps.set_fill_colour("cyan")
 eps.write(chainreach_set[mode2_id])
 eps.set_fill_colour("black")
-eps.write(initial_set[mode2_id])
+#eps.write(initial_set[mode2_id])
+
+
+eps.close()
+
+print " done."
+
+
+
+print "Computing upper reach set for 2 seconds..."
+chainreach_set=hybrid_evolver.upper_reach(automaton,initial_set,Rational(2))
+
+print "Sizes of the computed regions:"
+print "Mode 1:",chainreach_set[mode1_id].size()
+print "Mode 2:",chainreach_set[mode2_id].size()
+
+print "Exporting to postscript output...",
+epsbb=Box([[-5,30],[-5,30]]) # eps bounding box
+eps=EpsPlot()
+eps.open("automaton2_em_upper.eps",epsbb)
+eps.set_line_style(True)
+eps.set_fill_colour("red")
+eps.write(invariant1)
+eps.set_fill_colour("yellow")
+eps.write(invariant2)
+eps.set_fill_colour("green")
+eps.write(chainreach_set[mode1_id])
+eps.set_fill_colour("blue")
+eps.write(initial_set[mode1_id])
+eps.set_fill_colour("cyan")
+eps.write(chainreach_set[mode2_id])
+eps.set_fill_colour("black")
+#eps.write(initial_set[mode2_id])
 
 
 eps.close()

@@ -64,7 +64,7 @@ int main() {
 #endif
    
   cerr << "INCOMPLETE ";
-  return 0;
+  return ARIADNE_TEST_FAILURES;
 }
 
 
@@ -81,30 +81,31 @@ test_interval()
   
   // Construct from pair
   Interval<R> ivld1(R(1.125),R(2.25));
-  assert(ivld1.lower()==1.125); assert(ivld1.upper()==2.25);
+  ARIADNE_TEST_ASSERT(ivld1.lower()==1.125); ARIADNE_TEST_ASSERT(ivld1.upper()==2.25);
   // Default constructor
   Interval<R> ivld2;
   if(ivld2.empty()) { 
     cerr << "Warning: Interval<R> default constructor returns an empty set\n"; 
   } else {
-    assert((bool)(ivld2==Interval<R>(zero,zero)));
+    ARIADNE_TEST_ASSERT((bool)(ivld2==Interval<R>(zero,zero)));
   }
   // Constructor with approximations
   Interval<R> ivld3(Rational(21,10),Rational(16,5));
-  assert(ivld3.lower()<Rational(21,10));
-  assert(ivld3.upper()>Rational(16,5));
+  cout<<ivld3<<std::endl;
+  ARIADNE_TEST_ASSERT(ivld3.lower()<Rational(21,10));
+  ARIADNE_TEST_ASSERT(ivld3.upper()>Rational(16,5));
   // Constructor from approximate values
   Interval<R> ivld4(2.1,3.2);
-  assert(ivld4.lower()<=2.1);
-  assert(ivld4.upper()>=3.2);
+  ARIADNE_TEST_ASSERT(ivld4.lower()<=2.1);
+  ARIADNE_TEST_ASSERT(ivld4.upper()>=3.2);
   // Approximate constructor from a single value
   Interval<R> ivld5(Rational(1,3));
-  assert(ivld5.lower()<Rational(1,3));
-  assert(ivld5.upper()>Rational(1,3));
+  ARIADNE_TEST_ASSERT(ivld5.lower()<Rational(1,3));
+  ARIADNE_TEST_ASSERT(ivld5.upper()>Rational(1,3));
   // Exact constructor from a single value
   Interval<R> ivld6(R(1.25));
-  assert(ivld6.lower()==R(1.25));
-  assert(ivld6.upper()==R(1.25));
+  ARIADNE_TEST_ASSERT(ivld6.lower()==R(1.25));
+  ARIADNE_TEST_ASSERT(ivld6.upper()==R(1.25));
   
   Interval<R> ivlq1(1.1,2.2);
   Interval<R> ivlq2(1.125,1.125);
@@ -146,7 +147,7 @@ test_interval()
   cout << "midpoint(" << ivlf1 << ")=" << ivlf1.midpoint() << endl;
   cout << "radius(" << ivlf2 << ")=" << radius(ivlf2) << endl;
   cout << "width(" << ivlf2 << ")=" << width(ivlf2) << endl;
-  assert(ivlf1.midpoint()==R(2.3125));
+  ARIADNE_TEST_ASSERT(ivlf1.midpoint()==R(2.3125));
   
   try {
     string input("[1.125,2.25] ");
@@ -154,17 +155,17 @@ test_interval()
     
     iss >> ivld2;
     cout << "ivld1=" << ivld1 << "  ivld2=" << ivld2 << endl;
-    assert(equal(ivld1,ivld2));
-    assert(ivld1.lower()==ivld2.lower() && ivld1.upper()==ivld2.upper());
+    ARIADNE_TEST_ASSERT(equal(ivld1,ivld2));
+    ARIADNE_TEST_ASSERT(ivld1.lower()==ivld2.lower() && ivld1.upper()==ivld2.upper());
     
-    assert(equal(ivld1,ivld2));
+    ARIADNE_TEST_ASSERT(equal(ivld1,ivld2));
     
-    assert(indeterminate(ivld1==ivld2));
+    ARIADNE_TEST_ASSERT(indeterminate(ivld1==ivld2));
     
     Interval<R>& ivlf1ref=ivlf1;
     ivlf1ref=Interval<R>(5.25,7.375);
     cout << "ivlf1ref=" << ivlf1ref << endl;
-    assert(ivlf1ref.lower()==R(5.25));
+    ARIADNE_TEST_ASSERT(ivlf1ref.lower()==R(5.25));
     
     ivld1 = ivld2+ivld3;
     cout << ivld2 << " + " << ivld3 << " = " << ivld1 << endl;
@@ -205,14 +206,14 @@ test_interval()
     cout << endl;
     
     // Check to make sure aliases are handled correctly
-    ivlf1=ivlf3; ivlf1=ivlf2-ivlf1; assert(equal(ivlf1,I(ivlf2-ivlf3)));
-    ivlf1=ivlf3; ivlf1=ivlf2*ivlf1; assert(equal(ivlf1,I(ivlf2*ivlf3)));
-    ivlf1=ivlf2; ivlf1=ivlf1*ivlf3; assert(equal(ivlf1,I(ivlf2*ivlf3)));
-    ivlf1=ivlf2; ivlf1=ivlf1*f3; assert(equal(ivlf1,I(ivlf2*f3)));
-    ivlf1=ivlf3; ivlf1=f2*ivlf1; assert(equal(ivlf1,I(f2*ivlf3)));
-    ivlf1=ivlf2; ivlf1=ivlf1/ivlf3; assert(equal(ivlf1,I(ivlf2/ivlf3)));
-    ivlf1=ivlf2; ivlf1=ivlf1/f3; assert(equal(ivlf1,I(ivlf2/f3)));
-    ivlf1=ivlf3; ivlf1=f2/ivlf1; assert(equal(ivlf1,I(f2/ivlf3)));
+    ivlf1=ivlf3; ivlf1=ivlf2-ivlf1; ARIADNE_TEST_ASSERT(equal(ivlf1,I(ivlf2-ivlf3)));
+    ivlf1=ivlf3; ivlf1=ivlf2*ivlf1; ARIADNE_TEST_ASSERT(equal(ivlf1,I(ivlf2*ivlf3)));
+    ivlf1=ivlf2; ivlf1=ivlf1*ivlf3; ARIADNE_TEST_ASSERT(equal(ivlf1,I(ivlf2*ivlf3)));
+    ivlf1=ivlf2; ivlf1=ivlf1*f3; ARIADNE_TEST_ASSERT(equal(ivlf1,I(ivlf2*f3)));
+    ivlf1=ivlf3; ivlf1=f2*ivlf1; ARIADNE_TEST_ASSERT(equal(ivlf1,I(f2*ivlf3)));
+    ivlf1=ivlf2; ivlf1=ivlf1/ivlf3; ARIADNE_TEST_ASSERT(equal(ivlf1,I(ivlf2/ivlf3)));
+    ivlf1=ivlf2; ivlf1=ivlf1/f3; ARIADNE_TEST_ASSERT(equal(ivlf1,I(ivlf2/f3)));
+    ivlf1=ivlf3; ivlf1=f2/ivlf1; ARIADNE_TEST_ASSERT(equal(ivlf1,I(f2/ivlf3)));
     
 
     ivlq1 = ivlq2+ivlq3;
@@ -226,15 +227,15 @@ test_interval()
     cout << endl;
     //ivlr1 = sin(ivlr2);
 
-    // ensure proper rounding using assertions
+    // ensure proper rounding using ARIADNE_TEST_ASSERTions
     Interval<R> ivlo(1.0);
     Interval<R> ivlt(3.0);
     Interval<R> ivlodt=ivlo/ivlt;
     Interval<R> ivloa=ivlodt*ivlt;
     cout << ivlo << " / " << ivlt << " = " << ivlodt << endl;
     cout << ivlo << " in " << Interval<R>(ivlodt * ivlt) << endl;
-    assert(ivlodt.lower() < ivlodt.upper());
-    assert(ivloa.lower() < ivlo.lower() && ivloa.upper() > ivlo.upper());
+    ARIADNE_TEST_ASSERT(ivlodt.lower() < ivlodt.upper());
+    ARIADNE_TEST_ASSERT(ivloa.lower() < ivlo.lower() && ivloa.upper() > ivlo.upper());
     
     
 
@@ -267,13 +268,53 @@ test_interval()
     throw e;
   }
   
-  ivlf1=Interval<R>(R(1),R(1));
-  cout << "one=" << ivlf1 << endl;
-  ivlf2=exp(ivlf1);
-  cout << "exp(" << ivlf1 << ")=" << ivlf2 << endl;
-  ivlf3=log(ivlf1);
-  cout << "log(" << ivlf2 << ")=" << ivlf3 << endl;
- 
+  // e=2.718281828459045235360287471352662497[78]
+  // 2*pi = 6.283185307179586476925286766559005768[3,5]
+
+  // Regression test; fails dramatically on certain types of rounding
+  {
+    Interval<R> one(1.0);
+    Interval<R> expone=exp(one);
+    ARIADNE_TEST_PRINT(one);
+    ARIADNE_TEST_COMPARE(expone.lower(),<,2.71828182845905);
+    ARIADNE_TEST_COMPARE(expone.lower(),>,2.71828182845903);
+    ARIADNE_TEST_COMPARE(expone.upper(),>,2.71828182845904);
+    ARIADNE_TEST_COMPARE(expone.upper(),<,2.71828182845906);
+    ARIADNE_TEST_ASSERT(expone.lower()<expone.upper());
+  }
+
+  {
+    Interval<R> e(Rational(2.71828182845904),Rational(2.71828182845905));
+    Interval<R> loge=log(e);
+    ARIADNE_TEST_PRINT(e);
+    ARIADNE_TEST_COMPARE(loge.lower(),<,1);
+    ARIADNE_TEST_COMPARE(loge.lower(),>,0.9999999999998);
+    ARIADNE_TEST_COMPARE(loge.upper(),>,1);
+    ARIADNE_TEST_COMPARE(loge.upper(),<,1.000000000002);
+ }
+
+
+  // Regression test; fails dramatically on certain types of rounding
+  {
+    Interval<R> x(6.283185307179586,6.283185307179587);
+    Interval<R> sinx=sin(x);
+    ARIADNE_TEST_PRINT(x);
+    ARIADNE_TEST_COMPARE(sinx.lower(),<,0.0);
+    ARIADNE_TEST_COMPARE(sinx.lower(),>,-2e-15);
+    ARIADNE_TEST_COMPARE(sinx.upper(),>,0.0);
+    ARIADNE_TEST_COMPARE(sinx.upper(),<,+2e-15);
+    ARIADNE_TEST_ASSERT(sinx.lower()<sinx.upper());
+  }
+
+  {
+    Interval<R> x(7.0685834705770345);
+    Interval<R> sinx=sin(x);
+    ARIADNE_TEST_PRINT(x);
+    ARIADNE_TEST_COMPARE(sinx.lower(),<,0.7071067811866);
+    ARIADNE_TEST_COMPARE(sinx.upper(),>,0.7071067811865);
+    ARIADNE_TEST_ASSERT(sinx.lower()<sinx.upper());
+  }
+
   return 0;
 }
 
@@ -335,13 +376,13 @@ test_interval<Rational>()
     ivld1=Interval<R>(1.25,2.25);
     iss >> ivld2;
     cout << "ivld1=" << ivld1 << "  ivld2=" << ivld2 << endl;
-    assert(equal(ivld1,ivld2));
-    assert(indeterminate(ivld1==ivld2));
+    ARIADNE_TEST_ASSERT(equal(ivld1,ivld2));
+    ARIADNE_TEST_ASSERT(indeterminate(ivld1==ivld2));
     
     Interval<R>& ivlf1ref=ivlf1;
     ivlf1ref=Interval<R>(5.25,7.375);
     cout << "ivlf1ref=" << ivlf1ref << endl;
-    assert(ivlf1ref.lower()==R(5.25));
+    ARIADNE_TEST_ASSERT(ivlf1ref.lower()==R(5.25));
     
     ivld1 = ivld2+ivld3;
     cout << ivld2 << " + " << ivld3 << " = " << ivld1 << endl;
@@ -399,5 +440,4 @@ test_interval<Rational>()
     throw e;
   }
   
-  return 0;
 }

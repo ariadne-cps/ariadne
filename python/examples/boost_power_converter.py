@@ -100,6 +100,7 @@ par=EvolutionParameters();
 par.set_maximum_step_size(0.25);
 par.set_lock_to_grid_time(0.25);
 par.set_grid_length(0.0625);
+print "evolution parameters =",par
 
 apply=StandardApplicator()
 integrator=AffineIntegrator();

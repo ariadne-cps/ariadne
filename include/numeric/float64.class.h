@@ -32,6 +32,19 @@
 
 #include <boost/numeric/interval/rounded_arith.hpp>
 #include <boost/numeric/interval/rounded_transc.hpp>
+
+// Try uncommenting this code if experiencing difficulties with rounded and interval transcendental functions.
+/*
+#ifdef __x86_64__ 
+#ifndef __i386__
+#define __i386__
+#warning "Defining __i386__ preprocessor symbol in order to use x86 hardware rounding on an __x86_64__ machine. Please contact the developers if this causes a compilation problem."
+#include <boost/numeric/interval/hw_rounding.hpp>
+#undef __i386__
+#endif
+#endif
+*/
+
 #include <boost/numeric/interval/hw_rounding.hpp>
 
 #include "numeric/expression.h"

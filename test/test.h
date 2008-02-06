@@ -38,6 +38,7 @@ ariadne_check(std::ostream& os, const R& r, const ER& er) {
   os << r; return (r==er);
 }
 
+
 /*! \brief Catches an exception and writes a diagnostic to standard output and standard error. */
 #define ARIADNE_TEST_CATCH(message) \
   catch(const std::exception& e) {          \
@@ -100,7 +101,7 @@ ariadne_check(std::ostream& os, const R& r, const ER& er) {
   } else { \
     ++ARIADNE_TEST_FAILURES; \
     std::cout << "false" << std::endl; \
-    std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __FUNCTION__ << ": Assertion `" << #expression << "' failed.\n" << std::endl; \
+    std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __FUNCTION__ << ": Assertion `" << #expression << "' failed." << std::endl; \
   } \
 }\
 
@@ -124,6 +125,20 @@ ariadne_check(std::ostream& os, const R& r, const ER& er) {
 /*! \brief Evaluates \a expression and checks if the result is equal to \a expected. */
 #define ARIADNE_TEST_EQUAL(expression,expected) \
   ARIADNE_TEST_CHECK(expression,expected) \
+
+/*! \brief Evaluates \a expression and checks if the result compares correctly with \a expected. */
+#define ARIADNE_TEST_COMPARE(expression,comparison,expected)    \
+{ \
+  std::cout << #expression << ": " << (expression) << std::flush;        \
+  bool ok = (expression) comparison (expected);                         \
+  if(ok) { \
+    std::cout << "\n" << std::endl; \
+  } else { \
+    ++ARIADNE_TEST_FAILURES; \
+    std::cout << " (expected: " << #expression << #comparison << #expected << " )" << std::endl; \
+    std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Comparison `" << #expression << #comparison << #expected << "' failed; " << #expression << "=" << (expression) << std::endl; \
+  } \
+}\
 
 /*! \brief Constructs object \a variable of type \a class from \a expression. */
 #define ARIADNE_TEST_CONSTRUCT(class,variable,expression) \

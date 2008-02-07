@@ -179,7 +179,7 @@ namespace Ariadne {
       TBS integration_step(const VF& vf, const TBS& tbs, const T& h, const Bx& bb) const {
         return TBS(tbs.time()+h,this->_integrator->integration_step(vf,tbs.set(),h,bb)); }
       BS reachability_step(const VF& vf, const BS& bs, const T& h, const Bx& bb) const {
-        return this->_integrator->integration_step(vf,bs,h,bb); }
+        return this->_integrator->reachability_step(vf,bs,h,bb); }
       R radius(const BS& bs) const {
         return this->_approximator->radius(bs); }
       BS basic_set(const Bx& bx) const {

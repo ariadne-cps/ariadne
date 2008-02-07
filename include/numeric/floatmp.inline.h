@@ -136,7 +136,11 @@ inline void set_(Rational& r, const FloatMP& x) {
   mpf_t f; mpf_init2(f,mpfr_get_prec(x._value)+128); mpfr_get_f(f,x._value,GMP_RNDN); 
   mpq_set_f(r._value,f); mpq_canonicalize(r._value);
   mpf_clear(f);
-  ARIADNE_ASSERT(mpfr_cmp_q(x._value,r._value)==0); }
+  if(mpfr_cmp_q(x._value,r._value)!=0) {
+    std::cerr << "ERROR: conversion from FloatMP x to Rational q failed; x="<<x<<", q="<<r<<std::endl;
+    ARIADNE_ASSERT(mpfr_cmp_q(x._value,r._value)==0); 
+  }
+}
 
 inline void set_(FloatMP& r, const int& n) { mpfr_set_si(r._value,n,GMP_RNDN); }
 inline void set_(FloatMP& r, const unsigned int& n) { mpfr_set_ui(r._value,n,GMP_RNDN); }

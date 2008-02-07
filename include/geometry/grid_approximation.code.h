@@ -413,7 +413,9 @@ template<class R>
 Geometry::GridCellListSet<R>
 Geometry::outer_approximation(const Zonotope<R>& z, const Grid<R>& g) 
 {
-  return ::outer_approximation_of_basic_set(z,g);
+  //FIXME: This should not be hard-coded in
+  //return ::outer_approximation_of_basic_set(z,g);
+  return ::fuzzy_outer_approximation_of_zonotope(z,g);
 }
 
 template<class R>

@@ -191,11 +191,12 @@ Evaluation::VectorFieldEvolver<BS>::_step(BSL& evolve,
     this->_profiler->total_stepping_time+=h;
     this->_profiler->minimum_time_step=std::min(h,this->_profiler->minimum_time_step);
     h=std::min(h,T(time-tbs.time()));
-    tbs=this->integration_step(vf,tbs,h,bb);
     {
       rbs=this->reachability_step(vf,bs,h,bb);
       reach.adjoin(rbs);
     }
+    // Need to do integration step first to avoid clobbering bs reference
+    tbs=this->integration_step(vf,tbs,h,bb);
     working.adjoin(tbs);
   }
 }

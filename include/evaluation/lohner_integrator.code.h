@@ -160,9 +160,16 @@ Evaluation::LohnerIntegrator<R>::reachability_step(const System::VectorField<R>&
   using namespace Function;
   using namespace Geometry;
   using namespace System;
-  
+
   ARIADNE_LOG(6,"LohnerIntegrator::reachability_step(VectorField,Zonotope<Interval>,Interval,Box) const\n");
   Rational half_step_size=step_size/2;
+
+  /*
+  Zonotope<R> midset=this->integration_step(vector_field,initial_set,half_step_size,bounding_box);
+  Vector<I> ihhf=I(half_step_size)*vector_field(bounding_box);
+  Vector<R> hhf=midpoint(ihhf);
+  Zonotope<R> result(midset.centre()+(ihhf-hhf),concatenate_columns(midset.generators(),hhf));
+  */
 
   AffineModel<R> flow_model=this->_integrator->affine_flow_model(vector_field,initial_set.centre(),initial_set.bounding_box(),half_step_size,bounding_box);
   Point<I> phic=flow_model.value();

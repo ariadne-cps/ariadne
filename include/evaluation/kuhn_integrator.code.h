@@ -81,8 +81,6 @@ Evaluation::KuhnIntegrator<R>::integration_step(const System::VectorField<R>& ve
                                                 const Numeric::Rational& step_size, 
                                                 const Geometry::Box<R>& bounding_box) const
 {
-  ARIADNE_LOG(2,"KuhnIntegrator::integration_step(VectorField,Zonotope,Time,Box)\n");
-
   using namespace LinearAlgebra;
   using namespace Function;
   using namespace Geometry;
@@ -110,9 +108,15 @@ Evaluation::KuhnIntegrator<R>::reachability_step(const System::VectorField<R>& v
   using namespace Geometry;
   using namespace System;
 
-  ARIADNE_LOG(6,"LohnerIntegrator::reachability_step(VectorField,Zonotope<Interval>,Interval,Box) const\n");
+  ARIADNE_LOG(5,"KuhnIntegrator::reachability_step(VectorField,Zonotope<Interval>,Interval,Box) const\n");
   Rational half_step_size=step_size/2;
 
+  Zonotope<R> midset=this->integration_step(vector_field,initial_set,half_step_size,bounding_box);
+  Vector<I> ihhf=I(half_step_size)*vector_field(bounding_box);
+  Vector<R> hhf=midpoint(ihhf);
+  Zonotope<R> result(midset.centre()+(ihhf-hhf),concatenate_columns(midset.generators(),hhf));
+
+  /*
   AffineModel<R> flow_model=this->_integrator->affine_flow_model(vector_field,initial_set.centre(),initial_set.bounding_box(),half_step_size,bounding_box);
   Point<I> phic=flow_model.value();
   Matrix<I> Dphi=flow_model.jacobian();
@@ -121,7 +125,9 @@ Evaluation::KuhnIntegrator<R>::reachability_step(const System::VectorField<R>& v
   Vector<I> err=Dphi*(I(-1,1)*initial_set.error());
 
   Zonotope<R> result(phic+err,concatenate_columns(gen,hhf));
-
+  std::cerr << "initial="<<initial_set<<std::endl;
+  std::cerr << "result="<<result<<std::endl<<std::endl;
+  */
   return result;
 }
 

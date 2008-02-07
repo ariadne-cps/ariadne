@@ -559,7 +559,6 @@ Evaluation::SetBasedHybridEvolver<BS>::upper_reach(const System::HybridAutomaton
     ARIADNE_LOG(5,"working_set="<<evolve<<"\n\n");
   }
   reach.adjoin(this->_upper_evolve(automaton,evolve,lock_time));
-  const_cast<int&>(verbosity)=3;
   ARIADNE_LOG(2,*this->_profiler);
   ARIADNE_LOG(2,"initial.size()="<<initial.size()<<" final.size()="<<evolve.size()<<" reach.size()="<<reach.size()<<"\n");
   return HGMS(reach);

@@ -329,12 +329,13 @@ inline unsigned long int fac(unsigned long int n) {
 }
 
 inline int bin(int n, int k) { 
-  static const int nmax[16]={ 
+  static const int kmax=16;
+  static const int nmax[kmax]={ 
     2147483647, 2147483647, 46341, 1626, 338, 140, 82, 58, 
     46, 39, 35, 33, 31, 30, 30, 29 };
   if(k>n || k<0) { return 0; }
   int c=std::min(k,n-k);
-  if(c>=16 || n>nmax[c]) {
+  if(c>=kmax || n>nmax[c]) {
     ARIADNE_THROW(OverflowException,"int bin(int n, int k)","with n="<<n<<", k="<<k);
   }
   uint r; 
@@ -343,13 +344,14 @@ inline int bin(int n, int k) {
 }
 
 inline uint bin(unsigned int n, unsigned int k) { 
-  static const uint nmax[16]={ 
+  static const uint kmax=16;
+  static const uint nmax[kmax]={ 
     4294967295, 4294967295, 65536, 2049, 402, 161, 92, 63, 
     49, 42, 37, 34, 33, 31, 31, 30 };
   if(k>n) { return 0; }
   uint c=std::min(k,n-k);
   
-  if(c>=16 || n>nmax[c]) {
+  if(c>=kmax || n>nmax[c]) {
     ARIADNE_THROW(OverflowException,"uint bin(uint n,uint k)","with n="<<n<<", k="<<k);
   }
   
@@ -359,14 +361,21 @@ inline uint bin(unsigned int n, unsigned int k) {
 }
 
 inline long unsigned int bin(long unsigned int n, long unsigned int k) { 
-  static const unsigned long int nmax[32]={
+  static const unsigned long int kmax=16;
+  static const unsigned long int nmax[kmax]={ 
+    4294967295, 4294967295, 65536, 2049, 402, 161, 92, 63, 
+    49, 42, 37, 34, 33, 31, 31, 30 };
+  /*
+  static const unsigned long int kmax=32;
+  static const unsigned long int nmax[kmax]={
     18446744073709551615ul, 4294967296ul, 3329022, 102570, 13467, 3612, 1449, 746, 
     453, 308, 227, 178, 147, 125, 110, 99, 
     90, 84, 79, 75, 72, 69, 68, 66, 
     65, 64, 63, 63, 62, 62, 62, 62 };
+  */
   if(k>n) { return 0; }
   long unsigned int c=std::min(k,n-k);
-  if(c>=32 || n>nmax[c]) {
+  if(c>=kmax || n>nmax[c]) {
     ARIADNE_THROW(OverflowException,"ulong bin(ulong n, ulong k)","with n="<<n<<", k="<<k);
   }
   long unsigned int r; 

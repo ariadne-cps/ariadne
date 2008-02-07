@@ -301,7 +301,7 @@ template<class R, class N>
 inline int fac(int n) { 
 #ifndef NDEBUG 
   if(n>=13) {     
-    throw OverflowException();
+    ARIADNE_THROW(OverflowException,"int fac(int n)"," with n="<<n);
     //ARIADNE_THROW(OverflowException,__FUNCTION__," with n="<<n);
   }
 #endif
@@ -311,7 +311,7 @@ inline int fac(int n) {
 inline uint fac(uint n) { 
 #ifndef NDEBUG 
   if(n>=13) { 
-    throw OverflowException();
+    ARIADNE_THROW(OverflowException,"uint fac(uint n)"," with n="<<n);
     //ARIADNE_THROW(OverflowException,__FUNCTION__," with n="<<n);
   }
 #endif
@@ -321,7 +321,7 @@ inline uint fac(uint n) {
 inline unsigned long int fac(unsigned long int n) { 
 #ifndef NDEBUG 
   if(n>=13) { 
-    throw OverflowException();
+    ARIADNE_THROW(OverflowException,"ulong fac(ulong n)"," with n="<<n);
     //ARIADNE_THROW(OverflowException,__FUNCTION__," with n="<<n);
   }
 #endif
@@ -329,19 +329,50 @@ inline unsigned long int fac(unsigned long int n) {
 }
 
 inline int bin(int n, int k) { 
-  if(k>n) { return 0; }
-  if(n<13) { return fac(n)/(fac(k)*fac(n-k)); } 
-  else { uint r; bin_(r,n,k); return r; } }
+  static const int nmax[16]={ 
+    2147483647, 2147483647, 46341, 1626, 338, 140, 82, 58, 
+    46, 39, 35, 33, 31, 30, 30, 29 };
+  if(k>n || k<0) { return 0; }
+  int c=std::min(k,n-k);
+  if(c>=16 || n>nmax[c]) {
+    ARIADNE_THROW(OverflowException,"int bin(int n, int k)","with n="<<n<<", k="<<k);
+  }
+  uint r; 
+  bin_(r,n,c); 
+  return r; 
+}
 
 inline uint bin(unsigned int n, unsigned int k) { 
+  static const uint nmax[16]={ 
+    4294967295, 4294967295, 65536, 2049, 402, 161, 92, 63, 
+    49, 42, 37, 34, 33, 31, 31, 30 };
   if(k>n) { return 0; }
-  if(n<13) { return fac(n)/(fac(k)*fac(uint(n-k))); } 
-  else { uint r; bin_(r,n,k); return r; } }
+  uint c=std::min(k,n-k);
+  
+  if(c>=16 || n>nmax[c]) {
+    ARIADNE_THROW(OverflowException,"uint bin(uint n,uint k)","with n="<<n<<", k="<<k);
+  }
+  
+  uint r; 
+  bin_(r,n,c); 
+  return r; 
+}
 
 inline long unsigned int bin(long unsigned int n, long unsigned int k) { 
+  static const unsigned long int nmax[32]={
+    18446744073709551615ul, 4294967296ul, 3329022, 102570, 13467, 3612, 1449, 746, 
+    453, 308, 227, 178, 147, 125, 110, 99, 
+    90, 84, 79, 75, 72, 69, 68, 66, 
+    65, 64, 63, 63, 62, 62, 62, 62 };
   if(k>n) { return 0; }
-  if(n<13) { return fac(n)/(fac(k)*fac(uint(n-k))); } 
-  else { long unsigned int r; bin_(r,n,k); return r; } }
+  long unsigned int c=std::min(k,n-k);
+  if(c>=32 || n>nmax[c]) {
+    ARIADNE_THROW(OverflowException,"ulong bin(ulong n, ulong k)","with n="<<n<<", k="<<k);
+  }
+  long unsigned int r; 
+  bin_(r,n,c); 
+  return r; 
+}
 
 inline uint exp2(const uint& n) {
   ARIADNE_ASSERT(n<32);

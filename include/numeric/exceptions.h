@@ -38,11 +38,20 @@ namespace Ariadne {
   
     //@{ \name Exceptions
     /*! \brief A division by zero has occurred. */
-    class DivideByZeroException : public std::exception { };
+    struct DivideByZeroException : public std::runtime_error {
+      DivideByZeroException() : std::runtime_error("") { }
+      DivideByZeroException(const std::string& str) : std::runtime_error(str) { }
+    };
     /*! \brief An overflow occurred. */
-    class OverflowException : public std::exception { };
+    struct OverflowException : public std::runtime_error {
+      OverflowException() : std::runtime_error("") { }
+      OverflowException(const std::string& str) : std::runtime_error(str) { }
+    };
     /*! \brief A conversion could not be performed exactly. */
-    class ConversionException : public std::exception { };
+    struct ConversionException : public std::runtime_error {
+      ConversionException() : std::runtime_error("") { }
+      ConversionException(const std::string& str) : std::runtime_error(str) { }
+    };
     //@}
     
   }

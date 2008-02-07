@@ -6,6 +6,7 @@
 #
 
 from ariadne import *
+import sys
 
 # Definition of the automaton
 automaton=HybridAutomaton("Bouncing ball")
@@ -49,8 +50,11 @@ bounding_box=Box([[-1,2.5],[-2.5,2.5]])
 # Definition of the Hybrid Evolver
 par = EvolutionParameters()
 par.set_maximum_step_size(1.0/8)
-par.set_lock_to_grid_time(0.5)
+par.set_lock_to_grid_time(4)
 par.set_grid_length(1.0/32)
+par.set_bounding_domain_size(3.0)
+par.set_verbosity(3)
+
 
 print par
 
@@ -60,30 +64,18 @@ integrator=AffineIntegrator();
 #hybrid_evolver=HybridEvolver(apply,integrator);
 hybrid_evolver=SetBasedHybridEvolver(par,apply,integrator);
 
-set_hybrid_evolver_verbosity(4)
-#set_applicator_verbosity(7)
-#set_integrator_verbosity(7)
-#set_geometry_verbosity(7)
+time=Rational(4)
 
-#print "Computing continuous chainreachable set..."
-#continuous_chainreach_set=hybrid_evolver.continuous_chainreach(automaton,initial_set,bounding_set)
-continuous_chainreach_set=initial_set
+print "initial set=",initial_set
 
-print "Computing chainreachable set..."
-chainreach_set=hybrid_evolver.upper_reach(automaton,initial_set,Rational(5))
+print "Computing upper reachable set for",time,"seconds..."
+chain_reach_set=hybrid_evolver.upper_reach(automaton,initial_set,time)
+evolve_set=hybrid_evolver.upper_evolve(automaton,initial_set,time)
 
-#print "Computing discrete transition..."
-#discrete_init=HybridGridCellListSet(reach_set)
-#discrete_step=hybrid_evolver.discrete_step(automaton,discrete_init)
 
-print "Done."
-
-print "continuous_chainreach_set =",continuous_chainreach_set[mode_id]
-print "chainreach_set=",chainreach_set[mode_id]
-
-# Eps output
+print "Exporting to eps..."
 eps=EpsPlot()
-eps.open("bouncing-ball.eps",bounding_box,0,1)
+eps.open("bouncing-ball-chain.eps",bounding_box,0,1)
 
 # Print the bounding_box
 eps.set_line_style(True)
@@ -97,7 +89,96 @@ eps.write(act)
 # Write the reached set
 eps.set_line_style(False)
 eps.set_fill_colour("green")
-eps.write(chainreach_set[mode_id])
+eps.write(chain_reach_set[mode_id])
+eps.set_fill_colour("yellow")
+eps.write(evolve_set[mode_id])
+
+# Write the initial set
+eps.set_line_style(False)
+eps.set_fill_colour("blue")
+eps.write(initial_set[mode_id])
+#eps.write(act12)
+#eps.write(act23)
+#eps.write(act30)
+#eps.write(discrete_step[mode_id])
+#eps.write(discrete_step[l2.id()])
+#eps.write(discrete_step[l3.id()])
+
+eps.close()
+
+sys.exit(0)
+
+
+time=Rational(1)
+
+print "initial set=",initial_set
+
+print "Computing lower reachable set for",time,"seconds..."
+lower_reach_set=hybrid_evolver.lower_reach(automaton,initial_set,time)
+lower_evolve_set=hybrid_evolver.lower_evolve(automaton,initial_set,time)
+
+print "Exporting to eps..."
+eps=EpsPlot()
+eps.open("bouncing-ball-lower.eps",bounding_box,0,1)
+
+# Print the bounding_box
+eps.set_line_style(True)
+eps.set_fill_colour("white")
+eps.write(bounding_box)
+
+# Write the activation area
+eps.set_fill_colour("yellow")
+eps.write(act)
+
+# Write the reached set
+eps.set_line_style(False)
+eps.set_fill_colour("green")
+eps.write(lower_reach_set[mode_id])
+eps.set_fill_colour("yellow")
+eps.write(lower_evolve_set[mode_id])
+
+# Write the initial set
+eps.set_line_style(False)
+eps.set_fill_colour("blue")
+eps.write(initial_set[mode_id])
+#eps.write(act12)
+#eps.write(act23)
+#eps.write(act30)
+#eps.write(discrete_step[mode_id])
+#eps.write(discrete_step[l2.id()])
+#eps.write(discrete_step[l3.id()])
+
+eps.close()
+
+print "Computing upper eachable set for 5 seconds..."
+upper_reach_set=hybrid_evolver.upper_reach(automaton,initial_set,Rational(5))
+
+#print "Computing discrete transition..."
+#discrete_init=HybridGridCellListSet(reach_set)
+#discrete_step=hybrid_evolver.discrete_step(automaton,discrete_init)
+
+
+#print "continuous_chainreach_set =",continuous_chainreach_set[mode_id]
+#print "chainreach_set=",chainreach_set[mode_id]
+
+print "Exporting to eps..."
+
+# Eps output
+eps.open("bouncing-ball-upper.eps",bounding_box,0,1)
+
+# Print the bounding_box
+eps.set_line_style(True)
+eps.set_fill_colour("white")
+eps.write(bounding_box)
+
+# Write the activation area
+eps.set_fill_colour("yellow")
+eps.write(act)
+
+# Write the reached set
+eps.set_line_style(False)
+eps.set_fill_colour("green")
+eps.write(upper_reach_set[mode_id])
 eps.set_fill_colour("yellow")
 eps.write(continuous_chainreach_set[mode_id])
 
@@ -114,13 +195,7 @@ eps.write(initial_set[mode_id])
 
 eps.close()
 
-print
 
-# Text output
-txt=TextFile()
-txt.open("bouncing-ball.txt")
-txt.write(chainreach_set[mode_id])
-txt.close()
 
 
    

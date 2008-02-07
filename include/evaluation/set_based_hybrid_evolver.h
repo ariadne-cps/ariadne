@@ -270,7 +270,7 @@ namespace Ariadne {
         return Geometry::inner_approximation(s,this->grid(s.dimension())); }
      private:
       // Helper functions for accessing parameters
-      Q lock_to_grid_time() const { return this->_parameters->lock_to_grid_steps(); }
+      Q lock_to_grid_time() const { return this->_parameters->lock_to_grid_time(); }
       Q maximum_step_size() const { return this->_parameters->maximum_step_size(); }
       R maximum_basic_set_radius() const { return this->_parameters->maximum_basic_set_radius(); }
      private:

@@ -689,8 +689,7 @@ Geometry::subset(const Zonotope<R>& z, const ConstraintSet<R>& cs)
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(z,cs,"disjoint(Zonotope,ConstraintSet)");
   Zonotope<R> fz=apply(Function::AffineModel<R>(z.bounding_box(),z.centre(),cs.function()),z);
-  Box<R> bcd=closed_intersection(cs.codomain(),fz.bounding_box());
-  return subset(fz,bcd);
+  return subset(fz.bounding_box(),cs.codomain());
 }
 
 template<class R>

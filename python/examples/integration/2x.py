@@ -8,14 +8,11 @@
 from ariadne import *
 from math import *
 
-vector=extract_vector
-matrix=extract_matrix
-
 # y' = 2x
-dyn=AffineVectorField(matrix([[0,0],[2,0]]),vector([1,0]))
+dyn=AffineVectorField(Matrix([[0,0],[2,0]]),Vector([1,0]))
 
-grid=Grid(Vector("[0.01,0.01]"))
-block=LatticeBlock("[-2,102]x[-2,102]")
+grid=Grid(Vector([0.01,0.01]))
+block=Box([[-0.01,1.01],[-0.01,1.01]])
 fgrid=FiniteGrid(grid,block)
 print fgrid
 
@@ -26,43 +23,32 @@ for i in range(101):
 	y = x*x
 	pstr = "["+str(x)+","+str(x)+"]x["+str(y)+","+str(y)+"]"
 	# print pstr
-	point = Rectangle(pstr)
+	point = Box([[x,x],[y,y]])
 	reference_set.adjoin_outer_approximation(point)
 	
 print "reference_set.size(),capacity()=",reference_set.size(),reference_set.capacity()
 
 print "Creating inital set"
-initial_rectangle=Rectangle("[0.0,0.0]x[0.0,0.0]")
-initial_set=GridMaskSet(fgrid)
-print "Adjoining initial rectangle"
-initial_set.adjoin_outer_approximation(initial_rectangle)
-print "initial_set.size(),capacity()=",initial_set.size(),initial_set.capacity()
+initial_set=RectangularSet([[0.0,0.0],[0.0,0.0]])
 
-bounding_box=Rectangle("[-0.01,1.01]x[-0.01,1.01]")
+# Evolution parameters
+par=EvolutionParameters()
+par.set_maximum_step_size(0.005);
+par.set_lock_to_grid_time(2);
+par.set_grid_length(0.01);
 
-print "Creating bounding set"
-bounding_set=GridMaskSet(fgrid)
-print "Adjoining bounding rectangle"
-bounding_set.adjoin_over_approximation(bounding_box)
-print "bounding_set.size(),capacity()=",bounding_set.size(),bounding_set.capacity()
+integrator=AffineIntegrator()
+evolver=VectorFieldEvolver(par,integrator)
 
-maximum_step_size=0.005;
-lock_to_grid_time=2;
-maximum_set_radius=0.1;
-
-integrator=AffineIntegrator(maximum_step_size,lock_to_grid_time,maximum_set_radius)
-
-print "Computing chainreach sets with Affine Integrator..."
-chainreach_set=integrator.chainreach(dyn,initial_set,bounding_set)
-print "chainreach_set.size(),capacity()=",chainreach_set.size(),chainreach_set.capacity()
+print "Computing reach set with Affine Integrator..."
+chainreach_set=evolver.upper_reach(dyn,initial_set,Rational(1))
 
 print "Exporting to postscript output...",
+bounding_box=Box([[-0.01,1.01],[-0.01,1.01]])
 eps=EpsPlot()
 eps.open("2x-affine.eps",bounding_box,0,1)
 
 eps.set_line_style(True)
-eps.set_fill_colour("white")
-eps.write(bounding_box)
 eps.set_fill_colour("green")
 eps.write(chainreach_set)
 eps.set_fill_colour("magenta")
@@ -73,11 +59,11 @@ eps.close()
 
 print "Done."
 
-integrator=LohnerIntegrator(maximum_step_size,lock_to_grid_time,maximum_set_radius)
+integrator=LohnerIntegrator()
+evolver=VectorFieldEvolver(par,integrator)
 
 print "Computing chainreach sets with Lohner Integrator..."
-chainreach_set=integrator.chainreach(dyn,initial_set,bounding_set)
-print "chainreach_set.size(),capacity()=",chainreach_set.size(),chainreach_set.capacity()
+chainreach_set=evolver.chainreach(dyn,initial_set)
 
 print "Exporting to postscript output...",
 eps.open("2x-lohner.eps",bounding_box,0,1)

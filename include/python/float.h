@@ -30,7 +30,7 @@
 
 #include <config.h>
 
-#if PYTHON_FLOAT == Float64 
+#if defined PYTHON_FLOAT64
 
 #include "numeric/float64.h" 
 namespace Ariadne { 
@@ -40,7 +40,8 @@ namespace Ariadne {
   } 
 }
 
-#elif PYTHON_FLOAT == FloatMP 
+#elif defined PYTHON_FLOATMP
+
 #include "numeric/floatmp.h" 
 namespace Ariadne { 
   namespace Python { 
@@ -48,6 +49,10 @@ namespace Ariadne {
     typedef Numeric::Interval<FloatPy> IntervalPy;
   } 
 }
+
+#else
+
+#error "No Python floating-point type defined"
 
 #endif
 

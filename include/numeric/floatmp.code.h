@@ -145,6 +145,11 @@ namespace Ariadne {
   namespace Numeric {
 
 
+    FloatMP::Float(const std::string& str) 
+    {
+      std::stringstream ss(str); ss>>*this; 
+    }
+
     std::ostream& 
     operator<<(std::ostream& os, const FloatMP& x)
     {

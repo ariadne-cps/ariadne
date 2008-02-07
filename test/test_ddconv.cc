@@ -26,9 +26,9 @@
 #include <string>
 
 #include "ariadne.h"
+#include "test/test_float.h"
 #include "numeric/traits.h"
 #include "numeric/rational.h"
-#include "numeric/float64.h"
 #include "geometry/ddconv.h"
 #include "geometry/ddconv.code.h"
 
@@ -73,7 +73,7 @@ test_ddconv()
 int main() {
 
   test_ddconv<Rational>();
-  test_ddconv< Float64 >();
+  test_ddconv< Flt >();
 
   cerr << "INCOMPLETE ";
 }

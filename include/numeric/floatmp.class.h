@@ -28,6 +28,8 @@
 #ifndef ARIADNE_NUMERIC_FLOATMP_CLASS_H
 #define ARIADNE_NUMERIC_FLOATMP_CLASS_H
 
+#include <iosfwd>
+
 #include <mpfr.h>
 #include <gmp.h>
 
@@ -38,6 +40,8 @@ namespace Ariadne {
 
     class mpfr;
     
+    class Integer;
+    class Rational;
     template<class T> class Float;
     template<class R> class Interval;
 

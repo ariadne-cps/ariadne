@@ -101,7 +101,7 @@ Evaluation::StandardBounder<R>::flow_bounds(const System::VectorField<R>& vf,
   LinearAlgebra::Vector<I> delta=r.position_vectors()-r.centre().position_vector();
   
   Numeric::Rational h=hmax;
-  Numeric::Rational hmin=hmax/pow(2,REDUCTION_STEPS);
+  Numeric::Rational hmin=hmax/(1<<REDUCTION_STEPS);
   bool success=false;
   while(!success) {
     ARIADNE_ASSERT(h>hmin);

@@ -46,10 +46,10 @@ namespace Python {
   template<> inline std::string python_name<Numeric::Integer>(const std::string& bn) { return "Z"+bn; }
   template<> inline std::string python_name<Numeric::Rational>(const std::string& bn) { return "Q"+bn; }
 
-  #if PYTHON_FLOAT == Float64 
+  #if defined PYTHON_FLOAT64
   template<> inline std::string python_name<Numeric::Float64>(const std::string& bn) { return ""+bn; }
   template<> inline std::string python_name<Numeric::FloatMP>(const std::string& bn) { return "MPF"+bn; }
-  #elif PYTHON_FLOAT == FloatMP 
+  #elif defined PYTHON_FLOATMP
   template<> inline std::string python_name<Numeric::Float64>(const std::string& bn) { return "F64"+bn; }
   template<> inline std::string python_name<Numeric::FloatMP>(const std::string& bn) { return ""+bn; }
   #else

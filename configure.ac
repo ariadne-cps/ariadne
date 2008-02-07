@@ -72,13 +72,15 @@ AS_IF([test "x$enable_python" != xno],
          if test "x$enable_float64" = "xno"; then 
            AC_MSG_ERROR([Using Float64 for Python interface, but Float64 not instantiated]) 
          else
-           enable_python=Float64; 
+           AC_DEFINE([PYTHON_FLOAT64],[1],[Define to 1 if Float64 is the type used for floating-point numbers in Python])
+           enable_python=Float64 
          fi
        elif test "x$enable_python" = "xfloatmp" -o "x$enable_python" = "xFloatMP"; then                                         
          if test "x$enable_floatmp" = "xno"; then 
            AC_MSG_ERROR([Using FloatMP for Python interface, but FloatMP not instantiated]) 
          else 
-           enable_python=FloatMP; 
+           AC_DEFINE([PYTHON_FLOATMP],[1],[Define to 1 if FloatMP is the type used for floating-point numbers in Python])
+           enable_python=FloatMP 
          fi
        else
          AC_MSG_ERROR([Unrecognised floating-point type for Python interface])

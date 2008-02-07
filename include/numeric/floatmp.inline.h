@@ -133,7 +133,7 @@ inline void next_(FloatMP& r, const FloatMP& x, RoundDown) {
 inline void get_(double& r, const FloatMP& x, RoundApprox) { 
   r=mpfr_get_d(x._value,GMP_RNDN); }
 inline void set_(Rational& r, const FloatMP& x) { 
-  mpf_t f; mpf_init(f); mpfr_get_f(f,x._value,GMP_RNDN); 
+  mpf_t f; mpf_init2(f,mpfr_get_prec(x._value)+128); mpfr_get_f(f,x._value,GMP_RNDN); 
   mpq_set_f(r._value,f); mpq_canonicalize(r._value);
   mpf_clear(f);
   ARIADNE_ASSERT(mpfr_cmp_q(x._value,r._value)==0); }

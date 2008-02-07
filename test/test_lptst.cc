@@ -34,7 +34,6 @@
 #include "linear_algebra/permutation.h"
 #include "linear_programming/lptst.h"
 
-//#define FLOAT_TEST
 
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
@@ -49,11 +48,8 @@ int main() {
   
   set_linear_algebra_verbosity(1);
   
- #ifdef FLOAT_TEST
-  test_lptst<Flt64>();
-#else
+  //test_lptst<Flt>();
   test_lptst<Rational>();
-#endif
   
   cerr << "COMPLETE ";
   return 0;

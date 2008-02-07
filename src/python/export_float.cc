@@ -51,29 +51,29 @@ void set_output_precision(uint p) {
 }
 
 
-using Numeric::Float64;
+#if defined PYTHON_FLOAT64
 
-#if PYTHON_FLOAT == Float64 
+#warning "Compiling with FloatPy == Float64"
 
-template<> void set_default_precision<Float64>(uint p) { 
+template<> void set_default_precision<FloatPy>(uint p) { 
   throw std::runtime_error("Cannot set precision of 64-bit float");
 }
 
-template<> uint default_precision<Float64>() { 
+template<> uint default_precision<FloatPy>() { 
   return 64;
 }
 
-#elif PYTHON_FLOAT == FloatMP 
+#elif defined PYTHON_FLOATMP
 
-template<> void set_default_precision<Float64>(uint p) { 
-  FloatMP::set_default_precision(p);
+#warning "Compiling with FloatPy == FloatMP"
+
+template<> void set_default_precision<FloatPy>(uint p) { 
+  FloatPy::set_default_precision(p);
 }
 
-template<> uint default_precision<Float64>() { 
-  return FloatMP::default_precision();
+template<> uint default_precision<FloatPy>() { 
+  return FloatPy::default_precision();
 }
-
-#else
 
 #endif
 
@@ -81,7 +81,7 @@ template<class R>
 std::string
 __str__(const R& x) {
   std::stringstream ss;
-  if(x==Numeric::floor(x)) {
+  if(x==Numeric::floor<R>(x)) {
     ss << x << ".";
   } else {
     //ss << std::fixed;
@@ -96,7 +96,7 @@ std::string
 __repr__(const R& x) {
   std::stringstream ss;
   ss << "Float(";
-  if(x==Numeric::floor(x)) {
+  if(x==Numeric::floor<R>(x)) {
     ss << x;
   } else {
     //ss << std::fixed;

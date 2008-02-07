@@ -27,12 +27,12 @@
 
 #include <config.h>
 
-#if ENABLE_FLOAT64
+#if defined ENABLE_FLOAT64
 #include "numeric/float64.h"
 namespace Ariadne { namespace Numeric { typedef Float64 Flt; typedef Interval<Float64> Ivl; } }
-#elif ENABLE_FLOATMP
-#include "numeric/mpfloat.h"
-namespace Ariadne { namespace Numeric { typedef MPFloat Flt; typedef Interval<FloatMP> Ivl; } } }
+#elif defined ENABLE_FLOATMP
+#include "numeric/floatmp.h"
+namespace Ariadne { namespace Numeric { typedef FloatMP Flt; typedef Interval<FloatMP> Ivl; } }
 #endif
 /* */
 

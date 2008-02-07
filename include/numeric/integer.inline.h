@@ -344,10 +344,10 @@ inline int bin(int n, int k) {
 }
 
 inline uint bin(unsigned int n, unsigned int k) { 
-  static const uint kmax=16;
+  static const uint kmax=16u;
   static const uint nmax[kmax]={ 
-    4294967295, 4294967295, 65536, 2049, 402, 161, 92, 63, 
-    49, 42, 37, 34, 33, 31, 31, 30 };
+    4294967295u, 4294967295u, 65536u, 2049u, 402u, 161u, 92u, 63u, 
+    49u, 42u, 37u, 34u, 33u, 31u, 31u, 30u };
   if(k>n) { return 0; }
   uint c=std::min(k,n-k);
   
@@ -361,17 +361,17 @@ inline uint bin(unsigned int n, unsigned int k) {
 }
 
 inline long unsigned int bin(long unsigned int n, long unsigned int k) { 
-  static const unsigned long int kmax=16;
+  static const unsigned long int kmax=16u;
   static const unsigned long int nmax[kmax]={ 
-    4294967295, 4294967295, 65536, 2049, 402, 161, 92, 63, 
-    49, 42, 37, 34, 33, 31, 31, 30 };
+    4294967295u, 4294967295u, 65536u, 2049u, 402u, 161u, 92u, 63u, 
+    49u, 42u, 37u, 34u, 33u, 31u, 31u, 30u };
   /*
   static const unsigned long int kmax=32;
   static const unsigned long int nmax[kmax]={
-    18446744073709551615ul, 4294967296ul, 3329022, 102570, 13467, 3612, 1449, 746, 
-    453, 308, 227, 178, 147, 125, 110, 99, 
-    90, 84, 79, 75, 72, 69, 68, 66, 
-    65, 64, 63, 63, 62, 62, 62, 62 };
+    18446744073709551615ul, 4294967296ul, 3329022ul, 102570ul, 13467ul, 3612ul, 1449ul, 746ul, 
+    453ul, 308ul, 227ul, 178ul, 147ul, 125ul, 110ul, 99ul, 
+    90ul, 84ul, 79ul, 75ul, 72ul, 69ul, 68ul, 66ul, 
+    65ul, 64ul, 63ul, 63ul, 62ul, 62ul, 62ul, 62ul };
   */
   if(k>n) { return 0; }
   long unsigned int c=std::min(k,n-k);

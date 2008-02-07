@@ -48,11 +48,12 @@
 #include <boost/numeric/interval/hw_rounding.hpp>
 
 #include "numeric/expression.h"
-#include "numeric/integer.class.h"
 
 namespace Ariadne {
   namespace Numeric {
 
+    class Integer;
+    class Rational;
     template<class T> class Float;
     template<class R> class Interval;
 

@@ -100,7 +100,7 @@ test_rational()
   cout << "Testing comparison operators" << endl;
   {
     // Test comparison of two equal numbers
-    Rational q1(1.25); Rational q2(-1.25); Rational q3(-2.25); Rational q4(1.25);
+    Rational q1(1.25); Rational q2(-1.25); Rational q3(-2.25); Rational q4(1.25); // Rational q5(1,0);
     assert(!(q1==q2)); assert(q1!=q2); 
     assert(!(q1<=q2)); assert(q1> q2);
     assert(q1>=q2); assert(!(q1< q2));
@@ -110,6 +110,15 @@ test_rational()
     assert(q1<=q4); assert(!(q1> q4));
     assert(q1>=q4); assert(!(q1< q4));
     
+    // Test comparison with infinity
+    std::cerr << "WARNING: comparison with infinity does not work\n";
+    /*
+      assert(q4<q5); 
+      assert(q4!=q5);
+      assert(!(q4>q5)); 
+      assert(q5==q5);
+    */
+
     // Test comparison with in integer
     int i2=1;
     assert(!(q1==i2)); assert(q1!=i2); 

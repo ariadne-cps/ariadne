@@ -51,6 +51,7 @@
 
 #include "system/vector_field.h"
 
+#include "evaluation/evolution_profiler.h"
 #include "evaluation/evolution_parameters.h"
 #include "evaluation/integrator_interface.h"
 #include "evaluation/approximator_interface.h"
@@ -116,7 +117,8 @@ Evaluation::VectorFieldEvolver<BS>::VectorFieldEvolver(const EvolutionParameters
   : _parameters(parameters.clone()),
     _integrator(integrator.clone()),
     _approximator(new StandardApproximator<BS>()),
-    _subdivider(new StandardSubdivider<BS>)
+    _subdivider(new StandardSubdivider<BS>),
+    _profiler(new EvolutionProfiler())
 {
 }
 
@@ -127,7 +129,8 @@ Evaluation::VectorFieldEvolver<BS>::VectorFieldEvolver(const EvolutionParameters
   : _parameters(parameters.clone()),
     _integrator(integrator.clone()),
     _approximator(approximator.clone()),
-    _subdivider(new StandardSubdivider<BS>)
+    _subdivider(new StandardSubdivider<BS>),
+    _profiler(new EvolutionProfiler())
 {
 }
 
@@ -179,10 +182,14 @@ Evaluation::VectorFieldEvolver<BS>::_step(BSL& evolve,
   } else if(radius(bs) > maximum_basic_set_radius()) {
     if(semantics==upper_semantics) {
       working.adjoin(this->subdivide(tbs));
+      ++this->_profiler->subdivisions;
     } 
   } else {
+    ++this->_profiler->time_steps;
     Bx bb; T h; BS rbs; 
     make_lpair(h,bb)=this->flow_bounds(vf,this->bounding_box(bs));
+    this->_profiler->total_stepping_time+=h;
+    this->_profiler->minimum_time_step=std::min(h,this->_profiler->minimum_time_step);
     h=std::min(h,T(time-tbs.time()));
     tbs=this->integration_step(vf,tbs,h,bb);
     {
@@ -238,12 +245,16 @@ Evaluation::VectorFieldEvolver<BS>::upper_evolve(const System::VectorField<R>& v
                                                  const Numeric::Rational& time) const
 {
   ARIADNE_LOG(2,"VectorFieldEvolver::upper_evolve(...)\n");
+  this->_profiler->reset();
   BSL reach, evolve;
-  TBSL working=this->timed_basic_set_list(this->outer_approximation(initial_set));
+  BxLS initial=this->lower_approximation(initial_set);
+  TBSL working=this->timed_basic_set_list(initial);
   ARIADNE_LOG(3,"initial="<<working<<"\n");
   while(working.size()!=0) { 
     this->_step(evolve,reach,working,vector_field,time,upper_semantics);
   }
+  ARIADNE_LOG(2,*this->_profiler);
+  ARIADNE_LOG(2,"initial.size()="<<initial.size()<<" final.size()="<<evolve.size()<<"\n");
   return new GMS(this->outer_approximation(evolve,this->grid(vector_field.dimension())));
 }
 
@@ -254,13 +265,16 @@ Evaluation::VectorFieldEvolver<BS>::upper_reach(const System::VectorField<R>& ve
                                                const Numeric::Rational& time) const
 {
   ARIADNE_LOG(2,"VectorFieldEvolver::upper_reach(...)\n");
+  this->_profiler->reset();
   BSL reach, evolve;
-  TBSL working=this->timed_basic_set_list(this->outer_approximation(initial_set));
+  BxLS initial=this->lower_approximation(initial_set);
+  TBSL working=this->timed_basic_set_list(initial);
   ARIADNE_LOG(3,"initial="<<working<<"\n");
   while(working.size()!=0) { 
     this->_step(evolve,reach,working,vector_field,time,upper_semantics);
   }
-  ARIADNE_LOG(3,"reach="<<reach<<"\nevolve="<<evolve<<"\n");
+  ARIADNE_LOG(2,*this->_profiler);
+  ARIADNE_LOG(2,"initial.size()="<<initial.size()<<" final.size()="<<evolve.size()<<" reach.size()="<<reach.size()<<"\n");
   return new GMS(this->outer_approximation(reach,this->grid(vector_field.dimension())));
 }
 
@@ -272,12 +286,16 @@ Evaluation::VectorFieldEvolver<BS>::lower_evolve(const System::VectorField<R>& v
                                                  const Numeric::Rational& time) const
 {
   ARIADNE_LOG(2,"VectorFieldEvolver::lower_evolve(...)\n");
+  this->_profiler->reset();
   BSL reach, evolve;
-  TBSL working=this->timed_basic_set_list(this->lower_approximation(initial_set));
+  BxLS initial=this->lower_approximation(initial_set);
+  TBSL working=this->timed_basic_set_list(initial);
   ARIADNE_LOG(3,"initial="<<working<<"\n");
   while(working.size()!=0) { 
     this->_step(evolve,reach,working,vector_field,time,lower_semantics);
   }
+  ARIADNE_LOG(2,*this->_profiler);
+  ARIADNE_LOG(2,"initial.size()="<<initial.size()<<" final.size()="<<evolve.size()<<"\n");
   return new GMS(this->lower_approximation(evolve,this->grid(vector_field.dimension())));
 }
 
@@ -288,12 +306,16 @@ Evaluation::VectorFieldEvolver<BS>::lower_reach(const System::VectorField<R>& ve
                                                const Numeric::Rational& time) const
 {
   ARIADNE_LOG(2,"VectorFieldEvolver::lower_reach(...)\n");
+  this->_profiler->reset();
   BSL reach, evolve;
-  TBSL working=this->timed_basic_set_list(this->lower_approximation(initial_set));
+  BxLS initial=this->lower_approximation(initial_set);
+  TBSL working=this->timed_basic_set_list(initial);
   ARIADNE_LOG(3,"initial="<<working<<"\n");
   while(working.size()!=0) { 
     this->_step(evolve,reach,working,vector_field,time,lower_semantics);
   }
+  ARIADNE_LOG(2,*this->_profiler);
+  ARIADNE_LOG(2,"initial.size()="<<initial.size()<<" final.size()="<<evolve.size()<<" reach.size()="<<reach.size()<<"\n");
   return new GMS(this->lower_approximation(reach,this->grid(vector_field.dimension())));
 }
 
@@ -316,6 +338,7 @@ Evaluation::VectorFieldEvolver<BS>::chainreach(const System::VectorField<R>& vec
                                                const Geometry::SetInterface<R>& initial_set) const
 {
   ARIADNE_LOG(2,"VectorFieldEvolver::chainreach(...)\n");
+  this->_profiler->reset();
   Bx bb=this->bounding_domain(vector_field);
   Gr grid=this->grid(vector_field.dimension());
   T time=this->lock_to_grid_time();
@@ -327,6 +350,7 @@ Evaluation::VectorFieldEvolver<BS>::chainreach(const System::VectorField<R>& vec
     found=this->_upper_evolve(vector_field,found,time);
     found.remove(*result);
   }
+  ARIADNE_LOG(2,*this->_profiler);
   return result;
 }
 

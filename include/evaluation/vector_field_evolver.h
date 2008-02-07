@@ -58,6 +58,8 @@ namespace Ariadne {
       boost::shared_ptr< IntegratorInterface<BS> >  _integrator;
       boost::shared_ptr< ApproximatorInterface<BS> >  _approximator;
       boost::shared_ptr< SubdividerInterface<BS> >  _subdivider;
+      
+      boost::shared_ptr< EvolutionProfiler >  _profiler;
      public:
       typedef R real_type;
 

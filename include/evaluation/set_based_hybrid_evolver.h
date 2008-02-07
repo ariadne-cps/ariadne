@@ -279,9 +279,13 @@ namespace Ariadne {
       boost::shared_ptr< ApproximatorInterface<BS> > _approximator;
       boost::shared_ptr< ApplicatorInterface<BS> > _applicator;
       boost::shared_ptr< IntegratorInterface<BS> > _integrator;
+      boost::shared_ptr< EvolutionProfiler > _profiler;
       int verbosity;
     };
 
+    std::ostream& operator<<(std::ostream& os, const Semantics& semantics) {
+      return os << (semantics==lower_semantics ? "lower_semantics" : "upper_semantics"); 
+    }
 
   }
 }

@@ -79,7 +79,7 @@ class TestSetBasedHybridEvolver
       mode1_id(2),
       mode2_id(3)
   {
-    hybrid_evolver_verbosity = 0;
+    hybrid_evolver_verbosity = 2;
     integrator_verbosity = 0;
     
     

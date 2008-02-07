@@ -320,7 +320,7 @@ namespace Ariadne {
           //(*this)[iter->first].adjoin(outer_approximation(*iter->second,(*this)[iter->first].grid())); 
           GridCellListSet<R>& gcls=(*this)[iter->first];
           const SetInterface<R>& set=*iter->second;
-          gcls.adjoin_outer_approximation(*iter->second); 
+          gcls.adjoin_outer_approximation(set); 
         } 
       }
       void unique_sort();

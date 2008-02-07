@@ -46,6 +46,7 @@ namespace Ariadne {
     template<class BS> class ApplicatorInterface;
     template<class BS> class IntegratorInterface;
 
+    class EvolutionProfiler;
     template<class R> class EvolutionParameters;
 
     template<class R> class ModelChecker;

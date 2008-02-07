@@ -110,6 +110,11 @@ For example, to configure with only 64-bit floating-point support enabled (which
   ./configure --disable-floatmp
 \endcode
 
+To configure using the multiple-precision floating point type in the Python interface, and install in the user directory, use
+\code 
+  ./configure --prefix=$HOME --enable-python=FloatMP
+\endcode
+
 \section svninstallation Installation from the Subversion repository
 
 If installing from the Subversion repository, change to the ariadne/trunk/ directory and type 

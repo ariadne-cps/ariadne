@@ -128,21 +128,27 @@ template<class X>
 Function::TaylorSeries<X> 
 Function::TranscendentalSeries<X>::asin(smoothness_type d, const X& c)
 {
-  throw NotImplemented(__PRETTY_FUNCTION__);
+  if(d==0) { return TaylorSeries<X>::constant(d,Numeric::atan(c)); }
+  TaylorSeries<X> y = X(1)/Function::sqrt(X(1)-Function::pow(TaylorSeries<X>::variable(d-1,c),2));
+  return antiderivative(y,Numeric::asin(c));
 }
 
 template<class X>  
 Function::TaylorSeries<X> 
 Function::TranscendentalSeries<X>::acos(smoothness_type d, const X& c)
 {
-  throw NotImplemented(__PRETTY_FUNCTION__);
+  if(d==0) { return TaylorSeries<X>::constant(d,Numeric::atan(c)); }
+  TaylorSeries<X> y = X(-1)/Function::sqrt(X(1)-Function::pow(TaylorSeries<X>::variable(d-1,c),2));
+  return antiderivative(y,Numeric::acos(c));
 }
 
 template<class X>  
 Function::TaylorSeries<X> 
 Function::TranscendentalSeries<X>::atan(smoothness_type d, const X& c)
 {
-  throw NotImplemented(__PRETTY_FUNCTION__);
+  if(d==0) { return TaylorSeries<X>::constant(d,Numeric::atan(c)); } 
+  TaylorSeries<X> y = X(1)/(X(1)+Function::pow(TaylorSeries<X>::variable(d-1,c),2));
+  return antiderivative(y,Numeric::atan(c));
 }
 
 

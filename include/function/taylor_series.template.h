@@ -41,7 +41,9 @@ Function::TaylorSeries<X>::variable(smoothness_type d, const XX& c)
 {
   TaylorSeries<X> result(d);
   result[0]=c;
-  result[1]=1;
+  if(d>=1) {
+    result[1]=1;
+  }
   return result;
 }
 

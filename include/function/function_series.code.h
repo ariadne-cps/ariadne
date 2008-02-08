@@ -97,9 +97,11 @@ Function::TranscendentalSeries<X>::sin(smoothness_type d, const X& c)
 {
 TaylorSeries<X> y(d);
   y[0]=Numeric::sin(c);
-  y[1]=Numeric::cos(c);
-  for(uint i=2; i!=d; ++i) {
-    y[i]=-y[i-2]/(i*(i-1));
+  if(d>=1) {
+    y[1]=Numeric::cos(c);
+    for(uint i=2; i!=d; ++i) {
+      y[i]=-y[i-2]/(i*(i-1));
+    }
   }
   return y;
 }
@@ -110,9 +112,11 @@ Function::TranscendentalSeries<X>::cos(smoothness_type d, const X& c)
 {
   TaylorSeries<X> y(d);
   y[0]=Numeric::cos(c);
-  y[1]=-Numeric::sin(c);
-  for(uint i=2; i!=d; ++i) {
-    y[i]=-y[i-2]/(i*(i-1));
+  if(d>=1) {
+    y[1]=-Numeric::sin(c);
+    for(uint i=2; i!=d; ++i) {
+      y[i]=-y[i-2]/(i*(i-1));
+    }
   }
   return y;
 }

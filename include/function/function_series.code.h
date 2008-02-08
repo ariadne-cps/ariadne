@@ -49,7 +49,6 @@ Function::ArithmeticSeries<X>::pow(smoothness_type d, const X& c, const uint& k)
     uint j=n-i;
     y[i]=X(Numeric::bin<Numeric::Integer>(n,j))*Numeric::pow(c,j);
   }
-  //std::cout << "pow("<<d<<","<<c<<","<<k<<")="<<y<<std::endl;
   return y;
 }
 
@@ -57,11 +56,12 @@ template<class X>
 Function::TaylorSeries<X> 
 Function::TranscendentalSeries<X>::sqrt(smoothness_type d, const X& c)
 {
-TaylorSeries<X> y(d);
+  TaylorSeries<X> y(d);
   y[0]=Numeric::sqrt(c);
   X mhr=-0.5/c;
   for(uint i=1; i<=y.degree(); ++i) {
-    y[i]=((2*i-3)*mhr)/i*y[i-1];
+    // Need to convert uint to int to prevent wraparound for 2*1u-3
+    y[i]=((2*int(i)-3)*mhr)/i*y[i-1];
   }
   return y;
 }
@@ -70,7 +70,7 @@ template<class X>
 Function::TaylorSeries<X> 
 Function::TranscendentalSeries<X>::exp(smoothness_type d, const X& c)
 {
-TaylorSeries<X> y(d);
+  TaylorSeries<X> y(d);
   y[0]=Numeric::exp(c);
   for(uint i=1; i<=y.degree(); ++i) {
     y[i]=y[i-1]/i;
@@ -82,7 +82,7 @@ template<class X>
 Function::TaylorSeries<X> 
 Function::TranscendentalSeries<X>::log(smoothness_type d, const X& c)
 {
-TaylorSeries<X> y(d);
+  TaylorSeries<X> y(d);
   y[0]=Numeric::log(c);
   X mr=(-1)/c;
   for(uint i=1; i<=y.degree();++i) {
@@ -95,11 +95,11 @@ template<class X>
 Function::TaylorSeries<X> 
 Function::TranscendentalSeries<X>::sin(smoothness_type d, const X& c)
 {
-TaylorSeries<X> y(d);
+  TaylorSeries<X> y(d);
   y[0]=Numeric::sin(c);
   if(d>=1) {
     y[1]=Numeric::cos(c);
-    for(uint i=2; i!=d; ++i) {
+    for(uint i=2; i<=d; ++i) {
       y[i]=-y[i-2]/(i*(i-1));
     }
   }
@@ -114,7 +114,7 @@ Function::TranscendentalSeries<X>::cos(smoothness_type d, const X& c)
   y[0]=Numeric::cos(c);
   if(d>=1) {
     y[1]=-Numeric::sin(c);
-    for(uint i=2; i!=d; ++i) {
+    for(uint i=2; i<=d; ++i) {
       y[i]=-y[i-2]/(i*(i-1));
     }
   }

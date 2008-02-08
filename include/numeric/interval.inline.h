@@ -682,17 +682,19 @@ R mig(const Interval<R>& x) {
 
 template<class R> inline
 void pow_(Interval<R>& r, const Interval<R>& x, const uint& n) {
-  if(n%2==0) {
+  if(n%2 || x._lower>=0) {
+    pow_(r._lower,x._lower,n,round_down);
+    pow_(r._upper,x._upper,n,round_up);
+  } else if(x._upper<=0) {
+    Interval<R> t(x);
+    pow_(r._lower,t._upper,n,round_down);
+    pow_(r._upper,t._lower,n,round_up);
+  } else {
     R rl, ru;
     pow_(rl,x._lower,n,round_up);
     pow_(ru,x._upper,n,round_up);
     r._lower=0;
     r._upper=max(rl,ru);
-  } else {
-    //r._lower=pow_down(x._lower,n);
-    //r._upper=pow_up(x._upper,n);
-    pow_(r._lower,x._lower,n,round_down);
-    pow_(r._upper,x._upper,n,round_up);
   }
 }
 
@@ -704,14 +706,16 @@ void pow_(Interval<R>& r, const Interval<R>& x, const int& n) {
 
 template<class R> inline
 void pow_(Interval<R>& r, const Interval<R>& x, const Integer& n) {
-  Integer m=abs(n);
+  //TODO: Check this code for bugs; improve efficiency
   Interval<R> a = (n>=0) ? x : 1/x;
   r=1;
   for(Integer i=0; i!=m; ++i) {
     r*=a;
   }
   if(m%2==0) {
-    r._lower=0;
+    if(r._lower<0) {
+      r._lower=0;
+    }
   }
 }
 

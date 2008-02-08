@@ -322,6 +322,12 @@ inline void div_(Float64& r, const Float64& x,const double& y, RoundApprox) {
   r._value=x._value/y; }
 
 
+template<class Rnd>
+inline void pow_(Float64& r, const Float64& x,const uint& n, Rnd rnd) {
+  Float64 p=x; uint m=n; r=1; 
+  while(m) { if(m%2) { mul_(r,r,p,rnd); } mul_(p,p,p,rnd); m/=2; }
+}
+
 inline void next_(Float64& r, const Float64& x, RoundDown) { 
   Float64 min=std::numeric_limits<double>::min();
   sub_(r,x,min,round_down); }

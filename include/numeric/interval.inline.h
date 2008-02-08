@@ -23,7 +23,7 @@
 
 #include "numeric/expression.h"
 #include "numeric/rounding.h"
- 
+
 namespace Ariadne {
 namespace Numeric {
   
@@ -707,6 +707,7 @@ void pow_(Interval<R>& r, const Interval<R>& x, const int& n) {
 template<class R> inline
 void pow_(Interval<R>& r, const Interval<R>& x, const Integer& n) {
   //TODO: Check this code for bugs; improve efficiency
+  Integer m=abs(n);
   Interval<R> a = (n>=0) ? x : 1/x;
   r=1;
   for(Integer i=0; i!=m; ++i) {

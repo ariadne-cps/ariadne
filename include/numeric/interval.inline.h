@@ -682,10 +682,17 @@ R mig(const Interval<R>& x) {
 
 template<class R> inline
 void pow_(Interval<R>& r, const Interval<R>& x, const uint& n) {
-  Interval<R> y=x;
-  r=1;
-  for(uint i=0; i!=n; ++i) {
-    r=r*y;
+  if(n%2==0) {
+    R rl, ru;
+    pow_(rl,x._lower,n,round_up);
+    pow_(ru,x._upper,n,round_up);
+    r._lower=0;
+    r._upper=max(rl,ru);
+  } else {
+    //r._lower=pow_down(x._lower,n);
+    //r._upper=pow_up(x._upper,n);
+    pow_(r._lower,x._lower,n,round_down);
+    pow_(r._upper,x._upper,n,round_up);
   }
 }
 
@@ -702,6 +709,9 @@ void pow_(Interval<R>& r, const Interval<R>& x, const Integer& n) {
   r=1;
   for(Integer i=0; i!=m; ++i) {
     r*=a;
+  }
+  if(m%2==0) {
+    r._lower=0;
   }
 }
 

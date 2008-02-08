@@ -31,7 +31,7 @@ Function::TaylorSeries<X>
 Function::ArithmeticSeries<X>::rec(smoothness_type d, const X& c) 
 {
   TaylorSeries<X> y(d);
-  X mr = -1/c;
+  X mr = (-1)/c;
   for(uint i=0; i<=y.degree(); ++i) {
     y[i]=-Numeric::pow(mr,i+1u);
   }
@@ -133,7 +133,7 @@ Function::TaylorSeries<X>
 Function::TranscendentalSeries<X>::asin(smoothness_type d, const X& c)
 {
   if(d==0) { return TaylorSeries<X>::constant(d,Numeric::atan(c)); }
-  TaylorSeries<X> y = X(1)/Function::sqrt(X(1)-Function::pow(TaylorSeries<X>::variable(d-1,c),2));
+  TaylorSeries<X> y = X(1)/Function::sqrt(X(1)-Function::pow(TaylorSeries<X>::variable(d-1,c),2u));
   return antiderivative(y,Numeric::asin(c));
 }
 
@@ -142,7 +142,7 @@ Function::TaylorSeries<X>
 Function::TranscendentalSeries<X>::acos(smoothness_type d, const X& c)
 {
   if(d==0) { return TaylorSeries<X>::constant(d,Numeric::atan(c)); }
-  TaylorSeries<X> y = X(-1)/Function::sqrt(X(1)-Function::pow(TaylorSeries<X>::variable(d-1,c),2));
+  TaylorSeries<X> y = X(-1)/Function::sqrt(X(1)-Function::pow(TaylorSeries<X>::variable(d-1,c),2u));
   return antiderivative(y,Numeric::acos(c));
 }
 
@@ -151,7 +151,7 @@ Function::TaylorSeries<X>
 Function::TranscendentalSeries<X>::atan(smoothness_type d, const X& c)
 {
   if(d==0) { return TaylorSeries<X>::constant(d,Numeric::atan(c)); } 
-  TaylorSeries<X> y = X(1)/(X(1)+Function::pow(TaylorSeries<X>::variable(d-1,c),2));
+  TaylorSeries<X> y = X(1)/(X(1)+Function::pow(TaylorSeries<X>::variable(d-1,c),2u));
   return antiderivative(y,Numeric::atan(c));
 }
 

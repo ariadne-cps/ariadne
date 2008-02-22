@@ -26,41 +26,42 @@
 
 #include <boost/numeric/interval.hpp>
 
+#include "test/test.h"
+
 using namespace std;
 
-int test_boost_rounding(); 
 
+class TestBoost {
+ public:
+	void test_rounding() 
+	{
+		double x=1;
+		double y=3;
+		double zl,zu;
+		
+		{ 
+			boost::numeric::interval_lib::rounded_arith_std<double> rnd;
+			zl=rnd.div_down(x,y);
+			zu=rnd.div_up(x,y);
+		}
+		if(!(zl<zu)) {
+			cerr << "Warning: boost::numeric::interval_lib::rounded_arith_std<double> does not round correctly\n";
+		}
+		ARIADNE_TEST_ASSERT(zl<zu);
+	}
 
-int 
-main() 
+  void test()
+  {
+    ARIADNE_TEST_CALL(test_rounding());
+  }
+};
+
+int main() 
 {
-  test_boost_rounding();
-  return 0;
+  TestBoost().test();
+  return ARIADNE_TEST_FAILURES;
 }
 
-
-int
-test_boost_rounding() 
-{
-  cout << __PRETTY_FUNCTION__ << endl;
-
-  double x=1;
-  double y=3;
-  double zl,zu;
-  
-  { 
-    boost::numeric::interval_lib::rounded_arith_std<double> rnd;
-    zl=rnd.div_down(x,y);
-    zu=rnd.div_up(x,y);
-  }
-  cout << zl << " <= " << x << "/" << y << " <= " << zu << endl;
-  if(!(zl<zu)) {
-    cerr << "Warning: boost::numeric::interval_lib::rounded_arith_std<double> does not round correctly\n";
-  }
-  assert(zl<zu);
-  
-  return 0;
-}
 
 
 

@@ -482,7 +482,7 @@ Evaluation::SetBasedHybridEvolver<BS>::lower_evolve(const System::HybridAutomato
   HBSL reach(automaton.locations());
 	HBSL evolve(automaton.locations());
 	THBSL working=this->timed_basic_set_list(this->lower_approximation(initial_set,this->grid(automaton.locations())));
-  while(working.size()!=0) { 
+	while(working.size()!=0) { 
     this->_step(evolve,reach,working,automaton,time,lower_semantics);
   }
   HGCLS result=this->outer_approximation(evolve,this->grid(automaton.locations()));
@@ -495,10 +495,14 @@ Evaluation::SetBasedHybridEvolver<BS>::lower_reach(const System::HybridAutomaton
                                                    const Geometry::HybridSet<R>& initial_set,
                                                    const Numeric::Rational& time) const
 {
+  ARIADNE_LOG(2,"SetBasedHybridEvolver::lower_reach(automaton,set,time)\n");
+  ARIADNE_LOG(3,"  initial_set="<<initial_set<<"\n\n");
   HBSL reach(automaton.locations()), evolve(automaton.locations());
   THBSL working=this->timed_basic_set_list(this->lower_approximation(initial_set,this->grid(automaton.locations())));
+  ARIADNE_LOG(3,"  working_set="<<working<<"\n\n");	
   while(working.size()!=0) { 
     this->_step(evolve,reach,working,automaton,time,lower_semantics);
+		ARIADNE_LOG(3,"  working_set="<<working<<"\n\n");			
   }
   HGCLS result=this->outer_approximation(reach,this->grid(automaton.locations()));
   return HGMS(result);

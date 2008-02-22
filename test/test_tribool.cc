@@ -83,17 +83,17 @@ class TestTribool
     ARIADNE_TEST_ASSERT(definitely(!f));
   }
   
-  int test() { 
-    test_not();
-    test_equal();
-    test_indeterminate();
-    test_possibly();
-    test_definitely();
-    return 0;
+  void test() { 
+    ARIADNE_TEST_CALL(test_not());
+    ARIADNE_TEST_CALL(test_equal());
+    ARIADNE_TEST_CALL(test_indeterminate());
+    ARIADNE_TEST_CALL(test_possibly());
+    ARIADNE_TEST_CALL(test_definitely());
   }
 };
 
 int main() {
-  return TestTribool().test();
+  TestTribool().test();
+	return ARIADNE_TEST_FAILURES;
 }
 

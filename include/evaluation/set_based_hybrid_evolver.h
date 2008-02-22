@@ -50,6 +50,7 @@
 #include "system/hybrid_automaton.h"
 #include "evaluation/hybrid_time.h"
 
+
 #include "evaluation/approximator_interface.h"
 
 namespace Ariadne {  
@@ -202,7 +203,14 @@ namespace Ariadne {
       HBxLS lower_approximation(const HS& s, const HGr& g) const { 
         HBxLS hbxls(s.locations()); 
         for(typename HS::locations_const_iterator loc_iter=s.locations_begin(); loc_iter!=s.locations_end(); ++loc_iter) {
-          DS ds=loc_iter->first; hbxls[ds]=Geometry::lower_approximation(s[ds],g[ds]); } 
+          DS ds=loc_iter->first; 
+					try{
+						hbxls[ds]=Geometry::lower_approximation(s[ds],g[ds]);
+					}
+					catch(Geometry::EmptyInterior& e) {
+						// basic sets with empty interior are not added to lower approximation
+					}
+				} 
         return hbxls; }
       HBxLS point_approximation(const HS& s, const HGr& g) const { 
         HBxLS hbxls(s.locations()); 

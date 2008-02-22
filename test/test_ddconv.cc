@@ -32,7 +32,7 @@
 #include "geometry/ddconv.h"
 #include "geometry/ddconv.code.h"
 
-#include "test.h"
+#include "test/test.h"
 
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
@@ -42,38 +42,41 @@ using namespace std;
 
 
 
-template<class R>
-int 
-test_ddconv() 
-{
-  cout << "test_ddconv<" << name<R>() << ">" << endl;
-  typedef typename Numeric::traits<R>::arithmetic_type F;
-  
-  std::vector< LinearAlgebra::Vector<F> > constraints;
-  std::vector< LinearAlgebra::Vector<F> > generators;
-  std::vector< LinearAlgebra::Vector<F> > new_constraints;
-  std::vector< LinearAlgebra::Vector<F> > new_generators;
-  constraints.push_back(Vector<F>(Vector<R>("[1,0,-1]")));
-  constraints.push_back(Vector<F>(Vector<R>("[2,-1,2]")));
-  constraints.push_back(Vector<F>(Vector<R>("[-1,1,0]")));
-  constraints.push_back(Vector<F>(Vector<R>("[-1,-1,8]")));
+template<class R> class TestDdconv {
+ public:
+	void test_ddconv() {
+		typedef typename Numeric::traits<R>::arithmetic_type F;
+		
+		std::vector< LinearAlgebra::Vector<F> > constraints;
+		std::vector< LinearAlgebra::Vector<F> > generators;
+		std::vector< LinearAlgebra::Vector<F> > new_constraints;
+		std::vector< LinearAlgebra::Vector<F> > new_generators;
+		constraints.push_back(Vector<F>(Vector<R>("[1,0,-1]")));
+		constraints.push_back(Vector<F>(Vector<R>("[2,-1,2]")));
+		constraints.push_back(Vector<F>(Vector<R>("[-1,1,0]")));
+		constraints.push_back(Vector<F>(Vector<R>("[-1,-1,8]")));
 
-  cout << "constraints=" << constraints << endl;
-  ddconv(generators,constraints);
-  cout << "generators=" << generators << endl;
-  ddconv(new_constraints,generators);
-  cout << "new_constraints=" << new_constraints << endl;
-  ddconv(new_generators,new_constraints);
-  cout << "new_generators=" << generators << endl;
-  return 0;
-}
-
+		cout << "constraints=" << constraints << endl;
+		ARIADNE_TEST_TRY(ddconv(generators,constraints));
+		cout << "generators=" << generators << endl;
+		ARIADNE_TEST_TRY(ddconv(new_constraints,generators));
+		cout << "new_constraints=" << new_constraints << endl;
+		ARIADNE_TEST_TRY(ddconv(new_generators,new_constraints));
+		cout << "new_generators=" << generators << endl;
+	}
+	
+	void test () {
+		ARIADNE_TEST_CALL(test_ddconv());
+	}
+};
 
 
 int main() {
 
-  test_ddconv<Rational>();
-  test_ddconv< Flt >();
+  TestDdconv<Rational>().test();
+  TestDdconv< Flt >().test();
 
   cerr << "INCOMPLETE ";
+	  
+	return ARIADNE_TEST_FAILURES;
 }

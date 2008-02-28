@@ -27,7 +27,6 @@
 #include "numeric/rational.h"
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
-#include "function/affine_derivative.h"
 #include "function/taylor_derivative.h"
 #include "function/function_interface.h"
 
@@ -56,12 +55,6 @@ extract_array(const boost::python::object& obj)
 
 template<class X> void read(Vector<X>& v, const object& obj) {
   read_array(v.data(),obj); }
-
-template<class X> void read(AffineDerivative<X>& ad, const object& obj) {
-  array< AffineVariable<X> > ava=extract_array< AffineVariable<X> >(obj); 
-  ad.resize(ava.size(),ava[0].argument_size());
-  for(size_type i=0; i!=ava.size(); ++i) { ad[i]=ava[i]; } 
-}
 
 template<class X> 
 void read(TaylorDerivative<X>& td, const object& obj) {

@@ -21,7 +21,8 @@ NUMERIC_SRC = \
 	numeric/interval.cc
 
 LINEAR_ALGEBRA_SRC = \
-	linear_algebra/vector.cc linear_algebra/covector.cc \
+	linear_algebra/vector.cc \
+	linear_algebra/covector.cc \
 	linear_algebra/matrix.cc \
 	linear_algebra/matrix_function.cc 
 
@@ -30,29 +31,24 @@ LINEAR_PROGRAMMING_SRC = \
 
 COMBINATORIC_SRC = \
 	combinatoric/array_operations.cc \
-	combinatoric/binary_word.cc combinatoric/binary_tree.cc \
-	combinatoric/lattice_set.cc combinatoric/lattice_map.cc \
+	combinatoric/binary_word.cc \
+	combinatoric/binary_tree.cc \
+	combinatoric/lattice_set.cc \
+	combinatoric/lattice_map.cc \
 	combinatoric/subdivision_tree_set.cc 
 
 FUNCTION_SRC = \
-	function/function_series.cc \
-	function/taylor_series.cc \
 	function/affine_variable.cc \
+	function/affine_model.cc \
+	function/taylor_series.cc \
 	function/taylor_variable.cc \
 	function/taylor_derivative.cc \
-	function/affine_model.cc \
 	function/taylor_model.cc  \
-	function/interpreted_function.cc \
 	function/constant_function.cc \
 	function/identity_function.cc \
 	function/affine_function.cc \
 	function/polynomial_function.cc
 
-
-
-#	function/affine_variable.cc \
-#	function/taylor_variable.cc \
-# 	function/polynomial_variable.cc 
 
 GEOMETRY_SRC = \
 	geometry/point.cc \
@@ -62,22 +58,26 @@ GEOMETRY_SRC = \
 	geometry/point_list.cc \
 	geometry/rectangle.cc \
 	geometry/polyhedron.cc \
-	geometry/polytope.cc geometry/simplex.cc \
+	geometry/polytope.cc \
+	geometry/simplex.cc \
 	geometry/zonotope.cc \
-	geometry/ellipsoid.cc geometry/sphere.cc \
+	geometry/ellipsoid.cc \
+	geometry/sphere.cc \
 	geometry/taylor_set.cc \
 	geometry/list_set.cc \
 	geometry/grid.cc \
 	geometry/grid_approximation.cc \
-	geometry/grid_cell.cc geometry/grid_block.cc \
-	geometry/grid_cell_list_set.cc geometry/grid_mask_set.cc \
-	geometry/irregular_grid.cc geometry/irregular_grid_set.cc \
+	geometry/grid_cell.cc \
+	geometry/grid_block.cc \
+	geometry/grid_cell_list_set.cc \
+	geometry/grid_mask_set.cc \
 	geometry/partition_tree_set.cc \
 	geometry/curve.cc \
-	geometry/constraint.cc geometry/poincare_section.cc \
-	geometry/constraint_set.cc geometry/level_set.cc \
-	geometry/hybrid_set.cc \
-	geometry/ppl_polyhedron.cc
+	geometry/constraint.cc \
+	geometry/poincare_section.cc \
+	geometry/constraint_set.cc \
+	geometry/level_set.cc \
+	geometry/hybrid_set.cc 
 
 SYSTEM_SRC = \
 	system/map.cc \
@@ -121,8 +121,8 @@ OUTPUT_SRC = \
 	output/chompstream.cc \
 	output/dotstream.cc 
 
-INPUT_SRC = \
-	input/modelica.cc 
+INPUT_SRC = 
+
 
 
 noinst_LTLIBRARIES = libbase.la libnumeric.la liblinearalgebra.la liblinearprogramming.la \

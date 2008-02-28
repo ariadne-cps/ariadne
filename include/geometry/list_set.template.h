@@ -27,7 +27,6 @@
 #include "base/stlio.h"
 #include "geometry/rectangle.h"
 #include "geometry/name.h"
-#include "geometry/irregular_grid_set.h"
 
 namespace Ariadne {
 

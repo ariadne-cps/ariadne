@@ -483,7 +483,7 @@ Geometry::apply(const Function::AffineModel<R>& am,
   size_type m=z.number_of_generators();
   dimension_type nd=am.result_size();
 
-  Point<R> const& c=z.centre();
+  //Point<R> const& c=z.centre();
   Matrix<R> const& G=z.generators();
   Vector<R> const& e=z.error();
 
@@ -495,7 +495,6 @@ Geometry::apply(const Function::AffineModel<R>& am,
   Matrix<R> nG=midpoint(niG);
   Vector<R> ne(nd);
 
-  bool nonzero_error=not(e==0);
   for(size_type i=0; i!=nd; ++i) {
     R& err=ne[i];
     err=add_up(err,nic[i].radius());
@@ -1186,7 +1185,7 @@ instantiate_zonotope<Rational>()
   Geometry::Point<R>* pt=0;
   Geometry::Box<R>* bx=0;
   Geometry::Zonotope<R>* z=0;
-  Geometry::ListSet< Zonotope<R> >* zls=0;
+  //Geometry::ListSet< Zonotope<R> >* zls=0;
   
   *r=Geometry::radius(*z);
   *bx=Geometry::bounding_box(*z);

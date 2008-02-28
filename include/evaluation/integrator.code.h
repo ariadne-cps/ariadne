@@ -40,13 +40,14 @@
 #include "numeric/interval.h"
 
 #include "linear_algebra/vector.h"
+#include "linear_algebra/covector.h"
 #include "linear_algebra/matrix.h"
 
 #include "function/taylor_series.h"
-#include "function/affine_variable.h"
-#include "function/affine_model.h"
 #include "function/taylor_variable.h"
 #include "function/taylor_model.h"
+#include "function/affine_variable.h"
+#include "function/affine_model.h"
 
 #include "geometry/point.h"
 #include "geometry/box.h"
@@ -58,7 +59,6 @@
 #include "output/logging.h"
 
 #include "function/taylor_series.code.h"
-#include "function/affine_variable.code.h"
 
 
 using namespace std;

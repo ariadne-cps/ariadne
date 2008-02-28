@@ -37,14 +37,13 @@ COMBINATORIC_TESTS = \
 
 FUNCTION_TESTS = \
 	test_index \
-	test_interpreted_function \
-	test_polynomial_function \
 	test_affine_variable \
 	test_affine_model \
 	test_taylor_series \
 	test_taylor_variable \
 	test_taylor_derivative \
-	test_taylor_model 
+	test_taylor_model \
+	test_polynomial_function
 
 GEOMETRY_TESTS = \
 	test_point \
@@ -131,14 +130,13 @@ test_binary_word_SOURCES=test_binary_word.cc
 test_lattice_SOURCES=test_lattice.cc
 test_subdivision_tree_SOURCES=test_subdivision_tree.cc
 
-test_interpreted_function_SOURCES=test_interpreted_function.cc
-test_polynomial_function_SOURCES=test_polynomial_function.cc
 test_index_SOURCES=test_index.cc
 test_taylor_series_SOURCES=test_taylor_series.cc
 test_taylor_variable_SOURCES=test_taylor_variable.cc
 test_taylor_derivative_SOURCES=test_taylor_derivative.cc
 test_affine_model_SOURCES=test_affine_model.cc
 test_taylor_model_SOURCES=test_taylor_model.cc
+test_polynomial_function_SOURCES=test_polynomial_function.cc
 
 test_point_SOURCES=test_point.cc
 test_list_set_SOURCES=test_list_set.cc

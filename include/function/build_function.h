@@ -32,8 +32,6 @@
 #include "linear_algebra/covector.h"
 #include "linear_algebra/matrix.h"
 
-#include "function/affine_variable.h"
-#include "function/affine_derivative.h"
 #include "function/taylor_variable.h"
 #include "function/taylor_derivative.h"
 

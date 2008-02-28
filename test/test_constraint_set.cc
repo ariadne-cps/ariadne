@@ -36,7 +36,7 @@
 #include "geometry/grid_set.h"
 #include "geometry/constraint_set.h"
 #include "function/function_interface.h"
-#include "function/interpreted_function.h"
+#include "function/build_function.h"
 #include "output/epsstream.h"
 #include "output/logging.h"
 
@@ -50,6 +50,13 @@ using namespace Ariadne::Output;
 using namespace std;
 
 template<class R> int test_constraint_set();
+
+template<class R, class A, class P> 
+void radius_function(R& r, const A& a, const P& p) {
+  r[0] = 1 - ( pow(a[0],2u) + pow(a[1],2u) );
+}
+
+ARIADNE_BUILD_FUNCTION(Radius,radius_function,1,2,0,255);
 
 int main() {
   
@@ -66,7 +73,7 @@ test_constraint_set()
 {
   cout << "test_constraint_set<" << Numeric::name<R>() << ">" << endl;
 
-  InterpretedFunction<R> f("function disc output Real y; input Real[2] x; algorithm y=1-(x[0]^2+x[1]^2); end disc;");
+  Radius<R> f=Radius<R>(Vector<R>());
   Box<R> po=Box<R>::positive_orthant(1);
 
   ConstraintSet<R> s(f,po);

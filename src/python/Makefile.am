@@ -62,10 +62,8 @@ ARIADNE_SRC = ariadne_module.cc \
 	export_affine_model.cc \
 	export_taylor_model.cc \
 	export_flow_model.cc \
-	export_polynomial_variable.cc \
 	export_function_interface.cc \
 	export_affine_function.cc \
-	export_interpreted_function.cc \
 	export_python_function.cc \
 	 \
 	export_point.cc \

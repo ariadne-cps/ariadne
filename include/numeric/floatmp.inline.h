@@ -24,6 +24,7 @@
 #include <mpfr.h>
 
 #include "numeric/traits.h"
+#include "numeric/macros.h"
 
 #include "numeric/integer.h"
 #include "numeric/rational.h"
@@ -98,6 +99,11 @@ inline unsigned int FloatMP::precision() const {
   return mpfr_get_prec(this->_value); }
 inline void FloatMP::set_precision(unsigned int p) { 
   mpfr_set_prec(this->_value,p); }
+
+template<class Rnd> inline FloatMP::Float(const Rational& q, Rnd rnd) {
+  mpfr_init_set_q(this->_value,q._value,mpfr_rounding_mode<Rnd>()); }
+template<class Rnd> inline void FloatMP::set(const Rational& q, Rnd) {
+  mpfr_set_q(this->_value,q._value,mpfr_rounding_mode<Rnd>()); }
 
 inline double FloatMP::get_d() const {
   return mpfr_get_d(this->_value, GMP_RNDN); }
@@ -321,7 +327,8 @@ void div_(FloatMP& r, const FloatMP& x, const unsigned long int& y, Rnd) {
 
 template<class Rnd> inline 
 void div_(FloatMP& r, const FloatMP& x, const double& y, Rnd) {
-  mpfr_div_d(r._value,x._value,y,mpfr_rounding_mode<Rnd>()); }
+  mpfr_t t; mpfr_init_set_d(t,y,mpfr_rounding_mode<Rnd>()); 
+  mpfr_div(r._value,x._value,t,mpfr_rounding_mode<Rnd>()); }
 
 template<class Rnd> inline 
 void div_(FloatMP& r, const int& x, const FloatMP& y, Rnd) {

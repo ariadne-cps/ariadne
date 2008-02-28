@@ -14,6 +14,7 @@ SUBDIRS = . python
 BASE_SRC = 
 
 NUMERIC_SRC = \
+	numeric/double.cc \
 	numeric/integer.cc \
 	numeric/rational.cc \
 	numeric/float.cc \
@@ -155,3 +156,5 @@ libinput_la_SOURCES = $(INPUT_SRC)
 EXTRA_DIST =  
 bin_PROGRAMS = 
 include_HEADERS =
+
+rounding_CXXFLAGS = -O0

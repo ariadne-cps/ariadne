@@ -5,16 +5,18 @@ TESTS_ENVIRONMENT = ./run_test.sh
 
 
 INCLUDES = -I$(top_srcdir)/include
-LDADD   = ../src/libariadne.la -lmpfr -lgmpxx 
+LIBS = -lmpfr -lgmpxx -lgmp
+LDADD = ../src/libariadne.la $(LIBS)
 
 BASE_TESTS = \
 	test_tribool \
 	test_array \
-	test_ddconv \
+	test_rounding \
 	test_boost \
 	test_mpfr 
 
 NUMERIC_TESTS = \
+	test_rounding \
 	test_integer \
 	test_rational \
 	test_float \
@@ -26,11 +28,7 @@ LINEAR_ALGEBRA_TESTS = \
 	test_linear_algebra
 
 LINEAR_PROGRAMMING_TESTS = \
-	test_linear_program \
-	test_lpslv \
-	test_lpstp \
-	test_lpfsp \
-	test_lptst 
+	test_linear_program 
 
 COMBINATORIC_TESTS = \
 	test_binary_word \
@@ -57,6 +55,7 @@ GEOMETRY_TESTS = \
 	test_rectangle \
 	test_zonotope \
 	test_simplex \
+	test_ddconv \
 	test_polytope \
 	test_polyhedron \
 	test_constraint_set \
@@ -93,18 +92,15 @@ check_PROGRAMS = \
 
 tests: $(check_PROGRAMS)
 
-test_integer_LDADD = ../src/libnumeric.la -lmpfr -lgmpxx -lgmp
-test_rational_LDADD = ../src/libnumeric.la -lmpfr -lgmpxx -lgmp
-test_float_LDADD = ../src/libnumeric.la -lmpfr -lgmpxx -lgmp
-test_interval_LDADD = ../src/libnumeric.la -lmpfr -lgmpxx -lgmp
+test_rounding_LDADD = ../src/libnumeric.la $(LIBS)
+test_integer_LDADD = ../src/libnumeric.la $(LIBS)
+test_rational_LDADD = ../src/libnumeric.la $(LIBS)
+test_float_LDADD = ../src/libnumeric.la $(LIBS)
+test_interval_LDADD = ../src/libnumeric.la $(LIBS)
 check_numericdir = ./
 check_numeric_PROGRAMS = $(NUMERIC_TESTS) 
 check_numeric: $(check_numeric_PROGRAMS)
 
-#test_vector_LDADD = ../src/libnumeric.la ../src/liblinearalgebra.la -lmpfr -lgmpxx -lgmp
-#test_matrix_LDADD = ../src/libnumeric.la ../src/liblinearalgebra.la -lmpfr -lgmpxx -lgmp
-#test_tensor_LDADD = ../src/libnumeric.la ../src/liblinearalgebra.la -lmpfr -lgmpxx -lgmp
-#test_linear_algebra_LDADD = ../src/libnumeric.la ../src/liblinearalgebra.la -lmpfr -lgmpxx -lgmp
 check_linear_algebradir = ./
 check_linear_algebra_PROGRAMS = $(LINEAR_ALGEBRA_TESTS) 
 check_linear_algebra: $(check_linear_algebra_PROGRAMS)
@@ -127,14 +123,9 @@ test_interval_SOURCES=test_interval.cc
 
 test_vector_SOURCES=test_vector.cc
 test_matrix_SOURCES=test_matrix.cc
-test_tensor_SOURCES=test_tensor.cc
 test_linear_algebra_SOURCES=test_linear_algebra.cc
 
 test_linear_program_SOURCES=test_linear_program.cc
-test_lpslv_SOURCES=test_lpslv.cc
-test_lpstp_SOURCES=test_lpstp.cc
-test_lpfsp_SOURCES=test_lpfsp.cc
-test_lptst_SOURCES=test_lptst.cc
 
 test_binary_word_SOURCES=test_binary_word.cc
 test_lattice_SOURCES=test_lattice.cc
@@ -180,5 +171,5 @@ EXTRA_DIST =
 SUBDIRS =
 
 TESTS = $(check_PROGRAMS)
-XFAIL_TESTS = test_boost test_linear_program test_float
+XFAIL_TESTS = test_boost test_linear_program 
 testsubdir = ./

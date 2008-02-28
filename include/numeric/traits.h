@@ -48,10 +48,11 @@ namespace Ariadne {
     class Rational;
     template<class T> class Float;
     template<class T> class ApproximateFloat;
+    
     template<class R> class Interval;
-      
-    typedef Float<double> Float64;
-    typedef Float<mpfr> FloatMP;
+    template<> class Interval<Integer>;
+    template<> class Interval<Rational>;
+  //template<class T> class Interval< Float<T> >;
 
     /* numerical traits */
     /*! \brief Tags a class representing a ring. */
@@ -108,16 +109,6 @@ namespace Ariadne {
       typedef Interval<double> interval_type;
     };
   
-  /*
-    template<> struct traits< mpf_class > { 
-      typedef mpf_class number_type; 
-      typedef mpf_class approximate_arithmetic_type; 
-      typedef mpf_class closure_type; 
-      typedef mpf_class arithmetic_type; 
-      typedef Interval<FloatMP> interval_type; 
-    };
-  */
-    
     template<class T> struct traits< ApproximateFloat<T> > { 
       typedef float_tag type;
       typedef Float<T> number_type; 
@@ -136,6 +127,8 @@ namespace Ariadne {
       typedef Interval< Float<T> > interval_type;
     };
 
+  /*
+    class Float64;
     template<> struct traits< Float64 > { 
       typedef float_tag type;
       typedef Float64 number_type; 
@@ -144,6 +137,7 @@ namespace Ariadne {
       typedef Interval<Float64> arithmetic_type; 
       typedef Interval<Float64> interval_type;
     };
+  */
     
     
     template<> struct traits< Rational > { 
@@ -154,20 +148,6 @@ namespace Ariadne {
       typedef Rational arithmetic_type; 
       typedef Interval<Rational> interval_type; 
     };
-
-  /*
-    // FIXME: WE should not use GMP internals
-    // The following is needed for rational expressions in GMP 4.2.x
-    template<class E> struct traits< __gmp_expr<mpq_t,E> > { 
-      typedef Rational closure_type; 
-    };
-
-    // FIXME: WE should not use GMP internals
-    // The following is needed for rational expressions in GMP 4.1.x
-    template<class E> struct traits< __gmp_expr<_gmpq_value,E> > { 
-      typedef Rational closure_type; 
-    };
-  */  
 
 
     template<class T> struct traits< Interval< Float<T> > > { 
@@ -206,21 +186,14 @@ namespace Ariadne {
       typedef Rational arithmetic_type; 
     };
     
-    template<> struct traits< Float64, Rational > { 
+    template<class T> struct traits< Float<T>, Rational > { 
       typedef Rational arithmetic_type; 
     };
     
-    template<> struct traits< Rational, Float64 > { 
+    template<class T> struct traits< Rational, Float<T> > { 
       typedef Rational arithmetic_type; 
     };
     
-    template<> struct traits< FloatMP, Rational > { 
-      typedef Rational arithmetic_type; 
-    };
-    
-    template<> struct traits< Rational, FloatMP > { 
-      typedef Rational arithmetic_type; 
-    };
     
 
 

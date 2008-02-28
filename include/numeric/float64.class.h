@@ -1,8 +1,8 @@
 /***************************************************************************
- *            numeric/float64.h
+ *            numeric/float64.class.h
  *
- *  Copyright  2006  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
+ *  Copyright  2006-8  Alberto Casagrande, Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -21,32 +21,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file numeric/float64.h
- *  \brief Type definitions and conversion operators for 64-bit fixed precision floating point numbers.
+/*! \file numeric/float64.class.h
+ *  \brief Class definition for 64-bit fixed precision floating point numbers.
  */
 
 #ifndef ARIADNE_NUMERIC_FLOAT64_CLASS_H
 #define ARIADNE_NUMERIC_FLOAT64_CLASS_H
 
 #include <iosfwd>
-
-#include <boost/numeric/interval/rounded_arith.hpp>
-#include <boost/numeric/interval/rounded_transc.hpp>
-
-// Try uncommenting this code if experiencing difficulties with rounded and interval transcendental functions.
-/*
-#ifdef __x86_64__ 
-#ifndef __i386__
-#define __i386__
-#warning "Defining __i386__ preprocessor symbol in order to use x86 hardware rounding on an __x86_64__ machine. Please contact the developers if this causes a compilation problem."
-#include <boost/numeric/interval/hw_rounding.hpp>
-#undef __i386__
-#endif
-#endif
-*/
-
-#include <boost/numeric/interval/hw_rounding.hpp>
-
 #include "numeric/expression.h"
 
 namespace Ariadne {
@@ -73,9 +55,6 @@ namespace Ariadne {
       : public Value< Float<double> >
     {
      public:
-      typedef boost::numeric::interval_lib::rounded_arith_std<double> rounded_arith;
-      typedef boost::numeric::interval_lib::rounded_transc_std<double> rounding;
-     public:
       ~Float();
       Float();
       Float(const int& n);
@@ -92,6 +71,9 @@ namespace Ariadne {
       Float64& operator=(const Integer& n);
       Float64& operator=(const Float64& x);
       
+      template<class Rnd> Float(const Rational& q, Rnd);
+      template<class Rnd> void set(const Rational& q, Rnd);
+
       template<class E> Float(const Expression<E>& e);
       template<class E> Float64& operator=(const Expression<E>& e);
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            interval.template.h
+ *            interval-float.template.h
  *
  *  Copyright  2007-8  Pieter Collins
  *
@@ -25,47 +25,19 @@
 namespace Ariadne {
 namespace Numeric {
 
-template<class R> std::ostream& operator<<(std::ostream& os, const Interval<R>& x);
-template<class R> std::istream& operator>>(std::istream& is, Interval<R>& x);
+template<class T> void sqrt_(Interval< Float<T> >& r, const Interval< Float<T> >& x);
+template<class T> void hypot_(Interval< Float<T> >& r, const Interval< Float<T> >& x, const Interval< Float<T> >& y);
 
+template<class T> void exp_(Interval< Float<T> >& r, const Interval< Float<T> >& x);
+template<class T> void log_(Interval< Float<T> >& r, const Interval< Float<T> >& x);
+template<class T> void pi_(Interval< Float<T> >& r);
+template<class T> void sin_(Interval< Float<T> >& r, const Interval< Float<T> >& x);
+template<class T> void cos_(Interval< Float<T> >& r, const Interval< Float<T> >& x);
+template<class T> void tan_(Interval< Float<T> >& r, const Interval< Float<T> >& x);
+template<class T> void asin_(Interval< Float<T> >& r, const Interval< Float<T> >& x);
+template<class T> void acos_(Interval< Float<T> >& r, const Interval< Float<T> >& x);
+template<class T> void atan_(Interval< Float<T> >& r, const Interval< Float<T> >& x);
 
-template<class R> 
-std::ostream& operator<<(std::ostream& os, const Interval<R>& ivl) 
-{
-  if(ivl.lower()>ivl.upper()&&false) {
-    return os << "[1:0]";
-  }
-  else {
-    return os << "[" << ivl.lower() << ":" << ivl.upper() << "]";
-  }
-}
-
-
-template<class R> 
-std::istream& 
-operator>>(std::istream& is, Interval<R>& ivl)
-{
-  char c;
-  R l;
-  R u;
-  is >> c;
-  if(c=='[') {
-    is >> l >> c;
-    if(c!=',' && c!=':') {
-      is.setstate(std::ios_base::failbit);
-    }
-    is >> u >> c;
-    if(c!=']') {
-      is.setstate(std::ios_base::failbit);
-    }
-    ivl=Interval<R>(l,u);
-  } else {
-    is.putback(c);
-    is >> l;
-    ivl=Interval<R>(l);
-  }
-  return is;
-}
 
 
 } // namespace Numeric

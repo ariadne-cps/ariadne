@@ -27,7 +27,7 @@
 #ifdef ENABLE_FLOAT64
 
 #warning "Instantiating Float64"
-#include "numeric/float64.code.h"
+//#include "numeric/float64.code.h"
 #endif
 
 #ifdef ENABLE_FLOATMP

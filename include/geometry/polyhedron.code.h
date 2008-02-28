@@ -36,8 +36,9 @@
 
 #include "base/sequence_io.h"
 
+#include "numeric/rational.h"
+#include "numeric/float.h"
 #include "numeric/interval.h"
-#include "numeric/arithmetic.h"
 
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"

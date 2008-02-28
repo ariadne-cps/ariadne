@@ -1,7 +1,7 @@
 /***************************************************************************
- *            numeric/float64.h
+ *            numeric/interval-float.h
  *
- *  Copyright  2006-8  Alberto Casagrande, Pieter Collins
+ *  Copyright 2005-8  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 
@@ -21,17 +21,25 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file numeric/float64.h
- *  \brief Type definitions and conversion operators for 64-bit fixed precision floating point numbers.
+/*! \file numeric/interval-float.h
+ *  \brief Intervals of floating-point number types.
  */
+ 
+#ifndef ARIADNE_NUMERIC_INTERVAL_FLOAT_H
+#define ARIADNE_NUMERIC_INTERVAL_FLOAT_H
 
-#ifndef ARIADNE_NUMERIC_FLOAT64_H
-#define ARIADNE_NUMERIC_FLOAT64_H
+#include <iostream>
+#include <iomanip>
+#include <stdexcept>
+#include <cassert>
 
-#include "numeric/float64.class.h"
-#include "numeric/float64.inline.h"
-//#include "numeric/float64-boost.h"
-//#include "numeric/float64-double.h"
-//#include "numeric/float64-profil.h"
+#include "base/tribool.h"
 
-#endif /* ARIADNE_NUMERIC_FLOAT64_H */
+#include "numeric/traits.h"
+#include "numeric/expression.h"
+
+#include "numeric/interval-float.class.h"
+#include "numeric/interval-float.template.h"
+#include "numeric/interval-float.inline.h"
+
+#endif /* ARIADNE_NUMERIC_INTERVAL_FLOAT_H */

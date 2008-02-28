@@ -39,7 +39,6 @@
 #include "base/stlio.h"
 #include "base/array.h"
 #include "base/exceptions.h"
-#include "numeric/arithmetic.h"
 #include "numeric/interval.h"
 
 #include "linear_algebra/vector.h"

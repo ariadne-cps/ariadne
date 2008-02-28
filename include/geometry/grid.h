@@ -32,7 +32,6 @@
 #include <boost/shared_ptr.hpp>
 
 #include "base/array.h"
-#include "numeric/arithmetic.h"
 #include "linear_algebra/vector.h"
 #include "combinatoric/lattice_set.h"
 
@@ -58,6 +57,7 @@ namespace Ariadne {
       struct Data { array<R> _origin; array<R> _lengths; };
      public:
       /*! \brief The type of real number defining the vertices and cells of the grid. */
+      typedef int integer_type;
       typedef R real_type;
       
      public:
@@ -90,6 +90,7 @@ namespace Ariadne {
       LinearAlgebra::Vector<R> lengths() const;
 
       /*! \brief The coordinate of the \a n th subdivision point in dimension \a d. */
+      real_type subdivision_coordinate(dimension_type d, integer_type n) const;
       real_type subdivision_coordinate(dimension_type d, index_type n) const;
 
       /*! \brief The coordinate of the \a subdivision point \a x in dimension \a d. */
@@ -100,13 +101,13 @@ namespace Ariadne {
 
       /*! \brief The index in dimension \a d of the subdivision 
        * point \a x. Throws an exception if \a x is not a subdivision point. */
-      index_type subdivision_index(dimension_type d, const real_type& x) const;
+      integer_type subdivision_index(dimension_type d, const real_type& x) const;
       
       /*! \brief The index of the subdivision point below \a x. */
-      index_type subdivision_lower_index(dimension_type d, const real_type& x) const;
+      integer_type subdivision_lower_index(dimension_type d, const real_type& x) const;
 
       /*! \brief The index of the subdivision point above \a x. */
-      index_type subdivision_upper_index(dimension_type d, const real_type& x) const;
+      integer_type subdivision_upper_index(dimension_type d, const real_type& x) const;
 
       /*! \brief Tests equality of two grids. */
       bool operator==(const Grid<R>& g) const; 
@@ -155,6 +156,8 @@ namespace Ariadne {
      public:
       /*! \brief The type of real number defining the vertices and cells of the grid. */
       typedef R real_type;
+      /*! \brief The type of integer number defining the vertices and cells of the grid. */
+      typedef int integer_type;
 
       /*! \brief Destructor. Frees memory allocated to hold the grid if necessary. */
       ~FiniteGrid();
@@ -185,17 +188,17 @@ namespace Ariadne {
 
       /*! \brief The coordinate of the \a n th subdivision point in 
        * dimension \a d. */
-      real_type subdivision_coordinate(dimension_type d, index_type n) const;
+      real_type subdivision_coordinate(dimension_type d, integer_type n) const;
   
       /*! \brief The index of the subdivision point \a x in 
        * dimension \a d.  */
-      index_type subdivision_index(dimension_type d, const real_type& x) const;
+      int subdivision_index(dimension_type d, const real_type& x) const;
       
       /*! \brief The index of the subdivision point below \a x. */
-      index_type subdivision_lower_index(dimension_type d, const real_type& x) const;
+      int subdivision_lower_index(dimension_type d, const real_type& x) const;
 
       /*! \brief The index of the subdivision point above \a x. */
-      index_type subdivision_upper_index(dimension_type d, const real_type& x) const;
+      int subdivision_upper_index(dimension_type d, const real_type& x) const;
       
       /*!\brief Write to an output stream. */
       std::ostream& write(std::ostream& os) const;

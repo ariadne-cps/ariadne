@@ -37,6 +37,8 @@
 namespace Ariadne {
   namespace Numeric {
 
+  template<class R> class Interval;
+
     /*!\ingroup Numeric
      * \brief A templated class representing an interval of real numbers.
      * 
@@ -49,11 +51,13 @@ namespace Ariadne {
      *
      * Currently implemented as a wrapper around the boost::numeric::interval class template from the Boost C++ library.
      */
-    template<class R>
-    class Interval
-      : public Value< Interval<R> >
+    template<class T>
+    class Interval< Float<T> >
+      : public Value< Interval< Float<T> > >
     {
-      public:
+     private:
+      typedef Float<T> R;
+     public:
       R _lower; R _upper;
      public:
       //@{
@@ -248,22 +252,6 @@ namespace Ariadne {
 
     template<class X> std::string name();
 
-    
-    // A reference to an interval. 
-    template<class R>
-    class IntervalReference {
-     public:
-      IntervalReference(R& l, R& u);
-      IntervalReference(Interval<R>& ivl);
-      void operator=(const Interval<R>& ivl);
-      operator Interval<R> () const;
-      R lower() const;
-      R upper() const;
-      R midpoint() const;
-      R radius() const;
-     private:
-      R* _lower; R* _upper;
-    };
     
 
 

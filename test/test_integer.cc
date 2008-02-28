@@ -28,6 +28,7 @@
 #include <gmpxx.h>
 
 #include "numeric/integer.h"
+#include "numeric/rational.h"
 #include "test/test.h"
 
 using namespace std;
@@ -41,6 +42,38 @@ class TestInteger {
     cout << setprecision(20);
     mpf_set_default_prec (8);
   }    
+
+  void test_concept() {
+    int n; unsigned int m; 
+    long int ln; unsigned long int lm; 
+    Integer z;
+    Rational q;
+
+    // Constructors and assignment
+    z=Integer(); z=Integer(n); z=Integer(m); z=Integer(ln); z=Integer(lm); z=Integer(z);
+    z=n; z=m; z=ln; z=lm; z=z;
+    
+    // Maximum and minimum
+    z=max(z,z); z=min(z,z);
+    z=pos(z); z=neg(z); z=abs(z);
+
+    // Integer operations
+    z=add(z,z); z=sub(z,z); z=mul(z,z); // q=div(z,z); 
+    z=pow(z,m); z=gcd(z,z); z=lcm(z,z); z=fac(z); z=bin(z,z);
+
+    // Mixed arithmetic
+    z=add(z,n); z=sub(z,n); z=mul(z,n); // q=div(z,n);
+    // z=add(z,m); z=sub(z,m); z=mul(z,m); // z=div(z,m);
+    z=add(n,z); z=sub(n,z); z=mul(n,z); // q=div(n,z);
+    // z=add(m,z); z=sub(m,z); z=mul(m,z); // z=div(m,z);
+
+    // Comparisons
+    z==z; z!=z; z<=z; z>=z; z<z; z>z;
+    z==n; z!=n; z<=n; z>=n; z<n; z>n;
+    z==m; z!=m; z<=m; z>=m; z<m; z>m;
+    n==z; n!=z; n<=z; n>=z; n<z; n>z;
+    m==z; m!=z; m<=z; m>=z; m<z; m>z;
+  }
 
   void test_constructors() {
     // Default constructor

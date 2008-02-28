@@ -28,9 +28,9 @@
 #include <sstream>
 #include <string>
 
-#include "numeric/interval.h"
-#include "numeric/float.h"
 #include "numeric/rational.h"
+#include "numeric/float.h"
+#include "numeric/interval.h"
 
 #include "test.h"
 
@@ -46,31 +46,95 @@ template class Interval<Float64>;
 template class Interval<FloatMP>;
 #endif
 
-template<class R> int test_interval();
-template<> int test_interval<Rational>();
+template<class R> void test_interval();
+template<> void test_interval<Rational>();
 
-int main() {
-  cout << setprecision(20);
-  mpf_set_default_prec (8);
 
-  test_interval<Rational>();
 
-#ifdef ENABLE_FLOAT64
-  test_interval<Float64>();
-#endif
-   
-#ifdef ENABLE_FLOATMP
-  test_interval<FloatMP>();
-#endif
-   
-  cerr << "INCOMPLETE ";
-  return ARIADNE_TEST_FAILURES;
+template<class R> class TestInterval;
+
+template<class T> 
+class TestInterval< Float<T> >
+{
+ public:
+  void test();
+ private:
+  void test_concept();
+};
+
+template<> 
+class TestInterval< Rational >
+{
+ public:
+  void test();
+ private:
+  void test_concept();
+};
+
+
+template<class T> void
+TestInterval< Float<T> >::test()
+{
+  test_concept();
+}
+
+template<class T> void
+TestInterval< Float<T> >::test_concept()
+{
+  typedef Float<T> R;
+  typedef Interval< Float<T> > I;
+
+  int n=0; 
+  uint m=0;
+  double d=0;
+  Integer z=0;
+  Rational q=0;
+  Float<T> x=0;
+  Interval< Float<T> > i=0;
+ 
+  // Constructors
+  i=I(); i=I(n); i=I(m); i=I(d); i=I(z); i=I(x); i=I(q); i=I(i);
+  i=I(n,n); i=I(m,m); i=I(d,d); i=I(z,z); i=I(x,x); i=I(q,q);
+  i=I(n,m); i=I(m,d); i=I(d,n); 
+  i=I(z,x); i=I(x,q); i=I(q,z); 
+  // Assignment
+  i=n; i=m; i=d; i=z; i=x; i=q; i=i;
+
+  // Exact operations
+  i=abs(i); i=pos(i); i=neg(i);
+
+  // Arithmetic
+  i=add(x,x); i=add(x,i); i=add(i,x); i=add(i,i);
+  i=sub(x,x); i=sub(x,i); i=sub(i,x); i=sub(i,i);
+  i=mul(x,x); i=mul(x,i); i=mul(i,x); i=mul(i,i);
+  i=div(x,x); i=div(x,i); i=div(i,x); i=div(i,i);
+  //i=pow(x,n); i=pow(x,n);
+  //i=pow(x,m); i=pow(x,m);
+
+  // Transcendental functions
+  i=sqrt(x); i=sqrt(i);
+  i=exp(x); i=exp(i);
+  i=log(x); i=log(i);
+  i=sin(x); i=sin(i);
+  i=cos(x); i=cos(i);
+  i=tan(x); i=tan(i);
+  i=asin(x); i=asin(i);
+  i=acos(x); i=acos(i);
+  i=atan(x); i=atan(i);
+  
+  /*
+  i=sinh(x); i=sinh(i);
+  i=cosh(x); i=cosh(i);
+  i=tanh(x); i=tanh(i);
+  i=asinh(x); i=asinh(i);
+  i=acosh(x); i=acosh(i);
+  i=atanh(x); i=atanh(i);
+  */
 }
 
 
-
 template<class R>
-int
+void
 test_interval()
 {
   cout << __PRETTY_FUNCTION__ << endl;
@@ -306,6 +370,18 @@ test_interval()
     ARIADNE_TEST_ASSERT(sinx.lower()<sinx.upper());
   }
 
+  // Regression test; fails dramatically on certain types of rounding
+  {
+    Interval<R> x(1.5707963267948966,1.5707963267948968);
+    Interval<R> cosx=cos(x);
+    ARIADNE_TEST_PRINT(x);
+    ARIADNE_TEST_COMPARE(cosx.lower(),<,0.0);
+    ARIADNE_TEST_COMPARE(cosx.lower(),>,-2e-15);
+    ARIADNE_TEST_COMPARE(cosx.upper(),>,0.0);
+    ARIADNE_TEST_COMPARE(cosx.upper(),<,+2e-15);
+    ARIADNE_TEST_ASSERT(cosx.lower()<cosx.upper());
+  }
+
   {
     Interval<R> x(7.0685834705770345);
     Interval<R> sinx=sin(x);
@@ -314,12 +390,10 @@ test_interval()
     ARIADNE_TEST_COMPARE(sinx.upper(),>,0.7071067811865);
     ARIADNE_TEST_ASSERT(sinx.lower()<sinx.upper());
   }
-
-  return 0;
 }
 
 template<>
-int
+void
 test_interval<Rational>()
 {
   typedef Rational R;
@@ -441,3 +515,25 @@ test_interval<Rational>()
   }
   
 }
+
+
+int main() {
+  cout << setprecision(20);
+  mpf_set_default_prec (8);
+
+  test_interval<Rational>();
+
+#ifdef ENABLE_FLOAT64
+  test_interval<Float64>();
+  TestInterval<Float64>().test();
+#endif
+   
+#ifdef ENABLE_FLOATMP
+  test_interval<FloatMP>();
+  TestInterval<FloatMP>().test();
+#endif
+   
+  cerr << "INCOMPLETE ";
+  return ARIADNE_TEST_FAILURES;
+}
+

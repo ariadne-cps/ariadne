@@ -27,7 +27,7 @@
 
 #include "numeric/declarations.h"
 #include "numeric/integer.h"
-#include "numeric/arithmetic.h"
+#include "numeric/float.h"
 #include "numeric/approximate_float.h"
 
 #include "linear_algebra/vector.h"

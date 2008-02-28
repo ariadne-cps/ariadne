@@ -32,6 +32,7 @@
 #include <stdexcept>
 
 #include "base/tribool.h"
+#include "numeric/expression.h"
 #include "numeric/integer.h"
 
 namespace Ariadne {
@@ -41,6 +42,7 @@ namespace Ariadne {
   
     template<>
     class Interval<Integer>
+      : public Value< Interval<Integer> >
     {
       typedef Integer Z;
      public:
@@ -80,6 +82,41 @@ namespace Ariadne {
       return "ZInterval"; 
     }
 
+    inline void pos_(Interval<Integer>& r, const Interval<Integer>& x, const Interval<Integer>& y) {
+      r._lower=x._lower; r._upper=x._upper; 
+    }
+       
+    inline void neg_noalias_(Interval<Integer>& r, const Interval<Integer>& x) {
+      r._lower=-x._upper; r._upper=-x._lower; 
+    }
+       
+    inline void neg_(Interval<Integer>& r, const Interval<Integer>& x) {
+      if(&r==&x) { Interval<Integer> t(x); neg_noalias_(r,x); } else { neg_noalias_(r,x); }
+    }
+       
+    inline void add_(Interval<Integer>& r, const Interval<Integer>& x, const Interval<Integer>& y) {
+      r._lower=x._lower+y._lower; r._upper=x._upper+y._upper; 
+    }
+       
+    inline void sub_noalias_(Interval<Integer>& r, const Interval<Integer>& x, const Interval<Integer>& y) {
+      r._lower=x._lower-y._upper; r._upper=x._upper-y._lower; 
+    }
+       
+    inline void sub_(Interval<Integer>& r, const Interval<Integer>& x, const Interval<Integer>& y) {
+      if(&r==&y) { Interval<Integer> t(y); sub_noalias_(r,x,y); } else { sub_noalias_(r,x,y); }
+    }
+       
+    inline void mul_(Interval<Integer>& r, const Interval<Integer>& x, const Interval<Integer>& y) {
+      Integer b[4];
+      b[0]=x.lower()*y.lower();
+      b[1]=x.lower()*y.upper();
+      b[2]=x.upper()*y.lower();
+      b[3]=x.upper()*y.upper();
+      r._lower=min(min(b[0],b[1]),min(b[2],b[3]));
+      r._upper=max(max(b[0],b[1]),max(b[2],b[3]));
+    }
+       
+  /*
     Interval<Integer> inline operator+(const Interval<Integer>& ivl1, const Interval<Integer>& ivl2) {
       return Interval<Integer>(ivl1.lower()+ivl2.lower(),ivl1.upper()+ivl2.upper()); 
     }
@@ -99,6 +136,7 @@ namespace Ariadne {
       return Interval<Integer>(l,u);
     }
 
+  */
 
   } 
 }

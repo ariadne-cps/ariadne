@@ -30,8 +30,6 @@
 #include "exceptions.h"
 #include "base/stlio.h"
 
-#include "numeric/arithmetic.h"
-
 #include "geometry/box.h"
 #include "geometry/list_set.h"
 
@@ -106,8 +104,8 @@ Geometry::Grid<R>::Grid(const Box<R>& r, const Combinatoric::LatticeBlock& lb)
   for(dimension_type i=0; i!=d; ++i) {
     const R& l=r.lower_bound(i);
     const R& u=r.upper_bound(i);
-    const index_type& a=lb.lower_bound(i);
-    const index_type& b=lb.upper_bound(i);
+    const integer_type& a=lb.lower_bound(i);
+    const integer_type& b=lb.upper_bound(i);
     R& o=origin[i];
     R& s=lengths[i];
     
@@ -210,20 +208,27 @@ Geometry::Grid<R>::subdivision_coordinate(dimension_type d, dyadic_type x) const
 
 template<class R>
 R
-Geometry::Grid<R>::subdivision_coordinate(dimension_type d, index_type n) const 
+Geometry::Grid<R>::subdivision_coordinate(dimension_type d, integer_type n) const 
 {
   return add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],n));
 }
 
+template<class R>
+R
+Geometry::Grid<R>::subdivision_coordinate(dimension_type d, index_type n) const 
+{
+  return add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],integer_type(n)));
+}
+
 
 template<class R> 
-index_type 
+typename Geometry::Grid<R>::integer_type 
 Geometry::Grid<R>::subdivision_index(dimension_type d, const real_type& x) const 
 {
   using namespace Numeric;
   
   R half=0.5;
-  index_type n=floor(add_approx(div_approx(sub_approx(x,this->_data->_origin[d]),this->_data->_lengths[d]),half));
+  integer_type n=floor(add_approx(div_approx(sub_approx(x,this->_data->_origin[d]),this->_data->_lengths[d]),half));
   R sc=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],n));
   ARIADNE_LOG(9,std::setprecision(20) << std::boolalpha << "sc=" << sc << " x=" << x << " sc-x=" << Interval<R>(sc-x) << "\n")
     if(sc == x) { 
@@ -239,12 +244,12 @@ Geometry::Grid<R>::subdivision_index(dimension_type d, const real_type& x) const
 
 
 template<class R> 
-index_type 
+typename Geometry::Grid<R>::integer_type
 Geometry::Grid<R>::subdivision_lower_index(dimension_type d, const real_type& x) const 
 {
   using namespace Numeric;
   
-  index_type n=floor(div_down(sub_down(x,this->_data->_origin[d]),this->_data->_lengths[d]));
+  integer_type n=floor(div_down(sub_down(x,this->_data->_origin[d]),this->_data->_lengths[d]));
   if(x>=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],(n+1)))) {
     return n+1;
   } else {
@@ -254,12 +259,12 @@ Geometry::Grid<R>::subdivision_lower_index(dimension_type d, const real_type& x)
 
 
 template<class R> 
-index_type 
+typename Geometry::Grid<R>::integer_type
 Geometry::Grid<R>::subdivision_upper_index(dimension_type d, const real_type& x) const 
 {
   using namespace Numeric;
   
-  index_type n=ceil(div_up(sub_up(x,this->_data->_origin[d]),this->_data->_lengths[d]));
+  integer_type n=ceil(div_up(sub_up(x,this->_data->_origin[d]),this->_data->_lengths[d]));
   if(x<=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],(n-1)))) {
     return n-1;
   } else {
@@ -341,7 +346,7 @@ Geometry::Grid<R>::point(const IndexArray& a) const
 {
   Point<R> res(a.size());
   for(size_type i=0; i!=res.dimension(); ++i) {
-    res[i]=subdivision_coordinate(i,a[i]);
+    res[i]=subdivision_coordinate(i,integer_type(a[i]));
   }
   return res;
 }
@@ -353,8 +358,8 @@ Geometry::Grid<R>::rectangle(const Combinatoric::LatticeBlock& lb) const
 {
   Box<R> res(lb.dimension());
   for(size_type i=0; i!=res.dimension(); ++i) {
-    res.set_lower_bound(i,this->subdivision_coordinate(i,lb.lower_bound(i)));
-    res.set_upper_bound(i,this->subdivision_coordinate(i,lb.upper_bound(i)));
+    res.set_lower_bound(i,this->subdivision_coordinate(i,integer_type(lb.lower_bound(i))));
+    res.set_upper_bound(i,this->subdivision_coordinate(i,integer_type(lb.upper_bound(i))));
   }
   return res;
 }

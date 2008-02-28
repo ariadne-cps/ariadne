@@ -23,6 +23,7 @@
 
 #include "python/float.h"
 
+#include "numeric/float.h"
 #include "numeric/interval.h"
 #include "geometry/interval_set.h"
 

@@ -19,6 +19,9 @@ shiny: maintainer-clean
 lib: 
 	(cd src; make lib)
 
+lib-numeric:
+	(cd src; make libnumeric.la)
+
 python: lib
 	(cd src/python; make python)
 
@@ -30,6 +33,9 @@ examples: lib
 
 check-lib: lib
 	(cd test; make check)
+
+check-numeric: lib-numeric
+	(cd test; make check_numeric)
 
 check-python: python
 	(cd python; make check)

@@ -25,9 +25,12 @@
 #include <iostream>
 #include <cassert>
 
+#include "numeric/rounding.h"
+#include "numeric/operators.h"
+
 namespace Ariadne {
 namespace Numeric {
-
+  
 // These functions are not provided by GMP
 inline void mpq_min(mpq_ptr rop, mpq_srcptr op1, mpq_srcptr op2) { 
   if(mpq_cmp(op1,op2)<=0) { mpq_set(rop,op1); } else { mpq_set(rop,op2); } 
@@ -143,7 +146,7 @@ inline void set_(double& r, const Rational& x, RoundApprox) {
 
 inline void set_(Rational& r, const int& x) { 
   mpq_set_si(r._value,x,1); }
-inline void set_(Rational& r, const uint& x) { 
+inline void set_(Rational& r, const unsigned int& x) { 
   mpq_set_ui(r._value,x,1u); }
 inline void set_(Rational& r, const double& x) { 
   mpq_set_d(r._value,x); }
@@ -189,6 +192,14 @@ inline void med_(Rational& r, const Rational& x1, const Rational& x2) {
 inline void rad_(Rational& r, const Rational& x1, const Rational& x2) { 
   mpq_sub(r._value,x2._value,x1._value); 
   mpq_div_2exp(r._value,r._value,1); }
+
+// Mixed-mode arithmetic involving division by an Integer
+inline void div_(Rational& r, const Integer& x1, const Integer& x2) {
+  r=Rational(x1,x2); }
+inline void div_(Rational& r, const Integer& x1, const int& x2) {
+  r=Rational(x1,Integer(x2)); }
+inline void div_(Rational& r, const Integer& x1, const unsigned int& x2) {
+  r=Rational(x1,Integer(x2)); }
 
 // Mixed-mode arithmetic with int, long int, unsigned int, long unsigned int, double and Integer
 inline void add_(Rational& r, const Rational& x1, const int& x2) {
@@ -299,7 +310,7 @@ inline void mul_(Rational& r, const Integer& x1, const Rational& x2) {
 inline void div_(Rational& r, const Integer& x1, const Rational& x2) {
   div_(r,Rational(x1),x2); }
 
-inline void pow_(Rational& r, const Rational& x1, const uint& x2) { 
+inline void pow_(Rational& r, const Rational& x1, const unsigned int& x2) { 
   mpq_pow_ui(r._value,x1._value,x2); }
 inline void pow_(Rational& r, const Rational& x1, const int& x2) { 
   mpq_pow_si(r._value,x1._value,x2); }
@@ -379,7 +390,7 @@ inline int cmp(const Rational& x, const Rational& y) {
 
 inline int cmp(const Rational& x, const int& y) {
   return mpq_cmp_si(x._value,y,1); }
-inline int cmp(const Rational& x, const uint& y) {
+inline int cmp(const Rational& x, const unsigned int& y) {
   return mpq_cmp_ui(x._value,y,1u); }
 inline int cmp(const Rational& x, const double& y) {
   mpq_t t; mpq_init(t); mpq_set_d(t,y); 
@@ -412,10 +423,10 @@ inline bool operator>(const Rational& x1, const Rational& x2) {
 
 
 // Mixed comparison operators
-ARIADNE_MIXED_FUNCTION_COMPARISON(bool,Rational,int);
-ARIADNE_MIXED_FUNCTION_COMPARISON(bool,Rational,uint);
-ARIADNE_MIXED_FUNCTION_COMPARISON(bool,Rational,double);
-ARIADNE_MIXED_FUNCTION_COMPARISON(bool,Rational,Integer);
+ARIADNE_MIXED_FUNCTION_COMPARISON(bool,Rational,int)
+ARIADNE_MIXED_FUNCTION_COMPARISON(bool,Rational,uint)
+ARIADNE_MIXED_FUNCTION_COMPARISON(bool,Rational,double)
+ARIADNE_MIXED_FUNCTION_COMPARISON(bool,Rational,Integer)
 
 template<class E>
 inline bool operator==(const Rational& x1, const Expression<E>& x2) {
@@ -496,7 +507,7 @@ inline Rational div_up(const Rational& x, const long int& y) {
 
 
      
-template<> inline std::string name<Numeric::Rational>() { 
+template<> inline std::string name<Rational>() { 
   return "Rational"; }
     
 

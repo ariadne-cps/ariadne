@@ -21,7 +21,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
   
-#include "base/types.h"
 
 namespace Ariadne {
 namespace Numeric {
@@ -29,10 +28,10 @@ namespace Numeric {
 template<class T> class Float;
 
 template<class T, class Rnd>
-void pow_(Float<T>& r, const Float<T>& x, const uint& n, Rnd rnd) 
+void pow_(Float<T>& r, const Float<T>& x, const unsigned int& n, Rnd rnd) 
 {
-  Float<T> p=x; 
-  uint m=n;
+  Float<T> p(x); 
+  unsigned int m=n;
   r=1; 
   while(m) { 
     if(m%2) { 
@@ -48,12 +47,12 @@ template<class T, class Rnd>
 inline void pow_(Float<T>& r, const Float<T>& x, const int& n, Rnd rnd) 
 {
   if(n>=0) { 
-    pow_(r,x,uint(n),rnd); 
+    pow_(r,x,(unsigned int)(n),rnd); 
   }
   else { 
-    Float<T> t; 
-    div_(t,1,x,rnd); 
-    pow_(r,t,uint(-n),rnd); 
+    Float<T> t(x); 
+    div_(t,1,t,rnd); 
+    pow_(r,t,(unsigned int)(-n),rnd); 
   }
 }
 

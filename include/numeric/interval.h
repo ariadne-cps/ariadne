@@ -22,34 +22,37 @@
  */
  
 /*! \file numeric/interval.h
- *  \brief Intervals of real number types (currently implemented using Boost).
+ *  \brief Intervals of integer, rational and floating-point number types.
  */
  
 #ifndef ARIADNE_NUMERIC_INTERVAL_H
 #define ARIADNE_NUMERIC_INTERVAL_H
 
-#include <iostream>
-#include <iomanip>
-#include <stdexcept>
-#include <cassert>
+#include "numeric/interval-integer.h" // For explicit specialization of Integer interval
+#include "numeric/interval-rational.h" // For explicit specialization of Rational interval
+#include "numeric/interval-float.h" // For explicit specialization of Float interval
 
-#include "base/tribool.h"
+namespace Ariadne {
+namespace Numeric {
 
-#include "numeric/traits.h"
-#include "numeric/expression.h"
-#include "numeric/operators.h"
+template<class R> class Interval {
+ public:
+  Interval(const R& x) : _lower(x), _upper(x) { }
+  Interval(const R& l, const R& u) : _lower(l), _upper(u) { }
+  const R& lower() const { return this->_lower; }
+  const R& upper() const { return this->_upper; }
+  R _lower,_upper;
+};
 
-#include "numeric/interval.class.h"
-
-#include "numeric/interval_integer.h" // For explicit specialization of Integer interval
-//#include "numeric/interval_rational.h" // For explicit specialization of Rational interval
-
-namespace TBLAS {
-  template<class real> int iamax_ (const int N, const real *X, const int incX);
-  template<class real> int iamax_ (const int N, const Ariadne::Numeric::Interval<real> *X, const int incX);
+}
 }
 
-#include "numeric/interval.template.h"
-#include "numeric/interval.inline.h"
+namespace TBLAS {
+  template<class R> int iamax_ (const int N, const R *X, const int incX);
+  template<class R> int iamax_ (const int N, const Ariadne::Numeric::Interval<R> *X, const int incX);
+}
+
+#include "numeric/interval.inline.h" // General inline functions
+#include "numeric/interval.template.h" // General inline functions
 
 #endif /* ARIADNE_NUMERIC_INTERVAL_H */

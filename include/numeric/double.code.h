@@ -1,7 +1,7 @@
 /***************************************************************************
- *            numeric/float64.h
+ *            numeric/double.code.h
  *
- *  Copyright  2006-8  Alberto Casagrande, Pieter Collins
+ *  Copyright  2008  Pieter Collins
  *
  ****************************************************************************/
 
@@ -21,17 +21,30 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file numeric/float64.h
- *  \brief Type definitions and conversion operators for 64-bit fixed precision floating point numbers.
- */
+namespace Ariadne {
+namespace Numeric {
 
-#ifndef ARIADNE_NUMERIC_FLOAT64_H
-#define ARIADNE_NUMERIC_FLOAT64_H
+double exp(const double& x) {
+  if(x>1.0) { double r=x/2; r=exp(r); return r*r; }
+  else if(x<0) { return exp(1./x); }
+  else if(x==0) { return 1.0; }
+  else {
+    static const int N=24;
+    double r=0.0;
+    double p=1.0;
+    double t[N+1];
+    t[0]=p;
+    for(int i=1; i<=N; ++i) {
+      p*=x;
+      p/=i;
+      t[i]=p;
+    }
+    for(int i=N; i>=0; --i) {
+      r+=t[i];
+    }
+    return r;
+  }
+}
 
-#include "numeric/float64.class.h"
-#include "numeric/float64.inline.h"
-//#include "numeric/float64-boost.h"
-//#include "numeric/float64-double.h"
-//#include "numeric/float64-profil.h"
-
-#endif /* ARIADNE_NUMERIC_FLOAT64_H */
+}
+}

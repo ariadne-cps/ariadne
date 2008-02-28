@@ -87,6 +87,8 @@ namespace Ariadne {
       void set_precision(uint p);
       uint precision() const;
 
+      template<class Rnd> Float(const Rational& q, Rnd rnd);
+      template<class Rnd> void set(const Rational& q, Rnd rnd);
       double get_d() const;
      public:
       mpfr_t _value;

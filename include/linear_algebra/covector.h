@@ -34,7 +34,7 @@
 #include "base/types.h"
 #include "base/array.h"
 #include "numeric/integer.h"
-#include "numeric/arithmetic.h"
+#include "numeric/float.h"
 #include "numeric/interval.h"
 
 #include "linear_algebra/exceptions.h"

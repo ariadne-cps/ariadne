@@ -28,37 +28,66 @@
 #ifndef ARIADNE_ROUNDING_H
 #define ARIADNE_ROUNDING_H
 
-namespace Ariadne {
-  namespace Numeric {
-        
-    template<class RM> class Round { };
-    class Up; class Down; class Approx; class Exact;
+#include <fenv.h>
 
-    typedef Round<Down> RoundDown;
-    typedef Round<Up> RoundUp;
-    typedef Round<Approx> RoundApprox;
-    typedef Round<Exact> RoundExact;
+namespace Ariadne {
+namespace Numeric {
+        
+template<class RM> class Round { };
+class Near; class Up; class Down; class Chop; class Approx; class Exact;
+
+typedef Round<Near> RoundNear;
+typedef Round<Down> RoundDown;
+typedef Round<Up> RoundUp;
+typedef Round<Chop> RoundChop;
+typedef Round<Approx> RoundApprox;
+typedef Round<Exact> RoundExact;
 
 #ifdef DOXYGEN
-    //! \name Rounding classes.
-    //@{
-    //! \brief Round downwards
-    class RoundDown { };
-    //! \brief Round upwards
-    class RoundUp { };
-    //! \brief Round without control on error
-    class RoundApprox { };
-    //! \brief No rounding allowed
-    class RoundExact { };
-    //@}
+//! \name Rounding classes.
+//@{
+//! \brief Round downwards
+class RoundNear { };
+//! \brief Round downwards
+class RoundDown { };
+//! \brief Round upwards
+class RoundUp { };
+//! \brief Round toward zero
+class RoundChop { };
+//! \brief Round without control on error
+class RoundApprox { };
+//! \brief No rounding allowed
+class RoundExact { };
+//@}
 #endif
 
-    static const RoundUp round_up=RoundUp();    
-    static const RoundDown round_down=RoundDown();
-    static const RoundApprox round_approx=RoundApprox();; 
-    static const RoundExact round_exact=RoundExact(); 
+static const RoundNear round_near=RoundNear();    
+static const RoundUp round_up=RoundUp();    
+static const RoundDown round_down=RoundDown();
+static const RoundChop round_chop=RoundChop();
+static const RoundApprox round_approx=RoundApprox();; 
+static const RoundExact round_exact=RoundExact(); 
 
-  }
+typedef unsigned short rounding_mode;
+const rounding_mode hardware_round_near = FE_TONEAREST;
+const rounding_mode hardware_round_down = FE_DOWNWARD;
+const rounding_mode hardware_round_up = FE_UPWARD;
+const rounding_mode hardware_round_chop = FE_TOWARDZERO;
+const rounding_mode hardware_round_approx = FE_TONEAREST;
+
+template<class Rnd> inline rounding_mode hardware_rounding_mode();
+template<> inline rounding_mode hardware_rounding_mode<RoundNear>() { return hardware_round_near; }
+template<> inline rounding_mode hardware_rounding_mode<RoundDown>() { return hardware_round_down; }
+template<> inline rounding_mode hardware_rounding_mode<RoundUp>() { return hardware_round_up; }
+template<> inline rounding_mode hardware_rounding_mode<RoundChop>() { return hardware_round_chop; }
+template<> inline rounding_mode hardware_rounding_mode<RoundApprox>() { return hardware_round_near; }
+
+inline rounding_mode get_rounding_mode() { return fegetround(); }
+inline void set_rounding_mode(rounding_mode rnd) { fesetround(rnd); }
+template<class RM> inline void set_rounding_mode(Round<RM>) { fesetround(hardware_rounding_mode< Round<RM> >()); }
+template<class Rnd> inline void set_rounding_mode() { fesetround(hardware_rounding_mode<Rnd>()); }
+
+}
 }
  
 #endif /* ARIADNE_ROUNDING_H */

@@ -1,7 +1,7 @@
 /***************************************************************************
- *            numeric/float64.h
+ *            double.cc
  *
- *  Copyright  2006-8  Alberto Casagrande, Pieter Collins
+ *  Copyright  2008  Pieter Collins
  *
  ****************************************************************************/
 
@@ -20,18 +20,8 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
-/*! \file numeric/float64.h
- *  \brief Type definitions and conversion operators for 64-bit fixed precision floating point numbers.
- */
 
-#ifndef ARIADNE_NUMERIC_FLOAT64_H
-#define ARIADNE_NUMERIC_FLOAT64_H
 
-#include "numeric/float64.class.h"
-#include "numeric/float64.inline.h"
-//#include "numeric/float64-boost.h"
-//#include "numeric/float64-double.h"
-//#include "numeric/float64-profil.h"
-
-#endif /* ARIADNE_NUMERIC_FLOAT64_H */
+#include "numeric/rounding.h"
+#include "numeric/double.h"
+#include "numeric/double.code.h"

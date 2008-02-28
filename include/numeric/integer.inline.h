@@ -397,6 +397,8 @@ inline Integer& operator++(Integer& r) {
 inline Integer& operator--(Integer& r) {
   decr_(r,r); return r; }
 
+template<> inline std::string name<Integer>() { 
+  return "Integer"; }
 
 }}
 

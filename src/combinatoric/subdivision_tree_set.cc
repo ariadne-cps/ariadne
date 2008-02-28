@@ -28,9 +28,6 @@
 #include <cassert>
 
 
-#include "numeric/arithmetic.h"
-#include "numeric/integer.h"
-
 #include "combinatoric/lattice_set.h"
 #include "combinatoric/subdivision_tree_set.h"
 #include "combinatoric/exceptions.h"

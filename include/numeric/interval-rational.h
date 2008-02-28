@@ -33,6 +33,7 @@
 
 #include "base/tribool.h"
 #include "numeric/rational.h"
+#include "numeric/traits.h"
 
 namespace Ariadne {
   namespace Numeric {
@@ -41,6 +42,7 @@ namespace Ariadne {
   
     template<>
     class Interval<Rational>
+      : public Value< Interval<Rational> >
     {
       typedef Rational Q;
      public:
@@ -63,6 +65,11 @@ namespace Ariadne {
       /*! \brief Copy assignment operator. */
       template<class X> Interval<Q>& operator=(const Interval<X>& ivl) { _lower=ivl.lower(); _upper=ivl.upper(); return *this; }
 
+      /*! \brief Construct from an expression. */
+      template<class E> Interval(const Expression<E>& e) { e.assign_to(*this); }
+      /*! \brief Assign from an expression. */
+      template<class E> Interval<Q>& operator=(const Expression<E>& e) { e.assign_to(*this); return *this;  }
+
       //@}
       
       //@{
@@ -78,12 +85,74 @@ namespace Ariadne {
       /*! \brief The width of the interval, given by \f$b-a\f$. */
       Q width() const { return this->_upper-this->_lower; };
       //@}
+
+      //@{
+      //! \name Geometric operations
+      /*! \brief Tests if the interval is empty. */
+      bool empty() const { return this->_lower > this->_upper; }
+      /*! \brief Tests if the interval consists of a single point. */
+      bool singleton() const { return this->_lower == this->_upper; };
+      /*! \brief Tests if the interval contains \a x. */
+      template<class RX> bool encloses(const RX& x) const { 
+        return this->_lower <= x && x <= this->_upper; }
+      /*! \brief Tests if the interval contains \a r. */
+      template<class RX> bool refines(const Interval<RX>& ivl) const { 
+        return ivl._lower <= this->_lower && this->_upper <= ivl._upper; }
+      //}
     };      
 
     template<> inline std::string name<Interval<Rational> >() {
       return "QInterval"; 
     }
 
+    inline void pos_(Interval<Rational>& r, const Interval<Rational>& x) {
+      r=x; }
+
+    inline void neg_noalias_(Interval<Rational>& r, const Interval<Rational>& x) {
+      r._lower=-x._upper; r._upper=-x._lower; } 
+
+    inline void neg_(Interval<Rational>& r, const Interval<Rational>& x) {
+      if(&r==&x) { Interval<Rational> t=x; neg_noalias_(r,t); } else { neg_noalias_(r,x); } }
+
+    inline void add_(Interval<Rational>& r, const Interval<Rational>& x, const Interval<Rational>& y) {
+      r._lower=x._lower+y._lower; r._upper=x._upper+y._upper; }
+
+    inline void sub_noalias_(Interval<Rational>& r, const Interval<Rational>& x, const Interval<Rational>& y) {
+      r._lower=x._lower-y._upper; r._upper=x._upper-y._lower; }
+ 
+    inline void sub_(Interval<Rational>& r, const Interval<Rational>& x, const Interval<Rational>& y) {
+      if(&r==&y) { Interval<Rational> t=y; sub_noalias_(r,x,t); } else { sub_noalias_(r,x,y); } }
+
+    inline void mul_(Interval<Rational>& r, const Interval<Rational>& x, const Interval<Rational>& y) {
+      Rational b[4];
+      b[0]=x.lower()*y.lower();
+      b[1]=x.lower()*y.upper();
+      b[2]=x.upper()*y.lower();
+      b[3]=x.upper()*y.upper();
+      r._lower=min(min(b[0],b[1]),min(b[2],b[3]));
+      r._upper=max(max(b[0],b[1]),max(b[2],b[3]));
+    }
+  
+    inline void div_(Interval<Rational>& r, const Interval<Rational>& x, const Interval<Rational>& y) {
+      if(y._lower<=0 && 0 <= y._upper) {
+        inf_(r._upper); neg_(r._lower,r._upper); return; }
+      Interval<Rational> t;
+      div_(t._lower,1,y._upper);
+      div_(t._upper,1,y._lower);
+      mul_(r,x,t);
+    }
+  
+    
+
+  /*
+    inline Interval<Rational> operator+(const Interval<Rational>& ivl) {
+      return Interval<Rational>(ivl.upper(),ivl.lower());
+    }
+       
+    inline Interval<Rational> operator-(const Interval<Rational>& ivl) {
+      return Interval<Rational>(ivl.upper(),ivl.lower());
+    }
+       
     inline Interval<Rational> operator+(const Interval<Rational>& ivl1, const Interval<Rational>& ivl2) {
       return Interval<Rational>(ivl1.lower()+ivl2.lower(),ivl1.upper()+ivl2.upper()); 
     }
@@ -103,9 +172,32 @@ namespace Ariadne {
       return Interval<Rational>(l,u);
     }
 
+    inline Interval<Rational> operator/(const Interval<Rational>& ivl1, const Interval<Rational>& ivl2) {
+      if(ivl2.lower()<=0 && 0<=ivl2.upper()) {
+        Rational inf=Numeric::inf<Rational>(); 
+        return Interval<Rational>(-inf,inf); 
+      }
+      Rational b[4];
+      b[0]=ivl1.lower()/ivl2.lower();
+      b[1]=ivl1.lower()/ivl2.upper();
+      b[2]=ivl1.upper()/ivl2.lower();
+      b[3]=ivl1.upper()/ivl2.upper();
+      const Rational& l=min(min(b[0],b[1]),min(b[2],b[3]));
+      const Rational& u=max(max(b[0],b[1]),max(b[2],b[3]));
+      return Interval<Rational>(l,u);
+    }
+
+    inline Interval<Rational> operator/(const Interval<Rational>& ivl, const Rational& x) {
+      return ivl/Interval<Rational>(x); }
+     
+    inline Interval<Rational> operator/(const Rational& x,const Interval<Rational>& ivl) {
+      return Interval<Rational>(x)/ivl; }
+     
+  */
 
   } 
 }
+
 
 
 #endif /* ARIADNE_INTERVAL_RATIONAL_H */

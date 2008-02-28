@@ -1,7 +1,7 @@
 /***************************************************************************
- *            numeric/float64.h
+ *            numeric/transcendental.h
  *
- *  Copyright  2006-8  Alberto Casagrande, Pieter Collins
+ *  Copyright  2008  Pieter Collins
  *
  ****************************************************************************/
 
@@ -21,17 +21,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file numeric/float64.h
- *  \brief Type definitions and conversion operators for 64-bit fixed precision floating point numbers.
+/*! \file numeric/transcendental.h
+ *  \brief Tanscendental functions for double precision respecting rounding mode.
  */
 
-#ifndef ARIADNE_NUMERIC_FLOAT64_H
-#define ARIADNE_NUMERIC_FLOAT64_H
+namespace Ariadne {
+namespace Numeric {
 
-#include "numeric/float64.class.h"
-#include "numeric/float64.inline.h"
-//#include "numeric/float64-boost.h"
-//#include "numeric/float64-double.h"
-//#include "numeric/float64-profil.h"
+double exp(const double& x);
 
-#endif /* ARIADNE_NUMERIC_FLOAT64_H */
+}
+}

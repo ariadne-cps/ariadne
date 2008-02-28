@@ -30,7 +30,11 @@
 
 #include "config.h"
 
-#include "numeric/float.template.h"
+#include "base/types.h"
+
+#include "numeric/expression.h"
+#include "numeric/operators.h"
+
 
 #ifdef ENABLE_FLOAT64
   #include "numeric/float64.h"
@@ -40,7 +44,6 @@
   #include "numeric/floatmp.h"
 #endif
 
-#include "numeric/arithmetic.h"
 #include "numeric/float.inline.h"
 
 #endif /* ARIADNE_NUMERIC_FLOAT_H */

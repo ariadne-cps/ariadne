@@ -42,27 +42,27 @@ Geometry::FiniteGrid<R>::lattice_block() const
 
 template<class R> inline
 R 
-Geometry::FiniteGrid<R>::subdivision_coordinate(dimension_type d, index_type n) const
+Geometry::FiniteGrid<R>::subdivision_coordinate(dimension_type d, integer_type n) const
 {
   return this->_grid.subdivision_coordinate(d,n);
 }
 
 template<class R> inline
-index_type 
+typename Geometry::FiniteGrid<R>::integer_type 
 Geometry::FiniteGrid<R>::subdivision_index(dimension_type d, const real_type& x) const 
 {
   return this->_grid.subdivision_index(d,x);
 }
 
 template<class R> inline
-index_type 
+typename Geometry::FiniteGrid<R>::integer_type 
 Geometry::FiniteGrid<R>::subdivision_lower_index(dimension_type d, const real_type& x) const 
 {
   return this->_grid.subdivision_lower_index(d,x);
 }
 
 template<class R> inline
-index_type 
+typename Geometry::FiniteGrid<R>::integer_type 
 Geometry::FiniteGrid<R>::subdivision_upper_index(dimension_type d, const real_type& x) const 
 {
   return this->_grid.subdivision_upper_index(d,x);

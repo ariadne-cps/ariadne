@@ -37,7 +37,6 @@
 #include <cstring>
 
 #include "base/stlio.h"
-#include "numeric/conversion.h"
 #include "linear_algebra/matrix.h"
 #include "geometry/exceptions.h"
 #include "geometry/point.h"

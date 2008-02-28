@@ -110,13 +110,38 @@
 	return make_expression(Fn(),x,y.promote()); } \
 
 
-#define ARIADNE_COMPARISON(R,X,Y) \
+#define ARIADNE_FUNCTION_COMPARISON(R,X,Y) \
   inline R operator==(const X& x, const Y& y) { return cmp(x,y)==0; } \
   inline R operator!=(const X& x, const Y& y) { return cmp(x,y)!=0; } \
   inline R operator<=(const X& x, const Y& y) { return cmp(x,y)<=0; } \
   inline R operator>=(const X& x, const Y& y) { return cmp(x,y)>=0; } \
   inline R operator< (const X& x, const Y& y) { return cmp(x,y)< 0; } \
   inline R operator> (const X& x, const Y& y) { return cmp(x,y)> 0; } \
+
+#define ARIADNE_VALUE_VALUE_COMPARISON(R,X,Y) \
+  inline R operator==(const X& x, const Y& y) { return x._value==y._value; } \
+  inline R operator!=(const X& x, const Y& y) { return x._value!=y._value; } \
+  inline R operator<=(const X& x, const Y& y) { return x._value<=y._value; } \
+  inline R operator>=(const X& x, const Y& y) { return x._value>=y._value; } \
+  inline R operator< (const X& x, const Y& y) { return x._value< y._value; } \
+  inline R operator> (const X& x, const Y& y) { return x._value> y._value; } \
+
+#define ARIADNE_VALUE_BUILTIN_COMPARISON(R,X,Y) \
+  inline R operator==(const X& x, const Y& y) { return x._value==y; }   \
+  inline R operator!=(const X& x, const Y& y) { return x._value!=y; }   \
+  inline R operator<=(const X& x, const Y& y) { return x._value<=y; }   \
+  inline R operator>=(const X& x, const Y& y) { return x._value>=y; }   \
+  inline R operator< (const X& x, const Y& y) { return x._value< y; }   \
+  inline R operator> (const X& x, const Y& y) { return x._value> y; }   \
+
+#define ARIADNE_BUILTIN_VALUE_COMPARISON(R,X,Y) \
+  inline R operator==(const X& x, const Y& y) { return x==y._value; }   \
+  inline R operator!=(const X& x, const Y& y) { return x!=y._value; }   \
+  inline R operator<=(const X& x, const Y& y) { return x<=y._value; }   \
+  inline R operator>=(const X& x, const Y& y) { return x>=y._value; }   \
+  inline R operator< (const X& x, const Y& y) { return x< y._value; }   \
+  inline R operator> (const X& x, const Y& y) { return x> y._value; }   \
+
 
 #define ARIADNE_MIXED_FUNCTION_COMPARISON(R,X,Y) \
   inline R operator==(const X& x, const Y& y) { return cmp(x,y)==0; } \
@@ -132,10 +157,10 @@
   inline R operator< (const Y& y, const X& x) { return cmp(x,y)> 0; } \
   inline R operator> (const Y& y, const X& x) { return cmp(x,y)< 0; } \
 
+
 namespace Ariadne {
   namespace Numeric {
     
-
     ARIADNE_NULLARY_FUNCTION(NaN,nan,nan_,"nan");
     ARIADNE_NULLARY_FUNCTION(Inf,inf,inf_,"inf");
     ARIADNE_NULLARY_FUNCTION(Eps,eps,eps_,"eps");

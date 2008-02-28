@@ -215,7 +215,7 @@ Geometry::Grid<R>::subdivision_coordinate(dimension_type d, integer_type n) cons
 
 template<class R>
 R
-Geometry::Grid<R>::subdivision_coordinate(dimension_type d, index_type n) const 
+Geometry::Grid<R>::subdivision_coordinate(dimension_type d, long_integer_type n) const 
 {
   return add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],integer_type(n)));
 }

@@ -58,6 +58,7 @@ namespace Ariadne {
      public:
       /*! \brief The type of real number defining the vertices and cells of the grid. */
       typedef int integer_type;
+      typedef long int long_integer_type;
       typedef R real_type;
       
      public:
@@ -91,7 +92,7 @@ namespace Ariadne {
 
       /*! \brief The coordinate of the \a n th subdivision point in dimension \a d. */
       real_type subdivision_coordinate(dimension_type d, integer_type n) const;
-      real_type subdivision_coordinate(dimension_type d, index_type n) const;
+      real_type subdivision_coordinate(dimension_type d, long_integer_type n) const;
 
       /*! \brief The coordinate of the \a subdivision point \a x in dimension \a d. */
       real_type subdivision_coordinate(dimension_type d, dyadic_type x) const;
@@ -158,6 +159,7 @@ namespace Ariadne {
       typedef R real_type;
       /*! \brief The type of integer number defining the vertices and cells of the grid. */
       typedef int integer_type;
+      typedef long int long_integer_type;
 
       /*! \brief Destructor. Frees memory allocated to hold the grid if necessary. */
       ~FiniteGrid();
@@ -189,6 +191,7 @@ namespace Ariadne {
       /*! \brief The coordinate of the \a n th subdivision point in 
        * dimension \a d. */
       real_type subdivision_coordinate(dimension_type d, integer_type n) const;
+      real_type subdivision_coordinate(dimension_type d, long_integer_type n) const;
   
       /*! \brief The index of the subdivision point \a x in 
        * dimension \a d.  */

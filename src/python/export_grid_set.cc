@@ -63,12 +63,14 @@ void export_grid()
   typedef Grid<R> RGrid;
   typedef FiniteGrid<R> RFiniteGrid;
   
+  typedef typename Grid<R>::integer_type integer_type;
+
   class_< RGrid > grid_class("Grid",init<uint,R>());
   grid_class.def(init<RPoint,RVector>());
   grid_class.def(init<RVector>());
   grid_class.def(init<RBox,LatticeBlock>());
   grid_class.def("dimension", &RGrid::dimension);
-  grid_class.def("subdivision_coordinate",(R(RGrid::*)(dimension_type,index_type)const) &RGrid::subdivision_coordinate);
+  grid_class.def("subdivision_coordinate",(R(RGrid::*)(dimension_type,integer_type)const) &RGrid::subdivision_coordinate);
   grid_class.def("subdivision_coordinate",(R(RGrid::*)(dimension_type,dyadic_type)const) &RGrid::subdivision_coordinate);
   grid_class.def("subdivision_index", &RGrid::subdivision_index);
   grid_class.def("subdivision_lower_index", &RGrid::subdivision_lower_index);
@@ -80,7 +82,7 @@ void export_grid()
   finite_grid_class.def(init<RBox,size_type>());
   finite_grid_class.def(init<const RGrid&,RBox>());
   finite_grid_class.def("dimension", &RFiniteGrid::dimension);
-  finite_grid_class.def("subdivision_coordinate", &RFiniteGrid::subdivision_coordinate);
+  finite_grid_class.def("subdivision_coordinate",(R(RFiniteGrid::*)(dimension_type,integer_type)const) &RFiniteGrid::subdivision_coordinate);
   finite_grid_class.def("subdivision_lower_index", &RFiniteGrid::subdivision_lower_index);
   finite_grid_class.def("subdivision_upper_index", &RFiniteGrid::subdivision_upper_index);
   finite_grid_class.def("grid", &RFiniteGrid::grid,return_internal_reference<>());

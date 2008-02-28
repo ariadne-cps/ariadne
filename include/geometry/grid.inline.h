@@ -48,6 +48,13 @@ Geometry::FiniteGrid<R>::subdivision_coordinate(dimension_type d, integer_type n
 }
 
 template<class R> inline
+R 
+Geometry::FiniteGrid<R>::subdivision_coordinate(dimension_type d, long_integer_type n) const
+{
+  return this->_grid.subdivision_coordinate(d,n);
+}
+
+template<class R> inline
 typename Geometry::FiniteGrid<R>::integer_type 
 Geometry::FiniteGrid<R>::subdivision_index(dimension_type d, const real_type& x) const 
 {

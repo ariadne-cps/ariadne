@@ -10,7 +10,6 @@ ariadne_geometry_includedir = $(ariadne_includedir)/geometry
 ariadne_system_includedir = $(ariadne_includedir)/system
 ariadne_evaluation_includedir = $(ariadne_includedir)/evaluation
 ariadne_output_includedir = $(ariadne_includedir)/output
-ariadne_input_includedir = $(ariadne_includedir)/input
 ariadne_models_includedir = $(ariadne_includedir)/models
 ariadne_python_includedir = $(ariadne_includedir)/python
 
@@ -26,7 +25,6 @@ ariadne_geometry_include_DATA = geometry/*.h
 ariadne_system_include_DATA = system/*.h
 ariadne_evaluation_include_DATA = evaluation/*.h
 ariadne_output_include_DATA = output/*.h
-ariadne_input_include_DATA = input/*.h
 ariadne_models_include_DATA = models/*.h
 ariadne_python_include_DATA = python/*.h
 
@@ -43,7 +41,6 @@ EXTRA_DIST = \
 	$(ariadne_system_include_DATA)
 	$(ariadne_evaluation_include_DATA)
 	$(ariadne_output_include_DATA)
-	$(ariadne_input_include_DATA)
 	$(ariadne_models_include_DATA)
 	$(ariadne_python_include_DATA)
 

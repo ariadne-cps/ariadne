@@ -35,14 +35,8 @@
 #include "geometry/point_list.h"
 #include "geometry/polyhedron.h"
 #include "geometry/polytope.h"
-#include "geometry/ppl_polyhedron.h"
 #include "output/epsstream.h"
 #include "output/logging.h"
-
-#ifdef HAVE_PPL_HH
-#include <ppl.hh>
-using namespace Parma_Polyhedra_Library::IO_Operators;
-#endif
 
 #include "test.h"
 

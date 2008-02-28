@@ -43,8 +43,6 @@
 #include "output/epsstream.h"
 #include "output/logging.h"
 
-#include "geometry/ppl_polyhedron.h"
-
 #include "test.h"
 
 using namespace Ariadne;

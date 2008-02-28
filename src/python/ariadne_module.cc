@@ -61,7 +61,6 @@ void export_lattice_map();
 void export_subdivision_set();
 
 template<class R> void export_function_interface();
-template<class R> void export_interpreted_function();
 template<class R> void export_python_function();
 template<class R> void export_affine_function();
 template<class R> void export_affine_variable();
@@ -169,8 +168,6 @@ BOOST_PYTHON_MODULE(ariadne)
 
   export_function_interface<Rational>();
   export_function_interface<FloatPy>();
-  export_interpreted_function<Rational>();
-  export_interpreted_function<FloatPy>();
   export_python_function<Rational>();
   export_python_function<FloatPy>();
   export_affine_function<Rational>();
@@ -183,7 +180,7 @@ BOOST_PYTHON_MODULE(ariadne)
   export_taylor_variable<FloatPy>();
   export_taylor_derivative<FloatPy>();
   export_taylor_model<FloatPy>();
-  export_polynomial_variable<FloatPy>();
+  //export_polynomial_variable<FloatPy>();
   export_flow_model<FloatPy>();
   //export_taylor_series<Rational>();
   //export_taylor_variable<Rational>();

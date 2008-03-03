@@ -9,6 +9,7 @@ ariadne_function_includedir = $(ariadne_includedir)/function
 ariadne_geometry_includedir = $(ariadne_includedir)/geometry
 ariadne_system_includedir = $(ariadne_includedir)/system
 ariadne_evaluation_includedir = $(ariadne_includedir)/evaluation
+ariadne_input_includedir = $(ariadne_includedir)/output
 ariadne_output_includedir = $(ariadne_includedir)/output
 ariadne_models_includedir = $(ariadne_includedir)/models
 ariadne_python_includedir = $(ariadne_includedir)/python

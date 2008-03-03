@@ -2,7 +2,7 @@
 
 phony: lib
 
-lib: libgeometric.la libariadne.la
+lib: libariadne.la
 
 INCLUDES = -I$(top_srcdir)/include 
 LDADD = -lmpfr -lgmpxx

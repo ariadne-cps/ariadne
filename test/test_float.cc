@@ -26,6 +26,7 @@
 #include <sstream>
 #include <string>
 #include <iomanip>
+#include <fenv.h>
 
 #include "numeric/integer.h"
 #include "numeric/rational.h"
@@ -57,7 +58,8 @@ class TestFloat
 
 
 int main() {
-
+  initialise();
+  
   cout << setprecision(20);
   mpf_set_default_prec (8);
 

@@ -167,126 +167,125 @@ inline void neg_(Float64& r, const Float64& x, Rnd) {
 
 
 template<class Rnd> 
-inline void add_(Float64& r, const Float64& x, const Float64& y, Rnd) {
-  add_(r._value,x._value,y._value,hardware_rounding_mode<Rnd>()); }
+inline void add_(Float64& r, const Float64& x, const Float64& y, Rnd rnd) {
+  add_(r._value,x._value,y._value,rnd); }
 
 template<class Rnd> 
-inline void sub_(Float64& r, const Float64& x, const Float64& y, Rnd) {
-  sub_(r._value,x._value,y._value,hardware_rounding_mode<Rnd>()); }
+inline void sub_(Float64& r, const Float64& x, const Float64& y, Rnd rnd) {
+  sub_(r._value,x._value,y._value,rnd); }
 
 template<class Rnd> 
-inline void mul_(Float64& r, const Float64& x, const Float64& y, Rnd) {
-  mul_(r._value,x._value,y._value,hardware_rounding_mode<Rnd>()); }
+inline void mul_(Float64& r, const Float64& x, const Float64& y, Rnd rnd) {
+  mul_(r._value,x._value,y._value,rnd); }
 
 template<class Rnd> 
-inline void div_(Float64& r, const Float64& x, const Float64& y, Rnd) {
-  div_(r._value,x._value,y._value,hardware_rounding_mode<Rnd>()); }
+inline void div_(Float64& r, const Float64& x, const Float64& y, Rnd rnd) {
+  div_(r._value,x._value,y._value,rnd); }
 
-inline void med_(Float64& r, const Float64& x, const Float64& y, RoundApprox) {
-  med_(r._value,x._value,y._value,hardware_rounding_mode<RoundApprox>()); }
-inline void rad_(Float64& r, const Float64& x, const Float64& y, RoundUp) {
-  rad_(r._value,x._value,y._value,hardware_rounding_mode<RoundUp>()); }
+inline void med_(Float64& r, const Float64& x, const Float64& y, RoundApprox rnd) {
+  med_(r._value,x._value,y._value,rnd); }
+inline void rad_(Float64& r, const Float64& x, const Float64& y, RoundUp rnd) {
+  rad_(r._value,x._value,y._value,rnd); }
 
 
 // Mixed-mode arithmetic
 template<class Rnd> inline 
-void mul_(Float64& r, const Float64& x, const int& y, Rnd) {
-  mul_(r._value,x._value,y,hardware_rounding_mode<Rnd>()); }
+void mul_(Float64& r, const Float64& x, const int& y, Rnd rnd) {
+  mul_(r._value,x._value,y,rnd); }
 
 template<class Rnd> inline 
-void mul_(Float64& r, const int& x, const Float64& y, Rnd) {
-  mul_(r._value,x,y._value,hardware_rounding_mode<Rnd>()); }
+void mul_(Float64& r, const int& x, const Float64& y, Rnd rnd) {
+  mul_(r._value,x,y._value,rnd); }
 
 template<class Rnd> inline 
-void mul_(Float64& r, const Float64& x, const long int& y, Rnd) {
-  mul_(r._value,x._value,y,hardware_rounding_mode<Rnd>()); }
+void mul_(Float64& r, const Float64& x, const long int& y, Rnd rnd) {
+  mul_(r._value,x._value,y,rnd); }
 
 template<class Rnd> inline 
-void mul_(Float64& r, const long int& x, const Float64& y, Rnd) {
-  mul_(r._value,x,y._value,hardware_rounding_mode<Rnd>()); }
+void mul_(Float64& r, const long int& x, const Float64& y, Rnd rnd) {
+  mul_(r._value,x,y._value,rnd); }
 
 template<class Rnd> inline 
-void mul_(Float64& r, const Float64& x, const unsigned int& y, Rnd) {
-  mul_(r._value,x._value,y,hardware_rounding_mode<Rnd>()); }
+void mul_(Float64& r, const Float64& x, const unsigned int& y, Rnd rnd) {
+  mul_(r._value,x._value,y,rnd); }
 
 template<class Rnd> inline 
-void mul_(Float64& r, const unsigned int& x, const Float64& y, Rnd) {
-  mul_(r._value,x,y._value,hardware_rounding_mode<Rnd>()); }
+void mul_(Float64& r, const unsigned int& x, const Float64& y, Rnd rnd) {
+  mul_(r._value,x,y._value,rnd); }
 
 template<class Rnd> inline 
-void mul_(Float64& r, const Float64& x, const unsigned long int& y, Rnd) {
-  mul_(r._value,x._value,y,hardware_rounding_mode<Rnd>()); }
+void mul_(Float64& r, const Float64& x, const unsigned long int& y, Rnd rnd) {
+  mul_(r._value,x._value,y,rnd); }
 
 template<class Rnd> inline 
-void mul_(Float64& r, const unsigned long int& x, const Float64& y, Rnd) {
-  mul_(r._value,x,y._value,hardware_rounding_mode<Rnd>()); }
+void mul_(Float64& r, const unsigned long int& x, const Float64& y, Rnd rnd) {
+  mul_(r._value,x,y._value,rnd); }
 
 template<class Rnd> inline 
-void mul_(Float64& r, const Float64& x, const double& y, Rnd) {
-  mul_(r._value,x._value,y,hardware_rounding_mode<Rnd>()); }
+void mul_(Float64& r, const Float64& x, const double& y, Rnd rnd) {
+  mul_(r._value,x._value,y,rnd); }
 
 template<class Rnd> inline 
-void mul_(Float64& r, const double& x, const Float64& y, Rnd) {
-  mul_(r._value,x,y._value,hardware_rounding_mode<Rnd>()); }
+void mul_(Float64& r, const double& x, const Float64& y, Rnd rnd) {
+  mul_(r._value,x,y._value,rnd); }
 
 
 template<class Rnd> inline 
-void div_(Float64& r, const Float64& x, const int& y, Rnd) {
-  div_(r._value,x._value,y,hardware_rounding_mode<Rnd>()); }
+void div_(Float64& r, const Float64& x, const int& y, Rnd rnd) {
+  div_(r._value,x._value,y,rnd); }
 
 template<class Rnd> inline 
-void div_(Float64& r, const Float64& x, const long int& y, Rnd) {
-  div_(r._value,x._value,y,hardware_rounding_mode<Rnd>()); }
+void div_(Float64& r, const Float64& x, const long int& y, Rnd rnd) {
+  div_(r._value,x._value,y,rnd); }
 
 template<class Rnd> inline 
-void div_(Float64& r, const Float64& x, const unsigned int& y, Rnd) {
-  div_(r._value,x._value,y,hardware_rounding_mode<Rnd>()); }
+void div_(Float64& r, const Float64& x, const unsigned int& y, Rnd rnd) {
+  div_(r._value,x._value,y,rnd); }
 
 template<class Rnd> inline 
-void div_(Float64& r, const Float64& x, const unsigned long int& y, Rnd) {
-  div_(r._value,x._value,y,hardware_rounding_mode<Rnd>()); }
+void div_(Float64& r, const Float64& x, const unsigned long int& y, Rnd rnd) {
+  div_(r._value,x._value,y,rnd); }
 
 template<class Rnd> inline 
-void div_(Float64& r, const Float64& x, const double& y, Rnd) {
-  div_(r._value,x._value,y,hardware_rounding_mode<Rnd>()); }
+void div_(Float64& r, const Float64& x, const double& y, Rnd rnd) {
+  div_(r._value,x._value,y,rnd); }
 
 template<class Rnd> inline 
-void div_(Float64& r, const int& x, const Float64& y, Rnd) {
-  div_(r._value,x,y._value,hardware_rounding_mode<Rnd>()); }
+void div_(Float64& r, const int& x, const Float64& y, Rnd rnd) {
+  div_(r._value,x,y._value,rnd); }
 
 
 
 template<class Rnd> 
 inline void pow_(Float64& r, const Float64& x, const unsigned int& n, Rnd rnd) {
-  pow_(r._value,x._value,n,hardware_rounding_mode<Rnd>()); }
+  pow_(r._value,x._value,n,rnd); }
 
 template<class Rnd> 
 void pow_(Float64& r, const Float64& x, const int& n, Rnd rnd) {
-  pow_(r._value,x._value,n,hardware_rounding_mode<Rnd>()); }
+  pow_(r._value,x._value,n,rnd); }
 
 
 
 template<class Rnd> 
 inline void sqrt_(Float64& r, const Float64& x, Rnd rnd) { 
-  //set_rounding_mode(rnd); r._value=std::sqrt(x._value); }
-  sqrt_(r._value,x._value,hardware_rounding_mode<Rnd>()); }
+  sqrt_(r._value,x._value,rnd); }
 
 template<class Rnd> 
 inline void hypot_(Float64& r, const Float64& x, const Float64& y, Rnd rnd) { 
-  hypot_(r._value,x._value,hardware_rounding_mode<Rnd>()); }
+  hypot_(r._value,x._value,rnd); }
 
 template<class Rnd> 
 inline void exp_(Float64& r, const Float64& x, Rnd rnd) { 
-  exp_(r._value,x._value,hardware_rounding_mode<Rnd>()); }
+  exp_(r._value,x._value,rnd); }
 
 template<class Rnd> 
 inline void log_(Float64& r, const Float64& x, Rnd rnd) { 
-  log_(r._value,x._value,hardware_rounding_mode<Rnd>()); }
+  log_(r._value,x._value,rnd); }
 
   
 
 template<class Rnd> void pi_(Float64& r, Rnd rnd) {
-  pi_(r._value,hardware_rounding_mode<Rnd>()); }
+  pi_(r._value,rnd); }
 
 /*
 template<> 
@@ -302,33 +301,33 @@ inline void pi_(Float64& r, RoundUp) {
 
 template<class Rnd> 
 inline void sin_(Float64& r, const Float64& x, Rnd rnd) {
-  sin_(r._value,x._value,hardware_rounding_mode<Rnd>()); }
+  sin_(r._value,x._value,rnd); }
 template<class Rnd> 
 inline void cos_(Float64& r, const Float64& x, Rnd rnd) {
-  cos_(r._value,x._value,hardware_rounding_mode<Rnd>()); }
+  cos_(r._value,x._value,rnd); }
 template<class Rnd> 
 inline void tan_(Float64& r, const Float64& x, Rnd rnd) {
-  tan_(r._value,x._value,hardware_rounding_mode<Rnd>()); }
+  tan_(r._value,x._value,rnd); }
 
 template<class Rnd> 
 inline void asin_(Float64& r, const Float64& x, Rnd rnd) {
-  asin_(r._value,x._value,hardware_rounding_mode<Rnd>()); }
+  asin_(r._value,x._value,rnd); }
 template<class Rnd> 
 inline void acos_(Float64& r, const Float64& x, Rnd rnd) {
-  acos_(r._value,x._value,hardware_rounding_mode<Rnd>()); }
+  acos_(r._value,x._value,rnd); }
 template<class Rnd> 
 inline void atan_(Float64& r, const Float64& x, Rnd rnd) {
-  atan_(r._value,x._value,hardware_rounding_mode<Rnd>()); }
+  atan_(r._value,x._value,rnd); }
 
 template<class Rnd> 
 inline void sinh_(Float64& r, const Float64& x, Rnd rnd) {
-  sinh_(r._value,x._value,hardware_rounding_mode<Rnd>()); }
+  sinh_(r._value,x._value,rnd); }
 template<class Rnd> 
 inline void cosh_(Float64& r, const Float64& x, Rnd rnd) {
-  cosh_(r._value,x._value,hardware_rounding_mode<Rnd>()); }
+  cosh_(r._value,x._value,rnd); }
 template<class Rnd> 
 inline void tanh_(Float64& r, const Float64& x, Rnd rnd) {
-  tanh_(r._value,x._value,hardware_rounding_mode<Rnd>()); }
+  tanh_(r._value,x._value,rnd); }
 
 template<class Rnd> 
 inline void asinh_(Float64& r, const Float64& x, Rnd rnd);

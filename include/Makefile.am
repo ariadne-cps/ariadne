@@ -25,6 +25,7 @@ ariadne_geometry_include_DATA = geometry/*.h
 ariadne_system_include_DATA = system/*.h
 ariadne_evaluation_include_DATA = evaluation/*.h
 ariadne_output_include_DATA = output/*.h
+ariadne_input_include_DATA = 
 ariadne_models_include_DATA = models/*.h
 ariadne_python_include_DATA = python/*.h
 

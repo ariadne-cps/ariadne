@@ -22,6 +22,14 @@
  */
 
 
+#include <iomanip>
+
 #include "numeric/rounding.h"
 #include "numeric/double.h"
 #include "numeric/double.code.h"
+#include "numeric/float64.class.h"
+
+namespace Ariadne { namespace Numeric {
+
+} }
+

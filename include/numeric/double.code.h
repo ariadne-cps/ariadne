@@ -21,8 +21,42 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+#include <iostream>
+#include <cassert>
+#include <cmath>
+
 namespace Ariadne {
 namespace Numeric {
+
+bool ok = initialise();
+
+double sqrt(double x) {
+  return std::sqrt(x);
+}
+
+double pow(double x, unsigned int n) {
+  volatile double p(x); volatile double r(1.0); unsigned int m=n;
+  while(m) { if(m%2) { r*=p; } p*=p; m/=2; }
+  return r;
+}
+
+double pow(double x, int n) {
+  unsigned int m=(n>=0) ? n : -n;
+  volatile double p=(n>=0) ? x : 1/x;
+  volatile double r=1.0;
+  while(m) { if(m%2) { r*=p; } p*=p; m/=2; }
+  return r;
+}
+
+double hypot(double x, double y) {
+  volatile double s = x>=0 ? x : -x;
+  volatile double t = y>=0 ? y : -y;
+  volatile double u = s>t ? t/s : s/t;
+  u=u*u+1.0;
+  u=sqrt(u);
+  return s>t ? u*s : u*t;
+}
+
 
 double exp(const double& x) {
   if(x>1.0) { double r=x/2; r=exp(r); return r*r; }

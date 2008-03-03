@@ -22,269 +22,227 @@
  */
 
 
-#include <cmath>
+#include <iostream>
 #include <limits>
+#include "config.h"
 #include "numeric/rounding.h"
 #include "numeric/double.h"
 
-#define MPFR_TRANSCENDENTAL 1
-#undef STD_TRANSCENDENTAL
-#undef ARIADNE_TRANSCENDENTAL
+#if defined ARIADNE_STANDARD_ROUNDING 
 
-#ifdef MPFR_TRANSCENDENTAL
-#include <mpfr.h>
+#define ARIADNE_ROUNDED_ARITHMETIC(R,X,Y) \
+  template<class RM> inline void add_(R& r, const X& x, const Y& y, Round<RM> rnd) { \
+    set_rounding_mode(rnd); (volatile R&)r = (volatile X&)x + (volatile Y&)y; } \
+  template<class RM> inline void sub_(R& r, const X& x, const Y& y, Round<RM> rnd) { \
+    set_rounding_mode(rnd); (volatile R&)r = (volatile X&)x - (volatile Y&)y; } \
+  template<class RM> inline void mul_(R& r, const X& x, const Y& y, Round<RM> rnd) { \
+    set_rounding_mode(rnd); (volatile R&)r = (volatile X&)x * (volatile Y&)y; } \
+  template<class RM> inline void div_(R& r, const X& x, const Y& y, Round<RM> rnd) { \
+    set_rounding_mode(rnd); (volatile R&)r = (volatile X&)x / (volatile Y&)y; } \
+  \
+  template<class RM> inline R add(const X& x, const Y& y, Round<RM> rnd) { \
+    set_rounding_mode(rnd); return (volatile X&)x + (volatile Y&)y; } \
+  template<class RM> inline R sub(const X& x, const Y& y, Round<RM> rnd) { \
+    set_rounding_mode(rnd);  return (volatile X&)x - (volatile Y&)y; } \
+  template<class RM> inline R mul(const X& x, const Y& y, Round<RM> rnd) { \
+    set_rounding_mode(rnd); return (volatile X&)x * (volatile Y&)y; } \
+  template<class RM> inline R div(const X& x, const Y& y, Round<RM> rnd) { \
+    set_rounding_mode(rnd); return (volatile X&)x / (volatile Y&)y; } \
+
+#elif defined ARIADNE_OPPOSITE_ROUNDING 
+
+#ifdef ARIADNE_STD_TRANSCENDENTAL 
+#error "Cannot use std transcendental functions with opposite arithmetic"
 #endif
 
-#ifdef STD_TRANSCENDENTAL
+#define ARIADNE_ROUNDED_ARITHMETIC(R,X,Y) \
+  inline void add_(R& r, const X& x, const Y& y, RoundApprox) { r=x+y; } \
+  inline void add_(R& r, const X& x, const Y& y, RoundUp)     { r=(volatile X&)x+(volatile Y&)y; } \
+  inline void add_(R& r, const X& x, const Y& y, RoundDown)   { volatile X t=-x; r=-(t-y); } \
+  inline void sub_(R& r, const X& x, const Y& y, RoundApprox) { r=x-y; } \
+  inline void sub_(R& r, const X& x, const Y& y, RoundUp)     { r=(volatile X&)x-(volatile Y&)y; } \
+  inline void sub_(R& r, const X& x, const Y& y, RoundDown)   { volatile X t=-x; r=-(t+y); } \
+  inline void mul_(R& r, const X& x, const Y& y, RoundApprox) { r=x*y; } \
+  inline void mul_(R& r, const X& x, const Y& y, RoundUp)     { r=(volatile X&)x*(volatile Y&)y; } \
+  inline void mul_(R& r, const X& x, const Y& y, RoundDown)   { volatile X t=-x; r=-(t*y); } \
+  inline void div_(R& r, const X& x, const Y& y, RoundApprox) { r=x/y; } \
+  inline void div_(R& r, const X& x, const Y& y, RoundUp)     { r=(volatile X&)x/(volatile Y&)y; } \
+  inline void div_(R& r, const X& x, const Y& y, RoundDown)   { volatile X t=-x; r=-(t/y); } \
+  \
+  inline R add(const X& x, const Y& y, RoundApprox) { return x+y; } \
+  inline R add(const X& x, const Y& y, RoundUp)     { return (volatile X&)x+(volatile Y&)y; } \
+  inline R add(const X& x, const Y& y, RoundDown)   { volatile X t=-x; return -(t-y); } \
+  inline R sub(const X& x, const Y& y, RoundApprox) { return x-y; } \
+  inline R sub(const X& x, const Y& y, RoundUp)     { return (volatile X&)x-(volatile Y&)y; } \
+  inline R sub(const X& x, const Y& y, RoundDown)   { volatile X t=-x; return -(t+y); } \
+  inline R mul(const X& x, const Y& y, RoundApprox) { return x*y; } \
+  inline R mul(const X& x, const Y& y, RoundUp)     { return (volatile X&)x*(volatile Y&)y; } \
+  inline R mul(const X& x, const Y& y, RoundDown)   { volatile X t=-x; return -(t*y); } \
+  inline R div(const X& x, const Y& y, RoundApprox) { return x/y; } \
+  inline R div(const X& x, const Y& y, RoundUp)     { return (volatile X&)x/(volatile Y&)y; } \
+  inline R div(const X& x, const Y& y, RoundDown)   { volatile X t=-x; return -(t/y); } \
+  
+#else
+
+#error "No arithmetic mode defined"
+
+#endif
+
+
+
+#if defined ARIADNE_STD_TRANSCENDENTAL
+
 #include <cmath>
+#define ARIADNE_ROUNDED_FUNCTION(F) \
+  template<class RM> inline void F##_(double& r, const double& x, Round<RM> rnd) { \
+    set_rounding_mode(rnd); \
+    (volatile double&)r = std::F( (volatile double&)x ); \
+  } \
+
+#elif defined ARIADNE_MPFR_TRANSCENDENTAL
+
+#include <mpfr.h>
+#define ARIADNE_ROUNDED_FUNCTION(F) \
+  template<class RM> inline void F##_(double& r, const double& x, Round<RM> rnd) { \
+    mp_rnd_t rm=mpfr_rounding_mode(rnd); \
+    mpfr_t t; mpfr_init_set_d(t,x,GMP_RNDN); mpfr_##F(t,t,rm); r=mpfr_get_d(t,rm); \
+  } \
+
+#elif defined ARIADNE_INTERNAL_TRANSCENDENTAL
+
+#include "numeric/transcendental.h"
+
+#else
+
+#error "No transcendental functions defined"
+
 #endif
 
-#ifdef ARIADNE_TRANSCENDENTAL
-#include "numeric/transcendental.h"
-#endif
+
 
 
 namespace Ariadne {
 namespace Numeric {
 
+inline double med(double x, double y) { return (x+y)/2; }
+inline double rad(double x, double y) { return (y-x)/2; }
+
+#if defined ARIADNE_STANDARD_ROUNDING 
+
+inline bool initialise() { return true; }
 
 inline void incr_(double& r) {
-  set_rounding_mode(hardware_round_up); (volatile double&)r += std::numeric_limits<double>::min(); }
+  set_rounding_mode(round_up); (volatile double&)r += std::numeric_limits<double>::min(); }
 inline void decr_(double& r) {
-  set_rounding_mode(hardware_round_down); (volatile double&)r -= std::numeric_limits<double>::min(); }
+  set_rounding_mode(round_down); (volatile double&)r -= std::numeric_limits<double>::min(); }
 
 inline void prec_(double& r, const double& x) {
-  set_rounding_mode(hardware_round_down); (volatile double&)r = x - std::numeric_limits<double>::min(); }
+  set_rounding_mode(round_down); (volatile double&)r = x - std::numeric_limits<double>::min(); }
 inline void succ_(double& r, const double& x) {
-  set_rounding_mode(hardware_round_up); (volatile double&)r = x + std::numeric_limits<double>::min(); }
+  set_rounding_mode(round_up); (volatile double&)r = x + std::numeric_limits<double>::min(); }
 
-inline void add_(double& r, const double& x, const double& y, rounding_mode rnd) {
-  set_rounding_mode(rnd); (volatile double&)r = (volatile double&)x + (volatile double&)y; }
-inline void sub_(double& r, const double& x, const double& y, rounding_mode rnd) {
-  set_rounding_mode(rnd); (volatile double&)r = (volatile double&)x - (volatile double&)y; }
-inline void mul_(double& r, const double& x, const double& y, rounding_mode rnd) {
-  set_rounding_mode(rnd); (volatile double&)r = (volatile double&)x * (volatile double&)y; }
-inline void div_(double& r, const double& x, const double& y, rounding_mode rnd) {
-  set_rounding_mode(rnd); (volatile double&)r = (volatile double&)x / (volatile double&)y; }
-
-inline void add_(double& r, const int& x, const double& y, rounding_mode rnd) {
-  set_rounding_mode(rnd); (volatile double&)r = (volatile int&)x + (volatile double&)y; }
-inline void sub_(double& r, const int& x, const double& y, rounding_mode rnd) {
-  set_rounding_mode(rnd); (volatile double&)r = (volatile int&)x - (volatile double&)y; }
-inline void mul_(double& r, const int& x, const double& y, rounding_mode rnd) {
-  set_rounding_mode(rnd); (volatile double&)r = (volatile int&)x * (volatile double&)y; }
-inline void div_(double& r, const int& x, const double& y, rounding_mode rnd) {
-  set_rounding_mode(rnd); (volatile double&)r = (volatile int&)x / (volatile double&)y; }
-
-inline void add_(double& r, const double& x, const int& y, rounding_mode rnd) {
-  set_rounding_mode(rnd); (volatile double&)r = (volatile double&)x + (volatile int&)y; }
-inline void sub_(double& r, const double& x, const int& y, rounding_mode rnd) {
-  set_rounding_mode(rnd); (volatile double&)r = (volatile double&)x - (volatile int&)y; }
-inline void mul_(double& r, const double& x, const int& y, rounding_mode rnd) {
-  set_rounding_mode(rnd); (volatile double&)r = (volatile double&)x * (volatile int&)y; }
-inline void div_(double& r, const double& x, const int& y, rounding_mode rnd) {
-  set_rounding_mode(rnd); (volatile double&)r = (volatile double&)x / (volatile int&)y; }
-
-inline void add_(double& r, const unsigned int& x, const double& y, rounding_mode rnd) {
-  set_rounding_mode(rnd); (volatile double&)r = (volatile unsigned int&)x + (volatile double&)y; }
-inline void sub_(double& r, const unsigned int& x, const double& y, rounding_mode rnd) {
-  set_rounding_mode(rnd); (volatile double&)r = (volatile unsigned int&)x - (volatile double&)y; }
-inline void mul_(double& r, const unsigned int& x, const double& y, rounding_mode rnd) {
-  set_rounding_mode(rnd); (volatile double&)r = (volatile unsigned int&)x * (volatile double&)y; }
-inline void div_(double& r, const unsigned int& x, const double& y, rounding_mode rnd) {
-  set_rounding_mode(rnd); (volatile double&)r = (volatile unsigned int&)x / (volatile double&)y; }
-
-inline void add_(double& r, const double& x, const unsigned int& y, rounding_mode rnd) {
-  set_rounding_mode(rnd); (volatile double&)r = (volatile double&)x + (volatile unsigned int&)y; }
-inline void sub_(double& r, const double& x, const unsigned int& y, rounding_mode rnd) {
-  set_rounding_mode(rnd); (volatile double&)r = (volatile double&)x - (volatile unsigned int&)y; }
-inline void mul_(double& r, const double& x, const unsigned int& y, rounding_mode rnd) {
-  set_rounding_mode(rnd); (volatile double&)r = (volatile double&)x * (volatile unsigned int&)y; }
-inline void div_(double& r, const double& x, const unsigned int& y, rounding_mode rnd) {
-  set_rounding_mode(rnd); (volatile double&)r = (volatile double&)x / (volatile unsigned int&)y; }
-
-inline void med_(double& r, const double& x, const double& y, rounding_mode rnd) {
+inline void med_(double& r, const double& x, const double& y, RoundApprox rnd) {
   set_rounding_mode(rnd); (volatile double&)r = ( (volatile double&)x + (volatile double&)y ) / 2; }
-inline  void rad_(double& r, const double& x, const double& y, rounding_mode rnd) {
+inline  void rad_(double& r, const double& x, const double& y, RoundUp rnd) {
   set_rounding_mode(rnd); (volatile double&)r = ( (volatile double&)y - (volatile double&)x) / 2; }
 
 
-inline void pow_(double& r, const double& x, const unsigned int& n, rounding_mode rnd) {
-  set_rounding_mode(rnd); 
-  volatile double p(x); unsigned int m=n; r=1.0; 
-  while(m) { if(m%2) { r*=p; } p*=p; m/=2; }
+#elif defined ARIADNE_OPPOSITE_ROUNDING 
+
+inline bool initialise() { 
+  //std::cerr << "Initialising rounding mode\n"; 
+  fesetround(FE_UPWARD); return true; }
+
+inline void prec_(double& r, const double& x) {
+  r = -(-x+std::numeric_limits<double>::min()); }
+inline void succ_(double& r, const double& x) {
+  r = x + std::numeric_limits<double>::min(); }
+
+inline void decr_(double& r) {
+  r = -(-r+std::numeric_limits<double>::min()); }
+inline void incr_(double& r) {
+  r = r+std::numeric_limits<double>::min(); }
+
+inline void med_(double& r, const double& x, const double& y, RoundApprox rnd) { 
+  r = (x+y)/2; }
+
+inline void rad_(double& r, const double& x, const double& y, RoundUp rnd) {
+  r = (y-x)/2; }
+
+#endif
+
+ARIADNE_ROUNDED_ARITHMETIC(double,double,double);
+ARIADNE_ROUNDED_ARITHMETIC(double,double,int);
+ARIADNE_ROUNDED_ARITHMETIC(double,int,double);
+ARIADNE_ROUNDED_ARITHMETIC(double,double,unsigned int);
+ARIADNE_ROUNDED_ARITHMETIC(double,unsigned int,double);
+
+
+
+
+
+
+
+
+
+// Transcendental functions
+
+template<class RM> inline void pi_(double& r, Round<RM>) { r=3.1415926535897931; }
+template<> inline void pi_(double& r, Round<Up>) { r=3.1415926535897936; }
+
+ARIADNE_ROUNDED_FUNCTION(sqrt)
+ARIADNE_ROUNDED_FUNCTION(exp)
+ARIADNE_ROUNDED_FUNCTION(log)
+ARIADNE_ROUNDED_FUNCTION(sin)
+ARIADNE_ROUNDED_FUNCTION(cos)
+ARIADNE_ROUNDED_FUNCTION(tan)
+ARIADNE_ROUNDED_FUNCTION(asin)
+ARIADNE_ROUNDED_FUNCTION(acos)
+ARIADNE_ROUNDED_FUNCTION(atan)
+ARIADNE_ROUNDED_FUNCTION(sinh)
+ARIADNE_ROUNDED_FUNCTION(cosh)
+ARIADNE_ROUNDED_FUNCTION(tanh)
+
+
+#if defined ARIADNE_MPFR_TRANSCENDENTAL
+
+template<class Rnd> inline void pow_(double& r, const double& x, const unsigned int& m, Rnd rnd) {
+  mp_rnd_t rm=mpfr_rounding_mode(rnd);                                \
+  mpfr_t t; mpfr_init_set_d(t,x,GMP_RNDN); mpfr_pow_ui(t,t,m,rm); r=mpfr_get_d(t,rm);
 }
 
-inline void pow_(double& r, const double& x, const int& n, rounding_mode rnd) {
-  set_rounding_mode(rnd); 
-  unsigned int m=(n>=0) ? n : -n;
-  volatile double p=(n>=0) ? x : 1/x;
-  r=1.0; while(m) { if(m%2) { r*=p; } p*=p; m/=2; }
+template<class Rnd> inline void pow_(double& r, const double& x, const int& n, Rnd rnd) {
+  mp_rnd_t rm=mpfr_rounding_mode(rnd);                                \
+  mpfr_t t; mpfr_init_set_d(t,x,GMP_RNDN); mpfr_pow_si(t,t,n,rm); r=mpfr_get_d(t,rm);
 }
 
-
-
-
-
-#if defined MPFR_TRANSCENDENTAL
-
-inline mp_rnd_t mpfr_rounding_mode(rounding_mode rnd) {
-  switch(rnd) {
-    case hardware_round_near: return GMP_RNDN;
-    case hardware_round_down: return GMP_RNDD;
-    case hardware_round_up  : return GMP_RNDU;
-    case hardware_round_chop: return GMP_RNDZ;
-  }
-  return GMP_RNDN;
-}
-
-inline void sqrt_(double& r, const double& x, rounding_mode rnd) {
-  mp_rnd_t rm=mpfr_rounding_mode(rnd);
-  mpfr_t t; mpfr_init_set_d(t,x,rm); mpfr_sqrt(t,t,rm); r=mpfr_get_d(t,rm); 
-}
-
-inline void hypot_(double& r, const double& x, const double& y, rounding_mode rnd) {
-  if(std::fabs(x)>std::fabs(y)) { hypot_(r,y,x,rnd); return; }
-  set_rounding_mode(rnd);
-  double t=std::fabs(x)/std::fabs(y); t*=t; sqrt_(t,t,rnd); (volatile double&)r=t*std::fabs(y);
-}
-
-inline void exp_(double& r, const double& x, rounding_mode rnd) {
-  mp_rnd_t rm=mpfr_rounding_mode(rnd);
-  mpfr_t t; mpfr_init_set_d(t,x,rm); mpfr_exp(t,t,rm); r=mpfr_get_d(t,rm); 
-}
-
-inline void log_(double& r, const double& x, rounding_mode rnd) {
-  mp_rnd_t rm=mpfr_rounding_mode(rnd);
-  mpfr_t t; mpfr_init_set_d(t,x,rm); mpfr_log(t,t,rm); r=mpfr_get_d(t,rm); 
-}
-
-
-inline void pi_(double& r, rounding_mode rnd) {
-  r = (rnd==hardware_round_up ? 3.1415926535897936 : 3.1415926535897931); }
-
-inline void sin_(double& r, const double& x, rounding_mode rnd) {
-  mp_rnd_t rm=mpfr_rounding_mode(rnd);
-  mpfr_t t; mpfr_init_set_d(t,x,GMP_RNDN); mpfr_sin(t,t,rm); r=mpfr_get_d(t,rm); 
-}
-
-inline void cos_(double& r, const double& x, rounding_mode rnd) {
-  mp_rnd_t rm=mpfr_rounding_mode(rnd);
-  mpfr_t t; mpfr_init_set_d(t,x,GMP_RNDN); mpfr_cos(t,t,rm); r=mpfr_get_d(t,rm); 
-}
-
-inline void tan_(double& r, const double& x, rounding_mode rnd) {
-  mp_rnd_t rm=mpfr_rounding_mode(rnd);
-  mpfr_t t; mpfr_init_set_d(t,x,GMP_RNDN); mpfr_tan(t,t,rm); r=mpfr_get_d(t,rm); 
-}
-
-inline void asin_(double& r, const double& x, rounding_mode rnd) {
-  mp_rnd_t rm=mpfr_rounding_mode(rnd);
-  mpfr_t t; mpfr_init_set_d(t,x,GMP_RNDN); mpfr_asin(t,t,rm); r=mpfr_get_d(t,rm); 
-}
-
-inline void acos_(double& r, const double& x, rounding_mode rnd) {
-  mp_rnd_t rm=mpfr_rounding_mode(rnd);
-  mpfr_t t; mpfr_init_set_d(t,x,GMP_RNDN); mpfr_acos(t,t,rm); r=mpfr_get_d(t,rm); 
-}
-
-inline void atan_(double& r, const double& x, rounding_mode rnd) {
-  mp_rnd_t rm=mpfr_rounding_mode(rnd);
-  mpfr_t t; mpfr_init_set_d(t,x,GMP_RNDN); mpfr_atan(t,t,rm); r=mpfr_get_d(t,rm); 
-}
-
-inline void sinh_(double& r, const double& x, rounding_mode rnd) {
-  mp_rnd_t rm=mpfr_rounding_mode(rnd);
-  mpfr_t t; mpfr_init_set_d(t,x,GMP_RNDN); mpfr_sinh(t,t,rm); r=mpfr_get_d(t,rm); 
-}
-
-inline void cosh_(double& r, const double& x, rounding_mode rnd) {
-  mp_rnd_t rm=mpfr_rounding_mode(rnd);
-  mpfr_t t; mpfr_init_set_d(t,x,GMP_RNDN); mpfr_cosh(t,t,rm); r=mpfr_get_d(t,rm); 
-}
-
-inline void tanh_(double& r, const double& x, rounding_mode rnd) {
-  mp_rnd_t rm=mpfr_rounding_mode(rnd);
-  mpfr_t t; mpfr_init_set_d(t,x,GMP_RNDN); mpfr_tanh(t,t,rm); r=mpfr_get_d(t,rm); 
-}
-
-#elif defined STD_TRANSCENDENTAL
-
-inline void sqrt_(double& r, const double& x, rounding_mode rnd) {
-  set_rounding_mode(rnd); 
-  (volatile double&)r = std::sqrt( (volatile double&)x ); 
-}
-
-inline void hypot_(double& r, const double& x, const double& y, rounding_mode rnd) {
-  if(std::fabs(x)>std::fabs(y)) { hypot_(r,y,x,rnd); return; }
-  set_rounding_mode(r-+*nd);
-  volatile double t=std::fabs(x)/std::fabs(y); t*=t; t=std::sqrt(t); (volatile double&)r=t*fabs(y);
-}
-
- 
-
-
-inline void exp_(double& r, const double& x, rounding_mode rnd) {
-  set_rounding_mode(rnd); 
-  (volatile double&)r = std::exp( (volatile double&)x ); 
-}
-
-inline void log_(double& r, const double& x, rounding_mode rnd) {
-  set_rounding_mode(rnd); 
-  (volatile double&)r = std::log( (volatile double&)x ); 
+template<class Rnd> inline void hypot_(double& r, const double& x, const double& y, Rnd rnd) {
+  mp_rnd_t rm=mpfr_rounding_mode(rnd);                                \
+  mpfr_t s,t; mpfr_init_set_d(s,x,GMP_RNDN); mpfr_init_set_d(t,y,GMP_RNDN); mpfr_hypot(s,s,t,rm); r=mpfr_get_d(s,rm);
 }
 
 
-inline void pi_(double& r, rounding_mode rnd) {
-  r = (rnd==hardware_round_up ? 3.1415926535897936 : 3.1415926535897931); }
+#elif defined ARIADNE_STD_TRANSCENDENTAL
 
-inline void sin_(double& r, const double& x, rounding_mode rnd) {
-  set_rounding_mode(rnd); 
-  (volatile double&)r = std::sin( (volatile double&)x ); 
-}
+template<class Rnd> inline void pow_(double& r, const double& x, const int& n, Rnd rnd) {
+  set_rounding_mode(rnd); r=std::pow(x,n); }
 
-inline void cos_(double& r, const double& x, rounding_mode rnd) {
-  set_rounding_mode(rnd); 
-  (volatile double&)r = std::cos( (volatile double&)x ); 
-}
+template<class Rnd> inline void pow_(double& r, const double& x, const unsigned int& m, Rnd rnd) {
+  set_rounding_mode(rnd); int n=m; r=std::pow(x,n); }
 
-inline void tan_(double& r, const double& x, rounding_mode rnd) {
-  set_rounding_mode(rnd); 
-  (volatile double&)r = std::tan( (volatile double&)x ); 
-}
+template<class Rnd> inline void hypot_(double& r, const double& x, const double& y, Rnd rnd) {
+  set_rounding_mode(rnd); double s=std::fabs(x); double t=std::fabs(y); if(s>t) { std::swap(s,t); } 
+  s/=t; s*=s; s=std::sqrt(s); r=s*t; }
 
-inline void asin_(double& r, const double& x, rounding_mode rnd) {
-  set_rounding_mode(rnd); 
-  (volatile double&)r = std::asin( (volatile double&)x ); 
-}
+#elif defined ARIADNE_INTERNAL_TRANSCENDENTAL
 
-inline void acos_(double& r, const double& x, rounding_mode rnd) {
-  set_rounding_mode(rnd); 
-  (volatile double&)r = std::acos( (volatile double&)x ); 
-}
-
-inline void atan_(double& r, const double& x, rounding_mode rnd) {
-  set_rounding_mode(rnd); 
-  (volatile double&)r = std::atan( (volatile double&)x ); 
-}
-
-inline void sinh_(double& r, const double& x, rounding_mode rnd) {
-  set_rounding_mode(rnd); 
-  (volatile double&)r = std::sinh( (volatile double&)x ); 
-}
-
-inline void cosh_(double& r, const double& x, rounding_mode rnd) {
-  set_rounding_mode(rnd); 
-  (volatile double&)r = std::cosh( (volatile double&)x ); 
-}
-
-inline void tanh_(double& r, const double& x, rounding_mode rnd) {
-  set_rounding_mode(rnd); 
-  (volatile double&)r = std::tanh( (volatile double&)x ); 
-}
 
 #endif
 
 
 }
 }
+
+
+#undef ARIADNE_ROUNDED_ARITHMETIC
+#undef ARIADNE_ROUNDED_FUNCTION

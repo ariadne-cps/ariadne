@@ -25,26 +25,13 @@
 
 #include "numeric/traits.h"
 #include "numeric/macros.h"
+#include "numeric/rounding.h"
 
 #include "numeric/integer.h"
 #include "numeric/rational.h"
 
 namespace Ariadne {
 namespace Numeric {
-
-template<class Rnd> mp_rnd_t mpfr_rounding_mode();
-
-template<> 
-inline mp_rnd_t mpfr_rounding_mode<RoundApprox>() { 
-  return GMP_RNDN; }
-
-template<> 
-inline mp_rnd_t mpfr_rounding_mode<RoundDown>() { 
-  return GMP_RNDD; }
-
-template<> 
-inline mp_rnd_t mpfr_rounding_mode<RoundUp>() { 
-  return GMP_RNDU; }
 
 
 
@@ -101,9 +88,9 @@ inline void FloatMP::set_precision(unsigned int p) {
   mpfr_set_prec(this->_value,p); }
 
 template<class Rnd> inline FloatMP::Float(const Rational& q, Rnd rnd) {
-  mpfr_init_set_q(this->_value,q._value,mpfr_rounding_mode<Rnd>()); }
-template<class Rnd> inline void FloatMP::set(const Rational& q, Rnd) {
-  mpfr_set_q(this->_value,q._value,mpfr_rounding_mode<Rnd>()); }
+  mpfr_init_set_q(this->_value,q._value,mpfr_rounding_mode(rnd)); }
+template<class Rnd> inline void FloatMP::set(const Rational& q, Rnd rnd) {
+  mpfr_set_q(this->_value,q._value,mpfr_rounding_mode(rnd)); }
 
 inline double FloatMP::get_d() const {
   return mpfr_get_d(this->_value, GMP_RNDN); }
@@ -154,20 +141,20 @@ inline void set_(FloatMP& r, const double& x) { mpfr_set_d(r._value,x,GMP_RNDN);
 inline void set_(FloatMP& r, const Integer& n) { mpfr_set_z(r._value,n._value,GMP_RNDN); assert(r==n); }
 
 
-template<class Rnd> inline void set_(FloatMP& r, const int& x, Rnd) {
-  mpfr_set_si(r._value,x,mpfr_rounding_mode<Rnd>()); }
-template<class Rnd> inline void set_(FloatMP& r, const long int& x, Rnd) {
-  mpfr_set_si(r._value,x,mpfr_rounding_mode<Rnd>()); }
-template<class Rnd> inline void set_(FloatMP& r, const unsigned int& n, Rnd) {
-  mpfr_set_ui(r._value,n,mpfr_rounding_mode<Rnd>()); }
-template<class Rnd> inline void set_(FloatMP& r, const unsigned long int& n, Rnd) {
-  mpfr_set_ui(r._value,n,mpfr_rounding_mode<Rnd>()); }
-template<class Rnd> inline void set_(FloatMP& r, const double& x, Rnd) {
-  mpfr_set_d(r._value,x,mpfr_rounding_mode<Rnd>()); }
-template<class Rnd> inline void set_(FloatMP& r, const Integer& x, Rnd) {
-  mpfr_set_z(r._value,x._value,mpfr_rounding_mode<Rnd>()); }
-template<class Rnd> inline void set_(FloatMP& r, const Rational& x, Rnd) {
-  mpfr_set_q(r._value,x._value,mpfr_rounding_mode<Rnd>()); }
+template<class Rnd> inline void set_(FloatMP& r, const int& x, Rnd rnd) {
+  mpfr_set_si(r._value,x,mpfr_rounding_mode(rnd)); }
+template<class Rnd> inline void set_(FloatMP& r, const long int& x, Rnd rnd) {
+  mpfr_set_si(r._value,x,mpfr_rounding_mode(rnd)); }
+template<class Rnd> inline void set_(FloatMP& r, const unsigned int& n, Rnd rnd) {
+  mpfr_set_ui(r._value,n,mpfr_rounding_mode(rnd)); }
+template<class Rnd> inline void set_(FloatMP& r, const unsigned long int& n, Rnd rnd) {
+  mpfr_set_ui(r._value,n,mpfr_rounding_mode(rnd)); }
+template<class Rnd> inline void set_(FloatMP& r, const double& x, Rnd rnd) {
+  mpfr_set_d(r._value,x,mpfr_rounding_mode(rnd)); }
+template<class Rnd> inline void set_(FloatMP& r, const Integer& x, Rnd rnd) {
+  mpfr_set_z(r._value,x._value,mpfr_rounding_mode(rnd)); }
+template<class Rnd> inline void set_(FloatMP& r, const Rational& x, Rnd rnd) {
+  mpfr_set_q(r._value,x._value,mpfr_rounding_mode(rnd)); }
 
 
 
@@ -215,197 +202,197 @@ inline void abs_(FloatMP& r, const FloatMP& x) {
 
 // Rounded operations which may be performed exactly
 template<class Rnd>
-inline void min_(FloatMP& r, const FloatMP& x, const FloatMP& y, Rnd) { 
-  mpfr_min(r._value,x._value,y._value,mpfr_rounding_mode<Rnd>()); }
+inline void min_(FloatMP& r, const FloatMP& x, const FloatMP& y, Rnd rnd) { 
+  mpfr_min(r._value,x._value,y._value,mpfr_rounding_mode(rnd)); }
 
 template<class Rnd>
-inline void max_(FloatMP& r, const FloatMP& x, const FloatMP& y, Rnd) { 
-  mpfr_max(r._value,x._value,y._value,mpfr_rounding_mode<Rnd>()); }
+inline void max_(FloatMP& r, const FloatMP& x, const FloatMP& y, Rnd rnd) { 
+  mpfr_max(r._value,x._value,y._value,mpfr_rounding_mode(rnd)); }
 
 template<class Rnd>
-inline void abs_(FloatMP& r, const FloatMP& x, const FloatMP& y, Rnd) { 
-  mpfr_abs(r._value,x._value,mpfr_rounding_mode<Rnd>()); }
+inline void abs_(FloatMP& r, const FloatMP& x, const FloatMP& y, Rnd rnd) { 
+  mpfr_abs(r._value,x._value,mpfr_rounding_mode(rnd)); }
 
 template<class Rnd>
-inline void pos_(FloatMP& r, const FloatMP& x, Rnd) { 
-  mpfr_set(r._value,x._value,mpfr_rounding_mode<Rnd>()); }
+inline void pos_(FloatMP& r, const FloatMP& x, Rnd rnd) { 
+  mpfr_set(r._value,x._value,mpfr_rounding_mode(rnd)); }
 
 template<class Rnd>
-inline void neg_(FloatMP& r, const FloatMP& x, Rnd) { 
-  mpfr_neg(r._value,x._value,mpfr_rounding_mode<Rnd>()); }
+inline void neg_(FloatMP& r, const FloatMP& x, Rnd rnd) { 
+  mpfr_neg(r._value,x._value,mpfr_rounding_mode(rnd)); }
 
 
 
 // Rounded arithmetic operations
 template<class Rnd> 
-inline void add_(FloatMP& r, const FloatMP& x, const FloatMP& y, Rnd) {
-  mpfr_add(r._value,x._value,y._value,mpfr_rounding_mode<Rnd>()); }
+inline void add_(FloatMP& r, const FloatMP& x, const FloatMP& y, Rnd rnd) {
+  mpfr_add(r._value,x._value,y._value,mpfr_rounding_mode(rnd)); }
 
 
 template<class Rnd> 
-inline void sub_(FloatMP& r, const FloatMP& x, const FloatMP& y, Rnd) {
-  mpfr_sub(r._value,x._value,y._value,mpfr_rounding_mode<Rnd>()); }
+inline void sub_(FloatMP& r, const FloatMP& x, const FloatMP& y, Rnd rnd) {
+  mpfr_sub(r._value,x._value,y._value,mpfr_rounding_mode(rnd)); }
 
 template<class Rnd> 
-inline void mul_(FloatMP& r, const FloatMP& x, const FloatMP& y, Rnd) {
-  mpfr_mul(r._value,x._value,y._value,mpfr_rounding_mode<Rnd>()); }
+inline void mul_(FloatMP& r, const FloatMP& x, const FloatMP& y, Rnd rnd) {
+  mpfr_mul(r._value,x._value,y._value,mpfr_rounding_mode(rnd)); }
 
 template<class Rnd> 
-inline void div_(FloatMP& r, const FloatMP& x, const FloatMP& y, Rnd) {
-  mpfr_div(r._value,x._value,y._value,mpfr_rounding_mode<Rnd>()); }
+inline void div_(FloatMP& r, const FloatMP& x, const FloatMP& y, Rnd rnd) {
+  mpfr_div(r._value,x._value,y._value,mpfr_rounding_mode(rnd)); }
 
 
-inline void med_(FloatMP& r, const FloatMP& x, const FloatMP& y, RoundApprox) {
-  mpfr_add(r._value,x._value,y._value,mpfr_rounding_mode<RoundApprox>()); 
-  mpfr_div_ui(r._value,r._value,2u,mpfr_rounding_mode<RoundApprox>()); }
-inline void rad_(FloatMP& r, const FloatMP& x, const FloatMP& y, RoundUp) {
-  mpfr_sub(r._value,y._value,x._value,mpfr_rounding_mode<RoundUp>()); 
-  mpfr_div_ui(r._value,r._value,2u,mpfr_rounding_mode<RoundUp>()); }
+inline void med_(FloatMP& r, const FloatMP& x, const FloatMP& y, RoundApprox rnd) {
+  mpfr_add(r._value,x._value,y._value,mpfr_rounding_mode(rnd)); 
+  mpfr_div_ui(r._value,r._value,2u,mpfr_rounding_mode(rnd)); }
+inline void rad_(FloatMP& r, const FloatMP& x, const FloatMP& y, RoundUp rnd) {
+  mpfr_sub(r._value,y._value,x._value,mpfr_rounding_mode(rnd)); 
+  mpfr_div_ui(r._value,r._value,2u,mpfr_rounding_mode(rnd)); }
 
 
 
 
 // Mixed-mode arithmetic
 template<class Rnd> inline 
-void mul_(FloatMP& r, const FloatMP& x, const int& y, Rnd) {
-  mpfr_mul_si(r._value,x._value,y,mpfr_rounding_mode<Rnd>()); }
+void mul_(FloatMP& r, const FloatMP& x, const int& y, Rnd rnd) {
+  mpfr_mul_si(r._value,x._value,y,mpfr_rounding_mode(rnd)); }
 
 template<class Rnd> inline 
-void mul_(FloatMP& r, const int& x, const FloatMP& y, Rnd) {
-  mpfr_mul_si(r._value,y._value,x,mpfr_rounding_mode<Rnd>()); }
+void mul_(FloatMP& r, const int& x, const FloatMP& y, Rnd rnd) {
+  mpfr_mul_si(r._value,y._value,x,mpfr_rounding_mode(rnd)); }
 
 template<class Rnd> inline 
-void mul_(FloatMP& r, const FloatMP& x, const long int& y, Rnd) {
-  mpfr_mul_si(r._value,x._value,y,mpfr_rounding_mode<Rnd>()); }
+void mul_(FloatMP& r, const FloatMP& x, const long int& y, Rnd rnd) {
+  mpfr_mul_si(r._value,x._value,y,mpfr_rounding_mode(rnd)); }
 
 template<class Rnd> inline 
-void mul_(FloatMP& r, const long int& x, const FloatMP& y, Rnd) {
-  mpfr_mul_si(r._value,y._value,x,mpfr_rounding_mode<Rnd>()); }
+void mul_(FloatMP& r, const long int& x, const FloatMP& y, Rnd rnd) {
+  mpfr_mul_si(r._value,y._value,x,mpfr_rounding_mode(rnd)); }
 
 template<class Rnd> inline 
-void mul_(FloatMP& r, const FloatMP& x, const unsigned int& y, Rnd) {
-  mpfr_mul_ui(r._value,x._value,y,mpfr_rounding_mode<Rnd>()); }
+void mul_(FloatMP& r, const FloatMP& x, const unsigned int& y, Rnd rnd) {
+  mpfr_mul_ui(r._value,x._value,y,mpfr_rounding_mode(rnd)); }
 
 template<class Rnd> inline 
-void mul_(FloatMP& r, const unsigned int& x, const FloatMP& y, Rnd) {
-  mpfr_mul_ui(r._value,y._value,x,mpfr_rounding_mode<Rnd>()); }
+void mul_(FloatMP& r, const unsigned int& x, const FloatMP& y, Rnd rnd) {
+  mpfr_mul_ui(r._value,y._value,x,mpfr_rounding_mode(rnd)); }
 
 template<class Rnd> inline 
-void mul_(FloatMP& r, const FloatMP& x, const unsigned long int& y, Rnd) {
-  mpfr_mul_ui(r._value,x._value,y,mpfr_rounding_mode<Rnd>()); }
+void mul_(FloatMP& r, const FloatMP& x, const unsigned long int& y, Rnd rnd) {
+  mpfr_mul_ui(r._value,x._value,y,mpfr_rounding_mode(rnd)); }
 
 template<class Rnd> inline 
-void mul_(FloatMP& r, const unsigned long int& x, const FloatMP& y, Rnd) {
-  mpfr_mul_ui(r._value,y._value,x,mpfr_rounding_mode<Rnd>()); }
+void mul_(FloatMP& r, const unsigned long int& x, const FloatMP& y, Rnd rnd) {
+  mpfr_mul_ui(r._value,y._value,x,mpfr_rounding_mode(rnd)); }
 
 template<class Rnd> inline 
-void mul_(FloatMP& r, const FloatMP& x, const double& y, Rnd) {
-  mpfr_t t; mpfr_init_set_d(t,y,mpfr_rounding_mode<Rnd>()); 
-  mpfr_mul(r._value,x._value,t,mpfr_rounding_mode<Rnd>()); }
+void mul_(FloatMP& r, const FloatMP& x, const double& y, Rnd rnd) {
+  mpfr_t t; mpfr_init_set_d(t,y,mpfr_rounding_mode(rnd)); 
+  mpfr_mul(r._value,x._value,t,mpfr_rounding_mode(rnd)); }
 
 template<class Rnd> inline 
-void mul_(FloatMP& r, const double& x, const FloatMP& y, Rnd) {
-  mpfr_t t; mpfr_init_set_d(t,x,mpfr_rounding_mode<Rnd>()); 
-  mpfr_mul(r._value,y._value,t,mpfr_rounding_mode<Rnd>()); }
+void mul_(FloatMP& r, const double& x, const FloatMP& y, Rnd rnd) {
+  mpfr_t t; mpfr_init_set_d(t,x,mpfr_rounding_mode(rnd)); 
+  mpfr_mul(r._value,y._value,t,mpfr_rounding_mode(rnd)); }
 
 
 template<class Rnd> inline 
-void div_(FloatMP& r, const FloatMP& x, const int& y, Rnd) {
-  mpfr_div_si(r._value,x._value,y,mpfr_rounding_mode<Rnd>()); }
+void div_(FloatMP& r, const FloatMP& x, const int& y, Rnd rnd) {
+  mpfr_div_si(r._value,x._value,y,mpfr_rounding_mode(rnd)); }
 
 template<class Rnd> inline 
-void div_(FloatMP& r, const FloatMP& x, const long int& y, Rnd) {
-  mpfr_div_si(r._value,x._value,y,mpfr_rounding_mode<Rnd>()); }
+void div_(FloatMP& r, const FloatMP& x, const long int& y, Rnd rnd) {
+  mpfr_div_si(r._value,x._value,y,mpfr_rounding_mode(rnd)); }
 
 template<class Rnd> inline 
-void div_(FloatMP& r, const FloatMP& x, const unsigned int& y, Rnd) {
-  mpfr_div_ui(r._value,x._value,y,mpfr_rounding_mode<Rnd>()); }
+void div_(FloatMP& r, const FloatMP& x, const unsigned int& y, Rnd rnd) {
+  mpfr_div_ui(r._value,x._value,y,mpfr_rounding_mode(rnd)); }
 
 template<class Rnd> inline 
-void div_(FloatMP& r, const FloatMP& x, const unsigned long int& y, Rnd) {
-  mpfr_div_ui(r._value,x._value,y,mpfr_rounding_mode<Rnd>()); }
+void div_(FloatMP& r, const FloatMP& x, const unsigned long int& y, Rnd rnd) {
+  mpfr_div_ui(r._value,x._value,y,mpfr_rounding_mode(rnd)); }
 
 template<class Rnd> inline 
-void div_(FloatMP& r, const FloatMP& x, const double& y, Rnd) {
-  mpfr_t t; mpfr_init_set_d(t,y,mpfr_rounding_mode<Rnd>()); 
-  mpfr_div(r._value,x._value,t,mpfr_rounding_mode<Rnd>()); }
+void div_(FloatMP& r, const FloatMP& x, const double& y, Rnd rnd) {
+  mpfr_t t; mpfr_init_set_d(t,y,mpfr_rounding_mode(rnd)); 
+  mpfr_div(r._value,x._value,t,mpfr_rounding_mode(rnd)); }
 
 template<class Rnd> inline 
-void div_(FloatMP& r, const int& x, const FloatMP& y, Rnd) {
-  mpfr_si_div(r._value,x,y._value,mpfr_rounding_mode<Rnd>()); }
+void div_(FloatMP& r, const int& x, const FloatMP& y, Rnd rnd) {
+  mpfr_si_div(r._value,x,y._value,mpfr_rounding_mode(rnd)); }
 
 
 template<class Rnd> 
-inline void pow_(FloatMP& r, const FloatMP& x, const unsigned int& n, Rnd) {
-  mpfr_pow_ui(r._value,x._value,n,mpfr_rounding_mode<Rnd>()); }
+inline void pow_(FloatMP& r, const FloatMP& x, const unsigned int& n, Rnd rnd) {
+  mpfr_pow_ui(r._value,x._value,n,mpfr_rounding_mode(rnd)); }
 
 template<class Rnd> 
-inline void pow_(FloatMP& r, const FloatMP& x, const int& n, Rnd) {
-  mpfr_pow_si(r._value,x._value,n,mpfr_rounding_mode<Rnd>()); }
-
-
-
-template<class Rnd> 
-inline void sqrt_(FloatMP& r, const FloatMP& x, Rnd) { 
-  mpfr_sqrt(r._value,x._value,mpfr_rounding_mode<Rnd>()); }
-
-template<class Rnd> 
-inline void hypot_(FloatMP& r, const FloatMP& x,const FloatMP& y, Rnd) { 
-  mpfr_hypot(r._value,x._value,y._value,mpfr_rounding_mode<Rnd>()); }
-
-template<class Rnd> 
-inline void exp_(FloatMP& r, const FloatMP& x, Rnd) { 
-  mpfr_exp(r._value,x._value,mpfr_rounding_mode<Rnd>()); }
-
-template<class Rnd> 
-inline void log_(FloatMP& r, const FloatMP& x, Rnd) { 
-  mpfr_log(r._value,x._value,mpfr_rounding_mode<Rnd>()); }
-
+inline void pow_(FloatMP& r, const FloatMP& x, const int& n, Rnd rnd) {
+  mpfr_pow_si(r._value,x._value,n,mpfr_rounding_mode(rnd)); }
 
 
 
 template<class Rnd> 
-inline void pi_(FloatMP& r, Rnd) {
-  mpfr_const_pi(r._value,mpfr_rounding_mode<Rnd>()); }
-template<class Rnd> 
-inline void sin_(FloatMP& r, const FloatMP& x, Rnd) {
-  mpfr_sin(r._value,x._value,mpfr_rounding_mode<Rnd>()); }
-template<class Rnd> 
-inline void cos_(FloatMP& r, const FloatMP& x, Rnd) {
-  mpfr_cos(r._value,x._value,mpfr_rounding_mode<Rnd>()); }
-template<class Rnd> 
-inline void tan_(FloatMP& r, const FloatMP& x, Rnd) {
-  mpfr_tan(r._value,x._value,mpfr_rounding_mode<Rnd>()); }
+inline void sqrt_(FloatMP& r, const FloatMP& x, Rnd rnd) { 
+  mpfr_sqrt(r._value,x._value,mpfr_rounding_mode(rnd)); }
 
 template<class Rnd> 
-inline void asin_(FloatMP& r, const FloatMP& x, Rnd) {
-  mpfr_asin(r._value,x._value,mpfr_rounding_mode<Rnd>()); }
-template<class Rnd> 
-inline void acos_(FloatMP& r, const FloatMP& x, Rnd) {
-  mpfr_acos(r._value,x._value,mpfr_rounding_mode<Rnd>()); }
-template<class Rnd> 
-inline void atan_(FloatMP& r, const FloatMP& x, Rnd) {
-  mpfr_atan(r._value,x._value,mpfr_rounding_mode<Rnd>()); }
+inline void hypot_(FloatMP& r, const FloatMP& x,const FloatMP& y, Rnd rnd) { 
+  mpfr_hypot(r._value,x._value,y._value,mpfr_rounding_mode(rnd)); }
 
 template<class Rnd> 
-inline void sinh_(FloatMP& r, const FloatMP& x, Rnd) {
-  mpfr_sinh(r._value,x._value,mpfr_rounding_mode<Rnd>()); }
-template<class Rnd> 
-inline void cosh_(FloatMP& r, const FloatMP& x, Rnd) {
-  mpfr_cosh(r._value,x._value,mpfr_rounding_mode<Rnd>()); }
-template<class Rnd> 
-inline void tanh_(FloatMP& r, const FloatMP& x, Rnd) {
-  mpfr_tanh(r._value,x._value,mpfr_rounding_mode<Rnd>()); }
+inline void exp_(FloatMP& r, const FloatMP& x, Rnd rnd) { 
+  mpfr_exp(r._value,x._value,mpfr_rounding_mode(rnd)); }
 
 template<class Rnd> 
-inline void asinh_(FloatMP& r, const FloatMP& x, Rnd) {
-  mpfr_asinh(r._value,x._value,mpfr_rounding_mode<Rnd>()); }
+inline void log_(FloatMP& r, const FloatMP& x, Rnd rnd) { 
+  mpfr_log(r._value,x._value,mpfr_rounding_mode(rnd)); }
+
+
+
+
 template<class Rnd> 
-inline void acosh_(FloatMP& r, const FloatMP& x, Rnd) {
-  mpfr_acosh(r._value,x._value,mpfr_rounding_mode<Rnd>()); }
+inline void pi_(FloatMP& r, Rnd rnd) {
+  mpfr_const_pi(r._value,mpfr_rounding_mode(rnd)); }
 template<class Rnd> 
-inline void atanh_(FloatMP& r, const FloatMP& x, Rnd) {
-  mpfr_atanh(r._value,x._value,mpfr_rounding_mode<Rnd>()); }
+inline void sin_(FloatMP& r, const FloatMP& x, Rnd rnd) {
+  mpfr_sin(r._value,x._value,mpfr_rounding_mode(rnd)); }
+template<class Rnd> 
+inline void cos_(FloatMP& r, const FloatMP& x, Rnd rnd) {
+  mpfr_cos(r._value,x._value,mpfr_rounding_mode(rnd)); }
+template<class Rnd> 
+inline void tan_(FloatMP& r, const FloatMP& x, Rnd rnd) {
+  mpfr_tan(r._value,x._value,mpfr_rounding_mode(rnd)); }
+
+template<class Rnd> 
+inline void asin_(FloatMP& r, const FloatMP& x, Rnd rnd) {
+  mpfr_asin(r._value,x._value,mpfr_rounding_mode(rnd)); }
+template<class Rnd> 
+inline void acos_(FloatMP& r, const FloatMP& x, Rnd rnd) {
+  mpfr_acos(r._value,x._value,mpfr_rounding_mode(rnd)); }
+template<class Rnd> 
+inline void atan_(FloatMP& r, const FloatMP& x, Rnd rnd) {
+  mpfr_atan(r._value,x._value,mpfr_rounding_mode(rnd)); }
+
+template<class Rnd> 
+inline void sinh_(FloatMP& r, const FloatMP& x, Rnd rnd) {
+  mpfr_sinh(r._value,x._value,mpfr_rounding_mode(rnd)); }
+template<class Rnd> 
+inline void cosh_(FloatMP& r, const FloatMP& x, Rnd rnd) {
+  mpfr_cosh(r._value,x._value,mpfr_rounding_mode(rnd)); }
+template<class Rnd> 
+inline void tanh_(FloatMP& r, const FloatMP& x, Rnd rnd) {
+  mpfr_tanh(r._value,x._value,mpfr_rounding_mode(rnd)); }
+
+template<class Rnd> 
+inline void asinh_(FloatMP& r, const FloatMP& x, Rnd rnd) {
+  mpfr_asinh(r._value,x._value,mpfr_rounding_mode(rnd)); }
+template<class Rnd> 
+inline void acosh_(FloatMP& r, const FloatMP& x, Rnd rnd) {
+  mpfr_acosh(r._value,x._value,mpfr_rounding_mode(rnd)); }
+template<class Rnd> 
+inline void atanh_(FloatMP& r, const FloatMP& x, Rnd rnd) {
+  mpfr_atanh(r._value,x._value,mpfr_rounding_mode(rnd)); }
 
 
 

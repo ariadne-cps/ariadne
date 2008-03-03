@@ -518,6 +518,8 @@ test_interval<Rational>()
 
 
 int main() {
+  initialise();
+
   cout << setprecision(20);
   mpf_set_default_prec (8);
 

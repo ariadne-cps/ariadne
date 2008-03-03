@@ -60,7 +60,7 @@ AC_ARG_ENABLE(float64,[AS_HELP_STRING([--enable-float64],[enable compilation of 
               [],[enable_float64=yes])
 AC_ARG_ENABLE(floatmp,[AS_HELP_STRING([--enable-floatmp],[enable compilation of FloatMP types (default is enabled)])],
               [],[enable_floatmp=yes])
-AS_IF([test "x$enable_float64" != xno],[enable_float64="yes" AC_DEFINE([ENABLE_FLOAT64],[1],[Define to 1 if you want to enable Float64 compilation])],[])
+AS_IF([test "x$enable_float64" != xno],[enable_float64="yes" AC_DEFINE([ENABLE_FLOAT64],[1],[Define to 1 if you want to enable Float64 compilation]) AC_DEFINE([ARIADNE_STANDARD_ROUNDING],[1],[Define to 1 if you want to use processor rounding modes]) AC_DEFINE([ARIADNE_MPFR_TRANSCENDENTAL],[1],[Define to 1 if you want to use mpfr for transcendental functions])],[])
 AS_IF([test "x$enable_floatmp" != xno],[enable_floatmp="yes" AC_DEFINE([ENABLE_FLOATMP],[1],[Define to 1 if you want to enable FloatMP compilation])],[])
 AC_MSG_RESULT([Float64: $enable_float64  FloatMP: $enable_floatmp])
 

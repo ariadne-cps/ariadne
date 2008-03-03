@@ -54,39 +54,39 @@ void
 TestRounding::test() 
 {
   double rn, rl,ru;
-  div_(rl,1.0,3.0,hardware_round_down);
-  div_(ru,1.0,3.0,hardware_round_up);
+  div_(rl,1.0,3.0,round_down);
+  div_(ru,1.0,3.0,round_up);
   ARIADNE_TEST_PRINT(rl);
   ARIADNE_TEST_PRINT(ru);
   ARIADNE_TEST_ASSERT(rl<ru);
-  div_(rl,2.0,5.0,hardware_round_down);
-  div_(ru,2.0,5.0,hardware_round_up);
-  ARIADNE_TEST_PRINT(rl);
-  ARIADNE_TEST_PRINT(ru);
-  ARIADNE_TEST_ASSERT(rl<ru);
-
-  div_(rl,3.0,7,hardware_round_down);
-  div_(ru,3.0,7,hardware_round_up);
+  div_(rl,2.0,5.0,round_down);
+  div_(ru,2.0,5.0,round_up);
   ARIADNE_TEST_PRINT(rl);
   ARIADNE_TEST_PRINT(ru);
   ARIADNE_TEST_ASSERT(rl<ru);
 
-  div_(rl,3,7.0,hardware_round_down);
-  div_(ru,3,7.0,hardware_round_up);
+  div_(rl,3.0,7,round_down);
+  div_(ru,3.0,7,round_up);
   ARIADNE_TEST_PRINT(rl);
   ARIADNE_TEST_PRINT(ru);
   ARIADNE_TEST_ASSERT(rl<ru);
 
-  sqrt_(rl,2.0,hardware_round_down);
-  sqrt_(ru,2.0,hardware_round_up);
+  div_(rl,3,7.0,round_down);
+  div_(ru,3,7.0,round_up);
+  ARIADNE_TEST_PRINT(rl);
+  ARIADNE_TEST_PRINT(ru);
+  ARIADNE_TEST_ASSERT(rl<ru);
+
+  sqrt_(rl,2.0,round_down);
+  sqrt_(ru,2.0,round_up);
   ARIADNE_TEST_PRINT(rl);
   ARIADNE_TEST_PRINT(ru);
   ARIADNE_TEST_ASSERT(rl<ru);
   ARIADNE_TEST_ASSERT(1.41<rl);
   ARIADNE_TEST_ASSERT(ru<1.42);
 
-  exp_(rl,1.0,hardware_round_down);
-  exp_(ru,1.0,hardware_round_up);
+  exp_(rl,1.0,round_down);
+  exp_(ru,1.0,round_up);
   ARIADNE_TEST_PRINT(rl);
   ARIADNE_TEST_PRINT(ru);
   ARIADNE_TEST_ASSERT(rl<ru);

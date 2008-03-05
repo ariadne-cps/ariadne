@@ -195,7 +195,7 @@ namespace Ariadne {
           result.adjoin(HBS(iter->state(),this->basic_set(iter->set()))); }
         return result; }
       HGr grid(const HSp& s) const { 
-        return HGr(s,this->_parameters->grid_length()); }
+        return this->_parameters->hybrid_grid(s); }
       HGCLS outer_approximation(const HBSL& bsl, const HGr& g) const {
         return Geometry::outer_approximation(bsl,g); }
       HGCLS outer_approximation(const HS& s, const HGr& g) const { 

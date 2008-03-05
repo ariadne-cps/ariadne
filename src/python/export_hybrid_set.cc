@@ -140,7 +140,10 @@ void export_hybrid_set()
     .def(self_ns::str(self))
   ;
   
-  class_< HybridGrid<R> >("HybridGrid",init<HybridSpace,R>())
+  class_< HybridGrid<R> >("HybridGrid",init<>())
+    .def("new_location",&HybridGrid<R>::new_location)
+    .def("locations",&HybridGrid<R>::locations)
+    //.def("__getitem__", &HybridGrid<R>::operator[])
     .def(self_ns::str(self))
   ;
 

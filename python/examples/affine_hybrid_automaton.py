@@ -46,7 +46,7 @@ reset12 = AffineMap(Matrix([[1,0],[0,-1]]),Vector([0,0]))
 automaton=HybridAutomaton("Affine hybrid automaton")
 mode1_id=DiscreteState(2)
 mode2_id=DiscreteState(3)
-cinvariant1=ConstraintSet(invariant1)
+#cinvariant1=ConstraintSet(invariant1)
 vfdynamic1=VectorField(dynamic1)
 #mode1=automaton.new_mode(mode1_id,vfdynamic1,cinvariant1)
 mode1=automaton.new_mode(mode1_id,dynamic1,invariant1)
@@ -70,29 +70,35 @@ initial_set.new_location(mode1_id,initial_rectangle1)
 initial_set.new_location(mode2_id,initial_rectangle2)
 print "initial_set.locations() =",initial_set.locations()
 
+print "Creating hybrid grid"
+grid=Grid(Vector([0.25,0.25]))
+hgrid=HybridGrid()
+hgrid.new_location(mode1_id,grid)
+hgrid.new_location(mode2_id,grid)
 
 parameters=EvolutionParameters()
 #parameters.set_grid_length(0.125)
-parameters.set_grid_length(0.05)
+#parameters.set_grid_length(0.05)
+parameters.set_hybrid_grid(hgrid)
 parameters.set_lock_to_grid_time(0.25);
 parameters.set_maximum_step_size(0.125)
 #parameters.set_maximum_enclosure_radius(0.25);
 parameters.set_maximum_enclosure_radius(2.5);
-parameters.set_verbosity(9);
+parameters.set_verbosity(3);
 parameters.set_bounding_domain_size(8);
 print parameters
 applicator=KuhnApplicator(3)
 integrator=AffineIntegrator();
 hybrid_evolver=SetBasedHybridEvolver(parameters,applicator,integrator);
 
-time=Rational(2)
+time=0.2
 
 print "Computing lower reach set"
 print initial_set
 lower_reach_set=hybrid_evolver.lower_reach(automaton,initial_set,time)
 
 print "Exporting to postscript output...",
-epsbb=Box([[-8.1,8.1],[-8.1,8.1]]) # eps bounding box
+epsbb=RectangularSet([[-8.1,8.1],[-8.1,8.1]]) # eps bounding box
 eps=EpsPlot()
 eps.open("affine_hybrid_automaton-lower_reach.eps",epsbb)
 eps.set_line_style(True)

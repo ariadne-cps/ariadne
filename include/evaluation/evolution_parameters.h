@@ -32,6 +32,7 @@
 
 #include "base/types.h"
 #include "geometry/declarations.h"
+#include "geometry/hybrid_denotable_set.h"
 
 namespace Ariadne {
   namespace Evaluation {
@@ -62,6 +63,8 @@ namespace Ariadne {
       R _bounding_domain_size;
 
       uint _verbosity;
+
+      Geometry::HybridGrid<R> _hybrid_grid;
      public:
       /*! \brief Default constructor. */
       EvolutionParameters();
@@ -117,7 +120,7 @@ namespace Ariadne {
       /*! \brief A grid of dimension \a d with the default spacing. */
       Geometry::Grid<R> grid(dimension_type d) const;
 
-      /*! \brief A grid for a hybrid system with the default spacing. */
+      /*! \brief A grid for a hybrid system with hybrid space loc. */
       Geometry::HybridGrid<R> hybrid_grid(const Geometry::HybridSpace& loc) const;
 
       /*! \brief A grid of dimension \a d with the default spacing and bounds. */
@@ -166,6 +169,9 @@ namespace Ariadne {
 
       /*! \brief Set the verbosity of the output. */
       void set_verbosity(uint);
+
+      /*! \brief Set the hybrid grid for hybrid systems. */
+      void set_hybrid_grid(Geometry::HybridGrid<R>);
 
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream& os) const;      

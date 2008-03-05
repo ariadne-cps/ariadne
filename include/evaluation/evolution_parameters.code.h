@@ -41,7 +41,8 @@ Evaluation::EvolutionParameters<R>::EvolutionParameters()
     _argument_grid_length(1),
     _result_grid_length(1),
     _bounding_domain_size(1),
-    _verbosity(0)
+    _verbosity(0),
+    _hybrid_grid()
 {
 }
 
@@ -176,7 +177,10 @@ template<class R>
 Geometry::HybridGrid<R>
 Evaluation::EvolutionParameters<R>::hybrid_grid(const Geometry::HybridSpace& loc) const 
 {
-  return Geometry::HybridGrid<R>(loc,this->_grid_length);
+  if(this->_hybrid_grid.locations().number_of_locations() == 0) {
+    return Geometry::HybridGrid<R>(loc,this->_grid_length);
+  }
+  return this->_hybrid_grid;
 }
 
 
@@ -339,6 +343,16 @@ Evaluation::EvolutionParameters<R>::set_verbosity(uint v)
 {
   this->_verbosity=v;
 }
+
+
+
+template<class R>
+void
+  Evaluation::EvolutionParameters<R>::set_hybrid_grid(Geometry::HybridGrid<R> hgrid)  
+{
+  this->_hybrid_grid=hgrid;
+}
+
 
 
 template<class R>

@@ -60,14 +60,6 @@ using namespace Ariadne::Numeric;
 using namespace Ariadne::LinearAlgebra;
 using namespace Ariadne::Geometry;
 
-inline Rational med_approx(const Rational& ql, const Rational& qu) {
-  return (ql+qu)/2;
-}
-
-inline Rational rad_up(const Rational& ql, const Rational& qu) {
-  return (ql+qu)/2;
-}
-
 inline Rational add_up(const Rational& q1, const Rational& q2) {
   return q1+q2;
 }
@@ -172,15 +164,17 @@ template<> void instantiate_zonotope<Numeric::Rational>();
 
 } // namespace 
 
-
-
-
-
-
 namespace Ariadne {
 
 extern int Geometry::verbosity;
 
+inline Rational med_approx(const Rational& ql, const Rational& qu) {
+  return (ql+qu)/2;
+}
+
+inline Rational rad_up(const Rational& ql, const Rational& qu) {
+  return (ql+qu)/2;
+}
 
 template<class R> 
 Geometry::Zonotope<R>::Zonotope()

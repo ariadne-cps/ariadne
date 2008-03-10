@@ -25,6 +25,7 @@
 #include "geometry/box.h"
 #include "geometry/grid.h"
 #include "geometry/hybrid_denotable_set.h"
+#include "geometry/hybrid_set.h"
 
 namespace Ariadne {
 
@@ -43,7 +44,8 @@ Evaluation::EvolutionParameters<R>::EvolutionParameters()
     _bounding_domain_size(1),
     _verbosity(0),
     _grid(0,1),
-    _hybrid_grid()
+    _hybrid_grid(),
+		_hybrid_bounding_domain()
 {
 }
 
@@ -156,6 +158,23 @@ Geometry::Box<R>
 Evaluation::EvolutionParameters<R>::bounding_domain(dimension_type d) const 
 {
   return Geometry::Box<R>(LinearAlgebra::Vector< Numeric::Interval<R> >(d,Numeric::Interval<R>(-1,1)*this->bounding_domain_size()));
+}
+
+
+template<class R>
+Geometry::HybridSet<R>
+Evaluation::EvolutionParameters<R>::hybrid_bounding_domain(const Geometry::HybridSpace& loc) const
+{
+  if(this->_hybrid_bounding_domain.locations() == loc) {
+    return this->_hybrid_bounding_domain;
+  }
+	Geometry::HybridSet<R> result;
+	for(typename Geometry::HybridSpace::const_iterator loc_iter=loc.begin();
+			loc_iter!=loc.end(); ++loc_iter)
+	{
+		result.new_location(loc_iter->discrete_state(),Geometry::RectangularSet<R>(this->bounding_domain(loc_iter->dimension())));
+	}
+	return result;
 }
 
 
@@ -358,6 +377,14 @@ void
 }
 
 
+template<class R>
+void
+  Evaluation::EvolutionParameters<R>::set_hybrid_bounding_domain(Geometry::HybridSet<R> hdom)  
+{
+  this->_hybrid_bounding_domain=hdom;
+}
+
+
 
 template<class R>
 std::ostream&
@@ -377,8 +404,11 @@ Evaluation::EvolutionParameters<R>::write(std::ostream& os) const
      << ",\n  grid_length=" << this->_grid_length
      << ",\n  argument_grid_length=" << this->_argument_grid_length
      << ",\n  result_grid_length=" << this->_result_grid_length
+		 << ",\n  grid=" << this->_grid
+		 << ",\n  hybrid_grid=" << this->_hybrid_grid
 
      << ",\n  bounding_domain_size=" << this->_bounding_domain_size
+		 << ",\n  hybrid_bounding_domain=" << this->_hybrid_bounding_domain
      << ",\n  verbosity=" << this->_verbosity
      << "\n)\n";
   return os;

@@ -196,6 +196,8 @@ namespace Ariadne {
         return result; }
       HGr grid(const HSp& s) const { 
         return this->_parameters->hybrid_grid(s); }
+      HS domain(const HSp& s) const { 
+        return this->_parameters->hybrid_bounding_domain(s); }
       HGCLS outer_approximation(const HBSL& bsl, const HGr& g) const {
         return Geometry::outer_approximation(bsl,g); }
       HGCLS outer_approximation(const HS& s, const HGr& g) const { 

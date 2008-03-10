@@ -77,7 +77,9 @@ template<class R>
 Output::epsstream&
 Output::operator<<(epsstream& eps, const Geometry::Polytope<R>& p)
 {
-  eps.draw(eps.projection_map()(p));
+  if(p.bounded()) {
+		eps.draw(eps.projection_map()(p));
+	}
   return eps;
 }
 
@@ -85,7 +87,11 @@ template<class R>
 Output::epsstream&
 Output::operator<<(epsstream& eps, const Geometry::Polyhedron<R>& p)
 {
-  return eps << Geometry::Polytope<Numeric::Rational>(p);
+	if(p.bounded()) {
+		return eps << Geometry::Polytope<Numeric::Rational>(p);
+	} else {
+		return eps;
+	}
 }
 
 template<class R> 

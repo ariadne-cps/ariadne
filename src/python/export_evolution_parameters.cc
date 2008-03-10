@@ -50,6 +50,7 @@ void export_evolution_parameters()
     .def("argument_grid_length",&EvolutionParameters<R>::argument_grid_length)
     .def("result_grid_length",&EvolutionParameters<R>::result_grid_length)
     .def("bounding_domain_size",&EvolutionParameters<R>::bounding_domain_size)
+		.def("hybrid_bounding_domain",&EvolutionParameters<R>::hybrid_bounding_domain)
 
     .def("grid",&EvolutionParameters<R>::grid)
     .def("finite_grid",&EvolutionParameters<R>::finite_grid)
@@ -66,6 +67,7 @@ void export_evolution_parameters()
     .def("set_bounding_domain_size",(void(EvolutionParameters<R>::*)(double))&EvolutionParameters<R>::set_bounding_domain_size)
     .def("set_verbosity",&EvolutionParameters<R>::set_verbosity)
     .def("set_hybrid_grid",&EvolutionParameters<R>::set_hybrid_grid)
+		.def("set_hybrid_bounding_domain",&EvolutionParameters<R>::set_hybrid_bounding_domain)
 
     .def(self_ns::str(self))
   ;

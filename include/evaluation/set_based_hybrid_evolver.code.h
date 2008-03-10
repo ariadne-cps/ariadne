@@ -571,24 +571,29 @@ Evaluation::SetBasedHybridEvolver<BS>::chainreach(const System::HybridAutomaton<
   //const_cast<SetBasedHybridEvolver<BS>*>(this)->verbosity=5;
   ARIADNE_LOG(2,"SetBasedHybridEvolver::chainreach(...)\n");
   HGr grid=this->grid(automaton.locations());
+	HGMS domain=this->outer_approximation(this->domain(automaton.locations()),grid);
+	ARIADNE_LOG(3,"domain="<<this->domain(automaton.locations())<<"\n");	
+	ARIADNE_LOG(3,"domain.size()="<<domain.size()<<"\n");	
   HGCLS result(grid);
   T time=this->lock_to_grid_time();
   HGCLS found=this->outer_approximation(initial_set,grid);
-  ARIADNE_LOG(3,"initial_set.size()="<<found.size()<<"\n");
-  this->_upper_evolve(found,automaton,found,time);
+	found.restrict(domain);
+	ARIADNE_LOG(3,"initial_set.size()="<<found.size()<<"\n");
+//  result.adjoin(this->_upper_reach(automaton,found,time));
   while(!found.empty()) {
 		ARIADNE_LOG(3,"found.size()="<<found.size()<<"\n");
-    result.adjoin(found);
+		HGCLS reach=this->_upper_reach(automaton,found,time);
+		ARIADNE_LOG(3,"reach.size()="<<reach.size()<<"\n");
+		this->_upper_evolve(found,automaton,found,time);
+		found.remove(result);
+		found.restrict(domain);
+		ARIADNE_LOG(3,"found "<<found.size()<<" new cells\n");
+		result.adjoin(reach);
 		ARIADNE_LOG(3,"result.size()="<<result.size()<<"\n");
-    this->_upper_evolve(found,automaton,found,time);
-    found.remove(result);
   }
+	result.restrict(domain);
+	ARIADNE_LOG(3,"Final result.size()="<<result.size()<<"\n");
   return HGMS(result);
 }
-
-
-
-
-
 
 }

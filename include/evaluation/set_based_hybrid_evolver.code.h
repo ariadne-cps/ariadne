@@ -574,11 +574,12 @@ Evaluation::SetBasedHybridEvolver<BS>::chainreach(const System::HybridAutomaton<
   HGCLS result(grid);
   T time=this->lock_to_grid_time();
   HGCLS found=this->outer_approximation(initial_set,grid);
-  ARIADNE_LOG(3,"found.size()="<<found.size()<<"\n");
-  this->_upper_reach(found,automaton,found,time);
-  ARIADNE_LOG(3,"found.size()="<<found.size()<<"\n");
+  ARIADNE_LOG(3,"initial_set.size()="<<found.size()<<"\n");
+  this->_upper_evolve(found,automaton,found,time);
   while(!found.empty()) {
+		ARIADNE_LOG(3,"found.size()="<<found.size()<<"\n");
     result.adjoin(found);
+		ARIADNE_LOG(3,"result.size()="<<result.size()<<"\n");
     this->_upper_evolve(found,automaton,found,time);
     found.remove(result);
   }

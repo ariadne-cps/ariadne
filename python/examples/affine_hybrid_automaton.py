@@ -78,7 +78,7 @@ hgrid.new_location(mode2_id,grid)
 
 parameters=EvolutionParameters()
 #parameters.set_grid_length(0.125)
-#parameters.set_grid_length(0.05)
+parameters.set_grid_length(0.05)
 parameters.set_hybrid_grid(hgrid)
 parameters.set_lock_to_grid_time(0.25);
 parameters.set_maximum_step_size(0.125)

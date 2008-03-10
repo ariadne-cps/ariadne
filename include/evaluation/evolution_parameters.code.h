@@ -1,8 +1,8 @@
 /***************************************************************************
  *            evaluation_parameters.code.h
  *
- *  Copyright  2007  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
+ *  Copyright  2007-8  Davide Bresolin, Alberto Casagrande, Pieter Collins
+ *  davide.bresolin@univr.it, casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -42,6 +42,7 @@ Evaluation::EvolutionParameters<R>::EvolutionParameters()
     _result_grid_length(1),
     _bounding_domain_size(1),
     _verbosity(0),
+    _grid(0,1),
     _hybrid_grid()
 {
 }
@@ -162,6 +163,9 @@ template<class R>
 Geometry::Grid<R>
 Evaluation::EvolutionParameters<R>::grid(dimension_type d) const 
 {
+  if(this->_grid.dimension() == d) {
+    return this->_grid;
+  }
   return Geometry::Grid<R>(LinearAlgebra::Vector<R>(d,this->_grid_length));
 }
 
@@ -177,10 +181,10 @@ template<class R>
 Geometry::HybridGrid<R>
 Evaluation::EvolutionParameters<R>::hybrid_grid(const Geometry::HybridSpace& loc) const 
 {
-  if(this->_hybrid_grid.locations().number_of_locations() == 0) {
-    return Geometry::HybridGrid<R>(loc,this->_grid_length);
+  if(this->_hybrid_grid.locations() == loc) {
+    return this->_hybrid_grid;
   }
-  return this->_hybrid_grid;
+  return Geometry::HybridGrid<R>(loc,this->_grid_length);
 }
 
 

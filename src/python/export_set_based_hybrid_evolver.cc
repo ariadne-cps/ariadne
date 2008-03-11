@@ -95,10 +95,6 @@ void export_set_based_hybrid_evolver()
   class_< SetBasedHybridEvolver<ZBS> > evolver_class("SetBasedHybridEvolver",no_init);
   evolver_class.def(init<const EvolutionParameters<R>&>());
   evolver_class.def(init<const EvolutionParameters<R>&,const ApplicatorInterface<ZBS>&,const IntegratorInterface<ZBS>&>());
-  evolver_class.def("evolve",&SetBasedHybridEvolver<ZBS>::basic_set_evolve);
-  evolver_class.def("reach",&SetBasedHybridEvolver<ZBS>::basic_set_reach);
-  evolver_class.def("evolve",&SetBasedHybridEvolver<ZBS>::grid_set_evolve);
-  evolver_class.def("reach",&SetBasedHybridEvolver<ZBS>::grid_set_reach);
   evolver_class.def("lower_evolve",&evolver_lower_evolve<R>);
   evolver_class.def("lower_reach",&evolver_lower_reach<R>);
   evolver_class.def("upper_evolve",&evolver_upper_evolve<R>);

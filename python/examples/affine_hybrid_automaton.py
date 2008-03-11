@@ -61,7 +61,6 @@ print automaton
 
 initial_rectangle1=RectangularSet([[-6.96875,-6.9375],[-6.96875,-6.9375]]);
 initial_rectangle2=RectangularSet([[6.9375,6.96875],[6.9375,6.96875]])
-bounding_box=Box([[-8,8],[-8,8]])
 
 
 print "Creating initial hybrid set"
@@ -80,7 +79,7 @@ parameters=EvolutionParameters()
 #parameters.set_grid_length(0.125)
 parameters.set_grid_length(0.05)
 parameters.set_hybrid_grid(hgrid)
-parameters.set_lock_to_grid_time(0.25);
+parameters.set_lock_to_grid_time(10);
 parameters.set_maximum_step_size(0.125)
 #parameters.set_maximum_enclosure_radius(0.25);
 parameters.set_maximum_enclosure_radius(2.5);
@@ -91,21 +90,24 @@ applicator=KuhnApplicator(3)
 integrator=AffineIntegrator();
 hybrid_evolver=SetBasedHybridEvolver(parameters,applicator,integrator);
 
-time=0.2
+time=5
 
 print "Computing lower reach set"
 print initial_set
 lower_reach_set=hybrid_evolver.lower_reach(automaton,initial_set,time)
+lower_evolve_set=hybrid_evolver.lower_evolve(automaton,initial_set,time)
 
 print "Exporting to postscript output...",
 epsbb=RectangularSet([[-8.1,8.1],[-8.1,8.1]]) # eps bounding box
 eps=EpsPlot()
 eps.open("affine_hybrid_automaton-lower_reach.eps",epsbb)
 eps.set_line_style(True)
-eps.set_fill_colour("red")
-eps.write(lower_reach_set[mode2_id])
 eps.set_fill_colour("green")
 eps.write(lower_reach_set[mode1_id])
+eps.write(lower_reach_set[mode2_id])
+eps.set_fill_colour("red")
+eps.write(lower_evolve_set[mode1_id])
+eps.write(lower_evolve_set[mode2_id])
 eps.set_fill_colour("blue")
 eps.write(initial_set[mode1_id])
 eps.write(initial_set[mode2_id])

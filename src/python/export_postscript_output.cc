@@ -62,6 +62,25 @@ void eps_open(epsfstream& eps,
   eps.open(fn, box.bounding_box());
 }
 
+template <class R> inline
+void eps_open_x1x2(epsfstream& eps, 
+	      const char* fn,
+	      const SetInterface<R>& box,
+				uint x1, uint x2)
+{
+  eps.open(fn, box.bounding_box(), x1, x2);
+}
+
+template <class R> inline
+void eps_open_map(epsfstream& eps, 
+	      const char* fn,
+	      const SetInterface<R>& box,
+				const PlanarProjectionMap& map)
+{
+  eps.open(fn, box.bounding_box(), map);
+}
+
+
 void export_postscript_output()
 {
 
@@ -76,8 +95,8 @@ void export_postscript_output()
   class_<epsfstream, boost::noncopyable>("EpsPlot",init<>())
     .def("open",(void(epsfstream::*)(const char* fn,const Box<FloatPy>&))&epsfstream::open<FloatPy>)
     .def("open",&eps_open<FloatPy>)
-    .def("open",(void(epsfstream::*)(const char* fn,const Box<FloatPy>&,uint,uint))&epsfstream::open<FloatPy>)
-    .def("open",(void(epsfstream::*)(const char* fn,const Box<FloatPy>&,const PlanarProjectionMap&))&epsfstream::open<FloatPy>)
+    .def("open",&eps_open_x1x2<FloatPy>)
+    .def("open",&eps_open_map<FloatPy>)
     .def("open",(void(epsfstream::*)(const char*,const Rectangle2d&,const PlanarProjectionMap&))&epsfstream::open)
     .def("open",&epsfstream_open_with_defaults<FloatPy>)
     .def("close",&epsfstream_close)

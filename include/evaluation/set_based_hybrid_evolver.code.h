@@ -178,39 +178,6 @@ _final_activation_time(const VF& vf, const CS& inv, const BS& bs,
 
 
 template<class BS>
-tuple<Q, Q>
-Evaluation::SetBasedHybridEvolver<BS>::_activation_times(const VF& vf, 
-                                                         const CS& inv, 
-                                                         const BS& bs,
-                                                         const Q& maxt,
-                                                         const Bx& bb,
-                                                         const Semantics sem) const 
-{
-  return make_tuple(_initial_activation_time(vf,inv,bs,maxt,bb,sem),
-                    _final_activation_time(vf,inv,bs,maxt,bb,sem));
-}
-
-
-
-
-template<class BS>
-tuple<Q,BS>
-Evaluation::SetBasedHybridEvolver<BS>::_saltation_map(const VF& vf1, 
-                                                      const VF& vf2, 
-                                                      const Mp& rm, 
-                                                      const CS& inv, 
-                                                      const BS& bs,
-                                                      const Q& maxt,
-                                                      const Bx& bb,
-                                                      const Semantics sem) const
-{
-  // Compute activation times up to the given time and apply the saltation map 
-  Q h1=_initial_activation_time(vf1,inv,bs,maxt,bb,sem);
-  Q h2=_final_activation_time(vf1,inv,bs,maxt,bb,sem);
-  return _saltation_map(vf1,vf2,rm,inv,bs,h1,h2,bb,sem);
-}
-
-template<class BS>
 tuple<Q,BS>
 Evaluation::SetBasedHybridEvolver<BS>::
 _saltation_map(const VF& vf1, const VF& vf2, const Mp& rm, const CS& inv, 
@@ -225,22 +192,6 @@ _saltation_map(const VF& vf1, const VF& vf2, const Mp& rm, const CS& inv,
     BS rs=continuous_integration_step(vf1,bs,hmed,bb);
     return make_tuple(hmed,apply(rm,rs));  
   }
-}
-
-
-
-
-template<class BS>
-BS
-Evaluation::SetBasedHybridEvolver<BS>::_continuous_reachability_step(const VF& vf, 
-                                                                     const CS& inv, 
-                                                                     const BS& bs,
-                                                                     const Q& maximum_time,
-                                                                     const Bx& bb,
-                                                                     const Semantics semantics) const
-{
-  Q h=_final_activation_time(vf,inv,bs,maximum_time,bb,semantics);
-  return this->continuous_reachability_step(vf,bs,h,bb);
 }
 
 
@@ -291,7 +242,7 @@ Evaluation::SetBasedHybridEvolver<BS>::_step(HBSL& evolve,
 
     // Compute continous evolve and reach sets
     Q h; Bx bb;
-    make_lpair(h,bb)=this->flow_bounds(vf,this->bounding_box(bs));
+    make_lpair(h,bb)=this->flow_bounds(vf,bs.bounding_box());
     if(Q(t+h)>time) { h=time-t; }
     ARIADNE_LOG(7,"  h="<<h<<", bb="<<bb<<"\n");
     BS ebs=this->continuous_integration_step(vf,bs,h,bb);
@@ -358,132 +309,21 @@ Evaluation::SetBasedHybridEvolver<BS>::_step(HBSL& evolve,
 
 
 
-
-template<class BS>
-void
-Evaluation::SetBasedHybridEvolver<BS>::_evolve(HBSL& evolve, 
-                                               HBSL& reach, 
-                                               const HBSL& initial, 
-                                               const HA& ha,
-                                               const Q& time, 
-                                               const Semantics semantics) const
-{
-  //const_cast<SetBasedHybridEvolver<BS>*>(this)->verbosity=6;
-  ARIADNE_LOG(5,"SetBasedHybridEvolver::_evolve(...)\n");
-  THBSL working=initial;
-  ARIADNE_LOG(5,"initial="<<initial<<"\n");
-  ARIADNE_LOG(5,"working="<<working<<"\n");
-  while(working.size()!=0) {
-    _step(evolve,reach,working,ha,time,semantics);
-  }
-}
-
-template<class BS>
-typename Evaluation::SetBasedHybridEvolver<BS>::HBSL
-Evaluation::SetBasedHybridEvolver<BS>::basic_set_evolve(const HA& automaton, 
-                                                        const HBSL& sets,
-                                                        const Q& time,
-                                                        const Semantics semantics) const
-{
-  HBSL reach(automaton.locations());
-  HBSL evolve(automaton.locations());
-  THBSL working(sets);
-  while(!working.empty()) {
-    this->_step(evolve,reach,working,automaton,time,semantics);
-  }
-  return evolve;
-}
-
-
-template<class BS>
-typename Evaluation::SetBasedHybridEvolver<BS>::HBSL
-Evaluation::SetBasedHybridEvolver<BS>::basic_set_reach(const HA& automaton, 
-                                                       const HBSL& sets,
-                                                       const Q& time,
-                                                       const Semantics semantics) const
-{
-  ARIADNE_LOG(1,"SetBasedHybridEvolver::basic_set_reach(...)\n");
-  ARIADNE_LOG(1,"sets="<<sets<<"\n")
-
-  HBSL reach(automaton.locations());
-  HBSL evolve(automaton.locations());
-  THBSL working(sets);
-  while(!working.empty()) {
-    this->_step(evolve,reach,working,automaton,time,semantics);
-  }
-  return reach;
-}
-
-
-template<class BS>
-void
-Evaluation::SetBasedHybridEvolver<BS>::_upper_evolve(HGCLS& result, const HA& ha, const HGCLS& initial_set, const T& t) const
-{
-  ARIADNE_LOG(4,"SetBasedHybridEvolver::_upper_evolve(result,automaton,grid_set,time)\n");
-	ARIADNE_LOG(4,"  time="<<t.time()<<"\n");
-  HBSL reach(ha.locations());
-  HBSL evolve(ha.locations());
-  HBSL initial=this->basic_set_list(initial_set);
-  this->_evolve(evolve,reach,initial,ha,t.time(),upper_semantics);
-  result=this->outer_approximation(evolve,initial_set.grid());
-}
-
-template<class BS>
-void
-Evaluation::SetBasedHybridEvolver<BS>::_upper_reach(HGCLS& result, const HA& ha, const HGCLS& initial_set, const T& t) const
-{
-  ARIADNE_LOG(4,"SetBasedHybridEvolver::_upper_reach(result,automaton,grid_set,time)\n");
-  HBSL reach(ha.locations());
-  HBSL evolve(ha.locations());
-  HBSL initial=this->basic_set_list(initial_set);
-  ARIADNE_LOG(4,"initial_working="<<initial<<")\n");
-  this->_evolve(evolve,reach,initial,ha,t.time(),upper_semantics);
-  ARIADNE_LOG(4,"evolve="<<evolve<<")\n");
-  ARIADNE_LOG(4,"reach="<<reach<<")\n");
-  result=this->outer_approximation(reach,initial_set.grid());
-}
-
-
-template<class BS>
-typename Evaluation::SetBasedHybridEvolver<BS>::HGCLS
-Evaluation::SetBasedHybridEvolver<BS>::_upper_evolve(const HA& ha, const HGCLS& initial_set, const T& t) const
-{
-  ARIADNE_LOG(4,"SetBasedHybridEvolver::_upper_evolve(automaton,grid_set,time)\n");
-	ARIADNE_LOG(4,"  time="<<t.time()<<"\n");
-  HBSL reach(ha.locations());
-  HBSL evolve(ha.locations());
-  HBSL initial=this->basic_set_list(initial_set);
-  this->_evolve(evolve,reach,initial,ha,t.time(),upper_semantics);
-  return this->outer_approximation(evolve,initial_set.grid());
-}
-
-template<class BS>
-typename Evaluation::SetBasedHybridEvolver<BS>::HGCLS
-Evaluation::SetBasedHybridEvolver<BS>::_upper_reach(const HA& ha, const HGCLS& initial_set, const T& t) const
-{
-  ARIADNE_LOG(4,"SetBasedHybridEvolver::_upper_reach(automaton,grid_set,time)\n");
-  ARIADNE_LOG(5,"initial_set="<<initial_set<<"\n");
-  HBSL reach(ha.locations());
-  HBSL evolve(ha.locations());
-  ARIADNE_LOG(5,"empty="<<evolve<<"\n");
-  HBSL initial=this->basic_set_list(initial_set);
-  ARIADNE_LOG(5,"initial_basic_sets="<<initial<<"\n");
-  this->_evolve(evolve,reach,initial,ha,t.time(),upper_semantics);
-  return this->outer_approximation(reach,initial_set.grid());
-}
-
-
 template<class BS>
 Geometry::HybridGridMaskSet<typename BS::real_type> 
 Evaluation::SetBasedHybridEvolver<BS>::lower_evolve(const System::HybridAutomaton<R>& automaton, 
                                                     const Geometry::HybridSet<R>& initial_set,
                                                     const Numeric::Rational& time) const
 {
+  ARIADNE_LOG(2,"SetBasedHybridEvolver::lower_evolve(automaton,set,time)\n");
+  ARIADNE_LOG(3,"  initial_set="<<initial_set<<"\n\n");
   HBSL reach(automaton.locations());
 	HBSL evolve(automaton.locations());
 	THBSL working=this->timed_basic_set_list(this->lower_approximation(initial_set,this->grid(automaton.locations())));
+  ARIADNE_LOG(3,"  working_set="<<working<<"\n\n");	
 	while(working.size()!=0) { 
     this->_step(evolve,reach,working,automaton,time,lower_semantics);
+		ARIADNE_LOG(3,"  working_set="<<working<<"\n\n");	
   }
   HGCLS result=this->outer_approximation(evolve,this->grid(automaton.locations()));
   return HGMS(result);
@@ -516,22 +356,15 @@ Evaluation::SetBasedHybridEvolver<BS>::upper_evolve(const System::HybridAutomato
 {
   ARIADNE_LOG(2,"SetBasedHybridEvolver::upper_evolve(automaton,set,time)\n");
   ARIADNE_LOG(3,"  initial_set="<<initial_set<<"\n\n");
-  HGCLS evolve=this->outer_approximation(initial_set,this->grid(automaton.locations()));
-  ARIADNE_LOG(3,"  working_set="<<evolve<<"\n\n");
-  HGCLS reach=evolve;
-  Q lock_time=this->lock_to_grid_time();
-  Z steps=floor(Q(time/lock_time));
-  Q last_time=time-steps*lock_time;
-	ARIADNE_LOG(3,"  total time="<<time<<"  lock_time="<<lock_time<<"  steps="<<steps<<"  last time="<<last_time<<"\n");
-  for(size_type i=0; i!=steps; ++i) {
-    ARIADNE_LOG(3,"step i="<<i<<",  time="<<lock_time<<"\n");
-    evolve=this->_upper_evolve(automaton,evolve,lock_time);
-    ARIADNE_LOG(5,"working_set="<<evolve<<"\n\n");
+  HBSL reach(automaton.locations()), evolve(automaton.locations());
+  THBSL working=this->timed_basic_set_list(this->outer_approximation(initial_set,this->grid(automaton.locations())));
+  ARIADNE_LOG(3,"  working_set="<<working<<"\n\n");	
+  while(working.size()!=0) { 
+    this->_step(evolve,reach,working,automaton,time,upper_semantics);
+		ARIADNE_LOG(3,"  working_set="<<working<<"\n\n");			
   }
-	if(last_time > 0) {
-		evolve=this->_upper_evolve(automaton,evolve,last_time);
-	}
-  return HGMS(evolve);
+  HGCLS result=this->outer_approximation(evolve,this->grid(automaton.locations()));
+  return HGMS(result);
 }
 
 template<class BS>
@@ -542,24 +375,15 @@ Evaluation::SetBasedHybridEvolver<BS>::upper_reach(const System::HybridAutomaton
 {
   ARIADNE_LOG(2,"SetBasedHybridEvolver::upper_reach(automaton,set,time)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n\n");
-  HGr grid=this->grid(automaton.locations());
-  ARIADNE_LOG(3,"grid="<<grid<<"\n");
-  HGCLS evolve=this->outer_approximation(initial_set,grid);
-  ARIADNE_LOG(3,"working_set="<<evolve<<"\n\n");
-  HGCLS reach=evolve;
-  Q lock_time=this->lock_to_grid_time();
-  Z steps=floor(Q(time/lock_time));
-  Q last_time=time-steps*lock_time;
-  for(size_type i=0; i!=steps; ++i) {
-    ARIADNE_LOG(3,"step i="<<i<<",  time="<<lock_time<<"\n");
-    reach.adjoin(this->_upper_reach(automaton,evolve,lock_time));
-    evolve=this->_upper_evolve(automaton,evolve,lock_time);
-    ARIADNE_LOG(5,"working_set="<<evolve<<"\n\n");
+  HBSL reach(automaton.locations()), evolve(automaton.locations());
+  THBSL working=this->timed_basic_set_list(this->outer_approximation(initial_set,this->grid(automaton.locations())));
+  ARIADNE_LOG(3,"  working_set="<<working<<"\n\n");	
+  while(working.size()!=0) { 
+    this->_step(evolve,reach,working,automaton,time,upper_semantics);
+		ARIADNE_LOG(3,"  working_set="<<working<<"\n\n");			
   }
-	if(last_time > 0) {
-		reach.adjoin(this->_upper_reach(automaton,evolve,last_time));
-	}
-  return HGMS(reach);
+  HGCLS result=this->outer_approximation(reach,this->grid(automaton.locations()));
+  return HGMS(result);
 }
 
 
@@ -568,27 +392,31 @@ Geometry::HybridGridMaskSet<typename BS::real_type>
 Evaluation::SetBasedHybridEvolver<BS>::chainreach(const System::HybridAutomaton<R>& automaton, 
                                                   const Geometry::HybridSet<R>& initial_set) const
 {
-  //const_cast<SetBasedHybridEvolver<BS>*>(this)->verbosity=5;
-  ARIADNE_LOG(2,"SetBasedHybridEvolver::chainreach(...)\n");
+  ARIADNE_LOG(2,"SetBasedHybridEvolver::chainreach(autonaton, initial_set)\n");
+  ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n\n");	
   HGr grid=this->grid(automaton.locations());
 	HGMS domain=this->outer_approximation(this->domain(automaton.locations()),grid);
 	ARIADNE_LOG(3,"domain="<<this->domain(automaton.locations())<<"\n");	
 	ARIADNE_LOG(3,"domain.size()="<<domain.size()<<"\n");	
   HGCLS result(grid);
-  T time=this->lock_to_grid_time();
+  Numeric::Rational time=this->lock_to_grid_time();
   HGCLS found=this->outer_approximation(initial_set,grid);
 	found.restrict(domain);
 	ARIADNE_LOG(3,"initial_set.size()="<<found.size()<<"\n");
-//  result.adjoin(this->_upper_reach(automaton,found,time));
   while(!found.empty()) {
 		ARIADNE_LOG(3,"found.size()="<<found.size()<<"\n");
-		HGCLS reach=this->_upper_reach(automaton,found,time);
-		ARIADNE_LOG(3,"reach.size()="<<reach.size()<<"\n");
-		this->_upper_evolve(found,automaton,found,time);
+		THBSL working=this->timed_basic_set_list(found);
+		ARIADNE_LOG(3,"  working_set="<<working<<"\n\n");	
+		HBSL reach(automaton.locations()), evolve(automaton.locations());
+		while(working.size()!=0) { 
+			this->_step(evolve,reach,working,automaton,time,upper_semantics);
+			ARIADNE_LOG(3,"  working_set="<<working<<"\n\n");			
+		}
+		found.adjoin(this->outer_approximation(evolve,this->grid(automaton.locations())));
 		found.remove(result);
 		found.restrict(domain);
 		ARIADNE_LOG(3,"found "<<found.size()<<" new cells\n");
-		result.adjoin(reach);
+		result.adjoin(this->outer_approximation(reach,this->grid(automaton.locations())));
 		ARIADNE_LOG(3,"result.size()="<<result.size()<<"\n");
   }
 	result.restrict(domain);

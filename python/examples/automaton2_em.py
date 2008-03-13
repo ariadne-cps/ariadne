@@ -52,13 +52,13 @@ print "initial_set.locations() =",initial_set.locations()
 
 # set evolution parameters
 par=EvolutionParameters()
-par.set_maximum_enclosure_radius(0.25);
-par.set_maximum_step_size(0.25);
+par.set_maximum_enclosure_radius(1.25);
+par.set_maximum_step_size(1.25);
 par.set_lock_to_grid_time(1.5);
-par.set_grid_length(0.25)
+par.set_grid_length(0.5)
 par.set_argument_grid_length(0.25)
 par.set_result_grid_length(0.25)
-par.set_verbosity(3)
+par.set_verbosity(2)
 
 print par
 
@@ -113,10 +113,8 @@ eps.close()
 
 print " done."
 
-#sys.exit(0)
 
-
-print "Computing upper reach set for 2 seconds..."
+print "Computing upper reach set for 1 seconds..."
 chainreach_set=hybrid_evolver.upper_reach(automaton,initial_set,1)
 
 print "Sizes of the computed regions:"

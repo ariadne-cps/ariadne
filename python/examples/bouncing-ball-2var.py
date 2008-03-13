@@ -49,11 +49,11 @@ bounding_box=Box([[-1,2.5],[-2.5,2.5]])
 
 # Definition of the Hybrid Evolver
 par = EvolutionParameters()
-par.set_maximum_step_size(1.0/8)
+par.set_maximum_step_size(0.5)
 par.set_lock_to_grid_time(4)
-par.set_grid_length(1.0/32)
+par.set_grid_length(1.0/4)
 par.set_bounding_domain_size(10.0)
-par.set_verbosity(3)
+par.set_verbosity(2)
 
 
 print par

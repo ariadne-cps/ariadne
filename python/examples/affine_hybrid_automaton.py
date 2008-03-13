@@ -83,7 +83,7 @@ parameters.set_lock_to_grid_time(10);
 parameters.set_maximum_step_size(0.125)
 #parameters.set_maximum_enclosure_radius(0.25);
 parameters.set_maximum_enclosure_radius(2.5);
-parameters.set_verbosity(3);
+parameters.set_verbosity(2);
 parameters.set_bounding_domain_size(8);
 print parameters
 applicator=KuhnApplicator(3)
@@ -114,6 +114,14 @@ eps.write(initial_set[mode2_id])
 eps.close()
 print
 
+print "Exporting to txt output..."
+txt=TextFile()
+txt.open("affine_hybrid_automaton-lower_reach.txt")
+txt.write(lower_reach_set[mode1_id])
+txt.write(lower_reach_set[mode2_id])
+txt.close()
+
+
 #sys.exit(0)
 
 print "Computing upper reach set"
@@ -131,6 +139,14 @@ eps.write(initial_set[mode1_id])
 eps.write(initial_set[mode2_id])
 eps.close()
 print
+
+print "Exporting to txt output..."
+txt=TextFile()
+txt.open("affine_hybrid_automaton-upper_reach.txt")
+txt.write(upper_reach_set[mode1_id])
+txt.write(upper_reach_set[mode2_id])
+txt.close()
+
 
 print "Computing chainreach set"
 chainreach_set=hybrid_evolver.chain_reach(automaton,initial_set)
@@ -153,4 +169,13 @@ eps.set_fill_colour("blue")
 eps.write(initial_set[mode1_id])
 eps.write(initial_set[mode2_id])
 eps.close()
+
+print "Exporting to txt output..."
+txt=TextFile()
+txt.open("affine_hybrid_automaton-chain_reach.txt")
+txt.write(chainreach_set[mode1_id])
+txt.write(chainreach_set[mode2_id])
+txt.close()
+
+
 print " done."

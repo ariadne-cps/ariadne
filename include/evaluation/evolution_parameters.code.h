@@ -371,6 +371,15 @@ Evaluation::EvolutionParameters<R>::set_verbosity(uint v)
 
 template<class R>
 void
+  Evaluation::EvolutionParameters<R>::set_grid(Geometry::Grid<R> grid)  
+{
+  this->_grid=grid;
+}
+
+
+
+template<class R>
+void
   Evaluation::EvolutionParameters<R>::set_hybrid_grid(Geometry::HybridGrid<R> hgrid)  
 {
   this->_hybrid_grid=hgrid;

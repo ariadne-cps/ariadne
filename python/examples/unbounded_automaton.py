@@ -69,7 +69,7 @@ parameters.set_lock_to_grid_time(4.0);
 parameters.set_maximum_step_size(0.125)
 #parameters.set_maximum_enclosure_radius(0.25);
 parameters.set_maximum_enclosure_radius(2.5);
-parameters.set_verbosity(3);
+parameters.set_verbosity(2);
 parameters.set_bounding_domain_size(0.5);
 parameters.set_hybrid_bounding_domain(bounding_set);
 print parameters

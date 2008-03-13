@@ -70,9 +70,8 @@ automaton.new_transition(event2_id,mode2_id,mode3_id,reset23,activation23)
 automaton.new_transition(event3_id,mode3_id,mode1_id,reset31,activation31)
 print automaton
 
-initial_point=Point([0.96875,0.28125,0.0])
-initial_rectangle=Rectangle(initial_point,initial_point)
-bounding_box=Rectangle([[0,2],[0,2],[0,T]])
+initial_rectangle=RectangularSet([[0.96875,0.96875],[0.28125,0.28125],[0.0,0.0]])
+bounding_box=RectangularSet([[0,2],[0,2],[0,T]])
 
 print initial_rectangle
 print bounding_box

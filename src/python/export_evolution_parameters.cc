@@ -67,6 +67,7 @@ void export_evolution_parameters()
     .def("set_bounding_domain_size",(void(EvolutionParameters<R>::*)(double))&EvolutionParameters<R>::set_bounding_domain_size)
     .def("set_verbosity",&EvolutionParameters<R>::set_verbosity)
     .def("set_hybrid_grid",&EvolutionParameters<R>::set_hybrid_grid)
+    .def("set_grid",&EvolutionParameters<R>::set_grid)
 		.def("set_hybrid_bounding_domain",&EvolutionParameters<R>::set_hybrid_bounding_domain)
 
     .def(self_ns::str(self))

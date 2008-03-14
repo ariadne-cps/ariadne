@@ -211,6 +211,7 @@ namespace Ariadne {
       HS domain(const HSp& s) const { return this->_parameters->hybrid_bounding_domain(s); }
       Q lock_to_grid_time() const { return this->_parameters->lock_to_grid_time(); }
       Q maximum_step_size() const { return this->_parameters->maximum_step_size(); }
+			Q minimum_step_size() const { return this->_parameters->minimum_step_size(); }
       R maximum_basic_set_radius() const { return this->_parameters->maximum_basic_set_radius(); }
      private:
       boost::shared_ptr< EvolutionParameters<R> > _parameters;

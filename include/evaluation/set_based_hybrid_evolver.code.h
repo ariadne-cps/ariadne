@@ -114,12 +114,13 @@ Evaluation::SetBasedHybridEvolver<BS>::_initial_activation_time(const VF& vf,
   // Assume that the set is connected and nonempty
   Q initial_time=0;
   Q initial_activation_time=0;
+	Q minimum_step_size=this->minimum_step_size();
 
   // Compute initial activation time
   if(!_satisfies(bs,inv,semantics)) {
     Q lower_bound=initial_time;
     Q upper_bound=maximum_time;
-    for(uint i=0; i!=BISECTION_STEPS; ++i) {
+    for(uint i=0; i!=BISECTION_STEPS && upper_bound-lower_bound > minimum_step_size; ++i) {
       Q approx=med(lower_bound,upper_bound);
       BS rs=continuous_evolution_step(vf,bs,lower_bound,approx,bb);
       if(_satisfies(rs,inv,semantics)) {
@@ -153,11 +154,11 @@ _final_activation_time(const VF& vf, const CS& inv, const BS& bs,
     return maximum_time;
   }
 
-
+	Q minimum_step_size=this->minimum_step_size();
   Q final_activation_time=maximum_time;
   Q lower_bound=0;
   Q upper_bound=maximum_time;
-  for(uint i=0; i!=BISECTION_STEPS; ++i) {
+  for(uint i=0; i!=BISECTION_STEPS && upper_bound-lower_bound > minimum_step_size; ++i) {
     Q approx=med(lower_bound,upper_bound);
 		ARIADNE_LOG(9,"   lower_bound="<<lower_bound<<" upper_bound="<<upper_bound<<"\n");
     BS rs=continuous_evolution_step(vf,bs,approx,upper_bound,bb);
@@ -226,14 +227,14 @@ Evaluation::SetBasedHybridEvolver<BS>::_step(HBSL& evolve,
   ARIADNE_ASSERT(t<=time);
 
   if(t==time) {
-    ARIADNE_LOG(7," reached end time\n");
+    ARIADNE_LOG(2," reached end time\n");
     evolve.adjoin(HBS(ds,bs));
   } else if(bs.radius()>this->maximum_basic_set_radius()) {
-    ARIADNE_LOG(7," subdivide\n");
+    ARIADNE_LOG(2," subdivide\n");
     ARIADNE_LOG(7,"  r="<<bs.radius()<<"; max_r="<<this->maximum_basic_set_radius()<<"\n");
     this->append_subdivision(working,THBS(t,n,ds,bs));
   } else {
-    ARIADNE_LOG(7," time step\n");
+    ARIADNE_LOG(2," time step\n");
     ARIADNE_LOG(9," integrator="<<*this->_integrator<<"\n");
     const DM& mode=automaton.mode(ds);
     reference_vector<const DT> transitions=automaton.transitions(ds);
@@ -244,12 +245,14 @@ Evaluation::SetBasedHybridEvolver<BS>::_step(HBSL& evolve,
     Q h; Bx bb;
     make_lpair(h,bb)=this->flow_bounds(vf,bs.bounding_box());
     if(Q(t+h)>time) { h=time-t; }
-    ARIADNE_LOG(7,"  h="<<h<<", bb="<<bb<<"\n");
+    ARIADNE_LOG(2,"  h="<<h<<"\n");
+		ARIADNE_LOG(7," bb="<<bb<<"\n");
     BS ebs=this->continuous_integration_step(vf,bs,h,bb);
     ARIADNE_LOG(7,"  ebs="<<ebs<<"\n");
     Q rh=this->_final_activation_time(vf,inv,bs,h,bb,semantics);
     BS rbs=this->continuous_reachability_step(vf,bs,rh,bb);
-    ARIADNE_LOG(7,"  rh="<<rh<<", rbs="<<rbs<<"\n");
+    ARIADNE_LOG(2,"  rh="<<rh<< "\n");
+		ARIADNE_LOG(7,"  rbs="<<rbs<<"\n");
     BSL rbsl(rbs);
 
     // Process evolved set
@@ -257,6 +260,7 @@ Evaluation::SetBasedHybridEvolver<BS>::_step(HBSL& evolve,
     ARIADNE_LOG(9,", s="<<this->subset(ebs,mode.invariant()));
     ARIADNE_LOG(9,", inv="<<mode.invariant().bounding_box()<<"\n");
     if(rh==h) {
+			ARIADNE_LOG(2,"Continuous step: push with t="<<Q(t+h)<<" n="<<n<<"\n");
       working.push(THBS(Q(t+h),n,ds,ebs));
     }
   
@@ -294,6 +298,7 @@ Evaluation::SetBasedHybridEvolver<BS>::_step(HBSL& evolve,
 						ARIADNE_LOG(4,"Transition to "<<transition.destination().discrete_state()<<" at time="<<imt.get_d()<<"\n");
             ARIADNE_ASSERT(imt>=t);
 						ARIADNE_ASSERT(imt<=Q(t+h));
+						ARIADNE_LOG(2,"Transition: push with imt="<<imt<<" imn="<<imn<<"\n");
 						working.push(THBS(imt,imn,imds,imbs));
           }
         }
@@ -302,7 +307,7 @@ Evaluation::SetBasedHybridEvolver<BS>::_step(HBSL& evolve,
 
   }  // done step
   ARIADNE_LOG(9," done step\n")
-  ARIADNE_LOG(9,"  working.size()="<<working.size()<<"\n");
+  ARIADNE_LOG(2,"  working.size()="<<working.size()<<"\n");
   ARIADNE_LOG(9,"  evolve.size()="<<evolve.size()<<"\n");
   ARIADNE_LOG(9,"  reach.size()="<<reach.size()<<"\n\n");
 }

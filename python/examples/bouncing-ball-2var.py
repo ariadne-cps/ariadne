@@ -26,13 +26,6 @@ e12=automaton.new_transition(event_id,mode_id,mode_id,res,act)
 
 print automaton
 
-# Defintion of the underlying grid
-v=Vector(2)
-v[0]=1.0/32
-v[1]=1.0/32
-grid=Grid(v)
-#block=LatticeBlock([[-80,200],[-200,200]])
-#fgrid=FiniteGrid(grid,block)
 
 # Initial set 
 init=Rectangle([[1.999,2.0],[0,0.001]])
@@ -42,7 +35,7 @@ initial_set.new_location(mode_id,init)
 print "initial_set.locations() =",initial_set.locations()
 
 # Bounding set 
-bounding_box=Box([[-1,2.5],[-2.5,2.5]])
+bounding_box=RectangularSet([[-1,2.5],[-2.5,2.5]])
 #bounding_set=HybridSet()
 #bounding_set.new_location(mode_id,bounding_box)
 #print "bounding_set.locations() =",bounding_set.locations()
@@ -51,7 +44,7 @@ bounding_box=Box([[-1,2.5],[-2.5,2.5]])
 par = EvolutionParameters()
 par.set_maximum_step_size(0.5)
 par.set_lock_to_grid_time(4)
-par.set_grid_length(1.0/4)
+par.set_grid_length(1.0/32)
 par.set_bounding_domain_size(10.0)
 par.set_verbosity(2)
 
@@ -64,7 +57,7 @@ integrator=AffineIntegrator();
 #hybrid_evolver=HybridEvolver(apply,integrator);
 hybrid_evolver=SetBasedHybridEvolver(par,apply,integrator);
 
-time=4
+time=2
 
 print "initial set=",initial_set
 
@@ -75,7 +68,7 @@ evolve_set=hybrid_evolver.upper_evolve(automaton,initial_set,time)
 
 print "Exporting to eps..."
 eps=EpsPlot()
-eps.open("bouncing-ball-chain.eps",bounding_box,0,1)
+eps.open("bouncing-ball-upper.eps",bounding_box,0,1)
 
 # Print the bounding_box
 eps.set_line_style(True)

@@ -43,6 +43,49 @@ using namespace Ariadne::Python;
 #include <boost/python.hpp>
 using namespace boost::python;
 
+template<class R> inline
+HybridGridMaskSet<R> evolver_lower_reach(
+   const SetBasedHybridEvolver< Zonotope<R> >& evolver, 
+   const HybridAutomaton<R>& automaton, 
+   const HybridSet<R>& initial_set, 
+   double time) 
+{
+  return evolver.lower_reach(automaton, initial_set, time);
+}
+
+template<class R> inline
+HybridGridMaskSet<R> evolver_lower_evolve(
+   const SetBasedHybridEvolver< Zonotope<R> >& evolver, 
+   const HybridAutomaton<R>& automaton, 
+   const HybridSet<R>& initial_set, 
+   double time) 
+{
+  return evolver.lower_evolve(automaton, initial_set, time);
+}
+
+template<class R> inline
+HybridGridMaskSet<R> evolver_upper_reach(
+   const SetBasedHybridEvolver< Zonotope<R> >& evolver, 
+   const HybridAutomaton<R>& automaton, 
+   const HybridSet<R>& initial_set, 
+   double time) 
+{
+  return evolver.upper_reach(automaton, initial_set, time);
+}
+
+template<class R> inline
+HybridGridMaskSet<R> evolver_upper_evolve(
+   const SetBasedHybridEvolver< Zonotope<R> >& evolver, 
+   const HybridAutomaton<R>& automaton, 
+   const HybridSet<R>& initial_set, 
+   double time) 
+{
+  return evolver.lower_evolve(automaton, initial_set, time);
+}
+
+
+
+
 template<class R>
 void export_set_based_hybrid_evolver() 
 {
@@ -52,14 +95,10 @@ void export_set_based_hybrid_evolver()
   class_< SetBasedHybridEvolver<ZBS> > evolver_class("SetBasedHybridEvolver",no_init);
   evolver_class.def(init<const EvolutionParameters<R>&>());
   evolver_class.def(init<const EvolutionParameters<R>&,const ApplicatorInterface<ZBS>&,const IntegratorInterface<ZBS>&>());
-  evolver_class.def("evolve",&SetBasedHybridEvolver<ZBS>::basic_set_evolve);
-  evolver_class.def("reach",&SetBasedHybridEvolver<ZBS>::basic_set_reach);
-  evolver_class.def("evolve",&SetBasedHybridEvolver<ZBS>::grid_set_evolve);
-  evolver_class.def("reach",&SetBasedHybridEvolver<ZBS>::grid_set_reach);
-  evolver_class.def("lower_evolve",&SetBasedHybridEvolver<ZBS>::lower_evolve);
-  evolver_class.def("lower_reach",&SetBasedHybridEvolver<ZBS>::lower_reach);
-  evolver_class.def("upper_evolve",&SetBasedHybridEvolver<ZBS>::upper_evolve);
-  evolver_class.def("upper_reach",&SetBasedHybridEvolver<ZBS>::upper_reach);
+  evolver_class.def("lower_evolve",&evolver_lower_evolve<R>);
+  evolver_class.def("lower_reach",&evolver_lower_reach<R>);
+  evolver_class.def("upper_evolve",&evolver_upper_evolve<R>);
+  evolver_class.def("upper_reach",&evolver_upper_reach<R>);
   evolver_class.def("chain_reach",&SetBasedHybridEvolver<ZBS>::chainreach);
   evolver_class.def("chainreach",&SetBasedHybridEvolver<ZBS>::chainreach);
 

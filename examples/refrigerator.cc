@@ -97,7 +97,7 @@ int refrig()
   cout << "states={" << state1 << " " << state2 << " " << state3 << " " << state4 << "}" << endl;
 
   //  DiscretState state1=mode1_id;
-  const DiscreteMode<R>& mode1=automaton.new_mode(state1,dynamic1,inv);
+  const DiscreteMode<R>& mode1=automaton.new_mode(state1,dynamic1,domain);
   const DiscreteMode<R>& mode2=automaton.new_mode(state2,dynamic2,inv);
   const DiscreteMode<R>& mode3=automaton.new_mode(state3,dynamic3,inv);
   const DiscreteMode<R>& mode4=automaton.new_mode(state4,dynamic4,inv);

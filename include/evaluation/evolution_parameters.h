@@ -1,8 +1,8 @@
 /***************************************************************************
  *            evolution_parameters.h
  *
- *  Copyright  2007  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
+ *  Copyright  2007-8  Davide Bresolim, Alberto Casagrande, Pieter Collins
+ *  davide.bresolin@univr.it, casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -32,6 +32,9 @@
 
 #include "base/types.h"
 #include "geometry/declarations.h"
+#include "geometry/hybrid_denotable_set.h"
+#include "geometry/hybrid_set.h"
+
 
 namespace Ariadne {
   namespace Evaluation {
@@ -62,6 +65,10 @@ namespace Ariadne {
       R _bounding_domain_size;
 
       uint _verbosity;
+
+      Geometry::HybridGrid<R> _hybrid_grid;
+      Geometry::Grid<R> _grid;
+			Geometry::HybridSet<R> _hybrid_bounding_domain;
      public:
       /*! \brief Default constructor. */
       EvolutionParameters();
@@ -113,14 +120,17 @@ namespace Ariadne {
 
       /*! \brief A bounding domain for the evolution. */
       Geometry::Box<R> bounding_domain(dimension_type d) const;
+			
+			/*! \brief A bounding domain for the hybrid evolution */
+			Geometry::HybridSet<R> hybrid_bounding_domain(const Geometry::HybridSpace& loc) const;
 
-      /*! \brief A grid of dimension \a d with the default spacing. */
+      /*! \brief A grid of dimension \a d with the given spacing. */
       Geometry::Grid<R> grid(dimension_type d) const;
 
-      /*! \brief A grid for a hybrid system with the default spacing. */
+      /*! \brief A grid for a hybrid system with hybrid space loc. */
       Geometry::HybridGrid<R> hybrid_grid(const Geometry::HybridSpace& loc) const;
 
-      /*! \brief A grid of dimension \a d with the default spacing and bounds. */
+      /*! \brief A finite grid of dimension \a d with the given spacing and bounds. */
       Geometry::FiniteGrid<R> finite_grid(dimension_type d) const;
 
       /*! \brief The verbosity of the output. */
@@ -163,9 +173,18 @@ namespace Ariadne {
       /*! \brief Set the size of the region used for computation. */
       void set_bounding_domain_size(R);
       void set_bounding_domain_size(double);
+			
+			/*! \brief Set the the regions used for hybrid computation. */
+			void set_hybrid_bounding_domain(Geometry::HybridSet<R>);
 
       /*! \brief Set the verbosity of the output. */
       void set_verbosity(uint);
+
+      /*! \brief Set the default grid. */
+      void set_grid(Geometry::Grid<R>);
+
+      /*! \brief Set the hybrid grid for hybrid systems. */
+      void set_hybrid_grid(Geometry::HybridGrid<R>);
 
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream& os) const;      

@@ -1,8 +1,8 @@
 /***************************************************************************
  *            evaluation_parameters.code.h
  *
- *  Copyright  2007  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
+ *  Copyright  2007-8  Davide Bresolin, Alberto Casagrande, Pieter Collins
+ *  davide.bresolin@univr.it, casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -25,6 +25,7 @@
 #include "geometry/box.h"
 #include "geometry/grid.h"
 #include "geometry/hybrid_denotable_set.h"
+#include "geometry/hybrid_set.h"
 
 namespace Ariadne {
 
@@ -41,7 +42,10 @@ Evaluation::EvolutionParameters<R>::EvolutionParameters()
     _argument_grid_length(1),
     _result_grid_length(1),
     _bounding_domain_size(1),
-    _verbosity(0)
+    _verbosity(0),
+    _grid(0,1),
+    _hybrid_grid(),
+		_hybrid_bounding_domain()
 {
 }
 
@@ -158,9 +162,29 @@ Evaluation::EvolutionParameters<R>::bounding_domain(dimension_type d) const
 
 
 template<class R>
+Geometry::HybridSet<R>
+Evaluation::EvolutionParameters<R>::hybrid_bounding_domain(const Geometry::HybridSpace& loc) const
+{
+  if(this->_hybrid_bounding_domain.locations() == loc) {
+    return this->_hybrid_bounding_domain;
+  }
+	Geometry::HybridSet<R> result;
+	for(typename Geometry::HybridSpace::const_iterator loc_iter=loc.begin();
+			loc_iter!=loc.end(); ++loc_iter)
+	{
+		result.new_location(loc_iter->discrete_state(),Geometry::RectangularSet<R>(this->bounding_domain(loc_iter->dimension())));
+	}
+	return result;
+}
+
+
+template<class R>
 Geometry::Grid<R>
 Evaluation::EvolutionParameters<R>::grid(dimension_type d) const 
 {
+  if(this->_grid.dimension() == d) {
+    return this->_grid;
+  }
   return Geometry::Grid<R>(LinearAlgebra::Vector<R>(d,this->_grid_length));
 }
 
@@ -176,6 +200,9 @@ template<class R>
 Geometry::HybridGrid<R>
 Evaluation::EvolutionParameters<R>::hybrid_grid(const Geometry::HybridSpace& loc) const 
 {
+  if(this->_hybrid_grid.locations() == loc) {
+    return this->_hybrid_grid;
+  }
   return Geometry::HybridGrid<R>(loc,this->_grid_length);
 }
 
@@ -341,6 +368,33 @@ Evaluation::EvolutionParameters<R>::set_verbosity(uint v)
 }
 
 
+
+template<class R>
+void
+  Evaluation::EvolutionParameters<R>::set_grid(Geometry::Grid<R> grid)  
+{
+  this->_grid=grid;
+}
+
+
+
+template<class R>
+void
+  Evaluation::EvolutionParameters<R>::set_hybrid_grid(Geometry::HybridGrid<R> hgrid)  
+{
+  this->_hybrid_grid=hgrid;
+}
+
+
+template<class R>
+void
+  Evaluation::EvolutionParameters<R>::set_hybrid_bounding_domain(Geometry::HybridSet<R> hdom)  
+{
+  this->_hybrid_bounding_domain=hdom;
+}
+
+
+
 template<class R>
 std::ostream&
 Evaluation::EvolutionParameters<R>::write(std::ostream& os) const
@@ -359,8 +413,11 @@ Evaluation::EvolutionParameters<R>::write(std::ostream& os) const
      << ",\n  grid_length=" << this->_grid_length
      << ",\n  argument_grid_length=" << this->_argument_grid_length
      << ",\n  result_grid_length=" << this->_result_grid_length
+		 << ",\n  grid=" << this->_grid
+		 << ",\n  hybrid_grid=" << this->_hybrid_grid
 
      << ",\n  bounding_domain_size=" << this->_bounding_domain_size
+		 << ",\n  hybrid_bounding_domain=" << this->_hybrid_bounding_domain
      << ",\n  verbosity=" << this->_verbosity
      << "\n)\n";
   return os;

@@ -52,13 +52,13 @@ print "initial_set.locations() =",initial_set.locations()
 
 # set evolution parameters
 par=EvolutionParameters()
-par.set_maximum_enclosure_radius(0.25);
-par.set_maximum_step_size(0.25);
+par.set_maximum_enclosure_radius(1.25);
+par.set_maximum_step_size(1.25);
 par.set_lock_to_grid_time(1.5);
-par.set_grid_length(0.25)
+par.set_grid_length(0.5)
 par.set_argument_grid_length(0.25)
 par.set_result_grid_length(0.25)
-par.set_verbosity(9)
+par.set_verbosity(2)
 
 print par
 
@@ -72,7 +72,7 @@ hybrid_evolver=SetBasedHybridEvolver(par,apply,integrator);
 #print "Computing continuous chainreach set"
 #set_applicator_verbosity(4)
 set_integrator_verbosity(0)
-set_hybrid_evolver_verbosity(9)
+set_hybrid_evolver_verbosity(3)
 #continuous_chainreach_set=hybrid_evolver.continuous_chainreach(automaton,initial_set,bounding_set)
 print
 
@@ -80,10 +80,10 @@ print
 #discrete_step_set=hybrid_evolver.discrete_step(automaton,initial_set)
 print
 
-print "Computing lower evolve set for 2 seconds..."
-final_set=hybrid_evolver.lower_evolve(automaton,initial_set,Rational(2))
-print "Computing lower reach set for 2 seconds..."
-chainreach_set=hybrid_evolver.lower_reach(automaton,initial_set,Rational(2))
+print "Computing lower evolve set for 1 seconds..."
+final_set=hybrid_evolver.lower_evolve(automaton,initial_set,1)
+print "Computing lower reach set for 1 seconds..."
+chainreach_set=hybrid_evolver.lower_reach(automaton,initial_set,1)
 
 print "Sizes of the computed regions:"
 print "Mode 1:",chainreach_set[mode1_id].size()
@@ -113,11 +113,9 @@ eps.close()
 
 print " done."
 
-#sys.exit(0)
 
-
-print "Computing upper reach set for 2 seconds..."
-chainreach_set=hybrid_evolver.upper_reach(automaton,initial_set,Rational(2))
+print "Computing upper reach set for 1 seconds..."
+chainreach_set=hybrid_evolver.upper_reach(automaton,initial_set,1)
 
 print "Sizes of the computed regions:"
 print "Mode 1:",chainreach_set[mode1_id].size()

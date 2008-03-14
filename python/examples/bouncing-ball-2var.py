@@ -26,13 +26,6 @@ e12=automaton.new_transition(event_id,mode_id,mode_id,res,act)
 
 print automaton
 
-# Defintion of the underlying grid
-v=Vector(2)
-v[0]=1.0/32
-v[1]=1.0/32
-grid=Grid(v)
-#block=LatticeBlock([[-80,200],[-200,200]])
-#fgrid=FiniteGrid(grid,block)
 
 # Initial set 
 init=Rectangle([[1.999,2.0],[0,0.001]])
@@ -42,18 +35,18 @@ initial_set.new_location(mode_id,init)
 print "initial_set.locations() =",initial_set.locations()
 
 # Bounding set 
-bounding_box=Box([[-1,2.5],[-2.5,2.5]])
+bounding_box=RectangularSet([[-1,2.5],[-2.5,2.5]])
 #bounding_set=HybridSet()
 #bounding_set.new_location(mode_id,bounding_box)
 #print "bounding_set.locations() =",bounding_set.locations()
 
 # Definition of the Hybrid Evolver
 par = EvolutionParameters()
-par.set_maximum_step_size(1.0/8)
+par.set_maximum_step_size(0.5)
 par.set_lock_to_grid_time(4)
 par.set_grid_length(1.0/32)
-par.set_bounding_domain_size(3.0)
-par.set_verbosity(3)
+par.set_bounding_domain_size(10.0)
+par.set_verbosity(2)
 
 
 print par
@@ -64,7 +57,7 @@ integrator=AffineIntegrator();
 #hybrid_evolver=HybridEvolver(apply,integrator);
 hybrid_evolver=SetBasedHybridEvolver(par,apply,integrator);
 
-time=Rational(4)
+time=2
 
 print "initial set=",initial_set
 
@@ -75,7 +68,7 @@ evolve_set=hybrid_evolver.upper_evolve(automaton,initial_set,time)
 
 print "Exporting to eps..."
 eps=EpsPlot()
-eps.open("bouncing-ball-chain.eps",bounding_box,0,1)
+eps.open("bouncing-ball-upper.eps",bounding_box,0,1)
 
 # Print the bounding_box
 eps.set_line_style(True)
@@ -106,10 +99,6 @@ eps.write(initial_set[mode_id])
 
 eps.close()
 
-sys.exit(0)
-
-
-time=Rational(1)
 
 print "initial set=",initial_set
 
@@ -150,21 +139,13 @@ eps.write(initial_set[mode_id])
 
 eps.close()
 
-print "Computing upper eachable set for 5 seconds..."
-upper_reach_set=hybrid_evolver.upper_reach(automaton,initial_set,Rational(5))
-
-#print "Computing discrete transition..."
-#discrete_init=HybridGridCellListSet(reach_set)
-#discrete_step=hybrid_evolver.discrete_step(automaton,discrete_init)
-
-
-#print "continuous_chainreach_set =",continuous_chainreach_set[mode_id]
-#print "chainreach_set=",chainreach_set[mode_id]
+print "Computing chain reachable set..."
+chainreach_set=hybrid_evolver.chain_reach(automaton,initial_set)
 
 print "Exporting to eps..."
 
 # Eps output
-eps.open("bouncing-ball-upper.eps",bounding_box,0,1)
+eps.open("bouncing-ball-chain.eps",bounding_box,0,1)
 
 # Print the bounding_box
 eps.set_line_style(True)
@@ -178,9 +159,7 @@ eps.write(act)
 # Write the reached set
 eps.set_line_style(False)
 eps.set_fill_colour("green")
-eps.write(upper_reach_set[mode_id])
-eps.set_fill_colour("yellow")
-eps.write(continuous_chainreach_set[mode_id])
+eps.write(chainreach_set[mode_id])
 
 # Write the initial set
 eps.set_line_style(False)

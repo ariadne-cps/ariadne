@@ -70,17 +70,14 @@ automaton.new_transition(event2_id,mode2_id,mode3_id,reset23,activation23)
 automaton.new_transition(event3_id,mode3_id,mode1_id,reset31,activation31)
 print automaton
 
-initial_point=Point([0.96875,0.28125,0.0])
-initial_rectangle=Rectangle(initial_point,initial_point)
-bounding_box=Rectangle([[0,2],[0,2],[0,T]])
+initial_rectangle=RectangularSet([[0.96875,0.96875],[0.28125,0.28125],[0.0,0.0]])
+bounding_box=RectangularSet([[0,2],[0,2],[0,T]])
 
 print initial_rectangle
 print bounding_box
 
 grid=Grid(Vector([0.0625,0.0625,0.03125]))
-#block=LatticeBlock([[-1,33],[-1,33],[-1,33]])
-fgrid=FiniteGrid(grid,Box([[0,2],[0,2],[0,T]]))
-print fgrid
+print grid
 
 print "Creating hybrid set locations"
 initial_set=HybridSet()
@@ -100,6 +97,7 @@ par=EvolutionParameters();
 par.set_maximum_step_size(0.25);
 par.set_lock_to_grid_time(0.25);
 par.set_grid_length(0.0625);
+par.set_grid(grid);
 print "evolution parameters =",par
 
 apply=StandardApplicator()
@@ -109,7 +107,7 @@ hybrid_evolver=SetBasedHybridEvolver(par,apply,integrator);
 print "Computing continuous chainreach set"
 continuous_chainreach_set=hybrid_evolver.chainreach(automaton,initial_set)
 print "Exporting to postscript output...",
-epsbb=Box("[-0.1,2.1]x[-0.1,2.1]x[-0.1,1.1]") # eps bounding box
+epsbb=RectangularSet([[-0.1,2.1],[-0.1,2.1],[-0.1,1.1]]) # eps bounding box
 epspmap0=PlanarProjectionMap(3,2,0) # eps projection map
 epspmap1=PlanarProjectionMap(3,2,1) # eps projection map
 eps=EpsPlot()

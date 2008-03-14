@@ -49,6 +49,9 @@
 #include "geometry/zonotope.h"
 #include "geometry/polytope.h"
 #include "geometry/list_set.h"
+#include "geometry/rectangular_set.h"
+#include "geometry/polyhedral_set.h"
+
 
 
 namespace Ariadne {
@@ -57,7 +60,7 @@ namespace Ariadne {
     class textstream;
     class textfstream;
     
-    /*!\brief A stream for readable textual output. */
+    /*!\brief A stream for plottable textual output. */
     class textstream
     {
      public:
@@ -79,7 +82,7 @@ namespace Ariadne {
     };
 
 
-    /*!\brief A stream for readable textual output. */
+    /*!\brief A stream for plottable textual output. */
     class textfstream
       : public textstream
     {
@@ -108,7 +111,12 @@ namespace Ariadne {
     textstream::write(const Geometry::Point<R>& pt) 
     {
       if(pt.dimension() > 0) {
-        *this->_os_ptr << approximation(pt);
+				// Geometry::Point<R> p = approximation(pt);
+				*this->_os_ptr << pt[0];
+				for (dimension_type i=1; i<pt.dimension(); i++) {
+							*this->_os_ptr << " " << pt[i];
+					}
+        *this->_os_ptr << "\n";
       }
     }
 						 
@@ -156,7 +164,7 @@ namespace Ariadne {
     textstream&
     operator<<(textstream& txt, const Geometry::Box<R>& bx) 
     {
-      txt.ostream() << bx;
+      txt << Geometry::Rectangle<R>(bx).vertices();
       return txt;
     }
     
@@ -169,6 +177,7 @@ namespace Ariadne {
         for (size_type i=0; i<pl.size(); i++) {
           txt.write(pl[i]);			
         }
+				txt.writenl();
       }
       return txt;
     }
@@ -177,7 +186,10 @@ namespace Ariadne {
     textstream&
     operator<<(textstream& txt, const Geometry::BoxListSet<R>& bxls) 
     {
-      txt.ostream() << bxls;
+      typedef typename Geometry::BoxListSet<R>::const_iterator const_iterator;
+			for(const_iterator set_iter=bxls.begin(); set_iter!=bxls.end(); ++set_iter) {
+				txt << *set_iter;
+      }
       return txt;
     }
     
@@ -188,7 +200,7 @@ namespace Ariadne {
     textstream&
     operator<<(textstream& txt, const Geometry::GridCell<R>& bs)
     {
-      return txt << Geometry::Box<R>(bs);
+      return txt << Geometry::Rectangle<R>(bs);
     }
     
 
@@ -196,7 +208,7 @@ namespace Ariadne {
     textstream&
     operator<<(textstream& txt, const Geometry::GridBlock<R>& bs)
     {
-      return txt << Geometry::Box<R>(bs);
+      return txt << Geometry::Rectangle<R>(bs);
     }
     
 
@@ -231,7 +243,7 @@ namespace Ariadne {
     {
       typedef typename Geometry::PartitionTreeSet<R>::const_iterator const_iterator;
       for(const_iterator set_iter=ds.begin(); set_iter!=ds.end(); ++set_iter) {
-        txt << Geometry::Box<R>(*set_iter);
+        txt << Geometry::Rectangle<R>(*set_iter);
       }
       return txt;
     }
@@ -241,7 +253,7 @@ namespace Ariadne {
     textstream&
     operator<<(textstream& txt, const Geometry::Rectangle<R>& r)
     {
-      txt.ostream() << r;
+      txt << r.vertices();
       return txt;
     }
 
@@ -250,8 +262,7 @@ namespace Ariadne {
     textstream&
     operator<<(textstream& txt, const Geometry::Zonotope<R>& z)
     { 
-      txt.ostream()<< z;
-      return txt;
+			return txt << z.bounding_box();
     }
 
        
@@ -283,12 +294,54 @@ namespace Ariadne {
       return txt;
     }
     
+		template<class R> inline
+    textstream&
+    operator<<(textstream& txt, const Geometry::RectangularSet<R>& rs)
+    {
+      return txt << Geometry::Rectangle<R>(rs);
+    }
+
+		template<class R> inline
+    textstream&
+    operator<<(textstream& txt, const Geometry::PolyhedralSet<R>& ps)
+    {
+      return txt << Geometry::Polyhedron<R>(ps);
+    }
+
 
     template<class R> inline
     textstream&
     operator<<(textstream& txt, const Geometry::SetInterface<R>& set)
     {
-      return txt.ostream() << set;
+      using namespace Geometry;
+      
+      if(dynamic_cast<const RectangularSet<R>*>(&set)) {
+        return txt << dynamic_cast<const RectangularSet<R>&>(set);
+      } else if(dynamic_cast<const PolyhedralSet<R>*>(&set)) {
+        return txt << dynamic_cast<const PolyhedralSet<R>&>(set);
+      } else if(dynamic_cast<const ListSet< Rectangle<R> >*>(&set)) {
+        return txt << dynamic_cast<const ListSet< Rectangle<R> >&>(set);
+      } else if(dynamic_cast<const ListSet< Zonotope<R> >*>(&set)) {
+        return txt << dynamic_cast<const ListSet< Zonotope<R> >&>(set);
+      } else if(dynamic_cast<const GridCellListSet<R>*>(&set)) {
+        return txt << dynamic_cast<const GridCellListSet<R>&>(set);
+      } else if(dynamic_cast<const GridMaskSet<R>*>(&set)) {
+        return txt << dynamic_cast<const GridMaskSet<R>&>(set);
+      } else if(dynamic_cast<const PartitionTreeSet<R>*>(&set)) {
+        return txt << dynamic_cast<const PartitionTreeSet<R>&>(set);
+      }  else {
+        Rectangle<R> bb;
+        try {
+          bb=set.bounding_box();
+        } 
+        catch(Geometry::UnboundedSet& e) {
+            throw e;
+          }
+        Geometry::PartitionScheme<R> ps(bb);
+        int depth=16;
+        Geometry::PartitionTreeSet<R> pts=Geometry::outer_approximation(set,ps,depth);
+        return txt << pts;
+			}
     }
 
 

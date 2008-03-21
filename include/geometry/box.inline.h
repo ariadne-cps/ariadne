@@ -64,7 +64,6 @@ Geometry::Box<R>::Box(const dimension_type& d, const RR* ptr )
   for(dimension_type i=0; i!=this->dimension(); ++i) {
     this->set_lower_bound(i,ptr[2*i]);
     this->set_upper_bound(i,ptr[2*i+1]);
-    ++i;
   }
 }
 
@@ -75,7 +74,6 @@ Geometry::Box<R>::Box(const dimension_type& d, const RR ary[][2])
   for(dimension_type i=0; i!=this->dimension(); ++i) {
     this->set_lower_bound(i,ary[i][0]);
     this->set_upper_bound(i,ary[i][1]);
-    ++i;
   }
 }
 

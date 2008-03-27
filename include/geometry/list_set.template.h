@@ -124,7 +124,6 @@ Geometry::subset(const ListSet< BS1 >& ls,
 }
 
 
-
 template<class BS>
 Geometry::ListSet<BS>
 Geometry::join(const ListSet<BS>& ls1,

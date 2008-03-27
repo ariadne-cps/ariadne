@@ -90,11 +90,16 @@ applicator=KuhnApplicator(3)
 integrator=AffineIntegrator();
 hybrid_evolver=SetBasedHybridEvolver(parameters,applicator,integrator);
 
-time=5
+time=5.0
+
+set_geometry_verbosity(0)
 
 print "Computing lower reach set"
 print initial_set
 lower_reach_set=hybrid_evolver.lower_reach(automaton,initial_set,time)
+
+#sys.exit(0)
+
 lower_evolve_set=hybrid_evolver.lower_evolve(automaton,initial_set,time)
 
 print "Exporting to postscript output...",

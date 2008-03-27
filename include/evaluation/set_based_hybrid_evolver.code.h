@@ -110,6 +110,7 @@ Evaluation::SetBasedHybridEvolver<BS>::_initial_activation_time(const VF& vf,
                                                                  const Bx& bb,
                                                                  const Semantics semantics) const 
 {
+  ARIADNE_LOG(8,"  SetBasedHybridEvolver<BS>::_initial_activation_time\n");
   // Compute the set of times for which inv is satisfied.
   // Assume that the set is connected and nonempty
   Q initial_time=0;
@@ -184,13 +185,17 @@ Evaluation::SetBasedHybridEvolver<BS>::
 _saltation_map(const VF& vf1, const VF& vf2, const Mp& rm, const CS& inv, 
                const BS& bs, const Q& h1, const Q& h2, const Bx& bb, const Semantics sem) const
 {
+  ARIADNE_LOG(8,"\nEvaluation::SetBasedHybridEvolver<BS>::_saltation_map\n");
+  ARIADNE_LOG(9,(sem==upper_semantics?"  upper_semantics\n":"  lower_semantics\n"));
   ARIADNE_ASSERT(h1<=h2);
   if(sem==upper_semantics) {
     BS rs=continuous_evolution_step(vf1,bs,h1,h2,bb);
+    ARIADNE_LOG(9,"  rs="<< rs << "\n");    
 		return make_tuple(h1,apply(rm,rs));  } 
   else {
     Q hmed=med(h1,h2);
     BS rs=continuous_integration_step(vf1,bs,hmed,bb);
+    ARIADNE_LOG(9,"  rs="<< rs << "\n");    
     return make_tuple(hmed,apply(rm,rs));  
   }
 }
@@ -227,14 +232,14 @@ Evaluation::SetBasedHybridEvolver<BS>::_step(HBSL& evolve,
   ARIADNE_ASSERT(t<=time);
 
   if(t==time) {
-    ARIADNE_LOG(2," reached end time\n");
+    ARIADNE_LOG(6," reached end time\n");
     evolve.adjoin(HBS(ds,bs));
   } else if(bs.radius()>this->maximum_basic_set_radius()) {
-    ARIADNE_LOG(2," subdivide\n");
+    ARIADNE_LOG(6," subdivide\n");
     ARIADNE_LOG(7,"  r="<<bs.radius()<<"; max_r="<<this->maximum_basic_set_radius()<<"\n");
     this->append_subdivision(working,THBS(t,n,ds,bs));
   } else {
-    ARIADNE_LOG(2," time step\n");
+    ARIADNE_LOG(6," time step\n");
     ARIADNE_LOG(9," integrator="<<*this->_integrator<<"\n");
     const DM& mode=automaton.mode(ds);
     reference_vector<const DT> transitions=automaton.transitions(ds);
@@ -245,13 +250,13 @@ Evaluation::SetBasedHybridEvolver<BS>::_step(HBSL& evolve,
     Q h; Bx bb;
     make_lpair(h,bb)=this->flow_bounds(vf,bs.bounding_box());
     if(Q(t+h)>time) { h=time-t; }
-    ARIADNE_LOG(2,"  h="<<h<<"\n");
+    ARIADNE_LOG(6,"  h="<<h<<"\n");
 		ARIADNE_LOG(7," bb="<<bb<<"\n");
     BS ebs=this->continuous_integration_step(vf,bs,h,bb);
     ARIADNE_LOG(7,"  ebs="<<ebs<<"\n");
     Q rh=this->_final_activation_time(vf,inv,bs,h,bb,semantics);
     BS rbs=this->continuous_reachability_step(vf,bs,rh,bb);
-    ARIADNE_LOG(2,"  rh="<<rh<< "\n");
+    ARIADNE_LOG(6,"  rh="<<rh<< "\n");
 		ARIADNE_LOG(7,"  rbs="<<rbs<<"\n");
     BSL rbsl(rbs);
 
@@ -260,7 +265,7 @@ Evaluation::SetBasedHybridEvolver<BS>::_step(HBSL& evolve,
     ARIADNE_LOG(9,", s="<<this->subset(ebs,mode.invariant()));
     ARIADNE_LOG(9,", inv="<<mode.invariant().bounding_box()<<"\n");
     if(rh==h) {
-			ARIADNE_LOG(2,"Continuous step: push with t="<<Q(t+h)<<" n="<<n<<"\n");
+			ARIADNE_LOG(6,"Continuous step: push with t="<<Q(t+h)<<" n="<<n<<"\n");
       working.push(THBS(Q(t+h),n,ds,ebs));
     }
   
@@ -270,11 +275,13 @@ Evaluation::SetBasedHybridEvolver<BS>::_step(HBSL& evolve,
     }
 
     // Process transitions
+    ARIADNE_LOG(6,"Checking for active transitions...\n");
     for(transitions_const_iterator transition_iter=transitions.begin();
         transition_iter!=transitions.end(); ++transition_iter)
     {
       Z imn=n+1;
       const DT& transition=*transition_iter;
+      ARIADNE_LOG(7,"  transition = "<<transition<<"\n");
       DS imds=transition.destination().discrete_state();
       ARIADNE_LOG(9,"  i="<<this->intersect(ebs,transition.activation()));
       ARIADNE_LOG(9,", s="<<this->subset(ebs,transition.activation()));
@@ -290,16 +297,17 @@ Evaluation::SetBasedHybridEvolver<BS>::_step(HBSL& evolve,
           if(h1>h2) {
             // Can't prove that a transition occurs
           } else {
+            ARIADNE_LOG(7,"  Transition occurs at time t=["<<h1.get_d()<<","<<h2.get_d()<<"]\n");
             Q imh; DS imds=transition.destination().discrete_state(); BS imbs;
             make_ltuple(imh,imbs)=this->_saltation_map(vf,transition.destination().dynamic(),transition.reset(),transition.activation(),
                                                        bs,h1,h2,bb,semantics);
             Q imt=t+imh;
 						ARIADNE_LOG(9,"    imbs="<<imbs<<"\n");
-						ARIADNE_LOG(4,"Transition to "<<transition.destination().discrete_state()<<" at time="<<imt.get_d()<<"\n");
+						ARIADNE_LOG(6,"Transition to "<<transition.destination().discrete_state()<<" at time="<<imt.get_d()<<"\n");
             ARIADNE_ASSERT(imt>=t);
 						ARIADNE_ASSERT(imt<=Q(t+h));
-						ARIADNE_LOG(2,"Transition: push with imt="<<imt<<" imn="<<imn<<"\n");
-						working.push(THBS(imt,imn,imds,imbs));
+            ARIADNE_LOG(6,"Transition: push with imt="<<imt<<" imn="<<imn<<"\n");
+            working.push(THBS(imt,imn,imds,imbs));
           }
         }
       }
@@ -307,7 +315,7 @@ Evaluation::SetBasedHybridEvolver<BS>::_step(HBSL& evolve,
 
   }  // done step
   ARIADNE_LOG(9," done step\n")
-  ARIADNE_LOG(2,"  working.size()="<<working.size()<<"\n");
+  ARIADNE_LOG(6,"  working.size()="<<working.size()<<"\n");
   ARIADNE_LOG(9,"  evolve.size()="<<evolve.size()<<"\n");
   ARIADNE_LOG(9,"  reach.size()="<<reach.size()<<"\n\n");
 }
@@ -325,6 +333,7 @@ Evaluation::SetBasedHybridEvolver<BS>::lower_evolve(const System::HybridAutomato
   HBSL reach(automaton.locations());
 	HBSL evolve(automaton.locations());
 	THBSL working=this->timed_basic_set_list(this->lower_approximation(initial_set,this->grid(automaton.locations())));
+
   ARIADNE_LOG(3,"  working_set="<<working<<"\n\n");	
 	while(working.size()!=0) { 
     this->_step(evolve,reach,working,automaton,time,lower_semantics);
@@ -344,6 +353,7 @@ Evaluation::SetBasedHybridEvolver<BS>::lower_reach(const System::HybridAutomaton
   ARIADNE_LOG(3,"  initial_set="<<initial_set<<"\n\n");
   HBSL reach(automaton.locations()), evolve(automaton.locations());
   THBSL working=this->timed_basic_set_list(this->lower_approximation(initial_set,this->grid(automaton.locations())));
+  
   ARIADNE_LOG(3,"  working_set="<<working<<"\n\n");	
   while(working.size()!=0) { 
     this->_step(evolve,reach,working,automaton,time,lower_semantics);

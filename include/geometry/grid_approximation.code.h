@@ -414,8 +414,8 @@ Geometry::GridCellListSet<R>
 Geometry::outer_approximation(const Zonotope<R>& z, const Grid<R>& g) 
 {
   //FIXME: This should not be hard-coded in
-  //return ::outer_approximation_of_basic_set(z,g);
-  return ::fuzzy_outer_approximation_of_zonotope(z,g);
+  return ::outer_approximation_of_basic_set(z,g);
+  //return ::fuzzy_outer_approximation_of_zonotope(z,g);
 }
 
 template<class R>
@@ -601,13 +601,14 @@ Geometry::lower_approximation(const SetInterface<R>& s, const FiniteGrid<R>& fg)
   {
     r=*gb_iter;
     if(!bool(s.disjoint(r))) {
-      nr=gb_iter->neighbourhood();
-      if(s.intersects(nr)) {
-        result.adjoin(nr);
+      // nr=gb_iter->neighbourhood();
+      if(s.intersects(r)) {
+        result.adjoin(r);
       }
     }
-    ARIADNE_LOG(6,"s.interscts("<<r<<")="<<s.intersects(r)<<"\n");
+    ARIADNE_LOG(6,"s.intersects("<<r<<")="<<s.intersects(r)<<"\n");
   }
+  ARIADNE_LOG(4,"  result="<<result<<"\n");
   return result;
 }
 

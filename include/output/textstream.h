@@ -298,7 +298,7 @@ namespace Ariadne {
     textstream&
     operator<<(textstream& txt, const Geometry::RectangularSet<R>& rs)
     {
-      return txt << Geometry::Rectangle<R>(rs);
+      return txt << rs.bounding_box();
     }
 
 		template<class R> inline

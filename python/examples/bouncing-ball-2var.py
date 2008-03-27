@@ -57,7 +57,7 @@ integrator=AffineIntegrator();
 #hybrid_evolver=HybridEvolver(apply,integrator);
 hybrid_evolver=SetBasedHybridEvolver(par,apply,integrator);
 
-time=2
+time=4
 
 print "initial set=",initial_set
 

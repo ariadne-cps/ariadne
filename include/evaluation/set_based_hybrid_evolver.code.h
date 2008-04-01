@@ -265,7 +265,7 @@ Evaluation::SetBasedHybridEvolver<BS>::_step(HBSL& evolve,
     ARIADNE_LOG(9,", s="<<this->subset(ebs,mode.invariant()));
     ARIADNE_LOG(9,", inv="<<mode.invariant().bounding_box()<<"\n");
     if(rh==h) {
-			ARIADNE_LOG(6,"Continuous step: push with t="<<Q(t+h)<<" n="<<n<<"\n");
+			ARIADNE_LOG(3,"Continuous step: push with t="<<Q(t+h)<<" n="<<n<<"\n");
       working.push(THBS(Q(t+h),n,ds,ebs));
     }
   
@@ -306,7 +306,7 @@ Evaluation::SetBasedHybridEvolver<BS>::_step(HBSL& evolve,
 						ARIADNE_LOG(6,"Transition to "<<transition.destination().discrete_state()<<" at time="<<imt.get_d()<<"\n");
             ARIADNE_ASSERT(imt>=t);
 						ARIADNE_ASSERT(imt<=Q(t+h));
-            ARIADNE_LOG(6,"Transition: push with imt="<<imt<<" imn="<<imn<<"\n");
+            ARIADNE_LOG(3,"Transition: push with imt="<<imt<<" imn="<<imn<<"\n");
             working.push(THBS(imt,imn,imds,imbs));
           }
         }
@@ -334,10 +334,10 @@ Evaluation::SetBasedHybridEvolver<BS>::lower_evolve(const System::HybridAutomato
 	HBSL evolve(automaton.locations());
 	THBSL working=this->timed_basic_set_list(this->lower_approximation(initial_set,this->grid(automaton.locations())));
 
-  ARIADNE_LOG(3,"  working_set="<<working<<"\n\n");	
+  ARIADNE_LOG(5,"  working_set="<<working<<"\n\n");	
 	while(working.size()!=0) { 
     this->_step(evolve,reach,working,automaton,time,lower_semantics);
-		ARIADNE_LOG(3,"  working_set="<<working<<"\n\n");	
+		ARIADNE_LOG(5,"  working_set="<<working<<"\n\n");	
   }
   HGCLS result=this->outer_approximation(evolve,this->grid(automaton.locations()));
   return HGMS(result);
@@ -354,10 +354,10 @@ Evaluation::SetBasedHybridEvolver<BS>::lower_reach(const System::HybridAutomaton
   HBSL reach(automaton.locations()), evolve(automaton.locations());
   THBSL working=this->timed_basic_set_list(this->lower_approximation(initial_set,this->grid(automaton.locations())));
   
-  ARIADNE_LOG(3,"  working_set="<<working<<"\n\n");	
+  ARIADNE_LOG(5,"  working_set="<<working<<"\n\n");	
   while(working.size()!=0) { 
     this->_step(evolve,reach,working,automaton,time,lower_semantics);
-		ARIADNE_LOG(3,"  working_set="<<working<<"\n\n");			
+		ARIADNE_LOG(5,"  working_set="<<working<<"\n\n");			
   }
   HGCLS result=this->outer_approximation(reach,this->grid(automaton.locations()));
   return HGMS(result);
@@ -373,10 +373,10 @@ Evaluation::SetBasedHybridEvolver<BS>::upper_evolve(const System::HybridAutomato
   ARIADNE_LOG(3,"  initial_set="<<initial_set<<"\n\n");
   HBSL reach(automaton.locations()), evolve(automaton.locations());
   THBSL working=this->timed_basic_set_list(this->outer_approximation(initial_set,this->grid(automaton.locations())));
-  ARIADNE_LOG(3,"  working_set="<<working<<"\n\n");	
+  ARIADNE_LOG(5,"  working_set="<<working<<"\n\n");	
   while(working.size()!=0) { 
     this->_step(evolve,reach,working,automaton,time,upper_semantics);
-		ARIADNE_LOG(3,"  working_set="<<working<<"\n\n");			
+		ARIADNE_LOG(5,"  working_set="<<working<<"\n\n");			
   }
   HGCLS result=this->outer_approximation(evolve,this->grid(automaton.locations()));
   return HGMS(result);
@@ -392,10 +392,10 @@ Evaluation::SetBasedHybridEvolver<BS>::upper_reach(const System::HybridAutomaton
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n\n");
   HBSL reach(automaton.locations()), evolve(automaton.locations());
   THBSL working=this->timed_basic_set_list(this->outer_approximation(initial_set,this->grid(automaton.locations())));
-  ARIADNE_LOG(3,"  working_set="<<working<<"\n\n");	
+  ARIADNE_LOG(5,"  working_set="<<working<<"\n\n");	
   while(working.size()!=0) { 
     this->_step(evolve,reach,working,automaton,time,upper_semantics);
-		ARIADNE_LOG(3,"  working_set="<<working<<"\n\n");			
+		ARIADNE_LOG(5,"  working_set="<<working<<"\n\n");			
   }
   HGCLS result=this->outer_approximation(reach,this->grid(automaton.locations()));
   return HGMS(result);

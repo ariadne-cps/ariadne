@@ -47,20 +47,51 @@ extract_array(const boost::python::object& obj)
   int n=len(elements);
   array<X> result(n);
   for(int i=0; i!=n; ++i) {
-    X value=extract<X>(elements[i]);
-    result[i]=value;
+    boost::python::extract<X> xv(elements[i]);
+    boost::python::extract<double> dv(elements[i]);
+    if(xv.check()) {
+      result[i]=static_cast<X>(xv()); 
+    } else if(dv.check()) {
+      result[i]=static_cast<double>(dv());
+    } else {
+      result[i]=0;
+    }
   }
   return result;
 }
 
 template<class X> void read(Vector<X>& v, const object& obj) {
-  read_array(v.data(),obj); }
+  list elements=extract<list>(obj);
+  ARIADNE_ASSERT(v.size()==uint(len(elements)));
+  for(size_type i=0; i!=v.size(); ++i) { 
+    boost::python::extract<X> xv(elements[i]);
+    boost::python::extract<double> dv(elements[i]);
+    if(xv.check()) {
+      v[i]=static_cast<X>(xv()); 
+    } else if(dv.check()) {
+      v[i]=static_cast<double>(dv());
+    } else {
+      v[i]=xv();
+    }
+  }
+}
+
 
 template<class X> 
 void read(TaylorDerivative<X>& td, const object& obj) {
-  array< TaylorVariable<X> > tva=extract_array< TaylorVariable<X> >(obj); 
-  td=TaylorDerivative<X>(tva.size(),tva[0].argument_size(),tva[0].degree()); 
-  for(size_type i=0; i!=tva.size(); ++i) { td[i]=tva[i]; } 
+  list elements=extract<list>(obj);
+  ARIADNE_ASSERT(td.result_size()==uint(len(elements)));
+  for(size_type i=0; i!=td.size(); ++i) { 
+    boost::python::extract< TaylorVariable<X> > etv(elements[i]);
+    boost::python::extract<double> ed(elements[i]);
+    if(etv.check()) {
+      td[i]=etv(); 
+    } else if(ed.check()) {
+      td[i]=ed();
+    } else {
+      td[i]=etv();
+    }
+  }
 }
 
 template<class R>
@@ -83,7 +114,7 @@ class PythonFunction
   virtual smoothness_type smoothness() const { return 255; }
 
   virtual Vector<F> evaluate (const Vector<F>& x) const { 
-    Vector<F> r; 
+    Vector<F> r(this->_result_size); 
     read(r,this->_pyf(x)); 
     return r; }
   virtual Matrix<F> jacobian (const Vector<F>& x) const { 

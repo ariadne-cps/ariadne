@@ -86,11 +86,13 @@ Zonotope<R>
 Evaluation::StandardApplicator<R>::apply(const Map<R>& f, const Zonotope<R>& z) const
 {
   static int& verbosity = Evaluation::applicator_verbosity; 
+  ARIADNE_ASSERT(f.argument_dimension()==z.dimension());
   ARIADNE_LOG(6,"Zontope<UniformErrorTag> StandardApplicator::apply(Map f, Zonotope<UniformErrorTag> z)\n");
   ARIADNE_LOG(7,"  z="<<z<<"\n");
   typedef Interval<R> I;
   
-  dimension_type d=z.dimension();
+  dimension_type ad=f.argument_dimension();
+  dimension_type rd=f.result_dimension();
   dimension_type m=z.number_of_generators();
   Matrix<I> df = f.jacobian(Point<I>(z.bounding_box()));
   Point<I> ic=f(z.centre());
@@ -98,8 +100,8 @@ Evaluation::StandardApplicator<R>::apply(const Map<R>& f, const Zonotope<R>& z) 
   
   Point<R> nc=midpoint(ic);
   Matrix<R> nG=midpoint(iG);
-  Vector<R> ne(d);
-  for(dimension_type i=0; i!=d; ++i) {
+  Vector<R> ne(rd);
+  for(dimension_type i=0; i!=rd; ++i) {
     R& err=ne[i];
     err=add_up(err,ic[i].radius());
     for(size_type j=0; j!=m; ++j) {
@@ -108,9 +110,9 @@ Evaluation::StandardApplicator<R>::apply(const Map<R>& f, const Zonotope<R>& z) 
   }
 
   if(!(z.error()==0)) {
-    for(dimension_type i=0; i!=d; ++i) {
+    for(dimension_type i=0; i!=rd; ++i) {
       R& err=ne[i];
-      for(size_type j=0; j!=d; ++j) {
+      for(size_type j=0; j!=ad; ++j) {
         err=add_up(err,mul_up(abs(df(i,j)).upper(),z.error()[j]));
       }
     }

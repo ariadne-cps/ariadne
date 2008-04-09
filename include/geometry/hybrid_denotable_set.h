@@ -45,6 +45,7 @@
 #include "geometry/hybrid_set_iterator.h"
 #include "geometry/hybrid_basic_set.h"
 
+#include "output/logging.h"
 
 
 namespace Ariadne {
@@ -310,12 +311,16 @@ namespace Ariadne {
         : HybridDenotableSet< GridCellListSet<R> >(hgms) { }
       HybridGrid<R> grid() const { return HybridGrid<R>(*this); }
       template<class HBS> void adjoin_outer_approximation(const HBS& hbs) {
+        ARIADNE_LOG(6,"adjoin_outer_approximation(const HBS& hbs)\n");
         this->adjoin_outer_approximation(hbs,typename HBS::set_category()); }
       template<class HBS> void adjoin_outer_approximation(const HBS& hbs,basic_set_tag) {
+        ARIADNE_LOG(6,"adjoin_outer_approximation(const HBS& hbs,basic_set_tag)\n");
         this->operator[](hbs.discrete_state()).adjoin_outer_approximation(hbs.continuous_state_set()); }
       template<class HDS> void adjoin_outer_approximation(const HDS& hds,denotable_set_tag) {
+        ARIADNE_LOG(6,"adjoin_outer_approximation(const HDS& hds,denotable_set_tag)\n");
         for(typename HDS::const_iterator iter=hds.begin(); iter!=hds.end(); ++iter) { this->adjoin_outer_approximation(*iter); } }
       template<class HAS> void adjoin_outer_approximation(const HAS& has,abstract_set_tag) {
+        ARIADNE_LOG(6,"adjoin_outer_approximation(const HAS& has,abstract_set_tag)\n");
         for(typename HAS::locations_const_iterator iter=has.locations_begin(); iter!=has.locations_end(); ++iter) { 
           //(*this)[iter->first].adjoin(outer_approximation(*iter->second,(*this)[iter->first].grid())); 
           GridCellListSet<R>& gcls=(*this)[iter->first];

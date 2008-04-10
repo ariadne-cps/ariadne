@@ -34,26 +34,26 @@ namespace Ariadne {
     enum Semantics { lower_semantics, upper_semantics }; 
     enum EvolutionType { evolve, reach };
 
-
+    template<class Aprx, class ES> class ApproximatorInterface;
+    template<class ES> class ReducerInterface;
+    template<class ES> class SubdividerInterface;
+    
     template<class R> class SolverInterface;
-  
-    template<class R> class BounderInterface;
     template<class R> class DetectorInterface;
 
-    template<class BS> class ApproximatorInterface;
-    template<class BS> class SubdividerInterface;
-    template<class BS> class SatisfierInterface;
-    template<class BS> class ApplicatorInterface;
-    template<class BS> class IntegratorInterface;
+    template<class R> class BounderInterface;
+    template<class R> class FlowerInterface;
+
+    template<class ES> class SatisfierInterface;
+    template<class ES> class ApplicatorInterface;
+    template<class ES> class IntegratorInterface;
 
     class EvolutionProfiler;
     template<class R> class EvolutionParameters;
 
-    template<class R> class ModelChecker;
-    template<class R> class MapEvolver;
-    template<class R> class VectorFieldEvolver;
-    template<class R> class SetBasedHybridEvolver;
-    template<class R> class ConstraintBasedHybridEvolver;
+    template<class ES> class MapEvolver;
+    template<class ES> class VectorFieldEvolver;
+    template<class ES> class SetBasedHybridEvolver;
 
   }
 }

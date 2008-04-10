@@ -41,8 +41,8 @@ namespace Ariadne {
   namespace Evaluation {
 
    
-    /*! \brief %Base class for constraint crossing and detection schemes. 
-     *  \ingroup Detection
+    /*! \ingroup EvaluatorInterfaces \ingroup Solvers
+     *  \brief Interface for constraint crossing and detection schemes. 
      */
     template<class R>
     class DetectorInterface 

@@ -80,35 +80,44 @@ GEOMETRY_SRC = \
 	geometry/hybrid_set.cc 
 
 SYSTEM_SRC = \
+	system/numerical_system.cc \
+	system/transition_system.cc \
 	system/map.cc \
 	system/vector_field.cc \
 	system/hybrid_automaton.cc
 
 #	system/constraint_based_hybrid_automaton.cc \
-#	system/transition_system.cc \
 #	system/grid_multimap.cc 
 
 
 EVALUATION_SRC = \
 	evaluation/evolution_parameters.cc \
+	\
 	evaluation/solver.cc \
-	evaluation/newton_solver.cc \
+	\
 	evaluation/approximator.cc \
+	evaluation/satisfier.cc \
+	evaluation/reducer.cc \
+	evaluation/subdivider.cc \
+	\
 	evaluation/applicator.cc \
-	evaluation/integrator.cc \
-	evaluation/kuhn_applicator.cc \
-	evaluation/euler_integrator.cc \
-	evaluation/affine_integrator.cc \
-	evaluation/lohner_integrator.cc \
-	evaluation/kuhn_integrator.cc \
+	evaluation/affine_applicator.cc \
+	\
 	evaluation/bounder.cc \
 	evaluation/flower.cc \
-	evaluation/map_evolver.cc \
-	evaluation/model_checker.cc \
-	evaluation/vector_field_evolver.cc \
-	evaluation/set_based_hybrid_evolver.cc
+	evaluation/integrator.cc \
+	evaluation/euler_integrator.cc \
+	evaluation/affine_integrator.cc \
+	\
+	evaluation/evolver.cc \
+	evaluation/discretiser.cc \
+	evaluation/reachability_analyser.cc \
+	evaluation/model_checker.cc
 
 
+#	evaluation/map_evolver.cc \
+#	evaluation/vector_field_evolver.cc \
+#	evaluation/set_based_hybrid_evolver.cc \
 #	evaluation/constraint_based_hybrid_evolver.cc  
 
 OUTPUT_SRC = \

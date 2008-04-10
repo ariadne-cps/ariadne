@@ -1,7 +1,7 @@
 /***************************************************************************
  *            transition_system.code.h
  *
- *  Copyright  2006-7  Pieter Collins
+ *  Copyright  2006-8  Alberto Casagrande, Pieter Collins
  *
  ****************************************************************************/
 
@@ -21,13 +21,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "transition_system.h"
+#include <iosfwd>
 
+#include "transition_system.h"
+#include "output/logging.h"
 
 namespace Ariadne {
-  namespace System {
-
   
-    
-  }
+
+
+
 }

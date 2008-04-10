@@ -34,51 +34,71 @@
 #include "linear_algebra/declarations.h"
 #include "geometry/declarations.h"
 
+#include "geometry/list_set.h"
+
 namespace Ariadne {
   namespace Evaluation {
-
-    template<class BS> 
+  
+    /*! \brief Interface for approximating enclosure sets on a paving of space.
+     *  \ingroup EvaluatorInterfaces \ingroup Approximators
+     */
+    template<class Aprx, class ES> 
     class ApproximatorInterface 
     { 
-      typedef typename BS::real_type R;
-      typedef Numeric::Interval<R> I;
+      typedef typename Aprx::BasicSet BasicSet;
+      typedef typename Aprx::Paving Paving;
+      typedef typename Aprx::CoverListSet CoverListSet;
+      typedef typename Aprx::PartitionListSet PartitionListSet;
+      typedef typename Aprx::PartitionTreeSet PartitionTreeSet;
+      typedef ES EnclosureSet;
+      typedef Geometry::ListSet<ES> EnclosureSetList;
      public:
       /*! \brief Virtual destructor. */
       virtual ~ApproximatorInterface() { }
 
       /*! \brief Create a dynamically-allocated copy. */
-      virtual ApproximatorInterface<BS>* clone() const = 0;
+      virtual ApproximatorInterface<Aprx,ES>* clone() const = 0;
 
       /*! \brief Computes an over-approximation of a set from a rectangle. */
-      virtual BS basic_set(const Geometry::Box<R>& r) const = 0;
-
-      /*! \brief Computes the radius of a basic set. */
-      virtual R radius(const BS& bs) const = 0;
+      virtual EnclosureSet enclosure_set(const BasicSet& bs) const = 0;
 
       /*! \brief Computes a bounding box for a set. */
-      virtual Geometry::Box<R> bounding_box(const BS& bs) const = 0;
+      virtual BasicSet bounding_box(const EnclosureSet& es) const = 0;
 
       /*! \brief Computes an outer-approximation of a set on a grid. */
-      virtual Geometry::GridCellListSet<R> outer_approximation(const BS& bs, const Geometry::Grid<R>& g) const = 0;
+      virtual CoverListSet lower_approximation(const EnclosureSet& es) const = 0;
+
+      /*! \brief Computes an outer-approximation of a set on a grid. */
+      virtual PartitionListSet inner_approximation(const EnclosureSet& es, const Paving& pv) const = 0;
+
+      /*! \brief Computes an outer-approximation of a set on a grid. */
+      virtual PartitionListSet outer_approximation(const EnclosureSet& es, const Paving& pv) const = 0;
+
 
       /*! \brief Computes a bounding box for a set. */
-      Geometry::Box<R> bounding_box(const Geometry::ListSet<BS>& bs) const;
+      virtual BasicSet bounding_box(const EnclosureSetList& esl) const = 0;
 
-      /*! \brief Computes and outer-approximation of a set on a grid. */
-      Geometry::GridCellListSet<R> outer_approximation(const Geometry::ListSet<BS>& bs, const Geometry::Grid<R>& g) const;
+      /*! \brief Computes an lower-approximation of a set. */
+      virtual CoverListSet lower_approximation(const EnclosureSetList& esl) const = 0;
+
+      /*! \brief Computes an outer-approximation of a set. */
+      virtual PartitionListSet outer_approximation(const EnclosureSetList& esl, const Paving& pv) const = 0;
+
 
       /*! \brief Adjoins an outer approximation to a basic set to a grid mask set. */
-      void adjoin_outer_approximation(Geometry::GridMaskSet<R>& gms, const BS& bs) const;
+      virtual void adjoin_outer_approximation(PartitionTreeSet& pts, const EnclosureSet& es) const = 0;
 
       /*! \brief Computets and over-approximation of a set from a rectangle. */
-      void adjoin_outer_approximation(Geometry::GridMaskSet<R>& gms, const Geometry::ListSet<BS>& ls) const;
+      virtual void adjoin_outer_approximation(PartitionTreeSet& pts, const EnclosureSetList& esl) const = 0;
 
     };
+
+
+
 
 
   }
 }
 
-#include "approximator_interface.inline.h"
 
-#endif /* ARIADNE_APPROXIMATOR_H */
+#endif /* ARIADNE_APPROXIMATOR_INTERFACE_H */

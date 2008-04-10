@@ -50,6 +50,7 @@ namespace Ariadne {
   namespace Geometry {
 
     class basic_set_tag;
+    class EuclideanSpace;
     template<class R> class PointList;
     template<class BS> class ListSet;
     template<class R> class RectangleVerticesIterator;
@@ -95,6 +96,8 @@ namespace Ariadne {
       typedef basic_set_tag set_category;
       /*! \brief The type of denotable real number used for the corners. */
       typedef R real_type;
+      /*! \brief The type used to describe the space the set lies in. */
+      typedef EuclideanSpace space_type;
       /*! \brief The type used for the corners. */
       typedef R value_type;
       /*! \brief The type of denotable point contained by the rectangle. */
@@ -257,6 +260,8 @@ namespace Ariadne {
        *  half is used.
        */
       Rectangle<R> quadrant(const Combinatoric::BinaryWord& q) const;
+      /*! \brief Split into two smaller pieces. */
+      ListSet< Rectangle<R> > split() const;
       /*! \brief Subdivide into smaller pieces. */
       ListSet< Rectangle<R> > subdivide() const;
       
@@ -406,6 +411,7 @@ namespace Ariadne {
       Point<R> _pt;
     };
     
+    template<class X> ListSet< Rectangle<X> > split(const Rectangle<X>&);
     template<class X> ListSet< Rectangle<X> > subdivide(const Rectangle<X>&);
     template<class X> Box<typename Rectangle<X>::real_type> bounding_box(const Rectangle<X>& r);
     template<class X, class R> tribool disjoint(const Rectangle<X>& r, const Box<R>& bx);

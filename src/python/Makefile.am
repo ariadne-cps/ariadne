@@ -94,13 +94,15 @@ ARIADNE_SRC = ariadne_module.cc \
 	export_hybrid_automaton.cc \
 	 \
 	export_evolution_parameters.cc \
+	export_subdivider.cc \
+	export_reducer.cc \
+	export_approximator.cc \
 	export_solver.cc \
 	export_applicator.cc \
 	export_integrator.cc \
-	export_approximator.cc \
-	export_map_evolver.cc \
-	export_vector_field_evolver.cc \
-	export_set_based_hybrid_evolver.cc \
+	export_evolver.cc \
+	export_reachability_analyser.cc \
+	export_model_checker.cc \
 	 \
 	export_text_output.cc \
 	export_latex_output.cc \

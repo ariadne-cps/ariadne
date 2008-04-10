@@ -66,9 +66,9 @@ namespace Ariadne {
 
       uint _verbosity;
 
-      Geometry::HybridGrid<R> _hybrid_grid;
       Geometry::Grid<R> _grid;
-			Geometry::HybridSet<R> _hybrid_bounding_domain;
+      Geometry::HybridGrid<R> _hybrid_grid;
+      Geometry::HybridSet<R> _hybrid_bounding_domain;
      public:
       /*! \brief Default constructor. */
       EvolutionParameters();

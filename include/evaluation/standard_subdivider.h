@@ -34,36 +34,33 @@
 #include "linear_algebra/declarations.h"
 #include "geometry/declarations.h"
 
+#include "geometry/list_set.h"
 #include "subdivider_interface.h"
-#include "geometry/zonotope.h"
 
 namespace Ariadne {
   namespace Evaluation {
 
-    /*! \brief Method for subdividing a basic set.
+    /*! \brief Methods for subdividing a basic set.
      *  \ingroup Approximation
      */
-    template<class BS>
-    class StandardSubdivider : public SubdividerInterface<BS> {
+    template<class ES> class StandardSubdivider
+      : public SubdividerInterface<ES> 
+    {
+      typedef typename ES::real_type R;
      public:
-      virtual StandardSubdivider<BS>* clone() const {
-        return new StandardSubdivider<BS>(*this); }
-      virtual Geometry::ListSet<BS> split(const BS& bs) const {
-        return Geometry::split(bs); }
+      virtual StandardSubdivider<ES>* clone() const {
+        return new StandardSubdivider<ES>(*this); }
+      virtual R radius(const ES& es) const {
+        return es.radius(); }
+      virtual Geometry::ListSet<ES> split(const ES& es) const {
+        return Geometry::split(es); }
+      virtual Geometry::ListSet<ES> subdivide(const ES& es, const R& r) const {
+        Geometry::ListSet<ES> result; Geometry::ListSet<ES> working(es); ES set;
+        while(working.size()!=0) { set=working.pop(); 
+          if(set.radius()<r) { result.adjoin(set); } else { working.adjoin(this->split(set)); } }
+        return result; }
     };
 
-    template<class R>
-    class OrthogonalSubdivider
-      : public SubdividerInterface< Geometry::Zonotope<R> > {
-      typedef Geometry::Zonotope<R> BS;
-     public:
-      virtual StandardSubdivider< BS >* clone() const {
-        return new StandardSubdivider< BS >(*this); }
-      virtual BS reduce(const BS& bs) const {
-        return Geometry::orthogonal_over_approximation(bs); }
-      virtual Geometry::ListSet<BS> split(const BS& bs) const {
-        return Geometry::split(bs); }
-    };
 
 
 

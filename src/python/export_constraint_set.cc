@@ -42,7 +42,7 @@ void export_constraint_set()
 {
   typedef typename Numeric::traits<R>::arithmetic_type A;
 
-  class_< ConstraintSet<R>, bases< SetInterface<R> > >("ConstraintSet",init< const FunctionInterface<R>&, const Box<R>& >())
+  class_< ConstraintSet<R>, bases< SetInterface< Box<R> > > >("ConstraintSet",init< const FunctionInterface<R>&, const Box<R>& >())
     .def(init< const ConstraintSet<R>& >())
     .def("codomain", (Box<R>(ConstraintSet<R>::*)()const)&ConstraintSet<R>::codomain)
     .def("function", (FunctionInterface<R>*(ConstraintSet<R>::*)()const)&ConstraintSet<R>::function,

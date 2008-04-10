@@ -33,30 +33,14 @@ namespace Ariadne {
 
 
 
-template<class BS>
-Evaluation::StandardApproximator<BS>::StandardApproximator()
+
+
+
+template<class ES>
+ES
+Evaluation::StandardApproximator<ES>::enclosure_set(const Geometry::Box<R>& r) const
 {
-}
-
-template<class BS>
-Evaluation::StandardApproximator<BS>::StandardApproximator(const StandardApproximator<BS>& approx)
-{
-}
-
-
-template<class BS>
-Evaluation::StandardApproximator<BS>* 
-Evaluation::StandardApproximator<BS>::clone() const
-{
-  return new StandardApproximator<BS>(*this);
-}
-
-
-template<class BS>
-BS
-Evaluation::StandardApproximator<BS>::basic_set(const Geometry::Box<R>& r) const
-{
-  return BS(r);
+  return ES(r);
 }
 
 template<class BS>
@@ -71,6 +55,22 @@ Geometry::Box<typename BS::real_type>
 Evaluation::StandardApproximator<BS>::bounding_box(const BS& bs) const
 {
   return Geometry::bounding_box(bs);
+}
+
+template<class BS>
+Geometry::BoxListSet<typename BS::real_type>
+Evaluation::StandardApproximator<BS>::lower_approximation(const BS& bs) const
+{
+  Geometry::BoxListSet<R> result;
+  result.adjoin(bs.bounding_box());
+  return result;
+}
+
+template<class BS>
+Geometry::GridCellListSet<typename BS::real_type>
+Evaluation::StandardApproximator<BS>::inner_approximation(const BS& bs, const Geometry::Grid<R>& g) const
+{
+  return Geometry::inner_approximation(bs,g);
 }
 
 template<class BS>

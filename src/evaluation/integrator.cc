@@ -24,19 +24,21 @@
 
 #include "numeric/float.h"
 
-#include "evaluation/integrator.h"
-#include "evaluation/integrator.code.h"
+#include "evaluation/standard_integrator.h"
+#include "evaluation/standard_integrator.code.h"
+
 
 namespace Ariadne {
   namespace Evaluation {
     using namespace Numeric;
+    using namespace Geometry;
 
 #ifdef ENABLE_FLOAT64
-    template class IntegratorBase<Float64>;
+    template class StandardIntegrator< Zonotope<Float64> >;
 #endif
   
 #ifdef ENABLE_FLOATMP
-    template class IntegratorBase<FloatMP>;
+    template class StandardIntegrator< Zonotope<FloatMP> >;
 #endif
 
   }

@@ -162,7 +162,7 @@ Geometry::GridCellListSet<R>::clear()
 
 template<class R> 
 void 
-Geometry::GridCellListSet<R>::restrict_outer_approximation(const SetInterface<R>& s)
+Geometry::GridCellListSet<R>::restrict_outer_approximation(const SetInterface< Box<R> >& s)
 {
   Geometry::GridCellListSet<R> result(this->grid());
   Box<R> cell(this->dimension());
@@ -180,7 +180,7 @@ Geometry::GridCellListSet<R>::restrict_outer_approximation(const SetInterface<R>
 
 template<class R> 
 void 
-Geometry::GridCellListSet<R>::restrict_inner_approximation(const SetInterface<R>& s)
+Geometry::GridCellListSet<R>::restrict_inner_approximation(const SetInterface< Box<R> >& s)
 {
   Geometry::GridCellListSet<R> result(this->grid());
   Box<R> cell(this->dimension());

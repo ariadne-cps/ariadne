@@ -37,19 +37,55 @@
 #include "evaluation/declarations.h"
 
 namespace Ariadne {
+
   namespace System {
 
-    template<class R>
+    /*! \ingroup System
+     * \brief Interface for transition systems defined by reach and evolve operators. 
+     */
+    template<class T, class Aprx>
     class TransitionSystemInterface 
     {
+      typedef typename Aprx::space_type StateSpace;
+      typedef typename Aprx::Real Real;
+      typedef typename Aprx::BasicSet BasicSet;
+      typedef typename Aprx::CoverListSet CoverListSet;
+      typedef typename Aprx::PartitionListSet PartitionListSet;
+      typedef T Time;
      public:
-      virtual ~TransitionSystemInterface<R>() { }
-      virtual TransitionSystemInterface<R>* clone() const = 0;
-      virtual size_type dimension() const = 0;
-      virtual std::pair< Numeric::Integer, Geometry::Box<R> > lower_evolve(const Geometry::Box<R>&) const = 0;
-      virtual Geometry::BoxListSet<R> lower_reach(const Geometry::Box<R>&) const = 0;
-      virtual Geometry::GridCellListSet<R> upper_evolve(const Geometry::GridCell<R>&) const = 0;
-      virtual Geometry::GridCellListSet<R> upper_reach(const Geometry::GridCell<R>&) const = 0;
+      /*! \brief The type used to describe the state space. */
+      typedef typename Aprx::space_type state_space_type;
+      /*! \brief The type used to represent real numbers. */
+      typedef Real real_type;
+      /*! \brief The type used for a single basic set. */
+      typedef BasicSet basic_set_type;
+      /*! \brief The type used for a list of basic open sets. */
+      typedef CoverListSet cover_list_set_type; 
+      /*! \brief The type used for a list of basic compact sets. */
+      typedef PartitionListSet partition_list_set_type; 
+      /*! \brief The type used to represent time. */
+      typedef Time time_type;
+
+      /*! \brief Virtual destructor. */
+      virtual ~TransitionSystemInterface() { }
+      /*! \brief Cloning operation. */
+      virtual TransitionSystemInterface<T,Aprx>* clone() const = 0;
+
+      /*! \brief The underlying state space of the system. */
+      virtual StateSpace state_space() const = 0;
+
+      /*! \brief Compute a lower approximation to the evolution for time \a t starting in set \a s. */
+      virtual CoverListSet lower_evolve(const BasicSet& s, const Time& t) const = 0;
+      /*! \brief Compute a lower approximation to the evolution for times up to \a t starting in set \a s. */
+      virtual CoverListSet lower_reach(const BasicSet&, const Time&) const = 0;
+      /*! \brief Compute a lower approximation to the reachable and evolved sets for time \a t starting in set \a s. */
+      virtual std::pair<CoverListSet,CoverListSet> lower_reach_evolve(const BasicSet& s, const Time& t) const = 0;
+      /*! \brief Compute an upper approximation to the evolution for time \a t starting in set \a s. */
+      virtual PartitionListSet upper_evolve(const BasicSet&, const Time&) const = 0;
+      /*! \brief Compute a upper approximation to the evolution for times up to \a t starting in set \a s. */
+      virtual PartitionListSet upper_reach(const BasicSet&, const Time&) const = 0;
+      /*! \brief Compute a upper approximation to the reachable and evolved sets for time \a t starting in set \a s. */
+      virtual std::pair<PartitionListSet,PartitionListSet> upper_reach_evolve(const BasicSet& s, const Time& t) const = 0;
     };
 
   }

@@ -1,8 +1,8 @@
 /***************************************************************************
  *            test_constraint_set.cc
  *
- *  Copyright  2007  Alberto Casagrande,  Pieter Collins
- *  Email casagrande@dimi.uniud.it  Pieter.Collins@cwi.nl
+ *  Copyright  2007-8  Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -95,15 +95,15 @@ test_constraint_set()
   FiniteGrid<R> fg(g,bb);
   GridMaskSet<R> gmsia(fg); 
   GridMaskSet<R> gmsoa(fg); 
-  gmsia.adjoin_inner_approximation(static_cast<const SetInterface<R>&>(s));
-  gmsoa.adjoin_outer_approximation(static_cast<const SetInterface<R>&>(s));
+  gmsia.adjoin_inner_approximation(static_cast<const SetInterface< Box<R> >&>(s));
+  gmsoa.adjoin_outer_approximation(static_cast<const SetInterface< Box<R> >&>(s));
 
   // graphical output
   epsfstream eps;
   eps.open("test_constraint_set-1.eps",bb.neighbourhood(0.25));
   eps << fill_colour(red) << gmsoa;
   eps << fill_colour(green);
-  eps << line_style(false) << static_cast<const SetInterface<R>&>(s);
+  eps << line_style(false) << static_cast<const SetInterface< Box<R> >&>(s);
   eps << line_style(true) << fill_colour(blue) << gmsia;
   eps.close();
   

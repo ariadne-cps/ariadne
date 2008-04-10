@@ -28,7 +28,6 @@
 #include "system/map.h"
 #include "evaluation/applicator_interface.h"
 #include "evaluation/standard_applicator.h"
-#include "evaluation/kuhn_applicator.h"
 
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
@@ -55,21 +54,27 @@ class ApplicatorWrapper
 
 
 template<class R>
+class Applicator 
+  : public StandardApplicator< Rectangle<R> >,
+    public StandardApplicator< Zonotope<R> >
+{ };
+
+
+
+template<class R>
 void export_applicator() 
 {
   
   class_< ApplicatorWrapper<Rectangle<R> >, boost::noncopyable >("RectangleApplicatorInterface",init<>());
   class_< ApplicatorWrapper<Zonotope<R> >, boost::noncopyable >("ZonotopeApplicatorInterface",init<>());
 
-  class_< StandardApplicator<R>, 
+  class_< Applicator<R>, 
     bases<ApplicatorInterface< Rectangle<R> >,
           ApplicatorInterface< Zonotope<R> > > >
     applicator_class("StandardApplicator",init<>());
-  applicator_class.def("__call__",(Rectangle<R>(StandardApplicator<R>::*)(const Map<R>&,const Rectangle<R>&)const)&StandardApplicator<R>::apply);
-  applicator_class.def("__call__",(Zonotope<R>(StandardApplicator<R>::*)(const Map<R>&,const Zonotope<R>&)const)&StandardApplicator<R>::apply);
+  applicator_class.def("__call__",(Rectangle<R>(Applicator<R>::*)(const Map<R>&,const Rectangle<R>&)const)&StandardApplicator< Rectangle<R> >::apply);
+  applicator_class.def("__call__",(Zonotope<R>(Applicator<R>::*)(const Map<R>&,const Zonotope<R>&)const)&StandardApplicator< Zonotope<R> >::apply);
 
-  class_< KuhnApplicator<R>, bases< ApplicatorInterface< Zonotope<R> > > > kuhn_applicator_class("KuhnApplicator",init<size_type>());
-  kuhn_applicator_class.def("__call__",&KuhnApplicator<R>::apply);
   
 }
 

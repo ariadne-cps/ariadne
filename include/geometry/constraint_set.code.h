@@ -23,6 +23,7 @@
  
 #include "constraint_set.h"
 #include "linear_algebra/vector.h"
+#include "geometry/euclidean_space.h"
 #include "geometry/point.h"
 #include "geometry/box.h"
 
@@ -64,6 +65,7 @@ Geometry::ConstraintSet<R>::ConstraintSet(const Function::FunctionInterface<R>& 
 }
 
 
+
 template<class R>
 Geometry::ConstraintSet<R>::~ConstraintSet() 
 { 
@@ -84,6 +86,14 @@ Geometry::ConstraintSet<R>::dimension() const
 {
   return this->_function_ptr->argument_size(); 
 }
+
+template<class R>
+Geometry::EuclideanSpace
+Geometry::ConstraintSet<R>::space() const 
+{
+  return EuclideanSpace(this->dimension());
+}
+
 
 
 

@@ -69,11 +69,12 @@ static int& verbosity = Evaluation::applicator_verbosity;
 
 
 template<class R>
-Rectangle<R>
-Evaluation::StandardApplicator<R>::apply(const Map<R>& f, const Rectangle<R>& r) const
+Geometry::Rectangle<R>
+Evaluation::StandardApplicator< Geometry::Rectangle<R> >::
+apply(const System::Map<R>& f, const Geometry::Rectangle<R>& r) const
 {
   static int& verbosity = Evaluation::applicator_verbosity; 
-  ARIADNE_LOG(6,"Rectangle<Float> StandardApplicator::apply(Map f, Rectangle<Float> r)\n");
+  ARIADNE_LOG(6,"Rectangle StandardApplicator::apply(Map f, Rectangle r)\n");
   ARIADNE_LOG(7,"  r="<<r<<"\n");
   ARIADNE_LOG(8,"  f(r)="<<Rectangle<R>(f.image(Point< Interval<R> >(r)))<<"\n");
   return Rectangle<R>(f.image(Point< Interval<R> >(r)));
@@ -81,13 +82,20 @@ Evaluation::StandardApplicator<R>::apply(const Map<R>& f, const Rectangle<R>& r)
 
 
 
+
+
+
+
+
 template<class R>
-Zonotope<R>
-Evaluation::StandardApplicator<R>::apply(const Map<R>& f, const Zonotope<R>& z) const
+Geometry::Zonotope<R>
+Evaluation::StandardApplicator< Geometry::Zonotope<R> >::
+apply(const System::Map<R>& f, const Geometry::Zonotope<R>& z) const
 {
   static int& verbosity = Evaluation::applicator_verbosity; 
+
   ARIADNE_ASSERT(f.argument_dimension()==z.dimension());
-  ARIADNE_LOG(6,"Zontope<UniformErrorTag> StandardApplicator::apply(Map f, Zonotope<UniformErrorTag> z)\n");
+  ARIADNE_LOG(6,"Zonotope StandardApplicator::apply(Map f, Zonotope z)\n");
   ARIADNE_LOG(7,"  z="<<z<<"\n");
   typedef Interval<R> I;
   

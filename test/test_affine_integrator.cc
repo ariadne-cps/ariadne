@@ -1,8 +1,8 @@
 /***************************************************************************
  *            test_affine_integrator.cc
  *
- *  Copyright  2006  Pieter Collins
- *  Email Pieter.Collins@cwi.nl, casagrande@dimi.uniud.it
+ *  Copyright  2006-8  Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -29,8 +29,8 @@
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
 #include "geometry/zonotope.h"
+#include "geometry/polytope.h"
 #include "system/affine_vector_field.h"
-#include "evaluation/lohner_integrator.h"
 #include "evaluation/affine_integrator.h"
 #include "output/epsstream.h"
 
@@ -45,17 +45,21 @@ using namespace Ariadne::Evaluation;
 using namespace Ariadne::Output;
 using namespace std;
 
-template<class R> int test_affine_integrator();
+template<class R> 
+class TestAffineIntegrator
+{
+ public:
+  void test() const;
+};
 
 int main() {
-  test_affine_integrator<Flt>();
-  return 0;
+  TestAffineIntegrator<Flt>().test();
+  return ARIADNE_TEST_FAILURES;
 }
 
 
 template<class R> 
-int 
-test_affine_integrator()
+void TestAffineIntegrator<R>::test() const
 {
   cout << __PRETTY_FUNCTION__ << endl;
   typedef Interval<R> I;
@@ -79,7 +83,7 @@ test_affine_integrator()
   time_type h=0.125;
   time_type hh=h/2;
   time_type th=h*2;
-  AffineIntegrator<R> affine;
+  AffineIntegrator< Zonotope<R> > affine;
   AffineVectorField<R> avf(A,b);
   Box<R> bb("[-4,0]x[-2,2]");
   Box<R> r("[-3.125,-2.875]x[-0.125,0.125]");
@@ -122,5 +126,4 @@ test_affine_integrator()
   
   cout << endl;
   
-  return 0;
 }

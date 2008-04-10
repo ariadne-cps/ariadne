@@ -1,8 +1,8 @@
 /***************************************************************************
  *            rectangular_set.h
  *
- *  Copyright  2007  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
+ *  Copyright  2007-8  Alberto Casagrande, Pieter Collins
+ *
  ****************************************************************************/
 
 /*

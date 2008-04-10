@@ -46,6 +46,8 @@
 
 #include "system/vector_field.h"
 
+#include "evaluation/standard_flower.h"
+#include "evaluation/standard_bounder.h"
 #include "evaluation/standard_integrator.h"
 
 #include "output/logging.h"
@@ -58,7 +60,8 @@ namespace Evaluation { static int& verbosity = integrator_verbosity; }
 
 
 template<class R>
-Evaluation::EulerIntegrator<R>::EulerIntegrator()
+Evaluation::EulerIntegrator<R>::
+EulerIntegrator()
 {
 }
 
@@ -66,7 +69,8 @@ Evaluation::EulerIntegrator<R>::EulerIntegrator()
 
 template<class R>
 Evaluation::EulerIntegrator<R>*
-Evaluation::EulerIntegrator<R>::clone() const
+Evaluation::EulerIntegrator<R>::
+clone() const
 {
   return new EulerIntegrator<R>();
 }
@@ -74,11 +78,12 @@ Evaluation::EulerIntegrator<R>::clone() const
 
 template<class R> inline
 std::pair< Numeric::Rational, Geometry::Box<R> >
-Evaluation::EulerIntegrator<R>::flow_bounds(const System::VectorField<R>& vf, 
-                                            const Geometry::Box<R>& bx,
-                                            const Numeric::Rational& t) const
+Evaluation::EulerIntegrator<R>::
+flow_bounds(const System::VectorField<R>& vf, 
+            const Geometry::Box<R>& bx,
+            const Numeric::Rational& t) const
 {
-  return Evaluation::standard_flow_bounds(vf,bx,t);
+  return StandardBounder<R>().flow_bounds(vf,bx,t);
 }
 
 
@@ -86,10 +91,11 @@ Evaluation::EulerIntegrator<R>::flow_bounds(const System::VectorField<R>& vf,
 
 template<class R>
 Geometry::Rectangle<R> 
-Evaluation::EulerIntegrator<R>::integration_step(const System::VectorField<R>& vector_field, 
-                                                         const Geometry::Rectangle<R>& initial_set, 
-                                                         const Numeric::Rational& step_size, 
-                                                         const Geometry::Box<R>& bounding_set) const
+Evaluation::EulerIntegrator<R>::
+integration_step(const System::VectorField<R>& vector_field, 
+                 const Geometry::Rectangle<R>& initial_set, 
+                 const Numeric::Rational& step_size, 
+                 const Geometry::Box<R>& bounding_set) const
 {
   ARIADNE_LOG(6,"EulerIntegrator::integration_step(VectorField,Rectangle,Interval,Box) const\n");
   ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set,"EulerIntegrator::integration_step(VectorField,Rectangle,Interval,Box) const");
@@ -101,10 +107,11 @@ Evaluation::EulerIntegrator<R>::integration_step(const System::VectorField<R>& v
 
 template<class R>
 Geometry::Rectangle<R> 
-Evaluation::EulerIntegrator<R>::reachability_step(const System::VectorField<R>& vector_field, 
-                                                          const Geometry::Rectangle<R>& initial_set, 
-                                                          const Numeric::Rational& step_size, 
-                                                          const Geometry::Box<R>& bounding_set) const
+Evaluation::EulerIntegrator<R>::
+reachability_step(const System::VectorField<R>& vector_field, 
+                  const Geometry::Rectangle<R>& initial_set, 
+                  const Numeric::Rational& step_size, 
+                  const Geometry::Box<R>& bounding_set) const
 {
   ARIADNE_LOG(6,"EulerIntegrator::reachability_step(VectorField,Rectangle,Numeric::Rational) const\n");
   

@@ -72,7 +72,7 @@ namespace Ariadne {
      */
     template<class R>
     class GridMaskSet 
-      : public SetInterface<R>
+      : public SetInterface< Box<R> >
     {
       friend class GridCellListSet<R>;
       friend class PartitionTreeSet<R>;
@@ -130,8 +130,8 @@ namespace Ariadne {
       /*! \brief Make a dynamically-allocated copy of the set. */
       virtual GridMaskSet<R>* clone() const;
 
-      /*! \brief The space dimension of the set. */
-      virtual dimension_type dimension() const;
+      /*! \brief Returns the space the set lies in. */
+      virtual EuclideanSpace space() const;
 
       /*!\brief Checks if a denotable set includes a point. */
       virtual tribool contains(const Point<R>& p) const;
@@ -185,7 +185,10 @@ namespace Ariadne {
       /*! \brief The number of elements in the mask. */
       size_type capacity() const;
       
-      /*! \brief The block of cells available in the lattice. */
+      /*! \brief The space dimension of the set. */
+      dimension_type dimension() const;
+
+       /*! \brief The block of cells available in the lattice. */
       const Combinatoric::LatticeBlock& block() const;
 
       /*! \brief The number of cells in each dimension. */
@@ -269,16 +272,16 @@ namespace Ariadne {
       void adjoin_outer_approximation(const ListSet<BS>& ls);
 
       /*! \brief Adjoins an outer-approximation of the set \a s. */
-      void adjoin_outer_approximation(const SetInterface<R>& s);
+      void adjoin_outer_approximation(const SetInterface< Box<R> >& s);
 
       /*! \brief Adjoins an inner-approximation of the set \a s. */
-      void adjoin_inner_approximation(const SetInterface<R>& s);
+      void adjoin_inner_approximation(const SetInterface< Box<R> >& s);
 
       /*! \brief Restricts to an outer-approximation of the set \a s. */
-      void restrict_outer_approximation(const SetInterface<R>& s);
+      void restrict_outer_approximation(const SetInterface< Box<R> >& s);
 
       /*! \brief Restricts to an inner-approximation of the set \a s. */
-      void restrict_inner_approximation(const SetInterface<R>& s);
+      void restrict_inner_approximation(const SetInterface< Box<R> >& s);
 
       /*! \brief Writes a summary of the set. */
       std::string summary() const;

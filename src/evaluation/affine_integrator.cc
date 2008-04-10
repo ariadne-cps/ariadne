@@ -43,7 +43,7 @@ namespace Ariadne {
     template LinearAlgebra::Matrix<Interval64>
     gexp(const LinearAlgebra::Matrix<Interval64>& A, const Interval64& t, const uint& k);
     
-    template class AffineIntegrator<Float64>;
+  template class AffineIntegrator< Zonotope<Float64> >;
 #endif
   
 #ifdef ENABLE_FLOATMP
@@ -58,7 +58,7 @@ namespace Ariadne {
     gexp(const LinearAlgebra::Matrix<IntervalMP>& A, 
          const IntervalMP& t, const uint& k);
     
-    template class AffineIntegrator<FloatMP>;
+    template class AffineIntegrator< Zonotope<FloatMP> >;
 #endif
 
   }

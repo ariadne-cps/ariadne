@@ -34,6 +34,7 @@
 #include "base/types.h"
 #include "exceptions.h"
 
+#include "euclidean_space.h"
 #include "discrete_state.h"
 
 namespace Ariadne {  
@@ -101,6 +102,8 @@ namespace Ariadne {
           this->_locations.insert(HybridLocation(iter->first,iter->second));
         }
       }
+      /*! \brief Convert from a Euclidean space by making a single location with id 0. */
+      HybridSpace(const EuclideanSpace& espc) : _locations() { this->_locations.insert(HybridLocation(DiscreteState(0u),espc.dimension())); }
       /*! \brief Copy constructor. */
       HybridSpace(const HybridSpace& hspc) : _locations(hspc._locations) { }
       /*! \brief Equality operator. */

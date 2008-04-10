@@ -41,67 +41,42 @@ namespace Ariadne {
       HybridSystemError(const std::string& what) : std::runtime_error(what) { }
     };
 
-
+    template<class R> class HybridPoint;
     
-    /*! \ingroup HybridSet
-     *  \brief A hybrid set comprising of a single box in a discrete mode.
-     */
-    template<class R> 
-    class HybridBox
-    {
-     public:
-      /*! \brief */
-      typedef R real_type;
-      /*! \brief */
-      typedef Box<R> continuous_set_type;
-      /*! \brief */
-      typedef DiscreteState discrete_state_type;
-      /*! \brief */
-      typedef basic_set_tag set_category;
 
-      /*! \brief */
-      HybridBox(const DiscreteState& q, const Box<R>& bx) : _state(q), _box(bx) { }
-      /*! \brief */
-      const DiscreteState& state() const { return this->_state; }
-      /*! \brief */
-      const Box<R>& set() const { return this->_box; }
-    
-      /*! \brief */
-      bool operator==(const HybridBox<R>& other) const { 
-        return this->_state==other._state && this->_box==other._box; }
-      /*! \brief */
-      bool operator!=(const HybridBox<R>& other) const { return !(*this==other); }
-      /*! \brief */
-      bool operator<(const HybridBox<R>& other) const { return this->_state<other->_state; }
-     private:
-      DiscreteState _state;
-      Box<R> _box;
-    };
-  
 
-    /*! \ingroup HybridSet
+  /*! \ingroup HybridSet
      *  \brief A hybrid set comprising of a single basic set for in a discrete mode.
      */
     template<class BS> 
     class HybridBasicSet 
-      : public BS
     {
+      typedef typename BS::real_type R;
      public:
       /*! \brief */
       typedef typename BS::real_type real_type;
       /*! \brief */
+      typedef HybridSpace space_type;
+      /*! \brief */
+      typedef HybridPoint<R> state_type;
+      /*! \brief */
       typedef DiscreteState discrete_state_type;
+      /*! \brief */
+      typedef BS continuous_set_type;
       /*! \brief */
       typedef basic_set_tag set_category;
 
       // No default constructor as original set need not have default constructor
       // HybridBasicSet() : BS(), _discrete_state() { }
       /*! \brief */
-      template<class S> HybridBasicSet(const DiscreteState& q, const S& s) : BS(s), _state(q) { }
+      template<class M, class S> HybridBasicSet(const M& q, const S& s) : _state(q), _set(s) { }
       /*! \brief */
       const DiscreteState& state() const { return this->_state; }
       /*! \brief */
-      const BS& set() const { return *this; }
+      const BS& set() const { return this->_set; }
+    
+      /*! \brief */
+      dimension_type dimension() const { return this->_set.dimension(); }
     
       /*! \brief */
       bool operator==(const HybridBasicSet<BS>& other) const { 
@@ -112,14 +87,40 @@ namespace Ariadne {
       bool operator<(const HybridBasicSet<BS>& other) const { return this->_state < other->_state; }
      private:
       discrete_state_type _state;
+      continuous_set_type  _set;
     };
   
-
     template<class BS> inline 
     std::ostream& operator<<(std::ostream& os, const HybridBasicSet<BS>& hs) {
       return os << "{ q=" << hs.state() << ", s=" << hs.set() << " }";
     }
 
+    template<class R>
+    class HybridBox
+      : public HybridBasicSet< Box<R> >
+    {
+     public:
+      template<class HS> HybridBox(const HS& hs) : HybridBasicSet< Box<R> >(hs) { }
+      template<class M, class S> HybridBox(const M& q, const S& s) : HybridBasicSet< Box<R> >(q,s) { }
+    };
+
+    template<class R>
+    class HybridZonotope
+      : public HybridBasicSet< Zonotope<R> >
+    {
+     public:
+      template<class HS> HybridZonotope(const HS& hs) : HybridBasicSet< Box<R> >(hs) { }
+      template<class M, class S> HybridZonotope(const M& q, const S& s) : HybridBasicSet< Zonotope<R> >(q,s) { }
+    };
+
+    template<class R>
+    class HybridPolytope
+      : public HybridBasicSet< Polytope<R> >
+    {
+     public:
+      template<class HS> HybridPolytope(const HS& hs) : HybridBasicSet< Box<R> >(hs) { }
+      template<class M, class S> HybridPolytope(const M& q, const S& s) : HybridBasicSet< Polytope<R> >(q,s) { }
+    };
 
 
     /*! \ingroup HybridSet

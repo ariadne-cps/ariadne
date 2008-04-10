@@ -37,6 +37,7 @@ namespace Ariadne {
     class UniformErrorTag;
     class IntervalTag;
 
+    class EuclideanSpace;
     template<class X> class Point;
     template<class R> class PointList;
     template<class R> class Box;
@@ -92,6 +93,7 @@ namespace Ariadne {
     template<class R> class HybridGridCellListSet;
     template<class R> class HybridBox;
     template<class R> class HybridBoxListSet;
+    template<class BS> class HybridBasicSet;
     template<class BS> class HybridListSet;
 
     template<class T, class BS> class TimedSet;

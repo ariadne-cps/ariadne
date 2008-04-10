@@ -506,7 +506,18 @@ inline Rational div_up(const Rational& x, const long int& y) {
   Rational r; div_(r,x,y); return r; }
 
 
-     
+inline void quot_(Integer& r, const Rational& x1, const Rational& x2) { 
+  Rational q; Integer n,d; 
+  mpq_div(q._value,x1._value,x2._value); 
+  mpq_get_num(n._value,q._value);
+  mpq_get_den(d._value,q._value);
+  mpz_tdiv_q(r._value,d._value,n._value);
+}
+   
+inline void rem_(Rational& r, const Rational& x1, const Rational& x2) { 
+  Integer q; quot_(q,x1,x2); r=x1-x2*q;
+}
+   
 template<> inline std::string name<Rational>() { 
   return "Rational"; }
     

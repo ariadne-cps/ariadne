@@ -34,6 +34,7 @@
 #include "numeric/interval.h"
 #include "geometry/set_interface.h"
 #include "geometry/box.h"
+#include "geometry/euclidean_space.h"
 
 
 namespace Ariadne {
@@ -46,9 +47,10 @@ namespace Ariadne {
      */
     template<class R>
     class EmptySet
-      : public SetInterface<R> 
+      : public SetInterface< Box<R> > 
     {
      public:
+      typedef EuclideanSpace space_type;
       typedef R real_type;
       typedef Point<R> state_type;
       typedef Box<R> basic_set_type;
@@ -56,12 +58,16 @@ namespace Ariadne {
       /*! \brief An empty set in \a d dimensions. */
       EmptySet(dimension_type d) : _dimension(d) { }
      
+      /*! \brief The dimension of the Euclidean space the set lies in. */
+      dimension_type dimension() const { return this->_dimension; }
+ 
       /*! \brief A dynamically-allocated copy of the set. */
       virtual EmptySet<R>* clone() const { return new EmptySet(this->dimension()); }
      
       /*! \brief The dimension of the Euclidean space the set lies in. */
-      virtual dimension_type dimension() const { return this->_dimension; }
-      
+      virtual EuclideanSpace space() const { return EuclideanSpace(this->_dimension); }
+ 
+     
       /*! \brief Tests if the set contains a point. */
       virtual tribool contains(const Point<R>& pt) const { return false; }
      

@@ -38,30 +38,29 @@
 namespace Ariadne {
   namespace Evaluation {
 
-    /*! \brief A class for computing the image of a basic set under a map. 
-     *  \ingroup Satisfiers
+    /*! \ingroup EvaluatorInterfaces \ingroup Approximators
+     *  \brief Interface for testing whether a set satisfies a constraint. 
      */
-    template<class BS>
+    template<class ES>
     class SatisfierInterface
     {
-      typedef typename BS::real_type R;
+      typedef typename ES::real_type R;
       typedef Numeric::Interval<R> I;
      public:
       /*! \brief Compute the image of a basic set under a continuous function. */
       virtual ~SatisfierInterface() { }
 
       /*! \brief Make a dynamically-allocated copy. */
-      virtual SatisfierInterface<BS>* clone() const = 0;
+      virtual SatisfierInterface<ES>* clone() const = 0;
       
       /*! \brief Test whether a set is a subset of a given constraint set. */
-      virtual tribool subset(const BS& bs, const Geometry::ConstraintSet<R>& cs) const = 0;
+      virtual tribool subset(const ES& es, const Geometry::ConstraintSet<R>& cs) const = 0;
       
       /*! \brief Test whether a set is disjoint from a given constraint set. */
-      virtual tribool disjoint(const BS& bs, const Geometry::ConstraintSet<R>& cs) const = 0;
+      virtual tribool disjoint(const ES& es, const Geometry::ConstraintSet<R>& cs) const = 0;
       
       /*! \brief Test whether a set intersects from a given constraint set. */
-      tribool intersects(const BS& bs, const Geometry::ConstraintSet<R>& cs) const {
-        return !this->disjoint(bs,cs); }
+      virtual tribool intersects(const ES& es, const Geometry::ConstraintSet<R>& cs) const = 0;
       
     };
 

@@ -2,7 +2,7 @@
  *            affine_integrator.h
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
+ *
  ****************************************************************************/
 
 /*
@@ -53,14 +53,15 @@ namespace Ariadne {
     LinearAlgebra::Matrix< Numeric::Interval<R> > 
     gexp(const LinearAlgebra::Matrix< Numeric::Interval<R> >& Ab, const Numeric::Interval<R>& t, const uint& k);
       
+    template<class BS> class AffineIntegrator;
     
-    /*!\ingroup Integrate
+    /*!\ingroup Integrators
      * \brief An integrator based on using the exponential formula to integrate an affine vector field. 
      *  
      * The \f$C^1\f$-Affine algorithm is a Taylor method.
      */
     template<class R>
-    class AffineIntegrator
+    class AffineIntegrator< Geometry::Zonotope<R> >
       : public IntegratorInterface< Geometry::Zonotope<R> >      
     {
       typedef Numeric::Interval<R> I;
@@ -69,7 +70,7 @@ namespace Ariadne {
       AffineIntegrator();
 
       /*! \brief Cloning operator. */
-      virtual AffineIntegrator<R>* clone() const;
+      virtual AffineIntegrator< Geometry::Zonotope<R> >* clone() const;
 
      public:
 

@@ -55,7 +55,7 @@ namespace Ariadne {
      */
     template<class R>
     class BoxListSet 
-      : public SetInterface<R>
+      : public SetInterface< Box<R> >
     {
      private:
       /* List of basic sets. Note that std::vector provides a
@@ -102,6 +102,10 @@ namespace Ariadne {
       /*! \brief Accesses the i-th box. */
       const Box<R>& operator[](size_type index) const;
 
+      /*! \brief Returns the denotable set's space dimension. */
+      dimension_type dimension() const;
+
+
 
  
       //@{ 
@@ -109,8 +113,8 @@ namespace Ariadne {
       /*! \brief Returns the denotable set's space dimension. */
       virtual BoxListSet<R>* clone() const;
 
-      /*! \brief Returns the denotable set's space dimension. */
-      virtual dimension_type dimension() const;
+      /*! \brief Returns the denotable set's space. */
+      virtual EuclideanSpace space() const;
 
       /*!\brief Checks if a denotable set includes a point. */
       virtual tribool contains(const Point<R>& p) const;

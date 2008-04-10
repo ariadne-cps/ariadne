@@ -2,7 +2,7 @@
  *            epsstream.cc
  *
  *  Copyright  2007  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *
  ****************************************************************************/
 
 /*

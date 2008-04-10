@@ -43,8 +43,8 @@ namespace Ariadne {
 
     template<class R> class TimeModel;
 
-    /*! \brief %Base class for constraint crossing and detection schemes. 
-     *  \ingroup Detection
+    /*! \ingroup Solvers
+     *  \brief A class for detecting constraint crossings. 
      */
     template<class R>
     class Detector

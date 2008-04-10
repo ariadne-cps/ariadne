@@ -42,6 +42,7 @@
 #include "geometry/grid_cell_list_set.h"
 #include "geometry/grid_mask_set.h"
 #include "geometry/hybrid_space.h"
+#include "geometry/hybrid_grid.h"
 #include "geometry/hybrid_set_iterator.h"
 #include "geometry/hybrid_basic_set.h"
 
@@ -190,6 +191,20 @@ namespace Ariadne {
         : HybridDenotableSet< ListSet<BS> >(hspc) { this->adjoin(hbs); }
       HybridListSet(const HybridListSet<BS>& hls)
         : HybridDenotableSet< ListSet<BS> >(hls) { }
+      template<class HBS> HybridListSet(const ListSet<HBS>& ls)
+        : HybridDenotableSet< ListSet<BS> >() 
+      {
+        for(typename ListSet<HBS>::const_iterator iter=ls.begin(); iter!=ls.end(); ++iter) {
+          if(!this->has_location(iter->state())) {
+            this->new_location(iter->state(),iter->dimension()); }
+          this->adjoin(*iter); }
+      }
+      template<class HBS> HybridListSet(const HybridSpace& spc,const ListSet<HBS>& ls)
+        : HybridDenotableSet< ListSet<BS> >(spc) 
+      {
+        for(typename ListSet<HBS>::const_iterator iter=ls.begin(); iter!=ls.end(); ++iter) {
+           this->adjoin(*iter); }
+      }
       virtual std::ostream& write(std::ostream&) const;
     };
 
@@ -211,46 +226,6 @@ namespace Ariadne {
         : HybridDenotableSet< BoxListSet<R> >(hls) { }
     };
 
-
-
-    /*! \ingroup HybridSet
-     *  \brief A hybrid set comprising of a single basic set for in a discrete mode.
-     */
-    template<class R> 
-    class HybridGrid 
-    {
-     public:
-      typedef DiscreteState discrete_state_type;
-      typedef typename std::map< discrete_state_type, Grid<R> >::const_iterator locations_const_iterator;
-
-      /*! \brief */
-      HybridGrid() : _grids() { }
-      /*! \brief */
-      HybridGrid(const HybridSpace& loc, const R& gl) : _grids() { 
-        for(typename HybridSpace::const_iterator iter=loc.begin(); iter!=loc.end(); ++iter) {
-          this->_grids.insert(std::make_pair(iter->discrete_state(),Grid<R>(iter->dimension(),gl))); }
-      }
-      /*! \brief */
-      template<class GS> HybridGrid(const GS& gs) : _grids() { 
-        for(typename GS::locations_const_iterator iter=gs.locations_begin(); iter!=gs.locations_end(); ++iter) {
-          this->_grids.insert(std::make_pair(iter->first,iter->second.grid())); }
-      }
-      /*! \brief */
-      void new_location(DiscreteState q, const Grid<R>& g) {
-        this->_grids.insert(std::make_pair(q,g)); }
-      /*! \brief */
-      const Grid<R>& operator[](DiscreteState q) const {
-        return this->_grids.find(q)->second; }
-
-      HybridSpace locations() const;
-      locations_const_iterator locations_begin() const { return this->_grids.begin(); }
-      locations_const_iterator locations_end() const { return this->_grids.end(); }
-     private:
-      std::map< discrete_state_type, Grid<R> > _grids;
-    };
-
-    template<class R> 
-    std::ostream& operator<<(std::ostream& os, const HybridGrid<R>& hgr);
 
 
 

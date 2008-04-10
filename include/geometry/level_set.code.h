@@ -23,6 +23,7 @@
  
 #include "level_set.h"
 #include "linear_algebra/vector.h"
+#include "geometry/euclidean_space.h"
 #include "geometry/point.h"
 #include "geometry/box.h"
 
@@ -48,7 +49,7 @@ namespace Ariadne {
     
 template<class R>
 Geometry::LevelSet<R>::LevelSet(const Function::FunctionInterface<R>& f)
-  : SetInterface<R>(), _function_ptr(f.clone()) 
+  : _function_ptr(f.clone()) 
 { 
 }
 
@@ -73,6 +74,12 @@ Geometry::LevelSet<R>::dimension() const
   return this->_function_ptr->argument_size(); 
 }
 
+template<class R>
+Geometry::EuclideanSpace
+Geometry::LevelSet<R>::space() const 
+{
+  return EuclideanSpace(this->dimension());
+}
 
 
 template<class R>

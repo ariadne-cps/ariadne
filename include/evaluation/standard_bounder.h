@@ -40,8 +40,8 @@
 namespace Ariadne {
   namespace Evaluation {
 
-    /*! \brief A class for bounding the flow of a vector field.
-     *  \ingroup VectorFieldEvolver
+    /*! \ingroup Integrators
+     *  \brief A class for bounding the flow of a vector field.
      */
     template<class R>
     class StandardBounder
@@ -81,6 +81,14 @@ namespace Ariadne {
       flow_bounds(const System::VectorField<R>& vector_field,
                   const Geometry::Box<R>& initial_set,
                   const Numeric::Rational& maximum_step_size) const;
+
+      /*! \brief Compute an integration time and bounds for both the flow and its derivatives up to order \a o. */
+      virtual 
+      std::pair< Numeric::Rational, Function::TaylorDerivative<I> >
+      variation_flow_bounds(const System::VectorField<R>& f, 
+                            const Geometry::Box<R>& bx,
+                            const Numeric::Rational& t,
+                            smoothness_type o) const; 
 
      /*! \brief Verifies that the flow of \a vector_field starting in \a initial_set remains in \a bound for times up to time \a integration_time. 
        *

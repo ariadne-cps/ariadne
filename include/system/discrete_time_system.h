@@ -54,7 +54,7 @@ namespace Ariadne {
      * In a future version, restrictions on \f$U(x)\f$ will also be allowed.
      */
     template<class R>
-    class DiscreteTimeSystem
+    class DiscreteTimeControlSystemInterface
     {
       typedef typename Numeric::traits<R>::arithmetic_type F;
      public:
@@ -64,7 +64,7 @@ namespace Ariadne {
       typedef Geometry::Point<R> state_type;
       
       /*! \brief Virtual destructor.  */
-      virtual ~DiscreteTimeSystem();
+      virtual ~DiscreteTimeControlSystemInterface();
       
       /*! \brief  The image of a point, computed approximately.  */
       Geometry::Point<F> 

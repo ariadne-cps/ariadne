@@ -58,7 +58,7 @@ template<class R> class DiscreteMode;
 template<class R> class DiscreteTransition;  
 template<class R> class HybridAutomaton;  
 
-/*!
+/*! \ingroup HybridTime
  * \brief A discrete mode of a HybridAutomaton, comprising continuous evolution given by a VectorField
  * within and invariant Geometry::ConstraintSet. 
  *
@@ -176,7 +176,7 @@ bool operator<(const DiscreteMode<R>& mode1, const DiscreteMode<R>& mode2)
 
 
 
-/*!
+/*! \ingroup HybridTime
  * \brief A discrete transition of a HybridAutomaton, representing an instantaneous
  * jump from one DiscreteMode to another, governed by an activation Geometry::ConstraintSet and a reset MapInterface.
  *
@@ -342,7 +342,7 @@ bool operator<(const DiscreteTransition<R>& transition1, const DiscreteTransitio
 
 
 
-/*! \ingroup HybridTime
+/*! \ingroup System \ingroup HybridTime
  *  \brief A hybrid automaton, comprising continuous-time behaviour
  *  at each DiscreteMode, coupled by instantaneous DiscreteTransition events.
  *  The state space is given by a Geometry::HybridSet.  
@@ -370,7 +370,12 @@ template< class R >
 class HybridAutomaton
 {
  public:
+  /*! \brief The type used to represent time. */
+  typedef Numeric::Rational time_type;
+  /*! \brief The type used to represent real numbers. */
   typedef R real_type;
+  /*! \brief The type used to describe the state space. */
+  typedef Geometry::HybridSpace state_space_type;
  
   typedef typename std::set< DiscreteTransition<R> >::const_iterator discrete_transition_const_iterator;
   typedef typename std::set< DiscreteMode<R> >::const_iterator discrete_mode_const_iterator;
@@ -396,6 +401,9 @@ class HybridAutomaton
   
   /*! \brief Construct a named automaton. */
   HybridAutomaton(const std::string& name);
+  
+  /*! \brief Construct dynamically-allocated copy. (Not currently implemented)  */
+  HybridAutomaton<R>* clone() const;
   
   /*! \brief  Destructor. */
   ~HybridAutomaton();
@@ -466,6 +474,8 @@ class HybridAutomaton
 
   /*! \brief A set giving the dimension of the state space for each location identifier. */
   Geometry::HybridSpace locations() const;
+  /*! \brief The state space of the system. */
+  Geometry::HybridSpace state_space() const;
   
   /*! \brief The hybrid set giving the invariant for each discrete location. */
   Geometry::HybridSet<R> invariant() const;

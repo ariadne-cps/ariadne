@@ -101,14 +101,14 @@ test_level_set()
   FiniteGrid<R> fg(g,bb);
   GridMaskSet<R> gmsia(fg); 
   GridMaskSet<R> gmsoa(fg); 
-  gmsia.adjoin_inner_approximation(static_cast<const SetInterface<R>&>(s));
-  gmsoa.adjoin_outer_approximation(static_cast<const SetInterface<R>&>(s));
+  gmsia.adjoin_inner_approximation(static_cast<const SetInterface< Box<R> >&>(s));
+  gmsoa.adjoin_outer_approximation(static_cast<const SetInterface< Box<R> >&>(s));
 
   // graphical output
   epsfstream eps;
   eps.open("test_level_set-1.eps",bb.neighbourhood(0.25));
   eps << fill_colour(red) << gmsoa;
-  eps << line_style(false) << fill_colour(green) << static_cast<const SetInterface<R>&>(s);
+  eps << line_style(false) << fill_colour(green) << static_cast<const SetInterface< Box<R> >&>(s);
   eps << line_style(true) << fill_colour(blue) << gmsia;
   eps.close();
   

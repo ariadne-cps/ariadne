@@ -60,7 +60,7 @@ namespace Ariadne {
      */
     template<class R>
     class GridCellListSet 
-      : public SetInterface<R>
+      : public SetInterface< Box<R> >
     {
       friend class GridMaskSet<R>;
      public:
@@ -99,6 +99,9 @@ namespace Ariadne {
       /*! \brief The underlying grid. */
       const Grid<R>& grid() const;
 
+      /*! \brief The space dimension of the set. */
+      dimension_type dimension() const;
+
 
 
       //@{
@@ -106,8 +109,8 @@ namespace Ariadne {
       /*! \brief Make a dynamically-allocated copy of the set. */
       virtual GridCellListSet<R>* clone() const;
 
-      /*! \brief The space dimension of the set. */
-      virtual dimension_type dimension() const;
+      /*! \brief Returns the denotable set's space. */
+      virtual EuclideanSpace space() const;
 
       /*!\brief Checks if a denotable set includes a point. */
       virtual tribool contains(const Point<R>& p) const;
@@ -188,10 +191,10 @@ namespace Ariadne {
       void adjoin_inner_approximation(const S& s);
 
       /*! \brief Restricts to the outer-approximation of the set \a s. */
-      void restrict_outer_approximation(const SetInterface<R>& s);
+      void restrict_outer_approximation(const SetInterface< Box<R> >& s);
 
       /*! \brief Restricts to the inner-approximation of the set \a s. */
-      void restrict_inner_approximation(const SetInterface<R>& s);
+      void restrict_inner_approximation(const SetInterface< Box<R> >& s);
 
       /*! \brief Returns a summary. */
       std::string summary() const;

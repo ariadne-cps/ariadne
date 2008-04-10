@@ -23,19 +23,19 @@
 
 #include "numeric/float.h"
 
-#include "evaluation/flower.h"
-#include "evaluation/flower.code.h"
+#include "evaluation/standard_flower.h"
+#include "evaluation/standard_flower.code.h"
 
 namespace Ariadne {
   namespace Evaluation {
     using namespace Numeric;
 
 #ifdef ENABLE_FLOAT64
-    template class Flower<Float64>;
+    template class StandardFlower<Float64>;
 #endif
   
 #ifdef ENABLE_FLOATMP
-    template class Flower<FloatMP>;
+    template class StandardFlower<FloatMP>;
 #endif
 
   }

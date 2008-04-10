@@ -22,6 +22,7 @@
  */
  
 #include "geometry/box.h"
+#include "geometry/box_list_set.h"
 #include "geometry/zonotope.h"
 #include "geometry/grid_cell.h"
 #include "geometry/grid_block.h"
@@ -52,7 +53,7 @@ Evaluation::FastApproximator<BS>::clone() const
 
 template<class BS>
 BS
-Evaluation::FastApproximator<BS>::basic_set(const Geometry::Box<R>& r) const
+Evaluation::FastApproximator<BS>::enclosure_set(const Geometry::Box<R>& r) const
 {
   return BS(r);
 }
@@ -69,6 +70,22 @@ Geometry::Box<typename BS::real_type>
 Evaluation::FastApproximator<BS>::bounding_box(const BS& bs) const
 {
   return Geometry::bounding_box(bs);
+}
+
+template<class BS>
+Geometry::BoxListSet<typename BS::real_type>
+Evaluation::FastApproximator<BS>::lower_approximation(const BS& bs) const
+{
+  Geometry::BoxListSet<R> result;
+  result.adjoin(bs.bounding_box());
+  return result;
+}
+
+template<class BS>
+Geometry::GridCellListSet<typename BS::real_type>
+Evaluation::FastApproximator<BS>::inner_approximation(const BS& bs, const Geometry::Grid<R>& g) const
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
 template<class BS>

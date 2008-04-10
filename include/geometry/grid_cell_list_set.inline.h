@@ -22,6 +22,7 @@
  */
 
 #include "geometry/grid_set_iterator.h"
+#include "geometry/euclidean_space.h"
  
 namespace Ariadne {
 
@@ -37,6 +38,13 @@ dimension_type
 Geometry::GridCellListSet<R>::dimension() const 
 {
   return this->_lattice_set.dimension(); 
+}
+
+template<class R> inline
+Geometry::EuclideanSpace 
+Geometry::GridCellListSet<R>::space() const 
+{
+  return EuclideanSpace(this->dimension()); 
 }
 
 template<class R> inline

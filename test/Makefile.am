@@ -65,11 +65,14 @@ SYSTEM_TESTS = \
 
 EVALUATION_TESTS = \
 	test_newton_solver \
-	test_lohner_integrator \
+	test_reducer \
+	test_applicator \
+	test_integrator \
 	test_affine_integrator \
 	test_map_evolver \
 	test_vector_field_evolver \
-	test_set_based_hybrid_evolver 
+	test_hybrid_evolver \
+	test_reachability_analyser
 
 OUTPUT_TESTS = \
 	test_textstream \
@@ -153,11 +156,14 @@ test_level_set_SOURCES=test_level_set.cc
 test_hybrid_automaton_SOURCES=test_hybrid_automaton.cc
 
 test_newton_solver_SOURCES=test_newton_solver.cc
-test_lohner_integrator_SOURCES=test_lohner_integrator.cc
+test_reducer_SOURCES=test_reducer.cc
+test_applicator_SOURCES=test_applicator.cc
+test_integrator_SOURCES=test_integrator.cc
 test_affine_integrator_SOURCES=test_affine_integrator.cc
 test_map_evolver_SOURCES=test_map_evolver.cc
 test_vector_field_evolver_SOURCES=test_vector_field_evolver.cc
-test_set_based_hybrid_evolver_SOURCES=test_set_based_hybrid_evolver.cc
+test_hybrid_evolver_SOURCES=test_hybrid_evolver.cc
+test_reachability_analyser_SOURCES=test_reachability_analyser.cc
 
 test_epsstream_SOURCES=test_epsstream.cc 
 test_latexstream_SOURCES=test_latexstream.cc

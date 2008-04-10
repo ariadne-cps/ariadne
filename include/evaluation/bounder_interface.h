@@ -34,14 +34,15 @@
 #include "base/declarations.h"
 #include "numeric/declarations.h"
 #include "linear_algebra/declarations.h"
+#include "function/declarations.h"
 #include "geometry/declarations.h"
 #include "system/declarations.h"
 
 namespace Ariadne {
   namespace Evaluation {
 
-    /*! \brief A class for bounding the flow of a vector field.
-     *  \ingroup VectorFieldEvolver
+    /*! \brief Interface for bounding the flow of a vector field.
+     *  \ingroup EvaluatorInterfaces \ingroup Integrators
      */
     template<class R>
     class BounderInterface
@@ -76,6 +77,15 @@ namespace Ariadne {
                   const Geometry::Box<R>& initial_set) const = 0;
 
       
+      /*! \brief Compute an integration time and bounds for both the flow and its derivatives up to order \a o. */
+      virtual 
+      std::pair< Numeric::Rational, Function::TaylorDerivative<I> >
+      variation_flow_bounds(const System::VectorField<R>& f, 
+                            const Geometry::Box<R>& bx,
+                            const Numeric::Rational& t,
+                            smoothness_type o) const = 0; 
+
+
 
 
 

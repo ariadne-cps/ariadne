@@ -21,6 +21,7 @@
  *  Foundation, Inc., 59 Templece Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+#include "euclidean_space.h"
 #include "grid_approximation.h"
 
 namespace Ariadne {
@@ -69,6 +70,15 @@ Geometry::GridMaskSet<R>::dimension() const
 {
   return _lattice_set.dimension(); 
 }
+
+
+template<class R> inline
+Geometry::EuclideanSpace 
+Geometry::GridMaskSet<R>::space() const 
+{
+  return EuclideanSpace(this->dimension()); 
+}
+
 
 template<class R> inline
 size_type 

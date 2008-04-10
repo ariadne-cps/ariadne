@@ -22,6 +22,7 @@
  */
 
 #include "geometry/geometrical_traits.h"
+#include "geometry/euclidean_space.h"
 #include "base/exceptions.h"
 
 namespace Ariadne {
@@ -76,6 +77,13 @@ Geometry::BoxListSet<R>::dimension() const
   } else {
     return this->_vector.front().dimension();
   }
+}
+
+template<class R> inline
+Geometry::EuclideanSpace 
+Geometry::BoxListSet<R>::space() const 
+{
+  return EuclideanSpace(this->dimension()); 
 }
 
 template<class R> inline

@@ -314,27 +314,43 @@
  * \defgroup HybridTime Hybrid-Time Systems
  * \ingroup System 
  * \brief Hybrid-time systems.
+ *
+ * \defgroup NumericalSystem Numerical and Discretised Systems
+ * \ingroup System
+ * \brief Numerical and discretised systems, such as transition systems.
  */
 
 /*! \defgroup Evaluation Evaluation Module
  *  \brief Functions and methods for computing the evolution of a system and solving equations.
  *
  * 
- *  \defgroup Solve Solve
+ *  \defgroup EvaluatorInterfaces Interfaces
  *  \ingroup Evaluation
- *  \brief Functions for solving systems of equations.
+ *  \brief Interfaces for Evaluator classes.
  *
- *  \defgroup Apply Apply
+ *  \defgroup Approximators Approximators
+ *  \ingroup Evaluation
+ *  \brief Evaluators for approximating sets.
+ *
+ *  \defgroup Solvers Solving Equations
+ *  \ingroup Evaluation
+ *  \brief Functions for solving systems of equations and detecting crossings.
+ *
+ *  \defgroup Applicators Evaluating images
  *  \ingroup Evaluation
  *  \brief Functions for iterating forward discrete-time systems.
  *
- *  \defgroup Integrate Integrate
+ *  \defgroup Integrators Integration
  *  \ingroup Evaluation
  *  \brief Classes for integrating continuous-time systems.
  *
- *  \defgroup Evolve Evolve
+ *  \defgroup Evolvers System Evolution
+  *  \ingroup Evaluation
+ *  \brief Classes for computing the evolution of dynamic systems.
+ *
+ *  \defgroup Analysers System Analysis
  *  \ingroup Evaluation
- *  \brief Classes for computing the evolution of hybrid-time systems.
+ *  \brief Classes for analysing the behaviour of dynamic systems.
  *
  */
 

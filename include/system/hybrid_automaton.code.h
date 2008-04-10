@@ -44,6 +44,13 @@ System::HybridAutomaton<R>::HybridAutomaton(const std::string &name)
 
 
 template<class R>
+System::HybridAutomaton<R>*
+System::HybridAutomaton<R>::clone() const {
+  throw NotImplemented(__PRETTY_FUNCTION__);
+  return new HybridAutomaton<R>(*this);
+}
+
+template<class R>
 System::HybridAutomaton<R>::~HybridAutomaton() {
   this->_transitions.clear();
 }
@@ -180,6 +187,13 @@ System::HybridAutomaton<R>::locations() const
     result.new_location(mode_iter->discrete_state(),mode_iter->dimension());
   } 
   return result;
+}
+
+template<class R>
+Geometry::HybridSpace
+System::HybridAutomaton<R>::state_space() const 
+{
+  return this->locations();
 }
 
 

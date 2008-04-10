@@ -53,6 +53,14 @@ System::Map<R>::function() const
 }
 
 template<class R>
+Geometry::EuclideanSpace
+System::Map<R>::state_space() const
+{
+  ARIADNE_ASSERT(this->_function_ptr->argument_size()==this->_function_ptr->result_size());
+  return Geometry::EuclideanSpace(this->_function_ptr->result_size());
+}
+
+template<class R>
 dimension_type 
 System::Map<R>::dimension() const
 {

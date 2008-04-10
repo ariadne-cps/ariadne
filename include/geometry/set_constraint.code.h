@@ -22,11 +22,13 @@
  */
  
 #include "set_constraint.h"
+#include "geometry/box.h"
+#include "geometry/euclidean_space.h"
 
 namespace Ariadne {
 
 template<class R>
-Geometry::SetConstraint<R>::SetConstraint(const Geometry::SetInterface<R>& s, bool i)
+Geometry::SetConstraint<R>::SetConstraint(const Geometry::SetInterface< Box<R> >& s, bool i)
   : _set_ptr(s.clone()), _inside(i)
 {
 }
@@ -45,10 +47,18 @@ Geometry::SetConstraint<R>::clone() const
 
 
 template<class R>
-dimension_type 
+Geometry::EuclideanSpace
+Geometry::SetConstraint<R>::space() const 
+{
+  return this->_set_ptr->space();
+}
+
+
+template<class R>
+dimension_type
 Geometry::SetConstraint<R>::dimension() const 
 {
-  return this->_set_ptr->dimension();
+  return this->_set_ptr->space().dimension();
 }
 
 template<class R>
@@ -96,7 +106,7 @@ Geometry::SetConstraint<R>::gradient(const Point<A>& pt) const
 }
 
 template<class R>
-const Geometry::SetInterface<R>& 
+const Geometry::SetInterface< Geometry::Box<R> >& 
 Geometry::SetConstraint<R>::set() const
 {
   return *this->_set_ptr;

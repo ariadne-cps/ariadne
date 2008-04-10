@@ -39,6 +39,7 @@
 namespace Ariadne {
   namespace Geometry {
     
+    template<class R> class Box;
 
     //! \ingroup ExactSet
     /*! \brief A constraint on the state
@@ -51,12 +52,14 @@ namespace Ariadne {
       typedef typename Numeric::traits<R>::interval_type I;
      public:
       /*! \brief Construct the set \f$f(x) \lessgtr 0\f$ from the function \f$f\f$. */
-      SetConstraint(const Geometry::SetInterface<R>& s, bool i=true);
+      SetConstraint(const Geometry::SetInterface< Box<R> >& s, bool i=true);
 
       /*! \brief Destructor. */
       virtual ~SetConstraint();
       /*! \brief Return a new dynamically-allocated copy of the constraint. */
       virtual SetConstraint<R>* clone() const;
+      /*! \brief The dimension of the set. */
+      virtual EuclideanSpace space() const;
       /*! \brief The dimension of the set. */
       virtual dimension_type dimension() const;
       /*! \brief The smoothness of the constraint function. */
@@ -72,13 +75,13 @@ namespace Ariadne {
       virtual LinearAlgebra::Vector<A> gradient(const Point<A>& pt) const;
 
       /*! \brief The function defining the constraint. */
-      const Geometry::SetInterface<R>& set() const;
+      const Geometry::SetInterface< Box<R> >& set() const;
       /*! \brief Returns true if the constraint has negative value for points inside the set. */
       bool inside() const;
      private:
       static void instantiate();
      private:
-      boost::shared_ptr< const Geometry::SetInterface<R> > _set_ptr;
+      boost::shared_ptr< const Geometry::SetInterface< Box<R> > > _set_ptr;
       bool _inside;
     };
 

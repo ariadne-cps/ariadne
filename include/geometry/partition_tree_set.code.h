@@ -26,6 +26,7 @@
 
 #include "base/stlio.h"
 
+#include "geometry/euclidean_space.h"
 #include "geometry/box.h"
 #include "geometry/box_list_set.h"
 #include "geometry/grid_cell_list_set.h"
@@ -84,6 +85,14 @@ Geometry::PartitionTreeSet<R>*
 Geometry::PartitionTreeSet<R>::clone() const
 {
   return new PartitionTreeSet<R>(*this);
+}
+
+
+template<class R> inline
+Geometry::EuclideanSpace
+Geometry::PartitionTreeSet<R>::space() const 
+{
+  return EuclideanSpace(this->dimension()); 
 }
 
 
@@ -152,7 +161,7 @@ Geometry::PartitionTreeSet<R>::_instantiate_geometry_operators()
   Box<R>* bx=0;
   Rectangle<R>* r=0;
   Zonotope<R>* z=0;
-  SetInterface<R>* s=0;
+  SetInterface< Box<R> >* s=0;
   GridMaskSet<R>* gms=0;
   PartitionScheme<R>* ps=0;
   PartitionTreeCell<R>* ptc=0;

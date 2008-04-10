@@ -39,6 +39,9 @@
 namespace Ariadne {
   namespace Geometry {
     
+    class EuclideanSpace;
+    template<class R> class Box;
+
     //! \ingroup ExactSet
     /*! \brief A set defined by the conditions \f$f(x)\geq0\f$ for some function \f$f\f$. 
      *   Satisfies the conditions of the RegularSetInterface, 
@@ -47,7 +50,7 @@ namespace Ariadne {
      */
     template<class R>
     class ConstraintSet
-      : public SetInterface<R>
+      : public SetInterface< Box<R> >
     {
       typedef typename Numeric::traits<R>::arithmetic_type A;
      public:
@@ -60,8 +63,8 @@ namespace Ariadne {
       virtual ~ConstraintSet();
       /*! \brief Return a new dynamically-allocated copy of the set. */
       virtual ConstraintSet<R>* clone() const;
-      /*! \brief The dimension of the set. */
-      virtual dimension_type dimension() const;
+      /*! \brief The space the set lies in. */
+      virtual EuclideanSpace space() const;
       /*! \brief Test if the set contains a point. */
       virtual tribool contains(const Point<R>& pt) const;
       /*! \brief */
@@ -79,6 +82,8 @@ namespace Ariadne {
       /*! \brief */
       virtual std::ostream& write(std::ostream& os) const;
 
+      /*! \brief The dimension of the set. */
+      dimension_type dimension() const;
       /*! \brief The number of independed inequality constraints used to define the set. */
       size_type number_of_constraints() const;
       /*! \brief The codomain given the allowable values of the constraint function. */

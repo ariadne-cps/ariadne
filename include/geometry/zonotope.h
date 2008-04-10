@@ -46,6 +46,7 @@ namespace Ariadne {
   namespace Geometry {
     
     class basic_set_tag;
+    class EuclideanSpace;
     template<class X> class Point;
     template<class R> class Box;
     template<class X> class Polyhedron;
@@ -124,6 +125,8 @@ namespace Ariadne {
      public:
       //@{
       //! \name Typedefs 
+      /*! \brief The type used to describe the space the set lies in. */
+      typedef EuclideanSpace space_type;
       /*! \brief The type of real number used to describe the zonotope. */
       typedef R real_type;
       //@}

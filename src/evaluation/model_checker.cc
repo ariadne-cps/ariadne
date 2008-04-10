@@ -23,19 +23,23 @@
 
 #include "numeric/float.h"
 
+#include "geometry/grid_approximation_scheme.h"
 #include "evaluation/model_checker.h"
 #include "evaluation/model_checker.code.h"
 
 namespace Ariadne {
   namespace Evaluation {
     using namespace Numeric;
+    using namespace Geometry;
 
 #ifdef ENABLE_FLOAT64
-    template class ModelChecker<Float64>;
+    template class ModelChecker< Integer, GridApproximationScheme<Float64> >;
+    template class ModelChecker< Rational, GridApproximationScheme<Float64> >;
 #endif
   
 #ifdef ENABLE_FLOATMP
-    template class ModelChecker<FloatMP>;
+    template class ModelChecker< Integer, GridApproximationScheme<FloatMP> >;
+    template class ModelChecker< Rational, GridApproximationScheme<FloatMP> >;
 #endif
 
   }

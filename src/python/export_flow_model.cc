@@ -24,7 +24,6 @@
 #include "python/float.h"
 
 #include "function/flow_model.h"
-#include "evaluation/integrator.code.h"
 
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
@@ -36,19 +35,8 @@ using namespace Ariadne::Python;
 using namespace boost::python;
 
 template<class R>
-FlowModel<R> 
-integrate_(const TaylorDerivative< Interval<R> >& vf, const LinearAlgebra::Vector< Interval<R> > x,smoothness_type so) {
-  return FlowModel<R>(Function::integrate(vf,Geometry::Point<Interval<R> >(x),so)); 
-}
-
-template<class R>
 void export_flow_model() 
 {
-  class_< FlowModel<R> > flow_model_class("FlowModel", no_init);
-  flow_model_class.def("evaluate",&FlowModel<R>::evaluate);
-  flow_model_class.def(self_ns::str(self));
-
-  def("integrate",&integrate_<R>);
 }
 
 template void export_flow_model<FloatPy>();

@@ -78,6 +78,7 @@ Geometry::Rectangle<R>::_instantiate()
 {
   Rectangle<R>* r=0;
   ListSet< Rectangle<R> >* rls=0;
+  *rls = Geometry::split(*r);
   *rls = Geometry::subdivide(*r);
 }
   
@@ -129,8 +130,10 @@ Geometry::Rectangle<R>::quadrant(const Combinatoric::BinaryWord& w) const
 
 template<class R> 
 Geometry::ListSet< Geometry::Rectangle<R> >
-Geometry::subdivide(const Rectangle<R>& r)  
+Geometry::Rectangle<R>::split() const
 {
+  const Geometry::Rectangle<R>& r=*this;
+
   size_type d=r.dimension();
   R mr=0;
   size_type mi=0;
@@ -154,17 +157,18 @@ Geometry::subdivide(const Rectangle<R>& r)
 }
 
 
-/*
 template<class R>
 Geometry::ListSet< Geometry::Rectangle<R> >
 Geometry::Rectangle<R>::subdivide() const 
 {
-  ListSet< Rectangle<R> > result(this->dimension());
-  size_type n=this->dimension();
+  const Geometry::Rectangle<R>& r=*this;
+
+  size_type n=r.dimension();
+  ListSet< Rectangle<R> > result(n);
   
-  Point<R> lwr_crnr=this->lower_corner();
-  Point<R> cntr=this->centre();
-  Point<R> upr_crnr=this->upper_corner();
+  Point<R> lwr_crnr=r.lower_corner();
+  Point<R> cntr=r.centre();
+  Point<R> upr_crnr=r.upper_corner();
   Point<R> new_lwr_crnr(n);
   Point<R> new_upr_crnr(n);
   for(size_type i=0; i!=1u<<n; ++i) {
@@ -183,7 +187,7 @@ Geometry::Rectangle<R>::subdivide() const
   }
   return result;
 }
-*/
+
 
 
 

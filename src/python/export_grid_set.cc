@@ -109,7 +109,7 @@ void export_grid_set()
   typedef Point<R> RPoint;
   typedef Point<I> IPoint;
 
-  typedef SetInterface<R> RSetInterface;
+  typedef SetInterface< Box<R> > RSetInterface;
   typedef Box<R> RBox;
   typedef BoxListSet<R> RBoxListSet;
   typedef Rectangle<R> RRectangle;

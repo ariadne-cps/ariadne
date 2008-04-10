@@ -35,8 +35,9 @@ using namespace boost::python;
 template<class R>
 void export_empty_set() 
 {
-  class_< EmptySet<R>, bases< SetInterface<R> > >("EmptySet",init< dimension_type >())
-    .def("dimension", &EmptySet<R>::dimension)
+  typedef Box<R> BS;
+  class_< EmptySet<R>, bases< SetInterface<BS> > >("EmptySet",init< dimension_type >())
+    .def("space", &EmptySet<R>::space)
     .def("contains", &EmptySet<R>::contains)
     .def("superset", &EmptySet<R>::superset)
     .def("intersects", &EmptySet<R>::intersects)

@@ -243,7 +243,7 @@ namespace Ariadne {
      */
     template<class R>
     class PartitionTreeSet 
-      : public SetInterface<R>
+      : public SetInterface< Box<R> >
     {
      public:
       //      typedef PartitionTreeSetIterator<R> iterator;
@@ -255,6 +255,8 @@ namespace Ariadne {
 
       /*! \brief A tag describing the type of set. */
       typedef denotable_set_tag set_category;
+      /*! \brief The type used to describe the space the set lies in. */
+      typedef EuclideanSpace space_type;
       /*! \brief A tag describing the type of set. */
       typedef PartitionTreeCell<R> basic_set_type;
 
@@ -284,7 +286,7 @@ namespace Ariadne {
       virtual PartitionTreeSet<R>* clone() const;
 
       /*! \brief The space dimension of the set. */
-      virtual dimension_type dimension() const;
+      virtual space_type space() const;
 
       /*!\brief Checks if a denotable set includes a point. */
       virtual tribool contains(const Point<R>& p) const;
@@ -304,6 +306,9 @@ namespace Ariadne {
       /*!\brief A rectangle containing the grid cell. */
       virtual Box<R> bounding_box() const;
       //@}
+
+      /*! \brief The space dimension of the set. */
+      dimension_type dimension() const;
 
       /*! \brief Convert to a BoxListSet. */
       operator BoxListSet<R> () const;

@@ -30,6 +30,7 @@
 #include "exceptions.h"
 #include "base/stlio.h"
 
+#include "geometry/euclidean_space.h"
 #include "geometry/box.h"
 #include "geometry/list_set.h"
 
@@ -170,6 +171,14 @@ dimension_type
 Geometry::Grid<R>::dimension() const
 {
   return this->_data->_lengths.size();
+}
+
+
+template<class R>
+Geometry::EuclideanSpace
+Geometry::Grid<R>::space() const
+{
+  return EuclideanSpace(this->dimension());
 }
 
 
@@ -426,6 +435,14 @@ dimension_type
 Geometry::FiniteGrid<R>::dimension() const 
 {
   return this->_grid.dimension();
+}
+
+
+template<class R>
+Geometry::EuclideanSpace
+Geometry::FiniteGrid<R>::space() const
+{
+  return EuclideanSpace(this->dimension());
 }
 
 

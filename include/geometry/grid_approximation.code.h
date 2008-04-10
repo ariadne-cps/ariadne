@@ -218,7 +218,7 @@ Geometry::instantiate_grid_approximation()
   Zonotope<R>* z=0;
   Polytope<R>* pltp=0;
   Polyhedron<R>* plhd=0;
-  SetInterface<R>* set=0;
+  SetInterface< Box<R> >* set=0;
   
   Grid<R>* g=0;
   FiniteGrid<R>* fg=0;
@@ -442,18 +442,17 @@ Geometry::outer_approximation(const BoxListSet<R>& bxls, const FiniteGrid<R>& fg
 
 template<class R>
 Geometry::GridCellListSet<R>
-Geometry::outer_approximation(const SetInterface<R>& set, const Grid<R>& g) 
+Geometry::outer_approximation(const SetInterface< Box<R> >& set, const Grid<R>& g) 
 {
   ARIADNE_LOG(4,"GridCellListSet outer_approximation(SetInterface, Grid)\n");
   GridCellListSet<R> result(g);
-  ARIADNE_CHECK_EQUAL_DIMENSIONS(set,g,"outer_approximation(SetInterface<R>,Grid<R>)");
+  ARIADNE_CHECK_EQUAL_SPACE(set,g,"outer_approximation(SetInterface< Box<R> >,Grid<R>)");
   ARIADNE_ASSERT(set.bounding_box().bounded());
   ARIADNE_LOG(4,"bb="<<set.bounding_box()<<"\n");
 
   const GridBlock<R> gb=outer_approximation(set.bounding_box(),g);
   ARIADNE_LOG(4,"gb="<<gb<<"\n");
   Box<R> r(g.dimension());
-  uint i=0;
   for(typename GridBlock<R>::const_iterator iter=gb.begin(); iter!=gb.end(); ++iter) {
     ARIADNE_LOG(4,*iter<<"\n");
     r=*iter;
@@ -467,11 +466,11 @@ Geometry::outer_approximation(const SetInterface<R>& set, const Grid<R>& g)
 
 template<class R>
 Geometry::GridCellListSet<R>
-Geometry::inner_approximation(const SetInterface<R>& set, const Grid<R>& g) 
+Geometry::inner_approximation(const SetInterface< Box<R> >& set, const Grid<R>& g) 
 {
   ARIADNE_LOG(4,"GridCellListSet inner_approximation(SetInterface, Grid)\n");
   GridCellListSet<R> result(g);
-  ARIADNE_CHECK_EQUAL_DIMENSIONS(set,g,"inner_approximation(SetInterface<R>,Grid<R>)\n");
+  ARIADNE_CHECK_EQUAL_SPACE(set,g,"inner_approximation(SetInterface< Box<R> >,Grid<R>)\n");
   
   const GridBlock<R> gb=outer_approximation(set.bounding_box(),g);
   Box<R> r(g.dimension());
@@ -494,7 +493,7 @@ Geometry::fuzzy_outer_approximation(const Zonotope<R>& z, const Grid<R>& g)
 
 template<class R>
 Geometry::BoxListSet<R>
-Geometry::lower_approximation(const SetInterface<R>& s, const Grid<R>& g) 
+Geometry::lower_approximation(const SetInterface< Box<R> >& s, const Grid<R>& g) 
 {
   ARIADNE_LOG(4,"ListSet<Rectangle> lower_approximation(SetInterface s, Grid fg)\n");
   FiniteGrid<R> fg(g,s.bounding_box());
@@ -503,7 +502,7 @@ Geometry::lower_approximation(const SetInterface<R>& s, const Grid<R>& g)
 
 template<class R>
 Geometry::BoxListSet<R>
-Geometry::point_approximation(const SetInterface<R>& s, const Grid<R>& g) 
+Geometry::point_approximation(const SetInterface< Box<R> >& s, const Grid<R>& g) 
 {
   ARIADNE_LOG(4,"ListSet<Rectangle> point_approximation(SetInterface s, Grid fg)\n");
   FiniteGrid<R> fg(g,s.bounding_box());
@@ -540,11 +539,11 @@ Geometry::outer_approximation(const ListSet<BS>& ls, const Grid<R>& g)
 
 template<class R>
 Geometry::GridMaskSet<R>
-Geometry::outer_approximation(const SetInterface<R>& set, const FiniteGrid<R>& fg) 
+Geometry::outer_approximation(const SetInterface< Box<R> >& set, const FiniteGrid<R>& fg) 
 {
   ARIADNE_LOG(4,"GridMaskSet outer_approximation(SetInterface, FiniteGrid)\n");
   GridMaskSet<R> result(fg);
-  ARIADNE_CHECK_EQUAL_DIMENSIONS(set,fg,"outer_approximation(PartitionTreeSet<R>,FiniteGrid<R>)");
+  ARIADNE_CHECK_EQUAL_SPACE(set,fg,"outer_approximation(PartitionTreeSet<R>,FiniteGrid<R>)");
   
   const Grid<R>& g=fg.grid();
   const Combinatoric::LatticeBlock& lb=fg.lattice_block();
@@ -563,7 +562,7 @@ Geometry::outer_approximation(const SetInterface<R>& set, const FiniteGrid<R>& f
 
 template<class R>
 Geometry::GridMaskSet<R>
-Geometry::inner_approximation(const SetInterface<R>& s, const FiniteGrid<R>& fg) 
+Geometry::inner_approximation(const SetInterface< Box<R> >& s, const FiniteGrid<R>& fg) 
 {
   ARIADNE_LOG(4,"GridMaskSet inner_approximation(SetInterface s, FiniteGrid fg)\n");
   GridMaskSet<R> result(fg);
@@ -588,7 +587,7 @@ Geometry::inner_approximation(const SetInterface<R>& s, const FiniteGrid<R>& fg)
 
 template<class R>  
 Geometry::BoxListSet<R>
-Geometry::lower_approximation(const SetInterface<R>& s, const FiniteGrid<R>& fg) 
+Geometry::lower_approximation(const SetInterface< Box<R> >& s, const FiniteGrid<R>& fg) 
 {
   ARIADNE_LOG(4,"ListSet<Box> lower_approximation(SetInterface s, FiniteGrid fg)\n"); 
   BoxListSet<R> result;
@@ -615,7 +614,7 @@ Geometry::lower_approximation(const SetInterface<R>& s, const FiniteGrid<R>& fg)
 
 template<class R>  
 Geometry::BoxListSet<R>
-Geometry::point_approximation(const SetInterface<R>& s, const FiniteGrid<R>& fg) 
+Geometry::point_approximation(const SetInterface< Box<R> >& s, const FiniteGrid<R>& fg) 
 {
   typedef Numeric::Interval<R> I;
   ARIADNE_LOG(4,"ListSet<Box> point_approximation(SetInterface s, FiniteGrid fg)\n"); 

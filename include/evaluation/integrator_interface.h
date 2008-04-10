@@ -1,8 +1,8 @@
 /***************************************************************************
  *            integrator_interface.h
  *
- *  Copyright  2006-7  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
+ *  Copyright  2006-8  Alberto Casagrande, Pieter Collins
+ *  
  ****************************************************************************/
 
 /*
@@ -28,8 +28,6 @@
 #ifndef ARIADNE_INTEGRATOR_INTERFACE_H
 #define ARIADNE_INTEGRATOR_INTERFACE_H
 
-#include <boost/shared_ptr.hpp>
-
 #include "base/types.h"
 #include "base/declarations.h"
 #include "linear_algebra/declarations.h"
@@ -39,15 +37,14 @@
 namespace Ariadne {
   namespace Evaluation {
 
-
-    /*! \brief A class for computing the image of a basic set under a map. 
-     *  \ingroup Integrators
+    /*! \ingroup EvaluatorInterfaces \ingroup Integrators
+     *  \brief Interface for computing a step of the evolution of an enclosure set under a vector field.
      */
-    template<class BS>
+    template<class ES>
     class IntegratorInterface
     {
       typedef Numeric::Rational T;
-      typedef typename BS::real_type R;
+      typedef typename ES::real_type R;
       typedef Numeric::Interval<R> I;
      public:
       //@{ 
@@ -55,50 +52,45 @@ namespace Ariadne {
       /*! \brief Virtual destructor. */
       virtual ~IntegratorInterface() { }
       /*! \brief Make a dynamically-allocated copy. */
-      virtual IntegratorInterface<BS>* clone() const = 0;
+      virtual IntegratorInterface<ES>* clone() const = 0;
       //@}
 
 
       //@{ 
-      //! \name Methods for applying a system to a basic set.
+      //! \name Methods for integrating a vector field over an enclosure set.
 
       /*! \brief Compute an integration time and a bounding box. */
       virtual 
       std::pair< Numeric::Rational, Geometry::Box<R> >
-      flow_bounds(const System::VectorField<R>& f, 
+      flow_bounds(const System::VectorField<R>& vf, 
                   const Geometry::Box<R>& s,
                   const Numeric::Rational& t) const = 0; 
       
-      /*! \brief Compute the evolution of a basic set for times in the range [t1,t2]. */
+      /*! \brief Compute the time \a t flow of an enclosure set \a s under a vector field \a vf, assuming \a bb is a bounding box for the flow. */
       virtual 
-      BS
-      evolution_step(const System::VectorField<R>& f, 
-                     const BS& s,
-                     const Numeric::Rational& t1, 
-                     const Numeric::Rational& t2, 
-                     const Geometry::Box<R>& bb) const
-      {
-        ARIADNE_ASSERT(t2>=t1);
-        BS es=this->integration_step(f,s,t1,bb); 
-        if(t1==t2) { return es; }
-        else { return this->reachability_step(f,es,Numeric::Rational(t2-t1),bb); }
-      }
-          
-      /*! \brief Compute the image of a basic set under a continuous function. */
-      virtual 
-      BS
-      integration_step(const System::VectorField<R>& f, 
-                       const BS& s,
+      ES
+      integration_step(const System::VectorField<R>& vf, 
+                       const ES& s,
                        const Numeric::Rational& t, 
                        const Geometry::Box<R>& bb) const = 0; 
       
-      /*! \brief Compute the image of a basic set under a continuous function. */
+      /*! \brief Compute the time \a t flow tube around an enclosure set \a s under a vector field \a vf, assuming \a bb is a bounding box for the flow. */
       virtual 
-      BS
-      reachability_step(const System::VectorField<R>& f, 
-                        const BS& s,
+      ES
+      reachability_step(const System::VectorField<R>& vf, 
+                        const ES& s,
                         const Numeric::Rational& t, 
                         const Geometry::Box<R>& bb) const = 0;
+
+      /*! \brief Compute the evolution of a basic set \a s under the vector field \a vf for times in the range [t1,t2], assuming \a bb is a bounding box for the flow. */
+      virtual 
+      ES
+      evolution_step(const System::VectorField<R>& vf, 
+                     const ES& s,
+                     const Numeric::Rational& t1, 
+                     const Numeric::Rational& t2, 
+                     const Geometry::Box<R>& bb) const;
+          
       //@}
 
       //@{ 
@@ -108,52 +100,7 @@ namespace Ariadne {
       //@}
     };
 
-    template<class BS> std::ostream& operator<<(std::ostream& os, const IntegratorInterface<BS>& i);
-
-
-
-
-    /*! \brief A class for computing the flow of a vector field.
-     *  \ingroup Integrators
-     */
-    template<class R>
-    class FlowerInterface
-    {
-      typedef Numeric::Interval<R> I;
-     public:
-      /*! \brief Make a dynamically-allocated copy. */
-      virtual FlowerInterface<R>* clone() const = 0;
-
-      /*! \brief Compute the flow of a point. */
-      virtual 
-      Geometry::Point<I> 
-      flow_step(const System::VectorField<R>& f, 
-                const Geometry::Point<I>& s, 
-                const Numeric::Rational& t, 
-                const Geometry::Box<R>& bb) const = 0;
-    };
-
-
-    /*! \brief A class for computing the flow of a differentiable vector field.
-     *  \ingroup Integrators
-     */
-    template<class R>
-    class DifferentiableFlowerInterface
-      : public FlowerInterface<R>
-    {
-      typedef Numeric::Interval<R> I;
-     public:
-      /*! \brief Make a dynamically-allocated copy. */
-      virtual DifferentiableFlowerInterface<R>* clone() const = 0;
-      /*! \brief Compute the spacial jacobian over a flow step of time \a t starting at \a p assuming that the flow remains within \a bb. */
-      virtual LinearAlgebra::Matrix<I> flow_step_jacobian(const System::VectorField<R>& vf,
-                                                          const Geometry::Point<I>& p,
-                                                          const Numeric::Rational& t,
-                                                          const Geometry::Box<R>& bb) const = 0;
-    };
-
-    template<class R> std::ostream& operator<<(std::ostream& os, const FlowerInterface<R>& i);
-
+    template<class ES> std::ostream& operator<<(std::ostream& os, const IntegratorInterface<ES>& i);
 
   }
 }

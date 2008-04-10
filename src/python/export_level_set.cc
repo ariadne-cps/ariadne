@@ -42,7 +42,7 @@ void export_level_set()
 {
   typedef typename Numeric::traits<R>::arithmetic_type A;
 
-  class_< LevelSet<R>, bases< SetInterface<R> > >("LevelSet",init< const FunctionInterface<R>& >())
+  class_< LevelSet<R>, bases< SetInterface< Box<R> > > >("LevelSet",init< const FunctionInterface<R>& >())
     .def("function", (Point<A>(LevelSet<R>::*)(const Point<A>&)const) &LevelSet<R>::function)
     .def("separates", (tribool(LevelSet<R>::*)(const Point<A>&,const Point<A>&)const) &LevelSet<R>::separates)
     .def("dimension", &LevelSet<R>::dimension)

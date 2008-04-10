@@ -53,7 +53,7 @@ void export_partition_tree_set()
   typedef PartitionTreeCell<R> RPartitionTreeCell;
   typedef PartitionTreeSet<R> RPartitionTreeSet;
  
-  typedef SetInterface<R> RSetInterface;
+  typedef SetInterface< Box<R> > RSetInterface;
   typedef Box<R> RBox;
   typedef Zonotope<R> RZonotope;
   typedef GridMaskSet<R> RGridMaskSet;

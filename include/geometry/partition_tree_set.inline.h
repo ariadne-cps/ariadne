@@ -122,6 +122,7 @@ Geometry::PartitionScheme<R>::dimension() const
 
 
 
+
 template<class R> inline
 Geometry::PartitionTreeCell<R>::PartitionTreeCell(const Box<R>& r, const Combinatoric::SubdivisionCell& c)
   : _unit_box(r), _subdivision_cell(c)

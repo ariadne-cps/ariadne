@@ -34,6 +34,7 @@
 #include "geometry/declarations.h"
 
 #include <boost/shared_ptr.hpp>
+#include "geometry/euclidean_space.h"
 
 /*! \file map.h
  *  \brief MapInterface interface.
@@ -64,10 +65,6 @@ namespace Ariadne {
      * The method derivative(const Geometry::Point<F>& A) const computes the \a i th component of the derivative over the set \a A 
      * with respect to the variables in the multi-index \a j.
      */
-    /*!\ingroup System
-     * \ingroup DiscreteTime
-     * \brief A map (discrete-time dynamical system) described by an object satisfying the FunctionInterface.
-     */
     template<class R>
     class Map
     {
@@ -75,8 +72,12 @@ namespace Ariadne {
       typedef typename Numeric::traits<R>::arithmetic_type A; 
       typedef typename Numeric::traits<R>::interval_type I; 
      public:
+      /*! \brief The type used to represent time. */
+      typedef Numeric::Integer time_type;
       /*! \brief The real number type. */
       typedef R real_type;
+      /*! \brief The type used to describe the state space. */
+      typedef Geometry::EuclideanSpace state_space_type;
       /*! \brief The type of denotable state the system acts on. */
       typedef Geometry::Point<R> state_type;
       /*! \brief The type obtained by applying the map to a state. */
@@ -98,6 +99,8 @@ namespace Ariadne {
       /*! \brief The derivatives up to order \a s. */
       Function::TaylorDerivative<A> derivative(const Geometry::Point<A>& x, const smoothness_type& s) const;
         
+      /*! \brief The state space of a self-map. */
+      Geometry::EuclideanSpace state_space() const;
       /*! \brief The dimension of the space of a self-map. */
       dimension_type dimension() const;
       /*! \brief The degree of differentiability of the map. */

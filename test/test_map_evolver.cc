@@ -1,8 +1,8 @@
 /***************************************************************************
  *            test_map_evolver.cc
  *
- *  Copyright  2005-7  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
+ *  Copyright  2005-8  Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -31,9 +31,10 @@
 #include "geometry/polytope.h"
 #include "geometry/rectangular_set.h"
 #include "system/grid_multimap.h"
-#include "evaluation/evolution_parameters.h"
-#include "evaluation/map_evolver.h"
 #include "evaluation/standard_applicator.h"
+#include "evaluation/standard_subdivider.h"
+#include "evaluation/cascade_reducer.h"
+#include "evaluation/map_evolver.h"
 #include "output/epsstream.h"
 #include "output/logging.h"
 
@@ -50,15 +51,22 @@ using namespace Ariadne::Evaluation;
 using namespace Ariadne::Output;
 using namespace std;
 
-template<class R> int test_map_evolver();
+template<class R> 
+class TestMapEvolver
+{
+ public:
+  TestMapEvolver();
+  void test() const;
+};
 
-int main() {
-  return test_map_evolver<Flt>();
-}
 
 template<class R> 
-int 
-test_map_evolver()
+TestMapEvolver<R>::TestMapEvolver()
+{
+}
+
+template<class R>
+void TestMapEvolver<R>::test() const
 {
   set_evaluation_verbosity(0);
   typedef Interval<R> I;
@@ -82,74 +90,48 @@ test_map_evolver()
   Box<R> bounding_box=Box<R>("[-4,4]x[-4,4]") ;
   Box<R> eps_bounding_box=bounding_box.neighbourhood(0.1);
   
-  Grid<R> grid(2,grid_length);
-  Grid<R> fine_grid(2,fine_grid_length);
-  FiniteGrid<R> finite_grid=FiniteGrid<R>(grid,bounding_box); // grid
-
-  Box<R> bx=Box<R>("[1.499,1.501]x[0.499,0.501]");
+  Box<R> bx=Box<R>("[1.49,1.51]x[0.49,0.51]");
   Zonotope<R> z(bx);
   Polytope<R> pl(bx);
   
-  StandardApplicator<R> standard;
-
-  //Test evaluation on different classes of sets
-  Zonotope<R> fz=standard.apply(henon,z);
-
   EvolutionParameters<R> parameters;
-  parameters.set_maximum_basic_set_radius(maximum_basic_set_radius);
-  parameters.set_grid_length(grid_length);
-  parameters.set_bounding_domain_size(bounding_domain_size);
+  StandardApplicator< Zonotope<R> > applicator;
+  StandardSubdivider< Zonotope<R> > subdivider;
+  CascadeReducer< Zonotope<R> > reducer(3);
+  
+  MapEvolver< Zonotope<R> > evolver(parameters,applicator,subdivider,reducer);
+  
+  //Test evaluation on different classes of sets
+  uint steps=3;
+  ListSet< Zonotope<R> > fzl=evolver.reach(static_cast<const Map<R>&>(henon),z,Integer(steps));
+  ARIADNE_ASSERT(fzl.size()==(steps+1u));
+  cout << "z=" << z << " fzl=" << fzl << endl;
+  Zonotope<R> fz=fzl[steps];
 
-  MapEvolver<ZBS> evolver(parameters);
-  Zonotope<R> pfz=standard.apply(henon_inverse,fz);
+  ListSet< Zonotope<R> > pfzl=evolver.reach(static_cast<const Map<R>&>(henon_inverse),fz,Integer(steps));
+  ARIADNE_ASSERT(pfzl.size()==(steps+1u));
+  Zonotope<R> pfz=pfzl[steps];
   cout << "z=" << z << " fz=" << fz << " pfz="<< pfz << endl;
   
-  ConstraintSet<R> bounding_set(bounding_box);
-  Zonotope<R> initial_zonotope(Box<R>("[-0.2,0.8]x[0.3,1.7]"));
-  ConstraintSet<R> initial_set(Box<R>("[-0.2,0.8]x[0.3,1.7]"));
-  
+  Zonotope<R> initial_set = z;
+  ListSet< Zonotope<R> > evolve_set = fz;
+  ListSet< Zonotope<R> > reach_set = pfz;
 
-  // Test evaluation on concrete sets
-  GridMaskSet<R> grid_initial_set(grid,bounding_box);
-  grid_initial_set.adjoin_outer_approximation(initial_set);
-  cout << "grid_initial_set=" << grid_initial_set << endl;
-  GridMaskSet<R> grid_bounding_set(grid,bounding_box);
-  grid_bounding_set.adjoin_outer_approximation(bounding_set);
-  cout << "grid_bounding_set=" << grid_bounding_set << endl;
 
   epsfstream eps;
-
-  cout << "Computing with SetInterface" << endl;
-  
-  cout << "Computing reach set" << endl;
-  evolver.parameters().set_grid_length(div_approx(grid_length,4));
-  shared_ptr< SetInterface<R> > reach_set_ptr(evolver.lower_reach(henon,initial_set,maximum_number_of_steps));
-  cout << "reach_set=" << *reach_set_ptr << endl;
-  evolver.parameters().set_grid_length(grid_length);
-  cout << "Computing chainreach set" << endl;
-  shared_ptr< SetInterface<R> > chainreach_set_ptr(evolver.chainreach(henon,initial_set));
-  cout << "chainreach_set=" << *chainreach_set_ptr << endl;
-
-  eps.open("test_map_evolver-abstract_reach.eps",eps_bounding_box);
-  eps << fill_colour(cyan) << bounding_set;
-  eps << line_style(false) << fill_colour(green) << *chainreach_set_ptr;
-  eps << line_style(true) << fill_colour(magenta) << *reach_set_ptr;
-  eps << fill_colour(transparant);
-  eps << initial_set;
-  eps << bounding_set;
+  eps.open("test_map_evolver.eps",eps_bounding_box);
+  eps << line_style(true);
+  eps << fill_colour(cyan) << reach_set;
+  eps << fill_colour(yellow) << evolve_set;
+  eps << fill_colour(blue) << initial_set;
   eps.close();
-  
- /*
-  cout << "Computing viability kernel" << endl;
-  evolver.parameters().set_grid_length(grid_length);
-  shared_ptr< SetInterface<R> > viability_kernel_ptr(evolver.viable(henon,bounding_set));
-  cout << "viability_kernel=" << *viability_kernel_ptr << endl;
 
-  eps.open("test_map_evolver-abstract_viable.eps",eps_bounding_box);
-  eps << fill_colour(cyan) << bounding_set;
-  eps << fill_colour(magenta) << *viability_kernel_ptr;
-  eps.close();
- */
 
+
+}
+
+int main() {
+  TestMapEvolver<Flt>().test();
   return ARIADNE_TEST_FAILURES;
 }
+

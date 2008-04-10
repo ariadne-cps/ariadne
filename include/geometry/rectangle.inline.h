@@ -826,6 +826,22 @@ Geometry::minkowski_difference(const Rectangle<R1>& r1, const Rectangle<R2>& r2)
 
 
 template<class R> inline
+Geometry::ListSet< Geometry::Rectangle<R> >
+Geometry::split(const Rectangle<R>& r) 
+{
+  return r.split(); 
+}
+
+template<class R> inline
+Geometry::ListSet< Geometry::Rectangle<R> >
+Geometry::subdivide(const Rectangle<R>& r) 
+{
+  return r.subdivide(); 
+}
+
+
+
+template<class R> inline
 tribool 
 Geometry::subset(const Rectangle<R>& r, ListSet< Geometry::Rectangle<R> >& ls);
 

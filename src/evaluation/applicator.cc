@@ -34,11 +34,13 @@ namespace Ariadne {
     using namespace Numeric;
 
 #ifdef ENABLE_FLOAT64
-    template class StandardApplicator<Float64>;
+    template class StandardApplicator< Rectangle<Float64> >;
+    template class StandardApplicator< Zonotope<Float64> >;
 #endif
   
 #ifdef ENABLE_FLOATMP
-    template class StandardApplicator<FloatMP>;
+    template class StandardApplicator< Rectangle<FloatMP> >;
+    template class StandardApplicator< Zonotope<FloatMP> >;
 #endif
 
   }

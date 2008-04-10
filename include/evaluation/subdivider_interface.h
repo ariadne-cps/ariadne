@@ -37,62 +37,32 @@
 namespace Ariadne {
   namespace Evaluation {
 
-    template<class BS> 
+    /*! \brief Interface for methods subdividing enclosure sets into smaller pieces.
+     *  \ingroup EvaluatorInterfaces \ingroup Approximators
+     */
+    template<class ES> 
     class SubdividerInterface 
     { 
-      typedef typename BS::real_type R;
-      typedef Numeric::Interval<R> I;
-      typedef Geometry::ListSet<BS> BSL;
+      typedef typename ES::real_type R;
+      typedef Geometry::ListSet<ES> ESL;
      public:
       /*! \brief Virtual destructor. */
       virtual ~SubdividerInterface() { }
 
       /*! \brief Create a dynamically-allocated copy. */
-      virtual SubdividerInterface<BS>* clone() const = 0;
+      virtual SubdividerInterface<ES>* clone() const = 0;
 
-      /*! \brief Returns an over-approximation which simplifies the description of the set. */
-      virtual BS reduce(const BS& bs) const;
+      /*! \brief Computes the radius of a basic set. */
+      virtual R radius(const ES& es) const = 0;
 
       /*! \brief Subdivide the set \a bs into two smaller pieces. */
-      virtual Geometry::ListSet<BS> split(const BS& bs) const = 0;
+      virtual ESL split(const ES& es) const = 0;
 
       /*! \brief Subdivide the set \a bs into smaller pieces, each with radius at most \a r. */
-      virtual Geometry::ListSet<BS> subdivide(const BS& bs, const R& r) const;
+      virtual ESL subdivide(const ES& es, const R& r) const = 0;
     };
 
   }
-}
-
-
-
-namespace Ariadne {
-
-template<class BS> inline
-BS 
-Evaluation::SubdividerInterface<BS>::reduce(const BS& bs) const 
-{
-  return bs;
-}
-
-template<class BS>
-Geometry::ListSet<BS> 
-Evaluation::SubdividerInterface<BS>::subdivide(const BS& bs, const R& r) const
-{
-  BSL result; 
-  BS set=this->reduce(bs); 
-  BSL working(set);
-  while(working.size()!=0) { 
-    set=working.pop(); 
-    if(set.radius()<r) {
-      result.adjoin(set);
-    } else {
-      working.adjoin(this->split(set)); 
-    }
-  }
-  return result;
-}
-
-
 }
 
 #endif /* ARIADNE_SUBDIVIDER_INTERFACE_H */

@@ -36,12 +36,12 @@
 #include "function/declarations.h"
 #include "geometry/declarations.h"
 
-#include "solver.h"
+#include "solver_interface.h"
 
 namespace Ariadne {
   namespace Evaluation {
       
-    /*! \ingroup Solve
+    /*! \ingroup Solvers
      *  \brief Interval Newton solver.
      */
     template<class R>

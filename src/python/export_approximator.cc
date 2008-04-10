@@ -23,48 +23,83 @@
 
 #include "python/float.h"
 
+#include "geometry/box.h"
 #include "geometry/rectangle.h"
 #include "geometry/zonotope.h"
-#include "system/map.h"
+#include "geometry/box_list_set.h"
+#include "geometry/grid_cell_list_set.h"
+#include "geometry/grid_mask_set.h"
 #include "evaluation/approximator_interface.h"
 #include "evaluation/standard_approximator.h"
 
 using namespace Ariadne;
 using namespace Ariadne::Numeric;
 using namespace Ariadne::Geometry;
-using namespace Ariadne::System;
 using namespace Ariadne::Evaluation;
 using namespace Ariadne::Python;
 
 #include <boost/python.hpp>
 using namespace boost::python;
 
-template<class BS>
+template<class Aprx, class ES>
 class ApproximatorWrapper
-  : public ApproximatorInterface<BS>,
-    public wrapper< ApproximatorInterface<BS> >
+  : public ApproximatorInterface<Aprx,ES>,
+    public wrapper< ApproximatorInterface<Aprx,ES> >
 {
-  typedef typename BS::real_type R;
+  typedef typename ES::real_type R;
   typedef Interval<R> I;
+  typedef typename Aprx::Paving Paving;
+  typedef typename Aprx::BasicSet BasicSet;
+  typedef typename Aprx::CoverListSet CoverListSet;
+  typedef typename Aprx::PartitionListSet PartitionListSet;
+  typedef typename Aprx::PartitionTreeSet PartitionTreeSet;
+  typedef ES EnclosureSet;
+  typedef ListSet<ES> EnclosureSetList;
+  
  public:
-  ApproximatorWrapper<BS>* clone() const { return this->get_override("clone")(); }
-  BS basic_set(const Box<R>&) const { return this->get_override("basic_set")(); }
-  R radius(const BS&) const { return this->get_override("radius")(); }
-  Box<R> bounding_box(const BS&) const { return this->get_override("bounding_box")(); }
-  GridCellListSet<R> outer_approximation(const BS&, const Grid<R>&) const { return this->get_override("outer_approximation")(); }
+  ApproximatorWrapper<Aprx,ES>* clone() const { return this->get_override("clone")(); }
+  EnclosureSet enclosure_set(const BasicSet&) const { return this->get_override("enclosure_set")(); }
+  R radius(const EnclosureSet&) const { return this->get_override("radius")(); }
+  BasicSet bounding_box(const EnclosureSet&) const { return this->get_override("bounding_box")(); }
+  CoverListSet lower_approximation(const EnclosureSet&) const { return this->get_override("lower_approximation")(); }
+  PartitionListSet inner_approximation(const EnclosureSet&, const Paving&) const { return this->get_override("inner_approximation")(); }
+  PartitionListSet outer_approximation(const EnclosureSet&, const Paving&) const { return this->get_override("outer_approximation")(); }
+
+  BasicSet bounding_box(const EnclosureSetList&) const { return this->get_override("bounding_box")(); }
+  CoverListSet lower_approximation(const EnclosureSetList&) const { return this->get_override("lower_approximation")(); }
+  PartitionListSet outer_approximation(const EnclosureSetList&, const Paving&) const { return this->get_override("outer_approximation")(); }
+
+  void adjoin_outer_approximation(PartitionTreeSet&, const EnclosureSet&) const { this->get_override("adjoin_outer_approximation")(); }
+  void adjoin_outer_approximation(PartitionTreeSet&, const EnclosureSetList&) const { this->get_override("adjoin_outer_approximation")(); }
 };
 
 
 template<class R>
 void export_approximator() 
 {
+  typedef GridApproximationScheme<R> GAS;
   typedef Zonotope<R> ZBS;
 
-  class_< ApproximatorWrapper<ZBS>, boost::noncopyable >("ZonotopeApproximatorInterface",init<>());
+  class_< ApproximatorWrapper<GAS,ZBS>, boost::noncopyable >("ZonotopeApproximatorInterface",init<>());
 
-  class_< StandardApproximator<ZBS>, bases< ApproximatorInterface<ZBS> > >
+  class_< StandardApproximator<ZBS>, bases< ApproximatorInterface<GAS,ZBS> > >
     approximator_class("StandardApproximator",init<>());
+  approximator_class.def("enclosure_set",&StandardApproximator<ZBS>::enclosure_set);
+  approximator_class.def("radius",&StandardApproximator<ZBS>::radius);
+  approximator_class.def("bounding_box",&StandardApproximator<ZBS>::bounding_box);
+  approximator_class.def("lower_approximation",&StandardApproximator<ZBS>::lower_approximation);
+  approximator_class.def("inner_approximation",&StandardApproximator<ZBS>::inner_approximation);
+  approximator_class.def("outer_approximation",&StandardApproximator<ZBS>::outer_approximation);
 
+  /*
+  BasicSet bounding_box(const EnclosureSetList&) const { return this->get_override("bounding_box")(); }
+  CoverListSet lower_approximation(const EnclosureSetList&) const { return this->get_override("lower_approximation")(); }
+  PartitionListSet outer_approximation(const EnclosureSetList&, const Paving&) const { return this->get_override("outer_approximation")(); }
+
+  void adjoin_outer_approximation(PartitionTreeSet&, const EnclosureSet&) const { this->get_override("adjoin_outer_approximation")(); }
+  void adjoin_outer_approximation(PartitionTreeSet&, const EnclosureSetList&) const { this->get_override("adjoin_outer_approximation")(); }
+  */
+  
 }
 
 template void export_approximator<FloatPy>();

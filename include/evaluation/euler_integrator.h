@@ -35,7 +35,9 @@
 namespace Ariadne {
   namespace Evaluation {
    
-    /*! \brief An integrator based on the Euler method.
+
+    /*! \ingroup Integrators
+     *  \brief An integrator based on the Euler method.
      */
     template<class R>
     class EulerIntegrator

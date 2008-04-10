@@ -21,8 +21,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+#include "base/tuple.h"
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
+#include "function/taylor_derivative.h"
 #include "geometry/box.h"
 #include "system/vector_field_interface.h"
 #include "output/logging.h"
@@ -191,6 +193,28 @@ Evaluation::StandardBounder<R>::refine_flow_bounds(const System::VectorField<R>&
 }
 
  
+
+
+template<class R> inline
+std::pair< Numeric::Rational, Function::TaylorDerivative<Numeric::Interval<R> > >
+Evaluation::StandardBounder<R>::variation_flow_bounds(const System::VectorField<R>& vf, 
+                                                      const Geometry::Box<R>& bx,
+                                                      const Numeric::Rational& t,
+                                                      smoothness_type o) const
+{
+  Numeric::Rational h=t;
+  I hi=I(t)*I(0,1);
+  Function::TaylorDerivative<I> d=Function::TaylorDerivative<I>::variable(bx.position_vectors(),o);
+  while(false) {   // expand flow bounds
+    Function::TaylorDerivative<I> vfd=vf.derivative(Geometry::Point<I>(d.value()),1);
+    Function::TaylorDerivative<I> nd=bx+compose(vfd,d)*I(2*hi);
+    d=nd;
+  }
+  while(true) {
+    d=bx+compose(vf.derivative(Geometry::Point<I>(d.value()),1),d)*I(2*hi);
+  }
+  return make_pair(h,d);
+}
 
 
 

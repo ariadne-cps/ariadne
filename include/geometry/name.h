@@ -68,6 +68,10 @@ namespace Ariadne {
       static std::string string() { return std::string("Timed")+Name<BS>().string(); }
     };
 
+    template<class BS> struct Name< HybridBasicSet<BS> > {
+      static std::string string() { return std::string("Hybrid")+Name<BS>().string(); }
+    };
+
     template<class BS> 
     std::string name() {
       return Name<BS>::string();

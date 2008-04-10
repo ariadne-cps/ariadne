@@ -34,29 +34,34 @@
 #include "linear_algebra/declarations.h"
 #include "geometry/declarations.h"
 
-#include "approximator_interface.h"
+#include "geometry/grid_approximation_scheme.h"
+#include "approximator_base.h"
 
 namespace Ariadne {
   namespace Evaluation {
 
 
-    /*! \brief Geomerical approximation schemes.
-     *  \ingroup Faster but less accurate approximation methods.
+    /*! \ingroup Approximators
+     *  \brief Fast geomerical approximation scheme.
+     *  
+     *  Faster but less accurate approximation methods.
      */
-    template<class BS>
+    template<class ES>
     class FastApproximator
-      : public ApproximatorInterface<BS>
+      : public ApproximatorBase<Geometry::GridApproximationScheme<typename ES::real_type>,ES>
     {
-      typedef typename BS::real_type R;
+      typedef typename ES::real_type R;
       typedef Numeric::Interval<R> I;
      public:
       FastApproximator();
-      FastApproximator(const FastApproximator<BS>& approx);
-      virtual FastApproximator<BS>* clone() const;
-      virtual BS basic_set(const Geometry::Box<R>&  bx) const;
-      virtual R radius(const BS& bs) const;
-      virtual Geometry::Box<R> bounding_box(const BS& bs) const;
-      virtual Geometry::GridCellListSet<R> outer_approximation(const BS& bs, const Geometry::Grid<R>& g) const;
+      FastApproximator(const FastApproximator<ES>& approx);
+      virtual FastApproximator<ES>* clone() const;
+      virtual ES enclosure_set(const Geometry::Box<R>&  bx) const;
+      virtual R radius(const ES& bs) const;
+      virtual Geometry::Box<R> bounding_box(const ES& bs) const;
+      virtual Geometry::BoxListSet<R> lower_approximation(const ES& bs) const;
+      virtual Geometry::GridCellListSet<R> inner_approximation(const ES& bs, const Geometry::Grid<R>& g) const;
+      virtual Geometry::GridCellListSet<R> outer_approximation(const ES& bs, const Geometry::Grid<R>& g) const;
     };
 
   }

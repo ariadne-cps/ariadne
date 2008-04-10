@@ -33,9 +33,9 @@ namespace Ariadne {
 
 template<class S> 
 std::ostream& 
-Geometry::HybridAbstractSet<S>::write(std::ostream& os) const
+Geometry::HybridSet<S>::write(std::ostream& os) const
 { 
-  os << "HybridAbstractSet( { \n";
+  os << "HybridSet( { \n";
   for(locations_const_iterator iter=this->locations_begin(); iter!=this->locations_end(); ++iter)
   {
     discrete_state_type loc=iter->first;

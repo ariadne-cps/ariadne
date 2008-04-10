@@ -23,10 +23,23 @@
  
 #include "integrator_interface.h"
 
-#include "geometry/box.h"
-#include "geometry/zonotope.h"
-
 namespace Ariadne {
+
+template<class BS>
+BS
+Evaluation::IntegratorInterface<BS>::
+evolution_step(const System::VectorField<R>& f, 
+               const BS& s,
+               const Numeric::Rational& t1, 
+               const Numeric::Rational& t2, 
+               const Geometry::Box<R>& bb) const
+{
+  ARIADNE_ASSERT(t2>=t1);
+  BS es=this->integration_step(f,s,t1,bb); 
+  if(t1==t2) { return es; }
+  else { return this->reachability_step(f,es,Numeric::Rational(t2-t1),bb); }
+}
+          
 
 template<class R> inline
 std::ostream&

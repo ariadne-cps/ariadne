@@ -50,7 +50,7 @@ void export_rectangular_set()
 {
   typedef Numeric::Interval<R> I;
   
-  class_< RectangularSet<R>, bases< ConstraintSet<R>, SetInterface<R> > >("RectangularSet",no_init)
+  class_< RectangularSet<R>, bases< ConstraintSet<R>, SetInterface< Box<R> > > >("RectangularSet",no_init)
     .def("__init__", make_constructor(&make_rectangular_set<R>) )
     .def(init< Point<I> >())
     .def(init< Box<R> >())

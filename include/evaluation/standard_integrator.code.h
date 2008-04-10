@@ -34,7 +34,7 @@
 #include <vector>
 #include <valarray>
 
-#include "lohner_integrator.h"
+#include "standard_integrator.h"
 
 #include "base/array.h"
 #include "base/exceptions.h"
@@ -48,95 +48,133 @@
 #include "geometry/box.h"
 #include "geometry/zonotope.h"
 
+#include "function/affine_model.h"
+#include "function/taylor_model.h"
+
 #include "system/vector_field.h"
 
 #include "evaluation/standard_bounder.h"
+#include "evaluation/standard_flower.h"
 
 #include "output/logging.h"
-
-namespace {
-
-using namespace Ariadne;
-
-template<class R>
-LinearAlgebra::Matrix<R>
-symmetrize(const LinearAlgebra::Vector< Numeric::Interval<R> >& iv)
-{
-  LinearAlgebra::Matrix<R> A(iv.size(),iv.size()+1);
-  for(size_type i=0; i!=A.number_of_rows(); ++i) {
-    A(i,i)=radius(iv(i));
-    A(i,iv.size())=midpoint(iv(i));
-  }
-  return A;
-}
-
-}
 
 
 
 namespace Ariadne { 
 
-// Provide as a function for convenience
+
 template<class R> 
-std::pair< Numeric::Rational,Geometry::Box<R> >
-Evaluation::standard_flow_bounds(const System::VectorField<R>& vf, 
-                                 const Geometry::Box<R>& ibb, 
-                                 const Numeric::Rational& max_h)
+Evaluation::StandardIntegrator< Geometry::Zonotope<R> >::
+StandardIntegrator() 
+  : _bounder(new StandardBounder<R>()),
+    _flower(new StandardFlower<R>(4u,1u))
+{ }
+
+template<class R> 
+Evaluation::StandardIntegrator< Geometry::Zonotope<R> >::
+StandardIntegrator(const BounderInterface<R>& bounder, 
+                   const FlowerInterface<R>& flower)
+  : _bounder(bounder.clone()),
+    _flower(flower.clone())
+{ }
+
+template<class R> 
+Evaluation::StandardIntegrator< Geometry::Zonotope<R> >*
+Evaluation::StandardIntegrator< Geometry::Zonotope<R> >::
+clone() const
 {
-  return StandardBounder<R>().flow_bounds(vf,ibb,max_h);
+  return new StandardIntegrator< Geometry::Zonotope<R> >(*this);
 }
 
+
+
+
+template<class R> inline
+std::pair< Numeric::Rational, Geometry::Box<R> >
+Evaluation::StandardIntegrator< Geometry::Zonotope<R> >::
+flow_bounds(const System::VectorField<R>& vf, 
+            const Geometry::Box<R>& bx,
+            const Numeric::Rational& t) const
+{
+  return this->_bounder->flow_bounds(vf,bx,t);
+}
+
+
+template<class R>
+Geometry::Zonotope<R>
+Evaluation::StandardIntegrator< Geometry::Zonotope<R> >::
+integration_step(const System::VectorField<R>& vector_field, 
+                 const Geometry::Zonotope<R>& initial_set, 
+                 const Numeric::Rational& step_size, 
+                 const Geometry::Box<R>& flow_bounding_box) const
+{
+  using namespace Numeric;
+  using namespace LinearAlgebra;
+  using namespace Function;
+  using namespace Geometry;
+  using namespace System;
+  
+  uint verbosity=0;
+
+  ARIADNE_LOG(5,"StandardIntegrator::integration_step(VectorField,Zonotope,Time,Box)\n");
+  ARIADNE_LOG(6,"flow_bounding_box="<<flow_bounding_box<<"\n");
+  ARIADNE_LOG(6,"initial_set="<<initial_set<<"\n");
+  AffineModel<R> affine_flow_model=this->_flower->affine_flow_model(vector_field,initial_set.centre(),initial_set.bounding_box(),step_size,flow_bounding_box);
+  TaylorModel<R> taylor_flow_model=this->_flower->taylor_flow_model(vector_field,initial_set.centre(),initial_set.bounding_box(),step_size,flow_bounding_box);
+  ARIADNE_LOG(6,"affine_flow_model="<<affine_flow_model<<"\n");
+  ARIADNE_LOG(6,"taylor_flow_model="<<taylor_flow_model<<"\n");
+  ARIADNE_LOG(6,"affine_flow_model="<<affine_flow_model<<"\n");
+  Zonotope<R> flow_set=Geometry::apply(affine_flow_model,initial_set);
+  ARIADNE_LOG(6,"flow_set="<<flow_set<<"\n");
+
+  return flow_set;
+}
 
 
 
 
 template<class R>
-Geometry::Point< Numeric::Interval<R> >
-Evaluation::standard_flow_step(const System::VectorField<R>& vector_field, 
-                               const Geometry::Point< Numeric::Interval<R> >& initial_point, 
-                               const Numeric::Interval<R>& step_size, 
-                               const Geometry::Box<R>& bounding_box) 
+Geometry::Zonotope<R> 
+Evaluation::StandardIntegrator< Geometry::Zonotope<R> >::
+reachability_step(const System::VectorField<R>& vector_field, 
+                  const Geometry::Zonotope<R>& initial_set,
+                  const Numeric::Rational& step_size,
+                  const Geometry::Box<R>& bounding_box) const
 {
-  typedef Numeric::Interval<R> I;
-  
-  // Use second order formula \f$ \Phi(t,p) = p + tf(p) + t^2/2 Df(B)f(B) \f$
-  const System::VectorField<R>& vf=vector_field;
-  const Geometry::Point<I>& p=initial_point;
-  Geometry::Point<I> b=bounding_box;
-  I h=step_size;
-  
-  return p + h * ( vf(p) + (h/2) * ( vf.jacobian(b) * vf(b) ) );
+  using namespace Numeric;
+  using namespace LinearAlgebra;
+  using namespace Function;
+  using namespace Geometry;
+  using namespace System;
+
+  uint verbosity=0;
+
+  ARIADNE_LOG(6,"StandardIntegrator::reachability_step(VectorField,Zonotope<Interval>,Interval,Box) const\n");
+  Rational half_step_size=step_size/2;
+
+  AffineModel<R> flow_model=this->_flower->affine_flow_model(vector_field,initial_set.centre(),initial_set.bounding_box(),half_step_size,bounding_box);
+  Point<I> phic=flow_model.value();
+  Matrix<I> Dphi=flow_model.jacobian();
+  Matrix<I> gen=Dphi*initial_set.generators();
+  Vector<I> hhf=I(half_step_size)*vector_field(bounding_box);
+  Vector<I> err=Dphi*(I(-1,1)*initial_set.error());
+
+  Zonotope<R> result(phic+err,concatenate_columns(gen,hhf));
+
+  return result;
 }
+
+
 
 template<class R>
-LinearAlgebra::Matrix< Numeric::Interval<R> >
-Evaluation::standard_flow_step_jacobian(const System::VectorField<R>& vector_field, 
-                                        const Geometry::Point< Numeric::Interval<R> >& initial_point, 
-                                        const Numeric::Interval<R>& step_size, 
-                                        const Geometry::Box<R>& bounding_box) 
+std::ostream&
+Evaluation::StandardIntegrator< Geometry::Zonotope<R> >::write(std::ostream& os) const
 {
-  // Use first order formula \f$ D\Phi(t,p) = I + t Df(B) W \f$ where W is a bound for D\Phi([0,h],p)
-  // Use ||W-I|| < e^{Lh}-1, where L is the  norm of Df
-  typedef Numeric::Interval<R> I;
-  const dimension_type d=vector_field.dimension();
-  const System::VectorField<R>& vf=vector_field;
-  //const Geometry::Point<I>& pr=initial_point;
-  Geometry::Point<I> b=bounding_box;
-  I h=step_size;
-
-  LinearAlgebra::Matrix<I> Id = LinearAlgebra::Matrix<I>::identity(d);
-
-  LinearAlgebra::Matrix<I> Df = vf.jacobian(b);
-  R l = LinearAlgebra::norm(Df).upper();
-  I e = Numeric::sub_up(Numeric::exp_up(mul_up(h.upper(),l)),R(1))*I(-1,1);
-
-  LinearAlgebra::Matrix<I> W = LinearAlgebra::Matrix<I>::identity(d)+e*LinearAlgebra::Matrix<I>::one(d,d);
-
-  // Perform a couple of steps
-  W=Id + I(0,h.upper()) * (Df * W);
-  W=Id + h * (Df * W);
-  return W;
+  return os << "StandardIntegrator<Zonotope>( )";
 }
+
+
+
 
 
 }

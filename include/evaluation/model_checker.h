@@ -36,111 +36,59 @@
 #include "system/declarations.h"
 
 #include "system/transition_system_interface.h"
+#include "evaluation/evolver_interface.h"
 
 #include "evaluation/evolution_parameters.h"
-#include "evaluation/applicator_interface.h"
-#include "evaluation/map_orbiter_interface.h"
 
 namespace Ariadne {
   namespace Evaluation {
 
+    class TimedLogicFormula;
 
-
-    /*! \brief A class for computing the evolution of a discrete-time autonomous system.
-     *  \ingroup Applicators
+    /*! \ingroup Analysers
+     *  \brief A class for checking validity of logical formulae for transition systems.
      */
-    template<class R>
+    template<class T, class Aprx>
     class ModelChecker {
-      typedef Numeric::Interval<R> I;
+      typedef typename Aprx::real_type R;
+      typedef typename Aprx::PartitionTreeSet PartitionTreeSet;
+      typedef System::TransitionSystemInterface<T,Aprx> TransitionSystem;
      private:
-      EvolutionParameters<R>* _parameters;
+      boost::shared_ptr< EvolutionParameters<R> > _parameters;
      public:
+
       //@{
       //! \name Constructors and destructors
 
-      /*! \brief Default constructor chooses appropriate parameter values for maximum basic set radius and grid size. */
-      ModelChecker();
-      
+      /*! \brief Virtual destructor. */
+      virtual ~ModelChecker() { }
       /*! \brief Construct from evolution parameters. */
-      ModelChecker(const EvolutionParameters<R>& parameters);
-      
-      /*! \brief Copy constructor. */
-      ModelChecker(const ModelChecker<R>& other);
-      
-      /*! \brief Destructor. */
-      virtual ~ModelChecker();
-
+      ModelChecker(const EvolutionParameters<R>& parameters) : _parameters(parameters.clone()) { }
       /*! \brief Make a dynamically-allocated copy. */
-      ModelChecker<R>* clone() const;
-      
+      ModelChecker<T,Aprx>* clone() const { return new ModelChecker<T,Aprx>(*this); }
+  
       //@}
 
-
- 
       public:
       //@{ 
-      //! \name Evaluation of discretized maps on concrete sets
-
-      /*! \brief Compute an approximation to the iterated set of \a map starting in \a initial_set, iterating \a steps times. */
-      virtual
-      Geometry::BoxListSet<R> 
-      evolve(const System::TransitionSystemInterface<R>& map, 
-             const Geometry::BoxListSet<R>& initial_set,
-             const Numeric::Integer& steps) const;
-
-      /*! \brief Compute an approximation to the reachable set of \a map starting in \a initial_set, iterating at most \a steps times. */
-      virtual
-      Geometry::BoxListSet<R> 
-      reach(const System::TransitionSystemInterface<R>& map, 
-            const Geometry::BoxListSet<R>& initial_set,
-            const Numeric::Integer& steps) const;
-
-      /*! \brief Compute a lower-approximation to the reachable set of \a map starting in \a initial_set. */
-      virtual
-      Geometry::BoxListSet<R> 
-      lower_reach(const System::TransitionSystemInterface<R>& map, 
-                  const Geometry::BoxListSet<R>& initial_set) const;
-
-      
-     
-      /*! \brief Compute an outer-approximation to the chain-reachable set of \a map starting in \a initial_set while staying within \a bounding_set. */
-      virtual
-      Geometry::GridMaskSet<R> 
-      chainreach(const System::TransitionSystemInterface<R>& map, 
-                 const Geometry::GridMaskSet<R>& initial_set, 
-                 const Geometry::Box<R>& bounding_box) const;
-    
-      /*! \brief Compute the viability kernel of \a map within \a bounding_set. */
-      virtual
-      Geometry::GridMaskSet<R> 
-      viable(const System::TransitionSystemInterface<R>& map, 
-             const Geometry::GridMaskSet<R>& bounding_set) const;
-    
-      /*! \brief Attempt to verify that the reachable set of \a map starting in \a initial_set remains in \a safe_set. */
-      virtual
-      tribool
-      verify(const System::TransitionSystemInterface<R>& map, 
-             const Geometry::GridMaskSet<R>& initial_set, 
-             const Geometry::GridMaskSet<R>& safe_set) const;
-      //@}
-
-      
-
- 
-      //@{
-      //! \name Methods for computing discretizations
-
-      /*! \brief Discretize a system on a grid. */ 
-      virtual 
-      System::GridMultiMap<R> 
-      discretize(const System::TransitionSystemInterface<R>& f, 
-                 const Geometry::GridMaskSet<R>& dom,
-                 const Geometry::Grid<R>& range_grid) const;
-
+      //! \name Verification of logical formulae
+      /*! \brief Attempt to verify that the reachable set of \a system starting in \a initial_set remains in \a safe_set. */
+      virtual tribool verify(const TransitionSystem& system, const PartitionTreeSet& initial_set, const PartitionTreeSet& safe_set) const;
+      /*! \brief Attempt to verify that the reachable set of \a system starting in \a initial_set remains in \a safe_set. (Not currently implemented) */
+      virtual tribool verify(const TransitionSystem& system, const PartitionTreeSet& initial_set, const TimedLogicFormula& formula) const;
       //@}
 
      private:
-      const EvolutionParameters<R>& parameters() const;
+      typedef typename Aprx::Paving Pv;
+      typedef typename Aprx::BasicSet Bx;
+      typedef typename Aprx::BasicSet BS;
+      typedef typename Aprx::CoverListSet CLS;
+      typedef typename Aprx::PartitionListSet PLS;
+      typedef TransitionSystem TSI; 
+      typedef PartitionTreeSet PTS;
+
+      const int verbosity() const { return this->_parameters->verbosity(); }
+      const EvolutionParameters<R>& parameters() const { return *this->_parameters; }
    };
 
 

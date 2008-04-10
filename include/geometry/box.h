@@ -50,6 +50,7 @@ namespace Ariadne {
   namespace Geometry {
 
     class basic_set_tag;
+    class EuclideanSpace;
     template<class R> class BoxVerticesIterator;
     
     /*! \brief A box of arbitrary dimension.
@@ -92,6 +93,8 @@ namespace Ariadne {
      public:
       /*! \brief A tag describing the type of set. */
       typedef basic_set_tag set_category;
+      /*! \brief The type used to describe the space the set lies in. */
+      typedef EuclideanSpace space_type;
       /*! \brief The type of denotable real number used for the corners. */
       typedef R real_type;
       /*! \brief The type used for the corners. */

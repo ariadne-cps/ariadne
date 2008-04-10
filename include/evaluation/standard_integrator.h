@@ -32,36 +32,83 @@
 #include "geometry/box.h"
 #include "system/vector_field.h"
 
-namespace {
-
-using namespace Ariadne;
-
-}
-
+#include "evaluation/bounder_interface.h"
+#include "evaluation/flower_interface.h"
+#include "evaluation/reducer_interface.h"
+#include "evaluation/integrator_interface.h"
 
 
 namespace Ariadne { 
   namespace Evaluation { 
 
-    template<class R> 
-    std::pair< Numeric::Rational, Geometry::Box<R> >
-    standard_flow_bounds(const System::VectorField<R>& vf, 
-                         const Geometry::Box<R>& bx,
-                         const Numeric::Rational& t);
+    template<class R> class Flower;
 
-    template<class R>
-    Geometry::Point< Numeric::Interval<R> >
-    standard_flow_step(const System::VectorField<R>& vector_field, 
-                       const Geometry::Point< Numeric::Interval<R> >& initial_point, 
-                       const Numeric::Interval<R>& step_size, 
-                       const Geometry::Box<R>& bounding_box);
+    /*!\ingroup Integrators
+     * \brief A template for computing a step of the evolution of an enclosure set under a vector field.
+     */
+    template<class ES> class StandardIntegrator;
+  
+    /*!\ingroup Integrators
+     * \brief A template for computing a step of the evolution of a zonotope under a vector field.
+     *
+     * The update rule for an integration step on a zonotope is
+     * \f[  \Phi(X,t) \subset c+tf(c)+\frac{t^2}{2} Df(B)f(B) + \bigl(I+t\,Df(X)\bigr)\cdot(x-c) . \f]
+     * where \f$B\f$ is a bound for \f$\Phi(c,[0,t])\f$.
+     * Subdivision is performed using orthogonal over-approximation.
+     *
+     * The update rule for an integration step for an interval zonotope is 
+     * \f[  \Phi(x,t) \subset c+tf(c)+\frac{t^2}{2}\,Df(B_c)\,f(B_c) + \bigl(I+t\,Df(B)\,W\bigr)\cdot(x-c) \f]
+     * where \f$B_c\f$ is a bound for \f$\Phi(c,[0,t])\f$, \f$B\f$ is a bound for \f$\Phi(X,[0,t])\f$ and \f$W\f$ is a bound for \f$D\Phi(X,[0,t])\f$.
+     * Subdivision is performed using orthogonal over-approximation.
+     * See the section on the \ref c1lohnerintegrator for details.
+     */
+    template<class R> class StandardIntegrator< Geometry::Zonotope<R> >
+      : public IntegratorInterface< Geometry::Zonotope<R> >
+    {
+      typedef Numeric::Interval<R> I;
+      typedef Geometry::Zonotope<R> ES;
+     private:
+      boost::shared_ptr< BounderInterface<R> > _bounder;
+      boost::shared_ptr< FlowerInterface<R> > _flower;
+     public:
+      
+      /*! \brief Construct and integrator with a given temporal order. */
+      StandardIntegrator();
 
-    template<class R>
-    LinearAlgebra::Matrix< Numeric::Interval<R> >
-    standard_flow_step_jacobian(const System::VectorField<R>& vector_field, 
-                                const Geometry::Point< Numeric::Interval<R> >& initial_point, 
-                                const Numeric::Interval<R>& step_size, 
-                                const Geometry::Box<R>& bounding_box);
+      /*! \brief Construct an integrator from a bounding box method, an method for computing a flow, and an enclosure reduction method. */
+      StandardIntegrator(const BounderInterface<R>& bounder, 
+                         const FlowerInterface<R>& flower);
+
+      /*! \brief Cloning operator. */
+      virtual StandardIntegrator< Geometry::Zonotope<R> >* clone() const;
+
+     public:
+      
+      /*! \brief Compute an integration time and a bounding box, given a bounding box for the intitial set, and a maximum allowable flow time. */
+      virtual 
+      std::pair< Numeric::Rational, Geometry::Box<R> >
+      flow_bounds(const System::VectorField<R>& f, 
+                  const Geometry::Box<R>& bx,
+                  const Numeric::Rational& t) const; 
+
+      /*! \brief An algorithm for integrating forward a zonotope.  */
+      virtual Geometry::Zonotope<R> 
+      integration_step(const System::VectorField<R>& vf,
+                       const Geometry::Zonotope<R>& s,
+                       const Numeric::Rational& t,
+                       const Geometry::Box<R>& bb) const;
+
+      /*! \brief An algorithm for integrating forward a zonotope for a time up to time \a step_size, assuming the set \a bb is a bounding box for the integration. */
+      virtual Geometry::Zonotope<R> 
+      reachability_step(const System::VectorField<R>& vf,
+                        const Geometry::Zonotope<R>& s,
+                        const Numeric::Rational& t,
+                        const Geometry::Box<R>& bb) const;
+
+      /*! \brief Write to an output stream. */
+      virtual std::ostream& write(std::ostream&) const;
+    };
+    
 
 
   }

@@ -107,6 +107,9 @@ namespace Ariadne {
 #define ARIADNE_CHECK_EQUAL_DIMENSIONS(obj1,obj2,func)                  \
   { if((obj1).dimension()!=(obj2).dimension()) { using namespace Geometry; ARIADNE_THROW(IncompatibleDimensions,func,#obj1"="<<obj1<<", "#obj2"="<<obj2); } }
         
+#define ARIADNE_CHECK_EQUAL_SPACE(obj1,obj2,func)                  \
+  { if((obj1).space()!=(obj2).space()) { using namespace Geometry; ARIADNE_THROW(IncompatibleDimensions,func,#obj1"="<<obj1<<", "#obj2"="<<obj2); } }
+        
 #define ARIADNE_CHECK_COORDINATE(obj,ind,func)                          \
   { if((obj).dimension()<=ind) { using namespace Geometry; ARIADNE_THROW(InvalidCoordinate,func,#obj"="<<obj<<", "#ind"="<<ind); } }
 

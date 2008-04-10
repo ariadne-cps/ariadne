@@ -99,6 +99,8 @@ template<class R> void export_constraint();
 template<class R> void export_orbit();
 
 template<class R> void export_approximator();
+template<class R> void export_subdivider();
+template<class R> void export_reducer();
 
 template<class R> void export_map();
 template<class R> void export_vector_field();
@@ -111,10 +113,9 @@ template<class R> void export_applicator();
 template<class R> void export_integrator();
 template<class R> void export_detector();
 template<class R> void export_discretiser();
-template<class R> void export_map_evolver();
-template<class R> void export_vector_field_evolver();
-template<class R> void export_set_based_hybrid_evolver();
-template<class R> void export_constraint_based_hybrid_evolver();
+template<class R> void export_evolver();
+template<class R> void export_reachability_analyser();
+template<class R> void export_model_checker();
 
 void export_text_output();
 void export_latex_output();
@@ -217,6 +218,8 @@ BOOST_PYTHON_MODULE(ariadne)
   export_orbit<FloatPy>();
 
   export_approximator<FloatPy>();
+  export_subdivider<FloatPy>();
+  export_reducer<FloatPy>();
 
   export_map<FloatPy>();
   export_vector_field<FloatPy>();
@@ -227,12 +230,9 @@ BOOST_PYTHON_MODULE(ariadne)
   export_solver<FloatPy>();
   export_applicator<FloatPy>();
   export_integrator<FloatPy>();
-  //export_detector<FloatPy>();
-  //export_discretiser<FloatPy>();
-  export_map_evolver<FloatPy>();
-  export_vector_field_evolver<FloatPy>();
-  export_set_based_hybrid_evolver<FloatPy>();
-  //export_constraint_based_hybrid_evolver<FloatPy>();
+  export_evolver<FloatPy>();
+  export_reachability_analyser<FloatPy>();
+  export_model_checker<FloatPy>();
 
   export_text_output();
   export_latex_output();

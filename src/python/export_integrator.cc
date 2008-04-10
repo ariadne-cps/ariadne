@@ -31,8 +31,7 @@
 #include "system/affine_vector_field.h"
 
 #include "evaluation/integrator_interface.h"
-#include "evaluation/kuhn_integrator.h"
-#include "evaluation/lohner_integrator.h"
+#include "evaluation/standard_integrator.h"
 #include "evaluation/affine_integrator.h"
 #include "evaluation/euler_integrator.h"
 
@@ -85,24 +84,24 @@ void export_integrator()
   class_< IntegratorWrapper< Box<R> >, boost::noncopyable >("BoxIntegratorInterface",init<>());
   class_< IntegratorWrapper< Zonotope<R> >, boost::noncopyable >("ZonotopeIntegratorInterface",init<>());
 
-  class_< KuhnIntegrator<R>, bases<IntegratorInterface< Zonotope<R> > > > kuhn_integrator_class("KuhnIntegrator",init<uint,uint>());
-  kuhn_integrator_class.def("flow_bounds",&flow_bounds<KuhnIntegrator<R>,R>);
-  kuhn_integrator_class.def("integration_step",&KuhnIntegrator<R>::integration_step);
-  kuhn_integrator_class.def("reachability_step",&KuhnIntegrator<R>::reachability_step);
+  class_< StandardIntegrator< Zonotope<R> >, bases<IntegratorInterface< Zonotope<R> > > >
+    standard_integrator_class("StandardIntegrator",init<>());
+  standard_integrator_class.def("flow_bounds",&StandardIntegrator< Zonotope<R> >::flow_bounds);
+  standard_integrator_class.def("integration_step",&StandardIntegrator< Zonotope<R> >::integration_step);
+  standard_integrator_class.def("reachability_step",&StandardIntegrator< Zonotope<R> >::reachability_step);
 
-  class_< LohnerIntegrator<R>, bases<IntegratorInterface< Zonotope<R> > > >
-    lohner_integrator_class("LohnerIntegrator",init<>());
-  lohner_integrator_class.def("flow_bounds",&flow_bounds<LohnerIntegrator<R>,R>);
-  lohner_integrator_class.def("integration_step",&LohnerIntegrator<R>::integration_step);
-  lohner_integrator_class.def("reachability_step",&LohnerIntegrator<R>::reachability_step);
 
-  class_< AffineIntegrator<R>, bases< IntegratorInterface< Zonotope<R> > > >
+  class_< AffineIntegrator< Zonotope<R> >, bases< IntegratorInterface< Zonotope<R> > > >
     affine_integrator_class("AffineIntegrator",init<>());
-  affine_integrator_class.def("flow_bounds",&flow_bounds<AffineIntegrator<R>,R>);
-  affine_integrator_class.def("integration_step",(Zonotope<R>(AffineIntegrator<R>::*)(const VectorField<R>&,const Zonotope<R>&,const Rational&,const Box<R>&)const) &AffineIntegrator<R>::integration_step);
-  affine_integrator_class.def("reachability_step",(Zonotope<R>(AffineIntegrator<R>::*)(const VectorField<R>&,const Zonotope<R>&,const Rational&,const Box<R>&)const) &AffineIntegrator<R>::reachability_step);
+  affine_integrator_class.def("flow_bounds",&AffineIntegrator< Zonotope<R> >::flow_bounds);
+  affine_integrator_class.def("integration_step",(Zonotope<R>(AffineIntegrator< Zonotope<R> >::*)(const VectorField<R>&,const Zonotope<R>&,const Rational&,const Box<R>&)const) &AffineIntegrator< Zonotope<R> >::integration_step);
+  affine_integrator_class.def("reachability_step",(Zonotope<R>(AffineIntegrator< Zonotope<R> >::*)(const VectorField<R>&,const Zonotope<R>&,const Rational&,const Box<R>&)const) &AffineIntegrator< Zonotope<R> >::reachability_step);
 
-  class_< EulerIntegrator<R>, bases<IntegratorInterface< Box<R> > > >("EulerIntegrator",init<>());
+  class_< EulerIntegrator<R>, bases<IntegratorInterface< Box<R> > > >
+    euler_integrator_class("EulerIntegrator",init<>());
+  euler_integrator_class.def("flow_bounds",&flow_bounds<EulerIntegrator<R>,R>);
+  euler_integrator_class.def("integration_step",(Rectangle<R>(EulerIntegrator<R>::*)(const VectorField<R>&,const Rectangle<R>&,const Rational&,const Box<R>&)const) &EulerIntegrator<R>::integration_step);
+  euler_integrator_class.def("reachability_step",(Rectangle<R>(EulerIntegrator<R>::*)(const VectorField<R>&,const Rectangle<R>&,const Rational&,const Box<R>&)const) &EulerIntegrator<R>::reachability_step);
 }
 
 template void export_integrator<FloatPy>();

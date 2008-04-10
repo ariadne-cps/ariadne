@@ -57,25 +57,25 @@ inline void epsfstream_close(epsfstream& eps) { eps.close(); }
 template <class R> inline
 void eps_open(epsfstream& eps, 
 	      const char* fn,
-	      const SetInterface<R>& box)
+	      const Box<R>& box)
 {
   eps.open(fn, box.bounding_box());
 }
 
 template <class R> inline
 void eps_open_x1x2(epsfstream& eps, 
-	      const char* fn,
-	      const SetInterface<R>& box,
-				uint x1, uint x2)
+                   const char* fn,
+                   const Box<R>& box,
+                   uint x1, uint x2)
 {
   eps.open(fn, box.bounding_box(), x1, x2);
 }
 
 template <class R> inline
 void eps_open_map(epsfstream& eps, 
-	      const char* fn,
-	      const SetInterface<R>& box,
-				const PlanarProjectionMap& map)
+                  const char* fn,
+                  const Box<R>& box,
+                  const PlanarProjectionMap& map)
 {
   eps.open(fn, box.bounding_box(), map);
 }
@@ -108,7 +108,7 @@ void export_postscript_output()
     .def("set_fill_style",(void(epsfstream::*)(bool))&epsfstream::set_fill_style)
     .def("write",&write< Box<FloatPy> >)
     .def("write",&write< GridCell<FloatPy> >)
-    .def("write",&write< GridBlock<FloatPy> >)
+    //.def("write",&write< GridBlock<FloatPy> >)
     .def("write",&write< GridCellListSet<FloatPy> >)
     .def("write",&write< GridMaskSet<FloatPy> >)
     .def("write",&write< PartitionTreeSet<FloatPy> >)

@@ -1,8 +1,8 @@
 /****************************************************************************
  *            epsstream.template.h
  *
- *  Copyright  2005-7  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright  2005-8  Alberto Casagrande, Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -205,7 +205,7 @@ Output::operator<<(epsstream& eps, const Geometry::PartitionTreeSet<R>& ds)
 
 template<class R> 
 Output::epsstream&
-Output::operator<<(epsstream& eps, const Geometry::SetInterface<R>& set)
+Output::operator<<(epsstream& eps, const Geometry::SetInterface< Geometry::Box<R> >& set)
 {
   using namespace Geometry;
   typedef Numeric::Interval<R> I;
@@ -228,7 +228,7 @@ Output::operator<<(epsstream& eps, const Geometry::SetInterface<R>& set)
       bb=set.bounding_box();
     } 
     catch(Geometry::UnboundedSet& e) {
-      if(set.dimension()==2) {
+      if(set.space()==EuclideanSpace(2)) {
         Rectangle2d bbox=eps.bounding_box();
         bb=Geometry::Box<R>(2);
         bb.set_lower_bound(0,bbox.lower_bound(0));

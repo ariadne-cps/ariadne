@@ -39,14 +39,15 @@
 namespace Ariadne {
   namespace Geometry {
     
-
+    class EuclideanSpace;
+    template<class R> class Box;
 
     //! \ingroup ExactSet
     /*! \brief A set defined by the conditions \f$f(x)=0\f$ for some function \f$f\f$. 
      */
     template<class R>
     class LevelSet
-      : public SetInterface<R>
+      : public SetInterface< Box<R> >
     {
       typedef typename Numeric::traits<R>::arithmetic_type A;
      public:
@@ -57,8 +58,8 @@ namespace Ariadne {
       virtual ~LevelSet();
       /*! \brief Return a new dynamically-allocated copy of the set. */
       virtual LevelSet<R>* clone() const;
-      /*! \brief The dimension of the set. */
-      virtual dimension_type dimension() const;
+      /*! \brief The space the set lies in. */
+      virtual EuclideanSpace space() const;
       /*! \brief */
       virtual tribool contains(const Point<R>& pt) const;
       /*! \brief */
@@ -76,6 +77,8 @@ namespace Ariadne {
       /*! \brief */
       virtual std::ostream& write(std::ostream& os) const;
 
+      /*! \brief The dimension of the set. */
+      dimension_type dimension() const;
       /*! \brief The number of independed inequality constraints used to define the set. */
       size_type number_of_constraints() const;
       /*! \brief The countour function defining the level set. */

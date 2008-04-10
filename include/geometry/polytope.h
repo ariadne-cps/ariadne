@@ -44,6 +44,7 @@ namespace Ariadne {
   namespace Geometry {
 
     class basic_set_tag;
+    class EuclideanSpace;
     template<class R> class Box;
     template<class X> class Rectangle;
     template<class X> class Polyhedron;
@@ -97,6 +98,8 @@ namespace Ariadne {
      public:
       /*! \brief A tag describing the type of set. */
       typedef basic_set_tag set_category;
+      /*! \brief The type used to describe the space the set lies in. */
+      typedef EuclideanSpace space_type;
        /*! \brief The type of denotable real numbers used to describe the convex hull. */
       typedef R value_type;
        /*! \brief The type of real numbers used to describe the state space. */

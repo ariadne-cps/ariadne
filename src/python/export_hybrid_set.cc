@@ -57,23 +57,23 @@ inline void hybrid_set_set_item(HS& hs, DiscreteState id, const A& x) {
 }
 
 template<class R> inline 
-SetInterface<R>& hybrid_set_get_reference(HybridSet<R>& hs, DiscreteState id) {
+SetInterface< Box<R> >& hybrid_set_get_reference(HybridSet<R>& hs, DiscreteState id) {
   //return static_cast<SetInterface<R>&>(hs[id]);
-  SetReference<R> hsref=hs[id];
-  return static_cast<SetInterface<R>&>(hsref);
+  SetReference< Box<R> > hsref=hs[id];
+  return static_cast<SetInterface< Box<R> >&>(hsref);
 }
 
 template<class R> inline 
-SetInterface<R>* hybrid_set_get_pointer(HybridSet<R>& hs, DiscreteState id) {
+SetInterface< Box<R> >* hybrid_set_get_pointer(HybridSet<R>& hs, DiscreteState id) {
   std::cerr << "id="<<id<<std::endl;
   std::cerr << "hs="<<hs<<std::endl;
-  SetInterface<R>& hsref=hs[id];
+  SetInterface< Box<R> >& hsref=hs[id];
   std::cerr << "hsref="<<hsref<<std::endl;
-  return &static_cast<SetInterface<R>&>(hsref);
+  return &static_cast<SetInterface< Box<R> >&>(hsref);
 }
 
 template<class R> inline 
-SetInterface<R>* hybrid_set_get_cloned_pointer(HybridSet<R>& hs, DiscreteState id) {
+SetInterface< Box<R> >* hybrid_set_get_cloned_pointer(HybridSet<R>& hs, DiscreteState id) {
   return hs[id].clone();
 }
 
@@ -133,7 +133,7 @@ void export_hybrid_set()
     .def("new_location",&hybrid_set_new_location< HybridSet<R>, dimension_type >)
     .def("new_location",&hybrid_set_new_location< HybridSet<R>, Rectangle<R> >)
     .def("new_location",&hybrid_set_new_location< HybridSet<R>, Polyhedron<R> >)
-    .def("new_location",&hybrid_set_new_location< HybridSet<R>, SetInterface<R> >)
+    .def("new_location",&hybrid_set_new_location< HybridSet<R>, SetInterface< Box<R> > >)
     .def("locations",&HybridSet<R>::locations)
     .def("__getitem__", &hybrid_set_get_cloned_pointer<R>, return_manage_new_object)
     .def("__getitem__", &hybrid_set_get_pointer<R>, return_reference_existing_object)

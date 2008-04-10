@@ -39,6 +39,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include "function/function_interface.h"
+#include "geometry/euclidean_space.h"
 
 
 namespace Ariadne {
@@ -75,8 +76,12 @@ namespace Ariadne {
       typedef typename Numeric::traits<R>::arithmetic_type F; 
       typedef typename Numeric::traits<R>::interval_type I; 
      public:
+      /*! \brief The type used to represent time. */
+      typedef Numeric::Rational time_type;
       /*! \brief The real number type. */
       typedef R real_type;
+      /*! \brief The type used to describe the state space. */
+      typedef Geometry::EuclideanSpace state_space_type;
       /*! \brief The type of denotable state the system acts on. */
       typedef Geometry::Point<R> state_type;
       
@@ -108,10 +113,12 @@ namespace Ariadne {
       // Used in integration method
       void compute(Function::TaylorSeriesTaylorVariable<F>*, const Function::TaylorSeriesTaylorVariable<F>* x) const { };
 
-      /*! \brief The degree of differentiability of the vector field. */
-      smoothness_type smoothness() const { return this->_function_ptr->smoothness(); }
+      /*! \brief The state space of the vector field. */
+      Geometry::EuclideanSpace state_space() const { return Geometry::EuclideanSpace(this->_function_ptr->result_size()); }
       /*! \brief The dimension of the space the vector field lives in. */
       dimension_type dimension() const { return this->_function_ptr->result_size(); }
+      /*! \brief The degree of differentiability of the vector field. */
+      smoothness_type smoothness() const { return this->_function_ptr->smoothness(); }
 
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream& os) const;

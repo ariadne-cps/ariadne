@@ -35,9 +35,13 @@
 #include "linear_algebra/vector.h"
 #include "combinatoric/lattice_set.h"
 
+#include "grid_approximation_scheme.h"
+
 namespace Ariadne {
   namespace Geometry {
     
+    class EuclideanSpace;
+  
     template<class R> class Point;
     template<class R> class Box;
       
@@ -80,6 +84,9 @@ namespace Ariadne {
       /*! \brief Construct a grid \a g by dividing \a r into pieces given by lattice block \a lb.
        *  The grid \a g is such that %GridBlock(g,lb) is a superset of \a r, with equality holding if possible. */
       explicit Grid(const Box<R>& r, const Combinatoric::LatticeBlock& lb);
+
+      /*! \brief The underlying space of the grid. */
+      EuclideanSpace space() const;
 
       /*! \brief The underlying dimension of the grid. */
       dimension_type dimension() const;
@@ -184,6 +191,9 @@ namespace Ariadne {
      
       /*! \brief The extent of the finite grid in state space. */
       Box<R> extent() const;
+
+      /*! \brief The space the grid lies in. */
+      EuclideanSpace space() const;
 
       /*! \brief The dimension of the grid. */
       dimension_type dimension() const;

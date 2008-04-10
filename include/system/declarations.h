@@ -31,9 +31,6 @@
 namespace Ariadne { 
   namespace System {
 
-    template<class R> class TransitionSystemInterface;
-    template<class R> class TransitionSystem;
-
     template<class R> class Map;
     template<class R> class GridMultiMap;
     template<class R> class DiscreteTimeSystem;

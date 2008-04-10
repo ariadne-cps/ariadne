@@ -41,33 +41,41 @@ namespace Ariadne {
   namespace Evaluation {
 
 
-  
-    /*! \brief A class for computing the image of a basic set under a map. 
-     *  \ingroup Applicators
+    template<class ES> class StandardApplicator;
+ 
+    /*! \ingroup Applicators
+     *  \brief A class for computing the image of a rectangle under a map. 
      */
     template<class R>
-    class StandardApplicator
-      : public ApplicatorInterface< Geometry::Rectangle<R> >,
-        public ApplicatorInterface< Geometry::Zonotope<R> >
+    class StandardApplicator< Geometry::Rectangle<R> >
+      : public ApplicatorInterface< Geometry::Rectangle<R> >
     {
-      typedef Numeric::Interval<R> I;
+      typedef Geometry::Rectangle<R> ES;
      public:
-      //@{ 
-      //! \name Constructors and cloning operations.
       /*! \brief Default constructor. */
       StandardApplicator() { }
       /*! \brief Make a dynamically-allocated copy. */
-      StandardApplicator<R>* clone() const { return new StandardApplicator<R>(*this); }
-      //@}
-
-      //@{ 
-      //! \name Methods for applying a system to a basic set.
-      
+      StandardApplicator<ES>* clone() const { return new StandardApplicator<ES>(*this); }
       /*! \brief Compute the image of a rectangle under a continuous function. */
       virtual Geometry::Rectangle<R> apply(const System::Map<R>& f, const Geometry::Rectangle<R>& bs) const;
+    };
+
+
+    /*! \ingroup Applicators
+     *  \brief A class for computing the image of a zonotope under a map. 
+     */
+    template<class R>
+    class StandardApplicator< Geometry::Zonotope<R> >
+      : public ApplicatorInterface< Geometry::Zonotope<R> >
+    {
+      typedef Geometry::Zonotope<R> ES;
+     public:
+      /*! \brief Default constructor. */
+      StandardApplicator() { } 
+      /*! \brief Make a dynamically-allocated copy. */
+      StandardApplicator<ES>* clone() const { return new StandardApplicator<ES>(*this); }
       /*! \brief Compute the image of a zonotope under a continuous function. */
       virtual Geometry::Zonotope<R> apply(const System::Map<R>& f, const Geometry::Zonotope<R>& bs) const;
-      //@}
     };
 
   }

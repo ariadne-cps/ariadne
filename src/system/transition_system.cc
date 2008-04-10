@@ -1,8 +1,8 @@
 /***************************************************************************
  *            transition_system.cc
  *
- *  Copyright  2006-7 Pieter Collins
- *  pieter.collins@cwi.nl
+ *  Copyright  2006-8 Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -21,7 +21,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "numeric/integer.h"
 #include "numeric/float.h"
+
+#include "geometry/grid.h"
+#include "geometry/hybrid_grid.h"
+#include "system/map.h"
+#include "system/vector_field.h"
+#include "system/hybrid_automaton.h"
 
 #include "system/transition_system.h"
 #include "system/transition_system.code.h"
@@ -29,13 +36,18 @@
 namespace Ariadne {
   namespace System {
     using namespace Numeric;
+    using namespace Geometry;
 
 #ifdef ENABLE_FLOAT64
-    template class TransitionSystem<Float64>;
+  template class TransitionSystem< System::Map<Float64>, GridApproximationScheme<Float64> >;
+  template class TransitionSystem< System::VectorField<Float64>, GridApproximationScheme<Float64> >;
+  //template class TransitionSystem< System::HybridAutomaton<Float64>, HybridGridApproximationScheme<Float64> >;
 #endif
   
 #ifdef ENABLE_FLOATMP
-    template class TransitionSystem<FloatMP>;
+  template class TransitionSystem< System::Map<FloatMP>, GridApproximationScheme<FloatMP> >;
+  template class TransitionSystem< System::VectorField<FloatMP>, GridApproximationScheme<FloatMP> >;
+  //template class TransitionSystem< System::HybridAutomaton<FloatMP>, HybridGridApproximationScheme<FloatMP> >;
 #endif
 
   }

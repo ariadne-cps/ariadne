@@ -525,7 +525,7 @@ Geometry::difference(const GridCellListSet<R>& gcls, const GridMaskSet<R>& gms)
 
 template<class R> 
 void 
-Geometry::GridMaskSet<R>::adjoin_outer_approximation(const SetInterface<R>& s)
+Geometry::GridMaskSet<R>::adjoin_outer_approximation(const SetInterface< Box<R> >& s)
 {
   FiniteGrid<R> fg(this->grid(),this->block());
   this->adjoin(outer_approximation(s,fg));
@@ -533,7 +533,7 @@ Geometry::GridMaskSet<R>::adjoin_outer_approximation(const SetInterface<R>& s)
 
 template<class R> 
 void 
-Geometry::GridMaskSet<R>::adjoin_inner_approximation(const SetInterface<R>& s)
+Geometry::GridMaskSet<R>::adjoin_inner_approximation(const SetInterface< Box<R> >& s)
 {
   FiniteGrid<R> fg(this->grid(),this->block());
   this->adjoin(inner_approximation(s,fg));
@@ -541,7 +541,7 @@ Geometry::GridMaskSet<R>::adjoin_inner_approximation(const SetInterface<R>& s)
 
 template<class R> 
 void 
-Geometry::GridMaskSet<R>::restrict_outer_approximation(const SetInterface<R>& s)
+Geometry::GridMaskSet<R>::restrict_outer_approximation(const SetInterface< Box<R> >& s)
 {
   FiniteGrid<R> fg(this->grid(),this->block());
   this->restrict(outer_approximation(s,fg));
@@ -549,7 +549,7 @@ Geometry::GridMaskSet<R>::restrict_outer_approximation(const SetInterface<R>& s)
 
 template<class R> 
 void 
-Geometry::GridMaskSet<R>::restrict_inner_approximation(const SetInterface<R>& s)
+Geometry::GridMaskSet<R>::restrict_inner_approximation(const SetInterface< Box<R> >& s)
 {
   FiniteGrid<R> fg(this->grid(),this->block());
   this->restrict(inner_approximation(s,fg));

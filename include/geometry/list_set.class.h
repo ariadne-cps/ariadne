@@ -79,6 +79,8 @@ namespace Ariadne {
      public:
       /*! \brief A tag describing the type of set. */
       typedef denotable_set_tag set_category;
+      /*! \brief The type describing the space the set lies in. */
+      typedef typename BS::space_type space_type;
       /*!\brief The type of denotable real number used to represent points in the space. */
       typedef R real_type;
       /*!\brief The type of point contained by the set. */

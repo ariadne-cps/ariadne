@@ -190,19 +190,32 @@ To solve the robust problem, we first find a solution to the standard problem, a
 \section simplexalgorithm The simplex algorithm
 
   Suppose we wish to update a basis of the standard linear programming problem.
-   - The current point \f$x_B=A_B^{-1} (b - A_N x_N)\f$ (with \f$x_N=0\f$).
-   - The current dual variables are \f$y=A_B^{-1}c\f$.
-   - The reduced costs are \f$z_N=c_N-A_NA_B^{-1}c_B\f$.
-   - If the reduced costs are all positive, the algorithm terminates. Otherwise, select \f$j\f$ such that \f$c_j<0\f$.
-   - The direction to move the basic variables is \f$d=A_B^{-1}a_j\f$.
-   - Choose \f$t\f$ maximal so that \f$x_B-td\geq 0\f$; if the update is being used for feasibility, constraints violated by \f$v\f$ may be violated by \f$v-td\f$. Choose \f$k\f$ corresponding to a newly saturated constraint.
-   - Replace \f$x_j\f$ by \f$x_k\f$ to obtain new basic \f$B'\f$, and update \f$A_B^{-1}\f$.
-     - We have \f$A_B^{-1} A_B = I\f$ and \f$A_B^{-1}a_j=d\f$ and we want \f$A_{B'}a_j = e_i\f$ if \f$x_k\f$ is the \f$i^\mathrm{th}\f$ basis variable..
-     - Let \f$d=A_{B}^{-1} a_j\f$ where \f$a_j\f$ is the \f$j^\mathrm{th}\f$ column of \f$A\f$.
-     - For \f$p\neq i\f$, subtract \f$\mathrm{B}_{iq}\,d_p/d_i\f$ from \f$\mathrm{B}_{pq}\f$ for all \f$q\f$.
-     - Then divide \f$\mathrm{B}_{iq}\f$ by \f$d_i\f$ for all \f$q\f$.
+   - The current point \f$x_B=A_B^{-1} (b - A_N x_N)\f$ (with \f$x_N=0\f$), and satisfies \f$x_B\geq0\f$.
+   - The current dual variables are \f$y={(A_B^T)}^{-1}c_B;\ y^T = c_B^T A_B^{-1}\f$.
+   - The reduced costs are \f$z_N=c_N-A_N^T {(A_B^T)}^{-1} c_B; \ z_N^T = c_N^T - c_B^T A_B^{-1} A_N\f$.
+   - If the reduced costs are all positive, the algorithm terminates. Otherwise, select \f$s\f$ such that \f$z_s<0\f$.
+   - The direction to move the basic variables is \f$d=A_B^{-1}a_{s}\f$ where \f$a_{s}\f$ is the \f$s^\textrm{th}\f$ column of \f$A\f$.
+   - Choose \f$t\f$ maximal so that \f$x_B-td\geq 0\f$; if the update is being used for feasibility, constraints violated by \f$v\f$ may be violated by \f$v-td\f$. Choose \f$r\f$ corresponding to a newly saturated constraint.
+   - Replace \f$x_r\f$ by \f$x_s\f$ to obtain new basic \f$B'\f$, and update \f$A_B^{-1}\f$.
+     - We have \f$A_B^{-1} A_B = I\f$ and \f$A_B^{-1}a_s=d\f$ and we want \f$A_{B'}a_s = e_r\f$ if \f$x_r\f$ is the \f$r^\mathrm{th}\f$ basis variable..
+     - Let \f$d=A_{B}^{-1} a_s\f$ where \f$a_s\f$ is the \f$s^\mathrm{th}\f$ column of \f$A\f$.
+     - For \f$p\neq r\f$, subtract \f$\mathrm{B}_{rq}\,d_p/d_r\f$ from \f$\mathrm{B}_{pq}\f$ for all \f$q\f$.
+     - Then divide \f$\mathrm{B}_{rq}\f$ by \f$d_r\f$ for all \f$q\f$.
      <br>   
-     - Succinctly, \f$A_{B'}^{-1} := A_B^{-1} - (d-e_i) r^T / d_j\f$ where \f$d=A_B^{-1}\f$ and \f$r^T=e_i^T A_B^{-1}\f$.
+     - Succinctly, \f$A_{B'}^{-1} := A_B^{-1} - (d-e_r) r^T / d_r\f$ where \f$d=A_B^{-1}a_s\f$ and \f$r^T=e_r^T A_B^{-1}\f$.
+
+\section dualsimplexalgorithm The dual revised simplex algorithm
+
+  Suppose we wish to update a dual feasible basis of the standard linear programming problem; note that the reduced costs satisfy satisfy \f$z_N\geq0\f$.
+   - If the current point is positive, the algorithm terminates. Otherwise, select \f$r\f$ such that \f$x_r<0\f$.
+   - The direction to move the primal variables is \f$d=a_{r}A_B^{-1}\f$ where \f$a_{r}\f$ is the \f$r^\textrm{th}\f$ row of \f$A\f$.
+   - Choose \f$t\f$ maximal so that \f$z_N-td_N\geq 0\f$; if the update is being used for feasibility, constraints violated by \f$v\f$ may be violated by \f$v-td\f$. Choose \f$r\f$ corresponding to a newly saturated constraint.
+   - Replace \f$x_r\f$ by \f$x_s\f$ to obtain new basis \f$B'\f$, and update \f$A_B^{-1}\f$.
+
+\section simplexalgorithmconstrainst The simplex algorithm with constraints
+
+  Suppose we wish to update a basis of the standard linear programming problem.
+   - The current point \f$x_B=A_B^{-1} (b - A_N x_N)\f$ (with \f$x_L=l_L; x_U=u_U\f$).
 
 \section feasibilityalgorithms Algorithms for feasibility 
 
@@ -217,8 +230,10 @@ If the dual problem has a solution, then the primal problem has no solution, and
 
   - We solve dual feasibility problems by gradually adding constraints:<br>
 Suppose we have a basic feasible solution \f$y\f$ of \f$A^Ty\leq c\f$ and we wish to add the constraint \f$ b^Ty\leq d\f$.
-    -# Try to maximise \f$-b^Ty\f$ while satisfying the other constraints.
+    -# Try to maximise \f$-b^Ty\f$ while satisfying the other constraints. This can be done by solving the linear programming problem \f$ \min c^T x \text{ s.t. } Ax=b \f$. We start with a dual feasible problem and aim to find a primal feasible problem using the dual simplex algorithm.
     -# If a value of \f$y\f$ is found with \f$b^Ty\leq d\f$, the new constraint can be added.
+    <br><br>
+    An alternative approach is to consider the primal problem \f$ \min c^T x \text{ s.t. } Ax=0; x\geq 0 \f$. If an unbounded feasible solution to the primal exists, then the dual is infeasible.
 
  - Constrained feasibility problem with equalities  \f$ Ax=b;\ l\leq x\leq u\ (m\leq n)\f$.<br>
    Find a set of basic variables \f$B\f$ so that \f$ A_B\f$ is nonsingular, where \f$ A_B\f$ is the matrix formed from the columns of \f$A\f$ in \f$B\f$.
@@ -231,11 +246,6 @@ Suppose we have a basic feasible solution \f$y\f$ of \f$A^Ty\leq c\f$ and we wis
 
    See Chvatal [Chapter 8, pp 129] for more details on constrained feasibility.
 
-
-\section simplexalgorithmconstrains The simplex algorithm with constraints
-
-  Suppose we wish to update a basis of the standard linear programming problem.
-   - The current point \f$x_B=A_B^{-1} (b - A_N x_N)\f$ (with \f$x_L=l_L; x_U=u_U\f$).
 
 \section simplexefficiency Efficiency of the simplex algorithm
 
@@ -288,4 +298,6 @@ We can convert the standard dual feasibility problem into a primal linear progra
 
  - lprfsd() Solve the dual feasibility problem \f$Ax\leq b\f$.
 
+\section lpsolverspackages Other linear programming packages
+Koberstein · Uwe H. Suhl
 */

@@ -50,7 +50,7 @@ namespace Ariadne {
      * with respect to independent variables \f$x_1,\ldots,x_n\f$, 
      * 
      * In the current implementation, we store the coefficients of the power series expansion \f$y=\sum a_\alpha x^\alpha\f$ rather than
-     * the derivative values \f$d^\alpha y/dx^\alpha$, as the former are more convenient to work with.
+     * the derivative values \f$d^\alpha y/dx^\alpha\f$, as the former are more convenient to work with.
      *
      */
     template<class X>

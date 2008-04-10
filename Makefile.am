@@ -40,3 +40,5 @@ check-numeric: lib-numeric
 check-python: python
 	(cd python; make check)
 
+install-lib: lib python
+	(cd src; make install)

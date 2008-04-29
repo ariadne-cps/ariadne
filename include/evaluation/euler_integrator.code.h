@@ -80,7 +80,7 @@ template<class R> inline
 std::pair< Numeric::Rational, Geometry::Box<R> >
 Evaluation::EulerIntegrator<R>::
 flow_bounds(const System::VectorField<R>& vf, 
-            const Geometry::Box<R>& bx,
+            const Geometry::Rectangle<R>& bx,
             const Numeric::Rational& t) const
 {
   return StandardBounder<R>().flow_bounds(vf,bx,t);

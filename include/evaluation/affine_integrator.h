@@ -77,21 +77,21 @@ namespace Ariadne {
       /*! \brief Compute an integration time and a bounding box, given a bounding box for the intitial set, and a maximum allowable flow time. */
       virtual 
       std::pair< Numeric::Rational, Geometry::Box<R> >
-      flow_bounds(const System::VectorField<R>& f, 
-                  const Geometry::Box<R>& bx,
-                  const Numeric::Rational& t) const; 
+      flow_bounds(const System::VectorField<R>& vector_field, 
+                  const Geometry::Zonotope<R>& initial_set,
+                  const Numeric::Rational& maximum_step_size) const; 
 
       /*! \brief Integrate a basic set for within a bounding set. */
-      virtual Geometry::Point<I> flow_step(const System::VectorField<R>& vf,
-                                           const Geometry::Point<I>& p,
-                                           const Numeric::Rational& t,
-                                           const Geometry::Box<R>& bb) const;
+      virtual Geometry::Point<I> flow_step(const System::VectorField<R>& vector_field,
+                                           const Geometry::Point<I>& initial_point,
+                                           const Numeric::Rational& step_size,
+                                           const Geometry::Box<R>& bounding_set) const;
      
       /*! \brief Integrate a basic set for within a bounding set. */
-      virtual LinearAlgebra::Matrix<I> flow_step_jacobian(const System::VectorField<R>& vf,
-                                                          const Geometry::Point<I>& p,
-                                                          const Numeric::Rational& r,
-                                                          const Geometry::Box<R>& bb) const;
+      virtual LinearAlgebra::Matrix<I> flow_step_jacobian(const System::VectorField<R>& vector_field,
+                                                          const Geometry::Point<I>& initial_point,
+                                                          const Numeric::Rational& step_size,
+                                                          const Geometry::Box<R>& bounding_set) const;
      
 
       virtual Geometry::Zonotope<R> 

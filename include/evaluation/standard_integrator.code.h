@@ -93,10 +93,10 @@ template<class R> inline
 std::pair< Numeric::Rational, Geometry::Box<R> >
 Evaluation::StandardIntegrator< Geometry::Zonotope<R> >::
 flow_bounds(const System::VectorField<R>& vf, 
-            const Geometry::Box<R>& bx,
+            const Geometry::Zonotope<R>& es,
             const Numeric::Rational& t) const
 {
-  return this->_bounder->flow_bounds(vf,bx,t);
+  return this->_bounder->flow_bounds(vf,es.bounding_box(),t);
 }
 
 

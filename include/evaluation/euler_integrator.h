@@ -55,23 +55,23 @@ namespace Ariadne {
       /*! \brief Compute an integration time and a bounding box, given a bounding box for the intitial set, and a maximum allowable flow time. */
       virtual 
       std::pair< Numeric::Rational, Geometry::Box<R> >
-      flow_bounds(const System::VectorField<R>& f, 
-                  const Geometry::Box<R>& bx,
-                  const Numeric::Rational& t) const; 
+      flow_bounds(const System::VectorField<R>& vector_field, 
+                  const Geometry::Rectangle<R>& initial_set,
+                  const Numeric::Rational& maximum_step_size) const; 
 
       /*! \brief A C0 algorithm for integrating forward a rectangle. */
       virtual Geometry::Rectangle<R> 
-      integration_step(const System::VectorField<R>&,
-                       const Geometry::Rectangle<R>&,
-                       const Numeric::Rational&,
-                       const Geometry::Box<R>&) const;
+      integration_step(const System::VectorField<R>& vector_field,
+                       const Geometry::Rectangle<R>& initial_set,
+                       const Numeric::Rational& maximum_step_size,
+                       const Geometry::Box<R>& bounding_set) const;
 
       /*! \brief A C0 algorithm for integrating forward a rectangle up to a certain time. */
       virtual Geometry::Rectangle<R> 
-      reachability_step(const System::VectorField<R>&,
-                        const Geometry::Rectangle<R>&,
-                        const Numeric::Rational&,
-                        const Geometry::Box<R>&) const;
+      reachability_step(const System::VectorField<R>& vector_field,
+                        const Geometry::Rectangle<R>& initial_set,
+                        const Numeric::Rational& maximum_step_size,
+                        const Geometry::Box<R>& bounding_set) const;
 
       /*! \brief Write to an output stream. */
       virtual std::ostream& write(std::ostream&) const;

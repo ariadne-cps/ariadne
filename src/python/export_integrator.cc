@@ -66,7 +66,7 @@ class IntegratorWrapper
  public:
   IntegratorWrapper() { }
   IntegratorWrapper<BS>* clone() const { return this->get_override("clone")(); }
-  std::pair< T,Box<R> > flow_bounds(const VectorField<R>&, const Box<R>&, const T&) const {
+  std::pair< T,Box<R> > flow_bounds(const VectorField<R>&, const BS&, const T&) const {
     return this->get_override("flow_bounds")(); }
   BS integration_step(const VectorField<R>&, const BS&, const T&, const Box<R>&) const {
     return this->get_override("integration_step")(); }

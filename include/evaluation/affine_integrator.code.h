@@ -183,7 +183,7 @@ const System::AffineVectorField<R>*
 Evaluation::AffineIntegrator< Geometry::Zonotope<R> >::
 cast(const System::VectorField<R>* vf) const
 {
-  if(dynamic_cast<Function::AffineFunction<R>*>(&vf->function())) {
+ if(dynamic_cast<Function::AffineFunction<R>*>(&vf->function())) {
     return static_cast<const System::AffineVectorField<R>*>(vf);
   } else {
     return 0;
@@ -195,11 +195,11 @@ template<class R>
 std::pair< Numeric::Rational, Geometry::Box<R> >
 Evaluation::AffineIntegrator< Geometry::Zonotope<R> >::
 flow_bounds(const System::VectorField<R>& f, 
-            const Geometry::Box<R>& bx,
+            const Geometry::Zonotope<R>& z,
             const Numeric::Rational& t) const
 {
   // Since we don't need a bounding box for an affine integrator, we can just return the entire space.
-  return std::make_pair(t,Geometry::Box<R>::entire_space(bx.dimension())); 
+  return std::make_pair(t,Geometry::Box<R>::entire_space(z.dimension())); 
 }
 
 

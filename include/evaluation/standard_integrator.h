@@ -87,23 +87,23 @@ namespace Ariadne {
       /*! \brief Compute an integration time and a bounding box, given a bounding box for the intitial set, and a maximum allowable flow time. */
       virtual 
       std::pair< Numeric::Rational, Geometry::Box<R> >
-      flow_bounds(const System::VectorField<R>& f, 
-                  const Geometry::Box<R>& bx,
-                  const Numeric::Rational& t) const; 
+      flow_bounds(const System::VectorField<R>& vector_field, 
+                  const Geometry::Zonotope<R>& initial_set,
+                  const Numeric::Rational& maximum_step_size) const; 
 
       /*! \brief An algorithm for integrating forward a zonotope.  */
       virtual Geometry::Zonotope<R> 
-      integration_step(const System::VectorField<R>& vf,
-                       const Geometry::Zonotope<R>& s,
-                       const Numeric::Rational& t,
-                       const Geometry::Box<R>& bb) const;
+      integration_step(const System::VectorField<R>& vector_field,
+                       const Geometry::Zonotope<R>& initial_set,
+                       const Numeric::Rational& step_size,
+                       const Geometry::Box<R>& bounding_set) const;
 
       /*! \brief An algorithm for integrating forward a zonotope for a time up to time \a step_size, assuming the set \a bb is a bounding box for the integration. */
       virtual Geometry::Zonotope<R> 
-      reachability_step(const System::VectorField<R>& vf,
-                        const Geometry::Zonotope<R>& s,
-                        const Numeric::Rational& t,
-                        const Geometry::Box<R>& bb) const;
+      reachability_step(const System::VectorField<R>& vector_field,
+                        const Geometry::Zonotope<R>& initial_set,
+                        const Numeric::Rational& step_size,
+                        const Geometry::Box<R>& bounding_set) const;
 
       /*! \brief Write to an output stream. */
       virtual std::ostream& write(std::ostream&) const;

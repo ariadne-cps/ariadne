@@ -37,7 +37,7 @@
 namespace Ariadne {
   namespace Evaluation {
 
-    /*! \ingroup EvaluatorInterfaces \ingroup Integrators
+    /*! 
      *  \brief Interface for computing a step of the evolution of an enclosure set under a vector field.
      */
     template<class ES>
@@ -47,6 +47,9 @@ namespace Ariadne {
       typedef typename ES::real_type R;
       typedef Numeric::Interval<R> I;
      public:
+      /*! \brief The type of enclosure set used by the integrator. */
+      typedef ES EnclosureSetType;
+
       //@{ 
       //! \name Constructors and cloning operations.
       /*! \brief Virtual destructor. */
@@ -62,34 +65,34 @@ namespace Ariadne {
       /*! \brief Compute an integration time and a bounding box. */
       virtual 
       std::pair< Numeric::Rational, Geometry::Box<R> >
-      flow_bounds(const System::VectorField<R>& vf, 
-                  const Geometry::Box<R>& s,
-                  const Numeric::Rational& t) const = 0; 
+      flow_bounds(const System::VectorField<R>& vector_field, 
+                  const EnclosureSetType& initial_set,
+                  const Numeric::Rational& maximum_step_size) const = 0; 
       
-      /*! \brief Compute the time \a t flow of an enclosure set \a s under a vector field \a vf, assuming \a bb is a bounding box for the flow. */
+     /*! \brief Compute the time \a step_size flow of an enclosure set \a s under a vector field \a vector_field, assuming \a bounding_set is a bounding box for the flow. */
       virtual 
-      ES
-      integration_step(const System::VectorField<R>& vf, 
-                       const ES& s,
-                       const Numeric::Rational& t, 
-                       const Geometry::Box<R>& bb) const = 0; 
+      EnclosureSetType
+      integration_step(const System::VectorField<R>& vector_field, 
+                       const EnclosureSetType& initial_set,
+                       const Numeric::Rational& step_size, 
+                       const Geometry::Box<R>& bounding_set) const = 0; 
       
-      /*! \brief Compute the time \a t flow tube around an enclosure set \a s under a vector field \a vf, assuming \a bb is a bounding box for the flow. */
+      /*! \brief Compute the time \a step_size flow tube around an enclosure set \a initial_set under a vector field \a vector_field, assuming \a bounding_set is a bounding box for the flow. */
       virtual 
-      ES
-      reachability_step(const System::VectorField<R>& vf, 
-                        const ES& s,
-                        const Numeric::Rational& t, 
-                        const Geometry::Box<R>& bb) const = 0;
+      EnclosureSetType
+      reachability_step(const System::VectorField<R>& vector_field, 
+                        const EnclosureSetType& initial_set,
+                        const Numeric::Rational& step_size, 
+                        const Geometry::Box<R>& bounding_set) const = 0;
 
-      /*! \brief Compute the evolution of a basic set \a s under the vector field \a vf for times in the range [t1,t2], assuming \a bb is a bounding box for the flow. */
+      /*! \brief Compute the evolution of an enclosure set \a initial_set under the vector field \a vector_field for times in the range [t1,t2], assuming \a bounding_set is a bounding box for the flow. */
       virtual 
-      ES
-      evolution_step(const System::VectorField<R>& vf, 
-                     const ES& s,
-                     const Numeric::Rational& t1, 
-                     const Numeric::Rational& t2, 
-                     const Geometry::Box<R>& bb) const;
+      EnclosureSetType
+      evolution_step(const System::VectorField<R>& vector_field, 
+                     const EnclosureSetType& initial_set,
+                     const Numeric::Rational& initial_time, 
+                     const Numeric::Rational& final_time, 
+                     const Geometry::Box<R>& bounding_set) const;
           
       //@}
 

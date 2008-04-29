@@ -47,11 +47,15 @@ using namespace Ariadne::Python;
 #include <boost/python.hpp>
 using namespace boost::python;
 
-template<class Integrator, class R>
+template<class Integrator>
 tuple
-flow_bounds(const Integrator& i, const VectorField<R>& vf, const Box<R>& bb, const Rational& t)
+flow_bounds(const Integrator& i, 
+            const VectorField<typename Integrator::EnclosureSetType::real_type>& vf, 
+            const typename Integrator::EnclosureSetType& es, 
+            const Rational& t)
 {
-  std::pair< Rational, Box<R> > result=i.flow_bounds(vf,bb,t);
+  typedef typename Integrator::EnclosureSetType::real_type R;
+  std::pair< Rational, Box<R> > result=i.flow_bounds(vf,es,t);
   return boost::python::make_tuple(result.first,result.second);
 }
 
@@ -86,20 +90,20 @@ void export_integrator()
 
   class_< StandardIntegrator< Zonotope<R> >, bases<IntegratorInterface< Zonotope<R> > > >
     standard_integrator_class("StandardIntegrator",init<>());
-  standard_integrator_class.def("flow_bounds",&StandardIntegrator< Zonotope<R> >::flow_bounds);
+  standard_integrator_class.def("flow_bounds",&flow_bounds< StandardIntegrator< Zonotope<R> > >);
   standard_integrator_class.def("integration_step",&StandardIntegrator< Zonotope<R> >::integration_step);
   standard_integrator_class.def("reachability_step",&StandardIntegrator< Zonotope<R> >::reachability_step);
 
 
   class_< AffineIntegrator< Zonotope<R> >, bases< IntegratorInterface< Zonotope<R> > > >
     affine_integrator_class("AffineIntegrator",init<>());
-  affine_integrator_class.def("flow_bounds",&AffineIntegrator< Zonotope<R> >::flow_bounds);
+  affine_integrator_class.def("flow_bounds",&flow_bounds< AffineIntegrator< Zonotope<R> > >);
   affine_integrator_class.def("integration_step",(Zonotope<R>(AffineIntegrator< Zonotope<R> >::*)(const VectorField<R>&,const Zonotope<R>&,const Rational&,const Box<R>&)const) &AffineIntegrator< Zonotope<R> >::integration_step);
   affine_integrator_class.def("reachability_step",(Zonotope<R>(AffineIntegrator< Zonotope<R> >::*)(const VectorField<R>&,const Zonotope<R>&,const Rational&,const Box<R>&)const) &AffineIntegrator< Zonotope<R> >::reachability_step);
 
   class_< EulerIntegrator<R>, bases<IntegratorInterface< Box<R> > > >
     euler_integrator_class("EulerIntegrator",init<>());
-  euler_integrator_class.def("flow_bounds",&flow_bounds<EulerIntegrator<R>,R>);
+  euler_integrator_class.def("flow_bounds",&flow_bounds< EulerIntegrator<R> >);
   euler_integrator_class.def("integration_step",(Rectangle<R>(EulerIntegrator<R>::*)(const VectorField<R>&,const Rectangle<R>&,const Rational&,const Box<R>&)const) &EulerIntegrator<R>::integration_step);
   euler_integrator_class.def("reachability_step",(Rectangle<R>(EulerIntegrator<R>::*)(const VectorField<R>&,const Rectangle<R>&,const Rational&,const Box<R>&)const) &EulerIntegrator<R>::reachability_step);
 }

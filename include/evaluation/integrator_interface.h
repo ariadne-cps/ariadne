@@ -37,7 +37,7 @@
 namespace Ariadne {
   namespace Evaluation {
 
-    /*! 
+    /*! \ingroup EvaluatorInterfaces \ingroup Integrators
      *  \brief Interface for computing a step of the evolution of an enclosure set under a vector field.
      */
     template<class ES>
@@ -47,6 +47,8 @@ namespace Ariadne {
       typedef typename ES::real_type R;
       typedef Numeric::Interval<R> I;
      public:
+      /*! \brief The type of vector field used by the integrator. */
+      typedef System::VectorField<R> VectorFieldType;
       /*! \brief The type of enclosure set used by the integrator. */
       typedef ES EnclosureSetType;
 

@@ -39,7 +39,7 @@ print "nl_function =",nl_fun
 vector_field=VectorField(nl_fun)
 
 # Construct initial set and bounding set
-initial_set=RectangularSet([[0.0,0.01],[0.0,0.01]])
+initial_set=RectangularSet([[0.0,0.00001],[0.0,0.000001]])
 bounding_set=RectangularSet([[0,2],[0,2]])
 
 # Construct integrator (use Kuhn integrator for nonlinear systems)
@@ -47,8 +47,7 @@ integrator=KuhnIntegrator(3,4)
 
 # Construct evolver
 parameters=EvolutionParameters()
-#parameters.set_grid_length(0.125)
-parameters.set_grid_length(0.0625)
+parameters.set_grid_length(0.001)
 parameters.set_bounding_domain_size(2.0)
 evolver=VectorFieldEvolver(parameters,integrator)
 
@@ -58,10 +57,10 @@ chain_reach_set = evolver.upper_reach(vector_field,initial_set,Rational(2.0))
 print "Found", chain_reach_set.size(), "cells in grid with", chain_reach_set.capacity(), "cells."
 
 # Reduce chain-reachable set to partition tree set
-print "Computing tree representation of chain-reachable set..."
-chain_reach_tree_set = PartitionTreeSet(chain_reach_set)
-print "Reduced to", chain_reach_tree_set.size(),"cells " \
-    "in partition tree with", chain_reach_tree_set.capacity(),"cells."
+#print "Computing tree representation of chain-reachable set..."
+#chain_reach_tree_set = PartitionTreeSet(chain_reach_set)
+#print "Reduced to", chain_reach_tree_set.size(),"cells " \
+#    "in partition tree with", chain_reach_tree_set.capacity(),"cells."
 
 # Export to postscript output
 print "Exporting to postscript output...",
@@ -75,16 +74,16 @@ eps.set_fill_colour("blue")
 eps.write(initial_set)
 eps.close()
 
-eps.open("nonlinear_system-tree_set.eps",epsbb)
-eps.set_pen_colour("black")
-eps.set_fill_colour("green")
-eps.set_line_style(0)
-eps.write(chain_reach_tree_set)
-eps.set_line_style(1)
-eps.set_fill_style(0)
-eps.write(chain_reach_tree_set.partition_tree())
-eps.set_fill_style(1)
-eps.set_fill_colour("blue")
-eps.write(initial_set)
-eps.close()
+# eps.open("nonlinear_system-tree_set.eps",epsbb)
+# eps.set_pen_colour("black")
+# eps.set_fill_colour("green")
+# eps.set_line_style(0)
+# eps.write(chain_reach_tree_set)
+# eps.set_line_style(1)
+# eps.set_fill_style(0)
+# eps.write(chain_reach_tree_set.partition_tree())
+# eps.set_fill_style(1)
+# eps.set_fill_colour("blue")
+# eps.write(initial_set)
+# eps.close()
 print " done."

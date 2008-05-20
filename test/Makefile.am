@@ -1,4 +1,3 @@
-all: tests
 
 #TESTS_ENVIRONMENT = (function run_tst { $1 > $1.log; }; run_tst )
 TESTS_ENVIRONMENT = ./run_test.sh
@@ -89,23 +88,13 @@ check_PROGRAMS = \
 	$(EVALUATION_TESTS) \
 	$(OUTPUT_TESTS)
 
-tests: $(check_PROGRAMS)
+#tests: $(check_PROGRAMS)
 
 test_rounding_LDADD = ../src/libnumeric.la $(LIBS)
 test_integer_LDADD = ../src/libnumeric.la $(LIBS)
 test_rational_LDADD = ../src/libnumeric.la $(LIBS)
 test_float_LDADD = ../src/libnumeric.la $(LIBS)
 test_interval_LDADD = ../src/libnumeric.la $(LIBS)
-check_numericdir = ./
-check_numeric_PROGRAMS = $(NUMERIC_TESTS) 
-check_numeric: $(check_numeric_PROGRAMS)
-
-check_linear_algebradir = ./
-check_linear_algebra_PROGRAMS = $(LINEAR_ALGEBRA_TESTS) 
-check_linear_algebra: $(check_linear_algebra_PROGRAMS)
-
-
-
 
 # Explicitly list test sources
 # This should not be necessary!!

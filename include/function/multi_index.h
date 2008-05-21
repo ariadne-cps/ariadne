@@ -44,6 +44,9 @@ namespace Ariadne {
     class SortedIndex;
     class PositionIndex;
 
+    class MultiIndex;
+    std::ostream& operator<<(std::ostream&, const MultiIndex&);
+
     /*! \ingroup LinearAlgebra
      *  \brief An index of a symmetric object. 
      */

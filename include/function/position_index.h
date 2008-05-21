@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file symmetric_index.h
+/*! \file position_index.h
  *  \brief Position-based index for dense symmetric tensors
  */
 
-#ifndef ARIADNE_SYMMETRIC_POSITION_H
-#define ARIADNE_SYMMETRIC_POSITION_H
+#ifndef ARIADNE_POSITION_INDEX_H
+#define ARIADNE_POSITION_INDEX_H
 
 #include <cassert>
 
@@ -44,6 +44,9 @@ namespace Ariadne {
     
     class SortedIndex;
     class MultiIndex;
+
+    class PositionIndex;
+    std::ostream& operator<<(std::ostream&, const PositionIndex&);
 
     /*! \ingroup Function
      *  \brief An index of a dense symmetric object. 
@@ -232,4 +235,4 @@ namespace Ariadne {
 
   }
 }
-#endif /* ARIADNE_MULTI_INDEX_H */
+#endif /* ARIADNE_POSITION_INDEX_H */

@@ -41,6 +41,9 @@ namespace Ariadne {
     
     class MultiIndex;
 
+    class SortedIndex;
+    std::ostream& operator<<(std::ostream&, const SortedIndex&);
+
     /*! \ingroup LinearAlgebra
      *  \brief An index of a tensor object. 
      */

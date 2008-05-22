@@ -94,6 +94,8 @@ void export_postscript_output()
     
   class_<epsfstream, boost::noncopyable>("EpsPlot",init<>())
     .def("open",(void(epsfstream::*)(const char* fn,const Box<FloatPy>&))&epsfstream::open<FloatPy>)
+    .def("open",(void(epsfstream::*)(const char* fn,const Box<FloatPy>&, uint, uint))&epsfstream::open<FloatPy>)
+    .def("open",(void(epsfstream::*)(const char* fn,const Box<FloatPy>&, const PlanarProjectionMap&))&epsfstream::open<FloatPy>)
     .def("open",&eps_open<FloatPy>)
     .def("open",&eps_open_x1x2<FloatPy>)
     .def("open",&eps_open_map<FloatPy>)

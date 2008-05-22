@@ -248,7 +248,7 @@ Evaluation::VectorFieldEvolver<BS>::upper_evolve(const System::VectorField<R>& v
   ARIADNE_LOG(2,"VectorFieldEvolver::upper_evolve(...)\n");
   this->_profiler->reset();
   BSL reach, evolve;
-  BxLS initial=this->lower_approximation(initial_set);
+  BxLS initial=this->outer_approximation(initial_set);
   TBSL working=this->timed_basic_set_list(initial);
   ARIADNE_LOG(3,"initial="<<working<<"\n");
   while(working.size()!=0) { 
@@ -268,7 +268,7 @@ Evaluation::VectorFieldEvolver<BS>::upper_reach(const System::VectorField<R>& ve
   ARIADNE_LOG(2,"VectorFieldEvolver::upper_reach(...)\n");
   this->_profiler->reset();
   BSL reach, evolve;
-  BxLS initial=this->lower_approximation(initial_set);
+  BxLS initial=this->outer_approximation(initial_set);
   TBSL working=this->timed_basic_set_list(initial);
   ARIADNE_LOG(3,"initial="<<working<<"\n");
   while(working.size()!=0) { 
@@ -289,7 +289,7 @@ Evaluation::VectorFieldEvolver<BS>::lower_evolve(const System::VectorField<R>& v
   ARIADNE_LOG(2,"VectorFieldEvolver::lower_evolve(...)\n");
   this->_profiler->reset();
   BSL reach, evolve;
-  BxLS initial=this->lower_approximation(initial_set);
+  BxLS initial=this->outer_approximation(initial_set);
   TBSL working=this->timed_basic_set_list(initial);
   ARIADNE_LOG(3,"initial="<<working<<"\n");
   while(working.size()!=0) { 
@@ -297,7 +297,7 @@ Evaluation::VectorFieldEvolver<BS>::lower_evolve(const System::VectorField<R>& v
   }
   ARIADNE_LOG(2,*this->_profiler);
   ARIADNE_LOG(2,"initial.size()="<<initial.size()<<" final.size()="<<evolve.size()<<"\n");
-  return new GMS(this->lower_approximation(evolve,this->grid(vector_field.dimension())));
+  return new GMS(this->outer_approximation(evolve,this->grid(vector_field.dimension())));
 }
 
 template<class BS>
@@ -309,7 +309,7 @@ Evaluation::VectorFieldEvolver<BS>::lower_reach(const System::VectorField<R>& ve
   ARIADNE_LOG(2,"VectorFieldEvolver::lower_reach(...)\n");
   this->_profiler->reset();
   BSL reach, evolve;
-  BxLS initial=this->lower_approximation(initial_set);
+  BxLS initial=this->outer_approximation(initial_set);
   TBSL working=this->timed_basic_set_list(initial);
   ARIADNE_LOG(3,"initial="<<working<<"\n");
   while(working.size()!=0) { 
@@ -317,7 +317,7 @@ Evaluation::VectorFieldEvolver<BS>::lower_reach(const System::VectorField<R>& ve
   }
   ARIADNE_LOG(2,*this->_profiler);
   ARIADNE_LOG(2,"initial.size()="<<initial.size()<<" final.size()="<<evolve.size()<<" reach.size()="<<reach.size()<<"\n");
-  return new GMS(this->lower_approximation(reach,this->grid(vector_field.dimension())));
+  return new GMS(this->outer_approximation(reach,this->grid(vector_field.dimension())));
 }
 
 

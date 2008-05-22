@@ -24,9 +24,7 @@ reference_set=GridMaskSet(fgrid)
 for i in range(71):
 	x = 0.1*i
 	y = math.cos(x)
-	print x, y
-        if y <= 1 and y >= -1 :
-	  reference_set.adjoin_outer_approximation(Box([[x,x],[y,y],[0.001,0.001]]))
+	reference_set.adjoin_outer_approximation(Box([[x,x],[y,y],[0.001,0.001]]))
 	  	
 print "reference_set.size(),capacity()=",reference_set.size(),reference_set.capacity()
 
@@ -37,7 +35,7 @@ initial_set=RectangularSet([[0.001,0.002],[0.999,1],[0.001,0.002]])
 par=EvolutionParameters()
 par.set_maximum_step_size(0.25);
 par.set_lock_to_grid_time(time);
-par.set_grid_length(0.01);
+par.set_grid_length(0.05);
 
 
 integrator=AffineIntegrator()

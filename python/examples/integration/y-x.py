@@ -8,85 +8,64 @@
 from ariadne import *
 from math import *
 
-vector=extract_vector
-matrix=extract_matrix
-
 # y'=y-x
-dyn=AffineVectorField(matrix([[0,0],[-1,1]]),vector([1,0]))
+dyn=AffineVectorField(Matrix([[0,0],[-1,1]]),Vector([1,0]))
 
-grid=Grid(Vector("[0.01,0.01]"))
-block=LatticeBlock("[-2,102]x[198,481]")
-fgrid=FiniteGrid(grid,block)
-print fgrid
+grid=Grid(Vector([0.01,0.01]))
+box=Box([[-0.02,1.02],[1.98,4.81]])
+fgrid=FiniteGrid(grid,box)
 
 print "Creating reference set"
 reference_set=GridMaskSet(fgrid)
 for i in range(101):
 	x = 0.01*i+0.005
 	y = exp(x) + x + 1
-	pstr = "["+str(x)+","+str(x)+"]x["+str(y)+","+str(y)+"]"
-	# print pstr
-	point = Rectangle(pstr)
-	reference_set.adjoin_outer_approximation(point)
+	reference_set.adjoin_outer_approximation(RectangularSet([[x,x],[y,y]]))
 	
-print "reference_set.size(),capacity()=",reference_set.size(),reference_set.capacity()
 
 print "Creating inital set"
-initial_rectangle=Rectangle("[0.0001,0.00011]x[2.0001,2.00011]")
-initial_set=GridMaskSet(fgrid)
-print "Adjoining initial rectangle"
-initial_set.adjoin_over_approximation(initial_rectangle)
-print "initial_set.size(),capacity()=",initial_set.size(),initial_set.capacity()
+initial_set=RectangularSet([[0.0,0.0],[2.0,2.0]])
 
-bounding_box=Rectangle("[-0.01,1.01]x[1.99,4.8]")
+time = 1.0
+# Evolution parameters
+par=EvolutionParameters()
+par.set_maximum_step_size(0.25);
+par.set_lock_to_grid_time(time);
+par.set_grid_length(0.01);
 
-print "Creating bounding set"
-bounding_set=GridMaskSet(fgrid)
-print "Adjoining bounding rectangle"
-bounding_set.adjoin_over_approximation(bounding_box)
-print "bounding_set.size(),capacity()=",bounding_set.size(),bounding_set.capacity()
 
-maximum_step_size=0.005;
-lock_to_grid_time=2;
-maximum_set_radius=0.1;
+integrator=AffineIntegrator()
+evolver=VectorFieldEvolver(par,integrator)
 
-integrator=AffineIntegrator(maximum_step_size,lock_to_grid_time,maximum_set_radius)
-
-print "Computing chainreach sets with Affine Integrator..."
-chainreach_set=integrator.chainreach(dyn,initial_set,bounding_set)
-print "chainreach_set.size(),capacity()=",chainreach_set.size(),chainreach_set.capacity()
+print "Computing upper reach set with Affine Integrator..."
+upper_reach_set=evolver.upper_reach(dyn,initial_set,Rational(time))
 
 print "Exporting to postscript output...",
 eps=EpsPlot()
-eps.open("y-x-affine.eps",bounding_box,0,1)
+eps.open("y-x-affine.eps",box,0,1)
 
 eps.set_line_style(True)
-eps.set_fill_colour("white")
-eps.write(bounding_box)
 eps.set_fill_colour("green")
-eps.write(chainreach_set)
+eps.write(upper_reach_set)
 eps.set_fill_colour("magenta")
 eps.write(reference_set)
 eps.set_fill_colour("blue")
 eps.write(initial_set)
 eps.close()
 
-print "Done."
+print "Done.\n"
 
-integrator=LohnerIntegrator(maximum_step_size,lock_to_grid_time,maximum_set_radius)
+integrator=LohnerIntegrator()
+evolver=VectorFieldEvolver(par,integrator)
 
-print "Computing chainreach sets with Lohner Integrator..."
-chainreach_set=integrator.chainreach(dyn,initial_set,bounding_set)
-print "chainreach_set.size(),capacity()=",chainreach_set.size(),chainreach_set.capacity()
+print "Computing upper_reach sets with Lohner Integrator..."
+upper_reach_set=evolver.upper_reach(dyn,initial_set,Rational(time))
 
 print "Exporting to postscript output...",
-eps.open("y-x-lohner.eps",bounding_box,0,1)
-
+eps.open("y-x-lohner.eps",box,0,1)
 eps.set_line_style(True)
-eps.set_fill_colour("white")
-eps.write(bounding_box)
 eps.set_fill_colour("green")
-eps.write(chainreach_set)
+eps.write(upper_reach_set)
 eps.set_fill_colour("magenta")
 eps.write(reference_set)
 eps.set_fill_colour("blue")
@@ -95,22 +74,17 @@ eps.close()
 
 print "Done."
 
-lock_to_grid_time=1;
+integrator=KuhnIntegrator(3,3)
+evolver=VectorFieldEvolver(par,integrator)
 
-integrator=EulerIntegrator(maximum_step_size,lock_to_grid_time,maximum_set_radius)
+print "Computing upper_reach sets with Kuhn Integrator..."
+upper_reach_set=evolver.upper_reach(dyn,initial_set,Rational(time))
 
-print "Computing chainreach sets with Euler Integrator..."
-chainreach_set=integrator.chainreach(dyn,initial_set,bounding_set)
-print "chainreach_set.size(),capacity()=",chainreach_set.size(),chainreach_set.capacity()
-
-print "Exporting to postscript output...",
-eps.open("y-x-euler.eps",bounding_box,0,1)
+eps.open("y-x-kuhn.eps",box,0,1)
 
 eps.set_line_style(True)
-eps.set_fill_colour("white")
-eps.write(bounding_box)
 eps.set_fill_colour("green")
-eps.write(chainreach_set)
+eps.write(upper_reach_set)
 eps.set_fill_colour("magenta")
 eps.write(reference_set)
 eps.set_fill_colour("blue")
@@ -121,5 +95,6 @@ print "Done."
 
 
 
-  	
+
+
 

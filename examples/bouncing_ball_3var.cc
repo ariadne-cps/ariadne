@@ -102,7 +102,7 @@ int bouncing_ball_automaton()
   
   cout << "Computing chainreachable set..." << endl;
 
-  HybridGridMaskSet<R> chainreach=hybrid_evolver.chainreach(automaton,initial_set);
+  HybridGridMaskSet<R> chainreach=hybrid_evolver.upper_reach(automaton,initial_set,2.0);
   cout << "Reached (" << chainreach[mode1_id].size() << ") cells "
        << "out of (" << chainreach[mode1_id].capacity() << ") "
        << endl << endl;

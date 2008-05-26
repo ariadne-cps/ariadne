@@ -24,12 +24,14 @@
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 from ariadne import *
+#import math
 import sys
 
 # Construct Python-based nonlinear function
 print "Constructing and evaluating nonlinear integration system defined in Python"
-def fun(x):
-    return [ 1.0, 2.0*x[0] ]
+def fun(z):
+    return [ 3*z[1], z[1]+ cos(z[0]) ]
+    # return [ 1.0, 2.0*x[0] ]
 fun.result_size=2
 fun.argument_size=2
 nl_fun=AriadneFunction(fun)
@@ -47,8 +49,10 @@ integrator=KuhnIntegrator(3,4)
 
 # Construct evolver
 parameters=EvolutionParameters()
-parameters.set_grid_length(0.001)
+parameters.set_grid_length(0.01)
 parameters.set_bounding_domain_size(2.0)
+parameters.set_maximum_step_size(0.125)
+
 evolver=VectorFieldEvolver(parameters,integrator)
 
 # Compute chain-reachable set

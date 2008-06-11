@@ -116,7 +116,7 @@ evolution(ESL& final,
         intermediate.adjoin(rs);
       }
       // Need to do reachability step first to avoid clobbering bs reference
-      ts=this->integration_step(vf,ws,h,bb);
+      ts=this->integration_step(vf,ts,h,bb);
       ts=this->reduce(ts);
       working.adjoin(ts);
     }

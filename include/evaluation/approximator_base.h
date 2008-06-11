@@ -54,6 +54,8 @@ namespace Ariadne {
       typedef typename Aprx::PartitionTreeSet PartitionTreeSet;
       typedef ES EnclosureSet;
       typedef Geometry::ListSet<ES> EnclosureSetList;
+     protected:
+      ApproximatorBase(const Paving& pv) : _paving(pv) { }
      public:
       /*! \brief Computes a bounding box for a set. */
       BasicSet bounding_box(const EnclosureSetList& esl) const;
@@ -61,7 +63,19 @@ namespace Ariadne {
       /*! \brief Computes an lower-approximation of a set. */
       CoverListSet lower_approximation(const EnclosureSetList& esl) const;
 
+      /*! \brief Computes an inner-approximation of a set. */
+      PartitionListSet inner_approximation(const EnclosureSet& es) const;
+
       /*! \brief Computes an outer-approximation of a set. */
+      PartitionListSet outer_approximation(const EnclosureSet& es) const;
+
+      /*! \brief Computes an inner-approximation of a set. */
+      PartitionListSet inner_approximation(const EnclosureSetList& esl) const;
+
+      /*! \brief Computes an outer-approximation of a set. */
+      PartitionListSet outer_approximation(const EnclosureSetList& esl) const;
+
+      /*! \brief Computes an outer-approximation of a set on a given paving. */
       PartitionListSet outer_approximation(const EnclosureSetList& esl, const Paving& pv) const;
 
 
@@ -70,8 +84,11 @@ namespace Ariadne {
 
       /*! \brief Computets and over-approximation of a set from a rectangle. */
       void adjoin_outer_approximation(PartitionTreeSet& pts, const EnclosureSetList& esl) const;
-
-    };
+     protected:
+      Paving paving() const { return this->_paving; }
+     private:
+      Paving _paving;
+   };
 
   }
 }
@@ -109,11 +126,42 @@ Evaluation::ApproximatorBase<Aprx,ES>::lower_approximation(const EnclosureSetLis
   
 template<class Aprx, class ES> inline
 typename Evaluation::ApproximatorBase<Aprx,ES>::PartitionListSet
+Evaluation::ApproximatorBase<Aprx,ES>::inner_approximation(const EnclosureSet& es) const
+{
+  const ApproximatorInterface<Aprx,ES>* base=this;
+  return base->inner_approximation(es,this->paving());
+}
+
+template<class Aprx, class ES> inline
+typename Evaluation::ApproximatorBase<Aprx,ES>::PartitionListSet
+Evaluation::ApproximatorBase<Aprx,ES>::outer_approximation(const EnclosureSet& es) const
+{
+  const ApproximatorInterface<Aprx,ES>* base=this;
+  return base->inner_approximation(es,this->paving());
+}
+
+template<class Aprx, class ES> inline
+typename Evaluation::ApproximatorBase<Aprx,ES>::PartitionListSet
+Evaluation::ApproximatorBase<Aprx,ES>::inner_approximation(const EnclosureSetList& esl) const
+{
+  return this->inner_approximation(esl,this->paving());
+}
+
+template<class Aprx, class ES> inline
+typename Evaluation::ApproximatorBase<Aprx,ES>::PartitionListSet
+Evaluation::ApproximatorBase<Aprx,ES>::outer_approximation(const EnclosureSetList& esl) const
+{
+  return this->outer_approximation(esl,this->paving());
+}
+
+template<class Aprx, class ES> inline
+typename Evaluation::ApproximatorBase<Aprx,ES>::PartitionListSet
 Evaluation::ApproximatorBase<Aprx,ES>::outer_approximation(const EnclosureSetList& esl, const Paving& pv) const
 {
+  const ApproximatorInterface<Aprx,ES>* base=this;
   PartitionListSet pls(pv);
   for(size_type i=0; i!=esl.size(); ++i) {
-    pls.adjoin(this->outer_approximation(esl[i],pv));
+    pls.adjoin(base->outer_approximation(esl[i],pv));
   }
   pls.unique_sort();
   return pls;

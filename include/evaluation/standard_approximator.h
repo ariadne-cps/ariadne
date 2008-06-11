@@ -49,8 +49,10 @@ namespace Ariadne {
     {
       typedef typename ES::real_type R;
       typedef Numeric::Interval<R> I;
+      typedef Geometry::GridApproximationScheme<R> GAS;
      public:
-      StandardApproximator() { }
+      StandardApproximator() : ApproximatorBase<GAS,ES>(Geometry::Grid<R>()) { }
+      StandardApproximator(const Geometry::Grid<R>& g) : ApproximatorBase<GAS,ES>(g) { }
       virtual StandardApproximator<ES>* clone() const { return new StandardApproximator<ES>(*this); }
       virtual ES enclosure_set(const Geometry::Box<R>& r) const;
       virtual R radius(const ES& bs) const;
@@ -58,9 +60,9 @@ namespace Ariadne {
       virtual Geometry::BoxListSet<R> lower_approximation(const ES& es) const;
       virtual Geometry::GridCellListSet<R> inner_approximation(const ES& es, const Geometry::Grid<R>& g) const;
       virtual Geometry::GridCellListSet<R> outer_approximation(const ES& es, const Geometry::Grid<R>& g) const;
+      virtual std::ostream& write(std::ostream& os) const;
     };
-
-
+  
 
   }
 }

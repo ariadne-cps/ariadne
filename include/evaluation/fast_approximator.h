@@ -52,9 +52,10 @@ namespace Ariadne {
     {
       typedef typename ES::real_type R;
       typedef Numeric::Interval<R> I;
+      typedef Geometry::GridApproximationScheme<R> GAS;
      public:
-      FastApproximator();
-      FastApproximator(const FastApproximator<ES>& approx);
+      FastApproximator() : ApproximatorBase<GAS,ES>(Geometry::Grid<R>()) { };
+      FastApproximator(const Geometry::Grid<R>& g) : ApproximatorBase<GAS,ES>(g) { }
       virtual FastApproximator<ES>* clone() const;
       virtual ES enclosure_set(const Geometry::Box<R>&  bx) const;
       virtual R radius(const ES& bs) const;
@@ -62,6 +63,7 @@ namespace Ariadne {
       virtual Geometry::BoxListSet<R> lower_approximation(const ES& bs) const;
       virtual Geometry::GridCellListSet<R> inner_approximation(const ES& bs, const Geometry::Grid<R>& g) const;
       virtual Geometry::GridCellListSet<R> outer_approximation(const ES& bs, const Geometry::Grid<R>& g) const;
+      virtual std::ostream& write(std::ostream& os) const;
     };
 
   }

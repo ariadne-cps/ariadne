@@ -34,66 +34,63 @@
 namespace Ariadne {
 
 
-template<class BS>
-Evaluation::FastApproximator<BS>::FastApproximator()
+template<class ES>
+Evaluation::FastApproximator<ES>* 
+Evaluation::FastApproximator<ES>::clone() const
 {
+  return new FastApproximator<ES>(*this);
 }
 
-template<class BS>
-Evaluation::FastApproximator<BS>::FastApproximator(const FastApproximator<BS>& approx)
+template<class ES>
+ES
+Evaluation::FastApproximator<ES>::enclosure_set(const Geometry::Box<R>& r) const
 {
+  return ES(r);
 }
 
-template<class BS>
-Evaluation::FastApproximator<BS>* 
-Evaluation::FastApproximator<BS>::clone() const
+template<class ES>
+typename ES::real_type
+Evaluation::FastApproximator<ES>::radius(const ES& es) const
 {
-  return new FastApproximator<BS>(*this);
+  return Geometry::bounding_box(es).radius();
 }
 
-template<class BS>
-BS
-Evaluation::FastApproximator<BS>::enclosure_set(const Geometry::Box<R>& r) const
+template<class ES>
+Geometry::Box<typename ES::real_type>
+Evaluation::FastApproximator<ES>::bounding_box(const ES& es) const
 {
-  return BS(r);
+  return Geometry::bounding_box(es);
 }
 
-template<class BS>
-typename BS::real_type
-Evaluation::FastApproximator<BS>::radius(const BS& bs) const
-{
-  return Geometry::bounding_box(bs).radius();
-}
-
-template<class BS>
-Geometry::Box<typename BS::real_type>
-Evaluation::FastApproximator<BS>::bounding_box(const BS& bs) const
-{
-  return Geometry::bounding_box(bs);
-}
-
-template<class BS>
-Geometry::BoxListSet<typename BS::real_type>
-Evaluation::FastApproximator<BS>::lower_approximation(const BS& bs) const
+template<class ES>
+Geometry::BoxListSet<typename ES::real_type>
+Evaluation::FastApproximator<ES>::lower_approximation(const ES& es) const
 {
   Geometry::BoxListSet<R> result;
-  result.adjoin(bs.bounding_box());
+  result.adjoin(es.bounding_box());
   return result;
 }
 
-template<class BS>
-Geometry::GridCellListSet<typename BS::real_type>
-Evaluation::FastApproximator<BS>::inner_approximation(const BS& bs, const Geometry::Grid<R>& g) const
+template<class ES>
+Geometry::GridCellListSet<typename ES::real_type>
+Evaluation::FastApproximator<ES>::inner_approximation(const ES& es, const Geometry::Grid<R>& g) const
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
-template<class BS>
-Geometry::GridCellListSet<typename BS::real_type>
-Evaluation::FastApproximator<BS>::outer_approximation(const BS& bs, const Geometry::Grid<R>& g) const
+template<class ES>
+Geometry::GridCellListSet<typename ES::real_type>
+Evaluation::FastApproximator<ES>::outer_approximation(const ES& es, const Geometry::Grid<R>& g) const
 {
-  return Geometry::fuzzy_outer_approximation(bs,g);
+  return Geometry::fuzzy_outer_approximation(es,g);
 }
 
+template<class ES>
+std::ostream&
+Evaluation::FastApproximator<ES>::write(std::ostream& os) const
+{
+  os<<"StandardApproximator(" << std::flush;
+  return os<<" grid="<<this->paving()<<")\n";
+}
 
 } // namespace Ariadne

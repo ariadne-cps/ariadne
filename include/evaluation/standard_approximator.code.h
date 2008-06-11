@@ -43,41 +43,48 @@ Evaluation::StandardApproximator<ES>::enclosure_set(const Geometry::Box<R>& r) c
   return ES(r);
 }
 
-template<class BS>
-typename BS::real_type
-Evaluation::StandardApproximator<BS>::radius(const BS& bs) const
+template<class ES>
+typename ES::real_type
+Evaluation::StandardApproximator<ES>::radius(const ES& es) const
 {
-  return Geometry::bounding_box(bs).radius();
+  return Geometry::bounding_box(es).radius();
 }
 
-template<class BS>
-Geometry::Box<typename BS::real_type>
-Evaluation::StandardApproximator<BS>::bounding_box(const BS& bs) const
+template<class ES>
+Geometry::Box<typename ES::real_type>
+Evaluation::StandardApproximator<ES>::bounding_box(const ES& es) const
 {
-  return Geometry::bounding_box(bs);
+  return Geometry::bounding_box(es);
 }
 
-template<class BS>
-Geometry::BoxListSet<typename BS::real_type>
-Evaluation::StandardApproximator<BS>::lower_approximation(const BS& bs) const
+template<class ES>
+Geometry::BoxListSet<typename ES::real_type>
+Evaluation::StandardApproximator<ES>::lower_approximation(const ES& es) const
 {
   Geometry::BoxListSet<R> result;
-  result.adjoin(bs.bounding_box());
+  result.adjoin(es.bounding_box());
   return result;
 }
 
-template<class BS>
-Geometry::GridCellListSet<typename BS::real_type>
-Evaluation::StandardApproximator<BS>::inner_approximation(const BS& bs, const Geometry::Grid<R>& g) const
+template<class ES>
+Geometry::GridCellListSet<typename ES::real_type>
+Evaluation::StandardApproximator<ES>::inner_approximation(const ES& es, const Geometry::Grid<R>& g) const
 {
-  return Geometry::inner_approximation(bs,g);
+  return Geometry::inner_approximation(es,g);
 }
 
-template<class BS>
-Geometry::GridCellListSet<typename BS::real_type>
-Evaluation::StandardApproximator<BS>::outer_approximation(const BS& bs, const Geometry::Grid<R>& g) const
+template<class ES>
+Geometry::GridCellListSet<typename ES::real_type>
+Evaluation::StandardApproximator<ES>::outer_approximation(const ES& es, const Geometry::Grid<R>& g) const
 {
-  return Geometry::outer_approximation(bs,g);
+  return Geometry::outer_approximation(es,g);
+}
+
+template<class ES>
+std::ostream&
+Evaluation::StandardApproximator<ES>::write(std::ostream& os) const
+{
+  return os << "StandardApproximator( grid=" << this->paving() << ")\n";
 }
 
 

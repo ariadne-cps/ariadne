@@ -86,11 +86,12 @@ class TestReachabilityAnalyser
     parameters.set_lock_to_grid_time(0.5);
     parameters.set_verbosity(0);
     
+    Grid<R> grid(2,parameters.grid_length());
     StandardApplicator<ES> applicator;
     StandardSubdivider<ES> subdivider;
     CascadeReducer<ES> reducer(3);
     MapEvolver<ES> map_evolver(parameters,applicator,subdivider,reducer);
-    StandardApproximator<ES> approximator;
+    StandardApproximator<ES> approximator(grid);
     Discretiser<Map<R>,GridApproximationScheme<R>,ES> discretiser(parameters,map_evolver,approximator);
     return ReachabilityAnalyser< Map<R>, GridApproximationScheme<R> >(parameters,discretiser);
   }
@@ -160,10 +161,10 @@ class TestReachabilityAnalyser
 
 int main(int nargs, const char* args[]) 
 {
-  //TestReachabilityAnalyser<Flt>().test();
-  //cerr << "INCOMPLETE ";
-  cerr << "SKIPPED ";
-  ++ARIADNE_TEST_FAILURES;
+  TestReachabilityAnalyser<Flt>().test();
+  cerr << "INCOMPLETE ";
+  //cerr << "SKIPPED ";
+  //++ARIADNE_TEST_FAILURES;
   return ARIADNE_TEST_FAILURES;
 }
 

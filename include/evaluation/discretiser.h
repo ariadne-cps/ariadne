@@ -36,7 +36,6 @@
 #include "system/declarations.h"
 #include "evaluation/declarations.h"
 
-
 #include "evaluation/evolution_parameters.h"
 #include "evaluation/approximator_interface.h"
 #include "evaluation/discretiser_interface.h"
@@ -64,6 +63,7 @@ namespace Ariadne {
       typedef typename Sys::real_type R;
 
       typedef typename Aprx::BasicSet BasicSet;
+      typedef typename Aprx::Paving Paving;
       typedef typename Aprx::CoverListSet CoverListSet;
       typedef typename Aprx::PartitionListSet PartitionListSet;
       typedef Sys System;
@@ -111,9 +111,9 @@ namespace Ariadne {
       ES _over_approximation(const BS& bs) const {
         return this->_approximator->enclosure_set(bs); }
       CLS _lower_approximation(const ESL& esl) const {
-        CLS result; for(size_type i=0; i!=esl.size(); ++i) { result.adjoin(this->_approximator->bounding_box(esl[i])); } return result; }
+         CLS result; for(size_type i=0; i!=esl.size(); ++i) { result.adjoin(this->_approximator->bounding_box(esl[i])); } return result; }
       PLS _outer_approximation(const ESL& esl) const {
-        return this->_approximator->outer_approximation(esl,this->_parameters->grid(esl.dimension())); }
+         return this->_approximator->outer_approximation(esl); }
       std::pair<CLS,CLS> _lower_approximation(const std::pair<ESL,ESL>& esl) const {
         CLS first=this->_lower_approximation(esl.first); CLS second=this->_lower_approximation(esl.second); return std::make_pair(first,second); }
       std::pair<PLS,PLS> _outer_approximation(const std::pair<ESL,ESL>& esl) const {

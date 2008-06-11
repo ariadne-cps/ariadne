@@ -103,10 +103,6 @@ void TestVectorFieldEvolver<R>::test() const
   cout << "t=" << t << endl;
   cout << endl;
 
-  ++ARIADNE_TEST_FAILURES;
-  cerr << "ABORTED ";
-  return;
-
   //Function evaluation sanity check
   cout << "vdp.evaluate(" << r << ") = " << vdp.evaluate(r) << endl;
   cout << "vdp.jacobian(" << r << ") = " << vdp.jacobian(r) << endl;

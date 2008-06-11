@@ -68,6 +68,12 @@ namespace Ariadne {
       /*! \brief Computes an outer-approximation of a set on a grid. */
       virtual CoverListSet lower_approximation(const EnclosureSet& es) const = 0;
 
+      /*! \brief Computes an outer-approximation of a set. */
+      virtual PartitionListSet inner_approximation(const EnclosureSet& es) const = 0;
+
+      /*! \brief Computes an outer-approximation of a set. */
+      virtual PartitionListSet outer_approximation(const EnclosureSet& es) const = 0;
+
       /*! \brief Computes an outer-approximation of a set on a grid. */
       virtual PartitionListSet inner_approximation(const EnclosureSet& es, const Paving& pv) const = 0;
 
@@ -82,17 +88,26 @@ namespace Ariadne {
       virtual CoverListSet lower_approximation(const EnclosureSetList& esl) const = 0;
 
       /*! \brief Computes an outer-approximation of a set. */
+      virtual PartitionListSet outer_approximation(const EnclosureSetList& esl) const = 0;
+
+      /*! \brief Computes an outer-approximation of a set. */
       virtual PartitionListSet outer_approximation(const EnclosureSetList& esl, const Paving& pv) const = 0;
 
 
       /*! \brief Adjoins an outer approximation to a basic set to a grid mask set. */
       virtual void adjoin_outer_approximation(PartitionTreeSet& pts, const EnclosureSet& es) const = 0;
 
-      /*! \brief Computets and over-approximation of a set from a rectangle. */
+      /*! \brief Computes and over-approximation of a set from a rectangle. */
       virtual void adjoin_outer_approximation(PartitionTreeSet& pts, const EnclosureSetList& esl) const = 0;
 
+      /*! \brief Write to an output stream. */
+      virtual std::ostream& write(std::ostream& os) const = 0;
     };
 
+    template<class Aprx, class ES>
+    std::ostream& operator<<(std::ostream& os, const ApproximatorInterface<Aprx,ES>& ai) {
+      return ai.write(os); 
+    }
 
 
 

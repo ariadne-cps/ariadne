@@ -162,5 +162,5 @@ namespace Ariadne {
     }
 
       
-  } 
-}
+ 
+} // namespace Ariadne

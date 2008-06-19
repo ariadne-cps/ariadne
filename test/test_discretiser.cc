@@ -53,7 +53,7 @@ using namespace std;
 using Models::VanDerPolEquation;
 
 template<class R> 
-class TestVectorFieldEvolver
+class TestDiscretiser
 {
  public:
   void test() const;
@@ -61,12 +61,12 @@ class TestVectorFieldEvolver
 
 int main() 
 {
-  TestVectorFieldEvolver<Flt>().test();
+  TestDiscretiser<Flt>().test();
   return ARIADNE_TEST_FAILURES;
 }
 
 template<class R> 
-void TestVectorFieldEvolver<R>::test() const
+void TestDiscretiser<R>::test() const
 {
   cout << __PRETTY_FUNCTION__ << endl;
   typedef Interval<R> I;
@@ -77,7 +77,7 @@ void TestVectorFieldEvolver<R>::test() const
   R grid_size(0.125);
   R enclosure_radius(0.25);
     
-EvolutionParameters<R> parameters;
+  EvolutionParameters<R> parameters;
   parameters.set_maximum_basic_set_radius(enclosure_radius);
   parameters.set_maximum_step_size(step_size);
   Grid<R> grid(2,grid_size);
@@ -86,7 +86,7 @@ EvolutionParameters<R> parameters;
   StandardIntegrator< Zonotope<R> > integrator;
   StandardSubdivider< Zonotope<R> > subdivider;
   CascadeReducer< Zonotope<R> > reducer(3);
-  VectorFieldEvolver< Zonotope<R> > evolver(parameters,integrator,subdivider,reducer);
+  Evolver< VectorField<R>, Zonotope<R> > evolver(parameters,integrator,subdivider,reducer);
   StandardApproximator< Zonotope<R> > approximator(grid);
   Discretiser< VectorField<R>, GridApproximationScheme<R>, Zonotope<R> > discretiser(parameters,evolver,approximator);
 

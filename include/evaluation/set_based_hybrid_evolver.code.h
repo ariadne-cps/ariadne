@@ -49,8 +49,8 @@ const uint BISECTION_STEPS=8;
 
 
 template<class R> 
-SetBasedHybridEvolver< Zonotope<R> >::
-SetBasedHybridEvolver(const EvolutionParameters<R>& parameters, 
+Evolver< HybridAutomaton<R>, Zonotope<R> >::
+Evolver(const EvolutionParameters<R>& parameters, 
                       const ApplicatorInterface<ES>& applicator, 
                       const IntegratorInterface<ES>& integrator, 
                       const SatisfierInterface<ES>& satisfier, 
@@ -69,7 +69,7 @@ SetBasedHybridEvolver(const EvolutionParameters<R>& parameters,
 
 template<class R>
 bool
-SetBasedHybridEvolver<Zonotope<R> >::
+Evolver< HybridAutomaton<R>, Zonotope<R> >::
 _satisfies(const ES& bs,
            const CS& inv, 
            const Semantics semantics) const
@@ -94,7 +94,7 @@ _satisfies(const ES& bs,
 
 template<class R>
 Rational
-SetBasedHybridEvolver<Zonotope<R> >::
+Evolver< HybridAutomaton<R>, Zonotope<R> >::
 _initial_activation_time(const VF& vf, 
                          const CS& inv, 
                          const ES& bs,
@@ -135,7 +135,7 @@ _initial_activation_time(const VF& vf,
 
 template<class R>
 Q
-SetBasedHybridEvolver< Zonotope<R> >::
+Evolver< HybridAutomaton<R>, Zonotope<R> >::
 _final_activation_time(const VF& vf, const CS& inv, const ES& bs, 
                        const Q& maximum_time, const Bx& bb, const Semantics semantics) const 
 {
@@ -172,8 +172,8 @@ _final_activation_time(const VF& vf, const CS& inv, const ES& bs,
 
 
 template<class R>
-tuple<Q,typename SetBasedHybridEvolver< Zonotope<R> >::ES>
-SetBasedHybridEvolver< Zonotope<R> >::
+tuple<Rational,Zonotope<R> >
+Evolver< HybridAutomaton<R>, Zonotope<R> >::
 _saltation_map(const VF& vf1, const VF& vf2, const Mp& rm, const CS& inv, 
                const ES& bs, const Q& h1, const Q& h2, const Bx& bb, const Semantics sem) const
 {
@@ -196,7 +196,7 @@ _saltation_map(const VF& vf1, const VF& vf2, const Mp& rm, const CS& inv,
 
 template<class R>
 void
-SetBasedHybridEvolver< Zonotope<R> >::
+Evolver< HybridAutomaton<R>, Zonotope<R> >::
 _step(HESL& evolve,
       HESL& reach,
       THESL& working,
@@ -318,7 +318,7 @@ _step(HESL& evolve,
 
 
 template<class R> void
-SetBasedHybridEvolver< Zonotope<R> >::
+Evolver< HybridAutomaton<R>, Zonotope<R> >::
 evolution(HybridEnclosureSetList& final,
           HybridEnclosureSetList& intermediate,
           const Automaton& automaton,

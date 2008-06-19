@@ -101,10 +101,10 @@ namespace Ariadne {
       ListSet();
 
       /*! \brief An empty list set which can only hold sets of dimension \a n. */
-      ListSet(dimension_type n);
+      explicit ListSet(dimension_type n);
 
       /*! \brief A list set containing the element \a bs. */
-      ListSet(const BS& bs);
+      explicit ListSet(const BS& bs);
 
       /*! \brief Convert from a list set of another type. */
       template<class BST> ListSet(const ListSet<BST>& ls);

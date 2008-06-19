@@ -48,12 +48,12 @@ namespace Ariadne {
     template<class ES> class ApplicatorInterface;
     template<class ES> class IntegratorInterface;
 
+    template<class Sys, class ES> class EvolverInterface;
+    template<class Sys, class Aprx> class DiscretiserInterface;
+
     class EvolutionProfiler;
     template<class R> class EvolutionParameters;
 
-    template<class ES> class MapEvolver;
-    template<class ES> class VectorFieldEvolver;
-    template<class ES> class SetBasedHybridEvolver;
 
 } // namespace Ariadne
 

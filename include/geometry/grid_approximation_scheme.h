@@ -43,6 +43,7 @@ namespace Ariadne {
      public:
       typedef R Real;
       typedef Box<R> BasicSet;
+      typedef Grid<R> Cover;
       typedef Grid<R> Paving;
       typedef BoxListSet<R> CoverListSet;
       typedef GridCellListSet<R> PartitionListSet;

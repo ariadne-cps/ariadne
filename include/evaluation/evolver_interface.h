@@ -46,15 +46,36 @@ namespace Ariadne {
       virtual ~EvolverInterface<Sys,ES>() {};
       /*! \brief Make a dynamically-allocated copy. */
       virtual EvolverInterface<Sys,ES>* clone() const = 0;
-     public:
       /*! \brief Compute an approximation to the evolution set under the given semantics. The reachable set is only computed if \a reach is \c true. */
       virtual void evolution(ESL& final, ESL& intermediate, const Sys& system, const ES& initial, const T& time, Semantics semantics, bool reach) const = 0;
+      void evolution(ESL& final, ESL& intermediate, const Sys& system, const ESL& initial, const T& time, Semantics semantics, bool reach) const {
+        for(typename ESL::const_iterator iter=initial.begin(); iter!=initial.end(); ++iter) {
+          this->evolution(final,intermediate,system,*iter,time,semantics,reach); }
+      }
+     public:
+      /*! \brief Compute an approximation to the evolution set under the given semantics. */
+      void evolution(ESL& final, const Sys& system, const ES& initial, const T& time, Semantics semantics) const {
+        ESL intermediate; this->evolution(final,intermediate,system,initial,time,semantics,false); }
+        
+      /*! \brief Compute an approximation to the evolution set under the given semantics. */
+      void evolution(ESL& final, const Sys& system, const ESL& initial, const T& time, Semantics semantics) const {
+        ESL intermediate; this->evolution(final,intermediate,system,initial,time,semantics,false); }
+
+      /*! \brief Compute an approximation to the evolution set under the given semantics. */
+      void evolution(ESL& final, ESL& intermediate, const Sys& system, const ES& initial, const T& time, Semantics semantics) const {
+        this->evolution(final,intermediate,system,initial,time,semantics,true); }
+        
+      /*! \brief Compute an approximation to the evolution set under the given semantics. */
+      void evolution(ESL& final, ESL& intermediate, const Sys& system, const ESL& initial, const T& time, Semantics semantics) const {
+        this->evolution(final,intermediate,system,initial,time,semantics,true); }
+
     };
 
 
     template<class Sys, class ES> class EvolverBase
       : public EvolverInterface<Sys,ES>
     {
+      typedef EvolverInterface<Sys,ES> Interface;
       typedef typename Sys::time_type T;
       typedef ListSet<ES> ESL;
      public:

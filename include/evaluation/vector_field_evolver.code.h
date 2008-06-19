@@ -61,11 +61,11 @@
 namespace Ariadne {
   
 template<class ES>
-VectorFieldEvolver<ES>::
-VectorFieldEvolver(const EvolutionParameters<R>& parameters,
-                   const IntegratorInterface<ES>& integrator, 
-                   const SubdividerInterface<ES>& subdivider, 
-                   const ReducerInterface<ES>& reducer)
+Evolver<VectorField<typename ES::real_type>,ES>::
+Evolver(const EvolutionParameters<R>& parameters,
+        const IntegratorInterface<ES>& integrator, 
+        const SubdividerInterface<ES>& subdivider, 
+        const ReducerInterface<ES>& reducer)
   : _parameters(parameters.clone()),
     _integrator(integrator.clone()),
     _subdivider(subdivider.clone()),
@@ -75,7 +75,7 @@ VectorFieldEvolver(const EvolutionParameters<R>& parameters,
 
 template<class ES>
 void
-VectorFieldEvolver<ES>::
+Evolver<VectorField<typename ES::real_type>,ES>::
 evolution(ESL& final,
           ESL& intermediate, 
           const VF& vf,

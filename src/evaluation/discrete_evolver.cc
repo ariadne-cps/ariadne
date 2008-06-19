@@ -1,5 +1,5 @@
 /***************************************************************************
- *            evolver.cc
+ *            discretiser.cc
  *
  *  Copyright  2008  Pieter Collins
  *
@@ -24,33 +24,26 @@
 #include "numeric/float.h"
 
 #include "geometry/zonotope.h"
+#include "geometry/grid_approximation_scheme.h"
 
+#include "system/numerical_system.h"
 #include "system/map.h"
-#include "system/vector_field.h"
 
-#include "evaluation/map_evolver.h"
-#include "evaluation/map_evolver.code.h"
-
-#include "evaluation/vector_field_evolver.h"
-#include "evaluation/vector_field_evolver.code.h"
-
-#include "evaluation/set_based_hybrid_evolver.h"
-#include "evaluation/set_based_hybrid_evolver.code.h"
+#include "evaluation/discrete_evolver.h"
+#include "evaluation/discrete_evolver.code.h"
 
 namespace Ariadne {
   
     
-
 #ifdef ENABLE_FLOAT64
-    template class Evolver< Map<Float64>, Zonotope<Float64> >;
-    template class Evolver< VectorField<Float64>, Zonotope<Float64> >;
-    template class Evolver< HybridAutomaton<Float64>, Zonotope<Float64> >;
+    template class DiscreteEvolver< Map<Float64> , GridApproximationScheme<Float64>, Zonotope<Float64> >;
+//    template class DiscreteEvolver< NumericalSystemInterface< Integer,Zonotope<Float64> >, GridApproximationScheme<Float64>, Zonotope<Float64> >;
+//    template class DiscreteEvolver< NumericalSystemInterface< Rational,Zonotope<Float64> >, GridApproximationScheme<Float64>, Zonotope<Float64> >;
 #endif
   
 #ifdef ENABLE_FLOATMP
-    template class Evolver< Map<FloatMP>, Zonotope<FloatMP> >;
-    template class Evolver< VectorField<FloatMP>, Zonotope<FloatMP> >;
-    template class Evolver< HybridAutomaton<FloatMP>, Zonotope<FloatMP> >;
+//    template class DiscreteEvolver< NumericalSystemInterface< Integer,Zonotope<FloatMP> >, GridApproximationScheme<FloatMP>, Zonotope<FloatMP> >;
+//    template class DiscreteEvolver< NumericalSystemInterface< Rational,Zonotope<FloatMP> >, GridApproximationScheme<FloatMP>, Zonotope<FloatMP> >;
 #endif
 
   

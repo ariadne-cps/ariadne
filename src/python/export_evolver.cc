@@ -50,21 +50,21 @@ void export_evolver()
 {
   typedef Zonotope<R> ZES;
 
-  class_< MapEvolver<ZES> > map_evolver_class("MapEvolver",no_init);
+  class_< Evolver<Map<R>,ZES> > map_evolver_class("MapEvolver",no_init);
   map_evolver_class.def(init<const EvolutionParameters<R>&,const ApplicatorInterface<ZES>&,
                              const SubdividerInterface<ZES>&,const ReducerInterface<ZES>&>());
-  map_evolver_class.def("evolution",&VectorFieldEvolver<ZES>::evolution);
+  map_evolver_class.def("evolution",&Evolver<Map<R>,ZES>::evolution);
 
-  class_< VectorFieldEvolver<ZES> > vector_field_evolver_class("VectorFieldEvolver",no_init);
+  class_< Evolver<VectorField<R>,ZES> > vector_field_evolver_class("VectorFieldEvolver",no_init);
   vector_field_evolver_class.def(init<const EvolutionParameters<R>&,const IntegratorInterface<ZES>&,
                                       const SubdividerInterface<ZES>&,const ReducerInterface<ZES>&>());
-  vector_field_evolver_class.def("evolution",&VectorFieldEvolver<ZES>::evolution);
+  vector_field_evolver_class.def("evolution",&Evolver<VectorField<R>,ZES>::evolution);
 
-  class_< SetBasedHybridEvolver<ZES> > set_based_hybrid_evolver_class("SetBasedHybridEvolver",no_init);
+  class_< Evolver<HybridAutomaton<R>,ZES> > set_based_hybrid_evolver_class("SetBasedHybridEvolver",no_init);
   set_based_hybrid_evolver_class.def(init<const EvolutionParameters<R>&,
                                           const ApplicatorInterface<ZES>&,const IntegratorInterface<ZES>&,const SatisfierInterface<ZES>&,
                                           const SubdividerInterface<ZES>&,const ReducerInterface<ZES>&>());
-  set_based_hybrid_evolver_class.def("evolution",&SetBasedHybridEvolver<ZES>::evolution);
+  set_based_hybrid_evolver_class.def("evolution",&Evolver<HybridAutomaton<R>,ZES>::evolution);
 
 
 }

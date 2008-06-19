@@ -60,9 +60,11 @@ using Ariadne::Models::HenonMap;
 template<class R>
 class TestReachabilityAnalyser 
 {  
-  typedef Grid<R> Pv;
+  typedef Map<R> Sys;
+  typedef GridApproximationScheme<R> Aprx;
   typedef Zonotope<R> ES;
-  ReachabilityAnalyser< Map<R>, GridApproximationScheme<R> > map_analyser;
+
+  ReachabilityAnalyser<Sys,Aprx> map_analyser;
   Map<R> system;
   Grid<R> grid;
   Box<R> bounding_box;
@@ -83,10 +85,10 @@ class TestReachabilityAnalyser
     StandardApplicator<ES> applicator;
     StandardSubdivider<ES> subdivider;
     CascadeReducer<ES> reducer(3);
-    MapEvolver<ES> map_evolver(parameters,applicator,subdivider,reducer);
+    Evolver<Sys,ES> map_evolver(parameters,applicator,subdivider,reducer);
     StandardApproximator<ES> approximator(grid);
-    Discretiser<Map<R>,GridApproximationScheme<R>,ES> discretiser(parameters,map_evolver,approximator);
-    return ReachabilityAnalyser< Map<R>, GridApproximationScheme<R> >(parameters,discretiser);
+    Discretiser<Sys,Aprx,ES> discretiser(parameters,map_evolver,approximator);
+    return ReachabilityAnalyser<Sys,Aprx>(parameters,discretiser);
   }
 
   TestReachabilityAnalyser()

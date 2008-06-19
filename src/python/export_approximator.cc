@@ -70,6 +70,8 @@ class ApproximatorWrapper
   PartitionListSet outer_approximation(const EnclosureSetList&, const Paving&) const { return this->get_override("outer_approximation")(); }
 
   void adjoin_outer_approximation(PartitionTreeSet&, const EnclosureSet&) const { this->get_override("adjoin_outer_approximation")(); }
+  void adjoin_over_approximations(CoverListSet&, const EnclosureSetList&) const { this->get_override("adjoin_over_approximations")(); }
+  void adjoin_outer_approximation(PartitionListSet&, const EnclosureSetList&) const { this->get_override("adjoin_outer_approximation")(); }
   void adjoin_outer_approximation(PartitionTreeSet&, const EnclosureSetList&) const { this->get_override("adjoin_outer_approximation")(); }
   std::ostream& write(std::ostream& os) const { this->get_override("write")(); return os; }
 };

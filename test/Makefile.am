@@ -73,6 +73,7 @@ EVALUATION_TESTS = \
 	test_vector_field_evolver \
 	test_hybrid_evolver \
 	test_discretiser \
+	test_discrete_evolver \
 	test_reachability_analyser
 
 OUTPUT_TESTS = \

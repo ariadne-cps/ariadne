@@ -53,12 +53,13 @@
 
 namespace Ariadne {
   
-  
+    template<class Sys, class ES> class Evolver;
+ 
     /*! \ingroup Evolvers
      *  \brief A class for evolving a continuous-time dynamical system.
      */
     template<class ES> 
-    class VectorFieldEvolver
+    class Evolver< VectorField<typename ES::real_type>, ES>
       : public EvolverBase< VectorField<typename ES::real_type>, ES>
     {
       typedef typename ES::real_type R;
@@ -70,8 +71,8 @@ namespace Ariadne {
       typedef ListSet<TES> TESL;
       typedef Sys VF;
      public:
-      VectorFieldEvolver(const EvolutionParameters<R>&,const IntegratorInterface<ES>&, const SubdividerInterface<ES>&, const ReducerInterface<ES>&);
-      virtual VectorFieldEvolver<ES>* clone() const { return new VectorFieldEvolver<ES>(*this); }
+      Evolver(const EvolutionParameters<R>&,const IntegratorInterface<ES>&, const SubdividerInterface<ES>&, const ReducerInterface<ES>&);
+      virtual Evolver<Sys,ES>* clone() const { return new Evolver<Sys,ES>(*this); }
       virtual void evolution(ESL& final, ESL& intermediate, const Sys& system, const ES& initial, const T& time, Semantics semantics, bool reach) const;
      public:
       /*! \brief Compute an approximation to the evolution set. */

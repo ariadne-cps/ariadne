@@ -50,12 +50,13 @@
 
 namespace Ariadne {
   
-  
+   template<class Sys, class ES> class Evolver;
+
     /*! \ingroup Evolvers
      *  \brief A class for evolving a discrete-time dynamical system.
      */
     template<class ES> 
-    class MapEvolver
+    class Evolver< Map<typename ES::real_type>, ES >
       : public EvolverBase< Map<typename ES::real_type>, ES>
     {
       typedef typename ES::real_type R;
@@ -67,11 +68,8 @@ namespace Ariadne {
       typedef ListSet<TES> TESL;
       typedef Sys Mp;
      public:
-      MapEvolver(const EvolutionParameters<R>&,const ApplicatorInterface<ES>&, const SubdividerInterface<ES>&, const ReducerInterface<ES>&);
-      virtual MapEvolver<ES>* clone() const { return new MapEvolver<ES>(*this); }
-      virtual void evolution(ESL& final, ESL& intermediate, 
-                             const Sys& system, const ES& initial, const T& time, 
-                             Semantics semantics, bool reach) const;
+      Evolver(const EvolutionParameters<R>&,const ApplicatorInterface<ES>&, const SubdividerInterface<ES>&, const ReducerInterface<ES>&);
+      virtual Evolver<Sys,ES>* clone() const { return new Evolver<Sys,ES>(*this); }
      public:
       /*! \brief Compute an approximation to the evolution set. */
       ESL evolve(const Sys& system, const ES& initial_set, const T& time) const {
@@ -79,6 +77,9 @@ namespace Ariadne {
       /*! \brief Compute an approximation to the evolution set under the given semantics. */
       ESL reach(const Sys& system, const ES& initial_set, const T& time) const {
         ESL final; ESL intermediate; this->evolution(final,intermediate,system,initial_set,time,upper_semantics,true); return intermediate; }
+      virtual void evolution(ESL& final, ESL& intermediate, 
+                             const Sys& system, const ES& initial, const T& time, 
+                             Semantics semantics, bool reach) const;
      private:
       uint verbosity() const { 
         return this->_parameters->verbosity(); }

@@ -110,6 +110,7 @@ EVALUATION_SRC = \
 	evaluation/affine_integrator.cc \
 	\
 	evaluation/evolver.cc \
+	evaluation/discrete_evolver.cc \
 	evaluation/discretiser.cc \
 	evaluation/reachability_analyser.cc \
 	evaluation/model_checker.cc

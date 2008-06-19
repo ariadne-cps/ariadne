@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_vector_field_evolver.cc
+ *            test_discretiser.cc
  *
  *  Copyright  2006-8  Pieter Collins
  *
@@ -32,9 +32,13 @@
 #include "geometry/zonotope.h"
 #include "geometry/list_set.h"
 #include "geometry/empty_set.h"
+#include "evaluation/standard_approximator.h"
 #include "system/affine_vector_field.h"
+#include "system/numerical_system.h"
 #include "evaluation/evolution_parameters.h"
 #include "evaluation/vector_field_evolver.h"
+#include "evaluation/discrete_evolver.h"
+#include "evaluation/affine_integrator.h"
 #include "evaluation/standard_integrator.h"
 #include "evaluation/standard_subdivider.h"
 #include "evaluation/cascade_reducer.h"
@@ -44,12 +48,12 @@
 
 #include "test.h"
 
-using namespace std;
 using namespace Ariadne;
-using Ariadne::Models::VanDerPolEquation;
+using namespace std;
+using Models::VanDerPolEquation;
 
 template<class R> 
-class TestVectorFieldEvolver
+class TestDiscreteEvolver
 {
  public:
   void test() const;
@@ -57,61 +61,73 @@ class TestVectorFieldEvolver
 
 int main() 
 {
-  TestVectorFieldEvolver<Flt>().test();
+  TestDiscreteEvolver<Flt>().test();
   return ARIADNE_TEST_FAILURES;
 }
 
 template<class R> 
-void TestVectorFieldEvolver<R>::test() const
+void TestDiscreteEvolver<R>::test() const
 {
   cout << __PRETTY_FUNCTION__ << endl;
   typedef Interval<R> I;
 
+  // Set up the evolution parameters and grid
+  time_type time(6.0);
+  time_type step_size(0.0625);
+  R grid_size(0.125);
+  R enclosure_radius(0.25);
+    
   EvolutionParameters<R> parameters;
-  parameters.set_maximum_basic_set_radius(0.25);
-  parameters.set_maximum_step_size(0.125);
-  
-  // Test constructor/destructor
+  parameters.set_maximum_basic_set_radius(enclosure_radius);
+  parameters.set_maximum_step_size(step_size);
+  Grid<R> grid(2,grid_size);
+
+  // Set up the evaluators
   StandardIntegrator< Zonotope<R> > integrator;
   StandardSubdivider< Zonotope<R> > subdivider;
   CascadeReducer< Zonotope<R> > reducer(3);
-
   Evolver< VectorField<R>, Zonotope<R> > evolver(parameters,integrator,subdivider,reducer);
-  
-  AffineVectorField<R> avf=AffineVectorField<R>(Matrix<R>("[-0.25,-1.0;+1.0,-0.25]"),Vector<R>("[0.25,0.0]"));
-  cout << "avf=" << avf << endl;
+  StandardApproximator< Zonotope<R> > approximator(grid);
+  DiscreteEvolver< VectorField<R>, GridApproximationScheme<R>, Zonotope<R> > discretiser(evolver,approximator);
+
+  // Define the initial box
+  Box<R> initial_box=Box<R>("[1.01,1.02]x[0.51,0.52]");
+  cout << "initial_box=" << initial_box << endl;
+
+  // Set up the vector field
   R mu=0.865;
   VanDerPolEquation<R> vdp=VanDerPolEquation<R>(Point<R>(1,&mu));
-  cout << "vpd=" << avf << endl;
+  cout << "vdp=" << vdp << endl;
 
-  Box<R> r=Box<R>("[0.98,1.02]x[0.48,0.52]");
-  cout << "r=" << r << endl;
-  Zonotope<R> z(r);
-  cout << "z=" << z << endl;
-
+  //Function evaluation sanity check
+  cout << "vdp.evaluate(" << initial_box << ") = " << vdp.evaluate(initial_box) << endl;
+  cout << "vdp.jacobian(" << initial_box << ") = " << vdp.jacobian(initial_box) << endl;
+  cout << endl;
+  
+  // Define a bounding box for the evolution
   Box<R> bounding_box=Box<R>("[-4,4]x[-4,4]") ;
   Box<R> eps_bounding_box=bounding_box.neighbourhood(0.1);
  
-  time_type h(0.0625);
-  cout << "h=" << h << endl;
-  time_type t(0.25);
-  cout << "t=" << t << endl;
-  cout << endl;
+  // Over-approximate the initial set by a grid cell
+  GridCellListSet<R> initial_cells(grid);
+  initial_cells.adjoin(over_approximation(initial_box,grid));
+  cout << "initial_cells=" << initial_cells << endl << endl;
 
-  //Function evaluation sanity check
-  cout << "vdp.evaluate(" << r << ") = " << vdp.evaluate(r) << endl;
-  cout << "vdp.jacobian(" << r << ") = " << vdp.jacobian(r) << endl;
-  cout << endl;
+  // Compute the reachable sets
+  GridCellListSet<R> evolve_set = discretiser.upper_evolve(vdp,initial_cells,time,grid);
+  cout << "evolve_set=" << evolve_set << endl;
+  GridCellListSet<R> reach_set = discretiser.upper_reach(vdp,initial_cells,time,grid);
+  cout << "reach_set=" << reach_set << endl;
   
-  Zonotope<R> initial_set = z;
-  ListSet< Zonotope<R> > evolve_set = evolver.evolve(vdp,z,1);
-  ListSet< Zonotope<R> > reach_set = evolver.reach(vdp,z,1);
-  
+  // Print the intial, evolve and reach sets
   epsfstream eps;
-  eps.open("test_vector_field_evolver.eps",eps_bounding_box);
+  eps.open("test_discrete_evolver-vdp.eps",eps_bounding_box);
   eps << line_style(true);
   eps << fill_colour(cyan) << reach_set;
   eps << fill_colour(yellow) << evolve_set;
-  eps << fill_colour(blue) << initial_set;
+  eps << fill_colour(blue) << initial_cells;
   eps.close();
+
+
+
 }

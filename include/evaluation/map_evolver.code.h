@@ -57,11 +57,11 @@ namespace Ariadne {
   
 
 template<class ES>
-MapEvolver<ES>::
-MapEvolver(const EvolutionParameters<R>& parameters,
-           const ApplicatorInterface<ES>& applicator, 
-           const SubdividerInterface<ES>& subdivider, 
-           const ReducerInterface<ES>& reducer)
+Evolver< Map<typename ES::real_type>, ES>::
+Evolver(const EvolutionParameters<R>& parameters,
+        const ApplicatorInterface<ES>& applicator, 
+        const SubdividerInterface<ES>& subdivider, 
+        const ReducerInterface<ES>& reducer)
   : _parameters(parameters.clone()),
     _applicator(applicator.clone()),
     _subdivider(subdivider.clone()),
@@ -71,7 +71,7 @@ MapEvolver(const EvolutionParameters<R>& parameters,
 
 template<class ES>
 void
-MapEvolver<ES>::
+Evolver< Map<typename ES::real_type>, ES>::
 evolution(ESL& final,
           ESL& intermediate, 
           const Sys& system,

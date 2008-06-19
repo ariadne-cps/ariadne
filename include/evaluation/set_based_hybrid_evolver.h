@@ -60,13 +60,13 @@ namespace Ariadne {
   
   
     class HybridTime;
-    template<class ES> class SetBasedHybridEvolver;
+    template<class Sys, class ES> class Evolver;
 
     /*! \ingroup Evolvers
      *  \brief A class for computing the evolution of a hybrid system.
      */
     template<class R>
-    class SetBasedHybridEvolver< Zonotope<R> >
+    class Evolver< HybridAutomaton<R>, Zonotope<R> >
       : public EvolverBase< HybridAutomaton<R>, HybridBasicSet< Zonotope<R> > >
     {
       typedef Integer Z;
@@ -77,6 +77,7 @@ namespace Ariadne {
       typedef ListSet<HES> HESL;
       
       typedef HybridAutomaton<R> Automaton;
+      typedef HybridAutomaton<R> Sys;
       typedef Rational Time;
 
       typedef HES HybridEnclosureSet;
@@ -86,15 +87,15 @@ namespace Ariadne {
       //! \name Constructors and destructors
 
       /*! \brief Construct from evolution parameters, an applicator and an integrator. */
-      SetBasedHybridEvolver(const EvolutionParameters<R>& parameters, 
-                            const ApplicatorInterface<ES>& applicator, 
-                            const IntegratorInterface<ES>& integrator, 
-                            const SatisfierInterface<ES>& satisfier, 
-                            const SubdividerInterface<ES>& reducer, 
-                            const ReducerInterface<ES>& reducer);
+      Evolver(const EvolutionParameters<R>& parameters, 
+              const ApplicatorInterface<ES>& applicator, 
+              const IntegratorInterface<ES>& integrator, 
+              const SatisfierInterface<ES>& satisfier, 
+              const SubdividerInterface<ES>& reducer, 
+              const ReducerInterface<ES>& reducer);
 
       /*! \brief Make a dynamically-allocated copy. */
-      SetBasedHybridEvolver<ES>* clone() const { return new SetBasedHybridEvolver<ES>(*this); }
+      Evolver<Sys,ES>* clone() const { return new Evolver<Sys,ES>(*this); }
 
       //@}
 
@@ -153,6 +154,8 @@ namespace Ariadne {
       // Helper functions for timed sets
       THES integration_step(const VF& vf, const THES& thes, const Q& h, const Bx& bb) const {
         return THES(Q(thes.time()+h),thes.steps(),thes.state(),this->continuous_integration_step(vf,thes.set(),h,bb)); }
+      THESL timed_enclosure_set_list(const HES& hes) const {
+        return THESL(HESL(hes)); }
       THESL timed_enclosure_set_list(const HESL& hesl) const {
         return THESL(hesl); }
       R radius(const THES& thes) const {

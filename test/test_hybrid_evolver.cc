@@ -56,10 +56,12 @@ template<class R> int test_set_based_hybrid_evolver();
 template<class R>
 class TestHybridEvolver 
 {  
+  typedef HybridAutomaton<R> Sys;
   typedef Zonotope<R> ES;
   typedef HybridBasicSet< Zonotope<R> > HES;
   typedef ListSet< HybridBasicSet< Zonotope<R> > > HLS;
-  SetBasedHybridEvolver<ES>* hybrid_evolver;
+
+  Evolver<HybridAutomaton<R>, Zonotope<R> >* hybrid_evolver;
   HybridAutomaton<R> automaton;
   HybridBasicSet< Zonotope<R> > initial_set;
   Box<R> bounding_box;
@@ -125,7 +127,7 @@ class TestHybridEvolver
     StandardSatisfier<ES> satisfier;
     StandardSubdivider<ES> subdivider;
     CascadeReducer<ES> reducer(3);
-    hybrid_evolver=new SetBasedHybridEvolver<ES> (parameters,applicator,integrator,satisfier,subdivider,reducer);
+    hybrid_evolver=new Evolver<Sys,ES> (parameters,applicator,integrator,satisfier,subdivider,reducer);
     
     HybridBasicSet< Zonotope<R> > initial_set(mode1_id,Zonotope<R>(Box<R>("[-6.96875,-6.9375]x[-6.96875,-6.9375]")));
     cout << "initial_set=" << initial_set << endl;

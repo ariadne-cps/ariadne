@@ -96,7 +96,7 @@ void TestMapEvolver<R>::test() const
   StandardSubdivider< Zonotope<R> > subdivider;
   CascadeReducer< Zonotope<R> > reducer(3);
   
-  MapEvolver< Zonotope<R> > evolver(parameters,applicator,subdivider,reducer);
+  Evolver< Map<R>, Zonotope<R> > evolver(parameters,applicator,subdivider,reducer);
   
   //Test evaluation on different classes of sets
   uint steps=3;
@@ -111,8 +111,8 @@ void TestMapEvolver<R>::test() const
   cout << "z=" << z << " fz=" << fz << " pfz="<< pfz << endl;
   
   Zonotope<R> initial_set = z;
-  ListSet< Zonotope<R> > evolve_set = fz;
-  ListSet< Zonotope<R> > reach_set = pfz;
+  ListSet< Zonotope<R> > evolve_set(fz);
+  ListSet< Zonotope<R> > reach_set(pfz);
 
 
   epsfstream eps;

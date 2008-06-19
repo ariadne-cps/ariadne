@@ -1,8 +1,8 @@
 /***************************************************************************
- *            evolver.cc
+ *            discrete_evolver.code.h
  *
- *  Copyright  2008  Pieter Collins
- *
+ *  Copyright  2006-8  Alberto Casagrande, Pieter Collins
+ * 
  ****************************************************************************/
 
 /*
@@ -20,38 +20,13 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-
-#include "numeric/float.h"
-
-#include "geometry/zonotope.h"
-
-#include "system/map.h"
-#include "system/vector_field.h"
-
-#include "evaluation/map_evolver.h"
-#include "evaluation/map_evolver.code.h"
-
-#include "evaluation/vector_field_evolver.h"
-#include "evaluation/vector_field_evolver.code.h"
-
-#include "evaluation/set_based_hybrid_evolver.h"
-#include "evaluation/set_based_hybrid_evolver.code.h"
+ 
+#include "evaluation/discrete_evolver.h"
 
 namespace Ariadne {
   
-    
-
-#ifdef ENABLE_FLOAT64
-    template class Evolver< Map<Float64>, Zonotope<Float64> >;
-    template class Evolver< VectorField<Float64>, Zonotope<Float64> >;
-    template class Evolver< HybridAutomaton<Float64>, Zonotope<Float64> >;
-#endif
-  
-#ifdef ENABLE_FLOATMP
-    template class Evolver< Map<FloatMP>, Zonotope<FloatMP> >;
-    template class Evolver< VectorField<FloatMP>, Zonotope<FloatMP> >;
-    template class Evolver< HybridAutomaton<FloatMP>, Zonotope<FloatMP> >;
-#endif
-
   
 } // namespace Ariadne
+
+
+

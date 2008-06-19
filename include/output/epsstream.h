@@ -138,6 +138,7 @@ namespace Ariadne {
       void trace(const Polygon2d& p);
 
       void draw(const Point2d& pt);
+      void draw(const Segment2d& seg);
       void draw(const Rectangle2d& r);
       void draw(const Zonotope2d& z);
       void draw(const Polygon2d& p);
@@ -186,6 +187,7 @@ namespace Ariadne {
     epsstream& operator<<(epsstream&, const char* s);
 
     template<class R> epsstream& operator<<(epsstream&, const Point<R>&); 
+    template<class R> epsstream& operator<<(epsstream&, const Segment<R>&);
     template<class R> epsstream& operator<<(epsstream&, const Box<R>&);
     template<class R> epsstream& operator<<(epsstream&, const Rectangle<R>&);
     template<class R> epsstream& operator<<(epsstream&, const Zonotope<R>&);

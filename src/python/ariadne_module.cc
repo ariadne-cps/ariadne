@@ -75,6 +75,7 @@ template<class R> void export_polynomial_variable();
 template<class R> void export_point();
 template<class R> void export_interval_point();
 template<class R> void export_point_list();
+template<class R> void export_segment();
 template<class R> void export_box();
 template<class R> void export_box_list_set();
 template<class R> void export_set();
@@ -182,6 +183,7 @@ BOOST_PYTHON_MODULE(ariadne)
   //export_taylor_derivative<Rational>();
 
   export_point<Rational>();
+  export_segment<Rational>();
   export_polytope<Rational>();
   export_polyhedron<Rational>();
 
@@ -189,6 +191,7 @@ BOOST_PYTHON_MODULE(ariadne)
   export_point<FloatPy>();
   export_interval_point<FloatPy>();
   export_point_list<FloatPy>();
+  export_segment<FloatPy>();
   export_interval_set<FloatPy>();
   export_box<FloatPy>();
   export_box_list_set<FloatPy>();

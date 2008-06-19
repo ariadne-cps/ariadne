@@ -343,6 +343,20 @@ epsstream::draw(const Point2d& pt)
 }
 
 void
+epsstream::draw(const Segment2d& seg)
+{
+  std::ostream& os=this->ostream();
+  epsstream& eps=*this;
+  const Point2d& initial=seg.initial_point();
+  const Point2d& final=seg.final_point();
+  if(eps.line_style) {
+    os << initial[0] << " " << initial[1] << " moveto\n";
+    os << final[0] << " " << final[1] << " lineto\n";
+    os << eps.line_colour.name() << " stroke\n\n";
+  }
+}
+
+void
 epsstream::draw(const Rectangle2d& r) 
 {
   epsstream& eps=*this;

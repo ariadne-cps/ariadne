@@ -67,6 +67,7 @@ ARIADNE_SRC = ariadne_module.cc \
 	export_python_function.cc \
 	 \
 	export_point.cc \
+	export_curve.cc \
 	export_box.cc \
 	export_set.cc \
 	export_interval_set.cc \

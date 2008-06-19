@@ -36,6 +36,15 @@ operator<<(epsstream& eps, const Point<R>& pt)
 
 template<class R> 
 epsstream&
+operator<<(epsstream& eps, const Segment<R>& seg) 
+{
+  Segment2d dseg=eps.projection_map()(seg);
+  eps.draw(dseg);
+  return eps;
+}
+
+template<class R> 
+epsstream&
 operator<<(epsstream& eps, const Box<R>& r) 
 {
   Rectangle2d dr=eps.projection_map()(r);

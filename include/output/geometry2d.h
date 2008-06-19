@@ -41,6 +41,7 @@
 #include "geometry/exceptions.h"
 #include "geometry/point.h"
 #include "geometry/box.h"
+#include "geometry/segment.h"
 #include "geometry/rectangular_set.h"
 #include "geometry/list_set.h"
 #include "geometry/grid_set.h"
@@ -77,6 +78,17 @@ namespace Ariadne {
     inline Point2d& operator-=(Point2d& pt, const Vector2d& v) {
       pt[0]-=v[0]; pt[1]-=v[1]; return pt;
     }
+
+    class Segment2d {
+     private:
+      Point2d _initial_point;
+      Point2d _final_point;
+     public:
+      Segment2d(const Point2d& i, const Point2d& f) : _initial_point(i), _final_point(f) { }
+      dimension_type dimension() const { return 2; }
+      const Point2d& initial_point() const { return _initial_point; }
+      const Point2d& final_point() const { return _final_point; }
+    };
 
     class Rectangle2d {
      private:
@@ -149,6 +161,7 @@ namespace Ariadne {
       PlanarProjectionMap(dimension_type d, dimension_type i, dimension_type j);
       template<class R> Vector2d operator() (const Vector<R>& v) const;
       template<class R> Point2d operator() (const Point<R>& pt) const;
+      template<class R> Segment2d operator() (const Segment<R>& pt) const;
       template<class E> Rectangle2d operator() (const RectangleExpression<E>& re) const;
       template<class R> Zonotope2d operator() (const Zonotope<R>& z) const;
       template<class R> Polygon2d operator() (const Polytope<R>& p) const;
@@ -186,6 +199,14 @@ PlanarProjectionMap::operator()(const Point<R>& pt) const
 
 
 
+
+template<class R> 
+Segment2d
+PlanarProjectionMap::operator()(const Segment<R>& segment) const
+{
+  const PlanarProjectionMap& self=*this;
+  return Segment2d(self(segment.initial_point()),self(segment.final_point()));
+}
 
 template<class E> 
 Rectangle2d 

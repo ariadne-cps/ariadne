@@ -82,7 +82,7 @@ void TestMapEvolver<R>::test() const
   
   HenonMap<R> henon=HenonMap<R>(Point<R>(2,p));
   HenonInverseMap<R> henon_inverse=HenonInverseMap<R>(henon.parameters());
-  cout << henon << endl << henon_inverse << endl;
+  cout << henon << endl << henon_inverse << endl << endl;
 
   Box<R> bounding_box=Box<R>("[-4,4]x[-4,4]") ;
   Box<R> eps_bounding_box=bounding_box.neighbourhood(0.1);
@@ -102,18 +102,23 @@ void TestMapEvolver<R>::test() const
   uint steps=3;
   ListSet< Zonotope<R> > fzl=evolver.reach(static_cast<const Map<R>&>(henon),z,Integer(steps));
   ARIADNE_ASSERT(fzl.size()==(steps+1u));
-  cout << "z=" << z << " fzl=" << fzl << endl;
+  cout << "z=" << z << "\nfzl=" << fzl << endl;
   Zonotope<R> fz=fzl[steps];
+  cout << "fz=" << fz << endl;
 
   ListSet< Zonotope<R> > pfzl=evolver.reach(static_cast<const Map<R>&>(henon_inverse),fz,Integer(steps));
+  cout << "pfzl=" << pfzl << endl;
   ARIADNE_ASSERT(pfzl.size()==(steps+1u));
   Zonotope<R> pfz=pfzl[steps];
   cout << "z=" << z << " fz=" << fz << " pfz="<< pfz << endl;
   
   Zonotope<R> initial_set = z;
+  cout << "initial_set=" << initial_set << endl;
   ListSet< Zonotope<R> > evolve_set(fz);
+  cout << "evolve_set=" << evolve_set << endl;
   ListSet< Zonotope<R> > reach_set(pfz);
-
+  cout << "reach_set=" << reach_set << endl;
+  
 
   epsfstream eps;
   eps.open("test_map_evolver.eps",eps_bounding_box);

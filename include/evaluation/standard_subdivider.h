@@ -53,7 +53,7 @@ namespace Ariadne {
       virtual R radius(const ES& es) const {
         return es.radius(); }
       virtual ListSet<ES> split(const ES& es) const {
-        return split(es); }
+        return Ariadne::split(es); }
       virtual ListSet<ES> subdivide(const ES& es, const R& r) const {
         ListSet<ES> result; ListSet<ES> working(es); ES set;
         while(working.size()!=0) { set=working.pop(); 

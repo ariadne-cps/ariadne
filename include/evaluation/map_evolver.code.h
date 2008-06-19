@@ -72,13 +72,13 @@ Evolver(const EvolutionParameters<R>& parameters,
 template<class ES>
 void
 Evolver< Map<typename ES::real_type>, ES>::
-evolution(ESL& final,
-          ESL& intermediate, 
-          const Sys& system,
-          const ES& initial,
-          const T& time,
-          Semantics semantics,
-          bool reach) const
+_evolution(ESL& final,
+           ESL& intermediate, 
+           const Sys& system,
+           const ES& initial,
+           const T& time,
+           Semantics semantics,
+           bool reach) const
 {
   uint verbosity=this->verbosity();
 
@@ -88,7 +88,6 @@ evolution(ESL& final,
   if(reach) {
     intermediate.adjoin(initial);
   }
-
   while(working.size()!=0) {
     TES ts=working.pop();
     ARIADNE_LOG(5,"  ts="<<ts<<", r="<<this->radius(ts)<<"\n");

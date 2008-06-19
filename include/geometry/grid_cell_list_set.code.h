@@ -207,7 +207,7 @@ GridCellListSet<R>::summary() const
   ss << "GridCellListSet("
      << " grid=" << this->grid() << ","
      << " size=" << this->size() << ","
-     << " )" << std::endl;
+     << " )";
   return ss.str();
 }
 
@@ -219,7 +219,7 @@ GridCellListSet<R>::write(std::ostream& os) const
      << " grid=" << this->grid() << ","
      << " size=" << this->size() << ","
      << " lattice_set=" << this->lattice_set()
-     << " )" << std::endl;
+     << " )";
   return os;
 }
 

@@ -53,20 +53,24 @@ void export_evolver()
   class_< Evolver<Map<R>,ZES> > map_evolver_class("MapEvolver",no_init);
   map_evolver_class.def(init<const EvolutionParameters<R>&,const ApplicatorInterface<ZES>&,
                              const SubdividerInterface<ZES>&,const ReducerInterface<ZES>&>());
-  map_evolver_class.def("evolution",&Evolver<Map<R>,ZES>::evolution);
+  map_evolver_class.def("evolve",&Evolver<Map<R>,ZES>::evolve);
+  map_evolver_class.def("reach",&Evolver<Map<R>,ZES>::reach);
 
   class_< Evolver<VectorField<R>,ZES> > vector_field_evolver_class("VectorFieldEvolver",no_init);
   vector_field_evolver_class.def(init<const EvolutionParameters<R>&,const IntegratorInterface<ZES>&,
                                       const SubdividerInterface<ZES>&,const ReducerInterface<ZES>&>());
-  vector_field_evolver_class.def("evolution",&Evolver<VectorField<R>,ZES>::evolution);
+  vector_field_evolver_class.def("evolve",&Evolver<VectorField<R>,ZES>::evolve);
+  vector_field_evolver_class.def("reach",&Evolver<VectorField<R>,ZES>::reach);
 
   class_< Evolver<HybridAutomaton<R>,ZES> > set_based_hybrid_evolver_class("SetBasedHybridEvolver",no_init);
   set_based_hybrid_evolver_class.def(init<const EvolutionParameters<R>&,
                                           const ApplicatorInterface<ZES>&,const IntegratorInterface<ZES>&,const SatisfierInterface<ZES>&,
                                           const SubdividerInterface<ZES>&,const ReducerInterface<ZES>&>());
-  set_based_hybrid_evolver_class.def("evolution",&Evolver<HybridAutomaton<R>,ZES>::evolution);
-
+  set_based_hybrid_evolver_class.def("evolve",&Evolver<HybridAutomaton<R>,ZES>::evolve);
+  set_based_hybrid_evolver_class.def("reach",&Evolver<HybridAutomaton<R>,ZES>::reach);
 
 }
+
+
 
 template void export_evolver<FloatPy>();

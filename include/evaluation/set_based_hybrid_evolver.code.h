@@ -319,13 +319,13 @@ _step(HESL& evolve,
 
 template<class R> void
 Evolver< HybridAutomaton<R>, Zonotope<R> >::
-evolution(HybridEnclosureSetList& final,
-          HybridEnclosureSetList& intermediate,
-          const Automaton& automaton,
-          const HybridEnclosureSet& initial,
-          const Time& time,
-          Semantics semantics,
-          bool reach) const
+_evolution(HybridEnclosureSetList& final,
+           HybridEnclosureSetList& intermediate,
+           const Automaton& automaton,
+           const HybridEnclosureSet& initial,
+           const Time& time,
+           Semantics semantics,
+           bool reach) const
 {
   THESL working=this->timed_enclosure_set_list(initial);
 

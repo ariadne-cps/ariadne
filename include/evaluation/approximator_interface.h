@@ -95,7 +95,11 @@ namespace Ariadne {
 
 
       /*! \brief Adjoins an outer approximation to a basic set to a grid mask set. */
+      virtual void adjoin_outer_approximation(PartitionListSet& pls, const EnclosureSet& es) const = 0;
+
+      /*! \brief Adjoins an outer approximation to a basic set to a grid mask set. */
       virtual void adjoin_outer_approximation(PartitionTreeSet& pts, const EnclosureSet& es) const = 0;
+
 
       /*! \brief Adjoins a lower approximation of a list of sets to a grid mask set. */
       virtual void adjoin_over_approximations(CoverListSet& cls, const EnclosureSetList& esl) const = 0;

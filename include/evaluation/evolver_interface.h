@@ -41,34 +41,30 @@ namespace Ariadne {
     {
       typedef typename Sys::time_type T;
       typedef ListSet<ES> ESL;
+      typedef typename ListSet<ES>::const_iterator ESLCI;
      public:
       /*! \brief Destructor. */
       virtual ~EvolverInterface<Sys,ES>() {};
       /*! \brief Make a dynamically-allocated copy. */
       virtual EvolverInterface<Sys,ES>* clone() const = 0;
-      /*! \brief Compute an approximation to the evolution set under the given semantics. The reachable set is only computed if \a reach is \c true. */
-      virtual void evolution(ESL& final, ESL& intermediate, const Sys& system, const ES& initial, const T& time, Semantics semantics, bool reach) const = 0;
-      void evolution(ESL& final, ESL& intermediate, const Sys& system, const ESL& initial, const T& time, Semantics semantics, bool reach) const {
-        for(typename ESL::const_iterator iter=initial.begin(); iter!=initial.end(); ++iter) {
-          this->evolution(final,intermediate,system,*iter,time,semantics,reach); }
-      }
      public:
       /*! \brief Compute an approximation to the evolution set under the given semantics. */
       void evolution(ESL& final, const Sys& system, const ES& initial, const T& time, Semantics semantics) const {
-        ESL intermediate; this->evolution(final,intermediate,system,initial,time,semantics,false); }
+        ESL intermediate; this->_evolution(final,intermediate,system,initial,time,semantics,false); }
         
       /*! \brief Compute an approximation to the evolution set under the given semantics. */
       void evolution(ESL& final, const Sys& system, const ESL& initial, const T& time, Semantics semantics) const {
-        ESL intermediate; this->evolution(final,intermediate,system,initial,time,semantics,false); }
+        ESL intermediate; for(ESLCI iter=initial.begin(); iter!=initial.end(); ++iter) { this->_evolution(final,intermediate,system,*iter,time,semantics,false); } }
 
       /*! \brief Compute an approximation to the evolution set under the given semantics. */
       void evolution(ESL& final, ESL& intermediate, const Sys& system, const ES& initial, const T& time, Semantics semantics) const {
-        this->evolution(final,intermediate,system,initial,time,semantics,true); }
+        this->_evolution(final,intermediate,system,initial,time,semantics,true); }
         
       /*! \brief Compute an approximation to the evolution set under the given semantics. */
       void evolution(ESL& final, ESL& intermediate, const Sys& system, const ESL& initial, const T& time, Semantics semantics) const {
-        this->evolution(final,intermediate,system,initial,time,semantics,true); }
-
+        for(ESLCI iter=initial.begin(); iter!=initial.end(); ++iter) { this->_evolution(final,intermediate,system,*iter,time,semantics,true); } }
+     protected:
+      virtual void _evolution(ESL& final, ESL& intermediate, const Sys& system, const ES& initial, const T& time, Semantics semantics, bool reach) const = 0;
     };
 
 
@@ -83,21 +79,14 @@ namespace Ariadne {
       virtual EvolverBase<Sys,ES>* clone() const = 0;
 
       /*! \brief Compute an approximation to the evolution set under the given semantics. */
-      void evolve(ESL& final, const Sys& system, const ES& initial_set, const T& time, Semantics semantics) const {
-        ESL intermediate; ESL initial(initial_set); this->evolution(final,intermediate,system,initial_set,time,semantics,false); }
-      /*! \brief Compute an approximation to the evolution set under the given semantics. */
-      void evolve(ESL& final, ESL& intermediate, const Sys& system, const ES& initial_set, const T& time, Semantics semantics) const {
-        ESL initial(initial_set); this->evolution(final,intermediate,system,initial_set,time,semantics,true); }
-
-      /*! \brief Compute an approximation to the evolution set under the given semantics. */
       ESL evolve(const Sys& system, const ES& initial_set, const T& time, Semantics semantics) const {
-        ESL final; ESL intermediate; this->evolution(final,intermediate,system,initial_set,time,semantics,false); return final; }
+        ESL final; ESL intermediate; this->_evolution(final,intermediate,system,initial_set,time,semantics,false); return final; }
       /*! \brief Compute an approximation to the evolution set under the given semantics. */
       ESL reach(const Sys& system, const ES& initial_set, const T& time, Semantics semantics) const {
-        ESL final; ESL intermediate; this->evolution(final,intermediate,system,initial_set,time,semantics,false); return intermediate; }
+        ESL final; ESL intermediate; this->_evolution(final,intermediate,system,initial_set,time,semantics,false); return intermediate; }
       /*! \brief Compute an approximation to the evolution set under the given semantics. */
       std::pair<ESL,ESL> reach_evolve(const Sys& system, const ES& initial_set, const T& time, Semantics semantics) const {
-        ESL final; ESL intermediate; this->evolution(final,intermediate,system,initial_set,time,semantics,true); return std::make_pair(intermediate,final); }
+        ESL final; ESL intermediate; this->_evolution(final,intermediate,system,initial_set,time,semantics,true); return std::make_pair(intermediate,final); }
     };
 
   

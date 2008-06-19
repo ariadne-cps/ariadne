@@ -73,14 +73,15 @@ namespace Ariadne {
      public:
       Evolver(const EvolutionParameters<R>&,const IntegratorInterface<ES>&, const SubdividerInterface<ES>&, const ReducerInterface<ES>&);
       virtual Evolver<Sys,ES>* clone() const { return new Evolver<Sys,ES>(*this); }
-      virtual void evolution(ESL& final, ESL& intermediate, const Sys& system, const ES& initial, const T& time, Semantics semantics, bool reach) const;
+     protected:
+      virtual void _evolution(ESL& final, ESL& intermediate, const Sys& system, const ES& initial, const T& time, Semantics semantics, bool reach) const;
      public:
       /*! \brief Compute an approximation to the evolution set. */
       ESL evolve(const Sys& system, const ES& initial_set, const T& time) const {
-        ESL final; ESL intermediate; this->evolution(final,intermediate,system,initial_set,time,upper_semantics,false); return final; }
+        ESL final; ESL intermediate; this->_evolution(final,intermediate,system,initial_set,time,upper_semantics,false); return final; }
       /*! \brief Compute an approximation to the evolution set under the given semantics. */
       ESL reach(const Sys& system, const ES& initial_set, const T& time) const {
-        ESL final; ESL intermediate; this->evolution(final,intermediate,system,initial_set,time,upper_semantics,true); return intermediate; }
+        ESL final; ESL intermediate; this->_evolution(final,intermediate,system,initial_set,time,upper_semantics,true); return intermediate; }
      private:
       // Helper functions for accessing parameters
       uint verbosity() const { 

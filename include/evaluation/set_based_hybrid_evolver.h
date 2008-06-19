@@ -101,15 +101,15 @@ namespace Ariadne {
 
       //@{
       //! \name Evolution using abstract sets.
-     
+     protected: 
       /*! \brief Compute a lower approximation to the evolution up to time \a time using lower semantics. */
-      virtual void evolution(HybridEnclosureSetList& final,
-                             HybridEnclosureSetList& intermediate,
-                             const Automaton& automaton,
-                             const HybridEnclosureSet& initial,
-                             const Time& time,
-                             Semantics semantics,
-                             bool reach) const;
+      virtual void _evolution(HybridEnclosureSetList& final,
+                              HybridEnclosureSetList& intermediate,
+                              const Automaton& automaton,
+                              const HybridEnclosureSet& initial,
+                              const Time& time,
+                              Semantics semantics,
+                              bool reach) const;
       //@}
       
      private:

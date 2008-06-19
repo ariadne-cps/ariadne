@@ -73,13 +73,15 @@ namespace Ariadne {
      public:
       /*! \brief Compute an approximation to the evolution set. */
       ESL evolve(const Sys& system, const ES& initial_set, const T& time) const {
-        ESL final; ESL intermediate; this->evolution(final,intermediate,system,initial_set,time,upper_semantics,false); return final; }
+        ESL final; ESL intermediate; this->_evolution(final,intermediate,system,initial_set,time,upper_semantics,false); return final; }
       /*! \brief Compute an approximation to the evolution set under the given semantics. */
       ESL reach(const Sys& system, const ES& initial_set, const T& time) const {
-        ESL final; ESL intermediate; this->evolution(final,intermediate,system,initial_set,time,upper_semantics,true); return intermediate; }
-      virtual void evolution(ESL& final, ESL& intermediate, 
-                             const Sys& system, const ES& initial, const T& time, 
-                             Semantics semantics, bool reach) const;
+        ESL final; ESL intermediate; this->_evolution(final,intermediate,system,initial_set,time,upper_semantics,true); 
+        return intermediate; }
+     protected:
+      virtual void _evolution(ESL& final, ESL& intermediate, 
+                              const Sys& system, const ES& initial, const T& time, 
+                              Semantics semantics, bool reach) const;
      private:
       uint verbosity() const { 
         return this->_parameters->verbosity(); }

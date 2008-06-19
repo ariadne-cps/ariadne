@@ -52,14 +52,14 @@ template<class ES>
 typename ES::real_type
 FastApproximator<ES>::radius(const ES& es) const
 {
-  return bounding_box(es).radius();
+  return Ariadne::bounding_box(es).radius();
 }
 
 template<class ES>
 Box<typename ES::real_type>
 FastApproximator<ES>::bounding_box(const ES& es) const
 {
-  return bounding_box(es);
+  return Ariadne::bounding_box(es);
 }
 
 template<class ES>
@@ -67,7 +67,7 @@ BoxListSet<typename ES::real_type>
 FastApproximator<ES>::lower_approximation(const ES& es) const
 {
   BoxListSet<R> result;
-  result.adjoin(es.bounding_box());
+  result.adjoin(Ariadne::bounding_box(es));
   return result;
 }
 
@@ -82,7 +82,7 @@ template<class ES>
 GridCellListSet<typename ES::real_type>
 FastApproximator<ES>::outer_approximation(const ES& es, const Grid<R>& g) const
 {
-  return fuzzy_outer_approximation(es,g);
+  return Ariadne::fuzzy_outer_approximation(es,g);
 }
 
 template<class ES>

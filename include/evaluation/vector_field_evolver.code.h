@@ -76,13 +76,13 @@ Evolver(const EvolutionParameters<R>& parameters,
 template<class ES>
 void
 Evolver<VectorField<typename ES::real_type>,ES>::
-evolution(ESL& final,
-          ESL& intermediate, 
-          const VF& vf,
-          const ES& initial,
-          const T& time,
-          Semantics semantics,
-          bool reach) const
+_evolution(ESL& final,
+           ESL& intermediate, 
+           const VF& vf,
+           const ES& initial,
+           const T& time,
+           Semantics semantics,
+           bool reach) const
 {
   typedef Box<R> Bx;
   

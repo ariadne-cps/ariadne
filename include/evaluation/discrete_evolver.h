@@ -173,7 +173,7 @@ namespace Ariadne {
         CoverListSet evolve; CoverListSet reach; this->lower_evolution(evolve,reach,system,initial_set,time); return reach; }
       /*! \brief Compute a lower approximation to the reach set of \a system starting in \a initial_set after \a time, giving cells in \a paving which are guarenteed to contain all evolved points. */
       virtual PartitionListSet upper_evolve(const System& system, const PartitionListSet& initial_set, const Time& time, const Paving& paving) const {
-         PartitionListSet evolve(paving); this->upper_evolution(evolve,system,initial_set,time); return evolve; }
+        PartitionListSet evolve(paving); this->upper_evolution(evolve,system,initial_set,time); return evolve; }
       /*! \brief Compute a lower approximation to the reach set of \a system starting in \a initial_set after \a time, giving cells in \a paving which are guarenteed to contain all reached points. */
       virtual PartitionListSet upper_reach(const System& system, const PartitionListSet& initial_set, const Time& time, const Paving& paving) const {
          PartitionListSet evolve(paving); PartitionListSet reach(paving); this->upper_evolution(evolve,reach,system,initial_set,time); return reach; }

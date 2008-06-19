@@ -40,7 +40,8 @@
 #include "linear_algebra/matrix.h"
 #include "geometry/exceptions.h"
 #include "geometry/point.h"
-#include "geometry/box.h"
+#include "geometry/segment.h"
+#include "geometry/interpolated_curve.h"
 #include "geometry/box.h"
 #include "geometry/rectangular_set.h"
 #include "geometry/list_set.h"
@@ -118,19 +119,19 @@ namespace Ariadne {
       void set_fill_style(bool fs) {
         this->fill_style=fs; }
     
-      void set_pen_colour(const Colour& pc) {
-        this->line_colour=pc; }
+      void set_line_colour(const Colour& lc) {
+        this->line_colour=lc; }
     
       void set_fill_colour(const Colour& fc) {
         this->fill_colour=fc; }
 
       // FIXME: This is a hack to preserve the python interface
-      void set_pen_colour(const char* pc) {
-        this->line_colour=Colour(pc,0,0,0); }
+      void set_line_colour(const char* lc) {
+        this->line_colour=Colour(lc); }
     
       // FIXME: This is a hack to preserve the python interface
       void set_fill_colour(const char* fc) {
-        this->fill_colour=Colour(fc,0,0,0); }
+        this->fill_colour=Colour(fc); }
 
       void trace(const Point2d& pt);
       void trace(const Rectangle2d& r);
@@ -138,7 +139,7 @@ namespace Ariadne {
       void trace(const Polygon2d& p);
 
       void draw(const Point2d& pt);
-      void draw(const Segment2d& seg);
+      void draw(const InterpolatedCurve2d& cv);
       void draw(const Rectangle2d& r);
       void draw(const Zonotope2d& z);
       void draw(const Polygon2d& p);
@@ -188,6 +189,7 @@ namespace Ariadne {
 
     template<class R> epsstream& operator<<(epsstream&, const Point<R>&); 
     template<class R> epsstream& operator<<(epsstream&, const Segment<R>&);
+    template<class R> epsstream& operator<<(epsstream&, const InterpolatedCurve<R>&);
     template<class R> epsstream& operator<<(epsstream&, const Box<R>&);
     template<class R> epsstream& operator<<(epsstream&, const Rectangle<R>&);
     template<class R> epsstream& operator<<(epsstream&, const Zonotope<R>&);

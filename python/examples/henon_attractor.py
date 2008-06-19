@@ -94,7 +94,7 @@ eps.write(initial_set)
 eps.close()
 
 eps.open("henon_attractor-tree_set.eps",epsbb)
-eps.set_pen_colour("black")
+eps.set_line_colour("black")
 eps.set_fill_colour("green")
 eps.set_line_style(0)
 eps.write(chain_reach_tree_set)

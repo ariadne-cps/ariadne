@@ -41,7 +41,7 @@
 #include "geometry/exceptions.h"
 #include "geometry/point.h"
 #include "geometry/box.h"
-#include "geometry/segment.h"
+#include "geometry/interpolated_curve.h"
 #include "geometry/rectangular_set.h"
 #include "geometry/list_set.h"
 #include "geometry/grid_set.h"
@@ -79,15 +79,19 @@ namespace Ariadne {
       pt[0]-=v[0]; pt[1]-=v[1]; return pt;
     }
 
-    class Segment2d {
+    class InterpolatedCurve2d {
      private:
-      Point2d _initial_point;
-      Point2d _final_point;
+      std::vector< Point2d > _points;
      public:
-      Segment2d(const Point2d& i, const Point2d& f) : _initial_point(i), _final_point(f) { }
-      dimension_type dimension() const { return 2; }
-      const Point2d& initial_point() const { return _initial_point; }
-      const Point2d& final_point() const { return _final_point; }
+      typedef std::vector<Point2d>::const_iterator const_iterator;
+
+      InterpolatedCurve2d(const Point2d& pt) : _points() { push_back(pt); }
+      InterpolatedCurve2d(const Point2d& pt0, const Point2d& pt1) : _points() { push_back(pt0); push_back(pt1); }
+      void push_back(const Point2d& pt) { _points.push_back(pt); }
+      size_type size() const { return _points.size()-1; }
+      const Point2d& operator[](dimension_type i) const { return _points[i]; }
+      const_iterator begin() const { return _points.begin(); }
+      const_iterator end() const { return --_points.end(); }
     };
 
     class Rectangle2d {
@@ -161,7 +165,7 @@ namespace Ariadne {
       PlanarProjectionMap(dimension_type d, dimension_type i, dimension_type j);
       template<class R> Vector2d operator() (const Vector<R>& v) const;
       template<class R> Point2d operator() (const Point<R>& pt) const;
-      template<class R> Segment2d operator() (const Segment<R>& pt) const;
+      template<class R> InterpolatedCurve2d operator() (const InterpolatedCurve<R>& cv) const;
       template<class E> Rectangle2d operator() (const RectangleExpression<E>& re) const;
       template<class R> Zonotope2d operator() (const Zonotope<R>& z) const;
       template<class R> Polygon2d operator() (const Polytope<R>& p) const;
@@ -201,11 +205,18 @@ PlanarProjectionMap::operator()(const Point<R>& pt) const
 
 
 template<class R> 
-Segment2d
-PlanarProjectionMap::operator()(const Segment<R>& segment) const
+InterpolatedCurve2d
+PlanarProjectionMap::operator()(const InterpolatedCurve<R>& curve) const
 {
   const PlanarProjectionMap& self=*this;
-  return Segment2d(self(segment.initial_point()),self(segment.final_point()));
+  typename InterpolatedCurve<R>::const_iterator iter=curve.begin();
+  typename InterpolatedCurve<R>::const_iterator end=curve.end();
+  InterpolatedCurve2d result(self(iter->second));
+  while(iter!=curve.end()) {
+    ++iter;
+    result.push_back(self(iter->second));
+  }
+  return result;
 }
 
 template<class E> 

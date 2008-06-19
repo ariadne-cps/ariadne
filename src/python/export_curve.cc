@@ -25,7 +25,7 @@
 #include "python/utilities.h"
 #include "python/read_array.h"
 
-#include "geometry/segment.h"
+#include "geometry/interpolated_curve.h"
 
 
 using namespace Ariadne;
@@ -47,5 +47,22 @@ void export_segment()
 
 }
 
+template<class R>
+void export_interpolated_curve() 
+{
+  class_< InterpolatedCurve<R> > interpolated_curve_class(python_name<R>("InterpolatedCurve").c_str(),init< R, Point<R> >());
+  interpolated_curve_class.def(init< Point<R> >());
+  interpolated_curve_class.def(init< Point<R>, Point<R> >());
+  interpolated_curve_class.def(init< Segment<R> >());
+  interpolated_curve_class.def("dimension", &InterpolatedCurve<R>::dimension);
+  interpolated_curve_class.def("insert", (void(InterpolatedCurve<R>::*)(const double&, const Point<R>&)) &InterpolatedCurve<R>::insert);
+  interpolated_curve_class.def("insert", (void(InterpolatedCurve<R>::*)(const R&, const Point<R>&)) &InterpolatedCurve<R>::insert);
+  interpolated_curve_class.def(self_ns::str(self));
+
+}
+
 template void export_segment<Rational>();
 template void export_segment<FloatPy>();
+
+template void export_interpolated_curve<Rational>();
+template void export_interpolated_curve<FloatPy>();

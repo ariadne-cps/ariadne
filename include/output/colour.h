@@ -39,6 +39,7 @@ namespace Ariadne {
      public:
       Colour()
         : _name("transparant"), _transparant(true) { }
+      Colour(const char* name);
       Colour(const char* name, unsigned char red, unsigned char green, unsigned char blue) 
         : _name(name), _red(red), _green(green), _blue(blue), _transparant(false) { }
       std::string name() const { return this->_name; }

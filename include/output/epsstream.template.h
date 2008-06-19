@@ -38,8 +38,15 @@ template<class R>
 epsstream&
 operator<<(epsstream& eps, const Segment<R>& seg) 
 {
-  Segment2d dseg=eps.projection_map()(seg);
-  eps.draw(dseg);
+  return eps << InterpolatedCurve<R>(seg); 
+}
+
+template<class R> 
+epsstream&
+operator<<(epsstream& eps, const InterpolatedCurve<R>& cv) 
+{
+  InterpolatedCurve2d dcv=eps.projection_map()(cv);
+  eps.draw(dcv);
   return eps;
 }
 

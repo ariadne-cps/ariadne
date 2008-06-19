@@ -27,6 +27,19 @@
 
 namespace Ariadne {
 
+Colour::Colour(const char* name) {
+  std::string str(name);
+  if(str=="transparant") { *this=Ariadne::transparant; }
+  else if(str=="black") { *this=Ariadne::black; }
+  else if(str=="white") { *this=Ariadne::white; }
+  else if(str=="red") { *this=Ariadne::red; }
+  else if(str=="green") { *this=Ariadne::green; }
+  else if(str=="blue") { *this=Ariadne::blue; }
+  else if(str=="yellow") { *this=Ariadne::yellow; }
+  else if(str=="cyan") { *this=Ariadne::cyan; }
+  else if(str=="magenta") { *this=Ariadne::magenta; }
+}
+
 std::ostream& 
 operator<<(std::ostream& os, const Colour& c) 
 {

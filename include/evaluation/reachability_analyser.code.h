@@ -59,9 +59,9 @@
 
 namespace {
 using namespace Ariadne;
-template<class R> void compute_lock_to_grid_time(Numeric::Integer& t, const Evaluation::EvolutionParameters<R>& parameters) {
+template<class R> void compute_lock_to_grid_time(Integer& t, const EvolutionParameters<R>& parameters) {
   t=parameters.lock_to_grid_steps(); }
-template<class R> void compute_lock_to_grid_time(Numeric::Rational& t, const Evaluation::EvolutionParameters<R>& parameters) {
+template<class R> void compute_lock_to_grid_time(Rational& t, const EvolutionParameters<R>& parameters) {
   t=parameters.lock_to_grid_time(); }
 }
 
@@ -69,14 +69,14 @@ template<class R> void compute_lock_to_grid_time(Numeric::Rational& t, const Eva
 
 namespace Ariadne {
   
-namespace Evaluation { 
+ 
 static const double DEFAULT_MAXIMUM_BASIC_SET_RADIUS=0.25;
 static const double DEFAULT_GRID_LENGTH=0.125;
-}
+
 
 
 template<class T, class Aprx>
-Evaluation::ReachabilityAnalyser<System::TransitionSystemInterface<T,Aprx>,Aprx>::
+ReachabilityAnalyser<TransitionSystemInterface<T,Aprx>,Aprx>::
 ReachabilityAnalyser(const EvolutionParameters<R>& parameters)
   : _parameters(parameters.clone())
 {
@@ -86,16 +86,16 @@ ReachabilityAnalyser(const EvolutionParameters<R>& parameters)
 
 
 template<class T, class Aprx>
-const Evaluation::EvolutionParameters<typename Aprx::real_type>&
-Evaluation::ReachabilityAnalyser<System::TransitionSystemInterface<T,Aprx>,Aprx>::parameters() const
+const EvolutionParameters<typename Aprx::real_type>&
+ReachabilityAnalyser<TransitionSystemInterface<T,Aprx>,Aprx>::parameters() const
 {
   return *this->_parameters;
 }
 
 
 template<class T, class Aprx>
-Evaluation::EvolutionParameters<typename Aprx::real_type>&
-Evaluation::ReachabilityAnalyser<System::TransitionSystemInterface<T,Aprx>,Aprx>::parameters() 
+EvolutionParameters<typename Aprx::real_type>&
+ReachabilityAnalyser<TransitionSystemInterface<T,Aprx>,Aprx>::parameters() 
 {
   return *this->_parameters;
 }
@@ -104,7 +104,7 @@ Evaluation::ReachabilityAnalyser<System::TransitionSystemInterface<T,Aprx>,Aprx>
 
 template<class T, class Aprx>
 T
-Evaluation::ReachabilityAnalyser<System::TransitionSystemInterface<T,Aprx>,Aprx>::lock_to_grid_time() const
+ReachabilityAnalyser<TransitionSystemInterface<T,Aprx>,Aprx>::lock_to_grid_time() const
 {
   T t; compute_lock_to_grid_time(t,*this->_parameters); return t;
 }
@@ -118,8 +118,8 @@ Evaluation::ReachabilityAnalyser<System::TransitionSystemInterface<T,Aprx>,Aprx>
 
 
 template<class T, class Aprx>
-typename Evaluation::ReachabilityAnalyser<System::TransitionSystemInterface<T,Aprx>,Aprx>::SetPointer
-Evaluation::ReachabilityAnalyser<System::TransitionSystemInterface<T,Aprx>,Aprx>::
+typename ReachabilityAnalyser<TransitionSystemInterface<T,Aprx>,Aprx>::SetPointer
+ReachabilityAnalyser<TransitionSystemInterface<T,Aprx>,Aprx>::
 lower_evolve(const System& system, 
              const Set& initial_set,
              const Time& time) const
@@ -134,8 +134,8 @@ lower_evolve(const System& system,
 
 
 template<class T, class Aprx>
-typename Evaluation::ReachabilityAnalyser<System::TransitionSystemInterface<T,Aprx>,Aprx>::SetPointer
-Evaluation::ReachabilityAnalyser<System::TransitionSystemInterface<T,Aprx>,Aprx>::
+typename ReachabilityAnalyser<TransitionSystemInterface<T,Aprx>,Aprx>::SetPointer
+ReachabilityAnalyser<TransitionSystemInterface<T,Aprx>,Aprx>::
 lower_reach(const System& system, 
             const Set& initial_set,
             const Time& time) const
@@ -150,8 +150,8 @@ lower_reach(const System& system,
 
 
 template<class T, class Aprx>
-typename Evaluation::ReachabilityAnalyser<System::TransitionSystemInterface<T,Aprx>,Aprx>::SetPointer
-Evaluation::ReachabilityAnalyser<System::TransitionSystemInterface<T,Aprx>,Aprx>::
+typename ReachabilityAnalyser<TransitionSystemInterface<T,Aprx>,Aprx>::SetPointer
+ReachabilityAnalyser<TransitionSystemInterface<T,Aprx>,Aprx>::
 upper_evolve(const System& system, 
              const Set& initial_set,
              const Time& time) const
@@ -169,8 +169,8 @@ upper_evolve(const System& system,
 
 
 template<class T, class Aprx>
-typename Evaluation::ReachabilityAnalyser<System::TransitionSystemInterface<T,Aprx>,Aprx>::SetPointer
-Evaluation::ReachabilityAnalyser<System::TransitionSystemInterface<T,Aprx>,Aprx>::
+typename ReachabilityAnalyser<TransitionSystemInterface<T,Aprx>,Aprx>::SetPointer
+ReachabilityAnalyser<TransitionSystemInterface<T,Aprx>,Aprx>::
 upper_reach(const System& system, 
             const Set& initial_set,
             const Time& time) const
@@ -195,8 +195,8 @@ upper_reach(const System& system,
 
 
 template<class T, class Aprx>
-typename Evaluation::ReachabilityAnalyser<System::TransitionSystemInterface<T,Aprx>,Aprx>::SetPointer
-Evaluation::ReachabilityAnalyser<System::TransitionSystemInterface<T,Aprx>,Aprx>::
+typename ReachabilityAnalyser<TransitionSystemInterface<T,Aprx>,Aprx>::SetPointer
+ReachabilityAnalyser<TransitionSystemInterface<T,Aprx>,Aprx>::
 chain_reach(const System& system, 
             const Set& initial_set) const
 {
@@ -220,8 +220,8 @@ chain_reach(const System& system,
 
 
 template<class T, class Aprx>
-typename Evaluation::ReachabilityAnalyser<System::TransitionSystemInterface<T,Aprx>,Aprx>::SetPointer
-Evaluation::ReachabilityAnalyser<System::TransitionSystemInterface<T,Aprx>,Aprx>::
+typename ReachabilityAnalyser<TransitionSystemInterface<T,Aprx>,Aprx>::SetPointer
+ReachabilityAnalyser<TransitionSystemInterface<T,Aprx>,Aprx>::
 viable(const System& system, 
        const Set& bounding_set) const
 {
@@ -231,7 +231,7 @@ viable(const System& system,
 
 template<class T, class Aprx>
 tribool
-Evaluation::ReachabilityAnalyser<System::TransitionSystemInterface<T,Aprx>,Aprx>::
+ReachabilityAnalyser<TransitionSystemInterface<T,Aprx>,Aprx>::
 verify(const System& system, 
        const Set& initial_set, 
        const Set& safe_set) const
@@ -250,4 +250,4 @@ verify(const System& system,
 
 
 
-}
+} // namespace Ariadne

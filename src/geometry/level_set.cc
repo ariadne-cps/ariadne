@@ -28,9 +28,9 @@
 #include "geometry/level_set.code.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
-    using namespace Numeric;
+    
     
 #ifdef ENABLE_FLOAT64
     template class LevelSet<Float64>;
@@ -40,5 +40,5 @@ namespace Ariadne {
     template class LevelSet<FloatMP>;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

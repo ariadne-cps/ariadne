@@ -36,12 +36,12 @@
 namespace Ariadne {
 
 template<class R>
-System::VectorField<R>::~VectorField() 
+VectorField<R>::~VectorField() 
 {
 }
      
 template<class R>
-System::VectorField<R>::VectorField(const Function::FunctionInterface<R>& f) 
+VectorField<R>::VectorField(const FunctionInterface<R>& f) 
   : _function_ptr(f.clone())
 {
   assert(f.argument_size()==f.result_size());
@@ -49,29 +49,29 @@ System::VectorField<R>::VectorField(const Function::FunctionInterface<R>& f)
      
 
 template<class R>
-LinearAlgebra::Vector<typename System::VectorField<R>::F> 
-System::VectorField<R>::evaluate(const Geometry::Point<F>& x) const 
+Vector<typename VectorField<R>::F> 
+VectorField<R>::evaluate(const Point<F>& x) const 
 {
   return this->_function_ptr->evaluate(x.position_vector());
 }
 
 template<class R>
-LinearAlgebra::Matrix<typename System::VectorField<R>::F> 
-System::VectorField<R>::jacobian(const Geometry::Point<F>& x) const 
+Matrix<typename VectorField<R>::F> 
+VectorField<R>::jacobian(const Point<F>& x) const 
 {
   return this->_function_ptr->jacobian(x.position_vector());
 }
 
 template<class R>
-Function::TaylorDerivative<typename System::VectorField<R>::F>
-System::VectorField<R>::derivative(const Geometry::Point<F>& x, const smoothness_type& s) const
+TaylorDerivative<typename VectorField<R>::F>
+VectorField<R>::derivative(const Point<F>& x, const smoothness_type& s) const
 {
   return this->_function_ptr->derivative(x.position_vector(),s);
 }
    
 template<class R>
 std::ostream&
-System::VectorField<R>::write(std::ostream& os) const 
+VectorField<R>::write(std::ostream& os) const 
 {
   return os << "VectorField( function=" << *this->_function_ptr << " )";
 }

@@ -33,7 +33,7 @@ namespace Ariadne {
 
 template<class R>
 std::ostream&
-Geometry::GridBox<R>::write(std::ostream& os) const 
+GridBox<R>::write(std::ostream& os) const 
 {
   return os << Box<R>(*this);
 }

@@ -27,9 +27,9 @@
 #include "numeric/float.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
-    using namespace Numeric;
+    
     
 #ifdef ENABLE_FLOAT64
     template class Simplex<Float64>;
@@ -39,5 +39,5 @@ namespace Ariadne {
     template class Simplex<FloatMP>;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

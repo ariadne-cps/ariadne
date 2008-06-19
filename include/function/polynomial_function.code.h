@@ -48,7 +48,7 @@
 namespace Ariadne {
 
 template<class R>
-Function::PolynomialFunction<R>::PolynomialFunction() 
+PolynomialFunction<R>::PolynomialFunction() 
   : _result_size(0), 
     _argument_size(0), 
     _degree(0),
@@ -58,44 +58,44 @@ Function::PolynomialFunction<R>::PolynomialFunction()
 
 
 template<class R>
-Function::PolynomialFunction<R>::PolynomialFunction(const std::string& s) 
+PolynomialFunction<R>::PolynomialFunction(const std::string& s) 
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
 
 template<class R>
-Function::PolynomialFunction<R>::PolynomialFunction(const size_type& rs, const size_type& as, const size_type& d)
+PolynomialFunction<R>::PolynomialFunction(const size_type& rs, const size_type& as, const size_type& d)
   : _result_size(rs), 
     _argument_size(as), 
     _degree(d),
-    _data(rs*Numeric::bin(d+as,as),static_cast<R>(0)) 
+    _data(rs*bin(d+as,as),static_cast<R>(0)) 
 {
 }
 
 
 template<class R>
 void
-Function::PolynomialFunction<R>::resize(const size_type& rs, const size_type& as, const size_type& d)
+PolynomialFunction<R>::resize(const size_type& rs, const size_type& as, const size_type& d)
 {
   this->_result_size=rs; 
   this->_argument_size=as; 
   this->_degree=d;
-  this->_data.resize(rs*Numeric::bin(d+as,as));
+  this->_data.resize(rs*bin(d+as,as));
 }
 
 
 template<class R>
-Function::PolynomialFunction<R>
-Function::PolynomialFunction<R>::zero(const size_type& rs, const size_type& as)  
+PolynomialFunction<R>
+PolynomialFunction<R>::zero(const size_type& rs, const size_type& as)  
 {
   return PolynomialFunction<R>(rs,as,0);
 }
 
 
 template<class R>
-Function::PolynomialFunction<R>
-Function::PolynomialFunction<R>::one(const size_type& as)  
+PolynomialFunction<R>
+PolynomialFunction<R>::one(const size_type& as)  
 {
   R o=1;
   return PolynomialFunction<R>(1u,as,0,&o);
@@ -103,8 +103,8 @@ Function::PolynomialFunction<R>::one(const size_type& as)
 
 
 template<class R>
-Function::PolynomialFunction<R>
-Function::PolynomialFunction<R>::constant(const size_type& as, const R& c)  
+PolynomialFunction<R>
+PolynomialFunction<R>::constant(const size_type& as, const R& c)  
 {
   return PolynomialFunction<R>(1u,as,0,&c);
 }
@@ -112,7 +112,7 @@ Function::PolynomialFunction<R>::constant(const size_type& as, const R& c)
 
 template<class R>
 bool
-Function::PolynomialFunction<R>::operator==(const PolynomialFunction<R>& p2) const
+PolynomialFunction<R>::operator==(const PolynomialFunction<R>& p2) const
 {
   const PolynomialFunction<R>& p1=*this;
   if(p1._result_size!=p2._result_size || p1._argument_size!=p2._argument_size) {
@@ -148,7 +148,7 @@ Function::PolynomialFunction<R>::operator==(const PolynomialFunction<R>& p2) con
 
 template<class R>
 bool
-Function::PolynomialFunction<R>::operator!=(const PolynomialFunction<R>& p2) const
+PolynomialFunction<R>::operator!=(const PolynomialFunction<R>& p2) const
 {
   return !(*this==p2);
 }
@@ -156,35 +156,35 @@ Function::PolynomialFunction<R>::operator!=(const PolynomialFunction<R>& p2) con
 
 template<class R>
 size_type 
-Function::PolynomialFunction<R>::argument_size() const
+PolynomialFunction<R>::argument_size() const
 { 
   return this->_argument_size; 
 }
 
 template<class R>
 size_type 
-Function::PolynomialFunction<R>::result_size() const 
+PolynomialFunction<R>::result_size() const 
 { 
   return this->_result_size;
 }
 
 template<class R>
 size_type 
-Function::PolynomialFunction<R>::degree() const 
+PolynomialFunction<R>::degree() const 
 {
   return this->_degree; 
 }
       
 template<class R>
 size_type 
-Function::PolynomialFunction<R>::smoothness() const 
+PolynomialFunction<R>::smoothness() const 
 { 
   return (size_type) -1; 
 }
       
 template<class R>
 const array<R>&
-Function::PolynomialFunction<R>::data() const 
+PolynomialFunction<R>::data() const 
 { 
   return this->_data;
 }
@@ -192,7 +192,7 @@ Function::PolynomialFunction<R>::data() const
 
 template<class R>
 void
-Function::PolynomialFunction<R>::set(const size_type& i, const MultiIndex& j, const R& x) 
+PolynomialFunction<R>::set(const size_type& i, const MultiIndex& j, const R& x) 
 { 
   assert(i<this->result_size());
   assert(j.degree()<=this->degree());
@@ -201,7 +201,7 @@ Function::PolynomialFunction<R>::set(const size_type& i, const MultiIndex& j, co
       
 template<class R>
 R&
-Function::PolynomialFunction<R>::at(const size_type& i, const MultiIndex& j)
+PolynomialFunction<R>::at(const size_type& i, const MultiIndex& j)
 { 
   assert(i<this->result_size());
   assert(j.degree()<=this->degree());
@@ -210,7 +210,7 @@ Function::PolynomialFunction<R>::at(const size_type& i, const MultiIndex& j)
       
 template<class R>
 const R&
-Function::PolynomialFunction<R>::get(const size_type& i, const MultiIndex& j) const 
+PolynomialFunction<R>::get(const size_type& i, const MultiIndex& j) const 
 { 
   assert(i<this->result_size());
   assert(j.degree()<=this->degree());
@@ -220,8 +220,8 @@ Function::PolynomialFunction<R>::get(const size_type& i, const MultiIndex& j) co
 
 
 template<class R>
-Function::PolynomialFunction<R> 
-Function::PolynomialFunction<R>::component(const size_type& i) const
+PolynomialFunction<R> 
+PolynomialFunction<R>::component(const size_type& i) const
 {
   PolynomialFunction<R> result(1u,this->argument_size(),this->degree());
   R* rptr=result._data.begin();
@@ -242,19 +242,19 @@ Function::PolynomialFunction<R>::component(const size_type& i) const
 
 
 template<class R>
-LinearAlgebra::Vector<typename Function::PolynomialFunction<R>::F> 
-Function::PolynomialFunction<R>::evaluate(const LinearAlgebra::Vector<F>& x) const
+Vector<typename PolynomialFunction<R>::F> 
+PolynomialFunction<R>::evaluate(const Vector<F>& x) const
 {
   if(this->argument_size()!=x.size()) {
-    ARIADNE_THROW(IncompatibleSizes,"PolynomialFunction::evaluate(Vector)","Incompatible argument size");
+    ARIADNE_THROW(IncompatibleSizes,"Polynomialevaluate(Vector)","Incompatible argument size");
   }
 
   // TODO: Make this more efficient
-  LinearAlgebra::Vector<F> result(this->result_size());
+  Vector<F> result(this->result_size());
   for(MultiIndex j(this->argument_size()); j.degree()<=this->degree(); ++j) {
     F xa=1;
     for(size_type k=0; k!=j.number_of_variables(); ++k) {
-      xa*=Numeric::pow(x[k],j[k]);
+      xa*=pow(x[k],j[k]);
     }
     for(size_type i=0; i!=this->result_size(); ++i) {
       result[i]+=this->get(i,j)*xa;
@@ -267,7 +267,7 @@ Function::PolynomialFunction<R>::evaluate(const LinearAlgebra::Vector<F>& x) con
 
 template<class R0, class R1, class R2>
 void
-Function::add(PolynomialFunction<R0>& p0, const PolynomialFunction<R1>& p1, const PolynomialFunction<R2>& p2)
+add(PolynomialFunction<R0>& p0, const PolynomialFunction<R1>& p1, const PolynomialFunction<R2>& p2)
 {
   if(p1.result_size()!=p2.result_size()) {
     ARIADNE_THROW(IncompatibleSizes,"add(PolynomialFunction,PolynomialFunction)","Incompatible result sizes");
@@ -301,7 +301,7 @@ Function::add(PolynomialFunction<R0>& p0, const PolynomialFunction<R1>& p1, cons
 
 template<class R0, class R1, class R2>
 void
-Function::sub(PolynomialFunction<R0>& p0, const PolynomialFunction<R1>& p1, const PolynomialFunction<R2>& p2)
+sub(PolynomialFunction<R0>& p0, const PolynomialFunction<R1>& p1, const PolynomialFunction<R2>& p2)
 {
   if(p1.result_size()!=p2.result_size()) {
     ARIADNE_THROW(IncompatibleSizes,"add(PolynomialFunction,PolynomialFunction)","Incompatible result sizes");
@@ -335,7 +335,7 @@ Function::sub(PolynomialFunction<R0>& p0, const PolynomialFunction<R1>& p1, cons
 
 template<class R0, class R1, class R2>
 void
-Function::mul(PolynomialFunction<R0>& p0, const PolynomialFunction<R1>& p1, const PolynomialFunction<R2>& p2)
+mul(PolynomialFunction<R0>& p0, const PolynomialFunction<R1>& p1, const PolynomialFunction<R2>& p2)
 {
   if(p1.result_size()!=1u) {
     ARIADNE_THROW(IncompatibleSizes,"mul(PolynomialFunction,PolynomialFunction)","p1.result_size()="<<p1.result_size());
@@ -369,7 +369,7 @@ Function::mul(PolynomialFunction<R0>& p0, const PolynomialFunction<R1>& p1, cons
 
 template<class R0,class R1>
 void
-Function::pow(PolynomialFunction<R0>& p0, const PolynomialFunction<R1>& p1, const unsigned int& n)
+pow(PolynomialFunction<R0>& p0, const PolynomialFunction<R1>& p1, const unsigned int& n)
 {
   assert(p1.result_size()==1);
 
@@ -397,7 +397,7 @@ Function::pow(PolynomialFunction<R0>& p0, const PolynomialFunction<R1>& p1, cons
 
 template<class R0,class R1>
 void
-Function::scale(PolynomialFunction<R0>& p0, const R1& x1)
+scale(PolynomialFunction<R0>& p0, const R1& x1)
 {
   for(size_type i=0; i!=p0._data.size(); ++i) {
     p0._data[i]*=x1;
@@ -407,7 +407,7 @@ Function::scale(PolynomialFunction<R0>& p0, const R1& x1)
 
 template<class R0, class R1, class R2>
 void
-Function::compose(PolynomialFunction<R0>& p0, const PolynomialFunction<R1>& p1, const PolynomialFunction<R2>& p2)
+compose(PolynomialFunction<R0>& p0, const PolynomialFunction<R1>& p1, const PolynomialFunction<R2>& p2)
 {
   // TODO: Improve this algorithm as it's critical!!
   if(p1.argument_size()!=p2.result_size()) {
@@ -430,7 +430,7 @@ Function::compose(PolynomialFunction<R0>& p0, const PolynomialFunction<R1>& p1, 
     powers[i][0]=PolynomialFunction<R0>::one(p2.argument_size());
     powers[i][1]=p2.component(i);
     if(p1.degree()>=2) {
-      powers[i][2]=Function::pow(powers[i][1],2);
+      powers[i][2]=pow(powers[i][1],2);
     }
     for(size_type j=3; j<=p1.degree(); ++j) {
       powers[i][j]=powers[i][2]*powers[i][j-2];
@@ -465,7 +465,7 @@ Function::compose(PolynomialFunction<R0>& p0, const PolynomialFunction<R1>& p1, 
 
 template<class R0,class R1>
 void
-Function::derivative(PolynomialFunction<R0>& p0, const PolynomialFunction<R1>& p1, const size_type& k)
+derivative(PolynomialFunction<R0>& p0, const PolynomialFunction<R1>& p1, const size_type& k)
 {
   if(p1.degree()==0) {
     p0=PolynomialFunction<R0>(p1.result_size(),p1.argument_size(),0u);
@@ -489,8 +489,8 @@ Function::derivative(PolynomialFunction<R0>& p0, const PolynomialFunction<R1>& p
 
 
 template<class R>
-LinearAlgebra::Matrix<typename Function::PolynomialFunction<R>::F> 
-Function::PolynomialFunction<R>::jacobian(const LinearAlgebra::Vector<F>& s) const
+Matrix<typename PolynomialFunction<R>::F> 
+PolynomialFunction<R>::jacobian(const Vector<F>& s) const
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
@@ -499,7 +499,7 @@ Function::PolynomialFunction<R>::jacobian(const LinearAlgebra::Vector<F>& s) con
 
 template<class R>
 std::ostream&
-Function::PolynomialFunction<R>::write(std::ostream& os) const 
+PolynomialFunction<R>::write(std::ostream& os) const 
 {
   os << "PolynomialFunction(\n";
   for(uint i=0; i!=this->result_size(); ++i) {
@@ -518,7 +518,7 @@ Function::PolynomialFunction<R>::write(std::ostream& os) const
 
 template<class R>
 std::istream&
-Function::PolynomialFunction<R>::read(std::istream& is)  
+PolynomialFunction<R>::read(std::istream& is)  
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
@@ -526,7 +526,7 @@ Function::PolynomialFunction<R>::read(std::istream& is)
 
 template<class R>
 std::ostream&
-Function::operator<<(std::ostream& os, const PolynomialFunction<R>& p)
+operator<<(std::ostream& os, const PolynomialFunction<R>& p)
 {
   return p.write(os);
 }
@@ -534,17 +534,17 @@ Function::operator<<(std::ostream& os, const PolynomialFunction<R>& p)
 
 template<class R>
 std::istream&
-Function::operator>>(std::istream& is, PolynomialFunction<R>& p)
+operator>>(std::istream& is, PolynomialFunction<R>& p)
 {
   return p.read(is);
 }
 
 
 template<class R>
-Output::latexstream&
-Output::operator<<(Output::latexstream& texs, const Function::PolynomialFunction<R>& p)
+latexstream&
+operator<<(latexstream& texs, const PolynomialFunction<R>& p)
 {
-  using namespace Function;
+  
   texs << "%PolynomialFunction\n";
   texs << "\\ensuremath{\n";
   texs << "\\left( \\begin{array}{c}\n";
@@ -580,25 +580,25 @@ Output::operator<<(Output::latexstream& texs, const Function::PolynomialFunction
 
 template<class R>
 void
-Function::PolynomialFunction<R>::instantiate()
+PolynomialFunction<R>::instantiate()
 {
-  typedef typename Numeric::traits<R>::arithmetic_type I;
+  typedef typename traits<R>::arithmetic_type I;
   size_type* k=0;
   R* x=0;
   PolynomialFunction<R>* p=0;
   std::ostream* os = 0;
   std::istream* is = 0;
-  Output::latexstream* texs = 0;
+  latexstream* texs = 0;
 
-  Function::operator+(*p,*p);
-  Function::operator-(*p,*p);
-  Function::operator*(*p,*p);
-  Function::operator*(*x,*p);
-  Function::operator*(*p,*x);
-  Function::operator/(*p,*x);
-  Function::pow(*p,0u);
-  Function::compose(*p,*p);
-  Function::derivative(*p,*k);
+  operator+(*p,*p);
+  operator-(*p,*p);
+  operator*(*p,*p);
+  operator*(*x,*p);
+  operator*(*p,*x);
+  operator/(*p,*x);
+  pow(*p,0u);
+  compose(*p,*p);
+  derivative(*p,*k);
   *os << *p;
   *is >> *p;
   *texs << *p;
@@ -607,4 +607,5 @@ Function::PolynomialFunction<R>::instantiate()
 
 
 
-}
+} // namespace Ariadne
+

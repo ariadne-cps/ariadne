@@ -34,11 +34,10 @@
 #include "geometry/exceptions.h"
 
 namespace Ariadne {
-  namespace System {
+  
     struct InvalidParameters : public std::runtime_error { InvalidParameters(const std::string& what) : std::runtime_error(what) { } };
-    using Geometry::IncompatibleDimensions; 
-  }
-}
+
+} // namespace Ariadne;
 
 #define ARIADNE_CHECK_ARGUMENT_DIMENSION(map,set,func) \
   { if((map).argument_dimension()!=(set).dimension()) { ARIADNE_THROW(IncompatibleDimensions,func,#map".argument_dimension()="<<(map).argument_dimension()<<", "#set"="<<set); } }

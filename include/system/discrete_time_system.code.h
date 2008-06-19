@@ -31,7 +31,7 @@
 #include "system/discrete_time_system.h"
 
 namespace Ariadne {
-  namespace System {
+  
 
     template<class R>
     DiscreteTimeSystem<R>::~DiscreteTimeSystem() 
@@ -42,10 +42,10 @@ namespace Ariadne {
     
     
     template<class R>
-    LinearAlgebra::Matrix<F> 
-    DiscreteTimeSystem<R>::jacobian(const Geometry::Point<F>& x,
-                                    const Geometry::Point<F>& u,
-                                    const Geometry::Point<F>& v) const
+    Matrix<F> 
+    DiscreteTimeSystem<R>::jacobian(const Point<F>& x,
+                                    const Point<F>& u,
+                                    const Point<F>& v) const
     {
       throw DeferredImplementation(__PRETTY_FUNCTION__);
     }

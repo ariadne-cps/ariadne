@@ -25,9 +25,9 @@
 #include "models/duffing.h"
 
 namespace Ariadne {
-  namespace System {
+  
 
-    using namespace Numeric;
+    
 
 #ifdef ENABLE_FLOAT64
     template class DuffingEquation<Float64>;

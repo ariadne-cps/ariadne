@@ -31,9 +31,9 @@
 #include "evaluation/cascade_reducer.h"
 
 namespace Ariadne {
-  namespace Evaluation {
-    using namespace Numeric;
-    using namespace Geometry;
+  
+    
+    
 
 #ifdef ENABLE_FLOAT64
     template class IdentityReducer< Rectangle<Float64> >;
@@ -49,5 +49,5 @@ namespace Ariadne {
     template class CascadeReducer< Zonotope<FloatMP> >;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

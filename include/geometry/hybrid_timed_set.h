@@ -25,14 +25,14 @@
 #define ARIADNE_HYBRID_TIMED_SET_H
 
 namespace Ariadne {  
-  namespace Geometry {
+  
 
     /*! \brief A (basic) set with an associated time value. */
     template<class BS> 
     class HybridTimedSet
-      : public tuple<Numeric::Rational, Numeric::Integer, DiscreteState, BS>
+      : public tuple<Rational, Integer, DiscreteState, BS>
     {
-      typedef Numeric::Rational Q; typedef Numeric::Integer Z; typedef DiscreteState DS;
+      typedef Rational Q; typedef Integer Z; typedef DiscreteState DS;
       typedef tuple<Q,Z,DS,BS> _base;
      public:
       typedef typename BS::real_type real_type;
@@ -66,7 +66,7 @@ namespace Ariadne {
       return os << "{ (" << ts.time() << ","<<ts.set()<<") : (" << ts.state() << ","<< ts.set() << ") }";
     }
    
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_TIMED_SET_H */

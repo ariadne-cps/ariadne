@@ -42,11 +42,6 @@
 
 
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::LinearAlgebra;
-using namespace Ariadne::Function;
-using namespace Ariadne::Geometry;
-using namespace Ariadne::Output;
 using namespace std;
 
 template<class R> int test_constraint_set();
@@ -71,7 +66,7 @@ template<class R>
 int 
 test_constraint_set() 
 {
-  cout << "test_constraint_set<" << Numeric::name<R>() << ">" << endl;
+  cout << "test_constraint_set<" << name<R>() << ">" << endl;
 
   Radius<R> f=Radius<R>(Vector<R>());
   Box<R> po=Box<R>::positive_orthant(1);

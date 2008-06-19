@@ -42,7 +42,7 @@
 #include "linear_algebra/vector_expression.h"
 
 namespace Ariadne {
-  namespace LinearAlgebra {
+  
     
     class Slice;
     template<class R> class Vector;
@@ -123,7 +123,7 @@ namespace Ariadne {
     template<class R> std::ostream& operator<<(std::ostream& os, const VectorSlice<const R>& v) {
       return os << Vector<R>(v); }
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_VECTOR_SLICE_H */

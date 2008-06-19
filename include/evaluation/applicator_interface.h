@@ -36,7 +36,7 @@
 #include "system/declarations.h"
 
 namespace Ariadne {
-  namespace Evaluation {
+  
 
     /*! \ingroup EvaluatorInterfaces \ingroup Applicators
      *  \brief Interface for computing the image of an enclosure set under a map. 
@@ -46,7 +46,7 @@ namespace Ariadne {
     class ApplicatorInterface
     {
       typedef typename ES::real_type R;
-      typedef Numeric::Interval<R> I;
+      typedef Interval<R> I;
      public:
       /*! \brief Compute the image of a basic set under a continuous function. */
       virtual ~ApplicatorInterface() { }
@@ -61,10 +61,10 @@ namespace Ariadne {
       //! \name Methods for applying a system to a basic set.
 
       /*! \brief Compute the image of a basic set under a continuous function. */
-      virtual ES apply(const System::Map<R>& f, const ES& bs) const = 0;
+      virtual ES apply(const Map<R>& f, const ES& bs) const = 0;
 
       /*! \brief Compute the image of a basic set under a continuous function. */
-      ES operator() (const System::Map<R>& f, const ES& bs) const {
+      ES operator() (const Map<R>& f, const ES& bs) const {
         return this->apply(f,bs); }
 
       //@}
@@ -72,7 +72,7 @@ namespace Ariadne {
     };
 
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_APPLICATOR_INTERFACE_H */

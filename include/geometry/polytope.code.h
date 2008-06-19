@@ -60,24 +60,24 @@ using namespace Ariadne;
 
 inline
 tribool 
-contains(const Geometry::Polytope<Numeric::Rational>& ply, const Geometry::Point<Numeric::Rational>& pt) 
+contains(const Polytope<Rational>& ply, const Point<Rational>& pt) 
 {
-  return Geometry::contains(Geometry::Polyhedron<Numeric::Rational>(ply),pt);
+  return contains(Polyhedron<Rational>(ply),pt);
 }
 
 template<class T>
 inline
 tribool 
-contains(const Geometry::Polytope< Numeric::Float<T> >& ply, 
-         const Geometry::Point< Numeric::Float<T> >& pt) 
+contains(const Polytope< Float<T> >& ply, 
+         const Point< Float<T> >& pt) 
 {
-  return ::contains(Geometry::Polytope<Numeric::Rational>(ply),Geometry::Point<Numeric::Rational>(pt));
+  return ::contains(Polytope<Rational>(ply),Point<Rational>(pt));
 }
 
 template<class R>
 inline
 tribool 
-contains(const Geometry::Polytope< Numeric::Interval<R> >& ply, const Geometry::Point<R>& pt) 
+contains(const Polytope< Interval<R> >& ply, const Point<R>& pt) 
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
@@ -86,24 +86,24 @@ contains(const Geometry::Polytope< Numeric::Interval<R> >& ply, const Geometry::
 
 inline
 tribool 
-disjoint(const Geometry::Polytope<Numeric::Rational>& ply, const Geometry::Box<Numeric::Rational>& bx) 
+disjoint(const Polytope<Rational>& ply, const Box<Rational>& bx) 
 {
-  return Geometry::disjoint(Geometry::Polyhedron<Numeric::Rational>(ply),bx);
+  return disjoint(Polyhedron<Rational>(ply),bx);
 }
 
 template<class T>
 inline
 tribool 
-disjoint(const Geometry::Polytope< Numeric::Float<T> >& ply, 
-         const Geometry::Box< Numeric::Float<T> >& bx) 
+disjoint(const Polytope< Float<T> >& ply, 
+         const Box< Float<T> >& bx) 
 {
-  return ::disjoint(Geometry::Polytope<Numeric::Rational>(ply),Geometry::Box<Numeric::Rational>(bx));
+  return ::disjoint(Polytope<Rational>(ply),Box<Rational>(bx));
 }
 
 template<class R>
 inline
 tribool 
-disjoint(const Geometry::Polytope< Numeric::Interval<R> >& ply, const Geometry::Box<R>& bx) 
+disjoint(const Polytope< Interval<R> >& ply, const Box<R>& bx) 
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
@@ -111,22 +111,22 @@ disjoint(const Geometry::Polytope< Numeric::Interval<R> >& ply, const Geometry::
 
 inline
 tribool 
-disjoint(const Geometry::Polytope<Numeric::Rational>& ply1, const Geometry::Polytope<Numeric::Rational>& ply2) 
+disjoint(const Polytope<Rational>& ply1, const Polytope<Rational>& ply2) 
 {
-  return Geometry::disjoint(Geometry::Polyhedron<Numeric::Rational>(ply1),Geometry::Polyhedron<Numeric::Rational>(ply1));
+  return disjoint(Polyhedron<Rational>(ply1),Polyhedron<Rational>(ply1));
 }
 
 template<class R>
 inline
 tribool 
-disjoint(const Geometry::Polytope<R>& ply1, const Geometry::Polytope<R>& ply2) 
+disjoint(const Polytope<R>& ply1, const Polytope<R>& ply2) 
 {
-  return Geometry::disjoint(Geometry::Polytope<Numeric::Rational>(ply1),Geometry::Polytope<Numeric::Rational>(ply1));
+  return disjoint(Polytope<Rational>(ply1),Polytope<Rational>(ply1));
 }
 
 template<class R>
 tribool 
-disjoint(const Geometry::Polytope< Numeric::Interval<R> >& ply1, const Geometry::Polytope< Numeric::Interval<R> >& ply2) 
+disjoint(const Polytope< Interval<R> >& ply1, const Polytope< Interval<R> >& ply2) 
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
@@ -136,23 +136,23 @@ disjoint(const Geometry::Polytope< Numeric::Interval<R> >& ply1, const Geometry:
 
 inline
 tribool 
-subset(const Geometry::Box<Numeric::Rational>& bx, const Geometry::Polytope<Numeric::Rational>& ply) 
+subset(const Box<Rational>& bx, const Polytope<Rational>& ply) 
 {
-  return Geometry::subset(bx,Geometry::Polyhedron<Numeric::Rational>(ply));
+  return subset(bx,Polyhedron<Rational>(ply));
 }
 
 template<class R>
 inline
 tribool 
-subset(const Geometry::Box<R>& bx, const Geometry::Polytope<R>& ply) 
+subset(const Box<R>& bx, const Polytope<R>& ply) 
 {
-  return Geometry::subset(Geometry::Box<Numeric::Rational>(bx),Geometry::Polytope<Numeric::Rational>(ply));
+  return subset(Box<Rational>(bx),Polytope<Rational>(ply));
 }
 
 template<class R>
 inline
 tribool 
-subset(const Geometry::Box<R>& bx, const Geometry::Polytope< Numeric::Interval<R> >& ply) 
+subset(const Box<R>& bx, const Polytope< Interval<R> >& ply) 
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
@@ -161,23 +161,23 @@ subset(const Geometry::Box<R>& bx, const Geometry::Polytope< Numeric::Interval<R
 
 inline
 tribool 
-subset(const Geometry::Polytope<Numeric::Rational>& ply1, const Geometry::Polytope<Numeric::Rational>& ply2) 
+subset(const Polytope<Rational>& ply1, const Polytope<Rational>& ply2) 
 {
-  return Geometry::subset(ply1,Geometry::Polyhedron<Numeric::Rational>(ply2));
+  return subset(ply1,Polyhedron<Rational>(ply2));
 }
 
 template<class R>
 inline
 tribool 
-subset(const Geometry::Polytope<R>& ply1, const Geometry::Polytope<R>& ply2) 
+subset(const Polytope<R>& ply1, const Polytope<R>& ply2) 
 {
-  return Geometry::subset(Geometry::Polytope<Numeric::Rational>(ply1),Geometry::Polytope<Numeric::Rational>(ply2));
+  return subset(Polytope<Rational>(ply1),Polytope<Rational>(ply2));
 }
 
 template<class R>
 inline
 tribool 
-subset(const Geometry::Polytope< Numeric::Interval<R> >& ply1, const Geometry::Polytope< Numeric::Interval<R> >& ply2) 
+subset(const Polytope< Interval<R> >& ply1, const Polytope< Interval<R> >& ply2) 
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
@@ -197,20 +197,20 @@ namespace Ariadne {
     
 
 template<class X>
-Geometry::Polytope<X>::Polytope(dimension_type d)
+Polytope<X>::Polytope(dimension_type d)
   : _dimension(d), _number_of_vertices(0), _data()
 {
 }
 
 template<class X>
-Geometry::Polytope<X>::Polytope(dimension_type d, size_type nv, const X* data)
+Polytope<X>::Polytope(dimension_type d, size_type nv, const X* data)
   : _dimension(d), _number_of_vertices(nv), _data(data,data+(d+1)*nv)
 {
 }
 
 
 template<class X>
-Geometry::Polytope<X>::Polytope(const LinearAlgebra::Matrix<X>& G)
+Polytope<X>::Polytope(const Matrix<X>& G)
   : _dimension(G.number_of_rows()-1), 
     _number_of_vertices(G.number_of_columns()), 
     _data(G.number_of_rows()*G.number_of_columns())
@@ -218,12 +218,12 @@ Geometry::Polytope<X>::Polytope(const LinearAlgebra::Matrix<X>& G)
   dimension_type& d=this->_dimension;
   size_type& nv=this->_number_of_vertices;
   X* ptr=this->_data.begin();
-  LinearAlgebra::MatrixSlice<X>(d+1,nv,ptr,1u,d+1)=G;
+  MatrixSlice<X>(d+1,nv,ptr,1u,d+1)=G;
 }
 
 
 template<class X>
-Geometry::Polytope<X>::Polytope(const PointList<X>& pts)
+Polytope<X>::Polytope(const PointList<X>& pts)
   : _dimension(pts.dimension()),
     _number_of_vertices(pts.size()),
     _data((pts.dimension()+1)*pts.size())
@@ -231,7 +231,7 @@ Geometry::Polytope<X>::Polytope(const PointList<X>& pts)
   dimension_type& d=this->_dimension;
   size_type& nv=this->_number_of_vertices;
   X* ptr=this->_data.begin();
-  LinearAlgebra::MatrixSlice<X> g(d+1,nv,ptr,1,d+1);
+  MatrixSlice<X> g(d+1,nv,ptr,1,d+1);
   for(size_type j=0; j!=nv; ++j) {
     for(size_type i=0; i!=d; ++i) {
       g(i,j)=pts[j][i];
@@ -241,7 +241,7 @@ Geometry::Polytope<X>::Polytope(const PointList<X>& pts)
 }
 
 template<class X> 
-Geometry::Polytope<X>::Polytope(const Box<R>& bx)
+Polytope<X>::Polytope(const Box<R>& bx)
   : _dimension(bx.dimension()),
     _number_of_vertices(bx.number_of_vertices()),
     _data((bx.dimension()+1)*bx.number_of_vertices())
@@ -249,7 +249,7 @@ Geometry::Polytope<X>::Polytope(const Box<R>& bx)
   dimension_type& d=this->_dimension;
   size_type& nv=this->_number_of_vertices;
   X* ptr=this->_data.begin();
-  LinearAlgebra::MatrixSlice<X> g(d+1,nv,ptr,1,d+1);
+  MatrixSlice<X> g(d+1,nv,ptr,1,d+1);
   
   size_type j=0;
   for(typename Box<R>::vertices_const_iterator v=bx.vertices_begin();
@@ -264,8 +264,8 @@ Geometry::Polytope<X>::Polytope(const Box<R>& bx)
 
 
 template<class X>
-Geometry::Polytope<X>
-Geometry::polytope(const Rectangle<X>& r)
+Polytope<X>
+polytope(const Rectangle<X>& r)
 {
   dimension_type d=r.dimension();
   size_type nv=r.number_of_vertices();
@@ -286,21 +286,21 @@ Geometry::polytope(const Rectangle<X>& r)
 
 
 template<class X>
-Geometry::Polytope<typename Numeric::traits<X>::arithmetic_type>
-Geometry::polytope(const Polyhedron<X>& plhd)
+Polytope<typename traits<X>::arithmetic_type>
+polytope(const Polyhedron<X>& plhd)
 {
-  typedef typename Numeric::traits<X>::arithmetic_type F;
+  typedef typename traits<X>::arithmetic_type F;
   
   dimension_type d=plhd.dimension();
   size_type nc=plhd.number_of_constraints();
   
-  const LinearAlgebra::Matrix<X> A=plhd.A();
-  const LinearAlgebra::Vector<X> b=plhd.b();
+  const Matrix<X> A=plhd.A();
+  const Vector<X> b=plhd.b();
   
-  std::vector< LinearAlgebra::Vector<F> > constraints;
-  std::vector< LinearAlgebra::Vector<F> > generators;
+  std::vector< Vector<F> > constraints;
+  std::vector< Vector<F> > generators;
   
-  LinearAlgebra::Vector<F> tmp(d+1);
+  Vector<F> tmp(d+1);
   // Add positivity constraint
   tmp(d)=1;
   constraints.push_back(tmp);
@@ -334,14 +334,14 @@ Geometry::polytope(const Polyhedron<X>& plhd)
 
 template<class X>
 dimension_type 
-Geometry::Polytope<X>::dimension() const
+Polytope<X>::dimension() const
 {
   return this->_dimension;
 }
 
 template<class X>
-const LinearAlgebra::Matrix<X>
-Geometry::Polytope<X>::generators() const
+const Matrix<X>
+Polytope<X>::generators() const
 {
   return const_cast<Polytope<X>*>(this)->_generators_();
 }
@@ -349,23 +349,23 @@ Geometry::Polytope<X>::generators() const
 
 template<class X>
 size_type 
-Geometry::Polytope<X>::number_of_vertices() const
+Polytope<X>::number_of_vertices() const
 {
   return this->_number_of_vertices;
 }
 
 template<class X>
-Geometry::PointList<X> 
-Geometry::Polytope<X>::vertices() const 
+PointList<X> 
+Polytope<X>::vertices() const 
 {
   return PointList<X>(this->generators());
 }
 
 template<class X>
-Geometry::Point<X>
-Geometry::Polytope<X>::vertex(const size_type& j) const 
+Point<X>
+Polytope<X>::vertex(const size_type& j) const 
 {
-  LinearAlgebra::Matrix<X> g=this->generators();
+  Matrix<X> g=this->generators();
   Point<X> result(this->dimension());
   for(dimension_type i=0; i!=this->dimension(); ++i) {
     result[i]=g(i,j);
@@ -374,23 +374,23 @@ Geometry::Polytope<X>::vertex(const size_type& j) const
 }
 
 template<class X>
-typename Geometry::Polytope<X>::vertices_const_iterator
-Geometry::Polytope<X>::vertices_begin() const 
+typename Polytope<X>::vertices_const_iterator
+Polytope<X>::vertices_begin() const 
 {
   return PolytopeVerticesIterator<X>(*this,0);
 }
 
 template<class X>
-typename Geometry::Polytope<X>::vertices_const_iterator
-Geometry::Polytope<X>::vertices_end() const 
+typename Polytope<X>::vertices_const_iterator
+Polytope<X>::vertices_end() const 
 {
   return PolytopeVerticesIterator<X>(*this,this->number_of_vertices());
 }
 
 
 template<class X> 
-Geometry::Box<typename Geometry::Polytope<X>::R> 
-Geometry::Polytope<X>::bounding_box() const
+Box<typename Polytope<X>::R> 
+Polytope<X>::bounding_box() const
 {
   //std::cerr << "Polytope<X>::bounding_box()" << std::endl;
   typename Polytope<X>::vertices_const_iterator pt_iter=this->vertices_begin();
@@ -404,14 +404,14 @@ Geometry::Polytope<X>::bounding_box() const
 
 template<class X>
 tribool 
-Geometry::Polytope<X>::empty() const
+Polytope<X>::empty() const
 {
   return this->number_of_vertices()==0;
 }
 
 template<class X>
 tribool 
-Geometry::Polytope<X>::bounded() const
+Polytope<X>::bounded() const
 {
   tribool result=true;
   dimension_type d=this->dimension();
@@ -427,14 +427,14 @@ Geometry::Polytope<X>::bounded() const
 
 template<class X>
 tribool 
-Geometry::Polytope<X>::contains(const Point<R>& pt) const
+Polytope<X>::contains(const Point<R>& pt) const
 {
   return ::contains(*this,pt);
 }
 
 template<class X>
 tribool 
-Geometry::contains(const Polytope<X>& ply, const Point<typename Polytope<X>::real_type>& pt) 
+contains(const Polytope<X>& ply, const Point<typename Polytope<X>::real_type>& pt) 
 {
   return ::contains(ply,pt);
 }
@@ -442,7 +442,7 @@ Geometry::contains(const Polytope<X>& ply, const Point<typename Polytope<X>::rea
 
 template<class X>
 tribool 
-Geometry::disjoint(const Polytope<X>& ply, const Box<typename Polytope<X>::real_type>& bx)
+disjoint(const Polytope<X>& ply, const Box<typename Polytope<X>::real_type>& bx)
 {
   return ::disjoint(ply,bx);
 }
@@ -450,35 +450,35 @@ Geometry::disjoint(const Polytope<X>& ply, const Box<typename Polytope<X>::real_
 
 template<class X>
 tribool 
-Geometry::disjoint(const Box<typename Polytope<X>::real_type>& bx, const Polytope<X>& ply)
+disjoint(const Box<typename Polytope<X>::real_type>& bx, const Polytope<X>& ply)
 { 
   return ::disjoint(ply,bx);
 }
 
 template<class X>
 tribool 
-Geometry::disjoint(const Polytope<X>& ply1, const Polytope<X>& ply2)
+disjoint(const Polytope<X>& ply1, const Polytope<X>& ply2)
 {
   return ::disjoint(ply1,ply2);
 }
 
 template<class X>
 tribool 
-Geometry::subset(const Polytope<X>& ply1, const Polytope<X>& ply2)
+subset(const Polytope<X>& ply1, const Polytope<X>& ply2)
 {
   return ::subset(ply1,ply2);
 }
 
 template<class X>
 tribool 
-Geometry::subset(const Box<typename Polytope<X>::real_type>& bx, const Polytope<X>& ply)
+subset(const Box<typename Polytope<X>::real_type>& bx, const Polytope<X>& ply)
 {
   return ::subset(bx,ply);
 }
 
 template<class X>
 tribool 
-Geometry::subset(const Polytope<X>& ply, const Box<typename Polytope<X>::real_type>& bx)
+subset(const Polytope<X>& ply, const Box<typename Polytope<X>::real_type>& bx)
 {
   tribool result=true;
   for(typename Polytope<X>::vertices_const_iterator v=ply.vertices_begin(); v!=ply.vertices_end(); ++v) {
@@ -493,8 +493,8 @@ Geometry::subset(const Polytope<X>& ply, const Box<typename Polytope<X>::real_ty
 
 
 template<class X>
-Geometry::Polytope<X>
-Geometry::convex_hull(const Polytope<X>& A, const Polytope<X>& B)
+Polytope<X>
+convex_hull(const Polytope<X>& A, const Polytope<X>& B)
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
@@ -502,22 +502,22 @@ Geometry::convex_hull(const Polytope<X>& A, const Polytope<X>& B)
 
 template<class X>
 std::string
-Geometry::Polytope<X>::name()
+Polytope<X>::name()
 {
-  return std::string("Polytope")+"<"+Numeric::name<X>()+">";
+  return std::string("Polytope")+"<"+Ariadne::name<X>()+">";
 }
 
 
 template<class X>  
 std::ostream& 
-Geometry::Polytope<X>::write(std::ostream& os) const 
+Polytope<X>::write(std::ostream& os) const 
 {
   return os << "Polytope( vertices=" << this->vertices() << " )";
 }
 
 template<class X>  
 std::istream& 
-Geometry::Polytope<X>::read(std::istream& is)
+Polytope<X>::read(std::istream& is)
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
@@ -525,10 +525,10 @@ Geometry::Polytope<X>::read(std::istream& is)
 
 template<class X>
 void
-Geometry::Polytope<X>::_instantiate()
+Polytope<X>::_instantiate()
 {   
-  typedef typename Numeric::traits<X>::number_type R;
-  typedef typename Numeric::traits<X>::arithmetic_type I;
+  typedef typename traits<X>::number_type R;
+  typedef typename traits<X>::arithmetic_type I;
 
   tribool tb;
   Point<R>* pt=0;
@@ -540,14 +540,14 @@ Geometry::Polytope<X>::_instantiate()
   Polytope<I>* ip=0;
   Polyhedron<I>* ih=0;
 
-  tb=Geometry::contains(*p,*pt);
-  tb=Geometry::disjoint(*bx,*p);
-  Geometry::disjoint(*p,*bx);
-  Geometry::disjoint(*p,*p);
-  Geometry::subset(*bx,*p);
-  Geometry::subset(*p,*bx);
-  Geometry::subset(*p,*p);
-  Geometry::convex_hull(*p,*p);
+  tb=Ariadne::contains(*p,*pt);
+  tb=disjoint(*bx,*p);
+  disjoint(*p,*bx);
+  disjoint(*p,*p);
+  subset(*bx,*p);
+  subset(*p,*bx);
+  subset(*p,*p);
+  convex_hull(*p,*p);
   
   *p=polytope(*r);
   *ip=polytope(*h);

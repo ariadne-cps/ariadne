@@ -38,20 +38,20 @@
 #include "evaluation/set_based_hybrid_evolver.code.h"
 
 namespace Ariadne {
-  namespace Evaluation {
-    using namespace Numeric;
+  
+    
 
 #ifdef ENABLE_FLOAT64
-    template class MapEvolver< Geometry::Zonotope<Float64> >;
-    template class VectorFieldEvolver< Geometry::Zonotope<Float64> >;
-    template class SetBasedHybridEvolver< Geometry::Zonotope<Float64> >;
+    template class MapEvolver< Zonotope<Float64> >;
+    template class VectorFieldEvolver< Zonotope<Float64> >;
+    template class SetBasedHybridEvolver< Zonotope<Float64> >;
 #endif
   
 #ifdef ENABLE_FLOATMP
-    template class MapEvolver< Geometry::Zonotope<FloatMP> >;
-    template class VectorFieldEvolver< Geometry::Zonotope<FloatMP> >;
-    template class SetBasedHybridEvolver< Geometry::Zonotope<FloatMP> >;
+    template class MapEvolver< Zonotope<FloatMP> >;
+    template class VectorFieldEvolver< Zonotope<FloatMP> >;
+    template class SetBasedHybridEvolver< Zonotope<FloatMP> >;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

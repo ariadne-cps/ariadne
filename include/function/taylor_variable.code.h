@@ -31,11 +31,11 @@ namespace {
 
 template<class X>
 void 
-compute_composition(Function::TaylorVariable<X>& z, 
-                    const Function::TaylorSeries<X>& y, 
-                    const Function::TaylorVariable<X>& x)
+compute_composition(TaylorVariable<X>& z, 
+                    const TaylorSeries<X>& y, 
+                    const TaylorVariable<X>& x)
 {
-  using namespace Function;
+  
   size_type as=x.argument_size();
   size_type d=z.degree();
 
@@ -58,13 +58,13 @@ compute_composition(Function::TaylorVariable<X>& z,
 
 
 template<class X> 
-Function::TaylorVariable<X>::TaylorVariable()
+TaylorVariable<X>::TaylorVariable()
   : _argument_size(1), _degree(0), _data(1u,X(0)) 
 {
 }
 
 template<class X> 
-Function::TaylorVariable<X>::TaylorVariable(size_type a, smoothness_type d)
+TaylorVariable<X>::TaylorVariable(size_type a, smoothness_type d)
   : _argument_size(a), _degree(d), _data(compute_polynomial_data_size(a,d),X(0))
 {
 }
@@ -73,49 +73,49 @@ Function::TaylorVariable<X>::TaylorVariable(size_type a, smoothness_type d)
 
 template<class X> 
 size_type 
-Function::TaylorVariable<X>::argument_size() const 
+TaylorVariable<X>::argument_size() const 
 { 
   return this->_argument_size;
 }
 
 template<class X> 
 smoothness_type 
-Function::TaylorVariable<X>::degree() const 
+TaylorVariable<X>::degree() const 
 { 
   return this->_degree;
 }
 
 template<class X> 
 const X&
-Function::TaylorVariable<X>::value() const 
+TaylorVariable<X>::value() const 
 { 
   return this->_data[0];
 }
 
 template<class X> 
 X&
-Function::TaylorVariable<X>::value()  
+TaylorVariable<X>::value()  
 { 
   return this->_data[0];
 }
 
 template<class X> 
 const X&
-Function::TaylorVariable<X>::gradient(size_type j) const 
+TaylorVariable<X>::gradient(size_type j) const 
 { 
   return this->_data[j+1u];
 }
 
 template<class X> 
 array<X>& 
-Function::TaylorVariable<X>::data()
+TaylorVariable<X>::data()
 {
   return this->_data; 
 }
 
 template<class X> 
 const array<X>& 
-Function::TaylorVariable<X>::data() const 
+TaylorVariable<X>::data() const 
 {
   return this->_data; 
 }
@@ -123,28 +123,28 @@ Function::TaylorVariable<X>::data() const
 
 template<class X> 
 X& 
-Function::TaylorVariable<X>::operator[](const MultiIndex& a) 
+TaylorVariable<X>::operator[](const MultiIndex& a) 
 { 
   return this->_data[a.position()]; 
 }
 
 template<class X> 
 const X& 
-Function::TaylorVariable<X>::operator[](const MultiIndex& a) const 
+TaylorVariable<X>::operator[](const MultiIndex& a) const 
 { 
   return this->_data[a.position()]; 
 }
 
 template<class X> 
 bool
-Function::operator<(const TaylorVariable<X>& x1, const TaylorVariable<X>& x2)
+operator<(const TaylorVariable<X>& x1, const TaylorVariable<X>& x2)
 {
   return x1.value() < x2.value();
 }
 
 template<class X> 
-Function::TaylorVariable<X>&
-Function::acc(TaylorVariable<X>& r, const TaylorVariable<X>& x1, const TaylorVariable<X>& x2)
+TaylorVariable<X>&
+acc(TaylorVariable<X>& r, const TaylorVariable<X>& x1, const TaylorVariable<X>& x2)
 {
   ARIADNE_ASSERT(r.argument_size()==x1.argument_size());
   ARIADNE_ASSERT(r.argument_size()==x2.argument_size());
@@ -158,8 +158,8 @@ Function::acc(TaylorVariable<X>& r, const TaylorVariable<X>& x1, const TaylorVar
 }
 
 template<class X> 
-Function::TaylorVariable<X>&
-Function::acc(TaylorVariable<X>& r, const X& c, const TaylorVariable<X>& x)
+TaylorVariable<X>&
+acc(TaylorVariable<X>& r, const X& c, const TaylorVariable<X>& x)
 {
   ARIADNE_ASSERT(r.argument_size()==x.argument_size());
   size_type n=std::max(r.data().size(),x.data().size());
@@ -171,8 +171,8 @@ Function::acc(TaylorVariable<X>& r, const X& c, const TaylorVariable<X>& x)
 
 
 template<class X> 
-Function::TaylorVariable<X>&
-Function::TaylorVariable<X>::assign(const TaylorVariable<X>& x)
+TaylorVariable<X>&
+TaylorVariable<X>::assign(const TaylorVariable<X>& x)
 {
   ARIADNE_ASSERT(this->argument_size()==x.argument_size());
   ARIADNE_ASSERT(this->degree()>=x.degree());
@@ -184,16 +184,16 @@ Function::TaylorVariable<X>::assign(const TaylorVariable<X>& x)
 
 
 template<class X> 
-Function::TaylorVariable<X>&
-Function::operator+=(TaylorVariable<X>& r, const TaylorVariable<X>& x)
+TaylorVariable<X>&
+operator+=(TaylorVariable<X>& r, const TaylorVariable<X>& x)
 {
   ARIADNE_ASSERT(r.argument_size()==x.argument_size());
   ARIADNE_ASSERT(r.degree()==x.degree());
   for(uint i=0; i!=r.data().size(); ++i) {
     r.data()[i]+=x.data()[i];
   }
-  //reinterpret_cast<LinearAlgebra::Vector<X>&>(r._data)
-  //  += reinterpret_cast<LinearAlgebra::Vector<X>const&>(x._data);
+  //reinterpret_cast<Vector<X>&>(r._data)
+  //  += reinterpret_cast<Vector<X>const&>(x._data);
   return r;
 }
 
@@ -215,8 +215,8 @@ Function::operator+=(TaylorVariable<X>& r, const TaylorVariable<X>& x)
 
 
 template<class X> 
-Function::TaylorVariable<X> 
-Function::compose(const TaylorVariable<X>& y, const TaylorVariable<X>& x)
+TaylorVariable<X> 
+compose(const TaylorVariable<X>& y, const TaylorVariable<X>& x)
 {
   assert(y.argument_size()==1);
   TaylorSeries<X> t(y.degree(),y.data().begin());
@@ -226,8 +226,8 @@ Function::compose(const TaylorVariable<X>& y, const TaylorVariable<X>& x)
 }
 
 template<class X> 
-Function::TaylorVariable<X> 
-Function::compose(const TaylorSeries<X>& y, const TaylorVariable<X>& x)
+TaylorVariable<X> 
+compose(const TaylorSeries<X>& y, const TaylorVariable<X>& x)
 {
   TaylorVariable<X> z(x.argument_size(),std::min(x.degree(),y.degree()));
   compute_composition(z,y,x);
@@ -235,8 +235,8 @@ Function::compose(const TaylorSeries<X>& y, const TaylorVariable<X>& x)
 }
 
 template<class X> 
-Function::TaylorVariable<X> 
-Function::derivative(const TaylorVariable<X>& x, size_type k)
+TaylorVariable<X> 
+derivative(const TaylorVariable<X>& x, size_type k)
 {
   TaylorVariable<X> r(x.argument_size(),x.degree()-1);
   MultiIndex e(x.argument_size());
@@ -252,11 +252,11 @@ Function::derivative(const TaylorVariable<X>& x, size_type k)
 
 
 template<class X> 
-Function::TaylorVariable<X> 
-Function::reduce(const TaylorVariable<X>& x, const size_type& d)
+TaylorVariable<X> 
+reduce(const TaylorVariable<X>& x, const size_type& d)
 {
   assert(x.degree()>=d);
-  Function::TaylorVariable<X> r(x.argument_size(),d);
+  TaylorVariable<X> r(x.argument_size(),d);
   for(MultiIndex i(x.argument_size()); i.degree() <= x.degree(); ++i) {
     r[i]=x[i];
   }
@@ -271,7 +271,7 @@ Function::reduce(const TaylorVariable<X>& x, const size_type& d)
 
 template<class X> 
 std::ostream& 
-Function::operator<<(std::ostream& os, const TaylorVariable<X>& x) {
+operator<<(std::ostream& os, const TaylorVariable<X>& x) {
   //  return os << "TaylorVariable( argument_size=" << x.argument_size() << ", degree=" << x.degree() << ", data=" << x.data() << ")";
   //os << "TaylorVariable(";
   os << "V";
@@ -297,11 +297,11 @@ Function::operator<<(std::ostream& os, const TaylorVariable<X>& x) {
 
 template<class X> 
 void
-Function::TaylorVariable<X>::instantiate() 
+TaylorVariable<X>::instantiate() 
 {
   const int* n=0;
   X* x=0;
-  LinearAlgebra::Vector<X>* v=0;
+  Vector<X>* v=0;
   TaylorSeries<X>* ts=0;
   TaylorVariable<X>* tv=0;
   std::ostream* os = 0;
@@ -313,22 +313,22 @@ Function::TaylorVariable<X>::instantiate()
   compose(*ts,*tv);
   derivative(*tv,0u);
  
-  Function::operator<(*tv,*tv);
+  operator<(*tv,*tv);
 
-  Function::operator+(*tv);
-  Function::operator-(*tv);
-  Function::operator+(*tv,*tv);
-  Function::operator-(*tv,*tv);
-  Function::operator*(*tv,*tv);
-  Function::operator/(*tv,*tv);
+  operator+(*tv);
+  operator-(*tv);
+  operator+(*tv,*tv);
+  operator-(*tv,*tv);
+  operator*(*tv,*tv);
+  operator/(*tv,*tv);
 
-  Function::operator+=(*tv,*tv);
-  Function::operator+=(*tv,*n);
-  Function::operator*=(*tv,*n);
-  Function::operator+=(*tv,*x);
-  Function::operator*=(*tv,*x);
+  operator+=(*tv,*tv);
+  operator+=(*tv,*n);
+  operator*=(*tv,*n);
+  operator+=(*tv,*x);
+  operator*=(*tv,*x);
   
-  Function::operator<<(*os,*tv);
+  operator<<(*os,*tv);
 }
 
 

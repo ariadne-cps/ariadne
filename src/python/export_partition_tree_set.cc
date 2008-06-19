@@ -33,8 +33,6 @@
 #include "geometry/zonotope.h"
 
 using namespace Ariadne;
-using namespace Ariadne::Combinatoric;
-using namespace Ariadne::Geometry;
 using namespace Ariadne::Python;
 
 #include <boost/python.hpp>

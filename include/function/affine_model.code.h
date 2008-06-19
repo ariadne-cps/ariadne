@@ -31,7 +31,7 @@ namespace Ariadne {
 
 template<class R> 
 void 
-Function::AffineModel<R>::instantiate()
+AffineModel<R>::instantiate()
 {
   AffineModel<R>* am=0;
   compose(*am,*am);
@@ -40,10 +40,10 @@ Function::AffineModel<R>::instantiate()
 }
 
 template<class R> 
-Function::AffineModel<R>::AffineModel(const Geometry::Box<R>& d,
-                                      const Geometry::Point<R>& c, 
-                                      const Geometry::Point<I>& v, 
-                                      const LinearAlgebra::Matrix<I>& j)
+AffineModel<R>::AffineModel(const Box<R>& d,
+                                      const Point<R>& c, 
+                                      const Point<I>& v, 
+                                      const Matrix<I>& j)
   : _domain(d), _centre(c), _value(v), _jacobian(j)
 {
   ARIADNE_ASSERT(c.dimension()==d.dimension());
@@ -52,9 +52,9 @@ Function::AffineModel<R>::AffineModel(const Geometry::Box<R>& d,
 }
 
 template<class R> 
-Function::AffineModel<R>::AffineModel(const Geometry::Box<R>& d,
-                                      const Geometry::Point<R>& c, 
-                                      const array<Function::AffineVariable<I> >& av)
+AffineModel<R>::AffineModel(const Box<R>& d,
+                                      const Point<R>& c, 
+                                      const array<AffineVariable<I> >& av)
   : _domain(d), _centre(c), _value(av.size()), _jacobian(av.size(),c.dimension())
 {
   ARIADNE_ASSERT(c.dimension()==d.dimension());
@@ -69,17 +69,17 @@ Function::AffineModel<R>::AffineModel(const Geometry::Box<R>& d,
 
 
 template<class R> 
-Function::AffineModel<R>::AffineModel(const Geometry::Box<R>& d,
-                                      const Geometry::Point<R>& c,
-                                      const Function::FunctionInterface<R>& f)
+AffineModel<R>::AffineModel(const Box<R>& d,
+                                      const Point<R>& c,
+                                      const FunctionInterface<R>& f)
   : _domain(d), _centre(c), _value(f.evaluate(c.position_vector())), _jacobian(f.jacobian(d.position_vectors()))
 {
 }
 
 
 template<class R>
-Geometry::Point<typename Numeric::traits<R>::interval_type> 
-Function::AffineModel<R>::evaluate(const Geometry::Point<I>& pt) const
+Point<typename traits<R>::interval_type> 
+AffineModel<R>::evaluate(const Point<I>& pt) const
 {
   return this->_value+this->_jacobian*(pt-this->_centre);
 }
@@ -89,42 +89,42 @@ Function::AffineModel<R>::evaluate(const Geometry::Point<I>& pt) const
 /*
 
 template<class R> 
-Function::AffineModel<R>
-Function::operator+(const Function::AffineModel<R>& am) 
+AffineModel<R>
+operator+(const AffineModel<R>& am) 
 {
   return am;
 }
 
 template<class R> 
-Function::AffineModel<R>
-Function::operator-(const Function::AffineModel<R>& am) 
+AffineModel<R>
+operator-(const AffineModel<R>& am) 
 {
   return AffineModel<R>(am.domain(),am.centre(),-am.value(),-am.jacobian());
 }
 
 
 template<class R> 
-Function::AffineModel<R>
-Function::operator+(const Function::AffineModel<R>& am1, const Function::AffineModel<R>& am2) 
+AffineModel<R>
+operator+(const AffineModel<R>& am1, const AffineModel<R>& am2) 
 {
-  ARIADNE_LOG(3,"operator+(Function::AffineModel am1, Function::AffineModel am2)\n");
+  ARIADNE_LOG(3,"operator+(AffineModel am1, AffineModel am2)\n");
   if(am1.domain()==am2.domain() && am1.centre()==am2.centre()) {
     return AffineModel<R>(am1.domain(),am1.centre(),am1.value()+am2.value(),am1.jacobian()+am2.jacobian());
   } else {
-    Geometry::Box<R> nd=open_intersection(am1.domain(),am2.domain());
+    Box<R> nd=open_intersection(am1.domain(),am2.domain());
     return restrict(am1,nd)+restrict(am1,nd);
   }
 }
 
 template<class R> 
-Function::AffineModel<R>
-Function::operator-(const Function::AffineModel<R>& am1, const Function::AffineModel<R>& am2) 
+AffineModel<R>
+operator-(const AffineModel<R>& am1, const AffineModel<R>& am2) 
 {
-  ARIADNE_LOG(3,"operator+(Function::AffineModel am1, Function::AffineModel am2)\n");
+  ARIADNE_LOG(3,"operator+(AffineModel am1, AffineModel am2)\n");
   if(am1.domain()==am2.domain() && am1.centre()==am2.centre()) {
     return AffineModel<R>(am1.domain(),am1.centre(),am1.value()-am2.value(),am1.jacobian()-am2.jacobian());
   } else {
-    Geometry::Box<R> nd=open_intersection(am1.domain(),am2.domain());
+    Box<R> nd=open_intersection(am1.domain(),am2.domain());
     return restrict(am1,nd)-restrict(am1,nd);
   }
 }
@@ -133,45 +133,45 @@ Function::operator-(const Function::AffineModel<R>& am1, const Function::AffineM
 
 
 template<class R> 
-Geometry::Box<R>
-Function::AffineModel<R>::range() const
+Box<R>
+AffineModel<R>::range() const
 {
-  return Geometry::Box<R>(this->evaluate(Geometry::Point<I>(this->_domain.position_vectors())));
+  return Box<R>(this->evaluate(Point<I>(this->_domain.position_vectors())));
 }
 
 
 template<class R> 
-Function::AffineModel<R>
-Function::translate(const Function::AffineModel<R>& am, const Geometry::Point<R>& nc) 
+AffineModel<R>
+translate(const AffineModel<R>& am, const Point<R>& nc) 
 {
-  typedef Numeric::Interval<R> I;
-  Geometry::Box<R> nd=am.domain();
-  Geometry::Point<I> nv=am.evaluate(nc);
-  const LinearAlgebra::Matrix<I> & nj=am.jacobian();
+  typedef Interval<R> I;
+  Box<R> nd=am.domain();
+  Point<I> nv=am.evaluate(nc);
+  const Matrix<I> & nj=am.jacobian();
   return AffineModel<R>(nd,nc,nv,nj);
 }
 
 template<class R> 
-Function::AffineModel<R>
-Function::restrict(const Function::AffineModel<R>& am, const Geometry::Box<R>& nd) 
+AffineModel<R>
+restrict(const AffineModel<R>& am, const Box<R>& nd) 
 {
-  typedef Numeric::Interval<R> I;
-  Geometry::Point<R> nc=nd.centre();
-  Geometry::Point<I> nv=am.evaluate(nc);
-  const LinearAlgebra::Matrix<I> & nj=am.jacobian();
+  typedef Interval<R> I;
+  Point<R> nc=nd.centre();
+  Point<I> nv=am.evaluate(nc);
+  const Matrix<I> & nj=am.jacobian();
   return AffineModel<R>(nd,nc,nv,nj);
 }
 
 template<class R> 
-Function::AffineModel<R>
-Function::compose(const Function::AffineModel<R>& am1, const Function::AffineModel<R>& am2) 
+AffineModel<R>
+compose(const AffineModel<R>& am1, const AffineModel<R>& am2) 
 {
-  ARIADNE_ASSERT(Geometry::subset(am2.range(),am1.domain()));
-  typedef Numeric::Interval<R> I;
-  Geometry::Box<R> const& nd=am2.domain();
-  Geometry::Point<R> const& nc=am2.centre();
-  Geometry::Point<I> nv=am1.evaluate(reinterpret_cast<const Geometry::Point<I>&>(am2.value()));
-  LinearAlgebra::Matrix<I> nj=am1.jacobian()*am2.jacobian();
+  ARIADNE_ASSERT(subset(am2.range(),am1.domain()));
+  typedef Interval<R> I;
+  Box<R> const& nd=am2.domain();
+  Point<R> const& nc=am2.centre();
+  Point<I> nv=am1.evaluate(reinterpret_cast<const Point<I>&>(am2.value()));
+  Matrix<I> nj=am1.jacobian()*am2.jacobian();
   return AffineModel<R>(nd,nc,nv,nj);
 }
 
@@ -179,8 +179,8 @@ Function::compose(const Function::AffineModel<R>& am1, const Function::AffineMod
 
 
 template<class R> 
-Function::AffineModel<R>
-Function::reduce(const Function::AffineModel<R>& am, size_type s) 
+AffineModel<R>
+reduce(const AffineModel<R>& am, size_type s) 
 {
   assert(s<=am._s);
   if(s==am._s) { return am;  }
@@ -188,8 +188,8 @@ Function::reduce(const Function::AffineModel<R>& am, size_type s)
   const dimension_type rd=am._rd;
   const dimension_type ad=am._ad;
   
-  Function::AffineModel<R> res(rd,ad,s);
-  typename Function::AffineModel<R>::I tmp;
+  AffineModel<R> res(rd,ad,s);
+  typename AffineModel<R>::I tmp;
   for(size_type i=0; i!=rd; ++i) {
     res._iptr[i]=am._iptr[i];
     for(size_type j=i+rd; j!=i+rd*(ad+1); j+=rd) {
@@ -204,22 +204,22 @@ Function::reduce(const Function::AffineModel<R>& am, size_type s)
 
 
 template<class R> 
-Function::AffineModel<R> 
-Function::inverse(const Function::AffineModel<R>&) 
+AffineModel<R> 
+inverse(const AffineModel<R>&) 
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
 template<class R> 
-Function::AffineModel<R> 
-Function::implicit(const Function::AffineModel<R>&)
+AffineModel<R> 
+implicit(const AffineModel<R>&)
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
 template<class R> 
 std::ostream& 
-Function::AffineModel<R>::write(std::ostream& os) const
+AffineModel<R>::write(std::ostream& os) const
 {
   os << "AffineModel"
      << "( domain=" << this->domain()
@@ -232,7 +232,4 @@ Function::AffineModel<R>::write(std::ostream& os) const
 
 
 
-
-
-
-}
+} // namespace Ariadne

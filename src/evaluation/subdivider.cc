@@ -29,9 +29,9 @@
 #include "evaluation/standard_subdivider.h"
 
 namespace Ariadne {
-  namespace Evaluation {
-    using namespace Numeric;
-    using namespace Geometry;
+  
+    
+    
 
 #ifdef ENABLE_FLOAT64
     template class StandardSubdivider< Rectangle<Float64> >;
@@ -43,5 +43,5 @@ namespace Ariadne {
     template class StandardSubdivider< Zonotope<FloatMP> >;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

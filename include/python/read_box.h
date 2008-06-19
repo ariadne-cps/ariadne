@@ -40,17 +40,17 @@ namespace Python {
 
 template<class R>  
 void
-read_box(Geometry::Box<R>& bx, const boost::python::object& obj) 
+read_box(Box<R>& bx, const boost::python::object& obj) 
 {
   // See "Extracting C++ objects" in the Boost Python tutorial
-  array< Numeric::Interval<R> > ary;
+  array< Interval<R> > ary;
   read_array(ary,obj);
-  bx=Geometry::Box<R>(ary);
+  bx=Box<R>(ary);
 }
 
 template<class R>  
 void
-old_read_box(Geometry::Box<R>& bx, const boost::python::object& obj) 
+old_read_box(Box<R>& bx, const boost::python::object& obj) 
 {
   boost::python::list elements=boost::python::extract<const boost::python::list>(obj);
   int d=boost::python::len(elements);
@@ -70,12 +70,12 @@ old_read_box(Geometry::Box<R>& bx, const boost::python::object& obj)
     } else {
       boost::python::extract<std::string> extract_string(elements[i]);
       if(extract_string.check()) {
-        Numeric::Interval<R> interval(extract_string());
+        Interval<R> interval(extract_string());
         bx.set_lower_bound(i,interval.lower());
         bx.set_upper_bound(i,interval.upper());
       } else {
-        boost::python::extract< Numeric::Interval<R> > extract_interval(elements[i]);
-        Numeric::Interval<R> interval=extract_interval();
+        boost::python::extract< Interval<R> > extract_interval(elements[i]);
+        Interval<R> interval=extract_interval();
         bx.set_lower_bound(i,interval.lower());
         bx.set_upper_bound(i,interval.upper());
       } 

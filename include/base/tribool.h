@@ -31,7 +31,7 @@
 #include <boost/logic/tribool_io.hpp>
 
 namespace Ariadne {
-  namespace Base {
+
 
 #ifdef DOXYGEN
     /*!\brief A logic type which can take values \p true, \p false, and \p intermediate. 
@@ -61,7 +61,7 @@ namespace Ariadne {
 
 #endif
 
-  }
-}
+
+} // namespace Ariadne
 
 #endif /* ARIADNE_TRIBOOL_H */

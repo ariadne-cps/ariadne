@@ -36,7 +36,7 @@
 #include "numeric/integer.h"
 
 namespace Ariadne {
-  namespace Numeric {
+  
 
     template<class R> class Interval;
   
@@ -138,8 +138,8 @@ namespace Ariadne {
 
   */
 
-  } 
-}
+
+} // namespace Ariadne
 
 
 #endif /* ARIADNE_INTERVAL_INTEGER_H */

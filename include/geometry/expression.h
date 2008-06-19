@@ -29,7 +29,7 @@
 #define ARIADNE_GEOMETRY_EXPRESSION_H
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
     class OverApproximate 
     {

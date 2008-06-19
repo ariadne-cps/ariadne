@@ -27,7 +27,7 @@
 #include "numeric/rational.h"
 
 namespace Ariadne { 
-namespace Numeric {
+
 
 double
 Rational::get_d() const 
@@ -105,5 +105,5 @@ operator>>(std::istream& is, Rational& q)
 }
 
 
-} // namespace Numeric
+
 } // namespace Ariadne

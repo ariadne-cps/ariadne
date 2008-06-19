@@ -30,7 +30,7 @@
 #define ARIADNE_GEOMETRY_RECTANGLE_EXPRESSION_H
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
     /*! \brief %Base class tag for rectangle expressions
      *
@@ -47,7 +47,7 @@ namespace Ariadne {
       const E& operator() () const { return static_cast<const E&>(*this); }
     };
 
-  }
-}
+
+} // namespace Ariadne
 
 #endif /* ARIADNE_GEOMETRY_RECTANGLE_EXPRESSION_H */

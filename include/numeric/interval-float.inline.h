@@ -25,11 +25,8 @@
 #include "numeric/rounding.h"
 
 namespace Ariadne {
-namespace Numeric {
-  
 
-using Base::tribool;
-using Base::indeterminate;
+  
 
 using std::min;
 using std::max;
@@ -571,6 +568,6 @@ Interval< Float<T> >& Interval< Float<T> >::operator=(const Expression<E>& e) {
   e.assign_to(*this); return *this; }
 
 
-} // namespace Numeric
+
 } // namespace Ariadne
 

@@ -34,7 +34,7 @@
 #include "combinatoric/lattice_set.h"
 
 namespace Ariadne {
-  namespace Combinatoric {
+
     
     template<class Ptr>
     class array_less {
@@ -236,7 +236,7 @@ namespace Ariadne {
       array_vector<index_type> sorted(n);
       sorted.resize(pointers.size());
       for(size_type i=0; i!=sorted.size(); ++i) {
-        sorted[i]=range<index_type*>(pointers[i],pointers[i]+n);
+        sorted[i]=range_array<index_type*>(pointers[i],pointers[i]+n);
       }
       
       this->_list.swap(sorted);
@@ -946,7 +946,7 @@ namespace Ariadne {
     operator>>(std::istream& is, LatticePoint& lpt)
     {
       std::vector<int> v;
-      Base::read_sequence(is, v, '(', ')');
+      read_sequence(is, v, '(', ')');
       lpt=LatticePoint(v.size());
       for(dimension_type i=0; i!=lpt.dimension(); ++i) {
         lpt[i]=v[i];
@@ -959,7 +959,7 @@ namespace Ariadne {
     {
       /* Representation as a literal (l1,l2,...,ln) */
       std::vector<int> v;
-      Base::read_sequence(is, v, '(', ')');
+      read_sequence(is, v, '(', ')');
       IndexArray l(v.size());
       for(size_type i=0; i!=v.size(); ++i) {
         l[i]=v[i];
@@ -1057,7 +1057,7 @@ namespace Ariadne {
     std::ostream& 
     operator<<(std::ostream& os, const LatticeCellListSet& lcls) 
     {
-      return Base::write_sequence(os,lcls.begin(),lcls.end(),'[',']',',');
+      return write_sequence(os,lcls.begin(),lcls.end(),'[',']',',');
     }
     
     
@@ -1081,5 +1081,6 @@ namespace Ariadne {
     }
     
     
-  } 
-}
+   
+} // namespace Ariadne
+

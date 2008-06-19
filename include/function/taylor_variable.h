@@ -30,7 +30,6 @@
 
 
 namespace Ariadne {
-  namespace Function {
   
     class MultiIndex;
     template<class X> class TaylorSeries;
@@ -251,8 +250,8 @@ namespace Ariadne {
   template<class X> std::ostream& operator<<(std::ostream& os, const TaylorVariable<X>& x);
 
 
-  }
-}
+  
+} // namespace Ariadne
 
 
 #include "taylor_variable.inline.h"

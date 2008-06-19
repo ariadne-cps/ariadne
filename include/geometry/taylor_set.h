@@ -39,7 +39,7 @@
 #include "linear_algebra/matrix.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
     template<class R> class Point;
     template<class R> class Box;
@@ -57,8 +57,8 @@ namespace Ariadne {
      */
     template<class R>
     class TaylorSet {
-      typedef typename Numeric::traits<R>::arithmetic_type F; 
-      typedef typename Numeric::traits<R>::interval_type I; 
+      typedef typename traits<R>::arithmetic_type F; 
+      typedef typename traits<R>::interval_type I; 
      public:
       /*! \brief The real number type. */
       typedef R real_type;
@@ -67,7 +67,7 @@ namespace Ariadne {
 
      private:
       Point<R> _centre;
-      LinearAlgebra::Matrix<R> _generators;
+      Matrix<R> _generators;
      public:
       //@{
       //! \name Constructors
@@ -157,7 +157,7 @@ namespace Ariadne {
     std::istream& operator>>(std::istream& is, TaylorSet<R>& z);
 
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_TAYLOR_SET_H */

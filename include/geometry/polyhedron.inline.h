@@ -24,7 +24,7 @@
 #include "geometry/halfspace.h"
 
 namespace Ariadne {  
-  namespace Geometry {
+  
 
     template<class X>
     class PolyhedronConstraintsIterator
@@ -48,24 +48,17 @@ namespace Ariadne {
       const Polyhedron<X>* _p; size_type _i; mutable Halfspace<X> _c;
     };
   
-  } // namespace Geometry
-} // namespace Ariadne 
-
-
-
-
-namespace Ariadne {
 
 
 
 template<class X> template<class XX>
-Geometry::Polyhedron<X>::Polyhedron(const Rectangle<XX>& r)
+Polyhedron<X>::Polyhedron(const Rectangle<XX>& r)
   : _dimension(r.dimension()), 
     _number_of_constraints(r.dimension()*2u),
     _data((r.dimension()+1u)*r.dimension()*2u,static_cast<X>(0))
 {
   dimension_type d=r.dimension();
-  LinearAlgebra::MatrixSlice<X> constraints=this->_constraints();
+  MatrixSlice<X> constraints=this->_constraints();
   for(size_type i=0; i!=d; ++i) {
     constraints(i,i)=static_cast<X>(1);
     constraints(i,d)=-r.lower_bound(i);
@@ -76,13 +69,13 @@ Geometry::Polyhedron<X>::Polyhedron(const Rectangle<XX>& r)
 
 
 template<class X> template<class XX>  
-Geometry::Polyhedron<X>::Polyhedron(const Polytope<XX>& p)
+Polyhedron<X>::Polyhedron(const Polytope<XX>& p)
 { 
   (*this)=polyhedron(p);
 }
 
 template<class X> template<class XX>  
-Geometry::Polyhedron<X>::Polyhedron(const Polyhedron<XX>& p)
+Polyhedron<X>::Polyhedron(const Polyhedron<XX>& p)
   : _dimension(p.dimension()), 
     _number_of_constraints(p.number_of_constraints()), 
     _data(p.data())
@@ -90,8 +83,8 @@ Geometry::Polyhedron<X>::Polyhedron(const Polyhedron<XX>& p)
 }
 
 template<class X> template<class XX> inline
-Geometry::Polyhedron<X>&
-Geometry::Polyhedron<X>::operator=(const Polyhedron<XX>& plhd)
+Polyhedron<X>&
+Polyhedron<X>::operator=(const Polyhedron<XX>& plhd)
   
 {
   if(this!=(void*)&plhd) {
@@ -104,7 +97,7 @@ Geometry::Polyhedron<X>::operator=(const Polyhedron<XX>& plhd)
 
 template<class X> template<class XX> inline
 tribool 
-Geometry::Polyhedron<X>::contains(const Point<XX>& pt) const
+Polyhedron<X>::contains(const Point<XX>& pt) const
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(*this,pt,"tribool Polyhedron::contains(Point pt)");
   tribool result=true;
@@ -119,14 +112,14 @@ Geometry::Polyhedron<X>::contains(const Point<XX>& pt) const
 
 template<class X> inline 
 array<X>& 
-Geometry::Polyhedron<X>::data() 
+Polyhedron<X>::data() 
 { 
   return this->_data; 
 }
 
 template<class X> inline 
 const array<X>& 
-Geometry::Polyhedron<X>::data() const
+Polyhedron<X>::data() const
 { 
   return this->_data; 
 }
@@ -136,10 +129,10 @@ Geometry::Polyhedron<X>::data() const
 
 
 template<class X> inline 
-const LinearAlgebra::MatrixSlice<X> 
-Geometry::Polyhedron<X>::constraints() const 
+const MatrixSlice<X> 
+Polyhedron<X>::constraints() const 
 { 
-  return LinearAlgebra::MatrixSlice<X>(this->_number_of_constraints,
+  return MatrixSlice<X>(this->_number_of_constraints,
                                        this->_dimension+1u,
                                        const_cast<X*>(this->data().begin()),
                                        this->_dimension+1u,
@@ -148,20 +141,20 @@ Geometry::Polyhedron<X>::constraints() const
 
 
 template<class X> inline 
-LinearAlgebra::Matrix<X> 
-Geometry::Polyhedron<X>::A() const 
+Matrix<X> 
+Polyhedron<X>::A() const 
 { 
-  return -LinearAlgebra::MatrixSlice<X>(this->number_of_constraints(),
+  return -MatrixSlice<X>(this->number_of_constraints(),
                                         this->dimension(),
                                         const_cast<X*>(this->data().begin()),
                                         this->dimension()+1,1u);
 }
 
 template<class X> inline 
-LinearAlgebra::Vector<X> 
-Geometry::Polyhedron<X>::b() const 
+Vector<X> 
+Polyhedron<X>::b() const 
 { 
-  return LinearAlgebra::VectorSlice<X>(this->number_of_constraints(),
+  return VectorSlice<X>(this->number_of_constraints(),
                                        const_cast<X*>(this->data().begin()+this->dimension()),
                                        this->dimension()+1u);
 }
@@ -169,15 +162,15 @@ Geometry::Polyhedron<X>::b() const
 
 template<class X> inline 
 size_type 
-Geometry::Polyhedron<X>::number_of_constraints() const 
+Polyhedron<X>::number_of_constraints() const 
 { 
   return this->_number_of_constraints;
 }
 
 
 template<class X> inline
-Geometry::Box<typename Geometry::Polyhedron<X>::real_type> 
-Geometry::bounding_box(const Polyhedron<X>& plhd)
+Box<typename Polyhedron<X>::real_type> 
+bounding_box(const Polyhedron<X>& plhd)
 {
   return plhd.bounding_box();
 }
@@ -186,7 +179,7 @@ Geometry::bounding_box(const Polyhedron<X>& plhd)
 
 template<class X> inline
 std::ostream& 
-Geometry::operator<<(std::ostream& os, const Polyhedron<X>& p) 
+operator<<(std::ostream& os, const Polyhedron<X>& p) 
 {
   return p.write(os); 
 }
@@ -194,7 +187,7 @@ Geometry::operator<<(std::ostream& os, const Polyhedron<X>& p)
 
 template<class X> inline
 std::istream& 
-Geometry::operator>>(std::istream& os, Polyhedron<X>& p) 
+operator>>(std::istream& os, Polyhedron<X>& p) 
 {
   return p.read(os); 
 }

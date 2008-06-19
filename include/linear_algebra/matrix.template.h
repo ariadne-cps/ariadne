@@ -26,8 +26,8 @@ namespace Ariadne {
 
 
 template<class R> 
-LinearAlgebra::Matrix<R>
-LinearAlgebra::over_approximation(const Matrix< Numeric::Interval<R> >& A)
+Matrix<R>
+over_approximation(const Matrix< Interval<R> >& A)
 {
   if(A.number_of_rows()!=A.number_of_columns()) {
     ARIADNE_THROW(NotImplemented,"Matrix<Real> over_approximation(Matrix<Interval>)","A="<<A<<" (only implemented for square matrices)"); 
@@ -40,9 +40,9 @@ LinearAlgebra::over_approximation(const Matrix< Numeric::Interval<R> >& A)
       Amid(i,j)=(A(i,j).upper()+A(i,j).lower())/2;
     }
   }
-  Matrix< Numeric::Interval<R> > I=LinearAlgebra::inverse(Matrix< Numeric::Interval<R> >(Amid))*A;
+  Matrix< Interval<R> > I=inverse(Matrix< Interval<R> >(Amid))*A;
   
-  R excess=LinearAlgebra::norm(I).upper();
+  R excess=norm(I).upper();
   
   // FIXME: Outer bound on multiplication
   return excess*Amid;

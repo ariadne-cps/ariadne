@@ -36,53 +36,53 @@ namespace Ariadne {
 
 static const double DEFAULT_MAXIMUM_STEP_SIZE=0.125;
 
-namespace Evaluation { static int& verbosity = integrator_verbosity; }
+
 
 
 
 
 template<class R>
-Evaluation::StandardBounder<R>::StandardBounder()
+StandardBounder<R>::StandardBounder()
   : _maximum_step_size(DEFAULT_MAXIMUM_STEP_SIZE)
 {
 }
 
 template<class R>
-Evaluation::StandardBounder<R>::StandardBounder(const Numeric::Rational& mss)
+StandardBounder<R>::StandardBounder(const Rational& mss)
   : _maximum_step_size(mss)
 {
 }
 
 
 template<class R>
-Evaluation::StandardBounder<R>*
-Evaluation::StandardBounder<R>::clone() const
+StandardBounder<R>*
+StandardBounder<R>::clone() const
 {
   return new StandardBounder<R>(*this);
 }
 
 
 template<class R>
-Numeric::Rational
-Evaluation::StandardBounder<R>::maximum_step_size() const
+Rational
+StandardBounder<R>::maximum_step_size() const
 {
   return this->_maximum_step_size;
 }
 
 
 template<class R>
-std::pair<Numeric::Rational, Geometry::Box<R> >
-Evaluation::StandardBounder<R>::flow_bounds(const System::VectorField<R>& vf,
-                                            const Geometry::Box<R>& r) const
+std::pair<Rational, Box<R> >
+StandardBounder<R>::flow_bounds(const VectorField<R>& vf,
+                                            const Box<R>& r) const
 {
   return flow_bounds(vf,r,this->maximum_step_size());
 }
 
 template<class R>
-std::pair<Numeric::Rational, Geometry::Box<R> >
-Evaluation::StandardBounder<R>::flow_bounds(const System::VectorField<R>& vf,
-                                            const Geometry::Box<R>& r,
-                                            const Numeric::Rational& hmax) const
+std::pair<Rational, Box<R> >
+StandardBounder<R>::flow_bounds(const VectorField<R>& vf,
+                                            const Box<R>& r,
+                                            const Rational& hmax) const
 {
   // Try to find a time h and a set b such that subset(r+Interval<R>(0,h)*vf(b),b) holds
   ARIADNE_LOG(6,"flow_bounds(VectorField,Box,Time hmax)\n");
@@ -98,19 +98,19 @@ Evaluation::StandardBounder<R>::flow_bounds(const System::VectorField<R>& vf,
   const uint EXPANSION_STEPS=8;
   const uint REDUCTION_STEPS=8;
   const uint REFINEMENT_STEPS=4;
-  Geometry::Box<R> b,nb;
-  LinearAlgebra::Vector<I> eps(r.dimension(),I(-Numeric::eps<R>(),Numeric::eps<R>()));
-  LinearAlgebra::Vector<I> delta=r.position_vectors()-r.centre().position_vector();
+  Box<R> b,nb;
+  Vector<I> eps(r.dimension(),I(-Ariadne::eps<R>(),Ariadne::eps<R>()));
+  Vector<I> delta=r.position_vectors()-r.centre().position_vector();
   
-  Numeric::Rational h=hmax;
-  Numeric::Rational hmin=hmax/(1<<REDUCTION_STEPS);
+  Rational h=hmax;
+  Rational hmin=hmax/(1<<REDUCTION_STEPS);
   bool success=false;
   while(!success) {
     ARIADNE_ASSERT(h>hmin);
-    Numeric::Interval<R> ih(0,h);
+    Interval<R> ih(0,h);
     b=r+INITIAL_MULTIPLIER*ih*vf(r)+delta;
     for(uint i=0; i!=EXPANSION_STEPS; ++i) {
-      LinearAlgebra::Vector<I> df=vf(b);
+      Vector<I> df=vf(b);
       nb=r+ih*df;
       ARIADNE_LOG(9,"  h="<<h<<" b="<<b<<" vf="<<vf(b)<<" nb="<<nb<<"\n");
       if(possibly(subset(nb,b))) {
@@ -129,7 +129,7 @@ Evaluation::StandardBounder<R>::flow_bounds(const System::VectorField<R>& vf,
   ARIADNE_ASSERT(possibly(subset(nb,b)));
   b=nb;
   
-  Numeric::Interval<R> ih(0,h);
+  Interval<R> ih(0,h);
   for(uint i=0; i!=REFINEMENT_STEPS; ++i) {
      b=r+ih*vf(b);
   }
@@ -148,14 +148,14 @@ Evaluation::StandardBounder<R>::flow_bounds(const System::VectorField<R>& vf,
   
 template<class R>
 bool
-Evaluation::StandardBounder<R>::check_flow_bounds(const System::VectorField<R>& vf,
-                                                  const Geometry::Box<R>& r,
-                                                  const Numeric::Rational& h,
-                                                  const Geometry::Box<R>& b) const
+StandardBounder<R>::check_flow_bounds(const VectorField<R>& vf,
+                                                  const Box<R>& r,
+                                                  const Rational& h,
+                                                  const Box<R>& b) const
 {
   ARIADNE_LOG(6,"StandardBounder::check_flow_bounds");
-  using namespace Geometry;
-  using namespace Numeric;
+  
+  
   return subset(r+Interval<R>(0,h)*vf(b),b);
 }
 
@@ -165,19 +165,16 @@ Evaluation::StandardBounder<R>::check_flow_bounds(const System::VectorField<R>& 
 
 
 template<class R>
-Geometry::Box<R>
-Evaluation::StandardBounder<R>::refine_flow_bounds(const System::VectorField<R>& vector_field,
-                                              const Geometry::Box<R>& initial_set,
-                                              const Geometry::Box<R>& estimated_bounds,
-                                              const Numeric::Rational& step_size) const
+Box<R>
+StandardBounder<R>::refine_flow_bounds(const VectorField<R>& vector_field,
+                                              const Box<R>& initial_set,
+                                              const Box<R>& estimated_bounds,
+                                              const Rational& step_size) const
 {
   ARIADNE_LOG(6,"StandardBounder::refine_flow_bounds(VectorField vf, Box r, Box bb, Time t)\n");
   ARIADNE_LOG(7,"  h="<<step_size.get_d()<<", r="<<initial_set<<", bb="<<estimated_bounds<<", ");
   
-  using namespace System;
-  using namespace Geometry;
-  using namespace LinearAlgebra;
-  using namespace Numeric;
+  
   const VectorField<R>& vf=vector_field;
   Box<R> rx=initial_set;
   Box<R> b=estimated_bounds;
@@ -196,22 +193,22 @@ Evaluation::StandardBounder<R>::refine_flow_bounds(const System::VectorField<R>&
 
 
 template<class R> inline
-std::pair< Numeric::Rational, Function::TaylorDerivative<Numeric::Interval<R> > >
-Evaluation::StandardBounder<R>::variation_flow_bounds(const System::VectorField<R>& vf, 
-                                                      const Geometry::Box<R>& bx,
-                                                      const Numeric::Rational& t,
+std::pair< Rational, TaylorDerivative<Interval<R> > >
+StandardBounder<R>::variation_flow_bounds(const VectorField<R>& vf, 
+                                                      const Box<R>& bx,
+                                                      const Rational& t,
                                                       smoothness_type o) const
 {
-  Numeric::Rational h=t;
+  Rational h=t;
   I hi=I(t)*I(0,1);
-  Function::TaylorDerivative<I> d=Function::TaylorDerivative<I>::variable(bx.position_vectors(),o);
+  TaylorDerivative<I> d=TaylorDerivative<I>::variable(bx.position_vectors(),o);
   while(false) {   // expand flow bounds
-    Function::TaylorDerivative<I> vfd=vf.derivative(Geometry::Point<I>(d.value()),1);
-    Function::TaylorDerivative<I> nd=bx+compose(vfd,d)*I(2*hi);
+    TaylorDerivative<I> vfd=vf.derivative(Point<I>(d.value()),1);
+    TaylorDerivative<I> nd=bx+compose(vfd,d)*I(2*hi);
     d=nd;
   }
   while(true) {
-    d=bx+compose(vf.derivative(Geometry::Point<I>(d.value()),1),d)*I(2*hi);
+    d=bx+compose(vf.derivative(Point<I>(d.value()),1),d)*I(2*hi);
   }
   return make_pair(h,d);
 }
@@ -221,17 +218,17 @@ Evaluation::StandardBounder<R>::variation_flow_bounds(const System::VectorField<
 
 
 template<class R>
-LinearAlgebra::Matrix< Numeric::Interval<R> >
-Evaluation::StandardBounder<R>::estimate_flow_jacobian_bounds(const System::VectorField<R>& vf,
-                                                              const Geometry::Box<R>& b,
-                                                              const Numeric::Rational& h) const
+Matrix< Interval<R> >
+StandardBounder<R>::estimate_flow_jacobian_bounds(const VectorField<R>& vf,
+                                                              const Box<R>& b,
+                                                              const Rational& h) const
 {
   dimension_type d=vf.dimension();
-  LinearAlgebra::Matrix<I> Df = vf.jacobian(b);
-  R l = LinearAlgebra::norm(Df).upper();
-  I e = Numeric::sub_up(Numeric::exp_up(mul_up(Numeric::Interval<R>(h).upper(),l)),R(1))*I(-1,1);
+  Matrix<I> Df = vf.jacobian(b);
+  R l = norm(Df).upper();
+  I e = sub_up(exp_up(mul_up(Interval<R>(h).upper(),l)),R(1))*I(-1,1);
 
-  LinearAlgebra::Matrix<I> W = LinearAlgebra::Matrix<I>::identity(d)+e*LinearAlgebra::Matrix<I>::one(d,d);
+  Matrix<I> W = Matrix<I>::identity(d)+e*Matrix<I>::one(d,d);
   return W;
 }
 

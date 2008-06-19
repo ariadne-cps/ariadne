@@ -37,7 +37,7 @@ namespace Ariadne {
 
 
 template<class X>
-Geometry::Point<X>::Point(const std::string& s) : _vector(1)
+Point<X>::Point(const std::string& s) : _vector(1)
 {
   std::stringstream ss(s);
   ss >> *this;
@@ -46,7 +46,7 @@ Geometry::Point<X>::Point(const std::string& s) : _vector(1)
 
 template<class X>
 std::ostream& 
-Geometry::Point<X>::write(std::ostream& os) const
+Point<X>::write(std::ostream& os) const
 {
   const Point<X>& pt=*this;
   os << "(";
@@ -63,7 +63,7 @@ Geometry::Point<X>::write(std::ostream& os) const
 
 template<class X>
 std::istream& 
-Geometry::Point<X>::read(std::istream& is)
+Point<X>::read(std::istream& is)
 {
   Point<X>& pt=*this;
   static size_type last_size;
@@ -74,15 +74,15 @@ Geometry::Point<X>::read(std::istream& is)
   is >> c;
   is.putback(c);
   if(c=='(') {
-    Base::read_sequence(is, v, '(', ')');
+    read_sequence(is, v, '(', ')');
   } else if(c=='[') {
-    Base::read_sequence(is, v, '[', ']');
+    read_sequence(is, v, '[', ']');
   } else {
     throw InvalidInput("Invalid point input");
   }
   last_size = v.size();
   
-  pt._vector=LinearAlgebra::Vector<X>(v.size());
+  pt._vector=Vector<X>(v.size());
   for(size_t i=0; i!=v.size(); ++i) {
     pt._vector(i)=v[i];
   }

@@ -37,7 +37,7 @@
 #include "constraint_interface.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
     
     template<class R> class Point;
     template<class R> class Box;
@@ -60,11 +60,11 @@ namespace Ariadne {
     class Constraint
       : public ConstraintInterface<R>
     {
-      typedef typename Numeric::traits<R>::arithmetic_type A;
-      typedef typename Numeric::traits<R>::interval_type I;
+      typedef typename traits<R>::arithmetic_type A;
+      typedef typename traits<R>::interval_type I;
      public:
       /*! \brief Construct the set \f$f(x) \lessgtr 0\f$ from the function \f$f\f$. */
-      Constraint(const Function::FunctionInterface<R>& f, const Comparison cmp=greater);
+      Constraint(const FunctionInterface<R>& f, const Comparison cmp=greater);
 
       /*! \brief Destructor. */
       virtual ~Constraint();
@@ -80,11 +80,11 @@ namespace Ariadne {
       virtual std::ostream& write(std::ostream& os) const;
 
       /*! \brief The function defining the constraint. */
-      const Function::FunctionInterface<R>& function() const;
+      const FunctionInterface<R>& function() const;
       /*! \brief The value at a point. */
       A value(const Point<A>& pt) const;
       /*! \brief The gradient at a point. */
-      LinearAlgebra::Vector<A> gradient(const Point<A>& pt) const;
+      Vector<A> gradient(const Point<A>& pt) const;
      public:
       /*! \brief Test for equality as reference. */
       //      friend bool equal<>(const Constraint<R>& c1, const Constraint<R>& c2);
@@ -103,7 +103,7 @@ namespace Ariadne {
      private:
       static void instantiate();
      private:
-      boost::shared_ptr< const Function::FunctionInterface<R> > _function_ptr;
+      boost::shared_ptr< const FunctionInterface<R> > _function_ptr;
       Comparison _comparison;
     };
     
@@ -118,11 +118,11 @@ namespace Ariadne {
 
     template<class R> tribool satisfies(const Box<R>& r, const Constraint<R>& c);
     template<class R> tribool satisfies(const Zonotope<R,R>& z, const Constraint<R>& c);
-    template<class R> tribool satisfies(const Zonotope<Numeric::Interval<R>,R>& z, const Constraint<R>& c);
-    template<class R> tribool satisfies(const Zonotope< Numeric::Interval<R>,Numeric::Interval<R> >& z, const Constraint<R>& c);
+    template<class R> tribool satisfies(const Zonotope<Interval<R>,R>& z, const Constraint<R>& c);
+    template<class R> tribool satisfies(const Zonotope< Interval<R>,Interval<R> >& z, const Constraint<R>& c);
 */
-  }
-}
+  
+} // namespace Ariadne
 
 #include "constraint.inline.h"
 

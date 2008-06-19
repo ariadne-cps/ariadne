@@ -35,8 +35,6 @@
 #include "test.h"
 
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::Geometry;
 using namespace std;
 
 template<class R> int test_simplex();

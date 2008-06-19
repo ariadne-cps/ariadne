@@ -26,42 +26,42 @@
 namespace Ariadne {
 
 template<class R> inline 
-const Geometry::Grid<R>& 
-Geometry::GridCell<R>::grid() const 
+const Grid<R>& 
+GridCell<R>::grid() const 
 { 
   return this->_grid; 
 }
 
 template<class R> inline
 dimension_type 
-Geometry::GridCell<R>::dimension() const 
+GridCell<R>::dimension() const 
 {
   return this->_lattice_set.dimension(); 
 }
 
 template<class R> inline
-const Combinatoric::LatticeCell& 
-Geometry::GridCell<R>::lattice_set() const 
+const LatticeCell& 
+GridCell<R>::lattice_set() const 
 {
   return this->_lattice_set; 
 }
 
 template<class R> inline
 tribool 
-Geometry::GridCell<R>::bounded() const { 
+GridCell<R>::bounded() const { 
   return true; 
 }
 
 template<class R> inline
-Geometry::Box<R> 
-Geometry::GridCell<R>::bounding_box() const 
+Box<R> 
+GridCell<R>::bounding_box() const 
 {
   return *this; 
 }
 
 
 template<class R> inline
-Geometry::GridCell<R>::GridCell(const Grid<R>& g, const Combinatoric::LatticeCell& pos)
+GridCell<R>::GridCell(const Grid<R>& g, const LatticeCell& pos)
   : _grid(g), _lattice_set(pos)
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(g,pos,"GridCell<R>::GridCell(Grid<R>,LatticeCell");
@@ -69,7 +69,7 @@ Geometry::GridCell<R>::GridCell(const Grid<R>& g, const Combinatoric::LatticeCel
 
 
 template<class R> inline
-Geometry::GridCell<R>::GridCell(const Grid<R>& g, const IndexArray& pos)
+GridCell<R>::GridCell(const Grid<R>& g, const IndexArray& pos)
   : _grid(g), _lattice_set(pos)
 {
   ARIADNE_CHECK_DIMENSION(g,pos.size(),"GridCell::GridCell(Grid,IndexArray)");
@@ -78,7 +78,7 @@ Geometry::GridCell<R>::GridCell(const Grid<R>& g, const IndexArray& pos)
 
 template<class R> inline
 R
-Geometry::GridCell<R>::lower_bound(dimension_type i) const 
+GridCell<R>::lower_bound(dimension_type i) const 
 {
   return _grid.subdivision_coordinate(i,_lattice_set.lower_bound(i));
 }
@@ -86,7 +86,7 @@ Geometry::GridCell<R>::lower_bound(dimension_type i) const
 
 template<class R> inline
 R
-Geometry::GridCell<R>::upper_bound(dimension_type i) const 
+GridCell<R>::upper_bound(dimension_type i) const 
 {
   return _grid.subdivision_coordinate(i,_lattice_set.upper_bound(i));
 }
@@ -94,7 +94,7 @@ Geometry::GridCell<R>::upper_bound(dimension_type i) const
 
 template<class R> inline
 std::ostream& 
-Geometry::operator<<(std::ostream& os, const GridCell<R>& gc) {
+operator<<(std::ostream& os, const GridCell<R>& gc) {
   return gc.write(os);
 }
     

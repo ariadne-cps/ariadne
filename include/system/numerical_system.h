@@ -37,7 +37,7 @@
 #include "evaluation/evolver_interface.h"
 
 namespace Ariadne {
-  namespace System {
+  
 
     /*! \ingroup NumericalSystem
      *  \brief A numerical evaluation of the evolution of a dynamic system on enclosure sets, exposing reach and evolve interfaces. 
@@ -47,7 +47,7 @@ namespace Ariadne {
       : public NumericalSystemInterface<typename Sys::time_type,ES>
     {
       typedef typename Sys::time_type T;
-      typedef Geometry::ListSet<ES> ESL;
+      typedef ListSet<ES> ESL;
      public:
       /*! \brief The type used to denote time. */
       typedef T time_type;
@@ -57,8 +57,8 @@ namespace Ariadne {
       typedef ES enclosure_set_type;
      public:
       /*! \brief Construct from a system and an evolution algorithm. */
-      NumericalSystem(const Sys& system, const Evaluation::EvolverInterface<Sys,ES>& evolver)
-        : _system(system.clone()), _evolver(dynamic_cast< Evaluation::EvolverBase<Sys,ES>*>(evolver.clone())) { }
+      NumericalSystem(const Sys& system, const EvolverInterface<Sys,ES>& evolver)
+        : _system(system.clone()), _evolver(dynamic_cast< EvolverBase<Sys,ES>*>(evolver.clone())) { }
       /*! \brief Cloning operator. */
       virtual NumericalSystem<Sys,ES>* clone() const { 
         return new NumericalSystem<Sys,ES>(*this); }
@@ -66,25 +66,25 @@ namespace Ariadne {
       const Sys& system() const { 
         return *this->_system; }
       /*! \brief The state space of the system. */
-      virtual Geometry::EuclideanSpace state_space() const { 
+      virtual EuclideanSpace state_space() const { 
         return this->_system->state_space(); }
 
       /*! \brief Compute a lower-approximation to the evolved set under the system evolution. */
-      virtual ESL evolve(const ES& initial, const T& time, Evaluation::Semantics semantics) const {
+      virtual ESL evolve(const ES& initial, const T& time, Semantics semantics) const {
         return this->_evolver->evolve(this->system(),initial,time,semantics); }
       /*! \brief Compute a lower-approximation to the evolved set under the system evolution. */
-      virtual ESL reach(const ES& initial, const T& time, Evaluation::Semantics semantics) const {
+      virtual ESL reach(const ES& initial, const T& time, Semantics semantics) const {
         return this->_evolver->reach(this->system(),initial,time,semantics); }
       /*! \brief Compute a lower-approximation to the reachable and evolved sets under the system evolution. */
-      virtual std::pair<ESL,ESL> reach_evolve(const ES& initial, const T& time, Evaluation::Semantics semantics) const {
+      virtual std::pair<ESL,ESL> reach_evolve(const ES& initial, const T& time, Semantics semantics) const {
         return this->_evolver->reach_evolve(this->system(),initial,time,semantics); }
      private:
       boost::shared_ptr< Sys > _system;
-      boost::shared_ptr< Evaluation::EvolverBase<Sys,ES> > _evolver;
+      boost::shared_ptr< EvolverBase<Sys,ES> > _evolver;
     };
 
-  }
-}
+  
+} // namespace Ariadne
 
 
 

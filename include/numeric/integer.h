@@ -42,13 +42,13 @@
 #include "numeric/integer.template.h"
  
 namespace Ariadne {
-  namespace Numeric {
+  
 
     // Declare stream i/o operators
     std::ostream& operator<<(std::ostream& os, const Integer& n);
     std::istream& operator>>(std::istream& is, Integer& n);
 
-  }
-}
+
+} // namespace Ariadne
 
 #endif /* ARIADNE_NUMERIC_INTEGER_H */

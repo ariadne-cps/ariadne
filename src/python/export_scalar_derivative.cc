@@ -33,7 +33,7 @@
 
 using namespace boost::python;
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
+
 using namespace Ariadne::Function;
 using namespace Ariadne::Python;
 
@@ -53,7 +53,7 @@ R scalar_derivative_get_item(const ScalarDerivative<R>& sd, uint i) {
 template<class R>
 void export_scalar_derivative()
 {
-  typedef typename Numeric::traits<R>::arithmetic_type A;
+  typedef typename traits<R>::arithmetic_type A;
   typedef ScalarDerivative<A> SD;
 
 
@@ -101,23 +101,23 @@ void export_scalar_derivative()
     .def(self_ns::str(self))
  ;
   
-  def("compose",(SD(*)(const SD&,const SD&))&Function::compose);
-  def("inverse",(SD(*)(const SD&,const A&))&Function::inverse);
+  def("compose",(SD(*)(const SD&,const SD&))&compose);
+  def("inverse",(SD(*)(const SD&,const A&))&inverse);
 
-  def("max",(SD(*)(const SD&,const SD&))&Function::max);
-  def("min",(SD(*)(const SD&,const SD&))&Function::min);
-  def("abs",(SD(*)(const SD&))&Function::abs);
-  def("pow",(SD(*)(const SD&, int))&Function::pow);
+  def("max",(SD(*)(const SD&,const SD&))&max);
+  def("min",(SD(*)(const SD&,const SD&))&min);
+  def("abs",(SD(*)(const SD&))&abs);
+  def("pow",(SD(*)(const SD&, int))&pow);
 
-  def("sqrt", (SD(*)(const SD&))&Function::sqrt);
-  def("exp", (SD(*)(const SD&))&Function::exp);
-  def("log", (SD(*)(const SD&))&Function::log);
-  def("sin", (SD(*)(const SD&))&Function::sin);
-  def("cos", (SD(*)(const SD&))&Function::cos);
-  def("tan", (SD(*)(const SD&))&Function::tan);
-  def("asin", (SD(*)(const SD&))&Function::asin);
-  def("acos", (SD(*)(const SD&))&Function::acos);
-  def("atan", (SD(*)(const SD&))&Function::atan);
+  def("sqrt", (SD(*)(const SD&))&sqrt);
+  def("exp", (SD(*)(const SD&))&exp);
+  def("log", (SD(*)(const SD&))&log);
+  def("sin", (SD(*)(const SD&))&sin);
+  def("cos", (SD(*)(const SD&))&cos);
+  def("tan", (SD(*)(const SD&))&tan);
+  def("asin", (SD(*)(const SD&))&asin);
+  def("acos", (SD(*)(const SD&))&acos);
+  def("atan", (SD(*)(const SD&))&atan);
 
 }
 
@@ -165,13 +165,13 @@ void export_scalar_derivative<Rational>()
     .def(self_ns::str(self))
  ;
   
-  def("compose",(SD(*)(const SD&,const SD&))&Function::compose);
-  def("inverse",(SD(*)(const SD&,const Q&))&Function::inverse);
+  def("compose",(SD(*)(const SD&,const SD&))&compose);
+  def("inverse",(SD(*)(const SD&,const Q&))&inverse);
 
-  def("max",(SD(*)(const SD&,const SD&))&Function::max);
-  def("min",(SD(*)(const SD&,const SD&))&Function::min);
-  def("abs",(SD(*)(const SD&))&Function::abs);
-  def("pow",(SD(*)(const SD&, int))&Function::pow);
+  def("max",(SD(*)(const SD&,const SD&))&max);
+  def("min",(SD(*)(const SD&,const SD&))&min);
+  def("abs",(SD(*)(const SD&))&abs);
+  def("pow",(SD(*)(const SD&, int))&pow);
 
 }
 

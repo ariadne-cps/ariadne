@@ -39,7 +39,7 @@
 
 
 namespace Ariadne {  
-  namespace Geometry {
+  
 
     class basic_set_tag;
 
@@ -69,7 +69,7 @@ namespace Ariadne {
     template<class X> Polyhedron<X> closed_intersection(const Rectangle<X>& r, const Polyhedron<X>& plhd) ;
 
     template<class X> Polyhedron<X> polyhedron(const Rectangle<X>& A) ;
-    template<class X> Polyhedron<typename Numeric::traits<X>::arithmetic_type> polyhedron(const Polytope<X>& A) ;
+    template<class X> Polyhedron<typename traits<X>::arithmetic_type> polyhedron(const Polytope<X>& A) ;
 
     template<class X> std::ostream& operator<<(std::ostream& os, const Polyhedron<X>& p);
     template<class X> std::istream& operator>>(std::istream& os, Polyhedron<X>& p);
@@ -86,14 +86,14 @@ namespace Ariadne {
      */ 
     template<class X>
     class Polyhedron {
-      typedef typename Numeric::traits<X>::number_type R;
-      typedef typename Numeric::traits<X>::arithmetic_type F;
+      typedef typename traits<X>::number_type R;
+      typedef typename traits<X>::arithmetic_type F;
      private:
       dimension_type _dimension;
       size_type _number_of_constraints;
       array<X> _data;
      private:
-      LinearAlgebra::MatrixSlice<X> _constraints();
+      MatrixSlice<X> _constraints();
      public:
       /*! \brief A tag describing the type of set. */
       typedef basic_set_tag set_category;
@@ -122,11 +122,11 @@ namespace Ariadne {
             
       /*! \brief Construct the polyhedron defined by the matrix equations \f$Ax\leq b\f$.
        */
-      explicit Polyhedron(const LinearAlgebra::Matrix<X>& A, const LinearAlgebra::Vector<X>& b);
+      explicit Polyhedron(const Matrix<X>& A, const Vector<X>& b);
             
       /*! \brief Construct the polyhedron defined by the matrix of constraints \f$C\hat{x}\geq0\f$.
        */
-      explicit Polyhedron(const LinearAlgebra::Matrix<X>& C);
+      explicit Polyhedron(const Matrix<X>& C);
             
       /*! \brief Construct from a list of points. */
       explicit Polyhedron(const PointList<X>& pts);
@@ -156,14 +156,14 @@ namespace Ariadne {
       const array<X>& data() const;
 
       /*! \brief The matrix \f$A\f$ in the inequalities \f$Ax\leq b\f$. */
-      LinearAlgebra::Matrix<X> A() const;
+      Matrix<X> A() const;
       /*! \brief The vector \f$b\f$ in the inequalities \f$Ax\leq b\f$. */
-      LinearAlgebra::Vector<X> b() const;
+      Vector<X> b() const;
 
       /*! \brief An iterator to the beginning of the constraints. */
       size_type number_of_constraints() const;
       /*! \brief The matrix of constraints \f$C\f$ in the inequalities \f$C\left(\begin{array}{c}x\\1\end{array}\right)\geq 0\f$. */
-      const LinearAlgebra::MatrixSlice<X> constraints() const;
+      const MatrixSlice<X> constraints() const;
       /*! \brief The \a i<sup>th</sup> constraint. */
       Halfspace<X> constraint(size_type i) const;
       /*! \brief An iterator to the beginning of the constraints. */
@@ -215,43 +215,43 @@ namespace Ariadne {
       //@{
       //! \name Geometric binary predicates
       /*! \brief Tests if a polyhedron contains a point. */
-      friend tribool Geometry::contains<>(const Polyhedron<X>& A, 
+      friend tribool contains<>(const Polyhedron<X>& A, 
                                           const Point<R>& B);
         
       /*! \brief Tests disjointness. */
-      friend tribool Geometry::disjoint<>(const Polyhedron<X>& A, 
+      friend tribool disjoint<>(const Polyhedron<X>& A, 
                                           const Polyhedron<X>& B);
         
       /*! \brief Tests disjointness. */
-      friend tribool Geometry::disjoint<>(const Box<R>& A,
+      friend tribool disjoint<>(const Box<R>& A,
                                           const Polyhedron<X>& B);
         
       /*! \brief Tests disjointness. */
-      friend tribool Geometry::disjoint<>(const Polyhedron<X>& A, 
+      friend tribool disjoint<>(const Polyhedron<X>& A, 
                                           const Box<R>& B);
         
       /*! \brief Tests disjointness. */
-      friend tribool Geometry::disjoint<>(const Polytope<X>& A,
+      friend tribool disjoint<>(const Polytope<X>& A,
                                           const Polyhedron<X>& B);
         
       /*! \brief Tests disjointness. */
-      friend tribool Geometry::disjoint<>(const Polyhedron<X>& A, 
+      friend tribool disjoint<>(const Polyhedron<X>& A, 
                                           const Polytope<X>& B);
         
       /*! \brief Tests inclusion of \a A in \a B. */
-      friend tribool Geometry::subset<>(const Polyhedron<X>& A, 
+      friend tribool subset<>(const Polyhedron<X>& A, 
                                         const Polyhedron<X>& B);
     
       /*! \brief Tests inclusion of \a A in \a B. */
-      friend tribool Geometry::subset<>(const Box<R>& A, 
+      friend tribool subset<>(const Box<R>& A, 
                                         const Polyhedron<X>& B);
     
       /*! \brief Tests inclusion of \a A in \a B. */
-      friend tribool Geometry::subset<>(const Polyhedron<X>& A, 
+      friend tribool subset<>(const Polyhedron<X>& A, 
                                         const Box<R>& B);
     
       /*! \brief Tests disjointness. */
-      friend tribool Geometry::subset<>(const Polytope<X>& A, 
+      friend tribool subset<>(const Polytope<X>& A, 
                                         const Polyhedron<X>& B);
         
       //@}
@@ -290,8 +290,8 @@ namespace Ariadne {
     
 
 
-  }
-}
+  
+} // namespace Ariadne
 
 #include "polyhedron.inline.h"
 

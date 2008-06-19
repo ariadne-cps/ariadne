@@ -42,7 +42,7 @@
   inline bool operator> (const Arg1& x1, const Arg2& x2) { return Cmp< 0; } 
 
 namespace Ariadne {
-namespace Numeric {
+
 	
 using std::min;
 using std::max;
@@ -328,6 +328,7 @@ inline unsigned long int fac(unsigned long int n) {
   return factorials[n]; 
 }
 
+
 inline int bin(int n, int k) { 
   static const int kmax=16;
   static const int nmax[kmax]={ 
@@ -400,7 +401,7 @@ inline Integer& operator--(Integer& r) {
 template<> inline std::string name<Integer>() { 
   return "Integer"; }
 
-}}
+} // namespace Ariadne
 
 #undef ARIADNE_DIRECT_COMPARISON
 #undef ARIADNE_REVERSE_COMPARISON

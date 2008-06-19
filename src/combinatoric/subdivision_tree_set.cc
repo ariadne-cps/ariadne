@@ -33,7 +33,7 @@
 #include "combinatoric/exceptions.h"
 
 namespace Ariadne {
-namespace Combinatoric {
+
 
 const bool branch=BinaryTree::branch;
 const bool leaf=BinaryTree::leaf;
@@ -289,8 +289,8 @@ SubdivisionTreeSet::SubdivisionTreeSet(const LatticeMaskSet& ms)
   
   /* Compute grid sizes as powers of two */
   for(dimension_type i=0; i!=n; ++i) {
-    depths[i]=Numeric::log2_ceil(grid_sizes[i]);
-    new_sizes[i]=Numeric::exp2(depths[i]);
+    depths[i]=log2_ceil(grid_sizes[i]);
+    new_sizes[i]=exp2(depths[i]);
     depth+=depths[i];
   }
   
@@ -513,6 +513,5 @@ operator<<(std::ostream& os, const SubdivisionMaskSet& sms)
 } 
 
 
-
-} // namespace Combinatoric
 } // namespace Ariadne
+

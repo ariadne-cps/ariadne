@@ -43,7 +43,7 @@
 #include "function/function_interface.h"
 
 namespace Ariadne {
-  namespace Function {
+
 
     /*!
      * \brief A class representing the difference of a function and the identity.
@@ -53,7 +53,7 @@ namespace Ariadne {
     template<class R> class DifferenceFunction
       : public FunctionInterface<R>
     {
-      typedef typename Numeric::traits<R>::arithmetic_type F;
+      typedef typename traits<R>::arithmetic_type F;
      public:
       /*!\brief Construct from a map \a f, which must have the same argument dimension as result dimension. */
       DifferenceFunction(const FunctionInterface<R>& f);
@@ -66,11 +66,11 @@ namespace Ariadne {
       /*!\brief The dimension of the space the map acts on. */
       virtual size_type argument_size() const;
       /*!\brief Evaluate the function \f$f(x)-x\f$, where \f$f\f$ is the map used to construct the difference map. */
-      virtual LinearAlgebra::Vector<F> evaluate(const LinearAlgebra::Vector<F>& p) const;
+      virtual Vector<F> evaluate(const Vector<F>& p) const;
       /*!\brief Evaluate the derivative of function \f$f(x)-x\f$, which is \f$Df(x)-I\f$. */
-      virtual LinearAlgebra::Matrix<F> jacobian(const LinearAlgebra::Vector<F>& p) const;
+      virtual Matrix<F> jacobian(const Vector<F>& p) const;
       /*!\brief Evaluate the derivative of function \f$f(x)-x\f$, which is \f$Df(x)-I\f$. */
-      virtual Function::TaylorDerivative<F> derivative(const LinearAlgebra::Vector<F>& p, const smoothness_type& s) const;
+      virtual TaylorDerivative<F> derivative(const Vector<F>& p, const smoothness_type& s) const;
       /*!\brief The name of the class. */
       virtual std::string name() const;
       /*!\brief Write to an output stream. */
@@ -78,13 +78,8 @@ namespace Ariadne {
      private:
       const FunctionInterface<R>& _base;
     };
-  }
-}
 
-
-
-namespace Ariadne {
-  namespace Evaluation {
+  
     
     /*! \ingroup EvaluatorInterfaces \ingroup Solvers
      *  \brief %Interface for solving (nonlinear) equations. 
@@ -92,7 +87,7 @@ namespace Ariadne {
     template<class R>
     class SolverInterface
     {
-      typedef typename Numeric::traits<R>::interval_type I;
+      typedef typename traits<R>::interval_type I;
      public:
       /*! \brief Constructor. */
       SolverInterface(R max_error, uint max_steps);
@@ -111,17 +106,17 @@ namespace Ariadne {
       void set_maximum_number_of_steps(uint max_steps);
       
       /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
-      virtual Geometry::Point<I> solve(const Function::FunctionInterface<R>& f,const Geometry::Point<I>& pt) = 0;
+      virtual Point<I> solve(const FunctionInterface<R>& f,const Point<I>& pt) = 0;
       /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
-      virtual Geometry::Point<I> fixed_point(const System::Map<R>& f,const Geometry::Point<I>& pt);
+      virtual Point<I> fixed_point(const Map<R>& f,const Point<I>& pt);
       
      private:
       R _max_error;
       uint _max_steps;
     };
     
-  }
-}
+
+} // namespace Ariadne
 
 #include "solver.inline.h"
 

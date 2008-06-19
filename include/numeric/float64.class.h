@@ -32,7 +32,7 @@
 #include "numeric/expression.h"
 
 namespace Ariadne {
-  namespace Numeric {
+  
 
     class Integer;
     class Rational;
@@ -88,7 +88,7 @@ namespace Ariadne {
     std::ostream& operator<<(std::ostream& os, const Float64& x);
     std::istream& operator>>(std::istream& is, Float64& x);
 
-  }
-}
+} // namespace Ariadne
+
 
 #endif /* ARIADNE_NUMERIC_FLOAT64_CLASS_H */

@@ -34,7 +34,7 @@
 
 
 namespace Ariadne {
-  namespace System {
+  namespace Models {
 
     const dimension_type henon_dimension=2;
     const dimension_type henon_number_of_parameters=2;
@@ -86,8 +86,8 @@ namespace Ariadne {
     
     
     
-  }
-}
+  } // namespace Models
+} // namespace Ariadne
 
 
 #endif /* ARIADNE_HENON_MAP_H */

@@ -31,7 +31,7 @@
 #include "numeric/rational.h"
 
 namespace Ariadne {
-namespace Numeric {
+
 
 
 
@@ -440,6 +440,6 @@ ARIADNE_MIXED_FUNCTION_COMPARISON(bool,FloatMP,Integer);
 ARIADNE_MIXED_FUNCTION_COMPARISON(bool,FloatMP,Rational);
 
 
-} // namespace Numeric
+
 } // namespace Ariadne
 

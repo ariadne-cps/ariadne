@@ -46,7 +46,7 @@
 
 
 namespace Ariadne {
-  namespace Evaluation {
+  
   
 
     template<class Sys, class Aprx, class ES> class Discretiser;
@@ -56,10 +56,10 @@ namespace Ariadne {
      *  \brief A class for discretising the evolution of a numerically-integrated system.
      */
     template<class T, class Aprx, class ES>
-    class Discretiser<System::NumericalSystemInterface<T,ES>,Aprx,ES>
-      : public DiscretiserInterface<System::NumericalSystemInterface<T,ES>,Aprx>
+    class Discretiser<NumericalSystemInterface<T,ES>,Aprx,ES>
+      : public DiscretiserInterface<NumericalSystemInterface<T,ES>,Aprx>
     {
-      typedef System::NumericalSystemInterface<T,ES> Sys;
+      typedef NumericalSystemInterface<T,ES> Sys;
       typedef typename Sys::real_type R;
 
       typedef typename Aprx::BasicSet BasicSet;
@@ -103,7 +103,7 @@ namespace Ariadne {
       /*! \brief Compute an approximation to the reachable and evolved sets of \a system starting in \a initial_set iterating at most \a time times. */
       virtual std::pair<PartitionListSet,PartitionListSet> upper_reach_evolve(const System& system, const BasicSet& initial_set, const Time& time) const;
      private:
-      typedef Geometry::ListSet<ES> ESL;
+      typedef ListSet<ES> ESL;
       typedef BasicSet BS;
       typedef CoverListSet CLS;
       typedef PartitionListSet PLS;
@@ -140,8 +140,8 @@ namespace Ariadne {
       typedef Sys System;
       typedef T Time;
      private:
-      typedef Ariadne::System::NumericalSystemInterface<T,ES> NSysI;
-      typedef Ariadne::System::NumericalSystem<Sys,ES> NSys;
+      typedef Ariadne::NumericalSystemInterface<T,ES> NSysI;
+      typedef Ariadne::NumericalSystem<Sys,ES> NSys;
      private:
       boost::shared_ptr< EvolverInterface<Sys,ES>  > _evolver;
       boost::shared_ptr< Discretiser<NSysI,Aprx,ES>  > _discretiser;
@@ -193,8 +193,8 @@ namespace Ariadne {
     };
 
 
-  }
-}
+  
+} // namespace Ariadne
 
 
 

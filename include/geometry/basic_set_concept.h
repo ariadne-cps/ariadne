@@ -27,7 +27,7 @@
 
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
 
     /*! \ingroup BasicSet
@@ -151,5 +151,5 @@ namespace Ariadne {
       //@}
 #endif
     };
-  }
-}
+
+} // namespace Ariadne

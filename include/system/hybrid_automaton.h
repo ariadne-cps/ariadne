@@ -48,11 +48,11 @@
 
 namespace Ariadne {  
 
-namespace Geometry {
-template<class S> class HybridSet;
-}
 
-namespace System {
+template<class S> class HybridSet;
+
+
+
 
 template<class R> class DiscreteMode;  
 template<class R> class DiscreteTransition;  
@@ -60,7 +60,7 @@ template<class R> class HybridAutomaton;
 
 /*! \ingroup HybridTime
  * \brief A discrete mode of a HybridAutomaton, comprising continuous evolution given by a VectorField
- * within and invariant Geometry::ConstraintSet. 
+ * within and invariant ConstraintSet. 
  *
  * A %DiscreteMode can only be created using the new_mode() method in
  * the %HybridAutomaton class.
@@ -75,13 +75,13 @@ class DiscreteMode {
   private:
     
     // The discrete mode's discrete state.
-    Geometry::DiscreteState _state;
+    DiscreteState _state;
   
     // The discrete mode's vector field.
     boost::shared_ptr< const VectorField<R> > _dynamic;
   
     // The discrete mode's invariant.
-    boost::shared_ptr< const Geometry::ConstraintSet<R> > _invariant;
+    boost::shared_ptr< const ConstraintSet<R> > _invariant;
   
   public:
     /*! \brief Copy constructor. */
@@ -105,7 +105,7 @@ class DiscreteMode {
     }
     
     /*! \brief The mode's discrete state. */
-    Geometry::DiscreteState discrete_state() const {
+    DiscreteState discrete_state() const {
       return this->_state;
     }
     
@@ -115,7 +115,7 @@ class DiscreteMode {
     }
     
     /*! \brief The discrete mode's invariant. */
-    const Geometry::ConstraintSet<R>& invariant() const{
+    const ConstraintSet<R>& invariant() const{
       return *this->_invariant;  
     }
     
@@ -132,18 +132,18 @@ class DiscreteMode {
      * \param dynamic is the mode's vector field.
      * \param invariant is the mode's invariant.
      */
-    DiscreteMode(Geometry::DiscreteState state,
+    DiscreteMode(DiscreteState state,
                  const VectorField<R>& dynamic, 
-                 const Geometry::ConstraintSet<R>& invariant)
+                 const ConstraintSet<R>& invariant)
       :  _state(state), _dynamic(dynamic.clone()), _invariant(invariant.clone()) 
     {
       ARIADNE_CHECK_EQUAL_DIMENSIONS(dynamic,invariant,"DiscreteMode::DiscreteMode(...)");
     }
     
     /* Construct from objects managed by shared pointers (for internal use) */
-    DiscreteMode(Geometry::DiscreteState state,
+    DiscreteMode(DiscreteState state,
                  const boost::shared_ptr< VectorField<R> > dynamic, 
-                 const boost::shared_ptr< Geometry::ConstraintSet<R> > invariant)
+                 const boost::shared_ptr< ConstraintSet<R> > invariant)
       :  _state(state), _dynamic(dynamic), _invariant(invariant) 
     {
       ARIADNE_CHECK_EQUAL_DIMENSIONS(*dynamic,*invariant,"DiscreteMode::DiscreteMode(...)");
@@ -178,7 +178,7 @@ bool operator<(const DiscreteMode<R>& mode1, const DiscreteMode<R>& mode2)
 
 /*! \ingroup HybridTime
  * \brief A discrete transition of a HybridAutomaton, representing an instantaneous
- * jump from one DiscreteMode to another, governed by an activation Geometry::ConstraintSet and a reset MapInterface.
+ * jump from one DiscreteMode to another, governed by an activation ConstraintSet and a reset MapInterface.
  *
  * A %DiscreteTransition can only be created using the new_transition() method in
  * the %HybridAutomaton class.
@@ -198,7 +198,7 @@ class DiscreteTransition
     const DiscreteMode<R>* _destination;   
   
     // \brief The activation region of the discrete transition.
-    boost::shared_ptr< const Geometry::ConstraintSet<R> > _activation; 
+    boost::shared_ptr< const ConstraintSet<R> > _activation; 
 
     // \brief The reset of the discrete transition.
     boost::shared_ptr< const Map<R> > _reset;  
@@ -241,7 +241,7 @@ class DiscreteTransition
     }
   
     /*! \brief The activation region of the discrete transition. */
-    const Geometry::ConstraintSet<R>& activation() const { 
+    const ConstraintSet<R>& activation() const { 
       return *this->_activation;
     }
 
@@ -271,7 +271,7 @@ class DiscreteTransition
                                const DiscreteMode<R>& source, 
                                const DiscreteMode<R>& destination,
                                const Map<R>& reset,
-                               const Geometry::ConstraintSet<R>& activation)
+                               const ConstraintSet<R>& activation)
       : _event(event), _source(&source), _destination(&destination), 
         _activation(activation.clone()), _reset(reset.clone()) 
     { 
@@ -285,7 +285,7 @@ class DiscreteTransition
                        const DiscreteMode<R>& source, 
                        const DiscreteMode<R>& destination,
                        const boost::shared_ptr< Map<R> > reset,
-                       const boost::shared_ptr< Geometry::ConstraintSet<R> > activation) 
+                       const boost::shared_ptr< ConstraintSet<R> > activation) 
       : _event(event), _source(&source), _destination(&destination), 
         _activation(activation), _reset(reset) 
     { 
@@ -299,7 +299,7 @@ class DiscreteTransition
                        const boost::shared_ptr< DiscreteMode<R> > source, 
                        const boost::shared_ptr< DiscreteMode<R> > destination,
                        const boost::shared_ptr< Map<R> > reset,
-                       const boost::shared_ptr< Geometry::ConstraintSet<R> > activation) 
+                       const boost::shared_ptr< ConstraintSet<R> > activation) 
       : _event(event), _source(&*source), _destination(&*destination), 
         _activation(activation), _reset(reset) 
     { 
@@ -345,7 +345,7 @@ bool operator<(const DiscreteTransition<R>& transition1, const DiscreteTransitio
 /*! \ingroup System \ingroup HybridTime
  *  \brief A hybrid automaton, comprising continuous-time behaviour
  *  at each DiscreteMode, coupled by instantaneous DiscreteTransition events.
- *  The state space is given by a Geometry::HybridSet.  
+ *  The state space is given by a HybridSet.  
  *
  * A hybrid automaton is a dynamic system with evolution in both
  * continuous time and discrete time. 
@@ -371,11 +371,11 @@ class HybridAutomaton
 {
  public:
   /*! \brief The type used to represent time. */
-  typedef Numeric::Rational time_type;
+  typedef Rational time_type;
   /*! \brief The type used to represent real numbers. */
   typedef R real_type;
   /*! \brief The type used to describe the state space. */
-  typedef Geometry::HybridSpace state_space_type;
+  typedef HybridSpace state_space_type;
  
   typedef typename std::set< DiscreteTransition<R> >::const_iterator discrete_transition_const_iterator;
   typedef typename std::set< DiscreteMode<R> >::const_iterator discrete_mode_const_iterator;
@@ -418,9 +418,9 @@ class HybridAutomaton
    * \param dynamic is the mode's vector field.
    * \param invariant is the mode's invariant.
    */
-  const DiscreteMode<R>& new_mode(Geometry::DiscreteState state,
-                                          const System::VectorField<R>& dynamic,
-                                          const Geometry::ConstraintSet<R>& invariant);
+  const DiscreteMode<R>& new_mode(DiscreteState state,
+                                          const VectorField<R>& dynamic,
+                                          const ConstraintSet<R>& invariant);
     
   /*! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and destination modes.
    *
@@ -430,11 +430,11 @@ class HybridAutomaton
    * \param reset is the transition's reset.
    * \param activation is the transition's activation region.
    */
-  const DiscreteTransition<R>& new_transition(System::DiscreteEvent event,
-                                                      Geometry::DiscreteState source, 
-                                                      Geometry::DiscreteState destination,
-                                                      const System::Map<R>& reset,
-                                                      const Geometry::ConstraintSet<R>& activation);
+  const DiscreteTransition<R>& new_transition(DiscreteEvent event,
+                                                      DiscreteState source, 
+                                                      DiscreteState destination,
+                                                      const Map<R>& reset,
+                                                      const ConstraintSet<R>& activation);
 
   /*! \brief Adds a discrete transition to the automaton using the discrete modes to specify the source and destination.
    *
@@ -444,11 +444,11 @@ class HybridAutomaton
    * \param reset is the discrete transition's reset.
    * \param activation is the discrete transition's activation region.
    */
-  const DiscreteTransition<R>& new_transition(System::DiscreteEvent event,
+  const DiscreteTransition<R>& new_transition(DiscreteEvent event,
                                                       const DiscreteMode<R>& source, 
                                                       const DiscreteMode<R>& destination,
                                                       const Map<R>& reset,
-                                                      const Geometry::ConstraintSet<R>& activation);
+                                                      const ConstraintSet<R>& activation);
   
   //@}
   
@@ -458,27 +458,27 @@ class HybridAutomaton
   const std::string& name() const;
 
   /*! \brief Test if the hybrid automaton has a discrete mode with discrete state \a state. */
-  bool has_mode(Geometry::DiscreteState state) const;
+  bool has_mode(DiscreteState state) const;
   
   /*! \brief Test if the hybrid automaton has a discrete transition with \a event_id and \a source_id. */
-  bool has_transition(System::DiscreteEvent event, Geometry::DiscreteState source) const;
+  bool has_transition(DiscreteEvent event, DiscreteState source) const;
   
   /*! \brief The discrete mode with given discrete state. */
-  const DiscreteMode<R>& mode(Geometry::DiscreteState state) const;
+  const DiscreteMode<R>& mode(DiscreteState state) const;
   
   /*! \brief The discrete transition with given \a event and \a source location. */
-  const DiscreteTransition<R>& transition(System::DiscreteEvent event, Geometry::DiscreteState source) const;
+  const DiscreteTransition<R>& transition(DiscreteEvent event, DiscreteState source) const;
 
   /*! \brief The discrete transitions from location \a source. */
-  reference_vector< const DiscreteTransition<R> > transitions(Geometry::DiscreteState source) const;
+  reference_vector< const DiscreteTransition<R> > transitions(DiscreteState source) const;
 
   /*! \brief A set giving the dimension of the state space for each location identifier. */
-  Geometry::HybridSpace locations() const;
+  HybridSpace locations() const;
   /*! \brief The state space of the system. */
-  Geometry::HybridSpace state_space() const;
+  HybridSpace state_space() const;
   
   /*! \brief The hybrid set giving the invariant for each discrete location. */
-  Geometry::HybridSet<R> invariant() const;
+  HybridSet<R> invariant() const;
   
   /*! \brief The set of discrete modes. (Not available in Python interface) */
   const std::set< DiscreteMode<R> >& modes() const;
@@ -500,7 +500,7 @@ std::ostream& operator<<(std::ostream& os, const HybridAutomaton<R>& ha) {
 template< class R>
 void dot_print(const HybridAutomaton< R >& A);
 
-}
-}
+
+} // namespace Ariadne
 
 #endif /* ARIADNE_HYBRID_AUTOMATON_H */

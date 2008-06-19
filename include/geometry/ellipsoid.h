@@ -35,7 +35,7 @@
 #include "geometry/point.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
     class basic_set_tag;
 
@@ -54,7 +54,7 @@ namespace Ariadne {
      
      private:
       Point<R> _centre;
-      LinearAlgebra::Matrix<R> _bilinear_form;
+      Matrix<R> _bilinear_form;
      
      public:
       //! \name Constructors 
@@ -63,7 +63,7 @@ namespace Ariadne {
       Ellipsoid(size_type n = 0);
     
       /*! \brief Construct from centre and bilinear form. */
-      explicit Ellipsoid(const Point<R>& c, const LinearAlgebra::Matrix<R>& r);
+      explicit Ellipsoid(const Point<R>& c, const Matrix<R>& r);
      
       /*! \brief Construct from a string literal. */
       explicit Ellipsoid(const std::string& s);
@@ -95,7 +95,7 @@ namespace Ariadne {
       const Point<R>& centre() const;
       
       /*! \brief The bilinear form describing axes of the ellipsoid. */
-      const LinearAlgebra::Matrix<R>& bilinear_form() const;
+      const Matrix<R>& bilinear_form() const;
       //@}
       
       //! \name Geometric Operators
@@ -192,8 +192,8 @@ namespace Ariadne {
     std::istream& operator>>(std::istream& is, Ellipsoid<R>& e);
 
 
-  }
-}
+  
+} // namespace Ariadne
 
 #include "ellipsoid.inline.h"
 

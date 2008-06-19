@@ -35,7 +35,7 @@
 #include "geometry/declarations.h"
 
 namespace Ariadne {
-  namespace Evaluation {
+  
 
     /*! \brief Interface for methods subdividing enclosure sets into smaller pieces.
      *  \ingroup EvaluatorInterfaces \ingroup Approximators
@@ -44,7 +44,7 @@ namespace Ariadne {
     class SubdividerInterface 
     { 
       typedef typename ES::real_type R;
-      typedef Geometry::ListSet<ES> ESL;
+      typedef ListSet<ES> ESL;
      public:
       /*! \brief Virtual destructor. */
       virtual ~SubdividerInterface() { }
@@ -62,7 +62,7 @@ namespace Ariadne {
       virtual ESL subdivide(const ES& es, const R& r) const = 0;
     };
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_SUBDIVIDER_INTERFACE_H */

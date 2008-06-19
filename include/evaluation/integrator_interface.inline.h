@@ -27,23 +27,23 @@ namespace Ariadne {
 
 template<class BS>
 BS
-Evaluation::IntegratorInterface<BS>::
-evolution_step(const System::VectorField<R>& f, 
+IntegratorInterface<BS>::
+evolution_step(const VectorField<R>& f, 
                const BS& s,
-               const Numeric::Rational& t1, 
-               const Numeric::Rational& t2, 
-               const Geometry::Box<R>& bb) const
+               const Rational& t1, 
+               const Rational& t2, 
+               const Box<R>& bb) const
 {
   ARIADNE_ASSERT(t2>=t1);
   BS es=this->integration_step(f,s,t1,bb); 
   if(t1==t2) { return es; }
-  else { return this->reachability_step(f,es,Numeric::Rational(t2-t1),bb); }
+  else { return this->reachability_step(f,es,Rational(t2-t1),bb); }
 }
           
 
 template<class R> inline
 std::ostream&
-Evaluation::operator<<(std::ostream& os, const IntegratorInterface<R>& i) 
+operator<<(std::ostream& os, const IntegratorInterface<R>& i) 
 {
   return i.write(os);
 }

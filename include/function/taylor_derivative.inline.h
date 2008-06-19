@@ -32,12 +32,12 @@ namespace Ariadne {
 namespace {
 
 inline size_type compute_polynomial_data_size(size_type rs, size_type as,smoothness_type d) {
-  return rs*Numeric::bin(d+as,as);
+  return rs*bin(d+as,as);
 }
 
-}
+} // namespace
 
-namespace Function { 
+
 template<class X> class TaylorVariableReference { 
  public:
   TaylorVariableReference(TaylorDerivative<X>& td, const size_type& i) : _td(td), _i(i) { };
@@ -48,22 +48,21 @@ template<class X> class TaylorVariableReference {
   TaylorDerivative<X>& _td; const size_type _i;
 };
 
-}
 
 template<class X> inline
-Function::TaylorDerivative<X>::TaylorDerivative()
+TaylorDerivative<X>::TaylorDerivative()
   : _result_size(0), _argument_size(0), _degree(0), _variables() 
 {
 }
 
 template<class X> inline
-Function::TaylorDerivative<X>::TaylorDerivative(size_type r, size_type a, smoothness_type d)
+TaylorDerivative<X>::TaylorDerivative(size_type r, size_type a, smoothness_type d)
   : _result_size(r), _argument_size(a), _degree(d), _variables(r,TaylorVariable<X>(a,d))
 {
 }
 
 template<class X> template<class XX> inline
-Function::TaylorDerivative<X>::TaylorDerivative(size_type r, size_type a, smoothness_type d, const XX* ptr)
+TaylorDerivative<X>::TaylorDerivative(size_type r, size_type a, smoothness_type d, const XX* ptr)
   : _result_size(r), _argument_size(a), _degree(d), _variables(r,TaylorVariable<X>(a,d))
 {
   for(size_type i=0; i!=r; ++i) {
@@ -78,26 +77,26 @@ Function::TaylorDerivative<X>::TaylorDerivative(size_type r, size_type a, smooth
 
 
 template<class X> template<class XX> 
-Function::TaylorDerivative<X>::TaylorDerivative(const TaylorSeries<XX>& ts) 
+TaylorDerivative<X>::TaylorDerivative(const TaylorSeries<XX>& ts) 
   : _result_size(1u), _argument_size(1u), _degree(ts.degree()), _variables(1u,TaylorVariable<X>(ts))
 {
 }
   
 template<class X> template<class XX> 
-Function::TaylorDerivative<X>::TaylorDerivative(const TaylorVariable<XX>& tv) 
+TaylorDerivative<X>::TaylorDerivative(const TaylorVariable<XX>& tv) 
   : _result_size(1u), _argument_size(tv.argument_size()), _degree(tv.degree()), _variables(tv.data())
 {
 }
   
 template<class X> template<class XX> inline
-Function::TaylorDerivative<X>::TaylorDerivative(const TaylorDerivative<XX>& other) 
+TaylorDerivative<X>::TaylorDerivative(const TaylorDerivative<XX>& other) 
   :  _result_size(other.result_size()), _argument_size(other.argument_size()), _degree(other.degree()), _variables(other.variables()) 
 {
 }
   
 template<class X> template<class XX> inline
-Function::TaylorDerivative<X>& 
-Function::TaylorDerivative<X>::operator=(const TaylorDerivative<XX>& other) 
+TaylorDerivative<X>& 
+TaylorDerivative<X>::operator=(const TaylorDerivative<XX>& other) 
 {
   this->_argument_size=other._argument_size;
   this->_degree=other._degree;
@@ -108,7 +107,7 @@ Function::TaylorDerivative<X>::operator=(const TaylorDerivative<XX>& other)
 
 template<class X> template<class XX> inline
 bool 
-Function::TaylorDerivative<X>::operator==(const TaylorDerivative<XX>& other) const
+TaylorDerivative<X>::operator==(const TaylorDerivative<XX>& other) const
 {
   return this->_argument_size==other._argument_size
     && this->_degree==other._degree
@@ -117,7 +116,7 @@ Function::TaylorDerivative<X>::operator==(const TaylorDerivative<XX>& other) con
 
 template<class X> template<class XX> inline
 bool 
-Function::TaylorDerivative<X>::operator!=(const TaylorDerivative<XX>& other) const
+TaylorDerivative<X>::operator!=(const TaylorDerivative<XX>& other) const
 {
   return !(*this==other); 
 }
@@ -127,7 +126,7 @@ Function::TaylorDerivative<X>::operator!=(const TaylorDerivative<XX>& other) con
 
 template<class X> inline
 size_type 
-Function::TaylorDerivative<X>::_increment() const 
+TaylorDerivative<X>::_increment() const 
 { 
   return compute_polynomial_data_size(1u,this->_argument_size,this->_degree); 
 }
@@ -135,56 +134,56 @@ Function::TaylorDerivative<X>::_increment() const
 // Synonym for "result_size" for templated evaluate function
 template<class X> inline
 size_type 
-Function::TaylorDerivative<X>::size() const 
+TaylorDerivative<X>::size() const 
 { 
   return this->_result_size;
 }
 
 template<class X> inline
 size_type 
-Function::TaylorDerivative<X>::result_size() const 
+TaylorDerivative<X>::result_size() const 
 { 
   return this->_result_size;
 }
 
 template<class X> inline
 size_type 
-Function::TaylorDerivative<X>::argument_size() const 
+TaylorDerivative<X>::argument_size() const 
 { 
   return this->_argument_size;
 }
 
 template<class X> inline
 smoothness_type 
-Function::TaylorDerivative<X>::degree() const 
+TaylorDerivative<X>::degree() const 
 { 
   return this->_degree;
 }
 
 template<class X> inline
 const X&
-Function::TaylorDerivative<X>::get(const size_type& i, const MultiIndex& j) const 
+TaylorDerivative<X>::get(const size_type& i, const MultiIndex& j) const 
 { 
   return this->_variables[i]._data[j.position()];
 }
 
 template<class X> inline
-const Function::TaylorVariable<X>&
-Function::TaylorDerivative<X>::get(const size_type& i) const 
+const TaylorVariable<X>&
+TaylorDerivative<X>::get(const size_type& i) const 
 { 
   return this->_variables[i];
 }
 
 template<class X> template<class XX> inline
 void
-Function::TaylorDerivative<X>::set(const size_type& i, const MultiIndex& j, const XX& x)  
+TaylorDerivative<X>::set(const size_type& i, const MultiIndex& j, const XX& x)  
 { 
   this->_variables[i*this->_increment()+j.position()]=x;
 }
 
 template<class X> template<class XX> inline
 void
-Function::TaylorDerivative<X>::set(const size_type& i, const TaylorVariable<XX>& tv)
+TaylorDerivative<X>::set(const size_type& i, const TaylorVariable<XX>& tv)
 { 
   assert(tv.argument_size())==this->_argument_size;
   assert(tv.degree()>=this->_degree);
@@ -195,14 +194,14 @@ Function::TaylorDerivative<X>::set(const size_type& i, const TaylorVariable<XX>&
 /*
 template<class X> inline
 array<X>& 
-Function::TaylorDerivative<X>::data()
+TaylorDerivative<X>::data()
 {
   return this->_variables; 
 }
 
 template<class X> inline
 const array<X>& 
-Function::TaylorDerivative<X>::data() const 
+TaylorDerivative<X>::data() const 
 {
   return this->_variables; 
 }
@@ -210,15 +209,15 @@ Function::TaylorDerivative<X>::data() const
 
 
 template<class X> inline
-Function::TaylorVariable<X>&
-Function::TaylorDerivative<X>::operator[](const size_type& i) 
+TaylorVariable<X>&
+TaylorDerivative<X>::operator[](const size_type& i) 
 { 
   return this->_variables[i];
 }
 
 template<class X> inline
-Function::TaylorVariable<X> const&
-Function::TaylorDerivative<X>::operator[](const size_type& i) const 
+TaylorVariable<X> const&
+TaylorDerivative<X>::operator[](const size_type& i) const 
 { 
   return this->_variables[i];
 }
@@ -239,8 +238,8 @@ Function::TaylorDerivative<X>::operator[](const size_type& i) const
 
 
 template<class X> inline 
-Function::TaylorDerivative<X> 
-Function::min(const TaylorDerivative<X>& x1, const TaylorDerivative<X>& x2) 
+TaylorDerivative<X> 
+min(const TaylorDerivative<X>& x1, const TaylorDerivative<X>& x2) 
 {
   if(x1.value()==x2.value()) {
     ARIADNE_THROW(std::runtime_error,"min(TaylorDerivative x1, TaylorDerivative x2)","x1[0]==x2[0]");
@@ -249,8 +248,8 @@ Function::min(const TaylorDerivative<X>& x1, const TaylorDerivative<X>& x2)
 }
 
 template<class X> inline 
-Function::TaylorDerivative<X> 
-Function::max(const TaylorDerivative<X>& x1,const TaylorDerivative<X>& x2) 
+TaylorDerivative<X> 
+max(const TaylorDerivative<X>& x1,const TaylorDerivative<X>& x2) 
 {
   if(x1.value()==x2.value()) { 
     ARIADNE_THROW(std::runtime_error,"max(TaylorDerivative x1, TaylorDerivative x2)","x1[0]==x2[0]"); 
@@ -259,15 +258,15 @@ Function::max(const TaylorDerivative<X>& x1,const TaylorDerivative<X>& x2)
 }
 
 template<class X> inline
-Function::TaylorDerivative<X> 
-Function::pos(const TaylorDerivative<X>& x)
+TaylorDerivative<X> 
+pos(const TaylorDerivative<X>& x)
 {
   return x;
 }
 
 template<class X> inline
-Function::TaylorDerivative<X> 
-Function::neg(const TaylorDerivative<X>& x)
+TaylorDerivative<X> 
+neg(const TaylorDerivative<X>& x)
 {
   TaylorDerivative<X> y(x.result_size(),x.argument_size(),x.degree());
   for(size_type n=0; n<=y.result_size(); ++n) {
@@ -278,8 +277,8 @@ Function::neg(const TaylorDerivative<X>& x)
 
 
 template<class X> inline
-Function::TaylorDerivative<X> 
-Function::add(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y)
+TaylorDerivative<X> 
+add(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y)
 {
   assert(x.result_size()==y.result_size());
   assert(x.argument_size()==y.argument_size());
@@ -291,8 +290,8 @@ Function::add(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y)
 }
 
 template<class X> inline
-Function::TaylorDerivative<X> 
-Function::sub(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y)
+TaylorDerivative<X> 
+sub(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y)
 {
   assert(x.result_size()==y.result_size());
   assert(x.argument_size()==y.argument_size());
@@ -305,58 +304,58 @@ Function::sub(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y)
 
 
 template<class X> inline
-Function::TaylorDerivative<X> 
-Function::operator-(const TaylorDerivative<X>& x)
+TaylorDerivative<X> 
+operator-(const TaylorDerivative<X>& x)
 {
   return neg(x);
 }
 
 template<class X> inline
-Function::TaylorDerivative<X> 
-Function::operator+(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y)
+TaylorDerivative<X> 
+operator+(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y)
 {
   return add(x,y);
 }
 
 template<class X> inline
-Function::TaylorDerivative<X> 
-Function::operator-(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y)
+TaylorDerivative<X> 
+operator-(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y)
 {
   return sub(x,y);
 }
 
 
 template<class X, class R> inline
-Function::TaylorDerivative<X> 
-Function::operator+(const TaylorDerivative<X>& x, const R& c)
+TaylorDerivative<X> 
+operator+(const TaylorDerivative<X>& x, const R& c)
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
 template<class X, class R> inline
-Function::TaylorDerivative<X> 
-Function::operator+(const R& c, const TaylorDerivative<X>& x)
+TaylorDerivative<X> 
+operator+(const R& c, const TaylorDerivative<X>& x)
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
 template<class X, class R> inline
-Function::TaylorDerivative<X> 
-Function::operator-(const TaylorDerivative<X>& x, const R& c)
+TaylorDerivative<X> 
+operator-(const TaylorDerivative<X>& x, const R& c)
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
 template<class X, class R> inline
-Function::TaylorDerivative<X> 
-Function::operator-(const R& c, const TaylorDerivative<X>& x)
+TaylorDerivative<X> 
+operator-(const R& c, const TaylorDerivative<X>& x)
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
 template<class X, class R> inline
-Function::TaylorDerivative<X> 
-Function::operator*(const TaylorDerivative<X>& x, const R& c)
+TaylorDerivative<X> 
+operator*(const TaylorDerivative<X>& x, const R& c)
 {
   TaylorDerivative<X> y=x;
   X m(c);
@@ -367,8 +366,8 @@ Function::operator*(const TaylorDerivative<X>& x, const R& c)
 }
 
 template<class X, class R> inline
-Function::TaylorDerivative<X> 
-Function::operator*(const R& c, const TaylorDerivative<X>& x)
+TaylorDerivative<X> 
+operator*(const R& c, const TaylorDerivative<X>& x)
 {
   TaylorDerivative<X> y=x;
   X m(c);
@@ -379,8 +378,8 @@ Function::operator*(const R& c, const TaylorDerivative<X>& x)
 }
 
 template<class X, class R> inline
-Function::TaylorDerivative<X> 
-Function::operator/(const TaylorDerivative<X>& x, const R& c)
+TaylorDerivative<X> 
+operator/(const TaylorDerivative<X>& x, const R& c)
 {
   TaylorDerivative<X> y=x;
   for(uint i=0; i!=y.result_size(); ++i) {
@@ -390,4 +389,4 @@ Function::operator/(const TaylorDerivative<X>& x, const R& c)
 }
 
 
-}
+} // namespace Ariadne

@@ -38,7 +38,7 @@
 #include "subdivider_interface.h"
 
 namespace Ariadne {
-  namespace Evaluation {
+  
 
     /*! \brief Methods for subdividing a basic set.
      *  \ingroup Approximation
@@ -52,10 +52,10 @@ namespace Ariadne {
         return new StandardSubdivider<ES>(*this); }
       virtual R radius(const ES& es) const {
         return es.radius(); }
-      virtual Geometry::ListSet<ES> split(const ES& es) const {
-        return Geometry::split(es); }
-      virtual Geometry::ListSet<ES> subdivide(const ES& es, const R& r) const {
-        Geometry::ListSet<ES> result; Geometry::ListSet<ES> working(es); ES set;
+      virtual ListSet<ES> split(const ES& es) const {
+        return split(es); }
+      virtual ListSet<ES> subdivide(const ES& es, const R& r) const {
+        ListSet<ES> result; ListSet<ES> working(es); ES set;
         while(working.size()!=0) { set=working.pop(); 
           if(set.radius()<r) { result.adjoin(set); } else { working.adjoin(this->split(set)); } }
         return result; }
@@ -64,7 +64,7 @@ namespace Ariadne {
 
 
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_STANDARD_SUBDIVIDER_H */

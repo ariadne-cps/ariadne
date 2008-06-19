@@ -29,9 +29,9 @@
 #include "geometry/point.code.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
-    using namespace Numeric;
+    
     
     template class Point<Rational>;
     template class Point< Interval<Rational> >;
@@ -46,5 +46,5 @@ namespace Ariadne {
     template class Point<IntervalMP>;
 #endif
 
-  }
-}
+
+} // namespace Ariadne

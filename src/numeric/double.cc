@@ -29,7 +29,7 @@
 #include "numeric/double.code.h"
 #include "numeric/float64.class.h"
 
-namespace Ariadne { namespace Numeric {
+namespace Ariadne { 
 
-} }
+} 
 

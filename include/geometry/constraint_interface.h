@@ -37,7 +37,7 @@
 #include "linear_algebra/declarations.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
     
     template<class R> class Point;
     template<class R> class Box;
@@ -61,8 +61,8 @@ namespace Ariadne {
     template<class R>
     class ConstraintInterface
     {
-      typedef typename Numeric::traits<R>::arithmetic_type A;
-      typedef typename Numeric::traits<R>::interval_type I;
+      typedef typename traits<R>::arithmetic_type A;
+      typedef typename traits<R>::interval_type I;
      public:
       /*! \brief Destructor. */
       virtual ~ConstraintInterface();
@@ -73,7 +73,7 @@ namespace Ariadne {
       /*! \brief The operation used for comparison. */
       virtual Comparison comparison() const = 0;
       /*! \brief The gradient of the constraint function at a point. */
-      virtual LinearAlgebra::Vector<A> gradient(const Point<A>& pt) const = 0;
+      virtual Vector<A> gradient(const Point<A>& pt) const = 0;
       /*! \brief The smoothness of the constraint function. */
       virtual smoothness_type smoothness() const = 0;
       /*! \brief Write to an output stream. */
@@ -92,7 +92,7 @@ namespace Ariadne {
       return c.write(os);
     }
     
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_CONSTRAINT_INTERFACE_H */

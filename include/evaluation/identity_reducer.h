@@ -31,7 +31,7 @@
 #include "reducer_interface.h"
 
 namespace Ariadne {
-  namespace Evaluation {
+  
 
     /*! \ingroup Approximators
      *  \brief Class for over-approximating an enclosure set by a simpler set. Returns the original set.
@@ -45,7 +45,7 @@ namespace Ariadne {
     };
 
  
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_IDENTITY_REDUCER_H */

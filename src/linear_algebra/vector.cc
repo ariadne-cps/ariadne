@@ -29,9 +29,7 @@
 #include "linear_algebra/vector.code.h"
 
 namespace Ariadne {
-  namespace LinearAlgebra {
-    
-    using namespace Numeric;
+  
     
     #warning "Compiling Rational"
     template class Vector<Rational>;
@@ -48,5 +46,5 @@ namespace Ariadne {
     template class Vector<IntervalMP>;
 #endif
 
-  }
-}
+
+} // namespace Ariadne

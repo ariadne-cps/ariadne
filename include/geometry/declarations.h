@@ -31,7 +31,7 @@
 #include <iosfwd>
 
 namespace Ariadne { 
-  namespace Geometry {
+  
     
     class ExactTag;
     class UniformErrorTag;
@@ -103,7 +103,7 @@ namespace Ariadne {
 
     template<class BS> std::string name();
 
-  }
-}
+
+} // namespace Ariadne
 
 #endif /* ARIADNE_GEOMETRY_DECLARATIONS_H */

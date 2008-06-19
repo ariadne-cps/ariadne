@@ -28,21 +28,21 @@
 namespace Ariadne {
 
 std::ostream& 
-Output::operator<<(std::ostream& os, const Colour& c) 
+operator<<(std::ostream& os, const Colour& c) 
 {
   return os << "Colour( name=" << c.name() << ", r=" << c.red() << ", g=" << c.green() << ", b=" << c.blue() << " )";
 }
 
 
-const Output::Colour Output::transparant=Colour();
+const Colour transparant=Colour();
 
-const Output::Colour Output::white=Colour("white",255,255,255);
-const Output::Colour Output::black=Colour("black",0,0,0);
-const Output::Colour Output::red=Colour("red",255,0,0);
-const Output::Colour Output::green=Colour("green",0,255,0);
-const Output::Colour Output::blue=Colour("blue",0,0,255);
-const Output::Colour Output::yellow=Colour("yellow",255,255,0);
-const Output::Colour Output::cyan=Colour("cyan",0,255,255);
-const Output::Colour Output::magenta=Colour("magenta",255,0,255);
+const Colour white=Colour("white",255,255,255);
+const Colour black=Colour("black",0,0,0);
+const Colour red=Colour("red",255,0,0);
+const Colour green=Colour("green",0,255,0);
+const Colour blue=Colour("blue",0,0,255);
+const Colour yellow=Colour("yellow",255,255,0);
+const Colour cyan=Colour("cyan",0,255,255);
+const Colour magenta=Colour("magenta",255,0,255);
 
 }

@@ -43,14 +43,14 @@
 namespace Ariadne {
 
 template<class R>
-Function::Monomial<R>::Monomial(const std::string& s) 
+Monomial<R>::Monomial(const std::string& s) 
 {
   std::stringstream ss(s);
   ss >> *this;
 }
 
 template<class R>
-Function::PolynomialFunction<R>::PolynomialFunction(const std::string& s) 
+PolynomialFunction<R>::PolynomialFunction(const std::string& s) 
 {
   //std::cerr << "PolynomialFunction(\"" << s << "\")" << std::endl;
   std::stringstream ss(s);
@@ -59,7 +59,7 @@ Function::PolynomialFunction<R>::PolynomialFunction(const std::string& s)
 
 
 template<class R>
-Function::PolynomialModel<R>::PolynomialModel(const std::string& s) 
+PolynomialModel<R>::PolynomialModel(const std::string& s) 
 {
   //std::cerr << "PolynomialModel(\"" << s << "\")" << std::endl;
   std::stringstream ss(s);
@@ -69,7 +69,7 @@ Function::PolynomialModel<R>::PolynomialModel(const std::string& s)
 
 template<class R>
 size_type
-Function::Monomial<R>::degree() const 
+Monomial<R>::degree() const 
 {
   size_type result=0;
   for(size_type i=0; i!=this->argument_size(); ++i) {
@@ -80,14 +80,14 @@ Function::Monomial<R>::degree() const
 
 template<class R>
 void
-Function::Monomial<R>::_resize(const size_type& n) 
+Monomial<R>::_resize(const size_type& n) 
 {
   this->_multi_index.resize(n);
 }
 
 template<class R>
 void
-Function::PolynomialFunction<R>::_sort() 
+PolynomialFunction<R>::_sort() 
 {
   std::sort(this->_terms.begin(), this->_terms.end());
   
@@ -101,7 +101,7 @@ Function::PolynomialFunction<R>::_sort()
 
 template<class R>
 void
-Function::PolynomialFunction<R>::_set_argument_size(const size_type& n) 
+PolynomialFunction<R>::_set_argument_size(const size_type& n) 
 {
   this->_argument_size=n;
   for(size_type i=0; i!=this->_terms.size(); ++i) {
@@ -111,7 +111,7 @@ Function::PolynomialFunction<R>::_set_argument_size(const size_type& n)
 
 template<class R>
 size_type
-Function::PolynomialFunction<R>::_compute_maximum_term_size() const
+PolynomialFunction<R>::_compute_maximum_term_size() const
 {
   size_type result=0;
   for(size_type i=0; i!=this->_terms.size(); ++i) {
@@ -123,7 +123,7 @@ Function::PolynomialFunction<R>::_compute_maximum_term_size() const
 
 template<class R>
 void
-Function::PolynomialModel<R>::_set_argument_size(const size_type& n) 
+PolynomialModel<R>::_set_argument_size(const size_type& n) 
 {
   this->_argument_size=n;
   for(size_type i=0; i!=this->_components.size(); ++i) {
@@ -133,7 +133,7 @@ Function::PolynomialModel<R>::_set_argument_size(const size_type& n)
 
 template<class R>
 size_type
-Function::PolynomialModel<R>::_compute_maximum_component_size() const
+PolynomialModel<R>::_compute_maximum_component_size() const
 {
   size_type result=0;
   for(size_type i=0; i!=this->_components.size(); ++i) {
@@ -146,7 +146,7 @@ Function::PolynomialModel<R>::_compute_maximum_component_size() const
 
 template<class R> 
 bool 
-Function::operator<(const Monomial<R>& m1, const Monomial<R>& m2)
+operator<(const Monomial<R>& m1, const Monomial<R>& m2)
 {
   if(m1.degree() == m2.degree()) { 
     size_type max_arg_dim=std::max(m1.argument_size(),m2.argument_size());
@@ -169,8 +169,8 @@ Function::operator<(const Monomial<R>& m1, const Monomial<R>& m2)
 
 
 template<class R>
-typename Function::Monomial<R>::F
-Function::Monomial<R>::evaluate(const LinearAlgebra::Vector<F>& s) const 
+typename Monomial<R>::F
+Monomial<R>::evaluate(const Vector<F>& s) const 
 {
   ARIADNE_CHECK_ARGUMENT_SIZE(*this,s,"Monomial<R>::evaluate(Point<R>)");
   result_type result=_coefficient;
@@ -183,10 +183,10 @@ Function::Monomial<R>::evaluate(const LinearAlgebra::Vector<F>& s) const
 
 
 template<class R>
-typename Function::PolynomialFunction<R>::F
-Function::PolynomialFunction<R>::evaluate(const LinearAlgebra::Vector<F>& s) const 
+typename PolynomialFunction<R>::F
+PolynomialFunction<R>::evaluate(const Vector<F>& s) const 
 {
-  //std::cerr << "PolynomialFunction<R>::evaluate(const LinearAlgebra::Vector<R>& s) const " << std::endl;
+  //std::cerr << "PolynomialFunction<R>::evaluate(const Vector<R>& s) const " << std::endl;
   ARIADNE_CHECK_ARGUMENT_SIZE(*this,s,"PolynomialFunction<R>::evaluate(Point<R>)");
   F result=0;
   for(size_type j=0; j!=_terms.size(); ++j) {
@@ -198,11 +198,11 @@ Function::PolynomialFunction<R>::evaluate(const LinearAlgebra::Vector<F>& s) con
 
 
 template<class R>
-LinearAlgebra::Vector<typename Function::PolynomialModel<R>::F>
-Function::PolynomialModel<R>::evaluate(const LinearAlgebra::Vector<F>& s) const 
+Vector<typename PolynomialModel<R>::F>
+PolynomialModel<R>::evaluate(const Vector<F>& s) const 
 {
   ARIADNE_CHECK_ARGUMENT_SIZE(*this,s,"PolynomialModel<R>::apply(Point<R>)");
-  LinearAlgebra::Vector<F> result(this->result_size());
+  Vector<F> result(this->result_size());
   for(size_type i=0; i!=this->result_size(); ++i) {
     result[i] = _components[i].evaluate(s);
   }
@@ -211,8 +211,8 @@ Function::PolynomialModel<R>::evaluate(const LinearAlgebra::Vector<F>& s) const
 
 
 template<class R>
-LinearAlgebra::Matrix< typename Function::PolynomialModel<R>::F >
-Function::PolynomialModel<R>::jacobian(const LinearAlgebra::Vector<F>& s) const 
+Matrix< typename PolynomialModel<R>::F >
+PolynomialModel<R>::jacobian(const Vector<F>& s) const 
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
@@ -224,7 +224,7 @@ Function::PolynomialModel<R>::jacobian(const LinearAlgebra::Vector<F>& s) const
 
 template<class R>
 std::ostream&
-Function::Monomial<R>::write(std::ostream& os) const
+Monomial<R>::write(std::ostream& os) const
 {
   const Monomial<R>& m=*this;
   bool leading_term=true;
@@ -264,7 +264,7 @@ Function::Monomial<R>::write(std::ostream& os) const
 
 template<class R>
 std::ostream&
-Function::PolynomialFunction<R>::write(std::ostream& os) const
+PolynomialFunction<R>::write(std::ostream& os) const
 {
   const PolynomialFunction<R>& p=*this;
   if(p.number_of_terms()==0) {
@@ -289,7 +289,7 @@ Function::PolynomialFunction<R>::write(std::ostream& os) const
 
 template<class R>
 std::ostream&
-Function::PolynomialModel<R>::write(std::ostream& os) const
+PolynomialModel<R>::write(std::ostream& os) const
 {
   const PolynomialModel<R>& pm=*this;
   return os << pm._components;
@@ -300,7 +300,7 @@ Function::PolynomialModel<R>::write(std::ostream& os) const
 
 template<class R>
 std::istream&
-Function::Monomial<R>::read(std::istream& is)
+Monomial<R>::read(std::istream& is)
 {
   Monomial<R>& m=*this;
   R a;
@@ -372,7 +372,7 @@ Function::Monomial<R>::read(std::istream& is)
 
 template<class R>
 std::istream&
-Function::PolynomialFunction<R>::read(std::istream& is)
+PolynomialFunction<R>::read(std::istream& is)
 {
   PolynomialFunction<R>& p=*this;
   p=PolynomialFunction<R>(0);
@@ -398,7 +398,7 @@ Function::PolynomialFunction<R>::read(std::istream& is)
 
 template<class R>
 std::istream&
-Function::PolynomialModel<R>::read(std::istream& is)
+PolynomialModel<R>::read(std::istream& is)
 {
   PolynomialModel<R>& pm=*this;
   std::vector< PolynomialFunction<R> > vec;

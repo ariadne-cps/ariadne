@@ -30,7 +30,7 @@
 namespace Ariadne {
 
 template<class R>
-Evaluation::EvolutionParameters<R>::EvolutionParameters() 
+EvolutionParameters<R>::EvolutionParameters() 
   : _maximum_number_of_steps(255),
     _lock_to_grid_steps(1),
     _minimum_step_size(0),
@@ -51,8 +51,8 @@ Evaluation::EvolutionParameters<R>::EvolutionParameters()
 
 
 template<class R>
-Evaluation::EvolutionParameters<R>*
-Evaluation::EvolutionParameters<R>::clone() const
+EvolutionParameters<R>*
+EvolutionParameters<R>::clone() const
 {
   return new EvolutionParameters<R>(*this);
 }
@@ -60,7 +60,7 @@ Evaluation::EvolutionParameters<R>::clone() const
 
 template<class R>
 size_type
-Evaluation::EvolutionParameters<R>::maximum_number_of_steps() const
+EvolutionParameters<R>::maximum_number_of_steps() const
 {
   return this->_maximum_number_of_steps;
 }
@@ -68,7 +68,7 @@ Evaluation::EvolutionParameters<R>::maximum_number_of_steps() const
 
 template<class R>
 size_type
-Evaluation::EvolutionParameters<R>::lock_to_grid_steps() const
+EvolutionParameters<R>::lock_to_grid_steps() const
 {
   return this->_lock_to_grid_steps;
 }
@@ -76,7 +76,7 @@ Evaluation::EvolutionParameters<R>::lock_to_grid_steps() const
 
 template<class R>
 time_type
-Evaluation::EvolutionParameters<R>::minimum_step_size() const
+EvolutionParameters<R>::minimum_step_size() const
 {
   return this->_minimum_step_size;
 }
@@ -84,7 +84,7 @@ Evaluation::EvolutionParameters<R>::minimum_step_size() const
 
 template<class R>
 time_type
-Evaluation::EvolutionParameters<R>::maximum_step_size() const 
+EvolutionParameters<R>::maximum_step_size() const 
 {
   return this->_maximum_step_size;
 }
@@ -92,7 +92,7 @@ Evaluation::EvolutionParameters<R>::maximum_step_size() const
 
 template<class R>
 time_type
-Evaluation::EvolutionParameters<R>::lock_to_grid_time() const 
+EvolutionParameters<R>::lock_to_grid_time() const 
 {
   return this->_lock_to_grid_time;
 }
@@ -100,7 +100,7 @@ Evaluation::EvolutionParameters<R>::lock_to_grid_time() const
 
 template<class R>
 R
-Evaluation::EvolutionParameters<R>::minimum_basic_set_radius() const
+EvolutionParameters<R>::minimum_basic_set_radius() const
 {
   return this->_minimum_basic_set_radius;
 }
@@ -108,7 +108,7 @@ Evaluation::EvolutionParameters<R>::minimum_basic_set_radius() const
 
 template<class R>
 R
-Evaluation::EvolutionParameters<R>::maximum_basic_set_radius() const 
+EvolutionParameters<R>::maximum_basic_set_radius() const 
 {
   return this->_maximum_basic_set_radius;
 }
@@ -116,7 +116,7 @@ Evaluation::EvolutionParameters<R>::maximum_basic_set_radius() const
 
 template<class R>
 R
-Evaluation::EvolutionParameters<R>::grid_length() const 
+EvolutionParameters<R>::grid_length() const 
 {
   return this->_grid_length;
 }
@@ -124,28 +124,28 @@ Evaluation::EvolutionParameters<R>::grid_length() const
 
 template<class R>
 R
-Evaluation::EvolutionParameters<R>::argument_grid_length() const 
+EvolutionParameters<R>::argument_grid_length() const 
 {
   return this->_argument_grid_length;
 }
 
 template<class R>
 R
-Evaluation::EvolutionParameters<R>::result_grid_length() const 
+EvolutionParameters<R>::result_grid_length() const 
 {
   return this->_result_grid_length;
 }
 
 template<class R>
 R
-Evaluation::EvolutionParameters<R>::bounding_domain_size() const 
+EvolutionParameters<R>::bounding_domain_size() const 
 {
   return this->_bounding_domain_size;
 }
 
 template<class R>
 uint
-Evaluation::EvolutionParameters<R>::verbosity() const 
+EvolutionParameters<R>::verbosity() const 
 {
   return this->_verbosity;
 }
@@ -154,56 +154,56 @@ Evaluation::EvolutionParameters<R>::verbosity() const
 
 
 template<class R>
-Geometry::Box<R>
-Evaluation::EvolutionParameters<R>::bounding_domain(dimension_type d) const 
+Box<R>
+EvolutionParameters<R>::bounding_domain(dimension_type d) const 
 {
-  return Geometry::Box<R>(LinearAlgebra::Vector< Numeric::Interval<R> >(d,Numeric::Interval<R>(-1,1)*this->bounding_domain_size()));
+  return Box<R>(Vector< Interval<R> >(d,Interval<R>(-1,1)*this->bounding_domain_size()));
 }
 
 
 template<class R>
-Geometry::HybridSet<R>
-Evaluation::EvolutionParameters<R>::hybrid_bounding_domain(const Geometry::HybridSpace& loc) const
+HybridSet<R>
+EvolutionParameters<R>::hybrid_bounding_domain(const HybridSpace& loc) const
 {
   if(this->_hybrid_bounding_domain.locations() == loc) {
     return this->_hybrid_bounding_domain;
   }
-	Geometry::HybridSet<R> result;
-	for(typename Geometry::HybridSpace::const_iterator loc_iter=loc.begin();
+	HybridSet<R> result;
+	for(typename HybridSpace::const_iterator loc_iter=loc.begin();
 			loc_iter!=loc.end(); ++loc_iter)
 	{
-		result.new_location(loc_iter->discrete_state(),Geometry::RectangularSet<R>(this->bounding_domain(loc_iter->dimension())));
+		result.new_location(loc_iter->discrete_state(),RectangularSet<R>(this->bounding_domain(loc_iter->dimension())));
 	}
 	return result;
 }
 
 
 template<class R>
-Geometry::Grid<R>
-Evaluation::EvolutionParameters<R>::grid(dimension_type d) const 
+Grid<R>
+EvolutionParameters<R>::grid(dimension_type d) const 
 {
   if(this->_grid.dimension() == d) {
     return this->_grid;
   }
-  return Geometry::Grid<R>(LinearAlgebra::Vector<R>(d,this->_grid_length));
+  return Grid<R>(Vector<R>(d,this->_grid_length));
 }
 
 
 template<class R>
-Geometry::FiniteGrid<R>
-Evaluation::EvolutionParameters<R>::finite_grid(dimension_type d) const 
+FiniteGrid<R>
+EvolutionParameters<R>::finite_grid(dimension_type d) const 
 {
-  return Geometry::FiniteGrid<R>(this->grid(d),this->bounding_domain(d));
+  return FiniteGrid<R>(this->grid(d),this->bounding_domain(d));
 }
 
 template<class R>
-Geometry::HybridGrid<R>
-Evaluation::EvolutionParameters<R>::hybrid_grid(const Geometry::HybridSpace& loc) const 
+HybridGrid<R>
+EvolutionParameters<R>::hybrid_grid(const HybridSpace& loc) const 
 {
   if(this->_hybrid_grid.locations() == loc) {
     return this->_hybrid_grid;
   }
-  return Geometry::HybridGrid<R>(loc,this->_grid_length);
+  return HybridGrid<R>(loc,this->_grid_length);
 }
 
 
@@ -211,7 +211,7 @@ Evaluation::EvolutionParameters<R>::hybrid_grid(const Geometry::HybridSpace& loc
 
 template<class R>
 void
-Evaluation::EvolutionParameters<R>::set_maximum_number_of_steps(size_type x) 
+EvolutionParameters<R>::set_maximum_number_of_steps(size_type x) 
 {
   this->_maximum_number_of_steps=x;
 }
@@ -219,7 +219,7 @@ Evaluation::EvolutionParameters<R>::set_maximum_number_of_steps(size_type x)
 
 template<class R>
 void
-Evaluation::EvolutionParameters<R>::set_lock_to_grid_steps(size_type x) 
+EvolutionParameters<R>::set_lock_to_grid_steps(size_type x) 
 {
   this->_lock_to_grid_steps=x;
 }
@@ -227,28 +227,28 @@ Evaluation::EvolutionParameters<R>::set_lock_to_grid_steps(size_type x)
 
 template<class R>
 void
-Evaluation::EvolutionParameters<R>::set_minimum_step_size(time_type x) 
+EvolutionParameters<R>::set_minimum_step_size(time_type x) 
 {
   this->_minimum_step_size=x;
 }
 
 template<class R>
 void
-Evaluation::EvolutionParameters<R>::set_minimum_step_size(double x) 
+EvolutionParameters<R>::set_minimum_step_size(double x) 
 {
   this->_minimum_step_size=x;
 }
 
 template<class R>
 void
-Evaluation::EvolutionParameters<R>::set_maximum_step_size(Numeric::Rational x)  
+EvolutionParameters<R>::set_maximum_step_size(Rational x)  
 {
   this->_maximum_step_size=x;
 }
 
 template<class R>
 void
-Evaluation::EvolutionParameters<R>::set_maximum_step_size(double x)  
+EvolutionParameters<R>::set_maximum_step_size(double x)  
 {
   this->_maximum_step_size=x;
 }
@@ -256,14 +256,14 @@ Evaluation::EvolutionParameters<R>::set_maximum_step_size(double x)
 
 template<class R>
 void
-Evaluation::EvolutionParameters<R>::set_lock_to_grid_time(time_type x)  
+EvolutionParameters<R>::set_lock_to_grid_time(time_type x)  
 {
   this->_lock_to_grid_time=x;
 }
 
 template<class R>
 void
-Evaluation::EvolutionParameters<R>::set_lock_to_grid_time(double x)  
+EvolutionParameters<R>::set_lock_to_grid_time(double x)  
 {
   this->_lock_to_grid_time=x;
 }
@@ -271,14 +271,14 @@ Evaluation::EvolutionParameters<R>::set_lock_to_grid_time(double x)
 
 template<class R>
 void
-Evaluation::EvolutionParameters<R>::set_minimum_basic_set_radius(R x) 
+EvolutionParameters<R>::set_minimum_basic_set_radius(R x) 
 {
   this->_minimum_basic_set_radius=x;
 }
 
 template<class R>
 void
-Evaluation::EvolutionParameters<R>::set_minimum_basic_set_radius(double x) 
+EvolutionParameters<R>::set_minimum_basic_set_radius(double x) 
 {
   this->_minimum_basic_set_radius=x;
 }
@@ -286,14 +286,14 @@ Evaluation::EvolutionParameters<R>::set_minimum_basic_set_radius(double x)
 
 template<class R>
 void
-Evaluation::EvolutionParameters<R>::set_maximum_basic_set_radius(R x)  
+EvolutionParameters<R>::set_maximum_basic_set_radius(R x)  
 {
   this->_maximum_basic_set_radius=x;
 }
 
 template<class R>
 void
-Evaluation::EvolutionParameters<R>::set_maximum_basic_set_radius(double x)  
+EvolutionParameters<R>::set_maximum_basic_set_radius(double x)  
 {
   this->_maximum_basic_set_radius=x;
 }
@@ -301,14 +301,14 @@ Evaluation::EvolutionParameters<R>::set_maximum_basic_set_radius(double x)
 
 template<class R>
 void
-Evaluation::EvolutionParameters<R>::set_grid_length(double x)  
+EvolutionParameters<R>::set_grid_length(double x)  
 {
   this->_grid_length=x;
 }
 
 template<class R>
 void
-Evaluation::EvolutionParameters<R>::set_grid_length(R x)  
+EvolutionParameters<R>::set_grid_length(R x)  
 {
   this->_grid_length=x;
 }
@@ -316,14 +316,14 @@ Evaluation::EvolutionParameters<R>::set_grid_length(R x)
 
 template<class R>
 void
-Evaluation::EvolutionParameters<R>::set_argument_grid_length(R x)  
+EvolutionParameters<R>::set_argument_grid_length(R x)  
 {
   this->_argument_grid_length=x;
 }
 
 template<class R>
 void
-Evaluation::EvolutionParameters<R>::set_argument_grid_length(double x)  
+EvolutionParameters<R>::set_argument_grid_length(double x)  
 {
   this->_argument_grid_length=x;
 }
@@ -331,14 +331,14 @@ Evaluation::EvolutionParameters<R>::set_argument_grid_length(double x)
 
 template<class R>
 void
-Evaluation::EvolutionParameters<R>::set_result_grid_length(R x) 
+EvolutionParameters<R>::set_result_grid_length(R x) 
 {
   this->_result_grid_length=x;
 }
 
 template<class R>
 void
-Evaluation::EvolutionParameters<R>::set_result_grid_length(double x) 
+EvolutionParameters<R>::set_result_grid_length(double x) 
 {
   this->_result_grid_length=x;
 }
@@ -346,14 +346,14 @@ Evaluation::EvolutionParameters<R>::set_result_grid_length(double x)
 
 template<class R> 
 void
-Evaluation::EvolutionParameters<R>::set_bounding_domain_size(R x)  
+EvolutionParameters<R>::set_bounding_domain_size(R x)  
 {
   this->_bounding_domain_size=x;
 }
 
 template<class R>
 void
-Evaluation::EvolutionParameters<R>::set_bounding_domain_size(double x)  
+EvolutionParameters<R>::set_bounding_domain_size(double x)  
 {
   this->_bounding_domain_size=x;
 }
@@ -362,7 +362,7 @@ Evaluation::EvolutionParameters<R>::set_bounding_domain_size(double x)
 
 template<class R>
 void
-Evaluation::EvolutionParameters<R>::set_verbosity(uint v)  
+EvolutionParameters<R>::set_verbosity(uint v)  
 {
   this->_verbosity=v;
 }
@@ -371,7 +371,7 @@ Evaluation::EvolutionParameters<R>::set_verbosity(uint v)
 
 template<class R>
 void
-  Evaluation::EvolutionParameters<R>::set_grid(Geometry::Grid<R> grid)  
+  EvolutionParameters<R>::set_grid(Grid<R> grid)  
 {
   this->_grid=grid;
 }
@@ -380,7 +380,7 @@ void
 
 template<class R>
 void
-  Evaluation::EvolutionParameters<R>::set_hybrid_grid(Geometry::HybridGrid<R> hgrid)  
+  EvolutionParameters<R>::set_hybrid_grid(HybridGrid<R> hgrid)  
 {
   this->_hybrid_grid=hgrid;
 }
@@ -388,7 +388,7 @@ void
 
 template<class R>
 void
-  Evaluation::EvolutionParameters<R>::set_hybrid_bounding_domain(Geometry::HybridSet<R> hdom)  
+  EvolutionParameters<R>::set_hybrid_bounding_domain(HybridSet<R> hdom)  
 {
   this->_hybrid_bounding_domain=hdom;
 }
@@ -397,7 +397,7 @@ void
 
 template<class R>
 std::ostream&
-Evaluation::EvolutionParameters<R>::write(std::ostream& os) const
+EvolutionParameters<R>::write(std::ostream& os) const
 {
   os << "EvolutionParameters"
      << "(\n  maximum_number_of_steps=" << this->_maximum_number_of_steps

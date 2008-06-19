@@ -35,9 +35,6 @@
 #include "test/test.h"
 
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::LinearAlgebra;
-using namespace Ariadne::Geometry;
 using namespace std;
 
 
@@ -45,12 +42,12 @@ using namespace std;
 template<class R> class TestDdconv {
  public:
 	void test_ddconv() {
-		typedef typename Numeric::traits<R>::arithmetic_type F;
+		typedef typename traits<R>::arithmetic_type F;
 		
-		std::vector< LinearAlgebra::Vector<F> > constraints;
-		std::vector< LinearAlgebra::Vector<F> > generators;
-		std::vector< LinearAlgebra::Vector<F> > new_constraints;
-		std::vector< LinearAlgebra::Vector<F> > new_generators;
+		std::vector< Vector<F> > constraints;
+		std::vector< Vector<F> > generators;
+		std::vector< Vector<F> > new_constraints;
+		std::vector< Vector<F> > new_generators;
 		constraints.push_back(Vector<F>(Vector<R>("[1,0,-1]")));
 		constraints.push_back(Vector<F>(Vector<R>("[2,-1,2]")));
 		constraints.push_back(Vector<F>(Vector<R>("[-1,1,0]")));

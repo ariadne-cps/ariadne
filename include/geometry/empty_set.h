@@ -38,7 +38,7 @@
 
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
     //! \ingroup ExactSet
     /*! \brief A class for empty sets of a given dimension conforming to the Set interface. 
@@ -83,7 +83,7 @@ namespace Ariadne {
       /*! \brief A rectangle containing the set. Returns the default rectangle of the given dimension. */
       virtual tribool bounded() const { return true; }
       /*! \brief A rectangle containing the set. Returns the default rectangle of the given dimension. */
-      virtual Box<R> bounding_box() const { return Box<R>(array< Numeric::Interval<R> >(this->dimension())); }
+      virtual Box<R> bounding_box() const { return Box<R>(array< Interval<R> >(this->dimension())); }
 
 
       /*! \brief Write to an output stream. 
@@ -94,8 +94,8 @@ namespace Ariadne {
       dimension_type _dimension;
     };
     
-  }
-}
+  
+} // namespace Ariadne
 
 
 #endif /* ARIADNE_EMPTY_SET_H */

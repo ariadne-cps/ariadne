@@ -33,9 +33,6 @@
 using namespace boost::python;
 
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::LinearAlgebra;
-using namespace Ariadne::Function;
 using namespace Ariadne::Python;
 
 template<class R>
@@ -43,7 +40,7 @@ class FunctionWrapper
   : public FunctionInterface<R>
   , public wrapper< FunctionInterface<R> >
 {
-  typedef typename Numeric::traits<R>::arithmetic_type F;
+  typedef typename traits<R>::arithmetic_type F;
   virtual FunctionInterface<R>* clone() const { return this->get_override("clone")(); };
   virtual std::string name() const { return this->get_override("name")(); }
   virtual size_type result_size() const { return this->get_override("result_size")(); }

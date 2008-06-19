@@ -33,8 +33,8 @@ namespace Ariadne {
 
 
 template<class R> inline
-Geometry::HybridSpace
-Geometry::HybridGrid<R>::locations() const 
+HybridSpace
+HybridGrid<R>::locations() const 
 { 
   HybridSpace result;
   for(locations_const_iterator loc_iter=this->locations_begin(); 
@@ -49,12 +49,12 @@ Geometry::HybridGrid<R>::locations() const
 
 
 template<class S> inline
-Geometry::HybridDenotableSet<S>::~HybridDenotableSet() 
+HybridDenotableSet<S>::~HybridDenotableSet() 
 {
 }
   
 template<class S> inline
-Geometry::HybridDenotableSet<S>::HybridDenotableSet() 
+HybridDenotableSet<S>::HybridDenotableSet() 
   : _component_sets()
 {
 }
@@ -62,7 +62,7 @@ Geometry::HybridDenotableSet<S>::HybridDenotableSet()
   
  
 template<class S> inline
-Geometry::HybridDenotableSet<S>::HybridDenotableSet(const HybridSpace& locations)
+HybridDenotableSet<S>::HybridDenotableSet(const HybridSpace& locations)
   : _component_sets() 
 {
   for(HybridSpace::const_iterator loc_iter=locations.begin();
@@ -76,7 +76,7 @@ Geometry::HybridDenotableSet<S>::HybridDenotableSet(const HybridSpace& locations
 
 
 template<class S> inline
-Geometry::HybridDenotableSet<S>::HybridDenotableSet(const HybridDenotableSet<S>& hs)
+HybridDenotableSet<S>::HybridDenotableSet(const HybridDenotableSet<S>& hs)
   : _component_sets() 
 {
   for(typename HybridDenotableSet<S>::locations_const_iterator loc_iter=hs.locations_begin();
@@ -90,8 +90,8 @@ Geometry::HybridDenotableSet<S>::HybridDenotableSet(const HybridDenotableSet<S>&
 
 
 template<class S> inline
-Geometry::HybridDenotableSet<S>&
-Geometry::HybridDenotableSet<S>::operator=(const HybridDenotableSet<S>& hs)
+HybridDenotableSet<S>&
+HybridDenotableSet<S>::operator=(const HybridDenotableSet<S>& hs)
 {
   if(this!=&hs) {
     this->_component_sets.clear();
@@ -108,7 +108,7 @@ Geometry::HybridDenotableSet<S>::operator=(const HybridDenotableSet<S>& hs)
 
 
 template<class S> template<class S1> inline
-Geometry::HybridDenotableSet<S>::HybridDenotableSet(const HybridDenotableSet<S1>& hs)
+HybridDenotableSet<S>::HybridDenotableSet(const HybridDenotableSet<S1>& hs)
   : _component_sets() 
 {
   for(typename HybridDenotableSet<S1>::locations_const_iterator loc_iter=hs.locations_begin();
@@ -124,7 +124,7 @@ Geometry::HybridDenotableSet<S>::HybridDenotableSet(const HybridDenotableSet<S1>
 
 template<class DS> inline
 DS&
-Geometry::HybridDenotableSet<DS>::new_location(DiscreteState q, dimension_type d)
+HybridDenotableSet<DS>::new_location(DiscreteState q, dimension_type d)
 {
   ARIADNE_CHECK_NEW_LOCATION(*this,q,"DS& HybridDenotableSet<DS>::new_location(DiscreteState q, dimension_type d)");
   this->_component_sets.insert(std::make_pair(q,DS(d)));
@@ -134,7 +134,7 @@ Geometry::HybridDenotableSet<DS>::new_location(DiscreteState q, dimension_type d
 
 template<class DS> inline
 DS&
-Geometry::HybridDenotableSet<DS>::new_location(DiscreteState q, const DS& s)
+HybridDenotableSet<DS>::new_location(DiscreteState q, const DS& s)
 {
   ARIADNE_CHECK_NEW_LOCATION(*this,q,"DS& HybridDenotableSet<DS>::new_location(DiscreteState q, S t)");
   this->_component_sets.insert(std::make_pair(q,s));
@@ -145,7 +145,7 @@ Geometry::HybridDenotableSet<DS>::new_location(DiscreteState q, const DS& s)
 
 template<class DS> template<class T> inline
 DS&
-Geometry::HybridDenotableSet<DS>::new_location(DiscreteState q, const T& t)
+HybridDenotableSet<DS>::new_location(DiscreteState q, const T& t)
 {
   ARIADNE_CHECK_NEW_LOCATION(*this,q,"DS& HybridDenotableSet<DS>::new_location<T>(DiscreteState q, T t)");
   this->_component_sets.insert(std::make_pair(q,static_cast<DS>(t)));
@@ -156,7 +156,7 @@ Geometry::HybridDenotableSet<DS>::new_location(DiscreteState q, const T& t)
 
 template<class DS> template<class T1, class T2> inline
 DS&
-Geometry::HybridDenotableSet<DS>::new_location(DiscreteState q, const T1& t1, const T2& t2)
+HybridDenotableSet<DS>::new_location(DiscreteState q, const T1& t1, const T2& t2)
 {
   ARIADNE_CHECK_NEW_LOCATION(*this,q,"DS& HybridDenotableSet<DS>::new_location<T>(DiscreteState q, T1 t1, T2 t2)");
   this->_component_sets.insert(std::make_pair(q,static_cast<DS>(t1,t2)));
@@ -167,8 +167,8 @@ Geometry::HybridDenotableSet<DS>::new_location(DiscreteState q, const T1& t1, co
 
 
 template<class DS> inline
-Geometry::HybridSpace
-Geometry::HybridDenotableSet<DS>::locations() const 
+HybridSpace
+HybridDenotableSet<DS>::locations() const 
 { 
   HybridSpace result;
   for(locations_const_iterator loc_iter=this->locations_begin(); 
@@ -181,8 +181,8 @@ Geometry::HybridDenotableSet<DS>::locations() const
 
 
 template<class DS> inline
-Geometry::HybridSpace
-Geometry::HybridDenotableSet<DS>::space() const 
+HybridSpace
+HybridDenotableSet<DS>::space() const 
 { 
   return this->locations();
 }
@@ -192,7 +192,7 @@ Geometry::HybridDenotableSet<DS>::space() const
 
 template<class DS> inline
 size_type 
-Geometry::HybridDenotableSet<DS>::number_of_locations() const 
+HybridDenotableSet<DS>::number_of_locations() const 
 { 
   return _component_sets.size(); 
 }
@@ -200,7 +200,7 @@ Geometry::HybridDenotableSet<DS>::number_of_locations() const
 
 template<class DS> inline
 bool 
-Geometry::HybridDenotableSet<DS>::has_location(DiscreteState q) const
+HybridDenotableSet<DS>::has_location(DiscreteState q) const
 { 
   return this->_component_sets.find(q)!=this->_component_sets.end();
 }
@@ -208,7 +208,7 @@ Geometry::HybridDenotableSet<DS>::has_location(DiscreteState q) const
 
 template<class DS> inline
 DS& 
-Geometry::HybridDenotableSet<DS>::operator[](DiscreteState q)
+HybridDenotableSet<DS>::operator[](DiscreteState q)
 { 
   if(!this->has_location(q)) {
     ARIADNE_THROW(InvalidLocation,"DS& HybridDenotableSet::operator[](DiscreteState q)","this->locations()="<<this->locations()<<", q="<<q);
@@ -219,7 +219,7 @@ Geometry::HybridDenotableSet<DS>::operator[](DiscreteState q)
 
 template<class DS> inline  
 const DS& 
-Geometry::HybridDenotableSet<DS>::operator[](DiscreteState q) const 
+HybridDenotableSet<DS>::operator[](DiscreteState q) const 
 { 
   if(!this->has_location(q)) {
     ARIADNE_THROW(InvalidLocation,"DS HybridDenotableSet::operator[](DiscreteState q) const","this->locations()="<<this->locations()<<", q="<<q);
@@ -230,7 +230,7 @@ Geometry::HybridDenotableSet<DS>::operator[](DiscreteState q) const
 
 template<class DS> inline
 size_type
-Geometry::HybridDenotableSet<DS>::size() const
+HybridDenotableSet<DS>::size() const
 {
   size_type result=0;
   for(typename HybridDenotableSet<DS>::locations_const_iterator loc_iter=this->locations_begin(); 
@@ -244,7 +244,7 @@ Geometry::HybridDenotableSet<DS>::size() const
 
 template<class DS> inline  
 void 
-Geometry::HybridDenotableSet<DS>::clear()
+HybridDenotableSet<DS>::clear()
 { 
   for(locations_iterator loc_iter=this->locations_begin(); 
       loc_iter!=this->locations_end(); ++loc_iter) 
@@ -256,7 +256,7 @@ Geometry::HybridDenotableSet<DS>::clear()
 
 template<class DS> inline  
 tribool 
-Geometry::HybridDenotableSet<DS>::empty() const 
+HybridDenotableSet<DS>::empty() const 
 { 
   tribool result=true; 
   for(locations_const_iterator loc_iter=this->locations_begin(); loc_iter!=this->locations_end(); ++loc_iter) {
@@ -271,7 +271,7 @@ Geometry::HybridDenotableSet<DS>::empty() const
 
 template<class DS> inline  
 tribool 
-Geometry::HybridDenotableSet<DS>::bounded() const 
+HybridDenotableSet<DS>::bounded() const 
 { 
   tribool result=true; 
   for(locations_const_iterator loc_iter=this->locations_begin(); loc_iter!=this->locations_end(); ++loc_iter) {
@@ -286,7 +286,7 @@ Geometry::HybridDenotableSet<DS>::bounded() const
 
 template<class DS> template<class T> inline  
 void 
-Geometry::HybridDenotableSet<DS>::adjoin(DiscreteState q, const T& t) 
+HybridDenotableSet<DS>::adjoin(DiscreteState q, const T& t) 
 {
   ARIADNE_CHECK_LOCATION(*this,q,"HybridDenotableSet<DS>::adjoin<T>(DiscreteState q, T t)");
   (*this)[q].adjoin(t);
@@ -294,7 +294,7 @@ Geometry::HybridDenotableSet<DS>::adjoin(DiscreteState q, const T& t)
 
 template<class DS> template<class T> inline  
 void 
-Geometry::HybridDenotableSet<DS>::adjoin(const std::pair<DiscreteState,T>& pair)
+HybridDenotableSet<DS>::adjoin(const std::pair<DiscreteState,T>& pair)
 {
   ARIADNE_CHECK_LOCATION(*this,pair.first,"HybridDenotableSet<DS>::adjoin<T>(pair<DS,T>)")
   (*this)[pair.first].adjoin(pair.second);
@@ -303,15 +303,15 @@ Geometry::HybridDenotableSet<DS>::adjoin(const std::pair<DiscreteState,T>& pair)
 
 
 template<class DS>inline  
-typename Geometry:: HybridDenotableSet<DS>::const_iterator
-Geometry::HybridDenotableSet<DS>::begin() const
+typename  HybridDenotableSet<DS>::const_iterator
+HybridDenotableSet<DS>::begin() const
 {
   return const_iterator(this->_component_sets,false);
 }
 
 template<class DS>inline  
-typename Geometry:: HybridDenotableSet<DS>::const_iterator
-Geometry::HybridDenotableSet<DS>::end() const
+typename  HybridDenotableSet<DS>::const_iterator
+HybridDenotableSet<DS>::end() const
 {
   return const_iterator(this->_component_sets,true);
 }
@@ -319,7 +319,7 @@ Geometry::HybridDenotableSet<DS>::end() const
 
 template<class DS> template<class T> inline  
 void 
-Geometry::HybridDenotableSet<DS>::adjoin(const HybridBasicSet<T>& hbs) 
+HybridDenotableSet<DS>::adjoin(const HybridBasicSet<T>& hbs) 
 {
   ARIADNE_CHECK_LOCATION(*this,hbs.state(),"HybridDenotableSet<S>::adjoin<T>(DiscreteState q, T t)");
   (*this)[hbs.state()].adjoin(hbs.set());
@@ -328,7 +328,7 @@ Geometry::HybridDenotableSet<DS>::adjoin(const HybridBasicSet<T>& hbs)
 
 template<class DS> template<class DSA> inline  
 void 
-Geometry::HybridDenotableSet<DS>::adjoin(const HybridDenotableSet<DSA>& hs) 
+HybridDenotableSet<DS>::adjoin(const HybridDenotableSet<DSA>& hs) 
 {
   ARIADNE_CHECK_SAME_LOCATIONS(*this,hs,"void HybridDenotableSet<DS>::adjoin(HybridDenotableSet<DSA>)");
 
@@ -344,7 +344,7 @@ Geometry::HybridDenotableSet<DS>::adjoin(const HybridDenotableSet<DSA>& hs)
 
 template<class DS> template<class DSA> inline  
 void 
-Geometry::HybridDenotableSet<DS>::restrict(const HybridDenotableSet<DSA>& hs) 
+HybridDenotableSet<DS>::restrict(const HybridDenotableSet<DSA>& hs) 
 {
   ARIADNE_CHECK_SAME_LOCATIONS(*this,hs,"void HybridDenotableSet<DS>::restrict(HybridDenotableSet<DSA>)");
 
@@ -360,7 +360,7 @@ Geometry::HybridDenotableSet<DS>::restrict(const HybridDenotableSet<DSA>& hs)
 
 template<class DS> template<class DSA> inline  
 void 
-Geometry::HybridDenotableSet<DS>::remove(const HybridDenotableSet<DSA>& hs) 
+HybridDenotableSet<DS>::remove(const HybridDenotableSet<DSA>& hs) 
 {
   ARIADNE_CHECK_SAME_LOCATIONS(*this,hs,"void HybridDenotableSet<DS>::remove(HybridDenotableSet<DSA>)");
 
@@ -375,32 +375,32 @@ Geometry::HybridDenotableSet<DS>::remove(const HybridDenotableSet<DSA>& hs)
 
 
 template<class DS> inline
-typename Geometry::HybridDenotableSet<DS>::locations_iterator 
-Geometry::HybridDenotableSet<DS>::locations_begin()
+typename HybridDenotableSet<DS>::locations_iterator 
+HybridDenotableSet<DS>::locations_begin()
 { 
   return this->_component_sets.begin();
 }
 
 
 template<class DS> inline
-typename Geometry::HybridDenotableSet<DS>::locations_const_iterator 
-Geometry::HybridDenotableSet<DS>::locations_begin() const
+typename HybridDenotableSet<DS>::locations_const_iterator 
+HybridDenotableSet<DS>::locations_begin() const
 { 
   return this->_component_sets.begin();
 }
 
 
 template<class DS> inline
-typename Geometry::HybridDenotableSet<DS>::locations_iterator 
-Geometry::HybridDenotableSet<DS>::locations_end()
+typename HybridDenotableSet<DS>::locations_iterator 
+HybridDenotableSet<DS>::locations_end()
 { 
   return this->_component_sets.end();
 }
 
 
 template<class DS> inline
-typename Geometry::HybridDenotableSet<DS>::locations_const_iterator 
-Geometry::HybridDenotableSet<DS>::locations_end() const
+typename HybridDenotableSet<DS>::locations_const_iterator 
+HybridDenotableSet<DS>::locations_end() const
 { 
   return this->_component_sets.end();
 }
@@ -410,7 +410,7 @@ Geometry::HybridDenotableSet<DS>::locations_end() const
 
 template<class DS1, class DS2> inline
 tribool
-Geometry::subset(const HybridDenotableSet<DS1>& hs1, const HybridDenotableSet<DS2>& hs2)
+subset(const HybridDenotableSet<DS1>& hs1, const HybridDenotableSet<DS2>& hs2)
 {
   ARIADNE_CHECK_SAME_LOCATIONS(hs1,hs2,"tribool subset(HybridDenotableSet<DS1> hs1,HybridDenotableSet<DS2> hs2)"); 
   
@@ -430,7 +430,7 @@ Geometry::subset(const HybridDenotableSet<DS1>& hs1, const HybridDenotableSet<DS
 
 template<class DS> inline
 std::ostream& 
-Geometry::HybridDenotableSet<DS>::write(std::ostream& os) const
+HybridDenotableSet<DS>::write(std::ostream& os) const
 { 
   os << "HybridDenotableSet( { \n";
   for(locations_const_iterator iter=this->locations_begin(); iter!=this->locations_end(); ++iter)
@@ -446,14 +446,14 @@ Geometry::HybridDenotableSet<DS>::write(std::ostream& os) const
 
 template<class R> inline
 std::ostream& 
-Geometry::operator<<(std::ostream& os, const HybridGrid<R>& hs)
+operator<<(std::ostream& os, const HybridGrid<R>& hs)
 { 
   return os << "HybridGrid(...)";
 }
 
 template<class DS> inline
 std::ostream& 
-Geometry::operator<<(std::ostream& os, const HybridDenotableSet<DS>& hs)
+operator<<(std::ostream& os, const HybridDenotableSet<DS>& hs)
 { 
   return hs.write(os);
 }
@@ -465,7 +465,7 @@ Geometry::operator<<(std::ostream& os, const HybridDenotableSet<DS>& hs)
 
 
 template<class R> inline
-Geometry::HybridGridCellListSet<R>::HybridGridCellListSet(const HybridGrid<R>& hg) 
+HybridGridCellListSet<R>::HybridGridCellListSet(const HybridGrid<R>& hg) 
 {
   for(typename HybridGrid<R>::locations_const_iterator iter=hg.locations_begin(); 
       iter!=hg.locations_end(); ++iter) 
@@ -477,8 +477,8 @@ Geometry::HybridGridCellListSet<R>::HybridGridCellListSet(const HybridGrid<R>& h
 
 
 template<class R> inline
-Geometry::HybridGridCellListSet<R>
-Geometry::difference(const HybridGridCellListSet<R>& hgcl, const HybridGridMaskSet<R>& hgms) 
+HybridGridCellListSet<R>
+difference(const HybridGridCellListSet<R>& hgcl, const HybridGridMaskSet<R>& hgms) 
 {
   ARIADNE_CHECK_SAME_LOCATIONS(hgcl,hgms,"HybridGridCellListSet difference(HybridGridCellListSet hgcl, HybridGridMaskSet hgms)");
   
@@ -495,8 +495,8 @@ Geometry::difference(const HybridGridCellListSet<R>& hgcl, const HybridGridMaskS
 
 
 template<class R> inline
-Geometry::HybridGridMaskSet<R>
-Geometry::difference(const HybridGridMaskSet<R>& hgms1, const HybridGridMaskSet<R>& hgms2) 
+HybridGridMaskSet<R>
+difference(const HybridGridMaskSet<R>& hgms1, const HybridGridMaskSet<R>& hgms2) 
 {
   ARIADNE_CHECK_SAME_LOCATIONS(hgms1,hgms2,"HybridGridCellListSet difference(HybridGridCellListSet hgms1, HybridGridMaskSet hgms2)");
   
@@ -512,8 +512,8 @@ Geometry::difference(const HybridGridMaskSet<R>& hgms1, const HybridGridMaskSet<
 
 
 template<class BS> inline
-Geometry::HybridGridCellListSet<typename BS::real_type>
-Geometry::outer_approximation(const HybridListSet<BS>& hls, const HybridGrid<typename BS::real_type>& hg) 
+HybridGridCellListSet<typename BS::real_type>
+outer_approximation(const HybridListSet<BS>& hls, const HybridGrid<typename BS::real_type>& hg) 
 {
   typedef typename BS::real_type R;
   ARIADNE_CHECK_SAME_LOCATIONS(hls,hg,"HybridGridCellListSet outer_approximation(HybridListSet hls, HybridGrid hg)");
@@ -530,8 +530,8 @@ Geometry::outer_approximation(const HybridListSet<BS>& hls, const HybridGrid<typ
 }
 
 template<class R> inline
-Geometry::HybridGridCellListSet<R>
-Geometry::regular_intersection(const HybridGridCellListSet<R>& hgcl, const HybridGridMaskSet<R>& hgms) 
+HybridGridCellListSet<R>
+regular_intersection(const HybridGridCellListSet<R>& hgcl, const HybridGridMaskSet<R>& hgms) 
 {
   ARIADNE_CHECK_SAME_LOCATIONS(hgcl,hgms,"HybridGridCellListSet regular_intersection(HybridGridCellListSet hgcl, HybridGridMaskSet hgms)");
   
@@ -548,16 +548,16 @@ Geometry::regular_intersection(const HybridGridCellListSet<R>& hgcl, const Hybri
 
 
 template<class R> inline
-Geometry::HybridGridCellListSet<R>
-Geometry::regular_intersection(const HybridGridMaskSet<R>& hgms, const HybridGridCellListSet<R>& hgcl) 
+HybridGridCellListSet<R>
+regular_intersection(const HybridGridMaskSet<R>& hgms, const HybridGridCellListSet<R>& hgcl) 
 {
   return regular_intersection(hgcl,hgms);
 }
 
 
 template<class R> inline
-Geometry::HybridGridMaskSet<R>
-Geometry::regular_intersection(const HybridGridMaskSet<R>& hgms1, const HybridGridMaskSet<R>& hgms2) 
+HybridGridMaskSet<R>
+regular_intersection(const HybridGridMaskSet<R>& hgms1, const HybridGridMaskSet<R>& hgms2) 
 {
   ARIADNE_CHECK_SAME_LOCATIONS(hgms1,hgms2,"HybridGridMaskSet regular_intersection(HybridGridMaskSet hgms1, HybridGridMaskSet hgms2)");
 

@@ -36,7 +36,7 @@
 
 namespace Ariadne { 
 
-  namespace LinearProgramming {
+  
 
     /*! \ingroup LinearProgramming
      *  \brief Solver the linear programming problem \f$\max c^Tx\text{ s.t. } Ax=b; \ x\geq0\f$.
@@ -58,12 +58,12 @@ namespace Ariadne {
      */
     template<class R, class AP>
     AP 
-    lpslv(const LinearAlgebra::Matrix<R>& A, 
-          const LinearAlgebra::Vector<R>& b, 
-          const LinearAlgebra::Vector<R>& c, 
-          LinearAlgebra::Permutation& p,
-          LinearAlgebra::Vector<AP>& x,
-          LinearAlgebra::Vector<AP>& y);
+    lpslv(const Matrix<R>& A, 
+          const Vector<R>& b, 
+          const Vector<R>& c, 
+          Permutation& p,
+          Vector<AP>& x,
+          Vector<AP>& y);
   
 
     /*! \ingroup LinearProgramming
@@ -85,14 +85,14 @@ namespace Ariadne {
      */
     template<class R, class AP>
     AP 
-    lpslvc(const LinearAlgebra::Matrix<R>& A, 
-           const LinearAlgebra::Vector<R>& b, 
-           const LinearAlgebra::Vector<R>& c, 
-           const LinearAlgebra::Vector<R>& l, 
-           const LinearAlgebra::Vector<R>& u,
-           LinearAlgebra::Permutation& p,
-           LinearAlgebra::Vector<AP>& x, 
-           LinearAlgebra::Vector<AP>& y);
+    lpslvc(const Matrix<R>& A, 
+           const Vector<R>& b, 
+           const Vector<R>& c, 
+           const Vector<R>& l, 
+           const Vector<R>& u,
+           Permutation& p,
+           Vector<AP>& x, 
+           Vector<AP>& y);
  
     
      /*! \ingroup LinearProgramming
@@ -120,7 +120,6 @@ namespace Ariadne {
           int* piv);
 
 
-  } // namespace LinearProgramming
 } // namespace Ariadne
 
 #include "lpslv.template.h"

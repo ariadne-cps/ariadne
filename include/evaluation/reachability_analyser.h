@@ -49,7 +49,7 @@
 
 
 namespace Ariadne {
-  namespace Evaluation {
+  
 
     template<class Sys,class Aprx> class ReachabilityAnalyser;
 
@@ -57,17 +57,17 @@ namespace Ariadne {
      *  \ingroup Analysers
      */
     template<class T,class Aprx>
-    class ReachabilityAnalyser< System::TransitionSystemInterface<T,Aprx>, Aprx >
-      : public ReachabilityAnalyserInterface< System::TransitionSystemInterface<T,Aprx>, typename Aprx::basic_set_type >
+    class ReachabilityAnalyser< TransitionSystemInterface<T,Aprx>, Aprx >
+      : public ReachabilityAnalyserInterface< TransitionSystemInterface<T,Aprx>, typename Aprx::basic_set_type >
     {
-      typedef System::TransitionSystemInterface<T,Aprx> Sys;
+      typedef TransitionSystemInterface<T,Aprx> Sys;
       typedef typename Aprx::real_type R;
       typedef typename Aprx::basic_set_type BS;
       typedef T Time;
 
-      typedef System::TransitionSystemInterface<T,Aprx> System;
-      typedef Geometry::SetInterface<BS> Set;
-      typedef Geometry::SetInterface<BS>* SetPointer;
+      typedef TransitionSystemInterface<T,Aprx> System;
+      typedef SetInterface<BS> Set;
+      typedef SetInterface<BS>* SetPointer;
 
      private:
       boost::shared_ptr< EvolutionParameters<R> > _parameters;
@@ -121,19 +121,18 @@ namespace Ariadne {
       typedef typename Aprx::CoverListSet CLS;
       typedef typename Aprx::PartitionListSet PLS;
       typedef typename Aprx::PartitionTreeSet PTS;
-      typedef Numeric::Interval<R> I;
-      typedef Numeric::Integer Integer;
-      typedef Geometry::BoxListSet<R> BxLS;
-      typedef Geometry::Grid<R> Gr;
-      typedef Geometry::GridCell<R> GC;
-      typedef Geometry::GridBlock<R> GB;
-      typedef Geometry::GridCellListSet<R> GCLS;
-      typedef Geometry::GridMaskSet<R> GMS;
-      typedef Geometry::SetInterface<BS> SI;
-      typedef Geometry::Box<R> Bx;
-      typedef Geometry::ListSet<BS> BSL;
-      typedef Geometry::TimedSet<T,BS> TBS;
-      typedef Geometry::ListSet<TBS> TBSL;
+      typedef Interval<R> I;
+      typedef BoxListSet<R> BxLS;
+      typedef Grid<R> Gr;
+      typedef GridCell<R> GC;
+      typedef GridBlock<R> GB;
+      typedef GridCellListSet<R> GCLS;
+      typedef GridMaskSet<R> GMS;
+      typedef SetInterface<BS> SI;
+      typedef Box<R> Bx;
+      typedef ListSet<BS> BSL;
+      typedef TimedSet<T,BS> TBS;
+      typedef ListSet<TBS> TBSL;
      private:
       // Services provided by other classes
       CLS _lower_evolve(const Sys& sys, const BS& bs, const T& t) const {
@@ -162,18 +161,18 @@ namespace Ariadne {
         return result; }
      private:
       // Helper functions for approximating sets
-      Geometry::Grid<R> grid(Geometry::EuclideanSpace espc) const { 
-        return Geometry::Grid<R>(espc.dimension(),this->_parameters->grid_length()); }
-      Geometry::HybridGrid<R> grid(Geometry::HybridSpace hspc) const { 
-        return Geometry::HybridGrid<R>(hspc,this->_parameters->grid_length()); }
+      Grid<R> grid(EuclideanSpace espc) const { 
+        return Grid<R>(espc.dimension(),this->_parameters->grid_length()); }
+      HybridGrid<R> grid(HybridSpace hspc) const { 
+        return HybridGrid<R>(hspc,this->_parameters->grid_length()); }
       PLS _outer_approximation(const SI& s) const {
-        return Geometry::outer_approximation(s,this->grid(s.space())); }
+        return outer_approximation(s,this->grid(s.space())); }
       CLS _lower_approximation(const SI& s) const {
-        return Geometry::lower_approximation(s,this->grid(s.space())); }
+        return lower_approximation(s,this->grid(s.space())); }
       PLS _inner_approximation(const SI& s) const {
-        return Geometry::inner_approximation(s,this->grid(s.space())); }
+        return inner_approximation(s,this->grid(s.space())); }
       PLS _outer_approximation(const BxLS& s) const {
-        return GMS(Geometry::outer_approximation(s,this->grid(s.space()))); };
+        return GMS(outer_approximation(s,this->grid(s.space()))); };
      private:
       // Helper functions for accessing parameters
       T lock_to_grid_time() const;
@@ -198,13 +197,13 @@ namespace Ariadne {
       typedef typename Sys::real_type R;
       typedef typename Aprx::basic_set_type BS;
 
-      typedef System::TransitionSystemInterface<T,Aprx> TSI;
-      typedef System::TransitionSystem<Sys,Aprx> TS;
+      typedef TransitionSystemInterface<T,Aprx> TSI;
+      typedef TransitionSystem<Sys,Aprx> TS;
       typedef ReachabilityAnalyser<TSI,Aprx> TSRA;
 
       typedef Sys System;
-      typedef Geometry::SetInterface<BS> Set;
-      typedef Geometry::SetInterface<BS>* SetPointer;
+      typedef SetInterface<BS> Set;
+      typedef SetInterface<BS>* SetPointer;
       typedef T Time;
      private:
       boost::shared_ptr< DiscretiserInterface<Sys,Aprx> > _discretiser;
@@ -272,8 +271,8 @@ namespace Ariadne {
 
 
 
-  }
-}
+  
+} // namespace Ariadne
 
 
 

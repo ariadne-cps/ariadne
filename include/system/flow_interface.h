@@ -37,7 +37,7 @@
 
 namespace Ariadne {
 
-  namespace System {
+  
 
    
     /*! \brief %Base class for flows. 
@@ -45,12 +45,12 @@ namespace Ariadne {
      */
     template<class R>
     class FlowInterface {
-      typedef Numeric::Interval<R> I;
+      typedef Interval<R> I;
      public:
       virtual ~FlowInterface() { }
-      virtual Geometry::Point<I> evaluate(const I& t, const Geometry::Point<I>& x) = 0;
-      virtual LinearAlgebra::Vector<I> tangent(const I& t, const Geometry::Point<I>& pt) = 0;
-      virtual LinearAlgebra::Matrix<I> jacobian(const I& t, const Geometry::Point<I>& pt) = 0;
+      virtual Point<I> evaluate(const I& t, const Point<I>& x) = 0;
+      virtual Vector<I> tangent(const I& t, const Point<I>& pt) = 0;
+      virtual Matrix<I> jacobian(const I& t, const Point<I>& pt) = 0;
     };
     
   }

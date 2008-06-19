@@ -32,11 +32,11 @@
 #include <boost/shared_ptr.hpp>
 
 namespace Ariadne {
-  namespace Base {
+
     using boost::shared_ptr;
     using boost::scoped_ptr;
-  }
-}
+
+} // namespace Ariadne
 
 #ifdef DOXYGEN
 namespace Ariadne {

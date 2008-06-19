@@ -32,9 +32,9 @@
 #include "geometry/declarations.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
     
-    template<class R> GridBlock<R> outer_approximation(const Point< Numeric::Interval<R> >& ipt, const Grid<R>& g);
+    template<class R> GridBlock<R> outer_approximation(const Point< Interval<R> >& ipt, const Grid<R>& g);
 
     template<class R> GridBlock<R> over_approximation(const Box<R>& bx, const Grid<R>& g);
     template<class R> GridBlock<R> under_approximation(const Box<R>& bx, const Grid<R>& g);
@@ -77,8 +77,8 @@ namespace Ariadne {
     template<class R> BoxListSet<R> point_approximation(const SetInterface< Box<R> >& set, const FiniteGrid<R>& fg);
  
     template<class R> void instantiate_grid_approximation();
-  }
-}
+  
+} // namespace Ariadne
 
 
 #endif /* ARIADNE_GRID_APRROXIMATION_H */

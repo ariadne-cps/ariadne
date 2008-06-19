@@ -28,9 +28,9 @@
 #include "evaluation/euler_integrator.code.h"
 
 namespace Ariadne {
-  namespace Evaluation {
-    using namespace Numeric;
-    using namespace Geometry;
+  
+    
+    
 
 #ifdef ENABLE_FLOAT64
     template class EulerIntegrator< Float64 >;
@@ -40,5 +40,5 @@ namespace Ariadne {
     template class EulerIntegrator< FloatMP >;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

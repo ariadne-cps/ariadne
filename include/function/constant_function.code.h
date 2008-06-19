@@ -32,23 +32,23 @@
 namespace Ariadne {
 
 template<class R>
-LinearAlgebra::Vector<typename Function::ConstantFunction<R>::F> 
-Function::ConstantFunction<R>::evaluate(const LinearAlgebra::Vector<F>& x) const 
+Vector<typename ConstantFunction<R>::F> 
+ConstantFunction<R>::evaluate(const Vector<F>& x) const 
 { 
   return this->_c; 
 }
 
 
 template<class R>
-LinearAlgebra::Matrix<typename Function::ConstantFunction<R>::F> 
-Function::ConstantFunction<R>::jacobian(const LinearAlgebra::Vector<F>& x) const 
+Matrix<typename ConstantFunction<R>::F> 
+ConstantFunction<R>::jacobian(const Vector<F>& x) const 
 { 
-  return LinearAlgebra::Matrix<F>(this->result_size(),this->argument_size()); 
+  return Matrix<F>(this->result_size(),this->argument_size()); 
 }
 
 template<class R>
-Function::TaylorDerivative<typename Function::ConstantFunction<R>::F> 
-Function::ConstantFunction<R>::derivative(const LinearAlgebra::Vector<F>& x, const smoothness_type& s) const 
+TaylorDerivative<typename ConstantFunction<R>::F> 
+ConstantFunction<R>::derivative(const Vector<F>& x, const smoothness_type& s) const 
 {
   return TaylorDerivative<F>::constant(this->result_size(),this->argument_size(),s,this->c());
 }
@@ -56,11 +56,12 @@ Function::ConstantFunction<R>::derivative(const LinearAlgebra::Vector<F>& x, con
 
 template<class R>
 std::ostream& 
-Function::ConstantFunction<R>::write(std::ostream& os) const
+ConstantFunction<R>::write(std::ostream& os) const
 {
   return os << "ConstantFunction( c=" << this->_c << " )";
 }
 
 
 
-}
+} // namespace Ariadne
+

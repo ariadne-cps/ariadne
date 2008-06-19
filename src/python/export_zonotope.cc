@@ -33,10 +33,6 @@
 
 #include "python/utilities.h"
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::LinearAlgebra;
-using namespace Ariadne::Function;
-using namespace Ariadne::Geometry;
 using namespace Ariadne::Python;
 
 #include <boost/python.hpp>

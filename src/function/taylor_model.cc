@@ -27,8 +27,7 @@
 #include "function/taylor_model.code.h"
 
 namespace Ariadne {
-  namespace Function {
-    using namespace Numeric;
+    
     
 
 #ifdef ENABLE_FLOAT64
@@ -39,5 +38,5 @@ namespace Ariadne {
     template class TaylorModel<FloatMP>;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

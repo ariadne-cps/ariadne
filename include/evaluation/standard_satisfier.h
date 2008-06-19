@@ -38,7 +38,7 @@
 #include "satisfier_interface.h"
 
 namespace Ariadne {
-  namespace Evaluation {
+  
 
     /*! \ingroup EvaluatorInterfaces \ingroup Approximators
      *  \brief Interface for testing whether a set satisfies a constraint. 
@@ -54,21 +54,21 @@ namespace Ariadne {
         return new StandardSatisfier<ES>(*this); }
       
       /*! \brief Test whether a set is a subset of a given constraint set. */
-      virtual tribool subset(const ES& es, const Geometry::ConstraintSet<R>& cs) const {
-        return Geometry::subset(es,cs); }
+      virtual tribool subset(const ES& es, const ConstraintSet<R>& cs) const {
+        return subset(es,cs); }
       
       /*! \brief Test whether a set is disjoint from a given constraint set. */
-      virtual tribool disjoint(const ES& es, const Geometry::ConstraintSet<R>& cs) const {
-        return Geometry::disjoint(es,cs); }
+      virtual tribool disjoint(const ES& es, const ConstraintSet<R>& cs) const {
+        return disjoint(es,cs); }
       
       /*! \brief Test whether a set intersects from a given constraint set. */
-      virtual tribool intersects(const ES& es, const Geometry::ConstraintSet<R>& cs) const {
-        return Geometry::intersects(es,cs); }
+      virtual tribool intersects(const ES& es, const ConstraintSet<R>& cs) const {
+        return intersects(es,cs); }
       
     };
 
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_STANDARD_SATISFIER_H */

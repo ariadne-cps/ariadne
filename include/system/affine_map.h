@@ -43,7 +43,7 @@
 
 
 namespace Ariadne {
-  namespace System {
+  
 
     /*! \brief An affine map \f$f(x)=Ax+b\f$ on Euclidean space. 
      *  \ingroup DiscreteTime
@@ -54,13 +54,13 @@ namespace Ariadne {
     {
      public:
       /*! \brief Construct from the matrix \f$A\f$ and the vector \f$b\f$. */
-      explicit AffineMap(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b)
-        : Map<R>(Function::AffineFunction<R>(A,b)) { }
+      explicit AffineMap(const Matrix<R>& A, const Vector<R>& b)
+        : Map<R>(AffineFunction<R>(A,b)) { }
     };
 
 
-  }
-}
+  
+} // namespace Ariadne
 
 
 #endif /* ARIADNE_AFFINE_MAP_H */

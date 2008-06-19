@@ -36,9 +36,6 @@
 
 using namespace boost::python;
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::LinearAlgebra;
-using namespace Ariadne::Function;
 using namespace Ariadne::Python;
 
 
@@ -87,8 +84,8 @@ X taylor_derivative_get_item(const TaylorDerivative<X>& td, const size_type& i, 
 template<class R>
 void export_taylor_derivative()
 {
-  typedef typename Numeric::traits<R>::arithmetic_type A;
-  typedef typename Numeric::traits<R>::interval_type I;
+  typedef typename traits<R>::arithmetic_type A;
+  typedef typename traits<R>::interval_type I;
   typedef Vector<R> RVec;
   typedef Vector<A> IVec;
   typedef TaylorVariable<A> TV;
@@ -103,11 +100,11 @@ void export_taylor_derivative()
   taylor_derivative_class.def("__setitem__",&taylor_derivative_set_item<A,A>);
   taylor_derivative_class.def("__getitem__", &taylor_derivative_get_variable<A>);
   taylor_derivative_class.def("__setitem__",&taylor_derivative_set_variable<A,A>);
-  taylor_derivative_class.def("__neg__", &Python::neg<TD,TD>);
-  taylor_derivative_class.def("__add__", &Python::add<TD,TD,TD>);
-  taylor_derivative_class.def("__sub__", &Python::sub<TD,TD,TD>);
-  taylor_derivative_class.def("__sub__", &Python::sub<TD,TD,IVec>);
-  taylor_derivative_class.def("__mul__", &Python::mul<TD,TD,I>);
+  taylor_derivative_class.def("__neg__", &__neg__<TD,TD>);
+  taylor_derivative_class.def("__add__", &__add__<TD,TD,TD>);
+  taylor_derivative_class.def("__sub__", &__sub__<TD,TD,TD>);
+  taylor_derivative_class.def("__sub__", &__sub__<TD,TD,IVec>);
+  taylor_derivative_class.def("__mul__", &__mul__<TD,TD,I>);
   taylor_derivative_class.def("value", &TD::value);
   taylor_derivative_class.def("jacobian", &TD::jacobian);
   taylor_derivative_class.def(self_ns::str(self));
@@ -115,13 +112,13 @@ void export_taylor_derivative()
   def("variable",(TD(*)(const RVec&,smoothness_type))&TD::variable);
   def("variable",(TD(*)(const IVec&,smoothness_type))&TD::variable);
 
-  def("evaluate",(IVec(*)(const TD&,const IVec&))&Function::evaluate);
-  def("evaluate",(TV(*)(const TV&,const TD&))&Function::evaluate);
-  def("evaluate",(TD(*)(const TD&,const TD&))&Function::evaluate);
-  def("compose",(TV(*)(const TV&,const TD&))&Function::compose);
-  def("compose",(TD(*)(const TD&,const TD&))&Function::compose);
-  def("inverse",(TD(*)(const TD&,const IVec&))&Function::inverse);
-  def("implicit",(TD(*)(const TD&,const IVec&))&Function::implicit);
+  def("evaluate",(IVec(*)(const TD&,const IVec&))&evaluate);
+  def("evaluate",(TV(*)(const TV&,const TD&))&evaluate);
+  def("evaluate",(TD(*)(const TD&,const TD&))&evaluate);
+  def("compose",(TV(*)(const TV&,const TD&))&compose);
+  def("compose",(TD(*)(const TD&,const TD&))&compose);
+  def("inverse",(TD(*)(const TD&,const IVec&))&inverse);
+  def("implicit",(TD(*)(const TD&,const IVec&))&implicit);
 
 }
 
@@ -142,21 +139,21 @@ void export_taylor_derivative<Rational>()
   taylor_derivative_class.def("__setitem__",&taylor_derivative_set_item<Q,Q>);
   taylor_derivative_class.def("__getitem__", &taylor_derivative_get_variable<Q>);
   taylor_derivative_class.def("__setitem__",&taylor_derivative_set_variable<Q,Q>);
-  taylor_derivative_class.def("__neg__", &Python::neg<TD,TD>);
-  taylor_derivative_class.def("__add__", &Python::add<TD,TD,TD>);
-  taylor_derivative_class.def("__sub__", &Python::sub<TD,TD,TD>);
+  taylor_derivative_class.def("__neg__", &__neg__<TD,TD>);
+  taylor_derivative_class.def("__add__", &__add__<TD,TD,TD>);
+  taylor_derivative_class.def("__sub__", &__sub__<TD,TD,TD>);
   taylor_derivative_class.def(self_ns::str(self));
   
   def("constant",(TD(*)(size_type,size_type,smoothness_type,const Vec&))&TD::constant);
   def("variable",(TD(*)(size_type,size_type,smoothness_type,const Vec&))&TD::variable);
   def("variable",(TD(*)(const Vec&,smoothness_type))&TD::variable);
 
-  def("evaluate",(TV(*)(const TV&,const TD&))&Function::evaluate);
-  def("evaluate",(TD(*)(const TD&,const TD&))&Function::evaluate);
-  def("compose",(TV(*)(const TV&,const TD&))&Function::compose);
-  def("compose",(TD(*)(const TD&,const TD&))&Function::compose);
-  def("inverse",(TD(*)(const TD&,const Vec&))&Function::inverse);
-  def("implicit",(TD(*)(const TD&,const Vec&))&Function::implicit);
+  def("evaluate",(TV(*)(const TV&,const TD&))&evaluate);
+  def("evaluate",(TD(*)(const TD&,const TD&))&evaluate);
+  def("compose",(TV(*)(const TV&,const TD&))&compose);
+  def("compose",(TD(*)(const TD&,const TD&))&compose);
+  def("inverse",(TD(*)(const TD&,const Vec&))&inverse);
+  def("implicit",(TD(*)(const TD&,const Vec&))&implicit);
 
   
 }

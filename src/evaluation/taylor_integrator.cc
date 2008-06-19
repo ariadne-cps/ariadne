@@ -28,8 +28,8 @@
 #include "evaluation/taylor_integrator.code.h"
 
 namespace Ariadne {
-  namespace Evaluation {
-    using namespace Numeric;
+  
+    
 
 #ifdef ENABLE_FLOAT64
     template class TaylorIntegrator<Float64>;
@@ -39,5 +39,5 @@ namespace Ariadne {
     template class TaylorIntegrator<FloatMP>;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

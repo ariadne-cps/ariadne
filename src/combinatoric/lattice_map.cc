@@ -31,7 +31,7 @@
 
 
 namespace Ariadne {
-  namespace Combinatoric {
+
     
     void
     LatticeMultiMap::adjoin_to_image(const LatticeCell& lc, const LatticeCell& img)
@@ -258,5 +258,6 @@ namespace Ariadne {
       return os << "LatticeMap(" << m._map << ")";
     }
     
-  }
-}
+  
+} // namespace Ariadne
+

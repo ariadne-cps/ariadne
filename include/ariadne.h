@@ -1,8 +1,7 @@
 /***************************************************************************
  *            ariadne.h
  *
- *  Wed Sep 15 15:56 2004
- *  Copyright  2004  Alberto Casagrande, Pieter Collins
+ *  Copyright  2004-8  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
@@ -26,8 +25,8 @@
  *  \brief Top-level header file.
  */
 
-#ifndef _ARIADNE_H
-#define _ARIADNE_H
+#ifndef ARIADNE_ARIADNE_H
+#define ARIADNE_ARIADNE_H
 
 #include <gmpxx.h>
 #include <boost/numeric/interval.hpp>
@@ -41,50 +40,6 @@
  */
 namespace Ariadne {
 
-/*! \brief Fundamental base types. See the \ref Base for more information.
- */
-namespace Base {}
-  
-/*! \brief Numerical types, arithmetic, real functions and interval functions. See the \ref Numeric sub-module for more information.
- */
-namespace Numeric {}
-  
-/*! \brief Functions for linear algebra. See the \ref LinearAlgebra sub-module for more information.
- */
-namespace LinearAlgebra {}
-
-/*! \brief Functions for linear programming. See the \ref LinearProgramming sub-module for more information.
- */
-namespace LinearProgramming {}
-
-/*! \brief Combinatorial objects, such as sets and maps on lattices and subdivision trees. See the \ref Combinatoric for more information.
- */
-namespace Combinatoric {}
-  
-/*! \brief Functional calculus library, including affine and polynomial functions and automatic differentiation. See the \ref Function for more information.
- */
-namespace Function {}
-  
-/*! \brief Geometric calculus library. See the \ref Geometry for more information.
- */
-namespace Geometry {}
-
-/*! \brief Classes defining a dynamic system. See the \ref System for more information.
- */
-namespace System {}
-
-/*! \brief Classes for computing system trajectories. See the \ref Evaluation for more information.
- */
-namespace Evaluation {}
-
-/*! \brief Classes for input from various formats. See the \ref Input for more information.
- */
-namespace Input {}
-
-/*! \brief Classes for output in various formats. See the \ref Output for more information.
- */
-namespace Output {}
-
 /*! \brief Classes for describing system models. 
  */
 namespace Models {}
@@ -93,4 +48,4 @@ namespace Models {}
 
 
 
-#endif /* _ARIADNE_H */
+#endif /* ARIADNE_ARIADNE_H */

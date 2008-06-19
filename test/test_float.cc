@@ -37,7 +37,6 @@
 
 using namespace std;
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
 
 template<class T> 
 class TestFloat 

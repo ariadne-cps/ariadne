@@ -37,7 +37,7 @@
 #include "linear_algebra/exceptions.h"
 
 namespace Ariadne {
-  namespace LinearProgramming {
+  
     
     //@{ \name Exceptions
     
@@ -58,8 +58,8 @@ namespace Ariadne {
 
     //@}
 
-  }
-}
+
+} // namespace Ariadne
 
 
 #endif /* ARIADNE_LINEAR_PROGRAMMING_EXCEPTIONS_H */

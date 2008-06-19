@@ -29,7 +29,7 @@
 #define ARIADNE_SYSTEM_DECLARATIONS_H
 
 namespace Ariadne { 
-  namespace System {
+  
 
     template<class R> class Map;
     template<class R> class GridMultiMap;
@@ -47,7 +47,7 @@ namespace Ariadne {
     template<class R> class ConstraintBasedDiscreteMode;
     template<class R> class ConstraintBasedDiscreteTransition;
     template<class R> class ConstraintBasedHybridAutomaton;
-  }
-}
+
+} // namespace Ariadne
 
 #endif /* ARIADNE_SYSTEM_DECLARATIONS_H */

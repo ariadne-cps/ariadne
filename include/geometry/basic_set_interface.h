@@ -27,7 +27,7 @@
 
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
 
     /*!\ingroup BasicSet
@@ -78,5 +78,5 @@ namespace Ariadne {
     template<class R> inline BasicSetInterface<R>::~BasicSetInterface() { }
 
       
-  }
-}
+  
+} // namespace Ariadne

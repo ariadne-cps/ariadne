@@ -22,7 +22,6 @@
  */
  
 /*! \file function/constant_function.h
- *  \brief Functions of constant form \f$x\rightarrow c\f$.
  */
 
 #ifndef ARIADNE_CONSTANT_FUNCTION_H
@@ -40,7 +39,6 @@
 
 
 namespace Ariadne {
-  namespace Function {
 
     /*! \brief An constant function \f$f(x)=c\f$ on Euclidean space. 
      *  \ingroup FunctionTypes
@@ -49,11 +47,11 @@ namespace Ariadne {
     class ConstantFunction
       : public FunctionInterface<R> 
     {
-      typedef typename Numeric::traits<R>::arithmetic_type F;
-      typedef typename Numeric::traits<R>::interval_type I;
+      typedef typename traits<R>::arithmetic_type F;
+      typedef typename traits<R>::interval_type I;
      private:
       size_type _as;
-      LinearAlgebra::Vector<F> _c;
+      Vector<F> _c;
      public:
       /*! \brief The type of denotable real number used to describe the system. */
       typedef R real_type;
@@ -76,15 +74,15 @@ namespace Ariadne {
 
       
       /*! \brief  An approximation to the image of an approximate point. */
-      LinearAlgebra::Vector<F> evaluate(const LinearAlgebra::Vector<F>& x) const;
+      Vector<F> evaluate(const Vector<F>& x) const;
       /*! \brief The Jacobian derivative matrix at a point. */
-      LinearAlgebra::Matrix<F> jacobian(const LinearAlgebra::Vector<F>& x) const;
+      Matrix<F> jacobian(const Vector<F>& x) const;
       /*! \brief All the derivative values up to degree \a s. */
-      TaylorDerivative<F> derivative(const LinearAlgebra::Vector<F>& x, const smoothness_type& s) const;
+      TaylorDerivative<F> derivative(const Vector<F>& x, const smoothness_type& s) const;
 
            
       /*! \brief  The linear transformation of the function. */
-      const LinearAlgebra::Vector<F>& c() const { return _c; }
+      const Vector<F>& c() const { return _c; }
       
       /*! \brief The size of the result. */
       virtual size_type result_size() const {
@@ -107,8 +105,8 @@ namespace Ariadne {
     };
 
 
-  }
-}
+  
+} // namespace Ariadne
 
 
 #endif /* ARIADNE_CONSTANT_FUNCTION_H */

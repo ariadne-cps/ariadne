@@ -39,27 +39,27 @@ namespace Ariadne {
 
 
 template<class R>
-Geometry::LinearConstraint<R>::~LinearConstraint()
+LinearConstraint<R>::~LinearConstraint()
 {
 }
 
 
 template<class R>
-Geometry::LinearConstraint<R>::LinearConstraint(const LinearAlgebra::Vector<R> a, Comparison cmp, const R& b)
+LinearConstraint<R>::LinearConstraint(const Vector<R> a, Comparison cmp, const R& b)
   : _a(a), _b(b), _c(cmp)
 {
 }
 
 template<class R>
-Geometry::LinearConstraint<R>::LinearConstraint(const LinearAlgebra::Vector<R> a, const R& b)
+LinearConstraint<R>::LinearConstraint(const Vector<R> a, const R& b)
   : _a(a), _b(b), _c(less)
 {
 }
 
 
 template<class R>
-Geometry::LinearConstraint<R>* 
-Geometry::LinearConstraint<R>::clone() const
+LinearConstraint<R>* 
+LinearConstraint<R>::clone() const
 {
   return new LinearConstraint<R>(this->_a, this->_c, this->_b);
 }
@@ -67,7 +67,7 @@ Geometry::LinearConstraint<R>::clone() const
 
 template<class R>
 dimension_type
-Geometry::LinearConstraint<R>::dimension() const 
+LinearConstraint<R>::dimension() const 
 {
   return this->_a.size();
 }
@@ -75,30 +75,30 @@ Geometry::LinearConstraint<R>::dimension() const
 
 template<class R>
 smoothness_type 
-Geometry::LinearConstraint<R>::smoothness() const 
+LinearConstraint<R>::smoothness() const 
 {
   return std::numeric_limits<smoothness_type>::max();
 }
 
 
 template<class R>
-Geometry::Comparison
-Geometry::LinearConstraint<R>::comparison() const 
+Comparison
+LinearConstraint<R>::comparison() const 
 {
   return this->_c;
 }
 
 
 template<class R>
-Geometry::Polyhedron<R>
-Geometry::LinearConstraint<R>::polyhedron() const 
+Polyhedron<R>
+LinearConstraint<R>::polyhedron() const 
 {
   if(this->_c==less) {
-    return Polyhedron<R>(LinearAlgebra::Matrix<R>(1,this->dimension(),_a.begin()),
-                         LinearAlgebra::Vector<R>(1,&_b));
+    return Polyhedron<R>(Matrix<R>(1,this->dimension(),_a.begin()),
+                         Vector<R>(1,&_b));
   } else {
-    return Polyhedron<R>(-LinearAlgebra::Matrix<R>(1,this->dimension(),_a.begin()),
-                         -LinearAlgebra::Vector<R>(1,&_b));
+    return Polyhedron<R>(-Matrix<R>(1,this->dimension(),_a.begin()),
+                         -Vector<R>(1,&_b));
   }
 }
 
@@ -108,7 +108,7 @@ Geometry::LinearConstraint<R>::polyhedron() const
 
 template<class R>
 std::ostream& 
-Geometry::LinearConstraint<R>::write(std::ostream& os) const
+LinearConstraint<R>::write(std::ostream& os) const
 {
   //return os << "LinearConstraint( a=" << this->_a << ", b=" << this->_b << ", c='" << (this->_c==less ? "<" : ">") << "' )";
   return os << this->_a << ".x"<< (this->_c==less ? "<" : ">") << "=" << this->_b;
@@ -116,18 +116,18 @@ Geometry::LinearConstraint<R>::write(std::ostream& os) const
 
       
 template<class R>
-typename Geometry::LinearConstraint<R>::A
-Geometry::LinearConstraint<R>::value(const Point<A>& pt) const
+typename LinearConstraint<R>::A
+LinearConstraint<R>::value(const Point<A>& pt) const
 {
-  return LinearAlgebra::inner_product(pt.position_vector(),LinearAlgebra::Vector<A>(this->_a)) - this->_b;
+  return inner_product(pt.position_vector(),Vector<A>(this->_a)) - this->_b;
 }
 
 
 template<class R>
-LinearAlgebra::Vector<typename Geometry::LinearConstraint<R>::A>
-Geometry::LinearConstraint<R>::gradient(const Point<A>& pt) const
+Vector<typename LinearConstraint<R>::A>
+LinearConstraint<R>::gradient(const Point<A>& pt) const
 {
-  return LinearAlgebra::Vector<A>(this->_a);
+  return Vector<A>(this->_a);
 }
 
 

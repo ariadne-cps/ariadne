@@ -38,7 +38,7 @@
 #include "applicator_interface.h"
 
 namespace Ariadne {
-  namespace Evaluation {
+  
 
 
     template<class ES> class StandardApplicator;
@@ -47,17 +47,17 @@ namespace Ariadne {
      *  \brief A class for computing the image of a rectangle under a map. 
      */
     template<class R>
-    class StandardApplicator< Geometry::Rectangle<R> >
-      : public ApplicatorInterface< Geometry::Rectangle<R> >
+    class StandardApplicator< Rectangle<R> >
+      : public ApplicatorInterface< Rectangle<R> >
     {
-      typedef Geometry::Rectangle<R> ES;
+      typedef Rectangle<R> ES;
      public:
       /*! \brief Default constructor. */
       StandardApplicator() { }
       /*! \brief Make a dynamically-allocated copy. */
       StandardApplicator<ES>* clone() const { return new StandardApplicator<ES>(*this); }
       /*! \brief Compute the image of a rectangle under a continuous function. */
-      virtual Geometry::Rectangle<R> apply(const System::Map<R>& f, const Geometry::Rectangle<R>& bs) const;
+      virtual Rectangle<R> apply(const Map<R>& f, const Rectangle<R>& bs) const;
     };
 
 
@@ -65,20 +65,20 @@ namespace Ariadne {
      *  \brief A class for computing the image of a zonotope under a map. 
      */
     template<class R>
-    class StandardApplicator< Geometry::Zonotope<R> >
-      : public ApplicatorInterface< Geometry::Zonotope<R> >
+    class StandardApplicator< Zonotope<R> >
+      : public ApplicatorInterface< Zonotope<R> >
     {
-      typedef Geometry::Zonotope<R> ES;
+      typedef Zonotope<R> ES;
      public:
       /*! \brief Default constructor. */
       StandardApplicator() { } 
       /*! \brief Make a dynamically-allocated copy. */
       StandardApplicator<ES>* clone() const { return new StandardApplicator<ES>(*this); }
       /*! \brief Compute the image of a zonotope under a continuous function. */
-      virtual Geometry::Zonotope<R> apply(const System::Map<R>& f, const Geometry::Zonotope<R>& bs) const;
+      virtual Zonotope<R> apply(const Map<R>& f, const Zonotope<R>& bs) const;
     };
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_STANDARD_APPLICATOR_H */

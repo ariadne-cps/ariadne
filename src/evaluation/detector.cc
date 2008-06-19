@@ -28,8 +28,8 @@
 #include "evaluation/detector.code.h"
 
 namespace Ariadne {
-  namespace Evaluation {
-    using namespace Numeric;
+  
+    
 
 #ifdef ENABLE_FLOAT64
     template class Detector<Float64>;
@@ -39,5 +39,5 @@ namespace Ariadne {
     template class Detector<FloatMP>;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

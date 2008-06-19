@@ -42,10 +42,6 @@
 #include "test.h"
 
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::Geometry;
-using namespace Ariadne::LinearAlgebra;
-using namespace Ariadne::Output;
 using namespace std;
 
 #include "base/stlio.h"
@@ -78,7 +74,7 @@ class TestZonotope
       if(z.radius()<r) {
         subdivide.adjoin(z);
       } else {
-        working.adjoin(Geometry::split(z));
+        working.adjoin(split(z));
       }
     }
     ARIADNE_TEST_PRINT(z2d5g);
@@ -89,8 +85,8 @@ class TestZonotope
 
   void test_misc() {
     Point<R> c("(0.125,-0.25,0.5)");
-    LinearAlgebra::Vector<R> v("[0.0,1.0,-1.5]");
-    LinearAlgebra::Matrix<R> a("[2.0,1.0,-1.5; 1.0,1.0,0.5; 0.0,0.0,0.375]");
+    Vector<R> v("[0.0,1.0,-1.5]");
+    Matrix<R> a("[2.0,1.0,-1.5; 1.0,1.0,0.5; 0.0,0.0,0.375]");
     
     cout << "c=" << c << "\nv=" << v << "\na=" << a << endl;
     

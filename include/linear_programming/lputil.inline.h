@@ -25,7 +25,7 @@ namespace Ariadne {
     
   inline
   int 
-  LinearProgramming::getindex(uint* pptr, uint sz, uint value) 
+  getindex(uint* pptr, uint sz, uint value) 
   {
     if (value > sz) {
       return -1;

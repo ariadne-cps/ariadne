@@ -27,7 +27,7 @@ namespace Ariadne {
 
 template<class R>
 std::ostream&
-Geometry::Sphere<R>::write(std::ostream& os) const
+Sphere<R>::write(std::ostream& os) const
 {
   if(this->empty()) {
     os << "Empty";
@@ -40,7 +40,7 @@ Geometry::Sphere<R>::write(std::ostream& os) const
 
 template<class R>
 std::istream& 
-Geometry::Sphere<R>::read(std::istream& is)
+Sphere<R>::read(std::istream& is)
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }

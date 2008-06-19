@@ -47,7 +47,7 @@
 /*TODO: Unify bounds in FiniteGrid, and make GridMaskSet use only finite grid bounds*/
 
 namespace Ariadne {
-  namespace Geometry {
+  
       
     template<class R> class GridBlockIterator;
 
@@ -69,8 +69,8 @@ namespace Ariadne {
       friend class GridCell<R>;
       friend class GridMaskSet<R>;
      public:
-      typedef GridSetIterator< Combinatoric::LatticeBlock::const_iterator, GridCell<R> > iterator;
-      typedef GridSetIterator< Combinatoric::LatticeBlock::const_iterator, GridCell<R> > const_iterator;
+      typedef GridSetIterator< LatticeBlock::const_iterator, GridCell<R> > iterator;
+      typedef GridSetIterator< LatticeBlock::const_iterator, GridCell<R> > const_iterator;
 
       /*! \brief The type of denotable real number defining the vertices and cells of the grid. */
       typedef R real_type;
@@ -80,7 +80,7 @@ namespace Ariadne {
       /*!\brief Construct an empty rectangle on a grid. */
       GridBlock(const Grid<R>& g);
       /*!\brief Construct from a grid and a bounding block. */
-      GridBlock(const Grid<R>& g, const Combinatoric::LatticeBlock& b);
+      GridBlock(const Grid<R>& g, const LatticeBlock& b);
       /*!\brief Construct from a grid and two integer arrays giving the corners. */
       GridBlock(const Grid<R>& g, const IndexArray& l, const IndexArray& u);
       /*!\brief Construct from a grid and an ordinary rectangle. */
@@ -106,7 +106,7 @@ namespace Ariadne {
       R upper_bound(dimension_type i) const;
       
       /*!\brief The position of the rectangle in the grid. */
-      const Combinatoric::LatticeBlock& lattice_set() const;
+      const LatticeBlock& lattice_set() const;
 
       /*!\brief Tests if the rectangle is empty. */
       tribool empty() const;
@@ -131,7 +131,7 @@ namespace Ariadne {
       static void _instantiate_geometry_operators();
      private:
       Grid<R> _grid;
-      Combinatoric::LatticeBlock _lattice_set;
+      LatticeBlock _lattice_set;
     };
 
     
@@ -147,8 +147,8 @@ namespace Ariadne {
     template<class R> std::ostream& operator<<(std::ostream& os, const GridBlock<R>& gb);
     
     
-  }
-}
+  
+} // namespace Ariadne
 
 
 #include "grid_block.inline.h"

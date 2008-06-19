@@ -35,7 +35,7 @@
 
 using namespace boost::python;
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
+
 using namespace Ariadne::Function;
 using namespace Ariadne::Python;
 
@@ -72,7 +72,7 @@ R polynomial_variable_get_item(const PolynomialVariable<R>& td, const MultiIndex
 template<class R>
 void export_polynomial_variable()
 {
-  typedef typename Numeric::traits<R>::arithmetic_type A;
+  typedef typename traits<R>::arithmetic_type A;
   typedef PolynomialVariable<A> PV;
 
 
@@ -121,24 +121,24 @@ void export_polynomial_variable()
   def("polynomial_constant",(PV(*)(size_type, smoothness_type, const A&))&PV::constant);
   def("polynomial_variable",(PV(*)(size_type, smoothness_type, const A&, size_type))&PV::variable);
 
-  def("compose",(PV(*)(const PV&,const PV&))&Function::compose);
+  def("compose",(PV(*)(const PV&,const PV&))&compose);
 
-  def("max",(PV(*)(const PV&,const PV&))&Function::max);
-  def("min",(PV(*)(const PV&,const PV&))&Function::min);
-  def("abs",(PV(*)(const PV&))&Function::abs);
-  def("neg",(PV(*)(const PV&))&Function::neg);
-  def("rec",(PV(*)(const PV&))&Function::rec);
-  def("pow",(PV(*)(const PV&, int))&Function::pow);
+  def("max",(PV(*)(const PV&,const PV&))&max);
+  def("min",(PV(*)(const PV&,const PV&))&min);
+  def("abs",(PV(*)(const PV&))&abs);
+  def("neg",(PV(*)(const PV&))&neg);
+  def("rec",(PV(*)(const PV&))&rec);
+  def("pow",(PV(*)(const PV&, int))&pow);
 
-  def("sqrt", (PV(*)(const PV&))&Function::sqrt);
-  def("exp", (PV(*)(const PV&))&Function::exp);
-  def("log", (PV(*)(const PV&))&Function::log);
-  def("sin", (PV(*)(const PV&))&Function::sin);
-  def("cos", (PV(*)(const PV&))&Function::cos);
-  def("tan", (PV(*)(const PV&))&Function::tan);
-  def("asin", (PV(*)(const PV&))&Function::asin);
-  def("acos", (PV(*)(const PV&))&Function::acos);
-  def("atan", (PV(*)(const PV&))&Function::atan);
+  def("sqrt", (PV(*)(const PV&))&sqrt);
+  def("exp", (PV(*)(const PV&))&exp);
+  def("log", (PV(*)(const PV&))&log);
+  def("sin", (PV(*)(const PV&))&sin);
+  def("cos", (PV(*)(const PV&))&cos);
+  def("tan", (PV(*)(const PV&))&tan);
+  def("asin", (PV(*)(const PV&))&asin);
+  def("acos", (PV(*)(const PV&))&acos);
+  def("atan", (PV(*)(const PV&))&atan);
 
   def("rec_polynomial", (PV(*)(smoothness_type, const A&))&PV::rec);
   def("pow_polynomial",(PV(*)(smoothness_type, const A&, const uint&))&PV::pow);

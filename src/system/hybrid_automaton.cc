@@ -28,8 +28,8 @@
 
 
 namespace Ariadne {
-  namespace System {
-    using namespace Numeric;
+  
+    
     
 #ifdef ENABLE_FLOAT64
     template class DiscreteMode<Float64>;
@@ -43,5 +43,5 @@ namespace Ariadne {
     template class HybridAutomaton<FloatMP>;
 #endif
       
-  }
-}
+  
+} // namespace Ariadne

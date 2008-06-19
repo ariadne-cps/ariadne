@@ -27,8 +27,8 @@
 namespace Ariadne {
 
 template<class X> template<class V> inline
-Function::TaylorDerivative<X> 
-Function::TaylorDerivative<X>::constant(size_type r, size_type a, smoothness_type d, const V& c) 
+TaylorDerivative<X> 
+TaylorDerivative<X>::constant(size_type r, size_type a, smoothness_type d, const V& c) 
 {
   TaylorDerivative<X> result(r,a,d);
   ARIADNE_ASSERT(c.size()==r);
@@ -39,8 +39,8 @@ Function::TaylorDerivative<X>::constant(size_type r, size_type a, smoothness_typ
 }
 
 template<class X> template<class V> inline
-Function::TaylorDerivative<X> 
-Function::TaylorDerivative<X>::variable(size_type r, size_type a, smoothness_type d, const V& x) 
+TaylorDerivative<X> 
+TaylorDerivative<X>::variable(size_type r, size_type a, smoothness_type d, const V& x) 
 {
   ARIADNE_ASSERT(a==r);
   ARIADNE_ASSERT(x.size()==r);
@@ -54,8 +54,8 @@ Function::TaylorDerivative<X>::variable(size_type r, size_type a, smoothness_typ
 }
 
 template<class X> template<class V> inline
-Function::TaylorDerivative<X> 
-Function::TaylorDerivative<X>::variable(const V& x, smoothness_type d) 
+TaylorDerivative<X> 
+TaylorDerivative<X>::variable(const V& x, smoothness_type d) 
 {
   TaylorDerivative<X> result(x.size(),x.size(),d);
   //size_type inc=compute_polynomial_data_size(1u,a,d);
@@ -70,7 +70,7 @@ Function::TaylorDerivative<X>::variable(const V& x, smoothness_type d)
 
 template<class P, class M> 
 void
-Function::evaluate_polynomial(M& r, const P& p, const M& x)
+evaluate_polynomial(M& r, const P& p, const M& x)
 {
   ARIADNE_ASSERT(p.argument_size()==x.size());
   ARIADNE_ASSERT(p.result_size()==r.size());
@@ -123,7 +123,7 @@ Function::evaluate_polynomial(M& r, const P& p, const M& x)
 
 template<class X, class R> 
 array<R>
-Function::evaluate(const TaylorDerivative<X>& y, const array<R>& x)
+evaluate(const TaylorDerivative<X>& y, const array<R>& x)
 {
   using namespace std;
   ARIADNE_ASSERT(y.argument_size()==x.size());

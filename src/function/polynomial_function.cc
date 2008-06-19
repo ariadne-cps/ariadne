@@ -27,8 +27,7 @@
 #include "function/polynomial_function.code.h"
 
 namespace Ariadne {
-  namespace Function {
-    using namespace Numeric;
+    
     
     template class PolynomialFunction<Rational>;
 
@@ -42,5 +41,5 @@ namespace Ariadne {
     template class PolynomialFunction<IntervalMP>;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

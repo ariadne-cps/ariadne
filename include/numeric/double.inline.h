@@ -122,7 +122,7 @@
 
 
 namespace Ariadne {
-namespace Numeric {
+
 
 inline double med(double x, double y) { return (x+y)/2; }
 inline double rad(double x, double y) { return (y-x)/2; }
@@ -241,7 +241,7 @@ template<class Rnd> inline void hypot_(double& r, const double& x, const double&
 
 
 }
-}
+
 
 
 #undef ARIADNE_ROUNDED_ARITHMETIC

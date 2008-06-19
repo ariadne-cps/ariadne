@@ -36,7 +36,7 @@
 #include "numeric/expression.h"
 
 namespace Ariadne {
-  namespace Numeric {
+  
 
     class mpfr;
     
@@ -97,7 +97,8 @@ namespace Ariadne {
     std::ostream& operator<<(std::ostream& os, const FloatMP& x);
     std::istream& operator>>(std::istream& is, FloatMP& x);
       
-  }
-}
+
+} // namespace Ariadne
+
 
 #endif /* ARIADNE_NUMERIC_FLOATMP_CLASS_H */

@@ -28,7 +28,8 @@
 #include "base/tribool.h"
 
 using namespace std;
-using namespace Ariadne::Base;
+using namespace Ariadne;
+
 
 class TestTribool
 {

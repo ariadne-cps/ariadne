@@ -39,8 +39,6 @@
 
 using namespace std;
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::LinearAlgebra;
 
 template<class R> int test_matrix();
 
@@ -54,7 +52,7 @@ template<class R>
 int 
 test_matrix()
 {
-  typedef typename Numeric::traits<R>::arithmetic_type F;
+  typedef typename traits<R>::arithmetic_type F;
 
   R x=2.25;
   Interval<R> ix(1.5,2.25);

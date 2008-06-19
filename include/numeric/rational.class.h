@@ -33,7 +33,7 @@
 
 
 namespace Ariadne {
-  namespace Numeric {
+  
   
     template<class E> class Expression;
     template<class X> class Value;
@@ -208,7 +208,7 @@ namespace Ariadne {
     std::ostream& operator<<(std::ostream& os, const Rational& q);
     std::istream& operator>>(std::istream& is, Rational& q);
       
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_NUMERIC_RATIONAL_CLASS_H */

@@ -34,9 +34,6 @@
 
 
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::LinearAlgebra;
-using namespace Ariadne::Geometry;
 using namespace Ariadne::Python;
 
 #include <boost/python.hpp>
@@ -102,7 +99,7 @@ Point<R> point_list_get(const PointList<R>& pl, const size_type& n) {
 template<class R>
 void export_point() 
 {
-  typedef typename Numeric::traits<R>::arithmetic_type A;
+  typedef typename traits<R>::arithmetic_type A;
 
   class_< Point<R> >(python_name<R>("Point").c_str(),init<>())
     .def("__init__", make_constructor(&make_point<R>) )

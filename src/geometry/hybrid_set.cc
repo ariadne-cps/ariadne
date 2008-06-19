@@ -31,9 +31,7 @@
 #include "geometry/hybrid_set.code.h"
 
 namespace Ariadne {
-  namespace Geometry {
 
-    using namespace Numeric;
     
 #ifdef ENABLE_FLOAT64
   //template class HybridSet< SetInterface<Float64> >;
@@ -55,5 +53,5 @@ namespace Ariadne {
     template class HybridListSet< Zonotope<FloatMP> >;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

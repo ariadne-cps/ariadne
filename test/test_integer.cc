@@ -32,7 +32,7 @@
 #include "test/test.h"
 
 using namespace std;
-using namespace Ariadne::Numeric;
+using namespace Ariadne;
 
 
 

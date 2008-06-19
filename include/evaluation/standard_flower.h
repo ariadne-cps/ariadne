@@ -37,7 +37,7 @@
 
 
 namespace Ariadne { 
-  namespace Evaluation { 
+   
 
     /*!\ingroup Integrators
      * \brief A class for integrating a vector field to obtain a higher-order models for the flow.
@@ -54,7 +54,7 @@ namespace Ariadne {
     class StandardFlower
       : public FlowerInterface<R>
     {
-      typedef Numeric::Interval<R> I;
+      typedef Interval<R> I;
      public:
 
       /*! \brief Virtual destructor. */
@@ -74,37 +74,37 @@ namespace Ariadne {
     public:
       /*! \brief A model for the flow at time \a t with centre \a c, given that the flow remains in \a bb. */
       virtual 
-      Function::AffineModel<R> 
-      affine_flow_model(const System::VectorField<R>& vf,
-                        const Geometry::Point<R>& c,
-                        const Geometry::Box<R>& d,
-                        const Numeric::Rational& t,
-                        const Geometry::Box<R>& bb) const;
+      AffineModel<R> 
+      affine_flow_model(const VectorField<R>& vf,
+                        const Point<R>& c,
+                        const Box<R>& d,
+                        const Rational& t,
+                        const Box<R>& bb) const;
      
       /*! \brief A model for the flow at time \a t with centre \a c, given that the flow remains in \a bb. */
       virtual 
-      Function::TaylorModel<R> 
-      taylor_flow_model(const System::VectorField<R>& vf,
-                        const Geometry::Point<R>& c,
-                        const Geometry::Box<R>& d,
-                        const Numeric::Rational& t,
-                        const Geometry::Box<R>& bb) const;
+      TaylorModel<R> 
+      taylor_flow_model(const VectorField<R>& vf,
+                        const Point<R>& c,
+                        const Box<R>& d,
+                        const Rational& t,
+                        const Box<R>& bb) const;
       
       /*! \brief Evolve the flow for a step of time \a step_size, given that the flow remains in \a bounding_box. */
       virtual 
-      Geometry::Point<I>
-      flow_step(const System::VectorField<R>& vector_field,
-                const Geometry::Point<I>& initial_point,
-                const Numeric::Rational& step_size,
-                const Geometry::Box<R>& bounding_box) const;
+      Point<I>
+      flow_step(const VectorField<R>& vector_field,
+                const Point<I>& initial_point,
+                const Rational& step_size,
+                const Box<R>& bounding_box) const;
       
       /*! \brief Compute the Jacobian derivative (first variation) of the flow. */
       virtual
-      LinearAlgebra::Matrix< Numeric::Interval<R> >
-      flow_step_jacobian(const System::VectorField<R>& vector_field, 
-                         const Geometry::Point<I>& initial_point, 
-                         const Numeric::Rational& step_size, 
-                         const Geometry::Box<R>& bounding_box) const;
+      Matrix< Interval<R> >
+      flow_step_jacobian(const VectorField<R>& vector_field, 
+                         const Point<I>& initial_point, 
+                         const Rational& step_size, 
+                         const Box<R>& bounding_box) const;
      private:
       smoothness_type _temporal_order;
       smoothness_type _spacial_order;
@@ -113,7 +113,7 @@ namespace Ariadne {
 
 
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* STANDARD_FLOWER_H */

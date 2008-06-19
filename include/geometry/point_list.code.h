@@ -32,11 +32,11 @@ namespace Ariadne {
     
 template<class X> 
 void
-Geometry::PointList<X>::reserve(size_type n)
+PointList<X>::reserve(size_type n)
 {
   if(this->capacity()>=n) { return; }
-  LinearAlgebra::Matrix<X> old(this->_pts);
-  _pts=LinearAlgebra::Matrix<X>(this->dimension()+1,n);
+  Matrix<X> old(this->_pts);
+  _pts=Matrix<X>(this->dimension()+1,n);
   for(size_type j=0; j!=this->size(); ++j) {
     for(size_type i=0; i!=this->dimension()+1u; ++i) {
       _pts(i,j)=old(i,j);
@@ -46,8 +46,8 @@ Geometry::PointList<X>::reserve(size_type n)
 
 
 template<class X>
-const LinearAlgebra::Matrix<X>&
-Geometry::PointList<X>::generators() const 
+const Matrix<X>&
+PointList<X>::generators() const 
 { 
   return this->_pts;
 }
@@ -55,7 +55,7 @@ Geometry::PointList<X>::generators() const
 
 template<class X>
 void
-Geometry::PointList<X>::push_back(const Point<X>& pt) 
+PointList<X>::push_back(const Point<X>& pt) 
 {
   if(this->_size==0) {
     _pts.resize(pt.dimension()+1,1);
@@ -73,7 +73,7 @@ Geometry::PointList<X>::push_back(const Point<X>& pt)
 
 template<class X> 
 std::ostream& 
-Geometry::PointList<X>::write(std::ostream& os) const
+PointList<X>::write(std::ostream& os) const
 {
   const PointList<X>& ptl=*this;
   if(ptl.size()==0) { os << "[ "; }

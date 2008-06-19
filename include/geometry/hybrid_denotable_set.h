@@ -50,7 +50,7 @@
 
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
     class basic_set_tag;
     class denotable_set_tag;
@@ -331,8 +331,8 @@ namespace Ariadne {
     regular_intersection(const HybridGridMaskSet<R>& hgms1, const HybridGridMaskSet<R>& hgms2);
    
    
-  }
-}
+  
+} // namespace Ariadne
 
 
 #include "hybrid_denotable_set.inline.h"

@@ -35,7 +35,7 @@
 #include "python/read_scalar.h"
 
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
+
 using namespace Ariadne::LinearAlgebra;
 using namespace Ariadne::Python;
 

@@ -38,7 +38,7 @@
 
 namespace Ariadne {
 
-  namespace System {
+  
 
     /*!\ingroup System
      * \brief Interface for numerical systems defined by reach and evolve operators. 
@@ -46,7 +46,7 @@ namespace Ariadne {
     template<class T, class ES>
     class NumericalSystemInterface 
     {
-      typedef Geometry::ListSet<ES> ESL;
+      typedef ListSet<ES> ESL;
      public:
       /*! \brief The type used for a single enclosure set. */
       typedef ES enclosure_set_type;
@@ -65,17 +65,17 @@ namespace Ariadne {
       virtual NumericalSystemInterface<T,ES>* clone() const = 0;
 
       /*! \brief The underlying state space of the system. */
-      virtual Geometry::EuclideanSpace state_space() const = 0;
+      virtual EuclideanSpace state_space() const = 0;
 
       /*! \brief Compute a lower approximation to the evolution for time \a t starting in set \a s. */
-      virtual ESL evolve(const ES& initial, const T& time, Evaluation::Semantics semantics) const = 0;
+      virtual ESL evolve(const ES& initial, const T& time, Semantics semantics) const = 0;
       /*! \brief Compute a lower approximation to the evolution for time \a t starting in set \a s. */
-      virtual ESL reach(const ES& initial, const T& time, Evaluation::Semantics semantics) const = 0;
+      virtual ESL reach(const ES& initial, const T& time, Semantics semantics) const = 0;
       /*! \brief Compute a lower approximation to the evolution for time \a t starting in set \a s. */
-      virtual std::pair<ESL,ESL> reach_evolve(const ES& initial, const T& t, Evaluation::Semantics semantics) const = 0;
+      virtual std::pair<ESL,ESL> reach_evolve(const ES& initial, const T& t, Semantics semantics) const = 0;
     };
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_NUMERICAL_SYSTEM_INTERFACE_H */

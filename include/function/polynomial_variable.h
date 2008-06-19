@@ -37,7 +37,6 @@
 #include "base/stlio.h"
 
 namespace Ariadne {
-  namespace Function {
   
     class MultiIndex;
   
@@ -240,11 +239,11 @@ namespace Ariadne {
 namespace Ariadne {
 
 inline size_type compute_polynomial_data_size(size_type as, smoothness_type d) {
-  return Numeric::bin(d+as,as);
+  return bin(d+as,as);
 }
 
 template<class X> template<class XX> 
-Function::PolynomialVariable<X>::PolynomialVariable(size_type a, smoothness_type d, const XX* ptr)
+PolynomialVariable<X>::PolynomialVariable(size_type a, smoothness_type d, const XX* ptr)
   : _argument_size(a), _degree(d), _data(compute_polynomial_data_size(a,d)) 
 {
   for(size_type i=0; i!=this->_data.size(); ++i) {
@@ -253,8 +252,8 @@ Function::PolynomialVariable<X>::PolynomialVariable(size_type a, smoothness_type
 }
 
 template<class X> template<class XX> 
-Function::PolynomialVariable<X>& 
-Function::PolynomialVariable<X>::operator=(const XX& c) 
+PolynomialVariable<X>& 
+PolynomialVariable<X>::operator=(const XX& c) 
 {
   this->_data[0]=c;
   for(size_type i=1; i!=this->_data.size(); ++i) {
@@ -264,8 +263,8 @@ Function::PolynomialVariable<X>::operator=(const XX& c)
 }
 
 template<class X> template<class XX> 
-Function::PolynomialVariable<X> 
-Function::PolynomialVariable<X>::constant(size_type a, smoothness_type d, const XX& c) 
+PolynomialVariable<X> 
+PolynomialVariable<X>::constant(size_type a, smoothness_type d, const XX& c) 
 {
   PolynomialVariable<X> result(a,d);
   result._data[0]=c; 
@@ -273,8 +272,8 @@ Function::PolynomialVariable<X>::constant(size_type a, smoothness_type d, const 
 }
 
 template<class X> template<class XX> 
-Function::PolynomialVariable<X> 
-Function::PolynomialVariable<X>::variable(size_type a, smoothness_type d, const XX& x, size_type i) 
+PolynomialVariable<X> 
+PolynomialVariable<X>::variable(size_type a, smoothness_type d, const XX& x, size_type i) 
 {
   PolynomialVariable<X> result(a,d);
   result._data[0]=x; 
@@ -286,62 +285,62 @@ Function::PolynomialVariable<X>::variable(size_type a, smoothness_type d, const 
 
 
 template<class X, class R> inline
-Function::PolynomialVariable<X> 
-Function::operator+(const R& c, const PolynomialVariable<X>& x)
+PolynomialVariable<X> 
+operator+(const R& c, const PolynomialVariable<X>& x)
 {
   PolynomialVariable<X> r=x; r.value()+=c; return r;
 }
 
 template<class X, class R> inline
-Function::PolynomialVariable<X> 
-Function::operator+(const PolynomialVariable<X>& x, const R& c)
+PolynomialVariable<X> 
+operator+(const PolynomialVariable<X>& x, const R& c)
 {
   PolynomialVariable<X> r=x; r.value()+=c; return r;
 }
 
 template<class X, class R> inline
-Function::PolynomialVariable<X> 
-Function::operator-(const R& c, const PolynomialVariable<X>& x)
+PolynomialVariable<X> 
+operator-(const R& c, const PolynomialVariable<X>& x)
 {
   PolynomialVariable<X> r=x; 
-  reinterpret_cast<LinearAlgebra::Vector<X>&>(r.data())*=X(-1);
+  reinterpret_cast<Vector<X>&>(r.data())*=X(-1);
   r.value()+=c; 
   return r;
 }
 
 template<class X, class R> inline
-Function::PolynomialVariable<X> 
-Function::operator-(const PolynomialVariable<X>& x, const R& c)
+PolynomialVariable<X> 
+operator-(const PolynomialVariable<X>& x, const R& c)
 {
   PolynomialVariable<X> r=x; r.value()-=c; return r;
 }
 
 template<class X, class R> inline
-Function::PolynomialVariable<X> 
-Function::operator*(const R& c, const PolynomialVariable<X>& x)
+PolynomialVariable<X> 
+operator*(const R& c, const PolynomialVariable<X>& x)
 {
   PolynomialVariable<X> r=x; 
-  reinterpret_cast<LinearAlgebra::Vector<X>&>(r.data())*=X(c);
+  reinterpret_cast<Vector<X>&>(r.data())*=X(c);
   return r;
 }
 
 template<class X, class R> inline
-Function::PolynomialVariable<X> 
-Function::operator*(const PolynomialVariable<X>& x, const R& c)
+PolynomialVariable<X> 
+operator*(const PolynomialVariable<X>& x, const R& c)
 {
   return c*x;
 }
 
 template<class X, class R> inline
-Function::PolynomialVariable<X> 
-Function::operator/(const R& c, const PolynomialVariable<X>& x)
+PolynomialVariable<X> 
+operator/(const R& c, const PolynomialVariable<X>& x)
 {
   return c*rec(x);
 }
 
 template<class X, class R> inline
-Function::PolynomialVariable<X> 
-Function::operator/(const PolynomialVariable<X>& x, const R& c)
+PolynomialVariable<X> 
+operator/(const PolynomialVariable<X>& x, const R& c)
 {
   return X(1/c)*x;
 }

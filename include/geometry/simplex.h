@@ -36,7 +36,7 @@
 #include "geometry/polytope.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
     class basic_set_tag;
 
@@ -56,7 +56,7 @@ namespace Ariadne {
     class Simplex
       : public Polytope<X>
     {
-      typedef typename Numeric::traits<X>::number_type R;
+      typedef typename traits<X>::number_type R;
      public:
       /*! \brief The type of denotable real number used for the corners. */
       typedef R real_type;
@@ -72,7 +72,7 @@ namespace Ariadne {
       Simplex();
     
       /*! \brief Construct from matrix giving the vertices in column form. */
-      explicit Simplex(const LinearAlgebra::Matrix<X>& A);
+      explicit Simplex(const Matrix<X>& A);
       
       /*! \brief Construct from list of vertices. */
       explicit Simplex(const PointList<X>& v);
@@ -97,14 +97,14 @@ namespace Ariadne {
       std::istream& read(std::istream& is);
       //@}
      public:
-      LinearAlgebra::Vector<typename Numeric::traits<X>::arithmetic_type> coordinates(const Point<X>& s) const;
+      Vector<typename traits<X>::arithmetic_type> coordinates(const Point<X>& s) const;
     };
   
     template<class X> std::ostream& operator<<(std::ostream& os, const Simplex<X>& s);
     template<class X> std::istream& operator>>(std::istream& is, Simplex<X>& s);
     
-  }
-}
+  
+} // namespace Ariadne
 
 #include "simplex.inline.h"
 

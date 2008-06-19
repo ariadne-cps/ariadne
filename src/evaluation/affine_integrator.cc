@@ -28,20 +28,20 @@
 #include "evaluation/affine_integrator.code.h"
 
 namespace Ariadne {
-  namespace Evaluation {
-    using namespace Numeric;
+  
+    
 
 #ifdef ENABLE_FLOAT64
    template Float64 gexp_up(const Float64& x, uint k);
 
-    template LinearAlgebra::Vector<Interval64> 
-    gexp(const LinearAlgebra::Matrix<Interval64>& A, 
-         const LinearAlgebra::Vector<Interval64>& b, 
+    template Vector<Interval64> 
+    gexp(const Matrix<Interval64>& A, 
+         const Vector<Interval64>& b, 
          const Interval64& t, 
          const uint& k);
     
-    template LinearAlgebra::Matrix<Interval64>
-    gexp(const LinearAlgebra::Matrix<Interval64>& A, const Interval64& t, const uint& k);
+    template Matrix<Interval64>
+    gexp(const Matrix<Interval64>& A, const Interval64& t, const uint& k);
     
   template class AffineIntegrator< Zonotope<Float64> >;
 #endif
@@ -49,17 +49,17 @@ namespace Ariadne {
 #ifdef ENABLE_FLOATMP
    template FloatMP gexp_up(const FloatMP& x, uint k);
 
-    template LinearAlgebra::Vector<IntervalMP> 
-    gexp(const LinearAlgebra::Matrix<IntervalMP>& A, 
-         const LinearAlgebra::Vector<IntervalMP>& b, 
+    template Vector<IntervalMP> 
+    gexp(const Matrix<IntervalMP>& A, 
+         const Vector<IntervalMP>& b, 
          const IntervalMP& t, const uint& k);
     
-    template LinearAlgebra::Matrix<IntervalMP> 
-    gexp(const LinearAlgebra::Matrix<IntervalMP>& A, 
+    template Matrix<IntervalMP> 
+    gexp(const Matrix<IntervalMP>& A, 
          const IntervalMP& t, const uint& k);
     
     template class AffineIntegrator< Zonotope<FloatMP> >;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

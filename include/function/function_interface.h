@@ -40,14 +40,13 @@
 #include "function/declarations.h"
 
 namespace Ariadne {
-  namespace Function {
 
     class MultiIndex;
 
     /*!\ingroup Function
      * \brief Abstract base class for continuous functionss.
      * 
-     * The function is specified by the method operator()(const LinearAlgebra::Vector< Interval<R> >& A) const,
+     * The function is specified by the method operator()(const Vector< Interval<R> >& A) const,
      * This method should compute an interval vector \f$\overline{f}(A)\f$ with the
      * following properties:
      *   -# \f$f(A)\subset\overline{f}(A)\f$,
@@ -60,13 +59,13 @@ namespace Ariadne {
      * as \f$A_n\f$ tends to a point.
      *
      * Additional accuracy can be obtained be using derivatives.
-     * The method derivative(const LinearAlgebra::Vector< Interval<R> >& A) const computes the \a i th component of the derivative over the set \a A 
+     * The method derivative(const Vector< Interval<R> >& A) const computes the \a i th component of the derivative over the set \a A 
      * with respect to the variables in the multi-index \a j.
      */
     template<class R>
     class FunctionInterface {
-      typedef typename Numeric::traits<R>::arithmetic_type F;
-      typedef typename Numeric::traits<R>::interval_type I;
+      typedef typename traits<R>::arithmetic_type F;
+      typedef typename traits<R>::interval_type I;
      public:
       /*! \brief The real number type. */
       typedef R real_type;
@@ -78,14 +77,14 @@ namespace Ariadne {
       virtual FunctionInterface<R>* clone() const = 0;
      
       /*! \brief Evaluate the function. */
-      LinearAlgebra::Vector<F> operator() (const LinearAlgebra::Vector<F>& x) const;
+      Vector<F> operator() (const Vector<F>& x) const;
 
       /*! \brief Evaluate the function. */
-      virtual LinearAlgebra::Vector<F> evaluate(const LinearAlgebra::Vector<F>& x) const = 0;
+      virtual Vector<F> evaluate(const Vector<F>& x) const = 0;
       /*! \brief Evaluate the Jacobian derivative matrix at the point \a x. */
-      virtual LinearAlgebra::Matrix<F> jacobian(const LinearAlgebra::Vector<F>& x) const = 0;
+      virtual Matrix<F> jacobian(const Vector<F>& x) const = 0;
       /*! \brief Evaluate the derivative of the function. */
-      virtual Function::TaylorDerivative<F> derivative(const LinearAlgebra::Vector<F>& x, const smoothness_type& s) const = 0;
+      virtual TaylorDerivative<F> derivative(const Vector<F>& x, const smoothness_type& s) const = 0;
 
       /*! \brief The degree of differentiability of the function. */
       virtual smoothness_type smoothness() const = 0;
@@ -106,8 +105,8 @@ namespace Ariadne {
     }; 
 
     template<class R> inline 
-    LinearAlgebra::Vector<typename FunctionInterface<R>::F>
-    FunctionInterface<R>::operator() (const LinearAlgebra::Vector<F>& x) const {
+    Vector<typename FunctionInterface<R>::F>
+    FunctionInterface<R>::operator() (const Vector<F>& x) const {
       return this->evaluate(x);
     }; 
 
@@ -117,11 +116,8 @@ namespace Ariadne {
     }; 
 
 
+
   
-
-
-
-  }
-}
+} // namespace Ariadne
 
 #endif /* ARIADNE_SYSTEM_FUNCTION_H */

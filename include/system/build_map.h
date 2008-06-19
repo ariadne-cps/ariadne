@@ -41,15 +41,15 @@
    \
   template<class R>                        \
   class Nm##Map \
-    : public System::Map<R> \
+    : public Map<R> \
   { \
    public: \
     template<class P> explicit Nm##Map(const P& p) \
-      : System::Map<R>(Nm##Function<R>(p.position_vector())), _parameters(p) { } \
-    const Geometry::Point<R>& parameters() const { return this->_parameters; } \
+      : Map<R>(Nm##Function<R>(p.position_vector())), _parameters(p) { } \
+    const Point<R>& parameters() const { return this->_parameters; } \
     const R& parameter(size_type k) const { return this->_parameters[k]; }    \
    private: \
-    Geometry::Point<R> _parameters;                  \
+    Point<R> _parameters;                  \
   }; \
 
 

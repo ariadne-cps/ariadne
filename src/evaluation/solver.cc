@@ -28,9 +28,9 @@
 #include "evaluation/newton.code.h"
 
 namespace Ariadne {
-  namespace Evaluation {
+  
 
-    using namespace Numeric;
+    
     
 #ifdef ENABLE_FLOAT64
     template class IntervalNewtonSolver<Float64>;
@@ -40,5 +40,5 @@ namespace Ariadne {
     template class IntervalNewtonSolver<FloatMP>;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

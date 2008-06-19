@@ -127,13 +127,7 @@ template<class R> void export_van_der_pol_equation();
 template<class R> void export_lorenz_system();
 
 using namespace Ariadne;
-using namespace Ariadne::Base;
 using namespace Ariadne::Python;
-
-using Numeric::Integer;
-using Numeric::Rational;
-using Python::FloatPy;
-using Python::IntervalPy;
 
 BOOST_PYTHON_MODULE(ariadne)
 {

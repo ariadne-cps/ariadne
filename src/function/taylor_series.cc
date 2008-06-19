@@ -31,8 +31,7 @@
 #include "function/taylor_series.code.h"
 
 namespace Ariadne {
-  namespace Function {
-    using namespace Numeric;
+    
    
     template class ArithmeticSeries<Rational>;
     template class TaylorSeries<Rational>;
@@ -49,5 +48,5 @@ namespace Ariadne {
     template class TaylorSeries<IntervalMP>;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

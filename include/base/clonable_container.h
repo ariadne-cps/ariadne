@@ -32,7 +32,7 @@
 #define ARIADNE_CLONABLE_CONTAINER_H
 
 namespace Ariadne {
-  namespace Base {
+
 
     /*! \brief A vector whose elements are copied using a <code>clone()</code> method. */
     template< class T >
@@ -166,8 +166,8 @@ namespace Ariadne {
       base_type _map;
     };
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif // ARIADNE_CLONABLE_CONTAINER_H
 

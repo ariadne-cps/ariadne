@@ -27,8 +27,8 @@
 #include "evaluation/standard_bounder.code.h"
 
 namespace Ariadne {
-  namespace Evaluation {
-    using namespace Numeric;
+  
+    
 
 #ifdef ENABLE_FLOAT64
     template class StandardBounder<Float64>;
@@ -38,5 +38,5 @@ namespace Ariadne {
     template class StandardBounder<FloatMP>;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

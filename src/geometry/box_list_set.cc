@@ -1,5 +1,5 @@
 /***************************************************************************
- *            list_set.cc
+ *            box_list_set.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
@@ -27,9 +27,9 @@
 #include "geometry/box_list_set.code.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
  
-    using namespace Numeric;
+    
     
     template class BoxListSet<Rational>;
 
@@ -41,5 +41,4 @@ namespace Ariadne {
     template class BoxListSet<FloatMP>;
 #endif
    
-  }
-}
+} // namespace Ariadne

@@ -34,7 +34,7 @@
 
 
 namespace Ariadne {
-  namespace Combinatoric {
+
 
     /*! \brief A combinatorial map on a lattice. */
     class LatticeMultiMap {
@@ -163,8 +163,9 @@ namespace Ariadne {
       
     std::ostream& operator<<(std::ostream&, const LatticeSystem&);
     
-  }
-}
+  
+} // namespace Ariadne
+
 
 
 #endif /* ARIADNE_LATTICE_MAP_H */

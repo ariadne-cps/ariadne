@@ -31,7 +31,7 @@
 #include "interval.h"
 
 namespace Ariadne {
-  namespace Numeric {
+  
 
     template<class T>
     class ErrorFloat
@@ -129,7 +129,8 @@ namespace Ariadne {
       x._value=mul_up(x._value,y); return x; }
 
 
-  }
-}
+
+} // namespace Ariadne
+
 
 #endif /* ARIADNE_NUMERIC_ERROR_FLOAT_H */

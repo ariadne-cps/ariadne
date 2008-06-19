@@ -40,7 +40,7 @@
 #include "linear_algebra/exceptions.h"
 
 namespace Ariadne {
-  namespace LinearAlgebra {
+  
     
 
     /*!\brief %Base class for all vector expressions. */
@@ -61,13 +61,13 @@ namespace Ariadne {
       public VectorExpression< BinaryVectorVectorExpression<Op,VE1,VE2> >
     {
      public:
-      //      typedef typename Numeric::traits<typename VE1::value_type, typename VE2::value_type>::arithmetic_type value_type;
-      typedef Numeric::Expression< Numeric::Binary<Op, typename VE1::value_type, typename VE2::value_type> > value_type;
+      //      typedef typename traits<typename VE1::value_type, typename VE2::value_type>::arithmetic_type value_type;
+      typedef Expression< Binary<Op, typename VE1::value_type, typename VE2::value_type> > value_type;
       BinaryVectorVectorExpression(const Op& o, const VE1& v1, const VE2& v2)
         : _op(o), _ve1(v1), _ve2(v2)  { }
       size_type size() const { return _ve1.size(); }
-      value_type operator()(const size_type& i) const { return Numeric::make_expression(_op,_ve1(i),_ve2(i)); }
-      value_type operator[](const size_type& i) const { return Numeric::make_expression(_op,_ve1(i),_ve2(i)); }
+      value_type operator()(const size_type& i) const { return make_expression(_op,_ve1(i),_ve2(i)); }
+      value_type operator[](const size_type& i) const { return make_expression(_op,_ve1(i),_ve2(i)); }
       //      value_type operator()(const size_type& i) const { return _op(_ve1(i),_ve2(i)); }
       //      value_type operator[](const size_type& i) const { return _op(_ve1(i),_ve2(i)); }
      private:
@@ -80,15 +80,15 @@ namespace Ariadne {
       : public VectorExpression< BinaryVectorScalarExpression<Op,VE,SE> >
     {
       typedef typename VE::value_type vector_value_type;
-      //typedef typename Numeric::traits<SE>::closure_type scalar_closure_type;
+      //typedef typename traits<SE>::closure_type scalar_closure_type;
      public:
-      //typedef typename Numeric::traits<vector_value_type,scalar_closure_type>::arithmetic_type value_type;
-      typedef Numeric::Expression< Numeric::Binary<Op, typename VE::value_type, SE> > value_type;
+      //typedef typename traits<vector_value_type,scalar_closure_type>::arithmetic_type value_type;
+      typedef Expression< Binary<Op, typename VE::value_type, SE> > value_type;
       BinaryVectorScalarExpression(const Op& o, const VE& ve, const SE& se) 
         : _op(o), _ve(ve), _se(se) { }
       size_type size() const { return _ve.size(); }
-      value_type operator()(const size_type& i) const { return Numeric::make_expression(_op,_ve(i),_se); }
-      value_type operator[](const size_type& i) const { return Numeric::make_expression(_op,_ve(i),_se); }
+      value_type operator()(const size_type& i) const { return make_expression(_op,_ve(i),_se); }
+      value_type operator[](const size_type& i) const { return make_expression(_op,_ve(i),_se); }
      private:
       Op _op;
       const VE& _ve; 
@@ -97,8 +97,7 @@ namespace Ariadne {
     };
     
 
-  }
-}
+} // namespace Ariadne
 
 
 #endif /* ARIADNE_VECTOR_EXPRESSION_H */

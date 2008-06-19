@@ -39,11 +39,11 @@ namespace {
 using namespace Ariadne;
 
 
-Geometry::Rectangle<Numeric::Rational> 
-neighbourhood(const Geometry::Rectangle<Numeric::Rational>& r, 
-              const Numeric::Rational& delta) 
+Rectangle<Rational> 
+neighbourhood(const Rectangle<Rational>& r, 
+              const Rational& delta) 
 {
-  Geometry::Rectangle<Numeric::Rational> result(r.dimension());
+  Rectangle<Rational> result(r.dimension());
   for (size_type j=0; j!=r.dimension(); ++j) {
     result.set_lower_bound(j,r.lower_bound(j)-delta);
     result.set_upper_bound(j,r.upper_bound(j)+delta);
@@ -52,11 +52,11 @@ neighbourhood(const Geometry::Rectangle<Numeric::Rational>& r,
 }
 
 template<class T>
-Geometry::Rectangle< Numeric::Float<T> > 
-neighbourhood(const Geometry::Rectangle< Numeric::Float<T> >&r, 
-              const Numeric::Float<T>& delta) 
+Rectangle< Float<T> > 
+neighbourhood(const Rectangle< Float<T> >&r, 
+              const Float<T>& delta) 
 {
-  Geometry::Rectangle< Numeric::Float<T> > result(r.dimension());
+  Rectangle< Float<T> > result(r.dimension());
   for (size_type j=0; j!=r.dimension(); ++j) {
     result.set_lower_bound(j,sub_down(r.lower_bound(j),delta));
     result.set_upper_bound(j,add_up(r.upper_bound(j),delta));
@@ -74,16 +74,16 @@ namespace Ariadne {
 
 template<class R>
 void
-Geometry::Rectangle<R>::_instantiate()
+Rectangle<R>::_instantiate()
 {
   Rectangle<R>* r=0;
   ListSet< Rectangle<R> >* rls=0;
-  *rls = Geometry::split(*r);
-  *rls = Geometry::subdivide(*r);
+  *rls = Ariadne::split(*r);
+  *rls = Ariadne::subdivide(*r);
 }
   
 template<class R>
-Geometry::Rectangle<R>::Rectangle(const std::string& s)
+Rectangle<R>::Rectangle(const std::string& s)
   : _data()
 {
   std::stringstream ss(s);
@@ -92,15 +92,15 @@ Geometry::Rectangle<R>::Rectangle(const std::string& s)
 
 
 
-template<class R> Geometry::Rectangle<R> 
-Geometry::Rectangle<R>::neighbourhood(const R& delta) const
+template<class R> Rectangle<R> 
+Rectangle<R>::neighbourhood(const R& delta) const
 {
   return ::neighbourhood(*this,delta);
 }
 
 template<class R> inline
 R
-Geometry::Rectangle<R>::volume() const 
+Rectangle<R>::volume() const 
 {
   R result=1;
   for(dimension_type i=0; i!=this->dimension(); ++i) {
@@ -110,18 +110,18 @@ Geometry::Rectangle<R>::volume() const
 }
 
 template<class R>
-Geometry::Rectangle<R>
-Geometry::Rectangle<R>::quadrant(const Combinatoric::BinaryWord& w) const 
+Rectangle<R>
+Rectangle<R>::quadrant(const BinaryWord& w) const 
 {
   ARIADNE_CHECK_DIMENSION(*this,w.size(),"Rectangle Rectangle::quadrant(BinaryWord w)");
   Rectangle<R> quadrant(this->dimension());
   
   for (size_type i=0; i!=this->dimension(); ++i) {
     if(w[i]) {
-      quadrant[i]=Numeric::Interval<R>(this->interval(i).midpoint(),this->upper_bound(i));
+      quadrant[i]=Interval<R>(this->interval(i).midpoint(),this->upper_bound(i));
     } 
     else {
-      quadrant[i]=Numeric::Interval<R>(this->lower_bound(i),this->interval(i).midpoint());
+      quadrant[i]=Interval<R>(this->lower_bound(i),this->interval(i).midpoint());
     }
   }
   return quadrant;
@@ -129,10 +129,10 @@ Geometry::Rectangle<R>::quadrant(const Combinatoric::BinaryWord& w) const
 
 
 template<class R> 
-Geometry::ListSet< Geometry::Rectangle<R> >
-Geometry::Rectangle<R>::split() const
+ListSet< Rectangle<R> >
+Rectangle<R>::split() const
 {
-  const Geometry::Rectangle<R>& r=*this;
+  const Rectangle<R>& r=*this;
 
   size_type d=r.dimension();
   R mr=0;
@@ -147,7 +147,7 @@ Geometry::Rectangle<R>::split() const
   R c=r[mi].midpoint();
 
   Rectangle<R> nr(r);
-  ListSet< Geometry::Rectangle<R> > result;
+  ListSet< Rectangle<R> > result;
   nr.set_upper_bound(mi,c);
   result.adjoin(nr);
   nr.set_upper_bound(mi,r.upper_bound(mi));
@@ -158,10 +158,10 @@ Geometry::Rectangle<R>::split() const
 
 
 template<class R>
-Geometry::ListSet< Geometry::Rectangle<R> >
-Geometry::Rectangle<R>::subdivide() const 
+ListSet< Rectangle<R> >
+Rectangle<R>::subdivide() const 
 {
-  const Geometry::Rectangle<R>& r=*this;
+  const Rectangle<R>& r=*this;
 
   size_type n=r.dimension();
   ListSet< Rectangle<R> > result(n);
@@ -192,8 +192,8 @@ Geometry::Rectangle<R>::subdivide() const
 
 
 template<class R>
-Geometry::PointList<R>
-Geometry::Rectangle<R>::vertices() const
+PointList<R>
+Rectangle<R>::vertices() const
 {
   size_type number_of_vertices=(1<<this->dimension());
   PointList<R> result(this->dimension(),number_of_vertices);
@@ -216,15 +216,15 @@ Geometry::Rectangle<R>::vertices() const
 
 template<class R>
 size_type 
-Geometry::Rectangle<R>::number_of_vertices() const 
+Rectangle<R>::number_of_vertices() const 
 {
   return 1<<this->dimension();
 }
 
 
 template<class R>
-Geometry::Point<R> 
-Geometry::Rectangle<R>::vertex(size_type i) const 
+Point<R> 
+Rectangle<R>::vertex(size_type i) const 
 {
   size_type d=this->dimension();
   state_type result(d); 
@@ -246,15 +246,15 @@ Geometry::Rectangle<R>::vertex(size_type i) const
 
 
 template<class R>
-typename Geometry::Rectangle<R>::vertices_const_iterator
-Geometry::Rectangle<R>::vertices_begin() const
+typename Rectangle<R>::vertices_const_iterator
+Rectangle<R>::vertices_begin() const
 {
   return RectangleVerticesIterator<R>(*this,false);
 }
 
 template<class R>
-typename Geometry::Rectangle<R>::vertices_const_iterator
-Geometry::Rectangle<R>::vertices_end() const
+typename Rectangle<R>::vertices_const_iterator
+Rectangle<R>::vertices_end() const
 {
   return RectangleVerticesIterator<R>(*this,true);
 }
@@ -265,7 +265,7 @@ Geometry::Rectangle<R>::vertices_end() const
 
 template<class R> inline
 tribool 
-Geometry::Rectangle< Numeric::Interval<R> >::empty() const 
+Rectangle< Interval<R> >::empty() const 
 {
   tribool result=false;
   if(this->dimension()==0) {
@@ -286,11 +286,11 @@ Geometry::Rectangle< Numeric::Interval<R> >::empty() const
 template<class R>
 inline
 tribool 
-Geometry::Rectangle< Numeric::Interval<R> >::contains(const Point< Numeric::Interval<R> >& pt) const 
+Rectangle< Interval<R> >::contains(const Point< Interval<R> >& pt) const 
 {
   tribool result=true;
   ARIADNE_CHECK_EQUAL_DIMENSIONS(*this,pt,"tribool Rectangle<Interval>::contains(Point<Interval> pt)");
-  const Rectangle< Numeric::Interval<R> >& self=*this;
+  const Rectangle< Interval<R> >& self=*this;
   for (size_type i=0; i!=self.dimension(); ++i) {
     if(self.lower_bound(i)>pt[i] || pt[i]>self.upper_bound(i)) {
       return false;
@@ -304,42 +304,42 @@ Geometry::Rectangle< Numeric::Interval<R> >::contains(const Point< Numeric::Inte
 
 
 template<class R>
-Geometry::Point< Numeric::Interval<R> > 
-Geometry::Rectangle< Numeric::Interval<R> >::lower_corner() const 
+Point< Interval<R> > 
+Rectangle< Interval<R> >::lower_corner() const 
 {
-  return Point< Numeric::Interval<R> >(this->dimension(),this->_data.begin(),2u);
+  return Point< Interval<R> >(this->dimension(),this->_data.begin(),2u);
 }
 
 
 template<class R>
-Geometry::Point< Numeric::Interval<R> > 
-Geometry::Rectangle< Numeric::Interval<R> >::upper_corner() const 
+Point< Interval<R> > 
+Rectangle< Interval<R> >::upper_corner() const 
 {
-  return Point< Numeric::Interval<R> >(this->dimension(),this->_data.begin()+1u,2u);
+  return Point< Interval<R> >(this->dimension(),this->_data.begin()+1u,2u);
 }
 
 
 template<class R>
 size_type 
-Geometry::Rectangle< Numeric::Interval<R> >::number_of_vertices() const 
+Rectangle< Interval<R> >::number_of_vertices() const 
 {
   return 1<<this->dimension();
 }
 
 
 template<class R>
-typename Geometry::Rectangle< Numeric::Interval<R> >::vertices_const_iterator
-Geometry::Rectangle< Numeric::Interval<R> >::vertices_begin() const
+typename Rectangle< Interval<R> >::vertices_const_iterator
+Rectangle< Interval<R> >::vertices_begin() const
 {
-  return RectangleVerticesIterator< Numeric::Interval<R> >(*this,false);
+  return RectangleVerticesIterator< Interval<R> >(*this,false);
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
 template<class R>
-typename Geometry::Rectangle< Numeric::Interval<R> >::vertices_const_iterator
-Geometry::Rectangle< Numeric::Interval<R> >::vertices_end() const
+typename Rectangle< Interval<R> >::vertices_const_iterator
+Rectangle< Interval<R> >::vertices_end() const
 {
-  return RectangleVerticesIterator< Numeric::Interval<R> >(*this,true);
+  return RectangleVerticesIterator< Interval<R> >(*this,true);
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
@@ -347,15 +347,15 @@ Geometry::Rectangle< Numeric::Interval<R> >::vertices_end() const
 
 template<class R>
 std::string
-Geometry::Rectangle<R>::name()
+Rectangle<R>::name()
 {
-  return std::string("Rectangle")+"<"+Numeric::name<R>()+">";
+  return std::string("Rectangle")+"<"+Ariadne::name<R>()+">";
 }
 
 
 template<class R>
 std::ostream&
-Geometry::Rectangle<R>::write(std::ostream& os) const 
+Rectangle<R>::write(std::ostream& os) const 
 {
   const Rectangle<R>& self=*this;
   if(self.dimension()==0) {
@@ -372,17 +372,17 @@ Geometry::Rectangle<R>::write(std::ostream& os) const
 
 template<class R>
 std::string
-Geometry::Rectangle< Numeric::Interval<R> >::name()
+Rectangle< Interval<R> >::name()
 {
-  return std::string("Rectangle")+"<"+Numeric::name< Numeric::Interval<R> >()+">";
+  return std::string("Rectangle")+"<"+Ariadne::name< Interval<R> >()+">";
 }
 
 
 template<class R>
 std::ostream&
-Geometry::Rectangle< Numeric::Interval<R> >::write(std::ostream& os) const 
+Rectangle< Interval<R> >::write(std::ostream& os) const 
 {
-  const Rectangle< Numeric::Interval<R> >& self=*this;
+  const Rectangle< Interval<R> >& self=*this;
   if(self.dimension()==0) {
     os << "EmptyRectangle";
   }
@@ -397,7 +397,7 @@ Geometry::Rectangle< Numeric::Interval<R> >::write(std::ostream& os) const
 
 template<class R>
 std::istream& 
-Geometry::Rectangle<R>::read(std::istream& is)
+Rectangle<R>::read(std::istream& is)
 {
   
   char c;
@@ -405,8 +405,8 @@ Geometry::Rectangle<R>::read(std::istream& is)
   is.putback(c);
   if(c=='[') {
     /* Representation as a literal [a1,b1]x[a2,b2]x...x[an,bn] */
-    std::vector< Numeric::Interval<R> > v;
-    Numeric::Interval<R> i;
+    std::vector< Interval<R> > v;
+    Interval<R> i;
     c='x';
     while(c=='x') {
       is >> i;

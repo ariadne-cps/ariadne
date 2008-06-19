@@ -31,16 +31,16 @@
 #include "system/numerical_system.h"
 
 namespace Ariadne {
-  namespace System {
-    using namespace Numeric;
+  
+    
 
 #ifdef ENABLE_FLOAT64
-  template class NumericalSystem< System::Map<Float64>, Geometry::Zonotope<Float64> >;
+  template class NumericalSystem< Map<Float64>, Zonotope<Float64> >;
 #endif
   
 #ifdef ENABLE_FLOATMP
-    template class NumericalSystem< System::Map<FloatMP>, Geometry::Zonotope<Float64> >;
+    template class NumericalSystem< Map<FloatMP>, Zonotope<Float64> >;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

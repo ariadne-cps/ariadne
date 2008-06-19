@@ -33,26 +33,26 @@
 namespace Ariadne {
 
 template<class R>
-LinearAlgebra::Vector<typename Function::AffineFunction<R>::F> 
-Function::AffineFunction<R>::evaluate(const LinearAlgebra::Vector<F>& x) const
+Vector<typename AffineFunction<R>::F> 
+AffineFunction<R>::evaluate(const Vector<F>& x) const
 { 
   return this->_a*x+this->_b; 
 }
 
 template<class R>
-LinearAlgebra::Matrix<typename Function::AffineFunction<R>::F> 
-Function::AffineFunction<R>::jacobian(const LinearAlgebra::Vector<F>& x) const 
+Matrix<typename AffineFunction<R>::F> 
+AffineFunction<R>::jacobian(const Vector<F>& x) const 
 { 
   return this->_a; 
 }
 
 
 template<class R>
-Function::TaylorDerivative<typename Function::AffineFunction<R>::F> 
-Function::AffineFunction<R>::derivative(const LinearAlgebra::Vector<F>& x, const smoothness_type& s) const
+TaylorDerivative<typename AffineFunction<R>::F> 
+AffineFunction<R>::derivative(const Vector<F>& x, const smoothness_type& s) const
 {
   TaylorDerivative<F> result(this->result_size(),this->argument_size(),s);
-  LinearAlgebra::Vector<F> value=this->evaluate(x);
+  Vector<F> value=this->evaluate(x);
   for(size_type i=0; i!=this->result_size(); ++i) {
     array<F>& data=result[i].data();
     data[0]=value[i];
@@ -67,7 +67,7 @@ Function::AffineFunction<R>::derivative(const LinearAlgebra::Vector<F>& x, const
 
 template<class R>
 std::ostream& 
-Function::AffineFunction<R>::write(std::ostream& os) const
+AffineFunction<R>::write(std::ostream& os) const
 {
   return os << "AffineFunction( A=" << this->A()
             << ", b=" << this->b() << " )";
@@ -75,4 +75,5 @@ Function::AffineFunction<R>::write(std::ostream& os) const
 
 
 
-}
+} // namespace Ariadne
+

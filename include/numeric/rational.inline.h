@@ -29,7 +29,7 @@
 #include "numeric/operators.h"
 
 namespace Ariadne {
-namespace Numeric {
+
   
 // These functions are not provided by GMP
 inline void mpq_min(mpq_ptr rop, mpq_srcptr op1, mpq_srcptr op2) { 
@@ -522,7 +522,7 @@ template<> inline std::string name<Rational>() {
   return "Rational"; }
     
 
-  }
+  
 
-}
+} // namespace Ariadne
 

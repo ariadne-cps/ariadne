@@ -63,12 +63,12 @@ namespace {
 
 using namespace Ariadne;
 
-template<class R> void ltgt(Numeric::Integer& n, const Evaluation::EvolutionParameters<R>& params) {
+template<class R> void ltgt(Integer& n, const EvolutionParameters<R>& params) {
   n=params.lock_to_grid_steps(); }
-template<class R> void ltgt(Numeric::Rational& t, const Evaluation::EvolutionParameters<R>& params) {
+template<class R> void ltgt(Rational& t, const EvolutionParameters<R>& params) {
   t=params.lock_to_grid_time(); }
 
-template<class T, class R> T lock_to_grid_time(const Evaluation::EvolutionParameters<R>& params) {
+template<class T, class R> T lock_to_grid_time(const EvolutionParameters<R>& params) {
   T t; ltgt(t,params); return t; }
 
 }
@@ -78,20 +78,20 @@ namespace Ariadne {
 
 template<class T, class Aprx>
 tribool
-Evaluation::ModelChecker<T,Aprx>::verify(const TSI& f, 
+ModelChecker<T,Aprx>::verify(const TSI& f, 
                                          const PTS& initial_set, 
                                          const PTS& safe_set) const
 {
   int verbosity=this->verbosity();
-  ARIADNE_LOG(2,"triboolEvaluation::ModelChecker::verify(TransitionSystemInterface map, GridMaskSet initial_set,GridMaskSet  safe_set)\n");
+  ARIADNE_LOG(2,"triboolModelChecker::verify(TransitionSystemInterface map, GridMaskSet initial_set,GridMaskSet  safe_set)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n"<<"safe_set="<<safe_set);
-  using namespace Geometry;
+  
   ARIADNE_CHECK_BOUNDED(initial_set,"ModelChecker<R>::verify(...)");
   ARIADNE_CHECK_BOUNDED(safe_set,"ModelChecker<R>::verify(...)");
   
   T time = lock_to_grid_time<T>(this->parameters());
   const Pv& g=initial_set.grid();
-  Combinatoric::LatticeBlock bd=safe_set.block();
+  LatticeBlock bd=safe_set.block();
   Bx bb=safe_set.bounding_box();
   PTS reach(g,bd);
   PLS found(g);
@@ -121,7 +121,7 @@ Evaluation::ModelChecker<T,Aprx>::verify(const TSI& f,
 
 template<class T, class Aprx>
 tribool
-Evaluation::ModelChecker<T,Aprx>::verify(const TransitionSystem& system, 
+ModelChecker<T,Aprx>::verify(const TransitionSystem& system, 
                                          const PartitionTreeSet& initial_set, 
                                          const TimedLogicFormula& formula) const
 {

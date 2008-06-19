@@ -33,9 +33,7 @@
 
 
 namespace Ariadne {
-  namespace LinearAlgebra {
-    
-    using namespace Numeric;
+  
     
     template class Matrix<Rational>;
     template class Matrix< Interval<Rational> >;
@@ -50,5 +48,5 @@ namespace Ariadne {
     template class Matrix<IntervalMP>;
 #endif
 
-  }
-}
+
+} // namespace Ariadne

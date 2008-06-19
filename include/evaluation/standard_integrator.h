@@ -39,7 +39,7 @@
 
 
 namespace Ariadne { 
-  namespace Evaluation { 
+   
 
     template<class R> class Flower;
 
@@ -62,11 +62,11 @@ namespace Ariadne {
      * Subdivision is performed using orthogonal over-approximation.
      * See the section on the \ref c1lohnerintegrator for details.
      */
-    template<class R> class StandardIntegrator< Geometry::Zonotope<R> >
-      : public IntegratorInterface< Geometry::Zonotope<R> >
+    template<class R> class StandardIntegrator< Zonotope<R> >
+      : public IntegratorInterface< Zonotope<R> >
     {
-      typedef Numeric::Interval<R> I;
-      typedef Geometry::Zonotope<R> ES;
+      typedef Interval<R> I;
+      typedef Zonotope<R> ES;
      private:
       boost::shared_ptr< BounderInterface<R> > _bounder;
       boost::shared_ptr< FlowerInterface<R> > _flower;
@@ -80,30 +80,30 @@ namespace Ariadne {
                          const FlowerInterface<R>& flower);
 
       /*! \brief Cloning operator. */
-      virtual StandardIntegrator< Geometry::Zonotope<R> >* clone() const;
+      virtual StandardIntegrator< Zonotope<R> >* clone() const;
 
      public:
       
       /*! \brief Compute an integration time and a bounding box, given a bounding box for the intitial set, and a maximum allowable flow time. */
       virtual 
-      std::pair< Numeric::Rational, Geometry::Box<R> >
-      flow_bounds(const System::VectorField<R>& vector_field, 
-                  const Geometry::Zonotope<R>& initial_set,
-                  const Numeric::Rational& maximum_step_size) const; 
+      std::pair< Rational, Box<R> >
+      flow_bounds(const VectorField<R>& vector_field, 
+                  const Zonotope<R>& initial_set,
+                  const Rational& maximum_step_size) const; 
 
       /*! \brief An algorithm for integrating forward a zonotope.  */
-      virtual Geometry::Zonotope<R> 
-      integration_step(const System::VectorField<R>& vector_field,
-                       const Geometry::Zonotope<R>& initial_set,
-                       const Numeric::Rational& step_size,
-                       const Geometry::Box<R>& bounding_set) const;
+      virtual Zonotope<R> 
+      integration_step(const VectorField<R>& vector_field,
+                       const Zonotope<R>& initial_set,
+                       const Rational& step_size,
+                       const Box<R>& bounding_set) const;
 
       /*! \brief An algorithm for integrating forward a zonotope for a time up to time \a step_size, assuming the set \a bb is a bounding box for the integration. */
-      virtual Geometry::Zonotope<R> 
-      reachability_step(const System::VectorField<R>& vector_field,
-                        const Geometry::Zonotope<R>& initial_set,
-                        const Numeric::Rational& step_size,
-                        const Geometry::Box<R>& bounding_set) const;
+      virtual Zonotope<R> 
+      reachability_step(const VectorField<R>& vector_field,
+                        const Zonotope<R>& initial_set,
+                        const Rational& step_size,
+                        const Box<R>& bounding_set) const;
 
       /*! \brief Write to an output stream. */
       virtual std::ostream& write(std::ostream&) const;
@@ -111,7 +111,7 @@ namespace Ariadne {
     
 
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* STANDARD_INTEGRATOR_H */

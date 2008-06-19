@@ -47,7 +47,7 @@
 #include "geometry/rectangle_expression.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
     class basic_set_tag;
     class EuclideanSpace;
@@ -85,9 +85,9 @@ namespace Ariadne {
       : public RectangleExpression< Box<R> >
     {
       typedef Box<R> Self;
-      BOOST_CLASS_REQUIRE(Self,Ariadne::Geometry,BasicSetConcept);
-      typedef typename Numeric::traits<R>::interval_type I;
-      typedef typename Numeric::traits<R>::arithmetic_type A;
+      BOOST_CLASS_REQUIRE(Self,Ariadne,BasicSetConcept);
+      typedef typename traits<R>::interval_type I;
+      typedef typename traits<R>::arithmetic_type A;
      private:
       array<R> _data;
      public:
@@ -119,16 +119,16 @@ namespace Ariadne {
       template<class RR> explicit Box(const dimension_type& d, const RR ary[][2]);
       
       /*! \brief Construct from an array of intervals. */
-      explicit Box(const Base::array< Numeric::Interval<R> >& a);
+      explicit Box(const array< Interval<R> >& a);
       
       /*! \brief Construct from a std::vector of intervals. */
-      explicit Box(const std::vector< Numeric::Interval<R> >& v);
+      explicit Box(const std::vector< Interval<R> >& v);
 
       /*! \brief Construct a degenerate box from a single point. */
       explicit Box(const Point<R>& pt);
       
       /*! \brief Construct a box from an interval point. */
-      explicit Box(const Point< Numeric::Interval<R> >& pt);;
+      explicit Box(const Point< Interval<R> >& pt);;
       
       /*! \brief Construct from two corners. */
       explicit Box(const Point<R>& pt1, const Point<R>& pt2);
@@ -137,7 +137,7 @@ namespace Ariadne {
       explicit Box(const std::string& s);
       
       /*! \brief Construct from an interval vector. */
-      explicit Box(const LinearAlgebra::Vector< Numeric::Interval<R> >& iv);
+      explicit Box(const Vector< Interval<R> >& iv);
       
       /*! \brief Convert from a box expression. */
       template<class E> Box(const RectangleExpression<E>& r);
@@ -168,7 +168,7 @@ namespace Ariadne {
       //@{
       //! \name Conversion operators
       /*! \brief Convert to an interval point. */
-      operator Point< Numeric::Interval<R> >() const;
+      operator Point< Interval<R> >() const;
       //@}
       
       
@@ -203,13 +203,13 @@ namespace Ariadne {
       R& upper_bound(dimension_type i);
       
       /*! \brief Returns the projection onto the \a i th coordinate (unchecked). */
-      Numeric::Interval<R>& operator[] (dimension_type i);
+      Interval<R>& operator[] (dimension_type i);
      
       /*! \brief The projection onto the \a i th coordinate (unchecked). */
-      const Numeric::Interval<R>& operator[] (dimension_type i) const;
+      const Interval<R>& operator[] (dimension_type i) const;
       
       /*! \brief The interval of values in the \a i th coordinate. */
-      const Numeric::Interval<R>& interval(dimension_type i) const;
+      const Interval<R>& interval(dimension_type i) const;
       
       /*! \brief The lower corner. */
       Point<R> lower_corner() const;
@@ -218,7 +218,7 @@ namespace Ariadne {
       Point<R> upper_corner() const;
       
       /*! \brief The set of position vectors of the box. */
-      LinearAlgebra::Vector< Numeric::Interval<R> > position_vectors() const;
+      Vector< Interval<R> > position_vectors() const;
       //@}
       
       
@@ -228,7 +228,7 @@ namespace Ariadne {
       void clear();
       
       /*! \brief Sets the \a i th interval. */
-      void set_interval(dimension_type i, Numeric::Interval<R> x);
+      void set_interval(dimension_type i, Interval<R> x);
       
       /*! \brief Sets the lower bound of the \a i th coordinate to \a r. */
       void set_lower_bound(dimension_type i, const R& l);
@@ -285,7 +285,7 @@ namespace Ariadne {
        *  of the box in the ith coordinate is used, and 1 if the upper
        *  half is used.
        */
-      Box<R> quadrant(const Combinatoric::BinaryWord& q) const;
+      Box<R> quadrant(const BinaryWord& q) const;
       
       /*! \brief The number of vertices. */
       size_type number_of_vertices() const;
@@ -371,14 +371,14 @@ namespace Ariadne {
     template<class R> Box<R> open_intersection(const Box<R>& bx1, const Box<R>& bx2);
     template<class R> Box<R> rectangular_hull(const Box<R>& bx1, const Box<R>& bx2);
       
-    template<class R> Box<R> operator+(const Box<R>& bx, const LinearAlgebra::Vector< Numeric::Interval<R> >& iv);
+    template<class R> Box<R> operator+(const Box<R>& bx, const Vector< Interval<R> >& iv);
  
     template<class R> std::istream& operator>>(std::istream& is, Box<R>& bx);
     template<class R> std::ostream& operator<<(std::ostream& os, const Box<R>& bx);
 
     
-  }
-}
+
+} // namespace Ariadne
 
 #include "box.inline.h"
 

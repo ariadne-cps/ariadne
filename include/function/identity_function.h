@@ -40,7 +40,6 @@
 
 
 namespace Ariadne {
-  namespace Function {
 
     /*! \brief The identity function on Euclidean space. 
      *  \ingroup FunctionTypes
@@ -49,8 +48,8 @@ namespace Ariadne {
     class IdentityFunction
       : public FunctionInterface<R> 
     {
-      typedef typename Numeric::traits<R>::arithmetic_type F;
-      typedef typename Numeric::traits<R>::interval_type I;
+      typedef typename traits<R>::arithmetic_type F;
+      typedef typename traits<R>::interval_type I;
      public:
       /*! \brief The type of denotable real number used to describe the system. */
       typedef R real_type;
@@ -63,11 +62,11 @@ namespace Ariadne {
 
       
       /*! \brief  An approximation to the image of an approximate point. */
-      LinearAlgebra::Vector<F> evaluate(const LinearAlgebra::Vector<F>& x) const;
+      Vector<F> evaluate(const Vector<F>& x) const;
       /*! \brief The Jacobian derivative matrix at a point. */
-      LinearAlgebra::Matrix<F> jacobian(const LinearAlgebra::Vector<F>& x) const;
+      Matrix<F> jacobian(const Vector<F>& x) const;
       /*! \brief The Jacobian derivative matrix at a point. */
-      TaylorDerivative<F> derivative(const LinearAlgebra::Vector<F>& x, const smoothness_type& s) const;
+      TaylorDerivative<F> derivative(const Vector<F>& x, const smoothness_type& s) const;
 
            
       /*! \brief The size of the result. */
@@ -90,8 +89,8 @@ namespace Ariadne {
     };
 
 
-  }
-}
+  
+} // namespace Ariadne
 
 
 #endif /* ARIADNE_IDENTITY_FUNCTION_H */

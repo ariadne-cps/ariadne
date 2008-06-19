@@ -30,17 +30,17 @@ namespace Ariadne {
 
 template<class R>
 void
-Geometry::BoxListSet<R>::_instantiate()
+BoxListSet<R>::_instantiate()
 {
   BoxListSet<R>* bxls=0;
-  Geometry::open_intersection(*bxls,*bxls);
-  Geometry::subset(*bxls,*bxls);
-  Geometry::disjoint(*bxls,*bxls);
+  Ariadne::open_intersection(*bxls,*bxls);
+  Ariadne::subset(*bxls,*bxls);
+  Ariadne::disjoint(*bxls,*bxls);
 }
 
 template<class R>
-Geometry::BoxListSet<R>*
-Geometry::BoxListSet<R>::clone() const
+BoxListSet<R>*
+BoxListSet<R>::clone() const
 {
   return new BoxListSet<R>(*this);
 }
@@ -48,48 +48,48 @@ Geometry::BoxListSet<R>::clone() const
 
 template<class R> 
 tribool
-Geometry::BoxListSet<R>::intersects(const Box<R>& r) const
+BoxListSet<R>::intersects(const Box<R>& r) const
 {
-  return !Geometry::disjoint(*this,r);
+  return !Ariadne::disjoint(*this,r);
 }
 
 
 template<class R> 
 tribool
-Geometry::BoxListSet<R>::disjoint(const Box<R>& r) const
+BoxListSet<R>::disjoint(const Box<R>& r) const
 {
-  return Geometry::disjoint(*this,r);
+  return Ariadne::disjoint(*this,r);
 }
 
 
 template<class R>
 tribool
-Geometry::BoxListSet<R>::superset(const Box<R>& r) const
+BoxListSet<R>::superset(const Box<R>& r) const
 {
   BoxListSet<R> ls;
   ls.adjoin(r);
-  return Geometry::subset(ls,*this);
+  return Ariadne::subset(ls,*this);
 }
 
 
 template<class R>
 tribool
-Geometry::BoxListSet<R>::subset(const Box<R>& r) const
+BoxListSet<R>::subset(const Box<R>& r) const
 {
-  return Geometry::subset(*this,r);
+  return Ariadne::subset(*this,r);
 }
 
 
 template<class R>
 tribool
-Geometry::disjoint(const BoxListSet<R>& ls1,
+disjoint(const BoxListSet<R>& ls1,
                    const BoxListSet<R>& ls2)
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(ls1,ls2,"tribool disjoint(BoxListSet<R> ls1, BoxListSet<R> ls2)");
   tribool result=true;
   for (typename BoxListSet<R>::const_iterator i=ls1.begin(); i!=ls1.end(); ++i) {
     for (typename BoxListSet<R>::const_iterator j=ls2.begin(); j!=ls2.end(); ++j) {
-      result = result && disjoint(*i,*j);
+      result = result && Ariadne::disjoint(*i,*j);
       if(!result) { return result; }
     }
   }
@@ -100,7 +100,7 @@ Geometry::disjoint(const BoxListSet<R>& ls1,
 
 template<class R>
 tribool
-Geometry::subset(const BoxListSet<R>& bxls1,
+subset(const BoxListSet<R>& bxls1,
                  const BoxListSet<R>& bxls2)
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
@@ -109,14 +109,14 @@ Geometry::subset(const BoxListSet<R>& bxls1,
 
 template<class R>
 tribool
-Geometry::subset(const BoxListSet<R>& ls,
+subset(const BoxListSet<R>& ls,
                  const Box<R>& bx)
 {
   tribool result;
   for(typename BoxListSet<R>::const_iterator ls_iter=ls.begin();
       ls_iter!=ls.end(); ++ls_iter)
     {
-      result = result && Geometry::subset(*ls_iter,bx);
+      result = result && subset(*ls_iter,bx);
       if(result==false) {
         return result;
       }
@@ -127,8 +127,8 @@ Geometry::subset(const BoxListSet<R>& ls,
 
 
 template<class R>
-Geometry::BoxListSet<R>
-Geometry::join(const BoxListSet<R>& ls1,
+BoxListSet<R>
+join(const BoxListSet<R>& ls1,
                const BoxListSet<R>& ls2)
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(ls1,ls2,"BoxListSet<R> join(BoxListSet<R> ls1, BoxListSet<R> ls2)");
@@ -139,8 +139,8 @@ Geometry::join(const BoxListSet<R>& ls1,
 
 
 template<class R>
-Geometry::BoxListSet<R>
-Geometry::open_intersection(const BoxListSet<R>& ls1,
+BoxListSet<R>
+open_intersection(const BoxListSet<R>& ls1,
                             const BoxListSet<R>& ls2)
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(ls1,ls2,"BoxListSet<R> open_intersection(BoxListSet<R> ls1, BoxListSet<R> ls2)");
@@ -156,8 +156,8 @@ Geometry::open_intersection(const BoxListSet<R>& ls1,
 }
 
 template<class R>
-Geometry::BoxListSet<R>
-Geometry::inner_intersection(const BoxListSet<R>& ls,
+BoxListSet<R>
+inner_intersection(const BoxListSet<R>& ls,
                              const SetInterface<R>& ops)
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(ls,ops,"BoxListSet<R> inner_intersection(BoxListSet<R> ls, SetInterface<R> ops)");
@@ -171,8 +171,8 @@ Geometry::inner_intersection(const BoxListSet<R>& ls,
 }
 
 template<class R>
-Geometry::BoxListSet<R>
-Geometry::lower_intersection(const BoxListSet<R>& ls,
+BoxListSet<R>
+lower_intersection(const BoxListSet<R>& ls,
                              const SetInterface<R>& cls)
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(ls,cls,"BoxListSet<R> inner_intersection(BoxListSet<R> ls, SetInterface<R> cls)");
@@ -186,8 +186,8 @@ Geometry::lower_intersection(const BoxListSet<R>& ls,
 }
 
 template<class R>
-Geometry::BoxListSet<R>
-Geometry::outer_intersection(const BoxListSet<R>& ls,
+BoxListSet<R>
+outer_intersection(const BoxListSet<R>& ls,
                              const SetInterface<R>& cps)
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(ls,cps,"BoxListSet<R> inner_intersection(BoxListSet<R> ls, SetInterface<R> cps)");
@@ -207,7 +207,7 @@ Geometry::outer_intersection(const BoxListSet<R>& ls,
 
 template<class R>
 std::string 
-Geometry::BoxListSet<R>::summary() const
+BoxListSet<R>::summary() const
 {
   std::stringstream ss;
   ss << "BoxListSet( size="<<this->size()<<", dimension="<<this->dimension()<<" )";
@@ -216,7 +216,7 @@ Geometry::BoxListSet<R>::summary() const
 
 template<class R>
 std::ostream& 
-Geometry::BoxListSet<R>::write(std::ostream& os) const
+BoxListSet<R>::write(std::ostream& os) const
 {
   const BoxListSet<R>& ls=*this;
   os << "BoxListSet(\n size="<<ls.size()<<",\n";
@@ -235,7 +235,7 @@ Geometry::BoxListSet<R>::write(std::ostream& os) const
 
 template<class R>
 std::istream& 
-Geometry::BoxListSet<R>::read(std::istream& is)
+BoxListSet<R>::read(std::istream& is)
 {
   BoxListSet<R>& ls=*this;
   std::vector< Box<R> >& vec(ls._vector);
@@ -245,4 +245,5 @@ Geometry::BoxListSet<R>::read(std::istream& is)
 
 
 
-}
+} // namespace Ariadne
+

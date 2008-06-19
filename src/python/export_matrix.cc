@@ -35,9 +35,6 @@
 #include "python/read_matrix.h"
 
 using namespace Ariadne;
-using Numeric::Rational;
-using Numeric::Interval;
-using namespace Ariadne::LinearAlgebra;
 using namespace Ariadne::Python;
 
 #include <boost/python.hpp>
@@ -87,6 +84,12 @@ make_matrix(const boost::python::object& obj)
   return A;
 }
 
+template<class R, class A> 
+Matrix<R> 
+matrix_exp(const Matrix<A>& mx) 
+{
+  return exp(mx); 
+}
 
 template<class Mx>  
 typename Mx::value_type
@@ -108,22 +111,22 @@ void __setitem__(Mx& M, boost::python::object obj, const A& x) {
 
 
 template<class R1,class R2> inline 
-Vector<typename Numeric::traits<R1,R2>::arithmetic_type> 
+Vector<typename traits<R1,R2>::arithmetic_type> 
 matrix_vector_solve(const Matrix<R1>& A, const Vector<R2>& v) {
-  typedef typename Numeric::traits<R1,R2>::arithmetic_type F;
-  return LinearAlgebra::solve(static_cast<const Matrix<F>&>(A),static_cast<const Vector<F>&>(v));
+  typedef typename traits<R1,R2>::arithmetic_type F;
+  return solve(static_cast<const Matrix<F>&>(A),static_cast<const Vector<F>&>(v));
 }
 
 template<class R> inline 
-Matrix<typename Numeric::traits<R>::arithmetic_type> 
+Matrix<typename traits<R>::arithmetic_type> 
 matrix_inverse(const Matrix<R>& A) {
-  return LinearAlgebra::inverse(A);
+  return inverse(A);
 }
 
 template<class R> inline 
 Matrix<R> 
 matrix_transpose(const Matrix<R>& A) {
-  return  LinearAlgebra::transpose(A);
+  return  transpose(A);
 }
 
 template<class R> inline 
@@ -149,27 +152,27 @@ void export_matrix()
     .def("__getitem__",&__getitem__<Mx>)
     .def("__setitem__",&__setitem__<Mx,R>)
     .def("__setitem__",&__setitem__<Mx,double>)
-    .def("__neg__",&neg<Mx,Mx>)
-    .def("__add__",&add<IMx,Mx,Mx>)
-    .def("__add__",&add<IMx,Mx,IMx>)
-    .def("__sub__",&sub<IMx,Mx,Mx>)
-    .def("__sub__",&sub<IMx,Mx,IMx>)
-    .def("__rmul__",&mul<IMx,Mx,int,Mx,R>)
-    .def("__rmul__",&mul<IMx,Mx,double,Mx,R>)
-    .def("__rmul__",&mul<IMx,Mx,R>)
-    .def("__rmul__",&mul<IMx,Mx,I>)
-    .def("__mul__",&mul<IMx,Mx,int,Mx,R>)
-    .def("__mul__",&mul<IMx,Mx,double,Mx,R>)
-    .def("__mul__",&mul<IMx,Mx,R>)
-    .def("__mul__",&mul<IMx,Mx,I>)
-    .def("__mul__",&mul<IVec,Mx,Vec>)
-    .def("__mul__",&mul<IVec,Mx,IVec>)
-    .def("__mul__",&mul<IMx,Mx,Mx>)
-    .def("__mul__",&mul<IMx,Mx,IMx>)
-    .def("__div__",&div<IMx,Mx,int,Mx,R>)
-    .def("__div__",&div<IMx,Mx,double,Mx,R>)
-    .def("__div__",&div<IMx,Mx,R>)
-    .def("__div__",&div<IMx,Mx,I>)
+    .def("__neg__",&__neg__<Mx,Mx>)
+    .def("__add__",&__add__<IMx,Mx,Mx>)
+    .def("__add__",&__add__<IMx,Mx,IMx>)
+    .def("__sub__",&__sub__<IMx,Mx,Mx>)
+    .def("__sub__",&__sub__<IMx,Mx,IMx>)
+    .def("__rmul__",&__mul__<IMx,Mx,int,Mx,R>)
+    .def("__rmul__",&__mul__<IMx,Mx,double,Mx,R>)
+    .def("__rmul__",&__mul__<IMx,Mx,R>)
+    .def("__rmul__",&__mul__<IMx,Mx,I>)
+    .def("__mul__",&__mul__<IMx,Mx,int,Mx,R>)
+    .def("__mul__",&__mul__<IMx,Mx,double,Mx,R>)
+    .def("__mul__",&__mul__<IMx,Mx,R>)
+    .def("__mul__",&__mul__<IMx,Mx,I>)
+    .def("__mul__",&__mul__<IVec,Mx,Vec>)
+    .def("__mul__",&__mul__<IVec,Mx,IVec>)
+    .def("__mul__",&__mul__<IMx,Mx,Mx>)
+    .def("__mul__",&__mul__<IMx,Mx,IMx>)
+    .def("__div__",&__div__<IMx,Mx,int,Mx,R>)
+    .def("__div__",&__div__<IMx,Mx,double,Mx,R>)
+    .def("__div__",&__div__<IMx,Mx,R>)
+    .def("__div__",&__div__<IMx,Mx,I>)
     .def("__str__",&__str__<R>)
     .def("__repr__",&__repr__<R>)
   ;
@@ -198,20 +201,20 @@ void export_matrix<Rational>()
     .def("__setitem__",&__setitem__<Mx,R>)
     .def("__setitem__",&__setitem__<Mx,double>)
 
-    .def("__neg__",&neg<Mx,Mx>)
-    .def("__add__",&add<Mx,Mx,Mx>)
-    .def("__sub__",&sub<Mx,Mx,Mx>)
-    .def("__rmul__",&mul<Mx,Mx,int,Mx,R>)
-    .def("__rmul__",&mul<Mx,Mx,double,Mx,R>)
-    .def("__rmul__",&mul<Mx,Mx,R>)
-    .def("__mul__",&mul<Mx,Mx,int,Mx,R>)
-    .def("__mul__",&mul<Mx,Mx,double,Mx,R>)
-    .def("__mul__",&mul<Mx,Mx,R>)
-    .def("__mul__",&mul<Vec,Mx,Vec>)
-    .def("__mul__",&mul<Mx,Mx,Mx>)
-    .def("__div__",&div<Mx,Mx,int,Mx,R>)
-    .def("__div__",&div<Mx,Mx,double,Mx,R>)
-    .def("__div__",&div<Mx,Mx,R>)
+    .def("__neg__",&__neg__<Mx,Mx>)
+    .def("__add__",&__add__<Mx,Mx,Mx>)
+    .def("__sub__",&__sub__<Mx,Mx,Mx>)
+    .def("__rmul__",&__mul__<Mx,Mx,int,Mx,R>)
+    .def("__rmul__",&__mul__<Mx,Mx,double,Mx,R>)
+    .def("__rmul__",&__mul__<Mx,Mx,R>)
+    .def("__mul__",&__mul__<Mx,Mx,int,Mx,R>)
+    .def("__mul__",&__mul__<Mx,Mx,double,Mx,R>)
+    .def("__mul__",&__mul__<Mx,Mx,R>)
+    .def("__mul__",&__mul__<Vec,Mx,Vec>)
+    .def("__mul__",&__mul__<Mx,Mx,Mx>)
+    .def("__div__",&__div__<Mx,Mx,int,Mx,R>)
+    .def("__div__",&__div__<Mx,Mx,double,Mx,R>)
+    .def("__div__",&__div__<Mx,Mx,R>)
     .def("__str__",&__str__<R>)
     .def("__repr__",&__repr__<R>)
   ;
@@ -242,27 +245,27 @@ void export_interval_matrix()
     .def("__setitem__",&__setitem__<IMx,R>)
     .def("__setitem__",&__setitem__<IMx,double>)
 
-    .def("__neg__",&neg<IMx,IMx>)
-    .def("__add__",&add<IMx,IMx,Mx>)
-    .def("__add__",&add<IMx,IMx,IMx>)
-    .def("__sub__",&sub<IMx,IMx,Mx>)
-    .def("__sub__",&sub<IMx,IMx,IMx>)
-    .def("__rmul__",&mul<IMx,IMx,int,IMx,R>)
-    .def("__rmul__",&mul<IMx,IMx,double,IMx,R>)
-    .def("__rmul__",&mul<IMx,IMx,R>)
-    .def("__rmul__",&mul<IMx,IMx,I>)
-    .def("__mul__",&mul<IMx,IMx,int,IMx,R>)
-    .def("__mul__",&mul<IMx,IMx,double,IMx,R>)
-    .def("__mul__",&mul<IMx,IMx,R>)
-    .def("__mul__",&mul<IMx,IMx,I>)
-    .def("__mul__",&mul<IVec,IMx,Vec>)
-    .def("__mul__",&mul<IVec,IMx,IVec>)
-    .def("__mul__",&mul<IMx,IMx,Mx>)
-    .def("__mul__",&mul<IMx,IMx,IMx>)
-    .def("__div__",&div<IMx,IMx,int,IMx,R>)
-    .def("__div__",&div<IMx,IMx,double,IMx,R>)
-    .def("__div__",&div<IMx,IMx,R>)
-    .def("__div__",&div<IMx,IMx,I>)
+    .def("__neg__",&__neg__<IMx,IMx>)
+    .def("__add__",&__add__<IMx,IMx,Mx>)
+    .def("__add__",&__add__<IMx,IMx,IMx>)
+    .def("__sub__",&__sub__<IMx,IMx,Mx>)
+    .def("__sub__",&__sub__<IMx,IMx,IMx>)
+    .def("__rmul__",&__mul__<IMx,IMx,int,IMx,R>)
+    .def("__rmul__",&__mul__<IMx,IMx,double,IMx,R>)
+    .def("__rmul__",&__mul__<IMx,IMx,R>)
+    .def("__rmul__",&__mul__<IMx,IMx,I>)
+    .def("__mul__",&__mul__<IMx,IMx,int,IMx,R>)
+    .def("__mul__",&__mul__<IMx,IMx,double,IMx,R>)
+    .def("__mul__",&__mul__<IMx,IMx,R>)
+    .def("__mul__",&__mul__<IMx,IMx,I>)
+    .def("__mul__",&__mul__<IVec,IMx,Vec>)
+    .def("__mul__",&__mul__<IVec,IMx,IVec>)
+    .def("__mul__",&__mul__<IMx,IMx,Mx>)
+    .def("__mul__",&__mul__<IMx,IMx,IMx>)
+    .def("__div__",&__div__<IMx,IMx,int,IMx,R>)
+    .def("__div__",&__div__<IMx,IMx,double,IMx,R>)
+    .def("__div__",&__div__<IMx,IMx,R>)
+    .def("__div__",&__div__<IMx,IMx,I>)
     .def("__str__",&__str__<I>)
     .def("__repr__",&__repr__<I>)
   ;
@@ -272,8 +275,8 @@ void export_interval_matrix()
   def("solve",(Vector<I>(*)(const Matrix<I>&,const Vector<I>&))&solve);
   def("transpose",(Matrix<I>(*)(const Matrix<I>&))&transpose);
   def("inverse",(Matrix<I>(*)(const Matrix<I>&))&inverse);
-  def("exp",(Matrix<I>(*)(const Matrix<R>&))&exp);
-  def("exp",(Matrix<I>(*)(const Matrix<I>&))&exp);
+  def("exp",(Matrix<I>(*)(const Matrix<R>&))&matrix_exp<I,R>);
+  def("exp",(Matrix<I>(*)(const Matrix<I>&))&matrix_exp<I,I>);
 
   def("solve_approx",(Vector<R>(*)(const Matrix<R>&,const Vector<R>&))&solve_approx);
   def("inverse_approx",(Matrix<R>(*)(const Matrix<R>&))&inverse_approx);

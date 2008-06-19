@@ -39,10 +39,7 @@
 
 using namespace std;
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::Geometry;
-using namespace Ariadne::System;
-using namespace Ariadne::Evaluation;
+using Ariadne::Models::HenonMap;
 
 template<class R> int test_newton();
 

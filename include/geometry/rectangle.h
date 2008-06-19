@@ -47,7 +47,7 @@
 #include "geometry/rectangle_expression.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
     class basic_set_tag;
     class EuclideanSpace;
@@ -87,8 +87,8 @@ namespace Ariadne {
     class Rectangle 
       : public RectangleExpression< Rectangle<R> >
     {
-      typedef typename Numeric::traits<R>::interval_type I;
-      typedef typename Numeric::traits<R>::arithmetic_type A;
+      typedef typename traits<R>::interval_type I;
+      typedef typename traits<R>::arithmetic_type A;
      private:
       array<R> _data;
      public:
@@ -120,16 +120,16 @@ namespace Ariadne {
       template<class RR> explicit Rectangle(const dimension_type& d, const RR ary[][2]);
       
       /*! \brief Construct from an array of intervals. */
-      explicit Rectangle(const Base::array< Numeric::Interval<R> >& a);
+      explicit Rectangle(const array< Interval<R> >& a);
       
       /*! \brief Construct from a std::vector of intervals. */
-      explicit Rectangle(const std::vector< Numeric::Interval<R> >& v);
+      explicit Rectangle(const std::vector< Interval<R> >& v);
 
       /*! \brief Construct a degenerate rectangle from a single point. */
       explicit Rectangle(const Point<R>& pt);
       
       /*! \brief Construct a rectangle from an interval point. */
-      explicit Rectangle(const Point< Numeric::Interval<R> >& pt);;
+      explicit Rectangle(const Point< Interval<R> >& pt);;
       
       /*! \brief Construct from two corners. */
       explicit Rectangle(const Point<R>& pt1, const Point<R>& pt2);
@@ -138,7 +138,7 @@ namespace Ariadne {
       explicit Rectangle(const std::string& s);
       
       /*! \brief Construct from an interval vector. */
-      explicit Rectangle(const LinearAlgebra::Vector< Numeric::Interval<R> >& iv);
+      explicit Rectangle(const Vector< Interval<R> >& iv);
       
       /*! \brief Convert from a rectangle expression. */
       template<class E> Rectangle(const RectangleExpression<E>& r);
@@ -159,7 +159,7 @@ namespace Ariadne {
       //@{
       //! \name Conversion operators
       /*! \brief Convert to an interval point. */
-      operator Point< Numeric::Interval<R> >() const;
+      operator Point< Interval<R> >() const;
       //@}
       
       
@@ -194,13 +194,13 @@ namespace Ariadne {
       R& upper_bound(dimension_type i);
       
       /*! \brief Returns the projection onto the \a i th coordinate (unchecked). */
-      Numeric::Interval<R>& operator[] (dimension_type i);
+      Interval<R>& operator[] (dimension_type i);
      
       /*! \brief The projection onto the \a i th coordinate (unchecked). */
-      const Numeric::Interval<R>& operator[] (dimension_type i) const;
+      const Interval<R>& operator[] (dimension_type i) const;
       
       /*! \brief The interval of values in the \a i th coordinate. */
-      const Numeric::Interval<R>& interval(dimension_type i) const;
+      const Interval<R>& interval(dimension_type i) const;
       
       /*! \brief The lower corner. */
       Point<R> lower_corner() const;
@@ -209,7 +209,7 @@ namespace Ariadne {
       Point<R> upper_corner() const;
       
       /*! \brief The set of position vectors of the rectangle. */
-      LinearAlgebra::Vector< Numeric::Interval<R> > position_vectors() const;
+      Vector< Interval<R> > position_vectors() const;
       //@}
       
       
@@ -219,7 +219,7 @@ namespace Ariadne {
       void clear();
       
       /*! \brief Sets the \a i th interval. */
-      void set_interval(dimension_type i, Numeric::Interval<R> x);
+      void set_interval(dimension_type i, Interval<R> x);
       
       /*! \brief Sets the lower bound of the \a i th coordinate to \a r. */
       void set_lower_bound(dimension_type i, const R& l);
@@ -259,7 +259,7 @@ namespace Ariadne {
        *  of the rectangle in the ith coordinate is used, and 1 if the upper
        *  half is used.
        */
-      Rectangle<R> quadrant(const Combinatoric::BinaryWord& q) const;
+      Rectangle<R> quadrant(const BinaryWord& q) const;
       /*! \brief Split into two smaller pieces. */
       ListSet< Rectangle<R> > split() const;
       /*! \brief Subdivide into smaller pieces. */
@@ -322,15 +322,15 @@ namespace Ariadne {
       friend Rectangle<R> minkowski_difference(const Rectangle<R>& A, const Rectangle<R>& B); 
       
       /*! \brief The difference between two rectangles. */
-      friend LinearAlgebra::Vector< Numeric::Interval<R> > operator-(const Rectangle<R>& A, const Rectangle& B);
+      friend Vector< Interval<R> > operator-(const Rectangle<R>& A, const Rectangle& B);
       /*! \brief Adds a vector to a rectangle. */
-      friend Rectangle<R> operator+(const Rectangle<R>& r, const LinearAlgebra::Vector<R>& v);
+      friend Rectangle<R> operator+(const Rectangle<R>& r, const Vector<R>& v);
       /*! \brief Adds an interval vector to a rectangle. */
-      friend Rectangle<R> operator+(const Rectangle<R>& r, const LinearAlgebra::Vector< Numeric::Interval<R> >& v);
+      friend Rectangle<R> operator+(const Rectangle<R>& r, const Vector< Interval<R> >& v);
       /*! \brief Subtracts a vector from a rectangle. */
-      friend Rectangle<R> operator-(const Rectangle<R>& r, const LinearAlgebra::Vector<R>& v);
+      friend Rectangle<R> operator-(const Rectangle<R>& r, const Vector<R>& v);
       /*! \brief Subtracts an interval vector from a rectangle. */
-      friend Rectangle<R> operator-(const Rectangle<R>& r, const LinearAlgebra::Vector< Numeric::Interval<R> >& v);
+      friend Rectangle<R> operator-(const Rectangle<R>& r, const Vector< Interval<R> >& v);
       //@}
 #endif
       
@@ -351,12 +351,12 @@ namespace Ariadne {
     
     
     template<class R>
-    class Rectangle< Numeric::Interval<R> > 
-      : public RectangleExpression< Rectangle< Numeric::Interval<R> > >
+    class Rectangle< Interval<R> > 
+      : public RectangleExpression< Rectangle< Interval<R> > >
     {
-      typedef Numeric::Interval<R> I;
+      typedef Interval<R> I;
      public:
-      typedef Numeric::Interval<R> value_type;
+      typedef Interval<R> value_type;
       typedef R real_type;
       typedef Point<R> state_type;
       typedef RectangleVerticesIterator<I> vertices_const_iterator;
@@ -369,10 +369,10 @@ namespace Ariadne {
       dimension_type dimension() const;
       tribool empty() const;
       tribool contains(const Point<I>& pt) const;
-      const Numeric::Interval<R>& lower_bound(const dimension_type& i) const;
-      const Numeric::Interval<R>& upper_bound(const dimension_type& i) const;
-      void set_lower_bound(const dimension_type& i, const Numeric::Interval<R>& x);
-      void set_upper_bound(const dimension_type& i, const Numeric::Interval<R>& x);
+      const Interval<R>& lower_bound(const dimension_type& i) const;
+      const Interval<R>& upper_bound(const dimension_type& i) const;
+      void set_lower_bound(const dimension_type& i, const Interval<R>& x);
+      void set_upper_bound(const dimension_type& i, const Interval<R>& x);
       Point<I> lower_corner() const;
       Point<I> upper_corner() const;
       //Rectangle<R> bounding_box() const;
@@ -437,11 +437,11 @@ namespace Ariadne {
     template<class R> Rectangle<R> rectangular_hull(const Rectangle<R>& A, const Rectangle<R>& B);
       
     template<class R1, class R2>
-    Rectangle<typename Numeric::traits<R1,R2>::arithmetic_type> 
+    Rectangle<typename traits<R1,R2>::arithmetic_type> 
     minkowski_sum(const Rectangle<R1>& A, const Rectangle<R2>& B);
 
     template<class R1, class R2> 
-    Rectangle<typename Numeric::traits<R1,R2>::arithmetic_type> 
+    Rectangle<typename traits<R1,R2>::arithmetic_type> 
     minkowski_difference(const Rectangle<R1>& A, const Rectangle<R2>& B);
     
     
@@ -449,44 +449,44 @@ namespace Ariadne {
     template<class R> Rectangle<R> over_approximation(const Rectangle<R>& r);
     template<class R> Rectangle<R> under_approximation(const Rectangle<R>& r);
 
-    template<class R> Rectangle<R> over_approximation(const Rectangle< Numeric::Interval<R> >& ir);
-    template<class R> Rectangle<R> under_approximation(const Rectangle< Numeric::Interval<R> >& ir);
+    template<class R> Rectangle<R> over_approximation(const Rectangle< Interval<R> >& ir);
+    template<class R> Rectangle<R> under_approximation(const Rectangle< Interval<R> >& ir);
     
     
     
     template<class R>
-    LinearAlgebra::Vector< Numeric::Interval<R> > 
-    operator-(const Geometry::Rectangle<R>& r1, 
-              const Geometry::Rectangle<R>& r2);
+    Vector< Interval<R> > 
+    operator-(const Rectangle<R>& r1, 
+              const Rectangle<R>& r2);
     
     template<class R, class E>
-    Geometry::Rectangle<R> 
-    operator+(const Geometry::Rectangle<R>& r, 
-              const LinearAlgebra::VectorExpression<E>& v);
+    Rectangle<R> 
+    operator+(const Rectangle<R>& r, 
+              const VectorExpression<E>& v);
     
     template<class R>
-    Geometry::Rectangle<R> 
-    operator+(const Geometry::Rectangle<R>& r, 
-              const LinearAlgebra::Vector<R>& v);
+    Rectangle<R> 
+    operator+(const Rectangle<R>& r, 
+              const Vector<R>& v);
     
     template<class R>
-    Geometry::Rectangle<R> 
-    operator+(const Geometry::Rectangle<R>& r, 
-              const LinearAlgebra::Vector< Numeric::Interval<R> >& v);
+    Rectangle<R> 
+    operator+(const Rectangle<R>& r, 
+              const Vector< Interval<R> >& v);
     
     template<class R>
-    Geometry::Rectangle<R> 
-    operator-(const Geometry::Rectangle<R>& r, 
-              const LinearAlgebra::Vector<R>& v);
+    Rectangle<R> 
+    operator-(const Rectangle<R>& r, 
+              const Vector<R>& v);
     
     template<class R>
-    Geometry::Rectangle<R> 
-    operator-(const Geometry::Rectangle<R>& r, 
-              const LinearAlgebra::Vector< Numeric::Interval<R> >& v);
+    Rectangle<R> 
+    operator-(const Rectangle<R>& r, 
+              const Vector< Interval<R> >& v);
     
     template<class R>
-    Geometry::Rectangle<R> 
-    scale(const Geometry::Rectangle<R>& r, const R& scale_factor);
+    Rectangle<R> 
+    scale(const Rectangle<R>& r, const R& scale_factor);
     
     template<class R>
     std::istream&
@@ -497,8 +497,8 @@ namespace Ariadne {
     operator<<(std::ostream& os, const Rectangle<R>& r);
 
     
-  }
-}
+  
+} // namespace Ariadne
 
 #include "rectangle.inline.h"
 

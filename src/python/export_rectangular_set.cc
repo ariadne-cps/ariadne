@@ -27,9 +27,6 @@
 #include "geometry/rectangular_set.h"
 
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::LinearAlgebra;
-using namespace Ariadne::Geometry;
 using namespace Ariadne::Python;
 
 #include <boost/python.hpp>
@@ -48,7 +45,7 @@ make_rectangular_set(boost::python::object obj)
 template<class R>
 void export_rectangular_set() 
 {
-  typedef Numeric::Interval<R> I;
+  typedef Interval<R> I;
   
   class_< RectangularSet<R>, bases< ConstraintSet<R>, SetInterface< Box<R> > > >("RectangularSet",no_init)
     .def("__init__", make_constructor(&make_rectangular_set<R>) )

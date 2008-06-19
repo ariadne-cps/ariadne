@@ -43,13 +43,13 @@
 
 
 namespace Ariadne {
-  namespace System {
+  
 
     /*!\ingroup System
      * \ingroup DiscreteTime
      * \brief A discrete-time dynamical system, defined by a function.
      * 
-     * The system is specified by the method operator()(const Geometry::Point<F>& A) const.
+     * The system is specified by the method operator()(const Point<F>& A) const.
      * This method should compute a basic set \f$\overline{f}(A)\f$ with the
      * following properties:
      *   -# \f$f(A)\subset\overline{f}(A)\f$,
@@ -62,45 +62,45 @@ namespace Ariadne {
      * as \f$A_n\f$ tends to a point.
      *
      * Additional accuracy can be obtained be using derivatives.
-     * The method derivative(const Geometry::Point<F>& A) const computes the \a i th component of the derivative over the set \a A 
+     * The method derivative(const Point<F>& A) const computes the \a i th component of the derivative over the set \a A 
      * with respect to the variables in the multi-index \a j.
      */
     template<class R>
     class Map
     {
      protected:
-      typedef typename Numeric::traits<R>::arithmetic_type A; 
-      typedef typename Numeric::traits<R>::interval_type I; 
+      typedef typename traits<R>::arithmetic_type A; 
+      typedef typename traits<R>::interval_type I; 
      public:
       /*! \brief The type used to represent time. */
-      typedef Numeric::Integer time_type;
+      typedef Integer time_type;
       /*! \brief The real number type. */
       typedef R real_type;
       /*! \brief The type used to describe the state space. */
-      typedef Geometry::EuclideanSpace state_space_type;
+      typedef EuclideanSpace state_space_type;
       /*! \brief The type of denotable state the system acts on. */
-      typedef Geometry::Point<R> state_type;
+      typedef Point<R> state_type;
       /*! \brief The type obtained by applying the map to a state. */
-      typedef Geometry::Point<A> result_type;
+      typedef Point<A> result_type;
       
       /*! \brief Construct from a function interface. */
-      Map(const Function::FunctionInterface<R>& f);
+      Map(const FunctionInterface<R>& f);
       /*! \brief Construct a dynamically-allocated copy. */
       Map<R>* clone() const { return new Map<R>(*this); }
       /*! \brief The defining function. */
-      const Function::FunctionInterface<R>& function() const;
+      const FunctionInterface<R>& function() const;
 
       /*! \brief An over-approximation to the image of a point. */
-      Geometry::Point<A> operator() (const Geometry::Point<A>& pt) const;
+      Point<A> operator() (const Point<A>& pt) const;
       /*! \brief An over-approximation to the image of a point. */
-      Geometry::Point<A> image(const Geometry::Point<A>& pt) const;
+      Point<A> image(const Point<A>& pt) const;
       /*! \brief The Jacobian derivative matrix over a rectangle. */
-      LinearAlgebra::Matrix<A> jacobian(const Geometry::Point<A>& x) const;
+      Matrix<A> jacobian(const Point<A>& x) const;
       /*! \brief The derivatives up to order \a s. */
-      Function::TaylorDerivative<A> derivative(const Geometry::Point<A>& x, const smoothness_type& s) const;
+      TaylorDerivative<A> derivative(const Point<A>& x, const smoothness_type& s) const;
         
       /*! \brief The state space of a self-map. */
-      Geometry::EuclideanSpace state_space() const;
+      EuclideanSpace state_space() const;
       /*! \brief The dimension of the space of a self-map. */
       dimension_type dimension() const;
       /*! \brief The degree of differentiability of the map. */
@@ -113,14 +113,14 @@ namespace Ariadne {
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream& os) const;
      private:
-      boost::shared_ptr< Function::FunctionInterface<R> > _function_ptr;
+      boost::shared_ptr< FunctionInterface<R> > _function_ptr;
     };
    
     template<class R>
     std::ostream& operator<<(std::ostream& os, const Map<R>& f) {
       return f.write(os); }
 
-  }
-}
+
+} // namespace Ariadne
 
 #endif /* ARIADNE_MAP_H */

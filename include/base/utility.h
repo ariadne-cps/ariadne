@@ -31,10 +31,8 @@
 #include <iosfwd>
 
 namespace Ariadne {
-  namespace Base {
-    
 
-  }    
-}
+    
+} // namespace Ariadne
 
 #endif /* ARIADNE_UTILITY_H */

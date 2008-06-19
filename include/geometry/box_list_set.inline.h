@@ -28,13 +28,13 @@
 namespace Ariadne {
 
 template<class R> inline
-Geometry::BoxListSet<R>::BoxListSet()
+BoxListSet<R>::BoxListSet()
   : _vector()
 {
 }
 
 template<class R> inline
-Geometry::BoxListSet<R>::BoxListSet(dimension_type d)
+BoxListSet<R>::BoxListSet(dimension_type d)
   : _vector()
 {
 }
@@ -43,14 +43,14 @@ Geometry::BoxListSet<R>::BoxListSet(dimension_type d)
 
 template<class R> inline
 size_type 
-Geometry::BoxListSet<R>::size() const 
+BoxListSet<R>::size() const 
 {
   return this->_vector.size();
 }
 
 template<class R> inline
 void 
-Geometry::BoxListSet<R>::push_back(const Box<R>& bx) 
+BoxListSet<R>::push_back(const Box<R>& bx) 
 {
   if (this->size()!=0) { 
     ARIADNE_CHECK_EQUAL_DIMENSIONS(*this,bx,"void BoxListSet<R>::push_back(Box bx)");
@@ -60,7 +60,7 @@ Geometry::BoxListSet<R>::push_back(const Box<R>& bx)
 
 template<class R> inline
 void 
-Geometry::BoxListSet<R>::pop_back() 
+BoxListSet<R>::pop_back() 
 {
   if (this->_vector.empty()) { 
     ARIADNE_THROW(LengthError,"void BoxListSet<R>::pop_back()"," empty list");
@@ -70,7 +70,7 @@ Geometry::BoxListSet<R>::pop_back()
 
 template<class R> inline
 dimension_type 
-Geometry::BoxListSet<R>::dimension() const 
+BoxListSet<R>::dimension() const 
 {
   if(this->_vector.empty()) {
     return 0;
@@ -80,15 +80,15 @@ Geometry::BoxListSet<R>::dimension() const
 }
 
 template<class R> inline
-Geometry::EuclideanSpace 
-Geometry::BoxListSet<R>::space() const 
+EuclideanSpace 
+BoxListSet<R>::space() const 
 {
   return EuclideanSpace(this->dimension()); 
 }
 
 template<class R> inline
-const Geometry::Box<R>& 
-Geometry::BoxListSet<R>::get(size_type index) const 
+const Box<R>& 
+BoxListSet<R>::get(size_type index) const 
 {
   ARIADNE_CHECK_ARRAY_INDEX(*this,index,"Box BoxListSet::get(size_type index)");
   return this->_vector[index];
@@ -96,15 +96,15 @@ Geometry::BoxListSet<R>::get(size_type index) const
 
 template<class R> inline
 void 
-Geometry::BoxListSet<R>::set(size_type index, const Box<R>& set) 
+BoxListSet<R>::set(size_type index, const Box<R>& set) 
 {
   ARIADNE_CHECK_ARRAY_INDEX(*this,index,"void BoxListSet::set(size_type index, Box set)");
   this->_vector[index]=set;
 }
 
 template<class R> inline
-const Geometry::Box<R>& 
-Geometry::BoxListSet<R>::operator[](size_type index) const 
+const Box<R>& 
+BoxListSet<R>::operator[](size_type index) const 
 {
   ARIADNE_CHECK_ARRAY_INDEX(*this,index,"void BoxListSet<R>::operator[](size_type index)");
   return this->_vector[index];
@@ -114,7 +114,7 @@ Geometry::BoxListSet<R>::operator[](size_type index) const
 
 template<class R> inline
 tribool 
-Geometry::BoxListSet<R>::contains(const Point<R>& p) const 
+BoxListSet<R>::contains(const Point<R>& p) const 
 {
   tribool result=false;
   for (typename BoxListSet<R>::const_iterator i=this->begin(); i!=this->end(); ++i) {
@@ -126,7 +126,7 @@ Geometry::BoxListSet<R>::contains(const Point<R>& p) const
 
 template<class R> inline
 tribool 
-Geometry::BoxListSet<R>::empty() const 
+BoxListSet<R>::empty() const 
 {
   tribool result=true;
   for (typename BoxListSet<R>::const_iterator i=this->begin(); i!=this->end(); ++i) {
@@ -138,7 +138,7 @@ Geometry::BoxListSet<R>::empty() const
 
 template<class R> inline
 tribool 
-Geometry::BoxListSet<R>::bounded() const 
+BoxListSet<R>::bounded() const 
 {
   tribool result=true;
   for (typename BoxListSet<R>::const_iterator i=this->begin(); i!=this->end(); ++i) {
@@ -149,8 +149,8 @@ Geometry::BoxListSet<R>::bounded() const
 }
 
 template<class R> inline
-Geometry::Box<typename Geometry::BoxListSet<R>::real_type> 
-Geometry::BoxListSet<R>::bounding_box() const 
+Box<typename BoxListSet<R>::real_type> 
+BoxListSet<R>::bounding_box() const 
 {
   if(this->empty()) { return Box<R>(this->dimension()); }
   Box<R> result=(*this)[0];
@@ -162,46 +162,46 @@ Geometry::BoxListSet<R>::bounding_box() const
 
 template<class R> inline
 void 
-Geometry::BoxListSet<R>::clear() 
+BoxListSet<R>::clear() 
 { 
   this->_vector.clear();
 }
 
 template<class R> inline
-typename Geometry::BoxListSet<R>::iterator 
-Geometry::BoxListSet<R>::begin() 
+typename BoxListSet<R>::iterator 
+BoxListSet<R>::begin() 
 {
   return _vector.begin();
 }
 
 template<class R> inline
-typename Geometry::BoxListSet<R>::iterator 
-Geometry::BoxListSet<R>::end() 
+typename BoxListSet<R>::iterator 
+BoxListSet<R>::end() 
 {
   return _vector.end();
 }
 
 template<class R> inline
-typename Geometry::BoxListSet<R>::const_iterator 
-Geometry::BoxListSet<R>::begin() const 
+typename BoxListSet<R>::const_iterator 
+BoxListSet<R>::begin() const 
 {
   return _vector.begin();
 }
 
 template<class R> inline
-typename Geometry::BoxListSet<R>::const_iterator 
-Geometry::BoxListSet<R>::end() const 
+typename BoxListSet<R>::const_iterator 
+BoxListSet<R>::end() const 
 {
   return _vector.end();
 }
 
 template<class R> inline
 void 
-Geometry::BoxListSet<R>::adjoin(const BoxListSet<R>& ls) 
+BoxListSet<R>::adjoin(const BoxListSet<R>& ls) 
 {
   if(ls.size()==0) { return; }
   if(this->_vector.empty()) { *this=ls; }
-  ARIADNE_CHECK_EQUAL_DIMENSIONS(*this,ls,"void BoxListSet<R>::adjoin(Geometry::BoxListSet<R> ls)");
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(*this,ls,"void BoxListSet<R>::adjoin(BoxListSet<R> ls)");
   this->_vector.reserve(ls.size());
   for(typename BoxListSet<R>::const_iterator iter=ls.begin(); iter!=ls.end(); ++iter) {
     this->_vector.push_back(*iter);
@@ -210,7 +210,7 @@ Geometry::BoxListSet<R>::adjoin(const BoxListSet<R>& ls)
 
 template<class R> inline
 void 
-Geometry::BoxListSet<R>::adjoin(const Box<R>& bx) 
+BoxListSet<R>::adjoin(const Box<R>& bx) 
 {
   if(!this->_vector.empty()) {
     ARIADNE_CHECK_EQUAL_DIMENSIONS(*this,bx,"void BoxListSet<R>::adjoin(BS bs)");
@@ -225,17 +225,17 @@ Geometry::BoxListSet<R>::adjoin(const Box<R>& bx)
 
 template<class R> inline
 std::ostream& 
-Geometry::operator<<(std::ostream& os, const BoxListSet<R>& ls)
+operator<<(std::ostream& os, const BoxListSet<R>& ls)
 {
   return ls.write(os);
 }
 
 template<class R> inline
 std::istream& 
-Geometry::operator>>(std::istream& is, BoxListSet<R>& ls)
+operator>>(std::istream& is, BoxListSet<R>& ls)
 {
   return ls.read(is);
 }
 
 
-} // namespace Geometry
+} // namespace Ariadne

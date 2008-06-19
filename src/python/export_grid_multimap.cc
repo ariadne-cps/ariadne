@@ -38,7 +38,7 @@
 
 #include "python/utilities.h"
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
+
 using namespace Ariadne::LinearAlgebra;
 using namespace Ariadne::Combinatoric;
 using namespace Ariadne::Geometry;

@@ -31,9 +31,6 @@
 #include "system/constraint_based_hybrid_automaton.h"
 
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::Geometry;
-using namespace Ariadne::System;
 using namespace Ariadne::Python;
 
 #include <boost/python.hpp>

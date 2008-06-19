@@ -33,7 +33,7 @@
 #define ARIADNE_REFERENCE_CONTAINER_H
 
 namespace Ariadne {
-  namespace Base {
+
 
     /*! \brief A vector storing non-constant references to objects of class \a T. */
     template<class T>
@@ -202,31 +202,29 @@ namespace Ariadne {
     template<class T> inline
     std::ostream&
     operator<<(std::ostream& os, const reference_vector<T>& v) {
-      return Base::write_sequence(os,v.begin(),v.end(),'[',']',',');
+      return write_sequence(os,v.begin(),v.end(),'[',']',',');
     }
 
     template<class T> inline
     std::ostream&
     operator<<(std::ostream& os, const reference_set<T>& s) {
-      return Base::write_sequence(os,s.begin(),s.end(),'{','}',',');
+      return write_sequence(os,s.begin(),s.end(),'{','}',',');
     }
 
     template<class K, class D, class C> inline
     std::ostream&
     operator<<(std::ostream& os, const reference_key_map<K,D,C>& m) {
-      return Base::write_ariadne_map_sequence(os,m.begin(),m.end(),'{','}',',',':');
+      return write_ariadne_map_sequence(os,m.begin(),m.end(),'{','}',',',':');
     }
 
     template<class K, class D, class C> inline
     std::ostream&
     operator<<(std::ostream& os, const reference_data_map<K,D,C>& m) {
-      return Base::write_ariadne_map_sequence(os,m.begin(),m.end(),'{','}',',',':');
+      return write_ariadne_map_sequence(os,m.begin(),m.end(),'{','}',',',':');
     }
 
-
-
-  }
-}
+  
+} // namespace Ariadne
 
 #endif // ARIADNE_REFERENCE_CONTAINER_H
 

@@ -28,8 +28,7 @@
 #include "function/taylor_derivative.code.h"
 
 namespace Ariadne {
-  namespace Function {
-    using namespace Numeric;
+    
     
     template class TaylorDerivative<Rational>;
 
@@ -41,5 +40,5 @@ namespace Ariadne {
     template class TaylorDerivative<IntervalMP>;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

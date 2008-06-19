@@ -36,7 +36,7 @@
 #include "numeric/traits.h"
 
 namespace Ariadne {
-  namespace Numeric {
+  
 
     template<class R> class Interval;
   
@@ -174,7 +174,7 @@ namespace Ariadne {
 
     inline Interval<Rational> operator/(const Interval<Rational>& ivl1, const Interval<Rational>& ivl2) {
       if(ivl2.lower()<=0 && 0<=ivl2.upper()) {
-        Rational inf=Numeric::inf<Rational>(); 
+        Rational inf=inf<Rational>(); 
         return Interval<Rational>(-inf,inf); 
       }
       Rational b[4];
@@ -195,8 +195,8 @@ namespace Ariadne {
      
   */
 
-  } 
-}
+
+} // namespace Ariadne
 
 
 

@@ -28,8 +28,8 @@
 
 
 namespace Ariadne {
-  namespace System {
-    using namespace Numeric;
+  
+    
     
 #ifdef ENABLE_FLOAT64
     template class ConstraintBasedDiscreteMode<Float64>;
@@ -43,5 +43,5 @@ namespace Ariadne {
     template class ConstraintBasedHybridAutomaton<FloatMP>;
 #endif
       
-  }
-}
+  
+} // namespace Ariadne

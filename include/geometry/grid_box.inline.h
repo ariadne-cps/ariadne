@@ -26,15 +26,15 @@
 namespace Ariadne {
 
 template<class R> inline 
-const Geometry::Grid<R>& 
-Geometry::GridBox<R>::grid() const 
+const Grid<R>& 
+GridBox<R>::grid() const 
 { 
   return *this->_grid; 
 }
 
 template<class R> inline
 dimension_type 
-Geometry::GridBox<R>::dimension() const 
+GridBox<R>::dimension() const 
 {
   return this->_coordinates.size()/2; 
 }
@@ -43,7 +43,7 @@ Geometry::GridBox<R>::dimension() const
 
 template<class R> inline
 R
-Geometry::GridBox<R>::lower_bound(dimension_type i) const 
+GridBox<R>::lower_bound(dimension_type i) const 
 {
   return _grid.subdivision_coordinate(i,_coordinates[2*i]);
 }
@@ -51,14 +51,14 @@ Geometry::GridBox<R>::lower_bound(dimension_type i) const
 
 template<class R> inline
 R
-Geometry::GridBox<R>::upper_bound(dimension_type i) const 
+GridBox<R>::upper_bound(dimension_type i) const 
 {
   return _grid.subdivision_coordinate(i,_coordinates[2*i+1]);
 }
 
 template<class R> inline
-Geometry::GridBox<R>
-Geometry::GridBox<R>::subdivide(dimension_type i, bool lr) const 
+GridBox<R>
+GridBox<R>::subdivide(dimension_type i, bool lr) const 
 {
   GridBox<R> result(*this);
   mc=(this->_coordinates[2*i+1]-this->_coordinates[2*i])/2
@@ -71,8 +71,8 @@ Geometry::GridBox<R>::subdivide(dimension_type i, bool lr) const
 }
 
 template<class R> inline
-Geometry::GridBox<R>
-Geometry::GridBox<R>::subdivide(bool lr) const 
+GridBox<R>
+GridBox<R>::subdivide(bool lr) const 
 {
   dyadic_type mr=0;
   dimension_type mi=0;
@@ -89,7 +89,7 @@ Geometry::GridBox<R>::subdivide(bool lr) const
 
 template<class R> inline
 std::ostream& 
-Geometry::operator<<(std::ostream& os, const GridBox<R>& gc) {
+operator<<(std::ostream& os, const GridBox<R>& gc) {
   return gc.write(os);
 }
     

@@ -48,18 +48,10 @@
 #include "test.h"
 
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::LinearAlgebra;
-using namespace Ariadne::Combinatoric;
-using namespace Ariadne::Geometry;
-using namespace Ariadne::System;
-using namespace Ariadne::Evaluation;
-using namespace Ariadne::Output;
 using namespace std;
 
 template<class R> int test_set_based_hybrid_evolver();
   
-namespace Ariadne { namespace Evaluation { extern int verbosity; } }
 
 template<class R>
 class TestHybridEvolver 

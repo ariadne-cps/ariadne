@@ -23,7 +23,7 @@
  
 
 namespace Ariadne {
-namespace Numeric {
+
 
 template<class R> std::ostream& operator<<(std::ostream& os, const Interval<R>& x);
 template<class R> std::istream& operator>>(std::istream& is, Interval<R>& x);
@@ -68,6 +68,6 @@ operator>>(std::istream& is, Interval<R>& ivl)
 }
 
 
-} // namespace Numeric
+
 } // namespace Ariadne
 

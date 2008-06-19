@@ -1,5 +1,5 @@
 /***************************************************************************
- *            exceptions.h
+ *            base/exceptions.h
  *
  *  Copyright  2005-6  Pieter Collins, Alberto Casagrande
  *  Email  Pieter.Collins@cwi.nl, casagrande@dimi.uniud.it
@@ -34,6 +34,7 @@
 #include "macros/throw.h"
 #include "base/types.h"
 
+
 namespace Ariadne {
     
   //@{ \name Exceptions
@@ -61,7 +62,6 @@ namespace Ariadne {
 
   //@}
 
-  namespace Base {
    
     //@{ \name Exceptions
 
@@ -84,7 +84,7 @@ namespace Ariadne {
       
     //@}
    
-  }
+
   
 }
 

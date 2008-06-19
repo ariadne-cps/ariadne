@@ -43,18 +43,18 @@
 
 
 namespace Ariadne {
-  namespace Base { 
+
 
     template<class Iter> inline
     std::ostream&
-    operator<<(std::ostream& os, const range<Iter>& a) {
-      return Base::write_sequence(os,a.begin(),a.end());
+    operator<<(std::ostream& os, const range_array<Iter>& a) {
+      return write_sequence(os,a.begin(),a.end());
     }
     
     template<class T> inline
     std::ostream&
     operator<<(std::ostream& os, const array<T>& a) {
-      return Base::write_sequence(os,a.begin(),a.end());
+      return write_sequence(os,a.begin(),a.end());
     }
     
     template<class T> inline
@@ -65,7 +65,7 @@ namespace Ariadne {
         if(i!=0) {
           os << ", ";
         }
-        Base::write_sequence(os,a[i].begin(),a[i].end());
+        write_sequence(os,a[i].begin(),a[i].end());
         os.flush();
       }
       os << " ]";
@@ -81,7 +81,7 @@ namespace Ariadne {
       return is;
     }
     
-  } // namespace Base
+
 } // namespace Ariadne
 
 
@@ -105,7 +105,7 @@ namespace std {
   std::ostream& 
   operator<< (std::ostream &os, const std::vector<T>& v) 
   {
-    return Ariadne::Base::write_sequence(os,v.begin(),v.end());
+    return Ariadne::write_sequence(os,v.begin(),v.end());
   }
   
   template<class T> 
@@ -113,7 +113,7 @@ namespace std {
   std::ostream& 
   operator<< (std::ostream &os, const std::list<T>& l) 
   {
-    return Ariadne::Base::write_sequence(os,l.begin(),l.end());
+    return Ariadne::write_sequence(os,l.begin(),l.end());
   }
   
   template<class T> 
@@ -121,14 +121,14 @@ namespace std {
   std::ostream& 
   operator<< (std::ostream &os, const std::deque<T>& d) 
   {
-    return Ariadne::Base::write_sequence(os,d.begin(),d.end());
+    return Ariadne::write_sequence(os,d.begin(),d.end());
   }
   
   template<class T> 
   inline
   ostream& 
   operator<< (std::ostream &os, const std::valarray<T>& v) {
-    return Ariadne::Base::write_sequence(os,&(v[0]),&(v[v.size()-1]));
+    return Ariadne::write_sequence(os,&(v[0]),&(v[v.size()-1]));
   }
   
   template<class T, class C> 
@@ -136,7 +136,7 @@ namespace std {
   std::ostream& 
   operator<<(std::ostream &os, const std::set<T,C>& s) 
   {
-    return Ariadne::Base::write_sequence(os,s.begin(), s.end(), '{', '}');
+    return Ariadne::write_sequence(os,s.begin(), s.end(), '{', '}');
   }
   
   template<class K, class T, class C> 
@@ -144,7 +144,7 @@ namespace std {
   std::ostream& 
   operator<<(std::ostream &os, const std::map<K,T,C>& m) 
   {
-    return Ariadne::Base::write_map_sequence(os,m.begin(), m.end(), '{', '}');
+    return Ariadne::write_map_sequence(os,m.begin(), m.end(), '{', '}');
   }
   
 
@@ -152,7 +152,7 @@ namespace std {
   inline
   istream& 
   operator>> (std::istream &is, std::vector<T>& v) {
-    return Ariadne::Base::read_sequence(is,v);
+    return Ariadne::read_sequence(is,v);
   }
 
 } // namespace std

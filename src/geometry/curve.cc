@@ -29,9 +29,9 @@
 #include "geometry/curve.code.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
-    using namespace Numeric;
+    
     
 #ifdef ENABLE_FLOAT64
     template class CurveInterface<Float64>;
@@ -43,5 +43,5 @@ namespace Ariadne {
     template class Curve<FloatMP>;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

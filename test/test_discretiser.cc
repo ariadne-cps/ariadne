@@ -49,13 +49,8 @@
 #include "test.h"
 
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::LinearAlgebra;
-using namespace Ariadne::Geometry;
-using namespace Ariadne::System;
-using namespace Ariadne::Evaluation;
-using namespace Ariadne::Output;
 using namespace std;
+using Models::VanDerPolEquation;
 
 template<class R> 
 class TestVectorFieldEvolver
@@ -114,7 +109,7 @@ EvolutionParameters<R> parameters;
   Box<R> eps_bounding_box=bounding_box.neighbourhood(0.1);
  
   // Over-approximate the initial set by a grid cell
-  GridCell<R> initial_cell=*Geometry::over_approximation(initial_box,grid).begin();
+  GridCell<R> initial_cell=*over_approximation(initial_box,grid).begin();
   cout << "initial_cell=" << initial_cell << endl << endl;
 
   // Compute the reachable sets

@@ -32,11 +32,11 @@
 #include "base/stlio.h"
 
 namespace Ariadne {
-  namespace Combinatoric {
+
 
   inline size_type pow2(size_type n) { return 1<<n; }
   
-  BinaryTree::BinaryTree(const Base::array<bool>& t)
+  BinaryTree::BinaryTree(const Ariadne::array<bool>& t)
     : _array(t.begin(),t.end()) 
   { 
     check(); 
@@ -177,9 +177,10 @@ namespace Ariadne {
     std::ostream& 
     operator<<(std::ostream& os, const BinaryTree& t) {
       os << "BinaryTree( words=";
-      Base::write_sequence(os, t.begin(), t.end());
+      write_sequence(os, t.begin(), t.end());
       return os << ", sequence=" << t._array << " )"; 
     }
     
-  }
-}
+  
+} // namespace Ariadne
+

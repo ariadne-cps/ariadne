@@ -36,7 +36,7 @@
 #include "system/vector_field.h"
 
 namespace Ariadne {
-  namespace System {
+  
 
     /*!\ingroup ContinuousTime
      * \brief An affine vector field in Euclidean space, given by \f$f(x)=Ax+b\f$.
@@ -45,17 +45,17 @@ namespace Ariadne {
     class AffineVectorField
       : public VectorField<R> 
     {
-      typedef typename Numeric::traits<R>::interval_type F;
+      typedef typename traits<R>::interval_type F;
      public:
       /*! \brief Construct from the matrix \a A and the vector \a b.. */
-      AffineVectorField(const LinearAlgebra::Matrix<R> &A, const LinearAlgebra::Vector<R> &b)
-        : VectorField<R>(Function::AffineFunction<R>(A,b)) { }
-      LinearAlgebra::Matrix<F> A() const { return static_cast<Function::AffineFunction<R>&>(this->function()).A(); }
-      LinearAlgebra::Vector<F> b() const { return static_cast<Function::AffineFunction<R>&>(this->function()).b(); }
+      AffineVectorField(const Matrix<R> &A, const Vector<R> &b)
+        : VectorField<R>(AffineFunction<R>(A,b)) { }
+      Matrix<F> A() const { return static_cast<AffineFunction<R>&>(this->function()).A(); }
+      Vector<F> b() const { return static_cast<AffineFunction<R>&>(this->function()).b(); }
     };
  
     
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_AFFINE_VECTOR_FIELD_H */

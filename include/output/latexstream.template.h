@@ -28,43 +28,43 @@
 
 namespace Ariadne {
 
-inline Output::latexstream::latexstream() : _os_ptr(&std::cout) { }
-inline Output::latexstream::~latexstream() { }
-inline Output::latexstream::latexstream(std::ostream& os) : _os_ptr(&os) { }
-inline void Output::latexstream::redirect(std::ostream& os) { this->_os_ptr=&os; }
+inline latexstream::latexstream() : _os_ptr(&std::cout) { }
+inline latexstream::~latexstream() { }
+inline latexstream::latexstream(std::ostream& os) : _os_ptr(&os) { }
+inline void latexstream::redirect(std::ostream& os) { this->_os_ptr=&os; }
   
-inline Output::latexfstream::latexfstream() : latexstream(), _ofs_ptr(new std::ofstream())  { 
+inline latexfstream::latexfstream() : latexstream(), _ofs_ptr(new std::ofstream())  { 
   latexstream::redirect(*this->_ofs_ptr); }
-inline void Output::latexfstream::open(const char* fn, const char* preamble) { 
+inline void latexfstream::open(const char* fn, const char* preamble) { 
   this->_ofs_ptr->open(fn); *this->_ofs_ptr << "\\documentclass{article}\n" << preamble << "\n\\begin{document}\n"; }
-inline void Output::latexfstream::close() { 
+inline void latexfstream::close() { 
   *this->_ofs_ptr << "\n\\end{document}\n"; this->_ofs_ptr->close(); }
-inline Output::latexfstream::~latexfstream() { 
+inline latexfstream::~latexfstream() { 
   this->close(); delete this->_ofs_ptr; }
 
-inline Output::latexstream& Output::operator<<(latexstream& txs, const char& c) { *txs._os_ptr << c; return txs; }
-inline Output::latexstream& Output::operator<<(latexstream& txs, const char* s) { *txs._os_ptr << s; return txs; }
-inline Output::latexstream& Output::operator<<(latexstream& txs, const int& n) { *txs._os_ptr << n; return txs; }
-inline Output::latexstream& Output::operator<<(latexstream& txs, const long int& n) { *txs._os_ptr << n; return txs; }
-inline Output::latexstream& Output::operator<<(latexstream& txs, const unsigned int& n) { *txs._os_ptr << n; return txs; }
-inline Output::latexstream& Output::operator<<(latexstream& txs, const unsigned long int& n) { *txs._os_ptr << n; return txs; }
-inline Output::latexstream& Output::operator<<(latexstream& txs, const double& x) { *txs._os_ptr << x; return txs; }
+inline latexstream& operator<<(latexstream& txs, const char& c) { *txs._os_ptr << c; return txs; }
+inline latexstream& operator<<(latexstream& txs, const char* s) { *txs._os_ptr << s; return txs; }
+inline latexstream& operator<<(latexstream& txs, const int& n) { *txs._os_ptr << n; return txs; }
+inline latexstream& operator<<(latexstream& txs, const long int& n) { *txs._os_ptr << n; return txs; }
+inline latexstream& operator<<(latexstream& txs, const unsigned int& n) { *txs._os_ptr << n; return txs; }
+inline latexstream& operator<<(latexstream& txs, const unsigned long int& n) { *txs._os_ptr << n; return txs; }
+inline latexstream& operator<<(latexstream& txs, const double& x) { *txs._os_ptr << x; return txs; }
 
-inline Output::latexstream& Output::operator<<(latexstream& txs, const Numeric::Integer& z) { *txs._os_ptr << z; return txs; }
-inline Output::latexstream& Output::operator<<(latexstream& txs, const Numeric::Rational& q) { *txs._os_ptr << q; return txs; }
-inline Output::latexstream& Output::operator<<(latexstream& txs, const Numeric::Float64& x) { *txs._os_ptr << x; return txs; }
-inline Output::latexstream& Output::operator<<(latexstream& txs, const Numeric::FloatMP& x) { *txs._os_ptr << x; return txs; }
+inline latexstream& operator<<(latexstream& txs, const Integer& z) { *txs._os_ptr << z; return txs; }
+inline latexstream& operator<<(latexstream& txs, const Rational& q) { *txs._os_ptr << q; return txs; }
+inline latexstream& operator<<(latexstream& txs, const Float64& x) { *txs._os_ptr << x; return txs; }
+inline latexstream& operator<<(latexstream& txs, const FloatMP& x) { *txs._os_ptr << x; return txs; }
 
 template<class R> 
-Output::latexstream& 
-Output::operator<<(latexstream& txs, const Numeric::Interval<R>& ivl) 
+latexstream& 
+operator<<(latexstream& txs, const Interval<R>& ivl) 
 {
   return txs << "[" << ivl.lower() << ":" << ivl.upper() << "]";
 }
 
 template<class R> 
-Output::latexstream& 
-Output::operator<<(latexstream& txs, const LinearAlgebra::Vector<R>& v) 
+latexstream& 
+operator<<(latexstream& txs, const Vector<R>& v) 
 {
   txs << "\\left(\\begin{array}{c}";
   for(size_type i=0; i!=v.size(); ++i) {
@@ -76,8 +76,8 @@ Output::operator<<(latexstream& txs, const LinearAlgebra::Vector<R>& v)
 }
 
 template<class R> 
-Output::latexstream& 
-Output::operator<<(latexstream& txs, const LinearAlgebra::Matrix<R>& A) 
+latexstream& 
+operator<<(latexstream& txs, const Matrix<R>& A) 
 {
   txs << "\\left(\\begin{array}{ccccccccccc}";
   for(size_type i=0; i!=A.number_of_rows(); ++i) {
@@ -92,18 +92,19 @@ Output::operator<<(latexstream& txs, const LinearAlgebra::Matrix<R>& A)
 }
 
 template<class R> 
-Output::latexstream& 
-Output::operator<<(latexstream& txs, const Geometry::Box<R>& r) 
+latexstream& 
+operator<<(latexstream& txs, const Box<R>& r) 
 {
   for(size_type i=0; i!=r.dimension(); ++i) {
     if(i!=0) { txs << "\\times"; }
-    Numeric::Interval<R> ivl=r[i];
+    Interval<R> ivl=r[i];
     txs << ivl;
-    //    txs << Numeric::Interval<R>(r[i]);
+    //    txs << Interval<R>(r[i]);
   } 
   return txs;
 }
 
   
-}
+} // namespace Ariadne
+
 

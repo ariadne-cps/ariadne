@@ -37,7 +37,7 @@
 #include <iostream>
 
 namespace Ariadne {
-  namespace Base {
+
     template<class T> class sequence;
     template<class T> class compact_sequence;
     template<class T> class _sequence_const_iterator;
@@ -284,7 +284,7 @@ namespace Ariadne {
       return os;
     }
     
-  } // namespace Base
+
 } // namespace Ariadne
   
 #endif /* ARIADNE_SEQUENCE_H */

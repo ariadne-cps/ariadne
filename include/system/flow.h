@@ -37,7 +37,7 @@
 
 namespace Ariadne {
 
-  namespace System {
+  
 
    
     /* \ingroup System

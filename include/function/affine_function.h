@@ -22,7 +22,6 @@
  */
  
 /*! \file function/affine_function.h
- *  \brief Functions of affine form \f$x\rightarrow Ax+b\f$.
  */
 
 #ifndef ARIADNE_AFFINE_FUNCTION_H
@@ -40,7 +39,7 @@
 
 
 namespace Ariadne {
-  namespace Function {
+
 
     /*! \brief An affine function \f$f(x)=Ax+b\f$ on Euclidean space. 
      *  \ingroup FunctionTypes
@@ -49,8 +48,8 @@ namespace Ariadne {
     class AffineFunction
       : public FunctionInterface<R> 
     {
-      typedef typename Numeric::traits<R>::arithmetic_type F;
-      typedef typename Numeric::traits<R>::interval_type I;
+      typedef typename traits<R>::arithmetic_type F;
+      typedef typename traits<R>::interval_type I;
      public:
       /*! \brief The type of denotable real number used to describe the system. */
       typedef R real_type;
@@ -58,14 +57,14 @@ namespace Ariadne {
       /*! \brief Default constructor constructs a function on a zero-dimensional space. */
       explicit AffineFunction() {}
       /*! \brief Construct from the matrix \f$A\f$ and the vector \f$b\f$. */
-      explicit AffineFunction(const LinearAlgebra::Matrix<F>& A, const LinearAlgebra::Vector<F>& b)
+      explicit AffineFunction(const Matrix<F>& A, const Vector<F>& b)
         : _a(A), _b(b) { }
       /*! \brief Construct a linear function from the matrix \f$A\f$. */
-      explicit AffineFunction(const LinearAlgebra::Matrix<F>& A)
+      explicit AffineFunction(const Matrix<F>& A)
         : _a(A), _b(A.number_of_rows()) { }
       /*! \brief Construct a translation from the vector \f$b\f$. */
-      explicit AffineFunction(const LinearAlgebra::Vector<F>& b)
-        : _a(LinearAlgebra::Matrix<R>::identity(b.size())), _b(b) { }
+      explicit AffineFunction(const Vector<F>& b)
+        : _a(Matrix<R>::identity(b.size())), _b(b) { }
       
       /*! \brief Copy constructor. */
       AffineFunction(const AffineFunction<R>& f)
@@ -78,17 +77,17 @@ namespace Ariadne {
 
       
       /*! \brief  An approximation to the image of an approximate point. */
-      LinearAlgebra::Vector<F> evaluate(const LinearAlgebra::Vector<F>& x) const;
+      Vector<F> evaluate(const Vector<F>& x) const;
       /*! \brief The Jacobian derivative matrix at a point. */
-      LinearAlgebra::Matrix<F> jacobian(const LinearAlgebra::Vector<F>& x) const;
+      Matrix<F> jacobian(const Vector<F>& x) const;
       /*! \brief The Jacobian derivative matrix at a point. */
-      TaylorDerivative<F> derivative(const LinearAlgebra::Vector<F>& x, const smoothness_type& s) const;
+      TaylorDerivative<F> derivative(const Vector<F>& x, const smoothness_type& s) const;
 
            
       /*! \brief  The linear transformation of the function. */
-      const LinearAlgebra::Matrix<F>& A() const { return _a; }
+      const Matrix<F>& A() const { return _a; }
       /*! \brief  The offset vector of the function. */
-      const LinearAlgebra::Vector<F>& b() const { return _b; }
+      const Vector<F>& b() const { return _b; }
       
       /*! \brief The size of the result. */
       virtual size_type result_size() const {
@@ -109,13 +108,13 @@ namespace Ariadne {
       /*! \brief Write to an output stream. */
       virtual std::ostream& write(std::ostream& os) const;
      protected:
-      LinearAlgebra::Matrix<F> _a;
-      LinearAlgebra::Vector<F> _b;
+      Matrix<F> _a;
+      Vector<F> _b;
     };
 
 
-  }
-}
+  
+} // namespace Ariadne
 
 
 #endif /* ARIADNE_AFFINE_FUNCTION_H */

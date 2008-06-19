@@ -28,9 +28,9 @@
 
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
-    using namespace Numeric;
+    
     
 #ifdef ENABLE_FLOAT64
     template class Grid<Float64>;
@@ -42,5 +42,5 @@ namespace Ariadne {
     template class FiniteGrid<FloatMP>;
 #endif
  
-  }
-}
+  
+} // namespace Ariadne

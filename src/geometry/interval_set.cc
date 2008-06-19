@@ -27,17 +27,17 @@
 #include "geometry/interval_set.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
-    template class IntervalSet<Numeric::Rational>;
+    template class IntervalSet<Rational>;
 
 #ifdef ENABLE_FLOAT64
-    template class IntervalSet<Numeric::Float64>;
+    template class IntervalSet<Float64>;
 #endif
   
 #ifdef ENABLE_FLOATMP
-    template class IntervalSet<Numeric::FloatMP>;
+    template class IntervalSet<FloatMP>;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

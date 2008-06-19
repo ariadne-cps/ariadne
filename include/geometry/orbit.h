@@ -37,10 +37,10 @@
 
 namespace Ariadne {
 
-  namespace Output { class epsstream; }
+   class epsstream; 
 
 
-  namespace Geometry {
+  
 
     template<class T, class S> class TimedSet;
 
@@ -68,7 +68,7 @@ namespace Ariadne {
     {
      public:
       virtual ~OrbitInterface();
-      virtual Output::epsstream& write(Output::epsstream& eps) const = 0;
+      virtual epsstream& write(epsstream& eps) const = 0;
       virtual std::ostream& write(std::ostream& eps) const = 0;
     };
 
@@ -77,7 +77,7 @@ namespace Ariadne {
     }
 
     template<class T>
-    Output::epsstream& operator<<(Output::epsstream& eps, const OrbitInterface<T>& orbit) {
+    epsstream& operator<<(epsstream& eps, const OrbitInterface<T>& orbit) {
       return orbit.write(eps);
     }
 
@@ -92,10 +92,10 @@ namespace Ariadne {
      * 
      */
     template<class BS>
-    class Orbit<Numeric::Integer,BS>
-      : public OrbitInterface<Numeric::Integer>
+    class Orbit<Integer,BS>
+      : public OrbitInterface<Integer>
     {
-      typedef Numeric::Integer T;
+      typedef Integer T;
      private:
       std::vector< TimedSet<T,BS> > _data;
      public:
@@ -158,14 +158,14 @@ namespace Ariadne {
       //! \name Input-output operators
       std::ostream& write(std::ostream& os) const;
       //! \name Input-output operators
-      virtual Output::epsstream& write(Output::epsstream& eps) const;
+      virtual epsstream& write(epsstream& eps) const;
       //@}
     };
 
     
     template<class BS>
     std::ostream& 
-    Orbit<Numeric::Integer,BS>::write(std::ostream& os) const
+    Orbit<Integer,BS>::write(std::ostream& os) const
     {
       return os<<"Orbit"<<this->_data;
     }
@@ -176,10 +176,10 @@ namespace Ariadne {
      * 
      */
     template<class ES, class RS>
-    class Orbit<Numeric::Rational, ES, RS>
-      : public OrbitInterface<Numeric::Rational>
+    class Orbit<Rational, ES, RS>
+      : public OrbitInterface<Rational>
     {
-      typedef Numeric::Rational T;
+      typedef Rational T;
      private:
       std::vector< dSet<T,ES,RS> > _data;
      public:
@@ -245,13 +245,13 @@ namespace Ariadne {
       //! \name Input-output operators
       std::ostream& write(std::ostream& os) const;
       //! \name Input-output operators
-      virtual Output::epsstream& write(Output::epsstream& eps) const;
+      virtual epsstream& write(epsstream& eps) const;
       //@}
 
     };
 
-  }
-}
+  
+} // namespace Ariadne
 
 #include "orbit.template.h"
 

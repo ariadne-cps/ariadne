@@ -36,7 +36,6 @@
 #include "test.h"
 
 using namespace Ariadne;
-using namespace Ariadne::Combinatoric;
 using namespace std;
 
 

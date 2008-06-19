@@ -36,7 +36,7 @@
 #include "base/types.h"
 
 namespace Ariadne {
-  namespace Base {
+
 
     //! \ingroup Traversal
     /*! \brief An iterator traversing a subset of values defined by a mask */
@@ -214,7 +214,6 @@ namespace Ariadne {
     }
     
     
-  } // namespace Base
     
 } // namespace Ariadne
   

@@ -77,18 +77,18 @@ Combining lower-approximation and outer-approximation, we obtain an approximatio
 A BasicSet provides a building block for representing more complicated sets.
 Mathematically, a BasicSet type represents elements of a countable base of a topological space.
 More precisely, a BasicSet represents the \em closure of a basic set for the topology.
-The specification of the Basic Set concept is given by the class \ref Ariadne::Geometry::BasicSetConcept.
+The specification of the Basic Set concept is given by the class \ref Ariadne::BasicSetConcept.
 
-Generic classes fulfilling the BasicSet concept are Cuboid (Ariadne::Geometry::Rectangle), Polytope (Ariadne::Geometry::Polytope), Polyhedron (Ariadne::Geometry::Polyhedron), Zonotope (Ariadne::Geometry::Zonotope), Sphere (Ariadne::Geometry::Sphere) and Ellipsoid (Ariadne::Geometry::Ellipsoid).
-Subtypes are Simplex (Ariadne::Geometry::Simplex) and Parallelotope (Ariadne::Geometry::Parallelotope). 
+Generic classes fulfilling the BasicSet concept are Cuboid (Ariadne::Rectangle), Polytope (Ariadne::Polytope), Polyhedron (Ariadne::Polyhedron), Zonotope (Ariadne::Zonotope), Sphere (Ariadne::Sphere) and Ellipsoid (Ariadne::Ellipsoid).
+Subtypes are Simplex (Ariadne::Simplex) and Parallelotope (Ariadne::Parallelotope). 
 At some point in the future, it is planned to support a TaylorSet type as a higher-order generalisation of Zonotope.
 
 \section denotable_set Denotable Sets
 
 A DenotableSet implements a set as a union of basic sets.
-The specification of the Denotable Set concept is given by the class Ariadne::Geometry::DenotableSetConcept.
+The specification of the Denotable Set concept is given by the class Ariadne::DenotableSetConcept.
 
-Generic classes fulfilling the Denotable Set concept are ListSet<BS> (Ariadne::Geometry::ListSet), GridCellListSet (Ariadne::Geometry::GridCellListSet), GridMaskSet (Ariadne::Geometry::GridMaskSet) and PartitionTreeSet (Ariadne::Geometry::PartitionTreeSet).
+Generic classes fulfilling the Denotable Set concept are ListSet<BS> (Ariadne::ListSet), GridCellListSet (Ariadne::GridCellListSet), GridMaskSet (Ariadne::GridMaskSet) and PartitionTreeSet (Ariadne::PartitionTreeSet).
 
 
 \section GeometricOps Predicates and Operations on Sets

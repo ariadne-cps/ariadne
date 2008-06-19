@@ -26,8 +26,8 @@
 namespace Ariadne {
 
 template<class BS>
-Output::epsstream& 
-Geometry::Orbit<Numeric::Integer,BS>::write(Output::epsstream& eps) const
+epsstream& 
+Orbit<Integer,BS>::write(epsstream& eps) const
 {
   for(size_type i=0; i!=this->_data.size(); ++i) {
     eps << this->_data[i].set();

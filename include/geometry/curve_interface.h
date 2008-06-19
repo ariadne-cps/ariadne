@@ -36,7 +36,8 @@
 #include "linear_algebra/declarations.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
+    template<class R> class Vector;
     
     template<class R> class Point;
     template<class R> class Box;
@@ -53,8 +54,8 @@ namespace Ariadne {
     template<class R>
     class CurveInterface
     {
-      typedef typename Numeric::traits<R>::arithmetic_type A;
-      typedef typename Numeric::traits<R>::interval_type I;
+      typedef typename traits<R>::arithmetic_type A;
+      typedef typename traits<R>::interval_type I;
      public:
      public:
       /*! \brief Destructor. */
@@ -69,7 +70,7 @@ namespace Ariadne {
       /*! \brief The point on the curve at a parameter value. */
       virtual Point<A> value(const A& s) const = 0;
       /*! \brief The tangent vector to the curve at a parameter value. */
-      virtual LinearAlgebra::Vector<A> tangent(const A& s) const = 0;
+      virtual Vector<A> tangent(const A& s) const = 0;
 
       /*! \brief Write to an output stream. */
       virtual std::ostream& write(std::ostream& os) const = 0;
@@ -83,8 +84,8 @@ namespace Ariadne {
       return c.write(os);
     }
     
-  }
-}
+  
+} // namespace Ariadne
 
 
 #endif /* ARIADNE_CURVE_INTERFACE_H */

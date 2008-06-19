@@ -35,7 +35,7 @@
 #include "evaluation/map_orbiter.h"
 
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
+
 using namespace Ariadne::Geometry;
 using namespace Ariadne::System;
 using namespace Ariadne::Evaluation;
@@ -71,7 +71,7 @@ lower_evolve(const MapOrbiter<BS>& orb, const Map<R>& f, const Box<R>& bx, const
 template<class R>
 void export_orbiter() 
 {
-  typedef Numeric::Integer N;
+  typedef Integer N;
   typedef Zonotope<R,ExactTag> ZBS;
   typedef Zonotope<R,UniformErrorTag> EZBS;
   typedef Map<R> F;

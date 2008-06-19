@@ -31,7 +31,7 @@
 #include <iostream>
 
 namespace Ariadne {
-namespace Base { 
+
 
 template<class InputIterator>
 std::ostream&
@@ -154,8 +154,7 @@ read_sequence(std::istream& is, Container& v,
 }
 
 
-}
-}
+} // namespace Ariadne
 
 
 #endif /* ARIADNE_SEQUENCE_IO_H */

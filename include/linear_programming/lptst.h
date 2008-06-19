@@ -33,7 +33,7 @@
 #define ARIADNE_LPTST_H
 
 namespace Ariadne { 
-  namespace LinearProgramming {
+  
 
     
     /*! \ingroup LinearProgramming
@@ -46,9 +46,9 @@ namespace Ariadne {
      */
     template<class R, class AP>
     tribool 
-    lptst(const LinearAlgebra::Matrix<R>& A, 
-          const LinearAlgebra::Vector<R>& b, 
-          const LinearAlgebra::Vector<AP>& x);
+    lptst(const Matrix<R>& A, 
+          const Vector<R>& b, 
+          const Vector<AP>& x);
 
 
     /*! \ingroup LinearProgramming
@@ -63,14 +63,13 @@ namespace Ariadne {
      */
     template<class R, class AP>
     tribool 
-    lptstopt(const LinearAlgebra::Matrix<R>& A, 
-             const LinearAlgebra::Vector<R>& b, 
-             const LinearAlgebra::Vector<R>& c, 
-             const LinearAlgebra::Vector<AP>& x, 
-             const LinearAlgebra::Vector<AP>& y);
+    lptstopt(const Matrix<R>& A, 
+             const Vector<R>& b, 
+             const Vector<R>& c, 
+             const Vector<AP>& x, 
+             const Vector<AP>& y);
 
 
-  } // namespace LinearProgramming
 } // namespace Ariadne
 
 #include "lptst.template.h"

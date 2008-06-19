@@ -79,7 +79,7 @@
 #include "exceptions.h"
 
 namespace Ariadne {
-  namespace Combinatoric {    
+
     class BinaryWordList;
     class BinaryWordFixedSizeList;
     
@@ -300,8 +300,6 @@ namespace Ariadne {
     std::istream& operator>>(std::istream& is, BinaryWord& b);
     std::ostream& operator<<(std::ostream& os, const BinaryWord& b);
     
-    
-  } // namespace Base
 } // namespace Ariadne
   
 #endif /* ARIADNE_BINARY_WORD_H */

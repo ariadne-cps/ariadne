@@ -24,8 +24,9 @@
 #include <sstream>
 #include "numeric/interval.h"
 
+
 namespace Ariadne {
-namespace Numeric { 
+ 
 
 
 template<class R> void instantiate_interval();
@@ -94,7 +95,7 @@ cos_(Interval< Float<T> >& res, const Interval< Float<T> >& ivl)
 {
   typedef Float<T> R;
   assert(ivl.lower()<=ivl.upper());
-  Interval<R> pi=Numeric::pi< Interval<R> >();
+  Interval<R> pi=Ariadne::pi< Interval<R> >();
   Interval<R> two_pi=2*pi;
   R n=floor<R>(div_down(ivl.lower(),two_pi.lower()));
   //std::cerr << std::setprecision(20);
@@ -205,6 +206,5 @@ instantiate_interval()
 
 
 
-} // namespace Numeric
 } // namespace Ariadne
   

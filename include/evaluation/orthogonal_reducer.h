@@ -32,7 +32,7 @@
 #include "reducer_interface.h"
 
 namespace Ariadne {
-  namespace Evaluation {
+  
 
     template<class ES> class OrthogonalReducer;
 
@@ -41,18 +41,18 @@ namespace Ariadne {
      *  \brief Class for over-approximating a zonotope  by an orthogonal paralleletope.
      */ 
     template<class R>
-    class OrthogonalReducer< Geometry::Zonotope<R> >
-      : public ReducerInterface< Geometry::Zonotope<R> > 
+    class OrthogonalReducer< Zonotope<R> >
+      : public ReducerInterface< Zonotope<R> > 
     {
-      typedef Geometry::Zonotope<R> ES;
+      typedef Zonotope<R> ES;
      public:
       virtual OrthogonalReducer<ES>* clone() const { return new OrthogonalReducer<ES>(*this); }
-      virtual ES over_approximate(const ES& es) const { return Geometry::orthogonal_over_approximation(es); }
+      virtual ES over_approximate(const ES& es) const { return orthogonal_over_approximation(es); }
     };
 
 
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_ORTHOGONAL_REDUCER_H */

@@ -41,7 +41,7 @@
 #include "geometry/box.h"
 
 namespace Ariadne {  
-  namespace Geometry {
+  
 
     class basic_set_tag;
     class EuclideanSpace;
@@ -68,7 +68,7 @@ namespace Ariadne {
     template<class X> Polytope<X> convex_hull(const Polytope<X>& pltp1, const Polytope<X>& pltp2);
   
     template<class X> Polytope<X> polytope(const Rectangle<X>& r);
-    template<class X> Polytope<typename Numeric::traits<X>::arithmetic_type> polytope(const Polyhedron<X>& plhd);
+    template<class X> Polytope<typename traits<X>::arithmetic_type> polytope(const Polyhedron<X>& plhd);
   
 
 
@@ -89,8 +89,8 @@ namespace Ariadne {
      */ 
     template<class X>
     class Polytope {
-      typedef typename Numeric::traits<X>::number_type R;
-      typedef typename Numeric::traits<X>::arithmetic_type A;
+      typedef typename traits<X>::number_type R;
+      typedef typename traits<X>::arithmetic_type A;
      private:    
       dimension_type _dimension;
       size_type _number_of_vertices;
@@ -103,7 +103,7 @@ namespace Ariadne {
        /*! \brief The type of denotable real numbers used to describe the convex hull. */
       typedef R value_type;
        /*! \brief The type of real numbers used to describe the state space. */
-      typedef typename Numeric::traits<X>::number_type real_type;
+      typedef typename traits<X>::number_type real_type;
       /*! \brief The type of denotable point contained by the convex hull. */
       typedef Point<X> state_type;
       /*! \brief An iterator through the vertices of the polytope. */
@@ -125,7 +125,7 @@ namespace Ariadne {
       explicit Polytope<X>(dimension_type d, size_type nv, const X* data);
 
       /*! \brief Construct from a matrix whose columns give the vertices. */
-      explicit Polytope(const LinearAlgebra::Matrix<X>& A);
+      explicit Polytope(const Matrix<X>& A);
      
       /*! \brief Construct from a list of vertices. */
       explicit Polytope(const PointList<X>& v);
@@ -149,7 +149,7 @@ namespace Ariadne {
       //@{
       //! \name Data access
       /*! \brief The matrix of generators. */
-      const LinearAlgebra::Matrix<X> generators() const;
+      const Matrix<X> generators() const;
       /*! \brief The number of vertices of the convex set. */
       size_type number_of_vertices() const;
       /*! \brief The vertices of the convex set. */
@@ -171,8 +171,8 @@ namespace Ariadne {
         this->_data.resize((d+1)*nv);
       }
       
-      LinearAlgebra::MatrixSlice<X> _generators_() { 
-        return LinearAlgebra::MatrixSlice<X>(this->_dimension+1,this->_number_of_vertices,this->_data.begin(),1,this->_dimension+1); 
+      MatrixSlice<X> _generators_() { 
+        return MatrixSlice<X>(this->_dimension+1,this->_number_of_vertices,this->_data.begin(),1,this->_dimension+1); 
       }
       //@}
 
@@ -199,32 +199,32 @@ namespace Ariadne {
       //@{
       //! \name Geometric binary predicates
       /*! \brief Tests if the polytope contains a point. */
-      friend tribool Geometry::contains<>(const Polytope<X>& A, 
-                                          const Point<R>& B);
+      friend tribool Ariadne::contains<>(const Polytope<X>& A, 
+                                         const Point<R>& B);
         
       /*! \brief Tests disjointness. */
-      friend tribool Geometry::disjoint<>(const Polytope<X>& A, 
-                                          const Polytope<X>& B);
+      friend tribool disjoint<>(const Polytope<X>& A, 
+                                const Polytope<X>& B);
         
       /*! \brief Tests disjointness. */
-      friend tribool Geometry::disjoint<>(const Polytope<X>& A, 
-                                          const Box<R>& B);
+      friend tribool disjoint<>(const Polytope<X>& A, 
+                                const Box<R>& B);
         
       /*! \brief Tests disjointness. */
-      friend tribool Geometry::disjoint<>(const Box<R>& A, 
-                                          const Polytope<X>& B);
+      friend tribool disjoint<>(const Box<R>& A, 
+                                const Polytope<X>& B);
         
       /*! \brief Tests inclusion of \a A in \a B. */
-      friend tribool Geometry::subset<>(const Polytope<X>& A, 
+      friend tribool subset<>(const Polytope<X>& A, 
                                         const Polytope<X>& B);
     
       /*! \brief Tests inclusion of \a A in \a B. */
-      friend tribool Geometry::subset<>(const Polytope<X>& A, 
-                                        const Box<R>& B);
+      friend tribool subset<>(const Polytope<X>& A, 
+                              const Box<R>& B);
     
       /*! \brief Tests inclusion of \a A in \a B. */
-      friend tribool Geometry::subset<>(const Box<R>& A, 
-                                        const Polytope<X>& B);
+      friend tribool subset<>(const Box<R>& A, 
+                              const Polytope<X>& B);
       //@}
       
 
@@ -251,8 +251,8 @@ namespace Ariadne {
     };
    
 
-  }
-}
+  
+} // namespace Ariadne
 
 #include "polytope.inline.h"
 

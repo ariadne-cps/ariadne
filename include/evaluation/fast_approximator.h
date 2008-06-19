@@ -38,7 +38,7 @@
 #include "approximator_base.h"
 
 namespace Ariadne {
-  namespace Evaluation {
+  
 
 
     /*! \ingroup Approximators
@@ -48,25 +48,25 @@ namespace Ariadne {
      */
     template<class ES>
     class FastApproximator
-      : public ApproximatorBase<Geometry::GridApproximationScheme<typename ES::real_type>,ES>
+      : public ApproximatorBase<GridApproximationScheme<typename ES::real_type>,ES>
     {
       typedef typename ES::real_type R;
-      typedef Numeric::Interval<R> I;
-      typedef Geometry::GridApproximationScheme<R> GAS;
+      typedef Interval<R> I;
+      typedef GridApproximationScheme<R> GAS;
      public:
-      FastApproximator() : ApproximatorBase<GAS,ES>(Geometry::Grid<R>()) { };
-      FastApproximator(const Geometry::Grid<R>& g) : ApproximatorBase<GAS,ES>(g) { }
+      FastApproximator() : ApproximatorBase<GAS,ES>(Grid<R>()) { };
+      FastApproximator(const Grid<R>& g) : ApproximatorBase<GAS,ES>(g) { }
       virtual FastApproximator<ES>* clone() const;
-      virtual ES enclosure_set(const Geometry::Box<R>&  bx) const;
+      virtual ES enclosure_set(const Box<R>&  bx) const;
       virtual R radius(const ES& bs) const;
-      virtual Geometry::Box<R> bounding_box(const ES& bs) const;
-      virtual Geometry::BoxListSet<R> lower_approximation(const ES& bs) const;
-      virtual Geometry::GridCellListSet<R> inner_approximation(const ES& bs, const Geometry::Grid<R>& g) const;
-      virtual Geometry::GridCellListSet<R> outer_approximation(const ES& bs, const Geometry::Grid<R>& g) const;
+      virtual Box<R> bounding_box(const ES& bs) const;
+      virtual BoxListSet<R> lower_approximation(const ES& bs) const;
+      virtual GridCellListSet<R> inner_approximation(const ES& bs, const Grid<R>& g) const;
+      virtual GridCellListSet<R> outer_approximation(const ES& bs, const Grid<R>& g) const;
       virtual std::ostream& write(std::ostream& os) const;
     };
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_FAST_APPROXIMATOR_H */

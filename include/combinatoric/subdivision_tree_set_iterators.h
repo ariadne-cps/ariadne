@@ -33,7 +33,7 @@
 #include "base/iterator.h"
 
 namespace Ariadne {
-  namespace Combinatoric {
+
     
     inline uint log2(uint n) {
       uint r=0;  while(n>1) { ++r; n>>=1; } return r; 
@@ -130,8 +130,9 @@ namespace Ariadne {
       SubdivisionSequence _subdivisions;
     };
   
-  }
   
-}
+  
+} // namespace Ariadne
+
 
 #endif /* ARIADNE_SUBDIVISION_TREE_SET_ITERATORS_H */

@@ -30,7 +30,7 @@
 #include "hybrid_basic_set.h"
 
 namespace Ariadne { 
-  namespace Geometry {
+  
 
   // FIXME: This class doesn't work
 
@@ -60,14 +60,10 @@ namespace Ariadne {
     };
 
 
-  }
-}
 
-
-namespace Ariadne {
 
 template<class DS, class HBS> inline
-Geometry::HybridDenotableSetIterator<DS,HBS>::HybridDenotableSetIterator(const std::map<DiscreteState,DS>& map, bool end)
+HybridDenotableSetIterator<DS,HBS>::HybridDenotableSetIterator(const std::map<DiscreteState,DS>& map, bool end)
   : loc_begin(map.begin()),
     loc_end(map.end()),
     loc_iter(end?loc_end:loc_begin),
@@ -82,7 +78,7 @@ Geometry::HybridDenotableSetIterator<DS,HBS>::HybridDenotableSetIterator(const s
 
 template<class DS, class HBS> inline
 bool
-Geometry::HybridDenotableSetIterator<DS,HBS>::equal(const HybridDenotableSetIterator<DS>& other) const
+HybridDenotableSetIterator<DS,HBS>::equal(const HybridDenotableSetIterator<DS>& other) const
 {
   return this->loc_iter==other.loc_iter && (this->loc_iter==this->loc_end || this->bs_iter==other.bs_iter);
 }
@@ -90,7 +86,7 @@ Geometry::HybridDenotableSetIterator<DS,HBS>::equal(const HybridDenotableSetIter
 
 template<class DS, class HBS> inline
 HBS
-Geometry::HybridDenotableSetIterator<DS,HBS>::dereference() const
+HybridDenotableSetIterator<DS,HBS>::dereference() const
 {
   return HBS(loc_iter->first,*this->bs_iter);
 }
@@ -98,7 +94,7 @@ Geometry::HybridDenotableSetIterator<DS,HBS>::dereference() const
 
 template<class DS, class HBS> inline
 void
-Geometry::HybridDenotableSetIterator<DS,HBS>::increment() 
+HybridDenotableSetIterator<DS,HBS>::increment() 
 {
   ++this->bs_iter;
   this->increment_loc();
@@ -106,7 +102,7 @@ Geometry::HybridDenotableSetIterator<DS,HBS>::increment()
 
 template<class DS, class HBS> inline
 void
-Geometry::HybridDenotableSetIterator<DS,HBS>::increment_loc() 
+HybridDenotableSetIterator<DS,HBS>::increment_loc() 
 {
   while(bs_iter==loc_iter->second.end()) {
     ++loc_iter;
@@ -115,6 +111,6 @@ Geometry::HybridDenotableSetIterator<DS,HBS>::increment_loc()
   }
 }
 
-}
+} // namespace Ariadne
 
 #endif // ARIADNE_HYBRID_SET_ITERATOR_H

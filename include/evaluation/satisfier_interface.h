@@ -36,7 +36,7 @@
 #include "system/declarations.h"
 
 namespace Ariadne {
-  namespace Evaluation {
+  
 
     /*! \ingroup EvaluatorInterfaces \ingroup Approximators
      *  \brief Interface for testing whether a set satisfies a constraint. 
@@ -45,7 +45,7 @@ namespace Ariadne {
     class SatisfierInterface
     {
       typedef typename ES::real_type R;
-      typedef Numeric::Interval<R> I;
+      typedef Interval<R> I;
      public:
       /*! \brief Compute the image of a basic set under a continuous function. */
       virtual ~SatisfierInterface() { }
@@ -54,18 +54,18 @@ namespace Ariadne {
       virtual SatisfierInterface<ES>* clone() const = 0;
       
       /*! \brief Test whether a set is a subset of a given constraint set. */
-      virtual tribool subset(const ES& es, const Geometry::ConstraintSet<R>& cs) const = 0;
+      virtual tribool subset(const ES& es, const ConstraintSet<R>& cs) const = 0;
       
       /*! \brief Test whether a set is disjoint from a given constraint set. */
-      virtual tribool disjoint(const ES& es, const Geometry::ConstraintSet<R>& cs) const = 0;
+      virtual tribool disjoint(const ES& es, const ConstraintSet<R>& cs) const = 0;
       
       /*! \brief Test whether a set intersects from a given constraint set. */
-      virtual tribool intersects(const ES& es, const Geometry::ConstraintSet<R>& cs) const = 0;
+      virtual tribool intersects(const ES& es, const ConstraintSet<R>& cs) const = 0;
       
     };
 
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_SATISFIER_INTERFACE_H */

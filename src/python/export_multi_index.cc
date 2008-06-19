@@ -28,7 +28,6 @@
 #include "python/read_array.h"
 
 using namespace Ariadne;
-using namespace Ariadne::Function;
 using namespace Ariadne::Python;
 
 #include <boost/python.hpp>

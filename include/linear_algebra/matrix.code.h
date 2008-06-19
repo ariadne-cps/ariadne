@@ -44,26 +44,26 @@ template<class R>
 void
 instantiate_matrix_approx() 
 {
-  typedef typename Numeric::traits<R>::number_type X;
-  LinearAlgebra::Matrix<X>* nA=0;
-  LinearAlgebra::Vector<X>* nv=0;
+  typedef typename traits<R>::number_type X;
+  Matrix<X>* nA=0;
+  Vector<X>* nv=0;
 
-  LinearAlgebra::mul_approx(*nA,*nv);
-  LinearAlgebra::mul_approx(*nA,*nA);
-  LinearAlgebra::solve_approx(*nA,*nv);
-  LinearAlgebra::inverse_approx(*nA);
-  LinearAlgebra::qr_approx(*nA);
+  mul_approx(*nA,*nv);
+  mul_approx(*nA,*nA);
+  solve_approx(*nA,*nv);
+  inverse_approx(*nA);
+  qr_approx(*nA);
 }
 
 template<>
 void
-instantiate_matrix_approx<Numeric::Rational>() 
+instantiate_matrix_approx<Rational>() 
 {
 }
 
 template<>
 void
-instantiate_matrix_approx< Numeric::Interval<Numeric::Rational> >() 
+instantiate_matrix_approx< Interval<Rational> >() 
 {
 }
 
@@ -72,10 +72,10 @@ instantiate_matrix_approx< Numeric::Interval<Numeric::Rational> >()
 
 template<class R>
 void
-LinearAlgebra::Matrix<R>::instantiate()
+Matrix<R>::instantiate()
 {
-  typedef typename Numeric::traits<R>::number_type X;
-  typedef typename Numeric::traits<R>::interval_type I;
+  typedef typename traits<R>::number_type X;
+  typedef typename traits<R>::interval_type I;
 
   Matrix<R>* A=0;
   Vector<R>* v=0;
@@ -106,7 +106,7 @@ LinearAlgebra::Matrix<R>::instantiate()
 }
 
 template<class R>
-LinearAlgebra::Matrix<R>::Matrix(const std::string& s)
+Matrix<R>::Matrix(const std::string& s)
 {
   std::stringstream ss(s);
   ss >> *this;
@@ -114,43 +114,43 @@ LinearAlgebra::Matrix<R>::Matrix(const std::string& s)
     
 
 template<class R>
-typename Numeric::traits<R>::arithmetic_type
-LinearAlgebra::sup_norm(const Matrix<R>& A)
+typename traits<R>::arithmetic_type
+sup_norm(const Matrix<R>& A)
 {
-  typedef typename Numeric::traits<R>::arithmetic_type F;
+  typedef typename traits<R>::arithmetic_type F;
   F result=0;
   for(size_type i=0; i!=A.number_of_rows(); ++i) {
     F row_sum=0;
     for(size_type j=0; j!=A.number_of_columns(); ++j) {
       row_sum+=abs(A(i,j));
     }
-    result=Numeric::max(result,row_sum);
+    result=max(result,row_sum);
   }
   return result;
 }
 
 template<class R>
-typename Numeric::traits<R>::arithmetic_type
-LinearAlgebra::sup_norm(const MatrixSlice<R>& A)
+typename traits<R>::arithmetic_type
+sup_norm(const MatrixSlice<R>& A)
 {
-  typedef typename Numeric::traits<R>::arithmetic_type F;
+  typedef typename traits<R>::arithmetic_type F;
   F result=0;
   for(size_type i=0; i!=A.number_of_rows(); ++i) {
     F row_sum=0;
     for(size_type j=0; j!=A.number_of_columns(); ++j) {
       row_sum+=abs(A(i,j));
     }
-    result=Numeric::max(result,row_sum);
+    result=max(result,row_sum);
   }
   return result;
 }
 
 
 template<class R>
-typename Numeric::traits<R>::arithmetic_type
-LinearAlgebra::log_norm(const Matrix<R>& A) 
+typename traits<R>::arithmetic_type
+log_norm(const Matrix<R>& A) 
 {
-  typedef typename Numeric::traits<R>::arithmetic_type F;
+  typedef typename traits<R>::arithmetic_type F;
   F result=0;
   for(size_type i=0; i!=A.number_of_rows(); ++i) {
     F row_sum=A(i,i);
@@ -168,8 +168,8 @@ LinearAlgebra::log_norm(const Matrix<R>& A)
 
 
 template<class R>
-LinearAlgebra::Matrix<R>
-LinearAlgebra::transpose(const Matrix<R>& A)
+Matrix<R>
+transpose(const Matrix<R>& A)
 {
   return Matrix<R>(A.number_of_columns(),A.number_of_rows(),const_cast<R*>(A.begin()),
                    A.column_increment(),A.row_increment());
@@ -178,31 +178,31 @@ LinearAlgebra::transpose(const Matrix<R>& A)
 
 template<class R>
 bool
-LinearAlgebra::singular(const Matrix<R>& A) 
+singular(const Matrix<R>& A) 
 {
-  return LUMatrix<typename Numeric::traits<R>::arithmetic_type>(A).singular();
+  return LUMatrix<typename traits<R>::arithmetic_type>(A).singular();
 }
 
 
 template<class R>
-typename Numeric::traits<R>::arithmetic_type
-LinearAlgebra::determinant(const Matrix<R>& A) 
+typename traits<R>::arithmetic_type
+determinant(const Matrix<R>& A) 
 {
-  return LUMatrix<typename Numeric::traits<R>::arithmetic_type>(A).determinant();
+  return LUMatrix<typename traits<R>::arithmetic_type>(A).determinant();
 }
 
 
 template<class R>
-LinearAlgebra::Matrix<R>
-LinearAlgebra::direct_sum(const Matrix<R>& A1, const Matrix<R>& A2) {
+Matrix<R>
+direct_sum(const Matrix<R>& A1, const Matrix<R>& A2) {
   return concatenate(A1,A2);
 }
 
 
 template<class R>
-LinearAlgebra::Matrix<R>
-LinearAlgebra::concatenate(const Matrix<R>& A1, const Matrix<R>& A2) {
-  LinearAlgebra::Matrix<R> result(A1.number_of_rows()+A2.number_of_rows(),A1.number_of_columns()+A2.number_of_columns());
+Matrix<R>
+concatenate(const Matrix<R>& A1, const Matrix<R>& A2) {
+  Matrix<R> result(A1.number_of_rows()+A2.number_of_rows(),A1.number_of_columns()+A2.number_of_columns());
   for(size_type j=0; j!=A1.number_of_columns(); ++j) {
     for(size_type i=0; i!=A1.number_of_rows(); ++i) {
       result(i,j)=A1(i,j);
@@ -218,12 +218,12 @@ LinearAlgebra::concatenate(const Matrix<R>& A1, const Matrix<R>& A2) {
 
 
 template<class R>
-LinearAlgebra::Matrix<R>
-LinearAlgebra::concatenate_rows(const Matrix<R>& A, const Vector<R>& v) {
+Matrix<R>
+concatenate_rows(const Matrix<R>& A, const Vector<R>& v) {
   if(!(A.number_of_columns()==v.size())) { 
     ARIADNE_THROW(IncompatibleSizes,"Matrix concatenate_rows(Matrix,Matrix)","A="<<A<<", v="<<v); 
   }
-  LinearAlgebra::Matrix<R> result(A.number_of_rows()+1u,A.number_of_columns());
+  Matrix<R> result(A.number_of_rows()+1u,A.number_of_columns());
   for(size_type j=0; j!=A.number_of_columns(); ++j) {
     for(size_type i=0; i!=A.number_of_rows(); ++i) {
       result(i,j)=A(i,j);
@@ -235,12 +235,12 @@ LinearAlgebra::concatenate_rows(const Matrix<R>& A, const Vector<R>& v) {
 
 
 template<class R>
-LinearAlgebra::Matrix<R>
-LinearAlgebra::concatenate_rows(const Matrix<R>& A1, const Matrix<R>& A2) {
+Matrix<R>
+concatenate_rows(const Matrix<R>& A1, const Matrix<R>& A2) {
   if(!(A1.number_of_columns()==A2.number_of_columns())) { 
     ARIADNE_THROW(IncompatibleSizes,"Matrix concatenate_rows(Matrix,Matrix)","A1="<<A1<<", A2="<<A2); 
   }
-  LinearAlgebra::Matrix<R> result(A1.number_of_rows()+A2.number_of_rows(),A1.number_of_columns());
+  Matrix<R> result(A1.number_of_rows()+A2.number_of_rows(),A1.number_of_columns());
   for(size_type j=0; j!=result.number_of_columns(); ++j) {
     for(size_type i=0; i!=A1.number_of_rows(); ++i) {
       result(i,j)=A1(i,j);
@@ -254,12 +254,12 @@ LinearAlgebra::concatenate_rows(const Matrix<R>& A1, const Matrix<R>& A2) {
 
 
 template<class R>
-LinearAlgebra::Matrix<R>
-LinearAlgebra::concatenate_columns(const Matrix<R>& A1, const Matrix<R>& A2) {
+Matrix<R>
+concatenate_columns(const Matrix<R>& A1, const Matrix<R>& A2) {
   if(!(A1.number_of_rows()==A2.number_of_rows())) { 
     ARIADNE_THROW(IncompatibleSizes,"Matrix concatenate_columns(Matrix,Matrix)","A1="<<A1<<", A2="<<A2); 
   }
-  LinearAlgebra::Matrix<R> result(A1.number_of_rows(),A1.number_of_columns()+A2.number_of_columns());
+  Matrix<R> result(A1.number_of_rows(),A1.number_of_columns()+A2.number_of_columns());
   for(size_type i=0; i!=result.number_of_rows(); ++i) {
     for(size_type j=0; j!=A1.number_of_columns(); ++j) {
       result(i,j)=A1(i,j);
@@ -273,12 +273,12 @@ LinearAlgebra::concatenate_columns(const Matrix<R>& A1, const Matrix<R>& A2) {
 
 
 template<class R>
-LinearAlgebra::Matrix<R>
-LinearAlgebra::concatenate_columns(const Matrix<R>& A, const Vector<R>& v) {
+Matrix<R>
+concatenate_columns(const Matrix<R>& A, const Vector<R>& v) {
   if(!(A.number_of_rows()==v.size())) {
     ARIADNE_THROW(IncompatibleSizes,"Matrix concatenate_columns(Matrix,Vector)","A="<<A<<", v="<<v); 
   }
-  LinearAlgebra::Matrix<R> result(A.number_of_rows(),A.number_of_columns()+1u);
+  Matrix<R> result(A.number_of_rows(),A.number_of_columns()+1u);
   for(size_type i=0; i!=A.number_of_rows(); ++i) {
     for(size_type j=0; j!=A.number_of_columns(); ++j) {
       result(i,j)=A(i,j);
@@ -291,33 +291,33 @@ LinearAlgebra::concatenate_columns(const Matrix<R>& A, const Vector<R>& v) {
 
 
 template<class R>
-LinearAlgebra::Matrix<typename Numeric::traits<R>::arithmetic_type>
-LinearAlgebra::inverse(const Matrix<R>& A) 
+Matrix<typename traits<R>::arithmetic_type>
+inverse(const Matrix<R>& A) 
 {
-  return LUMatrix<typename Numeric::traits<R>::arithmetic_type>(A).inverse();
+  return LUMatrix<typename traits<R>::arithmetic_type>(A).inverse();
 }
 
 
 
 template<class T>
-LinearAlgebra::Vector< Numeric::Float<T> >
-LinearAlgebra::mul_approx(const Matrix< Numeric::Float<T> >& A,
-                          const Vector< Numeric::Float<T> >& b)
+Vector< Float<T> >
+mul_approx(const Matrix< Float<T> >& A,
+                          const Vector< Float<T> >& b)
 {
-  typedef Numeric::Float<T> F;
-  typedef Numeric::ApproximateFloat<T> AF;
+  typedef Float<T> F;
+  typedef ApproximateFloat<T> AF;
   Vector<F> r;
   reinterpret_cast<Vector<AF>&>(r)=reinterpret_cast<Matrix<AF>const&>(A) * reinterpret_cast<Vector<AF>const&>(b);
   return r;
 }
 
 template<class T>
-LinearAlgebra::Matrix< Numeric::Float<T> >
-LinearAlgebra::mul_approx(const Matrix< Numeric::Float<T> >& A,
-                          const Matrix< Numeric::Float<T> >& B)
+Matrix< Float<T> >
+mul_approx(const Matrix< Float<T> >& A,
+                          const Matrix< Float<T> >& B)
 {
-  typedef Numeric::Float<T> F;
-  typedef Numeric::ApproximateFloat<T> AF;
+  typedef Float<T> F;
+  typedef ApproximateFloat<T> AF;
   Matrix<F> C;
   reinterpret_cast<Vector<AF>&>(C)=reinterpret_cast<Matrix<AF>const&>(A) * reinterpret_cast<Vector<AF>const&>(A);
   return C;
@@ -326,43 +326,43 @@ LinearAlgebra::mul_approx(const Matrix< Numeric::Float<T> >& A,
 
 
 template<class T>
-LinearAlgebra::Vector< Numeric::Float<T> >
-LinearAlgebra::solve_approx(const Matrix< Numeric::Float<T> >& A,
-                            const Vector< Numeric::Float<T> >& b)
+Vector< Float<T> >
+solve_approx(const Matrix< Float<T> >& A,
+                            const Vector< Float<T> >& b)
 {
-  typedef Numeric::Float<T> F;
-  typedef Numeric::ApproximateFloat<T> AF;
+  typedef Float<T> F;
+  typedef ApproximateFloat<T> AF;
   Vector<F> r;
   reinterpret_cast<Vector<AF>&>(r)=solve(reinterpret_cast<Matrix<AF>const&>(A),reinterpret_cast<Vector<AF>const&>(b));
   return r;
 }
 
 template<class R1, class R2>
-LinearAlgebra::Vector<typename Numeric::traits<R1,R2>::arithmetic_type>
-LinearAlgebra::solve(const Matrix<R1>& A, const Vector<R2>& v) 
+Vector<typename traits<R1,R2>::arithmetic_type>
+solve(const Matrix<R1>& A, const Vector<R2>& v) 
 {
   return inverse(A)*v;
 }
 
 
 template<class T>
-LinearAlgebra::Matrix< Numeric::Float<T> >
-LinearAlgebra::inverse_approx(const Matrix< Numeric::Float<T> >& A)
+Matrix< Float<T> >
+inverse_approx(const Matrix< Float<T> >& A)
 {
-  typedef Numeric::Float<T> F;
-  typedef Numeric::ApproximateFloat<T> AF;
+  typedef Float<T> F;
+  typedef ApproximateFloat<T> AF;
   Matrix<F> r;
   reinterpret_cast<Matrix<AF>&>(r)=inverse(reinterpret_cast<Matrix<AF>const&>(A));
   return r;
 }
 
 template<class T>
-std::pair< LinearAlgebra::Matrix< Numeric::Float<T> >, 
-           LinearAlgebra::Matrix< Numeric::Float<T> > >
-LinearAlgebra::qr_approx(const Matrix< Numeric::Float<T> >& A)
+std::pair< Matrix< Float<T> >, 
+           Matrix< Float<T> > >
+qr_approx(const Matrix< Float<T> >& A)
 {
-  typedef Numeric::Float<T> F;
-  typedef Numeric::ApproximateFloat<T> AF;
+  typedef Float<T> F;
+  typedef ApproximateFloat<T> AF;
   QRMatrix<AF> qr(reinterpret_cast<Matrix<AF>const&>(A));
   Matrix<F> Q;
   Matrix<F> R;
@@ -374,8 +374,8 @@ LinearAlgebra::qr_approx(const Matrix< Numeric::Float<T> >& A)
 }
 
 template<class R>
-LinearAlgebra::Matrix<typename Numeric::traits<R>::arithmetic_type>
-LinearAlgebra::schulz_inverse(const Matrix<R>& A) 
+Matrix<typename traits<R>::arithmetic_type>
+schulz_inverse(const Matrix<R>& A) 
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
@@ -384,7 +384,7 @@ LinearAlgebra::schulz_inverse(const Matrix<R>& A)
 
 template<class R>
 std::ostream&
-LinearAlgebra::Matrix<R>::write(std::ostream& os) const
+Matrix<R>::write(std::ostream& os) const
 {
   const Matrix<R>& A=*this;
   os<<std::fixed<<std::setprecision(6);
@@ -403,7 +403,7 @@ LinearAlgebra::Matrix<R>::write(std::ostream& os) const
 
 template<class R>
 std::istream&
-LinearAlgebra::Matrix<R>::read(std::istream& is)
+Matrix<R>::read(std::istream& is)
 {
   char c;
   is >> c;

@@ -40,10 +40,10 @@ namespace Ariadne {
     void read_scalar(unsigned int&, const boost::python::object&);
     void read_scalar(unsigned long int&, const boost::python::object&);
     void read_scalar(double&, const boost::python::object&);
-    void read_scalar(Numeric::Integer&, const boost::python::object&);
-    void read_scalar(Numeric::Rational&, const boost::python::object&);
-    template<class T> void read_scalar(Numeric::Float<T>&, const boost::python::object&);
-    template<class R> void read_scalar(Numeric::Interval<R>&, const boost::python::object&);
+    void read_scalar(Integer&, const boost::python::object&);
+    void read_scalar(Rational&, const boost::python::object&);
+    template<class T> void read_scalar(Float<T>&, const boost::python::object&);
+    template<class R> void read_scalar(Interval<R>&, const boost::python::object&);
     
   }
 }

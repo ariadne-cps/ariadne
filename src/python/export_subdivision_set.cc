@@ -26,7 +26,6 @@
 #include "combinatoric/subdivision_tree_set.h"
 
 using namespace Ariadne;
-using namespace Ariadne::Combinatoric;
 
 #include <boost/python.hpp>
 using namespace boost::python;
@@ -69,6 +68,6 @@ void export_subdivision_set() {
     .def(self_ns::str(self))
     ;
 
-  def("hull",&Combinatoric::hull);
+  def("hull",&hull);
 
 }

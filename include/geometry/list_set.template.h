@@ -32,35 +32,35 @@ namespace Ariadne {
 
 template<class BS>
 void
-Geometry::ListSet<BS>::_instantiate()
+ListSet<BS>::_instantiate()
 {
 }
 
 
 template<class BS, class R> 
 tribool 
-Geometry::contains(const ListSet<BS>& ls, const Point<R>& p) 
+contains(const ListSet<BS>& ls, const Point<R>& p) 
 {
   tribool result=false;
   for (typename ListSet<BS>::const_iterator i=ls.begin(); i!=ls.end(); ++i) {
     //result=result || i->contains(p);
-    result=result || Geometry::contains(*i,p);
+    result=result || contains(*i,p);
     if(result) { return result; }
   }
   return result;
 }
 
 template<class BS> 
-Geometry::Box<typename BS::real_type> 
-Geometry::bounding_box(const ListSet<BS>& ls)  
+Box<typename BS::real_type> 
+bounding_box(const ListSet<BS>& ls)  
 {
   typedef typename ListSet<BS>::real_type R;
   if(ls.size()==0) { return Box<R>(ls.dimension()); }
   //Box<R> result=(*this)[0].bounding_box();
-  Box<R> result=Geometry::bounding_box(ls[0]);
+  Box<R> result=bounding_box(ls[0]);
   for(typename ListSet<BS>::const_iterator iter=ls.begin(); iter!=ls.end(); ++iter) {
     //Box<R> bb=iter->bounding_box();
-    Box<R> bb=Geometry::bounding_box(*iter);
+    Box<R> bb=bounding_box(*iter);
     for(size_type i=0; i!=result.dimension(); ++i) {
       if(bb.lower_bound(i) < result.lower_bound(i)) {
         result.set_lower_bound(i,bb.lower_bound(i));
@@ -76,7 +76,7 @@ Geometry::bounding_box(const ListSet<BS>& ls)
 
 template<class BS, class R>
 tribool
-Geometry::disjoint(const ListSet<BS>& ls,
+disjoint(const ListSet<BS>& ls,
                    const Box<R>& bx)
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(ls,bx,"tribool disjoint(ListSet<BS> ls, Box bx)");
@@ -90,7 +90,7 @@ Geometry::disjoint(const ListSet<BS>& ls,
 
 template<class BS1, class BS2>
 tribool
-Geometry::disjoint(const ListSet<BS1>& ls1,
+disjoint(const ListSet<BS1>& ls1,
                    const ListSet<BS2>& ls2)
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(ls1,ls2,"tribool disjoint(ListSet<BS> ls1, ListSet<BS> ls2)");
@@ -108,14 +108,14 @@ Geometry::disjoint(const ListSet<BS1>& ls1,
 
 template<class BS1, class BS2>
 tribool
-Geometry::subset(const ListSet< BS1 >& ls,
+subset(const ListSet< BS1 >& ls,
                  const BS2& bs)
 {
   tribool result=true;
   for(typename ListSet< BS1 >::const_iterator ls_iter=ls.begin();
       ls_iter!=ls.end(); ++ls_iter)
     {
-      result = result && Geometry::subset(*ls_iter,bs);
+      result = result && subset(*ls_iter,bs);
       if(result==false) {
         return result;
       }
@@ -125,8 +125,8 @@ Geometry::subset(const ListSet< BS1 >& ls,
 
 
 template<class BS>
-Geometry::ListSet<BS>
-Geometry::join(const ListSet<BS>& ls1,
+ListSet<BS>
+join(const ListSet<BS>& ls1,
                const ListSet<BS>& ls2)
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(ls1,ls2,"ListSet<BS> join(ListSet<BS> ls1, ListSet<BS> ls2)");
@@ -137,8 +137,8 @@ Geometry::join(const ListSet<BS>& ls1,
 
 
 template<class BS>
-Geometry::ListSet<BS>
-Geometry::open_intersection(const ListSet<BS>& ls1,
+ListSet<BS>
+open_intersection(const ListSet<BS>& ls1,
                             const ListSet<BS>& ls2)
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(ls1,ls2,"ListSet<BS> open_intersection(ListSet<BS> ls1, ListSet<BS> ls2)");
@@ -157,19 +157,19 @@ Geometry::open_intersection(const ListSet<BS>& ls1,
 
 template<class BS>
 std::string 
-Geometry::ListSet<BS>::summary() const
+ListSet<BS>::summary() const
 {
   std::stringstream ss;
-  ss << "ListSet<"<<Geometry::name<BS>()<<">( size="<<this->size()<<", dimension="<<this->dimension()<<" )";
+  ss << "ListSet<"<<name<BS>()<<">( size="<<this->size()<<", dimension="<<this->dimension()<<" )";
   return ss.str();
 }
 
 template<class BS>
 std::ostream& 
-Geometry::ListSet<BS>::write(std::ostream& os) const
+ListSet<BS>::write(std::ostream& os) const
 {
   const ListSet<BS>& ls=*this;
-  os << "ListSet<"<<Geometry::name<BS>()<<">(\n size="<<ls.size()<<",\n";
+  os << "ListSet<"<<name<BS>()<<">(\n size="<<ls.size()<<",\n";
   os << "  [ ";
   if (ls.size() >0 ) {
     os << ls[0];
@@ -185,7 +185,7 @@ Geometry::ListSet<BS>::write(std::ostream& os) const
 
 template<class BS>
 std::istream& 
-Geometry::ListSet<BS>::read(std::istream& is)
+ListSet<BS>::read(std::istream& is)
 {
   ListSet<BS>& ls=*this;
   std::vector< BS >& vec(ls._vector);
@@ -202,4 +202,4 @@ Geometry::ListSet<BS>::read(std::istream& is)
 
 
 
-}
+} // namespace Ariadne

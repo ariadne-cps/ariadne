@@ -28,7 +28,7 @@
 #include "numeric/interval.code.h"
 
 namespace Ariadne {
-  namespace Numeric {
+  
 
   template class Interval<Integer>;
   template class Interval<Rational>;
@@ -43,5 +43,5 @@ namespace Ariadne {
   template void instantiate_interval<FloatMP>();
 #endif
 
-  }
+
 }

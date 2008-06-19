@@ -41,7 +41,7 @@
 #include "evaluation/evolution_parameters.h"
 
 namespace Ariadne {
-  namespace Evaluation {
+  
 
     class TimedLogicFormula;
 
@@ -52,7 +52,7 @@ namespace Ariadne {
     class ModelChecker {
       typedef typename Aprx::real_type R;
       typedef typename Aprx::PartitionTreeSet PartitionTreeSet;
-      typedef System::TransitionSystemInterface<T,Aprx> TransitionSystem;
+      typedef TransitionSystemInterface<T,Aprx> TransitionSystem;
      private:
       boost::shared_ptr< EvolutionParameters<R> > _parameters;
      public:
@@ -93,7 +93,7 @@ namespace Ariadne {
 
 
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_MODEL_CHECKER_H */

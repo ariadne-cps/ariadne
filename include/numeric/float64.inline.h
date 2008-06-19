@@ -40,7 +40,7 @@
 #include "numeric/rational.h"
 
 namespace Ariadne {
-namespace Numeric {
+
 
 
 
@@ -411,5 +411,5 @@ inline Float64 neg(const Float64& x) { return -x._value; }
 inline Float64 operator+(const Float64& x) { return pos(x); }
 inline Float64 operator-(const Float64& x) { return neg(x); }
 
-} // namespace Numeric
+
 } // namespace Ariadne

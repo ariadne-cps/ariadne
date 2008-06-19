@@ -142,7 +142,7 @@ operator<<(std::ostream& os, mpfr_srcptr x)
 
 
 namespace Ariadne {
-  namespace Numeric {
+  
 
 
     FloatMP::Float(const std::string& str) 

@@ -29,9 +29,9 @@
 
 
 namespace Ariadne {
-  namespace Evaluation {
-    using namespace Numeric;
-    using namespace Geometry;
+  
+    
+    
 
 #ifdef ENABLE_FLOAT64
     template class StandardIntegrator< Zonotope<Float64> >;
@@ -41,5 +41,5 @@ namespace Ariadne {
     template class StandardIntegrator< Zonotope<FloatMP> >;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

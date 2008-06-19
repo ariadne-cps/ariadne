@@ -46,10 +46,6 @@
 #include "test.h"
 
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::LinearAlgebra;
-using namespace Ariadne::Geometry;
-using namespace Ariadne::Output;
 using namespace std;
 
 template<class R> int test_polyhedron();
@@ -71,7 +67,7 @@ template<class R>
 int 
 test_polyhedron() 
 {
-  cout << "test_polyhedron<" << Numeric::name<R>() << ">" << endl;
+  cout << "test_polyhedron<" << name<R>() << ">" << endl;
   Matrix<R> A("[1.0,0.875;-1,1.125;0.125,-2.25]");
   Vector<R> b("[1.375,0.5,0.25]");
   Polyhedron<R> phd1;
@@ -188,9 +184,9 @@ int
 test_polyhedron<Rational>() 
 {
   typedef Rational R;
-  cout << "test_polyhedron<" << Numeric::name<R>() << ">" << endl;
-  LinearAlgebra::Matrix<R> A("[1,7/8;-1,9/8;1/8,-9/4]");
-  LinearAlgebra::Vector<R> b("[11/8,1/2,1/4]");
+  cout << "test_polyhedron<" << name<R>() << ">" << endl;
+  Matrix<R> A("[1,7/8;-1,9/8;1/8,-9/4]");
+  Vector<R> b("[11/8,1/2,1/4]");
   ARIADNE_TEST_CONSTRUCT(Polyhedron<R>,plhd,(A,b));
   ARIADNE_TEST_ASSERT(!plhd.empty());
   ARIADNE_TEST_CONSTRUCT(Polytope<R>,pltp,(plhd));

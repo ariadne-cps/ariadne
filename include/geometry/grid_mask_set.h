@@ -32,6 +32,7 @@
 
 #include <boost/iterator/iterator_adaptor.hpp>
 
+
 #include "base/array.h"
 #include "base/tribool.h"
 #include "base/pointer.h"
@@ -43,10 +44,10 @@
 #include "geometry/grid.h"
 #include "geometry/grid_cell.h"
 
-/*TODO: Unify bounds in FiniteGrid, and make GridMaskSet use only finite grid bounds*/
+/* TODO: Unify bounds in FiniteGrid, and make GridMaskSet use only finite grid bounds */
 
 namespace Ariadne {
-  namespace Geometry {
+  
       
     class denotable_set_tag;
     template<class Base, class Value> class GridSetIterator;
@@ -77,8 +78,8 @@ namespace Ariadne {
       friend class GridCellListSet<R>;
       friend class PartitionTreeSet<R>;
      public:
-      typedef GridSetIterator< Combinatoric::LatticeMaskSet::const_iterator, GridCell<R> > iterator;
-      typedef GridSetIterator< Combinatoric::LatticeMaskSet::const_iterator, GridCell<R> > const_iterator;
+      typedef GridSetIterator< LatticeMaskSet::const_iterator, GridCell<R> > iterator;
+      typedef GridSetIterator< LatticeMaskSet::const_iterator, GridCell<R> > const_iterator;
 
       /*! \brief A tag describing the type of set. */
       typedef denotable_set_tag set_category;
@@ -94,13 +95,13 @@ namespace Ariadne {
 
       /*!\brief Construct an empty set from a finite grid. (Deprecated)
        *
-       * \deprecated Use GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeBlock& b) instead.
+       * \deprecated Use GridMaskSet(const Grid<R>& g, const LatticeBlock& b) instead.
        */
       explicit GridMaskSet(const FiniteGrid<R>& g);
      
       /*!\brief Construct a set from a finite grid and a mask. (Deprecated)
        *
-       * \deprecated Use GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeBlock& b, const BooleanArray& m) instead.
+       * \deprecated Use GridMaskSet(const Grid<R>& g, const LatticeBlock& b, const BooleanArray& m) instead.
        */
       explicit GridMaskSet(const FiniteGrid<R>& g, const BooleanArray& m);
 
@@ -108,13 +109,13 @@ namespace Ariadne {
       explicit GridMaskSet(const Grid<R>& g, const Box<R>& bb);
      
       /*!\brief Construct an empty set based on grid \a g and with cells in the block \a b. */
-      explicit GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeBlock& b);
+      explicit GridMaskSet(const Grid<R>& g, const LatticeBlock& b);
      
       /*!\brief Construct a set from a grid, a lattice rectangle and a mask. */
-      explicit GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeBlock& b, const BooleanArray& m);
+      explicit GridMaskSet(const Grid<R>& g, const LatticeBlock& b, const BooleanArray& m);
      
       /*!\brief Construct a set from a grid, and a lattice mask set. */
-      explicit GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeMaskSet& ms);
+      explicit GridMaskSet(const Grid<R>& g, const LatticeMaskSet& ms);
      
       /*!\brief Construct from a %GridCellListSet. Implicit conversion is disallowed since the grid bounds are synthesised automatically, which is usually not what is required. */
       explicit GridMaskSet(const GridCellListSet<R>& gcls);
@@ -171,7 +172,7 @@ namespace Ariadne {
       const Grid<R>& grid() const;
 
       /*! \brief The underlying lattice set. */
-      const Combinatoric::LatticeMaskSet& lattice_set() const;
+      const LatticeMaskSet& lattice_set() const;
 
       /*! \brief The underlying finite_grid. */
       FiniteGrid<R> finite_grid() const;
@@ -189,7 +190,7 @@ namespace Ariadne {
       dimension_type dimension() const;
 
        /*! \brief The block of cells available in the lattice. */
-      const Combinatoric::LatticeBlock& block() const;
+      const LatticeBlock& block() const;
 
       /*! \brief The number of cells in each dimension. */
       //const SizeArray& sizes() const;
@@ -306,7 +307,7 @@ namespace Ariadne {
       static void _instantiate_geometry_operators();
      private:
       Grid<R>  _grid;
-      Combinatoric::LatticeMaskSet _lattice_set;
+      LatticeMaskSet _lattice_set;
     };
     
     
@@ -347,8 +348,8 @@ namespace Ariadne {
     template<class R> std::ostream& operator<<(std::ostream& os, const GridMaskSet<R>& gms);
     
     
-  }
-}
+  
+} // namespace Ariadne
 
 
 #include "grid_mask_set.inline.h"

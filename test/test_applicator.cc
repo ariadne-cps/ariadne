@@ -38,14 +38,10 @@
 
 #include "test.h"
 
-using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::Combinatoric;
-using namespace Ariadne::Geometry;
-using namespace Ariadne::System;
-using namespace Ariadne::Evaluation;
-using namespace Ariadne::Output;
 using namespace std;
+using namespace Ariadne;
+using Ariadne::Models::HenonMap;
+using Ariadne::Models::HenonInverseMap;
 
 template<class R> 
 class TestApplicator

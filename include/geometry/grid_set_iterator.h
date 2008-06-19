@@ -30,7 +30,7 @@
 #define ARIADNE_GRID_SET_ITERATOR_H
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
     template<class Base, class Value>
     class GridSetIterator 
@@ -49,7 +49,7 @@ namespace Ariadne {
       Grid<real_type> _grid;
     };
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif // ARIADNE_GRID_SET_ITERATOR_H

@@ -39,7 +39,7 @@
 namespace Ariadne {
     
 template<class R>
-Geometry::GridBlock<R>::GridBlock(const Grid<R>& g)
+GridBlock<R>::GridBlock(const Grid<R>& g)
   : _grid(g), _lattice_set(g.dimension())
 { 
   _lattice_set.set_lower_bound(0,1);
@@ -51,7 +51,7 @@ Geometry::GridBlock<R>::GridBlock(const Grid<R>& g)
 
 
 template<class R>
-Geometry::GridBlock<R>::GridBlock(const Grid<R>& g, const IndexArray& l, const IndexArray& u)
+GridBlock<R>::GridBlock(const Grid<R>& g, const IndexArray& l, const IndexArray& u)
   : _grid(g), _lattice_set(l,u)
 {
   ARIADNE_CHECK_DIMENSION(g,l.size(),"GridBlock::GridBlock(Grid g, IndexArray l, IndexArray u)");
@@ -59,7 +59,7 @@ Geometry::GridBlock<R>::GridBlock(const Grid<R>& g, const IndexArray& l, const I
 
 
 template<class R>
-Geometry::GridBlock<R>::GridBlock(const Grid<R>& g, const Box<R>& r)
+GridBlock<R>::GridBlock(const Grid<R>& g, const Box<R>& r)
   : _grid(g), _lattice_set(g.dimension())
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(g,r,"GridBlock::GridBlock(Grid g,Box r)");
@@ -72,22 +72,22 @@ Geometry::GridBlock<R>::GridBlock(const Grid<R>& g, const Box<R>& r)
 
 
 template<class R>
-Geometry::GridBlock<R>::GridBlock(const GridCell<R>& gc)
+GridBlock<R>::GridBlock(const GridCell<R>& gc)
   : _grid(gc._grid), _lattice_set(gc.lattice_set())
 {
 }
 
 
 template<class R>
-Geometry::GridBlock<R>::GridBlock(const GridBlock<R>& gb)
+GridBlock<R>::GridBlock(const GridBlock<R>& gb)
   : _grid(gb._grid), _lattice_set(gb.lattice_set())
 {
 }
 
 
 template<class R>
-Geometry::GridBlock<R>&
-Geometry::GridBlock<R>::operator=(const GridBlock<R>& gb)
+GridBlock<R>&
+GridBlock<R>::operator=(const GridBlock<R>& gb)
 {
   if(this!=&gb) {
     this->_grid = gb._grid;
@@ -99,7 +99,7 @@ Geometry::GridBlock<R>::operator=(const GridBlock<R>& gb)
 
 template<class R>
 R
-Geometry::GridBlock<R>::lower_bound(dimension_type i) const 
+GridBlock<R>::lower_bound(dimension_type i) const 
 {
   return _grid.subdivision_coordinate(i,_lattice_set.lower_bound(i));
 }
@@ -107,14 +107,14 @@ Geometry::GridBlock<R>::lower_bound(dimension_type i) const
 
 template<class R>
 R
-Geometry::GridBlock<R>::upper_bound(dimension_type i) const 
+GridBlock<R>::upper_bound(dimension_type i) const 
 {
   return _grid.subdivision_coordinate(i,_lattice_set.upper_bound(i));
 }
 
 template<class R>
-Geometry::GridBlock<R>
-Geometry::GridBlock<R>::neighbourhood() const 
+GridBlock<R>
+GridBlock<R>::neighbourhood() const 
 {
   return GridBlock<R>(this->_grid,this->_lattice_set.neighbourhood());
 }
@@ -122,20 +122,20 @@ Geometry::GridBlock<R>::neighbourhood() const
 
 template<class R>
 void
-Geometry::GridBlock<R>::_instantiate_geometry_operators() 
+GridBlock<R>::_instantiate_geometry_operators() 
 {
-  typedef Numeric::Interval<R> I;
+  typedef Interval<R> I;
   tribool tb;
   Box<R>* r=0;
   //Grid<R>* g=0;
   GridCell<R>* gc=0;
   GridBlock<R>* gb=0;
   
-  tb=Geometry::subset(*r,*gb);
+  tb=subset(*r,*gb);
   
-  tb=Geometry::overlap(*gb,*gb);
-  tb=Geometry::subset(*gc,*gb);
-  tb=Geometry::subset(*gb,*gb);
+  tb=overlap(*gb,*gb);
+  tb=subset(*gc,*gb);
+  tb=subset(*gb,*gb);
 }
 
 
@@ -146,7 +146,7 @@ Geometry::GridBlock<R>::_instantiate_geometry_operators()
 
 template<class R>
 tribool
-Geometry::disjoint(const GridBlock<R>& gb1, const GridBlock<R>& gb2) {
+disjoint(const GridBlock<R>& gb1, const GridBlock<R>& gb2) {
   ARIADNE_CHECK_SAME_GRID(gb1,gb2,"tribool disjoint(GridBlock bg1, GridBlock gb2)");
   return disjoint(gb1.lattice_set(),gb2.lattice_set());
 }
@@ -157,7 +157,7 @@ Geometry::disjoint(const GridBlock<R>& gb1, const GridBlock<R>& gb2) {
 
 template<class R>
 tribool
-Geometry::overlap(const GridBlock<R>& gb1, const GridBlock<R>& gb2) {
+overlap(const GridBlock<R>& gb1, const GridBlock<R>& gb2) {
   ARIADNE_CHECK_SAME_GRID(gb1,gb2,"tribool overlap(GridBlock gb1,GridBlock gb2)");
   return overlap(gb1.lattice_set(),gb2.lattice_set());
 }
@@ -169,7 +169,7 @@ Geometry::overlap(const GridBlock<R>& gb1, const GridBlock<R>& gb2) {
 
 template<class R>
 tribool
-Geometry::subset(const GridCell<R>& gc, const GridBlock<R>& gb)
+subset(const GridCell<R>& gc, const GridBlock<R>& gb)
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(gc,gb,"tribool subset(GridCell gc, GridBlock gb)");
   if(gc.grid()==gb.grid()) {
@@ -180,7 +180,7 @@ Geometry::subset(const GridCell<R>& gc, const GridBlock<R>& gb)
 
 template<class R>
 tribool
-Geometry::subset(const GridBlock<R>& gb1, const GridBlock<R>& gb2)
+subset(const GridBlock<R>& gb1, const GridBlock<R>& gb2)
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(gb1,gb2,"tribool subset(GridBlock gb1, GridBlock gb2)");
   if(gb1.grid()==gb2.grid()) {
@@ -192,7 +192,7 @@ Geometry::subset(const GridBlock<R>& gb1, const GridBlock<R>& gb2)
 
 template<class R>
 tribool
-Geometry::subset(const Box<R>& r, const GridBlock<R>& gb)
+subset(const Box<R>& r, const GridBlock<R>& gb)
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(r,gb,"tribool subset(Box r, GridBlock gb)");
   return subset(r,Box<R>(gb));
@@ -214,7 +214,7 @@ Geometry::subset(const Box<R>& r, const GridBlock<R>& gb)
 
 template<class R>
 std::ostream&
-Geometry::GridBlock<R>::write(std::ostream& os) const 
+GridBlock<R>::write(std::ostream& os) const 
 {
   os << "GridBlock(\n";
   os << "  grid=" << this->grid() << ",\n";

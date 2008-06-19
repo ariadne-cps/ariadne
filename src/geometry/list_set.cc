@@ -26,9 +26,9 @@
 
 
 namespace Ariadne {
-  namespace Geometry {
+  
  
-    using namespace Numeric;
+    
     
     
 #ifdef ENABLE_FLOAT64
@@ -37,5 +37,5 @@ namespace Ariadne {
 #ifdef ENABLE_FLOATMP
 #endif
    
-  }
-}
+  
+} // namespace Ariadne

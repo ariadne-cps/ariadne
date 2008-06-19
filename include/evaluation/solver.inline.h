@@ -35,7 +35,7 @@
 #include "system/map.h"
 
 namespace Ariadne {
-namespace Function {
+
 
 template<class R> 
 inline
@@ -43,7 +43,7 @@ DifferenceFunction<R>::DifferenceFunction(const FunctionInterface<R>& f)
   : _base(f)
 { 
   if(f.argument_size()!=f.result_size()) { 
-    throw Geometry::IncompatibleDimensions("DifferenceFunction::DifferenceFunction(Map f): The argument dimension must equal the result dimension"); 
+    throw IncompatibleDimensions("DifferenceDifferenceFunction(Map f): The argument dimension must equal the result dimension"); 
   } 
 }
 
@@ -85,8 +85,8 @@ DifferenceFunction<R>::result_size() const
 
 template<class R> 
 inline
-LinearAlgebra::Vector<typename DifferenceFunction<R>::F> 
-DifferenceFunction<R>::evaluate(const LinearAlgebra::Vector<F>& p) const 
+Vector<typename DifferenceFunction<R>::F> 
+DifferenceFunction<R>::evaluate(const Vector<F>& p) const 
 {
   return _base.evaluate(p)-p; 
 }
@@ -94,18 +94,18 @@ DifferenceFunction<R>::evaluate(const LinearAlgebra::Vector<F>& p) const
 
 template<class R> 
 inline
-LinearAlgebra::Matrix<typename Function::DifferenceFunction<R>::F>
-DifferenceFunction<R>::jacobian(const LinearAlgebra::Vector<F>& p) const 
+Matrix<typename DifferenceFunction<R>::F>
+DifferenceFunction<R>::jacobian(const Vector<F>& p) const 
 {
-  LinearAlgebra::Matrix<F> d=_base.jacobian(p);
-  LinearAlgebra::Matrix<F> i=LinearAlgebra::Matrix< Numeric::Interval<R> >::identity(this->result_size());
+  Matrix<F> d=_base.jacobian(p);
+  Matrix<F> i=Matrix< Interval<R> >::identity(this->result_size());
   return d-i; 
 }
 
 template<class R> 
 inline
-Function::TaylorDerivative<typename Function::DifferenceFunction<R>::F>
-DifferenceFunction<R>::derivative(const LinearAlgebra::Vector<F>& p, const smoothness_type& s) const 
+TaylorDerivative<typename DifferenceFunction<R>::F>
+DifferenceFunction<R>::derivative(const Vector<F>& p, const smoothness_type& s) const 
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
@@ -129,7 +129,6 @@ DifferenceFunction<R>::write(std::ostream& os) const
 
 
 
-} namespace Evaluation {
 
 
 
@@ -186,12 +185,12 @@ SolverInterface<R>::set_maximum_number_of_steps(uint max_steps)
 
 template<class R> 
 inline
-Geometry::Point<typename SolverInterface<R>::I> 
-SolverInterface<R>::fixed_point(const System::Map<R>& f,const Geometry::Point<I>& pt) 
+Point<typename SolverInterface<R>::I> 
+SolverInterface<R>::fixed_point(const Map<R>& f,const Point<I>& pt) 
 {
-  return this->solve(Function::DifferenceFunction<R>(f.function()),pt); 
+  return this->solve(DifferenceFunction<R>(f.function()),pt); 
 }
 
 
 
-}}
+} // namespace Ariadne

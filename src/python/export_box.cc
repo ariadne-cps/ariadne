@@ -36,9 +36,6 @@
 #include "python/read_box.h"
 
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::LinearAlgebra;
-using namespace Ariadne::Geometry;
 using namespace Ariadne::Python;
 
 using namespace boost::python;
@@ -97,7 +94,7 @@ void export_box()
   box_class.def(init< Point<I> >());
     //box_class.def(init<std::string>());
   box_class.def("dimension", &Box<R>::dimension);
-  box_class.def("contains", (tribool(*)(const Box<R>&,const Point<R>&)) &Geometry::contains);
+  box_class.def("contains", (tribool(*)(const Box<R>&,const Point<R>&)) &contains);
   box_class.def("centre", &Box<R>::centre);
   box_class.def("radius", &Box<R>::radius);
   box_class.def("__getitem__", &Box<R>::interval, return_value_policy<copy_const_reference>());

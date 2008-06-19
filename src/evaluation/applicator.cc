@@ -30,8 +30,8 @@
 #include "evaluation/standard_applicator.code.h"
 
 namespace Ariadne {
-  namespace Evaluation {
-    using namespace Numeric;
+  
+    
 
 #ifdef ENABLE_FLOAT64
     template class StandardApplicator< Rectangle<Float64> >;
@@ -43,5 +43,5 @@ namespace Ariadne {
     template class StandardApplicator< Zonotope<FloatMP> >;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

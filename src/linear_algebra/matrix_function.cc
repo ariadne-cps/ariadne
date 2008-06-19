@@ -1,5 +1,5 @@
 /***************************************************************************
- *            Matrix.cc
+ *            matrix_function.cc
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it Pieter.Collins@cwi.nl
@@ -28,22 +28,17 @@
 #include "linear_algebra/matrix_function.code.h"
 
 namespace Ariadne {
-  namespace LinearAlgebra {
-    
-    using namespace Numeric;
-    
-    template Matrix< Interval<Rational> > exp(const Matrix<Rational>& A); 
-    template Matrix< Interval<Rational> > exp(const Matrix< Interval<Rational> >& A); 
+      
 
 #ifdef ENABLE_FLOAT64
-    template Matrix< Interval<Float64> > exp(const Matrix<Float64>& A); 
-    template Matrix< Interval<Float64> > exp(const Matrix< Interval<Float64> >& A); 
+template Matrix< Interval<Float64> > exp(const Matrix<Float64>&);
+template Matrix< Interval<Float64> > exp(const Matrix< Interval<Float64> >&);
 #endif
   
 #ifdef ENABLE_FLOATMP
-    template Matrix< Interval<FloatMP> > exp(const Matrix<FloatMP>& A); 
-    template Matrix< Interval<FloatMP> > exp(const Matrix< Interval<FloatMP> >& A); 
+template Matrix< Interval<FloatMP> > exp(const Matrix<FloatMP>&);
+template Matrix< Interval<FloatMP> > exp(const Matrix< Interval<FloatMP> >&);
 #endif
 
-  }
-}
+
+} // namespace Ariadne

@@ -52,56 +52,56 @@ namespace Ariadne {
 
 
 template<class R>
-Geometry::GridMaskSet<R>::GridMaskSet(const FiniteGrid<R>& fg)
+GridMaskSet<R>::GridMaskSet(const FiniteGrid<R>& fg)
   : _grid(fg.grid()), _lattice_set(fg.lattice_block()) 
 { 
 }
 
 
 template<class R>
-Geometry::GridMaskSet<R>::GridMaskSet(const FiniteGrid<R>& fg, const BooleanArray& m)
+GridMaskSet<R>::GridMaskSet(const FiniteGrid<R>& fg, const BooleanArray& m)
   : _grid(fg.grid()), _lattice_set(fg.lattice_block(),m)
 {
 }
 
 
 template<class R>
-Geometry::GridMaskSet<R>::GridMaskSet(const Grid<R>& g, const Box<R>& bb)
+GridMaskSet<R>::GridMaskSet(const Grid<R>& g, const Box<R>& bb)
   : _grid(g), _lattice_set(g.index_block(bb)) 
 { 
 }
 
 template<class R>
-Geometry::GridMaskSet<R>::GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeBlock& b)
+GridMaskSet<R>::GridMaskSet(const Grid<R>& g, const LatticeBlock& b)
   : _grid(g), _lattice_set(b) 
 { 
 }
 
 
 template<class R>
-Geometry::GridMaskSet<R>::GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeBlock& b, const BooleanArray& m)
+GridMaskSet<R>::GridMaskSet(const Grid<R>& g, const LatticeBlock& b, const BooleanArray& m)
   : _grid(g), _lattice_set(b,m)
 {
 }
 
 
 template<class R>
-Geometry::GridMaskSet<R>::GridMaskSet(const Grid<R>& g, const Combinatoric::LatticeMaskSet& ms)
+GridMaskSet<R>::GridMaskSet(const Grid<R>& g, const LatticeMaskSet& ms)
   : _grid(g), _lattice_set(ms)
 {
 }
 
 
 template<class R>
-Geometry::GridMaskSet<R>::GridMaskSet(const GridMaskSet<R>& gms) 
+GridMaskSet<R>::GridMaskSet(const GridMaskSet<R>& gms) 
   : _grid(gms._grid), _lattice_set(gms._lattice_set)
 {
 }
 
 
 template<class R>
-Geometry::GridMaskSet<R>&
-Geometry::GridMaskSet<R>::operator=(const GridMaskSet<R>& gms) 
+GridMaskSet<R>&
+GridMaskSet<R>::operator=(const GridMaskSet<R>& gms) 
 {
   if(this!=&gms) {
     this->_grid=gms._grid;
@@ -112,7 +112,7 @@ Geometry::GridMaskSet<R>::operator=(const GridMaskSet<R>& gms)
 
 
 template<class R>
-Geometry::GridMaskSet<R>::GridMaskSet(const GridCellListSet<R>& gcls)
+GridMaskSet<R>::GridMaskSet(const GridCellListSet<R>& gcls)
   : _grid(gcls._grid),
     _lattice_set(gcls.lattice_set())
 {
@@ -121,24 +121,24 @@ Geometry::GridMaskSet<R>::GridMaskSet(const GridCellListSet<R>& gcls)
 
 
 template<class R>
-Geometry::FiniteGrid<R>
-Geometry::GridMaskSet<R>::finite_grid() const
+FiniteGrid<R>
+GridMaskSet<R>::finite_grid() const
 {
   return FiniteGrid<R>(this->grid(),this->block());
 }
 
 
 template<class R>
-Geometry::Box<R>
-Geometry::GridMaskSet<R>::extent() const
+Box<R>
+GridMaskSet<R>::extent() const
 {
   return this->bounds();
 }
 
 
 template<class R> inline
-Geometry::GridBlock<R> 
-Geometry::GridMaskSet<R>::bounds() const 
+GridBlock<R> 
+GridMaskSet<R>::bounds() const 
 {
   return GridBlock<R>(this->_grid,_lattice_set.block()); 
 }
@@ -147,8 +147,8 @@ Geometry::GridMaskSet<R>::bounds() const
 // FIXME: Memory leak
 
 template<class R>
-Geometry::GridMaskSet<R>*
-Geometry::GridMaskSet<R>::clone() const
+GridMaskSet<R>*
+GridMaskSet<R>::clone() const
 {
   return new GridMaskSet<R>(*this);
 }
@@ -156,47 +156,47 @@ Geometry::GridMaskSet<R>::clone() const
 
 template<class R>
 tribool
-Geometry::GridMaskSet<R>::contains(const Point<R>& pt) const
+GridMaskSet<R>::contains(const Point<R>& pt) const
 {
-  return !Geometry::disjoint(*this,Box<R>(pt));
+  return !Ariadne::disjoint(*this,Box<R>(pt));
 }
 
 
 template<class R>
 tribool
-Geometry::GridMaskSet<R>::superset(const Box<R>& r) const
+GridMaskSet<R>::superset(const Box<R>& r) const
 {
-  return Geometry::subset(r,*this);
+  return Ariadne::subset(r,*this);
 }
 
 
 template<class R>
 tribool
-Geometry::GridMaskSet<R>::intersects(const Box<R>& r) const
+GridMaskSet<R>::intersects(const Box<R>& r) const
 {
-  return !Geometry::disjoint(*this,r);
+  return !Ariadne::disjoint(*this,r);
 }
 
 
 template<class R>
 tribool
-Geometry::GridMaskSet<R>::disjoint(const Box<R>& r) const
+GridMaskSet<R>::disjoint(const Box<R>& r) const
 {
-  return Geometry::disjoint(*this,r);
+  return Ariadne::disjoint(*this,r);
 }
 
 
 template<class R>
 tribool
-Geometry::GridMaskSet<R>::subset(const Box<R>& r) const
+GridMaskSet<R>::subset(const Box<R>& r) const
 {
-  return Geometry::subset(*this,r);
+  return Ariadne::subset(*this,r);
 }
 
 
 template<class R> 
-Geometry::Box<R> 
-Geometry::GridMaskSet<R>::bounding_box() const 
+Box<R> 
+GridMaskSet<R>::bounding_box() const 
 {
   return GridBlock<R>(grid(),bounds()); 
 }
@@ -204,7 +204,7 @@ Geometry::GridMaskSet<R>::bounding_box() const
 
 template<class R>
 void
-Geometry::GridMaskSet<R>::clear()
+GridMaskSet<R>::clear()
 {
   this->_lattice_set.clear();
 }
@@ -214,9 +214,9 @@ Geometry::GridMaskSet<R>::clear()
 
 template<class R>
 void
-Geometry::GridMaskSet<R>::_instantiate_geometry_operators()
+GridMaskSet<R>::_instantiate_geometry_operators()
 {
-  typedef Numeric::Interval<R> I;
+  typedef Interval<R> I;
   tribool tb;
   Box<R>* r=0;
   
@@ -226,31 +226,31 @@ Geometry::GridMaskSet<R>::_instantiate_geometry_operators()
   GridCellListSet<R>* gcls=0;
   GridMaskSet<R>* gms=0;
   
-  tb=Geometry::subset(*r,*gms);
-  tb=Geometry::subset(*gms,*r);
-  tb=Geometry::superset(*gms,*r);
-  tb=Geometry::disjoint(*r,*gms);
-  tb=Geometry::disjoint(*gms,*r);
+  tb=Ariadne::subset(*r,*gms);
+  tb=Ariadne::subset(*gms,*r);
+  tb=Ariadne::superset(*gms,*r);
+  tb=Ariadne::disjoint(*r,*gms);
+  tb=Ariadne::disjoint(*gms,*r);
   
-  tb=Geometry::overlap(*gb,*gms);
-  tb=Geometry::overlap(*gms,*gb);
-  tb=Geometry::overlap(*gcls,*gms);
-  tb=Geometry::overlap(*gms,*gcls);
-  tb=Geometry::overlap(*gms,*gms);
+  tb=Ariadne::overlap(*gb,*gms);
+  tb=Ariadne::overlap(*gms,*gb);
+  tb=Ariadne::overlap(*gcls,*gms);
+  tb=Ariadne::overlap(*gms,*gcls);
+  tb=Ariadne::overlap(*gms,*gms);
   
-  tb=Geometry::subset(*gc,*gms);
-  tb=Geometry::subset(*gb,*gms);
-  tb=Geometry::subset(*gcls,*gms);
-  tb=Geometry::subset(*gms,*gms);
+  tb=Ariadne::subset(*gc,*gms);
+  tb=Ariadne::subset(*gb,*gms);
+  tb=Ariadne::subset(*gcls,*gms);
+  tb=Ariadne::subset(*gms,*gms);
   
-  *gms=Geometry::regular_intersection(*gb,*gms);
-  *gms=Geometry::regular_intersection(*gms,*gb);
-  *gcls=Geometry::regular_intersection(*gcls,*gms);
-  *gcls=Geometry::regular_intersection(*gms,*gcls);
-  *gms=Geometry::regular_intersection(*gms,*gms);
-  *gcls=Geometry::difference(*gcls,*gms);
-  *gms=Geometry::difference(*gms,*gms);
-  *gms=Geometry::join(*gms,*gms);
+  *gms=Ariadne::regular_intersection(*gb,*gms);
+  *gms=Ariadne::regular_intersection(*gms,*gb);
+  *gcls=Ariadne::regular_intersection(*gcls,*gms);
+  *gcls=Ariadne::regular_intersection(*gms,*gcls);
+  *gms=Ariadne::regular_intersection(*gms,*gms);
+  *gcls=Ariadne::difference(*gcls,*gms);
+  *gms=Ariadne::difference(*gms,*gms);
+  *gms=Ariadne::join(*gms,*gms);
 }
 
 
@@ -262,7 +262,7 @@ Geometry::GridMaskSet<R>::_instantiate_geometry_operators()
 
 template<class R>
 tribool
-Geometry::disjoint(const GridBlock<R>& gb, const GridMaskSet<R>& gms) {
+disjoint(const GridBlock<R>& gb, const GridMaskSet<R>& gms) {
   ARIADNE_CHECK_SAME_GRID(gb,gms,"tribool disjoint(GridBlock gb, GridMaskSet gms)");
   return disjoint(gb.lattice_set(),gms.lattice_set());
 }
@@ -270,7 +270,7 @@ Geometry::disjoint(const GridBlock<R>& gb, const GridMaskSet<R>& gms) {
 
 template<class R>
 tribool
-Geometry::disjoint(const GridMaskSet<R>& gms, const GridBlock<R>& gb) {
+disjoint(const GridMaskSet<R>& gms, const GridBlock<R>& gb) {
   ARIADNE_CHECK_SAME_GRID(gms,gb,"tribool disjoint(GridMaskSet gms, GridBlock gb)");
   return disjoint(gms.lattice_set(),gb.lattice_set());
 }
@@ -278,7 +278,7 @@ Geometry::disjoint(const GridMaskSet<R>& gms, const GridBlock<R>& gb) {
 
 template<class R>
 tribool
-Geometry::disjoint(const GridMaskSet<R>& gms1, const GridMaskSet<R>& gms2)
+disjoint(const GridMaskSet<R>& gms1, const GridMaskSet<R>& gms2)
 {
   ARIADNE_CHECK_SAME_GRID(gms1,gms2,"tribool disjoint(GridMaskSet gms1, GridMaskSet gms2)");
   return disjoint(gms1.lattice_set(),gms2.lattice_set());
@@ -287,7 +287,7 @@ Geometry::disjoint(const GridMaskSet<R>& gms1, const GridMaskSet<R>& gms2)
 
 template<class R>
 tribool
-Geometry::disjoint(const Box<R>& r, const GridMaskSet<R>& gms) 
+disjoint(const Box<R>& r, const GridMaskSet<R>& gms) 
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(r,gms,"tribool disjoint(Box r, GridMaskSet gms)");
   Box<R> br=closed_intersection(r,Box<R>(gms.bounding_box()));
@@ -298,7 +298,7 @@ Geometry::disjoint(const Box<R>& r, const GridMaskSet<R>& gms)
 
 template<class R>
 tribool
-Geometry::disjoint(const GridMaskSet<R>& gms, const Box<R>& r) {
+disjoint(const GridMaskSet<R>& gms, const Box<R>& r) {
   return disjoint(r,gms);
 }
 
@@ -308,7 +308,7 @@ Geometry::disjoint(const GridMaskSet<R>& gms, const Box<R>& r) {
 
 template<class R>
 tribool
-Geometry::overlap(const GridBlock<R>& gb, const GridMaskSet<R>& gms) {
+overlap(const GridBlock<R>& gb, const GridMaskSet<R>& gms) {
   ARIADNE_CHECK_SAME_GRID(gb,gms,"tribool overlap(GridBlock gb, GridMaskSet gms)");
   return overlap(gb.lattice_set(),gms.lattice_set());
 }
@@ -316,7 +316,7 @@ Geometry::overlap(const GridBlock<R>& gb, const GridMaskSet<R>& gms) {
 
 template<class R>
 tribool
-Geometry::overlap(const GridMaskSet<R>& gms, const GridBlock<R>& gb) {
+overlap(const GridMaskSet<R>& gms, const GridBlock<R>& gb) {
   ARIADNE_CHECK_SAME_GRID(gms,gb,"tribool overlap(GridMaskSet gms, GridBlock gb)");
   return overlap(gms.lattice_set(),gb.lattice_set());
 }
@@ -324,7 +324,7 @@ Geometry::overlap(const GridMaskSet<R>& gms, const GridBlock<R>& gb) {
 
 template<class R>
 tribool
-Geometry::overlap(const GridCellListSet<R>& A, const GridMaskSet<R>& B) {
+overlap(const GridCellListSet<R>& A, const GridMaskSet<R>& B) {
   ARIADNE_CHECK_SAME_GRID(A,B,"overlap(GridCellListSet<R>,GridMaskSet<R>)");
   return overlap(A.lattice_set(),B.lattice_set());
 }
@@ -332,7 +332,7 @@ Geometry::overlap(const GridCellListSet<R>& A, const GridMaskSet<R>& B) {
 
 template<class R>
 tribool
-Geometry::overlap(const GridMaskSet<R>& A, const GridCellListSet<R>& B) {
+overlap(const GridMaskSet<R>& A, const GridCellListSet<R>& B) {
   ARIADNE_CHECK_SAME_GRID(A,B,"overlap(GridMaskSet<R>,GridCellListSet<R>)");
   return overlap(A.lattice_set(),B.lattice_set());
 }
@@ -340,7 +340,7 @@ Geometry::overlap(const GridMaskSet<R>& A, const GridCellListSet<R>& B) {
 
 template<class R>
 tribool
-Geometry::overlap(const GridMaskSet<R>& gms1, const GridMaskSet<R>& gms2)
+overlap(const GridMaskSet<R>& gms1, const GridMaskSet<R>& gms2)
 {
   ARIADNE_CHECK_SAME_GRID(gms1,gms2,"tribool overlap(GridMaskSet gms2, GridMaskSet gms2)");
   return overlap(gms1.lattice_set(),gms2.lattice_set());
@@ -353,7 +353,7 @@ Geometry::overlap(const GridMaskSet<R>& gms1, const GridMaskSet<R>& gms2)
 
 template<class R>
 tribool
-Geometry::subset(const GridMaskSet<R>& gms, const GridBlock<R>& gb)
+subset(const GridMaskSet<R>& gms, const GridBlock<R>& gb)
 {
   ARIADNE_CHECK_SAME_GRID(gms,gb,"tribool subset(GridMaskSet gms, GridBlock gb)");
   return subset(gms.lattice_set(),gb.lattice_set());
@@ -361,7 +361,7 @@ Geometry::subset(const GridMaskSet<R>& gms, const GridBlock<R>& gb)
 
 template<class R>
 tribool
-Geometry::subset(const GridCell<R>& gc, const GridMaskSet<R>& gms)
+subset(const GridCell<R>& gc, const GridMaskSet<R>& gms)
 {
   ARIADNE_CHECK_SAME_GRID(gc,gms,"tribool subset(GridCell gc, GridMaskSet gms)");
   return subset(gc.lattice_set(),gms.lattice_set()); 
@@ -369,7 +369,7 @@ Geometry::subset(const GridCell<R>& gc, const GridMaskSet<R>& gms)
 
 template<class R>
 tribool
-Geometry::subset(const GridBlock<R>& gb, const GridMaskSet<R>& gms)
+subset(const GridBlock<R>& gb, const GridMaskSet<R>& gms)
 {
   ARIADNE_CHECK_SAME_GRID(gb,gms,"tribool subset(GridBlock gb, GridMaskSet gms)");
   return subset(gb.lattice_set(),gms.lattice_set()); 
@@ -377,7 +377,7 @@ Geometry::subset(const GridBlock<R>& gb, const GridMaskSet<R>& gms)
 
 template<class R>
 tribool
-Geometry::subset(const GridCellListSet<R>& gcls, const GridMaskSet<R>& gms)
+subset(const GridCellListSet<R>& gcls, const GridMaskSet<R>& gms)
 {
   ARIADNE_CHECK_SAME_GRID(gcls,gms,"tribool subset(GridCellListSet gcls, GridMaskSet gms)");
   return subset(gcls.lattice_set(),gms.lattice_set()); 
@@ -385,7 +385,7 @@ Geometry::subset(const GridCellListSet<R>& gcls, const GridMaskSet<R>& gms)
 
 template<class R>
 tribool
-Geometry::subset(const GridMaskSet<R>& gms1, const GridMaskSet<R>& gms2)
+subset(const GridMaskSet<R>& gms1, const GridMaskSet<R>& gms2)
 {
   ARIADNE_CHECK_SAME_GRID(gms1,gms2,"tribool subset(GridMaskSet gms1, GridMaskSet gms2)");
   return subset(gms1.lattice_set(),gms2.lattice_set());
@@ -394,7 +394,7 @@ Geometry::subset(const GridMaskSet<R>& gms1, const GridMaskSet<R>& gms2)
 
 template<class R>
 tribool
-Geometry::superset(const GridMaskSet<R>& gms, const Box<R>& r)
+superset(const GridMaskSet<R>& gms, const Box<R>& r)
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(r,gms,"tribool superset(GridMaskSet gms, Box r)");
   if(!subset(r,gms.bounding_box())) {
@@ -407,7 +407,7 @@ Geometry::superset(const GridMaskSet<R>& gms, const Box<R>& r)
 
 template<class R>
 tribool
-Geometry::subset(const Box<R>& r, const GridMaskSet<R>& gms)
+subset(const Box<R>& r, const GridMaskSet<R>& gms)
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(r,gms,"tribool subset(Box r, GridMaskSet gms)");
   if(!subset(r,gms.bounding_box())) {
@@ -419,7 +419,7 @@ Geometry::subset(const Box<R>& r, const GridMaskSet<R>& gms)
 
 template<class R>
 tribool
-Geometry::subset(const GridMaskSet<R>& gms, const Box<R>& r)
+subset(const GridMaskSet<R>& gms, const Box<R>& r)
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(gms,r,"tribool subset(GridMaskSet gms, Box r)");
   if(!subset(gms,r.bounding_box())) {
@@ -433,14 +433,14 @@ Geometry::subset(const GridMaskSet<R>& gms, const Box<R>& r)
 
 
 template<class R>
-Geometry::GridMaskSet<R>
-Geometry::join(const GridMaskSet<R>& gms1, const GridMaskSet<R>& gms2)
+GridMaskSet<R>
+join(const GridMaskSet<R>& gms1, const GridMaskSet<R>& gms2)
 {
   ARIADNE_CHECK_SAME_GRID(gms1,gms2,"GridMaskSet join(GridMaskSet gms1, GridMaskSet gms2)");
   if(gms1.block()==gms2.block()) { 
     return GridMaskSet<R>(gms1.grid(), join(gms1.lattice_set(),gms2.lattice_set()));
   } else {
-    GridMaskSet<R> result(gms1.grid(),Combinatoric::rectangular_hull(gms1.block(),gms2.block()));
+    GridMaskSet<R> result(gms1.grid(),rectangular_hull(gms1.block(),gms2.block()));
     result.adjoin(gms1);
     result.adjoin(gms2);
     return result;
@@ -449,30 +449,30 @@ Geometry::join(const GridMaskSet<R>& gms1, const GridMaskSet<R>& gms2)
 
 
 template<class R>
-Geometry::GridMaskSet<R>
-Geometry::regular_intersection(const GridMaskSet<R>& gms, const GridBlock<R>& gb)
+GridMaskSet<R>
+regular_intersection(const GridMaskSet<R>& gms, const GridBlock<R>& gb)
 {
   ARIADNE_CHECK_SAME_GRID(gms,gb,"GridMaskSet regular_intersection(GridMaskSet gms, GridBlock gb)");
   return GridMaskSet<R>(gms.grid(), regular_intersection(gms.lattice_set(),gb.lattice_set()));
 }
 
 template<class R>
-Geometry::GridMaskSet<R>
-Geometry::regular_intersection(const GridBlock<R>& gb, const GridMaskSet<R>& gms)
+GridMaskSet<R>
+regular_intersection(const GridBlock<R>& gb, const GridMaskSet<R>& gms)
 {
   ARIADNE_CHECK_SAME_GRID(gb,gms,"GridMaskSet regular_intersection(GridBlock gb, GridMaskSet gms)");
   return GridMaskSet<R>(gb.grid(), regular_intersection(gb.lattice_set(),gms.lattice_set()));
 }
 
 template<class R>
-Geometry::GridMaskSet<R>
-Geometry::regular_intersection(const GridMaskSet<R>& gms1, const GridMaskSet<R>& gms2)
+GridMaskSet<R>
+regular_intersection(const GridMaskSet<R>& gms1, const GridMaskSet<R>& gms2)
 {
   ARIADNE_CHECK_SAME_GRID(gms1,gms2,"GridMaskSet regular_intersection(GridMaskSet gms1, GridMaskSet gms2)");
   if(gms1.block()==gms2.block()) { 
     return GridMaskSet<R>(gms1.grid(), regular_intersection(gms1.lattice_set(),gms2.lattice_set()));
   } else {
-    GridMaskSet<R> result(gms1.grid(),Combinatoric::rectangular_hull(gms1.block(),gms2.block()));
+    GridMaskSet<R> result(gms1.grid(),rectangular_hull(gms1.block(),gms2.block()));
     result.adjoin(gms1);
     result.restrict(gms2);
     return result;
@@ -480,16 +480,16 @@ Geometry::regular_intersection(const GridMaskSet<R>& gms1, const GridMaskSet<R>&
 }
 
 template<class R>
-Geometry::GridCellListSet<R>
-Geometry::regular_intersection(const GridCellListSet<R>& gcls, const GridMaskSet<R>& gms)
+GridCellListSet<R>
+regular_intersection(const GridCellListSet<R>& gcls, const GridMaskSet<R>& gms)
 {
   ARIADNE_CHECK_SAME_GRID(gcls,gms,"GridCellListSet regular_intersection(GridCellListSet gcls, GridMaskSet gms)");
   return GridCellListSet<R>(gcls.grid(), regular_intersection(gcls.lattice_set(),gms.lattice_set()));
 }
 
 template<class R>
-Geometry::GridCellListSet<R>
-Geometry::regular_intersection(const GridMaskSet<R>& gms, const GridCellListSet<R>& B)
+GridCellListSet<R>
+regular_intersection(const GridMaskSet<R>& gms, const GridCellListSet<R>& B)
 {
   ARIADNE_CHECK_SAME_GRID(gms,B,"GridCellListSet regular_intersection(GridMaskSet<R>,GridCellListSet<R>)");
   return GridCellListSet<R>(gms.grid(), regular_intersection(gms.lattice_set(),B.lattice_set()));
@@ -497,14 +497,14 @@ Geometry::regular_intersection(const GridMaskSet<R>& gms, const GridCellListSet<
 
 
 template<class R>
-Geometry::GridMaskSet<R>
-Geometry::difference(const GridMaskSet<R>& gms1, const GridMaskSet<R>& gms2)
+GridMaskSet<R>
+difference(const GridMaskSet<R>& gms1, const GridMaskSet<R>& gms2)
 {
   ARIADNE_CHECK_SAME_GRID(gms1,gms2,"GridMaskSet difference(GridMaskSet<R>,GridMaskSet<R>)");
   if(gms1.block()==gms2.block()) { 
     return GridMaskSet<R>(gms1.grid(), difference(gms1.lattice_set(),gms2.lattice_set()));
   } else {
-    GridMaskSet<R> result(gms1.grid(),Combinatoric::rectangular_hull(gms1.block(),gms2.block()));
+    GridMaskSet<R> result(gms1.grid(),rectangular_hull(gms1.block(),gms2.block()));
     result.adjoin(gms1);
     result.remove(gms2);
     return result;
@@ -512,11 +512,11 @@ Geometry::difference(const GridMaskSet<R>& gms1, const GridMaskSet<R>& gms2)
 }
 
 template<class R>
-Geometry::GridCellListSet<R>
-Geometry::difference(const GridCellListSet<R>& gcls, const GridMaskSet<R>& gms)
+GridCellListSet<R>
+difference(const GridCellListSet<R>& gcls, const GridMaskSet<R>& gms)
 {
   ARIADNE_CHECK_SAME_GRID(gcls,gms,"difference(GridCellListSet gcls, GridMaskSet gms)");
-  return GridCellListSet<R>(gcls.grid(),Combinatoric::difference(gcls.lattice_set(),gms.lattice_set()));
+  return GridCellListSet<R>(gcls.grid(),difference(gcls.lattice_set(),gms.lattice_set()));
 }
 
 
@@ -525,7 +525,7 @@ Geometry::difference(const GridCellListSet<R>& gcls, const GridMaskSet<R>& gms)
 
 template<class R> 
 void 
-Geometry::GridMaskSet<R>::adjoin_outer_approximation(const SetInterface< Box<R> >& s)
+GridMaskSet<R>::adjoin_outer_approximation(const SetInterface< Box<R> >& s)
 {
   FiniteGrid<R> fg(this->grid(),this->block());
   this->adjoin(outer_approximation(s,fg));
@@ -533,7 +533,7 @@ Geometry::GridMaskSet<R>::adjoin_outer_approximation(const SetInterface< Box<R> 
 
 template<class R> 
 void 
-Geometry::GridMaskSet<R>::adjoin_inner_approximation(const SetInterface< Box<R> >& s)
+GridMaskSet<R>::adjoin_inner_approximation(const SetInterface< Box<R> >& s)
 {
   FiniteGrid<R> fg(this->grid(),this->block());
   this->adjoin(inner_approximation(s,fg));
@@ -541,7 +541,7 @@ Geometry::GridMaskSet<R>::adjoin_inner_approximation(const SetInterface< Box<R> 
 
 template<class R> 
 void 
-Geometry::GridMaskSet<R>::restrict_outer_approximation(const SetInterface< Box<R> >& s)
+GridMaskSet<R>::restrict_outer_approximation(const SetInterface< Box<R> >& s)
 {
   FiniteGrid<R> fg(this->grid(),this->block());
   this->restrict(outer_approximation(s,fg));
@@ -549,7 +549,7 @@ Geometry::GridMaskSet<R>::restrict_outer_approximation(const SetInterface< Box<R
 
 template<class R> 
 void 
-Geometry::GridMaskSet<R>::restrict_inner_approximation(const SetInterface< Box<R> >& s)
+GridMaskSet<R>::restrict_inner_approximation(const SetInterface< Box<R> >& s)
 {
   FiniteGrid<R> fg(this->grid(),this->block());
   this->restrict(inner_approximation(s,fg));
@@ -562,7 +562,7 @@ Geometry::GridMaskSet<R>::restrict_inner_approximation(const SetInterface< Box<R
 
 template<class R>
 std::string 
-Geometry::GridMaskSet<R>::summary() const 
+GridMaskSet<R>::summary() const 
 {
   std::stringstream ss;
   ss << "GridMaskSet( "
@@ -577,7 +577,7 @@ Geometry::GridMaskSet<R>::summary() const
 
 template<class R>
 std::ostream& 
-Geometry::GridMaskSet<R>::write(std::ostream& os) const 
+GridMaskSet<R>::write(std::ostream& os) const 
 {
   os << "GridMaskSet( " << std::flush;
   os << " grid=" << this->grid() << ",";
@@ -591,5 +591,5 @@ Geometry::GridMaskSet<R>::write(std::ostream& os) const
 }
 
 
-}
+} // namespace Ariadne
                                                     

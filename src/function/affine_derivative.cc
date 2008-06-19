@@ -30,8 +30,8 @@
 
 namespace Ariadne {
   namespace Function {
-    using namespace Numeric;
-    using namespace LinearAlgebra;
+    
+    
     
 #ifdef ENABLE_FLOAT64
     template class AffineDerivative< Interval64 >;

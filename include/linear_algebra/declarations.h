@@ -30,14 +30,14 @@
 
 
 namespace Ariadne { 
-  namespace LinearAlgebra {
+  
     class Permutation;
       
     template<class R> class Vector;
     template<class R> class VectorSlice;
     template<class R> class Matrix;
     template<class R> class MatrixSlice;
-  }
-}
+
+} // namespace Ariadne
 
 #endif /* ARIADNE_LINEAR_ALGEBRA_DECLARATIONS_H */

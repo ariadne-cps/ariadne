@@ -35,13 +35,13 @@ namespace Ariadne {
  
       
 template<class R>
-Geometry::Ellipsoid<R>::Ellipsoid(size_type n)
-  : _centre(n), _bilinear_form(LinearAlgebra::Matrix<R>::identity(n))
+Ellipsoid<R>::Ellipsoid(size_type n)
+  : _centre(n), _bilinear_form(Matrix<R>::identity(n))
 {
 }
 
 template<class R>
-Geometry::Ellipsoid<R>::Ellipsoid(const Point<R>& c, const LinearAlgebra::Matrix<R>& A)
+Ellipsoid<R>::Ellipsoid(const Point<R>& c, const Matrix<R>& A)
   : _centre(c), _bilinear_form(A)
 {
   if(c.dimension()!=A.number_of_rows() && A.number_of_rows()!=A.number_of_columns()) {
@@ -50,14 +50,14 @@ Geometry::Ellipsoid<R>::Ellipsoid(const Point<R>& c, const LinearAlgebra::Matrix
 }
 
 template<class R>
-Geometry::Ellipsoid<R>::Ellipsoid(const std::string& s)
+Ellipsoid<R>::Ellipsoid(const std::string& s)
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
 
 template<class R>
-Geometry::Ellipsoid<R>::Ellipsoid(const Sphere<R>& s)
+Ellipsoid<R>::Ellipsoid(const Sphere<R>& s)
   : _centre(s.centre()), _bilinear_form(s.dimension(),s.dimension())
 { 
   for(size_type i=0; i!=this->dimension(); ++i) {
@@ -68,13 +68,13 @@ Geometry::Ellipsoid<R>::Ellipsoid(const Sphere<R>& s)
 
 template<class R>
 tribool 
-Geometry::Ellipsoid<R>::contains(const Point<R>& point) const 
+Ellipsoid<R>::contains(const Point<R>& point) const 
 {
-  LinearAlgebra::Vector<Numeric::Rational> p=point.position_vector();
-  LinearAlgebra::Vector<Numeric::Rational> c=this->centre().position_vector();
-  LinearAlgebra::Vector<Numeric::Rational> d=p-c;
-  LinearAlgebra::Matrix<Numeric::Rational> A=this->bilinear_form();
-  Numeric::Rational r=inner_product(d,LinearAlgebra::Vector<Numeric::Rational>(A*d));
+  Vector<Rational> p=point.position_vector();
+  Vector<Rational> c=this->centre().position_vector();
+  Vector<Rational> d=p-c;
+  Matrix<Rational> A=this->bilinear_form();
+  Rational r=inner_product(d,Vector<Rational>(A*d));
   if(r<1) { return true; }
   if(r>1) { return false; }
   return indeterminate;
@@ -83,7 +83,7 @@ Geometry::Ellipsoid<R>::contains(const Point<R>& point) const
 
 template<class R>
 void
-Geometry::Ellipsoid<R>::_instantiate_geometry_operators()
+Ellipsoid<R>::_instantiate_geometry_operators()
 {
   R sf=1.0;
   Ellipsoid<R>* e=0;
@@ -93,14 +93,14 @@ Geometry::Ellipsoid<R>::_instantiate_geometry_operators()
 
 
 template<class R>
-Geometry::Ellipsoid<R> 
-Geometry::scale(const Ellipsoid<R>& s, const R& scale_factor) 
+Ellipsoid<R> 
+scale(const Ellipsoid<R>& s, const R& scale_factor) 
 {
   const Point<R>& centre=s.centre();
-  const LinearAlgebra::Matrix<R>& bilinear_form=s.bilinear_form();
+  const Matrix<R>& bilinear_form=s.bilinear_form();
   
   Point<R> new_centre(s.dimension());
-  LinearAlgebra::Matrix<R> new_bilinear_form(s.dimension(),s.dimension());
+  Matrix<R> new_bilinear_form(s.dimension(),s.dimension());
   
   for(size_type i=0; i!=s.dimension(); ++i) {
     new_centre[i]=mul_approx(scale_factor,centre[i]);
@@ -121,7 +121,7 @@ Geometry::scale(const Ellipsoid<R>& s, const R& scale_factor)
 
 template<class R>
 std::ostream&
-Geometry::Ellipsoid<R>::write(std::ostream& os) const
+Ellipsoid<R>::write(std::ostream& os) const
 {
   if(this->empty()) {
     os << "Empty";
@@ -134,7 +134,7 @@ Geometry::Ellipsoid<R>::write(std::ostream& os) const
 
 template<class R>
 std::istream& 
-Geometry::Ellipsoid<R>::read(std::istream& is)
+Ellipsoid<R>::read(std::istream& is)
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
   

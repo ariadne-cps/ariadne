@@ -39,7 +39,7 @@
 #include "system/declarations.h"
 
 namespace Ariadne {
-  namespace Evaluation {
+  
 
     /*! \brief Interface for bounding the flow of a vector field.
      *  \ingroup EvaluatorInterfaces \ingroup Integrators
@@ -47,7 +47,7 @@ namespace Ariadne {
     template<class R>
     class BounderInterface
     {
-      typedef Numeric::Interval<R> I;
+      typedef Interval<R> I;
      public:
       //@{ 
       //! \name Destructors, constructors and cloning operations.
@@ -65,24 +65,24 @@ namespace Ariadne {
 
       /*! \brief Computes a step size and bounding box for the flow of \a vector_field starting in \a initial_set remains in the bound for times up to the step size. The step size must be less than \a maximum_step_size. */
       virtual 
-      std::pair< Numeric::Rational, Geometry::Box<R> >
-      flow_bounds(const System::VectorField<R>& vector_field,
-                  const Geometry::Box<R>& initial_set,
-                  const Numeric::Rational& maximum_step_size) const = 0;
+      std::pair< Rational, Box<R> >
+      flow_bounds(const VectorField<R>& vector_field,
+                  const Box<R>& initial_set,
+                  const Rational& maximum_step_size) const = 0;
 
       /*! \brief Computes a flow time and bounding box for the flow of \a vector_field starting in \a initial_set.  */
       virtual 
-      std::pair< Numeric::Rational, Geometry::Box<R> >
-      flow_bounds(const System::VectorField<R>& vector_field,
-                  const Geometry::Box<R>& initial_set) const = 0;
+      std::pair< Rational, Box<R> >
+      flow_bounds(const VectorField<R>& vector_field,
+                  const Box<R>& initial_set) const = 0;
 
       
       /*! \brief Compute an integration time and bounds for both the flow and its derivatives up to order \a o. */
       virtual 
-      std::pair< Numeric::Rational, Function::TaylorDerivative<I> >
-      variation_flow_bounds(const System::VectorField<R>& f, 
-                            const Geometry::Box<R>& bx,
-                            const Numeric::Rational& t,
+      std::pair< Rational, TaylorDerivative<I> >
+      variation_flow_bounds(const VectorField<R>& f, 
+                            const Box<R>& bx,
+                            const Rational& t,
                             smoothness_type o) const = 0; 
 
 
@@ -90,14 +90,14 @@ namespace Ariadne {
 
 
       /*! \brief Compute a bound for the Jacobian of the flow over the time interval [-h,h], assuming that the flow remains inside the set \a b. */
-      virtual LinearAlgebra::Matrix<I> estimate_flow_jacobian_bounds(const System::VectorField<R>& vf,
-                                                                     const Geometry::Box<R>& b,
-                                                                     const Numeric::Rational& h) const = 0;
+      virtual Matrix<I> estimate_flow_jacobian_bounds(const VectorField<R>& vf,
+                                                                     const Box<R>& b,
+                                                                     const Rational& h) const = 0;
 
 
     };
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_BOUNDER_INTERFACE_H */

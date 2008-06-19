@@ -30,7 +30,7 @@
 
 
 namespace Ariadne {
-  namespace Geometry {
+  
     
     class basic_set_tag { };
     class denotable_set_tag { };
@@ -46,8 +46,7 @@ namespace Ariadne {
       typedef typename S::set_category set_category;
     };
 
-  }   
-}
+} // namespace Ariadne
   
 
 #endif /* ARIADNE_GEOMETRICAL_TRAITS_H */

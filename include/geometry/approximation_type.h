@@ -28,7 +28,7 @@
 
 
 namespace Ariadne {
-namespace Geometry {
+
 
 /*! \brief An enumerated type describing the possible ways of approximating a set. */
 enum ApproxKind {

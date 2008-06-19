@@ -42,11 +42,11 @@
 
 namespace Ariadne {
     
-extern int Geometry::verbosity; 
+extern int verbosity; 
    
 template<class R>
 void
-Geometry::TaylorSet<R>::_instantiate_geometry_operators() 
+TaylorSet<R>::_instantiate_geometry_operators() 
 {
   Zonotope<R>* z=0;
   TaylorSet<R>* ts=0;
@@ -54,8 +54,8 @@ Geometry::TaylorSet<R>::_instantiate_geometry_operators()
 }
     
 template<class R> 
-Geometry::Zonotope<R> 
-Geometry::over_approximation(const TaylorSet<R>&) 
+Zonotope<R> 
+over_approximation(const TaylorSet<R>&) 
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }

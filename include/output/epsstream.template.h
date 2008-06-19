@@ -26,8 +26,8 @@ namespace Ariadne {
 
 
 template<class R> 
-Output::epsstream&
-Output::operator<<(epsstream& eps, const Geometry::Point<R>& pt) 
+epsstream&
+operator<<(epsstream& eps, const Point<R>& pt) 
 {
   Point2d dpt=eps.projection_map()(pt);
   eps.draw(dpt);
@@ -35,8 +35,8 @@ Output::operator<<(epsstream& eps, const Geometry::Point<R>& pt)
 }
 
 template<class R> 
-Output::epsstream&
-Output::operator<<(epsstream& eps, const Geometry::Box<R>& r) 
+epsstream&
+operator<<(epsstream& eps, const Box<R>& r) 
 {
   Rectangle2d dr=eps.projection_map()(r);
   eps.draw(dr);
@@ -44,8 +44,8 @@ Output::operator<<(epsstream& eps, const Geometry::Box<R>& r)
 }
 
 template<class R> 
-Output::epsstream&
-Output::operator<<(epsstream& eps, const Geometry::Rectangle<R>& r) 
+epsstream&
+operator<<(epsstream& eps, const Rectangle<R>& r) 
 {
   Rectangle2d dr=eps.projection_map()(r);
   eps.draw(dr);
@@ -53,20 +53,20 @@ Output::operator<<(epsstream& eps, const Geometry::Rectangle<R>& r)
 }
 
 template<class R> 
-Output::epsstream&
-Output::operator<<(epsstream& eps, const Geometry::RectangularSet<R>& rs)
+epsstream&
+operator<<(epsstream& eps, const RectangularSet<R>& rs)
 {
-  return eps << Geometry::Box<R>(rs);
+  return eps << Box<R>(rs);
 }
 
 
 
 
 template<class R> 
-Output::epsstream&
-Output::operator<<(epsstream& eps, const Geometry::Zonotope<R>& z)
+epsstream&
+operator<<(epsstream& eps, const Zonotope<R>& z)
 { 
-  Geometry::Zonotope<Numeric::Rational> qz(error_free_over_approximation(z));
+  Zonotope<Rational> qz(error_free_over_approximation(z));
   Polygon2d vertices=eps.projection_map()(qz);      
   eps.draw(vertices);
   return eps;
@@ -74,8 +74,8 @@ Output::operator<<(epsstream& eps, const Geometry::Zonotope<R>& z)
 
 
 template<class R> 
-Output::epsstream&
-Output::operator<<(epsstream& eps, const Geometry::Polytope<R>& p)
+epsstream&
+operator<<(epsstream& eps, const Polytope<R>& p)
 {
   if(p.bounded()) {
 		eps.draw(eps.projection_map()(p));
@@ -84,29 +84,29 @@ Output::operator<<(epsstream& eps, const Geometry::Polytope<R>& p)
 }
 
 template<class R> 
-Output::epsstream&
-Output::operator<<(epsstream& eps, const Geometry::Polyhedron<R>& p)
+epsstream&
+operator<<(epsstream& eps, const Polyhedron<R>& p)
 {
 	if(p.bounded()) {
-		return eps << Geometry::Polytope<Numeric::Rational>(p);
+		return eps << Polytope<Rational>(p);
 	} else {
 		return eps;
 	}
 }
 
 template<class R> 
-Output::epsstream&
-Output::operator<<(epsstream& eps, const Geometry::PolyhedralSet<R>& ps)
+epsstream&
+operator<<(epsstream& eps, const PolyhedralSet<R>& ps)
 {
-  return eps << Geometry::Polyhedron<R>(ps);
+  return eps << Polyhedron<R>(ps);
 }
 
 
 template<class R> 
-Output::epsstream&
-Output::operator<<(epsstream& eps, const Geometry::BoxListSet<R>& ds)
+epsstream&
+operator<<(epsstream& eps, const BoxListSet<R>& ds)
 {
-  typedef typename Geometry::BoxListSet<R>::const_iterator const_iterator;
+  typedef typename BoxListSet<R>::const_iterator const_iterator;
   if(eps.fill_style) {
     // draw without lines
     bool line_style=eps.line_style; 
@@ -128,10 +128,10 @@ Output::operator<<(epsstream& eps, const Geometry::BoxListSet<R>& ds)
 }
 
 template<class BS> 
-Output::epsstream&
-Output::operator<<(epsstream& eps, const Geometry::ListSet<BS>& ds)
+epsstream&
+operator<<(epsstream& eps, const ListSet<BS>& ds)
 {
-  typedef typename Geometry::ListSet<BS>::const_iterator const_iterator;
+  typedef typename ListSet<BS>::const_iterator const_iterator;
   if(eps.fill_style) {
     // draw without lines
     bool line_style=eps.line_style; 
@@ -155,24 +155,24 @@ Output::operator<<(epsstream& eps, const Geometry::ListSet<BS>& ds)
 
 
 template<class R> 
-Output::epsstream&
-Output::operator<<(epsstream& eps, const Geometry::GridCell<R>& bs)
+epsstream&
+operator<<(epsstream& eps, const GridCell<R>& bs)
 {
-  return eps << Geometry::Box<R>(bs);
+  return eps << Box<R>(bs);
 }
 
 
 template<class R> 
-Output::epsstream&
-Output::operator<<(epsstream& eps, const Geometry::GridBlock<R>& bs)
+epsstream&
+operator<<(epsstream& eps, const GridBlock<R>& bs)
 {
-  return eps << Geometry::Box<R>(bs);
+  return eps << Box<R>(bs);
 }
 
 
 template<class R> 
-Output::epsstream&
-Output::operator<<(epsstream& eps, const Geometry::GridCellListSet<R>& ds)
+epsstream&
+operator<<(epsstream& eps, const GridCellListSet<R>& ds)
 {
   std::vector<Rectangle2d> rl(ds.size());
   std::transform(ds.begin(),ds.end(),rl.begin(),eps.projection_map());
@@ -182,8 +182,8 @@ Output::operator<<(epsstream& eps, const Geometry::GridCellListSet<R>& ds)
 
 
 template<class R> 
-Output::epsstream&
-Output::operator<<(epsstream& eps, const Geometry::GridMaskSet<R>& ds)
+epsstream&
+operator<<(epsstream& eps, const GridMaskSet<R>& ds)
 {
   std::vector<Rectangle2d> rl(ds.size());
   std::transform(ds.begin(),ds.end(),rl.begin(),eps.projection_map());
@@ -194,8 +194,8 @@ Output::operator<<(epsstream& eps, const Geometry::GridMaskSet<R>& ds)
 
 
 template<class R> 
-Output::epsstream&
-Output::operator<<(epsstream& eps, const Geometry::PartitionTreeSet<R>& ds)
+epsstream&
+operator<<(epsstream& eps, const PartitionTreeSet<R>& ds)
 {
   std::vector<Rectangle2d> rl(ds.size());
   std::transform(ds.begin(),ds.end(),rl.begin(),eps.projection_map());
@@ -204,11 +204,11 @@ Output::operator<<(epsstream& eps, const Geometry::PartitionTreeSet<R>& ds)
 }
 
 template<class R> 
-Output::epsstream&
-Output::operator<<(epsstream& eps, const Geometry::SetInterface< Geometry::Box<R> >& set)
+epsstream&
+operator<<(epsstream& eps, const SetInterface< Box<R> >& set)
 {
-  using namespace Geometry;
-  typedef Numeric::Interval<R> I;
+  
+  typedef Interval<R> I;
   
   if(dynamic_cast<const RectangularSet<R>*>(&set)) {
     return eps << dynamic_cast<const RectangularSet<R>&>(set);
@@ -227,10 +227,10 @@ Output::operator<<(epsstream& eps, const Geometry::SetInterface< Geometry::Box<R
     try {
       bb=set.bounding_box();
     } 
-    catch(Geometry::UnboundedSet& e) {
+    catch(UnboundedSet& e) {
       if(set.space()==EuclideanSpace(2)) {
         Rectangle2d bbox=eps.bounding_box();
-        bb=Geometry::Box<R>(2);
+        bb=Box<R>(2);
         bb.set_lower_bound(0,bbox.lower_bound(0));
         bb.set_upper_bound(0,bbox.upper_bound(0));
         bb.set_lower_bound(1,bbox.lower_bound(1));
@@ -239,21 +239,21 @@ Output::operator<<(epsstream& eps, const Geometry::SetInterface< Geometry::Box<R
         throw e;
       }
     }
-    Geometry::PartitionScheme<R> ps(bb);
+    PartitionScheme<R> ps(bb);
     int depth=16;
-    Geometry::PartitionTreeSet<R> pts=Geometry::outer_approximation(set,ps,depth);
+    PartitionTreeSet<R> pts=outer_approximation(set,ps,depth);
     return eps << pts;
   }
 }
 
 template<class R> 
-Output::epsstream&
-Output::operator<<(epsstream& eps, const Geometry::FiniteGrid<R>& fg)
+epsstream&
+operator<<(epsstream& eps, const FiniteGrid<R>& fg)
 {
   bool fill_style=eps.fill_style;
   if(fill_style) { eps.fill_style=false; }
-  Geometry::GridCellListSet<R> gcls(fg.grid());
-  gcls.adjoin(Geometry::GridBlock<R>(fg.grid(),fg.lattice_block()));
+  GridCellListSet<R> gcls(fg.grid());
+  gcls.adjoin(GridBlock<R>(fg.grid(),fg.lattice_block()));
   eps << gcls;
   if(fill_style) { eps.fill_style=true; }
   return eps;
@@ -261,13 +261,13 @@ Output::operator<<(epsstream& eps, const Geometry::FiniteGrid<R>& fg)
 
 
 template<class R> 
-Output::epsstream&
-Output::operator<<(epsstream& eps, const Geometry::PartitionTree<R>& pt)
+epsstream&
+operator<<(epsstream& eps, const PartitionTree<R>& pt)
 {
   bool fill_style=eps.fill_style;
   if(fill_style) { eps.fill_style=false; }
-  for(typename Geometry::PartitionTree<R>::const_iterator iter = pt.begin(); iter!=pt.end(); ++iter) {
-    eps << Geometry::Box<R>(*iter);
+  for(typename PartitionTree<R>::const_iterator iter = pt.begin(); iter!=pt.end(); ++iter) {
+    eps << Box<R>(*iter);
   }
   if(fill_style) { eps.fill_style=true; }
   return eps;

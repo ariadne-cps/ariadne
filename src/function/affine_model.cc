@@ -28,8 +28,7 @@
 #include "function/affine_model.code.h"
 
 namespace Ariadne {
-  namespace Function {
-    using namespace Numeric;
+    
     
 #ifdef ENABLE_FLOAT64
     template class AffineModel<Float64>;
@@ -39,5 +38,5 @@ namespace Ariadne {
     template class AffineModel<FloatMP>;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

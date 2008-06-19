@@ -28,7 +28,6 @@
 #include "python/utilities.h"
 #include "python/float.h"
 using namespace Ariadne;
-using namespace Ariadne::Output;
 
 #include <boost/python.hpp>
 #include <boost/python/detail/api_placeholder.hpp>

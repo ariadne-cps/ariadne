@@ -55,9 +55,9 @@
 namespace {
 
 using namespace Ariadne;
-using namespace Numeric;
-using namespace LinearAlgebra;
-using namespace Geometry;
+
+
+
 
 template<class R>
 void
@@ -70,10 +70,10 @@ compute_orthogonal_over_approximation(Parallelotope<Interval<R>,R>& p, const Zon
   p.resize(z.dimension());
   typedef Interval<R> I;
   const Point<I>& ic=z.centre();
-  const LinearAlgebra::Matrix<R>& G=z.generators();
+  const Matrix<R>& G=z.generators();
   
   Point<I> c(d);
-  LinearAlgebra::Matrix<R> EG(d,d+ng);
+  Matrix<R> EG(d,d+ng);
   for(uint i=0; i!=d; ++i) {
     c[i]=midpoint(ic[i]);
     for(uint j=0; j!=ng; ++j) {
@@ -86,15 +86,15 @@ compute_orthogonal_over_approximation(Parallelotope<Interval<R>,R>& p, const Zon
 
   // Use QR without column pivoting
   try { 
-    LinearAlgebra::Matrix<I> iQ;
-    LinearAlgebra::Matrix<I> iR;
-    LinearAlgebra::QRMatrix<I> iQR(EG);
+    Matrix<I> iQ;
+    Matrix<I> iR;
+    QRMatrix<I> iQR(EG);
     iQ=iQR.Q();
     iR=iQR.R();
     //std::cerr << "Q=\n"<<midpoint(iQ)<<"\nR=\n"<<midpoint(iR)<<std::endl;
     //std::cerr << "QR-G=\n"<<midpoint(iQ*iR-EG)<<std::endl;
-    LinearAlgebra::Vector<I> rs(d);
-    LinearAlgebra::Matrix<I> iO=iQ;
+    Vector<I> rs(d);
+    Matrix<I> iO=iQ;
     for(size_type i=0; i!=d; ++i) {
       for(size_type j=i; j!=d+ng; ++j) {
         rs(i)+=abs(iR(i,j));
@@ -106,12 +106,12 @@ compute_orthogonal_over_approximation(Parallelotope<Interval<R>,R>& p, const Zon
     //std::cerr << "rs="<<midpoint(rs)<<std::endl;
     //std::cerr << "O="<<midpoint(iO)<<std::endl;
     
-    //assert(LinearAlgebra::norm(LinearAlgebra::row_norms(Qmid.inverse()*A)+(cmid-c))<=R(1));
-    p=Geometry::Parallelotope<I,R>(c,midpoint(iO));
+    //assert(norm(row_norms(Qmid.inverse()*A)+(cmid-c))<=R(1));
+    p=Parallelotope<I,R>(c,midpoint(iO));
     //return;
   } 
-  catch(Numeric::DivideByZeroException& e) {
-    //std::cerr << "QR(A) with A=" << LinearAlgebra::Matrix<R>(EG) << ": " <<  std::flush;
+  catch(DivideByZeroException& e) {
+    //std::cerr << "QR(A) with A=" << Matrix<R>(EG) << ": " <<  std::flush;
     p=z.bounding_box();
   }
   
@@ -197,15 +197,15 @@ namespace Ariadne {
 
 template<class XC, class XG>
 tribool
-Geometry::Parallelotope<XC,XG>::_instantiate() 
+Parallelotope<XC,XG>::_instantiate() 
 {
-  //Parallelotope<XC,XG>(*goa)(const Parallelotope< Interval<R> >&) = &Geometry::over_approximation<R>;
+  //Parallelotope<XC,XG>(*goa)(const Parallelotope< Interval<R> >&) = &over_approximation<R>;
   Box<R> r;
   Parallelotope<XC,XG> p;
   Zonotope<XC,XG> z;
-  Geometry::subset(r,p);
-  Geometry::over_approximation(p);
-  Geometry::orthogonal_over_approximation(z);
+  subset(r,p);
+  over_approximation(p);
+  orthogonal_over_approximation(z);
   return false;
 }
 
@@ -215,130 +215,130 @@ Geometry::Parallelotope<XC,XG>::_instantiate()
 
 template<class XC, class XG>
 void
-Geometry::Parallelotope<XC,XG>::resize(dimension_type d) 
+Parallelotope<XC,XG>::resize(dimension_type d) 
 {
   this->Zonotope<XC,XG>::resize(d,d);
 }
 
 template<class XC, class XG>
-typename Geometry::Parallelotope<XC,XG>::F
-Geometry::Parallelotope<XC,XG>::volume() const
+typename Parallelotope<XC,XG>::F
+Parallelotope<XC,XG>::volume() const
 {
-  return LinearAlgebra::determinant(this->generators());
+  return determinant(this->generators());
 }
 
 
 
 template<class XC, class XG>
 void 
-Geometry::Parallelotope<XC,XG>::_compute_generators_inverse() const 
+Parallelotope<XC,XG>::_compute_generators_inverse() const 
 {  
-  this->_generators_inverse=LinearAlgebra::inverse(this->generators());
+  this->_generators_inverse=inverse(this->generators());
 }
 
 
 template<class XC, class XG>
-Geometry::ListSet< Geometry::Parallelotope<XC,XG> >
-Geometry::Parallelotope<XC,XG>::divide() const 
+ListSet< Parallelotope<XC,XG> >
+Parallelotope<XC,XG>::divide() const 
 {
-  const Geometry::Zonotope<XC,XG>& z=*this;
-  Geometry::ListSet< Geometry::Zonotope<XC,XG> > zls=z.divide();
-  return Geometry::ListSet< Geometry::Parallelotope<XC,XG> >(zls);
+  const Zonotope<XC,XG>& z=*this;
+  ListSet< Zonotope<XC,XG> > zls=z.divide();
+  return ListSet< Parallelotope<XC,XG> >(zls);
 }
 
 template<class XC, class XG>
-Geometry::ListSet< Geometry::Parallelotope<XC,XG> >
-Geometry::Parallelotope<XC,XG>::subdivide() const 
+ListSet< Parallelotope<XC,XG> >
+Parallelotope<XC,XG>::subdivide() const 
 {
-  const Geometry::Zonotope<XC,XG>& z=*this;
-  Geometry::ListSet< Geometry::Zonotope<XC,XG> > zls=z.subdivide();
-  return Geometry::ListSet< Geometry::Parallelotope<XC,XG> >(zls);
+  const Zonotope<XC,XG>& z=*this;
+  ListSet< Zonotope<XC,XG> > zls=z.subdivide();
+  return ListSet< Parallelotope<XC,XG> >(zls);
 }
 
 
 
 
 template<class XC, class XG>
-LinearAlgebra::Vector<typename Geometry::Parallelotope<XC,XG>::F>
-Geometry::Parallelotope<XC,XG>::coordinates(const Point<R>& s) const 
+Vector<typename Parallelotope<XC,XG>::F>
+Parallelotope<XC,XG>::coordinates(const Point<R>& s) const 
 {
-  LinearAlgebra::Vector<F> p=s.position_vector();
-  LinearAlgebra::Vector<F> c=this->centre().position_vector();
-  LinearAlgebra::Vector<F> d=p-c;
-  LinearAlgebra::Matrix<F> G=this->generators();
-  return LinearAlgebra::solve(G,d);
+  Vector<F> p=s.position_vector();
+  Vector<F> c=this->centre().position_vector();
+  Vector<F> d=p-c;
+  Matrix<F> G=this->generators();
+  return solve(G,d);
 }
 
 
 
 
 template<class R>
-Geometry::Parallelotope<R,R>
-Geometry::over_approximation(const Parallelotope<R,R>& p)
+Parallelotope<R,R>
+over_approximation(const Parallelotope<R,R>& p)
 {
   return p;
 }
 
 template<class R>
-Geometry::Parallelotope<R,R>
-Geometry::over_approximation(const Parallelotope< Numeric::Interval<R>,R >& ep)
+Parallelotope<R,R>
+over_approximation(const Parallelotope< Interval<R>,R >& ep)
 {
-  typedef Numeric::Interval<R> I;
+  typedef Interval<R> I;
   const Zonotope<I,R>& ez=ep;
-  Zonotope<R,R> z=Geometry::over_approximation(ez);
+  Zonotope<R,R> z=over_approximation(ez);
   return static_cast<Parallelotope<R,R>&>(z);
 }
 
 template<class R>
-Geometry::Parallelotope<Numeric::Interval<R>,R>
-Geometry::over_approximation(const Parallelotope< Numeric::Interval<R> >& ip)
+Parallelotope<Interval<R>,R>
+over_approximation(const Parallelotope< Interval<R> >& ip)
 {
-  typedef Numeric::Interval<R> I;
+  typedef Interval<R> I;
   const Zonotope<I,I>& iz=ip;
-  Zonotope<I,R> ez=Geometry::over_approximation(iz);
+  Zonotope<I,R> ez=over_approximation(iz);
   return static_cast<Parallelotope<I,R>&>(ez);
 }
 
 
 
 template<class R>
-Geometry::Parallelotope<R>
-Geometry::orthogonal_over_approximation(const Zonotope<R>& z)
+Parallelotope<R>
+orthogonal_over_approximation(const Zonotope<R>& z)
 {
-  typedef Numeric::Interval<R> I;
+  typedef Interval<R> I;
   Zonotope<I,R> ez(z);
   Parallelotope<I,R> ep;
   compute_orthogonal_over_approximation(ep,ez);
-  return Geometry::over_approximation(ep);
+  return over_approximation(ep);
 }
 
 
 /*
 template<class R>
-Geometry::Parallelotope<R>
-Geometry::orthogonal_over_approximation(const Zonotope<Numeric::Interval<R>,R>& ez)
+Parallelotope<R>
+orthogonal_over_approximation(const Zonotope<Interval<R>,R>& ez)
 {
   ARIADNE_LOG(5,"Parallelotope<R> orthogonal_over_approximation(Zonotope<I,R>)\n");
-  typedef Numeric::Interval<R> I;
-  typedef typename Numeric::traits<R>::approximate_arithmetic_type A;
+  typedef Interval<R> I;
+  typedef typename traits<R>::approximate_arithmetic_type A;
   const Point<I>& c=ez.centre();
-  const LinearAlgebra::Matrix<R>& G=ez.generators();
+  const Matrix<R>& G=ez.generators();
   
   size_type d=ez.dimension();
   
   Point<R> cmid=midpoint(c);
-  LinearAlgebra::Vector<I> cerr=c-cmid;
+  Vector<I> cerr=c-cmid;
   
-  LinearAlgebra::Matrix<I> Q;
+  Matrix<I> Q;
   try { 
-    LinearAlgebra::QRMatrix<I> QR(G);
-    LinearAlgebra::Matrix<I> Q=QR.Q();
+    QRMatrix<I> QR(G);
+    Matrix<I> Q=QR.Q();
   } 
-  catch(Numeric::DivideByZeroException& e) {
+  catch(DivideByZeroException& e) {
     std::cerr << "QR(A) with A=" << G << ": " <<  std::flush;
   }
-  LinearAlgebra::Matrix<R> Qmid=midpoint(Q);
-  LinearAlgebra::Vector<I> Rrwnrm=LinearAlgebra::row_norms(LinearAlgebra::transpose(Qmid)*G);
+  Matrix<R> Qmid=midpoint(Q);
+  Vector<I> Rrwnrm=row_norms(transpose(Qmid)*G);
   for(size_type i=0; i!=d; ++i) {
     R scale=(Rrwnrm(i)+cerr(i)).upper();
     for(size_type j=0; j!=d; ++j) {
@@ -347,28 +347,28 @@ Geometry::orthogonal_over_approximation(const Zonotope<Numeric::Interval<R>,R>& 
   }
   
   // Check to make such result is valid.
-  //assert(LinearAlgebra::norm(LinearAlgebra::row_norms(Qmid.inverse()*A)+(cmid-c))<=R(1));
-  return Geometry::Parallelotope<R>(cmid,Qmid);
+  //assert(norm(row_norms(Qmid.inverse()*A)+(cmid-c))<=R(1));
+  return Parallelotope<R>(cmid,Qmid);
 }
 */
 
 template<class R>
-Geometry::Parallelotope<Numeric::Interval<R>,R>
-Geometry::orthogonal_over_approximation(const Zonotope<Numeric::Interval<R>,R>& z)
+Parallelotope<Interval<R>,R>
+orthogonal_over_approximation(const Zonotope<Interval<R>,R>& z)
 {
   ARIADNE_LOG(5,"Parallelotope<R> orthogonal_over_approximation(Zonotope<I,I>)\n");
-  Parallelotope<Numeric::Interval<R>,R> p;
+  Parallelotope<Interval<R>,R> p;
   ::compute_orthogonal_over_approximation(p,z);
   return p;
 }
 
 template<class R>
-Geometry::Parallelotope< Numeric::Interval<R> >
-Geometry::orthogonal_over_approximation(const Zonotope< Numeric::Interval<R> >& iz)
+Parallelotope< Interval<R> >
+orthogonal_over_approximation(const Zonotope< Interval<R> >& iz)
 {
   ARIADNE_LOG(5,"Parallelotope<R> orthogonal_over_approximation(Zonotope<I,I>)\n");
-  Zonotope<Numeric::Interval<R>,R> z=Geometry::over_approximation(iz);
-  Parallelotope<Numeric::Interval<R>,R> p;
+  Zonotope<Interval<R>,R> z=over_approximation(iz);
+  Parallelotope<Interval<R>,R> p;
   ::compute_orthogonal_over_approximation(p,z);
   return p;
 }
@@ -380,7 +380,7 @@ Geometry::orthogonal_over_approximation(const Zonotope< Numeric::Interval<R> >& 
 
 template<class XC, class XG>
 std::ostream&
-Geometry::Parallelotope<XC,XG>::write(std::ostream& os) const
+Parallelotope<XC,XG>::write(std::ostream& os) const
 {
   const Parallelotope<XC,XG>& p=*this;
   if(p.dimension() > 0) {
@@ -395,7 +395,7 @@ Geometry::Parallelotope<XC,XG>::write(std::ostream& os) const
 
 template<class XC, class XG>
 std::istream& 
-Geometry::Parallelotope<XC,XG>::read(std::istream& is)
+Parallelotope<XC,XG>::read(std::istream& is)
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }

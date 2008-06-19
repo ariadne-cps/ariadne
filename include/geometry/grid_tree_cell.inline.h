@@ -26,16 +26,16 @@ namespace Ariadne {
 
 
 template<class R> inline
-Geometry::GridTreeCell<R>::GridTreeCell(const Grid<R>& g, 
-                                        const Combinatoric::BinaryWord& nw)
+GridTreeCell<R>::GridTreeCell(const Grid<R>& g, 
+                                        const BinaryWord& nw)
   : _grid(r), _word(bw)
 {
 }
 
 
 template<class R> inline
-const Geometry::Grid<R>& 
-Geometry::GridTreeCell<R>::grid() const 
+const Grid<R>& 
+GridTreeCell<R>::grid() const 
 {
   return *this->_grid
 }
@@ -44,21 +44,21 @@ Geometry::GridTreeCell<R>::grid() const
 
 template<class R> inline
 dimension_type 
-Geometry::GridTreeCell<R>::dimension() const 
+GridTreeCell<R>::dimension() const 
 {
   return this->_grid.dimension(); 
 }
 
 template<class R>
 R
-Geometry::GridTreeCell<R>::lower_bound(dimension_type i) const 
+GridTreeCell<R>::lower_bound(dimension_type i) const 
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
 template<class R>
 R
-Geometry::GridTreeCell<R>::upper_bound(dimension_type i) const 
+GridTreeCell<R>::upper_bound(dimension_type i) const 
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
   //  return add_approx(_unit_box.lower_bound(i),
@@ -68,7 +68,7 @@ Geometry::GridTreeCell<R>::upper_bound(dimension_type i) const
 
 template<class R> inline
 GridTreeCell<R>
-Geometry::PartitionTreeCell<R>::subdivide(bool lr) const 
+PartitionTreeCell<R>::subdivide(bool lr) const 
 {
   GridTreeCell result(*this);
   result._word.push_back(lr);
@@ -79,7 +79,7 @@ Geometry::PartitionTreeCell<R>::subdivide(bool lr) const
 
 template<class R> inline
 std::ostream& 
-Geometry::operator<<(std::ostream& os, const GridTreeCell<R>& gtc)
+operator<<(std::ostream& os, const GridTreeCell<R>& gtc)
 { 
   return gtc.write(os);
 }

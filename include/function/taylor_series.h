@@ -31,7 +31,6 @@
 #include "base/array.h"
 
 namespace Ariadne {
-  namespace Function {
   
     template<class X> class TaylorVariable;
 
@@ -162,8 +161,8 @@ namespace Ariadne {
 
 
     template<class X> std::ostream& operator<<(std::ostream& os, const TaylorSeries<X>& ts);
-  }
-}
+  
+} // namespace Ariadne
 
 
 

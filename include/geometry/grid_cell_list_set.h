@@ -44,7 +44,7 @@
 #include "geometry/grid_cell.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
  
     template<class Base, class Value> class GridSetIterator;
 
@@ -64,8 +64,8 @@ namespace Ariadne {
     {
       friend class GridMaskSet<R>;
      public:
-      typedef GridSetIterator< Combinatoric::LatticeCellListSet::const_iterator, GridCell<R> > iterator;
-      typedef GridSetIterator< Combinatoric::LatticeCellListSet::const_iterator, GridCell<R> > const_iterator;
+      typedef GridSetIterator< LatticeCellListSet::const_iterator, GridCell<R> > iterator;
+      typedef GridSetIterator< LatticeCellListSet::const_iterator, GridCell<R> > const_iterator;
 
       /*! \brief A tag describing the type of set. */
       typedef denotable_set_tag set_category;
@@ -82,7 +82,7 @@ namespace Ariadne {
       explicit GridCellListSet(const Grid<R>& g);
 
       /*!\brief Construct from a grid and a lattice cell list set. */
-      explicit GridCellListSet(const Grid<R>& g, const Combinatoric::LatticeCellListSet& lcls);
+      explicit GridCellListSet(const Grid<R>& g, const LatticeCellListSet& lcls);
 
       /*!\brief Convert from a GridMaskSet. */
       GridCellListSet(const GridMaskSet<R>& gms);
@@ -145,7 +145,7 @@ namespace Ariadne {
       void clear();
 
       /*! \brief The lattice set. */
-      const Combinatoric::LatticeCellListSet& lattice_set() const;
+      const LatticeCellListSet& lattice_set() const;
 
       /*!\brief The @a i th cell in the list. */
       GridCell<R> operator[] (const size_type i) const;
@@ -204,7 +204,7 @@ namespace Ariadne {
       static void _instantiate();
      private:
       Grid<R>  _grid;
-      Combinatoric::LatticeCellListSet _lattice_set;
+      LatticeCellListSet _lattice_set;
     };
 
     template<class R> tribool subset(const GridCellListSet<R>&, const GridBlock<R>&);
@@ -213,8 +213,8 @@ namespace Ariadne {
     template<class R> std::ostream& operator<<(std::ostream& os, const GridCellListSet<R>& gcls);
     
     
-  }
-}
+  
+} // namespace Ariadne
 
 
 #include "grid_cell_list_set.inline.h"

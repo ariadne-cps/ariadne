@@ -40,7 +40,6 @@
 #include "multi_index.h"
 
 namespace Ariadne {
-  namespace Function {
     
     class SortedIndex;
     class MultiIndex;
@@ -162,28 +161,28 @@ namespace Ariadne {
       const uint& p=this->_position;
       
       uint d=0;
-      while(Numeric::bin(nv+d,nv)<p) {
+      while(bin(nv+d,nv)<p) {
         ++d;
       }
       std::cout << "nv=" << nv << " p=" << p << std::endl;
       std::cout << "d=" << d << std::endl;
       
       array<uint> a(d);
-      uint cp=Numeric::bin(nv+d,nv);
+      uint cp=bin(nv+d,nv);
       for(uint k=0; k!=d; ++k) {
         int m=d-k;
         int l=m+(nv-1);
         int j=nv-1;
-        long c=Numeric::bin(l-j,m);
+        long c=bin(l-j,m);
         //std::cout << "k=" << k <<" j="<<j<<" cp="<<cp<<" ("<<(l-j)<<","<<(m)<<")="<<c<<"\n";
         while(cp-c>p) {
           --j;
-          c=Numeric::bin(l-j,m);
+          c=bin(l-j,m);
           //std::cout << "k=" << k <<" j="<<j<<" cp="<<cp<<" ("<<(l-j)<<","<<(m)<<")="<<c<<"\n";
           assert(j>-2);
         }
         a[k]=j;
-        cp-=Numeric::bin(l-j-1,m);
+        cp-=bin(l-j-1,m);
       }
       SortedIndex r(nv,d,a.begin());
       //std::cout << "r=" << r << " r.position()=" << r.position() << "\n";
@@ -233,6 +232,6 @@ namespace Ariadne {
       *this=p.operator MultiIndex();
     }
 
-  }
-}
+  
+} // namespace Ariadne
 #endif /* ARIADNE_POSITION_INDEX_H */

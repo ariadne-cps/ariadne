@@ -37,7 +37,7 @@
 #include "constraint_interface.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
     
     template<class R> class Point;
     template<class R> class Box;
@@ -51,13 +51,13 @@ namespace Ariadne {
     class LinearConstraint
       : public ConstraintInterface<R>
     {
-      typedef typename Numeric::traits<R>::arithmetic_type A;
-      typedef typename Numeric::traits<R>::interval_type I;
+      typedef typename traits<R>::arithmetic_type A;
+      typedef typename traits<R>::interval_type I;
      public:
       /*! \brief Construct the constraint \f$a\cdot x < b\f$. */
-      LinearConstraint(const LinearAlgebra::Vector<R> a, const R& b);
+      LinearConstraint(const Vector<R> a, const R& b);
       /*! \brief Construct the constraint \f$a\cdot x \lessgtr b\f$. */
-      LinearConstraint(const LinearAlgebra::Vector<R> a, Comparison cmp, const R& b);
+      LinearConstraint(const Vector<R> a, Comparison cmp, const R& b);
 
       /*! \brief Destructor. */
       virtual ~LinearConstraint();
@@ -75,20 +75,20 @@ namespace Ariadne {
       /*! \brief The value at a point. */
       virtual A value(const Point<A>& pt) const;
       /*! \brief The gradient at a point. */
-      virtual LinearAlgebra::Vector<A> gradient(const Point<A>& pt) const;
+      virtual Vector<A> gradient(const Point<A>& pt) const;
 
       /*! \brief Convert to a polyhedron. */
       virtual Polyhedron<R> polyhedron() const;
      private:
       static void instantiate();
      private:
-      LinearAlgebra::Vector<R> _a;
+      Vector<R> _a;
       R _b;
       Comparison _c;
     };
 
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_LINEAR_CONSTRAINT_H */

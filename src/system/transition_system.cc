@@ -34,21 +34,21 @@
 #include "system/transition_system.code.h"
 
 namespace Ariadne {
-  namespace System {
-    using namespace Numeric;
-    using namespace Geometry;
+  
+    
+    
 
 #ifdef ENABLE_FLOAT64
-  template class TransitionSystem< System::Map<Float64>, GridApproximationScheme<Float64> >;
-  template class TransitionSystem< System::VectorField<Float64>, GridApproximationScheme<Float64> >;
-  //template class TransitionSystem< System::HybridAutomaton<Float64>, HybridGridApproximationScheme<Float64> >;
+  template class TransitionSystem< Map<Float64>, GridApproximationScheme<Float64> >;
+  template class TransitionSystem< VectorField<Float64>, GridApproximationScheme<Float64> >;
+  //template class TransitionSystem< HybridAutomaton<Float64>, HybridGridApproximationScheme<Float64> >;
 #endif
   
 #ifdef ENABLE_FLOATMP
-  template class TransitionSystem< System::Map<FloatMP>, GridApproximationScheme<FloatMP> >;
-  template class TransitionSystem< System::VectorField<FloatMP>, GridApproximationScheme<FloatMP> >;
-  //template class TransitionSystem< System::HybridAutomaton<FloatMP>, HybridGridApproximationScheme<FloatMP> >;
+  template class TransitionSystem< Map<FloatMP>, GridApproximationScheme<FloatMP> >;
+  template class TransitionSystem< VectorField<FloatMP>, GridApproximationScheme<FloatMP> >;
+  //template class TransitionSystem< HybridAutomaton<FloatMP>, HybridGridApproximationScheme<FloatMP> >;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

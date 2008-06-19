@@ -43,7 +43,7 @@
 
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
     template<class R> class Grid;
     template<class R> class GridTreeCell;
@@ -75,7 +75,7 @@ namespace Ariadne {
 
       /*!\brief Construct from a rectangle, the subdivision_coordinates and a binary word. */
       GridTreeCell(const Grid<R>& r, 
-                   const Combinatoric::BinaryWord& w);
+                   const BinaryWord& w);
 
       /*!\brief The underlying grid. */
       const Grid<R>& grid() const;
@@ -96,7 +96,7 @@ namespace Ariadne {
       std::ostream& write(std::ostream&) const;
      private:
       Grid<R> _grid;
-      Combinatoric::BinaryWord _word;
+      BinaryWord _word;
     };
 
     

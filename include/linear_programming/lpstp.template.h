@@ -31,21 +31,21 @@ namespace Ariadne {
 
   template<class AP>
   tribool 
-  LinearProgramming::lpstp(const LinearAlgebra::Matrix<AP>& A, 
-                           const LinearAlgebra::Vector<AP>& b, 
-                           const LinearAlgebra::Vector<AP>& c,
-                           LinearAlgebra::Permutation& p, 
-                           LinearAlgebra::Matrix<AP>& B,
+  lpstp(const Matrix<AP>& A, 
+                           const Vector<AP>& b, 
+                           const Vector<AP>& c,
+                           Permutation& p, 
+                           Matrix<AP>& B,
                            // Use these variables too if it's more efficient
-                           LinearAlgebra::Vector<AP>& x, 
-                           LinearAlgebra::Vector<AP>& y, 
-                           LinearAlgebra::Vector<AP>& z) 
+                           Vector<AP>& x, 
+                           Vector<AP>& y, 
+                           Vector<AP>& z) 
   {
       
     if (verbosity > 2)
       std::clog << "A:" << A << ", b:" << b << ", c:" << c << ", p:" << p << ", B:" << B << std::endl;
       
-    LinearAlgebra::Matrix<AP> t = to_tableau<AP>(A, b, c);
+    Matrix<AP> t = to_tableau<AP>(A, b, c);
       
     uint m = A.number_of_rows();
     uint n = A.number_of_columns();
@@ -66,14 +66,14 @@ namespace Ariadne {
     
   template<class AP>
   tribool 
-  LinearProgramming::lpstpc(const LinearAlgebra::Matrix<AP>& A, 
-                            const LinearAlgebra::Vector<AP>& b, 
-                            const LinearAlgebra::Vector<AP>& c,
-                            const LinearAlgebra::Vector<AP>& l, 
-                            const LinearAlgebra::Vector<AP>& u,
-                            LinearAlgebra::Permutation& p, 
-                            LinearAlgebra::Matrix<AP>& B, 
-                            LinearAlgebra::Vector<AP>& x) 
+  lpstpc(const Matrix<AP>& A, 
+                            const Vector<AP>& b, 
+                            const Vector<AP>& c,
+                            const Vector<AP>& l, 
+                            const Vector<AP>& u,
+                            Permutation& p, 
+                            Matrix<AP>& B, 
+                            Vector<AP>& x) 
   {
     throw NotImplemented(__PRETTY_FUNCTION__);
   }
@@ -82,7 +82,7 @@ namespace Ariadne {
 
   template<class AP>
   tribool 
-  LinearProgramming::lpstp(uint m, uint n,
+  lpstp(uint m, uint n,
                            AP* Aptr, uint Arinc, uint Acinc,
                            AP* bptr, uint binc,
                            AP* cptr, uint cinc,
@@ -99,7 +99,7 @@ namespace Ariadne {
 
   template<class AP>
   tribool 
-  LinearProgramming::lpstp(uint m, uint n,
+  lpstp(uint m, uint n,
                            AP* Aptr, uint Arinc, uint Acinc,
                            AP* bptr, uint binc,
                            AP* cptr, uint cinc,
@@ -113,8 +113,8 @@ namespace Ariadne {
   {
     if (verbosity > 2) {
       std::clog << "lpstp(m=" << m << ", n=" << n << ", Arinc=" << Arinc << ", Acinc=" << Acinc
-                << ", binc=" << binc << ", cinc=" << cinc << ", perm=" << LinearAlgebra::Permutation(pptr,pptr+n) << ", aux=" << aux << ")" << std::endl;
-      std::clog << "tableau=" << LinearAlgebra::Matrix<AP>(m+1, m+n+1, Aptr, Arinc, Acinc) << std::endl;
+                << ", binc=" << binc << ", cinc=" << cinc << ", perm=" << Permutation(pptr,pptr+n) << ", aux=" << aux << ")" << std::endl;
+      std::clog << "tableau=" << Matrix<AP>(m+1, m+n+1, Aptr, Arinc, Acinc) << std::endl;
     }
       
     int leave, enter = -1;
@@ -182,7 +182,7 @@ namespace Ariadne {
 
   template<class AP>
   tribool 
-  LinearProgramming::lpstpc(uint m, uint n,
+  lpstpc(uint m, uint n,
                             AP* Aptr, uint Arinc, uint Acinc,
                             AP* bptr, uint binc,
                             AP* cptr, uint cinc,

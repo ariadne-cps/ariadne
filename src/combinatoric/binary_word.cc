@@ -31,7 +31,7 @@
 #include "base/stlio.h"
 
 namespace Ariadne {
-  namespace Combinatoric {
+
 
     BinaryWord::BinaryWord(const std::string& str)
     {
@@ -72,5 +72,6 @@ namespace Ariadne {
       return os;
     }
  
-  }
-}
+  
+} // namespace Ariadne
+

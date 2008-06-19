@@ -53,7 +53,7 @@
 #include "evaluation/hybrid_time.h"
 
 namespace Ariadne {  
-  namespace Evaluation {
+  
   
     template<class R> class ConstraintBasedHybridEvolver;
     template<class R> class LohnerIntegrator;
@@ -67,10 +67,10 @@ namespace Ariadne {
     /*! \brief Data to hold information about a constraint crossing. */
     template<class R> 
     struct CrossingData { 
-      Numeric::Interval<R> initial_constraint_value; 
-      Numeric::Interval<R> final_constraint_value; 
-      Numeric::Interval<R> normal_derivative;
-      Numeric::Interval<R> crossing_time_bounds;
+      Interval<R> initial_constraint_value; 
+      Interval<R> final_constraint_value; 
+      Interval<R> normal_derivative;
+      Interval<R> crossing_time_bounds;
       TimeModel<R> crossing_time_model; 
       int direction;
     };
@@ -79,7 +79,7 @@ namespace Ariadne {
     /*! \brief Data to hold information about a constraint crossing. */
     template<class R> 
     struct IntegrationData { 
-      typedef Numeric::Rational Time;
+      typedef Rational Time;
       Time final_time;
       Time maximum_time_step;
       TimeModel<R> spacial_integration_time_step_model;
@@ -188,43 +188,43 @@ namespace Ariadne {
     class ConstraintBasedHybridScheduler
     {
       friend class ConstraintBasedHybridEvolver<R>;
-      typedef Numeric::Interval<R> I;
-      typedef Geometry::Zonotope<R,Geometry::IntervalTag> BS;
+      typedef Interval<R> I;
+      typedef Zonotope<R,IntervalTag> BS;
      public:
       /*! \brief The type used for real numbers. */
       typedef R real_type;
       /*! \brief . */
-      typedef Numeric::Rational time_type;
+      typedef Rational time_type;
       /*! \brief . */
-      typedef typename System::ConstraintBasedDiscreteMode<R> mode_type;
+      typedef typename ConstraintBasedDiscreteMode<R> mode_type;
       /*! \brief . */
-      typedef typename System::ConstraintBasedDiscreteTransition<R> transition_type;
+      typedef typename ConstraintBasedDiscreteTransition<R> transition_type;
       /*! \brief . */
-      typedef typename System::DiscreteEvent discrete_event_type;
+      typedef typename DiscreteEvent discrete_event_type;
       /*! \brief . */
-      typedef typename Geometry::DiscreteState discrete_state_type;
+      typedef typename DiscreteState discrete_state_type;
       /*! \brief . */
-      typedef typename Geometry::Zonotope<R,Geometry::IntervalTag> continuous_basic_set_type;
+      typedef typename Zonotope<R,IntervalTag> continuous_basic_set_type;
       /*! \brief . */
-      typedef Geometry::HybridBasicSet<continuous_basic_set_type> hybrid_basic_set_type;
+      typedef HybridBasicSet<continuous_basic_set_type> hybrid_basic_set_type;
       /*! \brief . */
       typedef TimeModelHybridBasicSet<continuous_basic_set_type> timed_set_type;
       /*! \brief . */
-      typedef Geometry::HybridListSet<continuous_basic_set_type> hybrid_list_set_type;
+      typedef HybridListSet<continuous_basic_set_type> hybrid_list_set_type;
       /*! \brief . */
-      typedef Geometry::ConstraintInterface<R> constraint_type;
+      typedef ConstraintInterface<R> constraint_type;
       /*! \brief . */
-      typedef Geometry::DifferentiableConstraintInterface<R> differentiable_constraint_type;
+      typedef DifferentiableConstraintInterface<R> differentiable_constraint_type;
       /*! \brief . */
-      typedef Geometry::Box<R> bounding_box_type;
+      typedef Box<R> bounding_box_type;
       /*! \brief . */
-      typedef System::Map<R> map_type;
+      typedef Map<R> map_type;
       /*! \brief . */
-      typedef System::VectorField<R> vector_field_type;
+      typedef VectorField<R> vector_field_type;
       /*! \brief . */
-      typedef Evaluation::TimeModel<R> time_model_type;
+      typedef TimeModel<R> time_model_type;
       /*! \brief . */
-      typedef std::pair<Evaluation::TimeModel<R>,Evaluation::TimeModel<R> > time_model_pair_type;
+      typedef std::pair<TimeModel<R>,TimeModel<R> > time_model_pair_type;
       /*! \brief . */
       typedef CrossingData<R> crossing_data_type;
   
@@ -247,7 +247,7 @@ namespace Ariadne {
        * the remaining sets should be continued as working sets.
        */
       std::vector<timed_set_type>
-      integration_step(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
+      integration_step(const ConstraintBasedHybridAutomaton<R>& automaton, 
                      const timed_set_type& initial_set,
                      const time_type& maximum_time_step,
                      const time_type& maximum_time_step_size,
@@ -256,28 +256,28 @@ namespace Ariadne {
 
       /*! \brief Compute a lower-approximation to the evolution of a timed basic set using lower semantics. */
       std::vector<timed_set_type>
-      lower_integration_step(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
+      lower_integration_step(const ConstraintBasedHybridAutomaton<R>& automaton, 
                            const timed_set_type& initial_set,
                            const time_type& maximum_time,
                            const time_type& maximum_time_step_size) const;
 
       /*! \brief Compute the an over-approximation to the evolution of a timed basic set using upper semantics. */
       std::vector<timed_set_type>
-      upper_integration_step(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
+      upper_integration_step(const ConstraintBasedHybridAutomaton<R>& automaton, 
                            const timed_set_type& initial_set,
                            const time_type& maximum_time,
                            const time_type& maximum_time_step_size) const;
 
       /*! \brief Compute the possible states reached during an evolution step using lower semantics. */
       std::vector<timed_set_type>
-      lower_reachability_step(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
+      lower_reachability_step(const ConstraintBasedHybridAutomaton<R>& automaton, 
                               const timed_set_type& initial_set,
                               const time_type& maximum_time,
                               const time_type& maximum_time_step_size) const;
 
       /*! \brief Compute the possible states reached during an evolution step using upper semantics. */
       std::vector<timed_set_type>
-      upper_reachability_step(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
+      upper_reachability_step(const ConstraintBasedHybridAutomaton<R>& automaton, 
                               const timed_set_type& initial_set,
                               const time_type& maximum_time,
                               const time_type& maximum_time_step_size) const;
@@ -420,7 +420,7 @@ namespace Ariadne {
       //! \name Utility functions
 
       /*! \brief Compute the crossing times for a set of modes. */
-      Geometry::Box<R> 
+      Box<R> 
       flow_bounds(const mode_type& mode, 
                   const timed_set_type& initial_set,
                   time_type& maximum_step_size) const;
@@ -458,7 +458,7 @@ namespace Ariadne {
     }
 
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_CONSTRAINT_BASED_HYBRID_EVOLVER_H */

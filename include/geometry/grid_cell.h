@@ -42,7 +42,7 @@
 #include "geometry/grid.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
       
     class basic_set_tag;
 
@@ -76,7 +76,7 @@ namespace Ariadne {
       GridCell(const Grid<R>& g);
 
       /*!\brief Construct from a grid and an unit grid cell. */
-      GridCell(const Grid<R>& g, const Combinatoric::LatticeCell& pos);
+      GridCell(const Grid<R>& g, const LatticeCell& pos);
 
       /*!\brief Construct from a grid and an unit grid cell. */
       GridCell(const Grid<R>& g, const IndexArray& pos);
@@ -94,7 +94,7 @@ namespace Ariadne {
       R upper_bound(dimension_type i) const;
 
       /*!\brief The position of the cell in the grid. */
-      const Combinatoric::LatticeCell& lattice_set() const;
+      const LatticeCell& lattice_set() const;
 
       /*! \brief True if the set is bounded. */
       tribool bounded() const;
@@ -109,13 +109,13 @@ namespace Ariadne {
       std::ostream& write(std::ostream&) const;
      private:
       Grid<R> _grid;
-      Combinatoric::LatticeCell _lattice_set;
+      LatticeCell _lattice_set;
     };
 
     template<class R> std::ostream& operator<<(std::ostream& os, const GridCell<R>& gc);
       
-  }
-}
+  
+} // namespace Ariadne
 
 
 #include "grid_cell.inline.h"

@@ -31,7 +31,7 @@
 #include <string>
 
 namespace Ariadne {
-  namespace Output {
+  
     
      /*!\brief A class representing a colour, with a \a name and \a rgb values. 
       * The default constructor creates a fully transparant colour. */
@@ -65,8 +65,8 @@ namespace Ariadne {
     extern const Colour cyan;
     extern const Colour magenta;
 
-  }
-}
+  
+} // namespace Ariadne
 
 
 #endif /* ARIADNE_COLOUR_H */

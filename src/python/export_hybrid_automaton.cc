@@ -29,9 +29,6 @@
 #include "system/hybrid_automaton.h"
 
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::Geometry;
-using namespace Ariadne::System;
 using namespace Ariadne::Python;
 
 #include <boost/python.hpp>
@@ -65,17 +62,17 @@ void export_hybrid_automaton()
 
 
   class_< HybridAutomaton<R> >("HybridAutomaton",hybrid_automaton_init)
-    .def("new_mode",(const DiscreteMode<R>&(HybridAutomaton<R>::*)(DiscreteState, const VectorField<R>&,const Geometry::ConstraintSet<R>&))
+    .def("new_mode",(const DiscreteMode<R>&(HybridAutomaton<R>::*)(DiscreteState, const VectorField<R>&,const ConstraintSet<R>&))
            (&HybridAutomaton<R>::new_mode),
          return_reference_existing_object())
     .def("new_transition",
          (const DiscreteTransition<R>&(HybridAutomaton<R>::*)
-             (DiscreteEvent,const DiscreteMode<R>&,const DiscreteMode<R>&,const Map<R>&,const Geometry::ConstraintSet<R>&))
+             (DiscreteEvent,const DiscreteMode<R>&,const DiscreteMode<R>&,const Map<R>&,const ConstraintSet<R>&))
            (&HybridAutomaton<R>::new_transition),
          return_reference_existing_object())
     .def("new_transition",
          (const DiscreteTransition<R>&(HybridAutomaton<R>::*)
-             (DiscreteEvent,DiscreteState,DiscreteState,const Map<R>&,const Geometry::ConstraintSet<R>&))
+             (DiscreteEvent,DiscreteState,DiscreteState,const Map<R>&,const ConstraintSet<R>&))
            (&HybridAutomaton<R>::new_transition),
          return_reference_existing_object())
     .def("name",&HybridAutomaton<R>::name,return_copy_const_reference())

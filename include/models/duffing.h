@@ -31,7 +31,7 @@
 #include "system/build_vector_field.h"
 
 namespace Ariadne {
-  namespace System {
+  namespace Models {  
 
 
     template<class R, class A, class P>
@@ -63,8 +63,8 @@ namespace Ariadne {
 
      
     
-  }
-}
+  } // namespace Models
+} // namespace Ariadne
 
 
 #endif /* ARIADNE_DUFFING_EQUATION_H */

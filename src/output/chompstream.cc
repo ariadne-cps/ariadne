@@ -27,26 +27,26 @@ namespace Ariadne {
 
 
 
-Output::chompstream::chompstream(std::ostream& os)
+chompstream::chompstream(std::ostream& os)
  : _os_ptr(&os)
 {
 }
 
 
 void
-Output::chompstream::redirect(std::ostream& os)
+chompstream::redirect(std::ostream& os)
 {
   this->_os_ptr=&os;
 }
 
 
-Output::chompstream::~chompstream() {
+chompstream::~chompstream() {
 }
 
       
 
-Output::chompstream& 
-Output::operator<<(chompstream& chomps, const char* str) 
+chompstream& 
+operator<<(chompstream& chomps, const char* str) 
 {
   std::ostream& os=*chomps._os_ptr;
   os << str; 
@@ -54,8 +54,8 @@ Output::operator<<(chompstream& chomps, const char* str)
 }
 
     
-Output::chompstream& 
-Output::operator<<(chompstream& chomps, const Combinatoric::LatticeCell& lc) 
+chompstream& 
+operator<<(chompstream& chomps, const LatticeCell& lc) 
 {
   std::ostream& os=*chomps._os_ptr;
   if(lc.dimension()>0) {
@@ -71,26 +71,26 @@ Output::operator<<(chompstream& chomps, const Combinatoric::LatticeCell& lc)
 }
 
 
-Output::chompstream& 
-Output::operator<<(chompstream& chomps, const Combinatoric::LatticeMaskSet& lms) 
+chompstream& 
+operator<<(chompstream& chomps, const LatticeMaskSet& lms) 
 {
-  for(Combinatoric::LatticeMaskSet::const_iterator cell_iter=lms.begin(); cell_iter!=lms.end(); ++cell_iter) {
+  for(LatticeMaskSet::const_iterator cell_iter=lms.begin(); cell_iter!=lms.end(); ++cell_iter) {
     chomps << *cell_iter << "\n";
   }
   return chomps;
 }
 
 
-Output::chompstream& 
-Output::operator<<(chompstream& chomps, const Combinatoric::LatticeMultiMap& lmm) 
+chompstream& 
+operator<<(chompstream& chomps, const LatticeMultiMap& lmm) 
 {
-  Combinatoric::LatticeCell lc(lmm.argument_dimension());
-  Combinatoric::LatticeCellListSet lcls(lmm.result_dimension());
-  for(Combinatoric::LatticeMultiMap::const_iterator iter=lmm.begin(); iter!=lmm.end(); ++iter) {
+  LatticeCell lc(lmm.argument_dimension());
+  LatticeCellListSet lcls(lmm.result_dimension());
+  for(LatticeMultiMap::const_iterator iter=lmm.begin(); iter!=lmm.end(); ++iter) {
     lc=iter->first;
     lcls=iter->second;
     chomps << lc << " -> { ";
-    for(Combinatoric::LatticeCellListSet::const_iterator lcls_iter=lcls.begin(); 
+    for(LatticeCellListSet::const_iterator lcls_iter=lcls.begin(); 
         lcls_iter!=lcls.end(); ++lcls_iter) 
     {
       chomps << *lcls_iter << " ";
@@ -102,4 +102,4 @@ Output::operator<<(chompstream& chomps, const Combinatoric::LatticeMultiMap& lmm
 
 
     
-}
+} // namespace Ariadne

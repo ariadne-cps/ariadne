@@ -34,13 +34,11 @@
 #include "geometry/zonotope.h"
 
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::Geometry;
-using namespace Ariadne::System;
 using namespace Ariadne::Python;
 
 #include <boost/python.hpp>
 using namespace boost::python;
+
 return_value_policy<reference_existing_object> return_reference_existing_object;
 return_value_policy<copy_const_reference> return_copy_const_reference;
 return_value_policy<manage_new_object> return_manage_new_object;

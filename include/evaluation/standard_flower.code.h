@@ -69,10 +69,10 @@ namespace {
 using namespace Ariadne;
 
 template<class R>
-LinearAlgebra::Matrix<R>
-symmetrize(const LinearAlgebra::Vector< Numeric::Interval<R> >& iv)
+Matrix<R>
+symmetrize(const Vector< Interval<R> >& iv)
 {
-  LinearAlgebra::Matrix<R> A(iv.size(),iv.size()+1);
+  Matrix<R> A(iv.size(),iv.size()+1);
   for(size_type i=0; i!=A.number_of_rows(); ++i) {
     A(i,i)=radius(iv(i));
     A(i,iv.size())=midpoint(iv(i));
@@ -80,7 +80,7 @@ symmetrize(const LinearAlgebra::Vector< Numeric::Interval<R> >& iv)
   return A;
 }
 
-}
+} // namespace
 
 
 
@@ -91,46 +91,46 @@ namespace Ariadne {
 
 
 template<class R>
-Geometry::Point< Numeric::Interval<R> >
-Evaluation::StandardFlower<R>::flow_step(const System::VectorField<R>& vector_field, 
-                                         const Geometry::Point<I>& initial_point, 
-                                         const Numeric::Rational& step_size, 
-                                         const Geometry::Box<R>& bounding_box) const
+Point< Interval<R> >
+StandardFlower<R>::flow_step(const VectorField<R>& vector_field, 
+                                         const Point<I>& initial_point, 
+                                         const Rational& step_size, 
+                                         const Box<R>& bounding_box) const
 {
-  typedef Numeric::Interval<R> I;
+  typedef Interval<R> I;
   
   // Use second order formula \f$ \Phi(t,p) = p + tf(p) + t^2/2 Df(B)f(B) \f$
-  const System::VectorField<R>& vf=vector_field;
-  const Geometry::Point<I>& p=initial_point;
-  Geometry::Point<I> b=bounding_box;
+  const VectorField<R>& vf=vector_field;
+  const Point<I>& p=initial_point;
+  Point<I> b=bounding_box;
   I h=step_size;
   
   return p + h * ( vf(p) + (h/2) * ( vf.jacobian(b) * vf(b) ) );
 }
 
 template<class R>
-LinearAlgebra::Matrix< Numeric::Interval<R> >
-Evaluation::StandardFlower<R>::flow_step_jacobian(const System::VectorField<R>& vector_field, 
-                                                  const Geometry::Point<I>& initial_point, 
-                                                  const Numeric::Rational& step_size, 
-                                                  const Geometry::Box<R>& bounding_box) const
+Matrix< Interval<R> >
+StandardFlower<R>::flow_step_jacobian(const VectorField<R>& vector_field, 
+                                                  const Point<I>& initial_point, 
+                                                  const Rational& step_size, 
+                                                  const Box<R>& bounding_box) const
 {
   // Use first order formula \f$ D\Phi(t,p) = I + t Df(B) W \f$ where W is a bound for D\Phi([0,h],p)
   // Use ||W-I|| < e^{Lh}-1, where L is the  norm of Df
-  typedef Numeric::Interval<R> I;
+  typedef Interval<R> I;
   const dimension_type d=vector_field.dimension();
-  const System::VectorField<R>& vf=vector_field;
-  //const Geometry::Point<I>& pr=initial_point;
-  Geometry::Point<I> b=bounding_box;
+  const VectorField<R>& vf=vector_field;
+  //const Point<I>& pr=initial_point;
+  Point<I> b=bounding_box;
   I h=step_size;
 
-  LinearAlgebra::Matrix<I> Id = LinearAlgebra::Matrix<I>::identity(d);
+  Matrix<I> Id = Matrix<I>::identity(d);
 
-  LinearAlgebra::Matrix<I> Df = vf.jacobian(b);
-  R l = LinearAlgebra::norm(Df).upper();
-  I e = Numeric::sub_up(Numeric::exp_up(mul_up(h.upper(),l)),R(1))*I(-1,1);
+  Matrix<I> Df = vf.jacobian(b);
+  R l = norm(Df).upper();
+  I e = sub_up(exp_up(mul_up(h.upper(),l)),R(1))*I(-1,1);
 
-  LinearAlgebra::Matrix<I> W = LinearAlgebra::Matrix<I>::identity(d)+e*LinearAlgebra::Matrix<I>::one(d,d);
+  Matrix<I> W = Matrix<I>::identity(d)+e*Matrix<I>::one(d,d);
 
   // Perform a couple of steps
   W=Id + I(0,h.upper()) * (Df * W);
@@ -143,7 +143,7 @@ Evaluation::StandardFlower<R>::flow_step_jacobian(const System::VectorField<R>& 
 
 
 
-namespace Function {
+
 
 template<class X>
 class TaylorSeriesAffineVariable
@@ -210,10 +210,10 @@ class TaylorSeriesTaylorVariable
 };
 
 template<class R>
-AffineVariable<R> midpoint(const Function::AffineVariable< Numeric::Interval<R> >& iav)
+AffineVariable<R> midpoint(const AffineVariable< Interval<R> >& iav)
 {
   R v=midpoint(iav.value());
-  LinearAlgebra::Covector<R> cv=midpoint(iav.derivative());
+  Covector<R> cv=midpoint(iav.derivative());
   return AffineVariable<R>(v,cv);
 }
 
@@ -221,7 +221,7 @@ AffineVariable<R> midpoint(const Function::AffineVariable< Numeric::Interval<R> 
 
 template<class X> 
 array< TaylorSeries< AffineVariable<X> > >
-integrate(const TaylorDerivative<X>& vf, const Geometry::Point<X> x)
+integrate(const TaylorDerivative<X>& vf, const Point<X> x)
 {
   ARIADNE_ASSERT(vf.result_size()==vf.argument_size());
   ARIADNE_ASSERT(vf.argument_size()==x.dimension());
@@ -246,7 +246,7 @@ integrate(const TaylorDerivative<X>& vf, const Geometry::Point<X> x)
 
 template<class X> 
 array< TaylorSeries< TaylorVariable<X> > >
-integrate(const TaylorDerivative<X>& vf, const Geometry::Point<X> x, smoothness_type ox)
+integrate(const TaylorDerivative<X>& vf, const Point<X> x, smoothness_type ox)
 {
   ARIADNE_ASSERT(vf.result_size()==vf.argument_size());
   ARIADNE_ASSERT(vf.argument_size()==x.dimension());
@@ -275,7 +275,7 @@ integrate(const TaylorDerivative<X>& vf, const Geometry::Point<X> x, smoothness_
 
 
 
-} // namespace Function
+
 
 
 
@@ -284,22 +284,22 @@ integrate(const TaylorDerivative<X>& vf, const Geometry::Point<X> x, smoothness_
 
 
 template<class R>
-Function::AffineModel<R>
-Evaluation::StandardFlower<R>::affine_flow_model(const System::VectorField<R>& vector_field, 
-                                                 const Geometry::Point<R>& initial_point, 
-                                                 const Geometry::Box<R>& initial_domain, 
-                                                 const Numeric::Rational& step_size, 
-                                                 const Geometry::Box<R>& bounding_box) const
+AffineModel<R>
+StandardFlower<R>::affine_flow_model(const VectorField<R>& vector_field, 
+                                                 const Point<R>& initial_point, 
+                                                 const Box<R>& initial_domain, 
+                                                 const Rational& step_size, 
+                                                 const Box<R>& bounding_box) const
 {
   // Convert from Taylor flow model
-  using namespace Function;
-  typedef Numeric::Interval<R> I;
+  
+  typedef Interval<R> I;
 
   TaylorModel<R> taylor_flow_model=this->taylor_flow_model(vector_field,initial_point,initial_domain,step_size,bounding_box);
-  return AffineModel<R>(Geometry::Box<R>(taylor_flow_model.domain()),
-                        Geometry::Point<R>(taylor_flow_model.centre()),
-                        Geometry::Point<I>(taylor_flow_model.evaluate(taylor_flow_model.centre())),
-                        LinearAlgebra::Matrix<I>(taylor_flow_model.jacobian(taylor_flow_model.domain().position_vectors())));
+  return AffineModel<R>(Box<R>(taylor_flow_model.domain()),
+                        Point<R>(taylor_flow_model.centre()),
+                        Point<I>(taylor_flow_model.evaluate(taylor_flow_model.centre())),
+                        Matrix<I>(taylor_flow_model.jacobian(taylor_flow_model.domain().position_vectors())));
 
   uint to=this->temporal_order();
   dimension_type n=initial_point.dimension();
@@ -307,7 +307,7 @@ Evaluation::StandardFlower<R>::affine_flow_model(const System::VectorField<R>& v
   
   // Make dvf contain the vector field derivatives at the centre of the initial set,
   // except for the highest-order term, which contains the derivatives over the entire set.
-  TaylorDerivative<I> dvf=vector_field.derivative(Geometry::Point<I>(bounding_box),to);
+  TaylorDerivative<I> dvf=vector_field.derivative(Point<I>(bounding_box),to);
   TaylorDerivative<I> cvf=vector_field.derivative(initial_point,to-1);
   for(uint i=0; i!=n; ++i) {
     dvf[i].assign(cvf[i]);
@@ -350,20 +350,20 @@ Evaluation::StandardFlower<R>::affine_flow_model(const System::VectorField<R>& v
 
 
 template<class R>
-Function::TaylorModel<R>
-Evaluation::StandardFlower<R>::taylor_flow_model(const System::VectorField<R>& vector_field, 
-                                                 const Geometry::Point<R>& initial_point, 
-                                                 const Geometry::Box<R>& initial_domain, 
-                                                 const Numeric::Rational& step_size, 
-                                                 const Geometry::Box<R>& bounding_box) const
+TaylorModel<R>
+StandardFlower<R>::taylor_flow_model(const VectorField<R>& vector_field, 
+                                                 const Point<R>& initial_point, 
+                                                 const Box<R>& initial_domain, 
+                                                 const Rational& step_size, 
+                                                 const Box<R>& bounding_box) const
 {
   uint verbosity=0;
   ARIADNE_LOG(6,"taylor_flow_model(...)\n");
-  using namespace Function;
+  
   dimension_type n=initial_point.dimension();
   smoothness_type ot=this->temporal_order();
   smoothness_type ox=this->spacial_order();
-  Numeric::Interval<R> h=step_size;
+  Interval<R> h=step_size;
 
   TaylorDerivative<I> vfc=vector_field.derivative(initial_point,ot);
   TaylorDerivative<I> vfb=vector_field.derivative(bounding_box,ot);
@@ -377,7 +377,7 @@ Evaluation::StandardFlower<R>::taylor_flow_model(const System::VectorField<R>& v
   ARIADNE_LOG(7,"y="<<y<<"\n");
   array< TaylorSeries< TaylorVariable<I> > > yp(n);
   for(uint j=0; j<=ot; ++j) {
-    yp=Function::evaluate(vfc,y);
+    yp=evaluate(vfc,y);
     for(uint i=0; i!=n; ++i) {  
       y[i]=antiderivative(yp[i],y[i][0]);
     }
@@ -392,16 +392,16 @@ Evaluation::StandardFlower<R>::taylor_flow_model(const System::VectorField<R>& v
   TaylorDerivative<I> phi(n,n,ox);
   for(uint j=0; j<=ot; ++j) {
     for(uint i=0; i!=n; ++i) {
-      phi[i]+=y[i][j]*Numeric::pow(h,j);
+      phi[i]+=y[i][j]*pow(h,j);
     }
     ARIADNE_LOG(7,"phi="<<phi<<"\n");
   }
 
   //FIXME: Put rigorous error bounds in flow model
-  return Function::TaylorModel<R>(initial_domain,initial_point,phi,phi);
+  return TaylorModel<R>(initial_domain,initial_point,phi,phi);
 }
 
 
 
 
-}
+} // namespace Ariadne

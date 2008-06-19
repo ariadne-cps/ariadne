@@ -26,10 +26,10 @@ namespace Ariadne {
 namespace {
 
 inline size_type compute_polynomial_data_size(uint as, smoothness_type d) {
-  return Numeric::bin(d+as,as);
+  return bin(d+as,as);
 }
 
-}
+} // namespace
 
 
-}
+} // namespace Ariadne

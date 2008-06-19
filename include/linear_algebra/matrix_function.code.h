@@ -31,21 +31,17 @@ namespace Ariadne {
 
 
 template<class R>
-LinearAlgebra::Matrix< Numeric::Interval<R> >
-LinearAlgebra::exp(const Matrix< R >& A) 
+Matrix< Interval<R> >
+exp(const Matrix< R >& A) 
 {
-  return exp(Matrix< Numeric::Interval<R> >(A));
+  return exp(Matrix< Interval<R> >(A));
 }
 
 
 template<class R>
-LinearAlgebra::Matrix< Numeric::Interval<R> >
-LinearAlgebra::exp(const Matrix< Numeric::Interval<R> >& A) 
+Matrix< Interval<R> >
+exp(const Matrix< Interval<R> >& A) 
 {
-  using Numeric::Interval;
-  using Numeric::RoundUp;
-  using Numeric::div;
-  
   ARIADNE_CHECK_SQUARE(A,__PRETTY_FUNCTION__);
   R err=div<RoundUp>(norm(A).upper(),65536);
   if(err==0) {

@@ -40,15 +40,15 @@ namespace Ariadne {
 
 
 template<class R>
-Geometry::GridCellListSet<R>::GridCellListSet(const Grid<R>& g)
+GridCellListSet<R>::GridCellListSet(const Grid<R>& g)
   : _grid(g), _lattice_set(g.dimension())
 {
 }
 
 
 template<class R>
-Geometry::GridCellListSet<R>::GridCellListSet(const Grid<R>& g, 
-                                    const Combinatoric::LatticeCellListSet& lcls)
+GridCellListSet<R>::GridCellListSet(const Grid<R>& g, 
+                                    const LatticeCellListSet& lcls)
   : _grid(g), _lattice_set(lcls)
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(g,lcls,"GridCellListSet::GridCellListSet(Grid g, LatticeCellListSet lcls)");
@@ -56,7 +56,7 @@ Geometry::GridCellListSet<R>::GridCellListSet(const Grid<R>& g,
 
 
 template<class R>
-Geometry::GridCellListSet<R>::GridCellListSet(const GridMaskSet<R>& gms)
+GridCellListSet<R>::GridCellListSet(const GridMaskSet<R>& gms)
   : _grid(gms._grid), _lattice_set(gms.dimension())
 {
   this->_lattice_set.adjoin(gms._lattice_set);
@@ -64,14 +64,14 @@ Geometry::GridCellListSet<R>::GridCellListSet(const GridMaskSet<R>& gms)
 
 
 template<class R>
-Geometry::GridCellListSet<R>::GridCellListSet(const GridCellListSet<R>& gcls)
+GridCellListSet<R>::GridCellListSet(const GridCellListSet<R>& gcls)
   : _grid(gcls._grid), _lattice_set(gcls._lattice_set)
 {
 }
 
 template<class R>
-Geometry::GridCellListSet<R>&
-Geometry::GridCellListSet<R>::operator=(const GridCellListSet<R>& gcls)
+GridCellListSet<R>&
+GridCellListSet<R>::operator=(const GridCellListSet<R>& gcls)
 {
   if(this!=&gcls) {
     this->_grid = gcls._grid;
@@ -83,7 +83,7 @@ Geometry::GridCellListSet<R>::operator=(const GridCellListSet<R>& gcls)
 
 
 template<class R>
-Geometry::GridCellListSet<R>::operator BoxListSet<R>() const
+GridCellListSet<R>::operator BoxListSet<R>() const
 {
   BoxListSet<R> result(dimension());
   for(size_type i=0; i!=size(); ++i) {
@@ -94,8 +94,8 @@ Geometry::GridCellListSet<R>::operator BoxListSet<R>() const
 
 
 template<class R>
-Geometry::GridCellListSet<R>*
-Geometry::GridCellListSet<R>::clone() const
+GridCellListSet<R>*
+GridCellListSet<R>::clone() const
 {
   return new GridCellListSet<R>(*this);
 }
@@ -103,47 +103,47 @@ Geometry::GridCellListSet<R>::clone() const
 
 template<class R>
 tribool
-Geometry::GridCellListSet<R>::contains(const Point<R>& pt) const
+GridCellListSet<R>::contains(const Point<R>& pt) const
 {
-  return !Geometry::disjoint(*this,Box<R>(pt));
+  return !Ariadne::disjoint(*this,Box<R>(pt));
 }
 
 
 template<class R>
 tribool
-Geometry::GridCellListSet<R>::superset(const Box<R>& r) const
+GridCellListSet<R>::superset(const Box<R>& r) const
 {
-  return Geometry::subset(r,*this);
+  return Ariadne::subset(r,*this);
 }
 
 
 template<class R>
 tribool
-Geometry::GridCellListSet<R>::intersects(const Box<R>& r) const
+GridCellListSet<R>::intersects(const Box<R>& r) const
 {
-  return !Geometry::disjoint(*this,r);
+  return !Ariadne::disjoint(*this,r);
 }
 
 
 template<class R>
 tribool
-Geometry::GridCellListSet<R>::disjoint(const Box<R>& r) const
+GridCellListSet<R>::disjoint(const Box<R>& r) const
 {
-  return Geometry::disjoint(*this,r);
+  return Ariadne::disjoint(*this,r);
 }
 
 
 template<class R>
 tribool
-Geometry::GridCellListSet<R>::subset(const Box<R>& r) const
+GridCellListSet<R>::subset(const Box<R>& r) const
 {
-  return Geometry::subset(*this,r);
+  return Ariadne::subset(*this,r);
 }
 
 
 template<class R> 
-Geometry::Box<R> 
-Geometry::GridCellListSet<R>::bounding_box() const 
+Box<R> 
+GridCellListSet<R>::bounding_box() const 
 {
   return GridBlock<R>(this->grid(),this->lattice_set().bounding_block()); 
 }
@@ -153,7 +153,7 @@ Geometry::GridCellListSet<R>::bounding_box() const
 
 template<class R>
 void
-Geometry::GridCellListSet<R>::clear()
+GridCellListSet<R>::clear()
 {
   this->_lattice_set.clear();
 }
@@ -162,9 +162,9 @@ Geometry::GridCellListSet<R>::clear()
 
 template<class R> 
 void 
-Geometry::GridCellListSet<R>::restrict_outer_approximation(const SetInterface< Box<R> >& s)
+GridCellListSet<R>::restrict_outer_approximation(const SetInterface< Box<R> >& s)
 {
-  Geometry::GridCellListSet<R> result(this->grid());
+  GridCellListSet<R> result(this->grid());
   Box<R> cell(this->dimension());
   for(typename GridCellListSet<R>::const_iterator cell_iter=this->begin();
       cell_iter!=this->end(); ++cell_iter)
@@ -180,9 +180,9 @@ Geometry::GridCellListSet<R>::restrict_outer_approximation(const SetInterface< B
 
 template<class R> 
 void 
-Geometry::GridCellListSet<R>::restrict_inner_approximation(const SetInterface< Box<R> >& s)
+GridCellListSet<R>::restrict_inner_approximation(const SetInterface< Box<R> >& s)
 {
-  Geometry::GridCellListSet<R> result(this->grid());
+  GridCellListSet<R> result(this->grid());
   Box<R> cell(this->dimension());
   for(typename GridCellListSet<R>::const_iterator cell_iter=this->begin();
       cell_iter!=this->end(); ++cell_iter)
@@ -201,7 +201,7 @@ Geometry::GridCellListSet<R>::restrict_inner_approximation(const SetInterface< B
 
 template<class R>
 std::string     
-Geometry::GridCellListSet<R>::summary() const 
+GridCellListSet<R>::summary() const 
 {
   std::stringstream ss;
   ss << "GridCellListSet("
@@ -213,7 +213,7 @@ Geometry::GridCellListSet<R>::summary() const
 
 template<class R>
 std::ostream&     
-Geometry::GridCellListSet<R>::write(std::ostream& os) const 
+GridCellListSet<R>::write(std::ostream& os) const 
 {
   os << "GridCellListSet("
      << " grid=" << this->grid() << ","
@@ -226,14 +226,14 @@ Geometry::GridCellListSet<R>::write(std::ostream& os) const
 
 template<class R>
 void
-Geometry::GridCellListSet<R>::_instantiate()
+GridCellListSet<R>::_instantiate()
 {
   tribool tb;
   GridBlock<R>* gb=0;
   GridCellListSet<R>* gcls=0;
   
-  tb=Geometry::subset(*gcls,*gb);
-  tb=Geometry::subset(*gcls,*gcls);
+  tb=Ariadne::subset(*gcls,*gb);
+  tb=Ariadne::subset(*gcls,*gcls);
 }
 
 
@@ -243,7 +243,7 @@ Geometry::GridCellListSet<R>::_instantiate()
 
 template<class R>
 tribool
-Geometry::subset(const GridCellListSet<R>& gcls, const GridBlock<R>& gb)
+subset(const GridCellListSet<R>& gcls, const GridBlock<R>& gb)
 {
   ARIADNE_CHECK_SAME_GRID(gcls,gb,"tribool subset(GridCellListSet gcls, GridBlock gb)");
   return subset(gcls.lattice_set(),gb.lattice_set());
@@ -251,7 +251,7 @@ Geometry::subset(const GridCellListSet<R>& gcls, const GridBlock<R>& gb)
 
 template<class R>
 tribool
-Geometry::subset(const GridCellListSet<R>& gcls1, const GridCellListSet<R>& gcls2)
+subset(const GridCellListSet<R>& gcls1, const GridCellListSet<R>& gcls2)
 {
   ARIADNE_CHECK_SAME_GRID(gcls1,gcls2,"tribool subset(GridCellListSet gcls1, GridCellListSet gcls2)");
   return subset(gcls1.lattice_set(),gcls2.lattice_set());

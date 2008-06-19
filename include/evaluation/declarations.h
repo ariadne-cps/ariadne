@@ -29,7 +29,7 @@
 #define ARIADNE_EVALUATION_DECLARATIONS_H
 
 namespace Ariadne { 
-  namespace Evaluation {
+  
 
     enum Semantics { lower_semantics, upper_semantics }; 
     enum EvolutionType { evolve, reach };
@@ -55,7 +55,6 @@ namespace Ariadne {
     template<class ES> class VectorFieldEvolver;
     template<class ES> class SetBasedHybridEvolver;
 
-  }
-}
+} // namespace Ariadne
 
 #endif /* ARIADNE_EVALUATION_DECLARATIONS_H */

@@ -32,20 +32,20 @@ namespace Ariadne {
 
 
 template<class X>
-Geometry::Simplex<X>::Simplex()
-  : Polytope<X>(LinearAlgebra::Matrix<X>(0,1))
+Simplex<X>::Simplex()
+  : Polytope<X>(Matrix<X>(0,1))
 {
 }
 
 template<class X>
-Geometry::Simplex<X>::Simplex(const LinearAlgebra::Matrix<X>& A)
+Simplex<X>::Simplex(const Matrix<X>& A)
   : Polytope<X>(A)
 {
   ARIADNE_CHECK_DIMENSION(*this,A.number_of_columns()-1,"Simplex::Simplex(Matrix A)");
 }
 
 template<class X>
-Geometry::Simplex<X>::Simplex(const PointList<X>& v)
+Simplex<X>::Simplex(const PointList<X>& v)
   : Polytope<X>(v)
 {
   ARIADNE_CHECK_DIMENSION(*this,v.size()-1,"Simplex::Simplex(PointList v)");
@@ -53,10 +53,10 @@ Geometry::Simplex<X>::Simplex(const PointList<X>& v)
 
 template<class X>
 tribool
-Geometry::Simplex<X>::contains(const Point<X>& pt) const
+Simplex<X>::contains(const Point<X>& pt) const
 {
-  typedef typename Numeric::traits<X>::arithmetic_type F;
-  LinearAlgebra::Vector<F> coords=this->coordinates(pt);
+  typedef typename traits<X>::arithmetic_type F;
+  Vector<F> coords=this->coordinates(pt);
   //std::cerr << "coordinates" << pt << "=" << coords << std::endl;
   tribool result=true;
   for(dimension_type i=0; i!=this->dimension()+1; ++i) {
@@ -67,22 +67,22 @@ Geometry::Simplex<X>::contains(const Point<X>& pt) const
 }
 
 template<class X>
-LinearAlgebra::Vector<typename Numeric::traits<X>::arithmetic_type>
-Geometry::Simplex<X>::coordinates(const Point<X>& pt) const
+Vector<typename traits<X>::arithmetic_type>
+Simplex<X>::coordinates(const Point<X>& pt) const
 {
-  typedef typename Numeric::traits<X>::arithmetic_type F;
-  LinearAlgebra::Vector<F> v(pt.dimension()+1);
+  typedef typename traits<X>::arithmetic_type F;
+  Vector<F> v(pt.dimension()+1);
   for(dimension_type i=0; i!=pt.dimension(); ++i) { 
     v(i)=pt[i];
   }
   v(pt.dimension())=1;
-  LinearAlgebra::Matrix<F> Ginv=LinearAlgebra::inverse(this->generators());
+  Matrix<F> Ginv=inverse(this->generators());
   return Ginv*v;
 }
 
 template<class X>
 std::ostream&
-Geometry::Simplex<X>::write(std::ostream& os) const
+Simplex<X>::write(std::ostream& os) const
 {
   const Simplex<X>& s=*this;
   if(s.dimension() > 0) {
@@ -93,7 +93,7 @@ Geometry::Simplex<X>::write(std::ostream& os) const
 
 template<class X>
 std::istream& 
-Geometry::Simplex<X>::read(std::istream& is)
+Simplex<X>::read(std::istream& is)
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }

@@ -30,9 +30,9 @@
 #include "geometry/polyhedron.code.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
-    using namespace Numeric;
+    
     
     template class Polyhedron<Rational>;
 
@@ -46,5 +46,5 @@ namespace Ariadne {
     template class Polyhedron<IntervalMP>;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

@@ -31,7 +31,7 @@
 #include "geometry/declarations.h"
 
 namespace Ariadne { 
-  namespace Geometry {
+  
     
     template<class R, class BS> 
     RadiusInterface
@@ -97,7 +97,7 @@ namespace Ariadne {
     };
 
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_GEOMETRY_INTERFACES_H */

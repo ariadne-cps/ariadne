@@ -27,13 +27,13 @@ namespace Ariadne {
 
    
 template<class X> inline
-Geometry::Point<X>::Point()
+Point<X>::Point()
   : _vector(0) 
 { 
 }
 
 template<class X> inline
-Geometry::Point<X>::Point(dimension_type d)
+Point<X>::Point(dimension_type d)
   : _vector(d) 
 {
   for(size_type i=0; i!=dimension(); ++i) {
@@ -43,19 +43,19 @@ Geometry::Point<X>::Point(dimension_type d)
 }
 
 template<class X> template<class XX> inline
-Geometry::Point<X>::Point(const array<XX>& ary)
+Point<X>::Point(const array<XX>& ary)
   : _vector(ary) 
 { 
 }
 
 template<class X> template<class XX> inline
-Geometry::Point<X>::Point(dimension_type d, const XX* data, size_type inc)
+Point<X>::Point(dimension_type d, const XX* data, size_type inc)
   : _vector(d,data,inc) 
 { 
 }
 
 template<class X> template<class ForwardIterator> inline
-Geometry::Point<X>::Point(ForwardIterator b, ForwardIterator e)
+Point<X>::Point(ForwardIterator b, ForwardIterator e)
   : _vector(std::distance(b,e))
 {
   for(size_type i=0; i!=dimension(); ++i) {
@@ -65,26 +65,26 @@ Geometry::Point<X>::Point(ForwardIterator b, ForwardIterator e)
 }
 
 template<class X> inline
-Geometry::Point<X>::Point(const LinearAlgebra::Vector<X>& position)
+Point<X>::Point(const Vector<X>& position)
   : _vector(position) 
 { 
 }
 
 template<class X> template<class XX> inline
-Geometry::Point<X>::Point(const Geometry::Point<XX>& original)
+Point<X>::Point(const Point<XX>& original)
   : _vector(original.position_vector())
 {
 }
 
 template<class X> inline
-Geometry::Point<X>::Point(const Geometry::Point<X>& original)
+Point<X>::Point(const Point<X>& original)
   : _vector(original._vector)
 { 
 }
 
 template<class X> inline
-Geometry::Point<X>& 
-Geometry::Point<X>::operator=(const Geometry::Point<X>& original) {
+Point<X>& 
+Point<X>::operator=(const Point<X>& original) {
   if(this!=&original) { 
     this->_vector=original._vector; 
   }
@@ -94,56 +94,56 @@ Geometry::Point<X>::operator=(const Geometry::Point<X>& original) {
 
 template<class X> inline
 bool 
-Geometry::Point<X>::operator==(const Geometry::Point<X>& A) const 
+Point<X>::operator==(const Point<X>& A) const 
 {
   return this->_vector==A._vector;
 }
 
 template<class X> inline
 bool 
-Geometry::Point<X>::operator!=(const Geometry::Point<X>& A) const 
+Point<X>::operator!=(const Point<X>& A) const 
 {
   return !( *this == A );
 }
 
 template<class X> inline
 const array<X>&
-Geometry::Point<X>::data() const 
+Point<X>::data() const 
 {
   return this->_vector.data();
 }
 
 template<class X> inline
 dimension_type 
-Geometry::Point<X>::dimension() const 
+Point<X>::dimension() const 
 {
   return this->_vector.size();
 }
 
 template<class X> inline
 void
-Geometry::Point<X>::resize(dimension_type d) 
+Point<X>::resize(dimension_type d) 
 {
   this->_vector.resize(d);
 }
 
 template<class X> inline
 X& 
-Geometry::Point<X>::operator[](dimension_type index) 
+Point<X>::operator[](dimension_type index) 
 {
   return  (this->_vector(index));
 }
 
 template<class X> inline
 const X& 
-Geometry::Point<X>::operator[](dimension_type index) const 
+Point<X>::operator[](dimension_type index) const 
 {
   return  (this->_vector(index));
 }
 
 template<class X> inline
 X& 
-Geometry::Point<X>::at(dimension_type index) 
+Point<X>::at(dimension_type index) 
 {
   ARIADNE_CHECK_COORDINATE(*this,index,"R& Point at(dimension_type index)");
   return  (this->_vector(index));
@@ -151,15 +151,15 @@ Geometry::Point<X>::at(dimension_type index)
 
 template<class X> inline
 const X& 
-Geometry::Point<X>::at(dimension_type index) const 
+Point<X>::at(dimension_type index) const 
 {
   ARIADNE_CHECK_COORDINATE(*this,index,"const R& Point at(dimension_type index) const");
   return  (this->_vector(index));
 }
 
 template<class X> inline
-const LinearAlgebra::Vector<X>& 
-Geometry::Point<X>::position_vector() const 
+const Vector<X>& 
+Point<X>::position_vector() const 
 {
   return this->_vector; 
 }
@@ -170,15 +170,15 @@ Geometry::Point<X>::position_vector() const
 
 
 template<class R> inline
-Geometry::Point<R> 
-Geometry::approximation(const Point<R>& pt) 
+Point<R> 
+approximation(const Point<R>& pt) 
 {
   return pt;
 }
 
 template<class R> inline
-Geometry::Point<R> 
-Geometry::approximation(const Point< Numeric::Interval<R> >& ipt) 
+Point<R> 
+approximation(const Point< Interval<R> >& ipt) 
 {
   Point<R> result(ipt.dimension());
   for(dimension_type i=0; i!=ipt.dimension(); ++i) {
@@ -189,8 +189,8 @@ Geometry::approximation(const Point< Numeric::Interval<R> >& ipt)
 
 
 template<class R> inline
-Geometry::Point<R>
-Geometry::midpoint(const Point< Numeric::Interval<R> >& pt) 
+Point<R>
+midpoint(const Point< Interval<R> >& pt) 
 {
   Point<R> result(pt.dimension());
   for(dimension_type i=0; i!=result.dimension(); ++i) {
@@ -202,11 +202,11 @@ Geometry::midpoint(const Point< Numeric::Interval<R> >& pt)
 
 template<class R> inline
 R 
-Geometry::radius(const Point< Numeric::Interval<R> >& ipt) 
+radius(const Point< Interval<R> >& ipt) 
 {
   R result(0);
   for(dimension_type i=0; i!=ipt.dimension(); ++i) {
-    result=Numeric::max(result,radius(ipt[i]));
+    result=max(result,radius(ipt[i]));
   }
   return result;
 }
@@ -214,7 +214,7 @@ Geometry::radius(const Point< Numeric::Interval<R> >& ipt)
 
 template<class R> inline
 bool 
-Geometry::encloses(const Point< Numeric::Interval<R> >& ipt, const Point<R>& pt) 
+encloses(const Point< Interval<R> >& ipt, const Point<R>& pt) 
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(ipt,pt,"bool encloses(Point<Interval>,Point<Real>)");
   for(dimension_type i=0; i!=ipt.dimension(); ++i) {
@@ -228,7 +228,7 @@ Geometry::encloses(const Point< Numeric::Interval<R> >& ipt, const Point<R>& pt)
 
 template<class R> inline
 bool 
-Geometry::refines(const Point< Numeric::Interval<R> >& ipt1, const Point< Numeric::Interval<R> >& ipt2) 
+refines(const Point< Interval<R> >& ipt1, const Point< Interval<R> >& ipt2) 
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(ipt1,ipt2,"bool refines(Point<Interval>,Point<Interval>)");
   for(dimension_type i=0; i!=ipt1.dimension(); ++i) {
@@ -241,58 +241,58 @@ Geometry::refines(const Point< Numeric::Interval<R> >& ipt1, const Point< Numeri
 
 
 template<class X> inline
-Geometry::Point<typename Numeric::traits<X>::arithmetic_type>
-Geometry::minkowski_sum(const Point<X>& pt1, const Point<X>& pt2) 
+Point<typename traits<X>::arithmetic_type>
+minkowski_sum(const Point<X>& pt1, const Point<X>& pt2) 
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(pt1,pt2,"Point minkowski_sum(Point,Point)");
-  return Point<typename Numeric::traits<X>::arithmetic_type>(pt1.position_vector()+pt2.position_vector());
+  return Point<typename traits<X>::arithmetic_type>(pt1.position_vector()+pt2.position_vector());
 }
 
 template<class X> inline
-Geometry::Point<typename Numeric::traits<X>::arithmetic_type>
-Geometry::minkowski_difference(const Point<X>& pt1, const Point<X>& pt2) 
+Point<typename traits<X>::arithmetic_type>
+minkowski_difference(const Point<X>& pt1, const Point<X>& pt2) 
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(pt1,pt2,"Point minkowski_difference(Point,Point)");
-  return Point<typename Numeric::traits<X>::arithmetic_type>(pt1.position_vector()-pt2.position_vector());
+  return Point<typename traits<X>::arithmetic_type>(pt1.position_vector()-pt2.position_vector());
 }
 
 
 template<class X1,class X2> inline
-LinearAlgebra::Vector<typename Numeric::traits<X1,X2>::arithmetic_type>
-Geometry::operator-(const Point<X1>& pt1, const Point<X2>& pt2) 
+Vector<typename traits<X1,X2>::arithmetic_type>
+operator-(const Point<X1>& pt1, const Point<X2>& pt2) 
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(pt1,pt2,"Vector operator-(Point,Point)");
   return pt1.position_vector()-pt2.position_vector();
 }
 
 template<class X1,class X2> inline
-Geometry::Point<typename Numeric::traits<X1,X2>::arithmetic_type> 
-Geometry::operator+(const Point<X1>& pt, const LinearAlgebra::Vector<X2>& v)
+Point<typename traits<X1,X2>::arithmetic_type> 
+operator+(const Point<X1>& pt, const Vector<X2>& v)
 {
   ARIADNE_CHECK_DIMENSION(pt,v.size(),"Point operator+(Point,Vector)");
-  return Point<typename Numeric::traits<X1,X2>::arithmetic_type>(pt.position_vector() + v);
+  return Point<typename traits<X1,X2>::arithmetic_type>(pt.position_vector() + v);
 }
 
 
 template<class X1,class X2> inline
-Geometry::Point<typename Numeric::traits<X1,X2>::arithmetic_type> 
-Geometry::operator-(const Point<X1>& pt, const LinearAlgebra::Vector<X2>& v)
+Point<typename traits<X1,X2>::arithmetic_type> 
+operator-(const Point<X1>& pt, const Vector<X2>& v)
 {
   ARIADNE_CHECK_DIMENSION(pt,v.size(),"Point operator-(Point,Vector)");
-  return Point<typename Numeric::traits<X1,X2>::arithmetic_type>(pt.position_vector() - v);
+  return Point<typename traits<X1,X2>::arithmetic_type>(pt.position_vector() - v);
 }
 
 template<class X> inline
-Geometry::Point<X> 
-Geometry::add_approx(const Point<X>& pt, const LinearAlgebra::Vector<X>& v)
+Point<X> 
+add_approx(const Point<X>& pt, const Vector<X>& v)
 {
   ARIADNE_CHECK_DIMENSION(pt,v.size(),"Point add_approx(Point,Vector)");
   return Point<X>(add_approx(pt.position_vector(),v));
 }
 
 template<class X> inline
-Geometry::Point<X> 
-Geometry::sub_approx(const Point<X>& pt, const LinearAlgebra::Vector<X>& v)
+Point<X> 
+sub_approx(const Point<X>& pt, const Vector<X>& v)
 {
   ARIADNE_CHECK_DIMENSION(pt,v.size(),"Point sub_approx(Point,Vector)");
   return Point<X>(sub_approx(pt.position_vector(),v));
@@ -302,8 +302,8 @@ Geometry::sub_approx(const Point<X>& pt, const LinearAlgebra::Vector<X>& v)
 
 
 template<class X> inline 
-Geometry::Point<X> 
-Geometry::project_on_dimensions(const Point<X> &pt, const Base::array<bool>& dims) 
+Point<X> 
+project_on_dimensions(const Point<X> &pt, const array<bool>& dims) 
 {
   if (pt.dimension()!=dims.size()) {
     ARIADNE_THROW(IncompatibleDimensions,"Point project_on_dimensions(Point pt, BooleanArray dims)","pt.dimension()="<<pt<<", dims.size()="<<dims.size());
@@ -329,8 +329,8 @@ Geometry::project_on_dimensions(const Point<X> &pt, const Base::array<bool>& dim
 }
 
 template<class X> inline 
-Geometry::Point<X> 
-Geometry::project_on_dimensions(const Point<X> &pt, 
+Point<X> 
+project_on_dimensions(const Point<X> &pt, 
                                 const size_type& x, const size_type& y, const size_type& z) 
 {
   if ((pt.dimension()<=x)||(pt.dimension()<=y)||(pt.dimension()<=z)) {
@@ -348,8 +348,8 @@ Geometry::project_on_dimensions(const Point<X> &pt,
 }
 
 template<class X> inline 
-Geometry::Point<X> 
-Geometry::project_on_dimensions(const Point<X> &pt, 
+Point<X> 
+project_on_dimensions(const Point<X> &pt, 
                                 const size_type &x, const size_type&y) 
 {
   if ((pt.dimension()<=x)||(pt.dimension()<=y)) {
@@ -369,14 +369,14 @@ Geometry::project_on_dimensions(const Point<X> &pt,
 
 template<class X> inline 
 std::ostream& 
-Geometry::operator<<(std::ostream& os, const Point<X>& pt) 
+operator<<(std::ostream& os, const Point<X>& pt) 
 {
   return pt.write(os);
 }
 
 template<class X> inline
 std::istream& 
-Geometry::operator>>(std::istream& is, Point<X>& pt) 
+operator>>(std::istream& is, Point<X>& pt) 
 {
   return pt.read(is);
 }

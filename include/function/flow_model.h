@@ -42,12 +42,11 @@
 
 namespace Ariadne {
   
-  namespace Function {
   
     template<class R> 
     class FlowModel 
     {
-      typedef Numeric::Interval<R> I;
+      typedef Interval<R> I;
      public:
       FlowModel(const array< TaylorSeries<TaylorVariable<I> > >& atstv) 
         : _variables(atstv) { }
@@ -70,7 +69,7 @@ namespace Ariadne {
       return os << fm.variables(); 
     }
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_FLOW_MODEL_H */

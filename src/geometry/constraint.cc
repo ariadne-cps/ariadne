@@ -36,9 +36,9 @@
 #include "geometry/set_constraint.code.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
-    using namespace Numeric;
+    
     
 #ifdef ENABLE_FLOAT64
     template class ConstraintInterface<Float64>;
@@ -54,5 +54,5 @@ namespace Ariadne {
     template class SetConstraint<FloatMP>;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

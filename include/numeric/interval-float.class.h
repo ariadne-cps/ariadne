@@ -35,7 +35,7 @@
 #include "numeric/expression.h"
 
 namespace Ariadne {
-  namespace Numeric {
+  
 
   template<class R> class Interval;
 
@@ -255,8 +255,7 @@ namespace Ariadne {
     
 
 
-  } 
-}
+} // namespace Ariadne
 
 
 #endif /* ARIADNE_INTERVAL_CLASS_H */

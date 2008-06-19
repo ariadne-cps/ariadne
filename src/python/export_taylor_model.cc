@@ -29,19 +29,29 @@
 #include "geometry/box.h"
 
 using namespace Ariadne;
-using namespace Ariadne::LinearAlgebra;
-using namespace Ariadne::Function;
-using namespace Ariadne::Geometry;
 using namespace Ariadne::Python;
 
 #include <boost/python.hpp>
 using namespace boost::python;
 
 template<class R>
+TaylorModel<R> 
+add(const TaylorModel<R>& tm1, const TaylorModel<R>& tm2) {
+  return Ariadne::add(tm1,tm2);
+}
+
+template<class R>
+TaylorModel<R> 
+sub(const TaylorModel<R>& tm1, const TaylorModel<R>& tm2) {
+  return Ariadne::sub(tm1,tm2);
+}
+
+
+template<class R>
 void export_taylor_model() 
 {
-  typedef typename Numeric::traits<R>::arithmetic_type A;
-  typedef typename Numeric::traits<R>::interval_type I;
+  typedef typename traits<R>::arithmetic_type A;
+  typedef typename traits<R>::interval_type I;
 
   class_< TaylorModel<R> > taylor_model_class("TaylorModel",init< Box<R>, Point<R>, smoothness_type, smoothness_type, const FunctionInterface<R>&>());
   taylor_model_class.def(init< Vector<I>, Vector<R>, smoothness_type, smoothness_type, const FunctionInterface<R>&>());
@@ -63,8 +73,8 @@ void export_taylor_model()
   taylor_model_class.def("truncate",&TaylorModel<R>::truncate);
   taylor_model_class.def("evaluate",(Vector<I>(TaylorModel<R>::*)(const Vector<I>&)const) &TaylorModel<R>::evaluate);
   taylor_model_class.def("jacobian",(Matrix<I>(TaylorModel<R>::*)(const Vector<I>&)const) &TaylorModel<R>::jacobian);
-  taylor_model_class.def("__add__",(TaylorModel<R>(*)(const TaylorModel<R>&,const TaylorModel<R>&)) &add);
-  taylor_model_class.def("__sub__",(TaylorModel<R>(*)(const TaylorModel<R>&,const TaylorModel<R>&)) &sub);
+  taylor_model_class.def("__add__",(TaylorModel<R>(*)(const TaylorModel<R>&,const TaylorModel<R>&)) &::add<R>);
+  taylor_model_class.def("__sub__",(TaylorModel<R>(*)(const TaylorModel<R>&,const TaylorModel<R>&)) &::sub<R>);
   taylor_model_class.def(self_ns::str(self));
  
   def("evaluate",(Vector<I>(TaylorModel<R>::*)(const Vector<R>&)const) &TaylorModel<R>::evaluate);

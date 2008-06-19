@@ -37,17 +37,13 @@
 using namespace boost::python;
 
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::LinearAlgebra;
-using namespace Ariadne::Function;
-using namespace Ariadne::Geometry;
 using namespace Ariadne::Python;
 
 
 //FIXME: This code should go elsewhere
 template<class X>
-Polyhedron<typename Numeric::traits<X>::arithmetic_type> 
-preimage(const Function::AffineFunction<X>& af, const Polyhedron<X>& plhd)
+Polyhedron<typename traits<X>::arithmetic_type> 
+preimage(const AffineFunction<X>& af, const Polyhedron<X>& plhd)
 {
   // Function f(x) = Ax+b = y
   const Matrix<X>& fA=af.A();
@@ -58,13 +54,13 @@ preimage(const Function::AffineFunction<X>& af, const Polyhedron<X>& plhd)
   const Vector<X>& pb=plhd.b();
 
   // Preimage is polyhedron pA fA x + pA fb <= pb
-  return Polyhedron<typename Numeric::traits<X>::arithmetic_type>(pA*fA,pb-pA*fb);
+  return Polyhedron<typename traits<X>::arithmetic_type>(pA*fA,pb-pA*fb);
 }
 
 
 template<class X>
-Polytope<typename Numeric::traits<X>::arithmetic_type> 
-image(const Function::AffineFunction<X>& af, const Polytope<X>& pltp)\
+Polytope<typename traits<X>::arithmetic_type> 
+image(const AffineFunction<X>& af, const Polytope<X>& pltp)\
 {
   // Function f(x) = Ax+b
   const Matrix<X>& fA=af.A();
@@ -86,7 +82,7 @@ image(const Function::AffineFunction<X>& af, const Polytope<X>& pltp)\
 template<class R>
 void export_affine_function() 
 {
-  typedef typename Numeric::traits<R>::arithmetic_type A;
+  typedef typename traits<R>::arithmetic_type A;
 
   class_< AffineFunction<R>, bases< FunctionInterface<R> > > affine_function_class("AffineFunction",init< Matrix<A>,Vector<A> >());
   affine_function_class.def(init< Matrix<R>,Vector<R> >());

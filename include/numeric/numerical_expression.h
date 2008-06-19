@@ -33,7 +33,7 @@
 #include "approximation.h"
 
 namespace Ariadne {
-  namespace Numeric {
+  
     
     template<class R>
     class ConstantFunction

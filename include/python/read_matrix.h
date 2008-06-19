@@ -41,10 +41,10 @@ namespace Python {
 
 template<class X>  
 void
-read_matrix(LinearAlgebra::Matrix<X>& A, const boost::python::object& obj) 
+read_matrix(Matrix<X>& A, const boost::python::object& obj) 
 {
   // See "Extracting C++ objects" in the Boost Python tutorial
-  typedef typename Numeric::traits<X>::number_type R;
+  typedef typename traits<X>::number_type R;
   boost::python::list elements=boost::python::extract<boost::python::list>(obj);
   int m=boost::python::len(elements);
   boost::python::list row=boost::python::extract<boost::python::list>(elements[0]);

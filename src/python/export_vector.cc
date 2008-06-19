@@ -37,9 +37,6 @@
 #include "python/read_array.h"
 
 using namespace Ariadne;
-using Numeric::Rational;
-using Numeric::Interval;
-using namespace Ariadne::LinearAlgebra;
 using namespace Ariadne::Python;
 
 #include <boost/python.hpp>
@@ -80,7 +77,7 @@ make_vector(const boost::python::object& obj)
 template<class R>
 void export_vector()
 {
-  typedef Numeric::Interval<R> I;
+  typedef Interval<R> I;
   typedef Vector<R> Vec;
   typedef Vector< Interval<R> > IVec;
   typedef Covector<R> Cvec;
@@ -96,25 +93,25 @@ void export_vector()
   vector_class.def("__getitem__",&__getitem__<Vec>);
   vector_class.def("__setitem__",&__setitem__<Vec,R>);
   vector_class.def("__setitem__",&__setitem__<Vec,double>);
-  vector_class.def("__neg__",&neg<Vec,Vec>);
-  vector_class.def("__add__",&add<IVec,Vec,Vec>);
-  vector_class.def("__add__",&add<IVec,Vec,IVec>);
-  vector_class.def("__sub__",&sub<IVec,Vec,Vec>);
-  vector_class.def("__sub__",&sub<IVec,Vec,IVec>);
-  vector_class.def("__rmul__",&mul<IVec,Vec,int,Vec,R>);
-  vector_class.def("__rmul__",&mul<IVec,Vec,double,Vec,R>);
-  vector_class.def("__rmul__",&mul<IVec,Vec,R>);
-  vector_class.def("__rmul__",&mul<IVec,Vec,I>);
-  vector_class.def("__mul__",&mul<IVec,Vec,int,Vec,R>);
-  vector_class.def("__mul__",&mul<IVec,Vec,double,Vec,R>);
-  vector_class.def("__mul__",&mul<IVec,Vec,R>);
-  vector_class.def("__mul__",&mul<IVec,Vec,I>);
-  vector_class.def("__mul__",&mul<IMx,Vec,Cvec>);
-  vector_class.def("__mul__",&mul<IMx,Vec,ICvec>);
-  vector_class.def("__div__",&div<IVec,Vec,int,Vec,R>);
-  vector_class.def("__div__",&div<IVec,Vec,double,Vec,R>);
-  vector_class.def("__div__",&div<IVec,Vec,R>);
-  vector_class.def("__div__",&div<IVec,Vec,I>);
+  vector_class.def("__neg__",&__neg__<Vec,Vec>);
+  vector_class.def("__add__",&__add__<IVec,Vec,Vec>);
+  vector_class.def("__add__",&__add__<IVec,Vec,IVec>);
+  vector_class.def("__sub__",&__sub__<IVec,Vec,Vec>);
+  vector_class.def("__sub__",&__sub__<IVec,Vec,IVec>);
+  vector_class.def("__rmul__",&__mul__<IVec,Vec,int,Vec,R>);
+  vector_class.def("__rmul__",&__mul__<IVec,Vec,double,Vec,R>);
+  vector_class.def("__rmul__",&__mul__<IVec,Vec,R>);
+  vector_class.def("__rmul__",&__mul__<IVec,Vec,I>);
+  vector_class.def("__mul__",&__mul__<IVec,Vec,int,Vec,R>);
+  vector_class.def("__mul__",&__mul__<IVec,Vec,double,Vec,R>);
+  vector_class.def("__mul__",&__mul__<IVec,Vec,R>);
+  vector_class.def("__mul__",&__mul__<IVec,Vec,I>);
+  vector_class.def("__mul__",&__mul__<IMx,Vec,Cvec>);
+  vector_class.def("__mul__",&__mul__<IMx,Vec,ICvec>);
+  vector_class.def("__div__",&__div__<IVec,Vec,int,Vec,R>);
+  vector_class.def("__div__",&__div__<IVec,Vec,double,Vec,R>);
+  vector_class.def("__div__",&__div__<IVec,Vec,R>);
+  vector_class.def("__div__",&__div__<IVec,Vec,I>);
   vector_class.def("__str__",&__str__<R>);
   vector_class.def("__repr__",&__repr__<R>);
 
@@ -142,19 +139,19 @@ void export_vector<Rational>()
   vector_class.def("__getitem__",&__getitem__<Vec>);
   vector_class.def("__setitem__",&__setitem__<Vec,R>);
   vector_class.def("__setitem__",&__setitem__<Vec,double>);
-  vector_class.def("__neg__",&neg<Vec,Vec>);
-  vector_class.def("__add__",&add<Vec,Vec,Vec>);
-  vector_class.def("__sub__",&sub<Vec,Vec,Vec>);
-  vector_class.def("__rmul__",&mul<Vec,Vec,int,Vec,R>);
-  vector_class.def("__rmul__",&mul<Vec,Vec,double,Vec,R>);
-  vector_class.def("__rmul__",&mul<Vec,Vec,R,Vec,R>);
-  vector_class.def("__mul__",&mul<Vec,Vec,int,Vec,R>);
-  vector_class.def("__mul__",&mul<Vec,Vec,double,Vec,R>);
-  vector_class.def("__mul__",&mul<Vec,Vec,R,Vec,R>);
-  vector_class.def("__mul__",&mul<Mx,Vec,Cvec>);
-  vector_class.def("__div__",&div<Vec,Vec,int,Vec,R>);
-  vector_class.def("__div__",&div<Vec,Vec,double,Vec,R>);
-  vector_class.def("__div__",&div<Vec,Vec,R,Vec,R>);
+  vector_class.def("__neg__",&__neg__<Vec,Vec>);
+  vector_class.def("__add__",&__add__<Vec,Vec,Vec>);
+  vector_class.def("__sub__",&__sub__<Vec,Vec,Vec>);
+  vector_class.def("__rmul__",&__mul__<Vec,Vec,int,Vec,R>);
+  vector_class.def("__rmul__",&__mul__<Vec,Vec,double,Vec,R>);
+  vector_class.def("__rmul__",&__mul__<Vec,Vec,R,Vec,R>);
+  vector_class.def("__mul__",&__mul__<Vec,Vec,int,Vec,R>);
+  vector_class.def("__mul__",&__mul__<Vec,Vec,double,Vec,R>);
+  vector_class.def("__mul__",&__mul__<Vec,Vec,R,Vec,R>);
+  vector_class.def("__mul__",&__mul__<Mx,Vec,Cvec>);
+  vector_class.def("__div__",&__div__<Vec,Vec,int,Vec,R>);
+  vector_class.def("__div__",&__div__<Vec,Vec,double,Vec,R>);
+  vector_class.def("__div__",&__div__<Vec,Vec,R,Vec,R>);
   vector_class.def("__str__",&__str__<R>);
   vector_class.def("__repr__",&__repr__<R>);
 
@@ -183,25 +180,25 @@ void export_interval_vector() {
   vector_class.def("__setitem__",&__setitem__<IVec,I>);
   vector_class.def("__setitem__",&__setitem__<IVec,R>);
   vector_class.def("__setitem__",&__setitem__<IVec,double>);
-  vector_class.def("__neg__",&neg<IVec,IVec>);
-  vector_class.def("__add__",&add<IVec,IVec,Vec>);
-  vector_class.def("__add__",&add<IVec,IVec,IVec>);
-  vector_class.def("__sub__",&sub<IVec,IVec,Vec>);
-  vector_class.def("__sub__",&sub<IVec,IVec,IVec>);
-  vector_class.def("__rmul__",&mul<IVec,IVec,int,IVec,R>);
-  vector_class.def("__rmul__",&mul<IVec,IVec,double,IVec,R>);
-  vector_class.def("__rmul__",&mul<IVec,IVec,R>);
-  vector_class.def("__rmul__",&mul<IVec,IVec,I>);
-  vector_class.def("__mul__",&mul<IVec,IVec,int,IVec,R>);
-  vector_class.def("__mul__",&mul<IVec,IVec,double,IVec,R>);
-  vector_class.def("__mul__",&mul<IVec,IVec,R>);
-  vector_class.def("__mul__",&mul<IVec,IVec,I>);
-  vector_class.def("__mul__",&mul<IMx,IVec,Cvec>);
-  vector_class.def("__mul__",&mul<IMx,IVec,ICvec>);
-  vector_class.def("__div__",&div<IVec,IVec,int,IVec,R>);
-  vector_class.def("__div__",&div<IVec,IVec,double,IVec,R>);
-  vector_class.def("__div__",&div<IVec,IVec,R>);
-  vector_class.def("__div__",&div<IVec,IVec,I>);
+  vector_class.def("__neg__",&__neg__<IVec,IVec>);
+  vector_class.def("__add__",&__add__<IVec,IVec,Vec>);
+  vector_class.def("__add__",&__add__<IVec,IVec,IVec>);
+  vector_class.def("__sub__",&__sub__<IVec,IVec,Vec>);
+  vector_class.def("__sub__",&__sub__<IVec,IVec,IVec>);
+  vector_class.def("__rmul__",&__mul__<IVec,IVec,int,IVec,R>);
+  vector_class.def("__rmul__",&__mul__<IVec,IVec,double,IVec,R>);
+  vector_class.def("__rmul__",&__mul__<IVec,IVec,R>);
+  vector_class.def("__rmul__",&__mul__<IVec,IVec,I>);
+  vector_class.def("__mul__",&__mul__<IVec,IVec,int,IVec,R>);
+  vector_class.def("__mul__",&__mul__<IVec,IVec,double,IVec,R>);
+  vector_class.def("__mul__",&__mul__<IVec,IVec,R>);
+  vector_class.def("__mul__",&__mul__<IVec,IVec,I>);
+  vector_class.def("__mul__",&__mul__<IMx,IVec,Cvec>);
+  vector_class.def("__mul__",&__mul__<IMx,IVec,ICvec>);
+  vector_class.def("__div__",&__div__<IVec,IVec,int,IVec,R>);
+  vector_class.def("__div__",&__div__<IVec,IVec,double,IVec,R>);
+  vector_class.def("__div__",&__div__<IVec,IVec,R>);
+  vector_class.def("__div__",&__div__<IVec,IVec,I>);
   vector_class.def("__str__",&__str__<I>);
   vector_class.def("__repr__",&__repr__<I>);
   

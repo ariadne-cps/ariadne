@@ -28,10 +28,6 @@
 #include "geometry/level_set.h"
 
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::LinearAlgebra;
-using namespace Ariadne::Function;
-using namespace Ariadne::Geometry;
 using namespace Ariadne::Python;
 
 #include <boost/python.hpp>
@@ -40,7 +36,7 @@ using namespace boost::python;
 template<class R>
 void export_level_set() 
 {
-  typedef typename Numeric::traits<R>::arithmetic_type A;
+  typedef typename traits<R>::arithmetic_type A;
 
   class_< LevelSet<R>, bases< SetInterface< Box<R> > > >("LevelSet",init< const FunctionInterface<R>& >())
     .def("function", (Point<A>(LevelSet<R>::*)(const Point<A>&)const) &LevelSet<R>::function)

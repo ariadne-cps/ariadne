@@ -36,9 +36,9 @@ namespace Ariadne {
 
 template<class R>
 void
-LinearAlgebra::Covector<R>::instantiate()
+Covector<R>::instantiate()
 {
-  typedef typename Numeric::traits<R>::arithmetic_type I;
+  typedef typename traits<R>::arithmetic_type I;
   std::ostream* os=0;
   Vector<R>* v=0;
   Vector<I>* iv=0;
@@ -63,11 +63,11 @@ LinearAlgebra::Covector<R>::instantiate()
 }
 
 template<class R1, class R2>
-typename Numeric::traits<R1,R2>::arithmetic_type
-LinearAlgebra::operator*(const Covector<R1>& cv1, const Vector<R2>& v2)
+typename traits<R1,R2>::arithmetic_type
+operator*(const Covector<R1>& cv1, const Vector<R2>& v2)
 {
   ARIADNE_CHECK_EQUAL_SIZES(cv1,v2,"Scalar operator*(Covector,Vector)");
-  typedef typename Numeric::traits<R1,R2>::arithmetic_type R0;
+  typedef typename traits<R1,R2>::arithmetic_type R0;
   R0 s(0);
   for(size_type i=0; i!=cv1.size(); ++i) {
     s+=cv1(i)*v2(i);
@@ -76,13 +76,13 @@ LinearAlgebra::operator*(const Covector<R1>& cv1, const Vector<R2>& v2)
 }
 
 template<class R1, class R2>
-LinearAlgebra::Covector<typename Numeric::traits<R1,R2>::arithmetic_type>
-LinearAlgebra::operator*(const Covector<R1>& cv1, const Matrix<R2>& A2)
+Covector<typename traits<R1,R2>::arithmetic_type>
+operator*(const Covector<R1>& cv1, const Matrix<R2>& A2)
 {
   //ARIADNE_ASSERT(cv1.size()==A2.number_of_rows());
   assert(cv1.size()==A2.number_of_rows());
-  typedef typename Numeric::traits<R1,R2>::arithmetic_type R0;
-  LinearAlgebra::Covector<R0> cv0(A2.number_of_columns());
+  typedef typename traits<R1,R2>::arithmetic_type R0;
+  Covector<R0> cv0(A2.number_of_columns());
   for(size_type i=0; i!=A2.number_of_rows(); ++i) {
     for(size_type j=0; j!=A2.number_of_columns(); ++j) {
       cv0(j)+=cv1(i)*A2(i,j);
@@ -92,10 +92,10 @@ LinearAlgebra::operator*(const Covector<R1>& cv1, const Matrix<R2>& A2)
 }
 
 template<class R1, class R2>
-LinearAlgebra::Matrix<typename Numeric::traits<R1,R2>::arithmetic_type>
-LinearAlgebra::operator*(const Vector<R1>& v1, const Covector<R2>& cv2)
+Matrix<typename traits<R1,R2>::arithmetic_type>
+operator*(const Vector<R1>& v1, const Covector<R2>& cv2)
 {
-  typedef typename Numeric::traits<R1,R2>::arithmetic_type R0;
+  typedef typename traits<R1,R2>::arithmetic_type R0;
   Matrix<R0> A(v1.size(),cv2.size());
   for(size_type i=0; i!=v1.size(); ++i) {
     for(size_type j=0; j!=cv2.size(); ++j) {
@@ -108,7 +108,7 @@ LinearAlgebra::operator*(const Vector<R1>& v1, const Covector<R2>& cv2)
 
 template<class R>
 std::ostream&
-LinearAlgebra::operator<<(std::ostream& os, const Covector<R>& cv) 
+operator<<(std::ostream& os, const Covector<R>& cv) 
 {  
   os << "[";
   if(cv.size()>0) {

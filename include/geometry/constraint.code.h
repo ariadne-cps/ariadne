@@ -40,21 +40,21 @@ namespace Ariadne {
 
 
 template<class R>
-Geometry::Constraint<R>::Constraint(const Function::FunctionInterface<R>& f, Comparison cmp)
+Constraint<R>::Constraint(const FunctionInterface<R>& f, Comparison cmp)
   : _function_ptr(f.clone()), _comparison(cmp)
 { 
 }
 
 
 template<class R>
-Geometry::Constraint<R>::~Constraint() 
+Constraint<R>::~Constraint() 
 { 
 }
 
 
 template<class R>
-Geometry::Constraint<R>* 
-Geometry::Constraint<R>::clone() const 
+Constraint<R>* 
+Constraint<R>::clone() const 
 {
   return new Constraint<R>(*this->_function_ptr); 
 }
@@ -62,7 +62,7 @@ Geometry::Constraint<R>::clone() const
 
 template<class R>
 dimension_type 
-Geometry::Constraint<R>::dimension() const 
+Constraint<R>::dimension() const 
 {
   return this->_function_ptr->argument_size(); 
 }
@@ -70,7 +70,7 @@ Geometry::Constraint<R>::dimension() const
 
 template<class R>
 smoothness_type 
-Geometry::Constraint<R>::smoothness() const 
+Constraint<R>::smoothness() const 
 {
   return this->_function_ptr->smoothness(); 
 }
@@ -81,7 +81,7 @@ Geometry::Constraint<R>::smoothness() const
 
 template<class R>
 std::ostream& 
-Geometry::Constraint<R>::write(std::ostream& os) const 
+Constraint<R>::write(std::ostream& os) const 
 {
   return os << "Constraint( ... )";
   return os << "Constraint( function=" << *this->_function_ptr << ", comparison=" << (this->_comparison==less ? "<" : ">") << " )";
@@ -90,34 +90,34 @@ Geometry::Constraint<R>::write(std::ostream& os) const
 
 
 template<class R>
-Geometry::Comparison
-Geometry::Constraint<R>::comparison() const 
+Comparison
+Constraint<R>::comparison() const 
 {
   return this->_comparison;
 }
 
 
 template<class R>
-const Function::FunctionInterface<R>&
-Geometry::Constraint<R>::function() const 
+const FunctionInterface<R>&
+Constraint<R>::function() const 
 {
   return *this->_function_ptr;
 }
 
 
 template<class R>
-typename Geometry::Constraint<R>::A 
-Geometry::Constraint<R>::value(const Point<A>& pt) const
+typename Constraint<R>::A 
+Constraint<R>::value(const Point<A>& pt) const
 {
   return this->_function_ptr->operator()(pt.position_vector())[0];
 }
 
 
 template<class R>
-LinearAlgebra::Vector<typename Geometry::Constraint<R>::A>
-Geometry::Constraint<R>::gradient(const Point<A>& pt) const
+Vector<typename Constraint<R>::A>
+Constraint<R>::gradient(const Point<A>& pt) const
 {
-  return LinearAlgebra::Vector<A>(this->dimension(),this->_function_ptr->jacobian(pt.position_vector()).begin());
+  return Vector<A>(this->dimension(),this->_function_ptr->jacobian(pt.position_vector()).begin());
 }
 
 
@@ -125,10 +125,10 @@ Geometry::Constraint<R>::gradient(const Point<A>& pt) const
 
 template<class R>
 void
-Geometry::Constraint<R>::instantiate() 
+Constraint<R>::instantiate() 
 {
   /*
-  typedef Numeric::Interval<R> I;
+  typedef Interval<R> I;
   Box<R>* r=0;
   Zonotope<R,R>* z=0;
   Zonotope<I,R>* ez=0;
@@ -153,30 +153,30 @@ Geometry::Constraint<R>::instantiate()
 /*
 
 template<class R>
-Numeric::Interval<R> 
-Geometry::value(const ConstraintInterface<R>& c, const Box<R>& r)
+Interval<R> 
+value(const ConstraintInterface<R>& c, const Box<R>& r)
 {
-  typedef typename Numeric::traits<R>::interval_type I;
+  typedef typename traits<R>::interval_type I;
   return c.value(Point<I>(r));
 }
 
 
 template<class R>
-Numeric::Interval<R> 
-Geometry::value(const ConstraintInterface<R>& c, const Zonotope< Numeric::Interval<R> >& z)
+Interval<R> 
+value(const ConstraintInterface<R>& c, const Zonotope< Interval<R> >& z)
 {
-  typedef typename Numeric::traits<R>::interval_type I;
-  LinearAlgebra::Vector<I> e(z.number_of_generators(),I(-1,1));
-  Geometry::Point<I> bpt(z.bounding_box());
-  return c.value(z.centre())+LinearAlgebra::inner_product(c.gradient(bpt),z.generators()*e);
+  typedef typename traits<R>::interval_type I;
+  Vector<I> e(z.number_of_generators(),I(-1,1));
+  Point<I> bpt(z.bounding_box());
+  return c.value(z.centre())+inner_product(c.gradient(bpt),z.generators()*e);
 }
 
 
 template<class R>
 tribool 
-Geometry::satisfies(const Box<R>& r, const ConstraintInterface<R>& c)
+satisfies(const Box<R>& r, const ConstraintInterface<R>& c)
 {
-  typedef typename Numeric::traits<R>::interval_type I;
+  typedef typename traits<R>::interval_type I;
   Point<I> pt(r);
   I v=c.value(pt);
   return ::compare_zero(v,c.comparison());
@@ -184,9 +184,9 @@ Geometry::satisfies(const Box<R>& r, const ConstraintInterface<R>& c)
 
 template<class R>
 tribool 
-Geometry::satisfies(const Box<R>& r, const Constraint<R>& c)
+satisfies(const Box<R>& r, const Constraint<R>& c)
 {
-  typedef typename Numeric::traits<R>::interval_type I;
+  typedef typename traits<R>::interval_type I;
   Point<I> pt(r);
   I v=c.value(pt);
   return ::compare_zero(v,c.comparison());
@@ -194,45 +194,45 @@ Geometry::satisfies(const Box<R>& r, const Constraint<R>& c)
 
 template<class R>
 tribool 
-Geometry::satisfies(const Zonotope<R,R>& z, const Constraint<R>& c)
+satisfies(const Zonotope<R,R>& z, const Constraint<R>& c)
 {
-  typedef Numeric::Interval<R> I;
-  LinearAlgebra::Vector<I> e(z.number_of_generators(),I(-1,1));
+  typedef Interval<R> I;
+  Vector<I> e(z.number_of_generators(),I(-1,1));
   const Point<R>& zc=z.centre();
-  const LinearAlgebra::Matrix<R>& zG=z.generators();
+  const Matrix<R>& zG=z.generators();
   Box<R> bb=z.bounding_box();
   Point<I> bpt(bb);
-  Numeric::Interval<R> v=c.value(zc)+LinearAlgebra::inner_product(c.gradient(bb)*zG,e);
+  Interval<R> v=c.value(zc)+inner_product(c.gradient(bb)*zG,e);
   return ::compare_zero(v,c.comparison());
 }
       
 template<class R>
 tribool 
-Geometry::satisfies(const Zonotope<Numeric::Interval<R>,R>& z, const Constraint<R>& c)
+satisfies(const Zonotope<Interval<R>,R>& z, const Constraint<R>& c)
 {
-  typedef Numeric::Interval<R> I;
-  LinearAlgebra::Vector<I> e(z.number_of_generators(),I(-1,1));
+  typedef Interval<R> I;
+  Vector<I> e(z.number_of_generators(),I(-1,1));
   const Point<I>& zc=z.centre();
-  const LinearAlgebra::Matrix<R>& zG=z.generators();
+  const Matrix<R>& zG=z.generators();
   Box<R> bb=z.bounding_box();
   Point<I> bpt(bb);
-  Numeric::Interval<R> v=c.value(zc)+LinearAlgebra::inner_product(c.gradient(bb)*zG,e);
+  Interval<R> v=c.value(zc)+inner_product(c.gradient(bb)*zG,e);
   return ::compare_zero(v,c.comparison());
 }
       
 
 template<class R>
 tribool 
-Geometry::satisfies(const Zonotope< Numeric::Interval<R>, Numeric::Interval<R> >& z, 
+satisfies(const Zonotope< Interval<R>, Interval<R> >& z, 
                     const ConstraintInterface<R>& c)
 {
-  typedef Numeric::Interval<R> I;
-  LinearAlgebra::Vector<I> e(z.number_of_generators(),I(-1,1));
+  typedef Interval<R> I;
+  Vector<I> e(z.number_of_generators(),I(-1,1));
   const Point<I>& zc=z.centre();
-  const LinearAlgebra::Matrix<I>& zG=z.generators();
+  const Matrix<I>& zG=z.generators();
   Box<R> bb=z.bounding_box();
   Point<I> bpt(bb);
-  Numeric::Interval<R> v=c.value(zc)+LinearAlgebra::inner_product(c.gradient(bb)*zG,e);
+  Interval<R> v=c.value(zc)+inner_product(c.gradient(bb)*zG,e);
   return ::compare_zero(v,c.comparison());
 }
       

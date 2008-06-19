@@ -32,7 +32,7 @@
 #include "base/array.h"
 
 namespace Ariadne {
-  namespace LinearAlgebra {
+  
     
     /*! \brief A permutation. */
     class Permutation {
@@ -109,7 +109,6 @@ namespace Ariadne {
     
     
     
-  } // namespace LinearAlgebra
 } // namespace Ariadne
 
 #endif	/* ARIADNE_PERMUTATION_H */

@@ -23,7 +23,7 @@
  
 
 namespace Ariadne {
-namespace Numeric {
+
 	
 
 template<class R, class A> 
@@ -95,4 +95,4 @@ void log2_ceil_(R& r, const N& n) {
 
 
 
-}}
+} // namespace Ariadne

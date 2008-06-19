@@ -27,8 +27,7 @@
 #include "function/function_series.code.h"
 
 namespace Ariadne {
-  namespace Function {
-    using namespace Numeric;
+    
     
     template class ArithmeticSeries<Rational>;
 
@@ -42,5 +41,5 @@ namespace Ariadne {
     template class TranscendentalSeries<IntervalMP>;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

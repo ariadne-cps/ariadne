@@ -32,12 +32,12 @@ namespace Ariadne {
 
 
 template<class R> inline
-Geometry::HybridSet<R>::~HybridSet() 
+HybridSet<R>::~HybridSet() 
 {
 }
   
 template<class R> inline
-Geometry::HybridSet<R>::HybridSet() 
+HybridSet<R>::HybridSet() 
   : _component_sets()
 {
 }
@@ -45,7 +45,7 @@ Geometry::HybridSet<R>::HybridSet()
   
  
 template<class R> inline
-Geometry::HybridSet<R>::HybridSet(const HybridSpace& locations)
+HybridSet<R>::HybridSet(const HybridSpace& locations)
   : _component_sets() 
 {
   for(HybridSpace::const_iterator loc_iter=locations.begin();
@@ -59,7 +59,7 @@ Geometry::HybridSet<R>::HybridSet(const HybridSpace& locations)
 
 
 template<class R> inline
-Geometry::HybridSet<R>::HybridSet(const HybridSet<R>& hs)
+HybridSet<R>::HybridSet(const HybridSet<R>& hs)
   : _component_sets() 
 {
   for(typename HybridSet<R>::locations_const_iterator loc_iter=hs.locations_begin();
@@ -73,8 +73,8 @@ Geometry::HybridSet<R>::HybridSet(const HybridSet<R>& hs)
 
 
 template<class R> inline
-Geometry::HybridSet<R>&
-Geometry::HybridSet<R>::operator=(const HybridSet<R>& hs)
+HybridSet<R>&
+HybridSet<R>::operator=(const HybridSet<R>& hs)
 {
   if(this!=&hs) {
     this->_component_sets.clear();
@@ -91,7 +91,7 @@ Geometry::HybridSet<R>::operator=(const HybridSet<R>& hs)
 
 
 template<class R> template<class DS> inline
-Geometry::HybridSet<R>::HybridSet(const HybridDenotableSet<DS>& hds)
+HybridSet<R>::HybridSet(const HybridDenotableSet<DS>& hds)
   : _component_sets() 
 {
   for(typename HybridDenotableSet<DS>::locations_const_iterator loc_iter=hds.locations_begin();
@@ -107,8 +107,8 @@ Geometry::HybridSet<R>::HybridSet(const HybridDenotableSet<DS>& hds)
 
 
 template<class R> inline
-typename Geometry::HybridSet<R>::S&
-Geometry::HybridSet<R>::new_location(discrete_state_type q, const S& s)
+typename HybridSet<R>::S&
+HybridSet<R>::new_location(discrete_state_type q, const S& s)
 {
   ARIADNE_CHECK_NEW_LOCATION(*this,q,"S& HybridSet<R>::new_location(discrete_state_type q, S t)");
   this->_component_sets.insert(std::make_pair(q,shared_ptr<S>(s.clone())));
@@ -116,8 +116,8 @@ Geometry::HybridSet<R>::new_location(discrete_state_type q, const S& s)
 }
 
 template<class R> inline
-typename Geometry::HybridSet<R>::S&
-Geometry::HybridSet<R>::new_location(discrete_state_type q, dimension_type d)
+typename HybridSet<R>::S&
+HybridSet<R>::new_location(discrete_state_type q, dimension_type d)
 {
   ARIADNE_CHECK_NEW_LOCATION(*this,q,"S& HybridSet<R>::new_location(discrete_state_type q, dimension_type d)");
   this->_component_sets.insert(std::make_pair(q,shared_ptr<S>(new EmptySet<R>(d))));
@@ -125,8 +125,8 @@ Geometry::HybridSet<R>::new_location(discrete_state_type q, dimension_type d)
 }
 
 template<class R> template<class T> inline
-typename Geometry::HybridSet<R>::S&
-Geometry::HybridSet<R>::new_location(discrete_state_type q, const T& s)
+typename HybridSet<R>::S&
+HybridSet<R>::new_location(discrete_state_type q, const T& s)
 {
   ARIADNE_CHECK_NEW_LOCATION(*this,q,"S& HybridSet<R>::new_location(discrete_state_type q, SS s)");
   this->_component_sets.insert(std::make_pair(q,shared_ptr<S>(s.clone())));
@@ -140,8 +140,8 @@ Geometry::HybridSet<R>::new_location(discrete_state_type q, const T& s)
 
 
 template<class R> inline
-Geometry::HybridSpace
-Geometry::HybridSet<R>::locations() const 
+HybridSpace
+HybridSet<R>::locations() const 
 { 
   HybridSpace result;
   for(locations_const_iterator loc_iter=this->locations_begin(); 
@@ -157,7 +157,7 @@ Geometry::HybridSet<R>::locations() const
 
 template<class R> inline
 size_type
-Geometry::HybridSet<R>::number_of_locations() const 
+HybridSet<R>::number_of_locations() const 
 { 
   return _component_sets.size(); 
 }
@@ -165,15 +165,15 @@ Geometry::HybridSet<R>::number_of_locations() const
 
 template<class R> inline
 bool 
-Geometry::HybridSet<R>::has_location(discrete_state_type q) const
+HybridSet<R>::has_location(discrete_state_type q) const
 { 
   return this->_component_sets.find(q)!=this->_component_sets.end();
 }
 
 
 template<class R> inline
-typename Geometry::HybridSet<R>::S& 
-Geometry::HybridSet<R>::operator[](discrete_state_type q)
+typename HybridSet<R>::S& 
+HybridSet<R>::operator[](discrete_state_type q)
 { 
   if(!this->has_location(q)) {
     ARIADNE_THROW(InvalidLocation,"S& HybridSet::operator[](discrete_state_type q)","this->locations()="<<this->locations()<<", q="<<q);
@@ -183,8 +183,8 @@ Geometry::HybridSet<R>::operator[](discrete_state_type q)
 
 
 template<class R> inline  
-const typename Geometry::HybridSet<R>::S& 
-Geometry::HybridSet<R>::operator[](discrete_state_type q) const 
+const typename HybridSet<R>::S& 
+HybridSet<R>::operator[](discrete_state_type q) const 
 { 
   if(!this->has_location(q)) {
     ARIADNE_THROW(InvalidLocation,"S HybridSet::operator[](discrete_state_type q) const","this->locations()="<<this->locations()<<", q="<<q);
@@ -199,32 +199,32 @@ Geometry::HybridSet<R>::operator[](discrete_state_type q) const
 
 
 template<class R> inline
-typename Geometry::HybridSet<R>::locations_iterator 
-Geometry::HybridSet<R>::locations_begin()
+typename HybridSet<R>::locations_iterator 
+HybridSet<R>::locations_begin()
 { 
   return this->_component_sets.begin();
 }
 
 
 template<class R> inline
-typename Geometry::HybridSet<R>::locations_const_iterator 
-Geometry::HybridSet<R>::locations_begin() const
+typename HybridSet<R>::locations_const_iterator 
+HybridSet<R>::locations_begin() const
 { 
   return this->_component_sets.begin();
 }
 
 
 template<class R> inline
-typename Geometry::HybridSet<R>::locations_iterator 
-Geometry::HybridSet<R>::locations_end()
+typename HybridSet<R>::locations_iterator 
+HybridSet<R>::locations_end()
 { 
   return this->_component_sets.end();
 }
 
 
 template<class R> inline
-typename Geometry::HybridSet<R>::locations_const_iterator 
-Geometry::HybridSet<R>::locations_end() const
+typename HybridSet<R>::locations_const_iterator 
+HybridSet<R>::locations_end() const
 { 
   return this->_component_sets.end();
 }
@@ -234,7 +234,7 @@ Geometry::HybridSet<R>::locations_end() const
 
 template<class R1, class R2> inline
 tribool
-Geometry::subset(const HybridSet<R1>& hs1, const HybridSet<R2>& hs2)
+subset(const HybridSet<R1>& hs1, const HybridSet<R2>& hs2)
 {
   ARIADNE_CHECK_SAME_LOCATIONS(hs1,hs2,"tribool subset(HybridSet<S1> hs1,HybridSet<S2> hs2)"); 
   
@@ -254,7 +254,7 @@ Geometry::subset(const HybridSet<R1>& hs1, const HybridSet<R2>& hs2)
 
 template<class R> inline
 std::ostream& 
-Geometry::operator<<(std::ostream& os, const HybridSet<R>& hs)
+operator<<(std::ostream& os, const HybridSet<R>& hs)
 { 
   return hs.write(os);
 }
@@ -269,8 +269,8 @@ Geometry::operator<<(std::ostream& os, const HybridSet<R>& hs)
 
 
 template<class R> inline
-typename Geometry::HybridSet<R>::S&
-Geometry::HybridSet<R>::new_location(discrete_state_type q, const Geometry::Rectangle<real_type>& r)
+typename HybridSet<R>::S&
+HybridSet<R>::new_location(discrete_state_type q, const Rectangle<real_type>& r)
 {
   ARIADNE_CHECK_NEW_LOCATION(*this,q,"HybridSet<R>::new_location(discrete_state_type q, Box<R> r)");
   RectangularSet<real_type> rs(r);
@@ -281,8 +281,8 @@ Geometry::HybridSet<R>::new_location(discrete_state_type q, const Geometry::Rect
 
 
 template<class R> inline
-typename Geometry::HybridSet<R>::S&
-Geometry::HybridSet<R>::new_location(discrete_state_type q, const Geometry::Polyhedron<real_type>& p)
+typename HybridSet<R>::S&
+HybridSet<R>::new_location(discrete_state_type q, const Polyhedron<real_type>& p)
 {
   ARIADNE_CHECK_NEW_LOCATION(*this,q,"HybridSet<R>::new_location(discrete_state_type q, Polyhedron<R> p)");
   PolyhedralSet<real_type> ps(p);

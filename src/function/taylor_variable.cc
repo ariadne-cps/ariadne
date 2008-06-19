@@ -29,8 +29,7 @@
 #include "function/taylor_variable.code.h"
 
 namespace Ariadne {
-  namespace Function {
-    using namespace Numeric;
+    
     
     template class TaylorVariable<Rational>;
 
@@ -42,5 +41,5 @@ namespace Ariadne {
     template class TaylorVariable<IntervalMP>;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

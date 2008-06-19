@@ -32,7 +32,7 @@
 
 namespace Ariadne {
 
-namespace Geometry {
+
 
 /*! \class ApproximateSet
  * \brief Represents an approximating denotable set. 

@@ -37,12 +37,12 @@ namespace Ariadne {
 
 
 template<class R>
-LinearProgramming::LinearProgram<R>::~LinearProgram()
+LinearProgram<R>::~LinearProgram()
 {
 }
 
 template<class R>
-LinearProgramming::LinearProgram<R>::LinearProgram()
+LinearProgram<R>::LinearProgram()
   : _tableau(),
     _variable_indices(),
     _status(UNSOLVED)
@@ -50,9 +50,9 @@ LinearProgramming::LinearProgram<R>::LinearProgram()
 }
 
 template<class R>
-LinearProgramming::LinearProgram<R>::LinearProgram(const LinearAlgebra::Matrix<R>& A,
-                                const LinearAlgebra::Vector<R>& b,
-                                const LinearAlgebra::Vector<R>& c)
+LinearProgram<R>::LinearProgram(const Matrix<R>& A,
+                                const Vector<R>& b,
+                                const Vector<R>& c)
   : _tableau(), 
     _variable_indices(b.size()+c.size()),
     _status(UNSOLVED)
@@ -72,7 +72,7 @@ LinearProgramming::LinearProgram<R>::LinearProgram(const LinearAlgebra::Matrix<R
   
   size_type n=nv+ne+na;
   size_type nfv=nv;
-  _tableau=LinearAlgebra::Matrix<R>(nc+1,nfv+1);
+  _tableau=Matrix<R>(nc+1,nfv+1);
   
   assert(ne==0);
   
@@ -112,7 +112,7 @@ LinearProgramming::LinearProgram<R>::LinearProgram(const LinearAlgebra::Matrix<R
 
 
 template<class R>
-LinearProgramming::LinearProgram<R>::LinearProgram(const LinearAlgebra::Matrix<R>& T)
+LinearProgram<R>::LinearProgram(const Matrix<R>& T)
   : _tableau(T),
     _variable_indices(),
     _status(UNSOLVED)
@@ -126,7 +126,7 @@ LinearProgramming::LinearProgram<R>::LinearProgram(const LinearAlgebra::Matrix<R
 
 
 template<class R>
-LinearProgramming::LinearProgram<R>::LinearProgram(const LinearProgram& LP)
+LinearProgram<R>::LinearProgram(const LinearProgram& LP)
   : _tableau(LP._tableau),
     _variable_indices(LP._variable_indices),
     _status(LP._status)
@@ -134,8 +134,8 @@ LinearProgramming::LinearProgram<R>::LinearProgram(const LinearProgram& LP)
 }
 
 template<class R>
-LinearProgramming::LinearProgram<R>&
-LinearProgramming::LinearProgram<R>::operator=(const LinearProgram& LP) 
+LinearProgram<R>&
+LinearProgram<R>::operator=(const LinearProgram& LP) 
 {
   if( this != &LP) {
     this->_tableau=LP._tableau;
@@ -148,7 +148,7 @@ LinearProgramming::LinearProgram<R>::operator=(const LinearProgram& LP)
 
 template<class R>
 void 
-LinearProgramming::LinearProgram<R>::compute_feasible_point() const
+LinearProgram<R>::compute_feasible_point() const
 {
   size_type m=this->number_of_constraints()+1;
   size_type n=this->number_of_free_variables();
@@ -159,7 +159,7 @@ LinearProgramming::LinearProgram<R>::compute_feasible_point() const
   
   //size_type nrA=this->tableau().number_of_rows();
   //size_type ncA=this->tableau().number_of_columns();
-  //std::cerr << this->tableau() << "\n" << LinearAlgebra::Matrix<R>(nrA,ncA,ptrA,rincA,cincA) << std::endl;
+  //std::cerr << this->tableau() << "\n" << Matrix<R>(nrA,ncA,ptrA,rincA,cincA) << std::endl;
   //std::cerr << nrA << " " << ncA << " " << ptrA << " " << rincA << " " << cincA << std::endl;
   
   lpslv(m,n, ptrA,rincA,cincA, ptrA+cincA*n,rincA, ptrA+rincA*(m),cincA, *(ptrA+rincA*(m)+cincA*n), (int*)piv);
@@ -172,7 +172,7 @@ LinearProgramming::LinearProgram<R>::compute_feasible_point() const
 
 template<class R>
 void 
-LinearProgramming::LinearProgram<R>::compute_optimizing_point() const
+LinearProgram<R>::compute_optimizing_point() const
 {
   size_type m=this->number_of_constraints();
   size_type n=this->number_of_free_variables();
@@ -186,7 +186,7 @@ LinearProgramming::LinearProgram<R>::compute_optimizing_point() const
 
 template<class R>
 void
-LinearProgramming::LinearProgram<R>::solve() const 
+LinearProgram<R>::solve() const 
 {
   if(this->_status==UNSOLVED) {
     this->compute_feasible_point();
@@ -198,7 +198,7 @@ LinearProgramming::LinearProgram<R>::solve() const
 
 template<class R>
 tribool
-LinearProgramming::LinearProgram<R>::is_feasible() const 
+LinearProgram<R>::is_feasible() const 
 {
   if(this->_status==UNSOLVED) {
     this->compute_feasible_point();
@@ -207,8 +207,8 @@ LinearProgramming::LinearProgram<R>::is_feasible() const
 }
 
 template<class R>
-LinearAlgebra::Vector<R>
-LinearProgramming::LinearProgram<R>::feasible_point() const 
+Vector<R>
+LinearProgram<R>::feasible_point() const 
 {
   if(this->_status==UNSOLVED) {
     this->compute_feasible_point();
@@ -216,7 +216,7 @@ LinearProgramming::LinearProgram<R>::feasible_point() const
   if(this->_status!=UNSATISFIABLE) {
     size_type m=this->number_of_constraints();
     size_type n=this->number_of_free_variables();
-    LinearAlgebra::Vector<R> result(n);
+    Vector<R> result(n);
     for(size_type i=0; i!=m; ++i) {
       size_type j=this->_variable_indices[n+i];
       if(j<result.size()) {
@@ -230,12 +230,12 @@ LinearProgramming::LinearProgram<R>::feasible_point() const
 }
 
 template<class R>
-LinearAlgebra::Vector<R>
-LinearProgramming::LinearProgram<R>::optimizing_point() const 
+Vector<R>
+LinearProgram<R>::optimizing_point() const 
 {
   this->solve();
   if(this->_status==OPTIMIZED) {
-    LinearAlgebra::Vector<R> result(this->number_of_free_variables());
+    Vector<R> result(this->number_of_free_variables());
     size_type m=this->number_of_constraints();
     size_type n=this->number_of_free_variables();
     for(size_type i=0; i!=m; ++i) {
@@ -252,7 +252,7 @@ LinearProgramming::LinearProgram<R>::optimizing_point() const
 
 template<class R>
 R
-LinearProgramming::LinearProgram<R>::optimal_value() const 
+LinearProgram<R>::optimal_value() const 
 {
   // std::cerr << "LinearProgram<" << name<R>() << ">::optimal_value() const\n";
   this->solve();
@@ -614,7 +614,7 @@ LinearProgramming::LinearProgram<R>::optimal_value() const
       // Variable(j) is bound to be nonnegative in `cs'.
       std::deque<bool> nonnegative_variable(cs_num_cols - 1, false);
       
-      // Process each row of the `cs' LinearAlgebra::Matrix.
+      // Process each row of the `cs' Matrix.
       for (size_type i = cs_num_rows; i-- > 0; ) {
       const Linear_Row& cs_i = cs[i];
       bool found_a_nonzero_coeff = false;
@@ -996,7 +996,7 @@ LinearProgramming::LinearProgram<R>::optimal_value() const
       }
       
       // The space dimension of the solution to be computed.
-      // Note: here we can not use method Constraint_System::space_dimension(),
+      // Note: here we can not use method Constraint_space_dimension(),
       // because if the constraint system is NNC, then even the epsilon
       // dimension has to be interpreted as a normal dimension.
       const size_type space_dim = x.input_cs.num_columns() - 1;
@@ -1165,7 +1165,7 @@ LinearProgramming::LinearProgram<R>::optimal_value() const
 
 template<class R>
 std::ostream& 
-LinearProgramming::LinearProgram<R>::write(std::ostream& os) const
+LinearProgram<R>::write(std::ostream& os) const
 {
   return os << "LinearProgram( tableau=" << this->tableau() << ")";
 }

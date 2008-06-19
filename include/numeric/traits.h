@@ -38,9 +38,9 @@
 
 
 namespace Ariadne {
-  namespace Function { template<class X, class V> class FirstDerivative; }
+    template<class X, class V> class FirstDerivative; 
 
-  namespace Numeric {
+  
 
     class mpfr;
 
@@ -166,7 +166,7 @@ namespace Ariadne {
       typedef Interval<Rational> interval_type; 
     };
 
-    template<class X, class V> struct traits< Function::FirstDerivative<X,V> > { 
+    template<class X, class V> struct traits< FirstDerivative<X,V> > { 
       typedef typename traits<X>::number_type number_type; 
     };
 
@@ -223,7 +223,7 @@ namespace Ariadne {
 
 
   }   
-}
+
   
 
 #endif /* ARIADNE_NUMERIC_TRAITS_H */

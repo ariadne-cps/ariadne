@@ -26,7 +26,7 @@
  */
 
 namespace Ariadne {
-  namespace Numeric {
+  
 
 #ifdef DOXYGEN
     /*!\ingroup Numeric

@@ -27,8 +27,8 @@
 #include "evaluation/standard_flower.code.h"
 
 namespace Ariadne {
-  namespace Evaluation {
-    using namespace Numeric;
+  
+    
 
 #ifdef ENABLE_FLOAT64
     template class StandardFlower<Float64>;
@@ -38,5 +38,5 @@ namespace Ariadne {
     template class StandardFlower<FloatMP>;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

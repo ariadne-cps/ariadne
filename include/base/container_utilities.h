@@ -29,7 +29,7 @@
 #define ARIADNE_CONTAINER_UTILITIES_H
 
 namespace Ariadne {
-  namespace Base {
+
 
     /*! \brief Compare two pointers by dereferencing their values and using the binary predicate object \a Compare. */
     template<class Compare> 
@@ -124,7 +124,7 @@ namespace Ariadne {
     };
 
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif // ARIADNE_CONTAINER_UTILITIES_H

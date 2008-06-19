@@ -41,7 +41,7 @@
 #include "combinatoric/binary_tree.h"
 
 namespace Ariadne {
-  namespace Combinatoric {
+
 
     typedef BinaryWord word_type;
 
@@ -252,7 +252,7 @@ namespace Ariadne {
       void _compute_bounds(const dimension_type& dim, const word_type& bw);
      private:
       word_type _subdivisions;
-      Base::array<dyadic_interval> _bounds;
+      array<dyadic_interval> _bounds;
     };
     
 
@@ -275,7 +275,7 @@ namespace Ariadne {
       dyadic_type volume() const;
      private:
       depth_type _depth;
-      Base::array<dyadic_interval> _bounds;
+      array<dyadic_interval> _bounds;
     };
 
     SubdivisionBox hull(const SubdivisionBox& sbx1, const SubdivisionBox& sbx2);
@@ -530,8 +530,9 @@ namespace Ariadne {
     }
 
 
-  }
-}
+  
+} // namespace Ariadne
+
 
 
 #include "subdivision_tree_set_iterators.h"

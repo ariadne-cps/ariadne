@@ -40,14 +40,14 @@ namespace Ariadne {
 
   
 template<class R> inline
-Geometry::Box<R>::Box(size_type d)
+Box<R>::Box(size_type d)
   : _data(2*d)
 { 
   if(d!=0) { this->_data[0]=1; this->_data[1]=0; }
 }
 
 template<class R> template<class ForwardIterator> inline
-Geometry::Box<R>::Box(ForwardIterator b, ForwardIterator e)
+Box<R>::Box(ForwardIterator b, ForwardIterator e)
   : _data(2*std::distance(b,e))
 {
   for(dimension_type i=0; i!=this->dimension(); ++i) {
@@ -58,7 +58,7 @@ Geometry::Box<R>::Box(ForwardIterator b, ForwardIterator e)
 }
 
 template<class R> template<class RR> inline
-Geometry::Box<R>::Box(const dimension_type& d, const RR* ptr )
+Box<R>::Box(const dimension_type& d, const RR* ptr )
   : _data(2*d)
 {
   for(dimension_type i=0; i!=this->dimension(); ++i) {
@@ -68,7 +68,7 @@ Geometry::Box<R>::Box(const dimension_type& d, const RR* ptr )
 }
 
 template<class R> template<class RR> inline
-Geometry::Box<R>::Box(const dimension_type& d, const RR ary[][2])
+Box<R>::Box(const dimension_type& d, const RR ary[][2])
   : _data(2*d)
 {
   for(dimension_type i=0; i!=this->dimension(); ++i) {
@@ -78,7 +78,7 @@ Geometry::Box<R>::Box(const dimension_type& d, const RR ary[][2])
 }
 
 template<class R> inline
-Geometry::Box<R>::Box(const array< Numeric::Interval<R> >& a)
+Box<R>::Box(const array< Interval<R> >& a)
   : _data(2*a.size())
 {
   for(dimension_type i=0; i!=a.size(); ++i) {
@@ -88,7 +88,7 @@ Geometry::Box<R>::Box(const array< Numeric::Interval<R> >& a)
 }
 
 template<class R> inline
-Geometry::Box<R>::Box(const std::vector< Numeric::Interval<R> >& v)
+Box<R>::Box(const std::vector< Interval<R> >& v)
   : _data(2*v.size())
 {
   for(dimension_type i=0; i!=v.size(); ++i) {
@@ -98,7 +98,7 @@ Geometry::Box<R>::Box(const std::vector< Numeric::Interval<R> >& v)
 }
 
 template<class R> inline
-Geometry::Box<R>::Box(const Point<R>& pt)
+Box<R>::Box(const Point<R>& pt)
   : _data(2*pt.dimension())
 {
   for(dimension_type i=0; i!=pt.dimension(); ++i) {
@@ -108,7 +108,7 @@ Geometry::Box<R>::Box(const Point<R>& pt)
 }
 
 template<class R> inline
-Geometry::Box<R>::Box(const Point< Numeric::Interval<R> >& pt)
+Box<R>::Box(const Point< Interval<R> >& pt)
   : _data(2*pt.dimension())
 {
   for(dimension_type i=0; i!=pt.dimension(); ++i) {
@@ -118,21 +118,21 @@ Geometry::Box<R>::Box(const Point< Numeric::Interval<R> >& pt)
 }
 
 template<class R> inline
-Geometry::Box<R>::Box(const Point<R>& pt1, const Point<R>& pt2) 
+Box<R>::Box(const Point<R>& pt1, const Point<R>& pt2) 
   : _data(2*pt1.dimension())
 {
   if(pt1.dimension()!=pt2.dimension()) {
     ARIADNE_THROW(IncompatibleDimensions,"Box(Point pt1, Point pt2)","pt1=" << pt1 << ", pt2=" << pt2);
   }
   for (size_type i=0; i!=this->dimension(); ++i) {
-    this->set_lower_bound(i,Numeric::min(pt1[i],pt2[i]));
-    this->set_upper_bound(i,Numeric::max(pt1[i],pt2[i]));
+    this->set_lower_bound(i,min(pt1[i],pt2[i]));
+    this->set_upper_bound(i,max(pt1[i],pt2[i]));
   }
 }
 
 
 template<class R> inline
-Geometry::Box<R>::Box(const LinearAlgebra::Vector< Numeric::Interval<R> >& iv)
+Box<R>::Box(const Vector< Interval<R> >& iv)
   : _data(2*iv.size())
 {
   for (size_type i=0; i!=this->dimension(); ++i) {
@@ -142,7 +142,7 @@ Geometry::Box<R>::Box(const LinearAlgebra::Vector< Numeric::Interval<R> >& iv)
 }
 
 template<class R> template<class E> inline
-Geometry::Box<R>::Box(const RectangleExpression<E>& original)
+Box<R>::Box(const RectangleExpression<E>& original)
   : _data(2*original().dimension())
 {         
   const E& expression=original();
@@ -153,14 +153,14 @@ Geometry::Box<R>::Box(const RectangleExpression<E>& original)
 }
 
 template<class R> inline
-Geometry::Box<R>::Box(const Box<R>& original)
+Box<R>::Box(const Box<R>& original)
   : _data(original._data)
 { 
 }
 
 template<class R> inline
-Geometry::Box<R>& 
-Geometry::Box<R>::operator=(const Box<R>& A) 
+Box<R>& 
+Box<R>::operator=(const Box<R>& A) 
 {
   if(this != &A) {
     this->_data = A._data;
@@ -169,8 +169,8 @@ Geometry::Box<R>::operator=(const Box<R>& A)
 }
 
 template<class R> template<class E> inline
-Geometry::Box<R>& 
-Geometry::Box<R>::operator=(const RectangleExpression<E>& original)
+Box<R>& 
+Box<R>::operator=(const RectangleExpression<E>& original)
 {         
   const E& expression=original();
   this->_data.resize(2*expression.dimension());
@@ -183,8 +183,8 @@ Geometry::Box<R>::operator=(const RectangleExpression<E>& original)
 
 
 template<class R> inline
-Geometry::Box<R> 
-Geometry::Box<R>::empty_box(dimension_type d)
+Box<R> 
+Box<R>::empty_box(dimension_type d)
 {
   Box<R> r(d);
   r.set_lower_bound(0,+1);
@@ -194,8 +194,8 @@ Geometry::Box<R>::empty_box(dimension_type d)
 
 
 template<class R> inline
-Geometry::Box<R> 
-Geometry::Box<R>::unit_box(dimension_type d)
+Box<R> 
+Box<R>::unit_box(dimension_type d)
 {
   Box<R> r(d);
   for(dimension_type i=0; i!=d; ++i) {
@@ -206,11 +206,11 @@ Geometry::Box<R>::unit_box(dimension_type d)
 }
 
 template<class R> inline
-Geometry::Box<R> 
-Geometry::Box<R>::positive_orthant(dimension_type d)
+Box<R> 
+Box<R>::positive_orthant(dimension_type d)
 {
   Box<R> r(d);
-  R inf=Numeric::inf();
+  R inf=Ariadne::inf<R>();
   for(dimension_type i=0; i!=d; ++i) {
     r.set_lower_bound(i,0);
     r.set_upper_bound(i,inf);
@@ -219,11 +219,11 @@ Geometry::Box<R>::positive_orthant(dimension_type d)
 }
 
 template<class R> inline
-Geometry::Box<R> 
-Geometry::Box<R>::entire_space(dimension_type d)
+Box<R> 
+Box<R>::entire_space(dimension_type d)
 {
   Box<R> r(d);
-  R pinf=Numeric::inf();
+  R pinf=inf();
   R minf=-pinf;
   for(dimension_type i=0; i!=d; ++i) {
     r.set_lower_bound(i,minf);
@@ -235,16 +235,16 @@ Geometry::Box<R>::entire_space(dimension_type d)
 
 // Conversion operators
 template<class R> inline
-Geometry::Box<R>::operator Point< Numeric::Interval<R> >() const 
+Box<R>::operator Point< Interval<R> >() const 
 {
-  return Point< Numeric::Interval<R> >(this->dimension(),reinterpret_cast<const Numeric::Interval<R>*>(this->_data.begin()));
+  return Point< Interval<R> >(this->dimension(),reinterpret_cast<const Interval<R>*>(this->_data.begin()));
 }    
 
 
 // Comparison operators
 template<class R> inline
 bool 
-Geometry::Box<R>::operator==(const Box<R>& A) const
+Box<R>::operator==(const Box<R>& A) const
 {
   if(this->dimension()!=A.dimension()) { return false; }
   for(dimension_type i=0; i!=this->dimension(); ++i) {
@@ -256,7 +256,7 @@ Geometry::Box<R>::operator==(const Box<R>& A) const
 
 template<class R> inline
 bool 
-Geometry::Box<R>::operator!=(const Box<R>& A) const 
+Box<R>::operator!=(const Box<R>& A) const 
 {
   return !(*this == A);
 }
@@ -265,14 +265,14 @@ Geometry::Box<R>::operator!=(const Box<R>& A) const
 // Data access
 template<class R> inline
 array<R>& 
-Geometry::Box<R>::data()
+Box<R>::data()
 {
   return this->_data;
 }
 
 template<class R> inline
 const array<R>& 
-Geometry::Box<R>::data() const
+Box<R>::data() const
 {
   return this->_data;
 }
@@ -281,7 +281,7 @@ Geometry::Box<R>::data() const
 
 template<class R> inline
 const R& 
-Geometry::Box<R>::lower_bound(dimension_type i) const 
+Box<R>::lower_bound(dimension_type i) const 
 {
   if(i>=this->dimension()) {
     ARIADNE_THROW(InvalidCoordinate,"Box::lower_bound(dimension_type i) const","*this=" << *this << ", i=" << i);
@@ -291,7 +291,7 @@ Geometry::Box<R>::lower_bound(dimension_type i) const
 
 template<class R> inline
 R& 
-Geometry::Box<R>::lower_bound(dimension_type i) 
+Box<R>::lower_bound(dimension_type i) 
 {
   if(i>=this->dimension()) {
     ARIADNE_THROW(InvalidCoordinate,"Box::lower_bound(dimension_type i)","self=" << *this << ", i=" << i);
@@ -301,7 +301,7 @@ Geometry::Box<R>::lower_bound(dimension_type i)
 
 template<class R> inline
 const R& 
-Geometry::Box<R>::upper_bound(dimension_type i) const 
+Box<R>::upper_bound(dimension_type i) const 
 {
   if(i>=this->dimension()) {
     ARIADNE_THROW(InvalidCoordinate,"Box::upper_bound(dimension_type i) const","self=" << *this << ", i=" << i);
@@ -311,7 +311,7 @@ Geometry::Box<R>::upper_bound(dimension_type i) const
 
 template<class R> inline
 R& 
-Geometry::Box<R>::upper_bound(dimension_type i) 
+Box<R>::upper_bound(dimension_type i) 
 {
   if(i>=this->dimension()) {
     ARIADNE_THROW(InvalidCoordinate,"Box::upper_bound(dimension_type i)","self=" << *this << ", i=" << i);
@@ -321,34 +321,34 @@ Geometry::Box<R>::upper_bound(dimension_type i)
 
 
 template<class R> inline
-Numeric::Interval<R>& 
-Geometry::Box<R>::operator[] (dimension_type i) 
+Interval<R>& 
+Box<R>::operator[] (dimension_type i) 
 {
-  return reinterpret_cast<Numeric::Interval<R>&>(this->_data[2*i]);
+  return reinterpret_cast<Interval<R>&>(this->_data[2*i]);
 }
 
 template<class R> inline
-const Numeric::Interval<R>& 
-Geometry::Box<R>::operator[] (dimension_type i) const 
+const Interval<R>& 
+Box<R>::operator[] (dimension_type i) const 
 {
-  return reinterpret_cast<const Numeric::Interval<R>&>(this->_data[2*i]);
+  return reinterpret_cast<const Interval<R>&>(this->_data[2*i]);
 }
 
 
 template<class R> inline
-const Numeric::Interval<R>& 
-Geometry::Box<R>::interval(dimension_type i) const 
+const Interval<R>& 
+Box<R>::interval(dimension_type i) const 
 {
   if(i>=this->dimension()) {
     ARIADNE_THROW(InvalidCoordinate,"Box::interval(dimension_type i) const","self=" << *this << ", i=" << i);
   }
-  return reinterpret_cast<const Numeric::Interval<R>&>(this->_data[2*i]);
+  return reinterpret_cast<const Interval<R>&>(this->_data[2*i]);
 }
 
 
 template<class R> inline
-Geometry::Point<R> 
-Geometry::Box<R>::lower_corner() const 
+Point<R> 
+Box<R>::lower_corner() const 
 {
   Point<R> result(this->dimension());
   for(dimension_type i=0; i!=this->dimension(); ++i) {
@@ -358,8 +358,8 @@ Geometry::Box<R>::lower_corner() const
 }
 
 template<class R> inline
-Geometry::Point<R> 
-Geometry::Box<R>::upper_corner() const 
+Point<R> 
+Box<R>::upper_corner() const 
 {
   Point<R> result(this->dimension());
   for(dimension_type i=0; i!=this->dimension(); ++i) {
@@ -370,10 +370,10 @@ Geometry::Box<R>::upper_corner() const
 
 
 template<class R> inline
-LinearAlgebra::Vector< Numeric::Interval<R> > 
-Geometry::Box<R>::position_vectors() const 
+Vector< Interval<R> > 
+Box<R>::position_vectors() const 
 {
-  LinearAlgebra::Vector< Numeric::Interval<R> > result(this->dimension());
+  Vector< Interval<R> > result(this->dimension());
   for(dimension_type i=0; i!=this->dimension(); ++i) {
     result(i)=this->interval(i);
   }
@@ -383,7 +383,7 @@ Geometry::Box<R>::position_vectors() const
 
 template<class R> inline
 tribool 
-Geometry::Box<R>::empty() const
+Box<R>::empty() const
 {
   tribool result=false;
   if(this->dimension()==0) {
@@ -402,9 +402,9 @@ Geometry::Box<R>::empty() const
 
 template<class R> inline
 tribool 
-Geometry::Box<R>::bounded() const
+Box<R>::bounded() const
 {
-  R pos_inf=Numeric::inf();
+  R pos_inf=inf();
   R neg_inf=-pos_inf;
   
   tribool result=true;
@@ -417,8 +417,8 @@ Geometry::Box<R>::bounded() const
 }
 
 template<class R> inline
-const Geometry::Box<R>&
-Geometry::Box<R>::bounding_box() const
+const Box<R>&
+Box<R>::bounding_box() const
 {
   return *this;
 }
@@ -426,7 +426,7 @@ Geometry::Box<R>::bounding_box() const
 // Modifying operations
 template<class R> inline
 void 
-Geometry::Box<R>::clear()
+Box<R>::clear()
 {
   if(this->_data.size()!=0) {
     this->_data[0]=1;
@@ -435,7 +435,7 @@ Geometry::Box<R>::clear()
 }
 
 template<class R> inline
-void Geometry::Box<R>::set_interval(dimension_type i, Numeric::Interval<R> x)
+void Box<R>::set_interval(dimension_type i, Interval<R> x)
 {
   if(i>=this->dimension()) {
     ARIADNE_THROW(InvalidCoordinate,"Box::set_interval(dimension_type i, Interval x) const","self=" << *this << ", i=" << i);
@@ -445,7 +445,7 @@ void Geometry::Box<R>::set_interval(dimension_type i, Numeric::Interval<R> x)
 }
 
 template<class R> inline
-void Geometry::Box<R>::set_lower_bound(dimension_type i, const R& l) 
+void Box<R>::set_lower_bound(dimension_type i, const R& l) 
 {
   if(i>=this->dimension()) {
     ARIADNE_THROW(InvalidCoordinate,"Box::set_lower_bound(dimension_type i, Real l) const","self=" << *this << ", i=" << i);
@@ -454,7 +454,7 @@ void Geometry::Box<R>::set_lower_bound(dimension_type i, const R& l)
 }
 
 template<class R> inline
-void Geometry::Box<R>::set_upper_bound(dimension_type i, const R& u) 
+void Box<R>::set_upper_bound(dimension_type i, const R& u) 
 {
   if(i>=this->dimension()) {
     ARIADNE_THROW(InvalidCoordinate,"Box::set_upper_bound(dimension_type i, Real u) const","self=" << *this << ", i=" << i);
@@ -463,11 +463,11 @@ void Geometry::Box<R>::set_upper_bound(dimension_type i, const R& u)
 }
 
 template<class R> inline
-Geometry::Box<R> 
-Geometry::Box<R>::neighbourhood(const R& delta) const 
+Box<R> 
+Box<R>::neighbourhood(const R& delta) const 
 {
   Box<R> result(this->dimension());
-  Numeric::Interval<R> expand(-delta,delta);
+  Interval<R> expand(-delta,delta);
   for (size_type j=0; j< this->dimension(); ++j) {
     result[j]=(*this)[j]+expand;
   }
@@ -480,15 +480,15 @@ Geometry::Box<R>::neighbourhood(const R& delta) const
 // Box geometric operations
 template<class R> inline
 dimension_type 
-Geometry::Box<R>::dimension() const 
+Box<R>::dimension() const 
 {
   return this->_data.size()/2;
 }
 
 
 template<class R> inline
-Geometry::Point<R> 
-Geometry::Box<R>::centre() const
+Point<R> 
+Box<R>::centre() const
 {
   Point<R> result(this->dimension());
   for(dimension_type i=0; i!=this->dimension(); ++i) {
@@ -499,7 +499,7 @@ Geometry::Box<R>::centre() const
 
 template<class R> inline
 R 
-Geometry::Box<R>::radius() const 
+Box<R>::radius() const 
 {
   R result=0;
   for(dimension_type i=0; i!=this->dimension(); ++i) {
@@ -512,35 +512,35 @@ Geometry::Box<R>::radius() const
 
 template<class R> inline
 tribool 
-Geometry::Box<R>::intersects(const Box<R>& r) const
+Box<R>::intersects(const Box<R>& r) const
 {
   return !this->disjoint(r);
 }
 
 template<class R> inline
 tribool 
-Geometry::Box<R>::superset(const Box<R>& r) const
+Box<R>::superset(const Box<R>& r) const
 {
   return r.subset(*this);
 }
 
 template<class R, class X> inline
 tribool 
-Geometry::contains(const Box<R>& bx, const Point<X>& pt)
+contains(const Box<R>& bx, const Point<X>& pt)
 {
   return bx.contains(pt);
 }
 
 template<class R> inline
 tribool 
-Geometry::disjoint(const Box<R>& r1, const Box<R>& r2)
+disjoint(const Box<R>& r1, const Box<R>& r2)
 {
   return r1.disjoint(r2);
 }
 
 template<class R> inline
 tribool 
-Geometry::intersect(const Box<R>& r1, const Box<R>& r2)
+intersect(const Box<R>& r1, const Box<R>& r2)
 {
   return !r1.disjoint(r2);
 }
@@ -548,86 +548,86 @@ Geometry::intersect(const Box<R>& r1, const Box<R>& r2)
 
 template<class R> inline
 tribool 
-Geometry::subset(const Box<R>& r1, const Box<R>& r2)
+subset(const Box<R>& r1, const Box<R>& r2)
 {
   return r1.subset(r2);
 }
 
 template<class R> inline
 tribool 
-Geometry::superset(const Box<R>& r1, const Box<R>& r2)
+superset(const Box<R>& r1, const Box<R>& r2)
 {
   return r2.subset(r1);
 }
 
 
 template<class R> inline
-Geometry::Box<R> 
-Geometry::closed_intersection(const Box<R>& r1, const Box<R>& r2)
+Box<R> 
+closed_intersection(const Box<R>& r1, const Box<R>& r2)
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(r1,r2,"Box closed_intersection(Box r1, Box r2)");
   Box<R> r3(r1.dimension());
   for(size_type i=0; i != r3.dimension(); ++i) {
-    r3[i]=Numeric::intersection(r1[i],r2[i]);
+    r3[i]=intersection(r1[i],r2[i]);
   }
   return r3;
 }
 
 template<class R> inline
-Geometry::Box<R> 
-Geometry::open_intersection(const Box<R>& r1, const Box<R>& r2)
+Box<R> 
+open_intersection(const Box<R>& r1, const Box<R>& r2)
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(r1,r2,"Box closed_intersection(Box r1, Box r2)");
   Box<R> r3(r1.dimension());
   for(size_type i=0; i != r3.dimension(); ++i) {
-    r3[i]=Numeric::intersection(r1[i],r2[i]);
+    r3[i]=intersection(r1[i],r2[i]);
     if(r3[i].lower()>=r3[i].upper()) {
-      r3[i]=Numeric::Interval<R>();
+      r3[i]=Interval<R>();
     }
   }
   return r3;
 }
 
 template<class R> inline
-Geometry::Box<R>
-Geometry::rectangular_hull(const Box<R>& r1, const Box<R>& r2)
+Box<R>
+rectangular_hull(const Box<R>& r1, const Box<R>& r2)
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(r1,r2,"Box rectangular_hull(Box r1, Box r2)");
   Box<R> r3(r1.dimension());
   for(size_type i=0; i != r3.dimension(); ++i) {
-    r3[i]=Numeric::hull(r1[i],r2[i]);
+    r3[i]=hull(r1[i],r2[i]);
   }
   return r3;
 }
 
 template<class R> inline
-Geometry::Box<R>
-Geometry::rectangular_hull(const Box<R>& r, const Point<R>& pt)
+Box<R>
+rectangular_hull(const Box<R>& r, const Point<R>& pt)
 {
   return rectangular_hull(r,Box<R>(pt));
 }
 
 template<class R> inline
-Geometry::Box<R>
-Geometry::rectangular_hull(const Point<R>& pt, const Box<R>& r)
+Box<R>
+rectangular_hull(const Point<R>& pt, const Box<R>& r)
 {
   return rectangular_hull(Box<R>(pt),r);
 }
 
 template<class R> inline
-Geometry::Box<R>
-Geometry::rectangular_hull(const Point<R>& pt1, const Point<R>& pt2)
+Box<R>
+rectangular_hull(const Point<R>& pt1, const Point<R>& pt2)
 {
   return Box<R>(pt1,pt2);
 }
 
 
 template<class R1, class R2> inline
-Geometry::Box<typename Numeric::traits<R1,R2>::arithmetic_type> 
-Geometry::minkowski_sum(const Box<R1>& r1, const Box<R2>& r2)
+Box<typename traits<R1,R2>::arithmetic_type> 
+minkowski_sum(const Box<R1>& r1, const Box<R2>& r2)
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(r1,r2,"Box minkowski_sum(Box r1, Box r2)");
-  Box<typename Numeric::traits<R1,R2>::arithmetic_type> r3(r1.dimension());
+  Box<typename traits<R1,R2>::arithmetic_type> r3(r1.dimension());
   for(dimension_type i=0; i!=r3.dimension(); ++i) {
     r3.set_lower_bound(i,r1.lower_bound(i)+r2.lower_bound(i));
     r3.set_lower_bound(i,r1.upper_bound(i)+r2.upper_bound(i));
@@ -636,11 +636,11 @@ Geometry::minkowski_sum(const Box<R1>& r1, const Box<R2>& r2)
 }
 
 template<class R1, class R2> inline
-Geometry::Box<typename Numeric::traits<R1,R2>::arithmetic_type> 
-Geometry::minkowski_difference(const Box<R1>& r1, const Box<R2>& r2)
+Box<typename traits<R1,R2>::arithmetic_type> 
+minkowski_difference(const Box<R1>& r1, const Box<R2>& r2)
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(r1,r2,"Box minkowski_difference(Box r1, Box r2)");
-  Box<typename Numeric::traits<R1,R2>::arithmetic_type> r3(r1.dimension());
+  Box<typename traits<R1,R2>::arithmetic_type> r3(r1.dimension());
   for(dimension_type i=0; i!=r3.dimension(); ++i) {
     r3.set_lower_bound(i,r1.lower_bound(i)-r2.lower_bound(i));
     r3.set_upper_bound(i,r1.upper_bound(i)-r2.upper_bound(i));
@@ -651,11 +651,11 @@ Geometry::minkowski_difference(const Box<R1>& r1, const Box<R2>& r2)
 
 
 template<class R> inline
-Geometry::Box<R> 
-Geometry::operator+(const Geometry::Box<R>& r, 
-                    const LinearAlgebra::Vector< Numeric::Interval<R> >& iv)
+Box<R> 
+operator+(const Box<R>& r, 
+                    const Vector< Interval<R> >& iv)
 {
-  Geometry::Box<R> result(r.dimension());
+  Box<R> result(r.dimension());
   ARIADNE_CHECK_DIMENSION_EQUALS_SIZE(r,iv,"Vector operator+(Box r, IntervalVector iv)");
   
   for(size_type i=0; i!=result.dimension(); ++i) {
@@ -669,19 +669,19 @@ Geometry::operator+(const Geometry::Box<R>& r,
 
 
 template<class R> inline
-Geometry::BoxVerticesIterator<R>::BoxVerticesIterator(const Box<R>& r, const bool end)
+BoxVerticesIterator<R>::BoxVerticesIterator(const Box<R>& r, const bool end)
   : _bx(&r), _i(end==true ? (1<<(r.dimension()-1))*3 : 0), _parity(0), _pt(r.lower_corner()) { }
 
 template<class R> inline
-bool Geometry::BoxVerticesIterator<R>::equal(const BoxVerticesIterator<R>& other) const {
+bool BoxVerticesIterator<R>::equal(const BoxVerticesIterator<R>& other) const {
   return this->_i==other._i && this->_bx==other._bx; }
 
 template<class R> inline
-const Geometry::Point<R>& Geometry::BoxVerticesIterator<R>::dereference() const { 
+const Point<R>& BoxVerticesIterator<R>::dereference() const { 
   return this->_pt; }
 
 template<class R> inline
-void Geometry::BoxVerticesIterator<R>::increment() { 
+void BoxVerticesIterator<R>::increment() { 
   uint j=0; uint m=1; if(this->_parity) { while(!(m&(this->_i))) { ++j; m*=2u; } ++j; m*=2u; }
   this->_parity=!this->_parity;
   if(j==this->_bx->dimension()) { this->_i+=m; return; }

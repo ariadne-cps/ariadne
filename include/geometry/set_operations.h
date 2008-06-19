@@ -35,7 +35,7 @@
 
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
     template<class R> class Point;
     template<class R> class Box;
@@ -69,7 +69,7 @@ namespace Ariadne {
       /*! \brief Tests if the set is a subset of a rectangle. */
       virtual tribool subset(const Box<R>&) const;
       
-      /*! \brief A rectangle containing the set. Throws Geometry::UnboundedSet exception if the set is unbounded. */
+      /*! \brief A rectangle containing the set. Throws UnboundedSet exception if the set is unbounded. */
       virtual Box<R> bounding_box() const;
 
       /*! \brief Write to an output stream. 
@@ -113,7 +113,7 @@ namespace Ariadne {
       /*! \brief Tests if the set is a subset of a rectangle. */
       virtual tribool subset(const Box<R>&) const;
       
-      /*! \brief A rectangle containing the set. Throws Geometry::UnboundedSet exception if the set is unbounded. */
+      /*! \brief A rectangle containing the set. Throws UnboundedSet exception if the set is unbounded. */
       virtual Box<R> bounding_box() const;
 
       /*! \brief Write to an output stream. 
@@ -158,7 +158,7 @@ namespace Ariadne {
       /*! \brief Tests if the set is a subset of a rectangle. */
       virtual tribool subset(const Box<R>&) const;
       
-      /*! \brief A rectangle containing the set. Throws Geometry::UnboundedSet exception if the set is unbounded. */
+      /*! \brief A rectangle containing the set. Throws UnboundedSet exception if the set is unbounded. */
       virtual Box<R> bounding_box() const;
 
       /*! \brief Write to an output stream. 
@@ -190,40 +190,40 @@ namespace Ariadne {
   
 
 template<class R>
-Geometry::IntersectionSet<R>::IntersectionSet(const SetInterface<R>& s1, 
+IntersectionSet<R>::IntersectionSet(const SetInterface<R>& s1, 
                                               const SetInterface<R>& s2) 
   : _set1(s1.clone()), _set2(s2._clone()) 
 {
 }
 
 template<class R>
-Geometry::IntersectionSet<R>*
-Geometry::IntersectionSet<R>::clone() const
+IntersectionSet<R>*
+IntersectionSet<R>::clone() const
 {
   return new IntersectionSet<R>(*this);
 }
 
 template<class R>
 tribool
-Geometry::IntersectionSet<R>::dimension() const {
+IntersectionSet<R>::dimension() const {
   return this->_set1->dimension();
 }
 
 template<class R>
 tribool
-Geometry::IntersectionSet<R>::contains(const Point<R>& x) const {
+IntersectionSet<R>::contains(const Point<R>& x) const {
   return this->_set1->contains(x) && this->_set2->contains(x); 
 }
 
 template<class R>
 tribool
-Geometry::IntersectionSet<R>::superset(const Box<R>& x) const {
+IntersectionSet<R>::superset(const Box<R>& x) const {
   return this->_set1->superset(x) && this->_set2->superset(x); 
 }
 
 template<class R>
 tribool
-Geometry::IntersectionSet<R>::disjoint(const Box<R>& x) const {
+IntersectionSet<R>::disjoint(const Box<R>& x) const {
   if(this->_set1->disjoint(x) || this->_set2->disjoint(x)) {
     return true;
   } else {
@@ -233,47 +233,47 @@ Geometry::IntersectionSet<R>::disjoint(const Box<R>& x) const {
 
 template<class R>
 tribool
-Geometry::IntersectionSet<R>::intersects(const Box<R>& x) const {
+IntersectionSet<R>::intersects(const Box<R>& x) const {
   return !this->disjoint(x); 
 }
 
 template<class R>
-Geometry::Box<R>
-Geometry::IntersectionSet<R>::bounding_box() const {
-  return Geometry::intersection(this->_set1->bounding_box(),this->_set2->bounding_box());
+Box<R>
+IntersectionSet<R>::bounding_box() const {
+  return intersection(this->_set1->bounding_box(),this->_set2->bounding_box());
 }
 
 
 
 
 template<class R>
-Geometry::UnionSet<R>::UnionSet(const SetInterface<R>& s1, 
+UnionSet<R>::UnionSet(const SetInterface<R>& s1, 
                                 const SetInterface<R>& s2) 
   : _set1(s1.clone()), _set2(s2._clone()) 
 {
 }
 
 template<class R>
-Geometry::UnionSet<R>*
-Geometry::UnionSet<R>::clone() const {
+UnionSet<R>*
+UnionSet<R>::clone() const {
   return new UnionSet<R>(*this);
 }
 
 template<class R>
 dimension_type
-Geometry::UnionSet<R>::dimension() const {
+UnionSet<R>::dimension() const {
   return this->_set1->dimension();
 }
 
 template<class R>
 tribool
-Geometry::UnionSet<R>::contains(const Point<R>& x) const {
+UnionSet<R>::contains(const Point<R>& x) const {
   return this->_set1->contains(x) || this->_set2->contains(x); 
 }
 
 template<class R>
 tribool
-Geometry::UnionSet<R>::superset(const Box<R>& x) const {
+UnionSet<R>::superset(const Box<R>& x) const {
   if(this->_set1->superset(x) || this->_set2->superset(x)) {
     return true;
   } else {
@@ -283,78 +283,78 @@ Geometry::UnionSet<R>::superset(const Box<R>& x) const {
 
 template<class R>
 tribool
-Geometry::UnionSet<R>::disjoint(const Box<R>& x) const {
+UnionSet<R>::disjoint(const Box<R>& x) const {
   return this->_set1->disjoint(x) && this->_set2->disjoint(x);
 }
 
 template<class R>
 tribool
-Geometry::UnionSet<R>::intersects(const Box<R>& x) const {
+UnionSet<R>::intersects(const Box<R>& x) const {
   return !this->disjoint(x); 
 }
 
 template<class R>
-Geometry::Box<R>
-Geometry::UnionSet<R>::bounding_box() const {
-  return Geometry::rectangular_hull(this->_set1->bounding_box(),this->_set2->bounding_box());
+Box<R>
+UnionSet<R>::bounding_box() const {
+  return rectangular_hull(this->_set1->bounding_box(),this->_set2->bounding_box());
 }
 
 
 
 
 template<class R>
-Geometry::ComplementSet<R>::ComplementSet(boost::shared_ptr<const SetInterface<R> > s)
+ComplementSet<R>::ComplementSet(boost::shared_ptr<const SetInterface<R> > s)
   : _set(s)
 {
 }
 
 template<class R>
-Geometry::ComplementSet<R>::ComplementSet(const SetInterface<R>& s) const
+ComplementSet<R>::ComplementSet(const SetInterface<R>& s) const
   : _set(s.clone())
 {
 }
 
 template<class R>
-Geometry::ComplementSet<R>*
-Geometry::ComplementSet<R>::clone() const {
+ComplementSet<R>*
+ComplementSet<R>::clone() const {
   return new ComplementSet<R>(*this);
 }
 
 template<class R>
 dimension_type
-Geometry::ComplementSet<R>::dimension() const {
+ComplementSet<R>::dimension() const {
   return this->_set1->dimension();
 }
 
 template<class R>
 tribool
-Geometry::ComplementSet<R>::contains(const Point<R>& x) const {
+ComplementSet<R>::contains(const Point<R>& x) const {
   return !this->_set->contains(x); 
 }
 
 template<class R>
 tribool
-Geometry::ComplementSet<R>::superset(const Box<R>& x) const {
+ComplementSet<R>::superset(const Box<R>& x) const {
   return this->_set->disjoint(x); 
 }
 
 template<class R>
 tribool
-Geometry::ComplementSet<R>::disjoint(const Box<R>& x) const {
+ComplementSet<R>::disjoint(const Box<R>& x) const {
   return this->_set->superset();
 }
 
 template<class R>
 tribool
-Geometry::ComplementSet<R>::intersects(const Box<R>& x) const {
+ComplementSet<R>::intersects(const Box<R>& x) const {
   return !this->disjoint(x); 
 }
 
 template<class R>
-Geometry::Box<R>
-Geometry::ComplementSet<R>::bounding_box() const {
-  Numeric::Interval<R> r(-inf<R>(),inf<R>());
-  return Geometry::Box(this->dimension(),r);
+Box<R>
+ComplementSet<R>::bounding_box() const {
+  Interval<R> r(-inf<R>(),inf<R>());
+  return Box(this->dimension(),r);
 }
 
 

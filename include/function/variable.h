@@ -31,7 +31,6 @@
 #include <iostream>
 
 namespace Ariadne {
-  namespace Function {
 
     struct Variable { std::string name; bool array_flag; uint size; };
     struct FunctionVariable : public Variable { enum Type { OUTPUT=0,INPUT=1,INTERMEDIATE=2,CONSTANT=3 }; Type type; int start; };
@@ -39,7 +38,6 @@ namespace Ariadne {
     std::ostream& operator<<(std::ostream& os, const Variable& var);
     std::ostream& operator<<(std::ostream& os, const FunctionVariable& var);
 
-  }
-}
+} // namespace Ariadne
 
 #endif /* ARIADNE_FUNCTION_VARIABLE_H */

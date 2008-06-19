@@ -38,7 +38,7 @@
 #include "discrete_state.h"
 
 namespace Ariadne {  
-  namespace Geometry {
+  
 
     /*! \ingroup HybridSet
      *  \brief A location of a hybrid system, with an identifier and a dimension.
@@ -186,7 +186,7 @@ namespace Ariadne {
     }
 
     
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_HYBRID_SPACE_H */

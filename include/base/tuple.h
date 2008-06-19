@@ -31,7 +31,7 @@
 
 namespace Ariadne { 
 
-  namespace Base {
+
     using std::pair;
     using std::make_pair;
 
@@ -144,7 +144,7 @@ namespace Ariadne {
 
 
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_TUPLE_H */

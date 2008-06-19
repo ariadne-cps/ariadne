@@ -68,9 +68,9 @@ void append(V& v, const C& c)
 }
 
 template<class T>
-std::set<System::DiscreteEvent> ids(const reference_set< T >& transitions) 
+std::set<DiscreteEvent> ids(const reference_set< T >& transitions) 
 {
-  std::set<System::DiscreteEvent> result;
+  std::set<DiscreteEvent> result;
   for(typename reference_set< T >::const_iterator transition_iter=transitions.begin();
       transition_iter!=transitions.end(); ++transition_iter)
   {
@@ -84,21 +84,21 @@ std::set<System::DiscreteEvent> ids(const reference_set< T >& transitions)
 
 namespace Ariadne {
 
-namespace Evaluation { 
+ 
 static int& verbosity = hybrid_evolver_verbosity; 
-static const System::DiscreteEvent time_step_event=System::DiscreteEvent(-1);
-static const System::DiscreteEvent final_time_event=System::DiscreteEvent(-2);
-static const System::DiscreteEvent regularizing_time_event=System::DiscreteEvent(-3);
+static const DiscreteEvent time_step_event=DiscreteEvent(-1);
+static const DiscreteEvent final_time_event=DiscreteEvent(-2);
+static const DiscreteEvent regularizing_time_event=DiscreteEvent(-3);
 }
   
-using namespace Numeric;
-using namespace LinearAlgebra;
-using namespace Geometry;
+
+
+
 using namespace System;
 
 
 template<class R>
-Evaluation::ConstraintBasedHybridScheduler<R>::~ConstraintBasedHybridScheduler()
+ConstraintBasedHybridScheduler<R>::~ConstraintBasedHybridScheduler()
 {
   delete _applicator;
   delete _bounder;
@@ -108,7 +108,7 @@ Evaluation::ConstraintBasedHybridScheduler<R>::~ConstraintBasedHybridScheduler()
 
 
 template<class R>
-Evaluation::ConstraintBasedHybridScheduler<R>::ConstraintBasedHybridScheduler(const ApplicatorInterface<BS>& a, const IntegratorInterface<BS>& i, const DetectorInterface<R>& d)
+ConstraintBasedHybridScheduler<R>::ConstraintBasedHybridScheduler(const ApplicatorInterface<BS>& a, const IntegratorInterface<BS>& i, const DetectorInterface<R>& d)
   : _applicator(a.clone()), 
     _bounder(new Bounder<R>()),
     _integrator(dynamic_cast<LohnerIntegrator<R>*>(i.clone())),
@@ -121,7 +121,7 @@ Evaluation::ConstraintBasedHybridScheduler<R>::ConstraintBasedHybridScheduler(co
 
 
 template<class R>
-Evaluation::ConstraintBasedHybridScheduler<R>::ConstraintBasedHybridScheduler(const ConstraintBasedHybridScheduler<R>& plugin)
+ConstraintBasedHybridScheduler<R>::ConstraintBasedHybridScheduler(const ConstraintBasedHybridScheduler<R>& plugin)
   : _applicator(plugin._applicator->clone()), 
     _bounder(plugin._bounder->clone()), 
     _integrator(plugin._integrator->clone()),
@@ -133,8 +133,8 @@ Evaluation::ConstraintBasedHybridScheduler<R>::ConstraintBasedHybridScheduler(co
 
 
 template<class R> inline
-typename Evaluation::ConstraintBasedHybridScheduler<R>::timed_set_type
-Evaluation::ConstraintBasedHybridScheduler<R>::regularize(const timed_set_type& timed_set) const
+typename ConstraintBasedHybridScheduler<R>::timed_set_type
+ConstraintBasedHybridScheduler<R>::regularize(const timed_set_type& timed_set) const
 {
   ARIADNE_LOG(8,"ConstraintBasedHybridScheduler::regularize(...)\n");
   ARIADNE_LOG(9,"  radius="<<timed_set.continuous_state_set().radius()<<"\n");
@@ -147,10 +147,10 @@ Evaluation::ConstraintBasedHybridScheduler<R>::regularize(const timed_set_type& 
     return timed_set;
   }
   return timed_set;
-  //if(Geometry::Box<R>(timed_set.centre()).radius()*2>timed_set.radius()) {
+  //if(Box<R>(timed_set.centre()).radius()*2>timed_set.radius()) {
   if(true) {
     Zonotope<R,IntervalTag> z=orthogonal_over_approximation(timed_set.continuous_state_set());
-    time_model_type t(timed_set.time().average(),LinearAlgebra::Vector<I>(z.number_of_generators()));
+    time_model_type t(timed_set.time().average(),Vector<I>(z.number_of_generators()));
     std::cerr << t << "\n" << z << std::endl;
     assert(t.number_of_generators()==z.number_of_generators());
     return timed_set_type(t,timed_set.steps(),timed_set.discrete_state(),z);
@@ -161,10 +161,10 @@ Evaluation::ConstraintBasedHybridScheduler<R>::regularize(const timed_set_type& 
 }
 
 template<class R> inline
-std::vector<typename Evaluation::ConstraintBasedHybridScheduler<R>::timed_set_type>
-Evaluation::ConstraintBasedHybridScheduler<R>::subdivide(const timed_set_type& timed_set) const
+std::vector<typename ConstraintBasedHybridScheduler<R>::timed_set_type>
+ConstraintBasedHybridScheduler<R>::subdivide(const timed_set_type& timed_set) const
 {
-  using namespace LinearAlgebra;
+  
   
   ARIADNE_LOG(8,"ConstraintBasedHybridScheduler:subdivide(...)\n");
   ARIADNE_LOG(9,"  radius="<<timed_set.continuous_state_set().radius()<<"\n");
@@ -182,7 +182,7 @@ Evaluation::ConstraintBasedHybridScheduler<R>::subdivide(const timed_set_type& t
   
   Zonotope<R,IntervalTag> combined_set(Point<I>(concatenate(z.centre().position_vector(),t.average())),concatenate_rows(z.generators(),t.gradient()));
   
-  ListSet< Zonotope<R,IntervalTag> > subdivisions=Geometry::subdivide(combined_set);
+  ListSet< Zonotope<R,IntervalTag> > subdivisions=subdivide(combined_set);
   for(typename ListSet< Zonotope<R,IntervalTag> >::const_iterator iter=subdivisions.begin();
       iter!=subdivisions.end(); ++iter)
   {
@@ -203,8 +203,8 @@ Evaluation::ConstraintBasedHybridScheduler<R>::subdivide(const timed_set_type& t
 
 
 template<class R>
-Geometry::Box<R>
-Evaluation::ConstraintBasedHybridScheduler<R>::flow_bounds(const mode_type& mode, 
+Box<R>
+ConstraintBasedHybridScheduler<R>::flow_bounds(const mode_type& mode, 
                                                            const timed_set_type& initial_set,
                                                            time_type& maximum_step_size) const
 {
@@ -223,7 +223,7 @@ Evaluation::ConstraintBasedHybridScheduler<R>::flow_bounds(const mode_type& mode
 
 template<class R>
 tribool
-Evaluation::ConstraintBasedHybridScheduler<R>::enabled(const transition_type& transition,
+ConstraintBasedHybridScheduler<R>::enabled(const transition_type& transition,
                                                            const bounding_box_type& bounding_box) const
 {
   return this->_detector->value(transition.constraint(),bounding_box) >= 0;
@@ -232,7 +232,7 @@ Evaluation::ConstraintBasedHybridScheduler<R>::enabled(const transition_type& tr
 
 template<class R>
 tribool
-Evaluation::ConstraintBasedHybridScheduler<R>::enabled(const transition_type& transition,
+ConstraintBasedHybridScheduler<R>::enabled(const transition_type& transition,
                                                            const timed_set_type& set) const
 {
   Detector<R>* detector=dynamic_cast<Detector<R>*>(this->_detector);
@@ -244,7 +244,7 @@ Evaluation::ConstraintBasedHybridScheduler<R>::enabled(const transition_type& tr
 /*! Tests if constraint2 is always unsatisfied if constraint1 is unsatisfied. */
 template<class R>
 tribool
-Evaluation::ConstraintBasedHybridScheduler<R>::forces(const constraint_type& constraint1,
+ConstraintBasedHybridScheduler<R>::forces(const constraint_type& constraint1,
                                                           const constraint_type& constraint2,
                                                           const bounding_box_type& bounding_box) const
 {
@@ -255,13 +255,13 @@ Evaluation::ConstraintBasedHybridScheduler<R>::forces(const constraint_type& con
 /*! Computes an estimation of the \em absolute crossing time step time, using the same base variables as the initial set current time.
  */
 template<class R>
-Numeric::Interval<R>
-Evaluation::ConstraintBasedHybridScheduler<R>::estimate_normal_derivative(const transition_type& transition,
+Interval<R>
+ConstraintBasedHybridScheduler<R>::estimate_normal_derivative(const transition_type& transition,
                                                                               const bounding_box_type& bounding_box) const
 {
   const vector_field_type& dynamic=transition.source().dynamic();
   const differentiable_constraint_type& constraint=dynamic_cast<const differentiable_constraint_type&>( transition.constraint());
-  const Geometry::Point<I> bounds=bounding_box;
+  const Point<I> bounds=bounding_box;
   assert(&constraint);
 
   return this->_detector->normal_derivative(dynamic,constraint,bounds);
@@ -271,14 +271,14 @@ Evaluation::ConstraintBasedHybridScheduler<R>::estimate_normal_derivative(const 
 /*! Computes an estimation of the \em absolute crossing time step time, using the same base variables as the initial set current time.
  */
 template<class R>
-Numeric::Interval<R>
-Evaluation::ConstraintBasedHybridScheduler<R>::estimate_crossing_time_step(const transition_type& transition, 
+Interval<R>
+ConstraintBasedHybridScheduler<R>::estimate_crossing_time_step(const transition_type& transition, 
                                                                                const timed_set_type& initial_set,
                                                                                const bounding_box_type& bounding_box) const
 {
   const vector_field_type& dynamic=transition.source().dynamic();
   const constraint_type& constraint=transition.constraint();
-  const Geometry::Point<I> initial_point=initial_set.bounding_box();
+  const Point<I> initial_point=initial_set.bounding_box();
 
   return this->_detector->crossing_time(dynamic,constraint,initial_point,bounding_box);
 }
@@ -288,15 +288,15 @@ Evaluation::ConstraintBasedHybridScheduler<R>::estimate_crossing_time_step(const
  *  Detects non-transverse crossings and provides first-order estimates
  */
 template<class R>
-typename Evaluation::ConstraintBasedHybridScheduler<R>::time_model_type
-Evaluation::ConstraintBasedHybridScheduler<R>::compute_crossing_time_step(const transition_type& transition, 
+typename ConstraintBasedHybridScheduler<R>::time_model_type
+ConstraintBasedHybridScheduler<R>::compute_crossing_time_step(const transition_type& transition, 
                                                                const timed_set_type& initial_set,
                                                                const bounding_box_type& bounding_box) const
 {
   ARIADNE_LOG(8,"    ConstraintBasedHybridScheduler::compute_crossing_time_step(...)\n");
-  const System::VectorField<R>& dynamic=transition.source().dynamic();
-  const Geometry::ConstraintInterface<R>& constraint=transition.constraint();
-  const Geometry::Box<R> domain=initial_set.bounding_box();
+  const VectorField<R>& dynamic=transition.source().dynamic();
+  const ConstraintInterface<R>& constraint=transition.constraint();
+  const Box<R> domain=initial_set.bounding_box();
 
   TimeModel<R> spacial_crossing_time_step=this->_detector->crossing_time(dynamic,constraint,domain,bounding_box);
   ARIADNE_LOG(9,"    spacial_crossing_time_step="<<spacial_crossing_time_step<<"\n");
@@ -312,8 +312,8 @@ Evaluation::ConstraintBasedHybridScheduler<R>::compute_crossing_time_step(const 
 
                                                             
 template<class R>
-typename Evaluation::ConstraintBasedHybridScheduler<R>::crossing_data_type
-Evaluation::ConstraintBasedHybridScheduler<R>::compute_crossing_data(const transition_type& transition,
+typename ConstraintBasedHybridScheduler<R>::crossing_data_type
+ConstraintBasedHybridScheduler<R>::compute_crossing_data(const transition_type& transition,
                                                                     const timed_set_type& initial_set,
                                                                     const timed_set_type& final_set,
                                                                     const bounding_box_type& bounding_box) const
@@ -344,9 +344,9 @@ Evaluation::ConstraintBasedHybridScheduler<R>::compute_crossing_data(const trans
 
 
 template<class R>
-std::map< typename Evaluation::ConstraintBasedHybridScheduler<R>::discrete_event_type, 
-          typename Evaluation::ConstraintBasedHybridScheduler<R>::crossing_data_type >
-Evaluation::ConstraintBasedHybridScheduler<R>::compute_crossing_data(const reference_set<const transition_type>& transitions,
+std::map< typename ConstraintBasedHybridScheduler<R>::discrete_event_type, 
+          typename ConstraintBasedHybridScheduler<R>::crossing_data_type >
+ConstraintBasedHybridScheduler<R>::compute_crossing_data(const reference_set<const transition_type>& transitions,
                                                                     const timed_set_type& initial_set,
                                                                     const timed_set_type& final_set,
                                                                     const bounding_box_type& bounding_box,
@@ -390,50 +390,50 @@ Evaluation::ConstraintBasedHybridScheduler<R>::compute_crossing_data(const refer
     
 
 template<class R>
-Numeric::Interval<R>
-Evaluation::ConstraintBasedHybridScheduler<R>::
+Interval<R>
+ConstraintBasedHybridScheduler<R>::
 compute_evolution_time_bounds(const std::map<discrete_event_type, crossing_data_type>& crossing_data) const
 {
   typedef typename std::map<discrete_event_type,crossing_data_type>::const_iterator crossing_data_const_iterator;
-  Numeric::Interval<R> time_bounds = crossing_data.begin()->second.crossing_time_bounds;
+  Interval<R> time_bounds = crossing_data.begin()->second.crossing_time_bounds;
   for(crossing_data_const_iterator cd_iter=crossing_data.begin(); cd_iter!=crossing_data.end(); ++cd_iter) {
-    time_bounds=Numeric::min(time_bounds,cd_iter->second.crossing_time_bounds);
+    time_bounds=min(time_bounds,cd_iter->second.crossing_time_bounds);
   }
   return time_bounds;
 }
 
 
 template<class R>
-Numeric::Interval<R>
-Evaluation::ConstraintBasedHybridScheduler<R>::
+Interval<R>
+ConstraintBasedHybridScheduler<R>::
 compute_evolution_time_bounds(const std::map<discrete_event_type, time_model_type>& event_times) const
 {
   typedef typename std::map<discrete_event_type,time_model_type>::const_iterator const_iterator;
-  Numeric::Interval<R> time_bounds = event_times.begin()->second.bound();
+  Interval<R> time_bounds = event_times.begin()->second.bound();
   for(const_iterator iter=event_times.begin(); iter!=event_times.end(); ++iter) {
-    time_bounds=Numeric::min(time_bounds,iter->second.bound());
+    time_bounds=min(time_bounds,iter->second.bound());
   }
   return time_bounds;
 }
 
 
 template<class R>
-std::map< typename Evaluation::ConstraintBasedHybridScheduler<R>::discrete_event_type, 
-          typename Evaluation::ConstraintBasedHybridScheduler<R>::time_model_type>
-Evaluation::ConstraintBasedHybridScheduler<R>::compute_terminating_event_times(const mode_type& mode,
+std::map< typename ConstraintBasedHybridScheduler<R>::discrete_event_type, 
+          typename ConstraintBasedHybridScheduler<R>::time_model_type>
+ConstraintBasedHybridScheduler<R>::compute_terminating_event_times(const mode_type& mode,
                                                                               const timed_set_type& initial_set,
                                                                               const timed_set_type& final_set,
                                                                               const time_type& final_time,
                                                                               const bounding_box_type& bounding_box,
                                                                               const time_type& time_step_size) const
 {
-  typedef boost::shared_ptr< const Geometry::ConstraintInterface<R> > constraint_const_pointer;
+  typedef boost::shared_ptr< const ConstraintInterface<R> > constraint_const_pointer;
   typedef typename reference_set<const transition_type>::const_iterator transitions_const_iterator;
   typedef typename std::set< discrete_event_type >::const_iterator events_const_iterator;
   typedef typename std::map< discrete_event_type, time_model_type >::const_iterator event_times_const_iterator;
   typedef typename std::map< discrete_event_type, crossing_data_type>::const_iterator crossings_const_iterator;
   typedef typename std::map< discrete_event_type, time_model_type>::const_iterator crossing_times_const_iterator;
-  typedef Numeric::Interval<R> time_interval_type;
+  typedef Interval<R> time_interval_type;
 
   const reference_set<const transition_type>& transitions=mode.transitions();
 
@@ -454,7 +454,7 @@ Evaluation::ConstraintBasedHybridScheduler<R>::compute_terminating_event_times(c
   for(transitions_const_iterator transition_iter=transitions.begin();
       transition_iter!=transitions.end(); ++transition_iter)
   {
-    if(transition_iter->kind()==System::invariant_tag || transition_iter->kind()==System::guard_tag) {
+    if(transition_iter->kind()==invariant_tag || transition_iter->kind()==guard_tag) {
       if(possibly(this->enabled(*transition_iter,bounding_box))) {
         possibly_enabled_transitions.insert(*transition_iter);
         ARIADNE_LOG(6,"  event "<<transition_iter->id()<<" with constraint "<<transition_iter->constraint()<<" possibly not satisfied by "<<bounding_box<<"\n");
@@ -534,8 +534,8 @@ Evaluation::ConstraintBasedHybridScheduler<R>::compute_terminating_event_times(c
 
 
 template<class R>
-reference_set<typename Evaluation::ConstraintBasedHybridScheduler<R>::transition_type>
-Evaluation::ConstraintBasedHybridScheduler<R>::compute_possibly_enabled_transitions(const mode_type& mode,
+reference_set<typename ConstraintBasedHybridScheduler<R>::transition_type>
+ConstraintBasedHybridScheduler<R>::compute_possibly_enabled_transitions(const mode_type& mode,
                                                                                    const bounding_box_type& bounding_box) const
 {
   reference_set<transition_type> possibly_enabled_transitions;
@@ -562,9 +562,9 @@ Evaluation::ConstraintBasedHybridScheduler<R>::compute_possibly_enabled_transiti
 
 
 template<class R>
-std::map< typename Evaluation::ConstraintBasedHybridScheduler<R>::discrete_event_type,
-          typename Evaluation::ConstraintBasedHybridScheduler<R>::time_model_pair_type>
-Evaluation::ConstraintBasedHybridScheduler<R>::compute_enabled_activation_times(const mode_type& mode,
+std::map< typename ConstraintBasedHybridScheduler<R>::discrete_event_type,
+          typename ConstraintBasedHybridScheduler<R>::time_model_pair_type>
+ConstraintBasedHybridScheduler<R>::compute_enabled_activation_times(const mode_type& mode,
                                                                                const timed_set_type& initial_set,
                                                                                const timed_set_type& final_set,
                                                                                const time_model_type& maximum_time_step,
@@ -584,7 +584,7 @@ Evaluation::ConstraintBasedHybridScheduler<R>::compute_enabled_activation_times(
   for(transitions_const_iterator transition_iter=transitions.begin();
       transition_iter!=transitions.end(); ++transition_iter)
   {
-    if(transition_iter->kind()==System::activation_tag) {
+    if(transition_iter->kind()==activation_tag) {
       if(possibly(this->enabled(*transition_iter,bounding_box))) {
         possibly_enabled_activations.insert(*transition_iter);
         ARIADNE_LOG(6,"  event "<<transition_iter->id()<<" with constraint "<<transition_iter->constraint()<<" possibly not satisfied by "<<bounding_box<<"\n");
@@ -602,7 +602,7 @@ Evaluation::ConstraintBasedHybridScheduler<R>::compute_enabled_activation_times(
     assert(&constraint);
     const vector_field_type& dynamic=transition.source().dynamic();
     time_model_type crossing_time_step=this->compute_crossing_time_step(transition,initial_set,bounding_box);
-    I normal_derivative = LinearAlgebra::inner_product(dynamic(bounding_box),constraint.gradient(bounding_box));
+    I normal_derivative = inner_product(dynamic(bounding_box),constraint.gradient(bounding_box));
     ARIADNE_LOG(7,"    event "<<transition_iter->id()<<" crossing time step is "<<crossing_time_step<<"\n");
   
     tribool initially_enabled=this->enabled(transition,initial_set);
@@ -644,15 +644,15 @@ Evaluation::ConstraintBasedHybridScheduler<R>::compute_enabled_activation_times(
 
 
 template<class R>
-typename Evaluation::ConstraintBasedHybridScheduler<R>::timed_set_type
-Evaluation::ConstraintBasedHybridScheduler<R>::final_continuous_integration_step(const mode_type& mode,
+typename ConstraintBasedHybridScheduler<R>::timed_set_type
+ConstraintBasedHybridScheduler<R>::final_continuous_integration_step(const mode_type& mode,
                                                                               const timed_set_type& initial_set,
                                                                               const time_type& final_time,
                                                                               const bounding_box_type& bounding_box) const
 {
   ARIADNE_LOG(7," ConstraintBasedHybridScheduler::final_continuous_integration_step(...)\n");
   ARIADNE_LOG(8,"    dynamic="<<mode.dynamic()<<"\n    initial_set="<<initial_set<<"\n    final_time="<<final_time<<"\n    bounding_box="<<bounding_box<<"\n");
-  time_model_type zero_time_model(I(0),LinearAlgebra::Vector<I>(initial_set.number_of_generators()));
+  time_model_type zero_time_model(I(0),Vector<I>(initial_set.number_of_generators()));
   time_model_type final_time_model=final_time+zero_time_model;
   time_model_type time_step=final_time-initial_set.time();
   timed_set_type final_set=this->continuous_integration_step(mode,initial_set,time_step,bounding_box);
@@ -662,8 +662,8 @@ Evaluation::ConstraintBasedHybridScheduler<R>::final_continuous_integration_step
 
 
 template<class R>
-typename Evaluation::ConstraintBasedHybridScheduler<R>::timed_set_type
-Evaluation::ConstraintBasedHybridScheduler<R>::continuous_integration_step(const mode_type& mode,
+typename ConstraintBasedHybridScheduler<R>::timed_set_type
+ConstraintBasedHybridScheduler<R>::continuous_integration_step(const mode_type& mode,
                                                                         const timed_set_type& initial_set,
                                                                         const time_model_type& time_step,
                                                                         const bounding_box_type& bounding_box) const
@@ -684,8 +684,8 @@ Evaluation::ConstraintBasedHybridScheduler<R>::continuous_integration_step(const
 
 
 template<class R>
-typename Evaluation::ConstraintBasedHybridScheduler<R>::timed_set_type
-Evaluation::ConstraintBasedHybridScheduler<R>::continuous_reachability_step(const mode_type& mode,
+typename ConstraintBasedHybridScheduler<R>::timed_set_type
+ConstraintBasedHybridScheduler<R>::continuous_reachability_step(const mode_type& mode,
                                                                            const timed_set_type& initial_set,
                                                                            const time_model_type& lower_time_step,
                                                                            const time_model_type& upper_time_step,
@@ -720,8 +720,8 @@ Evaluation::ConstraintBasedHybridScheduler<R>::continuous_reachability_step(cons
 
 
 template<class R>
-typename Evaluation::ConstraintBasedHybridScheduler<R>::timed_set_type
-Evaluation::ConstraintBasedHybridScheduler<R>::discrete_event_step(const transition_type& transition,
+typename ConstraintBasedHybridScheduler<R>::timed_set_type
+ConstraintBasedHybridScheduler<R>::discrete_event_step(const transition_type& transition,
                                                                   const timed_set_type& initial_set) const
 {
   ARIADNE_LOG(7," ConstraintBasedHybridScheduler::discrete_event_step(...)\n");
@@ -739,8 +739,8 @@ Evaluation::ConstraintBasedHybridScheduler<R>::discrete_event_step(const transit
  * \f[ D\Phi_2 \circ DF \circ D\Phi_1 G; \quad (D\Phi_i\circ DF \circ \dot{\Phi}_1 - \dot{\Phi}_2) (h/2) \f]
  */
 template<class R>
-typename Evaluation::ConstraintBasedHybridScheduler<R>::timed_set_type
-Evaluation::ConstraintBasedHybridScheduler<R>::forced_jump_step(const transition_type& transition,
+typename ConstraintBasedHybridScheduler<R>::timed_set_type
+ConstraintBasedHybridScheduler<R>::forced_jump_step(const transition_type& transition,
                                                                const timed_set_type& initial_set,
                                                                const time_model_type& crossing_time,
                                                                const bounding_box_type& bounding_box) const
@@ -765,8 +765,8 @@ Evaluation::ConstraintBasedHybridScheduler<R>::forced_jump_step(const transition
  * \f[ D\Phi_2 \circ DF \circ D\Phi_1 G; \quad (D\Phi_i\circ DF \circ \dot{\Phi}_1 - \dot{\Phi}_2) (h/2) \f]
  */
 template<class R>
-typename Evaluation::ConstraintBasedHybridScheduler<R>::timed_set_type
-Evaluation::ConstraintBasedHybridScheduler<R>::unforced_jump_step(const transition_type& transition,
+typename ConstraintBasedHybridScheduler<R>::timed_set_type
+ConstraintBasedHybridScheduler<R>::unforced_jump_step(const transition_type& transition,
                                                                  const timed_set_type& initial_set,
                                                                  const time_model_type& minimum_time,
                                                                  const time_model_type& maximum_time,
@@ -793,8 +793,8 @@ Evaluation::ConstraintBasedHybridScheduler<R>::unforced_jump_step(const transiti
 
 
 template<class R>
-std::vector<typename Evaluation::ConstraintBasedHybridScheduler<R>::timed_set_type>
-Evaluation::ConstraintBasedHybridScheduler<R>::integration_step(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
+std::vector<typename ConstraintBasedHybridScheduler<R>::timed_set_type>
+ConstraintBasedHybridScheduler<R>::integration_step(const ConstraintBasedHybridAutomaton<R>& automaton, 
                                                               const timed_set_type& initial_set,
                                                               const time_type& final_time,
                                                               const time_type& maximum_step_size,
@@ -804,8 +804,8 @@ Evaluation::ConstraintBasedHybridScheduler<R>::integration_step(const System::Co
   // FIXME: this is a hack!
   R maximum_splitting_set_radius = 0.0625;
 
-  using namespace LinearAlgebra;
-  using namespace Geometry;
+  
+  
   using namespace System;;
 
   typedef typename reference_set<const transition_type>::const_iterator transitions_const_iterator;
@@ -828,13 +828,13 @@ Evaluation::ConstraintBasedHybridScheduler<R>::integration_step(const System::Co
   //const discrete_time_type& initial_steps = initial_set.steps();
 
   const mode_type& mode = automaton.mode(discrete_state);
-  const System::VectorField<R>& dynamic=mode.dynamic();
+  const VectorField<R>& dynamic=mode.dynamic();
   const reference_set<const transition_type>& transitions=mode.transitions();
 
   ARIADNE_LOG(6,"  transitions="<<transitions<<"\n\n");
   
   // Easy references to the spacial time and the time relative to the set generators
-  time_model_type zero_spacial_time_step(I(0),LinearAlgebra::Vector<I>(initial_set.dimension()));
+  time_model_type zero_spacial_time_step(I(0),Vector<I>(initial_set.dimension()));
   time_model_type zero_time_step=initial_set.time()*0;
 
   // Compute rough bounding box
@@ -846,8 +846,8 @@ Evaluation::ConstraintBasedHybridScheduler<R>::integration_step(const System::Co
 
   // Log some facts about the flow
   ARIADNE_LOG(6,"  dynamic(initial_set.centre())="<<dynamic(midpoint(initial_set.centre()))<<"\n");
-  ARIADNE_LOG(6,"  dynamic(bounding_box)="<<dynamic(Geometry::Point<I>(bounding_box))<<"\n");
-  ARIADNE_LOG(6,"  dynamic.jacobian(bounding_box)="<<dynamic.jacobian(Geometry::Point<I>(bounding_box))<<"\n\n");
+  ARIADNE_LOG(6,"  dynamic(bounding_box)="<<dynamic(Point<I>(bounding_box))<<"\n");
+  ARIADNE_LOG(6,"  dynamic.jacobian(bounding_box)="<<dynamic.jacobian(Point<I>(bounding_box))<<"\n\n");
 
   // Set the preferred step for integration
   time_model_type integration_time_step = zero_time_step + time_step_size;
@@ -1007,8 +1007,8 @@ Evaluation::ConstraintBasedHybridScheduler<R>::integration_step(const System::Co
 
 
 template<class R>
-std::vector<typename Evaluation::ConstraintBasedHybridScheduler<R>::timed_set_type> 
-Evaluation::ConstraintBasedHybridScheduler<R>::lower_integration_step(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
+std::vector<typename ConstraintBasedHybridScheduler<R>::timed_set_type> 
+ConstraintBasedHybridScheduler<R>::lower_integration_step(const ConstraintBasedHybridAutomaton<R>& automaton, 
                                                                     const timed_set_type& initial_set,
                                                                     const time_type& maximum_time,
                                                                     const time_type& maximum_time_step_size) const
@@ -1018,8 +1018,8 @@ Evaluation::ConstraintBasedHybridScheduler<R>::lower_integration_step(const Syst
 
 
 template<class R>
-std::vector<typename Evaluation::ConstraintBasedHybridScheduler<R>::timed_set_type> 
-Evaluation::ConstraintBasedHybridScheduler<R>::upper_integration_step(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
+std::vector<typename ConstraintBasedHybridScheduler<R>::timed_set_type> 
+ConstraintBasedHybridScheduler<R>::upper_integration_step(const ConstraintBasedHybridAutomaton<R>& automaton, 
                                                                     const timed_set_type& initial_set,
                                                                     const time_type& maximum_time,
                                                                     const time_type& maximum_time_step_size) const
@@ -1030,8 +1030,8 @@ Evaluation::ConstraintBasedHybridScheduler<R>::upper_integration_step(const Syst
 
 
 template<class R>
-std::vector<typename Evaluation::ConstraintBasedHybridScheduler<R>::timed_set_type> 
-Evaluation::ConstraintBasedHybridScheduler<R>::lower_reachability_step(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
+std::vector<typename ConstraintBasedHybridScheduler<R>::timed_set_type> 
+ConstraintBasedHybridScheduler<R>::lower_reachability_step(const ConstraintBasedHybridAutomaton<R>& automaton, 
                                                                        const timed_set_type& initial_set,
                                                                        const time_type& maximum_time,
                                                                        const time_type& maximum_time_step_size) const
@@ -1041,8 +1041,8 @@ Evaluation::ConstraintBasedHybridScheduler<R>::lower_reachability_step(const Sys
 
 
 template<class R>
-std::vector<typename Evaluation::ConstraintBasedHybridScheduler<R>::timed_set_type> 
-Evaluation::ConstraintBasedHybridScheduler<R>::upper_reachability_step(const System::ConstraintBasedHybridAutomaton<R>& automaton, 
+std::vector<typename ConstraintBasedHybridScheduler<R>::timed_set_type> 
+ConstraintBasedHybridScheduler<R>::upper_reachability_step(const ConstraintBasedHybridAutomaton<R>& automaton, 
                                                                        const timed_set_type& initial_set,
                                                                        const time_type& maximum_time,
                                                                        const time_type& maximum_time_step_size) const

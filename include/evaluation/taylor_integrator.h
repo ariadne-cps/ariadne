@@ -34,7 +34,7 @@
 #include "evaluation/integrator_interface.h"
 
 namespace Ariadne {
-  namespace Evaluation {
+  
    
 
     /*!\ingroup Integrate
@@ -42,10 +42,10 @@ namespace Ariadne {
      */
     template<class R>
     class TaylorIntegrator
-      : public IntegratorInterface< Geometry::Zonotope< Numeric::Interval<R> > >
+      : public IntegratorInterface< Zonotope< Interval<R> > >
     {
-      typedef Numeric::Interval<R> I;
-      typedef Geometry::Zonotope<I,I> BS;
+      typedef Interval<R> I;
+      typedef Zonotope<I,I> BS;
      public:
       
       /*! \brief Constructor. */
@@ -58,29 +58,29 @@ namespace Ariadne {
       
       
       /*! \brief Compute the flow map of a vector field. */
-      virtual System::TaylorFlow<I> flow(const System::VectorField<R>& vf, 
-                                         const Geometry::Box<R>& bb) const;
+      virtual TaylorFlow<I> flow(const VectorField<R>& vf, 
+                                         const Box<R>& bb) const;
 
       /*! \brief Integrate a basic set for time \a t within a bounding set. */
-      virtual Geometry::Point<I> flow_step(const System::VectorField<R>& vf,
-                                           const Geometry::Point<I>& p,
-                                           const Numeric::Interval<R>& t,
-                                           const Geometry::Box<R>& bb) const;
+      virtual Point<I> flow_step(const VectorField<R>& vf,
+                                           const Point<I>& p,
+                                           const Interval<R>& t,
+                                           const Box<R>& bb) const;
      
       /*! \brief An algorithm for integrating forward a zonotope.
        */
-      virtual Geometry::Zonotope<I,I> 
-      integration_step(const System::VectorField<R>& vf,
-                       const Geometry::Zonotope<I,I>& s,
-                       const Numeric::Interval<R>& t,
-                       const Geometry::Box<R>& bb) const;
+      virtual Zonotope<I,I> 
+      integration_step(const VectorField<R>& vf,
+                       const Zonotope<I,I>& s,
+                       const Interval<R>& t,
+                       const Box<R>& bb) const;
 
       /*! \brief An algorithm for integrating forward a zonotope for a time up to time \a step_size, assuming the set \a bb is a bounding box for the integration. */
-      virtual Geometry::Zonotope<I,I> 
-      reachability_step(const System::VectorField<R>& vf,
-                        const Geometry::Zonotope<I,I>& s,
-                        const Numeric::Interval<R>& t,
-                        const Geometry::Box<R>& bb) const;
+      virtual Zonotope<I,I> 
+      reachability_step(const VectorField<R>& vf,
+                        const Zonotope<I,I>& s,
+                        const Interval<R>& t,
+                        const Box<R>& bb) const;
 
 
       /*! \brief Write to an output stream. */

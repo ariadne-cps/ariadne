@@ -43,10 +43,9 @@
 
 namespace Ariadne {
   
-  namespace Output { class latexstream; }
+   class latexstream;
 
 
-  namespace Function {
   
     template<class R> class PolynomialFunction;
 
@@ -63,17 +62,17 @@ namespace Ariadne {
     template<class R0, class R1, class R2> void join(PolynomialFunction<R0>&, const PolynomialFunction<R1>&, const PolynomialFunction<R2>&);
 
 
-    template<class R1, class R2> PolynomialFunction<typename Numeric::traits<R1,R2>::arithmetic_type> operator+(const PolynomialFunction<R1>&, const PolynomialFunction<R2>&);
-    template<class R1, class R2> PolynomialFunction<typename Numeric::traits<R1,R2>::arithmetic_type> operator-(const PolynomialFunction<R1>&, const PolynomialFunction<R2>&);
-    template<class R1, class R2> PolynomialFunction<typename Numeric::traits<R1,R2>::arithmetic_type> operator*(const PolynomialFunction<R1>&, const PolynomialFunction<R2>&);
+    template<class R1, class R2> PolynomialFunction<typename traits<R1,R2>::arithmetic_type> operator+(const PolynomialFunction<R1>&, const PolynomialFunction<R2>&);
+    template<class R1, class R2> PolynomialFunction<typename traits<R1,R2>::arithmetic_type> operator-(const PolynomialFunction<R1>&, const PolynomialFunction<R2>&);
+    template<class R1, class R2> PolynomialFunction<typename traits<R1,R2>::arithmetic_type> operator*(const PolynomialFunction<R1>&, const PolynomialFunction<R2>&);
 
-    template<class R1, class R2> PolynomialFunction<typename Numeric::traits<R1,R2>::arithmetic_type> operator*(const R1&, const PolynomialFunction<R2>&);
-    template<class R1, class R2> PolynomialFunction<typename Numeric::traits<R1,R2>::arithmetic_type> operator*(const PolynomialFunction<R1>&, const R2&);
-    template<class R1, class R2> PolynomialFunction<typename Numeric::traits<R1,R2>::arithmetic_type> operator/(const PolynomialFunction<R1>&, const R2&);
+    template<class R1, class R2> PolynomialFunction<typename traits<R1,R2>::arithmetic_type> operator*(const R1&, const PolynomialFunction<R2>&);
+    template<class R1, class R2> PolynomialFunction<typename traits<R1,R2>::arithmetic_type> operator*(const PolynomialFunction<R1>&, const R2&);
+    template<class R1, class R2> PolynomialFunction<typename traits<R1,R2>::arithmetic_type> operator/(const PolynomialFunction<R1>&, const R2&);
 
-    template<class R1, class R2> PolynomialFunction<typename Numeric::traits<R1,R2>::arithmetic_type> compose(const PolynomialFunction<R1>&, const PolynomialFunction<R2>&);
-    template<class R> PolynomialFunction<typename Numeric::traits<R>::arithmetic_type> pow(const PolynomialFunction<R>& p, const unsigned int& n);
-    template<class R> PolynomialFunction<typename Numeric::traits<R>::arithmetic_type> derivative(const PolynomialFunction<R>&, const size_type& k);
+    template<class R1, class R2> PolynomialFunction<typename traits<R1,R2>::arithmetic_type> compose(const PolynomialFunction<R1>&, const PolynomialFunction<R2>&);
+    template<class R> PolynomialFunction<typename traits<R>::arithmetic_type> pow(const PolynomialFunction<R>& p, const unsigned int& n);
+    template<class R> PolynomialFunction<typename traits<R>::arithmetic_type> derivative(const PolynomialFunction<R>&, const size_type& k);
 
     template<class R> std::ostream& operator<<(std::ostream&, const PolynomialFunction<R>&);
     template<class R> std::istream& operator>>(std::istream&, PolynomialFunction<R>&);
@@ -84,8 +83,8 @@ namespace Ariadne {
      */
     template<class R>
     class PolynomialFunction {
-      typedef typename Numeric::traits<R>::arithmetic_type F;
-      typedef typename Numeric::traits<R>::interval_type I;
+      typedef typename traits<R>::arithmetic_type F;
+      typedef typename traits<R>::interval_type I;
      public:
       /*! \brief The type of denotable real number used for the corners. */
       typedef R real_type;
@@ -136,13 +135,10 @@ namespace Ariadne {
       PolynomialFunction<R> component(const size_type& i) const;
 
       /*! \brief Evaluate the polynomial at the point \a x. */
-      LinearAlgebra::Vector<F> evaluate(const LinearAlgebra::Vector<F>& x) const;
+      Vector<F> evaluate(const Vector<F>& x) const;
       
       /*! \brief Compute the derivate of the map at a point. */
-      LinearAlgebra::Matrix<F> jacobian(const LinearAlgebra::Vector<F>& s) const;
-
-      /*! \brief Compute the derivate of the function with respect to the \a k<sup>th</sup> variable. */
-      PolynomialFunction<F> derivative(const size_type& k) const;
+      Matrix<F> jacobian(const Vector<F>& s) const;
 
       /*! \brief The zero polynomial with result size \a rs and argument size \a as. */
       static PolynomialFunction<R> zero(const size_type& rs, const size_type& as);
@@ -158,25 +154,25 @@ namespace Ariadne {
 
 #ifdef DOXYGEN
       /*! \brief Addition. */
-      friend template<class R1, class R2> PolynomialFunction<typename Numeric::traits<R1,R2>::arithmetic_type> operator+(const PolynomialFunction<R1>&, const PolynomialFunction<R2>&);
+      friend template<class R1, class R2> PolynomialFunction<typename traits<R1,R2>::arithmetic_type> operator+(const PolynomialFunction<R1>&, const PolynomialFunction<R2>&);
       /*! \brief Subtraction. */
-      friend template<class R1, class R2> PolynomialFunction<typename Numeric::traits<R1,R2>::arithmetic_type> operator-(const PolynomialFunction<R1>&, const PolynomialFunction<R2>&);
+      friend template<class R1, class R2> PolynomialFunction<typename traits<R1,R2>::arithmetic_type> operator-(const PolynomialFunction<R1>&, const PolynomialFunction<R2>&);
       /*! \brief Multiplication. At least one argument must be scalar-valued. */
-      friend template<class R1, class R2> PolynomialFunction<typename Numeric::traits<R1,R2>::arithmetic_type> operator*(const PolynomialFunction<R1>&, const PolynomialFunction<R2>&);
+      friend template<class R1, class R2> PolynomialFunction<typename traits<R1,R2>::arithmetic_type> operator*(const PolynomialFunction<R1>&, const PolynomialFunction<R2>&);
 
       /*! \brief Multiplication by a scalar. */
-      friend template<class R1, class R2> PolynomialFunction<typename Numeric::traits<R1,R2>::arithmetic_type> operator*(const R1&, const PolynomialFunction<R2>&);
+      friend template<class R1, class R2> PolynomialFunction<typename traits<R1,R2>::arithmetic_type> operator*(const R1&, const PolynomialFunction<R2>&);
       /*! \brief Multiplication by a scalar. */
-      friend template<class R1, class R2> PolynomialFunction<typename Numeric::traits<R1,R2>::arithmetic_type> operator*(const PolynomialFunction<R1>&, const R2&);
+      friend template<class R1, class R2> PolynomialFunction<typename traits<R1,R2>::arithmetic_type> operator*(const PolynomialFunction<R1>&, const R2&);
       /*! \brief Division by a scalar. */
-      friend template<class R1, class R2> PolynomialFunction<typename Numeric::traits<R1,R2>::arithmetic_type> operator/(const PolynomialFunction<R1>&, const R2&);
+      friend template<class R1, class R2> PolynomialFunction<typename traits<R1,R2>::arithmetic_type> operator/(const PolynomialFunction<R1>&, const R2&);
 
       /*! \brief Composition \f$p\circ q(x)=p(q(x))\f$. */
-      friend template<class R1, class R2> PolynomialFunction<typename Numeric::traits<R1,R2>::arithmetic_type> compose(const PolynomialFunction<R1>&, const PolynomialFunction<R2>&);
+      friend template<class R1, class R2> PolynomialFunction<typename traits<R1,R2>::arithmetic_type> compose(const PolynomialFunction<R1>&, const PolynomialFunction<R2>&);
       /*! \brief Power of a scalar polynomial. */
-      friend template<class R> PolynomialFunction<typename Numeric::traits<R>::arithmetic_type> pow(const PolynomialFunction<R>& p, const unsigned int& n);
+      friend template<class R> PolynomialFunction<typename traits<R>::arithmetic_type> pow(const PolynomialFunction<R>& p, const unsigned int& n);
       /*! \brief Derivative with respect to variable \a k. */
-      friend template<class R> PolynomialFunction<typename Numeric::traits<R>::arithmetic_type> derivative(const PolynomialFunction<R>&, const size_type& k);
+      friend template<class R> PolynomialFunction<typename traits<R>::arithmetic_type> derivative(const PolynomialFunction<R>&, const size_type& k);
 #endif
 
      private:
@@ -199,8 +195,8 @@ namespace Ariadne {
       array<R> _data;
     };
     
-  }
-}
+  
+} // namespace Ariadne
 
 #include "polynomial_function.inline.h"
 

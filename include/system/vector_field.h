@@ -44,18 +44,18 @@
 
 namespace Ariadne {
 
-  namespace Function { 
+
     template<class X> class TaylorSeriesAffineVariable; 
     template<class X> class TaylorSeriesTaylorVariable; 
-  }
 
-  namespace System {
+
+  
 
     /*!\ingroup System
      * \ingroup ContinuousTime
      * \brief Abstract base class for (differentiable) vector fields.
      * 
-     * The system is specified by the method operator()(const Geometry::Point<F>& pt) const,
+     * The system is specified by the method operator()(const Point<F>& pt) const,
      * This method should compute an interval vector \f$v=\overline{f}(A)\f$ with the
      * following properties:
      *   -# \f$f(p)\subset\overline{f}(A)\f$,
@@ -68,53 +68,53 @@ namespace Ariadne {
      * as \f$A_n\f$ tends to a point.
      *
      * Additional accuracy can be obtained be using derivatives.
-     * The method jacobian(const Geometry::Point<F>& pt) const computes the derivative matrix at/over the point \a pt.
+     * The method jacobian(const Point<F>& pt) const computes the derivative matrix at/over the point \a pt.
      */
     template<class R>
     class VectorField {
      protected:
-      typedef typename Numeric::traits<R>::arithmetic_type F; 
-      typedef typename Numeric::traits<R>::interval_type I; 
+      typedef typename traits<R>::arithmetic_type F; 
+      typedef typename traits<R>::interval_type I; 
      public:
       /*! \brief The type used to represent time. */
-      typedef Numeric::Rational time_type;
+      typedef Rational time_type;
       /*! \brief The real number type. */
       typedef R real_type;
       /*! \brief The type used to describe the state space. */
-      typedef Geometry::EuclideanSpace state_space_type;
+      typedef EuclideanSpace state_space_type;
       /*! \brief The type of denotable state the system acts on. */
-      typedef Geometry::Point<R> state_type;
+      typedef Point<R> state_type;
       
       /*! \brief Destructor. */
       ~VectorField();
 
       /*! \brief Construct from a function interface and parameters. */
-      VectorField(const Function::FunctionInterface<R>& f);
+      VectorField(const FunctionInterface<R>& f);
       /*! \brief Make a copy (clone) of the vector field. */
       VectorField<R>* clone() const { return new VectorField<R>(*this); }
      
       /*! \brief The function defining the vector field. */
-      Function::FunctionInterface<R>& function() const { return *this->_function_ptr; }
+      FunctionInterface<R>& function() const { return *this->_function_ptr; }
 
       /*! \brief An approximation to the vector field at a point. */
-      LinearAlgebra::Vector<F> operator() (const Geometry::Point<F>& x) const { return this->evaluate(x); }
+      Vector<F> operator() (const Point<F>& x) const { return this->evaluate(x); }
 
       /*! \brief An approximation to the vector field at a point. */
-      LinearAlgebra::Vector<F> evaluate(const Geometry::Point<F>& x) const;
+      Vector<F> evaluate(const Point<F>& x) const;
 
       /*! \brief An approximation to the Jacobian derivative at a point. */
-      LinearAlgebra::Matrix<F> jacobian(const Geometry::Point<F>& x) const;
+      Matrix<F> jacobian(const Point<F>& x) const;
     
        /*! \brief An approximation to the vector field at a point. */
-      Function::TaylorDerivative<F> derivative(const Geometry::Point<F>& x, const smoothness_type& s) const;
+      TaylorDerivative<F> derivative(const Point<F>& x, const smoothness_type& s) const;
 
       // Used in integration method
-      void compute(Function::TaylorSeriesAffineVariable<F>*, const Function::TaylorSeriesAffineVariable<F>* x) const { };
+      void compute(TaylorSeriesAffineVariable<F>*, const TaylorSeriesAffineVariable<F>* x) const { };
       // Used in integration method
-      void compute(Function::TaylorSeriesTaylorVariable<F>*, const Function::TaylorSeriesTaylorVariable<F>* x) const { };
+      void compute(TaylorSeriesTaylorVariable<F>*, const TaylorSeriesTaylorVariable<F>* x) const { };
 
       /*! \brief The state space of the vector field. */
-      Geometry::EuclideanSpace state_space() const { return Geometry::EuclideanSpace(this->_function_ptr->result_size()); }
+      EuclideanSpace state_space() const { return EuclideanSpace(this->_function_ptr->result_size()); }
       /*! \brief The dimension of the space the vector field lives in. */
       dimension_type dimension() const { return this->_function_ptr->result_size(); }
       /*! \brief The degree of differentiability of the vector field. */
@@ -123,7 +123,7 @@ namespace Ariadne {
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream& os) const;
      private:
-      boost::shared_ptr< Function::FunctionInterface<R> > _function_ptr;
+      boost::shared_ptr< FunctionInterface<R> > _function_ptr;
     };
    
     template<class R> inline 
@@ -131,7 +131,7 @@ namespace Ariadne {
       return vf.write(os);
     }
     
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_VECTOR_FIELD_H */

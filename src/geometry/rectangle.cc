@@ -30,9 +30,9 @@
 
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
-    using namespace Numeric;
+    
     
     template class Rectangle<Rational>;
 
@@ -46,5 +46,5 @@ namespace Ariadne {
     template class Rectangle<IntervalMP>;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

@@ -27,54 +27,54 @@
 namespace Ariadne { 
 
 
-Output::textstream::~textstream()
+textstream::~textstream()
 {
 }
 
-Output::textstream::textstream()
+textstream::textstream()
   : _os_ptr(&std::cout)
 {
 }
 
-Output::textstream::textstream(std::ostream& os)
+textstream::textstream(std::ostream& os)
   : _os_ptr(&os)
 {
 }
 
 void
-Output::textstream::redirect(std::ostream& os)
+textstream::redirect(std::ostream& os)
 {
   this->_os_ptr=&os;
 }
 
 void 
-Output::textstream::writenl() 
+textstream::writenl() 
 {
   (*this) << std::endl;
 }
 
 
-Output::textfstream::textfstream()
+textfstream::textfstream()
   : textstream(), _ofs_ptr(new std::ofstream())
 {
   this->textstream::redirect(*_ofs_ptr);
 }
 
-Output::textfstream::~textfstream()
+textfstream::~textfstream()
 {
   this->close(); 
   delete this->_ofs_ptr;
 }
 
 void
-Output::textfstream::open(const char* fn)
+textfstream::open(const char* fn)
 {
   this->_ofs_ptr->open(fn);
 }
 
 
 void 
-Output::textfstream::close() 
+textfstream::close() 
 {
   this->_ofs_ptr->close();
 }

@@ -33,7 +33,7 @@
 #include "evaluation/integrator_interface.h"
 
 namespace Ariadne {
-  namespace Evaluation {
+  
    
 
     /*! \ingroup Integrators
@@ -41,9 +41,9 @@ namespace Ariadne {
      */
     template<class R>
     class EulerIntegrator
-      : public IntegratorInterface< Geometry::Rectangle<R> >
+      : public IntegratorInterface< Rectangle<R> >
     {
-      typedef Numeric::Interval<R> I;
+      typedef Interval<R> I;
      public:
       /*! \brief Constructor. */
       EulerIntegrator();
@@ -54,32 +54,32 @@ namespace Ariadne {
 
       /*! \brief Compute an integration time and a bounding box, given a bounding box for the intitial set, and a maximum allowable flow time. */
       virtual 
-      std::pair< Numeric::Rational, Geometry::Box<R> >
-      flow_bounds(const System::VectorField<R>& vector_field, 
-                  const Geometry::Rectangle<R>& initial_set,
-                  const Numeric::Rational& maximum_step_size) const; 
+      std::pair< Rational, Box<R> >
+      flow_bounds(const VectorField<R>& vector_field, 
+                  const Rectangle<R>& initial_set,
+                  const Rational& maximum_step_size) const; 
 
       /*! \brief A C0 algorithm for integrating forward a rectangle. */
-      virtual Geometry::Rectangle<R> 
-      integration_step(const System::VectorField<R>& vector_field,
-                       const Geometry::Rectangle<R>& initial_set,
-                       const Numeric::Rational& maximum_step_size,
-                       const Geometry::Box<R>& bounding_set) const;
+      virtual Rectangle<R> 
+      integration_step(const VectorField<R>& vector_field,
+                       const Rectangle<R>& initial_set,
+                       const Rational& maximum_step_size,
+                       const Box<R>& bounding_set) const;
 
       /*! \brief A C0 algorithm for integrating forward a rectangle up to a certain time. */
-      virtual Geometry::Rectangle<R> 
-      reachability_step(const System::VectorField<R>& vector_field,
-                        const Geometry::Rectangle<R>& initial_set,
-                        const Numeric::Rational& maximum_step_size,
-                        const Geometry::Box<R>& bounding_set) const;
+      virtual Rectangle<R> 
+      reachability_step(const VectorField<R>& vector_field,
+                        const Rectangle<R>& initial_set,
+                        const Rational& maximum_step_size,
+                        const Box<R>& bounding_set) const;
 
       /*! \brief Write to an output stream. */
       virtual std::ostream& write(std::ostream&) const;
     };
 
     
-  }
-}
+  
+} // namespace Ariadne
 
 
 #endif /* ARIADNE_EULER_INTEGRATOR_H */

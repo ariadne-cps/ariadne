@@ -33,9 +33,9 @@
 #include "evaluation/fast_approximator.code.h"
 
 namespace Ariadne {
-  namespace Evaluation {
-    using namespace Numeric;
-    using namespace Geometry;
+  
+    
+    
 
 #ifdef ENABLE_FLOAT64
     template class StandardApproximator< Rectangle<Float64> >;
@@ -49,5 +49,5 @@ namespace Ariadne {
     template class FastApproximator< Zonotope<FloatMP> >;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

@@ -37,9 +37,9 @@
 namespace Ariadne {
 namespace Python {
 
-template<class R> void read_interval(Numeric::Interval<R>& ivl, const boost::python::list& pair);
-template<class R> void read_interval(Numeric::Interval<R>& ivl, const boost::python::tuple& pair);
-template<class R> void read_interval(Numeric::Interval<R>& ivl, const boost::python::dict& pair);
+template<class R> void read_interval(Interval<R>& ivl, const boost::python::list& pair);
+template<class R> void read_interval(Interval<R>& ivl, const boost::python::tuple& pair);
+template<class R> void read_interval(Interval<R>& ivl, const boost::python::dict& pair);
 
 void
 read_scalar(bool& n, const boost::python::object& obj)
@@ -73,15 +73,15 @@ read_scalar(unsigned long int& n, const boost::python::object& obj)
 }
 
 void
-read_scalar(Numeric::Integer& z, const boost::python::object& obj)
+read_scalar(Integer& z, const boost::python::object& obj)
 {
   boost::python::extract<std::string> sz(obj);
   boost::python::extract<int> nz(obj);
-  boost::python::extract<Numeric::Integer> zz(obj);
+  boost::python::extract<Integer> zz(obj);
   if(sz.check()) {
-    z=static_cast<Numeric::Integer>(sz());
+    z=static_cast<Integer>(sz());
   } else if(nz.check()) {
-    z=static_cast<Numeric::Integer>(nz());
+    z=static_cast<Integer>(nz());
   } else {
     z=zz();
   }
@@ -89,31 +89,31 @@ read_scalar(Numeric::Integer& z, const boost::python::object& obj)
  
 
 void
-read_scalar(Numeric::Rational& q, const boost::python::object& obj)
+read_scalar(Rational& q, const boost::python::object& obj)
 {
   boost::python::extract<std::string> sq(obj);
   boost::python::extract<int> nq(obj);
   boost::python::extract<double> dq(obj);
-  boost::python::extract<Numeric::Integer> zq(obj);
-  boost::python::extract<Numeric::Rational> qq(obj);
+  boost::python::extract<Integer> zq(obj);
+  boost::python::extract<Rational> qq(obj);
   if(sq.check()) {
-    q=static_cast<Numeric::Rational>(sq());
+    q=static_cast<Rational>(sq());
   } else if(nq.check()) {
-    q=static_cast<Numeric::Rational>(nq());
+    q=static_cast<Rational>(nq());
   } else if(dq.check()) {
-    q=static_cast<Numeric::Rational>(dq());
+    q=static_cast<Rational>(dq());
   } else if(zq.check()) {
-    q=static_cast<Numeric::Rational>(zq());
+    q=static_cast<Rational>(zq());
   } else {
-    q=static_cast<Numeric::Rational>(qq());
+    q=static_cast<Rational>(qq());
   }
 }
  
 template<class T>
 void
-read_scalar(Numeric::Float<T>& x, const boost::python::object& obj)
+read_scalar(Float<T>& x, const boost::python::object& obj)
 {
-  typedef Numeric::Float<T> R;
+  typedef Float<T> R;
   boost::python::extract<std::string> sx(obj);
   boost::python::extract<int> nx(obj);
   boost::python::extract<double> dx(obj);
@@ -131,13 +131,13 @@ read_scalar(Numeric::Float<T>& x, const boost::python::object& obj)
 
 template<class R> 
 void
-read_scalar(Numeric::Interval<R>& x, const boost::python::object& obj)
+read_scalar(Interval<R>& x, const boost::python::object& obj)
 {
   // The calls lx.check() and tx.check() produce compiler warnings 
   //   "dereferencing type-punned pointer will break strict-aliasing rules"
   // but this code works, and I don't how to change the extract type
   // to disable the warning without making the check fail.
-  typedef Numeric::Interval<R> I;
+  typedef Interval<R> I;
   boost::python::extract<std::string> sx(obj);
   boost::python::extract<boost::python::list> lx(obj);
   boost::python::extract<boost::python::tuple> tx(obj);
@@ -175,7 +175,7 @@ template void read_scalar(IntervalPy&, const boost::python::object&);
 
 template<class R> inline
 void
-read_interval(Numeric::Interval<R>& ivl, const boost::python::list& pair)
+read_interval(Interval<R>& ivl, const boost::python::list& pair)
 {
   if(boost::python::len(pair)!=2) {
     throw std::runtime_error("Interval must be list of pairs representing intervals");
@@ -186,7 +186,7 @@ read_interval(Numeric::Interval<R>& ivl, const boost::python::list& pair)
 
 template<class R> inline
 void
-read_interval(Numeric::Interval<R>& ivl, const boost::python::tuple& pair)
+read_interval(Interval<R>& ivl, const boost::python::tuple& pair)
 {
   if(boost::python::len(pair)!=2) {
     throw std::runtime_error("Interval must be list of pairs representing intervals");
@@ -197,7 +197,7 @@ read_interval(Numeric::Interval<R>& ivl, const boost::python::tuple& pair)
 
 template<class R> inline
 void
-read_interval(Numeric::Interval<R>& ivl, const boost::python::dict& pair)
+read_interval(Interval<R>& ivl, const boost::python::dict& pair)
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
   if(boost::python::len(pair)!=1) {

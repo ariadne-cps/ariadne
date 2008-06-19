@@ -33,7 +33,6 @@
 
 using namespace std;
 using namespace Ariadne;
-using namespace Ariadne::Combinatoric;
 
 int test_subdivision_tree();
 

@@ -38,7 +38,7 @@
 #include "geometry/rectangle.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
  
     
     //! \ingroup ExactSet
@@ -51,21 +51,21 @@ namespace Ariadne {
       /*! \brief */
       RectangularSet(const std::string& str) {
         Box<R> codomain(str); 
-        *this=ConstraintSet<R>(Function::IdentityFunction<R>(codomain.dimension()),codomain); }
+        *this=ConstraintSet<R>(IdentityFunction<R>(codomain.dimension()),codomain); }
       /*! \brief */
       template<class R1> RectangularSet(const dimension_type& d, const R1 a[][2])
-        : ConstraintSet<R>(Function::IdentityFunction<R>(d),Box<R>(d,a)) { }
+        : ConstraintSet<R>(IdentityFunction<R>(d),Box<R>(d,a)) { }
       /*! \brief */
       template<class R1> RectangularSet(const Point<R1>& pt)
-        : ConstraintSet<R>(Function::IdentityFunction<R>(pt.dimension()),Box<R>(pt)) { }
+        : ConstraintSet<R>(IdentityFunction<R>(pt.dimension()),Box<R>(pt)) { }
       /*! \brief */
       template<class R1> RectangularSet(const Box<R1>& bx)
-        : ConstraintSet<R>(Function::IdentityFunction<R>(bx.dimension()),Box<R>(bx)) { }
+        : ConstraintSet<R>(IdentityFunction<R>(bx.dimension()),Box<R>(bx)) { }
       /*! \brief */
       template<class R1> RectangularSet(const Rectangle<R1>& r)
-        : ConstraintSet<R>(Function::IdentityFunction<R>(r.dimension()),Box<R>(r)) { }
+        : ConstraintSet<R>(IdentityFunction<R>(r.dimension()),Box<R>(r)) { }
       /*! \brief */
-      operator Geometry::Box<R> () const { return this->codomain(); }      
+      operator Box<R> () const { return this->codomain(); }      
 
       /*! \brief */
       virtual ~RectangularSet<R>() { }
@@ -77,16 +77,16 @@ namespace Ariadne {
       virtual tribool contains(const Point<R>& pt) const { return this->codomain().contains(pt); }
       /*! \brief */
       virtual tribool superset(const Box<R>& r) const { 
-        return Geometry::superset(this->codomain(),r); }
+        return Ariadne::superset(this->codomain(),r); }
       /*! \brief */
       virtual tribool intersects(const Box<R>& r) const { 
-        return Geometry::intersect(this->codomain(),r); }
+        return Ariadne::intersect(this->codomain(),r); }
       /*! \brief */
       virtual tribool disjoint(const Box<R>& r) const { 
-        return Geometry::disjoint(this->codomain(),r); }
+        return Ariadne::disjoint(this->codomain(),r); }
       /*! \brief */
       virtual tribool subset(const Box<R>& r) const { 
-        return Geometry::subset(this->codomain(),r); }
+        return Ariadne::subset(this->codomain(),r); }
       /*! \brief */
       virtual tribool bounded() const { return this->codomain().bounded(); }      
       /*! \brief */
@@ -98,7 +98,7 @@ namespace Ariadne {
     };
     
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_RECTANGULAR_SET_H */

@@ -27,8 +27,7 @@
 #include "function/constant_function.code.h"
 
 namespace Ariadne {
-  namespace Function {
-    using namespace Numeric;
+    
     
     template class ConstantFunction<Rational>;
 
@@ -42,5 +41,5 @@ namespace Ariadne {
     template class ConstantFunction<IntervalMP>;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

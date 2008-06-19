@@ -31,7 +31,7 @@
 #include "timed_set.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
     template<class BS> class ListSet;
 
@@ -103,8 +103,8 @@ namespace Ariadne {
     }
 
   
-  }
-}
+  
+} // namespace Ariadne
 
 
 #endif /* ARIADNE_TIMED_LIST_SET_H */

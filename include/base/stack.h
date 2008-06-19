@@ -26,7 +26,7 @@
 #define ARIADNE_BASE_STACK_H
 
 namespace Ariadne {
-  namespace Base {
+
 
     template<class T>
     class stack
@@ -61,11 +61,10 @@ namespace Ariadne {
 
     template<class T>
     std::ostream& operator<<(std::ostream& os, const stack<T>& stack) {
-      return Base::write_sequence(os,stack.begin(),stack.end()); 
+      return write_sequence(os,stack.begin(),stack.end()); 
     }
 
-
-  }
-}
+ 
+} // namespace Ariadne
 
 #endif // ARIADNE_BASE_STACK_H

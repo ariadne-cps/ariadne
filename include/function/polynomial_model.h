@@ -37,28 +37,26 @@
 #include "linear_algebra/declarations.h"
 
 namespace Ariadne {
-  namespace Function {
+
     template<class R> class Monomial;
     template<class R> class PolynomialFunction;
     template<class R> class PolynomialModel;
 
     /*! \brief Graded lexicographical ordering. */
     template<class R> bool operator<(const Monomial<R>&, const Monomial<R>&);
-  }
 
-  namespace Numeric {
-    template<class R> struct traits< Function::PolynomialFunction<R> > {
-      typedef Function::PolynomialFunction<typename traits<R>::arithmetic_type> arithmetic_type;
-    };
-  }
+
   
-  namespace Function {
+    template<class R> struct traits< PolynomialFunction<R> > {
+      typedef PolynomialFunction<typename traits<R>::arithmetic_type> arithmetic_type;
+    };
+
     
     /*! \brief A monomial in several variables. */
     template<class R>
     class Monomial {
-      typedef typename Numeric::traits<R>::arithmetic_type F;
-      typedef typename Numeric::traits<R>::arithmetic_type result_type;
+      typedef typename traits<R>::arithmetic_type F;
+      typedef typename traits<R>::arithmetic_type result_type;
      public:
       /*! \brief The type of denotable real number used for the coefficients. */
       typedef R real_type;
@@ -95,7 +93,7 @@ namespace Ariadne {
       size_type degree() const;
       
       /*! \brief Compute the image of a point under the monomial. */
-      F evaluate(const LinearAlgebra::Vector<F>& pt) const;
+      F evaluate(const Vector<F>& pt) const;
  
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream& os) const;
@@ -120,8 +118,8 @@ namespace Ariadne {
     /*! \brief A polynomial in several variables. */
     template<class R>
     class PolynomialFunction {
-      typedef typename Numeric::traits<R>::arithmetic_type F;
-      typedef typename Numeric::traits<R>::arithmetic_type result_type;
+      typedef typename traits<R>::arithmetic_type F;
+      typedef typename traits<R>::arithmetic_type result_type;
      public:
       /*! \brief The type of denotable real number used for the corners. */
       typedef R real_type;
@@ -141,7 +139,7 @@ namespace Ariadne {
       size_type number_of_terms() const { return _terms.size(); }
       
       /*! \brief Evaluate the polynomial at \a s. */
-      F evaluate(const LinearAlgebra::Vector<F>& s) const;
+      F evaluate(const Vector<F>& s) const;
 
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream& os) const;
@@ -153,7 +151,7 @@ namespace Ariadne {
       size_type _compute_maximum_term_size() const;
      private:
       friend class PolynomialModel<R>;
-      friend class PolynomialModel<typename Numeric::traits<R>::number_type>;
+      friend class PolynomialModel<typename traits<R>::number_type>;
      private:
       /* Polynomials's terms. */
       size_type _argument_size;
@@ -166,7 +164,7 @@ namespace Ariadne {
     template<class R>
     class PolynomialModel
     {
-      typedef typename Numeric::traits<R>::arithmetic_type F;
+      typedef typename traits<R>::arithmetic_type F;
      public:
       /*! \brief The type of denotable real number used for the corners. */
       typedef R real_type;
@@ -193,10 +191,10 @@ namespace Ariadne {
       smoothness_type smoothness() const { return std::numeric_limits<smoothness_type>::max(); }
       
       /*! \brief Compute the image of a point under the polynomial map. */
-      LinearAlgebra::Vector<F> evaluate(const LinearAlgebra::Vector<F>& s) const;
+      Vector<F> evaluate(const Vector<F>& s) const;
       
       /*! \brief Compute the derivate of the map at a point. */
-      LinearAlgebra::Matrix<F> jacobian(const LinearAlgebra::Vector<F>& s) const;
+      Matrix<F> jacobian(const Vector<F>& s) const;
 
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream& os) const;
@@ -245,7 +243,7 @@ namespace Ariadne {
 
 
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_POLYNOMIAL_MODEL_H */

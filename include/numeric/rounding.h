@@ -32,7 +32,7 @@
 #include <mpfr.h>
 
 namespace Ariadne {
-namespace Numeric {
+
         
 template<class RM> class Round { };
 class Near; class Up; class Down; class Chop; class Approx; class Exact;
@@ -93,7 +93,7 @@ inline rounding_mode_type get_rounding_mode() { return fegetround(); }
 inline void set_rounding_mode(rounding_mode_type rnd) { fesetround(rnd); }
 template<class RM> inline void set_rounding_mode(Round<RM> rnd) { fesetround(hardware_rounding_mode(rnd)); }
 
-}
-}
+
+} // namespace Ariadne
  
 #endif /* ARIADNE_ROUNDING_H */

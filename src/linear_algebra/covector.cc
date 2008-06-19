@@ -29,10 +29,8 @@
 #include "linear_algebra/covector.code.h"
 
 namespace Ariadne {
-  namespace LinearAlgebra {
-      
-    using namespace Numeric;
   
+      
     template class Covector<Rational>;
 
 #ifdef ENABLE_FLOAT64
@@ -45,5 +43,5 @@ namespace Ariadne {
     template class Covector< Interval<FloatMP> >;
 #endif
 
-  }
-}
+
+} // namespace Ariadne

@@ -37,7 +37,7 @@
 #include "geometry/point.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
     template<class X> class PointListIterator;
     template<class X> class PointListReference;
@@ -77,7 +77,7 @@ namespace Ariadne {
       /*!\brief Construct a list consisting of \a n copies of the origin in dimension \a d. */
       explicit PointList(dimension_type d, size_type n);
       /*!\brief Construct from a matrix \a G whose columns contain the position vectors of the points padded by a one. */
-      explicit PointList(const LinearAlgebra::Matrix<X>& G);
+      explicit PointList(const Matrix<X>& G);
       
       /*!\brief Convert from a point list with another data type. */
       template<class XX> PointList(const PointList<XX>& ptl);
@@ -97,7 +97,7 @@ namespace Ariadne {
       void reserve(size_type n);
       
       /*!\brief A matrix expression whose columns are the position vectors of the points. */
-      const LinearAlgebra::Matrix<X>& generators() const;
+      const Matrix<X>& generators() const;
 
 #ifdef DOXYGEN
       /*!\brief The \a j th point in the list. */
@@ -134,15 +134,15 @@ namespace Ariadne {
 
      private:
       size_type _size;
-      LinearAlgebra::Matrix<X> _pts;
+      Matrix<X> _pts;
     };
     
     
     template<class X> 
     std::ostream& operator<<(std::ostream& os, const PointList<X>& pts);
     
-  }
-}
+  
+} // namespace Ariadne
 
 #include "point_list.inline.h"
 

@@ -39,7 +39,7 @@
 #include "applicator_interface.h"
 
 namespace Ariadne {
-  namespace Evaluation {
+  
 
 
     template<class ES> class AffineApplicator;
@@ -48,24 +48,24 @@ namespace Ariadne {
      *  \brief A class for computing the image of a zonotope under a map. 
      */
     template<class R>
-    class AffineApplicator< Geometry::Zonotope<R> >
-      : public ApplicatorInterface< Geometry::Zonotope<R> >
+    class AffineApplicator< Zonotope<R> >
+      : public ApplicatorInterface< Zonotope<R> >
     {
-      typedef Geometry::Zonotope<R> ES;
+      typedef Zonotope<R> ES;
      public:
       /*! \brief Default constructor. */
       AffineApplicator() { } 
       /*! \brief Make a dynamically-allocated copy. */
       AffineApplicator<ES>* clone() const { return new AffineApplicator<ES>(*this); }
       /*! \brief Compute the image of a zonotope under a continuous function. */
-      virtual Geometry::Zonotope<R> apply(const System::Map<R>& f, const Geometry::Zonotope<R>& bs) const;
+      virtual Zonotope<R> apply(const Map<R>& f, const Zonotope<R>& bs) const;
       /*! \brief Compute the image of a zonotope under a continuous function. */
-      virtual Geometry::Zonotope<R> apply(const System::AffineMap<R>& f, const Geometry::Zonotope<R>& bs) const;
+      virtual Zonotope<R> apply(const AffineMap<R>& f, const Zonotope<R>& bs) const;
      protected:
-      const System::AffineMap<R>* cast(const System::Map<R>* f) const;
+      const AffineMap<R>* cast(const Map<R>* f) const;
     };
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_AFFINE_APPLICATOR_H */

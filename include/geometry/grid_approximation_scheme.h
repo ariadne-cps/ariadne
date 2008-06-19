@@ -29,7 +29,7 @@
 #define ARIADNE_GRID_APPROXIMATION_SCHEME_H
 
 namespace Ariadne {
-  namespace Geometry {
+  
   
     class EuclideanSpace;
     template<class R> class Box;
@@ -53,8 +53,8 @@ namespace Ariadne {
       typedef Box<R> basic_set_type;
     };
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_GRID_APPROXIMATION_SCHEME_H */
 

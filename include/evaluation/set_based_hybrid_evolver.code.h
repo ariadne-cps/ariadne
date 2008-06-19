@@ -42,17 +42,14 @@
 
 namespace Ariadne {
  
-typedef Numeric::Rational Q;
-
-
-namespace Evaluation { 
+typedef Rational Q;
 const uint BISECTION_STEPS=8;
-static int& verbosity = hybrid_evolver_verbosity; 
-}
+
+
 
 
 template<class R> 
-Evaluation::SetBasedHybridEvolver< Geometry::Zonotope<R> >::
+SetBasedHybridEvolver< Zonotope<R> >::
 SetBasedHybridEvolver(const EvolutionParameters<R>& parameters, 
                       const ApplicatorInterface<ES>& applicator, 
                       const IntegratorInterface<ES>& integrator, 
@@ -72,7 +69,7 @@ SetBasedHybridEvolver(const EvolutionParameters<R>& parameters,
 
 template<class R>
 bool
-Evaluation::SetBasedHybridEvolver<Geometry::Zonotope<R> >::
+SetBasedHybridEvolver<Zonotope<R> >::
 _satisfies(const ES& bs,
            const CS& inv, 
            const Semantics semantics) const
@@ -96,8 +93,8 @@ _satisfies(const ES& bs,
 
 
 template<class R>
-Numeric::Rational
-Evaluation::SetBasedHybridEvolver<Geometry::Zonotope<R> >::
+Rational
+SetBasedHybridEvolver<Zonotope<R> >::
 _initial_activation_time(const VF& vf, 
                          const CS& inv, 
                          const ES& bs,
@@ -138,7 +135,7 @@ _initial_activation_time(const VF& vf,
 
 template<class R>
 Q
-Evaluation::SetBasedHybridEvolver< Geometry::Zonotope<R> >::
+SetBasedHybridEvolver< Zonotope<R> >::
 _final_activation_time(const VF& vf, const CS& inv, const ES& bs, 
                        const Q& maximum_time, const Bx& bb, const Semantics semantics) const 
 {
@@ -175,12 +172,12 @@ _final_activation_time(const VF& vf, const CS& inv, const ES& bs,
 
 
 template<class R>
-tuple<Q,typename Evaluation::SetBasedHybridEvolver< Geometry::Zonotope<R> >::ES>
-Evaluation::SetBasedHybridEvolver< Geometry::Zonotope<R> >::
+tuple<Q,typename SetBasedHybridEvolver< Zonotope<R> >::ES>
+SetBasedHybridEvolver< Zonotope<R> >::
 _saltation_map(const VF& vf1, const VF& vf2, const Mp& rm, const CS& inv, 
                const ES& bs, const Q& h1, const Q& h2, const Bx& bb, const Semantics sem) const
 {
-  ARIADNE_LOG(8,"\nEvaluation::SetBasedHybridEvolver<BS>::_saltation_map\n");
+  ARIADNE_LOG(8,"\nSetBasedHybridEvolver<BS>::_saltation_map\n");
   ARIADNE_LOG(9,(sem==upper_semantics?"  upper_semantics\n":"  lower_semantics\n"));
   ARIADNE_ASSERT(h1<=h2);
   if(sem==upper_semantics) {
@@ -199,7 +196,7 @@ _saltation_map(const VF& vf1, const VF& vf2, const Mp& rm, const CS& inv,
 
 template<class R>
 void
-Evaluation::SetBasedHybridEvolver< Geometry::Zonotope<R> >::
+SetBasedHybridEvolver< Zonotope<R> >::
 _step(HESL& evolve,
       HESL& reach,
       THESL& working,
@@ -321,7 +318,7 @@ _step(HESL& evolve,
 
 
 template<class R> void
-Evaluation::SetBasedHybridEvolver< Geometry::Zonotope<R> >::
+SetBasedHybridEvolver< Zonotope<R> >::
 evolution(HybridEnclosureSetList& final,
           HybridEnclosureSetList& intermediate,
           const Automaton& automaton,

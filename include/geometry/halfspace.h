@@ -40,7 +40,7 @@
 #include "geometry/point.h"
 
 namespace Ariadne {  
-  namespace Geometry {
+  
 
     /*! \ingroup BasicSet
      *  \brief A halfspace described by a linear inequalities.
@@ -51,8 +51,8 @@ namespace Ariadne {
      */ 
     template<class X>
     class Halfspace {
-      typedef typename Numeric::traits<X>::number_type R;
-      typedef typename Numeric::traits<X>::arithmetic_type F;
+      typedef typename traits<X>::number_type R;
+      typedef typename traits<X>::arithmetic_type F;
      private:
       array<X> _data;
     public:
@@ -86,7 +86,7 @@ namespace Ariadne {
     satisfies(const Point<X1>& pt, const Halfspace<X2>& hs)
     {
       ARIADNE_ASSERT(pt.dimension()==hs.dimension());
-      typedef typename Numeric::traits<X1,X2>::arithmetic_type F;
+      typedef typename traits<X1,X2>::arithmetic_type F;
       F dot=hs.data()[hs.dimension()];
       for(dimension_type i=0; i!=hs.dimension(); ++i) {
         dot+=pt[i]*hs.data()[i];
@@ -102,7 +102,7 @@ namespace Ariadne {
       return os << ";" << hsp.data()[hsp.dimension()] << "]";
     }
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_HALFSPACE_H */

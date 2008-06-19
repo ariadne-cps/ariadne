@@ -43,11 +43,6 @@
 
 
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::LinearAlgebra;
-using namespace Ariadne::Function;
-using namespace Ariadne::Geometry;
-using namespace Ariadne::Output;
 using namespace std;
 
 template<class R> int test_level_set();
@@ -71,8 +66,8 @@ template<class R>
 int 
 test_level_set() 
 {
-  cout << "test_level_set<" << Numeric::name<R>() << ">" << endl;
-  typedef typename Numeric::traits<R>::arithmetic_type A;
+  cout << "test_level_set<" << name<R>() << ">" << endl;
+  typedef typename traits<R>::arithmetic_type A;
 
   Radius<R> f=Radius<R>(Vector<R>());
 

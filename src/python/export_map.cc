@@ -35,10 +35,6 @@
 #include "system/affine_map.h"
 
 using namespace Ariadne;
-using namespace Ariadne::LinearAlgebra;
-using namespace Ariadne::Function;
-using namespace Ariadne::Geometry;
-using namespace Ariadne::System;
 using namespace Ariadne::Python;
 
 #include <boost/python.hpp>
@@ -48,7 +44,7 @@ using namespace boost::python;
 template<class R>
 void export_map() 
 {
-  typedef typename Numeric::traits<R>::arithmetic_type A;
+  typedef typename traits<R>::arithmetic_type A;
 
 
   class_< Map<R> >("Map", init< const FunctionInterface<R>& >())

@@ -31,11 +31,8 @@
 
 namespace Ariadne {
 
-  namespace Numeric { 
-    class Rational; 
-  }
+   
 
-  namespace Function {
   
     template<class X> class TaylorSeries;
 
@@ -81,14 +78,14 @@ namespace Ariadne {
     { };
 
     template<>
-    class FunctionSeries<Numeric::Rational>
-      : public ArithmeticSeries<Numeric::Rational>
+    class FunctionSeries<Rational>
+      : public ArithmeticSeries<Rational>
     { };
 
 
     
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_FUNCTION_SERIES_H */
 

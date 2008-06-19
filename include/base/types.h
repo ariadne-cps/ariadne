@@ -34,12 +34,10 @@
 
 namespace Ariadne { 
 
-  namespace Numeric {
+  
     class Integer;
     class Rational;
-  }
-  
-  namespace Base {
+
     //! \name Basic types
     //@{
     //! \ingroup Base
@@ -61,9 +59,9 @@ namespace Ariadne {
     typedef double dyadic_type;
 
     /*! \brief The type used to describe evolution time for discrete time systems. */
-    typedef Numeric::Integer discrete_time_type;
+    typedef Integer discrete_time_type;
     /*! \brief The type used to describe evolution time. */
-    typedef Numeric::Rational time_type;
+    typedef Rational time_type;
     //@}
   
     //! \name Array types
@@ -76,9 +74,8 @@ namespace Ariadne {
     /*! \brief An array of integer values. */
     typedef array<index_type> IndexArray;
     //@}
-  }
   
-  using namespace Base;
+  
 
 #ifdef DOXYGEN  
   //! \name Basic types
@@ -97,9 +94,9 @@ namespace Ariadne {
   /*! \brief An integral type used to represent the smoothness of a map. */
   typedef int smoothness_type;
   /*! \brief The type used to describe evolution time for discrete time systems. */
-  typedef Numeric::Integer discrete_time_type;
+  typedef Integer discrete_time_type;
   /*! \brief The type used to describe evolution time. */
-  typedef Numeric::Rational time_type;
+  typedef Rational time_type;
   //@}
   
   //! \name Array types
@@ -108,6 +105,7 @@ namespace Ariadne {
   /*! \brief An array of boolean values. */
   typedef array<bool> BooleanArray;
   /*! \brief An array of unsigned integer values. */
+
   typedef array<size_type> SizeArray;
   /*! \brief An array of integer values. */
   typedef array<index_type> IndexArray;

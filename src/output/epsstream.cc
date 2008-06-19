@@ -27,15 +27,15 @@
 namespace Ariadne { 
 
 
-const uint Output::epsstream::xBBoxSide=300;
-const uint Output::epsstream::yBBoxSide=300;
-const double Output::epsstream::linewidth=0.0000001;
-const double Output::epsstream::scale_dimension=3.5;
+const uint epsstream::xBBoxSide=300;
+const uint epsstream::yBBoxSide=300;
+const double epsstream::linewidth=0.0000001;
+const double epsstream::scale_dimension=3.5;
     
 
 
 void 
-Output::epsfstream::open(const char* fn, 
+epsfstream::open(const char* fn, 
                          const Rectangle2d& bbox, 
                          const PlanarProjectionMap& p_map)
 {
@@ -53,25 +53,25 @@ Output::epsfstream::open(const char* fn,
 
 
 
-Output::epsstream::epsstream()
+epsstream::epsstream()
   : _os_ptr(&std::cout), line_colour(black), fill_colour(green), line_style(true), fill_style(true)
 {
 }
 
-Output::epsstream::epsstream(std::ostream& os)
+epsstream::epsstream(std::ostream& os)
   : _os_ptr(&os), line_colour(black), fill_colour(green), line_style(true), fill_style(true)
 {
 }
 
 void
-Output::epsstream::redirect(std::ostream& os)
+epsstream::redirect(std::ostream& os)
 {
   this->_os_ptr=&os;
 }
 
 
 
-Output::epsstream::~epsstream() {
+epsstream::~epsstream() {
 }
 
      
@@ -83,7 +83,7 @@ Output::epsstream::~epsstream() {
 
 
 void 
-Output::epsstream::write_header() 
+epsstream::write_header() 
 {
   std::ostream& os=this->ostream();
   os      << "%!PS-Adobe-2.0\n"
@@ -132,7 +132,7 @@ Output::epsstream::write_header()
 
 
 void 
-Output::epsstream::write_trailer() 
+epsstream::write_trailer() 
 {
   std::ostream& os=this->ostream();
 
@@ -148,7 +148,7 @@ Output::epsstream::write_trailer()
 
 
 void
-Output::epsstream::trace_scale(const char* x_name, const char* y_name,
+epsstream::trace_scale(const char* x_name, const char* y_name,
                         const int& x_step, const int& y_step) 
 {
   std::ostream& os=this->ostream();
@@ -282,14 +282,14 @@ Output::epsstream::trace_scale(const char* x_name, const char* y_name,
 
 
 void
-Output::epsstream::trace(const Point2d& pt)
+epsstream::trace(const Point2d& pt)
 {        
   std::ostream& os=this->ostream();
   os << pt[0] << " " << pt[1] << " 0.001 0 360 arc closepath\n";
 }
 
 void
-Output::epsstream::trace(const Rectangle2d& r)
+epsstream::trace(const Rectangle2d& r)
 {
   double lx=r.lower_bound(0);
   double ux=r.upper_bound(0);
@@ -306,13 +306,13 @@ Output::epsstream::trace(const Rectangle2d& r)
 }
 
 void
-Output::epsstream::trace(const Zonotope2d& z)
+epsstream::trace(const Zonotope2d& z)
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
 void
-Output::epsstream::trace(const Polygon2d& vertices)
+epsstream::trace(const Polygon2d& vertices)
 {
   std::ostream& os=this->ostream();
   os << vertices[0][0] << ' ' << vertices[0][1] 
@@ -328,7 +328,7 @@ Output::epsstream::trace(const Polygon2d& vertices)
 
 
 void
-Output::epsstream::draw(const Point2d& pt)
+epsstream::draw(const Point2d& pt)
 {
   std::ostream& os=this->ostream();
   epsstream& eps=*this;
@@ -343,7 +343,7 @@ Output::epsstream::draw(const Point2d& pt)
 }
 
 void
-Output::epsstream::draw(const Rectangle2d& r) 
+epsstream::draw(const Rectangle2d& r) 
 {
   epsstream& eps=*this;
   if(eps.fill_style) {
@@ -357,13 +357,13 @@ Output::epsstream::draw(const Rectangle2d& r)
 }
 
 void
-Output::epsstream::draw(const Zonotope2d& z)
+epsstream::draw(const Zonotope2d& z)
 {
   draw(Polygon2d(z));
 }
 
 void
-Output::epsstream::draw(const Polygon2d& p)
+epsstream::draw(const Polygon2d& p)
 {
   epsstream& eps=*this;
   if(eps.fill_style) {
@@ -378,7 +378,7 @@ Output::epsstream::draw(const Polygon2d& p)
 
 
 void
-Output::epsstream::draw(std::vector<Rectangle2d>& rl)
+epsstream::draw(std::vector<Rectangle2d>& rl)
 {
   //std::cerr<<__PRETTY_FUNCTION__<<std::endl;
   epsstream& eps=*this;
@@ -400,7 +400,7 @@ Output::epsstream::draw(std::vector<Rectangle2d>& rl)
 
 
 void 
-Output::epsstream::fill()
+epsstream::fill()
 {
   std::ostream& os=this->ostream();
   os << this->fill_colour.name() << " fill\n";
@@ -408,14 +408,14 @@ Output::epsstream::fill()
 
 
 void 
-Output::epsstream::stroke()
+epsstream::stroke()
 {
   std::ostream& os=this->ostream();
   os << this->line_colour.name() << " stroke\n";
 }
 
 void 
-Output::epsstream::_instantiate() {
+epsstream::_instantiate() {
 }
 
 }

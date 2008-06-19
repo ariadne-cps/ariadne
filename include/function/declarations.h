@@ -29,7 +29,7 @@
 #define ARIADNE_FUNCTION_DECLARATIONS_H
 
 namespace Ariadne { 
-  namespace Function {
+
     class MultiIndex;
     class SortedIndex;
     class PositionIndex;
@@ -50,7 +50,7 @@ namespace Ariadne {
     template<class R> class TaylorDerivative;
     template<class R> class TaylorModel;
 
-  }
-}
+} // namespace Ariadne
+
 
 #endif /* ARIADNE_FUNCTION_DECLARATIONS_H */

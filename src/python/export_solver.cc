@@ -27,7 +27,6 @@
 #include "python/utilities.h"
 
 using namespace Ariadne;
-using namespace Ariadne::Evaluation;
 using namespace Ariadne::Python;
 
 #include <boost/python.hpp>

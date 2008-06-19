@@ -40,7 +40,7 @@
 #include "linear_algebra/matrix.h"
 
 namespace Ariadne {
-  namespace LinearAlgebra {
+  
 
     /*! \ingroup LinearAlgebra
      *  \brief A matrix stored in QR product form. */
@@ -98,7 +98,7 @@ namespace Ariadne {
       return result;
     }
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_QR_MATRIX_H */

@@ -29,19 +29,19 @@
 #include "evaluation/set_based_hybrid_orbiter.code.h"
 
 namespace Ariadne {
-  namespace Evaluation {
-    using namespace Numeric;
-    using namespace Geometry;
+  
+    
+    
 
 #ifdef ENABLE_FLOAT64
     template class SetBasedHybridOrbiterInterface<Float64>;
-    template class SetBasedHybridOrbiter< Zonotope<Float64,Geometry::UniformErrorTag> >;
+    template class SetBasedHybridOrbiter< Zonotope<Float64,UniformErrorTag> >;
 #endif
   
 #ifdef ENABLE_FLOATMP
     template class SetBasedHybridOrbiterInterface<FloatMP>;
-    template class SetBasedHybridOrbiter< Zonotope<FloatMP,Geometry::UniformErrorTag> >;
+    template class SetBasedHybridOrbiter< Zonotope<FloatMP,UniformErrorTag> >;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

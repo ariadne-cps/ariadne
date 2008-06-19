@@ -38,10 +38,6 @@
 #include "output/logging.h"
 
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::LinearAlgebra;
-using namespace Ariadne::Geometry;
-using namespace Ariadne::Output;
 using namespace std;
 
 template<class R> int test_parallelotope();
@@ -57,7 +53,7 @@ template<class R>
 int
 test_parallelotope()
 { 
-  typedef Numeric::Interval<R> I;
+  typedef Interval<R> I;
 
   Box<R> r1=Box<R>("[9,11]x[5,11]x[-1,1]");
   Box<R> r2=Box<R>("[4.875,5.125]x[2.875,3.125]x[1.75,2.25]");

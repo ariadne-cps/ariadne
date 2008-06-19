@@ -40,7 +40,7 @@
 #include "linear_algebra/vector_expression.h"
 
 namespace Ariadne {
-  namespace LinearAlgebra {
+  
 
     /*!\brief %Base class for all matrix expressions. */
     template<class E>
@@ -78,8 +78,8 @@ namespace Ariadne {
     };
     
 
-  }
-}
+  
+} // namespace Ariadne
 
 
 #endif /* ARIADNE_MATRIX_EXPRESSION_H */

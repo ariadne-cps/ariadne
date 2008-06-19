@@ -33,7 +33,7 @@ namespace Ariadne {
 
 template<class S> 
 std::ostream& 
-Geometry::HybridSet<S>::write(std::ostream& os) const
+HybridSet<S>::write(std::ostream& os) const
 { 
   os << "HybridSet( { \n";
   for(locations_const_iterator iter=this->locations_begin(); iter!=this->locations_end(); ++iter)
@@ -50,7 +50,7 @@ Geometry::HybridSet<S>::write(std::ostream& os) const
 
 template<class R> 
 std::ostream& 
-Geometry::HybridGridMaskSet<R>::write(std::ostream& os) const
+HybridGridMaskSet<R>::write(std::ostream& os) const
 { 
   os << "HybridGridMaskSet( { \n";
   for(typename HybridGridMaskSet<R>::locations_const_iterator iter=this->locations_begin();
@@ -67,9 +67,9 @@ Geometry::HybridGridMaskSet<R>::write(std::ostream& os) const
 
 template<class BS> 
 std::ostream& 
-Geometry::HybridListSet<BS>::write(std::ostream& os) const
+HybridListSet<BS>::write(std::ostream& os) const
 { 
-  os << "HybridListSet<"<<Geometry::name<BS>()<<">( { \n";
+  os << "HybridListSet<"<<name<BS>()<<">( { \n";
   for(typename HybridListSet<BS>::locations_const_iterator iter=this->locations_begin();
       iter!=this->locations_end(); ++iter)
   {

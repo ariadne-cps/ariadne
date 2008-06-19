@@ -37,7 +37,7 @@
 #include "system/declarations.h"
 
 namespace Ariadne {
-  namespace Evaluation {
+  
 
 
      /*! \brief Interface for computing the flow of a vector field and its spacial variations.
@@ -46,7 +46,7 @@ namespace Ariadne {
     template<class R>
     class FlowerInterface
     {
-      typedef Numeric::Interval<R> I;
+      typedef Interval<R> I;
      public:
       /*! \brief Virtual destructor. */
       virtual ~FlowerInterface() { }
@@ -56,39 +56,39 @@ namespace Ariadne {
 
       virtual 
       /*! \brief A model for the flow at time \a t with centre \a c, given that the flow remains in \a bb. */
-      Function::AffineModel<R> 
-      affine_flow_model(const System::VectorField<R>& vf,
-                        const Geometry::Point<R>& c,
-                        const Geometry::Box<R>& d,
-                        const Numeric::Rational& t,
-                        const Geometry::Box<R>& bb) const = 0;
+      AffineModel<R> 
+      affine_flow_model(const VectorField<R>& vf,
+                        const Point<R>& c,
+                        const Box<R>& d,
+                        const Rational& t,
+                        const Box<R>& bb) const = 0;
      
       /*! \brief A model for the flow at time \a t with centre \a c, given that the flow remains in \a bb. */
       virtual 
-      Function::TaylorModel<R> 
-      taylor_flow_model(const System::VectorField<R>& vf,
-                        const Geometry::Point<R>& c,
-                        const Geometry::Box<R>& d,
-                        const Numeric::Rational& t,
-                        const Geometry::Box<R>& bb) const = 0;
+      TaylorModel<R> 
+      taylor_flow_model(const VectorField<R>& vf,
+                        const Point<R>& c,
+                        const Box<R>& d,
+                        const Rational& t,
+                        const Box<R>& bb) const = 0;
       
        /*! \brief Compute the flow of a point. */
       virtual 
-      Geometry::Point<I> 
-      flow_step(const System::VectorField<R>& f, 
-                const Geometry::Point<I>& s, 
-                const Numeric::Rational& t, 
-                const Geometry::Box<R>& bb) const = 0;
+      Point<I> 
+      flow_step(const VectorField<R>& f, 
+                const Point<I>& s, 
+                const Rational& t, 
+                const Box<R>& bb) const = 0;
 
       /*! \brief Compute the spacial jacobian over a flow step of time \a t starting at \a p assuming that the flow remains within \a bb. */
-      virtual LinearAlgebra::Matrix<I> flow_step_jacobian(const System::VectorField<R>& vf,
-                                                          const Geometry::Point<I>& p,
-                                                          const Numeric::Rational& t,
-                                                          const Geometry::Box<R>& bb) const = 0;
+      virtual Matrix<I> flow_step_jacobian(const VectorField<R>& vf,
+                                                          const Point<I>& p,
+                                                          const Rational& t,
+                                                          const Box<R>& bb) const = 0;
     };
 
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_FLOWER_INTERFACE_H */

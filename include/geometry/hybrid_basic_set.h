@@ -32,7 +32,7 @@
 #include "geometry/hybrid_space.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
     class basic_set_tag;
 
@@ -175,8 +175,8 @@ namespace Ariadne {
     }
 
    
-  }
-}
+  
+} // namespace Ariadne
 
 #include "hybrid_basic_set.inline.h"
 

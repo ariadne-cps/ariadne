@@ -55,7 +55,7 @@
 
 
 namespace Ariadne {
-  namespace Output {
+  
 				
     class textstream;
     class textfstream;
@@ -71,7 +71,7 @@ namespace Ariadne {
       std::ostream& ostream();
       void writenl();
  			
-      template <class R> void write(const Geometry::Point<R>& pt);
+      template <class R> void write(const Point<R>& pt);
 
      private:
       friend textstream& operator<<(textstream&, std::ostream&(*)(std::ostream&) );
@@ -108,10 +108,10 @@ namespace Ariadne {
 						 
     template<class R> inline
     void 
-    textstream::write(const Geometry::Point<R>& pt) 
+    textstream::write(const Point<R>& pt) 
     {
       if(pt.dimension() > 0) {
-				// Geometry::Point<R> p = approximation(pt);
+				// Point<R> p = approximation(pt);
 				*this->_os_ptr << pt[0];
 				for (dimension_type i=1; i<pt.dimension(); i++) {
 							*this->_os_ptr << " " << pt[i];
@@ -127,30 +127,30 @@ namespace Ariadne {
       std::ostream& os(*(txt._os_ptr)); os << f; return txt; 
     }
       
-    template<class R> textstream& operator<<(textstream&, const Geometry::Point<R>&); 
-    template<class R> textstream& operator<<(textstream&, const Geometry::Box<R>&);
-    template<class R> textstream& operator<<(textstream&, const Geometry::GridCell<R>&);
+    template<class R> textstream& operator<<(textstream&, const Point<R>&); 
+    template<class R> textstream& operator<<(textstream&, const Box<R>&);
+    template<class R> textstream& operator<<(textstream&, const GridCell<R>&);
 
-    template<class R> textstream& operator<<(textstream&, const Geometry::PointList<R>&);
-    template<class R> textstream& operator<<(textstream&, const Geometry::BoxListSet<R>&);
-    template<class R> textstream& operator<<(textstream&, const Geometry::GridCellListSet<R>&); 
-    template<class R> textstream& operator<<(textstream&, const Geometry::GridMaskSet<R>&); 
-    template<class R> textstream& operator<<(textstream&, const Geometry::PartitionTreeSet<R>&); 
+    template<class R> textstream& operator<<(textstream&, const PointList<R>&);
+    template<class R> textstream& operator<<(textstream&, const BoxListSet<R>&);
+    template<class R> textstream& operator<<(textstream&, const GridCellListSet<R>&); 
+    template<class R> textstream& operator<<(textstream&, const GridMaskSet<R>&); 
+    template<class R> textstream& operator<<(textstream&, const PartitionTreeSet<R>&); 
 
-    template<class R> textstream& operator<<(textstream&, const Geometry::Zonotope<R>&);
-    template<class R> textstream& operator<<(textstream&, const Geometry::Polytope<R>&); 
-    template<class R> textstream& operator<<(textstream&, const Geometry::Polyhedron<R>&); 
-    template<class BS> textstream& operator<<(textstream&, const Geometry::ListSet<BS>&); 
+    template<class R> textstream& operator<<(textstream&, const Zonotope<R>&);
+    template<class R> textstream& operator<<(textstream&, const Polytope<R>&); 
+    template<class R> textstream& operator<<(textstream&, const Polyhedron<R>&); 
+    template<class BS> textstream& operator<<(textstream&, const ListSet<BS>&); 
 
-    template<class R> textstream& operator<<(textstream&, const Geometry::SetInterface<R>&); 
+    template<class R> textstream& operator<<(textstream&, const SetInterface<R>&); 
 
-    template<class R> textstream& operator<<(textstream&, const Geometry::FiniteGrid<R>&); 
-    template<class R> textstream& operator<<(textstream&, const Geometry::PartitionTree<R>&); 
+    template<class R> textstream& operator<<(textstream&, const FiniteGrid<R>&); 
+    template<class R> textstream& operator<<(textstream&, const PartitionTree<R>&); 
 
 
     template<class R> inline
     textstream&
-    operator<<(textstream& txt, const Geometry::Point<R>& pt) 
+    operator<<(textstream& txt, const Point<R>& pt) 
     { 		
       if(pt.dimension() > 0) {
         txt.write(pt);			
@@ -162,16 +162,16 @@ namespace Ariadne {
 
     template<class R> inline
     textstream&
-    operator<<(textstream& txt, const Geometry::Box<R>& bx) 
+    operator<<(textstream& txt, const Box<R>& bx) 
     {
-      txt << Geometry::Rectangle<R>(bx).vertices();
+      txt << Rectangle<R>(bx).vertices();
       return txt;
     }
     
 
     template<class R> inline
     textstream&
-    operator<<(textstream& txt, const Geometry::PointList<R>& pl)
+    operator<<(textstream& txt, const PointList<R>& pl)
     {
       if(pl.size() > 0) {
         for (size_type i=0; i<pl.size(); i++) {
@@ -184,9 +184,9 @@ namespace Ariadne {
 
     template<class R> inline
     textstream&
-    operator<<(textstream& txt, const Geometry::BoxListSet<R>& bxls) 
+    operator<<(textstream& txt, const BoxListSet<R>& bxls) 
     {
-      typedef typename Geometry::BoxListSet<R>::const_iterator const_iterator;
+      typedef typename BoxListSet<R>::const_iterator const_iterator;
 			for(const_iterator set_iter=bxls.begin(); set_iter!=bxls.end(); ++set_iter) {
 				txt << *set_iter;
       }
@@ -198,25 +198,25 @@ namespace Ariadne {
  
     template<class R> inline
     textstream&
-    operator<<(textstream& txt, const Geometry::GridCell<R>& bs)
+    operator<<(textstream& txt, const GridCell<R>& bs)
     {
-      return txt << Geometry::Rectangle<R>(bs);
+      return txt << Rectangle<R>(bs);
     }
     
 
     template<class R> inline
     textstream&
-    operator<<(textstream& txt, const Geometry::GridBlock<R>& bs)
+    operator<<(textstream& txt, const GridBlock<R>& bs)
     {
-      return txt << Geometry::Rectangle<R>(bs);
+      return txt << Rectangle<R>(bs);
     }
     
 
     template<class R> inline
     textstream&
-    operator<<(textstream& txt, const Geometry::GridCellListSet<R>& ds)
+    operator<<(textstream& txt, const GridCellListSet<R>& ds)
     {
-      typedef typename Geometry::GridCellListSet<R>::const_iterator const_iterator;
+      typedef typename GridCellListSet<R>::const_iterator const_iterator;
       for(const_iterator set_iter=ds.begin(); set_iter!=ds.end(); ++set_iter) {
         txt << *set_iter;
       }
@@ -226,9 +226,9 @@ namespace Ariadne {
 
     template<class R> inline
     textstream&
-    operator<<(textstream& txt, const Geometry::GridMaskSet<R>& ds)
+    operator<<(textstream& txt, const GridMaskSet<R>& ds)
     {
-      typedef typename Geometry::GridMaskSet<R>::const_iterator const_iterator;
+      typedef typename GridMaskSet<R>::const_iterator const_iterator;
       for(const_iterator set_iter=ds.begin(); set_iter!=ds.end(); ++set_iter) {
         txt << *set_iter;
       }
@@ -239,11 +239,11 @@ namespace Ariadne {
 
     template<class R> inline
     textstream&
-    operator<<(textstream& txt, const Geometry::PartitionTreeSet<R>& ds)
+    operator<<(textstream& txt, const PartitionTreeSet<R>& ds)
     {
-      typedef typename Geometry::PartitionTreeSet<R>::const_iterator const_iterator;
+      typedef typename PartitionTreeSet<R>::const_iterator const_iterator;
       for(const_iterator set_iter=ds.begin(); set_iter!=ds.end(); ++set_iter) {
-        txt << Geometry::Rectangle<R>(*set_iter);
+        txt << Rectangle<R>(*set_iter);
       }
       return txt;
     }
@@ -251,7 +251,7 @@ namespace Ariadne {
 
     template<class R> inline
     textstream&
-    operator<<(textstream& txt, const Geometry::Rectangle<R>& r)
+    operator<<(textstream& txt, const Rectangle<R>& r)
     {
       txt << r.vertices();
       return txt;
@@ -260,7 +260,7 @@ namespace Ariadne {
     
     template<class R> inline
     textstream&
-    operator<<(textstream& txt, const Geometry::Zonotope<R>& z)
+    operator<<(textstream& txt, const Zonotope<R>& z)
     { 
 			return txt << z.bounding_box();
     }
@@ -268,7 +268,7 @@ namespace Ariadne {
        
     template<class R> inline
     textstream&
-    operator<<(textstream& txt, const Geometry::Polytope<R>& p)
+    operator<<(textstream& txt, const Polytope<R>& p)
     {
       return txt << p.vertices();
     }
@@ -276,18 +276,18 @@ namespace Ariadne {
     
     template<class R> inline
     textstream&
-    operator<<(textstream& txt, const Geometry::Polyhedron<R>& p)
+    operator<<(textstream& txt, const Polyhedron<R>& p)
     {
-      return txt << Geometry::Polytope<Numeric::Rational>(p);
+      return txt << Polytope<Rational>(p);
     }
 
 
     
     template<class BS> inline
     textstream&
-    operator<<(textstream& txt, const Geometry::ListSet<BS>& ds)
+    operator<<(textstream& txt, const ListSet<BS>& ds)
     {
-      typedef typename Geometry::ListSet<BS>::const_iterator const_iterator;
+      typedef typename ListSet<BS>::const_iterator const_iterator;
       for(const_iterator set_iter=ds.begin(); set_iter!=ds.end(); ++set_iter) {
         txt << *set_iter;
       }
@@ -296,24 +296,24 @@ namespace Ariadne {
     
 		template<class R> inline
     textstream&
-    operator<<(textstream& txt, const Geometry::RectangularSet<R>& rs)
+    operator<<(textstream& txt, const RectangularSet<R>& rs)
     {
       return txt << rs.bounding_box();
     }
 
 		template<class R> inline
     textstream&
-    operator<<(textstream& txt, const Geometry::PolyhedralSet<R>& ps)
+    operator<<(textstream& txt, const PolyhedralSet<R>& ps)
     {
-      return txt << Geometry::Polyhedron<R>(ps);
+      return txt << Polyhedron<R>(ps);
     }
 
 
     template<class R> inline
     textstream&
-    operator<<(textstream& txt, const Geometry::SetInterface<R>& set)
+    operator<<(textstream& txt, const SetInterface<R>& set)
     {
-      using namespace Geometry;
+      
       
       if(dynamic_cast<const RectangularSet<R>*>(&set)) {
         return txt << dynamic_cast<const RectangularSet<R>&>(set);
@@ -334,19 +334,19 @@ namespace Ariadne {
         try {
           bb=set.bounding_box();
         } 
-        catch(Geometry::UnboundedSet& e) {
+        catch(UnboundedSet& e) {
             throw e;
           }
-        Geometry::PartitionScheme<R> ps(bb);
+        PartitionScheme<R> ps(bb);
         int depth=16;
-        Geometry::PartitionTreeSet<R> pts=Geometry::outer_approximation(set,ps,depth);
+        PartitionTreeSet<R> pts=outer_approximation(set,ps,depth);
         return txt << pts;
-			}
+      }
     }
 
 
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_TEXTSTREAM_H */

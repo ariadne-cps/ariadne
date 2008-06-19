@@ -35,7 +35,7 @@
 #include "system/declarations.h"
 
 namespace Ariadne {
-  namespace Evaluation {
+  
 
     /*! \ingroup EvaluatorInterfaces \ingroup Integrators
      *  \brief Interface for computing a step of the evolution of an enclosure set under a vector field.
@@ -43,12 +43,12 @@ namespace Ariadne {
     template<class ES>
     class IntegratorInterface
     {
-      typedef Numeric::Rational T;
+      typedef Rational T;
       typedef typename ES::real_type R;
-      typedef Numeric::Interval<R> I;
+      typedef Interval<R> I;
      public:
       /*! \brief The type of vector field used by the integrator. */
-      typedef System::VectorField<R> VectorFieldType;
+      typedef VectorField<R> VectorFieldType;
       /*! \brief The type of enclosure set used by the integrator. */
       typedef ES EnclosureSetType;
 
@@ -66,35 +66,35 @@ namespace Ariadne {
 
       /*! \brief Compute an integration time and a bounding box. */
       virtual 
-      std::pair< Numeric::Rational, Geometry::Box<R> >
-      flow_bounds(const System::VectorField<R>& vector_field, 
+      std::pair< Rational, Box<R> >
+      flow_bounds(const VectorField<R>& vector_field, 
                   const EnclosureSetType& initial_set,
-                  const Numeric::Rational& maximum_step_size) const = 0; 
+                  const Rational& maximum_step_size) const = 0; 
       
      /*! \brief Compute the time \a step_size flow of an enclosure set \a s under a vector field \a vector_field, assuming \a bounding_set is a bounding box for the flow. */
       virtual 
       EnclosureSetType
-      integration_step(const System::VectorField<R>& vector_field, 
+      integration_step(const VectorField<R>& vector_field, 
                        const EnclosureSetType& initial_set,
-                       const Numeric::Rational& step_size, 
-                       const Geometry::Box<R>& bounding_set) const = 0; 
+                       const Rational& step_size, 
+                       const Box<R>& bounding_set) const = 0; 
       
       /*! \brief Compute the time \a step_size flow tube around an enclosure set \a initial_set under a vector field \a vector_field, assuming \a bounding_set is a bounding box for the flow. */
       virtual 
       EnclosureSetType
-      reachability_step(const System::VectorField<R>& vector_field, 
+      reachability_step(const VectorField<R>& vector_field, 
                         const EnclosureSetType& initial_set,
-                        const Numeric::Rational& step_size, 
-                        const Geometry::Box<R>& bounding_set) const = 0;
+                        const Rational& step_size, 
+                        const Box<R>& bounding_set) const = 0;
 
       /*! \brief Compute the evolution of an enclosure set \a initial_set under the vector field \a vector_field for times in the range [t1,t2], assuming \a bounding_set is a bounding box for the flow. */
       virtual 
       EnclosureSetType
-      evolution_step(const System::VectorField<R>& vector_field, 
+      evolution_step(const VectorField<R>& vector_field, 
                      const EnclosureSetType& initial_set,
-                     const Numeric::Rational& initial_time, 
-                     const Numeric::Rational& final_time, 
-                     const Geometry::Box<R>& bounding_set) const;
+                     const Rational& initial_time, 
+                     const Rational& final_time, 
+                     const Box<R>& bounding_set) const;
           
       //@}
 
@@ -107,8 +107,8 @@ namespace Ariadne {
 
     template<class ES> std::ostream& operator<<(std::ostream& os, const IntegratorInterface<ES>& i);
 
-  }
-}
+  
+} // namespace Ariadne
 
 #include "integrator_interface.inline.h"
 

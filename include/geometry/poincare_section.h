@@ -31,7 +31,7 @@
 #include "poincare_section_interface.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
     
 
     /*! \brief A hypersurface suitable for use as a Poincare' section.
@@ -40,15 +40,15 @@ namespace Ariadne {
     class PoincareSection
       : public PoincareSectionInterface<R>
     {
-      typedef typename Numeric::traits<R>::arithmetic_type A;
-      typedef typename Numeric::traits<R>::interval_type I;
+      typedef typename traits<R>::arithmetic_type A;
+      typedef typename traits<R>::interval_type I;
      public:
       /*! \brief Destructor. */
       virtual ~PoincareSection();
       /*! \brief Constructor. */
-      PoincareSection(const Function::FunctionInterface<R>& im, 
-                      const Function::FunctionInterface<R>& pm, 
-                      const Function::FunctionInterface<R>& c);
+      PoincareSection(const FunctionInterface<R>& im, 
+                      const FunctionInterface<R>& pm, 
+                      const FunctionInterface<R>& c);
       /*! \brief Copy constructor. */
       PoincareSection(const PoincareSection<R>& s);
       /*! \brief Return a new dynamically-allocated copy of the constraint. */
@@ -60,17 +60,17 @@ namespace Ariadne {
       /*! \brief Write to an output stream. */
       virtual std::ostream& write(std::ostream& os) const;
 
-      virtual const Function::FunctionInterface<R>& inclusion_map() const;
-      virtual const Function::FunctionInterface<R>& projection_map() const;
-      virtual const Function::FunctionInterface<R>& crossing_condition() const;
+      virtual const FunctionInterface<R>& inclusion_map() const;
+      virtual const FunctionInterface<R>& projection_map() const;
+      virtual const FunctionInterface<R>& crossing_condition() const;
      private:
-      Function::FunctionInterface<R>* _inclusion_map_ptr;
-      Function::FunctionInterface<R>* _projection_map_ptr;
-      Function::FunctionInterface<R>* _constraint_ptr;
+      FunctionInterface<R>* _inclusion_map_ptr;
+      FunctionInterface<R>* _projection_map_ptr;
+      FunctionInterface<R>* _constraint_ptr;
     };
     
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_POINCARE_SECTION_H */

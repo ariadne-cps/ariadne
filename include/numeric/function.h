@@ -30,7 +30,7 @@
 #define ARIADNE_FUNCTION_H
 
 namespace Ariadne {
-  namespace Numeric {
+  
 
  #ifdef DOXYGEN
 

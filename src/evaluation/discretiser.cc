@@ -32,11 +32,8 @@
 #include "evaluation/discretiser.code.h"
 
 namespace Ariadne {
-  namespace Evaluation {
-    using namespace Numeric;
-    using namespace Geometry;
-    using namespace System;
-
+  
+    
 #ifdef ENABLE_FLOAT64
     template class Discretiser< NumericalSystemInterface< Integer,Zonotope<Float64> >, GridApproximationScheme<Float64>, Zonotope<Float64> >;
     template class Discretiser< NumericalSystemInterface< Rational,Zonotope<Float64> >, GridApproximationScheme<Float64>, Zonotope<Float64> >;
@@ -47,5 +44,5 @@ namespace Ariadne {
     template class Discretiser< NumericalSystemInterface< Rational,Zonotope<FloatMP> >, GridApproximationScheme<FloatMP>, Zonotope<FloatMP> >;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

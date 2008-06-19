@@ -37,30 +37,30 @@ namespace Ariadne {
   
 
 template<class R>
-System::HybridAutomaton<R>::HybridAutomaton(const std::string &name)
+HybridAutomaton<R>::HybridAutomaton(const std::string &name)
   : _name(name) 
 { 
 }
 
 
 template<class R>
-System::HybridAutomaton<R>*
-System::HybridAutomaton<R>::clone() const {
+HybridAutomaton<R>*
+HybridAutomaton<R>::clone() const {
   throw NotImplemented(__PRETTY_FUNCTION__);
   return new HybridAutomaton<R>(*this);
 }
 
 template<class R>
-System::HybridAutomaton<R>::~HybridAutomaton() {
+HybridAutomaton<R>::~HybridAutomaton() {
   this->_transitions.clear();
 }
 
 
 template<class R>
-const System::DiscreteMode<R>& 
-System::HybridAutomaton<R>::new_mode(Geometry::DiscreteState id,
+const DiscreteMode<R>& 
+HybridAutomaton<R>::new_mode(DiscreteState id,
          const VectorField<R>& dynamic,
-         const Geometry::ConstraintSet<R>& invariant) 
+         const ConstraintSet<R>& invariant) 
 {
   if(this->has_mode(id)) {
     throw std::runtime_error("The hybrid automaton already has a mode with the given id");
@@ -71,16 +71,16 @@ System::HybridAutomaton<R>::new_mode(Geometry::DiscreteState id,
 
 
 template<class R>
-const System::DiscreteTransition<R>& 
-System::HybridAutomaton<R>::new_transition(DiscreteEvent event,
+const DiscreteTransition<R>& 
+HybridAutomaton<R>::new_transition(DiscreteEvent event,
                const DiscreteMode<R> &source, 
                const DiscreteMode<R> &destination,
                const Map<R> &reset,
-               const Geometry::ConstraintSet<R> &activation) 
+               const ConstraintSet<R> &activation) 
 {
-  System::DiscreteEvent event_id=event;
-  Geometry::DiscreteState source_id=source.discrete_state();
-  Geometry::DiscreteState destination_id=destination.discrete_state();
+  DiscreteEvent event_id=event;
+  DiscreteState source_id=source.discrete_state();
+  DiscreteState destination_id=destination.discrete_state();
   if(this->has_transition(event_id,source_id)) {
     throw std::runtime_error("The automaton already has a transition with the given event_id and source id.");
   }
@@ -106,12 +106,12 @@ System::HybridAutomaton<R>::new_transition(DiscreteEvent event,
 
 
 template<class R>
-const System::DiscreteTransition<R>& 
-System::HybridAutomaton<R>::new_transition(DiscreteEvent event,
-               Geometry::DiscreteState source, 
-               Geometry::DiscreteState destination,
+const DiscreteTransition<R>& 
+HybridAutomaton<R>::new_transition(DiscreteEvent event,
+               DiscreteState source, 
+               DiscreteState destination,
                const Map<R> &reset,
-               const Geometry::ConstraintSet<R> &activation) 
+               const ConstraintSet<R> &activation) 
 {
   if(this->has_transition(event,source)) {
     throw std::runtime_error("The automaton already has a transition with the given id and source id.");
@@ -132,7 +132,7 @@ System::HybridAutomaton<R>::new_transition(DiscreteEvent event,
 
 template<class R>
 bool
-System::HybridAutomaton<R>::has_mode(Geometry::DiscreteState state) const 
+HybridAutomaton<R>::has_mode(DiscreteState state) const 
 {
   // FIXME: This is a hack since we use std::set which cannot be searched by id.
   for(discrete_mode_const_iterator mode_iter=this->_modes.begin();
@@ -148,7 +148,7 @@ System::HybridAutomaton<R>::has_mode(Geometry::DiscreteState state) const
 
 template<class R>
 bool 
-System::HybridAutomaton<R>::has_transition(DiscreteEvent event, Geometry::DiscreteState source) const 
+HybridAutomaton<R>::has_transition(DiscreteEvent event, DiscreteState source) const 
 {
   for(discrete_transition_const_iterator transition_iter=this->_transitions.begin();
       transition_iter!=this->_transitions.end(); ++transition_iter) 
@@ -163,10 +163,10 @@ System::HybridAutomaton<R>::has_transition(DiscreteEvent event, Geometry::Discre
 
 
 template<class R>
-Geometry::HybridSet<R>
-System::HybridAutomaton<R>::invariant() const 
+HybridSet<R>
+HybridAutomaton<R>::invariant() const 
 {
-  Geometry::HybridSet<R> result;
+  HybridSet<R> result;
   for(discrete_mode_const_iterator mode_iter=this->_modes.begin(); 
       mode_iter!=this->_modes.end(); ++mode_iter)
   {
@@ -177,10 +177,10 @@ System::HybridAutomaton<R>::invariant() const
 
 
 template<class R>
-Geometry::HybridSpace
-System::HybridAutomaton<R>::locations() const 
+HybridSpace
+HybridAutomaton<R>::locations() const 
 {
-  Geometry::HybridSpace result;
+  HybridSpace result;
   for(discrete_mode_const_iterator mode_iter=this->_modes.begin(); 
       mode_iter!=this->_modes.end(); ++mode_iter) 
   {
@@ -190,24 +190,24 @@ System::HybridAutomaton<R>::locations() const
 }
 
 template<class R>
-Geometry::HybridSpace
-System::HybridAutomaton<R>::state_space() const 
+HybridSpace
+HybridAutomaton<R>::state_space() const 
 {
   return this->locations();
 }
 
 
 template<class R>
-const std::set< System::DiscreteMode<R> >& 
-System::HybridAutomaton<R>::modes() const 
+const std::set< DiscreteMode<R> >& 
+HybridAutomaton<R>::modes() const 
 {
   return this->_modes;
 }
 
 
 template<class R>
-const System::DiscreteMode<R>& 
-System::HybridAutomaton<R>::mode(Geometry::DiscreteState state) const 
+const DiscreteMode<R>& 
+HybridAutomaton<R>::mode(DiscreteState state) const 
 {
   // FIXME: This is a hack; we should use a logarithmic time real search to find a mode with the given discrete state.
   for(discrete_mode_const_iterator mode_iter=this->_modes.begin();
@@ -222,16 +222,16 @@ System::HybridAutomaton<R>::mode(Geometry::DiscreteState state) const
 
 
 template<class R>
-const std::set< System::DiscreteTransition<R> >& 
-System::HybridAutomaton<R>::transitions() const 
+const std::set< DiscreteTransition<R> >& 
+HybridAutomaton<R>::transitions() const 
 {
   return this->_transitions;
 }
 
 
 template<class R>
-reference_vector< const System::DiscreteTransition<R> >
-System::HybridAutomaton<R>::transitions(Geometry::DiscreteState source) const
+reference_vector< const DiscreteTransition<R> >
+HybridAutomaton<R>::transitions(DiscreteState source) const
 {
   reference_vector< const DiscreteTransition<R> > result;
   for(discrete_transition_const_iterator transition_iter=this->_transitions.begin();
@@ -246,8 +246,8 @@ System::HybridAutomaton<R>::transitions(Geometry::DiscreteState source) const
 
 
 template<class R>
-const System::DiscreteTransition<R>& 
-System::HybridAutomaton<R>::transition(DiscreteEvent event, Geometry::DiscreteState source) const 
+const DiscreteTransition<R>& 
+HybridAutomaton<R>::transition(DiscreteEvent event, DiscreteState source) const 
 {
   for(discrete_transition_const_iterator transition_iter=this->_transitions.begin();
       transition_iter!=this->_transitions.end(); ++transition_iter) 
@@ -262,14 +262,14 @@ System::HybridAutomaton<R>::transition(DiscreteEvent event, Geometry::DiscreteSt
 
 template<class R>
 const std::string&
-System::HybridAutomaton<R>::name() const{ 
+HybridAutomaton<R>::name() const{ 
   return this->_name; 
 }
 
 
 template<class R>
 std::ostream& 
-System::HybridAutomaton<R>::write(std::ostream& os) const {
+HybridAutomaton<R>::write(std::ostream& os) const {
   return os << "HybridAutomaton( modes=" << this->_modes << ", transitions=" << this->_transitions << ")"; 
 }
 

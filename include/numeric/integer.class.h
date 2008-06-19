@@ -31,7 +31,7 @@
 #include <gmp.h>
 
 namespace Ariadne {
-  namespace Numeric {
+  
   
 
     template<class E> class Expression;
@@ -210,7 +210,7 @@ namespace Ariadne {
 #endif
     };
 
-  }
+  
 }
 
 #endif /* ARIADNE_NUMERIC_INTEGER_CLASS_H */

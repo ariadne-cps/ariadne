@@ -44,8 +44,6 @@
 #include "test.h"
 
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::LinearAlgebra;
 using namespace std;
 
 template<class R> int test_linear_algebra();
@@ -110,7 +108,7 @@ template<class Rl>
 int
 test_linear_algebra()
 {
-  typedef typename Numeric::traits<Rl>::arithmetic_type F;
+  typedef typename traits<Rl>::arithmetic_type F;
   Rl Arptr[9]={-1.0,3.0,1.0, -1.0,1.0,2.0, 2.0,1.0,1.0};
   Matrix<Rl> Ar(3,3,Arptr,3);
 

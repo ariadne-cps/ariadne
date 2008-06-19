@@ -37,7 +37,7 @@
 #include "constraint_interface.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
     
     template<class R> class Box;
 
@@ -48,11 +48,11 @@ namespace Ariadne {
     class SetConstraint
       : public ConstraintInterface<R>
     {
-      typedef typename Numeric::traits<R>::arithmetic_type A;
-      typedef typename Numeric::traits<R>::interval_type I;
+      typedef typename traits<R>::arithmetic_type A;
+      typedef typename traits<R>::interval_type I;
      public:
       /*! \brief Construct the set \f$f(x) \lessgtr 0\f$ from the function \f$f\f$. */
-      SetConstraint(const Geometry::SetInterface< Box<R> >& s, bool i=true);
+      SetConstraint(const SetInterface< Box<R> >& s, bool i=true);
 
       /*! \brief Destructor. */
       virtual ~SetConstraint();
@@ -72,20 +72,20 @@ namespace Ariadne {
       /*! \brief The value of the constraint function at a point. */
       virtual A value(const Point<A>& pt) const;
       /*! \brief The gradient of the constraint function at a point. */
-      virtual LinearAlgebra::Vector<A> gradient(const Point<A>& pt) const;
+      virtual Vector<A> gradient(const Point<A>& pt) const;
 
       /*! \brief The function defining the constraint. */
-      const Geometry::SetInterface< Box<R> >& set() const;
+      const SetInterface< Box<R> >& set() const;
       /*! \brief Returns true if the constraint has negative value for points inside the set. */
       bool inside() const;
      private:
       static void instantiate();
      private:
-      boost::shared_ptr< const Geometry::SetInterface< Box<R> > > _set_ptr;
+      boost::shared_ptr< const SetInterface< Box<R> > > _set_ptr;
       bool _inside;
     };
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_SET_CONSTRAINT_H */

@@ -41,23 +41,24 @@ namespace Python {
   template<class R> inline std::string python_name(const std::string& bn);
 
   template<> inline std::string python_name<bool>(const std::string& bn) { return "Boolean"+bn; }
-  template<> inline std::string python_name<Base::index_type>(const std::string& bn) { return "Index"+bn; }
-  template<> inline std::string python_name<Base::size_type>(const std::string& bn) { return "Size"+bn; }
-  template<> inline std::string python_name<Numeric::Integer>(const std::string& bn) { return "Z"+bn; }
-  template<> inline std::string python_name<Numeric::Rational>(const std::string& bn) { return "Q"+bn; }
+  template<> inline std::string python_name<index_type>(const std::string& bn) { return "Index"+bn; }
+  template<> inline std::string python_name<size_type>(const std::string& bn) { return "Size"+bn; }
+  template<> inline std::string python_name<Integer>(const std::string& bn) { return "Z"+bn; }
+  template<> inline std::string python_name<Rational>(const std::string& bn) { return "Q"+bn; }
 
   #if defined PYTHON_FLOAT64
-  template<> inline std::string python_name<Numeric::Float64>(const std::string& bn) { return ""+bn; }
-  template<> inline std::string python_name<Numeric::FloatMP>(const std::string& bn) { return "MPF"+bn; }
+  template<> inline std::string python_name<Float64>(const std::string& bn) { return ""+bn; }
+  template<> inline std::string python_name<FloatMP>(const std::string& bn) { return "MPF"+bn; }
   #elif defined PYTHON_FLOATMP
-  template<> inline std::string python_name<Numeric::Float64>(const std::string& bn) { return "F64"+bn; }
-  template<> inline std::string python_name<Numeric::FloatMP>(const std::string& bn) { return ""+bn; }
+  template<> inline std::string python_name<Float64>(const std::string& bn) { return "F64"+bn; }
+  template<> inline std::string python_name<FloatMP>(const std::string& bn) { return ""+bn; }
   #else
-  template<> inline std::string python_name<Numeric::Float64>(const std::string& bn) { return "F64"+bn; }
-  template<> inline std::string python_name<Numeric::FloatMP>(const std::string& bn) { return "MPF"+bn; }
+  template<> inline std::string python_name<Float64>(const std::string& bn) { return "F64"+bn; }
+  template<> inline std::string python_name<FloatMP>(const std::string& bn) { return "MPF"+bn; }
   #endif
 
 
-}}
+} // namespace Python
+} // namespace Ariadne
 
 #endif /* ARIADNE_PYTHON_NAME_H */

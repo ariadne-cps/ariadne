@@ -27,7 +27,7 @@
 
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
 
     /*! \ingroup DenotableSet

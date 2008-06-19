@@ -26,15 +26,15 @@ namespace Ariadne {
 
 
 template<class R> inline
-const Geometry::Grid<R>& 
-Geometry::FiniteGrid<R>::grid() const
+const Grid<R>& 
+FiniteGrid<R>::grid() const
 { 
   return this->_grid; 
 }
 
 template<class R> inline
-const Combinatoric::LatticeBlock& 
-Geometry::FiniteGrid<R>::lattice_block() const 
+const LatticeBlock& 
+FiniteGrid<R>::lattice_block() const 
 {
   return this->_lattice_block; 
 }
@@ -42,35 +42,35 @@ Geometry::FiniteGrid<R>::lattice_block() const
 
 template<class R> inline
 R 
-Geometry::FiniteGrid<R>::subdivision_coordinate(dimension_type d, integer_type n) const
+FiniteGrid<R>::subdivision_coordinate(dimension_type d, integer_type n) const
 {
   return this->_grid.subdivision_coordinate(d,n);
 }
 
 template<class R> inline
 R 
-Geometry::FiniteGrid<R>::subdivision_coordinate(dimension_type d, long_integer_type n) const
+FiniteGrid<R>::subdivision_coordinate(dimension_type d, long_integer_type n) const
 {
   return this->_grid.subdivision_coordinate(d,n);
 }
 
 template<class R> inline
-typename Geometry::FiniteGrid<R>::integer_type 
-Geometry::FiniteGrid<R>::subdivision_index(dimension_type d, const real_type& x) const 
+typename FiniteGrid<R>::integer_type 
+FiniteGrid<R>::subdivision_index(dimension_type d, const real_type& x) const 
 {
   return this->_grid.subdivision_index(d,x);
 }
 
 template<class R> inline
-typename Geometry::FiniteGrid<R>::integer_type 
-Geometry::FiniteGrid<R>::subdivision_lower_index(dimension_type d, const real_type& x) const 
+typename FiniteGrid<R>::integer_type 
+FiniteGrid<R>::subdivision_lower_index(dimension_type d, const real_type& x) const 
 {
   return this->_grid.subdivision_lower_index(d,x);
 }
 
 template<class R> inline
-typename Geometry::FiniteGrid<R>::integer_type 
-Geometry::FiniteGrid<R>::subdivision_upper_index(dimension_type d, const real_type& x) const 
+typename FiniteGrid<R>::integer_type 
+FiniteGrid<R>::subdivision_upper_index(dimension_type d, const real_type& x) const 
 {
   return this->_grid.subdivision_upper_index(d,x);
 }
@@ -81,21 +81,21 @@ Geometry::FiniteGrid<R>::subdivision_upper_index(dimension_type d, const real_ty
 
 template<class R> inline
 std::istream& 
-Geometry::operator>>(std::istream& is, Grid<R>& g)
+operator>>(std::istream& is, Grid<R>& g)
 {
   return g.read(is);
 }
 
 template<class R> inline
 std::ostream& 
-Geometry::operator<<(std::ostream& os, const Grid<R>& g)
+operator<<(std::ostream& os, const Grid<R>& g)
 {
   return g.write(os);
 }
 
 template<class R> inline
 std::ostream& 
-Geometry::operator<<(std::ostream& os, const FiniteGrid<R>& fg)
+operator<<(std::ostream& os, const FiniteGrid<R>& fg)
 {
   return fg.write(os);
 }

@@ -39,13 +39,13 @@
 
 
 namespace Ariadne {
-  namespace Geometry {
+  
   
  
     /*!\ingroup Geometry
      * \brief A templated class representing an interval set of real numbers. 
      * 
-     * The interval is specified by the lower and upper endpoints, and must be binary compatible with the Numeric::FuzzyFloat class.
+     * The interval is specified by the lower and upper endpoints, and must be binary compatible with the FuzzyFloat class.
      */
     template<class X>
     class IntervalSet
@@ -170,7 +170,7 @@ namespace Ariadne {
     template<class X> std::ostream& operator<<(std::ostream& os, const IntervalSet<X>& x);
     template<class X> std::istream& operator>>(std::istream& is, IntervalSet<X>& x);
     
-  } // namespace Geometry
+
 } // namespace Ariadne
 
 #include "interval_set.inline.h"

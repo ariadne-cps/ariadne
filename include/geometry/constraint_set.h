@@ -37,7 +37,7 @@
 #include "geometry/set_interface.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
     
     class EuclideanSpace;
     template<class R> class Box;
@@ -52,12 +52,12 @@ namespace Ariadne {
     class ConstraintSet
       : public SetInterface< Box<R> >
     {
-      typedef typename Numeric::traits<R>::arithmetic_type A;
+      typedef typename traits<R>::arithmetic_type A;
      public:
       /*! \brief Construct the set \f$x\in D\f$ from the function \f$f\f$ and the box \a D. */
-      ConstraintSet(const Geometry::Box<R>& D);
+      ConstraintSet(const Box<R>& D);
       /*! \brief Construct the set \f$f(x)\in D\f$ from the function \f$f\f$ and the box \a D. */
-      ConstraintSet(const Function::FunctionInterface<R>& f, const Geometry::Box<R>& D);
+      ConstraintSet(const FunctionInterface<R>& f, const Box<R>& D);
 
       /*! \brief Destructor. */
       virtual ~ConstraintSet();
@@ -87,15 +87,15 @@ namespace Ariadne {
       /*! \brief The number of independed inequality constraints used to define the set. */
       size_type number_of_constraints() const;
       /*! \brief The codomain given the allowable values of the constraint function. */
-      const Geometry::Box<R>& codomain() const;
+      const Box<R>& codomain() const;
       /*! \brief The function describing the constraints. */
-      const Function::FunctionInterface<R>& function() const;
+      const FunctionInterface<R>& function() const;
 
       /*! \brief Test if the set contains a point described approximately. */
       tribool contains(const Point<A>& pt) const;
      private:
-      boost::shared_ptr< const Function::FunctionInterface<R> > _function_ptr;
-      Geometry::Box<R> _codomain;
+      boost::shared_ptr< const FunctionInterface<R> > _function_ptr;
+      Box<R> _codomain;
     };
     
     template<class R> inline
@@ -107,7 +107,7 @@ namespace Ariadne {
 
 
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_CONSTRAINT_SET_H */

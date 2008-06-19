@@ -27,8 +27,8 @@
 #include "evaluation/constraint_based_hybrid_scheduler.code.h"
 
 namespace Ariadne {
-  namespace Evaluation {
-    using namespace Numeric;
+  
+    
 
 #ifdef ENABLE_FLOAT64
   template class ConstraintBasedHybridScheduler<Float64>;
@@ -39,5 +39,5 @@ namespace Ariadne {
 #endif
 
       
-  }
-}
+  
+} // namespace Ariadne

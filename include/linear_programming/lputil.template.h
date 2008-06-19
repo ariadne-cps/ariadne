@@ -27,10 +27,10 @@ namespace Ariadne {
 
 
 template<class R>
-LinearAlgebra::Matrix<R>
-LinearProgramming::to_tableau(const LinearAlgebra::Matrix<R>& A, 
-                              const LinearAlgebra::Vector<R>& b, 
-                              const LinearAlgebra::Vector<R>& c) 
+Matrix<R>
+to_tableau(const Matrix<R>& A, 
+                              const Vector<R>& b, 
+                              const Vector<R>& c) 
 {
   size_type nc = b.size(); // number of constraints
   size_type nv = c.size(); // number of variables
@@ -43,7 +43,7 @@ LinearProgramming::to_tableau(const LinearAlgebra::Matrix<R>& A,
   
   size_type n = nv+nc;
   // tableau  needs a row for each constraint + 1 and a column for each variable + slacks + 1
-  LinearAlgebra::Matrix<R> tableau =  LinearAlgebra::Matrix<R>(nc+1, n+1);
+  Matrix<R> tableau =  Matrix<R>(nc+1, n+1);
   //  NB: uninitialized elements are assumed to be 0
   
   for (size_type i = 0; i != nc; i++) {
@@ -74,7 +74,7 @@ LinearProgramming::to_tableau(const LinearAlgebra::Matrix<R>& A,
 // Modify the tableau
 template<class AP>
 void 
-LinearProgramming::pivot_tableau(uint m, uint n,
+pivot_tableau(uint m, uint n,
                                  AP* Aptr, uint Arinc, uint Acinc,
                                  AP* bptr, uint binc,
                                  AP* cptr, uint cinc,
@@ -89,7 +89,7 @@ LinearProgramming::pivot_tableau(uint m, uint n,
   AP pivot_scale = static_cast<AP>(1) / Aptr[leave_inc+enter_inc];
   
   if (verbosity > 3)
-    std::clog << "pivot_tableau: leave=" << n+leave << ", enter=" << enter << ", pivot scale=" << pivot_scale << ", perm=" << LinearAlgebra::Permutation(pptr,pptr+n) << std::endl;
+    std::clog << "pivot_tableau: leave=" << n+leave << ", enter=" << enter << ", pivot scale=" << pivot_scale << ", perm=" << Permutation(pptr,pptr+n) << std::endl;
   
   std::swap(pptr[enter], pptr[n+leave]);
   
@@ -113,7 +113,7 @@ LinearProgramming::pivot_tableau(uint m, uint n,
   }
   
   if (verbosity > 4)
-    std::clog << "after subtracting row " << leave << ": \ntableau=" << LinearAlgebra::Matrix<AP>(m+1, m+n+1, Aptr, Arinc, Acinc) << std::endl;
+    std::clog << "after subtracting row " << leave << ": \ntableau=" << Matrix<AP>(m+1, m+n+1, Aptr, Arinc, Acinc) << std::endl;
   
   // Subtract c(enter)/Aptr(leave,enter) times row leave from c,
   // except in the leave column, which is divided by Aptr(leave,enter)
@@ -130,7 +130,7 @@ LinearProgramming::pivot_tableau(uint m, uint n,
   cptr[enter*cinc] = -scale;
   
   if (verbosity > 4)
-    std::clog << "after subtracting row " << leave << " from c: \ntableau=" << LinearAlgebra::Matrix<AP>(m+1, m+n+1, Aptr, Arinc, Acinc) << std::endl;
+    std::clog << "after subtracting row " << leave << " from c: \ntableau=" << Matrix<AP>(m+1, m+n+1, Aptr, Arinc, Acinc) << std::endl;
   
   // Scale the enter row, except the leave column
   scale = pivot_scale;
@@ -141,7 +141,7 @@ LinearProgramming::pivot_tableau(uint m, uint n,
   Aptr[leave_inc+enter_inc] = scale;
   
   if (verbosity > 2)
-    std::clog << "leaving pivot_tableau\ntableau=" << LinearAlgebra::Matrix<AP>(m+1, m+n+1, Aptr, Arinc, Acinc) << "\nperm=" << LinearAlgebra::Permutation(pptr,pptr+n) << std::endl;
+    std::clog << "leaving pivot_tableau\ntableau=" << Matrix<AP>(m+1, m+n+1, Aptr, Arinc, Acinc) << "\nperm=" << Permutation(pptr,pptr+n) << std::endl;
 }
 
 

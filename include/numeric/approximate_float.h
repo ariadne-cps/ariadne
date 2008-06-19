@@ -31,7 +31,7 @@
 #include "interval.h"
 
 namespace Ariadne {
-  namespace Numeric {
+  
 
     template<class T>
     class ApproximateFloat
@@ -158,7 +158,7 @@ namespace Ariadne {
     operator/=(ApproximateFloat<T>& x, const ApproximateFloat<T>& y) {
       x._value=div_approx(x._value,y._value); return x; }
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_NUMERIC_APPROXIMATE_FLOAT_H */

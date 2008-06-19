@@ -26,7 +26,7 @@
 #include <cmath>
 
 namespace Ariadne {
-namespace Numeric {
+
 
 bool ok = initialise();
 
@@ -81,4 +81,4 @@ double exp(const double& x) {
 }
 
 }
-}
+

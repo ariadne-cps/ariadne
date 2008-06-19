@@ -25,9 +25,9 @@
 
 namespace Ariadne {
 
-std::ofstream Output::log_file_stream;
+std::ofstream log_file_stream;
 
-void Output::redirect_log(const char* filename) 
+void redirect_log(const char* filename) 
 {
   if(log_file_stream.is_open()) {
     log_file_stream.close();
@@ -36,18 +36,11 @@ void Output::redirect_log(const char* filename)
   std::clog.rdbuf( log_file_stream.rdbuf() );
 }
 
-int Numeric::verbosity=0; 
-int LinearAlgebra::verbosity=0; 
-int LinearProgramming::verbosity=0; 
-int Combinatoric::verbosity=0;
-int Function::verbosity=0;
-int Geometry::verbosity=0;
-int System::verbosity=0;
-int Evaluation::solver_verbosity=0;
-int Evaluation::applicator_verbosity=0;
-int Evaluation::integrator_verbosity=0;
-int Evaluation::detector_verbosity=0;
-int Evaluation::hybrid_evolver_verbosity=0;
-int Input::verbosity=0;
+int verbosity=0; 
+int solver_verbosity=0;
+int applicator_verbosity=0;
+int integrator_verbosity=0;
+int detector_verbosity=0;
+int hybrid_evolver_verbosity=0;
 
 }

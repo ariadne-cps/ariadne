@@ -32,7 +32,7 @@
 #include <iosfwd>
 
 namespace Ariadne {
-  namespace Evaluation {
+  
     
     //@{ \name Exceptions
     /*! \brief %Base class for exceptions in the Evaluation module. */
@@ -48,7 +48,7 @@ namespace Ariadne {
 
     //@}
 
-  } 
-}
+   
+} // namespace Ariadne
 
 #endif /* ARIADNE_EVALUATION_EXCEPTIONS_H */

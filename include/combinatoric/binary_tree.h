@@ -39,7 +39,7 @@
 #include "combinatoric/binary_word.h"
 
 namespace Ariadne {
-  namespace Combinatoric {
+
     class BinaryTree;
     class BinaryTreeIterator;
     
@@ -156,8 +156,7 @@ namespace Ariadne {
     
     std::ostream& operator<<(std::ostream& os, const BinaryTree& t);
     
-  } // namespace Base
-}// namespace Ariadne
+} // namespace Ariadne
 
 
 #endif /* ARIADNE_BINARY_TREE_H */

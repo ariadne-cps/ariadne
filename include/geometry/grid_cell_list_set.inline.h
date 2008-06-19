@@ -27,73 +27,73 @@
 namespace Ariadne {
 
 template<class R> inline
-const Geometry::Grid<R>& 
-Geometry::GridCellListSet<R>::grid() const 
+const Grid<R>& 
+GridCellListSet<R>::grid() const 
 {
   return this->_grid; 
 }
 
 template<class R> inline
 dimension_type 
-Geometry::GridCellListSet<R>::dimension() const 
+GridCellListSet<R>::dimension() const 
 {
   return this->_lattice_set.dimension(); 
 }
 
 template<class R> inline
-Geometry::EuclideanSpace 
-Geometry::GridCellListSet<R>::space() const 
+EuclideanSpace 
+GridCellListSet<R>::space() const 
 {
   return EuclideanSpace(this->dimension()); 
 }
 
 template<class R> inline
 tribool 
-Geometry::GridCellListSet<R>::empty() const 
+GridCellListSet<R>::empty() const 
 {
   return this->_lattice_set.empty(); 
 }
 
 template<class R> inline
 tribool 
-Geometry::GridCellListSet<R>::bounded() const 
+GridCellListSet<R>::bounded() const 
 {
   return true; 
 }
 
 template<class R> inline
 size_type 
-Geometry::GridCellListSet<R>::size() const 
+GridCellListSet<R>::size() const 
 {
   return _lattice_set.size(); 
 }
 
 template<class R> inline
-const Combinatoric::LatticeCellListSet& 
-Geometry::GridCellListSet<R>::lattice_set() const 
+const LatticeCellListSet& 
+GridCellListSet<R>::lattice_set() const 
 {
   return _lattice_set; 
 }
 
 template<class R> inline
-Geometry::GridCell<R> 
-Geometry::GridCellListSet<R>::operator[] (const size_type i) const 
+GridCell<R> 
+GridCellListSet<R>::operator[] (const size_type i) const 
 {
   return GridCell<R>(grid(),_lattice_set[i]); 
 }
 
 
 template<class R> inline
-typename Geometry::GridCellListSet<R>::const_iterator 
-Geometry::GridCellListSet<R>::begin() const 
+typename GridCellListSet<R>::const_iterator 
+GridCellListSet<R>::begin() const 
 {
   return const_iterator(this->_grid,_lattice_set.begin()); 
 }
 
 
 template<class R> inline
-typename Geometry::GridCellListSet<R>::const_iterator 
-Geometry::GridCellListSet<R>::end() const 
+typename GridCellListSet<R>::const_iterator 
+GridCellListSet<R>::end() const 
 {
   return const_iterator(this->_grid,_lattice_set.end()); 
 }
@@ -101,7 +101,7 @@ Geometry::GridCellListSet<R>::end() const
 
 template<class R> inline
 void
-Geometry::GridCellListSet<R>::unique_sort()
+GridCellListSet<R>::unique_sort()
 {
   this->_lattice_set.unique_sort();
 }
@@ -109,7 +109,7 @@ Geometry::GridCellListSet<R>::unique_sort()
 
 template<class R> inline
 void 
-Geometry::GridCellListSet<R>::adjoin(const GridCell<R>& c) 
+GridCellListSet<R>::adjoin(const GridCell<R>& c) 
 {
   _lattice_set.adjoin(c.lattice_set()); 
 }
@@ -117,7 +117,7 @@ Geometry::GridCellListSet<R>::adjoin(const GridCell<R>& c)
 
 template<class R> inline
 void 
-Geometry::GridCellListSet<R>::adjoin(const GridBlock<R>& bl) 
+GridCellListSet<R>::adjoin(const GridBlock<R>& bl) 
 {
   _lattice_set.adjoin(bl.lattice_set()); 
 }
@@ -125,7 +125,7 @@ Geometry::GridCellListSet<R>::adjoin(const GridBlock<R>& bl)
 
 template<class R> inline
 void 
-Geometry::GridCellListSet<R>::adjoin(const GridCellListSet<R>& cls) 
+GridCellListSet<R>::adjoin(const GridCellListSet<R>& cls) 
 {
   _lattice_set.adjoin(cls.lattice_set()); 
 }
@@ -133,42 +133,42 @@ Geometry::GridCellListSet<R>::adjoin(const GridCellListSet<R>& cls)
 
 template<class R> inline
 void 
-Geometry::GridCellListSet<R>::restrict(const GridBlock<R>& bl) 
+GridCellListSet<R>::restrict(const GridBlock<R>& bl) 
 {
   _lattice_set.restrict(bl.lattice_set()); 
 }
 
 template<class R> inline
 void 
-Geometry::GridCellListSet<R>::restrict(const GridMaskSet<R>& gms) 
+GridCellListSet<R>::restrict(const GridMaskSet<R>& gms) 
 {
   _lattice_set.restrict(gms.lattice_set()); 
 }
 
 template<class R> inline
 void 
-Geometry::GridCellListSet<R>::remove(const GridCellListSet<R>& gcls) 
+GridCellListSet<R>::remove(const GridCellListSet<R>& gcls) 
 {
   _lattice_set.remove(gcls.lattice_set()); 
 }
 
 template<class R> inline
 void 
-Geometry::GridCellListSet<R>::restrict(const GridCellListSet<R>& gcls) 
+GridCellListSet<R>::restrict(const GridCellListSet<R>& gcls) 
 {
   _lattice_set.restrict(gcls.lattice_set()); 
 }
 
 template<class R> inline
 void 
-Geometry::GridCellListSet<R>::remove(const GridMaskSet<R>& gms) 
+GridCellListSet<R>::remove(const GridMaskSet<R>& gms) 
 {
   _lattice_set.remove(gms.lattice_set()); 
 }
 
 template<class R> inline
 void 
-Geometry::GridCellListSet<R>::adjoin_over_approximation(const Box<R>& r) 
+GridCellListSet<R>::adjoin_over_approximation(const Box<R>& r) 
 {
   this->adjoin(over_approximation(r,this->grid()));
 }
@@ -176,14 +176,14 @@ Geometry::GridCellListSet<R>::adjoin_over_approximation(const Box<R>& r)
 
 template<class R> template<class BS> inline
 void 
-Geometry::GridCellListSet<R>::adjoin_outer_approximation(const BS& bs)
+GridCellListSet<R>::adjoin_outer_approximation(const BS& bs)
 {
   this->adjoin(outer_approximation(bs,this->grid()));
 }
 
 template<class R> template<class BS> inline
 void 
-Geometry::GridCellListSet<R>::adjoin_inner_approximation(const BS& bs)
+GridCellListSet<R>::adjoin_inner_approximation(const BS& bs)
 {
   this->adjoin(inner_approximation(bs,this->grid()));
 }
@@ -197,7 +197,7 @@ Geometry::GridCellListSet<R>::adjoin_inner_approximation(const BS& bs)
 
 template<class R> inline
 std::ostream& 
-Geometry::operator<<(std::ostream& os, const GridCellListSet<R>& gcls) {
+operator<<(std::ostream& os, const GridCellListSet<R>& gcls) {
   return gcls.write(os);
 }
 

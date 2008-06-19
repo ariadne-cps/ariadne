@@ -29,15 +29,13 @@
 #include "function/multi_index.h"
 #include "function/taylor_variable.h"
 
-#include <boost/python.hpp>
 #include "python/utilities.h"
 #include "python/read_array.h"
-
-using namespace boost::python;
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::Function;
 using namespace Ariadne::Python;
+
+#include <boost/python.hpp>
+using namespace boost::python;
 
 template<class X>
 TaylorVariable<X>*
@@ -64,10 +62,16 @@ R taylor_variable_get_item(const TaylorVariable<R>& td, const MultiIndex& i) {
   return td[i];
 }
 
+template<class X>
+TaylorVariable<X> exp(const TaylorVariable<X>& tv) {
+  return Ariadne::exp(tv);
+}
+
+
 template<class R>
 void export_taylor_variable()
 {
-  typedef typename Numeric::traits<R>::arithmetic_type A;
+  typedef typename traits<R>::arithmetic_type A;
   typedef TaylorSeries<A> TS;
   typedef TaylorVariable<A> TV;
 
@@ -79,36 +83,36 @@ void export_taylor_variable()
   taylor_variable_class.def("__setitem__",&taylor_variable_set_item<A,double>);
   taylor_variable_class.def("__setitem__",&taylor_variable_set_item<A,R>);
   taylor_variable_class.def("__setitem__",&taylor_variable_set_item<A,A>);
-  taylor_variable_class.def("__neg__", &Python::neg<TV,TV>);
-  taylor_variable_class.def("__add__", &Python::add<TV,TV,TV>);
-  taylor_variable_class.def("__add__", &Python::add<TV,TV,double>);
-  taylor_variable_class.def("__add__", &Python::add<TV,TV,R>);
-  taylor_variable_class.def("__add__", &Python::add<TV,TV,A>);
-  taylor_variable_class.def("__radd__", &Python::radd<TV,TV,double>);
-  taylor_variable_class.def("__radd__", &Python::radd<TV,TV,R>);
-  taylor_variable_class.def("__radd__", &Python::radd<TV,TV,A>);
-  taylor_variable_class.def("__sub__", &Python::sub<TV,TV,TV>);
-  taylor_variable_class.def("__sub__", &Python::sub<TV,TV,double>);
-  taylor_variable_class.def("__sub__", &Python::sub<TV,TV,R>);
-  taylor_variable_class.def("__sub__", &Python::sub<TV,TV,A>);
-  taylor_variable_class.def("__rsub__", &Python::rsub<TV,TV,double>);
-  taylor_variable_class.def("__rsub__", &Python::rsub<TV,TV,R>);
-  taylor_variable_class.def("__rsub__", &Python::rsub<TV,TV,A>);
-  taylor_variable_class.def("__mul__", &Python::mul<TV,TV,TV>);
-  taylor_variable_class.def("__mul__", &Python::mul<TV,TV,double>);
-  taylor_variable_class.def("__mul__", &Python::mul<TV,TV,R>);
-  taylor_variable_class.def("__mul__", &Python::mul<TV,TV,A>);
-  taylor_variable_class.def("__rmul__", &Python::rmul<TV,TV,double>);
-  taylor_variable_class.def("__rmul__", &Python::rmul<TV,TV,R>);
-  taylor_variable_class.def("__rmul__", &Python::rmul<TV,TV,A>);
-  taylor_variable_class.def("__div__", &Python::div<TV,TV,TV>);
-  taylor_variable_class.def("__div__", &Python::div<TV,TV,double>);
-  taylor_variable_class.def("__div__", &Python::div<TV,TV,R>);
-  taylor_variable_class.def("__div__", &Python::div<TV,TV,A>);
-  taylor_variable_class.def("__rdiv__", &Python::rdiv<TV,TV,double>);
-  taylor_variable_class.def("__rdiv__", &Python::rdiv<TV,TV,R>);
-  taylor_variable_class.def("__rdiv__", &Python::rdiv<TV,TV,A>);
-  taylor_variable_class.def("__pow__", &Python::pow<TV,TV,int>);
+  taylor_variable_class.def("__neg__", &__neg__<TV,TV>);
+  taylor_variable_class.def("__add__", &__add__<TV,TV,TV>);
+  taylor_variable_class.def("__add__", &__add__<TV,TV,double>);
+  taylor_variable_class.def("__add__", &__add__<TV,TV,R>);
+  taylor_variable_class.def("__add__", &__add__<TV,TV,A>);
+  taylor_variable_class.def("__radd__", &__radd__<TV,TV,double>);
+  taylor_variable_class.def("__radd__", &__radd__<TV,TV,R>);
+  taylor_variable_class.def("__radd__", &__radd__<TV,TV,A>);
+  taylor_variable_class.def("__sub__", &__sub__<TV,TV,TV>);
+  taylor_variable_class.def("__sub__", &__sub__<TV,TV,double>);
+  taylor_variable_class.def("__sub__", &__sub__<TV,TV,R>);
+  taylor_variable_class.def("__sub__", &__sub__<TV,TV,A>);
+  taylor_variable_class.def("__rsub__", &__rsub__<TV,TV,double>);
+  taylor_variable_class.def("__rsub__", &__rsub__<TV,TV,R>);
+  taylor_variable_class.def("__rsub__", &__rsub__<TV,TV,A>);
+  taylor_variable_class.def("__mul__", &__mul__<TV,TV,TV>);
+  taylor_variable_class.def("__mul__", &__mul__<TV,TV,double>);
+  taylor_variable_class.def("__mul__", &__mul__<TV,TV,R>);
+  taylor_variable_class.def("__mul__", &__mul__<TV,TV,A>);
+  taylor_variable_class.def("__rmul__", &__rmul__<TV,TV,double>);
+  taylor_variable_class.def("__rmul__", &__rmul__<TV,TV,R>);
+  taylor_variable_class.def("__rmul__", &__rmul__<TV,TV,A>);
+  taylor_variable_class.def("__div__", &__div__<TV,TV,TV>);
+  taylor_variable_class.def("__div__", &__div__<TV,TV,double>);
+  taylor_variable_class.def("__div__", &__div__<TV,TV,R>);
+  taylor_variable_class.def("__div__", &__div__<TV,TV,A>);
+  taylor_variable_class.def("__rdiv__", &__rdiv__<TV,TV,double>);
+  taylor_variable_class.def("__rdiv__", &__rdiv__<TV,TV,R>);
+  taylor_variable_class.def("__rdiv__", &__rdiv__<TV,TV,A>);
+  taylor_variable_class.def("__pow__", &__pow__<TV,TV,int>);
   taylor_variable_class.def(self_ns::str(self));
   
   def("constant",(TV(*)(size_type, smoothness_type, const double&))&TV::constant);
@@ -117,24 +121,24 @@ void export_taylor_variable()
   def("constant",(TV(*)(size_type, smoothness_type, const A&))&TV::constant);
   def("variable",(TV(*)(size_type, smoothness_type, const A&, size_type))&TV::variable);
 
-  def("compose",(TV(*)(const TS&,const TV&))&Function::compose);
+  def("compose",(TV(*)(const TS&,const TV&))&compose);
 
-  def("max",(TV(*)(const TV&,const TV&))&Function::max);
-  def("min",(TV(*)(const TV&,const TV&))&Function::min);
-  def("abs",(TV(*)(const TV&))&Function::abs);
-  def("neg",(TV(*)(const TV&))&Function::neg);
-  def("rec",(TV(*)(const TV&))&Function::rec);
-  def("pow",(TV(*)(const TV&, int))&Function::pow);
+  def("max",(TV(*)(const TV&,const TV&))&max<A>);
+  def("min",(TV(*)(const TV&,const TV&))&min<A>);
+  def("abs",(TV(*)(const TV&))&abs<A>);
+  def("neg",(TV(*)(const TV&))&neg<A>);
+  def("rec",(TV(*)(const TV&))&rec<A>);
+  def("pow",(TV(*)(const TV&, int))&pow<A>);
 
-  def("sqrt", (TV(*)(const TV&))&Function::sqrt);
-  def("exp", (TV(*)(const TV&))&Function::exp);
-  def("log", (TV(*)(const TV&))&Function::log);
-  def("sin", (TV(*)(const TV&))&Function::sin);
-  def("cos", (TV(*)(const TV&))&Function::cos);
-  def("tan", (TV(*)(const TV&))&Function::tan);
-  def("asin", (TV(*)(const TV&))&Function::asin);
-  def("acos", (TV(*)(const TV&))&Function::acos);
-  def("atan", (TV(*)(const TV&))&Function::atan);
+  def("sqrt", (TV(*)(const TV&))&sqrt<A>);
+  def("exp", (TV(*)(const TV&))&::exp<A>);
+  def("log", (TV(*)(const TV&))&log<A>);
+  def("sin", (TV(*)(const TV&))&sin<A>);
+  def("cos", (TV(*)(const TV&))&cos<A>);
+  def("tan", (TV(*)(const TV&))&tan<A>);
+  def("asin", (TV(*)(const TV&))&asin<A>);
+  def("acos", (TV(*)(const TV&))&acos<A>);
+  def("atan", (TV(*)(const TV&))&atan<A>);
 
 }
 
@@ -152,28 +156,28 @@ void export_taylor_variable<Rational>()
   taylor_variable_class.def("__getitem__", &taylor_variable_get_item<Q>);
   taylor_variable_class.def("__setitem__",&taylor_variable_set_item<Q,double>);
   taylor_variable_class.def("__setitem__",&taylor_variable_set_item<Q,Q>);
-  taylor_variable_class.def("__neg__", &Python::neg<TV,TV>);
-  taylor_variable_class.def("__add__", &Python::add<TV,TV,TV>);
-  taylor_variable_class.def("__add__", &Python::add<TV,TV,double>);
-  taylor_variable_class.def("__add__", &Python::add<TV,TV,Q>);
-  taylor_variable_class.def("__radd__", &Python::radd<TV,TV,double>);
-  taylor_variable_class.def("__radd__", &Python::radd<TV,TV,Q>);
-  taylor_variable_class.def("__sub__", &Python::sub<TV,TV,TV>);
-  taylor_variable_class.def("__sub__", &Python::sub<TV,TV,double>);
-  taylor_variable_class.def("__sub__", &Python::sub<TV,TV,Q>);
-  taylor_variable_class.def("__rsub__", &Python::rsub<TV,TV,double>);
-  taylor_variable_class.def("__rsub__", &Python::rsub<TV,TV,Q>);
-  taylor_variable_class.def("__mul__", &Python::mul<TV,TV,TV>);
-  taylor_variable_class.def("__mul__", &Python::mul<TV,TV,double>);
-  taylor_variable_class.def("__mul__", &Python::mul<TV,TV,Q>);
-  taylor_variable_class.def("__rmul__", &Python::rmul<TV,TV,double>);
-  taylor_variable_class.def("__rmul__", &Python::rmul<TV,TV,Q>);
-  taylor_variable_class.def("__div__", &Python::div<TV,TV,TV>);
-  taylor_variable_class.def("__div__", &Python::div<TV,TV,double>);
-  taylor_variable_class.def("__div__", &Python::div<TV,TV,Q>);
-  taylor_variable_class.def("__rdiv__", &Python::rdiv<TV,TV,double>);
-  taylor_variable_class.def("__rdiv__", &Python::rdiv<TV,TV,Q>);
-  taylor_variable_class.def("__pow__", &Python::pow<TV,TV,int>);
+  taylor_variable_class.def("__neg__", &__neg__<TV,TV>);
+  taylor_variable_class.def("__add__", &__add__<TV,TV,TV>);
+  taylor_variable_class.def("__add__", &__add__<TV,TV,double>);
+  taylor_variable_class.def("__add__", &__add__<TV,TV,Q>);
+  taylor_variable_class.def("__radd__", &__radd__<TV,TV,double>);
+  taylor_variable_class.def("__radd__", &__radd__<TV,TV,Q>);
+  taylor_variable_class.def("__sub__", &__sub__<TV,TV,TV>);
+  taylor_variable_class.def("__sub__", &__sub__<TV,TV,double>);
+  taylor_variable_class.def("__sub__", &__sub__<TV,TV,Q>);
+  taylor_variable_class.def("__rsub__", &__rsub__<TV,TV,double>);
+  taylor_variable_class.def("__rsub__", &__rsub__<TV,TV,Q>);
+  taylor_variable_class.def("__mul__", &__mul__<TV,TV,TV>);
+  taylor_variable_class.def("__mul__", &__mul__<TV,TV,double>);
+  taylor_variable_class.def("__mul__", &__mul__<TV,TV,Q>);
+  taylor_variable_class.def("__rmul__", &__rmul__<TV,TV,double>);
+  taylor_variable_class.def("__rmul__", &__rmul__<TV,TV,Q>);
+  taylor_variable_class.def("__div__", &__div__<TV,TV,TV>);
+  taylor_variable_class.def("__div__", &__div__<TV,TV,double>);
+  taylor_variable_class.def("__div__", &__div__<TV,TV,Q>);
+  taylor_variable_class.def("__rdiv__", &__rdiv__<TV,TV,double>);
+  taylor_variable_class.def("__rdiv__", &__rdiv__<TV,TV,Q>);
+  taylor_variable_class.def("__pow__", &__pow__<TV,TV,int>);
   taylor_variable_class.def(self_ns::str(self));
   
   def("constant",(TV(*)(size_type, smoothness_type, const double&))&TV::constant);
@@ -182,12 +186,12 @@ void export_taylor_variable<Rational>()
   def("constant",(TV(*)(size_type, smoothness_type, const Q&))&TV::constant);
   def("variable",(TV(*)(size_type, smoothness_type, const Q&, size_type))&TV::variable);
 
-  def("compose",(TV(*)(const TS&,const TV&))&Function::compose);
+  def("compose",(TV(*)(const TS&,const TV&))&compose);
 
-  def("max",(TV(*)(const TV&,const TV&))&Function::max);
-  def("min",(TV(*)(const TV&,const TV&))&Function::min);
-  def("abs",(TV(*)(const TV&))&Function::abs);
-  def("pow",(TV(*)(const TV&, int))&Function::pow);
+  def("max",(TV(*)(const TV&,const TV&))&max<Q>);
+  def("min",(TV(*)(const TV&,const TV&))&min<Q>);
+  def("abs",(TV(*)(const TV&))&abs<Q>);
+  def("pow",(TV(*)(const TV&, int))&pow<Q>);
 
 }
 

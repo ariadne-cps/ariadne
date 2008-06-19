@@ -26,7 +26,6 @@
 #include "geometry/empty_set.h"
 
 using namespace Ariadne;
-using namespace Ariadne::Geometry;
 using namespace Ariadne::Python;
 
 #include <boost/python.hpp>

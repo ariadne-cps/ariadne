@@ -36,8 +36,6 @@
 #include "test.h"
 
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::Geometry;
 using namespace std;
 
 template<class R> int test_rectangle();
@@ -131,7 +129,7 @@ test_rectangle()
     cout << " r1=" << r1 << endl;
     
     r1=Rectangle<R>("[0,1]x[-1,1]x[-1,0]");
-    cout << "r1.subdivide()=" << Geometry::subdivide(r1) << endl;
+    cout << "r1.subdivide()=" << subdivide(r1) << endl;
 
     try {
         string input("[ ]  [ [0,2] ]  [ [0,1], [3/4,4/3], [1,3/2] ] "

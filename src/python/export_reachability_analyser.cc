@@ -46,27 +46,23 @@
 #include "evaluation/reachability_analyser.h"
 
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::Geometry;
-using namespace Ariadne::System;
-using namespace Ariadne::Evaluation;
 using namespace Ariadne::Python;
 
 #include <boost/python.hpp>
 using namespace boost::python;
 
-namespace Ariadne { namespace System {
+namespace Ariadne { 
 template<class Sys> struct Name;
 template<class R> struct Name< Map<R> > { static std::string string() { return "Map"; } };
 template<class R> struct Name< VectorField<R> > { static std::string string() { return "VectorField"; } };
 template<class R> struct Name< HybridAutomaton<R> > { static std::string string() { return "HybridAutomaton"; } };
-} }
+}
 
 template<class Sys, class Aprx>
 void export_system_reachability_analyser()
 {
   typedef typename Aprx::real_type R;
-  std::string name=System::Name<Sys>::string()+"ReachabilityAnalyser";
+  std::string name=Name<Sys>::string()+"ReachabilityAnalyser";
 
   class_< ReachabilityAnalyser<Sys,Aprx> > reachability_analyser_class(name.c_str(),no_init);
   //reachability_analyser_class.def(init<const EvolutionParameters<R>&());

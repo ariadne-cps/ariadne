@@ -29,7 +29,7 @@
 #define ARIADNE_HYBRID_GRID_APPROXIMATION_SCHEME_H
 
 namespace Ariadne {
-  namespace Geometry {
+  
   
     class HybridSpace;
     template<class R> class HybridGrid;
@@ -53,7 +53,7 @@ namespace Ariadne {
       typedef HybridBox<R> basic_set_type;
     };
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_HYBRID_GRID_APPROXIMATION_SCHEME_H */

@@ -42,7 +42,7 @@
 #include "linear_algebra/matrix_expression.h"
 
 namespace Ariadne {
-  namespace LinearAlgebra {
+  
 
     class Slice;
     template<class R> class Matrix;
@@ -63,7 +63,7 @@ namespace Ariadne {
       size_type _nc;
       array<R> _array;
      private:
-      typedef typename Numeric::traits<R>::arithmetic_type F;
+      typedef typename traits<R>::arithmetic_type F;
      public:
       /*! \brief The type of real number stored by the matrix. */
       typedef R value_type;
@@ -165,7 +165,7 @@ namespace Ariadne {
       std::istream& read(std::istream& is);
 
 #ifdef DOXYGEN
-      typedef Numeric::traits<R>::arithmetic_type AT;
+      typedef traits<R>::arithmetic_type AT;
       /*! \brief The additive inverse of the matrix \a A. */
       friend Matrix<R> operator-(const Matrix<R>& A);
       /*! \brief The sum of \a A1 and \a A2. */
@@ -208,21 +208,20 @@ namespace Ariadne {
 #endif 
      private:
       static void instantiate();
-
     };
   
 
 
     template<class R> Matrix<R> approximation(const Matrix<R>& v);
-    template<class R> Matrix<R> approximation(const Matrix< Numeric::Interval<R> >& v);
+    template<class R> Matrix<R> approximation(const Matrix< Interval<R> >& v);
 
-    template<class R> Matrix<R> midpoint(const Matrix< Numeric::Interval<R> >& iA); 
-    template<class R> bool encloses(const Matrix< Numeric::Interval<R> >& iA, const Matrix<R>& A); 
-    template<class R> bool refines(const Matrix< Numeric::Interval<R> >& iA1, const Matrix< Numeric::Interval<R> >& iA2); 
+    template<class R> Matrix<R> midpoint(const Matrix< Interval<R> >& iA); 
+    template<class R> bool encloses(const Matrix< Interval<R> >& iA, const Matrix<R>& A); 
+    template<class R> bool refines(const Matrix< Interval<R> >& iA1, const Matrix< Interval<R> >& iA2); 
 
 
 
-    template<class R> Vector< Numeric::Interval<R> > radius_row_sum(const Matrix< Numeric::Interval<R> >& im); 
+    template<class R> Vector< Interval<R> > radius_row_sum(const Matrix< Interval<R> >& im); 
     
     template<class R> bool have_same_dimensions(const Matrix<R>& A1, const Matrix<R>& A2); 
     
@@ -231,45 +230,45 @@ namespace Ariadne {
     template<class R1, class R2>  Matrix<R1>& operator-=(Matrix<R1>& A1, const Matrix<R2>& A2); 
 
     template<class R> Matrix<R> operator-(const Matrix<R>& A);
-    template<class R1, class R2> Matrix<typename Numeric::traits<R1,R2>::arithmetic_type> operator+(const Matrix<R1>& A1, const Matrix<R2>& A2); 
-    template<class R1, class R2> Matrix<typename Numeric::traits<R1,R2>::arithmetic_type> operator-(const Matrix<R1>& A1, const Matrix<R2>& A2); 
-    template<class R1, class R2> Matrix<typename Numeric::traits<R1,R2>::arithmetic_type> operator*(const R1& s, const Matrix<R2>& A); 
-    template<class R1, class R2> Matrix<typename Numeric::traits<R1,R2>::arithmetic_type> operator*(const Matrix<R1>& A, const R2& s); 
-    template<class R1, class R2> Matrix<typename Numeric::traits<R1,R2>::arithmetic_type> operator/(const Matrix<R1>& A, const R2& s); 
-    template<class R1, class R2> Vector<typename Numeric::traits<R1,R2>::arithmetic_type> operator*(const Matrix<R1>& A, const Vector<R2>& v); 
-    template<class R1, class R2> Vector<typename Numeric::traits<R1,R2>::arithmetic_type> operator*(const Vector<R1>& v, const Matrix<R2>& A); 
-    template<class R1, class R2> Matrix<typename Numeric::traits<R1,R2>::arithmetic_type> operator*(const Matrix<R1>& A1, const Matrix<R2>& A2); 
+    template<class R1, class R2> Matrix<typename traits<R1,R2>::arithmetic_type> operator+(const Matrix<R1>& A1, const Matrix<R2>& A2); 
+    template<class R1, class R2> Matrix<typename traits<R1,R2>::arithmetic_type> operator-(const Matrix<R1>& A1, const Matrix<R2>& A2); 
+    template<class R1, class R2> Matrix<typename traits<R1,R2>::arithmetic_type> operator*(const R1& s, const Matrix<R2>& A); 
+    template<class R1, class R2> Matrix<typename traits<R1,R2>::arithmetic_type> operator*(const Matrix<R1>& A, const R2& s); 
+    template<class R1, class R2> Matrix<typename traits<R1,R2>::arithmetic_type> operator/(const Matrix<R1>& A, const R2& s); 
+    template<class R1, class R2> Vector<typename traits<R1,R2>::arithmetic_type> operator*(const Matrix<R1>& A, const Vector<R2>& v); 
+    template<class R1, class R2> Vector<typename traits<R1,R2>::arithmetic_type> operator*(const Vector<R1>& v, const Matrix<R2>& A); 
+    template<class R1, class R2> Matrix<typename traits<R1,R2>::arithmetic_type> operator*(const Matrix<R1>& A1, const Matrix<R2>& A2); 
 
 
     template<class R> Matrix<R> operator-(const MatrixSlice<R>& A);
-    template<class R1, class R2> Matrix<typename Numeric::traits<R1,R2>::arithmetic_type> operator*(const MatrixSlice<R1>& A1, const Matrix<R2>& A2); 
-    template<class R1, class R2> Matrix<typename Numeric::traits<R1,R2>::arithmetic_type> operator*(const MatrixSlice<R1>& A1, const MatrixSlice<R2>& A2); 
-    template<class R1, class R2> Matrix<typename Numeric::traits<R1,R2>::arithmetic_type> operator*(const R1& s, const MatrixSlice<R2>& A); 
-    template<class R1, class R2> Matrix<typename Numeric::traits<R1,R2>::arithmetic_type> operator*(const Matrix<R1>& A1, const MatrixSlice<R2>& A2); 
-    template<class R1, class R2> Matrix<typename Numeric::traits<R1,R2>::arithmetic_type> operator*(const MatrixSlice<R1>& A, const R2& s); 
-    template<class R1, class R2> Vector<typename Numeric::traits<R1,R2>::arithmetic_type> operator*(const MatrixSlice<R1>& A, const Vector<R2>& v); 
+    template<class R1, class R2> Matrix<typename traits<R1,R2>::arithmetic_type> operator*(const MatrixSlice<R1>& A1, const Matrix<R2>& A2); 
+    template<class R1, class R2> Matrix<typename traits<R1,R2>::arithmetic_type> operator*(const MatrixSlice<R1>& A1, const MatrixSlice<R2>& A2); 
+    template<class R1, class R2> Matrix<typename traits<R1,R2>::arithmetic_type> operator*(const R1& s, const MatrixSlice<R2>& A); 
+    template<class R1, class R2> Matrix<typename traits<R1,R2>::arithmetic_type> operator*(const Matrix<R1>& A1, const MatrixSlice<R2>& A2); 
+    template<class R1, class R2> Matrix<typename traits<R1,R2>::arithmetic_type> operator*(const MatrixSlice<R1>& A, const R2& s); 
+    template<class R1, class R2> Vector<typename traits<R1,R2>::arithmetic_type> operator*(const MatrixSlice<R1>& A, const Vector<R2>& v); 
 
-    template<class R1, class R2> Matrix<typename Numeric::traits<R1,R2>::arithmetic_type> outer_product(const Vector<R1>& v1, const Vector<R2>& v2); 
+    template<class R1, class R2> Matrix<typename traits<R1,R2>::arithmetic_type> outer_product(const Vector<R1>& v1, const Vector<R2>& v2); 
     
-    template<class R> Vector<typename Numeric::traits<R>::arithmetic_type> row_norms(const Matrix<R>& A); 
+    template<class R> Vector<typename traits<R>::arithmetic_type> row_norms(const Matrix<R>& A); 
     
-    template<class R> typename Numeric::traits<R>::arithmetic_type norm(const Matrix<R>& A); 
-    template<class R> typename Numeric::traits<R>::arithmetic_type norm(const MatrixSlice<R>& A); 
-    template<class R> typename Numeric::traits<R>::arithmetic_type sup_norm(const Matrix<R>& A); 
-    template<class R> typename Numeric::traits<R>::arithmetic_type sup_norm(const MatrixSlice<R>& A); 
-    template<class R> typename Numeric::traits<R>::arithmetic_type log_norm(const Matrix<R>& A);
+    template<class R> typename traits<R>::arithmetic_type norm(const Matrix<R>& A); 
+    template<class R> typename traits<R>::arithmetic_type norm(const MatrixSlice<R>& A); 
+    template<class R> typename traits<R>::arithmetic_type sup_norm(const Matrix<R>& A); 
+    template<class R> typename traits<R>::arithmetic_type sup_norm(const MatrixSlice<R>& A); 
+    template<class R> typename traits<R>::arithmetic_type log_norm(const Matrix<R>& A);
 
     template<class R> bool  singular(const Matrix<R>& A);
-    template<class R> typename Numeric::traits<R>::arithmetic_type  determinant(const Matrix<R>& A);
+    template<class R> typename traits<R>::arithmetic_type  determinant(const Matrix<R>& A);
     template<class R> Matrix<R>  transpose(const Matrix<R>& A);
-    template<class R> Matrix<typename Numeric::traits<R>::arithmetic_type> inverse(const Matrix<R>& A);
-    template<class R1, class R2> Vector<typename Numeric::traits<R1,R2>::arithmetic_type> solve(const Matrix<R1>& A, const Vector<R2>& v);
+    template<class R> Matrix<typename traits<R>::arithmetic_type> inverse(const Matrix<R>& A);
+    template<class R1, class R2> Vector<typename traits<R1,R2>::arithmetic_type> solve(const Matrix<R1>& A, const Vector<R2>& v);
     
-    template<class T> Vector< Numeric::Float<T> > mul_approx(const Matrix< Numeric::Float<T> >& A, const Vector< Numeric::Float<T> >& v);
-    template<class T> Matrix< Numeric::Float<T> > mul_approx(const Matrix< Numeric::Float<T> >& A, const Matrix< Numeric::Float<T> >& B);
-    template<class T> Vector< Numeric::Float<T> > solve_approx(const Matrix< Numeric::Float<T> >& A, const Vector< Numeric::Float<T> >& v);
-    template<class T> Matrix< Numeric::Float<T> > inverse_approx(const Matrix< Numeric::Float<T> >& A);
-    template<class T> std::pair<Matrix<Numeric::Float<T> >,Matrix<Numeric::Float<T> > > qr_approx(const Matrix< Numeric::Float<T> >& A);
+    template<class T> Vector< Float<T> > mul_approx(const Matrix< Float<T> >& A, const Vector< Float<T> >& v);
+    template<class T> Matrix< Float<T> > mul_approx(const Matrix< Float<T> >& A, const Matrix< Float<T> >& B);
+    template<class T> Vector< Float<T> > solve_approx(const Matrix< Float<T> >& A, const Vector< Float<T> >& v);
+    template<class T> Matrix< Float<T> > inverse_approx(const Matrix< Float<T> >& A);
+    template<class T> std::pair<Matrix<Float<T> >,Matrix<Float<T> > > qr_approx(const Matrix< Float<T> >& A);
 
     template<class R> Matrix<R> direct_sum(const Matrix<R>& A1, const Matrix<R>& A2);
 
@@ -280,15 +279,15 @@ namespace Ariadne {
     template<class R> Matrix<R> concatenate_columns(const Matrix<R>& A1, const Matrix<R>& A2);
     template<class R> Matrix<R> concatenate_columns(const MatrixSlice<R>& A1, const MatrixSlice<R>& A2);
     
-    template<class R> Matrix<R> over_approximation(const Matrix< Numeric::Interval<R> >& A);
+    template<class R> Matrix<R> over_approximation(const Matrix< Interval<R> >& A);
 
     template<class R> std::ostream& operator<<(std::ostream& os, const Matrix<R>& A);
     template<class R> std::istream& operator>>(std::istream& is, Matrix<R>& A);
    
-    template<class R> Matrix<typename Numeric::traits<R>::arithmetic_type> schulz_inverse(const Matrix<R>& A);
+    template<class R> Matrix<typename traits<R>::arithmetic_type> schulz_inverse(const Matrix<R>& A);
 
-  }
-}
+
+} // namespace Ariadne
 
 #include "matrix_slice.h"
 #include "matrix.inline.h"

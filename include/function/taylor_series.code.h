@@ -32,7 +32,7 @@ namespace {
 
 template<class X> 
 void 
-compute_product(Function::TaylorSeries<X>& z, const Function::TaylorSeries<X>& y, const Function::TaylorSeries<X>& x)
+compute_product(TaylorSeries<X>& z, const TaylorSeries<X>& y, const TaylorSeries<X>& x)
 {
   for(size_type n=0; n<=z.degree(); ++n) {
     z[n]*=0;
@@ -45,9 +45,9 @@ compute_product(Function::TaylorSeries<X>& z, const Function::TaylorSeries<X>& y
 
 template<class X> 
 void 
-compute_composition(Function::TaylorSeries<X>& y, const Function::TaylorSeries<X>& x)
+compute_composition(TaylorSeries<X>& y, const TaylorSeries<X>& x)
 {
-  using namespace Function;
+  
 
   int d=std::min(x.degree(),y.degree());
   using namespace std;
@@ -75,7 +75,7 @@ compute_composition(Function::TaylorSeries<X>& y, const Function::TaylorSeries<X
       //std::cout<<"y["<<d-i<<"] = 1*y["<<d-i<<"]*x[1]"<<std::flush;
       y[d-i]*=x[1];
       for(int j=1; j<=n-i; ++j) {
-        //std::cout<<" + "<<Numeric::bin(n-i,j)<<"*y["<<d-i-j<<"]*x["<<j+1<<"]"<<std::flush;
+        //std::cout<<" + "<<bin(n-i,j)<<"*y["<<d-i-j<<"]*x["<<j+1<<"]"<<std::flush;
         y[d-i] += y[d-i-j] * x[j+1];
       }
       //std::cout << std::endl;
@@ -93,11 +93,11 @@ compute_composition(Function::TaylorSeries<X>& y, const Function::TaylorSeries<X
 // Only inplemented for degree up to 5.
 // Useful for testing.
 template<class X>
-Function::TaylorSeries<X>
-algebraic_inverse(const Function::TaylorSeries<X>& x, const X& c)
+TaylorSeries<X>
+algebraic_inverse(const TaylorSeries<X>& x, const X& c)
 {
   smoothness_type d=x.degree();
-  Function::TaylorSeries<X> y(d);
+  TaylorSeries<X> y(d);
 
   assert(d<=5);
 
@@ -122,8 +122,8 @@ algebraic_inverse(const Function::TaylorSeries<X>& x, const X& c)
 // Useful for interval methods.
 // This method is explicit; see recursive inverse for details
 template<class X>
-Function::TaylorSeries<X>
-iterative_inverse(const Function::TaylorSeries<X>& x, const X& c)
+TaylorSeries<X>
+iterative_inverse(const TaylorSeries<X>& x, const X& c)
 {
   assert(bool(x[1]!=0));
   
@@ -131,8 +131,8 @@ iterative_inverse(const Function::TaylorSeries<X>& x, const X& c)
   X one=1;
   X r=1/x[1];
 
-  Function::TaylorSeries<X> id(d,x.value(),one);
-  Function::TaylorSeries<X> y(d,c,one);
+  TaylorSeries<X> id(d,x.value(),one);
+  TaylorSeries<X> y(d,c,one);
 
   std::cerr << "iterative_inverse(x,c)" << std::endl;
   std::cerr << "x=" << x << std::endl;
@@ -153,8 +153,8 @@ iterative_inverse(const Function::TaylorSeries<X>& x, const X& c)
 // This should be used as the default method
 // TODO: Only compute to the degree necessary at each iteration.
 template<class X>
-Function::TaylorSeries<X>
-recursive_inverse(const Function::TaylorSeries<X>& x, const X& c)
+TaylorSeries<X>
+recursive_inverse(const TaylorSeries<X>& x, const X& c)
 {
   assert(bool(x[1]!=0));
   
@@ -162,8 +162,8 @@ recursive_inverse(const Function::TaylorSeries<X>& x, const X& c)
   X one=1;
   X r=one/x[1];
 
-  Function::TaylorSeries<X> id=Function::TaylorSeries<X>::variable(d,1);
-  Function::TaylorSeries<X> y(d);
+  TaylorSeries<X> id=TaylorSeries<X>::variable(d,1);
+  TaylorSeries<X> y(d);
   
 #ifdef DEBUG
   std::cerr << "recursive_inverse(x,c)" << std::endl;
@@ -199,7 +199,7 @@ recursive_inverse(const Function::TaylorSeries<X>& x, const X& c)
 
 
 template<class X> 
-Function::TaylorSeries<X>::TaylorSeries(const TaylorVariable<X>& x)
+TaylorSeries<X>::TaylorSeries(const TaylorVariable<X>& x)
   : _data(x.data())
 {
   ARIADNE_ASSERT(x.argument_size()==1);
@@ -207,8 +207,8 @@ Function::TaylorSeries<X>::TaylorSeries(const TaylorVariable<X>& x)
 
 
 template<class X> 
-Function::TaylorSeries<X> 
-Function::mul(const TaylorSeries<X>& x, const TaylorSeries<X>& y)
+TaylorSeries<X> 
+mul(const TaylorSeries<X>& x, const TaylorSeries<X>& y)
 {
   TaylorSeries<X> result(std::min(x.degree(),y.degree()));
   for(size_type n=0; n<=result.degree(); ++n) {
@@ -222,8 +222,8 @@ Function::mul(const TaylorSeries<X>& x, const TaylorSeries<X>& y)
 
 
 template<class X> 
-Function::TaylorSeries<X> 
-Function::derivative(const TaylorSeries<X>& x)
+TaylorSeries<X> 
+derivative(const TaylorSeries<X>& x)
 {
   TaylorSeries<X> result(x.degree()-1);
   for(uint n=1; n<=x.degree(); ++n) { result[n-1]=X(n)*x[n]; }
@@ -231,8 +231,8 @@ Function::derivative(const TaylorSeries<X>& x)
 }
 
 template<class X> 
-Function::TaylorSeries<X> 
-Function::antiderivative(const TaylorSeries<X>& x, const X& c)
+TaylorSeries<X> 
+antiderivative(const TaylorSeries<X>& x, const X& c)
 {
   TaylorSeries<X> result(x.degree()+1);
   for(uint n=1; n<=x.degree()+1u; ++n) { result[n]=x[n-1]/n; }
@@ -241,8 +241,8 @@ Function::antiderivative(const TaylorSeries<X>& x, const X& c)
 }
 
 template<class X> 
-Function::TaylorSeries<X> 
-Function::compose(const TaylorSeries<X>& y, const TaylorSeries<X>& x)
+TaylorSeries<X> 
+compose(const TaylorSeries<X>& y, const TaylorSeries<X>& x)
 {
   using namespace std;
 
@@ -267,8 +267,8 @@ Function::compose(const TaylorSeries<X>& y, const TaylorSeries<X>& x)
 }
 
 template<class X>
-Function::TaylorSeries<X>
-Function::inverse(const TaylorSeries<X>& x, const X& c)
+TaylorSeries<X>
+inverse(const TaylorSeries<X>& x, const X& c)
 {
   return recursive_inverse(x,c);
 }
@@ -276,7 +276,7 @@ Function::inverse(const TaylorSeries<X>& x, const X& c)
 
 template<class X> 
 std::ostream& 
-Function::operator<<(std::ostream& os, const TaylorSeries<X>& x) {
+operator<<(std::ostream& os, const TaylorSeries<X>& x) {
   os << "S";
   for(size_type i=0; i<=x.degree(); ++i) {
     os << (i==0 ? '(' : ',') << x[i]; 
@@ -288,7 +288,7 @@ Function::operator<<(std::ostream& os, const TaylorSeries<X>& x) {
 
 template<class X> 
 void
-Function::TaylorSeries<X>::instantiate() 
+TaylorSeries<X>::instantiate() 
 {
   X* x=0;
   TaylorSeries<X>* ts=0;
@@ -308,4 +308,5 @@ Function::TaylorSeries<X>::instantiate()
 
 
 
-}
+} // namespace Ariadne
+

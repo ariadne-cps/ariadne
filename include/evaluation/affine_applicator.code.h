@@ -42,24 +42,24 @@ namespace Ariadne {
 
 
 template<class R>
-const System::AffineMap<R>*
-Evaluation::AffineApplicator< Geometry::Zonotope<R> >::
-cast(const System::Map<R>* f) const
+const AffineMap<R>*
+AffineApplicator< Zonotope<R> >::
+cast(const Map<R>* f) const
 {
-  if(dynamic_cast<const Function::AffineFunction<R>*>(&f->function())) {
-    return static_cast<const System::AffineMap<R>*>(f);
+  if(dynamic_cast<const AffineFunction<R>*>(&f->function())) {
+    return static_cast<const AffineMap<R>*>(f);
   } else {
     return 0;
   }
 }
 
 template<class R>
-Geometry::Zonotope<R> 
-Evaluation::AffineApplicator< Geometry::Zonotope<R> >::
-apply(const System::Map<R>& map, 
-      const Geometry::Zonotope<R>& initial_set) const
+Zonotope<R> 
+AffineApplicator< Zonotope<R> >::
+apply(const Map<R>& map, 
+      const Zonotope<R>& initial_set) const
 {
-  const System::AffineMap<R>* affine_map=this->cast(&map);
+  const AffineMap<R>* affine_map=this->cast(&map);
   if(!affine_map) {
     ARIADNE_THROW(std::runtime_error,"AffineApplicator::apply(...)","map is not affine.");
   }
@@ -70,12 +70,12 @@ apply(const System::Map<R>& map,
 
 
 template<class R>
-Geometry::Zonotope<R>
-Evaluation::AffineApplicator< Geometry::Zonotope<R> >::
-apply(const System::AffineMap<R>& f, const Geometry::Zonotope<R>& z) const
+Zonotope<R>
+AffineApplicator< Zonotope<R> >::
+apply(const AffineMap<R>& f, const Zonotope<R>& z) const
 {
-  return Evaluation::StandardApplicator< Geometry::Zonotope<R> >().apply(f,z);
+  return StandardApplicator< Zonotope<R> >().apply(f,z);
 }
 
 
-}
+} // namespace Ariadne

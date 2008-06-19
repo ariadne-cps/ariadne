@@ -50,6 +50,7 @@
   template<class A> inline Expression< Unary<Fn,A> > fn(const Scalar<A>& a) { \
     return make_expression(Fn(),static_cast<const A&>(a)); } \
 
+
 #define ARIADNE_BINARY_FUNCTION(Fn,fn,ifn,str)                          \
   class Fn { public: template<class R, class A1, class A2> void operator()(R& r, const A1& a1, const A2& a2) const { ifn(r,a1,a2); } }; \
   inline std::ostream& operator<<(std::ostream& os, const Fn&) { return os << str; } \
@@ -76,6 +77,12 @@
   template<class A> inline \
   Expression< Binary<Fn,double,A> > fn(const uint& a1,const Scalar<A>& a2) {  \
 	return make_expression(Fn(),a1,static_cast<const A&>(a2)); } \
+
+#define ARIADNE_UNARY_REAL_FUNCTION(Fn,fn,ifn,str)                  \
+  class Fn { public: template<class R, class A> void operator()(R& r, const A& a) const { ifn(r,a); } }; \
+  inline std::ostream& operator<<(std::ostream& os, const Fn&) { return os << str; } \
+  template<class A> inline Expression< Unary<Fn,A> > fn(const Scalar<A>& a) { \
+    return make_expression(Fn(),static_cast<const A&>(a)); } \
 
 #define ARIADNE_INPLACE_OPERATOR(op,ifn) \
   template<class X, class Y> inline X& op(Value<X>& x, const Expression<Y>& y) { \
@@ -159,7 +166,7 @@
 
 
 namespace Ariadne {
-  namespace Numeric {
+  
     
     ARIADNE_NULLARY_FUNCTION(NaN,nan,nan_,"nan");
     ARIADNE_NULLARY_FUNCTION(Inf,inf,inf_,"inf");
@@ -187,18 +194,18 @@ namespace Ariadne {
     ARIADNE_UNARY_FUNCTION(Floor,floor,floor_,"floor");
     ARIADNE_UNARY_FUNCTION(Ceil,ceil,ceil_,"ceil");
 
-    ARIADNE_UNARY_FUNCTION(Sqrt,sqrt,sqrt_,"sqrt");
+    ARIADNE_UNARY_REAL_FUNCTION(Sqrt,sqrt,sqrt_,"sqrt");
     ARIADNE_BINARY_FUNCTION(Hypot,hypot,hypot_,"hypot");
-    ARIADNE_UNARY_FUNCTION(Exp,exp,exp_,"exp");
-    ARIADNE_UNARY_FUNCTION(Log,log,log_,"log");
+    ARIADNE_UNARY_REAL_FUNCTION(Exp,exp,exp_,"exp");
+    ARIADNE_UNARY_REAL_FUNCTION(Log,log,log_,"log");
 
     ARIADNE_NULLARY_FUNCTION(Pi,pi,pi_,"pi");
-    ARIADNE_UNARY_FUNCTION(Sin,sin,sin_,"sin");
-    ARIADNE_UNARY_FUNCTION(Cos,cos,cos_,"cos");
-    ARIADNE_UNARY_FUNCTION(Tan,tan,tan_,"tan");
-    ARIADNE_UNARY_FUNCTION(Asin,asin,asin_,"asin");
-    ARIADNE_UNARY_FUNCTION(Acos,acos,acos_,"acos");
-    ARIADNE_UNARY_FUNCTION(Atan,atan,atan_,"atan");
+    ARIADNE_UNARY_REAL_FUNCTION(Sin,sin,sin_,"sin");
+    ARIADNE_UNARY_REAL_FUNCTION(Cos,cos,cos_,"cos");
+    ARIADNE_UNARY_REAL_FUNCTION(Tan,tan,tan_,"tan");
+    ARIADNE_UNARY_REAL_FUNCTION(Asin,asin,asin_,"asin");
+    ARIADNE_UNARY_REAL_FUNCTION(Acos,acos,acos_,"acos");
+    ARIADNE_UNARY_REAL_FUNCTION(Atan,atan,atan_,"atan");
 
     ARIADNE_UNARY_OPERATOR(operator+,Pos);
     ARIADNE_UNARY_OPERATOR(operator-,Neg);
@@ -256,8 +263,8 @@ namespace Ariadne {
 
 
 
-  }   
-}
+} // namespace Ariadne   
+
   
 
 #endif /* ARIADNE_NUMERIC_OPERATORS_H */

@@ -32,12 +32,10 @@
 #include "tribool.h"
 
 namespace Ariadne {
-  namespace Base {
-    
+
     template<class T> class sequence;
-    
-  }
-}
+  
+} // namespace Ariadne
 
   
 #endif /* ARIADNE_BASE_DECLARATIONS_H */

@@ -38,8 +38,6 @@
 
 using namespace std;
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::LinearAlgebra;
 
 template<class R> int test_vector();
 
@@ -57,8 +55,8 @@ test_vector()
 {
   std::cout << "\ntest_vector<" << name<R>() << ">()" << endl;
   
-  typedef typename Numeric::traits<R>::arithmetic_type F;
-  typedef typename Numeric::traits<R>::interval_type I;
+  typedef typename traits<R>::arithmetic_type F;
+  typedef typename traits<R>::interval_type I;
   
   int n=3;
   R vptr[3]={-4.0,3.0,1.0};

@@ -41,7 +41,7 @@ using namespace boost::python;
 
 template<class X>
 std::string
-__str__(const Geometry::IntervalSet<X>& ivl)
+__str__(const IntervalSet<X>& ivl)
 {
   std::stringstream ss;
   ss << ivl;
@@ -50,7 +50,7 @@ __str__(const Geometry::IntervalSet<X>& ivl)
 
 template<class X>
 std::string
-__repr__(const Geometry::IntervalSet<X>& ivl)
+__repr__(const IntervalSet<X>& ivl)
 {
   std::stringstream ss;
   if(empty(ivl)) {
@@ -66,36 +66,36 @@ __repr__(const Geometry::IntervalSet<X>& ivl)
 template<class R>
 void export_interval_set() 
 {
-  typedef Numeric::Interval<R> I;
+  typedef Interval<R> I;
 
-  class_< Geometry::IntervalSet<R> > interval_class("IntervalSet",init<>());
+  class_< IntervalSet<R> > interval_class("IntervalSet",init<>());
   interval_class.def(init< double >());
   interval_class.def(init< R >());
   interval_class.def(init< double, double >());
   interval_class.def(init< R, R >());
-  interval_class.def(init< Geometry::IntervalSet<R> >());
-  interval_class.def("lower_bound", &Geometry::IntervalSet<R>::lower_bound, return_value_policy<copy_const_reference>());
-  interval_class.def("upper_bound", &Geometry::IntervalSet<R>::upper_bound, return_value_policy<copy_const_reference>());
+  interval_class.def(init< IntervalSet<R> >());
+  interval_class.def("lower_bound", &IntervalSet<R>::lower_bound, return_value_policy<copy_const_reference>());
+  interval_class.def("upper_bound", &IntervalSet<R>::upper_bound, return_value_policy<copy_const_reference>());
   interval_class.def("__str__",&__str__<R>);
   interval_class.def("__repr__",&__repr__<R>);
   
 
 
-  def("centre", (R(*)(const Geometry::IntervalSet<R>&))(&Geometry::centre));
-  def("radius", (R(*)(const Geometry::IntervalSet<R>&))(&Geometry::radius));
-  def("empty", (tribool(*)(const Geometry::IntervalSet<R>&))(&Geometry::empty));
-  def("bounded", (tribool(*)(const Geometry::IntervalSet<R>&))(&Geometry::bounded));
-  def("contains", (tribool(*)(const Geometry::IntervalSet<R>&,const R&))(&Geometry::contains));
-  def("disjoint", (tribool(*)(const Geometry::IntervalSet<R>&, const Geometry::IntervalSet<R>&))(&Geometry::disjoint));
-  def("intersect", (tribool(*)(const Geometry::IntervalSet<R>&, const Geometry::IntervalSet<R>&))(&Geometry::intersect));
-  def("subset", (tribool(*)(const Geometry::IntervalSet<R>&, const Geometry::IntervalSet<R>&))(&Geometry::subset));
-  def("superset", (tribool(*)(const Geometry::IntervalSet<R>&, const Geometry::IntervalSet<R>&))(&Geometry::superset));
-  def("open_intersection", (Geometry::IntervalSet<R>(*)(const Geometry::IntervalSet<R>&, const Geometry::IntervalSet<R>&))(&Geometry::open_intersection));
-  def("closed_intersection", (Geometry::IntervalSet<R>(*)(const Geometry::IntervalSet<R>&, const Geometry::IntervalSet<R>&))(&Geometry::closed_intersection));
-  def("interval_hull", (Geometry::IntervalSet<R>(*)(const Geometry::IntervalSet<R>&, const Geometry::IntervalSet<R>&))(&Geometry::interval_hull));
+  def("centre", (R(*)(const IntervalSet<R>&))(&centre));
+  def("radius", (R(*)(const IntervalSet<R>&))(&radius));
+  def("empty", (tribool(*)(const IntervalSet<R>&))(&empty));
+  def("bounded", (tribool(*)(const IntervalSet<R>&))(&bounded));
+  def("contains", (tribool(*)(const IntervalSet<R>&,const R&))(&contains));
+  def("disjoint", (tribool(*)(const IntervalSet<R>&, const IntervalSet<R>&))(&disjoint));
+  def("intersect", (tribool(*)(const IntervalSet<R>&, const IntervalSet<R>&))(&intersect));
+  def("subset", (tribool(*)(const IntervalSet<R>&, const IntervalSet<R>&))(&subset));
+  def("superset", (tribool(*)(const IntervalSet<R>&, const IntervalSet<R>&))(&superset));
+  def("open_intersection", (IntervalSet<R>(*)(const IntervalSet<R>&, const IntervalSet<R>&))(&open_intersection));
+  def("closed_intersection", (IntervalSet<R>(*)(const IntervalSet<R>&, const IntervalSet<R>&))(&closed_intersection));
+  def("interval_hull", (IntervalSet<R>(*)(const IntervalSet<R>&, const IntervalSet<R>&))(&interval_hull));
 
  
-  class_< Geometry::IntervalSet<I> > fuzzy_interval_class("FuzzyIntervalSet",init<>());
+  class_< IntervalSet<I> > fuzzy_interval_class("FuzzyIntervalSet",init<>());
   fuzzy_interval_class.def(init< double >());
   fuzzy_interval_class.def(init< R >());
   fuzzy_interval_class.def(init< double, double >());
@@ -103,10 +103,10 @@ void export_interval_set()
   fuzzy_interval_class.def(init< R, I >());
   fuzzy_interval_class.def(init< I, R >());
   fuzzy_interval_class.def(init< I, I >());
-  fuzzy_interval_class.def(init< Geometry::IntervalSet<R> >());
-  fuzzy_interval_class.def(init< Geometry::IntervalSet<I> >());
-  fuzzy_interval_class.def("lower_bound", &Geometry::IntervalSet<I>::lower_bound, return_value_policy<copy_const_reference>());
-  fuzzy_interval_class.def("upper_bound", &Geometry::IntervalSet<I>::upper_bound, return_value_policy<copy_const_reference>());
+  fuzzy_interval_class.def(init< IntervalSet<R> >());
+  fuzzy_interval_class.def(init< IntervalSet<I> >());
+  fuzzy_interval_class.def("lower_bound", &IntervalSet<I>::lower_bound, return_value_policy<copy_const_reference>());
+  fuzzy_interval_class.def("upper_bound", &IntervalSet<I>::upper_bound, return_value_policy<copy_const_reference>());
   fuzzy_interval_class.def("__str__",&__str__<I>);
   fuzzy_interval_class.def("__repr__",&__repr__<I>);
 

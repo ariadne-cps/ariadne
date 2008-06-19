@@ -35,9 +35,10 @@
 #include "numeric/integer.h"
 #include "numeric/interval.h"
 #include "linear_algebra/matrix.h"
+#include "linear_algebra/vector_expression.h"
 
 namespace Ariadne {
-  namespace LinearAlgebra {
+  
 
     /*!\ingroup LinearAlgebra
      * \brief A matrix over \a R. 
@@ -50,7 +51,7 @@ namespace Ariadne {
     class DiagonalMatrix
       : public MatrixExpression< DiagonalMatrix<R> >
     {
-      typedef typename Numeric::traits<R>::arithmetic_type F;
+      typedef typename traits<R>::arithmetic_type F;
      private:
       array<R> _data;
      public:
@@ -132,10 +133,10 @@ namespace Ariadne {
     }
 
     template<class X1, class X2>
-    Matrix<typename Numeric::traits<X1,X2>::arithmetic_type>
+    Matrix<typename traits<X1,X2>::arithmetic_type>
     operator*(const Matrix<X1>& A, const DiagonalMatrix<X2>& D)
     {
-      typedef typename Numeric::traits<X1,X2>::arithmetic_type X0;
+      typedef typename traits<X1,X2>::arithmetic_type X0;
       assert(A.number_of_columns()==D.number_of_rows());
       Matrix<X0> R(A.number_of_rows(),D.number_of_columns());
       for(size_type i=0; i!=A.number_of_rows(); ++i) {
@@ -147,11 +148,11 @@ namespace Ariadne {
     }
 
     template<class T>
-    Matrix< Numeric::Float<T> >
-    mul_approx(const Matrix< Numeric::Float<T> >& A, const DiagonalMatrix< Numeric::Float<T> >& D)
+    Matrix< Float<T> >
+    mul_approx(const Matrix< Float<T> >& A, const DiagonalMatrix< Float<T> >& D)
     {
       assert(A.number_of_columns()==D.number_of_rows());
-      Matrix< Numeric::Float<T> > R(A.number_of_rows(),D.number_of_columns());
+      Matrix< Float<T> > R(A.number_of_rows(),D.number_of_columns());
       for(size_type i=0; i!=A.number_of_rows(); ++i) {
         for(size_type j=0; j!=A.number_of_columns(); ++j) {
           R(i,j)=mul_approx(A(i,j),D.data()[j]);
@@ -165,8 +166,8 @@ namespace Ariadne {
       return os <<"DiagonalMatrix("<<D.data()<<")";
     }
 
-  }
-}
+  
+} // namespace Ariadne
 
 
 #endif /* ARIADNE_DIAGONAL_MATRIX_H */

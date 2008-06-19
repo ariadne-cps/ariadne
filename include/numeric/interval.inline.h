@@ -25,7 +25,7 @@
 #include "numeric/rounding.h"
 
 namespace Ariadne {
-namespace Numeric {
+
   
 template<class R> inline
 bool empty(const Interval<R>& x) {
@@ -311,7 +311,6 @@ Interval<R> hull(const Interval<R>& x, const Interval<R>& y) {
 
 
 
-} // namespace Numeric
 } // namespace Ariadne
 
 
@@ -323,7 +322,7 @@ namespace TBLAS {
 
 template<class R>
 int
-iamax_ (const int N, const Ariadne::Numeric::Interval<R> *X, const int incX)
+iamax_ (const int N, const Ariadne::Interval<R> *X, const int incX)
 {
 #ifdef DEBUG
   std::cerr << "TBLAS::iamax_(const int N, const interval<real> *X, const int incX)\n";
@@ -339,9 +338,9 @@ iamax_ (const int N, const Ariadne::Numeric::Interval<R> *X, const int incX)
   }
   
   for (i = 0; i < N; i++) {
-    R av=Ariadne::Numeric::min_(
-                                   Ariadne::Numeric::abs_(X[ix].lower()),
-                                   Ariadne::Numeric::abs_(X[ix].upper()));
+    R av=Ariadne::min_(
+                                   Ariadne::abs_(X[ix].lower()),
+                                   Ariadne::abs_(X[ix].upper()));
     if (av > mx) {
       mx = av;
       result = i;

@@ -33,7 +33,6 @@
 #include "numeric/interval-float.h" // For explicit specialization of Float interval
 
 namespace Ariadne {
-namespace Numeric {
 
 template<class R> class Interval {
  public:
@@ -44,12 +43,11 @@ template<class R> class Interval {
   R _lower,_upper;
 };
 
-}
-}
+} // namespace Ariadne
 
 namespace TBLAS {
   template<class R> int iamax_ (const int N, const R *X, const int incX);
-  template<class R> int iamax_ (const int N, const Ariadne::Numeric::Interval<R> *X, const int incX);
+  template<class R> int iamax_ (const int N, const Ariadne::Interval<R> *X, const int incX);
 }
 
 #include "numeric/interval.inline.h" // General inline functions

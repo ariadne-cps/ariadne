@@ -31,7 +31,7 @@
 #include "rounding.h"
 
 namespace Ariadne { 
-  namespace Numeric {
+  
 
     class mpfr;
 
@@ -44,9 +44,9 @@ namespace Ariadne {
 
     typedef Float<double> Float64;
     typedef Float<mpfr> FloatMP;
-  }
   
-}
+  
+} // namespace Ariadne
 
 
 #endif /* ARIADNE_NUMERIC_DECLARATIONS_H */

@@ -25,7 +25,7 @@
 #include "numeric/float64.h"
 
 namespace Ariadne {
-  namespace Numeric {
+  
 
 
     Float64::Float(const std::string& str) 

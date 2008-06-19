@@ -29,7 +29,7 @@ namespace Ariadne {
 
 template<class R> inline
 bool 
-Geometry::GridMaskSet<R>::operator==(const GridMaskSet<R>& gms) 
+GridMaskSet<R>::operator==(const GridMaskSet<R>& gms) 
 {
   throw Deprecated(__PRETTY_FUNCTION__);
 }
@@ -37,28 +37,28 @@ Geometry::GridMaskSet<R>::operator==(const GridMaskSet<R>& gms)
 
 template<class R> inline
 bool 
-Geometry::GridMaskSet<R>::operator!=(const GridMaskSet<R>& gms) 
+GridMaskSet<R>::operator!=(const GridMaskSet<R>& gms) 
 {
   return !(*this==gms);
 }
 
 template<class R> inline
-const Geometry::Grid<R>& 
-Geometry::GridMaskSet<R>::grid() const 
+const Grid<R>& 
+GridMaskSet<R>::grid() const 
 {
   return this->_grid; 
 }
 
 template<class R> inline
-const Combinatoric::LatticeBlock& 
-Geometry::GridMaskSet<R>::block() const 
+const LatticeBlock& 
+GridMaskSet<R>::block() const 
 {
   return _lattice_set.block(); 
 }
 
 template<class R> inline
-const Combinatoric::LatticeMaskSet& 
-Geometry::GridMaskSet<R>::lattice_set() const 
+const LatticeMaskSet& 
+GridMaskSet<R>::lattice_set() const 
 {
   return _lattice_set; 
 }
@@ -66,15 +66,15 @@ Geometry::GridMaskSet<R>::lattice_set() const
 
 template<class R> inline
 dimension_type 
-Geometry::GridMaskSet<R>::dimension() const 
+GridMaskSet<R>::dimension() const 
 {
   return _lattice_set.dimension(); 
 }
 
 
 template<class R> inline
-Geometry::EuclideanSpace 
-Geometry::GridMaskSet<R>::space() const 
+EuclideanSpace 
+GridMaskSet<R>::space() const 
 {
   return EuclideanSpace(this->dimension()); 
 }
@@ -82,7 +82,7 @@ Geometry::GridMaskSet<R>::space() const
 
 template<class R> inline
 size_type 
-Geometry::GridMaskSet<R>::capacity() const 
+GridMaskSet<R>::capacity() const 
 {
   return _lattice_set.capacity(); 
 }
@@ -91,48 +91,48 @@ Geometry::GridMaskSet<R>::capacity() const
 
 template<class R> inline
 const BooleanArray& 
-Geometry::GridMaskSet<R>::mask() const 
+GridMaskSet<R>::mask() const 
 {
   return _lattice_set.mask(); 
 }
 
 template<class R> inline
 tribool 
-Geometry::GridMaskSet<R>::empty() const 
+GridMaskSet<R>::empty() const 
 {
   return _lattice_set.empty(); 
 }
 
 template<class R> inline
 tribool 
-Geometry::GridMaskSet<R>::bounded() const 
+GridMaskSet<R>::bounded() const 
 {
   return _lattice_set.bounded(); 
 }
 
 template<class R> inline
 size_type 
-Geometry::GridMaskSet<R>::size() const 
+GridMaskSet<R>::size() const 
 {
   return _lattice_set.size(); 
 }
 
 template<class R> inline
-Geometry::GridCell<R> 
-Geometry::GridMaskSet<R>::operator[](size_type i) const 
+GridCell<R> 
+GridMaskSet<R>::operator[](size_type i) const 
 {
   return GridCell<R>(this->_grid,_lattice_set[i]); 
 }
 
 template<class R> inline
-typename Geometry::GridMaskSet<R>::const_iterator 
-Geometry::GridMaskSet<R>::begin() const 
+typename GridMaskSet<R>::const_iterator 
+GridMaskSet<R>::begin() const 
 {
   return const_iterator(this->_grid,this->_lattice_set.begin()); 
 }
 template<class R> inline
-typename Geometry::GridMaskSet<R>::const_iterator 
-Geometry::GridMaskSet<R>::end() const 
+typename GridMaskSet<R>::const_iterator 
+GridMaskSet<R>::end() const 
 {
   return const_iterator(this->_grid,this->_lattice_set.end()); 
 }
@@ -140,7 +140,7 @@ Geometry::GridMaskSet<R>::end() const
 
 template<class R> inline
 void 
-Geometry::GridMaskSet<R>::remove(const GridCell<R>& gc) 
+GridMaskSet<R>::remove(const GridCell<R>& gc) 
 {
   ARIADNE_CHECK_SAME_GRID(*this,gc,"void GridMaskSet::remove(GridCell gc)");
   this->_lattice_set.remove(gc._lattice_set);
@@ -148,7 +148,7 @@ Geometry::GridMaskSet<R>::remove(const GridCell<R>& gc)
 
 template<class R> inline
 void 
-Geometry::GridMaskSet<R>::remove(const GridCellListSet<R>& gcls) 
+GridMaskSet<R>::remove(const GridCellListSet<R>& gcls) 
 {
   ARIADNE_CHECK_SAME_GRID(*this,gcls,"void GridMaskSet::remove(GridCellListSet gcls)");
   this->_lattice_set.remove(gcls._lattice_set);
@@ -156,7 +156,7 @@ Geometry::GridMaskSet<R>::remove(const GridCellListSet<R>& gcls)
 
 template<class R> inline
 void 
-Geometry::GridMaskSet<R>::remove(const GridMaskSet<R>& gms) 
+GridMaskSet<R>::remove(const GridMaskSet<R>& gms) 
 {
   ARIADNE_CHECK_SAME_GRID(*this,gms,"void GridMaskSet::remove(GridMaskSet gms)");
   this->_lattice_set.remove(gms._lattice_set);
@@ -164,14 +164,14 @@ Geometry::GridMaskSet<R>::remove(const GridMaskSet<R>& gms)
 
 template<class R> inline
 void
-Geometry::GridMaskSet<R>::adjoin_unbounded_cell() 
+GridMaskSet<R>::adjoin_unbounded_cell() 
 {
   this->_lattice_set.adjoin_unbounded_cell();
 }
 
 template<class R> inline
 void 
-Geometry::GridMaskSet<R>::adjoin(const GridCell<R>& gc) 
+GridMaskSet<R>::adjoin(const GridCell<R>& gc) 
 {
   ARIADNE_CHECK_SAME_GRID(*this,gc,"void GridMaskSet::adjoin(GridCell gc)");
   this->_lattice_set.adjoin(gc._lattice_set);
@@ -179,7 +179,7 @@ Geometry::GridMaskSet<R>::adjoin(const GridCell<R>& gc)
 
 template<class R> inline
 void 
-Geometry::GridMaskSet<R>::adjoin(const GridBlock<R>& gb) 
+GridMaskSet<R>::adjoin(const GridBlock<R>& gb) 
 {
   ARIADNE_CHECK_SAME_GRID(*this,gb,"void GridMaskSet::adjoin(GridBlock gb)");
   this->_lattice_set.adjoin(gb._lattice_set);
@@ -187,7 +187,7 @@ Geometry::GridMaskSet<R>::adjoin(const GridBlock<R>& gb)
 
 template<class R> inline
 void 
-Geometry::GridMaskSet<R>::adjoin(const GridCellListSet<R>& gcls) 
+GridMaskSet<R>::adjoin(const GridCellListSet<R>& gcls) 
 {
   ARIADNE_CHECK_SAME_GRID(*this,gcls,"void GridMaskSet::adjoin(GridCellListSet gcls)");
   this->_lattice_set.adjoin(gcls._lattice_set);
@@ -196,7 +196,7 @@ Geometry::GridMaskSet<R>::adjoin(const GridCellListSet<R>& gcls)
 
 template<class R> inline
 void 
-Geometry::GridMaskSet<R>::adjoin(const GridMaskSet<R>& gms) 
+GridMaskSet<R>::adjoin(const GridMaskSet<R>& gms) 
 {
   ARIADNE_CHECK_SAME_GRID(*this,gms,"void GridMaskSet::adjoin(GridMaskSet gms)");
   this->_lattice_set.adjoin(gms._lattice_set);
@@ -204,7 +204,7 @@ Geometry::GridMaskSet<R>::adjoin(const GridMaskSet<R>& gms)
 
 template<class R> inline
 void 
-Geometry::GridMaskSet<R>::restrict(const GridCellListSet<R>& gcls) 
+GridMaskSet<R>::restrict(const GridCellListSet<R>& gcls) 
 {
   ARIADNE_CHECK_SAME_GRID(*this,gcls,"void GridMaskSet::restrict(GridCellListSet gcls)");
   this->_lattice_set.restrict(gcls._lattice_set);
@@ -212,7 +212,7 @@ Geometry::GridMaskSet<R>::restrict(const GridCellListSet<R>& gcls)
 
 template<class R> inline
 void 
-Geometry::GridMaskSet<R>::restrict(const GridMaskSet<R>& gms) 
+GridMaskSet<R>::restrict(const GridMaskSet<R>& gms) 
 {
   ARIADNE_CHECK_SAME_GRID(*this,gms,"void GridMaskSet::restrict(GridMaskSet gms)");
   this->_lattice_set.restrict(gms._lattice_set);
@@ -220,23 +220,23 @@ Geometry::GridMaskSet<R>::restrict(const GridMaskSet<R>& gms)
 
 
 template<class R> inline
-Geometry::GridMaskSet<R> 
-Geometry::GridMaskSet<R>::neighbourhood() const 
+GridMaskSet<R> 
+GridMaskSet<R>::neighbourhood() const 
 {
   return GridMaskSet(this->grid(),this->_lattice_set.neighbourhood());
 }
 
 
 template<class R> inline
-Geometry::GridMaskSet<R> 
-Geometry::GridMaskSet<R>::adjoining() const 
+GridMaskSet<R> 
+GridMaskSet<R>::adjoining() const 
 {
   return GridMaskSet(this->grid(),this->_lattice_set.adjoining());
 }
 
 
 template<class R> template<class BS> inline
-Geometry::GridMaskSet<R>::operator ListSet<BS> () const 
+GridMaskSet<R>::operator ListSet<BS> () const 
 {
   ListSet<BS> result(this->dimension());
   Box<R> r(this->dimension());
@@ -251,7 +251,7 @@ Geometry::GridMaskSet<R>::operator ListSet<BS> () const
 
 template<class R> template<class BS>
 void 
-Geometry::GridMaskSet<R>::adjoin_outer_approximation(const ListSet<BS>& ls)
+GridMaskSet<R>::adjoin_outer_approximation(const ListSet<BS>& ls)
 {
   for(size_type i=0; i!=ls.size(); ++i) {
     this->adjoin_outer_approximation(ls[i]);
@@ -261,14 +261,14 @@ Geometry::GridMaskSet<R>::adjoin_outer_approximation(const ListSet<BS>& ls)
 
 template<class R> inline
 void 
-Geometry::GridMaskSet<R>::adjoin_over_approximation(const Box<R>& r)
+GridMaskSet<R>::adjoin_over_approximation(const Box<R>& r)
 {
   this->adjoin(over_approximation(r,this->grid()));
 }
 
 template<class R> inline
 void 
-Geometry::GridMaskSet<R>::adjoin_under_approximation(const Box<R>& r)
+GridMaskSet<R>::adjoin_under_approximation(const Box<R>& r)
 {
   this->adjoin(under_approximation(r,this->grid()));
 }
@@ -276,7 +276,7 @@ Geometry::GridMaskSet<R>::adjoin_under_approximation(const Box<R>& r)
 
 template<class R> template<class BS> inline
 void 
-Geometry::GridMaskSet<R>::adjoin_outer_approximation(const BS& bs)
+GridMaskSet<R>::adjoin_outer_approximation(const BS& bs)
 {
   this->adjoin(outer_approximation(bs,this->grid()));
 }
@@ -284,7 +284,7 @@ Geometry::GridMaskSet<R>::adjoin_outer_approximation(const BS& bs)
 
 template<class R> template<class BS> inline
 void 
-Geometry::GridMaskSet<R>::adjoin_inner_approximation(const BS& bs)
+GridMaskSet<R>::adjoin_inner_approximation(const BS& bs)
 {
   this->adjoin(inner_approximation(bs,this->grid()));
 }
@@ -302,10 +302,10 @@ Geometry::GridMaskSet<R>::adjoin_inner_approximation(const BS& bs)
 
 template<class R> inline
 std::ostream& 
-Geometry::operator<<(std::ostream& os, const GridMaskSet<R>& gms) {
+operator<<(std::ostream& os, const GridMaskSet<R>& gms) {
   return gms.write(os);
 }
 
 
 
-}
+} // namespace Ariadne

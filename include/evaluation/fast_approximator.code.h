@@ -35,59 +35,59 @@ namespace Ariadne {
 
 
 template<class ES>
-Evaluation::FastApproximator<ES>* 
-Evaluation::FastApproximator<ES>::clone() const
+FastApproximator<ES>* 
+FastApproximator<ES>::clone() const
 {
   return new FastApproximator<ES>(*this);
 }
 
 template<class ES>
 ES
-Evaluation::FastApproximator<ES>::enclosure_set(const Geometry::Box<R>& r) const
+FastApproximator<ES>::enclosure_set(const Box<R>& r) const
 {
   return ES(r);
 }
 
 template<class ES>
 typename ES::real_type
-Evaluation::FastApproximator<ES>::radius(const ES& es) const
+FastApproximator<ES>::radius(const ES& es) const
 {
-  return Geometry::bounding_box(es).radius();
+  return bounding_box(es).radius();
 }
 
 template<class ES>
-Geometry::Box<typename ES::real_type>
-Evaluation::FastApproximator<ES>::bounding_box(const ES& es) const
+Box<typename ES::real_type>
+FastApproximator<ES>::bounding_box(const ES& es) const
 {
-  return Geometry::bounding_box(es);
+  return bounding_box(es);
 }
 
 template<class ES>
-Geometry::BoxListSet<typename ES::real_type>
-Evaluation::FastApproximator<ES>::lower_approximation(const ES& es) const
+BoxListSet<typename ES::real_type>
+FastApproximator<ES>::lower_approximation(const ES& es) const
 {
-  Geometry::BoxListSet<R> result;
+  BoxListSet<R> result;
   result.adjoin(es.bounding_box());
   return result;
 }
 
 template<class ES>
-Geometry::GridCellListSet<typename ES::real_type>
-Evaluation::FastApproximator<ES>::inner_approximation(const ES& es, const Geometry::Grid<R>& g) const
+GridCellListSet<typename ES::real_type>
+FastApproximator<ES>::inner_approximation(const ES& es, const Grid<R>& g) const
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
 template<class ES>
-Geometry::GridCellListSet<typename ES::real_type>
-Evaluation::FastApproximator<ES>::outer_approximation(const ES& es, const Geometry::Grid<R>& g) const
+GridCellListSet<typename ES::real_type>
+FastApproximator<ES>::outer_approximation(const ES& es, const Grid<R>& g) const
 {
-  return Geometry::fuzzy_outer_approximation(es,g);
+  return fuzzy_outer_approximation(es,g);
 }
 
 template<class ES>
 std::ostream&
-Evaluation::FastApproximator<ES>::write(std::ostream& os) const
+FastApproximator<ES>::write(std::ostream& os) const
 {
   os<<"StandardApproximator(" << std::flush;
   return os<<" grid="<<this->paving()<<")\n";

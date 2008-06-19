@@ -38,33 +38,33 @@
 #include "approximator_base.h"
 
 namespace Ariadne {
-  namespace Evaluation {
+  
 
     /*! \brief Geomerical approximation schemes.
      *  \ingroup Approximators
      */
     template<class ES>
     class StandardApproximator
-      : public ApproximatorBase< Geometry::GridApproximationScheme<typename ES::real_type>,ES>
+      : public ApproximatorBase< GridApproximationScheme<typename ES::real_type>,ES>
     {
       typedef typename ES::real_type R;
-      typedef Numeric::Interval<R> I;
-      typedef Geometry::GridApproximationScheme<R> GAS;
+      typedef Interval<R> I;
+      typedef GridApproximationScheme<R> GAS;
      public:
-      StandardApproximator() : ApproximatorBase<GAS,ES>(Geometry::Grid<R>()) { }
-      StandardApproximator(const Geometry::Grid<R>& g) : ApproximatorBase<GAS,ES>(g) { }
+      StandardApproximator() : ApproximatorBase<GAS,ES>(Grid<R>()) { }
+      StandardApproximator(const Grid<R>& g) : ApproximatorBase<GAS,ES>(g) { }
       virtual StandardApproximator<ES>* clone() const { return new StandardApproximator<ES>(*this); }
-      virtual ES enclosure_set(const Geometry::Box<R>& r) const;
+      virtual ES enclosure_set(const Box<R>& r) const;
       virtual R radius(const ES& bs) const;
-      virtual Geometry::Box<R> bounding_box(const ES& bs) const;
-      virtual Geometry::BoxListSet<R> lower_approximation(const ES& es) const;
-      virtual Geometry::GridCellListSet<R> inner_approximation(const ES& es, const Geometry::Grid<R>& g) const;
-      virtual Geometry::GridCellListSet<R> outer_approximation(const ES& es, const Geometry::Grid<R>& g) const;
+      virtual Box<R> bounding_box(const ES& bs) const;
+      virtual BoxListSet<R> lower_approximation(const ES& es) const;
+      virtual GridCellListSet<R> inner_approximation(const ES& es, const Grid<R>& g) const;
+      virtual GridCellListSet<R> outer_approximation(const ES& es, const Grid<R>& g) const;
       virtual std::ostream& write(std::ostream& os) const;
     };
   
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_STANDARD_APPROXIMATOR_H */

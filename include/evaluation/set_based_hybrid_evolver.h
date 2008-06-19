@@ -57,7 +57,7 @@
 #include "output/logging.h"
 
 namespace Ariadne {  
-  namespace Evaluation {
+  
   
     class HybridTime;
     template<class ES> class SetBasedHybridEvolver;
@@ -66,18 +66,18 @@ namespace Ariadne {
      *  \brief A class for computing the evolution of a hybrid system.
      */
     template<class R>
-    class SetBasedHybridEvolver< Geometry::Zonotope<R> >
-      : public EvolverBase< System::HybridAutomaton<R>, Geometry::HybridBasicSet< Geometry::Zonotope<R> > >
+    class SetBasedHybridEvolver< Zonotope<R> >
+      : public EvolverBase< HybridAutomaton<R>, HybridBasicSet< Zonotope<R> > >
     {
-      typedef Numeric::Integer Z;
-      typedef Numeric::Rational Q;
-      typedef Geometry::Zonotope<R> ES;
-      typedef Geometry::ListSet<ES> ESL;
-      typedef Geometry::HybridBasicSet<ES> HES;
-      typedef Geometry::ListSet<HES> HESL;
+      typedef Integer Z;
+      typedef Rational Q;
+      typedef Zonotope<R> ES;
+      typedef ListSet<ES> ESL;
+      typedef HybridBasicSet<ES> HES;
+      typedef ListSet<HES> HESL;
       
-      typedef System::HybridAutomaton<R> Automaton;
-      typedef Numeric::Rational Time;
+      typedef HybridAutomaton<R> Automaton;
+      typedef Rational Time;
 
       typedef HES HybridEnclosureSet;
       typedef HESL HybridEnclosureSetList;
@@ -113,20 +113,20 @@ namespace Ariadne {
       
      private:
       // Simplifying typedefs
-      typedef Geometry::DiscreteState DS;
-      typedef Geometry::Box<R> Bx;
-      typedef Geometry::SetInterface<R> SI;
-      typedef Geometry::ConstraintSet<R> CS;
-      typedef System::Map<R> Mp;
-      typedef System::VectorField<R> VF;
-      typedef Geometry::HybridSpace HSp;
-      typedef Geometry::HybridSet<R> HS;
-      typedef Geometry::HybridBox<R> HBx;
-      typedef Geometry::HybridTimedSet<ES> THES;
-      typedef Base::stack<THES> THESL;
-      typedef System::HybridAutomaton<R> HA;
-      typedef System::DiscreteMode<R> DM;
-      typedef System::DiscreteTransition<R> DT;
+      typedef DiscreteState DS;
+      typedef Box<R> Bx;
+      typedef SetInterface<R> SI;
+      typedef ConstraintSet<R> CS;
+      typedef Map<R> Mp;
+      typedef VectorField<R> VF;
+      typedef HybridSpace HSp;
+      typedef HybridSet<R> HS;
+      typedef HybridBox<R> HBx;
+      typedef HybridTimedSet<ES> THES;
+      typedef stack<THES> THESL;
+      typedef HybridAutomaton<R> HA;
+      typedef DiscreteMode<R> DM;
+      typedef DiscreteTransition<R> DT;
      private:
       // Services provided by other classes
       std::pair<Q,Bx> flow_bounds(const VF& vf, const Bx& bx) const {
@@ -140,15 +140,15 @@ namespace Ariadne {
       ES continuous_evolution_step(const VF& vf, const ES& es, const Q& h1, const Q& h2, const Bx& bb) const {
         return this->_integrator->evolution_step(vf,es,h1,h2,bb); }
       tribool disjoint(const ES& es, const CS& cs) const {
-        return Geometry::disjoint(es,cs); }
+        return Ariadne::disjoint(es,cs); }
       tribool subset(const ES& es, const CS& cs) const {
-        return Geometry::subset(es,cs); }
+        return Ariadne::subset(es,cs); }
       tribool intersect(const ES& es, const CS& cs) const {
-        return Geometry::intersects(es,cs); }
+        return Ariadne::intersects(es,cs); }
       ES reduce(const ES& es) const {
         return this->_reducer->over_approximate(es); }
       ESL subdivide(const ES& es) const {
-        return Geometry::subdivide(es,this->maximum_basic_set_radius()); }
+        return Ariadne::subdivide(es,this->maximum_basic_set_radius()); }
      private:
       // Helper functions for timed sets
       THES integration_step(const VF& vf, const THES& thes, const Q& h, const Bx& bb) const {
@@ -158,7 +158,7 @@ namespace Ariadne {
       R radius(const THES& thes) const {
         return thes.set().radius(); }
       void append_subdivision(THESL& working, const THES& thes) const {
-        ESL sets=this->subdivide(Geometry::orthogonal_over_approximation(thes.set()));
+        ESL sets=this->subdivide(orthogonal_over_approximation(thes.set()));
         for(typename ESL::const_iterator iter=sets.begin(); iter!=sets.end(); ++iter) {
           working.push(THES(thes.time(),thes.steps(),thes.state(),*iter)); } }
      private:
@@ -191,7 +191,7 @@ namespace Ariadne {
       return os << (semantics==lower_semantics ? "lower_semantics" : "upper_semantics"); 
     }
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_SET_BASED_HYBRID_EVOLVER_H */

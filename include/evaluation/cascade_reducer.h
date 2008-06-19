@@ -32,7 +32,7 @@
 #include "geometry/zonotope.h"
 
 namespace Ariadne {
-  namespace Evaluation {
+  
 
     template<class ES> class CascadeReducer;
 
@@ -40,21 +40,21 @@ namespace Ariadne {
      *  \brief Class for over-approximating a zonotope using Kuhn's cascade method.
      */ 
     template<class R>
-    class CascadeReducer< Geometry::Zonotope<R> >
-      : public ReducerInterface< Geometry::Zonotope<R> > 
+    class CascadeReducer< Zonotope<R> >
+      : public ReducerInterface< Zonotope<R> > 
     {
-      typedef Geometry::Zonotope<R> ES;
+      typedef Zonotope<R> ES;
      public:
       CascadeReducer<ES>(size_type maximum_number_of_blocks) : _max_blocks(maximum_number_of_blocks) { }
       virtual CascadeReducer<ES>* clone() const { return new CascadeReducer<ES>(*this); }
-      virtual ES over_approximate(const ES& es) const { return Geometry::cascade_over_approximation(es,this->_max_blocks); }
+      virtual ES over_approximate(const ES& es) const { return cascade_over_approximation(es,this->_max_blocks); }
      private:
       size_type _max_blocks;
     };
 
 
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_CASCADE_REDUCER_H */

@@ -30,10 +30,7 @@
 #include "models/lorenz.h"
 
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::LinearAlgebra;
-using namespace Ariadne::Geometry;
-using namespace Ariadne::System;
+using namespace Ariadne::Models;
 using namespace Ariadne::Python;
 
 #include <boost/python.hpp>
@@ -42,7 +39,7 @@ using namespace boost::python;
 
 template<class R>
 void export_henon_map() {
-  typedef typename Numeric::traits<R>::arithmetic_type F;
+  typedef typename traits<R>::arithmetic_type F;
   
   class_< HenonMap<R>, bases< Map<R> > >("HenonMap",init< Point<R> >())
     // .def(init< Point<R> >)
@@ -68,7 +65,7 @@ void export_henon_map() {
 
 template<class R>
 void export_duffing_equation() {
-  typedef typename Numeric::traits<R>::arithmetic_type F;
+  typedef typename traits<R>::arithmetic_type F;
   
   class_< DuffingEquation<R>, bases< VectorField<R> > >("DuffingEquation",init< Point<R> >())
     .def("dimension", &DuffingEquation<R>::dimension)
@@ -80,7 +77,7 @@ void export_duffing_equation() {
 
 template<class R>
 void export_van_der_pol_equation() {
-  typedef typename Numeric::traits<R>::arithmetic_type F;
+  typedef typename traits<R>::arithmetic_type F;
   
   class_< VanDerPolEquation<R>, bases< VectorField<R> > >("VanDerPolEquation",init< Point<R> >())
     .def("dimension", &VanDerPolEquation<R>::dimension)
@@ -94,7 +91,7 @@ void export_van_der_pol_equation() {
 template<class R>
 void export_lorenz_system() 
 {
-  typedef typename Numeric::traits<R>::arithmetic_type F;
+  typedef typename traits<R>::arithmetic_type F;
   
   class_< LorenzSystem<R>, bases< VectorField<R> > >("LorenzSystem",init< Point<R> >())
     .def("dimension", &LorenzSystem<R>::dimension)

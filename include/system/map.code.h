@@ -38,7 +38,7 @@
 namespace Ariadne {
 
 template<class R>
-System::Map<R>::Map(const Function::FunctionInterface<R>& f)
+Map<R>::Map(const FunctionInterface<R>& f)
   : _function_ptr(f.clone())
 {
 }
@@ -46,23 +46,23 @@ System::Map<R>::Map(const Function::FunctionInterface<R>& f)
 
 
 template<class R>
-const Function::FunctionInterface<R>&
-System::Map<R>::function() const
+const FunctionInterface<R>&
+Map<R>::function() const
 {
   return *this->_function_ptr;
 }
 
 template<class R>
-Geometry::EuclideanSpace
-System::Map<R>::state_space() const
+EuclideanSpace
+Map<R>::state_space() const
 {
   ARIADNE_ASSERT(this->_function_ptr->argument_size()==this->_function_ptr->result_size());
-  return Geometry::EuclideanSpace(this->_function_ptr->result_size());
+  return EuclideanSpace(this->_function_ptr->result_size());
 }
 
 template<class R>
 dimension_type 
-System::Map<R>::dimension() const
+Map<R>::dimension() const
 {
   ARIADNE_ASSERT(this->_function_ptr->argument_size()==this->_function_ptr->result_size());
   return this->_function_ptr->result_size();
@@ -70,21 +70,21 @@ System::Map<R>::dimension() const
 
 template<class R>
 smoothness_type 
-System::Map<R>::smoothness() const
+Map<R>::smoothness() const
 {
   return this->_function_ptr->smoothness();
 }
 
 template<class R>
 dimension_type 
-System::Map<R>::result_dimension() const
+Map<R>::result_dimension() const
 {
   return this->_function_ptr->result_size();
 }
 
 template<class R>
 dimension_type 
-System::Map<R>::argument_dimension() const
+Map<R>::argument_dimension() const
 {
   return this->_function_ptr->argument_size();
 }
@@ -94,39 +94,39 @@ System::Map<R>::argument_dimension() const
 
 
 template<class R>
-Geometry::Point<typename System::Map<R>::A>
-System::Map<R>::operator() (const Geometry::Point<A>& x) const 
+Point<typename Map<R>::A>
+Map<R>::operator() (const Point<A>& x) const 
 {
   ARIADNE_LOG(8,"Map::operator() (Point x) with x="<<x);
   return this->image(x);
 }
 
 template<class R>
-Geometry::Point<typename System::Map<R>::A>
-System::Map<R>::image(const Geometry::Point<A>& x) const 
+Point<typename Map<R>::A>
+Map<R>::image(const Point<A>& x) const 
 {
   ARIADNE_LOG(8,"Map::image(Point x) with x="<<x);
-  return Geometry::Point<A>(this->_function_ptr->evaluate(x.position_vector()));
+  return Point<A>(this->_function_ptr->evaluate(x.position_vector()));
 }
 
 
 template<class R>
-LinearAlgebra::Matrix<typename System::Map<R>::A>
-System::Map<R>::jacobian(const Geometry::Point<A>& x) const 
+Matrix<typename Map<R>::A>
+Map<R>::jacobian(const Point<A>& x) const 
 {
   return this->_function_ptr->jacobian(x.position_vector());
 }
 
 template<class R>
-Function::TaylorDerivative<typename System::Map<R>::A>
-System::Map<R>::derivative(const Geometry::Point<A>& x, const smoothness_type& s) const 
+TaylorDerivative<typename Map<R>::A>
+Map<R>::derivative(const Point<A>& x, const smoothness_type& s) const 
 {
   return this->_function_ptr->derivative(x.position_vector(),s);
 }
 
 template<class R>
 std::ostream&
-System::Map<R>::write(std::ostream& os) const 
+Map<R>::write(std::ostream& os) const 
 {
   return os << "Map( \nfunction="<<*this->_function_ptr<<"\n)";
 }

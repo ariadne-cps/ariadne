@@ -31,7 +31,7 @@
 #include "evaluation/declarations.h"
 
 namespace Ariadne {
-  namespace Evaluation {
+  
   
     /*! \ingroup EvaluatorInterfaces \ingroup Evolvers
      *  \brief Interface for evolving a dynamic system and discretising the result on a grid.
@@ -84,8 +84,8 @@ namespace Ariadne {
 
 
 
-  }
-}
+  
+} // namespace Ariadne
 
 
 

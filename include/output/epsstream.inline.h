@@ -24,8 +24,8 @@
 namespace Ariadne {
 
 inline 
-Output::epsstream&
-Output::operator<<(epsstream& eps, const char* s) 
+epsstream&
+operator<<(epsstream& eps, const char* s) 
 {
   eps.ostream() << s; 
   return eps;
@@ -35,7 +35,7 @@ Output::operator<<(epsstream& eps, const char* s)
 
 
 
-inline Output::epsfstream::epsfstream()
+inline epsfstream::epsfstream()
   : epsstream(), 
     _ofs_ptr(new std::ofstream())  
 { 
@@ -44,7 +44,7 @@ inline Output::epsfstream::epsfstream()
 
 template<class R> inline 
 void 
-Output::epsfstream::open(const char* fn, const Geometry::Box<R>& bbox) 
+epsfstream::open(const char* fn, const Box<R>& bbox) 
 {
   PlanarProjectionMap p_map(bbox.dimension(),0,1);
   Rectangle2d bbox2d=p_map(bbox);
@@ -53,7 +53,7 @@ Output::epsfstream::open(const char* fn, const Geometry::Box<R>& bbox)
 
 template<class R> inline 
 void 
-Output::epsfstream::open(const char* fn, const Geometry::Box<R>& bbox, uint ix, uint iy) 
+epsfstream::open(const char* fn, const Box<R>& bbox, uint ix, uint iy) 
 {
   PlanarProjectionMap p_map(bbox.dimension(),ix,iy);
   Rectangle2d bbox2d=p_map(bbox);
@@ -62,7 +62,7 @@ Output::epsfstream::open(const char* fn, const Geometry::Box<R>& bbox, uint ix, 
 
 template<class R> inline 
 void 
-Output::epsfstream::open(const char* fn, const Geometry::Box<R>& bbox, 
+epsfstream::open(const char* fn, const Box<R>& bbox, 
                          const PlanarProjectionMap& p_map)
 {
   Rectangle2d bbox2d=p_map(bbox);
@@ -71,14 +71,14 @@ Output::epsfstream::open(const char* fn, const Geometry::Box<R>& bbox,
 
 inline
 void 
-Output::epsfstream::close() 
+epsfstream::close() 
 { 
   this->write_trailer();
   this->_ofs_ptr->close(); 
 }
 
 inline 
-Output::epsfstream::~epsfstream() 
+epsfstream::~epsfstream() 
 { 
   this->close();
   delete this->_ofs_ptr; 

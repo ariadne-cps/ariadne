@@ -54,7 +54,7 @@
 #include "output/geometry2d.h"
 
 namespace Ariadne {
-  namespace Output {
+  
 
     class LineStyle { bool _style; public: explicit LineStyle(bool ls) : _style(ls) { } operator bool() const { return this->_style; } };
     class FillColour : public Colour { public: FillColour(const Colour& fc) : Colour(fc) { } };
@@ -89,7 +89,7 @@ namespace Ariadne {
       void write_header();
       void write_trailer();
 
-      template<class R> void set_bounding_box(const Geometry::Box<R>& bbox) {
+      template<class R> void set_bounding_box(const Box<R>& bbox) {
         this->bbox=this->p_map(bbox); }
 
       void set_bounding_box(const Rectangle2d& bbox) {
@@ -163,9 +163,9 @@ namespace Ariadne {
       ~epsfstream();
       epsfstream();
       
-      template<class R> void open(const char* fn, const Geometry::Box<R>& bbox);
-      template<class R> void open(const char* fn, const Geometry::Box<R>& bbox, unsigned int ix,  unsigned int iy);
-      template<class R> void open(const char* fn, const Geometry::Box<R>& bbox, const PlanarProjectionMap& p_map);
+      template<class R> void open(const char* fn, const Box<R>& bbox);
+      template<class R> void open(const char* fn, const Box<R>& bbox, unsigned int ix,  unsigned int iy);
+      template<class R> void open(const char* fn, const Box<R>& bbox, const PlanarProjectionMap& p_map);
       void open(const char* fn, const Rectangle2d& bbox, const PlanarProjectionMap& p_map);
       void close();
      private:
@@ -185,24 +185,24 @@ namespace Ariadne {
 
     epsstream& operator<<(epsstream&, const char* s);
 
-    template<class R> epsstream& operator<<(epsstream&, const Geometry::Point<R>&); 
-    template<class R> epsstream& operator<<(epsstream&, const Geometry::Box<R>&);
-    template<class R> epsstream& operator<<(epsstream&, const Geometry::Rectangle<R>&);
-    template<class R> epsstream& operator<<(epsstream&, const Geometry::Zonotope<R>&);
-    template<class R> epsstream& operator<<(epsstream&, const Geometry::Polytope<R>&); 
-    template<class R> epsstream& operator<<(epsstream&, const Geometry::Polyhedron<R>&); 
-    template<class R> epsstream& operator<<(epsstream&, const Geometry::RectangularSet<R>&);
-    template<class R> epsstream& operator<<(epsstream&, const Geometry::PolyhedralSet<R>&);
-    template<class R> epsstream& operator<<(epsstream&, const Geometry::BoxListSet<R>&); 
-    template<class BS> epsstream& operator<<(epsstream&, const Geometry::ListSet<BS>&); 
-    template<class R> epsstream& operator<<(epsstream&, const Geometry::GridCell<R>&); 
-    template<class R> epsstream& operator<<(epsstream&, const Geometry::GridCellListSet<R>&); 
-    template<class R> epsstream& operator<<(epsstream&, const Geometry::GridMaskSet<R>&); 
-    template<class R> epsstream& operator<<(epsstream&, const Geometry::PartitionTreeSet<R>&); 
-    template<class R> epsstream& operator<<(epsstream&, const Geometry::SetInterface<R>&); 
+    template<class R> epsstream& operator<<(epsstream&, const Point<R>&); 
+    template<class R> epsstream& operator<<(epsstream&, const Box<R>&);
+    template<class R> epsstream& operator<<(epsstream&, const Rectangle<R>&);
+    template<class R> epsstream& operator<<(epsstream&, const Zonotope<R>&);
+    template<class R> epsstream& operator<<(epsstream&, const Polytope<R>&); 
+    template<class R> epsstream& operator<<(epsstream&, const Polyhedron<R>&); 
+    template<class R> epsstream& operator<<(epsstream&, const RectangularSet<R>&);
+    template<class R> epsstream& operator<<(epsstream&, const PolyhedralSet<R>&);
+    template<class R> epsstream& operator<<(epsstream&, const BoxListSet<R>&); 
+    template<class BS> epsstream& operator<<(epsstream&, const ListSet<BS>&); 
+    template<class R> epsstream& operator<<(epsstream&, const GridCell<R>&); 
+    template<class R> epsstream& operator<<(epsstream&, const GridCellListSet<R>&); 
+    template<class R> epsstream& operator<<(epsstream&, const GridMaskSet<R>&); 
+    template<class R> epsstream& operator<<(epsstream&, const PartitionTreeSet<R>&); 
+    template<class R> epsstream& operator<<(epsstream&, const SetInterface<R>&); 
 
-    template<class R> epsstream& operator<<(epsstream&, const Geometry::FiniteGrid<R>&); 
-    template<class R> epsstream& operator<<(epsstream&, const Geometry::PartitionTree<R>&); 
+    template<class R> epsstream& operator<<(epsstream&, const FiniteGrid<R>&); 
+    template<class R> epsstream& operator<<(epsstream&, const PartitionTree<R>&); 
 
     
 
@@ -231,21 +231,21 @@ namespace Ariadne {
 
   /*
     template<class R1, class R2>
-    Geometry::Point<R1> 
-    approximate_point(const Geometry::Point<R2>& pt) 
+    Point<R1> 
+    approximate_point(const Point<R2>& pt) 
     {
-      Geometry::Point<R1> result(pt.dimension());
+      Point<R1> result(pt.dimension());
       for(size_type i=0; i!= result.dimension(); ++i) {
-        result[i]=Numeric::conv_approx<R1>(pt[i]);
+        result[i]=conv_approx<R1>(pt[i]);
       }
       return result;
     }
     
     template<class R1, class R2>
-    Geometry::PointList<R1> 
-    approximate_point_list(const Geometry::PointList<R2>& ptl) 
+    PointList<R1> 
+    approximate_point_list(const PointList<R2>& ptl) 
     {
-      Geometry::PointList<R1> result(ptl.dimension(),ptl.size());
+      PointList<R1> result(ptl.dimension(),ptl.size());
       for(size_type i=0; i!= ptl.size(); ++i) {
         result.push_back(approximate_point<R1>(ptl[i]));
       }
@@ -253,9 +253,9 @@ namespace Ariadne {
     }
   */
     
-  }
+  
 
-}
+} // namespace Ariadne
 
 
 #include "epsstream.inline.h"

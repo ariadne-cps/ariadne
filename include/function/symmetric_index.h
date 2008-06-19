@@ -40,7 +40,6 @@
 #include "multi_index.h"
 
 namespace Ariadne {
-  namespace Function {
     
     class SortedIndex;
     class MultiIndex;
@@ -179,9 +178,9 @@ namespace Ariadne {
     inline
     size_type SymmetricIndex::number() const
     {
-      size_type result=Numeric::fac(this->degree());
+      size_type result=fac(this->degree());
       for(size_type k=0; k!=this->number_of_variables(); ++k) {
-        result/=Numeric::fac((*this)[k]);
+        result/=fac((*this)[k]);
       }
       //std::cerr << "number(" << (*this) << ")=" << result << " " << std::flush;
       return result;
@@ -196,7 +195,7 @@ namespace Ariadne {
       for(size_type k=0; k!=this->number_of_variables()-1; ++k) {
         --nvar;
         deg-=(*this)[k];
-        result+=Numeric::bin(deg+nvar-1,nvar);
+        result+=bin(deg+nvar-1,nvar);
       }
       //std::cerr << "position(" << (*this) << ")=" << result << " " << std::flush;
       return result;
@@ -285,15 +284,15 @@ namespace Ariadne {
       bool equal(const SymmetricIndexIterator& other) const { return this->_index==other._index; }
     };
               
+
       
             
-      
-      
     inline 
     std::ostream& operator<<(std::ostream& os, const SymmetricIndex& a) {
       return os << a._occurrences;
     }
     
-  }
-}
+ 
+} // namespace Ariadne
+
 #endif /* ARIADNE_MULTI_INDEX_H */

@@ -29,9 +29,9 @@
 #include "geometry/point_list.code.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
-    using namespace Numeric;
+    
     
     template class PointList<Rational>;
 
@@ -45,5 +45,5 @@ namespace Ariadne {
     template class PointList< Interval<FloatMP> >;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

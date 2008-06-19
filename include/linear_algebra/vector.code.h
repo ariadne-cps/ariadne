@@ -35,7 +35,7 @@
 namespace Ariadne {
 
 template<class R>
-LinearAlgebra::Vector<R>::Vector(const std::string& str)
+Vector<R>::Vector(const std::string& str)
   : _array(1)
 {  
   std::istringstream ss(str); 
@@ -44,7 +44,7 @@ LinearAlgebra::Vector<R>::Vector(const std::string& str)
 
 template<class R>
 std::ostream&
-LinearAlgebra::Vector<R>::write(std::ostream& os) const
+Vector<R>::write(std::ostream& os) const
 {  
   os << "[";
   if(this->size()>0) {
@@ -59,7 +59,7 @@ LinearAlgebra::Vector<R>::write(std::ostream& os) const
 
 template<class R>
 std::istream&
-LinearAlgebra::Vector<R>::read(std::istream& is)
+Vector<R>::read(std::istream& is)
 {  
   std::vector<R> stdvec;
   is >> stdvec;

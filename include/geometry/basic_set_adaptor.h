@@ -28,7 +28,7 @@
 #include "basic_set_interface.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
     template<class R> inline
     dimension_type dimension(const Box<R>& r) {
@@ -92,32 +92,32 @@ namespace Ariadne {
       //@{
       //! \name Required geometric operations
       /*! \brief The dimension of the Euclidean space the set lies in. */
-      virtual dimension_type dimension() const { return Geometry::dimension(*this); }
+      virtual dimension_type dimension() const { return dimension(*this); }
       
       /*! \brief A rectangle containing the given set */
-      virtual Box<R> bounding_box() const { return Geometry::bounding_box(*this); };
+      virtual Box<R> bounding_box() const { return bounding_box(*this); };
 
       /*! \brief Tests if a point is an element of the set. */
-      virtual tribool contains(const state_type& pt) const { return Geometry::contains(*this,pt); }
+      virtual tribool contains(const state_type& pt) const { return contains(*this,pt); }
       
       /*! \brief Tests if a rectangle is disjoint from the set. */
-      virtual tribool disjoint(const Box<R>& r) const { return Geometry::disjoint(*this,r); }
+      virtual tribool disjoint(const Box<R>& r) const { return disjoint(*this,r); }
       
       /*! \brief Tests if a point is an element of the set. */
-      virtual tribool intersects(const Box<R>& r) const { return !Geometry::disjoint(*this,r); }
+      virtual tribool intersects(const Box<R>& r) const { return !disjoint(*this,r); }
       
       /*! \brief Tests if a point is an element of the set. */
-      virtual tribool subset(const Box<R>& r) const { return Geometry::subset(*this,r); }
+      virtual tribool subset(const Box<R>& r) const { return subset(*this,r); }
       
       /*! \brief Tests if a point is an element of the set. */
-      virtual tribool superset(const Box<R>& r) const { return Geometry::subset(r,*this); }
+      virtual tribool superset(const Box<R>& r) const { return subset(r,*this); }
       
       //@}
       //@{ 
       //! \name Input/output operations
       /*! \brief Write to an output stream. */
-      std::ostream& write(std::ostream& os) const { return Geometry::operator<<(os,*this); }
+      std::ostream& write(std::ostream& os) const { return operator<<(os,*this); }
       //@}
     };
-  }
-}
+  
+} // namespace Ariadne

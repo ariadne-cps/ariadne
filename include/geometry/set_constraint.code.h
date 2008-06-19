@@ -28,27 +28,27 @@
 namespace Ariadne {
 
 template<class R>
-Geometry::SetConstraint<R>::SetConstraint(const Geometry::SetInterface< Box<R> >& s, bool i)
+SetConstraint<R>::SetConstraint(const SetInterface< Box<R> >& s, bool i)
   : _set_ptr(s.clone()), _inside(i)
 {
 }
 
 template<class R>
-Geometry::SetConstraint<R>::~SetConstraint() 
+SetConstraint<R>::~SetConstraint() 
 {
 }
 
 template<class R>
-Geometry::SetConstraint<R>* 
-Geometry::SetConstraint<R>::clone() const 
+SetConstraint<R>* 
+SetConstraint<R>::clone() const 
 {
   return new SetConstraint<R>(*this->_set_ptr,this->_inside);
 }
 
 
 template<class R>
-Geometry::EuclideanSpace
-Geometry::SetConstraint<R>::space() const 
+EuclideanSpace
+SetConstraint<R>::space() const 
 {
   return this->_set_ptr->space();
 }
@@ -56,35 +56,35 @@ Geometry::SetConstraint<R>::space() const
 
 template<class R>
 dimension_type
-Geometry::SetConstraint<R>::dimension() const 
+SetConstraint<R>::dimension() const 
 {
   return this->_set_ptr->space().dimension();
 }
 
 template<class R>
 smoothness_type 
-Geometry::SetConstraint<R>::smoothness() const
+SetConstraint<R>::smoothness() const
 {
   return 0u;
 }
 
 template<class R>
-Geometry::Comparison
-Geometry::SetConstraint<R>::comparison() const
+Comparison
+SetConstraint<R>::comparison() const
 {
   return this->_inside==true ? less : greater;
 }
 
 template<class R>
 std::ostream& 
-Geometry::SetConstraint<R>::write(std::ostream& os) const
+SetConstraint<R>::write(std::ostream& os) const
 {
   return os << "SetConstraint( set=" << *this->_set_ptr << " )";
 }
 
 template<class R>
-typename Geometry::SetConstraint<R>::A 
-Geometry::SetConstraint<R>::value(const Point<A>& pt) const
+typename SetConstraint<R>::A 
+SetConstraint<R>::value(const Point<A>& pt) const
 {
   Box<R> r(pt);
   tribool inside=this->_set_ptr->superset(r);
@@ -99,22 +99,22 @@ Geometry::SetConstraint<R>::value(const Point<A>& pt) const
 }
 
 template<class R>
-LinearAlgebra::Vector<typename Geometry::SetConstraint<R>::A> 
-Geometry::SetConstraint<R>::gradient(const Point<A>& pt) const
+Vector<typename SetConstraint<R>::A> 
+SetConstraint<R>::gradient(const Point<A>& pt) const
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
 template<class R>
-const Geometry::SetInterface< Geometry::Box<R> >& 
-Geometry::SetConstraint<R>::set() const
+const SetInterface< Box<R> >& 
+SetConstraint<R>::set() const
 {
   return *this->_set_ptr;
 }
 
 template<class R>
 bool
-Geometry::SetConstraint<R>::inside() const
+SetConstraint<R>::inside() const
 {
   return this->_inside;
 }

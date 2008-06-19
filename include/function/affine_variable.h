@@ -47,7 +47,6 @@
 
 namespace Ariadne {
 
-  namespace Function {
       
 
 
@@ -134,8 +133,8 @@ namespace Ariadne {
 
 
 
-  }
-}
+  
+} // namespace Ariadne
 
 #include "affine_variable.inline.h"
 

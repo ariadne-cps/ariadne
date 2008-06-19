@@ -38,7 +38,7 @@
 #include "exceptions.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
    
     template<class> class Box;
     template<class> class Sphere;
@@ -52,13 +52,13 @@ namespace Ariadne {
      */
     template<class X>
     class Point {
-      typedef typename Numeric::traits<X>::number_type R;
-      typedef typename Numeric::traits<X>::arithmetic_type F;
+      typedef typename traits<X>::number_type R;
+      typedef typename traits<X>::arithmetic_type F;
      public:
       /*!\brief The type of denotable real number giving the point's values. */
       typedef R real_type;
       /*!\brief The type of denotable vector in the space the point lies in. */
-      typedef LinearAlgebra::Vector<X> vector_type;
+      typedef Vector<X> vector_type;
 
       /*! \brief Default constructor. */
       Point();
@@ -79,7 +79,7 @@ namespace Ariadne {
       explicit Point(ForwardIterator b, ForwardIterator e);
 
       /*! \brief Construct a point from a position vector. */
-      explicit Point(const LinearAlgebra::Vector<X>& position);
+      explicit Point(const Vector<X>& position);
 
       /*! \brief Construct a point from a string literal. */
       explicit Point(const std::string& s);
@@ -122,7 +122,7 @@ namespace Ariadne {
       const X& at(dimension_type index) const;
 
       /*! \brief The position vector of the point. */
-      const LinearAlgebra::Vector<X>& position_vector() const;
+      const Vector<X>& position_vector() const;
       
      
       /*! \brief Write to an output stream. */
@@ -131,7 +131,7 @@ namespace Ariadne {
       std::istream& read(std::istream& is);
 
      private:
-      LinearAlgebra::Vector<X> _vector;
+      Vector<X> _vector;
     };
 
     
@@ -139,54 +139,54 @@ namespace Ariadne {
     Point<R> approximation(const Point<R>& pt);
     
     template<class R>
-    Point<R> approximation(const Point< Numeric::Interval<R> >& ipt);
+    Point<R> approximation(const Point< Interval<R> >& ipt);
 
     
     template<class R> 
-    Point<R> midpoint(const Point< Numeric::Interval<R> >& ipt);
+    Point<R> midpoint(const Point< Interval<R> >& ipt);
     
     template<class R> 
-    R radius(const Point< Numeric::Interval<R> >& ipt);
+    R radius(const Point< Interval<R> >& ipt);
 
     template<class R> 
-    bool encloses(const Point< Numeric::Interval<R> >& ipt, const Point<R>& pt);
+    bool encloses(const Point< Interval<R> >& ipt, const Point<R>& pt);
     
     template<class R> 
-    bool refines(const Point< Numeric::Interval<R> >& ipt1, const Point< Numeric::Interval<R> >& ipt2);
+    bool refines(const Point< Interval<R> >& ipt1, const Point< Interval<R> >& ipt2);
 
 
     
     template<class X>
-    Point<typename Numeric::traits<X>::arithmetic_type>
+    Point<typename traits<X>::arithmetic_type>
     minkowski_sum(const Point<X>& pt1, const Point<X>& pt2);
     
     template<class X>
-    Point<typename Numeric::traits<X>::arithmetic_type>
+    Point<typename traits<X>::arithmetic_type>
     minkowski_difference(const Point<X>& pt1, const Point<X>& pt2);
     
     template<class X1,class X2>
-    LinearAlgebra::Vector<typename Numeric::traits<X1,X2>::arithmetic_type>
+    Vector<typename traits<X1,X2>::arithmetic_type>
     operator-(const Point<X1>& pt1, const Point<X2>& pt2);
     
     template<class X1,class X2>
-    Point<typename Numeric::traits<X1,X2>::arithmetic_type> 
-    operator+(const Point<X1>& pt, const LinearAlgebra::Vector<X2>& v);
+    Point<typename traits<X1,X2>::arithmetic_type> 
+    operator+(const Point<X1>& pt, const Vector<X2>& v);
 
 
     template<class X1,class X2>
-    Point<typename Numeric::traits<X1,X2>::arithmetic_type> 
-    operator-(const Point<X1>& pt, const LinearAlgebra::Vector<X2>& v);
+    Point<typename traits<X1,X2>::arithmetic_type> 
+    operator-(const Point<X1>& pt, const Vector<X2>& v);
 
     template<class X>
-    Point<X> add_approx(const Point<X>& pt, const LinearAlgebra::Vector<X>& v);
+    Point<X> add_approx(const Point<X>& pt, const Vector<X>& v);
 
     template<class X>
-    Point<X> sub_approx(const Point<X>& pt, const LinearAlgebra::Vector<X>& v);
+    Point<X> sub_approx(const Point<X>& pt, const Vector<X>& v);
 
     
   //template<class X>
   //Point<X> 
-  //project_on_dimensions(const Point<X> &A, const Base::array<bool>& dims);
+  //project_on_dimensions(const Point<X> &A, const array<bool>& dims);
 
     template<class X>
     Point<X> 
@@ -206,8 +206,8 @@ namespace Ariadne {
     std::istream& operator>>(std::istream& is, Point<X>& pt);
 
 
-  }
-}
+
+} // namespace Ariadne
 
 #include "point.inline.h"
 

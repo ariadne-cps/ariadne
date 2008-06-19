@@ -27,7 +27,7 @@
 #include "base/types.h"
 
 namespace Ariadne {
-  namespace System {
+  
 
     class DiscreteEvent;
     std::ostream& operator<<(std::ostream&, const DiscreteEvent&);
@@ -48,8 +48,8 @@ namespace Ariadne {
     };
 
     inline std::ostream& operator<<(std::ostream& os, const DiscreteEvent& event) { return os << event._id; }
-  }
+  
 
-}
+} // namespace Ariadne
 
 #endif 

@@ -22,10 +22,10 @@
  */
 
 namespace Ariadne {
-  namespace LinearProgramming {
+  
     
     template<class R, class AP>
-    tribool lptst(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b, LinearAlgebra::Vector<AP>& x) {
+    tribool lptst(const Matrix<R>& A, const Vector<R>& b, Vector<AP>& x) {
       tribool ans;
       bool indeterminate_state = false;
       
@@ -54,17 +54,16 @@ namespace Ariadne {
     
     
     template<>
-    inline tribool lptst<Numeric::Float64, Numeric::Float64>(const LinearAlgebra::Matrix<Numeric::Float64>& A, const LinearAlgebra::Vector<Numeric::Float64>& b, const LinearAlgebra::Vector<Numeric::Float64>& x) {
-      LinearAlgebra::Vector < Numeric::Interval < Numeric::Float64 > > _x(x);
+    inline tribool lptst<Float64, Float64>(const Matrix<Float64>& A, const Vector<Float64>& b, const Vector<Float64>& x) {
+      Vector < Interval < Float64 > > _x(x);
       return lptst(A, b, _x);
     }
     
     
     template<class R, class AP>
-    tribool lptstopt(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b, const LinearAlgebra::Vector<R>& c, const LinearAlgebra::Vector<AP>& x, const LinearAlgebra::Vector<AP>& y) {
+    tribool lptstopt(const Matrix<R>& A, const Vector<R>& b, const Vector<R>& c, const Vector<AP>& x, const Vector<AP>& y) {
       throw NotImplemented(__PRETTY_FUNCTION__);
     }
     
     
-  } // namespace LinearProgramming
 } // namespace Ariadne

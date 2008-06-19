@@ -28,7 +28,7 @@ namespace Ariadne {
 
 template<class X>
 std::ostream& 
-Function::operator<<(std::ostream& os, const AffineVariable<X>& av)
+operator<<(std::ostream& os, const AffineVariable<X>& av)
 {
   os << "[" << av.value();
   for(uint i=0; i!=av.argument_size(); ++i) {
@@ -40,7 +40,7 @@ Function::operator<<(std::ostream& os, const AffineVariable<X>& av)
 
 template<class X>
 void
-Function::AffineVariable<X>::instantiate()
+AffineVariable<X>::instantiate()
 {
   AffineVariable<X>* av=0;
   std::ostream* os=0;

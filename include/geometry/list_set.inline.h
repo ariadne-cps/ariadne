@@ -27,26 +27,26 @@
 namespace Ariadne {
 
 template<class BS> inline
-Geometry::ListSet<BS>::ListSet()
+ListSet<BS>::ListSet()
   : _dimension(0), _vector()
 {
 }
 
 template<class BS> inline
-Geometry::ListSet<BS>::ListSet(dimension_type n) 
+ListSet<BS>::ListSet(dimension_type n) 
   : _dimension(n), _vector() 
 {
 }
 
 template<class BS> inline
-Geometry::ListSet<BS>::ListSet(const BS& bs)
+ListSet<BS>::ListSet(const BS& bs)
   : _dimension(bs.dimension()), _vector()
 {
   _vector.push_back(bs);
 }
 
 template<class BS> template<class BST> inline
-Geometry::ListSet<BS>::ListSet(const ListSet<BST>& ls)
+ListSet<BS>::ListSet(const ListSet<BST>& ls)
   : _dimension(ls.dimension()), _vector() 
 {
   _vector.reserve(ls.size());
@@ -57,7 +57,7 @@ Geometry::ListSet<BS>::ListSet(const ListSet<BST>& ls)
 }
 
 template<class BS> template<class Iter> inline
-Geometry::ListSet<BS>::ListSet(Iter curr, Iter end)
+ListSet<BS>::ListSet(Iter curr, Iter end)
   : _vector(curr,end) 
 {
   if(!_vector.empty()) {
@@ -67,7 +67,7 @@ Geometry::ListSet<BS>::ListSet(Iter curr, Iter end)
 
 
 template<class BS> inline
-Geometry::ListSet<BS>::~ListSet() 
+ListSet<BS>::~ListSet() 
 {
   this->_vector.clear();
 }
@@ -75,14 +75,14 @@ Geometry::ListSet<BS>::~ListSet()
 
 template<class BS> inline
 size_type 
-Geometry::ListSet<BS>::size() const 
+ListSet<BS>::size() const 
 {
   return this->_vector.size();
 }
 
 template<class BS> inline
 BS 
-Geometry::ListSet<BS>::pop() 
+ListSet<BS>::pop() 
 {
   if (this->_vector.empty()) { 
     ARIADNE_THROW(LengthError,"void ListSet<BS>::pop_back()"," empty list");
@@ -95,14 +95,14 @@ Geometry::ListSet<BS>::pop()
 
 template<class BS> inline
 dimension_type 
-Geometry::ListSet<BS>::dimension() const 
+ListSet<BS>::dimension() const 
 {
   return this->_dimension;
 }
 
 template<class BS> inline
 const BS& 
-Geometry::ListSet<BS>::operator[](size_type index) const 
+ListSet<BS>::operator[](size_type index) const 
 {
   ARIADNE_CHECK_ARRAY_INDEX(*this,index,"void ListSet<BS>::operator[](size_type index)");
   return this->_vector[index];
@@ -112,33 +112,33 @@ Geometry::ListSet<BS>::operator[](size_type index) const
 
 template<class BS> inline
 void 
-Geometry::ListSet<BS>::clear() 
+ListSet<BS>::clear() 
 { 
   this->_vector.clear();
 }
 
 
 template<class BS> inline
-typename Geometry::ListSet<BS>::const_iterator 
-Geometry::ListSet<BS>::begin() const 
+typename ListSet<BS>::const_iterator 
+ListSet<BS>::begin() const 
 {
   return _vector.begin();
 }
 
 template<class BS> inline
-typename Geometry::ListSet<BS>::const_iterator 
-Geometry::ListSet<BS>::end() const 
+typename ListSet<BS>::const_iterator 
+ListSet<BS>::end() const 
 {
   return _vector.end();
 }
 
 template<class BS> inline
 void 
-Geometry::ListSet<BS>::adjoin(const ListSet<BS>& ls) 
+ListSet<BS>::adjoin(const ListSet<BS>& ls) 
 {
   if(ls.size()==0) { return; }
   if(this->dimension()==0) { this->_dimension=ls.dimension(); }
-  ARIADNE_CHECK_EQUAL_DIMENSIONS(*this,ls,"void ListSet<BS>::adjoin(Geometry::ListSet<BS> ls)");
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(*this,ls,"void ListSet<BS>::adjoin(ListSet<BS> ls)");
   this->_vector.reserve(ls.size());
   for(typename ListSet<BS>::const_iterator iter=ls.begin(); iter!=ls.end(); ++iter) {
     this->_vector.push_back(*iter);
@@ -147,7 +147,7 @@ Geometry::ListSet<BS>::adjoin(const ListSet<BS>& ls)
 
 template<class BS> inline
 void 
-Geometry::ListSet<BS>::adjoin(const BS& bs) 
+ListSet<BS>::adjoin(const BS& bs) 
 {
   if(this->dimension()==0) { 
     this->_dimension=bs.dimension(); 
@@ -159,7 +159,7 @@ Geometry::ListSet<BS>::adjoin(const BS& bs)
 
 template<class BS> template<class S> inline
 void 
-Geometry::ListSet<BS>::adjoin(const S& s) 
+ListSet<BS>::adjoin(const S& s) 
 {
   this->adjoin(s, typename geometrical_traits<S>::set_category());
 }
@@ -167,7 +167,7 @@ Geometry::ListSet<BS>::adjoin(const S& s)
 
 template<class BS> template<class S> inline
 void 
-Geometry::ListSet<BS>::adjoin(const S& bs, basic_set_tag) 
+ListSet<BS>::adjoin(const S& bs, basic_set_tag) 
 {
   this->adjoin(static_cast<BS>(bs));
 }
@@ -175,7 +175,7 @@ Geometry::ListSet<BS>::adjoin(const S& bs, basic_set_tag)
 
 template<class BS> template<class DS> inline
 void 
-Geometry::ListSet<BS>::adjoin(const DS& ds, denotable_set_tag) 
+ListSet<BS>::adjoin(const DS& ds, denotable_set_tag) 
 {
   for(typename DS::const_iterator iter=ds.begin();
       iter!=ds.end(); ++iter)
@@ -189,17 +189,17 @@ Geometry::ListSet<BS>::adjoin(const DS& ds, denotable_set_tag)
 
 template<class BS> inline
 std::ostream& 
-Geometry::operator<<(std::ostream& os, const ListSet<BS>& ls)
+operator<<(std::ostream& os, const ListSet<BS>& ls)
 {
   return ls.write(os);
 }
 
 template<class BS> inline
 std::istream& 
-Geometry::operator>>(std::istream& is, ListSet<BS>& ls)
+operator>>(std::istream& is, ListSet<BS>& ls)
 {
   return ls.read(is);
 }
 
 
-} // namespace Geometry
+} // namespace Ariadne

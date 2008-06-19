@@ -24,14 +24,14 @@
 namespace Ariadne {
 
 template<class X> inline
-Geometry::Simplex<X>::Simplex(const Simplex<X>& s)
+Simplex<X>::Simplex(const Simplex<X>& s)
   : Polytope<X>(s) 
 { 
 }
 
 template<class X> inline
-Geometry::Simplex<X>& 
-Geometry::Simplex<X>::operator=(const Simplex<X>& s) 
+Simplex<X>& 
+Simplex<X>::operator=(const Simplex<X>& s) 
 {
   if(this != &s) {
     this->Polytope<X>::operator=(s); 
@@ -43,7 +43,7 @@ Geometry::Simplex<X>::operator=(const Simplex<X>& s)
 
 template<class X> inline 
 std::ostream& 
-Geometry::operator<<(std::ostream& os, const Simplex<X>& s) 
+operator<<(std::ostream& os, const Simplex<X>& s) 
 {
   return s.write(os);
 }
@@ -51,7 +51,7 @@ Geometry::operator<<(std::ostream& os, const Simplex<X>& s)
 
 template<class X> inline
 std::istream& 
-Geometry::operator>>(std::istream& is, Simplex<X>& s) 
+operator>>(std::istream& is, Simplex<X>& s) 
 {
   return s.read(is);
 }

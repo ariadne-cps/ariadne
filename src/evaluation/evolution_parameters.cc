@@ -28,8 +28,8 @@
 #include "evaluation/evolution_parameters.code.h"
 
 namespace Ariadne {
-  namespace Evaluation {
-    using namespace Numeric;
+  
+    
 
 #ifdef ENABLE_FLOAT64
     template class EvolutionParameters<Float64>;
@@ -39,5 +39,5 @@ namespace Ariadne {
     template class EvolutionParameters<FloatMP>;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

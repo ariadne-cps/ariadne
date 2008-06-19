@@ -32,66 +32,66 @@ namespace Ariadne {
 
 
 template<class R>
-Geometry::Curve<R>::~Curve() 
+Curve<R>::~Curve() 
 {
   delete this->_function_ptr;
 }
 
 template<class R>
-Geometry::Curve<R>::Curve(const Function::FunctionInterface<R>& f) 
+Curve<R>::Curve(const FunctionInterface<R>& f) 
   : _function_ptr(f.clone())
 {
   assert(this->_function_ptr->argument_size()==1);
 }
 
 template<class R>
-Geometry::Curve<R>::Curve(const Curve<R>& c) 
+Curve<R>::Curve(const Curve<R>& c) 
   : _function_ptr(c._function_ptr->clone())
 {
 }
 
 template<class R>
-Geometry::Curve<R>* 
-Geometry::Curve<R>::clone() const 
+Curve<R>* 
+Curve<R>::clone() const 
 {
   return new Curve<R>(*this);
 }
 
 template<class R>
 dimension_type 
-Geometry::Curve<R>::dimension() const 
+Curve<R>::dimension() const 
 {
   return this->_function_ptr->result_size();
 }
 
 template<class R>
 smoothness_type 
-Geometry::Curve<R>::smoothness() const 
+Curve<R>::smoothness() const 
 {
   return this->_function_ptr->smoothness();
 }
 
 
 template<class R>
-Geometry::Point< typename Geometry::Curve<R>::A > 
-Geometry::Curve<R>::value(const A& s) const 
+Point< typename Curve<R>::A > 
+Curve<R>::value(const A& s) const 
 {
-  LinearAlgebra::Vector<A> v(1,&s);
+  Vector<A> v(1,&s);
   return Point<A>(this->_function_ptr->evaluate(v));
 }
 
 template<class R>
-LinearAlgebra::Vector< typename Geometry::Curve<R>::A > 
-Geometry::Curve<R>::tangent(const A& s) const 
+Vector< typename Curve<R>::A > 
+Curve<R>::tangent(const A& s) const 
 {
-  LinearAlgebra::Vector<A> v(1,&s);
+  Vector<A> v(1,&s);
   return this->_function_ptr->jacobian(v).column(0);
 }
 
 
 template<class R>
 std::ostream& 
-Geometry::Curve<R>::write(std::ostream& os) const 
+Curve<R>::write(std::ostream& os) const 
 {
   return os << "Curve( function=" << *this->_function_ptr << " )";
 }

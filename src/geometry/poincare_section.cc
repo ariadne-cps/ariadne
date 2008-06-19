@@ -29,9 +29,9 @@
 #include "geometry/poincare_section.code.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
-    using namespace Numeric;
+    
     
 #ifdef ENABLE_FLOAT64
     template class PoincareSectionInterface<Float64>;
@@ -43,5 +43,5 @@ namespace Ariadne {
     template class PoincareSection<FloatMP>;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

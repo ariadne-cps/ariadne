@@ -30,9 +30,9 @@
 
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
-    using namespace Numeric;
+    
     
     template class Box<Rational>;
 
@@ -44,5 +44,5 @@ namespace Ariadne {
     template class Box<FloatMP>;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

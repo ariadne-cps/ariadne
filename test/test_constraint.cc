@@ -37,19 +37,12 @@
 #include "geometry/constraint.h"
 #include "geometry/linear_constraint.h"
 #include "function/function_interface.h"
-#include "function/interpreted_function.h"
 #include "evaluation/detector.h"
 #include "output/epsstream.h"
 #include "output/logging.h"
 
 
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::LinearAlgebra;
-using namespace Ariadne::Function;
-using namespace Ariadne::Geometry;
-using namespace Ariadne::Evaluation;
-using namespace Ariadne::Output;
 using namespace std;
 
 template<class R> int test_constraint();
@@ -67,7 +60,7 @@ template<class R>
 int 
 test_constraint() 
 {
-  cout << "test_constraint<" << Numeric::name<R>() << ">" << endl;
+  cout << "test_constraint<" << name<R>() << ">" << endl;
 
   InterpretedFunction<R> f("function disc output Real y; input Real[2] x; algorithm y=1-(x[0]^2+x[1]^2); end disc;");
 
@@ -90,7 +83,7 @@ test_constraint()
   ARIADNE_TEST_ASSERT(!d.satisfies(z,c));
 
   
-  LinearConstraint<R> lc(Vector<R>("[1,1]"),Geometry::less,R(2));
+  LinearConstraint<R> lc(Vector<R>("[1,1]"),less,R(2));
   return 0;
 }
 

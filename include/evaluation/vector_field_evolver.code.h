@@ -61,7 +61,7 @@
 namespace Ariadne {
   
 template<class ES>
-Evaluation::VectorFieldEvolver<ES>::
+VectorFieldEvolver<ES>::
 VectorFieldEvolver(const EvolutionParameters<R>& parameters,
                    const IntegratorInterface<ES>& integrator, 
                    const SubdividerInterface<ES>& subdivider, 
@@ -75,7 +75,7 @@ VectorFieldEvolver(const EvolutionParameters<R>& parameters,
 
 template<class ES>
 void
-Evaluation::VectorFieldEvolver<ES>::
+VectorFieldEvolver<ES>::
 evolution(ESL& final,
           ESL& intermediate, 
           const VF& vf,
@@ -84,7 +84,7 @@ evolution(ESL& final,
           Semantics semantics,
           bool reach) const
 {
-  typedef Geometry::Box<R> Bx;
+  typedef Box<R> Bx;
   
   uint verbosity=this->verbosity();
   ARIADNE_LOG(7,"VectorFieldEvolver::_step(...)\n");

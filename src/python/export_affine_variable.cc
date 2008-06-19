@@ -34,8 +34,6 @@
 
 using namespace boost::python;
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::Function;
 using namespace Ariadne::Python;
 
 
@@ -56,7 +54,7 @@ R affine_variable_get_item(const AffineVariable<R>& td, const MultiIndex& i) {
 template<class R>
 void export_affine_variable()
 {
-  typedef typename Numeric::traits<R>::arithmetic_type A;
+  typedef typename traits<R>::arithmetic_type A;
   typedef ScalarDerivative<A> SD;
   typedef AffineVariable<A> TD;
 
@@ -104,22 +102,22 @@ void export_affine_variable()
   affine_variable_class.def(self_ns::str(self));
 
   
-  def("compose",(TD(*)(const SD&,const TD&))&Function::compose);
+  def("compose",(TD(*)(const SD&,const TD&))&compose);
 
-  def("max",(TD(*)(const TD&,const TD&))&Function::max);
-  def("min",(TD(*)(const TD&,const TD&))&Function::min);
-  def("abs",(TD(*)(const TD&))&Function::abs);
-  def("pow",(TD(*)(const TD&, int))&Function::pow);
+  def("max",(TD(*)(const TD&,const TD&))&max);
+  def("min",(TD(*)(const TD&,const TD&))&min);
+  def("abs",(TD(*)(const TD&))&abs);
+  def("pow",(TD(*)(const TD&, int))&pow);
 
-  def("sqrt", (TD(*)(const TD&))&Function::sqrt);
-  def("exp", (TD(*)(const TD&))&Function::exp);
-  def("log", (TD(*)(const TD&))&Function::log);
-  def("sin", (TD(*)(const TD&))&Function::sin);
-  def("cos", (TD(*)(const TD&))&Function::cos);
-  def("tan", (TD(*)(const TD&))&Function::tan);
-  def("asin", (TD(*)(const TD&))&Function::asin);
-  def("acos", (TD(*)(const TD&))&Function::acos);
-  def("atan", (TD(*)(const TD&))&Function::atan);
+  def("sqrt", (TD(*)(const TD&))&sqrt);
+  def("exp", (TD(*)(const TD&))&exp);
+  def("log", (TD(*)(const TD&))&log);
+  def("sin", (TD(*)(const TD&))&sin);
+  def("cos", (TD(*)(const TD&))&cos);
+  def("tan", (TD(*)(const TD&))&tan);
+  def("asin", (TD(*)(const TD&))&asin);
+  def("acos", (TD(*)(const TD&))&acos);
+  def("atan", (TD(*)(const TD&))&atan);
 
 }
 
@@ -166,12 +164,12 @@ void export_affine_variable<Rational>()
   affine_variable_class.def(self_ns::str(self));
 
   
-  def("compose",(TD(*)(const SD&,const TD&))&Function::compose);
+  def("compose",(TD(*)(const SD&,const TD&))&compose);
 
-  def("max",(TD(*)(const TD&,const TD&))&Function::max);
-  def("min",(TD(*)(const TD&,const TD&))&Function::min);
-  def("abs",(TD(*)(const TD&))&Function::abs);
-  def("pow",(TD(*)(const TD&, int))&Function::pow);
+  def("max",(TD(*)(const TD&,const TD&))&max);
+  def("min",(TD(*)(const TD&,const TD&))&min);
+  def("abs",(TD(*)(const TD&))&abs);
+  def("pow",(TD(*)(const TD&, int))&pow);
 
 }
 

@@ -23,7 +23,7 @@
  
 
 namespace Ariadne {
-namespace Numeric {
+
 
 template<class T> void sqrt_(Interval< Float<T> >& r, const Interval< Float<T> >& x);
 template<class T> void hypot_(Interval< Float<T> >& r, const Interval< Float<T> >& x, const Interval< Float<T> >& y);
@@ -40,6 +40,5 @@ template<class T> void atan_(Interval< Float<T> >& r, const Interval< Float<T> >
 
 
 
-} // namespace Numeric
 } // namespace Ariadne
 

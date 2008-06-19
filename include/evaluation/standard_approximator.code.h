@@ -38,51 +38,51 @@ namespace Ariadne {
 
 template<class ES>
 ES
-Evaluation::StandardApproximator<ES>::enclosure_set(const Geometry::Box<R>& r) const
+StandardApproximator<ES>::enclosure_set(const Box<R>& r) const
 {
   return ES(r);
 }
 
 template<class ES>
 typename ES::real_type
-Evaluation::StandardApproximator<ES>::radius(const ES& es) const
+StandardApproximator<ES>::radius(const ES& es) const
 {
-  return Geometry::bounding_box(es).radius();
+  return bounding_box(es).radius();
 }
 
 template<class ES>
-Geometry::Box<typename ES::real_type>
-Evaluation::StandardApproximator<ES>::bounding_box(const ES& es) const
+Box<typename ES::real_type>
+StandardApproximator<ES>::bounding_box(const ES& es) const
 {
-  return Geometry::bounding_box(es);
+  return bounding_box(es);
 }
 
 template<class ES>
-Geometry::BoxListSet<typename ES::real_type>
-Evaluation::StandardApproximator<ES>::lower_approximation(const ES& es) const
+BoxListSet<typename ES::real_type>
+StandardApproximator<ES>::lower_approximation(const ES& es) const
 {
-  Geometry::BoxListSet<R> result;
+  BoxListSet<R> result;
   result.adjoin(es.bounding_box());
   return result;
 }
 
 template<class ES>
-Geometry::GridCellListSet<typename ES::real_type>
-Evaluation::StandardApproximator<ES>::inner_approximation(const ES& es, const Geometry::Grid<R>& g) const
+GridCellListSet<typename ES::real_type>
+StandardApproximator<ES>::inner_approximation(const ES& es, const Grid<R>& g) const
 {
-  return Geometry::inner_approximation(es,g);
+  return inner_approximation(es,g);
 }
 
 template<class ES>
-Geometry::GridCellListSet<typename ES::real_type>
-Evaluation::StandardApproximator<ES>::outer_approximation(const ES& es, const Geometry::Grid<R>& g) const
+GridCellListSet<typename ES::real_type>
+StandardApproximator<ES>::outer_approximation(const ES& es, const Grid<R>& g) const
 {
-  return Geometry::outer_approximation(es,g);
+  return outer_approximation(es,g);
 }
 
 template<class ES>
 std::ostream&
-Evaluation::StandardApproximator<ES>::write(std::ostream& os) const
+StandardApproximator<ES>::write(std::ostream& os) const
 {
   return os << "StandardApproximator( grid=" << this->paving() << ")\n";
 }

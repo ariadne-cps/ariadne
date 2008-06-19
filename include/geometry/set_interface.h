@@ -28,14 +28,14 @@
 #ifndef ARIADNE_SET_INTERFACE_H
 #define ARIADNE_SET_INTERFACE_H
 
-#include <iosfwd>
+//#include <iosfwd>
 
 #include "base/types.h"
 #include "base/tribool.h"
 
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
     template<class R> class Point;
     template<class R> class Box;
@@ -245,8 +245,7 @@ namespace Ariadne {
     }
     
 
-  }
-}
+} // namespace Ariadne
 
 
 #endif /* ARIADNE_SET_INTERFACE_H */

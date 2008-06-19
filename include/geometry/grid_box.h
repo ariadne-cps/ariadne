@@ -42,7 +42,7 @@
 #include "geometry/grid.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
       
     class basic_set_tag;
 

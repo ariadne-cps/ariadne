@@ -25,14 +25,14 @@ namespace Ariadne {
 
 
 template<class R> inline
-Geometry::Sphere<R>::Sphere(const Sphere<R>& original)
+Sphere<R>::Sphere(const Sphere<R>& original)
   : _centre(original._centre), _radius(original._radius)
 { 
 }
 
 template<class R> inline
-Geometry::Sphere<R>& 
-Geometry::Sphere<R>::operator=(const Sphere<R>& original) 
+Sphere<R>& 
+Sphere<R>::operator=(const Sphere<R>& original) 
 {
   if(this != &original) {
     this->_centre = original._centre;
@@ -44,43 +44,43 @@ Geometry::Sphere<R>::operator=(const Sphere<R>& original)
 
 template<class R> inline
 bool 
-Geometry::Sphere<R>::operator==(const Sphere<R>& other) const
+Sphere<R>::operator==(const Sphere<R>& other) const
 {
   return this->_centre==other._centre && this->_radius==other._radius;
 }
 
 template<class R> inline
 bool 
-Geometry::Sphere<R>::operator!=(const Sphere<R>& other) const 
+Sphere<R>::operator!=(const Sphere<R>& other) const 
 {
   return !(*this == other);
 }
 
 
 template<class R> inline
-const Geometry::Point<R>& 
-Geometry::Sphere<R>::centre() const 
+const Point<R>& 
+Sphere<R>::centre() const 
 {
   return this->_centre;
 }
 
 template<class R> inline
 const R& 
-Geometry::Sphere<R>::radius() const 
+Sphere<R>::radius() const 
 {
   return this->_radius;
 }
 
 template<class R> inline
 size_type 
-Geometry::Sphere<R>::dimension() const
+Sphere<R>::dimension() const
 {
   return this->_centre.dimension();
 }
 
 template<class R> inline
 bool 
-Geometry::Sphere<R>::empty() const 
+Sphere<R>::empty() const 
 {
   return this->_radius<R(0);
 }
@@ -88,7 +88,7 @@ Geometry::Sphere<R>::empty() const
 
 template<class R> inline
 bool
-Geometry::Sphere<R>::empty_interior() const 
+Sphere<R>::empty_interior() const 
 {
   return this->_radius <= R(0);
 }
@@ -96,7 +96,7 @@ Geometry::Sphere<R>::empty_interior() const
 
 template<class R> inline
 tribool
-Geometry::Sphere<R>::contains(const Point<R>& point) const 
+Sphere<R>::contains(const Point<R>& point) const 
 {
   if(euclidean_distance_square_down(point,this->_centre) < mul_approx(this->_radius , this->_radius)) {
     return true; 
@@ -110,7 +110,7 @@ Geometry::Sphere<R>::contains(const Point<R>& point) const
 
 template<class R> inline
 R
-Geometry::euclidean_distance_square_down(const Point<R>& pt1, const Point<R>& pt2) 
+euclidean_distance_square_down(const Point<R>& pt1, const Point<R>& pt2) 
 {
   R result=R(0);
   R tmp;
@@ -123,7 +123,7 @@ Geometry::euclidean_distance_square_down(const Point<R>& pt1, const Point<R>& pt
 
 template<class R> inline
 R
-Geometry::euclidean_distance_square_up(const Point<R>& pt1, const Point<R>& pt2) 
+euclidean_distance_square_up(const Point<R>& pt1, const Point<R>& pt2) 
 {
   R result=R(0);
   R tmp;
@@ -136,7 +136,7 @@ Geometry::euclidean_distance_square_up(const Point<R>& pt1, const Point<R>& pt2)
 
 template<class R> inline 
 tribool 
-Geometry::disjoint(const Sphere<R>& A, const Sphere<R>& B) 
+disjoint(const Sphere<R>& A, const Sphere<R>& B) 
 {
   if(euclidean_distance_down(A.centre(),B.centre()) > 
      pow_up(add_up(A.radius(),B.radius()),2)) {
@@ -151,14 +151,14 @@ Geometry::disjoint(const Sphere<R>& A, const Sphere<R>& B)
 
 template<class R> inline 
 tribool 
-Geometry::disjoint(const Sphere<R>& A, const Box<R>& B) 
+disjoint(const Sphere<R>& A, const Box<R>& B) 
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
 template<class R> inline 
 tribool 
-Geometry::disjoint(const Box<R>& A, const Sphere<R>& B) 
+disjoint(const Box<R>& A, const Sphere<R>& B) 
 {
   return disjoint(B,A);
 }
@@ -167,7 +167,7 @@ Geometry::disjoint(const Box<R>& A, const Sphere<R>& B)
 
 template<class R> inline 
 tribool 
-Geometry::subset(const Sphere<R>& A, const Sphere<R>& B) 
+subset(const Sphere<R>& A, const Sphere<R>& B) 
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
   //return A.radius()<=B.radius && euclidean_distance_square(A.centre()-B.centre()) <= square(B.centre()-A.centre());
@@ -175,7 +175,7 @@ Geometry::subset(const Sphere<R>& A, const Sphere<R>& B)
 
 template<class R> inline 
 tribool 
-Geometry::subset(const Sphere<R>& A, const Box<R>& B) 
+subset(const Sphere<R>& A, const Box<R>& B) 
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
   //return subset(A.bounding_box(),B);
@@ -183,7 +183,7 @@ Geometry::subset(const Sphere<R>& A, const Box<R>& B)
 
 template<class R> inline 
 tribool 
-Geometry::subset(const Box<R>& A, const Sphere<R>& B) 
+subset(const Box<R>& A, const Sphere<R>& B) 
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
   //array< Point<R> > vertices=A.vertices();
@@ -197,8 +197,8 @@ Geometry::subset(const Box<R>& A, const Sphere<R>& B)
 
 
 template<class R> inline
-Geometry::Sphere<R> 
-Geometry::scale(const Sphere<R>& s, const R& scale_factor) {
+Sphere<R> 
+scale(const Sphere<R>& s, const R& scale_factor) {
   
   const Point<R>& centre=s.centre();
   Point<R> new_centre(s.dimension());
@@ -212,14 +212,14 @@ Geometry::scale(const Sphere<R>& s, const R& scale_factor) {
 
 template<class R> inline
 std::ostream& 
-Geometry::operator<<(std::ostream& os, const Sphere<R>& s) {
+operator<<(std::ostream& os, const Sphere<R>& s) {
   return s.write(os);
 }
 
 
 template<class R> inline
 std::istream& 
-Geometry::operator>>(std::istream& is, Sphere<R>& s) {
+operator>>(std::istream& is, Sphere<R>& s) {
   return s.read(is);
 }
 

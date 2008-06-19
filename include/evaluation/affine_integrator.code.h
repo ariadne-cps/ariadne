@@ -39,6 +39,7 @@
 
 #include "base/array.h"
 
+#include "numeric/integer.h"
 #include "numeric/interval.h"
 
 #include "linear_algebra/vector.h"
@@ -59,22 +60,14 @@
 
 namespace Ariadne {
 
-namespace Evaluation { static int& verbosity = integrator_verbosity; }
-
-using Numeric::Interval;
-using Geometry::Point;
-using Geometry::Box;
-using Geometry::Zonotope;
-using Geometry::UniformErrorTag;
-using Geometry::IntervalTag;
 
 template<class R> 
 R
-Evaluation::gexp_up(const R& x, uint k)
+gexp_up(const R& x, uint k)
 {
-  using namespace Numeric;
   
-  R result=div_up(static_cast<R>(1),R(Numeric::fac<Integer>(k)));
+  
+  R result=div_up(static_cast<R>(1),R(fac<Integer>(k)));
   uint n=k;
   R term=result;
   while(add_down(result,term)==result) {
@@ -86,14 +79,14 @@ Evaluation::gexp_up(const R& x, uint k)
 }
 
 template<class R> 
-LinearAlgebra::Vector< Numeric::Interval<R> > 
-Evaluation::gexp(const LinearAlgebra::Matrix< Numeric::Interval<R> >& A, 
-                 const LinearAlgebra::Vector< Numeric::Interval<R> >& b, 
-                 const Numeric::Interval<R>& t, 
+Vector< Interval<R> > 
+gexp(const Matrix< Interval<R> >& A, 
+                 const Vector< Interval<R> >& b, 
+                 const Interval<R>& t, 
                  const uint& k)
 {
-  using namespace Numeric;
-  using namespace LinearAlgebra;
+  
+  
   
   //FIXME: Make number of steps depend on precision
   static const int MAX_STEPS=12;
@@ -101,9 +94,9 @@ Evaluation::gexp(const LinearAlgebra::Matrix< Numeric::Interval<R> >& A,
   
   int ns=MAX_STEPS;
   
-  Matrix<R> id=LinearAlgebra::Matrix<R>::identity(A.number_of_rows());
+  Matrix<R> id=Matrix<R>::identity(A.number_of_rows());
   
-  Vector<I> result=b/R(Numeric::fac<Integer>(k));
+  Vector<I> result=b/R(fac<Integer>(k));
   Vector<I> term=result;
   
   for(uint n=k+1; n!=k+ns; ++n) {
@@ -115,7 +108,7 @@ Evaluation::gexp(const LinearAlgebra::Matrix< Numeric::Interval<R> >& A,
   I ierr=err*I(-1,1);
   result+=Vector<I>(result.size(),ierr);
   
-  if(Evaluation::verbosity>7) { 
+  if(verbosity>7) { 
     std::clog << "A=" << A << ",  t=" << t << ",  k=" << k << "\n" 
               << "gexp(A,t,k)=" << result << ", err=" << err << std::endl; 
   }
@@ -124,14 +117,14 @@ Evaluation::gexp(const LinearAlgebra::Matrix< Numeric::Interval<R> >& A,
 }
 
 template<class R> 
-LinearAlgebra::Matrix< Numeric::Interval<R> > 
-Evaluation::gexp(
-                 const LinearAlgebra::Matrix< Numeric::Interval<R> >& A, 
-                 const Numeric::Interval<R>& t, 
+Matrix< Interval<R> > 
+gexp(
+                 const Matrix< Interval<R> >& A, 
+                 const Interval<R>& t, 
                  const uint& k)
 {
-  using namespace Numeric;
-  using namespace LinearAlgebra;
+  
+  
   
   //FIXME: Make number of steps depend on precision
   static const int MAX_STEPS=12;
@@ -139,8 +132,8 @@ Evaluation::gexp(
   
   int ns=MAX_STEPS;
   
-  Matrix<R> id=LinearAlgebra::Matrix<R>::identity(A.number_of_rows());
-  Matrix<I> result=id/static_cast<R>(Numeric::fac<Integer>(k));
+  Matrix<R> id=Matrix<R>::identity(A.number_of_rows());
+  Matrix<I> result=id/static_cast<R>(fac<Integer>(k));
   Matrix<I> term=result;
   
   for(uint n=k+1; n!=k+ns; ++n) {
@@ -152,7 +145,7 @@ Evaluation::gexp(
   I ierr=err*I(-1,1);
   result+=Matrix<I>(result.number_of_rows(),result.number_of_columns(),&ierr,0,0);
   
-  if(Evaluation::verbosity>7) { 
+  if(verbosity>7) { 
     std::clog << "A=" << A << ",  t=" << t << ",  k=" << k << "\n" 
               << "gexp(A,t,k)=" << result << ", err=" << err << std::endl; 
   }
@@ -162,7 +155,7 @@ Evaluation::gexp(
 
 
 template<class R>
-Evaluation::AffineIntegrator< Geometry::Zonotope<R> >::
+AffineIntegrator< Zonotope<R> >::
 AffineIntegrator()
 {
 }
@@ -170,8 +163,8 @@ AffineIntegrator()
 
 
 template<class R>
-Evaluation::AffineIntegrator< Geometry::Zonotope<R> >*
-Evaluation::AffineIntegrator< Geometry::Zonotope<R> >::
+AffineIntegrator< Zonotope<R> >*
+AffineIntegrator< Zonotope<R> >::
 clone() const
 {
   return new AffineIntegrator< Zonotope<R> >();
@@ -179,12 +172,12 @@ clone() const
 
 
 template<class R>
-const System::AffineVectorField<R>*
-Evaluation::AffineIntegrator< Geometry::Zonotope<R> >::
-cast(const System::VectorField<R>* vf) const
+const AffineVectorField<R>*
+AffineIntegrator< Zonotope<R> >::
+cast(const VectorField<R>* vf) const
 {
- if(dynamic_cast<Function::AffineFunction<R>*>(&vf->function())) {
-    return static_cast<const System::AffineVectorField<R>*>(vf);
+ if(dynamic_cast<AffineFunction<R>*>(&vf->function())) {
+    return static_cast<const AffineVectorField<R>*>(vf);
   } else {
     return 0;
   }
@@ -192,26 +185,26 @@ cast(const System::VectorField<R>* vf) const
 
 
 template<class R>
-std::pair< Numeric::Rational, Geometry::Box<R> >
-Evaluation::AffineIntegrator< Geometry::Zonotope<R> >::
-flow_bounds(const System::VectorField<R>& f, 
-            const Geometry::Zonotope<R>& z,
-            const Numeric::Rational& t) const
+std::pair< Rational, Box<R> >
+AffineIntegrator< Zonotope<R> >::
+flow_bounds(const VectorField<R>& f, 
+            const Zonotope<R>& z,
+            const Rational& t) const
 {
   // Since we don't need a bounding box for an affine integrator, we can just return the entire space.
-  return std::make_pair(t,Geometry::Box<R>::entire_space(z.dimension())); 
+  return std::make_pair(t,Box<R>::entire_space(z.dimension())); 
 }
 
 
 template<class R> 
-Geometry::Point< Numeric::Interval<R> > 
-Evaluation::AffineIntegrator< Geometry::Zonotope<R> >::
-flow_step(const System::VectorField<R>& vf,
-          const Geometry::Point<I>& p,
-          const Numeric::Rational& h,
-          const Geometry::Box<R>& bb) const
+Point< Interval<R> > 
+AffineIntegrator< Zonotope<R> >::
+flow_step(const VectorField<R>& vf,
+          const Point<I>& p,
+          const Rational& h,
+          const Box<R>& bb) const
 {
-  const System::AffineVectorField<R>* avf=this->cast(&vf);
+  const AffineVectorField<R>* avf=this->cast(&vf);
   if(!avf) {
     ARIADNE_THROW(std::runtime_error,"AffineIntegrator::flow_step(...)","vector_field is not affine.");
   }
@@ -220,14 +213,14 @@ flow_step(const System::VectorField<R>& vf,
      
  
 template<class R> 
-LinearAlgebra::Matrix< Numeric::Interval<R> > 
-Evaluation::AffineIntegrator< Geometry::Zonotope<R> >::
-flow_step_jacobian(const System::VectorField<R>& vf,
+Matrix< Interval<R> > 
+AffineIntegrator< Zonotope<R> >::
+flow_step_jacobian(const VectorField<R>& vf,
                    const Point<I>& p,
-                   const Numeric::Rational& h,
+                   const Rational& h,
                    const Box<R>& bb) const
 {
-  const System::AffineVectorField<R>* avf=this->cast(&vf);
+  const AffineVectorField<R>* avf=this->cast(&vf);
   if(!avf) {
     ARIADNE_THROW(std::runtime_error,"AffineIntegrator::flow_step_jacobian(...)","vector_field is not affine.");
   }
@@ -237,18 +230,18 @@ flow_step_jacobian(const System::VectorField<R>& vf,
      
 
 template<class R>
-Geometry::Zonotope<R>
-Evaluation::AffineIntegrator< Geometry::Zonotope<R> >::
-integration_step(const System::AffineVectorField<R>& affine_vector_field, 
-                 const Geometry::Zonotope<R>& initial_set, 
-                 const Numeric::Rational& step_size) const
+Zonotope<R>
+AffineIntegrator< Zonotope<R> >::
+integration_step(const AffineVectorField<R>& affine_vector_field, 
+                 const Zonotope<R>& initial_set, 
+                 const Rational& step_size) const
 {
   ARIADNE_LOG(6,"AffineIntegrator::integration_step(AffineVectorField,Zonotope<Interval>,Time) const\n");
   
-  using namespace LinearAlgebra;
   
-  const System::AffineVectorField<R>& vf=affine_vector_field;
-  const Geometry::Zonotope<R>& z=initial_set;
+  
+  const AffineVectorField<R>& vf=affine_vector_field;
+  const Zonotope<R>& z=initial_set;
   I h=step_size;
   
   ARIADNE_LOG(9,"vf="<<vf<<"\n");
@@ -276,24 +269,22 @@ integration_step(const System::AffineVectorField<R>& affine_vector_field,
   Point<I> ic(icv);
   ARIADNE_LOG(9,"ic="<<icv<<"\n");
   
-  Function::AffineModel<R> model(initial_set.bounding_box(),initial_set.centre(),ic,iDf);
-  return Geometry::apply(model,initial_set);
+  AffineModel<R> model(initial_set.bounding_box(),initial_set.centre(),ic,iDf);
+  return apply(model,initial_set);
 }
 
 
 
 
 template<class R>
-Geometry::Zonotope<R> 
-Evaluation::AffineIntegrator< Geometry::Zonotope<R> >::
-reachability_step(const System::AffineVectorField<R>& vector_field, 
-                  const Geometry::Zonotope<R>& initial_set, 
-                  const Numeric::Rational& step_size) const
+Zonotope<R> 
+AffineIntegrator< Zonotope<R> >::
+reachability_step(const AffineVectorField<R>& vector_field, 
+                  const Zonotope<R>& initial_set, 
+                  const Rational& step_size) const
 {
-  using namespace Numeric;
-  using namespace LinearAlgebra;
-  using namespace Geometry;
-  using namespace System;
+  
+  
   
   ARIADNE_LOG(6,"AffineIntegrator::reachability_step(AffineVectorField,Zonotope<Interval>,Time)\n");
   
@@ -334,14 +325,14 @@ reachability_step(const System::AffineVectorField<R>& vector_field,
 
 
 template<class R>
-Geometry::Zonotope<R> 
-Evaluation::AffineIntegrator< Geometry::Zonotope<R> >::
-integration_step(const System::VectorField<R>& vector_field, 
-                 const Geometry::Zonotope<R>& initial_set, 
-                 const Numeric::Rational& step_size, 
-                 const Geometry::Box<R>& bounding_set) const
+Zonotope<R> 
+AffineIntegrator< Zonotope<R> >::
+integration_step(const VectorField<R>& vector_field, 
+                 const Zonotope<R>& initial_set, 
+                 const Rational& step_size, 
+                 const Box<R>& bounding_set) const
 {
-  const System::AffineVectorField<R>* affine_vector_field=this->cast(&vector_field);
+  const AffineVectorField<R>* affine_vector_field=this->cast(&vector_field);
   if(!affine_vector_field) {
     ARIADNE_THROW(std::runtime_error,"AffineIntegrator::integration_step(...)","vector_field is not affine.");
   }
@@ -350,14 +341,14 @@ integration_step(const System::VectorField<R>& vector_field,
 
 
 template<class R>
-Geometry::Zonotope<R> 
-Evaluation::AffineIntegrator< Geometry::Zonotope<R> >::
-reachability_step(const System::VectorField<R>& vector_field, 
-                  const Geometry::Zonotope<R>& initial_set, 
-                  const Numeric::Rational& step_size, 
-                  const Geometry::Box<R>& bounding_set) const
+Zonotope<R> 
+AffineIntegrator< Zonotope<R> >::
+reachability_step(const VectorField<R>& vector_field, 
+                  const Zonotope<R>& initial_set, 
+                  const Rational& step_size, 
+                  const Box<R>& bounding_set) const
 {
-  const System::AffineVectorField<R>* affine_vector_field=this->cast(&vector_field);
+  const AffineVectorField<R>* affine_vector_field=this->cast(&vector_field);
   if(!affine_vector_field) {
     ARIADNE_THROW(std::runtime_error,"AffineIntegrator::reachability_step(...)","vector_field is not affine.");
   }
@@ -370,28 +361,28 @@ reachability_step(const System::VectorField<R>& vector_field,
 
 
 template<class R> 
-Geometry::Point< Numeric::Interval<R> > 
-Evaluation::AffineIntegrator<  Geometry::Zonotope<R> >::
-flow_step(const System::AffineVectorField<R>& avf,
-          const Geometry::Point<I>& p,
-          const Numeric::Rational& h) const
+Point< Interval<R> > 
+AffineIntegrator<  Zonotope<R> >::
+flow_step(const AffineVectorField<R>& avf,
+          const Point<I>& p,
+          const Rational& h) const
 {
   ARIADNE_LOG(6,"AffineIntegrator::flow_step(AffineVectorField,Point<Interval>,Time) const\n");
-  const LinearAlgebra::Matrix<I>& A=avf.A();
-  const LinearAlgebra::Vector<I>& b=avf.b();
+  const Matrix<I>& A=avf.A();
+  const Vector<I>& b=avf.b();
   return Point<I>(gexp(A,I(h),0)*p.position_vector() + gexp(A,I(h),1)*b);
 }
      
  
 template<class R> 
-LinearAlgebra::Matrix< Numeric::Interval<R> > 
-Evaluation::AffineIntegrator< Geometry::Zonotope<R> >::
-flow_step_jacobian(const System::AffineVectorField<R>& avf,
-                   const Geometry::Point<I>& p,
-                   const Numeric::Rational& h) const
+Matrix< Interval<R> > 
+AffineIntegrator< Zonotope<R> >::
+flow_step_jacobian(const AffineVectorField<R>& avf,
+                   const Point<I>& p,
+                   const Rational& h) const
 {
   ARIADNE_LOG(6,"AffineIntegrator::flow_step_jacobian(AffineVectorField,Point<Interval>,Time) const\n");
-  const LinearAlgebra::Matrix<I>& A=avf.A();
+  const Matrix<I>& A=avf.A();
   return gexp(A,I(h),0);
 }
 
@@ -400,7 +391,7 @@ flow_step_jacobian(const System::AffineVectorField<R>& avf,
 
 template<class R>
 std::ostream&
-Evaluation::AffineIntegrator< Geometry::Zonotope<R> >::
+AffineIntegrator< Zonotope<R> >::
 write(std::ostream& os) const
 {
   return os << "AffineIntegrator( )";

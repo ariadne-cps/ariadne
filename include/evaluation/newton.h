@@ -39,7 +39,7 @@
 #include "solver_interface.h"
 
 namespace Ariadne {
-  namespace Evaluation {
+  
       
     /*! \ingroup Solvers
      *  \brief Interval Newton solver.
@@ -47,19 +47,18 @@ namespace Ariadne {
     template<class R>
     class IntervalNewtonSolver : public SolverInterface<R>
     {
-      typedef typename Numeric::traits<R>::interval_type I;
+      typedef typename traits<R>::interval_type I;
      public:
       /*! \brief Constructor. */
       IntervalNewtonSolver(R max_error, uint max_steps) : SolverInterface<R>(max_error,max_steps) { }
       
       /*! \brief Solve \f$f(x)=0\f$, using the interval Newton method. */
-      Geometry::Point<I>
-      solve(const Function::FunctionInterface<R>& f, 
-            const Geometry::Point<I>& pt); 
+      Point<I>
+      solve(const FunctionInterface<R>& f, 
+            const Point<I>& pt); 
     };            
     
     
-  }
-}
+} // namespace Ariadne
 
 #endif /* ARIADNE_NEWTON_H */

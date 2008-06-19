@@ -22,7 +22,7 @@
  */
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
     template<class X>
     class PolytopeVerticesIterator
@@ -46,38 +46,31 @@ namespace Ariadne {
       const Polytope<X>* _p; size_type _j; mutable Point<X> _v;
     };
     
-  } // namespace Geometry
-} // namespace Ariadne
-
-
-
-
-namespace Ariadne {  
 
  
 template<class X> template<class XX> inline
-Geometry::Polytope<X>::Polytope(const Rectangle<XX>& r)
+Polytope<X>::Polytope(const Rectangle<XX>& r)
   : _dimension(r.dimension()), _number_of_vertices(r.number_of_vertices()), _data()
 {   
-  (*this)=Geometry::polytope(Rectangle<X>(r));
+  (*this)=polytope(Rectangle<X>(r));
 }
 
 template<class X> template<class XX> inline
-Geometry::Polytope<X>::Polytope(const Polyhedron<XX>& p)
+Polytope<X>::Polytope(const Polyhedron<XX>& p)
   : _dimension(p.dimension()), _number_of_vertices(), _data()
 {   
-  (*this)=Geometry::polytope(Polyhedron<X>(p));
+  (*this)=polytope(Polyhedron<X>(p));
 }
 
 template<class X> template<class XX> inline
-Geometry::Polytope<X>::Polytope(const Polytope<XX>& p)
+Polytope<X>::Polytope(const Polytope<XX>& p)
   : _dimension(p.dimension()), _number_of_vertices(p.number_of_vertices()), _data(p.data())
 { 
 }
 
 template<class X> template<class XX> inline
-Geometry::Polytope<X>&
-Geometry::Polytope<X>::operator=(const Polytope<XX>& p)
+Polytope<X>&
+Polytope<X>::operator=(const Polytope<XX>& p)
 {
   if(this!=(void*)&p) { 
     this->_dimension=p.dimension();
@@ -89,8 +82,8 @@ Geometry::Polytope<X>::operator=(const Polytope<XX>& p)
 
 
 template<class X> inline
-Geometry::Box<typename Geometry::Polytope<X>::real_type> 
-Geometry::bounding_box(const Polytope<X>& p)  
+Box<typename Polytope<X>::real_type> 
+bounding_box(const Polytope<X>& p)  
 {
   return p.bounding_box();
 }
@@ -100,7 +93,7 @@ Geometry::bounding_box(const Polytope<X>& p)
 
 template<class X> inline
 std::ostream& 
-Geometry::operator<<(std::ostream& os, const Polytope<X>& p)
+operator<<(std::ostream& os, const Polytope<X>& p)
 {
   return p.write(os); 
 }
@@ -108,7 +101,7 @@ Geometry::operator<<(std::ostream& os, const Polytope<X>& p)
 
 template<class X> inline
 std::istream& 
-Geometry::operator>>(std::istream& os, Polytope<X>& p) 
+operator>>(std::istream& os, Polytope<X>& p) 
 {
   return p.read(os); 
 }

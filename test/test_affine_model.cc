@@ -34,11 +34,6 @@
 #include "test.h"
 
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::LinearAlgebra;
-using namespace Ariadne::Function;
-using namespace Ariadne::Geometry;
-using namespace Ariadne::Output;
 using namespace std;
 
 
@@ -66,7 +61,7 @@ class TestAffineModel
   }
 
   void test_range() {
-    ARIADNE_ASSERT(subset(am1.range(),Geometry::Box<R>("[-7,7]x[-16,17]")))
+    ARIADNE_ASSERT(subset(am1.range(),Box<R>("[-7,7]x[-16,17]")))
   }
 
   void test_reduce() {

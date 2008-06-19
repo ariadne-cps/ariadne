@@ -35,7 +35,7 @@
 #include "base/exceptions.h"
 
 namespace Ariadne {
-  namespace Numeric {
+  
 
     /*!\ingroup Numeric
      * \brief A templated class representing an interval of real numbers using the midpoint-radius representation.

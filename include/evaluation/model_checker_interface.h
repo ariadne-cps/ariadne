@@ -29,7 +29,7 @@
 #define ARIADNE_MODEL_CHECKER_INTERFACE_H
 
 namespace Ariadne {
-  namespace Evaluation {
+  
 
     class TimedLogicFormula;
 
@@ -39,7 +39,7 @@ namespace Ariadne {
     template<class T, class Aprx>
     class ModelCheckerInterface {
       typedef typename Aprx::PartitionTreeSet PartitionTreeSet;
-      typedef System::TransitionSystemInterface<T,Aprx> TransitionSystem;
+      typedef TransitionSystemInterface<T,Aprx> TransitionSystem;
      public:
       /*! \brief Virtual destructor. */
       ~ModelChecker() { }

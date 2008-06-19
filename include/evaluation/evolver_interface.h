@@ -31,7 +31,7 @@
 #include "evaluation/declarations.h"
 
 namespace Ariadne {
-  namespace Evaluation {
+  
   
     /*! \ingroup EvaluatorInterfaces \ingroup Evolvers
      *  \brief Interface for evolving a dynamic system.
@@ -40,7 +40,7 @@ namespace Ariadne {
     template<class Sys, class ES> class EvolverInterface 
     {
       typedef typename Sys::time_type T;
-      typedef Geometry::ListSet<ES> ESL;
+      typedef ListSet<ES> ESL;
      public:
       /*! \brief Destructor. */
       virtual ~EvolverInterface<Sys,ES>() {};
@@ -56,7 +56,7 @@ namespace Ariadne {
       : public EvolverInterface<Sys,ES>
     {
       typedef typename Sys::time_type T;
-      typedef Geometry::ListSet<ES> ESL;
+      typedef ListSet<ES> ESL;
      public:
       /*! \brief Make a dynamically-allocated copy. */
       virtual EvolverBase<Sys,ES>* clone() const = 0;
@@ -79,8 +79,8 @@ namespace Ariadne {
         ESL final; ESL intermediate; this->evolution(final,intermediate,system,initial_set,time,semantics,true); return std::make_pair(intermediate,final); }
     };
 
-  }
-}
+  
+} // namespace Ariadne
 
 
 

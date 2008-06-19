@@ -38,7 +38,7 @@
 #include "geometry/declarations.h"
 
 namespace Ariadne {
-  namespace Output {
+  
     
     class latexstream;
 
@@ -48,17 +48,17 @@ namespace Ariadne {
     latexstream& operator<<(latexstream& txs, const uint& n);
     latexstream& operator<<(latexstream& txs, const double& x);
 
-    template<class R> latexstream& operator<<(latexstream& txs, const Numeric::Integer& z);
-    template<class R> latexstream& operator<<(latexstream& txs, const Numeric::Rational& q);
-    template<class R> latexstream& operator<<(latexstream& txs, const Numeric::Float64& x);
-    template<class R> latexstream& operator<<(latexstream& txs, const Numeric::FloatMP& x);
+    template<class R> latexstream& operator<<(latexstream& txs, const Integer& z);
+    template<class R> latexstream& operator<<(latexstream& txs, const Rational& q);
+    template<class R> latexstream& operator<<(latexstream& txs, const Float64& x);
+    template<class R> latexstream& operator<<(latexstream& txs, const FloatMP& x);
 
-    template<class R> latexstream& operator<<(latexstream& txs, const Numeric::Interval<R>& ivl);
-    template<class R> latexstream& operator<<(latexstream& txs, const LinearAlgebra::Vector<R>& v);
-    template<class R> latexstream& operator<<(latexstream& txs, const LinearAlgebra::Matrix<R>& v);
-    template<class R> latexstream& operator<<(latexstream& txs, const Geometry::Box<R>& r);
-    template<class R> latexstream& operator<<(latexstream& txs, const Function::PolynomialFunction<R>& p);
-    template<class R> latexstream& operator<<(latexstream& txs, const Function::TaylorModel<R>& t);
+    template<class R> latexstream& operator<<(latexstream& txs, const Interval<R>& ivl);
+    template<class R> latexstream& operator<<(latexstream& txs, const Vector<R>& v);
+    template<class R> latexstream& operator<<(latexstream& txs, const Matrix<R>& v);
+    template<class R> latexstream& operator<<(latexstream& txs, const Box<R>& r);
+    template<class R> latexstream& operator<<(latexstream& txs, const PolynomialFunction<R>& p);
+    template<class R> latexstream& operator<<(latexstream& txs, const TaylorModel<R>& t);
 
     /*!\brief A stream for output to the TeX or LaTeX typesetting language. */
     class latexstream {
@@ -75,10 +75,10 @@ namespace Ariadne {
       friend latexstream& operator<<(latexstream&, const unsigned int&);
       friend latexstream& operator<<(latexstream&, const unsigned long int&);
       friend latexstream& operator<<(latexstream&, const double&);
-      friend latexstream& operator<<(latexstream&, const Numeric::Integer&);
-      friend latexstream& operator<<(latexstream&, const Numeric::Rational&);
-      friend latexstream& operator<<(latexstream&, const Numeric::Float64&);
-      friend latexstream& operator<<(latexstream&, const Numeric::FloatMP&);
+      friend latexstream& operator<<(latexstream&, const Integer&);
+      friend latexstream& operator<<(latexstream&, const Rational&);
+      friend latexstream& operator<<(latexstream&, const Float64&);
+      friend latexstream& operator<<(latexstream&, const FloatMP&);
      private:
       std::ostream* _os_ptr;
     };
@@ -96,8 +96,9 @@ namespace Ariadne {
       std::ofstream* _ofs_ptr;
     };
 
-  }
-}
+
+} // namespace Ariadne
+
 
 #include "latexstream.template.h"
 

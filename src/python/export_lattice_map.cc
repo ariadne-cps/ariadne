@@ -24,9 +24,7 @@
 
 
 #include "combinatoric/lattice_map.h"
-
 using namespace Ariadne;
-using namespace Ariadne::Combinatoric;
 
 #include <boost/python.hpp>
 using namespace boost::python;

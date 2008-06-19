@@ -56,9 +56,6 @@
 namespace {
   
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::LinearAlgebra;
-using namespace Ariadne::Geometry;
 
 inline Rational add_up(const Rational& q1, const Rational& q2) {
   return q1+q2;
@@ -76,7 +73,7 @@ accumulate(R& value, R& error, uint n, const R* aptr, const R* bptr) {
 }
 
 template<class R>
-LinearAlgebra::Vector<R>
+Vector<R>
 row_norms(const Matrix< Interval<R> >& A)
 {
   size_type const& m=A.number_of_rows();
@@ -91,7 +88,7 @@ row_norms(const Matrix< Interval<R> >& A)
 }
 
 template<class R>
-LinearAlgebra::Vector<R>
+Vector<R>
 row_errors(const Matrix< Interval<R> >& A)
 {
   size_type const& m=A.number_of_rows();
@@ -106,7 +103,7 @@ row_errors(const Matrix< Interval<R> >& A)
 }
 
 template<class R> inline
-LinearAlgebra::Vector<R>
+Vector<R>
 errors(const Point< Interval<R> >& pt)
 {  
   Vector<R> result(pt.dimension());
@@ -118,7 +115,7 @@ errors(const Point< Interval<R> >& pt)
 
 
 template<class R> inline
-LinearAlgebra::Vector<R>
+Vector<R>
 row_errors(const Point< Interval<R> >& pt, const Matrix< Interval<R> >& A)
 {
   assert(pt.dimension()==A.number_of_rows());
@@ -145,9 +142,9 @@ add_up(const Vector<R>& v1, const Vector<R>& v2)
 }
 
 template<class R> inline
-tribool norm_grtr(const LinearAlgebra::Vector<R>& v1, const LinearAlgebra::Vector<R>& v2) 
+tribool norm_grtr(const Vector<R>& v1, const Vector<R>& v2) 
 {
-  return LinearAlgebra::norm(v1)>LinearAlgebra::norm(v2);
+  return norm(v1)>norm(v2);
 }
 
 
@@ -160,13 +157,17 @@ tribool superset(const Zonotope<Rational>& z, const Box<Rational>& r);
 tribool subset(const Zonotope<Rational>& z, const Box<Rational>& r);
 
 template<class R> void instantiate_zonotope();
-template<> void instantiate_zonotope<Numeric::Rational>();
+template<> void instantiate_zonotope<Rational>();
 
 } // namespace 
 
+
+
+
+
 namespace Ariadne {
 
-extern int Geometry::verbosity;
+extern int verbosity;
 
 inline Rational med_approx(const Rational& ql, const Rational& qu) {
   return (ql+qu)/2;
@@ -177,25 +178,25 @@ inline Rational rad_up(const Rational& ql, const Rational& qu) {
 }
 
 template<class R> 
-Geometry::Zonotope<R>::Zonotope()
+Zonotope<R>::Zonotope()
   : _centre(), _generators(), _error()
 {
 }
 
 template<class R> 
-Geometry::Zonotope<R>::Zonotope(dimension_type d)
+Zonotope<R>::Zonotope(dimension_type d)
   : _centre(d), _generators(d,0), _error(d)
 {
 }
 
 template<class R> 
-Geometry::Zonotope<R>::Zonotope(dimension_type d, size_type m)
+Zonotope<R>::Zonotope(dimension_type d, size_type m)
   : _centre(d), _generators(d,m), _error(d)
 {
 }
 
 template<class R> 
-Geometry::Zonotope<R>::Zonotope(const Point<R>& c, const LinearAlgebra::Matrix<R>& G, const LinearAlgebra::Vector<R>& e)
+Zonotope<R>::Zonotope(const Point<R>& c, const Matrix<R>& G, const Vector<R>& e)
   : _centre(c), _generators(G), _error(e)
 {
   ARIADNE_ASSERT(c.dimension()==G.number_of_rows());
@@ -203,28 +204,28 @@ Geometry::Zonotope<R>::Zonotope(const Point<R>& c, const LinearAlgebra::Matrix<R
 }
 
 template<class R> 
-Geometry::Zonotope<R>::Zonotope(const Point<R>& c, const LinearAlgebra::Matrix<R>& G)
+Zonotope<R>::Zonotope(const Point<R>& c, const Matrix<R>& G)
   : _centre(c), _generators(G), _error(c.dimension())
 {
   ARIADNE_ASSERT(c.dimension()==G.number_of_rows());
 }
 
 template<class R> 
-Geometry::Zonotope<R>::Zonotope(const Point<I>& c, const LinearAlgebra::Matrix<R>& G)
+Zonotope<R>::Zonotope(const Point<I>& c, const Matrix<R>& G)
   : _centre(midpoint(c)), _generators(G), _error(errors(c))
 {
   ARIADNE_ASSERT(c.dimension()==G.number_of_rows());
 }
 
 template<class R> 
-Geometry::Zonotope<R>::Zonotope(const Point<R>& c, const LinearAlgebra::Matrix<I>& G)
+Zonotope<R>::Zonotope(const Point<R>& c, const Matrix<I>& G)
   : _centre(c), _generators(midpoint(G)), _error(row_errors(G))
 {
   ARIADNE_ASSERT(c.dimension()==G.number_of_rows());
 }
 
 template<class R> 
-Geometry::Zonotope<R>::Zonotope(const Point<I>& c, const LinearAlgebra::Matrix<I>& G)
+Zonotope<R>::Zonotope(const Point<I>& c, const Matrix<I>& G)
   : _centre(midpoint(c)), _generators(midpoint(G)), _error(row_errors(c,G))
 {
   ARIADNE_ASSERT(c.dimension()==G.number_of_rows());
@@ -232,14 +233,14 @@ Geometry::Zonotope<R>::Zonotope(const Point<I>& c, const LinearAlgebra::Matrix<I
 
 
 template<class R>       
-Geometry::Zonotope<R>::Zonotope(const Zonotope<R>& z) 
+Zonotope<R>::Zonotope(const Zonotope<R>& z) 
   : _centre(z._centre), _generators(z._generators), _error(z._error)
 {
 }
 
 template<class R>       
-Geometry::Zonotope<R>&
-Geometry::Zonotope<R>::operator=(const Zonotope<R>& z) 
+Zonotope<R>&
+Zonotope<R>::operator=(const Zonotope<R>& z) 
 { 
   if(this!=&z) {
     this->_centre=z._centre;
@@ -251,67 +252,67 @@ Geometry::Zonotope<R>::operator=(const Zonotope<R>& z)
 
 template<class R>       
 dimension_type
-Geometry::Zonotope<R>::dimension() const
+Zonotope<R>::dimension() const
 {
   return this->_centre.dimension();
 }
 
 template<class R>       
 size_type
-Geometry::Zonotope<R>::number_of_generators() const
+Zonotope<R>::number_of_generators() const
 {
   return this->_generators.number_of_columns();
 }
 
 template<class R>       
-const Geometry::Point<R>&
-Geometry::Zonotope<R>::centre() const
+const Point<R>&
+Zonotope<R>::centre() const
 {
   return this->_centre;
 }
 
 template<class R>       
-const LinearAlgebra::Matrix<R>&
-Geometry::Zonotope<R>::generators() const
+const Matrix<R>&
+Zonotope<R>::generators() const
 {
   return this->_generators;
 }
 
 template<class R>       
-const LinearAlgebra::Vector<R>&
-Geometry::Zonotope<R>::error() const
+const Vector<R>&
+Zonotope<R>::error() const
 {
   return this->_error;
 }
 
 template<class R>       
-Geometry::Box<R>
-Geometry::Zonotope<R>::domain() const
+Box<R>
+Zonotope<R>::domain() const
 {
   return Box<R>::unit_box(this->number_of_generators());
 }
 
 template<class R>       
-Geometry::Box<R>
-Geometry::Zonotope<R>::bounding_box() const
+Box<R>
+Zonotope<R>::bounding_box() const
 {
   const Zonotope<R>& z=*this;
-  LinearAlgebra::Vector<I> b=z.centre().position_vector()+z.generators()*z.domain().position_vectors()+z.error()*I(-1,1);
+  Vector<I> b=z.centre().position_vector()+z.generators()*z.domain().position_vectors()+z.error()*I(-1,1);
   return Box<R>(b);
 }
 
 template<class R>       
 R
-Geometry::Zonotope<R>::radius() const
+Zonotope<R>::radius() const
 {
   return this->bounding_box().radius();
 }
 
 template<class R>       
 tribool
-Geometry::Zonotope<R>::contains(const Point<R>& pt) const
+Zonotope<R>::contains(const Point<R>& pt) const
 {
-  return Geometry::contains(*this,pt);
+  return Ariadne::contains(*this,pt);
 }
 
 
@@ -319,21 +320,21 @@ Geometry::Zonotope<R>::contains(const Point<R>& pt) const
 
 template<class R>       
 tribool
-Geometry::empty(const Zonotope<R>& z) 
+empty(const Zonotope<R>& z) 
 {
   return false;
 }
 
 template<class R>       
 tribool
-Geometry::bounded(const Zonotope<R>& z) 
+bounded(const Zonotope<R>& z) 
 {
   return true;
 }
 
 template<class R>       
 tribool
-Geometry::subset(const Box<R>& r, const Zonotope<R>& z) 
+subset(const Box<R>& r, const Zonotope<R>& z) 
 {
   return superset(z,r);
 }
@@ -342,46 +343,40 @@ Geometry::subset(const Box<R>& r, const Zonotope<R>& z)
 
 template<class R>       
 R 
-Geometry::radius(const Zonotope<R>& z) 
+radius(const Zonotope<R>& z) 
 {
-  typedef Numeric::Interval<R> I;
+  typedef Interval<R> I;
   return radius(z.centre()+z.generators()*z.domain().position_vectors()+z.error()*I(-1,1));
 }
 
 
 template<class R>       
 tribool
-Geometry::disjoint(const Box<R>& r, Zonotope<R>& z) 
+disjoint(const Box<R>& r, const Zonotope<R>& z) 
 {
   return disjoint(z,r);
 }
 
-template<class R>       
-tribool
-Geometry::subset(const Box<R>& r, Zonotope<R>& z) 
-{
-  return superset(z,r);
-}
 
 
 
 
 
 template<class R>
-Geometry::Box<R>
-Geometry::bounding_box(const Zonotope<R>& z)
+Box<R>
+bounding_box(const Zonotope<R>& z)
 {
   return z.bounding_box();
 }
 
 
 template<class R>
-Geometry::ListSet< Zonotope<R> >
-Geometry::split(const Zonotope<R>& z)
+ListSet< Zonotope<R> >
+split(const Zonotope<R>& z)
 {
   // FIXME: Not quite guarenteed to give an over-approximation
-  typedef Numeric::Interval<R> I;
-  using namespace LinearAlgebra;
+  typedef Interval<R> I;
+  
   
   ListSet< Zonotope<R>  > result;
   
@@ -412,7 +407,7 @@ Geometry::split(const Zonotope<R>& z)
   }
   
   if(longest_generator<m) {
-    LinearAlgebra::Matrix<R> new_generators=z.generators();
+    Matrix<R> new_generators=z.generators();
     size_type j=longest_generator;
     for(size_type i=0; i!=d; ++i) {
       new_generators(i,j)=div_up(new_generators(i,j),2);
@@ -441,13 +436,13 @@ Geometry::split(const Zonotope<R>& z)
 
 
 template<class R>       
-Geometry::Zonotope<R>::Zonotope(const Box<R>& r) 
+Zonotope<R>::Zonotope(const Box<R>& r) 
   : _centre(r.dimension()), _generators(r.dimension(),r.dimension()), _error(r.dimension())
 {
   dimension_type d=r.dimension();
   Point<R>& c=this->_centre;
-  LinearAlgebra::Matrix<R>& G=this->_generators;
-  LinearAlgebra::Vector<R>& e=this->_error;
+  Matrix<R>& G=this->_generators;
+  Vector<R>& e=this->_error;
   for(size_type i=0; i!=d; ++i) {
     c[i]=med_approx(r.lower_bound(i),r.upper_bound(i));
     for(size_type j=0; j!=d; ++j) {
@@ -461,10 +456,10 @@ Geometry::Zonotope<R>::Zonotope(const Box<R>& r)
 
 template<class R>
 Zonotope<R>
-Geometry::apply(const Function::AffineModel<R>& am,
+apply(const AffineModel<R>& am,
                 const Zonotope<R>& z)
 {
-  using namespace LinearAlgebra;
+  
   typedef Interval<R> I;
   
   ARIADNE_ASSERT(z.centre()==am.centre());
@@ -508,7 +503,7 @@ Geometry::apply(const Function::AffineModel<R>& am,
 
 template<class R>
 tribool 
-Geometry::contains(const Zonotope<R>& z, const Point<R>& pt)  
+contains(const Zonotope<R>& z, const Point<R>& pt)  
 {
   return ::contains(Zonotope<Rational>(z),Point<Rational>(pt));
 }
@@ -516,39 +511,39 @@ Geometry::contains(const Zonotope<R>& z, const Point<R>& pt)
 
 template<class R>
 tribool
-Geometry::disjoint(const Zonotope<R>& z, const Box<R>& r)
+disjoint(const Zonotope<R>& z, const Box<R>& r)
 {
   return ::disjoint(Zonotope<Rational>(z),Box<Rational>(r));
 }
 
 template<class R>
 tribool
-Geometry::intersects(const Zonotope<R>& z, const Box<R>& r)
+intersects(const Zonotope<R>& z, const Box<R>& r)
 {
   return not ::disjoint(Zonotope<Rational>(z),Box<Rational>(r));
 }
 
 template<class R>
 tribool
-Geometry::superset(const Zonotope<R>& z, const Box<R>& r)
+superset(const Zonotope<R>& z, const Box<R>& r)
 {
   return ::superset(Zonotope<Rational>(z),Box<Rational>(r));
 }
 
 template<class R>
 tribool
-Geometry::subset(const Zonotope<R>& z, const Box<R>& r)
+subset(const Zonotope<R>& z, const Box<R>& r)
 {
-  return Geometry::subset(bounding_box(z),r);
+  return subset(bounding_box(z),r);
 }
 
 template<class R>
 tribool
-Geometry::subset(const Zonotope<R>& z, const Polyhedron<R>& p)
+subset(const Zonotope<R>& z, const Polyhedron<R>& p)
 {
-  typedef Numeric::Interval<R> I;
+  typedef Interval<R> I;
   if(z.error()==0) {
-    LinearAlgebra::Vector<I> im=(p.A()*z.generators())*z.domain().position_vectors()+(p.A()*z.centre().position_vector()+p.b());
+    Vector<I> im=(p.A()*z.generators())*z.domain().position_vectors()+(p.A()*z.centre().position_vector()+p.b());
     return im>=0;
   } else {
     return subset(error_free_over_approximation(z),p);
@@ -560,22 +555,22 @@ Geometry::subset(const Zonotope<R>& z, const Polyhedron<R>& p)
 
 
 template<class R> 
-Geometry::Zonotope<R> 
-Geometry::approximation(const Zonotope<R>& z)
+Zonotope<R> 
+approximation(const Zonotope<R>& z)
 {
   return Zonotope<R>(z.centre(),z.generators());
 }
 
 template<class R> 
 Zonotope<R>
-Geometry::over_approximation(const Zonotope<R>& z)
+over_approximation(const Zonotope<R>& z)
 {
   return z;
 }
 
 template<class R> 
 Zonotope<R>
-Geometry::error_free_over_approximation(const Zonotope<R>& z)
+error_free_over_approximation(const Zonotope<R>& z)
 {
   if(z.error()==0) {
     return z;
@@ -592,7 +587,7 @@ Geometry::error_free_over_approximation(const Zonotope<R>& z)
 
 template<class R> 
 Zonotope<R>
-Geometry::nonsingular_over_approximation(const Zonotope<R>& z)
+nonsingular_over_approximation(const Zonotope<R>& z)
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }  
@@ -600,11 +595,11 @@ Geometry::nonsingular_over_approximation(const Zonotope<R>& z)
 
 
 template<class R> 
-Geometry::Zonotope<R>
-Geometry::orthogonal_over_approximation(const Zonotope<R>& z)
+Zonotope<R>
+orthogonal_over_approximation(const Zonotope<R>& z)
 {
   //assert(iz.dimension()==iz.number_of_generators());
-  typedef Numeric::Interval<R> I;
+  typedef Interval<R> I;
   Zonotope<R> ez=error_free_over_approximation(z);
 
   const Point<R>& c=ez.centre();
@@ -615,7 +610,7 @@ Geometry::orthogonal_over_approximation(const Zonotope<R>& z)
 
   Matrix<I> aQinv=inverse(aQ);
   Matrix<I> iR=aQinv*G;
-  DiagonalMatrix<R> aD(row_norms(iR));
+  DiagonalMatrix<R> aD(::row_norms(iR));
 
   Matrix<I> niG=aQ*aD;
 
@@ -623,11 +618,11 @@ Geometry::orthogonal_over_approximation(const Zonotope<R>& z)
 }  
 
 template<class R>
-Geometry::Zonotope<R>
-Geometry::cascade_over_approximation(const Zonotope<R>& z, size_type cs)
+Zonotope<R>
+cascade_over_approximation(const Zonotope<R>& z, size_type cs)
 {
   using namespace std;
-  using namespace LinearAlgebra;
+  
   if(z.number_of_generators()<=z.dimension()*cs) { return z; }  
 
   assert(z.number_of_generators()%z.dimension()==0);
@@ -667,30 +662,30 @@ Geometry::cascade_over_approximation(const Zonotope<R>& z, size_type cs)
 
 template<class R>
 tribool
-Geometry::disjoint(const Zonotope<R>& z, const ConstraintSet<R>& cs)
+disjoint(const Zonotope<R>& z, const ConstraintSet<R>& cs)
 {
   //TODO: Change disjoint(Zonotope,Box) to accept unbounded boxes.
   ARIADNE_CHECK_EQUAL_DIMENSIONS(z,cs,"disjoint(Zonotope,ConstraintSet)");
-  Zonotope<R> fz=apply(Function::AffineModel<R>(z.bounding_box(),z.centre(),cs.function()),z);
+  Zonotope<R> fz=apply(AffineModel<R>(z.bounding_box(),z.centre(),cs.function()),z);
   Box<R> bcd=closed_intersection(cs.codomain(),fz.bounding_box());
   return disjoint(fz,bcd);
 }
 
 template<class R>
 tribool
-Geometry::subset(const Zonotope<R>& z, const ConstraintSet<R>& cs)
+subset(const Zonotope<R>& z, const ConstraintSet<R>& cs)
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(z,cs,"disjoint(Zonotope,ConstraintSet)");
-  Zonotope<R> fz=apply(Function::AffineModel<R>(z.bounding_box(),z.centre(),cs.function()),z);
+  Zonotope<R> fz=apply(AffineModel<R>(z.bounding_box(),z.centre(),cs.function()),z);
   return subset(fz.bounding_box(),cs.codomain());
 }
 
 template<class R>
 tribool
-Geometry::intersects(const Zonotope<R>& z, const ConstraintSet<R>& cs)
+intersects(const Zonotope<R>& z, const ConstraintSet<R>& cs)
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(z,cs,"disjoint(Zonotope,ConstraintSet)");
-  Zonotope<R> fz=apply(Function::AffineModel<R>(z.bounding_box(),z.centre(),cs.function()),z);
+  Zonotope<R> fz=apply(AffineModel<R>(z.bounding_box(),z.centre(),cs.function()),z);
   Box<R> bcd=closed_intersection(cs.codomain(),fz.bounding_box());
   return intersects(fz,bcd);
 }
@@ -700,8 +695,8 @@ Geometry::intersects(const Zonotope<R>& z, const ConstraintSet<R>& cs)
 
 /*
 template<class R> 
-Geometry::Zonotope<Numeric::Interval<R>,R> 
-Geometry::orthogonal_over_approximation(const Zonotope<R,R>& z)
+Zonotope<Interval<R>,R> 
+orthogonal_over_approximation(const Zonotope<R,R>& z)
 {
   // FIXME: Subdivide in zero order as well!
   static bool warn=true;
@@ -732,8 +727,8 @@ Geometry::orthogonal_over_approximation(const Zonotope<R,R>& z)
 }
 
 template<class R> 
-Geometry::Zonotope<Numeric::Interval<R>,R> 
-Geometry::orthogonal_over_approximation(const Zonotope<Numeric::Interval<R>,R>& z)
+Zonotope<Interval<R>,R> 
+orthogonal_over_approximation(const Zonotope<Interval<R>,R>& z)
 {
   Zonotope<R,R> oaz=over_approximation(z);
   
@@ -758,8 +753,8 @@ Geometry::orthogonal_over_approximation(const Zonotope<Numeric::Interval<R>,R>& 
 }
 
 template<class R> 
-Geometry::Zonotope< Numeric::Interval<R> > 
-Geometry::orthogonal_over_approximation(const Zonotope< Numeric::Interval<R> >& z)
+Zonotope< Interval<R> > 
+orthogonal_over_approximation(const Zonotope< Interval<R> >& z)
 {
   Zonotope<R,R> oaz=over_approximation(z);
   
@@ -790,9 +785,9 @@ Geometry::orthogonal_over_approximation(const Zonotope< Numeric::Interval<R> >& 
 
 template<class R>
 std::ostream&
-Geometry::operator<<(std::ostream& os, const Zonotope<R>& z) 
+operator<<(std::ostream& os, const Zonotope<R>& z) 
 {
-  typedef Numeric::Interval<R> I;
+  typedef Interval<R> I;
   os << "["<<z.centre();
   for(size_type j=0; j!=z.number_of_generators(); ++j) {
     os << ";";
@@ -806,10 +801,10 @@ Geometry::operator<<(std::ostream& os, const Zonotope<R>& z)
 
 template<class R>
 std::istream& 
-Geometry::operator>>(std::istream& is, Zonotope<R>& z)
+operator>>(std::istream& is, Zonotope<R>& z)
 {
   Point<R> centre;
-  LinearAlgebra::Matrix<R> generators;
+  Matrix<R> generators;
   char c0,c1,c2;
   is >> c0 >> centre >> c1 >> generators >> c2;
   z = Zonotope<R>(centre,generators);
@@ -824,7 +819,7 @@ Geometry::operator>>(std::istream& is, Zonotope<R>& z)
 
 template<class R>
 void
-Geometry::Zonotope<R>::_instantiate() 
+Zonotope<R>::_instantiate() 
 {
   ::instantiate_zonotope<R>();
 }
@@ -834,27 +829,22 @@ Geometry::Zonotope<R>::_instantiate()
 
 
 } // namespace Ariadne
+
+
                                                             
                                                             
                                                             
 
 namespace {
 
-using Geometry::verbosity;
+using Ariadne::verbosity;
 
 template<class R>
 void
 adjoin_subdivision(ListSet< Zonotope<R> >& ls, const Zonotope<R>& z) 
 {
-  ls.adjoin(Geometry::subdivide(z));
+  ls.adjoin(subdivide(z));
 }
-
-
-
-
-
-
-
 
 
 /* Test vertices individually. Highly inefficient!! */
@@ -866,7 +856,7 @@ superset(const Zonotope<Rational>& z, const Box<Rational>& r)
       rv_iter!=r.vertices_end(); ++rv_iter) 
   {
     const Point<Rational>& pt=*rv_iter;
-    result=result && Geometry::contains(z,pt);
+    result=result && contains(z,pt);
     if(result==false) {
       break;
     }
@@ -909,24 +899,24 @@ disjoint(const Zonotope<Rational>& z, const Box<Rational>& r)
   //  
   // Change sign of RHS of first equality if necessary
   // Introduce slack variables for last two inequalities
-  typedef Numeric::Rational Q;
-  LinearAlgebra::Matrix<Q> T(2*d+m+1,d+m+1);
+  typedef Rational Q;
+  Matrix<Q> T(2*d+m+1,d+m+1);
   
-  const Geometry::Point<Q> l=r.lower_corner()-z.error();
-  const Geometry::Point<Q> u=r.upper_corner()+z.error();
-  const Geometry::Point<Q>& c=z.centre();
-  const LinearAlgebra::Matrix<Q>& G=z.generators();
-  //const LinearAlgebra::Vector<Q>& e=z.error();
+  const Point<Q> l=r.lower_corner()-z.error();
+  const Point<Q> u=r.upper_corner()+z.error();
+  const Point<Q>& c=z.centre();
+  const Matrix<Q>& G=z.generators();
+  //const Vector<Q>& e=z.error();
   
-  const LinearAlgebra::Vector<Q> qo(m,Q(1));
-  const LinearAlgebra::Vector<Q> ql=l.position_vector();
-  const LinearAlgebra::Vector<Q> qu=u.position_vector();
-  const LinearAlgebra::Vector<Q> qd=qu-ql;
-  const LinearAlgebra::Vector<Q> qc=c.position_vector();
-  const LinearAlgebra::Matrix<Q> qG=G;
-  const LinearAlgebra::Vector<Q> qrhs=qc-ql-qG*qo;
+  const Vector<Q> qo(m,Q(1));
+  const Vector<Q> ql=l.position_vector();
+  const Vector<Q> qu=u.position_vector();
+  const Vector<Q> qd=qu-ql;
+  const Vector<Q> qc=c.position_vector();
+  const Matrix<Q> qG=G;
+  const Vector<Q> qrhs=qc-ql-qG*qo;
   
-  if(Geometry::verbosity>8) { std::clog << "ql=" << ql << ", qd=" << qd <<", qc=" << qc << ", qrhs=" << qrhs << std::endl; }
+  if(verbosity>8) { std::clog << "ql=" << ql << ", qd=" << qd <<", qc=" << qc << ", qrhs=" << qrhs << std::endl; }
   
   // Set up constraints x+sx=u-l
   for(size_type i=0; i!=d; ++i) {
@@ -967,7 +957,7 @@ disjoint(const Zonotope<Rational>& z, const Box<Rational>& r)
     T(2*d+m,d+m) -= T(i+d+m,d+m);
   }
   
-  LinearProgramming::LinearProgram<Q> lp(T);
+  LinearProgram<Q> lp(T);
   tribool result=!lp.is_feasible();
   
   return result;
@@ -978,7 +968,7 @@ disjoint(const Zonotope<Rational>& z, const Box<Rational>& r)
 tribool
 disjoint(const Zonotope<Rational>& z1, const Zonotope<Rational>& z2)
 {
-  typedef Numeric::Rational Q;
+  typedef Rational Q;
   ARIADNE_CHECK_EQUAL_DIMENSIONS(z1,z2,"tribool disjoint(Zonotope<Rational> z1, Zonotope<Rational> z2)");
   
   dimension_type d=z1.dimension();
@@ -986,16 +976,16 @@ disjoint(const Zonotope<Rational>& z1, const Zonotope<Rational>& z2)
   size_type m1=z1.number_of_generators();
   size_type m2=z2.number_of_generators();
   
-  LinearAlgebra::Matrix<Q> T(m1+m2+d+1,m1+m2+1);
+  Matrix<Q> T(m1+m2+d+1,m1+m2+1);
   
-  const LinearAlgebra::Vector<Q> qo1(m1,one);
-  const LinearAlgebra::Vector<Q> qo2(m2,one);
+  const Vector<Q> qo1(m1,one);
+  const Vector<Q> qo2(m2,one);
   
-  const Geometry::Point<Q>& qc1=z1.centre();
-  const LinearAlgebra::Matrix<Q>& qG1=z1.generators();
-  const Geometry::Point<Q>& qc2=z2.centre();
-  const LinearAlgebra::Matrix<Q>& qG2=z2.generators();
-  LinearAlgebra::Vector<Q> qrhs = qG1*qo1 - qG2*qo2 + (qc2 - qc1);
+  const Point<Q>& qc1=z1.centre();
+  const Matrix<Q>& qG1=z1.generators();
+  const Point<Q>& qc2=z2.centre();
+  const Matrix<Q>& qG2=z2.generators();
+  Vector<Q> qrhs = qG1*qo1 - qG2*qo2 + (qc2 - qc1);
   
   // Set up constraints e1 + se1 = 2
   for(size_type j1=0; j1!=m1; ++j1) {
@@ -1042,7 +1032,7 @@ disjoint(const Zonotope<Rational>& z1, const Zonotope<Rational>& z2)
     T(m1+m2+d,m1+m2) -= T(m1+m2+i,m1+m2);
   }
   
-  LinearProgramming::LinearProgram<Q> lp(T);
+  LinearProgram<Q> lp(T);
   
   tribool result=!lp.is_feasible();
   
@@ -1067,16 +1057,16 @@ contains(const Zonotope<Rational>& z, const Point<Rational>& pt)
   Q one=1;
   Q two=2;
   
-  const Geometry::Point<Q>& qc=z.centre();
-  const Geometry::Point<Q>& qp=pt;
-  const LinearAlgebra::Matrix<Q>& qG=z.generators();
-  const LinearAlgebra::Vector<Q> qo(m,one);
-  const LinearAlgebra::Vector<Q> zv(m,zero);
-  const LinearAlgebra::Vector<Q> tv(m,two);
+  const Point<Q>& qc=z.centre();
+  const Point<Q>& qp=pt;
+  const Matrix<Q>& qG=z.generators();
+  const Vector<Q> qo(m,one);
+  const Vector<Q> zv(m,zero);
+  const Vector<Q> tv(m,two);
   
-  LinearAlgebra::Vector<Q> qrhs=qp-qc+qG*qo;
+  Vector<Q> qrhs=qp-qc+qG*qo;
   
-  LinearAlgebra::Matrix<Q> T(d+m+1,m+1);
+  Matrix<Q> T(d+m+1,m+1);
   
   // Set up constraints e+se=2
   for(dimension_type j=0; j!=m; ++j) {
@@ -1107,7 +1097,7 @@ contains(const Zonotope<Rational>& z, const Point<Rational>& pt)
     T(m+d,m)-=T(m+i,m);
   }
   
-  LinearProgramming::LinearProgram<Q> lp(T);
+  LinearProgram<Q> lp(T);
   //std::clog << lp.tableau() << std::endl;
   tribool result=lp.is_feasible();
   //std::clog << lp.tableau() << std::endl;
@@ -1129,42 +1119,42 @@ instantiate_zonotope()
 {
   tribool* tb=0;
   R* r=0;
-  Geometry::Point<R>* pt=0;
-  Geometry::Box<R>* bx=0;
-  Geometry::Polyhedron<R>* p=0;
-  Geometry::Zonotope<R>* z=0;
-  Geometry::ConstraintSet<R>* cs=0;
-  Function::AffineModel<R>* am=0;
+  Point<R>* pt=0;
+  Box<R>* bx=0;
+  Polyhedron<R>* p=0;
+  Zonotope<R>* z=0;
+  ConstraintSet<R>* cs=0;
+  AffineModel<R>* am=0;
   std::ostream* os=0;
   std::istream* is=0;
 
-  *r=Geometry::radius(*z);
-  *bx=Geometry::bounding_box(*z);
+  *r=Ariadne::radius(*z);
+  *bx=Ariadne::bounding_box(*z);
   
-  *tb=Geometry::contains(*z,*pt);
-  *tb=Geometry::disjoint(*z,*bx);
-  *tb=Geometry::superset(*z,*bx);
-  *tb=Geometry::subset(*bx,*z);
-  *tb=Geometry::subset(*z,*bx);
-  *tb=Geometry::subset(*z,*p);
+  *tb=Ariadne::contains(*z,*pt);
+  *tb=Ariadne::disjoint(*z,*bx);
+  *tb=Ariadne::superset(*z,*bx);
+  *tb=Ariadne::subset(*bx,*z);
+  *tb=Ariadne::subset(*z,*bx);
+  *tb=Ariadne::subset(*z,*p);
   
-  *tb=Geometry::disjoint(*z,*cs);
-  *tb=Geometry::intersects(*z,*cs);
-  *tb=Geometry::subset(*z,*cs);
+  *tb=Ariadne::disjoint(*z,*cs);
+  *tb=Ariadne::intersects(*z,*cs);
+  *tb=Ariadne::subset(*z,*cs);
 
-  Geometry::split(*z);
+  Ariadne::split(*z);
 
-  Geometry::approximation(*z);
-  Geometry::over_approximation(*z);
-  Geometry::error_free_over_approximation(*z);
-  Geometry::orthogonal_over_approximation(*z);
-  Geometry::nonsingular_over_approximation(*z);
-  Geometry::cascade_over_approximation(*z,1);
+  Ariadne::approximation(*z);
+  Ariadne::over_approximation(*z);
+  Ariadne::error_free_over_approximation(*z);
+  Ariadne::orthogonal_over_approximation(*z);
+  Ariadne::nonsingular_over_approximation(*z);
+  Ariadne::cascade_over_approximation(*z,1);
 
-  Geometry::apply(*am,*z);
+  Ariadne::apply(*am,*z);
 
-  Geometry::operator<<(*os,*z);
-  Geometry::operator>>(*is,*z);
+  operator<<(*os,*z);
+  operator>>(*is,*z);
 }
 
 template<> 
@@ -1176,30 +1166,31 @@ instantiate_zonotope<Rational>()
   R* r=0;
   std::ostream* os=0;
   std::istream* is=0;
-  Geometry::Point<R>* pt=0;
-  Geometry::Box<R>* bx=0;
-  Geometry::Zonotope<R>* z=0;
-  //Geometry::ListSet< Zonotope<R> >* zls=0;
+  Point<R>* pt=0;
+  Box<R>* bx=0;
+  Zonotope<R>* z=0;
+  //ListSet< Zonotope<R> >* zls=0;
   
-  *r=Geometry::radius(*z);
-  *bx=Geometry::bounding_box(*z);
+  *r=Ariadne::radius(*z);
+  *bx=Ariadne::bounding_box(*z);
   
-  *tb=Geometry::contains(*z,*pt);
-  *tb=Geometry::contains(*z,*pt);
-  *tb=Geometry::disjoint(*z,*bx);
-  *tb=Geometry::superset(*z,*bx);
-  *tb=Geometry::subset(*bx,*z);
-  *tb=Geometry::subset(*z,*bx);
+  *tb=Ariadne::contains(*z,*pt);
+  *tb=Ariadne::contains(*z,*pt);
+  *tb=Ariadne::disjoint(*z,*bx);
+  *tb=Ariadne::superset(*z,*bx);
+  *tb=Ariadne::subset(*bx,*z);
+  *tb=Ariadne::subset(*z,*bx);
 
-  *z=Geometry::approximation(*z);
+  *z=Ariadne::approximation(*z);
 
-  Geometry::operator<<(*os,*z);
-  Geometry::operator>>(*is,*z);
+  operator<<(*os,*z);
+  operator>>(*is,*z);
 
 }
 
 
 } // namespace 
+
 
 
 

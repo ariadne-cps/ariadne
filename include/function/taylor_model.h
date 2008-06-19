@@ -34,15 +34,17 @@
 
 #include "base/types.h"
 #include "base/array.h"
+
 #include "linear_algebra/declarations.h"
 
 #include "function/taylor_derivative.h"
 
 namespace Ariadne {
   
-  namespace Geometry { template<class R> class Point; template<class R> class Box; }
+   template<class R> class Point; 
+   template<class R> class Box; 
 
-  namespace Function {
+
   
     class MultiIndex;
     template<class R> class FunctionInterface;
@@ -51,12 +53,12 @@ namespace Ariadne {
 
     template<class R> class TaylorModel;
 
-    template<class R> TaylorModel<R> recentre(const TaylorModel<R>&, const Geometry::Box<R>& bx, const LinearAlgebra::Vector<R>& pt);
-    template<class R> TaylorModel<R> truncate(const TaylorModel<R>&, const Geometry::Box<R>&, size_type, size_type);
+    template<class R> TaylorModel<R> recentre(const TaylorModel<R>&, const Box<R>& bx, const Vector<R>& pt);
+    template<class R> TaylorModel<R> truncate(const TaylorModel<R>&, const Box<R>&, size_type, size_type);
 
     template<class R> TaylorModel<R> compose(const TaylorModel<R>&, const TaylorModel<R>&);
-    template<class R> TaylorModel<R> inverse(const TaylorModel<R>&, const LinearAlgebra::Vector<R>&);
-    template<class R> TaylorModel<R> implicit(const TaylorModel<R>&, const LinearAlgebra::Vector<R>&);
+    template<class R> TaylorModel<R> inverse(const TaylorModel<R>&, const Vector<R>&);
+    template<class R> TaylorModel<R> implicit(const TaylorModel<R>&, const Vector<R>&);
     template<class R> TaylorModel<R> derivative(const TaylorModel<R>&, size_type);
 
  
@@ -67,7 +69,7 @@ namespace Ariadne {
      */
     template<class R>
     class TaylorModel {
-      typedef typename Numeric::Interval<R> I;
+      typedef Interval<R> I;
      public:
       /*! \brief The type of denotable real number used for the corners. */
       typedef R real_type;
@@ -78,20 +80,20 @@ namespace Ariadne {
       TaylorModel(size_type rs, size_type as, smoothness_type o, smoothness_type s);
 
       /*! \brief Construct from a domain, centre, and two derivative expansions, one for the centre and one over the entire domain. */
-      TaylorModel(const Geometry::Box<R>& domain, const Geometry::Point<R>& centre, 
+      TaylorModel(const Box<R>& domain, const Point<R>& centre, 
                   const TaylorDerivative<I>& centre_derivatives, const TaylorDerivative<I>& domain_derivatives);
-      TaylorModel(const Geometry::Box<R>& domain, const LinearAlgebra::Vector<R>& centre, 
+      TaylorModel(const Box<R>& domain, const Vector<R>& centre, 
                   const TaylorDerivative<I>& centre_derivatives, const TaylorDerivative<I>& domain_derivatives);
-      TaylorModel(const LinearAlgebra::Vector<I>& domain, const LinearAlgebra::Vector<R>& centre, 
+      TaylorModel(const Vector<I>& domain, const Vector<R>& centre, 
                   const TaylorDerivative<I>& centre_derivatives, const TaylorDerivative<I>& domain_derivatives);
 
       /*! \brief Construct from a domain, centre, an order and a function. */
-      TaylorModel(const Geometry::Box<R>& domain, const Geometry::Point<R>& centre,
+      TaylorModel(const Box<R>& domain, const Point<R>& centre,
                   smoothness_type order, smoothness_type smoothness,
-                  const Function::FunctionInterface<R>& function);
-      TaylorModel(const LinearAlgebra::Vector<I>& domain, const LinearAlgebra::Vector<R>& centre,
+                  const FunctionInterface<R>& function);
+      TaylorModel(const Vector<I>& domain, const Vector<R>& centre,
                   smoothness_type order, smoothness_type smoothness,
-                  const Function::FunctionInterface<R>& function);
+                  const FunctionInterface<R>& function);
 
        
       /*! \brief Equality operator. */
@@ -116,22 +118,22 @@ namespace Ariadne {
       size_type result_size() const;
 
       /*! \brief The domain of validity of the Taylor model. */
-      Geometry::Box<R> domain() const;
+      Box<R> domain() const;
       /*! \brief The centre of the derivative expansion. */
-      LinearAlgebra::Vector<R> centre() const;
+      Vector<R> centre() const;
       /*! \brief The range of values the Taylor model can take. */
-      Geometry::Box<R> range() const;
+      Box<R> range() const;
      
       /*! \brief Evaluate the Taylor model at the point \a x. */
-      LinearAlgebra::Vector<I> evaluate(const LinearAlgebra::Vector<I>& x) const;
-      LinearAlgebra::Vector<I> evaluate(const LinearAlgebra::Vector<R>& x) const;
+      Vector<I> evaluate(const Vector<I>& x) const;
+      Vector<I> evaluate(const Vector<R>& x) const;
       
       /*! \brief Compute the derivate of the map at a point. */
-      LinearAlgebra::Matrix<I> jacobian(const LinearAlgebra::Vector<I>& s) const;
-      LinearAlgebra::Matrix<I> jacobian(const LinearAlgebra::Vector<R>& s) const;
+      Matrix<I> jacobian(const Vector<I>& s) const;
+      Matrix<I> jacobian(const Vector<R>& s) const;
 
       /*! \brief Truncate to a model of lower order and/or smoothness, possibly on a different domain. */
-      TaylorModel<R> truncate(const Geometry::Box<R>& domain, const LinearAlgebra::Vector<R>& centre, 
+      TaylorModel<R> truncate(const Box<R>& domain, const Vector<R>& centre, 
                               smoothness_type order, smoothness_type smoothness) const;
 
       /*! \brief The zero Taylor model with result size \a rs and argument size \a as. */
@@ -170,13 +172,13 @@ namespace Ariadne {
 #endif
      private:
       static void instantiate();
-      array< array<I> > _powers(const LinearAlgebra::Vector<I>&) const;
+      array< array<I> > _powers(const Vector<I>&) const;
       void _compute_jacobian() const;
       void _set_argument_size(size_type n);
       size_type _compute_maximum_component_size() const;
      private:
-      friend TaylorModel<R> recentre<>(const TaylorModel<R>&, const Geometry::Box<R>& bx, const LinearAlgebra::Vector<R>&);
-      friend TaylorModel<R> inverse<>(const TaylorModel<R>&, const LinearAlgebra::Vector<R>&);
+      friend TaylorModel<R> recentre<>(const TaylorModel<R>&, const Box<R>& bx, const Vector<R>&);
+      friend TaylorModel<R> inverse<>(const TaylorModel<R>&, const Vector<R>&);
       //template<class R> friend void add(TaylorModel<R>&,const TaylorModel<R>&,const TaylorModel<R>&);
       //template<class R> friend void sub(TaylorModel<R>&,const TaylorModel<R>&,const TaylorModel<R>&);
       //template<class R> friend void mul(TaylorModel<R>&,const TaylorModel<R>&,const TaylorModel<R>&);
@@ -185,12 +187,12 @@ namespace Ariadne {
       //template<class R> friend void scale(TaylorModel<R>&,const R&);
      private:
       /* Domain of definition. */
-      Geometry::Box<R> _domain;
+      Box<R> _domain;
       /* The centre of the derivative expansion. */
-      LinearAlgebra::Vector<R> _centre;
+      Vector<R> _centre;
       size_type _smoothness; 
-      Function::TaylorDerivative<I> _centre_derivatives;
-      Function::TaylorDerivative<I> _domain_derivatives;
+      TaylorDerivative<I> _centre_derivatives;
+      TaylorDerivative<I> _domain_derivatives;
    };
     
 
@@ -204,8 +206,9 @@ namespace Ariadne {
     template<class R> std::ostream& operator<<(std::ostream&, const TaylorModel<R>&);
   
 
-  }
-}
+
+} // namespace Ariadne
+
 
 #include "taylor_model.inline.h"
 

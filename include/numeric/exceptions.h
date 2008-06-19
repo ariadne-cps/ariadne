@@ -1,5 +1,5 @@
 /***************************************************************************
- *            numeric.except.h.h
+ *            numeric.exceptions.h
  *
  *  Copyright  2005-6  Pieter Collins, Alberto Casagrande
  *  Email  Pieter.Collins@cwi.nl, casagrande@dimi.uniud.it
@@ -34,7 +34,7 @@
 #include "base/types.h"
 
 namespace Ariadne {
-  namespace Numeric {
+  
   
     //@{ \name Exceptions
     /*! \brief A division by zero has occurred. */
@@ -54,8 +54,8 @@ namespace Ariadne {
     };
     //@}
     
-  }
-}
+
+} // namespace Ariadne
 
 
 #endif /* ARIADNE_NUMERIC_EXCEPTIONS_H */

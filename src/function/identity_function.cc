@@ -27,8 +27,7 @@
 #include "function/identity_function.code.h"
 
 namespace Ariadne {
-  namespace Function {
-    using namespace Numeric;
+    
     
     template class IdentityFunction<Rational>;
 
@@ -40,5 +39,5 @@ namespace Ariadne {
     template class IdentityFunction<FloatMP>;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

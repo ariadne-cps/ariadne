@@ -29,7 +29,7 @@
 #define ARIADNE_SLICE_H 
 
 namespace Ariadne {
-  namespace LinearAlgebra {
+  
     
     class Slice 
     {
@@ -51,8 +51,8 @@ namespace Ariadne {
     inline Slice range(size_type start, size_type finish, size_type stride=1u) {
       return Slice(start,(finish-start-1)/stride+1,stride); }
 
-  }
-}
+
+} // namespace Ariadne
 
 
 #endif /* ARIADNE_SLICE_H */

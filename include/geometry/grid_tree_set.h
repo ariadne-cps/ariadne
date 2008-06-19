@@ -42,7 +42,7 @@
 
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
     template<class R> class Grid;
     template<class R> class GridTreeCell;
@@ -76,18 +76,18 @@ namespace Ariadne {
       typedef Point<R> state_type;
 
       /*!\brief Construct from a rectangle, and a unit grid tree cell. */
-      GridTreeCell(const Box<R>& r, const Combinatoric::SubdivisionTreeCell& c);
+      GridTreeCell(const Box<R>& r, const SubdivisionTreeCell& c);
 
       /*!\brief Construct from a rectangle, the subdivision_coordinates and a binary word. */
       GridTreeCell(const Box<R>& r, 
-                        const Combinatoric::SubdivisionSequence& s, 
-                        const Combinatoric::BinaryWord& w);
+                        const SubdivisionSequence& s, 
+                        const BinaryWord& w);
 
       /*!\brief The cell in a unit box. */
       const Box<R>& unit_box() const;
 
       /*!\brief The cell in a unit box. */
-      const Combinatoric::SubdivisionTreeCell& subdivision_cell() const;
+      const SubdivisionTreeCell& subdivision_cell() const;
 
       /*!\brief The dimension of the cell. */
       dimension_type dimension() const;
@@ -111,7 +111,7 @@ namespace Ariadne {
       std::ostream& write(std::ostream&) const;
      private:
       Box<R> _unit_box;
-      Combinatoric::SubdivisionTreeCell _subdivision_cell;
+      SubdivisionTreeCell _subdivision_cell;
     };
 
 
@@ -139,7 +139,7 @@ namespace Ariadne {
      public:
       //      typedef GridTreeSetIterator<R> iterator;
       //      typedef GridTreeSetIterator<R> const_iterator;
-      typedef binary_constructor_iterator< Combinatoric::SubdivisionTreeSet::const_iterator,
+      typedef binary_constructor_iterator< SubdivisionTreeSet::const_iterator,
                                            GridTreeCell<R>,
                                            Box<R> > const_iterator;         
       typedef const_iterator iterator;
@@ -154,7 +154,7 @@ namespace Ariadne {
       GridTreeSet(const Grid<R>& g);
 
       /*! \brief Construct an set based on a grid scheme, a binary tree and a mask. */
-      GridTreeSet(const Grid<R>& g, const Combinatoric::BinaryTree& t, const BooleanArray& m);
+      GridTreeSet(const Grid<R>& g, const BinaryTree& t, const BooleanArray& m);
 
       /*! \brief Convert from a GridMaskSet.
        *
@@ -197,7 +197,7 @@ namespace Ariadne {
       const Grid<R>& grid() const;
 
       /*! \brief The binary tree. */
-      const Combinatoric::BinaryTree& binary_tree() const;
+      const BinaryTree& binary_tree() const;
       
       /*! \brief The mask. */
       const BooleanArray& mask() const;
@@ -253,7 +253,7 @@ namespace Ariadne {
       static void _instantiate_geometry_operators();
      private:
       Grid<R> _grid;
-      Combinatoric::BinaryTree _tree;
+      BinaryTree _tree;
       BooleanArray _mask;
     };
 

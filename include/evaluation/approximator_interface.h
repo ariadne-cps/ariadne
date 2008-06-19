@@ -37,7 +37,7 @@
 #include "geometry/list_set.h"
 
 namespace Ariadne {
-  namespace Evaluation {
+  
   
     /*! \brief Interface for approximating enclosure sets on a paving of space.
      *  \ingroup EvaluatorInterfaces \ingroup Approximators
@@ -51,7 +51,7 @@ namespace Ariadne {
       typedef typename Aprx::PartitionListSet PartitionListSet;
       typedef typename Aprx::PartitionTreeSet PartitionTreeSet;
       typedef ES EnclosureSet;
-      typedef Geometry::ListSet<ES> EnclosureSetList;
+      typedef ListSet<ES> EnclosureSetList;
      public:
       /*! \brief Virtual destructor. */
       virtual ~ApproximatorInterface() { }
@@ -112,8 +112,8 @@ namespace Ariadne {
 
 
 
-  }
-}
+  
+} // namespace Ariadne
 
 
 #endif /* ARIADNE_APPROXIMATOR_INTERFACE_H */

@@ -38,7 +38,7 @@
 #include "function/affine_function.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
     
  
     
@@ -50,7 +50,7 @@ namespace Ariadne {
     {
      public:
       /*! \brief */
-      PolyhedralSet(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b)
+      PolyhedralSet(const Matrix<R>& A, const Vector<R>& b)
         : ConstraintSet<R>(make_constraint_set(Polyhedron<R>(A,b))), _polyhedron(A,b) { }
       /*! \brief */
       PolyhedralSet(const std::string& str)
@@ -80,16 +80,16 @@ namespace Ariadne {
       virtual tribool contains(const Point<R>& pt) const { return this->_polyhedron.contains(pt); }
       /*! \brief */
       virtual tribool superset(const Box<R>& r) const { 
-        return Geometry::subset(r,this->_polyhedron); }
+        return Ariadne::subset(r,this->_polyhedron); }
       /*! \brief */
       virtual tribool intersects(const Box<R>& r) const { 
-        return !Geometry::disjoint(r,this->_polyhedron); }
+        return !Ariadne::disjoint(r,this->_polyhedron); }
       /*! \brief */
       virtual tribool disjoint(const Box<R>& r) const { 
-        return Geometry::disjoint(r,this->_polyhedron); }
+        return Ariadne::disjoint(r,this->_polyhedron); }
       /*! \brief */
       virtual tribool subset(const Box<R>& r) const { 
-        return Geometry::subset(this->_polyhedron,r); }
+        return Ariadne::subset(this->_polyhedron,r); }
       /*! \brief */
       virtual tribool bounded() const { return this->_polyhedron.bounded(); }      
       /*! \brief */
@@ -100,7 +100,7 @@ namespace Ariadne {
       }
      private:
       static ConstraintSet<R> make_constraint_set(const Polyhedron<R>& ply) {
-        return ConstraintSet<R>(Function::AffineFunction<R>(-ply.A(),ply.b()),Box<R>::positive_orthant(ply.number_of_constraints())); }
+        return ConstraintSet<R>(AffineFunction<R>(-ply.A(),ply.b()),Box<R>::positive_orthant(ply.number_of_constraints())); }
      private:
       Polyhedron<R> _polyhedron;
     };
@@ -111,7 +111,7 @@ namespace Ariadne {
     }
     
     
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_POLYHEDRAL_SET_H */

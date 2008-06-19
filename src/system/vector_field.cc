@@ -27,8 +27,8 @@
 #include "numeric/float.h"
 
 namespace Ariadne {
-  namespace System {
-    using namespace Numeric;
+  
+    
     
 #ifdef ENABLE_FLOAT64
     template class VectorField<Float64>;
@@ -38,5 +38,5 @@ namespace Ariadne {
     template class VectorField<FloatMP>;
 #endif
     
-  }
-}
+  
+} // namespace Ariadne

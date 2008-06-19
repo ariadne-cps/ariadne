@@ -30,12 +30,12 @@
 #define ARIADNE_ARRAY_DECL_H
 
 namespace Ariadne {
-  namespace Base {
+
     
     // Need to give default size in first declaration.
     template<class T, unsigned short int N=0> class array;
     
-  }
+
 }
 
   

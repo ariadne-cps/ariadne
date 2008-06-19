@@ -31,7 +31,6 @@
 #include "combinatoric/lattice_map.h"
 
 using namespace Ariadne;
-using namespace Combinatoric;
 using namespace std;
 
 int main() {

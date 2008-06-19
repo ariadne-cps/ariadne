@@ -29,7 +29,7 @@
 #define ARIADNE_REDUCER_INTERFACE_H
 
 namespace Ariadne {
-  namespace Evaluation {
+  
 
     /*! \brief Interface for over-approximating enclosure sets by sets with a reduced (simpler) description. 
      *  \ingroup EvaluatorInterfaces \ingroup Approximators
@@ -46,7 +46,7 @@ namespace Ariadne {
       virtual ES over_approximate(const ES& es) const = 0;
     };
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_REDUCER_INTERFACE_H */

@@ -34,10 +34,6 @@
 
 
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::LinearAlgebra;
-using namespace Ariadne::Function;
-using namespace Ariadne::Geometry;
 using namespace Ariadne::Python;
 
 #include <boost/python.hpp>
@@ -48,7 +44,7 @@ class ConstraintWrapper
   : public ConstraintInterface<R>, 
     public wrapper< ConstraintInterface<R> >
 {
-  typedef typename Numeric::traits<R>::arithmetic_type A;
+  typedef typename traits<R>::arithmetic_type A;
  public:
   ConstraintWrapper() { }
   ConstraintWrapper<R>* clone() const { return this->get_override("clone")(); }
@@ -58,7 +54,7 @@ class ConstraintWrapper
   std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
   
   A value(const Point<A>& pt) const { return this->get_override("value")(); }
-  LinearAlgebra::Vector<A> gradient(const Point<A>& pt) const { return this->get_override("gradient")(); }
+  Vector<A> gradient(const Point<A>& pt) const { return this->get_override("gradient")(); }
 };
   
 

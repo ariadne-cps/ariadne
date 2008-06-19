@@ -29,7 +29,7 @@
 #define ARIADNE_COMBINATORIC_DECLARATIONSS_H
 
 namespace Ariadne { 
-  namespace Combinatoric {
+
     class BinaryWord;
     class BinaryTree;  
 
@@ -40,7 +40,7 @@ namespace Ariadne {
     class LatticeTransformation;
     class LatticeMultiMap;
     class LatticeSystem;
-  }
-}
+
+} // namespace Ariadne
 
 #endif /* ARIADNE_COMBINATORIC_DECLARATIONSS_H */

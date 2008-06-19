@@ -27,9 +27,9 @@
 #include "numeric/float.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
-    using namespace Numeric;
+    
     
 #ifdef ENABLE_FLOAT64
     template class GridCellListSet<Float64>;
@@ -41,5 +41,5 @@ namespace Ariadne {
   //    template class GridCellListSetIterator<FloatMP>;
 #endif
     
-  }
-}
+  
+} // namespace Ariadne

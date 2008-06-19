@@ -42,7 +42,7 @@
 #include "geometry/discrete_state.h"
 
 namespace Ariadne {  
-  namespace Evaluation {
+  
   
 
 
@@ -51,10 +51,10 @@ namespace Ariadne {
     class HybridTimedSet 
     {
      public:
-      HybridTimedSet(const time_type& t, const Geometry::DiscreteState& id, const SetInterface& s)
+      HybridTimedSet(const time_type& t, const DiscreteState& id, const SetInterface& s)
         : _time(t), _discrete_state(id), _continuous_state_set(s) { }
       const time_type& time() const { return _time; }
-      const Geometry::DiscreteState& discrete_state() const { return _discrete_state; }
+      const DiscreteState& discrete_state() const { return _discrete_state; }
       const SetInterface& continuous_state_set() const { return _continuous_state_set; } 
       
       bool operator==(const HybridTimedSet& other) const { 
@@ -65,33 +65,33 @@ namespace Ariadne {
       bool operator<=(const HybridTimedSet& other) const { return this->_time <= other._time; }
      private:
       time_type _time;
-      Geometry::DiscreteState _discrete_state;
+      DiscreteState _discrete_state;
       SetInterface _continuous_state_set;
     };
 
     /*! \brief A class representing a hybrid time and a hybrid basic set. */
     template<class BS>
     class TimeModelHybridBasicSet 
-      : public Geometry::HybridBasicSet<BS>
+      : public HybridBasicSet<BS>
     {                                           
       typedef typename BS::real_type R;
-      typedef Numeric::Interval<R> I;
+      typedef Interval<R> I;
      public:
-      TimeModelHybridBasicSet(const Geometry::DiscreteState& q, const BS& bs)
-        : Geometry::HybridBasicSet<BS>(q,bs), _time(I(0),LinearAlgebra::Vector<I>(bs.number_of_generators())), _steps(0) { }
-      TimeModelHybridBasicSet(const Numeric::Rational& t, const Numeric::Integer& n, const Geometry::DiscreteState& q, const BS& bs)
-        : Geometry::HybridBasicSet<BS>(q,bs), _time(I(t),LinearAlgebra::Vector<I>(bs.number_of_generators())), _steps(n) { }
-      TimeModelHybridBasicSet(const TimeModel<R>& t, const Numeric::Integer& n, const Geometry::DiscreteState& q, const BS& bs)
-        : Geometry::HybridBasicSet<BS>(q,bs), _time(t), _steps(n) { 
+      TimeModelHybridBasicSet(const DiscreteState& q, const BS& bs)
+        : HybridBasicSet<BS>(q,bs), _time(I(0),Vector<I>(bs.number_of_generators())), _steps(0) { }
+      TimeModelHybridBasicSet(const Rational& t, const Integer& n, const DiscreteState& q, const BS& bs)
+        : HybridBasicSet<BS>(q,bs), _time(I(t),Vector<I>(bs.number_of_generators())), _steps(n) { }
+      TimeModelHybridBasicSet(const TimeModel<R>& t, const Integer& n, const DiscreteState& q, const BS& bs)
+        : HybridBasicSet<BS>(q,bs), _time(t), _steps(n) { 
         if(t.number_of_generators()!=bs.number_of_generators()) { std::cerr << "t=" << t << "\nbs=" << bs << std::endl; }
         assert(t.number_of_generators()==bs.number_of_generators()); }
       TimeModelHybridBasicSet(const TimeModelHybridBasicSet<BS>& thbs) 
-        : Geometry::HybridBasicSet<BS>(thbs), _time(thbs._time), _steps(thbs._steps) { }
+        : HybridBasicSet<BS>(thbs), _time(thbs._time), _steps(thbs._steps) { }
       const TimeModel<R>& time() const { return this->_time; }
-      const Numeric::Integer& steps() const { return this->_steps; }
+      const Integer& steps() const { return this->_steps; }
      private:
       TimeModel<R> _time;
-      Numeric::Integer _steps;
+      Integer _steps;
     };
   
     template<class BS> inline 

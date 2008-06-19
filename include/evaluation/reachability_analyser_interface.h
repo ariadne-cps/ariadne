@@ -39,7 +39,7 @@
 
 namespace Ariadne {
 
-  namespace Evaluation {
+  
 
     /*! \brief Interface for computing (chain) reachable sets of a dynamic system.
      *  \ingroup EvaluatorInterfaces \ingroup Analysers
@@ -51,8 +51,8 @@ namespace Ariadne {
 
       typedef Sys System;
       typedef T Time;
-      typedef Geometry::SetInterface<BS> Set;
-      typedef Geometry::SetInterface<BS>* SetPointer;
+      typedef SetInterface<BS> Set;
+      typedef SetInterface<BS>* SetPointer;
 
      public:
       /*! \brief Virtual destructor. */
@@ -87,8 +87,8 @@ namespace Ariadne {
 
 
 
-  }
-}
+  
+} // namespace Ariadne
 
  
 

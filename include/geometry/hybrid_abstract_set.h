@@ -44,7 +44,7 @@
 #include "geometry/hybrid_denotable_set.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
     class basic_set_tag;
     class denotable_set_tag;
@@ -192,8 +192,7 @@ namespace Ariadne {
 
 
    
-  }
-}
+} // namespace Ariadne
 
 #include "hybrid_abstract_set.inline.h"
 

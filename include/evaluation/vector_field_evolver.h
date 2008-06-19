@@ -52,22 +52,22 @@
 
 
 namespace Ariadne {
-  namespace Evaluation {
+  
   
     /*! \ingroup Evolvers
      *  \brief A class for evolving a continuous-time dynamical system.
      */
     template<class ES> 
     class VectorFieldEvolver
-      : public EvolverBase< System::VectorField<typename ES::real_type>, ES>
+      : public EvolverBase< VectorField<typename ES::real_type>, ES>
     {
       typedef typename ES::real_type R;
-      typedef System::VectorField<R> Sys;
+      typedef VectorField<R> Sys;
       typedef typename Sys::time_type T;
-      typedef Geometry::Box<R> Bx;
-      typedef Geometry::ListSet<ES> ESL;
-      typedef Geometry::TimedSet<T,ES> TES;
-      typedef Geometry::ListSet<TES> TESL;
+      typedef Box<R> Bx;
+      typedef ListSet<ES> ESL;
+      typedef TimedSet<T,ES> TES;
+      typedef ListSet<TES> TESL;
       typedef Sys VF;
      public:
       VectorFieldEvolver(const EvolutionParameters<R>&,const IntegratorInterface<ES>&, const SubdividerInterface<ES>&, const ReducerInterface<ES>&);
@@ -128,8 +128,8 @@ namespace Ariadne {
 
 
 
-  }
-}
+  
+} // namespace Ariadne
 
 
 

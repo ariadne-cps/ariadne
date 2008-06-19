@@ -35,7 +35,7 @@
 #include "geometry/point.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
     class basic_set_tag;
 
@@ -181,8 +181,8 @@ namespace Ariadne {
     template<class R> 
     Sphere<R> scale(const Sphere<R>& s, const R& scale_factor);
   
-  }
-}
+  
+} // namespace Ariadne
 
 #include "sphere.inline.h"
 

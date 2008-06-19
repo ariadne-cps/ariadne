@@ -26,14 +26,14 @@ namespace Ariadne {
     
     
 template<class XC,class XG> inline 
-Geometry::Parallelotope<XC,XG>::Parallelotope(dimension_type n)
+Parallelotope<XC,XG>::Parallelotope(dimension_type n)
   : Zonotope<XC,XG>(n,n) 
 { 
 }
 
 
 template<class XC,class XG> template<class RC, class RG> inline 
-Geometry::Parallelotope<XC,XG>::Parallelotope(const Point<RC>& c, const LinearAlgebra::Matrix<RG>& G)
+Parallelotope<XC,XG>::Parallelotope(const Point<RC>& c, const Matrix<RG>& G)
   : Zonotope<XC,XG>(c,G)
 {
   if (G.number_of_rows()!=G.number_of_columns()) {
@@ -43,14 +43,14 @@ Geometry::Parallelotope<XC,XG>::Parallelotope(const Point<RC>& c, const LinearAl
 
 
 template<class XC,class XG> template<class RR> inline 
-Geometry::Parallelotope<XC,XG>::Parallelotope(const Box<RR>& r)
+Parallelotope<XC,XG>::Parallelotope(const Box<RR>& r)
   : Zonotope<XC,XG>(r) 
 { 
 }
 
 
 template<class XC, class XG> inline 
-Geometry::Parallelotope<XC,XG>::Parallelotope(const std::string& str)
+Parallelotope<XC,XG>::Parallelotope(const std::string& str)
   : Zonotope<XC,XG>(str) 
 { 
   if (this->dimension()!=this->number_of_generators()) {
@@ -60,7 +60,7 @@ Geometry::Parallelotope<XC,XG>::Parallelotope(const std::string& str)
 
 
 template<class XC, class XG> template<class RC, class RG> inline 
-Geometry::Parallelotope<XC,XG>::Parallelotope(const Zonotope<RC,RG>& z)
+Parallelotope<XC,XG>::Parallelotope(const Zonotope<RC,RG>& z)
   : Zonotope<XC,XG>(z) 
 { 
   if (z.dimension()!=z.number_of_generators()) {
@@ -69,15 +69,15 @@ Geometry::Parallelotope<XC,XG>::Parallelotope(const Zonotope<RC,RG>& z)
 }
 
 template<class XC, class XG> template<class RC, class RG> inline 
-Geometry::Parallelotope<XC,XG>::Parallelotope(const Parallelotope<RC,RG>& original)
+Parallelotope<XC,XG>::Parallelotope(const Parallelotope<RC,RG>& original)
   : Zonotope<XC,XG>(original) 
 { 
 }
 
 
 template<class XC, class XG> template<class RR> inline 
-Geometry::Parallelotope<XC,XG>& 
-Geometry::Parallelotope<XC,XG>::operator=(const Box<RR>& r)
+Parallelotope<XC,XG>& 
+Parallelotope<XC,XG>::operator=(const Box<RR>& r)
 {
   Zonotope<XC,XG>& z=*this; z=r; return *this;
 }
@@ -87,7 +87,7 @@ Geometry::Parallelotope<XC,XG>::operator=(const Box<RR>& r)
 
 template<class XC, class XG> inline
 std::ostream& 
-Geometry::operator<<(std::ostream& os, const Parallelotope<XC,XG>& p) 
+operator<<(std::ostream& os, const Parallelotope<XC,XG>& p) 
 {
   return p.write(os);
 }
@@ -95,7 +95,7 @@ Geometry::operator<<(std::ostream& os, const Parallelotope<XC,XG>& p)
 
 template<class XC, class XG> inline
 std::istream& 
-Geometry::operator>>(std::ostream& is, Parallelotope<XC,XG>& p) 
+operator>>(std::ostream& is, Parallelotope<XC,XG>& p) 
 {
   return p.read(is);
 }

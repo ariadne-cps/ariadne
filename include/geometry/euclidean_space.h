@@ -34,7 +34,7 @@
 #include "base/types.h"
 
 namespace Ariadne {  
-  namespace Geometry {
+  
 
 
     /*! \ingroup EuclideanSet
@@ -62,7 +62,7 @@ namespace Ariadne {
       return os << "EuclideanSpace( dimension=" << espc.dimension() << " )" << std::endl;
     }
     
-  }
-}
+
+} // namespace Ariadne
 
 #endif /* ARIADNE_EUCLIDEAN_SPACE_H */

@@ -25,7 +25,7 @@
 #define ARIADNE_DISCRETE_STATE_H
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
     class DiscreteState;
     std::ostream& operator<<(std::ostream& os, const DiscreteState& ds);
@@ -53,7 +53,7 @@ namespace Ariadne {
     }
 
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif

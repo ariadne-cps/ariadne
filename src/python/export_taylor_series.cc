@@ -28,15 +28,12 @@
 #include "numeric/interval.h"
 #include "function/taylor_series.h"
 #include "function/taylor_variable.h"
+using namespace Ariadne;
+using namespace Ariadne::Python;
 
 #include <boost/python.hpp>
 #include "python/utilities.h"
-
 using namespace boost::python;
-using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::Function;
-using namespace Ariadne::Python;
 
 
 template<class R1, class R2> inline 
@@ -51,10 +48,16 @@ R get_item(const TaylorSeries<R>& sd, uint i) {
   return sd[i];
 }
 
+template<class X> inline
+TaylorSeries<X> exp(const TaylorSeries<X>& ts) {
+  return Ariadne::exp(ts);
+}
+
+
 template<class R>
 void export_taylor_series()
 {
-  typedef typename Numeric::traits<R>::arithmetic_type A;
+  typedef typename traits<R>::arithmetic_type A;
   typedef TaylorSeries<A> TS;
   typedef TaylorVariable<A> TV;
 
@@ -67,36 +70,36 @@ void export_taylor_series()
   taylor_series_class.def("__setitem__",&set_item<A,double>);
   taylor_series_class.def("__setitem__",&set_item<A,R>);
   taylor_series_class.def("__setitem__",&set_item<A,A>);
-  taylor_series_class.def("__neg__", &Python::neg<TS,TS>);
-  taylor_series_class.def("__add__", &Python::add<TS,TS,TS>);
-  //taylor_series_class.def("__add__", &Python::add<TS,TS,double>);
-  //taylor_series_class.def("__add__", &Python::add<TS,TS,R>);
-  taylor_series_class.def("__add__", &Python::add<TS,TS,A>);
-  //taylor_series_class.def("__radd__", &Python::radd<TS,TS,double>);
-  //taylor_series_class.def("__radd__", &Python::radd<TS,TS,R>);
-  taylor_series_class.def("__radd__", &Python::radd<TS,TS,A>);
-  taylor_series_class.def("__sub__", &Python::sub<TS,TS,TS>);
-  //taylor_series_class.def("__sub__", &Python::sub<TS,TS,double>);
-  ///taylor_series_class.def("__sub__", &Python::sub<TS,TS,R>);
-  taylor_series_class.def("__sub__", &Python::sub<TS,TS,A>);
-  //taylor_series_class.def("__rsub__", &Python::rsub<TS,TS,double>);
-  //taylor_series_class.def("__rsub__", &Python::rsub<TS,TS,R>);
-  taylor_series_class.def("__rsub__", &Python::rsub<TS,TS,A>);
-  taylor_series_class.def("__mul__", &Python::mul<TS,TS,TS>);
-  //taylor_series_class.def("__mul__", &Python::mul<TS,TS,double>);
-  //taylor_series_class.def("__mul__", &Python::mul<TS,TS,R>);
-  taylor_series_class.def("__mul__", &Python::mul<TS,TS,A>);
-  //taylor_series_class.def("__rmul__", &Python::rmul<TS,TS,double>);
-  //taylor_series_class.def("__rmul__", &Python::rmul<TS,TS,R>);
-  taylor_series_class.def("__rmul__", &Python::rmul<TS,TS,A>);
-  taylor_series_class.def("__div__", &Python::div<TS,TS,TS>);
-  //taylor_series_class.def("__div__", &Python::div<TS,TS,double>);
-  //taylor_series_class.def("__div__", &Python::div<TS,TS,R>);
-  taylor_series_class.def("__div__", &Python::div<TS,TS,A>);
-  //taylor_series_class.def("__rdiv__", &Python::rdiv<TS,TS,double>);
-  //taylor_series_class.def("__rdiv__", &Python::rdiv<TS,TS,R>);
-  taylor_series_class.def("__rdiv__", &Python::rdiv<TS,TS,A>);
-  taylor_series_class.def("__pow__", &Python::pow<TS,TS,int>);
+  taylor_series_class.def("__neg__", &__neg__<TS,TS>);
+  taylor_series_class.def("__add__", &__add__<TS,TS,TS>);
+  //taylor_series_class.def("__add__", &__add__<TS,TS,double>);
+  //taylor_series_class.def("__add__", &__add__<TS,TS,R>);
+  taylor_series_class.def("__add__", &__add__<TS,TS,A>);
+  //taylor_series_class.def("__radd__", &__radd__<TS,TS,double>);
+  //taylor_series_class.def("__radd__", &__radd__<TS,TS,R>);
+  taylor_series_class.def("__radd__", &__radd__<TS,TS,A>);
+  taylor_series_class.def("__sub__", &__sub__<TS,TS,TS>);
+  //taylor_series_class.def("__sub__", &__sub__<TS,TS,double>);
+  ///taylor_series_class.def("__sub__", &__sub__<TS,TS,R>);
+  taylor_series_class.def("__sub__", &__sub__<TS,TS,A>);
+  //taylor_series_class.def("__rsub__", &__rsub__<TS,TS,double>);
+  //taylor_series_class.def("__rsub__", &__rsub__<TS,TS,R>);
+  taylor_series_class.def("__rsub__", &__rsub__<TS,TS,A>);
+  taylor_series_class.def("__mul__", &__mul__<TS,TS,TS>);
+  //taylor_series_class.def("__mul__", &__mul__<TS,TS,double>);
+  //taylor_series_class.def("__mul__", &__mul__<TS,TS,R>);
+  taylor_series_class.def("__mul__", &__mul__<TS,TS,A>);
+  //taylor_series_class.def("__rmul__", &__rmul__<TS,TS,double>);
+  //taylor_series_class.def("__rmul__", &__rmul__<TS,TS,R>);
+  taylor_series_class.def("__rmul__", &__rmul__<TS,TS,A>);
+  taylor_series_class.def("__div__", &__div__<TS,TS,TS>);
+  //taylor_series_class.def("__div__", &__div__<TS,TS,double>);
+  //taylor_series_class.def("__div__", &__div__<TS,TS,R>);
+  taylor_series_class.def("__div__", &__div__<TS,TS,A>);
+  //taylor_series_class.def("__rdiv__", &__rdiv__<TS,TS,double>);
+  //taylor_series_class.def("__rdiv__", &__rdiv__<TS,TS,R>);
+  taylor_series_class.def("__rdiv__", &__rdiv__<TS,TS,A>);
+  taylor_series_class.def("__pow__", &__pow__<TS,TS,int>);
   taylor_series_class.def(self_ns::str(self));
   
   def("constant",(TS(*)(smoothness_type, const A&))&TS::constant);
@@ -104,39 +107,26 @@ void export_taylor_series()
   def("variable",(TS(*)(smoothness_type, const A&))&TS::variable);
   def("variable",(TS(*)(smoothness_type, const double&))&TS::variable);
 
-  def("compose",(TS(*)(const TS&,const TS&))&Function::compose);
-  def("inverse",(TS(*)(const TS&,const A&))&Function::inverse);
+  def("compose",(TS(*)(const TS&,const TS&))&compose);
+  def("inverse",(TS(*)(const TS&,const A&))&inverse);
 
-  def("max",(TS(*)(const TS&,const TS&))&Function::max);
-  def("min",(TS(*)(const TS&,const TS&))&Function::min);
-  def("abs",(TS(*)(const TS&))&Function::abs);
-  def("pow",(TS(*)(const TS&, const uint&))&Function::pow);
 
-  def("rec", (TS(*)(const TS&))&Function::rec);
+  def("max",(TS(*)(const TS&,const TS&))&max<A>);
+  def("min",(TS(*)(const TS&,const TS&))&min<A>);
+  def("abs",(TS(*)(const TS&))&abs<A>);
+  def("pow",(TS(*)(const TS&, const uint&))&pow<A>);
 
-  def("sqrt", (TS(*)(const TS&))&Function::sqrt);
-  def("exp", (TS(*)(const TS&))&Function::exp);
-  def("log", (TS(*)(const TS&))&Function::log);
-  def("sin", (TS(*)(const TS&))&Function::sin);
-  def("cos", (TS(*)(const TS&))&Function::cos);
-  def("tan", (TS(*)(const TS&))&Function::tan);
-  def("asin", (TS(*)(const TS&))&Function::asin);
-  def("acos", (TS(*)(const TS&))&Function::acos);
-  def("atan", (TS(*)(const TS&))&Function::atan);
+  def("rec", (TS(*)(const TS&))&Ariadne::rec<A>);
 
-  /*
-  def("rec_series", (TS(*)(smoothness_type, const A&))&TS::rec);
-  def("pow_series",(TS(*)(smoothness_type, const A&, const uint&))&TS::pow);
-  def("sqrt_series", (TS(*)(smoothness_type, const A&))&TS::sqrt);
-  def("exp_series", (TS(*)(smoothness_type, const A&))&TS::exp);
-  def("log_series", (TS(*)(smoothness_type, const A&))&TS::log);
-  def("sin_series", (TS(*)(smoothness_type, const A&))&TS::sin);
-  def("cos_series", (TS(*)(smoothness_type, const A&))&TS::cos);
-  def("tan_series", (TS(*)(smoothness_type, const A&))&TS::tan);
-  def("asin_series", (TS(*)(smoothness_type, const A&))&TS::asin);
-  def("acos_series", (TS(*)(smoothness_type, const A&))&TS::acos);
-  def("atan_series", (TS(*)(smoothness_type, const A&))&TS::atan);
-  */
+  def("sqrt", (TS(*)(const TS&))&Ariadne::sqrt<A>);
+  def("exp", (TS(*)(const TS&))&::exp<A>);
+  def("log", (TS(*)(const TS&))&Ariadne::log<A>);
+  def("sin", (TS(*)(const TS&))&Ariadne::sin<A>);
+  def("cos", (TS(*)(const TS&))&Ariadne::cos<A>);
+  def("tan", (TS(*)(const TS&))&Ariadne::tan<A>);
+  def("asin", (TS(*)(const TS&))&Ariadne::asin<A>);
+  def("acos", (TS(*)(const TS&))&Ariadne::acos<A>);
+  def("atan", (TS(*)(const TS&))&Ariadne::atan<A>);
 
 }
 
@@ -154,7 +144,7 @@ void export_taylor_series<Rational>()
   taylor_series_class.def("__getitem__", &taylor_series_get_item<Q>);
   taylor_series_class.def("__setitem__",&taylor_series_set_item<Q,double>);
   taylor_series_class.def("__setitem__",&taylor_series_set_item<Q,Q>);
-  taylor_series_class.def("__neg__", &Python::neg<TS,TS>);
+  taylor_series_class.def("__neg__", &__neg__<TS,TS>);
   taylor_series_class.def("__add__", &add<TS,TS,TS>);
   taylor_series_class.def("__add__", &add<TS,TS,double>);
   taylor_series_class.def("__add__", &add<TS,TS,Q>);
@@ -178,13 +168,13 @@ void export_taylor_series<Rational>()
   taylor_series_class.def("__pow__", &pow<TS,TS,int>);
   taylor_series_class.def(self_ns::str(self));
   
-  def("compose",(TS(*)(const TS&,const TS&))&Function::compose);
-  def("inverse",(TS(*)(const TS&,const Q&))&Function::inverse);
+  def("compose",(TS(*)(const TS&,const TS&))&compose);
+  def("inverse",(TS(*)(const TS&,const Q&))&inverse);
 
-  def("max",(TS(*)(const TS&,const TS&))&Function::max);
-  def("min",(TS(*)(const TS&,const TS&))&Function::min);
-  def("abs",(TS(*)(const TS&))&Function::abs);
-  def("pow",(TS(*)(const TS&, const uint&))&Function::pow);
+  def("max",(TS(*)(const TS&,const TS&))&max);
+  def("min",(TS(*)(const TS&,const TS&))&min);
+  def("abs",(TS(*)(const TS&))&abs);
+  def("pow",(TS(*)(const TS&, const uint&))&pow);
 
 }
 

@@ -31,14 +31,14 @@ namespace Ariadne {
 
 
 template<class R> 
-Geometry::GridCell<R>::GridCell(const Grid<R>& g)  
+GridCell<R>::GridCell(const Grid<R>& g)  
   : _grid(g), _lattice_set(g.dimension())
 {
 }
 
 template<class R> 
-Geometry::GridBlock<R>
-Geometry::GridCell<R>::neighbourhood() const 
+GridBlock<R>
+GridCell<R>::neighbourhood() const 
 {
   return GridBlock<R>(this->_grid,this->_lattice_set.neighbourhood());
 }
@@ -46,7 +46,7 @@ Geometry::GridCell<R>::neighbourhood() const
 
 template<class R>
 std::ostream&
-Geometry::GridCell<R>::write(std::ostream& os) const 
+GridCell<R>::write(std::ostream& os) const 
 {
   return os << Box<R>(*this);
 }

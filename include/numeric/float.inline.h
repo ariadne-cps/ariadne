@@ -25,7 +25,7 @@
 #include "numeric/rounding.h"
 
 namespace Ariadne {
-namespace Numeric {
+
 
 template<class T> class Float;
 
@@ -246,5 +246,4 @@ inline Float<T> log_approx(const Float<T>& x) {
 
 
 } // namespace Ariadne
-} // namespace Numeric
 

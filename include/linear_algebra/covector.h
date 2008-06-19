@@ -40,7 +40,7 @@
 #include "linear_algebra/exceptions.h"
 
 namespace Ariadne {
-  namespace LinearAlgebra {
+  
     
     template<class R> class Vector;
     template<class R> class Covector;
@@ -135,14 +135,14 @@ namespace Ariadne {
     template<class R1, class R2> Covector<R1>& operator/=(Covector<R1>& v1, const R2& s2);
 
     template<class R> Covector<R> operator-(const Covector<R>& v);
-    template<class R1, class R2> Covector<typename Numeric::traits<R1,R2>::arithmetic_type> operator+(const Covector<R1>& v1, const Covector<R2>& v2);
-    template<class R1, class R2> Covector<class Numeric::traits<R1,R2>::arithmetic_type> operator-(const Covector<R1>& v1, const Covector<R2>& v2);
-    template<class R1, class R2> Covector<typename Numeric::traits<R1,R2>::arithmetic_type> operator*(const R1& s, const Covector<R2>& v);
-    template<class R1, class R2> Covector<typename Numeric::traits<R1,R2>::arithmetic_type> operator*(const Covector<R1>& v, const R2& s);
-    template<class R1, class R2> Covector<typename Numeric::traits<R1,R2>::arithmetic_type> operator/(const Covector<R1>& v, const R2& s);
-    template<class R1, class R2> typename Numeric::traits<R1,R2>::arithmetic_type operator*(const Covector<R1>& cv, const Vector<R2>& v);
-    template<class R1, class R2> Covector<typename Numeric::traits<R1,R2>::arithmetic_type> operator*(const Covector<R1>& cv, const Matrix<R2>& A);
-    template<class R1, class R2> Matrix<typename Numeric::traits<R1,R2>::arithmetic_type> operator*(const Vector<R1>& v, const Covector<R2>& cv);
+    template<class R1, class R2> Covector<typename traits<R1,R2>::arithmetic_type> operator+(const Covector<R1>& v1, const Covector<R2>& v2);
+    template<class R1, class R2> Covector<class traits<R1,R2>::arithmetic_type> operator-(const Covector<R1>& v1, const Covector<R2>& v2);
+    template<class R1, class R2> Covector<typename traits<R1,R2>::arithmetic_type> operator*(const R1& s, const Covector<R2>& v);
+    template<class R1, class R2> Covector<typename traits<R1,R2>::arithmetic_type> operator*(const Covector<R1>& v, const R2& s);
+    template<class R1, class R2> Covector<typename traits<R1,R2>::arithmetic_type> operator/(const Covector<R1>& v, const R2& s);
+    template<class R1, class R2> typename traits<R1,R2>::arithmetic_type operator*(const Covector<R1>& cv, const Vector<R2>& v);
+    template<class R1, class R2> Covector<typename traits<R1,R2>::arithmetic_type> operator*(const Covector<R1>& cv, const Matrix<R2>& A);
+    template<class R1, class R2> Matrix<typename traits<R1,R2>::arithmetic_type> operator*(const Vector<R1>& v, const Covector<R2>& cv);
    
     template<class R> std::ostream& operator<<(std::ostream& os, const Covector<R>& cv);
 
@@ -151,9 +151,9 @@ namespace Ariadne {
     template<class R> Covector<R> unit_covector(size_type n, size_type i);
 	
 	
-    template<class R> Covector<R> midpoint(const Covector< Numeric::Interval<R> >& iv); 
-    template<class R> bool encloses(const Covector< Numeric::Interval<R> >& iv,const Covector<R>& v); 
-    template<class R> bool refines(const Covector< Numeric::Interval<R> >& iv1, const Covector< Numeric::Interval<R> >& iv2); 
+    template<class R> Covector<R> midpoint(const Covector< Interval<R> >& iv); 
+    template<class R> bool encloses(const Covector< Interval<R> >& iv,const Covector<R>& v); 
+    template<class R> bool refines(const Covector< Interval<R> >& iv1, const Covector< Interval<R> >& iv2); 
 
     template<class R1, class R2> Covector<R1> approximation(const Covector<R2>& v);
 
@@ -173,8 +173,8 @@ namespace Ariadne {
 
     template<class R> Covector<R> concatenate(const Covector<R>& v1, const Covector<R>& v2);
     template<class R> Covector<R> concatenate(const Covector<R>& v, const R& s);
-  }
-}
+  
+} // namespace Ariadne
 
 #include "covector.inline.h"
 

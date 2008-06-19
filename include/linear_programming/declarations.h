@@ -30,7 +30,7 @@
 
 
 namespace Ariadne { 
-  namespace LinearProgramming {
+  
     template<class R> class LinearProgram;
   }
 }

@@ -34,7 +34,7 @@
 
 
 namespace Ariadne {
-  namespace Combinatoric {
+
     //! \name Array operations
     //@{
     //! \ingroup ArrayOperations
@@ -82,9 +82,7 @@ namespace Ariadne {
     
     //@}
     
-  }
-
-}
+} // namespace Ariadne
 
 
 #endif /* ARIADNE_ARRAY_OPERATIONS_H */

@@ -41,17 +41,14 @@
 #include "output/epsstream.h"
 
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::Geometry;
-using namespace Ariadne::Output;
 using namespace Ariadne::Python;
 
 #include <boost/python.hpp>
 using namespace boost::python;
 
 template<class S> inline void write(epsfstream& eps, const S& s) { eps << s; }
-template<class R> inline void epsfstream_open(epsfstream& eps, const Ariadne::Geometry::Box<R>& bbox, int ix, int iy) { eps.open("Ariadne",bbox,ix,iy); }
-template<class R> inline void epsfstream_open_with_defaults(epsfstream& eps, const Ariadne::Geometry::Box<R>& bbox) { eps.open("Ariadne",bbox); }
+template<class R> inline void epsfstream_open(epsfstream& eps, const Ariadne::Box<R>& bbox, int ix, int iy) { eps.open("Ariadne",bbox,ix,iy); }
+template<class R> inline void epsfstream_open_with_defaults(epsfstream& eps, const Ariadne::Box<R>& bbox) { eps.open("Ariadne",bbox); }
 inline void epsfstream_close(epsfstream& eps) { eps.close(); }
 
 template <class R> inline

@@ -29,7 +29,7 @@
 #define ARIADNE_OUTPUT_DECLARATIONS_H
 
 namespace Ariadne { 
-  namespace Output {
+  
 
   }
 }

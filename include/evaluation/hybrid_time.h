@@ -42,34 +42,34 @@
 #include "geometry/discrete_state.h"
 
 namespace Ariadne {  
-  namespace Evaluation {
+  
   
     /*! \brief A class containing a continuous time \c time() and a discrete time \c steps() . */
     class HybridTime {
      public:
-      HybridTime(Numeric::Rational t) : _time(t), _steps(0) { }
-      HybridTime(Numeric::Rational t, Numeric::Integer s) : _time(t), _steps(s) { }
-      Numeric::Rational& time() { return this->_time; }
-      Numeric::Integer& steps() { return this->_steps; }
-      const Numeric::Rational& time() const { return this->_time; }
-      const Numeric::Integer& steps() const { return this->_steps; }
+      HybridTime(Rational t) : _time(t), _steps(0) { }
+      HybridTime(Rational t, Integer s) : _time(t), _steps(s) { }
+      Rational& time() { return this->_time; }
+      Integer& steps() { return this->_steps; }
+      const Rational& time() const { return this->_time; }
+      const Integer& steps() const { return this->_steps; }
       bool operator==(const HybridTime& other) const { return this->_time==other._time && this->_steps==other._steps; }
       bool operator!=(const HybridTime& other) const { return !(*this==other); }
       bool operator<(const HybridTime& other) const { return this->_time<other._time; }
       HybridTime& operator+=(const HybridTime& other) { this->_time+=other._time; this->_steps+=other._steps; return *this; }
-      HybridTime& operator+=(const Numeric::Rational& time) { this->_time+=time; return *this; }
+      HybridTime& operator+=(const Rational& time) { this->_time+=time; return *this; }
       HybridTime& operator++() { ++this->_steps; return *this; }
       HybridTime operator+(const HybridTime& other) const { return HybridTime(*this)+=other; }
-      HybridTime operator+(const Numeric::Rational& other) const { return HybridTime(*this)+=other; }
+      HybridTime operator+(const Rational& other) const { return HybridTime(*this)+=other; }
      private:
-      Numeric::Rational _time;
-      Numeric::Integer _steps;
+      Rational _time;
+      Integer _steps;
     };
 
     typedef HybridTime hybrid_time_type;  
 
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_HYBRID_TIME_H */

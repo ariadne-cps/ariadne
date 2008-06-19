@@ -34,9 +34,6 @@
 using namespace boost::python;
 
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::LinearAlgebra;
-using namespace Ariadne::Function;
 using namespace Ariadne::Python;
 
 template<class X> 
@@ -98,7 +95,7 @@ template<class R>
 class PythonFunction
   : public FunctionInterface<R>
 {
-  typedef typename Numeric::traits<R>::arithmetic_type F;
+  typedef typename traits<R>::arithmetic_type F;
  public:
   PythonFunction(std::string& nm, size_type rs, size_type as, const object& pyf) : _name(nm), _result_size(rs), _argument_size(as), _pyf(pyf) { }
   PythonFunction(size_type rs, size_type as, const object& pyf) : _name(), _result_size(rs), _argument_size(as), _pyf(pyf) { }
@@ -145,7 +142,7 @@ class PythonFunction
 template<class R>
 void export_python_function() 
 {
-  typedef typename Numeric::traits<R>::arithmetic_type F;
+  typedef typename traits<R>::arithmetic_type F;
 
   class_<PythonFunction<R>, bases< FunctionInterface<R> > > python_function_class("AriadneFunction", init<object>());
   python_function_class.def(init<uint,uint,object>());

@@ -28,7 +28,7 @@ The test \c refines(Interval,Interval) can also be used.
 In the C++ kernel, the \c Float class is a generic (templated) class parameterised by the base number type \c T, which can either be double precision (\c Float64) or multiple precision (\c FloatMP). The Interval class is also a generic class parameterised by the base number type \c R, which can be an \c Integer, \c Rational or \c Float<T>. 
 In the Python interface, the C++ type \c FloatPy used for floating-point numbers must be chosen at compile-time, and the interval type is then \c Interval<FloatPy>.
 
-\sa  Numeric sub-module, Ariadne::Numeric::Integer, Ariadne::Numeric::Rational, Ariadne::Numeric::Float, Ariadne::Numeric::Interval
+\sa  Numeric sub-module, Ariadne::Integer, Ariadne::Rational, Ariadne::Float, Ariadne::Interval
 
 <br><br>
 
@@ -72,7 +72,7 @@ The semantics of this operator have not been determined, since Python has differ
 
 The main design decision is whether to use a single "Ariadne" slicing semantics which is used for any and all interfaces, or whether to use the natural semantics for the given environment. For the C++ API, we could provide STL \c valarray semantics <c> v[slice(start,size,stride=1)] </c> and Python semantics <c> v[range(start,finish,stride=1)] </c>.
 
-\sa  \ref LinearAlgebra sub-module, Ariadne::LinearAlgebra::Vector, Ariadne::LinearAlgebra::Covector, Ariadne::LinearAlgebra::Matrix
+\sa  \ref LinearAlgebra sub-module, Ariadne::Vector, Ariadne::Covector, Ariadne::Matrix
 
 <br><br>
 
@@ -178,7 +178,7 @@ ARIADNE_BUILD_BINARY_FUNCTION("Henon", parameterised_henon_function, henon_resul
 
 \endcode
 
-\sa \ref Function, Ariadne::Function::FunctionInterface
+\sa \ref Function, Ariadne::FunctionInterface
 
 <br><br>
 
@@ -278,12 +278,12 @@ In some future version, a dynamic system may be described by a binary function \
 
 \subsection tutorial_system_hybrid Hybrid Automata
 
-See the documentation for the Ariadne::System::SetBasedHybridAutomaton.
+See the documentation for the Ariadne::SetBasedHybridAutomaton.
 
 \note The current distinction between "SetBased" and "ConstraintBased" hybrid systems may at some point be eliminated.
 
 
-\sa \ref System, Ariadne::System::Map, Ariadne::System::VectorField, Ariadne::System::SetBasedHybridAutomaton
+\sa \ref System, Ariadne::Map, Ariadne::VectorField, Ariadne::SetBasedHybridAutomaton
 
 \note 
 The rationale for having separate "Function" and "System" classes is that the "Function" classes are supposed to be elementary building blocks which can be used for a variety of purposes, whereas a "Map" or "VectorField" object is tagged as specifying a dynamic system Further, extra information such as variable and parameter names may be attached to system classes.
@@ -348,7 +348,7 @@ eps.close()
 \note 
 The finite-time \c evolve and \c reach routines could be combined into a single routine, with signature <c>evolve(system, initial_set, time_interval)</c> or <c>evolve(system, initial_set, lower_time, upper_time)</c> if this would be preferable to users.
 
-\sa Ariadne::Evaluation::MapEvolver, Ariadne::Evaluation::VectorFieldEvolver, Ariadne::Evaluation::SetBasedHybridEvolver
+\sa Ariadne::MapEvolver, Ariadne::VectorFieldEvolver, Ariadne::SetBasedHybridEvolver
 
 
 
@@ -375,7 +375,7 @@ In the current version of %Ariadne, different "plugin" classes can be used to pr
 
 Core evolution paramters which are common to (most) evolution routines are given in the class \c EvolutionParameters.
 
-\sa Ariadne::Evaluation::EvolutionParameters
+\sa Ariadne::EvolutionParameters
 
 
 */

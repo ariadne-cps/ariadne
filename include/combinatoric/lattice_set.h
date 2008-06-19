@@ -44,7 +44,7 @@
 #include "combinatoric/exceptions.h"
 
 namespace Ariadne {
-  namespace Combinatoric {
+
     class LatticeCell;
 
     class LatticePoint;
@@ -172,8 +172,8 @@ namespace Ariadne {
       /*!\brief The dimension of the cell. */
       dimension_type dimension() const { return this->_lower.size(); }
       /*!\brief The \a i th interval. */
-      Numeric::Interval<index_type> operator[](dimension_type i) const {
-        index_type l=this->_lower[i]; index_type u=l+1; return Numeric::Interval<index_type>(l,u); } 
+      Interval<index_type> operator[](dimension_type i) const {
+        index_type l=this->_lower[i]; index_type u=l+1; return Interval<index_type>(l,u); } 
       /*!\brief The lower bound in the \a i th dimension. */
       index_type lower_bound(dimension_type i) const { return this->_lower[i]; }
       /*!\brief The upper bound in the \a i th dimension. */
@@ -237,8 +237,8 @@ namespace Ariadne {
       
 
       /*!\brief The \a i th interval. */
-      Numeric::Interval<index_type> operator[](dimension_type i) const {
-        index_type l=this->_lower[i]; index_type u=this->_upper[i]; return Numeric::Interval<index_type>(l,u); } 
+      Interval<index_type> operator[](dimension_type i) const {
+        index_type l=this->_lower[i]; index_type u=this->_upper[i]; return Interval<index_type>(l,u); } 
       /*!\brief The lower bound in the \a i th dimension. */
       index_type lower_bound(dimension_type i) const { return this->_lower[i]; }
       /*!\brief The upper bound in the \a i th dimension. */
@@ -592,7 +592,8 @@ namespace Ariadne {
     };
     
   
-  }
-}
+  
+} // namespace Ariadne
+
 
 #endif /* ARIADNE_LATTICE_SET_H */

@@ -36,7 +36,7 @@
 #include "geometry/set_interface.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
     class denotable_set_tag;
     template<class R> class Box;
@@ -239,7 +239,7 @@ namespace Ariadne {
     ListSet<BS> open_intersection(const ListSet<BS>& A, const ListSet<BS>& B);
   
   
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_LIST_SET_CLASS_H */

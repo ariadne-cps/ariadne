@@ -29,9 +29,9 @@
 #include "numeric/float.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
-    using namespace Numeric;
+    
     
 #ifdef ENABLE_FLOAT64
     template class PartitionScheme<Float64>;
@@ -47,5 +47,5 @@ namespace Ariadne {
     template class PartitionTreeSet<FloatMP>;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

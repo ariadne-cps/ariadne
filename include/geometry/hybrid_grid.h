@@ -48,7 +48,7 @@
 
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
     /*! \ingroup HybridSet
      *  \brief A hybrid set comprising of a single basic set for in a discrete mode.
@@ -90,7 +90,7 @@ namespace Ariadne {
     std::ostream& operator<<(std::ostream& os, const HybridGrid<R>& hgr);
 
    
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_HYBRID_GRID_H */

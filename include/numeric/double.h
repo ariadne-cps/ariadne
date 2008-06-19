@@ -29,7 +29,7 @@
 #define ARIADNE_NUMERIC_DOUBLE_H
 
 namespace Ariadne {
-namespace Numeric {
+
 
 bool initialise();
 
@@ -38,7 +38,6 @@ double rad(double x, double y);
 double pow(double x, unsigned int n);
 double hypot(double x, double y);
 
-}
 }
 
 #include "double.inline.h"

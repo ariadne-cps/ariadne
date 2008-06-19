@@ -28,9 +28,6 @@
 
 #include "python/name.h"
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::LinearAlgebra;
-using namespace Ariadne::LinearProgramming;
 using namespace Ariadne::Python;
 
 #include <boost/python.hpp>

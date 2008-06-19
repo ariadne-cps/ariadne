@@ -62,17 +62,17 @@ namespace Python {
 
   template<class Res, class Arg1, class Arg2> inline
   Res min(const Arg1& a1, const Arg2& a2) {
-    return std::min(Res(a1),Res(a2));
+    return Ariadne::min(Res(a1),Res(a2));
   }
 
   template<class Res, class Arg1, class Arg2> inline
   Res max(const Arg1& a1, const Arg2& a2) {
-    return std::max(Res(a1),Res(a2));
+    return Ariadne::max(Res(a1),Res(a2));
   }
 
   template<class Res, class Arg> inline
   Res abs(const Arg& a) {
-    return Res(abs(a));
+    return Res(Ariadne::abs(a));
   }
 
   template<class Res, class Arg> inline
@@ -81,92 +81,135 @@ namespace Python {
   }
 
   template<class Res, class Arg> inline
-  Res neg(const Arg& a) {
+  Res __neg__(const Arg& a) {
     return Res(-a);
   }
 
   template<class Res, class Arg1, class Arg2, class Tmp1, class Tmp2> inline
-  Res add(const Arg1& a1, const Arg2& a2) {
+  Res __add__(const Arg1& a1, const Arg2& a2) {
     return Res(Tmp1(a1)+Tmp2(a2));
   }
 
   template<class Res, class Arg1, class Arg2> inline
-  Res add(const Arg1& a1, const Arg2& a2) {
+  Res __add__(const Arg1& a1, const Arg2& a2) {
     return Res(a1+a2);
   }
 
   template<class Res, class Arg1, class Arg2, class Tmp1, class Tmp2> inline
-  Res radd(const Arg1& a1, const Arg2& a2) {
+  Res __radd__(const Arg1& a1, const Arg2& a2) {
     return Res(Tmp2(a2)+Tmp1(a1));
   }
 
   template<class Res, class Arg1, class Arg2> inline
-  Res radd(const Arg1& a1, const Arg2& a2) {
+  Res __radd__(const Arg1& a1, const Arg2& a2) {
     return Res(a2+a1);
   }
 
 
   template<class Res, class Arg1, class Arg2, class Tmp1, class Tmp2> inline
-  Res sub(const Arg1& a1, const Arg2& a2) {
+  Res __sub__(const Arg1& a1, const Arg2& a2) {
     return Res(Tmp1(a1)-Tmp2(a2));
   }
 
   template<class Res, class Arg1, class Arg2> inline
-  Res sub(const Arg1& a1, const Arg2& a2) {
+  Res __sub__(const Arg1& a1, const Arg2& a2) {
     return Res(a1-a2);
   }
 
   template<class Res, class Arg1, class Arg2, class Tmp1, class Tmp2> inline
-  Res rsub(const Arg1& a1, const Arg2& a2) {
+  Res __rsub__(const Arg1& a1, const Arg2& a2) {
     return Res(Tmp2(a2)-Tmp1(a1));
   }
 
   template<class Res, class Arg1, class Arg2> inline
-  Res rsub(const Arg1& a1, const Arg2& a2) {
+  Res __rsub__(const Arg1& a1, const Arg2& a2) {
     return Res(a2-a1);
   }
 
 
   template<class Res, class Arg1, class Arg2, class Tmp1, class Tmp2> inline
-  Res mul(const Arg1& a1, const Arg2& a2) {
+  Res __mul__(const Arg1& a1, const Arg2& a2) {
    return Res(Tmp1(a1)*Tmp2(a2));
   }
 
   template<class Res, class Arg1, class Arg2> inline
-  Res mul(const Arg1& a1, const Arg2& a2) {
+  Res __mul__(const Arg1& a1, const Arg2& a2) {
     return Res(a1*a2);
   }
 
   template<class Res, class Arg1, class Arg2, class Tmp1, class Tmp2> inline
-  Res rmul(const Arg1& a1, const Arg2& a2) {
+  Res __rmul__(const Arg1& a1, const Arg2& a2) {
    return Res(Tmp2(a2)*Tmp1(a1));
   }
 
   template<class Res, class Arg1, class Arg2> inline
-  Res rmul(const Arg1& a1, const Arg2& a2) {
+  Res __rmul__(const Arg1& a1, const Arg2& a2) {
     return Res(a2*a1);
   }
 
 
   template<class Res, class Arg1, class Arg2, class Tmp1, class Tmp2> inline
-  Res div(const Arg1& a1, const Arg2& a2) {
+  Res __div__(const Arg1& a1, const Arg2& a2) {
     return Res(Tmp1(a1)/Tmp2(a2));
   }
 
   template<class Res, class Arg1, class Arg2> inline
-  Res div(const Arg1& a1, const Arg2& a2) {
+  Res __div__(const Arg1& a1, const Arg2& a2) {
     return Res(a1/a2);
   }
 
   template<class Res, class Arg1, class Arg2, class Tmp1, class Tmp2> inline
-  Res rdiv(const Arg1& a1, const Arg2& a2) {
+  Res __rdiv__(const Arg1& a1, const Arg2& a2) {
     return Res(Tmp2(a2)/Tmp1(a1));
   }
 
   template<class Res, class Arg1, class Arg2> inline
-  Res rdiv(const Arg1& a1, const Arg2& a2) {
+  Res __rdiv__(const Arg1& a1, const Arg2& a2) {
     return Res(a2/a1);
   }
+
+  template<class Res, class Arg1, class Arg2, class Tmp1, class Tmp2> inline
+  Res __pow__(const Arg1& a1, const Arg2& a2) {
+    return Res(pow(Tmp1(a1),Tmp2(a2)));
+  }
+
+  template<class Res, class Arg1, class Arg2> inline
+  Res __pow__(const Arg1& a1, const Arg2& a2) {
+    return Res(pow(a1,a2));
+  }
+
+
+
+  template<class Res,class Arg1,class Arg2> inline
+  Res __eq__(const Arg1& a1, const Arg2& a2) {
+    return a1==a2;
+  }
+
+  template<class Res,class Arg1,class Arg2> inline
+  Res __ne__(const Arg1& a1, const Arg2& a2) {
+    return a1!=a2;
+  }
+
+  template<class Res,class Arg1,class Arg2> inline
+  Res __lt__(const Arg1& a1, const Arg2& a2) {
+    return a1< a2;
+  }
+
+  template<class Res,class Arg1,class Arg2> inline
+  Res __le__(const Arg1& a1, const Arg2& a2) {
+    return a1<=a2;
+  }
+
+  template<class Res,class Arg1,class Arg2> inline
+  Res __gt__(const Arg1& a1, const Arg2& a2) {
+    return a1> a2;
+  }
+
+  template<class Res,class Arg1,class Arg2> inline
+  Res __ge__(const Arg1& a1, const Arg2& a2) {
+    return a1>=a2;
+  }
+
 
   template<class Res, class Arg1, class Arg2, class Tmp1, class Tmp2> inline
   Res pow(const Arg1& a1, const Arg2& a2) {
@@ -177,39 +220,6 @@ namespace Python {
   Res pow(const Arg1& a1, const Arg2& a2) {
     return Res(pow(a1,a2));
   }
-
-
-
-  template<class Res,class Arg1,class Arg2> inline
-  Res eq(const Arg1& a1, const Arg2& a2) {
-    return a1==a2;
-  }
-
-  template<class Res,class Arg1,class Arg2> inline
-  Res ne(const Arg1& a1, const Arg2& a2) {
-    return a1!=a2;
-  }
-
-  template<class Res,class Arg1,class Arg2> inline
-  Res lt(const Arg1& a1, const Arg2& a2) {
-    return a1< a2;
-  }
-
-  template<class Res,class Arg1,class Arg2> inline
-  Res le(const Arg1& a1, const Arg2& a2) {
-    return a1<=a2;
-  }
-
-  template<class Res,class Arg1,class Arg2> inline
-  Res gt(const Arg1& a1, const Arg2& a2) {
-    return a1> a2;
-  }
-
-  template<class Res,class Arg1,class Arg2> inline
-  Res ge(const Arg1& a1, const Arg2& a2) {
-    return a1>=a2;
-  }
-
 
   template<class Res,class Arg,class Tmp> inline
   Res sqrt(const Arg& a) {
@@ -225,6 +235,11 @@ namespace Python {
   template<class Res,class Arg,class Tmp> inline
   Res log(const Arg& a) {
     return log(static_cast<Tmp>(a));
+  }
+
+  template<class Res> inline
+  Res pi() {
+    Res r; pi_(r); return r; 
   }
 
   template<class Res,class Arg,class Tmp> inline
@@ -257,6 +272,7 @@ namespace Python {
     return atan(static_cast<Tmp>(a));
   }
 
-}}
+} // namespace Python
+} // namespace Ariadne
 
 #endif /* ARIADNE_PYTHON_OPERATORS_H */

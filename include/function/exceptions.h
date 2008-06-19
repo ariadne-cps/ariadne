@@ -34,11 +34,12 @@
 #include "linear_algebra/exceptions.h"
 
 namespace Ariadne {
-  namespace Function {
-    using LinearAlgebra::IncompatibleSizes;
-    struct InvalidParameters : public std::runtime_error { InvalidParameters(const std::string& what) : std::runtime_error(what) { } };
-  }
-}
+
+    struct InvalidParameters : public std::runtime_error { 
+      InvalidParameters(const std::string& what) : std::runtime_error(what) { } 
+    };
+
+} // namespace Ariadne
 
 #define ARIADNE_CHECK_ARGUMENT_SIZE(function,argument,func) \
   { if((function).argument_size()!=(argument).size()) { ARIADNE_THROW(IncompatibleSizes,func,#function".argument_size()="<<(function).argument_size()<<", "#argument"="<<argument); } }

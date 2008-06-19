@@ -64,14 +64,14 @@ namespace Ariadne {
 
 
 template<class R> 
-Evaluation::StandardIntegrator< Geometry::Zonotope<R> >::
+StandardIntegrator< Zonotope<R> >::
 StandardIntegrator() 
   : _bounder(new StandardBounder<R>()),
     _flower(new StandardFlower<R>(4u,1u))
 { }
 
 template<class R> 
-Evaluation::StandardIntegrator< Geometry::Zonotope<R> >::
+StandardIntegrator< Zonotope<R> >::
 StandardIntegrator(const BounderInterface<R>& bounder, 
                    const FlowerInterface<R>& flower)
   : _bounder(bounder.clone()),
@@ -79,40 +79,38 @@ StandardIntegrator(const BounderInterface<R>& bounder,
 { }
 
 template<class R> 
-Evaluation::StandardIntegrator< Geometry::Zonotope<R> >*
-Evaluation::StandardIntegrator< Geometry::Zonotope<R> >::
+StandardIntegrator< Zonotope<R> >*
+StandardIntegrator< Zonotope<R> >::
 clone() const
 {
-  return new StandardIntegrator< Geometry::Zonotope<R> >(*this);
+  return new StandardIntegrator< Zonotope<R> >(*this);
 }
 
 
 
 
 template<class R> inline
-std::pair< Numeric::Rational, Geometry::Box<R> >
-Evaluation::StandardIntegrator< Geometry::Zonotope<R> >::
-flow_bounds(const System::VectorField<R>& vf, 
-            const Geometry::Zonotope<R>& es,
-            const Numeric::Rational& t) const
+std::pair< Rational, Box<R> >
+StandardIntegrator< Zonotope<R> >::
+flow_bounds(const VectorField<R>& vf, 
+            const Zonotope<R>& es,
+            const Rational& t) const
 {
   return this->_bounder->flow_bounds(vf,es.bounding_box(),t);
 }
 
 
 template<class R>
-Geometry::Zonotope<R>
-Evaluation::StandardIntegrator< Geometry::Zonotope<R> >::
-integration_step(const System::VectorField<R>& vector_field, 
-                 const Geometry::Zonotope<R>& initial_set, 
-                 const Numeric::Rational& step_size, 
-                 const Geometry::Box<R>& flow_bounding_box) const
+Zonotope<R>
+StandardIntegrator< Zonotope<R> >::
+integration_step(const VectorField<R>& vector_field, 
+                 const Zonotope<R>& initial_set, 
+                 const Rational& step_size, 
+                 const Box<R>& flow_bounding_box) const
 {
-  using namespace Numeric;
-  using namespace LinearAlgebra;
-  using namespace Function;
-  using namespace Geometry;
-  using namespace System;
+  
+  
+  
   
   uint verbosity=0;
 
@@ -124,7 +122,7 @@ integration_step(const System::VectorField<R>& vector_field,
   ARIADNE_LOG(6,"affine_flow_model="<<affine_flow_model<<"\n");
   ARIADNE_LOG(6,"taylor_flow_model="<<taylor_flow_model<<"\n");
   ARIADNE_LOG(6,"affine_flow_model="<<affine_flow_model<<"\n");
-  Zonotope<R> flow_set=Geometry::apply(affine_flow_model,initial_set);
+  Zonotope<R> flow_set=apply(affine_flow_model,initial_set);
   ARIADNE_LOG(6,"flow_set="<<flow_set<<"\n");
 
   return flow_set;
@@ -134,18 +132,17 @@ integration_step(const System::VectorField<R>& vector_field,
 
 
 template<class R>
-Geometry::Zonotope<R> 
-Evaluation::StandardIntegrator< Geometry::Zonotope<R> >::
-reachability_step(const System::VectorField<R>& vector_field, 
-                  const Geometry::Zonotope<R>& initial_set,
-                  const Numeric::Rational& step_size,
-                  const Geometry::Box<R>& bounding_box) const
+Zonotope<R> 
+StandardIntegrator< Zonotope<R> >::
+reachability_step(const VectorField<R>& vector_field, 
+                  const Zonotope<R>& initial_set,
+                  const Rational& step_size,
+                  const Box<R>& bounding_box) const
 {
-  using namespace Numeric;
-  using namespace LinearAlgebra;
-  using namespace Function;
-  using namespace Geometry;
-  using namespace System;
+  
+  
+  
+  
 
   uint verbosity=0;
 
@@ -168,7 +165,7 @@ reachability_step(const System::VectorField<R>& vector_field,
 
 template<class R>
 std::ostream&
-Evaluation::StandardIntegrator< Geometry::Zonotope<R> >::write(std::ostream& os) const
+StandardIntegrator< Zonotope<R> >::write(std::ostream& os) const
 {
   return os << "StandardIntegrator<Zonotope>( )";
 }

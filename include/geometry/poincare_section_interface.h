@@ -35,7 +35,7 @@
 #include "function/declarations.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
     
     // Forward declarations for friends
     template<class R> class ConstraintInterface;
@@ -46,8 +46,8 @@ namespace Ariadne {
     template<class R>
     class PoincareSectionInterface
     {
-      typedef typename Numeric::traits<R>::arithmetic_type A;
-      typedef typename Numeric::traits<R>::interval_type I;
+      typedef typename traits<R>::arithmetic_type A;
+      typedef typename traits<R>::interval_type I;
      public:
       /*! \brief Destructor. */
       virtual ~PoincareSectionInterface() { };
@@ -61,18 +61,18 @@ namespace Ariadne {
       virtual std::ostream& write(std::ostream& os) const = 0;
 
       /*! \brief The map used to define the inclusion of the section in state space. */
-      virtual const Function::FunctionInterface<R>& inclusion_map() const = 0;
+      virtual const FunctionInterface<R>& inclusion_map() const = 0;
       /*! \brief The map used to define the (local) projection of state space to the section. */
-      virtual const Function::FunctionInterface<R>& projection_map() const = 0;
+      virtual const FunctionInterface<R>& projection_map() const = 0;
       /*! \brief A function whose zero set is the section. */
-      virtual const Function::FunctionInterface<R>& crossing_condition() const = 0;
+      virtual const FunctionInterface<R>& crossing_condition() const = 0;
     };
     
     template<class R> inline std::ostream& operator<<(std::ostream& os, const PoincareSectionInterface<R>& ps) {
       return ps.write(os);
     }
     
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_POINCARE_SECTION_INTERFACE_H */

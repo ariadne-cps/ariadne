@@ -38,7 +38,7 @@
 
 namespace Ariadne {
 
-  namespace System {
+  
 
     /*! \ingroup System
      * \brief Interface for transition systems defined by reach and evolve operators. 
@@ -88,7 +88,7 @@ namespace Ariadne {
       virtual std::pair<PartitionListSet,PartitionListSet> upper_reach_evolve(const BasicSet& s, const Time& t) const = 0;
     };
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_TRANSITION_SYSTEM_INTERFACE_H */

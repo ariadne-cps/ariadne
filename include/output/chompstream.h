@@ -34,7 +34,7 @@
 #include "combinatoric/lattice_map.h"
 
 namespace Ariadne {
-  namespace Output {
+  
     
     /*!\brief A stream for output to the computational homology programs CHomP. */
     class chompstream {
@@ -44,15 +44,15 @@ namespace Ariadne {
       ~chompstream();
      private:
       friend chompstream& operator<<(chompstream&, const char*);
-      friend chompstream& operator<<(chompstream&, const Combinatoric::LatticeCell&);
-      friend chompstream& operator<<(chompstream&, const Combinatoric::LatticeMaskSet&);
-      friend chompstream& operator<<(chompstream&, const Combinatoric::LatticeMultiMap&);
+      friend chompstream& operator<<(chompstream&, const LatticeCell&);
+      friend chompstream& operator<<(chompstream&, const LatticeMaskSet&);
+      friend chompstream& operator<<(chompstream&, const LatticeMultiMap&);
      private:
       std::ostream* _os_ptr;
     };
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_CHOMPFSTREAM_H */
 

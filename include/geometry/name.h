@@ -35,7 +35,7 @@
 
 namespace Ariadne {
 
-  namespace Geometry {
+  
 
     template<class BS> struct Name;
   
@@ -78,7 +78,7 @@ namespace Ariadne {
     }
 
 
-    }
-}
+    
+} // namespace Ariadne
 
 #endif /* ARIADNE_GEOMETRY_NAME_H */

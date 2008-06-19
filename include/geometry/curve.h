@@ -32,7 +32,7 @@
 #include "curve_interface.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
     
     //! \ingroup ExactSet
     /*! \brief A curve in Euclidean space
@@ -41,13 +41,13 @@ namespace Ariadne {
     class Curve
       : public CurveInterface<R>
     {
-      typedef typename Numeric::traits<R>::arithmetic_type A;
-      typedef typename Numeric::traits<R>::interval_type I;
+      typedef typename traits<R>::arithmetic_type A;
+      typedef typename traits<R>::interval_type I;
      public:
       /*! \brief Destructor. */
       virtual ~Curve();
       /*! \brief Constructor. */
-      Curve(const Function::FunctionInterface<R>& f);
+      Curve(const FunctionInterface<R>& f);
       /*! \brief Copy constructor. */
       Curve(const Curve<R>& c);
       /*! \brief Return a new dynamically-allocated copy of the constraint. */
@@ -60,15 +60,15 @@ namespace Ariadne {
       /*! \brief The value at a point. */
       virtual Point<A> value(const A& s) const;
       /*! \brief The tangent at a point. */
-      virtual LinearAlgebra::Vector<A> tangent(const A& s) const;
+      virtual Vector<A> tangent(const A& s) const;
 
       /*! \brief Write to an output stream. */
       virtual std::ostream& write(std::ostream& os) const;
      private:
-      Function::FunctionInterface<R>* _function_ptr;
+      FunctionInterface<R>* _function_ptr;
     };
     
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_CURVE_H */

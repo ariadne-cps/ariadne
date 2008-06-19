@@ -36,14 +36,6 @@
 #define alpha2 0.15
 
 using namespace Ariadne;
-using namespace Ariadne::Function;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::LinearAlgebra;
-using namespace Ariadne::Geometry;
-using namespace Ariadne::System;
-using namespace Ariadne::Evaluation;
-using namespace Ariadne::Output;
-using namespace Ariadne::Combinatoric;
 using namespace std;
 
 template<class R> int refrig();

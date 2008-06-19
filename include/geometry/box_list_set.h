@@ -42,7 +42,7 @@
 #include "geometry/set_interface.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
     template<class R> class Box;
     
@@ -254,20 +254,20 @@ namespace Ariadne {
     template<class R>
     BoxListSet<R>
     inner_intersection(const BoxListSet<R>& A,
-                       const Geometry::SetInterface<typename R::real_type>& B);
+                       const SetInterface<typename R::real_type>& B);
   
     template<class R>
     BoxListSet<R>
     lower_intersection(const BoxListSet<R>& A,
-                       const Geometry::SetInterface<typename R::real_type>& B);
+                       const SetInterface<typename R::real_type>& B);
   
     template<class R>
     BoxListSet<R>
     outer_intersection(const BoxListSet<R>& A,
-                       const Geometry::SetInterface<typename R::real_type>& B);
+                       const SetInterface<typename R::real_type>& B);
   
-  }
-}
+  
+} // namespace Ariadne
 
 #include "box_list_set.inline.h"
 

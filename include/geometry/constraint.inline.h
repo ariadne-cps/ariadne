@@ -26,13 +26,13 @@ namespace {
  
 template<class R> inline 
 Ariadne::tribool 
-compare_zero(const Ariadne::Numeric::Interval<R>& ivl, 
-             Ariadne::Geometry::Comparison cmp) 
+compare_zero(const Ariadne::Interval<R>& ivl, 
+             Ariadne::Comparison cmp) 
 {
   if(ivl.upper()<0) {
-    return (cmp==Ariadne::Geometry::less);
+    return (cmp==Ariadne::less);
   } else if(ivl.lower()>0) {
-    return (cmp==Ariadne::Geometry::greater);
+    return (cmp==Ariadne::greater);
   } else {
     return Ariadne::indeterminate;
   }
@@ -44,14 +44,14 @@ namespace Ariadne {
   
   template<class R> inline
   bool
-  Geometry::equal(const Constraint<R>& c1, const Constraint<R>& c2)
+  equal(const Constraint<R>& c1, const Constraint<R>& c2)
   {
     return c1._function_ptr == c2._function_ptr && c1._comparison == c2._comparison;;
   }
 
   template<class R> inline
   bool 
-  Geometry::opposite(const Constraint<R>& c1, const Constraint<R>& c2)
+  opposite(const Constraint<R>& c1, const Constraint<R>& c2)
   {
     return c1._function_ptr==c2._function_ptr && c1._comparison != c2._comparison;
   }

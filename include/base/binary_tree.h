@@ -29,7 +29,7 @@
 #define ARIADNE_BASE_BINARY_TREE_H
 
 namespace Ariadne {
-  namespace Base {
+
 
     template<class T> class binary_tree;
 
@@ -103,7 +103,7 @@ namespace Ariadne {
     };
  
 
-  }
-}
+
+} // namespace Ariadne
 
 #endif // ARIADNE_BASE_BINARY_TREE_H

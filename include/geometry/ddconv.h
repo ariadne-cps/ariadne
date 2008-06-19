@@ -29,12 +29,12 @@
 #include "linear_algebra/vector.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
   
     template<class R>
     void
-    ddconv(std::vector< LinearAlgebra::Vector<R> >&  result,
-           const std::vector< LinearAlgebra::Vector<R> >&  argument);
+    ddconv(std::vector< Vector<R> >&  result,
+           const std::vector< Vector<R> >&  argument);
 
-  }
-}
+  
+} // namespace Ariadne

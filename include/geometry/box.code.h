@@ -37,7 +37,7 @@
 namespace Ariadne {
 
 template<class R>
-Geometry::Box<R>::Box(const std::string& s)
+Box<R>::Box(const std::string& s)
   : _data()
 {
   std::stringstream ss(s);
@@ -48,7 +48,7 @@ Geometry::Box<R>::Box(const std::string& s)
 
 template<class R> 
 R
-Geometry::Box<R>::volume() const 
+Box<R>::volume() const 
 {
   R result=1;
   for(dimension_type i=0; i!=this->dimension(); ++i) {
@@ -58,18 +58,18 @@ Geometry::Box<R>::volume() const
 }
 
 template<class R>
-Geometry::Box<R>
-Geometry::Box<R>::quadrant(const Combinatoric::BinaryWord& w) const 
+Box<R>
+Box<R>::quadrant(const BinaryWord& w) const 
 {
   ARIADNE_CHECK_DIMENSION(*this,w.size(),"Box Box::quadrant(BinaryWord w)");
   Box<R> quadrant(this->dimension());
   
   for (size_type i=0; i!=this->dimension(); ++i) {
     if(w[i]) {
-      quadrant[i]=Numeric::Interval<R>(this->interval(i).midpoint(),this->upper_bound(i));
+      quadrant[i]=Interval<R>(this->interval(i).midpoint(),this->upper_bound(i));
     } 
     else {
-      quadrant[i]=Numeric::Interval<R>(this->lower_bound(i),this->interval(i).midpoint());
+      quadrant[i]=Interval<R>(this->lower_bound(i),this->interval(i).midpoint());
     }
   }
   return quadrant;
@@ -78,7 +78,7 @@ Geometry::Box<R>::quadrant(const Combinatoric::BinaryWord& w) const
 
 template<class R> 
 tribool 
-Geometry::Box<R>::contains(const Point<R>& pt) const {
+Box<R>::contains(const Point<R>& pt) const {
   const Box<R>& bx=*this;
   ARIADNE_CHECK_EQUAL_DIMENSIONS(bx,pt,"contains(Box bx, Point pt)");
   tribool result=true;
@@ -96,7 +96,7 @@ Geometry::Box<R>::contains(const Point<R>& pt) const {
 
 template<class R> 
 tribool 
-Geometry::Box<R>::contains(const Point<I>& pt) const {
+Box<R>::contains(const Point<I>& pt) const {
   const Box<R>& bx=*this;
   ARIADNE_CHECK_EQUAL_DIMENSIONS(bx,pt,"contains(Box bx, Point pt)");
   tribool result=true;
@@ -114,7 +114,7 @@ Geometry::Box<R>::contains(const Point<I>& pt) const {
 
 template<class R> 
 tribool 
-Geometry::Box<R>::disjoint(const Box<R>& r2) const
+Box<R>::disjoint(const Box<R>& r2) const
 {
   const Box<R>& r1=*this;
   ARIADNE_CHECK_EQUAL_DIMENSIONS(r1,r2,"disjoint(Box r1, Box r2)");
@@ -133,7 +133,7 @@ Geometry::Box<R>::disjoint(const Box<R>& r2) const
 
 template<class R> 
 tribool 
-Geometry::Box<R>::subset(const Box<R>& r2) const
+Box<R>::subset(const Box<R>& r2) const
 {
   const Box<R>& r1=*this;
   ARIADNE_CHECK_EQUAL_DIMENSIONS(r1,r2,"subset(Box r1, Box r2)")
@@ -152,15 +152,15 @@ Geometry::Box<R>::subset(const Box<R>& r2) const
 
 template<class R>
 size_type 
-Geometry::Box<R>::number_of_vertices() const 
+Box<R>::number_of_vertices() const 
 {
   return 1<<this->dimension();
 }
 
 
 template<class R>
-Geometry::Point<R> 
-Geometry::Box<R>::vertex(size_type i) const 
+Point<R> 
+Box<R>::vertex(size_type i) const 
 {
   size_type d=this->dimension();
   state_type result(d); 
@@ -182,15 +182,15 @@ Geometry::Box<R>::vertex(size_type i) const
 
 
 template<class R>
-typename Geometry::Box<R>::vertices_const_iterator
-Geometry::Box<R>::vertices_begin() const
+typename Box<R>::vertices_const_iterator
+Box<R>::vertices_begin() const
 {
   return BoxVerticesIterator<R>(*this,false);
 }
 
 template<class R>
-typename Geometry::Box<R>::vertices_const_iterator
-Geometry::Box<R>::vertices_end() const
+typename Box<R>::vertices_const_iterator
+Box<R>::vertices_end() const
 {
   return BoxVerticesIterator<R>(*this,true);
 }
@@ -203,7 +203,7 @@ Geometry::Box<R>::vertices_end() const
 
 template<class R>
 std::ostream&
-Geometry::operator<<(std::ostream& os, const Box<R>& bx)
+operator<<(std::ostream& os, const Box<R>& bx)
 {
   if(bx.dimension()==0) {
     os << "EmptyBox";
@@ -220,7 +220,7 @@ Geometry::operator<<(std::ostream& os, const Box<R>& bx)
 
 template<class R>
 std::istream& 
-Geometry::operator>>(std::istream& is, Box<R>& bx)
+operator>>(std::istream& is, Box<R>& bx)
 {
   
   char c;
@@ -228,8 +228,8 @@ Geometry::operator>>(std::istream& is, Box<R>& bx)
   is.putback(c);
   if(c=='[') {
     /* Representation as a literal [a1,b1]x[a2,b2]x...x[an,bn] */
-    std::vector< Numeric::Interval<R> > v;
-    Numeric::Interval<R> i;
+    std::vector< Interval<R> > v;
+    Interval<R> i;
     c='x';
     while(c=='x') {
       is >> i;

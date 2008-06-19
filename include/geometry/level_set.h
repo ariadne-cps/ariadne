@@ -37,7 +37,7 @@
 #include "geometry/set_interface.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
     
     class EuclideanSpace;
     template<class R> class Box;
@@ -49,10 +49,10 @@ namespace Ariadne {
     class LevelSet
       : public SetInterface< Box<R> >
     {
-      typedef typename Numeric::traits<R>::arithmetic_type A;
+      typedef typename traits<R>::arithmetic_type A;
      public:
       /*! \brief Construct the set \f$f(x)\geq0\f$ from the function \f$f\f$. */
-      LevelSet(const Function::FunctionInterface<R>& f);
+      LevelSet(const FunctionInterface<R>& f);
 
       /*! \brief Destructor. */
       virtual ~LevelSet();
@@ -82,14 +82,14 @@ namespace Ariadne {
       /*! \brief The number of independed inequality constraints used to define the set. */
       size_type number_of_constraints() const;
       /*! \brief The countour function defining the level set. */
-      const Function::FunctionInterface<R>& function() const;
+      const FunctionInterface<R>& function() const;
       /*! \brief The countour function applied to a point. */
       Point<A> function(const Point<A>& pt) const;
 
       /*! \brief Test if the two points lie on opposite components of the constaint set. */
       tribool separates(const Point<A>& pt1, const Point<A>& pt2) const;
      private:
-      boost::shared_ptr< const Function::FunctionInterface<R> > _function_ptr;
+      boost::shared_ptr< const FunctionInterface<R> > _function_ptr;
     };
     
     template<class R> inline
@@ -98,7 +98,7 @@ namespace Ariadne {
     }
 
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_LEVEL_SET_H */

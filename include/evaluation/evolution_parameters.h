@@ -37,7 +37,7 @@
 
 
 namespace Ariadne {
-  namespace Evaluation {
+  
 
     /*! \brief Parameters for controlling the accuracy of evolution methods. 
      *
@@ -66,9 +66,9 @@ namespace Ariadne {
 
       uint _verbosity;
 
-      Geometry::Grid<R> _grid;
-      Geometry::HybridGrid<R> _hybrid_grid;
-      Geometry::HybridSet<R> _hybrid_bounding_domain;
+      Grid<R> _grid;
+      HybridGrid<R> _hybrid_grid;
+      HybridSet<R> _hybrid_bounding_domain;
      public:
       /*! \brief Default constructor. */
       EvolutionParameters();
@@ -119,19 +119,19 @@ namespace Ariadne {
       R bounding_domain_size() const;
 
       /*! \brief A bounding domain for the evolution. */
-      Geometry::Box<R> bounding_domain(dimension_type d) const;
+      Box<R> bounding_domain(dimension_type d) const;
 			
 			/*! \brief A bounding domain for the hybrid evolution */
-			Geometry::HybridSet<R> hybrid_bounding_domain(const Geometry::HybridSpace& loc) const;
+			HybridSet<R> hybrid_bounding_domain(const HybridSpace& loc) const;
 
       /*! \brief A grid of dimension \a d with the given spacing. */
-      Geometry::Grid<R> grid(dimension_type d) const;
+      Grid<R> grid(dimension_type d) const;
 
       /*! \brief A grid for a hybrid system with hybrid space loc. */
-      Geometry::HybridGrid<R> hybrid_grid(const Geometry::HybridSpace& loc) const;
+      HybridGrid<R> hybrid_grid(const HybridSpace& loc) const;
 
       /*! \brief A finite grid of dimension \a d with the given spacing and bounds. */
-      Geometry::FiniteGrid<R> finite_grid(dimension_type d) const;
+      FiniteGrid<R> finite_grid(dimension_type d) const;
 
       /*! \brief The verbosity of the output. */
       uint verbosity() const;
@@ -175,16 +175,16 @@ namespace Ariadne {
       void set_bounding_domain_size(double);
 			
 			/*! \brief Set the the regions used for hybrid computation. */
-			void set_hybrid_bounding_domain(Geometry::HybridSet<R>);
+			void set_hybrid_bounding_domain(HybridSet<R>);
 
       /*! \brief Set the verbosity of the output. */
       void set_verbosity(uint);
 
       /*! \brief Set the default grid. */
-      void set_grid(Geometry::Grid<R>);
+      void set_grid(Grid<R>);
 
       /*! \brief Set the hybrid grid for hybrid systems. */
-      void set_hybrid_grid(Geometry::HybridGrid<R>);
+      void set_hybrid_grid(HybridGrid<R>);
 
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream& os) const;      
@@ -195,7 +195,7 @@ namespace Ariadne {
       return p.write(os);
     }
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_EVOLUTION_PARAMETERS_H */

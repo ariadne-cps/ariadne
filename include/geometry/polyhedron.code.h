@@ -59,18 +59,17 @@
 namespace {
 
 using namespace Ariadne;
-using Geometry::verbosity;
 
 inline
 void
-assign(Geometry::Polyhedron<Numeric::Rational>& plhd, const Geometry::PointList<Numeric::Rational>& vl)
+assign(Polyhedron<Rational>& plhd, const PointList<Rational>& vl)
 {
-  plhd=Geometry::Polyhedron<Numeric::Rational>(Geometry::Polytope<Numeric::Rational>(vl));
+  plhd=Polyhedron<Rational>(Polytope<Rational>(vl));
 }
 
 template<class X> inline
 void
-assign(Geometry::Polyhedron<X>& plhd, const Geometry::PointList<X>& pltp)
+assign(Polyhedron<X>& plhd, const PointList<X>& pltp)
 {
   throw NotImplemented(__PRETTY_FUNCTION__); 
 }
@@ -79,28 +78,28 @@ assign(Geometry::Polyhedron<X>& plhd, const Geometry::PointList<X>& pltp)
 
 inline
 tribool 
-empty(const Geometry::Polyhedron<Numeric::Rational>& plhd) 
+empty(const Polyhedron<Rational>& plhd) 
 {
   try {
-    Geometry::Polytope<Numeric::Rational> pltp(plhd);
+    Polytope<Rational> pltp(plhd);
     ARIADNE_LOG(7,"empty(plhd): plhd="<<plhd<<" pltp="<<pltp);
     return pltp.empty();
   }
-  catch(Geometry::UnboundedSet& e) {
+  catch(UnboundedSet& e) {
     return false;
   }
 }
 
 template<class R> inline
 tribool 
-empty(const Geometry::Polyhedron<R>& plhd) 
+empty(const Polyhedron<R>& plhd) 
 {
-  return empty(Geometry::Polyhedron<Numeric::Rational>(plhd));
+  return empty(Polyhedron<Rational>(plhd));
 }
 
 template<class R> inline
 tribool 
-empty(const Geometry::Polyhedron< Numeric::Interval<R> >& plhd) 
+empty(const Polyhedron< Interval<R> >& plhd) 
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
@@ -109,38 +108,38 @@ empty(const Geometry::Polyhedron< Numeric::Interval<R> >& plhd)
 
 inline
 tribool 
-bounded(const Geometry::Polyhedron<Numeric::Rational>& plhd)
+bounded(const Polyhedron<Rational>& plhd)
 {
   try {
-    Geometry::Polytope<Numeric::Rational> pltp(plhd);
+    Polytope<Rational> pltp(plhd);
     return pltp.bounded();
   }
-  catch(Geometry::UnboundedSet& e) {
+  catch(UnboundedSet& e) {
     return false;
   }
 }
 
 template<class R> inline
 tribool 
-bounded(const Geometry::Polyhedron<R>& plhd) 
+bounded(const Polyhedron<R>& plhd) 
 {
-  return bounded(Geometry::Polyhedron<Numeric::Rational>(plhd));
+  return bounded(Polyhedron<Rational>(plhd));
 }
 
 
 template<class R> inline
 tribool 
-bounded(const Geometry::Polyhedron< Numeric::Interval<R> >& plhd) 
+bounded(const Polyhedron< Interval<R> >& plhd) 
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
 
 tribool 
-disjoint(const Geometry::Polyhedron<Numeric::Rational>& plhd, const Geometry::Box<Numeric::Rational>& r)
+disjoint(const Polyhedron<Rational>& plhd, const Box<Rational>& r)
 {
-  typedef Numeric::Rational R;
-  typedef Numeric::Rational F;
+  typedef Rational R;
+  typedef Rational F;
   
   if(verbosity>7) { std::clog << "tribool disjoint(Polyhedron<Rational>,Polyhedron<Rational>)" << std::endl; }
   if(verbosity>8) { std::clog << plhd << " " << r << std::endl; }
@@ -151,9 +150,9 @@ disjoint(const Geometry::Polyhedron<Numeric::Rational>& plhd, const Geometry::Bo
   size_type nnc=0; // number of negative constraints Ax<=b
   
   // Translate x'=x-l;  Ax<=b A(x'+l)<=b Ax'<= b-Al b'=b-Al 
-  LinearAlgebra::Vector<F> u=r.upper_corner()-r.lower_corner();
-  LinearAlgebra::Matrix<R> A=plhd.A();
-  LinearAlgebra::Vector<F> b=plhd.b()-A*r.lower_corner().position_vector();
+  Vector<F> u=r.upper_corner()-r.lower_corner();
+  Matrix<R> A=plhd.A();
+  Vector<F> b=plhd.b()-A*r.lower_corner().position_vector();
   
   if(verbosity>8) { std::clog << "u'=" << u << " A'=" << A << " b'=" << b << std::endl; }
   
@@ -164,7 +163,7 @@ disjoint(const Geometry::Polyhedron<Numeric::Rational>& plhd, const Geometry::Bo
     }
   }
   
-  LinearAlgebra::Matrix<F> T(nc+d+1,d+nnc+1);
+  Matrix<F> T(nc+d+1,d+nnc+1);
   // set up constraints Ax<=b
   size_type k=0; // negative constraint number
   for(size_type i=0; i!=nc; ++i) {
@@ -201,46 +200,46 @@ disjoint(const Geometry::Polyhedron<Numeric::Rational>& plhd, const Geometry::Bo
   
   if(verbosity>8) { std::clog << T << std::endl; }
   
-  LinearProgramming::LinearProgram<F> lp(T);
+  LinearProgram<F> lp(T);
   tribool result=!lp.is_feasible();
   return result;
 }
 
 template<class T>
 tribool 
-disjoint(const Geometry::Polyhedron< Numeric::Float<T> >& plhd, 
-         const Geometry::Box< Numeric::Float<T> >& r)
+disjoint(const Polyhedron< Float<T> >& plhd, 
+         const Box< Float<T> >& r)
 {
-  return ::disjoint(Geometry::Polyhedron<Numeric::Rational>(plhd),
-                    Geometry::Box<Numeric::Rational>(r));
+  return ::disjoint(Polyhedron<Rational>(plhd),
+                    Box<Rational>(r));
 }
                   
 template<class R>
 tribool 
-disjoint(const Geometry::Polyhedron< Numeric::Interval<R> >& plhd, const Geometry::Box<R>& bx)
+disjoint(const Polyhedron< Interval<R> >& plhd, const Box<R>& bx)
 {
   throw NotImplemented("disjoint(Polyhedron<Fuzzy>,Box<Fuzzy>");
 }
                   
 
 tribool 
-disjoint(const Geometry::Polyhedron<Numeric::Rational>& plhd, const Geometry::Polytope<Numeric::Rational>& pltp)
+disjoint(const Polyhedron<Rational>& plhd, const Polytope<Rational>& pltp)
 {
-  return disjoint(plhd,Geometry::Polyhedron<Numeric::Rational>(pltp));
+  return disjoint(plhd,Polyhedron<Rational>(pltp));
 }
 
 template<class T>
 tribool 
-disjoint(const Geometry::Polyhedron< Numeric::Float<T> >& plhd, 
-         const Geometry::Polytope< Numeric::Float<T> >& pltp)
+disjoint(const Polyhedron< Float<T> >& plhd, 
+         const Polytope< Float<T> >& pltp)
 {
-  return ::disjoint(Geometry::Polyhedron<Numeric::Rational>(plhd),
-                    Geometry::Polytope<Numeric::Rational>(pltp));
+  return ::disjoint(Polyhedron<Rational>(plhd),
+                    Polytope<Rational>(pltp));
 }
                   
 template<class R>
 tribool 
-disjoint(const Geometry::Polyhedron< Numeric::Interval<R> >& plhd, const Geometry::Polytope< Numeric::Interval<R> >& pltp)
+disjoint(const Polyhedron< Interval<R> >& plhd, const Polytope< Interval<R> >& pltp)
 {
   throw NotImplemented("disjoint(Polyhedron<Fuzzy>,Polytope<Fuzzy>");
 }
@@ -251,13 +250,13 @@ disjoint(const Geometry::Polyhedron< Numeric::Interval<R> >& plhd, const Geometr
 
 template<class R, class BS> inline
 tribool 
-subset(const BS& A, const Geometry::Polyhedron<R>& B)
+subset(const BS& A, const Polyhedron<R>& B)
 {
   tribool result=true;
   for(typename BS::vertices_const_iterator v=A.vertices_begin();
       v!=A.vertices_end(); ++v)
   {
-    for(typename Geometry::Polyhedron<R>::constraints_const_iterator c=B.constraints_begin();
+    for(typename Polyhedron<R>::constraints_const_iterator c=B.constraints_begin();
         c!=B.constraints_end(); ++c)
     {
       result=result && (satisfies(*v,*c));
@@ -271,17 +270,17 @@ subset(const BS& A, const Geometry::Polyhedron<R>& B)
 
 inline
 tribool 
-subset(const Geometry::Polyhedron<Numeric::Rational>& plhd, const Geometry::Box<Numeric::Rational>& r)
+subset(const Polyhedron<Rational>& plhd, const Box<Rational>& r)
 {
-  ARIADNE_LOG(3,"Geometry::subset(plhd,r): ""plhd="<<plhd<<", r="<<r<<"\n");
-  typedef Numeric::Rational Q;
+  ARIADNE_LOG(3,"subset(plhd,r): ""plhd="<<plhd<<", r="<<r<<"\n");
+  typedef Rational Q;
   tribool result=true;
   dimension_type d=plhd.dimension();
   array<Q> data(d+1u);
   for(size_type i=0; i!=d+1u; ++i) {
     data[i]=0;
   }
-  Geometry::Polyhedron<Q> halfspace;
+  Polyhedron<Q> halfspace;
   ARIADNE_LOG(9,"data="<<data<<"\n");
   
   for(size_type j=0; j!=d; ++j) {
@@ -289,13 +288,13 @@ subset(const Geometry::Polyhedron<Numeric::Rational>& plhd, const Geometry::Box<
     data[j]=-1;
     data[d]=r.lower_bound(j);
     ARIADNE_LOG(9,"data="<<data<<"\n");
-    halfspace=Geometry::Polyhedron<Q>(d,1u,data.begin());
+    halfspace=Polyhedron<Q>(d,1u,data.begin());
     ARIADNE_LOG(8,"halfspace="<<halfspace<<"\n");
     result=result && disjoint(plhd,halfspace);
     // Check if disjoint from upper halfspace
     data[j]=1;
     data[d]=-r.upper_bound(j);
-    halfspace=Geometry::Polyhedron<Q>(d,1u,data.begin());
+    halfspace=Polyhedron<Q>(d,1u,data.begin());
     ARIADNE_LOG(8,"halfspace="<<halfspace<<"\n");
     result=result && disjoint(plhd,halfspace);
     // Early return
@@ -310,16 +309,16 @@ subset(const Geometry::Polyhedron<Numeric::Rational>& plhd, const Geometry::Box<
 template<class T>
 inline
 tribool 
-subset(const Geometry::Polyhedron< Numeric::Float<T> >& plhd, 
-       const Geometry::Box< Numeric::Float<T> >& r)
+subset(const Polyhedron< Float<T> >& plhd, 
+       const Box< Float<T> >& r)
 {
-  return subset(Geometry::Polyhedron<Numeric::Rational>(plhd),Geometry::Box<Numeric::Rational>(r));
+  return subset(Polyhedron<Rational>(plhd),Box<Rational>(r));
 }
 
 template<class R>
 inline
 tribool 
-subset(const Geometry::Polyhedron< Numeric::Interval<R> >& plhd, const Geometry::Box<R>& r)
+subset(const Polyhedron< Interval<R> >& plhd, const Box<R>& r)
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
@@ -327,23 +326,23 @@ subset(const Geometry::Polyhedron< Numeric::Interval<R> >& plhd, const Geometry:
 
 inline
 tribool 
-subset(const Geometry::Polyhedron<Numeric::Rational>& plhd1, const Geometry::Polyhedron<Numeric::Rational>& plhd2)
+subset(const Polyhedron<Rational>& plhd1, const Polyhedron<Rational>& plhd2)
 {
-  return Geometry::subset(Geometry::Polytope<Numeric::Rational>(plhd1),plhd2);
+  return subset(Polytope<Rational>(plhd1),plhd2);
 }
 
 template<class R>
 inline
 tribool 
-subset(const Geometry::Polyhedron<R>& plhd1, const Geometry::Polyhedron<R>& plhd2)
+subset(const Polyhedron<R>& plhd1, const Polyhedron<R>& plhd2)
 {
-  return ::subset(Geometry::Polyhedron<Numeric::Rational>(plhd1),Geometry::Polyhedron<Numeric::Rational>(plhd2));
+  return ::subset(Polyhedron<Rational>(plhd1),Polyhedron<Rational>(plhd2));
 }
 
 template<class R>
 inline
 tribool 
-subset(const Geometry::Polyhedron< Numeric::Interval<R> >& plhd1, const Geometry::Polyhedron< Numeric::Interval<R> >& plhd2)
+subset(const Polyhedron< Interval<R> >& plhd1, const Polyhedron< Interval<R> >& plhd2)
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
@@ -354,29 +353,28 @@ subset(const Geometry::Polyhedron< Numeric::Interval<R> >& plhd1, const Geometry
 
 
 inline
-Geometry::Box<Numeric::Rational> 
-bounding_box(const Geometry::Polyhedron<Numeric::Rational>& plhd)
+Box<Rational> 
+bounding_box(const Polyhedron<Rational>& plhd)
 {
-  return Geometry::Polytope<Numeric::Rational>(plhd).bounding_box();
+  return Polytope<Rational>(plhd).bounding_box();
 }
 
 template<class R> inline
-Geometry::Box<R> 
-bounding_box(const Geometry::Polyhedron<R>& plhd)
+Box<R> 
+bounding_box(const Polyhedron<R>& plhd)
 {
-  using Numeric::Rational;
-  Geometry::Box<Numeric::Rational> qbb=bounding_box(Geometry::Polyhedron<Numeric::Rational>(plhd));
-  Geometry::Box<R> bb(plhd.dimension());
+  Box<Rational> qbb=bounding_box(Polyhedron<Rational>(plhd));
+  Box<R> bb(plhd.dimension());
   for(dimension_type i=0; i!=bb.dimension(); ++i) {
-    bb.set_lower_bound(i,R(qbb.lower_bound(i),Numeric::round_down));
-    bb.set_upper_bound(i,R(qbb.upper_bound(i),Numeric::round_up));
+    bb.set_lower_bound(i,R(qbb.lower_bound(i),round_down));
+    bb.set_upper_bound(i,R(qbb.upper_bound(i),round_up));
   }
   return bb;
 }
 
 template<class R> inline
-Geometry::Box<R> 
-bounding_box(const Geometry::Polyhedron< Numeric::Interval<R> >& plhd)
+Box<R> 
+bounding_box(const Polyhedron< Interval<R> >& plhd)
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
@@ -392,14 +390,14 @@ namespace Ariadne {
 
 template<class X> 
 tribool 
-Geometry::empty(const Polyhedron<X>& plhd) 
+empty(const Polyhedron<X>& plhd) 
 {
   return ::empty(plhd);
 }
 
 template<class X> 
 tribool 
-Geometry::bounded(const Polyhedron<X>& plhd) 
+bounded(const Polyhedron<X>& plhd) 
 {
   return ::bounded(plhd);
 }
@@ -411,13 +409,13 @@ Geometry::bounded(const Polyhedron<X>& plhd)
 
 
 template<class X> 
-Geometry::Polyhedron<X>::Polyhedron(const Box<R>& bx)
+Polyhedron<X>::Polyhedron(const Box<R>& bx)
   : _dimension(bx.dimension()), 
     _number_of_constraints(bx.dimension()*2u),
     _data((bx.dimension()+1u)*bx.dimension()*2u,static_cast<X>(0))
 {
   dimension_type d=bx.dimension();
-  LinearAlgebra::MatrixSlice<X> constraints=this->_constraints();
+  MatrixSlice<X> constraints=this->_constraints();
   for(size_type i=0; i!=d; ++i) {
     constraints(i,i)=static_cast<X>(1);
     constraints(i,d)=-bx.lower_bound(i);
@@ -431,7 +429,7 @@ Geometry::Polyhedron<X>::Polyhedron(const Box<R>& bx)
 
 
 template<class X>
-Geometry::Polyhedron<X>::Polyhedron(const std::string& str)
+Polyhedron<X>::Polyhedron(const std::string& str)
 {
   std::stringstream ss(str);
   ss >> *this;
@@ -439,7 +437,7 @@ Geometry::Polyhedron<X>::Polyhedron(const std::string& str)
 
 
 template<class X>
-Geometry::Polyhedron<X>::Polyhedron(dimension_type d)
+Polyhedron<X>::Polyhedron(dimension_type d)
   : _dimension(d), 
     _number_of_constraints(0), 
     _data()
@@ -448,7 +446,7 @@ Geometry::Polyhedron<X>::Polyhedron(dimension_type d)
 
 
 template<class X>
-Geometry::Polyhedron<X>::Polyhedron(dimension_type d, size_type nc, const X* data)
+Polyhedron<X>::Polyhedron(dimension_type d, size_type nc, const X* data)
   : _dimension(d), 
     _number_of_constraints(nc), 
     _data(data,data+(d+1)*nc)
@@ -457,23 +455,23 @@ Geometry::Polyhedron<X>::Polyhedron(dimension_type d, size_type nc, const X* dat
 
 
 template<class X>
-Geometry::Polyhedron<X>::Polyhedron(const LinearAlgebra::Matrix<X>& A,
-                                    const LinearAlgebra::Vector<X>& b) 
+Polyhedron<X>::Polyhedron(const Matrix<X>& A,
+                                    const Vector<X>& b) 
   : _dimension(A.number_of_columns()), 
     _number_of_constraints(A.number_of_rows()), 
     _data((A.number_of_columns()+1)*A.number_of_rows())
 {
-  using namespace LinearAlgebra;
+  
   ARIADNE_CHECK_SIZE(b,A.number_of_rows(),"Polyhedron::Polyhedron(Matrix A, Vector b)");
   dimension_type d=this->dimension();
   dimension_type nc=this->number_of_constraints();
-  LinearAlgebra::MatrixSlice<X>(nc,d,this->data().begin(),d+1u,1u)=-A;
-  LinearAlgebra::VectorSlice<X>(nc,this->data().begin()+d,d+1u)=b;
+  MatrixSlice<X>(nc,d,this->data().begin(),d+1u,1u)=-A;
+  VectorSlice<X>(nc,this->data().begin()+d,d+1u)=b;
 }
 
 
 template<class X>
-Geometry::Polyhedron<X>::Polyhedron(const LinearAlgebra::Matrix<X>& C) 
+Polyhedron<X>::Polyhedron(const Matrix<X>& C) 
   : _dimension(C.number_of_columns()-1), 
     _number_of_constraints(C.number_of_rows()), 
     _data(C.data())
@@ -482,7 +480,7 @@ Geometry::Polyhedron<X>::Polyhedron(const LinearAlgebra::Matrix<X>& C)
 
 
 template<class X>
-Geometry::Polyhedron<X>::Polyhedron(const PointList<X>& pts)
+Polyhedron<X>::Polyhedron(const PointList<X>& pts)
   : _dimension(pts.dimension()), _number_of_constraints(0), _data()
 {
   assign(*this,pts);
@@ -492,7 +490,7 @@ Geometry::Polyhedron<X>::Polyhedron(const PointList<X>& pts)
 
 template<class X>
 void
-Geometry::Polyhedron<X>::new_constraint(const Halfspace<X>& c)
+Polyhedron<X>::new_constraint(const Halfspace<X>& c)
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(*this,c,"void Polyhedron::new_constraint(PolyhedralConstraint& c)");
   dimension_type d=this->_dimension;
@@ -506,8 +504,8 @@ Geometry::Polyhedron<X>::new_constraint(const Halfspace<X>& c)
 
 
 template<class X>
-Geometry::Halfspace<X>
-Geometry::Polyhedron<X>::constraint(size_type i) const
+Halfspace<X>
+Polyhedron<X>::constraint(size_type i) const
 {
   ARIADNE_ASSERT(i<this->_number_of_constraints);
   return Halfspace<X>(this->_dimension,this->_data.begin()+i*(this->_dimension+1u));
@@ -515,10 +513,10 @@ Geometry::Polyhedron<X>::constraint(size_type i) const
 
 
 template<class X>
-LinearAlgebra::MatrixSlice<X>
-Geometry::Polyhedron<X>::_constraints()
+MatrixSlice<X>
+Polyhedron<X>::_constraints()
 {
-  return LinearAlgebra::MatrixSlice<X>(this->_number_of_constraints,
+  return MatrixSlice<X>(this->_number_of_constraints,
                                        this->_dimension+1u,
                                        this->data().begin(),
                                        this->_dimension+1u,
@@ -529,22 +527,22 @@ Geometry::Polyhedron<X>::_constraints()
 
 
 template<class X>
-typename Geometry::Polyhedron<X>::constraints_const_iterator
-Geometry::Polyhedron<X>::constraints_begin() const
+typename Polyhedron<X>::constraints_const_iterator
+Polyhedron<X>::constraints_begin() const
 {
   return constraints_const_iterator(*this,0u);
 }
 
 template<class X>
-typename Geometry::Polyhedron<X>::constraints_const_iterator
-Geometry::Polyhedron<X>::constraints_end() const
+typename Polyhedron<X>::constraints_const_iterator
+Polyhedron<X>::constraints_end() const
 {
   return constraints_const_iterator(*this,this->number_of_constraints());
 }
 
 template<class X>
 dimension_type
-Geometry::Polyhedron<X>::dimension() const
+Polyhedron<X>::dimension() const
 {
   return this->_dimension;
 }
@@ -552,22 +550,22 @@ Geometry::Polyhedron<X>::dimension() const
 
 
 template<class X> 
-Geometry::Box<typename Geometry::Polyhedron<X>::real_type> 
-Geometry::Polyhedron<X>::bounding_box() const
+Box<typename Polyhedron<X>::real_type> 
+Polyhedron<X>::bounding_box() const
 {
   return ::bounding_box(*this);
 }
 
 template<class X>
 tribool 
-Geometry::Polyhedron<X>::empty() const
+Polyhedron<X>::empty() const
 {
   return ::empty(*this);
 }
 
 template<class X>
 tribool 
-Geometry::Polyhedron<X>::bounded() const
+Polyhedron<X>::bounded() const
 {
   return ::bounded(*this);
 }
@@ -577,14 +575,14 @@ Geometry::Polyhedron<X>::bounded() const
 
 template<class X>
 tribool 
-Geometry::contains(const Polyhedron<X>& plhd, const Point<typename Polyhedron<X>::real_type>& pt)
+contains(const Polyhedron<X>& plhd, const Point<typename Polyhedron<X>::real_type>& pt)
 {
   return plhd.contains(pt);
 }
 
 template<class X>
 tribool 
-Geometry::disjoint(const Polyhedron<X>& plhd, const Box<typename Polyhedron<X>::real_type>& bx)
+disjoint(const Polyhedron<X>& plhd, const Box<typename Polyhedron<X>::real_type>& bx)
 {
   return ::disjoint(plhd,bx);
 }
@@ -592,7 +590,7 @@ Geometry::disjoint(const Polyhedron<X>& plhd, const Box<typename Polyhedron<X>::
 
 template<class X>
 tribool 
-Geometry::disjoint(const Box<typename Polyhedron<X>::real_type>& bx, const Polyhedron<X>& plhd)
+disjoint(const Box<typename Polyhedron<X>::real_type>& bx, const Polyhedron<X>& plhd)
 {
   return ::disjoint(plhd,bx);
 }
@@ -601,7 +599,7 @@ Geometry::disjoint(const Box<typename Polyhedron<X>::real_type>& bx, const Polyh
 
 template<class X>
 tribool 
-Geometry::disjoint(const Polyhedron<X>& plhd, const Polytope<X>& pltp)
+disjoint(const Polyhedron<X>& plhd, const Polytope<X>& pltp)
 {
   return ::disjoint(plhd,pltp);
 }
@@ -609,7 +607,7 @@ Geometry::disjoint(const Polyhedron<X>& plhd, const Polytope<X>& pltp)
 
 template<class X>
 tribool 
-Geometry::disjoint(const Polytope<X>& pltp, const Polyhedron<X>& plhd)
+disjoint(const Polytope<X>& pltp, const Polyhedron<X>& plhd)
 {
   return ::disjoint(plhd,pltp);
 }
@@ -618,21 +616,21 @@ Geometry::disjoint(const Polytope<X>& pltp, const Polyhedron<X>& plhd)
 
 template<class X>
 tribool 
-Geometry::disjoint(const Polyhedron<X>& plhd1, const Polyhedron<X>& plhd2)
+disjoint(const Polyhedron<X>& plhd1, const Polyhedron<X>& plhd2)
 {
   return closed_intersection(plhd1,plhd2).empty();
 }
 
 template<class X>
 tribool 
-Geometry::subset(const Polyhedron<X>& plhd1, const Polyhedron<X>& plhd2)
+subset(const Polyhedron<X>& plhd1, const Polyhedron<X>& plhd2)
 {
   return ::subset(plhd1,plhd2);
 }
 
 template<class X>
 tribool 
-Geometry::subset(const Polyhedron<X>& plhd, const Box<typename Polyhedron<X>::real_type>& r)
+subset(const Polyhedron<X>& plhd, const Box<typename Polyhedron<X>::real_type>& r)
 {
   return ::subset(plhd,r);
 }
@@ -640,7 +638,7 @@ Geometry::subset(const Polyhedron<X>& plhd, const Box<typename Polyhedron<X>::re
 
 template<class X>
 tribool 
-Geometry::subset(const Box<typename Polyhedron<X>::real_type>& r, const Polyhedron<X>& plhd)
+subset(const Box<typename Polyhedron<X>::real_type>& r, const Polyhedron<X>& plhd)
 {
   return ::subset(r,plhd);
 }
@@ -648,7 +646,7 @@ Geometry::subset(const Box<typename Polyhedron<X>::real_type>& r, const Polyhedr
 
 template<class X1,class X2>
 tribool 
-Geometry::subset(const Polytope<X1>& pltp, const Polyhedron<X2>& plhd)
+subset(const Polytope<X1>& pltp, const Polyhedron<X2>& plhd)
 {
   return ::subset(pltp,plhd);
 }
@@ -657,8 +655,8 @@ Geometry::subset(const Polytope<X1>& pltp, const Polyhedron<X2>& plhd)
 
 
 template<class X>
-Geometry::Polyhedron<X> 
-Geometry::open_intersection(const Polyhedron<X>& plhd1, const Polyhedron<X>& plhd2)
+Polyhedron<X> 
+open_intersection(const Polyhedron<X>& plhd1, const Polyhedron<X>& plhd2)
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(plhd1,plhd2,"Polyhedron open_intersection(Polyhedron plhd1, Polyhedron plhd2)");
   throw NotImplemented(__PRETTY_FUNCTION__);
@@ -666,24 +664,24 @@ Geometry::open_intersection(const Polyhedron<X>& plhd1, const Polyhedron<X>& plh
 
 
 template<class X>
-Geometry::Polyhedron<X> 
-Geometry::closed_intersection(const Polyhedron<X>& plhd1, const Polyhedron<X>& plhd2)
+Polyhedron<X> 
+closed_intersection(const Polyhedron<X>& plhd1, const Polyhedron<X>& plhd2)
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(plhd1,plhd2,"Polyhedron closed_intersection(Polyhedron plhd1, Polyhedron plhd2)");
   dimension_type d=plhd1.dimension();
   size_type nc1=plhd1.number_of_constraints();
   size_type nc2=plhd2.number_of_constraints();
-  LinearAlgebra::Matrix<X> A(nc1+nc2,d);
-  LinearAlgebra::MatrixSlice<X>(nc1,d,A.begin(),d,1)=plhd1.A();
-  LinearAlgebra::MatrixSlice<X>(nc2,d,A.begin()+nc1*d,d,1)=plhd2.A();
-  LinearAlgebra::Vector<X> b=direct_sum(plhd1.b(),plhd2.b());
+  Matrix<X> A(nc1+nc2,d);
+  MatrixSlice<X>(nc1,d,A.begin(),d,1)=plhd1.A();
+  MatrixSlice<X>(nc2,d,A.begin()+nc1*d,d,1)=plhd2.A();
+  Vector<X> b=direct_sum(plhd1.b(),plhd2.b());
   return Polyhedron<X>(A,b);
 }
 
 
 template<class X>
-Geometry::Polyhedron<X> 
-Geometry::closed_intersection(const Rectangle<X>& r, const Polyhedron<X>& plhd)
+Polyhedron<X> 
+closed_intersection(const Rectangle<X>& r, const Polyhedron<X>& plhd)
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(r,plhd,"Polyhedron closed_intersection(Rectangle r, Polyhedron plhd)");
   return closed_intersection(Polyhedron<X>(r),plhd);
@@ -691,8 +689,8 @@ Geometry::closed_intersection(const Rectangle<X>& r, const Polyhedron<X>& plhd)
 
 
 template<class X>
-Geometry::Polyhedron<X> 
-Geometry::closed_intersection(const Polyhedron<X>& plhd, const Rectangle<X>& r)
+Polyhedron<X> 
+closed_intersection(const Polyhedron<X>& plhd, const Rectangle<X>& r)
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(plhd,r,"Polyhedron closed_intersection(Polyhedron plhd, Rectangle r)");
   return closed_intersection(plhd,Polyhedron<X>(r));
@@ -700,18 +698,18 @@ Geometry::closed_intersection(const Polyhedron<X>& plhd, const Rectangle<X>& r)
 
 
 template<class X>
-Geometry::Polyhedron<X> 
-Geometry::polyhedron(const Rectangle<X>& r)
+Polyhedron<X> 
+polyhedron(const Rectangle<X>& r)
 {
   return Polyhedron<X>(r);
 }
 
 
 template<class X>
-Geometry::Polyhedron<typename Numeric::traits<X>::arithmetic_type>
-Geometry::polyhedron(const Polytope<X>& pltp)
+Polyhedron<typename traits<X>::arithmetic_type>
+polyhedron(const Polytope<X>& pltp)
 {
-  typedef typename Numeric::traits<X>::arithmetic_type F;
+  typedef typename traits<X>::arithmetic_type F;
   
   dimension_type d=pltp.dimension();
   size_type nv=pltp.number_of_vertices();
@@ -723,12 +721,12 @@ Geometry::polyhedron(const Polytope<X>& pltp)
     return Polyhedron<F>(d,1,data.begin());
   }
   
-  const LinearAlgebra::Matrix<X> G=pltp.generators();
+  const Matrix<X> G=pltp.generators();
   
-  std::vector< LinearAlgebra::Vector<F> > result;
-  std::vector< LinearAlgebra::Vector<F> > argument;
+  std::vector< Vector<F> > result;
+  std::vector< Vector<F> > argument;
   
-  LinearAlgebra::Vector<F> tmp(d+1);
+  Vector<F> tmp(d+1);
   
   for(size_type j=0; j!=nv; ++j) {
     for(size_type i=0; i!=d+1u; ++i) {
@@ -754,14 +752,14 @@ Geometry::polyhedron(const Polytope<X>& pltp)
 
 template<class X>
 std::string
-Geometry::Polyhedron<X>::name()
+Polyhedron<X>::name()
 {
-  return std::string("Polyhedron")+"<"+Numeric::name<X>()+">";
+  return std::string("Polyhedron")+"<"+Ariadne::name<X>()+">";
 }
 
 template<class X>  
 std::ostream& 
-Geometry::Polyhedron<X>::write(std::ostream& os) const
+Polyhedron<X>::write(std::ostream& os) const
 {
   //return os << "Polyhedron( A=" << this->A() << ", b=" << this->b() << " )";
   os << "Polyhedron( constraints=";
@@ -781,7 +779,7 @@ Geometry::Polyhedron<X>::write(std::ostream& os) const
 
 template<class X>  
 std::istream& 
-Geometry::Polyhedron<X>::read(std::istream& is) 
+Polyhedron<X>::read(std::istream& is) 
 {
   std::vector< std::vector<X> > Alst;
   std::vector< X > Blst;
@@ -796,7 +794,7 @@ Geometry::Polyhedron<X>::read(std::istream& is)
   c=is.peek();
   while(c=='[') {
     // Read constraint ax<=b in form [a_1,a_2,...,a_n;b];
-    Base::read_sequence(is,a,'[',';',',');
+    read_sequence(is,a,'[',';',',');
     is >> b;
     is >> c;
     assert(c==']');
@@ -806,8 +804,8 @@ Geometry::Polyhedron<X>::read(std::istream& is)
   
   size_type m=Alst.size();
   size_type n=Alst[0].size();
-  LinearAlgebra::Matrix<X> A(m,n);
-  LinearAlgebra::Vector<X> B(m);
+  Matrix<X> A(m,n);
+  Vector<X> B(m);
   for(uint i=0; i!=m; ++i) {
     for(size_type j=0; j!=n; ++j) {
       A(i,j)=Alst[i][j];
@@ -823,10 +821,10 @@ Geometry::Polyhedron<X>::read(std::istream& is)
 
 template<class X>
 void
-Geometry::Polyhedron<X>::_instantiate() 
+Polyhedron<X>::_instantiate() 
 {
-  typedef typename Numeric::traits<X>::number_type R;
-  typedef typename Numeric::traits<X>::arithmetic_type F;
+  typedef typename traits<X>::number_type R;
+  typedef typename traits<X>::arithmetic_type F;
   tribool tb;
   Point<R> pt;
   Box<R> bx;
@@ -839,7 +837,7 @@ Geometry::Polyhedron<X>::_instantiate()
   p=Polyhedron<X>(p);
   ip=Polyhedron<F>(c);
   
-  tb=Geometry::contains(p,pt);
+  tb=Ariadne::contains(p,pt);
   tb=disjoint(bx,p);
   tb=disjoint(p,bx);
   tb=disjoint(c,p);

@@ -37,7 +37,7 @@
 #include "geometry/set_interface.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
     
     //! \ingroup ExactSet
     /*! \brief A set defined by the conditions \f$f(x)\geq0\f$ for some function \f$f\f$. 
@@ -49,10 +49,10 @@ namespace Ariadne {
     class ImageSet
       : public SetInterface<R>
     {
-      typedef typename Numeric::traits<R>::arithmetic_type A;
+      typedef typename traits<R>::arithmetic_type A;
      public:
       /*! \brief Construct the set \f$f(x)\in B\f$ from the function \f$f\f$ and the box \a D. */
-      ImageSet(const Box<R> D, const Function::FunctionInterface<R>& f)
+      ImageSet(const Box<R> D, const FunctionInterface<R>& f)
         : _domain(D), _function_ptr(f.clone());
 
       /*! \brief Return a new dynamically-allocated copy of the set. */
@@ -66,9 +66,9 @@ namespace Ariadne {
       /*! \brief */
       virtual tribool intersects(const Box<R>& r) const { return indeterminate; }
       /*! \brief */
-      virtual tribool disjoint(const Box<R>& r) const { return Geometry::disjoint(this->_range(),r) or indeterminate; }
+      virtual tribool disjoint(const Box<R>& r) const { return disjoint(this->_range(),r) or indeterminate; }
       /*! \brief */
-      virtual tribool subset(const Box<R>& r) const { return Geometry::subset(this->_range(),r) or indeterminate; }
+      virtual tribool subset(const Box<R>& r) const { return subset(this->_range(),r) or indeterminate; }
       /*! \brief */
       virtual tribool bounded() const { return this->_range().bounded(); }
       /*! \brief */
@@ -77,15 +77,15 @@ namespace Ariadne {
       virtual std::ostream& write(std::ostream& os) const;
 
       /*! \brief The codomain given the allowable values of the image function. */
-      const Geometry::Box<R>& domain() const { return this->_domain; }
+      const Box<R>& domain() const { return this->_domain; }
       /*! \brief The function describing the images. */
-      const Function::FunctionInterface<R>& function() const { return *this->_function_ptr; }
+      const FunctionInterface<R>& function() const { return *this->_function_ptr; }
      private:
-      inline Geometry::Box<R> _range() const { 
+      inline Box<R> _range() const { 
         return Box<R>(this->_function_ptr->evaluate(this->_domain.position_vectors())); }
      private:
-      Geometry::Box<R> _domain;
-      boost::shared_ptr< const Function::FunctionInterface<R> > _function_ptr;
+      Box<R> _domain;
+      boost::shared_ptr< const FunctionInterface<R> > _function_ptr;
     };
     
     template<class R> inline

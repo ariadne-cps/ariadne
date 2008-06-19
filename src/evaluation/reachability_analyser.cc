@@ -33,11 +33,9 @@
 #include "evaluation/reachability_analyser.code.h"
 
 namespace Ariadne {
-  namespace Evaluation {
-    using namespace Numeric;
-    using namespace Geometry;
-    using namespace System;
-
+  
+    
+    
 #ifdef ENABLE_FLOAT64
     template class ReachabilityAnalyser< TransitionSystemInterface<Integer,GridApproximationScheme<Float64> >, GridApproximationScheme<Float64> >;
     template class ReachabilityAnalyser< TransitionSystemInterface<Rational,GridApproximationScheme<Float64> >, GridApproximationScheme<Float64> >;
@@ -52,5 +50,5 @@ namespace Ariadne {
     template class ReachabilityAnalyser< VectorField<FloatMP>, GridApproximationScheme<FloatMP> >;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

@@ -43,7 +43,7 @@
 
 
 namespace Ariadne {
-  namespace Geometry {
+  
     
     class basic_set_tag;
     class EuclideanSpace;
@@ -87,7 +87,7 @@ namespace Ariadne {
     template<class R> tribool disjoint(const Zonotope<R>& z, const ConstraintSet<R>& cs);
     template<class R> tribool intersects(const Zonotope<R>& z, const ConstraintSet<R>& cs);
     
-    template<class R> Zonotope<R> apply(const Function::AffineModel<R>& am, const Zonotope<R>& z);
+    template<class R> Zonotope<R> apply(const AffineModel<R>& am, const Zonotope<R>& z);
         
     template<class R> std::ostream& operator<<(std::ostream& os, const Zonotope<R>& z);
     template<class R> std::istream& operator>>(std::istream& is, Zonotope<R>& z);
@@ -117,11 +117,11 @@ namespace Ariadne {
      */
     template<class R>
     class Zonotope {
-      typedef Numeric::Interval<R> I;
+      typedef Interval<R> I;
      private:
-      Geometry::Point<R> _centre;
-      LinearAlgebra::Matrix<R> _generators;
-      LinearAlgebra::Vector<R> _error;
+      Point<R> _centre;
+      Matrix<R> _generators;
+      Vector<R> _error;
      public:
       //@{
       //! \name Typedefs 
@@ -141,15 +141,15 @@ namespace Ariadne {
       explicit Zonotope(dimension_type d, size_type m);
 
       /*! \brief Construct from centre, generators, and a uniform error term. */
-      explicit Zonotope(const Point<R>& c, const LinearAlgebra::Matrix<R>& G, const LinearAlgebra::Vector<R>& e);
+      explicit Zonotope(const Point<R>& c, const Matrix<R>& G, const Vector<R>& e);
       /*! \brief Construct from centre and generators. */
-      explicit Zonotope(const Point<R>& c, const LinearAlgebra::Matrix<R>& G);
+      explicit Zonotope(const Point<R>& c, const Matrix<R>& G);
       /*! \brief Construct from interval centre and a generator matrix. */
-      explicit Zonotope(const Point<I>& c, const LinearAlgebra::Matrix<R>& G);
+      explicit Zonotope(const Point<I>& c, const Matrix<R>& G);
       /*! \brief Construct from centre and an interval generator matrix. */
-      explicit Zonotope(const Point<R>& c, const LinearAlgebra::Matrix<I>& G);
+      explicit Zonotope(const Point<R>& c, const Matrix<I>& G);
       /*! \brief Construct from an interval centre and an interval generator matrix. */
-      explicit Zonotope(const Point<I>& c, const LinearAlgebra::Matrix<I>& G);
+      explicit Zonotope(const Point<I>& c, const Matrix<I>& G);
 
 
       /*! \brief Construct a zonotope of dimension \a d with centre at the origin and \a m generators from the data beginning at \a ptr. */
@@ -182,10 +182,10 @@ namespace Ariadne {
       const Point<R>& centre() const;
 
       /*! \brief The matrix of principle directions. */
-      const LinearAlgebra::Matrix<R>& generators() const;
+      const Matrix<R>& generators() const;
      
       /*! \brief The uniform error bound. */
-      const LinearAlgebra::Vector<R>& error() const;
+      const Vector<R>& error() const;
      
       /*! \brief A bounding box for the set. */
       Box<R> bounding_box() const;
@@ -244,7 +244,7 @@ namespace Ariadne {
       //@{
       //! \name Function operations.
       /*! \brief Compute the image of \a z under a function given by the concrete model \a am. */
-      friend Zonotope<R> apply<>(const Function::AffineModel<R>& am, const Zonotope<R>& z);
+      friend Zonotope<R> apply<>(const AffineModel<R>& am, const Zonotope<R>& z);
       //@}
      private:
       static void _instantiate();
@@ -253,8 +253,8 @@ namespace Ariadne {
 
 
  
-  }
-}
+  
+} // namespace Ariadne
 
 #include "zonotope.inline.h"
 #include "zonotope.template.h"

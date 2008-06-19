@@ -32,7 +32,7 @@ namespace {
 using namespace Ariadne;
 
 template<class X1, class X2> inline
-tribool less(const LinearAlgebra::Vector<X1>& v1, const LinearAlgebra::Vector<X2>& v2)
+tribool less(const Vector<X1>& v1, const Vector<X2>& v2)
 {
   tribool result=true;
   for(size_type i=0; i!=v1.size(); ++i) {
@@ -48,35 +48,35 @@ tribool less(const LinearAlgebra::Vector<X1>& v1, const LinearAlgebra::Vector<X2
 namespace Ariadne {
     
 template<class R>
-Geometry::LevelSet<R>::LevelSet(const Function::FunctionInterface<R>& f)
+LevelSet<R>::LevelSet(const FunctionInterface<R>& f)
   : _function_ptr(f.clone()) 
 { 
 }
 
 
 template<class R>
-Geometry::LevelSet<R>::~LevelSet() 
+LevelSet<R>::~LevelSet() 
 { 
 }
 
 
 template<class R>
-Geometry::LevelSet<R>* 
-Geometry::LevelSet<R>::clone() const 
+LevelSet<R>* 
+LevelSet<R>::clone() const 
 {
   return new LevelSet<R>(*this->_function_ptr); 
 }
 
 template<class R>
 dimension_type 
-Geometry::LevelSet<R>::dimension() const 
+LevelSet<R>::dimension() const 
 {
   return this->_function_ptr->argument_size(); 
 }
 
 template<class R>
-Geometry::EuclideanSpace
-Geometry::LevelSet<R>::space() const 
+EuclideanSpace
+LevelSet<R>::space() const 
 {
   return EuclideanSpace(this->dimension());
 }
@@ -84,14 +84,14 @@ Geometry::LevelSet<R>::space() const
 
 template<class R>
 tribool 
-Geometry::LevelSet<R>::separates(const Point<A>& pt1, const Point<A>& pt2) const 
+LevelSet<R>::separates(const Point<A>& pt1, const Point<A>& pt2) const 
 {
   if(this->number_of_constraints()!=1) {
     return false;
   }
-  const Function::FunctionInterface<R>& f=*this->_function_ptr;
+  const FunctionInterface<R>& f=*this->_function_ptr;
   A z=0;
-  LinearAlgebra::Vector<A> v1=pt1.position_vector();
+  Vector<A> v1=pt1.position_vector();
   A fv1=f(pt1.position_vector())[0];
   A fv2=f(pt2.position_vector())[0];
   tribool less1=z<fv1;
@@ -103,19 +103,19 @@ Geometry::LevelSet<R>::separates(const Point<A>& pt1, const Point<A>& pt2) const
 
 template<class R>
 tribool 
-Geometry::LevelSet<R>::contains(const Point<R>& pt) const 
+LevelSet<R>::contains(const Point<R>& pt) const 
 {
-  const Function::FunctionInterface<R>& f=*this->_function_ptr;
-  LinearAlgebra::Vector<A> v=pt.position_vector();
-  LinearAlgebra::Vector<R> z=LinearAlgebra::Vector<R>::zero(this->number_of_constraints());
-  LinearAlgebra::Vector<A> fv=f(v);
+  const FunctionInterface<R>& f=*this->_function_ptr;
+  Vector<A> v=pt.position_vector();
+  Vector<R> z=Vector<R>::zero(this->number_of_constraints());
+  Vector<A> fv=f(v);
   return !(::less(z,fv) || ::less(fv,z));
 }
 
 
 template<class R>
 tribool 
-Geometry::LevelSet<R>::superset(const Box<R>& r) const 
+LevelSet<R>::superset(const Box<R>& r) const 
 {
   return false;
 }
@@ -123,7 +123,7 @@ Geometry::LevelSet<R>::superset(const Box<R>& r) const
 
 template<class R>
 tribool 
-Geometry::LevelSet<R>::intersects(const Box<R>& r) const 
+LevelSet<R>::intersects(const Box<R>& r) const 
 {
   return !this->disjoint(r);
 }
@@ -131,39 +131,39 @@ Geometry::LevelSet<R>::intersects(const Box<R>& r) const
 
 template<class R>
 tribool 
-Geometry::LevelSet<R>::disjoint(const Box<R>& r) const 
+LevelSet<R>::disjoint(const Box<R>& r) const 
 {
-  const Function::FunctionInterface<R>& f=*this->_function_ptr;
-  LinearAlgebra::Vector<A> v=r.position_vectors();
-  LinearAlgebra::Vector<R> z=LinearAlgebra::Vector<R>::zero(this->number_of_constraints());
-  LinearAlgebra::Vector<A> fv=f(v);
+  const FunctionInterface<R>& f=*this->_function_ptr;
+  Vector<A> v=r.position_vectors();
+  Vector<R> z=Vector<R>::zero(this->number_of_constraints());
+  Vector<A> fv=f(v);
   return ::less(fv,z) || ::less(z,fv);
 }
 
 template<class R>
 tribool 
-Geometry::LevelSet<R>::subset(const Box<R>& r) const 
+LevelSet<R>::subset(const Box<R>& r) const 
 {
   return indeterminate;
 }
 
 template<class R>
 tribool 
-Geometry::LevelSet<R>::bounded() const 
+LevelSet<R>::bounded() const 
 {
   return indeterminate;
 }      
 
 template<class R>
-Geometry::Box<R> 
-Geometry::LevelSet<R>::bounding_box() const 
+Box<R> 
+LevelSet<R>::bounding_box() const 
 {
   throw UnboundedSet("LevelSet::bounding_box(): cannot be computed in general case");
 }      
 
 template<class R>
 std::ostream& 
-Geometry::LevelSet<R>::write(std::ostream& os) const 
+LevelSet<R>::write(std::ostream& os) const 
 {
   return os << "LevelSet( function=" << *this->_function_ptr << " )";
 }
@@ -172,27 +172,27 @@ Geometry::LevelSet<R>::write(std::ostream& os) const
 
 template<class R>
 size_type
-Geometry::LevelSet<R>::number_of_constraints() const
+LevelSet<R>::number_of_constraints() const
 {
   return this->_function_ptr->result_size();
 }
 
 
 template<class R>
-const Function::FunctionInterface<R>&
-Geometry::LevelSet<R>::function() const 
+const FunctionInterface<R>&
+LevelSet<R>::function() const 
 {
   return *this->_function_ptr;
 }
 
 
 template<class R>
-Geometry::Point<typename Geometry::LevelSet<R>::A> 
-Geometry::LevelSet<R>::function(const Point<A>& pt) const 
+Point<typename LevelSet<R>::A> 
+LevelSet<R>::function(const Point<A>& pt) const 
 {
-  const Function::FunctionInterface<R>& f=*this->_function_ptr;
-  LinearAlgebra::Vector<A> v=pt.position_vector();
+  const FunctionInterface<R>& f=*this->_function_ptr;
+  Vector<A> v=pt.position_vector();
   return Point<A>(f(v));
 }
 
-}
+} // namespace Ariadne

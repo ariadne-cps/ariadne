@@ -42,7 +42,7 @@
 
 namespace Ariadne {
   
-  namespace Base {
+
     
     /*! \ingroup Storage
      *  \brief STL style interface to dynamically-sizable arrays. 
@@ -374,7 +374,7 @@ namespace Ariadne {
     //! \ingroup Storage
     /*! \brief A range of values defined by a beginning and end iterator, which can be used as a reference to an array. */
     template<class Iter>
-    class range {
+    class range_array {
      public:
       typedef Iter iterator;
       typedef typename std::iterator_traits<Iter>::value_type value_type;
@@ -384,13 +384,13 @@ namespace Ariadne {
       typedef typename array<value_type>::size_type size_type;
       
       /*! \brief Destructor. */
-      ~range() { }
+      ~range_array() { }
       /*! \brief Construct a range giving a reference to an array. */
-      range(const array<value_type>& a) : _first(a.begin()), _last(a.end()) { }
+      range_array(const array<value_type>& a) : _first(a.begin()), _last(a.end()) { }
       
       /*! \brief Construct a range from a beginning and end iterator. */
       template<class ForwardIterator>
-      range(ForwardIterator first, ForwardIterator last)
+      range_array(ForwardIterator first, ForwardIterator last)
         : _first(first), _last(last) { }
       
       /*! \brief Convert to an array by copying elements. */
@@ -417,9 +417,9 @@ namespace Ariadne {
       iterator end() const { return _last; }
       
       /*! \brief Equality operator (compares the referenced arrays). */
-      bool operator==(const range<iterator>& other) const { return equals(other.begin(),other.end()); }
+      bool operator==(const range_array<iterator>& other) const { return equals(other.begin(),other.end()); }
       /*! \brief Inequality operator. */
-      bool operator!=(const range<iterator>& other) const { return !((*this)==other); }
+      bool operator!=(const range_array<iterator>& other) const { return !((*this)==other); }
       /*! \brief Equality operator (compares the referenced arrays). */
       bool operator==(const array<value_type>& other) const { return equals(other.begin(),other.end()); }
       /*! \brief Inequality operator. */
@@ -470,7 +470,7 @@ namespace Ariadne {
         if(this->size()!=a.size()) { throw std::length_error("array_reference<T>::operator=(array<X> const&)"); }
         _assign(a.begin(),a.end()); return *this; }
       /*! Assign the referenced array. */
-      template<class RanIter> Self& operator=(const range<RanIter>& r) { 
+      template<class RanIter> Self& operator=(const range_array<RanIter>& r) { 
         if(this->size()!=r.size()) { throw std::length_error("array_reference<T>::operator=(range<X> const&)"); }
         _assign(r.begin(),r.end()); return *this; }
       
@@ -820,7 +820,6 @@ namespace Ariadne {
     
     
     
-  } // namespace Base
 } // namespace Ariadne
   
 #endif /* ARIADNE_ARRAY_H */

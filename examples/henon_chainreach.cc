@@ -33,16 +33,15 @@
 #include "evaluation/evolution_parameters.h"
 #include "evaluation/map_evolver.h"
 #include "evaluation/standard_applicator.h"
+#include "evaluation/standard_subdivider.h"
+#include "evaluation/orthogonal_reducer.h"
+#include "evaluation/standard_approximator.h"
+#include "evaluation/reachability_analyser.h"
 #include "output/epsstream.h"
 #include "output/logging.h"
 #include "models/henon.h"
 
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::Geometry;
-using namespace Ariadne::System;
-using namespace Ariadne::Evaluation;
-using namespace Ariadne::Output;
 using namespace std;
 
 template<class R> int henon_chainreach();
@@ -55,14 +54,27 @@ template<class R>
 int 
 henon_chainreach()
 {
-  set_applicator_verbosity(0);
-  
   typedef Zonotope<R> BS;
 
   double maximum_basic_set_radius=0.25;
   double grid_length=0.125;
-
   int subdivisions=128;
+
+  EvolutionParameters<R> parameters;
+  parameters.set_maximum_basic_set_radius(maximum_basic_set_radius);
+  parameters.set_grid_length(grid_length);
+  
+  StandardApplicator<BS> applicator;
+  StandardSubdivider<BS> subdivider;
+  OrthogonalReducer<BS> reducer;
+  MapEvolver<BS> evolver(parameters,applicator,subdivider,reducer);
+
+  StandardApproximator<BS> approximator;
+
+  set_applicator_verbosity(0);
+  
+  Discretiser< Map<R>, GridApproximationScheme<R>, BS > discretiser(parameters,evolver,approximator);
+  ReachabilityAnalyser< Map<R>, GridApproximationScheme<R> > analyser(parameters,discretiser);
 
   Point<R> params=Point<R>("(1.5,0.875)");
   R a=params[0];
@@ -70,7 +82,8 @@ henon_chainreach()
 
 
   HenonMap<R> h=HenonMap<R>(params);
-  Point<R> pt("(3,5)"); smoothness_type s=3;
+  Point<R> pt("(3,5)"); 
+  smoothness_type s=3;
   cout << "pt="<<pt<<" s="<<s<<endl;
   cout << "h(pt)="<<h(pt)<<endl;
   cout << "h.jacobian(pt)="<<h.jacobian(pt) << endl; 
@@ -93,15 +106,8 @@ henon_chainreach()
   in.adjoin(over_approximation(ir,g));
   bd.adjoin(over_approximation(gbb,g));
 
-  EvolutionParameters<R> parameters;
-  parameters.set_maximum_basic_set_radius(maximum_basic_set_radius);
-  parameters.set_grid_length(grid_length);
-  
-  MapEvolver<BS> evolver(parameters);
-  evolver.parameters().set_grid_length(16.0/subdivisions);
-
-  SetInterface<R>* cr=evolver.chainreach(h,in);
-	GridMaskSet<R>& gmcr=*dynamic_cast<GridMaskSet<R>*>(cr);
+  SetInterface< Box<R> >* cr=analyser.chain_reach(h,in);
+  GridMaskSet<R>& gmcr=*dynamic_cast<GridMaskSet<R>*>(cr);
   PartitionTreeSet<R> ptcr=PartitionTreeSet<R>(gmcr);
 
   cout << gmcr <<endl;
@@ -113,7 +119,7 @@ henon_chainreach()
 
   RectangularSet<R> ins(ir);
   RectangularSet<R> cbs(cb);
-  SetInterface<R>* crs=evolver.chainreach(h,ins);
+  SetInterface< Box<R> >* crs=analyser.chain_reach(h,ins);
   cout << "*crs=" << *crs <<endl;
   GridMaskSet<R>& gmcrs=*dynamic_cast<GridMaskSet<R>*>(crs);
   cout << "gmcrs=" << gmcrs <<endl;

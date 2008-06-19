@@ -42,7 +42,7 @@ namespace Ariadne {
 
 
 template<class R>
-Geometry::GridTreeSet<R>::GridTreeSet(const GridMaskSet<R>& gms) 
+GridTreeSet<R>::GridTreeSet(const GridMaskSet<R>& gms) 
   : _unit_box(gms.bounding_box()),
     _subdivision_set(gms._lattice_set)
 { }
@@ -50,8 +50,8 @@ Geometry::GridTreeSet<R>::GridTreeSet(const GridMaskSet<R>& gms)
 
 
 template<class R>
-Geometry::GridTreeSet<R>*
-Geometry::GridTreeSet<R>::clone() const
+GridTreeSet<R>*
+GridTreeSet<R>::clone() const
 {
   return new GridTreeSet<R>(*this);
 }
@@ -59,41 +59,41 @@ Geometry::GridTreeSet<R>::clone() const
 
 template<class R>
 tribool
-Geometry::GridTreeSet<R>::contains(const Point<R>& pt) const
+GridTreeSet<R>::contains(const Point<R>& pt) const
 {
-  return Geometry::contains(*this,pt);
+  return contains(*this,pt);
 }
 
 
 template<class R>
 tribool
-Geometry::GridTreeSet<R>::intersects(const Box<R>& r) const
+GridTreeSet<R>::intersects(const Box<R>& r) const
 {
-  return !Geometry::disjoint(*this,r);
+  return !disjoint(*this,r);
 }
 
 
 template<class R>
 tribool
-Geometry::GridTreeSet<R>::disjoint(const Box<R>& r) const
+GridTreeSet<R>::disjoint(const Box<R>& r) const
 {
-  return Geometry::disjoint(*this,r);
+  return disjoint(*this,r);
 }
 
 
 template<class R>
 tribool
-Geometry::GridTreeSet<R>::superset(const Box<R>& r) const
+GridTreeSet<R>::superset(const Box<R>& r) const
 {
-  return Geometry::subset(r,*this);
+  return subset(r,*this);
 }
 
 
 template<class R>
 tribool
-Geometry::GridTreeSet<R>::subset(const Box<R>& r) const
+GridTreeSet<R>::subset(const Box<R>& r) const
 {
-  return Geometry::subset(*this,r);
+  return subset(*this,r);
 }
 
 
@@ -103,7 +103,7 @@ Geometry::GridTreeSet<R>::subset(const Box<R>& r) const
 
 
 template<class R>
-Geometry::GridTreeSet<R>::operator ListSet< Box<R> >() const 
+GridTreeSet<R>::operator ListSet< Box<R> >() const 
 {
   ListSet< Box<R> > res(this->dimension());
   for(const_iterator iter=begin(); iter!=end(); ++iter) {
@@ -116,7 +116,7 @@ Geometry::GridTreeSet<R>::operator ListSet< Box<R> >() const
 
 template<class R>
 void
-Geometry::GridTreeSet<R>::_instantiate_geometry_operators()
+GridTreeSet<R>::_instantiate_geometry_operators()
 {
   uint d=0;
   Box<R>* r=0;
@@ -145,7 +145,7 @@ Geometry::GridTreeSet<R>::_instantiate_geometry_operators()
 
 template<class R>
 tribool
-Geometry::contains(const GridTreeSet<R>& pts, const Point<R>& pt)
+contains(const GridTreeSet<R>& pts, const Point<R>& pt)
 {
   return subset(Box<R>(pt),pts);
 }
@@ -153,7 +153,7 @@ Geometry::contains(const GridTreeSet<R>& pts, const Point<R>& pt)
 
 template<class R>
 tribool
-Geometry::disjoint(const GridTreeSet<R>& pts, const Box<R>& r)
+disjoint(const GridTreeSet<R>& pts, const Box<R>& r)
 {
   tribool result=true;
   Box<R> cell(pts.dimension());
@@ -161,7 +161,7 @@ Geometry::disjoint(const GridTreeSet<R>& pts, const Box<R>& r)
       pts_iter!=pts.end(); ++pts_iter)
     {
       cell=*pts_iter;
-      result = result && Geometry::disjoint(cell,r);
+      result = result && disjoint(cell,r);
       if(result==false) {
         return result;
       }
@@ -172,7 +172,7 @@ Geometry::disjoint(const GridTreeSet<R>& pts, const Box<R>& r)
 
 template<class R>
 tribool
-Geometry::subset(const GridTreeSet<R>& pts, const Box<R>& r)
+subset(const GridTreeSet<R>& pts, const Box<R>& r)
 {
   tribool result=true;
   Box<R> cell(pts.dimension());
@@ -180,7 +180,7 @@ Geometry::subset(const GridTreeSet<R>& pts, const Box<R>& r)
       pts_iter!=pts.end(); ++pts_iter)
     {
       cell=*pts_iter;
-      result = result && Geometry::subset(cell,r);
+      result = result && subset(cell,r);
       if(result==false) {
         return result;
       }
@@ -191,7 +191,7 @@ Geometry::subset(const GridTreeSet<R>& pts, const Box<R>& r)
 
 template<class R>
 tribool
-Geometry::subset(const Box<R>& r, const GridTreeSet<R>& pts)
+subset(const Box<R>& r, const GridTreeSet<R>& pts)
 {
   return subset(r,ListSet< Box<R> >(pts));
 }
@@ -200,8 +200,8 @@ Geometry::subset(const Box<R>& r, const GridTreeSet<R>& pts)
 
 
 template<class R>
-Geometry::GridTreeCell<R>
-Geometry::over_approximation(const Box<R>& r, const GridScheme<R>& ps)
+GridTreeCell<R>
+over_approximation(const Box<R>& r, const GridScheme<R>& ps)
 {
   if(possibly(r.empty())) {
     ARIADNE_THROW(EmptyInterior,"GridTreeCell<R> over_approximation(const Box<R>& r, const GridScheme<R>& ps)"," with r="<<r);
@@ -212,17 +212,17 @@ Geometry::over_approximation(const Box<R>& r, const GridScheme<R>& ps)
   }
   
   const Box<R>& unit_box=ps.unit_box();
-  const Combinatoric::SubdivisionSequence& subdivisions=ps.subdivisions();
+  const SubdivisionSequence& subdivisions=ps.subdivisions();
   
-  Combinatoric::BinaryWord word;
-  Combinatoric::BinaryWord new_word;
+  BinaryWord word;
+  BinaryWord new_word;
   
   while(true) {
     new_word=word;
-    new_word.push_back(Combinatoric::BinaryTree::leaf);
+    new_word.push_back(BinaryTree::leaf);
     if(!subset(r,Box<R>(GridTreeCell<R>(unit_box,subdivisions,new_word)))) {
       new_word.pop_back();
-      word.push_back(Combinatoric::BinaryTree::right);
+      word.push_back(BinaryTree::right);
       if(!subset(r,Box<R>(GridTreeCell<R>(unit_box,subdivisions,word)))) {
         break;
       }
@@ -233,110 +233,110 @@ Geometry::over_approximation(const Box<R>& r, const GridScheme<R>& ps)
 
 
 template<class R, class S>
-Geometry::GridTreeSet<R>
-Geometry::outer_approximation(const S& s, const Grid<R>& g, const uint depth)
+GridTreeSet<R>
+outer_approximation(const S& s, const Grid<R>& g, const uint depth)
 {
   ARIADNE_LOG(4,"outer_approximation(S set, GridScheme ps, uint depth");
   const Box<R>& bounding_box=ps.unit_box();
-  const Combinatoric::SubdivisionSequence& subdivisions=ps.subdivisions();
+  const SubdivisionSequence& subdivisions=ps.subdivisions();
   std::vector<bool> tree;
   std::vector<bool> mask;
   
-  Combinatoric::BinaryWord word;
+  BinaryWord word;
   
   do {
     Box<R> cell=Box<R>(GridTreeCell<R>(bounding_box,subdivisions,word));
     if(word.size()==depth+1 || subset(cell,s)) {
-      tree.push_back(Combinatoric::BinaryTree::leaf);
+      tree.push_back(BinaryTree::leaf);
       mask.push_back(true);
-      Combinatoric::BinaryTree::advance(word);
+      BinaryTree::advance(word);
     }  
     else if(disjoint(cell,s)) {
-      tree.push_back(Combinatoric::BinaryTree::leaf);
+      tree.push_back(BinaryTree::leaf);
       mask.push_back(false);
-      Combinatoric::BinaryTree::advance(word);
+      BinaryTree::advance(word);
     }
     else {
-      tree.push_back(Combinatoric::BinaryTree::branch);
-      word.push_back(Combinatoric::BinaryTree::left);
+      tree.push_back(BinaryTree::branch);
+      word.push_back(BinaryTree::left);
     }
   } while(!word.empty());
   
-  return GridTreeSet<R>(bounding_box,subdivisions,Combinatoric::BinaryTree(tree),BooleanArray(mask));
+  return GridTreeSet<R>(bounding_box,subdivisions,BinaryTree(tree),BooleanArray(mask));
 }
 
 template<class R, class S>
-Geometry::GridTreeSet<R>
-Geometry::inner_approximation(const S& s, const GridScheme<R>& ps, const uint depth)
+GridTreeSet<R>
+inner_approximation(const S& s, const GridScheme<R>& ps, const uint depth)
 {
   const Box<R>& unit_box=ps.unit_box();
-  const Combinatoric::SubdivisionSequence& subdivisions=ps.subdivisions();
+  const SubdivisionSequence& subdivisions=ps.subdivisions();
   std::vector<bool> tree;
   std::vector<bool> mask;
   
-  Combinatoric::BinaryWord word;
+  BinaryWord word;
   
   do {
     Box<R> cell=Box<R>(GridTreeCell<R>(unit_box,subdivisions,word));
     if(word.size()==depth+1 || disjoint(cell,s)) {
-      tree.push_back(Combinatoric::BinaryTree::leaf);
+      tree.push_back(BinaryTree::leaf);
       mask.push_back(false);
-      Combinatoric::BinaryTree::advance(word);
+      BinaryTree::advance(word);
     }  
     else if(subset(cell,s)) {
-      tree.push_back(Combinatoric::BinaryTree::leaf);
+      tree.push_back(BinaryTree::leaf);
       mask.push_back(true);
-      Combinatoric::BinaryTree::advance(word);
+      BinaryTree::advance(word);
     }
     else {
-      tree.push_back(Combinatoric::BinaryTree::branch);
-      word.push_back(Combinatoric::BinaryTree::left);
+      tree.push_back(BinaryTree::branch);
+      word.push_back(BinaryTree::left);
     }
   } while(!word.empty());
   
-  return GridTreeSet<R>(unit_box,subdivisions,Combinatoric::BinaryTree(tree),BooleanArray(mask));
+  return GridTreeSet<R>(unit_box,subdivisions,BinaryTree(tree),BooleanArray(mask));
 }
 
 
 template<class R, class S>
-Geometry::GridTreeSet<R>
-Geometry::under_approximation(const S& s, const GridScheme<R>& ps, const uint depth)
+GridTreeSet<R>
+under_approximation(const S& s, const GridScheme<R>& ps, const uint depth)
 {
   const Box<R>& unit_box=ps.unit_box();
-  const Combinatoric::SubdivisionSequence& subdivisions=ps.subdivisions();
+  const SubdivisionSequence& subdivisions=ps.subdivisions();
   std::vector<bool> tree;
   std::vector<bool> mask;
   
-  Combinatoric::BinaryWord word;
+  BinaryWord word;
   
   do {
     Box<R> cell=Box<R>(GridTreeCell<R>(unit_box,subdivisions,word));
     if(word.size()==depth+1 || disjoint(cell,s)) {
-      tree.push_back(Combinatoric::BinaryTree::leaf);
+      tree.push_back(BinaryTree::leaf);
       mask.push_back(false);
-      Combinatoric::BinaryTree::advance(word);
+      BinaryTree::advance(word);
     }  
     else if(subset(cell,s)) {
-      tree.push_back(Combinatoric::BinaryTree::leaf);
+      tree.push_back(BinaryTree::leaf);
       mask.push_back(true);
-      Combinatoric::BinaryTree::advance(word);
+      BinaryTree::advance(word);
     }
     else {
-      tree.push_back(Combinatoric::BinaryTree::branch);
-      word.push_back(Combinatoric::BinaryTree::left);
+      tree.push_back(BinaryTree::branch);
+      word.push_back(BinaryTree::left);
     }
   } while(!word.empty());
   
-  return GridTreeSet<R>(unit_box,subdivisions,Combinatoric::BinaryTree(tree),BooleanArray(mask));
+  return GridTreeSet<R>(unit_box,subdivisions,BinaryTree(tree),BooleanArray(mask));
 }
 
 
 
 template<class R>
 std::ostream&
-Geometry::GridScheme<R>::write(std::ostream& os) const
+GridScheme<R>::write(std::ostream& os) const
 {
-  os << "GridScheme<" << Numeric::name<R>() << ">(\n";
+  os << "GridScheme<" << name<R>() << ">(\n";
   os << "  unit_box=" << this->unit_box() << ",\n";
   os << "  subdivision_coordinates=" << this->subdivisions() << "\n";
   os << ")\n";
@@ -345,9 +345,9 @@ Geometry::GridScheme<R>::write(std::ostream& os) const
 
 template<class R>
 std::ostream&
-Geometry::GridTreeCell<R>::write(std::ostream& os) const
+GridTreeCell<R>::write(std::ostream& os) const
 {
-  os << "GridTreeCell<" << Numeric::name<R>() << ">(\n";
+  os << "GridTreeCell<" << name<R>() << ">(\n";
   os << "  bounds=" << this->subdivision_cell() << ",\n";
   os << "  rectangle=" << Box<R>(*this) << "\n";
   os << ")\n";
@@ -356,39 +356,39 @@ Geometry::GridTreeCell<R>::write(std::ostream& os) const
 
 template<class R>
 std::ostream&
-Geometry::GridTree<R>::write(std::ostream& os) const
+GridTree<R>::write(std::ostream& os) const
 {
-  os << "GridTree<" << Numeric::name<R>() << ">(\n";
+  os << "GridTree<" << name<R>() << ">(\n";
   os << "  unit_box=" << this->unit_box() << ",\n";
   os << "  subdivisions=" << this->subdivisions() << "\n";
-  os << "  words="; Base::write_sequence(os, this->binary_tree().begin(), this->binary_tree().end()); os << ",\n";
-  os << "  blocks=["; Base::write_sequence(os,  this->subdivision_tree().begin(), this->subdivision_tree().end()); os << ",\n";
-  os << "  cells=["; Base::write_sequence(os,  this->begin(), this->end()); os << ",\n";
+  os << "  words="; write_sequence(os, this->binary_tree().begin(), this->binary_tree().end()); os << ",\n";
+  os << "  blocks=["; write_sequence(os,  this->subdivision_tree().begin(), this->subdivision_tree().end()); os << ",\n";
+  os << "  cells=["; write_sequence(os,  this->begin(), this->end()); os << ",\n";
   os << ")\n";
   return os;
 }
 
 template<class R>
 std::ostream&
-Geometry::GridTreeSet<R>::write(std::ostream& os) const
+GridTreeSet<R>::write(std::ostream& os) const
 {
-  os << "GridTreeSet<" << Numeric::name<R>() << ">(\n";
+  os << "GridTreeSet<" << name<R>() << ">(\n";
   os << "  unit_box=" << this->unit_box() << ",\n";
   os << "  subdivisions=" << this->subdivisions() << ",\n";
   os << "  tree=" << this->binary_tree() << ",\n";
   os << "  mask=" << this->mask() << ",\n";
-  os << "  words="; Base::write_sequence(os, this->subdivision_set().words().begin(), this->subdivision_set().words().end()); os << ",\n";
-  os << "  blocks=["; Base::write_sequence(os,  this->subdivision_set().begin(), this->subdivision_set().end()); os << ",\n";
-  os << "  cells=["; Base::write_sequence(os,  this->begin(), this->end()); os << ",\n";
+  os << "  words="; write_sequence(os, this->subdivision_set().words().begin(), this->subdivision_set().words().end()); os << ",\n";
+  os << "  blocks=["; write_sequence(os,  this->subdivision_set().begin(), this->subdivision_set().end()); os << ",\n";
+  os << "  cells=["; write_sequence(os,  this->begin(), this->end()); os << ",\n";
   os << ")\n";
   return os;
 }
 
 template<class R>
 std::ostream&
-Geometry::GridTreeSet<R>::summarize(std::ostream& os) const
+GridTreeSet<R>::summarize(std::ostream& os) const
 {
-  os << "GridTreeSet<" << Numeric::name<R>() << ">(";
+  os << "GridTreeSet<" << name<R>() << ">(";
   os << " unit_box=" << this->unit_box() << ",";
   os << " size=" << this->size() << " )";
   return os;

@@ -46,15 +46,15 @@
    \
   template<class R> \
   class Nm \
-    : public System::VectorField<R> \
+    : public VectorField<R> \
   { \
    public: \
     template<class P> explicit Nm(const P& p) \
-      : System::VectorField<R>(Nm##Function<R>(p.position_vector())), _parameters(p) { } \
-    const Geometry::Point<R>& parameters() const { return this->_parameters; } \
+      : VectorField<R>(Nm##Function<R>(p.position_vector())), _parameters(p) { } \
+    const Point<R>& parameters() const { return this->_parameters; } \
     const R& parameter(size_type k) const { return this->_parameters[k]; }    \
    private: \
-    Geometry::Point<R> _parameters;                  \
+    Point<R> _parameters;                  \
   };
 
 #endif /* ARIADNE_BUILD_VECTOR_FIELD_H */

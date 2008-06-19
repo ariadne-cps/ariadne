@@ -38,7 +38,7 @@
 
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
 
     //! \ingroup ExactSet
@@ -175,8 +175,8 @@ namespace Ariadne {
       return set.write(os);
     }
 
-  }
-}
+  
+} // namespace Ariadne
 
 
 #endif /* ARIADNE_SET_REFERENCE_H */

@@ -36,7 +36,7 @@
 
 namespace Ariadne {
   
-  namespace Base {
+
     
   
   template<class M>
@@ -142,7 +142,6 @@ namespace Ariadne {
 
 
      
-  } // namespace Base
 } // namespace Ariadne
   
 #endif /* ARIADNE_DISCRETE_MAP_H */

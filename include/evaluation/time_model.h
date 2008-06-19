@@ -39,7 +39,7 @@
 #include "evaluation/declarations.h"
 
 namespace Ariadne {  
-  namespace Evaluation {
+  
   
     /*! \brief A class representing a time as a fuzzy affine function of independent variables.
      *
@@ -47,24 +47,24 @@ namespace Ariadne {
      * if used at all. */
     template<class R>
     class TimeModel {
-      typedef Numeric::Interval<R> I;
+      typedef Interval<R> I;
      public:
       TimeModel() : _average(), _gradient() { }
       TimeModel(uint d) : _average(), _gradient(d) { }
-      TimeModel(const I& t, const LinearAlgebra::Vector<I>& dt)
+      TimeModel(const I& t, const Vector<I>& dt)
         : _average(t), _gradient(dt) { }
-      TimeModel(const I& t, const LinearAlgebra::Vector<I>& dt, const I& ndt)
+      TimeModel(const I& t, const Vector<I>& dt, const I& ndt)
         : _average(t), _gradient(dt.size()+1) { for(uint i=0; i!=dt.size(); ++i) { this->_gradient(i)=dt(i); } this->_gradient(dt.size())=ndt; }
       TimeModel(const TimeModel<R>& t)
         : _average(t._average), _gradient(t._gradient) { }
       size_type number_of_generators() const { return this->_gradient.size(); }
       const I& average() const { return this->_average; }
-      const LinearAlgebra::Vector<I>& gradient() const { return this->_gradient; }
-      I bound() const { return this->_average+inner_product(this->_gradient,LinearAlgebra::Vector<I>(this->_gradient.size(),I(-1,1))); }
-      I value(const LinearAlgebra::Vector<I>& e) const { return this->_average+inner_product(this->_gradient,e); }
+      const Vector<I>& gradient() const { return this->_gradient; }
+      I bound() const { return this->_average+inner_product(this->_gradient,Vector<I>(this->_gradient.size(),I(-1,1))); }
+      I value(const Vector<I>& e) const { return this->_average+inner_product(this->_gradient,e); }
      private:
       I _average;
-      LinearAlgebra::Vector<I> _gradient;
+      Vector<I> _gradient;
     };
 
     template<class R> inline
@@ -73,13 +73,13 @@ namespace Ariadne {
     }
 
     template<class R> inline
-    TimeModel<R> operator+(const Numeric::Rational& t1, const TimeModel<R>& t2) {
-      return TimeModel<R>(Numeric::Interval<R>(t1)+t2.average(),t2.gradient());
+    TimeModel<R> operator+(const Rational& t1, const TimeModel<R>& t2) {
+      return TimeModel<R>(Interval<R>(t1)+t2.average(),t2.gradient());
     }
 
     template<class R> inline
-    TimeModel<R> operator+(const TimeModel<R>& t1, const Numeric::Rational& t2) {
-      return TimeModel<R>(t1.average()+Numeric::Interval<R>(t2),t1.gradient());
+    TimeModel<R> operator+(const TimeModel<R>& t1, const Rational& t2) {
+      return TimeModel<R>(t1.average()+Interval<R>(t2),t1.gradient());
     }
 
     template<class R> inline
@@ -88,13 +88,13 @@ namespace Ariadne {
     }
 
     template<class R> inline
-    TimeModel<R> operator-(const Numeric::Rational& t1, const TimeModel<R>& t2) {
-      return TimeModel<R>(Numeric::Interval<R>(t1)-t2.average(),-t2.gradient());
+    TimeModel<R> operator-(const Rational& t1, const TimeModel<R>& t2) {
+      return TimeModel<R>(Interval<R>(t1)-t2.average(),-t2.gradient());
     }
 
     template<class R> inline
-    TimeModel<R> operator-(const TimeModel<R>& t1, const Numeric::Rational& t2) {
-      return TimeModel<R>(t1.average()-Numeric::Interval<R>(t2),t1.gradient());
+    TimeModel<R> operator-(const TimeModel<R>& t1, const Rational& t2) {
+      return TimeModel<R>(t1.average()-Interval<R>(t2),t1.gradient());
     }
 
     template<class R> inline
@@ -108,17 +108,17 @@ namespace Ariadne {
     }
 
     template<class R> inline
-    tribool operator<=(const TimeModel<R>& t1, const Numeric::Rational& t2) {
+    tribool operator<=(const TimeModel<R>& t1, const Rational& t2) {
       return t1.bound() <= t2;
     }
 
     template<class R> inline
-    tribool operator>(const TimeModel<R>& t1, const Numeric::Rational& t2) {
+    tribool operator>(const TimeModel<R>& t1, const Rational& t2) {
       return t1.bound()>t2;
     }
 
     template<class R> inline
-    tribool operator>=(const TimeModel<R>& t1, const Numeric::Rational& t2) {
+    tribool operator>=(const TimeModel<R>& t1, const Rational& t2) {
       return t1.bound() >=t2;
     }
 
@@ -133,7 +133,7 @@ namespace Ariadne {
     }
 
     template<class R> inline
-    tribool operator==(const TimeModel<R>& t1, const Numeric::Rational& t2) {
+    tribool operator==(const TimeModel<R>& t1, const Rational& t2) {
       return t1.bound() == t2;
     }
 
@@ -165,30 +165,30 @@ namespace Ariadne {
 
     template<class R> inline
     std::ostream& operator<<(std::ostream& os, const TimeModel<R>& t1) {
-      //return os << t1.average() << "+" << LinearAlgebra::midpoint(t1.gradient()) << "xe";
+      //return os << t1.average() << "+" << midpoint(t1.gradient()) << "xe";
       return os << t1.average() << "+" << t1.gradient() << "xe";
     }
 
 
     template<class R> inline
     TimeModel<R> lower_bound(TimeModel<R>& t) {
-      typedef Numeric::Interval<R> I;
-      LinearAlgebra::Vector<I> g=LinearAlgebra::midpoint(t.gradient());
-      I a=t.average()+LinearAlgebra::inner_product(g-t.gradient(),LinearAlgebra::Vector<I>(g.size(),Numeric::Interval<I>(-1,1)));
+      typedef Interval<R> I;
+      Vector<I> g=midpoint(t.gradient());
+      I a=t.average()+inner_product(g-t.gradient(),Vector<I>(g.size(),Interval<I>(-1,1)));
       return TimeModel<R>(a.lower(),t);
     }
       
     template<class R> inline
     TimeModel<R> upper_bound(TimeModel<R>& t) {
-      typedef Numeric::Interval<R> I;
-      LinearAlgebra::Vector<I> g=LinearAlgebra::midpoint(t.gradient());
-      I a=t.average()+LinearAlgebra::inner_product(g-t.gradient(),LinearAlgebra::Vector<I>(g.size(),Numeric::Interval<I>(-1,1)));
+      typedef Interval<R> I;
+      Vector<I> g=midpoint(t.gradient());
+      I a=t.average()+inner_product(g-t.gradient(),Vector<I>(g.size(),Interval<I>(-1,1)));
       return TimeModel<R>(a.upper(),t);
     }
       
 
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_TIME_MODEL_H */

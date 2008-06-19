@@ -37,17 +37,12 @@
 
 using namespace std;
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::LinearAlgebra;
-using namespace Ariadne::Function;
-using namespace Ariadne::Output;
 
-using LinearAlgebra::Vector;
 
 template<class R> 
 class TestTaylorModel
 {
-  typedef typename Numeric::traits<R>::arithmetic_type F;
+  typedef typename traits<R>::arithmetic_type F;
 
  public:
   
@@ -105,7 +100,7 @@ class TestTaylorModel
     double a[10]={1,2,3,4,5,6,7,8,9,10};
     TaylorModel<R> p1(1,2,3,3,a);
     TaylorModel<R> p2(1,2,2,2,a);
-    //TaylorModel<F> p=Function::add(p1,p2);
+    //TaylorModel<F> p=add(p1,p2);
     TaylorModel<F> p=p1+p2;
     std::cout << p << std::endl;
   }
@@ -131,14 +126,14 @@ class TestTaylorModel
     TaylorModel<R> p3(1,2,6,6,a3);
     TaylorModel<R> p=p1;
     std::cout << "p=" << p << std::endl;
-    std::cout << "pow(p,0)=" << Function::pow(p,0) << std::endl;
-    std::cout << "pow(p,1)=" << Function::pow(p,1) << std::endl;
-    std::cout << "pow(p,2)=" << Function::pow(p,2) << std::endl;
-    std::cout << "pow(p,3)=" << Function::pow(p,3) << std::endl;
-    ARIADNE_TEST_ASSERT(Function::pow(p,0)==p0);
-    ARIADNE_TEST_ASSERT(Function::pow(p,1)==p1);
-    ARIADNE_TEST_ASSERT(Function::pow(p,2)==p2);
-    ARIADNE_TEST_ASSERT(Function::pow(p,3)==p3);
+    std::cout << "pow(p,0)=" << pow(p,0) << std::endl;
+    std::cout << "pow(p,1)=" << pow(p,1) << std::endl;
+    std::cout << "pow(p,2)=" << pow(p,2) << std::endl;
+    std::cout << "pow(p,3)=" << pow(p,3) << std::endl;
+    ARIADNE_TEST_ASSERT(pow(p,0)==p0);
+    ARIADNE_TEST_ASSERT(pow(p,1)==p1);
+    ARIADNE_TEST_ASSERT(pow(p,2)==p2);
+    ARIADNE_TEST_ASSERT(pow(p,3)==p3);
   }
 
 

@@ -42,7 +42,7 @@
 #include "linear_algebra/vector_expression.h"
 
 namespace Ariadne {
-  namespace LinearAlgebra {
+  
     
     class Slice;
     template<class R> class VectorSlice;
@@ -150,9 +150,9 @@ namespace Ariadne {
       /*! \brief The inner product of \a v1 and \a v2. */
       friend R inner_product(const Vector<R>& v1, const Vector<R>& v2);
       /*! \brief The supremum norm of \a v. */
-      friend R LinearAlgebra::sup_norm(const Vector<R>& v);
+      friend R sup_norm(const Vector<R>& v);
       /*! \brief The supremum norm of \a v. */
-      friend R LinearAlgebra::norm(const Vector<R>& v);
+      friend R norm(const Vector<R>& v);
       /*! \brief The direct sum (concatentation) of v1 and v2. */
       friend Vector<R> direct_sum(const Vector<R>& v1, const Vector<R>& v2);
       /*! \brief The concatentation of v1 and v2. */
@@ -173,24 +173,24 @@ namespace Ariadne {
     template<class R1, class R2> Vector<R1>& operator/=(Vector<R1>& v1, const R2& s2);
 
   /*
-    template<class E1, class E2> BinaryVectorVectorExpression<Numeric::Add,E1,E2> operator+(const VectorExpression<E1>& e1, const VectorExpression<E2>& e2);
-    template<class E1, class E2> BinaryVectorVectorExpression<Numeric::Sub,E1,E2> operator-(const VectorExpression<E1>& e1, const VectorExpression<E2>& e2);
-    template<class E1, class E2> BinaryVectorScalarExpression<Numeric::Mul,E1,E2> operator*(const E2& e2, const VectorExpression<E1>& e1);
-    template<class E1, class E2> BinaryVectorScalarExpression<Numeric::Mul,E1,E2> operator*(const VectorExpression<E1>& e1, const E2& e2);
-    template<class E1, class E2> BinaryVectorScalarExpression<Numeric::Div,E1,E2> operator/(const VectorExpression<E1>& e1, const E2& e2);
+    template<class E1, class E2> BinaryVectorVectorExpression<Add,E1,E2> operator+(const VectorExpression<E1>& e1, const VectorExpression<E2>& e2);
+    template<class E1, class E2> BinaryVectorVectorExpression<Sub,E1,E2> operator-(const VectorExpression<E1>& e1, const VectorExpression<E2>& e2);
+    template<class E1, class E2> BinaryVectorScalarExpression<Mul,E1,E2> operator*(const E2& e2, const VectorExpression<E1>& e1);
+    template<class E1, class E2> BinaryVectorScalarExpression<Mul,E1,E2> operator*(const VectorExpression<E1>& e1, const E2& e2);
+    template<class E1, class E2> BinaryVectorScalarExpression<Div,E1,E2> operator/(const VectorExpression<E1>& e1, const E2& e2);
   */
 
     template<class R> Vector<R> operator-(const Vector<R>& v);
-    template<class R1, class R2> Vector<typename Numeric::traits<R1,R2>::arithmetic_type> operator+(const Vector<R1>& v1, const Vector<R2>& v2);
-    template<class R1, class R2> Vector<class Numeric::traits<R1,R2>::arithmetic_type> operator-(const Vector<R1>& v1, const Vector<R2>& v2);
-    template<class R1, class R2> Vector<typename Numeric::traits<R1,R2>::arithmetic_type> operator*(const R1& s, const Vector<R2>& v);
-    template<class R1, class R2> Vector<typename Numeric::traits<R1,R2>::arithmetic_type> operator*(const Vector<R1>& v, const R2& s);
-    template<class R1, class R2> Vector<typename Numeric::traits<R1,R2>::arithmetic_type> operator/(const Vector<R1>& v, const R2& s);
+    template<class R1, class R2> Vector<typename traits<R1,R2>::arithmetic_type> operator+(const Vector<R1>& v1, const Vector<R2>& v2);
+    template<class R1, class R2> Vector<class traits<R1,R2>::arithmetic_type> operator-(const Vector<R1>& v1, const Vector<R2>& v2);
+    template<class R1, class R2> Vector<typename traits<R1,R2>::arithmetic_type> operator*(const R1& s, const Vector<R2>& v);
+    template<class R1, class R2> Vector<typename traits<R1,R2>::arithmetic_type> operator*(const Vector<R1>& v, const R2& s);
+    template<class R1, class R2> Vector<typename traits<R1,R2>::arithmetic_type> operator/(const Vector<R1>& v, const R2& s);
    
     template<class R> Vector<R> operator-(const VectorSlice<R>& v);
-    template<class R1, class R2> Vector<typename Numeric::traits<R1,R2>::arithmetic_type> operator*(const R1& s, const VectorSlice<R2>& v);
-    template<class R1, class R2> Vector<typename Numeric::traits<R1,R2>::arithmetic_type> operator*(const VectorSlice<R1>& v, const R2& s);
-    template<class R1, class R2> Vector<typename Numeric::traits<R1,R2>::arithmetic_type> operator/(const VectorSlice<R1>& v, const R2& s);
+    template<class R1, class R2> Vector<typename traits<R1,R2>::arithmetic_type> operator*(const R1& s, const VectorSlice<R2>& v);
+    template<class R1, class R2> Vector<typename traits<R1,R2>::arithmetic_type> operator*(const VectorSlice<R1>& v, const R2& s);
+    template<class R1, class R2> Vector<typename traits<R1,R2>::arithmetic_type> operator/(const VectorSlice<R1>& v, const R2& s);
    
     
     template<class R> Vector<R> add_approx(const Vector<R>& u, const Vector<R>& v);
@@ -205,19 +205,19 @@ namespace Ariadne {
   template<class R> Vector<R> unit_vector(size_type n, size_type i);
 	
 	
-  template<class R> Vector<R> midpoint(const Vector< Numeric::Interval<R> >& iv); 
-  template<class T> Vector< Numeric::Float<T> > radius(const Vector< Numeric::Interval< Numeric::Float<T> > >& iv); 
+  template<class R> Vector<R> midpoint(const Vector< Interval<R> >& iv); 
+  template<class T> Vector< Float<T> > radius(const Vector< Interval< Float<T> > >& iv); 
 
-  template<class R> bool encloses(const Vector< Numeric::Interval<R> >& iv,const Vector<R>& v); 
-  template<class R> bool refines(const Vector< Numeric::Interval<R> >& iv1, const Vector< Numeric::Interval<R> >& iv2); 
+  template<class R> bool encloses(const Vector< Interval<R> >& iv,const Vector<R>& v); 
+  template<class R> bool refines(const Vector< Interval<R> >& iv1, const Vector< Interval<R> >& iv2); 
 
   template<class R> Vector<R> approximation(const Vector<R>& v);
-  template<class R> Vector<R> approximation(const Vector< Numeric::Interval<R> >& v);
+  template<class R> Vector<R> approximation(const Vector< Interval<R> >& v);
 
   template<class R1, class R2> bool operator==(const Vector<R1>& v1, const Vector<R2>& v2);
   template<class R1, class R2> bool operator!=(const Vector<R1>& v1, const Vector<R2>& v2);
   template<class R> bool operator==(const Vector<R>& v, int n);
-  template<class R> tribool operator>=(const Vector< Numeric::Interval<R> >& iv, int n);
+  template<class R> tribool operator>=(const Vector< Interval<R> >& iv, int n);
 
 
   template<class R> std::ostream& operator<<(std::ostream& os, const Vector<R>& v);
@@ -236,8 +236,10 @@ namespace Ariadne {
 
     template<class R> Vector<R> concatenate(const Vector<R>& v1, const Vector<R>& v2);
     template<class R> Vector<R> concatenate(const Vector<R>& v, const R& s);
-  }
-}
+
+
+} // namespace Ariadne
+
 
 #include "vector_slice.h"
 #include "vector.inline.h"

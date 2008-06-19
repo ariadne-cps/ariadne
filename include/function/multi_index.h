@@ -39,7 +39,6 @@
 #include "sorted_index.h"
 
 namespace Ariadne {
-  namespace Function {
     
     class SortedIndex;
     class PositionIndex;
@@ -202,9 +201,9 @@ namespace Ariadne {
     inline
     uint MultiIndex::number() const
     {
-      uint result=Numeric::fac(this->degree());
+      uint result=fac(this->degree());
       for(uint k=0; k!=this->number_of_variables(); ++k) {
-        result/=Numeric::fac((*this)[k]);
+        result/=fac((*this)[k]);
       }
       return result;
     }
@@ -214,7 +213,7 @@ namespace Ariadne {
     {
       uint result=1;
       for(uint k=0; k!=this->number_of_variables(); ++k) {
-        result*=Numeric::fac((*this)[k]);
+        result*=fac((*this)[k]);
       }
       return result;
     }
@@ -224,11 +223,11 @@ namespace Ariadne {
     {
       uint deg=this->degree()-1;
       uint nvar=this->number_of_variables();
-      uint result=Numeric::bin(deg+nvar,nvar);
+      uint result=bin(deg+nvar,nvar);
       for(uint k=0; k!=this->number_of_variables()-1; ++k) {
         --nvar;
         deg-=(*this)[k];
-        result+=Numeric::bin(deg+nvar,nvar);
+        result+=bin(deg+nvar,nvar);
       }
       return result;
     }
@@ -320,9 +319,9 @@ namespace Ariadne {
     uint 
     number(const MultiIndex& i)
     {
-      uint result=Numeric::fac(i.degree());
+      uint result=fac(i.degree());
       for(uint k=0; k!=i.number_of_variables(); ++k) {
-        result/=Numeric::fac(i[k]);
+        result/=fac(i[k]);
       }
       return result;
     }
@@ -333,7 +332,7 @@ namespace Ariadne {
     {
       uint result=1;
       for(uint k=0; k!=i.number_of_variables(); ++k) {
-        result*=Numeric::fac(i[k]);
+        result*=fac(i[k]);
       }
       return result;
     }
@@ -345,7 +344,7 @@ namespace Ariadne {
       assert(n.number_of_variables()==k.number_of_variables());
       uint result=1;
       for(uint i=0; i!=n.number_of_variables(); ++i) {
-        result*=Numeric::bin(n[i],k[i]);
+        result*=bin(n[i],k[i]);
       }
       return result;
     }
@@ -397,6 +396,7 @@ namespace Ariadne {
       return os << a._occurrences;
     }
     
-  }
-}
+  
+} // namespace Ariadne
+
 #endif /* ARIADNE_MULTI_INDEX_H */

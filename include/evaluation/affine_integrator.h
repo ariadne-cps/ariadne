@@ -36,22 +36,22 @@
 #include "system/affine_vector_field.h"
 
 namespace Ariadne {
-  namespace Evaluation {
+  
    
     /*! \brief Compute an over-approximation to \f$\sum_{n=0}^{\infty} \frac{x^n}{(k+n)!}\f$. */
     template<class R> R gexp_up(const R& x, uint k);
   
     /*! \brief Compute an interval approximation to \f$\sum_{n=0}^{\infty} \frac{(tA)^n}{(k+n)!}b\f$. */
     template<class R> 
-    LinearAlgebra::Vector< Numeric::Interval<R> > 
-    gexp(const LinearAlgebra::Matrix< Numeric::Interval<R> >& A, 
-         const LinearAlgebra::Vector< Numeric::Interval<R> >& b, 
-         const Numeric::Interval<R>& t, const uint& k);
+    Vector< Interval<R> > 
+    gexp(const Matrix< Interval<R> >& A, 
+         const Vector< Interval<R> >& b, 
+         const Interval<R>& t, const uint& k);
       
     /*! \brief Compute an interval approximation to \f$\sum_{n=0}^{\infty} \frac{(tA)^n}{(k+n)!}\f$. */
     template<class R> 
-    LinearAlgebra::Matrix< Numeric::Interval<R> > 
-    gexp(const LinearAlgebra::Matrix< Numeric::Interval<R> >& Ab, const Numeric::Interval<R>& t, const uint& k);
+    Matrix< Interval<R> > 
+    gexp(const Matrix< Interval<R> >& Ab, const Interval<R>& t, const uint& k);
       
     template<class BS> class AffineIntegrator;
     
@@ -61,85 +61,85 @@ namespace Ariadne {
      * The \f$C^1\f$-Affine algorithm is a Taylor method.
      */
     template<class R>
-    class AffineIntegrator< Geometry::Zonotope<R> >
-      : public IntegratorInterface< Geometry::Zonotope<R> >      
+    class AffineIntegrator< Zonotope<R> >
+      : public IntegratorInterface< Zonotope<R> >      
     {
-      typedef Numeric::Interval<R> I;
+      typedef Interval<R> I;
      public:
       /*! \brief Constructor. */
       AffineIntegrator();
 
       /*! \brief Cloning operator. */
-      virtual AffineIntegrator< Geometry::Zonotope<R> >* clone() const;
+      virtual AffineIntegrator< Zonotope<R> >* clone() const;
 
      public:
 
       /*! \brief Compute an integration time and a bounding box, given a bounding box for the intitial set, and a maximum allowable flow time. */
       virtual 
-      std::pair< Numeric::Rational, Geometry::Box<R> >
-      flow_bounds(const System::VectorField<R>& vector_field, 
-                  const Geometry::Zonotope<R>& initial_set,
-                  const Numeric::Rational& maximum_step_size) const; 
+      std::pair< Rational, Box<R> >
+      flow_bounds(const VectorField<R>& vector_field, 
+                  const Zonotope<R>& initial_set,
+                  const Rational& maximum_step_size) const; 
 
       /*! \brief Integrate a basic set for within a bounding set. */
-      virtual Geometry::Point<I> flow_step(const System::VectorField<R>& vector_field,
-                                           const Geometry::Point<I>& initial_point,
-                                           const Numeric::Rational& step_size,
-                                           const Geometry::Box<R>& bounding_set) const;
+      virtual Point<I> flow_step(const VectorField<R>& vector_field,
+                                           const Point<I>& initial_point,
+                                           const Rational& step_size,
+                                           const Box<R>& bounding_set) const;
      
       /*! \brief Integrate a basic set for within a bounding set. */
-      virtual LinearAlgebra::Matrix<I> flow_step_jacobian(const System::VectorField<R>& vector_field,
-                                                          const Geometry::Point<I>& initial_point,
-                                                          const Numeric::Rational& step_size,
-                                                          const Geometry::Box<R>& bounding_set) const;
+      virtual Matrix<I> flow_step_jacobian(const VectorField<R>& vector_field,
+                                                          const Point<I>& initial_point,
+                                                          const Rational& step_size,
+                                                          const Box<R>& bounding_set) const;
      
 
-      virtual Geometry::Zonotope<R> 
-      integration_step(const System::VectorField<R>& vector_field,
-                       const Geometry::Zonotope<R>& initial_set,
-                       const Numeric::Rational& step_size,
-                       const Geometry::Box<R>& bounding_set) const;
+      virtual Zonotope<R> 
+      integration_step(const VectorField<R>& vector_field,
+                       const Zonotope<R>& initial_set,
+                       const Rational& step_size,
+                       const Box<R>& bounding_set) const;
       
-      virtual Geometry::Zonotope<R> 
-      reachability_step(const System::VectorField<R>& affine_vector_field,
-                        const Geometry::Zonotope<R>& initial_set,
-                        const Numeric::Rational& step_size,
-                        const Geometry::Box<R>& bounding_set) const;
+      virtual Zonotope<R> 
+      reachability_step(const VectorField<R>& affine_vector_field,
+                        const Zonotope<R>& initial_set,
+                        const Rational& step_size,
+                        const Box<R>& bounding_set) const;
 
      public:
       /*! \brief Integrate \a initial point for time \a step_size. */
-      Geometry::Point<I> 
-      flow_step(const System::AffineVectorField<R>& affine_vector_field,
-                const Geometry::Point<I>& initial_point,
-                const Numeric::Rational& step_size) const;
+      Point<I> 
+      flow_step(const AffineVectorField<R>& affine_vector_field,
+                const Point<I>& initial_point,
+                const Rational& step_size) const;
 
       /*! \brief Comput the spacial Jacobian derivative at \a initial point for time \a step_size. */
-      LinearAlgebra::Matrix<I> 
-      flow_step_jacobian(const System::AffineVectorField<R>& vector_field,
-                         const Geometry::Point<I>& affine_initial_point,
-                         const Numeric::Rational& step_size) const;
+      Matrix<I> 
+      flow_step_jacobian(const AffineVectorField<R>& vector_field,
+                         const Point<I>& affine_initial_point,
+                         const Rational& step_size) const;
 
       /*! \brief A \f$C^\infty\f$ algorithm for integrating forward a zonotope for a time up to time \a step_size. */
-      Geometry::Zonotope<R> 
-      integration_step(const System::AffineVectorField<R>& affine_vector_field,
-                       const Geometry::Zonotope<R>& initial_set,
-                       const Numeric::Rational& step_size) const;
+      Zonotope<R> 
+      integration_step(const AffineVectorField<R>& affine_vector_field,
+                       const Zonotope<R>& initial_set,
+                       const Rational& step_size) const;
 
       /*! \brief A \f$C^\infty\f$ algorithm for integrating forward a zonotope for a time up to time \a step_size. */
-      Geometry::Zonotope<R> 
-      reachability_step(const System::AffineVectorField<R>& affine_vector_field,
-                        const Geometry::Zonotope<R>& initial_set,
-                        const Numeric::Rational& step_size) const;
+      Zonotope<R> 
+      reachability_step(const AffineVectorField<R>& affine_vector_field,
+                        const Zonotope<R>& initial_set,
+                        const Rational& step_size) const;
 
       /*! \brief Write to an output stream. */
       virtual std::ostream& write(std::ostream&) const;
 
      private:
-      const System::AffineVectorField<R>* cast(const System::VectorField<R>*) const;
+      const AffineVectorField<R>* cast(const VectorField<R>*) const;
     };
 
      
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_AFFINE_INTEGRATOR_H */

@@ -31,15 +31,15 @@
 
 namespace Ariadne {
 
-extern int Geometry::verbosity;
+extern int verbosity;
 
 /*! \param argument is a list of constraints (or generators).
  *  \param result is an output parameter storing a list of generators (or constraints).
  */  
 template<class R>
 void
-Geometry::ddconv(std::vector< LinearAlgebra::Vector<R> >&  result,
-                 const std::vector< LinearAlgebra::Vector<R> >&  argument)
+ddconv(std::vector< Vector<R> >&  result,
+                 const std::vector< Vector<R> >&  argument)
 {  
   assert(argument.size()>0);
 
@@ -51,29 +51,29 @@ Geometry::ddconv(std::vector< LinearAlgebra::Vector<R> >&  result,
   size_type number_of_lines;
 
   // 'constraints' is a list of vectors $a$ representing the constraint $a^Tx\geq 0$
-  const std::vector< LinearAlgebra::Vector<R> >& constraints=argument;
+  const std::vector< Vector<R> >& constraints=argument;
 
   // 'generators' is a list of vectors $r$ representing the ray $x=\lambda r, \lambda\geq0$
-  std::vector< LinearAlgebra::Vector<R> >& generators=result;
+  std::vector< Vector<R> >& generators=result;
   
 
   // temporary storage
-  std::vector< LinearAlgebra::Vector<R> > new_generators;
+  std::vector< Vector<R> > new_generators;
   
   // Constants
   R zero=0;
   
   //std::cout << "C=" << constraints << "\n\n";
   
-  LinearAlgebra::Vector<R> v(dimension);
-  LinearAlgebra::Vector<R> w(dimension);
+  Vector<R> v(dimension);
+  Vector<R> w(dimension);
   
   if(verbosity>1) { std::clog << "C=" << constraints << "\n"; }
 
   // Initialize 'lines' to include lines parallel to coordinate directions.
   number_of_lines=dimension;
   for(dimension_type i=0; i!=dimension; ++i) {
-    v=LinearAlgebra::Vector<R>::zero(dimension);
+    v=Vector<R>::zero(dimension);
     v(i)=1;
     generators.push_back(v);
   }
@@ -109,7 +109,7 @@ Geometry::ddconv(std::vector< LinearAlgebra::Vector<R> >&  result,
       if(verbosity > 5) { std::clog << "G=" << generators << " after pivot on " << imax << std::endl; }
 
       // Alias pivot element
-      LinearAlgebra::Vector<R>& p=generators[number_of_lines];
+      Vector<R>& p=generators[number_of_lines];
 
       // Ensure 'p' satisfies new constraint
       if(inner_product(constraints[k],p)<zero) {
@@ -133,7 +133,7 @@ Geometry::ddconv(std::vector< LinearAlgebra::Vector<R> >&  result,
     
     } else { // No pivot line found, so deal with new constraint normally
   
-      LinearAlgebra::Matrix<int> saturation_matrix(k+1,generators.size());
+      Matrix<int> saturation_matrix(k+1,generators.size());
       for(size_type i=0; i!=k+1; ++i) {
         for(size_type j=0; j!=generators.size(); ++j) {
           R dot=inner_product(constraints[i],generators[j]);
@@ -147,7 +147,7 @@ Geometry::ddconv(std::vector< LinearAlgebra::Vector<R> >&  result,
         }
       }
       if(verbosity>3) { std::clog << "S=" << saturation_matrix  << "\n"; }
-      //std::vector< LinearAlgebra::Vector<R> > generators;
+      //std::vector< Vector<R> > generators;
     
       size_type number_of_generators=generators.size();
       // Test number of generators satisfying new constraint
@@ -163,7 +163,7 @@ Geometry::ddconv(std::vector< LinearAlgebra::Vector<R> >&  result,
           ++number_saturated;
         }
       }
-      std::vector< LinearAlgebra::Vector<R> > new_generators;
+      std::vector< Vector<R> > new_generators;
       for(size_type j=0; j!=number_of_lines; ++j) {
         new_generators.push_back(generators[j]);
       }
@@ -208,7 +208,7 @@ Geometry::ddconv(std::vector< LinearAlgebra::Vector<R> >&  result,
   }
   
   uint unsatisfied_constraints=0;
-  LinearAlgebra::Matrix<int> saturation_matrix(constraints.size(),generators.size());
+  Matrix<int> saturation_matrix(constraints.size(),generators.size());
   for(size_type i=0; i!=constraints.size(); ++i) {
     for(size_type j=0; j!=generators.size(); ++j) {
       R dot=inner_product(constraints[i],generators[j]);

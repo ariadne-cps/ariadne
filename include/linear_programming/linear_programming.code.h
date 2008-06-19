@@ -33,25 +33,20 @@
 #include "base/stlio.h"
 
 namespace Ariadne {
-  namespace LinearProgramming {
+  
 
-    template<class R> void instantiate();
+template<class R> void instantiate();
 
-    template<class AP> tribool lpstp(uint, uint, const AP*, uint, uint, const AP*, uint, const AP*, uint, AP*, uint*, AP*, uint, uint, int);
-
-  }
-}
+template<class AP> tribool lpstp(uint, uint, const AP*, uint, uint, const AP*, uint, const AP*, uint, AP*, uint*, AP*, uint, uint, int);
 
 
-
-namespace Ariadne {
 
 template<class R>
 void
-LinearProgramming::instantiate()
+instantiate()
 {
-  LinearAlgebra::Matrix<R>* M=0;
-  LinearAlgebra::Vector<R>* v=0;
+  Matrix<R>* M=0;
+  Vector<R>* v=0;
   
   solve(*M,*v,*v);
   solve(*M,*v,*v,*v,*v);
@@ -63,7 +58,7 @@ LinearProgramming::instantiate()
 
 template<class R>
 R
-LinearProgramming::solve(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b, const LinearAlgebra::Vector<R>& c) 
+solve(const Matrix<R>& A, const Vector<R>& b, const Vector<R>& c) 
 {
   LinearProgram<R> lp(A,b,c);
   return lp.optimal_value();
@@ -72,8 +67,8 @@ LinearProgramming::solve(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra:
 
 template<class R>
 R
-LinearProgramming::solve(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b, const LinearAlgebra::Vector<R>& c,
-                         const LinearAlgebra::Vector<R>& l, const LinearAlgebra::Vector<R>& u) 
+solve(const Matrix<R>& A, const Vector<R>& b, const Vector<R>& c,
+                         const Vector<R>& l, const Vector<R>& u) 
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
@@ -82,9 +77,9 @@ LinearProgramming::solve(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra:
 
 template<class R>
 tribool
-LinearProgramming::feasible(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b) 
+feasible(const Matrix<R>& A, const Vector<R>& b) 
 {
-  LinearAlgebra::Vector<R> c(A.number_of_columns(),0);
+  Vector<R> c(A.number_of_columns(),0);
   LinearProgram<R> lp(A,b,c);
   return lp.is_feasible();
 }
@@ -92,12 +87,12 @@ LinearProgramming::feasible(const LinearAlgebra::Matrix<R>& A, const LinearAlgeb
 
 template<class R>
 tribool
-LinearProgramming::feasible(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& b,
-                            const LinearAlgebra::Vector<R>& l, const LinearAlgebra::Vector<R>& u) 
+feasible(const Matrix<R>& A, const Vector<R>& b,
+                            const Vector<R>& l, const Vector<R>& u) 
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
   /*
-  LinearAlgebra::Vector<R> c(A.number_of_columns(),0);
+  Vector<R> c(A.number_of_columns(),0);
   LinearProgram<R> lp(A,b,c);
   return lp.is_feasible();
   */
@@ -106,10 +101,10 @@ LinearProgramming::feasible(const LinearAlgebra::Matrix<R>& A, const LinearAlgeb
 
 template<class R>
 tribool
-LinearProgramming::dual_feasible(const LinearAlgebra::Matrix<R>& A, const LinearAlgebra::Vector<R>& c) 
+dual_feasible(const Matrix<R>& A, const Vector<R>& c) 
 {
   // The problem A'y<=c is feasible if and only if the problem min c'x st Ax=0; x>=0 has a negative solution
-  LinearAlgebra::Vector<R> b(A.number_of_rows(),0);
+  Vector<R> b(A.number_of_rows(),0);
   LinearProgram<R> lp(A,b,c);
   R d=lp.optimal_value();
   return (d<0);
@@ -120,7 +115,7 @@ LinearProgramming::dual_feasible(const LinearAlgebra::Matrix<R>& A, const Linear
 
 template<class AP>
 tribool 
-LinearProgramming::lpstp(uint m, uint n,
+lpstp(uint m, uint n,
                          const AP* Aptr, uint Arinc, uint Acinc,
                          const AP* bptr, uint binc,
                          const AP* cptr, uint cinc,
@@ -137,7 +132,7 @@ LinearProgramming::lpstp(uint m, uint n,
   //   d is a scalar
   //   pptr is a list of the m pivot variables
   //   B in an mxm-matrix giving the inverse of A restricted to the pivot variables
-
 }
+
 
 } // namespace Ariadne 

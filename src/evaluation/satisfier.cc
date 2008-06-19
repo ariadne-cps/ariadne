@@ -28,9 +28,9 @@
 #include "evaluation/standard_satisfier.h"
 
 namespace Ariadne {
-  namespace Evaluation {
-    using namespace Numeric;
-    using namespace Geometry;
+  
+    
+    
 
 #ifdef ENABLE_FLOAT64
     template class StandardSatisfier< Zonotope<Float64> >;
@@ -40,5 +40,5 @@ namespace Ariadne {
     template class StandardSatisfier< Zonotope<FloatMP> >;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

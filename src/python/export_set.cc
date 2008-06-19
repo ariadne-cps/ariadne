@@ -29,8 +29,6 @@
 #include "geometry/box.h"
 
 using namespace Ariadne;
-using namespace Ariadne::LinearAlgebra;
-using namespace Ariadne::Geometry;
 using namespace Ariadne::Python;
 
 #include <boost/python.hpp>

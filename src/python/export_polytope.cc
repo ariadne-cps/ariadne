@@ -32,9 +32,6 @@
 #include "geometry/polyhedron.h"
 
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::LinearAlgebra;
-using namespace Ariadne::Geometry;
 using namespace Ariadne::Python;
 
 #include <boost/python.hpp>
@@ -70,7 +67,7 @@ __repr__(const Polytope<X>& p)
 
 template<class R>  
 void
-read_polytope(Geometry::Polytope<R>& pltp, const boost::python::object& obj) 
+read_polytope(Polytope<R>& pltp, const boost::python::object& obj) 
 {
   Matrix<R> A;
   read_matrix(A,obj);

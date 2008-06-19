@@ -42,7 +42,7 @@
 #include "linear_algebra/matrix_expression.h"
 
 namespace Ariadne {
-  namespace LinearAlgebra {
+  
 
     class Slice;
     template<class R> class Matrix;
@@ -136,7 +136,6 @@ namespace Ariadne {
       return *this;
     }
 
-
       
     template<class R> inline std::ostream& operator<<(std::ostream& os, const MatrixSlice<R>& A) {
       return os << Matrix<R>(A); }
@@ -144,8 +143,6 @@ namespace Ariadne {
       return os << Matrix<R>(A); }
 
 
-
-  }
-}
+} // namespace Ariadne
 
 #endif /* ARIADNE_MATRIX_SLICE_H */

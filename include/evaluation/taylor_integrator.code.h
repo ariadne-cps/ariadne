@@ -56,40 +56,40 @@
 
 namespace Ariadne { 
 
-namespace Evaluation { static int& verbosity = integrator_verbosity; }
+ static int& verbosity = integrator_verbosity; }
 
 
 
 template<class R>
-Evaluation::TaylorIntegrator<R>*
-Evaluation::TaylorIntegrator<R>::clone() const
+TaylorIntegrator<R>*
+TaylorIntegrator<R>::clone() const
 {
   return new TaylorIntegrator<R>();
 }
 
 
 template<class R>
-Evaluation::TaylorIntegrator<R>::TaylorIntegrator()
+TaylorIntegrator<R>::TaylorIntegrator()
 {
 }
 
 
 
 template<class R>
-System::TaylorFlow<typename Evaluation::TaylorIntegrator<R>::I>
-Evaluation::TaylorIntegrator<R>::flow(const System::VectorField<R>& vector_field, 
-                                      const Geometry::Box<R>& bounding_box) const
+TaylorFlow<typename TaylorIntegrator<R>::I>
+TaylorIntegrator<R>::flow(const VectorField<R>& vector_field, 
+                                      const Box<R>& bounding_box) const
 {
 }
 
 
 
 template<class R>
-Geometry::Point<typename Evaluation::TaylorIntegrator<R>::I>
-Evaluation::TaylorIntegrator<R>::flow_step(const System::VectorField<R>& vector_field, 
-                                           const Geometry::Point<I>& initial_point, 
-                                           const Numeric::Interval<R>& step_size, 
-                                           const Geometry::Box<R>& bounding_box) const
+Point<typename TaylorIntegrator<R>::I>
+TaylorIntegrator<R>::flow_step(const VectorField<R>& vector_field, 
+                                           const Point<I>& initial_point, 
+                                           const Interval<R>& step_size, 
+                                           const Box<R>& bounding_box) const
 {
 }
 
@@ -97,21 +97,21 @@ Evaluation::TaylorIntegrator<R>::flow_step(const System::VectorField<R>& vector_
 
 
 template<class R>
-Geometry::Zonotope<typename Evaluation::TaylorIntegrator<R>::I>
-Evaluation::TaylorIntegrator<R>::integration_step(const System::VectorField<R>& vector_field, 
-                                                  const Geometry::Zonotope<I,I>& initial_set, 
-                                                  const Numeric::Interval<R>& step_size, 
-                                                  const Geometry::Box<R>& bounding_box) const
+Zonotope<typename TaylorIntegrator<R>::I>
+TaylorIntegrator<R>::integration_step(const VectorField<R>& vector_field, 
+                                                  const Zonotope<I,I>& initial_set, 
+                                                  const Interval<R>& step_size, 
+                                                  const Box<R>& bounding_box) const
 {
 }
 
 
 template<class R>
-Geometry::Zonotope<typename Evaluation::TaylorIntegrator<R>::I>
-Evaluation::TaylorIntegrator<R>::reachability_step(const System::VectorField<R>& vector_field, 
-                                                   const Geometry::Zonotope<I,I>& initial_set, 
-                                                   const Numeric::Interval<R>& step_size, 
-                                                   const Geometry::Box<R>& bounding_box) const
+Zonotope<typename TaylorIntegrator<R>::I>
+TaylorIntegrator<R>::reachability_step(const VectorField<R>& vector_field, 
+                                                   const Zonotope<I,I>& initial_set, 
+                                                   const Interval<R>& step_size, 
+                                                   const Box<R>& bounding_box) const
 {
 }
 
@@ -119,7 +119,7 @@ Evaluation::TaylorIntegrator<R>::reachability_step(const System::VectorField<R>&
 
 template<class R>
 std::ostream&
-Evaluation::TaylorIntegrator<R>::write(std::ostream& os) const
+TaylorIntegrator<R>::write(std::ostream& os) const
 {
   return os << "TaylorIntegrator( )";
 }

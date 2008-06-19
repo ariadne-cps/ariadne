@@ -26,15 +26,15 @@ namespace Ariadne {
 
 
 template<class R> inline
-Geometry::GridBlock<R>::GridBlock(const Grid<R>& g, const Combinatoric::LatticeBlock& lc)
+GridBlock<R>::GridBlock(const Grid<R>& g, const LatticeBlock& lc)
   : _grid(g), _lattice_set(lc)
 {
 }
 
 
 template<class R> inline
-const Geometry::Grid<R>& 
-Geometry::GridBlock<R>::grid() const 
+const Grid<R>& 
+GridBlock<R>::grid() const 
 {
   return this->_grid; 
 }
@@ -42,15 +42,15 @@ Geometry::GridBlock<R>::grid() const
 
 template<class R> inline
 dimension_type 
-Geometry::GridBlock<R>::dimension() const 
+GridBlock<R>::dimension() const 
 {
   return this->_lattice_set.dimension(); 
 }
 
 
 template<class R> inline
-const Combinatoric::LatticeBlock& 
-Geometry::GridBlock<R>::lattice_set() const 
+const LatticeBlock& 
+GridBlock<R>::lattice_set() const 
 {
   return this->_lattice_set; 
 }
@@ -58,7 +58,7 @@ Geometry::GridBlock<R>::lattice_set() const
 
 template<class R> inline
 tribool 
-Geometry::GridBlock<R>::empty() const 
+GridBlock<R>::empty() const 
 {
   return this->_lattice_set.empty(); 
 }
@@ -66,15 +66,15 @@ Geometry::GridBlock<R>::empty() const
 
 template<class R> inline
 tribool 
-Geometry::GridBlock<R>::bounded() const 
+GridBlock<R>::bounded() const 
 {
   return true; 
 }
 
 
 template<class R> inline
-Geometry::Box<R> 
-Geometry::GridBlock<R>::bounding_box() const 
+Box<R> 
+GridBlock<R>::bounding_box() const 
 {
   return *this; 
 }
@@ -82,16 +82,16 @@ Geometry::GridBlock<R>::bounding_box() const
 
 
 template<class R> inline
-typename Geometry::GridBlock<R>::const_iterator 
-Geometry::GridBlock<R>::begin() const 
+typename GridBlock<R>::const_iterator 
+GridBlock<R>::begin() const 
 {
   return const_iterator(this->_grid,_lattice_set.begin()); 
 }
 
 
 template<class R> inline
-typename Geometry::GridBlock<R>::const_iterator 
-Geometry::GridBlock<R>::end() const 
+typename GridBlock<R>::const_iterator 
+GridBlock<R>::end() const 
 {
   return const_iterator(this->_grid,_lattice_set.end()); 
 }
@@ -100,7 +100,7 @@ Geometry::GridBlock<R>::end() const
 
 template<class R> inline
 std::ostream&
-Geometry::operator<<(std::ostream& os, const GridBlock<R>& gb) {
+operator<<(std::ostream& os, const GridBlock<R>& gb) {
   return gb.write(os);
 }
 

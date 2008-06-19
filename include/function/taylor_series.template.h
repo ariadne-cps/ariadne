@@ -26,8 +26,8 @@ namespace Ariadne {
 
 
 template<class X> template<class XX>
-Function::TaylorSeries<X>
-Function::TaylorSeries<X>::constant(smoothness_type d, const XX& c)
+TaylorSeries<X>
+TaylorSeries<X>::constant(smoothness_type d, const XX& c)
 {
   TaylorSeries<X> result(d);
   result[0]=c;
@@ -36,8 +36,8 @@ Function::TaylorSeries<X>::constant(smoothness_type d, const XX& c)
 
 
 template<class X> template<class XX>
-Function::TaylorSeries<X>
-Function::TaylorSeries<X>::variable(smoothness_type d, const XX& c)
+TaylorSeries<X>
+TaylorSeries<X>::variable(smoothness_type d, const XX& c)
 {
   TaylorSeries<X> result(d);
   result[0]=c;

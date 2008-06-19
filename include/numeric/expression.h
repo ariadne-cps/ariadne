@@ -38,7 +38,7 @@
 #endif 
 
 namespace Ariadne {
-  namespace Numeric {
+  
     
     template<class X> class Scalar; 
     template<class E> class Expression; 
@@ -190,7 +190,7 @@ namespace Ariadne {
 
 
   }   
-}
+
   
 
 #endif /* ARIADNE_NUMERIC_EXPRESSION_H */

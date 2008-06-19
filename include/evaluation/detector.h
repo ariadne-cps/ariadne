@@ -39,7 +39,7 @@
 #include "evaluation/detector_interface.h"
 
 namespace Ariadne {
-  namespace Evaluation {
+  
 
     template<class R> class TimeModel;
 
@@ -50,7 +50,7 @@ namespace Ariadne {
     class Detector
       : public DetectorInterface<R>
     {
-      typedef Numeric::Interval<R> I;
+      typedef Interval<R> I;
      public:
       /*! \brief Virtual destructor. */
       virtual ~Detector();
@@ -66,65 +66,60 @@ namespace Ariadne {
 
       /*! \brief Test if a set entirely satisfies the constraint. */
       template<class BS>
-      tribool satisfies(const BS& bs, const Geometry::ConstraintInterface<R>& c) const;
+      tribool satisfies(const BS& bs, const ConstraintInterface<R>& c) const;
 
 
       /*! \brief Compute the value of a constraint over a rectangle. */
-      Numeric::Interval<R> value(const Geometry::ConstraintInterface<R>& c, 
-                                 const Geometry::Box<R>& r) const;
+      Interval<R> value(const ConstraintInterface<R>& c, 
+                                 const Box<R>& r) const;
 
       /*! \brief Compute the value of a constraint over a zonotope. */
-      Numeric::Interval<R> value(const Geometry::ConstraintInterface<R>& c, 
-                                 const Geometry::Zonotope<R>& z) const;
+      Interval<R> value(const ConstraintInterface<R>& c, 
+                                 const Zonotope<R>& z) const;
 
       /*! \brief Determine whether constraint \a c1 forces constraint \a c2 within \a dom.
        */
-      virtual tribool forces(const Geometry::ConstraintInterface<R>& c1,
-                             const Geometry::ConstraintInterface<R>& c2,
-                             const Geometry::Box<R>& dom) const;
+      virtual tribool forces(const ConstraintInterface<R>& c1,
+                             const ConstraintInterface<R>& c2,
+                             const Box<R>& dom) const;
 
       /*! \brief Compute the normal derivative to of the vector field \a vf to the constraint \a c at the point \a pt.
        */
-      virtual Numeric::Interval<R> normal_derivative(const System::VectorField<R>& vf, 
-                                                     const Geometry::ConstraintInterface<R>& c, 
-                                                     const Geometry::Point<I>& pt) const;
+      virtual Interval<R> normal_derivative(const VectorField<R>& vf, 
+                                                     const ConstraintInterface<R>& c, 
+                                                     const Point<I>& pt) const;
 
       /*! \brief Estimate the time needed for the point \a pt to reach constraint \a c under vector field \a vf,
        *  assuming that the flow remains in \a bb. 
        */
-      virtual Numeric::Interval<R> crossing_time(const System::VectorField<R>& vf, 
-                                                 const Geometry::ConstraintInterface<R>& c, 
-                                                 const Geometry::Point<I>& pt, 
-                                                 const Geometry::Box<R>& bb) const;
+      virtual Interval<R> crossing_time(const VectorField<R>& vf, 
+                                                 const ConstraintInterface<R>& c, 
+                                                 const Point<I>& pt, 
+                                                 const Box<R>& bb) const;
 
       /*! \brief Compute the time needed for points in the domain rectangle \a dom to reach constraint \a c under vector field \a vf,
        *  assuming that the flow remains in \a bb. The integrator \a i is used to integrate the flow.
        */
-      virtual Evaluation::TimeModel<R> crossing_time(const System::VectorField<R>& vf, 
-                                                     const Geometry::ConstraintInterface<R>& c, 
-                                                     const Geometry::Box<R>& dom, 
-                                                     const Geometry::Box<R>& bb) const;
+      virtual TimeModel<R> crossing_time(const VectorField<R>& vf, 
+                                                     const ConstraintInterface<R>& c, 
+                                                     const Box<R>& dom, 
+                                                     const Box<R>& bb) const;
 
     };
 
-  }
-}
 
-
-
-namespace Ariadne {
 
 template<class R> template<class BS> inline
 tribool 
-Evaluation::Detector<R>::satisfies(const BS& bs,
-                                   const Geometry::ConstraintInterface<R>& c) const
+Detector<R>::satisfies(const BS& bs,
+                                   const ConstraintInterface<R>& c) const
 {
-  Numeric::Interval<R> ivl=this->value(c,bs);
-  Geometry::Comparison cmp=c.comparison();
+  Interval<R> ivl=this->value(c,bs);
+  Comparison cmp=c.comparison();
   if(ivl.upper()<0) {
-    return (cmp==Geometry::less);
+    return (cmp==less);
   } else if(ivl.lower()>0) {
-    return (cmp==Geometry::greater);
+    return (cmp==greater);
   } else {
     return indeterminate;
   }

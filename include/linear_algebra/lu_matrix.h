@@ -44,7 +44,7 @@
 #include "linear_algebra/matrix.h"
 
 namespace Ariadne {
-  namespace LinearAlgebra {
+  
 
     /*! \ingroup LinearAlgebra
      *  \brief A matrix stored in LU product form, \f$PA=LU\f$. 
@@ -210,7 +210,7 @@ namespace Ariadne {
       return os << "LUMatrix( L=" << lu.L() << ", U=" << lu.U() << " )";
     }
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_LU_MATRIX_H */

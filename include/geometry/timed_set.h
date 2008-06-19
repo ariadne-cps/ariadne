@@ -25,7 +25,7 @@
 #define ARIADNE_TIMED_SET_H
 
 namespace Ariadne {  
-  namespace Geometry {
+  
 
     /*! \brief A (basic) set with an associated time value. */
     template<class T, class S> 
@@ -77,7 +77,7 @@ namespace Ariadne {
       return os << "{ " << ts.time() << " : " << ts.set() << " }";
     }
    
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_TIMED_SET_H */

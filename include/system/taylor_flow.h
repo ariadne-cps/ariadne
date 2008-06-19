@@ -41,7 +41,7 @@
 #include "system/flow_interface.h"
 
 namespace Ariadne {
-  namespace System {
+  
    
     /*! \brief Flows defined by Taylor series 
      *  \ingroup Integrate
@@ -50,14 +50,14 @@ namespace Ariadne {
     class TaylorFlow
       : public FlowInterface<R>
     {
-      typedef Numeric::Interval<R> I;
+      typedef Interval<R> I;
      public:
-      TaylorFlow(const Function::TaylorSeries< Function::AffineDerivative<I> >&);
-      virtual Geometry::Point<I> evaluate(const I& t, const Geometry::Point<I>& x);
-      virtual LinearAlgebra::Vector<I> tangent(const I& t, const Geometry::Point<I>& pt);
-      virtual LinearAlgebra::Matrix<I> jacobian(const I& t, const Geometry::Point<I>& pt);
+      TaylorFlow(const TaylorSeries< AffineDerivative<I> >&);
+      virtual Point<I> evaluate(const I& t, const Point<I>& x);
+      virtual Vector<I> tangent(const I& t, const Point<I>& pt);
+      virtual Matrix<I> jacobian(const I& t, const Point<I>& pt);
      private:
-      Function::TaylorSeries< Function::AffineVariable<I> > _data;
+      TaylorSeries< AffineVariable<I> > _data;
     };
     
   }

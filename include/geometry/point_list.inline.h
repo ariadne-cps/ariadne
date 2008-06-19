@@ -24,7 +24,7 @@
 #include "base/iterator.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
     template<class X>
     class PointListIterator
@@ -60,46 +60,41 @@ namespace Ariadne {
       size_type _j;
     };
     
-   } // namespace Geometry
-} // namespace Ariadne
 
-
-
-namespace Ariadne {
 
 template<class X> inline
-Geometry::PointList<X>::PointList(dimension_type d)
+PointList<X>::PointList(dimension_type d)
   : _size(0), _pts(d+1,1) 
 { 
 }
 
 template<class X> inline
-Geometry::PointList<X>::PointList(dimension_type d, size_type n)
+PointList<X>::PointList(dimension_type d, size_type n)
   : _size(n), _pts(d+1,n) 
 { 
 }
 
 template<class X> inline
-Geometry::PointList<X>::PointList(const LinearAlgebra::Matrix<X>& G)
+PointList<X>::PointList(const Matrix<X>& G)
   : _size(G.number_of_columns()), _pts(G) 
 { 
 }
 
 template<class X> template<class XX> inline
-Geometry::PointList<X>::PointList(const PointList<XX>& ptl)
+PointList<X>::PointList(const PointList<XX>& ptl)
   : _size(ptl.size()), _pts(ptl.generators()) 
 { 
 }
 
 template<class X> inline
-Geometry::PointList<X>::PointList(const PointList<X>& ptl)
+PointList<X>::PointList(const PointList<X>& ptl)
   : _size(ptl._size), _pts(ptl.generators()) 
 { 
 }
 
 template<class X> inline
-Geometry::PointList<X>& 
-Geometry::PointList<X>::operator=(const PointList<X>& ptl)
+PointList<X>& 
+PointList<X>::operator=(const PointList<X>& ptl)
 {
   if(this!=&ptl) { 
     this->_size=ptl.size(); 
@@ -110,29 +105,29 @@ Geometry::PointList<X>::operator=(const PointList<X>& ptl)
 
 template<class X> inline
 dimension_type 
-Geometry::PointList<X>::dimension() const
+PointList<X>::dimension() const
 {
   return _pts.number_of_rows()-1; 
 }
 
 template<class X> inline
 size_type 
-Geometry::PointList<X>::size() const
+PointList<X>::size() const
 {
   return _size; 
 }
 
 template<class X> inline
 size_type 
-Geometry::PointList<X>::capacity() const
+PointList<X>::capacity() const
 {
   return _pts.number_of_columns(); 
 }
 
 
 template<class X> inline
-Geometry::Point<X> 
-Geometry::PointList<X>::operator[] (const size_type j) const
+Point<X> 
+PointList<X>::operator[] (const size_type j) const
 {
   Point<X> result(this->dimension());
   for(size_type i=0; i!=this->dimension(); ++i) {
@@ -142,8 +137,8 @@ Geometry::PointList<X>::operator[] (const size_type j) const
 }
 
 template<class X> inline
-Geometry::PointListReference<X>  
-Geometry::PointList<X>::operator[](const size_type j)
+PointListReference<X>  
+PointList<X>::operator[](const size_type j)
 { 
   return PointListReference<X>(*this,j);
 }
@@ -151,35 +146,35 @@ Geometry::PointList<X>::operator[](const size_type j)
 
 template<class X> inline
 void 
-Geometry::PointList<X>::pop_back()
+PointList<X>::pop_back()
 {
   --this->_size; 
 }
 
 template<class X> inline
 void 
-Geometry::PointList<X>::adjoin(const Point<X>& pt)
+PointList<X>::adjoin(const Point<X>& pt)
 {
   this->push_back(pt); 
 }
 template<class X> inline
 void 
-Geometry::PointList<X>::clear()
+PointList<X>::clear()
 {
   this->_size=0; 
 }
 
 
 template<class X> inline
-typename Geometry::PointList<X>::const_iterator 
-Geometry::PointList<X>::begin() const
+typename PointList<X>::const_iterator 
+PointList<X>::begin() const
 {
   return const_iterator(this,0); 
 }
 
 template<class X> inline
-typename Geometry::PointList<X>::const_iterator 
-Geometry::PointList<X>::end() const
+typename PointList<X>::const_iterator 
+PointList<X>::end() const
 {
   return const_iterator(this,this->_size); 
 }
@@ -188,21 +183,21 @@ Geometry::PointList<X>::end() const
 
 template<class X> inline
 void 
-Geometry::PointList<X>::_set(size_type j, dimension_type i,const X& x)
+PointList<X>::_set(size_type j, dimension_type i,const X& x)
 {
   _pts(i,j)=x; 
 }
 
 template<class X> inline
-Geometry::Point<X> 
-Geometry::PointList<X>::_get(size_type j) const
+Point<X> 
+PointList<X>::_get(size_type j) const
 {
   return Point<X>(_pts.column(j)); 
 }
 
 template<class X> inline
 X 
-Geometry::PointList<X>::_get(size_type j, dimension_type i) const 
+PointList<X>::_get(size_type j, dimension_type i) const 
 {
   return _pts(i,j); 
 }
@@ -211,7 +206,7 @@ Geometry::PointList<X>::_get(size_type j, dimension_type i) const
 
 template<class X> inline
 std::ostream& 
-Geometry::operator<<(std::ostream& os, const PointList<X>& pts)
+operator<<(std::ostream& os, const PointList<X>& pts)
 {
   return pts.write(os);
 }

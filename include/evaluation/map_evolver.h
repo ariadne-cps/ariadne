@@ -49,22 +49,22 @@
 #include "evaluation/evolution_parameters.h"
 
 namespace Ariadne {
-  namespace Evaluation {
+  
   
     /*! \ingroup Evolvers
      *  \brief A class for evolving a discrete-time dynamical system.
      */
     template<class ES> 
     class MapEvolver
-      : public EvolverBase< System::Map<typename ES::real_type>, ES>
+      : public EvolverBase< Map<typename ES::real_type>, ES>
     {
       typedef typename ES::real_type R;
-      typedef System::Map<R> Sys;
+      typedef Map<R> Sys;
       typedef typename Sys::time_type T;
 
-      typedef Geometry::ListSet<ES> ESL;
-      typedef Geometry::TimedSet<T,ES> TES;
-      typedef Geometry::ListSet<TES> TESL;
+      typedef ListSet<ES> ESL;
+      typedef TimedSet<T,ES> TES;
+      typedef ListSet<TES> TESL;
       typedef Sys Mp;
      public:
       MapEvolver(const EvolutionParameters<R>&,const ApplicatorInterface<ES>&, const SubdividerInterface<ES>&, const ReducerInterface<ES>&);
@@ -108,8 +108,8 @@ namespace Ariadne {
 
 
 
-  }
-}
+  
+} // namespace Ariadne
 
 
 

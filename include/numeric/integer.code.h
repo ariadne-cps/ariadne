@@ -26,17 +26,17 @@
 
 namespace Ariadne {
 
-Numeric::Integer::Integer(const std::string& str) {
+Integer::Integer(const std::string& str) {
   mpz_init(_value); std::stringstream ss(str); ss>>*this; }
 
 std::ostream& 
-Numeric::operator<<(std::ostream& os, const Integer& n)
+operator<<(std::ostream& os, const Integer& n)
 {
   return os << n._value;
 }
 
 std::istream& 
-Numeric::operator>>(std::istream& is, Integer& n) 
+operator>>(std::istream& is, Integer& n) 
 {
   return is >> n._value;
 }

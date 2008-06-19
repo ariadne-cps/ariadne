@@ -28,9 +28,9 @@
 #include "evaluation/model_checker.code.h"
 
 namespace Ariadne {
-  namespace Evaluation {
-    using namespace Numeric;
-    using namespace Geometry;
+  
+    
+    
 
 #ifdef ENABLE_FLOAT64
     template class ModelChecker< Integer, GridApproximationScheme<Float64> >;
@@ -42,5 +42,5 @@ namespace Ariadne {
     template class ModelChecker< Rational, GridApproximationScheme<FloatMP> >;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

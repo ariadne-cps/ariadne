@@ -35,20 +35,20 @@
 #include "numeric/float64.h" 
 namespace Ariadne { 
   namespace Python { 
-    typedef Numeric::Float64 FloatPy; 
-    typedef Numeric::Interval<FloatPy> IntervalPy;
-  } 
-}
+    typedef Float64 FloatPy; 
+    typedef Interval<FloatPy> IntervalPy;
+  } // namespace Python 
+} // namespace Ariadne
 
 #elif defined PYTHON_FLOATMP
 
 #include "numeric/floatmp.h" 
 namespace Ariadne { 
   namespace Python { 
-    typedef Numeric::FloatMP FloatPy; 
-    typedef Numeric::Interval<FloatPy> IntervalPy;
-  } 
-}
+    typedef FloatMP FloatPy; 
+    typedef Interval<FloatPy> IntervalPy;
+  }  // namespace Python
+} // namespace Ariadne
 
 #else
 

@@ -51,13 +51,6 @@
 static const int verbosity = 0;
 
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::LinearAlgebra;
-using namespace Ariadne::Combinatoric;
-using namespace Ariadne::Geometry;
-using namespace Ariadne::System;
-using namespace Ariadne::Evaluation;
-using namespace Ariadne::Output;
 using namespace std;
 
 static const DiscreteState mode1_id(1);
@@ -103,12 +96,12 @@ construct_automaton()
     AffineVectorField<R> dynamic2(Matrix<R>("[0,0; 0,0]"),Vector<R>("[0.75,1]"));
 
     AffineMap<R> reset312(Matrix<R>("[0,1;-1,0]"),Vector<R>("[-2,3]"));
-    LinearConstraint<R> guard312(Vector<R>("[1,0]"),Geometry::less,R(2));
+    LinearConstraint<R> guard312(Vector<R>("[1,0]"),less,R(2));
     AffineMap<R> reset412(Matrix<R>("[0,1;-1,0]"),Vector<R>("[-2,1]"));
-    LinearConstraint<R> guard412(Vector<R>("[0,-1]"),Geometry::less,R(2));
+    LinearConstraint<R> guard412(Vector<R>("[0,-1]"),less,R(2));
     AffineMap<R> reset512(Matrix<R>("[1,0;0,1]"),Vector<R>("[0,-3]"));
-    LinearConstraint<R> activation512(Vector<R>("[0,1]"),Geometry::less,R(2));
-    LinearConstraint<R> invariant61(Vector<R>("[0,1]"),Geometry::less,R(2.5));
+    LinearConstraint<R> activation512(Vector<R>("[0,1]"),less,R(2));
+    LinearConstraint<R> invariant61(Vector<R>("[0,1]"),less,R(2.5));
     
     ConstraintBasedHybridAutomaton<R> automaton("");
 

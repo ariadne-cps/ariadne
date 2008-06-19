@@ -37,11 +37,6 @@
 
 
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::LinearAlgebra;
-using namespace Ariadne::Geometry;
-using namespace Ariadne::System;
-using namespace Ariadne::Evaluation;
 using namespace Ariadne::Python;
 
 #include <boost/python.hpp>
@@ -64,7 +59,7 @@ class IntegratorWrapper
   : public IntegratorInterface<BS>,
     public wrapper< IntegratorInterface<BS> >
 {
-  typedef Numeric::Rational T;
+  typedef Rational T;
   typedef typename BS::real_type R;
   typedef Interval<R> I;
  public:

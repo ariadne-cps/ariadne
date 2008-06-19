@@ -31,17 +31,17 @@
 #include "exceptions.h"
 
 namespace Ariadne {
-  namespace LinearProgramming {
+  
     
     // Returns the index of the permuation list pptr of size sz with requested value
     int getindex(uint* pptr, uint sz, uint value);
       
 
     template<class R>
-    LinearAlgebra::Matrix<R> 
-    to_tableau(const LinearAlgebra::Matrix<R>& A, 
-               const LinearAlgebra::Vector<R>& b, 
-               const LinearAlgebra::Vector<R>& c);
+    Matrix<R> 
+    to_tableau(const Matrix<R>& A, 
+               const Vector<R>& b, 
+               const Vector<R>& c);
 
 
     // Modify the tableau
@@ -58,7 +58,6 @@ namespace Ariadne {
 
 
     
-  } // namespace LinearProgramming
 } // namespace Ariadne
 
 #include "lputil.inline.h"

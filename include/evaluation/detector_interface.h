@@ -38,7 +38,7 @@
 #include "evaluation/time_model.h"
 
 namespace Ariadne {
-  namespace Evaluation {
+  
 
    
     /*! \ingroup EvaluatorInterfaces \ingroup Solvers
@@ -47,8 +47,8 @@ namespace Ariadne {
     template<class R>
     class DetectorInterface 
     {
-      typedef Numeric::Interval<R> I;
-      typedef typename Geometry::Box<R> BS;
+      typedef Interval<R> I;
+      typedef Box<R> BS;
      public:
       /*! \brief Virtual destructor. */
       virtual ~DetectorInterface() { };
@@ -57,36 +57,36 @@ namespace Ariadne {
       virtual DetectorInterface<R>* clone() const = 0;
 
       /*! \brief Compute the value of a constraint over a set. */
-      virtual Numeric::Interval<R> value(const Geometry::ConstraintInterface<R>& c, 
-                                         const Geometry::Box<R>& r) const = 0;
+      virtual Interval<R> value(const ConstraintInterface<R>& c, 
+                                         const Box<R>& r) const = 0;
 
       /*! \brief Determine whether constraint \a c1 forces constraint \a c2 within \a dom.
        */
-      virtual tribool forces(const Geometry::ConstraintInterface<R>& c1,
-                             const Geometry::ConstraintInterface<R>& c2,
-                             const Geometry::Box<R>& dom) const = 0;
+      virtual tribool forces(const ConstraintInterface<R>& c1,
+                             const ConstraintInterface<R>& c2,
+                             const Box<R>& dom) const = 0;
 
       /*! \brief Compute the normal derivative to of the vector field \a vf to the constraint \a c at the point \a pt.
        */
-      virtual Numeric::Interval<R> normal_derivative(const System::VectorField<R>& vf, 
-                                                     const Geometry::ConstraintInterface<R>& c, 
-                                                     const Geometry::Point<I>& pt) const = 0;
+      virtual Interval<R> normal_derivative(const VectorField<R>& vf, 
+                                                     const ConstraintInterface<R>& c, 
+                                                     const Point<I>& pt) const = 0;
 
       /*! \brief Estimate the time needed to cross a constraint. */
-      virtual Numeric::Interval<R> crossing_time(const System::VectorField<R>& vf, 
-                                                 const Geometry::ConstraintInterface<R>& c, 
-                                                 const Geometry::Point<I>& pt, 
-                                                 const Geometry::Box<R>& b) const = 0;
+      virtual Interval<R> crossing_time(const VectorField<R>& vf, 
+                                                 const ConstraintInterface<R>& c, 
+                                                 const Point<I>& pt, 
+                                                 const Box<R>& b) const = 0;
 
       /*! \brief Compute the value of the crossing time over a set. */
-      virtual Evaluation::TimeModel<R> crossing_time(const System::VectorField<R>& vf, 
-                                                     const Geometry::ConstraintInterface<R>& c, 
-                                                     const Geometry::Box<R>& d, 
-                                                     const Geometry::Box<R>& b) const = 0;
+      virtual TimeModel<R> crossing_time(const VectorField<R>& vf, 
+                                                     const ConstraintInterface<R>& c, 
+                                                     const Box<R>& d, 
+                                                     const Box<R>& b) const = 0;
 
     };
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_DETECTOR_INTERFACE_H */

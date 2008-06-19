@@ -44,7 +44,7 @@
 #include "evaluation/discretiser.h"
 
 namespace Ariadne {
-  namespace System {
+  
 
     /*! \ingroup NumericalSystem
      * \brief A numerical discretisation of a dynamic system, exposing reach and evolve interfaces to an approximation scheme.
@@ -79,17 +79,17 @@ namespace Ariadne {
      public:
       /*! \brief Construct from a system, an evolver and an approximator. */
       template<class ES> TransitionSystem(const Sys& system, 
-                                          const Evaluation::EvolutionParameters<R>& parameters, 
-                                          const Evaluation::EvolverInterface<Sys,ES>& evolver, 
-                                          const Evaluation::ApproximatorInterface<Aprx,ES>& approximator)
-        : _system(system.clone()), _discretiser(new Evaluation::Discretiser<Sys,Aprx,ES>(parameters,evolver,approximator)) { }
+                                          const EvolutionParameters<R>& parameters, 
+                                          const EvolverInterface<Sys,ES>& evolver, 
+                                          const ApproximatorInterface<Aprx,ES>& approximator)
+        : _system(system.clone()), _discretiser(new Discretiser<Sys,Aprx,ES>(parameters,evolver,approximator)) { }
 
       /*! \brief Construct from a system and an evolution algorithm. */
-      TransitionSystem(const Sys& system, const Evaluation::DiscretiserInterface<Sys,Aprx>& discretiser)
+      TransitionSystem(const Sys& system, const DiscretiserInterface<Sys,Aprx>& discretiser)
         : _system(system.clone()), _discretiser(discretiser.clone()) { }
 
       /*! \brief Construct from a system and an evolution algorithm. */
-      TransitionSystem(shared_ptr<Sys> system_ptr, const Evaluation::DiscretiserInterface<Sys,Aprx>& discretiser)
+      TransitionSystem(shared_ptr<Sys> system_ptr, const DiscretiserInterface<Sys,Aprx>& discretiser)
         : _system(system_ptr), _discretiser(discretiser.clone()) { }
 
       /*! \brief Cloning operator. */
@@ -115,7 +115,7 @@ namespace Ariadne {
       virtual std::pair<PartitionListSet,PartitionListSet> upper_reach_evolve(const BasicSet& s, const T& t) const { return _discretiser->upper_reach_evolve(this->system(),s,t); }
      private:
       boost::shared_ptr< Sys > _system;
-      boost::shared_ptr< Evaluation::DiscretiserInterface<Sys,Aprx> > _discretiser;
+      boost::shared_ptr< DiscretiserInterface<Sys,Aprx> > _discretiser;
     };
 
 
@@ -151,21 +151,21 @@ namespace Ariadne {
 
       /*! \brief Construct from a system, an evolution algorithm and an approximation scheme. */
       template<class Sys> TransitionSystem(const Sys& system, 
-                                           const Evaluation::EvolutionParameters<R>& parameters, 
-                                           const Evaluation::EvolverInterface<Sys,ES>& evolver,
-                                           const Evaluation::ApproximatorInterface<Aprx,ES>& approximator)
+                                           const EvolutionParameters<R>& parameters, 
+                                           const EvolverInterface<Sys,ES>& evolver,
+                                           const ApproximatorInterface<Aprx,ES>& approximator)
         : _system(new NumericalSystem<T,ES>(system,evolver)), 
-          _discretiser(new Evaluation::Discretiser<NSys,Aprx,ES>(parameters,approximator)) { }
+          _discretiser(new Discretiser<NSys,Aprx,ES>(parameters,approximator)) { }
 
       /*! \brief Construct from a numerical system and an approximation scheme. */
       TransitionSystem(const NumericalSystem<T,ES>& system, 
-                       const Evaluation::EvolutionParameters<R>& parameters, 
-                       const Evaluation::ApproximatorInterface<Aprx,ES>& approximator)
-        : _system(system.clone()), _discretiser(new Evaluation::Discretiser<NSys,Aprx,ES>(parameters,approximator)) { }
+                       const EvolutionParameters<R>& parameters, 
+                       const ApproximatorInterface<Aprx,ES>& approximator)
+        : _system(system.clone()), _discretiser(new Discretiser<NSys,Aprx,ES>(parameters,approximator)) { }
 
       /*! \brief Construct from a numerical system and a discretisation algorithm. */
       TransitionSystem(const NumericalSystem<T,ES>& system, 
-                       const Evaluation::Discretiser<NSys,Aprx,ES>& discretiser)
+                       const Discretiser<NSys,Aprx,ES>& discretiser)
         : _system(system.clone()), _discretiser(discretiser.clone()) { }
 
       /*! \brief Cloning operator. */
@@ -196,12 +196,12 @@ namespace Ariadne {
         return this->_discretiser->upper_reach_evolve(*this->_system,s,t); }
      private:
       boost::shared_ptr< NSys > _system;
-      boost::shared_ptr< Evaluation::DiscretiserInterface<NSys,Aprx> > _discretiser;
+      boost::shared_ptr< DiscretiserInterface<NSys,Aprx> > _discretiser;
     };
 
 
-  }
-}
+  
+} // namespace Ariadne
 
 
 

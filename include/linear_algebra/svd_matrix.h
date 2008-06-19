@@ -37,7 +37,7 @@
 #include "linear_algebra/matrix.h"
 
 namespace Ariadne {
-  namespace LinearAlgebra {
+  
 
     /*! \ingroup LinearAlgebra
      *  \brief A matrix stored in SVD product form. 
@@ -136,7 +136,7 @@ namespace Ariadne {
       return result; 
     }
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_SVD_MATRIX_H */

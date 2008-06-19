@@ -30,9 +30,9 @@
 #include "evaluation/affine_applicator.code.h"
 
 namespace Ariadne {
-  namespace Evaluation {
-    using namespace Numeric;
-    using namespace Geometry;
+  
+    
+    
 
 #ifdef ENABLE_FLOAT64
   template class AffineApplicator< Zonotope<Float64> >;
@@ -42,5 +42,5 @@ namespace Ariadne {
     template class AffineApplicator< Zonotope<FloatMP> >;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

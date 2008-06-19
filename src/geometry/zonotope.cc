@@ -29,9 +29,9 @@
 #include "geometry/zonotope.code.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
 
-    using namespace Numeric;
+    
     
     template class Zonotope<Rational>;
 
@@ -43,5 +43,5 @@ namespace Ariadne {
     template class Zonotope<FloatMP>;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

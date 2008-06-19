@@ -34,7 +34,7 @@
 #include "geometry/declarations.h"
 
 namespace Ariadne {
-  namespace Evaluation {
+  
 
     /*! \brief Profiler for evolution classes.
      */
@@ -43,8 +43,8 @@ namespace Ariadne {
       size_type subdivisions;
       size_type transitions;
       size_type time_steps;
-      Numeric::Rational total_stepping_time;
-      Numeric::Rational minimum_time_step;
+      Rational total_stepping_time;
+      Rational minimum_time_step;
      public:
       EvolutionProfiler() { this->reset(); }
       void reset() { subdivisions=0; transitions=0; time_steps=0; total_stepping_time=0; minimum_time_step=1; }
@@ -54,12 +54,12 @@ namespace Ariadne {
       return os << "subdivisions=" << p.subdivisions
                 << ", transitions=" << p.transitions
                 << ", time_steps=" << p.time_steps
-                << ", average_time_steps=" << Numeric::Rational(p.total_stepping_time/Numeric::Integer(p.time_steps)).get_d()
+                << ", average_time_steps=" << Rational(p.total_stepping_time/Integer(p.time_steps)).get_d()
                 << ", minimum_time_step=" << p.minimum_time_step.get_d()
                 << "\n";
     }
 
-  }
-}
+  
+} // namespace Ariadne
 
 #endif /* ARIADNE_EVOLUTION_PROFILE_H */

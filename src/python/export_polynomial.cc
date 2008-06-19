@@ -39,7 +39,7 @@ using namespace boost::python;
 template<class R>
 void export_polynomial() 
 {
-  typedef typename Numeric::traits<R>::arithmetic_type A;
+  typedef typename traits<R>::arithmetic_type A;
 
   class_< Polynomial<R> >("Polynomial",init<>())
     .def(init< Polynomial<R> >())

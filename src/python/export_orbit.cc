@@ -30,9 +30,6 @@
 #include "output/epsstream.h"
 
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::Geometry;
-
 using namespace Ariadne::Python;
 
 #include <boost/python.hpp>
@@ -54,7 +51,7 @@ template<class R>
 void export_orbit() 
 {
   typedef Zonotope<R> ZBS;
-  class_< Orbit<Numeric::Integer,ZBS>, boost::noncopyable > orbit_class("Orbit",init<>());
+  class_< Orbit<Integer,ZBS>, boost::noncopyable > orbit_class("Orbit",init<>());
   orbit_class.def(self_ns::str(self));
 }
 

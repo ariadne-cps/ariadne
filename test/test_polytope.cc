@@ -41,10 +41,6 @@
 #include "test.h"
 
 using namespace Ariadne;
-using namespace Ariadne::Numeric;
-using namespace Ariadne::LinearAlgebra;
-using namespace Ariadne::Geometry;
-using namespace Ariadne::Output;
 using namespace std;
 
 template<class R> int test_polytope();
@@ -62,7 +58,7 @@ template<class R>
 int 
 test_polytope() 
 {
-  cout << "test_polytope<" << Numeric::name<R>() << ">" << endl;
+  cout << "test_polytope<" << name<R>() << ">" << endl;
   Point<R> pt1("(1.0,0.875)");
   Point<R> pt2("(1.375,0.5)");
   Point<R> pt3("(1.50,1.25)");
@@ -161,7 +157,7 @@ test_polytope<Rational>()
 {
   typedef Rational R;
   
-  cout << "test_polytope<" << Numeric::name<R>() << ">" << endl;
+  cout << "test_polytope<" << name<R>() << ">" << endl;
   Point<R> s1("(1,7/8)");
   Point<R> s2("(11/8,1/2)");
   Point<R> s3("(3/2,5/4)");

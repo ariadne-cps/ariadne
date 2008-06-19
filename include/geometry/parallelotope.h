@@ -41,7 +41,7 @@
 #include "geometry/zonotope.h"
 
 namespace Ariadne {
-  namespace Geometry {
+  
  
     class basic_set_tag;
 
@@ -65,9 +65,9 @@ namespace Ariadne {
     class Parallelotope
       : public Zonotope<XC,XG> {
      private:
-      typedef typename Numeric::traits<XC>::number_type R;
-      typedef typename Numeric::traits<R>::arithmetic_type F;
-      typedef typename Numeric::traits<R>::interval_type I;
+      typedef typename traits<XC>::number_type R;
+      typedef typename traits<R>::arithmetic_type F;
+      typedef typename traits<R>::interval_type I;
      public:
       /*! \brief The real number type. */
       typedef R real_type;
@@ -80,7 +80,7 @@ namespace Ariadne {
       explicit Parallelotope(dimension_type n=0);
       
       /*! \brief Construct from centre and directions. */
-      template<class RC,class RG> explicit Parallelotope(const Point<RC>& c, const LinearAlgebra::Matrix<RG>& m);
+      template<class RC,class RG> explicit Parallelotope(const Point<RC>& c, const Matrix<RG>& m);
        
       /*! \brief Construct from a rectangle. */
       template<class RR> explicit Parallelotope(const Box<RR>& r);
@@ -123,12 +123,12 @@ namespace Ariadne {
      private:
       static tribool _instantiate();
      private:
-      static LinearAlgebra::Matrix<R> compute_generators(const Box<R>& r);
-      static void compute_linear_inequalities(LinearAlgebra::Matrix<R>&, LinearAlgebra::Vector<R>&, LinearAlgebra::Vector<R>&);
-      LinearAlgebra::Vector<F> coordinates(const Point<R>& s) const;
+      static Matrix<R> compute_generators(const Box<R>& r);
+      static void compute_linear_inequalities(Matrix<R>&, Vector<R>&, Vector<R>&);
+      Vector<F> coordinates(const Point<R>& s) const;
       void _compute_generators_inverse() const;
      private:
-      mutable LinearAlgebra::Matrix<F> _generators_inverse;
+      mutable Matrix<F> _generators_inverse;
     };
     
 
@@ -138,11 +138,11 @@ namespace Ariadne {
     
     /*! \brief Computes an over approximation from an interval parallelotope. */
     template<class R> 
-    Parallelotope<R,R> over_approximation(const Parallelotope< Numeric::Interval<R>, R >& p);
+    Parallelotope<R,R> over_approximation(const Parallelotope< Interval<R>, R >& p);
     
     /*! \brief Computes an over approximation from an interval parallelotope. */
     template<class R> 
-    Parallelotope<Numeric::Interval<R>,R> over_approximation(const Parallelotope< Numeric::Interval<R>, Numeric::Interval<R> >& p);
+    Parallelotope<Interval<R>,R> over_approximation(const Parallelotope< Interval<R>, Interval<R> >& p);
     
     /*! \brief Computes an over approximation from a zonotope using a qr factorization. */
     template<class R> 
@@ -150,11 +150,11 @@ namespace Ariadne {
     
     /*! \brief Computes an over approximation from an uniform error zonotope using a qr factorization. */
     template<class R> 
-    Parallelotope<Numeric::Interval<R>,R> orthogonal_over_approximation(const Zonotope<Numeric::Interval<R>,R>& ez);
+    Parallelotope<Interval<R>,R> orthogonal_over_approximation(const Zonotope<Interval<R>,R>& ez);
     
     /*! \brief Computes an over approximation from an interval zonotope using a qr factorization. */
     template<class R> 
-    Parallelotope< Numeric::Interval<R> > orthogonal_over_approximation(const Zonotope< Numeric::Interval<R> >& iz);
+    Parallelotope< Interval<R> > orthogonal_over_approximation(const Zonotope< Interval<R> >& iz);
     
     
     

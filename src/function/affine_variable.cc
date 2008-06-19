@@ -31,8 +31,7 @@
 #include "function/affine_variable.code.h"
 
 namespace Ariadne {
-  namespace Function {
-    using namespace Numeric;
+    
     
     template class AffineVariable<Rational>;
 
@@ -44,5 +43,5 @@ namespace Ariadne {
     template class AffineVariable<IntervalMP>;
 #endif
 
-  }
-}
+  
+} // namespace Ariadne

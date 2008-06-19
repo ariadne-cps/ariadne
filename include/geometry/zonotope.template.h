@@ -24,23 +24,23 @@
 
 namespace Ariadne {
     
-namespace Geometry { template<class BS> ListSet<BS> subdivide(const BS&, const typename BS::real_type&); }
+template<class BS> ListSet<BS> subdivide(const BS&, const typename BS::real_type&);
 
 template<class R> template<class XX> 
-Geometry::Zonotope<R>::Zonotope(dimension_type d, size_type m, const XX* ptr)
+Zonotope<R>::Zonotope(dimension_type d, size_type m, const XX* ptr)
   : _centre(d,ptr), _generators(d,m,ptr+d), _error(d)
 {
 }
 
 template<class R> template<class XX> 
-Geometry::Zonotope<R>::Zonotope(const Zonotope<XX>& z)
+Zonotope<R>::Zonotope(const Zonotope<XX>& z)
   : _centre(z.centre()), _generators(z.generators()), _error(z.error())
 {
 }
 
 template<class BS>
-Geometry::ListSet<BS> 
-Geometry::subdivide(const BS& bs, const typename BS::real_type& r)
+ListSet<BS> 
+subdivide(const BS& bs, const typename BS::real_type& r)
 {
   typedef typename BS::real_type R;
   ListSet<BS> result;

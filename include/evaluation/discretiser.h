@@ -44,6 +44,9 @@
 #include "geometry/grid_approximation.h"
 #include "geometry/timed_list_set.h"
 
+#include "system/numerical_system_interface.h"
+#include "system/numerical_system.h"
+
 
 namespace Ariadne {
   

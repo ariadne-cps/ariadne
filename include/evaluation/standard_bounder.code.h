@@ -24,7 +24,7 @@
 #include "base/tuple.h"
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
-#include "function/taylor_derivative.h"
+#include "differentiation/taylor_derivative.h"
 #include "geometry/box.h"
 #include "system/vector_field_interface.h"
 #include "output/logging.h"

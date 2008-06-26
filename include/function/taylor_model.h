@@ -37,7 +37,7 @@
 
 #include "linear_algebra/declarations.h"
 
-#include "function/taylor_derivative.h"
+#include "differentiation/taylor_derivative.h"
 
 namespace Ariadne {
   

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            python/export_taylor_series`.cc
+ *            python/export_taylor_series.cc
  *
  *  Copyright  2007  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
@@ -26,8 +26,9 @@
 
 #include "numeric/rational.h"
 #include "numeric/interval.h"
-#include "function/taylor_series.h"
-#include "function/taylor_variable.h"
+#include "differentiation/taylor_series.h"
+#include "differentiation/taylor_variable.h"
+#include "python/read_array.h"
 using namespace Ariadne;
 using namespace Ariadne::Python;
 
@@ -35,6 +36,15 @@ using namespace Ariadne::Python;
 #include "python/utilities.h"
 using namespace boost::python;
 
+
+template<class X>
+TaylorSeries<X>*
+make_taylor_series(const boost::python::object& obj) 
+{
+  TaylorSeries<X>* ts=new TaylorSeries<X>;
+  read_array(ts->data(),obj);
+  return ts;
+}
 
 template<class R1, class R2> inline 
 void set_item(TaylorSeries<R1>& sd, uint i, R2 x) {
@@ -63,6 +73,7 @@ void export_taylor_series()
 
 
   class_<TS> taylor_series_class(python_name<R>("TaylorSeries").c_str());
+  taylor_series_class.def("__init__", make_constructor(&make_taylor_series<R>));
   taylor_series_class.def( init< uint >());
   taylor_series_class.def( init< TV >());
   taylor_series_class.def("degree", &TS::degree);
@@ -72,14 +83,14 @@ void export_taylor_series()
   taylor_series_class.def("__setitem__",&set_item<A,A>);
   taylor_series_class.def("__neg__", &__neg__<TS,TS>);
   taylor_series_class.def("__add__", &__add__<TS,TS,TS>);
-  //taylor_series_class.def("__add__", &__add__<TS,TS,double>);
+  taylor_series_class.def("__add__", &__add__<TS,TS,double>);
   //taylor_series_class.def("__add__", &__add__<TS,TS,R>);
   taylor_series_class.def("__add__", &__add__<TS,TS,A>);
   //taylor_series_class.def("__radd__", &__radd__<TS,TS,double>);
   //taylor_series_class.def("__radd__", &__radd__<TS,TS,R>);
   taylor_series_class.def("__radd__", &__radd__<TS,TS,A>);
   taylor_series_class.def("__sub__", &__sub__<TS,TS,TS>);
-  //taylor_series_class.def("__sub__", &__sub__<TS,TS,double>);
+  taylor_series_class.def("__sub__", &__sub__<TS,TS,double>);
   ///taylor_series_class.def("__sub__", &__sub__<TS,TS,R>);
   taylor_series_class.def("__sub__", &__sub__<TS,TS,A>);
   //taylor_series_class.def("__rsub__", &__rsub__<TS,TS,double>);

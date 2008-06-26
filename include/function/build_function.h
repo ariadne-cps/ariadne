@@ -32,8 +32,8 @@
 #include "linear_algebra/covector.h"
 #include "linear_algebra/matrix.h"
 
-#include "function/taylor_variable.h"
-#include "function/taylor_derivative.h"
+#include "differentiation/taylor_variable.h"
+#include "differentiation/taylor_derivative.h"
 
 #define ARIADNE_BUILD_FUNCTION(Nm,f,rs,as,np,sm)   \
   template<class R> \

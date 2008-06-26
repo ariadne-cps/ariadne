@@ -1,8 +1,8 @@
 /***************************************************************************
- *            affine_variable.cc
+ *            taylor_series.cc
  *
- *  Copyright  2007  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
+ *  Copyright  2007   Pieter Collins
+ *   pieter.collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -25,22 +25,27 @@
 #include "numeric/float.h"
 #include "numeric/interval.h"
 
-#include "linear_algebra/covector.h"
-
-#include "function/affine_variable.h"
-#include "function/affine_variable.code.h"
+#include "differentiation/function_series.h"
+#include "differentiation/taylor_series.h"
+#include "differentiation/function_series.code.h"
+#include "differentiation/taylor_series.code.h"
 
 namespace Ariadne {
     
-    
-    template class AffineVariable<Rational>;
+   
+    template class ArithmeticSeries<Rational>;
+    template class TaylorSeries<Rational>;
 
 #ifdef ENABLE_FLOAT64
-    template class AffineVariable<Interval64>;
+    template class ArithmeticSeries<Interval64>;
+    template class TranscendentalSeries<Interval64>;
+    template class TaylorSeries<Interval64>;
 #endif
     
 #ifdef ENABLE_FLOATMP
-    template class AffineVariable<IntervalMP>;
+    template class ArithmeticSeries<IntervalMP>;
+    template class TranscendentalSeries<IntervalMP>;
+    template class TaylorSeries<IntervalMP>;
 #endif
 
   

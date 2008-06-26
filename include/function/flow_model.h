@@ -37,8 +37,8 @@
 #include "numeric/declarations.h"
 #include "linear_algebra/declarations.h"
 
-#include "function/taylor_series.h"
-#include "function/taylor_variable.h"
+#include "differentiation/taylor_series.h"
+#include "differentiation/taylor_variable.h"
 
 namespace Ariadne {
   

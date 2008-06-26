@@ -28,17 +28,14 @@
  * \brief Documentation for %Ariadne modules.
  */
 
-/*!\addtogroup Base Base Module
+/*!\addtogroup Base Base Modules
  * \brief Fundamental classes and operations, mostly implemented as wrappers 
  * around other libraries.
  *
- * \defgroup Storage Storage
+ * \defgroup Container Container
  * \ingroup Base
- * \brief Array classes for data storage
- * \addtogroup Storage
- * \class array<bool>
+ * \brief Array and other container classes for data storage
  * 
- *
  * \defgroup Traversal Traversal
  * \ingroup Base
  * \brief Iterator classes for data traversal
@@ -125,6 +122,13 @@
  * programming problems. Tests for feasibility only are also possible. The 
  * computations are performed by a BLAS/LAPACK style lpslv() routing.
  *
+ *
+ * \defgroup Differentiation Automatic Differentiation
+ * \ingroup Base
+ * \brief Support for automatic differentiation using Taylor expansions
+ *
+ * In this core module are the classes used to compute derivatives
+ * of functions.
  */
 
 /*!\defgroup Combinatoric Combinatoric Module
@@ -172,7 +176,7 @@
  * and by subdividing once in the \f$x_1\f$ direction, taking the upper half.
  * This gives the dyadic rectangle '[0.25,0.5]x[0.5,1.0]'.
  */
- 
+
 /*!\defgroup Function Function Module
  * \brief Functions on Euclidean space.
  *
@@ -233,30 +237,9 @@
  * rectangles) or may need to be represented by a fuzzy set (e.g. Minkowski sum
  * of two rectangles).
  *
- *
- * \defgroup DenotableSet Denotable Sets
- * \ingroup Geometry
- * \brief Denotable set classes.
- *
- * Denotable sets are unions of basic sets of a particular kind. In addition to
- * the fundamental geometric predicates, basic sets must also support iteration
- * through their elements, and union (join) with basic sets and denotable sets
- * of the same kind. 
- * 
- *
  * \defgroup List List Sets
- * \ingroup DenotableSet
+ * \ingroup Geometry
  * \brief Denotable sets based on arbitrary lists of elements.
- *
- *
- * \defgroup Grid Grid Sets 
- * \ingroup DenotableSet
- * \brief Sets based on grids.
- *
- *
- * \defgroup PartitionTree Partition Tree Sets
- * \ingroup DenotableSet
- * \brief Sets based on partition trees.
  *
  * \defgroup SetInterface Set interfaces
  * \ingroup Geometry
@@ -278,6 +261,23 @@
  * one for each discrete mode. Hybrid sets consist of a union of many different
  * sets, one for each component of the state space.
  */
+
+/*!\defgroup Storage Storage Module
+ * \brief Classes for representing discretised sets
+ *
+ * Denotable sets are unions of basic sets of a simple kind, typically boxes.
+ * In addition to the fundamental geometric predicates, denotable sets must also 
+ * support iteration through their elements, and union (join) with basic sets 
+ * and denotable sets of the same kind. 
+ *
+ * \defgroup Grid Grid Sets 
+ * \ingroup Storage
+ * \brief Sets based on grids.
+ *
+ * \defgroup PartitionTree Partition Tree Sets
+ * \ingroup Storage
+ * \brief Sets based on partition trees.
+*/
 
 /*!\defgroup System System Module
  * \brief Abstract base classes for system interface, and some commonly used systems.

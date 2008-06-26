@@ -46,7 +46,7 @@ namespace Ariadne {
     class MultiIndex;
     std::ostream& operator<<(std::ostream&, const MultiIndex&);
 
-    /*! \ingroup LinearAlgebra
+    /*! \ingroup Differentiation
      *  \brief An index of a symmetric object. 
      */
     class MultiIndex {

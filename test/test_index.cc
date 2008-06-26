@@ -25,9 +25,9 @@
 #include <iostream>
 #include <fstream>
 
-#include "function/sorted_index.h"
-#include "function/multi_index.h"
-#include "function/position_index.h"
+#include "differentiation/sorted_index.h"
+#include "differentiation/multi_index.h"
+#include "differentiation/position_index.h"
 
 #include "test.h"
 

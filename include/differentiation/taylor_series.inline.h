@@ -22,7 +22,7 @@
  */
  
 #include "linear_algebra/vector.h"
-#include "function/function_series.h"
+#include "differentiation/function_series.h"
 
 namespace Ariadne {
 
@@ -460,6 +460,20 @@ operator/=(TaylorSeries<X>& x, const double& c)
   return x;
 }
 
+
+template<class X>  
+TaylorSeries<X>
+operator+(const TaylorSeries<X>& x, const double& c)
+{
+  TaylorSeries<X> r(x); r+=c; return r;
+}
+
+template<class X>  
+TaylorSeries<X>
+operator-(const TaylorSeries<X>& x, const double& c)
+{
+  TaylorSeries<X> r(x); r-=c; return r;
+}
 
 template<class X, class R>  
 TaylorSeries<X>&

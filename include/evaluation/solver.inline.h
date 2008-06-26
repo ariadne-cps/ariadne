@@ -28,10 +28,10 @@
 
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
+#include "differentiation/taylor_derivative.h"
 #include "geometry/point.h"
 #include "geometry/box.h"
 
-#include "function/taylor_derivative.h"
 #include "system/map.h"
 
 namespace Ariadne {

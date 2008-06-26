@@ -37,8 +37,8 @@
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
 
-#include "sorted_index.h"
-#include "multi_index.h"
+#include "differentiation/sorted_index.h"
+#include "differentiation/multi_index.h"
 
 
 namespace Ariadne {

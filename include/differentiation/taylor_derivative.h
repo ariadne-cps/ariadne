@@ -39,8 +39,8 @@ namespace Ariadne {
     // Base template algorithm for evaluating a polynomial
     template<class P, class M> void evaluate_polynomial(M& r, const P& p, const M& x);
 
-    /*!\ingroup Function
-     * \brief A templated class representing a the derivatives of a vector quantity with respect to a multiple arguments.
+    /*!\ingroup Differentiation
+     * \brief A templated class representing a the derivatives of a vector quantity with respect to multiple arguments.
      *
      * Formally, a Taylor variable \f$y\f$ is a member of a differential algebra over some field, denoted by the template variable X. 
      * A Taylor variable therefore supports addition, subtraction and multiplication, and also division, as long as the division has a

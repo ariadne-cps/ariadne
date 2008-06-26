@@ -47,7 +47,7 @@ namespace Ariadne {
     class PositionIndex;
     std::ostream& operator<<(std::ostream&, const PositionIndex&);
     
-    /*! \ingroup Function
+    /*! \ingroup Differentiation
      *  \brief An index of a dense symmetric object. 
      */
     class PositionIndex {

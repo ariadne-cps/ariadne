@@ -34,8 +34,8 @@ namespace Ariadne {
   
     template<class X> class TaylorVariable;
 
-    /*!\ingroup Function
-     * \brief A templated class representing a the derivatives of a scalar quantity with respect to a multiple arguments.
+    /*!\ingroup Differentiation
+     * \brief A templated class representing a the derivatives of a scalar quantity with respect to a single argument.
      */
     template<class X>
     class TaylorSeries

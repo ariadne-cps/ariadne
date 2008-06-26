@@ -44,7 +44,7 @@ namespace Ariadne {
   
 
     
-    /*! \ingroup Storage
+    /*! \ingroup Container
      *  \brief STL style interface to dynamically-sizable arrays. 
      *
      * An array<T> is a variable-size array which can be resized and is allocated 
@@ -215,7 +215,7 @@ namespace Ariadne {
     
     
     
-    //! \ingroup Storage
+    //! \ingroup Container
     /*! \brief STL style interface to sized arrays. 
      *
      * An array<T,N> is a fixed-size array of size \a N which is allocated 
@@ -371,7 +371,7 @@ namespace Ariadne {
     
     
     
-    //! \ingroup Storage
+    //! \ingroup Container
     /*! \brief A range of values defined by a beginning and end iterator, which can be used as a reference to an array. */
     template<class Iter>
     class range_array {
@@ -440,7 +440,7 @@ namespace Ariadne {
     
     
     
-    //! \ingroup Storage
+    //! \ingroup Container
     /*! \brief A reference to an array of values, defined by a size and a beginning iterator. */
     template<class Iter>
     class array_reference {
@@ -563,7 +563,7 @@ namespace Ariadne {
     };  
     
     
-    //! \ingroup Storage
+    //! \ingroup Container
     /*! \brief A vector of arrays of different sizes. */
     template<class T>
     class vector_array {
@@ -710,7 +710,7 @@ namespace Ariadne {
     };
     
     
-    //! \ingroup Storage
+    //! \ingroup Container
     /*! \brief A vector of arrays of a fixed size. */
     template<class T>
     class array_vector {

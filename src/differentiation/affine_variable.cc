@@ -1,5 +1,5 @@
 /***************************************************************************
- *            taylor_variable.cc
+ *            affine_variable.cc
  *
  *  Copyright  2007  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -25,20 +25,22 @@
 #include "numeric/float.h"
 #include "numeric/interval.h"
 
-#include "function/taylor_variable.h"
-#include "function/taylor_variable.code.h"
+#include "linear_algebra/covector.h"
+
+#include "differentiation/affine_variable.h"
+#include "differentiation/affine_variable.code.h"
 
 namespace Ariadne {
     
     
-    template class TaylorVariable<Rational>;
+    template class AffineVariable<Rational>;
 
 #ifdef ENABLE_FLOAT64
-    template class TaylorVariable<Interval64>;
+    template class AffineVariable<Interval64>;
 #endif
     
 #ifdef ENABLE_FLOATMP
-    template class TaylorVariable<IntervalMP>;
+    template class AffineVariable<IntervalMP>;
 #endif
 
   

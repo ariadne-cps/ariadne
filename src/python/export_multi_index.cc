@@ -22,7 +22,7 @@
  */
 
 #include "base/array.h"
-#include "function/multi_index.h"
+#include "differentiation/multi_index.h"
 
 #include "python/operators.h"
 #include "python/read_array.h"

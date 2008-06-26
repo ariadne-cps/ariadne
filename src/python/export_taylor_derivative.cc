@@ -27,8 +27,8 @@
 #include "macros/assert.h"
 #include "numeric/rational.h"
 #include "numeric/interval.h"
-#include "function/multi_index.h"
-#include "function/taylor_derivative.h"
+#include "differentiation/multi_index.h"
+#include "differentiation/taylor_derivative.h"
 
 #include <boost/python.hpp>
 #include "python/utilities.h"

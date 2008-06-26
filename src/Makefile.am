@@ -37,12 +37,14 @@ COMBINATORIC_SRC = \
 	combinatoric/lattice_map.cc \
 	combinatoric/subdivision_tree_set.cc 
 
+DIFFERENTIATION_SRC = \
+	differentiation/affine_variable.cc \
+	differentiation/taylor_series.cc \
+	differentiation/taylor_variable.cc \
+	differentiation/taylor_derivative.cc
+
 FUNCTION_SRC = \
-	function/affine_variable.cc \
 	function/affine_model.cc \
-	function/taylor_series.cc \
-	function/taylor_variable.cc \
-	function/taylor_derivative.cc \
 	function/taylor_model.cc  \
 	function/constant_function.cc \
 	function/identity_function.cc \
@@ -65,19 +67,21 @@ GEOMETRY_SRC = \
 	geometry/sphere.cc \
 	geometry/taylor_set.cc \
 	geometry/list_set.cc \
-	geometry/grid.cc \
-	geometry/grid_approximation.cc \
-	geometry/grid_cell.cc \
-	geometry/grid_block.cc \
-	geometry/grid_cell_list_set.cc \
-	geometry/grid_mask_set.cc \
-	geometry/partition_tree_set.cc \
 	geometry/curve.cc \
 	geometry/constraint.cc \
 	geometry/poincare_section.cc \
 	geometry/constraint_set.cc \
 	geometry/level_set.cc \
 	geometry/hybrid_set.cc 
+
+STORAGE_SRC = \
+	geometry/grid.cc \
+	geometry/grid_approximation.cc \
+	geometry/grid_cell.cc \
+	geometry/grid_block.cc \
+	geometry/grid_cell_list_set.cc \
+	geometry/grid_mask_set.cc \
+	geometry/partition_tree_set.cc 
 
 SYSTEM_SRC = \
 	system/numerical_system.cc \
@@ -136,7 +140,8 @@ INPUT_SRC =
 
 
 noinst_LTLIBRARIES = libbase.la libnumeric.la liblinearalgebra.la liblinearprogramming.la \
-	libcombinatoric.la libfunction.la libgeometry.la libsystem.la libevaluation.la \
+	libcombinatoric.la libdifferentiation.la \
+	libfunction.la libgeometry.la libstorage.la libsystem.la libevaluation.la \
 	liboutput.la libinput.la
 
 lib_LTLIBRARIES = libariadne.la libgeometric.la 
@@ -145,7 +150,7 @@ libariadne_la_SOURCES =
 nodist_EXTRA_libariadne_la_SOURCES = dummy.cc
 
 libgeometric_la_LIBADD = libbase.la libnumeric.la liblinearalgebra.la liblinearprogramming.la \
-	libcombinatoric.la libfunction.la libgeometry.la -lmpfr -lgmpxx
+	libcombinatoric.la libdifferentiation.la libfunction.la libgeometry.la -lmpfr -lgmpxx
 libgeometric_la_SOURCES = 
 nodist_EXTRA_libgeometric_la_SOURCES = dummy.cc
 
@@ -155,8 +160,10 @@ libnumeric_la_SOURCES = $(NUMERIC_SRC)
 liblinearalgebra_la_SOURCES = $(LINEAR_ALGEBRA_SRC)
 liblinearprogramming_la_SOURCES = $(LINEAR_PROGRAMMING_SRC)
 libcombinatoric_la_SOURCES = $(COMBINATORIC_SRC)
+libdifferentiation_la_SOURCES = $(DIFFERENTIATION_SRC)
 libfunction_la_SOURCES = $(FUNCTION_SRC)
 libgeometry_la_SOURCES = $(GEOMETRY_SRC)
+libstorage_la_SOURCES = $(STORAGE_SRC)
 libsystem_la_SOURCES = $(SYSTEM_SRC)
 libevaluation_la_SOURCES = $(EVALUATION_SRC)
 liboutput_la_SOURCES = $(OUTPUT_SRC)

@@ -1,8 +1,8 @@
 /***************************************************************************
- *            taylor_series.cc
+ *            taylor_variable.cc
  *
- *  Copyright  2007   Pieter Collins
- *   pieter.collins@cwi.nl
+ *  Copyright  2007  Alberto Casagrande, Pieter Collins
+ *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
 
 /*
@@ -25,27 +25,20 @@
 #include "numeric/float.h"
 #include "numeric/interval.h"
 
-#include "function/function_series.h"
-#include "function/taylor_series.h"
-#include "function/function_series.code.h"
-#include "function/taylor_series.code.h"
+#include "differentiation/taylor_variable.h"
+#include "differentiation/taylor_variable.code.h"
 
 namespace Ariadne {
     
-   
-    template class ArithmeticSeries<Rational>;
-    template class TaylorSeries<Rational>;
+    
+    template class TaylorVariable<Rational>;
 
 #ifdef ENABLE_FLOAT64
-    template class ArithmeticSeries<Interval64>;
-    template class TranscendentalSeries<Interval64>;
-    template class TaylorSeries<Interval64>;
+    template class TaylorVariable<Interval64>;
 #endif
     
 #ifdef ENABLE_FLOATMP
-    template class ArithmeticSeries<IntervalMP>;
-    template class TranscendentalSeries<IntervalMP>;
-    template class TaylorSeries<IntervalMP>;
+    template class TaylorVariable<IntervalMP>;
 #endif
 
   

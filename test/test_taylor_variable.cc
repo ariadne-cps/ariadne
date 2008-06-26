@@ -31,8 +31,8 @@
 #include "test_float.h"
 #include "numeric/rational.h"
 #include "linear_algebra/vector.h"
-#include "function/taylor_series.h"
-#include "function/taylor_variable.h"
+#include "differentiation/taylor_series.h"
+#include "differentiation/taylor_variable.h"
 
 #include "test.h"
 

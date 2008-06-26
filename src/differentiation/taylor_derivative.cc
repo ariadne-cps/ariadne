@@ -24,8 +24,8 @@
 #include "numeric/float.h"
 #include "numeric/interval.h"
 
-#include "function/taylor_derivative.h"
-#include "function/taylor_derivative.code.h"
+#include "differentiation/taylor_derivative.h"
+#include "differentiation/taylor_derivative.code.h"
 
 namespace Ariadne {
     

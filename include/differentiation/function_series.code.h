@@ -21,8 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "function/taylor_series.h"
-#include "function/function_series.h"
+#include "differentiation/taylor_series.h"
+#include "differentiation/function_series.h"
 
 namespace Ariadne {
 

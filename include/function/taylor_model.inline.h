@@ -21,8 +21,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "sorted_index.h"
-#include "multi_index.h"
 
 namespace Ariadne {
 

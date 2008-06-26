@@ -26,8 +26,8 @@
 
 #include "numeric/rational.h"
 #include "numeric/interval.h"
-#include "function/multi_index.h"
-#include "function/taylor_variable.h"
+#include "differentiation/multi_index.h"
+#include "differentiation/taylor_variable.h"
 
 #include "python/utilities.h"
 #include "python/read_array.h"

@@ -43,14 +43,14 @@
 #include "linear_algebra/covector.h"
 #include "linear_algebra/matrix.h"
 
-#include "function/taylor_variable.h"
+#include "differentiation/taylor_variable.h"
 
 namespace Ariadne {
 
       
 
 
-    /*!\ingroup FunctionVariable
+    /*!\ingroup Differentiation
      * \brief Concrete class for functions.
      *
      * \deprecated This class has unknown bugs, and is deprecated in favour of TaylorVariable.

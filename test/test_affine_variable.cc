@@ -31,7 +31,7 @@
 #include "test_float.h"
 #include "numeric/rational.h"
 #include "linear_algebra/vector.h"
-#include "function/affine_variable.h"
+#include "differentiation/affine_variable.h"
 
 #include "test.h"
 

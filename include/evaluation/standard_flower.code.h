@@ -45,13 +45,13 @@
 #include "linear_algebra/matrix.h"
 #include "linear_algebra/matrix_function.h"
 
-#include "function/taylor_series.h"
-#include "function/taylor_variable.h"
-#include "function/taylor_derivative.h"
-#include "function/taylor_model.h"
+#include "differentiation/affine_variable.h"
+#include "differentiation/taylor_series.h"
+#include "differentiation/taylor_variable.h"
+#include "differentiation/taylor_derivative.h"
 
-#include "function/affine_variable.h"
 #include "function/affine_model.h"
+#include "function/taylor_model.h"
 
 #include "geometry/box.h"
 
@@ -61,8 +61,8 @@
 
 #include "output/logging.h"
 
-#include "function/taylor_series.code.h"
-#include "function/taylor_variable.code.h"
+#include "differentiation/taylor_series.code.h"
+#include "differentiation/taylor_variable.code.h"
 
 namespace {
 

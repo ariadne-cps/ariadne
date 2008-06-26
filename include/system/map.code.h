@@ -24,8 +24,8 @@
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
 
-#include "function/multi_index.h"
-#include "function/taylor_derivative.h"
+#include "differentiation/multi_index.h"
+#include "differentiation/taylor_derivative.h"
 #include "function/function_interface.h"
 
 #include "geometry/point.h"

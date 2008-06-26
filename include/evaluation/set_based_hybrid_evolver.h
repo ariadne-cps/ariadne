@@ -52,6 +52,7 @@
 #include "evaluation/hybrid_time.h"
 #include "evaluation/evolver_interface.h"
 
+#include "evaluation/evolver_base.h"
 
 
 #include "output/logging.h"

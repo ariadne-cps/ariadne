@@ -58,7 +58,7 @@ namespace Ariadne {
      public:
       /*! \brief Construct from a system and an evolution algorithm. */
       NumericalSystem(const Sys& system, const EvolverInterface<Sys,ES>& evolver)
-        : _system(system.clone()), _evolver(dynamic_cast< EvolverBase<Sys,ES>*>(evolver.clone())) { }
+        : _system(system.clone()), _evolver(evolver.clone()) { }
       /*! \brief Cloning operator. */
       virtual NumericalSystem<Sys,ES>* clone() const { 
         return new NumericalSystem<Sys,ES>(*this); }
@@ -69,18 +69,18 @@ namespace Ariadne {
       virtual EuclideanSpace state_space() const { 
         return this->_system->state_space(); }
 
-      /*! \brief Compute a lower-approximation to the evolved set under the system evolution. */
+      /*! \brief Compute an approximation to the evolved set for the system evolution with the given semantics. */
       virtual ESL evolve(const ES& initial, const T& time, Semantics semantics) const {
         return this->_evolver->evolve(this->system(),initial,time,semantics); }
-      /*! \brief Compute a lower-approximation to the evolved set under the system evolution. */
+      /*! \brief Compute an approximation to the evolved set for the system evolution with the given semantics. */
       virtual ESL reach(const ES& initial, const T& time, Semantics semantics) const {
         return this->_evolver->reach(this->system(),initial,time,semantics); }
-      /*! \brief Compute a lower-approximation to the reachable and evolved sets under the system evolution. */
+      /*! \brief Compute a approximations to the reachable and evolved sets for the system evolution with the given semantics. */
       virtual std::pair<ESL,ESL> reach_evolve(const ES& initial, const T& time, Semantics semantics) const {
         return this->_evolver->reach_evolve(this->system(),initial,time,semantics); }
      private:
       boost::shared_ptr< Sys > _system;
-      boost::shared_ptr< EvolverBase<Sys,ES> > _evolver;
+      boost::shared_ptr< EvolverInterface<Sys,ES> > _evolver;
     };
 
   

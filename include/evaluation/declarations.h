@@ -31,9 +31,6 @@
 namespace Ariadne { 
   
 
-    enum Semantics { lower_semantics, upper_semantics }; 
-    enum EvolutionType { evolve, reach };
-
     template<class Aprx, class ES> class ApproximatorInterface;
     template<class ES> class ReducerInterface;
     template<class ES> class SubdividerInterface;

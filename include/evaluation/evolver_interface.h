@@ -28,10 +28,9 @@
 #ifndef ARIADNE_EVOLVER_INTERFACE_H
 #define ARIADNE_EVOLVER_INTERFACE_H
 
-#include "evaluation/declarations.h"
+#include "evaluation/semantics.h"
 
 namespace Ariadne {
-  
   
     /*! \ingroup EvaluatorInterfaces \ingroup Evolvers
      *  \brief Interface for evolving a dynamic system.
@@ -41,55 +40,33 @@ namespace Ariadne {
     {
       typedef typename Sys::time_type T;
       typedef ListSet<ES> ESL;
-      typedef typename ListSet<ES>::const_iterator ESLCI;
      public:
       /*! \brief Destructor. */
       virtual ~EvolverInterface<Sys,ES>() {};
       /*! \brief Make a dynamically-allocated copy. */
       virtual EvolverInterface<Sys,ES>* clone() const = 0;
      public:
-      /*! \brief Compute an approximation to the evolution set under the given semantics. */
-      void evolution(ESL& final, const Sys& system, const ES& initial, const T& time, Semantics semantics) const {
-        ESL intermediate; this->_evolution(final,intermediate,system,initial,time,semantics,false); }
-        
-      /*! \brief Compute an approximation to the evolution set under the given semantics. */
-      void evolution(ESL& final, const Sys& system, const ESL& initial, const T& time, Semantics semantics) const {
-        ESL intermediate; for(ESLCI iter=initial.begin(); iter!=initial.end(); ++iter) { this->_evolution(final,intermediate,system,*iter,time,semantics,false); } }
+      /*! \brief Compute an approximation to the evolved set under the given semantics. */
+      virtual ESL evolve(const Sys& system, const ES& initial_set, const T& time, Semantics semantics) const = 0;
+      /*! \brief Compute an approximation to the reachable set under the given semantics. */
+      virtual ESL reach(const Sys& system, const ES& initial_set, const T& time, Semantics semantics) const = 0;
+      /*! \brief Compute an approximation to the evolved and reachable sets under the given semantics. */
+      virtual std::pair<ESL,ESL> reach_evolve(const Sys& system, const ES& initial_set, const T& time, Semantics semantics) const = 0;
 
-      /*! \brief Compute an approximation to the evolution set under the given semantics. */
-      void evolution(ESL& final, ESL& intermediate, const Sys& system, const ES& initial, const T& time, Semantics semantics) const {
-        this->_evolution(final,intermediate,system,initial,time,semantics,true); }
-        
-      /*! \brief Compute an approximation to the evolution set under the given semantics. */
-      void evolution(ESL& final, ESL& intermediate, const Sys& system, const ESL& initial, const T& time, Semantics semantics) const {
-        for(ESLCI iter=initial.begin(); iter!=initial.end(); ++iter) { this->_evolution(final,intermediate,system,*iter,time,semantics,true); } }
-     protected:
-      virtual void _evolution(ESL& final, ESL& intermediate, const Sys& system, const ES& initial, const T& time, Semantics semantics, bool reach) const = 0;
+
+      /*! \brief Compute an approximation to the evolved set under the given semantics. */
+      virtual void evolution(ESL& final, const Sys& system, const ES& initial, const T& time, Semantics semantics) const = 0;
+      /*! \brief Compute an approximation to the evolved and reachable sets under the given semantics. */
+      virtual void evolution(ESL& final, ESL& intermediate, const Sys& system, const ES& initial, const T& time, Semantics semantics) const = 0;
+
+      /*! \brief Compute an approximation to the evolved set under the given semantics, starting from a list of enclosure sets. */
+      virtual void evolution(ESL& final, const Sys& system, const ESL& initial, const T& time, Semantics semantics) const = 0;
+      /*! \brief Compute an approximation to the evolved and reachable sets under the given semantics starting from a list of enclosure sets. */
+      virtual void evolution(ESL& final, ESL& intermediate, const Sys& system, const ESL& initial, const T& time, Semantics semantics) const = 0;
     };
 
 
-    template<class Sys, class ES> class EvolverBase
-      : public EvolverInterface<Sys,ES>
-    {
-      typedef EvolverInterface<Sys,ES> Interface;
-      typedef typename Sys::time_type T;
-      typedef ListSet<ES> ESL;
-     public:
-      /*! \brief Make a dynamically-allocated copy. */
-      virtual EvolverBase<Sys,ES>* clone() const = 0;
 
-      /*! \brief Compute an approximation to the evolution set under the given semantics. */
-      ESL evolve(const Sys& system, const ES& initial_set, const T& time, Semantics semantics) const {
-        ESL final; ESL intermediate; this->_evolution(final,intermediate,system,initial_set,time,semantics,false); return final; }
-      /*! \brief Compute an approximation to the evolution set under the given semantics. */
-      ESL reach(const Sys& system, const ES& initial_set, const T& time, Semantics semantics) const {
-        ESL final; ESL intermediate; this->_evolution(final,intermediate,system,initial_set,time,semantics,false); return intermediate; }
-      /*! \brief Compute an approximation to the evolution set under the given semantics. */
-      std::pair<ESL,ESL> reach_evolve(const Sys& system, const ES& initial_set, const T& time, Semantics semantics) const {
-        ESL final; ESL intermediate; this->_evolution(final,intermediate,system,initial_set,time,semantics,true); return std::make_pair(intermediate,final); }
-    };
-
-  
 } // namespace Ariadne
 
 

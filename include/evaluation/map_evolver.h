@@ -42,6 +42,8 @@
 #include "evaluation/subdivider_interface.h"
 #include "evaluation/reducer_interface.h"
 
+#include "evaluation/evolver_base.h"
+
 // For approximation
 #include "geometry/grid_approximation.h"
 #include "geometry/timed_list_set.h"

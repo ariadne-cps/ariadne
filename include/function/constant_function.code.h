@@ -27,6 +27,7 @@
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
 #include "differentiation/taylor_derivative.h"
+#include "differentiation/sparse_differential.h"
 
 
 namespace Ariadne {
@@ -46,11 +47,22 @@ ConstantFunction<R>::jacobian(const Vector<F>& x) const
   return Matrix<F>(this->result_size(),this->argument_size()); 
 }
 
+
 template<class R>
 TaylorDerivative<typename ConstantFunction<R>::F> 
 ConstantFunction<R>::derivative(const Vector<F>& x, const smoothness_type& s) const 
 {
   return TaylorDerivative<F>::constant(this->result_size(),this->argument_size(),s,this->c());
+}
+
+
+template<class R>
+SparseDifferentialVector<typename ConstantFunction<R>::A> 
+ConstantFunction<R>::expansion(const Vector<A>& x, const smoothness_type& s) const 
+{
+  SparseDifferentialVector<A> result(this->result_size(),this->argument_size(),s);
+  for(uint i=0; i!=x.size(); ++i) { result[i]=A(this->_c[i]); }
+  return result;
 }
 
 

@@ -41,7 +41,10 @@
 
 namespace Ariadne {
 
+    template<class X> class Vector;
+    template<class X> class Matrix;
     class MultiIndex;
+    template<class X> class SparseDifferentialVector;
 
     /*!\ingroup Function
      * \brief Abstract base class for continuous functionss.
@@ -64,6 +67,7 @@ namespace Ariadne {
      */
     template<class R>
     class FunctionInterface {
+      typedef typename traits<R>::approximate_arithmetic_type A;
       typedef typename traits<R>::arithmetic_type F;
       typedef typename traits<R>::interval_type I;
      public:
@@ -85,6 +89,8 @@ namespace Ariadne {
       virtual Matrix<F> jacobian(const Vector<F>& x) const = 0;
       /*! \brief Evaluate the derivative of the function. */
       virtual TaylorDerivative<F> derivative(const Vector<F>& x, const smoothness_type& s) const = 0;
+      /*! \brief Evaluate the derivative of the function using approximate arithmetic. */
+      virtual SparseDifferentialVector<A> expansion(const Vector<A>& x, const smoothness_type& s) const = 0;
 
       /*! \brief The degree of differentiability of the function. */
       virtual smoothness_type smoothness() const = 0;

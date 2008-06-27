@@ -36,9 +36,11 @@ namespace Ariadne {
 
     class Integer;
     class Rational;
+    template<class T> class ApproximateFloat;
     template<class T> class Float;
     template<class R> class Interval;
 
+    typedef ApproximateFloat<double> ApproximateFloat64;
     typedef Float<double> Float64;
     typedef Interval<Float64> Interval64;
 

@@ -1,7 +1,7 @@
 /***************************************************************************
- *            henon_chainreach.cc
+ *            lorenz_attractor.cc
  *
- *  Copyright  2005-6  Alberto Casagrande, Pieter Collins
+ *  Copyright  2008  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
  ****************************************************************************/
 
@@ -33,29 +33,29 @@
 #include "geometry/rectangular_set.h"
 #include "geometry/zonotope.h"
 #include "evaluation/evolution_parameters.h"
-#include "evaluation/map_evolver.h"
-#include "evaluation/standard_applicator.h"
+#include "evaluation/vector_field_evolver.h"
+#include "evaluation/standard_integrator.h"
 #include "evaluation/standard_subdivider.h"
 #include "evaluation/orthogonal_reducer.h"
 #include "evaluation/standard_approximator.h"
 #include "evaluation/reachability_analyser.h"
 #include "output/epsstream.h"
 #include "output/logging.h"
-#include "models/henon.h"
+#include "models/lorenz.h"
 
 using namespace Ariadne;
 using namespace Ariadne::Models;
 using namespace std;
 
-template<class R> int henon_chainreach();
+template<class R> int lorenz_attractor();
 
 int main() {
-  return henon_chainreach<Float64>();
+  return lorenz_attractor<Float64>();
 }
 
 template<class R> 
 int 
-henon_chainreach()
+lorenz_attractor()
 {
   typedef Zonotope<R> ES;
 
@@ -63,34 +63,36 @@ henon_chainreach()
   double grid_length=0.125;
   int subdivisions=128;
 
-  EvolutionParameters<R> parameters;
-  parameters.set_maximum_basic_set_radius(maximum_basic_set_radius);
-  parameters.set_grid_length(grid_length);
+  EvolutionParameters<R> evolution_parameters;
+  evolution_parameters.set_maximum_basic_set_radius(maximum_basic_set_radius);
+  evolution_parameters.set_grid_length(grid_length);
   
-  StandardApplicator<ES> applicator;
+  StandardIntegrator<ES> integrator;
   StandardSubdivider<ES> subdivider;
   OrthogonalReducer<ES> reducer;
-  Evolver<Map<R>,ES> evolver(parameters,applicator,subdivider,reducer);
+  Evolver<VectorField<R>,ES> evolver(evolution_parameters,integrator,subdivider,reducer);
 
   StandardApproximator<ES> approximator;
 
   set_applicator_verbosity(0);
   
-  Discretiser< Map<R>, GridApproximationScheme<R>, ES > discretiser(parameters,evolver,approximator);
-  ReachabilityAnalyser< Map<R>, GridApproximationScheme<R> > analyser(parameters,discretiser);
+  Discretiser< VectorField<R>, GridApproximationScheme<R>, ES > discretiser(evolution_parameters,evolver,approximator);
+  ReachabilityAnalyser< VectorField<R>, GridApproximationScheme<R> > analyser(evolution_parameters,discretiser);
 
-  Point<R> params=Point<R>("(1.5,0.875)");
-  R a=params[0];
-  R b=params[1];
+  double parameter_array[]={8./3.,10,28};
+  Point<R> parameters=Point<R>(3,parameter_array);
+  R beta=parameters[0];
+  R rho=parameters[1];
+  R sigma=parameters[2];
 
 
-  HenonMap<R> h=HenonMap<R>(params);
+  LorenzSystem<R> lorenz=LorenzSystem<R>(parameters);
   Point<R> pt("(3,5)"); 
   smoothness_type s=3;
   cout << "pt="<<pt<<" s="<<s<<endl;
-  cout << "h(pt)="<<h(pt)<<endl;
-  cout << "h.jacobian(pt)="<<h.jacobian(pt) << endl; 
-  cout << "h.derivative(pt,s)="<<h.derivative(pt,s) << endl; 
+  cout << "lorenz(pt)="<<lorenz(pt)<<endl;
+  cout << "lorenz.jacobian(pt)="<<lorenz.jacobian(pt) << endl; 
+  cout << "lorenz.derivative(pt,s)="<<lorenz.derivative(pt,s) << endl; 
 
   Box<R> gbb=Box<R>("[-11.0,5.0]x[-8.0,8.0]") ;
   cout << "gbb=" << gbb << endl;
@@ -109,7 +111,7 @@ henon_chainreach()
   in.adjoin(over_approximation(ir,g));
   bd.adjoin(over_approximation(gbb,g));
 
-  SetInterface< Box<R> >* cr=analyser.chain_reach(h,in);
+  SetInterface< Box<R> >* cr=analyser.chain_reach(lorenz,in);
   GridMaskSet<R>& gmcr=*dynamic_cast<GridMaskSet<R>*>(cr);
   PartitionTreeSet<R> ptcr=PartitionTreeSet<R>(gmcr);
 
@@ -122,7 +124,7 @@ henon_chainreach()
 
   RectangularSet<R> ins(ir);
   RectangularSet<R> cbs(cb);
-  SetInterface< Box<R> >* crs=analyser.chain_reach(h,ins);
+  SetInterface< Box<R> >* crs=analyser.chain_reach(lorenz,ins);
   cout << "*crs=" << *crs <<endl;
   GridMaskSet<R>& gmcrs=*dynamic_cast<GridMaskSet<R>*>(crs);
   cout << "gmcrs=" << gmcrs <<endl;

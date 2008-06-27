@@ -48,6 +48,7 @@ namespace Ariadne {
     class IdentityFunction
       : public FunctionInterface<R> 
     {
+      typedef typename traits<R>::approximate_arithmetic_type A;
       typedef typename traits<R>::arithmetic_type F;
       typedef typename traits<R>::interval_type I;
      public:
@@ -65,8 +66,10 @@ namespace Ariadne {
       Vector<F> evaluate(const Vector<F>& x) const;
       /*! \brief The Jacobian derivative matrix at a point. */
       Matrix<F> jacobian(const Vector<F>& x) const;
-      /*! \brief The Jacobian derivative matrix at a point. */
+      /*! \brief All the derivative values up to degree \a s. */
       TaylorDerivative<F> derivative(const Vector<F>& x, const smoothness_type& s) const;
+      /*! \brief All the derivative values up to degree \a s, computed using approximate arithmetic. */
+      SparseDifferentialVector<A> expansion(const Vector<A>& x, const smoothness_type& s) const;
 
            
       /*! \brief The size of the result. */

@@ -48,8 +48,23 @@ namespace Ariadne {
     inline Slice slice(size_type start, size_type size, size_type stride=1u) {
       return Slice(start,size,stride); }
 
-    inline Slice range(size_type start, size_type finish, size_type stride=1u) {
-      return Slice(start,(finish-start-1)/stride+1,stride); }
+    inline Slice range(size_type start, size_type stop) {
+      return Slice(start,stop-start,1u); }
+
+    class Range 
+    {
+     public:
+      Range(size_type start, size_type stop)
+        : _start(start), _size(stop-start) { }
+      size_type start() const { return this->_start; }
+      size_type stop() const { return this->_start+this->_size; }
+      size_type size() const { return this->_size; }
+      size_type stride() const { return 1u; }
+     private:
+      size_type _start;
+      size_type _size;
+    };
+
 
 
 } // namespace Ariadne

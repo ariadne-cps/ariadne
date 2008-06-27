@@ -44,42 +44,6 @@
 
 namespace Ariadne {
 
-
-    /*!
-     * \brief A class representing the difference of a function and the identity.
-     *
-     * Useful for computing fixed points.
-     */
-    template<class R> class DifferenceFunction
-      : public FunctionInterface<R>
-    {
-      typedef typename traits<R>::arithmetic_type F;
-     public:
-      /*!\brief Construct from a map \a f, which must have the same argument dimension as result dimension. */
-      DifferenceFunction(const FunctionInterface<R>& f);
-      /*! \brief Make a copy (clone) of the vector field. */
-      DifferenceFunction<R>* clone() const;
-      /*!\brief The dimension of the space the map acts on. */
-      virtual smoothness_type smoothness() const;
-      /*!\brief The dimension of the space the map acts on. */
-      virtual size_type result_size() const;
-      /*!\brief The dimension of the space the map acts on. */
-      virtual size_type argument_size() const;
-      /*!\brief Evaluate the function \f$f(x)-x\f$, where \f$f\f$ is the map used to construct the difference map. */
-      virtual Vector<F> evaluate(const Vector<F>& p) const;
-      /*!\brief Evaluate the derivative of function \f$f(x)-x\f$, which is \f$Df(x)-I\f$. */
-      virtual Matrix<F> jacobian(const Vector<F>& p) const;
-      /*!\brief Evaluate the derivative of function \f$f(x)-x\f$, which is \f$Df(x)-I\f$. */
-      virtual TaylorDerivative<F> derivative(const Vector<F>& p, const smoothness_type& s) const;
-      /*!\brief The name of the class. */
-      virtual std::string name() const;
-      /*!\brief Write to an output stream. */
-      virtual std::ostream& write(std::ostream&) const;
-     private:
-      const FunctionInterface<R>& _base;
-    };
-
-  
     
     /*! \ingroup EvaluatorInterfaces \ingroup Solvers
      *  \brief %Interface for solving (nonlinear) equations. 

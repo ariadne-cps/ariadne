@@ -68,7 +68,7 @@ Vector<R>::Vector(const VectorExpression<E>& ve)
 { 
   const E& v=ve(); 
   for(size_type i=0; i!=this->size(); ++i) {
-    (*this)(i)=v(i); 
+    (*this)(i)=R(v(i)); 
   }
 }
 

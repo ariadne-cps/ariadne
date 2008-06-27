@@ -41,11 +41,13 @@ DIFFERENTIATION_SRC = \
 	differentiation/affine_variable.cc \
 	differentiation/taylor_series.cc \
 	differentiation/taylor_variable.cc \
-	differentiation/taylor_derivative.cc
+	differentiation/taylor_derivative.cc \
+	differentiation/sparse_differential.cc
 
 FUNCTION_SRC = \
 	function/affine_model.cc \
 	function/taylor_model.cc  \
+	function/approximate_taylor_model.cc  \
 	function/constant_function.cc \
 	function/identity_function.cc \
 	function/affine_function.cc \

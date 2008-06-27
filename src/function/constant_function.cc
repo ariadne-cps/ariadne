@@ -33,12 +33,10 @@ namespace Ariadne {
 
 #ifdef ENABLE_FLOAT64
     template class ConstantFunction<Float64>;
-    template class ConstantFunction<Interval64>;
 #endif
     
 #ifdef ENABLE_FLOATMP
     template class ConstantFunction<FloatMP>;
-    template class ConstantFunction<IntervalMP>;
 #endif
 
   

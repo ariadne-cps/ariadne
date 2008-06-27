@@ -1,11 +1,11 @@
 /***************************************************************************
- *            vector.cc
+ *            approximate_taylor_model.cc
  *
- *  Copyright  2006  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it Pieter.Collins@cwi.nl
+ *  Copyright  2008  Pieter Collins
+ *
  ****************************************************************************/
 
- /*
+/*
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
@@ -20,32 +20,18 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
-#include "numeric/rational.h"
-#include "numeric/float.h"
-#include "numeric/interval.h"
 
-#include "linear_algebra/vector.h"
-#include "linear_algebra/vector.code.h"
+#include "numeric/float.h"
+
+#include "function/approximate_taylor_model.h"
+#include "function/approximate_taylor_model.code.h"
 
 namespace Ariadne {
-  
     
-    #warning "Compiling Rational"
-    template class Vector<Rational>;
-    template class Vector< Interval<Rational> >;
 
 #ifdef ENABLE_FLOAT64
-    #warning "Compiling Float64"
-    template class Vector<ApproximateFloat64>;
-    template class Vector<Float64>;
-    template class Vector<Interval64>;
+    template class ApproximateTaylorModel<Float64>;
 #endif
+    
   
-#ifdef ENABLE_FLOATMP
-    template class Vector<FloatMP>;
-    template class Vector<IntervalMP>;
-#endif
-
-
 } // namespace Ariadne

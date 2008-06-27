@@ -28,108 +28,13 @@
 
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
-#include "differentiation/taylor_derivative.h"
+#include "function/difference_function.h"
 #include "geometry/point.h"
 #include "geometry/box.h"
 
 #include "system/map.h"
 
 namespace Ariadne {
-
-
-template<class R> 
-inline
-DifferenceFunction<R>::DifferenceFunction(const FunctionInterface<R>& f)
-  : _base(f)
-{ 
-  if(f.argument_size()!=f.result_size()) { 
-    throw IncompatibleDimensions("DifferenceDifferenceFunction(Map f): The argument dimension must equal the result dimension"); 
-  } 
-}
-
-
-template<class R> 
-inline
-DifferenceFunction<R>* 
-DifferenceFunction<R>::clone() const 
-{ 
-  return new DifferenceFunction<R>(this->_base); 
-}
-
-
-template<class R> 
-inline
-smoothness_type 
-DifferenceFunction<R>::smoothness() const 
-{ 
-  return _base.smoothness(); 
-}
-
-
-template<class R> 
-inline
-size_type 
-DifferenceFunction<R>::argument_size() const 
-{ 
-  return _base.argument_size(); 
-}
-
-template<class R> 
-inline
-size_type 
-DifferenceFunction<R>::result_size() const 
-{ 
-  return _base.result_size(); 
-}
-
-
-template<class R> 
-inline
-Vector<typename DifferenceFunction<R>::F> 
-DifferenceFunction<R>::evaluate(const Vector<F>& p) const 
-{
-  return _base.evaluate(p)-p; 
-}
-
-
-template<class R> 
-inline
-Matrix<typename DifferenceFunction<R>::F>
-DifferenceFunction<R>::jacobian(const Vector<F>& p) const 
-{
-  Matrix<F> d=_base.jacobian(p);
-  Matrix<F> i=Matrix< Interval<R> >::identity(this->result_size());
-  return d-i; 
-}
-
-template<class R> 
-inline
-TaylorDerivative<typename DifferenceFunction<R>::F>
-DifferenceFunction<R>::derivative(const Vector<F>& p, const smoothness_type& s) const 
-{
-  throw NotImplemented(__PRETTY_FUNCTION__);
-}
-
-
-template<class R> 
-inline
-std::string 
-DifferenceFunction<R>::name() const 
-{ 
-  return "DifferenceFunction"; 
-}
-
-template<class R> 
-inline
-std::ostream&
-DifferenceFunction<R>::write(std::ostream& os) const 
-{ 
-  return os << "DifferenceFunction"; 
-}
-
-
-
-
 
 
 template<class R> 

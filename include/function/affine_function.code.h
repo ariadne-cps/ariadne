@@ -28,6 +28,7 @@
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
 #include "differentiation/taylor_derivative.h"
+#include "differentiation/sparse_differential.h"
 
 
 namespace Ariadne {
@@ -63,6 +64,13 @@ AffineFunction<R>::derivative(const Vector<F>& x, const smoothness_type& s) cons
     }
   }
   return result;
+}
+
+template<class R>
+SparseDifferentialVector<typename AffineFunction<R>::AA> 
+AffineFunction<R>::expansion(const Vector<AA>& x, const smoothness_type& s) const
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
 template<class R>

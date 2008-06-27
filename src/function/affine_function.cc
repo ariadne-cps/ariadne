@@ -21,6 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "numeric/rational.h"
 #include "numeric/float.h"
 
 #include "function/affine_function.h"
@@ -33,12 +34,10 @@ namespace Ariadne {
 
 #ifdef ENABLE_FLOAT64
     template class AffineFunction<Float64>;
-    template class AffineFunction<Interval64>;
 #endif
     
 #ifdef ENABLE_FLOATMP
     template class AffineFunction<FloatMP>;
-    template class AffineFunction<IntervalMP>;
 #endif
 
   

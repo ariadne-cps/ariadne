@@ -28,6 +28,7 @@
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
 #include "differentiation/taylor_derivative.h"
+#include "differentiation/sparse_differential.h"
 
 
 namespace Ariadne {
@@ -58,6 +59,18 @@ IdentityFunction<R>::derivative(const Vector<F>& x, const smoothness_type& s) co
     if(s>0) {
       data[i+1u]=1;
     }
+  }
+  return result;
+}
+
+template<class R>
+SparseDifferentialVector<typename IdentityFunction<R>::A> 
+IdentityFunction<R>::expansion(const Vector<A>& x, const smoothness_type& s) const
+{
+  SparseDifferentialVector<A> result(this->result_size(),this->argument_size(),s);
+  for(size_type i=0; i!=this->result_size(); ++i) {
+    result[i]=x[i];
+    result[i][i]=A(1);
   }
   return result;
 }

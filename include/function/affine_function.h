@@ -48,6 +48,7 @@ namespace Ariadne {
     class AffineFunction
       : public FunctionInterface<R> 
     {
+      typedef typename traits<R>::approximate_arithmetic_type AA;
       typedef typename traits<R>::arithmetic_type F;
       typedef typename traits<R>::interval_type I;
      public:
@@ -80,8 +81,11 @@ namespace Ariadne {
       Vector<F> evaluate(const Vector<F>& x) const;
       /*! \brief The Jacobian derivative matrix at a point. */
       Matrix<F> jacobian(const Vector<F>& x) const;
-      /*! \brief The Jacobian derivative matrix at a point. */
+      /*! \brief All the derivative values up to degree \a s. */
       TaylorDerivative<F> derivative(const Vector<F>& x, const smoothness_type& s) const;
+      /*! \brief All the derivative values up to degree \a s, computed using approximate arithmetic. */
+      SparseDifferentialVector<AA> expansion(const Vector<AA>& x, const smoothness_type& s) const;
+
 
            
       /*! \brief  The linear transformation of the function. */

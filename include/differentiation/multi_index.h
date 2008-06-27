@@ -90,6 +90,8 @@ namespace Ariadne {
       MultiIndex& operator+=(const MultiIndex& a); // inline
       /*! Sum. */
       MultiIndex operator+(const MultiIndex& a) const; // inline
+      /*! Difference. */
+      MultiIndex operator-(const MultiIndex& a) const; // inline
      
       /*! Convert to a normal tensor index, with elements ordered lowest to highest. */
       operator SortedIndex () const;
@@ -310,6 +312,16 @@ namespace Ariadne {
       const MultiIndex& a1=*this;
       for(uint i=0; i!=a1.number_of_variables(); ++i) {
         result.set_index(i,a1[i]+a2[i]);
+      }
+      return result;
+    }
+    
+    inline
+    MultiIndex MultiIndex::operator-(const MultiIndex& a2) const {
+      MultiIndex result(a2.number_of_variables());
+      const MultiIndex& a1=*this;
+      for(uint i=0; i!=a1.number_of_variables(); ++i) {
+        result.set_index(i,a1[i]-a2[i]);
       }
       return result;
     }

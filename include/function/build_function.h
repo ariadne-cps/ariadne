@@ -34,6 +34,7 @@
 
 #include "differentiation/taylor_variable.h"
 #include "differentiation/taylor_derivative.h"
+#include "differentiation/sparse_differential.h"
 
 #define ARIADNE_BUILD_FUNCTION(Nm,f,rs,as,np,sm)   \
   template<class R> \
@@ -41,6 +42,7 @@
     : public FunctionInterface<R> \
   { \
    private: \
+    typedef typename traits<R>::approximate_arithmetic_type A; \
     typedef typename traits<R>::arithmetic_type X; \
    public: \
     template<class P> explicit Nm(const P& p) : _p(p) { } \
@@ -62,6 +64,14 @@
       const Vector<X>& p=this->_p; \
       TaylorDerivative<X> dx(as,as,s); \
       TaylorDerivative<X> dr(rs,as,s); \
+      for(uint i=0; i!=as; ++i) { dx[i]=x[i]; } \
+      f(dr,dx,p);      \
+      return dr; \
+    } \
+    virtual SparseDifferentialVector<A> expansion(const Vector<A>& x, const smoothness_type& s) const { \
+      const Vector<A>& p=this->_p; \
+      SparseDifferentialVector<A> dx(as,as,s); \
+      SparseDifferentialVector<A> dr(rs,as,s); \
       for(uint i=0; i!=as; ++i) { dx[i]=x[i]; } \
       f(dr,dx,p);      \
       return dr; \

@@ -47,6 +47,7 @@ namespace Ariadne {
     class ConstantFunction
       : public FunctionInterface<R> 
     {
+      typedef typename traits<R>::approximate_arithmetic_type A;
       typedef typename traits<R>::arithmetic_type F;
       typedef typename traits<R>::interval_type I;
      private:
@@ -79,6 +80,8 @@ namespace Ariadne {
       Matrix<F> jacobian(const Vector<F>& x) const;
       /*! \brief All the derivative values up to degree \a s. */
       TaylorDerivative<F> derivative(const Vector<F>& x, const smoothness_type& s) const;
+      /*! \brief All the derivative values up to degree \a s. */
+      SparseDifferentialVector<A> expansion(const Vector<A>& x, const smoothness_type& s) const;
 
            
       /*! \brief  The linear transformation of the function. */

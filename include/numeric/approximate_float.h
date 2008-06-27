@@ -27,8 +27,8 @@
 #ifndef ARIADNE_NUMERIC_APPROXIMATE_FLOAT_H
 #define ARIADNE_NUMERIC_APPROXIMATE_FLOAT_H
 
-#include "float.h"
-#include "interval.h"
+#include "numeric/float.h"
+#include "numeric/interval.h"
 
 namespace Ariadne {
   
@@ -54,6 +54,16 @@ namespace Ariadne {
         _value=x._value; return *this; }
     };
 
+
+    template<class T> inline
+    bool
+    operator==(const ApproximateFloat<T>& x, const int& y) {
+      return x._value==y; }
+
+    template<class T> inline
+    bool
+    operator==(const ApproximateFloat<T>& x, const double& y) {
+      return x._value==y; }
 
     template<class T> inline
     bool
@@ -133,6 +143,11 @@ namespace Ariadne {
 
     template<class T> inline
     ApproximateFloat<T> 
+    pow(const ApproximateFloat<T>& x, const int& y) {
+      return pow_approx(x._value,y)._value; }
+
+    template<class T> inline
+    ApproximateFloat<T> 
     sqrt(const ApproximateFloat<T>& x) {
       return ApproximateFloat<T>(sqrt_approx(x._value)); }
 
@@ -158,7 +173,38 @@ namespace Ariadne {
     operator/=(ApproximateFloat<T>& x, const ApproximateFloat<T>& y) {
       x._value=div_approx(x._value,y._value); return x; }
 
-  
+
+    template<class T> inline
+    Interval< Float<T> > 
+    operator*(const ApproximateFloat<T>& x, const Float<T>& y) {
+      return Float<T>(x._value)*y; }
+
+    template<class T> inline
+    Interval< Float<T> > 
+    operator*(const Float<T>& x, const ApproximateFloat<T>& y) {
+      return x*Float<T>(y._value); }
+
+    template<class T> inline
+    Interval< Float<T> > 
+    operator*(const ApproximateFloat<T>& x, const Interval< Float<T> >& y) {
+      return Float<T>(x._value)*y; }
+
+    template<class T> inline
+    Interval< Float<T> > 
+    operator*(const Interval< Float<T> >& x, const ApproximateFloat<T>& y) {
+      return x*Float<T>(y._value); }
+
+    template<class T> inline
+    std::ostream& 
+    operator<<(std::ostream& os, const ApproximateFloat<T>& x) {
+      return os << x._value; }
+
+    template<class T> inline
+    std::istream& 
+    operator>>(std::istream& is, ApproximateFloat<T>& x) {
+      return is >> x._value; }
+
+
 } // namespace Ariadne
 
 #endif /* ARIADNE_NUMERIC_APPROXIMATE_FLOAT_H */

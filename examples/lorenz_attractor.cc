@@ -1,8 +1,8 @@
 /***************************************************************************
  *            lorenz_attractor.cc
  *
- *  Copyright  2008  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
+ *  Copyright  2008  Pieter Collins
+ *
  ****************************************************************************/
 
 /*

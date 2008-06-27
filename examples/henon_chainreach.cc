@@ -1,8 +1,8 @@
 /***************************************************************************
  *            henon_chainreach.cc
  *
- *  Copyright  2005-6  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
+ *  Copyright  2005-8  Pieter Collins
+ *
  ****************************************************************************/
 
 /*

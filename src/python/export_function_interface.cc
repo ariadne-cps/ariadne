@@ -27,6 +27,7 @@
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
 #include "differentiation/taylor_derivative.h"
+#include "differentiation/sparse_differential.h"
 #include "function/function_interface.h"
 
 #include <boost/python.hpp>
@@ -41,6 +42,7 @@ class FunctionWrapper
   , public wrapper< FunctionInterface<R> >
 {
   typedef typename traits<R>::arithmetic_type F;
+  typedef typename traits<R>::approximate_arithmetic_type A;
   virtual FunctionInterface<R>* clone() const { return this->get_override("clone")(); };
   virtual std::string name() const { return this->get_override("name")(); }
   virtual size_type result_size() const { return this->get_override("result_size")(); }
@@ -49,6 +51,7 @@ class FunctionWrapper
   virtual Vector<F> evaluate(const Vector<F>&) const { return this->get_override("evaluate")(); }
   virtual Matrix<F> jacobian(const Vector<F>&) const { return this->get_override("jacobian")(); }
   virtual TaylorDerivative<F> derivative(const Vector<F>&, const smoothness_type&) const { return this->get_override("derivative")(); }
+  virtual SparseDifferentialVector<A> expansion(const Vector<A>&, const smoothness_type&) const { return this->get_override("expansion")(); }
   virtual std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
 };
 

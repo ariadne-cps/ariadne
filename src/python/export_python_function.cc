@@ -24,10 +24,12 @@
 #include "python/float.h"
 #include "python/read_array.h"
 
+#include "numeric/float.h"
 #include "numeric/rational.h"
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
 #include "differentiation/taylor_derivative.h"
+#include "differentiation/sparse_differential.h"
 #include "function/function_interface.h"
 
 #include <boost/python.hpp>
@@ -96,6 +98,7 @@ class PythonFunction
   : public FunctionInterface<R>
 {
   typedef typename traits<R>::arithmetic_type F;
+  typedef typename traits<R>::approximate_arithmetic_type A;
  public:
   PythonFunction(std::string& nm, size_type rs, size_type as, const object& pyf) : _name(nm), _result_size(rs), _argument_size(as), _pyf(pyf) { }
   PythonFunction(size_type rs, size_type as, const object& pyf) : _name(), _result_size(rs), _argument_size(as), _pyf(pyf) { }
@@ -122,6 +125,11 @@ class PythonFunction
   virtual TaylorDerivative<F> derivative (const Vector<F>& x, const smoothness_type& d) const {  
     TaylorDerivative<F> rd(this->_result_size,this->_argument_size,d); 
     TaylorDerivative<F> ad=TaylorDerivative<F>::variable(x.size(),x.size(),d,x); 
+    read(rd,this->_pyf(ad)); 
+    return rd; }
+  virtual SparseDifferentialVector<A> expansion (const Vector<A>& x, const smoothness_type& d) const {  
+    SparseDifferentialVector<A> rd(this->_result_size,this->_argument_size,d); 
+    SparseDifferentialVector<A> ad=SparseDifferentialVector<A>::variable(x.size(),x.size(),d,x); 
     read(rd,this->_pyf(ad)); 
     return rd; }
 

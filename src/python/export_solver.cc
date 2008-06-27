@@ -1,8 +1,8 @@
 /***************************************************************************
- *            python/export_solve.cc
+ *            python/export_solver.cc
  *
- *  Copyright  2006  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright  2006-8  Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -23,7 +23,8 @@
 
 #include "python/float.h"
 
-#include "evaluation/newton.h"
+#include "geometry/point.h"
+#include "evaluation/newton_solver.h"
 #include "python/utilities.h"
 
 using namespace Ariadne;
@@ -35,14 +36,13 @@ using namespace boost::python;
 template<class R>
 void export_solver() 
 {
-  return_value_policy<copy_const_reference> copy_const_reference;
   
   class_< IntervalNewtonSolver<R> >("IntervalNewtonSolver",init<R,uint>())
     .def(init<double,uint>())
-    .def("maximum_error",&SolverInterface<R>::maximum_error,copy_const_reference)
-    .def("maximum_number_of_steps",&SolverInterface<R>::maximum_number_of_steps,copy_const_reference)
+    .def("maximum_error",&SolverBase<R>::maximum_error)
+    .def("maximum_number_of_steps",&SolverBase<R>::maximum_number_of_steps)
     .def("solve",&IntervalNewtonSolver<R>::solve)
-    .def("fixed_point",&SolverInterface<R>::fixed_point)
+    .def("fixed_point",&SolverBase<R>::fixed_point)
   ;
   
 }

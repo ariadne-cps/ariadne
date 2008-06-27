@@ -41,6 +41,7 @@ namespace Ariadne {
      public:
       ApproximateFloat() : _value(0) { }
       ApproximateFloat(const int& n) : _value(n) { }
+      ApproximateFloat(const uint& n) : _value(n) { }
       ApproximateFloat(const double& x) : _value(x) { }
       explicit ApproximateFloat(const Float<T>& x) : _value(x) { }
       explicit ApproximateFloat(const Interval< Float<T> >& x) : _value(x.midpoint()) { }
@@ -130,16 +131,6 @@ namespace Ariadne {
     ApproximateFloat<T> 
     operator/(const ApproximateFloat<T>& x, const ApproximateFloat<T>& y) {
       return ApproximateFloat<T>(div_approx(x._value,y._value)); }
-
-    template<class T> inline
-    ApproximateFloat<T> 
-    operator/(const int& x, const ApproximateFloat<T>& y) {
-      return div_approx(x,y._value); }
-
-    template<class T> inline
-    ApproximateFloat<T> 
-    operator/(const ApproximateFloat<T>& x, const int& y) {
-      return div_approx(x._value,y); }
 
     template<class T> inline
     ApproximateFloat<T> 

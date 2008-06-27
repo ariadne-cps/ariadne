@@ -1,5 +1,5 @@
 /***************************************************************************
- *            solver.h
+ *            solver_interface.h
  *
  *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file solver.h
- *  \brief Base class for solving equations.
+/*! \file solver_interface.h
+ *  \brief Interface class for solving equations.
  */
 
-#ifndef ARIADNE_SOLVER_H
-#define ARIADNE_SOLVER_H
+#ifndef ARIADNE_SOLVER_INTERFACE_H
+#define ARIADNE_SOLVER_INTERFACE_H
 
 #include <exception>
 #include <stdexcept>
@@ -53,35 +53,26 @@ namespace Ariadne {
     {
       typedef typename traits<R>::interval_type I;
      public:
-      /*! \brief Constructor. */
-      SolverInterface(R max_error, uint max_steps);
-      
       /*! \brief Virtual destructor. */
-      virtual ~SolverInterface();
+      virtual ~SolverInterface() { };
         
       /*! \brief The maximum permissible error of the solution. */
-      const R& maximum_error() const;
-      /*! \brief The maximum number of steps allowed before the method must quit. */
-      const uint& maximum_number_of_steps() const;
-      
+      virtual R maximum_error() const = 0;
       /*! \brief Set the maximum error. */
-      void set_maximum_error(R max_error);
+      virtual void set_maximum_error(R max_error) = 0;
+
+      /*! \brief The maximum number of steps allowed before the method must quit. */
+      virtual uint maximum_number_of_steps() const = 0;
       /*! \brief Set the maximum number of steps. */
-      void set_maximum_number_of_steps(uint max_steps);
+      virtual void set_maximum_number_of_steps(uint max_steps) = 0;
       
       /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
       virtual Point<I> solve(const FunctionInterface<R>& f,const Point<I>& pt) = 0;
       /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
-      virtual Point<I> fixed_point(const Map<R>& f,const Point<I>& pt);
-      
-     private:
-      R _max_error;
-      uint _max_steps;
+      virtual Point<I> fixed_point(const Map<R>& f,const Point<I>& pt) = 0;
     };
     
 
 } // namespace Ariadne
 
-#include "solver.inline.h"
-
-#endif /* ARIADNE_SOLVER_H */
+#endif /* ARIADNE_SOLVER_INTERFACE_H */

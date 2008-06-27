@@ -51,6 +51,24 @@ template<class X> SparseDifferential<X> operator-(const SparseDifferential<X>& x
 template<class X> SparseDifferential<X> operator*(const SparseDifferential<X>& x, const SparseDifferential<X>& y);
 template<class X> SparseDifferential<X> operator/(const SparseDifferential<X>& x, const SparseDifferential<X>& y);
 
+template<class X> SparseDifferential<X> operator+(const SparseDifferential<X>& x, const X& c);
+template<class X> SparseDifferential<X> operator-(const SparseDifferential<X>& x, const X& c);
+template<class X> SparseDifferential<X> operator*(const SparseDifferential<X>& x, const X& c);
+template<class X> SparseDifferential<X> operator/(const SparseDifferential<X>& x, const X& c);
+template<class X> SparseDifferential<X> operator+(const X& c, const SparseDifferential<X>& x);
+template<class X> SparseDifferential<X> operator-(const X& c, const SparseDifferential<X>& x);
+template<class X> SparseDifferential<X> operator*(const X& c, const SparseDifferential<X>& x);
+template<class X> SparseDifferential<X> operator/(const X& c, const SparseDifferential<X>& x);
+
+template<class X> SparseDifferential<X> pow(const SparseDifferential<X>& x, int n);
+template<class X> SparseDifferential<X> sqr(const SparseDifferential<X>& x);
+template<class X> SparseDifferential<X> sqrt(const SparseDifferential<X>& x);
+template<class X> SparseDifferential<X> exp(const SparseDifferential<X>& x);
+template<class X> SparseDifferential<X> log(const SparseDifferential<X>& x);
+template<class X> SparseDifferential<X> sin(const SparseDifferential<X>& x);
+template<class X> SparseDifferential<X> cos(const SparseDifferential<X>& x);
+template<class X> SparseDifferential<X> tan(const SparseDifferential<X>& x);
+
 template<class X, class Y> Y evaluate(const SparseDifferential<X>& y, const Vector<Y>& z);
 template<class X> SparseDifferential<X> compose(const SparseSeries<X>& x, const SparseDifferential<X>& y);
 template<class X> SparseDifferential<X> derivative(const SparseDifferential<X>& x, uint i);
@@ -102,7 +120,7 @@ template<class X> SparseSeries<X> SparseSeries<X>::rec(ushort d, const X& c) {
 template<class X> SparseSeries<X> SparseSeries<X>::pow(ushort d, const X& c, int k) {
   uint n=k; SparseSeries<X> y;
   for(uint i=0; i<=std::min(uint(d),n); ++i) {
-    uint j=n-i; y[i]=X(bin(n,j))*::pow(c,j); }
+    uint j=n-i; y[i]=X(bin(n,j))*Ariadne::pow(c,j); }
   return y;
 }
 
@@ -222,13 +240,13 @@ SparseDifferential<X> operator-(const SparseDifferential<X>& x)
 
 
 template<class X>
-SparseDifferential<X> operator+(const X& c, const SparseDifferential<X>& x)
+SparseDifferential<X> operator+(const SparseDifferential<X>& x, const X& c)
 {
   SparseDifferential<X> r(x); r+=c; return r; 
 }
 
 template<class X>
-SparseDifferential<X> operator+(const SparseDifferential<X>& x, const X& c)
+SparseDifferential<X> operator+(const X& c, const SparseDifferential<X>& x)
 {
   SparseDifferential<X> r(x); r+=c; return r; 
 }
@@ -246,9 +264,33 @@ SparseDifferential<X> operator-(const X& c, const SparseDifferential<X>& x)
 }
 
 template<class X>
+SparseDifferential<X> operator-(const double& c, const SparseDifferential<X>& x)
+{
+  SparseDifferential<X> r(-x); r+=(c); return r; 
+}
+
+template<class X>
+SparseDifferential<X> operator*(const SparseDifferential<X>& x, const X& c)
+{
+  SparseDifferential<X> r(x); r*=c; return r; 
+}
+
+template<class X>
 SparseDifferential<X> operator*(const X& c, const SparseDifferential<X>& x)
 {
   SparseDifferential<X> r(x); r*=c; return r; 
+}
+
+template<class X>
+SparseDifferential<X> operator/(const SparseDifferential<X>& x, const X& c)
+{
+  SparseDifferential<X> r(x); r*=(X(1)/c); return r; 
+}
+
+template<class X>
+SparseDifferential<X> operator/(const X& c, const SparseDifferential<X>& x)
+{
+  SparseDifferential<X> r=rec(x); r*=c; return r; 
 }
 
 template<class X>
@@ -262,7 +304,6 @@ SparseDifferential<X> operator-(const SparseDifferential<X>& x, const SparseDiff
 {
   SparseDifferential<X> r(x); r-=y; r.cleanup(); return r; 
 }
-
 
 template<class X>
 SparseDifferential<X> operator*(const SparseDifferential<X>& x, const SparseDifferential<X>& y)
@@ -282,9 +323,63 @@ SparseDifferential<X> operator*(const SparseDifferential<X>& x, const SparseDiff
 }
 
 template<class X>
+SparseDifferential<X> operator/(const SparseDifferential<X>& x, const SparseDifferential<X>& y)
+{
+  return x*rec(y);
+}
+
+template<class X>
 SparseDifferential<X> rec(const SparseDifferential<X>& x)
 {
   return compose(SparseSeries<X>::rec(x.degree(),x.value()),x);
+}
+
+template<class X>
+SparseDifferential<X> sqr(const SparseDifferential<X>& x)
+{
+  return pow(x,2);
+}
+
+template<class X>
+SparseDifferential<X> pow(const SparseDifferential<X>& x, int n)
+{
+  return compose(SparseSeries<X>::pow(x.degree(),x.value(),n),x);
+}
+
+template<class X>
+SparseDifferential<X> sqrt(const SparseDifferential<X>& x)
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+template<class X>
+SparseDifferential<X> exp(const SparseDifferential<X>& x)
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+template<class X>
+SparseDifferential<X> log(const SparseDifferential<X>& x)
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+template<class X>
+SparseDifferential<X> sin(const SparseDifferential<X>& x)
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+template<class X>
+SparseDifferential<X> cos(const SparseDifferential<X>& x)
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+template<class X>
+SparseDifferential<X> tan(const SparseDifferential<X>& x)
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
 template<class X>
@@ -373,6 +468,13 @@ class SparseDifferentialVector
     ARIADNE_ASSERT(c.size()==rs);
     SparseDifferentialVector<X> result(rs,as,d);
     for(uint i=0; i!=rs; ++i) { result[i]=c[i]; }
+    return result;
+  }
+
+  static SparseDifferentialVector<X> variable(uint rs, uint as, ushort d, const Vector<X>& x) {
+    ARIADNE_ASSERT(x.size()==rs);
+    SparseDifferentialVector<X> result(rs,as,d);
+    for(uint i=0; i!=rs; ++i) { result[i]=x[i]; result[i][i]=X(1.0); }
     return result;
   }
 };

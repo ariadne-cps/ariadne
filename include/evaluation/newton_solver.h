@@ -1,8 +1,8 @@
 /***************************************************************************
- *            newton.h
+ *            newton_solver.h
  *
- *  Copyright  2006  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
+ *  Copyright  2006-8  Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file newton.h
+/*! \file newton_solver.h
  *  \brief Newton and interval Newton methods.
  */
 
-#ifndef ARIADNE_NEWTON_H
-#define ARIADNE_NEWTON_H
+#ifndef ARIADNE_NEWTON_SOLVER_H
+#define ARIADNE_NEWTON_SOLVER_H
 
 #include <exception>
 #include <stdexcept>
@@ -37,6 +37,7 @@
 #include "geometry/declarations.h"
 
 #include "solver_interface.h"
+#include "solver_base.h"
 
 namespace Ariadne {
   
@@ -45,12 +46,12 @@ namespace Ariadne {
      *  \brief Interval Newton solver.
      */
     template<class R>
-    class IntervalNewtonSolver : public SolverInterface<R>
+    class IntervalNewtonSolver : public SolverBase<R>
     {
       typedef typename traits<R>::interval_type I;
      public:
       /*! \brief Constructor. */
-      IntervalNewtonSolver(R max_error, uint max_steps) : SolverInterface<R>(max_error,max_steps) { }
+      IntervalNewtonSolver(R max_error, uint max_steps) : SolverBase<R>(max_error,max_steps) { }
       
       /*! \brief Solve \f$f(x)=0\f$, using the interval Newton method. */
       Point<I>
@@ -61,4 +62,4 @@ namespace Ariadne {
     
 } // namespace Ariadne
 
-#endif /* ARIADNE_NEWTON_H */
+#endif /* ARIADNE_NEWTON_SOLVER_H */

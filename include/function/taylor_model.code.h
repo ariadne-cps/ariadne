@@ -46,7 +46,7 @@
 #include "geometry/point.h"
 #include "geometry/box.h"
 
-#include "evaluation/newton.h"
+#include "evaluation/newton_solver.h"
 
 #include "output/logging.h"
 #include "output/latexstream.h"

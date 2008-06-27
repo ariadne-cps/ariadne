@@ -31,7 +31,7 @@
 #include "geometry/point.h"
 #include "geometry/rectangle.h"
 #include "evaluation/exceptions.h"
-#include "evaluation/newton.h"
+#include "evaluation/newton_solver.h"
 
 #include "models/henon.h"
 #include "test.h"

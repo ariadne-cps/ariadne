@@ -21,10 +21,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "newton.h"
+#include "newton_solver.h"
 
 #include "output/logging.h"
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
 #include "geometry/point.h"
+#include "geometry/box.h"
 
 #include "system/vector_field.h"
 
@@ -36,7 +39,7 @@ namespace Ariadne {
 template<class R>
 Point<typename IntervalNewtonSolver<R>::I>
 IntervalNewtonSolver<R>::solve(const FunctionInterface<R>& f, 
-                                           const Point<I>& ix)
+                               const Point<I>& ix)
 {
   const R& e=this->maximum_error();
   uint n=this->maximum_number_of_steps();

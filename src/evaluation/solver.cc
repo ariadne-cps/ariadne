@@ -24,8 +24,8 @@
 
 #include "numeric/float.h"
 
-#include "evaluation/newton.h"
-#include "evaluation/newton.code.h"
+#include "evaluation/newton_solver.h"
+#include "evaluation/newton_solver.code.h"
 
 namespace Ariadne {
   

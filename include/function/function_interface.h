@@ -34,16 +34,14 @@
 #include <stdexcept>
 
 #include "base/types.h"
-#include "base/array.h"
 #include "numeric/traits.h"
-#include "linear_algebra/declarations.h"
-#include "function/declarations.h"
 
 namespace Ariadne {
 
     template<class X> class Vector;
     template<class X> class Matrix;
     class MultiIndex;
+    template<class X> class TaylorDerivative;
     template<class X> class SparseDifferentialVector;
 
     /*!\ingroup Function

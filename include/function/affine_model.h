@@ -33,8 +33,8 @@
 #include "numeric/traits.h"
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
-#include "geometry/point.h"
-#include "geometry/box.h"
+
+#include "function/function_model_concept.h"
 
 namespace Ariadne {
     
@@ -45,10 +45,10 @@ namespace Ariadne {
     template<class R> AffineModel<R> add(const AffineModel<R>&, const AffineModel<R>&);
     template<class R> AffineModel<R> sub(const AffineModel<R>&, const AffineModel<R>&);
 
-    template<class R> AffineModel<R> recentre(const AffineModel<R>&, const Box<R>& bx, const Point<R>& pt);
-    template<class R> AffineModel<R> restrict(const AffineModel<R>&, const Box<R>& bx);
+    template<class R> AffineModel<R> recentre(const AffineModel<R>&, const Vector< Interval<R> >& bx, const Vector<R>& pt);
+    template<class R> AffineModel<R> restrict(const AffineModel<R>&, const Vector< Interval<R> >& bx);
     template<class R> AffineModel<R> reduce(const AffineModel<R>&, size_type);
-    template<class R> AffineModel<R> translate(const AffineModel<R>&, const Point<R>& c);
+    template<class R> AffineModel<R> translate(const AffineModel<R>&, const Vector<R>& c);
 
     template<class R> AffineModel<R> compose(const AffineModel<R>&, const AffineModel<R>&);
     template<class R> AffineModel<R> inverse(const AffineModel<R>&);
@@ -66,67 +66,70 @@ namespace Ariadne {
      public:
       /*! \brief The real number type. */
       typedef R real_type;
-      
+
       /*! \brief Destructor. */
       ~AffineModel() { };
      
       /*! \brief Constructor. */
-      AffineModel(const Box<R>& d,
-                  const Point<R>& c, 
-                  const Point<I>& v, 
+      AffineModel(const Vector<I>& d,
+                  const Vector<R>& c, 
+                  const Vector<I>& v, 
                   const Matrix<I>& j);
      
       /*! \brief Constructor. */
-      AffineModel(const Box<R>& d,
-                  const Point<R>& c, 
-                  const array< AffineVariable<I> >& av);
+      AffineModel(const Vector<I>& d,
+                  const Vector<R>& c, 
+                  const Vector< AffineVariable<I> >& av);
 
       /*! \brief Constructor. */
-      AffineModel(const Box<R>& d,
-                  const Point<R>& c,
+      AffineModel(const Vector<I>& d,
+                  const Vector<R>& c,
                   const FunctionInterface<R>& f);
 
       // Data access
       /*! \brief The image of the centre of the domain. */
-      Point<I> const& value() const { return this->_value; }
+      Vector<I> const& value() const { return this->_value; }
       /*! \brief The jacobian derivative of the model. */
       Matrix<I> const& jacobian() const {  return this->_jacobian; }
 
 
       /*! \brief The size of the result. */
-      size_type result_size() const { return this->_value.dimension(); }
+      size_type result_size() const { return this->_value.size(); }
       /*! \brief The size of the argument. */
-      size_type argument_size() const { return this->_centre.dimension(); }
+      size_type argument_size() const { return this->_centre.size(); }
       /*! \brief The order of the function model. Returns the constant 1. */
       smoothness_type order() const { return 1u; }
       /*! \brief The smoothness of the function. */
       smoothness_type smoothness() const { return 1u; }
 
       /*! \brief The domain of validity of the model. */
-      Box<R> domain() const { return this->_domain; }
+      Vector<I> domain() const { return this->_domain; }
       /*! \brief The centre of the  of validity of the model. */
-      Point<R> centre() const { return this->_centre; }
+      Vector<R> centre() const { return this->_centre; }
       /*! \brief The image of the domain. */
-      Box<R> range() const;
+      Vector<I> range() const;
 
       /*! \brief Evaluate at a point. */
-      Point<I> evaluate(const Point<I>& pt) const;
-      Point<I> evaluate(const Point<R>& pt) const {
-        return this->evaluate(Point<I>(pt)); }
+      Vector<I> evaluate(const Vector<I>& pt) const;
+      Vector<I> evaluate(const Vector<R>& pt) const {
+        return this->evaluate(Vector<I>(pt)); }
       /*! \brief The Jacobian derivative at a point. */
-      Point<I> jacobian(const Point<I>& pt) const;
-      Point<I> jacobian(const Point<R>& pt) const {
-        return this->evaluate(Point<I>(pt)); }
+      Vector<I> jacobian(const Vector<I>& pt) const;
+      Vector<I> jacobian(const Vector<R>& pt) const {
+        return this->evaluate(Vector<I>(pt)); }
 
       /*! \brief Write to an output stream. */
       std::ostream& write(std::ostream& os) const;
      private:
       static void instantiate();
      private:
-      Box<R> _domain;
-      Point<R> _centre;
-      Point<I> _value;
+      Vector<I> _domain;
+      Vector<R> _centre;
+      Vector<I> _value;
       Matrix<I> _jacobian;
+     private:
+      // Doesn't conform to FunctionModelConcept since no derivative/antiderivative
+      // BOOST_CONCEPT_ASSERT((FunctionModelConcept< AffineModel<R> >));
     };
     
     template<class R> inline
@@ -134,7 +137,8 @@ namespace Ariadne {
       return am.write(os);
     }
 
-  
+
+
 } // namespace Ariadne
 
 #endif /* ARIADNE_AFFINE_MODEL_H */

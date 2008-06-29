@@ -73,7 +73,7 @@ namespace Ariadne {
       AffineVariable(const TaylorVariable<X>& tv)
         : TaylorVariable<X>(tv) { ARIADNE_ASSERT(tv.degree()==1u); }
     
-      // Dispatct assignment operator
+      // Dispatch assignment operator
       template<class XX> AffineVariable<X> operator=(const XX& x) { 
         this->TaylorVariable<X>::operator=(x); return *this; }
 

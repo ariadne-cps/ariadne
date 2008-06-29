@@ -121,6 +121,7 @@ namespace Ariadne {
       TaylorVariable<X>& operator[](const size_type& i); 
       /*! \brief The \a i<sup> th</sup> component. */
       const TaylorVariable<X>& operator[](const size_type& i) const; 
+
 #ifdef DOXYGEN
     //@{ 
     //! \name Friend operations
@@ -171,13 +172,15 @@ namespace Ariadne {
   template<class X> TaylorVariable<X> compose(const TaylorVariable<X>& y, const TaylorDerivative<X>& x);
 
   template<class X> Vector<X> evaluate(const TaylorDerivative<X>& y, const Vector<X>& x);
-  template<class X> TaylorDerivative<X> evaluate(const TaylorDerivative<X>& y, const TaylorDerivative<X>& x);
+
+  template<class X> TaylorDerivative<X> translate(const TaylorDerivative<X>& x, const Vector<X>& c);
   template<class X> TaylorDerivative<X> compose(const TaylorDerivative<X>& y, const TaylorDerivative<X>& x);
   template<class X> TaylorDerivative<X> inverse(const TaylorDerivative<X>& x, const Vector<X>& c);
   template<class X> TaylorDerivative<X> implicit(const TaylorDerivative<X>& x, const Vector<X>& c);
   template<class X> TaylorDerivative<X> concatenate(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y);
   template<class X> TaylorDerivative<X> reduce(const TaylorDerivative<X>& x);
   template<class X> TaylorDerivative<X> derivative(const TaylorDerivative<X>& x, const size_type& k);
+  template<class X> TaylorDerivative<X> antiderivative(const TaylorDerivative<X>& x, const size_type& k);
   
   template<class X>
   array< TaylorSeries< TaylorVariable<X> > > 
@@ -198,6 +201,7 @@ namespace Ariadne {
   template<class X> TaylorDerivative<X>& operator-=(TaylorDerivative<X>& x, const Vector<X>& v);
   template<class X> TaylorDerivative<X> operator-(const TaylorDerivative<X>& x, const Vector<X>& v);
 
+  template<class X> TaylorDerivative<X>& operator*=(TaylorDerivative<X>& x, const double& c);
   template<class X> TaylorDerivative<X>& operator*=(TaylorDerivative<X>& x, const X& c);
   template<class X> TaylorDerivative<X> operator*(const X& c, const TaylorDerivative<X>& x);
   template<class X> TaylorDerivative<X> operator*(const TaylorDerivative<X>& x, const X& c);

@@ -266,10 +266,9 @@ integration_step(const AffineVectorField<R>& affine_vector_field,
   Vector<I> iv2=h*(iP*b);
   ARIADNE_LOG(9,"iv2="<<iv2<<"\n");
   Vector<I> icv=iv1+iv2;
-  Point<I> ic(icv);
   ARIADNE_LOG(9,"ic="<<icv<<"\n");
   
-  AffineModel<R> model(initial_set.bounding_box(),initial_set.centre(),ic,iDf);
+  AffineModel<R> model(initial_set.bounding_box().position_vectors(),initial_set.centre().position_vector(),icv,iDf);
   return apply(model,initial_set);
 }
 

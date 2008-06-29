@@ -200,10 +200,10 @@ void
 read_interval(Interval<R>& ivl, const boost::python::dict& pair)
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
-  if(boost::python::len(pair)!=1) {
-    throw std::runtime_error("Interval must be a pair [a,b] or {a:b}.");
-  }
-  R& l=ivl._lower; R& u=ivl._upper;
+  //if(boost::python::len(pair)!=1) {
+  //  throw std::runtime_error("Interval must be a pair [a,b] or {a:b}.");
+  //}
+  //R& l=ivl._lower; R& u=ivl._upper;
   //read_scalar(l,pair[0].key()); read_scalar(u,pair[1].value());
 }
 

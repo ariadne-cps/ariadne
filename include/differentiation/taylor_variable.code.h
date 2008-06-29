@@ -248,6 +248,20 @@ derivative(const TaylorVariable<X>& x, size_type k)
 }
 
 
+template<class X> 
+TaylorVariable<X> 
+antiderivative(const TaylorVariable<X>& x, size_type k)
+{
+  TaylorVariable<X> r(x.argument_size(),x.degree()+1);
+  MultiIndex e(x.argument_size());
+  e.set(k,1);
+  for(MultiIndex j(r.argument_size()); j.degree() <= x.degree(); ++j) {
+    r[j+e]=x[j]/(j[k]+1);
+  }
+  return r;
+}
+
+
 
 
 
@@ -312,6 +326,7 @@ TaylorVariable<X>::instantiate()
   evaluate(*tv,v->data());
   compose(*ts,*tv);
   derivative(*tv,0u);
+  antiderivative(*tv,0u);
  
   operator<(*tv,*tv);
 

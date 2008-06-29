@@ -113,10 +113,11 @@ void export_taylor_derivative()
   def("variable",(TD(*)(const IVec&,smoothness_type))&TD::variable);
 
   def("evaluate",(IVec(*)(const TD&,const IVec&))&evaluate);
-  def("evaluate",(TV(*)(const TV&,const TD&))&evaluate);
-  def("evaluate",(TD(*)(const TD&,const TD&))&evaluate);
+  //def("evaluate",(TV(*)(const TV&,const TD&))&evaluate);
+  //def("evaluate",(TD(*)(const TD&,const TD&))&evaluate);
   def("compose",(TV(*)(const TV&,const TD&))&compose);
   def("compose",(TD(*)(const TD&,const TD&))&compose);
+  def("translate",(TD(*)(const TD&,const IVec&))&translate);
   def("inverse",(TD(*)(const TD&,const IVec&))&inverse);
   def("implicit",(TD(*)(const TD&,const IVec&))&implicit);
 
@@ -149,9 +150,9 @@ void export_taylor_derivative<Rational>()
   def("variable",(TD(*)(const Vec&,smoothness_type))&TD::variable);
 
   def("evaluate",(TV(*)(const TV&,const TD&))&evaluate);
-  def("evaluate",(TD(*)(const TD&,const TD&))&evaluate);
   def("compose",(TV(*)(const TV&,const TD&))&compose);
   def("compose",(TD(*)(const TD&,const TD&))&compose);
+  def("translate",(TD(*)(const TD&,const Vec&))&translate);
   def("inverse",(TD(*)(const TD&,const Vec&))&inverse);
   def("implicit",(TD(*)(const TD&,const Vec&))&implicit);
 

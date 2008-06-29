@@ -150,13 +150,13 @@ reachability_step(const VectorField<R>& vector_field,
   Rational half_step_size=step_size/2;
 
   AffineModel<R> flow_model=this->_flower->affine_flow_model(vector_field,initial_set.centre(),initial_set.bounding_box(),half_step_size,bounding_box);
-  Point<I> phic=flow_model.value();
+  Vector<I> phic=flow_model.value();
   Matrix<I> Dphi=flow_model.jacobian();
   Matrix<I> gen=Dphi*initial_set.generators();
   Vector<I> hhf=I(half_step_size)*vector_field(bounding_box);
   Vector<I> err=Dphi*(I(-1,1)*initial_set.error());
 
-  Zonotope<R> result(phic+err,concatenate_columns(gen,hhf));
+  Zonotope<R> result(Point<I>(phic+err),concatenate_columns(gen,hhf));
 
   return result;
 }

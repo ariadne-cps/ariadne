@@ -1,8 +1,8 @@
 /***************************************************************************
- *            integrator_interface.inline.h
+ *            integrator_base.h
  *
- *  Copyright  2006-7  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
+ *  Copyright  2006-8  Alberto Casagrande, Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -21,31 +21,44 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+#ifndef ARIADNE_INTEGRATOR_BASE_H
+#define ARIADNE_INTEGRATOR_BASE_H
+
 #include "integrator_interface.h"
 
 namespace Ariadne {
 
-template<class BS>
-BS
-IntegratorInterface<BS>::
+template<class ES, class TM=Rational>
+class IntegratorBase
+  : public IntegratorInterface<ES,TM>
+{
+  typedef typename ES::real_type R;
+  ES evolution_step(const VectorField<R>& f, const ES& s,
+                    const TM& t1, const TM& t2, 
+                    const Box<R>& bb) const;
+};
+
+
+       
+
+template<class ES, class TM>
+ES
+IntegratorBase<ES,TM>::
 evolution_step(const VectorField<R>& f, 
-               const BS& s,
-               const Rational& t1, 
-               const Rational& t2, 
+               const ES& s,
+               const TM& t1, 
+               const TM& t2, 
                const Box<R>& bb) const
 {
   ARIADNE_ASSERT(t2>=t1);
-  BS es=this->integration_step(f,s,t1,bb); 
+  ES es=this->integration_step(f,s,t1,bb); 
   if(t1==t2) { return es; }
-  else { return this->reachability_step(f,es,Rational(t2-t1),bb); }
+  else { return this->reachability_step(f,es,TM(t2-t1),bb); }
 }
           
 
-template<class R> inline
-std::ostream&
-operator<<(std::ostream& os, const IntegratorInterface<R>& i) 
-{
-  return i.write(os);
-}
 
 } // namespace Ariadne
+
+#endif /* ARIADNE_INTEGRATOR_BASE_H */
+

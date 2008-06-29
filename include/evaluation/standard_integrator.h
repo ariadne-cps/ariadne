@@ -37,6 +37,8 @@
 #include "evaluation/reducer_interface.h"
 #include "evaluation/integrator_interface.h"
 
+#include "evaluation/integrator_base.h"
+
 
 namespace Ariadne { 
    
@@ -63,7 +65,7 @@ namespace Ariadne {
      * See the section on the \ref c1lohnerintegrator for details.
      */
     template<class R> class StandardIntegrator< Zonotope<R> >
-      : public IntegratorInterface< Zonotope<R> >
+      : public IntegratorBase< Zonotope<R> >
     {
       typedef Interval<R> I;
       typedef Zonotope<R> ES;

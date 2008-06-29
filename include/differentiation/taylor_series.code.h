@@ -232,6 +232,16 @@ derivative(const TaylorSeries<X>& x)
 
 template<class X> 
 TaylorSeries<X> 
+antiderivative(const TaylorSeries<X>& x)
+{
+  TaylorSeries<X> result(x.degree()+1);
+  for(uint n=1; n<=x.degree()+1u; ++n) { result[n]=x[n-1]/n; }
+  result[0]=x[0]*0;
+  return result;
+}
+
+template<class X> 
+TaylorSeries<X> 
 antiderivative(const TaylorSeries<X>& x, const X& c)
 {
   TaylorSeries<X> result(x.degree()+1);
@@ -298,6 +308,7 @@ TaylorSeries<X>::instantiate()
   compose(*ts,*ts);
   inverse(*ts,*x);
   derivative(*ts);
+  antiderivative(*ts);
   antiderivative(*ts,*x);
 
   operator<<(*os,*ts);

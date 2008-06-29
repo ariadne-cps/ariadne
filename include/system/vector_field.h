@@ -1,7 +1,7 @@
 /***************************************************************************
- *            vector_field.h
+ *            impact_system.h
  *
- *  Copyright  2005-7  Alberto Casagrande, Pieter Collins
+ *  Copyright  2008, Pieter Collins
  *
  ****************************************************************************/
 

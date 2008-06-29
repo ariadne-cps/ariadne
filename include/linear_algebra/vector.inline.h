@@ -362,6 +362,19 @@ midpoint(const Vector< Interval<R> >& iv)
   return result;
 }
 
+template<class R> inline
+Vector< Interval<R> >
+intersection(const Vector< Interval<R> >& iv1, const Vector< Interval<R> >& iv2) 
+{
+  ARIADNE_ASSERT(iv1.size()==iv2.size());
+  Vector< Interval<R> > ivr(iv1.size());
+  for(uint i=0; i!=iv1.size(); ++i) {
+    ivr[i]=intersection(iv1[i],iv2[i]);
+  }
+  return ivr;
+}
+
+
 template<class T> inline 
 Vector< Float<T> >
 radius(const Vector< Interval< Float<T> > >& iv) 
@@ -373,6 +386,20 @@ radius(const Vector< Interval< Float<T> > >& iv)
   return result;
 }
 
+
+
+template<class R> inline
+bool
+disjoint(const Vector< Interval<R> >& iv1, const Vector< Interval<R> >& iv2) 
+{
+  ARIADNE_ASSERT(iv1.size()==iv2.size());
+  for(uint i=0; i!=iv1.size(); ++i) {
+    if(disjoint(iv1[i],iv2[i])) {
+      return true;
+    }
+  }
+  return false;
+}
 
 
 template<class R> inline

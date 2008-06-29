@@ -28,6 +28,7 @@
 #include "numeric/float64.h"
 #include "linear_algebra/vector.h"
 #include "differentiation/sparse_differential.h"
+#include "function/function_model_concept.h"
 
 namespace Ariadne {
 
@@ -43,17 +44,24 @@ template<class R> class FunctionInterface;
 
 
 
+template<class R> ApproximateTaylorModel<R> operator+(const ApproximateTaylorModel<R>&, const ApproximateTaylorModel<R>&);
+template<class R> ApproximateTaylorModel<R> operator-(const ApproximateTaylorModel<R>&, const ApproximateTaylorModel<R>&);
+
+
 template<class R> ApproximateTaylorModel<R> project(const ApproximateTaylorModel<R>&, Range rng);
 template<class R> ApproximateTaylorModel<R> recentre(const ApproximateTaylorModel<R>&, const Vector< Interval<R> >& bx, const Vector<R>& pt);
+template<class R> ApproximateTaylorModel<R> restrict(const ApproximateTaylorModel<R>&, const Vector< Interval<R> >& bx);
 template<class R> ApproximateTaylorModel<R> truncate(const ApproximateTaylorModel<R>&, const Vector<R>&, uint, uint);
+
 template<class R> ApproximateTaylorModel<R> join(const ApproximateTaylorModel<R>& f, const ApproximateTaylorModel<R>& g);
 
 template<class R> ApproximateTaylorModel<R> compose(const ApproximateTaylorModel<R>&, const ApproximateTaylorModel<R>&);
-template<class R> ApproximateTaylorModel<R> inverse(const ApproximateTaylorModel<R>&, const Vector<R>&);
+template<class R> ApproximateTaylorModel<R> inverse(const ApproximateTaylorModel<R>&);
 template<class R> ApproximateTaylorModel<R> implicit(const ApproximateTaylorModel<R>&);
 template<class R> ApproximateTaylorModel<R> derivative(const ApproximateTaylorModel<R>&, uint);
-template<class R> ApproximateTaylorModel<R> flow(const ApproximateTaylorModel<R>&, uint);
-template<class R> ApproximateTaylorModel<R> integrate(const ApproximateTaylorModel<R>&, const R&, uint);
+template<class R> ApproximateTaylorModel<R> antiderivative(const ApproximateTaylorModel<R>&, uint);
+template<class R> ApproximateTaylorModel<R> flow(const ApproximateTaylorModel<R>&);
+template<class R> ApproximateTaylorModel<R> integrate(const ApproximateTaylorModel<R>&, const R& time);
 template<class R> ApproximateTaylorModel<R> hitting(const ApproximateTaylorModel<R>& vf, const ApproximateTaylorModel<R>& g);
 template<class R> Vector< Interval<R> > solve(const ApproximateTaylorModel<R>&, const Vector<R>&);
 
@@ -70,6 +78,9 @@ class ApproximateTaylorModel {
   typedef Interval<R> I;
   typedef typename traits<R>::approximate_arithmetic_type A;
  public:
+  //! \brief The type used to represent real numbers.
+  typedef R real_type;
+  
   //! \brief Default constructor constructs a Taylor model of order zero with no arguments and no result variables. 
   ApproximateTaylorModel<R>();
   //! \brief The zero Taylor model in \a as variables with size \a rs image, order \a o and smoothness \a s, defined on the whole space with centre at the origin. 
@@ -83,6 +94,10 @@ class ApproximateTaylorModel {
   ApproximateTaylorModel<R>(const Vector<I>& domain, const Vector<R>& centre, 
                             const SparseDifferentialVector<I>& centre_expansion,
                             const SparseDifferentialVector<I>& domain_expansion);
+  
+  //! \brief Construct an approximate model of \a function over \a domain, using a Taylor expansion of the given \a order. The \a smoothness parameter is not used.
+  ApproximateTaylorModel<R>(const Vector<I>& domain, const FunctionInterface<R>& function,
+                            ushort order, ushort smoothness);
   
   //! \brief Construct from a domain, centre, an order and a function. 
   ApproximateTaylorModel<R>(const Vector<I>& domain, const Vector<A>& centre,
@@ -165,6 +180,8 @@ class ApproximateTaylorModel {
   uint _smoothness; 
   // The derivatives of the model
   SparseDifferentialVector<A> _expansion;
+ private:
+  BOOST_CONCEPT_ASSERT((FunctionModelConcept< ApproximateTaylorModel<R> >));
 };
 
 

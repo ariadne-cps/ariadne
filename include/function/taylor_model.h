@@ -33,33 +33,40 @@
 #include <sstream>
 
 #include "base/types.h"
-#include "base/array.h"
-
-#include "linear_algebra/declarations.h"
-
+#include "linear_algebra/vector.h"
 #include "differentiation/taylor_derivative.h"
+#include "function/function_model_concept.h"
 
 namespace Ariadne {
   
-   template<class R> class Point; 
-   template<class R> class Box; 
-
-
+   template<class X> class Vector; 
+   template<class X> class Matrix; 
   
     class MultiIndex;
     template<class R> class FunctionInterface;
     template<class R> class TaylorVariable;
     template<class R> class TaylorDerivative;
 
+
+
     template<class R> class TaylorModel;
 
-    template<class R> TaylorModel<R> recentre(const TaylorModel<R>&, const Box<R>& bx, const Vector<R>& pt);
-    template<class R> TaylorModel<R> truncate(const TaylorModel<R>&, const Box<R>&, size_type, size_type);
+    template<class R> TaylorModel<R> operator+(const TaylorModel<R>&, const TaylorModel<R>&);
+    template<class R> TaylorModel<R> operator-(const TaylorModel<R>&, const TaylorModel<R>&);
+  
+    template<class R> TaylorModel<R> recentre(const TaylorModel<R>&, const Vector< Interval<R> >&, const Vector<R>&);
+    template<class R> TaylorModel<R> restrict(const TaylorModel<R>&, const Vector< Interval<R> >&);
+    template<class R> TaylorModel<R> project(const TaylorModel<R>&, const Slice&);
+    template<class R> TaylorModel<R> join(const TaylorModel<R>&, const TaylorModel<R>&);
 
     template<class R> TaylorModel<R> compose(const TaylorModel<R>&, const TaylorModel<R>&);
-    template<class R> TaylorModel<R> inverse(const TaylorModel<R>&, const Vector<R>&);
-    template<class R> TaylorModel<R> implicit(const TaylorModel<R>&, const Vector<R>&);
+    template<class R> TaylorModel<R> inverse(const TaylorModel<R>&);
+    template<class R> TaylorModel<R> implicit(const TaylorModel<R>&);
     template<class R> TaylorModel<R> derivative(const TaylorModel<R>&, size_type);
+    template<class R> TaylorModel<R> antiderivative(const TaylorModel<R>&, size_type);
+
+    template<class R> std::ostream& operator<<(std::ostream&, const TaylorModel<R>&);
+
 
  
 
@@ -80,20 +87,17 @@ namespace Ariadne {
       TaylorModel(size_type rs, size_type as, smoothness_type o, smoothness_type s);
 
       /*! \brief Construct from a domain, centre, and two derivative expansions, one for the centre and one over the entire domain. */
-      TaylorModel(const Box<R>& domain, const Point<R>& centre, 
-                  const TaylorDerivative<I>& centre_derivatives, const TaylorDerivative<I>& domain_derivatives);
-      TaylorModel(const Box<R>& domain, const Vector<R>& centre, 
-                  const TaylorDerivative<I>& centre_derivatives, const TaylorDerivative<I>& domain_derivatives);
       TaylorModel(const Vector<I>& domain, const Vector<R>& centre, 
                   const TaylorDerivative<I>& centre_derivatives, const TaylorDerivative<I>& domain_derivatives);
 
+      /*! \brief Construct from a domain, a function, an order and a smoothness. The centre is the centre of the domain. */
+      TaylorModel(const Vector<I>& domain, const FunctionInterface<R>& function,
+                  smoothness_type order, smoothness_type smoothness);
+
       /*! \brief Construct from a domain, centre, an order and a function. */
-      TaylorModel(const Box<R>& domain, const Point<R>& centre,
-                  smoothness_type order, smoothness_type smoothness,
-                  const FunctionInterface<R>& function);
       TaylorModel(const Vector<I>& domain, const Vector<R>& centre,
-                  smoothness_type order, smoothness_type smoothness,
-                  const FunctionInterface<R>& function);
+                  const FunctionInterface<R>& function,
+                  smoothness_type order, smoothness_type smoothness);
 
        
       /*! \brief Equality operator. */
@@ -118,11 +122,11 @@ namespace Ariadne {
       size_type result_size() const;
 
       /*! \brief The domain of validity of the Taylor model. */
-      Box<R> domain() const;
+      Vector<I> domain() const;
       /*! \brief The centre of the derivative expansion. */
       Vector<R> centre() const;
       /*! \brief The range of values the Taylor model can take. */
-      Box<R> range() const;
+      Vector<I> range() const;
      
       /*! \brief Evaluate the Taylor model at the point \a x. */
       Vector<I> evaluate(const Vector<I>& x) const;
@@ -132,9 +136,8 @@ namespace Ariadne {
       Matrix<I> jacobian(const Vector<I>& s) const;
       Matrix<I> jacobian(const Vector<R>& s) const;
 
-      /*! \brief Truncate to a model of lower order and/or smoothness, possibly on a different domain. */
-      TaylorModel<R> truncate(const Box<R>& domain, const Vector<R>& centre, 
-                              smoothness_type order, smoothness_type smoothness) const;
+      /*! \brief Truncate to a model oforder  \a o and smoothness \a s. */
+      TaylorModel<R> truncate(smoothness_type o, smoothness_type s) const;
 
       /*! \brief The zero Taylor model with result size \a rs and argument size \a as. */
       static TaylorModel<R> zero(size_type rs, size_type as);
@@ -177,34 +180,22 @@ namespace Ariadne {
       void _set_argument_size(size_type n);
       size_type _compute_maximum_component_size() const;
      private:
-      friend TaylorModel<R> recentre<>(const TaylorModel<R>&, const Box<R>& bx, const Vector<R>&);
-      friend TaylorModel<R> inverse<>(const TaylorModel<R>&, const Vector<R>&);
-      //template<class R> friend void add(TaylorModel<R>&,const TaylorModel<R>&,const TaylorModel<R>&);
-      //template<class R> friend void sub(TaylorModel<R>&,const TaylorModel<R>&,const TaylorModel<R>&);
-      //template<class R> friend void mul(TaylorModel<R>&,const TaylorModel<R>&,const TaylorModel<R>&);
-      //template<class R> friend void div(TaylorModel<R>&,const TaylorModel<R>&,const TaylorModel<R>&);
-      //template<class R> friend void compose(TaylorModel<R>&,const TaylorModel<R>&,const TaylorModel<R>&);
-      //template<class R> friend void scale(TaylorModel<R>&,const R&);
+      friend TaylorModel<R> recentre<>(const TaylorModel<R>&, const Vector<I>& bx, const Vector<R>&);
+      friend TaylorModel<R> inverse<>(const TaylorModel<R>&);
      private:
       /* Domain of definition. */
-      Box<R> _domain;
+      Vector<I> _domain;
       /* The centre of the derivative expansion. */
       Vector<R> _centre;
       size_type _smoothness; 
       TaylorDerivative<I> _centre_derivatives;
       TaylorDerivative<I> _domain_derivatives;
+
+      BOOST_CONCEPT_ASSERT((FunctionModelConcept< TaylorModel<R> >));
+
    };
     
 
-    template<class R> TaylorModel<R> add(const TaylorModel<R>&, const TaylorModel<R>&);
-    template<class R> TaylorModel<R> sub(const TaylorModel<R>&, const TaylorModel<R>&);
-
-    template<class R> TaylorModel<R> combine(const TaylorModel<R>&, const TaylorModel<R>&);
-    template<class R> TaylorModel<R> join(const TaylorModel<R>&, const TaylorModel<R>&);
-
-
-    template<class R> std::ostream& operator<<(std::ostream&, const TaylorModel<R>&);
-  
 
 
 } // namespace Ariadne

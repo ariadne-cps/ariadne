@@ -40,10 +40,9 @@ namespace Ariadne {
     /*! \ingroup EvaluatorInterfaces \ingroup Integrators
      *  \brief Interface for computing a step of the evolution of an enclosure set under a vector field.
      */
-    template<class ES>
+    template<class ES, class TM=Rational>
     class IntegratorInterface
     {
-      typedef Rational T;
       typedef typename ES::real_type R;
       typedef Interval<R> I;
      public:
@@ -51,6 +50,8 @@ namespace Ariadne {
       typedef VectorField<R> VectorFieldType;
       /*! \brief The type of enclosure set used by the integrator. */
       typedef ES EnclosureSetType;
+      /*! \brief The type of enclosure set used by the integrator. */
+      typedef TM TimeType;
 
       //@{ 
       //! \name Constructors and cloning operations.
@@ -76,7 +77,7 @@ namespace Ariadne {
       EnclosureSetType
       integration_step(const VectorField<R>& vector_field, 
                        const EnclosureSetType& initial_set,
-                       const Rational& step_size, 
+                       const TimeType& step_size, 
                        const Box<R>& bounding_set) const = 0; 
       
       /*! \brief Compute the time \a step_size flow tube around an enclosure set \a initial_set under a vector field \a vector_field, assuming \a bounding_set is a bounding box for the flow. */
@@ -84,7 +85,7 @@ namespace Ariadne {
       EnclosureSetType
       reachability_step(const VectorField<R>& vector_field, 
                         const EnclosureSetType& initial_set,
-                        const Rational& step_size, 
+                        const TimeType& step_size, 
                         const Box<R>& bounding_set) const = 0;
 
       /*! \brief Compute the evolution of an enclosure set \a initial_set under the vector field \a vector_field for times in the range [t1,t2], assuming \a bounding_set is a bounding box for the flow. */
@@ -92,9 +93,9 @@ namespace Ariadne {
       EnclosureSetType
       evolution_step(const VectorField<R>& vector_field, 
                      const EnclosureSetType& initial_set,
-                     const Rational& initial_time, 
-                     const Rational& final_time, 
-                     const Box<R>& bounding_set) const;
+                     const TimeType& initial_time, 
+                     const TimeType& final_time, 
+                     const Box<R>& bounding_set) const = 0;
           
       //@}
 
@@ -105,11 +106,10 @@ namespace Ariadne {
       //@}
     };
 
-    template<class ES> std::ostream& operator<<(std::ostream& os, const IntegratorInterface<ES>& i);
+    template<class ES> std::ostream& operator<<(std::ostream& os, const IntegratorInterface<ES>& i) {
+      return i.write(os); }
 
   
 } // namespace Ariadne
-
-#include "integrator_interface.inline.h"
 
 #endif /* ARIADNE_INTEGRATOR_INTERFACE_H */

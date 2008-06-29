@@ -31,6 +31,7 @@
 #include "geometry/declarations.h"
 #include "system/declarations.h"
 #include "evaluation/integrator_interface.h"
+#include "evaluation/integrator_base.h"
 
 namespace Ariadne {
   
@@ -41,7 +42,7 @@ namespace Ariadne {
      */
     template<class R>
     class EulerIntegrator
-      : public IntegratorInterface< Rectangle<R> >
+      : public IntegratorBase< Rectangle<R> >
     {
       typedef Interval<R> I;
      public:

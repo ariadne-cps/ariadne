@@ -31,12 +31,10 @@
 namespace Ariadne {
   
     
-    #warning "Compiling Rational"
     template class Vector<Rational>;
     template class Vector< Interval<Rational> >;
 
 #ifdef ENABLE_FLOAT64
-    #warning "Compiling Float64"
     template class Vector<ApproximateFloat64>;
     template class Vector<Float64>;
     template class Vector<Interval64>;

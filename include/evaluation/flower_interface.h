@@ -82,9 +82,9 @@ namespace Ariadne {
 
       /*! \brief Compute the spacial jacobian over a flow step of time \a t starting at \a p assuming that the flow remains within \a bb. */
       virtual Matrix<I> flow_step_jacobian(const VectorField<R>& vf,
-                                                          const Point<I>& p,
-                                                          const Rational& t,
-                                                          const Box<R>& bb) const = 0;
+                                           const Point<I>& p,
+                                           const Rational& t,
+                                           const Box<R>& bb) const = 0;
     };
 
 

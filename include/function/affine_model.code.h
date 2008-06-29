@@ -41,27 +41,27 @@ AffineModel<R>::instantiate()
 }
 
 template<class R> 
-AffineModel<R>::AffineModel(const Box<R>& d,
-                                      const Point<R>& c, 
-                                      const Point<I>& v, 
-                                      const Matrix<I>& j)
+AffineModel<R>::AffineModel(const Vector<I>& d,
+                            const Vector<R>& c, 
+                            const Vector<I>& v, 
+                            const Matrix<I>& j)
   : _domain(d), _centre(c), _value(v), _jacobian(j)
 {
-  ARIADNE_ASSERT(c.dimension()==d.dimension());
-  ARIADNE_ASSERT(v.dimension()==j.number_of_rows());
-  ARIADNE_ASSERT(c.dimension()==j.number_of_columns());
+  ARIADNE_ASSERT(c.size()==d.size());
+  ARIADNE_ASSERT(v.size()==j.number_of_rows());
+  ARIADNE_ASSERT(c.size()==j.number_of_columns());
 }
 
 template<class R> 
-AffineModel<R>::AffineModel(const Box<R>& d,
-                                      const Point<R>& c, 
-                                      const array<AffineVariable<I> >& av)
-  : _domain(d), _centre(c), _value(av.size()), _jacobian(av.size(),c.dimension())
+AffineModel<R>::AffineModel(const Vector<I>& d,
+                            const Vector<R>& c, 
+                            const Vector<AffineVariable<I> >& av)
+  : _domain(d), _centre(c), _value(av.size()), _jacobian(av.size(),c.size())
 {
-  ARIADNE_ASSERT(c.dimension()==d.dimension());
+  ARIADNE_ASSERT(c.size()==d.size());
   for(uint i=0; i!=av.size(); ++i) {
     _value[i]=av[i].value();
-    for(uint j=0; j!=c.dimension(); ++j) {
+    for(uint j=0; j!=c.size(); ++j) {
       _jacobian(i,j)=av[i].gradient(j);
     }
   }
@@ -70,17 +70,17 @@ AffineModel<R>::AffineModel(const Box<R>& d,
 
 
 template<class R> 
-AffineModel<R>::AffineModel(const Box<R>& d,
-                                      const Point<R>& c,
-                                      const FunctionInterface<R>& f)
-  : _domain(d), _centre(c), _value(f.evaluate(c.position_vector())), _jacobian(f.jacobian(d.position_vectors()))
+AffineModel<R>::AffineModel(const Vector<I>& d,
+                            const Vector<R>& c,
+                            const FunctionInterface<R>& f)
+  : _domain(d), _centre(c), _value(f.evaluate(c)), _jacobian(f.jacobian(d))
 {
 }
 
 
 template<class R>
-Point<typename traits<R>::interval_type> 
-AffineModel<R>::evaluate(const Point<I>& pt) const
+Vector<typename traits<R>::interval_type> 
+AffineModel<R>::evaluate(const Vector<I>& pt) const
 {
   return this->_value+this->_jacobian*(pt-this->_centre);
 }
@@ -134,31 +134,31 @@ operator-(const AffineModel<R>& am1, const AffineModel<R>& am2)
 
 
 template<class R> 
-Box<R>
+Vector<typename AffineModel<R>::I>
 AffineModel<R>::range() const
 {
-  return Box<R>(this->evaluate(Point<I>(this->_domain.position_vectors())));
+  return this->evaluate(this->_domain);
 }
 
 
 template<class R> 
 AffineModel<R>
-translate(const AffineModel<R>& am, const Point<R>& nc) 
+translate(const AffineModel<R>& am, const Vector<R>& nc) 
 {
   typedef Interval<R> I;
-  Box<R> nd=am.domain();
-  Point<I> nv=am.evaluate(nc);
+  Vector<I> nd=am.domain();
+  Vector<I> nv=am.evaluate(nc);
   const Matrix<I> & nj=am.jacobian();
   return AffineModel<R>(nd,nc,nv,nj);
 }
 
 template<class R> 
 AffineModel<R>
-restrict(const AffineModel<R>& am, const Box<R>& nd) 
+restrict(const AffineModel<R>& am, const Vector< Interval<R> >& nd) 
 {
   typedef Interval<R> I;
-  Point<R> nc=nd.centre();
-  Point<I> nv=am.evaluate(nc);
+  Vector<R> nc=nd.centre();
+  Vector<I> nv=am.evaluate(nc);
   const Matrix<I> & nj=am.jacobian();
   return AffineModel<R>(nd,nc,nv,nj);
 }
@@ -167,11 +167,11 @@ template<class R>
 AffineModel<R>
 compose(const AffineModel<R>& am1, const AffineModel<R>& am2) 
 {
-  ARIADNE_ASSERT(subset(am2.range(),am1.domain()));
+  ARIADNE_ASSERT(refines(am2.range(),am1.domain()));
   typedef Interval<R> I;
-  Box<R> const& nd=am2.domain();
-  Point<R> const& nc=am2.centre();
-  Point<I> nv=am1.evaluate(reinterpret_cast<const Point<I>&>(am2.value()));
+  Vector<I> const& nd=am2.domain();
+  Vector<R> const& nc=am2.centre();
+  Vector<I> nv=am1.evaluate(am2.value());
   Matrix<I> nj=am1.jacobian()*am2.jacobian();
   return AffineModel<R>(nd,nc,nv,nj);
 }
@@ -186,8 +186,8 @@ reduce(const AffineModel<R>& am, size_type s)
   assert(s<=am._s);
   if(s==am._s) { return am;  }
   
-  const dimension_type rd=am._rd;
-  const dimension_type ad=am._ad;
+  const size_type rd=am._rd;
+  const size_type ad=am._ad;
   
   AffineModel<R> res(rd,ad,s);
   typename AffineModel<R>::I tmp;

@@ -457,16 +457,16 @@ Zonotope<R>::Zonotope(const Box<R>& r)
 template<class R>
 Zonotope<R>
 apply(const AffineModel<R>& am,
-                const Zonotope<R>& z)
+      const Zonotope<R>& z)
 {
   
   typedef Interval<R> I;
   
-  ARIADNE_ASSERT(z.centre()==am.centre());
-  if(!subset(z,am.domain())) {
+  ARIADNE_ASSERT(z.centre()==Point<R>(am.centre()));
+  if(!subset(z,Box<R>(am.domain()))) {
     std::cerr<<"z="<<z<<"\nz.bounding_box()="<<z.bounding_box()<<"\nam.domain()="<<am.domain()<<std::endl;
   }
-  ARIADNE_ASSERT(possibly(subset(z,am.domain())));
+  ARIADNE_ASSERT(possibly(subset(z,Box<R>(am.domain()))));
   
   dimension_type d=z.dimension();
   size_type m=z.number_of_generators();
@@ -476,11 +476,11 @@ apply(const AffineModel<R>& am,
   Matrix<R> const& G=z.generators();
   Vector<R> const& e=z.error();
 
-  Point<I> const& nic=am.value();
+  Vector<I> const nic=am.value();
   Matrix<I> const& iDf=am.jacobian();
   Matrix<I> niG=iDf*G;
   
-  Point<R> nc=midpoint(nic);
+  Point<R> nc(midpoint(nic));
   Matrix<R> nG=midpoint(niG);
   Vector<R> ne(nd);
 
@@ -666,7 +666,7 @@ disjoint(const Zonotope<R>& z, const ConstraintSet<R>& cs)
 {
   //TODO: Change disjoint(Zonotope,Box) to accept unbounded boxes.
   ARIADNE_CHECK_EQUAL_DIMENSIONS(z,cs,"disjoint(Zonotope,ConstraintSet)");
-  Zonotope<R> fz=apply(AffineModel<R>(z.bounding_box(),z.centre(),cs.function()),z);
+  Zonotope<R> fz=apply(AffineModel<R>(z.bounding_box().position_vectors(),z.centre().position_vector(),cs.function()),z);
   Box<R> bcd=closed_intersection(cs.codomain(),fz.bounding_box());
   return disjoint(fz,bcd);
 }
@@ -676,7 +676,7 @@ tribool
 subset(const Zonotope<R>& z, const ConstraintSet<R>& cs)
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(z,cs,"disjoint(Zonotope,ConstraintSet)");
-  Zonotope<R> fz=apply(AffineModel<R>(z.bounding_box(),z.centre(),cs.function()),z);
+  Zonotope<R> fz=apply(AffineModel<R>(z.bounding_box().position_vectors(),z.centre().position_vector(),cs.function()),z);
   return subset(fz.bounding_box(),cs.codomain());
 }
 
@@ -685,7 +685,7 @@ tribool
 intersects(const Zonotope<R>& z, const ConstraintSet<R>& cs)
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(z,cs,"disjoint(Zonotope,ConstraintSet)");
-  Zonotope<R> fz=apply(AffineModel<R>(z.bounding_box(),z.centre(),cs.function()),z);
+  Zonotope<R> fz=apply(AffineModel<R>(z.bounding_box().position_vectors(),z.centre().position_vector(),cs.function()),z);
   Box<R> bcd=closed_intersection(cs.codomain(),fz.bounding_box());
   return intersects(fz,bcd);
 }

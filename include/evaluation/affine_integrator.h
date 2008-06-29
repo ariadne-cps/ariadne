@@ -32,6 +32,7 @@
 #include "geometry/declarations.h"
 #include "system/declarations.h"
 #include "evaluation/integrator_interface.h"
+#include "evaluation/integrator_base.h"
 
 #include "system/affine_vector_field.h"
 
@@ -62,7 +63,7 @@ namespace Ariadne {
      */
     template<class R>
     class AffineIntegrator< Zonotope<R> >
-      : public IntegratorInterface< Zonotope<R> >      
+      : public IntegratorBase< Zonotope<R> >      
     {
       typedef Interval<R> I;
      public:

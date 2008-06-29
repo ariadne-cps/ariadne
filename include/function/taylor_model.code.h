@@ -25,6 +25,7 @@
 #include "exceptions.h"
 
 #include <string>
+#include <iostream>
 #include <sstream>
 
 #include <list>
@@ -43,15 +44,14 @@
 #include "differentiation/sorted_index.h"
 #include "differentiation/multi_index.h"
 
-#include "geometry/point.h"
-#include "geometry/box.h"
-
 #include "evaluation/newton_solver.h"
 
 #include "output/logging.h"
 #include "output/latexstream.h"
 
 namespace Ariadne {
+
+
 
 template<class R>
 TaylorModel<R>::TaylorModel() 
@@ -64,7 +64,7 @@ TaylorModel<R>::TaylorModel()
 
 template<class R>
 TaylorModel<R>::TaylorModel(size_type rs, size_type as, smoothness_type o, smoothness_type s) 
-  : _domain(Box<R>::entire_space(as)),
+  : _domain(Vector<I>(as,I(-inf<R>(),+inf<R>()))),
     _centre(Vector<R>(as)),
     _centre_derivatives(rs,as,o),
     _domain_derivatives(rs,as,o) 
@@ -72,50 +72,19 @@ TaylorModel<R>::TaylorModel(size_type rs, size_type as, smoothness_type o, smoot
 }
 
 template<class R>
-TaylorModel<R>::TaylorModel(const Box<R>& d, const Vector<R>& c, 
-                                      const TaylorDerivative<I>& cd, const TaylorDerivative<I>& dd)
-  : _domain(d),
-    _centre(c),
-    _centre_derivatives(cd),
-    _domain_derivatives(dd)
-{
-}
-
-template<class R>
-TaylorModel<R>::TaylorModel(const Box<R>& d, const Point<R>& c, 
-                                      const TaylorDerivative<I>& cd, const TaylorDerivative<I>& dd)
-  : _domain(d),
-    _centre(c.position_vector()),
-    _centre_derivatives(cd),
-    _domain_derivatives(dd)
-{
-}
-
-template<class R>
 TaylorModel<R>::TaylorModel(const Vector<I>& d, const Vector<R>& c,
-                                      const TaylorDerivative<I>& cd, const TaylorDerivative<I>& dd)
+                            const TaylorDerivative<I>& cd, const TaylorDerivative<I>& dd)
   : _domain(d),
     _centre(c),
     _centre_derivatives(cd),
     _domain_derivatives(dd)
-{
-}
-
-template<class R>
-TaylorModel<R>::TaylorModel(const Box<R>& d, const Point<R>& c, 
-                                      smoothness_type o, smoothness_type s,
-                                      const FunctionInterface<R>& f)
-  : _domain(d),
-    _centre(c.position_vector()),
-    _centre_derivatives(f.derivative(Vector<I>(c.position_vector()),o)),
-    _domain_derivatives(f.derivative(d.position_vectors(),o))
 {
 }
 
 template<class R>
 TaylorModel<R>::TaylorModel(const Vector<I>& d, const Vector<R>& c, 
-                                      smoothness_type o, smoothness_type s, 
-                                      const FunctionInterface<R>& f)
+                            const FunctionInterface<R>& f, 
+                            smoothness_type o, smoothness_type s)
   : _domain(d),
     _centre(c),
     _centre_derivatives(f.derivative(Vector<I>(c),o)),
@@ -175,7 +144,7 @@ TaylorModel<R>::operator!=(const TaylorModel<R>& p2) const
 
 
 template<class R>
-Box<R>
+Vector<typename TaylorModel<R>::I>
 TaylorModel<R>::domain() const
 { 
   return this->_domain; 
@@ -189,10 +158,10 @@ TaylorModel<R>::centre() const
 }
 
 template<class R>
-Box<R>
+Vector<typename TaylorModel<R>::I>
 TaylorModel<R>::range() const
 { 
-  return Box<R>(this->_domain_derivatives.value());
+  return this->_domain_derivatives.value();
 }
 
 
@@ -238,7 +207,12 @@ TaylorModel<R>::smoothness() const
   return this->_domain_derivatives.degree();
 }
       
-
+template<class R>
+TaylorModel<R>
+TaylorModel<R>::truncate(smoothness_type o, smoothness_type s) const
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
 
 
 
@@ -257,12 +231,29 @@ TaylorModel<R>::smoothness() const
 
 template<class R>
 TaylorModel<R> 
-TaylorModel<R>::truncate(const Box<R>& domain, const Vector<R>& centre,
-                                   smoothness_type order, smoothness_type smoothness) const
+recentre(const TaylorModel<R>& model, const Vector< Interval<R> >& domain, const Vector<R>& centre) 
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
+  ARIADNE_ASSERT(refines(domain,model.domain()));
+  ARIADNE_ASSERT(encloses(domain,centre));
+  typedef Interval<R> I;
+
+  TaylorDerivative<I> translation=TaylorDerivative<I>::variable(model.argument_size(),model.argument_size(),model.order(),centre);
+  
+  //FIXME: This is incorrect...
+  TaylorDerivative<I> new_centre_derivatives=translate(model.centre_derivatives(),centre-model.centre());
+  TaylorDerivative<I> new_domain_derivatives=translate(model.domain_derivatives(),centre-model.centre());
+
+  return TaylorModel<R>(domain,centre,new_centre_derivatives,new_domain_derivatives);
 }
 
+
+template<class R>
+TaylorModel<R> 
+restrict(const TaylorModel<R>& model, const Vector< Interval<R> >& domain) 
+{
+  return recentre(model,domain,midpoint(domain));
+}
 
 
 template<class R>
@@ -306,56 +297,40 @@ TaylorModel<R>::evaluate(const Vector<I>& x) const
 }
 
 
-template<class R>
-TaylorModel<R>
-recentre(const TaylorModel<R>& tm, const Box<R>& bx, const Vector<R>& c)
-{
-  ARIADNE_ASSERT(bx.subset(tm.domain()));
-  ARIADNE_ASSERT(bx.contains(Point<R>(c)));
-  typedef Interval<R> I;
-
-  TaylorDerivative<I> translation=TaylorDerivative<I>::variable(tm.argument_size(),tm.argument_size(),tm.order(),c);
-  
-  //FIXME: This is incorrect...
-  TaylorDerivative<I> new_centre_derivatives=compose(tm.centre_derivatives(),translation);
-  TaylorDerivative<I> new_domain_derivatives=compose(tm.domain_derivatives(),translation);
-
-  return TaylorModel<R>(bx,c,new_centre_derivatives,new_domain_derivatives);
-}
 
 
 template<class R>
 TaylorModel<R>
-add(const TaylorModel<R>& p1, const TaylorModel<R>& p2)
+operator+(const TaylorModel<R>& p1, const TaylorModel<R>& p2)
 {
-  ARIADNE_ASSERT(!open_intersection(p1.domain(),p2.domain()).empty());
+  ARIADNE_ASSERT(!disjoint(p1.domain(),p2.domain()));
   if(p1.centre()==p2.centre()) {
-    return TaylorModel<R>(closed_intersection(p1.domain(),p2.domain()),
+    return TaylorModel<R>(intersection(p1.domain(),p2.domain()),
                           p1.centre(),
                           p1.centre_derivatives()+p2.centre_derivatives(),
                           p1.domain_derivatives()+p2.domain_derivatives());
   } else {
-    Box<R> new_domain=closed_intersection(p1.domain(),p2.domain());
-    Vector<R> new_centre=new_domain.centre().position_vector();
-    return add(recentre(p1,new_domain,new_centre),recentre(p2,new_domain,new_centre));
+    Vector< Interval<R> > new_domain=intersection(p1.domain(),p2.domain());
+    Vector<R> new_centre=midpoint(new_domain);
+    return operator+(recentre(p1,new_domain,new_centre),recentre(p2,new_domain,new_centre));
   }
 }
 
 template<class R>
 TaylorModel<R>
-sub(const TaylorModel<R>& p1, const TaylorModel<R>& p2)
+operator-(const TaylorModel<R>& p1, const TaylorModel<R>& p2)
 {
-  ARIADNE_ASSERT(!open_intersection(p1.domain(),p2.domain()).empty());
+  ARIADNE_ASSERT(!disjoint(p1.domain(),p2.domain()));
   if(p1.centre()==p2.centre()) {
-    return TaylorModel<R>(closed_intersection(p1.domain(),p2.domain()),
+    return TaylorModel<R>(intersection(p1.domain(),p2.domain()),
                           p1.centre(),
                           p1.centre_derivatives()-p2.centre_derivatives(),
                           p1.domain_derivatives()-p2.domain_derivatives());
   } else {
-    Box<R> new_domain=closed_intersection(p1.domain(),p2.domain());
+    Vector< Interval<R> > new_domain=intersection(p1.domain(),p2.domain());
     //Point<R> new_centre=new_domain.centre();
-    Vector<R> new_centre=new_domain.centre().position_vector();
-    return add(recentre(p1,new_domain,new_centre),recentre(p2,new_domain,new_centre));
+    Vector<R> new_centre=midpoint(new_domain);
+    return operator-(recentre(p1,new_domain,new_centre),recentre(p2,new_domain,new_centre));
   }
 }
 
@@ -451,8 +426,8 @@ compose(const TaylorModel<R>& p2, const TaylorModel<R>& p1)
 {
   typedef Interval<R> I;
   ARIADNE_ASSERT(p2.centre()==p1.centre_derivatives().value());
-  ARIADNE_ASSERT(subset(p1.range(),p2.domain()));
-  Box<R> new_domain=p1.domain();
+  ARIADNE_ASSERT(refines(p1.range(),p2.domain()));
+  Vector<I> new_domain=p1.domain();
   Vector<R> new_centre=p1.centre();
   TaylorDerivative<I> new_centre_derivatives=compose(p1.centre_derivatives(),p2.centre_derivatives());
   TaylorDerivative<I> new_domain_derivatives=compose(p1.domain_derivatives(),p2.domain_derivatives());
@@ -469,6 +444,17 @@ derivative(const TaylorModel<R>& tm, size_type k)
                         tm.centre(),
                         derivative(tm.centre_derivatives(),k),
                         derivative(tm.domain_derivatives(),k));
+}
+
+
+template<class R>
+TaylorModel<R>
+antiderivative(const TaylorModel<R>& tm, size_type k) 
+{
+  return TaylorModel<R>(tm.domain(),
+                        tm.centre(),
+                        antiderivative(tm.centre_derivatives(),k),
+                        antiderivative(tm.domain_derivatives(),k));
 }
 
 
@@ -607,13 +593,12 @@ TaylorModel<R>::jacobian(const Vector<I>& x) const
 
 template<class R> 
 TaylorModel<R> 
-inverse(const TaylorModel<R>& p, const Vector<R>& v)
+inverse(const TaylorModel<R>& p)
 {
   assert(p.result_size()==p.argument_size());
-  assert(p.argument_size()==v.size());
 
   // The following are only to simplfy testing.
-  assert(v==Vector<R>(v.size(),0));
+  Vector<R> v(p.centre());
   assert(p.evaluate(v)==Vector<R>(p.result_size(),0));
   typedef typename traits<R>::interval_type I;
 
@@ -648,10 +633,27 @@ inverse(const TaylorModel<R>& p, const Vector<R>& v)
 
 template<class R> 
 TaylorModel<R> 
-implicit(const TaylorModel<R>& p, const Vector<R>& v)
+implicit(const TaylorModel<R>& f)
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
+
+
+template<class R> 
+TaylorModel<R> 
+flow(const TaylorModel<R>& vf)
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+
+template<class R> 
+TaylorModel<R> 
+hitting(const TaylorModel<R>& vf, const TaylorModel<R>& g)
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
 
 template<class R>
 array< array<typename TaylorModel<R>::I> >
@@ -745,19 +747,21 @@ TaylorModel<R>::instantiate()
   size_type* k=0;
   //R* x=0;
   Vector<R>* v=0;
-  //Point<R>* pt=0;
-  Box<R>* bx=0;
+  Vector<I>* iv=0;
   TaylorModel<R>* tm=0;
   std::ostream* os = 0;
   latexstream* texs = 0;
 
-  recentre(*tm,*bx,*v);
-  add(*tm,*tm);
-  sub(*tm,*tm);
+  operator+(*tm,*tm);
+  operator-(*tm,*tm);
+
+  recentre(*tm,*iv,*v);
+  restrict(*tm,*iv);
   compose(*tm,*tm);
   derivative(*tm,*k);
-  inverse(*tm,*v);
-  implicit(*tm,*v);
+  antiderivative(*tm,*k);
+  inverse(*tm);
+  implicit(*tm);
   *os << *tm;
   *texs << *tm;
 }

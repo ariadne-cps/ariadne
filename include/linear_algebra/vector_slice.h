@@ -40,6 +40,7 @@
 
 #include "linear_algebra/exceptions.h"
 #include "linear_algebra/vector_expression.h"
+#include "linear_algebra/slice.h"
 
 namespace Ariadne {
   
@@ -51,7 +52,7 @@ namespace Ariadne {
 
 
     /*! \ingroup LinearAlgebra
-     *  \brief A slice through an array or vector, with equally spaces increments. 
+     *  \brief A slice through an array or vector, with equally spaces strides. 
      */
     template<class R>
     class VectorSlice
@@ -60,24 +61,27 @@ namespace Ariadne {
      public:
       typedef R value_type;
      
-      explicit VectorSlice(const size_type& size, R* begin, const size_type& increment=1u)
-        : _size(size), _begin(begin), _increment(increment) { }
+      explicit VectorSlice(const size_type& size, R* begin, const size_type& stride=1u)
+        : _size(size), _begin(begin), _stride(stride) { }
+      explicit VectorSlice(Vector<R>& v, const Slice& s) 
+        : _size(s.size()), _begin(v.begin()+s.start()), _stride(s.stride()) { 
+        ARIADNE_ASSERT(s.start()+(s.size()-1u)*s.stride() < v.size()); }
       VectorSlice(Vector<R>& v)
-        : _size(v.size()), _begin(v.data().begin()), _increment(1u) { }
+        : _size(v.size()), _begin(v.data().begin()), _stride(1u) { }
       size_type size() const { return this->_size; }
-      size_type increment() const { return this->_increment; };
+      size_type stride() const { return this->_stride; };
       R* begin() { return this->_begin; }
       const R* begin() const { return this->_begin; } 
-      R& operator() (const size_type& i) { return this->_begin[i*this->_increment]; }
-      R& operator[] (const size_type& i) { return this->_begin[i*this->_increment]; }
-      const R& operator() (const size_type& i) const { return this->_begin[i*this->_increment]; };
-      const R& operator[] (const size_type& i) const { return this->_begin[i*this->_increment]; }
+      R& operator() (const size_type& i) { return this->_begin[i*this->_stride]; }
+      R& operator[] (const size_type& i) { return this->_begin[i*this->_stride]; }
+      const R& operator() (const size_type& i) const { return this->_begin[i*this->_stride]; };
+      const R& operator[] (const size_type& i) const { return this->_begin[i*this->_stride]; }
      
       template<class E> VectorSlice<R>& operator=(const VectorExpression< E >& v);
      private:
       size_type _size;
       R* _begin;
-      size_type _increment;
+      size_type _stride;
     };
     
 
@@ -87,15 +91,18 @@ namespace Ariadne {
     {
      public:
       typedef R value_type;
-      explicit VectorSlice(const size_type& size, const R* begin, const size_type& increment=1u)
-        : _size(size), _begin(begin), _increment(increment) { }
+      explicit VectorSlice(const size_type& size, const R* begin, const size_type& stride=1u)
+        : _size(size), _begin(begin), _stride(stride) { }
+      explicit VectorSlice(const Vector<R>& v, const Slice& s) 
+        : _size(s.size()), _begin(v.begin()+s.start()), _stride(s.stride()) { 
+        ARIADNE_ASSERT(s.start()+(s.size()-1u)*s.stride() < v.size()); }
       VectorSlice(const Vector<R>& v)
-        : _size(v.size()), _begin(v.data().begin()), _increment(1u) { }
+        : _size(v.size()), _begin(v.data().begin()), _stride(1u) { }
       size_type size() const { return this->_size; }
-      size_type increment() const { return this->_increment; };
+      size_type stride() const { return this->_stride; };
       const R* begin() const { return this->_begin; } 
-      const R& operator() (const size_type& i) const { return this->_begin[i*this->_increment]; };
-      const R& operator[] (const size_type& i) const { return this->_begin[i*this->_increment]; }
+      const R& operator() (const size_type& i) const { return this->_begin[i*this->_stride]; };
+      const R& operator[] (const size_type& i) const { return this->_begin[i*this->_stride]; }
      private:
       // Disable assignment operators
       VectorSlice<const R>& operator=(const Vector<R>&);
@@ -103,7 +110,7 @@ namespace Ariadne {
      private:
       size_type _size;
       const R* _begin;
-      size_type _increment;
+      size_type _stride;
     };
     
     template<class R> template<class E> inline
@@ -113,7 +120,7 @@ namespace Ariadne {
       const E& e=v(); 
       ARIADNE_CHECK_EQUAL_SIZES(*this,e,"VectorSlice& VectorSlice::operator=(VectorExpression)");
       for(size_type i=0; i!=e.size(); ++i) {
-        this->_begin[i*this->_increment]=e(i); 
+        this->_begin[i*this->_stride]=e(i); 
       }
       return *this;
     }
@@ -123,7 +130,12 @@ namespace Ariadne {
     template<class R> std::ostream& operator<<(std::ostream& os, const VectorSlice<const R>& v) {
       return os << Vector<R>(v); }
 
-  
+    template<class R> VectorSlice<R> project(Vector<R>& v, Slice s) {
+      return VectorSlice<R>(v,s); }
+    template<class R> VectorSlice<const R> project(const Vector<R>& v, Slice s) {
+      return VectorSlice<const R>(v,s); }
+
+
 } // namespace Ariadne
 
 #endif /* ARIADNE_VECTOR_SLICE_H */

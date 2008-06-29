@@ -286,20 +286,20 @@ integrate(const TaylorDerivative<X>& vf, const Point<X> x, smoothness_type ox)
 template<class R>
 AffineModel<R>
 StandardFlower<R>::affine_flow_model(const VectorField<R>& vector_field, 
-                                                 const Point<R>& initial_point, 
-                                                 const Box<R>& initial_domain, 
-                                                 const Rational& step_size, 
-                                                 const Box<R>& bounding_box) const
+                                     const Point<R>& initial_point, 
+                                     const Box<R>& initial_domain, 
+                                     const Rational& step_size, 
+                                     const Box<R>& bounding_box) const
 {
   // Convert from Taylor flow model
   
   typedef Interval<R> I;
 
   TaylorModel<R> taylor_flow_model=this->taylor_flow_model(vector_field,initial_point,initial_domain,step_size,bounding_box);
-  return AffineModel<R>(Box<R>(taylor_flow_model.domain()),
-                        Point<R>(taylor_flow_model.centre()),
-                        Point<I>(taylor_flow_model.evaluate(taylor_flow_model.centre())),
-                        Matrix<I>(taylor_flow_model.jacobian(taylor_flow_model.domain().position_vectors())));
+  return AffineModel<R>(taylor_flow_model.domain(),
+                        taylor_flow_model.centre(),
+                        taylor_flow_model.evaluate(taylor_flow_model.centre()),
+                        taylor_flow_model.jacobian(taylor_flow_model.domain()));
 
   uint to=this->temporal_order();
   dimension_type n=initial_point.dimension();
@@ -332,7 +332,7 @@ StandardFlower<R>::affine_flow_model(const VectorField<R>& vector_field,
   //for(uint j=0; j<=to; ++j) { cout << "y["<<j<<"]=\n"; for(uint i=0; i!=n; ++i) { cout << " " << midpoint(y[i][j]) << endl; } }
 
   // Compute the state and first variation at the final time
-  array< AffineVariable<I> > r(n);
+  Vector< AffineVariable<I> > r(n);
   for(uint i=0; i!=n; ++i) {
     r[i]=y[i][0];
   }
@@ -344,7 +344,7 @@ StandardFlower<R>::affine_flow_model(const VectorField<R>& vector_field,
     }
   }
 
-  return AffineModel<R>(bounding_box,initial_point,r);
+  return AffineModel<R>(bounding_box.position_vectors(),initial_point.position_vector(),r);
 }
 
 
@@ -398,7 +398,7 @@ StandardFlower<R>::taylor_flow_model(const VectorField<R>& vector_field,
   }
 
   //FIXME: Put rigorous error bounds in flow model
-  return TaylorModel<R>(initial_domain,initial_point,phi,phi);
+  return TaylorModel<R>(initial_domain.position_vectors(),initial_point.position_vector(),phi,phi);
 }
 
 

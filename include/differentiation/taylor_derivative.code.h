@@ -127,6 +127,16 @@ operator*(const Matrix<X>& A, const TaylorDerivative<X>& x)
 
 template<class X>
 TaylorDerivative<X>&
+operator*=(TaylorDerivative<X>& x, const double& c)
+{
+  for(size_type i=0; i!=x.result_size(); ++i) {
+    x[i]*=c;
+  }
+  return x;
+}
+
+template<class X>
+TaylorDerivative<X>&
 operator*=(TaylorDerivative<X>& x, const X& c)
 {
   for(size_type i=0; i!=x.result_size(); ++i) {
@@ -176,6 +186,34 @@ evaluate(const TaylorDerivative<X>& y, const Vector<X>& x)
 }
 
 
+
+template<class X>
+TaylorDerivative<X> 
+translate(const TaylorDerivative<X>& x, const Vector<X>& c)
+{
+  assert(x.argument_size()==c.size());
+  TaylorDerivative<X> r(x);
+  for(uint k=0; k!=x.argument_size(); ++k) {
+    if(c[k]!=0) { 
+      TaylorDerivative<X> y(r);
+      r*=0.0;
+      MultiIndex e(y.argument_size());
+      e.set(k,1);
+      for(MultiIndex j(y.argument_size()); j.degree()<=y.degree(); ++j) {
+        MultiIndex tj=j;
+        for(uint l=0; l<=y.degree()-j.degree(); ++l) {
+          assert(tj.degree()<=y.degree());
+          for(uint i=0; i!=x.result_size(); ++i) {
+            r[i][j]+=y[i][tj]*pow(c[k],l)*bin(tj[k],l);
+          }
+          tj+=e;
+        }
+      }
+    }
+  }
+  return r;
+}
+ 
 
 template<class X> 
 TaylorVariable<X>
@@ -283,6 +321,18 @@ derivative(const TaylorDerivative<X>& x, const size_type& k)
   TaylorDerivative<X> r( x.result_size(), x.argument_size(), ( x.degree()==0 ? 0u : x.degree()-1 ) );
   for(uint i=0; i!=x.result_size(); ++i) {
     r[i]=derivative(x[i],k);
+  }
+  return r;
+}
+
+
+template<class X> 
+TaylorDerivative<X> 
+antiderivative(const TaylorDerivative<X>& x, const size_type& k)
+{
+  TaylorDerivative<X> r( x.result_size(), x.argument_size(), x.degree()+1);
+  for(uint i=0; i!=x.result_size(); ++i) {
+    r[i]=antiderivative(x[i],k);
   }
   return r;
 }
@@ -436,9 +486,11 @@ TaylorDerivative<X>::instantiate()
   evaluate(*td,*v);
   evaluate(*td,*td);
   compose(*td,*td);
+  translate(*td,*v);
   inverse(*td,*v);
   implicit(*td,*v);
   derivative(*td,0u);
+  antiderivative(*td,0u);
   concatenate(*td,*td);
 
   operator<<(*os,*td);

@@ -28,7 +28,6 @@
 #include "ariadne.h"
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
-#include "geometry/box.h"
 #include "function/affine_model.h"
 
 #include "test.h"
@@ -48,9 +47,9 @@ class TestAffineModel
   AffineModel<R> am3;
 
   TestAffineModel()
-    : am1(Box<R>("[-1,1]x[-1,1]x[-1,1]"),Point<R>("(0,0,0)"),Point<I>("[[-0.125,0.125],[0.875,1.125]]"),Matrix<R>("[1,2,3;4,5,6]"))
-    , am2(Box<R>("[-1,1]x[-1,1]x[-1,1]"),Point<R>("(0,0,0)"),Point<I>("[[-0.125,0.125],[0.875,1.125]]"),Matrix<I>("[[1,1.1],2,[3,3.1];4,[5,5.5],6]"))
-    , am3(Box<R>("[-8,8]x[-24,24]"),Point<R>("(0,0)"),Point<I>("[[-0.125,0.125],[0.875,1.125]]"),Matrix<I>("[[1,1.1],2;[3,3.1],4]"))
+    : am1(Vector<I>("[[-1,1],[-1,1],[-1,1]]"),Vector<R>("[0,0,0]"),Vector<I>("[[-0.125,0.125],[0.875,1.125]]"),Matrix<R>("[1,2,3;4,5,6]"))
+    , am2(Vector<I>("[[-1,1],[-1,1],[-1,1]]"),Vector<R>("[0,0,0]"),Vector<I>("[[-0.125,0.125],[0.875,1.125]]"),Matrix<I>("[[1,1.1],2,[3,3.1];4,[5,5.5],6]"))
+    , am3(Vector<I>("[[-8,8],[-24,24]]"),Vector<R>("[0,0]"),Vector<I>("[[-0.125,0.125],[0.875,1.125]]"),Matrix<I>("[[1,1.1],2;[3,3.1],4]"))
   { }
 
   void test_copy_constructor() {
@@ -61,7 +60,7 @@ class TestAffineModel
   }
 
   void test_range() {
-    ARIADNE_ASSERT(subset(am1.range(),Box<R>("[-7,7]x[-16,17]")))
+    ARIADNE_ASSERT(refines(am1.range(),Vector<I>("[[-7,7],[-16,17]]")))
   }
 
   void test_reduce() {

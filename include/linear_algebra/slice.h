@@ -37,6 +37,7 @@ namespace Ariadne {
       Slice(size_type start, size_type size, size_type stride=1u)
         : _start(start), _size(size), _stride(stride) { }
       size_type start() const { return this->_start; }
+      size_type stop() const { return this->_start+this->_size*this->_stride; }
       size_type size() const { return this->_size; }
       size_type stride() const { return this->_stride; }
      private:

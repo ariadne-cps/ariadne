@@ -135,7 +135,12 @@ namespace Ariadne {
     template<class T> inline
     ApproximateFloat<T> 
     pow(const ApproximateFloat<T>& x, const int& y) {
-      return pow_approx(x._value,y)._value; }
+      return ApproximateFloat<T>(pow_approx(x._value,y)); }
+
+    template<class T> inline
+    ApproximateFloat<T> 
+    pow(const ApproximateFloat<T>& x, const uint& y) {
+      return ApproximateFloat<T>(pow_approx(x._value,y)); }
 
     template<class T> inline
     ApproximateFloat<T> 
@@ -165,15 +170,39 @@ namespace Ariadne {
       x._value=div_approx(x._value,y._value); return x; }
 
 
+
     template<class T> inline
-    Interval< Float<T> > 
-    operator*(const ApproximateFloat<T>& x, const Float<T>& y) {
-      return Float<T>(x._value)*y; }
+    ApproximateFloat<T>
+    operator/(int n, const ApproximateFloat<T>& x) {
+      return ApproximateFloat<T>(n)/x; }
+
+    template<class T> inline
+    ApproximateFloat<T>
+    operator/(const ApproximateFloat<T>& x, int n) {
+      return x/ApproximateFloat<T>(n); }
+
 
     template<class T> inline
     Interval< Float<T> > 
-    operator*(const Float<T>& x, const ApproximateFloat<T>& y) {
-      return x*Float<T>(y._value); }
+    operator+(const ApproximateFloat<T>& x, const Interval< Float<T> >& y) {
+      return Float<T>(x._value)+y; }
+
+    template<class T> inline
+    Interval< Float<T> > 
+    operator+(const Interval< Float<T> >& x, const ApproximateFloat<T>& y) {
+      return x+Float<T>(y._value); }
+
+
+    template<class T> inline
+    Interval< Float<T> > 
+    operator-(const ApproximateFloat<T>& x, const Interval< Float<T> >& y) {
+      return Float<T>(x._value)-y; }
+
+    template<class T> inline
+    Interval< Float<T> > 
+    operator-(const Interval< Float<T> >& x, const ApproximateFloat<T>& y) {
+      return x-Float<T>(y._value); }
+
 
     template<class T> inline
     Interval< Float<T> > 
@@ -185,6 +214,19 @@ namespace Ariadne {
     operator*(const Interval< Float<T> >& x, const ApproximateFloat<T>& y) {
       return x*Float<T>(y._value); }
 
+
+
+    template<class T> inline
+    Interval< Float<T> > 
+    operator*(const ApproximateFloat<T>& x, const Float<T>& y) {
+      return Float<T>(x._value)*y; }
+
+    template<class T> inline
+    Interval< Float<T> > 
+    operator*(const Float<T>& x, const ApproximateFloat<T>& y) {
+      return x*Float<T>(y._value); }
+
+ 
     template<class T> inline
     std::ostream& 
     operator<<(std::ostream& os, const ApproximateFloat<T>& x) {

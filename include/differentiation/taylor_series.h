@@ -91,6 +91,7 @@ namespace Ariadne {
     template<class X> TaylorSeries<X> compose(const TaylorSeries<X>& ts1, const TaylorSeries<X>& ts2);
     template<class X> TaylorSeries<X> inverse(const TaylorSeries<X>& ts, const X& c);
     template<class X> TaylorSeries<X> derivative(const TaylorSeries<X>& ts);
+    template<class X> TaylorSeries<X> antiderivative(const TaylorSeries<X>& ts);
     template<class X> TaylorSeries<X> antiderivative(const TaylorSeries<X>& ts, const X& c);
 
     template<class X> TaylorSeries<X> min(const TaylorSeries<X>& ts1, const TaylorSeries<X>& ts2);

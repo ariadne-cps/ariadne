@@ -207,7 +207,9 @@ namespace Ariadne {
 	
   template<class R> Vector<R> midpoint(const Vector< Interval<R> >& iv); 
   template<class T> Vector< Float<T> > radius(const Vector< Interval< Float<T> > >& iv); 
-
+  template<class R> Vector< Interval<R> > intersection(const Vector< Interval<R> >& iv1, const Vector< Interval<R> >& iv2); 
+  
+  template<class R> bool disjoint(const Vector< Interval<R> >& iv, const Vector< Interval<R> >& v); 
   template<class R> bool encloses(const Vector< Interval<R> >& iv,const Vector<R>& v); 
   template<class R> bool refines(const Vector< Interval<R> >& iv1, const Vector< Interval<R> >& iv2); 
 
@@ -228,7 +230,6 @@ namespace Ariadne {
     
     
     
-    
     template<class R> R inner_product(const Vector<R>& u, const Vector<R>& v);
     template<class R> Vector<R> direct_sum(const Vector<R>& v1, const Vector<R>& v2);
     template<class R> R sup_norm(const Vector<R>& v);
@@ -237,6 +238,8 @@ namespace Ariadne {
     template<class R> Vector<R> concatenate(const Vector<R>& v1, const Vector<R>& v2);
     template<class R> Vector<R> concatenate(const Vector<R>& v, const R& s);
 
+    template<class R> Vector<R> join(const Vector<R>& v1, const Vector<R>& v2);
+    template<class R> Vector<R> join(const Vector<R>& v, const R& s);
 
 } // namespace Ariadne
 

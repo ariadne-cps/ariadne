@@ -43,7 +43,7 @@ namespace Ariadne {
 
     template<class ES> class SatisfierInterface;
     template<class ES> class ApplicatorInterface;
-    template<class ES> class IntegratorInterface;
+    template<class ES, class TM> class IntegratorInterface;
 
     template<class Sys, class ES> class EvolverInterface;
     template<class Sys, class Aprx> class DiscretiserInterface;

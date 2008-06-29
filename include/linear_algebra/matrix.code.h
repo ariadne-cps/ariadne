@@ -40,6 +40,9 @@ namespace Ariadne {
 
 namespace {
 
+template<class A, class B> inline A unchecked_cast(B& b) { return reinterpret_cast<A>(b); }
+template<class A, class B> inline A unchecked_cast(const B& b) { return reinterpret_cast<A>(b); }
+
 template<class R>
 void
 instantiate_matrix_approx() 
@@ -302,24 +305,25 @@ inverse(const Matrix<R>& A)
 template<class T>
 Vector< Float<T> >
 mul_approx(const Matrix< Float<T> >& A,
-                          const Vector< Float<T> >& b)
+           const Vector< Float<T> >& b)
 {
   typedef Float<T> F;
   typedef ApproximateFloat<T> AF;
   Vector<F> r;
-  reinterpret_cast<Vector<AF>&>(r)=reinterpret_cast<Matrix<AF>const&>(A) * reinterpret_cast<Vector<AF>const&>(b);
+  unchecked_cast<Vector<AF>&>(r)=unchecked_cast<Matrix<AF>const&>(A) * unchecked_cast<Vector<AF>const&>(b);
   return r;
 }
 
 template<class T>
 Matrix< Float<T> >
 mul_approx(const Matrix< Float<T> >& A,
-                          const Matrix< Float<T> >& B)
+           const Matrix< Float<T> >& B)
 {
   typedef Float<T> F;
   typedef ApproximateFloat<T> AF;
   Matrix<F> C;
-  reinterpret_cast<Vector<AF>&>(C)=reinterpret_cast<Matrix<AF>const&>(A) * reinterpret_cast<Vector<AF>const&>(A);
+  unchecked_cast<Vector<AF>&>(C) = unchecked_cast<Matrix<AF>const&>(A) * unchecked_cast<Vector<AF>const&>(A);
+  //reinterpret_cast<Vector<AF>&>(C) = reinterpret_cast<Matrix<AF>const&>(A) * reinterpret_cast<Vector<AF>const&>(A);
   return C;
 }
 
@@ -328,12 +332,13 @@ mul_approx(const Matrix< Float<T> >& A,
 template<class T>
 Vector< Float<T> >
 solve_approx(const Matrix< Float<T> >& A,
-                            const Vector< Float<T> >& b)
+             const Vector< Float<T> >& b)
 {
   typedef Float<T> F;
   typedef ApproximateFloat<T> AF;
   Vector<F> r;
-  reinterpret_cast<Vector<AF>&>(r)=solve(reinterpret_cast<Matrix<AF>const&>(A),reinterpret_cast<Vector<AF>const&>(b));
+  unchecked_cast<Vector<AF>&>(r)=solve(unchecked_cast<Matrix<AF>const&>(A),unchecked_cast<Vector<AF>const&>(b));
+  //reinterpret_cast<Vector<AF>&>(r)=solve(reinterpret_cast<Matrix<AF>const&>(A),reinterpret_cast<Vector<AF>const&>(b));
   return r;
 }
 
@@ -352,7 +357,8 @@ inverse_approx(const Matrix< Float<T> >& A)
   typedef Float<T> F;
   typedef ApproximateFloat<T> AF;
   Matrix<F> r;
-  reinterpret_cast<Matrix<AF>&>(r)=inverse(reinterpret_cast<Matrix<AF>const&>(A));
+  unchecked_cast<Matrix<AF>&>(r)=inverse(unchecked_cast<Matrix<AF>const&>(A));
+  //reinterpret_cast<Matrix<AF>&>(r)=inverse(reinterpret_cast<Matrix<AF>const&>(A));
   return r;
 }
 
@@ -363,11 +369,11 @@ qr_approx(const Matrix< Float<T> >& A)
 {
   typedef Float<T> F;
   typedef ApproximateFloat<T> AF;
-  QRMatrix<AF> qr(reinterpret_cast<Matrix<AF>const&>(A));
+  QRMatrix<AF> qr(unchecked_cast<Matrix<AF>const&>(A));
   Matrix<F> Q;
   Matrix<F> R;
-  Matrix<AF>& AQ=reinterpret_cast<Matrix<AF>&>(Q);
-  Matrix<AF>& AR=reinterpret_cast<Matrix<AF>&>(R);
+  Matrix<AF>& AQ=unchecked_cast<Matrix<AF>&>(Q);
+  Matrix<AF>& AR=unchecked_cast<Matrix<AF>&>(R);
   AQ=qr.Q();
   AR=qr.R();
   return std::pair< Matrix<F>, Matrix<F> >(Q,R);

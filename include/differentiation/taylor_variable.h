@@ -44,8 +44,12 @@ namespace Ariadne {
     {
       friend class TaylorDerivative<X>;
      public:
+      /*! The type used to represent indices. */
+      typedef MultiIndex index_type;
       /*! The type used to represent numbers. */
       typedef X value_type;
+      /*! The type used for a vector of variables. */
+      typedef TaylorDerivative<X> vector_type;
 
       /*! \brief Default constructor constructs a constant of degree zero. */
       TaylorVariable();
@@ -108,6 +112,8 @@ namespace Ariadne {
       friend TaylorVariable<X> inverse(const TaylorVariable<X>& y, const X& x);
       /*! \brief The derivative of \f$x\f$ with respect to the variable \a k .*/
       friend TaylorVariable<X> derivative(const TaylorVariable<x>& x, size_type k);
+      /*! \brief The antiderivative of \f$x\f$ with respect to the variable \a k .*/
+      friend TaylorVariable<X> antiderivative(const TaylorVariable<x>& x, size_type k);
       /*! \brief The minimum of two variables. Returns the variable whose zero-th order value is minimal. */
       friend TaylorVariable<X> min(const TaylorVariable<X>& x1, const TaylorVariable<X>& x2);
       /*! \brief The maximum of two variables. Returns the variable whose zero-th order value is maximal. */
@@ -177,6 +183,7 @@ namespace Ariadne {
   template<class X> TaylorVariable<X> compose(const TaylorVariable<X>& y, const TaylorVariable<X>& x);
   template<class X> TaylorVariable<X> reduce(const TaylorVariable<X>& x);
   template<class X> TaylorVariable<X> derivative(const TaylorVariable<X>& x, size_type k);
+  template<class X> TaylorVariable<X> antiderivative(const TaylorVariable<X>& x, size_type k);
 
   template<class X> TaylorVariable<X> min(const TaylorVariable<X>& x1, const TaylorVariable<X>& x2); 
   template<class X> TaylorVariable<X> max(const TaylorVariable<X>& x1,const TaylorVariable<X>& x2); 

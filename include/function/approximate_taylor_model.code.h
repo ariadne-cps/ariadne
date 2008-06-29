@@ -31,6 +31,7 @@
 #include "differentiation/sparse_differential.h"
 #include "function/approximate_taylor_model.h"
 #include "function/function_interface.h"
+#include "function/function_model_concept.h"
 #include "output/latexstream.h"
 
 
@@ -123,6 +124,7 @@ ApproximateTaylorModel<R>::domain() const
 
 
 template<class R>
+//Vector<typename ApproximateTaylorModel<R>::A>
 Vector<R>
 ApproximateTaylorModel<R>::centre() const
 { 
@@ -138,7 +140,8 @@ template<class R>
 Vector< Interval<R> >
 ApproximateTaylorModel<R>::range() const
 { 
-  //  return Vector<I>(this->_expansion.value());
+  I infty(-inf<R>(),+inf<R>());
+  return Vector<I>(this->result_size(),infty);
 }
 
 
@@ -235,7 +238,8 @@ ApproximateTaylorModel<R>::evaluate(const Vector<I>& x) const
   assert(this->argument_size()==x.size());
 
   // TODO: Make this more efficient
-  Vector<I> w=x-this->centre();
+  Vector<R> c=this->centre();
+  Vector<I> w=x-c;
   Vector<I> result(this->result_size());
   for(MultiIndex j(this->argument_size()); j.degree()<=this->order(); ++j) {
     I wa=1;
@@ -328,7 +332,7 @@ ApproximateTaylorModel<R>::identity(const Vector<I>& d, uint o)
 
 template<class R> 
 ApproximateTaylorModel<R> 
-project(const ApproximateTaylorModel<R>& f, Range rng)
+project(const ApproximateTaylorModel<R>& f, Slice rng)
 {
   return ApproximateTaylorModel<R>(f.domain(),f.centre(),project(f.expansion(),rng));
 }
@@ -337,12 +341,14 @@ template<class R>
 ApproximateTaylorModel<R> 
 join(const ApproximateTaylorModel<R>& f, const ApproximateTaylorModel<R>& g)
 {
+  typedef typename traits<R>::approximate_arithmetic_type A;
   assert(f.domain()==g.domain());
   assert(f.centre()==g.centre());
 
-  SparseDifferentialVector<R> he(f.result_size()+g.result_size(),f.argument_size(),f.order());
+  SparseDifferentialVector<A> he(f.result_size()+g.result_size(),f.argument_size(),f.order());
   project(he,range(0,f.result_size()))=f.expansion();
-  project(he,range(f.result_size(),f.result_size()+g.result_size()))=g.expansion();
+  //project(he,range(0,f.result_size()))=f.expansion();
+  //project(he,range(f.result_size(),f.result_size()+g.result_size()))=g.expansion();
 
   return ApproximateTaylorModel<R> (f.domain(),f.centre(),he);
 }
@@ -406,18 +412,19 @@ compose(const ApproximateTaylorModel<R>& f,
   //std::cerr<<__PRETTY_FUNCTION__<<std::endl;
   assert(f.argument_size()==g.result_size());
   typedef Interval<R> I;
-  SparseDifferentialVector<R> const& fe=f.expansion();
+  typedef typename traits<R>::approximate_arithmetic_type A;
+  SparseDifferentialVector<A> const& fe=f.expansion();
   //std::cerr<<"fe="<<fe<<std::endl;
-  SparseDifferentialVector<R> const& ge=g.expansion();
+  SparseDifferentialVector<A> const& ge=g.expansion();
   //std::cerr<<"ge="<<ge<<std::endl;
-  Vector<R> tr=-f.centre()+ge.value();
+  Vector<A> tr=-Vector<A>(f.centre())+ge.value();
   //std::cerr<<"tr="<<tr<<std::endl;
-  SparseDifferentialVector<R> fet=translate(fe,tr);
+  SparseDifferentialVector<A> fet=translate(fe,tr);
   //std::cerr<<"fet="<<fet<<std::endl;
-  Vector<I> hd=g.domain();
-  Vector<R> hc=g.centre();
+  Vector<I> const& hd=g.domain();
+  Vector<A> hc=g.centre();
   //std::cerr<<"he="<<std::flush;
-  SparseDifferentialVector<R> he=compose(fet,ge);
+  SparseDifferentialVector<A> he=compose(fet,ge);
   // FIXME: Change domain
   //std::cerr<<he<<std::endl;
   return ApproximateTaylorModel<R>(hd,hc,he);
@@ -453,7 +460,8 @@ template<class R>
 ApproximateTaylorModel<R>
 implicit(const ApproximateTaylorModel<R>& f)
 {
-  typedef Interval<R> I;
+  typedef typename traits<R>::interval_type I;
+  typedef typename traits<R>::approximate_arithmetic_type A;
   assert(f.argument_size()>f.result_size());
   uint m=f.argument_size(); 
   uint n=f.result_size();
@@ -463,36 +471,36 @@ implicit(const ApproximateTaylorModel<R>& f)
   //std::cerr << "p=" << p << std::endl;
 
   // Construct the Taylor model for g(y)=f(c,y)
-  Interval<R> gd=project(f.domain(),range(m-n,m));
+  Vector<I> gd=project(f.domain(),range(m-n,m));
   //std::cerr << "gd=" << gd << std::endl;
-  Vector<R> gc=project(f.centre(),range(m-n,m));
+  Vector<A> gc=project(f.centre(),range(m-n,m));
   //std::cerr << "gc=" << gc << std::endl;
-  SparseDifferentialVector<R> ge=restrict(f.expansion(),p);
+  SparseDifferentialVector<A> ge=project(f.expansion(),range(m-n,m));
   //std::cerr << "ge=" << ge << std::endl;
   ApproximateTaylorModel<R> g(gd,gc,ge);
 
   Vector<R> z(n);
   Vector<I> iv = solve(g,z);
-  Vector<R> v = midpoint(iv);
+  Vector<A> v = midpoint(iv);
   //std::cerr<<"iv="<<iv<<std::endl;
   //std::cerr<<"v="<<v<<std::endl;
-  Vector<R> t(m);
+  Vector<A> t(m);
   project(t,range(m-n,m))=v;
   //std::cerr<<"t="<<t<<std::endl;
 
-  SparseDifferentialVector<R> fe=f.expansion();
+  SparseDifferentialVector<A> fe=f.expansion();
   //std::cerr<<"fe="<<fe<<std::endl;
-  SparseDifferentialVector<R> fet=translate(fe,t);
+  SparseDifferentialVector<A> fet=translate(fe,t);
   //std::cerr<<"fet="<<fet<<std::endl;
-  fet.set_value(Vector<R>(fe.result_size(),0.0));
+  fet.set_value(Vector<A>(fe.result_size(),0.0));
   //std::cerr<<"fet="<<fet<<std::endl;
 
-  SparseDifferentialVector<R> he=implicit(fet);
+  SparseDifferentialVector<A> he=implicit(fet);
   //std::cerr<<"he="<<he<<std::endl;
   he+=v;
   //std::cerr<<"he="<<he<<std::endl;
   Vector<I> hd=project(f.domain(),range(0,m-n));
-  Vector<R> hc=project(f.centre(),range(0,m-n));
+  Vector<A> hc=project(f.centre(),range(0,m-n));
   return ApproximateTaylorModel<R>(hd,hc,he);
 }
 
@@ -551,14 +559,18 @@ implicit2(const ApproximateTaylorModel<R>& f,
 
 template<class R> 
 ApproximateTaylorModel<R> 
-flow(const ApproximateTaylorModel<R>& vf, uint ox)
+flow(const ApproximateTaylorModel<R>& vf)
 {
   typedef Interval<R> I;
+  typedef typename traits<R>::approximate_arithmetic_type A;
+  uint ox=vf.order();
+  uint ot=4u;
 
-  Vector< SparseSeries< SparseDifferential<R> > > y=flow(vf.expansion(),vf.centre(),ox);
+  Vector<A> vfc=vf.centre();
+  Vector< SparseSeries< SparseDifferential<A> > > y=flow(vf.expansion(),vfc,ot,ox);
   
   uint n=vf.result_size();
-  SparseDifferentialVector<R> x(n,n+1,ox);
+  SparseDifferentialVector<A> x(n,n+1,ox);
   for(MultiIndex jx(n+1); jx.degree()<=ox; ++jx) {
     MultiIndex jy(n);
     for(uint k=0; k!=n; ++k) { 
@@ -572,7 +584,7 @@ flow(const ApproximateTaylorModel<R>& vf, uint ox)
 
   I h(-0.1,0.1);
   Vector<I> d=join(vf.domain(),h);
-  Vector<R> c=join(vf.centre(),0.0);
+  Vector<R> c=join(vf.centre(),R(0.0));
   return ApproximateTaylorModel<R>(d,c,x);
 }
 
@@ -601,12 +613,13 @@ Vector< Interval<R> >
 solve(const ApproximateTaylorModel<R>& f,
       const Vector<R>& y)
 {
+  typedef typename traits<R>::approximate_arithmetic_type A;
   typedef Interval<R> I;
   Vector<I> x=f.centre();
   //Vector<I> x=f.domain();
-  Matrix<R> J,Jinv;
+  Matrix<A> J,Jinv;
   Vector<I> nx,fx,fxmy;
-  Vector<R> m;
+  Vector<A> m;
   for(uint i=0; i!=6; ++i) {
     //std::cerr << "  x[" << i << "]="<<x <<" y="<<y<<"\n";
     m=midpoint(x);
@@ -614,7 +627,7 @@ solve(const ApproximateTaylorModel<R>& f,
     Jinv=inverse(J);
     fx=f.evaluate(x);
     fxmy=fx-y;
-    nx=m-Jinv*Vector<I>(fx-y);
+    nx=m-Vector<I>(Jinv*Vector<I>(fx-y));
     if(disjoint(x,nx)) {
       x=nx;
     } else {
@@ -634,6 +647,7 @@ ApproximateTaylorModel<R>
 hitting(const ApproximateTaylorModel<R>& vf,
         const ApproximateTaylorModel<R>& g)
 {
+  typedef typename traits<R>::approximate_arithmetic_type A;
   typedef Interval<R> I;
   assert(vf.result_size()==vf.argument_size());
   assert(g.argument_size()==vf.result_size());
@@ -645,14 +659,14 @@ hitting(const ApproximateTaylorModel<R>& vf,
   //std::cerr<<"g="<<g<<std::endl; // 1,n+1
   //Differential<R> t=variable(n+1,d,0.0,n); // 1,n+1
   //std::cerr<<"t="<<t<<std::endl;
-  ApproximateTaylorModel<R> f=flow(vf,d); // n,n+1
+  ApproximateTaylorModel<R> f=flow(vf); // n,n+1
   //std::cerr<<"f="<<f<<std::endl;
   ApproximateTaylorModel<R> gf=compose(g,f); // 1,n+1
   //std::cerr<<"gf="<<gf<<std::endl;
   ApproximateTaylorModel<R> ht=implicit(gf); // 1,n
   //std::cerr<<"ht="<<ht<<std::endl;
 
-  SparseDifferentialVector<R> xe=vector_variable(n,d,vf.centre());
+  SparseDifferentialVector<A> xe=SparseDifferentialVector<A>::variable(n,n,d,vf.centre());
   //std::cerr<<"  xe="<<xe<<std::endl;
   ApproximateTaylorModel<R> hxt(ht.domain(),ht.centre(),join(xe,ht.expansion())); // n+1,n
   //std::cerr<<"hxt="<<hxt<<std::endl;

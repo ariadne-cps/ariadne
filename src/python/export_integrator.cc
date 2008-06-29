@@ -71,6 +71,8 @@ class IntegratorWrapper
     return this->get_override("integration_step")(); }
   BS reachability_step(const VectorField<R>&, const BS&, const T&, const Box<R>&) const {
     return this->get_override("reachability_step")(); }
+  BS evolution_step(const VectorField<R>&, const BS&, const T&, const T&, const Box<R>&) const {
+    return this->get_override("evolution_step")(); }
   std::ostream& write(std::ostream&) const {
     return this->get_override("write")(); }
 };

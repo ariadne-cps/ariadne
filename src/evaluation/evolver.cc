@@ -34,6 +34,9 @@
 #include "evaluation/vector_field_evolver.h"
 #include "evaluation/vector_field_evolver.code.h"
 
+#include "evaluation/impact_system_evolver.h"
+#include "evaluation/impact_system_evolver.code.h"
+
 #include "evaluation/set_based_hybrid_evolver.h"
 #include "evaluation/set_based_hybrid_evolver.code.h"
 
@@ -44,12 +47,14 @@ namespace Ariadne {
 #ifdef ENABLE_FLOAT64
     template class Evolver< Map<Float64>, Zonotope<Float64> >;
     template class Evolver< VectorField<Float64>, Zonotope<Float64> >;
+    template class Evolver< ImpactSystem<Float64>, Zonotope<Float64> >;
     template class Evolver< HybridAutomaton<Float64>, Zonotope<Float64> >;
 #endif
   
 #ifdef ENABLE_FLOATMP
     template class Evolver< Map<FloatMP>, Zonotope<FloatMP> >;
     template class Evolver< VectorField<FloatMP>, Zonotope<FloatMP> >;
+    template class Evolver< ImpactSystem<FloatMP>, Zonotope<FloatMP> >;
     template class Evolver< HybridAutomaton<FloatMP>, Zonotope<FloatMP> >;
 #endif
 

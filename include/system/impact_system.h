@@ -36,6 +36,7 @@
 #include "linear_algebra/declarations.h"
 #include "function/declarations.h"
 #include "geometry/declarations.h"
+#include "system/declarations.h"
 
 #include <boost/shared_ptr.hpp>
 #include "function/function_interface.h"
@@ -46,59 +47,59 @@ namespace Ariadne {
 
 
 
-    /*!\ingroup System
-     * \ingroup ContinuousTime
-     * \brief A class representing a system in which continuous evolution is interrupted 
-     * by discrete resets in a single mode.
-     *
-     * An impact system is a simple type of hybrid system. The state space is 
-     * Euclidean space i.e. a single mode, and there is one guard set with an
-     * associated reset map.
-     *
-     */
-    template<class R>
-    class ImpactSystem {
-     protected:
-      typedef typename traits<R>::arithmetic_type F; 
-      typedef typename traits<R>::interval_type I; 
-     public:
-      /*! \brief The type used to represent time. */
-      typedef Rational time_type;
-      /*! \brief The real number type. */
-      typedef R real_type;
-      /*! \brief The type used to describe the state space. */
-      typedef EuclideanSpace state_space_type;
-      
-      /*! \brief Destructor. */
-      ~ImpactSystem() { };
-
-      /*! \brief Construct from functions giving the vector field \a vf, the guard set \a g and the impact (reset) map \a h. 
-       *  The guard condition is a function \f$\R^n\rightarrow\R\f$ which is positive when continuous evolution is allowed.
-       */
-      ImpactSystem(const FunctionInterface<R>& vf, const FunctionInterface<R>& g, const FunctionInterface<R>& h);
-
-      /*! \brief Make a copy (clone) of the vector field. */
-      VectorField<R>* clone() const { return new VectorField<R>(*this); }
-     
-      /*! \brief The function defining the vector field. */
-      FunctionInterface<R>& vector_field() const { return *this->_vector_field_ptr; }
-
-      /*! \brief The function defining the vector field. */
-      FunctionInterface<R>& guard_condition() const { return *this->_guard_ptr; }
-
-      /*! \brief The function defining the vector field. */
-      FunctionInterface<R>& impact_map() const { return *this->_impact_ptr; }
-
-      /*! \brief The state space of the vector field. */
-      EuclideanSpace state_space() const { return EuclideanSpace(this->_function_ptr->result_size()); }
-
-      /*! \brief Write to an output stream. */
-      std::ostream& write(std::ostream& os) const;
-     private:
-      boost::shared_ptr< FunctionInterface<R> > _vector_field_ptr;
-      boost::shared_ptr< FunctionInterface<R> > _guard_ptr;
-      boost::shared_ptr< FunctionInterface<R> > _impact_ptr;
-    };
+/*!\ingroup System
+ * \ingroup ContinuousTime
+ * \brief A class representing a system in which continuous evolution is interrupted 
+ * by discrete resets in a single mode.
+ *
+ * An impact system is a simple type of hybrid system. The state space is 
+ * Euclidean space i.e. a single mode, and there is one guard set with an
+ * associated reset map.
+ *
+ */
+template<class R>
+class ImpactSystem {
+ protected:
+  typedef typename traits<R>::arithmetic_type F; 
+  typedef typename traits<R>::interval_type I; 
+ public:
+  /*! \brief The type used to represent time. */
+  typedef Rational time_type;
+  /*! \brief The real number type. */
+  typedef R real_type;
+  /*! \brief The type used to describe the state space. */
+  typedef EuclideanSpace state_space_type;
+  
+  /*! \brief Destructor. */
+  ~ImpactSystem() { };
+  
+  /*! \brief Construct from functions giving the vector field \a vf, the guard set \a g and the impact (reset) map \a h. 
+   *  The guard condition is a function \f$\R^n\rightarrow\R\f$ which is positive when continuous evolution is allowed.
+   */
+  ImpactSystem(const FunctionInterface<R>& vf, const FunctionInterface<R>& g, const FunctionInterface<R>& h);
+  
+  /*! \brief Make a copy (clone) of the vector field. */
+  VectorField<R>* clone() const { return new VectorField<R>(*this); }
+  
+  /*! \brief The function defining the vector field. */
+  const FunctionInterface<R>& vector_field() const { return *this->_vector_field_ptr; }
+  
+  /*! \brief The function defining the vector field. */
+  const FunctionInterface<R>& guard_condition() const { return *this->_guard_ptr; }
+  
+  /*! \brief The function defining the vector field. */
+  const FunctionInterface<R>& impact_map() const { return *this->_impact_ptr; }
+  
+  /*! \brief The state space of the vector field. */
+  EuclideanSpace state_space() const { return EuclideanSpace(this->_vector_field_ptr->result_size()); }
+  
+  /*! \brief Write to an output stream. */
+  std::ostream& write(std::ostream& os) const;
+ private:
+  boost::shared_ptr< FunctionInterface<R> > _vector_field_ptr;
+  boost::shared_ptr< FunctionInterface<R> > _guard_ptr;
+  boost::shared_ptr< FunctionInterface<R> > _impact_ptr;
+};
    
 template<class R> inline 
 std::ostream& 
@@ -120,7 +121,8 @@ ImpactSystem<R>::ImpactSystem(const FunctionInterface<R>& f,
 }
     
 template<class R>  
-ImpactSystem<R>::write(std::ostream& os) {
+std::ostream& 
+ImpactSystem<R>::write(std::ostream& os) const {
   os << "ImpactSystem"
      << "( vector_field=" << *this->_vector_field_ptr
      << ", guard=" << *this->_guard_ptr

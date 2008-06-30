@@ -83,6 +83,7 @@ ARIADNE_SRC = ariadne_module.cc \
 	export_list_set.cc \
 	export_grid_set.cc \
 	export_partition_tree_set.cc \
+	export_image_set.cc \
 	export_constraint_set.cc \
 	export_level_set.cc \
 	export_orbit.cc \
@@ -92,6 +93,7 @@ ARIADNE_SRC = ariadne_module.cc \
 	 \
 	export_map.cc \
 	export_vector_field.cc \
+	export_impact_system.cc \
 	export_hybrid_automaton.cc \
 	 \
 	export_evolution_parameters.cc \

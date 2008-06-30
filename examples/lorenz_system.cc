@@ -87,21 +87,22 @@ lorenz_attractor()
 
 
   LorenzSystem<R> lorenz=LorenzSystem<R>(parameters);
-  Point<R> pt("(3,5)"); 
+  cout << "system = " << lorenz << endl;
+  Point<R> pt("(1,0.5,0)"); 
   smoothness_type s=3;
   cout << "pt="<<pt<<" s="<<s<<endl;
   cout << "lorenz(pt)="<<lorenz(pt)<<endl;
   cout << "lorenz.jacobian(pt)="<<lorenz.jacobian(pt) << endl; 
   cout << "lorenz.derivative(pt,s)="<<lorenz.derivative(pt,s) << endl; 
 
-  Box<R> gbb=Box<R>("[-11.0,5.0]x[-8.0,8.0]") ;
+  Box<R> gbb=Box<R>("[-4.0,4.0]x[-4.0,4.0]x[-4.0,4.0]") ;
   cout << "gbb=" << gbb << endl;
   FiniteGrid<R> fg=FiniteGrid<R>(gbb,subdivisions); // grid
   cout << "fg=" << fg << endl;
   const Grid<R>& g=fg.grid(); // grid
-  Box<R> ir=Box<R>("[1.499,1.501]x[0.499,0.501]"); // initial state
-  Box<R> cb=Box<R>("[-4,4]x[-4,4]"); // cutoff box
-  Box<R> epsbb=Box<R>("[-4.1,4.1]x[-4.1,4.1]"); // eps bounding box
+  Box<R> ir=Box<R>("[-0.01,0.01]x[-0.01,0.01]x[-0.01,0.01]"); // initial state
+  Box<R> cb=Box<R>("[-4,4]x[-4,4]x[-4,4]"); // cutoff box
+  Box<R> epsbb=Box<R>("[-4.1,4.1]x[-4.1,4.1]x[-4.1,4.1]"); // eps bounding box
   
   cb=Box<R>(gbb); // cutoff box
   epsbb=Box<R>(gbb); // eps bounding box
@@ -111,7 +112,9 @@ lorenz_attractor()
   in.adjoin(over_approximation(ir,g));
   bd.adjoin(over_approximation(gbb,g));
 
+  cout << "Computing attractor..." << flush;
   SetInterface< Box<R> >* cr=analyser.chain_reach(lorenz,in);
+  cout << "  done" << endl;
   GridMaskSet<R>& gmcr=*dynamic_cast<GridMaskSet<R>*>(cr);
   PartitionTreeSet<R> ptcr=PartitionTreeSet<R>(gmcr);
 

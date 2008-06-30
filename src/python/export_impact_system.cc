@@ -1,7 +1,7 @@
 /***************************************************************************
- *            python/export_constraint_set.cc
+ *            python/export_impact_system.cc
  *
- *  Copyright  2007  Alberto Casagrande, Pieter Collins
+ *  Copyright  2006  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
  ****************************************************************************/
 
@@ -23,9 +23,14 @@
 
 #include "python/float.h"
 
+#include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
+#include "differentiation/taylor_derivative.h"
+#include "function/function_interface.h"
 #include "geometry/point.h"
 #include "geometry/box.h"
-#include "geometry/constraint_set.h"
+
+#include "system/impact_system.h"
 
 using namespace Ariadne;
 using namespace Ariadne::Python;
@@ -33,29 +38,22 @@ using namespace Ariadne::Python;
 #include <boost/python.hpp>
 using namespace boost::python;
 
+
 template<class R>
-void export_constraint_set() 
+void export_impact_system() 
 {
   typedef typename traits<R>::arithmetic_type A;
 
-  class_< ConstraintSet<R>, bases< SetInterface< Box<R> > > >("ConstraintSet",init< const FunctionInterface<R>&, const Box<R>& >())
-    .def(init< const Box<R>& >())
-    .def(init< const ConstraintSet<R>& >())
-    .def("codomain", (Box<R>(ConstraintSet<R>::*)()const)&ConstraintSet<R>::codomain)
-    .def("function", (FunctionInterface<R>*(ConstraintSet<R>::*)()const)&ConstraintSet<R>::function,
-         return_value_policy<manage_new_object>())
-    .def("contains", (tribool(ConstraintSet<R>::*)(const Point<A>&)const)&ConstraintSet<R>::contains)
-    .def("dimension", &ConstraintSet<R>::dimension)
-    .def("contains", (tribool(ConstraintSet<R>::*)(const Point<R>&)const)&ConstraintSet<R>::contains)
-    .def("superset", &ConstraintSet<R>::superset)
-    .def("intersects", &ConstraintSet<R>::intersects)
-    .def("disjoint", &ConstraintSet<R>::disjoint)
-    .def("subset", &ConstraintSet<R>::subset)
-    .def("bounded", &ConstraintSet<R>::bounded)
-    .def("bounding_box", &ConstraintSet<R>::bounding_box)
+
+  class_< ImpactSystem<R> >("ImpactSystem",
+                            init<const FunctionInterface<R>&, const FunctionInterface<R>&, const FunctionInterface<R>&>())
+    .def("state_space", &ImpactSystem<R>::state_space)
+    .def("vector_field", &ImpactSystem<R>::vector_field,return_value_policy<copy_const_reference>())
+    .def("guard_condition", &ImpactSystem<R>::guard_condition,return_value_policy<copy_const_reference>())
+    .def("impact_map", &ImpactSystem<R>::impact_map,return_value_policy<copy_const_reference>())
     .def(self_ns::str(self))
   ;
+
 }
 
-
-template void export_constraint_set<FloatPy>();
+template void export_impact_system<FloatPy>();

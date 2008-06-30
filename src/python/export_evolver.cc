@@ -26,7 +26,7 @@
 #include "geometry/box.h"
 #include "geometry/zonotope.h"
 
-#include "system/map.h"
+#include "system/impact_system.h"
 
 #include "evaluation/evolution_parameters.h"
 #include "evaluation/approximator_interface.h"
@@ -37,6 +37,7 @@
 #include "evaluation/evolver_interface.h"
 #include "evaluation/map_evolver.h"
 #include "evaluation/vector_field_evolver.h"
+#include "evaluation/impact_system_evolver.h"
 #include "evaluation/set_based_hybrid_evolver.h"
 
 using namespace Ariadne;
@@ -61,6 +62,11 @@ void export_evolver()
                                       const SubdividerInterface<ZES>&,const ReducerInterface<ZES>&>());
   vector_field_evolver_class.def("evolve",&Evolver<VectorField<R>,ZES>::evolve);
   vector_field_evolver_class.def("reach",&Evolver<VectorField<R>,ZES>::reach);
+
+  class_< Evolver<ImpactSystem<R>,ZES> > impact_system_evolver_class("ImpactSystemEvolver",no_init);
+  impact_system_evolver_class.def(init<const EvolutionParameters<R>&>());
+  impact_system_evolver_class.def("evolve",&Evolver<ImpactSystem<R>,ZES>::evolve);
+  impact_system_evolver_class.def("reach",&Evolver<ImpactSystem<R>,ZES>::reach);
 
   class_< Evolver<HybridAutomaton<R>,ZES> > set_based_hybrid_evolver_class("SetBasedHybridEvolver",no_init);
   set_based_hybrid_evolver_class.def(init<const EvolutionParameters<R>&,

@@ -34,7 +34,9 @@
 #include "base/tribool.h"
 
 #include "function/function_interface.h"
+#include "function/identity_function.h"
 #include "geometry/set_interface.h"
+#include "geometry/euclidean_space.h"
 
 namespace Ariadne {
   
@@ -47,34 +49,43 @@ namespace Ariadne {
      */
     template<class R>
     class ImageSet
-      : public SetInterface<R>
+      : public SetInterface< Box<R> >
     {
       typedef typename traits<R>::arithmetic_type A;
      public:
-      /*! \brief Construct the set \f$f(x)\in B\f$ from the function \f$f\f$ and the box \a D. */
-      ImageSet(const Box<R> D, const FunctionInterface<R>& f)
-        : _domain(D), _function_ptr(f.clone());
+      /*! \brief Construct the set \f$\{p\}\f$ from the point \a p. */
+      ImageSet(const Point<R>& p)
+        : _domain(p), _function_ptr(new IdentityFunction<R>(p.dimension())) { }
+      /*! \brief Construct the set \f$D\f$ from the box \a D. */
+      ImageSet(const Box<R>& D)
+        : _domain(D), _function_ptr(new IdentityFunction<R>(D.dimension())) { }
+      /*! \brief Construct the set \f$f(x)\in D\f$ from the function \f$f\f$ and the box \a D. */
+      ImageSet(const Box<R>& D, const FunctionInterface<R>& f)
+        : _domain(D), _function_ptr(f.clone()) { }
 
       /*! \brief Return a new dynamically-allocated copy of the set. */
       virtual ImageSet<R>* clone() const { return new ImageSet<R>(*this); }
       /*! \brief The dimension of the set. */
       virtual dimension_type dimension() const { return this->_function_ptr->argument_size(); }
+      /*! \brief The the space in which the set lies. */
+      virtual EuclideanSpace space() const { return EuclideanSpace(this->_function_ptr->argument_size()); }
       /*! \brief Test if the set contains a point. */
       virtual tribool contains(const Point<R>& pt) const { return indeterminate; }
-      /*! \brief */
-        virtual tribool superset(const Box<R>& r) const { return indeterminate; }
-      /*! \brief */
+      /*! \brief Tests if the set is a superset of the box \a r. In general, only possible if the defining function is nonsingular. */
+      virtual tribool superset(const Box<R>& r) const { return indeterminate; }
+      /*! \brief Tests if the set intersects the box \a r. */
       virtual tribool intersects(const Box<R>& r) const { return indeterminate; }
-      /*! \brief */
-      virtual tribool disjoint(const Box<R>& r) const { return disjoint(this->_range(),r) or indeterminate; }
-      /*! \brief */
-      virtual tribool subset(const Box<R>& r) const { return subset(this->_range(),r) or indeterminate; }
-      /*! \brief */
-      virtual tribool bounded() const { return this->_range().bounded(); }
-      /*! \brief */
+      /*! \brief Tests if the set is disjoint from the box \a r. */
+      virtual tribool disjoint(const Box<R>& r) const { return Ariadne::disjoint(this->_range(),r) or indeterminate; }
+      /*! \brief Tests if the set is a subset of the box \a r. */
+      virtual tribool subset(const Box<R>& r) const { return Ariadne::subset(this->_range(),r) or indeterminate; }
+      /*! \brief Returns true if the set is bounded; always true in this case. */
+      virtual tribool bounded() const { return true; }
+      /*! \brief A bounding box for the set. */
       virtual Box<R> bounding_box() const { return this->_range(); }
-      /*! \brief */
-      virtual std::ostream& write(std::ostream& os) const;
+      /*! \brief Write to an output stream. */
+      std::ostream& write(std::ostream& os) const { 
+        return os << "ImageSet( domain=" << this->_domain << ", function=" << *this->_function_ptr << " )"; }
 
       /*! \brief The codomain given the allowable values of the image function. */
       const Box<R>& domain() const { return this->_domain; }
@@ -89,15 +100,10 @@ namespace Ariadne {
     };
     
     template<class R> inline
-    std::ostream& operator<<(std::ostream& os, const ImageSet<R>& cset) {
-      return cset.write(os);
+    std::ostream& operator<<(std::ostream& os, const ImageSet<R>& imset) {
+      return imset.write(os);
     }
     
-
-
-
-
-  }
 }
 
 #endif /* ARIADNE_IMAGE_SET_H */

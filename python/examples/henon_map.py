@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 ##############################################################################
-#            henon_attractor.py
+#            henon_map.py
 #
 #  Copyright 2006  Pieter Collins
 #
@@ -28,7 +28,7 @@ import sys
 
 print "\nAvailable classes and functions\n",dir(),"\n\n"
 
-#Set parameters for Henon attractor
+#Set parameters for Henon map
 a=Float(1.5)
 b=Float(-0.375)
 

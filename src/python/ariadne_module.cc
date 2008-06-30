@@ -91,6 +91,7 @@ template<class R> void export_list_set();
 template<class R> void export_grid();
 template<class R> void export_grid_set();
 template<class R> void export_partition_tree_set();
+template<class R> void export_image_set();
 template<class R> void export_constraint_set();
 template<class R> void export_rectangular_set();
 template<class R> void export_polyhedral_set();
@@ -106,6 +107,7 @@ template<class R> void export_reducer();
 
 template<class R> void export_map();
 template<class R> void export_vector_field();
+template<class R> void export_impact_system();
 template<class R> void export_hybrid_automaton();
 template<class R> void export_constraint_based_hybrid_automaton();
 
@@ -204,6 +206,7 @@ BOOST_PYTHON_MODULE(ariadne)
   export_polytope<FloatPy>();
   export_polyhedron<FloatPy>();
   export_empty_set<FloatPy>();
+  export_image_set<FloatPy>();
   export_constraint_set<FloatPy>();
   export_rectangular_set<FloatPy>();
   export_polyhedral_set<FloatPy>();
@@ -223,6 +226,7 @@ BOOST_PYTHON_MODULE(ariadne)
 
   export_map<FloatPy>();
   export_vector_field<FloatPy>();
+  export_impact_system<FloatPy>();
   export_hybrid_automaton<FloatPy>();
   //export_constraint_based_hybrid_automaton<FloatPy>();
 

@@ -99,7 +99,7 @@ _evolution(ESL& final,
     ARIADNE_ASSERT(ts.time()<=time);
     if(ts.time()==time) {
       final.adjoin(ts.set());
-    } else if(radius(ts.set()) > maximum_basic_set_radius()) {
+    } else if(radius(ts.set()) > maximum_enclosure_radius()) {
       if(semantics==upper_semantics) {
         this->adjoin_subdivision(working,ts);
         ++this->_profiler->subdivisions;

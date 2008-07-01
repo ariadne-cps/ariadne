@@ -227,9 +227,9 @@ _step(HESL& evolve,
   if(t==time) {
     ARIADNE_LOG(6," reached end time\n");
     evolve.adjoin(HES(ds,bs));
-  } else if(bs.radius()>this->maximum_basic_set_radius()) {
+  } else if(bs.radius()>this->maximum_enclosure_radius()) {
     ARIADNE_LOG(6," subdivide\n");
-    ARIADNE_LOG(7,"  r="<<bs.radius()<<"; max_r="<<this->maximum_basic_set_radius()<<"\n");
+    ARIADNE_LOG(7,"  r="<<bs.radius()<<"; max_r="<<this->maximum_enclosure_radius()<<"\n");
     this->append_subdivision(working,THES(t,n,ds,bs));
   } else {
     ARIADNE_LOG(6," time step\n");

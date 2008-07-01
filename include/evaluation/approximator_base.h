@@ -55,7 +55,8 @@ namespace Ariadne {
       typedef ES EnclosureSet;
       typedef ListSet<ES> EnclosureSetList;
      protected:
-      ApproximatorBase(const Paving& pv) : _paving(pv) { }
+      ApproximatorBase(const Paving& pv) : _grid_spacing(pv.lengths()[0]) { }
+      ApproximatorBase(const R& l) : _grid_spacing(l) { }
      public:
       /*! \brief Computes a bounding box for a set. */
       BasicSet bounding_box(const EnclosureSetList& esl) const;
@@ -95,9 +96,9 @@ namespace Ariadne {
       /*! \brief Computets and over-approximation of a set from a rectangle. */
       void adjoin_outer_approximation(PartitionTreeSet& pts, const EnclosureSetList& esl) const;
      protected:
-      Paving paving() const { return this->_paving; }
+      Paving paving(uint d) const { return Paving(d,this->_grid_spacing); }
      private:
-      Paving _paving;
+      R _grid_spacing;
    };
 
 
@@ -136,7 +137,7 @@ typename ApproximatorBase<Aprx,ES>::PartitionListSet
 ApproximatorBase<Aprx,ES>::inner_approximation(const EnclosureSet& es) const
 {
   const ApproximatorInterface<Aprx,ES>* base=this;
-  return base->inner_approximation(es,this->paving());
+  return base->inner_approximation(es,this->paving(es.dimension()));
 }
 
 template<class Aprx, class ES> inline
@@ -144,21 +145,21 @@ typename ApproximatorBase<Aprx,ES>::PartitionListSet
 ApproximatorBase<Aprx,ES>::outer_approximation(const EnclosureSet& es) const
 {
   const ApproximatorInterface<Aprx,ES>* base=this;
-  return base->inner_approximation(es,this->paving());
+  return base->inner_approximation(es,this->paving(es.dimension()));
 }
 
 template<class Aprx, class ES> inline
 typename ApproximatorBase<Aprx,ES>::PartitionListSet
 ApproximatorBase<Aprx,ES>::inner_approximation(const EnclosureSetList& esl) const
 {
-  return this->inner_approximation(esl,this->paving());
+  return this->inner_approximation(esl,this->paving(esl.dimension()));
 }
 
 template<class Aprx, class ES> inline
 typename ApproximatorBase<Aprx,ES>::PartitionListSet
 ApproximatorBase<Aprx,ES>::outer_approximation(const EnclosureSetList& esl) const
 {
-  return this->outer_approximation(esl,this->paving());
+  return this->outer_approximation(esl,this->paving(esl.dimension()));
 }
 
 template<class Aprx, class ES> inline

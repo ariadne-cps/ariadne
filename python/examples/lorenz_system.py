@@ -33,6 +33,9 @@ beta=Float(8./3.)
 rho=Float(10)
 sigma=Float(28)
 
+#Give the evolution time for finite-time evolution.
+time=Rational(2)
+
 #Construct built-in Lorenz system
 print "Constructing built-in Lorenz system"
 lorenz_system=LorenzSystem(Point([beta,rho,sigma]))
@@ -41,36 +44,56 @@ print lorenz_system
 # Start at the origin
 initial_point=Point([0,0,0]);
 
+# Construct concrete initial sets
+initial_box=Box([[0.9,1.1],[-0.1,0.1],[-0.1,0.1]])
+initial_zonotope=Zonotope(initial_box)
+
 # Construct initial set and bounding set
 initial_set=ImageSet(initial_point)
-bounding_set=RectangularSet([[-10,6],[-8,8]])
 
-# Construct evolver
+# Define evolution parameters
 parameters=EvolutionParameters()
 #parameters.set_grid_length(0.125)
 parameters.set_grid_length(0.0625)
-parameters.set_bounding_domain_size(4.0)
-evolver=VectorFieldEvolver(parameters)
+parameters.set_maximum_enclosure_radius(0.25)
+parameters.set_bounding_domain_size(8.0)
+
+evolver=default_evolver(lorenz_system,initial_zonotope,parameters)
+approximator=default_approximator(Box(0),Zonotope(0))
+
+analyser=VectorFieldReachabilityAnalyser(parameters,evolver,approximator)
+
+# Compute finite-time reachable and evolved set
+print "Computing evolve set..."
+evolve_set = evolver.evolve(lorenz_system,initial_zonotope,time)
+print "Computing reach set..."
+reach_set = evolver.reach(lorenz_system,initial_zonotope,time)
+print "evolve_set has",evolve_set.size(),"enclosures"
+print "reach_set has",reach_set.size(),"enclosures"
+
 
 # Compute chain-reachable set
 print "Computing chain-reachable set..."
-chain_reach_set = evolver.chain_reach(lorenz_system,ConstraintSet(initial_set))
-print "Found", chain_reach_set.size(), "cells in grid with", chain_reach_set.capacity(), "cells."
+#chain_reach_set = analyser.chain_reach(lorenz_system,initial_set)
+chain_reach_set=initial_set
+#print "Found", chain_reach_set.size(), "cells in grid with", chain_reach_set.capacity(), "cells."
 
 # Reduce chain-reachable set to partition tree set
 print "Computing tree representation of chain-reachable set..."
-chain_reach_tree_set = PartitionTreeSet(chain_reach_set)
-print "Reduced to", chain_reach_tree_set.size(),"cells " \
-    "in partition tree with", chain_reach_tree_set.capacity(),"cells."
+#tree_chain_reach_set = PartitionTreeSet(chain_reach_set)
+#print "Reduced to", chain_reach_tree_set.size(),"cells " \
+#    "in partition tree with", chain_reach_tree_set.capacity(),"cells."
 
 # Export to postscript output
 print "Exporting to postscript output...",
-epsbb=Box([[-4.1,4.1],[-4.1,4.1]]) # eps bounding box
+epsbb=Box([[-8.1,8.1],[-8.1,8.1],[-8.1,8.1]]) # eps bounding box
 eps=EpsPlot()
-eps.open("lorenz_attractor-mask_set.eps",epsbb)
+eps.open("lorenz_attractor-reach_set.eps",epsbb)
 eps.set_line_style(True)
 eps.set_fill_colour("green")
-eps.write(chain_reach_set)
+eps.write(reach_set)
+eps.set_fill_colour("yellow")
+eps.write(evolve_set)
 eps.set_fill_colour("blue")
 eps.write(initial_set)
 eps.close()

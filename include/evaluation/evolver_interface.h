@@ -63,9 +63,14 @@ namespace Ariadne {
       virtual void evolution(ESL& final, const Sys& system, const ESL& initial, const T& time, Semantics semantics) const = 0;
       /*! \brief Compute an approximation to the evolved and reachable sets under the given semantics starting from a list of enclosure sets. */
       virtual void evolution(ESL& final, ESL& intermediate, const Sys& system, const ESL& initial, const T& time, Semantics semantics) const = 0;
+
+      /*! \brief Write to an output stream. */
+      virtual std::ostream& write(std::ostream& os) const = 0;
     };
 
-
+    template<class Sys, class ES> inline
+    std::ostream& operator<<(std::ostream& os, const EvolverInterface<Sys,ES>& e) {
+      return e.write(os); }
 
 } // namespace Ariadne
 

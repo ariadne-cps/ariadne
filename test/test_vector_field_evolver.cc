@@ -68,7 +68,7 @@ void TestVectorFieldEvolver<R>::test() const
   typedef Interval<R> I;
 
   EvolutionParameters<R> parameters;
-  parameters.set_maximum_basic_set_radius(0.25);
+  parameters.set_maximum_enclosure_radius(0.25);
   parameters.set_maximum_step_size(0.125);
   
   // Test constructor/destructor

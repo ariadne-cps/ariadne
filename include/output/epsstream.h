@@ -38,6 +38,8 @@
 
 #include "base/stlio.h"
 #include "linear_algebra/matrix.h"
+#include "function/function_interface.h"
+#include "function/identity_function.h"
 #include "geometry/exceptions.h"
 #include "geometry/point.h"
 #include "geometry/segment.h"
@@ -50,6 +52,7 @@
 #include "geometry/polytope.h"
 #include "geometry/polyhedral_set.h"
 #include "geometry/partition_tree_set.h"
+#include "geometry/image_set.h"
 #include "system/affine_map.h"
 #include "output/colour.h"
 #include "output/geometry2d.h"

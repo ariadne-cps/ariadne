@@ -89,8 +89,7 @@ template<class ES>
 std::ostream&
 FastApproximator<ES>::write(std::ostream& os) const
 {
-  os<<"StandardApproximator(" << std::flush;
-  return os<<" grid="<<this->paving()<<")\n";
+  return os<<"FastApproximator()\n";
 }
 
 } // namespace Ariadne

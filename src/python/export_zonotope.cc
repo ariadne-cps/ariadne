@@ -91,6 +91,7 @@ void export_zonotope()
 
   class_<RZonotope> zonotope_class("Zonotope",init<int>());
   zonotope_class.def("__init__", make_constructor(&make_zonotope<R>) );
+  zonotope_class.def(init<int>());
   zonotope_class.def(init<RPoint,RMatrix>());
   zonotope_class.def(init<RZonotope>());
   zonotope_class.def(init<RBox>());

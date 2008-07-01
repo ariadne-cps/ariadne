@@ -150,7 +150,7 @@ namespace Ariadne {
       ES reduce(const ES& es) const {
         return this->_reducer->over_approximate(es); }
       ESL subdivide(const ES& es) const {
-        return Ariadne::subdivide(es,this->maximum_basic_set_radius()); }
+        return Ariadne::subdivide(es,this->maximum_enclosure_radius()); }
      private:
       // Helper functions for timed sets
       THES integration_step(const VF& vf, const THES& thes, const Q& h, const Bx& bb) const {
@@ -179,7 +179,7 @@ namespace Ariadne {
       HS domain(const HSp& s) const { return this->_parameters->hybrid_bounding_domain(s); }
       Q maximum_step_size() const { return this->_parameters->maximum_step_size(); }
       Q minimum_step_size() const { return this->_parameters->minimum_step_size(); }
-      R maximum_basic_set_radius() const { return this->_parameters->maximum_basic_set_radius(); }
+      R maximum_enclosure_radius() const { return this->_parameters->maximum_enclosure_radius(); }
      private:
       boost::shared_ptr< EvolutionParameters<R> > _parameters;
       boost::shared_ptr< ApplicatorInterface<ES> > _applicator;

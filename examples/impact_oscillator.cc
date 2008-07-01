@@ -96,7 +96,7 @@ impact_oscillator()
 {
   typedef Zonotope<R> ES;
 
-  double maximum_basic_set_radius=0.25;
+  double maximum_enclosure_radius=0.25;
 
   StandardApplicator<ES> applicator;
   StandardIntegrator<ES> integrator;

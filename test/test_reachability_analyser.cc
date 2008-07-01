@@ -75,7 +75,7 @@ class TestReachabilityAnalyser
   static ReachabilityAnalyser< Map<R>, GridApproximationScheme<R> > build_map_analyser()
   {
     EvolutionParameters<R> parameters;
-    parameters.set_maximum_basic_set_radius(0.25);
+    parameters.set_maximum_enclosure_radius(0.25);
     parameters.set_grid_length(0.0625);
     parameters.set_maximum_step_size(0.125);
     parameters.set_lock_to_grid_time(0.5);

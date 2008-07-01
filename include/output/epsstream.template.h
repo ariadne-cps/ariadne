@@ -221,6 +221,17 @@ operator<<(epsstream& eps, const PartitionTreeSet<R>& ds)
 
 template<class R> 
 epsstream&
+operator<<(epsstream& eps, const ImageSet<R>& ds)
+{
+  if(dynamic_cast<const IdentityFunction<R>*>(&ds.function())!=0) {
+    eps << ds.domain(); 
+  } else {
+    throw NotImplemented("Cannot draw image set which is not a box.");
+  }
+}
+
+template<class R> 
+epsstream&
 operator<<(epsstream& eps, const SetInterface< Box<R> >& set)
 {
   
@@ -238,6 +249,8 @@ operator<<(epsstream& eps, const SetInterface< Box<R> >& set)
     return eps << dynamic_cast<const GridMaskSet<R>&>(set);
   } else if(dynamic_cast<const PartitionTreeSet<R>*>(&set)) {
     return eps << dynamic_cast<const PartitionTreeSet<R>&>(set);
+  } else if(dynamic_cast<const ImageSet<R>*>(&set)) {
+    return eps << dynamic_cast<const ImageSet<R>&>(set);
   }  else {
     Box<R> bb;
     try {
@@ -288,5 +301,6 @@ operator<<(epsstream& eps, const PartitionTree<R>& pt)
   if(fill_style) { eps.fill_style=true; }
   return eps;
 }
+
 
 }

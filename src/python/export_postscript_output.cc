@@ -125,5 +125,6 @@ void export_postscript_output()
     .def("write",&write< Box<Rational> >)
     .def("write",&write< Polytope<Rational> >)
     .def("write",&write< Polyhedron<Rational> >)
+    .def("write",&write< ImageSet<FloatPy> >)
     ;
 }

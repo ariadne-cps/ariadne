@@ -70,7 +70,7 @@ template<class R> void compute_lock_to_grid_time(Rational& t, const EvolutionPar
 namespace Ariadne {
   
  
-static const double DEFAULT_MAXIMUM_BASIC_SET_RADIUS=0.25;
+static const double DEFAULT_MAXIMUM_ENCLOSURE_RADIUS=0.25;
 static const double DEFAULT_GRID_LENGTH=0.125;
 
 

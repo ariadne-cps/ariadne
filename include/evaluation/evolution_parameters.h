@@ -55,8 +55,8 @@ namespace Ariadne {
       time_type _maximum_step_size;
       time_type _lock_to_grid_time;
 
-      R _minimum_basic_set_radius;
-      R _maximum_basic_set_radius;
+      R _minimum_enclosure_radius;
+      R _maximum_enclosure_radius;
 
       R _grid_length;
       R _argument_grid_length;
@@ -93,9 +93,9 @@ namespace Ariadne {
       /*! \brief The maximum allowable step size for integration. Decreasing this value increases the accuracy of the computation. */
       time_type maximum_step_size() const;
       /*! \brief A suggested minimum radius of a basic set after a subdivision (not a strict bound). */
-      R minimum_basic_set_radius() const;
+      R minimum_enclosure_radius() const;
       /*! \brief The maximum allowable radius of a basic set during integration. Decreasing this value increases the accuracy of the computation of an over-approximation. */
-      R maximum_basic_set_radius() const;
+      R maximum_enclosure_radius() const;
 
       /*! \brief The time after which an VectorFieldEvolver may approximate computed sets on a grid,
        *  in order to use previously cached integration results for the grid. Increasing this 
@@ -150,11 +150,11 @@ namespace Ariadne {
       void set_maximum_step_size(double);
       
       /*! \brief Set the minimum radius of a basic set after a subdivision. */
-      void set_minimum_basic_set_radius(R);
-      void set_minimum_basic_set_radius(double);
+      void set_minimum_enclosure_radius(R);
+      void set_minimum_enclosure_radius(double);
       /*! \brief Set the maximum radius of a basic set after a subdivision. */
-      void set_maximum_basic_set_radius(R);
-      void set_maximum_basic_set_radius(double);
+      void set_maximum_enclosure_radius(R);
+      void set_maximum_enclosure_radius(double);
 
       /*! \brief Set the time after which an integrator may approximate computed sets on a grid. */
       void set_lock_to_grid_time(time_type);

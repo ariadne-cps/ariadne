@@ -91,7 +91,7 @@ _evolution(ESL& final,
   while(working.size()!=0) {
     TES ts=working.pop();
     ARIADNE_LOG(5,"  ts="<<ts<<", r="<<this->radius(ts)<<"\n");
-    if(this->radius(ts) > this->maximum_basic_set_radius()) {
+    if(this->radius(ts) > this->maximum_enclosure_radius()) {
       if(semantics==upper_semantics) {
         ARIADNE_LOG(5,"    subdivide...\n");
         //ARIADNE_LOG(7,"      "<<this->subdivide(ts)<<"\n");

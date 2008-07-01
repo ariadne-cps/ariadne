@@ -59,12 +59,15 @@ lorenz_attractor()
 {
   typedef Zonotope<R> ES;
 
-  double maximum_basic_set_radius=0.25;
+  // Specify the time for finite-time evolution
+  Rational time(2);
+
+  // Specify the evolution parameters
+  EvolutionParameters<R> evolution_parameters;
+  double maximum_enclosure_radius=0.25;
   double grid_length=0.125;
   int subdivisions=128;
-
-  EvolutionParameters<R> evolution_parameters;
-  evolution_parameters.set_maximum_basic_set_radius(maximum_basic_set_radius);
+  evolution_parameters.set_maximum_enclosure_radius(maximum_enclosure_radius);
   evolution_parameters.set_grid_length(grid_length);
   
   StandardIntegrator<ES> integrator;
@@ -76,8 +79,7 @@ lorenz_attractor()
 
   set_applicator_verbosity(0);
   
-  Discretiser< VectorField<R>, GridApproximationScheme<R>, ES > discretiser(evolution_parameters,evolver,approximator);
-  ReachabilityAnalyser< VectorField<R>, GridApproximationScheme<R> > analyser(evolution_parameters,discretiser);
+  ReachabilityAnalyser< VectorField<R>, GridApproximationScheme<R> > analyser(evolution_parameters,evolver,approximator);
 
   double parameter_array[]={8./3.,10,28};
   Point<R> parameters=Point<R>(3,parameter_array);
@@ -88,73 +90,64 @@ lorenz_attractor()
 
   LorenzSystem<R> lorenz=LorenzSystem<R>(parameters);
   cout << "system = " << lorenz << endl;
-  Point<R> pt("(1,0.5,0)"); 
+  Point<R> pt("(1.0, 0.0, 0.0)"); 
   smoothness_type s=3;
   cout << "pt="<<pt<<" s="<<s<<endl;
   cout << "lorenz(pt)="<<lorenz(pt)<<endl;
   cout << "lorenz.jacobian(pt)="<<lorenz.jacobian(pt) << endl; 
   cout << "lorenz.derivative(pt,s)="<<lorenz.derivative(pt,s) << endl; 
 
-  Box<R> gbb=Box<R>("[-4.0,4.0]x[-4.0,4.0]x[-4.0,4.0]") ;
-  cout << "gbb=" << gbb << endl;
-  FiniteGrid<R> fg=FiniteGrid<R>(gbb,subdivisions); // grid
-  cout << "fg=" << fg << endl;
-  const Grid<R>& g=fg.grid(); // grid
-  Box<R> ir=Box<R>("[-0.01,0.01]x[-0.01,0.01]x[-0.01,0.01]"); // initial state
-  Box<R> cb=Box<R>("[-4,4]x[-4,4]x[-4,4]"); // cutoff box
-  Box<R> epsbb=Box<R>("[-4.1,4.1]x[-4.1,4.1]x[-4.1,4.1]"); // eps bounding box
+  Box<R> bounding_box("[-8.0,8.0]x[-8.0,8.0]x[-8.0,8.0]") ;
+  Box<R> initial_box("[0.9,1.1]x[-0.1,0.1]x[-0.1,0.1]"); // initial state
+  Box<R> graphic_bounding_box=Box<R>("[-8.1,8.1]x[-8.1,8.1]x[-8.1,8.1]"); // eps bounding box
   
-  cb=Box<R>(gbb); // cutoff box
-  epsbb=Box<R>(gbb); // eps bounding box
-  
-  GridMaskSet<R> in=GridMaskSet<R>(fg);
-  GridMaskSet<R> bd=GridMaskSet<R>(fg);
-  in.adjoin(over_approximation(ir,g));
-  bd.adjoin(over_approximation(gbb,g));
+  Zonotope<R> initial_zonotope(initial_box);
+  ImageSet<R> initial_set(initial_box);
 
-  cout << "Computing attractor..." << flush;
-  SetInterface< Box<R> >* cr=analyser.chain_reach(lorenz,in);
+  cout << "Computing finite time evolution..." << flush;
+  ListSet< Zonotope<R> > evolve_set=evolver.evolve(lorenz,initial_zonotope,time);
   cout << "  done" << endl;
-  GridMaskSet<R>& gmcr=*dynamic_cast<GridMaskSet<R>*>(cr);
-  PartitionTreeSet<R> ptcr=PartitionTreeSet<R>(gmcr);
+  cout << "Computing finite time reachable set..." << flush;
+  ListSet< Zonotope<R> > reach_set=evolver.reach(lorenz,initial_zonotope,time);
+  cout << "  done" << endl;
 
-  cout << gmcr <<endl;
-  cout << ptcr <<endl;
+  /*
+  cout << "Computing attractor..." << flush;
+  SetInterface< Box<R> >* cr=analyser.chain_reach(lorenz,initial_set);
+  cout << "  done" << endl;
+  GridMaskSet<R> grid_chain_reach_set=*dynamic_cast<GridMaskSet<R>*>(cr);
+  */
+
+  cout << "Skipping computation of attractor..." << flush;
+  GridMaskSet<R> grid_chain_reach_set(Grid<R>(3,0.125),bounding_box);
+  PartitionTreeSet<R> tree_chain_reach_set(grid_chain_reach_set);
+
+  cout << grid_chain_reach_set <<endl;
+  cout << tree_chain_reach_set <<endl;
   
-  cout << "gmcr.size()=" << gmcr.size() << endl;
-  cout << "ptcr.size()=" << ptcr.size() << "  " << flush;
-  cout << "ptcr.capacity()=" << ptcr.capacity() << endl;
-
-  RectangularSet<R> ins(ir);
-  RectangularSet<R> cbs(cb);
-  SetInterface< Box<R> >* crs=analyser.chain_reach(lorenz,ins);
-  cout << "*crs=" << *crs <<endl;
-  GridMaskSet<R>& gmcrs=*dynamic_cast<GridMaskSet<R>*>(crs);
-  cout << "gmcrs=" << gmcrs <<endl;
-  cout << "gmcrs.size()=" << gmcrs.size() << " of " << gmcrs.capacity() << endl;
+  cout << "evolve_set.size()=" << evolve_set.size() << endl;
+  cout << "reach_set.size()=" << reach_set.size() << endl;
+  cout << "grid_chain_reach_set.size()=" << grid_chain_reach_set.size() << endl;
+  cout << "tree_chain_reach_set.size()=" << tree_chain_reach_set.size() << "  " << flush;
+  cout << "tree_chain_reach_set.capacity()=" << tree_chain_reach_set.capacity() << endl;
 
   epsfstream eps;
-  eps.open("henon_chainreach-1.eps",epsbb);
-  eps << fill_colour(white) << cb;
+  eps.open("lorenz-reach.eps",graphic_bounding_box);
+  eps << fill_colour(white) << bounding_box;
+  eps << fill_colour(green) << reach_set;
+  eps << fill_colour(yellow) << evolve_set;
+  eps << fill_colour(blue) << initial_box;
+  eps.close();
+
+  eps.open("lorenz-chainreach.eps",graphic_bounding_box);
+  eps << fill_colour(white) << bounding_box;
   eps << line_style(false);
-  eps << fill_colour(green) << gmcr;
-  eps << fill_colour(blue) << ir;
+  eps << fill_colour(green) << tree_chain_reach_set;
+  eps << fill_colour(blue) << initial_box;
   eps << line_style(true);
-  eps << ptcr.partition_tree();
+  eps << tree_chain_reach_set.partition_tree();
   eps.close();
 
-  eps.open("henon_chainreach-2.eps",epsbb);
-  eps << line_style(false);
-  eps << fill_colour(red) << difference(gmcr.neighbourhood(),gmcr);
-  eps << fill_colour(blue) << gmcr.adjoining();
-  eps << fill_colour(green) << gmcr;
-  eps.close();
-
-  epsbb=Box<R>("[-4.1,4.1]x[-4.1,4.1]"); // eps bounding box
-  eps.open("henon_chainreach-3.eps",epsbb);
-  eps << line_style(false);
-  eps << fill_colour(green) << gmcr;
-  eps.close();
 
   return 0;
 }

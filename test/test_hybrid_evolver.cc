@@ -112,11 +112,11 @@ class TestHybridEvolver
     
     time_type maximum_step_size=0.125;
     time_type lock_to_grid_time=0.25;
-    R maximum_basic_set_radius=0.5;
+    R maximum_enclosure_radius=0.5;
     R grid_length=0.25;
     
     EvolutionParameters<R> parameters;
-    parameters.set_maximum_basic_set_radius(maximum_basic_set_radius);
+    parameters.set_maximum_enclosure_radius(maximum_enclosure_radius);
     parameters.set_grid_length(grid_length);
     parameters.set_maximum_step_size(maximum_step_size);
     parameters.set_lock_to_grid_time(lock_to_grid_time);

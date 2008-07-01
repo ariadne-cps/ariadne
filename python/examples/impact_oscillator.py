@@ -37,6 +37,9 @@ d=0.125
 parameters=Point([z,T,l,d])
 p=parameters
 
+# Set the evolution time
+time=Rational(15)
+
 #Construct Python-based impact osciallator
 print "Constructing impact osciallator"
 def dynamic_function(x):
@@ -60,11 +63,12 @@ reset_function=AriadneFunction(reset_function)
 
 impact_oscillator = ImpactSystem(dynamic_function, guard_function, reset_function)
 
-
 # Choose initial point
 initial_point=Point([0.5,0.0,0.0])
 
 # Construct initial set and bounding set
+initial_box=Box(initial_point)
+initial_zonotope=Zonotope(initial_box)
 initial_set=ImageSet(initial_point)
 bounding_set=ConstraintSet(Box([[0,3],[-2,2],[0,32]]))
 
@@ -73,41 +77,31 @@ parameters=EvolutionParameters()
 #parameters.set_grid_length(0.125)
 parameters.set_grid_length(0.0625)
 parameters.set_bounding_domain_size(4.0)
-evolver=ImpactSystemEvolver(parameters)
 
-# Compute chain-reachable set
-print "Computing chain-reachable set..."
-chain_reach_set = evolver.chain_reach(impact_system,ConstraintSet(initial_set))
-print "Found", chain_reach_set.size(), "cells in grid with", chain_reach_set.capacity(), "cells."
+# Construct the evolver. The first two arguments are dummys which are
+# used to infer the type of the evolver to be constructed; the values
+# are irrelevant.
+evolver=default_evolver(impact_oscillator,initial_zonotope,parameters)
 
-# Reduce chain-reachable set to partition tree set
-print "Computing tree representation of chain-reachable set..."
-chain_reach_tree_set = PartitionTreeSet(chain_reach_set)
-print "Reduced to", chain_reach_tree_set.size(),"cells " \
-    "in partition tree with", chain_reach_tree_set.capacity(),"cells."
+# Compute reachable set
+print "Computing reachable set..."
+reach_set = evolver.reach(impact_oscillator,initial_zonotope,time)
+print "Computing evolved set..."
+reach_set = evolver.evolve(impact_system,initial_zonotope,time)
+
+print "Found", reach_set.size(), "enclosures."
 
 # Export to postscript output
 print "Exporting to postscript output...",
 epsbb=Box([[-4.1,4.1],[-4.1,4.1]]) # eps bounding box
 eps=EpsPlot()
-eps.open("impact_oscillator-mask_set.eps",epsbb)
+eps.open("impact_oscillator-reach_set.eps",epsbb)
 eps.set_line_style(True)
 eps.set_fill_colour("green")
-eps.write(chain_reach_set)
+eps.write(reach_set)
+eps.set_fill_colour("yellow")
+eps.write(evolve_set)
 eps.set_fill_colour("blue")
 eps.write(initial_set)
 eps.close()
 
-eps.open("impact_oscillator-tree_set.eps",epsbb)
-eps.set_line_colour("black")
-eps.set_fill_colour("green")
-eps.set_line_style(0)
-eps.write(chain_reach_tree_set)
-eps.set_line_style(1)
-eps.set_fill_style(0)
-eps.write(chain_reach_tree_set.partition_tree())
-eps.set_fill_style(1)
-eps.set_fill_colour("blue")
-eps.write(initial_set)
-eps.close()
-print " done."

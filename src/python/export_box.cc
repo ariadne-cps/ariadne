@@ -88,6 +88,7 @@ void export_box()
   class_< Box<R> > box_class("Box",init<int>());
   box_class.def("__init__", make_constructor(&make_box<R>) );
   box_class.def(init< int >());
+  box_class.def(init< Point<R> >());
   box_class.def(init< Point<R>,Point<R> >());
   box_class.def(init< Box<R> >());
   box_class.def(init< Vector<I> >());

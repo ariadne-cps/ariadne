@@ -69,6 +69,9 @@ namespace Ariadne {
       /*! \brief Compute an approximation to the evolution set under the given semantics. */
       void evolution(ESL& final, ESL& intermediate, const Sys& system, const ESL& initial, const T& time, Semantics semantics) const {
         for(ESLCI iter=initial.begin(); iter!=initial.end(); ++iter) { this->_evolution(final,intermediate,system,*iter,time,semantics,true); } }
+      /*! \brief Write to an output stream. */
+      virtual std::ostream& write(std::ostream& os) const {
+        return os << "Evolver( ... )"; }
      protected:
       virtual void _evolution(ESL& final, ESL& intermediate, const Sys& system, const ES& initial, const T& time, Semantics semantics, bool reach) const = 0;
      };

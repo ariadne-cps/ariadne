@@ -28,9 +28,18 @@ import sys
 
 print "\nAvailable classes and functions\n",dir(),"\n\n"
 
+#Set number of steps for finite-time evolution
+steps=Integer(5)
+
 #Set parameters for Henon map
 a=Float(1.5)
 b=Float(-0.375)
+
+# Set evolution parameters
+evolution_parameters=EvolutionParameters()
+evolution_parameters.set_maximum_enclosure_radius(0.25);
+evolution_parameters.set_grid_length(0.0625)
+evolution_parameters.set_bounding_domain_size(4.0)
 
 #Construct Python-based Henon map.
 print "Constructing and evaluating Henon map defined in Python"
@@ -60,19 +69,30 @@ fixed_point=interval_newton.fixed_point(henon_map,initial_guess)
 print "Found fixed point in",fixed_point
 
 # Construct initial set and bounding set
-initial_set=RectangularSet(fixed_point)
-bounding_set=RectangularSet([[-10,6],[-8,8]])
+initial_box=Box([[1.49,1.51],[0.49,0.51]])
+initial_zonotope=Zonotope(initial_box)
+initial_set=ImageSet(Box(initial_box))
+bounding_box=Box([[-4,4],[-4,4]])
+bounding_set=ConstraintSet(bounding_box)
 
 # Construct evolver
-parameters=EvolutionParameters()
-#parameters.set_grid_length(0.125)
-parameters.set_grid_length(0.0625)
-parameters.set_bounding_domain_size(4.0)
-evolver=MapEvolver(parameters)
+evolver=default_evolver(henon_map,initial_zonotope,evolution_parameters)
+print evolver
+
+# Construct reachability analyser
+approximator=StandardApproximator(evolution_parameters.grid(2))
+analyser=MapReachabilityAnalyser(evolution_parameters,evolver,approximator)
+
+# Compute reachable set
+print "Computing finite-time reachable and evolved sets..."
+reach_set = evolver.reach(python_henon_map,initial_zonotope,steps)
+evolve_set = evolver.evolve(python_henon_map,initial_zonotope,steps)
+print "Found", reach_set.size(), "enclosure sets in reachable set."
+print "Found", evolve_set.size(), "enclosure sets in evolved set."
 
 # Compute chain-reachable set
 print "Computing chain-reachable set..."
-chain_reach_set = evolver.chain_reach(henon_map,ConstraintSet(initial_set))
+chain_reach_set = analyser.chain_reach(henon_map,initial_set)
 print "Found", chain_reach_set.size(), "cells in grid with", chain_reach_set.capacity(), "cells."
 
 # Reduce chain-reachable set to partition tree set
@@ -85,15 +105,18 @@ print "Reduced to", chain_reach_tree_set.size(),"cells " \
 print "Exporting to postscript output...",
 epsbb=Box([[-4.1,4.1],[-4.1,4.1]]) # eps bounding box
 eps=EpsPlot()
-eps.open("henon_attractor-mask_set.eps",epsbb)
+
+eps.open("henon_attractor-reach_set.eps",epsbb)
 eps.set_line_style(True)
 eps.set_fill_colour("green")
-eps.write(chain_reach_set)
+eps.write(reach_set)
+eps.set_fill_colour("yellow")
+eps.write(evolve_set)
 eps.set_fill_colour("blue")
 eps.write(initial_set)
 eps.close()
 
-eps.open("henon_attractor-tree_set.eps",epsbb)
+eps.open("henon_attractor-chain_reach.eps",epsbb)
 eps.set_line_colour("black")
 eps.set_fill_colour("green")
 eps.set_line_style(0)

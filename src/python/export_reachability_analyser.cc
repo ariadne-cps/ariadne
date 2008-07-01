@@ -62,11 +62,11 @@ template<class Sys, class Aprx>
 void export_system_reachability_analyser()
 {
   typedef typename Aprx::real_type R;
+  typedef Zonotope<R> ES;
   std::string name=Name<Sys>::string()+"ReachabilityAnalyser";
 
   class_< ReachabilityAnalyser<Sys,Aprx> > reachability_analyser_class(name.c_str(),no_init);
-  //reachability_analyser_class.def(init<const EvolutionParameters<R>&());
-  //reachability_analyser_class.def("parameters",(EvolutionParameters<R>&(ReachabilityAnalyser<Sys,Aprx>::*)())&ReachabilityAnalyser<Sys,Aprx>::parameters,reference_existing_object);
+  reachability_analyser_class.def(init<const EvolutionParameters<R>&, const EvolverInterface<Sys,ES>&, const ApproximatorInterface<Aprx,ES>& >());
   reachability_analyser_class.def("lower_evolve",&ReachabilityAnalyser<Sys,Aprx>::lower_evolve,return_value_policy<manage_new_object>());
   reachability_analyser_class.def("lower_reach",&ReachabilityAnalyser<Sys,Aprx>::lower_reach,return_value_policy<manage_new_object>());
   reachability_analyser_class.def("upper_evolve",&ReachabilityAnalyser<Sys,Aprx>::upper_evolve,return_value_policy<manage_new_object>());
@@ -80,7 +80,7 @@ void export_reachability_analyser()
 {
   export_system_reachability_analyser< Map<R>,GridApproximationScheme<R> >();
   export_system_reachability_analyser< VectorField<R>,GridApproximationScheme<R> >();
-  export_system_reachability_analyser< HybridAutomaton<R>,HybridGridApproximationScheme<R> >();
+  //export_system_reachability_analyser< HybridAutomaton<R>,HybridGridApproximationScheme<R> >();
 }
 
 template void export_reachability_analyser<FloatPy>();

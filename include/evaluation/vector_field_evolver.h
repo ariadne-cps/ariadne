@@ -90,8 +90,8 @@ namespace Ariadne {
         return this->_parameters->verbosity(); }
       T maximum_step_size() const { 
         return this->_parameters->maximum_step_size(); }
-      R maximum_basic_set_radius() const { 
-        return this->_parameters->maximum_basic_set_radius(); }
+      R maximum_enclosure_radius() const { 
+        return this->_parameters->maximum_enclosure_radius(); }
      private:
       // Services provided by other classes
       std::pair<T,Bx> flow_bounds(const VF& vf, const Bx& bx) const {
@@ -107,13 +107,13 @@ namespace Ariadne {
       Bx bounding_box(const ES& s) const {
         return s.bounding_box(); }
       ESL subdivide(const ES& s) const {
-        return this->_subdivider->subdivide(s,this->maximum_basic_set_radius()); }
+        return this->_subdivider->subdivide(s,this->maximum_enclosure_radius()); }
      private:
       // Helper functions for timed sets
       R radius(const TES& tes) const { return tes.set().radius(); }
       void adjoin_subdivision(TESL& tls, const TES& ts) const { 
         T t=ts.time();
-        ESL subdivisions=this->_subdivider->subdivide(ts.set(),this->maximum_basic_set_radius());
+        ESL subdivisions=this->_subdivider->subdivide(ts.set(),this->maximum_enclosure_radius());
         for(size_type i=0; i!=subdivisions.size(); ++i) {
           tls.adjoin(TES(t,subdivisions[i]));
         }

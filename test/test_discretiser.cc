@@ -78,7 +78,7 @@ void TestDiscretiser<R>::test() const
   R enclosure_radius(0.25);
     
   EvolutionParameters<R> parameters;
-  parameters.set_maximum_basic_set_radius(enclosure_radius);
+  parameters.set_maximum_enclosure_radius(enclosure_radius);
   parameters.set_maximum_step_size(step_size);
   Grid<R> grid(2,grid_size);
 

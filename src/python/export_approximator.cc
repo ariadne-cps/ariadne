@@ -31,6 +31,7 @@
 #include "geometry/grid_mask_set.h"
 #include "evaluation/approximator_interface.h"
 #include "evaluation/standard_approximator.h"
+#include "evaluation/default_approximator.h"
 
 using namespace Ariadne;
 using namespace Ariadne::Python;
@@ -82,18 +83,19 @@ template<class R>
 void export_approximator() 
 {
   typedef GridApproximationScheme<R> GAS;
-  typedef Zonotope<R> ZBS;
+  typedef Box<R> Bx;
+  typedef Zonotope<R> ZES;
 
-  class_< ApproximatorWrapper<GAS,ZBS>, boost::noncopyable >("ZonotopeApproximatorInterface",init< >());
+  class_< ApproximatorWrapper<GAS,ZES>, boost::noncopyable >("ZonotopeApproximatorInterface",init< >());
 
-  class_< StandardApproximator<ZBS>, bases< ApproximatorInterface<GAS,ZBS> > >
+  class_< StandardApproximator<ZES>, bases< ApproximatorInterface<GAS,ZES> > >
     approximator_class("StandardApproximator",init< Grid<R> >());
-  approximator_class.def("enclosure_set",&StandardApproximator<ZBS>::enclosure_set);
-  approximator_class.def("radius",&StandardApproximator<ZBS>::radius);
-  approximator_class.def("bounding_box",&StandardApproximator<ZBS>::bounding_box);
-  approximator_class.def("lower_approximation",&StandardApproximator<ZBS>::lower_approximation);
-  approximator_class.def("inner_approximation",(GridCellListSet<R>(StandardApproximator<ZBS>::*)(const ZBS&)const)&StandardApproximator<ZBS>::inner_approximation);
-  approximator_class.def("outer_approximation",(GridCellListSet<R>(StandardApproximator<ZBS>::*)(const ZBS&)const)&StandardApproximator<ZBS>::outer_approximation);
+  approximator_class.def("enclosure_set",&StandardApproximator<ZES>::enclosure_set);
+  approximator_class.def("radius",&StandardApproximator<ZES>::radius);
+  approximator_class.def("bounding_box",&StandardApproximator<ZES>::bounding_box);
+  approximator_class.def("lower_approximation",&StandardApproximator<ZES>::lower_approximation);
+  approximator_class.def("inner_approximation",(GridCellListSet<R>(StandardApproximator<ZES>::*)(const ZES&)const)&StandardApproximator<ZES>::inner_approximation);
+  approximator_class.def("outer_approximation",(GridCellListSet<R>(StandardApproximator<ZES>::*)(const ZES&)const)&StandardApproximator<ZES>::outer_approximation);
 
   /*
   BasicSet bounding_box(const EnclosureSetList&) const { return this->get_override("bounding_box")(); }
@@ -104,6 +106,8 @@ void export_approximator()
   void adjoin_outer_approximation(PartitionTreeSet&, const EnclosureSetList&) const { this->get_override("adjoin_outer_approximation")(); }
   */
   
+  def("default_approximator",(ApproximatorInterface<GridApproximationScheme<R>,ZES>*(*)(const Bx&, const ZES&, const EvolutionParameters<R>& p)) &default_approximator, return_value_policy<manage_new_object>());
+  def("default_approximator",(ApproximatorInterface<GridApproximationScheme<R>,ZES>*(*)(const Bx&, const ZES&)) &default_approximator, return_value_policy<manage_new_object>());
 }
 
 template void export_approximator<FloatPy>();

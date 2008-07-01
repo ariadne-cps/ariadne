@@ -25,19 +25,19 @@
 
 #include "numeric/float.h"
 #include "numeric/approximate_float.h"
+#include "function/function_interface.h"
 #include "geometry/point.h"
 #include "geometry/box.h"
 #include "geometry/grid.h"
 #include "geometry/grid_set.h"
+#include "geometry/image_set.h"
+#include "geometry/constraint_set.h"
 #include "geometry/partition_tree_set.h"
-#include "geometry/rectangular_set.h"
 #include "geometry/zonotope.h"
 #include "evaluation/evolution_parameters.h"
 #include "evaluation/map_evolver.h"
-#include "evaluation/standard_applicator.h"
-#include "evaluation/standard_subdivider.h"
-#include "evaluation/orthogonal_reducer.h"
-#include "evaluation/standard_approximator.h"
+#include "evaluation/default_evolver.h"
+#include "evaluation/default_approximator.h"
 #include "evaluation/reachability_analyser.h"
 #include "output/epsstream.h"
 #include "output/logging.h"
@@ -59,96 +59,71 @@ henon_chainreach()
 {
   typedef Zonotope<R> ES;
 
-  double maximum_basic_set_radius=0.25;
-  double grid_length=0.125;
-  int subdivisions=128;
-
-  EvolutionParameters<R> parameters;
-  parameters.set_maximum_basic_set_radius(maximum_basic_set_radius);
-  parameters.set_grid_length(grid_length);
+  uint steps = 5;
   
-  StandardApplicator<ES> applicator;
-  StandardSubdivider<ES> subdivider;
-  OrthogonalReducer<ES> reducer;
-  Evolver<Map<R>,ES> evolver(parameters,applicator,subdivider,reducer);
+  double maximum_enclosure_radius=0.25;
+  double grid_length=0.0625;
+  EvolutionParameters<R> evolution_parameters; evolution_parameters.set_maximum_enclosure_radius(maximum_enclosure_radius);
+  evolution_parameters.set_grid_length(grid_length);
 
-  StandardApproximator<ES> approximator;
+  EvolverInterface<Map<R>,ES>& evolver=*default_evolver<Map<R>,ES>(evolution_parameters);
+  ApproximatorInterface<GridApproximationScheme<R>,ES>& approximator=*default_approximator<Box<R>,ES>();
+  ReachabilityAnalyser< Map<R>, GridApproximationScheme<R> > analyser(evolution_parameters,evolver,approximator);
 
-  set_applicator_verbosity(0);
-  
-  Discretiser< Map<R>, GridApproximationScheme<R>, ES > discretiser(parameters,evolver,approximator);
-  ReachabilityAnalyser< Map<R>, GridApproximationScheme<R> > analyser(parameters,discretiser);
-
-  Point<R> params=Point<R>("(1.5,0.875)");
+  Point<R> params=Point<R>("(1.5,-0.375)");
   R a=params[0];
   R b=params[1];
 
-
-  HenonMap<R> h=HenonMap<R>(params);
+  HenonMap<R> henon=HenonMap<R>(params);
   Point<R> pt("(3,5)"); 
-  smoothness_type s=3;
-  cout << "pt="<<pt<<" s="<<s<<endl;
-  cout << "h(pt)="<<h(pt)<<endl;
-  cout << "h.jacobian(pt)="<<h.jacobian(pt) << endl; 
-  cout << "h.derivative(pt,s)="<<h.derivative(pt,s) << endl; 
+  smoothness_type sm=3;
+  cout << "h="<<henon<<"\npt="<<pt<<"\nsm="<<sm<<endl;
+  cout << "h(pt)="<<henon(pt)<<endl;
+  cout << "h.jacobian(pt)="<<henon.jacobian(pt) << endl; 
+  cout << "h.derivative(pt,sm)="<<henon.derivative(pt,sm) << endl; 
 
-  Box<R> gbb=Box<R>("[-11.0,5.0]x[-8.0,8.0]") ;
-  cout << "gbb=" << gbb << endl;
-  FiniteGrid<R> fg=FiniteGrid<R>(gbb,subdivisions); // grid
-  cout << "fg=" << fg << endl;
-  const Grid<R>& g=fg.grid(); // grid
-  Box<R> ir=Box<R>("[1.499,1.501]x[0.499,0.501]"); // initial state
-  Box<R> cb=Box<R>("[-4,4]x[-4,4]"); // cutoff box
-  Box<R> epsbb=Box<R>("[-4.1,4.1]x[-4.1,4.1]"); // eps bounding box
+  Box<R> initial_box("[1.49,1.51]x[0.49,0.51]");
+  Box<R> bounding_box("[-4,4]x[-3,3]");
+  Box<R> graphics_bounding_box("[-4.1,4.1]x[-3.1,3.1]");
+
+  Zonotope<R> initial_zonotope(initial_box);
+  ListSet< Zonotope<R> > reach=evolver.reach(henon,initial_zonotope,steps,upper_semantics);
+  ListSet< Zonotope<R> > evolve=evolver.evolve(henon,initial_zonotope,steps,upper_semantics);
+
+
+  ImageSet<R> initial_set(initial_box);
+  ConstraintSet<R> bounding_set(bounding_box);
+
+  SetInterface< Box<R> >* chain_reach=analyser.chain_reach(henon,initial_set);
+  GridMaskSet<R> grid_chain_reach=*dynamic_cast<GridMaskSet<R>*>(chain_reach);
+  PartitionTreeSet<R> tree_chain_reach=PartitionTreeSet<R>(grid_chain_reach);
+
+  cout << grid_chain_reach <<endl;
+  cout << tree_chain_reach <<endl;
   
-  cb=Box<R>(gbb); // cutoff box
-  epsbb=Box<R>(gbb); // eps bounding box
-  
-  GridMaskSet<R> in=GridMaskSet<R>(fg);
-  GridMaskSet<R> bd=GridMaskSet<R>(fg);
-  in.adjoin(over_approximation(ir,g));
-  bd.adjoin(over_approximation(gbb,g));
+  cout << "evolve(" << steps << ").size()=" << evolve.size() << endl;
+  cout << "reach(" << steps << ").size()=" << reach.size() << endl;
 
-  SetInterface< Box<R> >* cr=analyser.chain_reach(h,in);
-  GridMaskSet<R>& gmcr=*dynamic_cast<GridMaskSet<R>*>(cr);
-  PartitionTreeSet<R> ptcr=PartitionTreeSet<R>(gmcr);
-
-  cout << gmcr <<endl;
-  cout << ptcr <<endl;
-  
-  cout << "gmcr.size()=" << gmcr.size() << endl;
-  cout << "ptcr.size()=" << ptcr.size() << "  " << flush;
-  cout << "ptcr.capacity()=" << ptcr.capacity() << endl;
-
-  RectangularSet<R> ins(ir);
-  RectangularSet<R> cbs(cb);
-  SetInterface< Box<R> >* crs=analyser.chain_reach(h,ins);
-  cout << "*crs=" << *crs <<endl;
-  GridMaskSet<R>& gmcrs=*dynamic_cast<GridMaskSet<R>*>(crs);
-  cout << "gmcrs=" << gmcrs <<endl;
-  cout << "gmcrs.size()=" << gmcrs.size() << " of " << gmcrs.capacity() << endl;
+  cout << "grid_chain_reach.size()=" << grid_chain_reach.size() << endl;
+  cout << "tree_chain_reach.size()=" << tree_chain_reach.size() << "  " << flush;
+  cout << "tree_chain_reach.capacity()=" << tree_chain_reach.capacity() << endl;
 
   epsfstream eps;
-  eps.open("henon_chainreach-1.eps",epsbb);
-  eps << fill_colour(white) << cb;
-  eps << line_style(false);
-  eps << fill_colour(green) << gmcr;
-  eps << fill_colour(blue) << ir;
+  eps.open("henon_map-reach.eps",graphics_bounding_box);
+  eps << fill_colour(white) << bounding_box;
   eps << line_style(true);
-  eps << ptcr.partition_tree();
+  eps << fill_colour(green) << reach;
+  eps << fill_colour(yellow) << evolve;
+  eps << fill_colour(blue) << initial_zonotope;
   eps.close();
 
-  eps.open("henon_chainreach-2.eps",epsbb);
+  eps.open("henon_map_chainreach.eps",graphics_bounding_box);
+  eps << fill_colour(white) << bounding_box;
   eps << line_style(false);
-  eps << fill_colour(red) << difference(gmcr.neighbourhood(),gmcr);
-  eps << fill_colour(blue) << gmcr.adjoining();
-  eps << fill_colour(green) << gmcr;
-  eps.close();
-
-  epsbb=Box<R>("[-4.1,4.1]x[-4.1,4.1]"); // eps bounding box
-  eps.open("henon_chainreach-3.eps",epsbb);
-  eps << line_style(false);
-  eps << fill_colour(green) << gmcr;
+  eps << fill_colour(green) << grid_chain_reach;
+  eps << fill_colour(blue) << initial_box;
+  eps << line_style(true);
+  eps << tree_chain_reach.partition_tree();
   eps.close();
 
   return 0;

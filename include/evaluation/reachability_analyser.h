@@ -176,7 +176,7 @@ namespace Ariadne {
      private:
       // Helper functions for accessing parameters
       T lock_to_grid_time() const;
-      R maximum_basic_set_radius() const { return this->_parameters->maximum_basic_set_radius(); }
+      R maximum_enclosure_radius() const { return this->_parameters->maximum_enclosure_radius(); }
       Bx bounding_domain(const Sys& system) const { return this->_parameters->bounding_domain(system.state_space().dimension()); }
       uint verbosity() const { return this->_parameters->verbosity(); }
     };
@@ -217,6 +217,13 @@ namespace Ariadne {
       ReachabilityAnalyser(const EvolutionParameters<R>& parameters,
                            const DiscretiserInterface<Sys,Aprx>& discretiser)
         : _discretiser(discretiser.clone()), _analyser(new ReachabilityAnalyser<TSI,Aprx>(parameters)) { }
+      /*! \brief Construct from evolution parameters, an approximator and an evolver. */
+      template<class ES> 
+      ReachabilityAnalyser(const EvolutionParameters<R>& parameters,
+                           const EvolverInterface<Sys,ES>& evolver,
+                           const ApproximatorInterface<Aprx,ES>& approximator)
+        : _discretiser(new Discretiser<Sys,Aprx,ES>(parameters,evolver,approximator)), 
+          _analyser(new ReachabilityAnalyser<TSI,Aprx>(parameters)) { }
       //@}
 
 

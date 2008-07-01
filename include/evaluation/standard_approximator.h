@@ -51,7 +51,7 @@ namespace Ariadne {
       typedef Interval<R> I;
       typedef GridApproximationScheme<R> GAS;
      public:
-      StandardApproximator() : ApproximatorBase<GAS,ES>(Grid<R>()) { }
+      StandardApproximator() : ApproximatorBase<GAS,ES>(Grid<R>(2,1.0)) { }
       StandardApproximator(const Grid<R>& g) : ApproximatorBase<GAS,ES>(g) { }
       virtual StandardApproximator<ES>* clone() const { return new StandardApproximator<ES>(*this); }
       virtual ES enclosure_set(const Box<R>& r) const;

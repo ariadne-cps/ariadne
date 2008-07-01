@@ -84,7 +84,7 @@ template<class ES>
 std::ostream&
 StandardApproximator<ES>::write(std::ostream& os) const
 {
-  return os << "StandardApproximator( grid=" << this->paving() << ")\n";
+  return os << "StandardApproximator( )\n";
 }
 
 

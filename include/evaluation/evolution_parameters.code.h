@@ -36,8 +36,8 @@ EvolutionParameters<R>::EvolutionParameters()
     _minimum_step_size(0),
     _maximum_step_size(1),
     _lock_to_grid_time(1),
-    _minimum_basic_set_radius(0),
-    _maximum_basic_set_radius(1),
+    _minimum_enclosure_radius(0),
+    _maximum_enclosure_radius(1),
     _grid_length(1),
     _argument_grid_length(1),
     _result_grid_length(1),
@@ -100,17 +100,17 @@ EvolutionParameters<R>::lock_to_grid_time() const
 
 template<class R>
 R
-EvolutionParameters<R>::minimum_basic_set_radius() const
+EvolutionParameters<R>::minimum_enclosure_radius() const
 {
-  return this->_minimum_basic_set_radius;
+  return this->_minimum_enclosure_radius;
 }
 
 
 template<class R>
 R
-EvolutionParameters<R>::maximum_basic_set_radius() const 
+EvolutionParameters<R>::maximum_enclosure_radius() const 
 {
-  return this->_maximum_basic_set_radius;
+  return this->_maximum_enclosure_radius;
 }
 
 
@@ -271,31 +271,31 @@ EvolutionParameters<R>::set_lock_to_grid_time(double x)
 
 template<class R>
 void
-EvolutionParameters<R>::set_minimum_basic_set_radius(R x) 
+EvolutionParameters<R>::set_minimum_enclosure_radius(R x) 
 {
-  this->_minimum_basic_set_radius=x;
+  this->_minimum_enclosure_radius=x;
 }
 
 template<class R>
 void
-EvolutionParameters<R>::set_minimum_basic_set_radius(double x) 
+EvolutionParameters<R>::set_minimum_enclosure_radius(double x) 
 {
-  this->_minimum_basic_set_radius=x;
+  this->_minimum_enclosure_radius=x;
 }
 
 
 template<class R>
 void
-EvolutionParameters<R>::set_maximum_basic_set_radius(R x)  
+EvolutionParameters<R>::set_maximum_enclosure_radius(R x)  
 {
-  this->_maximum_basic_set_radius=x;
+  this->_maximum_enclosure_radius=x;
 }
 
 template<class R>
 void
-EvolutionParameters<R>::set_maximum_basic_set_radius(double x)  
+EvolutionParameters<R>::set_maximum_enclosure_radius(double x)  
 {
-  this->_maximum_basic_set_radius=x;
+  this->_maximum_enclosure_radius=x;
 }
 
 
@@ -407,8 +407,8 @@ EvolutionParameters<R>::write(std::ostream& os) const
      << ",\n  maximum_step_size=" << this->_maximum_step_size
      << ",\n  lock_to_grid_time=" << this->_lock_to_grid_time
 
-     << ",\n  minimum_basic_set_radius=" << this->_minimum_basic_set_radius
-     << ",\n  maximum_basic_set_radius=" << this->_maximum_basic_set_radius
+     << ",\n  minimum_enclosure_radius=" << this->_minimum_enclosure_radius
+     << ",\n  maximum_enclosure_radius=" << this->_maximum_enclosure_radius
 
      << ",\n  grid_length=" << this->_grid_length
      << ",\n  argument_grid_length=" << this->_argument_grid_length

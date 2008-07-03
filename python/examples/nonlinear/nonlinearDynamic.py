@@ -7,25 +7,22 @@ import sys
 # Construct Python-based nonlinear function
 print "Constructing and evaluating nonlinear integration system defined in Python"
 def fun(x):
-     
      yF   = 0.5
      VMAX = 0.5
      K    = 10
      A    = 0.03
-
      xdot = x[3]*cos(x[2]);
      ydot = x[3]*sin(x[2]);
-     thetadot = -((x[1]-yF)*sin(x[2])*x[3]/x[2])-K*x[3]*x[2];	
- 
+     thetadot = -((x[1]-yF)*sin(x[2])*x[3]/x[2])-K*x[3]*x[2];	 
      if x[3]<VMAX:
  	      vdot = A
      else:
         vdot = 0
-
      return [ xdot, ydot, thetadot, vdot ]
 
 fun.result_size=4
 fun.argument_size=4
+
 nl_fun=AriadneFunction(fun)
 print "nl_function =",nl_fun
 
@@ -33,7 +30,21 @@ print "nl_function =",nl_fun
 for i in range(11):
   x = Float(i*0.1)
   print "fun(",x,") = ",fun([x, x, x, x])
-  #print "nl_fun(",x,") = ",nl_fun(Vector([x, x, x, x]))
+  print "nl_fun(",x,") = ",nl_fun(IntervalVector([[x,x], [x,x], [x,x], [x,x]]))
+  print " "
+
+#sys.exit(0)
+
+# Evaluate fun at the critical point:
+
+print "nl_fun([-0.05,0.259698]x[0.85,1.12058]x[-0.37058,0.65]x[0.35,0.55]) = ", nl_fun(IntervalVector([[-0.05,0.259698],[0.85,1.12058],[-0.37058,-0.00001],[0.35,0.55]]))
+print " "
+print "fun([-0.05,0.259698]x[0.85,1.12058]x[-0.37058,0.65]x[0.35,0.55]) = ", fun([Float((-0.05+0.259698)/2.0),Float((0.85)),Float((-0.37058+0.65)/2),Float((0.35+0.55)/2)])
+print
+print "fun([-0.05,0.259698]x[0.85,1.12058]x[-0.37058,0.65]x[0.35,0.55]) = ", fun([Float((-0.05+0.259698)/2.0),Float((1.12058)),Float((-0.37058+0.65)/2),Float((0.35+0.55)/2)])
+
+
+
 
 #sys.exit(0)
 
@@ -45,13 +56,15 @@ initial_set=RectangularSet([[0.0,0.00001],[0.0,0.90001],[0.10001,0.57001],[0.000
 bounding_set=RectangularSet([[0,20],[-1,2],[-1.6,1.6],[0,0.6]])
 
 # Construct integrator (use Kuhn integrator for nonlinear systems)
-integrator=KuhnIntegrator(3,4)
+integrator=KuhnIntegrator(3,3)
 
 # Construct evolver
 parameters=EvolutionParameters()
 parameters.set_grid_length(0.1)
 parameters.set_bounding_domain_size(2.0)
-parameters.set_maximum_step_size(0.125)
+parameters.set_maximum_step_size(0.1)
+parameters.set_verbosity(7)
+set_evaluation_verbosity(9)
 
 evolver=VectorFieldEvolver(parameters,integrator)
 

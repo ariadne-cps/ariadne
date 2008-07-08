@@ -34,6 +34,13 @@
 #include "evaluation/integrator_interface.h"
 #include "evaluation/satisfier_interface.h"
 
+#include "evaluation/standard_applicator.h"
+#include "evaluation/standard_integrator.h"
+#include "evaluation/standard_approximator.h"
+#include "evaluation/standard_satisfier.h"
+#include "evaluation/standard_subdivider.h"
+#include "evaluation/cascade_reducer.h"
+
 #include "output/epsstream.h"
 #include "output/logging.h"
 
@@ -51,11 +58,11 @@ const uint BISECTION_STEPS=8;
 template<class R> 
 Evolver< HybridAutomaton<R>, Zonotope<R> >::
 Evolver(const EvolutionParameters<R>& parameters, 
-                      const ApplicatorInterface<ES>& applicator, 
-                      const IntegratorInterface<ES>& integrator, 
-                      const SatisfierInterface<ES>& satisfier, 
-                      const SubdividerInterface<ES>& subdivider, 
-                      const ReducerInterface<ES>& reducer)
+        const ApplicatorInterface<ES>& applicator, 
+        const IntegratorInterface<ES>& integrator, 
+        const SatisfierInterface<ES>& satisfier, 
+        const SubdividerInterface<ES>& subdivider, 
+        const ReducerInterface<ES>& reducer)
   : _parameters(parameters.clone()),
     _applicator(applicator.clone()),
     _integrator(integrator.clone()),
@@ -64,6 +71,43 @@ Evolver(const EvolutionParameters<R>& parameters,
     _reducer(reducer.clone()),
     verbosity(parameters.verbosity())
 {
+}
+
+template<class R> 
+Evolver< HybridAutomaton<R>, Zonotope<R> >::
+Evolver(const EvolutionParameters<R>& parameters, 
+        const ApplicatorInterface<ES>& applicator, 
+        const IntegratorInterface<ES>& integrator)
+{
+  StandardSatisfier< ES > satisfier;
+  StandardSubdivider< ES > subdivider;
+  CascadeReducer< ES > reducer(3);
+  Evolver(parameters,applicator,integrator,satisfier,subdivider,reducer);
+}
+
+template<class R> 
+Evolver< HybridAutomaton<R>, Zonotope<R> >::
+Evolver(const EvolutionParameters<R>& parameters)
+{
+  StandardApplicator< ES > applicator;
+  StandardIntegrator< ES > integrator;
+  StandardSatisfier< ES > satisfier;
+  StandardSubdivider< ES > subdivider;
+  CascadeReducer< ES > reducer(3);
+  Evolver(parameters,applicator,integrator,satisfier,subdivider,reducer);
+}
+
+template<class R> 
+Evolver< HybridAutomaton<R>, Zonotope<R> >::
+Evolver()
+{
+  EvolutionParameters<R> parameters;
+  StandardApplicator< ES > applicator;
+  StandardIntegrator< ES > integrator;
+  StandardSatisfier< ES > satisfier;
+  StandardSubdivider< ES > subdivider;
+  CascadeReducer< ES > reducer(3);
+  Evolver(parameters,applicator,integrator,satisfier,subdivider,reducer);
 }
 
 

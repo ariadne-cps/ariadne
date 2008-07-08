@@ -53,8 +53,10 @@
 #include "evaluation/standard_applicator.h"
 #include "evaluation/standard_integrator.h"
 #include "evaluation/standard_approximator.h"
+#include "evaluation/standard_satisfier.h"
 #include "evaluation/standard_subdivider.h"
 #include "evaluation/standard_reducer.h"
+#include "evaluation/cascade_reducer.h"
 
 #include "output/logging.h"
 
@@ -64,15 +66,38 @@ template<class ES>
 Evolver<ImpactSystem<typename ES::real_type>,ES>::
 Evolver()
 {
-  throw NotImplemented(__PRETTY_FUNCTION__);
+  EvolutionParameters<R> parameters;
+  StandardApplicator< ES > applicator;
+  StandardIntegrator< ES > integrator;
+  StandardSatisfier< ES > satisfier;
+  StandardSubdivider< ES > subdivider;
+  CascadeReducer< ES > reducer(3);
+  Evolver(parameters,applicator,integrator,satisfier,subdivider,reducer);
 }
 
 
 template<class ES>
 Evolver<ImpactSystem<typename ES::real_type>,ES>::
-Evolver(const EvolutionParameters<R>&)
+Evolver(const EvolutionParameters<R>& parameters)
 {
-  throw NotImplemented(__PRETTY_FUNCTION__);
+  StandardApplicator< ES > applicator;
+  StandardIntegrator< ES > integrator;
+  StandardSatisfier< ES > satisfier;
+  StandardSubdivider< ES > subdivider;
+  CascadeReducer< ES > reducer(3);
+  Evolver(parameters,applicator,integrator,satisfier,subdivider,reducer);
+}
+
+template<class ES>
+Evolver<ImpactSystem<typename ES::real_type>,ES>::
+Evolver(const EvolutionParameters<R>& parameters,
+        const ApplicatorInterface<ES>& applicator, 
+        const IntegratorInterface<ES>& integrator)
+{
+  StandardSatisfier< ES > satisfier;
+  StandardSubdivider< ES > subdivider;
+  CascadeReducer< ES > reducer(3);
+  Evolver(parameters,applicator,integrator,satisfier,subdivider,reducer);
 }
 
 
@@ -90,6 +115,8 @@ Evolver(const EvolutionParameters<R>& parameters,
     _reducer(reducer.clone()),
     _profiler(new EvolutionProfiler)
 { }
+
+
 
 template<class ES>
 void

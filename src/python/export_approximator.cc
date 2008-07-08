@@ -31,7 +31,6 @@
 #include "geometry/grid_mask_set.h"
 #include "evaluation/approximator_interface.h"
 #include "evaluation/standard_approximator.h"
-#include "evaluation/default_approximator.h"
 
 using namespace Ariadne;
 using namespace Ariadne::Python;
@@ -106,8 +105,6 @@ void export_approximator()
   void adjoin_outer_approximation(PartitionTreeSet&, const EnclosureSetList&) const { this->get_override("adjoin_outer_approximation")(); }
   */
   
-  def("default_approximator",(ApproximatorInterface<GridApproximationScheme<R>,ZES>*(*)(const Bx&, const ZES&, const EvolutionParameters<R>& p)) &default_approximator, return_value_policy<manage_new_object>());
-  def("default_approximator",(ApproximatorInterface<GridApproximationScheme<R>,ZES>*(*)(const Bx&, const ZES&)) &default_approximator, return_value_policy<manage_new_object>());
 }
 
 template void export_approximator<FloatPy>();

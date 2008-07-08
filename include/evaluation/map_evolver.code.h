@@ -47,6 +47,9 @@
 #include "geometry/partition_tree_set.h"
 #include "geometry/grid_approximation.h"
 
+#include "evaluation/standard_applicator.h"
+#include "evaluation/standard_subdivider.h"
+#include "evaluation/cascade_reducer.h"
 
 #include "system/map.h"
 
@@ -67,6 +70,39 @@ Evolver(const EvolutionParameters<R>& parameters,
     _subdivider(subdivider.clone()),
     _reducer(reducer.clone())
 { }
+
+template<class ES>
+Evolver< Map<typename ES::real_type>, ES>::
+Evolver(const EvolutionParameters<R>& parameters,
+        const ApplicatorInterface<ES>& applicator) 
+{ 
+  StandardSubdivider< ES > subdivider;
+  CascadeReducer< ES > reducer(3);
+  Evolver(parameters,applicator,subdivider,reducer);
+}
+
+template<class ES>
+Evolver< Map<typename ES::real_type>, ES>::
+Evolver(const EvolutionParameters<R>& parameters) { 
+  StandardApplicator< ES > applicator;
+  StandardSubdivider< ES > subdivider;
+  CascadeReducer< ES > reducer(3);
+  Evolver(parameters,applicator,subdivider,reducer);
+}
+
+
+template<class ES>
+Evolver< Map<typename ES::real_type>, ES>::
+Evolver() { 
+  EvolutionParameters<R> parameters;
+  StandardApplicator< ES > applicator;
+  StandardSubdivider< ES > subdivider;
+  CascadeReducer< ES > reducer(3);
+  Evolver(parameters,applicator,subdivider,reducer);
+}
+
+
+
 
 
 template<class ES>

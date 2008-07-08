@@ -40,8 +40,6 @@
 #include "evaluation/impact_system_evolver.h"
 #include "evaluation/set_based_hybrid_evolver.h"
 
-#include "evaluation/default_evolver.h"
-
 using namespace Ariadne;
 using namespace Ariadne::Python;
 
@@ -68,6 +66,8 @@ void export_evolver()
   typedef Zonotope<R> ZES;
   typedef ListSet< Zonotope<R> > ZESL;
   typedef typename Map<R>::time_type MapT;
+  typedef typename VectorField<R>::time_type VfT;
+  typedef typename ImpactSystem<R>::time_type IsT;
 
   class_< EvolverWrapper<Map<R>,ZES>, boost::noncopyable >("MapZonotopeEvolverInterface",init< >());
   class_< EvolverWrapper<VectorField<R>,ZES>, boost::noncopyable >("VectorFieldZonotopeEvolverInterface",init< >());
@@ -86,15 +86,19 @@ void export_evolver()
     vector_field_evolver_class("VectorFieldEvolver",no_init);
   vector_field_evolver_class.def(init<const EvolutionParameters<R>&,const IntegratorInterface<ZES>&,
                                       const SubdividerInterface<ZES>&,const ReducerInterface<ZES>&>());
-  vector_field_evolver_class.def("evolve",&Evolver<VectorField<R>,ZES>::evolve);
-  vector_field_evolver_class.def("reach",&Evolver<VectorField<R>,ZES>::reach);
+  vector_field_evolver_class.def("evolve", (ZESL(Evolver<VectorField<R>,ZES>::*)(const VectorField<R>&,const ZES&,const VfT&)const) &Evolver<VectorField<R>,ZES>::evolve);
+  vector_field_evolver_class.def("reach", (ZESL(Evolver<VectorField<R>,ZES>::*)(const VectorField<R>&,const ZES&,const VfT&)const) &Evolver<VectorField<R>,ZES>::reach);
+  //vector_field_evolver_class.def("evolve",&Evolver<VectorField<R>,ZES>::evolve);
+  //vector_field_evolver_class.def("reach",&Evolver<VectorField<R>,ZES>::reach);
   vector_field_evolver_class.def(self_ns::str(self));
 
   class_< Evolver<ImpactSystem<R>,ZES>, bases< EvolverInterface<ImpactSystem<R>,ZES> > > 
     impact_system_evolver_class("ImpactSystemEvolver",no_init);
   impact_system_evolver_class.def(init<const EvolutionParameters<R>&>());
-  impact_system_evolver_class.def("evolve",&Evolver<ImpactSystem<R>,ZES>::evolve);
-  impact_system_evolver_class.def("reach",&Evolver<ImpactSystem<R>,ZES>::reach);
+  vector_field_evolver_class.def("evolve", (ZESL(Evolver<ImpactSystem<R>,ZES>::*)(const ImpactSystem<R>&,const ZES&,const IsT&)const) &Evolver<ImpactSystem<R>,ZES>::evolve);
+  vector_field_evolver_class.def("reach", (ZESL(Evolver<ImpactSystem<R>,ZES>::*)(const ImpactSystem<R>&,const ZES&,const IsT&)const) &Evolver<ImpactSystem<R>,ZES>::reach);  
+  //impact_system_evolver_class.def("evolve",&Evolver<ImpactSystem<R>,ZES>::evolve);
+  //impact_system_evolver_class.def("reach",&Evolver<ImpactSystem<R>,ZES>::reach);
   impact_system_evolver_class.def(self_ns::str(self));
 
   class_< Evolver<HybridAutomaton<R>,ZES> > set_based_hybrid_evolver_class("SetBasedHybridEvolver",no_init);
@@ -104,14 +108,6 @@ void export_evolver()
   set_based_hybrid_evolver_class.def("evolve",&Evolver<HybridAutomaton<R>,ZES>::evolve);
   set_based_hybrid_evolver_class.def("reach",&Evolver<HybridAutomaton<R>,ZES>::reach);
   set_based_hybrid_evolver_class.def(self_ns::str(self));
-
-  def("default_evolver", (EvolverInterface< Map<R>, Zonotope<R> >*(*)(const Map<R>&, const Zonotope<R>&, const EvolutionParameters<R>&)) &make_default_evolver, return_value_policy<manage_new_object>());
-  def("default_evolver",(EvolverInterface< VectorField<R>, Zonotope<R> >*(*)(const VectorField<R>&, const Zonotope<R>&, const EvolutionParameters<R>&)) &make_default_evolver, return_value_policy<manage_new_object>());
-  def("default_evolver",(EvolverInterface< ImpactSystem<R>, Zonotope<R> >*(*)(const ImpactSystem<R>&, const Zonotope<R>&, const EvolutionParameters<R>&)) &make_default_evolver, return_value_policy<manage_new_object>());
-
-  def("default_evolver", (EvolverInterface< Map<R>, Zonotope<R> >*(*)(const Map<R>&, const Zonotope<R>&)) &make_default_evolver, return_value_policy<manage_new_object>());
-  def("default_evolver",(EvolverInterface< VectorField<R>, Zonotope<R> >*(*)(const VectorField<R>&, const Zonotope<R>&)) &make_default_evolver, return_value_policy<manage_new_object>());
-  def("default_evolver",(EvolverInterface< ImpactSystem<R>, Zonotope<R> >*(*)(const ImpactSystem<R>&, const Zonotope<R>&)) &make_default_evolver, return_value_policy<manage_new_object>());
 
 }
 

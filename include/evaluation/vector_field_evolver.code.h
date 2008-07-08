@@ -50,9 +50,10 @@
 
 #include "system/vector_field.h"
 
-#include "evaluation/standard_applicator.h"
+#include "evaluation/standard_integrator.h"
 #include "evaluation/standard_approximator.h"
 #include "evaluation/standard_subdivider.h"
+#include "evaluation/cascade_reducer.h"
 
 #include "evaluation/evolution_profiler.h"
 
@@ -72,6 +73,42 @@ Evolver(const EvolutionParameters<R>& parameters,
     _reducer(reducer.clone()),
     _profiler(new EvolutionProfiler)
 { }
+
+template<class ES>
+Evolver<VectorField<typename ES::real_type>,ES>::
+Evolver(const EvolutionParameters<R>& parameters,
+        const IntegratorInterface<ES>& integrator)
+{ 
+  StandardSubdivider< ES > subdivider;
+  CascadeReducer< ES > reducer(3);
+  Evolver(parameters,integrator,subdivider,reducer);
+}
+
+
+template<class ES>
+Evolver<VectorField<typename ES::real_type>,ES>::
+Evolver(const EvolutionParameters<R>& parameters)
+{ 
+  StandardIntegrator< ES > integrator;
+  StandardSubdivider< ES > subdivider;
+  CascadeReducer< ES > reducer(3);
+  Evolver(parameters,integrator,subdivider,reducer);
+}
+
+
+
+template<class ES>
+Evolver<VectorField<typename ES::real_type>,ES>::
+Evolver()
+{ 
+  EvolutionParameters<R> parameters;
+  StandardIntegrator< ES > integrator;
+  StandardSubdivider< ES > subdivider;
+  CascadeReducer< ES > reducer(3);
+  Evolver(parameters,integrator,subdivider,reducer);
+}
+
+
 
 template<class ES>
 void

@@ -36,9 +36,8 @@
 #include "geometry/zonotope.h"
 #include "evaluation/evolution_parameters.h"
 #include "evaluation/map_evolver.h"
-#include "evaluation/default_evolver.h"
-#include "evaluation/default_approximator.h"
 #include "evaluation/reachability_analyser.h"
+#include "evaluation/standard_approximator.h"
 #include "output/epsstream.h"
 #include "output/logging.h"
 #include "models/henon.h"
@@ -66,8 +65,8 @@ henon_chainreach()
   EvolutionParameters<R> evolution_parameters; evolution_parameters.set_maximum_enclosure_radius(maximum_enclosure_radius);
   evolution_parameters.set_grid_length(grid_length);
 
-  EvolverInterface<Map<R>,ES>& evolver=*default_evolver<Map<R>,ES>(evolution_parameters);
-  ApproximatorInterface<GridApproximationScheme<R>,ES>& approximator=*default_approximator<Box<R>,ES>();
+  Evolver<Map<R>,ES> evolver(evolution_parameters);
+  StandardApproximator<ES> approximator;
   ReachabilityAnalyser< Map<R>, GridApproximationScheme<R> > analyser(evolution_parameters,evolver,approximator);
 
   Point<R> params=Point<R>("(1.5,-0.375)");

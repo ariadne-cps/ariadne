@@ -87,13 +87,26 @@ namespace Ariadne {
       //@{
       //! \name Constructors and destructors
 
-      /*! \brief Construct from evolution parameters, an applicator and an integrator. */
+      /*! \brief Construct from evolution parameters, applicator, integrator, satisfier, subdivider and reducer. */
       Evolver(const EvolutionParameters<R>& parameters, 
               const ApplicatorInterface<ES>& applicator, 
               const IntegratorInterface<ES>& integrator, 
               const SatisfierInterface<ES>& satisfier, 
-              const SubdividerInterface<ES>& reducer, 
+              const SubdividerInterface<ES>& subdivider, 
               const ReducerInterface<ES>& reducer);
+
+      /*! \brief Construct from evolution parameters, an applicator and an integrator. */
+      Evolver(const EvolutionParameters<R>& parameters, 
+              const ApplicatorInterface<ES>& applicator, 
+              const IntegratorInterface<ES>& integrator);
+
+      /*! \brief Construct from evolution parameters. */
+      Evolver(const EvolutionParameters<R>& parameters);
+
+      /*! \brief Construct from default values. */
+      Evolver();
+
+
 
       /*! \brief Make a dynamically-allocated copy. */
       Evolver<Sys,ES>* clone() const { return new Evolver<Sys,ES>(*this); }

@@ -74,16 +74,25 @@ namespace Ariadne {
       typedef Sys VF;
      public:
       Evolver(const EvolutionParameters<R>&,const IntegratorInterface<ES>&, const SubdividerInterface<ES>&, const ReducerInterface<ES>&);
+      Evolver(const EvolutionParameters<R>&,const IntegratorInterface<ES>&);
+      Evolver(const EvolutionParameters<R>&);
+      Evolver();
       virtual Evolver<Sys,ES>* clone() const { return new Evolver<Sys,ES>(*this); }
      protected:
       virtual void _evolution(ESL& final, ESL& intermediate, const Sys& system, const ES& initial, const T& time, Semantics semantics, bool reach) const;
      public:
-      /*! \brief Compute an approximation to the evolution set. */
+      /*! \brief Compute an approximation to the evolution set under upper semantics. */
       ESL evolve(const Sys& system, const ES& initial_set, const T& time) const {
         ESL final; ESL intermediate; this->_evolution(final,intermediate,system,initial_set,time,upper_semantics,false); return final; }
-      /*! \brief Compute an approximation to the evolution set under the given semantics. */
+      /*! \brief Compute an approximation to the evolution set under upper semantics. */
       ESL reach(const Sys& system, const ES& initial_set, const T& time) const {
         ESL final; ESL intermediate; this->_evolution(final,intermediate,system,initial_set,time,upper_semantics,true); return intermediate; }
+      /*! \brief Compute an approximation to the evolution set under the given semantics. */
+      ESL evolve(const Sys& system, const ES& initial_set, const T& time, Semantics semantics) const {
+        ESL final; ESL intermediate; this->_evolution(final,intermediate,system,initial_set,time,semantics,false); return final; }
+      /*! \brief Compute an approximation to the evolution set under the given semantics. */
+      ESL reach(const Sys& system, const ES& initial_set, const T& time, Semantics semantics) const {
+        ESL final; ESL intermediate; this->_evolution(final,intermediate,system,initial_set,time,semantics,true); return intermediate; }                
      private:
       // Helper functions for accessing parameters
       uint verbosity() const { 

@@ -61,7 +61,7 @@ class TestHybridEvolver
   typedef HybridBasicSet< Zonotope<R> > HES;
   typedef ListSet< HybridBasicSet< Zonotope<R> > > HLS;
 
-  Evolver<HybridAutomaton<R>, Zonotope<R> >* hybrid_evolver;
+  Evolver<HybridAutomaton<R>, Zonotope<R> > hybrid_evolver;
   HybridAutomaton<R> automaton;
   HybridBasicSet< Zonotope<R> > initial_set;
   Box<R> bounding_box;
@@ -127,7 +127,7 @@ class TestHybridEvolver
     StandardSatisfier<ES> satisfier;
     StandardSubdivider<ES> subdivider;
     CascadeReducer<ES> reducer(3);
-    hybrid_evolver=new Evolver<Sys,ES> (parameters,applicator,integrator,satisfier,subdivider,reducer);
+    hybrid_evolver=Evolver<Sys,ES> (parameters,applicator,integrator,satisfier,subdivider,reducer);
     
     HybridBasicSet< Zonotope<R> > initial_set(mode1_id,Zonotope<R>(Box<R>("[-6.96875,-6.9375]x[-6.96875,-6.9375]")));
     cout << "initial_set=" << initial_set << endl;
@@ -136,12 +136,12 @@ class TestHybridEvolver
 
   void test_lower_semantics() {  
     cout << "Computing timed evolved set" << endl;
-    ListSet< HybridBasicSet< Zonotope<R> > > lower_evolve=hybrid_evolver->reach(automaton,initial_set,Rational(1),lower_semantics);
-    ListSet< HybridBasicSet< Zonotope<R> > > lower_reach=hybrid_evolver->reach(automaton,initial_set,Rational(1),lower_semantics);
+    ListSet< HybridBasicSet< Zonotope<R> > > lower_evolve=hybrid_evolver.reach(automaton,initial_set,Rational(1),lower_semantics);
+    ListSet< HybridBasicSet< Zonotope<R> > > lower_reach=hybrid_evolver.reach(automaton,initial_set,Rational(1),lower_semantics);
     HybridListSet< Zonotope<R> > lower_evolve_sets(automaton.locations(),lower_evolve);
     HybridListSet< Zonotope<R> > lower_reach_sets(automaton.locations(),lower_reach);
     cout << "Reached (" << lower_reach_sets[mode1_id].size() << "," << lower_reach_sets[mode2_id].size() << ") enclosures, "
-         << "with (" << lower_evolve_sets[mode1_id].size() << "," << lower_evolve_sets[mode2_id].size() << ") at final time, "
+         << "with (" << lower_evolve_sets[mode1_id].size() << "," << lower_evolve_sets[mode2_id].size() << ") at final time."
          << endl << endl;
 
     epsfstream eps;
@@ -158,13 +158,14 @@ class TestHybridEvolver
 
   void test_upper_semantics() {  
     cout << "Computing timed evolved set" << endl;
-    ListSet< HybridBasicSet< Zonotope<R> > > upper_evolve=hybrid_evolver->reach(automaton,initial_set,Rational(1),upper_semantics);
-    ListSet< HybridBasicSet< Zonotope<R> > > upper_reach=hybrid_evolver->reach(automaton,initial_set,Rational(1),upper_semantics);
+    ListSet< HybridBasicSet< Zonotope<R> > > upper_evolve=hybrid_evolver.reach(automaton,initial_set,Rational(1),upper_semantics);
+    ListSet< HybridBasicSet< Zonotope<R> > > upper_reach=hybrid_evolver.reach(automaton,initial_set,Rational(1),upper_semantics);
     HybridListSet< Zonotope<R> > upper_evolve_sets(automaton.locations(),upper_evolve);
     HybridListSet< Zonotope<R> > upper_reach_sets(automaton.locations(),upper_reach);
     cout << "Reached (" << upper_reach_sets[mode1_id].size() << "," << upper_reach_sets[mode2_id].size() << ") enclosures, "
-         << "with (" << upper_evolve_sets[mode1_id].size() << "," << upper_evolve_sets[mode2_id].size() << ") at final time, "
+         << "with (" << upper_evolve_sets[mode1_id].size() << "," << upper_evolve_sets[mode2_id].size() << ") at final time."
          << endl << endl;
+
     epsfstream eps;
     eps.open("test_hybrid_evolver-upper.eps",bounding_box.neighbourhood(0.5));
     eps << fill_colour(white) << bounding_box;
@@ -174,7 +175,7 @@ class TestHybridEvolver
     eps << fill_colour(green) << upper_evolve_sets[mode1_id];
     eps << fill_colour(cyan) << upper_evolve_sets[mode2_id];
     eps << fill_colour(blue) << initial_set.set();
-    eps.close();
+    eps.close(); 
   }
 
   

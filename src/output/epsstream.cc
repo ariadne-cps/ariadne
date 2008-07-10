@@ -315,14 +315,16 @@ void
 epsstream::trace(const Polygon2d& vertices)
 {
   std::ostream& os=this->ostream();
-  os << vertices[0][0] << ' ' << vertices[0][1] 
-     << " moveto\n";
-  for (size_type i=1; i!=vertices.size(); ++i) {
-    os << vertices[i][0] << ' ' << vertices[i][1] 
+  if (vertices.size() > 0) {
+    os << vertices[0][0] << ' ' << vertices[0][1] 
+       << " moveto\n";
+    for (size_type i=1; i!=vertices.size(); ++i) {
+      os << vertices[i][0] << ' ' << vertices[i][1] 
+         << " lineto\n";
+    }
+    os << vertices[0][0] << ' ' << vertices[0][1] 
        << " lineto\n";
   }
-  os << vertices[0][0] << ' ' << vertices[0][1] 
-     << " lineto\n";
 }
 
 
@@ -385,13 +387,15 @@ void
 epsstream::draw(const Polygon2d& p)
 {
   epsstream& eps=*this;
-  if(eps.fill_style) {
-    eps.trace(p);
-    eps.fill();
-  }
-  if(eps.line_style) {
-    eps.trace(p);
-    eps.stroke();
+  if(p.size() > 0) {
+    if(eps.fill_style) {
+      eps.trace(p);
+      eps.fill();
+    }
+    if(eps.line_style) {
+      eps.trace(p);
+      eps.stroke();
+    }
   }
 }
 

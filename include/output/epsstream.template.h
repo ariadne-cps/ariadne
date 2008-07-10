@@ -83,7 +83,7 @@ epsstream&
 operator<<(epsstream& eps, const Zonotope<R>& z)
 { 
   Zonotope<Rational> qz(error_free_over_approximation(z));
-  Polygon2d vertices=eps.projection_map()(qz);      
+  Polygon2d vertices=eps.projection_map()(qz);  
   eps.draw(vertices);
   return eps;
 }

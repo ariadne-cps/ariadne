@@ -82,7 +82,7 @@ Evolver(const EvolutionParameters<R>& parameters,
   StandardSatisfier< ES > satisfier;
   StandardSubdivider< ES > subdivider;
   CascadeReducer< ES > reducer(3);
-  Evolver(parameters,applicator,integrator,satisfier,subdivider,reducer);
+  *this = Evolver(parameters,applicator,integrator,satisfier,subdivider,reducer);
 }
 
 template<class R> 
@@ -94,7 +94,7 @@ Evolver(const EvolutionParameters<R>& parameters)
   StandardSatisfier< ES > satisfier;
   StandardSubdivider< ES > subdivider;
   CascadeReducer< ES > reducer(3);
-  Evolver(parameters,applicator,integrator,satisfier,subdivider,reducer);
+  *this = Evolver(parameters,applicator,integrator,satisfier,subdivider,reducer);
 }
 
 template<class R> 
@@ -107,7 +107,7 @@ Evolver()
   StandardSatisfier< ES > satisfier;
   StandardSubdivider< ES > subdivider;
   CascadeReducer< ES > reducer(3);
-  Evolver(parameters,applicator,integrator,satisfier,subdivider,reducer);
+  *this = Evolver(parameters,applicator,integrator,satisfier,subdivider,reducer);
 }
 
 

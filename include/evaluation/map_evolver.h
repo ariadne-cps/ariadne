@@ -77,6 +77,8 @@ namespace Ariadne {
 
       virtual Evolver<Sys,ES>* clone() const { return new Evolver<Sys,ES>(*this); }
      public:
+      using EvolverBase<Sys,ES>::evolve;
+      using EvolverBase<Sys,ES>::reach;
       /*! \brief Compute an approximation to the evolution set using upper semantics. */
       ESL evolve(const Sys& system, const ES& initial_set, const T& time) const {
         ESL final; ESL intermediate; this->_evolution(final,intermediate,system,initial_set,time,upper_semantics,false); return final; }
@@ -84,12 +86,6 @@ namespace Ariadne {
       ESL reach(const Sys& system, const ES& initial_set, const T& time) const {
         ESL final; ESL intermediate; this->_evolution(final,intermediate,system,initial_set,time,upper_semantics,true); 
         return intermediate; }
-      /*! \brief Compute an approximation to the evolution set under the given semantics. */
-      ESL evolve(const Sys& system, const ES& initial_set, const T& time, Semantics semantics) const {
-        ESL final; ESL intermediate; this->_evolution(final,intermediate,system,initial_set,time,semantics,false); return final; }
-      /*! \brief Compute an approximation to the evolution set under the given semantics. */
-      ESL reach(const Sys& system, const ES& initial_set, const T& time, Semantics semantics) const {
-        ESL final; ESL intermediate; this->_evolution(final,intermediate,system,initial_set,time,semantics,true); return intermediate; }                
      protected:
       virtual void _evolution(ESL& final, ESL& intermediate, 
                               const Sys& system, const ES& initial, const T& time, 

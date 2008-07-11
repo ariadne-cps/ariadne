@@ -78,7 +78,7 @@ Evolver(const EvolutionParameters<R>& parameters,
 { 
   StandardSubdivider< ES > subdivider;
   CascadeReducer< ES > reducer(3);
-  Evolver(parameters,applicator,subdivider,reducer);
+  *this = Evolver(parameters,applicator,subdivider,reducer);
 }
 
 template<class ES>
@@ -87,7 +87,7 @@ Evolver(const EvolutionParameters<R>& parameters) {
   StandardApplicator< ES > applicator;
   StandardSubdivider< ES > subdivider;
   CascadeReducer< ES > reducer(3);
-  Evolver(parameters,applicator,subdivider,reducer);
+  *this = Evolver(parameters,applicator,subdivider,reducer);
 }
 
 
@@ -98,7 +98,7 @@ Evolver() {
   StandardApplicator< ES > applicator;
   StandardSubdivider< ES > subdivider;
   CascadeReducer< ES > reducer(3);
-  Evolver(parameters,applicator,subdivider,reducer);
+  *this = Evolver(parameters,applicator,subdivider,reducer);
 }
 
 

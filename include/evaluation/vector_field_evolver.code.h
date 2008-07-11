@@ -81,7 +81,7 @@ Evolver(const EvolutionParameters<R>& parameters,
 { 
   StandardSubdivider< ES > subdivider;
   CascadeReducer< ES > reducer(3);
-  Evolver(parameters,integrator,subdivider,reducer);
+  *this = Evolver(parameters,integrator,subdivider,reducer);
 }
 
 
@@ -92,7 +92,7 @@ Evolver(const EvolutionParameters<R>& parameters)
   StandardIntegrator< ES > integrator;
   StandardSubdivider< ES > subdivider;
   CascadeReducer< ES > reducer(3);
-  Evolver(parameters,integrator,subdivider,reducer);
+  *this = Evolver(parameters,integrator,subdivider,reducer);
 }
 
 
@@ -105,7 +105,7 @@ Evolver()
   StandardIntegrator< ES > integrator;
   StandardSubdivider< ES > subdivider;
   CascadeReducer< ES > reducer(3);
-  Evolver(parameters,integrator,subdivider,reducer);
+  *this = Evolver(parameters,integrator,subdivider,reducer);
 }
 
 

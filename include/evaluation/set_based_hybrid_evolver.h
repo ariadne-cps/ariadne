@@ -50,6 +50,7 @@
 #include "geometry/hybrid_timed_set.h"
 #include "system/hybrid_automaton.h"
 #include "evaluation/hybrid_time.h"
+#include "evaluation/integrator_interface.h"
 #include "evaluation/evolver_interface.h"
 
 #include "evaluation/evolver_base.h"

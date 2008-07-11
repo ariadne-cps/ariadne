@@ -115,7 +115,11 @@ EVALUATION_SRC = \
 	evaluation/euler_integrator.cc \
 	evaluation/affine_integrator.cc \
 	\
-	evaluation/evolver.cc \
+	evaluation/map_evolver.cc \
+	evaluation/vector_field_evolver.cc \
+	evaluation/impact_system_evolver.cc \
+	evaluation/hybrid_evolver.cc \
+	\
 	evaluation/discrete_evolver.cc \
 	evaluation/discretiser.cc \
 	evaluation/reachability_analyser.cc \

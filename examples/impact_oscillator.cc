@@ -104,7 +104,7 @@ impact_oscillator()
   StandardSubdivider<ES> subdivider;
   StandardReducer<ES> reducer;
   Evolver<ImpactSystem<R>,ES> evolver;
-
+  std::cout << evolver << std::endl;
 
   // Define the system
   double parameter_array[4]={1.0,1.0,0.75,0.125};

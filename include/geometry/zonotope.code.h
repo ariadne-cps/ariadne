@@ -780,6 +780,24 @@ orthogonal_over_approximation(const Zonotope< Interval<R> >& z)
 */
 
 
+template<class R> 
+Zonotope<R> 
+project(const Zonotope<R>& z, const Slice& slc)
+{
+  Point<R> new_centre(project(z.centre().position_vector(),slc));
+
+  const Matrix<R>& generators=z.generators();
+  Matrix<R> new_generators(slc.size(),generators.column_size());
+  for(uint i=0; i!=new_generators.row_size(); ++i) {
+    for(uint j=0; j!=new_generators.column_size(); ++j) {
+      new_generators(i,j)=generators(slc.start()+i*slc.stride(),j);
+    }
+  }
+
+  Vector<R> new_error(project(z.error(),slc));
+
+  return Zonotope<R>(new_centre,new_generators,new_error);
+}
 
 
 
@@ -1118,6 +1136,7 @@ void
 instantiate_zonotope()
 {
   tribool* tb=0;
+  Slice * slc=0;
   R* r=0;
   Point<R>* pt=0;
   Box<R>* bx=0;
@@ -1143,6 +1162,7 @@ instantiate_zonotope()
   *tb=Ariadne::subset(*z,*cs);
 
   Ariadne::split(*z);
+  Ariadne::project(*z,*slc);
 
   Ariadne::approximation(*z);
   Ariadne::over_approximation(*z);

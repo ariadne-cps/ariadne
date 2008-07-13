@@ -65,7 +65,9 @@ namespace Ariadne {
       /*! \brief Default constructer constructs empty interval. */
       Interval();
       /*! \brief Construct from a string literal. */
-      Interval(const std::string& str);
+      explicit Interval(const std::string& str);
+      /*! \brief Construct a one-point interval from an approximate float. */
+      explicit Interval(const ApproximateFloat<T>& x);
       /*! \brief Construct a one-point interval. */
       Interval(const R& x);
       /*! \brief Construct from lower and upper bounds. */

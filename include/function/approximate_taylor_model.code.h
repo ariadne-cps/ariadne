@@ -38,6 +38,12 @@
 namespace Ariadne {
 
 template<class R>
+ApproximateTaylorModel<R>::~ApproximateTaylorModel() 
+{
+}
+
+
+template<class R>
 ApproximateTaylorModel<R>::ApproximateTaylorModel() 
   : _domain(), 
     _centre(),
@@ -63,10 +69,10 @@ ApproximateTaylorModel<R>::ApproximateTaylorModel(const Vector<I>& d,
     _centre(c),
     _expansion(e)
 {
-  assert(d.size()==e.argument_size());
-  assert(c.size()==e.argument_size());
+  ARIADNE_ASSERT(d.size()==e.argument_size());
+  ARIADNE_ASSERT(c.size()==e.argument_size());
   for(uint i=0; i!=e.size(); ++i) {
-    assert(e[i].argument_size()==e[0].argument_size());
+    ARIADNE_ASSERT(e[i].argument_size()==e[0].argument_size());
   }
 }
 
@@ -81,8 +87,54 @@ ApproximateTaylorModel<R>::ApproximateTaylorModel(const Vector<I>& d, const Vect
     _centre(c),
     _expansion(f.expansion(Vector<A>(c),o))
 {
-  assert(d.size()==f.argument_size());
-  assert(c.size()==f.argument_size());
+  ARIADNE_ASSERT(d.size()==f.argument_size());
+  ARIADNE_ASSERT(c.size()==f.argument_size());
+}
+
+
+template<class R>
+ApproximateTaylorModel<R>::ApproximateTaylorModel(const Vector<I>& d, const Vector<A>& c,
+                                                  const FunctionInterface<R>& f, 
+                                                  ushort o, ushort s)
+  : _domain(d),
+    _centre(c),
+    _expansion(f.expansion(Vector<A>(c),o))
+{
+  ARIADNE_ASSERT(d.size()==f.argument_size());
+  ARIADNE_ASSERT(c.size()==f.argument_size());
+}
+
+
+template<class R>
+ApproximateTaylorModel<R>::ApproximateTaylorModel(const Vector<I>& d, 
+                                                  const FunctionInterface<R>& f, 
+                                                  ushort o, ushort s)
+  : _domain(d),
+    _centre(midpoint(d)),
+    _expansion(f.expansion(Vector<A>(_centre),o))
+{
+  ARIADNE_ASSERT(d.size()==f.argument_size());
+}
+
+template<class R>
+ApproximateTaylorModel<R>::ApproximateTaylorModel(const ApproximateTaylorModel<R>& atm)
+  : _domain(atm._domain),
+    _centre(atm._centre),
+    _expansion(atm._expansion)
+{
+}
+
+
+template<class R>
+ApproximateTaylorModel<R>&
+ApproximateTaylorModel<R>::operator=(const ApproximateTaylorModel<R>& atm)
+{
+  if(this!=&atm) {
+    this->_domain=atm._domain;
+    this->_centre=atm._centre;
+    this->_expansion=atm._expansion;
+  }
+  return *this;
 }
 
 
@@ -140,8 +192,7 @@ template<class R>
 Vector< Interval<R> >
 ApproximateTaylorModel<R>::range() const
 { 
-  I infty(-inf<R>(),+inf<R>());
-  return Vector<I>(this->result_size(),infty);
+  return Ariadne::evaluate(this->expansion(),this->domain());
 }
 
 
@@ -151,6 +202,37 @@ const SparseDifferentialVector<typename ApproximateTaylorModel<R>::A>&
 ApproximateTaylorModel<R>::expansion() const
 { 
   return this->_expansion; 
+  //return *this->_expansion_ptr; 
+}
+
+
+template<class R>
+std::pair< Vector<Interval<R> >, Matrix<R> >
+affine(const ApproximateTaylorModel<R>& f)
+{ 
+  typedef typename traits<R>::interval_type I;
+  typedef typename traits<R>::approximate_arithmetic_type A;
+
+  uint rs=f.result_size();
+  uint as=f.argument_size();
+  const SparseDifferentialVector<A>& fe=f.expansion();
+  Vector<I> value_range(rs);
+  Matrix<R> jacobian(rs,as);
+  for(uint i=0; i!=rs; ++i) {
+    value_range[i]=fe[i].value()._value;
+    for(uint j=0; j!=as; ++j) {
+      jacobian[i][j]=R(fe[i].gradient(j)._value);
+    }
+    for(typename SparseDifferential<A>::const_iterator iter=fe[i].begin();
+        iter!=fe[i].end(); ++iter)
+    {
+      if(iter->first.degree()>=2) {
+        // FIXME: Change domain
+        value_range[i]+=I(-1,1)*iter->second;
+      }
+    }
+  }
+  return std::make_pair(value_range,jacobian);
 }
 
 
@@ -190,6 +272,7 @@ template<class R> template<class X>
 array< array<X> >
 ApproximateTaylorModel<R>::_powers(const Vector<X>& v) const
 {
+  ARIADNE_ASSERT(this->argument_size()==v.size());
   array< array<X> > powers(this->argument_size(), array<X>(this->order()+1));
   for(uint i=0; i!=this->argument_size(); ++i) {
     powers[i][0]=1;
@@ -211,23 +294,8 @@ template<class R>
 Vector<typename ApproximateTaylorModel<R>::A> 
 ApproximateTaylorModel<R>::evaluate(const Vector<A>& x) const
 {
-  assert(this->argument_size()==x.size());
-
-  // TODO: Make this more efficient
-  Vector<A> result(this->result_size());
-  Vector<A> w=Vector<A>(x)-this->_centre;
-  for(MultiIndex j(this->argument_size()); j.degree()<=this->order(); ++j) {
-    A wa=1;
-    for(uint k=0; k!=j.number_of_variables(); ++k) {
-      wa*=pow(w[k],int(j[k]));
-    }
-    for(uint i=0; i!=this->result_size(); ++i) {
-      const SparseDifferential<A>& cd=this->expansion()[i];
-      result[i]+=cd[j]*wa;
-    }
-  }
-
-  return result;
+  ARIADNE_ASSERT(this->argument_size()==x.size());
+  return Ariadne::evaluate(this->expansion(),x);
 }
 
 
@@ -235,24 +303,8 @@ template<class R>
 Vector< Interval<R> > 
 ApproximateTaylorModel<R>::evaluate(const Vector<I>& x) const
 {
-  assert(this->argument_size()==x.size());
-
-  // TODO: Make this more efficient
-  Vector<R> c=this->centre();
-  Vector<I> w=x-c;
-  Vector<I> result(this->result_size());
-  for(MultiIndex j(this->argument_size()); j.degree()<=this->order(); ++j) {
-    I wa=1;
-    for(uint k=0; k!=j.number_of_variables(); ++k) {
-      wa*=pow(w[k],int(j[k]));
-    }
-    for(uint i=0; i!=this->result_size(); ++i) {
-      const SparseDifferential<A>& cd=this->expansion()[i];
-      result[i]+=cd[j]*wa;
-    }
-  }
-
-  return result;
+  ARIADNE_ASSERT(this->argument_size()==x.size());
+  return Ariadne::evaluate(this->expansion(),x);
 }
 
 
@@ -262,28 +314,10 @@ template<class R>
 Matrix<typename ApproximateTaylorModel<R>::A> 
 ApproximateTaylorModel<R>::jacobian(const Vector<A>& x) const
 {
-  assert(this->argument_size()==x.size());
-  Matrix<A> J(this->result_size(),this->argument_size());
-  Vector<A> w=x-this->_centre;
-  array< array<A> > powers=this->_powers(w);
-  for(uint j=0; j!=this->argument_size(); ++j) {
-    for(MultiIndex m(this->argument_size()); m.degree()<=this->order(); ++m) {
-      MultiIndex n=m;
-      int c=n[j];
-      if(c!=0) {
-        n.decrement_index(j);
-        A a=c;
-        for(uint k=0; k!=this->argument_size(); ++k) {
-          a*=powers[k][n[k]];
-        }
-        for(uint i=0; i!=this->result_size(); ++i) {
-          A& x=J[i][j];
-          x+=a*this->_expansion[i][m];
-        }
-      }
-    }
-  }  
-  return J;
+  ARIADNE_ASSERT(this->argument_size()==x.size());
+  SparseDifferentialVector<A> affine=SparseDifferentialVector<A>::variable(x.size(),x.size(),1u,x);
+  affine=Ariadne::evaluate(this->expansion(),affine);
+  return affine.jacobian();
 }
 
 
@@ -291,29 +325,11 @@ template<class R>
 Matrix< Interval<R> > 
 ApproximateTaylorModel<R>::jacobian(const Vector<I>& x) const
 {
-  Matrix<I> J(this->result_size(),this->argument_size());
-  Vector<I> w=x-this->centre();
-  array< array<I> > powers=this->_powers(w);
-
-  for(uint j=0; j!=this->argument_size(); ++j) {
-    for(MultiIndex m(this->argument_size()); m.degree()<=this->order(); ++m) {
-      MultiIndex n=m;
-      int c=n[j];
-      if(c!=0) {
-        n.decrement_index(j);
-        I a=c;
-        for(uint k=0; k!=this->argument_size(); ++k) {
-          a*=powers[k][n[k]];
-        }
-        for(uint i=0; i!=this->result_size(); ++i) {
-          I amim=a*this->_expansion[i][m];
-          J[i][j]+=amim;
-        }
-      }
-    }
-  }
-  
-  return J;
+  ARIADNE_ASSERT(this->argument_size()==x.size());
+  SparseDifferentialVector<I> affine=SparseDifferentialVector<I>::variable(x.size(),x.size(),1u,x);
+  Vector< SparseDifferential<I> >& vec=affine;
+  vec=Ariadne::evaluate(this->expansion(),vec);
+  return affine.jacobian();
 }
 
 
@@ -332,9 +348,10 @@ ApproximateTaylorModel<R>::identity(const Vector<I>& d, uint o)
 
 template<class R> 
 ApproximateTaylorModel<R> 
-project(const ApproximateTaylorModel<R>& f, Slice rng)
+project(const ApproximateTaylorModel<R>& f, Slice slc)
 {
-  return ApproximateTaylorModel<R>(f.domain(),f.centre(),project(f.expansion(),rng));
+  ARIADNE_ASSERT(slc.stop()<=f.result_size());
+  return ApproximateTaylorModel<R>(f.domain(),f.centre(),project(f.expansion(),slc));
 }
 
 template<class R> 
@@ -342,13 +359,12 @@ ApproximateTaylorModel<R>
 join(const ApproximateTaylorModel<R>& f, const ApproximateTaylorModel<R>& g)
 {
   typedef typename traits<R>::approximate_arithmetic_type A;
-  assert(f.domain()==g.domain());
-  assert(f.centre()==g.centre());
+  ARIADNE_ASSERT(f.domain()==g.domain());
+  ARIADNE_ASSERT(f.centre()==g.centre());
 
   SparseDifferentialVector<A> he(f.result_size()+g.result_size(),f.argument_size(),f.order());
   project(he,range(0,f.result_size()))=f.expansion();
-  //project(he,range(0,f.result_size()))=f.expansion();
-  //project(he,range(f.result_size(),f.result_size()+g.result_size()))=g.expansion();
+  project(he,range(f.result_size(),f.result_size()+g.result_size()))=g.expansion();
 
   return ApproximateTaylorModel<R> (f.domain(),f.centre(),he);
 }
@@ -360,7 +376,7 @@ ApproximateTaylorModel<R>
 compose(const ApproximateTaylorModel<R>& f,
         const AffineTransformation<R>& g)
 {
-  assert(f.centre()==g.b());
+  ARIADNE_ASSERT(f.centre()==g.b());
   SparseDifferentialVector<R> const& fe=f.expansion();
   Vector<R> const& b=g.b();
   Matrix<R> const& A=g.A();
@@ -372,19 +388,19 @@ compose(const ApproximateTaylorModel<R>& f,
     uint ones=0;
     for(uint j=0; i!=A.column_size(); ++i) {
       if(A[i][j]==1) { ++ones; }
-      else { assert(A[i][j]==0); }
+      else { ARIADNE_ASSERT(A[i][j]==0); }
     }
-    assert(ones<=1);
+    ARIADNE_ASSERT(ones<=1);
   }
   
-  assert(false); // not called
+  ARIADNE_ASSERT(false); // not called
 }
 
 ApproximateTaylorModel<R> 
 compose(const AffineTransformation<R>& f,
         const ApproximateTaylorModel<R>& g)
 {
-  assert(f.centre()==g.expansion().value());
+  ARIADNE_ASSERT(f.centre()==g.expansion().value());
   Vector<R> const& c=f.centre();
   Vector<R> const& b=f.b();
   Matrix<R> const& A=f.A();
@@ -406,11 +422,43 @@ compose(const AffineTransformation<R>& f,
 
 template<class R> 
 ApproximateTaylorModel<R> 
+operator+(const ApproximateTaylorModel<R>& f,
+          const ApproximateTaylorModel<R>& g)
+{
+  typedef typename traits<R>::approximate_arithmetic_type A;
+  ARIADNE_ASSERT(f.domain()==g.domain());
+  ARIADNE_ASSERT(f.centre()==g.centre());
+  ARIADNE_ASSERT(f.result_size()==g.result_size());
+  SparseDifferentialVector<A> he;
+  Vector< SparseDifferential<A> >& hev=he;
+  hev=f.expansion(); hev+=g.expansion();
+  return ApproximateTaylorModel<R>(f.domain(),f.centre(),he);
+}
+
+
+template<class R> 
+ApproximateTaylorModel<R> 
+operator-(const ApproximateTaylorModel<R>& f,
+          const ApproximateTaylorModel<R>& g)
+{
+  typedef typename traits<R>::approximate_arithmetic_type A;
+  ARIADNE_ASSERT(f.domain()==g.domain());
+  ARIADNE_ASSERT(f.centre()==g.centre());
+  ARIADNE_ASSERT(f.result_size()==g.result_size());
+  SparseDifferentialVector<A> he;
+  Vector< SparseDifferential<A> >& hev=he;
+  hev=f.expansion(); hev-=g.expansion();
+  return ApproximateTaylorModel<R>(f.domain(),f.centre(),he);
+}
+
+
+template<class R> 
+ApproximateTaylorModel<R> 
 compose(const ApproximateTaylorModel<R>& f,
         const ApproximateTaylorModel<R>& g)
 {
   //std::cerr<<__PRETTY_FUNCTION__<<std::endl;
-  assert(f.argument_size()==g.result_size());
+  ARIADNE_ASSERT(f.argument_size()==g.result_size());
   typedef Interval<R> I;
   typedef typename traits<R>::approximate_arithmetic_type A;
   SparseDifferentialVector<A> const& fe=f.expansion();
@@ -437,6 +485,9 @@ recentre(const ApproximateTaylorModel<R>& f,
          const Vector< Interval<R> >& d,
          const Vector<R>& c)
 {
+  ARIADNE_ASSERT(f.argument_size()==d.size());
+  ARIADNE_ASSERT(f.argument_size()==c.size());
+  throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
 
@@ -445,6 +496,7 @@ ApproximateTaylorModel<R>
 inverse(const ApproximateTaylorModel<R>& f,
         const Vector<R>& x)
 {
+  ARIADNE_ASSERT(f.argument_size()==x.size());
   typedef Interval<R> I;
   Vector<R> tr=f.centre()-x;
   SparseDifferentialVector<R> fet=translate(f.expansion(),tr);
@@ -460,9 +512,10 @@ template<class R>
 ApproximateTaylorModel<R>
 implicit(const ApproximateTaylorModel<R>& f)
 {
+  //std::cerr << __PRETTY_FUNCTION__ << std::endl;
   typedef typename traits<R>::interval_type I;
   typedef typename traits<R>::approximate_arithmetic_type A;
-  assert(f.argument_size()>f.result_size());
+  ARIADNE_ASSERT(f.argument_size()>f.result_size());
   uint m=f.argument_size(); 
   uint n=f.result_size();
 
@@ -475,7 +528,9 @@ implicit(const ApproximateTaylorModel<R>& f)
   //std::cerr << "gd=" << gd << std::endl;
   Vector<A> gc=project(f.centre(),range(m-n,m));
   //std::cerr << "gc=" << gc << std::endl;
-  SparseDifferentialVector<A> ge=project(f.expansion(),range(m-n,m));
+  SparseDifferentialVector<A> projection(m,n,f.order());
+  for(uint i=0; i!=n; ++i) { projection[m-n+i][i]=1.0; }
+  SparseDifferentialVector<A> ge=compose(f.expansion(),projection);
   //std::cerr << "ge=" << ge << std::endl;
   ApproximateTaylorModel<R> g(gd,gc,ge);
 
@@ -567,8 +622,11 @@ flow(const ApproximateTaylorModel<R>& vf)
   uint ot=4u;
 
   Vector<A> vfc=vf.centre();
-  Vector< SparseSeries< SparseDifferential<A> > > y=flow(vf.expansion(),vfc,ot,ox);
-  
+  SparseDifferentialVector<A> x=flow(vf.expansion(),vfc,ot,ox);
+
+  //std::cerr << "x=" << x << std::endl;
+
+  /*
   uint n=vf.result_size();
   SparseDifferentialVector<A> x(n,n+1,ox);
   for(MultiIndex jx(n+1); jx.degree()<=ox; ++jx) {
@@ -578,9 +636,16 @@ flow(const ApproximateTaylorModel<R>& vf)
     }
     uint jt=jx[n];
     for(uint i=0; i!=n; ++i) {
+      std::cerr<<"i="<<i<<" jx="<<jx<<std::flush; std::cerr<<" x[i][jx]="<<x[i][jx]<<std::endl;
+      std::cerr<<"i="<<i<<" jt="<<jt<<" jy="<<jy<<std::endl; 
+      std::cerr<<"   y[i]]="<<y[i]<<std::endl;
+      std::cerr<<"   y[i][jt]="<<y[i][jt]<<std::endl;
+      std::cerr<<"   y[i][jt][jy]="<<y[i][jt][jy]<<std::endl;
       x[i][jx]=y[i][jt][jy];
     }
   }
+  std::cerr << "x=" << x << std::endl;
+  */
 
   I h(-0.1,0.1);
   Vector<I> d=join(vf.domain(),h);
@@ -594,7 +659,7 @@ ApproximateTaylorModel<R>
 integrate(const ApproximateTaylorModel<R>& vf, const R& h, uint ox)
 {
   typedef Interval<R> I;
-  assert(vf.result_size()==vf.argument_size());
+  ARIADNE_ASSERT(vf.result_size()==vf.argument_size());
   uint n=vf.result_size();
   SparseDifferentialVector<R> xe=vector_variable(n,ox,Vector<R>(n+1,0.0));
   SparseDifferential<R> te=scalar_constant(n,ox,h);
@@ -613,6 +678,7 @@ Vector< Interval<R> >
 solve(const ApproximateTaylorModel<R>& f,
       const Vector<R>& y)
 {
+  ARIADNE_ASSERT(f.argument_size()==y.size());
   typedef typename traits<R>::approximate_arithmetic_type A;
   typedef Interval<R> I;
   Vector<I> x=f.centre();
@@ -649,10 +715,10 @@ hitting(const ApproximateTaylorModel<R>& vf,
 {
   typedef typename traits<R>::approximate_arithmetic_type A;
   typedef Interval<R> I;
-  assert(vf.result_size()==vf.argument_size());
-  assert(g.argument_size()==vf.result_size());
-  assert(g.result_size()==1);
-  assert(g.expansion().degree()==vf.expansion().degree());
+  ARIADNE_ASSERT(vf.result_size()==vf.argument_size());
+  ARIADNE_ASSERT(g.argument_size()==vf.result_size());
+  ARIADNE_ASSERT(g.result_size()==1);
+  ARIADNE_ASSERT(g.expansion().degree()==vf.expansion().degree());
   uint n=vf.result_size();
   uint d=vf.order();
   //std::cerr<<"vf="<<vf<<std::endl; // n,n
@@ -683,6 +749,8 @@ ApproximateTaylorModel<R>
 ApproximateTaylorModel<R>::truncate(const Vector<I>& domain, const Vector<R>& centre,
                                     ushort order, ushort smoothness) const
 {
+  ARIADNE_ASSERT(this->argument_size()==domain.size());
+  ARIADNE_ASSERT(this->argument_size()==centre.size());
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
@@ -693,6 +761,9 @@ std::ostream&
 operator<<(std::ostream& os, const ApproximateTaylorModel<R>& tm)
 {
   os << "ApproximateTaylorModel(\n";
+  os << "  argument_size=" << tm.expansion().argument_size() << ",\n" << std::flush;
+  os << "  result_size=" << tm.expansion().result_size() << ",\n" << std::flush;
+  os << "  degree=" << tm.expansion().degree() << ",\n" << std::flush;
   os << "  domain=" << tm.domain() << ",\n" << std::flush;
   os << "  centre=" << tm.centre() << ",\n" << std::flush;
   os << "  expansion=" << tm.expansion() << ",\n" << std::flush;
@@ -737,5 +808,27 @@ operator<<(latexstream& texs, const ApproximateTaylorModel<R>& p)
   return texs;
 }
 
+
+template<class R> 
+void
+ApproximateTaylorModel<R>::_instantiate()
+{
+  Slice* slc=0;
+  ApproximateTaylorModel<R>* atm=0;
+  std::ostream* os = 0;
+
+  operator+(*atm,*atm);
+  operator-(*atm,*atm);
+  
+  project(*atm,*slc);
+  join(*atm,*atm);
+  compose(*atm,*atm);
+  implicit(*atm);
+  flow(*atm);
+
+  affine(*atm);
+  
+  *os << *atm;
+}
 
 } // namespace Ariadne

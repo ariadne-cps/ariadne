@@ -65,6 +65,7 @@ namespace Ariadne {
       Float(const Integer& n);
       Float(const Float64& x);
       
+      explicit Float(const ApproximateFloat64& x);
       explicit Float(const std::string& x);
       
       Float64& operator=(const int& n);

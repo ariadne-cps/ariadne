@@ -55,8 +55,6 @@ namespace Ariadne {
      
       /*! Construct a multi index of degree \a 0 with \a nv variables. */
       explicit MultiIndex(uint nv);
-      /*! Construct the first multi index of degree \a d with \a nv variables. */
-      explicit MultiIndex(uint nv, uint d);
       /*! Construct a multi index with \a nv variables from the array \a ary. */
       explicit MultiIndex(uint nv, const uint* ary);
       /*! Construct a multi index from the sorted index \a a. */
@@ -67,6 +65,17 @@ namespace Ariadne {
       MultiIndex(const MultiIndex& a);
       /*! Copy assignment operator. */
       MultiIndex& operator=(const MultiIndex& a);
+
+      /*! The zero multi index in \a nv variables. */
+      static MultiIndex zero(uint nv) { return MultiIndex(nv); }
+
+       /*! The \a i<sup>th</sup> unit multi index in \a nv variables. */
+      static MultiIndex unit(uint nv, uint i) {
+        MultiIndex result(nv); result._occurrences[i]=1; result._degree=1; return result; }
+
+      /*! The first multi index in \a nv variables with degree \a d. */
+      static MultiIndex first(uint nv, uint d) { 
+        MultiIndex result(nv); result._occurrences[0]=d; result._degree=d; return result; }
 
       /*! The degree of the multi-index, equal to the sum of the number of occurrences of the variables. */
       const uint degree() const;
@@ -125,13 +134,6 @@ namespace Ariadne {
     inline MultiIndex::MultiIndex(uint nv)
       : _degree(0), _occurrences(nv,0) 
     {
-    }
-
-    inline MultiIndex::MultiIndex(uint nv, uint d)
-      : _degree(0), _occurrences(nv,0) 
-    {
-      this->_occurrences[0]=d;
-      this->_degree=d;
     }
 
     inline MultiIndex::MultiIndex(uint nv, const uint* ary)
@@ -261,7 +263,7 @@ namespace Ariadne {
       } else {
         for(uint i=0; i!=a1.number_of_variables(); ++i) {
           if(a1[i]!=a2[i]) { 
-            return a1[i]<a2[i];
+            return a1[i]>a2[i];
           }
         }
         return false;

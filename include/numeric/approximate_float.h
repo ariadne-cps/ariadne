@@ -55,6 +55,7 @@ namespace Ariadne {
         _value=x._value; return *this; }
     };
 
+    inline Float64::Float(const ApproximateFloat64& x) : _value(x._value._value) { }
 
     template<class T> inline
     bool
@@ -70,6 +71,16 @@ namespace Ariadne {
     bool
     operator==(const ApproximateFloat<T>& x, const ApproximateFloat<T>& y) {
       return x._value==y._value; }
+
+    template<class T> inline
+    bool
+    operator!=(const ApproximateFloat<T>& x, const int& y) {
+      return x._value!=y; }
+
+    template<class T> inline
+    bool
+    operator!=(const ApproximateFloat<T>& x, const double& y) {
+      return x._value!=y; }
 
     template<class T> inline
     bool
@@ -151,6 +162,38 @@ namespace Ariadne {
 
     template<class T> inline
     ApproximateFloat<T>&
+    operator+=(ApproximateFloat<T>& x, const int& y) {
+      x._value._value+=y; return x; }
+
+    template<class T> inline
+    ApproximateFloat<T>&
+    operator*=(ApproximateFloat<T>& x, const int& y) {
+      x._value._value*=y; return x; }
+
+
+    template<class T> inline
+    ApproximateFloat<T>&
+    operator+=(ApproximateFloat<T>& x, const double& y) {
+      x._value._value+=y; return x; }
+
+    template<class T> inline
+    ApproximateFloat<T>&
+    operator-=(ApproximateFloat<T>& x, const double& y) {
+      x._value._value-=y; return x; }
+
+    template<class T> inline
+    ApproximateFloat<T>&
+    operator*=(ApproximateFloat<T>& x, const double& y) {
+      x._value._value*=y; return x; }
+
+    template<class T> inline
+    ApproximateFloat<T>&
+    operator/=(ApproximateFloat<T>& x, const double& y) {
+      x._value._value/=y; return x; }
+
+
+    template<class T> inline
+    ApproximateFloat<T>&
     operator+=(ApproximateFloat<T>& x, const ApproximateFloat<T>& y) {
       x._value=add_approx(x._value,y._value); return x; }
 
@@ -225,6 +268,17 @@ namespace Ariadne {
     Interval< Float<T> > 
     operator*(const Float<T>& x, const ApproximateFloat<T>& y) {
       return x*Float<T>(y._value); }
+
+
+    template<class T> inline
+    ApproximateFloat<T>
+    sin(const ApproximateFloat<T>& y) {
+      return std::sin(y._value._value); }
+
+    template<class T> inline
+    ApproximateFloat<T>
+    cos(const ApproximateFloat<T>& y) {
+      return std::cos(y._value._value); }
 
  
     template<class T> inline

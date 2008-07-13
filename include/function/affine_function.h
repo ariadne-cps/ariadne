@@ -60,6 +60,9 @@ namespace Ariadne {
       /*! \brief Construct from the matrix \f$A\f$ and the vector \f$b\f$. */
       explicit AffineFunction(const Matrix<F>& A, const Vector<F>& b)
         : _a(A), _b(b) { }
+      /*! \brief Construct from the vector \f$b\f$ and the matrix \f$A\f$. */
+      explicit AffineFunction(const Vector<F>& b, const Matrix<F>& A)
+        : _a(A), _b(b) { }
       /*! \brief Construct a linear function from the matrix \f$A\f$. */
       explicit AffineFunction(const Matrix<F>& A)
         : _a(A), _b(A.number_of_rows()) { }

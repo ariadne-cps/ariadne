@@ -32,9 +32,8 @@
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
 
-// The following includes are not necessary,
+// The following include is not necessary,
 // but allow testing without rebuilding the entire library.
-#include "linear_algebra/vector.code.h"
 #include "linear_algebra/matrix.code.h"
 
 using namespace std;

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            vector.code.h
+ *            vector.template.h
  *
  *  Copyright  2004-6  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
@@ -30,7 +30,6 @@
 #include "base/stlio.h"
 
 #include "numeric/interval.h"
-#include "linear_algebra/vector.h"
 
 namespace Ariadne {
 

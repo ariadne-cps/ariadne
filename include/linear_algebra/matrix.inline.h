@@ -71,6 +71,17 @@ Matrix<R>::Matrix(const size_type& nr, const size_type& nc,
 }
 
 
+template<class R> template<class RR> inline
+Matrix<R>::Matrix(const Matrix<RR>& A)
+  : _nr(A.number_of_rows()), _nc(A.number_of_columns()), _array(_nc*_nr)
+{ 
+  for(size_type i=0; i!=_nr; ++i) { 
+    for(size_type j=0; j!=_nc; ++j) { 
+      (*this)(i,j)=R(A(i,j));
+    } 
+  } 
+}
+
 template<class R> template<class E> inline
 Matrix<R>::Matrix(const MatrixExpression<E>& A)
   : _nr(A().number_of_rows()), _nc(A().number_of_columns()), _array(_nc*_nr)
@@ -177,6 +188,21 @@ Matrix<R>::number_of_columns() const
   return this->_nc; 
 }
 
+
+template<class R> inline
+size_type 
+Matrix<R>::row_size() const 
+{ 
+  return this->_nr; 
+}
+
+
+template<class R> inline
+size_type 
+Matrix<R>::column_size() const 
+{ 
+  return this->_nc; 
+}
 
 template<class R> inline
 array<size_type,2u> 

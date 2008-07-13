@@ -87,6 +87,8 @@ namespace Ariadne {
     template<class R> tribool disjoint(const Zonotope<R>& z, const ConstraintSet<R>& cs);
     template<class R> tribool intersects(const Zonotope<R>& z, const ConstraintSet<R>& cs);
     
+    template<class R> Zonotope<R> project(const Zonotope<R>& z, const Slice& slc);
+
     template<class R> Zonotope<R> apply(const AffineModel<R>& am, const Zonotope<R>& z);
         
     template<class R> std::ostream& operator<<(std::ostream& os, const Zonotope<R>& z);

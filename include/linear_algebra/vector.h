@@ -220,6 +220,7 @@ namespace Ariadne {
   template<class R1, class R2> bool operator!=(const Vector<R1>& v1, const Vector<R2>& v2);
   template<class R> bool operator==(const Vector<R>& v, int n);
   template<class R> tribool operator>=(const Vector< Interval<R> >& iv, int n);
+  template<class R> tribool operator<=(const Vector< Interval<R> >& iv, int n);
 
 
   template<class R> std::ostream& operator<<(std::ostream& os, const Vector<R>& v);
@@ -246,5 +247,6 @@ namespace Ariadne {
 
 #include "vector_slice.h"
 #include "vector.inline.h"
+#include "vector.template.h"
 
 #endif /* ARIADNE_VECTOR_H */

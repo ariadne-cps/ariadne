@@ -70,9 +70,19 @@ template<class R>
 SparseDifferentialVector<typename AffineFunction<R>::AA> 
 AffineFunction<R>::expansion(const Vector<AA>& x, const smoothness_type& s) const
 {
-  throw NotImplemented(__PRETTY_FUNCTION__);
+  const Vector<AA> b=Vector<AA>(this->_b);
+  const Matrix<AA> A=Matrix<AA>(this->_a);
+  Vector<AA> c=b+A*x;
+  SparseDifferentialVector<AA> result(this->result_size(),this->argument_size(),s);
+  for(uint i=0; i!=this->result_size(); ++i) {
+    result[i].value()=c[i];
+    for(uint j=0; j!=this->argument_size(); ++j) {
+      result[i].gradient(j)=A[i][j];
+    }
+  }
+  return result;
 }
-
+  
 template<class R>
 std::ostream& 
 AffineFunction<R>::write(std::ostream& os) const

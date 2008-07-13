@@ -42,6 +42,7 @@ FUNCTION_TESTS = \
 	test_taylor_series \
 	test_taylor_variable \
 	test_taylor_derivative \
+	test_sparse_differential \
 	test_taylor_model \
 	test_polynomial_function
 
@@ -71,6 +72,7 @@ EVALUATION_TESTS = \
 	test_affine_integrator \
 	test_map_evolver \
 	test_vector_field_evolver \
+	test_impact_system_evolver \
 	test_hybrid_evolver \
 	test_discretiser \
 	test_discrete_evolver \
@@ -164,6 +166,7 @@ test_integrator_SOURCES=test_integrator.cc
 test_affine_integrator_SOURCES=test_affine_integrator.cc
 test_map_evolver_SOURCES=test_map_evolver.cc
 test_vector_field_evolver_SOURCES=test_vector_field_evolver.cc
+test_impact_system_evolver_SOURCES=test_impact_system_evolver.cc
 test_hybrid_evolver_SOURCES=test_hybrid_evolver.cc
 test_reachability_analyser_SOURCES=test_reachability_analyser.cc
 

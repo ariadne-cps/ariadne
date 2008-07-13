@@ -81,6 +81,8 @@ namespace Ariadne {
       template<class RR> explicit Matrix(const size_type& nr, const size_type& nc, 
                                          const RR* ptr, const size_type& ri, const size_type& ci=1u);
 
+      /*! \brief Convert from a matrix with a different numerical type. */
+      template<class RR> Matrix(const Matrix<RR>& A);
       /*! \brief Convert from a matrix expression. */
       template<class E> Matrix(const MatrixExpression<E>& A);
         
@@ -107,10 +109,14 @@ namespace Ariadne {
       /*! \brief Resize the matrix. */
       void resize(const size_type& nr, const size_type nc);
       
-      /*! \brief The number of rows of the matrix. */
+      /*! \brief The number of rows of the matrix. (Deprecated) \deprecated */
       size_type number_of_rows() const;
-      /*! \brief The number of columns of the matrix. */
+      /*! \brief The number of columns of the matrix. (Deprecated) \deprecated */
       size_type number_of_columns() const;
+      /*! \brief The number of rows of the matrix. */
+      size_type row_size() const;
+      /*! \brief The number of columns of the matrix. */
+      size_type column_size() const;
       /*! \brief A two-element array giving the number of rows and number of columns of the matrix. */
       array<size_type,2u> size() const;
 

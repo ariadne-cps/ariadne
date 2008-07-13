@@ -228,6 +228,7 @@ operator<<(epsstream& eps, const ImageSet<R>& ds)
   } else {
     throw NotImplemented("Cannot draw image set which is not a box.");
   }
+  return eps;
 }
 
 template<class R> 

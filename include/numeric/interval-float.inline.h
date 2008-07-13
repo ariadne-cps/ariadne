@@ -37,6 +37,10 @@ Interval< Float<T> >::Interval()
   : _lower(0), _upper(0) { }
 
 template<class T> inline 
+Interval< Float<T> >::Interval(const ApproximateFloat<T>& x)
+  : _lower(x._value), _upper(x._value) { }
+
+template<class T> inline 
 Interval< Float<T> >::Interval(const R& x)
   : _lower(x), _upper(x) { }
 

@@ -114,6 +114,7 @@ class DifferentialVectorConcept {
     Vector<X>& vector_ref;
     const Vector<X>& vector;
     Matrix<X>& matrix_ref;
+    const Matrix<X>& matrix;
     
     const X scalar;
     const double dbl;
@@ -126,6 +127,14 @@ class DifferentialVectorConcept {
     typedef typename DV::value_type D;
     typedef typename D::value_type X;
 
+    differential_vector_ref += vector;
+    differential_vector_ref -= vector;
+      
+    differential_vector_ref = differential_vector+vector;
+    differential_vector_ref = differential_vector-vector;
+    differential_vector_ref = matrix*differential_vector;
+
+    project(differential_vector,slice);
     differential_vector_ref = project(differential_vector,slice);
     project(differential_vector_ref,slice) = differential_vector;
     differential_vector_ref = join(differential_vector,differential);

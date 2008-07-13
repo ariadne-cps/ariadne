@@ -25,10 +25,13 @@
 #define ARIADNE_APPROXIMATE_TAYLOR_MODEL_H
 
 #include <iosfwd>
+#include "base/pointer.h"
 #include "numeric/float64.h"
 #include "linear_algebra/vector.h"
 #include "differentiation/sparse_differential.h"
 #include "function/function_model_concept.h"
+
+
 
 namespace Ariadne {
 
@@ -48,10 +51,11 @@ template<class R> ApproximateTaylorModel<R> operator+(const ApproximateTaylorMod
 template<class R> ApproximateTaylorModel<R> operator-(const ApproximateTaylorModel<R>&, const ApproximateTaylorModel<R>&);
 
 
-template<class R> ApproximateTaylorModel<R> project(const ApproximateTaylorModel<R>&, Range rng);
+template<class R> ApproximateTaylorModel<R> project(const ApproximateTaylorModel<R>&, Slice slc);
 template<class R> ApproximateTaylorModel<R> recentre(const ApproximateTaylorModel<R>&, const Vector< Interval<R> >& bx, const Vector<R>& pt);
 template<class R> ApproximateTaylorModel<R> restrict(const ApproximateTaylorModel<R>&, const Vector< Interval<R> >& bx);
 template<class R> ApproximateTaylorModel<R> truncate(const ApproximateTaylorModel<R>&, const Vector<R>&, uint, uint);
+template<class R> std::pair<Vector<Interval<R> >, Matrix<R> > affine(const ApproximateTaylorModel<R>&);
 
 template<class R> ApproximateTaylorModel<R> join(const ApproximateTaylorModel<R>& f, const ApproximateTaylorModel<R>& g);
 
@@ -81,6 +85,8 @@ class ApproximateTaylorModel {
   //! \brief The type used to represent real numbers.
   typedef R real_type;
   
+  //! \brief Destructor.
+  ~ApproximateTaylorModel<R>();
   //! \brief Default constructor constructs a Taylor model of order zero with no arguments and no result variables. 
   ApproximateTaylorModel<R>();
   //! \brief The zero Taylor model in \a as variables with size \a rs image, order \a o and smoothness \a s, defined on the whole space with centre at the origin. 
@@ -99,10 +105,21 @@ class ApproximateTaylorModel {
   ApproximateTaylorModel<R>(const Vector<I>& domain, const FunctionInterface<R>& function,
                             ushort order, ushort smoothness);
   
+  //! \brief Construct from a domain, centre, a function, a maximum order of the polynomial expansion and a dummy \a smoothness parameter. 
+  ApproximateTaylorModel<R>(const Vector<I>& domain, const Vector<A>& centre,
+                            const FunctionInterface<R>& function,
+                            ushort order, ushort smoothness);
+  
   //! \brief Construct from a domain, centre, an order and a function. 
   ApproximateTaylorModel<R>(const Vector<I>& domain, const Vector<A>& centre,
                             ushort order, ushort smoothness,
                             const FunctionInterface<R>& function);
+  
+  //! \brief Copy constructor.
+  ApproximateTaylorModel<R>(const ApproximateTaylorModel<R>& atm);
+  
+  //! \brief Copy assignment operator.
+  ApproximateTaylorModel<R>& operator=(const ApproximateTaylorModel<R>& atm);
   
   
   // Data access
@@ -149,6 +166,8 @@ class ApproximateTaylorModel {
   static ApproximateTaylorModel<R> constant(uint as, const R& c);
   //!
   static ApproximateTaylorModel<R> identity(const Vector<I>& d, uint o=1u);
+  //!
+  static ApproximateTaylorModel<R> identity(uint s, uint o=1u);
  
   //! \brief Write to an output stream. 
   std::ostream& write(std::ostream& os) const;
@@ -166,7 +185,7 @@ class ApproximateTaylorModel {
   friend ApproximateTaylorModel<R> truncate(const ApproximateTaylorModel<R>& p, const Rectangle& bb, uint d, uint s);
 #endif
  private:
-  static void instantiate();
+  static void _instantiate();
   template<class X> array< array<X> > _powers(const Vector<X>&) const;
   void _compute_jacobian() const;
   void _set_argument_size(uint n);
@@ -180,6 +199,7 @@ class ApproximateTaylorModel {
   uint _smoothness; 
   // The derivatives of the model
   SparseDifferentialVector<A> _expansion;
+  //copy_ptr< SparseDifferentialVector<A> > _expansion_ptr;
  private:
   BOOST_CONCEPT_ASSERT((FunctionModelConcept< ApproximateTaylorModel<R> >));
 };

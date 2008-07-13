@@ -47,4 +47,27 @@ namespace Ariadne {
 }
 #endif
 
+namespace Ariadne {
+
+  template<class T> 
+  class copy_ptr
+  {
+   public:
+    ~copy_ptr() { delete _ptr; }
+    copy_ptr() : _ptr(new T()) { }
+    copy_ptr(T* t) : _ptr(t) { }
+    copy_ptr(const copy_ptr<T>& p) : _ptr(new T(*p._ptr)) { }
+    copy_ptr& operator=(const copy_ptr<T>& p) { if(this->_ptr!=p._ptr) { *this->_ptr=*p._ptr; } return *this; }
+    
+    const T* operator->() const { return this->_ptr; }
+    T* operator->() { return this->_ptr; }
+    
+    const T& operator*() const { return *this->_ptr; }
+    T& operator*() { return *this->_ptr; }
+   private:
+    T* _ptr;
+  };
+
+}
+
 #endif /* ARIADNE_POINTER_H */

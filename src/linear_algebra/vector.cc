@@ -26,7 +26,6 @@
 #include "numeric/interval.h"
 
 #include "linear_algebra/vector.h"
-#include "linear_algebra/vector.code.h"
 
 namespace Ariadne {
   

@@ -474,7 +474,21 @@ operator>=(const Vector< Interval<R> >& v, int n)
 }
 
 
-
+template<class R> inline 
+tribool
+operator<=(const Vector< Interval<R> >& v, int n) 
+{
+  tribool result=true;
+  for(size_type i=0; i!=v.size(); ++i) {
+    if(v[i].upper()>n) {
+      return false;
+    }
+    if(v[i].lower()>=n) {
+      result=indeterminate;
+    }
+  }
+  return result;
+}
 
 
 template<class R> inline
@@ -707,6 +721,22 @@ concatenate(const Vector<R>& v, const R& s)
   }
   result(v.size())=s;
   return result;
+}
+
+
+template<class R> inline 
+Vector<R> 
+join(const Vector<R>& v1, const Vector<R>& v2) 
+{
+  return concatenate(v1,v2);
+}
+
+
+template<class R> inline 
+Vector<R> 
+join(const Vector<R>& v, const R& s) 
+{
+  return concatenate(v,s);
 }
 
 

@@ -284,7 +284,7 @@ TaylorModel<R>::evaluate(const Vector<I>& x) const
       result[i]+=this->_centre_derivatives[i][j]*wa;
     }
   }
-  for(MultiIndex j(this->argument_size(),this->order()); j.degree()<=this->order(); ++j) {
+  for(MultiIndex j=MultiIndex::first(this->argument_size(),this->order()); j.degree()<=this->order(); ++j) {
     I wa=1;
     for(size_type k=0; k!=j.number_of_variables(); ++k) {
       wa*=pow(w[k],int(j[k]));
@@ -570,7 +570,7 @@ TaylorModel<R>::jacobian(const Vector<I>& x) const
         }
       }
     }
-    for(MultiIndex m(this->argument_size(),this->order()); m.degree()<=this->order(); ++m) {
+    for(MultiIndex m=MultiIndex::first(this->argument_size(),this->order()); m.degree()<=this->order(); ++m) {
       MultiIndex n=m;
       int c=n[j];
       if(c!=0) {

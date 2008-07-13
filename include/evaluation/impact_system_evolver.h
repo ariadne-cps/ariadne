@@ -58,6 +58,7 @@
 namespace Ariadne {
   
     template<class R> class ImpactSystem;
+    template<class R> class ApproximateTaylorModel;
 
     template<class Sys, class ES> class Evolver;
  
@@ -69,10 +70,14 @@ namespace Ariadne {
       : public EvolverBase< ImpactSystem<typename ES::real_type>, ES>
     {
       typedef typename ES::real_type R;
+      typedef typename traits<R>::approximate_arithmetic_type A;
+      typedef typename traits<R>::interval_type I;
       typedef ImpactSystem<R> Sys;
       typedef typename Sys::time_type T;
+      typedef Vector<I> IVec;
       typedef Box<R> Bx;
       typedef ListSet<ES> ESL;
+      typedef ApproximateTaylorModel<R> ATM;
       typedef TimedSet<T,ES> TES;
       typedef ListSet<TES> TESL;
       typedef VectorField<R> VF;
@@ -94,6 +99,9 @@ namespace Ariadne {
       /*! \brief Compute an approximation to the evolution set under upper semantics. */
       ESL reach(const Sys& system, const ES& initial_set, const T& time) const {
         ESL final; ESL intermediate; this->_evolution(final,intermediate,system,initial_set,time,upper_semantics,true); return intermediate; }
+     public:
+      void evolution(ESL& final_sets, TESL& reach_sets, TESL& intermediate_sets, const Sys& system, const ES& initial_set, const T& time) const;
+      void evolution(ESL& final_sets, ESL& reach_sets, ESL& intermediate_sets, const Sys& system, const ES& initial_set, const T& time) const;
      private:
       // Helper functions for accessing parameters
       uint verbosity() const { 
@@ -104,18 +112,22 @@ namespace Ariadne {
         return this->_parameters->maximum_enclosure_radius(); }
      private:
       // Services provided by other classes
-      std::pair<T,Bx> flow_bounds(const VF& vf, const Bx& bx) const {
-        return this->_integrator->flow_bounds(vf,bx,this->maximum_step_size()); }
-      std::pair<T,Bx> flow_bounds(const VF& vf, const Bx& bx, const T& h) const {
-        return this->_integrator->flow_bounds(vf,bx,h); }
-      TES integration_step(const VF& vf, const TES& ts, const T& h, const Bx& bb) const { return ts; }
-      ES reachability_step(const VF& vf, const ES& s, const T& h, const Bx& bb) const { return s; }
+      std::pair<T,IVec> flow_bounds(const FN& vf, const IVec& bx) const {
+        std::pair<T,Bx> bounds=this->_integrator->flow_bounds(VF(vf),Bx(bx),this->maximum_step_size()); 
+        return std::make_pair(bounds.first,bounds.second.position_vectors()); }
+      std::pair<T,IVec> flow_bounds(const VF& vf, const IVec& bx, const T& h) const {
+        std::pair<T,Bx> bounds=this->_integrator->flow_bounds(VF(vf),Bx(bx),h); 
+        return std::make_pair(bounds.first,bounds.second.position_vectors()); }
       R radius(const ES& s) const {
         return s.radius(); }
-      Bx bounding_box(const ES& s) const {
-        return s.bounding_box(); }
+      IVec bounding_box(const ES& s) const {
+        return s.bounding_box().position_vectors(); }
       ESL subdivide(const ES& s) const {
         return this->_subdivider->subdivide(s,this->maximum_enclosure_radius()); }
+     private:
+      // Helper functions for converting between sets and models.
+      ApproximateTaylorModel<R> model(const ES& s, ushort d) const;
+      ES set(const ApproximateTaylorModel<R>& s) const;
      private:
       // Helper functions for timed sets
       R radius(const TES& tes) const { return tes.set().radius(); }

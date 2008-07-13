@@ -32,9 +32,6 @@
 #include "numeric/interval.h"
 #include "linear_algebra/vector.h"
 
-// The following include is not necessary,
-// but allows testing without rebuilding the entire library.
-#include "linear_algebra/vector.code.h"
 
 using namespace std;
 using namespace Ariadne;

@@ -72,6 +72,7 @@ namespace Ariadne {
       typedef Sys System;
       typedef T Time;
      private:
+     public:
       boost::shared_ptr< EvolutionParameters<R> > _parameters;
       boost::shared_ptr< ApproximatorInterface<Aprx,ES> > _approximator;
      public:
@@ -110,13 +111,15 @@ namespace Ariadne {
       typedef BasicSet BS;
       typedef CoverListSet CLS;
       typedef PartitionListSet PLS;
+      typedef Grid<R> Gr;
 
+      Gr _grid(uint d) const { return this->_parameters->grid(d); }
       ES _over_approximation(const BS& bs) const {
         return this->_approximator->enclosure_set(bs); }
       CLS _lower_approximation(const ESL& esl) const {
          CLS result; for(size_type i=0; i!=esl.size(); ++i) { result.adjoin(this->_approximator->bounding_box(esl[i])); } return result; }
       PLS _outer_approximation(const ESL& esl) const {
-         return this->_approximator->outer_approximation(esl); }
+        return this->_approximator->outer_approximation(esl,this->_grid(esl.dimension())); }
       std::pair<CLS,CLS> _lower_approximation(const std::pair<ESL,ESL>& esl) const {
         CLS first=this->_lower_approximation(esl.first); CLS second=this->_lower_approximation(esl.second); return std::make_pair(first,second); }
       std::pair<PLS,PLS> _outer_approximation(const std::pair<ESL,ESL>& esl) const {

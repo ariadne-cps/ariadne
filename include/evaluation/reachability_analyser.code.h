@@ -200,18 +200,29 @@ ReachabilityAnalyser<TransitionSystemInterface<T,Aprx>,Aprx>::
 chain_reach(const System& system, 
             const Set& initial_set) const
 {
+  uint verbosity=0;
   Bx bb=this->bounding_domain(system);
+  ARIADNE_LOG(5,"bounding_box="<<bb);
   Gr grid=this->grid(system.state_space());
   T time=this->lock_to_grid_time();
   GMS* result=new GMS(grid,bb);
   GB bounds=result->bounds();
+  ARIADNE_LOG(5,"initial_set="<<initial_set);
   GCLS found=this->_outer_approximation(initial_set);
+  ARIADNE_LOG(5,"initial_size="<<found.size());
   found=this->_upper_reach(system,found,time);
+  ARIADNE_LOG(5,"reach_size="<<found.size());
   while(!found.empty()) {
     result->adjoin(found);
+    ARIADNE_LOG(5,"result_size="<<found.size());
     found=this->_upper_evolve(system,found,time);
+    ARIADNE_LOG(5,"found_size="<<found.size());
+    found.unique_sort();
+    ARIADNE_LOG(5,"unique_size="<<found.size());
     found.remove(*result);
+    ARIADNE_LOG(5,"new_size="<<found.size());
     found.restrict(bounds);
+    ARIADNE_LOG(5,"bounded_new_size="<<found.size());
   }
   return result;
 }

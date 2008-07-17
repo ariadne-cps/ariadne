@@ -62,7 +62,7 @@ To compile %Ariadne, you will need:
 You will also need the following libraries:
   - The GNU Multiple-Precision Library (version 4.1.2 or higher)  <a href="http://www.swox.com/gmp/">http://www.swox.com/gmp/</a>.
   - MPFR Library (version 2.2.1 or higher) <a href="http://www.mpfr.org/">http://www.mpfr.org/</a>.
-  - The Boost C++ Libraries (version 1.33.1) <a href="http://www.boost.org/">http://www.boost.org/</a>.
+  - The Boost C++ Libraries (version 1.35.0) <a href="http://www.boost.org/">http://www.boost.org/</a>.
   - TBLAS (version 0.4.1 or higher) <a href="http://homepages.cwi.nl/~collins/software/">http://homepages.cwi.nl/~collins/software/</a>.
   - TLAPACK (version 0.4.1 or higher) <a href="http://homepages.cwi.nl/~collins/software/">http://homepages.cwi.nl/~collins/software/</a>.
 
@@ -103,11 +103,11 @@ These defaults can be changed by using the --prefix flag to ./configure, as in
   ./configure --prefix=$HOME
 \endcode
 
-By default, the C++ library is compiled with both Float64 and FloatMP support, and the Python interface is compiled to use Float64 as the default floating-point type. The flags \c --disable-float64 or \c --disable-floatmp can be used to disable support for Float64 or FloatMP, respectively. If Float64 support is disabled, then the Python interface is automatically compiled with FloatMP support. To compile the Python interface with FloatMP support, use \c --enable-python=FloatMP.
+By default, the C++ library is compiled with Float64 support and without FloatMP support, and the Python interface is compiled to use Float64 as the default floating-point type. The flags \c --disable-float64 or \c --enable-floatmp can be used to disable support for Float64 or enable support for FloatMP, respectively. If Float64 support is disabled, then the Python interface is automatically compiled with FloatMP support. To compile the Python interface with FloatMP support, use \c --enable-python=FloatMP.
 
-For example, to configure with only 64-bit floating-point support enabled (which should result in the shortest compile times), use
+For example, to configure with multiple-precision floating-point support enabled, use
 \code 
-  ./configure --disable-floatmp
+  ./configure --enable-floatmp
 \endcode
 
 To configure using the multiple-precision floating point type in the Python interface, and install in the user directory, use

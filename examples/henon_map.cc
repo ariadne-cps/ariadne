@@ -36,6 +36,7 @@
 #include "geometry/zonotope.h"
 #include "evaluation/evolution_parameters.h"
 #include "evaluation/map_evolver.h"
+#include "evaluation/discretiser.h"
 #include "evaluation/reachability_analyser.h"
 #include "evaluation/standard_approximator.h"
 #include "output/epsstream.h"
@@ -58,18 +59,24 @@ henon_chainreach()
 {
   typedef Zonotope<R> ES;
 
-  uint steps = 5;
+  Integer steps = 5;
   
+  double bounding_domain_size=4.0;
   double maximum_enclosure_radius=0.25;
   double grid_length=0.0625;
-  EvolutionParameters<R> evolution_parameters; evolution_parameters.set_maximum_enclosure_radius(maximum_enclosure_radius);
+  EvolutionParameters<R> evolution_parameters; 
+  evolution_parameters.set_maximum_enclosure_radius(maximum_enclosure_radius);
+  evolution_parameters.set_bounding_domain_size(bounding_domain_size);
   evolution_parameters.set_grid_length(grid_length);
+  evolution_parameters.set_lock_to_grid_steps(1);
+  cout << "evolution_parameters = " << evolution_parameters << endl;
 
   Evolver<Map<R>,ES> evolver(evolution_parameters);
   StandardApproximator<ES> approximator;
+  Discretiser< Map<R>, GridApproximationScheme<R>, ES > discretiser(evolution_parameters,evolver,approximator);
   ReachabilityAnalyser< Map<R>, GridApproximationScheme<R> > analyser(evolution_parameters,evolver,approximator);
 
-  Point<R> params=Point<R>("(1.5,-0.375)");
+  Point<R> params=Point<R>("(1.5,0.375)");
   R a=params[0];
   R b=params[1];
 
@@ -89,6 +96,13 @@ henon_chainreach()
   ListSet< Zonotope<R> > reach=evolver.reach(henon,initial_zonotope,steps,upper_semantics);
   ListSet< Zonotope<R> > evolve=evolver.evolve(henon,initial_zonotope,steps,upper_semantics);
 
+  //Grid<R> grid=evolution_parameters.grid(2);
+  //GridCellListSet<R> initial_grid_cells(grid);
+  //initial_grid_cells.adjoin_outer_approximation(initial_box);
+  GridCellListSet<R> grid_initial=discretiser.upper_reach(henon,initial_box,Integer(0));
+  GridCellListSet<R> grid_reach=discretiser.upper_reach(henon,initial_box,steps);
+  GridCellListSet<R> grid_evolve=discretiser.upper_evolve(henon,initial_box,steps);
+
 
   ImageSet<R> initial_set(initial_box);
   ConstraintSet<R> bounding_set(bounding_box);
@@ -97,11 +111,14 @@ henon_chainreach()
   GridMaskSet<R> grid_chain_reach=*dynamic_cast<GridMaskSet<R>*>(chain_reach);
   PartitionTreeSet<R> tree_chain_reach=PartitionTreeSet<R>(grid_chain_reach);
 
-  cout << grid_chain_reach <<endl;
-  cout << tree_chain_reach <<endl;
+  //cout << grid_chain_reach <<endl;
+  //cout << tree_chain_reach <<endl;
   
   cout << "evolve(" << steps << ").size()=" << evolve.size() << endl;
   cout << "reach(" << steps << ").size()=" << reach.size() << endl;
+
+  cout << "grid_evolve(" << steps << ").size()=" << grid_evolve.size() << endl;
+  cout << "grid_reach(" << steps << ").size()=" << grid_reach.size() << endl;
 
   cout << "grid_chain_reach.size()=" << grid_chain_reach.size() << endl;
   cout << "tree_chain_reach.size()=" << tree_chain_reach.size() << "  " << flush;
@@ -116,7 +133,15 @@ henon_chainreach()
   eps << fill_colour(blue) << initial_zonotope;
   eps.close();
 
-  eps.open("henon_map_chainreach.eps",graphics_bounding_box);
+  eps.open("henon_map-grid_reach.eps",graphics_bounding_box);
+  eps << fill_colour(white) << bounding_box;
+  eps << line_style(true);
+  eps << fill_colour(green) << grid_reach;
+  eps << fill_colour(yellow) << grid_evolve;
+  eps << fill_colour(blue) << grid_initial;
+  eps.close();
+
+  eps.open("henon_map-chainreach.eps",graphics_bounding_box);
   eps << fill_colour(white) << bounding_box;
   eps << line_style(false);
   eps << fill_colour(green) << grid_chain_reach;

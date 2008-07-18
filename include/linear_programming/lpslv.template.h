@@ -172,7 +172,11 @@ namespace Ariadne {
       }
       
       while(j!=n) {
-        assert(--recursions);
+        --recursions;
+        if(recursions==0) {
+          std::cerr << "Error in lpslv(...) with A="<<Matrix<R>(m,n,A,rincA,cincA)<<", b="<<Vector<R>(m,B,incB)<<", c="<<Vector<R>(n,C,incC)<<std::endl;
+          throw std::runtime_error("Unknown error in lpslv");
+        }
         
         // compute variable to exit basis
         i=m;

@@ -51,7 +51,7 @@ Grid<R>::~Grid()
 
 template<class R> 
 Grid<R>::Grid()
-  : _data()
+  : _data(new Data())
 {
 }
 

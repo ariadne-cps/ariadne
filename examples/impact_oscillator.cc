@@ -129,9 +129,16 @@ impact_oscillator()
   // Give the evolution time
   Rational time=0.5;
 
-  ListSet<ES> reach,evolve;
+  Vector<ApproximateFloat64> initial_state("[1.5,0.5,0.5]");
+  cout << dynamic->evaluate(initial_state) << endl;
+  cout << dynamic->jacobian(initial_state) << endl;
+  cout << dynamic->expansion(initial_state,6) << endl;
+
+
+  ListSet<ES> reach,evolve,intermediate;
   cout << "Computing reachable set...\n" << flush;
-  make_lpair(reach,evolve)=evolver.reach_evolve(impact_oscillator_ref,initial_set,time,upper_semantics);
+  //make_lpair(reach,evolve)=evolver.reach_evolve(impact_oscillator_ref,initial_set,time,upper_semantics);
+  evolver.evolution(evolve,reach,intermediate,impact_oscillator,initial_set,time);
   cout << "  done." << flush;
   cout << reach <<endl;
   cout << evolve <<endl;

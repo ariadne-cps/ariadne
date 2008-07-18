@@ -126,7 +126,7 @@ void export_approximate_taylor_model()
   def("compose",(Model(*)(const Model&,const Model&)) &compose);
   def("inverse",(Model(*)(const Model&)) &inverse);
   def("implicit",(Model(*)(const Model&)) &implicit);
-  def("derivative",(Model(*)(const Model&, size_type)) &derivative);
+  //def("derivative",(Model(*)(const Model&, size_type)) &derivative);
   def("flow",(Model(*)(const Model&)) &flow);
   //def("integrate",(Model(*)(const Model&,const R&)) &integrate);
   def("hitting",(Model(*)(const Model&,const Model&)) &hitting);

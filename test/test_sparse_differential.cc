@@ -31,6 +31,7 @@
 #include "test_float.h"
 #include "numeric/rational.h"
 #include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
 #include "differentiation/sparse_differential.h"
 
 #include "test.h"

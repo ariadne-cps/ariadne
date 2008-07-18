@@ -38,6 +38,7 @@
 #include "evaluation/standard_subdivider.h"
 #include "evaluation/orthogonal_reducer.h"
 #include "evaluation/standard_approximator.h"
+#include "evaluation/fast_approximator.h"
 #include "evaluation/reachability_analyser.h"
 #include "output/epsstream.h"
 #include "output/logging.h"
@@ -69,14 +70,17 @@ lorenz_attractor()
   int subdivisions=128;
   evolution_parameters.set_maximum_enclosure_radius(maximum_enclosure_radius);
   evolution_parameters.set_grid_length(grid_length);
+  evolution_parameters.set_lock_to_grid_time(0.25);
+  evolution_parameters.set_maximum_step_size(0.25);
   
   StandardIntegrator<ES> integrator;
   StandardSubdivider<ES> subdivider;
   OrthogonalReducer<ES> reducer;
   Evolver<VectorField<R>,ES> evolver(evolution_parameters,integrator,subdivider,reducer);
 
-  StandardApproximator<ES> approximator;
-
+  //StandardApproximator<ES> approximator;
+  FastApproximator<ES> approximator;
+  
   set_applicator_verbosity(0);
   
   ReachabilityAnalyser< VectorField<R>, GridApproximationScheme<R> > analyser(evolution_parameters,evolver,approximator);
@@ -111,16 +115,19 @@ lorenz_attractor()
   ListSet< Zonotope<R> > reach_set=evolver.reach(lorenz,initial_zonotope,time);
   cout << "  done" << endl;
 
-  /*
+  
   cout << "Computing attractor..." << flush;
   SetInterface< Box<R> >* cr=analyser.chain_reach(lorenz,initial_set);
   cout << "  done" << endl;
   GridMaskSet<R> grid_chain_reach_set=*dynamic_cast<GridMaskSet<R>*>(cr);
-  */
+  PartitionTreeSet<R> tree_chain_reach_set(grid_chain_reach_set);
+   
 
+  /*
   cout << "Skipping computation of attractor..." << flush;
   GridMaskSet<R> grid_chain_reach_set(Grid<R>(3,0.125),bounding_box);
   PartitionTreeSet<R> tree_chain_reach_set(grid_chain_reach_set);
+  */
 
   cout << grid_chain_reach_set <<endl;
   cout << tree_chain_reach_set <<endl;

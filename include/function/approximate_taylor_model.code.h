@@ -639,8 +639,6 @@ flow(const ApproximateTaylorModel<R>& vf)
   Vector<A> vfc=vf.centre();
   SparseDifferentialVector<A> x=flow(vf.expansion(),vfc,ot,ox);
 
-  //std::cerr << "x=" << x << std::endl;
-
   /*
   uint n=vf.result_size();
   SparseDifferentialVector<A> x(n,n+1,ox);

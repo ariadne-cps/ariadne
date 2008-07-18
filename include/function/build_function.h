@@ -62,18 +62,16 @@
     } \
     virtual TaylorDerivative<X> derivative(const Vector<X>& x, const smoothness_type& s) const { \
       const Vector<X>& p=this->_p; \
-      TaylorDerivative<X> dx(as,as,s); \
+      TaylorDerivative<X> dx=TaylorDerivative<X>::variable(x,s); \
       TaylorDerivative<X> dr(rs,as,s); \
-      for(uint i=0; i!=as; ++i) { dx[i]=x[i]; } \
       f(dr,dx,p);      \
       return dr; \
     } \
     virtual SparseDifferentialVector<A> expansion(const Vector<A>& x, const smoothness_type& s) const { \
       const Vector<A>& p=this->_p; \
-      SparseDifferentialVector<A> dx(as,as,s); \
+      SparseDifferentialVector<A> dx=SparseDifferentialVector<A>::variable(as,as,s,x); \
       SparseDifferentialVector<A> dr(rs,as,s); \
-      for(uint i=0; i!=as; ++i) { dx[i]=x[i]; } \
-      f(dr,dx,p);      \
+      f(dr,dx,p);                                       \
       return dr; \
     } \
     size_type result_size() const { return rs; } \

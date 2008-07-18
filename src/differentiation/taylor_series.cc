@@ -37,12 +37,18 @@ namespace Ariadne {
     template class TaylorSeries<Rational>;
 
 #ifdef ENABLE_FLOAT64
+    template class ArithmeticSeries<ApproximateFloat64>;
+    template class TranscendentalSeries<ApproximateFloat64>;
+    template class TaylorSeries<ApproximateFloat64>;
     template class ArithmeticSeries<Interval64>;
     template class TranscendentalSeries<Interval64>;
     template class TaylorSeries<Interval64>;
 #endif
     
 #ifdef ENABLE_FLOATMP
+    template class ArithmeticSeries<ApproximateFloatMP>;
+    template class TranscendentalSeries<ApproximateFloatMP>;
+    template class TaylorSeries<ApproximateFloatMP>;
     template class ArithmeticSeries<IntervalMP>;
     template class TranscendentalSeries<IntervalMP>;
     template class TaylorSeries<IntervalMP>;

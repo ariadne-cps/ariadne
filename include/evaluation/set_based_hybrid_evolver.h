@@ -119,6 +119,7 @@ namespace Ariadne {
      protected: 
       /*! \brief Compute a lower approximation to the evolution up to time \a time using lower semantics. */
       virtual void _evolution(HybridEnclosureSetList& final,
+                              HybridEnclosureSetList& reachable,
                               HybridEnclosureSetList& intermediate,
                               const Automaton& automaton,
                               const HybridEnclosureSet& initial,
@@ -187,7 +188,7 @@ namespace Ariadne {
       Q _initial_activation_time(const VF&, const CS&, const ES&, const Q&, const Bx&, const Semantics) const;
       Q _final_activation_time(const VF&, const CS&, const ES&, const Q&, const Bx&, const Semantics) const;
       tuple<Q,ES> _saltation_map(const VF&, const VF&, const Mp&, const CS&, const ES&, const Q&, const Q&, const Bx&, const Semantics) const;
-      void _step(HESL& evolve, HESL& reach, THESL& working, const HA& ha, const Q& time, const Semantics semantics) const;
+      void _step(HESL& evolve, HESL& reach, HESL& intermediate, THESL& working, const HA& ha, const Q& time, const Semantics semantics) const;
      private:
       // Helper functions for accessing parameters
       HS domain(const HSp& s) const { return this->_parameters->hybrid_bounding_domain(s); }

@@ -21,12 +21,14 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file vector.h
- *  \brief Vector types and vector operations.
+/*! \file slice.h
+ *  \brief Slicing.
   */
 
 #ifndef ARIADNE_SLICE_H
 #define ARIADNE_SLICE_H 
+
+#include "base/types.h"
 
 namespace Ariadne {
   

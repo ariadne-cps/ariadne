@@ -24,7 +24,11 @@
 #include "python/float.h"
 
 #include "linear_algebra/vector.h"
+#include "linear_algebra/matrix.h"
+#include "differentiation/taylor_derivative.h"
+#include "differentiation/sparse_differential.h"
 #include "function/taylor_model.h"
+#include "function/approximate_taylor_model.h"
 #include "function/function_interface.h"
 #include "geometry/box.h"
 
@@ -50,37 +54,84 @@ sub(const TaylorModel<R>& tm1, const TaylorModel<R>& tm2) {
 template<class R>
 void export_taylor_model() 
 {
+  typedef TaylorModel<R> Model;
   typedef typename traits<R>::arithmetic_type A;
   typedef typename traits<R>::interval_type I;
 
-  class_< TaylorModel<R> > taylor_model_class("TaylorModel",init< Vector<I>, Vector<R>, const FunctionInterface<R>&, smoothness_type, smoothness_type>());
-  taylor_model_class.def(init< size_type, size_type, smoothness_type, smoothness_type >());
-  taylor_model_class.def(init< Vector<I>, Vector<R>, TaylorDerivative<I>, TaylorDerivative<I> >());
-  taylor_model_class.def(init< TaylorModel<R> >());
-  taylor_model_class.def("__call__",(Vector<I>(TaylorModel<R>::*)(const Vector<R>&)const) &TaylorModel<R>::evaluate);
-  taylor_model_class.def("__call__",(Vector<I>(TaylorModel<R>::*)(const Vector<I>&)const) &TaylorModel<R>::evaluate);
-  taylor_model_class.def("result_size", &TaylorModel<R>::result_size);
-  taylor_model_class.def("argument_size", &TaylorModel<R>::argument_size);
-  taylor_model_class.def("order", &TaylorModel<R>::order);
-  taylor_model_class.def("smoothness", &TaylorModel<R>::smoothness);
-  taylor_model_class.def("domain", &TaylorModel<R>::domain);
-  taylor_model_class.def("centre", &TaylorModel<R>::centre);
-  taylor_model_class.def("range", &TaylorModel<R>::range);
-  //taylor_model_class.def("set",(void(TaylorModel<R>::*)(size_type,const MultiIndex&,const R&)) &TaylorModel<R>::set);
-  //taylor_model_class.def("get",(R(TaylorModel<R>::*)(size_type,const MultiIndex&)const) &TaylorModel<R>::get);
-  taylor_model_class.def("truncate",&TaylorModel<R>::truncate);
-  taylor_model_class.def("evaluate",(Vector<I>(TaylorModel<R>::*)(const Vector<I>&)const) &TaylorModel<R>::evaluate);
-  taylor_model_class.def("jacobian",(Matrix<I>(TaylorModel<R>::*)(const Vector<I>&)const) &TaylorModel<R>::jacobian);
-  taylor_model_class.def("__add__",(TaylorModel<R>(*)(const TaylorModel<R>&,const TaylorModel<R>&)) &Ariadne::operator+<R>);
-  taylor_model_class.def("__sub__",(TaylorModel<R>(*)(const TaylorModel<R>&,const TaylorModel<R>&)) &Ariadne::operator-<R>);
-  taylor_model_class.def(self_ns::str(self));
+  class_< Model > function_model_class("TaylorModel",init< Vector<I>, Vector<R>, const FunctionInterface<R>&, smoothness_type, smoothness_type>());
+  function_model_class.def(init< size_type, size_type, smoothness_type, smoothness_type >());
+  //function_model_class.def(init< Vector<I>, Vector<R>, TaylorDerivative<I>, TaylorDerivative<I> >());
+  function_model_class.def(init< Model >());
+  //function_model_class.def("__call__",(Vector<I>(Model::*)(const Vector<R>&)const) &Model::evaluate);
+  function_model_class.def("__call__",(Vector<I>(Model::*)(const Vector<I>&)const) &Model::evaluate);
+  function_model_class.def("result_size", &Model::result_size);
+  function_model_class.def("argument_size", &Model::argument_size);
+  function_model_class.def("order", &Model::order);
+  function_model_class.def("smoothness", &Model::smoothness);
+  function_model_class.def("domain", &Model::domain);
+  function_model_class.def("centre", &Model::centre);
+  function_model_class.def("range", &Model::range);
+  //function_model_class.def("set",(void(Model::*)(size_type,const MultiIndex&,const R&)) &Model::set);
+  //function_model_class.def("get",(R(Model::*)(size_type,const MultiIndex&)const) &Model::get);
+  function_model_class.def("truncate",&Model::truncate);
+  function_model_class.def("evaluate",(Vector<I>(Model::*)(const Vector<I>&)const) &Model::evaluate);
+  function_model_class.def("jacobian",(Matrix<I>(Model::*)(const Vector<I>&)const) &Model::jacobian);
+  function_model_class.def("__add__",(Model(*)(const Model&,const Model&)) &Ariadne::operator+<R>);
+  function_model_class.def("__sub__",(Model(*)(const Model&,const Model&)) &Ariadne::operator-<R>);
+  function_model_class.def(self_ns::str(self));
  
-  def("evaluate",(Vector<I>(TaylorModel<R>::*)(const Vector<R>&)const) &TaylorModel<R>::evaluate);
-  def("evaluate",(Vector<I>(TaylorModel<R>::*)(const Vector<I>&)const) &TaylorModel<R>::evaluate);
-  def("compose",(TaylorModel<R>(*)(const TaylorModel<R>&,const TaylorModel<R>&)) &compose);
-  def("inverse",(TaylorModel<R>(*)(const TaylorModel<R>&)) &inverse);
-  def("implicit",(TaylorModel<R>(*)(const TaylorModel<R>&)) &implicit);
-  def("derivative",(TaylorModel<R>(*)(const TaylorModel<R>&, size_type)) &derivative);
+  //def("evaluate",(Vector<I>(Model::*)(const Vector<R>&)const) &Model::evaluate);
+  def("evaluate",(Vector<I>(Model::*)(const Vector<I>&)const) &Model::evaluate);
+  def("compose",(Model(*)(const Model&,const Model&)) &compose);
+  def("inverse",(Model(*)(const Model&)) &inverse);
+  def("implicit",(Model(*)(const Model&)) &implicit);
+  def("derivative",(Model(*)(const Model&, size_type)) &derivative);
 }
 
-template void export_taylor_model<FloatPy>();
+template<class R>
+void export_approximate_taylor_model() 
+{
+  typedef ApproximateTaylorModel<R> Model;
+  typedef typename traits<R>::approximate_arithmetic_type A;
+  typedef typename traits<R>::interval_type I;
+
+  class_< Model > function_model_class("ApproximateTaylorModel",init< Vector<I>, Vector<R>, const FunctionInterface<R>&, smoothness_type, smoothness_type>());
+  function_model_class.def(init< size_type, size_type, smoothness_type, smoothness_type >());
+  function_model_class.def(init< Vector<I>, Vector<A>, SparseDifferentialVector<A> >());
+  function_model_class.def(init< Vector<I>, Vector<R>, SparseDifferentialVector<A> >());
+  function_model_class.def(init< Model >());
+  //function_model_class.def("__call__",(Vector<I>(Model::*)(const Vector<R>&)const) &Model::evaluate);
+  function_model_class.def("__call__",(Vector<I>(Model::*)(const Vector<I>&)const) &Model::evaluate);
+  function_model_class.def("result_size", &Model::result_size);
+  function_model_class.def("argument_size", &Model::argument_size);
+  function_model_class.def("order", &Model::order);
+  function_model_class.def("smoothness", &Model::smoothness);
+  function_model_class.def("domain", &Model::domain);
+  function_model_class.def("centre", &Model::centre);
+  function_model_class.def("range", &Model::range);
+  function_model_class.def("expansion", &Model::expansion, return_value_policy<copy_const_reference>());
+  //function_model_class.def("set",(void(Model::*)(size_type,const MultiIndex&,const R&)) &Model::set);
+  //function_model_class.def("get",(R(Model::*)(size_type,const MultiIndex&)const) &Model::get);
+  function_model_class.def("truncate",&Model::truncate);
+  function_model_class.def("evaluate",(Vector<I>(Model::*)(const Vector<I>&)const) &Model::evaluate);
+  function_model_class.def("jacobian",(Matrix<I>(Model::*)(const Vector<I>&)const) &Model::jacobian);
+  function_model_class.def("__add__",(Model(*)(const Model&,const Model&)) &Ariadne::operator+<R>);
+  function_model_class.def("__sub__",(Model(*)(const Model&,const Model&)) &Ariadne::operator-<R>);
+  function_model_class.def(self_ns::str(self));
+ 
+  //def("evaluate",(Vector<I>(Model::*)(const Vector<R>&)const) &Model::evaluate);
+  def("evaluate",(Vector<I>(Model::*)(const Vector<I>&)const) &Model::evaluate);
+  def("project",(Model(*)(const Model&,const Slice&)) &project);
+  def("join",(Model(*)(const Model&,const Model&)) &join);
+  def("compose",(Model(*)(const Model&,const Model&)) &compose);
+  def("inverse",(Model(*)(const Model&)) &inverse);
+  def("implicit",(Model(*)(const Model&)) &implicit);
+  def("derivative",(Model(*)(const Model&, size_type)) &derivative);
+  def("flow",(Model(*)(const Model&)) &flow);
+  //def("integrate",(Model(*)(const Model&,const R&)) &integrate);
+  def("hitting",(Model(*)(const Model&,const Model&)) &hitting);
+  def("solve",(Vector<I>(*)(const Model&,const Vector<R>&)) &solve);
+}
+
+template void export_taylor_model< FloatPy >();
+template void export_approximate_taylor_model< FloatPy >();

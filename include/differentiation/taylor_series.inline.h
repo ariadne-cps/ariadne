@@ -66,6 +66,35 @@ TaylorSeries<X>::operator=(const XX& c)
   return *this;
 }
 
+
+template<class X> inline
+TaylorSeries<X>
+TaylorSeries<X>::zero(smoothness_type d)
+{
+  return TaylorSeries<X>(d);
+}
+
+template<class X> inline
+TaylorSeries<X>
+TaylorSeries<X>::constant(smoothness_type d, const X& c)
+{
+  TaylorSeries<X> result(d);
+  result[0]=c;
+  return result;
+}
+
+template<class X> inline
+TaylorSeries<X>
+TaylorSeries<X>::variable(smoothness_type d, const X& c)
+{
+  TaylorSeries<X> result(d);
+  result[0]=c;
+  if(d>=1) {
+    result[1]=1;
+  }
+  return result;
+}
+
 template<class X> inline
 smoothness_type 
 TaylorSeries<X>::degree() const 

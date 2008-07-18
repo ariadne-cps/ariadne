@@ -89,19 +89,19 @@ namespace Ariadne {
       Evolver(const EvolutionParameters<R>&,const ApplicatorInterface<ES>&, const IntegratorInterface<ES>&, const SatisfierInterface<ES>&, const SubdividerInterface<ES>&, const ReducerInterface<ES>&);
       virtual Evolver<Sys,ES>* clone() const { return new Evolver<Sys,ES>(*this); }
      protected:
-      virtual void _evolution(ESL& final, ESL& intermediate, const Sys& system, const ES& initial, const T& time, Semantics semantics, bool reach) const;
+      virtual void _evolution(ESL& final, ESL& reachable, ESL& intermediate, const Sys& system, const ES& initial, const T& time, Semantics semantics, bool reach) const;
      public:
       using EvolverBase<Sys,ES>::evolve;
       using EvolverBase<Sys,ES>::reach;
       /*! \brief Compute an approximation to the evolution set under upper semantics. */
       ESL evolve(const Sys& system, const ES& initial_set, const T& time) const {
-        ESL final; ESL intermediate; this->_evolution(final,intermediate,system,initial_set,time,upper_semantics,false); return final; }
+        ESL final; ESL reachable; ESL intermediate; this->_evolution(final,reachable,intermediate,system,initial_set,time,upper_semantics,false); return final; }
       /*! \brief Compute an approximation to the evolution set under upper semantics. */
       ESL reach(const Sys& system, const ES& initial_set, const T& time) const {
-        ESL final; ESL intermediate; this->_evolution(final,intermediate,system,initial_set,time,upper_semantics,true); return intermediate; }
+        ESL final; ESL reachable; ESL intermediate; this->_evolution(final,reachable,intermediate,system,initial_set,time,upper_semantics,true); return reachable; }
      public:
-      void evolution(ESL& final_sets, TESL& reach_sets, TESL& intermediate_sets, const Sys& system, const ES& initial_set, const T& time) const;
-      void evolution(ESL& final_sets, ESL& reach_sets, ESL& intermediate_sets, const Sys& system, const ES& initial_set, const T& time) const;
+      void evolution(ESL& final_sets, ESL& reach_sets, ESL& intermediate_sets, const Sys& system, const ES& initial_set, const T& time) const {
+        return this->_evolution(final_sets, reach_sets, intermediate_sets, system, initial_set, time, upper_semantics, true); }
      private:
       // Helper functions for accessing parameters
       uint verbosity() const { 

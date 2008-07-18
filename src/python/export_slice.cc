@@ -1,7 +1,7 @@
 /***************************************************************************
- *            function/function_series.cc
+ *            python/export_slice.cc
  *
- *  Copyright  2007  Pieter Collins
+ *  Copyright  2008  Pieter Collins
  *
  ****************************************************************************/
 
@@ -21,25 +21,29 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include "numeric/float.h"
+#include "linear_algebra/slice.h"
 
-#include "function/function_series.h"
-#include "function/function_series.code.h"
+#include "python/operators.h"
+#include "python/read_array.h"
 
-namespace Ariadne {
-    
-    
-    template class ArithmeticSeries<Rational>;
+using namespace Ariadne;
+using namespace Ariadne::Python;
 
-#ifdef ENABLE_FLOAT64
-    template class ArithmeticSeries<Interval64>;
-    template class TranscendentalSeries<Interval64>;
-#endif
-    
-#ifdef ENABLE_FLOATMP
-    template class ArithmeticSeries<IntervalMP>;
-    template class TranscendentalSeries<IntervalMP>;
-#endif
+#include <boost/python.hpp>
+#include <boost/python/detail/api_placeholder.hpp>
+using namespace boost::python;
 
+
+void export_slice()
+{
   
-} // namespace Ariadne
+  class_<Slice> slice_class("Slice",init<uint,uint,uint>());
+  slice_class.def("start",&Slice::start);
+  slice_class.def("stop",&Slice::stop);
+  slice_class.def("size",&Slice::size);
+  slice_class.def("stride",&Slice::stride);
+
+  def("slice",&slice);
+  def("Range",&Ariadne::range);
+}
+

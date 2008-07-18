@@ -709,6 +709,24 @@ norm(const MatrixSlice<R>& A)
 
 
 template<class R> inline
+MatrixSlice<R>
+project(Matrix<R>& A, const Slice& i, const Slice& j)  
+{ 
+  R* begin=A.begin()+A.row_increment()*i.start()+A.column_increment()*j.start();
+  return MatrixSlice<R>(i.size(),j.size(),begin,
+                        A.row_increment()*i.stride(), A.column_increment()*j.stride());
+}
+
+template<class R> inline
+MatrixSlice<const R>
+project(const Matrix<R>& A, const Slice& i, const Slice& j)  
+{ 
+  const R* begin=A.begin()+A.row_increment()*i.start()+A.column_increment()*j.start();
+  return MatrixSlice<const R>(i.size(),j.size(),begin,
+                              A.row_increment()*i.stride(), A.column_increment()*j.stride());
+}
+
+template<class R> inline
 Matrix<R>
 concatenate_columns(const MatrixSlice<R>& A1, const MatrixSlice<R>& A2) {
   return concatenate_columns(Matrix<R>(A1),Matrix<R>(A2));

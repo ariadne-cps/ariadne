@@ -79,16 +79,21 @@ namespace Ariadne {
       Evolver();
       virtual Evolver<Sys,ES>* clone() const { return new Evolver<Sys,ES>(*this); }
      protected:
-      virtual void _evolution(ESL& final, ESL& intermediate, const Sys& system, const ES& initial, const T& time, Semantics semantics, bool reach) const;
+      virtual void _evolution(ESL& final, ESL& reachable, ESL& intermediate, const Sys& system, const ES& initial, const T& time, Semantics semantics, bool reach) const;
      public:
       using EvolverBase<Sys,ES>::evolve;
       using EvolverBase<Sys,ES>::reach;
-      /*! \brief Compute an approximation to the evolution set under upper semantics. */
+      using EvolverBase<Sys,ES>::evolution;
+      /*! \brief Compute an approximation to the evolved set under upper semantics. */
       ESL evolve(const Sys& system, const ES& initial_set, const T& time) const {
-        ESL final; ESL intermediate; this->_evolution(final,intermediate,system,initial_set,time,upper_semantics,false); return final; }
-      /*! \brief Compute an approximation to the evolution set under upper semantics. */
+        ESL final; ESL reachable; ESL intermediate; this->_evolution(final,reachable,intermediate,system,initial_set,time,upper_semantics,false); return final; }
+      /*! \brief Compute an approximation to the reachable set under upper semantics. */
       ESL reach(const Sys& system, const ES& initial_set, const T& time) const {
-        ESL final; ESL intermediate; this->_evolution(final,intermediate,system,initial_set,time,upper_semantics,true); return intermediate; }
+        ESL final; ESL reachable; ESL intermediate; this->_evolution(final,reachable,intermediate,system,initial_set,time,upper_semantics,true); return reachable; }
+
+      /*! \brief Compute an approximation to the evolution sets under the given semantics. */
+      void evolution(ESL& final, ESL& reachable, ESL& intermediate, const Sys& system, const ES& initial_set, const T& time) const {
+        this->_evolution(final,reachable,intermediate,system,initial_set,time,upper_semantics,false); }
      private:
       // Helper functions for accessing parameters
       uint verbosity() const { 

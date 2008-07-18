@@ -278,6 +278,8 @@ namespace Ariadne {
 
     template<class R> Matrix<R> direct_sum(const Matrix<R>& A1, const Matrix<R>& A2);
 
+    template<class R> MatrixSlice<R> project(Matrix<R>& A, const Slice& rs, const Slice& cs);
+    template<class R> MatrixSlice<const R> project(const Matrix<R>& A, const Slice& rs, const Slice& cs);
     template<class R> Matrix<R> concatenate(const Matrix<R>& A1, const Matrix<R>& A2);
     template<class R> Matrix<R> concatenate_rows(const Matrix<R>& A, const Vector<R>& v);
     template<class R> Matrix<R> concatenate_rows(const Matrix<R>& A1, const Matrix<R>& A2);

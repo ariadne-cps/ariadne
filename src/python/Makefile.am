@@ -49,6 +49,7 @@ ARIADNE_SRC = ariadne_module.cc \
 	export_float.cc \
 	export_interval.cc \
 	 \
+	export_slice.cc \
 	export_vector.cc \
 	export_covector.cc \
 	export_matrix.cc \
@@ -59,6 +60,7 @@ ARIADNE_SRC = ariadne_module.cc \
 	export_taylor_series.cc \
 	export_taylor_variable.cc \
 	export_taylor_derivative.cc \
+	export_sparse_differential.cc \
 	export_affine_model.cc \
 	export_taylor_model.cc \
 	export_flow_model.cc \

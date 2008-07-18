@@ -55,7 +55,7 @@ class EvolverWrapper
  public:
   EvolverWrapper<Sys,ES>* clone() const { return this->get_override("clone")(); }
  protected:
-  void _evolution(ListSet<ES>&,ListSet<ES>&,const Sys&,const ES&,const T&,Semantics,bool) const  { this->get_override("_evolution")(); }
+  void _evolution(ListSet<ES>&,ListSet<ES>&,ListSet<ES>&,const Sys&,const ES&,const T&,Semantics,bool) const  { this->get_override("_evolution")(); }
 };
 
 

@@ -77,6 +77,8 @@ make_vector(const boost::python::object& obj)
 template<class R>
 void export_vector()
 {
+  typedef typename traits<R>::approximate_arithmetic_type A;
+
   typedef Interval<R> I;
   typedef Vector<R> Vec;
   typedef Vector< Interval<R> > IVec;
@@ -84,9 +86,14 @@ void export_vector()
   typedef Covector< Interval<R> > ICvec;
   typedef Matrix< Interval<R> > IMx;
   
+  class_< Vector<A> > approximate_vector_class("ApproximateVector",init< Vector<R> >());
+  approximate_vector_class.def("__len__", &Vector<A>::size);
+  approximate_vector_class.def("__getitem__",&__getitem__< Vector<A> >);
+
   class_< Vector<R> > vector_class(python_name<R>("Vector").c_str(),no_init);
   vector_class.def("__init__", make_constructor(&make_vector<R>));
   vector_class.def(init<int>());
+  vector_class.def(init< Vector<A> >());
   //vector_class.def(init<std::string>());
   vector_class.def(init<Vec>());
   vector_class.def("__len__", &Vec::size);

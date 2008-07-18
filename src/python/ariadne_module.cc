@@ -54,6 +54,7 @@ template<class R> void export_interval_vector();
 template<class R> void export_interval_covector();
 template<class R> void export_interval_matrix();
 
+void export_slice();
 void export_multi_index();
 void export_binary_tree();
 void export_lattice_set();
@@ -68,8 +69,11 @@ template<class R> void export_affine_derivative();
 template<class R> void export_taylor_series();
 template<class R> void export_taylor_variable();
 template<class R> void export_taylor_derivative();
+template<class R> void export_sparse_differential();
+template<class R> void export_sparse_differential_vector();
 template<class R> void export_flow_model();
 template<class R> void export_taylor_model();
+template<class R> void export_approximate_taylor_model();
 template<class R> void export_polynomial_variable();
 
 template<class R> void export_point();
@@ -147,6 +151,7 @@ BOOST_PYTHON_MODULE(ariadne)
   export_float<FloatPy>();
   export_interval<FloatPy>();
 
+  export_slice();
   export_vector<FloatPy>();
   export_vector<Rational>();
   export_covector<FloatPy>();
@@ -178,7 +183,12 @@ BOOST_PYTHON_MODULE(ariadne)
   export_taylor_series<FloatPy>();
   export_taylor_variable<FloatPy>();
   export_taylor_derivative<FloatPy>();
-  export_taylor_model<FloatPy>();
+  export_sparse_differential<FloatPy>();
+  export_sparse_differential_vector<FloatPy>();
+
+  export_taylor_model< FloatPy >();
+  export_approximate_taylor_model< FloatPy >();
+
   //export_polynomial_variable<FloatPy>();
   export_flow_model<FloatPy>();
   //export_taylor_series<Rational>();

@@ -198,13 +198,6 @@ recursive_inverse(const TaylorSeries<X>& x, const X& c)
 
 
 
-template<class X> 
-TaylorSeries<X>::TaylorSeries(const TaylorVariable<X>& x)
-  : _data(x.data())
-{
-  ARIADNE_ASSERT(x.argument_size()==1);
-}  
-
 
 template<class X> 
 TaylorSeries<X> 

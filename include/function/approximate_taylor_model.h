@@ -25,16 +25,13 @@
 #define ARIADNE_APPROXIMATE_TAYLOR_MODEL_H
 
 #include <iosfwd>
-#include "base/pointer.h"
-#include "numeric/float64.h"
-#include "linear_algebra/vector.h"
-#include "differentiation/sparse_differential.h"
 #include "function/function_model_concept.h"
 
 
 
 namespace Ariadne {
 
+class Slice;
 template<class X> class Vector;
 template<class X> class Matrix;
 
@@ -51,7 +48,7 @@ template<class R> ApproximateTaylorModel<R> operator+(const ApproximateTaylorMod
 template<class R> ApproximateTaylorModel<R> operator-(const ApproximateTaylorModel<R>&, const ApproximateTaylorModel<R>&);
 
 
-template<class R> ApproximateTaylorModel<R> project(const ApproximateTaylorModel<R>&, Slice slc);
+template<class R> ApproximateTaylorModel<R> project(const ApproximateTaylorModel<R>&, const Slice& slc);
 template<class R> ApproximateTaylorModel<R> recentre(const ApproximateTaylorModel<R>&, const Vector< Interval<R> >& bx, const Vector<R>& pt);
 template<class R> ApproximateTaylorModel<R> restrict(const ApproximateTaylorModel<R>&, const Vector< Interval<R> >& bx);
 template<class R> ApproximateTaylorModel<R> truncate(const ApproximateTaylorModel<R>&, const Vector<R>&, uint, uint);
@@ -109,11 +106,6 @@ class ApproximateTaylorModel {
   ApproximateTaylorModel<R>(const Vector<I>& domain, const Vector<A>& centre,
                             const FunctionInterface<R>& function,
                             ushort order, ushort smoothness);
-  
-  //! \brief Construct from a domain, centre, an order and a function. 
-  ApproximateTaylorModel<R>(const Vector<I>& domain, const Vector<A>& centre,
-                            ushort order, ushort smoothness,
-                            const FunctionInterface<R>& function);
   
   //! \brief Copy constructor.
   ApproximateTaylorModel<R>(const ApproximateTaylorModel<R>& atm);
@@ -191,15 +183,8 @@ class ApproximateTaylorModel {
   void _set_argument_size(uint n);
   uint _compute_maximum_component_size() const;
  private:
-  // Domain of definition.
-  Vector<I> _domain;
-  // The centre of the derivative expansion.
-  Vector<A> _centre;
-  // The smoothness to which the model can be computed
-  uint _smoothness; 
-  // The derivatives of the model
-  SparseDifferentialVector<A> _expansion;
-  //copy_ptr< SparseDifferentialVector<A> > _expansion_ptr;
+  class Data;
+  Data* _data;
  private:
   BOOST_CONCEPT_ASSERT((FunctionModelConcept< ApproximateTaylorModel<R> >));
 };

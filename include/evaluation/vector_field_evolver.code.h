@@ -114,6 +114,7 @@ template<class ES>
 void
 Evolver<VectorField<typename ES::real_type>,ES>::
 _evolution(ESL& final,
+           ESL& reachable,
            ESL& intermediate, 
            const VF& vf,
            const ES& initial,
@@ -150,11 +151,12 @@ _evolution(ESL& final,
       h=std::min(h,T(time-ts.time()));
       {
         rs=this->reachability_step(vf,ws,h,bb);
-        intermediate.adjoin(rs);
+        reachable.adjoin(rs);
       }
       // Need to do reachability step first to avoid clobbering bs reference
       ts=this->integration_step(vf,ts,h,bb);
       ts=this->reduce(ts);
+      intermediate.adjoin(ts.set());
       working.adjoin(ts);
     }
   }

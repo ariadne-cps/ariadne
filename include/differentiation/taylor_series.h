@@ -52,9 +52,6 @@ namespace Ariadne {
       /*! \brief A taylor variable of degree \a d in \a arguments, with values given by the array based at \a ptr. */
       template<class XX> TaylorSeries(smoothness_type d, const XX* ptr);
 
-      /*! \brief Convert from a TaylorVariable. */
-      explicit TaylorSeries(const TaylorVariable<X>& tv);
-
       /*! \brief Copy constructor. */
       template<class XX> TaylorSeries(const TaylorSeries<XX>& ts); 
       /*! \brief Copy assignment operator. */
@@ -63,10 +60,12 @@ namespace Ariadne {
       /*! \brief Assign a constant \a c. */
       template<class XX> TaylorSeries<X>& operator=(const XX& c);
 
-      /*! \brief Construct a constant variable of degree \a d with respect to \a as variables and value \a c. */
-      template<class XX> static TaylorSeries<X> constant(smoothness_type d, const XX& c); 
-      /*! \brief Construct the variable of degree \a d at value \a x with respect to the \a i<sup>th</sup> variable of \a as. */
-      template<class XX> static TaylorSeries<X> variable(smoothness_type d, const XX& x);
+      /*! \brief Construct a constant series of degree \a d with value zero. */
+      static TaylorSeries<X> zero(smoothness_type d); 
+      /*! \brief Construct a constant serues of degree \a d with value \a c. */
+      static TaylorSeries<X> constant(smoothness_type d, const X& c); 
+      /*! \brief Construct the variable of degree \a d at value \a x with respect to a single scalar variable. */
+      static TaylorSeries<X> variable(smoothness_type d, const X& x);
 
       /*! \brief The degree (number of derivatives computed). */
       smoothness_type degree() const; 
@@ -168,7 +167,6 @@ namespace Ariadne {
 
 
 #include "taylor_series.inline.h"
-#include "taylor_series.template.h"
 
 
 #endif /* ARIADNE_TAYLOR_SERIES_H */

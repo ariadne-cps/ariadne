@@ -67,6 +67,7 @@ void export_function_interface()
   function_interface_class.def("evaluate",pure_virtual(&FunctionInterface<R>::evaluate));
   function_interface_class.def("jacobian",pure_virtual(&FunctionInterface<R>::jacobian));
   function_interface_class.def("derivative",pure_virtual(&FunctionInterface<R>::derivative));
+  function_interface_class.def("expansion",pure_virtual(&FunctionInterface<R>::expansion));
 
 }
 

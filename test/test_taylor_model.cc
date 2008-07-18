@@ -32,6 +32,7 @@
 
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
+#include "differentiation/multi_index.h"
 #include "function/taylor_model.h"
 #include "output/latexstream.h"
 

@@ -1,67 +1,27 @@
-/***************************************************************************
- *            sparse_differential.h
- *
- *  Copyright 2008  Pieter Collins
- *
- ****************************************************************************/
-
-/*
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- */
- 
-/*! \file sparse_differential.h
- *  \brief Derivatives of scalar functions of many variables.
- */
- 
 #ifndef ARIADNE_SPARSE_DIFFERENTIAL_H
 #define ARIADNE_SPARSE_DIFFERENTIAL_H
 
-#include <cassert>
 #include <map>
 
+#include "macros/throw.h"
 #include "base/array.h"
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
 #include "differentiation/multi_index.h"
-#include "differentiation/differential_concept.h"
+#include "differentiation/taylor_series.h"
+#include "differentiation/function_series.h"
 
 namespace Ariadne {
 
 template<class X> class Vector;
 template<class X> class Matrix;
+template<class X> class TaylorSeries;
 
-template<class X> struct AffineTransformation {
-  AffineTransformation(const Vector<X>& v, const Matrix<X>& M)
-    : b(v), A(M) { ARIADNE_ASSERT(v.size()==M.row_size()); }
-  Vector<X> b;
-  Matrix<X> A;
-};
+template<class X> struct AffineTransformation;
 
-template<class X> class SparseSeries;
 template<class X> class SparseDifferential;
 template<class X> class SparseDifferentialVector;
 
-template<class X> SparseSeries<X> operator+(const SparseSeries<X>& x);
-template<class X> SparseSeries<X> operator-(const SparseSeries<X>& x);
-template<class X> SparseSeries<X> operator+(const SparseSeries<X>& x, const SparseSeries<X>& y);
-template<class X> SparseSeries<X> operator-(const SparseSeries<X>& x, const SparseSeries<X>& y);
-template<class X> SparseSeries<X> operator*(const SparseSeries<X>& x, const SparseSeries<X>& y);
-template<class X> SparseSeries<X> operator/(const SparseSeries<X>& x, const SparseSeries<X>& y);
-
-template<class X> SparseSeries<X> derivative(const SparseSeries<X>& x, uint n);
-template<class X> SparseSeries<X> antiderivative(const SparseSeries<X>& x, uint n);
 
 template<class X> SparseDifferential<X> operator+(const SparseDifferential<X>& x);
 template<class X> SparseDifferential<X> operator-(const SparseDifferential<X>& x);
@@ -88,15 +48,6 @@ template<class X> SparseDifferential<X> operator-(const X& c, const SparseDiffer
 template<class X> SparseDifferential<X> operator*(const X& c, const SparseDifferential<X>& x);
 template<class X> SparseDifferential<X> operator/(const X& c, const SparseDifferential<X>& x);
 
-template<class X> SparseDifferential<X> operator+(const SparseDifferential<X>& x, const double& c);
-template<class X> SparseDifferential<X> operator-(const SparseDifferential<X>& x, const double& c);
-template<class X> SparseDifferential<X> operator*(const SparseDifferential<X>& x, const double& c);
-template<class X> SparseDifferential<X> operator/(const SparseDifferential<X>& x, const double& c);
-template<class X> SparseDifferential<X> operator+(const double& c, const SparseDifferential<X>& x);
-template<class X> SparseDifferential<X> operator-(const double& c, const SparseDifferential<X>& x);
-template<class X> SparseDifferential<X> operator*(const double& c, const SparseDifferential<X>& x);
-template<class X> SparseDifferential<X> operator/(const double& c, const SparseDifferential<X>& x);
-
 template<class X> SparseDifferential<X> pow(const SparseDifferential<X>& x, int n);
 template<class X> SparseDifferential<X> sqr(const SparseDifferential<X>& x);
 template<class X> SparseDifferential<X> sqrt(const SparseDifferential<X>& x);
@@ -107,7 +58,7 @@ template<class X> SparseDifferential<X> cos(const SparseDifferential<X>& x);
 template<class X> SparseDifferential<X> tan(const SparseDifferential<X>& x);
 
 template<class X, class Y> Y evaluate(const SparseDifferential<X>& y, const Vector<Y>& z);
-template<class X> SparseDifferential<X> compose(const SparseSeries<X>& x, const SparseDifferential<X>& y);
+template<class X> SparseDifferential<X> compose(const TaylorSeries<X>& x, const SparseDifferential<X>& y);
 template<class X> SparseDifferential<X> translate(const SparseDifferential<X>& x, const Vector<X>& c);
 template<class X> SparseDifferential<X> derivative(const SparseDifferential<X>& x, uint i);
 template<class X> SparseDifferential<X> antiderivative(const SparseDifferential<X>& x, uint i);
@@ -123,187 +74,10 @@ template<class X> SparseDifferentialVector<X> translate(const SparseDifferential
 template<class X> SparseDifferentialVector<X> compose(const SparseDifferentialVector<X>& x, const SparseDifferentialVector<X>& y);
 template<class X> SparseDifferentialVector<X> inverse(const SparseDifferentialVector<X>& x);
 template<class X> SparseDifferentialVector<X> implicit(const SparseDifferentialVector<X>& x);
-template<class X> SparseDifferentialVector<X> derivative(const SparseDifferentialVector<X>& x, uint i);
+template<class X> SparseDifferentialVector<X> derivative(const SparseDifferentialVector<X>& x, uint j);
 template<class X> SparseDifferentialVector<X> antiderivative(const SparseDifferentialVector<X>& x, uint j);
 template<class X> SparseDifferentialVector<X> flow(const SparseDifferentialVector<X>& vf);
 template<class X> SparseDifferentialVector<X> hitting(const SparseDifferentialVector<X>& vf, const SparseDifferentialVector<X>& g);
-
-
-
-template<class X>
-class SparseSeries
-{
- public:
-  typedef typename std::map<uint,X>::const_iterator const_iterator;
-  SparseSeries() : _deg(0), _data() { _data[0u]; }
-  SparseSeries(ushort d) : _deg(d), _data() { _data[0u]; }
-  SparseSeries(ushort d, const X& x) : _deg(d), _data() { _data[0u]=x; }
-  template<class XX> SparseSeries(uint d, const XX* ptr) : _deg(d), _data() { 
-    for(uint i=0; i<=d; ++i) { if(*ptr!=0) { _data[i]=*ptr; } ++ptr; } }
-  const_iterator begin() const { return this->_data.begin(); }
-  const_iterator end() const { return this->_data.end(); }
-  ushort degree() const { return this->_deg; }
-  X& operator[](const uint& a) { return this->_data[a]; }
-  X operator[](const uint& a) const { const_iterator iter=this->_data.find(a); 
-    if(iter==this->_data.end()) { return X(); } else { return iter->second; } }
-  SparseSeries<X>& operator+=(const SparseSeries<X>& s);
-  SparseSeries<X>& operator-=(const SparseSeries<X>& s);
-  static SparseSeries<X> rec(ushort d, const X& c);
-  static SparseSeries<X> pow(ushort d, const X& c, int k);
-  static SparseSeries<X> sqrt(ushort d, const X& c);
-  static SparseSeries<X> exp(ushort d, const X& c);
-  static SparseSeries<X> log(ushort d, const X& c);
-  static SparseSeries<X> sin(ushort d, const X& c);
-  static SparseSeries<X> cos(ushort d, const X& c);
-  static SparseSeries<X> tan(ushort d, const X& c);
- private:
-  uint _deg;
-  std::map<uint,X> _data;
-};
-
-template<class X> SparseSeries<X>& SparseSeries<X>::operator+=(const SparseSeries<X>& x) {
-  for(typename SparseSeries<X>::const_iterator iter=x.begin();
-      iter!=x.end(); ++iter) {
-    (*this)[iter->first]+=iter->second; 
-  }
-}
-
-template<class X> SparseSeries<X>& SparseSeries<X>::operator-=(const SparseSeries<X>& x) {
-  for(typename SparseSeries<X>::const_iterator iter=x.begin();
-      iter!=x.end(); ++iter) {
-    (*this)[iter->first]-=iter->second; 
-  }
-}
-
-template<class X> SparseSeries<X> mul(const SparseSeries<X>& x, const SparseSeries<X>& y) {
-  typedef typename SparseSeries<X>::const_iterator const_iterator;
-  SparseSeries<X> r(x.degree()+y.degree());
-  for(const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
-    for(const_iterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
-      r[xiter->first+yiter->first]+=xiter->second*yiter->second;
-    }
-  }
-  return r;
-}
-
-
-template<class X> SparseSeries<X> SparseSeries<X>::rec(ushort d, const X& c) {
-  SparseSeries<X> r(d); X cr = (-1)/c; 
-  for(uint i=0; i<=d; ++i) {
-    r[i]=-Ariadne::pow(cr,i+1u); }
-  return r;
-}
-
-template<class X> SparseSeries<X> SparseSeries<X>::pow(ushort d, const X& c, int k) {
-  uint n=k; SparseSeries<X> r(d);
-  for(uint i=0; i<=std::min(uint(d),n); ++i) {
-    uint j=n-i; r[i]=X(bin(n,j))*Ariadne::pow(c,j); }
-  return r;
-}
-
-template<class X> SparseSeries<X> SparseSeries<X>::sqrt(ushort d, const X& c)
-{
-  SparseSeries<X> r(d);
-  r[0]=Ariadne::sqrt(c);
-  X mhr=-0.5/c;
-  for(uint i=1; i<=d; ++i) {
-    // Need to convert uint to int to prevent wraparound for 2*1u-3
-    r[i]=((2*int(i)-3)*mhr)/i*r[i-1];
-  }
-  return r;
-}
-
-template<class X> SparseSeries<X> SparseSeries<X>::exp(ushort d, const X& c)
-{
-  SparseSeries<X> r(d);
-  r[0]=Ariadne::exp(c);
-  for(uint i=1; i<=d; ++i) {
-    r[i]=r[i-1]/i;
-  }
-  return r;
-}
-
-template<class X> SparseSeries<X> SparseSeries<X>::log(ushort d, const X& c)
-{
-  SparseSeries<X> r(d);
-  r[0]=Ariadne::log(c);
-  X mr=(-1)/c;
-  for(uint i=1; i<=r.degree();++i) {
-    r[i]=-Ariadne::pow(mr,i)/i;
-  }
-  return r;
-}
-
-template<class X> SparseSeries<X> SparseSeries<X>::sin(ushort d, const X& c) {
-  SparseSeries<X> r;
-  r[0]=Ariadne::sin(c);
-  if(d>=1) {
-    r[1]=Ariadne::cos(c);
-    for(uint i=2; i<=d; ++i) {
-      r[i]=-r[i-2]/(i*(i-1));
-    }
-  }
-  return r;
-}
-
-template<class X> SparseSeries<X> SparseSeries<X>::cos(ushort d, const X& c) {
-  SparseSeries<X> r;
-  r[0]=Ariadne::cos(c);
-  if(d>=1) {
-    r[1]=-Ariadne::sin(c);
-    for(uint i=2; i<=d; ++i) {
-      r[i]=-r[i-2]/(i*(i-1));
-    }
-  }
-  return r;
-}
-
-template<class X> SparseSeries<X> SparseSeries<X>::tan(ushort d, const X& c) {
-  return SparseSeries<X>::sin(d,c)/SparseSeries<X>::cos(d,c);
-}
-
-template<class X> SparseSeries<X> operator+(const SparseSeries<X>& x) {
-  return x;
-}
-
-template<class X> SparseSeries<X> operator-(const SparseSeries<X>& x) {
-  SparseSeries<X> r(x.degree());
-  for(typename SparseSeries<X>::const_iterator iter=x.begin();
-      iter!=x.end(); ++iter) {
-    r[iter->first]=-iter->second;
-  }
-}
-
-template<class X> SparseSeries<X> operator+(const SparseSeries<X>& x, const SparseSeries<X>& y) {
-  SparseSeries<X> r(x); r+=y; return r;  
-}
-
-template<class X> SparseSeries<X> operator-(const SparseSeries<X>& x, const SparseSeries<X>& y) {
-  SparseSeries<X> r(x); r-=y; return r;  
-}
-
-template<class X> SparseSeries<X> operator*(const SparseSeries<X>& x, const SparseSeries<X>& y) {
-  return mul(x,y);
-}
-
-template<class X> SparseSeries<X> operator/(const SparseSeries<X>& x, const SparseSeries<X>& y) {
-  throw NotImplemented(__PRETTY_FUNCTION__);
-}
-
-template<class X> SparseSeries<X> derivative(const SparseSeries<X>& x) {
-  SparseSeries<X> r(std::min(x.degree(),1u)-1u);
-  for(uint i=0; i!=r.degree(); ++i) { r[i]=x[i+1]*(i+1); }
-  return r;
-}
-
-template<class X> SparseSeries<X> antiderivative(const SparseSeries<X>& x) {
-  SparseSeries<X> r(x.degree()+1);
-  for(uint i=0; i!=x.degree(); ++i) { r[i+1]=x[i]/(i+1); }
-  return r;
-}
-
-template<class X> std::ostream& operator<<(std::ostream& os, const SparseSeries<X>& x) {
-  for(uint i=0; i<=x.degree(); ++i) { os << (i==0 ? "S[" : ",") << x[i] << std::flush; } return os << "]"; }
 
 
 
@@ -323,8 +97,8 @@ class SparseDifferential
 
   SparseDifferential() : _as(1), _deg(0), _data() { }
   //explicit SparseDifferential(int c) : _as(0), _deg(0), _data() { this->set_value(c); }
-  SparseDifferential(uint as, uint deg) : _as(as), _deg(deg), _data() { _data[MultiIndex(as)]=0; }
-  template<class XX> SparseDifferential(uint as, uint deg, const XX* ptr) : _as(as), _deg(deg), _data() { 
+  SparseDifferential(uint as, ushort deg) : _as(as), _deg(deg), _data() { _data[MultiIndex(as)]=0; }
+  template<class XX> SparseDifferential(uint as, ushort deg, const XX* ptr) : _as(as), _deg(deg), _data() { 
     for(MultiIndex j(as); j.degree()<=deg; ++j) { if(*ptr!=0) { _data[j]=*ptr; } ++ptr; } }
   
   SparseDifferential<X>& operator=(const X& c) { this->_data.clear(); this->_data[MultiIndex(this->argument_size())]=c; return *this; }
@@ -348,7 +122,7 @@ class SparseDifferential
 
   const_iterator begin() const { return this->_data.begin(); }
   const_iterator end() const { return this->_data.end(); }
-  ushort argument_size() const { return this->_as; }
+  uint argument_size() const { return this->_as; }
   ushort degree() const { return this->_deg; }
   X operator[](const MultiIndex& a) const { 
     ARIADNE_ASSERT(a.number_of_variables()==this->argument_size()); 
@@ -357,6 +131,8 @@ class SparseDifferential
   X value() const { return this->operator[](MultiIndex(this->_as)); }
   X gradient(uint j) const { return this->operator[](MultiIndex::unit(this->_as,j)); }
 
+  static SparseDifferential<X> zero(uint as, ushort d) {
+    return SparseDifferential<X>(as,d); }
   static SparseDifferential<X> constant(uint as, ushort d, const X& c) {
     SparseDifferential<X> r(as,d); r.value()=c; return r; }
   static SparseDifferential<X> variable(uint as, ushort d, const X& x, uint i) {
@@ -376,9 +152,9 @@ class SparseDifferential
   friend SparseDifferential<X> operator-<>(const SparseDifferential<X>& x, const SparseDifferential<X>& y);
   friend SparseDifferential<X> operator*<>(const SparseDifferential<X>& x, const SparseDifferential<X>& y);
   friend SparseDifferential<X> operator/<>(const SparseDifferential<X>& x, const SparseDifferential<X>& y);
-  friend SparseDifferential<X> compose<>(const SparseSeries<X>& x, const SparseDifferential<X>& y);
-  friend SparseDifferential<X> derivative<>(const SparseDifferential<X>& x, uint i);
-  friend SparseDifferential<X> antiderivative<>(const SparseDifferential<X>& x, uint i);
+  friend SparseDifferential<X> compose<>(const TaylorSeries<X>& x, const SparseDifferential<X>& y);
+  friend SparseDifferential<X> derivative<>(const SparseDifferential<X>& x, uint j);
+  friend SparseDifferential<X> antiderivative<>(const SparseDifferential<X>& x, uint j);
  public:
   void cleanup() { 
     for(typename std::map<MultiIndex,X>::iterator iter=this->_data.begin(); iter!=this->_data.end(); ++iter) { 
@@ -386,10 +162,10 @@ class SparseDifferential
     this->_data[MultiIndex(this->_as)]; }
  private:
   uint _as;
-  uint _deg;
+  ushort _deg;
   std::map<MultiIndex,X> _data;
  private:
-  BOOST_CONCEPT_ASSERT((DifferentialConcept< SparseDifferential<X> >));
+  //BOOST_CONCEPT_ASSERT((DifferentialConcept< SparseDifferential<X> >));
 };
 
 template<class X>
@@ -499,7 +275,7 @@ SparseDifferential<X> operator/(const SparseDifferential<X>& x, const R& c)
 template<class X, class R>
 SparseDifferential<X> operator/(const R& c, const SparseDifferential<X>& x)
 {
-  SparseDifferential<X> r=reX(c)(x); r*=c; return r; 
+  SparseDifferential<X> r=rec(x); r*=c; return r; 
 }
 
 
@@ -554,53 +330,6 @@ SparseDifferential<X> operator/(const X& c, const SparseDifferential<X>& x)
 
 
 
-template<class X>
-SparseDifferential<X> operator+(const SparseDifferential<X>& x, const double& c)
-{
-  SparseDifferential<X> r(x); r+=X(c); return r; 
-}
-
-template<class X>
-SparseDifferential<X> operator+(const double& c, const SparseDifferential<X>& x)
-{
-  SparseDifferential<X> r(x); r+=X(c); return r; 
-}
-
-template<class X>
-SparseDifferential<X> operator-(const SparseDifferential<X>& x, const double& c)
-{
-  SparseDifferential<X> r(x); r-=X(c); return r; 
-}
-
-template<class X>
-SparseDifferential<X> operator-(const double& c, const SparseDifferential<X>& x)
-{
-  SparseDifferential<X> r(-x); r+=X(c); return r; 
-}
-
-template<class X>
-SparseDifferential<X> operator*(const SparseDifferential<X>& x, const double& c)
-{
-  SparseDifferential<X> r(x); r*=X(c); return r; 
-}
-
-template<class X>
-SparseDifferential<X> operator*(const double& c, const SparseDifferential<X>& x)
-{
-  SparseDifferential<X> r(x); r*=X(c); return r; 
-}
-
-template<class X>
-SparseDifferential<X> operator/(const SparseDifferential<X>& x, const double& c)
-{
-  SparseDifferential<X> r(x); r/=X(c); return r; 
-}
-
-template<class X>
-SparseDifferential<X> operator/(const double& c, const SparseDifferential<X>& x)
-{
-  SparseDifferential<X> r=rec(x); r*=X(c); return r; 
-}
 
 
 template<class X>
@@ -641,7 +370,7 @@ SparseDifferential<X> operator/(const SparseDifferential<X>& x, const SparseDiff
 template<class X>
 SparseDifferential<X> rec(const SparseDifferential<X>& x)
 {
-  return compose(SparseSeries<X>::rec(x.degree(),x.value()),x);
+  return compose(FunctionSeries<X>::rec(x.degree(),x.value()),x);
 }
 
 template<class X>
@@ -653,56 +382,56 @@ SparseDifferential<X> sqr(const SparseDifferential<X>& x)
 template<class X>
 SparseDifferential<X> pow(const SparseDifferential<X>& x, int n)
 {
-  return compose(SparseSeries<X>::pow(x.degree(),x.value(),n),x);
+  return compose(FunctionSeries<X>::pow(x.degree(),x.value(),n),x);
 }
 
 template<class X>
 SparseDifferential<X> sqrt(const SparseDifferential<X>& x)
 {
-  return compose(SparseSeries<X>::sqrt(x.degree(),x.value()),x);
+  return compose(FunctionSeries<X>::sqrt(x.degree(),x.value()),x);
 }
 
 template<class X>
 SparseDifferential<X> exp(const SparseDifferential<X>& x)
 {
-  return compose(SparseSeries<X>::exp(x.degree(),x.value()),x);
+  return compose(FunctionSeries<X>::exp(x.degree(),x.value()),x);
 }
 
 template<class X>
 SparseDifferential<X> log(const SparseDifferential<X>& x)
 {
-  return compose(SparseSeries<X>::log(x.degree(),x.value()),x);
+  return compose(FunctionSeries<X>::log(x.degree(),x.value()),x);
 }
 
 template<class X>
 SparseDifferential<X> sin(const SparseDifferential<X>& x)
 {
-  return compose(SparseSeries<X>::sin(x.degree(),x.value()),x);
+  return compose(FunctionSeries<X>::sin(x.degree(),x.value()),x);
 }
 
 template<class X>
 SparseDifferential<X> cos(const SparseDifferential<X>& x)
 {
-  return compose(SparseSeries<X>::cos(x.degree(),x.value()),x);
+  return compose(FunctionSeries<X>::cos(x.degree(),x.value()),x);
 }
 
 template<class X>
 SparseDifferential<X> tan(const SparseDifferential<X>& x)
 {
-  return compose(SparseSeries<X>::tan(x.degree(),x.value()),x);
+  return compose(FunctionSeries<X>::tan(x.degree(),x.value()),x);
 }
 
 template<class X>
-SparseDifferential<X> compose(const SparseSeries<X>& x, const SparseDifferential<X>& y)
+SparseDifferential<X> compose(const TaylorSeries<X>& x, const SparseDifferential<X>& y)
 {
   uint as=y.argument_size();
-  uint d=std::min(x.degree(),y.degree());
+  ushort d=std::min(x.degree(),y.degree());
 
   SparseDifferential<X> w=y;
   w[MultiIndex(as)]=0;
   SparseDifferential<X> r(as,d);
   r[MultiIndex(as)]=x[d];
-  for(uint n=1; n<=d; ++n) {
+  for(ushort n=1; n<=d; ++n) {
     r=r*w; r+=x[d-n];
   }
   return r;
@@ -710,35 +439,37 @@ SparseDifferential<X> compose(const SparseSeries<X>& x, const SparseDifferential
 
 
 template<class X>
-SparseDifferential<X> derivative(const SparseDifferential<X>& x, uint i)
+SparseDifferential<X> derivative(const SparseDifferential<X>& x, uint j)
 {
   if(x.degree()==0) { return SparseDifferential<X>(x.argument_size(),0u); }
   SparseDifferential<X> r(x.argument_size(), x.degree()-1); 
-  MultiIndex da=MultiIndex::unit(x.argument_size(),i); 
-  MultiIndex ai=MultiIndex::unit(x.argument_size(),i);
+  MultiIndex da=MultiIndex::unit(x.argument_size(),j); 
+  MultiIndex ej=MultiIndex::unit(x.argument_size(),j);
   for(typename SparseDifferential<X>::const_iterator iter=x.begin(); iter!=x.end(); ++iter) 
   {
     const MultiIndex& a=iter->first;
-    if(a[i]!=0) { 
-      da=a-ai;
-      r[da]=x[a]*a[i];
+    if(a[j]!=0) { 
+      da=a-ej;
+      int aj=a[j];
+      const X& xa=x[a];
+      r[da]=xa*aj;
     }
   }
   return r;
 }
 
 template<class X>
-SparseDifferential<X> antiderivative(const SparseDifferential<X>& x, uint i)
+SparseDifferential<X> antiderivative(const SparseDifferential<X>& x, uint j)
 {
   SparseDifferential<X> r(x.argument_size(), x.degree()+1); 
   MultiIndex da=MultiIndex::zero(x.argument_size()); 
-  MultiIndex ai=MultiIndex::unit(x.argument_size(),i);
+  MultiIndex aj=MultiIndex::unit(x.argument_size(),j);
   for(typename SparseDifferential<X>::const_iterator iter=x.begin(); iter!=x.end(); ++iter) 
   {
     const MultiIndex& a=iter->first;
     const X& xj=x[a];
-    da=a+ai;
-    uint dai=da[i]; r[da]=xj/dai;
+    da=a+aj;
+    uint daj=da[j]; r[da]=xj/daj;
     //r[da]=x[a]/da[i];
   }
   return r;
@@ -752,7 +483,7 @@ translate(const SparseDifferential<X>& x, const Vector<X>& v)
 {
   ARIADNE_ASSERT(x.argument_size()==v.size());
   uint as=x.argument_size();
-  uint d=x.degree();
+  ushort d=x.degree();
   SparseDifferentialVector<X> t=SparseDifferentialVector<X>::variable(as,as,d,v);
   return evaluate(x,t);
 }
@@ -776,7 +507,7 @@ template<class X>
 class SparseDifferentialVector
   : public Vector< SparseDifferential<X> >
 {
-  BOOST_CONCEPT_ASSERT((DifferentialVectorConcept<SparseDifferentialVector<X> >));
+  //BOOST_CONCEPT_ASSERT((DifferentialVectorConcept<SparseDifferentialVector<X> >));
  public:
   SparseDifferentialVector() 
     : Vector< SparseDifferential<X> >(0,SparseDifferential<X>()) { }
@@ -802,8 +533,6 @@ class SparseDifferentialVector
         const X& x=A[i][j];
         if(x!=0) { (*this)[i][j]=x; } } } 
   }
-  template<class T> SparseDifferentialVector(const VectorSlice<T>& ve) 
-    : Vector< SparseDifferential<X> >(ve) { }
 
   uint result_size() const { return this->Vector< SparseDifferential<X> >::size(); }
   uint argument_size() const { return (*this)[0].argument_size(); }
@@ -812,11 +541,15 @@ class SparseDifferentialVector
   Vector<X> value() const { 
     Vector<X> r(this->result_size()); for(uint i=0; i!=r.size(); ++i) { r[i]=(*this)[i].value(); } return r; }
   Matrix<X> jacobian() const { Matrix<X> r(this->result_size(),this->argument_size()); 
-    for(uint i=0; i!=r.number_of_rows(); ++i) { for(uint j=0; j!=r.number_of_columns(); ++j) { r[i][j]=(*this)[i].gradient(j); } } return r; }
+    for(uint i=0; i!=r.row_size(); ++i) { for(uint j=0; j!=r.column_size(); ++j) { r[i][j]=(*this)[i].gradient(j); } } return r; }
 
   void set_value(const Vector<X>& c) {
     ARIADNE_ASSERT(this->result_size()==c.size());
     for(uint i=0; i!=c.size(); ++i) { (*this)[i].set_value(c[i]); } }
+
+  static SparseDifferentialVector<X> zero(uint rs, uint as, ushort d) {
+    return SparseDifferentialVector<X>(rs,as,d);
+  }
 
   static SparseDifferentialVector<X> constant(uint rs, uint as, ushort d, const Vector<X>& c) {
     ARIADNE_ASSERT(c.size()==rs);
@@ -966,14 +699,14 @@ evaluate(const SparseDifferential<X>& x,
   array< array< Y > > val(s, array< Y >(d+1,zero));
   for(uint j=0; j!=s; ++j) {
     val[j][0]=one;
-    for(uint k=1; k<=d; ++k) {
+    for(ushort k=1; k<=d; ++k) {
       val[j][k]=val[j][k-1]*y[j];
     }
   }
   //std::cerr << "val="<<val<<std::endl;
   for(MultiIndex j(s); j.degree()<=d; ++j) {
     Y t=one;
-    for(uint k=0; k!=s; ++k) {
+    for(ushort k=0; k!=s; ++k) {
       t=t*val[k][j[k]];
     }
     r+=x[j]*t;
@@ -1007,7 +740,7 @@ evaluate(const SparseDifferentialVector<X>& x,
   array< array< Y > > val(as, array< Y >(d+1,zero));
   for(uint j=0; j!=as; ++j) {
     val[j][0]=one;
-    for(uint k=1; k<=d; ++k) {
+    for(ushort k=1; k<=d; ++k) {
       val[j][k]=val[j][k-1]*y[j];
     }
   }
@@ -1083,7 +816,7 @@ implicit(const SparseDifferentialVector<X>& x)
   uint rs=x.result_size();
   uint xas=x.argument_size();
   uint zas=x.argument_size()-x.result_size();
-  uint d=x.degree();
+  ushort d=x.degree();
 
   Matrix<X> A1(rs,zas);
   for(uint i=0; i!=rs; ++i) {
@@ -1100,7 +833,8 @@ implicit(const SparseDifferentialVector<X>& x)
   }
   
   Matrix<X> J(xas,rs);
-  J(slice(zas,rs),slice(0,rs))=inverse(A2);
+  //J(range(zas,zas+rs),range(0,rs))=inverse(A2);
+  project(J,range(zas,zas+rs),range(0,rs)) = inverse(A2);
 
   SparseDifferentialVector<X> y(xas,zas,d);
   for(uint i=0; i!=zas; ++i) {
@@ -1110,7 +844,7 @@ implicit(const SparseDifferentialVector<X>& x)
     // y[as+i]=TaylorVariable<X>::constant(as,d,0.0);
   }
 
-  for(uint i=0; i!=d; ++i) {
+  for(ushort i=0; i!=d; ++i) {
     SparseDifferentialVector<X> z=compose(x,y);
     y-=J*z;
   }
@@ -1126,6 +860,13 @@ implicit(const SparseDifferentialVector<X>& x)
 
 template<class X> 
 SparseDifferentialVector<X> 
+inverse(const SparseDifferentialVector<X>& x)
+{
+  return inverse(x,Vector<X>(x.argument_size()));
+}
+
+template<class X> 
+SparseDifferentialVector<X> 
 inverse(const SparseDifferentialVector<X>& x, const Vector<X>& c)
 {
   using namespace std;
@@ -1133,7 +874,7 @@ inverse(const SparseDifferentialVector<X>& x, const Vector<X>& c)
   assert(x.result_size()==c.size());
   //std::cerr << "x=" << x << std::endl;
   uint n=x.result_size();
-  uint d=x.degree();
+  ushort d=x.degree();
   Vector<X> z(n,0);
   Matrix<X> J=inverse(x.jacobian());
 
@@ -1148,7 +889,7 @@ inverse(const SparseDifferentialVector<X>& x, const Vector<X>& c)
     }
   }
 
-  for(uint i=2; i<=d; ++i) {
+  for(ushort i=2; i<=d; ++i) {
     SparseDifferentialVector<X> z=compose(x,y);
     z-=id;
     y-=J*z;
@@ -1157,16 +898,40 @@ inverse(const SparseDifferentialVector<X>& x, const Vector<X>& c)
 }
 
 
+template<class X> 
+SparseDifferentialVector<X> 
+derivative(const SparseDifferentialVector<X>& x, uint j)
+{
+  ushort d=std::min(uint(x.degree()),1u)-1u;
+  SparseDifferentialVector<X> r(x.result_size(),x.argument_size(), d);
+  for(uint i=0; i!=x.result_size(); ++i) {
+    r[i]=derivative(x[i],j);
+  }
+  return r;
+}
+
+
+template<class X> 
+SparseDifferentialVector<X> 
+antiderivative(const SparseDifferentialVector<X>& x, uint j)
+{
+  SparseDifferentialVector<X> r(x.result_size(),x.argument_size(), x.degree()+1u);
+  for(uint i=0; i!=x.result_size(); ++i) {
+    r[i]=antiderivative(x[i],j);
+  }
+  return r;
+}
+
 
 template<class X> 
 SparseDifferentialVector<X>
-flow1(const SparseDifferentialVector<X>& f, const Vector<X>& x, uint to, uint so)
+flow1(const SparseDifferentialVector<X>& f, const Vector<X>& x, ushort to, ushort so)
 {
   // f is an untimed vector field
   assert(f.result_size()==f.argument_size());
   assert(f.result_size()==x.size());
   uint n=x.size();
-  uint d=f.degree();
+  ushort d=f.degree();
 
   Matrix<X> Q(n+1,n); for(uint i=0; i!=n; ++i) { Q[i][i]=1; }
   
@@ -1192,7 +957,7 @@ flow1(const SparseDifferentialVector<X>& f, const Vector<X>& x, uint to, uint so
   for(uint i=0; i!=n; ++i) { y[i].gradient(i)=1; }
   //std::cerr << "y=" << y << std::endl;
   SparseDifferentialVector<X> yp(n,n+1,d);
-  for(uint j=0; j<d; ++j) {
+  for(ushort j=0; j<d; ++j) {
     yp=compose(f,y);
     //std::cerr << "yp=" << yp << std::endl;
     for(uint i=0; i!=n; ++i) {  
@@ -1210,7 +975,7 @@ flow1(const SparseDifferentialVector<X>& f, const Vector<X>& x, uint to, uint so
 
 template<class X> 
 SparseDifferentialVector<X>
-flow(const SparseDifferentialVector<X>& f, const Vector<X>& x, uint to, uint so)
+flow(const SparseDifferentialVector<X>& f, const Vector<X>& x, ushort to, ushort so)
 {
   return flow1(f,x,to,so);
 }
@@ -1231,7 +996,7 @@ SparseDifferentialVector<X>
 translate(const SparseDifferentialVector<X>& x, const Vector<X>& v)
 {
   uint as=v.size();
-  uint d=x.degree();
+  ushort d=x.degree();
   SparseDifferentialVector<X> t=SparseDifferentialVector<X>::variable(as,as,d,v);
   return evaluate(x,t);
 }
@@ -1240,15 +1005,14 @@ translate(const SparseDifferentialVector<X>& x, const Vector<X>& v)
 //! Scale the polynomial given by \a x by the values in the array \a s. 
 template<class X> 
 SparseDifferentialVector<X>  
-scale(const SparseDifferentialVector<X>& x, const array<X>& s)
+scale(const SparseDifferentialVector<X>& x, const Vector<X>& s)
 {
   uint as=s.size();
-  uint d=x.degree();
+  ushort d=x.degree();
   SparseDifferentialVector<X> t(as,as,d);
   for(uint i=0; i!=as; ++i) { t[i][i]=s[i]; } 
   return evaluate(x,t);
 }
-
 
 } //namespace Ariadne
 

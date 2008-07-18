@@ -43,6 +43,7 @@ namespace Ariadne {
       ApproximateFloat(const int& n) : _value(n) { }
       ApproximateFloat(const uint& n) : _value(n) { }
       ApproximateFloat(const double& x) : _value(x) { }
+      explicit ApproximateFloat(const Integer& z) : _value(Float<T>(z)._value) { }
       explicit ApproximateFloat(const Float<T>& x) : _value(x) { }
       explicit ApproximateFloat(const Interval< Float<T> >& x) : _value(x.midpoint()) { }
       ApproximateFloat(const ApproximateFloat<T>& x) : _value(x._value) { }
@@ -153,11 +154,6 @@ namespace Ariadne {
     pow(const ApproximateFloat<T>& x, const uint& y) {
       return ApproximateFloat<T>(pow_approx(x._value,y)); }
 
-    template<class T> inline
-    ApproximateFloat<T> 
-    sqrt(const ApproximateFloat<T>& x) {
-      return ApproximateFloat<T>(sqrt_approx(x._value)); }
-
 
 
     template<class T> inline
@@ -216,6 +212,16 @@ namespace Ariadne {
 
     template<class T> inline
     ApproximateFloat<T>
+    operator*(int n, const ApproximateFloat<T>& x) {
+      return ApproximateFloat<T>(n)*x; }
+
+    template<class T> inline
+    ApproximateFloat<T>
+    operator*(const ApproximateFloat<T>& x, int n) {
+      return x*ApproximateFloat<T>(n); }
+
+    template<class T> inline
+    ApproximateFloat<T>
     operator/(int n, const ApproximateFloat<T>& x) {
       return ApproximateFloat<T>(n)/x; }
 
@@ -223,6 +229,11 @@ namespace Ariadne {
     ApproximateFloat<T>
     operator/(const ApproximateFloat<T>& x, int n) {
       return x/ApproximateFloat<T>(n); }
+
+    template<class T> inline
+    ApproximateFloat<T>
+    operator/(double d, const ApproximateFloat<T>& x) {
+      return ApproximateFloat<T>(d)/x; }
 
 
     template<class T> inline
@@ -272,6 +283,21 @@ namespace Ariadne {
 
     template<class T> inline
     ApproximateFloat<T>
+    sqrt(const ApproximateFloat<T>& y) {
+      return std::sqrt(y._value._value); }
+
+    template<class T> inline
+    ApproximateFloat<T>
+    exp(const ApproximateFloat<T>& y) {
+      return std::exp(y._value._value); }
+
+    template<class T> inline
+    ApproximateFloat<T>
+    log(const ApproximateFloat<T>& y) {
+      return std::log(y._value._value); }
+
+    template<class T> inline
+    ApproximateFloat<T>
     sin(const ApproximateFloat<T>& y) {
       return std::sin(y._value._value); }
 
@@ -279,6 +305,26 @@ namespace Ariadne {
     ApproximateFloat<T>
     cos(const ApproximateFloat<T>& y) {
       return std::cos(y._value._value); }
+
+    template<class T> inline
+    ApproximateFloat<T>
+    tan(const ApproximateFloat<T>& y) {
+      return std::tan(y._value._value); }
+
+    template<class T> inline
+    ApproximateFloat<T>
+    asin(const ApproximateFloat<T>& y) {
+      return std::asin(y._value._value); }
+
+    template<class T> inline
+    ApproximateFloat<T>
+    acos(const ApproximateFloat<T>& y) {
+      return std::acos(y._value._value); }
+
+    template<class T> inline
+    ApproximateFloat<T>
+    atan(const ApproximateFloat<T>& y) {
+      return std::atan(y._value._value); }
 
  
     template<class T> inline

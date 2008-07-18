@@ -44,6 +44,8 @@
 #include "differentiation/sorted_index.h"
 #include "differentiation/multi_index.h"
 
+#include "differentiation/taylor_derivative.h"
+
 #include "evaluation/newton_solver.h"
 
 #include "output/logging.h"
@@ -52,32 +54,39 @@
 namespace Ariadne {
 
 
+template<class R>
+struct TaylorModel<R>::Data 
+{
+  Data() { }
+  Data(const Vector<I>& d, const Vector<R>& c, 
+       const TaylorDerivative<I>& ce, const TaylorDerivative<I>& de)
+    : _domain(d), _centre(c), _centre_derivatives(ce), _domain_derivatives(de) { }
+
+  Vector<I> _domain;
+  Vector<R> _centre;
+  TaylorDerivative<I> _centre_derivatives;
+  TaylorDerivative<I> _domain_derivatives;
+};
+
 
 template<class R>
-TaylorModel<R>::TaylorModel() 
-  : _domain(), 
-    _centre(),
-    _centre_derivatives(),
-    _domain_derivatives() 
+TaylorModel<R>::TaylorModel()
+  : _data(new Data) 
 {
 }
 
 template<class R>
 TaylorModel<R>::TaylorModel(size_type rs, size_type as, smoothness_type o, smoothness_type s) 
-  : _domain(Vector<I>(as,I(-inf<R>(),+inf<R>()))),
-    _centre(Vector<R>(as)),
-    _centre_derivatives(rs,as,o),
-    _domain_derivatives(rs,as,o) 
+  : _data(new Data(Vector<I>(as,I(-inf<R>(),+inf<R>())),Vector<R>(as),
+                   TaylorDerivative<I>(rs,as,o),TaylorDerivative<I>(rs,as,o)))
 {
 }
 
+
 template<class R>
 TaylorModel<R>::TaylorModel(const Vector<I>& d, const Vector<R>& c,
-                            const TaylorDerivative<I>& cd, const TaylorDerivative<I>& dd)
-  : _domain(d),
-    _centre(c),
-    _centre_derivatives(cd),
-    _domain_derivatives(dd)
+                            const TaylorDerivative<I>& ce, const TaylorDerivative<I>& de)
+  : _data(new Data(d,c,ce,de)) 
 {
 }
 
@@ -85,22 +94,29 @@ template<class R>
 TaylorModel<R>::TaylorModel(const Vector<I>& d, const Vector<R>& c, 
                             const FunctionInterface<R>& f, 
                             smoothness_type o, smoothness_type s)
-  : _domain(d),
-    _centre(c),
-    _centre_derivatives(f.derivative(Vector<I>(c),o)),
-    _domain_derivatives(f.derivative(d,o))
+  : _data(new Data(d,c,f.derivative(Vector<I>(c),o),f.derivative(d,o)))
 {
 }
 
-/*
+
 template<class R>
-void
-TaylorModel<R>::resize(size_type rs, size_type as, size_type d, size_type s)
+TaylorModel<R>::TaylorModel(const TaylorModel<R>& tm)
+  : _data(new Data(*tm._data))
 {
-  this->_smoothness=s;
-  //this->_derivatives.resize(rs,as,d);
 }
-*/
+
+
+template<class R>
+TaylorModel<R>&
+TaylorModel<R>::operator=(const TaylorModel<R>& tm)
+{
+  if(this!=&tm) {
+    *this->_data=*tm._data;
+  }
+  return *this;
+}
+
+
 
 template<class R>
 TaylorModel<R>
@@ -130,8 +146,8 @@ template<class R>
 bool
 TaylorModel<R>::operator==(const TaylorModel<R>& tm) const
 {
-  return this->_centre==tm._centre
-    && this->_centre_derivatives==tm._centre_derivatives;
+  return this->_data->_centre==tm._data->_centre
+    && this->_data->_centre_derivatives==tm._data->_centre_derivatives;
 }
 
 
@@ -147,21 +163,21 @@ template<class R>
 Vector<typename TaylorModel<R>::I>
 TaylorModel<R>::domain() const
 { 
-  return this->_domain; 
+  return this->_data->_domain; 
 }
 
 template<class R>
 Vector<R>
 TaylorModel<R>::centre() const
 { 
-  return this->_centre; 
+  return this->_data->_centre; 
 }
 
 template<class R>
 Vector<typename TaylorModel<R>::I>
 TaylorModel<R>::range() const
 { 
-  return this->_domain_derivatives.value();
+  return this->_data->_domain_derivatives.value();
 }
 
 
@@ -169,42 +185,42 @@ template<class R>
 const TaylorDerivative<typename TaylorModel<R>::I>&
 TaylorModel<R>::centre_derivatives() const
 { 
-  return this->_centre_derivatives; 
+  return this->_data->_centre_derivatives; 
 }
 
 template<class R>
 const TaylorDerivative<typename TaylorModel<R>::I>&
 TaylorModel<R>::domain_derivatives() const
 { 
-  return this->_domain_derivatives; 
+  return this->_data->_domain_derivatives; 
 }
 
 template<class R>
 size_type 
 TaylorModel<R>::argument_size() const
 { 
-  return this->_centre_derivatives.argument_size(); 
+  return this->_data->_centre_derivatives.argument_size(); 
 }
 
 template<class R>
 size_type 
 TaylorModel<R>::result_size() const 
 { 
-  return this->_centre_derivatives.result_size();
+  return this->_data->_centre_derivatives.result_size();
 }
 
 template<class R>
 smoothness_type 
 TaylorModel<R>::order() const 
 {
-  return this->_centre_derivatives.degree();
+  return this->_data->_centre_derivatives.degree();
 }
       
 template<class R>
 smoothness_type 
 TaylorModel<R>::smoothness() const 
 { 
-  return this->_domain_derivatives.degree();
+  return this->_data->_domain_derivatives.degree();
 }
       
 template<class R>
@@ -268,6 +284,9 @@ template<class R>
 Vector<typename TaylorModel<R>::I> 
 TaylorModel<R>::evaluate(const Vector<I>& x) const
 {
+  TaylorDerivative<I> const& centre_derivatives=this->_data->_centre_derivatives;
+  TaylorDerivative<I> const& domain_derivatives=this->_data->_domain_derivatives;
+
   if(this->argument_size()!=x.size()) {
     ARIADNE_THROW(IncompatibleSizes,"TaylorModel::evaluate(Vector)","Incompatible argument size");
   }
@@ -281,7 +300,7 @@ TaylorModel<R>::evaluate(const Vector<I>& x) const
       wa*=pow(w[k],int(j[k]));
     }
     for(size_type i=0; i!=this->result_size(); ++i) {
-      result[i]+=this->_centre_derivatives[i][j]*wa;
+      result[i]+=centre_derivatives[i][j]*wa;
     }
   }
   for(MultiIndex j=MultiIndex::first(this->argument_size(),this->order()); j.degree()<=this->order(); ++j) {
@@ -290,7 +309,7 @@ TaylorModel<R>::evaluate(const Vector<I>& x) const
       wa*=pow(w[k],int(j[k]));
     }
     for(size_type i=0; i!=this->result_size(); ++i) {
-      result[i]+=this->_domain_derivatives[i][j]*wa;
+      result[i]+=domain_derivatives[i][j]*wa;
     }
   }
   return result;
@@ -551,6 +570,9 @@ template<class R>
 Matrix<typename TaylorModel<R>::I> 
 TaylorModel<R>::jacobian(const Vector<I>& x) const
 {
+  TaylorDerivative<I> const& centre_derivatives=this->_data->_centre_derivatives;
+  TaylorDerivative<I> const& domain_derivatives=this->_data->_domain_derivatives;
+
   Matrix<I> J(this->result_size(),this->argument_size());
   Vector<I> w=x-this->centre();
   array< array<I> > powers=this->_powers(w);
@@ -566,7 +588,7 @@ TaylorModel<R>::jacobian(const Vector<I>& x) const
           a*=powers[k][n[k]];
         }
         for(size_type i=0; i!=this->result_size(); ++i) {
-          J[i][j]+=a*this->_centre_derivatives[i][m];
+          J[i][j]+=a*centre_derivatives[i][m];
         }
       }
     }
@@ -580,7 +602,7 @@ TaylorModel<R>::jacobian(const Vector<I>& x) const
           a*=powers[k][n[k]];
         }
         for(size_type i=0; i!=this->result_size(); ++i) {
-          J[i][j]+=a*this->_domain_derivatives[i][m];
+          J[i][j]+=a*domain_derivatives[i][m];
         }
       }
     }
@@ -617,11 +639,11 @@ inverse(const TaylorModel<R>& p)
   for(MultiIndex m(p.result_size()); m.degree()<=p.order(); ++m) {
     if(m.degree()==0) {
       for(size_type i=0; i!=p.argument_size(); ++i) {
-        result._centre_derivatives[i][m]=v[i];
+        result._data->_centre_derivatives[i][m]=v[i];
       }
     } else if(m.degree()==1) {
       for(size_type i=0; i!=p.argument_size(); ++i) {
-        result._centre_derivatives[i][m]=invJ[i][m.position()-1];
+        result._data->_centre_derivatives[i][m]=invJ[i][m.position()-1];
       }
     } else {
       // FIXME: Add code for higher indices
@@ -685,8 +707,8 @@ TaylorModel<R>::write(std::ostream& os) const
     os << "  domain=" << this->domain() << ",\n" << std::flush;
     os << "  centre=" << this->centre() << ",\n" << std::flush;
     os << "  range=" << this->range() << ",\n" << std::flush;
-    os << "  expansion=" << this->_centre_derivatives << ",\n" << std::flush;
-    os << "  bounds=" << this->_domain_derivatives << ",\n" << std::flush;
+    os << "  expansion=" << this->centre_derivatives() << ",\n" << std::flush;
+    os << "  bounds=" << this->domain_derivatives() << ",\n" << std::flush;
   }
   os << ")\n";
   return os;

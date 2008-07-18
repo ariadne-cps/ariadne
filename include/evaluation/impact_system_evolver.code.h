@@ -163,10 +163,18 @@ set(const ApproximateTaylorModel<R>& model) const
 template<class ES>
 void
 Evolver<ImpactSystem<typename ES::real_type>,ES>::
-evolution(ESL& final_sets, ESL& reach_sets, ESL& intermediate_sets, const Sys& system, const ES& initial_set, const T& time) const
+_evolution(ESL& final_sets, 
+           ESL& reach_sets, 
+           ESL& intermediate_sets, 
+           const Sys& system, 
+           const ES& initial_set, 
+           const T& time, 
+           Semantics semantics, 
+           bool reach) const
 {
   uint verbosity=0;
   ARIADNE_LOG(5,__PRETTY_FUNCTION__);
+  assert(semantics==upper_semantics);
 
   const uint n=system.state_space().dimension();
   const uint spacial_order=2;
@@ -347,10 +355,12 @@ evolution(ESL& final_sets, ESL& reach_sets, ESL& intermediate_sets, const Sys& s
 }
 
 
+/*
 template<class ES>
 void
 Evolver<ImpactSystem<typename ES::real_type>,ES>::
 _evolution(ESL& final,
+           ESL& reachable,
            ESL& intermediate, 
            const Sys& sys,
            const ES& initial,
@@ -396,7 +406,7 @@ _evolution(ESL& final,
     }
   }
 }
-
+*/
 
 
 }  // namespace Ariadne

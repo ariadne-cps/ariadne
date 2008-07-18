@@ -35,6 +35,7 @@
 #include "numeric/float64.h" 
 namespace Ariadne { 
   namespace Python { 
+    typedef ApproximateFloat64 ApproximateFloatPy; 
     typedef Float64 FloatPy; 
     typedef Interval<FloatPy> IntervalPy;
   } // namespace Python 
@@ -45,6 +46,7 @@ namespace Ariadne {
 #include "numeric/floatmp.h" 
 namespace Ariadne { 
   namespace Python { 
+    typedef ApproximateFloatMP ApproximateFloatPy; 
     typedef FloatMP FloatPy; 
     typedef Interval<FloatPy> IntervalPy;
   }  // namespace Python

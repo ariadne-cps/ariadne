@@ -27,6 +27,8 @@
 #include "linear_algebra/vector.h"
 #include "linear_algebra/covector.h"
 #include "linear_algebra/matrix.h"
+#include "differentiation/taylor_derivative.h"
+#include "differentiation/sparse_differential.h"
 #include "function/affine_function.h"
 #include "function/identity_function.h"
 
@@ -82,16 +84,21 @@ image(const AffineFunction<X>& af, const Polytope<X>& pltp)\
 template<class R>
 void export_affine_function() 
 {
-  typedef typename traits<R>::arithmetic_type A;
+  typedef typename traits<R>::arithmetic_type I;
+  typedef typename traits<R>::approximate_arithmetic_type A;
 
-  class_< AffineFunction<R>, bases< FunctionInterface<R> > > affine_function_class("AffineFunction",init< Matrix<A>,Vector<A> >());
+  class_< AffineFunction<R>, bases< FunctionInterface<R> > > affine_function_class("AffineFunction",init< Matrix<I>,Vector<I> >());
   affine_function_class.def(init< Matrix<R>,Vector<R> >());
+  affine_function_class.def(init< Vector<I>,Matrix<I> >());
+  affine_function_class.def(init< Vector<R>,Matrix<R> >());
   affine_function_class.def("argument_size", &AffineFunction<R>::argument_size);
   affine_function_class.def("result_size", &AffineFunction<R>::result_size);
   affine_function_class.def("smoothness", &AffineFunction<R>::smoothness);
-  affine_function_class.def("__call__",(Vector<A>(AffineFunction<R>::*)(const Vector<A>&)const)(&AffineFunction<R>::evaluate));
-  affine_function_class.def("evaluate",(Vector<A>(AffineFunction<R>::*)(const Vector<A>&)const)(&AffineFunction<R>::evaluate));
-  affine_function_class.def("jacobian",(Matrix<A>(AffineFunction<R>::*)(const Vector<A>&)const)(&AffineFunction<R>::jacobian));
+  affine_function_class.def("__call__",(Vector<I>(AffineFunction<R>::*)(const Vector<I>&)const)(&AffineFunction<R>::evaluate));
+  affine_function_class.def("evaluate",(Vector<I>(AffineFunction<R>::*)(const Vector<I>&)const)(&AffineFunction<R>::evaluate));
+  affine_function_class.def("jacobian",(Matrix<I>(AffineFunction<R>::*)(const Vector<I>&)const)(&AffineFunction<R>::jacobian));
+  affine_function_class.def("derivative",(TaylorDerivative<I>(AffineFunction<R>::*)(const Vector<I>&)const)(&AffineFunction<R>::derivative));
+  affine_function_class.def("expansion",(SparseDifferentialVector<A>(AffineFunction<R>::*)(const Vector<A>&, const ushort&)const)(&AffineFunction<R>::expansion));
   affine_function_class.def(self_ns::str(self));
 
   class_< IdentityFunction<R>, bases< FunctionInterface<R> > > identity_function_class("IdentityFunction",init<uint>());

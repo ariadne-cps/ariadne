@@ -109,6 +109,7 @@ template<class ES>
 void
 Evolver< Map<typename ES::real_type>, ES>::
 _evolution(ESL& final,
+           ESL& reachable,
            ESL& intermediate, 
            const Sys& system,
            const ES& initial,
@@ -146,8 +147,9 @@ _evolution(ESL& final,
       ARIADNE_LOG(7,ts);
       ARIADNE_LOG(5,"\n");
       if(reach) {
-        intermediate.adjoin(ts.set());
+        reachable.adjoin(ts.set());
       }
+      intermediate.adjoin(ts.set());
       working.adjoin(ts);
     }
   }

@@ -81,13 +81,13 @@ namespace Ariadne {
       using EvolverBase<Sys,ES>::reach;
       /*! \brief Compute an approximation to the evolution set using upper semantics. */
       ESL evolve(const Sys& system, const ES& initial_set, const T& time) const {
-        ESL final; ESL intermediate; this->_evolution(final,intermediate,system,initial_set,time,upper_semantics,false); return final; }
+        ESL final; ESL reachable; ESL intermediate; this->_evolution(final,reachable,intermediate,system,initial_set,time,upper_semantics,false); return final; }
       /*! \brief Compute an approximation to the evolution set under upper semantics. */
       ESL reach(const Sys& system, const ES& initial_set, const T& time) const {
-        ESL final; ESL intermediate; this->_evolution(final,intermediate,system,initial_set,time,upper_semantics,true); 
+        ESL final; ESL reachable; ESL intermediate; this->_evolution(final,reachable,intermediate,system,initial_set,time,upper_semantics,true); 
         return intermediate; }
      protected:
-      virtual void _evolution(ESL& final, ESL& intermediate, 
+      virtual void _evolution(ESL& final, ESL& reachable, ESL& intermediate, 
                               const Sys& system, const ES& initial, const T& time, 
                               Semantics semantics, bool reach) const;
      private:

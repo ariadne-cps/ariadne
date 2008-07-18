@@ -75,7 +75,6 @@ void export_taylor_series()
   class_<TS> taylor_series_class(python_name<R>("TaylorSeries").c_str());
   taylor_series_class.def("__init__", make_constructor(&make_taylor_series<R>));
   taylor_series_class.def( init< uint >());
-  taylor_series_class.def( init< TV >());
   taylor_series_class.def("degree", &TS::degree);
   taylor_series_class.def("__getitem__", &get_item<A>);
   taylor_series_class.def("__setitem__",&set_item<A,double>);

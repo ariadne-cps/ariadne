@@ -52,6 +52,8 @@ bool tribool_nonzero(tribool tb) {
 
 tribool tribool_indeterminate() { return indeterminate; }
 
+bool possibly(bool b) { return b; }
+
 void export_tribool() {
 
   class_<tribool>("tribool",init<bool>())
@@ -73,6 +75,8 @@ void export_tribool() {
   ;
   
   def("indeterminate",(tribool(*)(void))&tribool_indeterminate);
+  def("possibly",(bool(*)(tribool))&possibly);
+  def("possibly",(bool(*)(bool))&possibly);
   // no facility for wrapping C++ constants
   // def("Indeterminate",tribool_indeterminate_constant);
 

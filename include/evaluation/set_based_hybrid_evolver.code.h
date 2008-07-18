@@ -243,6 +243,7 @@ void
 Evolver< HybridAutomaton<R>, Zonotope<R> >::
 _step(HESL& evolve,
       HESL& reach,
+      HESL& intermediate,
       THESL& working,
       const HA& automaton, 
       const Q& time,
@@ -304,6 +305,7 @@ _step(HESL& evolve,
     ARIADNE_LOG(9,", inv="<<mode.invariant().bounding_box()<<"\n");
     if(rh==h) {
       ARIADNE_LOG(2,"Continuous step: push with t="<<Q(t+h)<<" n="<<n<<"\n");
+      intermediate.adjoin(HES(ds,ebs));
       working.push(THES(Q(t+h),n,ds,ebs));
     }
   
@@ -346,6 +348,7 @@ _step(HESL& evolve,
             ARIADNE_ASSERT(imt>=t);
             ARIADNE_ASSERT(imt<=Q(t+h));
             ARIADNE_LOG(2,"Transition: push with imt="<<imt<<" imn="<<imn<<"\n");
+            intermediate.adjoin(HES(imds,imbs));
             working.push(THES(imt,imn,imds,imbs));
           }
         }
@@ -364,6 +367,7 @@ _step(HESL& evolve,
 template<class R> void
 Evolver< HybridAutomaton<R>, Zonotope<R> >::
 _evolution(HybridEnclosureSetList& final,
+           HybridEnclosureSetList& reachable,
            HybridEnclosureSetList& intermediate,
            const Automaton& automaton,
            const HybridEnclosureSet& initial,
@@ -375,7 +379,7 @@ _evolution(HybridEnclosureSetList& final,
 
   ARIADNE_LOG(5,"  working_set="<<working<<"\n\n");	
   while(working.size()!=0) { 
-    this->_step(final,intermediate,working,automaton,time,semantics);
+    this->_step(final,reachable,intermediate,working,automaton,time,semantics);
     ARIADNE_LOG(3,"  working_set="<<working<<"\n\n");	
   }
   return;

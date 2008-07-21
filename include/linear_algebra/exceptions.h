@@ -45,6 +45,11 @@ namespace Ariadne {
       IncompatibleSizes(const std::string& str) : std::runtime_error(str) { }
     };
 
+    /*! \brief A matrix is singular. */
+    struct SingularMatrixException : public std::runtime_error {
+      SingularMatrixException(const std::string& str) : std::runtime_error(str) { }
+   };
+
     //@}
 
 

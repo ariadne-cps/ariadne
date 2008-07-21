@@ -173,7 +173,7 @@ namespace Ariadne {
     bool
     LUMatrix<Real>::singular() const
     {
-      return this->determinant()==Real(0); 
+      return possibly(this->determinant()==Real(0)); 
     }
 
     template<class Real>
@@ -196,6 +196,7 @@ namespace Ariadne {
     Matrix<Real>
     LUMatrix<Real>::inverse() const
     {
+      if(this->singular()) { throw(SingularMatrixException("SingularMatrix")); }
       size_type n=this->number_of_rows();
       Matrix<Real> result(n,n);
       TBLAS::geset(TBLAS::RowMajor,n,n,Real(0),Real(1),result.begin(),n);

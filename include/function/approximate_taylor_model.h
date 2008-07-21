@@ -46,7 +46,9 @@ template<class R> class FunctionInterface;
 
 template<class R> ApproximateTaylorModel<R> operator+(const ApproximateTaylorModel<R>&, const ApproximateTaylorModel<R>&);
 template<class R> ApproximateTaylorModel<R> operator-(const ApproximateTaylorModel<R>&, const ApproximateTaylorModel<R>&);
+template<class R> ApproximateTaylorModel<R> operator*(const ApproximateTaylorModel<R>&, const ApproximateTaylorModel<R>&);
 
+template<class R> ApproximateTaylorModel<R> operator*(const ApproximateTaylorModel<R>&, const R& c);
 
 template<class R> ApproximateTaylorModel<R> project(const ApproximateTaylorModel<R>&, const Slice& slc);
 template<class R> ApproximateTaylorModel<R> recentre(const ApproximateTaylorModel<R>&, const Vector< Interval<R> >& bx, const Vector<R>& pt);
@@ -55,6 +57,7 @@ template<class R> ApproximateTaylorModel<R> truncate(const ApproximateTaylorMode
 template<class R> std::pair<Vector<Interval<R> >, Matrix<R> > affine_model(const ApproximateTaylorModel<R>&);
 
 template<class R> ApproximateTaylorModel<R> join(const ApproximateTaylorModel<R>& f, const ApproximateTaylorModel<R>& g);
+template<class R> ApproximateTaylorModel<R> embed(const ApproximateTaylorModel<R>& f, const Vector< Interval<R> >& bx, const Vector<R>& pt, uint start);
 template<class R> ApproximateTaylorModel<R> combine(const ApproximateTaylorModel<R>& f, const ApproximateTaylorModel<R>& g);
 
 template<class R> ApproximateTaylorModel<R> compose(const ApproximateTaylorModel<R>&, const ApproximateTaylorModel<R>&);
@@ -132,6 +135,11 @@ class ApproximateTaylorModel {
   //! \brief Construct an affine model with the given domain, centre, value, jacobian, order and smoothness.
   static ApproximateTaylorModel<R> affine(const Vector<I>& domain, const Vector<R>& centre,
                                           const Vector<A>& value, const Matrix<A>& jacobian,
+                                          ushort order, ushort smoothness);
+  
+  //! \brief Construct an affine model in one variable with the given domain, centre, value, derivative, order and smoothness.
+  static ApproximateTaylorModel<R> affine(const I& domain, const R& centre,
+                                          const A& value, const A& derivative,
                                           ushort order, ushort smoothness);
   
   

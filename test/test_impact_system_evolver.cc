@@ -42,21 +42,25 @@ int main() {
   Evolver<ImpactSystem<R>,Zonotope<R> > evolver;
   std::cout << "evolver = " << evolver << std::endl;
 
-  FunctionInterface<R>* dynamic=new AffineFunction<R>(Vector<R>("[0.25,0]"),Matrix<R>("[0.25,-0.5;0.5,0.25]"));
-  FunctionInterface<R>* reset=new AffineFunction<R>(Vector<R>("[-1,0]"),Matrix<R>("[1,0;0,1]"));
-  FunctionInterface<R>* guard=new AffineFunction<R>(Vector<R>("[-1]"),Matrix<R>("[1,0]"));
+  FunctionInterface<R>* dynamic=new AffineFunction<R>(Vector<R>("[1,0]"),Matrix<R>("[0.0,0.0;-1.0,0.0]"));
+  FunctionInterface<R>* reset=new AffineFunction<R>(Vector<R>("[-0.5,-1.0]"),Matrix<R>("[0.9,0;0,0.9]"));
+  FunctionInterface<R>* guard=new AffineFunction<R>(Vector<R>("[-1]"),Matrix<R>("[0,1]"));
 
   ImpactSystem<R> impact_oscillator(*dynamic,*guard,*reset);
 
-  Box<R> initial_box("[0.49,0.51]x[-0.51,-0.49]"); // initial state
+  //Box<R> initial_box("[-1.51,-1.49]x[-0.01,+0.01]"); // initial state
+  //Box<R> initial_box("[-1.51,-1.49]x[0.49,0.51]"); // initial state
+  Box<R> initial_box("[-1.71,-1.69]x[0.49,0.51]"); // initial state
   Zonotope<R> initial_set(initial_box);
   Rational time=3.5;
+  Integer steps=3;
+  HybridTime hybrid_time(time,steps);
 
   ListSet< Zonotope<R> > evolve_sets;
   ListSet< Zonotope<R> > reach_sets;
   ListSet< Zonotope<R> > intermediate_sets;
 
-  evolver.evolution(evolve_sets,reach_sets,intermediate_sets,impact_oscillator,initial_set,time);
+  evolver.evolution(evolve_sets,reach_sets,intermediate_sets,impact_oscillator,initial_set,hybrid_time);
 
   std::cout << "\nfinal:\n";
   for(uint i=0; i!=evolve_sets.size(); ++i) {
@@ -74,8 +78,9 @@ int main() {
   std::cout << initial_set << std::endl;
 
   epsfstream eps;
-  eps.open("test_impact_system_evolver.eps",Box<R>("[-1.25,1.25]x[-2,2]"));
-  eps << fill_colour(cyan) << Box<R>("[1,1.25]x[-2,2]");
+  eps.open("test_impact_system_evolver.eps",Box<R>("[-2.125,2.125]x[-1.25,1.25]"));
+  //eps << fill_colour(cyan) << Box<R>("[1,1.25]x[-2,2]");
+  eps << fill_colour(cyan) << Box<R>("[-3,3]x[1,2]");
   for(uint i=0; i!=reach_sets.size(); ++i) {
     eps << fill_colour(green) << reach_sets[i];
   }

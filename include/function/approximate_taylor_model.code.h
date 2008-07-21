@@ -29,6 +29,7 @@
 #include "linear_algebra/matrix.h"
 #include "differentiation/multi_index.h"
 #include "differentiation/sparse_differential.h"
+#include "function/exceptions.h"
 #include "function/approximate_taylor_model.h"
 #include "function/function_interface.h"
 #include "function/function_model_concept.h"
@@ -161,6 +162,19 @@ ApproximateTaylorModel<R>::affine(const Vector<I>& domain, const Vector<R>& cent
 {
   SparseDifferentialVector<A> expansion=SparseDifferentialVector<A>::affine(value.size(),domain.size(),order,value,jacobian);
   return ApproximateTaylorModel<R>(domain,centre,expansion);
+}
+
+
+template<class R>
+ApproximateTaylorModel<R>
+ApproximateTaylorModel<R>::affine(const I& domain, const R& centre,
+                                  const A& value, const A& derivative,
+                                  ushort order, ushort smoothness)
+{
+  SparseDifferentialVector<A> expansion(1u,1u,order);
+  expansion[0].set_value(value);
+  expansion[0].set_gradient(0,derivative);
+  return ApproximateTaylorModel<R>(Vector<I>(1u,domain),Vector<R>(1u,centre),expansion);
 }
 
 
@@ -350,6 +364,13 @@ project(const ApproximateTaylorModel<R>& f, const Slice& slc)
 
 template<class R> 
 ApproximateTaylorModel<R> 
+embed(const ApproximateTaylorModel<R>& f, const Vector< Interval<R> >& new_domain, const Vector<R>& new_centre, uint start)
+{
+  return ApproximateTaylorModel<R>(new_domain,new_centre,embed(f.expansion(),new_centre.size(),start));
+}
+
+template<class R> 
+ApproximateTaylorModel<R> 
 join(const ApproximateTaylorModel<R>& f, const ApproximateTaylorModel<R>& g)
 {
   typedef typename traits<R>::approximate_arithmetic_type A;
@@ -460,6 +481,43 @@ operator-(const ApproximateTaylorModel<R>& f,
 
 template<class R> 
 ApproximateTaylorModel<R> 
+operator*(const ApproximateTaylorModel<R>& f,
+          const ApproximateTaylorModel<R>& g)
+{
+  typedef typename traits<R>::approximate_arithmetic_type A;
+  ARIADNE_ASSERT(f.domain()==g.domain());
+  ARIADNE_ASSERT(f.centre()==g.centre());
+  ARIADNE_ASSERT(f.result_size()==1u || g.result_size()==1u);
+  const SparseDifferential<A>* se;
+  const Vector< SparseDifferential<A> >* ve;
+  if(f.result_size()==1u) {
+    se=&(f.expansion()[0]);
+    ve=&g.expansion();
+  } else {
+    se=&(g.expansion()[0]);
+    ve=&f.expansion();
+  }
+  SparseDifferentialVector<A> he(ve->size());
+  Vector< SparseDifferential<A> >& hev=he;
+  for(uint i=0; i!=ve->size(); ++i) {
+    hev[i] = (*se) * ((*ve)[i]);
+  }
+  return ApproximateTaylorModel<R>(f.domain(),f.centre(),he);
+}
+
+
+template<class R> 
+ApproximateTaylorModel<R> 
+operator*(const ApproximateTaylorModel<R>& f,
+          const R& c)
+{
+  typedef typename traits<R>::approximate_arithmetic_type A;
+  return ApproximateTaylorModel<R>(f.domain(),f.centre(),f.expansion()*A(c));
+}
+
+
+template<class R> 
+ApproximateTaylorModel<R> 
 compose(const ApproximateTaylorModel<R>& f,
         const ApproximateTaylorModel<R>& g)
 {
@@ -531,7 +589,15 @@ inverse(const ApproximateTaylorModel<R>& f,
   SparseDifferentialVector<A> fet=translate(f.expansion(),tr);
   Vector<I> gd=f.domain();
   Vector<A> gc=fet.value();
-  SparseDifferentialVector<A> ge=inverse(fet);
+  
+  SparseDifferentialVector<A> ge;
+  try {
+    ge=inverse(fet);
+  } 
+  catch(const SingularMatrixException&) {
+    throw NonInvertibleFunctionException("inverse function model");
+  }
+
   // FIXME: Change domain
   return ApproximateTaylorModel<R>(gd,gc,ge);
 }
@@ -579,7 +645,14 @@ implicit(const ApproximateTaylorModel<R>& f)
   fet.set_value(Vector<A>(fe.result_size(),0.0));
   //std::cerr<<"fet="<<fet<<std::endl;
 
-  SparseDifferentialVector<A> he=implicit(fet);
+  SparseDifferentialVector<A> he;
+  try {
+    he=implicit(fet);
+  } 
+  catch(const SingularMatrixException&) {
+    ARIADNE_THROW(NonInvertibleFunctionException,__FUNCTION__,fet);
+  }
+
   //std::cerr<<"he="<<he<<std::endl;
   he+=v;
   //std::cerr<<"he="<<he<<std::endl;
@@ -842,14 +915,16 @@ ApproximateTaylorModel<R>::_instantiate()
 {
   Slice* slc=0;
   Vector<R>* v=0;
+  Vector< Interval<R> >* iv=0;
   ApproximateTaylorModel<R>* atm=0;
   std::ostream* os = 0;
 
   operator+(*atm,*atm);
   operator-(*atm,*atm);
+  operator*(*atm,*atm);
   
   project(*atm,*slc);
-  join(*atm,*atm);
+  embed(*atm,*iv,*v,0u);
   combine(*atm,*atm);
   derivative(*atm,0u);
   antiderivative(*atm,0u);

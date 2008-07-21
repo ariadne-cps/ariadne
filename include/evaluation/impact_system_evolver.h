@@ -103,20 +103,21 @@ namespace Ariadne {
       void evolution(ESL& final_sets, ESL& reach_sets, ESL& intermediate_sets, const Sys& system, const ES& initial_set, const T& time) const {
         return this->_evolution(final_sets, reach_sets, intermediate_sets, system, initial_set, time, upper_semantics, true); }
      private:
+      ATM _integration_step(const ATM& flow_model, const ATM& initial_set_model, const ATM& integration_time_model) const;
+      ATM _reachability_step(const ATM& flow_model, const ATM& initial_set_model, const ATM& integration_time_model) const;
+     private:
       // Helper functions for accessing parameters
-      uint verbosity() const { 
-        return this->_parameters->verbosity(); }
-      T maximum_step_size() const { 
+      Rational maximum_step_size() const { 
         return this->_parameters->maximum_step_size(); }
       R maximum_enclosure_radius() const { 
         return this->_parameters->maximum_enclosure_radius(); }
      private:
       // Services provided by other classes
-      std::pair<T,IVec> flow_bounds(const FN& vf, const IVec& bx) const {
-        std::pair<T,Bx> bounds=this->_integrator->flow_bounds(VF(vf),Bx(bx),this->maximum_step_size()); 
+      std::pair<Rational,IVec> flow_bounds(const FN& vf, const IVec& bx) const {
+        std::pair<Rational,Bx> bounds=this->_integrator->flow_bounds(VF(vf),Bx(bx),this->maximum_step_size()); 
         return std::make_pair(bounds.first,bounds.second.position_vectors()); }
-      std::pair<T,IVec> flow_bounds(const VF& vf, const IVec& bx, const T& h) const {
-        std::pair<T,Bx> bounds=this->_integrator->flow_bounds(VF(vf),Bx(bx),h); 
+      std::pair<Rational,IVec> flow_bounds(const VF& vf, const IVec& bx, const Rational& h) const {
+        std::pair<Rational,Bx> bounds=this->_integrator->flow_bounds(VF(vf),Bx(bx),h); 
         return std::make_pair(bounds.first,bounds.second.position_vectors()); }
       R radius(const ES& s) const {
         return s.radius(); }
@@ -147,7 +148,8 @@ namespace Ariadne {
       boost::shared_ptr< ReducerInterface<ES> > _reducer;
 
       boost::shared_ptr< EvolutionProfiler >  _profiler;
- 
+     public:
+      uint verbosity;
     };
 
 

@@ -41,6 +41,7 @@
 #include <boost/shared_ptr.hpp>
 #include "function/function_interface.h"
 #include "geometry/euclidean_space.h"
+#include "evaluation/hybrid_time.h"
 
 
 namespace Ariadne {
@@ -64,7 +65,7 @@ class ImpactSystem {
   typedef typename traits<R>::interval_type I; 
  public:
   /*! \brief The type used to represent time. */
-  typedef Rational time_type;
+  typedef HybridTime time_type;
   /*! \brief The real number type. */
   typedef R real_type;
   /*! \brief The type used to describe the state space. */

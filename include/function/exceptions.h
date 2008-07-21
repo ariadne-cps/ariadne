@@ -39,6 +39,10 @@ namespace Ariadne {
       InvalidParameters(const std::string& what) : std::runtime_error(what) { } 
     };
 
+    struct NonInvertibleFunctionException : public std::runtime_error { 
+      NonInvertibleFunctionException(const std::string& what) : std::runtime_error(what) { } 
+    };
+
 } // namespace Ariadne
 
 #define ARIADNE_CHECK_ARGUMENT_SIZE(function,argument,func) \

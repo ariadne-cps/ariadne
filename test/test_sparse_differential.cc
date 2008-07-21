@@ -232,6 +232,8 @@ class TestSparseDifferentialVector {
   void test_implicit() {
     double ax[30]={ 0.0,  2.0,1.0,3.0,1.0, 4.0,5.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
                     0.0,  1.0,1.0,2.0,1.0, 3.0,4.0,0.0,6.0,0.0,7.0,0.0,0.0,0.0,0.0 };
+    double bx[30]={ 0.0,  2.0,1.0,2.0,1.0, 4.0,5.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
+                    0.0,  1.0,1.0,2.0,1.0, 3.0,4.0,0.0,6.0,0.0,7.0,0.0,0.0,0.0,0.0 };
     Vector<X> c(2);
     SparseDifferentialVector<X> id1=SparseDifferentialVector<X>::variable(1,1,2,Vector<X>(1));
     SparseDifferentialVector<X> id2=SparseDifferentialVector<X>::variable(2,2,2,Vector<X>(2));
@@ -245,6 +247,8 @@ class TestSparseDifferentialVector {
     ARIADNE_TEST_PRINT(z);
     ARIADNE_TEST_EQUAL(compose(x,z),SparseDifferentialVector<X>::constant(2,2,2,Vector<X>(2)));
     
+    x=SparseDifferentialVector<X>(2,4,2,bx);
+    ARIADNE_TEST_THROW(implicit(x),SingularMatrixException);
   }
 };
 

@@ -47,6 +47,7 @@ namespace Ariadne {
     /*! \brief A class containing a continuous time \c time() and a discrete time \c steps() . */
     class HybridTime {
      public:
+      HybridTime() : _time(0), _steps(0) { }
       HybridTime(Rational t) : _time(t), _steps(0) { }
       HybridTime(Rational t, Integer s) : _time(t), _steps(s) { }
       Rational& time() { return this->_time; }

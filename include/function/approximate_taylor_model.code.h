@@ -156,6 +156,27 @@ ApproximateTaylorModel<R>::constant(const Vector<I>& domain, const Vector<R>& ce
 
 template<class R>
 ApproximateTaylorModel<R>
+ApproximateTaylorModel<R>::scaling(const Vector<I>& domain, const Vector<R>& centre,
+                                   const Vector<I>& range,
+                                   ushort order, ushort smoothness)
+{
+  ARIADNE_ASSERT(domain.size()==range.size());
+  ARIADNE_ASSERT(midpoint(domain)==centre);
+  uint n=domain.size();
+  
+  Vector<A> value(midpoint(range));
+  SparseDifferentialVector<A> expansion(n,n,order);
+  for(uint i=0; i!=n; ++i) {
+    expansion[i].set_value(value[i]);
+    expansion[i].set_gradient(i,A(domain[i].radius())/A(range[i].radius()));
+  }
+  
+  return ApproximateTaylorModel(domain,centre,expansion);
+}
+
+
+template<class R>
+ApproximateTaylorModel<R>
 ApproximateTaylorModel<R>::affine(const Vector<I>& domain, const Vector<R>& centre,
                                   const Vector<A>& value, const Matrix<A>& jacobian,
                                   ushort order, ushort smoothness)

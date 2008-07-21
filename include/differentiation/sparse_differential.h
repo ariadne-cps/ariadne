@@ -1082,6 +1082,15 @@ scale(const SparseDifferentialVector<X>& x, const Vector<X>& s)
   return evaluate(x,t);
 }
 
+
+template<class X>
+std::ostream& operator<<(std::ostream& os, const SparseDifferentialVector<X>& x)
+{
+  const Vector< SparseDifferential<X> >& xv=x;
+  return os << xv;
+}
+
+
 } //namespace Ariadne
 
 #endif /* ARIADNE_SPARSE_DIFFERENTIAL_H */

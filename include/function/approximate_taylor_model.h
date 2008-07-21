@@ -132,6 +132,11 @@ class ApproximateTaylorModel {
                                             const Vector<A>& value,
                                             ushort order, ushort smoothness);
   
+  //! \brief Construct an affine model which scales the domain onto the range. The centre must be the midpoint of the domain.
+  static ApproximateTaylorModel<R> scaling(const Vector<I>& domain, const Vector<R>& centre,
+                                            const Vector<I>& range,
+                                            ushort order, ushort smoothness);
+  
   //! \brief Construct an affine model with the given domain, centre, value, jacobian, order and smoothness.
   static ApproximateTaylorModel<R> affine(const Vector<I>& domain, const Vector<R>& centre,
                                           const Vector<A>& value, const Matrix<A>& jacobian,

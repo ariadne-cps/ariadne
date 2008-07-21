@@ -40,8 +40,6 @@
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
 
-#include "differentiation/sparse_differential.h"
-
 #include "function/function_interface.h"
 #include "function/affine_function.h"
 #include "function/constant_function.h"
@@ -132,14 +130,13 @@ ApproximateTaylorModel<typename ES::real_type>
 Evolver<ImpactSystem<typename ES::real_type>,ES>::
 model(const ES& set, ushort d) const
 {
-  uint n=set.dimension();
-  uint m=set.number_of_generators();
-  Vector<I> set_domain=set.domain().position_vectors();
-  SparseDifferentialVector<A> set_expansion(n,m,d,
-                                            Vector<A>(set.centre().position_vector()),
-                                            reinterpret_cast<Matrix<A>const&>(set.generators()));
-  ApproximateTaylorModel<R> set_model(set_domain,midpoint(set_domain),set_expansion);
-  return set_model;
+  ushort order=d;
+  ushort smoothness=d;
+  Vector<I> domain=set.domain().position_vectors();
+  Vector<R> midpoint=Ariadne::midpoint(domain);
+  Vector<A> centre=Vector<A>(set.centre().position_vector());
+  Matrix<A> const& generators=reinterpret_cast<Matrix<A>const&>(set.generators());
+  return ApproximateTaylorModel<R>::affine(domain,midpoint,centre,generators,order,smoothness);
 }
 
   
@@ -152,7 +149,7 @@ set(const ApproximateTaylorModel<R>& model) const
   uint m=model.argument_size();
   Vector<I> set_centre(n);
   Matrix<R> set_generators(n,m);
-  make_lpair(set_centre,set_generators) = affine(model);
+  make_lpair(set_centre,set_generators) = affine_model(model);
   ES enclosure_set(Point<I>(set_centre),set_generators);
   return enclosure_set;
 }
@@ -193,8 +190,9 @@ _evolution(ESL& final_sets,
     ApproximateTaylorModel<R> initial_set_model=this->model(initial_set,spacial_order);
     ARIADNE_LOG(6,"initial_set_model = "<<initial_set_model<<"\n");
     
-    ApproximateTaylorModel<R> initial_time_model(initial_set_model.domain(),initial_set_model.centre(),
-                                                 SparseDifferentialVector<A>::constant(1,n,order,Vector<A>(1,A(0))));
+    ApproximateTaylorModel<R> initial_time_model
+      =ApproximateTaylorModel<R>::constant(initial_set_model.domain(),initial_set_model.centre(),
+                                           Vector<A>(1,A(0)),order,smoothness);
     ARIADNE_LOG(6,"initial_time_model = "<<initial_time_model<<"\n");
     ApproximateTaylorModel<R> initial_timed_set_model=join(initial_set_model,initial_time_model);
     ARIADNE_LOG(6,"initial_timed_set_model = "<<initial_timed_set_model<<"\n");
@@ -244,10 +242,7 @@ _evolution(ESL& final_sets,
     ApproximateTaylorModel<R> reach_time_model;
     
     if(possibly(hitting)) { // hitting
-      SparseDifferentialVector<A> guard_expansion=guard_function.expansion(midpoint(flow_bounds),order);
       ARIADNE_LOG(6,"guard_function = "<<guard_function<<"\n");
-      ARIADNE_LOG(6,"guard_centre = "<<midpoint(flow_bounds)<<"\n");
-      ARIADNE_LOG(6,"guard_expansion = "<<guard_expansion<<"\n");
 
       guard_model=ApproximateTaylorModel<R>(flow_bounds,guard_function,order,smoothness);
       ARIADNE_LOG(6,"guard_model = "<<guard_model<<"\n");
@@ -263,8 +258,7 @@ _evolution(ESL& final_sets,
       I initial_time_range=initial_time_model.range()[0];
       ARIADNE_ASSERT(A(initial_time_range.lower())+step_size > A(initial_time_range.upper()));
       A final_time=A(initial_time_range.lower())+step_size;
-      SparseDifferentialVector<A> final_time_expansion=SparseDifferentialVector<A>::constant(1u,n,order,Vector<A>(1u,final_time));
-      final_time_model=ApproximateTaylorModel<R>(initial_set_model.domain(),initial_set_model.centre(),final_time_expansion);
+      final_time_model=ApproximateTaylorModel<R>::constant(initial_set_model.domain(),initial_set_model.centre(),Vector<A>(1u,final_time),order,smoothness);
       ARIADNE_LOG(6,"final_time_model = "<<final_time_model<<"\n");
       integration_time_model=final_time_model-initial_time_model;
       ARIADNE_LOG(6,"integration_time_model = "<<integration_time_model<<"\n");
@@ -278,13 +272,9 @@ _evolution(ESL& final_sets,
     //final_set_model=compose(flow_model,hitting_model<<"\n");
     //final_time_model=initial_time_model+hitting_time_model;
 
-    SparseDifferentialVector<A> step_expansion(n+1,n,order);
-    step_expansion[n]=integration_time_model.expansion()[0];
-    for(uint i=0; i!=n; ++i) {
-      step_expansion[i].gradient(i)=1.0;
-    }
-    ARIADNE_LOG(6,"step_expansion = "<<step_expansion<<"\n");
-    ApproximateTaylorModel<R> time_flow_model(Vector<I>(n,I(-1,1)),Vector<R>(n,R(0)),step_expansion);
+    ApproximateTaylorModel<R> identity_model=ApproximateTaylorModel<R>::identity(integration_time_model.domain(),integration_time_model.centre(),order,smoothness);
+    ARIADNE_LOG(6,"identity_model = "<<identity_model<<"\n");
+    ApproximateTaylorModel<R> time_flow_model=join(identity_model,integration_time_model);
     ARIADNE_LOG(6,"time_flow_model = "<<time_flow_model<<"\n");
     ApproximateTaylorModel<R> integration_step_model=compose(flow_model,time_flow_model);
     ARIADNE_LOG(6,"integration_step_model = "<<integration_step_model<<"\n");
@@ -301,30 +291,50 @@ _evolution(ESL& final_sets,
     
     // Compute the reachable set
     // Need an extra independent variable to represent time
+    
+    /*
     SparseDifferentialVector<A> space_expansion(n,n+1,order);
     for(uint i=0; i!=n; ++i) { space_expansion[i][i]=1; }
-    //ARIADNE_LOG(6,"space_expansion = "<<space_expansion<<"\n");
-    SparseDifferentialVector<A> time_expansion(1,n+1,order);
-    time_expansion[0].value()=A(h)/2;
-    time_expansion[0].gradient(n)=A(h)/2;
-    //ARIADNE_LOG(6,"time_expansion = "<<time_expansion<<"\n");
     ApproximateTaylorModel<R> space_expansion_model(Vector<I>(n+1,I(-1,1)),Vector<R>(n+1,R(0)),space_expansion);
     ARIADNE_LOG(6,"space_expansion_model = "<<space_expansion_model<<"\n");
     ARIADNE_LOG(6,"intial_set_model = "<<initial_set_model<<"\n");
     ApproximateTaylorModel<R> expanded_set_model=compose(initial_set_model,space_expansion_model);
     ARIADNE_LOG(6,"expanded_set_model = "<<expanded_set_model<<"\n");
+    SparseDifferentialVector<A> time_expansion(1u,n+1,order);
+    A hh=A(h)/2; time_expansion[0]=hh; time_expansion[0][n]=hh;
     ApproximateTaylorModel<R> expanded_time_model(Vector<I>(n+1,I(-1,1)),Vector<R>(n+1,R(0)),time_expansion);
     ARIADNE_LOG(6,"expanded_time_model = "<<expanded_time_model<<"\n");
     ApproximateTaylorModel<R> expanded_timed_set_model=join(expanded_set_model,expanded_time_model);
     ARIADNE_LOG(6,"expanded_timed_set_model = "<<expanded_timed_set_model<<"\n");
+    */
     
+    ApproximateTaylorModel<R> time_model;
+    ApproximateTaylorModel<R> expanded_timed_set_model;
+
+    
+    //Currently, can only convert model with domain the unit box to an affine model,
+    //so can't use real time domain
+    //Vector<I> time_domain(1,I(0u,h));
+    //time_model=ApproximateTaylorModel<R>::identity(time_domain,midpoint(time_domain),order,smoothness);
+
+    A hh=A(h)/2; 
+    Vector<I> unit_interval(1,I(-1,1));
+    Vector<A> time_centre(1); time_centre[0]=hh;
+    Matrix<A> time_generator(1,1); time_generator[0][0]=hh;
+    time_model=ApproximateTaylorModel<R>::affine(unit_interval,midpoint(unit_interval),time_centre,time_generator,order,smoothness);
+    
+    ARIADNE_LOG(6,"time_model = "<<time_model<<"\n");
+    expanded_timed_set_model=combine(initial_set_model,time_model);
+    ARIADNE_LOG(6,"expanded_timed_set_model = "<<expanded_timed_set_model<<"\n");
+
     reach_set_model=compose(flow_model,expanded_timed_set_model);
     ARIADNE_LOG(6,"reach_set_model = "<<reach_set_model<<"\n");
     
 
     ApproximateTaylorModel<R> jump_set_model;
     if(possibly(hitting)) {
-      ApproximateTaylorModel<R> reset_model(final_set_model.range(),Vector<R>(final_set_model.expansion().value()),reset_map,spacial_order,smoothness);
+      Vector<A> reset_model_centre(final_set_model.evaluate(Vector<A>(final_set_model.centre())));
+      ApproximateTaylorModel<R> reset_model(final_set_model.range(),reset_model_centre,reset_map,spacial_order,smoothness);
       ARIADNE_LOG(6,"reset_model = "<<reset_model<<"\n");
       jump_set_model=compose(reset_model,final_set_model);
       ARIADNE_LOG(6,"jump_set_model = "<<jump_set_model<<"\n");
@@ -335,8 +345,9 @@ _evolution(ESL& final_sets,
   
     // Compute final set from model
     ES final_set=this->set(final_set_model);
-    T t=T(final_time_model.expansion().value()[0]._value);
-    
+    //T t=T(final_time_model.expansion().value()[0]._value);
+    T t=T(midpoint(final_time_model.range()[0]));
+
     reach_sets.adjoin(reach_set);
     if(possibly(hitting)) {
       ES jump_set=this->set(jump_set_model);

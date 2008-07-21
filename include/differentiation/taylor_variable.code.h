@@ -234,6 +234,25 @@ compose(const TaylorSeries<X>& y, const TaylorVariable<X>& x)
   return z;
 }
 
+template<class X>
+TaylorVariable<X> 
+embed(const TaylorVariable<X>& x, 
+      uint size, uint start)
+{  
+  assert(start+x.argument_size()<=size);
+  TaylorVariable<X> r(size,x.degree());
+  MultiIndex jr(size);
+  for(MultiIndex jx(x.argument_size()); jx.degree()<=x.degree(); ++jx)
+  {
+    for(uint k=0; k!=x.argument_size(); ++k) {
+      jr.set(start+k,jx[k]);
+    }
+    r[jr]=x[jx];
+  }
+  return r;
+}
+
+
 template<class X> 
 TaylorVariable<X> 
 derivative(const TaylorVariable<X>& x, size_type k)

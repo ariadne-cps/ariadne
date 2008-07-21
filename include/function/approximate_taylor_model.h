@@ -52,9 +52,10 @@ template<class R> ApproximateTaylorModel<R> project(const ApproximateTaylorModel
 template<class R> ApproximateTaylorModel<R> recentre(const ApproximateTaylorModel<R>&, const Vector< Interval<R> >& bx, const Vector<R>& pt);
 template<class R> ApproximateTaylorModel<R> restrict(const ApproximateTaylorModel<R>&, const Vector< Interval<R> >& bx);
 template<class R> ApproximateTaylorModel<R> truncate(const ApproximateTaylorModel<R>&, const Vector<R>&, uint, uint);
-template<class R> std::pair<Vector<Interval<R> >, Matrix<R> > affine(const ApproximateTaylorModel<R>&);
+template<class R> std::pair<Vector<Interval<R> >, Matrix<R> > affine_model(const ApproximateTaylorModel<R>&);
 
 template<class R> ApproximateTaylorModel<R> join(const ApproximateTaylorModel<R>& f, const ApproximateTaylorModel<R>& g);
+template<class R> ApproximateTaylorModel<R> combine(const ApproximateTaylorModel<R>& f, const ApproximateTaylorModel<R>& g);
 
 template<class R> ApproximateTaylorModel<R> compose(const ApproximateTaylorModel<R>&, const ApproximateTaylorModel<R>&);
 template<class R> ApproximateTaylorModel<R> inverse(const ApproximateTaylorModel<R>&);
@@ -90,7 +91,7 @@ class ApproximateTaylorModel {
   ApproximateTaylorModel<R>(uint rs, uint as, ushort o, ushort s);
   
   //! \brief Construct from a domain, centre, and two derivative expansions, one for the centre and one over the entire domain. 
-  ApproximateTaylorModel<R>(const Vector<I>& domain, const Vector<A>& centre, 
+  ApproximateTaylorModel<R>(const Vector<I>& domain, const Vector<R>& centre, 
                             const SparseDifferentialVector<A>& expansion);
   
   //! \brief Construct from a domain, centre, and two derivative expansions, one for the centre and one over the entire domain. Included for compatibility with TaylorModel<R> class.
@@ -103,7 +104,7 @@ class ApproximateTaylorModel {
                             ushort order, ushort smoothness);
   
   //! \brief Construct from a domain, centre, a function, a maximum order of the polynomial expansion and a dummy \a smoothness parameter. 
-  ApproximateTaylorModel<R>(const Vector<I>& domain, const Vector<A>& centre,
+  ApproximateTaylorModel<R>(const Vector<I>& domain, const Vector<R>& centre,
                             const FunctionInterface<R>& function,
                             ushort order, ushort smoothness);
   
@@ -112,6 +113,26 @@ class ApproximateTaylorModel {
   
   //! \brief Copy assignment operator.
   ApproximateTaylorModel<R>& operator=(const ApproximateTaylorModel<R>& atm);
+  
+  // Named constructors
+  //! \brief Construct a constant model with the given domain, centre, value, order and smoothness.
+  static ApproximateTaylorModel<R> identity(const Vector<I>& domain, const Vector<R>& centre,
+                                            ushort order, ushort smoothness);
+  
+  //! \brief Construct a constant model with the given domain, centre, value, order and smoothness.
+  static ApproximateTaylorModel<R> constant(const Vector<I>& domain, const Vector<R>& centre,
+                                            const Vector<A>& value,
+                                            ushort order, ushort smoothness);
+  
+  //! \brief Construct a constant model with the given domain, centre, value, order and smoothness.
+  static ApproximateTaylorModel<R> variable(const Vector<I>& domain, const Vector<R>& centre,
+                                            const Vector<A>& value,
+                                            ushort order, ushort smoothness);
+  
+  //! \brief Construct an affine model with the given domain, centre, value, jacobian, order and smoothness.
+  static ApproximateTaylorModel<R> affine(const Vector<I>& domain, const Vector<R>& centre,
+                                          const Vector<A>& value, const Matrix<A>& jacobian,
+                                          ushort order, ushort smoothness);
   
   
   // Data access
@@ -150,17 +171,6 @@ class ApproximateTaylorModel {
   ApproximateTaylorModel<R> truncate(const Vector<I>& domain, const Vector<R>& centre, 
                                      ushort order, ushort smoothness) const;
   
-  //!
-  static ApproximateTaylorModel<R> zero(uint rs, uint as);
-  //!
-  static ApproximateTaylorModel<R> one(uint as);
-  //!
-  static ApproximateTaylorModel<R> constant(uint as, const R& c);
-  //!
-  static ApproximateTaylorModel<R> identity(const Vector<I>& d, uint o=1u);
-  //!
-  static ApproximateTaylorModel<R> identity(uint s, uint o=1u);
- 
   //! \brief Write to an output stream. 
   std::ostream& write(std::ostream& os) const;
   

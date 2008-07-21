@@ -108,6 +108,8 @@ namespace Ariadne {
        *  \f$ y = a_0 + x ( a_1 + x ( a_2/2 + x ( a_3/3! + \cdots)))\f$.
        */
       friend TaylorVariable<X> compose(const TaylorVariable<X>& y, const TaylorVariable<X>& x);
+      /*! \brief Embed \a x in a space of independent variables of dimension \a size, with the first independent variable of \a x becoming the \a start independen variable of the result. */
+      friend TaylorVariable<X> embed(const TaylorVariable<X>& x, uint size, uint start);
       /*! \brief The derivatives of the inverse of \f$y\f$ evaluated at \f$x\f$. (Not currently implemented.) */
       friend TaylorVariable<X> inverse(const TaylorVariable<X>& y, const X& x);
       /*! \brief The derivative of \f$x\f$ with respect to the variable \a k .*/

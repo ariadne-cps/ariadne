@@ -99,6 +99,7 @@ class TaylorSet {
   
   //@{ 
   //! \name Data access
+  /*! \brief The function model describing the set. */
   const ApproximateTaylorModel<R>& model() const;
   //@}
   

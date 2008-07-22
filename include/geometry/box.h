@@ -303,6 +303,8 @@ namespace Ariadne {
 
       /*! \brief Split into two smaller boxes along the longest edge. */
       ListSet< Box<R> > split() const;
+      /*! \brief Split into boxes along all longest edge. */
+      ListSet< Box<R> > subdivide() const;
       //@}
       
 #ifdef DOXYGEN
@@ -374,6 +376,7 @@ namespace Ariadne {
     template<class R> tribool superset(const Box<R>& bx1, const Box<R>& bx2);
     template<class R> Box<R> bounding_box(const Box<R>& bx);
     template<class R> ListSet< Box<R> > split(const Box<R>& bx);
+    template<class R> ListSet< Box<R> > subdivide(const Box<R>& bx);
     template<class R> Box<R> closed_intersection(const Box<R>& bx1, const Box<R>& bx2);
     template<class R> Box<R> open_intersection(const Box<R>& bx1, const Box<R>& bx2);
     template<class R> Box<R> rectangular_hull(const Box<R>& bx1, const Box<R>& bx2);

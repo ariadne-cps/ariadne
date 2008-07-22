@@ -122,7 +122,7 @@ TaylorSet<R>::radius() const
 
 template<class R>
 Point<R>
-TaylorSet<R>::centre() const
+TaylorSet<R>::centre() const 
 {
   return Point<R>(this->_model.evaluate(Vector<A>(this->_model.centre())));
 }
@@ -177,6 +177,28 @@ TaylorSet<R>::split() const
 
   
 template<class R> 
+ListSet< TaylorSet<R> > 
+TaylorSet<R>::subdivide() const
+{
+  ListSet< TaylorSet<R> > result;
+  Vector<I> domain=this->model().domain();
+  Vector<R> centre=this->model().centre();
+  uint order=this->model().order();
+  uint smoothness=this->model().smoothness();
+  //ListSet< Box<R> > new_domains=Ariadne::subdivide(Box<R>(domain));
+  ListSet< Box<R> > new_domains=Box<R>(domain).subdivide();
+  ApproximateTaylorModel<R> transformation;
+  for(uint i=0; i!=new_domains.size(); ++i) {
+    Vector<I> new_domain=new_domains[i].position_vectors();
+    transformation=ApproximateTaylorModel<R>::scaling(domain, centre, new_domain,
+                                                      order, smoothness);
+    result.adjoin(TaylorSet<R>(compose(this->model(),transformation)));
+  }
+  return result;
+}
+
+  
+template<class R> 
 std::ostream&
 TaylorSet<R>::write(std::ostream& os) const
 {
@@ -188,7 +210,6 @@ template<class R>
 void
 TaylorSet<R>::_instantiate() 
 {
-  Box<R>* bx = 0;
   TaylorSet<R>* ts = 0;
   zonotope_over_approximation(*ts);
 }

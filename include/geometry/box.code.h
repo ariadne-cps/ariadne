@@ -236,6 +236,37 @@ Box<R>::split() const
 }
   
 
+template<class R>
+ListSet< Box<R> >
+Box<R>::subdivide() const 
+{
+  const Box<R>& bx=*this;
+
+  size_type n=bx.dimension();
+  ListSet< Box<R> > result(n);
+  
+  Point<R> lwr_crnr=bx.lower_corner();
+  Point<R> cntr=bx.centre();
+  Point<R> upr_crnr=bx.upper_corner();
+  Point<R> new_lwr_crnr(n);
+  Point<R> new_upr_crnr(n);
+  for(size_type i=0; i!=1u<<n; ++i) {
+    for(size_type j=0; j!=n; ++j) {
+      if(i&(1u<<j)) {
+        new_lwr_crnr[j]=lwr_crnr[j];
+        new_upr_crnr[j]=cntr[j];
+      }
+      else {
+        new_lwr_crnr[j]=cntr[j];
+        new_upr_crnr[j]=upr_crnr[j];
+      }
+    }
+    Box<R> new_box(new_lwr_crnr,new_upr_crnr);
+    result.adjoin(new_box);
+  }
+  return result;
+}
+  
 
 
 

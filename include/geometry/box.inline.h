@@ -578,6 +578,14 @@ split(const Box<R>& bx)
 
 
 template<class R> inline
+ListSet< Box<R> >
+subdivide(const Box<R>& bx) 
+{
+  return bx.subdivide();
+}
+
+
+template<class R> inline
 Box<R> 
 closed_intersection(const Box<R>& r1, const Box<R>& r2)
 {

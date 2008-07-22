@@ -99,8 +99,22 @@ namespace Ariadne {
       void evolution(ESL& final_sets, ESL& reach_sets, ESL& intermediate_sets, const Sys& system, const ES& initial_set, const T& time) const {
         return this->_evolution(final_sets, reach_sets, intermediate_sets, system, initial_set, time, upper_semantics, true); }
      private:
+      Interval<R> _grazing_time_interval(const ATM& flow_model, const ATM& guard_model, const ATM& initial_set_model, 
+                                         const A& initial_time, const A& final_time) const;
+      Interval<R> _crossing_time_interval(const ATM& flow_model, const ATM& guard_model, const ATM& initial_set_model, 
+                                          const A& initial_time, const A& final_time) const;
+      ATM _hitting_time_model(const ATM& flow_model, const ATM& guard_model, const ATM& initial_set_model, 
+                              const A& initial_time, const A& final_time) const;
+
+      ATM _reset_step(const ATM& map_model, const ATM& set_model) const;
+      ATM _integration_step(const ATM& flow_model, const ATM& initial_set_model, const A& integration_time) const;
       ATM _integration_step(const ATM& flow_model, const ATM& initial_set_model, const ATM& integration_time_model) const;
-      ATM _reachability_step(const ATM& flow_model, const ATM& initial_set_model, const ATM& integration_time_model) const;
+      ATM _reachability_step(const ATM& flow_model, const ATM& initial_set_model, const A& initial_time, const A& final_time) const;
+      ATM _reachability_step(const ATM& flow_model, const ATM& initial_set_model, const A& initial_time, const ATM& final_time_model) const;
+      ATM _reachability_step(const ATM& flow_model, const ATM& initial_set_model, const ATM& initial_time_model, const ATM& final_time_model) const;
+
+      tribool _active(const ATM& guard_model, const ATM& _set_model) const;
+      tribool _active(const FN& guard_function, const ATM& _set_model) const;
      private:
       // Helper functions for accessing parameters
       Rational maximum_step_size() const { 
@@ -145,7 +159,7 @@ namespace Ariadne {
 
       boost::shared_ptr< EvolutionProfiler >  _profiler;
      public:
-      uint verbosity;
+      mutable uint verbosity;
     };
 
 

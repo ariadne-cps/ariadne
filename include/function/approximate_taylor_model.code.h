@@ -168,7 +168,7 @@ ApproximateTaylorModel<R>::scaling(const Vector<I>& domain, const Vector<R>& cen
   SparseDifferentialVector<A> expansion(n,n,order);
   for(uint i=0; i!=n; ++i) {
     expansion[i].set_value(value[i]);
-    expansion[i].set_gradient(i,A(domain[i].radius())/A(range[i].radius()));
+    expansion[i].set_gradient(i,A(range[i].radius())/A(domain[i].radius()));
   }
   
   return ApproximateTaylorModel(domain,centre,expansion);

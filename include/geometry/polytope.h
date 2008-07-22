@@ -46,7 +46,6 @@ namespace Ariadne {
     class basic_set_tag;
     class EuclideanSpace;
     template<class R> class Box;
-    template<class X> class Rectangle;
     template<class X> class Polyhedron;
     template<class X> class Polytope;
     template<class X> class PolytopeVerticesIterator;
@@ -67,7 +66,7 @@ namespace Ariadne {
     template<class X> Box<typename Polytope<X>::real_type> bounding_box(const Polytope<X>& pltp);
     template<class X> Polytope<X> convex_hull(const Polytope<X>& pltp1, const Polytope<X>& pltp2);
   
-    template<class X> Polytope<X> polytope(const Rectangle<X>& r);
+    template<class X> Polytope<X> polytope(const Box<typename Polytope<X>::real_type>& r);
     template<class X> Polytope<typename traits<X>::arithmetic_type> polytope(const Polyhedron<X>& plhd);
   
 
@@ -131,10 +130,7 @@ namespace Ariadne {
       explicit Polytope(const PointList<X>& v);
      
       /*! \brief Construct from a box. */
-      explicit Polytope(const Box<R>& bx);
-            
-      /*! \brief Construct from a rectangle. */
-      template<class XX> explicit Polytope(const Rectangle<XX>& r);
+      explicit Polytope(const Box<typename Polytope<X>::real_type>& bx);
             
       /*! \brief Construct from a polyhedron. */
       template<class XX> explicit Polytope(const Polyhedron<XX>& p);
@@ -216,7 +212,7 @@ namespace Ariadne {
         
       /*! \brief Tests inclusion of \a A in \a B. */
       friend tribool subset<>(const Polytope<X>& A, 
-                                        const Polytope<X>& B);
+                              const Polytope<X>& B);
     
       /*! \brief Tests inclusion of \a A in \a B. */
       friend tribool subset<>(const Polytope<X>& A, 

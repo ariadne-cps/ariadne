@@ -60,7 +60,6 @@ GEOMETRY_SRC = \
 	geometry/box.cc \
 	geometry/box_list_set.cc \
 	geometry/point_list.cc \
-	geometry/rectangle.cc \
 	geometry/polyhedron.cc \
 	geometry/polytope.cc \
 	geometry/simplex.cc \

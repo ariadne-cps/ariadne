@@ -41,66 +41,74 @@
 namespace Ariadne {
   
 
-    /* \brief %Base class for approximators implementing standard methods which can be implemented in terms of others. */
-    template<class Aprx, class ES> 
-    class ApproximatorBase
-      : public ApproximatorInterface<Aprx,ES> 
-    { 
-      typedef typename Aprx::real_type R;
-      typedef typename Aprx::BasicSet BasicSet;
-      typedef typename Aprx::Paving Paving;
-      typedef typename Aprx::CoverListSet CoverListSet;
-      typedef typename Aprx::PartitionListSet PartitionListSet;
-      typedef typename Aprx::PartitionTreeSet PartitionTreeSet;
-      typedef ES EnclosureSet;
-      typedef ListSet<ES> EnclosureSetList;
-     protected:
-      ApproximatorBase(const Paving& pv) : _grid_spacing(pv.lengths()[0]) { }
-      ApproximatorBase(const R& l) : _grid_spacing(l) { }
-     public:
-      /*! \brief Computes a bounding box for a set. */
-      BasicSet bounding_box(const EnclosureSetList& esl) const;
+/* \brief %Base class for approximators implementing standard methods which can be implemented in terms of others. */
+template<class Aprx, class ES> 
+class ApproximatorBase
+  : public ApproximatorInterface<Aprx,ES> 
+{ 
+  typedef typename Aprx::real_type R;
+  typedef typename Aprx::BasicSet BasicSet;
+  typedef typename Aprx::Paving Paving;
+  typedef typename Aprx::CoverListSet CoverListSet;
+  typedef typename Aprx::PartitionListSet PartitionListSet;
+  typedef typename Aprx::PartitionTreeSet PartitionTreeSet;
+  typedef ES EnclosureSet;
+  typedef ListSet<ES> EnclosureSetList;
+ public:
+  using ApproximatorInterface<Aprx,ES>::bounding_box;
+  using ApproximatorInterface<Aprx,ES>::adjoin_over_approximation;
+  using ApproximatorInterface<Aprx,ES>::adjoin_outer_approximation;
 
-      /*! \brief Computes an lower-approximation of a set. */
-      CoverListSet lower_approximation(const EnclosureSetList& esl) const;
+  /*! \brief Computes an over-approximation to a set on a grid. */
+  virtual CoverListSet over_approximation(const EnclosureSet& es) const;
+  
+  /*! \brief Computes an outer-approximation of a set on a grid. */
+  virtual PartitionListSet outer_approximation(const EnclosureSet& es, const Paving& pv) const;
+  
+  
+  /*! \brief Computes a bounding box for a set. */
+  BasicSet bounding_box(const EnclosureSetList& esl) const;
+  
+  /*! \brief Computes an lower-approximation of a set. */
+  CoverListSet over_approximations(const EnclosureSetList& esl) const;
+  
+  /*! \brief Computes an outer-approximation of a set. */
+  PartitionListSet outer_approximation(const EnclosureSetList& es, const Paving& pv) const;
+  
+  
+  /*! \brief Adjoins an over approximation of a set to a list. */
+  void adjoin_over_approximation(CoverListSet& cls, const EnclosureSet& es) const;
+  
+ 
+  /*! \brief Adjoins an over approximation to each of the sets in the list. */
+  void adjoin_over_approximations(CoverListSet& cls, const EnclosureSetList& esl) const;
+  
+  /*! \brief Computes over-approximations of the sets. */
+  void adjoin_outer_approximation(PartitionListSet& pls, const EnclosureSetList& esl) const;
+  
+  /*! \brief Computets and over-approximation of a set from a rectangle. */
+  void adjoin_outer_approximation(PartitionTreeSet& pts, const EnclosureSetList& esl) const;
+};
 
-      /*! \brief Computes an inner-approximation of a set. */
-      PartitionListSet inner_approximation(const EnclosureSet& es) const;
-
-      /*! \brief Computes an outer-approximation of a set. */
-      PartitionListSet outer_approximation(const EnclosureSet& es) const;
-
-      /*! \brief Computes an inner-approximation of a set. */
-      PartitionListSet inner_approximation(const EnclosureSetList& esl) const;
-
-      /*! \brief Computes an outer-approximation of a set. */
-      PartitionListSet outer_approximation(const EnclosureSetList& esl) const;
-
-      /*! \brief Computes an outer-approximation of a set on a given paving. */
-      PartitionListSet outer_approximation(const EnclosureSetList& esl, const Paving& pv) const;
 
 
-      /*! \brief Adjoins an outer approximation of a basic set to a grid set. */
-      void adjoin_outer_approximation(PartitionListSet& pls, const EnclosureSet& es) const;
+template<class Aprx, class ES> inline
+typename ApproximatorBase<Aprx,ES>::CoverListSet
+ApproximatorBase<Aprx,ES>::over_approximation(const EnclosureSet& es) const
+{
+  CoverListSet cls;
+  cls.adjoin(this->bounding_box(es));
+  return cls;
+}
 
-      /*! \brief Adjoins an outer approximation to a basic set to a grid mask set. */
-      void adjoin_outer_approximation(PartitionTreeSet& pts, const EnclosureSet& es) const;
-
-
-      /*! \brief Computes over-approximations of the sets. */
-      void adjoin_over_approximations(CoverListSet& cls, const EnclosureSetList& esl) const;
-
-      /*! \brief Computes over-approximations of the sets. */
-      void adjoin_outer_approximation(PartitionListSet& pls, const EnclosureSetList& esl) const;
-
-      /*! \brief Computets and over-approximation of a set from a rectangle. */
-      void adjoin_outer_approximation(PartitionTreeSet& pts, const EnclosureSetList& esl) const;
-     protected:
-      Paving paving(uint d) const { return Paving(d,this->_grid_spacing); }
-     private:
-      R _grid_spacing;
-   };
-
+template<class Aprx, class ES> inline
+typename ApproximatorBase<Aprx,ES>::PartitionListSet
+ApproximatorBase<Aprx,ES>::outer_approximation(const EnclosureSet& es, const Paving& pv) const
+{
+  PartitionListSet pls(pv);
+  this->adjoin_outer_approximation(pls,es);
+  return pls;
+}
 
 
 template<class Aprx, class ES> inline
@@ -119,81 +127,36 @@ ApproximatorBase<Aprx,ES>::bounding_box(const EnclosureSetList& esl) const
   return bb;
 }
 
+
 template<class Aprx, class ES> inline
 typename ApproximatorBase<Aprx,ES>::CoverListSet
-ApproximatorBase<Aprx,ES>::lower_approximation(const EnclosureSetList& esl) const
+ApproximatorBase<Aprx,ES>::over_approximations(const EnclosureSetList& esl) const
 {
   CoverListSet cls;
-  const ApproximatorInterface<Aprx,ES>* base=this;
-  for(size_type i=0; i!=esl.size(); ++i) {
-    cls.adjoin(base->lower_approximation(esl[i]));
-  }
+  this->adjoin_over_approximations(cls,esl);
   return cls;
-}
-
-  
-template<class Aprx, class ES> inline
-typename ApproximatorBase<Aprx,ES>::PartitionListSet
-ApproximatorBase<Aprx,ES>::inner_approximation(const EnclosureSet& es) const
-{
-  const ApproximatorInterface<Aprx,ES>* base=this;
-  return base->inner_approximation(es,this->paving(es.dimension()));
-}
-
-template<class Aprx, class ES> inline
-typename ApproximatorBase<Aprx,ES>::PartitionListSet
-ApproximatorBase<Aprx,ES>::outer_approximation(const EnclosureSet& es) const
-{
-  const ApproximatorInterface<Aprx,ES>* base=this;
-  return base->inner_approximation(es,this->paving(es.dimension()));
-}
-
-template<class Aprx, class ES> inline
-typename ApproximatorBase<Aprx,ES>::PartitionListSet
-ApproximatorBase<Aprx,ES>::inner_approximation(const EnclosureSetList& esl) const
-{
-  return this->inner_approximation(esl,this->paving(esl.dimension()));
-}
-
-template<class Aprx, class ES> inline
-typename ApproximatorBase<Aprx,ES>::PartitionListSet
-ApproximatorBase<Aprx,ES>::outer_approximation(const EnclosureSetList& esl) const
-{
-  return this->outer_approximation(esl,this->paving(esl.dimension()));
 }
 
 template<class Aprx, class ES> inline
 typename ApproximatorBase<Aprx,ES>::PartitionListSet
 ApproximatorBase<Aprx,ES>::outer_approximation(const EnclosureSetList& esl, const Paving& pv) const
 {
-  const ApproximatorInterface<Aprx,ES>* base=this;
   PartitionListSet pls(pv);
-  for(size_type i=0; i!=esl.size(); ++i) {
-    pls.adjoin(base->outer_approximation(esl[i],pv));
-  }
-  pls.unique_sort();
+  this->adjoin_outer_approximation(pls,esl);
   return pls;
 }
 
   
 template<class Aprx, class ES> inline
 void
-ApproximatorBase<Aprx,ES>::adjoin_outer_approximation(PartitionTreeSet& pts, 
-                                                      const EnclosureSet& es) const
+ApproximatorBase<Aprx,ES>::adjoin_over_approximation(CoverListSet& cls, 
+                                                     const EnclosureSet& es) const
 {
-  const ApproximatorInterface<Aprx,ES>* base=this;
-  pts.adjoin(base->outer_approximation(es,pts.grid()));
+  cls.adjoin(this->bounding_box(es));
 }
 
 
-template<class Aprx, class ES> inline
-void
-ApproximatorBase<Aprx,ES>::adjoin_outer_approximation(PartitionListSet& pls, 
-                                                      const EnclosureSet& es) const
-{
-  const ApproximatorInterface<Aprx,ES>* base=this;
-  pls.adjoin(base->outer_approximation(es,pls.grid()));
-}
+
 
 
 template<class Aprx, class ES> inline
@@ -201,8 +164,9 @@ void
 ApproximatorBase<Aprx,ES>::adjoin_over_approximations(CoverListSet& cls, 
                                                       const EnclosureSetList& esl) const
 {
-  const ApproximatorInterface<Aprx,ES>* base=this;
-  cls.adjoin(base->bounding_box(esl));
+  for(typename EnclosureSetList::const_iterator iter=esl.begin(); iter!=esl.end(); ++iter) {
+    this->adjoin_over_approximation(cls,*iter); 
+  }
 }
 
 template<class Aprx, class ES> inline
@@ -210,10 +174,10 @@ void
 ApproximatorBase<Aprx,ES>::adjoin_outer_approximation(PartitionListSet& pls, 
                                                       const EnclosureSetList& esl) const
 {
-  const ApproximatorInterface<Aprx,ES>* base=this;
   for(typename EnclosureSetList::const_iterator iter=esl.begin(); iter!=esl.end(); ++iter) {
-    base->adjoin_outer_approximation(pls,*iter);
+    this->adjoin_outer_approximation(pls,*iter); 
   }
+  pls.unique_sort();
 }
 
 template<class Aprx, class ES> inline
@@ -221,9 +185,8 @@ void
 ApproximatorBase<Aprx,ES>::adjoin_outer_approximation(PartitionTreeSet& pts, 
                                                       const EnclosureSetList& esl) const
 {
-  const ApproximatorInterface<Aprx,ES>* base=this;
   for(typename EnclosureSetList::const_iterator iter=esl.begin(); iter!=esl.end(); ++iter) {
-    base->adjoin_outer_approximation(pts,*iter);
+    this->adjoin_outer_approximation(pts,*iter); 
   }
 }
 

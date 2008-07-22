@@ -27,6 +27,7 @@
 #include "geometry/grid_cell_list_set.h"
 #include "geometry/grid_mask_set.h"
 #include "geometry/grid_approximation.h"
+#include "geometry/partition_tree_set.h"
 #include "evaluation/standard_approximator.h"
 
 namespace Ariadne {
@@ -58,27 +59,42 @@ StandardApproximator<ES>::bounding_box(const ES& es) const
 }
 
 template<class ES>
-BoxListSet<typename ES::real_type>
-StandardApproximator<ES>::lower_approximation(const ES& es) const
+tribool
+StandardApproximator<ES>::disjoint(const ES& es, const Box<R>& bx) const
 {
-  BoxListSet<R> result;
-  result.adjoin(Ariadne::bounding_box(es));
-  return result;
+  return Ariadne::disjoint(es,bx);
 }
 
 template<class ES>
-GridCellListSet<typename ES::real_type>
-StandardApproximator<ES>::inner_approximation(const ES& es, const Grid<R>& g) const
+tribool
+StandardApproximator<ES>::superset(const ES& es, const Box<R>& bx) const
 {
-  return Ariadne::inner_approximation(es,g);
+  return Ariadne::subset(bx,es);
 }
 
 template<class ES>
-GridCellListSet<typename ES::real_type>
-StandardApproximator<ES>::outer_approximation(const ES& es, const Grid<R>& g) const
+void
+StandardApproximator<ES>::adjoin_over_approximation(BoxListSet<R>& bxls, const ES& es) const
 {
-  return Ariadne::outer_approximation(es,g);
+  bxls.adjoin(Ariadne::bounding_box(es));
 }
+
+template<class ES>
+void
+StandardApproximator<ES>::adjoin_outer_approximation(GridCellListSet<R>& gcls, const ES& es) const
+{
+  gcls.adjoin(Ariadne::outer_approximation(es,gcls.grid()));
+}
+
+template<class ES>
+void
+StandardApproximator<ES>::adjoin_outer_approximation(GridMaskSet<R>& gms, const ES& es) const
+{
+  gms.adjoin(Ariadne::outer_approximation(es,gms.grid()));
+  //gms.adjoin_outer_approximation(es);
+}
+
+
 
 template<class ES>
 std::ostream&

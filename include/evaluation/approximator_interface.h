@@ -65,49 +65,47 @@ namespace Ariadne {
       /*! \brief Computes a bounding box for a set. */
       virtual BasicSet bounding_box(const EnclosureSet& es) const = 0;
 
-      /*! \brief Computes an outer-approximation of a set on a grid. */
-      virtual CoverListSet lower_approximation(const EnclosureSet& es) const = 0;
+      /*! \brief Determines whether an enclosure set is a superset of a basic set. */
+      virtual tribool superset(const EnclosureSet& es, const BasicSet& bs) const = 0;
 
-      /*! \brief Computes an outer-approximation of a set. */
-      virtual PartitionListSet inner_approximation(const EnclosureSet& es) const = 0;
+      /*! \brief Determines whether an enclosure set is disjoint from a basic set. */
+      virtual tribool disjoint(const EnclosureSet& es, const BasicSet& bs) const = 0;
 
-      /*! \brief Computes an outer-approximation of a set. */
-      virtual PartitionListSet outer_approximation(const EnclosureSet& es) const = 0;
 
-      /*! \brief Computes an outer-approximation of a set on a grid. */
-      virtual PartitionListSet inner_approximation(const EnclosureSet& es, const Paving& pv) const = 0;
+      /*! \brief Computes an over-approximation to a set on a grid. */
+      virtual CoverListSet over_approximation(const EnclosureSet& es) const = 0;
 
       /*! \brief Computes an outer-approximation of a set on a grid. */
       virtual PartitionListSet outer_approximation(const EnclosureSet& es, const Paving& pv) const = 0;
 
 
-      /*! \brief Computes a bounding box for a set. */
+      /*! \brief Computes a bounding box for a list of sets. */
       virtual BasicSet bounding_box(const EnclosureSetList& esl) const = 0;
 
-      /*! \brief Computes an lower-approximation of a set. */
-      virtual CoverListSet lower_approximation(const EnclosureSetList& esl) const = 0;
-
-      /*! \brief Computes an outer-approximation of a set. */
-      virtual PartitionListSet outer_approximation(const EnclosureSetList& esl) const = 0;
+      /*! \brief Computes an lower-approximation to a list of sets on a grid. */
+      virtual CoverListSet over_approximations(const EnclosureSetList& esl) const = 0;
 
       /*! \brief Computes an outer-approximation of a set. */
       virtual PartitionListSet outer_approximation(const EnclosureSetList& esl, const Paving& pv) const = 0;
 
 
-      /*! \brief Adjoins an outer approximation to a basic set to a grid mask set. */
+      /*! \brief Adjoins an over approximation of a basic set to a list set. */
+      virtual void adjoin_over_approximation(CoverListSet& cls, const EnclosureSet& es) const = 0;
+
+      /*! \brief Adjoins an outer approximation to a basic set to a grid set. */
       virtual void adjoin_outer_approximation(PartitionListSet& pls, const EnclosureSet& es) const = 0;
 
-      /*! \brief Adjoins an outer approximation to a basic set to a grid mask set. */
+      /*! \brief Adjoins an outer approximation to a basic set to a grid set. */
       virtual void adjoin_outer_approximation(PartitionTreeSet& pts, const EnclosureSet& es) const = 0;
 
 
-      /*! \brief Adjoins a lower approximation of a list of sets to a grid mask set. */
+      /*! \brief Adjoins a lower approximation of a list of sets to a list set. */
       virtual void adjoin_over_approximations(CoverListSet& cls, const EnclosureSetList& esl) const = 0;
 
-      /*! \brief Computes and over-approximation of a set from a rectangle. */
+      /*! \brief Adjoins an outer approximation of a list of sets to a grid set. */
       virtual void adjoin_outer_approximation(PartitionListSet& pls, const EnclosureSetList& esl) const = 0;
 
-      /*! \brief Computes and over-approximation of a set from a rectangle. */
+      /*! \brief Computes and over-approximation of a list of sets to a grid set. */
       virtual void adjoin_outer_approximation(PartitionTreeSet& pts, const EnclosureSetList& esl) const = 0;
 
       /*! \brief Write to an output stream. */

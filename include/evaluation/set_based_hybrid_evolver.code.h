@@ -22,7 +22,6 @@
  */
  
 #include "base/tuple.h"
-#include "geometry/rectangle_expression.h"
 #include "geometry/box_list_set.h"
 #include "geometry/set_interface.h"
 #include "geometry/hybrid_set.h"

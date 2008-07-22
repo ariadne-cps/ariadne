@@ -103,7 +103,7 @@ namespace Ariadne {
       /*! \brief Create a new location based on the parameters \a t1 and \a t2. */
       template<class T1, class T2> S& new_location(DiscreteState q, const T1& t1, const T2& t2);
       /*! \brief Create a new location based on the rectangle \a r. */
-      S& new_location(DiscreteState q, const Rectangle<R>& r);
+      S& new_location(DiscreteState q, const Box<R>& r);
       /*! \brief Create a new location based on the polyhedron \a p. */
       S& new_location(DiscreteState q, const Polyhedron<R>& p);
 

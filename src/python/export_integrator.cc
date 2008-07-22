@@ -24,7 +24,6 @@
 #include "python/float.h"
 
 #include "geometry/box.h"
-#include "geometry/rectangle.h"
 #include "geometry/zonotope.h"
 
 #include "system/vector_field.h"
@@ -101,8 +100,8 @@ void export_integrator()
   class_< EulerIntegrator<R>, bases<IntegratorInterface< Box<R> > > >
     euler_integrator_class("EulerIntegrator",init<>());
   euler_integrator_class.def("flow_bounds",&flow_bounds< EulerIntegrator<R> >);
-  euler_integrator_class.def("integration_step",(Rectangle<R>(EulerIntegrator<R>::*)(const VectorField<R>&,const Rectangle<R>&,const Rational&,const Box<R>&)const) &EulerIntegrator<R>::integration_step);
-  euler_integrator_class.def("reachability_step",(Rectangle<R>(EulerIntegrator<R>::*)(const VectorField<R>&,const Rectangle<R>&,const Rational&,const Box<R>&)const) &EulerIntegrator<R>::reachability_step);
+  euler_integrator_class.def("integration_step",(Box<R>(EulerIntegrator<R>::*)(const VectorField<R>&,const Box<R>&,const Rational&,const Box<R>&)const) &EulerIntegrator<R>::integration_step);
+  euler_integrator_class.def("reachability_step",(Box<R>(EulerIntegrator<R>::*)(const VectorField<R>&,const Box<R>&,const Rational&,const Box<R>&)const) &EulerIntegrator<R>::reachability_step);
 }
 
 template void export_integrator<FloatPy>();

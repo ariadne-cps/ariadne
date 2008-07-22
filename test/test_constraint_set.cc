@@ -32,7 +32,7 @@
 #include "test_float.h"
 
 #include "geometry/point.h"
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "geometry/grid_set.h"
 #include "geometry/constraint_set.h"
 #include "function/function_interface.h"

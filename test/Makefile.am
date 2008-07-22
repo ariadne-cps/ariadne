@@ -52,7 +52,6 @@ GEOMETRY_TESTS = \
 	test_list_set \
 	test_grid_set \
 	test_partition_tree_set \
-	test_rectangle \
 	test_zonotope \
 	test_simplex \
 	test_ddconv \

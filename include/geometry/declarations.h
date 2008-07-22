@@ -42,9 +42,8 @@ namespace Ariadne {
     template<class R> class PointList;
     template<class R> class Box;
     template<class R> class BoxListSet;
+    template<class E> class BoxExpression;
 
-    template<class E> class RectangleExpression;
-    template<class R> class Rectangle;
     template<class R> class Zonotope;
     template<class R> class Simplex;
     template<class R> class Halfspace;
@@ -53,6 +52,8 @@ namespace Ariadne {
     template<class R> class Sphere;
     template<class R> class Ellipsoid;
 
+    template<class R> class TaylorSet;
+    
     template<class BS> class ListSet;
 
     template<class R> class Grid;

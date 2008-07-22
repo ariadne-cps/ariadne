@@ -42,7 +42,7 @@
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
 
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 
 #include "system/vector_field.h"
 
@@ -79,7 +79,7 @@ template<class R> inline
 std::pair< Rational, Box<R> >
 EulerIntegrator<R>::
 flow_bounds(const VectorField<R>& vf, 
-            const Rectangle<R>& bx,
+            const Box<R>& bx,
             const Rational& t) const
 {
   return StandardBounder<R>().flow_bounds(vf,bx,t);
@@ -89,15 +89,15 @@ flow_bounds(const VectorField<R>& vf,
 
 
 template<class R>
-Rectangle<R> 
+Box<R> 
 EulerIntegrator<R>::
 integration_step(const VectorField<R>& vector_field, 
-                 const Rectangle<R>& initial_set, 
+                 const Box<R>& initial_set, 
                  const Rational& step_size, 
                  const Box<R>& bounding_set) const
 {
-  ARIADNE_LOG(6,"EulerIntegrator::integration_step(VectorField,Rectangle,Interval,Box) const\n");
-  ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set,"EulerIntegrator::integration_step(VectorField,Rectangle,Interval,Box) const");
+  ARIADNE_LOG(6,"EulerIntegrator::integration_step(VectorField,Box,Interval,Box) const\n");
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set,"EulerIntegrator::integration_step(VectorField,Box,Interval,Box) const");
 
   return initial_set + I(step_size) * vector_field(bounding_set);
 }
@@ -105,16 +105,16 @@ integration_step(const VectorField<R>& vector_field,
 
 
 template<class R>
-Rectangle<R> 
+Box<R> 
 EulerIntegrator<R>::
 reachability_step(const VectorField<R>& vector_field, 
-                  const Rectangle<R>& initial_set, 
+                  const Box<R>& initial_set, 
                   const Rational& step_size, 
                   const Box<R>& bounding_set) const
 {
-  ARIADNE_LOG(6,"EulerIntegrator::reachability_step(VectorField,Rectangle,Rational) const\n");
+  ARIADNE_LOG(6,"EulerIntegrator::reachability_step(VectorField,Box,Rational) const\n");
   
-  ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set(),"EulerIntegrator::reachability_step(VectorField,Rectangle,Rational) const");
+  ARIADNE_CHECK_EQUAL_DIMENSIONS(vector_field,initial_set(),"EulerIntegrator::reachability_step(VectorField,Box,Rational) const");
   
   return initial_set + I(0,step_size) * vector_field(bounding_set);
 }

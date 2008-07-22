@@ -159,7 +159,7 @@ PartitionTreeSet<R>::_instantiate_geometry_operators()
 {
   uint d=0;
   Box<R>* bx=0;
-  Rectangle<R>* r=0;
+  Box<R>* r=0;
   Zonotope<R>* z=0;
   SetInterface< Box<R> >* s=0;
   GridMaskSet<R>* gms=0;

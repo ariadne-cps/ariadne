@@ -32,6 +32,8 @@
 #include "combinatoric/binary_word.h" 
 #include "base/array.h" 
 #include "geometry/point.h" 
+#include "geometry/point_list.h" 
+#include "geometry/list_set.h" 
 
 
 namespace Ariadne {
@@ -182,6 +184,20 @@ Box<R>::vertex(size_type i) const
 
 
 template<class R>
+PointList<R> 
+Box<R>::vertices() const
+{
+  PointList<R> result;
+  for(vertices_const_iterator iter=this->vertices_begin(); 
+      iter!=this->vertices_end(); ++iter)
+  {  
+    result.adjoin(*iter);
+  }
+  return result;
+}
+
+
+template<class R>
 typename Box<R>::vertices_const_iterator
 Box<R>::vertices_begin() const
 {
@@ -195,8 +211,30 @@ Box<R>::vertices_end() const
   return BoxVerticesIterator<R>(*this,true);
 }
 
+template<class R>
+ListSet< Box<R> >
+Box<R>::split() const 
+{
+  dimension_type d=this->dimension();
+  ListSet< Box<R> > result(d);
+  if(d==0) { return result; }
 
-
+  dimension_type ld=0;
+  R l=(*this)[0].width();
+  for(uint i=1; i!=d; ++i) {
+    R tl=(*this)[i].width();
+    if(tl>l) { ld=i; }
+  }
+  Box<R> s(*this);
+  R m=this->interval(ld).midpoint();
+  s.set_upper_bound(ld,m);
+  result.adjoin(s);
+  s.set_lower_bound(ld,m);
+  s.set_upper_bound(ld,this->upper_bound(ld));
+  result.adjoin(s);
+  return result;
+}
+  
 
 
 

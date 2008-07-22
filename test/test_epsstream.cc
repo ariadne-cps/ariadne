@@ -31,7 +31,7 @@
 
 #include "base/utility.h"
 #include "geometry/point.h"
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "geometry/zonotope.h"
 #include "geometry/list_set.h"
 #include "output/epsstream.h"

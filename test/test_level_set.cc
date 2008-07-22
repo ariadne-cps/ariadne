@@ -33,7 +33,7 @@
 
 #include "numeric/traits.h"
 #include "geometry/point.h"
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "geometry/grid_set.h"
 #include "geometry/level_set.h"
 #include "function/function_interface.h"

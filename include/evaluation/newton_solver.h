@@ -54,9 +54,9 @@ namespace Ariadne {
       IntervalNewtonSolver(R max_error, uint max_steps) : SolverBase<R>(max_error,max_steps) { }
       
       /*! \brief Solve \f$f(x)=0\f$, using the interval Newton method. */
-      Point<I>
+      Vector<I>
       solve(const FunctionInterface<R>& f, 
-            const Point<I>& pt); 
+            const Vector<I>& pt); 
     };            
     
     

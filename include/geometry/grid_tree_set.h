@@ -38,7 +38,7 @@
 
 #include "geometry/declarations.h"
 #include "geometry/set_interface.h"
-#include "geometry/rectangle_expression.h"
+#include "geometry/box_expression.h"
 
 
 namespace Ariadne {
@@ -61,11 +61,11 @@ namespace Ariadne {
      *
      * Defined as a SubdivisionTreeCell within a base cell given as a Box<R>.
      *
-     * Satisfies the requirements of a RectangleExpression.
+     * Satisfies the requirements of a BoxExpression.
      */
     template<class R>
     class GridTreeCell
-      : public RectangleExpression< GridTreeCell<R> >
+      : public BoxExpression< GridTreeCell<R> >
     {
      public:
       /*! \brief A tag describing the type of set. */

@@ -1,8 +1,9 @@
 /***************************************************************************
- *            rectangle.cc
+ *            geometry/box_expression.h
  *
- *  Copyright  2006  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  
+ *  Copyright 2005-6  Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -20,31 +21,33 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+ 
+/*! \file geometry/box_expression.h
+ *  \brief Base class for box expression templates.
+ */
 
-#include "numeric/rational.h"
-#include "numeric/float.h"
-#include "numeric/interval.h"
-
-#include "geometry/rectangle.h"
-#include "geometry/rectangle.code.h"
-
+#ifndef ARIADNE_GEOMETRY_BOX_EXPRESSION_H
+#define ARIADNE_GEOMETRY_BOX_EXPRESSION_H
 
 namespace Ariadne {
   
 
-    
-    
-    template class Rectangle<Rational>;
+    /*! \brief %Base class tag for box expressions
+     *
+     * Note that this class is \em not itself a model of a
+     * %BoxExpression, but must be a base class of any 
+     * %BoxExpression. */
+    template<class E>
+    class BoxExpression 
+    {
+     public:
+      /*!\brief Convert \a *this to a reference to E. */
+      E& operator() () { return static_cast<E&>(*this); }
+      /*!\brief Convert \a *this to a constant reference to E. */
+      const E& operator() () const { return static_cast<const E&>(*this); }
+    };
 
-#ifdef ENABLE_FLOAT64
-    template class Rectangle<Float64>;
-    template class Rectangle<Interval64>;
-#endif
-  
-#ifdef ENABLE_FLOATMP
-    template class Rectangle<FloatMP>;
-    template class Rectangle<IntervalMP>;
-#endif
 
-  
 } // namespace Ariadne
+
+#endif /* ARIADNE_GEOMETRY_BOX_EXPRESSION_H */

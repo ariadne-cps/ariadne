@@ -42,9 +42,6 @@ namespace Ariadne {
     template<class R> GridBlock<R> inner_approximation(const Box<R>& bx, const Grid<R>& g);
 
 
-    template<class R> GridCellListSet<R> outer_approximation(const Rectangle<R>& r, const Grid<R>& g);
-    template<class R> GridCellListSet<R> inner_approximation(const Rectangle<R>& r, const Grid<R>& g);
-
     template<class R> GridCellListSet<R> outer_approximation(const Polytope<R>& pltp, const Grid<R>& g);
     template<class R> GridCellListSet<R> inner_approximation(const Polytope<R>& pltp, const Grid<R>& g);
  
@@ -54,6 +51,9 @@ namespace Ariadne {
     template<class R> GridCellListSet<R> outer_approximation(const Zonotope<R>& z, const Grid<R>& g);
     template<class R> GridCellListSet<R> inner_approximation(const Zonotope<R>& z, const Grid<R>& g);
  
+    template<class R> GridCellListSet<R> outer_approximation(const TaylorSet<R>& ts, const Grid<R>& g);
+    template<class R> GridCellListSet<R> inner_approximation(const TaylorSet<R>& ts, const Grid<R>& g);
+
     template<class R> GridCellListSet<R> outer_approximation(const SetInterface< Box<R> >& set, const Grid<R>& g);
     template<class R> GridCellListSet<R> inner_approximation(const SetInterface< Box<R> >& set, const Grid<R>& g);
 

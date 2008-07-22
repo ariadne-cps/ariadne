@@ -47,7 +47,7 @@ void
 epsfstream::open(const char* fn, const Box<R>& bbox) 
 {
   PlanarProjectionMap p_map(bbox.dimension(),0,1);
-  Rectangle2d bbox2d=p_map(bbox);
+  Box2d bbox2d=p_map(bbox);
   this->open(fn,bbox2d,p_map);
 }
 
@@ -56,16 +56,16 @@ void
 epsfstream::open(const char* fn, const Box<R>& bbox, uint ix, uint iy) 
 {
   PlanarProjectionMap p_map(bbox.dimension(),ix,iy);
-  Rectangle2d bbox2d=p_map(bbox);
+  Box2d bbox2d=p_map(bbox);
   this->open(fn,bbox2d,p_map);
 }
 
 template<class R> inline 
 void 
 epsfstream::open(const char* fn, const Box<R>& bbox, 
-                         const PlanarProjectionMap& p_map)
+                 const PlanarProjectionMap& p_map)
 {
-  Rectangle2d bbox2d=p_map(bbox);
+  Box2d bbox2d=p_map(bbox);
   this->open(fn,bbox2d,p_map);
 }
 

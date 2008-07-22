@@ -125,7 +125,7 @@ operator<<(std::ostream& os, const Vector2d& v)
 }
 
 std::ostream& 
-operator<<(std::ostream& os, const Rectangle2d& r) 
+operator<<(std::ostream& os, const Box2d& r) 
 {
   return os << "[" << r.lower_bound(0) << "," << r.upper_bound(0) << "]x["
             << r.lower_bound(1) << "," << r.upper_bound(1) << "]";

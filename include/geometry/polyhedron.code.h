@@ -49,7 +49,6 @@
 #include "geometry/point.h"
 #include "geometry/point_list.h"
 #include "geometry/box.h"
-#include "geometry/rectangle.h"
 #include "geometry/polytope.h"
 
 #include "output/logging.h"
@@ -681,27 +680,27 @@ closed_intersection(const Polyhedron<X>& plhd1, const Polyhedron<X>& plhd2)
 
 template<class X>
 Polyhedron<X> 
-closed_intersection(const Rectangle<X>& r, const Polyhedron<X>& plhd)
+closed_intersection(const Box<typename Polyhedron<X>::real_type>& r, const Polyhedron<X>& plhd)
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(r,plhd,"Polyhedron closed_intersection(Rectangle r, Polyhedron plhd)");
   return closed_intersection(Polyhedron<X>(r),plhd);
 }
 
-
+ 
 template<class X>
 Polyhedron<X> 
-closed_intersection(const Polyhedron<X>& plhd, const Rectangle<X>& r)
+closed_intersection(const Polyhedron<X>& plhd, const Box<typename Polyhedron<X>::real_type>& r)
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(plhd,r,"Polyhedron closed_intersection(Polyhedron plhd, Rectangle r)");
   return closed_intersection(plhd,Polyhedron<X>(r));
 }
 
 
-template<class X>
-Polyhedron<X> 
-polyhedron(const Rectangle<X>& r)
+template<class R>
+Polyhedron<R> 
+polyhedron(const Box<R>& r)
 {
-  return Polyhedron<X>(r);
+  return Polyhedron<R>(r);
 }
 
 
@@ -828,12 +827,11 @@ Polyhedron<X>::_instantiate()
   tribool tb;
   Point<R> pt;
   Box<R> bx;
-  Rectangle<X> r;
   Polytope<X> c;
   Polyhedron<X> p;
   Polyhedron<F> ip;
   
-  p=Polyhedron<X>(r);
+  p=Polyhedron<X>(bx);
   p=Polyhedron<X>(p);
   ip=Polyhedron<F>(c);
   
@@ -849,11 +847,11 @@ Polyhedron<X>::_instantiate()
   tb=subset(p,bx);
   
   closed_intersection(p,p);
-  closed_intersection(r,p);
-  closed_intersection(p,r);
+  closed_intersection(bx,p);
+  closed_intersection(p,bx);
   open_intersection(p,p);
   
-  p=polyhedron(r);
+  p=polyhedron(bx);
   ip=polyhedron(c);
 }
 

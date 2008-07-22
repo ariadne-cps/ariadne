@@ -25,7 +25,6 @@
 
 #include "geometry/box.h"
 #include "geometry/box_list_set.h"
-#include "geometry/rectangle.h"
 #include "geometry/zonotope.h"
 #include "geometry/orbit.h"
 #include "system/map.h"

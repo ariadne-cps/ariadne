@@ -23,8 +23,9 @@
 
 #include "numeric/float.h"
 
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "geometry/zonotope.h"
+#include "geometry/taylor_set.h"
 
 #include "evaluation/standard_subdivider.h"
 
@@ -34,13 +35,15 @@ namespace Ariadne {
     
 
 #ifdef ENABLE_FLOAT64
-    template class StandardSubdivider< Rectangle<Float64> >;
+    template class StandardSubdivider< Box<Float64> >;
     template class StandardSubdivider< Zonotope<Float64> >;
+    template class StandardSubdivider< TaylorSet<Float64> >;
 #endif
   
 #ifdef ENABLE_FLOATMP
-    template class StandardSubdivider< Rectangle<FloatMP> >;
+    template class StandardSubdivider< Box<FloatMP> >;
     template class StandardSubdivider< Zonotope<FloatMP> >;
+    template class StandardSubdivider< TaylorSet<FloatMP> >;
 #endif
 
   

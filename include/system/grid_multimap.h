@@ -38,7 +38,7 @@
 #include "combinatoric/lattice_map.h"
 
 #include "geometry/exceptions.h"
-#include "geometry/rectangle_expression.h"
+#include "geometry/box_expression.h"
 #include "geometry/grid.h"
 #include "geometry/grid_cell.h"
 #include "geometry/grid_block.h"

@@ -23,7 +23,7 @@
 
 #include "python/float.h"
 
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "geometry/zonotope.h"
 #include "system/map.h"
 #include "evaluation/applicator_interface.h"
@@ -51,7 +51,7 @@ class ApplicatorWrapper
 
 template<class R>
 class Applicator 
-  : public StandardApplicator< Rectangle<R> >,
+  : public StandardApplicator< Box<R> >,
     public StandardApplicator< Zonotope<R> >
 { };
 
@@ -61,14 +61,14 @@ template<class R>
 void export_applicator() 
 {
   
-  class_< ApplicatorWrapper<Rectangle<R> >, boost::noncopyable >("RectangleApplicatorInterface",init<>());
+  class_< ApplicatorWrapper<Box<R> >, boost::noncopyable >("BoxApplicatorInterface",init<>());
   class_< ApplicatorWrapper<Zonotope<R> >, boost::noncopyable >("ZonotopeApplicatorInterface",init<>());
 
   class_< Applicator<R>, 
-    bases<ApplicatorInterface< Rectangle<R> >,
+    bases<ApplicatorInterface< Box<R> >,
           ApplicatorInterface< Zonotope<R> > > >
     applicator_class("StandardApplicator",init<>());
-  applicator_class.def("__call__",(Rectangle<R>(Applicator<R>::*)(const Map<R>&,const Rectangle<R>&)const)&StandardApplicator< Rectangle<R> >::apply);
+  applicator_class.def("__call__",(Box<R>(Applicator<R>::*)(const Map<R>&,const Box<R>&)const)&StandardApplicator< Box<R> >::apply);
   applicator_class.def("__call__",(Zonotope<R>(Applicator<R>::*)(const Map<R>&,const Zonotope<R>&)const)&StandardApplicator< Zonotope<R> >::apply);
 
   

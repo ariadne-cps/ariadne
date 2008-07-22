@@ -65,10 +65,10 @@ namespace Ariadne {
     template<class X> Box<typename Polyhedron<X>::real_type> bounding_box(const Polyhedron<X>& plhd);
     template<class X> Polyhedron<X> open_intersection(const Polyhedron<X>& plhd1, const Polyhedron<X>& plhd2);
     template<class X> Polyhedron<X> closed_intersection(const Polyhedron<X>& plhd1, const Polyhedron<X>& plhd2) ;
-    template<class X> Polyhedron<X> closed_intersection(const Polyhedron<X>& plhd, const Rectangle<X>& r) ;
-    template<class X> Polyhedron<X> closed_intersection(const Rectangle<X>& r, const Polyhedron<X>& plhd) ;
+    template<class X> Polyhedron<X> closed_intersection(const Polyhedron<X>& plhd, const Box<typename Polyhedron<X>::real_type>& r) ;
+    template<class X> Polyhedron<X> closed_intersection(const Box<typename Polyhedron<X>::real_type>& r, const Polyhedron<X>& plhd) ;
 
-    template<class X> Polyhedron<X> polyhedron(const Rectangle<X>& A) ;
+    template<class R> Polyhedron<R> polyhedron(const Box<R>& A) ;
     template<class X> Polyhedron<typename traits<X>::arithmetic_type> polyhedron(const Polytope<X>& A) ;
 
     template<class X> std::ostream& operator<<(std::ostream& os, const Polyhedron<X>& p);
@@ -135,7 +135,7 @@ namespace Ariadne {
       explicit Polyhedron(const Box<R>& bx);
             
       /*! \brief Convert from a rectangle. */
-      template<class XX> explicit Polyhedron(const Rectangle<XX>& rect);
+      template<class XX> explicit Polyhedron(const Box<XX>& rect);
             
       /*! \brief Convert from a polytope. */
       template<class XX> explicit Polyhedron(const Polytope<XX>& plyt);

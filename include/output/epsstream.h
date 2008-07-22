@@ -78,7 +78,7 @@ namespace Ariadne {
       static const double scale_dimension;
       
       PlanarProjectionMap p_map;
-      Rectangle2d bbox;
+      Box2d bbox;
      public:
       Colour line_colour;
       Colour fill_colour;
@@ -96,7 +96,7 @@ namespace Ariadne {
       template<class R> void set_bounding_box(const Box<R>& bbox) {
         this->bbox=this->p_map(bbox); }
 
-      void set_bounding_box(const Rectangle2d& bbox) {
+      void set_bounding_box(const Box2d& bbox) {
         this->bbox=bbox; }
 
       void set_projection_map(const PlanarProjectionMap& p_map) {
@@ -106,7 +106,7 @@ namespace Ariadne {
       void trace_scale(const char* x_name, const char* y_name,
                        const int& x_step=5, const int& y_step=5);
       
-      const Rectangle2d& bounding_box() const { 
+      const Box2d& bounding_box() const { 
         return this->bbox; }
 
       const PlanarProjectionMap& projection_map() const { 
@@ -137,17 +137,17 @@ namespace Ariadne {
         this->fill_colour=Colour(fc); }
 
       void trace(const Point2d& pt);
-      void trace(const Rectangle2d& r);
+      void trace(const Box2d& r);
       void trace(const Zonotope2d& z);
       void trace(const Polygon2d& p);
 
       void draw(const Point2d& pt);
       void draw(const InterpolatedCurve2d& cv);
-      void draw(const Rectangle2d& r);
+      void draw(const Box2d& r);
       void draw(const Zonotope2d& z);
       void draw(const Polygon2d& p);
 
-      void draw(std::vector<Rectangle2d>& rls);
+      void draw(std::vector<Box2d>& rls);
 
       void fill();
       void stroke();
@@ -171,7 +171,7 @@ namespace Ariadne {
       template<class R> void open(const char* fn, const Box<R>& bbox);
       template<class R> void open(const char* fn, const Box<R>& bbox, unsigned int ix,  unsigned int iy);
       template<class R> void open(const char* fn, const Box<R>& bbox, const PlanarProjectionMap& p_map);
-      void open(const char* fn, const Rectangle2d& bbox, const PlanarProjectionMap& p_map);
+      void open(const char* fn, const Box2d& bbox, const PlanarProjectionMap& p_map);
       void close();
      private:
       epsfstream(const epsfstream&); // no copy constructor
@@ -194,7 +194,6 @@ namespace Ariadne {
     template<class R> epsstream& operator<<(epsstream&, const Segment<R>&);
     template<class R> epsstream& operator<<(epsstream&, const InterpolatedCurve<R>&);
     template<class R> epsstream& operator<<(epsstream&, const Box<R>&);
-    template<class R> epsstream& operator<<(epsstream&, const Rectangle<R>&);
     template<class R> epsstream& operator<<(epsstream&, const Zonotope<R>&);
     template<class R> epsstream& operator<<(epsstream&, const Polytope<R>&); 
     template<class R> epsstream& operator<<(epsstream&, const Polyhedron<R>&); 

@@ -45,6 +45,7 @@ namespace Ariadne {
 
 template<class R> class ApproximateTaylorModel;
 
+class EuclideanSpace;
 template<class R> class Point;
 template<class R> class Box;
 template<class R> class Zonotope;
@@ -69,7 +70,8 @@ class TaylorSet {
   typedef R real_type;
   /*! \brief The type of denotable point contained by the Taylor set. */
   typedef Point<R> state_type;
-  
+  /*! \brief The type of space the set lies in. */
+  typedef EuclideanSpace space_type;
  private:
   static const uint _max_degree=7u;
   ApproximateTaylorModel<R> _model;
@@ -104,6 +106,9 @@ class TaylorSet {
   
   //@{
   //! \name Geometric operations.
+  /*! \brief The Euclidean space the Taylor set lies in. */
+  EuclideanSpace space() const;
+  
   /*! \brief The dimension of the Euclidean space the Taylor set lies in. */
   dimension_type dimension() const;
   
@@ -120,7 +125,7 @@ class TaylorSet {
   R radius() const;
   
   /*! \brief Subdivide into two smaller pieces. */
-  ListSet< TaylorSet<R> > divide() const;
+  ListSet< TaylorSet<R> > split() const;
   
   /*! \brief Subdivide into smaller pieces in each dimension. */
   ListSet< TaylorSet<R> > subdivide() const;
@@ -163,6 +168,10 @@ const ApproximateTaylorModel<R>& TaylorSet<R>::model() const {
 
 
 template<class R> inline
+tribool subset(const Box<R>& bx, const TaylorSet<R>& ts) {
+  return ts.superset(bx); }
+
+template<class R> inline
 tribool superset(const TaylorSet<R>& ts, const Box<R>& bx) {
   return ts.superset(bx); }
 
@@ -181,6 +190,10 @@ tribool subset(const TaylorSet<R>& ts, const Box<R>& bx) {
 template<class R> inline
 Box<R> bounding_box(const TaylorSet<R>& ts) {
   return ts.bounding_box(); }
+
+template<class R> inline
+ListSet< TaylorSet<R> > split(const TaylorSet<R>& ts) {
+  return ts.split(); }
 
 template<class R> inline
 std::ostream& operator<<(std::ostream& os, const TaylorSet<R>& ts) {

@@ -31,6 +31,7 @@
 #include "geometry/set_reference.h"
 #include "system/discrete_event.h"
 
+#include "geometry/box.h"
 #include "geometry/zonotope.h"
 
 using namespace Ariadne;
@@ -129,7 +130,7 @@ void export_hybrid_set()
   class_< HybridSet<R> >("HybridSet",init<>())
     .def("__len__",&HybridSet<R>::number_of_locations)
     .def("new_location",&hybrid_set_new_location< HybridSet<R>, dimension_type >)
-    .def("new_location",&hybrid_set_new_location< HybridSet<R>, Rectangle<R> >)
+    .def("new_location",&hybrid_set_new_location< HybridSet<R>, Box<R> >)
     .def("new_location",&hybrid_set_new_location< HybridSet<R>, Polyhedron<R> >)
     .def("new_location",&hybrid_set_new_location< HybridSet<R>, SetInterface< Box<R> > >)
     .def("locations",&HybridSet<R>::locations)

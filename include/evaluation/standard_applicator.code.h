@@ -66,15 +66,15 @@ namespace Ariadne {
 
 
 template<class R>
-Rectangle<R>
-StandardApplicator< Rectangle<R> >::
-apply(const Map<R>& f, const Rectangle<R>& r) const
+Box<R>
+StandardApplicator< Box<R> >::
+apply(const Map<R>& f, const Box<R>& r) const
 {
   static int& verbosity = applicator_verbosity; 
-  ARIADNE_LOG(6,"Rectangle StandardApplicator::apply(Map f, Rectangle r)\n");
+  ARIADNE_LOG(6,"Box StandardApplicator::apply(Map f, Box r)\n");
   ARIADNE_LOG(7,"  r="<<r<<"\n");
-  ARIADNE_LOG(8,"  f(r)="<<Rectangle<R>(f.image(Point< Interval<R> >(r)))<<"\n");
-  return Rectangle<R>(f.image(Point< Interval<R> >(r)));
+  ARIADNE_LOG(8,"  f(r)="<<Box<R>(f.image(Point< Interval<R> >(r)))<<"\n");
+  return Box<R>(f.image(Point< Interval<R> >(r)));
 }
 
 

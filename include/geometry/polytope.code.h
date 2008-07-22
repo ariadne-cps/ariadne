@@ -47,7 +47,6 @@
 #include "geometry/point.h"
 #include "geometry/point_list.h"
 #include "geometry/box.h"
-#include "geometry/rectangle.h"
 #include "geometry/polyhedron.h"
 
 #include "output/logging.h"
@@ -265,13 +264,13 @@ Polytope<X>::Polytope(const Box<R>& bx)
 
 template<class X>
 Polytope<X>
-polytope(const Rectangle<X>& r)
+polytope(const Box<X>& r)
 {
   dimension_type d=r.dimension();
   size_type nv=r.number_of_vertices();
   array<X> data((d+1)*nv);
   size_type j=0;
-  for(typename Rectangle<X>::vertices_const_iterator v=r.vertices_begin();
+  for(typename Box<X>::vertices_const_iterator v=r.vertices_begin();
       v!=r.vertices_end(); ++v)
   {
     for(size_type i=0; i!=d; ++i) {
@@ -533,10 +532,8 @@ Polytope<X>::_instantiate()
   tribool tb;
   Point<R>* pt=0;
   Box<R>* bx=0;
-  Rectangle<X>* r=0;
   Polytope<X>* p=0;
   Polyhedron<X>* h=0;
-  //Rectangle<I>* ir=0;
   Polytope<I>* ip=0;
   Polyhedron<I>* ih=0;
 
@@ -549,7 +546,7 @@ Polytope<X>::_instantiate()
   subset(*p,*p);
   convex_hull(*p,*p);
   
-  *p=polytope(*r);
+  *p=polytope(*bx);
   *ip=polytope(*h);
   *ih=polyhedron(*p);
   

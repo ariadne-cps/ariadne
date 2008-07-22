@@ -73,7 +73,6 @@ ARIADNE_SRC = ariadne_module.cc \
 	export_box.cc \
 	export_set.cc \
 	export_interval_set.cc \
-	export_rectangle.cc \
 	export_zonotope.cc \
 	export_polytope.cc \
 	export_simplex.cc \

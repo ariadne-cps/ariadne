@@ -26,7 +26,6 @@
 
 #include "base/reference_container.h"
 #include "linear_algebra/vector.h"
-#include "geometry/rectangle_expression.h"
 #include "geometry/set_interface.h"
 #include "geometry/hybrid_set.h"
 #include "geometry/timed_set.h"

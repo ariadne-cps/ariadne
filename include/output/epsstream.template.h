@@ -54,16 +54,7 @@ template<class R>
 epsstream&
 operator<<(epsstream& eps, const Box<R>& r) 
 {
-  Rectangle2d dr=eps.projection_map()(r);
-  eps.draw(dr);
-  return eps;
-}
-
-template<class R> 
-epsstream&
-operator<<(epsstream& eps, const Rectangle<R>& r) 
-{
-  Rectangle2d dr=eps.projection_map()(r);
+  Box2d dr=eps.projection_map()(r);
   eps.draw(dr);
   return eps;
 }
@@ -190,7 +181,7 @@ template<class R>
 epsstream&
 operator<<(epsstream& eps, const GridCellListSet<R>& ds)
 {
-  std::vector<Rectangle2d> rl(ds.size());
+  std::vector<Box2d> rl(ds.size());
   std::transform(ds.begin(),ds.end(),rl.begin(),eps.projection_map());
   eps.draw(rl);
   return eps;
@@ -201,7 +192,7 @@ template<class R>
 epsstream&
 operator<<(epsstream& eps, const GridMaskSet<R>& ds)
 {
-  std::vector<Rectangle2d> rl(ds.size());
+  std::vector<Box2d> rl(ds.size());
   std::transform(ds.begin(),ds.end(),rl.begin(),eps.projection_map());
   eps.draw(rl);
   return eps;
@@ -213,7 +204,7 @@ template<class R>
 epsstream&
 operator<<(epsstream& eps, const PartitionTreeSet<R>& ds)
 {
-  std::vector<Rectangle2d> rl(ds.size());
+  std::vector<Box2d> rl(ds.size());
   std::transform(ds.begin(),ds.end(),rl.begin(),eps.projection_map());
   eps.draw(rl);
   return eps;
@@ -259,7 +250,7 @@ operator<<(epsstream& eps, const SetInterface< Box<R> >& set)
     } 
     catch(UnboundedSet& e) {
       if(set.space()==EuclideanSpace(2)) {
-        Rectangle2d bbox=eps.bounding_box();
+        Box2d bbox=eps.bounding_box();
         bb=Box<R>(2);
         bb.set_lower_bound(0,bbox.lower_bound(0));
         bb.set_upper_bound(0,bbox.upper_bound(0));

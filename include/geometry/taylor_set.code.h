@@ -169,6 +169,14 @@ TaylorSet<R>::subset(const Box<R>& bx) const
   
     
 template<class R> 
+ListSet< TaylorSet<R> > 
+TaylorSet<R>::split() const
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+  
+template<class R> 
 std::ostream&
 TaylorSet<R>::write(std::ostream& os) const
 {

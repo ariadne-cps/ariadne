@@ -52,7 +52,7 @@ namespace Ariadne {
 
 
 template<class X> template<class XX>
-Polyhedron<X>::Polyhedron(const Rectangle<XX>& r)
+Polyhedron<X>::Polyhedron(const Box<XX>& r)
   : _dimension(r.dimension()), 
     _number_of_constraints(r.dimension()*2u),
     _data((r.dimension()+1u)*r.dimension()*2u,static_cast<X>(0))

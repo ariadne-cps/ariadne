@@ -23,8 +23,9 @@
 
 #include "python/float.h"
 
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "geometry/zonotope.h"
+#include "geometry/taylor_set.h"
 #include "evaluation/reducer_interface.h"
 #include "evaluation/identity_reducer.h"
 #include "evaluation/orthogonal_reducer.h"

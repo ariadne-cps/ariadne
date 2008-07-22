@@ -23,8 +23,9 @@
 
 #include "numeric/float.h"
 
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "geometry/zonotope.h"
+#include "geometry/taylor_set.h"
 
 #include "evaluation/standard_approximator.h"
 #include "evaluation/standard_approximator.code.h"
@@ -38,14 +39,16 @@ namespace Ariadne {
     
 
 #ifdef ENABLE_FLOAT64
-    template class StandardApproximator< Rectangle<Float64> >;
+    template class StandardApproximator< Box<Float64> >;
     template class StandardApproximator< Zonotope<Float64> >;
+    template class StandardApproximator< TaylorSet<Float64> >;
     template class FastApproximator< Zonotope<Float64> >;
 #endif
   
 #ifdef ENABLE_FLOATMP
-    template class StandardApproximator< Rectangle<FloatMP> >;
+    template class StandardApproximator< Box<FloatMP> >;
     template class StandardApproximator< Zonotope<FloatMP> >;
+    template class StandardApproximator< TaylorSet<FloatMP> >;
     template class FastApproximator< Zonotope<FloatMP> >;
 #endif
 

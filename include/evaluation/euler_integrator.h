@@ -42,7 +42,7 @@ namespace Ariadne {
      */
     template<class R>
     class EulerIntegrator
-      : public IntegratorBase< Rectangle<R> >
+      : public IntegratorBase< Box<R> >
     {
       typedef Interval<R> I;
      public:
@@ -57,20 +57,20 @@ namespace Ariadne {
       virtual 
       std::pair< Rational, Box<R> >
       flow_bounds(const VectorField<R>& vector_field, 
-                  const Rectangle<R>& initial_set,
+                  const Box<R>& initial_set,
                   const Rational& maximum_step_size) const; 
 
       /*! \brief A C0 algorithm for integrating forward a rectangle. */
-      virtual Rectangle<R> 
+      virtual Box<R> 
       integration_step(const VectorField<R>& vector_field,
-                       const Rectangle<R>& initial_set,
+                       const Box<R>& initial_set,
                        const Rational& maximum_step_size,
                        const Box<R>& bounding_set) const;
 
       /*! \brief A C0 algorithm for integrating forward a rectangle up to a certain time. */
-      virtual Rectangle<R> 
+      virtual Box<R> 
       reachability_step(const VectorField<R>& vector_field,
-                        const Rectangle<R>& initial_set,
+                        const Box<R>& initial_set,
                         const Rational& maximum_step_size,
                         const Box<R>& bounding_set) const;
 

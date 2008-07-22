@@ -54,15 +54,16 @@ namespace Ariadne {
       typedef Interval<R> I;
       typedef GridApproximationScheme<R> GAS;
      public:
-      FastApproximator() : ApproximatorBase<GAS,ES>(Grid<R>(2,1.0)) { };
-      FastApproximator(const Grid<R>& g) : ApproximatorBase<GAS,ES>(g) { }
+      FastApproximator() : ApproximatorBase<GAS,ES>() { };
       virtual FastApproximator<ES>* clone() const;
       virtual ES enclosure_set(const Box<R>&  bx) const;
       virtual R radius(const ES& bs) const;
-      virtual Box<R> bounding_box(const ES& bs) const;
-      virtual BoxListSet<R> lower_approximation(const ES& bs) const;
-      virtual GridCellListSet<R> inner_approximation(const ES& bs, const Grid<R>& g) const;
-      virtual GridCellListSet<R> outer_approximation(const ES& bs, const Grid<R>& g) const;
+      virtual tribool disjoint(const ES& es, const Box<R>& bx) const;
+      virtual tribool superset(const ES& es, const Box<R>& bx) const;
+      virtual Box<R> bounding_box(const ES& es) const;
+      virtual BoxListSet<R> over_approximation(const ES& es) const;
+      virtual void adjoin_outer_approximation(GridCellListSet<R>& gcls, const ES& bs) const;
+      virtual void adjoin_outer_approximation(GridMaskSet<R>& gms, const ES& bs) const;
       virtual std::ostream& write(std::ostream& os) const;
     };
 

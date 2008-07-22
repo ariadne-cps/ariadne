@@ -38,6 +38,7 @@
 #include <cstring>
 
 #include "base/stlio.h"
+#include "numeric/interval.h"
 #include "linear_algebra/matrix.h"
 #include "geometry/exceptions.h"
 #include "geometry/point.h"
@@ -45,7 +46,6 @@
 #include "geometry/box_list_set.h"
 #include "geometry/grid_set.h"
 #include "geometry/partition_tree_set.h"
-#include "geometry/rectangle.h"
 #include "geometry/zonotope.h"
 #include "geometry/polytope.h"
 #include "geometry/list_set.h"
@@ -111,11 +111,11 @@ namespace Ariadne {
     textstream::write(const Point<R>& pt) 
     {
       if(pt.dimension() > 0) {
-				// Point<R> p = approximation(pt);
-				*this->_os_ptr << pt[0];
-				for (dimension_type i=1; i<pt.dimension(); i++) {
-							*this->_os_ptr << " " << pt[i];
-					}
+        // Point<R> p = approximation(pt);
+        *this->_os_ptr << pt[0];
+        for (dimension_type i=1; i<pt.dimension(); i++) {
+          *this->_os_ptr << " " << pt[i];
+        }
         *this->_os_ptr << "\n";
       }
     }
@@ -164,7 +164,11 @@ namespace Ariadne {
     textstream&
     operator<<(textstream& txt, const Box<R>& bx) 
     {
-      txt << Rectangle<R>(bx).vertices();
+      std::ostream& os=txt.ostream();
+      for(uint i=0; i!=bx.dimension(); ++i) {
+        if(i!=0) { os<<'x'; } 
+        os << bx[i];;
+      }
       return txt;
     }
     
@@ -177,7 +181,7 @@ namespace Ariadne {
         for (size_type i=0; i<pl.size(); i++) {
           txt.write(pl[i]);			
         }
-				txt.writenl();
+        txt.writenl();
       }
       return txt;
     }
@@ -187,8 +191,8 @@ namespace Ariadne {
     operator<<(textstream& txt, const BoxListSet<R>& bxls) 
     {
       typedef typename BoxListSet<R>::const_iterator const_iterator;
-			for(const_iterator set_iter=bxls.begin(); set_iter!=bxls.end(); ++set_iter) {
-				txt << *set_iter;
+      for(const_iterator set_iter=bxls.begin(); set_iter!=bxls.end(); ++set_iter) {
+        txt << *set_iter;
       }
       return txt;
     }
@@ -200,7 +204,7 @@ namespace Ariadne {
     textstream&
     operator<<(textstream& txt, const GridCell<R>& bs)
     {
-      return txt << Rectangle<R>(bs);
+      return txt << Box<R>(bs);
     }
     
 
@@ -208,7 +212,7 @@ namespace Ariadne {
     textstream&
     operator<<(textstream& txt, const GridBlock<R>& bs)
     {
-      return txt << Rectangle<R>(bs);
+      return txt << Box<R>(bs);
     }
     
 
@@ -243,21 +247,12 @@ namespace Ariadne {
     {
       typedef typename PartitionTreeSet<R>::const_iterator const_iterator;
       for(const_iterator set_iter=ds.begin(); set_iter!=ds.end(); ++set_iter) {
-        txt << Rectangle<R>(*set_iter);
+        txt << Box<R>(*set_iter);
       }
       return txt;
     }
 
 
-    template<class R> inline
-    textstream&
-    operator<<(textstream& txt, const Rectangle<R>& r)
-    {
-      txt << r.vertices();
-      return txt;
-    }
-
-    
     template<class R> inline
     textstream&
     operator<<(textstream& txt, const Zonotope<R>& z)
@@ -313,35 +308,7 @@ namespace Ariadne {
     textstream&
     operator<<(textstream& txt, const SetInterface<R>& set)
     {
-      
-      
-      if(dynamic_cast<const RectangularSet<R>*>(&set)) {
-        return txt << dynamic_cast<const RectangularSet<R>&>(set);
-      } else if(dynamic_cast<const PolyhedralSet<R>*>(&set)) {
-        return txt << dynamic_cast<const PolyhedralSet<R>&>(set);
-      } else if(dynamic_cast<const ListSet< Rectangle<R> >*>(&set)) {
-        return txt << dynamic_cast<const ListSet< Rectangle<R> >&>(set);
-      } else if(dynamic_cast<const ListSet< Zonotope<R> >*>(&set)) {
-        return txt << dynamic_cast<const ListSet< Zonotope<R> >&>(set);
-      } else if(dynamic_cast<const GridCellListSet<R>*>(&set)) {
-        return txt << dynamic_cast<const GridCellListSet<R>&>(set);
-      } else if(dynamic_cast<const GridMaskSet<R>*>(&set)) {
-        return txt << dynamic_cast<const GridMaskSet<R>&>(set);
-      } else if(dynamic_cast<const PartitionTreeSet<R>*>(&set)) {
-        return txt << dynamic_cast<const PartitionTreeSet<R>&>(set);
-      }  else {
-        Rectangle<R> bb;
-        try {
-          bb=set.bounding_box();
-        } 
-        catch(UnboundedSet& e) {
-            throw e;
-          }
-        PartitionScheme<R> ps(bb);
-        int depth=16;
-        PartitionTreeSet<R> pts=outer_approximation(set,ps,depth);
-        return txt << pts;
-      }
+      set.write(txt); return txt;
     }
 
 

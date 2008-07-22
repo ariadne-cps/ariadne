@@ -47,10 +47,6 @@ namespace Ariadne {
       static std::string string() { return "Box"; }
     };
 
-    template<class R> struct Name< Rectangle<R> > {
-      static std::string string() { return "Rectangle"; }
-    };
-
     template<class R> struct Name< Zonotope<R> > {
       static std::string string() { return "Zonotope"; }
     };
@@ -61,6 +57,10 @@ namespace Ariadne {
   
     template<class R> struct Name< Polyhedron<R> > {
       static std::string string() { return "Polyhedron"; }
+    };
+  
+    template<class R> struct Name< TaylorSet<R> > {
+      static std::string string() { return "TaylorSet"; }
     };
   
 

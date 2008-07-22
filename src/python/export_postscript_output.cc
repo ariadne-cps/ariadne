@@ -27,7 +27,6 @@
 #include "geometry/point.h"
 #include "geometry/box.h"
 #include "geometry/box_list_set.h"
-#include "geometry/rectangle.h"
 #include "geometry/zonotope.h"
 #include "geometry/polytope.h"
 #include "geometry/polyhedron.h"
@@ -95,7 +94,7 @@ void export_postscript_output()
     .def("open",&eps_open<FloatPy>)
     .def("open",&eps_open_x1x2<FloatPy>)
     .def("open",&eps_open_map<FloatPy>)
-    .def("open",(void(epsfstream::*)(const char*,const Rectangle2d&,const PlanarProjectionMap&))&epsfstream::open)
+    .def("open",(void(epsfstream::*)(const char*,const Box2d&,const PlanarProjectionMap&))&epsfstream::open)
     .def("open",&epsfstream_open_with_defaults<FloatPy>)
     .def("close",&epsfstream_close)
     .def("set_line_colour",(void(epsfstream::*)(const char*))&epsfstream::set_line_colour)

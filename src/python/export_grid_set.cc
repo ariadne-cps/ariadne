@@ -27,7 +27,6 @@
 #include "linear_algebra/vector.h"
 
 #include "geometry/box.h"
-#include "geometry/rectangle.h"
 #include "geometry/zonotope.h"
 #include "geometry/polytope.h"
 #include "geometry/polyhedron.h"
@@ -52,7 +51,6 @@ void export_grid()
   typedef Vector<R> RVector;
   typedef Point<R> RPoint;
   typedef Box<R> RBox;
-  typedef Rectangle<R> RRectangle;
   typedef BoxListSet<R> RBoxListSet;
   typedef SetInterface<R> RSetInterface;
 
@@ -108,7 +106,6 @@ void export_grid_set()
   typedef SetInterface< Box<R> > RSetInterface;
   typedef Box<R> RBox;
   typedef BoxListSet<R> RBoxListSet;
-  typedef Rectangle<R> RRectangle;
   typedef Polyhedron<R> RPolyhedron;
   typedef Polytope<R> RPolytope;
   typedef Zonotope<R> RZonotope;
@@ -200,7 +197,6 @@ void export_grid_set()
   def("inner_approximation",(RGridBlock(*)(const RBox&,const RGrid&))(&inner_approximation));
 
 
-  def("outer_approximation",(RGridCellListSet(*)(const RRectangle&,const RGrid&))(&outer_approximation));
   def("outer_approximation",(RGridCellListSet(*)(const RPolyhedron&,const RGrid&))(&outer_approximation));
   def("outer_approximation",(RGridCellListSet(*)(const RPolytope&,const RGrid&))(&outer_approximation));
   def("outer_approximation",(RGridCellListSet(*)(const RZonotope&,const RGrid&))(&outer_approximation));
@@ -208,7 +204,6 @@ void export_grid_set()
   def("outer_approximation",(RGridMaskSet(*)(const RZonotopeListSet&,const RFiniteGrid&))(&outer_approximation));
   def("outer_approximation",(RGridMaskSet(*)(const RSetInterface&,const RFiniteGrid&))(&outer_approximation));
 
-  def("inner_approximation",(RGridCellListSet(*)(const RRectangle&,const RGrid&))(&inner_approximation));
   def("inner_approximation",(RGridCellListSet(*)(const RPolytope&,const RGrid&))(&inner_approximation));
   def("inner_approximation",(RGridCellListSet(*)(const RPolyhedron&,const RGrid&))(&inner_approximation));
   def("inner_approximation",(RGridCellListSet(*)(const RZonotope&,const RGrid&))(&inner_approximation));

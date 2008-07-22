@@ -36,7 +36,7 @@ const double epsstream::scale_dimension=3.5;
 
 void 
 epsfstream::open(const char* fn, 
-                         const Rectangle2d& bbox, 
+                         const Box2d& bbox, 
                          const PlanarProjectionMap& p_map)
 {
   this->_ofs_ptr->open(fn); 
@@ -289,7 +289,7 @@ epsstream::trace(const Point2d& pt)
 }
 
 void
-epsstream::trace(const Rectangle2d& r)
+epsstream::trace(const Box2d& r)
 {
   double lx=r.lower_bound(0);
   double ux=r.upper_bound(0);
@@ -364,7 +364,7 @@ epsstream::draw(const InterpolatedCurve2d& cv)
 }
 
 void
-epsstream::draw(const Rectangle2d& r) 
+epsstream::draw(const Box2d& r) 
 {
   epsstream& eps=*this;
   if(eps.fill_style) {
@@ -401,7 +401,7 @@ epsstream::draw(const Polygon2d& p)
 
 
 void
-epsstream::draw(std::vector<Rectangle2d>& rl)
+epsstream::draw(std::vector<Box2d>& rl)
 {
   //std::cerr<<__PRETTY_FUNCTION__<<std::endl;
   epsstream& eps=*this;

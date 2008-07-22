@@ -34,7 +34,7 @@
 
 #include "geometry/exceptions.h"
 #include "geometry/point.h"
-#include "geometry/rectangle_expression.h"
+#include "geometry/box_expression.h"
 
 namespace Ariadne {
 
@@ -142,7 +142,7 @@ Box<R>::Box(const Vector< Interval<R> >& iv)
 }
 
 template<class R> template<class E> inline
-Box<R>::Box(const RectangleExpression<E>& original)
+Box<R>::Box(const BoxExpression<E>& original)
   : _data(2*original().dimension())
 {         
   const E& expression=original();
@@ -170,7 +170,7 @@ Box<R>::operator=(const Box<R>& A)
 
 template<class R> template<class E> inline
 Box<R>& 
-Box<R>::operator=(const RectangleExpression<E>& original)
+Box<R>::operator=(const BoxExpression<E>& original)
 {         
   const E& expression=original();
   this->_data.resize(2*expression.dimension());
@@ -558,6 +558,22 @@ tribool
 superset(const Box<R>& r1, const Box<R>& r2)
 {
   return r2.subset(r1);
+}
+
+
+template<class R> inline
+Box<R> 
+bounding_box(const Box<R>& r)
+{
+  return r.bounding_box();
+}
+
+
+template<class R> inline
+ListSet< Box<R> >
+split(const Box<R>& bx) 
+{
+  return bx.split();
 }
 
 

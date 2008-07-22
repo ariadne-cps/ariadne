@@ -86,7 +86,7 @@ class TestReachabilityAnalyser
     StandardSubdivider<ES> subdivider;
     CascadeReducer<ES> reducer(3);
     Evolver<Sys,ES> map_evolver(parameters,applicator,subdivider,reducer);
-    StandardApproximator<ES> approximator(grid);
+    StandardApproximator<ES> approximator;
     Discretiser<Sys,Aprx,ES> discretiser(parameters,map_evolver,approximator);
     return ReachabilityAnalyser<Sys,Aprx>(parameters,discretiser);
   }

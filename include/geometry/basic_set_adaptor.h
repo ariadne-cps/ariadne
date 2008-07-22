@@ -36,11 +36,6 @@ namespace Ariadne {
     }
 
     template<class R> inline
-    Box<R> bounding_box(const Box<R>& r) {
-      return r;
-    }
-
-    template<class R> inline
     dimension_type dimension(const Zonotope<R>& z) {
       return z.dimension();
     }

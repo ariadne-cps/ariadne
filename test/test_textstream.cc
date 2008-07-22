@@ -32,7 +32,7 @@
 
 #include "base/utility.h"
 #include "geometry/point.h"
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "geometry/zonotope.h"
 #include "geometry/list_set.h"
 #include "output/textstream.h"
@@ -48,7 +48,7 @@ int main() {
 
   Point<Flt> pt("(0.0,0.0)");
 
-  Rectangle<Flt> r1,r2,r3,r4;
+  Box<Flt> r1,r2,r3,r4;
   string input("[-0.125,1.125]x[-0.25, 3.25] "
                "[ 0.0125,1.0]x[0.0,2.0] "
                "[ 0.5,1.0]x[1.0,3.0] "

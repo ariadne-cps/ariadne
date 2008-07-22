@@ -23,7 +23,7 @@
 
 #include "python/float.h"
 
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "geometry/zonotope.h"
 #include "geometry/orbit.h"
 

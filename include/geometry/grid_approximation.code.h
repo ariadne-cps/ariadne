@@ -32,10 +32,10 @@
 
 #include "point.h"
 #include "box.h"
-#include "rectangle.h"
 #include "zonotope.h"
 #include "polytope.h"
 #include "polyhedron.h"
+#include "taylor_set.h"
 #include "box_list_set.h"
 #include "list_set.h"
 
@@ -214,10 +214,11 @@ instantiate_grid_approximation()
   tribool tb;
   Point<I>* ipt=0;
   Box<R>* bx=0;
-  Rectangle<R>* r=0;
+  Box<R>* r=0;
   Zonotope<R>* z=0;
   Polytope<R>* pltp=0;
   Polyhedron<R>* plhd=0;
+  TaylorSet<R>* ts=0;
   SetInterface< Box<R> >* set=0;
   
   Grid<R>* g=0;
@@ -227,7 +228,7 @@ instantiate_grid_approximation()
   GridMaskSet<R>* gms=0;
   BoxListSet<R>* bxls=0;
 
-  ListSet< Rectangle<R> >* rls=0;
+  ListSet< Box<R> >* rls=0;
   ListSet< Zonotope<R> >* zls=0;
   
   *gb=outer_approximation(*ipt,*g);
@@ -237,12 +238,10 @@ instantiate_grid_approximation()
   *gb=outer_approximation(*bx,*g);
   *gb=inner_approximation(*bx,*g);
   
-  *gcls=outer_approximation(*r,*g);
-  *gcls=inner_approximation(*r,*g);
-
   *gcls=outer_approximation(*pltp,*g);
   *gcls=outer_approximation(*plhd,*g);
   *gcls=outer_approximation(*z,*g);
+  *gcls=outer_approximation(*ts,*g);
   *gcls=outer_approximation(*set,*g);
   
   //  *gcls=fuzzy_outer_approximation(*pltp,*g);
@@ -360,24 +359,7 @@ inner_approximation(const Point< Interval<R> >& ipt, const Grid<R>& g)
   return inner_approximation(Box<R>(ipt),g);
 }
 
-template<class R>
-GridCellListSet<R>
-outer_approximation(const Rectangle<R>& r, const Grid<R>& g) 
-{
-  GridCellListSet<R> gcls(g);
-  gcls.adjoin_outer_approximation(Box<R>(r));
-  return gcls;
-}
 
-
-template<class R>
-GridCellListSet<R>
-inner_approximation(const Rectangle<R>& r, const Grid<R>& g) 
-{
-  GridCellListSet<R> gcls(g);
-  gcls.adjoin_inner_approximation(Box<R>(r));
-  return gcls;
-}
 
 template<class R>
 GridCellListSet<R>
@@ -425,6 +407,20 @@ inner_approximation(const Zonotope<R>& z, const Grid<R>& g)
   return ::inner_approximation_of_basic_set(z,g);
 }
 
+
+template<class R>
+GridCellListSet<R>
+outer_approximation(const TaylorSet<R>& ts, const Grid<R>& g) 
+{
+  return ::outer_approximation_of_basic_set(ts,g);
+}
+
+template<class R>
+GridCellListSet<R>
+inner_approximation(const TaylorSet<R>& ts, const Grid<R>& g) 
+{
+  return ::inner_approximation_of_basic_set(ts,g);
+}
 
 template<class R>
 GridCellListSet<R>
@@ -495,7 +491,7 @@ template<class R>
 BoxListSet<R>
 lower_approximation(const SetInterface< Box<R> >& s, const Grid<R>& g) 
 {
-  ARIADNE_LOG(4,"ListSet<Rectangle> lower_approximation(SetInterface s, Grid fg)\n");
+  ARIADNE_LOG(4,"ListSet<Box> lower_approximation(SetInterface s, Grid fg)\n");
   FiniteGrid<R> fg(g,s.bounding_box());
   return lower_approximation(s,fg);
 }
@@ -504,7 +500,7 @@ template<class R>
 BoxListSet<R>
 point_approximation(const SetInterface< Box<R> >& s, const Grid<R>& g) 
 {
-  ARIADNE_LOG(4,"ListSet<Rectangle> point_approximation(SetInterface s, Grid fg)\n");
+  ARIADNE_LOG(4,"ListSet<Box> point_approximation(SetInterface s, Grid fg)\n");
   FiniteGrid<R> fg(g,s.bounding_box());
   return point_approximation(s,fg);
 }

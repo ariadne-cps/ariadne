@@ -33,9 +33,9 @@
 #include "base/tribool.h"
 
 #include "function/identity_function.h"
+#include "geometry/image_set.h"
 #include "geometry/constraint_set.h"
 #include "geometry/box.h"
-#include "geometry/rectangle.h"
 
 namespace Ariadne {
   
@@ -61,9 +61,6 @@ namespace Ariadne {
       /*! \brief */
       template<class R1> RectangularSet(const Box<R1>& bx)
         : ConstraintSet<R>(IdentityFunction<R>(bx.dimension()),Box<R>(bx)) { }
-      /*! \brief */
-      template<class R1> RectangularSet(const Rectangle<R1>& r)
-        : ConstraintSet<R>(IdentityFunction<R>(r.dimension()),Box<R>(r)) { }
       /*! \brief */
       operator Box<R> () const { return this->codomain(); }      
 

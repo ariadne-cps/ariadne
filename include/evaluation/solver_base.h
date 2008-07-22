@@ -89,7 +89,7 @@ template<class R>
 Point<typename SolverBase<R>::I> 
 SolverBase<R>::fixed_point(const Map<R>& f,const Point<I>& pt) 
 {
-  return this->solve(DifferenceFunction<R>(f.function()),pt); 
+  return Point<I>(this->solve(DifferenceFunction<R>(f.function()),pt.position_vector())); 
 }
 
 

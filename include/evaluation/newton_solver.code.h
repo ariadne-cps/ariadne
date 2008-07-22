@@ -26,10 +26,9 @@
 #include "output/logging.h"
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
+#include "function/function_interface.h"
 #include "geometry/point.h"
 #include "geometry/box.h"
-
-#include "system/vector_field.h"
 
 #include "evaluation/exceptions.h"
 
@@ -37,14 +36,14 @@ namespace Ariadne {
 
 
 template<class R>
-Point<typename IntervalNewtonSolver<R>::I>
+Vector<typename IntervalNewtonSolver<R>::I>
 IntervalNewtonSolver<R>::solve(const FunctionInterface<R>& f, 
-                               const Point<I>& ix)
+                               const Vector<I>& ix)
 {
   const R& e=this->maximum_error();
   uint n=this->maximum_number_of_steps();
   ARIADNE_LOG(1,"verbosity="<<verbosity<<"\n");
-  Point<I> x=ix;
+  Point<I> x(ix);
   Box<R> r(x);
   while(n>0) {
     ARIADNE_LOG(4,"Testing for root in "<<x<<"\n");
@@ -66,7 +65,7 @@ IntervalNewtonSolver<R>::solve(const FunctionInterface<R>& f,
     ARIADNE_LOG(5,"  nr="<<nr<<"\n");
 
     if(subset(nr,r) && radius(nx) < e) {
-      return nr;
+      return nr.position_vectors();
     }
     if(disjoint(nr,r)) {
       throw EvaluationException("No result found -- disjoint");

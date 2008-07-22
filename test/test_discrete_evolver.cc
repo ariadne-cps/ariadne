@@ -87,7 +87,7 @@ void TestDiscreteEvolver<R>::test() const
   StandardSubdivider< Zonotope<R> > subdivider;
   CascadeReducer< Zonotope<R> > reducer(3);
   Evolver< VectorField<R>, Zonotope<R> > evolver(parameters,integrator,subdivider,reducer);
-  StandardApproximator< Zonotope<R> > approximator(grid);
+  StandardApproximator< Zonotope<R> > approximator;
   DiscreteEvolver< VectorField<R>, GridApproximationScheme<R>, Zonotope<R> > discretiser(evolver,approximator);
 
   // Define the initial box

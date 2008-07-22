@@ -56,6 +56,20 @@ FastApproximator<ES>::radius(const ES& es) const
 }
 
 template<class ES>
+tribool
+FastApproximator<ES>::disjoint(const ES& es, const Box<R>& bx) const
+{
+  return Ariadne::disjoint(es,bx);
+}
+
+template<class ES>
+tribool
+FastApproximator<ES>::superset(const ES& es, const Box<R>& bx) const
+{
+  return Ariadne::superset(es,bx);
+}
+
+template<class ES>
 Box<typename ES::real_type>
 FastApproximator<ES>::bounding_box(const ES& es) const
 {
@@ -64,7 +78,7 @@ FastApproximator<ES>::bounding_box(const ES& es) const
 
 template<class ES>
 BoxListSet<typename ES::real_type>
-FastApproximator<ES>::lower_approximation(const ES& es) const
+FastApproximator<ES>::over_approximation(const ES& es) const
 {
   BoxListSet<R> result;
   result.adjoin(Ariadne::bounding_box(es));
@@ -72,17 +86,17 @@ FastApproximator<ES>::lower_approximation(const ES& es) const
 }
 
 template<class ES>
-GridCellListSet<typename ES::real_type>
-FastApproximator<ES>::inner_approximation(const ES& es, const Grid<R>& g) const
+void
+FastApproximator<ES>::adjoin_outer_approximation(GridCellListSet<R>& gcls, const ES& es) const
 {
-  throw NotImplemented(__PRETTY_FUNCTION__);
+  gcls.adjoin(Ariadne::fuzzy_outer_approximation(es,gcls.grid()));
 }
 
 template<class ES>
-GridCellListSet<typename ES::real_type>
-FastApproximator<ES>::outer_approximation(const ES& es, const Grid<R>& g) const
+void
+FastApproximator<ES>::adjoin_outer_approximation(GridMaskSet<R>& gms, const ES& es) const
 {
-  return Ariadne::fuzzy_outer_approximation(es,g);
+  gms.adjoin(Ariadne::fuzzy_outer_approximation(es,gms.grid()));
 }
 
 template<class ES>

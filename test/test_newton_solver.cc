@@ -28,8 +28,10 @@
 #include <cassert>
 
 
+#include "linear_algebra/vector.h"
+#include "function/function_interface.h"
 #include "geometry/point.h"
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "evaluation/exceptions.h"
 #include "evaluation/newton_solver.h"
 

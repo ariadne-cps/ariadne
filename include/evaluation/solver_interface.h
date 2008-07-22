@@ -1,8 +1,8 @@
 /***************************************************************************
  *            solver_interface.h
  *
- *  Copyright  2006  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
+ *  Copyright  2006-8  Alberto Casagrande, Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -33,18 +33,17 @@
 #include <string>
 
 #include "base/types.h"
-#include "base/declarations.h"
 #include "numeric/declarations.h"
-#include "linear_algebra/declarations.h"
-#include "function/declarations.h"
-#include "geometry/declarations.h"
-#include "system/declarations.h"
-
-#include "function/function_interface.h"
 
 namespace Ariadne {
 
     
+    template<class X> class Vector;
+    template<class X> class FunctionInterface;
+
+    template<class R> class Point;
+    template<class R> class Map;
+
     /*! \ingroup EvaluatorInterfaces \ingroup Solvers
      *  \brief %Interface for solving (nonlinear) equations. 
      */
@@ -67,8 +66,8 @@ namespace Ariadne {
       virtual void set_maximum_number_of_steps(uint max_steps) = 0;
       
       /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
-      virtual Point<I> solve(const FunctionInterface<R>& f,const Point<I>& pt) = 0;
-      /*! \brief Solve \f$f(x)=0\f$, starting in the interval point \a pt. */
+      virtual Vector<I> solve(const FunctionInterface<R>& f,const Vector<I>& pt) = 0;
+      /*! \brief Solve \f$f(x)=x\f$, starting in the interval point \a pt. */
       virtual Point<I> fixed_point(const Map<R>& f,const Point<I>& pt) = 0;
     };
     

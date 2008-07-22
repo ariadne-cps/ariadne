@@ -85,7 +85,6 @@ template<class R> void export_box();
 template<class R> void export_box_list_set();
 template<class R> void export_set();
 template<class R> void export_interval_set();
-template<class R> void export_rectangle();
 template<class R> void export_simplex();
 template<class R> void export_zonotope();
 template<class R> void export_polytope();
@@ -210,7 +209,6 @@ BOOST_PYTHON_MODULE(ariadne)
   export_interval_set<FloatPy>();
   export_box<FloatPy>();
   export_box_list_set<FloatPy>();
-  export_rectangle<FloatPy>();
   export_zonotope<FloatPy>();
   export_simplex<FloatPy>();
   export_polytope<FloatPy>();

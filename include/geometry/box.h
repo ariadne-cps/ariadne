@@ -44,7 +44,7 @@
 #include "geometry/exceptions.h"
 #include "geometry/point.h"
 #include "geometry/basic_set_concept.h"
-#include "geometry/rectangle_expression.h"
+#include "geometry/box_expression.h"
 
 namespace Ariadne {
   
@@ -52,6 +52,8 @@ namespace Ariadne {
     class basic_set_tag;
     class EuclideanSpace;
     template<class R> class BoxVerticesIterator;
+    template<class R> class PointList;
+    template<class BS> class ListSet;
     
     /*! \brief A box of arbitrary dimension.
      * 
@@ -82,7 +84,7 @@ namespace Ariadne {
      */
     template<class R>
     class Box 
-      : public RectangleExpression< Box<R> >
+      : public BoxExpression< Box<R> >
     {
       typedef Box<R> Self;
       BOOST_CLASS_REQUIRE(Self,Ariadne,BasicSetConcept);
@@ -140,7 +142,7 @@ namespace Ariadne {
       explicit Box(const Vector< Interval<R> >& iv);
       
       /*! \brief Convert from a box expression. */
-      template<class E> Box(const RectangleExpression<E>& r);
+      template<class E> Box(const BoxExpression<E>& r);
     
     
       /*! \brief Copy constructor. */
@@ -150,7 +152,7 @@ namespace Ariadne {
       Box<R>& operator=(const Box<R>& bx);
 
       /*! \brief Assign from a box expression. */
-      template<class E> Box<R>& operator=(const RectangleExpression<E>& r);
+      template<class E> Box<R>& operator=(const BoxExpression<E>& r);
     
 
       /*! \brief Make an empty box. */
@@ -291,13 +293,16 @@ namespace Ariadne {
       size_type number_of_vertices() const;
       /*! \brief The \a i th vertex. */
       Point<R> vertex(size_type i) const;
+      /*! \brief A list of all vertices. */
+      PointList<R> vertices() const;
 
       /*! \brief An iterator to the first vertex of the box. */
       vertices_const_iterator vertices_begin() const;
       /*! \brief An iterator to the end vertex of the box. */
       vertices_const_iterator vertices_end() const;
 
- 
+      /*! \brief Split into two smaller boxes along the longest edge. */
+      ListSet< Box<R> > split() const;
       //@}
       
 #ifdef DOXYGEN
@@ -367,6 +372,8 @@ namespace Ariadne {
     template<class R> tribool intersect(const Box<R>& bx1, const Box<R>& bx2);
     template<class R> tribool subset(const Box<R>& bx1, const Box<R>& bx2);
     template<class R> tribool superset(const Box<R>& bx1, const Box<R>& bx2);
+    template<class R> Box<R> bounding_box(const Box<R>& bx);
+    template<class R> ListSet< Box<R> > split(const Box<R>& bx);
     template<class R> Box<R> closed_intersection(const Box<R>& bx1, const Box<R>& bx2);
     template<class R> Box<R> open_intersection(const Box<R>& bx1, const Box<R>& bx2);
     template<class R> Box<R> rectangular_hull(const Box<R>& bx1, const Box<R>& bx2);

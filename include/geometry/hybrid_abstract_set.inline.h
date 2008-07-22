@@ -270,7 +270,7 @@ operator<<(std::ostream& os, const HybridSet<R>& hs)
 
 template<class R> inline
 typename HybridSet<R>::S&
-HybridSet<R>::new_location(discrete_state_type q, const Rectangle<real_type>& r)
+HybridSet<R>::new_location(discrete_state_type q, const Box<real_type>& r)
 {
   ARIADNE_CHECK_NEW_LOCATION(*this,q,"HybridSet<R>::new_location(discrete_state_type q, Box<R> r)");
   RectangularSet<real_type> rs(r);

@@ -58,13 +58,13 @@ namespace Ariadne {
      *  g.subdivision_coordinate(i,lb.lower_bound(i)) and
      *  g.subdivision_coordinate(i,lb.upper_bound(i)).
      *
-     *  A %GridBlock satisfies all the requirements of a RectangleExpression.
+     *  A %GridBlock satisfies all the requirements of a BoxExpression.
      *  \ingroup BasicSet
      *  \ingroup Grid
      */
     template<class R>
     class GridBlock 
-      : public RectangleExpression< GridBlock<R> >
+      : public BoxExpression< GridBlock<R> >
     {
       friend class GridCell<R>;
       friend class GridMaskSet<R>;

@@ -23,7 +23,6 @@
  
 #include <vector>
 
-#include "geometry/rectangle_expression.h"
 #include "geometry/set_interface.h"
 #include "geometry/hybrid_set.h"
 #include "geometry/timed_set.h"

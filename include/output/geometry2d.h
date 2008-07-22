@@ -94,13 +94,13 @@ namespace Ariadne {
       const_iterator end() const { return --_points.end(); }
     };
 
-    class Rectangle2d {
+    class Box2d {
      private:
       Point2d _lower_corner;
       Point2d _upper_corner;
      public:
-      Rectangle2d() { }
-      Rectangle2d(const Point2d& l, const Point2d& u) : _lower_corner(l), _upper_corner(u) { }
+      Box2d() { }
+      Box2d(const Point2d& l, const Point2d& u) : _lower_corner(l), _upper_corner(u) { }
       dimension_type dimension() const { return 2; }
       const double& lower_bound(dimension_type i) const { return _lower_corner[i]; }
       const double& upper_bound(dimension_type i) const { return _upper_corner[i]; }
@@ -108,24 +108,24 @@ namespace Ariadne {
       double& upper_bound(dimension_type i) { return _upper_corner[i]; }
       void set_lower_bound(dimension_type i,const double& x) { _lower_corner[i]=x; }
       void set_upper_bound(dimension_type i,const double& x) { _upper_corner[i]=x; }
-      friend bool operator==(const Rectangle2d& r1, const Rectangle2d& r2);
-      friend bool operator<(const Rectangle2d& r1, const Rectangle2d& r2);
+      friend bool operator==(const Box2d& r1, const Box2d& r2);
+      friend bool operator<(const Box2d& r1, const Box2d& r2);
     };
 
 
     inline 
-    bool operator==(const Rectangle2d& r1, const Rectangle2d& r2) {
+    bool operator==(const Box2d& r1, const Box2d& r2) {
       return r1._lower_corner==r2._lower_corner && r1._upper_corner==r2._upper_corner;
     }
 
     inline 
-    bool operator<(const Rectangle2d& r1, const Rectangle2d& r2) {
+    bool operator<(const Box2d& r1, const Box2d& r2) {
       //std::cerr<<__PRETTY_FUNCTION__<<std::endl;
       return r1._lower_corner<r2._lower_corner 
         || r1._lower_corner==r2._lower_corner && r1._upper_corner<r2._upper_corner; 
     }
 
-    std::ostream& operator<<(std::ostream&, const Rectangle2d&);
+    std::ostream& operator<<(std::ostream&, const Box2d&);
 
 
 
@@ -166,7 +166,7 @@ namespace Ariadne {
       template<class R> Vector2d operator() (const Vector<R>& v) const;
       template<class R> Point2d operator() (const Point<R>& pt) const;
       template<class R> InterpolatedCurve2d operator() (const InterpolatedCurve<R>& cv) const;
-      template<class E> Rectangle2d operator() (const RectangleExpression<E>& re) const;
+      template<class E> Box2d operator() (const BoxExpression<E>& re) const;
       template<class R> Zonotope2d operator() (const Zonotope<R>& z) const;
       template<class R> Polygon2d operator() (const Polytope<R>& p) const;
      private:
@@ -220,12 +220,12 @@ PlanarProjectionMap::operator()(const InterpolatedCurve<R>& curve) const
 }
 
 template<class E> 
-Rectangle2d 
-PlanarProjectionMap::operator()(const RectangleExpression<E>& re) const 
+Box2d 
+PlanarProjectionMap::operator()(const BoxExpression<E>& re) const 
 {
-  Rectangle2d result; 
+  Box2d result; 
   const E& r=re();
-  ARIADNE_CHECK_DIMENSION(r,this->_d,"Rectangle2d PlanarProjectionMap::operator()(Box<R> r)");
+  ARIADNE_CHECK_DIMENSION(r,this->_d,"Box2d PlanarProjectionMap::operator()(Box<R> r)");
   result.lower_bound(0)=approx<double>(r.lower_bound(this->_i));
   result.upper_bound(0)=approx<double>(r.upper_bound(this->_i));
   result.lower_bound(1)=approx<double>(r.lower_bound(this->_j));

@@ -49,13 +49,6 @@ namespace Ariadne {
 
  
 template<class X> template<class XX> inline
-Polytope<X>::Polytope(const Rectangle<XX>& r)
-  : _dimension(r.dimension()), _number_of_vertices(r.number_of_vertices()), _data()
-{   
-  (*this)=polytope(Rectangle<X>(r));
-}
-
-template<class X> template<class XX> inline
 Polytope<X>::Polytope(const Polyhedron<XX>& p)
   : _dimension(p.dimension()), _number_of_vertices(), _data()
 {   

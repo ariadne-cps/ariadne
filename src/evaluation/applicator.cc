@@ -23,7 +23,7 @@
 
 #include "numeric/float.h"
 
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "geometry/zonotope.h"
 
 #include "evaluation/standard_applicator.h"
@@ -34,12 +34,12 @@ namespace Ariadne {
     
 
 #ifdef ENABLE_FLOAT64
-    template class StandardApplicator< Rectangle<Float64> >;
+    template class StandardApplicator< Box<Float64> >;
     template class StandardApplicator< Zonotope<Float64> >;
 #endif
   
 #ifdef ENABLE_FLOATMP
-    template class StandardApplicator< Rectangle<FloatMP> >;
+    template class StandardApplicator< Box<FloatMP> >;
     template class StandardApplicator< Zonotope<FloatMP> >;
 #endif
 

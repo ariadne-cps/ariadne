@@ -47,17 +47,17 @@ namespace Ariadne {
      *  \brief A class for computing the image of a rectangle under a map. 
      */
     template<class R>
-    class StandardApplicator< Rectangle<R> >
-      : public ApplicatorInterface< Rectangle<R> >
+    class StandardApplicator< Box<R> >
+      : public ApplicatorInterface< Box<R> >
     {
-      typedef Rectangle<R> ES;
+      typedef Box<R> ES;
      public:
       /*! \brief Default constructor. */
       StandardApplicator() { }
       /*! \brief Make a dynamically-allocated copy. */
       StandardApplicator<ES>* clone() const { return new StandardApplicator<ES>(*this); }
-      /*! \brief Compute the image of a rectangle under a continuous function. */
-      virtual Rectangle<R> apply(const Map<R>& f, const Rectangle<R>& bs) const;
+      /*! \brief Compute the image of a box under a continuous function. */
+      virtual Box<R> apply(const Map<R>& f, const Box<R>& bs) const;
     };
 
 

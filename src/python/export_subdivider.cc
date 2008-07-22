@@ -23,7 +23,6 @@
 
 #include "python/float.h"
 
-#include "geometry/rectangle.h"
 #include "geometry/zonotope.h"
 #include "geometry/list_set.h"
 #include "evaluation/subdivider_interface.h"

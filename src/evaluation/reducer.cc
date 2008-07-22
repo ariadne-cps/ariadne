@@ -23,8 +23,9 @@
 
 #include "numeric/float.h"
 
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "geometry/zonotope.h"
+#include "geometry/taylor_set.h"
 
 #include "evaluation/identity_reducer.h"
 #include "evaluation/orthogonal_reducer.h"
@@ -36,15 +37,17 @@ namespace Ariadne {
     
 
 #ifdef ENABLE_FLOAT64
-    template class IdentityReducer< Rectangle<Float64> >;
+    template class IdentityReducer< Box<Float64> >;
     template class IdentityReducer< Zonotope<Float64> >;
+    template class IdentityReducer< TaylorSet<Float64> >;
     template class OrthogonalReducer< Zonotope<Float64> >;
     template class CascadeReducer< Zonotope<Float64> >;
 #endif
   
 #ifdef ENABLE_FLOATMP
-    template class IdentityReducer< Rectangle<FloatMP> >;
+    template class IdentityReducer< Box<FloatMP> >;
     template class IdentityReducer< Zonotope<FloatMP> >;
+    template class IdentityReducer< TaylorSet<FloatMP> >;
     template class OrthogonalReducer< Zonotope<FloatMP> >;
     template class CascadeReducer< Zonotope<FloatMP> >;
 #endif

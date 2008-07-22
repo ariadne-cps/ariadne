@@ -48,13 +48,13 @@ namespace Ariadne {
 
     /*! \brief A box in a grid with dyadic relative coordinates.
      *
-     *  A %GridBox satisfies the requirements of a RectangleExpression.
+     *  A %GridBox satisfies the requirements of a BoxExpression.
      *  \ingroup BasicSet
      *  \ingroup Grid
      */
     template<class R>
     class GridBox 
-      : public RectangleExpression< GridBox<R> >
+      : public BoxExpression< GridBox<R> >
     {
      public:
       /*! \brief A tag describing the type of set. */

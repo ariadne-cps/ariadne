@@ -42,8 +42,6 @@
 #include "system/declarations.h"
 #include "evaluation/declarations.h"
 
-#include "geometry/grid_approximation_scheme.h"
-#include "geometry/grid_approximation.h"
 #include "geometry/list_set.h"
 #include "geometry/hybrid_space.h"
 #include "geometry/hybrid_set.h"

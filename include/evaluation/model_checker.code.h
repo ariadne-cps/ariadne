@@ -47,7 +47,6 @@
 #include "geometry/grid.h"
 #include "geometry/grid_set.h"
 #include "geometry/partition_tree_set.h"
-#include "geometry/grid_approximation.h"
 #include "geometry/rectangular_set.h"
 #include "geometry/orbit.h"
 

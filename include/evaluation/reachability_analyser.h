@@ -43,10 +43,6 @@
 #include "evaluation/discretiser_interface.h"
 #include "evaluation/reachability_analyser_interface.h"
 
-// For approximation
-#include "geometry/grid_approximation.h"
-#include "geometry/timed_list_set.h"
-
 
 namespace Ariadne {
   

@@ -38,14 +38,11 @@
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
 
-#include "combinatoric/lattice_set.h"
-
 #include "geometry/box.h"
 #include "geometry/box_list_set.h"
 #include "geometry/list_set.h"
-#include "geometry/grid_set.h"
-#include "geometry/partition_tree_set.h"
-#include "geometry/grid_approximation.h"
+#include "geometry/timed_list_set.h"
+
 
 #include "evaluation/standard_applicator.h"
 #include "evaluation/standard_subdivider.h"

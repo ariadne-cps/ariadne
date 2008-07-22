@@ -45,10 +45,6 @@
 
 #include "evaluation/evolver_base.h"
 
-// For approximation
-#include "geometry/grid_approximation.h"
-#include "geometry/timed_list_set.h"
-
 #include "evaluation/evolution_parameters.h"
 
 

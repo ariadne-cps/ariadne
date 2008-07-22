@@ -214,7 +214,6 @@ instantiate_grid_approximation()
   tribool tb;
   Point<I>* ipt=0;
   Box<R>* bx=0;
-  Box<R>* r=0;
   Zonotope<R>* z=0;
   Polytope<R>* pltp=0;
   Polyhedron<R>* plhd=0;
@@ -390,6 +389,13 @@ inner_approximation(const Polytope<R>& p, const Grid<R>& g)
   return ::inner_approximation_of_basic_set(p,g);
 }
 
+
+template<class R>
+void 
+adjoin_outer_approximation(const GridMaskSet<R>& gms, const Zonotope<R>& z) 
+{
+  adjoin_outer_approximation_of_basic_set(gms,z);
+}
 
 template<class R>
 GridCellListSet<R>

@@ -45,7 +45,6 @@
 #include "geometry/list_set.h"
 #include "geometry/grid_set.h"
 #include "geometry/partition_tree_set.h"
-#include "geometry/grid_approximation.h"
 
 
 #include "system/map.h"

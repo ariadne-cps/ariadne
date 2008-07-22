@@ -83,15 +83,30 @@ template<class ES>
 void
 StandardApproximator<ES>::adjoin_outer_approximation(GridCellListSet<R>& gcls, const ES& es) const
 {
-  gcls.adjoin(Ariadne::outer_approximation(es,gcls.grid()));
+  GridBlock<R> gbb=Ariadne::outer_approximation(this->bounding_box(es),gcls.grid());
+  Box<R> r(es.dimension());
+  for(typename GridBlock<R>::const_iterator iter=gbb.begin(); iter!=gbb.end(); ++iter) {
+    r=*iter;
+    if(possibly(not this->disjoint(es,r))) {
+      gcls.adjoin(*iter);
+    }
+  }
 }
 
 template<class ES>
 void
 StandardApproximator<ES>::adjoin_outer_approximation(GridMaskSet<R>& gms, const ES& es) const
 {
-  gms.adjoin(Ariadne::outer_approximation(es,gms.grid()));
-  //gms.adjoin_outer_approximation(es);
+  GridBlock<R> gbb=Ariadne::outer_approximation(this->bounding_box(es),gms.grid());
+  Box<R> r(es.dimension());
+  for(typename GridBlock<R>::const_iterator iter=gbb.begin(); iter!=gbb.end(); ++iter) {
+    if(!subset(*iter,gms)) {
+      r=*iter;
+      if(possibly(not this->disjoint(es,r))) {
+        gms.adjoin(*iter);
+      }
+    }
+  }
 }
 
 

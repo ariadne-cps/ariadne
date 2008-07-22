@@ -49,6 +49,7 @@
 
 #include "geometry/box.h"
 #include "geometry/list_set.h"
+#include "geometry/timed_list_set.h"
 
 #include "system/impact_system.h"
 

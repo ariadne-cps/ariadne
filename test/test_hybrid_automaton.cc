@@ -29,7 +29,6 @@
 #include "geometry/set_interface.h"
 #include "geometry/set_reference.h"
 #include "geometry/hybrid_set.h"
-#include "geometry/rectangle.h"
 #include "geometry/polyhedron.h"
 #include "geometry/polyhedral_set.h"
 #include "system/affine_map.h"

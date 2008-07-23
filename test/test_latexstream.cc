@@ -33,7 +33,7 @@
 #include "numeric/rational.h"
 #include "linear_algebra/matrix.h"
 #include "linear_algebra/matrix.h"
-#include "geometry/rectangle.h"
+#include "geometry/box.h"
 #include "output/latexstream.h"
 
 #include "test.h"

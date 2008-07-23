@@ -31,11 +31,9 @@
 #include "test_float.h"
 #include "combinatoric/binary_word.h"
 #include "geometry/point.h"
-#include "geometry/rectangle.h"
 #include "geometry/zonotope.h"
 #include "geometry/list_set.h"
 #include "geometry/grid_set.h"
-//#include "geometry/irregular_grid_set.h"
 
 #include "test.h"
 

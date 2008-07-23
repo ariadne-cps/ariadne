@@ -372,6 +372,8 @@ void div_noalias_(Interval< Float<T> >& r, const Interval<X>& x, const Interval<
     }
   } else {
     inf_(ru); neg_(rl,ru);
+    std::cerr << "Dividing by [" << rl << ":" << ru << "]" << std::endl;
+    throw std::runtime_error("Divide by zero error");
   }
 }
 

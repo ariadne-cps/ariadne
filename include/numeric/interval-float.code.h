@@ -119,9 +119,9 @@ cos_(Interval< Float<T> >& res, const Interval< Float<T> >& ivl)
     return;
   } else {
     // Check values are reasonable
-    //if(!(l>=0 && l<=tpu)) {
-    //  std::cerr << "ivl=" << ivl << ", [l:u]=[" << l << ":" << u << "]" << std::endl;
-    //}
+    if(!(l>=0 && l<=tpu)) {
+      std::cerr << "ivl=" << ivl << ", [l:u]=[" << l << ":" << u << "]" << std::endl;
+    }
     assert(l>=-0 && l<=tpu);
     if(l<pl) {
       if(u<pl) { 

@@ -21,16 +21,16 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "differentiation/taylor_series.h"
+#include "differentiation/power_series.h"
 #include "differentiation/function_series.h"
 
 namespace Ariadne {
 
 template<class X> 
-TaylorSeries<X> 
+PowerSeries<X> 
 ArithmeticSeries<X>::rec(smoothness_type d, const X& c) 
 {
-  TaylorSeries<X> y(d);
+  PowerSeries<X> y(d);
   X mr = (-1)/c;
   for(uint i=0; i<=y.degree(); ++i) {
     y[i]=-Ariadne::pow(mr,i+1u);
@@ -40,11 +40,11 @@ ArithmeticSeries<X>::rec(smoothness_type d, const X& c)
 
 
 template<class X> 
-TaylorSeries<X> 
+PowerSeries<X> 
 ArithmeticSeries<X>::pow(smoothness_type d, const X& c, const uint& k)
 {
   uint n=k;
-  TaylorSeries<X> y(d);
+  PowerSeries<X> y(d);
   for(uint i=0; i<=std::min(uint(d),n); ++i) {
     uint j=n-i;
     y[i]=X(Ariadne::bin<Integer>(n,j))*Ariadne::pow(c,j);
@@ -53,10 +53,10 @@ ArithmeticSeries<X>::pow(smoothness_type d, const X& c, const uint& k)
 }
 
 template<class X> 
-TaylorSeries<X> 
+PowerSeries<X> 
 TranscendentalSeries<X>::sqrt(smoothness_type d, const X& c)
 {
-  TaylorSeries<X> y(d);
+  PowerSeries<X> y(d);
   y[0]=Ariadne::sqrt(c);
   X mhr=-0.5/c;
   for(uint i=1; i<=y.degree(); ++i) {
@@ -67,10 +67,10 @@ TranscendentalSeries<X>::sqrt(smoothness_type d, const X& c)
 }
 
 template<class X> 
-TaylorSeries<X> 
+PowerSeries<X> 
 TranscendentalSeries<X>::exp(smoothness_type d, const X& c)
 {
-  TaylorSeries<X> y(d);
+  PowerSeries<X> y(d);
   y[0]=Ariadne::exp(c);
   for(uint i=1; i<=y.degree(); ++i) {
     y[i]=y[i-1]/i;
@@ -79,10 +79,10 @@ TranscendentalSeries<X>::exp(smoothness_type d, const X& c)
 }
 
 template<class X>  
-TaylorSeries<X> 
+PowerSeries<X> 
 TranscendentalSeries<X>::log(smoothness_type d, const X& c)
 {
-  TaylorSeries<X> y(d);
+  PowerSeries<X> y(d);
   y[0]=Ariadne::log(c);
   X mr=(-1)/c;
   for(uint i=1; i<=y.degree();++i) {
@@ -92,10 +92,10 @@ TranscendentalSeries<X>::log(smoothness_type d, const X& c)
 }
 
 template<class X> 
-TaylorSeries<X> 
+PowerSeries<X> 
 TranscendentalSeries<X>::sin(smoothness_type d, const X& c)
 {
-  TaylorSeries<X> y(d);
+  PowerSeries<X> y(d);
   y[0]=Ariadne::sin(c);
   if(d>=1) {
     y[1]=Ariadne::cos(c);
@@ -107,10 +107,10 @@ TranscendentalSeries<X>::sin(smoothness_type d, const X& c)
 }
 
 template<class X> 
-TaylorSeries<X> 
+PowerSeries<X> 
 TranscendentalSeries<X>::cos(smoothness_type d, const X& c)
 {
-  TaylorSeries<X> y(d);
+  PowerSeries<X> y(d);
   y[0]=Ariadne::cos(c);
   if(d>=1) {
     y[1]=-Ariadne::sin(c);
@@ -122,36 +122,36 @@ TranscendentalSeries<X>::cos(smoothness_type d, const X& c)
 }
 
 template<class X> 
-TaylorSeries<X> 
+PowerSeries<X> 
 TranscendentalSeries<X>::tan(smoothness_type d, const X& c)
 {
   return sin(d,c)/cos(d,c);
 }
 
 template<class X>  
-TaylorSeries<X> 
+PowerSeries<X> 
 TranscendentalSeries<X>::asin(smoothness_type d, const X& c)
 {
-  if(d==0) { return TaylorSeries<X>::constant(d,Ariadne::atan(c)); }
-  TaylorSeries<X> y = X(1)/Ariadne::sqrt(X(1)-Ariadne::pow(TaylorSeries<X>::variable(d-1,c),2u));
+  if(d==0) { return PowerSeries<X>::constant(d,Ariadne::atan(c)); }
+  PowerSeries<X> y = X(1)/Ariadne::sqrt(X(1)-Ariadne::pow(PowerSeries<X>::variable(d-1,c),2u));
   return antiderivative(y,Ariadne::asin(c));
 }
 
 template<class X>  
-TaylorSeries<X> 
+PowerSeries<X> 
 TranscendentalSeries<X>::acos(smoothness_type d, const X& c)
 {
-  if(d==0) { return TaylorSeries<X>::constant(d,Ariadne::atan(c)); }
-  TaylorSeries<X> y = X(-1)/Ariadne::sqrt(X(1)-pow(TaylorSeries<X>::variable(d-1,c),2u));
+  if(d==0) { return PowerSeries<X>::constant(d,Ariadne::atan(c)); }
+  PowerSeries<X> y = X(-1)/Ariadne::sqrt(X(1)-pow(PowerSeries<X>::variable(d-1,c),2u));
   return antiderivative(y,Ariadne::acos(c));
 }
 
 template<class X>  
-TaylorSeries<X> 
+PowerSeries<X> 
 TranscendentalSeries<X>::atan(smoothness_type d, const X& c)
 {
-  if(d==0) { return TaylorSeries<X>::constant(d,Ariadne::atan(c)); } 
-  TaylorSeries<X> y = X(1)/(X(1)+pow(TaylorSeries<X>::variable(d-1,c),2u));
+  if(d==0) { return PowerSeries<X>::constant(d,Ariadne::atan(c)); } 
+  PowerSeries<X> y = X(1)/(X(1)+pow(PowerSeries<X>::variable(d-1,c),2u));
   return antiderivative(y,Ariadne::atan(c));
 }
 

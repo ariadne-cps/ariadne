@@ -25,8 +25,8 @@
 
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
-#include "differentiation/taylor_derivative.h"
-#include "differentiation/sparse_differential.h"
+#include "differentiation/differential_vector.h"
+#include "differentiation/sparse_differential_vector.h"
 #include "function/taylor_model.h"
 #include "function/approximate_taylor_model.h"
 #include "function/function_interface.h"
@@ -60,7 +60,7 @@ void export_taylor_model()
 
   class_< Model > function_model_class("TaylorModel",init< Vector<I>, Vector<R>, const FunctionInterface<R>&, smoothness_type, smoothness_type>());
   function_model_class.def(init< size_type, size_type, smoothness_type, smoothness_type >());
-  //function_model_class.def(init< Vector<I>, Vector<R>, TaylorDerivative<I>, TaylorDerivative<I> >());
+  //function_model_class.def(init< Vector<I>, Vector<R>, DifferentialVector<I>, DifferentialVector<I> >());
   function_model_class.def(init< Model >());
   //function_model_class.def("__call__",(Vector<I>(Model::*)(const Vector<R>&)const) &Model::evaluate);
   function_model_class.def("__call__",(Vector<I>(Model::*)(const Vector<I>&)const) &Model::evaluate);

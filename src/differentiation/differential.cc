@@ -1,8 +1,8 @@
 /***************************************************************************
- *            affine_variable.cc
+ *            differential.cc
  *
- *  Copyright  2007  Pieter Collins
- *  
+ *  Copyright  2007-8  Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -25,22 +25,30 @@
 #include "numeric/float.h"
 #include "numeric/interval.h"
 
-#include "linear_algebra/covector.h"
+#include "differentiation/differential.h"
+#include "differentiation/differential.code.h"
 
-#include "differentiation/affine_variable.h"
-#include "differentiation/affine_variable.code.h"
+#include "differentiation/differential_vector.h"
+#include "differentiation/differential_vector.code.h"
 
 namespace Ariadne {
     
     
-    template class AffineVariable<Rational>;
+    template class Differential<Rational>;
+    template class DifferentialVector<Rational>;
 
 #ifdef ENABLE_FLOAT64
-    template class AffineVariable<Interval64>;
+    template class Differential<ApproximateFloat64>;
+    template class Differential<Interval64>;
+    template class DifferentialVector<ApproximateFloat64>;
+    template class DifferentialVector<Interval64>;
 #endif
     
 #ifdef ENABLE_FLOATMP
-    template class AffineVariable<IntervalMP>;
+    template class Differential<ApproximateFloatMP>;
+    template class Differential<IntervalMP>;
+    template class DifferentialVector<ApproximateFloatMP>;
+    template class DifferentialVector<IntervalMP>;
 #endif
 
   

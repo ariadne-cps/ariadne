@@ -58,8 +58,8 @@ ARIADNE_SRC = ariadne_module.cc \
 	 \
 	export_multi_index.cc \
 	export_taylor_series.cc \
-	export_taylor_variable.cc \
-	export_taylor_derivative.cc \
+	export_differential.cc \
+	export_differential_vector.cc \
 	export_sparse_differential.cc \
 	export_affine_model.cc \
 	export_taylor_model.cc \

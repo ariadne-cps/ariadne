@@ -35,7 +35,7 @@
 
 using namespace Ariadne;
 
-const uint LOGGING_VERBOSITY = 4;
+const uint LOGGING_VERBOSITY = 0;
 
 int main() {
   typedef Float64 R;

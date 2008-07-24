@@ -27,8 +27,8 @@
 
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
-#include "differentiation/taylor_derivative.h"
-#include "differentiation/sparse_differential.h"
+#include "differentiation/differential_vector.h"
+#include "differentiation/sparse_differential_vector.h"
 
 
 namespace Ariadne {
@@ -49,10 +49,10 @@ AffineFunction<R>::jacobian(const Vector<F>& x) const
 
 
 template<class R>
-TaylorDerivative<typename AffineFunction<R>::F> 
+DifferentialVector<typename AffineFunction<R>::F> 
 AffineFunction<R>::derivative(const Vector<F>& x, const smoothness_type& s) const
 {
-  TaylorDerivative<F> result(this->result_size(),this->argument_size(),s);
+  DifferentialVector<F> result(this->result_size(),this->argument_size(),s);
   Vector<F> value=this->evaluate(x);
   for(size_type i=0; i!=this->result_size(); ++i) {
     array<F>& data=result[i].data();

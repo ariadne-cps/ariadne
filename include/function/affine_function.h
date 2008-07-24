@@ -85,7 +85,7 @@ namespace Ariadne {
       /*! \brief The Jacobian derivative matrix at a point. */
       Matrix<F> jacobian(const Vector<F>& x) const;
       /*! \brief All the derivative values up to degree \a s. */
-      TaylorDerivative<F> derivative(const Vector<F>& x, const smoothness_type& s) const;
+      DifferentialVector<F> derivative(const Vector<F>& x, const smoothness_type& s) const;
       /*! \brief All the derivative values up to degree \a s, computed using approximate arithmetic. */
       SparseDifferentialVector<AA> expansion(const Vector<AA>& x, const smoothness_type& s) const;
 

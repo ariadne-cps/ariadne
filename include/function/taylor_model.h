@@ -42,7 +42,7 @@ template<class X> class Matrix;
 
 class MultiIndex;
 template<class R> class FunctionInterface;
-template<class R> class TaylorDerivative;
+template<class R> class DifferentialVector;
 
 
 template<class R> class TaylorModel;
@@ -85,7 +85,7 @@ class TaylorModel {
   
   /*! \brief Construct from a domain, centre, and two derivative expansions, one for the centre and one over the entire domain. */
   TaylorModel(const Vector<I>& domain, const Vector<R>& centre, 
-              const TaylorDerivative<I>& centre_derivatives, const TaylorDerivative<I>& domain_derivatives);
+              const DifferentialVector<I>& centre_derivatives, const DifferentialVector<I>& domain_derivatives);
   
   /*! \brief Construct from a domain, a function, an order and a smoothness. The centre is the centre of the domain. */
   TaylorModel(const Vector<I>& domain, const FunctionInterface<R>& function,
@@ -110,9 +110,9 @@ class TaylorModel {
   
   // Data access
   /*! \brief The data used to define the centre of the Taylor model. */
-  const TaylorDerivative<I>& centre_derivatives() const;
+  const DifferentialVector<I>& centre_derivatives() const;
   /*! \brief The bounds on the derivative values over the domain of the Taylor model. */
-  const TaylorDerivative<I>& domain_derivatives() const;
+  const DifferentialVector<I>& domain_derivatives() const;
   
   // Data access
   /*! \brief The order of the Taylor model. */

@@ -79,7 +79,7 @@ namespace Ariadne {
       
       /*! \brief Compute an integration time and bounds for both the flow and its derivatives up to order \a o. */
       virtual 
-      std::pair< Rational, TaylorDerivative<I> >
+      std::pair< Rational, DifferentialVector<I> >
       variation_flow_bounds(const VectorField<R>& f, 
                             const Box<R>& bx,
                             const Rational& t,
@@ -91,8 +91,8 @@ namespace Ariadne {
 
       /*! \brief Compute a bound for the Jacobian of the flow over the time interval [-h,h], assuming that the flow remains inside the set \a b. */
       virtual Matrix<I> estimate_flow_jacobian_bounds(const VectorField<R>& vf,
-                                                                     const Box<R>& b,
-                                                                     const Rational& h) const = 0;
+                                                      const Box<R>& b,
+                                                      const Rational& h) const = 0;
 
 
     };

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            taylor_series.inline.h
+ *            power_series.inline.h
  *
  *  Copyright 2007  A Pieter Collins
  *  
@@ -27,40 +27,40 @@
 namespace Ariadne {
 
 template<class X> inline
-TaylorSeries<X>::TaylorSeries() 
+PowerSeries<X>::PowerSeries() 
   : _data(1u)
 {
 }
 
 template<class X> inline
-TaylorSeries<X>::TaylorSeries(smoothness_type d) 
+PowerSeries<X>::PowerSeries(smoothness_type d) 
   : _data(d+1u)
 {
 }
 
 template<class X> template<class XX> inline
-TaylorSeries<X>::TaylorSeries(smoothness_type d, const XX* ptr) 
+PowerSeries<X>::PowerSeries(smoothness_type d, const XX* ptr) 
   : _data(ptr,ptr+d+1)
 {
 }
 
 template<class X> template<class XX> inline
-TaylorSeries<X>::TaylorSeries(const TaylorSeries<XX>& ts) 
+PowerSeries<X>::PowerSeries(const PowerSeries<XX>& ts) 
   : _data(ts.data())
 {
 }
 
 template<class X> template<class XX> inline
-TaylorSeries<X>&
-TaylorSeries<X>::operator=(const TaylorSeries<XX>& ts) 
+PowerSeries<X>&
+PowerSeries<X>::operator=(const PowerSeries<XX>& ts) 
 {
   this->_data=ts.data();
   return *this;
 }
 
 template<class X> template<class XX> inline
-TaylorSeries<X>&
-TaylorSeries<X>::operator=(const XX& c) 
+PowerSeries<X>&
+PowerSeries<X>::operator=(const XX& c) 
 {
   this->_data[0]=c;
   return *this;
@@ -68,26 +68,26 @@ TaylorSeries<X>::operator=(const XX& c)
 
 
 template<class X> inline
-TaylorSeries<X>
-TaylorSeries<X>::zero(smoothness_type d)
+PowerSeries<X>
+PowerSeries<X>::zero(smoothness_type d)
 {
-  return TaylorSeries<X>(d);
+  return PowerSeries<X>(d);
 }
 
 template<class X> inline
-TaylorSeries<X>
-TaylorSeries<X>::constant(smoothness_type d, const X& c)
+PowerSeries<X>
+PowerSeries<X>::constant(smoothness_type d, const X& c)
 {
-  TaylorSeries<X> result(d);
+  PowerSeries<X> result(d);
   result[0]=c;
   return result;
 }
 
 template<class X> inline
-TaylorSeries<X>
-TaylorSeries<X>::variable(smoothness_type d, const X& c)
+PowerSeries<X>
+PowerSeries<X>::variable(smoothness_type d, const X& c)
 {
-  TaylorSeries<X> result(d);
+  PowerSeries<X> result(d);
   result[0]=c;
   if(d>=1) {
     result[1]=1;
@@ -97,49 +97,49 @@ TaylorSeries<X>::variable(smoothness_type d, const X& c)
 
 template<class X> inline
 smoothness_type 
-TaylorSeries<X>::degree() const 
+PowerSeries<X>::degree() const 
 {
   return this->_data.size()-1;
 }
 
 template<class X> inline 
 const X& 
-TaylorSeries<X>::value() const
+PowerSeries<X>::value() const
 {
   return this->_data[0];
 }
 
 template<class X> inline 
 X& 
-TaylorSeries<X>::value() 
+PowerSeries<X>::value() 
 {
   return this->_data[0];
 }
 
 template<class X> inline
 const array<X>& 
-TaylorSeries<X>::data() const
+PowerSeries<X>::data() const
 {
   return this->_data;
 }
 
 template<class X> inline
 array<X>& 
-TaylorSeries<X>::data() 
+PowerSeries<X>::data() 
 {
   return this->_data;
 }
 
 template<class X> inline 
 const X& 
-TaylorSeries<X>::operator[](const smoothness_type& j) const
+PowerSeries<X>::operator[](const smoothness_type& j) const
 {
   return this->_data[j];
 }
 
 template<class X> inline
 X& 
-TaylorSeries<X>::operator[](const smoothness_type& j)
+PowerSeries<X>::operator[](const smoothness_type& j)
 {
   return this->_data[j];
 }
@@ -148,37 +148,37 @@ TaylorSeries<X>::operator[](const smoothness_type& j)
 
 
 template<class X> inline 
-TaylorSeries<X> 
-min(const TaylorSeries<X>& x1, const TaylorSeries<X>& x2) 
+PowerSeries<X> 
+min(const PowerSeries<X>& x1, const PowerSeries<X>& x2) 
 {
   if(x1[0]==x2[0]) {
-    ARIADNE_THROW(std::runtime_error,"min(TaylorSeries x1, TaylorSeries x2)","x1[0]==x2[0]");
+    ARIADNE_THROW(std::runtime_error,"min(PowerSeries x1, PowerSeries x2)","x1[0]==x2[0]");
   }
   return x1[0]<x2[0] ? x1 : x2;
 }
 
 template<class X> inline 
-TaylorSeries<X> 
-max(const TaylorSeries<X>& x1,const TaylorSeries<X>& x2) 
+PowerSeries<X> 
+max(const PowerSeries<X>& x1,const PowerSeries<X>& x2) 
 {
   if(x1[0]==x2[0]) { 
-    ARIADNE_THROW(std::runtime_error,"max(TaylorSeries x1, TaylorSeries x2)","x1[0]==x2[0]"); 
+    ARIADNE_THROW(std::runtime_error,"max(PowerSeries x1, PowerSeries x2)","x1[0]==x2[0]"); 
   }
   return x1[0]>x2[0] ? x1 : x2;
 }
 
 template<class X> inline
-TaylorSeries<X> 
-pos(const TaylorSeries<X>& x)
+PowerSeries<X> 
+pos(const PowerSeries<X>& x)
 {
   return x;
 }
 
 template<class X> inline
-TaylorSeries<X> 
-neg(const TaylorSeries<X>& x)
+PowerSeries<X> 
+neg(const PowerSeries<X>& x)
 {
-  TaylorSeries<X> result(x.degree());
+  PowerSeries<X> result(x.degree());
   for(size_type n=0; n<=result.degree(); ++n) {
     result[n] = -x[n];
   }
@@ -186,18 +186,18 @@ neg(const TaylorSeries<X>& x)
 }
 
 template<class X> inline 
-TaylorSeries<X> 
-abs(const TaylorSeries<X>& x) 
+PowerSeries<X> 
+abs(const PowerSeries<X>& x) 
 {
   if(x[0]==0) { 
-    ARIADNE_THROW(std::runtime_error,"abs(TaylorSeries x)","x[0]==0"); 
+    ARIADNE_THROW(std::runtime_error,"abs(PowerSeries x)","x[0]==0"); 
   }
   return x[0]>0 ? pos(x) : neg(x); 
 }
 
 template<class X> inline
-TaylorSeries<X> 
-rec(const TaylorSeries<X>& x)
+PowerSeries<X> 
+rec(const PowerSeries<X>& x)
 {
   return compose(FunctionSeries<X>::rec(x.degree(),x.value()),x);
 }
@@ -205,10 +205,10 @@ rec(const TaylorSeries<X>& x)
 
 
 template<class X> inline
-TaylorSeries<X> 
-add(const TaylorSeries<X>& x, const TaylorSeries<X>& y)
+PowerSeries<X> 
+add(const PowerSeries<X>& x, const PowerSeries<X>& y)
 {
-  TaylorSeries<X> result(std::min(x.degree(),y.degree()));
+  PowerSeries<X> result(std::min(x.degree(),y.degree()));
   for(size_type n=0; n<=result.degree(); ++n) {
     result[n] = x[n]+y[n];
   }
@@ -216,10 +216,10 @@ add(const TaylorSeries<X>& x, const TaylorSeries<X>& y)
 }
 
 template<class X> inline
-TaylorSeries<X> 
-sub(const TaylorSeries<X>& x, const TaylorSeries<X>& y)
+PowerSeries<X> 
+sub(const PowerSeries<X>& x, const PowerSeries<X>& y)
 {
-  TaylorSeries<X> result(std::min(x.degree(),y.degree()));
+  PowerSeries<X> result(std::min(x.degree(),y.degree()));
   for(size_type n=0; n<=result.degree(); ++n) {
     result[n] = x[n]-y[n];
   }
@@ -228,129 +228,129 @@ sub(const TaylorSeries<X>& x, const TaylorSeries<X>& y)
 
 
 template<class X> inline
-TaylorSeries<X> 
-div(const TaylorSeries<X>& x, const TaylorSeries<X>& y)
+PowerSeries<X> 
+div(const PowerSeries<X>& x, const PowerSeries<X>& y)
 {
   return x*rec(y);
 }
 
 template<class X> inline
-TaylorSeries<X> 
-pow(const TaylorSeries<X>& x, const uint& k)
+PowerSeries<X> 
+pow(const PowerSeries<X>& x, const uint& k)
 {
   return compose(FunctionSeries<X>::pow(x.degree(),x.value(),k),x);
 }
 
 template<class X> inline
-TaylorSeries<X> 
-pow(const TaylorSeries<X>& x, const int& k)
+PowerSeries<X> 
+pow(const PowerSeries<X>& x, const int& k)
 {
   return compose(FunctionSeries<X>::pow(x.degree(),x.value(),uint(k)),x);
 }
 
 template<class X>  
-TaylorSeries<X> 
-sqrt(const TaylorSeries<X>& x) 
+PowerSeries<X> 
+sqrt(const PowerSeries<X>& x) 
 {
   return compose(FunctionSeries<X>::sqrt(x.degree(),x.value()),x);
 }
 
 template<class X>  
-TaylorSeries<X> 
-exp(const TaylorSeries<X>& x) 
+PowerSeries<X> 
+exp(const PowerSeries<X>& x) 
 {
   return compose(FunctionSeries<X>::exp(x.degree(),x.value()),x);
 }
 
 template<class X>  
-TaylorSeries<X> 
-log(const TaylorSeries<X>& x) 
+PowerSeries<X> 
+log(const PowerSeries<X>& x) 
 {
   return compose(FunctionSeries<X>::log(x.degree(),x.value()),x);
 }
 
 template<class X>  
-TaylorSeries<X> 
-sin(const TaylorSeries<X>& x) 
+PowerSeries<X> 
+sin(const PowerSeries<X>& x) 
 {
   return compose(FunctionSeries<X>::sin(x.degree(),x.value()),x);
 }
 
 template<class X>  
-TaylorSeries<X> 
-cos(const TaylorSeries<X>& x) 
+PowerSeries<X> 
+cos(const PowerSeries<X>& x) 
 {
   return compose(FunctionSeries<X>::cos(x.degree(),x.value()),x);
 }
 
 template<class X>  
-TaylorSeries<X> 
-tan(const TaylorSeries<X>& x) 
+PowerSeries<X> 
+tan(const PowerSeries<X>& x) 
 {
   return compose(FunctionSeries<X>::tan(x.degree(),x.value()),x);
 }
 
 template<class X>  
-TaylorSeries<X> 
-asin(const TaylorSeries<X>& x) 
+PowerSeries<X> 
+asin(const PowerSeries<X>& x) 
 {
   return compose(FunctionSeries<X>::asin(x.degree(),x.value()),x);
 }
 
 template<class X>  
-TaylorSeries<X> 
-acos(const TaylorSeries<X>& x) 
+PowerSeries<X> 
+acos(const PowerSeries<X>& x) 
 {
   return compose(FunctionSeries<X>::acos(x.degree(),x.value()),x);
 }
 
 template<class X>  
-TaylorSeries<X> 
-atan(const TaylorSeries<X>& x) 
+PowerSeries<X> 
+atan(const PowerSeries<X>& x) 
 {
   return compose(FunctionSeries<X>::atan(x.degree(),x.value()),x);
 }
 
 
 template<class X> inline
-TaylorSeries<X> 
-operator-(const TaylorSeries<X>& x)
+PowerSeries<X> 
+operator-(const PowerSeries<X>& x)
 {
   return neg(x);
 }
 
 template<class X> inline
-TaylorSeries<X> 
-operator+(const TaylorSeries<X>& x, const TaylorSeries<X>& y)
+PowerSeries<X> 
+operator+(const PowerSeries<X>& x, const PowerSeries<X>& y)
 {
   return add(x,y);
 }
 
 template<class X> inline
-TaylorSeries<X> 
-operator-(const TaylorSeries<X>& x, const TaylorSeries<X>& y)
+PowerSeries<X> 
+operator-(const PowerSeries<X>& x, const PowerSeries<X>& y)
 {
   return sub(x,y);
 }
 
 template<class X> inline
-TaylorSeries<X> 
-operator*(const TaylorSeries<X>& x, const TaylorSeries<X>& y)
+PowerSeries<X> 
+operator*(const PowerSeries<X>& x, const PowerSeries<X>& y)
 {
   return mul(x,y);
 }
 
 template<class X> inline
-TaylorSeries<X> 
-operator/(const TaylorSeries<X>& x, const TaylorSeries<X>& y)
+PowerSeries<X> 
+operator/(const PowerSeries<X>& x, const PowerSeries<X>& y)
 {
   return div(x,y);
 }
 
 
 template<class X> inline
-TaylorSeries<X>& 
-operator+=(TaylorSeries<X>& x, const TaylorSeries<X>& y)
+PowerSeries<X>& 
+operator+=(PowerSeries<X>& x, const PowerSeries<X>& y)
 {
   for(size_type n=0; n<=std::min(x.degree(),y.degree()); ++n) {
     x[n] += y[n];
@@ -361,95 +361,95 @@ operator+=(TaylorSeries<X>& x, const TaylorSeries<X>& y)
 
 
 template<class X> inline
-TaylorSeries<X> 
-operator+(const TaylorSeries<X>& x, const X& c)
+PowerSeries<X> 
+operator+(const PowerSeries<X>& x, const X& c)
 {
-  return add(x,TaylorSeries<X>::constant(x.degree(),c));
+  return add(x,PowerSeries<X>::constant(x.degree(),c));
 }
 
 template<class X> inline
-TaylorSeries<X> 
-operator+(const X& c, const TaylorSeries<X>& x)
+PowerSeries<X> 
+operator+(const X& c, const PowerSeries<X>& x)
 {
-  return add(TaylorSeries<X>::constant(x.degree(),c),x);
+  return add(PowerSeries<X>::constant(x.degree(),c),x);
 }
 
 template<class X> inline
-TaylorSeries<X> 
-operator-(const TaylorSeries<X>& x, const X& c)
+PowerSeries<X> 
+operator-(const PowerSeries<X>& x, const X& c)
 {
-  return sub(x,TaylorSeries<X>::constant(x.degree(),c));
+  return sub(x,PowerSeries<X>::constant(x.degree(),c));
 }
 
 template<class X> inline
-TaylorSeries<X> 
-operator-(const X& c, const TaylorSeries<X>& x)
+PowerSeries<X> 
+operator-(const X& c, const PowerSeries<X>& x)
 {
-  return sub(TaylorSeries<X>::constant(x.degree(),c),x);
+  return sub(PowerSeries<X>::constant(x.degree(),c),x);
 }
 
 template<class X> inline
-TaylorSeries<X> 
-operator*(const TaylorSeries<X>& x, const X& c)
+PowerSeries<X> 
+operator*(const PowerSeries<X>& x, const X& c)
 {
-  return mul(x,TaylorSeries<X>::constant(x.degree(),c));
+  return mul(x,PowerSeries<X>::constant(x.degree(),c));
 }
 
 template<class X> inline
-TaylorSeries<X> 
-operator*(const X& c, const TaylorSeries<X>& x)
+PowerSeries<X> 
+operator*(const X& c, const PowerSeries<X>& x)
 {
-  return mul(TaylorSeries<X>::constant(x.degree(),c),x);
+  return mul(PowerSeries<X>::constant(x.degree(),c),x);
 }
 
 template<class X> inline
-TaylorSeries<X> 
-operator/(const TaylorSeries<X>& x, const X& c)
+PowerSeries<X> 
+operator/(const PowerSeries<X>& x, const X& c)
 {
-  return div(x,TaylorSeries<X>::constant(x.degree(),c));
+  return div(x,PowerSeries<X>::constant(x.degree(),c));
 }
 
 template<class X> inline
-TaylorSeries<X> 
-operator/(const X& c, const TaylorSeries<X>& x)
+PowerSeries<X> 
+operator/(const X& c, const PowerSeries<X>& x)
 {
-  return div(TaylorSeries<X>::constant(x.degree(),c),x);
+  return div(PowerSeries<X>::constant(x.degree(),c),x);
 }
 
 template<class X> inline
-TaylorSeries<X> 
-operator/(const double& c, const TaylorSeries<X>& x)
+PowerSeries<X> 
+operator/(const double& c, const PowerSeries<X>& x)
 {
   return X(c)/x;
 }
 
 template<class X>  
-TaylorSeries<X>&
-operator+=(TaylorSeries<X>& x, const X& c)
+PowerSeries<X>&
+operator+=(PowerSeries<X>& x, const X& c)
 {
   x[0]+=c;
   return x;
 }
 
 template<class X>  
-TaylorSeries<X>&
-operator-=(TaylorSeries<X>& x, const X& c)
+PowerSeries<X>&
+operator-=(PowerSeries<X>& x, const X& c)
 {
   x[0]-=c;
   return x;
 }
 
 template<class X>  
-TaylorSeries<X>&
-operator*=(TaylorSeries<X>& x, const X& c)
+PowerSeries<X>&
+operator*=(PowerSeries<X>& x, const X& c)
 {
   reinterpret_cast< Vector<X>& >(x.data())*=c;
   return x;
 }
 
 template<class X>  
-TaylorSeries<X>&
-operator/=(TaylorSeries<X>& x, const X& c)
+PowerSeries<X>&
+operator/=(PowerSeries<X>& x, const X& c)
 {
   reinterpret_cast< Vector<X>& >(x.data())/=c;
   return x;
@@ -457,8 +457,8 @@ operator/=(TaylorSeries<X>& x, const X& c)
 
 
 template<class X>  
-TaylorSeries<X>&
-operator+=(TaylorSeries<X>& x, const double& c)
+PowerSeries<X>&
+operator+=(PowerSeries<X>& x, const double& c)
 {
   X& v=x[0];
   v+=c;
@@ -466,24 +466,24 @@ operator+=(TaylorSeries<X>& x, const double& c)
 }
 
 template<class X>  
-TaylorSeries<X>&
-operator-=(TaylorSeries<X>& x, const double& c)
+PowerSeries<X>&
+operator-=(PowerSeries<X>& x, const double& c)
 {
   x[0]-=c;
   return x;
 }
 
 template<class X>  
-TaylorSeries<X>&
-operator*=(TaylorSeries<X>& x, const double& c)
+PowerSeries<X>&
+operator*=(PowerSeries<X>& x, const double& c)
 {
   reinterpret_cast< Vector<X>& >(x.data())*=c;
   return x;
 }
 
 template<class X>  
-TaylorSeries<X>&
-operator/=(TaylorSeries<X>& x, const double& c)
+PowerSeries<X>&
+operator/=(PowerSeries<X>& x, const double& c)
 {
   reinterpret_cast< Vector<X>& >(x.data())/=c;
   return x;
@@ -491,22 +491,22 @@ operator/=(TaylorSeries<X>& x, const double& c)
 
 
 template<class X>  
-TaylorSeries<X>
-operator+(const TaylorSeries<X>& x, const double& c)
+PowerSeries<X>
+operator+(const PowerSeries<X>& x, const double& c)
 {
-  TaylorSeries<X> r(x); r+=c; return r;
+  PowerSeries<X> r(x); r+=c; return r;
 }
 
 template<class X>  
-TaylorSeries<X>
-operator-(const TaylorSeries<X>& x, const double& c)
+PowerSeries<X>
+operator-(const PowerSeries<X>& x, const double& c)
 {
-  TaylorSeries<X> r(x); r-=c; return r;
+  PowerSeries<X> r(x); r-=c; return r;
 }
 
 template<class X, class R>  
-TaylorSeries<X>&
-operator*=(TaylorSeries<X>& x, const R& c)
+PowerSeries<X>&
+operator*=(PowerSeries<X>& x, const R& c)
 {
   reinterpret_cast< Vector<X>& >(x.data())*=c;
   return x;

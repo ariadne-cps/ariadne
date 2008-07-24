@@ -24,7 +24,7 @@
 #include "base/tuple.h"
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
-#include "differentiation/taylor_derivative.h"
+#include "differentiation/differential_vector.h"
 #include "geometry/box.h"
 #include "system/vector_field_interface.h"
 #include "output/logging.h"
@@ -193,7 +193,7 @@ StandardBounder<R>::refine_flow_bounds(const VectorField<R>& vector_field,
 
 
 template<class R> inline
-std::pair< Rational, TaylorDerivative<Interval<R> > >
+std::pair< Rational, DifferentialVector<Interval<R> > >
 StandardBounder<R>::variation_flow_bounds(const VectorField<R>& vf, 
                                                       const Box<R>& bx,
                                                       const Rational& t,
@@ -201,10 +201,10 @@ StandardBounder<R>::variation_flow_bounds(const VectorField<R>& vf,
 {
   Rational h=t;
   I hi=I(t)*I(0,1);
-  TaylorDerivative<I> d=TaylorDerivative<I>::variable(bx.position_vectors(),o);
+  DifferentialVector<I> d=DifferentialVector<I>::variable(bx.position_vectors(),o);
   while(false) {   // expand flow bounds
-    TaylorDerivative<I> vfd=vf.derivative(Point<I>(d.value()),1);
-    TaylorDerivative<I> nd=bx+compose(vfd,d)*I(2*hi);
+    DifferentialVector<I> vfd=vf.derivative(Point<I>(d.value()),1);
+    DifferentialVector<I> nd=bx+compose(vfd,d)*I(2*hi);
     d=nd;
   }
   while(true) {

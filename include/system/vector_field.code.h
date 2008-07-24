@@ -25,7 +25,7 @@
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
 
-#include "differentiation/taylor_derivative.h"
+#include "differentiation/differential_vector.h"
 #include "function/function_interface.h"
 
 #include "geometry/point.h"
@@ -63,7 +63,7 @@ VectorField<R>::jacobian(const Point<F>& x) const
 }
 
 template<class R>
-TaylorDerivative<typename VectorField<R>::F>
+DifferentialVector<typename VectorField<R>::F>
 VectorField<R>::derivative(const Point<F>& x, const smoothness_type& s) const
 {
   return this->_function_ptr->derivative(x.position_vector(),s);

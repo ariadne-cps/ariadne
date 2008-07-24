@@ -45,9 +45,9 @@ namespace Ariadne {
     template<class R> class AffineDerivative;
     template<class R> class AffineModel;
 
-    template<class R> class TaylorSeries;
-    template<class R> class TaylorVariable;
-    template<class R> class TaylorDerivative;
+    template<class R> class PowerSeries;
+    template<class R> class Differential;
+    template<class R> class DifferentialVector;
     template<class R> class TaylorModel;
 
 } // namespace Ariadne

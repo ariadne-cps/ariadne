@@ -41,7 +41,7 @@ namespace Ariadne {
     template<class X> class Vector;
     template<class X> class Matrix;
     class MultiIndex;
-    template<class X> class TaylorDerivative;
+    template<class X> class DifferentialVector;
     template<class X> class SparseDifferentialVector;
 
     /*!\ingroup Function
@@ -86,7 +86,7 @@ namespace Ariadne {
       /*! \brief Evaluate the Jacobian derivative matrix at the point \a x. */
       virtual Matrix<F> jacobian(const Vector<F>& x) const = 0;
       /*! \brief Evaluate the derivative of the function. */
-      virtual TaylorDerivative<F> derivative(const Vector<F>& x, const smoothness_type& s) const = 0;
+      virtual DifferentialVector<F> derivative(const Vector<F>& x, const smoothness_type& s) const = 0;
       /*! \brief Evaluate the derivative of the function using approximate arithmetic. */
       virtual SparseDifferentialVector<A> expansion(const Vector<A>& x, const smoothness_type& s) const = 0;
 

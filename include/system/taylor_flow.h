@@ -37,7 +37,7 @@
 #include "system/declarations.h"
 
 #include "function/affine_variable.h"
-#include "function/taylor_series.h"
+#include "function/power_series.h"
 #include "system/flow_interface.h"
 
 namespace Ariadne {
@@ -52,12 +52,12 @@ namespace Ariadne {
     {
       typedef Interval<R> I;
      public:
-      TaylorFlow(const TaylorSeries< AffineDerivative<I> >&);
+      TaylorFlow(const PowerSeries< AffineDerivative<I> >&);
       virtual Point<I> evaluate(const I& t, const Point<I>& x);
       virtual Vector<I> tangent(const I& t, const Point<I>& pt);
       virtual Matrix<I> jacobian(const I& t, const Point<I>& pt);
      private:
-      TaylorSeries< AffineVariable<I> > _data;
+      PowerSeries< AffineVariable<I> > _data;
     };
     
   }

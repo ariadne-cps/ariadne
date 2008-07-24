@@ -25,7 +25,7 @@
 #include "linear_algebra/matrix.h"
 
 #include "differentiation/multi_index.h"
-#include "differentiation/taylor_derivative.h"
+#include "differentiation/differential_vector.h"
 #include "function/function_interface.h"
 
 #include "geometry/point.h"
@@ -118,7 +118,7 @@ Map<R>::jacobian(const Point<A>& x) const
 }
 
 template<class R>
-TaylorDerivative<typename Map<R>::A>
+DifferentialVector<typename Map<R>::A>
 Map<R>::derivative(const Point<A>& x, const smoothness_type& s) const 
 {
   return this->_function_ptr->derivative(x.position_vector(),s);

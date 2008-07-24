@@ -1,8 +1,8 @@
 /***************************************************************************
- *            affine_variable.cc
+ *            power_series.cc
  *
- *  Copyright  2007  Pieter Collins
- *  
+ *  Copyright  2007   Pieter Collins
+ *   
  ****************************************************************************/
 
 /*
@@ -25,22 +25,33 @@
 #include "numeric/float.h"
 #include "numeric/interval.h"
 
-#include "linear_algebra/covector.h"
-
-#include "differentiation/affine_variable.h"
-#include "differentiation/affine_variable.code.h"
+#include "differentiation/function_series.h"
+#include "differentiation/power_series.h"
+#include "differentiation/function_series.code.h"
+#include "differentiation/power_series.code.h"
 
 namespace Ariadne {
     
-    
-    template class AffineVariable<Rational>;
+   
+    template class ArithmeticSeries<Rational>;
+    template class PowerSeries<Rational>;
 
 #ifdef ENABLE_FLOAT64
-    template class AffineVariable<Interval64>;
+    template class ArithmeticSeries<ApproximateFloat64>;
+    template class TranscendentalSeries<ApproximateFloat64>;
+    template class PowerSeries<ApproximateFloat64>;
+    template class ArithmeticSeries<Interval64>;
+    template class TranscendentalSeries<Interval64>;
+    template class PowerSeries<Interval64>;
 #endif
     
 #ifdef ENABLE_FLOATMP
-    template class AffineVariable<IntervalMP>;
+    template class ArithmeticSeries<ApproximateFloatMP>;
+    template class TranscendentalSeries<ApproximateFloatMP>;
+    template class PowerSeries<ApproximateFloatMP>;
+    template class ArithmeticSeries<IntervalMP>;
+    template class TranscendentalSeries<IntervalMP>;
+    template class PowerSeries<IntervalMP>;
 #endif
 
   

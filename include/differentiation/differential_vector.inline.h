@@ -1,8 +1,8 @@
 /***************************************************************************
- *            taylor_derivative.inline.h
+ *            differential_vector.inline.h
  *
- *  Copyright 2007  Alberto Casagrande, Pieter Collins
- *  Email casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright 2007  Pieter Collins
+ *  
  ****************************************************************************/
 
 /*
@@ -24,8 +24,8 @@
 #include <cassert>
 
 #include "multi_index.h"
-#include "taylor_series.h"
-#include "taylor_variable.h"
+#include "power_series.h"
+#include "differential.h"
 
 namespace Ariadne {
 
@@ -38,32 +38,32 @@ inline size_type compute_polynomial_data_size(size_type rs, size_type as,smoothn
 } // namespace
 
 
-template<class X> class TaylorVariableReference { 
+template<class X> class DifferentialReference { 
  public:
-  TaylorVariableReference(TaylorDerivative<X>& td, const size_type& i) : _td(td), _i(i) { };
-  void operator=(const TaylorVariable<X>& tv) { _td.set(_i,tv); }
+  DifferentialReference(DifferentialVector<X>& td, const size_type& i) : _td(td), _i(i) { };
+  void operator=(const Differential<X>& tv) { _td.set(_i,tv); }
   template<class XX> void operator=(const XX& x) { _td.data()[_i*_increment()]=x; }
  private:
   size_type _increment() { return compute_polynomial_data_size(1u,_td.argument_size(),_td.degree()); }
-  TaylorDerivative<X>& _td; const size_type _i;
+  DifferentialVector<X>& _td; const size_type _i;
 };
 
 
 template<class X> inline
-TaylorDerivative<X>::TaylorDerivative()
+DifferentialVector<X>::DifferentialVector()
   : _result_size(0), _argument_size(0), _degree(0), _variables() 
 {
 }
 
 template<class X> inline
-TaylorDerivative<X>::TaylorDerivative(size_type r, size_type a, smoothness_type d)
-  : _result_size(r), _argument_size(a), _degree(d), _variables(r,TaylorVariable<X>(a,d))
+DifferentialVector<X>::DifferentialVector(size_type r, size_type a, smoothness_type d)
+  : _result_size(r), _argument_size(a), _degree(d), _variables(r,Differential<X>(a,d))
 {
 }
 
 template<class X> template<class XX> inline
-TaylorDerivative<X>::TaylorDerivative(size_type r, size_type a, smoothness_type d, const XX* ptr)
-  : _result_size(r), _argument_size(a), _degree(d), _variables(r,TaylorVariable<X>(a,d))
+DifferentialVector<X>::DifferentialVector(size_type r, size_type a, smoothness_type d, const XX* ptr)
+  : _result_size(r), _argument_size(a), _degree(d), _variables(r,Differential<X>(a,d))
 {
   for(size_type i=0; i!=r; ++i) {
     array<X>& tvd=this->_variables[i].data();
@@ -77,26 +77,26 @@ TaylorDerivative<X>::TaylorDerivative(size_type r, size_type a, smoothness_type 
 
 
 template<class X> template<class XX> 
-TaylorDerivative<X>::TaylorDerivative(const TaylorSeries<XX>& ts) 
-  : _result_size(1u), _argument_size(1u), _degree(ts.degree()), _variables(1u,TaylorVariable<X>(ts))
+DifferentialVector<X>::DifferentialVector(const PowerSeries<XX>& ts) 
+  : _result_size(1u), _argument_size(1u), _degree(ts.degree()), _variables(1u,Differential<X>(ts))
 {
 }
   
 template<class X> template<class XX> 
-TaylorDerivative<X>::TaylorDerivative(const TaylorVariable<XX>& tv) 
+DifferentialVector<X>::DifferentialVector(const Differential<XX>& tv) 
   : _result_size(1u), _argument_size(tv.argument_size()), _degree(tv.degree()), _variables(tv.data())
 {
 }
   
 template<class X> template<class XX> inline
-TaylorDerivative<X>::TaylorDerivative(const TaylorDerivative<XX>& other) 
+DifferentialVector<X>::DifferentialVector(const DifferentialVector<XX>& other) 
   :  _result_size(other.result_size()), _argument_size(other.argument_size()), _degree(other.degree()), _variables(other.variables()) 
 {
 }
   
 template<class X> template<class XX> inline
-TaylorDerivative<X>& 
-TaylorDerivative<X>::operator=(const TaylorDerivative<XX>& other) 
+DifferentialVector<X>& 
+DifferentialVector<X>::operator=(const DifferentialVector<XX>& other) 
 {
   this->_argument_size=other._argument_size;
   this->_degree=other._degree;
@@ -107,7 +107,7 @@ TaylorDerivative<X>::operator=(const TaylorDerivative<XX>& other)
 
 template<class X> template<class XX> inline
 bool 
-TaylorDerivative<X>::operator==(const TaylorDerivative<XX>& other) const
+DifferentialVector<X>::operator==(const DifferentialVector<XX>& other) const
 {
   return this->_argument_size==other._argument_size
     && this->_degree==other._degree
@@ -116,7 +116,7 @@ TaylorDerivative<X>::operator==(const TaylorDerivative<XX>& other) const
 
 template<class X> template<class XX> inline
 bool 
-TaylorDerivative<X>::operator!=(const TaylorDerivative<XX>& other) const
+DifferentialVector<X>::operator!=(const DifferentialVector<XX>& other) const
 {
   return !(*this==other); 
 }
@@ -126,7 +126,7 @@ TaylorDerivative<X>::operator!=(const TaylorDerivative<XX>& other) const
 
 template<class X> inline
 size_type 
-TaylorDerivative<X>::_increment() const 
+DifferentialVector<X>::_increment() const 
 { 
   return compute_polynomial_data_size(1u,this->_argument_size,this->_degree); 
 }
@@ -134,56 +134,56 @@ TaylorDerivative<X>::_increment() const
 // Synonym for "result_size" for templated evaluate function
 template<class X> inline
 size_type 
-TaylorDerivative<X>::size() const 
+DifferentialVector<X>::size() const 
 { 
   return this->_result_size;
 }
 
 template<class X> inline
 size_type 
-TaylorDerivative<X>::result_size() const 
+DifferentialVector<X>::result_size() const 
 { 
   return this->_result_size;
 }
 
 template<class X> inline
 size_type 
-TaylorDerivative<X>::argument_size() const 
+DifferentialVector<X>::argument_size() const 
 { 
   return this->_argument_size;
 }
 
 template<class X> inline
 smoothness_type 
-TaylorDerivative<X>::degree() const 
+DifferentialVector<X>::degree() const 
 { 
   return this->_degree;
 }
 
 template<class X> inline
 const X&
-TaylorDerivative<X>::get(const size_type& i, const MultiIndex& j) const 
+DifferentialVector<X>::get(const size_type& i, const MultiIndex& j) const 
 { 
   return this->_variables[i]._data[j.position()];
 }
 
 template<class X> inline
-const TaylorVariable<X>&
-TaylorDerivative<X>::get(const size_type& i) const 
+const Differential<X>&
+DifferentialVector<X>::get(const size_type& i) const 
 { 
   return this->_variables[i];
 }
 
 template<class X> template<class XX> inline
 void
-TaylorDerivative<X>::set(const size_type& i, const MultiIndex& j, const XX& x)  
+DifferentialVector<X>::set(const size_type& i, const MultiIndex& j, const XX& x)  
 { 
   this->_variables[i*this->_increment()+j.position()]=x;
 }
 
 template<class X> template<class XX> inline
 void
-TaylorDerivative<X>::set(const size_type& i, const TaylorVariable<XX>& tv)
+DifferentialVector<X>::set(const size_type& i, const Differential<XX>& tv)
 { 
   assert(tv.argument_size())==this->_argument_size;
   assert(tv.degree()>=this->_degree);
@@ -194,14 +194,14 @@ TaylorDerivative<X>::set(const size_type& i, const TaylorVariable<XX>& tv)
 /*
 template<class X> inline
 array<X>& 
-TaylorDerivative<X>::data()
+DifferentialVector<X>::data()
 {
   return this->_variables; 
 }
 
 template<class X> inline
 const array<X>& 
-TaylorDerivative<X>::data() const 
+DifferentialVector<X>::data() const 
 {
   return this->_variables; 
 }
@@ -209,15 +209,15 @@ TaylorDerivative<X>::data() const
 
 
 template<class X> inline
-TaylorVariable<X>&
-TaylorDerivative<X>::operator[](const size_type& i) 
+Differential<X>&
+DifferentialVector<X>::operator[](const size_type& i) 
 { 
   return this->_variables[i];
 }
 
 template<class X> inline
-TaylorVariable<X> const&
-TaylorDerivative<X>::operator[](const size_type& i) const 
+Differential<X> const&
+DifferentialVector<X>::operator[](const size_type& i) const 
 { 
   return this->_variables[i];
 }
@@ -238,37 +238,37 @@ TaylorDerivative<X>::operator[](const size_type& i) const
 
 
 template<class X> inline 
-TaylorDerivative<X> 
-min(const TaylorDerivative<X>& x1, const TaylorDerivative<X>& x2) 
+DifferentialVector<X> 
+min(const DifferentialVector<X>& x1, const DifferentialVector<X>& x2) 
 {
   if(x1.value()==x2.value()) {
-    ARIADNE_THROW(std::runtime_error,"min(TaylorDerivative x1, TaylorDerivative x2)","x1[0]==x2[0]");
+    ARIADNE_THROW(std::runtime_error,"min(DifferentialVector x1, DifferentialVector x2)","x1[0]==x2[0]");
   }
   return x1.value()<x2.value() ? x1 : x2;
 }
 
 template<class X> inline 
-TaylorDerivative<X> 
-max(const TaylorDerivative<X>& x1,const TaylorDerivative<X>& x2) 
+DifferentialVector<X> 
+max(const DifferentialVector<X>& x1,const DifferentialVector<X>& x2) 
 {
   if(x1.value()==x2.value()) { 
-    ARIADNE_THROW(std::runtime_error,"max(TaylorDerivative x1, TaylorDerivative x2)","x1[0]==x2[0]"); 
+    ARIADNE_THROW(std::runtime_error,"max(DifferentialVector x1, DifferentialVector x2)","x1[0]==x2[0]"); 
   }
   return x1.value()>x2.value() ? x1 : x2;
 }
 
 template<class X> inline
-TaylorDerivative<X> 
-pos(const TaylorDerivative<X>& x)
+DifferentialVector<X> 
+pos(const DifferentialVector<X>& x)
 {
   return x;
 }
 
 template<class X> inline
-TaylorDerivative<X> 
-neg(const TaylorDerivative<X>& x)
+DifferentialVector<X> 
+neg(const DifferentialVector<X>& x)
 {
-  TaylorDerivative<X> y(x.result_size(),x.argument_size(),x.degree());
+  DifferentialVector<X> y(x.result_size(),x.argument_size(),x.degree());
   for(size_type n=0; n<=y.result_size(); ++n) {
     y[n] = -x[n];
   }
@@ -277,12 +277,12 @@ neg(const TaylorDerivative<X>& x)
 
 
 template<class X> inline
-TaylorDerivative<X> 
-add(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y)
+DifferentialVector<X> 
+add(const DifferentialVector<X>& x, const DifferentialVector<X>& y)
 {
   assert(x.result_size()==y.result_size());
   assert(x.argument_size()==y.argument_size());
-  TaylorDerivative<X> z(x.result_size(),x.argument_size(),std::min(x.degree(),y.degree()));
+  DifferentialVector<X> z(x.result_size(),x.argument_size(),std::min(x.degree(),y.degree()));
   for(size_type n=0; n<z.result_size(); ++n) {
     z[n] = x[n]+y[n];
   }
@@ -290,12 +290,12 @@ add(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y)
 }
 
 template<class X> inline
-TaylorDerivative<X> 
-sub(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y)
+DifferentialVector<X> 
+sub(const DifferentialVector<X>& x, const DifferentialVector<X>& y)
 {
   assert(x.result_size()==y.result_size());
   assert(x.argument_size()==y.argument_size());
-  TaylorDerivative<X> z(x.result_size(),x.argument_size(),std::min(x.degree(),y.degree()));
+  DifferentialVector<X> z(x.result_size(),x.argument_size(),std::min(x.degree(),y.degree()));
   for(size_type n=0; n<z.result_size(); ++n) {
     z[n] = x[n]-y[n];
   }
@@ -304,60 +304,60 @@ sub(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y)
 
 
 template<class X> inline
-TaylorDerivative<X> 
-operator-(const TaylorDerivative<X>& x)
+DifferentialVector<X> 
+operator-(const DifferentialVector<X>& x)
 {
   return neg(x);
 }
 
 template<class X> inline
-TaylorDerivative<X> 
-operator+(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y)
+DifferentialVector<X> 
+operator+(const DifferentialVector<X>& x, const DifferentialVector<X>& y)
 {
   return add(x,y);
 }
 
 template<class X> inline
-TaylorDerivative<X> 
-operator-(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y)
+DifferentialVector<X> 
+operator-(const DifferentialVector<X>& x, const DifferentialVector<X>& y)
 {
   return sub(x,y);
 }
 
 
 template<class X, class R> inline
-TaylorDerivative<X> 
-operator+(const TaylorDerivative<X>& x, const R& c)
+DifferentialVector<X> 
+operator+(const DifferentialVector<X>& x, const R& c)
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
 template<class X, class R> inline
-TaylorDerivative<X> 
-operator+(const R& c, const TaylorDerivative<X>& x)
+DifferentialVector<X> 
+operator+(const R& c, const DifferentialVector<X>& x)
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
 template<class X, class R> inline
-TaylorDerivative<X> 
-operator-(const TaylorDerivative<X>& x, const R& c)
+DifferentialVector<X> 
+operator-(const DifferentialVector<X>& x, const R& c)
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
 template<class X, class R> inline
-TaylorDerivative<X> 
-operator-(const R& c, const TaylorDerivative<X>& x)
+DifferentialVector<X> 
+operator-(const R& c, const DifferentialVector<X>& x)
 {
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
 template<class X, class R> inline
-TaylorDerivative<X> 
-operator*(const TaylorDerivative<X>& x, const R& c)
+DifferentialVector<X> 
+operator*(const DifferentialVector<X>& x, const R& c)
 {
-  TaylorDerivative<X> y=x;
+  DifferentialVector<X> y=x;
   X m(c);
   for(uint i=0; i!=y.result_size(); ++i) {
     y[i]*=m;
@@ -366,10 +366,10 @@ operator*(const TaylorDerivative<X>& x, const R& c)
 }
 
 template<class X, class R> inline
-TaylorDerivative<X> 
-operator*(const R& c, const TaylorDerivative<X>& x)
+DifferentialVector<X> 
+operator*(const R& c, const DifferentialVector<X>& x)
 {
-  TaylorDerivative<X> y=x;
+  DifferentialVector<X> y=x;
   X m(c);
   for(uint i=0; i!=y.result_size(); ++i) {
     y[i]*=m;
@@ -378,10 +378,10 @@ operator*(const R& c, const TaylorDerivative<X>& x)
 }
 
 template<class X, class R> inline
-TaylorDerivative<X> 
-operator/(const TaylorDerivative<X>& x, const R& c)
+DifferentialVector<X> 
+operator/(const DifferentialVector<X>& x, const R& c)
 {
-  TaylorDerivative<X> y=x;
+  DifferentialVector<X> y=x;
   for(uint i=0; i!=y.result_size(); ++i) {
     y[i]/=c;
   }

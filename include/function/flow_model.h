@@ -37,8 +37,8 @@
 #include "numeric/declarations.h"
 #include "linear_algebra/declarations.h"
 
-#include "differentiation/taylor_series.h"
-#include "differentiation/taylor_variable.h"
+#include "differentiation/power_series.h"
+#include "differentiation/differential.h"
 
 namespace Ariadne {
   
@@ -48,19 +48,19 @@ namespace Ariadne {
     {
       typedef Interval<R> I;
      public:
-      FlowModel(const array< TaylorSeries<TaylorVariable<I> > >& atstv) 
+      FlowModel(const array< PowerSeries<Differential<I> > >& atstv) 
         : _variables(atstv) { }
-      TaylorDerivative<I> evaluate(const I& t) const {
-        TaylorDerivative<I> result(this->_variables.size(),this->_variables[0][0].argument_size(),this->_variables[0][0].degree());
+      DifferentialVector<I> evaluate(const I& t) const {
+        DifferentialVector<I> result(this->_variables.size(),this->_variables[0][0].argument_size(),this->_variables[0][0].degree());
         for(uint i=0; i!=this->_variables.size(); ++i) {
           result[i]=this->_variables[i][0]; 
           for(uint j=1; j<=_variables[i].degree(); ++j) {
             result[i]+=this->_variables[i][j]*pow(t,j); } }
         return result; }
-      const array< TaylorSeries< TaylorVariable<I> > >& variables() const {
+      const array< PowerSeries< Differential<I> > >& variables() const {
         return this->_variables; }
      private:
-      const array< TaylorSeries< TaylorVariable<I> > > _variables;
+      const array< PowerSeries< Differential<I> > > _variables;
     };
 
 

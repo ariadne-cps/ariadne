@@ -25,7 +25,7 @@
 
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
-#include "differentiation/taylor_derivative.h"
+#include "differentiation/differential_vector.h"
 #include "function/function_interface.h"
 #include "function/affine_function.h"
 #include "geometry/point.h"
@@ -56,7 +56,7 @@ void export_map()
     .def("__call__",(Point<A>(Map<R>::*)(const Point<A>&)const)(&Map<R>::image))
     .def("image",(Point<A>(Map<R>::*)(const Point<A>&)const)(&Map<R>::image))
     .def("jacobian",(Matrix<A>(Map<R>::*)(const Point<A>&)const)(&Map<R>::jacobian))
-    .def("derivative",(TaylorDerivative<A>(Map<R>::*)(const Point<A>&,const smoothness_type&)const)(&Map<R>::derivative))
+    .def("derivative",(DifferentialVector<A>(Map<R>::*)(const Point<A>&,const smoothness_type&)const)(&Map<R>::derivative))
     .def(self_ns::str(self))
   ;
 

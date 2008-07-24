@@ -97,7 +97,7 @@ namespace Ariadne {
       /*! \brief The Jacobian derivative matrix over a rectangle. */
       Matrix<A> jacobian(const Point<A>& x) const;
       /*! \brief The derivatives up to order \a s. */
-      TaylorDerivative<A> derivative(const Point<A>& x, const smoothness_type& s) const;
+      DifferentialVector<A> derivative(const Point<A>& x, const smoothness_type& s) const;
         
       /*! \brief The state space of a self-map. */
       EuclideanSpace state_space() const;

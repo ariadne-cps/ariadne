@@ -28,7 +28,7 @@
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
 #include "differentiation/multi_index.h"
-#include "differentiation/sparse_differential.h"
+#include "differentiation/sparse_differential_vector.h"
 #include "function/exceptions.h"
 #include "function/approximate_taylor_model.h"
 #include "function/function_interface.h"

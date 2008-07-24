@@ -84,7 +84,7 @@ namespace Ariadne {
 
       /*! \brief Compute an integration time and bounds for both the flow and its derivatives up to order \a o. */
       virtual 
-      std::pair< Rational, TaylorDerivative<I> >
+      std::pair< Rational, DifferentialVector<I> >
       variation_flow_bounds(const VectorField<R>& f, 
                             const Box<R>& bx,
                             const Rational& t,

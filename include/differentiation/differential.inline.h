@@ -1,8 +1,8 @@
 /***************************************************************************
- *            taylor_derivative.cc
+ *            differential.inline.h
  *
- *  Copyright  2007  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
+ *  Copyright 2007  Pieter Collins
+ *  
  ****************************************************************************/
 
 /*
@@ -20,25 +20,16 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-
-#include "numeric/float.h"
-#include "numeric/interval.h"
-
-#include "differentiation/taylor_derivative.h"
-#include "differentiation/taylor_derivative.code.h"
-
+ 
 namespace Ariadne {
-    
-    
-    template class TaylorDerivative<Rational>;
 
-#ifdef ENABLE_FLOAT64
-    template class TaylorDerivative<Interval64>;
-#endif
-    
-#ifdef ENABLE_FLOATMP
-    template class TaylorDerivative<IntervalMP>;
-#endif
+namespace {
 
-  
+inline size_type compute_polynomial_data_size(uint as, smoothness_type d) {
+  return bin(d+as,as);
+}
+
+} // namespace
+
+
 } // namespace Ariadne

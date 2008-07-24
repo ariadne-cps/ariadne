@@ -45,8 +45,8 @@
 namespace Ariadne {
 
 
-    template<class X> class TaylorSeriesAffineVariable; 
-    template<class X> class TaylorSeriesTaylorVariable; 
+    template<class X> class PowerSeriesAffineVariable; 
+    template<class X> class PowerSeriesTaylorVariable; 
 
 
   
@@ -106,12 +106,12 @@ namespace Ariadne {
       Matrix<F> jacobian(const Point<F>& x) const;
     
        /*! \brief An approximation to the vector field at a point. */
-      TaylorDerivative<F> derivative(const Point<F>& x, const smoothness_type& s) const;
+      DifferentialVector<F> derivative(const Point<F>& x, const smoothness_type& s) const;
 
       // Used in integration method
-      void compute(TaylorSeriesAffineVariable<F>*, const TaylorSeriesAffineVariable<F>* x) const { };
+      void compute(PowerSeriesAffineVariable<F>*, const PowerSeriesAffineVariable<F>* x) const { };
       // Used in integration method
-      void compute(TaylorSeriesTaylorVariable<F>*, const TaylorSeriesTaylorVariable<F>* x) const { };
+      void compute(PowerSeriesTaylorVariable<F>*, const PowerSeriesTaylorVariable<F>* x) const { };
 
       /*! \brief The state space of the vector field. */
       EuclideanSpace state_space() const { return EuclideanSpace(this->_function_ptr->result_size()); }

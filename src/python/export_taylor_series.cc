@@ -1,5 +1,5 @@
 /***************************************************************************
- *            python/export_taylor_series.cc
+ *            python/export_power_series.cc
  *
  *  Copyright  2007  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
@@ -26,8 +26,8 @@
 
 #include "numeric/rational.h"
 #include "numeric/interval.h"
-#include "differentiation/taylor_series.h"
-#include "differentiation/taylor_variable.h"
+#include "differentiation/power_series.h"
+#include "differentiation/differential.h"
 #include "python/read_array.h"
 using namespace Ariadne;
 using namespace Ariadne::Python;
@@ -38,79 +38,79 @@ using namespace boost::python;
 
 
 template<class X>
-TaylorSeries<X>*
-make_taylor_series(const boost::python::object& obj) 
+PowerSeries<X>*
+make_power_series(const boost::python::object& obj) 
 {
-  TaylorSeries<X>* ts=new TaylorSeries<X>;
+  PowerSeries<X>* ts=new PowerSeries<X>;
   read_array(ts->data(),obj);
   return ts;
 }
 
 template<class R1, class R2> inline 
-void set_item(TaylorSeries<R1>& sd, uint i, R2 x) {
+void set_item(PowerSeries<R1>& sd, uint i, R2 x) {
   assert(i<=sd.degree()); 
   sd[i]=x;
 }
 
 template<class R> inline 
-R get_item(const TaylorSeries<R>& sd, uint i) {
+R get_item(const PowerSeries<R>& sd, uint i) {
   assert(i<=sd.degree()); 
   return sd[i];
 }
 
 template<class X> inline
-TaylorSeries<X> exp(const TaylorSeries<X>& ts) {
+PowerSeries<X> exp(const PowerSeries<X>& ts) {
   return Ariadne::exp(ts);
 }
 
 
 template<class R>
-void export_taylor_series()
+void export_power_series()
 {
   typedef typename traits<R>::arithmetic_type A;
-  typedef TaylorSeries<A> TS;
-  typedef TaylorVariable<A> TV;
+  typedef PowerSeries<A> TS;
+  typedef Differential<A> TV;
 
 
-  class_<TS> taylor_series_class(python_name<R>("TaylorSeries").c_str());
-  taylor_series_class.def("__init__", make_constructor(&make_taylor_series<R>));
-  taylor_series_class.def( init< uint >());
-  taylor_series_class.def("degree", &TS::degree);
-  taylor_series_class.def("__getitem__", &get_item<A>);
-  taylor_series_class.def("__setitem__",&set_item<A,double>);
-  taylor_series_class.def("__setitem__",&set_item<A,R>);
-  taylor_series_class.def("__setitem__",&set_item<A,A>);
-  taylor_series_class.def("__neg__", &__neg__<TS,TS>);
-  taylor_series_class.def("__add__", &__add__<TS,TS,TS>);
-  taylor_series_class.def("__add__", &__add__<TS,TS,double>);
-  //taylor_series_class.def("__add__", &__add__<TS,TS,R>);
-  taylor_series_class.def("__add__", &__add__<TS,TS,A>);
-  //taylor_series_class.def("__radd__", &__radd__<TS,TS,double>);
-  //taylor_series_class.def("__radd__", &__radd__<TS,TS,R>);
-  taylor_series_class.def("__radd__", &__radd__<TS,TS,A>);
-  taylor_series_class.def("__sub__", &__sub__<TS,TS,TS>);
-  taylor_series_class.def("__sub__", &__sub__<TS,TS,double>);
-  ///taylor_series_class.def("__sub__", &__sub__<TS,TS,R>);
-  taylor_series_class.def("__sub__", &__sub__<TS,TS,A>);
-  //taylor_series_class.def("__rsub__", &__rsub__<TS,TS,double>);
-  //taylor_series_class.def("__rsub__", &__rsub__<TS,TS,R>);
-  taylor_series_class.def("__rsub__", &__rsub__<TS,TS,A>);
-  taylor_series_class.def("__mul__", &__mul__<TS,TS,TS>);
-  //taylor_series_class.def("__mul__", &__mul__<TS,TS,double>);
-  //taylor_series_class.def("__mul__", &__mul__<TS,TS,R>);
-  taylor_series_class.def("__mul__", &__mul__<TS,TS,A>);
-  //taylor_series_class.def("__rmul__", &__rmul__<TS,TS,double>);
-  //taylor_series_class.def("__rmul__", &__rmul__<TS,TS,R>);
-  taylor_series_class.def("__rmul__", &__rmul__<TS,TS,A>);
-  taylor_series_class.def("__div__", &__div__<TS,TS,TS>);
-  //taylor_series_class.def("__div__", &__div__<TS,TS,double>);
-  //taylor_series_class.def("__div__", &__div__<TS,TS,R>);
-  taylor_series_class.def("__div__", &__div__<TS,TS,A>);
-  //taylor_series_class.def("__rdiv__", &__rdiv__<TS,TS,double>);
-  //taylor_series_class.def("__rdiv__", &__rdiv__<TS,TS,R>);
-  taylor_series_class.def("__rdiv__", &__rdiv__<TS,TS,A>);
-  taylor_series_class.def("__pow__", &__pow__<TS,TS,int>);
-  taylor_series_class.def(self_ns::str(self));
+  class_<TS> power_series_class(python_name<R>("PowerSeries").c_str());
+  power_series_class.def("__init__", make_constructor(&make_power_series<R>));
+  power_series_class.def( init< uint >());
+  power_series_class.def("degree", &TS::degree);
+  power_series_class.def("__getitem__", &get_item<A>);
+  power_series_class.def("__setitem__",&set_item<A,double>);
+  power_series_class.def("__setitem__",&set_item<A,R>);
+  power_series_class.def("__setitem__",&set_item<A,A>);
+  power_series_class.def("__neg__", &__neg__<TS,TS>);
+  power_series_class.def("__add__", &__add__<TS,TS,TS>);
+  power_series_class.def("__add__", &__add__<TS,TS,double>);
+  //power_series_class.def("__add__", &__add__<TS,TS,R>);
+  power_series_class.def("__add__", &__add__<TS,TS,A>);
+  //power_series_class.def("__radd__", &__radd__<TS,TS,double>);
+  //power_series_class.def("__radd__", &__radd__<TS,TS,R>);
+  power_series_class.def("__radd__", &__radd__<TS,TS,A>);
+  power_series_class.def("__sub__", &__sub__<TS,TS,TS>);
+  power_series_class.def("__sub__", &__sub__<TS,TS,double>);
+  ///power_series_class.def("__sub__", &__sub__<TS,TS,R>);
+  power_series_class.def("__sub__", &__sub__<TS,TS,A>);
+  //power_series_class.def("__rsub__", &__rsub__<TS,TS,double>);
+  //power_series_class.def("__rsub__", &__rsub__<TS,TS,R>);
+  power_series_class.def("__rsub__", &__rsub__<TS,TS,A>);
+  power_series_class.def("__mul__", &__mul__<TS,TS,TS>);
+  //power_series_class.def("__mul__", &__mul__<TS,TS,double>);
+  //power_series_class.def("__mul__", &__mul__<TS,TS,R>);
+  power_series_class.def("__mul__", &__mul__<TS,TS,A>);
+  //power_series_class.def("__rmul__", &__rmul__<TS,TS,double>);
+  //power_series_class.def("__rmul__", &__rmul__<TS,TS,R>);
+  power_series_class.def("__rmul__", &__rmul__<TS,TS,A>);
+  power_series_class.def("__div__", &__div__<TS,TS,TS>);
+  //power_series_class.def("__div__", &__div__<TS,TS,double>);
+  //power_series_class.def("__div__", &__div__<TS,TS,R>);
+  power_series_class.def("__div__", &__div__<TS,TS,A>);
+  //power_series_class.def("__rdiv__", &__rdiv__<TS,TS,double>);
+  //power_series_class.def("__rdiv__", &__rdiv__<TS,TS,R>);
+  power_series_class.def("__rdiv__", &__rdiv__<TS,TS,A>);
+  power_series_class.def("__pow__", &__pow__<TS,TS,int>);
+  power_series_class.def(self_ns::str(self));
   
   def("constant",(TS(*)(smoothness_type, const A&))&TS::constant);
   def("constant",(TS(*)(smoothness_type, const double&))&TS::constant);
@@ -143,40 +143,40 @@ void export_taylor_series()
 /*
 
 template<>
-void export_taylor_series<Rational>()
+void export_power_series<Rational>()
 {
   typedef Rational Q;
-  typedef TaylorSeries<Q> TS;
+  typedef PowerSeries<Q> TS;
 
 
-  class_<TS> taylor_series_class(python_name<Q>("TaylorSeries").c_str());
-  taylor_series_class.def( init< uint >());
-  taylor_series_class.def("__getitem__", &taylor_series_get_item<Q>);
-  taylor_series_class.def("__setitem__",&taylor_series_set_item<Q,double>);
-  taylor_series_class.def("__setitem__",&taylor_series_set_item<Q,Q>);
-  taylor_series_class.def("__neg__", &__neg__<TS,TS>);
-  taylor_series_class.def("__add__", &add<TS,TS,TS>);
-  taylor_series_class.def("__add__", &add<TS,TS,double>);
-  taylor_series_class.def("__add__", &add<TS,TS,Q>);
-  taylor_series_class.def("__radd__", &radd<TS,TS,double>);
-  taylor_series_class.def("__radd__", &radd<TS,TS,Q>);
-  taylor_series_class.def("__sub__", &sub<TS,TS,TS>);
-  taylor_series_class.def("__sub__", &sub<TS,TS,double>);
-  taylor_series_class.def("__sub__", &sub<TS,TS,Q>);
-  taylor_series_class.def("__rsub__", &rsub<TS,TS,double>);
-  taylor_series_class.def("__rsub__", &rsub<TS,TS,Q>);
-  taylor_series_class.def("__mul__", &mul<TS,TS,TS>);
-  taylor_series_class.def("__mul__", &mul<TS,TS,double>);
-  taylor_series_class.def("__mul__", &mul<TS,TS,Q>);
-  taylor_series_class.def("__rmul__", &rmul<TS,TS,double>);
-  taylor_series_class.def("__rmul__", &rmul<TS,TS,Q>);
-  taylor_series_class.def("__div__", &div<TS,TS,TS>);
-  taylor_series_class.def("__div__", &div<TS,TS,double>);
-  taylor_series_class.def("__div__", &div<TS,TS,Q>);
-  taylor_series_class.def("__rdiv__", &rdiv<TS,TS,double>);
-  taylor_series_class.def("__rdiv__", &rdiv<TS,TS,Q>);
-  taylor_series_class.def("__pow__", &pow<TS,TS,int>);
-  taylor_series_class.def(self_ns::str(self));
+  class_<TS> power_series_class(python_name<Q>("PowerSeries").c_str());
+  power_series_class.def( init< uint >());
+  power_series_class.def("__getitem__", &power_series_get_item<Q>);
+  power_series_class.def("__setitem__",&power_series_set_item<Q,double>);
+  power_series_class.def("__setitem__",&power_series_set_item<Q,Q>);
+  power_series_class.def("__neg__", &__neg__<TS,TS>);
+  power_series_class.def("__add__", &add<TS,TS,TS>);
+  power_series_class.def("__add__", &add<TS,TS,double>);
+  power_series_class.def("__add__", &add<TS,TS,Q>);
+  power_series_class.def("__radd__", &radd<TS,TS,double>);
+  power_series_class.def("__radd__", &radd<TS,TS,Q>);
+  power_series_class.def("__sub__", &sub<TS,TS,TS>);
+  power_series_class.def("__sub__", &sub<TS,TS,double>);
+  power_series_class.def("__sub__", &sub<TS,TS,Q>);
+  power_series_class.def("__rsub__", &rsub<TS,TS,double>);
+  power_series_class.def("__rsub__", &rsub<TS,TS,Q>);
+  power_series_class.def("__mul__", &mul<TS,TS,TS>);
+  power_series_class.def("__mul__", &mul<TS,TS,double>);
+  power_series_class.def("__mul__", &mul<TS,TS,Q>);
+  power_series_class.def("__rmul__", &rmul<TS,TS,double>);
+  power_series_class.def("__rmul__", &rmul<TS,TS,Q>);
+  power_series_class.def("__div__", &div<TS,TS,TS>);
+  power_series_class.def("__div__", &div<TS,TS,double>);
+  power_series_class.def("__div__", &div<TS,TS,Q>);
+  power_series_class.def("__rdiv__", &rdiv<TS,TS,double>);
+  power_series_class.def("__rdiv__", &rdiv<TS,TS,Q>);
+  power_series_class.def("__pow__", &pow<TS,TS,int>);
+  power_series_class.def(self_ns::str(self));
   
   def("compose",(TS(*)(const TS&,const TS&))&compose);
   def("inverse",(TS(*)(const TS&,const Q&))&inverse);
@@ -191,5 +191,5 @@ void export_taylor_series<Rational>()
 */
 
 
- //template void export_taylor_series<Rational>();
-template void export_taylor_series<FloatPy>();
+ //template void export_power_series<Rational>();
+template void export_power_series<FloatPy>();

@@ -40,8 +40,8 @@ FUNCTION_TESTS = \
 	test_affine_variable \
 	test_affine_model \
 	test_taylor_series \
-	test_taylor_variable \
-	test_taylor_derivative \
+	test_differential \
+	test_differential_vector \
 	test_sparse_differential \
 	test_taylor_model \
 	test_polynomial_function

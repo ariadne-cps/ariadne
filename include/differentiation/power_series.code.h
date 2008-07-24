@@ -1,5 +1,5 @@
 /***************************************************************************
- *            taylor_series.code.h
+ *            power_series.code.h
  *
  *  Copyright 2007  Pieter Collins
  *  
@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "taylor_variable.h"
+#include "differential.h"
 
 
 namespace Ariadne {
@@ -32,7 +32,7 @@ namespace {
 
 template<class X> 
 void 
-compute_product(TaylorSeries<X>& z, const TaylorSeries<X>& y, const TaylorSeries<X>& x)
+compute_product(PowerSeries<X>& z, const PowerSeries<X>& y, const PowerSeries<X>& x)
 {
   for(size_type n=0; n<=z.degree(); ++n) {
     z[n]*=0;
@@ -45,18 +45,18 @@ compute_product(TaylorSeries<X>& z, const TaylorSeries<X>& y, const TaylorSeries
 
 template<class X> 
 void 
-compute_composition(TaylorSeries<X>& y, const TaylorSeries<X>& x)
+compute_composition(PowerSeries<X>& y, const PowerSeries<X>& x)
 {
   
 
   int d=std::min(x.degree(),y.degree());
   using namespace std;
   //cerr<<"y="<<y<<"\nx="<<x<<endl;
-  TaylorSeries<X> w=x;
+  PowerSeries<X> w=x;
   w.value()=0;
   //cerr<<"w="<<w<<endl<<endl;
-  TaylorSeries<X> t(d);
-  TaylorSeries<X> u(d);
+  PowerSeries<X> t(d);
+  PowerSeries<X> u(d);
   t[0]=y[d];
   //cerr<<"t="<<t<<endl;
   for(int n=1; n<=d; ++n) {
@@ -93,11 +93,11 @@ compute_composition(TaylorSeries<X>& y, const TaylorSeries<X>& x)
 // Only inplemented for degree up to 5.
 // Useful for testing.
 template<class X>
-TaylorSeries<X>
-algebraic_inverse(const TaylorSeries<X>& x, const X& c)
+PowerSeries<X>
+algebraic_inverse(const PowerSeries<X>& x, const X& c)
 {
   smoothness_type d=x.degree();
-  TaylorSeries<X> y(d);
+  PowerSeries<X> y(d);
 
   assert(d<=5);
 
@@ -122,8 +122,8 @@ algebraic_inverse(const TaylorSeries<X>& x, const X& c)
 // Useful for interval methods.
 // This method is explicit; see recursive inverse for details
 template<class X>
-TaylorSeries<X>
-iterative_inverse(const TaylorSeries<X>& x, const X& c)
+PowerSeries<X>
+iterative_inverse(const PowerSeries<X>& x, const X& c)
 {
   assert(bool(x[1]!=0));
   
@@ -131,8 +131,8 @@ iterative_inverse(const TaylorSeries<X>& x, const X& c)
   X one=1;
   X r=1/x[1];
 
-  TaylorSeries<X> id(d,x.value(),one);
-  TaylorSeries<X> y(d,c,one);
+  PowerSeries<X> id(d,x.value(),one);
+  PowerSeries<X> y(d,c,one);
 
   std::cerr << "iterative_inverse(x,c)" << std::endl;
   std::cerr << "x=" << x << std::endl;
@@ -153,8 +153,8 @@ iterative_inverse(const TaylorSeries<X>& x, const X& c)
 // This should be used as the default method
 // TODO: Only compute to the degree necessary at each iteration.
 template<class X>
-TaylorSeries<X>
-recursive_inverse(const TaylorSeries<X>& x, const X& c)
+PowerSeries<X>
+recursive_inverse(const PowerSeries<X>& x, const X& c)
 {
   assert(bool(x[1]!=0));
   
@@ -162,8 +162,8 @@ recursive_inverse(const TaylorSeries<X>& x, const X& c)
   X one=1;
   X r=one/x[1];
 
-  TaylorSeries<X> id=TaylorSeries<X>::variable(d,1);
-  TaylorSeries<X> y(d);
+  PowerSeries<X> id=PowerSeries<X>::variable(d,1);
+  PowerSeries<X> y(d);
   
 #ifdef DEBUG
   std::cerr << "recursive_inverse(x,c)" << std::endl;
@@ -200,10 +200,10 @@ recursive_inverse(const TaylorSeries<X>& x, const X& c)
 
 
 template<class X> 
-TaylorSeries<X> 
-mul(const TaylorSeries<X>& x, const TaylorSeries<X>& y)
+PowerSeries<X> 
+mul(const PowerSeries<X>& x, const PowerSeries<X>& y)
 {
-  TaylorSeries<X> result(std::min(x.degree(),y.degree()));
+  PowerSeries<X> result(std::min(x.degree(),y.degree()));
   for(size_type n=0; n<=result.degree(); ++n) {
     result[n]=x[0]*y[n];
     for(size_type i=1; i<=n; ++i) {
@@ -215,48 +215,48 @@ mul(const TaylorSeries<X>& x, const TaylorSeries<X>& y)
 
 
 template<class X> 
-TaylorSeries<X> 
-derivative(const TaylorSeries<X>& x)
+PowerSeries<X> 
+derivative(const PowerSeries<X>& x)
 {
-  TaylorSeries<X> result(x.degree()-1);
+  PowerSeries<X> result(x.degree()-1);
   for(uint n=1; n<=x.degree(); ++n) { result[n-1]=X(n)*x[n]; }
   return result;
 }
 
 template<class X> 
-TaylorSeries<X> 
-antiderivative(const TaylorSeries<X>& x)
+PowerSeries<X> 
+antiderivative(const PowerSeries<X>& x)
 {
-  TaylorSeries<X> result(x.degree()+1);
+  PowerSeries<X> result(x.degree()+1);
   for(uint n=1; n<=x.degree()+1u; ++n) { result[n]=x[n-1]/n; }
   result[0]=x[0]*0;
   return result;
 }
 
 template<class X> 
-TaylorSeries<X> 
-antiderivative(const TaylorSeries<X>& x, const X& c)
+PowerSeries<X> 
+antiderivative(const PowerSeries<X>& x, const X& c)
 {
-  TaylorSeries<X> result(x.degree()+1);
+  PowerSeries<X> result(x.degree()+1);
   for(uint n=1; n<=x.degree()+1u; ++n) { result[n]=x[n-1]/n; }
   result[0]=c;
   return result;
 }
 
 template<class X> 
-TaylorSeries<X> 
-compose(const TaylorSeries<X>& y, const TaylorSeries<X>& x)
+PowerSeries<X> 
+compose(const PowerSeries<X>& y, const PowerSeries<X>& x)
 {
   using namespace std;
 
   size_type d=std::min(x.degree(),y.degree());
-  TaylorSeries<X> r(d);
+  PowerSeries<X> r(d);
 
   //cerr<<"y="<<y<<"\nx="<<x<<endl;
-  TaylorSeries<X> w=x;
+  PowerSeries<X> w=x;
   w.value()=0;
   //cerr<<"w="<<w<<endl<<endl;
-  TaylorSeries<X> t(d);
+  PowerSeries<X> t(d);
   r[0]=y[d];
   //cerr<<"t="<<t<<endl;
   for(uint n=1; n<=d; ++n) {
@@ -270,8 +270,8 @@ compose(const TaylorSeries<X>& y, const TaylorSeries<X>& x)
 }
 
 template<class X>
-TaylorSeries<X>
-inverse(const TaylorSeries<X>& x, const X& c)
+PowerSeries<X>
+inverse(const PowerSeries<X>& x, const X& c)
 {
   return recursive_inverse(x,c);
 }
@@ -279,7 +279,7 @@ inverse(const TaylorSeries<X>& x, const X& c)
 
 template<class X> 
 std::ostream& 
-operator<<(std::ostream& os, const TaylorSeries<X>& x) {
+operator<<(std::ostream& os, const PowerSeries<X>& x) {
   os << "S";
   for(size_type i=0; i<=x.degree(); ++i) {
     os << (i==0 ? '(' : ',') << x[i]; 
@@ -291,10 +291,10 @@ operator<<(std::ostream& os, const TaylorSeries<X>& x) {
 
 template<class X> 
 void
-TaylorSeries<X>::instantiate() 
+PowerSeries<X>::instantiate() 
 {
   X* x=0;
-  TaylorSeries<X>* ts=0;
+  PowerSeries<X>* ts=0;
   std::ostream* os = 0;
 
   mul(*ts,*ts);

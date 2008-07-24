@@ -28,8 +28,8 @@
 #include "numeric/rational.h"
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
-#include "differentiation/taylor_derivative.h"
-#include "differentiation/sparse_differential.h"
+#include "differentiation/differential_vector.h"
+#include "differentiation/sparse_differential_vector.h"
 #include "function/function_interface.h"
 
 #include <boost/python.hpp>
@@ -77,11 +77,11 @@ template<class X> void read(Vector<X>& v, const object& obj) {
 
 
 template<class X> 
-void read(TaylorDerivative<X>& td, const object& obj) {
+void read(DifferentialVector<X>& td, const object& obj) {
   list elements=extract<list>(obj);
   ARIADNE_ASSERT(td.result_size()==uint(len(elements)));
   for(size_type i=0; i!=td.size(); ++i) { 
-    boost::python::extract< TaylorVariable<X> > etv(elements[i]);
+    boost::python::extract< Differential<X> > etv(elements[i]);
     boost::python::extract<double> ed(elements[i]);
     if(etv.check()) {
       td[i]=etv(); 
@@ -118,13 +118,13 @@ class PythonFunction
     read(r,this->_pyf(x)); 
     return r; }
   virtual Matrix<F> jacobian (const Vector<F>& x) const { 
-    TaylorDerivative<F> rj(this->_result_size,this->_argument_size,1u); 
-    TaylorDerivative<F> aj=TaylorDerivative<F>::variable(x.size(),x.size(),1u,x); 
+    DifferentialVector<F> rj(this->_result_size,this->_argument_size,1u); 
+    DifferentialVector<F> aj=DifferentialVector<F>::variable(x.size(),x.size(),1u,x); 
     read(rj,this->_pyf(aj)); 
     return rj.jacobian(); }
-  virtual TaylorDerivative<F> derivative (const Vector<F>& x, const smoothness_type& d) const {  
-    TaylorDerivative<F> rd(this->_result_size,this->_argument_size,d); 
-    TaylorDerivative<F> ad=TaylorDerivative<F>::variable(x.size(),x.size(),d,x); 
+  virtual DifferentialVector<F> derivative (const Vector<F>& x, const smoothness_type& d) const {  
+    DifferentialVector<F> rd(this->_result_size,this->_argument_size,d); 
+    DifferentialVector<F> ad=DifferentialVector<F>::variable(x.size(),x.size(),d,x); 
     read(rd,this->_pyf(ad)); 
     return rd; }
   virtual SparseDifferentialVector<A> expansion (const Vector<A>& x, const smoothness_type& d) const {  

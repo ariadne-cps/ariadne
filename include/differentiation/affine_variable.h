@@ -2,7 +2,7 @@
  *            affine_variable.h
  *
  *  Copyright  2007  Pieter Collins
- *  Pieter.Collins@cwi.nl
+ *  
  ****************************************************************************/
 
 /*
@@ -43,7 +43,7 @@
 #include "linear_algebra/covector.h"
 #include "linear_algebra/matrix.h"
 
-#include "differentiation/taylor_variable.h"
+#include "differentiation/differential.h"
 
 namespace Ariadne {
 
@@ -53,29 +53,29 @@ namespace Ariadne {
     /*!\ingroup Differentiation
      * \brief Concrete class for functions.
      *
-     * \deprecated This class has unknown bugs, and is deprecated in favour of TaylorVariable.
+     * \deprecated This class has unknown bugs, and is deprecated in favour of Differential.
      */
     template<class X>
     class AffineVariable
-      : public TaylorVariable<X>
+      : public Differential<X>
     {
      public:
       /*! \brief Default constructor constructs an affine variable with value zero and no arguments. */
-      explicit AffineVariable() : TaylorVariable<X>(0u,1u) { }
+      explicit AffineVariable() : Differential<X>(0u,1u) { }
      
       /*! \brief Construct an affine variable with \a d arguments. */
-      explicit AffineVariable(const size_type& as) : TaylorVariable<X>(as,1u) { } ;
+      explicit AffineVariable(const size_type& as) : Differential<X>(as,1u) { } ;
      
       /*! \brief Construct an affine variable with \a d arguments based on the array \a ary. */
-      template<class XX> explicit AffineVariable(const size_type& as, const XX* ary) : TaylorVariable<X>(as,1u,ary) { }
+      template<class XX> explicit AffineVariable(const size_type& as, const XX* ary) : Differential<X>(as,1u,ary) { }
            
       /*! \brief Upcast from a Taylor variable. */
-      AffineVariable(const TaylorVariable<X>& tv)
-        : TaylorVariable<X>(tv) { ARIADNE_ASSERT(tv.degree()==1u); }
+      AffineVariable(const Differential<X>& tv)
+        : Differential<X>(tv) { ARIADNE_ASSERT(tv.degree()==1u); }
     
       // Dispatch assignment operator
       template<class XX> AffineVariable<X> operator=(const XX& x) { 
-        this->TaylorVariable<X>::operator=(x); return *this; }
+        this->Differential<X>::operator=(x); return *this; }
 
            
       /*! \brief Construct a constant variable with respect to \a as variables and value \a c. */
@@ -93,43 +93,43 @@ namespace Ariadne {
    
     template<class X>
     AffineVariable<X>& operator+=(AffineVariable<X>& r, const AffineVariable<X>& x) {
-      static_cast<TaylorVariable<X>&>(r)+=static_cast<const TaylorVariable<X>&>(x); return r; }
+      static_cast<Differential<X>&>(r)+=static_cast<const Differential<X>&>(x); return r; }
 
     template<class X>
     AffineVariable<X>& operator-=(AffineVariable<X>& r, const AffineVariable<X>& x) {
-      static_cast<TaylorVariable<X>&>(r)-=static_cast<const TaylorVariable<X>&>(x); return r; }
+      static_cast<Differential<X>&>(r)-=static_cast<const Differential<X>&>(x); return r; }
 
 
     template<class X>
     AffineVariable<X> operator+(const AffineVariable<X>& x1, const AffineVariable<X>& x2) {
-      return static_cast<const TaylorVariable<X>&>(x1)+static_cast<const TaylorVariable<X>&>(x2); }
+      return static_cast<const Differential<X>&>(x1)+static_cast<const Differential<X>&>(x2); }
 
     template<class X>
     AffineVariable<X> operator-(const AffineVariable<X>& x1, const AffineVariable<X>& x2) {
-      return static_cast<const TaylorVariable<X>&>(x1)-static_cast<const TaylorVariable<X>&>(x2); }
+      return static_cast<const Differential<X>&>(x1)-static_cast<const Differential<X>&>(x2); }
 
     template<class X>
     AffineVariable<X> operator*(const AffineVariable<X>& x1, const AffineVariable<X>& x2) {
-      return static_cast<const TaylorVariable<X>&>(x1)*static_cast<const TaylorVariable<X>&>(x2); }
+      return static_cast<const Differential<X>&>(x1)*static_cast<const Differential<X>&>(x2); }
 
     template<class X>
     AffineVariable<X> operator/(const AffineVariable<X>& x1, const AffineVariable<X>& x2) {
-      return static_cast<const TaylorVariable<X>&>(x1)/static_cast<const TaylorVariable<X>&>(x2); }
+      return static_cast<const Differential<X>&>(x1)/static_cast<const Differential<X>&>(x2); }
 
   
     // FIXME: We need to provide explicit operations here to prevent interception by 
     // templated Taylor variable operators.
     template<class X>
-    AffineVariable<X> operator+(const TaylorVariable<X>& x1, const AffineVariable<X>& x2) {
-      return x1+static_cast<const TaylorVariable<X>&>(x2); }
+    AffineVariable<X> operator+(const Differential<X>& x1, const AffineVariable<X>& x2) {
+      return x1+static_cast<const Differential<X>&>(x2); }
 
     template<class X>
-    AffineVariable<X> operator-(const TaylorVariable<X>& x1, const AffineVariable<X>& x2) {
-      return x1-static_cast<const TaylorVariable<X>&>(x2); }
+    AffineVariable<X> operator-(const Differential<X>& x1, const AffineVariable<X>& x2) {
+      return x1-static_cast<const Differential<X>&>(x2); }
 
     template<class X>
-    AffineVariable<X> operator*(const TaylorVariable<X>& x1, const AffineVariable<X>& x2) {
-      return x1*static_cast<const TaylorVariable<X>&>(x2); }
+    AffineVariable<X> operator*(const Differential<X>& x1, const AffineVariable<X>& x2) {
+      return x1*static_cast<const Differential<X>&>(x2); }
 
 
 

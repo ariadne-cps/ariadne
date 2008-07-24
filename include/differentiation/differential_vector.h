@@ -1,8 +1,8 @@
 /***************************************************************************
- *            taylor_derivative.h
+ *            differential_vector.h
  *
- *  Copyright 2007  Alberto Casagrande, Pieter Collins
- *  Email casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright 2007  Pieter Collins
+ *  
  ****************************************************************************/
 
 /*
@@ -21,20 +21,20 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file taylor_derivative.h
+/*! \file differential_vector.h
  *  \brief Derivatives of scalar functions of many variables.
  */
  
-#ifndef ARIADNE_TAYLOR_DERIVATIVE_H
-#define ARIADNE_TAYLOR_DERIVATIVE_H
+#ifndef ARIADNE_DIFFERENTIAL_VECTOR_H
+#define ARIADNE_DIFFERENTIAL_VECTOR_H
 
 #include "linear_algebra/declarations.h"
 
 namespace Ariadne {
   
     class MultiIndex;
-    template<class X> class TaylorSeries;
-    template<class X> class TaylorVariable;
+    template<class X> class PowerSeries;
+    template<class X> class Differential;
   
     // Base template algorithm for evaluating a polynomial
     template<class P, class M> void evaluate_polynomial(M& r, const P& p, const M& x);
@@ -53,37 +53,37 @@ namespace Ariadne {
      *
      */
     template<class X>
-    class TaylorDerivative
+    class DifferentialVector
     {
      public:
       typedef X value_type;
 
       /*! \brief Default constructor constructs a constant of degree zero. */
-      TaylorDerivative();
+      DifferentialVector();
       /*! \brief The constant zero of degree \a d in \a a arguments. */
-      TaylorDerivative(size_type r, size_type a, smoothness_type d);
+      DifferentialVector(size_type r, size_type a, smoothness_type d);
       /*! \brief A taylor derivative of degree \a d in \a arguments, with values given by the array based at \a ptr. */
-      template<class XX> TaylorDerivative(size_type r, size_type a, smoothness_type d, const XX* ptr);
+      template<class XX> DifferentialVector(size_type r, size_type a, smoothness_type d, const XX* ptr);
 
       /*! \brief Construct from a univariate Taylor series. */
-      template<class XX> TaylorDerivative(const TaylorSeries<XX>& ts); 
+      template<class XX> DifferentialVector(const PowerSeries<XX>& ts); 
       /*! \brief Construct from a scalar Taylor variable. */
-      template<class XX> TaylorDerivative(const TaylorVariable<XX>& tv); 
+      template<class XX> DifferentialVector(const Differential<XX>& tv); 
       /*! \brief Copy constructor. */
-      template<class XX> TaylorDerivative(const TaylorDerivative<XX>& td); 
+      template<class XX> DifferentialVector(const DifferentialVector<XX>& td); 
       /*! \brief Copy assignment operator. */
-      template<class XX> TaylorDerivative<X>& operator=(const TaylorDerivative<XX>& td);
+      template<class XX> DifferentialVector<X>& operator=(const DifferentialVector<XX>& td);
 
       /*! \brief Equality operator. */
-      template<class XX> bool operator==(const TaylorDerivative<XX>& other) const;
+      template<class XX> bool operator==(const DifferentialVector<XX>& other) const;
       /*! \brief Inequality operator. */
-      template<class XX> bool operator!=(const TaylorDerivative<XX>& other) const;
+      template<class XX> bool operator!=(const DifferentialVector<XX>& other) const;
 
       /*! \brief Construct a constant derivative of degree \a d with respect to \a as variables and value \a c. */
-      template<class V> static TaylorDerivative<X> constant(size_type rs, size_type as, smoothness_type d, const V& c); 
+      template<class V> static DifferentialVector<X> constant(size_type rs, size_type as, smoothness_type d, const V& c); 
       /*! \brief Construct the derivative of degree \a d at values \a x. Requires rs==as. */
-      template<class V> static TaylorDerivative<X> variable(size_type rs, size_type as, smoothness_type d, const V& x);
-      template<class V> static TaylorDerivative<X> variable(const V& x, smoothness_type d);
+      template<class V> static DifferentialVector<X> variable(size_type rs, size_type as, smoothness_type d, const V& x);
+      template<class V> static DifferentialVector<X> variable(const V& x, smoothness_type d);
 
       /*! \brief The number of variables of the argument. */
       size_type result_size() const; 
@@ -108,19 +108,19 @@ namespace Ariadne {
       /*! \brief Set the derivative of the \a i<sup>th</sup> variable with respect to multi-index \a j. */
       template<class XX> void set(const size_type& i, const MultiIndex& j, const XX& x);
       /*! \brief The derivative values of the \a i<sup>th</sup> variable. */
-      const TaylorVariable<X>& get(const size_type& i) const;
+      const Differential<X>& get(const size_type& i) const;
       /*! \brief Set the derivative of the \a i<sup>th</sup> variable. */
-      template<class XX> void set(const size_type& i, const TaylorVariable<XX>& tv);
+      template<class XX> void set(const size_type& i, const Differential<XX>& tv);
       /*! \brief The array of Taylor variables. */
-      const array< TaylorVariable<X> >& variables() const;
+      const array< Differential<X> >& variables() const;
       /*! \brief The array of derivative values. */
       //const array<X>& data() const;
       /*! \brief A reference to the array of derivative values. */
       //array<X>& data();
       /*! \brief A reference to the \a i<sup> th</sup> component. */
-      TaylorVariable<X>& operator[](const size_type& i); 
+      Differential<X>& operator[](const size_type& i); 
       /*! \brief The \a i<sup> th</sup> component. */
-      const TaylorVariable<X>& operator[](const size_type& i) const; 
+      const Differential<X>& operator[](const size_type& i) const; 
 
 #ifdef DOXYGEN
     //@{ 
@@ -129,28 +129,28 @@ namespace Ariadne {
      *  The composition inductively by
      *  \f$ y^{[n]} = \sum_{i=0}^{n-1} \Bigl(\!\begin{array}{c}n\\i\end{array}\!\Bigr) {\dot{y}}^{[i]} x^{(n-i)} \f$
      */
-    friend TaylorVariable<X> compose(const TaylorVariable<X>& y, const TaylorDerivative<X>& x);
+    friend Differential<X> compose(const Differential<X>& y, const DifferentialVector<X>& x);
     /*! \brief The composition of two derivatives computes \f$d^iy/dt^i\f$ from \f$d^iy/dx^i\f$ and \f$d^ix/dt^i\f$. 
      *  The composition inductively by
      *  \f$ y^{[n]} = \sum_{i=0}^{n-1} \Bigl(\!\begin{array}{c}n\\i\end{array}\!\Bigr) {\dot{y}}^{[i]} x^{(n-i)} \f$
      */
-    friend TaylorDerivative<X> compose(const TaylorDerivative<X>& y, const TaylorDerivative<X>& x);
+    friend DifferentialVector<X> compose(const DifferentialVector<X>& y, const DifferentialVector<X>& x);
     /*! \brief The derivative of the inverse of \f$y\f$, assuming \f$c\f$ is the centre of the approximation. */
-    friend TaylorDerivative<X> inverse(const TaylorDerivative<X>& y, const Vector<X>& c);
+    friend DifferentialVector<X> inverse(const DifferentialVector<X>& y, const Vector<X>& c);
     /*! \brief The taylor derivatives of the function \f$z:\R^m\rightarrow\R^n\f$ defined by \f$y(x,z(x))=\text{const}\f$. The value of \f$z(x)\f$ is set to be \f$c\f$. */
-    friend TaylorDerivative<X> implicit(const TaylorDerivative<X>& y, const Vector<X>& c);
+    friend DifferentialVector<X> implicit(const DifferentialVector<X>& y, const Vector<X>& c);
     /*! \brief The derivatives of \f$x+y\f$. */
-    friend TaylorDerivative<X> add(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y);
+    friend DifferentialVector<X> add(const DifferentialVector<X>& x, const DifferentialVector<X>& y);
     /*! \brief The derivatives of \f$x-y\f$. */
-    friend TaylorDerivative<X> sub(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y);
+    friend DifferentialVector<X> sub(const DifferentialVector<X>& x, const DifferentialVector<X>& y);
 
     /*! \brief The derivatives of \f$x+y\f$. */
-    friend TaylorDerivative<X> operator+(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y);
+    friend DifferentialVector<X> operator+(const DifferentialVector<X>& x, const DifferentialVector<X>& y);
     /*! \brief The derivatives of \f$x-y\f$. */
-    friend TaylorDerivative<X> operator-(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y);
+    friend DifferentialVector<X> operator-(const DifferentialVector<X>& x, const DifferentialVector<X>& y);
 
     /*! \brief Stream output operator. */
-    friend std::ostream& operator<<(std::ostream& os, const TaylorDerivative<X>& x);
+    friend std::ostream& operator<<(std::ostream& os, const DifferentialVector<X>& x);
     //@}
 #endif 
      private:
@@ -160,63 +160,63 @@ namespace Ariadne {
       size_type _result_size;
       size_type _argument_size;
       smoothness_type _degree;
-      array< TaylorVariable<X> > _variables;
+      array< Differential<X> > _variables;
     };
 
-  template<class X, class R> array<R> evaluate(const TaylorDerivative<X>& y, const array<R>& x);
+  template<class X, class R> array<R> evaluate(const DifferentialVector<X>& y, const array<R>& x);
 
-  template<class X0, class X1, class X2> void compute_composition(TaylorVariable<X0>& z, const TaylorVariable<X1>& y, const TaylorDerivative<X2>& x);
-  template<class X0, class X1, class X2> void compute_composition(TaylorDerivative<X0>& z, const TaylorDerivative<X1>& y, const TaylorDerivative<X2>& x);
+  template<class X0, class X1, class X2> void compute_composition(Differential<X0>& z, const Differential<X1>& y, const DifferentialVector<X2>& x);
+  template<class X0, class X1, class X2> void compute_composition(DifferentialVector<X0>& z, const DifferentialVector<X1>& y, const DifferentialVector<X2>& x);
 
-  template<class X> TaylorVariable<X> evaluate(const TaylorVariable<X>& y, const TaylorDerivative<X>& x);
-  template<class X> TaylorVariable<X> compose(const TaylorVariable<X>& y, const TaylorDerivative<X>& x);
+  template<class X> Differential<X> evaluate(const Differential<X>& y, const DifferentialVector<X>& x);
+  template<class X> Differential<X> compose(const Differential<X>& y, const DifferentialVector<X>& x);
 
-  template<class X> Vector<X> evaluate(const TaylorDerivative<X>& y, const Vector<X>& x);
+  template<class X> Vector<X> evaluate(const DifferentialVector<X>& y, const Vector<X>& x);
 
-  template<class X> TaylorDerivative<X> translate(const TaylorDerivative<X>& x, const Vector<X>& c);
-  template<class X> TaylorDerivative<X> compose(const TaylorDerivative<X>& y, const TaylorDerivative<X>& x);
-  template<class X> TaylorDerivative<X> inverse(const TaylorDerivative<X>& x, const Vector<X>& c);
-  template<class X> TaylorDerivative<X> implicit(const TaylorDerivative<X>& x, const Vector<X>& c);
-  template<class X> TaylorDerivative<X> concatenate(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y);
-  template<class X> TaylorDerivative<X> reduce(const TaylorDerivative<X>& x);
-  template<class X> TaylorDerivative<X> derivative(const TaylorDerivative<X>& x, const size_type& k);
-  template<class X> TaylorDerivative<X> antiderivative(const TaylorDerivative<X>& x, const size_type& k);
+  template<class X> DifferentialVector<X> translate(const DifferentialVector<X>& x, const Vector<X>& c);
+  template<class X> DifferentialVector<X> compose(const DifferentialVector<X>& y, const DifferentialVector<X>& x);
+  template<class X> DifferentialVector<X> inverse(const DifferentialVector<X>& x, const Vector<X>& c);
+  template<class X> DifferentialVector<X> implicit(const DifferentialVector<X>& x, const Vector<X>& c);
+  template<class X> DifferentialVector<X> concatenate(const DifferentialVector<X>& x, const DifferentialVector<X>& y);
+  template<class X> DifferentialVector<X> reduce(const DifferentialVector<X>& x);
+  template<class X> DifferentialVector<X> derivative(const DifferentialVector<X>& x, const size_type& k);
+  template<class X> DifferentialVector<X> antiderivative(const DifferentialVector<X>& x, const size_type& k);
   
   template<class X>
-  array< TaylorSeries< TaylorVariable<X> > > 
-  integrate(const array<TaylorVariable<X> >& y, const array<TaylorVariable<X> >& x);
+  array< PowerSeries< Differential<X> > > 
+  integrate(const array<Differential<X> >& y, const array<Differential<X> >& x);
 
 
-  template<class X> TaylorDerivative<X> neg(const TaylorDerivative<X>& x);
-  template<class X> TaylorDerivative<X> add(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y);
-  template<class X> TaylorDerivative<X> sub(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y);
+  template<class X> DifferentialVector<X> neg(const DifferentialVector<X>& x);
+  template<class X> DifferentialVector<X> add(const DifferentialVector<X>& x, const DifferentialVector<X>& y);
+  template<class X> DifferentialVector<X> sub(const DifferentialVector<X>& x, const DifferentialVector<X>& y);
 
-  template<class X> TaylorDerivative<X> operator+(const TaylorDerivative<X>& x);
-  template<class X> TaylorDerivative<X> operator-(const TaylorDerivative<X>& x);
-  template<class X> TaylorDerivative<X> operator+(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y);
-  template<class X> TaylorDerivative<X> operator-(const TaylorDerivative<X>& x, const TaylorDerivative<X>& y);
+  template<class X> DifferentialVector<X> operator+(const DifferentialVector<X>& x);
+  template<class X> DifferentialVector<X> operator-(const DifferentialVector<X>& x);
+  template<class X> DifferentialVector<X> operator+(const DifferentialVector<X>& x, const DifferentialVector<X>& y);
+  template<class X> DifferentialVector<X> operator-(const DifferentialVector<X>& x, const DifferentialVector<X>& y);
 
-  template<class X> TaylorDerivative<X> operator*(const Matrix<X>& A, const TaylorDerivative<X>& x);
+  template<class X> DifferentialVector<X> operator*(const Matrix<X>& A, const DifferentialVector<X>& x);
 
-  template<class X> TaylorDerivative<X>& operator-=(TaylorDerivative<X>& x, const Vector<X>& v);
-  template<class X> TaylorDerivative<X> operator-(const TaylorDerivative<X>& x, const Vector<X>& v);
+  template<class X> DifferentialVector<X>& operator-=(DifferentialVector<X>& x, const Vector<X>& v);
+  template<class X> DifferentialVector<X> operator-(const DifferentialVector<X>& x, const Vector<X>& v);
 
-  template<class X> TaylorDerivative<X>& operator*=(TaylorDerivative<X>& x, const double& c);
-  template<class X> TaylorDerivative<X>& operator*=(TaylorDerivative<X>& x, const X& c);
-  template<class X> TaylorDerivative<X> operator*(const X& c, const TaylorDerivative<X>& x);
-  template<class X> TaylorDerivative<X> operator*(const TaylorDerivative<X>& x, const X& c);
+  template<class X> DifferentialVector<X>& operator*=(DifferentialVector<X>& x, const double& c);
+  template<class X> DifferentialVector<X>& operator*=(DifferentialVector<X>& x, const X& c);
+  template<class X> DifferentialVector<X> operator*(const X& c, const DifferentialVector<X>& x);
+  template<class X> DifferentialVector<X> operator*(const DifferentialVector<X>& x, const X& c);
 
 
-  template<class X> std::ostream& operator<<(std::ostream& os, const TaylorDerivative<X>& x);
+  template<class X> std::ostream& operator<<(std::ostream& os, const DifferentialVector<X>& x);
 
 
   
 } // namespace Ariadne
 
 
-#include "taylor_derivative.inline.h"
-#include "taylor_derivative.template.h"
+#include "differential_vector.inline.h"
+#include "differential_vector.template.h"
 
 
-#endif /* ARIADNE_TAYLOR_DERIVATIVE_H */
+#endif /* ARIADNE_DIFFERENTIAL_VECTOR_H */
 

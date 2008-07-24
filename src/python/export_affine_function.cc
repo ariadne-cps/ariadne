@@ -27,8 +27,8 @@
 #include "linear_algebra/vector.h"
 #include "linear_algebra/covector.h"
 #include "linear_algebra/matrix.h"
-#include "differentiation/taylor_derivative.h"
-#include "differentiation/sparse_differential.h"
+#include "differentiation/differential_vector.h"
+#include "differentiation/sparse_differential_vector.h"
 #include "function/affine_function.h"
 #include "function/identity_function.h"
 
@@ -97,7 +97,7 @@ void export_affine_function()
   affine_function_class.def("__call__",(Vector<I>(AffineFunction<R>::*)(const Vector<I>&)const)(&AffineFunction<R>::evaluate));
   affine_function_class.def("evaluate",(Vector<I>(AffineFunction<R>::*)(const Vector<I>&)const)(&AffineFunction<R>::evaluate));
   affine_function_class.def("jacobian",(Matrix<I>(AffineFunction<R>::*)(const Vector<I>&)const)(&AffineFunction<R>::jacobian));
-  affine_function_class.def("derivative",(TaylorDerivative<I>(AffineFunction<R>::*)(const Vector<I>&)const)(&AffineFunction<R>::derivative));
+  affine_function_class.def("derivative",(DifferentialVector<I>(AffineFunction<R>::*)(const Vector<I>&)const)(&AffineFunction<R>::derivative));
   affine_function_class.def("expansion",(SparseDifferentialVector<A>(AffineFunction<R>::*)(const Vector<A>&, const ushort&)const)(&AffineFunction<R>::expansion));
   affine_function_class.def(self_ns::str(self));
 

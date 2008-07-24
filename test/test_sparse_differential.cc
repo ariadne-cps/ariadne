@@ -33,6 +33,7 @@
 #include "linear_algebra/vector.h"
 #include "linear_algebra/matrix.h"
 #include "differentiation/sparse_differential.h"
+#include "differentiation/sparse_differential_vector.h"
 
 #include "test.h"
 
@@ -141,8 +142,8 @@ class TestSparseDifferential {
     double ayx[10] = { 1.0,  2.0, 4.0,  -1.0, -11.0, -8.0,  -1.0, 15.0, 42.0, 16.0 };
     double aid[4] = { ax[0], 1.0, 0.0, 0.0 };
     ARIADNE_TEST_CONSTRUCT(SparseDifferential<X>,x,(2,3,ax));
-    ARIADNE_TEST_CONSTRUCT(TaylorSeries<X>,y,(3,ay));
-    ARIADNE_TEST_CONSTRUCT(TaylorSeries<X>,id,(3,aid));
+    ARIADNE_TEST_CONSTRUCT(PowerSeries<X>,y,(3,ay));
+    ARIADNE_TEST_CONSTRUCT(PowerSeries<X>,id,(3,aid));
     ARIADNE_TEST_EQUAL(compose(y,x),SparseDifferential<X>(2,3,ayx));
     ARIADNE_TEST_EQUAL(compose(id,x),x);
   }

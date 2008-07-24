@@ -66,9 +66,9 @@ template<class R> void export_python_function();
 template<class R> void export_affine_function();
 template<class R> void export_affine_variable();
 template<class R> void export_affine_derivative();
-template<class R> void export_taylor_series();
-template<class R> void export_taylor_variable();
-template<class R> void export_taylor_derivative();
+template<class R> void export_power_series();
+template<class R> void export_differential();
+template<class R> void export_differential_vector();
 template<class R> void export_sparse_differential();
 template<class R> void export_sparse_differential_vector();
 template<class R> void export_flow_model();
@@ -179,9 +179,9 @@ BOOST_PYTHON_MODULE(ariadne)
   //export_affine_variable<FloatPy>();
   //export_affine_derivative<Rational>();
   //export_affine_derivative<FloatPy>();
-  export_taylor_series<FloatPy>();
-  export_taylor_variable<FloatPy>();
-  export_taylor_derivative<FloatPy>();
+  export_power_series<FloatPy>();
+  export_differential<FloatPy>();
+  export_differential_vector<FloatPy>();
   export_sparse_differential<FloatPy>();
   export_sparse_differential_vector<FloatPy>();
 
@@ -190,9 +190,9 @@ BOOST_PYTHON_MODULE(ariadne)
 
   //export_polynomial_variable<FloatPy>();
   export_flow_model<FloatPy>();
-  //export_taylor_series<Rational>();
-  //export_taylor_variable<Rational>();
-  //export_taylor_derivative<Rational>();
+  //export_power_series<Rational>();
+  //export_differential<Rational>();
+  //export_differential_vector<Rational>();
 
   export_point<Rational>();
   export_segment<Rational>();

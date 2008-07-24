@@ -34,16 +34,16 @@ namespace Ariadne {
    
 
   
-    template<class X> class TaylorSeries;
+    template<class X> class PowerSeries;
 
     template<class X> 
     class ArithmeticSeries
     {
      public:
       /*! \brief Construct the Taylor series of the reciprocal function. */
-      static TaylorSeries<X> rec(smoothness_type d, const X& c); 
+      static PowerSeries<X> rec(smoothness_type d, const X& c); 
       /*! \brief Construct the Taylor series of the \a n<sup>th</sup> power function. */
-      static TaylorSeries<X> pow(smoothness_type d, const X& c, const uint& k); 
+      static PowerSeries<X> pow(smoothness_type d, const X& c, const uint& k); 
     };
 
     template<class X> 
@@ -51,23 +51,23 @@ namespace Ariadne {
     {
      public:
       /*! \brief Construct the Taylor series of the square-root function. */
-      static TaylorSeries<X> sqrt(smoothness_type d, const X& c); 
+      static PowerSeries<X> sqrt(smoothness_type d, const X& c); 
       /*! \brief Construct the Taylor series of the exponential function. */
-      static TaylorSeries<X> exp(smoothness_type d, const X& c); 
+      static PowerSeries<X> exp(smoothness_type d, const X& c); 
       /*! \brief Construct the Taylor series of the logarithm function. */
-      static TaylorSeries<X> log(smoothness_type d, const X& c); 
+      static PowerSeries<X> log(smoothness_type d, const X& c); 
       /*! \brief Construct the Taylor series of the sine function. */
-      static TaylorSeries<X> sin(smoothness_type d, const X& c); 
+      static PowerSeries<X> sin(smoothness_type d, const X& c); 
       /*! \brief Construct the Taylor series of the cosine function. */
-      static TaylorSeries<X> cos(smoothness_type d, const X& c); 
+      static PowerSeries<X> cos(smoothness_type d, const X& c); 
       /*! \brief Construct the Taylor series of the tangent function. */
-      static TaylorSeries<X> tan(smoothness_type d, const X& c); 
+      static PowerSeries<X> tan(smoothness_type d, const X& c); 
       /*! \brief Construct the Taylor series of the inverse sine function. */
-      static TaylorSeries<X> asin(smoothness_type d, const X& c); 
+      static PowerSeries<X> asin(smoothness_type d, const X& c); 
       /*! \brief Construct the Taylor series of the inversecosine function. */
-      static TaylorSeries<X> acos(smoothness_type d, const X& c); 
+      static PowerSeries<X> acos(smoothness_type d, const X& c); 
       /*! \brief Construct the Taylor series of the inversetangent function. */
-      static TaylorSeries<X> atan(smoothness_type d, const X& c); 
+      static PowerSeries<X> atan(smoothness_type d, const X& c); 
     };
 
 

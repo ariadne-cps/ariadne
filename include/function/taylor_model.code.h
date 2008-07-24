@@ -44,7 +44,7 @@
 #include "differentiation/sorted_index.h"
 #include "differentiation/multi_index.h"
 
-#include "differentiation/taylor_derivative.h"
+#include "differentiation/differential_vector.h"
 
 #include "evaluation/newton_solver.h"
 
@@ -59,13 +59,13 @@ struct TaylorModel<R>::Data
 {
   Data() { }
   Data(const Vector<I>& d, const Vector<R>& c, 
-       const TaylorDerivative<I>& ce, const TaylorDerivative<I>& de)
+       const DifferentialVector<I>& ce, const DifferentialVector<I>& de)
     : _domain(d), _centre(c), _centre_derivatives(ce), _domain_derivatives(de) { }
 
   Vector<I> _domain;
   Vector<R> _centre;
-  TaylorDerivative<I> _centre_derivatives;
-  TaylorDerivative<I> _domain_derivatives;
+  DifferentialVector<I> _centre_derivatives;
+  DifferentialVector<I> _domain_derivatives;
 };
 
 
@@ -78,14 +78,14 @@ TaylorModel<R>::TaylorModel()
 template<class R>
 TaylorModel<R>::TaylorModel(size_type rs, size_type as, smoothness_type o, smoothness_type s) 
   : _data(new Data(Vector<I>(as,I(-inf<R>(),+inf<R>())),Vector<R>(as),
-                   TaylorDerivative<I>(rs,as,o),TaylorDerivative<I>(rs,as,o)))
+                   DifferentialVector<I>(rs,as,o),DifferentialVector<I>(rs,as,o)))
 {
 }
 
 
 template<class R>
 TaylorModel<R>::TaylorModel(const Vector<I>& d, const Vector<R>& c,
-                            const TaylorDerivative<I>& ce, const TaylorDerivative<I>& de)
+                            const DifferentialVector<I>& ce, const DifferentialVector<I>& de)
   : _data(new Data(d,c,ce,de)) 
 {
 }
@@ -182,14 +182,14 @@ TaylorModel<R>::range() const
 
 
 template<class R>
-const TaylorDerivative<typename TaylorModel<R>::I>&
+const DifferentialVector<typename TaylorModel<R>::I>&
 TaylorModel<R>::centre_derivatives() const
 { 
   return this->_data->_centre_derivatives; 
 }
 
 template<class R>
-const TaylorDerivative<typename TaylorModel<R>::I>&
+const DifferentialVector<typename TaylorModel<R>::I>&
 TaylorModel<R>::domain_derivatives() const
 { 
   return this->_data->_domain_derivatives; 
@@ -254,11 +254,11 @@ recentre(const TaylorModel<R>& model, const Vector< Interval<R> >& domain, const
   ARIADNE_ASSERT(encloses(domain,centre));
   typedef Interval<R> I;
 
-  TaylorDerivative<I> translation=TaylorDerivative<I>::variable(model.argument_size(),model.argument_size(),model.order(),centre);
+  DifferentialVector<I> translation=DifferentialVector<I>::variable(model.argument_size(),model.argument_size(),model.order(),centre);
   
   //FIXME: This is incorrect...
-  TaylorDerivative<I> new_centre_derivatives=translate(model.centre_derivatives(),centre-model.centre());
-  TaylorDerivative<I> new_domain_derivatives=translate(model.domain_derivatives(),centre-model.centre());
+  DifferentialVector<I> new_centre_derivatives=translate(model.centre_derivatives(),centre-model.centre());
+  DifferentialVector<I> new_domain_derivatives=translate(model.domain_derivatives(),centre-model.centre());
 
   return TaylorModel<R>(domain,centre,new_centre_derivatives,new_domain_derivatives);
 }
@@ -284,8 +284,8 @@ template<class R>
 Vector<typename TaylorModel<R>::I> 
 TaylorModel<R>::evaluate(const Vector<I>& x) const
 {
-  TaylorDerivative<I> const& centre_derivatives=this->_data->_centre_derivatives;
-  TaylorDerivative<I> const& domain_derivatives=this->_data->_domain_derivatives;
+  DifferentialVector<I> const& centre_derivatives=this->_data->_centre_derivatives;
+  DifferentialVector<I> const& domain_derivatives=this->_data->_domain_derivatives;
 
   if(this->argument_size()!=x.size()) {
     ARIADNE_THROW(IncompatibleSizes,"TaylorModel::evaluate(Vector)","Incompatible argument size");
@@ -448,8 +448,8 @@ compose(const TaylorModel<R>& p2, const TaylorModel<R>& p1)
   ARIADNE_ASSERT(refines(p1.range(),p2.domain()));
   Vector<I> new_domain=p1.domain();
   Vector<R> new_centre=p1.centre();
-  TaylorDerivative<I> new_centre_derivatives=compose(p1.centre_derivatives(),p2.centre_derivatives());
-  TaylorDerivative<I> new_domain_derivatives=compose(p1.domain_derivatives(),p2.domain_derivatives());
+  DifferentialVector<I> new_centre_derivatives=compose(p1.centre_derivatives(),p2.centre_derivatives());
+  DifferentialVector<I> new_domain_derivatives=compose(p1.domain_derivatives(),p2.domain_derivatives());
 
   return TaylorModel<R>(new_domain,new_centre,new_centre_derivatives,new_domain_derivatives);
 }
@@ -570,8 +570,8 @@ template<class R>
 Matrix<typename TaylorModel<R>::I> 
 TaylorModel<R>::jacobian(const Vector<I>& x) const
 {
-  TaylorDerivative<I> const& centre_derivatives=this->_data->_centre_derivatives;
-  TaylorDerivative<I> const& domain_derivatives=this->_data->_domain_derivatives;
+  DifferentialVector<I> const& centre_derivatives=this->_data->_centre_derivatives;
+  DifferentialVector<I> const& domain_derivatives=this->_data->_domain_derivatives;
 
   Matrix<I> J(this->result_size(),this->argument_size());
   Vector<I> w=x-this->centre();

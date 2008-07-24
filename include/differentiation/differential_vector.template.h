@@ -1,8 +1,8 @@
 /***************************************************************************
- *            taylor_derivative.template.h
+ *            differential_vector.template.h
  *
- *  Copyright 2007  Alberto Casagrande, Pieter Collins
- *  Email casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright 2007  Pieter Collins
+ *  
  ****************************************************************************/
 
 /*
@@ -27,10 +27,10 @@
 namespace Ariadne {
 
 template<class X> template<class V> inline
-TaylorDerivative<X> 
-TaylorDerivative<X>::constant(size_type r, size_type a, smoothness_type d, const V& c) 
+DifferentialVector<X> 
+DifferentialVector<X>::constant(size_type r, size_type a, smoothness_type d, const V& c) 
 {
-  TaylorDerivative<X> result(r,a,d);
+  DifferentialVector<X> result(r,a,d);
   ARIADNE_ASSERT(c.size()==r);
   for(size_type i=0; i!=r; ++i) {
     result._variables[i].value()=c[i];
@@ -39,12 +39,12 @@ TaylorDerivative<X>::constant(size_type r, size_type a, smoothness_type d, const
 }
 
 template<class X> template<class V> inline
-TaylorDerivative<X> 
-TaylorDerivative<X>::variable(size_type r, size_type a, smoothness_type d, const V& x) 
+DifferentialVector<X> 
+DifferentialVector<X>::variable(size_type r, size_type a, smoothness_type d, const V& x) 
 {
   ARIADNE_ASSERT(a==r);
   ARIADNE_ASSERT(x.size()==r);
-  TaylorDerivative<X> result(r,a,d);
+  DifferentialVector<X> result(r,a,d);
   //size_type inc=compute_polynomial_data_size(1u,a,d);
   for(size_type i=0; i!=r; ++i) {
     result._variables[i].value()=x[i];
@@ -54,10 +54,10 @@ TaylorDerivative<X>::variable(size_type r, size_type a, smoothness_type d, const
 }
 
 template<class X> template<class V> inline
-TaylorDerivative<X> 
-TaylorDerivative<X>::variable(const V& x, smoothness_type d) 
+DifferentialVector<X> 
+DifferentialVector<X>::variable(const V& x, smoothness_type d) 
 {
-  TaylorDerivative<X> result(x.size(),x.size(),d);
+  DifferentialVector<X> result(x.size(),x.size(),d);
   //size_type inc=compute_polynomial_data_size(1u,a,d);
   for(size_type i=0; i!=x.size(); ++i) {
     result._variables[i].value()=x[i];
@@ -123,7 +123,7 @@ evaluate_polynomial(M& r, const P& p, const M& x)
 
 template<class X, class R> 
 array<R>
-evaluate(const TaylorDerivative<X>& y, const array<R>& x)
+evaluate(const DifferentialVector<X>& y, const array<R>& x)
 {
   using namespace std;
   ARIADNE_ASSERT(y.argument_size()==x.size());

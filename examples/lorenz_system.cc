@@ -72,6 +72,7 @@ lorenz_attractor()
   evolution_parameters.set_grid_length(grid_length);
   evolution_parameters.set_lock_to_grid_time(0.25);
   evolution_parameters.set_maximum_step_size(0.25);
+  //evolution_parameters.set_bounding_domain_size(1.0);
   
   StandardIntegrator<ES> integrator;
   StandardSubdivider<ES> subdivider;

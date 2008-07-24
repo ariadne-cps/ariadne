@@ -1,5 +1,5 @@
 /***************************************************************************
- *            taylor_variable.code.h
+ *            differential.code.h
  *
  *  Copyright 2007  Pieter Collins
  *
@@ -23,7 +23,7 @@
  
 #include "linear_algebra/vector.h"
 #include "differentiation/multi_index.h"
-#include "differentiation/taylor_series.h"
+#include "differentiation/power_series.h"
 
 namespace Ariadne {
 
@@ -31,20 +31,20 @@ namespace {
 
 template<class X>
 void 
-compute_composition(TaylorVariable<X>& z, 
-                    const TaylorSeries<X>& y, 
-                    const TaylorVariable<X>& x)
+compute_composition(Differential<X>& z, 
+                    const PowerSeries<X>& y, 
+                    const Differential<X>& x)
 {
   
   size_type as=x.argument_size();
   size_type d=z.degree();
 
-  TaylorVariable<X> w=x;
+  Differential<X> w=x;
   w.value()=0;
-  TaylorVariable<X> t(as,d);
+  Differential<X> t(as,d);
   t.value()=y.data()[d];
   for(uint n=1; n<=d; ++n) {
-    TaylorVariable<X> u(as,d);
+    Differential<X> u(as,d);
     acc(u,t,w);
     t=u+y.data()[d-n];
   }
@@ -58,13 +58,13 @@ compute_composition(TaylorVariable<X>& z,
 
 
 template<class X> 
-TaylorVariable<X>::TaylorVariable()
+Differential<X>::Differential()
   : _argument_size(1), _degree(0), _data(1u,X(0)) 
 {
 }
 
 template<class X> 
-TaylorVariable<X>::TaylorVariable(size_type a, smoothness_type d)
+Differential<X>::Differential(size_type a, smoothness_type d)
   : _argument_size(a), _degree(d), _data(compute_polynomial_data_size(a,d),X(0))
 {
 }
@@ -73,49 +73,49 @@ TaylorVariable<X>::TaylorVariable(size_type a, smoothness_type d)
 
 template<class X> 
 size_type 
-TaylorVariable<X>::argument_size() const 
+Differential<X>::argument_size() const 
 { 
   return this->_argument_size;
 }
 
 template<class X> 
 smoothness_type 
-TaylorVariable<X>::degree() const 
+Differential<X>::degree() const 
 { 
   return this->_degree;
 }
 
 template<class X> 
 const X&
-TaylorVariable<X>::value() const 
+Differential<X>::value() const 
 { 
   return this->_data[0];
 }
 
 template<class X> 
 X&
-TaylorVariable<X>::value()  
+Differential<X>::value()  
 { 
   return this->_data[0];
 }
 
 template<class X> 
 const X&
-TaylorVariable<X>::gradient(size_type j) const 
+Differential<X>::gradient(size_type j) const 
 { 
   return this->_data[j+1u];
 }
 
 template<class X> 
 array<X>& 
-TaylorVariable<X>::data()
+Differential<X>::data()
 {
   return this->_data; 
 }
 
 template<class X> 
 const array<X>& 
-TaylorVariable<X>::data() const 
+Differential<X>::data() const 
 {
   return this->_data; 
 }
@@ -123,28 +123,28 @@ TaylorVariable<X>::data() const
 
 template<class X> 
 X& 
-TaylorVariable<X>::operator[](const MultiIndex& a) 
+Differential<X>::operator[](const MultiIndex& a) 
 { 
   return this->_data[a.position()]; 
 }
 
 template<class X> 
 const X& 
-TaylorVariable<X>::operator[](const MultiIndex& a) const 
+Differential<X>::operator[](const MultiIndex& a) const 
 { 
   return this->_data[a.position()]; 
 }
 
 template<class X> 
 bool
-operator<(const TaylorVariable<X>& x1, const TaylorVariable<X>& x2)
+operator<(const Differential<X>& x1, const Differential<X>& x2)
 {
   return x1.value() < x2.value();
 }
 
 template<class X> 
-TaylorVariable<X>&
-acc(TaylorVariable<X>& r, const TaylorVariable<X>& x1, const TaylorVariable<X>& x2)
+Differential<X>&
+acc(Differential<X>& r, const Differential<X>& x1, const Differential<X>& x2)
 {
   ARIADNE_ASSERT(r.argument_size()==x1.argument_size());
   ARIADNE_ASSERT(r.argument_size()==x2.argument_size());
@@ -158,8 +158,8 @@ acc(TaylorVariable<X>& r, const TaylorVariable<X>& x1, const TaylorVariable<X>& 
 }
 
 template<class X> 
-TaylorVariable<X>&
-acc(TaylorVariable<X>& r, const X& c, const TaylorVariable<X>& x)
+Differential<X>&
+acc(Differential<X>& r, const X& c, const Differential<X>& x)
 {
   ARIADNE_ASSERT(r.argument_size()==x.argument_size());
   size_type n=std::max(r.data().size(),x.data().size());
@@ -171,8 +171,8 @@ acc(TaylorVariable<X>& r, const X& c, const TaylorVariable<X>& x)
 
 
 template<class X> 
-TaylorVariable<X>&
-TaylorVariable<X>::assign(const TaylorVariable<X>& x)
+Differential<X>&
+Differential<X>::assign(const Differential<X>& x)
 {
   ARIADNE_ASSERT(this->argument_size()==x.argument_size());
   ARIADNE_ASSERT(this->degree()>=x.degree());
@@ -184,8 +184,8 @@ TaylorVariable<X>::assign(const TaylorVariable<X>& x)
 
 
 template<class X> 
-TaylorVariable<X>&
-operator+=(TaylorVariable<X>& r, const TaylorVariable<X>& x)
+Differential<X>&
+operator+=(Differential<X>& r, const Differential<X>& x)
 {
   ARIADNE_ASSERT(r.argument_size()==x.argument_size());
   ARIADNE_ASSERT(r.degree()==x.degree());
@@ -215,32 +215,32 @@ operator+=(TaylorVariable<X>& r, const TaylorVariable<X>& x)
 
 
 template<class X> 
-TaylorVariable<X> 
-compose(const TaylorVariable<X>& y, const TaylorVariable<X>& x)
+Differential<X> 
+compose(const Differential<X>& y, const Differential<X>& x)
 {
   assert(y.argument_size()==1);
-  TaylorSeries<X> t(y.degree(),y.data().begin());
-  TaylorVariable<X> z(x.argument_size(),std::min(x.degree(),t.degree()));
+  PowerSeries<X> t(y.degree(),y.data().begin());
+  Differential<X> z(x.argument_size(),std::min(x.degree(),t.degree()));
   compute_composition(z,t,x);
   return z;
 }
 
 template<class X> 
-TaylorVariable<X> 
-compose(const TaylorSeries<X>& y, const TaylorVariable<X>& x)
+Differential<X> 
+compose(const PowerSeries<X>& y, const Differential<X>& x)
 {
-  TaylorVariable<X> z(x.argument_size(),std::min(x.degree(),y.degree()));
+  Differential<X> z(x.argument_size(),std::min(x.degree(),y.degree()));
   compute_composition(z,y,x);
   return z;
 }
 
 template<class X>
-TaylorVariable<X> 
-embed(const TaylorVariable<X>& x, 
+Differential<X> 
+embed(const Differential<X>& x, 
       uint size, uint start)
 {  
   assert(start+x.argument_size()<=size);
-  TaylorVariable<X> r(size,x.degree());
+  Differential<X> r(size,x.degree());
   MultiIndex jr(size);
   for(MultiIndex jx(x.argument_size()); jx.degree()<=x.degree(); ++jx)
   {
@@ -254,10 +254,10 @@ embed(const TaylorVariable<X>& x,
 
 
 template<class X> 
-TaylorVariable<X> 
-derivative(const TaylorVariable<X>& x, size_type k)
+Differential<X> 
+derivative(const Differential<X>& x, size_type k)
 {
-  TaylorVariable<X> r(x.argument_size(),x.degree()-1);
+  Differential<X> r(x.argument_size(),x.degree()-1);
   MultiIndex e(x.argument_size());
   e.set(k,1);
   for(MultiIndex j(r.argument_size()); j.degree() <= r.degree(); ++j) {
@@ -268,10 +268,10 @@ derivative(const TaylorVariable<X>& x, size_type k)
 
 
 template<class X> 
-TaylorVariable<X> 
-antiderivative(const TaylorVariable<X>& x, size_type k)
+Differential<X> 
+antiderivative(const Differential<X>& x, size_type k)
 {
-  TaylorVariable<X> r(x.argument_size(),x.degree()+1);
+  Differential<X> r(x.argument_size(),x.degree()+1);
   MultiIndex e(x.argument_size());
   e.set(k,1);
   for(MultiIndex j(r.argument_size()); j.degree() <= x.degree(); ++j) {
@@ -285,11 +285,11 @@ antiderivative(const TaylorVariable<X>& x, size_type k)
 
 
 template<class X> 
-TaylorVariable<X> 
-reduce(const TaylorVariable<X>& x, const size_type& d)
+Differential<X> 
+reduce(const Differential<X>& x, const size_type& d)
 {
   assert(x.degree()>=d);
-  TaylorVariable<X> r(x.argument_size(),d);
+  Differential<X> r(x.argument_size(),d);
   for(MultiIndex i(x.argument_size()); i.degree() <= x.degree(); ++i) {
     r[i]=x[i];
   }
@@ -304,9 +304,9 @@ reduce(const TaylorVariable<X>& x, const size_type& d)
 
 template<class X> 
 std::ostream& 
-operator<<(std::ostream& os, const TaylorVariable<X>& x) {
-  //  return os << "TaylorVariable( argument_size=" << x.argument_size() << ", degree=" << x.degree() << ", data=" << x.data() << ")";
-  //os << "TaylorVariable(";
+operator<<(std::ostream& os, const Differential<X>& x) {
+  //  return os << "Differential( argument_size=" << x.argument_size() << ", degree=" << x.degree() << ", data=" << x.data() << ")";
+  //os << "Differential(";
   os << "V";
   size_type degree=0;
   for(MultiIndex i(x.argument_size()); i.degree()<=x.degree(); ++i) {
@@ -324,19 +324,19 @@ operator<<(std::ostream& os, const TaylorVariable<X>& x) {
   //os << ")";
   return os;
 
-//  return os << "TaylorVariable( argument_size=" << x.argument_size() << ", degree=" << x.degree() << ", data=" << x.data() << ")";
+//  return os << "Differential( argument_size=" << x.argument_size() << ", degree=" << x.degree() << ", data=" << x.data() << ")";
 }
 
 
 template<class X> 
 void
-TaylorVariable<X>::instantiate() 
+Differential<X>::instantiate() 
 {
   const int* n=0;
   X* x=0;
   Vector<X>* v=0;
-  TaylorSeries<X>* ts=0;
-  TaylorVariable<X>* tv=0;
+  PowerSeries<X>* ts=0;
+  Differential<X>* tv=0;
   std::ostream* os = 0;
 
   acc(*tv,*x,*tv);

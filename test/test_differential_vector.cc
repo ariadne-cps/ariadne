@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_taylor_derivative.cc
+ *            test_differential_vector.cc
  *
  *  Copyright  2007  Alberto Casagrande, Pieter Collins
  *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
@@ -31,9 +31,9 @@
 #include "test_float.h"
 #include "numeric/rational.h"
 #include "linear_algebra/vector.h"
-#include "differentiation/taylor_series.h"
-#include "differentiation/taylor_variable.h"
-#include "differentiation/taylor_derivative.h"
+#include "differentiation/power_series.h"
+#include "differentiation/differential.h"
+#include "differentiation/differential_vector.h"
 
 #include "test.h"
 
@@ -41,17 +41,17 @@ using namespace Ariadne;
 using namespace std;
 
 template<class X>
-class TestTaylorDerivative {
+class TestDifferentialVector {
  private:
-  TaylorDerivative<X> x1,x2,x3;
+  DifferentialVector<X> x1,x2,x3;
  public:
-  TestTaylorDerivative() {
+  TestDifferentialVector() {
     double a1[15]={ 2.0, 1.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
     double a2[15]={ 3.0, 1.0, 0.0, 0.25, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
     double a3[15]={ 2.0, 1.0, 0.0, 0.125, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-    x1=TaylorDerivative<X>(1,2,4,a1);
-    x2=TaylorDerivative<X>(1,2,4,a2);
-    x3=TaylorDerivative<X>(1,1,4,a3);
+    x1=DifferentialVector<X>(1,2,4,a1);
+    x2=DifferentialVector<X>(1,2,4,a2);
+    x3=DifferentialVector<X>(1,1,4,a3);
     
     ARIADNE_TEST_CALL(test_degree());
     ARIADNE_TEST_CALL(test_add());
@@ -69,19 +69,19 @@ class TestTaylorDerivative {
 
   void test_add() {
     cout << x1 << "+" << x2 << " = " << x1+x2 << std::endl;
-    //assert((x1+x2)==TaylorDerivative<X>("[3,2,0,0]"));
+    //assert((x1+x2)==DifferentialVector<X>("[3,2,0,0]"));
   }
 
   void test_sub() {
     cout << x1 << "-" << x2 << " = " << x1-x2 << std::endl;
-    //assert((x1-x2)==TaylorDerivative<X>("[-1,0,0,0]"));
+    //assert((x1-x2)==DifferentialVector<X>("[-1,0,0,0]"));
   }
 
   void test_mul() {
     X c=2;
     cout << x1 << "*" << c << " = " << x1*c << std::endl;
     cout << c << "*" << x1 << " = " << c*x1 << std::endl;
-    //assert((x1*x2)==TaylorDerivative<X>("[2,3,2,0]"));
+    //assert((x1*x2)==DifferentialVector<X>("[2,3,2,0]"));
   }
 
   void test_div() {
@@ -94,9 +94,9 @@ class TestTaylorDerivative {
     double ax[10] = { 3.0, 1.0, 0.0, 0.0, 0.125, 0.25, 0.0, 0.0, 0.0, 0.0 };
     double ay[4] = { 1.0, -1.0, 0.5, -0.25 };
     double aid[4] = { ax[0], 1.0, 0.0, 0.0 };
-    TaylorDerivative<X> x(1,2,3,ax);
-    TaylorVariable<X> y(1,3,ay);
-    TaylorDerivative<X> id(1,1,3,aid);
+    DifferentialVector<X> x(1,2,3,ax);
+    Differential<X> y(1,3,ay);
+    DifferentialVector<X> id(1,1,3,aid);
     cout << "x=" << x << endl;
     cout << "y=" << y << endl;
     cout << "compose(y,x)=" << compose(y,x) << endl;
@@ -108,8 +108,8 @@ class TestTaylorDerivative {
   void test_inverse() {
     double ax[12]={ 0.0, 2.0, 1.0, 3.0, 4.0, 5.0,   0.0, 1.0, 1.0, 2.0, 3.0, 4.0 };
     Vector<X> c(2);
-    TaylorDerivative<X> id=TaylorDerivative<X>::variable(2,2,2,c);
-    TaylorDerivative<X> x(2,2,2,ax);
+    DifferentialVector<X> id=DifferentialVector<X>::variable(2,2,2,c);
+    DifferentialVector<X> x(2,2,2,ax);
     ARIADNE_TEST_PRINT(c);
     ARIADNE_TEST_PRINT(x);
     ARIADNE_TEST_PRINT(inverse(x,c));
@@ -122,24 +122,24 @@ class TestTaylorDerivative {
     double ax[30]={ 0.0,  2.0,1.0,3.0,1.0, 4.0,5.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
                     0.0,  1.0,1.0,2.0,1.0, 3.0,4.0,0.0,6.0,0.0,7.0,0.0,0.0,0.0,0.0 };
     Vector<X> c(2);
-    TaylorDerivative<X> id1=TaylorDerivative<X>::variable(1,1,2,Vector<X>(1));
-    TaylorDerivative<X> id2=TaylorDerivative<X>::variable(2,2,2,Vector<X>(2));
-    TaylorDerivative<X> id3=TaylorDerivative<X>::variable(3,3,2,Vector<X>(3));
+    DifferentialVector<X> id1=DifferentialVector<X>::variable(1,1,2,Vector<X>(1));
+    DifferentialVector<X> id2=DifferentialVector<X>::variable(2,2,2,Vector<X>(2));
+    DifferentialVector<X> id3=DifferentialVector<X>::variable(3,3,2,Vector<X>(3));
     ARIADNE_TEST_PRINT(id3);
-    TaylorDerivative<X> x(2,4,2,ax);
+    DifferentialVector<X> x(2,4,2,ax);
     ARIADNE_TEST_PRINT(x);
     ARIADNE_TEST_PRINT(implicit(x,c));
-    TaylorDerivative<X> y=implicit(x,c);
-    TaylorDerivative<X> z=concatenate(TaylorDerivative<X>::variable(2,2,2,Vector<X>(2)),y);
+    DifferentialVector<X> y=implicit(x,c);
+    DifferentialVector<X> z=concatenate(DifferentialVector<X>::variable(2,2,2,Vector<X>(2)),y);
     ARIADNE_TEST_PRINT(z);
-    ARIADNE_TEST_EQUAL(compose(x,z),TaylorDerivative<X>::constant(2,2,2,Vector<X>(2)));
+    ARIADNE_TEST_EQUAL(compose(x,z),DifferentialVector<X>::constant(2,2,2,Vector<X>(2)));
     
   }
 };
 
 
 int main() {
-  TestTaylorDerivative<Rational> t1;
+  TestDifferentialVector<Rational> t1;
   cout << "INCOMPLETE " << flush;
   return ARIADNE_TEST_FAILURES;
 }

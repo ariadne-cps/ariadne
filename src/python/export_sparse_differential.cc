@@ -27,8 +27,9 @@
 #include "numeric/rational.h"
 #include "numeric/interval.h"
 #include "differentiation/multi_index.h"
+#include "differentiation/differential.h"
 #include "differentiation/sparse_differential.h"
-#include "differentiation/taylor_variable.h"
+#include "differentiation/sparse_differential_vector.h"
 
 #include "python/utilities.h"
 #include "python/read_array.h"
@@ -130,7 +131,7 @@ template<class R>
 void export_sparse_differential()
 {
   typedef typename traits<R>::approximate_arithmetic_type A;
-  typedef TaylorSeries<A> TS;
+  typedef PowerSeries<A> TS;
   typedef SparseDifferential<A> SD;
 
 

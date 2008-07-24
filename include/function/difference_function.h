@@ -35,8 +35,8 @@
 #include "linear_algebra/declarations.h"
 #include "linear_algebra/vector.h"
 
-#include "differentiation/taylor_derivative.h"
-#include "differentiation/sparse_differential.h"
+#include "differentiation/differential_vector.h"
+#include "differentiation/sparse_differential_vector.h"
 #include "function/function_interface.h"
 
 
@@ -69,7 +69,7 @@ template<class R> class DifferenceFunction
   /*!\brief Evaluate the derivative of function \f$f(x)-x\f$, which is \f$Df(x)-I\f$. */
   virtual Matrix<F> jacobian(const Vector<F>& p) const;
   /*!\brief Evaluate the derivative of function \f$f(x)-x\f$, which is \f$Df(x)-I\f$. */
-  virtual TaylorDerivative<F> derivative(const Vector<F>& p, const smoothness_type& s) const;
+  virtual DifferentialVector<F> derivative(const Vector<F>& p, const smoothness_type& s) const;
   /*!\brief Evaluate the derivative of function \f$f(x)-x\f$, which is \f$Df(x)-I\f$. */
   virtual SparseDifferentialVector<A> expansion(const Vector<A>& p, const smoothness_type& s) const;
   /*!\brief The name of the class. */
@@ -148,7 +148,7 @@ DifferenceFunction<R>::jacobian(const Vector<F>& p) const
 
 template<class R> 
 inline
-TaylorDerivative<typename DifferenceFunction<R>::F>
+DifferentialVector<typename DifferenceFunction<R>::F>
 DifferenceFunction<R>::derivative(const Vector<F>& p, const smoothness_type& s) const 
 {
   throw NotImplemented(__PRETTY_FUNCTION__);

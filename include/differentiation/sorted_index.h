@@ -1,8 +1,8 @@
 /***************************************************************************
  *            sorted_index.h
  *
- *  Copyright  2006  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it Pieter.Collins@cwi.nl
+ *  Copyright  2006  Pieter Collins
+ *  
  ****************************************************************************/
 
 /*

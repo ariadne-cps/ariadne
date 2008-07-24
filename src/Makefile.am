@@ -39,9 +39,8 @@ COMBINATORIC_SRC = \
 
 DIFFERENTIATION_SRC = \
 	differentiation/affine_variable.cc \
-	differentiation/taylor_series.cc \
-	differentiation/taylor_variable.cc \
-	differentiation/taylor_derivative.cc \
+	differentiation/power_series.cc \
+	differentiation/differential.cc \
 	differentiation/sparse_differential.cc
 
 FUNCTION_SRC = \

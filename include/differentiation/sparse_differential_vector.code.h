@@ -1,8 +1,8 @@
 /***************************************************************************
- *            taylor_series.template.h
+ *            sparse_differential_vector.code.h
  *
- *  Copyright 2007  Pieter Collins
- *  
+ *  Copyright 2008  Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -21,9 +21,5 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-
-namespace Ariadne {
-
-
-
-}
+ 
+#include "sparse_differential_vector.h"

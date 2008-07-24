@@ -1,8 +1,8 @@
 /***************************************************************************
- *            taylor_variable.cc
+ *            power_series.template.h
  *
- *  Copyright  2007  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
+ *  Copyright 2007  Pieter Collins
+ *  
  ****************************************************************************/
 
 /*
@@ -20,26 +20,10 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-
-#include "numeric/rational.h"
-#include "numeric/float.h"
-#include "numeric/interval.h"
-
-#include "differentiation/taylor_variable.h"
-#include "differentiation/taylor_variable.code.h"
+ 
 
 namespace Ariadne {
-    
-    
-    template class TaylorVariable<Rational>;
 
-#ifdef ENABLE_FLOAT64
-    template class TaylorVariable<Interval64>;
-#endif
-    
-#ifdef ENABLE_FLOATMP
-    template class TaylorVariable<IntervalMP>;
-#endif
 
-  
-} // namespace Ariadne
+
+}

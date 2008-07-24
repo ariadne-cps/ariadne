@@ -32,9 +32,8 @@
 #include "linear_algebra/covector.h"
 #include "linear_algebra/matrix.h"
 
-#include "differentiation/taylor_variable.h"
-#include "differentiation/taylor_derivative.h"
-#include "differentiation/sparse_differential.h"
+#include "differentiation/differential_vector.h"
+#include "differentiation/sparse_differential_vector.h"
 
 #define ARIADNE_BUILD_FUNCTION(Nm,f,rs,as,np,sm)   \
   template<class R> \
@@ -55,15 +54,15 @@
     virtual Matrix<X> jacobian(const Vector<X>& x) const { \
       Matrix<X> r(rs,as); \
       const Vector<X>& p=this->_p; \
-      TaylorDerivative<X> dr(as,as,1u); \
-      TaylorDerivative<X> dx=TaylorDerivative<X>::variable(x,1u); \
+      DifferentialVector<X> dr(as,as,1u); \
+      DifferentialVector<X> dx=DifferentialVector<X>::variable(x,1u); \
       f(dr,dx,p); \
       return dr.jacobian(); \
     } \
-    virtual TaylorDerivative<X> derivative(const Vector<X>& x, const smoothness_type& s) const { \
+    virtual DifferentialVector<X> derivative(const Vector<X>& x, const smoothness_type& s) const { \
       const Vector<X>& p=this->_p; \
-      TaylorDerivative<X> dx=TaylorDerivative<X>::variable(x,s); \
-      TaylorDerivative<X> dr(rs,as,s); \
+      DifferentialVector<X> dx=DifferentialVector<X>::variable(x,s); \
+      DifferentialVector<X> dr(rs,as,s); \
       f(dr,dx,p);      \
       return dr; \
     } \

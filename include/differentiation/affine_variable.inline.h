@@ -2,7 +2,7 @@
  *            affine_variable.inline.h
  *
  *  Copyright  2007  Pieter Collins
- *  Pieter.Collins@cwi.nl
+ *  
  ****************************************************************************/
 
 /*

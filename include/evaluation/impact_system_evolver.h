@@ -112,6 +112,7 @@ namespace Ariadne {
       ATM _reachability_step(const ATM& flow_model, const ATM& initial_set_model, const A& initial_time, const A& final_time) const;
       ATM _reachability_step(const ATM& flow_model, const ATM& initial_set_model, const A& initial_time, const ATM& final_time_model) const;
       ATM _reachability_step(const ATM& flow_model, const ATM& initial_set_model, const ATM& initial_time_model, const ATM& final_time_model) const;
+      ATM _reachability_time(const ATM& initial_time_model, const A& start_time, const A& finish_time) const;
 
       tribool _active(const ATM& guard_model, const ATM& _set_model) const;
       tribool _active(const FN& guard_function, const ATM& _set_model) const;

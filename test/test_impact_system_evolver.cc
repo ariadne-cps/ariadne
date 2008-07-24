@@ -35,34 +35,38 @@
 
 using namespace Ariadne;
 
+const uint LOGGING_VERBOSITY = 4;
+
 int main() {
   typedef Float64 R;
   typedef ApproximateFloat64 A;
 
+
+  Rational time=1.0;
+  Integer steps=4;
+
   EvolutionParameters<R> evolution_parameters;
   evolution_parameters.set_maximum_step_size(0.25);
+  evolution_parameters.set_maximum_enclosure_radius(0.1875);
+  evolution_parameters.set_maximum_enclosure_radius(0.125);
   Evolver<ImpactSystem<R>,Zonotope<R> > evolver(evolution_parameters);
+  evolver.verbosity=LOGGING_VERBOSITY;
   std::cout << "evolver = " << evolver << std::endl;
 
-  evolver.verbosity=5;
-
   FunctionInterface<R>* dynamic=new AffineFunction<R>(Vector<R>("[1,0]"),Matrix<R>("[0.0,0.0;-1.0,0.0]"));
-  FunctionInterface<R>* reset=new AffineFunction<R>(Vector<R>("[-2,-1.0]"),Matrix<R>("[0.9,0;0,0.9]"));
+  FunctionInterface<R>* reset=new AffineFunction<R>(Vector<R>("[-2.0,-1.0]"),Matrix<R>("[0.9,0;0,0.9]"));
   FunctionInterface<R>* guard=new AffineFunction<R>(Vector<R>("[-1]"),Matrix<R>("[0,1]"));
 
   ImpactSystem<R> impact_oscillator(*dynamic,*guard,*reset);
 
-  Box<R> initial_box("[-1.03,-1.01]x[0.49,0.51]"); // initial state
-  //Box<R> initial_box("[-1.11,-1.09]x[0.49,0.51]"); // initial state
-  //Box<R> initial_box("[-1.21,-1.19]x[0.49,0.51]"); // initial state
-  //Box<R> initial_box("[-1.51,-1.49]x[0.49,0.51]"); // initial state
-  //Box<R> initial_box("[-1.81,-1.79]x[0.49,0.51]"); // initial state
-  //Box<R> initial_box("[-1.83,-1.81]x[0.49,0.51]"); // initial state
-  //Box<R> initial_box("[-1.86,-1.84]x[0.49,0.51]"); // initial state
-  Zonotope<R> initial_set(initial_box);
-  Rational time=1.5;
-  Integer steps=4;
+  Box<R> initial_box;
+  initial_box=Box<R>("[-1.03,-1.01]x[0.49,0.51]"); time=1.25; // Use this box for grazing
+  //initial_box=Box<R>("[-1.05,-1.03]x[0.49,0.51]"); // Use this box for non-transverse crossing
+  //initial_box=Box<R>("[-1.09,-1.07]x[0.49,0.51]"); // Use this box for transverse crossing
+  //initial_box=Box<R>("[-1.101,-1.099]x[0.499,0.501]"); // Use this box for accurate computation
+
   HybridTime hybrid_time(time,steps);
+  Zonotope<R> initial_set(initial_box);
 
   ListSet< Zonotope<R> > evolve_sets;
   ListSet< Zonotope<R> > reach_sets;
@@ -87,9 +91,9 @@ int main() {
 
 
   epsfstream eps;
-  eps.open("test_impact_system_evolver.eps",Box<R>("[-2.625,1.625]x[-1.25,1.25]"));
+  eps.open("test_impact_system_evolver.eps",Box<R>("[-3.625,1.125]x[-1.25,1.25]"));
   //eps << fill_colour(cyan) << Box<R>("[1,1.25]x[-2,2]");
-  eps << fill_colour(cyan) << Box<R>("[-3,3]x[1,2]");
+  eps << fill_colour(cyan) << Box<R>("[-5,3]x[1,2]");
   for(uint i=0; i!=reach_sets.size(); ++i) {
     eps << fill_colour(green) << reach_sets[i];
   }

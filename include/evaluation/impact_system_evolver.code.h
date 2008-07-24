@@ -172,9 +172,9 @@ ApproximateTaylorModel<typename ES::real_type>
 Evolver<ImpactSystem<typename ES::real_type>,ES>::
 _integration_step(const ATM& flow_model, const ATM& initial_set_model, const A& integration_time) const
 {
-  uint n=flow_model.result_size();
+  uint ng=initial_set_model.argument_size();
   ApproximateTaylorModel<R> integration_time_model
-    =ApproximateTaylorModel<R>::constant(Vector<I>(n,I(-1,1)),Vector<R>(n,R(0)),Vector<A>(1,integration_time),order,smoothness);
+    =ApproximateTaylorModel<R>::constant(Vector<I>(ng,I(-1,1)),Vector<R>(ng,R(0)),Vector<A>(1,integration_time),order,smoothness);
   ARIADNE_LOG(6,"integration_time_step_model = "<<integration_time_model<<"\n");
 
   return this->_integration_step(flow_model,initial_set_model,integration_time_model);
@@ -210,6 +210,23 @@ _reachability_step(const ATM& flow_model, const ATM& initial_set_model, const A&
   ARIADNE_LOG(6,"reach_set_model = "<<reach_set_model<<"\n");
   
   return reach_set_model;
+}
+
+
+template<class ES>
+ApproximateTaylorModel<typename ES::real_type>
+Evolver<ImpactSystem<typename ES::real_type>,ES>::
+_reachability_time(const ATM& initial_time_model, const A& initial_time, const A& final_time) const
+{
+  uint n=initial_time_model.argument_size();
+  Vector<A> value(1);
+  Matrix<A> gradient(1,n+1);
+  value[0]=(initial_time+final_time)/2;
+  gradient[0][n]=(final_time-initial_time)/2;
+  ApproximateTaylorModel<R> expanded_time_interval_model
+    =ApproximateTaylorModel<R>::affine(Vector<I>(n+1,I(-1,1)),Vector<R>(n+1,R(0)),value,gradient,spacial_order,smoothness);
+  ApproximateTaylorModel<R> expanded_initial_time_model=embed(initial_time_model,Vector<I>(n+1,I(-1,1)),Vector<R>(n+1,R(0)),0);
+  return expanded_initial_time_model+expanded_time_interval_model;
 }
 
 
@@ -265,8 +282,8 @@ _crossing_time_interval(const ATM& flow_model, const ATM& guard_model, const ATM
 
   uint refinements=5;
 
-  A lower_time=final_time;
-  A upper_time=initial_time;
+  A lower_time=initial_time;
+  A upper_time=final_time;
   
   if(possibly(this->_active(guard_model,initial_set_model))) {
     lower_time=initial_time;
@@ -291,11 +308,11 @@ _crossing_time_interval(const ATM& flow_model, const ATM& guard_model, const ATM
     A max_upper_time=final_time;
     for(uint i=0; i!=refinements; ++i) {
       A new_upper_time=(min_upper_time+max_upper_time)/2;
-      if(possibly(this->_active(guard_model,this->_integration_step(flow_model,initial_set_model,new_upper_time)))) {
-        min_upper_time=new_upper_time;
-      } else {
+      if(definitely(this->_active(guard_model,this->_integration_step(flow_model,initial_set_model,new_upper_time)))) {
         max_upper_time=new_upper_time;
         upper_time=new_upper_time;
+      } else {
+        min_upper_time=new_upper_time;
       }
     }
   }
@@ -312,7 +329,9 @@ Evolver<ImpactSystem<typename ES::real_type>,ES>::
 _grazing_time_interval(const ATM& flow_model, const ATM& guard_model, const ATM& initial_set_model, const A& initial_time, const A& final_time) const
 {
   uint refinements=5;
-
+  
+  //ARIADNE_LOG(6,"_grazing_time_interval\nflow_mode="<<flow_model<<"\nguard_model="<<guard_model<<"\ninitial_set_model="<<initial_set_model<<"\n\ninitial_time="<<initial_time<<" final_time="<<final_time<<"\n");
+  
   ATM final_set_model=this->_integration_step(flow_model,initial_set_model,final_time);
   ATM reach_set_model=this->_reachability_step(flow_model,initial_set_model,initial_time,final_time);
   
@@ -370,18 +389,18 @@ _reachability_step(const ATM& flow_model, const ATM& initial_set_model, const AT
 
     // Compute the reachable set
     // Need an extra independent variable to represent time
-    uint n=flow_model.result_size();
+    uint ng=initial_set_model.argument_size();
     
-    ApproximateTaylorModel<R> expanded_initial_set_model=embed(initial_set_model,Vector<I>(n+1,I(-1,1)),Vector<R>(n+1,R(0)),0u);
+    ApproximateTaylorModel<R> expanded_initial_set_model=embed(initial_set_model,Vector<I>(ng+1,I(-1,1)),Vector<R>(ng+1,R(0)),0u);
     ARIADNE_LOG(6,"expanded_initial_set_model="<<expanded_initial_set_model<<"\n");
-    ApproximateTaylorModel<R> expanded_initial_time_model=embed(initial_time_model,Vector<I>(n+1,I(-1,1)),Vector<R>(n+1,R(0)),0u);
+    ApproximateTaylorModel<R> expanded_initial_time_model=embed(initial_time_model,Vector<I>(ng+1,I(-1,1)),Vector<R>(ng+1,R(0)),0u);
     ARIADNE_LOG(6,"expanded_initial_time_model="<<expanded_initial_time_model<<"\n");
-    ApproximateTaylorModel<R> expanded_final_time_model=embed(final_time_model,Vector<I>(n+1,I(-1,1)),Vector<R>(n+1,R(0)),0u);
+    ApproximateTaylorModel<R> expanded_final_time_model=embed(final_time_model,Vector<I>(ng+1,I(-1,1)),Vector<R>(ng+1,R(0)),0u);
     ARIADNE_LOG(6,"expanded_final_time_model="<<expanded_final_time_model<<"\n");
     
     ApproximateTaylorModel<R> time_interval_model=ApproximateTaylorModel<R>::affine(I(-1,1),R(0),A(0.5),A(0.5),order,smoothness);
     ARIADNE_LOG(6,"time_interval_time_model="<<time_interval_model<<"\n");
-    ApproximateTaylorModel<R> expanded_time_interval_model=embed(time_interval_model,Vector<I>(n+1,I(-1,1)),Vector<R>(n+1,R(0)),n);
+    ApproximateTaylorModel<R> expanded_time_interval_model=embed(time_interval_model,Vector<I>(ng+1,I(-1,1)),Vector<R>(ng+1,R(0)),ng);
     ARIADNE_LOG(6,"expanded_time_interval_model="<<expanded_time_interval_model<<"\n");
     ApproximateTaylorModel<R> expanded_reach_time_model=expanded_initial_time_model+expanded_time_interval_model*(expanded_final_time_model-expanded_initial_time_model);
     ARIADNE_LOG(6,"expanded_reach_time_model="<<expanded_reach_time_model<<"\n");
@@ -474,167 +493,176 @@ _evolution(ESL& final_sets,
     make_ltuple(initial_steps,initial_timed_set_model)=working_sets.pop();
     ARIADNE_LOG(4,"initial_steps = "<<initial_steps<<"\n");
     ARIADNE_LOG(6,"initial_timed_set_model = "<<initial_timed_set_model<<"\n");
+    const uint ng=initial_timed_set_model.argument_size();
 
-    const ApproximateTaylorModel<R> initial_set_model=project(initial_timed_set_model,range(0,n));
-    ARIADNE_LOG(4,"initial_set_model = "<<initial_set_model<<"\n");
-    const ApproximateTaylorModel<R> initial_time_model=project(initial_timed_set_model,range(n,n+1));
-    ARIADNE_LOG(4,"initial_time_model = "<<initial_time_model<<"\n");
-    I initial_time_range=initial_time_model.range()[0];
-    ARIADNE_LOG(4,"initial_time_range = "<<initial_time_range<<"\n");
-    ARIADNE_ASSERT(A(initial_time_range.width()) <= max_step_size);
+    if(radius(Box<R>(initial_timed_set_model.range()))>this->_parameters->maximum_enclosure_radius()) {
+      TaylorSet<R> set(initial_timed_set_model);
+      ListSet< TaylorSet<R> > subdivisions=set.subdivide();
+      for(uint i=0; i!=subdivisions.size(); ++i) {
+        working_sets.push(make_tuple(initial_steps,subdivisions[i].model()));
+      }
+    } else {
+      const ApproximateTaylorModel<R> initial_set_model=project(initial_timed_set_model,range(0,n));
+      ARIADNE_LOG(4,"initial_set_model = "<<initial_set_model<<"\n");
+      const ApproximateTaylorModel<R> initial_time_model=project(initial_timed_set_model,range(n,n+1));
+      ARIADNE_LOG(4,"initial_time_model = "<<initial_time_model<<"\n");
+      I initial_time_range=initial_time_model.range()[0];
+      ARIADNE_LOG(4,"initial_time_range = "<<initial_time_range<<"\n");
+      ARIADNE_ASSERT(A(initial_time_range.width()) <= max_step_size);
+      
+      ++this->_profiler->time_steps;
+      IVec flow_bounds; 
+      Rational h;
+      I guard_value(-1,1);
+      
+      // Try to unwind time interval
+      if(initial_time_range.width()>0) {
+        h=Rational(initial_time_range.width());
+        make_lpair(h,flow_bounds)=this->flow_bounds(vector_field,initial_set_model.range(),h);
+        guard_value=guard_function.evaluate(flow_bounds)[0];
+      }
+      if(guard_value.upper()>0) {
+        h=this->maximum_step_size();
+        make_lpair(h,flow_bounds)=this->flow_bounds(vector_field,initial_set_model.range(),h);
+        guard_value=guard_function.evaluate(flow_bounds)[0];
+      }
+      
+      this->_profiler->total_stepping_time+=h;
+      this->_profiler->minimum_time_step=std::min(h,this->_profiler->minimum_time_step);
+      A step_size=A(h);
+      ARIADNE_LOG(6,"set_bounding_box = "<<initial_set_model.range()<<"\n");
+      ARIADNE_LOG(6,"flow_bounds = "<<flow_bounds<<"\n");
+      ARIADNE_LOG(6,"step_size = "<<step_size<<"\n");
+      ARIADNE_LOG(6,"guard_value = "<<guard_value<<"\n\n");
+      
+      FlowType flow_type=UNKNOWN;
+      
+      if(guard_value <= 0) { flow_type = MISSING; }
+      
+      
+      ApproximateTaylorModel<R> vector_field_model(flow_bounds,vector_field,order,smoothness);
+      ARIADNE_LOG(6,"vector_field_model = "<<vector_field_model<<"\n");
+      ApproximateTaylorModel<R> flow_model=Ariadne::flow(vector_field_model);
+      ARIADNE_LOG(6,"flow_model = "<<flow_model<<"\n");
+      
+      A zero_time=0;
+      A step_time=step_size;
+      A final_time;
+      
+      Interval<R> crossing_time_interval;
+      Interval<R> grazing_time_interval;
+      
+      ApproximateTaylorModel<R> guard_model;
+      
+      ApproximateTaylorModel<R> hitting_time_model;
+      ApproximateTaylorModel<R> integration_time_model;
+      
+      ApproximateTaylorModel<R> active_set_model;
+      ApproximateTaylorModel<R> jump_set_model;
+      ApproximateTaylorModel<R> jump_time_model;
+      ApproximateTaylorModel<R> final_set_model;
+      ApproximateTaylorModel<R> final_time_model;
+      ApproximateTaylorModel<R> reach_set_model;
+      ApproximateTaylorModel<R> reach_time_model;
+      
+      if(flow_type==UNKNOWN) {
+        A reduced_step_time=step_time;
+        for(uint i=0; i!=4; ++i) {
+          reach_set_model=this->_reachability_step(flow_model,initial_set_model,zero_time,reduced_step_time);
+          if(definitely(!this->_active(guard_function,reach_set_model))) {
+            flow_type=MISSING;
+            step_time=reduced_step_time;
+            break;
+          } else {
+            reduced_step_time/=2;
+          }
+        }
+      }
 
-    ++this->_profiler->time_steps;
-    IVec flow_bounds; 
-    Rational h;
-    I guard_value(-1,1);
-
-    // Try to unwind time interval
-    if(initial_time_range.width()>0) {
-      h=Rational(initial_time_range.width());
-      make_lpair(h,flow_bounds)=this->flow_bounds(vector_field,initial_set_model.range(),h);
-      guard_value=guard_function.evaluate(flow_bounds)[0];
-    }
-    if(guard_value.upper()>0) {
-      h=this->maximum_step_size();
-      make_lpair(h,flow_bounds)=this->flow_bounds(vector_field,initial_set_model.range(),h);
-      guard_value=guard_function.evaluate(flow_bounds)[0];
-    }
-
-    this->_profiler->total_stepping_time+=h;
-    this->_profiler->minimum_time_step=std::min(h,this->_profiler->minimum_time_step);
-    A step_size=A(h);
-    ARIADNE_LOG(6,"set_bounding_box = "<<initial_set_model.range()<<"\n");
-    ARIADNE_LOG(6,"flow_bounds = "<<flow_bounds<<"\n");
-    ARIADNE_LOG(6,"step_size = "<<step_size<<"\n");
-    ARIADNE_LOG(6,"guard_value = "<<guard_value<<"\n\n");
-  
-    FlowType flow_type=UNKNOWN;
-  
-    if(guard_value <= 0) { flow_type = MISSING; }
-
-    
-    ApproximateTaylorModel<R> vector_field_model(flow_bounds,vector_field,order,smoothness);
-    ARIADNE_LOG(6,"vector_field_model = "<<vector_field_model<<"\n");
-    ApproximateTaylorModel<R> flow_model=Ariadne::flow(vector_field_model);
-    ARIADNE_LOG(6,"flow_model = "<<flow_model<<"\n");
-    
-    A zero_time=0;
-    A step_time=step_size;
-    A final_time;
-
-    Interval<R> crossing_time_interval;
-    Interval<R> grazing_time_interval;
-
-    ApproximateTaylorModel<R> guard_model;
-
-    ApproximateTaylorModel<R> hitting_time_model;
-    ApproximateTaylorModel<R> integration_time_model;
-
-    ApproximateTaylorModel<R> active_set_model;
-    ApproximateTaylorModel<R> jump_set_model;
-    ApproximateTaylorModel<R> jump_time_model;
-    ApproximateTaylorModel<R> final_set_model;
-    ApproximateTaylorModel<R> final_time_model;
-    ApproximateTaylorModel<R> reach_set_model;
-    ApproximateTaylorModel<R> reach_time_model;
-    
-    if(flow_type==UNKNOWN) {
-      A reduced_step_time=step_time;
-      for(uint i=0; i!=4; ++i) {
-        reach_set_model=this->_reachability_step(flow_model,initial_set_model,zero_time,reduced_step_time);
-        if(definitely(!this->_active(guard_function,reach_set_model))) {
-          flow_type=MISSING;
-          step_time=reduced_step_time;
-          break;
+      if(flow_type==MISSING) {
+        ARIADNE_LOG(4,"\nMISSING\n\n"); 
+        final_time=A(initial_time_range.lower())+step_time;
+        final_time=std::min(max_time,final_time);
+        final_time_model=ApproximateTaylorModel<R>::constant(Vector<I>(ng,I(-1,1)),Vector<R>(ng,R(0)),Vector<A>(1u,final_time),spacial_order,smoothness);
+        integration_time_model=final_time_model-initial_time_model;
+        final_set_model=this->_integration_step(flow_model,initial_set_model,integration_time_model);
+        reach_set_model=this->_reachability_step(flow_model,initial_set_model,zero_time,integration_time_model);
+      } else {
+        guard_model=ApproximateTaylorModel<R>(flow_bounds,guard_function,order,smoothness);
+        ARIADNE_LOG(6,"guard_model = "<<guard_model<<"\n");   
+        try {
+          hitting_time_model=this->_hitting_time_model(flow_model,guard_model,initial_set_model,zero_time,step_time);
+          jump_time_model=initial_time_model+hitting_time_model;
+          active_set_model=this->_integration_step(flow_model,initial_set_model,hitting_time_model);
+          reach_set_model=this->_reachability_step(flow_model,initial_set_model,zero_time,hitting_time_model);
+          flow_type=TRANSVERSE;
+          ARIADNE_LOG(4,"\nTRANSVERSE\n\n"); 
+        } 
+        catch(DegenerateCrossingException) { 
+          final_set_model = this->_integration_step(flow_model,initial_set_model,step_size);
+          integration_time_model=ApproximateTaylorModel<R>::constant(Vector<I>(ng,I(-1,1)),Vector<R>(ng,R(0)),Vector<A>(1u,step_size),spacial_order,smoothness);
+          final_time_model = initial_time_model + integration_time_model;
+          if(definitely(this->_active(guard_function,final_set_model))) {
+            flow_type=CROSSING;
+            ARIADNE_LOG(4,"\nCROSSING\n\n"); 
+            crossing_time_interval=this->_crossing_time_interval(flow_model, guard_model,initial_set_model, zero_time, step_time);
+            ARIADNE_LOG(4,"crossing_time_interval="<<crossing_time_interval<<"\n\n"); 
+            active_set_model=this->_reachability_step(flow_model,initial_set_model,A(crossing_time_interval.lower()),A(crossing_time_interval.upper()));
+            jump_time_model=this->_reachability_time(initial_time_model,A(crossing_time_interval.lower()),A(crossing_time_interval.upper()));
+            reach_set_model=this->_reachability_step(flow_model,initial_set_model,zero_time,A(crossing_time_interval.upper()));
+          } else {
+            flow_type=GRAZING;
+            ARIADNE_LOG(4,"\nGRAZING \n\n"); 
+            grazing_time_interval=this->_grazing_time_interval(flow_model,guard_model,initial_set_model,zero_time,step_time);
+            ARIADNE_LOG(4,"grazing_time_interval="<<grazing_time_interval<<"\n\n"); 
+            A grazing_time_midpoint=A(grazing_time_interval.midpoint());
+            active_set_model=this->_reachability_step(flow_model,initial_set_model,A(grazing_time_interval.lower()),A(grazing_time_interval.upper()));
+            ARIADNE_LOG(6,"active_set_model="<<active_set_model<<"\n\n"); 
+            jump_time_model=this->_reachability_time(initial_time_model,A(grazing_time_interval.lower()),A(grazing_time_interval.upper()));
+            ARIADNE_LOG(6,"jump_time_model="<<jump_time_model<<"\n\n"); 
+            reach_set_model=this->_reachability_step(flow_model,initial_set_model,A(zero_time),A(step_time));
+            ARIADNE_LOG(6,"reach_set_model="<<reach_set_model<<"\n\n"); 
+          } 
+        }
+      }
+      
+      
+      // Compute the jump set
+      if(flow_type!=MISSING) {
+        Vector<A> reset_model_centre(active_set_model.evaluate(Vector<A>(active_set_model.centre())));
+        ARIADNE_LOG(6,"active_set_model = "<<active_set_model<<"\n");
+        ApproximateTaylorModel<R> reset_model(active_set_model.range(),reset_model_centre,reset_map,spacial_order,smoothness);
+        ARIADNE_LOG(6,"reset_model = "<<reset_model<<"\n");
+        jump_set_model=compose(reset_model,active_set_model);
+        ARIADNE_LOG(6,"jump_set_model = "<<jump_set_model<<"\n");
+        ARIADNE_LOG(6,"jump_time_model = "<<jump_time_model<<"\n");
+      }
+      
+      if(flow_type==GRAZING) {
+        ARIADNE_LOG(6,"final_set_model = "<<final_set_model<<"\n");
+        ARIADNE_LOG(6,"final_time_model = "<<final_time_model<<"\n");
+      }
+      
+      reach_sets.adjoin(this->set(reach_set_model));
+      if(flow_type!=MISSING) {
+        ES active_set=this->set(active_set_model);
+        ES jump_set=this->set(jump_set_model);
+        Integer jump_steps=initial_steps+1;
+        intermediate_sets.adjoin(active_set);
+        intermediate_sets.adjoin(jump_set);
+        working_sets.push(make_tuple(jump_steps,join(jump_set_model,jump_time_model)));
+      } 
+      if(flow_type==MISSING || flow_type==GRAZING) {
+        ES final_set=this->set(final_set_model);
+        Rational final_time_midpoint=Rational(final_time_model.range()[0].midpoint());
+        if(final_time_midpoint >= maximum_time) {
+          final_sets.adjoin(final_set);
         } else {
-          reduced_step_time/=2;
+          intermediate_sets.adjoin(final_set);
+          working_sets.push(make_tuple(initial_steps,join(final_set_model,final_time_model)));
         }
       }
     }
-
-    if(flow_type==MISSING) {
-      final_time=A(initial_time_range.lower())+step_time;
-      final_time_model=ApproximateTaylorModel<R>::constant(Vector<I>(n,I(-1,1)),Vector<R>(n,R(0)),Vector<A>(1u,final_time),spacial_order,smoothness);
-      integration_time_model=final_time_model-initial_time_model;
-      final_set_model=this->_integration_step(flow_model,initial_set_model,integration_time_model);
-      reach_set_model=this->_reachability_step(flow_model,initial_set_model,zero_time,integration_time_model);
-    } else {
-      guard_model=ApproximateTaylorModel<R>(flow_bounds,guard_function,order,smoothness);
-      ARIADNE_LOG(6,"guard_model = "<<guard_model<<"\n");   
-      try {
-        hitting_time_model=this->_hitting_time_model(flow_model,guard_model,initial_set_model,zero_time,step_time);
-        jump_time_model=initial_time_model+hitting_time_model;
-        active_set_model=this->_integration_step(flow_model,initial_set_model,hitting_time_model);
-        reach_set_model=this->_reachability_step(flow_model,initial_set_model,zero_time,hitting_time_model);
-        flow_type=TRANSVERSE;
-      } 
-      catch(DegenerateCrossingException) { 
-        final_set_model = this->_integration_step(flow_model,initial_set_model,step_size);
-        integration_time_model=ApproximateTaylorModel<R>::constant(Vector<I>(n,I(-1,1)),Vector<R>(n,R(0)),Vector<A>(1u,step_size),spacial_order,smoothness);
-        final_time_model = initial_time_model + integration_time_model;
-        if(definitely(this->_active(guard_function,final_set_model))) {
-          flow_type=CROSSING;
-          crossing_time_interval=this->_crossing_time_interval(flow_model, guard_model,initial_set_model, zero_time, step_time);
-          A crossing_time_midpoint=A(crossing_time_interval.midpoint());
-          //active_set_model=this->_reachable_set(flow_model, guard_model,initial_set_model,A(crossing_time_interval.lower()),A(crossing_time_interval.upper()));
-          active_set_model=this->_integration_step(flow_model,initial_set_model,A(crossing_time_interval.midpoint()));
-          jump_time_model=ApproximateTaylorModel<R>::constant(Vector<I>(n,I(-1,1)),Vector<R>(n,R(0)),Vector<A>(1u,crossing_time_midpoint),spacial_order,smoothness);
-          reach_set_model=this->_reachability_step(flow_model,initial_set_model,zero_time,A(crossing_time_interval.upper()));
-        } else {
-          flow_type=GRAZING;
-          grazing_time_interval=this->_grazing_time_interval(flow_model, guard_model,initial_set_model, zero_time, step_time);
-          A grazing_time_midpoint=A(grazing_time_interval.midpoint());
-          //active_set_model=this->_reachability_step(flow_model, guard_model,initial_set_model,A(grazing_time_interval.lower()),A(grazing_time_interval.upper()));
-          active_set_model=this->_integration_step(flow_model,initial_set_model,A(grazing_time_midpoint));
-          jump_time_model=ApproximateTaylorModel<R>::constant(Vector<I>(n,I(-1,1)),Vector<R>(n,R(0)),Vector<A>(1u,grazing_time_midpoint),spacial_order,smoothness);
-          reach_set_model=this->_reachability_step(flow_model,initial_set_model,A(crossing_time_interval.lower()),A(grazing_time_interval.upper()));
-        } 
-      }
-    }
-        
-    
-    if(flow_type == TRANSVERSE) { ARIADNE_LOG(4,"\nTRANSVERSE\n\n"); }
-    if(flow_type == CROSSING ) { ARIADNE_LOG(4,"\nCROSSING\n\n"); }
-    if(flow_type == GRAZING ) { ARIADNE_LOG(4,"\nGRAZING \n\n"); }
-    if(flow_type == MISSING) { ARIADNE_LOG(4,"\nMISSING\n\n"); }
-    
-
-    // Compute the jump set
-    if(flow_type!=MISSING) {
-      Vector<A> reset_model_centre(active_set_model.evaluate(Vector<A>(active_set_model.centre())));
-      ARIADNE_LOG(6,"active_set_model = "<<active_set_model<<"\n");
-      ApproximateTaylorModel<R> reset_model(active_set_model.range(),reset_model_centre,reset_map,spacial_order,smoothness);
-      ARIADNE_LOG(6,"reset_model = "<<reset_model<<"\n");
-      jump_set_model=compose(reset_model,active_set_model);
-      ARIADNE_LOG(6,"jump_set_model = "<<jump_set_model<<"\n");
-      ARIADNE_LOG(6,"jump_time_model = "<<jump_time_model<<"\n");
-    }
-  
-    if(flow_type==GRAZING) {
-      ARIADNE_LOG(6,"final_set_model = "<<final_set_model<<"\n");
-      ARIADNE_LOG(6,"final_time_model = "<<final_time_model<<"\n");
-    }
-
-    reach_sets.adjoin(this->set(reach_set_model));
-    if(flow_type!=MISSING) {
-      ES active_set=this->set(active_set_model);
-      ES jump_set=this->set(jump_set_model);
-      Integer jump_steps=initial_steps+1;
-      intermediate_sets.adjoin(active_set);
-      intermediate_sets.adjoin(jump_set);
-      working_sets.push(make_tuple(jump_steps,join(jump_set_model,jump_time_model)));
-    } 
-    if(flow_type==MISSING || flow_type==GRAZING) {
-      ES final_set=this->set(final_set_model);
-      Rational final_time_midpoint=Rational(final_time_model.range()[0].midpoint());
-      if(final_time_midpoint >= maximum_time) {
-        final_sets.adjoin(final_set);
-      } else {
-        intermediate_sets.adjoin(final_set);
-        working_sets.push(make_tuple(initial_steps,join(final_set_model,final_time_model)));
-      }
-    }
-
   }
 }
 

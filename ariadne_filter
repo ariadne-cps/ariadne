@@ -26,6 +26,7 @@ s/ >/>/g
 s/basic_ostream<char, std::char_traits<char>>/ostream/g
 
 s/typename\ ES::real_type/R/g
+s/typename\ traits<R,\ R>::approximate_arithmetic_type/A/g
 
 s/Float<double>/Float64/g
 s/Float<mpfr>/FloatMP/g

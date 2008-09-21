@@ -89,7 +89,7 @@ void export_zonotope()
   typedef ListSet< Zonotope<R> > RZonotopeListSet;
   typedef AffineModel<R> RAffineModel;
 
-  class_<RZonotope> zonotope_class("Zonotope",init<int>());
+  class_<RZonotope> zonotope_class("Zonotope",no_init);
   zonotope_class.def("__init__", make_constructor(&make_zonotope<R>) );
   zonotope_class.def(init<int>());
   zonotope_class.def(init<RPoint,RMatrix>());

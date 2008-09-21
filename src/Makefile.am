@@ -99,6 +99,8 @@ EVALUATION_SRC = \
 	\
 	evaluation/solver.cc \
 	\
+	evaluation/tools.cc \
+	\
 	evaluation/approximator.cc \
 	evaluation/satisfier.cc \
 	evaluation/reducer.cc \

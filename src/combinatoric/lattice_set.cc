@@ -217,6 +217,14 @@ namespace Ariadne {
       return LatticeBlock(lower,upper);
     }
     
+    LatticeCell
+    LatticeCellListSet::pop()
+    { 
+      LatticeCell result=(*this)[this->size()-1];
+      this->_list.pop_back(); 
+      return result; 
+    }
+
     void
     LatticeCellListSet::unique_sort()
     {

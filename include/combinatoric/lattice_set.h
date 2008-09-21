@@ -426,6 +426,8 @@ namespace Ariadne {
       /*! \brief Constant iterator to the end of the cells in the set. */
       const_iterator end() const { return const_iterator(_list.end()); }
       
+      /*! \brief Removes and returns the last cell. */
+      LatticeCell pop();
       /*! \brief Sorts the cells lexicographically, removing duplicates. */
       void unique_sort(); 
       /*! \brief Efficiently swaps with another lattice set. */

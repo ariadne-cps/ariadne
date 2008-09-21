@@ -65,6 +65,15 @@ Grid<R>::Grid(const dimension_type& d, const R& l)
   this->create(origin,lengths);
 }
 
+template<class R> 
+Grid<R>::Grid(const dimension_type& d, const double& l)
+  : _data(new Data())
+{
+  array<R> origin(d,R(0));
+  array<R> lengths(d,l);
+  this->create(origin,lengths);
+}
+
 
 template<class R> 
 Grid<R>::Grid(const Vector<R>& v)

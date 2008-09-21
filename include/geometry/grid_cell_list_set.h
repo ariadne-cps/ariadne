@@ -159,6 +159,9 @@ namespace Ariadne {
       /*! \brief Sorts the cells lexicographically, removing duplicates. */
       void unique_sort(); 
 
+      /*! \brief Removes the last cell and returns it. */
+      GridCell<R> pop(); 
+
       /*!\brief Append a GridCell to the list. */
       void adjoin(const GridCell<R>& c);
       /*!\brief Append a GridBlock to the list. */

@@ -59,11 +59,14 @@ void export_grid()
   
   typedef typename Grid<R>::integer_type integer_type;
 
-  class_< RGrid > grid_class("Grid",init<uint,R>());
+  class_< RGrid > grid_class("Grid",init<uint,double>());
+  grid_class.def(init<uint,R>());
   grid_class.def(init<RPoint,RVector>());
   grid_class.def(init<RVector>());
   grid_class.def(init<RBox,LatticeBlock>());
   grid_class.def("dimension", &RGrid::dimension);
+  grid_class.def("origin", &RGrid::origin);
+  grid_class.def("lengths", &RGrid::lengths);
   grid_class.def("subdivision_coordinate",(R(RGrid::*)(dimension_type,integer_type)const) &RGrid::subdivision_coordinate);
   grid_class.def("subdivision_coordinate",(R(RGrid::*)(dimension_type,dyadic_type)const) &RGrid::subdivision_coordinate);
   grid_class.def("subdivision_index", &RGrid::subdivision_index);
@@ -146,6 +149,8 @@ void export_grid_set()
   grid_cell_list_set_class.def("__len__", &RGridCellListSet::size);
   grid_cell_list_set_class.def("__getitem__", &__getitem__<RGridCellListSet>);
   grid_cell_list_set_class.def("__iter__", iterator<RGridCellListSet>());
+  grid_cell_list_set_class.def("unique_sort", &RGridCellListSet::unique_sort);
+  grid_cell_list_set_class.def("pop", &RGridCellListSet::pop);
   grid_cell_list_set_class.def(self_ns::str(self));
 
  
@@ -157,6 +162,7 @@ void export_grid_set()
   grid_mask_set_class.def("empty", &RGridMaskSet::empty);
   grid_mask_set_class.def("dimension", &RGridMaskSet::dimension);
   grid_mask_set_class.def("clear", &RGridMaskSet::clear);
+  grid_mask_set_class.def("grid", &RGridMaskSet::grid,return_value_policy<copy_const_reference>());
   grid_mask_set_class.def("block", &RGridMaskSet::block,return_value_policy<copy_const_reference>());
   grid_mask_set_class.def("lattice_set", &RGridMaskSet::lattice_set,return_value_policy<copy_const_reference>());
   grid_mask_set_class.def("adjoin", (void(RGridMaskSet::*)(const RGridCell&))(&RGridMaskSet::adjoin));
@@ -165,6 +171,7 @@ void export_grid_set()
   grid_mask_set_class.def("adjoin", (void(RGridMaskSet::*)(const RGridMaskSet&))(&RGridMaskSet::adjoin));
   grid_mask_set_class.def("restrict", (void(RGridMaskSet::*)(const RGridCellListSet&))(&RGridMaskSet::restrict));
   grid_mask_set_class.def("restrict", (void(RGridMaskSet::*)(const RGridMaskSet&))(&RGridMaskSet::restrict));
+  grid_mask_set_class.def("remove", (void(RGridMaskSet::*)(const RGridMaskSet&))(&RGridMaskSet::remove));
   grid_mask_set_class.def("adjoin_over_approximation", &RGridMaskSet::adjoin_over_approximation);
   grid_mask_set_class.def("adjoin_outer_approximation", (void(RGridMaskSet::*)(const RBox&))(&RGridMaskSet::adjoin_outer_approximation));
   grid_mask_set_class.def("adjoin_outer_approximation", (void(RGridMaskSet::*)(const RPolyhedron&))(&RGridMaskSet::adjoin_outer_approximation));

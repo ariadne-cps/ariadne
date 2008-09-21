@@ -27,6 +27,7 @@
 #include "linear_algebra/vector.h"
 
 #include "geometry/box.h"
+#include "geometry/grid_cell.h"
 #include "geometry/list_set.h"
 
 #include <boost/python.hpp>
@@ -85,12 +86,13 @@ void export_box()
 {
   typedef Interval<R> I;
   
-  class_< Box<R> > box_class("Box",init<int>());
+  class_< Box<R> > box_class("Box",no_init);
   box_class.def("__init__", make_constructor(&make_box<R>) );
   box_class.def(init< int >());
   box_class.def(init< Point<R> >());
   box_class.def(init< Point<R>,Point<R> >());
   box_class.def(init< Box<R> >());
+  box_class.def(init< GridCell<R> >());
   box_class.def(init< Vector<I> >());
   box_class.def(init< Point<I> >());
     //box_class.def(init<std::string>());

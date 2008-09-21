@@ -74,6 +74,7 @@ namespace Ariadne {
       
       /*! \brief Construct a regular grid in dimension \a n with subdivision lengths \a l in every direction. */
       explicit Grid(const dimension_type& n, const R& l);
+      explicit Grid(const dimension_type& n, const double& l);
       
       /*! \brief Construct from a centre point and a vector of offsets. */
       explicit Grid(const Point<R>& pt, const Vector<R>& v);

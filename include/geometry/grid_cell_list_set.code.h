@@ -102,6 +102,14 @@ GridCellListSet<R>::clone() const
 
 
 template<class R>
+GridCell<R>
+GridCellListSet<R>::pop() 
+{
+  return GridCell<R>(this->grid(),this->_lattice_set.pop());
+}
+
+
+template<class R>
 tribool
 GridCellListSet<R>::contains(const Point<R>& pt) const
 {

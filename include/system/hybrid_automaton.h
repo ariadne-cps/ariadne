@@ -32,7 +32,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "geometry/declarations.h"
-#include "system/declarations.h"
+#include "function/function_interface.h"
 
 #include "base/reference_container.h"
 #include "base/stlio.h"
@@ -78,10 +78,10 @@ class DiscreteMode {
     DiscreteState _state;
   
     // The discrete mode's vector field.
-    boost::shared_ptr< const VectorField<R> > _dynamic;
+    boost::shared_ptr< const FunctionInterface<R> > _dynamic;
   
     // The discrete mode's invariant.
-    boost::shared_ptr< const ConstraintSet<R> > _invariant;
+    boost::shared_ptr< const FunctionInterface<R> > _invariant;
   
   public:
     /*! \brief Copy constructor. */
@@ -110,17 +110,17 @@ class DiscreteMode {
     }
     
     /*! \brief The discrete mode's dynamic (a vector field). */
-    const VectorField<R>& dynamic() const {
+    const FunctionInterface<R>& dynamic() const {
       return *this->_dynamic;  
     }
     
     /*! \brief The discrete mode's invariant. */
-    const ConstraintSet<R>& invariant() const{
+    const FunctionInterface<R>& invariant() const{
       return *this->_invariant;  
     }
     
     /*! \brief The dimension of the discrete mode. */
-    dimension_type dimension() const { return this->_invariant->dimension(); }
+    dimension_type dimension() const { return this->_invariant->argument_size(); }
     
     /*! \brief Write to an output stream. */
     std::ostream& write(std::ostream& os) const;
@@ -133,20 +133,24 @@ class DiscreteMode {
      * \param invariant is the mode's invariant.
      */
     DiscreteMode(DiscreteState state,
-                 const VectorField<R>& dynamic, 
-                 const ConstraintSet<R>& invariant)
+                 const FunctionInterface<R>& dynamic, 
+                 const FunctionInterface<R>& invariant)
       :  _state(state), _dynamic(dynamic.clone()), _invariant(invariant.clone()) 
     {
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(dynamic,invariant,"DiscreteMode::DiscreteMode(...)");
+      ARIADNE_ASSERT(dynamic.argument_size()==invariant.argument_size());
+      ARIADNE_ASSERT(dynamic.result_size()==dynamic.argument_size());
+      ARIADNE_ASSERT(invariant.result_size()==1);
     }
     
     /* Construct from objects managed by shared pointers (for internal use) */
     DiscreteMode(DiscreteState state,
-                 const boost::shared_ptr< VectorField<R> > dynamic, 
-                 const boost::shared_ptr< ConstraintSet<R> > invariant)
+                 const boost::shared_ptr< FunctionInterface<R> > dynamic, 
+                 const boost::shared_ptr< FunctionInterface<R> > invariant)
       :  _state(state), _dynamic(dynamic), _invariant(invariant) 
     {
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(*dynamic,*invariant,"DiscreteMode::DiscreteMode(...)");
+      ARIADNE_ASSERT(dynamic->argument_size()==invariant->argument_size());
+      ARIADNE_ASSERT(dynamic->result_size()==dynamic->argument_size());
+      ARIADNE_ASSERT(invariant->result_size()==1);
     }
     
 };
@@ -198,10 +202,10 @@ class DiscreteTransition
     const DiscreteMode<R>* _destination;   
   
     // \brief The activation region of the discrete transition.
-    boost::shared_ptr< const ConstraintSet<R> > _activation; 
+    boost::shared_ptr< const FunctionInterface<R> > _activation; 
 
     // \brief The reset of the discrete transition.
-    boost::shared_ptr< const Map<R> > _reset;  
+    boost::shared_ptr< const FunctionInterface<R> > _reset;  
     
   public:
     /*! \brief Copy constructor. */
@@ -241,12 +245,12 @@ class DiscreteTransition
     }
   
     /*! \brief The activation region of the discrete transition. */
-    const ConstraintSet<R>& activation() const { 
+    const FunctionInterface<R>& activation() const { 
       return *this->_activation;
     }
 
     /*! \brief The reset map of the discrete transition. */
-    const Map<R>& reset() const { 
+    const FunctionInterface<R>& reset() const { 
       return *this->_reset;
     }
     
@@ -270,42 +274,45 @@ class DiscreteTransition
     DiscreteTransition(DiscreteEvent event, 
                                const DiscreteMode<R>& source, 
                                const DiscreteMode<R>& destination,
-                               const Map<R>& reset,
-                               const ConstraintSet<R>& activation)
+                               const FunctionInterface<R>& reset,
+                               const FunctionInterface<R>& activation)
       : _event(event), _source(&source), _destination(&destination), 
         _activation(activation.clone()), _reset(reset.clone()) 
     { 
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(activation,source,"DiscreteTransition::DiscreteTransition(...)");
-      ARIADNE_CHECK_ARGUMENT_DIMENSION(reset,source,"DiscreteTransition::DiscreteTransition(...)");
-      ARIADNE_CHECK_RESULT_DIMENSION(reset,destination,"DiscreteTransition::DiscreteTransition(...)");
+      ARIADNE_ASSERT(activation.result_size()==1);
+      ARIADNE_ASSERT(activation.argument_size()==source.dimension());
+      ARIADNE_ASSERT(reset.argument_size()==source.dimension());
+      ARIADNE_ASSERT(reset.result_size()==destination.dimension());
     }
 
     /* Construct from shared pointers (for internal use). */
     DiscreteTransition(DiscreteEvent event,
                        const DiscreteMode<R>& source, 
                        const DiscreteMode<R>& destination,
-                       const boost::shared_ptr< Map<R> > reset,
-                       const boost::shared_ptr< ConstraintSet<R> > activation) 
+                       const boost::shared_ptr< FunctionInterface<R> > reset,
+                       const boost::shared_ptr< FunctionInterface<R> > activation) 
       : _event(event), _source(&source), _destination(&destination), 
         _activation(activation), _reset(reset) 
     { 
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(*activation,source,"DiscreteTransition::DiscreteTransition(...)");
-      ARIADNE_CHECK_ARGUMENT_DIMENSION(*reset,source,"DiscreteTransition::DiscreteTransition(...)");
-      ARIADNE_CHECK_RESULT_DIMENSION(*reset,destination,"DiscreteTransition::DiscreteTransition(...)");
+      ARIADNE_ASSERT(activation->result_size()==1);
+      ARIADNE_ASSERT(activation->argument_size()==source.dimension());
+      ARIADNE_ASSERT(reset->argument_size()==source.dimension());
+      ARIADNE_ASSERT(reset->result_size()==destination.dimension());
     }
 
     /* Construct from shared pointers (for internal use). */
     DiscreteTransition(DiscreteEvent event,
                        const boost::shared_ptr< DiscreteMode<R> > source, 
                        const boost::shared_ptr< DiscreteMode<R> > destination,
-                       const boost::shared_ptr< Map<R> > reset,
-                       const boost::shared_ptr< ConstraintSet<R> > activation) 
+                       const boost::shared_ptr< FunctionInterface<R> > reset,
+                       const boost::shared_ptr< FunctionInterface<R> > activation) 
       : _event(event), _source(&*source), _destination(&*destination), 
         _activation(activation), _reset(reset) 
     { 
-      ARIADNE_CHECK_EQUAL_DIMENSIONS(*activation,*source,"DiscreteTransition::DiscreteTransition(...)");
-      ARIADNE_CHECK_ARGUMENT_DIMENSION(*reset,*source,"DiscreteTransition::DiscreteTransition(...)");
-      ARIADNE_CHECK_RESULT_DIMENSION(*reset,*destination,"DiscreteTransition::DiscreteTransition(...)");
+      ARIADNE_ASSERT(activation->result_size()==1);
+      ARIADNE_ASSERT(activation->argument_size()==source->dimension());
+      ARIADNE_ASSERT(reset->argument_size()==source->dimension());
+      ARIADNE_ASSERT(reset->result_size()==destination->dimension());
     }
 
 };
@@ -419,8 +426,8 @@ class HybridAutomaton
    * \param invariant is the mode's invariant.
    */
   const DiscreteMode<R>& new_mode(DiscreteState state,
-                                          const VectorField<R>& dynamic,
-                                          const ConstraintSet<R>& invariant);
+                                  const FunctionInterface<R>& dynamic,
+                                  const FunctionInterface<R>& invariant);
     
   /*! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and destination modes.
    *
@@ -431,10 +438,10 @@ class HybridAutomaton
    * \param activation is the transition's activation region.
    */
   const DiscreteTransition<R>& new_transition(DiscreteEvent event,
-                                                      DiscreteState source, 
-                                                      DiscreteState destination,
-                                                      const Map<R>& reset,
-                                                      const ConstraintSet<R>& activation);
+                                              DiscreteState source, 
+                                              DiscreteState destination,
+                                              const FunctionInterface<R>& reset,
+                                              const FunctionInterface<R>& activation);
 
   /*! \brief Adds a discrete transition to the automaton using the discrete modes to specify the source and destination.
    *
@@ -445,10 +452,10 @@ class HybridAutomaton
    * \param activation is the discrete transition's activation region.
    */
   const DiscreteTransition<R>& new_transition(DiscreteEvent event,
-                                                      const DiscreteMode<R>& source, 
-                                                      const DiscreteMode<R>& destination,
-                                                      const Map<R>& reset,
-                                                      const ConstraintSet<R>& activation);
+                                              const DiscreteMode<R>& source, 
+                                              const DiscreteMode<R>& destination,
+                                              const FunctionInterface<R>& reset,
+                                              const FunctionInterface<R>& activation);
   
   //@}
   

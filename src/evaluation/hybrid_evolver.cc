@@ -28,19 +28,24 @@
 
 #include "geometry/zonotope.h"
 
-#include "evaluation/set_based_hybrid_evolver.h"
-#include "evaluation/set_based_hybrid_evolver.code.h"
+//#include "evaluation/set_based_hybrid_evolver.h"
+//#include "evaluation/set_based_hybrid_evolver.code.h"
+
+#include "evaluation/constraint_based_hybrid_evolver.h"
+#include "evaluation/constraint_based_hybrid_evolver.code.h"
 
 namespace Ariadne {
   
     
 
 #ifdef ENABLE_FLOAT64
-    template class Evolver< HybridAutomaton<Float64>, Zonotope<Float64> >;
+//    template class Evolver< HybridAutomaton<Float64>, Zonotope<Float64> >;
+template class HybridEvolver<Float64>;
 #endif
   
 #ifdef ENABLE_FLOATMP
     template class Evolver< HybridAutomaton<FloatMP>, Zonotope<FloatMP> >;
+template class HybridEvolver<FloatMP>;
 #endif
 
   

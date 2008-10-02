@@ -45,6 +45,7 @@ namespace Ariadne {
 
 template<class R> class ApproximateTaylorModel;
 
+class basic_set_tag;
 class EuclideanSpace;
 template<class R> class Point;
 template<class R> class Box;
@@ -66,6 +67,8 @@ class TaylorSet {
   typedef typename traits<R>::arithmetic_type F; 
   typedef typename traits<R>::interval_type I; 
  public:
+  /*! \brief A tag describing the type of set. */
+  typedef basic_set_tag set_category;
   /*! \brief The real number type. */
   typedef R real_type;
   /*! \brief The type of denotable point contained by the Taylor set. */

@@ -1,7 +1,7 @@
 /***************************************************************************
- *            approximator.cc
+ *            dynamical_toolbox.cc
  *
- *  Copyright  2007  Pieter Collins
+ *  Copyright  2008  Pieter Collins
  *
  ****************************************************************************/
 
@@ -25,8 +25,8 @@
 
 #include "function/approximate_taylor_model.h"
 
-#include "evaluation/tools.h"
-#include "evaluation/tools.code.h"
+#include "evaluation/dynamical_toolbox.h"
+#include "evaluation/dynamical_toolbox.code.h"
 
 namespace Ariadne {
   
@@ -34,11 +34,11 @@ namespace Ariadne {
     
 
 #ifdef ENABLE_FLOAT64
-    template class Tools< ApproximateTaylorModel<Float64> >;
+    template class DynamicalToolbox< ApproximateTaylorModel<Float64> >;
 #endif
   
 #ifdef ENABLE_FLOATMP
-    template class Tools< ApproximateTaylorModel<FloatMP> >;
+    template class DynamicalToolbox< ApproximateTaylorModel<FloatMP> >;
 #endif
 
   

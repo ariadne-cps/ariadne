@@ -28,6 +28,7 @@
 #ifndef ARIADNE_HYBRID_EVOLVER_H
 #define ARIADNE_HYBRID_EVOLVER_H
 
-#include "set_based_hybrid_evolver.h"
+//#include "set_based_hybrid_evolver.h"
+#include "constraint_based_hybrid_evolver.h"
 
 #endif /* ARIADNE_HYBRID_EVOLVER_H */

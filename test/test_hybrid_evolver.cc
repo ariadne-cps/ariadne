@@ -79,22 +79,28 @@ class TestHybridEvolver
     integrator_verbosity = 0;
     
     
-    PolyhedralSet<R> space(Box<R>("[-7.5,7.5]x[-7.5,7.5]"));
-    AffineMap<R> identity(Matrix<R>("[1,0;0,-1]"),Vector<R>("[0,0]"));
+    PolyhedralSet<R> spaceset(Box<R>("[-7.5,7.5]x[-7.5,7.5]"));
+    AffineFunction<R> identity(Matrix<R>("[1,0;0,-1]"),Vector<R>("[0,0]"));
     
-    PolyhedralSet<R> invariant1(space);
-    PolyhedralSet<R> invariant2(space);
-    AffineVectorField<R> dynamic1(Matrix<R>("[-2,-1;1,-2]"),Vector<R>("[-1,0]"));
-    AffineVectorField<R> dynamic2(Matrix<R>("[-2,-1; 1,-2]"),Vector<R>("[1,0]"));
-    //AffineVectorField<R> dynamic2(Matrix<R>("[0,0;0,0]"),Vector<R>("[-1,-2]"));
-    PolyhedralSet<R> activation11(Box<R>("[-7.5,7.5]x[-3,-2]"));
-    PolyhedralSet<R> activation21(Box<R>("[-7.5,7.5]x[-7,-6]"));
-    PolyhedralSet<R> activation12(Box<R>("[-7.5,7.5]x[6,7]"));
-    AffineMap<R> reset11(Matrix<R>("[1,0;0,-1]"),Vector<R>("[0,0]"));
-    AffineMap<R> reset21(Matrix<R>("[1,0;0,-1]"),Vector<R>("[0,0]"));
-    AffineMap<R> reset12(Matrix<R>("[1,0;0,-1]"),Vector<R>("[0,0]"));
+    PolyhedralSet<R> invariantset1(spaceset);
+    PolyhedralSet<R> invariantset2(spaceset);
+    AffineFunction<R> dynamic1(Matrix<R>("[-2,-1;1,-2]"),Vector<R>("[-1,0]"));
+    AffineFunction<R> dynamic2(Matrix<R>("[-2,-1; 1,-2]"),Vector<R>("[1,0]"));
+    //AffineFunction<R> dynamic2(Matrix<R>("[0,0;0,0]"),Vector<R>("[-1,-2]"));
+    PolyhedralSet<R> activationset11(Box<R>("[-7.5,7.5]x[-3,-2]"));
+    PolyhedralSet<R> activationset21(Box<R>("[-7.5,7.5]x[-7,-6]"));
+    PolyhedralSet<R> activationset12(Box<R>("[-7.5,7.5]x[6,7]"));
+    AffineFunction<R> reset11(Matrix<R>("[1,0;0,-1]"),Vector<R>("[0,0]"));
+    AffineFunction<R> reset21(Matrix<R>("[1,0;0,-1]"),Vector<R>("[0,0]"));
+    AffineFunction<R> reset12(Matrix<R>("[1,0;0,-1]"),Vector<R>("[0,0]"));
     
-    
+    AffineFunction<R> space(Matrix<R>("[1,0]"),Vector<R>("[-7.5]"));
+    AffineFunction<R> invariant1(Matrix<R>("[1,0]"),Vector<R>("[-7.5]"));
+    AffineFunction<R> invariant2=invariant1;
+    AffineFunction<R> activation11=invariant1;
+    AffineFunction<R> activation21=invariant1;
+    AffineFunction<R> activation12=invariant1;
+
     automaton=HybridAutomaton<R>("Affine automaton");
     mode1_id=DiscreteState(2);
     mode2_id=DiscreteState(3);

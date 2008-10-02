@@ -1,5 +1,5 @@
 /***************************************************************************
- *            tools.code.h
+ *            dynamical_toolbox.code.h
  *
  *  Copyright  2008  Pieter Collins
  *
@@ -34,7 +34,7 @@
 
 #include "geometry/box.h"
 
-#include "evaluation/tools.h"
+#include "evaluation/dynamical_toolbox.h"
 
 
 namespace Ariadne {
@@ -55,8 +55,8 @@ const uint smoothness=1;
 
 /*
 template<class Mdl>
-typename Tools<Mdl>::ModelType
-Tools<Mdl>::
+typename DynamicalToolbox<Mdl>::ModelType
+DynamicalToolbox<Mdl>::
 model(const FunctionType& f, ushort d) const
 {
   ushort order=d;
@@ -72,8 +72,8 @@ model(const FunctionType& f, ushort d) const
   
 /*
 template<class Mdl>
-typename Tools<Mdl>::ModelType
-Tools<Mdl>::
+typename DynamicalToolbox<Mdl>::ModelType
+DynamicalToolbox<Mdl>::
 set(const BoxType& box) const
 {
   uint n=model.result_size();
@@ -89,8 +89,8 @@ set(const BoxType& box) const
 
   
 template<class Mdl>
-typename Tools<Mdl>::SetModelType
-Tools<Mdl>::
+typename DynamicalToolbox<Mdl>::SetModelType
+DynamicalToolbox<Mdl>::
 integration_step(const FlowModelType& flow_model, 
                  const SetModelType& initial_set_model, 
                  const TimeType& integration_time) const
@@ -101,8 +101,8 @@ integration_step(const FlowModelType& flow_model,
 
 
 template<class Mdl>
-typename Tools<Mdl>::SetModelType
-Tools<Mdl>::
+typename DynamicalToolbox<Mdl>::SetModelType
+DynamicalToolbox<Mdl>::
 integration_step(const FlowModelType& flow_model, 
                  const SetModelType& initial_set_model, 
                  const TimeModelType& integration_time_model) const
@@ -120,8 +120,8 @@ integration_step(const FlowModelType& flow_model,
 
 
 template<class Mdl>
-typename Tools<Mdl>::SetModelType
-Tools<Mdl>::
+typename DynamicalToolbox<Mdl>::SetModelType
+DynamicalToolbox<Mdl>::
 reachability_step(const FlowModelType& flow_model, 
                   const SetModelType& initial_set_model, 
                   const TimeType& initial_time, 
@@ -137,8 +137,8 @@ reachability_step(const FlowModelType& flow_model,
 
 
 template<class Mdl>
-typename Tools<Mdl>::ModelType
-Tools<Mdl>::
+typename DynamicalToolbox<Mdl>::ModelType
+DynamicalToolbox<Mdl>::
 reachability_step(const ModelType& flow_model, 
                   const ModelType& initial_set_model, 
                   const ModelType& initial_time_model, 
@@ -172,8 +172,8 @@ reachability_step(const ModelType& flow_model,
 
 
 template<class Mdl>
-typename Tools<Mdl>::TimeModelType
-Tools<Mdl>::
+typename DynamicalToolbox<Mdl>::TimeModelType
+DynamicalToolbox<Mdl>::
 reachability_time(const TimeModelType& initial_time_model, 
                   const TimeModelType& final_time_model) const
 {
@@ -197,16 +197,19 @@ reachability_time(const TimeModelType& initial_time_model,
 
 
 
-// Compute the grazing time using bisections
+// Compute the crossing time using the implicit function theorem
 template<class Mdl>
-typename Tools<Mdl>::ModelType
-Tools<Mdl>::
+typename DynamicalToolbox<Mdl>::ModelType
+DynamicalToolbox<Mdl>::
 crossing_time(const ModelType& flow_model, 
               const ModelType& guard_model, 
-              const ModelType& initial_set_model, 
-              const RealType& maximum_time) const
+              const ModelType& initial_set_model) const
 {
-  RealType minimum_time=0;
+  uint dimension=flow_model.result_size();
+  RealType minimum_time=flow_model.domain()[dimension].lower(); 
+  RealType maximum_time=flow_model.domain()[dimension].upper(); 
+  ARIADNE_ASSERT(minimum_time<=0);
+  ARIADNE_ASSERT(maximum_time>=0);
   ModelType hitting_model=compose(guard_model,flow_model);
   ARIADNE_LOG(6,"hitting_model = "<<hitting_model<<"\n");
   ModelType free_hitting_time_model;
@@ -231,13 +234,18 @@ crossing_time(const ModelType& flow_model,
 // Compute the grazing time using bisections
 template<class Mdl>
 pair<Mdl,Mdl>
-Tools<Mdl>::
+DynamicalToolbox<Mdl>::
 touching_time_interval(const ModelType& flow_model, 
                        const ModelType& guard_model, 
-                       const ModelType& initial_set_model, 
-                       const RealType& maximum_time) const
+                       const ModelType& initial_set_model) const
 {
-  RealType minimum_time=0;
+  uint dimension=guard_model.argument_size();
+  RealType minimum_time=flow_model.domain()[dimension].lower(); 
+  RealType maximum_time=flow_model.domain()[dimension].upper(); 
+
+  ARIADNE_ASSERT(minimum_time<=0);
+  ARIADNE_ASSERT(maximum_time>=0);
+
   ModelType final_set_model=this->integration_step(flow_model,initial_set_model,maximum_time);
 
   uint refinements=5;
@@ -290,7 +298,7 @@ touching_time_interval(const ModelType& flow_model,
 
 template<class Mdl>
 tribool
-Tools<Mdl>::
+DynamicalToolbox<Mdl>::
 active(const ModelType& guard_model, const ModelType& set_model) const
 {
   IntervalType range=compose(guard_model,set_model).range()[0];
@@ -305,14 +313,27 @@ active(const ModelType& guard_model, const ModelType& set_model) const
 
 template<class Mdl>
 tribool
-Tools<Mdl>::
+DynamicalToolbox<Mdl>::
 active(const FunctionType& guard_function, const ModelType& set_model) const
 {
   ModelType guard_model(set_model.range(),guard_function,spacial_order,smoothness);
   return this->active(guard_model,set_model);
 }
 
-
+template<class Mdl>
+tribool
+DynamicalToolbox<Mdl>::
+active(const FunctionType& guard_function, const BoxType& box) const
+{
+  IntervalType range=guard_function.evaluate(box)[0];
+  if(range.lower()>0) {
+    return true;
+  } else if(range.upper()<0) {
+    return false; 
+  } else {
+    return indeterminate;
+  }
+}
 
 
 

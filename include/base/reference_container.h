@@ -51,8 +51,8 @@ namespace Ariadne {
       
       iterator begin() { return this->_vector.begin(); }
       iterator end() { return this->_vector.end(); }
-      const_iterator begin() const { this->_vector.begin(); }
-      const_iterator end() const { this->_vector.end(); }
+      const_iterator begin() const { return this->_vector.begin(); }
+      const_iterator end() const { return this->_vector.end(); }
       bool empty() const { return this->_vector.empty(); }
       size_type size() const { return this->_vector.size(); }
       size_type max_size() const { return this->_vector.max_size(); }

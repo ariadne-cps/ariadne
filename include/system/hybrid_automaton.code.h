@@ -59,8 +59,8 @@ HybridAutomaton<R>::~HybridAutomaton() {
 template<class R>
 const DiscreteMode<R>& 
 HybridAutomaton<R>::new_mode(DiscreteState id,
-         const VectorField<R>& dynamic,
-         const ConstraintSet<R>& invariant) 
+         const FunctionInterface<R>& dynamic,
+         const FunctionInterface<R>& invariant) 
 {
   if(this->has_mode(id)) {
     throw std::runtime_error("The hybrid automaton already has a mode with the given id");
@@ -75,8 +75,8 @@ const DiscreteTransition<R>&
 HybridAutomaton<R>::new_transition(DiscreteEvent event,
                const DiscreteMode<R> &source, 
                const DiscreteMode<R> &destination,
-               const Map<R> &reset,
-               const ConstraintSet<R> &activation) 
+               const FunctionInterface<R> &reset,
+               const FunctionInterface<R> &activation) 
 {
   DiscreteEvent event_id=event;
   DiscreteState source_id=source.discrete_state();
@@ -110,8 +110,8 @@ const DiscreteTransition<R>&
 HybridAutomaton<R>::new_transition(DiscreteEvent event,
                DiscreteState source, 
                DiscreteState destination,
-               const Map<R> &reset,
-               const ConstraintSet<R> &activation) 
+               const FunctionInterface<R> &reset,
+               const FunctionInterface<R> &activation) 
 {
   if(this->has_transition(event,source)) {
     throw std::runtime_error("The automaton already has a transition with the given id and source id.");
@@ -166,11 +166,12 @@ template<class R>
 HybridSet<R>
 HybridAutomaton<R>::invariant() const 
 {
+  throw NotImplemented(__PRETTY_FUNCTION__);
   HybridSet<R> result;
   for(discrete_mode_const_iterator mode_iter=this->_modes.begin(); 
       mode_iter!=this->_modes.end(); ++mode_iter)
   {
-    result.new_location(mode_iter->discrete_state(),mode_iter->invariant());
+    //result.new_location(mode_iter->discrete_state(),ConstraintSet<R>(mode_iter->invariant());
   }
   return result;
 }

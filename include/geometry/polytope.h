@@ -59,8 +59,8 @@ namespace Ariadne {
     template<class X> tribool disjoint(const Polytope<X>& pltp1, const Polytope<X>& pltp2);
     template<class X> tribool disjoint(const Polytope<X>& pltp, const Box<typename Polytope<X>::real_type>& bx);
     template<class X> tribool disjoint(const Box<typename Polytope<X>::real_type>& bx, const Polytope<X>& pltp);
-    template<class X> tribool subset(const Polytope<X>& pltp2, const Polytope<X>& pltp2);
-    template<class X> tribool subset(const Polytope<X>& pltp2, const Box<typename Polytope<X>::real_type>& bx);
+    template<class X> tribool subset(const Polytope<X>& pltp1, const Polytope<X>& pltp2);
+    template<class X> tribool subset(const Polytope<X>& pltp, const Box<typename Polytope<X>::real_type>& bx);
     template<class X> tribool subset(const Box<typename Polytope<X>::real_type>& bx, const Polytope<X>& pltp);
 
     template<class X> Box<typename Polytope<X>::real_type> bounding_box(const Polytope<X>& pltp);

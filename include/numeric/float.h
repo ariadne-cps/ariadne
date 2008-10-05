@@ -28,6 +28,9 @@
 #ifndef ARIADNE_NUMERIC_FLOAT_H
 #define ARIADNE_NUMERIC_FLOAT_H
 
+// For uint typedef
+#include <cstdlib>
+
 #include "config.h"
 
 #include "base/types.h"

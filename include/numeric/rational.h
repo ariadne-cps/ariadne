@@ -30,6 +30,7 @@
 
 #include <gmp.h>
 #include <iostream>
+#include <cstdlib>
 
 #include "numeric/macros.h"
 #include "numeric/traits.h"

@@ -69,6 +69,7 @@
 #ifndef ARIADNE_BINARY_WORD_H
 #define ARIADNE_BINARY_WORD_H
 
+#include <limits>
 #include <vector>
 #include <iosfwd>
 #include <stdexcept>

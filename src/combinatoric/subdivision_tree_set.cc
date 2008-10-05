@@ -67,7 +67,7 @@ SubdivisionSequence::_compute_dimension()
 void
 MaskedBinaryTree::reduce()
 {
-  const BooleanArray& tree(this->_tree.array());
+  const BooleanArray& tree(this->_tree.bitarray());
   const BooleanArray& mask(this->_mask);
   
   std::vector<bool> new_tree;

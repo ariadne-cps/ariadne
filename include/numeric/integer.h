@@ -32,6 +32,7 @@
 #include <gmp.h>
 #include <iosfwd>
 #include <stdexcept>
+#include <cstdlib>
 
 #include "numeric/traits.h"
 #include "numeric/expression.h"

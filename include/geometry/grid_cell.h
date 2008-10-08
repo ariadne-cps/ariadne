@@ -87,6 +87,9 @@ namespace Ariadne {
       /*!\brief The dimension of the cell. */
       dimension_type dimension() const;
 
+      /*!\brief The interval of \a i th coordinate values. */
+      Interval<R> operator[](dimension_type i) const;
+
       /*!\brief The lower bound of the \a i th coordinate. */
       R lower_bound(dimension_type i) const;
 

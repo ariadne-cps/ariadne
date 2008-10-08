@@ -37,6 +37,13 @@ GridCell<R>::GridCell(const Grid<R>& g)
 }
 
 template<class R> 
+Interval<R>
+GridCell<R>::operator[](dimension_type i) const
+{
+  return Interval<R>(this->lower_bound(i),this->upper_bound(i));
+}
+
+template<class R> 
 GridBlock<R>
 GridCell<R>::neighbourhood() const 
 {

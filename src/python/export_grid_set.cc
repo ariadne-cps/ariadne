@@ -118,6 +118,7 @@ void export_grid_set()
 
   class_<RGridCell> grid_cell_class("GridCell",init<const RGrid&>());
   grid_cell_class.def("dimension", &RGridCell::dimension);
+  grid_cell_class.def("__getitem__", &RGridCell::operator[]);
   grid_cell_class.def("lattice_set", &RGridCell::lattice_set,return_value_policy<copy_const_reference>());
   grid_cell_class.def(self_ns::str(self));
   

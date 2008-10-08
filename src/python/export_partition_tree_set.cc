@@ -31,6 +31,7 @@
 #include "geometry/partition_tree_set.h"
 
 #include "geometry/zonotope.h"
+#include "geometry/polytope.h"
 
 using namespace Ariadne;
 using namespace Ariadne::Python;
@@ -54,6 +55,7 @@ void export_partition_tree_set()
   typedef SetInterface< Box<R> > RSetInterface;
   typedef Box<R> RBox;
   typedef Zonotope<R> RZonotope;
+  typedef Polytope<R> RPolytope;
   typedef GridMaskSet<R> RGridMaskSet;
   
   class_<SubdivisionSequence>("SubdivisionSequence",init<unsigned int>())
@@ -85,6 +87,7 @@ void export_partition_tree_set()
   class_<RPartitionTreeSet, bases<RSetInterface> >("PartitionTreeSet",init<RBox,SubdivisionSequence,BinaryTree,BooleanArray>())
     .def(init<RPartitionTree,BooleanArray>())
     .def(init<RPartitionScheme>())
+    .def(init<RBox>())
     .def(init<RGridMaskSet>())
     .def("dimension", &RPartitionTreeSet::dimension)
     .def("bounding_box", &RPartitionTreeSet::bounding_box)
@@ -99,11 +102,16 @@ void export_partition_tree_set()
     .def("size", &RPartitionTreeSet::size)
     .def("__len__", &RPartitionTreeSet::size)
     .def("__iter__", iterator<RPartitionTreeSet>())
+    .def("adjoin", &RPartitionTreeSet::adjoin)
+    .def("adjoin_outer_approximation", (void(RPartitionTreeSet::*)(const RBox&,const uint)) &RPartitionTreeSet::adjoin_outer_approximation)
+    .def("adjoin_outer_approximation", (void(RPartitionTreeSet::*)(const RZonotope&,const uint)) &RPartitionTreeSet::adjoin_outer_approximation)
+    .def("adjoin_outer_approximation", (void(RPartitionTreeSet::*)(const RPolytope&,const uint)) &RPartitionTreeSet::adjoin_outer_approximation)
     .def(self_ns::str(self))    // __self_ns::str__
   ;
 
   class_<RPartitionTreeCell>("PartitionTreeCell",init<RBox,SubdivisionSequence,BinaryWord>())
     .def("dimension", &RPartitionTreeCell::dimension)
+    .def("__getitem__", &RPartitionTreeCell::operator[])
     .def(self_ns::str(self))    // __self_ns::str__
   ;
 

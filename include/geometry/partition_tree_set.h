@@ -142,6 +142,9 @@ namespace Ariadne {
       /*!\brief The dimension of the cell. */
       dimension_type dimension() const;
 
+      /*!\brief The bounds on the \a ith coordinate. */
+      Interval<R> operator[](dimension_type i) const;
+
       /*!\brief Tests if the set is empty. */
       tribool empty() const;
 
@@ -261,6 +264,9 @@ namespace Ariadne {
       typedef PartitionTreeCell<R> basic_set_type;
 
 
+      /*! \brief Construct an empty set based on the standard partition scheme over the given bounding box. */
+      PartitionTreeSet(const Box<R>& g);
+
       /*! \brief Construct an empty set based on a partition scheme. */
       PartitionTreeSet(const PartitionScheme<R>& g);
 
@@ -359,6 +365,13 @@ namespace Ariadne {
 
       /*! \brief An approximation to the volume of the set. */
       R volume() const;
+      
+      /*! \brief Inplace union with another partition tree set. */
+      void adjoin(const PartitionTreeSet<R>& pts);
+      
+      /*! \brief Over-approximate another set to the given depth and take the inplace union. */
+      template<class S> void adjoin_outer_approximation(const S& set, const uint depth);
+      
       
 #ifdef DOXYGEN
       /*! \brief Compute an over approximation to a rectangle \a r based on the partition scheme \a ps. */

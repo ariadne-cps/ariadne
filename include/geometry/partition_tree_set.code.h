@@ -28,6 +28,8 @@
 
 #include "geometry/euclidean_space.h"
 #include "geometry/box.h"
+#include "geometry/zonotope.h"
+#include "geometry/polytope.h"
 #include "geometry/box_list_set.h"
 #include "geometry/grid_cell_list_set.h"
 #include "geometry/grid_mask_set.h"
@@ -36,17 +38,38 @@
 
 #include <vector>
 
+
 namespace Ariadne {
 
+    
+    
+namespace {
 
-    
-    
+template<class R> inline 
+tribool 
+superset(const Polytope<R>& ply, const Box<R>& bx)
+{
+  return indeterminate;
+}
+
+}
+
+
+
+
 template<class R>
 PartitionScheme<R>::PartitionScheme(const Box<R>& bb) 
   : _unit_box(bb), 
     _subdivisions(bb.dimension()) 
 { }
 
+
+template<class R>
+Interval<R>
+PartitionTreeCell<R>::operator[](dimension_type i) const 
+{
+  return Interval<R>(this->lower_bound(i),this->upper_bound(i));
+}
 
 // FIXME: Should use add_approx etc here.
 // We use approximate values since the cell boundaries are defined
@@ -71,6 +94,12 @@ PartitionTreeCell<R>::upper_bound(dimension_type i) const
 }
 
 
+
+template<class R>
+PartitionTreeSet<R>::PartitionTreeSet(const Box<R>& bbox) 
+  : _unit_box(bbox),
+    _subdivision_set(SubdivisionSequence(bbox.dimension()))
+{ }
 
 template<class R>
 PartitionTreeSet<R>::PartitionTreeSet(const GridMaskSet<R>& gms) 
@@ -155,12 +184,20 @@ PartitionTreeSet<R>::operator BoxListSet<R>() const
 
 template<class R>
 void
+PartitionTreeSet<R>::adjoin(const PartitionTreeSet<R>& pts)
+{
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+template<class R>
+void
 PartitionTreeSet<R>::_instantiate_geometry_operators()
 {
   uint d=0;
   Box<R>* bx=0;
   Box<R>* r=0;
   Zonotope<R>* z=0;
+  Polytope<R>* p=0;
   SetInterface< Box<R> >* s=0;
   GridMaskSet<R>* gms=0;
   PartitionScheme<R>* ps=0;
@@ -175,6 +212,8 @@ PartitionTreeSet<R>::_instantiate_geometry_operators()
   *pts=Ariadne::outer_approximation(*z,*ps,d);
   *pts=Ariadne::boundary_approximation(*z,*ps,d);
   *pts=Ariadne::inner_approximation(*z,*ps,d);
+  
+  *pts=Ariadne::outer_approximation(*p,*ps,d);
   
   *pts=Ariadne::outer_approximation(*gms,*ps,d);
   *pts=Ariadne::inner_approximation(*gms,*ps,d);

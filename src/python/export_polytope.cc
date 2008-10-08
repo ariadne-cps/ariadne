@@ -104,6 +104,7 @@ void export_polytope()
   polytope_class.def(init< Box<R> >());
   polytope_class.def("dimension", &Polytope<R>::dimension);
   polytope_class.def("number_of_vertices", &Polytope<R>::number_of_vertices);
+  polytope_class.def("vertex", &Polytope<R>::vertex);
   polytope_class.def("empty", &Polytope<R>::empty);
   polytope_class.def("vertices", &Polytope<R>::vertices);
   polytope_class.def("bounding_box", &Polytope<R>::bounding_box);

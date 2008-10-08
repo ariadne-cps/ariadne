@@ -400,6 +400,13 @@ PartitionTreeSet<R>::bounded() const
   return true; 
 }
 
+template<class R> template<class S> inline
+void
+PartitionTreeSet<R>::adjoin_outer_approximation(const S& set, const uint depth)
+{
+  this->adjoin(outer_approximation(set,this->scheme(),depth));
+}
+
 
 
 

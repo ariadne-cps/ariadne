@@ -336,5 +336,35 @@ active(const FunctionType& guard_function, const BoxType& box) const
 }
 
 
+template<class Mdl>
+array<Mdl> 
+DynamicalToolbox<Mdl>::subdivide(Mdl const&) const
+{ 
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+template<class Mdl>
+std::pair<typename Mdl::real_type, Vector<Interval<typename Mdl::real_type> > >
+DynamicalToolbox<Mdl>::flow_bounds(FunctionInterface<R> const&, Vector<I> const&, R const&, R const&)
+{ 
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+template<class Mdl>
+Mdl
+DynamicalToolbox<Mdl>::model(TaylorSet<R> const&)
+{ 
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+template<class Mdl>
+Mdl
+DynamicalToolbox<Mdl>::flow_model(FunctionInterface<R> const&, Vector<I> const&, R const&, Vector<I> const&)
+{ 
+  throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+
+
 
 }  // namespace Ariadne

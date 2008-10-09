@@ -38,6 +38,7 @@
 #include <set>
 #include <map>
 #include "array.h"
+#include "tuple.h"
 
 #include "sequence_io.h"
 
@@ -81,6 +82,30 @@ namespace Ariadne {
       return is;
     }
     
+  template<class T1, class T2> 
+  inline 
+  std::ostream& 
+  operator<<(std::ostream &os, const tuple<T1,T2>& t) 
+  {
+    return os << '(' << t.first << ',' << t.second << ')';
+  }
+  
+  template<class T1, class T2, class T3> 
+  inline 
+  std::ostream& 
+  operator<<(std::ostream &os, const tuple<T1,T2,T3>& t) 
+  {
+    return os << '(' << t.first << ',' << t.second << ',' << t.third << ')';
+  }
+  
+  template<class T1, class T2, class T3, class T4> 
+  inline 
+  std::ostream& 
+  operator<<(std::ostream &os, const tuple<T1,T2,T3,T4>& t) 
+  {
+    return os << '(' << t.first << ',' << t.second << ',' << t.third << ',' << t.fourth << ')';
+  }
+  
 
 } // namespace Ariadne
 

@@ -53,29 +53,27 @@ int test_hybrid_automaton()
   Box<R> r("[-1,1]x[-1,1]");
   cout << "r=" << r << endl;
 
-  AffineFunction<R> dynamic(Matrix<R>("[0.25,-1.00;1.00,0.25]"),Vector<R>("[0.00,0.00]"));
+  AffineVectorField<R> dynamic(Matrix<R>("[-0.25,-1.00;1.00,-0.25]"),Vector<R>("[0.00,0.00]"));
   cout << "dynamic=" << dynamic << endl;
-  AffineFunction<R> reset(Matrix<R>("[-0.125,0;0,-0.125]"),Vector<R>("[0,0]"));
+  AffineMap<R> reset(Matrix<R>("[-7,0;0,-7]"),Vector<R>("[0,0]"));
   cout << "reset=" << reset << endl;
   
-  AffineFunction<R> invariant1(Matrix<R>("[-1,0]"),Vector<R>("[1]"));
-  AffineFunction<R> invariant2(Matrix<R>("[-1,0]"),Vector<R>("[4]"));
-  cout << "invariant1=" << invariant1 << endl;
-  cout << "invariant2=" << invariant2 << endl;
-  AffineFunction<R> activation12(Matrix<R>("[-1,0]"),Vector<R>("[1.125]"));
-  AffineFunction<R> guard21(Matrix<R>("[1,0]"),Vector<R>("[-1]"));
+  PolyhedralSet<R> invariant(r);
+  cout << "invariant=" << invariant << endl;
+  PolyhedralSet<R> activation12(Box<R>("[-0.20,0.00]x[-0.20,0.00]"));
+  PolyhedralSet<R> activation21(Box<R>("[0.00,0.20]x[0.00,0.20]"));
   cout << "activation12=" << activation12 << endl;
-  cout << "activation21=" << guard21 << endl;
+  cout << "activation21=" << activation21 << endl;
   cout << endl;
   
-  HybridAutomaton<R> automaton("Constraint-based affine test automaton");
+  HybridAutomaton<R> automaton("Set-based affine test automaton");
   DiscreteState dstate1(0);
   DiscreteState dstate2(1);
-  const DiscreteMode<R>& mode1=automaton.new_mode(dstate1,dynamic,invariant1);
-  const DiscreteMode<R>& mode2=automaton.new_mode(dstate2,dynamic,invariant2);
+  const DiscreteMode<R>& mode1=automaton.new_mode(dstate1,dynamic,invariant);
+  const DiscreteMode<R>& mode2=automaton.new_mode(dstate2,dynamic,invariant);
   DiscreteEvent event(5);
   const DiscreteTransition<R>& transition12=automaton.new_transition(event,dstate1,dstate2,reset,activation12);
-  const DiscreteTransition<R>& transition21=automaton.new_transition(event,dstate2,dstate1,reset,guard21);
+  const DiscreteTransition<R>& transition21=automaton.new_transition(event,dstate2,dstate1,reset,activation21);
   
   cout << mode1  <<  "\n" << mode2 << "\n" << transition12 << "\n" << transition21 << endl;
 

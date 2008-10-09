@@ -30,7 +30,7 @@
 #include "geometry/hybrid_set.h"
 #include "geometry/zonotope.h"
 #include "geometry/empty_set.h"
-#include "geometry/polyhedral_set.h"
+#include "geometry/taylor_set.h"
 #include "system/affine_map.h"
 #include "system/affine_vector_field.h"
 #include "system/hybrid_automaton.h"
@@ -41,7 +41,7 @@
 #include "evaluation/standard_satisfier.h"
 #include "evaluation/standard_subdivider.h"
 #include "evaluation/cascade_reducer.h"
-#include "evaluation/set_based_hybrid_evolver.h"
+#include "evaluation/hybrid_evolver.h"
 #include "output/epsstream.h"
 #include "output/logging.h"
 
@@ -51,10 +51,12 @@ using namespace Ariadne;
 using namespace std;
 
 template<class R> int test_set_based_hybrid_evolver();
+template<class R> int test_constraint_based_hybrid_evolver();
   
+/*
 
 template<class R>
-class TestHybridEvolver 
+class TestSetBasedHybridEvolver 
 {  
   typedef HybridAutomaton<R> Sys;
   typedef Zonotope<R> ES;
@@ -192,6 +194,139 @@ class TestHybridEvolver
 
 };
 
+*/
+
+
+template<class R>
+class TestConstraintBasedHybridEvolver 
+{  
+  typedef HybridAutomaton<R> Sys;
+  typedef TaylorSet<R> EnclosureSetType;
+  typedef TaylorSet<R> ES;
+  typedef HybridBasicSet<ES> HES;
+  typedef ListSet<HES> HLS;
+
+  HybridEvolver< R > hybrid_evolver;
+  HybridAutomaton<R> automaton;
+  HybridBasicSet<ES> initial_set;
+  Box<R> bounding_box;
+  DiscreteState mode1_id, mode2_id;
+
+ public:
+  TestConstraintBasedHybridEvolver() 
+    : automaton(""),
+      initial_set(DiscreteState(2),EnclosureSetType(2)),
+      bounding_box(Box<R>("[-4,4]x[-4,4]")),
+      mode1_id(2),
+      mode2_id(3)
+  {
+    hybrid_evolver_verbosity = 2;
+    integrator_verbosity = 0;
+    
+    
+  
+    Box<R> r("[-1,1]x[-1,1]");
+    cout << "r=" << r << endl;
+    
+    AffineFunction<R> dynamic(Matrix<R>("[0.25,-1.00;1.00,0.25]"),Vector<R>("[0.00,0.00]"));
+    cout << "dynamic=" << dynamic << endl;
+    AffineFunction<R> reset(Matrix<R>("[-0.125,0;0,-0.125]"),Vector<R>("[0,0]"));
+    cout << "reset=" << reset << endl;
+    
+    AffineFunction<R> invariant1(Matrix<R>("[-1,0]"),Vector<R>("[1]"));
+    AffineFunction<R> invariant2(Matrix<R>("[-1,0]"),Vector<R>("[4]"));
+    cout << "invariant1=" << invariant1 << endl;
+    cout << "invariant2=" << invariant2 << endl;
+    AffineFunction<R> activation12(Matrix<R>("[-1,0]"),Vector<R>("[1.125]"));
+    AffineFunction<R> guard21(Matrix<R>("[1,0]"),Vector<R>("[-1]"));
+    cout << "activation12=" << activation12 << endl;
+    cout << "activation21=" << guard21 << endl;
+    cout << endl;
+    
+    automaton =HybridAutomaton<R>("Constraint-based affine test automaton");
+    DiscreteState dstate1(0);
+    DiscreteState dstate2(1);
+    const DiscreteMode<R>& mode1=automaton.new_mode(dstate1,dynamic,invariant1);
+    const DiscreteMode<R>& mode2=automaton.new_mode(dstate2,dynamic,invariant2);
+    DiscreteEvent event(5);
+    const DiscreteTransition<R>& transition12=automaton.new_transition(event,dstate1,dstate2,reset,activation12);
+    const DiscreteTransition<R>& transition21=automaton.new_transition(event,dstate2,dstate1,reset,guard21);
+    
+    cout << mode1 << " " << mode2 << endl;
+    cout << transition21 << " " << transition12 << " " << endl;
+    cout << endl;
+    
+    time_type maximum_step_size=0.125;
+    time_type lock_to_grid_time=0.25;
+    R maximum_enclosure_radius=0.5;
+    R grid_length=0.25;
+    
+    EvolutionParameters<R> parameters;
+    parameters.set_maximum_enclosure_radius(maximum_enclosure_radius);
+    parameters.set_grid_length(grid_length);
+    parameters.set_maximum_step_size(maximum_step_size);
+    parameters.set_lock_to_grid_time(lock_to_grid_time);
+    parameters.set_verbosity(0);
+    
+    hybrid_evolver=HybridEvolver<R> ();
+    
+    HybridBasicSet<EnclosureSetType> initial_set(mode1_id,EnclosureSetType(Box<R>("[-6.96875,-6.9375]x[-6.96875,-6.9375]")));
+    cout << "initial_set=" << initial_set << endl;
+    
+  }
+
+  void test_lower_semantics() {  
+    cout << "Computing timed evolved set" << endl;
+    ListSet< HybridBasicSet< EnclosureSetType > > lower_evolve=hybrid_evolver.reach(automaton,initial_set,Rational(1),lower_semantics);
+    ListSet< HybridBasicSet< EnclosureSetType > > lower_reach=hybrid_evolver.reach(automaton,initial_set,Rational(1),lower_semantics);
+    HybridListSet< EnclosureSetType > lower_evolve_sets(automaton.locations(),lower_evolve);
+    HybridListSet< EnclosureSetType > lower_reach_sets(automaton.locations(),lower_reach);
+    cout << "Reached (" << lower_reach_sets[mode1_id].size() << "," << lower_reach_sets[mode2_id].size() << ") enclosures, "
+         << "with (" << lower_evolve_sets[mode1_id].size() << "," << lower_evolve_sets[mode2_id].size() << ") at final time."
+         << endl << endl;
+
+    epsfstream eps;
+    eps.open("test_hybrid_evolver-lower.eps",bounding_box.neighbourhood(0.5));
+    eps << fill_colour(white) << bounding_box;
+    eps << line_style(true);
+    eps << fill_colour(red) << lower_reach_sets[mode1_id];
+    eps << fill_colour(magenta) << lower_reach_sets[mode2_id];
+    eps << fill_colour(green) << lower_evolve_sets[mode1_id];
+    eps << fill_colour(cyan) << lower_evolve_sets[mode2_id];
+    eps << fill_colour(blue) << initial_set.set();
+    eps.close();
+  }
+
+  void test_upper_semantics() {  
+    cout << "Computing timed evolved set" << endl;
+    ListSet< HybridBasicSet< EnclosureSetType > > upper_evolve=hybrid_evolver.reach(automaton,initial_set,Rational(1),upper_semantics);
+    ListSet< HybridBasicSet< EnclosureSetType > > upper_reach=hybrid_evolver.reach(automaton,initial_set,Rational(1),upper_semantics);
+    HybridListSet< EnclosureSetType > upper_evolve_sets(automaton.locations(),upper_evolve);
+    HybridListSet< EnclosureSetType > upper_reach_sets(automaton.locations(),upper_reach);
+    cout << "Reached (" << upper_reach_sets[mode1_id].size() << "," << upper_reach_sets[mode2_id].size() << ") enclosures, "
+         << "with (" << upper_evolve_sets[mode1_id].size() << "," << upper_evolve_sets[mode2_id].size() << ") at final time."
+         << endl << endl;
+
+    epsfstream eps;
+    eps.open("test_hybrid_evolver-upper.eps",bounding_box.neighbourhood(0.5));
+    eps << fill_colour(white) << bounding_box;
+    eps << line_style(true);
+    eps << fill_colour(red) << upper_reach_sets[mode1_id];
+    eps << fill_colour(magenta) << upper_reach_sets[mode2_id];
+    eps << fill_colour(green) << upper_evolve_sets[mode1_id];
+    eps << fill_colour(cyan) << upper_evolve_sets[mode2_id];
+    eps << fill_colour(blue) << initial_set.set();
+    eps.close(); 
+  }
+
+  
+  void test() {
+    //ARIADNE_TEST_CALL(test_lower_semantics());
+    ARIADNE_TEST_CALL(test_upper_semantics());
+  }
+
+};
+
 
 int main(int nargs, const char* args[]) 
 {
@@ -205,7 +340,7 @@ int main(int nargs, const char* args[])
   }
   set_hybrid_evolver_verbosity(hybrid_evolver_verbosity);
   set_integrator_verbosity(integrator_verbosity);
-  TestHybridEvolver<Flt>().test();
+  TestConstraintBasedHybridEvolver<Flt>().test();
   cerr << "INCOMPLETE ";
   return ARIADNE_TEST_FAILURES;
 }

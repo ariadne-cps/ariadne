@@ -23,6 +23,7 @@
 
 #include <utility>  //for std::pair
 
+#include "base/tuple.h"
 #include "numeric/rational.h"
 #include "numeric/interval.h"
 #include "linear_algebra/vector.h"
@@ -43,9 +44,9 @@ using namespace boost::python;
 
 template<class T1, class T2>
 boost::python::tuple
-make_tuple(const std::pair<T1,T2>& p)
+make_python_tuple(const std::pair<T1,T2>& p)
 {
-  return make_tuple(p.first,p.second);
+  return boost::python::make_tuple(p.first,p.second);
 }
 
 template<class X>
@@ -95,7 +96,7 @@ template<class Mx>
 typename Mx::value_type
 __getitem__(const Mx& M, boost::python::object obj) 
 {
-  tuple index=extract<tuple>(obj);
+  boost::python::tuple index=extract<boost::python::tuple>(obj);
   int i=extract<int>(index[0]);
   int j=extract<int>(index[1]);
   return M(i,j);
@@ -103,7 +104,7 @@ __getitem__(const Mx& M, boost::python::object obj)
 
 template<class Mx, class A>  
 void __setitem__(Mx& M, boost::python::object obj, const A& x) {
-  tuple index=extract<tuple>(obj);
+  boost::python::tuple index=extract<boost::python::tuple>(obj);
   int i=extract<int>(index[0]);
   int j=extract<int>(index[1]);
   M(i,j)=x;
@@ -132,7 +133,7 @@ matrix_transpose(const Matrix<R>& A) {
 template<class R> inline 
 boost::python::tuple
 matrix_qr_approx(const Matrix<R>& A) {
-  return make_tuple(qr_approx(A));
+  return make_python_tuple(qr_approx(A));
 }
 
 template<class R>

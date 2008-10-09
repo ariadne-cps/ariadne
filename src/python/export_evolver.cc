@@ -25,6 +25,7 @@
 
 #include "geometry/box.h"
 #include "geometry/zonotope.h"
+#include "geometry/taylor_set.h"
 
 #include "system/impact_system.h"
 
@@ -38,7 +39,7 @@
 #include "evaluation/map_evolver.h"
 #include "evaluation/vector_field_evolver.h"
 #include "evaluation/impact_system_evolver.h"
-#include "evaluation/set_based_hybrid_evolver.h"
+#include "evaluation/hybrid_evolver.h"
 
 using namespace Ariadne;
 using namespace Ariadne::Python;
@@ -101,6 +102,13 @@ void export_evolver()
   //impact_system_evolver_class.def("reach",&Evolver<ImpactSystem<R>,ZES>::reach);
   impact_system_evolver_class.def(self_ns::str(self));
 
+  class_< HybridEvolver<R> > hybrid_evolver_class("HybridEvolver",no_init);
+  hybrid_evolver_class.def(init<const EvolutionParameters<R>&>());
+  hybrid_evolver_class.def("evolve",&HybridEvolver<R>::evolve);
+  hybrid_evolver_class.def("reach",&HybridEvolver<R>::reach);
+  hybrid_evolver_class.def(self_ns::str(self));
+
+  /*
   class_< Evolver<HybridAutomaton<R>,ZES> > set_based_hybrid_evolver_class("SetBasedHybridEvolver",no_init);
   set_based_hybrid_evolver_class.def(init<const EvolutionParameters<R>&,
                                           const ApplicatorInterface<ZES>&,const IntegratorInterface<ZES>&,const SatisfierInterface<ZES>&,
@@ -108,6 +116,7 @@ void export_evolver()
   set_based_hybrid_evolver_class.def("evolve",&Evolver<HybridAutomaton<R>,ZES>::evolve);
   set_based_hybrid_evolver_class.def("reach",&Evolver<HybridAutomaton<R>,ZES>::reach);
   set_based_hybrid_evolver_class.def(self_ns::str(self));
+  */
 
 }
 

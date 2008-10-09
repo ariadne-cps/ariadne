@@ -60,7 +60,6 @@ namespace Ariadne {
     template<class BS> class HybridBasicSet;
     template<class BS> class TimeModelHybridBasicSet;
  
-    enum CrossingKind { MISSING, TOUCHING, TRANSVERSE, CROSSING, GRAZING, UNKNOWN };
 
     /*! \ingroup Evolve 
      *  \brief A class for computing the evolution of a hybrid system. 
@@ -77,12 +76,16 @@ namespace Ariadne {
       typedef HybridAutomaton<R> SystemType;
       typedef HybridBasicSet< TaylorSet<R> > EnclosureType;
       typedef ListSet<EnclosureType> EnclosureListType;
-      typedef HybridTime TimeType;
+      //typedef HybridTime TimeType;
+      typedef typename SystemType::time_type TimeType;
       typedef Rational ContinuousTimeType;
      public:
 
       /*! \brief The type used for real numbers. */
       typedef R RealType;
+
+      /*! \brief Default constructor. */
+      HybridEvolver();
 
       /*! \brief Copy constructor. */
       HybridEvolver(const HybridEvolver<R>& evolver);
@@ -94,7 +97,10 @@ namespace Ariadne {
       virtual ~HybridEvolver();
 
 
-      //@{
+      /*! \brief Virtual destructor. */
+      virtual HybridEvolver<R>* clone() const;
+
+     //@{
       //! \name Parameters controlling the evolution.
       /*! \brief A reference to the parameters controlling the evolution. */
       EvolutionParameters<R>& parameters();
@@ -110,25 +116,25 @@ namespace Ariadne {
       //@}
 
 
+      /*
       //@{
       //! \name Evolution using abstract sets.
-      /*! \brief Compute an approximation to the evolution set using upper semantics. */
+      //! \brief Compute an approximation to the evolution set using upper semantics. 
       EnclosureListType evolve(const SystemType& system, const EnclosureType& initial_set, const TimeType& time) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate; 
         this->_evolution(final,reachable,intermediate,system,initial_set,time,upper_semantics,false); 
         return final; }
-      /*! \brief Compute an approximation to the evolution set under upper semantics. */
+      //! \brief Compute an approximation to the evolution set under upper semantics. 
       EnclosureListType reach(const SystemType& system, const EnclosureType& initial_set, const TimeType& time) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate; 
         this->_evolution(final,reachable,intermediate,system,initial_set,time,upper_semantics,true); 
         return intermediate; }
+*/
      protected:
       virtual void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate, 
                               const SystemType& system, const EnclosureType& initial, const TimeType& time, 
                               Semantics semantics, bool reach) const;
 
-      tuple< CrossingKind, ApproximateTaylorModel<R> > 
-      _crossing(const ApproximateTaylorModel<R>& guard_model, const ApproximateTaylorModel<R>& flow_model);
      private:
       boost::shared_ptr< EvolutionParameters<R> > _parameters;
       boost::shared_ptr< DynamicalToolbox<ModelType> > _toolbox;

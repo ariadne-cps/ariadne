@@ -29,6 +29,8 @@
 #ifndef ARIADNE_DYNAMICAL_TOOLBOX_H
 #define ARIADNE_DYNAMICAL_TOOLBOX_H
 
+#include "base/tuple.h"
+
 /* \brief Top-level namespace. */
 namespace Ariadne {
  
@@ -41,6 +43,9 @@ template<class R> class FunctionInterface;
 template<class X> class Vector;
 template<class R> class Box;
 template<class R> class TaylorSet;
+class DiscreteEvent;
+
+enum CrossingKind { MISSING, TOUCHING, TRANSVERSE, CROSSING, GRAZING, UNKNOWN };
 
 
 /*! \brief Tools for analysing dynamical systems based on function models. */
@@ -101,6 +106,12 @@ class DynamicalToolbox
                               const SetModelType& initial_set_model) const;
 
   
+  
+  tuple<DiscreteEvent,CrossingKind,Mdl,Mdl>
+  crossing_data(const FlowModelType& flow_model, 
+                const GuardModelType& guard_model, 
+                const SetModelType& initial_set_model) const;
+
   //! \brief Computes the image of the set defined by \a set_model under the \a map.
   SetModelType reset_step(const FunctionType& map, 
                           const SetModelType& set_model) const;
@@ -152,13 +163,13 @@ class DynamicalToolbox
   
 
   //! \brief A model for the map \a f over the domain \a d.
-  MapModelType map_model(const FunctionType& f, BoxType& d);
+  MapModelType map_model(const FunctionType& f, BoxType& d) const;
   //! \brief A model for the flow determined by the vector field \a vf over the initial domain \a d,
   //! valid for times up to \a h, assuming that the state remains in the bounding box \a b.
   FlowModelType flow_model(const FunctionType& vf, const BoxType& d, 
-                           const TimeType& h, const BoxType& b);
+                           const TimeType& h, const BoxType& b) const;
   //! \brief A model for the real-valued function \a g over the domain \a d.
-  GuardModelType guard_model(const FunctionType& g, const BoxType& d);
+  GuardModelType guard_model(const FunctionType& g, const BoxType& d) const;
 
   //! \brief Computed a pair \f$(h,B)\f$ such that the flow of the vector_field \a vf starting in
   //! domain \a d remains in \a B for times up to \a h. The maximum allowable \a h and maximum
@@ -167,14 +178,14 @@ class DynamicalToolbox
   flow_bounds(const FunctionType& vf, 
               const BoxType& d, 
               const RealType& maximum_step_size, 
-              const RealType& maximum_bound_diameter);
+              const RealType& maximum_bound_diameter) const;
 
 
   //@{ \name Conversion operations
   //! \brief Converts a set to a model (Unstable)
-  SetModelType model(const SetType& s);
+  SetModelType model(const SetType& s) const;
   //! \brief Converts a model to a set (Unstable)
-  SetType set(const SetModelType& s);
+  SetType set(const SetModelType& s) const;
   //@}
 
   //@{ \name Set-based operations

@@ -42,7 +42,7 @@ using namespace Ariadne::Python;
 using namespace boost::python;
 
 template<class Integrator>
-tuple
+boost::python::tuple
 flow_bounds(const Integrator& i, 
             const VectorField<typename Integrator::EnclosureSetType::real_type>& vf, 
             const typename Integrator::EnclosureSetType& es, 

@@ -103,6 +103,14 @@ operator<<(epsstream& eps, const Polyhedron<R>& p)
 
 template<class R> 
 epsstream&
+operator<<(epsstream& eps, const TaylorSet<R>& ts)
+{
+  return eps << ts.bounding_box();
+}
+
+
+template<class R> 
+epsstream&
 operator<<(epsstream& eps, const PolyhedralSet<R>& ps)
 {
   return eps << Polyhedron<R>(ps);

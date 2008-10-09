@@ -197,6 +197,7 @@ namespace Ariadne {
     template<class R> epsstream& operator<<(epsstream&, const Zonotope<R>&);
     template<class R> epsstream& operator<<(epsstream&, const Polytope<R>&); 
     template<class R> epsstream& operator<<(epsstream&, const Polyhedron<R>&); 
+    template<class R> epsstream& operator<<(epsstream&, const TaylorSet<R>&);
     template<class R> epsstream& operator<<(epsstream&, const RectangularSet<R>&);
     template<class R> epsstream& operator<<(epsstream&, const PolyhedralSet<R>&);
     template<class R> epsstream& operator<<(epsstream&, const BoxListSet<R>&); 

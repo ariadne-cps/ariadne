@@ -33,6 +33,7 @@
 #include "function/approximate_taylor_model.h"
 
 #include "geometry/box.h"
+#include "geometry/taylor_set.h"
 
 #include "evaluation/dynamical_toolbox.h"
 
@@ -70,6 +71,14 @@ model(const FunctionType& f, ushort d) const
 */
 
   
+template<class Mdl>
+typename DynamicalToolbox<Mdl>::SetType
+DynamicalToolbox<Mdl>::
+set(const SetModelType& model) const
+{
+  return SetType(model);
+}
+
 /*
 template<class Mdl>
 typename DynamicalToolbox<Mdl>::ModelType
@@ -118,6 +127,20 @@ integration_step(const FlowModelType& flow_model,
 
 
 
+
+template<class Mdl>
+typename DynamicalToolbox<Mdl>::SetModelType
+DynamicalToolbox<Mdl>::
+reachability_step(const FlowModelType& flow_model, 
+                  const SetModelType& initial_set_model, 
+                  const TimeType& initial_time, 
+                  const TimeModelType& final_time_model) const
+{
+  uint ng=initial_set_model.argument_size();
+  Mdl initial_time_model = Mdl::constant(Vector<I>(ng,I(-1,1)),Vector<R>(ng,R(0)),
+                                         Vector<A>(1,A(initial_time)),order,smoothness);
+  return this->reachability_step(flow_model,initial_set_model,initial_time_model,final_time_model);
+}
 
 template<class Mdl>
 typename DynamicalToolbox<Mdl>::SetModelType
@@ -194,6 +217,11 @@ reachability_time(const TimeModelType& initial_time_model,
   return expanded_reach_time_model;
 }
 
+
+
+
+  
+      
 
 
 
@@ -285,7 +313,9 @@ touching_time_interval(const ModelType& flow_model,
     }
   }
 
-  //return std::pair(R(lower_time),R(upper_time));
+  ModelType lower_time_model=ModelType::constant(initial_set_model.domain(),initial_set_model.centre(),Vector<A>(1u,A(lower_time)),order,smoothness);
+  ModelType upper_time_model=ModelType::constant(initial_set_model.domain(),initial_set_model.centre(),Vector<A>(1u,A(upper_time)),order,smoothness);
+  return make_pair(lower_time_model,upper_time_model);
 }
 
 
@@ -345,21 +375,21 @@ DynamicalToolbox<Mdl>::subdivide(Mdl const&) const
 
 template<class Mdl>
 std::pair<typename Mdl::real_type, Vector<Interval<typename Mdl::real_type> > >
-DynamicalToolbox<Mdl>::flow_bounds(FunctionInterface<R> const&, Vector<I> const&, R const&, R const&)
+DynamicalToolbox<Mdl>::flow_bounds(FunctionInterface<R> const&, Vector<I> const&, R const&, R const&) const
 { 
   throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
 template<class Mdl>
 Mdl
-DynamicalToolbox<Mdl>::model(TaylorSet<R> const&)
+DynamicalToolbox<Mdl>::model(TaylorSet<R> const& ts) const
 { 
-  throw NotImplemented(__PRETTY_FUNCTION__);
+  return ts.model();
 }
 
 template<class Mdl>
 Mdl
-DynamicalToolbox<Mdl>::flow_model(FunctionInterface<R> const&, Vector<I> const&, R const&, Vector<I> const&)
+DynamicalToolbox<Mdl>::flow_model(FunctionInterface<R> const&, Vector<I> const&, R const&, Vector<I> const&) const
 { 
   throw NotImplemented(__PRETTY_FUNCTION__);
 }

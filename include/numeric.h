@@ -1,7 +1,10 @@
 #ifndef ARIADNE_NUMERIC_H
 #define ARIADNE_NUMERIC_H
 
+#ifdef HAVE_GMPXX_H
 #include <gmpxx.h>
+#endif // HAVE_GMPXX_H
+
 #include <cmath>
 #include <limits>
 
@@ -15,9 +18,19 @@ using std::max;
 uint fac(uint n);
 uint bin(uint n, uint k);
 
+#ifdef HAVE_GMPXX_H
 typedef mpz_class Integer;
 typedef mpq_class Rational;
+#endif // HAVE_GMPXX_H 
+
+
+#ifdef DOXYGEN
+//! \brief Floating point numbers.
+class Float { };
+#endif
+
 typedef double Float;
+//class Float : public double { template<class T> Float(const T& t) : double(t) { } };
 
 inline Float inf() { return std::numeric_limits<double>::max(); }
 inline Float eps() { return std::numeric_limits<double>::epsilon(); }
@@ -48,6 +61,7 @@ inline Float med_approx(Float x, Float y) { return (x+y)/2; }
 
 
 
+//! \brief Intervals supporting interval arithmetic.
 class Interval {
  public:
   Interval() : l(0.0), u(0.0) { }
@@ -57,7 +71,9 @@ class Interval {
   Interval(const Interval& i) : l(i.l), u(i.u) { }
   
   Interval(Float lower, Float upper) : l(lower), u(upper) { }
+#ifdef HAVE_GMPXX_H
   Interval(Rational lower, Rational upper) : l(down(lower.get_d())), u(up(upper.get_d())) { }
+#endif // HAVE_GMPXX_H 
 
   const Float& lower() const { return l; }
   const Float& upper() const { return u; }

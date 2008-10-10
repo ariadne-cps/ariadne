@@ -1,7 +1,7 @@
 #include "array.h"
 #include "numeric.h"
 #include "vector.h"
-#include "differential.h"
+#include "dense_differential.h"
 #include "sparse_differential.h"
 #include "function.h"
 
@@ -53,11 +53,11 @@ template<class X> void read(Vector<X>& v, const object& obj) {
 
 
 template<class X> 
-void read(DifferentialVector<X>& td, const object& obj) {
+void read(SparseDifferentialVector<X>& td, const object& obj) {
   list elements=extract<list>(obj);
   ARIADNE_ASSERT(td.result_size()==uint(len(elements)));
   for(uint i=0; i!=td.size(); ++i) { 
-    boost::python::extract< Differential<X> > etv(elements[i]);
+    boost::python::extract< SparseDifferential<X> > etv(elements[i]);
     boost::python::extract<double> ed(elements[i]);
     if(etv.check()) {
       td[i]=etv(); 
@@ -180,6 +180,7 @@ void export_model()
 
   class_< Model > function_model_class("ApproximateTaylorModel",init< Vector<I>, Vector<R>, const FunctionInterface&, ushort, ushort>());
   function_model_class.def(init< uint, uint, ushort, ushort >());
+  //function_model_class.def(init< Vector<I> >());
   function_model_class.def(init< Vector<I>, Vector<R>, SparseDifferentialVector<R> >());
   function_model_class.def(init< Vector<I>, Vector<R>, SparseDifferentialVector<R> >());
   function_model_class.def(init< Model >());
@@ -191,6 +192,8 @@ void export_model()
   function_model_class.def("centre", &Model::centre);
   function_model_class.def("range", &Model::range);
   function_model_class.def("expansion", &Model::expansion, return_value_policy<copy_const_reference>());
+  function_model_class.def("identity", &Model::identity);
+  function_model_class.staticmethod("identity");
   //function_model_class.def("set",(void(Model::*)(uint,const MultiIndex&,const R&)) &Model::set);
   //function_model_class.def("get",(R(Model::*)(uint,const MultiIndex&)const) &Model::get);
   //function_model_class.def("truncate",&Model::truncate);

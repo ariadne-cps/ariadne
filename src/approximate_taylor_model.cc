@@ -293,9 +293,10 @@ ApproximateTaylorModel::jacobian(const Vector<Interval>& x) const
 
 
 ApproximateTaylorModel
-ApproximateTaylorModel::identity(const Vector<I>& d, uint o)
+ApproximateTaylorModel::identity(const Vector<I>& d)
 {
   uint n=d.size();
+  uint o=255;
   SparseDifferentialVector<A> ide(n,n,o);
   for(uint i=0; i!=n; ++i) {
     ide[i]=SparseDifferential<A>::variable(n,o,0.0,i);

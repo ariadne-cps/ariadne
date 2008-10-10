@@ -2,38 +2,45 @@
 #include "numeric.h"
 #include "vector.h"
 #include "matrix.h"
-#include "function.h"
 #include "sparse_differential.h"
+#include "function.h"
 #include "approximate_taylor_model.h"
 
 using std::cout; using std::endl; using std::flush;
 using namespace Ariadne;
 
-template<class R, class A, class P>
-void henon(R& r, const A& x, const P& p) 
-{
-  r[0]=p[0]-x[0]*x[0]-p[1]*x[1];
-  r[1]=x[0];
-}
+struct Henon {
+  static const int result_size=2;
+  static const int argument_size=2;
+  static const int smoothness=2;
+  template<class R, class A, class P>
+  void compute(R& r, const A& x, const P& p) const {
+    r[0]=p[0]-x[0]*x[0]-p[1]*x[1];
+    r[1]=x[0];
+  }
+};
 
-template<class R, class A, class P>
-void henon_square(R& r, const A& x, const P& p) 
-{
-  r[1]=p[0]-x[0]*x[0]-p[1]*x[1];
-  r[0]=p[0]-r[1]*r[1]-p[1]*x[0];
-}
+struct HenonSquared {
+  static const int result_size=2;
+  static const int argument_size=2;
+  static const int smoothness=2;
+  template<class R, class A, class P>
+  void compute(R& r, const A& x, const P& p) const {
+    r[1]=p[0]-x[0]*x[0]-p[1]*x[1];
+    r[0]=p[0]-r[1]*r[1]-p[1]*x[0];
+  }
+};
 
-template<class R, class A, class P>
-void vanderpol(R& r, const A& x, const P& p) 
-{
-  r[0]=x[1];
-  r[1]=p[0]*(1-x[0]*x[0])*x[1]-x[0];
-}
-
-ARIADNE_BUILD_FUNCTION(HenonMap,henon,2,2,2,255);
-ARIADNE_BUILD_FUNCTION(HenonMapSquared,henon_square,2,2,2,255);
-
-ARIADNE_BUILD_FUNCTION(VanDerPol,vanderpol,2,2,1,255);
+struct VanDerPol {
+  static const int result_size=2;
+  static const int argument_size=2;
+  static const int smoothness=2;
+  template<class R, class A, class P>
+  void compute(R& r, const A& x, const P& p) const {
+    r[0]=x[1];
+    r[1]=p[0]*(1-x[0]*x[0])*x[1]-x[0];
+  }
+};
 
 
 int main() {
@@ -103,7 +110,7 @@ int main() {
     cout << "implicit:\nf="<< f << "\nc=" << c << "\nv=" << v << "\n" << flush;
     ApproximateTaylorModel h=implicit(f);
     cout << "implicit(f)=" << h << "\n\n";
-    ApproximateTaylorModel id=ApproximateTaylorModel::identity(project(d,range(0,1)),2u);
+    ApproximateTaylorModel id=ApproximateTaylorModel::identity(project(d,range(0,1)));
     cout << "id=" << id << "\n\n";
     ApproximateTaylorModel g=join(id,h);
     cout << "(id,h)=" << g << endl;
@@ -128,7 +135,7 @@ int main() {
     cout << "Flow:"<<endl;
     Vector<Interval> d(2,Interval(-2,2));
     Vector<Float> c(2,0.0);
-    VanDerPol vdp(Vector<Float>(1,0.25));
+    Function<VanDerPol> vdp(Vector<Float>(1,0.25));
     ApproximateTaylorModel vdpm(d,c,vdp,4,1);
     cout << "vdpm="<<vdpm<<endl;
     ApproximateTaylorModel vdpfm=flow(vdpm);
@@ -173,8 +180,9 @@ int main() {
     Vector<Float> pm=point(2,apm);
     Vector<Float> pt0=point(2,apt);
     Vector<Interval> bx=box(2,abx);
-    HenonMap h(pm);
-    HenonMapSquared hsq(pm);
+
+    Function<Henon> h(pm);
+    Function<HenonSquared> hsq(pm);
 
     cout << h.expansion(pt0,3) << endl << endl;
 

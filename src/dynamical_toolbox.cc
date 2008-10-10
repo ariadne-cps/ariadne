@@ -25,6 +25,7 @@
 #include "numeric.h"
 #include "vector.h"
 #include "matrix.h"
+#include "sparse_differential.h"
 #include "function.h"
 #include "box.h"
 #include "dynamical_toolbox.h"

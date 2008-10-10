@@ -1,5 +1,5 @@
 OBJ=numeric.o vector.o matrix.o \
-	differential.o sparse_differential.o \
+	dense_differential.o sparse_differential.o \
 	approximate_taylor_model.o \
 	point.o box.o zonotope.o \
 	grid.o paving.o \

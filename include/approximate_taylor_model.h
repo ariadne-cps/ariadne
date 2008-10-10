@@ -63,6 +63,9 @@ class ApproximateTaylorModel {
   //! \brief The zero Taylor model in \a as variables with size \a rs image, order \a o and smoothness \a s, defined on the whole space with centre at the origin. 
   ApproximateTaylorModel(uint rs, uint as, ushort o, ushort s);
   
+  //! \brief Construct the identity model on a domain. 
+  //ApproximateTaylorModel(const Vector<I>& domain);
+  
   //! \brief Construct from a domain, centre, and a derivative expansion. 
   ApproximateTaylorModel(const Vector<I>& domain, const Vector<A>& centre, 
                          const SparseDifferentialVector<A>& expansion);
@@ -135,9 +138,7 @@ class ApproximateTaylorModel {
   static ApproximateTaylorModel constant(const Vector<I>& d, const Vector<R>& c, const Vector<R>& x, ushort o=4, ushort s=1);
 
   //!
-  static ApproximateTaylorModel identity(const Vector<I>& d, uint o=1u);
-  //!
-  static ApproximateTaylorModel identity(uint s, uint o=1u);
+  static ApproximateTaylorModel identity(const Vector<I>& d);
  
   //!
   static ApproximateTaylorModel affine(const I&, const R&, const R&, const R&, ushort, ushort);

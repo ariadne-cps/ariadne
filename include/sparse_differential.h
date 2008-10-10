@@ -86,8 +86,8 @@ template<class X>
 class SparseDifferential
 {
  public:
-  typedef MultiIndex index_type;
-  typedef X value_type;
+  typedef MultiIndex IndexType;
+  typedef X ScalarType;
   typedef SparseDifferentialVector<X> vector_type;
   typedef typename std::map<MultiIndex,X>::iterator iterator;
   typedef typename std::map<MultiIndex,X>::const_iterator const_iterator;
@@ -1015,6 +1015,9 @@ scale(const SparseDifferentialVector<X>& x, const Vector<X>& s)
   for(uint i=0; i!=as; ++i) { t[i][i]=s[i]; } 
   return evaluate(x,t);
 }
+
+
+
 
 } //namespace Ariadne
 

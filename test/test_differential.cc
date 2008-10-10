@@ -2,7 +2,7 @@
 #include "numeric.h"
 #include "vector.h"
 #include "matrix.h"
-#include "differential.h"
+#include "dense_differential.h"
 
 using std::cout; using std::endl;
 using namespace Ariadne;
@@ -19,9 +19,9 @@ int main() {
 
   {
     // Arithmetic
-    Differential<Float> x(2,2,1.0,0);
-    Differential<Float> y(2,2,1.0,1);
-    Differential<Float> z=2*x+y;
+    DenseDifferential<Float> x(2,2,1.0,0);
+    DenseDifferential<Float> y(2,2,1.0,1);
+    DenseDifferential<Float> z=2*x+y;
     std::cout << x << y << z << std::endl;
     std::cout << z*z << std::endl;
     std::cout << pow(z,2) << std::endl;
@@ -34,7 +34,7 @@ int main() {
                     0,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39};
     int pa[2]={0,2};
     array<int> p(pa,pa+2);
-    DifferentialVector<Float> x(2,3,3,xa);
+    DenseDifferentialVector<Float> x(2,3,3,xa);
     std::cout << x << restrict(x,p) << "\n";
   }
 
@@ -44,7 +44,7 @@ int main() {
                     0,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39};
     int pa[2]={0,2};
     array<int> p(pa,pa+2);
-    DifferentialVector<Float> x(2,3,3,xa);
+    DenseDifferentialVector<Float> x(2,3,3,xa);
     std::cout << "restrict:\n" << x << "\n" << restrict(x,p) << "\n\n";
   }
 
@@ -53,7 +53,7 @@ int main() {
     double xa[20]={ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0,11,12,13,14,15,16,17,18,19};
     int pa[2]={1,2};
     array<int> p(pa,pa+2);
-    DifferentialVector<Float> x(2,2,3,xa);
+    DenseDifferentialVector<Float> x(2,2,3,xa);
     std::cout << "expand:\n" << x << "\n" << expand(x,3,p) << "\n" << restrict(expand(x,3,p),p) << "\n";
   }
 
@@ -63,8 +63,8 @@ int main() {
     Vector<Float> v(2u,av); Matrix<Float> dv(2u,2u,adv);
     std::cout << v << " " << dv << std::endl;
 
-    DifferentialVector<Float> x(v,dv,2);
-    DifferentialVector<Float> y(v,dv,2);
+    DenseDifferentialVector<Float> x(v,dv,2);
+    DenseDifferentialVector<Float> y(v,dv,2);
     std::cout << x << std::endl;
     std::cout << compose(x,y) << std::endl;
     std::cout << x[0] << std::endl;
@@ -77,7 +77,7 @@ int main() {
     Float ac[2]={0,1}; Float adv[10]={1,2,3,4,5,6,7,8,9,10};
     Vector<Float> c(2u,ac); 
     Vector<Float> mc=-c;
-    DifferentialVector<Float> dv(1u,2u,2u,adv);
+    DenseDifferentialVector<Float> dv(1u,2u,2u,adv);
     std::cout << "c=" << c << std::endl;
     std::cout << "dv="<< dv << std::endl;
     std::cout << "dv(x+c)" << translate(dv,c) << std::endl;
@@ -92,7 +92,7 @@ int main() {
     cout << "evaluate:"<<endl;
     Float ac[2]={1,2}; Float adv[10]={1,2,3,4,5,6,7,8,9,10};
     Vector<Float> c(2u,ac); 
-    DifferentialVector<Float> dv(1u,2u,3u,adv);
+    DenseDifferentialVector<Float> dv(1u,2u,3u,adv);
     std::cout << "c=" << c << std::endl;
     std::cout << "dv="<< dv << std::endl;
     std::cout << "v(c)" << evaluate(dv,c) << std::endl;
@@ -103,7 +103,7 @@ int main() {
     // inverse
     cout << "inverse:"<<endl;
     Float ac[2]={1,2}; Float adv[12]={0,1,2,3,4,5,0,6,7,8,9,10};
-    DifferentialVector<Float> dv(2u,2u,2u,adv);
+    DenseDifferentialVector<Float> dv(2u,2u,2u,adv);
     std::cout << "dv="<< dv << std::endl;
     std::cout << "inverse(dv)" << inverse(dv) << std::endl;
     std::cout << "inverse(inverse(dv))" << inverse(inverse(dv)) << std::endl;
@@ -115,12 +115,12 @@ int main() {
     cout << "implicit:"<<endl;
     Float adv[20]={0,1,2,3,4,5,6,7,8,9,0,6,7,8,9,10,11,12,13,14};
     //Float adv[20]={0, 3,2,1, 0,0,0,0,0,0, 0, 5,1,1, 0,0,0,0,0,0};
-    DifferentialVector<Float> x(2u,3u,2u,adv);
+    DenseDifferentialVector<Float> x(2u,3u,2u,adv);
     cout << "x="<< x << endl;
-    DifferentialVector<Float> y=implicit(x);
+    DenseDifferentialVector<Float> y=implicit(x);
     cout << "implicit(x)" << y << endl;
-    DifferentialVector<Float> z(3u,1u,2u);
-    z[0]=Differential<Float>::variable(1u,2u,0.0,0u);
+    DenseDifferentialVector<Float> z(3u,1u,2u);
+    z[0]=DenseDifferential<Float>::variable(1u,2u,0.0,0u);
     z[1]=y[0];
     z[2]=y[1];
     cout << "compose(x,i:y)="<<compose(x,z) << endl;

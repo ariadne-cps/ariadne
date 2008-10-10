@@ -24,9 +24,10 @@ clean:
 	(cd wrap/; make clean)
 
 dep: 
-	(cd src/; make dep);
-	(cd test/; make dep);
-	(cd wrap/; make dep);
+	(touch src/Makefile.dep test/Makefile.dep wrap/Makefile.dep)
+	(cd src/; make dep)
+	(cd test/; make dep)
+	(cd wrap/; make dep)
 
 depclean: 
 	(cd ${SRCDIR}; ${MAKE} depclean);

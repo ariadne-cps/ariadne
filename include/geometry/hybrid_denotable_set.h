@@ -57,7 +57,6 @@ namespace Ariadne {
     class list_set_tag;
 
 
-
     /*! \ingroup HybridSet
      *  \brief A base class for representing subsets of hybrid state spaces.
      */
@@ -152,9 +151,9 @@ namespace Ariadne {
 
       /*! \brief Write to an output stream. */
       virtual std::ostream& write(std::ostream& os) const;
-     protected:
-      
-
+     public:
+      template<class A> void serialize(A& a, const uint v) {
+        a & _component_sets; }
      private:
       std::map< discrete_state_type, continuous_state_set_type > _component_sets;
     };

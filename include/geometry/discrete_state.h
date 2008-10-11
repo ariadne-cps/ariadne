@@ -33,9 +33,12 @@ namespace Ariadne {
     /*! \brief A class representing a discrete state of a hybrid system. */
     class DiscreteState {
      public:
+      //! \brief Default constructor needed for serialization.
+      //! \deprecated
+      explicit DiscreteState() : _id(0) { }
       //! \brief Construct from an identifier. 
       explicit DiscreteState(const id_type& id) : _id(id) { }
-      id_type id() const { return _id; }
+      const id_type& id() const { return _id; }
       bool operator==(const DiscreteState& other) const { return this->_id==other._id; }
       bool operator!=(const DiscreteState& other) const { return this->_id!=other._id; }
       bool operator<(const DiscreteState& other) const { return this->_id<other._id; }

@@ -52,7 +52,7 @@ namespace Ariadne {
     class denotable_set_tag;
     template<class Base, class Value> class GridSetIterator;
 
-    
+  
     
     /*! \brief A denotable set on a finite grid, defined using a mask over a block of cells.
      *
@@ -93,6 +93,12 @@ namespace Ariadne {
       typedef GridCell<R> value_type;
       /*! \brief The type of object returned by indexing. */
 
+     /*!\brief Default constructor constructs an empty set in zero dimensions. 
+       *
+       * \deprecated Only needed for Boost serialization library.
+       */
+      GridMaskSet();
+ 
       /*!\brief Construct an empty set from a finite grid. (Deprecated)
        *
        * \deprecated Use GridMaskSet(const Grid<R>& g, const LatticeBlock& b) instead.
@@ -156,17 +162,14 @@ namespace Ariadne {
       /*!\brief Convert to a %ListSet of BS. */
       template<class BS> operator ListSet<BS> () const;
       
-      /*!\brief Equality operator. (Deprecated)
-       *
-       * \deprecated Equality operator for sets is deprecated.
-       */
-      bool operator==(const GridMaskSet<R>& gms);
+      /*!\brief Equality operator. */
+      bool operator==(const GridMaskSet<R>& gms) const;
 
-      /*! \brief Inequality operator. (Deprecated)
+      /*! \brief Inequality operator.
        *
        * \deprecated Equality operator for sets is deprecated.
        */
-      bool operator!=(const GridMaskSet<R>& gms);
+      bool operator!=(const GridMaskSet<R>& gms) const;
 
       /*! \brief The underlying grid. */
       const Grid<R>& grid() const;

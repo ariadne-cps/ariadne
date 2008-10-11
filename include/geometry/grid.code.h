@@ -188,18 +188,18 @@ Grid<R>::space() const
 
 
 template<class R>
-Point<R>
+const Point<R>&
 Grid<R>::origin() const
 {
-  return Point<R>(reinterpret_cast<const Vector<R>&>(this->_data->_origin));
+  return reinterpret_cast<const Point<R>&>(this->_data->_origin);
 }
 
 
 template<class R>
-Vector<R>
+const Vector<R>&
 Grid<R>::lengths() const
 {
-  return Vector<R>(this->_data->_lengths);
+  return reinterpret_cast<const Vector<R>&>(this->_data->_lengths);
 }
 
 

@@ -52,6 +52,12 @@ namespace Ariadne {
 
 
 template<class R>
+GridMaskSet<R>::GridMaskSet()
+  : _grid(), _lattice_set(0) 
+{ 
+}
+
+template<class R>
 GridMaskSet<R>::GridMaskSet(const FiniteGrid<R>& fg)
   : _grid(fg.grid()), _lattice_set(fg.lattice_block()) 
 { 
@@ -522,6 +528,20 @@ difference(const GridCellListSet<R>& gcls, const GridMaskSet<R>& gms)
 
 
 
+
+template<class R> 
+void 
+GridMaskSet<R>::adjoin_over_approximation(const Box<R>& r)
+{
+  this->adjoin(over_approximation(r,this->grid()));
+}
+
+template<class R> 
+void 
+GridMaskSet<R>::adjoin_under_approximation(const Box<R>& r)
+{
+  this->adjoin(under_approximation(r,this->grid()));
+}
 
 template<class R> 
 void 

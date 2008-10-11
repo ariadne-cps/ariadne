@@ -5,7 +5,7 @@ TESTS_ENVIRONMENT = ./run_test.sh
 
 
 INCLUDES = -I$(top_srcdir)/include
-LIBS = -lmpfr -lgmpxx -lgmp
+LIBS = -lmpfr -lgmpxx -lgmp -lboost_serialization
 LDADD = ../src/libariadne.la $(LIBS)
 
 BASE_TESTS = \
@@ -78,6 +78,7 @@ EVALUATION_TESTS = \
 	test_reachability_analyser
 
 OUTPUT_TESTS = \
+	test_serialization \
 	test_textstream \
         test_latexstream \
         test_epsstream \

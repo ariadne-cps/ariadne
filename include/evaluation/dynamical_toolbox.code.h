@@ -238,6 +238,9 @@ crossing_time(const ModelType& flow_model,
   RealType maximum_time=flow_model.domain()[dimension].upper(); 
   ARIADNE_ASSERT(minimum_time<=0);
   ARIADNE_ASSERT(maximum_time>=0);
+  ARIADNE_ASSERT(flow_model.argument_size()==flow_model.result_size()+1);
+  ARIADNE_ASSERT(guard_model.argument_size()==flow_model.result_size());
+  ARIADNE_ASSERT(initial_set_model.result_size()==flow_model.result_size());
   ModelType hitting_model=compose(guard_model,flow_model);
   ARIADNE_LOG(6,"hitting_model = "<<hitting_model<<"\n");
   ModelType free_hitting_time_model;
@@ -267,13 +270,18 @@ touching_time_interval(const ModelType& flow_model,
                        const ModelType& guard_model, 
                        const ModelType& initial_set_model) const
 {
+  ARIADNE_ASSERT(flow_model.result_size()+1==flow_model.argument_size());
+  ARIADNE_ASSERT(guard_model.argument_size()==flow_model.result_size());
+  ARIADNE_ASSERT(guard_model.result_size()==1u);
+  std::cout << flow_model.domain() << std::endl;
   uint dimension=guard_model.argument_size();
   RealType minimum_time=flow_model.domain()[dimension].lower(); 
   RealType maximum_time=flow_model.domain()[dimension].upper(); 
 
-  ARIADNE_ASSERT(minimum_time<=0);
-  ARIADNE_ASSERT(maximum_time>=0);
-
+  ARIADNE_LOG(6,"\nminimum_time="<<minimum_time<<" maximum_time="<<maximum_time<<"\n");
+  ARIADNE_ASSERT(minimum_time<=0.0);
+  ARIADNE_ASSERT(maximum_time>=0.0);
+  
   ModelType final_set_model=this->integration_step(flow_model,initial_set_model,maximum_time);
 
   uint refinements=5;
@@ -375,9 +383,64 @@ DynamicalToolbox<Mdl>::subdivide(Mdl const&) const
 
 template<class Mdl>
 std::pair<typename Mdl::real_type, Vector<Interval<typename Mdl::real_type> > >
-DynamicalToolbox<Mdl>::flow_bounds(FunctionInterface<R> const&, Vector<I> const&, R const&, R const&) const
+DynamicalToolbox<Mdl>::flow_bounds(FunctionInterface<R> const& vf, Vector<I> const& r, R const& hmax, R const& dmax) const
 { 
-  throw NotImplemented(__PRETTY_FUNCTION__);
+  // Try to find a time h and a set b such that subset(r+Interval<R>(0,h)*vf(b),b) holds
+  ARIADNE_LOG(6,"flow_bounds(Function,Box,Time hmax)\n");
+  ARIADNE_LOG(7,"  r="<<r<<" hmax="<<hmax<<"\n");
+  
+  ARIADNE_ASSERT(vf.argument_size()==r.size());
+
+  // Set up constants of the method.
+  // TODO: Better estimates of constants
+  const R INITIAL_MULTIPLIER=2;
+  const R MULTIPLIER=1.125;
+  const R BOX_RADIUS_MULTIPLIER=1.03125;
+  const uint EXPANSION_STEPS=8;
+  const uint REDUCTION_STEPS=8;
+  const uint REFINEMENT_STEPS=4;
+  Vector<I> b,nb;
+  Vector<I> eps(r.size(),I(-Ariadne::eps<R>(),Ariadne::eps<R>()));
+  Vector<I> delta=r-midpoint(r);
+  
+  R h=hmax;
+  R hmin=div_approx(hmax,(1<<REDUCTION_STEPS));
+  bool success=false;
+  while(!success) {
+    ARIADNE_ASSERT(h>hmin);
+    Interval<R> ih(0,h);
+    b=r+INITIAL_MULTIPLIER*ih*vf(r)+delta;
+    for(uint i=0; i!=EXPANSION_STEPS; ++i) {
+      Vector<I> df=vf(b);
+      nb=r+ih*df;
+      ARIADNE_LOG(9,"  h="<<h<<" b="<<b<<" vf="<<vf(b)<<" nb="<<nb<<"\n");
+      if(subset(nb,b)) {
+        success=true;
+        break;
+      } else {
+        b=r+MULTIPLIER*ih*df+delta;
+      }
+    }
+    if(!success) {
+      h=div_approx(h,2);
+    }
+  }
+
+  ARIADNE_ASSERT(possibly(subset(nb,b)));
+  b=nb;
+  
+  Interval<R> ih(0,h);
+  for(uint i=0; i!=REFINEMENT_STEPS; ++i) {
+     b=r+ih*vf(b);
+  }
+  
+  // Check result of operation
+  // We use "possibly" here since the bound may touch 
+  ARIADNE_ASSERT(possibly(subset(r+ih*vf(b),b)));
+  
+  ARIADNE_LOG(7,"  h="<<h<<" b="<<b<<" r+[0,h]*f(b)="<<r+ih*vf(b)<<"\n");
+
+  return std::make_pair(h,b);
 }
 
 template<class Mdl>
@@ -389,9 +452,17 @@ DynamicalToolbox<Mdl>::model(TaylorSet<R> const& ts) const
 
 template<class Mdl>
 Mdl
-DynamicalToolbox<Mdl>::flow_model(FunctionInterface<R> const&, Vector<I> const&, R const&, Vector<I> const&) const
+DynamicalToolbox<Mdl>::flow_model(FunctionInterface<R> const& vf, Vector<I> const& bx, R const& h, Vector<I> const& bb) const
 { 
-  throw NotImplemented(__PRETTY_FUNCTION__);
+  ApproximateTaylorModel<R> vector_field_model(bb,vf,order,smoothness);
+  ARIADNE_LOG(6,"vector_field_model = "<<vector_field_model<<"\n");
+  
+
+  // Use flow function on model type
+  ApproximateTaylorModel<R> flow_model=Ariadne::flow(vector_field_model);
+  ARIADNE_LOG(6,"flow_model = "<<flow_model<<"\n");
+
+  return flow_model;
 }
 
 

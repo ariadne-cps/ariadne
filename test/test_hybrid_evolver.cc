@@ -67,15 +67,15 @@ class TestSetBasedHybridEvolver
   HybridAutomaton<R> automaton;
   HybridBasicSet< Zonotope<R> > initial_set;
   Box<R> bounding_box;
-  DiscreteState mode1_id, mode2_id;
+  DiscreteState location1, location2;
 
  public:
   TestHybridEvolver() 
     : automaton(""),
       initial_set(DiscreteState(2),Zonotope<R>(2)),
       bounding_box(Box<R>("[-4,4]x[-4,4]")),
-      mode1_id(2),
-      mode2_id(3)
+      location1(2),
+      location2(3)
   {
     hybrid_evolver_verbosity = 2;
     integrator_verbosity = 0;
@@ -104,15 +104,15 @@ class TestSetBasedHybridEvolver
     AffineFunction<R> activation12=invariant1;
 
     automaton=HybridAutomaton<R>("Affine automaton");
-    mode1_id=DiscreteState(2);
-    mode2_id=DiscreteState(3);
-    const DiscreteMode<R>& mode1=automaton.new_mode(mode1_id,dynamic1,invariant1);
-    const DiscreteMode<R>& mode2=automaton.new_mode(mode2_id,dynamic2,invariant2);
+    location1=DiscreteState(2);
+    location2=DiscreteState(3);
+    const DiscreteMode<R>& mode1=automaton.new_mode(location1,dynamic1,invariant1);
+    const DiscreteMode<R>& mode2=automaton.new_mode(location2,dynamic2,invariant2);
     DiscreteEvent event1_id(5);
     DiscreteEvent event2_id(7);
-    const DiscreteTransition<R>& transition11=automaton.new_transition(event1_id,mode1_id,mode1_id,reset11,activation11);
-    const DiscreteTransition<R>& transition21=automaton.new_transition(event1_id,mode2_id,mode1_id,reset21,activation21);
-    const DiscreteTransition<R>& transition12=automaton.new_transition(event2_id,mode1_id,mode2_id,reset12,activation12);
+    const DiscreteTransition<R>& transition11=automaton.new_transition(event1_id,location1,location1,reset11,activation11);
+    const DiscreteTransition<R>& transition21=automaton.new_transition(event1_id,location2,location1,reset21,activation21);
+    const DiscreteTransition<R>& transition12=automaton.new_transition(event2_id,location1,location2,reset12,activation12);
     
     cout << mode1 << " " << mode2 << endl;
     cout << transition11 << " " << transition21 << " " << transition12 << " " << endl;
@@ -137,7 +137,7 @@ class TestSetBasedHybridEvolver
     CascadeReducer<ES> reducer(3);
     hybrid_evolver=Evolver<Sys,ES> (parameters,applicator,integrator,satisfier,subdivider,reducer);
     
-    HybridBasicSet< Zonotope<R> > initial_set(mode1_id,Zonotope<R>(Box<R>("[-6.96875,-6.9375]x[-6.96875,-6.9375]")));
+    HybridBasicSet< Zonotope<R> > initial_set(location1,Zonotope<R>(Box<R>("[-6.96875,-6.9375]x[-6.96875,-6.9375]")));
     cout << "initial_set=" << initial_set << endl;
     
   }
@@ -148,18 +148,18 @@ class TestSetBasedHybridEvolver
     ListSet< HybridBasicSet< Zonotope<R> > > lower_reach=hybrid_evolver.reach(automaton,initial_set,Rational(1),lower_semantics);
     HybridListSet< Zonotope<R> > lower_evolve_sets(automaton.locations(),lower_evolve);
     HybridListSet< Zonotope<R> > lower_reach_sets(automaton.locations(),lower_reach);
-    cout << "Reached (" << lower_reach_sets[mode1_id].size() << "," << lower_reach_sets[mode2_id].size() << ") enclosures, "
-         << "with (" << lower_evolve_sets[mode1_id].size() << "," << lower_evolve_sets[mode2_id].size() << ") at final time."
+    cout << "Reached (" << lower_reach_sets[location1].size() << "," << lower_reach_sets[location2].size() << ") enclosures, "
+         << "with (" << lower_evolve_sets[location1].size() << "," << lower_evolve_sets[location2].size() << ") at final time."
          << endl << endl;
 
     epsfstream eps;
     eps.open("test_hybrid_evolver-lower.eps",bounding_box.neighbourhood(0.5));
     eps << fill_colour(white) << bounding_box;
     eps << line_style(true);
-    eps << fill_colour(red) << lower_reach_sets[mode1_id];
-    eps << fill_colour(magenta) << lower_reach_sets[mode2_id];
-    eps << fill_colour(green) << lower_evolve_sets[mode1_id];
-    eps << fill_colour(cyan) << lower_evolve_sets[mode2_id];
+    eps << fill_colour(red) << lower_reach_sets[location1];
+    eps << fill_colour(magenta) << lower_reach_sets[location2];
+    eps << fill_colour(green) << lower_evolve_sets[location1];
+    eps << fill_colour(cyan) << lower_evolve_sets[location2];
     eps << fill_colour(blue) << initial_set.set();
     eps.close();
   }
@@ -170,18 +170,18 @@ class TestSetBasedHybridEvolver
     ListSet< HybridBasicSet< Zonotope<R> > > upper_reach=hybrid_evolver.reach(automaton,initial_set,Rational(1),upper_semantics);
     HybridListSet< Zonotope<R> > upper_evolve_sets(automaton.locations(),upper_evolve);
     HybridListSet< Zonotope<R> > upper_reach_sets(automaton.locations(),upper_reach);
-    cout << "Reached (" << upper_reach_sets[mode1_id].size() << "," << upper_reach_sets[mode2_id].size() << ") enclosures, "
-         << "with (" << upper_evolve_sets[mode1_id].size() << "," << upper_evolve_sets[mode2_id].size() << ") at final time."
+    cout << "Reached (" << upper_reach_sets[location1].size() << "," << upper_reach_sets[location2].size() << ") enclosures, "
+         << "with (" << upper_evolve_sets[location1].size() << "," << upper_evolve_sets[location2].size() << ") at final time."
          << endl << endl;
 
     epsfstream eps;
     eps.open("test_hybrid_evolver-upper.eps",bounding_box.neighbourhood(0.5));
     eps << fill_colour(white) << bounding_box;
     eps << line_style(true);
-    eps << fill_colour(red) << upper_reach_sets[mode1_id];
-    eps << fill_colour(magenta) << upper_reach_sets[mode2_id];
-    eps << fill_colour(green) << upper_evolve_sets[mode1_id];
-    eps << fill_colour(cyan) << upper_evolve_sets[mode2_id];
+    eps << fill_colour(red) << upper_reach_sets[location1];
+    eps << fill_colour(magenta) << upper_reach_sets[location2];
+    eps << fill_colour(green) << upper_evolve_sets[location1];
+    eps << fill_colour(cyan) << upper_evolve_sets[location2];
     eps << fill_colour(blue) << initial_set.set();
     eps.close(); 
   }
@@ -210,20 +210,20 @@ class TestConstraintBasedHybridEvolver
   HybridAutomaton<R> automaton;
   HybridBasicSet<ES> initial_set;
   Box<R> bounding_box;
-  DiscreteState mode1_id, mode2_id;
+  DiscreteState location1, location2;
 
  public:
   TestConstraintBasedHybridEvolver() 
     : automaton(""),
       initial_set(DiscreteState(2),EnclosureSetType(2)),
       bounding_box(Box<R>("[-4,4]x[-4,4]")),
-      mode1_id(2),
-      mode2_id(3)
+      location1(2),
+      location2(3)
   {
     hybrid_evolver_verbosity = 2;
     integrator_verbosity = 0;
     
-    
+    initial_set=HES(location1,Box<R>("[-0.0,0.125]x[-0.0,0.125]"));
   
     Box<R> r("[-1,1]x[-1,1]");
     cout << "r=" << r << endl;
@@ -244,13 +244,11 @@ class TestConstraintBasedHybridEvolver
     cout << endl;
     
     automaton =HybridAutomaton<R>("Constraint-based affine test automaton");
-    DiscreteState dstate1(0);
-    DiscreteState dstate2(1);
-    const DiscreteMode<R>& mode1=automaton.new_mode(dstate1,dynamic,invariant1);
-    const DiscreteMode<R>& mode2=automaton.new_mode(dstate2,dynamic,invariant2);
+    const DiscreteMode<R>& mode1=automaton.new_mode(location1,dynamic,invariant1);
+    const DiscreteMode<R>& mode2=automaton.new_mode(location2,dynamic,invariant2);
     DiscreteEvent event(5);
-    const DiscreteTransition<R>& transition12=automaton.new_transition(event,dstate1,dstate2,reset,activation12);
-    const DiscreteTransition<R>& transition21=automaton.new_transition(event,dstate2,dstate1,reset,guard21);
+    const DiscreteTransition<R>& transition12=automaton.new_transition(event,location1,location2,reset,activation12);
+    const DiscreteTransition<R>& transition21=automaton.new_transition(event,location2,location1,reset,guard21);
     
     cout << mode1 << " " << mode2 << endl;
     cout << transition21 << " " << transition12 << " " << endl;
@@ -270,7 +268,7 @@ class TestConstraintBasedHybridEvolver
     
     hybrid_evolver=HybridEvolver<R> ();
     
-    HybridBasicSet<EnclosureSetType> initial_set(mode1_id,EnclosureSetType(Box<R>("[-6.96875,-6.9375]x[-6.96875,-6.9375]")));
+    HybridBasicSet<EnclosureSetType> initial_set(location1,EnclosureSetType(Box<R>("[-6.96875,-6.9375]x[-6.96875,-6.9375]")));
     cout << "initial_set=" << initial_set << endl;
     
   }
@@ -281,18 +279,18 @@ class TestConstraintBasedHybridEvolver
     ListSet< HybridBasicSet< EnclosureSetType > > lower_reach=hybrid_evolver.reach(automaton,initial_set,Rational(1),lower_semantics);
     HybridListSet< EnclosureSetType > lower_evolve_sets(automaton.locations(),lower_evolve);
     HybridListSet< EnclosureSetType > lower_reach_sets(automaton.locations(),lower_reach);
-    cout << "Reached (" << lower_reach_sets[mode1_id].size() << "," << lower_reach_sets[mode2_id].size() << ") enclosures, "
-         << "with (" << lower_evolve_sets[mode1_id].size() << "," << lower_evolve_sets[mode2_id].size() << ") at final time."
+    cout << "Reached (" << lower_reach_sets[location1].size() << "," << lower_reach_sets[location2].size() << ") enclosures, "
+         << "with (" << lower_evolve_sets[location1].size() << "," << lower_evolve_sets[location2].size() << ") at final time."
          << endl << endl;
 
     epsfstream eps;
     eps.open("test_hybrid_evolver-lower.eps",bounding_box.neighbourhood(0.5));
     eps << fill_colour(white) << bounding_box;
     eps << line_style(true);
-    eps << fill_colour(red) << lower_reach_sets[mode1_id];
-    eps << fill_colour(magenta) << lower_reach_sets[mode2_id];
-    eps << fill_colour(green) << lower_evolve_sets[mode1_id];
-    eps << fill_colour(cyan) << lower_evolve_sets[mode2_id];
+    eps << fill_colour(red) << lower_reach_sets[location1];
+    eps << fill_colour(magenta) << lower_reach_sets[location2];
+    eps << fill_colour(green) << lower_evolve_sets[location1];
+    eps << fill_colour(cyan) << lower_evolve_sets[location2];
     eps << fill_colour(blue) << initial_set.set();
     eps.close();
   }
@@ -303,18 +301,18 @@ class TestConstraintBasedHybridEvolver
     ListSet< HybridBasicSet< EnclosureSetType > > upper_reach=hybrid_evolver.reach(automaton,initial_set,Rational(1),upper_semantics);
     HybridListSet< EnclosureSetType > upper_evolve_sets(automaton.locations(),upper_evolve);
     HybridListSet< EnclosureSetType > upper_reach_sets(automaton.locations(),upper_reach);
-    cout << "Reached (" << upper_reach_sets[mode1_id].size() << "," << upper_reach_sets[mode2_id].size() << ") enclosures, "
-         << "with (" << upper_evolve_sets[mode1_id].size() << "," << upper_evolve_sets[mode2_id].size() << ") at final time."
+    cout << "Reached (" << upper_reach_sets[location1].size() << "," << upper_reach_sets[location2].size() << ") enclosures, "
+         << "with (" << upper_evolve_sets[location1].size() << "," << upper_evolve_sets[location2].size() << ") at final time."
          << endl << endl;
 
     epsfstream eps;
     eps.open("test_hybrid_evolver-upper.eps",bounding_box.neighbourhood(0.5));
     eps << fill_colour(white) << bounding_box;
     eps << line_style(true);
-    eps << fill_colour(red) << upper_reach_sets[mode1_id];
-    eps << fill_colour(magenta) << upper_reach_sets[mode2_id];
-    eps << fill_colour(green) << upper_evolve_sets[mode1_id];
-    eps << fill_colour(cyan) << upper_evolve_sets[mode2_id];
+    eps << fill_colour(red) << upper_reach_sets[location1];
+    eps << fill_colour(magenta) << upper_reach_sets[location2];
+    eps << fill_colour(green) << upper_evolve_sets[location1];
+    eps << fill_colour(cyan) << upper_evolve_sets[location2];
     eps << fill_colour(blue) << initial_set.set();
     eps.close(); 
   }

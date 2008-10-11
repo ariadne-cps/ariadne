@@ -122,7 +122,7 @@ namespace Ariadne {
     bool operator<(const Box2d& r1, const Box2d& r2) {
       //std::cerr<<__PRETTY_FUNCTION__<<std::endl;
       return r1._lower_corner<r2._lower_corner 
-        || r1._lower_corner==r2._lower_corner && r1._upper_corner<r2._upper_corner; 
+        || (r1._lower_corner==r2._lower_corner && r1._upper_corner<r2._upper_corner); 
     }
 
     std::ostream& operator<<(std::ostream&, const Box2d&);

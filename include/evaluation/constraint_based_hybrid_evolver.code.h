@@ -73,6 +73,8 @@ void append(V& v, const C& c)
 
 namespace Ariadne {
  
+const bool ENABLE_SUBDIVISIONS = false;
+
 class DegenerateCrossingException { };
 
 template<class R>
@@ -92,7 +94,8 @@ HybridEvolver<R>::clone() const
 template<class R>
 HybridEvolver<R>::HybridEvolver()
   : _parameters(new EvolutionParameters<R>()),
-    _toolbox(new DynamicalToolbox< ApproximateTaylorModel<R> >())
+    _toolbox(new DynamicalToolbox< ApproximateTaylorModel<R> >()),
+    _profiler(new EvolutionProfiler)
 {
 }
 
@@ -158,66 +161,6 @@ HybridEvolver<R>::lock_to_grid_time() const
 
 
 
-/*
-
-
-template<class R>
-tuple< CrossingKind, ApproximateTaylorModel<R> >
-HybridEvolver<R>::_crossing(const ApproximateTaylorModel<R>& guard_model, const ApproximateTaylorModel<R>& flow_model)
-{
-  ARIADNE_ASSERT(guard_model.result_size()=1u);
-  ARIADNE_ASSERT(guard_model.argument_size()=flow_model.result_size());
-  ARIADNE_ASSERT(flow_model.argument_size()=flow_model.result_size()+1u);
-  uint dimension=flow_model.result_size();
-
-  CrossingKind crossing_kind;
-  Interval<R> touching_time_interval;
-  ApproximateTaylorModel<R> hitting_time_model;
-  ApproximateTaylorModel<R> initial_set_model;
-  ApproximateTaylorModel<R> final_set_model;
-
-  R zero_time=0;
-  R step_time=flow_model.domain()[dimension].upper();
-
-
-  try {
-    hitting_time_model=this->_toolbox->crossing_time(flow_model,guard_model,initial_set_model,zero_time,step_time);
-    crossing_kind=TRANSVERSE;
-    ARIADNE_LOG(4,"\nTRANSVERSE\n\n"); 
-  } 
-  catch(DegenerateCrossingException) { 
-    final_set_model = this->_toolbox->integration_step(flow_model,initial_set_model,step_time);
-    integration_time_model=ModelType::constant(Vector<I>(ng,I(-1,1)),Vector<R>(ng,R(0)),Vector<R>(1u,step_time),spacial_order,smoothness);
-    final_time_model = integration_time_model;
-    if(definitely(this->_toolbox->active(invariant,final_set_model))) {
-      flow_type=CROSSING;
-      ARIADNE_LOG(4,"\nCROSSING\n\n"); 
-      make_lpair(lower_touching_time,upper_touching_time)=this->_toolbox->touching_time_interval(flow_model, invariant_model,initial_set_model, zero_time, step_time);
-      ARIADNE_LOG(4,"crossing_time_interval="<<lower_touching_time<<","<<upper_touching_time<<"\n\n"); 
-      active_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,lower_touching_time,upper_touching_time);
-      // TODO: put this in!
-      //jump_time_model=this->_toolbox->reachability_time(initial_time_model,crossing_time_interval.lower(),crossing_time_interval.upper());
-      reach_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,zero_time,upper_touching_time);
-    } else {
-      flow_type=GRAZING;
-      ARIADNE_LOG(4,"\nGRAZING \n\n"); 
-      make_lpair(lower_touching_time,upper_touching_time)=this->_toolbox->touching_time_interval(flow_model,invariant_model,initial_set_model,zero_time,step_time);
-      ARIADNE_LOG(4,"grazing_time_interval="<<lower_touching_time<<","<<upper_touching_time<<"\n\n"); 
-      active_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,lower_touching_time,upper_touching_time);
-      ARIADNE_LOG(6,"active_set_model="<<active_set_model<<"\n\n"); 
-      // TODO: put this in!
-      //jump_time_model=this->_toolbox->reachability_time(initial_time_model,grazing_time_interval.lower(),grazing_time_interval.upper());
-      ARIADNE_LOG(6,"jump_time_model="<<jump_time_model<<"\n\n"); 
-      reach_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,zero_time,step_time);
-      ARIADNE_LOG(6,"reach_set_model="<<reach_set_model<<"\n\n"); 
-    } 
-  }
-}
-
-
-}
-
-*/
 
 
 
@@ -234,6 +177,8 @@ _evolution(EnclosureListType& final_sets,
            Semantics semantics, 
            bool reach) const
 {
+  uint verbosity=0;
+  
   typedef typename traits<R>::approximate_arithmetic_type A;
   typedef typename traits<R>::interval_type I;
   
@@ -258,8 +203,7 @@ _evolution(EnclosureListType& final_sets,
 
   typedef boost::shared_ptr< const FunctionInterface<R> > FunctionConstPointer;
 
-
-  ARIADNE_LOG(5,__PRETTY_FUNCTION__);
+  ARIADNE_LOG(5,__PRETTY_FUNCTION__<<"\n");
   assert(semantics==upper_semantics);
 
   const Rational maximum_time=maximum_real_time;
@@ -282,6 +226,7 @@ _evolution(EnclosureListType& final_sets,
   {
     // Set up initial timed set models
     DiscreteState initial_location=initial_set.state();
+    ARIADNE_LOG(6,"initial_set = "<<initial_set<<"\n");
     ModelType initial_set_model=this->_toolbox->model(initial_set.set());
     ARIADNE_LOG(6,"initial_set_model = "<<initial_set_model<<"\n");
     ModelType initial_time_model
@@ -300,17 +245,30 @@ _evolution(EnclosureListType& final_sets,
     SetModelType initial_set_model;
     TimeModelType initial_time_model;
     make_ltuple(initial_location,initial_steps,initial_set_model,initial_time_model)=working_sets.pop();
+
     ARIADNE_LOG(4,"initial_steps = "<<initial_steps<<"\n");
     ARIADNE_LOG(6,"initial_time_model = "<<initial_time_model<<"\n");
     ARIADNE_LOG(4,"initial_location = "<<initial_location<<"\n");
     ARIADNE_LOG(6,"initial_set_model = "<<initial_set_model<<"\n");
 
+    ARIADNE_LOG(2,"steps = "<<initial_steps<<" ");
+    ARIADNE_LOG(2,"time = "<<initial_time_model.range()<<" ");
+    ARIADNE_LOG(2,"location = "<<initial_location<<" ");
+    ARIADNE_LOG(2,"box = "<<initial_set_model.range()<<" ");
+    ARIADNE_LOG(2,"radius = "<<Box<R>(initial_set_model.range()).radius()<<"\n\n");
     const uint nd=initial_set_model.result_size();
     const uint ng=initial_set_model.argument_size();
 
+    ARIADNE_LOG(6,"modes="<<system.modes()<<"\n");
+    ARIADNE_LOG(6,"transitions="<<system.transitions()<<"\n");
     reference_vector< const DiscreteTransition<R> > transitions = system.transitions(initial_location);
-    
-    if(Box<R>(initial_set_model.range()).radius()>this->_parameters->maximum_enclosure_radius()) {
+    ARIADNE_LOG(6,"transitions="<<transitions<<"\n");
+
+    if(initial_time_model.range()[0].lower()>=maximum_time) {
+      final_sets.adjoin(HybridEnclosureType(initial_location,this->_toolbox->set(initial_set_model)));
+    } else if(ENABLE_SUBDIVISIONS
+              && (Box<R>(initial_set_model.range()).radius()>this->_parameters->maximum_enclosure_radius())) 
+    {
       // Subdivide
       TimedSetModelType initial_timed_set_model=join(initial_set_model,initial_time_model);
       array< TimedSetModelType > subdivisions=this->_toolbox->subdivide(initial_timed_set_model);
@@ -328,7 +286,6 @@ _evolution(EnclosureListType& final_sets,
       const FunctionType* invariant_ptr=&initial_mode.invariant();
       const FunctionType* activation_ptr=0;
       const FunctionType* reset_ptr=0;
-      const FunctionType* guard_ptr=0;
 
       
       // Main evolution
@@ -394,7 +351,6 @@ _evolution(EnclosureListType& final_sets,
       
       // Compute the crossing times of the invariant
       bool blocking=false;
-      id_type time_transition(-1);
       if(this->_toolbox->active(*invariant_ptr,flow_model)) {
         ARIADNE_LOG(4,"\nMISSING\n\n"); 
         R final_time=add_approx(initial_time_range.lower(),step_time);
@@ -420,9 +376,12 @@ _evolution(EnclosureListType& final_sets,
 
       ModelType final_set_model=this->_toolbox->integration_step(flow_model,initial_set_model,integration_time_model);
       ModelType reach_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,zero_time,integration_time_model);         
-      
+      ARIADNE_LOG(4,"Done computing continuous evolution\n");
+
       if(!blocking) { working_sets.push(make_tuple(initial_location,initial_steps,final_set_model,final_time_model)); }
       intermediate_sets.adjoin(HybridEnclosureType(initial_location,this->_toolbox->set(final_set_model)));
+
+      ARIADNE_LOG(4,"intermediate_set="<<intermediate_sets[intermediate_sets.size()-1]<<"\n\n");
 
       // Set up the data for the events
       std::map< id_type,ModelType > transverse_event_times;
@@ -434,19 +393,25 @@ _evolution(EnclosureListType& final_sets,
       // Compute the events and their types
       for(uint i=0; i!=possibly_active_transitions.size(); ++i) {
         DiscreteEvent event(possibly_active_transitions[i].id());
+        ARIADNE_LOG(6,"Testing for event "<<event<<" ");
         DiscreteState jump_location(possibly_active_transitions[i].destination().id());
+        ARIADNE_LOG(6,"with target "<<jump_location<<"\n");
         Integer jump_steps = initial_steps + 1;
         activation_ptr = &possibly_active_transitions[i].activation();
+        ARIADNE_LOG(6,"  activation="<<*activation_ptr<<"\n");
         reset_ptr = &possibly_active_transitions[i].reset();
-        ModelType guard_model=ModelType(flow_bounds,*guard_ptr,order,smoothness);
+        ARIADNE_LOG(6,"  reset="<<*reset_ptr<<"\n");
+        ModelType activation_model=ModelType(flow_bounds,*activation_ptr,order,smoothness);
+        ARIADNE_LOG(6,"\nactivation_model="<<activation_model<<"\n");
         try {
-          ModelType crossing_time_model=this->_toolbox->crossing_time(guard_model,flow_model,initial_set_model);
+          ModelType crossing_time_model=this->_toolbox->crossing_time(flow_model,activation_model,initial_set_model);
+          ARIADNE_LOG(6,"TRANSVERSE\n");
           ModelType active_set_model=this->_toolbox->integration_step(flow_model,initial_set_model,crossing_time_model);
           Vector<A> reset_model_centre(active_set_model.evaluate(Vector<A>(active_set_model.centre())));
           ModelType reset_model(active_set_model.range(),reset_model_centre,*reset_ptr,spacial_order,smoothness);
-          ARIADNE_LOG(6,"reset_model = "<<reset_model<<"\n");
+          ARIADNE_LOG(6,"\nreset_model = "<<reset_model<<"\n");
           ModelType jump_set_model=compose(reset_model,active_set_model);
-          ARIADNE_LOG(6,"jump_set_model = "<<jump_set_model<<"\n");
+          ARIADNE_LOG(6,"\njump_set_model = "<<jump_set_model<<"\n");
           ModelType jump_time_model=initial_time_model+crossing_time_model;
           ARIADNE_LOG(6,"jump_time_model = "<<jump_time_model<<"\n");
           working_sets.push(make_tuple(jump_location,jump_steps,jump_set_model,jump_time_model));
@@ -454,9 +419,10 @@ _evolution(EnclosureListType& final_sets,
           intermediate_sets.adjoin(HybridEnclosureType(jump_location,this->_toolbox->set(jump_set_model)));
         }
         catch(DegenerateCrossingException) {
+          ARIADNE_LOG(6,"TOUCHING\n");
           ModelType lower_touching_time_model, upper_touching_time_model;
           make_lpair(lower_touching_time_model, upper_touching_time_model)
-            =this->_toolbox->touching_time_interval(guard_model,flow_model,initial_set_model);
+            =this->_toolbox->touching_time_interval(flow_model,activation_model,initial_set_model);
           ModelType active_set_model
             =this->_toolbox->reachability_step(flow_model,initial_set_model,lower_touching_time_model,upper_touching_time_model);
           ModelType active_time_model=this->_toolbox->reachability_time(lower_touching_time_model+initial_time_model,upper_touching_time_model+initial_time_model);
@@ -474,136 +440,6 @@ _evolution(EnclosureListType& final_sets,
       }
       
 
-
-
-      
-      //********************************************************
-      // FROM HERE IS ONLY OLD CODE
-      //********************************************************
-
-      //*******************************************************
-      // Compute the type (TRANSVERSE, TOUCHING, CROSSING or 
-      // GRAZING) of each transition.
-      //*******************************************************
-      /*
-      CrossingKind crossing_kind;
-      for(uint i=0; i!=possibly_active_transitions.size(); ++i) {
-        try {
-          crossing_time_model=this->_toolbox->crossing_time(guard_model,flow_model,initial_set_model);
-          crossing_kind=TRANSVERSE;
-        }
-        catch(DegenerateCrossingException) {
-          make_lpair(lower_touching_time_model,upper_touching_time_model)
-            =this->_toolbox->touching_time_interval(guard_model,flow_model,initial_set_model);
-          crossing_kind=TOUCHING;
-        }
-      }
-      */
-
-
-           /*
-      R reduced_step_time=step_time;
-      for(uint i=0; i!=4; ++i) {
-        reach_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,zero_time,reduced_step_time);
-        if(definitely(!this->_toolbox->active(invariant,reach_set_model))) {
-          flow_type=MISSING;
-          step_time=reduced_step_time;
-            break;
-          } else {
-            reduced_step_time=div_approx(reduced_step_time,2);
-        }
-        step_time=reduced_step_time;
-      }
-      
-      
-
-      if(flow_type==MISSING) {
-        ARIADNE_LOG(4,"\nMISSING\n\n"); 
-        final_time=add_approx(initial_time_range.lower(),step_time);
-        final_time=std::min(max_time,final_time);
-        final_time_model=ModelType::constant(Vector<I>(ng,I(-1,1)),Vector<R>(ng,R(0)),Vector<R>(1u,final_time),spacial_order,smoothness);
-        integration_time_model=final_time_model-initial_time_model;
-        final_set_model=this->_toolbox->integration_step(flow_model,initial_set_model,integration_time_model);
-        reach_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,zero_time,integration_time_model);
-      } else {
-        invariant_model=ModelType(flow_bounds,invariant,order,smoothness);
-        ARIADNE_LOG(6,"invariant_model = "<<invariant_model<<"\n");   
-        try {
-          hitting_time_model=this->_toolbox->crossing_time(flow_model,invariant_model,initial_set_model,zero_time,step_time);
-          jump_time_model=initial_time_model+hitting_time_model;
-          active_set_model=this->_toolbox->integration_step(flow_model,initial_set_model,hitting_time_model);
-          reach_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,zero_time,hitting_time_model);
-          flow_type=TRANSVERSE;
-          ARIADNE_LOG(4,"\nTRANSVERSE\n\n"); 
-        } 
-        catch(DegenerateCrossingException) { 
-          final_set_model = this->_toolbox->integration_step(flow_model,initial_set_model,step_size);
-          integration_time_model=ModelType::constant(Vector<I>(ng,I(-1,1)),Vector<R>(ng,R(0)),Vector<R>(1u,step_size),spacial_order,smoothness);
-          final_time_model = initial_time_model + integration_time_model;
-          if(definitely(this->_toolbox->active(invariant,final_set_model))) {
-            flow_type=CROSSING;
-            ARIADNE_LOG(4,"\nCROSSING\n\n"); 
-            make_lpair(lower_touching_time,upper_touching_time)=this->_toolbox->touching_time_interval(flow_model, invariant_model,initial_set_model, zero_time, step_time);
-            ARIADNE_LOG(4,"crossing_time_interval="<<lower_touching_time<<","<<upper_touching_time<<"\n\n"); 
-            active_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,lower_touching_time,upper_touching_time);
-            // TODO: put this in!
-            //jump_time_model=this->_toolbox->reachability_time(initial_time_model,crossing_time_interval.lower(),crossing_time_interval.upper());
-            reach_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,zero_time,upper_touching_time);
-          } else {
-            flow_type=GRAZING;
-            ARIADNE_LOG(4,"\nGRAZING \n\n"); 
-            make_lpair(lower_touching_time,upper_touching_time)=this->_toolbox->touching_time_interval(flow_model,invariant_model,initial_set_model,zero_time,step_time);
-            ARIADNE_LOG(4,"grazing_time_interval="<<lower_touching_time<<","<<upper_touching_time<<"\n\n"); 
-            active_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,lower_touching_time,upper_touching_time);
-            ARIADNE_LOG(6,"active_set_model="<<active_set_model<<"\n\n"); 
-            // TODO: put this in!
-            //jump_time_model=this->_toolbox->reachability_time(initial_time_model,grazing_time_interval.lower(),grazing_time_interval.upper());
-            ARIADNE_LOG(6,"jump_time_model="<<jump_time_model<<"\n\n"); 
-            reach_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,zero_time,step_time);
-            ARIADNE_LOG(6,"reach_set_model="<<reach_set_model<<"\n\n"); 
-          } 
-        }
-      }
-      
-      
-      // Compute the jump set
-      if(flow_type!=MISSING) {
-        Vector<A> reset_model_centre(active_set_model.evaluate(Vector<A>(active_set_model.centre())));
-        ARIADNE_LOG(6,"active_set_model = "<<active_set_model<<"\n");
-        ModelType reset_model(active_set_model.range(),reset_model_centre,reset_map,spacial_order,smoothness);
-        ARIADNE_LOG(6,"reset_model = "<<reset_model<<"\n");
-        jump_set_model=compose(reset_model,active_set_model);
-        ARIADNE_LOG(6,"jump_set_model = "<<jump_set_model<<"\n");
-        ARIADNE_LOG(6,"jump_time_model = "<<jump_time_model<<"\n");
-      }
-      
-      if(flow_type==GRAZING) {
-        ARIADNE_LOG(6,"final_set_model = "<<final_set_model<<"\n");
-        ARIADNE_LOG(6,"final_time_model = "<<final_time_model<<"\n");
-      }
-      
-      reach_sets.adjoin(EnclosureType(initial_location,this->_toolbox->set(reach_set_model)));
-      if(flow_type!=MISSING) {
-        // FIXME: Use correct discrete state
-        DiscreteState jump_location=initial_location;
-        EnclosureType active_set=EnclosureType(initial_location,this->_toolbox->set(active_set_model));
-        EnclosureType jump_set=EnclosureType(jump_location,this->_toolbox->set(jump_set_model));
-        Integer jump_steps=initial_steps+1;
-        intermediate_sets.adjoin(active_set);
-        intermediate_sets.adjoin(jump_set);
-        working_sets.push(make_tuple(jump_location,jump_steps,jump_set_model,jump_time_model));
-      } 
-      if(flow_type==MISSING || flow_type==GRAZING) {
-        EnclosureType final_set=EnclosureType(initial_location,this->_toolbox->set(final_set_model));
-        Rational final_time_midpoint=Rational(final_time_model.range()[0].midpoint());
-        if(final_time_midpoint >= maximum_time) {
-          final_sets.adjoin(final_set);
-        } else {
-          intermediate_sets.adjoin(final_set);
-          working_sets.push(make_tuple(initial_location,initial_steps,final_set_model,final_time_model));
-        }
-      }
-          */
     }
   }
 }

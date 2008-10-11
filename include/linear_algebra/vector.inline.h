@@ -418,15 +418,23 @@ encloses(const Vector< Interval<R> >& iv, const Vector<R>& v)
 
 template<class R> inline
 bool
-refines(const Vector< Interval<R> >& iv1, const  Vector< Interval<R> >& iv2) 
+subset(const Vector< Interval<R> >& iv1, const  Vector< Interval<R> >& iv2) 
 {
-  ARIADNE_CHECK_EQUAL_SIZES(iv1,iv2,"bool refines(Vector<Interval>,Vector<Interval>)");
+  ARIADNE_CHECK_EQUAL_SIZES(iv1,iv2,"bool subset(Vector<Interval>,Vector<Interval>)");
   for(size_type i=0; i!=iv1.size(); ++i) {
     if(!refines(iv1(i),iv2(i))) {
       return false;
     }
   }
   return true;
+}
+
+template<class R> inline
+bool
+refines(const Vector< Interval<R> >& iv1, const  Vector< Interval<R> >& iv2) 
+{
+  ARIADNE_CHECK_EQUAL_SIZES(iv1,iv2,"bool refines(Vector<Interval>,Vector<Interval>)");
+  return subset(iv1,iv2);
 }
 
 

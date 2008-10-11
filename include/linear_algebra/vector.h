@@ -210,6 +210,7 @@ namespace Ariadne {
   template<class R> Vector< Interval<R> > intersection(const Vector< Interval<R> >& iv1, const Vector< Interval<R> >& iv2); 
   
   template<class R> bool disjoint(const Vector< Interval<R> >& iv, const Vector< Interval<R> >& v); 
+  template<class R> bool subset(const Vector< Interval<R> >& iv, const Vector< Interval<R> >& v); 
   template<class R> bool encloses(const Vector< Interval<R> >& iv,const Vector<R>& v); 
   template<class R> bool refines(const Vector< Interval<R> >& iv1, const Vector< Interval<R> >& iv2); 
 

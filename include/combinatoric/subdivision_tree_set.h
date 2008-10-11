@@ -29,6 +29,7 @@
 #define ARIADNE_SUBDIVISION_TREE_SET_H
 
 #include <iosfwd>
+#include <algorithm>
 
 #include "macros/precondition.h"
 

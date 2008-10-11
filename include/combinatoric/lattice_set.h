@@ -552,8 +552,10 @@ namespace Ariadne {
 
       /*! \brief Write to an output stream */
       std::ostream& write(std::ostream& os) const;
-     private:
+
+      // This should be private, but is exposed to help in serialization of GridMaskSet
       void _compute_cached_attributes();
+     private:
       size_type _index(const IndexArray& cl) const;
      private:
       LatticeBlock _block;

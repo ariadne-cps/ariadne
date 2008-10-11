@@ -151,6 +151,10 @@ namespace Ariadne {
 
       /*! \brief Write to an output stream. */
       virtual std::ostream& write(std::ostream& os) const;
+
+      /*! \brief Serialize with an archive. */
+      template<class A> void serialize(A& a, const uint v) {
+        a & _component_sets; }
      protected:
       
 

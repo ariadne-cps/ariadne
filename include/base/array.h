@@ -632,7 +632,7 @@ namespace Ariadne {
       }
       
       /*!\brief Returns the nth array of the vector. */
-      const_reference operator[] (size_type i) {
+      const_reference operator[] (size_type i) const {
         return const_reference(_positions[i+1]-_positions[i],_elements.begin()+_positions[i]);
       }
       

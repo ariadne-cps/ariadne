@@ -126,7 +126,7 @@ namespace Ariadne {
       /*! \brief . */
       void set_noise_values(const LatticeCell& lc, const LatticeCellListSet& img);
       /*! \brief . */
-      void set_noise_values(const LatticeCell& lc, const LatticeCell& lc, const LatticeCellListSet& img);
+      void set_noise_values(const LatticeCell& lc1, const LatticeCell& lc2, const LatticeCellListSet& img);
         
       /*! \brief  The set of cells which can be controlled into lms regardless of the noise. */
       LatticeCellListSet preimage (const LatticeMaskSet& lms) const;

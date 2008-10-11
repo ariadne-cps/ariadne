@@ -55,7 +55,7 @@ Geometry::Grid<R>::~Grid()
 
 template<class R> 
 Geometry::Grid<R>::Grid()
-  : _data()
+  : _data(new Data())
 {
 }
 
@@ -175,18 +175,18 @@ Geometry::Grid<R>::dimension() const
 
 
 template<class R>
-Geometry::Point<R>
+const Geometry::Point<R>&
 Geometry::Grid<R>::origin() const
 {
-  return Point<R>(reinterpret_cast<const LinearAlgebra::Vector<R>&>(this->_data->_origin));
+  return reinterpret_cast<const Geometry::Point<R>&>(this->_data->_origin);
 }
 
 
 template<class R>
-LinearAlgebra::Vector<R>
+const LinearAlgebra::Vector<R>&
 Geometry::Grid<R>::lengths() const
 {
-  return LinearAlgebra::Vector<R>(this->_data->_lengths);
+  return reinterpret_cast<const LinearAlgebra::Vector<R>&>(this->_data->_lengths);
 }
 
 

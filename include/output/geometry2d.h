@@ -105,8 +105,8 @@ namespace Ariadne {
     inline 
     bool operator<(const Rectangle2d& r1, const Rectangle2d& r2) {
       //std::cerr<<__PRETTY_FUNCTION__<<std::endl;
-      return r1._lower_corner<r2._lower_corner 
-        || r1._lower_corner==r2._lower_corner && r1._upper_corner<r2._upper_corner; 
+      return (r1._lower_corner<r2._lower_corner) 
+        || ( (r1._lower_corner==r2._lower_corner) && (r1._upper_corner<r2._upper_corner) ); 
     }
 
     std::ostream& operator<<(std::ostream&, const Rectangle2d&);

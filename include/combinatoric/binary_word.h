@@ -72,6 +72,7 @@
 #include <vector>
 #include <iosfwd>
 #include <stdexcept>
+#include <limits>
 
 #include "base/types.h"
 

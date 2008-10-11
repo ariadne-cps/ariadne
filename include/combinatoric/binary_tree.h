@@ -87,7 +87,7 @@ namespace Ariadne {
       size_type depth() const;
       
       /*! \brief The array of bits denoting branches and leaves. */
-      const std::vector<bool>& array() const;
+      const std::vector<bool>& data() const;
       
       /*!\brief Advance a binary word used to describe a position in a tree by
        * removing all trailing right's and replacing the last left by a right.    
@@ -135,7 +135,7 @@ namespace Ariadne {
       
     inline
     const std::vector<bool>& 
-    BinaryTree::array() const 
+    BinaryTree::data() const 
     { 
       return this->_array;
     }

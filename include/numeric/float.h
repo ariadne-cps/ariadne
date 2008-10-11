@@ -28,6 +28,8 @@
 #ifndef ARIADNE_NUMERIC_FLOAT_H
 #define ARIADNE_NUMERIC_FLOAT_H
 
+#include <cstdlib>
+
 #include "config.h"
 
 #include "base/types.h"

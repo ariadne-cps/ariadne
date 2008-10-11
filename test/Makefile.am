@@ -71,6 +71,7 @@ EVALUATION_TESTS = \
 	test_set_based_hybrid_evolver 
 
 OUTPUT_TESTS = \
+	test_serialization \
 	test_textstream \
         test_latexstream \
         test_epsstream \
@@ -95,6 +96,7 @@ test_integer_LDADD = ../src/libnumeric.la $(LIBS)
 test_rational_LDADD = ../src/libnumeric.la $(LIBS)
 test_float_LDADD = ../src/libnumeric.la $(LIBS)
 test_interval_LDADD = ../src/libnumeric.la $(LIBS)
+test_serialization_LDADD = $(LDADD) -lboost_serialization
 
 # Explicitly list test sources
 # This should not be necessary!!
@@ -148,6 +150,7 @@ test_map_evolver_SOURCES=test_map_evolver.cc
 test_vector_field_evolver_SOURCES=test_vector_field_evolver.cc
 test_set_based_hybrid_evolver_SOURCES=test_set_based_hybrid_evolver.cc
 
+test_serialization_SOURCES=test_serialization.cc 
 test_epsstream_SOURCES=test_epsstream.cc 
 test_latexstream_SOURCES=test_latexstream.cc
 test_textstream_SOURCES=test_textstream.cc

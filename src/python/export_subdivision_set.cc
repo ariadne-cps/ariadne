@@ -22,7 +22,6 @@
  */
 
 
-
 #include "combinatoric/subdivision_tree_set.h"
 
 using namespace Ariadne;

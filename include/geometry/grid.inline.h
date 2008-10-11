@@ -100,5 +100,12 @@ Geometry::operator<<(std::ostream& os, const FiniteGrid<R>& fg)
   return fg.write(os);
 }
 
+template<class R> template<class A> 
+void 
+Geometry::Grid<R>::serialize(A& archive, const unsigned int version) {
+  archive & this->_data->_origin;
+  archive & this->_data->_lengths;
+}
+
 
 } // namespace Ariadne

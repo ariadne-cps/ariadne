@@ -33,9 +33,11 @@ namespace Ariadne {
     /*! \brief A class representing a discrete state of a hybrid system. */
     class DiscreteState {
      public:
+      //! \brief Default constructor. Used for serialization. 
+      DiscreteState() : _id() { }
       //! \brief Construct from an identifier. 
       explicit DiscreteState(const id_type& id) : _id(id) { }
-      id_type id() const { return _id; }
+      const id_type& id() const { return _id; }
       bool operator==(const DiscreteState& other) const { return this->_id==other._id; }
       bool operator!=(const DiscreteState& other) const { return this->_id!=other._id; }
       bool operator<(const DiscreteState& other) const { return this->_id<other._id; }
@@ -52,6 +54,9 @@ namespace Ariadne {
       return os << state._id; 
     }
 
+    template<class A> void serialize(A& a, Geometry::DiscreteState& ds, const uint v) {
+      id_type& id = const_cast<id_type&>(ds.id()); a & id;
+    }
 
   }
 }

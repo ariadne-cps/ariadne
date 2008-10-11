@@ -28,15 +28,17 @@ namespace Ariadne {
 
 template<class R> inline
 bool 
-Geometry::GridMaskSet<R>::operator==(const GridMaskSet<R>& gms) 
+Geometry::GridMaskSet<R>::operator==(const GridMaskSet<R>& gms) const
 {
-  throw Deprecated(__PRETTY_FUNCTION__);
+  return this->grid()==gms.grid()
+    && this->block()==gms.block()
+    && this->mask()==gms.mask();
 }
 
 
 template<class R> inline
 bool 
-Geometry::GridMaskSet<R>::operator!=(const GridMaskSet<R>& gms) 
+Geometry::GridMaskSet<R>::operator!=(const GridMaskSet<R>& gms) const
 {
   return !(*this==gms);
 }
@@ -249,20 +251,6 @@ Geometry::GridMaskSet<R>::adjoin_outer_approximation(const ListSet<BS>& ls)
 }
 
 
-template<class R> inline
-void 
-Geometry::GridMaskSet<R>::adjoin_over_approximation(const Box<R>& r)
-{
-  this->adjoin(over_approximation(r,this->grid()));
-}
-
-template<class R> inline
-void 
-Geometry::GridMaskSet<R>::adjoin_under_approximation(const Box<R>& r)
-{
-  this->adjoin(under_approximation(r,this->grid()));
-}
-
 
 template<class R> template<class BS> inline
 void 
@@ -294,6 +282,23 @@ template<class R> inline
 std::ostream& 
 Geometry::operator<<(std::ostream& os, const GridMaskSet<R>& gms) {
   return gms.write(os);
+}
+
+template<class A, class R> void Geometry::serialize(A& a, GridMaskSet<R>& gms, const uint v) {
+  typedef array<R> RealArray;
+  array<R>& origin = const_cast<RealArray&>(gms.grid().origin().data());
+  array<R>& lengths = const_cast<RealArray&>(gms.grid().lengths().data());
+  IndexArray& lower = const_cast<IndexArray&>(gms.block().lower_corner());
+  IndexArray& upper = const_cast<IndexArray&>(gms.block().upper_corner());
+  BooleanArray& mask = const_cast<BooleanArray&>(gms.mask());
+  a & origin;
+  a & lengths;
+  a & lower;
+  a & upper;
+  a & mask;
+  // Need to reassign block to compute 
+  Combinatoric::LatticeMaskSet& lattice_set = const_cast<Combinatoric::LatticeMaskSet&>(gms.lattice_set()); \
+  lattice_set._compute_cached_attributes();
 }
 
 

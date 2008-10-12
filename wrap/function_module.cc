@@ -95,7 +95,7 @@ void read(DifferentialVector< SparseDifferential<X> >& td, const object& obj) {
   }
 }
 
-class FunctionWrapper
+class FunctionPyWrap
   : public FunctionInterface
   , public wrapper< FunctionInterface >
 {
@@ -170,7 +170,7 @@ typedef DifferentialVector< SparseDifferential<Interval> > ISDV;
 
 void export_function_interface() 
 {
-  class_<FunctionWrapper, boost::noncopyable> function_interface_class("FunctionInterface");
+  class_<FunctionPyWrap, boost::noncopyable> function_interface_class("FunctionInterface");
   function_interface_class.def("argument_size", pure_virtual(&FunctionInterface::argument_size));
   function_interface_class.def("result_size", pure_virtual(&FunctionInterface::result_size));
   function_interface_class.def("smoothness", pure_virtual(&FunctionInterface::smoothness));
@@ -230,7 +230,7 @@ void export_model()
   function_model_class.def(self_ns::str(self));
  
   def("evaluate",(Vector<I>(Model::*)(const Vector<I>&)const) &Model::evaluate);
-  def("project",(Model(*)(const Model&,const Slice&)) &project_model);
+  def("project",(Model(*)(const Model&,const Slice&)) &project);
   def("join",(Model(*)(const Model&,const Model&)) &join);
   def("compose",(Model(*)(const Model&,const Model&)) &compose);
   //def("inverse",(Model(*)(const Model&)) &inverse);

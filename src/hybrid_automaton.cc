@@ -55,8 +55,8 @@ DiscreteMode(DiscreteState location,
 
 DiscreteMode::
 DiscreteMode(DiscreteState location,
-             const boost::shared_ptr< FunctionInterface > dynamic, 
-             const boost::shared_array< const FunctionInterface > invariants)
+             const boost::shared_ptr< const FunctionInterface > dynamic, 
+             const std::vector< boost::shared_ptr< const FunctionInterface > >& invariants)
   :  _location(location), _dynamic(dynamic), _invariants(invariants) 
 {
   ARIADNE_ASSERT(dynamic->result_size()==dynamic->argument_size());
@@ -153,14 +153,15 @@ HybridAutomaton::HybridAutomaton(const std::string& name)
 
 
 const DiscreteMode& 
-HybridAutomaton::new_mode(DiscreteState id,
-                             const FunctionInterface& dynamic) 
+HybridAutomaton::new_mode(DiscreteState location,
+                          const FunctionInterface& dynamic) 
 {
-  if(this->has_mode(id)) {
+  ARIADNE_ASSERT(location>0);
+  if(this->has_mode(location)) {
     throw std::runtime_error("The hybrid automaton already has a mode with the given id");
   }
-  this->_modes.insert(DiscreteMode(id,dynamic));
-  return this->mode(id);
+  this->_modes.insert(DiscreteMode(location,dynamic));
+  return this->mode(location);
 }
 
 
@@ -171,6 +172,7 @@ HybridAutomaton::new_transition(DiscreteEvent event,
                const FunctionInterface &reset,
                const FunctionInterface &activation) 
 {
+  ARIADNE_ASSERT(event>0);
   DiscreteEvent event_id=event;
   DiscreteState source_id=source.location();
   DiscreteState target_id=target.location();
@@ -205,6 +207,7 @@ HybridAutomaton::new_transition(DiscreteEvent event,
                const FunctionInterface &reset,
                const FunctionInterface &activation) 
 {
+  ARIADNE_ASSERT(event>0);
   if(this->has_transition(event,source)) {
     throw std::runtime_error("The automaton already has a transition with the given id and source id.");
   }
@@ -302,21 +305,21 @@ HybridAutomaton::transitions() const
 }
 
 
-/*
-reference_vector< const DiscreteTransition >
+
+std::set< DiscreteTransition >
 HybridAutomaton::transitions(DiscreteState source) const
 {
-  reference_vector< const DiscreteTransition > result;
+  std::set< DiscreteTransition > result;
   for(discrete_transition_const_iterator transition_iter=this->_transitions.begin();
       transition_iter!=this->_transitions.end(); ++transition_iter) 
   {
     if(transition_iter->source().location()==source) {
-      result.push_back(*transition_iter);
+      result.insert(*transition_iter);
     }
   }
   return result;
 }
-*/
+
 
 
 const DiscreteTransition& 

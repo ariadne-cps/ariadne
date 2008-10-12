@@ -39,7 +39,7 @@ class ListSet
 {
  private:
   uint _dimension;
-  std::vector<BS> _vector;
+  std::vector<BS> _data;
 
  public:
   typedef typename std::vector<BS>::const_iterator const_iterator;
@@ -55,31 +55,31 @@ class ListSet
 
 
   /*! \brief Returns the number of basic sets forming this object. */
-  uint size() const;
+  uint size() const { return this->_data.size(); }
 
   /*! \brief Accesses the i-th BasicSet. */
-  const BS& operator[](uint index) const;
+  const BS& operator[](uint i) const { return this->_data[i]; };
   
   /*! \brief Make the set empty. */
-  void clear();
+  void clear() { this->_data.clear(); }
       
   /*! \brief A constant iterator to the beginning of the list of basic sets. */
-  const_iterator begin() const;
+  const_iterator begin() const { return this->_data.begin(); }
   
   /*! \brief A constant iterator to the end of the list of basic sets. */
-  const_iterator end() const;
+  const_iterator end() const { return this->_data.end(); };
 
   /*! \brief Returns the denotable set's space dimension. */
-  uint dimension() const;
+  uint dimension() const { return this->_dimension; }
 
   /*! \brief Removes a set from the list and return it. */
-  BS pop();
+  BS pop() { BS result=this->_data.back(); this->_data.pop_back(); return result; }
 
   /*! \brief Adjoins (makes union with) a basic set. */
-  void adjoin(const BS& bs) { this->_vector.push_back(bs); }
+  void adjoin(const BS& bs) { this->_data.push_back(bs); }
 
   /*! \brief Adjoins (makes union with) another list set. */
-  void adjoin(const ListSet<BS>& ls);
+  void adjoin(const ListSet<BS>& ls) { this->_data.insert(this->_data.end(),ls.begin(),ls.end()); }
 };      
   
 

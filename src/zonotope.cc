@@ -1,5 +1,5 @@
 /***************************************************************************
- *            file
+ *            zonotope.cc
  *
  *  Copyright 2008  Alberto Casagrande, Pieter Collins
  * 
@@ -36,9 +36,6 @@
 #include "point.h"
 #include "box.h"
 #include "list_set.h"
-
-//#include "linear_program.h"
-//#include "affine_model.h"
 
 
 namespace Ariadne {

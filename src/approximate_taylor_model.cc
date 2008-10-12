@@ -332,7 +332,14 @@ ApproximateTaylorModel::identity(const Vector<I>& d)
 
 
 ApproximateTaylorModel 
-project_model(const ApproximateTaylorModel& f, const Slice& slc)
+project(const ApproximateTaylorModel& f, const Range& rng)
+{
+  //ARIADNE_ASSERT(slc.stop()<=f.result_size());
+  return ApproximateTaylorModel(f.domain(),f.centre(),project(f.expansion(),rng));
+}
+
+ApproximateTaylorModel 
+project(const ApproximateTaylorModel& f, const Slice& slc)
 {
   //ARIADNE_ASSERT(slc.stop()<=f.result_size());
   return ApproximateTaylorModel(f.domain(),f.centre(),project(f.expansion(),slc));

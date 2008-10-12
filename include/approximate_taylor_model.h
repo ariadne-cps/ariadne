@@ -52,7 +52,8 @@ ApproximateTaylorModel operator-(const ApproximateTaylorModel&, const Approximat
 ApproximateTaylorModel operator*(const ApproximateTaylorModel&, const ApproximateTaylorModel&);
 
 
-ApproximateTaylorModel project_model(const ApproximateTaylorModel&, const Slice& slc);
+ApproximateTaylorModel project(const ApproximateTaylorModel&, const Slice& slc);
+ApproximateTaylorModel project(const ApproximateTaylorModel&, const Range& rng);
 ApproximateTaylorModel recentre(const ApproximateTaylorModel&, const Vector<Interval>& bx, const Vector<Float>& pt);
 ApproximateTaylorModel restrict(const ApproximateTaylorModel&, const Vector< Interval >& bx);
 ApproximateTaylorModel truncate(const ApproximateTaylorModel&, const Vector<Float>&, uint, uint);

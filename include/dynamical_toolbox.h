@@ -37,7 +37,7 @@ namespace Ariadne {
 using std::pair;
 
 
-template<class T> class Array;
+template<class T> class array;
 
 class Interval;
 class FunctionInterface;
@@ -79,6 +79,11 @@ class DynamicalToolbox
   //! \brief Default constructor.
   DynamicalToolbox();
 
+  //! \brief Test if a box satisfies the constraint given by the guard. Returns \a true is all points
+  //! in the box satisfy the constraint, \a false if all points do not satisfy the constraint, and 
+  //! indeterminate otherwise.
+  tribool active(const FunctionType& guard,  const BoxType& box) const;
+
   //! \brief Test if a set satisfied the constraint given by the guard. Returns \a true is all points
   //! in the set satisfy the constraint, \a false if all points do not satisfy the constraint, and 
   //! indeterminate otherwise.
@@ -96,18 +101,14 @@ class DynamicalToolbox
   pair<TimeModelType,TimeModelType> 
   touching_time_interval(const FlowModelType& flow_model, 
                          const GuardModelType& guard_model, 
-                         const SetModelType& initial_set_model, 
-                         const RealType& minimum_time, 
-                         const RealType& maximum_time) const;
+                         const SetModelType& initial_set_model) const;
   
   //! \brief Computes the time at which points in the \a initial_set_model cross the zero-set of the
   //! the \a guard_model under evolution of the \a flow_model, for times between the \a minimum_time and \a maximum_time.
   //! The crossing must be (differentiably) transverse.
   TimeModelType crossing_time(const FlowModelType& flow_model, 
                               const GuardModelType& guard_model, 
-                              const SetModelType& initial_set_model, 
-                              const RealType& minimum_time, 
-                              const RealType& maximum_time) const;
+                              const SetModelType& initial_set_model) const;
 
   
   //! \brief Computes the image of the set defined by \a set_model under the \a map.
@@ -161,13 +162,16 @@ class DynamicalToolbox
   
 
   //! \brief A model for the map \a f over the domain \a d.
-  MapModelType map_model(const FunctionType& f, BoxType& d);
+  MapModelType map_model(const FunctionType& f, BoxType& d) const;
+
   //! \brief A model for the flow determined by the vector field \a vf over the initial domain \a d,
   //! valid for times up to \a h, assuming that the state remains in the bounding box \a b.
   FlowModelType flow_model(const FunctionType& vf, const BoxType& d, 
-                           const TimeType& h, const BoxType& b);
+                           const TimeType& h, const BoxType& b) const;
+
   //! \brief A model for the real-valued function \a g over the domain \a d.
-  GuardModelType guard_model(const FunctionType& g, const BoxType& d);
+  GuardModelType guard_model(const FunctionType& g, const BoxType& d) const;
+
 
   //! \brief Computed a pair \f$(h,B)\f$ such that the flow of the vector_field \a vf starting in
   //! domain \a d remains in \a B for times up to \a h. The maximum allowable \a h and maximum
@@ -176,14 +180,14 @@ class DynamicalToolbox
   flow_bounds(const FunctionType& vf, 
               const BoxType& d, 
               const RealType& maximum_step_size, 
-              const RealType& maximum_bound_diameter);
+              const RealType& maximum_bound_diameter) const;
 
 
   //@{ \name Conversion operations
   //! \brief Converts a set to a model (Unstable)
-  SetModelType model(const SetType& s);
+  SetModelType model(const SetType& s) const;
   //! \brief Converts a model to a set (Unstable)
-  SetType set(const SetModelType& s);
+  SetType set(const SetModelType& s) const;
   //@}
 
   //@{ \name Set-based operations
@@ -194,7 +198,7 @@ class DynamicalToolbox
   //! \brief A box containing the set \a s.
   BoxType bounding_box(const SetModelType& s) const;
   //! \brief A list of sets obtained by subdividing the set \a s into at least two smaller pieces.
-  Array<SetModelType> subdivide(const SetModelType& s) const;
+  array<SetModelType> subdivide(const SetModelType& s) const;
   //! \brief An over-approximation to the set \a s with a simplified description.
   SetModelType reduce(const SetModelType& s) const;
   //@}

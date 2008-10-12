@@ -34,6 +34,8 @@
 
 namespace Ariadne {  
 
+typedef std::pair<int,Float> HybridTime;
+
 class HybridSpace;
 class HybridSet;
   
@@ -63,7 +65,7 @@ class DiscreteMode {
   // The discrete mode's vector field.
   boost::shared_ptr< const FunctionInterface > _dynamic; 
   // The discrete mode's invariants.
-  boost::shared_array< const FunctionInterface > _invariants;
+  std::vector< boost::shared_ptr< const FunctionInterface > > _invariants;
   
  public:
   //! \brief The mode's discrete state. 
@@ -75,7 +77,7 @@ class DiscreteMode {
     return *this->_dynamic; }
   
   //! \brief The discrete mode's invariants. 
-  const boost::shared_array<const FunctionInterface> invariants() const{
+  const std::vector< boost::shared_ptr< const FunctionInterface > >& invariants() const {
     return this->_invariants; }
   
   //! \brief The dimension of the discrete mode. 
@@ -95,8 +97,8 @@ class DiscreteMode {
 
   // Construct from objects managed by shared pointers (for internal use) 
   DiscreteMode(DiscreteState location,
-               const boost::shared_ptr< FunctionInterface > dynamic, 
-               const boost::shared_array< const FunctionInterface > invariants);
+               const boost::shared_ptr< const FunctionInterface > dynamic, 
+               const std::vector< boost::shared_ptr< const FunctionInterface > >& invariants);
     
 };
   
@@ -345,10 +347,7 @@ class HybridAutomaton
   const std::set< DiscreteTransition >& transitions() const;
   
   //! \brief The discrete transitions from location \a source. 
-  //reference_set< const DiscreteTransition > transitions(DiscreteState source) const;
-
-  //! \brief The discrete transitions from location \a source. 
-  //reference_vector< const DiscreteTransition > transitions(DiscreteState source) const;
+  std::set< DiscreteTransition > transitions(DiscreteState source) const;
 
   //! \brief The state space of the system. 
   HybridSpace state_space() const;

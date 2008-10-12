@@ -1,5 +1,5 @@
 /***************************************************************************
- *            file
+ *            test_approximate_taylor_model.cc
  *
  *  Copyright 2008  Pieter Collins
  * 
@@ -188,7 +188,7 @@ int main() {
     const ApproximateTaylorModel hm=hitting(fm,gm);
     cout << "hm=" << hm << endl;
     Slice slc=slice(0,1,1);
-    ApproximateTaylorModel hmp=project_model(hm,slc);
+    ApproximateTaylorModel hmp=Ariadne::project(hm,slc);
     cout << "hmp=" << hmp << endl;
     ApproximateTaylorModel zm=compose(gm,hmp);
     cout << "zm=" << zm << endl;

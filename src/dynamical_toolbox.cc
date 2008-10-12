@@ -36,7 +36,7 @@
 
 namespace Ariadne {
 
-uint verbosity = 0;
+int verbosity = 0;
 
 class DegenerateCrossingException { };
 class NonInvertibleFunctionException { };
@@ -139,12 +139,26 @@ reachability_step(const FlowModelType& flow_model,
 
 
 template<class Mdl>
-typename DynamicalToolbox<Mdl>::ModelType
+typename DynamicalToolbox<Mdl>::SetModelType
 DynamicalToolbox<Mdl>::
-reachability_step(const ModelType& flow_model, 
-                  const ModelType& initial_set_model, 
-                  const ModelType& initial_time_model, 
-                  const ModelType& final_time_model) const
+reachability_step(const FlowModelType& flow_model, 
+                  const SetModelType& initial_set_model, 
+                  const TimeType& initial_time, 
+                  const TimeModelType& final_time_model) const
+{
+  uint ng=initial_set_model.argument_size();
+  Mdl initial_time_model = Mdl::constant(Vector<Interval>(ng,I(-1,1)),Vector<Float>(ng,R(0)),
+                                         Vector<Float>(1,initial_time),_order,_smoothness);
+  return this->reachability_step(flow_model,initial_set_model,initial_time_model,final_time_model);
+}
+
+template<class Mdl>
+typename DynamicalToolbox<Mdl>::SetModelType
+DynamicalToolbox<Mdl>::
+reachability_step(const FlowModelType& flow_model, 
+                  const SetModelType& initial_set_model, 
+                  const TimeModelType& initial_time_model, 
+                  const TimeModelType& final_time_model) const
 {
   // Compute the reachable set
   // Need an extra independent variable to represent time
@@ -205,12 +219,18 @@ typename DynamicalToolbox<Mdl>::ModelType
 DynamicalToolbox<Mdl>::
 crossing_time(const ModelType& flow_model, 
               const ModelType& guard_model, 
-              const ModelType& initial_set_model, 
-              const RealType& minimum_time, 
-              const RealType& maximum_time) const
+              const ModelType& initial_set_model) const
 {
+  uint dimension=flow_model.result_size();
+  RealType minimum_time=flow_model.domain()[dimension].lower(); 
+  RealType maximum_time=flow_model.domain()[dimension].upper(); 
+
   ARIADNE_ASSERT(minimum_time<=0);
   ARIADNE_ASSERT(maximum_time>=0);
+  ARIADNE_ASSERT(flow_model.argument_size()==flow_model.result_size()+1);
+  ARIADNE_ASSERT(guard_model.argument_size()==flow_model.result_size());
+  ARIADNE_ASSERT(initial_set_model.result_size()==flow_model.result_size());
+
   ModelType hitting_model=compose(guard_model,flow_model);
   ARIADNE_LOG(6,"hitting_model = "<<hitting_model<<"\n");
   ModelType free_hitting_time_model;
@@ -238,12 +258,20 @@ pair<Mdl,Mdl>
 DynamicalToolbox<Mdl>::
 touching_time_interval(const ModelType& flow_model, 
                        const ModelType& guard_model, 
-                       const ModelType& initial_set_model, 
-                       const RealType& minimum_time, 
-                       const RealType& maximum_time) const
+                       const ModelType& initial_set_model) const
 {
+  ARIADNE_ASSERT(flow_model.result_size()+1==flow_model.argument_size());
+  ARIADNE_ASSERT(guard_model.argument_size()==flow_model.result_size());
+  ARIADNE_ASSERT(guard_model.result_size()==1u);
+
+  uint dimension=guard_model.argument_size();
+  RealType minimum_time=flow_model.domain()[dimension].lower(); 
+  RealType maximum_time=flow_model.domain()[dimension].upper(); 
+  
+  ARIADNE_LOG(6,"\nminimum_time="<<minimum_time<<" maximum_time="<<maximum_time<<"\n");
   ARIADNE_ASSERT(minimum_time<=0);
   ARIADNE_ASSERT(maximum_time>=0);
+
   ModelType final_set_model=this->integration_step(flow_model,initial_set_model,maximum_time);
 
   uint refinements=5;
@@ -283,7 +311,10 @@ touching_time_interval(const ModelType& flow_model,
     }
   }
 
-  //return std::pair(R(lower_time),R(upper_time));
+  ModelType lower_time_model=ModelType::constant(initial_set_model.domain(),initial_set_model.centre(),Vector<Float>(1u,lower_time),_order,_smoothness);
+  ModelType upper_time_model=ModelType::constant(initial_set_model.domain(),initial_set_model.centre(),Vector<Float>(1u,upper_time),_order,_smoothness);
+  return std::make_pair(lower_time_model,upper_time_model);
+
 }
 
 
@@ -292,6 +323,21 @@ touching_time_interval(const ModelType& flow_model,
 
 
     
+template<class Mdl>
+tribool
+DynamicalToolbox<Mdl>::
+active(const FunctionType& guard_function, const BoxType& box) const
+{
+  IntervalType range=guard_function.evaluate(box)[0];
+  if(range.lower()>0) {
+    return true;
+  } else if(range.upper()<0) {
+    return false; 
+  } else {
+    return indeterminate;
+  }
+}
+
 
 
 template<class Mdl>
@@ -316,6 +362,101 @@ active(const FunctionType& guard_function, const ModelType& set_model) const
 {
   ModelType guard_model(set_model.range(),guard_function,this->_spacial_order,this->_smoothness);
   return this->active(guard_model,set_model);
+}
+
+template<class Mdl>
+Mdl
+DynamicalToolbox<Mdl>::set(Mdl const& model) const
+{ 
+  return model;
+}
+
+template<class Mdl>
+Mdl
+DynamicalToolbox<Mdl>::model(Mdl const& set) const
+{ 
+  return set;
+}
+
+template<class Mdl>
+Mdl
+DynamicalToolbox<Mdl>::flow_model(FunctionInterface const& vf, Vector<Interval> const& bx, Float const& h, Vector<Interval> const& bb) const
+{ 
+  Mdl vector_field_model(bb,vf,_order,_smoothness);
+  ARIADNE_LOG(6,"vector_field_model = "<<vector_field_model<<"\n");
+  
+
+  // Use flow function on model type
+  Mdl flow_model=Ariadne::flow(vector_field_model);
+  ARIADNE_LOG(6,"flow_model = "<<flow_model<<"\n");
+
+  return flow_model;
+}
+
+
+template<class Mdl>
+std::pair<Float, Vector<Interval> >
+DynamicalToolbox<Mdl>::flow_bounds(FunctionInterface const& vf, 
+                                   Vector<Interval> const& r, 
+                                   Float const& hmax, 
+                                   Float const& dmax) const
+{ 
+  // Try to find a time h and a set b such that subset(r+Interval<R>(0,h)*vf(b),b) holds
+  ARIADNE_LOG(6,"flow_bounds(Function,Box,Time hmax)\n");
+  ARIADNE_LOG(7,"  r="<<r<<" hmax="<<hmax<<"\n");
+  
+  ARIADNE_ASSERT(vf.argument_size()==r.size());
+
+  // Set up constants of the method.
+  // TODO: Better estimates of constants
+  const Float INITIAL_MULTIPLIER=2;
+  const Float MULTIPLIER=1.125;
+  const Float BOX_RADIUS_MULTIPLIER=1.03125;
+  const uint EXPANSION_STEPS=8;
+  const uint REDUCTION_STEPS=8;
+  const uint REFINEMENT_STEPS=4;
+  
+  Vector<Interval> delta=r-midpoint(r);
+  
+  Float h=hmax;
+  Float hmin=hmax/(1<<REDUCTION_STEPS);
+  bool success=false;
+  Vector<Interval> b,nb,df;
+  while(!success) {
+    ARIADNE_ASSERT(h>hmin);
+    Interval ih(0,h);
+    b=r+INITIAL_MULTIPLIER*ih*vf.evaluate(r)+delta;
+    for(uint i=0; i!=EXPANSION_STEPS; ++i) {
+      df=vf.evaluate(b);
+      nb=r+ih*df;
+      ARIADNE_LOG(9,"  h="<<h<<" b="<<b<<" vf="<<vf.evaluate(b)<<" nb="<<nb<<"\n");
+      if(subset(nb,b)) {
+        success=true;
+        break;
+      } else {
+        b=r+MULTIPLIER*ih*df+delta;
+      }
+    }
+    if(!success) {
+      h/=2;
+    }
+  }
+
+  ARIADNE_ASSERT(possibly(subset(nb,b)));
+  b=nb;
+  
+  Interval ih(0,h);
+  for(uint i=0; i!=REFINEMENT_STEPS; ++i) {
+     b=r+ih*vf.evaluate(b);
+  }
+  
+  // Check result of operation
+  // We use "possibly" here since the bound may touch 
+  ARIADNE_ASSERT(possibly(subset(Vector<Interval>(r+ih*vf.evaluate(b)),b)));
+  
+  ARIADNE_LOG(7,"  h="<<h<<" b="<<b<<" r+[0,h]*f(b)="<<r+ih*vf.evaluate(b)<<"\n");
+
+  return std::make_pair(h,b);
 }
 
 

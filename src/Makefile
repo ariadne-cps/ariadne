@@ -8,7 +8,8 @@ OBJ=numeric.o vector.o matrix.o \
 	grid.o paving.o \
 	dynamical_toolbox.o \
 	hybrid_automaton.o \
-	graphics.o
+	hybrid_evolver.o \
+	logging.o graphics.o
 
 
 

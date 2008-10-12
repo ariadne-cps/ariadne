@@ -67,7 +67,6 @@ typedef ublas::slice Slice;
 typedef ublas::range Range;
 using ublas::range;
 using ublas::slice;
-using ublas::project;
 using ublas::identity_matrix;
 
 
@@ -93,8 +92,8 @@ Vector<X> join(const Vector<X>& v1, const Vector<X>& v2)
   uint n1=v1.size();
   uint n2=v2.size();
   Vector<X> r(n1+n2);
-  project(r,range(0,n1))=v1;
-  project(r,range(n1,n1+n2))=v2;
+  ublas::project(r,range(0,n1))=v1;
+  ublas::project(r,range(n1,n1+n2))=v2;
   return r;
 }
 
@@ -103,12 +102,12 @@ Vector<X> join(const Vector<X>& v1, const X& s2)
 {
   uint n1=v1.size();
   Vector<X> r(n1+1);
-  project(r,range(0,n1))=v1;
+  ublas::project(r,range(0,n1))=v1;
   r[n1]=s2;
   return r;
 }
 
-
+  
 
 template<class X1, class X2>
 bool operator==(const Vector<X1>& v1, const Vector<X2>& v2)

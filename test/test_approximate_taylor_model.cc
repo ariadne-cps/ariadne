@@ -21,9 +21,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file orbit.h
- *  \brief Orbits of dynamic systems
- */
 #include <iostream>
 #include "numeric.h"
 #include "vector.h"

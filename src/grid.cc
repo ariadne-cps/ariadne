@@ -1,5 +1,5 @@
 /***************************************************************************
- *            file
+ *            grid.cc
  *
  *  Copyright 2008  Alberto Casagrande, Pieter Collins
  * 
@@ -21,7 +21,4 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file orbit.h
- *  \brief Orbits of dynamic systems
- */
 #include "grid.h"

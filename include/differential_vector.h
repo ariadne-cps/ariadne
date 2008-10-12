@@ -13,6 +13,36 @@ namespace Ariadne {
 
 template<class X> class Vector;
 
+
+
+
+template<class DIFF> DifferentialVector<DIFF> differential_vector(uint rs, uint as, uint d, const typename DIFF::RealType* ptr);
+
+template<class DIFF> DifferentialVector<DIFF> vector_variable(uint n, uint d, const Vector<typename DIFF::RealType>& c);
+
+template<class DIFF> DifferentialVector<DIFF> project(const DifferentialVector<DIFF>& y, Slice rng);
+template<class DIFF> DifferentialVector<DIFF> restrict(const DifferentialVector<DIFF>& y, const array<uint>& p);
+template<class DIFF> DifferentialVector<DIFF> expand(const DifferentialVector<DIFF>& y, uint as, const array<uint>& p);
+template<class DIFF> DifferentialVector<DIFF> join(const DifferentialVector<DIFF>& x1, const DifferentialVector<DIFF>& x2);
+template<class DIFF> DifferentialVector<DIFF> join(const DifferentialVector<DIFF>& x1, const DIFF& x2);
+
+template<class DIFF> DifferentialVector<DIFF> operator-(const DifferentialVector<DIFF>& x, const DifferentialVector<DIFF>& y);
+template<class DIFF> DifferentialVector<DIFF> operator+(const DifferentialVector<DIFF>& v, const Vector<typename DIFF::RealType>& c);
+template<class DIFF> DifferentialVector<DIFF> operator-(const DifferentialVector<DIFF>& v, const Vector<typename DIFF::RealType>& c);
+
+template<class DIFF, class Y> Vector<Y> evaluate(const DifferentialVector<DIFF>& x, const Vector<Y>& y);
+
+template<class DIFF> DifferentialVector<DIFF> translate(const DifferentialVector<DIFF>& y, const Vector<typename DIFF::RealType>& c);
+template<class DIFF> DifferentialVector<DIFF> compose(const DifferentialVector<DIFF>& y, const DifferentialVector<DIFF>& z);
+template<class DIFF> DifferentialVector<DIFF> inverse(const DifferentialVector<DIFF>& y);
+template<class DIFF> DifferentialVector<DIFF> implicit(const DifferentialVector<DIFF>& y);
+template<class DIFF> DifferentialVector<DIFF> derivative(const DifferentialVector<DIFF>& x, uint i);
+template<class DIFF> DifferentialVector<DIFF> antiderivative(const DifferentialVector<DIFF>& x, uint j);
+//template<class DIFF> DifferentialVector<DIFF> flow(const DifferentialVector<DIFF>& vf, const Vector<typename DIFF::RealType>& x, uint ox);
+
+
+
+
 /*! \brief A class representing the derivatives of a vector quantity depending on multiple arguments. */
 template<class DIFF>
 class DifferentialVector
@@ -21,6 +51,13 @@ class DifferentialVector
   //BOOST_CONCEPT_ASSERT((DifferentialVectorConcept<SparseDifferentialVector<X> >));
   typedef typename DIFF::ScalarType X;
  public:
+  // The type used for accessing elements
+  typedef uint IndexType;
+  // The value stored in the vector.
+  typedef DIFF ValueType;
+  // The type used for scalars.
+  typedef typename DIFF::ScalarType ScalarType;
+
   DifferentialVector() 
     : Vector<DIFF>(0,DIFF()) { }
   DifferentialVector(uint rs, uint as, uint d) 
@@ -47,6 +84,7 @@ class DifferentialVector
   }
   template<class E> DifferentialVector(const ublas::vector_expression<E>& ve) 
     : Vector<DIFF>(ve) { }
+
 
   uint result_size() const { return this->Vector<DIFF>::size(); }
   uint argument_size() const { return (*this)[0].argument_size(); }
@@ -75,7 +113,29 @@ class DifferentialVector
     return result;
   }
 
+  static DifferentialVector<DIFF> affine(uint rs, uint as, uint d, const Vector<X>& b, const Matrix<X>& A) {
+    ARIADNE_ASSERT(b.size()==rs);
+    ARIADNE_ASSERT(A.row_size()==rs);
+    ARIADNE_ASSERT(A.column_size()==as);
+    DifferentialVector<DIFF> result(rs,as,d);
+    for(uint i=0; i!=rs; ++i) { 
+      result[i]=b[i]; 
+      for(uint j=0; j!=as; ++j) {
+        result[i][j]=A[i][j]; 
+      }
+    }
+    return result;
+  }
+
 };
+
+
+template<class DIFF> DifferentialVector<DIFF> 
+differential_vector(uint rs, uint as, uint d, const typename DIFF::RealType* ptr)
+{
+  return DifferentialVector<DIFF>(rs,as,d,ptr);
+}
+
 
 template<class DIFF, class Y>
 DifferentialVector<DIFF>&
@@ -149,7 +209,49 @@ DifferentialVector<DIFF>
 operator-(const DifferentialVector<DIFF>& x, const DifferentialVector<DIFF>& y)
 {  
   DifferentialVector<DIFF> r(x);
-  return r-=y;
+  return static_cast<Vector<DIFF>&>(r)-=y;
+}
+
+
+template<class DIFF>
+DifferentialVector<DIFF> 
+restrict(const DifferentialVector<DIFF>& x, const array<uint>& p)
+{
+  uint d=x.degree();
+  uint rs=x.result_size();
+  DifferentialVector<DIFF> r(x.result_size(),p.size(),x.degree());
+  MultiIndex rj(r.argument_size());
+  MultiIndex xj(x.argument_size());
+  for( ; rj.degree()<=d; ++rj) {
+    for(uint k=0; k!=p.size(); ++k) {
+      xj.set(p[k],rj[k]);
+    }
+    for(uint i=0; i!=rs; ++i) {
+      r[i][rj]=x[i][xj];
+    }
+  }
+  return r;
+}
+
+
+template<class DIFF>
+DifferentialVector<DIFF> 
+expand(const DifferentialVector<DIFF>& x, uint as, const array<uint>& p)
+{
+  uint d=x.degree();
+  uint rs=x.result_size();
+  DifferentialVector<DIFF> r(rs,as,d);
+  MultiIndex rj(r.argument_size());
+  MultiIndex xj(x.argument_size());
+  for( ; xj.degree()<=d; ++xj) {
+    for(uint k=0; k!=p.size(); ++k) {
+      rj.set(p[k],xj[k]);
+    }
+    for(uint i=0; i!=rs; ++i) {
+      r[i][rj]=x[i][xj];
+    }
+  }
+  return r;
 }
 
 
@@ -189,21 +291,20 @@ evaluate(const DIFF& x,
          const Vector<Y>& y)
 {  
   //std::cerr<<__PRETTY_FUNCTION__<<std::endl;
+  //std::cerr<<" y="<<y<<std::endl;
+  //std::cerr<<" x="<<x<<std::endl;
+
   using namespace std;
   assert(x.argument_size()==y.size());
-  //std::cerr << "y=" << y << std::endl;
-  //std::cerr << "x=" << x << std::endl;
 
   uint d=x.degree();
   uint s=y.size();
 
-  Y zero=y[0]; zero*=0;
+  Y zero=y[0]; zero*=0;  
   Y one=zero; one+=1;
 
   Y r=zero;
 
-  //std::cerr << "zero="<<zero<<std::endl;
-  //std::cerr << "one="<<one<<std::endl;
   // Use inefficient brute-force approach with lots of storage...
   array< array< Y > > val(s, array< Y >(d+1,zero));
   for(uint j=0; j!=s; ++j) {
@@ -231,11 +332,11 @@ evaluate(const DifferentialVector<DIFF>& x,
          const Vector<Y>& y)
 {  
   //std::cerr<<__PRETTY_FUNCTION__<<std::endl;
+  //std::cerr<<" y="<<y<<std::endl;
+  //std::cerr<<" x="<<x<<std::endl;
   using namespace std;
   assert(x.argument_size()==y.size());
   typedef typename DIFF::ScalarType X;
-  //std::cerr << "y=" << y << std::endl;
-  //std::cerr << "x=" << x << std::endl;
 
   uint d=x.degree();
   uint rs=x.result_size();
@@ -254,6 +355,7 @@ evaluate(const DifferentialVector<DIFF>& x,
       val[j][k]=val[j][k-1]*y[j];
     }
   }
+
   for(MultiIndex j(as); j.degree()<=d; ++j) {
     Y t=one;
     for(uint k=0; k!=as; ++k) {
@@ -283,6 +385,18 @@ evaluate(const DifferentialVector<DIFF>& x,
   static_cast<Vector<DIFF>&>(r) = 
     evaluate(x,static_cast<const Vector<DIFF>&>(y));
   for(uint i=0; i!=r.result_size(); ++i) { r[i].cleanup(); }
+  return r;
+}
+
+
+template<class DIFF>
+DifferentialVector<DIFF> 
+project(const DifferentialVector<DIFF>& x, Slice slc)
+{
+  DifferentialVector<DIFF> r(slc.size(),x.argument_size(),x.degree());
+  for(uint i=0; i!=slc.size(); ++i) {
+    r[i]=x[i+slc.start()];
+  }
   return r;
 }
 
@@ -341,11 +455,13 @@ DifferentialVector<DIFF>
 compose(const DifferentialVector<DIFF>& x, 
         const DifferentialVector<DIFF>& y)
 {  
+  //std::cerr<<"compose(DV x, DV y)\n x="<<x<<"\n y="<<y<<std::endl;
   typedef typename DIFF::ScalarType X;
   Vector<X> yv=y.value();
   DifferentialVector<DIFF>& ync=const_cast<DifferentialVector<DIFF>&>(y); 
   for(uint i=0; i!=ync.result_size(); ++i) { ync[i].value()=0; }
   DifferentialVector<DIFF> r=evaluate(x,ync);
+  //std::cerr<<"r="<<r<<"\n"<<std::endl;
   ync+=yv;
   return r;
 }
@@ -380,18 +496,25 @@ implicit(const DifferentialVector<DIFF>& x)
   Matrix<X> J(xas,rs);
   //J(range(zas,zas+rs),range(0,rs))=inverse(A2);
   project(J,range(zas,zas+rs),range(0,rs)) = inverse(A2);
+  std::cerr<<"A2="<<A2<<std::endl;
+  std::cerr<<"J="<<J<<std::endl;
 
   DifferentialVector<DIFF> y(xas,zas,d);
   for(uint i=0; i!=zas; ++i) {
     y[i]=DIFF::variable(zas,d,1.0,i);
   }
   for(uint i=0; i!=rs; ++i) {
-    // y[as+i]=TaylorVariable<X>::constant(as,d,0.0);
+    y[zas+i]=DIFF::constant(zas,d,0.0);
   }
 
+  std::cerr<<"\nx="<<x<<std::endl;
+  std::cerr<<"y="<<y<<std::endl;
   for(uint i=0; i!=d; ++i) {
     DifferentialVector<DIFF> z=compose(x,y);
-    y-=J*z;
+    std::cerr<<"z="<<z<<std::endl;
+    // Need cast to avoid ambiguity
+    static_cast<Vector<DIFF>&>(y)-=J*z;
+    std::cerr<<"y="<<y<<std::endl;
   }
 
   DifferentialVector<DIFF> r(rs,zas,d);
@@ -408,6 +531,7 @@ DifferentialVector<DIFF>
 inverse(const DifferentialVector<DIFF>& x)
 {
   typedef typename DIFF::ScalarType X;
+  std::cerr << "\ninverse(x)\nx=" << x << "\n" << std::endl;
   return inverse(x,Vector<X>(x.argument_size()));
 }
 
@@ -419,7 +543,7 @@ inverse(const DifferentialVector<DIFF>& x, const Vector<typename DIFF::ScalarTyp
   typedef typename DIFF::ScalarType X;
   assert(x.result_size()==x.argument_size());
   assert(x.result_size()==c.size());
-  //std::cerr << "x=" << x << std::endl;
+  std::cerr << "\ninverse(x,c)\nx=" << x << "\nc=" << c << "\n" << std::endl;
   uint n=x.result_size();
   uint d=x.degree();
   Vector<X> z(n,0);
@@ -435,12 +559,13 @@ inverse(const DifferentialVector<DIFF>& x, const Vector<typename DIFF::ScalarTyp
       y[i][j]=J[i][j];
     }
   }
-
+  
   for(uint i=2; i<=d; ++i) {
     DifferentialVector<DIFF> z=compose(x,y);
-    z-=id;
-    y-=J*z;
+    static_cast<Vector<DIFF>&>(z)-=id;
+    static_cast<Vector<DIFF>&>(y)-=J*z;
   }
+
   return y;
 }
 
@@ -457,39 +582,29 @@ flow1(const DifferentialVector<DIFF>& f, const Vector<typename DIFF::ScalarType>
   uint n=x.size();
   uint d=f.degree();
 
-  Matrix<X> Q(n+1,n); for(uint i=0; i!=n; ++i) { Q[i][i]=1; }
+  // Perform antiderivatives starting from zero
+  // The code below will compute all derivates correctly up to order d
+  // However, in principle, derivatives with respect to time can be 
+  // computed up to order d+1. This has not been done in the code below
+  // since in the dense representation, we have a fixed order
+  // for all variables. Of course, in the sparse representation, 
+  // we could modify the code by setting the gradients at the beginning
   
-  Vector<X> tx(n+1);
-  for(uint i=0; i!=n; ++i) { tx[i]=x[i]; } 
-  tx[n]=0.0;
-
-  /*
-    DifferentialVector<DIFF> tf(n,n+1,d);
-  MultiIndex ta(n+1);
-  for(uint i=0; i!=n; ++i) {
-    for(typename DIFF::const_iterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
-      const MultiIndex& a=iter->first;
-      for(uint k=0; k!=n; ++k) { ta.set(k,a[k]); }
-      tf[i][ta]=iter->second;
-    }
-  }
-  */
-  //std::cerr << "f=" << f << std::endl;
-  //std::cerr << "tf=" << tf << std::endl << std::endl;
-
-  DifferentialVector<DIFF> y(n,n+1,d);
-  for(uint i=0; i!=n; ++i) { y[i].gradient(i)=1; }
-  //std::cerr << "y=" << y << std::endl;
+  
+  //std::cerr << "\nf=" << f << "\n" << std::endl;
+  DifferentialVector<DIFF> y(n,n+1,0);
+  //for(uint i=0; i!=n; ++i) { y[i].gradient(i)=1; }
+  //std::cerr << "y[0]=" << y << std::endl;
   DifferentialVector<DIFF> yp(n,n+1,d);
   for(uint j=0; j<d; ++j) {
     yp=compose(f,y);
-    //std::cerr << "yp=" << yp << std::endl;
+    //std::cerr << "yp["<<j<<"]=" << yp << std::endl;
     for(uint i=0; i!=n; ++i) {  
       y[i]=antiderivative(yp[i],n);
       y[i].value()=0;
       y[i].gradient(i)=1;
     }
-    //std::cerr << "y=" << y << std::endl << std::endl;
+    //std::cerr << "y["<<j+1<<"]=" << y << std::endl << std::endl;
   } 
   for(uint i=0; i!=n; ++i) { y[i].value()=x[i]; }
   return y;

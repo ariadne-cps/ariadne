@@ -1,8 +1,7 @@
-TESTS=test_differential.o test_sparse_differential.o test_approximate_taylor_model.o 
+TESTS=test_differential.o test_approximate_taylor_model.o 
 
 tests: $(TESTS)
 	g++ -L../src test_differential.o -lariadne-lite -o test_differential.exe
-	g++ -L../src test_sparse_differential.o -lariadne-lite -o test_sparse_differential.exe
 	g++ -L../src test_approximate_taylor_model.o -lariadne-lite -o test_approximate_taylor_model.exe
 
 dep:  

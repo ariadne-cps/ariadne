@@ -9,7 +9,8 @@ namespace Ariadne {
 
 template<class X> class Vector;
 template<class X> class Matrix;
-template<class X> class SparseDifferentialVector;
+template<class X> class SparseDifferential;
+template<class X> class DifferentialVector;
 
 //! \brief Interface for functions whose derivatives can be computed.
 class FunctionInterface {
@@ -23,8 +24,8 @@ class FunctionInterface {
 
   virtual Vector<Interval> evaluate(const Vector<Interval>& x) const = 0;
   virtual Matrix<Interval> jacobian(const Vector<Interval>& x) const = 0;
-  virtual SparseDifferentialVector<Float> expansion(const Vector<Float>& x, const ushort& s) const = 0;
-  virtual SparseDifferentialVector<Interval> expansion(const Vector<Interval>& x, const ushort& s) const = 0;
+  virtual DifferentialVector< SparseDifferential<Float> > expansion(const Vector<Float>& x, const ushort& s) const = 0;
+  virtual DifferentialVector< SparseDifferential<Interval> > expansion(const Vector<Interval>& x, const ushort& s) const = 0;
   
   virtual std::ostream& write(std::ostream& os) const = 0;
 };

@@ -14,7 +14,7 @@ template<class X> class Matrix;
 
 class MultiIndex;
 template<class X> class SparseDifferential;
-template<class X> class SparseDifferentialVector;
+template<class D> class DifferentialVector;
 
 class ApproximateTaylorModel;
 class FunctionInterface;
@@ -56,6 +56,11 @@ class ApproximateTaylorModel {
   typedef Float R;
   typedef Float A;
  public:
+  typedef Vector<Float> PointType;
+  typedef Vector<Interval> BoxType;
+  typedef DifferentialVector< SparseDifferential<R> > DifferentialVectorType;
+  typedef DifferentialVector< SparseDifferential<I> > IntervalDifferentialVectorType;
+
   //! \brief Destructor.
   ~ApproximateTaylorModel();
   //! \brief Default constructor constructs a Taylor model of order zero with no arguments and no result variables. 
@@ -64,23 +69,23 @@ class ApproximateTaylorModel {
   ApproximateTaylorModel(uint rs, uint as, ushort o, ushort s);
   
   //! \brief Construct the identity model on a domain. 
-  //ApproximateTaylorModel(const Vector<I>& domain);
+  //ApproximateTaylorModel(const BoxType& domain);
   
   //! \brief Construct from a domain, centre, and a derivative expansion. 
-  ApproximateTaylorModel(const Vector<I>& domain, const Vector<A>& centre, 
-                         const SparseDifferentialVector<A>& expansion);
+  ApproximateTaylorModel(const BoxType& domain, const PointType& centre, 
+                         const DifferentialVectorType& expansion);
   
   //! \brief Construct from a domain, centre, and two derivative expansions, one for the centre and one over the entire domain. Included for compatibility with TaylorModel class.
-  ApproximateTaylorModel(const Vector<I>& domain, const Vector<A>& centre, 
-                            const SparseDifferentialVector<I>& centre_expansion,
-                            const SparseDifferentialVector<I>& domain_expansion);
+  ApproximateTaylorModel(const BoxType& domain, const PointType& centre, 
+                         const IntervalDifferentialVectorType& centre_expansion,
+                         const IntervalDifferentialVectorType& domain_expansion);
   
   //! \brief Construct an approximate model of \a function over \a domain, using a Taylor expansion of the given \a order. The \a smoothness parameter is not used.
-  ApproximateTaylorModel(const Vector<I>& domain, const FunctionInterface& function,
+  ApproximateTaylorModel(const BoxType& domain, const FunctionInterface& function,
                          ushort order, ushort smoothness);
   
   //! \brief Construct from a domain, centre, a function, a maximum order of the polynomial expansion and a dummy \a smoothness parameter. 
-  ApproximateTaylorModel(const Vector<I>& domain, const Vector<A>& centre,
+  ApproximateTaylorModel(const BoxType& domain, const PointType& centre,
                             const FunctionInterface& function,
                             ushort order, ushort smoothness);
   
@@ -94,7 +99,7 @@ class ApproximateTaylorModel {
   
   // Data access
   //! \brief The data used to define the centre of the Taylor model. 
-  const SparseDifferentialVector<A>& expansion() const;
+  const DifferentialVectorType& expansion() const;
   
   // Data access
   //! \brief The order of the Taylor model. 
@@ -110,22 +115,22 @@ class ApproximateTaylorModel {
   void resize(uint rs, uint as, ushort d, ushort s);
 
   //! \brief The domain of validity of the Taylor model. 
-  Vector<I> domain() const;
+  BoxType domain() const;
   //! \brief The centre of the derivative expansion. 
   Vector<R> centre() const;
   //! \brief The range of values the Taylor model can take. 
-  Vector<I> range() const;
+  BoxType range() const;
   
   //! \brief Evaluate the Taylor model at the point \a x. 
-  Vector<I> evaluate(const Vector<I>& x) const;
-  Vector<A> evaluate(const Vector<A>& x) const;
+  BoxType evaluate(const BoxType& x) const;
+  PointType evaluate(const PointType& x) const;
   
   //! \brief Compute the derivate of the map at a point. 
-  Matrix<I> jacobian(const Vector<I>& s) const;
-  Matrix<A> jacobian(const Vector<A>& s) const;
+  Matrix<I> jacobian(const BoxType& s) const;
+  Matrix<A> jacobian(const PointType& s) const;
   
   //! \brief Truncate to a model of lower order and/or smoothness, possibly on a different domain. 
-  ApproximateTaylorModel truncate(const Vector<I>& domain, const Vector<R>& centre, 
+  ApproximateTaylorModel truncate(const BoxType& domain, const Vector<R>& centre, 
                                   ushort order, ushort smoothness) const;
   
   //!
@@ -135,10 +140,10 @@ class ApproximateTaylorModel {
   //!
   static ApproximateTaylorModel constant(uint as, const R& c);
   //!
-  static ApproximateTaylorModel constant(const Vector<I>& d, const Vector<R>& c, const Vector<R>& x, ushort o=4, ushort s=1);
+  static ApproximateTaylorModel constant(const BoxType& d, const Vector<R>& c, const Vector<R>& x, ushort o=4, ushort s=1);
 
   //!
-  static ApproximateTaylorModel identity(const Vector<I>& d);
+  static ApproximateTaylorModel identity(const BoxType& d);
  
   //!
   static ApproximateTaylorModel affine(const I&, const R&, const R&, const R&, ushort, ushort);
@@ -148,7 +153,7 @@ class ApproximateTaylorModel {
   
 #ifdef DOXYGEN
   //! \brief Embed in a larger space.
-  friend ApproximateTaylorModel embed(const ApproximateTaylorModel&, const Vector<I>&, const Vector<R>&, uint);
+  friend ApproximateTaylorModel embed(const ApproximateTaylorModel&, const BoxType&, const Vector<R>&, uint);
   //! \brief Composition \f$p\circ q(x)=p(q(x))\f$. 
   friend ApproximateTaylorModel compose(const ApproximateTaylorModel&, const ApproximateTaylorModel&);
   //! \brief Inverse function model \f$p^{-1}\f$. 

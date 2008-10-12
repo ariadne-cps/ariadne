@@ -53,7 +53,7 @@ template<class X> void read(Vector<X>& v, const object& obj) {
 
 
 template<class X> 
-void read(SparseDifferentialVector<X>& td, const object& obj) {
+void read(DifferentialVector< SparseDifferential<X> >& td, const object& obj) {
   list elements=extract<list>(obj);
   ARIADNE_ASSERT(td.result_size()==uint(len(elements)));
   for(uint i=0; i!=td.size(); ++i) { 
@@ -80,8 +80,8 @@ class FunctionWrapper
   virtual ushort smoothness() const { return this->get_override("smoothness")(); }
   virtual Vector<Interval> evaluate(const Vector<Interval>&) const { return this->get_override("evaluate")(); }
   virtual Matrix<Interval> jacobian(const Vector<Interval>&) const { return this->get_override("jacobian")(); }
-  virtual SparseDifferentialVector<Float> expansion(const Vector<Float>&, const ushort&) const { return this->get_override("expansion")(); }
-  virtual SparseDifferentialVector<Interval> expansion(const Vector<Interval>&, const ushort&) const { return this->get_override("expansion")(); }
+  virtual DifferentialVector< SparseDifferential<Float> > expansion(const Vector<Float>&, const ushort&) const { return this->get_override("expansion")(); }
+  virtual DifferentialVector< SparseDifferential<Interval> > expansion(const Vector<Interval>&, const ushort&) const { return this->get_override("expansion")(); }
   virtual std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
 };
 
@@ -108,18 +108,18 @@ class PythonFunction
     read(r,this->_pyf(x)); 
     return r; }
   virtual Matrix<Interval> jacobian (const Vector<Interval>& x) const { 
-    SparseDifferentialVector<Interval> rj(this->_result_size,this->_argument_size,1u); 
-    SparseDifferentialVector<Interval> aj=SparseDifferentialVector<Interval>::variable(x.size(),x.size(),1u,x); 
+    DifferentialVector< SparseDifferential<Interval> > rj(this->_result_size,this->_argument_size,1u); 
+    DifferentialVector< SparseDifferential<Interval> > aj=DifferentialVector< SparseDifferential<Interval> >::variable(x.size(),x.size(),1u,x); 
     read(rj,this->_pyf(aj)); 
     return rj.jacobian(); }
-  virtual SparseDifferentialVector<Float> expansion (const Vector<Float>& x, const ushort& d) const {  
-    SparseDifferentialVector<Float> rd(this->_result_size,this->_argument_size,d); 
-    SparseDifferentialVector<Float> ad=SparseDifferentialVector<Float>::variable(x.size(),x.size(),d,x); 
+  virtual DifferentialVector< SparseDifferential<Float> > expansion (const Vector<Float>& x, const ushort& d) const {  
+    DifferentialVector< SparseDifferential<Float> > rd(this->_result_size,this->_argument_size,d); 
+    DifferentialVector< SparseDifferential<Float> > ad=DifferentialVector< SparseDifferential<Float> >::variable(x.size(),x.size(),d,x); 
     read(rd,this->_pyf(ad)); 
     return rd; }
-  virtual SparseDifferentialVector<Interval> expansion (const Vector<Interval>& x, const ushort& d) const {  
-    SparseDifferentialVector<Interval> rd(this->_result_size,this->_argument_size,d); 
-    SparseDifferentialVector<Interval> ad=SparseDifferentialVector<Interval>::variable(x.size(),x.size(),d,x); 
+  virtual DifferentialVector< SparseDifferential<Interval> > expansion (const Vector<Interval>& x, const ushort& d) const {  
+    DifferentialVector< SparseDifferential<Interval> > rd(this->_result_size,this->_argument_size,d); 
+    DifferentialVector< SparseDifferential<Interval> > ad=DifferentialVector< SparseDifferential<Interval> >::variable(x.size(),x.size(),d,x); 
     read(rd,this->_pyf(ad)); 
     return rd; }
 
@@ -139,8 +139,8 @@ class PythonFunction
 
 typedef Vector<Float> FV;
 typedef Vector<Interval> IV;
-typedef SparseDifferentialVector<Float> FSDV;
-typedef SparseDifferentialVector<Interval> ISDV;
+typedef DifferentialVector< SparseDifferential<Float> > FSDV;
+typedef DifferentialVector< SparseDifferential<Interval> > ISDV;
 
 void export_function_interface() 
 {
@@ -176,13 +176,13 @@ void export_model()
   typedef Interval I;
   typedef Vector<I> Box;
   typedef Vector<R> Point;
-  typedef SparseDifferentialVector<R> Expansion;
+  typedef DifferentialVector< SparseDifferential<R> > Expansion;
 
   class_< Model > function_model_class("ApproximateTaylorModel",init< Vector<I>, Vector<R>, const FunctionInterface&, ushort, ushort>());
   function_model_class.def(init< uint, uint, ushort, ushort >());
   //function_model_class.def(init< Vector<I> >());
-  function_model_class.def(init< Vector<I>, Vector<R>, SparseDifferentialVector<R> >());
-  function_model_class.def(init< Vector<I>, Vector<R>, SparseDifferentialVector<R> >());
+  function_model_class.def(init< Vector<I>, Vector<R>, DifferentialVector< SparseDifferential<R> > >());
+  function_model_class.def(init< Vector<I>, Vector<R>, DifferentialVector< SparseDifferential<R> > >());
   function_model_class.def(init< Model >());
   function_model_class.def("result_size", &Model::result_size);
   function_model_class.def("argument_size", &Model::argument_size);

@@ -18,7 +18,7 @@ struct ApproximateTaylorModel::Data {
   Data() : _domain(), _centre(), _expansion() { }
 
   Data(const Vector<Interval>& domain, const Vector<Float>& centre,
-       const SparseDifferentialVector<Float>& expansion) 
+       const DifferentialVector< SparseDifferential<Float> >& expansion) 
     : _domain(domain), _centre(centre), _expansion(expansion) { }
 
   // Domain of definition.
@@ -28,7 +28,7 @@ struct ApproximateTaylorModel::Data {
   // The smoothness to which the model can be computed
   uint _smoothness; 
   // The derivatives of the model
-  SparseDifferentialVector<Float> _expansion;
+  DifferentialVector< SparseDifferential<Float> > _expansion;
 };
 
 ApproximateTaylorModel::~ApproximateTaylorModel() 
@@ -43,14 +43,14 @@ ApproximateTaylorModel::ApproximateTaylorModel()
 
 
 ApproximateTaylorModel::ApproximateTaylorModel(uint rs, uint as, ushort o, ushort s) 
-  : _data(new Data(Vector<I>(as,I(-1,1)),Vector<R>(as),SparseDifferentialVector<R>(rs,as,o)))
+  : _data(new Data(Vector<I>(as,I(-1,1)),Vector<R>(as),DifferentialVectorType(rs,as,o)))
 {
 }
 
 
 ApproximateTaylorModel::ApproximateTaylorModel(const Vector<I>& d, 
                                                const Vector<A>& c, 
-                                               const SparseDifferentialVector<A>& e)
+                                               const DifferentialVectorType& e)
   : _data(new Data(d,c,e)) 
 {
   ARIADNE_ASSERT(d.size()==e.argument_size());
@@ -166,7 +166,7 @@ ApproximateTaylorModel::range() const
 
 
 
-const SparseDifferentialVector<Float>&
+const ApproximateTaylorModel::DifferentialVectorType&
 ApproximateTaylorModel::expansion() const
 { 
   return this->_data->_expansion; 
@@ -181,7 +181,7 @@ affine(const ApproximateTaylorModel& f)
 
   uint rs=f.result_size();
   uint as=f.argument_size();
-  const SparseDifferentialVector<A>& fe=f.expansion();
+  const ApproximateTaylorModel::DifferentialVectorType& fe=f.expansion();
   Vector<I> value_range(rs);
   Matrix<A> jacobian(rs,as);
   for(uint i=0; i!=rs; ++i) {
@@ -275,7 +275,7 @@ Matrix<Float>
 ApproximateTaylorModel::jacobian(const Vector<Float>& x) const
 {
   ARIADNE_ASSERT(this->argument_size()==x.size());
-  SparseDifferentialVector<A> affine=SparseDifferentialVector<A>::variable(x.size(),x.size(),1u,x);
+  DifferentialVectorType affine=DifferentialVectorType::variable(x.size(),x.size(),1u,x);
   affine=Ariadne::evaluate(this->expansion(),affine);
   return affine.jacobian();
 }
@@ -285,7 +285,7 @@ Matrix<Interval>
 ApproximateTaylorModel::jacobian(const Vector<Interval>& x) const
 {
   ARIADNE_ASSERT(this->argument_size()==x.size());
-  SparseDifferentialVector<I> affine=SparseDifferentialVector<I>::variable(x.size(),x.size(),1u,x);
+  IntervalDifferentialVectorType affine=IntervalDifferentialVectorType::variable(x.size(),x.size(),1u,x);
   Vector< SparseDifferential<I> >& vec=affine;
   vec=Ariadne::evaluate(this->expansion(),vec);
   return affine.jacobian();
@@ -297,7 +297,7 @@ ApproximateTaylorModel::identity(const Vector<I>& d)
 {
   uint n=d.size();
   uint o=255;
-  SparseDifferentialVector<A> ide(n,n,o);
+  DifferentialVectorType ide(n,n,o);
   for(uint i=0; i!=n; ++i) {
     ide[i]=SparseDifferential<A>::variable(n,o,0.0,i);
   }
@@ -325,7 +325,7 @@ join(const ApproximateTaylorModel& f, const ApproximateTaylorModel& g)
   ARIADNE_ASSERT(f.domain()==g.domain());
   ARIADNE_ASSERT(f.centre()==g.centre());
 
-  SparseDifferentialVector<A> he(f.result_size()+g.result_size(),f.argument_size(),f.order());
+  ApproximateTaylorModel::DifferentialVectorType he(f.result_size()+g.result_size(),f.argument_size(),f.order());
   project(he,range(0,f.result_size()))=f.expansion();
   project(he,range(f.result_size(),f.result_size()+g.result_size()))=g.expansion();
 
@@ -391,7 +391,7 @@ operator+(const ApproximateTaylorModel& f,
   ARIADNE_ASSERT(f.domain()==g.domain());
   ARIADNE_ASSERT(f.centre()==g.centre());
   ARIADNE_ASSERT(f.result_size()==g.result_size());
-  SparseDifferentialVector<A> he;
+  ApproximateTaylorModel::DifferentialVectorType he;
   Vector< SparseDifferential<A> >& hev=he;
   hev=f.expansion(); hev+=g.expansion();
   return ApproximateTaylorModel(f.domain(),f.centre(),he);
@@ -406,8 +406,8 @@ operator-(const ApproximateTaylorModel& f,
   ARIADNE_ASSERT(f.domain()==g.domain());
   ARIADNE_ASSERT(f.centre()==g.centre());
   ARIADNE_ASSERT(f.result_size()==g.result_size());
-  SparseDifferentialVector<A> he;
-  Vector< SparseDifferential<A> >& hev=he;
+  ApproximateTaylorModel::DifferentialVectorType he;
+  Vector< SparseDifferential<Float> >& hev=he;
   hev=f.expansion(); hev-=g.expansion();
   return ApproximateTaylorModel(f.domain(),f.centre(),he);
 }
@@ -430,7 +430,7 @@ operator*(const ApproximateTaylorModel& f,
     se=&(g.expansion()[0]);
     ve=&f.expansion();
   }
-  SparseDifferentialVector<Float> he(ve->size());
+  ApproximateTaylorModel::DifferentialVectorType he(ve->size());
   Vector< SparseDifferential<Float> >& hev=he;
   for(uint i=0; i!=ve->size(); ++i) {
     hev[i] = (*se) * ((*ve)[i]);
@@ -447,18 +447,20 @@ compose(const ApproximateTaylorModel& f,
   ARIADNE_ASSERT(f.argument_size()==g.result_size());
   typedef Interval I;
   typedef Float A;
-  SparseDifferentialVector<A> const& fe=f.expansion();
+  typedef ApproximateTaylorModel::DifferentialVectorType DifferentialVectorType;
+
+  DifferentialVectorType const& fe=f.expansion();
   //std::cerr<<"fe="<<fe<<std::endl;
-  SparseDifferentialVector<A> const& ge=g.expansion();
+  DifferentialVectorType const& ge=g.expansion();
   //std::cerr<<"ge="<<ge<<std::endl;
   Vector<A> tr=-Vector<A>(f.centre())+ge.value();
   //std::cerr<<"tr="<<tr<<std::endl;
-  SparseDifferentialVector<A> fet=translate(fe,tr);
+  DifferentialVectorType fet=translate(fe,tr);
   //std::cerr<<"fet="<<fet<<std::endl;
   Vector<I> const& hd=g.domain();
   Vector<A> hc=g.centre();
   //std::cerr<<"he="<<std::flush;
-  SparseDifferentialVector<A> he=compose(fet,ge);
+  DifferentialVectorType he=compose(fet,ge);
   // FIXME: Change domain
   //std::cerr<<he<<std::endl;
   return ApproximateTaylorModel(hd,hc,he);
@@ -484,10 +486,10 @@ inverse(const ApproximateTaylorModel& f,
   typedef Interval I;
   typedef Float A;
   Vector<A> tr=f.centre()-x;
-  SparseDifferentialVector<A> fet=translate(f.expansion(),tr);
+  ApproximateTaylorModel::DifferentialVectorType fet=translate(f.expansion(),tr);
   Vector<I> gd=f.domain();
   Vector<A> gc=fet.value();
-  SparseDifferentialVector<A> ge=inverse(fet);
+  ApproximateTaylorModel::DifferentialVectorType ge=inverse(fet);
   // FIXME: Change domain
   return ApproximateTaylorModel(gd,gc,ge);
 }
@@ -499,6 +501,8 @@ implicit(const ApproximateTaylorModel& f)
   //std::cerr << __PRETTY_FUNCTION__ << std::endl;
   typedef Interval I;
   typedef Float A;
+  typedef ApproximateTaylorModel::DifferentialVectorType DifferentialVectorType;
+  
   ARIADNE_ASSERT(f.argument_size()>f.result_size());
   uint m=f.argument_size(); 
   uint n=f.result_size();
@@ -512,9 +516,9 @@ implicit(const ApproximateTaylorModel& f)
   //std::cerr << "gd=" << gd << std::endl;
   Vector<A> gc=project(f.centre(),range(m-n,m));
   //std::cerr << "gc=" << gc << std::endl;
-  SparseDifferentialVector<A> projection(m,n,f.order());
+  DifferentialVectorType projection(m,n,f.order());
   for(uint i=0; i!=n; ++i) { projection[m-n+i][i]=1.0; }
-  SparseDifferentialVector<A> ge=compose(f.expansion(),projection);
+  DifferentialVectorType ge=compose(f.expansion(),projection);
   //std::cerr << "ge=" << ge << std::endl;
   ApproximateTaylorModel g(gd,gc,ge);
 
@@ -527,14 +531,14 @@ implicit(const ApproximateTaylorModel& f)
   project(t,range(m-n,m))=v;
   //std::cerr<<"t="<<t<<std::endl;
 
-  SparseDifferentialVector<A> fe=f.expansion();
+  DifferentialVectorType fe=f.expansion();
   //std::cerr<<"fe="<<fe<<std::endl;
-  SparseDifferentialVector<A> fet=translate(fe,t);
+  DifferentialVectorType fet=translate(fe,t);
   //std::cerr<<"fet="<<fet<<std::endl;
   fet.set_value(Vector<A>(fe.result_size(),0.0));
   //std::cerr<<"fet="<<fet<<std::endl;
 
-  SparseDifferentialVector<A> he=implicit(fet);
+  ApproximateTaylorModel::DifferentialVectorType he=implicit(fet);
   //std::cerr<<"he="<<he<<std::endl;
   he+=v;
   //std::cerr<<"he="<<he<<std::endl;
@@ -588,8 +592,8 @@ implicit2(const ApproximateTaylorModel& f,
   Vector<A> y(n);
   Vector<A> tr=y-f.centre();
   
-  SparseDifferentialVector<A> fet=translate(f.expansion(),tr)-z;
-  SparseDifferentialVector<A> he=implicit(fet)+y;
+  ApproximateTaylorModel::DifferentialVectorType fet=translate(f.expansion(),tr)-z;
+  ApproximateTaylorModel::DifferentialVectorType he=implicit(fet)+y;
   
   Vector<I> hd(m-n,I(-inf(),+inf()));
   Vector<A> hc=c;
@@ -605,13 +609,13 @@ flow(const ApproximateTaylorModel& vf)
   uint ot=4u;
 
   Vector<A> vfc=vf.centre();
-  SparseDifferentialVector<A> x=flow(vf.expansion(),vfc,ot,ox);
+  ApproximateTaylorModel::DifferentialVectorType x=flow(vf.expansion(),vfc,ot,ox);
 
   //std::cerr << "x=" << x << std::endl;
 
   /*
   uint n=vf.result_size();
-  SparseDifferentialVector<A> x(n,n+1,ox);
+  DifferentialVectorType x(n,n+1,ox);
   for(MultiIndex jx(n+1); jx.degree()<=ox; ++jx) {
     MultiIndex jy(n);
     for(uint k=0; k!=n; ++k) { 
@@ -642,9 +646,11 @@ integrate(const ApproximateTaylorModel& vf, const Float& h, uint ox)
 {
   typedef Float A;
   typedef Interval I;
+  typedef ApproximateTaylorModel::DifferentialVectorType DifferentialVectorType;
+  
   ARIADNE_ASSERT(vf.result_size()==vf.argument_size());
   uint n=vf.result_size();
-  SparseDifferentialVector<A> xe=SparseDifferentialVector<A>::variable(n,n,ox,Vector<A>(n+1,0.0));
+  DifferentialVectorType xe=DifferentialVectorType::variable(n,n,ox,Vector<A>(n+1,0.0));
   SparseDifferential<A> te=SparseDifferential<A>::constant(n,ox,h);
   ApproximateTaylorModel f=flow(vf);
   Vector<I> xtd=join(vf.domain(),I(-1,1));
@@ -696,6 +702,8 @@ hitting(const ApproximateTaylorModel& vf,
 {
   typedef Float A;
   typedef Interval I;
+  typedef ApproximateTaylorModel::DifferentialVectorType DifferentialVectorType;
+
   ARIADNE_ASSERT(vf.result_size()==vf.argument_size());
   ARIADNE_ASSERT(g.argument_size()==vf.result_size());
   ARIADNE_ASSERT(g.result_size()==1);
@@ -713,7 +721,7 @@ hitting(const ApproximateTaylorModel& vf,
   ApproximateTaylorModel ht=implicit(gf); // 1,n
   //std::cerr<<"ht="<<ht<<std::endl;
 
-  SparseDifferentialVector<A> xe=SparseDifferentialVector<A>::variable(n,n,d,vf.centre());
+  DifferentialVectorType xe=DifferentialVectorType::variable(n,n,d,vf.centre());
   //std::cerr<<"  xe="<<xe<<std::endl;
   ApproximateTaylorModel hxt(ht.domain(),ht.centre(),join(xe,ht.expansion())); // n+1,n
   //std::cerr<<"hxt="<<hxt<<std::endl;

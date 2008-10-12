@@ -27,23 +27,23 @@ class Function : public FunctionInterface
     return this->_expansion(x,1u).jacobian(); }                         
   virtual Matrix<Interval> jacobian(const Vector<Interval>& x) const {
     return this->_expansion(x,1u).jacobian(); }                         
-  virtual SparseDifferentialVector<Float> expansion(const Vector<Float>& x, const ushort& s) const {
+  virtual DifferentialVector< SparseDifferential<Float> > expansion(const Vector<Float>& x, const ushort& s) const {
     return this->_expansion(x,s); } 
-  virtual SparseDifferentialVector<Interval> expansion(const Vector<Interval>& x, const ushort& s) const {
+  virtual DifferentialVector< SparseDifferential<Interval> > expansion(const Vector<Interval>& x, const ushort& s) const {
     return this->_expansion(x,s); }
   virtual std::ostream& write(std::ostream& os) const  {
     return os << "Function"; }
-  private:
-    template<class X> SparseDifferentialVector<X> _expansion(const Vector<X>& x, const ushort& s) const {
-      const uint& rs=t.result_size;
-      const uint& as=t.argument_size;
-      SparseDifferentialVector<X> dx(as,as,s);
-      SparseDifferentialVector<X> dr(rs,as,s);
-      for(uint i=0; i!=as; ++i) { dx[i]=x[i]; }
-      for(uint i=0; i!=as; ++i) { dx[i][i+1]=1; }
-      t.compute(dr,dx,p);
-      return dr;
-    }                                                                   \
+ private:
+  template<class X> DifferentialVector< SparseDifferential<X> > _expansion(const Vector<X>& x, const ushort& s) const {
+    const uint& rs=t.result_size;
+    const uint& as=t.argument_size;
+    DifferentialVector< SparseDifferential<X> > dx(as,as,s);
+    DifferentialVector< SparseDifferential<X> > dr(rs,as,s);
+    for(uint i=0; i!=as; ++i) { dx[i]=x[i]; }
+    for(uint i=0; i!=as; ++i) { dx[i][i+1]=1; }
+    t.compute(dr,dx,p);
+    return dr;
+  }                                             \
 };
 
 

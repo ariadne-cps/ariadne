@@ -67,7 +67,7 @@ int main() {
   double da[4]={-2,2,-2,2};
   double ca[2]={0,0};
   double ea[20]={1.5, 0,-0.375, -1,0,0, 0,0,0,0,  0, 1,0, 0,0,0,  0,0,0,0};
-  ApproximateTaylorModel f(box(2,da),point(2,ca),SparseDifferentialVector<Float>(2,2,3,ea));
+  ApproximateTaylorModel f(box(2,da),point(2,ca),DifferentialVector< SparseDifferential<Float> >(2,2,3,ea));
 
   cout << f << std::endl;
   cout << f.evaluate(Vector<Float>(2,0.0)) << std::endl;
@@ -103,7 +103,7 @@ int main() {
     double fa[20]={0, 1,2,1, 0.3,0.4,0.1,0.0,0.0,0.0,  0, 0,1,1, 0.1,0.2,0.3,0.4,0.5,0.6};
     Vector<Interval> d(3,Interval(-1,1));
     Vector<Float> c(3,0.0);
-    ApproximateTaylorModel f(d,c,SparseDifferentialVector<Float>(2,3,2,fa));
+    ApproximateTaylorModel f(d,c,DifferentialVector< SparseDifferential<Float> >(2,3,2,fa));
     
     c=Vector<Float>(2,0.0);
     Vector<Float> v=Vector<Float>(1,1.0);
@@ -123,7 +123,7 @@ int main() {
     Vector<Interval> d(1,Interval(-2,2));
     Vector<Float> c(1,0.0);
     double ea[]={0,1,0,0,0,0,0,0};
-    SparseDifferentialVector<Float> e(1,1,6,ea); 
+    DifferentialVector< SparseDifferential<Float> > e(1,1,6,ea); 
     ApproximateTaylorModel am(d,c,e);
     cout << "am="<<am<<endl;
     ApproximateTaylorModel afm=flow(am);
@@ -150,13 +150,13 @@ int main() {
     Vector<Interval> fd(n,Interval(-2,2));
     Vector<Float> fc(n,0.0);
     double fea[]={1,1,0,0,0,0,0,0};
-    SparseDifferentialVector<Float> fe(n,n,d,fea); 
+    DifferentialVector< SparseDifferential<Float> > fe(n,n,d,fea); 
     ApproximateTaylorModel fm(fd,fc,fe);
     cout << "fm=" << fm << endl;
     double gea[]={1,-1,0,0,0,0,0,0,0,0,0,0,0,0,0};
     Vector<Interval> gd(n,Interval(-2,2));
     Vector<Float> gc(n,0.0);
-    SparseDifferentialVector<Float> ge(1,n,d,gea); 
+    DifferentialVector< SparseDifferential<Float> > ge(1,n,d,gea); 
     ApproximateTaylorModel gm(gd,gc,ge);
     cout << "gm=" << gm << endl;
     const ApproximateTaylorModel hm=hitting(fm,gm);

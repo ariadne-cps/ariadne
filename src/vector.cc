@@ -52,6 +52,16 @@ Vector<Float> upper(const Vector<Interval>& v)
   return r;
 }
 
+Vector<Interval> hull(const Vector<Interval>& v1, const Vector<Interval>& v2)
+{
+  ARIADNE_ASSERT(v1.size()==v2.size());
+  Vector<Interval> r(v1.size());
+  for(uint i=0; i!=v1.size(); ++i) {
+    r[i]=hull(v1[i],v2[i]);
+  }
+  return r;
+}
+
 Vector<Interval> intersection(const Vector<Interval>& v1, const Vector<Interval>& v2) 
 {
   ARIADNE_ASSERT(v1.size()==v2.size());
@@ -67,6 +77,15 @@ Float radius(const Vector<Interval>& v)
   Float r=0;
   for(uint i=0; i!=v.size(); ++i) {
     r=Ariadne::max(r,v[i].radius());
+  }
+  return r;
+}
+
+Float volume(const Vector<Interval>& v) 
+{
+  Float r=1.0;
+  for(uint i=0; i!=v.size(); ++i) {
+    r*=diam(v[i]);
   }
   return r;
 }

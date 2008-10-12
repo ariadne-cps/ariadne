@@ -31,26 +31,6 @@ bool intersection(IntervalVector& r,
   return true;
 }
 
-IntervalVector hull(const IntervalVector& a,
-                    const IntervalVector& b)
-{
-  assert(a.size()==b.size());
-  IntervalVector r(a.size());
-  for (uint i=0; i!=a.size(); ++i) {
-    r[i]=hull(a[i],b[i]);
-  }
-  return r;
-}
-
-double volume(const IntervalVector& iv) 
-{
-  double r=1.0;
-  for(uint i=0; i!=iv.size(); ++i) {
-    r*=diam(iv[i]);
-  }
-  return r;
-}
-
 IntervalVector split(const IntervalVector& iv, int j, bool lu) 
 {
   IntervalVector r=iv;

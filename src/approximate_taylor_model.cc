@@ -790,25 +790,5 @@ operator<<(latexstream& texs, const ApproximateTaylorModel& p)
 }
 
 
-void
-ApproximateTaylorModel::_instantiate()
-{
-  //Slice* slc=0;
-  ApproximateTaylorModel* atm=0;
-  std::ostream* os = 0;
-
-  operator+(*atm,*atm);
-  operator-(*atm,*atm);
-  
-  //Ariadne::project(*atm,*slc);
-  join(*atm,*atm);
-  compose(*atm,*atm);
-  implicit(*atm);
-  flow(*atm);
-
-  Ariadne::affine(*atm);
-  
-  *os << *atm;
-}
 
 } // namespace Ariadne

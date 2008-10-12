@@ -22,4 +22,8 @@
 #define ARIADNE_LOG(level,msg)                  \
   if(verbosity >= level) { std::clog << msg << std::flush; }
 
+#define ARIADNE_NOT_IMPLEMENTED                        \
+  throw std::runtime_error(__PRETTY_FUNCTION__); 
+
+
 #endif // ARIADNE_MACROS_H

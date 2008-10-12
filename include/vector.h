@@ -105,11 +105,13 @@ bool subset(const Vector<Float>& v1, const Vector<Interval>& v2);
 bool subset(const Vector<Interval>& v1, const Vector<Interval>& v2);
 bool disjoint(const Vector<Interval>& v1, const Vector<Interval>& v2);
 
+Vector<Interval> hull(const Vector<Interval>& v1, const Vector<Interval>& v2);
 Vector<Interval> intersection(const Vector<Interval>& v1, const Vector<Interval>& v2);
 Vector<Float> midpoint(const Vector<Interval>& v);
 Vector<Float> lower(const Vector<Interval>& v);
 Vector<Float> upper(const Vector<Interval>& v);
 Float radius(const Vector<Interval>& z);
+Float volume(const Vector<Interval>& z);
 
 inline Vector<Float> add_approx(const Vector<Float>& v1, const Vector<Float>& v2) { return v1+v2; }
 inline Vector<Float> sub_approx(const Vector<Float>& v1, const Vector<Float>& v2) { return v1-v2; }

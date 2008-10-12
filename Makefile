@@ -1,6 +1,7 @@
 .PHONY: doc lib tests wrappers clean install
 
 all: lib tests wrappers
+	(cd src/; make plotting)
 
 doc:
 	doxygen;

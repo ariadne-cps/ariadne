@@ -79,6 +79,7 @@ class Interval {
   const Float& upper() const { return u; }
   const Float midpoint() const { return (l+u)/2; }
   const Float radius() const { return up((u-l)/2); }
+  const Float width() const { return up(u-l); }
  public:
   double l, u;
 };

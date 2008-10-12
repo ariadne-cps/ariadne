@@ -1,8 +1,8 @@
 INTERVAL_OBJ=../src/numeric.o
 
-DIFFERENTIATION_OBJ=../src/numeric.o ../src/vector.o ../src/matrix.o ../src/differential.o
+DIFFERENTIATION_OBJ=../src/numeric.o ../src/vector.o ../src/matrix.o ../src/dense_differential.o
 
-FUNCTION_OBJ=../src/numeric.o ../src/vector.o ../src/matrix.o ../src/differential.o ../src/approximate_taylor_model.o
+FUNCTION_OBJ=../src/numeric.o ../src/vector.o ../src/matrix.o ../src/dense_differential.o ../src/approximate_taylor_model.o
 
 GRID_OBJ=../src/numeric.o 
 

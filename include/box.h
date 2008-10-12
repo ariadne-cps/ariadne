@@ -15,7 +15,10 @@ class Box : public Vector<Interval>
   template<class T1, class T2> Box(const T1& t1, const T2& t2) : Vector<Interval>(t1,t2) { }
   uint dimension() const { return this->size(); }
   Vector<Float> centre() const { return midpoint(*this); }
+  Float radius() const { 
+    Float dmax=0; for(uint i=0; i!=this->size(); ++i) { dmax=max(dmax,(*this)[i].width()); } return up(dmax/2); }
 };
+
 
 } // namespace Ariadne
 

@@ -161,7 +161,6 @@ class ApproximateTaylorModel {
   friend ApproximateTaylorModel truncate(const ApproximateTaylorModel& p, const Rectangle& bb, uint d, uint );
 #endif
  private:
-  static void _instantiate();
   template<class X> array< array<X> > _powers(const Vector<X>&) const;
   void _compute_jacobian() const;
   void _set_argument_size(uint n);

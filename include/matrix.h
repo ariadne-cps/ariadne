@@ -30,8 +30,6 @@ class Matrix
   X* operator[](uint r) { return &this->operator()(r,0); }
   const X& get(uint i, uint j) const { return (*this)[i][j]; }
   template<class T> void set(uint i, uint j, const T& x) { (*this)[i][j] = x; }
- private:
-  static void _instantiate(); 
 };
 
 template<class X> Matrix<X> inverse(const Matrix<X>& A);

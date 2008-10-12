@@ -132,7 +132,6 @@ class TaylorModel {
   friend template<class R> TaylorModel truncate(const TaylorModel& p, const Rectangle& bb, uint d, uint s);
 #endif
  private:
-  static void instantiate();
   array< array<I> > _powers(const Vector<I>&) const;
   void _compute_jacobian() const;
   void _set_argument_size(uint n);

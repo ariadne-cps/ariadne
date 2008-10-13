@@ -36,6 +36,13 @@
 
 #include "tribool.h"
 
+// Simplifying typedefs for unsigned types
+// These may be inclused in other headers,
+// but repeating a typedef is not an error
+typedef unsigned short ushort;
+typedef unsigned int uint;
+typedef unsigned long ulong;
+
 namespace Ariadne {
 
 using std::min;
@@ -43,6 +50,9 @@ using std::max;
 
 uint fac(uint n);
 uint bin(uint n, uint k);
+
+typedef uint Nat;
+typedef int Int;
 
 #ifdef HAVE_GMPXX_H
 typedef mpz_class Integer;
@@ -54,6 +64,9 @@ typedef mpq_class Rational;
 //! \brief Floating point numbers.
 class Float { };
 #endif
+
+template<class X> X pi();
+
 
 typedef double Float;
 //class Float : public double { template<class T> Float(const T& t) : double(t) { } };
@@ -72,6 +85,14 @@ inline Float pow(Float x, uint n) { return std::pow(x,Float(n)); }
 inline Float sqrt(Float x) { return std::sqrt(x); }
 inline Float exp(Float x) { return std::exp(x); }
 inline Float log(Float x) { return std::log(x); }
+
+template<> inline Float pi<Float>() { return 3.1415926535897931; }
+inline Float sin(Float x) { return std::sin(x); }
+inline Float cos(Float x) { return std::cos(x); }
+inline Float tan(Float x) { return std::tan(x); }
+inline Float asin(Float x) { return std::asin(x); }
+inline Float acos(Float x) { return std::acos(x); }
+inline Float atan(Float x) { return std::atan(x); }
 
 inline Float add_up(Float x, Float y) { return up(x+y); }
 inline Float sub_up(Float x, Float y) { return up(x-y); }
@@ -129,6 +150,8 @@ inline Float med(Interval i) { return (i.l+i.u)/2; }
 inline Float rad(Interval i) { return up((i.u-i.l)/2); }
 inline Float diam(Interval i) { return up(i.u-i.l); }
 
+
+
 Interval neg(Interval);
 Interval add(Interval, Interval);
 Interval sub(Interval, Interval);
@@ -143,6 +166,14 @@ Interval rec(Interval);
 Interval sqrt(Interval);
 Interval exp(Interval);
 Interval log(Interval);
+
+template<> Interval pi<Interval>();
+Interval sin(Interval);
+Interval cos(Interval);
+Interval tan(Interval);
+Interval asin(Interval);
+Interval acos(Interval);
+Interval atan(Interval);
 
 inline bool operator==(const Interval& i1, const Interval& i2) { return i1.l==i2.l && i1.u==i2.u; }
 inline bool operator!=(const Interval& i1, const Interval& i2) { return i1.l!=i2.l || i1.u!=i2.u; }
@@ -180,7 +211,11 @@ inline Float mig(Interval i) { return min(abs(i.l),abs(i.u)); }
 inline bool subset(Float x, Interval i) { return i.l<=x && x<=i.u; }
 inline bool subset(Interval i1, Interval i2) { return i2.l<=i1.l && i1.u<=i2.u; }
 
+template<class A> void serialize(A& a, Interval& ivl, const uint version) {
+  a & ivl.l & ivl.u; }
+
 std::ostream& operator<<(std::ostream&, const Interval&);
+std::istream& operator>>(std::istream&, Interval&);
 
 } // namespace Ariadne 
 

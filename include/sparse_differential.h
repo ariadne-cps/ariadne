@@ -35,6 +35,7 @@
 #include "vector.h"
 #include "matrix.h"
 #include "multi_index.h"
+#include "series.h"
 
 namespace Ariadne {
 

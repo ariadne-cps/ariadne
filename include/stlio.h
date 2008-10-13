@@ -166,6 +166,11 @@ read_sequence(std::istream& is, Container& v,
 
 
 
+template<class T> inline
+std::ostream& operator<<(std::ostream& os, const array<T>& ary) {
+  return Ariadne::write_sequence(os,ary.begin(),ary.end(),'[',']');
+}
+
 
 template<class T> inline
 std::istream&

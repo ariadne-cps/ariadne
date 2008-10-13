@@ -50,14 +50,16 @@ class ApproximateTaylorModel;
 class HybridAutomaton;
 
 class EvolutionParameters;
-template<class MDL> class DynamicalToolbox;
+template<class MDL> class ToolboxInterface;
 
 class EvolutionProfiler;
 
-typedef std::pair<int,Float> HybridTime;
+class HybridTime;
 
 
 typedef ApproximateTaylorModel DefaultModelType;
+
+typedef std::pair<DiscreteState,ApproximateTaylorModel> DefaultHybridSetType;
 
 /*! \ingroup Evolve 
  *  \brief A class for computing the evolution of a hybrid system. 
@@ -65,16 +67,16 @@ typedef ApproximateTaylorModel DefaultModelType;
  * The actual evolution steps are performed by the HybridEvolver class.
  */
 class HybridEvolver
-  : public EvolverBase< HybridAutomaton, DefaultModelType >
+  : public EvolverBase< HybridAutomaton,DefaultHybridSetType>
 {
   typedef Ariadne::DefaultModelType ModelType;
  public:
+  typedef HybridAutomaton::TimeType TimeType;
   typedef Float RealType;
   typedef HybridAutomaton SystemType;
   typedef ModelType ContinuousEnclosureType;
   typedef pair<DiscreteState,ContinuousEnclosureType> EnclosureType;
   typedef ListSet<EnclosureType> EnclosureListType;
-  typedef HybridTime TimeType;
   typedef Float ContinuousTimeType;
  public:
     
@@ -84,6 +86,8 @@ class HybridEvolver
   //! \brief Construct from parameters using a default integrator.
   HybridEvolver(const EvolutionParameters& parameters);
   
+  /*! \brief Make a dynamically-allocated copy. */
+  HybridEvolver* clone() const { return new HybridEvolver(*this); }
 
   //@{
   //! \name Parameters controlling the evolution.
@@ -115,7 +119,7 @@ class HybridEvolver
 
  private:
   boost::shared_ptr< EvolutionParameters > _parameters;
-  boost::shared_ptr< DynamicalToolbox<ModelType> > _toolbox;
+  boost::shared_ptr< ToolboxInterface<ModelType> > _toolbox;
   //boost::shared_ptr< EvolutionProfiler >  _profiler;
 };
 

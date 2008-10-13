@@ -23,7 +23,7 @@
  
 #include "numeric.h"
 #include "set.h"
-#include "grid.h"
+#include "grid_set.h"
 
 using namespace Ariadne;
 

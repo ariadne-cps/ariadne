@@ -174,11 +174,60 @@ Interval log(Interval i)
   return Interval(down(log(i.l)),up(log(i.u)));
 }
 
+template<> Interval pi<Interval>()
+{
+  return Interval(3.1415926535897927,3.1415926535897936);
+}
+
+
+Interval sin(Interval i)
+{
+  ARIADNE_NOT_IMPLEMENTED;
+}
+
+Interval cos(Interval i)
+{
+  ARIADNE_NOT_IMPLEMENTED;
+}
+
+Interval tan(Interval i)
+{
+  ARIADNE_NOT_IMPLEMENTED;
+}
+
+Interval asin(Interval i)
+{
+  ARIADNE_NOT_IMPLEMENTED;
+}
+
+Interval acos(Interval i)
+{
+  ARIADNE_NOT_IMPLEMENTED;
+}
+
+Interval atan(Interval i)
+{
+  ARIADNE_NOT_IMPLEMENTED;
+}
+
+
 
 std::ostream& 
-operator<<(std::ostream& os, const Interval& i)
+operator<<(std::ostream& os, const Interval& ivl)
 {
-  return os << '[' << i.l << ':' << i.u << ']';
+  return os << '[' << ivl.l << ':' << ivl.u << ']';
+}
+
+std::istream& 
+operator>>(std::istream& is, Interval& ivl)
+{
+  char cl,cm,cr;
+  return is >> cl >> ivl.l >> cm >> ivl.u >> cr;
+  ARIADNE_ASSERT(is);
+  ARIADNE_ASSERT(cl=='[' || cl=='(');
+  ARIADNE_ASSERT(cm==':' || cm==',' || cm==';');
+  ARIADNE_ASSERT(cr==']' || cr==')');
+  return is;
 }
 
 } // namespace Ariadne

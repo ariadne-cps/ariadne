@@ -36,7 +36,7 @@
 
 namespace Ariadne {
 
-int verbosity = 0;
+static int verbosity = 0;
 
 class DegenerateCrossingException { };
 class NonInvertibleFunctionException { };
@@ -411,7 +411,7 @@ DynamicalToolbox<Mdl>::flow_bounds(FunctionInterface const& vf,
   // TODO: Better estimates of constants
   const Float INITIAL_MULTIPLIER=2;
   const Float MULTIPLIER=1.125;
-  const Float BOX_RADIUS_MULTIPLIER=1.03125;
+  //const Float BOX_RADIUS_MULTIPLIER=1.03125;
   const uint EXPANSION_STEPS=8;
   const uint REDUCTION_STEPS=8;
   const uint REFINEMENT_STEPS=4;
@@ -457,6 +457,36 @@ DynamicalToolbox<Mdl>::flow_bounds(FunctionInterface const& vf,
   ARIADNE_LOG(7,"  h="<<h<<" b="<<b<<" r+[0,h]*f(b)="<<r+ih*vf.evaluate(b)<<"\n");
 
   return std::make_pair(h,b);
+}
+
+
+
+template<class Mdl>
+tribool
+DynamicalToolbox<Mdl>::disjoint(Mdl const&, Vector<Interval> const&) const
+{ 
+  ARIADNE_NOT_IMPLEMENTED;
+}
+
+template<class Mdl>
+Vector<Interval>
+DynamicalToolbox<Mdl>::bounding_box(Mdl const&) const
+{ 
+  ARIADNE_NOT_IMPLEMENTED;
+}
+
+template<class Mdl>
+array<Mdl> 
+DynamicalToolbox<Mdl>::subdivide(Mdl const&) const
+{ 
+  ARIADNE_NOT_IMPLEMENTED;
+}
+
+template<class Mdl>
+Mdl 
+DynamicalToolbox<Mdl>::simplify(Mdl const&) const
+{ 
+  ARIADNE_NOT_IMPLEMENTED;
 }
 
 

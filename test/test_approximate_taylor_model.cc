@@ -32,10 +32,7 @@
 using std::cout; using std::endl; using std::flush;
 using namespace Ariadne;
 
-struct Henon {
-  static const int result_size=2;
-  static const int argument_size=2;
-  static const int smoothness=2;
+struct Henon : public FunctionData<2,2,2> {
   template<class R, class A, class P>
   void compute(R& r, const A& x, const P& p) const {
     r[0]=p[0]-x[0]*x[0]-p[1]*x[1];
@@ -43,10 +40,7 @@ struct Henon {
   }
 };
 
-struct HenonSquared {
-  static const int result_size=2;
-  static const int argument_size=2;
-  static const int smoothness=2;
+struct HenonSquared : public FunctionData<2,2,2> {
   template<class R, class A, class P>
   void compute(R& r, const A& x, const P& p) const {
     r[1]=p[0]-x[0]*x[0]-p[1]*x[1];
@@ -54,10 +48,7 @@ struct HenonSquared {
   }
 };
 
-struct VanDerPol {
-  static const int result_size=2;
-  static const int argument_size=2;
-  static const int smoothness=2;
+struct VanDerPol : public FunctionData<2,2,1> {
   template<class R, class A, class P>
   void compute(R& r, const A& x, const P& p) const {
     r[0]=x[1];

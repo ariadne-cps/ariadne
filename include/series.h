@@ -53,6 +53,13 @@ class Series
   static Series<X> sqrt(uint d, const X& x);
   static Series<X> exp(uint d, const X& x);
   static Series<X> log(uint d, const X& x);
+
+  static Series<X> sin(uint d, const X& x);
+  static Series<X> cos(uint d, const X& x);
+  static Series<X> tan(uint d, const X& x);
+  static Series<X> asin(uint d, const X& x);
+  static Series<X> acos(uint d, const X& x);
+  static Series<X> atan(uint d, const X& x);
  private:
   array<X> _data;
 };
@@ -121,6 +128,72 @@ Series<X>::log(uint d, const X& c)
   }
   return y;
 }
+
+template<class X>
+Series<X> 
+Series<X>::sin(uint d, const X& c) 
+{
+  Series<X> y(d);
+  y[0]=Ariadne::sin(c);
+  if(d>=1) {
+    y[1]=Ariadne::cos(c);
+    for(uint i=2; i<=d; ++i) {
+      y[i]=-y[i-2]/(i*(i-1));
+    }
+  }
+  return y;
+}
+
+
+template<class X> 
+Series<X> 
+Series<X>::cos(uint d, const X& c)
+{
+  Series<X> y(d);
+  y[0]=Ariadne::cos(c);
+  if(d>=1) {
+    y[1]=-Ariadne::sin(c);
+    for(uint i=2; i<=d; ++i) {
+      y[i]=-y[i-2]/(i*(i-1));
+    }
+  }
+  return y;
+}
+
+template<class X> 
+Series<X> 
+Series<X>::tan(uint d, const X& c)
+{
+  return sin(d,c)/cos(d,c);
+}
+
+template<class X>  
+Series<X> 
+Series<X>::asin(uint d, const X& c)
+{
+  if(d==0) { return Series<X>::constant(d,Ariadne::atan(c)); }
+  Series<X> y = X(1)/Ariadne::sqrt(X(1)-Ariadne::pow(Series<X>::variable(d-1,c),2u));
+  return antiderivative(y,Ariadne::asin(c));
+}
+
+template<class X>  
+Series<X> 
+Series<X>::acos(uint d, const X& c)
+{
+  if(d==0) { return Series<X>::constant(d,Ariadne::atan(c)); }
+  Series<X> y = X(-1)/Ariadne::sqrt(X(1)-pow(Series<X>::variable(d-1,c),2u));
+  return antiderivative(y,Ariadne::acos(c));
+}
+
+template<class X>  
+Series<X> 
+Series<X>::atan(uint d, const X& c)
+{
+  if(d==0) { return Series<X>::constant(d,Ariadne::atan(c)); } 
+  Series<X> y = X(1)/(X(1)+pow(Series<X>::variable(d-1,c),2u));
+  return antiderivative(y,Ariadne::atan(c));
+}
+
 
 
 template<class X>

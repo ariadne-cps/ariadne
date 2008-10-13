@@ -8,7 +8,7 @@ GRID_OBJ=../src/numeric.o
 
 OBJ=interval_module.o differentiation_module.o function_module.o grid_module.o
 
-wrappers: interval.so differentiation.so function.so grid.so
+wrappers: interval.so differentiation.so function.so #grid.so
 
 dep:  
 	@rm -f Makefile.dep
@@ -32,6 +32,6 @@ differentiation.so: differentiation_module.o $(DIFFERENTIATION_OBJ)
 function.so: function_module.o $(FUNCTION_OBJ)
 	g++ -shared -Wall -O2 -lboost_python function_module.o $(FUNCTION_OBJ) -o function.so
 
-grid.so: grid_module.o $(GRID_OBJ)
-	g++ -shared -Wall -O2 -lboost_python grid_module.o $(GRID_OBJ) -o grid.so
+#grid.so: grid_module.o $(GRID_OBJ)
+#	g++ -shared -Wall -O2 -lboost_python grid_module.o $(GRID_OBJ) -o grid.so
 

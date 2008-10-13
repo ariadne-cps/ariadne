@@ -34,7 +34,16 @@
 
 namespace Ariadne {  
 
-typedef std::pair<int,Float> HybridTime;
+struct HybridTime :
+    public std::pair<double,int>
+{
+  HybridTime(double t, int n)
+    : std::pair<double,int>(t,n) { } 
+};
+
+
+typedef int DiscreteState;
+typedef int DiscreteEvent;
 
 class HybridSpace;
 class HybridSet;
@@ -45,8 +54,6 @@ class HybridAutomaton;
 
 class FunctionInterface;
 
-typedef uint DiscreteState;
-typedef uint DiscreteEvent;
 
 /*! \ingroup HybridTime
  * \brief A discrete mode of a HybridAutomaton, comprising continuous evolution given by a VectorField
@@ -137,6 +144,9 @@ class DiscreteTransition
     // \brief The reset of the discrete transition.
     boost::shared_ptr< const FunctionInterface > _reset;  
     
+    // \brief Whether or not the transition is forced.
+    bool _forced;
+    
  public:
     
   //! \brief The discrete event associated with the discrete transition. 
@@ -162,6 +172,11 @@ class DiscreteTransition
       return *this->_reset;
     }
 
+  //! \brief True if the transition is forced (occurs as soon as it is activated). 
+    bool forced() const { 
+      return this->_forced;
+    }
+
   private:
  
   // Constructor.
@@ -180,21 +195,24 @@ class DiscreteTransition
                      const DiscreteMode& source, 
                      const DiscreteMode& target,
                      const FunctionInterface& reset,
-                     const FunctionInterface& activation);
+                     const FunctionInterface& activation,
+                     bool forced=false);
 
   // Construct from shared pointers (for internal use). 
   DiscreteTransition(DiscreteEvent event,
                      const DiscreteMode& source, 
                      const DiscreteMode& target,
                      const boost::shared_ptr< FunctionInterface > reset,
-                     const boost::shared_ptr< FunctionInterface > activation);
+                     const boost::shared_ptr< FunctionInterface > activation,
+                     bool forced=false);
 
   // Construct from shared pointers (for internal use). */
   DiscreteTransition(DiscreteEvent event,
                      const boost::shared_ptr< DiscreteMode > source, 
                      const boost::shared_ptr< DiscreteMode > target,
                      const boost::shared_ptr< FunctionInterface > reset,
-                     const boost::shared_ptr< FunctionInterface > activation);
+                     const boost::shared_ptr< FunctionInterface > activation,
+                     bool forced=false);
 };
 
 std::ostream& operator<<(std::ostream& os, const DiscreteTransition& dt);
@@ -307,6 +325,20 @@ class HybridAutomaton
                                            DiscreteState target,
                                            const FunctionInterface& reset,
                                            const FunctionInterface& activation);
+
+  //! \brief Adds a forced (urgent) discrete transition to the automaton 
+  //! using the discrete states to specify the source and target modes.
+  //   
+  //    \param event is the transition's event.
+  //    \param source is the transition's source location.
+  //    \param target is the transition's target location.
+  //    \param reset is the transition's reset.
+  //    \param activation is the transition's activation region.
+  const DiscreteTransition& new_forced_transition(DiscreteEvent event,
+                                                  DiscreteState source, 
+                                                  DiscreteState target,
+                                                  const FunctionInterface& reset,
+                                                  const FunctionInterface& activation);
 
   //! \brief Adds a discrete transition to the automaton using the discrete modes to specify the source and target.
   //   

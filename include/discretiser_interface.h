@@ -28,59 +28,47 @@
 #ifndef ARIADNE_DISCRETISER_INTERFACE_H
 #define ARIADNE_DISCRETISER_INTERFACE_H
 
-#include "evaluation/declarations.h"
 
 namespace Ariadne {
   
+template<class SYS>
+class DiscretiserInterface; 
+
+typedef int DiscreteState;
+class HybridGridCell;
+
+class HybridTime;
+class HybridGridTreeSet;
+class HybridAutomaton;
+
+template<class ES> class Orbit;
+
+/*! \ingroup EvaluatorInterfaces \ingroup Evolvers
+ *  \brief Interface for evolving a dynamic system and discretising the result on a grid.
+ */
+template<>
+class DiscretiserInterface<HybridAutomaton>
+{
+ public:
+  typedef HybridTime TimeType;
+  typedef HybridAutomaton SystemType;
+  typedef HybridGridCell BasicSetType;
+  typedef HybridGridTreeSet ConcreteSetType;
   
-    /*! \ingroup EvaluatorInterfaces \ingroup Evolvers
-     *  \brief Interface for evolving a dynamic system and discretising the result on a grid.
-     */
-    template<class Sys, class Aprx>
-    class DiscretiserInterface 
-    {
-      typedef typename Sys::time_type T;
-      typedef typename Aprx::BasicSet BasicSet;
-      typedef typename Aprx::CoverListSet CoverListSet;
-      typedef typename Aprx::PartitionListSet PartitionListSet;
-      typedef Sys System;
-      typedef T Time;
-     public:
-      /*! \brief The type used to denote time. */
-      typedef T time_type;
-      /*! \brief The type of the system. */
-      typedef Sys system_type;
-      /*! \brief The type used to represent basic sets. */
-      typedef BasicSet basic_set_type;
-      /*! \brief The type used to represent lists of basic open sets. */
-      typedef CoverListSet cover_list_set_type;
-      /*! \brief The type used to represent lists of basic compact sets. */
-      typedef PartitionListSet partition_list_set_type;
-     public:
-      /*! \brief Destructor. */
-      virtual ~DiscretiserInterface() { };
-
-      /*! \brief Make a dynamically-allocated copy. */
-      virtual DiscretiserInterface<Sys,Aprx>* clone() const = 0;
-
-      /*! \brief Compute a lower-approximation to the evolved set under the system evolution. */
-      virtual CoverListSet lower_evolve(const System& f, const BasicSet& s, const Time& t) const = 0;
-
-      /*! \brief Compute a lower-approximation to the reachable set under the system evolution. */
-      virtual CoverListSet lower_reach(const System& f, const BasicSet& s, const Time& t) const = 0;
-
-      /*! \brief Compute a lower-approximation to the reachable and evolved sets under the system evolution. */
-      virtual std::pair<CoverListSet,CoverListSet> lower_reach_evolve(const System& f, const BasicSet& s, const Time& t) const = 0;
-
-      /*! \brief Compute an upper-approximation to the evolved set under the system evolution. */
-      virtual PartitionListSet upper_evolve(const System& f, const BasicSet& s, const Time& t) const = 0;
-
-      /*! \brief Compute an upper-approximation to the reachable set under the system evolution. */
-      virtual PartitionListSet upper_reach(const System& f, const BasicSet& s, const Time& t) const = 0;
-
-      /*! \brief Compute an upper-approximation to the reachable and evolved set under the system evolution. */
-      virtual std::pair<PartitionListSet,PartitionListSet> upper_reach_evolve(const System& f, const BasicSet& s, const Time& t) const = 0;
-    };
+  /*! \brief Destructor. */
+  virtual ~DiscretiserInterface() { };
+  
+  /*! \brief Make a dynamically-allocated copy. */
+  virtual DiscretiserInterface<SystemType>* clone() const = 0;
+  
+  /*! \brief Compute a lower-approximation to the the reachable and evolved sets under the system evolution. */
+  virtual Orbit<BasicSetType> 
+  lower_evolve(const SystemType& f, const BasicSetType& s, const TimeType& t) const = 0;
+  
+  /*! \brief Compute a lower-approximation to the the reachable and evolved sets under the system evolution. */
+  virtual Orbit<BasicSetType> 
+  upper_evolve(const SystemType& f, const BasicSetType& s, const TimeType& t) const = 0;
+};
 
 
 

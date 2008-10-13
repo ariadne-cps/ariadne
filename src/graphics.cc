@@ -1,5 +1,5 @@
 /***************************************************************************
- *            file
+ *            graphics.cc
  *
  *  Copyright 2008  Pieter Collins
  * 
@@ -21,9 +21,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file orbit.h
- *  \brief Orbits of dynamic systems
- */
 #include "macros.h"
 #include "stlio.h"
 #include "vector.h"

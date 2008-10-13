@@ -106,6 +106,7 @@ EvolutionParameters::EvolutionParameters()
 }
 
 
+inline
 std::ostream& 
 operator<<(std::ostream& os, const EvolutionParameters& p) 
 {

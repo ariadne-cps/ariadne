@@ -29,7 +29,6 @@
 #define ARIADNE_ARRAY_H
 
 #include <cstddef>
-#include <iostream>
 #include <stdexcept>
 
 namespace Ariadne {
@@ -131,13 +130,17 @@ class array {
   pointer _ptr; 
 };
 
-template<class T> 
-std::ostream& operator<<(std::ostream& os, const array<T>& ary) {
-  for(typename array<T>::size_type i=0; i!=ary.size(); ++i) {
-    os << (i==0 ? '[' : ',') << ary[i];
-  }
-  return os << ']';
+    
+template<class A, class X> void serialize(A& a, array<X>& ary, const unsigned int v) {
+  // We can't use separate save/load unless serialize is a member (I think).
+  // We therefore need the same code to read and write. 
+  // We use a trick by which we first store the current value in a temporary
+  // variable, read/write the temporary, and set it back to the archive.
+  size_t m=ary.size(); a & m; if(m!=ary.size()) { ary.resize(m); }
+  for(size_t i=0; i!=m; ++i) { X& k=ary[i]; a & k; }
 }
+
+
     
 } // namespace Ariadne;
 

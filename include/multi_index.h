@@ -473,7 +473,8 @@ class MultiIndexIterator
 
 inline 
 std::ostream& operator<<(std::ostream& os, const MultiIndex& a) {
-  return os << a._occurrences;
+  for(uint i=0; i!=a.size(); ++i) { os << (i==0?'[':',') << a[i]; } 
+  return os << ']';
 }
 
 }

@@ -5,11 +5,13 @@ OBJ=numeric.o vector.o matrix.o \
 	approximate_taylor_model.o \
 	set.o hybrid_set.o \
 	point.o box.o zonotope.o \
-	grid.o paving.o \
+	grid_set.o paving.o \
 	dynamical_toolbox.o \
 	hybrid_automaton.o \
 	hybrid_evolver.o \
-	logging.o graphics.o
+	discretiser.o analyser.o \
+	logging.o graphics.o \
+	models.o
 
 
 
@@ -37,7 +39,5 @@ GRAPHICS_CFLAGS  = `pkg-config gtk+-2.0 --cflags`
 graphics.o:
 	g++ $(CXXFLAGS) $(GRAPHICS_CFLAGS) -c graphics.cc
 
-plotting: lib plotting.o
-	g++ plotting.o libariadne-lite.so `pkg-config gtk+-2.0 --libs` -o plotting
 
 include Makefile.dep

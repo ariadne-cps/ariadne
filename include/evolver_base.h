@@ -35,13 +35,13 @@ namespace Ariadne {
   
   
 template<class SYS, class ES> class EvolverBase
-  : public EvolverInterface<SYS,ES>,
-    public Clonable< EvolverBase<SYS,ES> >
+  : public EvolverInterface<SYS,ES>
 {
   typedef EvolverInterface<SYS,ES> Interface;
   typedef typename SYS::TimeType T;
   typedef ListSet<ES> ESL;
   typedef typename ListSet<ES>::const_iterator ESLCI;
+ public:
 
   //! \brief Write to an output stream. 
   virtual std::ostream& write(std::ostream& os) const {

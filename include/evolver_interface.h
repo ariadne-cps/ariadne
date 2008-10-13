@@ -33,10 +33,6 @@ namespace Ariadne {
 
 using std::pair;
 
-template<class T> class Clonable 
-{
-  virtual T* clone() const = 0;
-};
 
 template<class BS> class ListSet;
 
@@ -48,7 +44,6 @@ enum Semantics { lower_semantics, upper_semantics };
  */
 template<class SYS, class ES> 
 class EvolverInterface 
-  : public Clonable< EvolverInterface<SYS,ES> >
 {
  public:
   typedef SYS SystemType;
@@ -58,6 +53,9 @@ class EvolverInterface
 
   //! \brief Virtual destructor. 
   virtual ~EvolverInterface() {};
+
+  //! \brief Cloning operator.
+  virtual EvolverInterface<SYS,ES>* clone() const = 0;
 
   //! \brief Write to an output stream. 
   virtual std::ostream& write(std::ostream& os) const = 0;

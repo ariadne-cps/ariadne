@@ -34,6 +34,7 @@
 
 namespace Ariadne {
 
+static const int SMOOTH=255;
 
 // A wrapper for transformations  
 // This class is for internal use only; we can easily specify parameter types.
@@ -49,9 +50,9 @@ class FunctionBase
   template<class S1, class S2, class S3> FunctionBase(const S1& s1, const S2& s2, const S3& s3) : t(s1,s2,s3) { }
  public:
   virtual FunctionBase<T>* clone() const { return new FunctionBase<T>(*this); }
-  virtual uint result_size() const { return t.result_size; }
-  virtual uint argument_size() const { return t.argument_size; }
-  virtual ushort smoothness() const { return t.smoothness; }
+  virtual uint result_size() const { return t.result_size(); }
+  virtual uint argument_size() const { return t.argument_size(); }
+  virtual ushort smoothness() const { return t.smoothness(); }
   virtual Vector<Float> evaluate(const Vector<Float>& x) const {
     Vector<Float> r; t.compute(r,x); return r; } 
   virtual Vector<Interval> evaluate(const Vector<Interval>& x) const {
@@ -68,8 +69,8 @@ class FunctionBase
     return os << "Function"; }
  private:
   template<class X> DifferentialVector< SparseDifferential<X> > _expansion(const Vector<X>& x, const ushort& s) const {
-    const uint& rs=t.result_size;
-    const uint& as=t.argument_size;
+    const uint& rs=t.result_size();
+    const uint& as=t.argument_size();
     DifferentialVector< SparseDifferential<X> > dx(as,as,s);
     DifferentialVector< SparseDifferential<X> > dr(rs,as,s);
     for(uint i=0; i!=as; ++i) { dx[i]=x[i]; }
@@ -83,19 +84,19 @@ class FunctionBase
 template<uint RS, uint AS, uint PS=0u, uint SM=255u>
 struct FunctionData 
 {
-  static const uint result_size=RS;
-  static const uint argument_size=AS;
-  static const uint parameter_size=PS;
-  static const uint smoothness=SM;
+  const uint result_size() const { return RS; }
+  const uint argument_size() const { return AS; }
+  const uint parameter_size() const { return PS; }
+  const uint smoothness() const { return SM; }
 };
   
 // FIXME: Make interval computations use interval version of parameters!
 template<class T> struct FunctionWrapper
   : public T
 {
-  FunctionWrapper() : T(), _p(Vector<Float>(T::parameter_size)) { }
-  FunctionWrapper(const Vector<Float>& p) : T(), _p(p) { ARIADNE_ASSERT(p.size()==T::parameter_size); }
-  FunctionWrapper(const Vector<Interval>& p) : T(), _p(midpoint(p)) { ARIADNE_ASSERT(p.size()==T::parameter_size); }
+  FunctionWrapper() : T(), _p(Vector<Float>(T::parameter_size())) { }
+  FunctionWrapper(const Vector<Float>& p) : T(), _p(p) { ARIADNE_ASSERT(p.size()==T::parameter_size()); }
+  FunctionWrapper(const Vector<Interval>& p) : T(), _p(midpoint(p)) { ARIADNE_ASSERT(p.size()==T::parameter_size()); }
   template<class R, class A> void compute(R& r, const A& x) const { this->T::compute(r,x,_p); }
  private:
   Vector<Float> _p;
@@ -115,42 +116,45 @@ template<class T> class Function
 struct ConstantTransformation 
 {
   ConstantTransformation(const Vector<Float>& c, uint as)
-    : result_size(c.size()), argument_size(as), _c(c) { }
-  const uint result_size;
-  const uint argument_size;
-  static const int smoothness=255;
+    : _as(as), _c(c) { }
+  const uint result_size() const { return _c.size(); }
+  const uint argument_size() const { return _as; }
+  const int smoothness() const { return SMOOTH; }
   template<class R, class A>
   void compute(R& r, const A& x) const {
-    for(uint i=0; i!=result_size; ++i) { r[i]=_c[i]; } }
+    for(uint i=0; i!=result_size(); ++i) { r[i]=_c[i]; } }
  private:
+  uint _as;
   Vector<Float> _c;
 };
 
 struct IdentityTransformation 
 {
   IdentityTransformation(uint n)
-    : result_size(n), argument_size(n) { }
-  const uint result_size;
-  const uint argument_size;
-  static const int smoothness=255;
+    : _n(n) { }
+  const uint result_size() const { return _n; }
+  const uint argument_size() const { return _n; }
+  const int smoothness() const { return SMOOTH; }
   template<class R, class A>
   void compute(R& r, const A& x) const {
-    for(uint i=0; i!=result_size; ++i) { r[i]=x[i]; } }
+    for(uint i=0; i!=result_size(); ++i) { r[i]=x[i]; } }
+ private:
+  uint _n;
 };
 
 struct AffineTransformation 
 {
   AffineTransformation(const Matrix<Float>& A, const Vector<Float>& b)
-    : result_size(A.row_size()), argument_size(A.column_size()), _A(A), _b(b) { }
-  const uint result_size;
-  const uint argument_size;
-  static const int smoothness=255;
+    : _A(A), _b(b) { ARIADNE_ASSERT(A.row_size()==b.size()); }
+  const uint result_size() const { return _A.row_size(); }
+  const uint argument_size() const { return _A.column_size(); }
+  const int smoothness() const { return SMOOTH; }
   
   template<class R, class A>
   void compute(R& r, const A& x) const {
-    for(uint i=0; i!=result_size; ++i) {
+    for(uint i=0; i!=result_size(); ++i) {
       r[i]=_b[i]; 
-      for(uint j=0; j!=argument_size; ++j) {
+      for(uint j=0; j!=argument_size(); ++j) {
         r[i]+=_A[i][j]*x[j];
       }
     }

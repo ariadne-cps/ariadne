@@ -173,7 +173,7 @@ class ConstantFunction
 };
 
 
-//! The identity function \f$ x\mapsto x\f$ in $\R^n\f$.
+//! The identity function \f$ x\mapsto x\f$ in \f$\R^n\f$.
 class IdentityFunction
   : public FunctionBase<IdentityTransformation>
 {

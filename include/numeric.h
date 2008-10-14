@@ -45,31 +45,39 @@ typedef unsigned long ulong;
 
 namespace Ariadne {
 
+#ifdef DOXYGEN
+#ifdef HAVE_GMPXX_H
+//! \brief Integers of arbitrary size.
+class Integer { };
+//! \brief Rationals numbers.
+class Rational { };
+#else
+//! \brief Integers implemented using longest integral machine type.
+class Integer { };
+#endif // HAVE_GMPXX_H 
+//! \brief Floating point numbers (double precision).
+class Float { };
+#endif // DOXYGEN
+
+
+#ifdef HAVE_GMPXX_H
+typedef mpz_class Integer;
+typedef mpq_class Rational;
+#else
+typedef long long int Integer;
+#endif // HAVE_GMPXX_H 
+
+
+typedef double Float;
+
+
 using std::min;
 using std::max;
 
 uint fac(uint n);
 uint bin(uint n, uint k);
 
-typedef uint Nat;
-typedef int Int;
-
-#ifdef HAVE_GMPXX_H
-typedef mpz_class Integer;
-typedef mpq_class Rational;
-#endif // HAVE_GMPXX_H 
-
-
-#ifdef DOXYGEN
-//! \brief Floating point numbers.
-class Float { };
-#endif
-
 template<class X> X pi();
-
-
-typedef double Float;
-//class Float : public double { template<class T> Float(const T& t) : double(t) { } };
 
 inline Float inf() { return std::numeric_limits<double>::max(); }
 inline Float eps() { return std::numeric_limits<double>::epsilon(); }

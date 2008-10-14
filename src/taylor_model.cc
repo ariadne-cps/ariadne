@@ -90,7 +90,7 @@ TaylorModel::zero(uint rs, uint as)
 TaylorModel
 TaylorModel::one(uint as)  
 {
-  throw NotImplemented(__PRETTY_FUNCTION__);
+  ARIADNE_NOT_IMPLEMENTED;
 }
 
 
@@ -98,7 +98,7 @@ TaylorModel::one(uint as)
 TaylorModel
 TaylorModel::constant(uint as, const R& c)  
 {
-  throw NotImplemented(__PRETTY_FUNCTION__);
+  ARIADNE_NOT_IMPLEMENTED;
 }
 
 
@@ -205,7 +205,7 @@ TaylorModel
 TaylorModel::truncate(const Box& domain, const Point& centre,
                       ushort order, ushort smoothness) const
 {
-  throw NotImplemented(__PRETTY_FUNCTION__);
+  ARIADNE_NOT_IMPLEMENTED;
 }
 
 
@@ -600,7 +600,7 @@ inverse(const TaylorModel& p, const Point& v)
 TaylorModel 
 implicit(const TaylorModel& p, const Point& v)
 {
-  throw NotImplemented(__PRETTY_FUNCTION__);
+  ARIADNE_NOT_IMPLEMENTED;
 }
 
 

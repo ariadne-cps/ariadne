@@ -31,8 +31,11 @@
 
 namespace Ariadne {
   
+/*! \ingroup EvaluatorInterfaces \ingroup Evolvers
+ *  \brief Interface for evolving a dynamic system and discretising the result on a grid.
+ */
 template<class SYS>
-class DiscretiserInterface; 
+class DiscretiserInterface;
 
 typedef int DiscreteState;
 class HybridGridCell;
@@ -44,7 +47,7 @@ class HybridAutomaton;
 template<class ES> class Orbit;
 
 /*! \ingroup EvaluatorInterfaces \ingroup Evolvers
- *  \brief Interface for evolving a dynamic system and discretising the result on a grid.
+ *  \brief Interface for evolving a hybrid dynamic system and discretising the result on a grid.
  */
 template<>
 class DiscretiserInterface<HybridAutomaton>

@@ -494,7 +494,7 @@ error_free_over_approximation(const Zonotope& z)
 Zonotope
 nonsingular_over_approximation(const Zonotope& z)
 {
-  throw NotImplemented(__PRETTY_FUNCTION__);
+  ARIADNE_NOT_IMPLEMENTED;
 }  
 */
 

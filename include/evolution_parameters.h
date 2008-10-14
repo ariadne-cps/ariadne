@@ -35,7 +35,7 @@
 namespace Ariadne {
   
 
-//! \brief Parameters for controlling the accuracy of evolution methods. 
+//! \brief Parameters for controlling the accuracy of evolution methods.
 //!
 //! \internal This class is an abomination. Parameter specification should be
 //! delegated to the class implementing the method that needs it. Currently
@@ -47,10 +47,7 @@ struct EvolutionParameters {
   //! \brief Default constructer gives reasonable values. 
   EvolutionParameters();
 
-  //! \brief The maximum number of steps for an iterative algorithm. 
-  uint maximum_number_of_steps;
-  
-  //! \brief The time after which an MapEvolver may approximate computed sets on a grid,
+  //! \brief The time after which an evolver may approximate computed sets on a grid,
   //! in order to use previously cached results for the grid. Increasing this 
   //! parameter may improve the accuracy of the computations.  
   //! If there is recurrence in the system, then this parameter should be set to 
@@ -93,8 +90,7 @@ struct EvolutionParameters {
 
 inline
 EvolutionParameters::EvolutionParameters() 
-  : maximum_number_of_steps(255),
-    lock_to_grid_steps(1),
+  : lock_to_grid_steps(1),
     minimum_step_size(0.0),
     maximum_step_size(1.0),
     minimum_enclosure_radius(0.0),
@@ -111,8 +107,7 @@ std::ostream&
 operator<<(std::ostream& os, const EvolutionParameters& p) 
 {
   os << "EvolutionParameters"
-     << "(\n  maximum_number_of_steps=" << p.maximum_number_of_steps
-     << ",\n  lock_to_grid_steps=" << p.lock_to_grid_steps
+     << "(\n  lock_to_grid_steps=" << p.lock_to_grid_steps
 
      << ",\n  minimum_step_size=" << p.minimum_step_size
      << ",\n  maximum_step_size=" << p.maximum_step_size
@@ -128,7 +123,6 @@ operator<<(std::ostream& os, const EvolutionParameters& p)
   return os;
 }
 
-  
 } //!namespace Ariadne
 
 #endif //!ARIADNE_EVOLUTION_PARAMETERS_H

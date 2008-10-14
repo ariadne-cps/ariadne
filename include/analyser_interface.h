@@ -36,11 +36,14 @@ namespace Ariadne {
 
   
 
-/*! \brief Interface for computing (chain) reachable sets of a dynamic system.
- *  \ingroup EvaluatorInterfaces \ingroup Analysers
+/*! \ingroup EvaluatorInterfaces \ingroup Analysers
+ *  \brief Interface for computing (chain) reachable sets of a dynamic system.
  */
 template<class SYS> class AnalyserInterface;
 
+/*! \ingroup EvaluatorInterfaces \ingroup Analysers
+ *  \brief Interface for computing (chain) reachable sets of a hybrid system.
+ */
 template<> 
 class AnalyserInterface<HybridAutomaton> 
 {

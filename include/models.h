@@ -34,12 +34,21 @@
 
 namespace Ariadne {
 
+namespace Models {
+
 static const uint SMOOTH=255;
 
+/*! \brief The %Henon map \f$(x,y)\mapsto(a-x^2+by,x)\f$.
+ *
+ *  Variables: x, y
+ *  Parameters: a,b
+ *  System: x'=a-x*x+b*y
+ *          x'=x
+ */
 struct Henon : FunctionData<2,2,2> {
   template<class R, class A, class P>
   void compute(R& r, const A& x, const P& p) const {
-    r[0]=p[0]-x[0]*x[0]-p[1]*x[1];
+    r[0]=p[0]-x[0]*x[0]+p[1]*x[1];
     r[1]=x[0];
   }
 };
@@ -48,13 +57,13 @@ struct HenonInverse : FunctionData<2,2,2> {
   template<class R, class A, class P>
   void compute(R& r, const A& x, const P& p) const {
     r[0]=x[1]; 
-    r[1]=(p[0]-x[1]*x[1]-x[0])/p[1];
+    r[1]=(p[0]-x[1]*x[1]+x[0])/p[1];
   }
 };
                    
   
-/*! \class Duffing
- *  \brief The Duffing equation. 
+/*! \brief The %Duffing equation \f$\ddot{x}+\delta\dot{x}+x(\alpha+\beta x^2)=\gamma\cos(\omega t+\phi)\f$. 
+ *
  *  Variables: x, v, t
  *  Parameters: delta, beta, alpha, gamma, omega, phi
  *  System: dotx=v; 
@@ -71,8 +80,8 @@ struct Duffing : FunctionData<3,3,6> {
                    
 
 
-/*! \class VanDerPol
- *  \brief The Van der Pol equation \f$\ddot{x}=\mu*(1-x^2)*\dot{x}-x\f$.
+/*! \brief The Van der Pol equation \f$\ddot{x}+\mu(x^2-1)\dot{x}+x=0\f$.
+ *
  *     Variables:  x, v
  *     Parameters: mu
  *     System:     dotx=v
@@ -87,8 +96,8 @@ struct VanDerPol : FunctionData<2,2,1> {
 };
 
 
-/*! \class VanDerPol
- *  \brief The Van der Pol equation \f$\ddot{x}=\mu*(1-x^2)*\dot{x}-x+a\sin(\omega t)\f$.
+/*! \brief The forced Van der Pol equation \f$\ddot{x}+\mu(x^2-1)\dot{x}+x=A\sin(\omega t)\f$.
+ *
  *     Variables:  x, v, t
  *     Parameters: mu, a, omega
  *     System:     dotx=v
@@ -105,14 +114,14 @@ struct ForcedVanDerPol : FunctionData<3,3,3> {
 };
 
 
-/*! \class LorenzSystem
- *  \brief The Lorenz system \f$(\dot{x},\dot{y},\dot{z}) = (\sigma(y-x),\rho x-y-xz,-\beta z+xy)\f$. 
+/*! \brief The %Lorenz system \f$(\dot{x},\dot{y},\dot{z}) = (\sigma(y-x),\rho x-y-xz,-\beta z+xy)\f$. 
+ *
  *     Variables: x, y, z
  *     Parameters: beta, rho, sigma
  *     System: dotx=sigma*(y-x)
  *             doty=rho*x-y-x*z
  *             dotz=-beta*z+x*y
- *  The standard parameters for the Lorenz attractos are \f$\sigma=10\f$, \f$\beta = 8/3\f$ and \f$\rho=28\f$.
+ *  The standard parameters for the %Lorenz attractor are \f$\sigma=10\f$, \f$\beta = 8/3\f$ and \f$\rho=28\f$.
  */
 struct Lorenz : FunctionData<3,3,3> {
   template<class R, class A, class P>
@@ -131,6 +140,9 @@ class SingularVanDerPol
   SingularVanDerPol(const Vector<Interval>& p);
 };
 
+} // namespace Models
+
+using namespace Models;
 
 } // namespace Ariadne
 

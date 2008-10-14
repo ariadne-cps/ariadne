@@ -31,6 +31,8 @@
 
 namespace Ariadne {
 
+namespace Models {
+
 //\dot{x}      & = -x+a(x^2-1) \sin(2 pi t) 
 //\dot{t} & =  \omega(x^2- 1) 
 //
@@ -80,5 +82,7 @@ SingularVanDerPol(const Vector<Interval>& p)
   this->new_forced_transition(1,1,1,reset,guard);
 } 
 
+
+} // namespace Models
 
 } // namespace Ariadne

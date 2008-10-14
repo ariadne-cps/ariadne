@@ -56,8 +56,8 @@ class FunctionInterface;
 
 
 /*! \ingroup HybridTime
- * \brief A discrete mode of a HybridAutomaton, comprising continuous evolution given by a VectorField
- * within and invariant ConstraintSet. 
+ * \brief A discrete mode of a hybrid automaton, comprising continuous evolution given by a vector field
+ * within and invariant constraint set. 
  *
  * A %DiscreteMode can only be created using the new_mode() method in
  * the %HybridAutomaton class.
@@ -119,8 +119,8 @@ inline bool operator<(const DiscreteMode& mode1, const DiscreteMode& mode2) {
 
 
 /*! \ingroup HybridTime
- * \brief A discrete transition of a HybridAutomaton, representing an instantaneous
- * jump from one DiscreteMode to another, governed by an activation ConstraintSet and a reset MapInterface.
+ * \brief A discrete transition of a hybrid automaton, representing an instantaneous
+ * jump from one discrete mode to another, governed by an activation set and a reset map.
  *
  * A %DiscreteTransition can only be created using the new_transition() method in
  * the %HybridAutomaton class.
@@ -229,8 +229,8 @@ inline bool operator<(const DiscreteTransition& transition1, const DiscreteTrans
 
 /*! \ingroup System \ingroup HybridTime
  *  \brief A hybrid automaton, comprising continuous-time behaviour
- *  at each DiscreteMode, coupled by instantaneous DiscreteTransition events.
- *  The state space is given by a HybridSet.  
+ *  at each discrete mode, coupled by instantaneous discrete transitions.
+ *  The state space is given by a hybrid set.  
  *
  * A hybrid automaton is a dynamic system with evolution in both
  * continuous time and discrete time. 

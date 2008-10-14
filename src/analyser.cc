@@ -187,7 +187,7 @@ HybridAnalyser::
 viable(const SystemType& system, 
        const CompactSetType& bounding_set) const
 {
-  throw NotImplemented(__PRETTY_FUNCTION__);
+  ARIADNE_NOT_IMPLEMENTED;
 }
 
 
@@ -198,7 +198,7 @@ verify(const SystemType& system,
        const LocatedSetType& initial_set, 
        const RegularSetType& safe_set) const
 {
-  throw NotImplemented(__PRETTY_FUNCTION__);
+  ARIADNE_NOT_IMPLEMENTED;
 }
 
 

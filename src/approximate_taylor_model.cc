@@ -133,7 +133,7 @@ ApproximateTaylorModel::zero(uint rs, uint as)
 ApproximateTaylorModel
 ApproximateTaylorModel::one(uint as)  
 {
-  throw NotImplemented(__PRETTY_FUNCTION__);
+  ARIADNE_NOT_IMPLEMENTED;
 }
 
 
@@ -141,7 +141,7 @@ ApproximateTaylorModel::one(uint as)
 ApproximateTaylorModel
 ApproximateTaylorModel::constant(uint as, const R& c)  
 {
-  throw NotImplemented(__PRETTY_FUNCTION__);
+  ARIADNE_NOT_IMPLEMENTED;
 }
 
 
@@ -504,7 +504,7 @@ recentre(const ApproximateTaylorModel& f,
 {
   ARIADNE_ASSERT(f.argument_size()==d.size());
   ARIADNE_ASSERT(f.argument_size()==c.size());
-  throw NotImplemented(__PRETTY_FUNCTION__);
+  ARIADNE_NOT_IMPLEMENTED;
 }
 
 
@@ -594,7 +594,7 @@ implicit1(const ApproximateTaylorModel& f,
   Vector<A> v=f.evaluate(c);
   Vector<A> hc=project(c,range(0,m-n));
   Vector<I> hd=project(f.domain(),range(0,m-n));
-  throw NotImplemented(__PRETTY_FUNCTION__);
+  ARIADNE_NOT_IMPLEMENTED;
 }
 
 // If \f$f:\R^m\rightarrow \R^n\f$, compute the function
@@ -769,7 +769,7 @@ ApproximateTaylorModel::truncate(const Vector<Interval>& domain, const Vector<Fl
 {
   ARIADNE_ASSERT(this->argument_size()==domain.size());
   ARIADNE_ASSERT(this->argument_size()==centre.size());
-  throw NotImplemented(__PRETTY_FUNCTION__);
+  ARIADNE_NOT_IMPLEMENTED;
 }
 
 

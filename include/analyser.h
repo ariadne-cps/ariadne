@@ -60,7 +60,7 @@ template<class ES> class HybridDiscretiser;
 
 
 
-/*! \brief A class for computing the evolution of a discrete-time autonomous system.
+/*! \brief A class for performing reachability analysis on a hybrid system.
  *  \ingroup Analysers
  */
 class HybridAnalyser

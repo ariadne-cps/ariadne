@@ -47,7 +47,7 @@ class HybridSpace
 {
 };
 
-//! A set comprising a GridTreeSet in each location.
+//! A set comprising a %ListSet in each location.
 template<class ES>
 class HybridListSet 
   : public ListSet< std::pair<DiscreteState,ES> >
@@ -94,7 +94,7 @@ class HybridGridCellListSet
 
 
 
-//! A set comprising a GridTreeSet in each location.
+//! A set comprising a %GridTreeSet in each location.
 class HybridGridTreeSet 
   : public virtual HybridSetInterface,
     public std::map<DiscreteState,GridTreeSet>

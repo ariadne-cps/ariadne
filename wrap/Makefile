@@ -1,12 +1,12 @@
-INTERVAL_OBJ=interval_module.o export_numeric.o export_linear_algebra.o 
+INTERVAL_OBJ=interval_module.o numeric_submodule.o linear_algebra_submodule.o 
 INTERVAL_LIB=../src/numeric.o ../src/vector.o ../src/matrix.o
 
-DIFFERENTIATION_OBJ=differentiation_module.o export_differentiation.o 
+DIFFERENTIATION_OBJ=differentiation_module.o differentiation_submodule.o 
 DIFFERENTIATION_LIB=../src/numeric.o ../src/vector.o ../src/matrix.o \
 	../src/dense_differential.o ../src/sparse_differential.o 
 
 ARIADNE_OBJ=ariadne_module.o \
-	export_numeric.o export_linear_algebra.o export_differentiation.o export_function.o
+	numeric_submodule.o linear_algebra_submodule.o differentiation_submodule.o function_submodule.o
 
 ARIADNE_LIB=../src/libariadne-lite.so
 

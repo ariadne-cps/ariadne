@@ -1,5 +1,5 @@
 /***************************************************************************
- *            export_numeric.cc
+ *            numeric_submodule.cc
  *
  *  Copyright 2008  Pieter Collins
  * 

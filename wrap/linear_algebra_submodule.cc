@@ -1,5 +1,5 @@
 /***************************************************************************
- *            export_linear_algebra.cc
+ *            linear_algebra_submodule.cc
  *
  *  Copyright 2008  Pieter Collins
  * 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            function_module.cc
+ *            function_submodule.cc
  *
  *  Copyright 2008  Pieter Collins
  * 

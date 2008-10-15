@@ -25,6 +25,7 @@
 #include "linear_algebra/matrix.h"
 
 #include "grid.h"
+#include "grid_paving.h"
 #include "grid_cell.h"
 #include "grid_block.h"
 #include "grid_cell_list_set.h"
@@ -212,6 +213,7 @@ instantiate_grid_approximation()
 {
   typedef Interval<R> I;
   tribool tb;
+  uint dpth=0;
   Point<I>* ipt=0;
   Box<R>* bx=0;
   Zonotope<R>* z=0;
@@ -225,6 +227,7 @@ instantiate_grid_approximation()
   GridBlock<R>* gb=0;
   GridCellListSet<R>* gcls=0;
   GridMaskSet<R>* gms=0;
+  GridPaving<R>* gp=0;
   BoxListSet<R>* bxls=0;
 
   ListSet< Box<R> >* rls=0;
@@ -259,6 +262,8 @@ instantiate_grid_approximation()
   *gms=outer_approximation(*zls,*fg);
   *gcls=outer_approximation(*zls,*g);
   
+  *gp=outer_approximation(*g,*set,dpth);
+ 
   *gms=outer_approximation(*set,*fg);
   *gms=inner_approximation(*set,*fg);
 
@@ -483,6 +488,42 @@ inner_approximation(const SetInterface< Box<R> >& set, const Grid<R>& g)
     }
   }
   return result;
+}
+
+template<class R, class Set> GridPaving<R> outer_approximation(const Grid<R>& theGrid, const Set& theSet, const uint depth){
+	ARIADNE_LOG( 4,"GridPaving outer_approximation( Set, Grid, uint )\n" );
+	ARIADNE_CHECK_EQUAL_SPACE( theSet, theGrid, "outer_approximation( Set, Grid<R>, uint )\n" );
+	
+	//1. Computes the outer approximation (on the grid) of theSet
+	const GridBlock<R> theSetGridBlock = outer_approximation( theSet.bounding_box(), theGrid );
+	//2. Allocates the paving for this outer approximation
+	//IVAN S. ZAPREEV
+	//WARNING: We need to have the bounding box on the grid, in order to compute proper primary cell for the GridPaving
+	// A) We need to get the box representing the block theSetGridBlock in the grid theGrid
+	// B) We create a trivial grid with with no scaling
+	// C) We use this grid and the Lattice block of the theSetGridBlock to create a new GridBlock
+	// D) The resulting GridBlock will be in the grid theGrid i.e. it's bounding_box() method will
+	//     return us it's box in the grid theGrid but not in the original space
+	GridPaving<R> theGridPaving( theGrid, GridBlock<R>( Grid<R>( theGrid.dimension(), R(1.0) ), theSetGridBlock.lattice_set() ).bounding_box() );
+	
+	//   Enable the root node of the binary three, otherwise we will not be able to mince it
+	theGridPaving._pRootTreeNode->set_enabled();
+	//3. Mince the paving to the level: <the primary cell hight>*dimension + depth;
+	theGridPaving.mince( theGridPaving.cell().height()*theGridPaving.cell().dimension() + depth );
+	
+	//4. Iterates through the enabled leaf nodes of the paving (all the nodes are initially enabled)
+	//   and disable the cells that are disjoint with the \a theSet.
+	for( typename GridSubPaving<R>::const_iterator it = theGridPaving.begin(), end = theGridPaving.end(); it != end; it++ ) {
+		if( bool( theSet.disjoint( (*it).box() ) ) ) {
+			it.cursor().set_disabled();
+		}
+	}
+	return theGridPaving;
+}
+
+
+template<class R, class Set> GridPaving<R> inner_approximation(const Grid<R>& theGrid, const Set& theSet, const uint depth){
+	throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
 

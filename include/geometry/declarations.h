@@ -63,6 +63,12 @@ namespace Ariadne {
     template<class R> class GridCellListSet;
     template<class R> class GridMaskSet;
 
+    template<class R> class GridPavingCell;
+    template<class R> class GridPavingCursor;
+    template<class R> class GridSubPaving;
+    template<class R> class GridSubPavingIterator;
+    template<class R> class GridPaving;
+
     template<class R> class IrregularGrid;
     template<class R> class IrregularGridMaskSet;
 

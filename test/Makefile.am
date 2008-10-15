@@ -58,7 +58,8 @@ GEOMETRY_TESTS = \
 	test_polytope \
 	test_polyhedron \
 	test_constraint_set \
-	test_level_set 
+	test_level_set \
+	test_grid_paving 
 
 SYSTEM_TESTS = \
 	test_hybrid_automaton 

@@ -72,6 +72,7 @@ GEOMETRY_SRC = \
 	geometry/poincare_section.cc \
 	geometry/constraint_set.cc \
 	geometry/level_set.cc \
+	geometry/grid_paving.cc \
 	geometry/hybrid_set.cc 
 
 STORAGE_SRC = \

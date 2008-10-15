@@ -28,6 +28,7 @@
 #ifndef ARIADNE_GRID_APPROXIMATION_H
 #define ARIADNE_GRID_APPROXIMATION_H
 
+#include "base/types.h"
 #include "numeric/declarations.h"
 #include "geometry/declarations.h"
 
@@ -69,6 +70,20 @@ namespace Ariadne {
  
     template<class R> GridMaskSet<R> outer_approximation(const SetInterface< Box<R> >& set, const FiniteGrid<R>& fg);
     template<class R> GridMaskSet<R> inner_approximation(const SetInterface< Box<R> >& set, const FiniteGrid<R>& fg);
+
+	/**
+	 *!\ brief This method computes an outer approximation for the set \a theSet on the grid \a theGrid.
+	 * Note that, the depth is the total number of subdivisions (in all dimensions) of the unit cello of the grid.
+	 * This method does the followig:
+	 * 1. Computes the smallest Primary cell enclosing \a theSet
+	 * 2. Allocates the pacing for this cell
+	 * 3. Minces the paving to the level: depth + <the primary cell hight>
+	 * 4. Iterates through the enabled leaf nodes of the paving (all the nodes are initially enabled)
+	 * 5. Disables the cells that are disjoint with the \a theSet
+	 */
+	template<class R, class Set> GridPaving<R> outer_approximation(const Grid<R>& theGrid, const Set& theSet, const uint depth);
+	template<class R, class Set> GridPaving<R> inner_approximation(const Grid<R>& theGrid, const Set& theSet, const uint depth);
+	
 
     template<class R> BoxListSet<R> lower_approximation(const SetInterface< Box<R> >& set, const Grid<R>& fg);
     template<class R> BoxListSet<R> lower_approximation(const SetInterface< Box<R> >& set, const FiniteGrid<R>& fg);

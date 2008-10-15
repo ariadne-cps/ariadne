@@ -40,23 +40,23 @@ static const int SMOOTH=255;
 // This class is for internal use only; we can easily specify parameter types.
 template<class T> 
 class FunctionBase
-  : public FunctionInterface 
+  : public FunctionInterface,
+    public T
 {
-  T t;
  protected:
-  FunctionBase() : t() { }
-  template<class S> FunctionBase(const S& s) : t(s) { }
-  template<class S1, class S2> FunctionBase(const S1& s1, const S2& s2) : t(s1,s2) { }
-  template<class S1, class S2, class S3> FunctionBase(const S1& s1, const S2& s2, const S3& s3) : t(s1,s2,s3) { }
+  FunctionBase() : T() { }
+  template<class S> FunctionBase(const S& s) : T(s) { }
+  template<class S1, class S2> FunctionBase(const S1& s1, const S2& s2) : T(s1,s2) { }
+  template<class S1, class S2, class S3> FunctionBase(const S1& s1, const S2& s2, const S3& s3) : T(s1,s2,s3) { }
  public:
   virtual FunctionBase<T>* clone() const { return new FunctionBase<T>(*this); }
-  virtual uint result_size() const { return t.result_size(); }
-  virtual uint argument_size() const { return t.argument_size(); }
-  virtual ushort smoothness() const { return t.smoothness(); }
+  virtual uint result_size() const { return this->T::result_size(); }
+  virtual uint argument_size() const { return this->T::argument_size(); }
+  virtual ushort smoothness() const { return this->T::smoothness(); }
   virtual Vector<Float> evaluate(const Vector<Float>& x) const {
-    Vector<Float> r; t.compute(r,x); return r; } 
+    Vector<Float> r(this->T::result_size()); this->T::compute(r,x); return r; } 
   virtual Vector<Interval> evaluate(const Vector<Interval>& x) const {
-    Vector<Interval> r; t.compute(r,x); return r; }                          
+    Vector<Interval> r(this->T::result_size()); this->T::compute(r,x); return r; }                          
   virtual Matrix<Float> jacobian(const Vector<Float>& x) const {
     return this->_expansion(x,1u).jacobian(); }                         
   virtual Matrix<Interval> jacobian(const Vector<Interval>& x) const {
@@ -65,17 +65,19 @@ class FunctionBase
     return this->_expansion(x,s); } 
   virtual DifferentialVector< SparseDifferential<Interval> > expansion(const Vector<Interval>& x, const ushort& s) const {
     return this->_expansion(x,s); }
+  // TODO: Find a better way for writing functions which can handle transformations which may not have a
+  // write() method or operator<<.
   virtual std::ostream& write(std::ostream& os) const  {
     return os << "Function"; }
  private:
   template<class X> DifferentialVector< SparseDifferential<X> > _expansion(const Vector<X>& x, const ushort& s) const {
-    const uint& rs=t.result_size();
-    const uint& as=t.argument_size();
+    const uint rs=this->T::result_size();
+    const uint as=this->T::argument_size();
     DifferentialVector< SparseDifferential<X> > dx(as,as,s);
     DifferentialVector< SparseDifferential<X> > dr(rs,as,s);
     for(uint i=0; i!=as; ++i) { dx[i]=x[i]; }
     for(uint i=0; i!=as; ++i) { dx[i][i+1]=1; }
-    t.compute(dr,dx);
+    this->T::compute(dr,dx);
     return dr;
   }                                             
 };
@@ -97,11 +99,24 @@ template<class T> struct FunctionWrapper
   FunctionWrapper() : T(), _p(Vector<Float>(T::parameter_size())) { }
   FunctionWrapper(const Vector<Float>& p) : T(), _p(p) { ARIADNE_ASSERT(p.size()==T::parameter_size()); }
   FunctionWrapper(const Vector<Interval>& p) : T(), _p(midpoint(p)) { ARIADNE_ASSERT(p.size()==T::parameter_size()); }
+  const Vector<Float>& parameters() const { return this->_p; }
   template<class R, class A> void compute(R& r, const A& x) const { this->T::compute(r,x,_p); }
  private:
   Vector<Float> _p;
 };
 
+//! \brief A wrapper for converting templated C++ functions to %Ariadne functions.
+//!
+//! Given a C++ class T with a (static) template method 
+//!   <code>template<class R, class A, class P> compute(R& r, const A& a, const P& p);</code>
+//! the type <code>Function<T></code> is an Ariadne function defined by \f$r=f(a)\f$. 
+//! The constructor for Function<T> takes a Vector<Float> argument which is used for \a p.
+//! 
+//! The class T must also define meta-data <c>result_size(), argument_size(), parameter_size()
+//! and smoothness()</c>. These are most easily defined by inheriting from the 
+//! <tt>FunctionData<RS,AS,PS,SM=SMOOTH></tt> class.
+//! 
+//! The constant \a SMOOTH is used for an arbitrarily-differentiable function.
 template<class T> class Function
   : public FunctionBase< FunctionWrapper<T> >
 {
@@ -117,6 +132,7 @@ struct ConstantTransformation
 {
   ConstantTransformation(const Vector<Float>& c, uint as)
     : _as(as), _c(c) { }
+  const Vector<Float>& c() const { return _c; }
   const uint result_size() const { return _c.size(); }
   const uint argument_size() const { return _as; }
   const int smoothness() const { return SMOOTH; }
@@ -146,10 +162,11 @@ struct AffineTransformation
 {
   AffineTransformation(const Matrix<Float>& A, const Vector<Float>& b)
     : _A(A), _b(b) { ARIADNE_ASSERT(A.row_size()==b.size()); }
+  const Matrix<Float>& A() const { return _A; }
+  const Vector<Float>& b() const { return _b; }
   const uint result_size() const { return _A.row_size(); }
   const uint argument_size() const { return _A.column_size(); }
   const int smoothness() const { return SMOOTH; }
-  
   template<class R, class A>
   void compute(R& r, const A& x) const {
     for(uint i=0; i!=result_size(); ++i) {
@@ -170,9 +187,13 @@ struct AffineTransformation
 class ConstantFunction
   : public FunctionBase<ConstantTransformation>
 {
-  //! A constant function with value \f$c\in\R^n\f$ and domain \f$\R^m\f$.
+ public:
+ //! A constant function with value \f$c\in\R^n\f$ and domain \f$\R^m\f$.
   ConstantFunction(const Vector<Float>& c, uint m) 
     : FunctionBase<ConstantTransformation>(c,m) { }
+  std::ostream& write(std::ostream& os) const {
+    return os << "ConstantFunction( argument_size=" << this->argument_size() 
+              << ", c=" << this->c() << " )"; }
 
 };
 
@@ -181,18 +202,24 @@ class ConstantFunction
 class IdentityFunction
   : public FunctionBase<IdentityTransformation>
 {
+ public:
   //! Construct the identity function in dimension \a n.
   IdentityFunction(uint n) 
     : FunctionBase<IdentityTransformation>(n) { }
+  std::ostream& write(std::ostream& os) const {
+    return os << "IdentityFunction( size=" << this->result_size() << " )"; }
 };
 
 //! An affine function \f$x\mapsto Ax+b\f$. 
 class AffineFunction
   : public FunctionBase<AffineTransformation>
 {
+ public:
   //! Construct an affine function from the matrix \a A and vector \a b.
   AffineFunction(const Matrix<Float>& A, const Vector<Float>& b) 
     : FunctionBase<AffineTransformation>(A,b) { }
+  std::ostream& write(std::ostream& os) const {
+    return os << "AffineFunction( A=" << this->A() << ", b=" << this->b() << " )"; }
 };
 
 

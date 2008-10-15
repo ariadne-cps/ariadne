@@ -28,17 +28,23 @@
 #ifndef ARIADNE_GRAPHICS_H
 #define ARIADNE_GRAPHICS_H
 
-#define HAVE_GTK_H
+#include <iosfwd>
 
 namespace Ariadne {
 
 class Box;
 class Polytope;
 
+enum Colour { transparant,black,white,red,green,blue,yellow,cyan,magenta };
+Colour fill_colour(Colour c) { return c; }
+double line_width(double l) { return l; }
+bool line_style(bool l) { return l; }
+
 class Graphic {
   public:
     ~Graphic();
     Graphic();
+    Graphic(std::ofstream& ofs);
     void set_bounding_box(const Box&);
     void plot(const Box&);
     void plot(const Polytope&);
@@ -51,7 +57,9 @@ class Graphic {
     Impl* _impl;
 };
 
-Graphic& operator<<(Graphic& g, const Box& bx);
+
+template<class X> Graphic& operator<<(Graphic& g, const X& x) { return g; }
+template<> Graphic& operator<<(Graphic& g, const Box& bx);
 
 } // namespace Ariadne
 

@@ -49,8 +49,10 @@ class ListSet
   ListSet() { };
   explicit ListSet(uint);
   explicit ListSet(const BS& bs);
-  template<class BST> ListSet(const ListSet<BST>& ls);
-  template<class Iter> ListSet(Iter first, Iter last);
+  template<class BST> ListSet(const ListSet<BST>& ls) {
+    this->_data.insert(this->end(),ls.begin(),ls.end()); }
+  template<class Iter> ListSet(Iter first, Iter last) {
+    this->_data.insert(this->end(),first,last); };
 
 
 

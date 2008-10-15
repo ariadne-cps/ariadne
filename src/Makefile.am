@@ -1,0 +1,41 @@
+#AM_CXXFLAGS = -O2 -Wall
+
+phony: lib
+
+lib: libariadne.la
+
+INCLUDES = -I$(top_srcdir)/include $(CAIRO_CFLAGS) $(GTK_CFLAGS)
+LDADD = -lmpfr -lgmpxx $(GTK_LIBS) -lboost_serialization  
+
+SRC = \
+	numeric.cc \
+	vector.cc \
+	matrix.cc \
+	dense_differential.cc \
+	sparse_differential.cc \
+	approximate_taylor_model.cc  \
+	dynamical_toolbox.cc \
+	point.cc \
+	box.cc \
+	zonotope.cc \
+	set.cc \
+	hybrid_set.cc \
+	grid_set.cc \
+	hybrid_automaton.cc \
+	hybrid_evolver.cc \
+	discretiser.cc \
+	analyser.cc \
+	logging.cc \
+	graphics.cc 
+
+
+
+lib_LTLIBRARIES = libariadne.la 
+libariadne_la_SOURCES = $(SRC)
+nodist_EXTRA_libariadne_la_SOURCES = dummy.cc
+
+EXTRA_DIST =  
+bin_PROGRAMS = 
+include_HEADERS =
+
+rounding_CXXFLAGS = -O0

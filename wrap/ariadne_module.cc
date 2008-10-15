@@ -1,8 +1,8 @@
 /***************************************************************************
- *            main.cc
+ *            ariadne_module.cc
  *
- *  Copyright 2008  Pieter Collins
- * 
+ *  Copyright  2007-8  Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -20,16 +20,19 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
-#include <iostream>
-using namespace std;
 
-#include "numeric.h"
-#include "differential_variable.h"
 
-int main()
+#include <boost/python.hpp>
+
+void numeric_submodule();
+void linear_algebra_submodule();
+void differentiation_submodule();
+void function_submodule();
+
+BOOST_PYTHON_MODULE(ariadne)
 {
-  DifferentialVariable x=DifferentialVariable(3,2,1.0,1);
-  cout << x << x*x << endl;
+  numeric_submodule();
+  linear_algebra_submodule();
+  differentiation_submodule();
+  function_submodule();
 }
-

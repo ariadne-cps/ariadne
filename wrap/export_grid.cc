@@ -32,7 +32,7 @@ using namespace boost::python;
 
 
 
-void export_grid() 
+void export_grid_set() 
 {
   typedef Vector<Float> RVector;
   typedef Vector<Interval> IVector;
@@ -107,7 +107,7 @@ void export_grid()
 }
 
 
-BOOST_PYTHON_MODULE(grid)
+storage_submodule()
 {
- export_grid();
+  export_grid_set();
 }

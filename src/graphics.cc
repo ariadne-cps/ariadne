@@ -84,7 +84,7 @@ void trace(cairo_t *cr, const Box& bx)
 
 void draw(cairo_t *cr, const std::vector<Box>& boxes, int canvas_width, int canvas_height) 
 {
-    std::cerr << "draw boxes: " << boxes << std::endl;
+    //std::cerr << "draw boxes: " << boxes << std::endl;
 
     // Compute extreme values
     assert(!boxes.empty());
@@ -114,12 +114,12 @@ void draw(cairo_t *cr, const std::vector<Box>& boxes, int canvas_width, int canv
                     -canvas_height/gbbox[1].width());
     cairo_translate(cr, 0.0, 0.05-gbbox[1].width());
     
-    std::cerr<<"gbbox="<<gbbox<<std::endl;
-    std::cerr<<"bbox="<<bbox<<std::endl;
+    //std::cerr<<"gbbox="<<gbbox<<std::endl;
+    //std::cerr<<"bbox="<<bbox<<std::endl;
     cairo_set_source_rgb (cr, 0.5, 0.5, 1.0);
     for(uint i=0; i!=boxes.size(); ++i) {
         const Box& bx=boxes[i];
-        std::cerr<<"boxes[i]="<<bx<<"\n" << std::endl;
+        //std::cerr<<"boxes[i]="<<bx<<"\n" << std::endl;
         trace (cr,bx);
         cairo_fill (cr);
     }

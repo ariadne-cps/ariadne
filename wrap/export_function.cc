@@ -240,10 +240,9 @@ void export_model()
   def("solve",(Vector<I>(*)(const Model&,const Vector<R>&)) &solve);
 }
 
-
-BOOST_PYTHON_MODULE(function)
-{
+void function_submodule() {
   export_function_interface();
   export_python_function();
   export_model();
 }
+

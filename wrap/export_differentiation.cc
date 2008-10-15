@@ -1,5 +1,5 @@
 /***************************************************************************
- *            differentiation_module.cc
+ *            export_differentiation.cc
  *
  *  Copyright 2008  Pieter Collins
  * 
@@ -31,7 +31,6 @@
 using namespace boost::python;
 
 using namespace Ariadne;
-
 
 template<class X> void read_array(array<X>&, const boost::python::object& obj) { }
 
@@ -89,47 +88,6 @@ matrix_get_item(const C& c, const I& i, const J& j) {
   return c[i][j];
 }
 
-/*
-template<class X, class XX> inline 
-DenseDifferential<X> differential_variable(uint as, ushort d, const XX& x, uint i) {
-  return DenseDifferential<X>::variable(as,d,X(x),i);
-}
-*/
-
-
-/*
-template<class DIFF1, class DIFF2> inline 
-void differential_vector_set_variable(DifferentialVector<DIFF1>& td, const uint& i, const DIFF2& x) {
-  ARIADNE_ASSERT(i<td.result_size()); 
-  ARIADNE_ASSERT(x.argument_size()==td.argument_size()); 
-  ARIADNE_ASSERT(x.degree()<=td.degree()); 
-  td[i]=x;
-}
-
-template<class DIFF> inline 
-DIFF differential_vector_get_variable(const DifferentialVector<DIFF>& td, const uint& i) {
-  ARIADNE_ASSERT(i<td.result_size()); 
-  return td[i];
-}
-
-template<class DIFF, class X> inline 
-void differential_vector_set_item(DifferentialVector<DIFF>& td, const uint& i, const MultiIndex& j, const X& x) {
-  ARIADNE_ASSERT(i<td.result_size()); 
-  ARIADNE_ASSERT(j.number_of_variables()==td.argument_size()); 
-  ARIADNE_ASSERT(j.degree()<=td.degree()); 
-  td[i][j]=x;
-}
-
-template<class DIFF> inline 
-DIFF differential_vector_get_item(const DifferentialVector<DIFF>& td, const uint& i, const MultiIndex& j) {
-  ARIADNE_ASSERT(i==td.result_size()); 
-  ARIADNE_ASSERT(j.number_of_variables()==td.argument_size()); 
-  ARIADNE_ASSERT(j.degree()<=td.degree()); 
-  return td[i][j];
-}
-
-*/
-
 
 template<class DIFF>
 void export_differential() 
@@ -183,9 +141,17 @@ void export_differential()
   def("acos", (D(*)(const D&))&acos<X>);
   def("atan", (D(*)(const D&))&atan<X>);
   */
+}
 
-
-
+template<class DIFF> 
+void
+export_differential_vector()
+{
+  typedef typename DIFF::ScalarType X;
+  typedef Vector<X> V;
+  typedef Series<X> S;
+  typedef DIFF D;
+  typedef DifferentialVector<D> DV;
 
   class_<DV> differential_vector_class("DifferentialVector");
   differential_vector_class.def("__init__", make_constructor(&make_differential_vector<D>) );
@@ -220,8 +186,42 @@ void export_differential()
 
 }
 
-BOOST_PYTHON_MODULE(differentiation)
+template void export_differential< DenseDifferential<Float> >();
+template void export_differential< DenseDifferential<Interval> >();
+template void export_differential< SparseDifferential<Float> >();
+template void export_differential< SparseDifferential<Interval> >();
+
+template void export_differential_vector< DenseDifferential<Float> >();
+template void export_differential_vector< DenseDifferential<Interval> >();
+template void export_differential_vector< SparseDifferential<Float> >();
+template void export_differential_vector< SparseDifferential<Interval> >();
+
+void differentiation_submodule() 
 {
+  export_differential< DenseDifferential<Float> >();
+  export_differential< DenseDifferential<Interval> >();
   export_differential< SparseDifferential<Float> >();
   export_differential< SparseDifferential<Interval> >();
+
+  export_differential_vector< DenseDifferential<Float> >();
+  export_differential_vector< DenseDifferential<Interval> >();
+  export_differential_vector< SparseDifferential<Float> >();
+  export_differential_vector< SparseDifferential<Interval> >();
 }
+
+
+
+ /*
+BOOST_PYTHON_MODULE(differentiation)
+{
+  export_differential< DenseDifferential<Float> >();
+  export_differential< DenseDifferential<Interval> >();
+  export_differential< SparseDifferential<Float> >();
+  export_differential< SparseDifferential<Interval> >();
+
+  export_differential_vector< DenseDifferential<Float> >();
+  export_differential_vector< DenseDifferential<Interval> >();
+  export_differential_vector< SparseDifferential<Float> >();
+  export_differential_vector< SparseDifferential<Interval> >();
+}
+ */

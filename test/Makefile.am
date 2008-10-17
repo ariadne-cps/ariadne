@@ -12,6 +12,7 @@ check_PROGRAMS = \
 	test_differential \
 	test_approximate_taylor_model \
 	test_discrete_evolution \
+	test_grid_paving \
 	test_serialization \
 	test_graphics
 

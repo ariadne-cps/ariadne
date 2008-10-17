@@ -27,6 +27,7 @@
 
 #include "zonotope.h"
 
+#include "macros.h"
 #include "array.h"
 #include "vector.h"
 #include "matrix.h"
@@ -39,8 +40,8 @@ namespace Ariadne {
 
 template<class X> class LinearProgram {
  public:
-  LinearProgram(const Matrix<X>& A) { assert(false); }
-  bool is_feasible() { assert(false); }
+  LinearProgram(const Matrix<X>& A) { ARIADNE_NOT_IMPLEMENTED; }
+  bool is_feasible() { ARIADNE_NOT_IMPLEMENTED; }
 };
 
 

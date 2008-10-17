@@ -22,6 +22,7 @@
  */
  
 #include "set.h"
+#include "macros.h"
 
 namespace Ariadne {
 
@@ -33,11 +34,112 @@ ImageSet::ImageSet(const BoxType& dom, const FunctionInterface& fn)
 }
 
 
+ImageSet*
+ImageSet::clone() const 
+{ 
+  return new ImageSet(*this);
+}
+
+
+uint
+ImageSet::dimension() const 
+{ 
+  return this->_function->result_size();
+}
+
+
+tribool
+ImageSet::disjoint(const Vector<Interval>& bx) const 
+{ 
+  ARIADNE_NOT_IMPLEMENTED;
+}
+
+
+tribool
+ImageSet::intersects(const Vector<Interval>& bx) const 
+{ 
+  ARIADNE_NOT_IMPLEMENTED;
+}
+
+
+tribool
+ImageSet::subset(const Vector<Interval>& bx) const 
+{ 
+  ARIADNE_NOT_IMPLEMENTED;
+}
+
+
+Vector<Interval>
+ImageSet::bounding_box() const 
+{ 
+  ARIADNE_NOT_IMPLEMENTED;
+}
+
+
+std::ostream&
+ImageSet::write(std::ostream& os) const 
+{ 
+  ARIADNE_NOT_IMPLEMENTED;
+}
+
+
+
+
+
 ConstraintSet::ConstraintSet(const BoxType& codom, const FunctionInterface& fn) 
   : _codomain(codom), _function(fn.clone()) 
 { 
   ARIADNE_ASSERT(codom.size()==fn.result_size());
 }
+
+ConstraintSet*
+ConstraintSet::clone() const 
+{ 
+  return new ConstraintSet(*this);
+}
+
+
+uint
+ConstraintSet::dimension() const 
+{ 
+  return this->_function->argument_size();
+}
+
+
+tribool
+ConstraintSet::disjoint(const Vector<Interval>& bx) const 
+{ 
+  ARIADNE_NOT_IMPLEMENTED;
+}
+
+
+tribool
+ConstraintSet::intersects(const Vector<Interval>& bx) const 
+{ 
+  ARIADNE_NOT_IMPLEMENTED;
+}
+
+
+tribool
+ConstraintSet::superset(const Vector<Interval>& bx) const 
+{ 
+  ARIADNE_NOT_IMPLEMENTED;
+}
+
+
+Vector<Interval>
+ConstraintSet::bounding_box() const 
+{ 
+  ARIADNE_NOT_IMPLEMENTED;
+}
+
+
+std::ostream&
+ConstraintSet::write(std::ostream& os) const 
+{ 
+  ARIADNE_NOT_IMPLEMENTED;
+}
+
 
 
 } // namespace Ariadne

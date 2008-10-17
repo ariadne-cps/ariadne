@@ -46,6 +46,7 @@ class Box : public Vector<Interval>
     Float dmax=0; for(uint i=0; i!=this->size(); ++i) { dmax=max(dmax,(*this)[i].width()); } return up(dmax/2); }
 };
 
+Box make_box(const std::string&);
 
 } // namespace Ariadne
 

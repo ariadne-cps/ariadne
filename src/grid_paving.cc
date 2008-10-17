@@ -30,7 +30,7 @@ namespace Ariadne {
 
 /****************************************BinaryTreeNode**********************************************/
 
-	void BinaryTreeNode::restore_node( BinaryTreeNode * theCurrentNode, int & arr_index, int & leaf_counter,
+	void BinaryTreeNode::restore_node( BinaryTreeNode * theCurrentNode, uint & arr_index, uint & leaf_counter,
 					const BooleanArray& theTree, const BooleanArray& theEnabledCells) {
 		//If we are not done with the the tree yet
 		if( arr_index < theTree.size() ) {
@@ -267,7 +267,7 @@ namespace Ariadne {
 		tmp_stream.str("");
 
 		result += "\n The current stack data: \n";
-		for(uint i = 0; i <= _currentStackIndex; i++){
+		for(int i = 0; i <= _currentStackIndex; i++){
 			tmp_stream << i;
 			result += " Element " + tmp_stream.str() + ": "+ _theStack[i]->node_to_string()+"\n";
 			tmp_stream.str("");
@@ -349,7 +349,7 @@ namespace Ariadne {
 	Box GridPavingCell::primary_cell( const uint theHeight, const dimension_type dimensions ) {
 		int leftBottomCorner = 0, rightTopCorner = 1;
 		//The zero level coordinates are known, so we need to iterate only for higher level primary cells
-		for(int i = 1; i <= theHeight; i++){
+		for(uint i = 1; i <= theHeight; i++){
 			primary_cell_at_height(i, leftBottomCorner, rightTopCorner);
 		}
 		// 1.2 Constructing and return the box defining the primary cell (relative to the grid).
@@ -383,7 +383,7 @@ namespace Ariadne {
 		Point theGridOrigin( theGrid.origin() );
 		Vector<Float> theGridLengths( theGrid.lengths() );
 		
-		for(int current_dimension = 0; current_dimension < dimensions; current_dimension ++){
+		for(uint current_dimension = 0; current_dimension < dimensions; current_dimension ++){
 			const Float theDimLength = theGridLengths[current_dimension];
 			const Float theDimOrigin = theGridOrigin[current_dimension];
 			//Recompute the new dimension coordinates, detaching them from the grid 
@@ -405,7 +405,7 @@ namespace Ariadne {
 
 		//2. Compute the cell on some grid, corresponding to the binary path from the primary cell.
 		uint current_dimension = 0;
-		for(int i = 0; i < theWord.size(); i++){
+		for(uint i = 0; i < theWord.size(); i++){
 			//We move through the dimensions in a linear fasshion
 			current_dimension = i % dimensions;
 			//Compute the middle point of the box's projection onto
@@ -515,13 +515,13 @@ namespace Ariadne {
 			//we need to do to reach and split the dimension K one first time and then we should add the remaining
 			//( M - 1 )*N tree subdevisions which will make shure that the K'th dimension is subdivided M times.
 			uint first_subdiv_steps;
-			if( last_subdiv_dim == max_subdiv_dim ) {
+			if( last_subdiv_dim == static_cast<int>(max_subdiv_dim) ) {
 				//If last_subdiv_dim == -1 then we will never get here
 				first_subdiv_steps = dimensions; // C == K
 			} else {
 				//If last_subdiv_dim == -1 then we will add a needed extra subdivision
 				first_subdiv_steps = max_subdiv_dim - last_subdiv_dim; // C < K
-				if( last_subdiv_dim > max_subdiv_dim ) {
+				if( last_subdiv_dim > static_cast<int>(max_subdiv_dim) ) {
 					//If last_subdiv_dim == -1 then we will never get here
 					first_subdiv_steps = dimensions - first_subdiv_steps; // C > K
 				}

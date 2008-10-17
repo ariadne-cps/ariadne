@@ -35,7 +35,7 @@ AC_CHECK_HEADER([gmpxx.h],[AC_DEFINE([HAVE_GMPXX_H],[1],[Define to 1 if you have
 AC_CHECK_HEADER([mpfr.h],[AC_DEFINE([HAVE_MPFR_H],[1],[Define to 1 if you have the <mpfr.h> header file.])],AC_MSG_WARN([MPFR library development files are missing. You cannot use multiple-precision floating-point numbers.]))
 
 # Check for GTK (optional)
-PKG_CHECK_MODULES(GTK, gtk+-2.0 >= 2.2, [AC_DEFINE([HAVE_CAIRO_H],[1],[Define to 1 if you have the <gtk.h> header file.])],AC_MSG_WARN([GTK library development files are missing. You cannot use graphics windows.]) )
+PKG_CHECK_MODULES(GTK, gtk+-2.0 >= 2.2, [AC_DEFINE([HAVE_GTK_H],[1],[Define to 1 if you have the <gtk.h> header file.])],AC_MSG_WARN([GTK library development files are missing. You cannot use graphics windows.]) )
 
 # Check for Cairo (optional)
 PKG_CHECK_MODULES(CAIRO, cairo, [AC_DEFINE([HAVE_CAIRO_H],[1],[Define to 1 if you have the <cairo.h> header file.])],AC_MSG_WARN([Cairo library development files are missing. You cannot use graphics facilities.]))

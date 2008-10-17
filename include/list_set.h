@@ -47,8 +47,8 @@ class ListSet
   virtual ~ListSet() { }
 
   ListSet() { };
-  explicit ListSet(uint);
-  explicit ListSet(const BS& bs);
+  explicit ListSet(uint) { };
+  explicit ListSet(const BS& bs) { this->adjoin(bs); }
   template<class BST> ListSet(const ListSet<BST>& ls) {
     this->_data.insert(this->end(),ls.begin(),ls.end()); }
   template<class Iter> ListSet(Iter first, Iter last) {
@@ -76,6 +76,9 @@ class ListSet
 
   /*! \brief Removes a set from the list and return it. */
   BS pop() { BS result=this->_data.back(); this->_data.pop_back(); return result; }
+
+  /*! \brief Pushes a basic set to the end of the list. */
+  void push_back(const BS& bs) { this->_data.push_back(bs); }
 
   /*! \brief Adjoins (makes union with) a basic set. */
   void adjoin(const BS& bs) { this->_data.push_back(bs); }

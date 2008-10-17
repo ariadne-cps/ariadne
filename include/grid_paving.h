@@ -36,6 +36,8 @@
 #include "tribool.h"
 #include "array.h"
 
+#include "binary_word.h"
+
 #include "grid_set.h"
 #include "exceptions.h"
 #include "box.h"
@@ -43,14 +45,11 @@
 
 #include "vector.h"
 
-//#include "binary_word.h"
 
 using namespace std;
 using namespace Ariadne;
 
 namespace Ariadne {
-        typedef std::vector<bool> BinaryWord;
-        template<class T> std::ostream& operator<<(std::ostream&, const std::vector<T>&);
 
 	/*Some type definitions*/
         typedef std::vector<bool> BooleanArray;
@@ -137,7 +136,7 @@ namespace Ariadne {
 			 *  the used data, i.e. \a theTree and \a theEnabledCells. It is used in the
 			 *  constructor \a BinaryTreeNode( const BooleanArray& , const BooleanArray& )
 			 */
-			void restore_node( BinaryTreeNode * theCurrentNode, int & arr_index, int & leaf_counter,
+			void restore_node( BinaryTreeNode * theCurrentNode, uint & arr_index, uint & leaf_counter,
 						const BooleanArray& theTree, const BooleanArray& theEnabledCells);
 			
 			/*! \brief This method is used in constructors for the node initialization */
@@ -351,7 +350,7 @@ namespace Ariadne {
 			Interval operator[](dimension_type i) const;
 			
 			/*! \brief Serialize the current object state, this is mostly needed for testing */
-			virtual string to_string() const;
+			string to_string() const;
 
 			/*! \brief this method computes the box in the original space based on the \a theGrid,
 			 *  and a cell which is obtained by traversing the path given by \a _theWord from the

@@ -85,6 +85,14 @@ inline Float eps() { return std::numeric_limits<double>::epsilon(); }
 inline Float down(Float x) { return x>0 ? x*(1-2e-16) : x*(1+2e-16); }
 inline Float up(Float x) { return x>0 ? x*(1+2e-16) : x*(1-2e-16); }
 
+inline Float neg(Float x) { return -x; }
+inline Float rec(Float x) { return 1.0/x; }
+
+inline Float add(Float x, Float y) { return x+y; }
+inline Float sub(Float x, Float y) { return x-y; }
+inline Float mul(Float x, Float y) { return x*y; }
+inline Float div(Float x, Float y) { return x/y; }
+
 inline Float abs(Float x) { return std::fabs(x); }
 inline Float sqr(Float x) { return x*x; }
 inline Float pow(Float x, int n) { return std::pow(x,Float(n)); }
@@ -135,6 +143,9 @@ class Interval {
   const Float midpoint() const { return (l+u)/2; }
   const Float radius() const { return up((u-l)/2); }
   const Float width() const { return up(u-l); }
+
+  void set_lower(const Float& lower) { l=lower; }
+  void set_upper(const Float& upper) { u=upper; }
  public:
   double l, u;
 };

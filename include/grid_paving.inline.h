@@ -51,7 +51,7 @@ namespace Ariadne {
 		
 		//If the tree is not empry and there are enabled leafs then do the thing
 		if( ( theTree.size() ) > 0 && ( theEnabledCells.size() > 0 ) ) {
-			int arr_index = 0, leaf_counter = 0;
+			uint arr_index = 0, leaf_counter = 0;
 			restore_node( this, arr_index, leaf_counter, theTree, theEnabledCells );
 		} else {
 			//Otherwise settle with one disabled node
@@ -153,7 +153,7 @@ namespace Ariadne {
 /********************************************GridPavingCursor***************************************/
 
 	inline GridPavingCursor::GridPavingCursor(const GridPavingCursor & theSubPaving) :
-						_theStack(theSubPaving._theStack), _currentStackIndex(theSubPaving._currentStackIndex),
+						_currentStackIndex(theSubPaving._currentStackIndex), _theStack(theSubPaving._theStack), 
 						_pSubPaving(theSubPaving._pSubPaving), _theCurrentGridCell(theSubPaving._theCurrentGridCell){
 		//Copy everything
 	}
@@ -179,7 +179,7 @@ namespace Ariadne {
 	
 	inline void GridPavingCursor::push( BinaryTreeNode* pLatestNode ){
 		//If we are out of free space, increase the array's capacity
-		if( _currentStackIndex == ( _theStack.size() -1 ) ){
+          if( static_cast<uint>(_currentStackIndex +1) == ( _theStack.size()  ) ){
 			_theStack.resize( _theStack.size() + STACK_SIZE_INCREMENT );
 		}
 		

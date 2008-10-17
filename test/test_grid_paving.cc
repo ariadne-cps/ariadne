@@ -28,6 +28,7 @@
 #include <sstream>
 #include <string>
 
+#include "stlio.h"
 
 #include "macros.h"
 #include "tribool.h"

@@ -47,9 +47,18 @@ class ImageSet
   boost::shared_ptr<FunctionInterface> _function;
  public:
   typedef Vector<Interval> BoxType;
+  ImageSet(const BoxType& dom);
   ImageSet(const BoxType& dom, const FunctionInterface& fn);
   const BoxType& domain() { return this->_domain; }
   const FunctionInterface& function() { return *this->_function; }
+
+  ImageSet* clone() const;
+  uint dimension() const;
+  tribool disjoint(const Vector<Interval>&) const;
+  tribool intersects(const Vector<Interval>&) const;
+  tribool subset(const Vector<Interval>&) const;
+  Vector<Interval> bounding_box() const;
+  std::ostream& write(std::ostream&) const;
 };
 
 class ConstraintSet
@@ -62,6 +71,14 @@ class ConstraintSet
   ConstraintSet(const BoxType& codom, const FunctionInterface& fn);
   const BoxType& codomain() { return this->_codomain; }
   const FunctionInterface& function() { return *this->_function; };
+
+  ConstraintSet* clone() const;
+  uint dimension() const;
+  tribool disjoint(const Vector<Interval>&) const;
+  tribool intersects(const Vector<Interval>&) const;
+  tribool superset(const Vector<Interval>&) const;
+  Vector<Interval> bounding_box() const;
+  std::ostream& write(std::ostream&) const;
 };
 
 

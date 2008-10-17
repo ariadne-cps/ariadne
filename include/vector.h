@@ -63,6 +63,8 @@ class Vector
   template<class T> void set(uint i, const T& x) { (*this)[i] = x; }
 };
 
+template<class X> Vector<X> make_vector(const std::string&);
+
 typedef ublas::slice Slice;
 typedef ublas::range Range;
 using ublas::range;

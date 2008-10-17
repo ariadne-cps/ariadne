@@ -29,16 +29,45 @@
 #define ARIADNE_GRAPHICS_H
 
 #include <iosfwd>
+#include <string>
 
 namespace Ariadne {
 
 class Box;
 class Polytope;
 
-enum Colour { transparant,black,white,red,green,blue,yellow,cyan,magenta };
-Colour fill_colour(Colour c) { return c; }
-double line_width(double l) { return l; }
-bool line_style(bool l) { return l; }
+struct Colour {
+  Colour();
+  Colour(unsigned char rd, unsigned char gr, unsigned char bl, bool tr=true);
+  Colour(const char* nm, unsigned char rd, unsigned char gr, unsigned char bl, bool tr=true);
+  std::string name;
+  unsigned char red, green, blue;
+  bool transparant;
+};
+
+std::ostream& operator<<(std::ostream& os, const Colour& c);
+
+extern const Colour transparant;
+
+extern const Colour white;
+extern const Colour black;
+extern const Colour red;
+extern const Colour green;
+extern const Colour blue;
+extern const Colour yellow;
+extern const Colour cyan;
+extern const Colour magenta;
+
+struct LineStyle { explicit LineStyle(bool ls) : _style(ls) { } operator bool() const { return this->_style; } private: bool _style; };
+struct LineWidth { explicit LineWidth(double lw) : _width(lw) { } operator double() const { return this->_width; } private: double _width; };
+struct LineColour : Colour { LineColour(const Colour& lc) : Colour(lc) { } };
+struct FillColour : Colour { FillColour(const Colour& fc) : Colour(fc) { } };
+
+inline LineStyle line_style(bool s) { return LineStyle(s); }
+inline LineWidth line_width(double w) { return LineWidth(w); }
+inline LineColour line_colour(const Colour& c) { return LineColour(c); }
+inline FillColour fill_colour(const Colour& c) { return FillColour(c); }
+    
 
 class Graphic {
   public:

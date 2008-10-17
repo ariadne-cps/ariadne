@@ -21,6 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+#include "config.h"
+
 #include "macros.h"
 #include "stlio.h"
 #include "vector.h"
@@ -32,7 +34,9 @@
 #include <gtk/gtk.h>
 #endif
 
+#ifdef HAVE_CAIRO_H
 #include <cairo/cairo.h>
+#endif
 
 namespace Ariadne {
 
@@ -47,9 +51,31 @@ draw(cairo_t *cr, const std::vector<Box>& boxes,
      int canvas_width, int canvas_height);
 
 
-struct Graphic::Impl {
+struct Graphic::Impl 
+{
     std::vector<Box> boxes;
 };
+
+Colour::Colour()
+    : name("transparant"), red(255), green(255), blue(255), transparant(true) { }
+Colour::Colour(unsigned char rd, unsigned char gr, unsigned char bl, bool tr) 
+    : name(), red(rd), green(gr), blue(bl), transparant(tr) { }
+Colour::Colour(const char* nm, unsigned char rd, unsigned char gr, unsigned char bl, bool tr) 
+    : name(nm), red(rd), green(gr), blue(bl), transparant(tr) { }
+std::ostream& operator<<(std::ostream& os, const Colour& c) {
+  return os << "Colour( name=" << c.name << ", r=" << c.red << ", g=" << c.green << ", b=" << c.blue << " )"; }
+
+
+const Colour transparant=Colour();
+
+const Colour white=Colour("white",255,255,255);
+const Colour black=Colour("black",0,0,0);
+const Colour red=Colour("red",255,0,0);
+const Colour green=Colour("green",0,255,0);
+const Colour blue=Colour("blue",0,0,255);
+const Colour yellow=Colour("yellow",255,255,0);
+const Colour cyan=Colour("cyan",0,255,255);
+const Colour magenta=Colour("magenta",255,0,255);
 
 Graphic::~Graphic()
 {

@@ -24,6 +24,10 @@
 /*! \file exceptions.h
  *  \brief Exception classes
  */
+
+#ifndef ARIADNE_EXCEPTIONS_H
+#define ARIADNE_EXCEPTIONS_H
+
 #include <exception>
 #include <stdexcept>
 
@@ -38,3 +42,4 @@ class IncompatibleSizes : public std::runtime_error {
   IncompatibleSizes(const std::string& str) : std::runtime_error(str) { }
 };
 
+#endif

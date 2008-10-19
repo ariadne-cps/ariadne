@@ -19,9 +19,8 @@ SRC = \
 	box.cc \
 	zonotope.cc \
 	set.cc \
-	hybrid_set.cc \
 	grid_set.cc \
-	grid_paving.cc \
+	hybrid_set.cc \
 	hybrid_automaton.cc \
 	hybrid_evolver.cc \
 	discretiser.cc \

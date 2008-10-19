@@ -31,6 +31,8 @@
 
 #include <vector>
 
+typedef unsigned int uint;
+
 namespace Ariadne {
 
 
@@ -57,10 +59,10 @@ class ListSet
 
 
   /*! \brief Returns the number of basic sets forming this object. */
-  uint size() const { return this->_data.size(); }
+  size_t size() const { return this->_data.size(); }
 
   /*! \brief Accesses the i-th BasicSet. */
-  const BS& operator[](uint i) const { return this->_data[i]; };
+  const BS& operator[](size_t i) const { return this->_data[i]; };
   
   /*! \brief Make the set empty. */
   void clear() { this->_data.clear(); }

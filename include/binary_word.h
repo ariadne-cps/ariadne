@@ -137,7 +137,7 @@ namespace Ariadne {
     }
 
        
-    std::ostream& 
+    inline std::ostream& 
     operator<<(std::ostream& os, const BinaryWord& bw) 
     {
       if(bw.empty()) { return os << 'e'; }

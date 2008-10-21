@@ -132,7 +132,7 @@ namespace Ariadne {
                 typedef Float real_type;
             private:
                 // Structure containing actual data values
-                struct Data { array<Float> _origin; array<Float> _lengths; };
+                struct Data { Vector<Float> _origin; Vector<Float> _lengths; };
             public:
                 //! Destructor.
                 ~Grid();

@@ -42,4 +42,9 @@ class IncompatibleSizes : public std::runtime_error {
   IncompatibleSizes(const std::string& str) : std::runtime_error(str) { }
 };
 
+class InvalidGridPosition : public std::runtime_error {
+ public:
+  InvalidGridPosition(const std::string& str) : std::runtime_error(str) { }
+};
+
 #endif

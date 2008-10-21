@@ -23,10 +23,17 @@
  
 #include "set.h"
 #include "macros.h"
+#include "function.h"
 
 namespace Ariadne {
 
  
+ImageSet::ImageSet(const BoxType& dom)
+  : _domain(dom), _function(new IdentityFunction(dom.size()))
+{ 
+}
+
+
 ImageSet::ImageSet(const BoxType& dom, const FunctionInterface& fn)
   : _domain(dom), _function(fn.clone()) 
 { 

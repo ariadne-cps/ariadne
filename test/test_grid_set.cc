@@ -899,7 +899,7 @@ void test_adjoin_outer_approximation_operation(){
 	// !!!
 	print_title("Create an outer_approximation of the rectangle on the scaling grid and get the GridTreeSet");
 	Grid theScalingGrid(2, 2.0);
-	GridTreeSet theOuterApproxGridTreeSet = outer_approximation( theScalingGrid, static_cast<LocatedSetInterface&>(initialRectangle), 2 );
+	GridTreeSet theOuterApproxGridTreeSet = outer_approximation( static_cast<LocatedSetInterface&>(initialRectangle), theScalingGrid, 2 );
 	//IVAN S. ZAPREEV
 	//NOTE: The recombination is needed because in the scaling Grid doing
 	//	outer_approximation( theScalingGrid, initialRectangle, 2 )

@@ -31,7 +31,8 @@
 #include <iostream>
 #include <string>
 
-#include "boost/iterator/iterator_facade.hpp"
+#include <boost/iterator/iterator_facade.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include "tribool.h"
 #include "array.h"
@@ -61,6 +62,7 @@ namespace Ariadne {
 
 	/*Some pre-declarations*/
 	class BinaryTreeNode;
+	class Grid;
 	class GridCell;
 	class GridCellListSet;
 	class GridTreeSet;
@@ -90,6 +92,9 @@ namespace Ariadne {
 	GridTreeSet intersection(const GridTreeSubset& theSet1, const GridTreeSubset& theSet2);
 	GridTreeSet difference(const GridTreeSubset& theSet1, const GridTreeSubset& theSet2);
 	
+        GridCell outer_approximation(const Vector<Interval>& theBox, const Grid& theGrid, const uint depth);
+        GridTreeSet outer_approximation(const CompactSetInterface& theSet, const Grid& theGrid, const uint depth);
+
 	/*! \brief The binary-tree node operation is not allowed on a non-leaf node. */
 	class NotALeafNodeException : public std::logic_error {
 		public: 
@@ -122,39 +127,74 @@ namespace Ariadne {
          */
         class Grid
         { 
+                typedef double dyadic_type;
+                typedef int integer_type;
+                typedef Float real_type;
+            private:
+                // Structure containing actual data values
+                struct Data { array<Float> _origin; array<Float> _lengths; };
             public:
                 //! Destructor.
-                ~Grid() { ARIADNE_NOT_IMPLEMENTED; }
+                ~Grid();
                 
                 //! Default constructor constructs a grid from a null pointer. Needed for some iterators.
-                explicit Grid() { ARIADNE_NOT_IMPLEMENTED; }
+                explicit Grid();
                 
                 //! Construct from a dimension and a spacing in each direction. 
-                explicit Grid(uint d) { ARIADNE_NOT_IMPLEMENTED; }
+                explicit Grid(uint d);
                 
                 //! Construct from a dimension and a spacing in each direction. 
-                explicit Grid(uint d, Float l) { ARIADNE_NOT_IMPLEMENTED; }
+                explicit Grid(uint d, Float l);
+                
+                //! Construct from a vector of offsets.
+                explicit Grid(const Vector<Float>& lengths);
                 
                 //! Construct from a centre point and a vector of offsets.
-                explicit Grid(const Vector<Float>& pt, const Vector<Float>& v) { ARIADNE_NOT_IMPLEMENTED; }
+                explicit Grid(const Vector<Float>& origin, const Vector<Float>& lengths);
                 
                 //! Copy constructor. Copies a reference to the grid data.
-                Grid(const Grid& g) { ARIADNE_NOT_IMPLEMENTED; }
+                Grid(const Grid& g);
                 
                 //! The underlying dimension of the grid.
-                uint dimension() const { ARIADNE_NOT_IMPLEMENTED; }
+                uint dimension() const;
                 
-                //! Tests equality of two grids. Tests equality of references.
-                bool operator==(const Grid& g) const { ARIADNE_NOT_IMPLEMENTED; } 
+                //! Tests equality of two grids. Tests equality of references first.
+                bool operator==(const Grid& g) const;
+                
+                //! Tests inequality of two grids.
+                bool operator!=(const Grid& g) const;
                 
                 //! The origin of the grid.
-                Vector<Float> origin() const { ARIADNE_NOT_IMPLEMENTED; }
+                const Vector<Float>& origin() const;
                 
                 //! The strides between successive integer points.
-                Vector<Float> lengths() const { ARIADNE_NOT_IMPLEMENTED; }
+                const Vector<Float>& lengths() const;
                 
                 //! Write to an output stream.
-                friend std::ostream& operator<<(std::ostream& os, const Grid& g) { ARIADNE_NOT_IMPLEMENTED; }
+                friend std::ostream& operator<<(std::ostream& os, const Grid& g);
+
+                Float coordinate(uint d, dyadic_type x) const;
+                Float subdivision_coordinate(uint d, dyadic_type x) const;
+                Float subdivision_coordinate(uint d, integer_type n) const; 
+
+                int subdivision_index(uint d, const Float& x) const; 
+                int subdivision_lower_index(uint d, const Float& x) const; 
+                int subdivision_upper_index(uint d, const Float& x) const; 
+
+                array<double> index(const Vector<Float>& pt) const;
+                array<double> lower_index(const Vector<Interval>& bx) const;
+                array<double> upper_index(const Vector<Interval>& bx) const;
+
+                Vector<Float> point(const array<int>& a) const;
+                Vector<Float> point(const array<double>& a) const;
+                Vector<Interval> box(const array<double>& l, const array<double>& u) const;
+                Vector<Interval> box(const GridCell& cell) const;
+           private:
+                 // Create new data
+                 void _create(const array<Float>& o, const array<Float>& l);
+           private:
+                // Pointer to data. We can test grids for equality using reference semantics since data is a constant.
+                boost::shared_ptr<Data> _data;
         };
         
 
@@ -485,6 +525,9 @@ namespace Ariadne {
          */
         class GridCellListSet 
         {
+            private:
+                Grid _grid;
+                std::vector<GridCell> _list;
             public:
                 //! The type used for iterating through the cells in the list. 
                 typedef std::vector<GridCell>::iterator iterator;
@@ -505,13 +548,11 @@ namespace Ariadne {
                 //! \name Constructors.
                 
                 //! \brief Virtual destructor. */
-                virtual ~GridCellListSet() { }
+                virtual ~GridCellListSet();
                 //! \brief Construct an empty set based on a Grid.
-                explicit GridCellListSet(const Grid& g) { ARIADNE_NOT_IMPLEMENTED; }
-                //! Copy constructor.
-                GridCellListSet(const GridCellListSet& gcls) { ARIADNE_NOT_IMPLEMENTED; }
+                explicit GridCellListSet(const Grid& g);
                 //! Convert from a GridTreeSet.
-                GridCellListSet(const GridTreeSet& gts) { ARIADNE_NOT_IMPLEMENTED; }
+                GridCellListSet(const GridTreeSet& gts);
                 //@}
                 
                 
@@ -519,7 +560,8 @@ namespace Ariadne {
                 //! \name Conversion operators.
                 
                 //! Convert to a list of ordinary boxes.
-                operator ListSet< Vector<Interval> >() const;
+                operator ListSet< Box >() const;
+                //operator ListSet< Vector<Interval> >() const;
                 //@}
                 
   
@@ -557,64 +599,36 @@ namespace Ariadne {
                 //! \name Modifying operations
                 
                 //! Empties the set.
-                void clear() { ARIADNE_NOT_IMPLEMENTED; }
+                void clear();
                 
                 //! Removes and returns the last cell in the list.
-                GridCell pop() { ARIADNE_NOT_IMPLEMENTED; }
+                GridCell pop();
                 
                 //! Sorts the cells lexicographically, removing duplicates.
-                void unique_sort() { ARIADNE_NOT_IMPLEMENTED; } 
+                void unique_sort();
                 //@}
                 
                 //@{ 
                 //! \name Union, intersection and difference
                 
                 //! Append the cell \a c to the list.
-                void adjoin(const GridCell& gc) { ARIADNE_NOT_IMPLEMENTED; }
+                void adjoin(const GridCell& gc);
                 //! Append the cells of \a cls to the list.
-                void adjoin(const GridCellListSet& gcls) { ARIADNE_NOT_IMPLEMENTED; }
+                void adjoin(const GridCellListSet& gcls);
                 //! Adjoins cells contained in \a gts.
-                void adjoin(const GridTreeSet& gts) { ARIADNE_NOT_IMPLEMENTED; }
+                void adjoin(const GridTreeSet& gts);
                 //! Restricts to cells contained in \a gts.
-                void restrict(const GridTreeSet& gts) { ARIADNE_NOT_IMPLEMENTED; }
+                void restrict(const GridTreeSet& gts);
                 //! Removes cells contained in \a bl.
-                void remove(const GridTreeSet& gts) { ARIADNE_NOT_IMPLEMENTED; }
+                void remove(const GridTreeSet& gts);
                 //@}
                 
                 //@{
                 //! \name SetInterface methods
                 //! These operators are needed for compliance with the set interface. 
-                //! They are probably not all actually needed.
-                
-                //! Make a dynamically-allocated copy of the set.
-                virtual GridCellListSet* clone() const;
-                
-                //! Returns the denotable set's space.
-                virtual uint dimension() const;
-                
-                //! True if the set is empty.
-                tribool empty() const;
-                
-                //! Checks if a denotable set includes a point.
-                virtual tribool contains(const Vector<Float>& p) const;
-                
-                //! Tests for superset of a box. 
-                virtual tribool superset(const Vector<Interval>& r) const;
-                
-                //! Tests for intersection with a box.
-                virtual tribool intersects(const Vector<Interval>& r) const;
-                
-                //! Tests for disjointness with a box.
-                virtual tribool disjoint(const Vector<Interval>& r) const;
-                
-                //! Tests for subset of a box.
-                virtual tribool subset(const Vector<Interval>& r) const;
-                
-                //! True if the set is bounded.
-                tribool bounded() const;
-                
-                //! The rectangle bounding the region of the mask.
-                virtual Vector<Interval> bounding_box() const;
+                //! Returns the set's dimension.
+                uint dimension() const;
+   
                 //@}
                 
                 //@{ 
@@ -622,14 +636,14 @@ namespace Ariadne {
                 //! Adjoin an over approximation to the set \a bx, computing to depth \a d.
                 void adjoin_over_approximation(const Vector<Interval>& bx, uint d) { ARIADNE_NOT_IMPLEMENTED; }
                 //! Adjoin an outer approximation to the set \a s, computing to depth \a d.
-                void adjoin_outer_approximation(const SetInterface& s, uint d) { ARIADNE_NOT_IMPLEMENTED; }
+                void adjoin_outer_approximation(const CompactSetInterface& s, uint d) { ARIADNE_NOT_IMPLEMENTED; }
                 //@}
                 
                 //@{ 
                 //! \name Input/output operators 
                 
                 //! Write to an output stream.
-                friend std::ostream& operator<<(std::ostream& os, const GridCellListSet& gcls) { ARIADNE_NOT_IMPLEMENTED; }
+                friend std::ostream& operator<<(std::ostream& os, const GridCellListSet& gcls);
                 //@}
         };
 
@@ -646,8 +660,8 @@ namespace Ariadne {
 			
 			friend class GridTreeCursor;
 
-			template<class Set> friend GridTreeSet outer_approximation( const Grid& theGrid, const Set& theSet, const uint depth );
-			template<class Set> friend GridTreeSet inner_approximation( const Grid& theGrid, const Set& theSet, const uint depth );
+			friend GridTreeSet outer_approximation( const CompactSetInterface& theSet, const Grid& theGrid, const uint depth );
+			friend GridTreeSet inner_approximation( const OpenSetInterface& theSet, const Grid& theGrid, const uint depth );
 			
 			/*! \brief The pointer to the root node of the subpaving tree.
 			 * Note that, this is not necessarily the root node of the corresponding paving tree.
@@ -687,6 +701,9 @@ namespace Ariadne {
 			
 			//@{
 			//! \name Properties
+			
+                        /*! \brief Returns a constant reference to the underlying grid. */
+			const Grid& grid() const;
 			
 			/*! \brief Returns the const pointer to the root BinaryTreeNode of the SubPaving*/
 			const BinaryTreeNode * binary_tree() const;
@@ -938,7 +955,7 @@ namespace Ariadne {
 			 * 4. Iterates through the enabled leaf nodes of the paving (all the nodes are initially enabled)
 			 * 5. Disables the cells that are disjoint with the \a theSet
 			 */
-			template<class Set> void adjoin_outer_approximation( const Set& theSet, const uint depth );
+			void adjoin_outer_approximation( const CompactSetInterface& theSet, const uint depth );
 			
 			/*! \brief Adjoin an inner approximation to a given set, computing to the given depth. */
 			template<class Set> void adjoin_inner_approximation( const Set& theSet, const uint depth );
@@ -1597,6 +1614,10 @@ namespace Ariadne {
 		return result;
 	}
 
+	inline const Grid& GridTreeSubset::grid() const {
+                return this->_theGridCell.grid();
+	}
+	
 	inline GridCell GridTreeSubset::cell() const {
 		return _theGridCell;
 	}
@@ -1637,6 +1658,7 @@ namespace Ariadne {
 
 /*********************************************GridTreeSet*********************************************/
 	
+
 	inline GridTreeSet::GridTreeSet( const Grid& theGrid, const bool enable  ) :
 								GridTreeSubset( theGrid, 0, BinaryWord(), new BinaryTreeNode( enable ) ){
 	}
@@ -1728,6 +1750,11 @@ namespace Ariadne {
 
 /*************************************FRIENDS OF GridTreeSet*****************************************/
 
+        inline GridTreeSet outer_approximation(const CompactSetInterface& theSet, const Grid& theGrid, const uint depth) {
+                GridTreeSet result(theGrid);
+                result.adjoin_outer_approximation(theSet,depth);
+                return result;
+        }
 
 } // namespace Ariadne
 

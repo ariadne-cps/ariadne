@@ -21,11 +21,296 @@
  *  Foundation, Inc., 59 Templece Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include <iostream>
+#include <iomanip>
+
 #include "macros.h"
+#include "exceptions.h"
+#include "stlio.h"
 #include "list_set.h"
 #include "grid_set.h"
 
+#include "set_interface.h"
+
 namespace Ariadne {
+
+typedef size_t size_type;
+
+
+/****************************************Grid**********************************************/
+
+ 
+Grid::~Grid()
+{
+}
+
+
+
+ 
+Grid::Grid()
+  : _data(new Data())
+{
+}
+
+
+ 
+Grid::Grid(const Grid& gr)
+  : _data(gr._data)
+{
+}
+
+
+ 
+Grid::Grid(uint d, Float l)
+  : _data(new Data())
+{
+  array<Float> origin(d,Float(0));
+  array<Float> lengths(d,l);
+  this->_create(origin,lengths);
+}
+
+ 
+
+Grid::Grid(const Vector<Float>& lengths)
+  : _data(new Data())
+{
+  array<Float> o(lengths.size(),0);
+  const array<Float>& l=reinterpret_cast<const array<Float>&>(lengths.data());
+  this->_create(o,l);
+}
+
+
+ 
+Grid::Grid(const Vector<Float>& origin, const Vector<Float>& lengths)
+  : _data(new Data())
+{
+  if(origin.size() != lengths.size()) {
+    throw IncompatibleSizes(__PRETTY_FUNCTION__);
+  }
+  const array<Float>& o=reinterpret_cast<const array<Float>&>(origin.data());
+  const array<Float>& l=reinterpret_cast<const array<Float>&>(lengths.data());
+  this->_create(o,l);
+}
+
+
+ 
+
+
+
+void
+Grid::_create(const array<Float>& origin, const array<Float>& lengths) 
+{
+  this->_data->_origin=origin;
+  this->_data->_lengths=lengths;
+}
+
+
+
+
+uint
+Grid::dimension() const
+{
+  return this->_data->_lengths.size();
+}
+
+
+
+const Vector<Float>&
+Grid::origin() const
+{
+  return reinterpret_cast<const Vector<Float>&>(this->_data->_origin);
+}
+
+
+
+const Vector<Float>&
+Grid::lengths() const
+{
+  return reinterpret_cast<const Vector<Float>&>(this->_data->_lengths);
+}
+
+
+
+
+
+Float
+Grid::coordinate(uint d, dyadic_type x) const 
+{
+  return add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],x));
+}
+
+
+Float
+Grid::subdivision_coordinate(uint d, dyadic_type x) const 
+{
+  return add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],x));
+}
+
+
+Float
+Grid::subdivision_coordinate(uint d, integer_type n) const 
+{
+  return add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],n));
+}
+
+
+ 
+int
+Grid::subdivision_index(uint d, const real_type& x) const 
+{
+  
+  
+  Float half=0.5;
+  int n=floor(add_approx(div_approx(sub_approx(x,this->_data->_origin[d]),this->_data->_lengths[d]),half));
+  Float sc=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],n));
+    if(sc == x) { 
+      return n; 
+    } else {
+      std::cerr << std::setprecision(20) << std::boolalpha
+                << "sc=" << sc << " x=" << x << " sc-x=" << Interval(sc-x) << "\n"
+                << "sc==x=" << (sc==x) << " sc!=x=" << (sc!=x)
+                << " sc<x=" << (sc<x) << " sc>x=" << (sc>x) << " sc<=x=" << (sc<=x) << " sc>=x=" << (sc>=x) << std::endl; 
+      ARIADNE_THROW(InvalidGridPosition,std::setprecision(20)<<"Grid::subdivision_index(uint d,real_type x)","d="<<d<<", x="<<x<<", this->origin[d]="<<this->_data->_origin[d]<<", this->lengths[d]="<<this->_data->_lengths[d]<<" (closest value is "<<sc<<")");
+    }
+}
+
+
+ 
+int
+Grid::subdivision_lower_index(uint d, const real_type& x) const 
+{
+  
+  
+  int n=floor(div_down(sub_down(x,this->_data->_origin[d]),this->_data->_lengths[d]));
+  if(x>=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],(n+1)))) {
+    return n+1;
+  } else {
+    return n;
+  }
+}
+
+
+ 
+int
+Grid::subdivision_upper_index(uint d, const real_type& x) const 
+{
+  
+  
+  int n=ceil(div_up(sub_up(x,this->_data->_origin[d]),this->_data->_lengths[d]));
+  if(x<=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],(n-1)))) {
+    return n-1;
+  } else {
+    return n;
+  }
+}
+
+
+
+ 
+bool 
+Grid::operator==(const Grid& g) const
+{
+  if(this->_data==g._data) { 
+    return true; 
+  } else {
+    return this->_data->_origin==g._data->_origin && this->_data->_lengths==g._data->_lengths;
+  }
+}
+
+
+ 
+bool 
+Grid::operator!=(const Grid& g) const
+{
+  return !(*this==g);
+}
+
+
+
+array<double>
+Grid::index(const Vector<Float>& pt) const
+{
+        array<double> res(pt.dimension());
+        for(size_t i=0; i!=res.size(); ++i) {
+                res[i]=subdivision_index(i,pt[i]);
+        }
+        return res;
+}
+
+
+
+array<double>
+Grid::lower_index(const Vector<Interval>& bx) const {
+        array<double> res(bx.dimension());
+        for(size_t i=0; i!=res.size(); ++i) {
+                res[i]=subdivision_lower_index(i,bx[i].lower());
+        }
+        return res;
+}
+
+
+
+array<double>
+Grid::upper_index(const Vector<Interval>& bx) const {
+        array<double> res(bx.size());
+        for(size_type i=0; i!=res.size(); ++i) {
+                res[i]=subdivision_upper_index(i,bx[i].upper());
+        }
+        return res;
+}
+
+
+
+
+
+Vector<Float>
+Grid::point(const array<int>& a) const
+{
+  Vector<float> res(a.size());
+  for(size_type i=0; i!=res.dimension(); ++i) {
+          res[i]=this->_data->_origin[i]+this->_data->_lengths[i]*a[i];
+  }
+  return res;
+}
+
+
+Vector<Float>
+Grid::point(const array<double>& a) const
+{
+  Vector<float> res(a.size());
+  for(size_type i=0; i!=res.dimension(); ++i) {
+          res[i]=this->_data->_origin[i]+this->_data->_lengths[i]*a[i];
+  }
+  return res;
+}
+
+
+
+Vector<Interval>
+Grid::box(const array<double>& lower, const array<double>& upper) const
+{
+        Vector<Interval> res(lower.size());
+        for(size_type i=0; i!=res.size(); ++i) {
+                res[i]=Interval(this->subdivision_coordinate(i,lower[i]),
+                                this->subdivision_coordinate(i,upper[i]));
+        }
+        return res;
+}
+
+
+
+std::ostream& 
+operator<<(std::ostream& os, const Grid& gr) 
+{
+        os << "Grid( ";
+        os << "origin=" << gr.origin() << ", ";
+        os << "lengths=" << gr.lengths() << " )";
+        return os;
+}
+
+
+
+
 
 /****************************************BinaryTreeNode**********************************************/
 
@@ -471,6 +756,104 @@ namespace Ariadne {
 		return result;
 	}
 
+
+
+
+/********************************************GridTreeSubset*****************************************/
+
+
+GridCellListSet::~GridCellListSet()
+{
+}
+
+
+GridCellListSet::GridCellListSet(const Grid& g)
+  : _grid(g), _list()
+{
+}
+
+
+
+
+GridCellListSet::GridCellListSet(const GridTreeSet& gts)
+  : _grid(gts.grid()), _list(gts.begin(),gts.end())
+{
+}
+
+
+
+
+
+
+GridCellListSet::operator ListSet<Box>() const
+{
+  ListSet<Box> result(this->dimension());
+  for(size_type i=0; i!=size(); ++i) {
+    result.push_back((*this)[i].box());
+  }
+  return result;
+}
+
+
+const Grid& 
+GridCellListSet::grid() const 
+{
+  return this->_grid; 
+}
+
+
+uint
+GridCellListSet::dimension() const 
+{
+  return this->_grid.dimension(); 
+}
+
+
+uint
+GridCellListSet::size() const 
+{
+  return this->_list.size(); 
+}
+
+
+GridCell
+GridCellListSet::operator[](uint i) const 
+{
+  return this->_list[i]; 
+}
+
+
+GridCell
+GridCellListSet::pop() 
+{
+  GridCell back=this->_list.back(); 
+  this->_list.pop_back();
+  return back;
+}
+
+
+void
+GridCellListSet::clear()
+{
+  this->_list.clear();
+}
+
+
+std::ostream&     
+operator<<(std::ostream& os, const GridCellListSet& gcls)
+{
+  os << "GridCellListSet("
+     << " grid=" << gcls.grid() << ","
+     << " size=" << gcls.size() << ","
+     << " cells=" << gcls._list
+     << " )";
+  return os;
+}
+
+
+
+
+
 /********************************************GridTreeSubset*****************************************/
 
 	void GridTreeSubset::subdivide( Float theMaxCellWidth ) {
@@ -659,15 +1042,15 @@ namespace Ariadne {
 		}
 	}
 
-	template<class Set> inline void GridTreeSet::adjoin_outer_approximation( const Set& theSet, const uint depth ) {
+	void GridTreeSet::adjoin_outer_approximation( const CompactSetInterface& theSet, const uint depth ) {
 		Grid theGrid( this->cell().grid() );
-		ARIADNE_CHECK_EQUAL_SPACE( theSet, this->cell().grid(), "outer_approximation( Set, Grid, uint )\n" );
+		ARIADNE_ASSERT( theSet.dimension() == this->cell().dimension());
 		
                 throw NotImplemented(__PRETTY_FUNCTION__);
                 // PIETER COLLINS: TODO: GridBlock not in current version; preferably reimplement without
 		//1. Computes the outer approximation (on the grid) of theSet
 		//const GridBlock theSetGridBlock = outer_approximation( theSet.bounding_box(), theGrid );
-		const GridCell theSetGridBlock = outer_approximation( theSet.bounding_box(), theGrid );
+		const GridCell theSetGridBlock = outer_approximation( theSet.bounding_box(), theGrid, depth );
 		//2. Allocates the paving for this outer approximation
 		//IVAN S. ZAPREEV
 		//WARNING: We need to have the bounding box on the grid, in order to compute proper primary cell for the GridTreeSet
@@ -679,7 +1062,7 @@ namespace Ariadne {
 		
                 // FIXME: No LatticeSet defined
                 //GridTreeSet theGridPavingOfSetOuterBox( theGrid, GridBlock( Grid( theGrid.dimension(), R(1.0) ), theSetGridBlock.lattice_set() ).bounding_box() );
-		GridTreeSet theGridPavingOfSetOuterBox;
+		GridTreeSet theGridPavingOfSetOuterBox(theGrid);
 
 		GridCell theSetBoxCell( theGridPavingOfSetOuterBox.cell() );
 

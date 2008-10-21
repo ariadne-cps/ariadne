@@ -21,3 +21,21 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+#include <sstream>
+#include <string>
+#include <vector>
+
+#include "box.h"
+#include "stlio.h"
+
+namespace Ariadne {
+
+Box make_box(const std::string& str)
+{
+  std::stringstream ss(str);
+  std::vector<Interval> vec;
+  read_sequence(ss,vec,'[',']','x');
+  return Box(vec.size(),&vec[0]);
+}
+
+} //namespace Ariadne

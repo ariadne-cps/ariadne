@@ -30,7 +30,11 @@
 #include <iosfwd>
 #include <iostream>
 #include "function_interface.h"
+
 #include "vector.h"
+#include "matrix.h"
+#include "sparse_differential.h"
+#include "differential_vector.h"
 
 namespace Ariadne {
 

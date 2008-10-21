@@ -32,7 +32,11 @@
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/vector_proxy.hpp>
 
+#include <string>
+#include <sstream>
+
 #include "numeric.h"
+#include "stlio.h"
 
 using namespace boost::numeric;
 
@@ -129,6 +133,13 @@ template<class X> std::ostream& operator<<(std::ostream& os, const Vector<X>& v)
   return os << ']';
 }
 
+template<class X> std::istream& operator>>(std::istream& is, Vector<X>& v) {
+  std::vector<X> vec;
+  is >> vec;
+  v=Vector<X>(vec.size(),&v[0]);
+  return is;
+}
+
 bool subset(const Vector<Float>& v1, const Vector<Interval>& v2);
 bool subset(const Vector<Interval>& v1, const Vector<Interval>& v2);
 bool disjoint(const Vector<Interval>& v1, const Vector<Interval>& v2);
@@ -157,6 +168,17 @@ inline Vector<Interval> box(uint d, Float* ptr) {
     bx[i]=Interval(ptr[2*i],ptr[2*i+1]); }
   return bx;
 }
+
+template<class X> Vector<X> 
+make_vector(const std::string& str)
+{
+  Vector<X> res;
+  std::stringstream ss(str);
+  ss >> res;
+  return res;
+}
+
+
 
 } // namespace Ariadne
 

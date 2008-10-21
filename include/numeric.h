@@ -114,12 +114,18 @@ inline Float add_up(Float x, Float y) { return up(x+y); }
 inline Float sub_up(Float x, Float y) { return up(x-y); }
 inline Float mul_up(Float x, Float y) { return up(x*y); }
 inline Float div_up(Float x, Float y) { return up(x/y); }
-inline Float rad_up(Float x, Float y) { return up((y-x)/2); }
+
+inline Float add_down(Float x, Float y) { return down(x+y); }
+inline Float sub_down(Float x, Float y) { return down(x-y); }
+inline Float mul_down(Float x, Float y) { return down(x*y); }
+inline Float div_down(Float x, Float y) { return down(x/y); }
 
 inline Float add_approx(Float x, Float y) { return x+y; }
 inline Float sub_approx(Float x, Float y) { return x-y; }
 inline Float mul_approx(Float x, Float y) { return x*y; }
 inline Float div_approx(Float x, Float y) { return x/y; }
+
+inline Float rad_up(Float x, Float y) { return up((y-x)/2); }
 inline Float med_approx(Float x, Float y) { return (x+y)/2; }
 
 

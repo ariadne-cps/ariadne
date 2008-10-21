@@ -77,7 +77,7 @@ Interval mul(Interval i1, Interval i2)
     if(i2.l>=0) {
       return Interval(down(i1.l*i2.l),up(i1.u*i2.u));
     } else if(i2.u<=0) {
-      return Interval(down(i1.l*i2.u),up(i1.u*i2.l));
+      return Interval(down(i1.u*i2.l),up(i1.l*i2.u));
     } else {
       return Interval(down(i1.u*i2.l),up(i1.u*i2.u));
     }
@@ -102,12 +102,51 @@ Interval mul(Interval i1, Interval i2)
 }
 
 
-Interval mul(Float x, Interval i) 
+Interval div(Interval i1, Interval i2) 
+{
+  if(i2.l>=0) {
+    if(i1.l>=0) {
+      return Interval(down(i1.l/i2.u),up(i1.u/i2.l));
+    } else if(i1.u<=0) {
+      return Interval(down(i1.l/i2.l),up(i1.u/i2.u));
+    } else {
+      return Interval(down(i1.l/i2.l),up(i1.u/i2.l));
+    }
+  }
+  else if(i2.u<=0) {
+    if(i1.l>=0) {
+      return Interval(down(i1.l/i2.l),up(i1.u/i2.u));
+    } else if(i1.u<=0) {
+      return Interval(down(i1.u/i2.l),up(i1.l/i2.u));
+    } else {
+      return Interval(down(i1.u/i2.u),up(i1.l/i2.u));;
+    } 
+  }
+  else {
+    return Interval(-inf(),+inf());
+  }
+}
+
+
+
+Interval mul(Interval i, Float x) 
 {
   if(x>=0) {
-    return Interval(down(x*i.l),up(x*i.u)); 
+    return Interval(down(i.l*x),up(i.u*x)); 
   } else {
-    return Interval(down(x*i.u),up(x*i.l));
+    return Interval(down(i.u*x),up(i.l*x));
+  }
+}
+
+
+Interval div(Interval i, Float x) 
+{
+  if(x>0) {
+    return Interval(down(i.l/x),up(i.u/x)); 
+  } else if(x<0) {
+    return Interval(down(i.u/x),up(i.l/x));
+  } else {
+    return Interval(-inf(),+inf());
   }
 }
 

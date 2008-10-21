@@ -181,7 +181,9 @@ Interval neg(Interval);
 Interval add(Interval, Interval);
 Interval sub(Interval, Interval);
 Interval mul(Interval, Interval);
-Interval mul(Float, Interval);
+Interval div(Interval, Interval);
+Interval mul(Interval, Float);
+Interval div(Interval, Float);
 Interval abs(Interval);
 Interval sqr(Interval);
 Interval pow(Interval, int);
@@ -215,7 +217,10 @@ inline Interval& operator-=(Interval& i1, Interval i2) { i1=sub(i1,i2); return i
 inline Interval& operator*=(Interval& i1, Interval i2) { i1=mul(i1,i2); return i1; }
 inline Interval& operator/=(Interval& i1, Interval i2) { i1=mul(i1,rec(i2)); return i1; }
 
-inline Interval operator*(Interval i1, Float x2) { return mul(x2,i1); }
+inline Interval operator*(Interval i1, Float x2) { return mul(i1,x2); }
+inline Interval operator*(Float x1, Interval i2) { return mul(i2,x1); }
+inline Interval operator/(Interval i1, Float x2) { return div(i1,x2); }
+inline Interval operator/(Float x1, Interval i2) { return mul(rec(i2),x1); }
 
 inline tribool operator>(Interval i1, Interval i2) { 
   if(i1.lower()>i2.upper()) { return true; }

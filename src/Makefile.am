@@ -26,6 +26,7 @@ SRC = \
 	discretiser.cc \
 	analyser.cc \
 	logging.cc \
+	geometry2d.cc \
 	graphics.cc 
 
 

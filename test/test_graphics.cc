@@ -34,16 +34,23 @@ int main(int argc, char **argv)
     Box bx3(2); bx3[0]=Interval(0.25,0.5); bx3[1]=Interval(0.20,0.50);
     Box bx4(2); bx4[0]=Interval(0.4,0.8); bx4[1]=Interval(0.40,1.1);
     Graphic g;
+
+    g.set_fill_colour(Colour(0.5,1.0,1.0));
     g.plot(bx1);
     g.plot(bx2);
     g.plot(bx3);
     g.plot(bx4);
-    g.write("test_graphics");
+    g.write("test_graphics-1");
+
+    g.set_fill_colour(Colour(1.0,1.0,0.5));
     g.display();
+
     g.clear();
+
+    g.set_fill_colour(Colour(1.0,0.5,1.0));
     g.plot(bx1);
     g.plot(bx4);
-    g.display();
+    g.write("test_graphics-2");
 
 }
 

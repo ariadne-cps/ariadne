@@ -27,7 +27,9 @@
 #include "stlio.h"
 #include "vector.h"
 #include "matrix.h"
+#include "point.h"
 #include "box.h"
+#include "geometry2d.h"
 #include "graphics.h"
 
 #ifdef HAVE_GTK_H
@@ -51,31 +53,19 @@ draw(cairo_t *cr, const std::vector<Box>& boxes,
      int canvas_width, int canvas_height);
 
 
-struct Graphic::Impl 
-{
-    std::vector<Box> boxes;
+struct GraphicsObject {
+  Colour fill_colour;
+  Polytope shape;
 };
 
-Colour::Colour()
-    : name("transparant"), red(255), green(255), blue(255), transparant(true) { }
-Colour::Colour(unsigned char rd, unsigned char gr, unsigned char bl, bool tr) 
-    : name(), red(rd), green(gr), blue(bl), transparant(tr) { }
-Colour::Colour(const char* nm, unsigned char rd, unsigned char gr, unsigned char bl, bool tr) 
-    : name(nm), red(rd), green(gr), blue(bl), transparant(tr) { }
-std::ostream& operator<<(std::ostream& os, const Colour& c) {
-  return os << "Colour( name=" << c.name << ", r=" << c.red << ", g=" << c.green << ", b=" << c.blue << " )"; }
+struct Graphic::Impl 
+{
+  Box bounding_box;
+  PlanarProjectionMap projection_map;
+  Colour fill_colour;
+  std::vector<Polytope> polytopes;
+};
 
-
-const Colour transparant=Colour();
-
-const Colour white=Colour("white",255,255,255);
-const Colour black=Colour("black",0,0,0);
-const Colour red=Colour("red",255,0,0);
-const Colour green=Colour("green",0,255,0);
-const Colour blue=Colour("blue",0,0,255);
-const Colour yellow=Colour("yellow",255,255,0);
-const Colour cyan=Colour("cyan",0,255,255);
-const Colour magenta=Colour("magenta",255,0,255);
 
 Graphic::~Graphic()
 {
@@ -88,13 +78,36 @@ Graphic::Graphic()
 { 
 }
 
+
+void Graphic::set_line_style(bool ls) 
+{
+}
+
+void Graphic::set_line_width(double lw) 
+{
+}
+
+void Graphic::set_line_colour(Colour lc)
+{ 
+}
+
+void Graphic::set_fill_style(bool fs) 
+{
+}
+
+void Graphic::set_fill_colour(Colour fc)
+{ 
+  this->_impl->fill_colour=fc;
+}
+
+
 void Graphic::plot(const Box& bx) {
     ARIADNE_ASSERT(bx.size()==2);
-    _impl->boxes.push_back(bx);
+    _impl->polytopes.push_back(polytope(bx));
 }
 
 void Graphic::clear() {
-    _impl->boxes.clear();
+    _impl->polytopes.clear();
 }
 
 
@@ -108,15 +121,30 @@ void trace(cairo_t *cr, const Box& bx)
     cairo_line_to (cr, bx[0].lower(), bx[1].lower());
 }
 
-void draw(cairo_t *cr, const std::vector<Box>& boxes, int canvas_width, int canvas_height) 
+void trace(cairo_t *cr, const Polytope& p) 
 {
-    //std::cerr << "draw boxes: " << boxes << std::endl;
+    ARIADNE_ASSERT(p.dimension()==2);
+    ARIADNE_ASSERT(p.size()>=3);
+    cairo_move_to (cr, p[0][0], p[0][1]);
+    for(uint i=1; i!=p.size(); ++i) {
+      cairo_line_to (cr, p[i][0], p[i][1]); 
+    }
+    cairo_line_to (cr, p[0][0], p[0][1]); 
+}
+
+void draw(cairo_t *cr, const std::vector<Polytope>& polytopes, const Colour& fill_colour, int canvas_width, int canvas_height) 
+{
+    //std::cerr << "draw(...)\n  polytopes=" << polytopes << std::endl;
 
     // Compute extreme values
-    assert(!boxes.empty());
-    Box bbox=boxes[0];
-    for(uint i=1; i!=boxes.size(); ++i) {
-        bbox=hull(bbox,boxes[i]); 
+    if(polytopes.empty()) {
+      cairo_destroy (cr);
+      return; 
+    }
+
+    Box bbox=polytopes[0].bounding_box();
+    for(uint i=1; i!=polytopes.size(); ++i) {
+        bbox=hull(bbox,polytopes[i].bounding_box()); 
     }
 
     // The bounding box for the actual used area
@@ -124,7 +152,8 @@ void draw(cairo_t *cr, const std::vector<Box>& boxes, int canvas_width, int canv
 
     // The bounding box for the entire figure
     Box gbbox=bbox+Vector<Interval>(2,Interval(-0.1,0.1));
-   
+  
+    // std::cerr << "  bbox="<<bbox<<std::endl;
     bbox[0]+=Interval(-0.1,0.1);
     bbox[1]+=Interval(-0.1,0.1);
 
@@ -140,20 +169,17 @@ void draw(cairo_t *cr, const std::vector<Box>& boxes, int canvas_width, int canv
                     -canvas_height/gbbox[1].width());
     cairo_translate(cr, 0.0, 0.05-gbbox[1].width());
     
-    //std::cerr<<"gbbox="<<gbbox<<std::endl;
-    //std::cerr<<"bbox="<<bbox<<std::endl;
-    cairo_set_source_rgb (cr, 0.5, 0.5, 1.0);
-    for(uint i=0; i!=boxes.size(); ++i) {
-        const Box& bx=boxes[i];
-        //std::cerr<<"boxes[i]="<<bx<<"\n" << std::endl;
-        trace (cr,bx);
+    cairo_set_source_rgb (cr, fill_colour.red, fill_colour.green, fill_colour.blue);
+    for(uint i=0; i!=polytopes.size(); ++i) {
+        const Polytope& p=polytopes[i];
+        trace (cr,p);
         cairo_fill (cr);
     }
     
     cairo_set_source_rgb (cr, 0,0,0);
-    for(uint i=0; i!=boxes.size(); ++i) {
-        const Box& bx=boxes[i];
-        trace (cr,bx);
+    for(uint i=0; i!=polytopes.size(); ++i) {
+        const Polytope& p=polytopes[i];
+        trace (cr,p);
         cairo_stroke (cr);
     }
 
@@ -173,12 +199,12 @@ Graphic::write(const char* filename)
     const int canvas_width = DEFAULT_WIDTH;
     const int canvas_height = DEFAULT_HEIGHT;
 
-    std::vector<Box>& boxes=this->_impl->boxes;
+    std::vector<Polytope>& polytopes=this->_impl->polytopes;
 
     surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, canvas_width, canvas_height);
     cr = cairo_create (surface);
  
-   draw(cr, boxes, canvas_width, canvas_height);
+    draw(cr, polytopes, this->_impl->fill_colour, canvas_width, canvas_height);
 
    cairo_destroy (cr);
    
@@ -202,7 +228,7 @@ paint (GtkWidget      *widget,
   
     Graphic::Impl* impl=static_cast<Graphic::Impl*>(data);
     //Graphic::Impl* impl=(Graphic::Impl*)data;
-    std::vector<Box>& boxes=impl->boxes;
+    std::vector<Polytope>& polytopes=impl->polytopes;
 
     gint canvas_width  = widget->allocation.width;
     gint canvas_height = widget->allocation.height;
@@ -211,13 +237,11 @@ paint (GtkWidget      *widget,
     cr = gdk_cairo_create (widget->window);
 
     // Draw Cairo objects
-    draw(cr, boxes, canvas_width, canvas_height);
+    draw(cr, polytopes, impl->fill_colour, canvas_width, canvas_height);
 }
 
 void Graphic::display() 
 {
-    const std::vector<Box>& boxes=this->_impl->boxes;
-    std::cerr << "Graphic::boxes=" << boxes << std::endl;
     
     GtkWidget *window;
     GtkWidget *canvas;
@@ -243,7 +267,7 @@ void Graphic::display()
     // connect our drawing method to the "expose" signal
     g_signal_connect (G_OBJECT (canvas), "expose-event",
                       G_CALLBACK (paint),
-                      const_cast<std::vector<Box>*>(&boxes));  //  here we can pass a pointer to a custom data structure 
+                      const_cast<Graphic::Impl*>(this->_impl));  //  here we can pass a pointer to a custom data structure 
 
     // pack canvas widget into window
     gtk_container_add (GTK_CONTAINER (window), canvas);
@@ -264,6 +288,32 @@ void Graphic::display()
 }
 
 #endif
+
+
+
+Colour::Colour()
+    : name("transparant"), red(1.0), green(1.0), blue(1.0), transparant(true) { }
+Colour::Colour(double rd, double gr, double bl, bool tr) 
+    : name(), red(rd), green(gr), blue(bl), transparant(tr) { }
+Colour::Colour(const char* nm, double rd, double gr, double bl, bool tr) 
+    : name(nm), red(rd), green(gr), blue(bl), transparant(tr) { }
+std::ostream& operator<<(std::ostream& os, const Colour& c) {
+  return os << "Colour( name=" << c.name << ", r=" << c.red << ", g=" << c.green << ", b=" << c.blue << " )"; }
+
+
+const Colour transparant=Colour();
+
+const Colour white=Colour("white",1.0,1.0,1.0);
+const Colour black=Colour("black",0.0,0.0,0.0);
+const Colour red=Colour("red",1.0,0.0,0.0);
+const Colour green=Colour("green",0.0,1.0,0.0);
+const Colour blue=Colour("blue",0.0,0.0,1.0);
+const Colour yellow=Colour("yellow",1.0,1.0,0.0);
+const Colour cyan=Colour("cyan",0.0,1.0,1.0);
+const Colour magenta=Colour("magenta",1.0,0.0,1.0);
+
+
+
 
 } // namespace Ariadne
 

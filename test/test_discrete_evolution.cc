@@ -124,6 +124,7 @@ void TestDiscreteEvolver::test() const
   hybrid_reach_set = evolver.reach(henon,initial_hybrid_set,hybrid_time);
   //cout << "reach_set=" << hybrid_reach_set << endl;
   
+  /*
   // Print the intial, evolve and reach sets
   std::ofstream ofs("test_discrete_evolution-henon.eps");
   //Graphic plot(ofstream);
@@ -132,5 +133,5 @@ void TestDiscreteEvolver::test() const
   plot << fill_colour(yellow) << hybrid_evolve_set[1];
   plot << fill_colour(blue) << initial_set;
   ofs.close();
-
+  */
 }

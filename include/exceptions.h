@@ -47,4 +47,9 @@ class InvalidGridPosition : public std::runtime_error {
   InvalidGridPosition(const std::string& str) : std::runtime_error(str) { }
 };
 
+class InvalidCoordinate : public std::runtime_error {
+ public:
+  InvalidCoordinate(const std::string& str) : std::runtime_error(str) { }
+};
+
 #endif

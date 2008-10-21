@@ -31,17 +31,21 @@
 #include <iosfwd>
 #include <string>
 
+#include "box.h"
+#include "approximate_taylor_model.h"
+
 namespace Ariadne {
 
 class Box;
 class Polytope;
+class PlanarProjectionMap;
 
 struct Colour {
   Colour();
-  Colour(unsigned char rd, unsigned char gr, unsigned char bl, bool tr=true);
-  Colour(const char* nm, unsigned char rd, unsigned char gr, unsigned char bl, bool tr=true);
+  Colour(double rd, double gr, double bl, bool tr=true);
+  Colour(const char* nm, double rd, double gr, double bl, bool tr=true);
   std::string name;
-  unsigned char red, green, blue;
+  double red, green, blue;
   bool transparant;
 };
 
@@ -61,11 +65,13 @@ extern const Colour magenta;
 struct LineStyle { explicit LineStyle(bool ls) : _style(ls) { } operator bool() const { return this->_style; } private: bool _style; };
 struct LineWidth { explicit LineWidth(double lw) : _width(lw) { } operator double() const { return this->_width; } private: double _width; };
 struct LineColour : Colour { LineColour(const Colour& lc) : Colour(lc) { } };
+struct FillStyle { explicit FillStyle(bool fs) : _style(fs) { } operator bool() const { return this->_style; } private: bool _style; };
 struct FillColour : Colour { FillColour(const Colour& fc) : Colour(fc) { } };
 
 inline LineStyle line_style(bool s) { return LineStyle(s); }
 inline LineWidth line_width(double w) { return LineWidth(w); }
 inline LineColour line_colour(const Colour& c) { return LineColour(c); }
+inline FillStyle fill_style(bool s) { return FillStyle(s); }
 inline FillColour fill_colour(const Colour& c) { return FillColour(c); }
     
 
@@ -73,8 +79,13 @@ class Graphic {
   public:
     ~Graphic();
     Graphic();
-    Graphic(std::ofstream& ofs);
+    void set_projection_map(const PlanarProjectionMap&);
     void set_bounding_box(const Box&);
+    void set_line_style(bool);
+    void set_line_width(double);
+    void set_line_colour(Colour);
+    void set_fill_style(bool);
+    void set_fill_colour(Colour);
     void plot(const Box&);
     void plot(const Polytope&);
     void clear();
@@ -87,8 +98,23 @@ class Graphic {
 };
 
 
-template<class X> Graphic& operator<<(Graphic& g, const X& x) { return g; }
-template<> Graphic& operator<<(Graphic& g, const Box& bx);
+Graphic& operator<<(Graphic& g, const LineStyle& ls) { g.set_line_style(ls); return g; }
+Graphic& operator<<(Graphic& g, const LineWidth& lw) { g.set_line_width(lw); return g; }
+Graphic& operator<<(Graphic& g, const LineColour& lc) { g.set_line_colour(lc); return g; }
+Graphic& operator<<(Graphic& g, const FillStyle& fs) { g.set_fill_style(fs); return g; }
+Graphic& operator<<(Graphic& g, const FillColour& fc) { g.set_fill_colour(fc); return g; }
+
+inline void plot(Graphic& g, const Box& bx) { g.plot(bx); }
+
+inline void plot(Graphic& g, const std::pair<int,ApproximateTaylorModel>& hs) {
+  g.plot(Box(hs.second.range())); }
+inline void plot(Graphic& g, const ApproximateTaylorModel& ts) {
+  g.plot(Box(ts.range())); }
+
+template<class SET> Graphic& operator<<(Graphic& g, const SET& set) { plot(g,set); return g; }
+
+
+
 
 } // namespace Ariadne
 

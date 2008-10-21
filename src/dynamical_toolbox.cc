@@ -96,6 +96,16 @@ DynamicalToolbox()
 template<class Mdl>
 typename DynamicalToolbox<Mdl>::SetModelType
 DynamicalToolbox<Mdl>::
+compose(const FunctionInterface& function, 
+        const SetModelType& set_model) const
+{
+  FlowModelType function_model=this->map_model(function,set_model.range());
+  return Ariadne::compose(function_model,set_model);
+}
+
+template<class Mdl>
+typename DynamicalToolbox<Mdl>::SetModelType
+DynamicalToolbox<Mdl>::
 compose(const FlowModelType& function_model, 
         const SetModelType& set_model) const
 {
@@ -165,6 +175,23 @@ reachability_step(const FlowModelType& flow_model,
   return this->reachability_step(flow_model,initial_set_model,initial_time_model,final_time_model);
 }
 
+
+template<class Mdl>
+typename DynamicalToolbox<Mdl>::SetModelType
+DynamicalToolbox<Mdl>::
+reachability_step(const FlowModelType& flow_model, 
+                  const SetModelType& initial_set_model, 
+                  const TimeModelType& initial_time_model, 
+                  const TimeType& final_time) const
+{
+  uint ng=initial_set_model.argument_size();
+  Mdl final_time_model = Mdl::constant(Vector<Interval>(ng,I(-1,1)),Vector<Float>(ng,R(0)),
+                                       Vector<Float>(1,final_time),_order,_smoothness);
+  return this->reachability_step(flow_model,initial_set_model,initial_time_model,final_time_model);
+}
+
+  
+
 template<class Mdl>
 typename DynamicalToolbox<Mdl>::SetModelType
 DynamicalToolbox<Mdl>::
@@ -224,22 +251,34 @@ reachability_time(const TimeModelType& initial_time_model,
 }
 
 
+template<class Mdl>
+typename DynamicalToolbox<Mdl>::TimeModelType
+DynamicalToolbox<Mdl>::
+reachability_time(const TimeModelType& initial_time_model, 
+                  const TimeType& final_time) const
+{
+  Mdl final_time_model = Mdl::constant(initial_time_model.domain(),initial_time_model.centre(),
+                                       Vector<Float>(1,final_time),_order,_smoothness);
+  return this->reachability_time(initial_time_model,final_time_model);
+}
+
+
 
 
 // Compute the grazing time using bisections
 template<class Mdl>
 typename DynamicalToolbox<Mdl>::ModelType
 DynamicalToolbox<Mdl>::
-crossing_time(const ModelType& flow_model, 
-              const ModelType& guard_model, 
+crossing_time(const ModelType& guard_model,
+              const ModelType& flow_model, 
               const ModelType& initial_set_model) const
 {
   uint dimension=flow_model.result_size();
   RealType minimum_time=flow_model.domain()[dimension].lower(); 
   RealType maximum_time=flow_model.domain()[dimension].upper(); 
 
-  ARIADNE_ASSERT(minimum_time<=0);
-  ARIADNE_ASSERT(maximum_time>=0);
+  //ARIADNE_ASSERT(minimum_time<=0);
+  //ARIADNE_ASSERT(maximum_time>=0);
   ARIADNE_ASSERT(flow_model.argument_size()==flow_model.result_size()+1);
   ARIADNE_ASSERT(guard_model.argument_size()==flow_model.result_size());
   ARIADNE_ASSERT(initial_set_model.result_size()==flow_model.result_size());
@@ -267,10 +306,10 @@ crossing_time(const ModelType& flow_model,
 
 // Compute the grazing time using bisections
 template<class Mdl>
-pair<Mdl,Mdl>
+Interval
 DynamicalToolbox<Mdl>::
-touching_time_interval(const ModelType& flow_model, 
-                       const ModelType& guard_model, 
+touching_time_interval(const ModelType& guard_model, 
+                       const ModelType& flow_model, 
                        const ModelType& initial_set_model) const
 {
   ARIADNE_ASSERT(flow_model.result_size()+1==flow_model.argument_size());
@@ -324,9 +363,9 @@ touching_time_interval(const ModelType& flow_model,
     }
   }
 
-  ModelType lower_time_model=ModelType::constant(initial_set_model.domain(),initial_set_model.centre(),Vector<Float>(1u,lower_time),_order,_smoothness);
-  ModelType upper_time_model=ModelType::constant(initial_set_model.domain(),initial_set_model.centre(),Vector<Float>(1u,upper_time),_order,_smoothness);
-  return std::make_pair(lower_time_model,upper_time_model);
+  //ModelType lower_time_model=ModelType::constant(initial_set_model.domain(),initial_set_model.centre(),Vector<Float>(1u,lower_time),_order,_smoothness);
+  //ModelType upper_time_model=ModelType::constant(initial_set_model.domain(),initial_set_model.centre(),Vector<Float>(1u,upper_time),_order,_smoothness);
+  return Interval(lower_time,upper_time);
 
 }
 
@@ -391,6 +430,21 @@ DynamicalToolbox<Mdl>::model(Mdl const& set) const
   return set;
 }
 
+
+
+template<class Mdl>
+Mdl
+DynamicalToolbox<Mdl>::map_model(FunctionInterface const& f, Vector<Interval> const& bx) const
+{ 
+  ARIADNE_ASSERT(f.argument_size()==bx.size());
+
+  Mdl map_model(bx,f,_order,_smoothness);
+  ARIADNE_LOG(6,"map_model = "<<map_model<<"\n");
+
+  return map_model;
+}
+
+
 template<class Mdl>
 Mdl
 DynamicalToolbox<Mdl>::flow_model(FunctionInterface const& vf, Vector<Interval> const& bx, Float const& h, Vector<Interval> const& bb) const
@@ -398,13 +452,28 @@ DynamicalToolbox<Mdl>::flow_model(FunctionInterface const& vf, Vector<Interval> 
   Mdl vector_field_model(bb,vf,_order,_smoothness);
   ARIADNE_LOG(6,"vector_field_model = "<<vector_field_model<<"\n");
   
-
   // Use flow function on model type
   Mdl flow_model=Ariadne::flow(vector_field_model);
   ARIADNE_LOG(6,"flow_model = "<<flow_model<<"\n");
 
   return flow_model;
 }
+
+
+template<class Mdl>
+Mdl
+DynamicalToolbox<Mdl>::predicate_model(FunctionInterface const& g, Vector<Interval> const& bx) const
+{ 
+  ARIADNE_ASSERT(g.result_size()==1);
+  ARIADNE_ASSERT(g.argument_size()==bx.size());
+
+  Mdl predicate_model(bx,g,_order,_smoothness);
+  ARIADNE_LOG(6,"predicate_model = "<<predicate_model<<"\n");
+
+  return predicate_model;
+}
+
+
 
 
 template<class Mdl>

@@ -74,15 +74,15 @@ TestHybridEvolution::system()
   double bdata[]={1.0,0.0};
   Matrix<Float> A(2,2,adata);
   Vector<Float> b(2,bdata);
-  AffineFunction dynamic1(A,b);
+  AffineFunction dynamic1(A,3*b);
   AffineFunction dynamic2(A,-b);
   IdentityFunction reset(2);
   
   Matrix<Float> c(1,2,bdata);
   Vector<Float> d(1,Float(1.0));
-  AffineFunction guard3(c,d);
-  AffineFunction activation4(c,-d);
-  AffineFunction invariant2(c,-1.125*d);
+  AffineFunction guard3(c,-d);
+  AffineFunction activation4(-c,-d);
+  AffineFunction invariant2(-c,-1.125*d);
 
   automaton.new_mode(location1,dynamic1);
   automaton.new_mode(location2,dynamic2);
@@ -108,7 +108,7 @@ void TestHybridEvolution::test() const
   typedef std::pair<DiscreteState,ApproximateTaylorModel> HybridEnclosureType;
 
   // Set up the evolution parameters and grid
-  Float time(8.0);
+  Float time(5.0);
   Float step_size(0.125);
   Float enclosure_radius(0.25);
     
@@ -121,8 +121,8 @@ void TestHybridEvolution::test() const
   
   // Define the initial box
   Box initial_box(2); 
-  initial_box[0]=Interval(1.01,1.02);
-  initial_box[1]=Interval(0.51,0.52);
+  initial_box[0]=Interval(-0.01,0.01);
+  initial_box[1]=Interval(0.49,0.51);
 
   // cout << "initial_box=" << initial_box << endl;
 

@@ -89,18 +89,68 @@ HybridEvolver::HybridEvolver(const EvolutionParameters& p)
 
 
 
+enum PredicateKind { INVARIANT, ACTIVATION, GUARD };
+enum CrossingKind { TRANSVERSE, TOUCHING, NONE, UNKNOWN };
 
 
 struct DetectionData {
   int id;
   DiscreteEvent event;
-  shared_ptr<const FunctionInterface> guard;
-  int kind;
-  bool initially_active;
-  bool finally_active;
-  Interval touching_times;
-  ApproximateTaylorModel hitting_time;
+  shared_ptr<const FunctionInterface> guard_ptr;
+  PredicateKind predicate_kind;
+  CrossingKind crossing_kind;
+  tribool active;
+  tribool initially_active;
+  tribool finally_active;
+  Interval touching_time_interval;
+  ApproximateTaylorModel crossing_time_model;
+
+  DetectionData()
+    : id(0), event(0), guard_ptr()
+    , predicate_kind(), crossing_kind(UNKNOWN)
+    , active(indeterminate), initially_active(indeterminate), finally_active(indeterminate)
+    , touching_time_interval(+1,-1), crossing_time_model() { }
 };
+
+
+std::ostream& operator<<(std::ostream& os, const PredicateKind& kind) {
+  switch(kind) {
+    case INVARIANT: return os << "INVARIANT"; 
+    case ACTIVATION: return os << "ACTIVATION"; 
+    case GUARD: return os << "GUARD"; 
+  }
+  return os << "INVALID"; 
+}
+
+std::ostream& operator<<(std::ostream& os, const CrossingKind& kind) {
+  switch(kind) {
+    case TRANSVERSE: return os << "TRANSVERSE"; 
+      //case CROSSING: return os << "CROSSING"; 
+      //case GRAZING: return os << "GRAZING"; 
+    case TOUCHING: return os << "TOUCHING"; 
+      //case ACTIVE: return os << "ACTIVE"; 
+      //case MISSING: return os << "MISSING"; 
+    case NONE: return os << "NONE"; 
+    case UNKNOWN: return os << "UNKNOWN"; 
+  }
+  return os << "INVALID"; 
+}
+
+std::ostream& operator<<(std::ostream& os, const DetectionData& data) {
+  os << std::boolalpha;
+  os << " { id="<<data.id;
+  os << ", event="<<data.event;
+  os << ", kind="<<data.predicate_kind;
+  os << ", crossing="<<data.crossing_kind;
+  os << ", active="<<data.active;
+  if(data.crossing_kind!=NONE) {
+    os << ", initially_active="<<data.initially_active;
+    os << ", finally_active="<<data.finally_active;
+    if(data.touching_time_interval.lower()<=data.touching_time_interval.upper()) { 
+      os << ", touching_times="<<data.touching_time_interval; }
+  }
+  return os <<" } "; 
+}
 
 inline bool operator<(const DetectionData& d1, const DetectionData& d2) {
   return d1.id < d2.id;
@@ -218,34 +268,6 @@ _evolution(EnclosureListType& final_sets,
       const FunctionType* dynamic_ptr=&initial_mode.dynamic();
       
 
-      std::set<DetectionData> transition_data;
-      std::vector< shared_ptr<const FunctionInterface> > invariants
-        =initial_mode.invariants();
-      ARIADNE_LOG(9,"invariants="<<invariants<<"\n");
-      for(std::vector< shared_ptr<const FunctionInterface> >::const_iterator
-            iter=invariants.begin(); iter!=invariants.end(); ++iter)
-      {
-        DetectionData new_data;
-        new_data.id=transition_data.size();
-        new_data.event=BLOCKING_EVENT;
-        new_data.guard=(*iter);
-        transition_data.insert(new_data);
-      }
-
-      std::set< DiscreteTransition > transitions
-        =system.transitions(initial_mode.location());
-      ARIADNE_LOG(9,"transitions="<<transitions<<"\n");
-      for(std::set< DiscreteTransition >::const_iterator 
-            iter=transitions.begin(); iter!=transitions.end(); ++iter)
-      {
-        DetectionData new_data;
-        new_data.id=transition_data.size();
-        new_data.event=iter->event();
-        new_data.guard=iter->activation_ptr();
-        transition_data.insert(new_data);
-      }
-      
-
 
       // Set evolution parameters
       const Float maximum_step_size=this->_parameters->maximum_step_size;
@@ -288,15 +310,181 @@ _evolution(EnclosureListType& final_sets,
 
 
 
-      static const bool NO_DISCRETE_EVOLUTION=true;
+
+
       
-      if(NO_DISCRETE_EVOLUTION) {
-        working_sets.push_back(make_tuple(initial_location,initial_steps,final_set_model,final_time_model));
-        intermediate_sets.adjoin(EnclosureType(initial_location,reach_set_model));
-        final_sets.adjoin(EnclosureType(initial_location,final_set_model));
+      // Compute transitions
+      verbosity=0;
+      
+      ARIADNE_LOG(7,"flow_bounds="<<flow_bounds<<"\n");
+      ARIADNE_LOG(7,"intermediate_flow_bounds="<<reach_set_model.range()<<"\n");
+      ARIADNE_LOG(7,"initial_flow_bounds="<<initial_set_model.range()<<"\n");
+      ARIADNE_LOG(7,"final_flow_bounds="<<final_set_model.range()<<"\n");
+      ARIADNE_LOG(7,"time_interval="<<Interval(0,step_size)<<"\n\n");
+      
+      std::map<int,DetectionData> detection_data;
+      std::vector< shared_ptr<const FunctionInterface> > invariants
+        =initial_mode.invariants();
+      ARIADNE_LOG(9,"invariants="<<invariants<<"\n");
+      for(std::vector< shared_ptr<const FunctionInterface> >::const_iterator
+            iter=invariants.begin(); iter!=invariants.end(); ++iter)
+      {
+        DetectionData new_data;
+        new_data.id=detection_data.size();
+        new_data.event=BLOCKING_EVENT;
+        new_data.predicate_kind=INVARIANT;
+        new_data.crossing_kind=UNKNOWN;
+        new_data.guard_ptr=(*iter);
+        detection_data.insert(make_pair(new_data.id,new_data));
       }
 
+      std::set< DiscreteTransition > transitions
+        =system.transitions(initial_mode.location());
+      ARIADNE_LOG(9,"transitions="<<transitions<<"\n");
+      for(std::set< DiscreteTransition >::const_iterator 
+            iter=transitions.begin(); iter!=transitions.end(); ++iter)
+      {
+        DetectionData new_data;
+        new_data.id=detection_data.size();
+        new_data.event=iter->event();
+        new_data.predicate_kind=iter->forced() ? GUARD : ACTIVATION;
+        new_data.crossing_kind=UNKNOWN;
+        new_data.guard_ptr=iter->activation_ptr();
+        detection_data.insert(make_pair(new_data.id,new_data));
+      }
+ 
+     ARIADNE_LOG(8,"detection_data="<<detection_data<<"\n\n");
 
+     typedef std::map<int,DetectionData>::iterator predicate_iterator;
+     for(predicate_iterator iter=detection_data.begin(); 
+         iter!=detection_data.end(); ++iter)
+     {
+       DetectionData& data=iter->second;
+       if(possibly(this->_toolbox->active(*data.guard_ptr,flow_bounds))) {
+         data.active=this->_toolbox->active(*data.guard_ptr,reach_set_model);
+         data.initially_active=data.active;
+         data.finally_active=data.active;
+         if(data.active) {
+           data.crossing_kind=NONE;
+         } else if(!data.active) {
+           data.crossing_kind=NONE;
+         } else {
+           data.initially_active=this->_toolbox->active(*data.guard_ptr,initial_set_model);
+           data.finally_active=this->_toolbox->active(*data.guard_ptr,final_set_model);
+           ModelType guard_model=this->_toolbox->predicate_model(*data.guard_ptr,flow_bounds);
+           if(data.initially_active xor data.finally_active) {
+             ARIADNE_LOG(7," Testing crossing time for: "<<data<<"\n");
+             try {
+               data.crossing_time_model=this->_toolbox->crossing_time(guard_model,flow_model,initial_set_model);
+               data.touching_time_interval=data.crossing_time_model.range()[0];
+               data.crossing_kind=TRANSVERSE;
+             }
+             catch(DegenerateCrossingException) { ARIADNE_LOG(7," DegenerateCrossing\n"); }
+           }
+           if(data.crossing_kind!=TRANSVERSE) {
+             data.touching_time_interval=this->_toolbox->touching_time_interval(guard_model,flow_model,initial_set_model);
+             data.crossing_kind=TOUCHING;
+           }
+         }
+       } else {
+         data.active=false;
+         data.crossing_kind=NONE;                
+       }
+     }
+     
+     ARIADNE_LOG(6,"detection_data="<<detection_data<<"\n\n");
+
+     // Remove inactive transitions
+     for(predicate_iterator iter=detection_data.begin(); iter!=detection_data.end(); ) {
+       if(!iter->second.active) {
+         detection_data.erase(iter++);
+       } else {
+         ++iter;
+       }
+     }
+
+     ARIADNE_LOG(6,"active_detection_data="<<detection_data<<"\n\n");
+
+
+
+
+     if(detection_data.size()==0) {
+       ARIADNE_LOG(6,"No active events\n");
+       working_sets.push_back(make_tuple(initial_location,initial_steps,final_set_model,final_time_model));
+       intermediate_sets.adjoin(EnclosureType(initial_location,reach_set_model));
+       final_sets.adjoin(EnclosureType(initial_location,final_set_model));
+     }
+
+     else if(detection_data.size()==1) {
+       DetectionData& data=detection_data.begin()->second;
+       if(data.crossing_kind==TRANSVERSE) {
+         ARIADNE_LOG(6,"  Single transverse crossing; source="<<initial_location<<", event="<<data.event<<"\n");
+         if(data.predicate_kind==INVARIANT && !data.initially_active) {
+           reach_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,zero_time,data.crossing_time_model);
+           final_set_model=this->_toolbox->integration_step(flow_model,initial_set_model,data.crossing_time_model);
+           intermediate_sets.adjoin(EnclosureType(initial_location,reach_set_model));
+           final_sets.adjoin(EnclosureType(initial_location,final_set_model));
+         }
+         else if(data.predicate_kind==GUARD && !data.initially_active) {
+           const DiscreteTransition& transition=system.transition(data.event,initial_location);
+           DiscreteState jump_location=transition.target().location();
+           const FunctionInterface* reset_ptr=&transition.reset();
+           reach_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,zero_time,data.crossing_time_model);
+           final_set_model=this->_toolbox->integration_step(flow_model,initial_set_model,data.crossing_time_model);
+           ModelType jump_set_model=this->_toolbox->compose(*reset_ptr,final_set_model);
+
+           working_sets.push_back(make_tuple(jump_location,initial_steps+1,jump_set_model,final_time_model));
+           intermediate_sets.adjoin(EnclosureType(initial_location,reach_set_model));
+           final_sets.adjoin(EnclosureType(initial_location,final_set_model));
+           final_sets.adjoin(EnclosureType(jump_location,jump_set_model));
+         }
+         else if(data.predicate_kind==ACTIVATION && !data.initially_active) {
+           const DiscreteTransition& transition=system.transition(data.event,initial_location);
+           DiscreteState jump_location=transition.target().location();
+           const FunctionInterface* reset_ptr=&transition.reset();
+           ModelType active_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,data.crossing_time_model,step_size);
+           ModelType jump_set_model=this->_toolbox->compose(*reset_ptr,active_set_model);
+           ModelType jump_time_model=this->_toolbox->reachability_time(data.crossing_time_model,step_size);
+
+           working_sets.push_back(make_tuple(initial_location,initial_steps,final_set_model,final_time_model));
+           working_sets.push_back(make_tuple(jump_location,initial_steps+1,jump_set_model,jump_time_model));
+           intermediate_sets.adjoin(EnclosureType(initial_location,reach_set_model));
+           final_sets.adjoin(EnclosureType(initial_location,final_set_model));
+           final_sets.adjoin(EnclosureType(initial_location,active_set_model));
+           final_sets.adjoin(EnclosureType(jump_location,jump_set_model));
+         }
+       }
+     }
+     else {
+       ARIADNE_LOG(6,"Testing for enabled evolutions\n\n");
+       //TODO: This is for upper semantics
+       Float maximum_evolution_time=inf();
+       for(predicate_iterator iter=detection_data.begin(); iter!=detection_data.end(); ++iter) {
+         DetectionData& data=iter->second;
+         if(data.predicate_kind==INVARIANT || data.predicate_kind==GUARD) {
+           if(data.initially_active) {
+             maximum_evolution_time=0.0;
+             ARIADNE_LOG(6,"No continuous evolution possible\n\n");
+           } else if(data.finally_active){
+             maximum_evolution_time=data.touching_time_interval.upper();
+           }
+         }
+       }
+
+       if(maximum_evolution_time>step_size) {
+         ARIADNE_LOG(6,"No restrictions on continuous evolution\n");
+         maximum_evolution_time=step_size;
+       }
+       
+       ARIADNE_LOG(6,"maximum_evolution_time="<<maximum_evolution_time<<"\n");
+     }
+     
+
+
+
+    verbosity=0;
+
+      
 
 
 

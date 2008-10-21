@@ -81,6 +81,11 @@ class DynamicalToolbox
   //! \brief Default constructor.
   DynamicalToolbox();
 
+  //! \brief Compose a function with a set model.
+  virtual SetModelType 
+  compose(const FunctionInterface& function, 
+          const SetModelType& set_model) const;
+  
   //! \brief Compose a function model with a set model.
   virtual SetModelType 
   compose(const FlowModelType& function_model, 
@@ -105,16 +110,16 @@ class DynamicalToolbox
   //! \brief Computes an over-approximation to the time interval for which the \a initial_set_model 
   //! touch the set specified by the \a guard model under the \a flow_model. The \a minimum and \a maximum_time 
   //! gives the minimum and maximum time for which the evolution is valid.
-  pair<TimeModelType,TimeModelType> 
-  touching_time_interval(const FlowModelType& flow_model, 
-                         const GuardModelType& guard_model, 
+  Interval
+  touching_time_interval(const GuardModelType& guard_model, 
+                         const FlowModelType& flow_model, 
                          const SetModelType& initial_set_model) const;
   
   //! \brief Computes the time at which points in the \a initial_set_model cross the zero-set of the
   //! the \a guard_model under evolution of the \a flow_model, for times between the \a minimum_time and \a maximum_time.
   //! The crossing must be (differentiably) transverse.
-  TimeModelType crossing_time(const FlowModelType& flow_model, 
-                              const GuardModelType& guard_model, 
+  TimeModelType crossing_time(const GuardModelType& guard_model,
+                              const FlowModelType& flow_model, 
                               const SetModelType& initial_set_model) const;
 
   
@@ -155,6 +160,13 @@ class DynamicalToolbox
                                  const TimeModelType& final_time_model) const;
   
   //! \brief Computes the points reached by evolution of the \a initial_set_model under the flow
+  //! given by \a flow_model for times between \a initial_time_model and \a final_time.
+  SetModelType reachability_step(const FlowModelType& flow_model, 
+                                 const SetModelType& initial_set_model, 
+                                 const TimeModelType& initial_time_model, 
+                                 const TimeType& final_time) const;
+  
+  //! \brief Computes the points reached by evolution of the \a initial_set_model under the flow
   //! given by \a flow_model for times between \a initial_time_model and \a final_time_model.
   SetModelType reachability_step(const FlowModelType& flow_model, 
                                  const SetModelType& initial_set_model, 
@@ -167,9 +179,15 @@ class DynamicalToolbox
   TimeModelType reachability_time(const TimeModelType& initial_time_model, 
                                   const TimeModelType& final_time_model) const;
   
+  //! \brief Gives the extended time model for the reachability step between the
+  //! \a initial_time_model and the \a final_time_model. The new time is given by
+  //! \f$\tau'(e,s) = (1-s)\tau_0(e)+s\tau_1\f$.
+  TimeModelType reachability_time(const TimeModelType& initial_time_model, 
+                                  const TimeType& final_time) const;
+  
 
   //! \brief A model for the map \a f over the domain \a d.
-  MapModelType map_model(const FunctionType& f, BoxType& d) const;
+  MapModelType map_model(const FunctionType& f, const BoxType& d) const;
 
   //! \brief A model for the flow determined by the vector field \a vf over the initial domain \a d,
   //! valid for times up to \a h, assuming that the state remains in the bounding box \a b.
@@ -177,7 +195,10 @@ class DynamicalToolbox
                            const TimeType& h, const BoxType& b) const;
 
   //! \brief A model for the real-valued function \a g over the domain \a d.
-  GuardModelType guard_model(const FunctionType& g, const BoxType& d) const;
+  GuardModelType predicate_model(const FunctionType& g, const BoxType& d) const;
+
+  //! \brief A model for the constant time \a t over the box \a d.
+  TimeModelType constant_time_model(Float& t, const BoxType& d) const;
 
 
   //! \brief Computed a pair \f$(h,B)\f$ such that the flow of the vector_field \a vf starting in

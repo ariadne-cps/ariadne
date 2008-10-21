@@ -47,6 +47,7 @@ class ListSet
 
  public:
   typedef typename std::vector<BS>::const_iterator const_iterator;
+  typedef BS value_type;
 
   virtual ~ListSet() { }
 

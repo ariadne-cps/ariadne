@@ -152,7 +152,6 @@ ApproximateTaylorModel::constant(const Vector<I>& d, const Vector<R>& c, const V
   result._data->_domain=d;
   result._data->_centre=c;
   result._data->_expansion.set_value(x);
-  std::cerr<<"constant="<<result<<std::endl;
   return result;
 }
 

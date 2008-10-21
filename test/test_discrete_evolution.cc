@@ -107,13 +107,14 @@ void TestDiscreteEvolver::test() const
   
   // Make a hybrid automaton for the Henon function
   HybridAutomaton henon("Henon");
-  henon.new_mode(2,ConstantFunction(Vector<Float>(2),2));
+  DiscreteState location(42);
+  henon.new_mode(location,ConstantFunction(Vector<Float>(2),2));
 
 
   // Over-approximate the initial set by a grid cell
   EnclosureType initial_set(initial_box,IdentityFunction(2),4,1);
   cout << "initial_set=" << initial_set << endl << endl;
-  HybridEnclosureType initial_hybrid_set(DiscreteState(1),initial_set);
+  HybridEnclosureType initial_hybrid_set(location,initial_set);
   HybridTime hybrid_time(1.0,5);
 
   
@@ -124,14 +125,10 @@ void TestDiscreteEvolver::test() const
   hybrid_reach_set = evolver.reach(henon,initial_hybrid_set,hybrid_time);
   //cout << "reach_set=" << hybrid_reach_set << endl;
   
-  /*
   // Print the intial, evolve and reach sets
-  std::ofstream ofs("test_discrete_evolution-henon.eps");
-  //Graphic plot(ofstream);
-  Graphic plot;
-  plot << line_style(true) << fill_colour(cyan) << hybrid_reach_set[1];
-  plot << fill_colour(yellow) << hybrid_evolve_set[1];
-  plot << fill_colour(blue) << initial_set;
-  ofs.close();
-  */
+  Graphic fig;
+  fig << line_style(true) << fill_colour(cyan) << hybrid_reach_set;
+  fig << fill_colour(yellow) << hybrid_evolve_set;
+  fig << fill_colour(blue) << initial_set;
+  fig.write("test_discrete_evolution-henon");
 }

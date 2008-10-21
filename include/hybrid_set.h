@@ -29,6 +29,11 @@
 #define ARIADNE_HYBRID_SET_H
 
 #include <map>
+
+#include <boost/iterator.hpp>
+#include <boost/iterator_adaptors.hpp>
+
+
 #include "macros.h"
 #include "stlio.h"
 #include "set.h"
@@ -47,11 +52,50 @@ class HybridSpace
 {
 };
 
+// FIXME: This class doesn't work
+
+template< class DS, class HBS=std::pair<DiscreteState,typename DS::value_type> >
+class HybridSetIterator
+  : public boost::iterator_facade<HybridSetIterator<DS>,
+                                  HBS,
+                                  boost::forward_traversal_tag,
+                                  HBS
+                                  >
+
+{
+ public:
+  HybridSetIterator(const std::map<DiscreteState,DS>&, bool);
+  bool equal(const HybridSetIterator<DS>&) const;
+  HBS dereference() const;
+  void increment();
+  const DiscreteState& discrete_state() const;
+  const typename DS::value_type& continuous_state_set() const;
+ private:
+  void increment_loc();
+ private:
+  typename std::map< DiscreteState,DS>::const_iterator loc_begin;
+  typename std::map< DiscreteState,DS>::const_iterator loc_end;
+  typename std::map< DiscreteState,DS>::const_iterator loc_iter;
+  typename DS::const_iterator bs_iter;
+};
+
+
+
 //! A set comprising a %ListSet in each location.
 template<class ES>
 class HybridListSet 
-  : public ListSet< std::pair<DiscreteState,ES> >
+  : public std::map<DiscreteState,ListSet<ES> > 
 {
+ public:
+  typedef typename std::map< DiscreteState,ListSet<ES> >::iterator locations_iterator;
+  typedef typename std::map< DiscreteState,ListSet<ES> >::const_iterator locations_const_iterator;
+  typedef HybridSetIterator< ListSet<ES> > const_iterator;
+  locations_iterator locations_begin() { return this->std::map<DiscreteState,ListSet<ES> >::begin(); }
+  locations_iterator locations_end() { return this->std::map<DiscreteState,ListSet<ES> >::end(); }
+  locations_const_iterator locations_begin() const { return this->std::map<DiscreteState,ListSet<ES> >::begin(); }
+  locations_const_iterator locations_end() const { return this->std::map<DiscreteState,ListSet<ES> >::end(); }
+  const_iterator begin() const { return HybridSetIterator< ListSet<ES> >(*this,false); }
+  const_iterator end() const { return HybridSetIterator< ListSet<ES> >(*this,true); }
 };
 
 
@@ -165,6 +209,72 @@ class HybridGridTreeSet
   std::ostream& write(std::ostream& os) const { 
     return os << static_cast<const std::map<DiscreteState,GridTreeSet>&>(*this); }
 };
+
+
+
+
+template<class DS, class HBS> inline
+HybridSetIterator<DS,HBS>::HybridSetIterator(const std::map<DiscreteState,DS>& map, bool end)
+  : loc_begin(map.begin()),
+    loc_end(map.end()),
+    loc_iter(end?loc_end:loc_begin),
+    bs_iter()
+{
+  if(loc_iter!=loc_end) {
+    bs_iter=loc_iter->second.begin();
+    this->increment_loc();
+  }
+}
+
+
+template<class DS, class HBS> inline
+bool
+HybridSetIterator<DS,HBS>::equal(const HybridSetIterator<DS>& other) const
+{
+  return this->loc_iter==other.loc_iter && (this->loc_iter==this->loc_end || this->bs_iter==other.bs_iter);
+}
+
+
+template<class DS, class HBS> inline
+HBS
+HybridSetIterator<DS,HBS>::dereference() const
+{
+  return HBS(loc_iter->first,*this->bs_iter);
+}
+
+
+template<class DS, class HBS> inline
+void
+HybridSetIterator<DS,HBS>::increment() 
+{
+  ++this->bs_iter;
+  this->increment_loc();
+}
+
+template<class DS, class HBS> inline
+void
+HybridSetIterator<DS,HBS>::increment_loc() 
+{
+  while(bs_iter==loc_iter->second.end()) {
+    ++loc_iter;
+    if(loc_iter==loc_end) { return; } 
+    bs_iter=loc_iter->second.begin();
+  }
+}
+
+template<class DS, class HBS> inline
+const DiscreteState&
+HybridSetIterator<DS,HBS>::discrete_state() const 
+{ 
+  return loc_iter->first; 
+}
+
+template<class DS, class HBS> inline
+const typename DS::value_type&
+HybridSetIterator<DS,HBS>::continuous_state_set() const { 
+  return *bs_iter; 
+}
+
 
 
 } // namespace Ariadne

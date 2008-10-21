@@ -26,8 +26,19 @@
 #include "box.h"
 #include "zonotope.h"
 #include "approximate_taylor_model.h"
+#include "set.h"
 
 using namespace Ariadne;
+
+
+struct RadiusSquare : FunctionData<1,2,1> {
+  template<class R, class A, class P>
+  void compute(R& r, const A& x, const P& p) const {
+    r[0]=sqr(x[0])+sqr(x[1])-sqr(p[0]);
+  }
+};
+                   
+
 
 int main(int argc, char **argv) 
 {
@@ -46,6 +57,10 @@ int main(int argc, char **argv)
     AffineFunction afn1(ts1g,ts1c);
     ApproximateTaylorModel ts1(Box(3,Interval(-1,1)),afn1,1,0);
 
+    Function<RadiusSquare> radius(Vector<Float>(1u,0.5));
+    ConstraintSet cs1(Box(1u,Interval(-1,0)),radius);
+    
+
     Graphic g;
     g.set_fill_colour(Colour(0.5,1.0,1.0));
     g.plot(bx1);
@@ -53,10 +68,11 @@ int main(int argc, char **argv)
     g.plot(bx3);
     g.plot(bx4);
     g.plot(bx5);
+    g.set_fill_colour(Colour(0.0,0.5,0.5));
     g.plot(polytope(z1));
     g.plot(polytope(ts1));
     g.write("test_graphics-1");
-
+    
     g.set_fill_colour(Colour(1.0,1.0,0.5));
     g.display();
 

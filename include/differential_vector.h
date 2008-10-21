@@ -522,8 +522,8 @@ implicit(const DifferentialVector<DIFF>& x)
   Matrix<X> J(xas,rs);
   //J(range(zas,zas+rs),range(0,rs))=inverse(A2);
   project(J,range(zas,zas+rs),range(0,rs)) = inverse(A2);
-  std::cerr<<"A2="<<A2<<std::endl;
-  std::cerr<<"J="<<J<<std::endl;
+  // std::cerr<<"A2="<<A2<<std::endl;
+  // std::cerr<<"J="<<J<<std::endl;
 
   DifferentialVector<DIFF> y(xas,zas,d);
   for(uint i=0; i!=zas; ++i) {
@@ -533,14 +533,14 @@ implicit(const DifferentialVector<DIFF>& x)
     y[zas+i]=DIFF::constant(zas,d,0.0);
   }
 
-  std::cerr<<"\nx="<<x<<std::endl;
-  std::cerr<<"y="<<y<<std::endl;
+  // std::cerr<<"\nx="<<x<<std::endl;
+  // std::cerr<<"y="<<y<<std::endl;
   for(uint i=0; i!=d; ++i) {
     DifferentialVector<DIFF> z=compose(x,y);
-    std::cerr<<"z="<<z<<std::endl;
+    // std::cerr<<"z="<<z<<std::endl;
     // Need cast to avoid ambiguity
     static_cast<Vector<DIFF>&>(y)-=J*z;
-    std::cerr<<"y="<<y<<std::endl;
+    // std::cerr<<"y="<<y<<std::endl;
   }
 
   DifferentialVector<DIFF> r(rs,zas,d);
@@ -557,7 +557,7 @@ DifferentialVector<DIFF>
 inverse(const DifferentialVector<DIFF>& x)
 {
   typedef typename DIFF::ScalarType X;
-  std::cerr << "\ninverse(x)\nx=" << x << "\n" << std::endl;
+  //std::cerr << "\ninverse(x)\nx=" << x << "\n" << std::endl;
   return inverse(x,Vector<X>(x.argument_size()));
 }
 
@@ -569,7 +569,7 @@ inverse(const DifferentialVector<DIFF>& x, const Vector<typename DIFF::ScalarTyp
   typedef typename DIFF::ScalarType X;
   assert(x.result_size()==x.argument_size());
   assert(x.result_size()==c.size());
-  std::cerr << "\ninverse(x,c)\nx=" << x << "\nc=" << c << "\n" << std::endl;
+  //std::cerr << "\ninverse(x,c)\nx=" << x << "\nc=" << c << "\n" << std::endl;
   uint n=x.result_size();
   uint d=x.degree();
   Vector<X> z(n,0);

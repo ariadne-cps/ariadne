@@ -101,7 +101,9 @@ class FunctionPyWrap
   virtual uint result_size() const { return this->get_override("result_size")(); }
   virtual uint argument_size() const { return this->get_override("argument_size")(); }
   virtual ushort smoothness() const { return this->get_override("smoothness")(); }
+  virtual Vector<Float> evaluate(const Vector<Float>&) const { return this->get_override("evaluate")(); }
   virtual Vector<Interval> evaluate(const Vector<Interval>&) const { return this->get_override("evaluate")(); }
+  virtual Matrix<Float> jacobian(const Vector<Float>&) const { return this->get_override("jacobian")(); }
   virtual Matrix<Interval> jacobian(const Vector<Interval>&) const { return this->get_override("jacobian")(); }
   virtual DifferentialVector< SparseDifferential<Float> > expansion(const Vector<Float>&, const ushort&) const { return this->get_override("expansion")(); }
   virtual DifferentialVector< SparseDifferential<Interval> > expansion(const Vector<Interval>&, const ushort&) const { return this->get_override("expansion")(); }
@@ -126,10 +128,19 @@ class PythonFunction
   virtual uint argument_size() const { return this->_argument_size; }
   virtual ushort smoothness() const { return 255; }
 
+  virtual Vector<Float> evaluate (const Vector<Float>& x) const { 
+    Vector<Float> r(this->_result_size); 
+    read(r,this->_pyf(x)); 
+    return r; }
   virtual Vector<Interval> evaluate (const Vector<Interval>& x) const { 
     Vector<Interval> r(this->_result_size); 
     read(r,this->_pyf(x)); 
     return r; }
+  virtual Matrix<Float> jacobian (const Vector<Float>& x) const { 
+    DifferentialVector< SparseDifferential<Float> > rj(this->_result_size,this->_argument_size,1u); 
+    DifferentialVector< SparseDifferential<Float> > aj=DifferentialVector< SparseDifferential<Float> >::variable(x.size(),x.size(),1u,x); 
+    read(rj,this->_pyf(aj)); 
+    return rj.get_jacobian(); }
   virtual Matrix<Interval> jacobian (const Vector<Interval>& x) const { 
     DifferentialVector< SparseDifferential<Interval> > rj(this->_result_size,this->_argument_size,1u); 
     DifferentialVector< SparseDifferential<Interval> > aj=DifferentialVector< SparseDifferential<Interval> >::variable(x.size(),x.size(),1u,x); 
@@ -162,6 +173,8 @@ class PythonFunction
 
 typedef Vector<Float> FV;
 typedef Vector<Interval> IV;
+typedef Matrix<Float> FM;
+typedef Matrix<Interval> IM;
 typedef DifferentialVector< SparseDifferential<Float> > FSDV;
 typedef DifferentialVector< SparseDifferential<Interval> > ISDV;
 
@@ -171,8 +184,8 @@ void export_function_interface()
   function_interface_class.def("argument_size", pure_virtual(&FunctionInterface::argument_size));
   function_interface_class.def("result_size", pure_virtual(&FunctionInterface::result_size));
   function_interface_class.def("smoothness", pure_virtual(&FunctionInterface::smoothness));
-  function_interface_class.def("evaluate",pure_virtual(&FunctionInterface::evaluate));
-  function_interface_class.def("jacobian",pure_virtual(&FunctionInterface::jacobian));
+  function_interface_class.def("evaluate",pure_virtual((IV(FunctionInterface::*)(const IV&)const)&FunctionInterface::evaluate));
+  function_interface_class.def("jacobian",pure_virtual((IM(FunctionInterface::*)(const IV&)const)&FunctionInterface::jacobian));
   function_interface_class.def("expansion",pure_virtual((ISDV(FunctionInterface::*)(const IV&,const ushort&)const)&FunctionInterface::expansion));
 }
 
@@ -184,9 +197,12 @@ void export_python_function()
   python_function_class.def("argument_size", &PythonFunction::argument_size);
   python_function_class.def("result_size", &PythonFunction::result_size);
   python_function_class.def("smoothness", &PythonFunction::smoothness);
-  python_function_class.def("__call__",&PythonFunction::evaluate);
-  python_function_class.def("evaluate",&PythonFunction::evaluate);
-  python_function_class.def("jacobian",&PythonFunction::jacobian);
+  python_function_class.def("__call__",pure_virtual((FV(FunctionInterface::*)(const FV&)const)&FunctionInterface::evaluate));
+  python_function_class.def("__call__",pure_virtual((IV(FunctionInterface::*)(const IV&)const)&FunctionInterface::evaluate));
+  python_function_class.def("evaluate",pure_virtual((FV(FunctionInterface::*)(const FV&)const)&FunctionInterface::evaluate));
+  python_function_class.def("evaluate",pure_virtual((IV(FunctionInterface::*)(const IV&)const)&FunctionInterface::evaluate));
+  python_function_class.def("jacobian",pure_virtual((FM(FunctionInterface::*)(const FV&)const)&FunctionInterface::jacobian));
+  python_function_class.def("jacobian",pure_virtual((IM(FunctionInterface::*)(const IV&)const)&FunctionInterface::jacobian));
   python_function_class.def("expansion",(FSDV(PythonFunction::*)(const FV&,const ushort&)const)&PythonFunction::expansion);
   python_function_class.def("expansion",(ISDV(PythonFunction::*)(const IV&,const ushort&)const)&PythonFunction::expansion);
   python_function_class.def(self_ns::str(self));

@@ -21,7 +21,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+#include <iomanip>
+
 #include "macros.h"
+#include "logging.h"
 #include "numeric.h"
 #include "vector.h"
 #include "matrix.h"
@@ -411,7 +414,6 @@ DynamicalToolbox<Mdl>::flow_bounds(FunctionInterface const& vf,
                                    Float const& hmax, 
                                    Float const& dmax) const
 { 
-  verbosity=9;
   // Try to find a time h and a set b such that subset(r+Interval<R>(0,h)*vf(b),b) holds
   ARIADNE_LOG(6,"flow_bounds(Function,Box,Time hmax)\n");
   ARIADNE_LOG(7,"  r="<<r<<" hmax="<<hmax<<"\n");
@@ -433,9 +435,9 @@ DynamicalToolbox<Mdl>::flow_bounds(FunctionInterface const& vf,
   Float hmin=hmax/(1<<REDUCTION_STEPS);
   bool success=false;
   Vector<Interval> b,nb,df;
+  Interval ih(0,h);
   while(!success) {
     ARIADNE_ASSERT(h>hmin);
-    Interval ih(0,h);
     b=r+INITIAL_MULTIPLIER*ih*vf.evaluate(r)+delta;
     for(uint i=0; i!=EXPANSION_STEPS; ++i) {
       df=vf.evaluate(b);
@@ -450,24 +452,31 @@ DynamicalToolbox<Mdl>::flow_bounds(FunctionInterface const& vf,
     }
     if(!success) {
       h/=2;
+      ih=Interval(0,h);
     }
   }
 
   ARIADNE_ASSERT(possibly(subset(nb,b)));
-  b=nb;
   
-  Interval ih(0,h);
+  Vector<Interval> vfb;
+  vfb=vf.evaluate(b);
+  ARIADNE_LOG(9,std::setprecision(20)<<"\n\n   b="<<b<<" vf="<<vfb<<"\n  nb="<<nb<<"\n");
+
   for(uint i=0; i!=REFINEMENT_STEPS; ++i) {
-     b=r+ih*vf.evaluate(b);
+    b=nb;
+    vfb=vf.evaluate(b);
+    nb=r+ih*vfb;
+    ARIADNE_LOG(9,std::setprecision(20)<<"   b="<<b<<" vf="<<vfb<<"\n  nb="<<nb<<"\n");
+    ARIADNE_ASSERT_MSG(possibly(subset(nb,b)),std::setprecision(20)<<"refinement "<<i<<": "<<nb<<" is not a subset of "<<b);
   }
   
   // Check result of operation
   // We use "possibly" here since the bound may touch 
-  ARIADNE_ASSERT(possibly(subset(Vector<Interval>(r+ih*vf.evaluate(b)),b)));
+  ARIADNE_ASSERT(possibly(subset(nb,b)));
   
-  ARIADNE_LOG(7,"  h="<<h<<" b="<<b<<" r+[0,h]*f(b)="<<r+ih*vf.evaluate(b)<<"\n");
+  ARIADNE_LOG(7,"  h="<<h<<" b="<<nb<<"\n");
 
-  return std::make_pair(h,b);
+  return std::make_pair(h,nb);
 }
 
 

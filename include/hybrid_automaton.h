@@ -137,10 +137,10 @@ class DiscreteTransition
     DiscreteEvent _event;
   
     // \brief The source of the discrete transition.
-    boost::shared_ptr< const DiscreteMode > _source;   
+    const DiscreteMode* _source;   
   
     // \brief The target of the discrete transition.
-    boost::shared_ptr< const DiscreteMode > _target;   
+    const DiscreteMode* _target;   
   
     // \brief The activation region of the discrete transition.
     boost::shared_ptr< const FunctionInterface > _activation; 
@@ -188,37 +188,19 @@ class DiscreteTransition
 
   private:
  
-  // Constructor.
-  //   \param event is the discrete event.
-  //   \param source is the source mode of the discrete 
-  //     transition.
-  //   \param source is the source mode of the discrete 
-  //     transition.
-  //   \param target is the target mode of the discrete 
-  //     transition.
-  //   \param reset is the reset relation of the discrete 
-  //     transition.
-  //   \param activation is the activation region of the 
-  //     discrete transition.
-  DiscreteTransition(DiscreteEvent event, 
+
+  // Construct from shared pointers (for internal use). 
+  DiscreteTransition(DiscreteEvent event,
                      const DiscreteMode& source, 
                      const DiscreteMode& target,
                      const FunctionInterface& reset,
                      const FunctionInterface& activation,
                      bool forced=false);
 
-  // Construct from shared pointers (for internal use). 
+  // Construct from shared pointers (for internal use). */
   DiscreteTransition(DiscreteEvent event,
                      const DiscreteMode& source, 
                      const DiscreteMode& target,
-                     const boost::shared_ptr< FunctionInterface > reset,
-                     const boost::shared_ptr< FunctionInterface > activation,
-                     bool forced=false);
-
-  // Construct from shared pointers (for internal use). */
-  DiscreteTransition(DiscreteEvent event,
-                     const boost::shared_ptr< DiscreteMode > source, 
-                     const boost::shared_ptr< DiscreteMode > target,
                      const boost::shared_ptr< FunctionInterface > reset,
                      const boost::shared_ptr< FunctionInterface > activation,
                      bool forced=false);
@@ -310,7 +292,7 @@ class HybridAutomaton
   //!   \param state is the mode's discrete state.
   //!   \param invariants is the new invariants condition.
    
-  const DiscreteMode& new_invariants(DiscreteState state,
+  const DiscreteMode& new_invariant(DiscreteState state,
                                     const FunctionInterface& invariants);
 
   //! \brief Adds an invariants to a mode of the automaton.
@@ -318,7 +300,7 @@ class HybridAutomaton
   //    \param mode is the discrete mode.
   //    \param invariants is the new invariants condition.
    
-  const DiscreteMode& new_invariants(const DiscreteMode& mode,
+  const DiscreteMode& new_invariant(const DiscreteMode& mode,
                                     const FunctionInterface& invariants);
 
     
@@ -333,7 +315,8 @@ class HybridAutomaton
                                            DiscreteState source, 
                                            DiscreteState target,
                                            const FunctionInterface& reset,
-                                           const FunctionInterface& activation);
+                                           const FunctionInterface& activation,
+                                           bool forced);
 
   //! \brief Adds a forced (urgent) discrete transition to the automaton 
   //! using the discrete states to specify the source and target modes.
@@ -349,6 +332,20 @@ class HybridAutomaton
                                                   const FunctionInterface& reset,
                                                   const FunctionInterface& activation);
 
+  //! \brief Adds an unforced (non-urgent) discrete transition to the automaton 
+  //! using the discrete states to specify the source and target modes.
+  //   
+  //    \param event is the transition's event.
+  //    \param source is the transition's source location.
+  //    \param target is the transition's target location.
+  //    \param reset is the transition's reset.
+  //    \param activation is the transition's activation region.
+  const DiscreteTransition& new_unforced_transition(DiscreteEvent event,
+                                                    DiscreteState source, 
+                                                    DiscreteState target,
+                                                    const FunctionInterface& reset,
+                                                    const FunctionInterface& activation);
+
   //! \brief Adds a discrete transition to the automaton using the discrete modes to specify the source and target.
   //   
   //    \param event is the discrete transition's discrete event. 
@@ -360,7 +357,8 @@ class HybridAutomaton
                                            const DiscreteMode& source, 
                                            const DiscreteMode& target,
                                            const FunctionInterface& reset,
-                                           const FunctionInterface& activation);
+                                           const FunctionInterface& activation,
+                                           bool forced);
   
   //@}
   

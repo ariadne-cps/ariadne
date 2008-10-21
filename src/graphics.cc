@@ -51,26 +51,25 @@ trace(cairo_t *cr, const Box& bx);
 static void 
 trace(cairo_t *cr, const Polytope& p);
 
+struct GraphicsObject {
+  enum ShapeKind { BOX, POLYTOPE, CURVE };
+  GraphicsObject(Colour fc, Polytope sh) : fill_colour(fc), shape(sh) { }
+  Colour fill_colour;
+  Polytope shape;
+};
+
 static void 
-draw(cairo_t *cr, const std::vector<Polytope>& boxes, 
+draw(cairo_t *cr, const std::vector<GraphicsObject>& objects, 
      int canvas_width, int canvas_height);
 
 
-
-struct GraphicsObject {
-  ~GraphicsObject() { if(shape_ptr) { delete shape_ptr; } }
-  enum ShapeKind { BOX, POLYTOPE, CURVE };
-  ShapeKind kind;
-  Colour fill_colour;
-  void* shape_ptr;
-};
 
 struct Graphic::Impl 
 {
   Box bounding_box;
   PlanarProjectionMap projection_map;
   Colour fill_colour;
-  std::vector<Polytope> polytopes;
+  std::vector<GraphicsObject> objects;
 };
 
 
@@ -110,16 +109,16 @@ void Graphic::set_fill_colour(Colour fc)
 
 void Graphic::plot(const Box& bx) {
     ARIADNE_ASSERT(bx.dimension()==2);
-    this->_impl->polytopes.push_back(polytope(bx));
+    this->_impl->objects.push_back(GraphicsObject(this->_impl->fill_colour,polytope(bx)));
 }
 
 void Graphic::plot(const Polytope& p) {
     ARIADNE_ASSERT(p.dimension()==2);
-    this->_impl->polytopes.push_back(polytope(p));
+    this->_impl->objects.push_back(GraphicsObject(this->_impl->fill_colour,polytope(p)));
 }
 
 void Graphic::clear() {
-    this->_impl->polytopes.clear();
+    this->_impl->objects.clear();
 }
 
 
@@ -146,19 +145,19 @@ void trace(cairo_t *cr, const Polytope& p)
     cairo_line_to (cr, p[0][0], p[0][1]); 
 }
 
-void draw(cairo_t *cr, const std::vector<Polytope>& polytopes, const Colour& fill_colour, int canvas_width, int canvas_height) 
+void draw(cairo_t *cr, const std::vector<GraphicsObject>& objects, int canvas_width, int canvas_height) 
 {
     //std::cerr<<"draw(...)\n  polytopes=("<<polytopes.size()<<")"<<polytopes<<std::endl;
 
     // Compute extreme values
-    if(polytopes.empty()) {
+    if(objects.empty()) {
       cairo_destroy (cr);
       return; 
     }
 
-    Box bbox=polytopes[0].bounding_box();
-    for(uint i=1; i!=polytopes.size(); ++i) {
-        bbox=hull(bbox,polytopes[i].bounding_box()); 
+    Box bbox=objects[0].shape.bounding_box();
+    for(uint i=1; i!=objects.size(); ++i) {
+        bbox=hull(bbox,objects[i].shape.bounding_box()); 
     }
 
     // The bounding box for the actual used area
@@ -185,16 +184,17 @@ void draw(cairo_t *cr, const std::vector<Polytope>& polytopes, const Colour& fil
     cairo_scale (cr, sc0,sc1);
     cairo_translate(cr, tr0, tr1);
     
-    cairo_set_source_rgb (cr, fill_colour.red, fill_colour.green, fill_colour.blue);
-    for(uint i=0; i!=polytopes.size(); ++i) {
-        const Polytope& p=polytopes[i];
+    for(uint i=0; i!=objects.size(); ++i) {
+        const Colour& fc=objects[i].fill_colour;
+        const Polytope& p=objects[i].shape;
+        cairo_set_source_rgb (cr, fc.red, fc.green, fc.blue);
         trace (cr,p);
         cairo_fill (cr);
     }
     
     cairo_set_source_rgb (cr, 0,0,0);
-    for(uint i=0; i!=polytopes.size(); ++i) {
-        const Polytope& p=polytopes[i];
+    for(uint i=0; i!=objects.size(); ++i) {
+        const Polytope& p=objects[i].shape;
         trace (cr,p);
         cairo_stroke (cr);
     }
@@ -215,12 +215,12 @@ Graphic::write(const char* filename)
     const int canvas_width = DEFAULT_WIDTH;
     const int canvas_height = DEFAULT_HEIGHT;
 
-    std::vector<Polytope>& polytopes=this->_impl->polytopes;
+    std::vector<GraphicsObject>& objects=this->_impl->objects;
 
     surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, canvas_width, canvas_height);
     cr = cairo_create (surface);
  
-    draw(cr, polytopes, this->_impl->fill_colour, canvas_width, canvas_height);
+    draw(cr, objects, canvas_width, canvas_height);
 
    cairo_surface_write_to_png (surface, (std::string(filename)+".png").c_str());
    
@@ -242,7 +242,7 @@ paint (GtkWidget      *widget,
   
     Graphic::Impl* impl=static_cast<Graphic::Impl*>(data);
     //Graphic::Impl* impl=(Graphic::Impl*)data;
-    std::vector<Polytope>& polytopes=impl->polytopes;
+    std::vector<GraphicsObject>& objects=impl->objects;
 
     gint canvas_width  = widget->allocation.width;
     gint canvas_height = widget->allocation.height;
@@ -251,7 +251,7 @@ paint (GtkWidget      *widget,
     cr = gdk_cairo_create (widget->window);
 
     // Draw Cairo objects
-    draw(cr, polytopes, impl->fill_colour, canvas_width, canvas_height);
+    draw(cr, objects, canvas_width, canvas_height);
 }
 
 void Graphic::display() 

@@ -79,18 +79,14 @@ operator<<(std::ostream& os, const DiscreteMode& mode)
 
 
 DiscreteTransition::
-DiscreteTransition(DiscreteEvent event, 
+DiscreteTransition(DiscreteEvent event,
                    const DiscreteMode& source, 
                    const DiscreteMode& target,
                    const FunctionInterface& reset,
                    const FunctionInterface& activation,
-                   bool forced)
-  : _event(event), 
-    _source(&source), 
-    _target(&target), 
-    _activation(activation.clone()), 
-    _reset(reset.clone()),
-    _forced(forced)  
+                   bool forced) 
+  : _event(event), _source(&source), _target(&target), 
+    _activation(activation.clone()), _reset(reset.clone()), _forced(forced) 
 { 
   ARIADNE_ASSERT(activation.result_size()==1);
   ARIADNE_ASSERT(activation.argument_size()==source.dimension());
@@ -113,23 +109,6 @@ DiscreteTransition(DiscreteEvent event,
   ARIADNE_ASSERT(activation->argument_size()==source.dimension());
   ARIADNE_ASSERT(reset->argument_size()==source.dimension());
   ARIADNE_ASSERT(reset->result_size()==target.dimension());
-}
-
-
-DiscreteTransition::
-DiscreteTransition(DiscreteEvent event,
-                   const boost::shared_ptr< DiscreteMode > source, 
-                   const boost::shared_ptr< DiscreteMode > target,
-                   const boost::shared_ptr< FunctionInterface > reset,
-                   const boost::shared_ptr< FunctionInterface > activation,
-                   bool forced) 
-  : _event(event), _source(&*source), _target(&*target), 
-    _activation(activation), _reset(reset), _forced(forced) 
-{ 
-  ARIADNE_ASSERT(activation->result_size()==1);
-  ARIADNE_ASSERT(activation->argument_size()==source->dimension());
-  ARIADNE_ASSERT(reset->argument_size()==source->dimension());
-  ARIADNE_ASSERT(reset->result_size()==target->dimension());
 }
 
 
@@ -173,13 +152,29 @@ HybridAutomaton::new_mode(DiscreteState location,
 }
 
 
+const DiscreteMode& 
+HybridAutomaton::new_invariant(DiscreteState location,
+                               const FunctionInterface& invariant) 
+{
+  ARIADNE_ASSERT(location>0);
+  if(!this->has_mode(location)) {
+    throw std::runtime_error("The location of the invariant must be in the automaton.");
+  }
+  DiscreteMode& mode=const_cast<DiscreteMode&>(this->mode(location));
+  boost::shared_ptr< const FunctionInterface > new_invariant(invariant.clone());
+  mode._invariants.push_back(new_invariant);
+  return mode;
+}
+
+
 const DiscreteTransition& 
 HybridAutomaton::
 new_transition(DiscreteEvent event,
                const DiscreteMode &source, 
                const DiscreteMode &target,
                const FunctionInterface &reset,
-               const FunctionInterface &activation) 
+               const FunctionInterface &activation,
+               bool forced) 
 {
   ARIADNE_ASSERT(event>0);
   DiscreteEvent event_id=event;
@@ -204,17 +199,18 @@ new_transition(DiscreteEvent event,
     throw std::runtime_error("The target mode of the transition is not equal to the mode in the automaton with the same id.");
   }
   
-  this->_transitions.insert(DiscreteTransition(event_id,this_source,this_target,reset,activation,false));
+  this->_transitions.insert(DiscreteTransition(event_id,this_source,this_target,reset,activation,forced));
   return this->transition(event_id,source_id);
 }
 
 
 const DiscreteTransition& 
 HybridAutomaton::new_transition(DiscreteEvent event,
-               DiscreteState source, 
-               DiscreteState target,
-               const FunctionInterface &reset,
-               const FunctionInterface &activation) 
+                                DiscreteState source, 
+                                DiscreteState target,
+                                const FunctionInterface &reset,
+                                const FunctionInterface &activation,
+                                bool forced) 
 {
   ARIADNE_ASSERT(event>0);
   if(this->has_transition(event,source)) {
@@ -229,7 +225,7 @@ HybridAutomaton::new_transition(DiscreteEvent event,
   
   const DiscreteMode& source_mode=this->mode(source);
   const DiscreteMode& target_mode=this->mode(target);
-  this->_transitions.insert(DiscreteTransition(event,source_mode,target_mode,reset,activation));
+  this->_transitions.insert(DiscreteTransition(event,source_mode,target_mode,reset,activation,forced));
   return this->transition(event,source);
 }
 
@@ -255,6 +251,32 @@ new_forced_transition(DiscreteEvent event,
   const DiscreteMode& source_mode=this->mode(source);
   const DiscreteMode& target_mode=this->mode(target);
   this->_transitions.insert(DiscreteTransition(event,source_mode,target_mode,reset,activation,true));
+  return this->transition(event,source);
+}
+
+
+const DiscreteTransition& 
+HybridAutomaton::
+new_unforced_transition(DiscreteEvent event,
+                        DiscreteState source, 
+                        DiscreteState target,
+                        const FunctionInterface &reset,
+                        const FunctionInterface &activation) 
+{
+  ARIADNE_ASSERT(event>0);
+  if(this->has_transition(event,source)) {
+    throw std::runtime_error("The automaton already has a transition with the given id and source id.");
+  }
+  if(!this->has_mode(source)) {
+    throw std::runtime_error("The automaton does not contain a mode with ths given source id");
+  }
+  if(!this->has_mode(target)) {
+    throw std::runtime_error("The automaton does not contain a mode with ths given desitination id");
+  }
+  
+  const DiscreteMode& source_mode=this->mode(source);
+  const DiscreteMode& target_mode=this->mode(target);
+  this->_transitions.insert(DiscreteTransition(event,source_mode,target_mode,reset,activation,false));
   return this->transition(event,source);
 }
 
@@ -315,6 +337,7 @@ HybridAutomaton::modes() const
 {
   return this->_modes;
 }
+
 
 
 const DiscreteMode& 

@@ -117,7 +117,6 @@ _evolution(EnclosureListType& final_sets,
            Semantics semantics, 
            bool reach) const
 {
-  //  uint verbosity=9;
   uint verbosity=0;
 
   
@@ -283,26 +282,25 @@ _evolution(EnclosureListType& final_sets,
       ModelType reach_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,zero_time,integration_time_model);         
       ARIADNE_LOG(6,"reach_set_model = "<<reach_set_model<<"\n");
       ARIADNE_LOG(4,"Done computing continuous evolution\n");
-      std::cerr << "verbosity="<<verbosity<<std::endl;
+
+
+
+
 
 
       static const bool NO_DISCRETE_EVOLUTION=true;
-
       
-      working_sets.push_back(make_tuple(initial_location,initial_steps,final_set_model,final_time_model));
-      intermediate_sets.adjoin(EnclosureType(initial_location,reach_set_model));
-      final_sets.adjoin(EnclosureType(initial_location,final_set_model));
-
-
-      break;
-
-
+      if(NO_DISCRETE_EVOLUTION) {
+        working_sets.push_back(make_tuple(initial_location,initial_steps,final_set_model,final_time_model));
+        intermediate_sets.adjoin(EnclosureType(initial_location,reach_set_model));
+        final_sets.adjoin(EnclosureType(initial_location,final_set_model));
+      }
 
 
 
 
 
-
+      /*
       Interval invariant_value;
       const FunctionInterface* invariant_ptr;
       const FunctionInterface* activation_ptr;
@@ -444,7 +442,7 @@ _evolution(EnclosureListType& final_sets,
           intermediate_sets.adjoin(EnclosureType(jump_location,jump_set_model));
         }
       }
-      
+      */  
 
     }
   }

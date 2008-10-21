@@ -64,9 +64,6 @@
   } \
 } \
 
-#define ARIADNE_LOG(level,msg)                  \
-  if(verbosity >= level) { std::clog << msg << std::flush; }
-
 #define ARIADNE_NOT_IMPLEMENTED                        \
   throw NotImplemented(__PRETTY_FUNCTION__); 
 

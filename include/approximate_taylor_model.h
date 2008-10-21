@@ -50,6 +50,7 @@ class FunctionInterface;
 ApproximateTaylorModel operator+(const ApproximateTaylorModel&, const ApproximateTaylorModel&);
 ApproximateTaylorModel operator-(const ApproximateTaylorModel&, const ApproximateTaylorModel&);
 ApproximateTaylorModel operator*(const ApproximateTaylorModel&, const ApproximateTaylorModel&);
+ApproximateTaylorModel operator+(const ApproximateTaylorModel&, const Vector<Float>&);
 
 
 ApproximateTaylorModel project(const ApproximateTaylorModel&, const Slice& slc);

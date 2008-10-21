@@ -81,6 +81,11 @@ class DynamicalToolbox
   //! \brief Default constructor.
   DynamicalToolbox();
 
+  //! \brief Compose a function model with a set model.
+  virtual SetModelType 
+  compose(const FlowModelType& function_model, 
+          const SetModelType& set_model) const;
+  
   //! \brief Test if a box satisfies the constraint given by the guard. Returns \a true is all points
   //! in the box satisfy the constraint, \a false if all points do not satisfy the constraint, and 
   //! indeterminate otherwise.

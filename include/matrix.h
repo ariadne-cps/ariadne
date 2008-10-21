@@ -53,6 +53,7 @@ class Matrix
     : boost::numeric::ublas::matrix<X>(r,c) { for(uint i=0; i!=r; ++i) { for(uint j=0; j!=c; ++j) { (*this)(i,j)=ptr[i*c+j]; } } }
   uint row_size() const { return this->size1(); }
   uint column_size() const { return this->size2(); }
+  template<class XX> bool operator==(const Matrix<XX>& mx) const;
   const X* operator[](uint r) const { return &this->operator()(r,0); }
   X* operator[](uint r) { return &this->operator()(r,0); }
   const X& get(uint i, uint j) const { return (*this)[i][j]; }
@@ -74,6 +75,24 @@ template<class X> inline Matrix<X> operator*(const Matrix<X>& A, const Matrix<X>
   return boost::numeric::ublas::prod(A,B);
 }
  
+template<class X> template<class XX> bool Matrix<X>::operator==(const Matrix<XX>& A2) const 
+{
+  const Matrix<X>& A1=*this;
+  if(A1.row_size()!=A2.row_size() || A1.column_size() != A2.column_size()) {
+    return false;
+  }
+  for(uint i=0; i!=A1.row_size(); ++i) {
+   for(uint j=0; j!=A1.column_size(); ++j) {
+     if(A1[i][j]!=A2[i][j]) {
+       return false;
+     }
+   }
+  }
+  return true;
+}
+
+
+
 template<class X> Matrix<X> inverse(const Matrix<X>& A) 
 {
   assert(A.row_size()==A.column_size());

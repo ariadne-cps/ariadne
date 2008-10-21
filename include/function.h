@@ -62,9 +62,9 @@ class FunctionBase
   virtual Vector<Interval> evaluate(const Vector<Interval>& x) const {
     Vector<Interval> r(this->T::result_size()); this->T::compute(r,x); return r; }                          
   virtual Matrix<Float> jacobian(const Vector<Float>& x) const {
-    return this->_expansion(x,1u).jacobian(); }                         
+    return this->_expansion(x,1u).get_jacobian(); }                         
   virtual Matrix<Interval> jacobian(const Vector<Interval>& x) const {
-    return this->_expansion(x,1u).jacobian(); }                         
+    return this->_expansion(x,1u).get_jacobian(); }                         
   virtual DifferentialVector< SparseDifferential<Float> > expansion(const Vector<Float>& x, const ushort& s) const {
     return this->_expansion(x,s); } 
   virtual DifferentialVector< SparseDifferential<Interval> > expansion(const Vector<Interval>& x, const ushort& s) const {
@@ -72,7 +72,7 @@ class FunctionBase
   // TODO: Find a better way for writing functions which can handle transformations which may not have a
   // write() method or operator<<.
   virtual std::ostream& write(std::ostream& os) const  {
-    return os << "Function"; }
+    return os << "Function( result_size="<<this->result_size()<<", argument_size="<<this->argument_size()<<" )"; }
  private:
   template<class X> DifferentialVector< SparseDifferential<X> > _expansion(const Vector<X>& x, const ushort& s) const {
     const uint rs=this->T::result_size();
@@ -80,7 +80,7 @@ class FunctionBase
     DifferentialVector< SparseDifferential<X> > dx(as,as,s);
     DifferentialVector< SparseDifferential<X> > dr(rs,as,s);
     for(uint i=0; i!=as; ++i) { dx[i]=x[i]; }
-    for(uint i=0; i!=as; ++i) { dx[i][i+1]=1; }
+    for(uint i=0; i!=as; ++i) { dx[i][i]=1; }
     this->T::compute(dr,dx);
     return dr;
   }                                             
@@ -162,6 +162,30 @@ struct IdentityTransformation
   uint _n;
 };
 
+struct ScalingTransformation 
+{
+  ScalingTransformation(const Vector<Float>& origin, 
+                        const Vector<Float>& lengths)
+    : _o(origin), _l(lengths) { ARIADNE_ASSERT(origin.size()==lengths.size()); }
+  explicit ScalingTransformation(const Vector<Interval>& range)
+    : _o(midpoint(range)), _l(range.size()) { for(uint i=0; i!=_l.size(); ++i) { _l[i]=range[i].radius(); } }
+  const Vector<Float>& origin() const { return _o; }
+  const Vector<Float>& lengths() const { return _l; }
+  const uint result_size() const { return _l.size(); }
+  const uint argument_size() const { return _l.size(); }
+  const int smoothness() const { return SMOOTH; }
+  template<class R, class A>
+  void compute(R& r, const A& x) const {
+    for(uint i=0; i!=result_size(); ++i) {
+      r[i]=_o[i]+_l[i]*x[i]; 
+    }
+  }
+ private:
+  Vector<Float> _o;
+  Vector<Float> _l;
+};
+
+
 struct AffineTransformation 
 {
   AffineTransformation(const Matrix<Float>& A, const Vector<Float>& b)
@@ -213,6 +237,22 @@ class IdentityFunction
   std::ostream& write(std::ostream& os) const {
     return os << "IdentityFunction( size=" << this->result_size() << " )"; }
 };
+
+
+//! An scaling function \f$x_i' = o_i+l_ix_i\f$. 
+class ScalingFunction
+  : public FunctionBase<ScalingTransformation>
+{
+ public:
+  //! Construct an affine function from the matrix \a A and vector \a b.
+  ScalingFunction(const Vector<Float>& o, const Vector<Float>& l) 
+    : FunctionBase<ScalingTransformation>(o,l) { }
+  explicit ScalingFunction(const Vector<Interval>& bx) 
+    : FunctionBase<ScalingTransformation>(bx) { }
+  std::ostream& write(std::ostream& os) const {
+    return os << "ScalingFunction( o=" << this->origin() << ", l=" << this->lengths() << " )"; }
+};
+
 
 //! An affine function \f$x\mapsto Ax+b\f$. 
 class AffineFunction

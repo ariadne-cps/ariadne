@@ -116,9 +116,9 @@ class DifferentialVector
   uint argument_size() const { return (*this)[0].argument_size(); }
   uint degree() const { return (*this)[0].degree(); }
 
-  Vector<X> value() const { 
+  Vector<X> get_value() const { 
     Vector<X> r(this->result_size()); for(uint i=0; i!=r.size(); ++i) { r[i]=(*this)[i].value(); } return r; }
-  Matrix<X> jacobian() const { Matrix<X> r(this->result_size(),this->argument_size()); 
+  Matrix<X> get_jacobian() const { Matrix<X> r(this->result_size(),this->argument_size()); 
     for(uint i=0; i!=r.row_size(); ++i) { for(uint j=0; j!=r.column_size(); ++j) { r[i][j]=(*this)[i].gradient(j); } } return r; }
 
   void set_value(const Vector<X>& c) {
@@ -483,9 +483,9 @@ compose(const DifferentialVector<DIFF>& x,
 {  
   //std::cerr<<"compose(DV x, DV y)\n x="<<x<<"\n y="<<y<<std::endl;
   typedef typename DIFF::ScalarType X;
-  Vector<X> yv=y.value();
+  Vector<X> yv=y.get_value();
   DifferentialVector<DIFF>& ync=const_cast<DifferentialVector<DIFF>&>(y); 
-  for(uint i=0; i!=ync.result_size(); ++i) { ync[i].value()=0; }
+  for(uint i=0; i!=ync.result_size(); ++i) { ync[i].set_value(0); }
   DifferentialVector<DIFF> r=evaluate(x,ync);
   //std::cerr<<"r="<<r<<"\n"<<std::endl;
   ync+=yv;
@@ -573,16 +573,16 @@ inverse(const DifferentialVector<DIFF>& x, const Vector<typename DIFF::ScalarTyp
   uint n=x.result_size();
   uint d=x.degree();
   Vector<X> z(n,0);
-  Matrix<X> J=inverse(x.jacobian());
+  Matrix<X> J=inverse(x.get_jacobian());
 
   DifferentialVector<DIFF> y(n,n,d);
   DifferentialVector<DIFF> id(n,n,d);
   for(uint i=0; i!=n; ++i) { id[i][i]=1.0; }
   
   for(uint i=0; i!=n; ++i) { 
-    y[i].value()=c[i]; 
+    y[i].set_value(c[i]); 
     for(uint j=0; j!=n; ++j) { 
-      y[i][j]=J[i][j];
+      y[i].set_gradient(j,J[i][j]);
     }
   }
   
@@ -627,12 +627,12 @@ flow1(const DifferentialVector<DIFF>& f, const Vector<typename DIFF::ScalarType>
     //std::cerr << "yp["<<j<<"]=" << yp << std::endl;
     for(uint i=0; i!=n; ++i) {  
       y[i]=antiderivative(yp[i],n);
-      y[i].value()=0;
-      y[i].gradient(i)=1;
+      y[i].set_value(0);
+      y[i].set_gradient(i,1);
     }
     //std::cerr << "y["<<j+1<<"]=" << y << std::endl << std::endl;
   } 
-  for(uint i=0; i!=n; ++i) { y[i].value()=x[i]; }
+  for(uint i=0; i!=n; ++i) { y[i].set_value(x[i]); }
   return y;
 }
 

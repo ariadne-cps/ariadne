@@ -12,6 +12,7 @@ check_PROGRAMS = \
 	test_differential \
 	test_approximate_taylor_model \
 	test_discrete_evolution \
+	test_continuous_evolution \
 	test_grid_set \
 	test_serialization \
 	test_graphics
@@ -39,6 +40,9 @@ tests: $(check_PROGRAMS)
 test_differential_SOURCES=test_differential.cc
 
 test_approximate_taylor_model_SOURCES=test_approximate_taylor_model.cc
+
+test_discrete_evolution_SOURCES=test_discrete_evolution.cc
+test_continuous_evolution_SOURCES=test_continuous_evolution.cc
 
 test_serialization_SOURCES=test_serialization.cc
 test_graphics_SOURCES=test_graphics.cc

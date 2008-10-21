@@ -170,8 +170,8 @@ export_differential_vector()
   differential_vector_class.def(self+=V());
   differential_vector_class.def(self-=V());
   differential_vector_class.def(self*=X());
-  differential_vector_class.def("value", &DV::value);
-  differential_vector_class.def("jacobian", &DV::jacobian);
+  differential_vector_class.def("value", &DV::get_value);
+  differential_vector_class.def("jacobian", &DV::get_jacobian);
   differential_vector_class.def(self_ns::str(self));
 
   //def("variable",(DV(*)(const Vector<Float>&,ushort)) &DV::variable);

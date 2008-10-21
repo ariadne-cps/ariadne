@@ -1146,6 +1146,11 @@ operator<<(std::ostream& os, const GridCellListSet& gcls)
 		throw NotImplemented(__PRETTY_FUNCTION__);
 	}
  
+        template<class G> void plot(G& theGraphic, const GridTreeSet& theSet) {
+                  for(GridTreeSet::const_iterator iter=theSet.begin(); iter!=theSet.end(); ++iter) {
+                          theGraphic << iter->box(); 
+                  }
+        }
 
 
 } // namespace Ariadne

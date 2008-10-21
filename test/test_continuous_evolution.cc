@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_discrete_evolution.cc
+ *            test_continuous_evolution.cc
  *
  *  Copyright  2006-8  Pieter Collins
  *
@@ -47,7 +47,7 @@ using namespace Ariadne;
 using namespace std;
 using Models::Henon;
 
-class TestDiscreteEvolver
+class TestContinuousEvolution
 {
  public:
   void test() const;
@@ -55,11 +55,11 @@ class TestDiscreteEvolver
 
 int main() 
 {
-  TestDiscreteEvolver().test();
+  TestContinuousEvolution().test();
   return ARIADNE_TEST_FAILURES;
 }
 
-void TestDiscreteEvolver::test() const
+void TestContinuousEvolution::test() const
 {
   cout << __PRETTY_FUNCTION__ << endl;
 
@@ -67,9 +67,8 @@ void TestDiscreteEvolver::test() const
   typedef std::pair<DiscreteState,ApproximateTaylorModel> HybridEnclosureType;
 
   // Set up the evolution parameters and grid
-  Float time(6.0);
+  Float time(4.0);
   Float step_size(0.0625);
-  Float grid_size(0.125);
   Float enclosure_radius(0.25);
     
   EvolutionParameters parameters;
@@ -87,50 +86,59 @@ void TestDiscreteEvolver::test() const
   cout << "initial_box=" << initial_box << endl;
 
   // Set up the vector field
-  Vector<Float> p(2); p[0]=1.5; p[1]=0.375;
-  Function<Henon> h(p);
-  cout << "henon_function=" << h << endl;
-  cout << "henon_function.parameters()=" << h.parameters() << endl;
+  Float mu=0.5;
+  Vector<Float> p(1); p[0]=mu;
+  Function<VanDerPol> vdp(p);
+  cout << "van_der_pol_function=" << vdp << endl;
+  cout << "van_der_pol_function.parameters()=" << vdp.parameters() << endl;
 
   //Function evaluation sanity check
-  Vector<Float> x(2); x[0]=0.5; x[1]=0.25; 
-  Vector<Float> hx(2); hx[0]=p[0]-x[0]*x[0]+x[1]*p[1]; hx[1]=x[0];
-  ARIADNE_TEST_EQUAL(h.evaluate(x),hx);
-  Matrix<Float> dhx(2,2); dhx[0][0]=-2*x[0]; dhx[0][1]=p[1]; dhx[1][0]=1.0;
-  ARIADNE_TEST_EQUAL(h.jacobian(x),dhx);
- 
-
-  //Function evaluation sanity check
-  cout << "h.evaluate(" << initial_box << ") " << flush; cout << " = " << h.evaluate(initial_box) << endl;
-  cout << "h.jacobian(" << initial_box << ") = " << h.jacobian(initial_box) << endl;
-
+  cout << "vdp.evaluate(" << initial_box << ") " << flush; cout << " = " << vdp.evaluate(initial_box) << endl;
+  cout << "vdp.jacobian(" << initial_box << ") = " << vdp.jacobian(initial_box) << endl;
+  cout << endl;
   
   // Make a hybrid automaton for the Henon function
-  HybridAutomaton henon("Henon");
-  henon.new_mode(2,ConstantFunction(Vector<Float>(2),2));
+  DiscreteState location(23);
+
+  // Make a hybrid automaton for the Henon function
+  HybridAutomaton vanderpol("Van der Pol");
+  vanderpol.new_mode(location,vdp);
 
 
   // Over-approximate the initial set by a grid cell
-  EnclosureType initial_set(initial_box,IdentityFunction(2),4,1);
+  Vector<Interval> unit_box(2,Interval(-1,1));
+  EnclosureType initial_set=ApproximateTaylorModel(unit_box,ScalingFunction(initial_box),4,1);
   cout << "initial_set=" << initial_set << endl << endl;
-  HybridEnclosureType initial_hybrid_set(DiscreteState(1),initial_set);
+  HybridEnclosureType initial_hybrid_set(location,initial_set);
   HybridTime hybrid_time(1.0,5);
 
   
   // Compute the reachable sets
   ListSet<HybridEnclosureType> hybrid_evolve_set,hybrid_reach_set;
-  hybrid_evolve_set = evolver.evolve(henon,initial_hybrid_set,hybrid_time);
-  //cout << "evolve_set=" << hybrid_evolve_set << endl;
-  hybrid_reach_set = evolver.reach(henon,initial_hybrid_set,hybrid_time);
-  //cout << "reach_set=" << hybrid_reach_set << endl;
+  hybrid_evolve_set = evolver.evolve(vanderpol,initial_hybrid_set,hybrid_time);
+  cout << "evolve_set=" << hybrid_evolve_set << endl;
+  hybrid_reach_set = evolver.reach(vanderpol,initial_hybrid_set,hybrid_time);
+  cout << "reach_set=" << hybrid_reach_set << endl;
   
+  //cout << "evolve_set=" << hybrid_evolve_set[location] << endl;
+  //cout << "reach_set=" << hybrid_reach_set[location] << endl;
+
   // Print the intial, evolve and reach sets
-  std::ofstream ofs("test_discrete_evolution-henon.eps");
+  cout << "Plotting sets" << endl;
+  std::ofstream ofs("test_continuous_evolution-vdp");
   //Graphic plot(ofstream);
-  Graphic plot;
-  plot << line_style(true) << fill_colour(cyan) << hybrid_reach_set[1];
-  plot << fill_colour(yellow) << hybrid_evolve_set[1];
-  plot << fill_colour(blue) << initial_set;
+  Graphic fig;
+  //fig.set_bounding_box(Box(hybrid_reach_set[0].second.range()));
+  //fig << line_style(true) << fill_colour(cyan) << hybrid_reach_set[0].second;
+  //fig << fill_colour(yellow) << hybrid_evolve_set[0].second;
+  //fig << fill_colour(blue) << initial_set;
+  Box bx1,bx2;
+  bx1=hybrid_reach_set[0].second.range();
+  bx2=hybrid_evolve_set[0].second.range();
+  fig.plot(bx1);
+  fig.plot(bx2);
+  //fig << bx2;
+  fig.display();
   ofs.close();
 
 }

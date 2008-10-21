@@ -29,7 +29,9 @@ namespace Ariadne {
 
  
 ImageSet::ImageSet(const BoxType& dom)
-  : _domain(dom), _function(new IdentityFunction(dom.size()))
+  //  : _domain(dom), _function(new IdentityFunction(dom.size()))
+  : _domain(Vector<Interval>(dom.size(),Interval(-1,1))), 
+    _function(new ScalingFunction(dom))
 { 
 }
 

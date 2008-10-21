@@ -211,11 +211,11 @@ test_differential()
     cout << "w=" << w << endl;
     x=henon(w,a);
     cout << "h(w)=" << w << endl;
-    y=inverse(x,x.value());
+    y=inverse(x,x.get_value());
     cout << "hinv(h(w))=" << y << endl;
-    z=inverse(y,y.value());
+    z=inverse(y,y.get_value());
     cout << "hinv(hinv(h(y)))=" << z << endl;
-    cout << "h(hinv(hinv(h(y))))=" << henon(z,y.value()) << endl;
+    cout << "h(hinv(hinv(h(y))))=" << henon(z,y.get_value()) << endl;
 
     // inverse
     cout << "inverse:"<<endl;

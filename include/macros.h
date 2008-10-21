@@ -44,7 +44,23 @@
 { \
   bool result = (expression); \
   if(!result) { \
-    ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<__PRETTY_FUNCTION__,"Assertion `" << #expression << "' failed.\n"); \
+    ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<__FUNCTION__,"Assertion `" << #expression << "' failed.\n"); \
+  } \
+} \
+
+#define ARIADNE_ASSERT_MSG(expression,error)             \
+{ \
+  bool result = (expression); \
+  if(!result) { \
+    ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<__PRETTY_FUNCTION__,"Assertion `" << #expression << "' failed.\n"<<"  "<<error<<"\n"); \
+  } \
+} \
+
+#define ARIADNE_ASSERT_EQUAL(expression1,expression2)    \
+{ \
+  bool result = ((expression1) == (expression2));       \
+  if(!result) { \
+    ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<__PRETTY_FUNCTION__,"Assertion `" << #expression1 << "==" << #expression2 << "' failed.\n"<<"  "<<expression1<<" != "<<expression2<<"\n"); \
   } \
 } \
 

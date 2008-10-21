@@ -30,6 +30,8 @@
 
 
 #include <vector>
+#include "stlio.h"
+
 
 typedef unsigned int uint;
 
@@ -89,6 +91,15 @@ class ListSet
   void adjoin(const ListSet<BS>& ls) { this->_data.insert(this->_data.end(),ls.begin(),ls.end()); }
 };      
   
+
+template<class BS>
+std::ostream& 
+operator<<(std::ostream& os, const ListSet<BS>& ls)
+{
+  return os << "ListSet( size=" << ls.size() << " )";
+}
+
+
 
 } // namespace Ariadne
 

@@ -83,6 +83,10 @@ class DiscreteMode {
   const FunctionInterface& dynamic() const { 
     return *this->_dynamic; }
   
+  //! \brief The discrete mode's dynamic (a vector field). 
+   boost::shared_ptr<const FunctionInterface> dynamic_ptr() const { 
+    return this->_dynamic; }
+  
   //! \brief The discrete mode's invariants. 
   const std::vector< boost::shared_ptr< const FunctionInterface > >& invariants() const {
     return this->_invariants; }
@@ -162,6 +166,11 @@ class DiscreteTransition
       return *this->_target; }
 
   
+  //! \brief The activation region of the discrete transition. 
+  boost::shared_ptr<const FunctionInterface> activation_ptr() const { 
+      return this->_activation;
+    }
+
   //! \brief The activation region of the discrete transition. 
     const FunctionInterface& activation() const { 
       return *this->_activation;

@@ -127,11 +127,9 @@ class SparseDifferential
 
   X& operator[](const uint& j) { return this->_data[MultiIndex::unit(this->_as,j)]; }
   X& operator[](const MultiIndex& a) { ARIADNE_ASSERT(a.number_of_variables()==this->argument_size()); return this->_data[a]; }
-  X& value() { return this->operator[](MultiIndex(this->_as)); }
-  X& gradient(uint j) { return this->operator[](MultiIndex::unit(this->_as,j)); }
 
-  void set_value(const X& c) { this->value()=c; }
-  void set_gradient(uint j, const X& d) { this->gradient(j)=d; }
+  void set_value(const X& c) { this->operator[](MultiIndex(this->_as))=c; }
+  void set_gradient(uint j, const X& d) { this->operator[](MultiIndex::unit(this->_as,j))=d; }
 
   const_iterator begin() const { return this->_data.begin(); }
   const_iterator end() const { return this->_data.end(); }
@@ -145,7 +143,7 @@ class SparseDifferential
   const X& gradient(uint j) const { return this->operator[](MultiIndex::unit(this->_as,j)); }
 
   static SparseDifferential<X> constant(uint as, uint d, const X& c) {
-    SparseDifferential<X> r(as,d); r.value()=c; return r; }
+    SparseDifferential<X> r(as,d); r.set_value(c); return r; }
   static SparseDifferential<X> variable(uint as, uint d, const X& x, uint i) {
     SparseDifferential<X> r(as,d); r._data[MultiIndex::zero(as)]=x; r._data[MultiIndex::unit(as,i)]=1.0; return r; }
 

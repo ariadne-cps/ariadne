@@ -91,7 +91,7 @@ class DenseDifferential
   void set_value(const X&);
   /// The variation of the quantity with respect to the \a j<sup>th</sup> argument.
   const X& gradient(uint j) const;
-  X& gradient(uint j);
+  void set_gradient(uint j, const X&);
   /// The array of derivative values.
   const Vector<X>& data() const;
   /// A reference to the array of derivative values.
@@ -670,10 +670,10 @@ DenseDifferential<X>::gradient(uint j) const
 }
 
 template<class X>
-X&
-DenseDifferential<X>::gradient(uint j)
+void
+DenseDifferential<X>::set_gradient(uint j, const X& x)
 { 
-  return this->_data[j+1u];
+  this->_data[j+1u]=x;
 }
 
  

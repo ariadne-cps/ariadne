@@ -60,7 +60,7 @@ ApproximateTaylorModel::~ApproximateTaylorModel()
 
 
 ApproximateTaylorModel::ApproximateTaylorModel() 
-  : _data(new Data()) 
+  : _data(new Data(Vector<I>(),Vector<R>(),DifferentialVectorType(0,0,0))) 
 {
 }
 
@@ -79,7 +79,7 @@ ApproximateTaylorModel::ApproximateTaylorModel(const Vector<I>& d,
   ARIADNE_ASSERT(d.size()==e.argument_size());
   ARIADNE_ASSERT(c.size()==e.argument_size());
   for(uint i=0; i!=e.size(); ++i) {
-    ARIADNE_ASSERT(e[i].argument_size()==e[0].argument_size());
+    ARIADNE_ASSERT_MSG(e[i].argument_size()==e[0].argument_size(),"e="<<e);
   }
 }
 
@@ -151,7 +151,8 @@ ApproximateTaylorModel::constant(const Vector<I>& d, const Vector<R>& c, const V
   ApproximateTaylorModel result(x.size(),d.size(),o,s);
   result._data->_domain=d;
   result._data->_centre=c;
-  result._data->_expansion=x;
+  result._data->_expansion.set_value(x);
+  std::cerr<<"constant="<<result<<std::endl;
   return result;
 }
 
@@ -161,8 +162,8 @@ ApproximateTaylorModel::affine(const I& d, const R& c, const R& x, const R& g, u
   ApproximateTaylorModel result(1u,1u,o,s);
   result._data->_domain[0]=d;
   result._data->_centre[0]=c;
-  result._data->_expansion[0].value()=x;
-  result._data->_expansion[0].gradient(0)=g;
+  result._data->_expansion[0].set_value(x);
+  result._data->_expansion[0].set_gradient(0,g);
   return result;
 }
 
@@ -300,7 +301,7 @@ ApproximateTaylorModel::jacobian(const Vector<Float>& x) const
   ARIADNE_ASSERT(this->argument_size()==x.size());
   DifferentialVectorType affine=DifferentialVectorType::variable(x.size(),x.size(),1u,x);
   affine=Ariadne::evaluate(this->expansion(),affine);
-  return affine.jacobian();
+  return affine.get_jacobian();
 }
 
 
@@ -311,7 +312,7 @@ ApproximateTaylorModel::jacobian(const Vector<Interval>& x) const
   IntervalDifferentialVectorType affine=IntervalDifferentialVectorType::variable(x.size(),x.size(),1u,x);
   Vector< SparseDifferential<I> >& vec=affine;
   vec=Ariadne::evaluate(this->expansion(),vec);
-  return affine.jacobian();
+  return affine.get_jacobian();
 }
 
 
@@ -415,6 +416,22 @@ compose(const AffineTransformation& f,
 
 ApproximateTaylorModel 
 operator+(const ApproximateTaylorModel& f,
+          const Vector<Float>& c)
+{
+  typedef Float A;
+  ARIADNE_ASSERT(f.result_size()==c.size());
+  ApproximateTaylorModel h(f);
+  DifferentialVector< SparseDifferential<A> >& hev
+    =const_cast<DifferentialVector< SparseDifferential<A> >&>(h.expansion());
+  for(uint i=0; i!=c.size(); ++i) {
+    hev[i]+=c[i];
+  }
+  return h;
+}
+
+
+ApproximateTaylorModel 
+operator+(const ApproximateTaylorModel& f,
           const ApproximateTaylorModel& g)
 {
   typedef Float A;
@@ -483,7 +500,7 @@ compose(const ApproximateTaylorModel& f,
   //std::cerr<<"fe="<<fe<<std::endl;
   DifferentialVectorType const& ge=g.expansion();
   //std::cerr<<"ge="<<ge<<std::endl;
-  Vector<A> tr=-Vector<A>(f.centre())+ge.value();
+  Vector<A> tr=-Vector<A>(f.centre())+ge.get_value();
   //std::cerr<<"tr="<<tr<<std::endl;
   DifferentialVectorType fet=translate(fe,tr);
   //std::cerr<<"fet="<<fet<<std::endl;
@@ -518,7 +535,7 @@ inverse(const ApproximateTaylorModel& f,
   Vector<A> tr=f.centre()-x;
   ApproximateTaylorModel::DifferentialVectorType fet=translate(f.expansion(),tr);
   Vector<I> gd=f.domain();
-  Vector<A> gc=fet.value();
+  Vector<A> gc=fet.get_value();
   ApproximateTaylorModel::DifferentialVectorType ge=inverse(fet);
   // FIXME: Change domain
   return ApproximateTaylorModel(gd,gc,ge);
@@ -616,7 +633,7 @@ implicit2(const ApproximateTaylorModel& f,
   uint m=f.argument_size(); 
   uint n=f.result_size();
   Vector<A> v=f.evaluate(c);
-  Matrix<A> a=f.expansion().jacobian();
+  Matrix<A> a=f.expansion().get_jacobian();
   //A=A[slice(0,n)][slice(m-n,n)];
   Matrix<A> b=inverse(a);
   Vector<A> y(n);
@@ -783,6 +800,7 @@ operator<<(std::ostream& os, const ApproximateTaylorModel& tm)
   os << "  degree=" << tm.expansion().degree() << ",\n" << std::flush;
   os << "  domain=" << tm.domain() << ",\n" << std::flush;
   os << "  centre=" << tm.centre() << ",\n" << std::flush;
+  os << "  range=" << tm.range() << ",\n" << std::flush;
   os << "  expansion=" << tm.expansion() << ",\n" << std::flush;
   os << ")\n";
   return os;

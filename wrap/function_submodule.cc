@@ -134,7 +134,7 @@ class PythonFunction
     DifferentialVector< SparseDifferential<Interval> > rj(this->_result_size,this->_argument_size,1u); 
     DifferentialVector< SparseDifferential<Interval> > aj=DifferentialVector< SparseDifferential<Interval> >::variable(x.size(),x.size(),1u,x); 
     read(rj,this->_pyf(aj)); 
-    return rj.jacobian(); }
+    return rj.get_jacobian(); }
   virtual DifferentialVector< SparseDifferential<Float> > expansion (const Vector<Float>& x, const ushort& d) const {  
     DifferentialVector< SparseDifferential<Float> > rd(this->_result_size,this->_argument_size,d); 
     DifferentialVector< SparseDifferential<Float> > ad=DifferentialVector< SparseDifferential<Float> >::variable(x.size(),x.size(),d,x); 

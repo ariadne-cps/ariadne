@@ -93,13 +93,23 @@ DynamicalToolbox()
 template<class Mdl>
 typename DynamicalToolbox<Mdl>::SetModelType
 DynamicalToolbox<Mdl>::
+compose(const FlowModelType& function_model, 
+        const SetModelType& set_model) const
+{
+  return Ariadne::compose(function_model,set_model);
+}
+
+template<class Mdl>
+typename DynamicalToolbox<Mdl>::SetModelType
+DynamicalToolbox<Mdl>::
 integration_step(const FlowModelType& flow_model, 
                  const SetModelType& initial_set_model, 
                  const TimeType& integration_time) const
 {
   uint ng=initial_set_model.argument_size();
   Mdl integration_time_model = Mdl::constant(Vector<I>(ng,I(-1,1)),Vector<R>(ng,R(0)),Vector<A>(1,A(integration_time)),_order,_smoothness);
-  return this->integration_step(flow_model,initial_set_model,integration_time_model);                   }
+  return this->integration_step(flow_model,initial_set_model,integration_time_model);                   
+}
 
 
 template<class Mdl>
@@ -401,6 +411,7 @@ DynamicalToolbox<Mdl>::flow_bounds(FunctionInterface const& vf,
                                    Float const& hmax, 
                                    Float const& dmax) const
 { 
+  verbosity=9;
   // Try to find a time h and a set b such that subset(r+Interval<R>(0,h)*vf(b),b) holds
   ARIADNE_LOG(6,"flow_bounds(Function,Box,Time hmax)\n");
   ARIADNE_LOG(7,"  r="<<r<<" hmax="<<hmax<<"\n");

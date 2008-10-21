@@ -36,7 +36,6 @@
 #include "hybrid_automaton.h"
 #include "hybrid_evolver.h"
 
-
 namespace {
 
 using namespace Ariadne;
@@ -65,6 +64,8 @@ void append(V& v, const C& c)
 namespace Ariadne {
  
 const bool ENABLE_SUBDIVISIONS = false;
+static const int BLOCKING_EVENT = -2;
+using boost::shared_ptr;
 
 class DegenerateCrossingException { };
 
@@ -90,8 +91,20 @@ HybridEvolver::HybridEvolver(const EvolutionParameters& p)
 
 
 
+struct DetectionData {
+  int id;
+  DiscreteEvent event;
+  shared_ptr<const FunctionInterface> guard;
+  int kind;
+  bool initially_active;
+  bool finally_active;
+  Interval touching_times;
+  ApproximateTaylorModel hitting_time;
+};
 
-
+inline bool operator<(const DetectionData& d1, const DetectionData& d2) {
+  return d1.id < d2.id;
+}
 
 void
 HybridEvolver::
@@ -104,8 +117,9 @@ _evolution(EnclosureListType& final_sets,
            Semantics semantics, 
            bool reach) const
 {
+  //  uint verbosity=9;
   uint verbosity=0;
-  
+
   
   typedef FunctionInterface FunctionType;
   typedef Vector<Interval> BoxType;
@@ -162,16 +176,17 @@ _evolution(EnclosureListType& final_sets,
     Integer initial_steps;
     SetModelType initial_set_model;
     TimeModelType initial_time_model;
+    ARIADNE_LOG(9,"working_set = "<<working_sets.back()<<"\n");
     make_ltuple(initial_location,initial_steps,initial_set_model,initial_time_model)=working_sets.back();
     working_sets.pop_back();
 
     ARIADNE_LOG(4,"initial_steps = "<<initial_steps<<"\n");
-    ARIADNE_LOG(6,"initial_time_model = "<<initial_time_model<<"\n");
+    ARIADNE_LOG(6,"initial_time_model = "<<initial_time_model<<"");
     ARIADNE_LOG(4,"initial_location = "<<initial_location<<"\n");
     ARIADNE_LOG(6,"initial_set_model = "<<initial_set_model<<"\n");
 
     ARIADNE_LOG(2,"steps = "<<initial_steps<<" ");
-    ARIADNE_LOG(2,"time = "<<initial_time_model.range()<<" ");
+    ARIADNE_LOG(2,"time_range = "<<initial_time_model.range()<<" ");
     ARIADNE_LOG(2,"location = "<<initial_location<<" ");
     ARIADNE_LOG(2,"box = "<<initial_set_model.range()<<" ");
     ARIADNE_LOG(2,"radius = "<<radius(initial_set_model.range())<<"\n\n");
@@ -199,32 +214,111 @@ _evolution(EnclosureListType& final_sets,
       }
     } else {
 
+      /////////////// Main Evolution ////////////////////////////////
       const DiscreteMode& initial_mode=system.mode(initial_location);
-      ARIADNE_ASSERT(initial_mode.invariants().size()==1);
       const FunctionType* dynamic_ptr=&initial_mode.dynamic();
-      const FunctionType* invariant_ptr=&*initial_mode.invariants()[0];
-      const FunctionType* activation_ptr=0;
-      const FunctionType* reset_ptr=0;
+      
 
+      std::set<DetectionData> transition_data;
+      std::vector< shared_ptr<const FunctionInterface> > invariants
+        =initial_mode.invariants();
+      ARIADNE_LOG(9,"invariants="<<invariants<<"\n");
+      for(std::vector< shared_ptr<const FunctionInterface> >::const_iterator
+            iter=invariants.begin(); iter!=invariants.end(); ++iter)
+      {
+        DetectionData new_data;
+        new_data.id=transition_data.size();
+        new_data.event=BLOCKING_EVENT;
+        new_data.guard=(*iter);
+        transition_data.insert(new_data);
+      }
+
+      std::set< DiscreteTransition > transitions
+        =system.transitions(initial_mode.location());
+      ARIADNE_LOG(9,"transitions="<<transitions<<"\n");
+      for(std::set< DiscreteTransition >::const_iterator 
+            iter=transitions.begin(); iter!=transitions.end(); ++iter)
+      {
+        DetectionData new_data;
+        new_data.id=transition_data.size();
+        new_data.event=iter->event();
+        new_data.guard=iter->activation_ptr();
+        transition_data.insert(new_data);
+      }
       
-      // Main evolution
-      Vector<Interval> initial_set_bounds=initial_set_model.range();
-      Interval initial_time_range=initial_time_model.range()[0];
-      ARIADNE_LOG(4,"initial_time_range = "<<initial_time_range<<"\n");
-      ARIADNE_ASSERT(initial_time_range.width() <= maximum_step_size);
-      
-      Vector<Interval> flow_bounds; 
+
+
+      // Set evolution parameters
       const Float maximum_step_size=this->_parameters->maximum_step_size;
       const Float maximum_bounds_diameter=this->_parameters->maximum_enclosure_radius*2;
+      const Float zero_time=0.0;
+
+      // Get bounding boxes for time and space range
+      Vector<Interval> initial_set_bounds=initial_set_model.range();
+      ARIADNE_LOG(4,"initial_set_range = "<<initial_set_bounds<<"\n");
+      Interval initial_time_range=initial_time_model.range()[0];
+      ARIADNE_LOG(4,"initial_time_range = "<<initial_time_range<<"\n");
+      
+      ARIADNE_ASSERT(initial_time_range.width() <= maximum_step_size);
+      
+      // Compute flow bounds and find flow bounding box
+      Vector<Interval> flow_bounds; 
       Float step_size;
-      Interval invariant_value(-1,1);
+      make_lpair(step_size,flow_bounds)=this->_toolbox->flow_bounds(*dynamic_ptr,initial_set_model.range(),maximum_step_size,maximum_bounds_diameter);
+      ARIADNE_LOG(4,"step_size = "<<step_size<<"\n");
+      ARIADNE_LOG(4,"flow_bounds = "<<flow_bounds<<"\n");
+   
+      // Compute the flow model
+      FlowModelType flow_model=this->_toolbox->flow_model(*dynamic_ptr,initial_set_bounds,step_size,flow_bounds);
+      ARIADNE_LOG(6,"flow_model = "<<flow_model<<"\n");
+
+      // Compute the integration time model
+      TimeModelType final_time_model=initial_time_model+Vector<Float>(1u,step_size);
+      ARIADNE_LOG(6,"final_time_model = "<<final_time_model<<"\n");
+      TimeModelType integration_time_model=final_time_model-initial_time_model;
+
+      // Compute the flow tube (reachable set) model and the final set
+      ModelType final_set_model=this->_toolbox->integration_step(flow_model,initial_set_model,integration_time_model);
+      ARIADNE_LOG(6,"final_set_model = "<<final_set_model<<"\n");
+      ModelType reach_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,zero_time,integration_time_model);         
+      ARIADNE_LOG(6,"reach_set_model = "<<reach_set_model<<"\n");
+      ARIADNE_LOG(4,"Done computing continuous evolution\n");
+      std::cerr << "verbosity="<<verbosity<<std::endl;
+
+
+      static const bool NO_DISCRETE_EVOLUTION=true;
+
+      
+      working_sets.push_back(make_tuple(initial_location,initial_steps,final_set_model,final_time_model));
+      intermediate_sets.adjoin(EnclosureType(initial_location,reach_set_model));
+      final_sets.adjoin(EnclosureType(initial_location,final_set_model));
+
+
+      break;
+
+
+
+
+
+
+
+
+      Interval invariant_value;
+      const FunctionInterface* invariant_ptr;
+      const FunctionInterface* activation_ptr;
+      const FunctionInterface* reset_ptr;
+      
+    
      
 
       // Compute flow bounds and find flow bounding box
       if(initial_time_range.width()>0) {
         make_lpair(step_size,flow_bounds)=this->_toolbox->flow_bounds(*dynamic_ptr,initial_set_model.range(),maximum_step_size,maximum_bounds_diameter);
-        invariant_value=invariant_ptr->evaluate(flow_bounds)[0];
       }
+      
+      // Compute the values of the invariants over the flow bo
+      invariant_value=invariant_ptr->evaluate(flow_bounds)[0];
+      
       if(invariant_value.upper()>0) {
         make_lpair(step_size,flow_bounds)=this->_toolbox->flow_bounds(*dynamic_ptr,initial_set_model.range(),maximum_step_size,maximum_bounds_diameter);
         invariant_value=invariant_ptr->evaluate(flow_bounds)[0];
@@ -238,12 +332,12 @@ _evolution(EnclosureListType& final_sets,
 
       // Compute the discrete transitions and their activation times
       std::set< DiscreteTransition > transition_set=system.transitions(initial_location);
-      std::vector< DiscreteTransition > transitions(transition_set.begin(),transition_set.end());
+      std::vector< DiscreteTransition > all_transitions(transition_set.begin(),transition_set.end());
       std::vector< DiscreteTransition > possibly_active_transitions;
       std::vector< DiscreteTransition > active_transitions;
 
       for(uint i=0; i!=transitions.size(); ++i) {
-        const DiscreteTransition& transition=transitions[i];
+        const DiscreteTransition& transition=all_transitions[i];
         if(possibly(this->_toolbox->active(transition.activation(),flow_bounds))) {
           possibly_active_transitions.push_back(transition);
         }
@@ -255,16 +349,8 @@ _evolution(EnclosureListType& final_sets,
         throw std::runtime_error("Current version cannot handle more than one possibly active transition at a time.");
       }
 
-      // Compute the flow model
-      FlowModelType flow_model=this->_toolbox->flow_model(*dynamic_ptr,initial_set_bounds,step_size,flow_bounds);
-      ARIADNE_LOG(6,"flow_model = "<<flow_model<<"\n");
-      
-      const Float zero_time=0;
       Float step_time=step_size;
       Float final_time;
-      
-      ModelType integration_time_model;
-      ModelType final_time_model;
       
       // Compute the crossing times of the invariant
       bool blocking=false;
@@ -294,8 +380,8 @@ _evolution(EnclosureListType& final_sets,
         }
       }
 
-      ModelType final_set_model=this->_toolbox->integration_step(flow_model,initial_set_model,integration_time_model);
-      ModelType reach_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,zero_time,integration_time_model);         
+      final_set_model=this->_toolbox->integration_step(flow_model,initial_set_model,integration_time_model);
+      reach_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,zero_time,integration_time_model);         
       ARIADNE_LOG(4,"Done computing continuous evolution\n");
 
       if(!blocking) { working_sets.push_back(make_tuple(initial_location,initial_steps,final_set_model,final_time_model)); }

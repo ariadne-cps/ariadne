@@ -28,8 +28,11 @@
 #include "point.h"
 #include "box.h"
 #include "zonotope.h"
+#include "curve.h"
 #include "list_set.h"
 #include "grid_set.h"
+
+#include "approximate_taylor_model.h"
 
 #include "geometry2d.h"
 
@@ -113,6 +116,14 @@ Polytope polytope(const Polytope& p)
 {
   Polytope r=p;
   return reduce2d(r);
+}
+
+
+Polytope polytope(const ApproximateTaylorModel& ts) 
+{
+  Vector<Float> c=ts.evaluate(ts.centre());
+  Matrix<Float> G=ts.jacobian(ts.centre());
+  return polytope(Zonotope(c,G)); 
 }
 
 
@@ -265,21 +276,20 @@ PlanarProjectionMap::operator() (const Polytope& p) const
 }
 
 
-/*
 InterpolatedCurve
 PlanarProjectionMap::operator()(const InterpolatedCurve& curve) const
 {
-  const PlanarProjectionMap& self=*this;
+  const PlanarProjectionMap& map=*this;
   InterpolatedCurve::const_iterator iter=curve.begin();
   InterpolatedCurve::const_iterator end=curve.end();
-  InterpolatedCurve result(self(iter->second));
+  InterpolatedCurve result(map(iter->second));
   while(iter!=curve.end()) {
     ++iter;
-    result.push_back(self(iter->second));
+    result.insert(iter->first,map(iter->second));
   }
   return result;
 }
-*/
+
 
 std::ostream& 
 operator<<(std::ostream& os, const PlanarProjectionMap& ppm) 

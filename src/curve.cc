@@ -23,75 +23,76 @@
  
 #include <cassert>
 
-#include "linear_algebra/vector.h"
-#include "linear_algebra/matrix.h"
-#include "geometry/point.h"
+#include "vector.h"
+#include "matrix.h"
+#include "point.h"
+
+#include "curve.h"
 
 
 namespace Ariadne {
 
 
-template<class R>
-Curve<R>::~Curve() 
+Curve::~Curve() 
 {
-  delete this->_function_ptr;
 }
 
-template<class R>
-Curve<R>::Curve(const FunctionInterface<R>& f) 
+
+
+Curve::Curve(const FunctionInterface& f) 
   : _function_ptr(f.clone())
 {
   assert(this->_function_ptr->argument_size()==1);
 }
 
-template<class R>
-Curve<R>::Curve(const Curve<R>& c) 
+
+Curve::Curve(const Curve& c) 
   : _function_ptr(c._function_ptr->clone())
 {
 }
 
-template<class R>
-Curve<R>* 
-Curve<R>::clone() const 
+
+Curve* 
+Curve::clone() const 
 {
-  return new Curve<R>(*this);
+  return new Curve(*this);
 }
 
-template<class R>
-dimension_type 
-Curve<R>::dimension() const 
+
+uint 
+Curve::dimension() const 
 {
   return this->_function_ptr->result_size();
 }
 
-template<class R>
-smoothness_type 
-Curve<R>::smoothness() const 
+
+ushort 
+Curve::smoothness() const 
 {
   return this->_function_ptr->smoothness();
 }
 
 
-template<class R>
-Point< typename Curve<R>::A > 
-Curve<R>::value(const A& s) const 
-{
-  Vector<A> v(1,&s);
-  return Point<A>(this->_function_ptr->evaluate(v));
-}
 
-template<class R>
-Vector< typename Curve<R>::A > 
-Curve<R>::tangent(const A& s) const 
+Point 
+Curve::value(const Float& s) const 
 {
-  Vector<A> v(1,&s);
-  return this->_function_ptr->jacobian(v).column(0);
+  Vector<Float> v(1,&s);
+  return Point(this->_function_ptr->evaluate(v));
 }
 
 
-template<class R>
+Vector< Float > 
+Curve::tangent(const Float& s) const 
+{
+  Vector<Float> v(1,&s);
+  return column(this->_function_ptr->jacobian(v),0);
+}
+
+
+
 std::ostream& 
-Curve<R>::write(std::ostream& os) const 
+Curve::write(std::ostream& os) const 
 {
   return os << "Curve( function=" << *this->_function_ptr << " )";
 }

@@ -36,7 +36,8 @@
 #include <cassert>
 #include <cstring>
 
-#include <point.h>
+#include "macros.h"
+#include "point.h"
 
 namespace Ariadne {
 
@@ -46,11 +47,13 @@ class Box;
 class Zonotope;
 class Polytope;
 class InterpolatedCurve;
-
+class ApproximateTaylorModel;
 
 Polytope polytope(const Box& bx);
 Polytope polytope(const Zonotope& z);
 Polytope polytope(const Polytope& p);
+Polytope polytope(const ApproximateTaylorModel& ts);
+
 Point baricentre(const Polytope& p);
 bool operator<(const Point& pt1, const Point& pt2);
 
@@ -85,9 +88,9 @@ class PlanarProjectionMap
   Box operator() (const Box& bx) const;
   Zonotope operator() (const Zonotope& z) const;
   Polytope operator() (const Polytope& z) const;
-  //InterpolatedCurve operator() (const InterpolatedCurve& c) const;
+  InterpolatedCurve operator() (const InterpolatedCurve& c) const;
  private:
-  friend std::ostream& operator<<(std::ostream&,const PlanarProjectionMap&);
+  friend std::ostream& operator<<(std::ostream&, const PlanarProjectionMap&);
  private:
   uint _d;
   uint _i;

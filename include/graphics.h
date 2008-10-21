@@ -32,7 +32,9 @@
 #include <string>
 
 #include "box.h"
+#include "zonotope.h"
 #include "approximate_taylor_model.h"
+#include "geometry2d.h"
 
 namespace Ariadne {
 
@@ -105,11 +107,10 @@ Graphic& operator<<(Graphic& g, const FillStyle& fs) { g.set_fill_style(fs); ret
 Graphic& operator<<(Graphic& g, const FillColour& fc) { g.set_fill_colour(fc); return g; }
 
 inline void plot(Graphic& g, const Box& bx) { g.plot(bx); }
-
-inline void plot(Graphic& g, const std::pair<int,ApproximateTaylorModel>& hs) {
-  g.plot(Box(hs.second.range())); }
-inline void plot(Graphic& g, const ApproximateTaylorModel& ts) {
-  g.plot(Box(ts.range())); }
+inline void plot(Graphic& g, const Zonotope& z) { g.plot(polytope(z)); }
+inline void plot(Graphic& g, const Polytope& p) { g.plot(polytope(p)); }
+inline void plot(Graphic& g, const ApproximateTaylorModel& ts) { g.plot(polytope(ts)); }
+template<class BS> inline void plot(Graphic& g, const std::pair<int,BS>& hs) { plot(g,hs.second); }
 
 template<class SET> Graphic& operator<<(Graphic& g, const SET& set) { plot(g,set); return g; }
 

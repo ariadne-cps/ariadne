@@ -49,13 +49,20 @@ static void
 trace(cairo_t *cr, const Box& bx);
 
 static void 
-draw(cairo_t *cr, const std::vector<Box>& boxes, 
+trace(cairo_t *cr, const Polytope& p);
+
+static void 
+draw(cairo_t *cr, const std::vector<Polytope>& boxes, 
      int canvas_width, int canvas_height);
 
 
+
 struct GraphicsObject {
+  ~GraphicsObject() { if(shape_ptr) { delete shape_ptr; } }
+  enum ShapeKind { BOX, POLYTOPE, CURVE };
+  ShapeKind kind;
   Colour fill_colour;
-  Polytope shape;
+  void* shape_ptr;
 };
 
 struct Graphic::Impl 
@@ -102,18 +109,24 @@ void Graphic::set_fill_colour(Colour fc)
 
 
 void Graphic::plot(const Box& bx) {
-    ARIADNE_ASSERT(bx.size()==2);
-    _impl->polytopes.push_back(polytope(bx));
+    ARIADNE_ASSERT(bx.dimension()==2);
+    this->_impl->polytopes.push_back(polytope(bx));
+}
+
+void Graphic::plot(const Polytope& p) {
+    ARIADNE_ASSERT(p.dimension()==2);
+    this->_impl->polytopes.push_back(polytope(p));
 }
 
 void Graphic::clear() {
-    _impl->polytopes.clear();
+    this->_impl->polytopes.clear();
 }
 
 
 
 void trace(cairo_t *cr, const Box& bx) 
 {
+    // std::cerr << "trace(cairo_t *cr, Box bx) bx="<<bx<<std::endl;
     cairo_move_to (cr, bx[0].lower(), bx[1].lower());
     cairo_line_to (cr, bx[0].upper(), bx[1].lower());
     cairo_line_to (cr, bx[0].upper(), bx[1].upper());
@@ -123,6 +136,7 @@ void trace(cairo_t *cr, const Box& bx)
 
 void trace(cairo_t *cr, const Polytope& p) 
 {
+    // std::cerr << "trace(cairo_t *cr, Polytope p) p="<<p<<std::endl;
     ARIADNE_ASSERT(p.dimension()==2);
     ARIADNE_ASSERT(p.size()>=3);
     cairo_move_to (cr, p[0][0], p[0][1]);
@@ -134,7 +148,7 @@ void trace(cairo_t *cr, const Polytope& p)
 
 void draw(cairo_t *cr, const std::vector<Polytope>& polytopes, const Colour& fill_colour, int canvas_width, int canvas_height) 
 {
-    //std::cerr << "draw(...)\n  polytopes=" << polytopes << std::endl;
+    //std::cerr<<"draw(...)\n  polytopes=("<<polytopes.size()<<")"<<polytopes<<std::endl;
 
     // Compute extreme values
     if(polytopes.empty()) {
@@ -153,9 +167,7 @@ void draw(cairo_t *cr, const std::vector<Polytope>& polytopes, const Colour& fil
     // The bounding box for the entire figure
     Box gbbox=bbox+Vector<Interval>(2,Interval(-0.1,0.1));
   
-    // std::cerr << "  bbox="<<bbox<<std::endl;
-    bbox[0]+=Interval(-0.1,0.1);
-    bbox[1]+=Interval(-0.1,0.1);
+    //std::cerr<<"  bbox="<<bbox<<"\n  lbbox="<<lbbox<<"\n  gbbox="<<gbbox<<std::endl;
 
     // clear background 
     cairo_set_source_rgb (cr, 1,1,1);
@@ -165,9 +177,13 @@ void draw(cairo_t *cr, const std::vector<Polytope>& polytopes, const Colour& fil
     cairo_set_line_width (cr,0.001);
 
     // compute user to canvas coordinate transformation
-    cairo_scale (cr, canvas_width/gbbox[0].width(), 
-                    -canvas_height/gbbox[1].width());
-    cairo_translate(cr, 0.0, 0.05-gbbox[1].width());
+    double sc0=canvas_width/gbbox[0].width();
+    double sc1=-canvas_height/gbbox[1].width();
+    double tr0=-gbbox[0].lower();
+    double tr1=-gbbox[1].upper();
+    //std::cerr << "  sc0="<<sc0<<", sc1="<<sc1<<", tr0="<<tr0<<", tr1="<<tr1<<std::endl;
+    cairo_scale (cr, sc0,sc1);
+    cairo_translate(cr, tr0, tr1);
     
     cairo_set_source_rgb (cr, fill_colour.red, fill_colour.green, fill_colour.blue);
     for(uint i=0; i!=polytopes.size(); ++i) {
@@ -206,8 +222,6 @@ Graphic::write(const char* filename)
  
     draw(cr, polytopes, this->_impl->fill_colour, canvas_width, canvas_height);
 
-   cairo_destroy (cr);
-   
    cairo_surface_write_to_png (surface, (std::string(filename)+".png").c_str());
    
    cairo_surface_destroy (surface);

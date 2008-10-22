@@ -23,6 +23,7 @@ SRC = \
 	grid_set.cc \
 	hybrid_set.cc \
 	hybrid_automaton.cc \
+	orbit.cc \
 	hybrid_evolver.cc \
 	discretiser.cc \
 	analyser.cc \

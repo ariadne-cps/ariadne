@@ -37,10 +37,11 @@
 #include "discretiser_interface.h"
 #include "analyser_interface.h"
 
-
-
 #include "grid_set.h"
 #include "hybrid_set.h"
+
+#include "logging.h"
+
 
 namespace Ariadne {
  
@@ -65,6 +66,7 @@ template<class ES> class HybridDiscretiser;
  */
 class HybridAnalyser
   : public AnalyserInterface<HybridAutomaton>
+  , public Loggable
 {
  private:
   boost::shared_ptr< EvolutionParameters > _parameters;

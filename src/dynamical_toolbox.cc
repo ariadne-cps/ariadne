@@ -149,6 +149,31 @@ typename DynamicalToolbox<Mdl>::SetModelType
 DynamicalToolbox<Mdl>::
 reachability_step(const FlowModelType& flow_model, 
                   const SetModelType& initial_set_model, 
+                  const TimeModelType& expanded_reach_time_model) const
+{
+  ARIADNE_ASSERT(initial_set_model.argument_size()+1==expanded_reach_time_model.argument_size());
+
+  // Compute the reachable set
+  // Need an extra independent variable to represent time
+  uint ng=initial_set_model.argument_size();
+  
+  ModelType expanded_initial_set_model=embed(initial_set_model,Vector<I>(ng+1,I(-1,1)),Vector<R>(ng+1,R(0)),0u);
+  ARIADNE_LOG(6,"expanded_initial_set_model="<<expanded_initial_set_model<<"\n");
+  ModelType expanded_timed_set_model=join(expanded_initial_set_model,expanded_reach_time_model);
+  ARIADNE_LOG(6,"expanded_timed_set_model="<<expanded_timed_set_model<<"\n");
+  ModelType reach_set_model=compose(flow_model,expanded_timed_set_model);
+  ARIADNE_LOG(6,"reach_set_model = "<<reach_set_model<<"\n");
+  
+  return reach_set_model;
+}
+
+
+
+template<class Mdl>
+typename DynamicalToolbox<Mdl>::SetModelType
+DynamicalToolbox<Mdl>::
+reachability_step(const FlowModelType& flow_model, 
+                  const SetModelType& initial_set_model, 
                   const TimeType& initial_time, 
                   const TimeType& final_time) const
 {
@@ -248,6 +273,18 @@ reachability_time(const TimeModelType& initial_time_model,
   ModelType expanded_reach_time_model=expanded_initial_time_model+expanded_time_interval_model*(expanded_final_time_model-expanded_initial_time_model);
   ARIADNE_LOG(6,"expanded_reach_time_model="<<expanded_reach_time_model<<"\n");
   return expanded_reach_time_model;
+}
+
+
+template<class Mdl>
+typename DynamicalToolbox<Mdl>::TimeModelType
+DynamicalToolbox<Mdl>::
+reachability_time(const TimeType& initial_time, 
+                  const TimeModelType& final_time_model) const
+{
+  Mdl initial_time_model = Mdl::constant(final_time_model.domain(),final_time_model.centre(),
+                                         Vector<Float>(1,initial_time),_order,_smoothness);
+  return this->reachability_time(initial_time_model,final_time_model);
 }
 
 
@@ -471,6 +508,19 @@ DynamicalToolbox<Mdl>::predicate_model(FunctionInterface const& g, Vector<Interv
   ARIADNE_LOG(6,"predicate_model = "<<predicate_model<<"\n");
 
   return predicate_model;
+}
+
+//! \brief A model for the constant time function \a t over the domain \a d.
+template<class Mdl>
+Mdl
+DynamicalToolbox<Mdl>::
+constant_time_model(const Float& t, 
+                    const BoxType& bx) const
+{
+  Mdl time_model=Mdl::constant(bx,midpoint(bx),Vector<Float>(1u,t),_order,_smoothness);
+  ARIADNE_LOG(6,"time_model = "<<time_model<<"\n");
+
+  return time_model;
 }
 
 

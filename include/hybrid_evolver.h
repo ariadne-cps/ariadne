@@ -42,12 +42,15 @@
 #include "evolver_base.h"
 #include "evolution_parameters.h"
 
+#include "logging.h"
+
 namespace Ariadne {  
   
 template<class Sys, class BS> class Evolver;
 
 class ApproximateTaylorModel;
 class HybridAutomaton;
+template<class ES> class Orbit;
 
 class EvolutionParameters;
 template<class MDL> class ToolboxInterface;
@@ -68,6 +71,7 @@ typedef std::pair<DiscreteState,ApproximateTaylorModel> DefaultHybridSetType;
  */
 class HybridEvolver
   : public EvolverBase< HybridAutomaton,DefaultHybridSetType>
+  , public Loggable
 {
   typedef Ariadne::DefaultModelType ModelType;
  public:
@@ -100,22 +104,32 @@ class HybridEvolver
 
   //@{
   //! \name Evolution using abstract sets.
+  //! \brief Compute an approximation to the orbit set using upper semantics. 
+  Orbit<EnclosureType> orbit(const SystemType& system, const EnclosureType& initial_set, const TimeType& time) const;
+
+
   //! \brief Compute an approximation to the evolution set using upper semantics. 
   EnclosureListType evolve(const SystemType& system, const EnclosureType& initial_set, const TimeType& time) const {
     EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate; 
-    this->_evolution(final,reachable,intermediate,system,initial_set,time,upper_semantics,false); 
+    this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS,false); 
         return final; }
 
   //! \brief Compute an approximation to the evolution set under upper semantics. 
   EnclosureListType reach(const SystemType& system, const EnclosureType& initial_set, const TimeType& time) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate; 
-        this->_evolution(final,reachable,intermediate,system,initial_set,time,upper_semantics,true); 
+        this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS,true); 
         return intermediate; }
 
  protected:
   virtual void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate, 
                           const SystemType& system, const EnclosureType& initial, const TimeType& time, 
                           Semantics semantics, bool reach) const;
+
+  typedef tuple<DiscreteState, Integer, ModelType, ModelType> HybridTimedSetType;
+  virtual void _evolution_step(std::vector< HybridTimedSetType >& working_sets, 
+                               EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,  
+                               const SystemType& system, const HybridTimedSetType& current_set, const TimeType& time, 
+                               Semantics semantics, bool reach) const;
 
  private:
   boost::shared_ptr< EvolutionParameters > _parameters;

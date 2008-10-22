@@ -30,6 +30,7 @@
 #define ARIADNE_DYNAMICAL_TOOLBOX_H
 
 #include "tribool.h"
+#include "logging.h"
 #include "toolbox_interface.h"
 
 /* \brief Top-level namespace. */
@@ -51,6 +52,7 @@ class Box;
 template<class Mdl> 
 class DynamicalToolbox
   : public ToolboxInterface<Mdl>
+  , public Loggable
 {
   typedef Float R;
   typedef Float A;
@@ -146,6 +148,17 @@ class DynamicalToolbox
                                 const TimeModelType& integration_time_model) const;
   
   //! \brief Computes the points reached by evolution of the \a initial_set_model under the flow
+  //! given by \a flow_model for times given by \a reachability_time_model. 
+  //! The \a reachability_time_model must have one more independent variable than the 
+  //! \a initial_set_model.
+  //! 
+  //! \invariant <code>reachability_time_model.argument_size()==initial_set_model.argument_size()+1</code>
+  virtual SetModelType 
+  reachability_step(const FlowModelType& flow_model, 
+                    const SetModelType& initial_set_model, 
+                    const TimeModelType& reachability_time_model) const;
+  
+  //! \brief Computes the points reached by evolution of the \a initial_set_model under the flow
   //! given by \a flow_model for times between \a initial_time and \a final_time.
   SetModelType reachability_step(const FlowModelType& flow_model, 
                                  const SetModelType& initial_set_model, 
@@ -180,7 +193,13 @@ class DynamicalToolbox
                                   const TimeModelType& final_time_model) const;
   
   //! \brief Gives the extended time model for the reachability step between the
-  //! \a initial_time_model and the \a final_time_model. The new time is given by
+  //! \a initial_time and the \a final_time_model. The new time is given by
+  //! \f$\tau'(e,s) = (1-s)\tau_0+s\tau_1(e)\f$.
+  TimeModelType reachability_time(const TimeType& initial_time, 
+                                  const TimeModelType& final_time_model) const;
+  
+  //! \brief Gives the extended time model for the reachability step between the
+  //! \a initial_time_model and the \a final_time. The new time is given by
   //! \f$\tau'(e,s) = (1-s)\tau_0(e)+s\tau_1\f$.
   TimeModelType reachability_time(const TimeModelType& initial_time_model, 
                                   const TimeType& final_time) const;
@@ -198,7 +217,7 @@ class DynamicalToolbox
   GuardModelType predicate_model(const FunctionType& g, const BoxType& d) const;
 
   //! \brief A model for the constant time \a t over the box \a d.
-  TimeModelType constant_time_model(Float& t, const BoxType& d) const;
+  TimeModelType constant_time_model(const Float& t, const BoxType& d) const;
 
 
   //! \brief Computed a pair \f$(h,B)\f$ such that the flow of the vector_field \a vf starting in

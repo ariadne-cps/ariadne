@@ -36,7 +36,7 @@ using std::pair;
 
 template<class BS> class ListSet;
 
-enum Semantics { lower_semantics, upper_semantics }; 
+enum Semantics { LOWER_SEMANTICS, UPPER_SEMANTICS }; 
 
   
 /*! \ingroup EvaluatorInterfaces \ingroup Evolvers

@@ -152,6 +152,17 @@ class ToolboxInterface
                    const TimeModelType& integration_time_model) const = 0;
   
   //! \brief Computes the points reached by evolution of the \a initial_set_model under the flow
+  //! given by \a flow_model for times given by \a reachability_time_model. 
+  //! The \a reachability_time_model must have one more independent variable than the 
+  //! \a initial_set_model.
+  //! 
+  //! \invariant <code>reachability_time_model.argument_size()==initial_set_model.argument_size()+1</code>
+  virtual SetModelType 
+  reachability_step(const FlowModelType& flow_model, 
+                    const SetModelType& initial_set_model, 
+                    const TimeModelType& reachability_time_model) const = 0;
+  
+  //! \brief Computes the points reached by evolution of the \a initial_set_model under the flow
   //! given by \a flow_model for times between \a initial_time and \a final_time.
   virtual SetModelType 
   reachability_step(const FlowModelType& flow_model, 
@@ -191,8 +202,15 @@ class ToolboxInterface
                     const TimeModelType& final_time_model) const = 0;
   
   //! \brief Gives the extended time model for the reachability step between the
-  //! \a initial_time_model and the \a final_time_model. The new time is given by
-  //! \f$\tau'(e,s) = (1-s)\tau_0(e)+s\tau_1(e)\f$.
+  //! \a initial_time and the \a final_time_model. The new time is given by
+  //! \f$\tau'(e,s) = (1-s)\tau_0+s\tau_1(e)\f$.
+  virtual TimeModelType
+  reachability_time(const TimeType& initial_time, 
+                    const TimeModelType& final_time_model) const = 0;
+  
+  //! \brief Gives the extended time model for the reachability step between the
+  //! \a initial_time_model and the \a final_time. The new time is given by
+  //! \f$\tau'(e,s) = (1-s)\tau_0(e)+s\tau_1\f$.
   virtual TimeModelType
   reachability_time(const TimeModelType& initial_time_model, 
                     const TimeType& final_time) const = 0;
@@ -215,6 +233,11 @@ class ToolboxInterface
   virtual GuardModelType 
   predicate_model(const FunctionType& g, 
                   const BoxType& d) const = 0;
+
+  //! \brief A model for the constant time function \a t over the domain \a d.
+  virtual TimeModelType 
+  constant_time_model(const Float& t, 
+                      const BoxType& d) const = 0;
 
   
   //! \brief Computed a pair \f$(h,B)\f$ such that the flow of the vector_field \a vf starting in

@@ -40,6 +40,14 @@ typedef size_t size_type;
 /****************************************Grid**********************************************/
 
  
+struct Grid::Data 
+{ 
+  Vector<Float> _origin; 
+  Vector<Float> _lengths; 
+};
+
+
+
 Grid::~Grid()
 {
 }
@@ -64,8 +72,8 @@ Grid::Grid(const Grid& gr)
 Grid::Grid(uint d, Float l)
   : _data(new Data())
 {
-  array<Float> origin(d,Float(0));
-  array<Float> lengths(d,l);
+  Vector<Float> origin(d,Float(0));
+  Vector<Float> lengths(d,l);
   this->_create(origin,lengths);
 }
 
@@ -74,9 +82,8 @@ Grid::Grid(uint d, Float l)
 Grid::Grid(const Vector<Float>& lengths)
   : _data(new Data())
 {
-  array<Float> o(lengths.size(),0);
-  const array<Float>& l=reinterpret_cast<const array<Float>&>(lengths.data());
-  this->_create(o,l);
+  Vector<Float> origin(lengths.size(),0);
+  this->_create(origin,lengths);
 }
 
 
@@ -87,9 +94,7 @@ Grid::Grid(const Vector<Float>& origin, const Vector<Float>& lengths)
   if(origin.size() != lengths.size()) {
     throw IncompatibleSizes(__PRETTY_FUNCTION__);
   }
-  const array<Float>& o=reinterpret_cast<const array<Float>&>(origin.data());
-  const array<Float>& l=reinterpret_cast<const array<Float>&>(lengths.data());
-  this->_create(o,l);
+  this->_create(origin,lengths);
 }
 
 
@@ -98,7 +103,7 @@ Grid::Grid(const Vector<Float>& origin, const Vector<Float>& lengths)
 
 
 void
-Grid::_create(const array<Float>& origin, const array<Float>& lengths) 
+Grid::_create(const Vector<Float>& origin, const Vector<Float>& lengths) 
 {
   this->_data->_origin=origin;
   this->_data->_lengths=lengths;
@@ -118,7 +123,7 @@ Grid::dimension() const
 const Vector<Float>&
 Grid::origin() const
 {
-  return reinterpret_cast<const Vector<Float>&>(this->_data->_origin);
+  return this->_data->_origin;
 }
 
 
@@ -126,7 +131,7 @@ Grid::origin() const
 const Vector<Float>&
 Grid::lengths() const
 {
-  return reinterpret_cast<const Vector<Float>&>(this->_data->_lengths);
+  return this->_data->_lengths;
 }
 
 

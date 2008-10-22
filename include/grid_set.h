@@ -70,7 +70,6 @@ namespace Ariadne {
 
 	class GridTreeCursor;
 	class GridTreeConstIterator;
-	class GridSubTreeIterator;
 
 	
 	/*Declarations of classes in other files*/
@@ -132,7 +131,7 @@ namespace Ariadne {
                 typedef Float real_type;
             private:
                 // Structure containing actual data values
-                struct Data { Vector<Float> _origin; Vector<Float> _lengths; };
+                struct Data;
             public:
                 //! Destructor.
                 ~Grid();
@@ -191,7 +190,7 @@ namespace Ariadne {
                 Vector<Interval> box(const GridCell& cell) const;
            private:
                  // Create new data
-                 void _create(const array<Float>& o, const array<Float>& l);
+                 void _create(const Vector<Float>& o, const Vector<Float>& l);
            private:
                 // Pointer to data. We can test grids for equality using reference semantics since data is a constant.
                 boost::shared_ptr<Data> _data;

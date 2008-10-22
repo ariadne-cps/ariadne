@@ -35,6 +35,7 @@
 #include "zonotope.h"
 #include "list_set.h"
 #include "evolution_parameters.h"
+#include "orbit.h"
 #include "hybrid_set.h"
 #include "hybrid_evolver.h"
 #include "graphics.h"
@@ -81,14 +82,16 @@ TestHybridEvolution::system()
   Matrix<Float> c(1,2,bdata);
   Vector<Float> d(1,Float(1.0));
   AffineFunction guard3(c,-d);
+  AffineFunction guard4(-c,-d);
   AffineFunction activation4(-c,-d);
   AffineFunction invariant2(-c,-1.125*d);
 
   automaton.new_mode(location1,dynamic1);
   automaton.new_mode(location2,dynamic2);
-  automaton.new_invariant(location2,invariant2);
+  //automaton.new_invariant(location2,invariant2);
   automaton.new_forced_transition(event3,location1,location2,reset,guard3);
-  automaton.new_unforced_transition(event4,location2,location1,reset,activation4);
+  automaton.new_forced_transition(event4,location2,location1,reset,guard4);
+  //automaton.new_unforced_transition(event4,location2,location1,reset,activation4);
 
   cout << "Finished creating hybrid automaton." << endl;
 
@@ -108,7 +111,7 @@ void TestHybridEvolution::test() const
   typedef std::pair<DiscreteState,ApproximateTaylorModel> HybridEnclosureType;
 
   // Set up the evolution parameters and grid
-  Float time(5.0);
+  Float time(3.0);
   Float step_size(0.125);
   Float enclosure_radius(0.25);
     
@@ -123,6 +126,8 @@ void TestHybridEvolution::test() const
   Box initial_box(2); 
   initial_box[0]=Interval(-0.01,0.01);
   initial_box[1]=Interval(0.49,0.51);
+  //initial_box[0]=Interval(-0.02,0.02);
+  //initial_box[1]=Interval(0.48,0.52);
 
   // cout << "initial_box=" << initial_box << endl;
 
@@ -141,16 +146,22 @@ void TestHybridEvolution::test() const
 
   
   // Compute the reachable sets
-  ListSet<HybridEnclosureType> hybrid_evolve_set,hybrid_reach_set;
-  hybrid_evolve_set = evolver.evolve(automaton,initial_hybrid_set,hybrid_time);
+  Orbit<HybridEnclosureType> orbit=evolver.orbit(automaton,initial_hybrid_set,hybrid_time);
+  ListSet<HybridEnclosureType> hybrid_evolve_set,hybrid_intermediate_set,hybrid_reach_set;
+  hybrid_evolve_set = orbit.final();
+  hybrid_intermediate_set = orbit.intermediate();
+  hybrid_reach_set = orbit.reach();
+
   ARIADNE_TEST_PRINT(hybrid_evolve_set);
-  hybrid_reach_set = evolver.reach(automaton,initial_hybrid_set,hybrid_time);
   ARIADNE_TEST_PRINT(hybrid_reach_set);
+  ARIADNE_TEST_PRINT(hybrid_intermediate_set);
   
   cout << "Plotting sets... " << flush;
   Graphic fig;
-  fig << line_style(true) << fill_colour(cyan) << hybrid_reach_set;
-  fig << fill_colour(magenta) << hybrid_evolve_set;
+  fig << line_style(true);
+  fig << fill_colour(cyan) << hybrid_reach_set;
+  fig << fill_colour(magenta) << hybrid_intermediate_set;
+  fig << fill_colour(blue) << hybrid_evolve_set;
   fig << fill_colour(blue) << initial_set;
   fig.write("test_hybrid_evolution-affine");
   cout << "done" << endl;

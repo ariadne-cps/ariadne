@@ -4,7 +4,7 @@ EXTRA_DIST = Doxyfile
 
 CXXFLAGS += -Wall 
 
-.PHONY: shiny lib python examples check-lib 
+.PHONY: shiny doc lib python examples check-lib check-python 
 shiny: maintainer-clean
 	-rm -rf *~ */*~
 	-rm -f *.log */*.log */*.eps
@@ -15,6 +15,9 @@ shiny: maintainer-clean
 	-rm -f Makefile.in */Makefile.in
 	-rm -f */Makefile
 	-rm -f Makefile
+
+doc:
+	doxygen
 
 lib: 
 	(cd src; make lib)

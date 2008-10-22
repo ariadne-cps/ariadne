@@ -33,6 +33,9 @@
 #include "evolver_interface.h"
 #include "discretiser_interface.h"
 
+#include "logging.h"
+
+
 namespace Ariadne {
   
   
@@ -48,6 +51,7 @@ class HybridAutomaton;
 template<class ES>
 class HybridDiscretiser
   : public DiscretiserInterface<HybridAutomaton>
+  , public Loggable
 {
   typedef HybridTime TimeType;
   typedef HybridAutomaton SystemType;

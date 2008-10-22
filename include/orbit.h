@@ -28,10 +28,15 @@
 #ifndef ARIADNE_ORBIT_H
 #define ARIADNE_ORBIT_H
 
+#include <utility>
+#include <iostream>
+#include <boost/shared_ptr.hpp>
+
 namespace Ariadne {
 
 template<class ES> class Orbit;
 
+template<class BS> class ListSet;
 class HybridGridCell;
 class HybridGridCellListSet;
 
@@ -40,9 +45,52 @@ class Orbit<HybridGridCell>
 {
  public:
   HybridGridCell initial() const;
+  HybridGridCellListSet reach() const;
   HybridGridCellListSet intermediate() const;
   HybridGridCellListSet final() const;
 };
+
+
+typedef int DiscreteState;
+class ApproximateTaylorModel;
+typedef ApproximateTaylorModel TaylorSetType;
+typedef std::pair<DiscreteState,TaylorSetType> HybridTaylorSetType;
+typedef ListSet<HybridTaylorSetType> HybridTaylorSetListType;
+
+template<>
+class Orbit<HybridTaylorSetType>
+{
+  class Data;
+  typedef HybridTaylorSetListType list_set_const_iterator;
+ public:
+  Orbit(const HybridTaylorSetType&);
+  void adjoin_reach(const HybridTaylorSetType& set);
+  void adjoin_intermediate(const HybridTaylorSetType& set);
+  void adjoin_final(const HybridTaylorSetType& set);
+
+  void adjoin_reach(const HybridTaylorSetListType& set);
+  void adjoin_intermediate(const HybridTaylorSetListType& set);
+  void adjoin_final(const HybridTaylorSetListType& set);
+
+  HybridTaylorSetType const& initial() const;
+  HybridTaylorSetListType const& reach() const;
+  HybridTaylorSetListType const& intermediate() const;
+  HybridTaylorSetListType const& final() const;
+ private:
+  boost::shared_ptr<Data> _data;
+};
+
+template<class ES> 
+std::ostream& 
+operator<<(std::ostream& os, const Orbit<ES>& orb)
+{
+  os << "Orbit(\n  initial=" << orb.initial()
+     << "\n  intermediate=" << orb.intermediate()
+     << "\n  reach=" << orb.reach()
+     << "\n  final=" << orb.final()
+     << ")\n";
+  return os;
+}
 
 
 } // namespace Ariadne

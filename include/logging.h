@@ -38,7 +38,7 @@ namespace Ariadne {
 struct Loggable {
  public:
   Loggable() : verbosity(0) { }
-  int verbosity;
+  mutable int verbosity;
 };
 
 // Global log output file

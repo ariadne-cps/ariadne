@@ -162,6 +162,27 @@ struct IdentityTransformation
   uint _n;
 };
 
+struct ProjectionTransformation 
+{
+  ProjectionTransformation(const array<uint>& p, uint as) 
+    : _as(as), _p(p) 
+  { for(uint i=0; i!=_p.size(); ++i) { ARIADNE_ASSERT p[i]<as; } } 
+  ProjectionTransformation(const Range& rng, uint as) 
+    : _as(as), _p(rng.size()) 
+  { ARIADNE_ASSERT range.start()+range.size()<=as;
+    for(uint i=0; i!=_p.size(); ++i) { _p[i]=rng.start()+i; } }
+  const array<uint>& p() const { return _p; }
+  const uint result_size() const { return _p.size(); }
+  const uint argument_size() const { return _as; }
+  const int smoothness() const { return SMOOTH; }
+  template<class R, class A>
+  void compute(R& r, const A& x) const {
+    for(uint i=0; i!=result_size(); ++i) { r[i]=x[p[i]]; } }
+ private:
+  uint _as;
+  array<uint> _p;
+};
+
 struct ScalingTransformation 
 {
   ScalingTransformation(const Vector<Float>& origin, 
@@ -223,6 +244,19 @@ class ConstantFunction
     return os << "ConstantFunction( argument_size=" << this->argument_size() 
               << ", c=" << this->c() << " )"; }
 
+};
+
+
+//! A projection function \f$ x'_i= x_{p(i)}\f$.
+class ProjectionFunction
+  : public FunctionBase<IdentityTransformation>
+{
+ public:
+  //! Construct the identity function in dimension \a n.
+  ProjectionFunction(const array<uint>& p, uint as) 
+    : FunctionBase<ProjectionTransformation>(_p,as) { }
+  std::ostream& write(std::ostream& os) const {
+    return os << "ProjectionFunction( p=" << this->p() << " )"; }
 };
 
 

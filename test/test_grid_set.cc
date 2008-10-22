@@ -34,6 +34,7 @@
 #include "geometry/zonotope.h"
 #include "geometry/list_set.h"
 #include "geometry/grid_set.h"
+//#include "geometry/irregular_grid_set.h"
 
 #include "test.h"
 
@@ -74,8 +75,8 @@ test_grid_set()
   GridCellListSet<R> zua=inner_approximation(z,gr);
   cout << "zua=" << zua << std::endl;
 
-  // test GridMaskSet clone
   {
+    // test GridMaskSet clone
     Grid<R> g(Vector<R>("[0.25,0.25]"));
     Box<R> bb("[-2,2]x[-2,2]");
     Box<R> r("[-1.375,0.625]x[0.5,1.375]");
@@ -86,8 +87,19 @@ test_grid_set()
     ARIADNE_TEST_ASSERT(gms_clone->size()==gms.size());
     ARIADNE_TEST_EVALUATE(*gms_clone);
     delete gms_clone;
+    
+    // Test subset inclusion with box
+    Box<R> b1("[-1.5,0.75]x[0.25,1.5]");
+    Box<R> b2("[0,2]x[0,2]");
+    cout << "gms = " << gms << std::endl;
+    cout << "bb = " << bb << endl;
+    cout << "b1 = " << b1 << endl;
+    cout << "b2 = " << b2 << endl;
+    ARIADNE_TEST_ASSERT(definitely(subset(gms,bb)));
+    ARIADNE_TEST_ASSERT(indeterminate(subset(gms,b1)));
+    ARIADNE_TEST_ASSERT(!possibly(subset(gms,b2)));
   }
-
+  
   return 0;
 }
 
@@ -144,5 +156,5 @@ int main() {
   test_grid_set<Flt>();
   test_irregular_grid_set<Flt>();
   cerr << "INCOMPLETE ";
-  return 0;
+  return ARIADNE_TEST_FAILURES;
 }

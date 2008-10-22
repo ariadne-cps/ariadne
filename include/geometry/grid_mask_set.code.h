@@ -204,7 +204,7 @@ template<class R>
 Box<R> 
 GridMaskSet<R>::bounding_box() const 
 {
-  return GridBlock<R>(grid(),bounds()); 
+  return GridCellListSet<R>(*this).bounding_box(); 
 }
 
 
@@ -428,10 +428,7 @@ tribool
 subset(const GridMaskSet<R>& gms, const Box<R>& r)
 {
   ARIADNE_CHECK_EQUAL_DIMENSIONS(gms,r,"tribool subset(GridMaskSet gms, Box r)");
-  if(!subset(gms,r.bounding_box())) {
-    return false;
-  }
-  return subset(gms,outer_approximation(r,gms.grid()));
+  return subset(gms.bounding_box(),r);
 }
 
 

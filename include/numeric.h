@@ -61,10 +61,9 @@ class Float { };
 
 
 #ifdef HAVE_GMPXX_H
-typedef mpz_class Integer;
-typedef mpq_class Rational;
+#include "integer.h"
+#include "rational.h"
 #else
-typedef long long int Integer;
 #endif // HAVE_GMPXX_H 
 
 
@@ -73,6 +72,7 @@ typedef double Float;
 
 using std::min;
 using std::max;
+using std::abs;
 
 uint fac(uint n);
 uint bin(uint n, uint k);
@@ -93,7 +93,6 @@ inline Float sub(Float x, Float y) { return x-y; }
 inline Float mul(Float x, Float y) { return x*y; }
 inline Float div(Float x, Float y) { return x/y; }
 
-inline Float abs(Float x) { return std::fabs(x); }
 inline Float sqr(Float x) { return x*x; }
 inline Float pow(Float x, int n) { return std::pow(x,Float(n)); }
 inline Float pow(Float x, uint n) { return std::pow(x,Float(n)); }
@@ -114,16 +113,19 @@ inline Float add_up(Float x, Float y) { return up(x+y); }
 inline Float sub_up(Float x, Float y) { return up(x-y); }
 inline Float mul_up(Float x, Float y) { return up(x*y); }
 inline Float div_up(Float x, Float y) { return up(x/y); }
+inline Float pow_up(Float x, int n) { return up(pow(x,n)); }
 
 inline Float add_down(Float x, Float y) { return down(x+y); }
 inline Float sub_down(Float x, Float y) { return down(x-y); }
 inline Float mul_down(Float x, Float y) { return down(x*y); }
 inline Float div_down(Float x, Float y) { return down(x/y); }
+inline Float pow_down(Float x, int n) { return down(pow(x,n)); }
 
 inline Float add_approx(Float x, Float y) { return x+y; }
 inline Float sub_approx(Float x, Float y) { return x-y; }
 inline Float mul_approx(Float x, Float y) { return x*y; }
 inline Float div_approx(Float x, Float y) { return x/y; }
+inline Float pow_approx(Float x, int n) { return pow(x,n); }
 
 inline Float rad_up(Float x, Float y) { return up((y-x)/2); }
 inline Float med_approx(Float x, Float y) { return (x+y)/2; }
@@ -141,6 +143,7 @@ class Interval {
   
   Interval(Float lower, Float upper) : l(lower), u(upper) { }
 #ifdef HAVE_GMPXX_H
+  Interval(Rational q) : l(down(q.get_d())), u(up(q.get_d())) { }
   Interval(Rational lower, Rational upper) : l(down(lower.get_d())), u(up(upper.get_d())) { }
 #endif // HAVE_GMPXX_H 
 
@@ -150,6 +153,9 @@ class Interval {
   const Float radius() const { return up((u-l)/2); }
   const Float width() const { return up(u-l); }
 
+  bool empty() const { return l>u; }
+  bool singleton() const { return l==u; }
+
   void set_lower(const Float& lower) { l=lower; }
   void set_upper(const Float& upper) { u=upper; }
  public:
@@ -158,6 +164,18 @@ class Interval {
 
 inline Float midpoint(Interval i) { 
   return (i.l+i.u)/2; 
+}
+
+inline Float radius(Interval i) { 
+  return up((i.u-i.l)/2); 
+}
+
+inline Float width(Interval i) { 
+  return up(i.u-i.l); 
+}
+
+inline bool equal(Interval i1, Interval i2) { 
+  return i1.l==i2.l && i1.u==i2.u;
 }
 
 inline Interval intersection(Interval i1, Interval i2) { 
@@ -177,18 +195,18 @@ inline Float diam(Interval i) { return up(i.u-i.l); }
 
 
 
+Interval abs(Interval);
 Interval neg(Interval);
+Interval rec(Interval);
 Interval add(Interval, Interval);
 Interval sub(Interval, Interval);
 Interval mul(Interval, Interval);
 Interval div(Interval, Interval);
 Interval mul(Interval, Float);
 Interval div(Interval, Float);
-Interval abs(Interval);
 Interval sqr(Interval);
 Interval pow(Interval, int);
 Interval pow(Interval, uint);
-Interval rec(Interval);
 
 Interval sqrt(Interval);
 Interval exp(Interval);
@@ -202,8 +220,15 @@ Interval asin(Interval);
 Interval acos(Interval);
 Interval atan(Interval);
 
+// Standard equality operators
 inline bool operator==(const Interval& i1, const Interval& i2) { return i1.l==i2.l && i1.u==i2.u; }
 inline bool operator!=(const Interval& i1, const Interval& i2) { return i1.l!=i2.l || i1.u!=i2.u; }
+
+// Boost-style tribool (in)equality operators
+//inline tribool operator==(const Interval& i1, const Interval& i2) { 
+//  if(i1.l>i2.u || i1.u<i2.l) { return false; } else if(i1.l==i2.u && i1.u==i2.l) { return true; } else { return indeterminate; } }
+//inline tribool operator!=(const Interval& i1, const Interval& i2) { return !(i1==i2); }
+
 
 inline Interval operator+(Interval i) { return Interval(i.l,i.u); }
 inline Interval operator-(Interval i) { return Interval(-i.u,-i.l); }
@@ -238,6 +263,7 @@ inline tribool operator<(Interval i1, Interval i2) {
 inline Float mag(Interval i) { return max(abs(i.l),abs(i.u)); }
 inline Float mig(Interval i) { return min(abs(i.l),abs(i.u)); }
 
+inline bool contains(Interval i, Float x) { return i.l<=x && x<=i.u; }
 inline bool subset(Float x, Interval i) { return i.l<=x && x<=i.u; }
 inline bool subset(Interval i1, Interval i2) { return i2.l<=i1.l && i1.u<=i2.u; }
 

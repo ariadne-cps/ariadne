@@ -50,19 +50,18 @@ class Vector
  public:
   Vector()
     : ublas::vector<X>() { }
-  Vector(int n)
+  Vector(size_t n)
     : ublas::vector<X>(n) { for(uint i=0; i!=this->size(); ++i) { (*this)[i]=0; } }
-  Vector(uint n)
-    : ublas::vector<X>(n) { for(uint i=0; i!=this->size(); ++i) { (*this)[i]=0; } }
-  Vector(uint n, const X& t)
+  Vector(size_t n, const X& t)
     : ublas::vector<X>(n) { for(uint i=0; i!=this->size(); ++i) { (*this)[i]=t; } }
-  template<class XX> Vector(uint n, const XX* ptr)
-    : ublas::vector<X>(n) { for(uint i=0; i!=this->size(); ++i) { (*this)[i]=ptr[i]; } }
+  template<class XX> Vector(size_t n, const XX* ptr)
+    : ublas::vector<X>(n) { for(size_t i=0; i!=this->size(); ++i) { (*this)[i]=ptr[i]; } }
   template<class XX> Vector(const Vector<XX>& v)
     : ublas::vector<X>(v) { }
-  template<class E> Vector(const E& ve)
+  template<class E> Vector(const ublas::vector_expression<E> &ve)
     : ublas::vector<X>(ve) { }
-  uint dimension() const { return this->size(); }
+  template<class E> Vector<X>& operator=(const ublas::vector_expression<E> &ve) { 
+    this->ublas::vector<X>::operator=(ve); return *this; }
   const X& get(uint i) const { return (*this)[i]; }
   template<class T> void set(uint i, const T& x) { (*this)[i] = x; }
 };
@@ -155,7 +154,6 @@ Float volume(const Vector<Interval>& z);
 inline Vector<Float> add_approx(const Vector<Float>& v1, const Vector<Float>& v2) { return v1+v2; }
 inline Vector<Float> sub_approx(const Vector<Float>& v1, const Vector<Float>& v2) { return v1-v2; }
 
-template<class X, class XX> inline Vector<X> operator*(const XX& s, const Vector<X>& v) { return v*s; }
 
 
 template<class X, class XX> inline Vector<X> vector(uint d, const XX* ptr) {

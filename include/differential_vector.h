@@ -57,6 +57,7 @@ template<class DIFF> DifferentialVector<DIFF> operator+(const DifferentialVector
 template<class DIFF> DifferentialVector<DIFF> operator-(const DifferentialVector<DIFF>& v, const Vector<typename DIFF::RealType>& c);
 
 template<class DIFF, class Y> Vector<Y> evaluate(const DifferentialVector<DIFF>& x, const Vector<Y>& y);
+template<class DIFF> DifferentialVector<DIFF> evaluate(const DifferentialVector<DIFF>& x, const DifferentialVector<DIFF>& y);
 
 template<class DIFF> DifferentialVector<DIFF> translate(const DifferentialVector<DIFF>& y, const Vector<typename DIFF::RealType>& c);
 template<class DIFF> DifferentialVector<DIFF> compose(const DifferentialVector<DIFF>& y, const DifferentialVector<DIFF>& z);
@@ -466,9 +467,9 @@ compose(const DIFF& x,
         const DifferentialVector<DIFF>& y)
 {  
   typedef typename DIFF::ScalarType X;
-  Vector<X> yv=y.value();
+  Vector<X> yv=y.get_value();
   DifferentialVector<DIFF>& ync=const_cast<DifferentialVector<DIFF>&>(y); 
-  for(uint i=0; i!=ync.result_size(); ++i) { ync[i].value()=0; }
+  for(uint i=0; i!=ync.result_size(); ++i) { ync[i].set_value(0); }
   DIFF r=evaluate(x,ync);
   ync+=yv;
   return r;

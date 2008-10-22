@@ -76,6 +76,7 @@ class HybridEvolver
   typedef Ariadne::DefaultModelType ModelType;
  public:
   typedef HybridAutomaton::TimeType TimeType;
+  typedef int IntegerType;
   typedef Float RealType;
   typedef HybridAutomaton SystemType;
   typedef ModelType ContinuousEnclosureType;
@@ -125,7 +126,7 @@ class HybridEvolver
                           const SystemType& system, const EnclosureType& initial, const TimeType& time, 
                           Semantics semantics, bool reach) const;
 
-  typedef tuple<DiscreteState, Integer, ModelType, ModelType> HybridTimedSetType;
+  typedef tuple<DiscreteState, IntegerType, ModelType, ModelType> HybridTimedSetType;
   virtual void _evolution_step(std::vector< HybridTimedSetType >& working_sets, 
                                EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,  
                                const SystemType& system, const HybridTimedSetType& current_set, const TimeType& time, 

@@ -9,14 +9,19 @@ LIBS = -lmpfr -lgmpxx -lgmp $(GTK_LIBS) -lboost_serialization
 LDADD = ../src/libariadne.la $(LIBS)
 
 check_PROGRAMS = \
+	test_float \
+	test_interval \
+	test_vector \
+	test_matrix \
 	test_differential \
+	test_differential_vector \
 	test_approximate_taylor_model \
 	test_discrete_evolution \
 	test_continuous_evolution \
 	test_hybrid_evolution \
 	test_grid_set \
 	test_serialization \
-	test_graphics
+	test_graphics 
 
 tests: $(check_PROGRAMS)
 
@@ -54,5 +59,5 @@ EXTRA_DIST =
 SUBDIRS =
 
 TESTS = $(check_PROGRAMS)
-XFAIL_TESTS = 
+XFAIL_TESTS = test_interval
 testsubdir = ./

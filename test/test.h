@@ -25,6 +25,9 @@
  * \brief Macros for test suite. 
  */
 
+#ifndef ARIADNE_TEST_H
+#define ARIADNE_TEST_H
+
 #include <iostream>
 #include <exception>
 
@@ -100,7 +103,7 @@ ariadne_check(std::ostream& os, const R& r, const ER& er) {
     std::cout << "true\n" << std::endl; \
   } else { \
     ++ARIADNE_TEST_FAILURES; \
-    std::cout << "false" << std::endl; \
+    std::cout << "\nERROR: false" << std::endl; \
     std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __FUNCTION__ << ": Assertion `" << #expression << "' failed." << std::endl; \
   } \
 }\
@@ -116,7 +119,7 @@ ariadne_check(std::ostream& os, const R& r, const ER& er) {
     std::cout << "\n" << std::endl; \
   } else { \
     ++ARIADNE_TEST_FAILURES; \
-    std::cout << " (expected: " << #expression << " = " << #expected << " = " << (expected) << " )\n" << std::endl; \
+    std::cout << "\nERROR: expected " << #expression << " = " << #expected << " = " << (expected) << " \n" << std::endl; \
     std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Check `" << #expression << "==" << #expected << "' failed." << std::endl; \
   } \
 }\
@@ -135,7 +138,7 @@ ariadne_check(std::ostream& os, const R& r, const ER& er) {
     std::cout << "\n" << std::endl; \
   } else { \
     ++ARIADNE_TEST_FAILURES; \
-    std::cout << " (expected: " << #expression << #comparison << #expected << " )" << std::endl; \
+    std::cout << "\nERROR: expected: " << #expression << #comparison << #expected << std::endl; \
     std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Comparison `" << #expression << #comparison << #expected << "' failed; " << #expression << "=" << (expression) << std::endl; \
   } \
 }\
@@ -172,7 +175,7 @@ class variable expression; \
   try { \
     statement; \
     ++ARIADNE_TEST_FAILURES; \
-    std::cout << "expected " << #error << "; no exception thrown\n"; \
+    std::cout << "\nERROR: expected " << #error << "; no exception thrown\n"; \
     std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": expected " << #error << "; no exception thrown." << std::endl; \
   } \
   catch(const error& e) { \
@@ -180,7 +183,7 @@ class variable expression; \
   } \
   catch(const std::exception& e) {             \
     ++ARIADNE_TEST_FAILURES; \
-    std::cout << "caught exception " << e.what() << "; expected " << #error << "\n"; \
+    std::cout << "\nERROR: caught exception " << e.what() << "; expected " << #error << "\n"; \
     std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": caught exception " << e.what() << "; expected " << #error << std::endl; \
   } \
 } \
@@ -192,11 +195,13 @@ class variable expression; \
   try { \
     statement; \
     ++ARIADNE_TEST_FAILURES; \
-    std::cout << "expected exception; none thrown\n"; \
+    std::cout << "\nERROR: expected exception; none thrown\n"; \
     std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": expected exception; no exception thrown." << std::endl; \
   } \
   catch(...) { \
     std::cout << "caught exception as expected\n" << std::endl; \
   } \
 } \
+
+#endif // ARIADNE_TEST_H
 

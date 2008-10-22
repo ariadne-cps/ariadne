@@ -55,10 +55,18 @@ bin(uint n, uint k)
 }
 
 
+Interval neg(Interval i) 
+{
+  return Interval(-i.u,-i.l);
+}
+
 Interval rec(Interval i) 
 {
-  ARIADNE_ASSERT(i.u<0 || i.l>0);
-  return Interval(down(1/i.u),up(1/i.l)); 
+  if(i.l>0 || i.u<0) {
+    return Interval(down(1/i.u),up(1/i.l)); 
+  } else {
+    ARIADNE_THROW(DivideByZeroException,"rec(Interval i)","i="<<i<<")");
+  }
 }
 
 Interval add(Interval i1, Interval i2) 

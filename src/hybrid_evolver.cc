@@ -205,7 +205,7 @@ _evolution(EnclosureListType& final_sets,
   ARIADNE_LOG(5,__PRETTY_FUNCTION__<<"\n");
   assert(semantics==UPPER_SEMANTICS);
 
-  const uint maximum_steps=maximum_hybrid_time.second;
+  const IntegerType maximum_steps=maximum_hybrid_time.second;
   const Float maximum_time=maximum_hybrid_time.first;
 
   const uint spacial_order=2;
@@ -215,7 +215,7 @@ _evolution(EnclosureListType& final_sets,
 
 
 
-  typedef tuple<DiscreteState, Integer, SetModelType, TimeModelType> HybridTimedSetType;
+  typedef tuple<DiscreteState, IntegerType, SetModelType, TimeModelType> HybridTimedSetType;
 
   std::vector< HybridTimedSetType > working_sets;
 
@@ -234,7 +234,7 @@ _evolution(EnclosureListType& final_sets,
     ARIADNE_LOG(6,"initial_time_model = "<<initial_time_model<<"\n");
     ModelType initial_timed_set_model=join(initial_set_model,initial_time_model);
     ARIADNE_LOG(6,"initial_timed_set_model = "<<initial_timed_set_model<<"\n");
-    working_sets.push_back(make_tuple(initial_location,Integer(0),initial_set_model,initial_time_model));
+    working_sets.push_back(make_tuple(initial_location,IntegerType(0),initial_set_model,initial_time_model));
   }
 
 
@@ -242,7 +242,7 @@ _evolution(EnclosureListType& final_sets,
     HybridTimedSetType current_set=working_sets.back();
     working_sets.pop_back();
     DiscreteState initial_location=current_set.first;
-    Integer initial_steps=current_set.second;
+    IntegerType initial_steps=current_set.second;
     SetModelType initial_set_model=current_set.third;
     TimeModelType initial_time_model=current_set.fourth;
     if(initial_time_model.range()[0].lower()>=maximum_time || initial_steps>=maximum_steps) {
@@ -296,7 +296,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
   typedef ModelType TimedSetModelType;
   
   DiscreteState initial_location(0);
-  Integer initial_steps;
+  IntegerType initial_steps;
   SetModelType initial_set_model;
   TimeModelType initial_time_model;
   ARIADNE_LOG(9,"working_set = "<<current_set<<"\n");

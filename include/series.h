@@ -39,6 +39,7 @@ class Series
  public:
   explicit Series() : _data(1) { }
   explicit Series(uint d) : _data(d+1) { }
+  template<class XX> Series(uint d, const XX* ptr) : _data(ptr,ptr+(d+1)) { }
   uint degree() const { return this->_data.size()-1; }
   X& operator[](uint i) { return this->_data[i]; }
   const X& operator[](uint i) const { return this->_data[i]; }

@@ -1,8 +1,8 @@
 /***************************************************************************
  *            test_differential.cc
  *
- *  Copyright 2008  Pieter Collins
- * 
+ *  Copyright  2007-8  Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -20,234 +20,145 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
+#include <cassert>
 #include <iostream>
-#include "numeric.h"
+#include <iomanip>
+#include <fstream>
+#include <sstream>
+#include <string>
+
+#define HAVE_GMPXX_H
+#include "rational.h"
+#undef HAVE_GMPXX_H
 #include "vector.h"
-#include "matrix.h"
-#include "dense_differential.h"
 #include "sparse_differential.h"
-#include "differential_vector.h"
 
-using std::cout; using std::endl; using std::flush;
+#include "test.h"
+
+
 using namespace Ariadne;
+using namespace std;
 
-template<class R, class A, class P>
-void henon(R& r, const A& x, const P& p) 
-{
-  r[0]=p[0]-x[0]*x[0]-p[1]*x[1];
-  r[1]=x[0];
-}
-
-template<class R, class A>
-void spiral(R& r, const A& x) 
-{
-  r[0]=-0.8*x[0]+0.4*x[1]-1.0;
-  r[1]=-0.4*x[0]-0.8*x[1];
-}
-
-template<class DIFF>
-DifferentialVector<DIFF> 
-henon(const DifferentialVector<DIFF>& x, const Vector<typename DIFF::ScalarType>& p) 
-{
-  DifferentialVector<DIFF> r(2,2,x.degree()); henon(r,x,p); return r;
-}
-
-
-template<class DIFF>
-int 
-test_differential()
-{
-  typedef typename DIFF::ScalarType ScalarType;
-  typedef DIFF DifferentialType;
-  typedef DifferentialVector<DIFF> DifferentialVectorType;
-  
-  {
-    //Indexing
-    MultiIndex a(4);
-    for(uint i=0; i!=100; ++i) { cout << a << "\n"; ++a; }
+template<class DF>
+class TestDifferential {
+  typedef typename DF::ScalarType X;
+  typedef typename DF::ScalarType ScalarType;
+  typedef Series<X> SeriesType;
+  typedef DF DifferentialType;
+  typedef DifferentialVector<DF> DifferentialVectorType;
+ private:
+  X c1;
+  DifferentialType x1,x2,x3;
+ public:
+  TestDifferential() {
+    double a1[15]={ 2.0, 1.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+    double a2[15]={ 3.0, 1.0, 0.0, 0.25, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+    double a3[15]={ 2.0, 1.0, 0.0, 0.125, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+    c1=3.0;
+    x1=DifferentialType(2,4,a1);
+    x2=DifferentialType(2,4,a2);
+    x3=DifferentialType(1,4,a3);
     
-    DifferentialType x(2,3);
-    DifferentialType y(2,3);
-    a=MultiIndex::zero(2); x[a]=2.0;
-    a=MultiIndex::unit(2,0); x[a]=1.0;
-    a=MultiIndex::unit(2,1); x[a]=1.0;
-    a=MultiIndex::zero(2); y[a]=3.0;
-    a=MultiIndex::unit(2,0); y[a]=0.0;
-    a=MultiIndex::unit(2,1); y[a]=1.0;
-    cout << "x=" << x << endl;
-    cout << "y=" << y << endl;
+    ARIADNE_TEST_CALL(test_degree());
+    ARIADNE_TEST_CALL(test_neg());
+    ARIADNE_TEST_CALL(test_add());
+    ARIADNE_TEST_CALL(test_sub());
+    ARIADNE_TEST_CALL(test_mul());
+    ARIADNE_TEST_CALL(test_div());
+    ARIADNE_TEST_CALL(test_rec());
+    ARIADNE_TEST_CALL(test_pow());
+    ARIADNE_TEST_CALL(test_compose());
   }
 
-  {
-    // Arithmetic
-    DifferentialType x=DifferentialType::variable(2,2,1.0,0);
-    DifferentialType y=DifferentialType::variable(2,2,1.0,1);
-    DifferentialType z=2*x+y;
-    std::cout << x << y << z << std::endl;
-    std::cout << z*z << std::endl;
-    std::cout << pow(z,2) << std::endl;
-    std::cout << pow(z,3) << std::endl;
+  void test_degree() {
+    ARIADNE_TEST_ASSERT(x1.degree()==4);
   }
 
-  {
-    // reciprocal
-    DifferentialType x(2,3);
-    x[MultiIndex::zero(2)]=2.0;
-    x[MultiIndex::unit(2,0)]=1.0;
-    x[MultiIndex::unit(2,1)]=1.0;
-    cout << "x=" << x << endl;
-    cout << "rec(x)=" << rec(x) << endl;
-    cout << "rec(x)*x=" << rec(x)*x << endl;
-    cout << "rec(x)*x-1=" << rec(x)*x-1.0 << endl;
-    cout << endl;
+  void test_neg() {
+    cout << -x1 << " = " << -x1 << std::endl;
+    //assert((x1+x2)==DifferentialType("[3,2,0,0]"));
   }
 
-  {
-    // restrict
-    double xa[40]={ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,
-                    0,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39};
-    int pa[2]={0,2};
-    array<int> p(pa,pa+2);
-    DifferentialVectorType x(2,3,3,xa);
-    std::cout << x << restrict(x,p) << "\n";
+  void test_add() {
+    cout << x1 << "+" << x2 << " = " << x1+x2 << std::endl;
+    ARIADNE_TEST_EVALUATE(x1+x2);
+    ARIADNE_TEST_EVALUATE(x1+c1);
+    ARIADNE_TEST_EVALUATE(c1+x1);
+    //assert((x1+x2)==DifferentialType("[3,2,0,0]"));
   }
 
-  {
-    // restrict
-    double xa[40]={ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15,16,17,18,19,
-                    0,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39};
-    int pa[2]={0,2};
-    array<int> p(pa,pa+2);
-    DifferentialVectorType x(2,3,3,xa);
-    std::cout << "restrict:\n" << x << "\n" << restrict(x,p) << "\n\n";
+  void test_sub() {
+    cout << x1 << "-" << x2 << " = " << x1-x2 << std::endl;
+    ARIADNE_TEST_EVALUATE(x1-x2);
+    ARIADNE_TEST_EVALUATE(x1-c1);
+    ARIADNE_TEST_EVALUATE(c1-x1);
+    //assert((x1-x2)==DifferentialType("[-1,0,0,0]"));
   }
 
-  {
-    // expand
-    double xa[20]={ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0,11,12,13,14,15,16,17,18,19};
-    int pa[2]={1,2};
-    array<int> p(pa,pa+2);
-    DifferentialVectorType x(2,2,3,xa);
-    std::cout << "expand:\n" << x << "\n" << expand(x,3,p) << "\n" << restrict(expand(x,3,p),p) << "\n";
+  void test_mul() {
+    double a1[6]={ 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 };
+    double a2[6]={ 2.0, 3.0, 5.0, 7.0, 11.0, 13.0 };
+    double a1m2[6]={ 2.0, 7.0, 11.0, 21.0, 40.0, 40.0 };
+    double acm2[6]={ 10.0, 15.0, 25.0, 35.0, 55.0, 65.0 };
+    DifferentialType x1(2,2,a1);
+    DifferentialType x2(2,2,a2);
+    DifferentialType x1mx2(2,2,a1m2);
+    DifferentialType cmx2(2,2,acm2);
+    X c=5;
+    ARIADNE_TEST_EQUAL(x1*x2,x1mx2);
+    ARIADNE_TEST_EQUAL(c*x2,cmx2);
+    ARIADNE_TEST_EQUAL(x2*c,cmx2);
   }
 
-  {
-    // compose
-    Float av[2]={1,2}; Float adv[4]={1,2,3,4};
-    Vector<Float> v(2u,av); Matrix<Float> dv(2u,2u,adv);
-    std::cout << v << " " << dv << std::endl;
-
-    DifferentialVectorType x=DifferentialVectorType::affine(2,2,2,v,dv);
-    DifferentialVectorType y=DifferentialVectorType::affine(2,2,2,v,dv);
-    std::cout << x << std::endl;
-    std::cout << compose(x,y) << std::endl;
-    std::cout << x[0] << std::endl;
-    std::cout << std::endl;
-  }
-    
-  {
-    // translate
-    cout << "translate:"<<endl;
-    Float ac[2]={0,1}; Float adv[10]={1,2,3,4,5,6,7,8,9,10};
-    Vector<Float> c(2u,ac); 
-    Vector<Float> mc=-c;
-    DifferentialVectorType dv(1u,2u,2u,adv);
-    std::cout << "c=" << c << std::endl;
-    std::cout << "dv="<< dv << std::endl;
-    std::cout << "dv(x+c)" << translate(dv,c) << std::endl;
-    std::cout << "dv((x+c)-c)" <<  translate(translate(dv,c),mc) << std::endl;
-    std::cout << "dv(x-c)" << translate(dv,mc) << std::endl;
-    std::cout << "dv((x+c)-c)" <<  translate(translate(dv,mc),c) << std::endl;
-    std::cout << std::endl;
+  void test_div() {
+    ARIADNE_TEST_EVALUATE(x1/x2);
+    ARIADNE_TEST_EVALUATE(x1/c1);
+    ARIADNE_TEST_EVALUATE(c1/x1);
+    /*
+    DifferentialType x3("[2,3,4]");
+    DifferentialType x4("[1,0,0]");
+    cout << x3 << "/" << x4 << " = " << x3/x4 << std::endl;
+    assert((x3/x4)==x3);
+    cout << x4 << "/" << x3 << " = " << x4/x3 << std::endl;
+    assert((x4/x3)==DifferentialType("[0.5,-0.75,1.25]"));
+    cout << 1 << "/" << x2 << " = " << 1/x2 << std::endl;
+    assert((1/x2)==DifferentialType("[0.5,-0.25,0.25,-0.375]"));
+    cout << x1 << "/" << x2 << " = " << x1/x2 << std::endl;
+    assert((x1/x2)==DifferentialType("[0.5,0.25,-0.25,0.375]"));
+    */
   }
 
-  {
-    // evaluate
-    cout << "evaluate:"<<endl;
-    Float ac[2]={1,2}; Float adv[10]={1,2,3,4,5,6,7,8,9,10};
-    Vector<Float> c(2u,ac); 
-    DifferentialVectorType dv(1u,2u,3u,adv);
-    std::cout << "c=" << c << std::endl;
-    std::cout << "dv="<< dv << std::endl;
-    std::cout << "v(c)" << evaluate(dv,c) << std::endl;
-    std::cout << std::endl;
+  void test_rec() {
+    double a1[6]={ 1.0, 2.0, 3.0, 4.0, 5.0, 6.0 };
+    ARIADNE_TEST_CONSTRUCT(DifferentialType,x1,(2,2,a1));
+    ARIADNE_TEST_EQUAL(rec(rec(x1)),x1);
   }
 
-  {
-    // differentiation
-    double a[]={ 1,2,3,4,5,6,7,8,9,10 };
-    DifferentialType y(2,3,a);
-    cout << "y=" << y << endl;
-    cout << "derivative(y,0)=" << derivative(y,0) << endl;
-    cout << "antiderivative(derivative(y,0),0)-y=" << antiderivative(derivative(y,0),0)-y << endl;
-    cout << "derivative(antiderivative(y,0),0)-y=" << derivative(antiderivative(y,0),0)-y << endl;
-    cout << endl;
+  void test_pow() {
+    cout << x2 << "^5 = " << pow(x2,5) << std::endl;
+    //    assert(pow(x2,5)==DifferentialType("[32,80,160,240]"));
   }
 
-  {
-    // mapping 
-    DifferentialVectorType x(2,2,3); 
-    x[0][MultiIndex::unit(2,0)]=1; x[1][MultiIndex::unit(2,1)]=1; 
-    cout << "x=" << x << endl;
-    DifferentialVectorType y(2,2,3);
-    Vector<Float> a(2); a[0]=1.5; a[1]=0.375;
-    y=henon(x,a);
-    cout << "h(x)=" << y << endl;
-    x=y; y=henon(x,a); cout << "h(h(x))=" << y << endl;
-    y=henon(henon(henon(x,a),a),a);
-    cout << endl;
+  void test_compose() {
+    //double ax[10] = { 3.0, 1.0, 0.0, 0.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+    double ax[10] = { 3.0,  1.0, 2.0,  1.0, 0.5, 2.0,  0.0, 0.0, 0.0, 0.0 };
+    double ay[4] = { 1.0, 2.0, -3.0, 5.0 };
+    double ayx[10] = { 1.0,  2.0, 4.0,  -1.0, -11.0, -8.0,  -1.0, 15.0, 42.0, 16.0 };
+    double aid[4] = { ax[0], 1.0, 0.0, 0.0 };
+    ARIADNE_TEST_CONSTRUCT(DifferentialType,x,(2,3,ax));
+    ARIADNE_TEST_CONSTRUCT(SeriesType,y,(3,ay));
+    ARIADNE_TEST_CONSTRUCT(SeriesType,id,(3,aid));
+    ARIADNE_TEST_EQUAL(compose(y,x),DifferentialType(2,3,ayx));
+    ARIADNE_TEST_EQUAL(compose(id,x),x);
   }
 
-  {
-    // inverse
-    Vector<Float> a(2); a[0]=1.5; a[1]=0.375;
-    Vector<Float> v(2); v[0]=2; v[1]=1;
-    DifferentialVectorType w(2,2,3);
-    DifferentialVectorType x(2,2,3);
-    DifferentialVectorType y(2,2,3);
-    DifferentialVectorType z(2,2,3);
-    w=DifferentialVectorType::variable(2,2,3,v);
-    cout << "w=" << w << endl;
-    x=henon(w,a);
-    cout << "h(w)=" << w << endl;
-    y=inverse(x,x.get_value());
-    cout << "hinv(h(w))=" << y << endl;
-    z=inverse(y,y.get_value());
-    cout << "hinv(hinv(h(y)))=" << z << endl;
-    cout << "h(hinv(hinv(h(y))))=" << henon(z,y.get_value()) << endl;
 
-    // inverse
-    cout << "inverse:"<<endl;
-    Float adv[12]={0,1,2,3,4,5,0,6,7,8,9,10};
-    DifferentialVectorType dv(2u,2u,2u,adv);
-    std::cout << "dv="<< dv << std::endl;
-    std::cout << "inverse(dv)" << inverse(dv) << std::endl;
-    std::cout << "inverse(inverse(dv))" << inverse(inverse(dv)) << std::endl;
-    std::cout << std::endl;
-  }
+};
 
-  {
-    // implicit
-    cout << "implicit:"<<endl;
-    Float adv[20]={0,1,2,3,4,5,6,7,8,9,0,6,7,8,9,10,11,12,13,14};
-    //Float adv[20]={0, 3,2,1, 0,0,0,0,0,0, 0, 5,1,1, 0,0,0,0,0,0};
-    DifferentialVectorType x(2u,3u,2u,adv);
-    cout << "x="<< x << endl;
-    DifferentialVectorType y=implicit(x);
-    cout << "implicit(x)" << y << endl;
-    DifferentialVectorType z(3u,1u,2u);
-    z[0]=DifferentialType::variable(1u,2u,0.0,0u);
-    z[1]=y[0];
-    z[2]=y[1];
-    cout << "compose(x,i:y)="<<compose(x,z) << endl;
-    cout << endl;
-  }
-
-  return 0;
-}  
 
 int main() {
-  test_differential<DenseDifferential<Float> >();
-  test_differential<SparseDifferential<Float> >();
+  TestDifferential< SparseDifferential<Rational> > t1;
+  cout << "INCOMPLETE " << flush;
+  return ARIADNE_TEST_FAILURES;
 }

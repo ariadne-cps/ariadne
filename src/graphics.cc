@@ -22,9 +22,11 @@
  */
  
 #include "config.h"
+#undef HAVE_GMPXX_H
 
 #include "macros.h"
 #include "stlio.h"
+#include "numeric.h"
 #include "vector.h"
 #include "matrix.h"
 #include "point.h"

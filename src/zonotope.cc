@@ -269,7 +269,7 @@ Vector<Interval>
 Zonotope::bounding_box() const
 {
   const Zonotope& z=*this;
-  Vector<Interval> b=z.centre()+Matrix<Interval>(z.generators())*z.domain()+z.error()*Interval(-1,1);
+  Vector<Interval> b=z.centre()+prod(z.generators(),z.domain())+z.error()*Interval(-1,1);
   return b;
 }
 
@@ -310,7 +310,7 @@ bounded(const Zonotope& z)
 Float 
 radius(const Zonotope& z) 
 {
-  return Ariadne::radius(z.centre()+z.generators()*z.domain()+z.error()*Interval(-1,1));
+  return Ariadne::radius(z.centre()+prod(z.generators(),z.domain())+z.error()*Interval(-1,1));
 }
 
 
@@ -739,7 +739,7 @@ disjoint(const Zonotope& z, const Box& r)
   const Vector<Float> qd=qu-ql;
   const Vector<Float> qc=c;
   const Matrix<Float> qG=G;
-  const Vector<Float> qrhs=qc-ql-qG*qo;
+  const Vector<Float> qrhs=qc-ql-prod(qG,qo);
   
   { std::clog << "ql=" << ql << ", qd=" << qd <<", qc=" << qc << ", qrhs=" << qrhs << std::endl; }
   
@@ -810,7 +810,7 @@ disjoint(const Zonotope& z1, const Zonotope& z2)
   const Matrix<Float>& qG1=z1.generators();
   const Vector<Float>& qc2=z2.centre();
   const Matrix<Float>& qG2=z2.generators();
-  Vector<Float> qrhs = qG1*qo1 - qG2*qo2 + (qc2 - qc1);
+  Vector<Float> qrhs = prod(qG1,qo1) - prod(qG2,qo2) + (qc2 - qc1);
   
   // Set up constraints e1 + se1 = 2
   for(uint j1=0; j1!=m1; ++j1) {
@@ -890,7 +890,7 @@ contains(const Zonotope& z, const Point& pt)
   const Vector<Float> zv(m,zero);
   const Vector<Float> tv(m,two);
   
-  Vector<Float> qrhs=qp-qc+qG*qo;
+  Vector<Float> qrhs=qp-qc+prod(qG,qo);
   
   Matrix<Float> T(d+m+1,m+1);
   

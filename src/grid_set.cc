@@ -235,7 +235,7 @@ Grid::operator!=(const Grid& g) const
 array<double>
 Grid::index(const Vector<Float>& pt) const
 {
-        array<double> res(pt.dimension());
+        array<double> res(pt.size());
         for(size_t i=0; i!=res.size(); ++i) {
                 res[i]=subdivision_index(i,pt[i]);
         }
@@ -246,7 +246,7 @@ Grid::index(const Vector<Float>& pt) const
 
 array<double>
 Grid::lower_index(const Vector<Interval>& bx) const {
-        array<double> res(bx.dimension());
+        array<double> res(bx.size());
         for(size_t i=0; i!=res.size(); ++i) {
                 res[i]=subdivision_lower_index(i,bx[i].lower());
         }
@@ -271,9 +271,9 @@ Grid::upper_index(const Vector<Interval>& bx) const {
 Vector<Float>
 Grid::point(const array<int>& a) const
 {
-  Vector<float> res(a.size());
-  for(size_type i=0; i!=res.dimension(); ++i) {
-          res[i]=this->_data->_origin[i]+this->_data->_lengths[i]*a[i];
+  Vector<Float> res(a.size());
+  for(size_type i=0; i!=res.size(); ++i) {
+    res[i]=this->_data->_origin[i]+this->_data->_lengths[i]*a[i];
   }
   return res;
 }
@@ -283,7 +283,7 @@ Vector<Float>
 Grid::point(const array<double>& a) const
 {
   Vector<float> res(a.size());
-  for(size_type i=0; i!=res.dimension(); ++i) {
+  for(size_type i=0; i!=res.size(); ++i) {
           res[i]=this->_data->_origin[i]+this->_data->_lengths[i]*a[i];
   }
   return res;

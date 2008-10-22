@@ -487,6 +487,50 @@ SparseDifferential<X> tan(const SparseDifferential<X>& x)
   return compose(Series<X>::tan(x.degree(),x.value()),x);
 }
 
+
+
+template<class X, class Y>
+Y
+evaluate(const SparseDifferential<X>& y, const Vector<Y>& x) 
+{
+  //std::cerr<<__PRETTY_FUNCTION__<<std::endl;
+  ARIADNE_ASSERT(y.argument_size()==x.size());
+  //std::cerr << "y=" << y << std::endl;
+  //std::cerr << "x=" << x << std::endl;
+  uint d=y.degree();
+  uint ms=x.size();
+  ARIADNE_ASSERT(d>=1);
+
+  Y zero = x[0]; zero*=0;
+  Y one = zero; one+=1;
+
+  // Use inefficient brute-force approach with lots of storage...
+  array< array< Y > > val(ms, array< Y >(d+1));
+  for(uint j=0; j!=ms; ++j) {
+    val[j][0]=one;
+    val[j][1]=x[j];
+    for(uint k=2; k<=d; ++k) {
+      val[j][k]=val[j][k-1]*x[j];
+    }
+  }
+
+  Y r(zero);
+  for(typename SparseDifferential<X>::const_iterator iter=y.begin();
+      iter!=y.end(); ++iter)
+  {
+    const MultiIndex& j=iter->first;
+    const X& c=iter->second;
+    Y t=one;
+    for(uint k=0; k!=ms; ++k) {
+      t=t*val[k][j[k]];
+    }
+    t*=(c/fac(j));
+    r+=t;
+  }
+  return r;
+}
+
+
 template<class X>
 SparseDifferential<X> compose(const Series<X>& x, const SparseDifferential<X>& y)
 {

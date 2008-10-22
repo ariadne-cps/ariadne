@@ -33,6 +33,8 @@
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/io.hpp>
 
+#include "macros.h"
+#include "exceptions.h"
 #include "numeric.h"
 
 namespace Ariadne {
@@ -45,44 +47,94 @@ class Matrix
  public:
   Matrix()
     : boost::numeric::ublas::matrix<X>() { }
-  template<class T> Matrix(const T& t)
-    : boost::numeric::ublas::matrix<X>(t) { }
-  Matrix(uint r, uint c)
-    : boost::numeric::ublas::matrix<X>(r,c) { for(uint i=0; i!=r; ++i) { for(uint j=0; j!=c; ++j) { (*this)(i,j)=0; } } }
-  template<class XX> Matrix(uint r, uint c, const XX* ptr)
-    : boost::numeric::ublas::matrix<X>(r,c) { for(uint i=0; i!=r; ++i) { for(uint j=0; j!=c; ++j) { (*this)(i,j)=ptr[i*c+j]; } } }
-  uint row_size() const { return this->size1(); }
-  uint column_size() const { return this->size2(); }
+  template<class AE> Matrix(const boost::numeric::ublas::matrix_expression<AE> &ae)
+    : boost::numeric::ublas::matrix<X>(ae) { }
+  Matrix(size_t r, size_t c)
+    : boost::numeric::ublas::matrix<X>(r,c) { for(size_t i=0; i!=r; ++i) { for(size_t j=0; j!=c; ++j) { (*this)(i,j)=0; } } }
+  template<class XX> Matrix(size_t r, size_t c, const XX* ptr)
+    : boost::numeric::ublas::matrix<X>(r,c) { for(size_t i=0; i!=r; ++i) { for(size_t j=0; j!=c; ++j) { (*this)(i,j)=ptr[i*c+j]; } } }
+  template<class XX> Matrix(size_t r, size_t c, const XX* ptr, int ri, int ci)
+    : boost::numeric::ublas::matrix<X>(r,c) { for(size_t i=0; i!=r; ++i) { for(size_t j=0; j!=c; ++j) { (*this)(i,j)=ptr[i*ri+j*ci]; } } }
+  size_t row_size() const { return this->size1(); }
+  size_t column_size() const { return this->size2(); }
   template<class XX> bool operator==(const Matrix<XX>& mx) const;
-  const X* operator[](uint r) const { return &this->operator()(r,0); }
-  X* operator[](uint r) { return &this->operator()(r,0); }
-  const X& get(uint i, uint j) const { return (*this)[i][j]; }
-  template<class T> void set(uint i, uint j, const T& x) { (*this)[i][j] = x; }
+  const X* operator[](size_t r) const { return &this->operator()(r,0); }
+  X* operator[](size_t r) { return &this->operator()(r,0); }
+  const X& get(size_t i, size_t j) const { return (*this)[i][j]; }
+  template<class T> void set(size_t i, size_t j, const T& x) { (*this)[i][j] = x; }
+  
+  static Matrix<X> zero(size_t r, size_t c) { return Matrix<X>(r,c); }
+  static Matrix<X> identity(size_t n) { Matrix<X> I(n,n); for(size_t i=0; i!=n; ++i) { I[i][i]=1; } return I; }
+
 };
+
+template<class X> Matrix<X> make_matrix(const std::string& str) {
+  Matrix<X> res;
+  std::stringstream ss(str);
+  ss >> res;
+  return res;
+}
+  
 
 template<class X> Matrix<X> inverse(const Matrix<X>& A);
 template<class X> X norm(const Matrix<X>& A);
 
+/*
 template<class X> inline Vector<X> operator*(const Matrix<X>& A, const Vector<X>& v) {
   return boost::numeric::ublas::prod(A,v);
 }
  
-inline Vector<Interval> operator*(const Matrix<Float>& A, const Vector<Interval>& v) {
-  return boost::numeric::ublas::prod(A,v);
-}
-
 template<class X> inline Matrix<X> operator*(const Matrix<X>& A, const Matrix<X>& B) {
   return boost::numeric::ublas::prod(A,B);
 }
  
+
+template<class E1, class E2>
+inline
+typename ublas::matrix_vector_binary1_traits<typename E1::value_type, E1,
+                                             typename E2::value_type, E2>::result_type
+operator* (const ublas::matrix_expression<E1> &e1,
+           const ublas::vector_expression<E2> &e2) 
+{
+  typedef typename ublas::matrix_vector_binary1_traits<typename E1::value_type, E1,
+    typename E2::value_type, E2>::expression_type expression_type;
+  return expression_type (e1 (), e2 ());
+}
+
+
+template<class E1, class E2>
+inline
+typename ublas::matrix_matrix_binary_traits<typename E1::value_type, E1,
+                                            typename E2::value_type, E2>::result_type
+operator* (const ublas::matrix_expression<E1> &e1,
+           const ublas::matrix_expression<E2> &e2) 
+{
+  typedef typename ublas::matrix_matrix_binary_traits<typename E1::value_type, E1,
+    typename E2::value_type, E2>::expression_type expression_type;
+  return expression_type (e1 (), e2 ());
+}
+
+template<class E1, class T2>
+inline
+typename ublas::matrix_binary_scalar2_traits<E1, const T2, ublas::scalar_multiplies<typename E1::value_type, T2> >::result_type
+operator* (const ublas::matrix_expression<E1> &e1,
+           const T2 &e2) {
+  typedef typename ublas::matrix_binary_scalar2_traits<E1, const T2, 
+    ublas::scalar_multiplies<typename E1::value_type, T2> >::expression_type expression_type;
+  return expression_type (e1 (), e2);
+}
+
+*/
+
+
 template<class X> template<class XX> bool Matrix<X>::operator==(const Matrix<XX>& A2) const 
 {
   const Matrix<X>& A1=*this;
   if(A1.row_size()!=A2.row_size() || A1.column_size() != A2.column_size()) {
     return false;
   }
-  for(uint i=0; i!=A1.row_size(); ++i) {
-   for(uint j=0; j!=A1.column_size(); ++j) {
+  for(size_t i=0; i!=A1.row_size(); ++i) {
+   for(size_t j=0; j!=A1.column_size(); ++j) {
      if(A1[i][j]!=A2[i][j]) {
        return false;
      }
@@ -116,9 +168,9 @@ template<class X> Matrix<X> inverse(const Matrix<X>& A)
 template<class X> X norm(const Matrix<X>& A) 
 {
   X result=0;
-  for(uint i=0; i!=A.row_size(); ++i) {
+  for(size_t i=0; i!=A.row_size(); ++i) {
     X row_sum=0;
-    for(uint j=0; j!=A.column_size(); ++j) {
+    for(size_t j=0; j!=A.column_size(); ++j) {
       row_sum+=abs(A[i][j]);
     }
     if(row_sum>result) { result=row_sum; }
@@ -126,16 +178,57 @@ template<class X> X norm(const Matrix<X>& A)
   return result;
 }
 
+
+Matrix<Float> midpoint(const Matrix<Interval>& A);
+
+
+
 template<class X> std::ostream& operator<<(std::ostream& os, const Matrix<X>& A) {
   if(A.row_size()==0 || A.column_size()==0) { os << '['; }
-  for(uint i=0; i!=A.row_size(); ++i) { 
-    for(uint j=0; j!=A.column_size(); ++j) { 
+  for(size_t i=0; i!=A.row_size(); ++i) { 
+    for(size_t j=0; j!=A.column_size(); ++j) { 
       os << (j==0 ? (i==0 ? '[' : ';') : ',') << A(i,j); } }
   return os << ']';
 }
 
 
-Matrix<Float> midpoint(const Matrix<Interval>& A);
+template<class X> std::istream& operator>>(std::istream& is, Matrix<X>& A) {
+  char c;
+  is >> c;
+  is.putback(c);
+  if(c=='[') {
+    is >> c;
+    /* Representation as a literal [a11,a12,...,a1n; a21,a22,...a2n; ... ; am1,am2,...,amn] */
+    std::vector< std::vector<X> > v;
+    X x;
+    c=';';
+    while(is && c==';') {
+      v.push_back(std::vector<X>());
+      c=',';
+      while(is && c==',') {
+        is >> x;
+        v.back().push_back(x);
+        is >> c;
+      }
+    }
+    if(is) {
+      A=Matrix<X>(v.size(),v.front().size());
+      for(size_t i=0; i!=A.row_size(); ++i) {
+        if(v[i].size()!=A.column_size()) {
+          ARIADNE_THROW(InvalidInput,"Matrix::read(istream&)","row[0].size()="<<v[0].size()<<", row["<<i<<"].size()="<<v[i].size());
+        }
+        for(size_t j=0; j!=A.column_size(); ++j) {
+          A(i,j)=v[i][j];
+        }
+      }
+    }
+  }
+  else {
+    ARIADNE_THROW(InvalidInput,"Matrix::read(istream&)"," separator c="<<c);
+  }
+  return is;
+}
+
 
 } // namespace Ariadne
 

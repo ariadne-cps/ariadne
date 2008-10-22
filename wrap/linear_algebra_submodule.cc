@@ -31,6 +31,17 @@ using namespace boost::python;
 
 using namespace Ariadne;
 
+template<class X0, class X1, class X2>
+Vector<X0> __mul__(const Matrix<X1>& A1, const Vector<X2>& v2) {
+  return prod(A1,v2); 
+}
+
+template<class X0, class X1, class X2>
+Matrix<X0> __mul__(const Matrix<X1>& A1, const Matrix<X2>& A2) {
+  return prod(A1,A2); 
+}
+
+
 
 template<class X>
 void export_vector()
@@ -65,14 +76,14 @@ void export_vector()
 template<class X>
 void export_matrix()
 {
-    class_< Matrix<X> > matrix_class("Matrix",init<int,int>());
+    class_< Matrix<X> > matrix_class("Matrix",init<size_t,size_t>());
     //matrix_class.def(init<const boost::python::object&>());
     matrix_class.def("rows", &Matrix<X>::row_size);
     matrix_class.def("columns", &Matrix<X>::column_size);
     matrix_class.def("row_size", &Matrix<X>::row_size);
     matrix_class.def("column_size", &Matrix<X>::column_size);
-    matrix_class.def("__setitem__", (void(Matrix<X>::*)(uint,uint,const double&)) &Matrix<X>::set);
-    matrix_class.def("__setitem__", (void(Matrix<X>::*)(uint,uint,const X&)) &Matrix<X>::set);
+    matrix_class.def("__setitem__", (void(Matrix<X>::*)(size_t,size_t,const double&)) &Matrix<X>::set);
+    matrix_class.def("__setitem__", (void(Matrix<X>::*)(size_t,size_t,const X&)) &Matrix<X>::set);
     matrix_class.def("__getitem__", &Matrix<X>::get, return_value_policy<copy_const_reference>());
     matrix_class.def(-self);        // __neg__
     matrix_class.def(self + self);  // __add__
@@ -83,8 +94,8 @@ void export_matrix()
     matrix_class.def(double() * self);  // __mul__
     //matrix_class.def(self * double());  // __mul__
     matrix_class.def(self / double());  // __div__
-    matrix_class.def("__mul__",(Vector<X>(*)(const Matrix<X>&,const Vector<X>&))&operator*);
-    matrix_class.def("__mul__",(Matrix<X>(*)(const Matrix<X>&,const Matrix<X>&))&operator*);
+    matrix_class.def("__mul__",(Vector<X>(*)(const Matrix<X>&,const Vector<X>&))&__mul__);
+    matrix_class.def("__mul__",(Matrix<X>(*)(const Matrix<X>&,const Matrix<X>&))&__mul__);
     //matrix_class.def("inverse", &inverse<X>);
     //matrix_class.def("determinant", &Matrix::determinant);
     //matrix_class.def("transpose", &Matrix::transpose);

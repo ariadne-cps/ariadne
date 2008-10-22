@@ -727,7 +727,7 @@ solve(const ApproximateTaylorModel& f,
     Jinv=inverse(J);
     fx=f.evaluate(x);
     fxmy=fx-y;
-    nx=m-Vector<I>(Jinv*Vector<I>(fx-y));
+    nx=m-Vector<I>(prod(Jinv,fx-y));
     if(disjoint(x,nx)) {
       x=nx;
     } else {

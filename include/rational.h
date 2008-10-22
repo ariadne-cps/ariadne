@@ -1,7 +1,7 @@
 /***************************************************************************
- *            matrix.cc
+ *            rational.h
  *
- *  Copyright 2008  Alberto Casagrande, Pieter Collins
+ *  Copyright 2008  Pieter Collins
  * 
  ****************************************************************************/
 
@@ -21,29 +21,36 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include <numeric.h>
-#include "vector.h"
-#include "matrix.h"
+/*! \file rational.h
+ *  \brief Rational number class.
+ */
+#ifndef ARIADNE_RATIONAL_H
+#define ARIADNE_RATIONAL_H
 
-template class boost::numeric::ublas::matrix<Ariadne::Float>;
-template class boost::numeric::ublas::matrix<Ariadne::Interval>;
+#include <gmpxx.h>
 
 namespace Ariadne {
 
-Matrix<Float> 
-midpoint(const Matrix<Interval>& A) {
-  Matrix<Float> R(A.row_size(),A.column_size());
-  for(uint i=0; i!=A.row_size(); ++i) {
-    for(uint j=0; j!=A.row_size(); ++j) {
-      R[i][j]=A[i][j].midpoint();
-    }
+typedef mpq_class Rational;
+
+Rational sqr(const Rational& q) { return q*q; }
+
+Rational pow(const Rational& q, int n) {
+  if(n==0) { return 1; }
+  if(n<0) { return pow(1/q,-n); }
+  Rational r=1; Rational p=q; int m=n;
+  while(m>=1) {
+    if(m%2) { r*=p; }
+    m/=2;
+    p=p*p;
   }
-  return R;
+  return r;
 }
 
 
-template class Matrix<Float>;
-template class Matrix<Interval>;
 
-} // namespace Ariadne
+} // namespace Ariadne 
 
+
+
+#endif // ARIADNE_RATIONAL_H

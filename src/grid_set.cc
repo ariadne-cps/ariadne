@@ -164,7 +164,6 @@ int
 Grid::subdivision_index(uint d, const real_type& x) const 
 {
   
-  
   Float half=0.5;
   int n=floor(add_approx(div_approx(sub_approx(x,this->_data->_origin[d]),this->_data->_lengths[d]),half));
   Float sc=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],n));
@@ -743,9 +742,9 @@ operator<<(std::ostream& os, const Grid& gr)
 		string result = "\n The grid: " + tmp_stream.str();
 		tmp_stream.str("");
 		
-		//Get the Primary cell higth
+		//Get the Primary cell height
 		tmp_stream << _theHeight;
-		result += "\n Primary root cell's higth: " + tmp_stream.str();
+		result += "\n Primary root cell's height: " + tmp_stream.str();
 		tmp_stream.str("");
 		
 		//Get the binary word path to the subpaving root cell
@@ -960,8 +959,8 @@ operator<<(std::ostream& os, const GridCellListSet& gcls)
 /*********************************************GridTreeSet*********************************************/
 	
 	BinaryTreeNode* GridTreeSet::align_with_cell( const GridCell& theCell, const bool stop_on_enabled, bool & has_stopped ) {
-		const uint thisPavingPCellHight = this->cell().height();
-		const uint otherPavingPCellHight = theCell.height();
+		const uint thisPavingPCellHeight = this->cell().height();
+		const uint otherPavingPCellHeight = theCell.height();
 		
 		ARIADNE_ASSERT( this->cell().grid()==theCell.grid() );
 		
@@ -969,11 +968,11 @@ operator<<(std::ostream& os, const GridCellListSet& gcls)
 		//add the cell. This variable's value might change in the following if clauses
 		BinaryTreeNode * pBinaryTreeNode = this->_pRootTreeNode;
 		
-		if( thisPavingPCellHight > otherPavingPCellHight ){
+		if( thisPavingPCellHeight > otherPavingPCellHeight ){
 
 			//The primary cell of this paving is higher then the one of the other paving.
 			//1. We locate the path to the primary cell node common with the other paving
-			BinaryWord primaryCellPath = GridCell::primary_cell_path( this->cell().grid().dimension(), thisPavingPCellHight, otherPavingPCellHight );
+			BinaryWord primaryCellPath = GridCell::primary_cell_path( this->cell().grid().dimension(), thisPavingPCellHeight, otherPavingPCellHeight );
 			
 			//2. Locate the binary tree node corresponding to this primnary cell
 			uint position = 0;
@@ -986,15 +985,15 @@ operator<<(std::ostream& os, const GridCellListSet& gcls)
 				position++;
 			}
 		} else {
-			if( thisPavingPCellHight < otherPavingPCellHight ) {
+			if( thisPavingPCellHeight < otherPavingPCellHeight ) {
 				//The primary cell of this paving is lower then the one in the other paving so this
 				//paving's has to be rerooted to another primary cell and then we merge the pavings.
 				//1. Compute the path 
-				BinaryWord primaryCellPath = GridCell::primary_cell_path( this->cell().grid().dimension(), otherPavingPCellHight, thisPavingPCellHight );
+				BinaryWord primaryCellPath = GridCell::primary_cell_path( this->cell().grid().dimension(), otherPavingPCellHeight, thisPavingPCellHeight );
 				//2. Substitute the root node of the paiving with the extended tree
 				pBinaryTreeNode = ( this->_pRootTreeNode = BinaryTreeNode::prepend_tree( primaryCellPath, this->_pRootTreeNode ) );
 				//3. Update the GridCell that corresponds to the root of this GridTreeSubset
-				this->_theGridCell = GridCell( this->_theGridCell.grid(), otherPavingPCellHight, BinaryWord() );
+				this->_theGridCell = GridCell( this->_theGridCell.grid(), otherPavingPCellHeight, BinaryWord() );
 			} else {
 				//If we are rooted to the same primary cell, then there
 				//is nothing to be done, except adding the enabled cell
@@ -1004,7 +1003,7 @@ operator<<(std::ostream& os, const GridCellListSet& gcls)
 	}
 	
 	template<class Set> void GridTreeSet::adjoin_outer_approximation( BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
-												const uint max_mince_depth,  const Set& theSet, BinaryWord * pPath ){
+                                                                          const uint max_mince_depth,  const Set& theSet, BinaryWord * pPath ){
 		//Compute the cell correspomding to the current node
 		GridCell theCurrentCell( GridTreeSubset::_theGridCell.grid(), primary_cell_height, *pPath );
 
@@ -1030,7 +1029,7 @@ operator<<(std::ostream& os, const GridCellListSet& gcls)
 				} else {
 					//We should not mince any further, so since the node is a leaf and
 					//it's cell is not disjoint from theSet, we mark the node as enabled.
-					if( pBinaryTreeNode->is_leaf() ){
+                                        if( !pBinaryTreeNode->is_leaf() ){
 						//If the node is not leaf, then we make it an enabled one
 						pBinaryTreeNode->make_leaf(true);
 					} else {
@@ -1051,11 +1050,9 @@ operator<<(std::ostream& os, const GridCellListSet& gcls)
 		Grid theGrid( this->cell().grid() );
 		ARIADNE_ASSERT( theSet.dimension() == this->cell().dimension());
 		
-                throw NotImplemented(__PRETTY_FUNCTION__);
-                // PIETER COLLINS: TODO: GridBlock not in current version; preferably reimplement without
-		//1. Computes the outer approximation (on the grid) of theSet
-		//const GridBlock theSetGridBlock = outer_approximation( theSet.bounding_box(), theGrid );
-		const GridCell theSetGridBlock = outer_approximation( theSet.bounding_box(), theGrid, depth );
+		//1. Computes the smalled primary cell (on the grid) containing theSet
+		const uint theSetBoxHeight = GridCell::smallest_primary_cell( theSet.dimension(), theSet.bounding_box() );
+
 		//2. Allocates the paving for this outer approximation
 		//IVAN S. ZAPREEV
 		//WARNING: We need to have the bounding box on the grid, in order to compute proper primary cell for the GridTreeSet
@@ -1065,11 +1062,7 @@ operator<<(std::ostream& os, const GridCellListSet& gcls)
 		// D) The resulting GridBlock will be in the grid theGrid i.e. it's bounding_box() method will
 		//     return us it's box in the grid theGrid but not in the original space
 		
-                // FIXME: No LatticeSet defined
-                //GridTreeSet theGridPavingOfSetOuterBox( theGrid, GridBlock( Grid( theGrid.dimension(), R(1.0) ), theSetGridBlock.lattice_set() ).bounding_box() );
-		GridTreeSet theGridPavingOfSetOuterBox(theGrid);
-
-		GridCell theSetBoxCell( theGridPavingOfSetOuterBox.cell() );
+                const GridCell theSetBoxCell(theGrid,theSetBoxHeight,BinaryWord());
 
 		//3. Align this paving and paving enclosing the provided set
 		bool has_stopped = false;
@@ -1084,9 +1077,10 @@ operator<<(std::ostream& os, const GridCellListSet& gcls)
 			//with the binary tree node pBinaryTreeNode.
 			const uint max_mince_depth = theSetBoxCell.height() * theSetBoxCell.dimension() + depth;
 			
-			//Adjoin the outer approximation, comoputing it on the fly.
+			//Adjoin the outer approximation, computing it on the fly.
 			BinaryWord * pEmptyPath = new BinaryWord(); 
 			adjoin_outer_approximation( pBinaryTreeNode, theSetBoxCell.height(), max_mince_depth, theSet, pEmptyPath );
+
 			delete pEmptyPath;
 		}
 	}

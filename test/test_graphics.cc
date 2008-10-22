@@ -27,6 +27,7 @@
 #include "zonotope.h"
 #include "approximate_taylor_model.h"
 #include "set.h"
+#include "grid_set.h"
 
 using namespace Ariadne;
 
@@ -74,7 +75,7 @@ int main(int argc, char **argv)
     g.write("test_graphics-1");
     
     g.set_fill_colour(Colour(1.0,1.0,0.5));
-    g.display();
+    //g.display();
 
     g.clear();
 
@@ -83,6 +84,22 @@ int main(int argc, char **argv)
     g.plot(bx2);
     g.plot(bx5);
     g.write("test_graphics-2");
+
+    g.clear();
+    GridTreeSet gts(2);
+    gts.adjoin_outer_approximation(ImageSet(bx1), 6);
+    gts.adjoin_outer_approximation(ImageSet(bx2), 7);
+    gts.adjoin_outer_approximation(ImageSet(bx3), 8);
+    gts.adjoin_outer_approximation(ImageSet(bx4), 9);
+    gts.adjoin_outer_approximation(ImageSet(bx5),10);
+    //gts.recombine();
+    g.set_fill_colour(Colour(1.0,0.5,1.0));
+    for(GridTreeSet::const_iterator iter=gts.begin();
+        iter!=gts.end(); ++iter)
+    {
+      plot(g,iter->box());
+    }
+    g.write("test_graphics-gts");
 
 }
 

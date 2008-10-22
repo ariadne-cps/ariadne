@@ -60,7 +60,14 @@ ImageSet::dimension() const
 tribool
 ImageSet::disjoint(const Vector<Interval>& bx) const 
 { 
-  ARIADNE_NOT_IMPLEMENTED;
+  if(dynamic_cast<const IdentityFunction*>(&*this->_function)) {
+    return Ariadne::disjoint(bx,this->_domain);
+  } else if(dynamic_cast<const ScalingFunction*>(&*this->_function)) {
+    return Ariadne::disjoint(bx,this->_function->evaluate(this->_domain));
+  } else {
+    std::cerr<<*this->_function<<std::endl;
+    ARIADNE_NOT_IMPLEMENTED;
+  }
 }
 
 
@@ -81,7 +88,7 @@ ImageSet::subset(const Vector<Interval>& bx) const
 Vector<Interval>
 ImageSet::bounding_box() const 
 { 
-  ARIADNE_NOT_IMPLEMENTED;
+  return this->_function->evaluate(this->_domain);
 }
 
 

@@ -94,9 +94,9 @@ class Graphic {
     void display();
     void write(const char* filename);
   public:
-    class Impl;
+    class Data;
   private:
-    Impl* _impl;
+    Data* _data;
 };
 
 

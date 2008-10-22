@@ -72,7 +72,7 @@ int main(int argc, char **argv)
     g.set_fill_colour(Colour(0.0,0.5,0.5));
     g.plot(polytope(z1));
     g.plot(polytope(ts1));
-    g.write("test_graphics-1");
+    g.write("test_graphics-bx1");
     
     g.set_fill_colour(Colour(1.0,1.0,0.5));
     //g.display();
@@ -83,9 +83,8 @@ int main(int argc, char **argv)
     g.plot(bx1);
     g.plot(bx2);
     g.plot(bx5);
-    g.write("test_graphics-2");
+    g.write("test_graphics-bx2");
 
-    g.clear();
     GridTreeSet gts(2);
     gts.adjoin_outer_approximation(ImageSet(bx1), 6);
     gts.adjoin_outer_approximation(ImageSet(bx2), 7);
@@ -93,13 +92,18 @@ int main(int argc, char **argv)
     gts.adjoin_outer_approximation(ImageSet(bx4), 9);
     gts.adjoin_outer_approximation(ImageSet(bx5),10);
     //gts.recombine();
-    g.set_fill_colour(Colour(1.0,0.5,1.0));
-    for(GridTreeSet::const_iterator iter=gts.begin();
-        iter!=gts.end(); ++iter)
-    {
-      plot(g,iter->box());
-    }
-    g.write("test_graphics-gts");
+
+    g.clear();
+    Box bbox(2); bbox[0]=Interval(-1,1); bbox[1]=Interval(-1,1);
+    g.set_bounding_box(bbox);
+    plot(g,gts);
+    g.write("test_graphics-gts1");
+
+    g.clear();
+    g.set_bounding_box(Box());
+    plot(g,gts);
+    g.write("test_graphics-gts2");
+    
 
 }
 

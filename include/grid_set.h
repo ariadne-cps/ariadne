@@ -418,7 +418,7 @@ namespace Ariadne {
 			
 			friend class GridTreeCursor;
 
-			/*! \brief having \a theHeight the hight of the primary cell, with \a leftBottomCorner and \a rightTopCorner
+			/*! \brief having \a theHeight the height of the primary cell, with \a leftBottomCorner and \a rightTopCorner
 			 * defining the primary cell corners for \a theHeight-1, we recompute \a leftBottomCorner and \a rightTopCorner
 			 * for the current level \a theHeight.
 			 */
@@ -1753,6 +1753,12 @@ namespace Ariadne {
                 GridTreeSet result(theGrid);
                 result.adjoin_outer_approximation(theSet,depth);
                 return result;
+        }
+
+        template<class G> void plot(G& theGraphic, const GridTreeSet& theGridTreeSet) {
+          for(GridTreeSet::const_iterator iter=theGridTreeSet.begin(); iter!=theGridTreeSet.end(); ++iter) {
+            plot(theGraphic,iter->box());
+          }
         }
 
 } // namespace Ariadne

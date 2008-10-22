@@ -83,6 +83,7 @@ class PlanarProjectionMap
  public:
   PlanarProjectionMap();
   PlanarProjectionMap(uint d, uint i, uint j);
+  size_t argument_size() const;
   template<class X> Vector<X> operator() (const Vector<X>& v) const;
   Point operator() (const Point& pt) const;
   Box operator() (const Box& bx) const;

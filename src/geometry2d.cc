@@ -226,6 +226,12 @@ PlanarProjectionMap::PlanarProjectionMap(uint d, uint i, uint j)
 }
   
 
+size_t
+PlanarProjectionMap::argument_size() const 
+{
+  return this->_d;
+}
+
 Point
 PlanarProjectionMap::operator()(const Point& pt) const 
 {

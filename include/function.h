@@ -31,14 +31,15 @@
 #include <iostream>
 #include "function_interface.h"
 
+#include "macros.h"
+
 #include "vector.h"
 #include "matrix.h"
+#include "transformation.h"
 #include "sparse_differential.h"
 #include "differential_vector.h"
 
 namespace Ariadne {
-
-static const int SMOOTH=255;
 
 // A wrapper for transformations  
 // This class is for internal use only; we can easily specify parameter types.
@@ -132,103 +133,6 @@ template<class T> class Function
 
 
 
-struct ConstantTransformation 
-{
-  ConstantTransformation(const Vector<Float>& c, uint as)
-    : _as(as), _c(c) { }
-  const Vector<Float>& c() const { return _c; }
-  const uint result_size() const { return _c.size(); }
-  const uint argument_size() const { return _as; }
-  const int smoothness() const { return SMOOTH; }
-  template<class R, class A>
-  void compute(R& r, const A& x) const {
-    for(uint i=0; i!=result_size(); ++i) { r[i]=_c[i]; } }
- private:
-  uint _as;
-  Vector<Float> _c;
-};
-
-struct IdentityTransformation 
-{
-  IdentityTransformation(uint n)
-    : _n(n) { }
-  const uint result_size() const { return _n; }
-  const uint argument_size() const { return _n; }
-  const int smoothness() const { return SMOOTH; }
-  template<class R, class A>
-  void compute(R& r, const A& x) const {
-    for(uint i=0; i!=result_size(); ++i) { r[i]=x[i]; } }
- private:
-  uint _n;
-};
-
-struct ProjectionTransformation 
-{
-  ProjectionTransformation(const array<uint>& p, uint as) 
-    : _as(as), _p(p) 
-  { for(uint i=0; i!=_p.size(); ++i) { ARIADNE_ASSERT p[i]<as; } } 
-  ProjectionTransformation(const Range& rng, uint as) 
-    : _as(as), _p(rng.size()) 
-  { ARIADNE_ASSERT range.start()+range.size()<=as;
-    for(uint i=0; i!=_p.size(); ++i) { _p[i]=rng.start()+i; } }
-  const array<uint>& p() const { return _p; }
-  const uint result_size() const { return _p.size(); }
-  const uint argument_size() const { return _as; }
-  const int smoothness() const { return SMOOTH; }
-  template<class R, class A>
-  void compute(R& r, const A& x) const {
-    for(uint i=0; i!=result_size(); ++i) { r[i]=x[p[i]]; } }
- private:
-  uint _as;
-  array<uint> _p;
-};
-
-struct ScalingTransformation 
-{
-  ScalingTransformation(const Vector<Float>& origin, 
-                        const Vector<Float>& lengths)
-    : _o(origin), _l(lengths) { ARIADNE_ASSERT(origin.size()==lengths.size()); }
-  explicit ScalingTransformation(const Vector<Interval>& range)
-    : _o(midpoint(range)), _l(range.size()) { for(uint i=0; i!=_l.size(); ++i) { _l[i]=range[i].radius(); } }
-  const Vector<Float>& origin() const { return _o; }
-  const Vector<Float>& lengths() const { return _l; }
-  const uint result_size() const { return _l.size(); }
-  const uint argument_size() const { return _l.size(); }
-  const int smoothness() const { return SMOOTH; }
-  template<class R, class A>
-  void compute(R& r, const A& x) const {
-    for(uint i=0; i!=result_size(); ++i) {
-      r[i]=_o[i]+_l[i]*x[i]; 
-    }
-  }
- private:
-  Vector<Float> _o;
-  Vector<Float> _l;
-};
-
-
-struct AffineTransformation 
-{
-  AffineTransformation(const Matrix<Float>& A, const Vector<Float>& b)
-    : _A(A), _b(b) { ARIADNE_ASSERT(A.row_size()==b.size()); }
-  const Matrix<Float>& A() const { return _A; }
-  const Vector<Float>& b() const { return _b; }
-  const uint result_size() const { return _A.row_size(); }
-  const uint argument_size() const { return _A.column_size(); }
-  const int smoothness() const { return SMOOTH; }
-  template<class R, class A>
-  void compute(R& r, const A& x) const {
-    for(uint i=0; i!=result_size(); ++i) {
-      r[i]=_b[i]; 
-      for(uint j=0; j!=argument_size(); ++j) {
-        r[i]+=_A[i][j]*x[j];
-      }
-    }
-  }
- private:
-  Matrix<Float> _A;
-  Vector<Float> _b;
-};
 
 
 
@@ -249,12 +153,18 @@ class ConstantFunction
 
 //! A projection function \f$ x'_i= x_{p(i)}\f$.
 class ProjectionFunction
-  : public FunctionBase<IdentityTransformation>
+  : public FunctionBase<ProjectionTransformation>
 {
  public:
   //! Construct the identity function in dimension \a n.
+  ProjectionFunction(uint n) 
+    : FunctionBase<ProjectionTransformation>(Range(0,n),n) { }
+  //! Construct a projection function based on the array \a p.
   ProjectionFunction(const array<uint>& p, uint as) 
-    : FunctionBase<ProjectionTransformation>(_p,as) { }
+    : FunctionBase<ProjectionTransformation>(p,as) { }
+  //! Construct a projection function based on the range \a rng.
+  ProjectionFunction(const Range& rng, uint as) 
+    : FunctionBase<ProjectionTransformation>(rng,as) { }
   std::ostream& write(std::ostream& os) const {
     return os << "ProjectionFunction( p=" << this->p() << " )"; }
 };

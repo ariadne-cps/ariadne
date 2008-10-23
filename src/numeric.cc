@@ -22,10 +22,13 @@
  */
  
 #include <iostream>
+
+#include "config.h"
 #include "macros.h"
 #include "numeric.h"
 
 namespace Ariadne {
+
 
 uint 
 fac(uint n) 
@@ -257,6 +260,34 @@ Interval atan(Interval i)
   ARIADNE_NOT_IMPLEMENTED;
 }
 
+
+
+#ifdef HAVE_GMPXX_H 
+
+typedef mpq_class Rational;
+
+Rational sqr(const Rational& q) { return q*q; }
+
+Rational pow(const Rational& q, uint n) {
+  if(n==0) { return 1; }
+  Rational r=1; Rational p=q; uint m=n;
+  while(m>=1) { if(m%2) { r*=p; } m/=2; p=p*p; }
+  return r;
+}
+
+Rational pow(const Rational& q, int n) {
+  if(n>=0) { return pow(q,uint(n)); }
+  else { return pow(1/q,uint(-n)); }
+}
+
+
+Interval::Interval(Rational q)
+  : l(down(q.get_d())), u(up(q.get_d())) { }
+
+Interval::Interval(Rational lower, Rational upper)
+  : l(down(lower.get_d())), u(up(upper.get_d())) { }
+
+#endif // HAVE_GMPXX_H 
 
 
 std::ostream& 

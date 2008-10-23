@@ -28,9 +28,9 @@
 #include <sstream>
 #include <string>
 
-#define HAVE_GMPXX_H
-#include "rational.h"
-#undef HAVE_GMPXX_H
+#include "config.h"
+
+#include "numeric.h"
 #include "vector.h"
 #include "sparse_differential.h"
 

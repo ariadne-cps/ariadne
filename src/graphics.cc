@@ -29,6 +29,7 @@
 #include "numeric.h"
 #include "vector.h"
 #include "matrix.h"
+#include "function.h"
 #include "point.h"
 #include "box.h"
 #include "geometry2d.h"
@@ -68,8 +69,9 @@ draw(cairo_t *cr, const Box& bounding_box, const std::vector<GraphicsObject>& ob
 
 struct Graphic::Data 
 {
+  Data() : bounding_box(0), projection(2) { }
   Box bounding_box;
-  PlanarProjectionMap projection_map;
+  ProjectionFunction projection;
   Colour fill_colour;
   std::vector<GraphicsObject> objects;
 };
@@ -85,14 +87,15 @@ Graphic::Graphic()
     : _data(new Data()) 
 { 
   this->_data->bounding_box=Box(0);
+  this->_data->projection=ProjectionFunction(2);
 }
 
 
 void Graphic::set_bounding_box(const Box& bx) 
 {
-  ARIADNE_ASSERT(bx.dimension()==0 || bx.dimension()==2 || bx.dimension()==this->_data->projection_map.argument_size());
+  ARIADNE_ASSERT(bx.dimension()==0 || bx.dimension()==2 || bx.dimension()==this->_data->projection.argument_size());
   if(bx.dimension()>2) {
-    this->_data->bounding_box=this->_data->projection_map(bx);
+    this->_data->bounding_box=this->_data->projection(bx);
   } else {
     this->_data->bounding_box=bx;
   }

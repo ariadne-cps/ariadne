@@ -28,9 +28,10 @@
 #include <sstream>
 #include <string>
 
-#include "rational.h"
+#include "config.h"
 
 #include "test.h"
+#include "numeric.h"
 #include "vector.h"
 #include "series.h"
 #include "sparse_differential.h"

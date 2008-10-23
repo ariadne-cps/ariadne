@@ -28,12 +28,11 @@
 #include <sstream>
 #include <string>
 
-#include "rational.h"
+#include "config.h"
 #include "numeric.h"
 
 #include "test.h"
 
-using namespace Ariadne;
 using namespace Ariadne;
 using namespace std;
 

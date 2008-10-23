@@ -26,11 +26,11 @@
 #include <cassert>
 
 
-#include "test/test.h"
-#include "rational.h"
+#include "config.h"
 #include "numeric.h"
 #include "vector.h"
 
+#include "test.h"
 
 using namespace std;
 using namespace Ariadne;

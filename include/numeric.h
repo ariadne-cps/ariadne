@@ -51,9 +51,6 @@ namespace Ariadne {
 class Integer { };
 //! \brief Rationals numbers.
 class Rational { };
-#else
-//! \brief Integers implemented using longest integral machine type.
-class Integer { };
 #endif // HAVE_GMPXX_H 
 //! \brief Floating point numbers (double precision).
 class Float { };
@@ -61,8 +58,10 @@ class Float { };
 
 
 #ifdef HAVE_GMPXX_H
-#include "integer.h"
-#include "rational.h"
+typedef mpq_class Rational;
+Rational sqr(const Rational& q);
+Rational pow(const Rational& q, int n);
+Rational pow(const Rational& q, uint n);
 #else
 #endif // HAVE_GMPXX_H 
 
@@ -143,8 +142,8 @@ class Interval {
   
   Interval(Float lower, Float upper) : l(lower), u(upper) { }
 #ifdef HAVE_GMPXX_H
-  Interval(Rational q) : l(down(q.get_d())), u(up(q.get_d())) { }
-  Interval(Rational lower, Rational upper) : l(down(lower.get_d())), u(up(upper.get_d())) { }
+  Interval(Rational q);
+  Interval(Rational lower, Rational upper);
 #endif // HAVE_GMPXX_H 
 
   const Float& lower() const { return l; }

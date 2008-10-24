@@ -91,8 +91,10 @@ namespace Ariadne {
 	GridTreeSet intersection(const GridTreeSubset& theSet1, const GridTreeSubset& theSet2);
 	GridTreeSet difference(const GridTreeSubset& theSet1, const GridTreeSubset& theSet2);
 	
-        GridCell outer_approximation(const Vector<Interval>& theBox, const Grid& theGrid, const uint depth);
+        GridCell over_approximation(const Box& theBox, const Grid& theGrid);
+        GridCell outer_approximation(const Box& theBox, const Grid& theGrid, const uint depth);
         GridTreeSet outer_approximation(const CompactSetInterface& theSet, const Grid& theGrid, const uint depth);
+        GridTreeSet outer_approximation(const CompactSetInterface& theSet, const uint depth);
 
 	/*! \brief The binary-tree node operation is not allowed on a non-leaf node. */
 	class NotALeafNodeException : public std::logic_error {
@@ -485,16 +487,16 @@ namespace Ariadne {
 			 *  space is not taken into account.
 			 *
 			 * Here
-			 * \a theHeight defines the higth of the primary cell above the zero level and
+			 * \a theHeight defines the height of the primary cell above the zero level and
 			 * \a dimensions is the number of dimension in the considered space
 			 */
 			static Box primary_cell( const uint theHeight, const dimension_type dimensions );
 			
 			/*! \brief Takes a box \a theBox related to some grid and computes the smallest primary cell on
-			 *   that grid that will contain this box. Here \a dimensions defines the space dimension and
-			 *   the method returns the hight of that primary cell.
+			 *   that grid that will contain this box. 
+			 *   The method returns the hight of that primary cell.
 			 */
-			static uint smallest_primary_cell( const dimension_type dimensions, const Box& theBox );
+			static uint smallest_primary_cell_height( const Box& theBox );
 
 			/*! \brief Apply grid data \a theGrid to \a theGridBox in order to compute
 			 * the box dimensions in the original space
@@ -685,7 +687,7 @@ namespace Ariadne {
 			/*! \brief The new root node can only be constructed from the existing tree node.
 			 * Here, \a pRootTreeNode is not copied, we simply store its pointer inside this class.
 			 * Note that, \a pRootTreeNode should correspond to the sub-paving root node. Thus,
-			 * \a theHeight defines the higth of the primary root cell of the GridTreeSet
+			 * \a theHeight defines the height of the primary root cell of the GridTreeSet
 			 * (Remember that every GridTreeSubset is just a reference to a subtree of a GridTreeSet).
 			 * \a theWord defines the path to the \a pRootTreeNode node from the primary root cell
 			 * of the corresponding GridTreeSet.
@@ -822,7 +824,7 @@ namespace Ariadne {
 			/*! \brief The new root node can only be constructed from the existing tree node.
 			 * Here, \a pRootTreeNode is not copied, we simply store its pointer inside this class.
 			 * Note that, \a pRootTreeNode should correspond to the root node. \a theHeight defines
-			 * the higth of the primary root cell corresponding to the \a pRootTreeNode node.
+			 * the height of the primary root cell corresponding to the \a pRootTreeNode node.
 			 */
 			GridTreeSet( const Grid& theGrid, const uint theHeight, BinaryTreeNode * pRootTreeNode );
 			
@@ -859,7 +861,7 @@ namespace Ariadne {
 
                         /*! \brief Creates a new paving from the user data. \a theTree is an array representation of the binary
 			 * tree structure, \a theEnabledCells tells whether a node is or is not a leaf, \a theHeight gives the
-			 * higth of the primary cell which is assumed to correspond to the root node of \a theTree.
+			 * height of the primary cell which is assumed to correspond to the root node of \a theTree.
 			 */
 			explicit GridTreeSet( const Grid& theGrid, uint theHeight, const BooleanArray& theTree, const BooleanArray& theEnabledCells );
 
@@ -944,6 +946,8 @@ namespace Ariadne {
 			//@{
 			//! \name Geometric Approximation
 
+			/*! \brief Adjoin an over approximation to box, computing to the given depth. */
+			void adjoin_over_approximation( const Box& theBox, const uint depth );
 			/*! \brief Adjoin an outer approximation to a given set, computing to the given depth.
 			 *! This method computes an outer approximation for the set \a theSet on the grid \a theGrid.
 			 *  Note that, the depth is the total number of subdivisions (in all dimensions) of the unit
@@ -1676,14 +1680,14 @@ namespace Ariadne {
 							GridTreeSubset( Grid( theDimension, Float(1.0) ), 0, BinaryWord(), new BinaryTreeNode( enable )) {
 		//We want a [0,1]x...[0,1] cell in N dimensional space with no sxaling or shift of coordinates:
 		//1. Create a new non scaling grid with no shift of the coordinates
-		//2. The higth of the primary cell is zero, since is is [0,1]x...[0,1] itself
+		//2. The height of the primary cell is zero, since is is [0,1]x...[0,1] itself
 		//3. The binary word that describes the path from the primary cell to the root
 		//   of the tree is empty, because any paving always has a primary cell as a root
 		//4. A new disabled binary tree node, gives us the root for the paving tree
 	}
 
 	inline GridTreeSet::GridTreeSet(const Grid& theGrid, const Box & theBoundingBox ) :
-								GridTreeSubset( theGrid, GridCell::smallest_primary_cell( theGrid.dimension(), theBoundingBox ),
+								GridTreeSubset( theGrid, GridCell::smallest_primary_cell_height( theBoundingBox ),
 											BinaryWord(), new BinaryTreeNode( false ) ) {
 		//1. The main point here is that we have to compute the smallest primary cell that contains theBoundingBox
 		//2. This cell is defined by it's height and becomes the root of the GridTreeSet
@@ -1749,16 +1753,30 @@ namespace Ariadne {
 
 /*************************************FRIENDS OF GridTreeSet*****************************************/
 
+        inline GridTreeSet outer_approximation(const CompactSetInterface& theSet, const uint depth) {
+                Grid theGrid(theSet.dimension());
+                return outer_approximation(theSet,theGrid,depth);
+        }
+
         inline GridTreeSet outer_approximation(const CompactSetInterface& theSet, const Grid& theGrid, const uint depth) {
                 GridTreeSet result(theGrid);
                 result.adjoin_outer_approximation(theSet,depth);
                 return result;
         }
 
+        template<class G> void plot(G& theGraphic, const GridCell& theGridCell) {
+          plot(theGraphic,theGridCell.box());
+        }
+
         template<class G> void plot(G& theGraphic, const GridTreeSet& theGridTreeSet) {
           for(GridTreeSet::const_iterator iter=theGridTreeSet.begin(); iter!=theGridTreeSet.end(); ++iter) {
             plot(theGraphic,iter->box());
           }
+        }
+
+        template<class G> void plot(G& theGraphic, const CompactSetInterface& theSet) {
+                static const int PLOTTING_DEPTH=16;
+                plot(theGraphic,outer_approximation(theSet,Grid(theSet.dimension()),PLOTTING_DEPTH));
         }
 
 } // namespace Ariadne

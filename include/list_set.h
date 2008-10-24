@@ -37,6 +37,11 @@ typedef unsigned int uint;
 
 namespace Ariadne {
 
+template<class ES> class ListSet;
+typedef int DiscreteState;
+
+// Declare template specialisation for hybrid list set
+template<class ES> class ListSet< std::pair<DiscreteState,ES> >;
 
 template<class BS>
 class ListSet 
@@ -60,6 +65,13 @@ class ListSet
     this->_data.insert(this->end(),first,last); };
 
 
+  /*! \brief Tests if the sets are equal. Tests equality of sequences, 
+   *  including ordering. */   
+  bool operator==(const ListSet<BS>& other) const { return this->_data==other._data; }
+
+
+  /*! \brief Returns true if the list is empty. */
+  bool empty() const { return this->_data.empty(); }
 
   /*! \brief Returns the number of basic sets forming this object. */
   size_t size() const { return this->_data.size(); }
@@ -86,10 +98,14 @@ class ListSet
   void push_back(const BS& bs) { this->_data.push_back(bs); }
 
   /*! \brief Adjoins (makes union with) a basic set. */
-  void adjoin(const BS& bs) { this->_data.push_back(bs); }
+  void adjoin(const BS& bs) { 
+    ARIADNE_ASSERT(this->empty() || this->_data.back().dimension()==bs.dimension());
+    this->_data.push_back(bs); }
 
   /*! \brief Adjoins (makes union with) another list set. */
-  void adjoin(const ListSet<BS>& ls) { this->_data.insert(this->_data.end(),ls.begin(),ls.end()); }
+  void adjoin(const ListSet<BS>& ls) { 
+    ARIADNE_ASSERT(this->empty() || ls.empty() || this->_data.back().dimension()==ls._data.back().dimension());
+    this->_data.insert(this->_data.end(),ls.begin(),ls.end()); }
 };      
   
 
@@ -100,6 +116,13 @@ operator<<(std::ostream& os, const ListSet<BS>& ls)
   return os << "ListSet( size=" << ls.size() << " )";
 }
 
+
+template<class G, class BS> 
+void 
+plot(G& graphic, const ListSet<BS>& ls) { 
+  for(typename ListSet<BS>::const_iterator iter=ls.begin(); 
+      iter!=ls.end();  ++iter) { plot(graphic,*iter); } 
+}
 
 
 } // namespace Ariadne

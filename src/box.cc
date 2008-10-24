@@ -32,9 +32,26 @@ namespace Ariadne {
 
 Box make_box(const std::string& str)
 {
+  // Representation as a literal 
+  //   "[a1,b1]x[a2,b2]x...x[an,bn]" 
+
   std::stringstream ss(str);
   std::vector<Interval> vec;
-  read_sequence(ss,vec,'[',']','x');
+  Interval ivl; 
+  char c;
+
+  c='x';
+  while(c=='x') {
+    ss >> ivl;
+    vec.push_back(ivl);
+    c=' ';
+    while( ss && c==' ') {
+      ss >> c;
+    }
+  }
+  if(ss) {
+    ss.putback(c);
+  }
   return Box(vec.size(),&vec[0]);
 }
 

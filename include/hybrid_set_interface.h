@@ -38,13 +38,13 @@
 namespace Ariadne {
 
 class Interval;
-template<class X> class Vector;
+class Box;
 
 class HybridSpace;
 typedef int DiscreteState;
 
-typedef std::pair<DiscreteState,Vector<Interval> > HybridBox;
-typedef std::map<DiscreteState,Vector<Interval> > HybridBoxes;
+typedef std::pair<DiscreteState,Box> HybridBox;
+typedef std::map<DiscreteState,Box> HybridBoxes;
 
 class HybridSetInterfaceBase 
 {

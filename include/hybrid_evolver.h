@@ -37,6 +37,8 @@
 
 #include "tuple.h"
 
+#include "hybrid_set.h"
+
 #include "hybrid_automaton.h"
 #include "evolver_interface.h"
 #include "evolver_base.h"
@@ -61,8 +63,8 @@ class HybridTime;
 
 
 typedef ApproximateTaylorModel DefaultModelType;
-
-typedef std::pair<DiscreteState,ApproximateTaylorModel> DefaultHybridSetType;
+typedef ApproximateTaylorModel DefaultEnclosureType;
+typedef std::pair<DiscreteState,DefaultEnclosureType> DefaultHybridEnclosureType;
 
 /*! \ingroup Evolve 
  *  \brief A class for computing the evolution of a hybrid system. 
@@ -70,7 +72,7 @@ typedef std::pair<DiscreteState,ApproximateTaylorModel> DefaultHybridSetType;
  * The actual evolution steps are performed by the HybridEvolver class.
  */
 class HybridEvolver
-  : public EvolverBase< HybridAutomaton,DefaultHybridSetType>
+  : public EvolverBase< HybridAutomaton,DefaultHybridEnclosureType>
   , public Loggable
 {
   typedef Ariadne::DefaultModelType ModelType;
@@ -106,7 +108,7 @@ class HybridEvolver
   //@{
   //! \name Evolution using abstract sets.
   //! \brief Compute an approximation to the orbit set using upper semantics. 
-  Orbit<EnclosureType> orbit(const SystemType& system, const EnclosureType& initial_set, const TimeType& time) const;
+  Orbit<EnclosureType> orbit(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
 
 
   //! \brief Compute an approximation to the evolution set using upper semantics. 

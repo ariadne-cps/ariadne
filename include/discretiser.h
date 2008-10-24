@@ -56,6 +56,7 @@ class HybridDiscretiser
   typedef HybridTime TimeType;
   typedef HybridAutomaton SystemType;
   typedef HybridGridCell BasicSetType;
+  typedef ES ContinuousEnclosureType;
   typedef std::pair<DiscreteState,ES> EnclosureType;
  private:
   boost::shared_ptr< EvolverInterface<SystemType,EnclosureType>  > _evolver;
@@ -91,15 +92,13 @@ class HybridDiscretiser
                const TimeType& time) const;
 
  private:
-  EnclosureType _enclosure(const BasicSetType& bs);
-  Orbit<BasicSetType> _discretise(const Orbit<EnclosureType>& orb);
+  EnclosureType _enclosure(const BasicSetType& bs) const;
+  Orbit<BasicSetType> _discretise(const Orbit<EnclosureType>& orb) const;
   
 };
 
 
-
 } // namespace Ariadne
-
 
 
 #endif /* ARIADNE_DISCRETISER_H */

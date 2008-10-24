@@ -97,7 +97,7 @@ class ApproximateTaylorModel {
   ApproximateTaylorModel(uint rs, uint as, ushort o, ushort s);
   
   //! \brief Construct the identity model on a domain. 
-  //ApproximateTaylorModel(const BoxType& domain);
+  ApproximateTaylorModel(const BoxType& domain);
   
   //! \brief Construct from a domain, centre, and a derivative expansion. 
   ApproximateTaylorModel(const BoxType& domain, const PointType& centre, 
@@ -129,6 +129,10 @@ class ApproximateTaylorModel {
   //! \brief The data used to define the centre of the Taylor model. 
   const DifferentialVectorType& expansion() const;
   
+  // FIXME: A model should not have a dimension!! Needed because we're using 
+  // a model directly as a set.
+  uint dimension() const { return this->result_size(); }
+
   // Data access
   //! \brief The order of the Taylor model. 
   ushort order() const;

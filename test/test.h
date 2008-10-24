@@ -59,10 +59,21 @@ ariadne_check(std::ostream& os, const R& r, const ER& er) {
 /*! \brief Calls a function */
 #define ARIADNE_TEST_CALL(function) \
 { \
-  std::cout << #function << std::endl; \
+  std::cout << "****************************************\n"             \
+            << "CALLING " << #function << "\n"                          \
+            << "****************************************\n" << std::endl; \
   function; \
   std::cout << std::endl;          \
 } \
+
+
+/*! \brief Executes \a statement, writing the statement to standard output. Does not check for any errors. */
+#define ARIADNE_TEST_EXECUTE(statement) \
+{ \
+  std::cout << #statement << ": " << std::flush; \
+  statement;                                     \
+  std::cout << " (ok)\n" << std::endl;           \
+}\
 
 
 /*! \brief Tries to execute \a statement, writing the statement to standard output. Writes a diagnostic report to standard error if an exception is thrown. <br> <b>Important:</b> Use the ARIADNE_TEST_CONSTRUCT() macro if \a statement declares a variable and calls a constructor. */

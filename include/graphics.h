@@ -110,9 +110,6 @@ inline void plot(Graphic& g, const Box& bx) { g.plot(bx); }
 inline void plot(Graphic& g, const Zonotope& z) { g.plot(polytope(z)); }
 inline void plot(Graphic& g, const Polytope& p) { g.plot(polytope(p)); }
 inline void plot(Graphic& g, const ApproximateTaylorModel& ts) { g.plot(polytope(ts)); }
-template<class BS> inline void plot(Graphic& g, const ListSet<BS>& ls) { 
-  for(typename ListSet<BS>::const_iterator iter=ls.begin(); iter!=ls.end();  ++iter) { plot(g,*iter); } }
-template<class BS> inline void plot(Graphic& g, const std::pair<int,BS>& hs) { plot(g,hs.second); }
 
 template<class SET> Graphic& operator<<(Graphic& g, const SET& set) { plot(g,set); return g; }
 

@@ -300,7 +300,7 @@ std::istream&
 operator>>(std::istream& is, Interval& ivl)
 {
   char cl,cm,cr;
-  return is >> cl >> ivl.l >> cm >> ivl.u >> cr;
+  is >> cl >> ivl.l >> cm >> ivl.u >> cr;
   ARIADNE_ASSERT(is);
   ARIADNE_ASSERT(cl=='[' || cl=='(');
   ARIADNE_ASSERT(cm==':' || cm==',' || cm==';');

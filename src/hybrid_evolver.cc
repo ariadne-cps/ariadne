@@ -90,14 +90,15 @@ Orbit<HybridEvolver::EnclosureType>
 HybridEvolver::
 orbit(const SystemType& system, 
       const EnclosureType& initial_set, 
-      const TimeType& time) const 
+      const TimeType& time,
+      Semantics semantics) const 
 {
   Orbit<EnclosureType> orbit(initial_set);
   EnclosureListType final; 
   EnclosureListType reachable; 
   EnclosureListType intermediate; 
   this->_evolution(final,reachable,intermediate,
-                   system,initial_set,time,UPPER_SEMANTICS,false); 
+                   system,initial_set,time,semantics,false); 
   orbit.adjoin_intermediate(intermediate);
   orbit.adjoin_reach(reachable);
   orbit.adjoin_final(final);

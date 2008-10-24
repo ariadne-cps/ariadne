@@ -117,4 +117,51 @@ final() const
 }
 
 
+
+
+
+struct Orbit<HybridGridCell>::Data {
+  Data(const HybridGridCell& initial_set) 
+    : initial(initial_set) { }
+  HybridGridCell initial;
+  HybridGridCellListSet reach;
+  HybridGridCellListSet intermediate;
+  HybridGridCellListSet final;
+};
+
+Orbit<HybridGridCell>::
+Orbit(const HybridGridCell& initial_set)
+  : _data(new Data(initial_set))
+{
+}
+
+HybridGridCell const&
+Orbit<HybridGridCell>::
+initial() const
+{
+  return this->_data->initial;
+}
+
+HybridGridCellListSet const&
+Orbit<HybridGridCell>::
+reach() const
+{
+  return this->_data->reach;
+}
+
+HybridGridCellListSet const&
+Orbit<HybridGridCell>::
+intermediate() const
+{
+  return this->_data->intermediate;
+}
+
+HybridGridCellListSet const&
+Orbit<HybridGridCell>::
+final() const
+{
+  return this->_data->final;
+}
+
+
 } // namespace Ariadne

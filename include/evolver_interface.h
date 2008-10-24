@@ -34,7 +34,8 @@ namespace Ariadne {
 using std::pair;
 
 
-template<class BS> class ListSet;
+template<class ES> class ListSet;
+template<class ES> class Orbit;
 
 enum Semantics { LOWER_SEMANTICS, UPPER_SEMANTICS }; 
 
@@ -61,6 +62,14 @@ class EvolverInterface
   virtual std::ostream& write(std::ostream& os) const = 0;
 
  public:
+  //! \brief Compute an approximation to the evolved set under the given semantics. 
+  virtual 
+  Orbit<EnclosureType>
+  orbit(const SystemType& system, 
+        const EnclosureType& initial_set, 
+        const TimeType& time, 
+         Semantics semantics) const = 0;
+
   //! \brief Compute an approximation to the evolved set under the given semantics. 
   virtual 
   EnclosureListType 

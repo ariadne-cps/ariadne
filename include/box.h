@@ -40,6 +40,8 @@ class Box : public Vector<Interval>
   Box() : Vector<Interval>() { }
   template<class T> Box(const T& t) : Vector<Interval>(t) { }
   template<class T1, class T2> Box(const T1& t1, const T2& t2) : Vector<Interval>(t1,t2) { }
+  static Box unit_box(uint n) { return Box(n,Interval(-1,1)); }
+  static Box upper_quadrant(uint n) { return Box(n,Interval(0,inf())); }
   uint dimension() const { return this->size(); }
   Vector<Float> centre() const { return midpoint(*this); }
   Float radius() const { 

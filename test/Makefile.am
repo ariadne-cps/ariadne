@@ -16,10 +16,13 @@ check_PROGRAMS = \
 	test_differential \
 	test_differential_vector \
 	test_approximate_taylor_model \
+	test_grid_set \
+	test_hybrid_set \
 	test_discrete_evolution \
 	test_continuous_evolution \
 	test_hybrid_evolution \
-	test_grid_set \
+	test_reachability_analyser \
+	test_discretiser \
 	test_serialization \
 	test_graphics 
 
@@ -29,21 +32,14 @@ tests: $(check_PROGRAMS)
 #test_rational_LDADD = -lgmp $(LIBS)
 
 # Explicitly list test sources
-#test_tribool_SOURCES=test_tribool.cc
-#test_array_SOURCES=test_array.cc
-#test_boost_SOURCES=test_boost.cc
-#test_mpfr_SOURCES=test_mpfr.cc
+test_float_SOURCES=test_float.cc
+test_interval_SOURCES=test_interval.cc
 
-#test_integer_SOURCES=test_integer.cc
-#test_rational_SOURCES=test_rational.cc
-#test_float_SOURCES=test_float.cc
-#test_interval_SOURCES=test_interval.cc
+test_vector_SOURCES=test_vector.cc
+test_matrix_SOURCES=test_matrix.cc
 
-#test_vector_SOURCES=test_vector.cc
-#test_matrix_SOURCES=test_matrix.cc
-
-#test_multi_index_SOURCES=test_multi_index.cc
 test_differential_SOURCES=test_differential.cc
+test_differential_vector_SOURCES=test_differential_vector.cc
 
 test_approximate_taylor_model_SOURCES=test_approximate_taylor_model.cc
 
@@ -51,9 +47,14 @@ test_discrete_evolution_SOURCES=test_discrete_evolution.cc
 test_continuous_evolution_SOURCES=test_continuous_evolution.cc
 test_hybrid_evolution_SOURCES=test_hybrid_evolution.cc
 
+test_grid_set_SOURCES=test_grid_set.cc
+
+test_discretiser_SOURCES=test_discretiser.cc
+test_discrete_evolver_SOURCES=test_discrete_evolver.cc
+test_reachability_analyser_SOURCES=test_reachability_analyser.cc
+
 test_serialization_SOURCES=test_serialization.cc
 test_graphics_SOURCES=test_graphics.cc
-
 
 EXTRA_DIST =
 SUBDIRS =

@@ -69,6 +69,15 @@ Grid::Grid(const Grid& gr)
 
 
  
+Grid::Grid(uint d)
+  : _data(new Data())
+{
+  Vector<Float> origin(d,Float(0));
+  Vector<Float> lengths(d,Float(1));
+  this->_create(origin,lengths);
+}
+
+ 
 Grid::Grid(uint d, Float l)
   : _data(new Data())
 {
@@ -645,8 +654,9 @@ operator<<(std::ostream& os, const Grid& gr)
 		return Box( Vector< Interval >( dimensions, Interval( leftBottomCorner, rightTopCorner ) ) );
 	}
 
-	uint GridCell::smallest_primary_cell( const dimension_type dimensions, const Box& theBox ) {
-		int leftBottomCorner = 0, rightTopCorner = 1;
+	uint GridCell::smallest_primary_cell_height( const Box& theBox ) {
+                const dimension_type dimensions = theBox.dimension();
+                int leftBottomCorner = 0, rightTopCorner = 1;
 		uint height = 0;
 		//The zero level coordinates are known, so we need to iterate only for higher level primary cells
 		do{
@@ -1051,7 +1061,7 @@ operator<<(std::ostream& os, const GridCellListSet& gcls)
 		ARIADNE_ASSERT( theSet.dimension() == this->cell().dimension());
 		
 		//1. Computes the smalled primary cell (on the grid) containing theSet
-		const uint theSetBoxHeight = GridCell::smallest_primary_cell( theSet.dimension(), theSet.bounding_box() );
+		const uint theSetBoxHeight = GridCell::smallest_primary_cell_height( theSet.bounding_box() );
 
 		//2. Allocates the paving for this outer approximation
 		//IVAN S. ZAPREEV
@@ -1098,6 +1108,17 @@ operator<<(std::ostream& os, const GridCellListSet& gcls)
 	}
 
 /*************************************FRIENDS OF BinaryTreeNode*************************************/
+
+/*************************************FRIENDS OF GridCell*****************************************/
+
+        GridCell over_approximation(const Box& theBox, const Grid& theGrid) {
+                Box theDyadicBox(theBox.size());
+                for(uint i=0; i!=theBox.size(); ++i) {
+                  theDyadicBox[i]=(theBox[i]-theGrid.origin()[i])/theGrid.lengths()[i]; }
+                uint height=GridCell::smallest_primary_cell_height( theDyadicBox );
+                return GridCell(theGrid,height,BinaryWord());
+        }
+
 
 /*************************************FRIENDS OF GridTreeSet*****************************************/
 

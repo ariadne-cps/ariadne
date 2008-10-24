@@ -37,6 +37,7 @@
 #include "discretiser_interface.h"
 #include "analyser_interface.h"
 
+#include "orbit.h"
 #include "grid_set.h"
 #include "hybrid_set.h"
 
@@ -55,9 +56,11 @@ class HybridGridCellListSet;
 class HybridGridTreeSet;
 
 template<class ES> class HybridListSet;
-template<class ES> class HybridEvolver;
+class HybridEvolver;
 template<class ES> class HybridDiscretiser;
 
+typedef ApproximateTaylorModel DefaultEnclosureType;
+typedef std::pair<DiscreteState,DefaultEnclosureType> DefaultHybridEnclosureType;
 
 
 
@@ -85,7 +88,8 @@ class HybridAnalyser
   //@{
   //! \name Constructors and destructors
   /*! \brief Construct from evolution parameters and a method for evolving basic sets. */
-  template<class ES> HybridAnalyser(const EvolutionParameters& parameters, const HybridEvolver<ES>& evolver);
+  HybridAnalyser(const EvolutionParameters& parameters, 
+                 const EvolverInterface<HybridAutomaton,DefaultHybridEnclosureType>& evolver);
   /*! \brief Make a dynamically-allocated copy. */
   HybridAnalyser* clone() const { return new HybridAnalyser(*this); }
   //@}

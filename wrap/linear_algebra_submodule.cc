@@ -51,8 +51,8 @@ void export_vector()
     class_< Vector<X> > vector_class("Vector",init<int>());
     //vector_class.def(init<const boost::python::object&>());
     vector_class.def("__len__", &Vector<X>::size);
-    vector_class.def("__setitem__", (void(Vector<X>::*)(uint,const double&)) &Vector<X>::set);
-    vector_class.def("__setitem__", (void(Vector<X>::*)(uint,const X&)) &Vector<X>::set);
+    vector_class.def("__setitem__", (void(Vector<X>::*)(size_t,const double&)) &Vector<X>::set);
+    vector_class.def("__setitem__", (void(Vector<X>::*)(size_t,const X&)) &Vector<X>::set);
     vector_class.def("__getitem__", &Vector<X>::get, return_value_policy<copy_const_reference>());
     vector_class.def(-self);
     vector_class.def(self + self);

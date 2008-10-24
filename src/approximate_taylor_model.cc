@@ -71,6 +71,12 @@ ApproximateTaylorModel::ApproximateTaylorModel(uint rs, uint as, ushort o, ushor
 }
 
 
+ApproximateTaylorModel::ApproximateTaylorModel(const Vector<I>& d)
+  : _data(new Data(d,midpoint(d),IdentityFunction(d.size()).expansion(Vector<A>(midpoint(d)),1u)))
+{
+}
+
+
 ApproximateTaylorModel::ApproximateTaylorModel(const Vector<I>& d, 
                                                const Vector<A>& c, 
                                                const DifferentialVectorType& e)

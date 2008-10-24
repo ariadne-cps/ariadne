@@ -23,7 +23,17 @@
  
 #include "discretiser.h"
 
+#include "approximate_taylor_model.h"
+#include "orbit.h"
+#include "grid_set.h"
+#include "hybrid_set.h"
+#include "hybrid_automaton.h"
+
 namespace Ariadne {
+
+typedef ApproximateTaylorModel DefaultModelType;
+typedef ApproximateTaylorModel DefaultEnclosureType;
+typedef std::pair<DiscreteState,DefaultEnclosureType> DefaultHybridEnclosureType;
 
 template<class ES>
 Orbit<typename HybridDiscretiser<ES>::BasicSetType> 
@@ -32,7 +42,7 @@ lower_evolve(const SystemType& system,
              const BasicSetType& initial_set, 
              const TimeType& time) const
 {
-  return this->_discretize(this->_evolver->lower_evolve(system,this->_enclosure(initial_set),time));
+  return this->_discretise(this->_evolver->orbit(system,this->_enclosure(initial_set),time,LOWER_SEMANTICS));
 }
 
 template<class ES>
@@ -42,9 +52,25 @@ upper_evolve(const SystemType& system,
              const BasicSetType& initial_set, 
              const TimeType& time) const
 {
-  return this->_discretize(this->_evolver->upper_evolve(system,this->_enclosure(initial_set),time));
+  return this->_discretise(this->_evolver->orbit(system,this->_enclosure(initial_set),time,UPPER_SEMANTICS));
 }
 
+template<class ES>
+typename HybridDiscretiser<ES>::EnclosureType 
+HybridDiscretiser<ES>::
+_enclosure(const BasicSetType& initial_set) const
+{
+  return EnclosureType(initial_set.first,ES(initial_set.second.box()));
+}
 
+template<class ES>
+Orbit<typename HybridDiscretiser<ES>::BasicSetType> 
+HybridDiscretiser<ES>::
+_discretise(const Orbit<EnclosureType>& orbit) const
+{
+  ARIADNE_NOT_IMPLEMENTED;
+}
+
+template class HybridDiscretiser<DefaultEnclosureType>;
 
 } // namespace Ariadne

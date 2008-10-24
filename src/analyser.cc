@@ -49,6 +49,7 @@
 #include "evolver_interface.h"
 #include "discretiser_interface.h"
 
+#include "discretiser.h"
 #include "analyser.h"
 #include "logging.h"
 
@@ -61,6 +62,14 @@ static const double DEFAULT_GRID_LENGTH=0.125;
 
 static int verbosity=global_verbosity;
 
+
+HybridAnalyser::
+HybridAnalyser(const EvolutionParameters& parameters, 
+               const EvolverInterface<HybridAutomaton,DefaultHybridEnclosureType>& evolver)
+  : _parameters(new EvolutionParameters(parameters))
+  , _discretiser(new HybridDiscretiser<DefaultEnclosureType>(evolver))
+{
+}
 
 HybridAnalyser::ConcreteSetType*
 HybridAnalyser::

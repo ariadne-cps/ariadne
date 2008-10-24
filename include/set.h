@@ -44,14 +44,15 @@ class ImageSet
   : public LocatedSetInterface
 {
   Vector<Interval> _domain;
-  boost::shared_ptr<FunctionInterface> _function;
+  boost::shared_ptr<FunctionInterface> _function_ptr;
  public:
   typedef Vector<Interval> BoxType;
+  ImageSet();
   ImageSet(const BoxType& dom);
   ImageSet(const BoxType& dom, const FunctionInterface& fn);
   const BoxType& domain() { return this->_domain; }
-  const FunctionInterface& function() { return *this->_function; }
-
+  const FunctionInterface& function() { return *this->_function_ptr; }
+  bool operator==(const ImageSet& ims) const { return this->_domain==ims._domain && this->_function_ptr==ims._function_ptr; }
   ImageSet* clone() const;
   uint dimension() const;
   tribool disjoint(const Vector<Interval>&) const;
@@ -65,12 +66,12 @@ class ConstraintSet
   : public RegularSetInterface
 {
   Vector<Interval> _codomain;
-  boost::shared_ptr<FunctionInterface> _function;
+  boost::shared_ptr<FunctionInterface> _function_ptr;
  public:
   typedef Vector<Interval> BoxType;
   ConstraintSet(const BoxType& codom, const FunctionInterface& fn);
   const BoxType& codomain() { return this->_codomain; }
-  const FunctionInterface& function() { return *this->_function; };
+  const FunctionInterface& function() { return *this->_function_ptr; };
 
   ConstraintSet* clone() const;
   uint dimension() const;
@@ -81,7 +82,6 @@ class ConstraintSet
   std::ostream& write(std::ostream&) const;
 };
 
-
-}
+} // namespace Ariadne 
 
 #endif

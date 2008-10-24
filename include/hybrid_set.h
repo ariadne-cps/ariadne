@@ -52,6 +52,20 @@ class HybridSpace
 {
 };
 
+inline
+HybridBoxes 
+bounding_boxes(const std::map<DiscreteState,uint> space, Interval bound)
+{
+  HybridBoxes result; 
+  for(std::map<DiscreteState,uint>::const_iterator loc_iter=space.begin();
+      loc_iter!=space.end(); ++loc_iter)
+  {
+    result.insert(make_pair(loc_iter->first,Box(loc_iter->second, bound)));
+  }
+  return result;
+}
+
+
 // FIXME: This class doesn't work
 
 template< class DS, class HBS=std::pair<DiscreteState,typename DS::value_type> >
@@ -82,6 +96,41 @@ class HybridSetIterator
 
 
 //! A set comprising a %ListSet in each location.
+class HybridImageSet
+  : public std::map<DiscreteState,ImageSet> 
+  , public HybridLocatedSetInterface
+{
+ public:
+  typedef std::map<DiscreteState,ImageSet>::iterator locations_iterator;
+  typedef std::map<DiscreteState,ImageSet>::const_iterator locations_const_iterator;
+  locations_iterator locations_begin() { 
+    return this->std::map<DiscreteState,ImageSet>::begin(); }
+  locations_iterator locations_end() { 
+    return this->std::map<DiscreteState,ImageSet>::end(); }
+  locations_const_iterator locations_begin() const { 
+    return this->std::map<DiscreteState,ImageSet>::begin(); }
+  locations_const_iterator locations_end() const { 
+    return this->std::map<DiscreteState,ImageSet>::end(); }
+
+  using std::map<DiscreteState,ImageSet>::insert;
+
+  virtual HybridImageSet* clone() const { return new HybridImageSet(*this); }
+  virtual HybridSpace space() const { ARIADNE_NOT_IMPLEMENTED; }
+  virtual tribool intersects(const HybridBox& hbx) const { 
+    locations_const_iterator loc_iter=this->find(hbx.first);
+    return loc_iter!=this->locations_end()
+      && loc_iter->second.intersects(hbx.second); }
+  virtual tribool disjoint(const HybridBox& hbx) const { 
+    locations_const_iterator loc_iter=this->find(hbx.first);
+    return loc_iter!=this->locations_end()
+      || loc_iter->second.disjoint(hbx.second); }
+  virtual tribool subset(const HybridBoxes& hbx) const { ARIADNE_NOT_IMPLEMENTED; } 
+  virtual HybridBoxes bounding_box() const { ARIADNE_NOT_IMPLEMENTED; } 
+virtual std::ostream& write(std::ostream& os) const { return os << "HybridImageSet(...)"; }
+};
+
+
+//! A set comprising a %ListSet in each location.
 template<class ES>
 class HybridListSet 
   : public std::map<DiscreteState,ListSet<ES> > 
@@ -90,14 +139,41 @@ class HybridListSet
   typedef typename std::map< DiscreteState,ListSet<ES> >::iterator locations_iterator;
   typedef typename std::map< DiscreteState,ListSet<ES> >::const_iterator locations_const_iterator;
   typedef HybridSetIterator< ListSet<ES> > const_iterator;
-  locations_iterator locations_begin() { return this->std::map<DiscreteState,ListSet<ES> >::begin(); }
-  locations_iterator locations_end() { return this->std::map<DiscreteState,ListSet<ES> >::end(); }
-  locations_const_iterator locations_begin() const { return this->std::map<DiscreteState,ListSet<ES> >::begin(); }
-  locations_const_iterator locations_end() const { return this->std::map<DiscreteState,ListSet<ES> >::end(); }
-  const_iterator begin() const { return HybridSetIterator< ListSet<ES> >(*this,false); }
-  const_iterator end() const { return HybridSetIterator< ListSet<ES> >(*this,true); }
+  locations_iterator locations_begin() { 
+    return this->std::map<DiscreteState,ListSet<ES> >::begin(); }
+  locations_iterator locations_end() { 
+    return this->std::map<DiscreteState,ListSet<ES> >::end(); }
+  locations_const_iterator locations_begin() const { 
+    return this->std::map<DiscreteState,ListSet<ES> >::begin(); }
+  locations_const_iterator locations_end() const { 
+    return this->std::map<DiscreteState,ListSet<ES> >::end(); }
+  const_iterator begin() const { 
+    return HybridSetIterator< ListSet<ES> >(*this,false); }
+  const_iterator end() const { 
+    return HybridSetIterator< ListSet<ES> >(*this,true); }
+
+  using std::map< DiscreteState,ListSet<ES> >::insert;
+
+  void adjoin(const DiscreteState& q, const ES& es) {
+    (*this)[q].adjoin(es); }
+  void adjoin(const std::pair<DiscreteState,ES>& hes) {
+    (*this)[hes.first].adjoin(hes.second); }
+  void adjoin(const HybridListSet<ES>& hls) {
+    for(locations_const_iterator loc_iter=hls.locations_begin();
+        loc_iter!=hls.locations_end(); ++loc_iter)
+    {  
+      (*this)[loc_iter->first].adjoin(loc_iter->second); 
+    }
+  }
 };
 
+
+
+template<class ES>
+class ListSet< std::pair<DiscreteState,ES> >
+  : public HybridListSet<ES>
+{
+};
 
 
 class HybridGrid
@@ -118,6 +194,7 @@ class HybridGridCell
     : std::pair<DiscreteState,GridCell>(hgc) { }
   HybridGridCell(const std::pair<const DiscreteState,GridCell>& hgc) 
     : std::pair<DiscreteState,GridCell>(hgc.first,hgc.second) { }
+  HybridBox box() const { return HybridBox(this->first,this->second.box()); }
 };
 
 class HybridGridTreeSet;
@@ -275,6 +352,11 @@ HybridSetIterator<DS,HBS>::continuous_state_set() const {
   return *bs_iter; 
 }
 
+template<class G, class BS> inline 
+void 
+plot(G& graphic, const std::pair<int,BS>& hs) { 
+  plot(graphic,hs.second); 
+}
 
 
 } // namespace Ariadne

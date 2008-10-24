@@ -21,23 +21,28 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "set.h"
 #include "macros.h"
 #include "function.h"
+#include "set.h"
 
 namespace Ariadne {
 
  
+ImageSet::ImageSet()
+  : _domain(), _function_ptr(new IdentityFunction(0))
+{ 
+}
+
 ImageSet::ImageSet(const BoxType& dom)
-  //  : _domain(dom), _function(new IdentityFunction(dom.size()))
+  //  : _domain(dom), _function_ptr(new IdentityFunction(dom.size()))
   : _domain(Vector<Interval>(dom.size(),Interval(-1,1))), 
-    _function(new ScalingFunction(dom))
+    _function_ptr(new ScalingFunction(dom))
 { 
 }
 
 
 ImageSet::ImageSet(const BoxType& dom, const FunctionInterface& fn)
-  : _domain(dom), _function(fn.clone()) 
+  : _domain(dom), _function_ptr(fn.clone()) 
 { 
   ARIADNE_ASSERT(dom.size()==fn.argument_size()); 
 }
@@ -53,19 +58,19 @@ ImageSet::clone() const
 uint
 ImageSet::dimension() const 
 { 
-  return this->_function->result_size();
+  return this->_function_ptr->result_size();
 }
 
 
 tribool
 ImageSet::disjoint(const Vector<Interval>& bx) const 
 { 
-  if(dynamic_cast<const IdentityFunction*>(&*this->_function)) {
+  if(dynamic_cast<const IdentityFunction*>(&*this->_function_ptr)) {
     return Ariadne::disjoint(bx,this->_domain);
-  } else if(dynamic_cast<const ScalingFunction*>(&*this->_function)) {
-    return Ariadne::disjoint(bx,this->_function->evaluate(this->_domain));
+  } else if(dynamic_cast<const ScalingFunction*>(&*this->_function_ptr)) {
+    return Ariadne::disjoint(bx,this->_function_ptr->evaluate(this->_domain));
   } else {
-    std::cerr<<*this->_function<<std::endl;
+    std::cerr<<*this->_function_ptr<<std::endl;
     ARIADNE_NOT_IMPLEMENTED;
   }
 }
@@ -88,7 +93,7 @@ ImageSet::subset(const Vector<Interval>& bx) const
 Vector<Interval>
 ImageSet::bounding_box() const 
 { 
-  return this->_function->evaluate(this->_domain);
+  return this->_function_ptr->evaluate(this->_domain);
 }
 
 
@@ -103,7 +108,7 @@ ImageSet::write(std::ostream& os) const
 
 
 ConstraintSet::ConstraintSet(const BoxType& codom, const FunctionInterface& fn) 
-  : _codomain(codom), _function(fn.clone()) 
+  : _codomain(codom), _function_ptr(fn.clone()) 
 { 
   ARIADNE_ASSERT(codom.size()==fn.result_size());
 }
@@ -118,7 +123,7 @@ ConstraintSet::clone() const
 uint
 ConstraintSet::dimension() const 
 { 
-  return this->_function->argument_size();
+  return this->_function_ptr->argument_size();
 }
 
 

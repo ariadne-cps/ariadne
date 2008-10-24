@@ -40,7 +40,7 @@ template<class SYS, class ES> class EvolverBase
   typedef EvolverInterface<SYS,ES> Interface;
   typedef typename SYS::TimeType T;
   typedef ListSet<ES> ESL;
-  typedef typename ListSet<ES>::const_iterator ESLCI;
+  typedef typename ESL::const_iterator ESLCI;
  public:
 
   //! \brief Write to an output stream. 

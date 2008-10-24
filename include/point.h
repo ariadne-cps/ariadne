@@ -40,9 +40,12 @@ class Point : public Vector<Float>
   Point() : Vector<Float>() { }
   template<class T> Point(const T& t) : Vector<Float>(t) { }
   template<class T1, class T2> Point(const T1& t1, const T2& t2) : Vector<Float>(t1,t2) { }
+  static Point origin(uint n) { return Point(n,0.0); }
   uint dimension() const { return this->size(); }
   Vector<Float> centre() const { return *this; }
 };
+
+Point make_point(const std::string&);
 
 } // namespace Ariadne
 

@@ -46,6 +46,8 @@ class Orbit<HybridGridCell>
   class Data;
  public:
   Orbit(const HybridGridCell&);
+  Orbit(const HybridGridCell&, const HybridGridCellListSet&,
+        const HybridGridCellListSet&, const HybridGridCellListSet&);
   HybridGridCell const& initial() const;
   HybridGridCellListSet const& reach() const;
   HybridGridCellListSet const& intermediate() const;

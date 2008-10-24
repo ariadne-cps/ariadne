@@ -67,5 +67,13 @@
 #define ARIADNE_NOT_IMPLEMENTED                        \
   throw NotImplemented(__PRETTY_FUNCTION__); 
 
+#if defined(linux) || defined(__linux) || defined(__linux__)
+#define ARIADNE_PRETTY_FUNCTION __PRETTY_FUNCTION__
+#elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
+#define ARIADNE_PRETTY_FUNCTION __FUNCTION__
+#else
+#define ARIADNE_PRETTY_FUNCTION ""
+#endif 
+
 
 #endif // ARIADNE_MACROS_H

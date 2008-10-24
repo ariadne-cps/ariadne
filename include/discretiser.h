@@ -38,7 +38,8 @@
 
 namespace Ariadne {
   
-  
+class HybridGridCell;
+class HybridGridCellListSet;
 
 template<class SYS> class DiscretiserInterface;
 
@@ -56,10 +57,12 @@ class HybridDiscretiser
   typedef HybridTime TimeType;
   typedef HybridAutomaton SystemType;
   typedef HybridGridCell BasicSetType;
+  typedef HybridGridCellListSet DenotableSetType;
   typedef ES ContinuousEnclosureType;
   typedef std::pair<DiscreteState,ES> EnclosureType;
  private:
   boost::shared_ptr< EvolverInterface<SystemType,EnclosureType>  > _evolver;
+  uint _accuracy;
  public:
   //@{
   //! \name Constructors and destructors
@@ -67,7 +70,7 @@ class HybridDiscretiser
   //! \brief Construct from evolution parameters and a method for evolving basic sets, 
   //!  and a scheme for approximating sets.
   HybridDiscretiser(const EvolverInterface<SystemType,EnclosureType>& evolver)
-    : _evolver(evolver.clone()) { }
+    : _evolver(evolver.clone()), _accuracy(8) { }
       
   //! \brief Make a dynamically-allocated copy.
   HybridDiscretiser<ES>* clone() const { return new HybridDiscretiser<ES>(*this); }
@@ -93,7 +96,8 @@ class HybridDiscretiser
 
  private:
   EnclosureType _enclosure(const BasicSetType& bs) const;
-  Orbit<BasicSetType> _discretise(const Orbit<EnclosureType>& orb) const;
+  Orbit<BasicSetType> _discretise(const Orbit<EnclosureType>& orb,
+                                  const BasicSetType& initial_set) const;
   
 };
 

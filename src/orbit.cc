@@ -135,6 +135,18 @@ Orbit(const HybridGridCell& initial_set)
 {
 }
 
+Orbit<HybridGridCell>::
+Orbit(const HybridGridCell& initial_set,
+      const HybridGridCellListSet& reach_set,
+      const HybridGridCellListSet& intermediate_set,
+      const HybridGridCellListSet& final_set)
+  : _data(new Data(initial_set))
+{
+  this->_data->reach=reach_set;
+  this->_data->intermediate=intermediate_set;
+  this->_data->final=final_set;
+}
+
 HybridGridCell const&
 Orbit<HybridGridCell>::
 initial() const

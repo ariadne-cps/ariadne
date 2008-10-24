@@ -92,7 +92,7 @@ namespace Ariadne {
 	GridTreeSet difference(const GridTreeSubset& theSet1, const GridTreeSubset& theSet2);
 	
         GridCell over_approximation(const Box& theBox, const Grid& theGrid);
-        GridCell outer_approximation(const Box& theBox, const Grid& theGrid, const uint depth);
+        GridTreeSet outer_approximation(const Box& theBox, const Grid& theGrid, const uint depth);
         GridTreeSet outer_approximation(const CompactSetInterface& theSet, const Grid& theGrid, const uint depth);
         GridTreeSet outer_approximation(const CompactSetInterface& theSet, const uint depth);
 
@@ -374,6 +374,12 @@ namespace Ariadne {
 			 */
 			void add_enabled( BinaryTreeNode* pToTreeRoot, const BinaryTreeNode* pFromTreeRoot );
 			
+			/*! \brief Starting in the \a pNode node as at the root, this method counts 
+			 *  the number of enabled leaf nodes in the subtree
+                         *  rooted at pNode.
+			 */
+                         static size_t count_enabled_leaf_nodes( const BinaryTreeNode* pNode );
+
 			/*! \brief Starting in the \a pRootTreeNode node as at the root, this method finds(creates)
 			 *  the leaf node defined by the \a path and marks it as enabled. If some prefix of the \a path
 			 *  references an enabled node then nothing is done.
@@ -881,8 +887,19 @@ namespace Ariadne {
 			/* GridTreeSubset referencing this GridTreeSet becomes invalid. */
 			virtual ~GridTreeSet();
 			
+		
+                        //@{
+			//! \name List operations
+			/*! \brief The number of activated cells in the set. */
+                        size_t size() const; 
+                        //@}
+
+
 			//@{
 			//! \name Geometric Predicates
+
+			/*! \brief The dimension of the set. */
+			dimension_type dimension() const;
 
 			/*! \brief Tests if a cell is a subset of a set. */
 			friend bool subset( const GridCell& theCell, const GridTreeSubset& theSet );
@@ -1578,6 +1595,24 @@ namespace Ariadne {
                 return _theBox[i];
 	}
 	
+/*********************************************GridCellListSet***********************************************/
+
+inline
+GridCellListSet::const_iterator
+GridCellListSet::begin() const
+{
+  return this->_list.begin();
+}
+
+
+inline
+GridCellListSet::const_iterator
+GridCellListSet::end() const
+{
+  return this->_list.end();
+}
+
+
 /********************************************GridTreeSubset******************************************/
 	
 	inline GridTreeSubset::GridTreeSubset( const Grid& theGrid, const uint theHeight,
@@ -1711,6 +1746,10 @@ namespace Ariadne {
 		}
 	}
 	
+        inline dimension_type GridTreeSet::dimension( ) const {
+                return grid().dimension();
+        }
+
 	inline void GridTreeSet::adjoin( const GridCell& theCell ) {
 		bool has_stopped = false;
 		//Align the paving and the cell
@@ -1766,6 +1805,12 @@ namespace Ariadne {
 
         template<class G> void plot(G& theGraphic, const GridCell& theGridCell) {
           plot(theGraphic,theGridCell.box());
+        }
+
+        template<class G> void plot(G& theGraphic, const GridCellListSet& theGridCellListSet) {
+          for(GridCellListSet::const_iterator iter=theGridCellListSet.begin(); iter!=theGridCellListSet.end(); ++iter) {
+            plot(theGraphic,iter->box());
+          }
         }
 
         template<class G> void plot(G& theGraphic, const GridTreeSet& theGridTreeSet) {

@@ -50,6 +50,21 @@ typedef int DiscreteState;
 class HybridSpace 
   : public std::map<DiscreteState,uint>
 {
+ public:
+  typedef std::map<DiscreteState,uint>::const_iterator 
+    locations_const_iterator;
+    
+  HybridSpace() : std::map<DiscreteState,uint>() { }
+  template<class HSET> HybridSpace(const HSET& set) {
+    for(typename HSET::locations_const_iterator loc_iter
+          =set.locations_begin(); loc_iter!=set.locations_end(); ++loc_iter) {
+      this->insert(make_pair(loc_iter->first,loc_iter->second.dimension())); }
+  }
+
+  locations_const_iterator locations_begin() const { 
+    return this->std::map<DiscreteState,uint>::begin(); }
+  locations_const_iterator locations_end() const { 
+    return this->std::map<DiscreteState,uint>::end(); }
 };
 
 inline
@@ -68,9 +83,9 @@ bounding_boxes(const std::map<DiscreteState,uint> space, Interval bound)
 
 // FIXME: This class doesn't work
 
-template< class DS, class HBS=std::pair<DiscreteState,typename DS::value_type> >
+template< class DS, class HBS >
 class HybridSetIterator
-  : public boost::iterator_facade<HybridSetIterator<DS>,
+  : public boost::iterator_facade<HybridSetIterator<DS,HBS>,
                                   HBS,
                                   boost::forward_traversal_tag,
                                   HBS
@@ -79,7 +94,7 @@ class HybridSetIterator
 {
  public:
   HybridSetIterator(const std::map<DiscreteState,DS>&, bool);
-  bool equal(const HybridSetIterator<DS>&) const;
+  bool equal(const HybridSetIterator<DS,HBS>&) const;
   HBS dereference() const;
   void increment();
   const DiscreteState& discrete_state() const;
@@ -92,7 +107,6 @@ class HybridSetIterator
   typename std::map< DiscreteState,DS>::const_iterator loc_iter;
   typename DS::const_iterator bs_iter;
 };
-
 
 
 //! A set comprising a %ListSet in each location.
@@ -115,7 +129,7 @@ class HybridImageSet
   using std::map<DiscreteState,ImageSet>::insert;
 
   virtual HybridImageSet* clone() const { return new HybridImageSet(*this); }
-  virtual HybridSpace space() const { ARIADNE_NOT_IMPLEMENTED; }
+  virtual HybridSpace space() const { return HybridSpace(*this); }
   virtual tribool intersects(const HybridBox& hbx) const { 
     locations_const_iterator loc_iter=this->find(hbx.first);
     return loc_iter!=this->locations_end()
@@ -138,7 +152,7 @@ class HybridListSet
  public:
   typedef typename std::map< DiscreteState,ListSet<ES> >::iterator locations_iterator;
   typedef typename std::map< DiscreteState,ListSet<ES> >::const_iterator locations_const_iterator;
-  typedef HybridSetIterator< ListSet<ES> > const_iterator;
+  typedef HybridSetIterator< ListSet<ES>, std::pair<DiscreteState,ES> > const_iterator;
   locations_iterator locations_begin() { 
     return this->std::map<DiscreteState,ListSet<ES> >::begin(); }
   locations_iterator locations_end() { 
@@ -148,23 +162,27 @@ class HybridListSet
   locations_const_iterator locations_end() const { 
     return this->std::map<DiscreteState,ListSet<ES> >::end(); }
   const_iterator begin() const { 
-    return HybridSetIterator< ListSet<ES> >(*this,false); }
+    return const_iterator(*this,false); }
   const_iterator end() const { 
-    return HybridSetIterator< ListSet<ES> >(*this,true); }
+    return const_iterator(*this,true); }
 
   using std::map< DiscreteState,ListSet<ES> >::insert;
 
+  using std::map<DiscreteState,ListSet<ES> >::operator[];
+  const ListSet<ES>& operator[](const DiscreteState& q) const {
+    ARIADNE_ASSERT(this->find(q)!=this->locations_end());
+    return this->find(q)->second; }
+  
   void adjoin(const DiscreteState& q, const ES& es) {
     (*this)[q].adjoin(es); }
   void adjoin(const std::pair<DiscreteState,ES>& hes) {
     (*this)[hes.first].adjoin(hes.second); }
   void adjoin(const HybridListSet<ES>& hls) {
     for(locations_const_iterator loc_iter=hls.locations_begin();
-        loc_iter!=hls.locations_end(); ++loc_iter)
-    {  
-      (*this)[loc_iter->first].adjoin(loc_iter->second); 
-    }
-  }
+        loc_iter!=hls.locations_end(); ++loc_iter) {  
+      (*this)[loc_iter->first].adjoin(loc_iter->second); } }
+
+  HybridSpace space() const { return HybridSpace(*this); }
 };
 
 
@@ -175,12 +193,31 @@ class ListSet< std::pair<DiscreteState,ES> >
 {
 };
 
+template<class ES>
+std::ostream& 
+operator<<(std::ostream& os, 
+           const ListSet< std::pair<DiscreteState,ES> >& ls) {
+  const std::map< DiscreteState, ListSet<ES> >& hls=ls;
+  return os << "HybridListSet" << hls; 
+}
+    
 
 class HybridGrid
   : public std::map<DiscreteState,Grid>
 {
  public:
-  HybridGrid(const HybridSpace& hspc, const Float& l) { ARIADNE_NOT_IMPLEMENTED; }
+  typedef std::map<DiscreteState,Grid>::const_iterator 
+    locations_const_iterator;
+  HybridGrid(const HybridSpace& hspc, const Float l=1.0) { 
+    for(HybridSpace::locations_const_iterator loc_iter=hspc.begin();
+        loc_iter!=hspc.end(); ++loc_iter) {
+      this->insert(make_pair(loc_iter->first,Grid(loc_iter->second,l))); } }
+  locations_const_iterator locations_begin() const { 
+    return this->std::map<DiscreteState,Grid>::begin(); }
+  locations_const_iterator locations_end() const { 
+    return this->std::map<DiscreteState,Grid>::end(); }
+  const Grid& operator[](DiscreteState q) const {
+    return this->find(q)->second; }
 };
 
 
@@ -199,17 +236,60 @@ class HybridGridCell
 
 class HybridGridTreeSet;
 
+  
+
+template<class HDS1, class HDS2> 
+void adjoin_denotable_set(HDS1& hds1, const HDS2 hds2) {
+  for(typename HDS2::locations_const_iterator loc2_iter=
+        hds2.locations_begin(); loc2_iter!=hds2.locations_end(); ++loc2_iter)
+  {
+    typename HDS1::locations_iterator loc1_iter=hds1.find(loc2_iter->first);
+    if(loc1_iter==hds1.locations_end()) {
+      hds1.insert(make_pair(loc2_iter->first,
+                            typename HDS2::value_type::second_type(loc2_iter->second))); 
+    } else {
+      loc1_iter->second.adjoin(loc2_iter->second);
+    }
+  }
+}
+                   
+
 class HybridGridCellListSet
-  : public std::vector<HybridGridCell>
+  : public std::map<DiscreteState,GridCellListSet>
 {
  public:
-  HybridGridCellListSet() { ARIADNE_NOT_IMPLEMENTED; };
-  HybridGridCellListSet(const HybridGridTreeSet&) { ARIADNE_NOT_IMPLEMENTED; };
-  void adjoin(const HybridGridCell&) { ARIADNE_NOT_IMPLEMENTED; };
-  void adjoin(const HybridGridCellListSet&) { ARIADNE_NOT_IMPLEMENTED; };
+  typedef std::map<DiscreteState,GridCellListSet>::iterator 
+    locations_iterator;
+  typedef std::map<DiscreteState,GridCellListSet>::const_iterator 
+    locations_const_iterator;
+  typedef HybridSetIterator<GridCellListSet,HybridGridCell> 
+    const_iterator;
+
+  HybridGridCellListSet() { };
+  HybridGridCellListSet(const HybridGridTreeSet& hgts) { 
+    this->adjoin(hgts); }
+  void adjoin(const HybridGridCell& hgc) {  ARIADNE_NOT_IMPLEMENTED; }
+  void adjoin(const HybridGridCellListSet& hgcls);
+  void adjoin(const HybridGridTreeSet&);
   void remove(const HybridGridCellListSet&) { ARIADNE_NOT_IMPLEMENTED; };
   void restrict(const HybridBoxes&) { ARIADNE_NOT_IMPLEMENTED; };
   void unique_sort() { ARIADNE_NOT_IMPLEMENTED; };
+
+  using std::map<DiscreteState,GridCellListSet>::operator[];
+  const GridCellListSet& operator[](const DiscreteState& q) const {
+    ARIADNE_ASSERT(this->find(q)!=this->locations_end());
+    return this->find(q)->second; }
+
+  locations_const_iterator locations_begin() const { 
+    return this->std::map<DiscreteState,GridCellListSet>::begin(); }
+  locations_const_iterator locations_end() const { 
+    return this->std::map<DiscreteState,GridCellListSet>::end(); }
+
+  const_iterator begin() const { 
+    return const_iterator(*this,false); }
+  const_iterator end() const { 
+    return const_iterator(*this,true); }
+ private:
 };
 
 
@@ -231,16 +311,25 @@ class HybridGridTreeSet
  public:
   typedef Iterator iterator;
   typedef Iterator const_iterator;
+  typedef std::map<DiscreteState,GridTreeSet>::const_iterator locations_const_iterator;
  public:
+    locations_const_iterator locations_begin() const { 
+      return this->std::map<DiscreteState,GridTreeSet>::begin(); }
+    locations_const_iterator locations_end() const { 
+      return this->std::map<DiscreteState,GridTreeSet>::end(); }
     Iterator begin() const { ARIADNE_NOT_IMPLEMENTED; }
     Iterator end() const { ARIADNE_NOT_IMPLEMENTED; }
     Iterator begin() { ARIADNE_NOT_IMPLEMENTED; }
     Iterator end() { ARIADNE_NOT_IMPLEMENTED; }
  public:
-  HybridGridTreeSet() { ARIADNE_NOT_IMPLEMENTED; }
+  HybridGridTreeSet() { }
   HybridGridTreeSet(const HybridSpace& hspace) { ARIADNE_NOT_IMPLEMENTED; }
-  HybridGridTreeSet(const HybridGrid& hgrid) { ARIADNE_NOT_IMPLEMENTED; }
-  HybridGridTreeSet(const HybridGridCellListSet& hgcls) { ARIADNE_NOT_IMPLEMENTED; }
+  HybridGridTreeSet(const HybridGrid& hgrid) { 
+    for(HybridGrid::locations_const_iterator loc_iter =hgrid.
+          locations_begin(); loc_iter!=hgrid.locations_end(); ++loc_iter) {
+      this->insert(make_pair(loc_iter->first,Grid(loc_iter->second))); } }
+  HybridGridTreeSet(const HybridGridCellListSet& hgcls) { 
+    ARIADNE_NOT_IMPLEMENTED; }
 
   HybridGrid grid() const { ARIADNE_NOT_IMPLEMENTED; }
   
@@ -254,8 +343,14 @@ class HybridGridTreeSet
     this->find(hgc.first)->second.adjoin(hgc.second); }
 
   void adjoin(const HybridGridCellListSet& hgcls) {
-    for(HybridGridCellListSet::const_iterator iter=hgcls.begin(); iter!=hgcls.end(); ++iter) {
-      this->find(iter->first)->second.adjoin(iter->second); } }
+    for(HybridGridCellListSet::locations_const_iterator loc_iter
+          =hgcls.locations_begin(); loc_iter!=hgcls.locations_end(); ++loc_iter) {
+      for(GridCellListSet::const_iterator iter=loc_iter->second.begin();
+          iter!=loc_iter->second.end(); ++iter) {
+        this->adjoin(HybridGridCell(loc_iter->first,*iter));
+      }
+    }
+  }
 
   void adjoin(const HybridGridTreeSet& hgts) {
     for(HybridGridTreeSet::const_iterator iter=hgts.begin(); iter!=hgts.end(); ++iter) {
@@ -267,9 +362,14 @@ class HybridGridTreeSet
   template<class S> void adjoin_outer_approximation(DiscreteState q, const S& s) {
     this->operator[](q).adjoin_outer_approximation(s); }
 
+  GridTreeSet& operator[](DiscreteState q) {
+    ARIADNE_ASSERT(this->has_location(q));
+    return this->find(q)->second;
+  }
+
   const GridTreeSet& operator[](DiscreteState q) const {
     ARIADNE_ASSERT(this->has_location(q));
-    return const_cast<HybridGridTreeSet*>(this)->operator[](q);
+    return this->find(q)->second;
   }
 
   HybridGridCellListSet cells() const { ARIADNE_NOT_IMPLEMENTED; }
@@ -277,7 +377,7 @@ class HybridGridTreeSet
  public:
   // HybridSetInterface methods
   HybridGridTreeSet* clone() const { return new HybridGridTreeSet(*this); }
-  HybridSpace space() const { ARIADNE_NOT_IMPLEMENTED; }
+  HybridSpace space() const { return HybridSpace(*this); }
   tribool disjoint(const HybridBox& hbx) const { ARIADNE_NOT_IMPLEMENTED; }
   tribool intersects(const HybridBox& hbx) const { ARIADNE_NOT_IMPLEMENTED; }
   tribool superset(const HybridBox& hbx) const { ARIADNE_NOT_IMPLEMENTED; }
@@ -288,10 +388,18 @@ class HybridGridTreeSet
 };
 
 
+inline void HybridGridCellListSet::adjoin(const HybridGridCellListSet& hgcls) {
+  adjoin_denotable_set(*this,hgcls); 
+}
+
+inline void HybridGridCellListSet::adjoin(const HybridGridTreeSet& hgts) {
+  adjoin_denotable_set(*this,hgts); 
+}
 
 
 template<class DS, class HBS> inline
-HybridSetIterator<DS,HBS>::HybridSetIterator(const std::map<DiscreteState,DS>& map, bool end)
+HybridSetIterator<DS,HBS>::
+HybridSetIterator(const std::map<DiscreteState,DS>& map, bool end)
   : loc_begin(map.begin()),
     loc_end(map.end()),
     loc_iter(end?loc_end:loc_begin),
@@ -306,7 +414,7 @@ HybridSetIterator<DS,HBS>::HybridSetIterator(const std::map<DiscreteState,DS>& m
 
 template<class DS, class HBS> inline
 bool
-HybridSetIterator<DS,HBS>::equal(const HybridSetIterator<DS>& other) const
+HybridSetIterator<DS,HBS>::equal(const HybridSetIterator<DS,HBS>& other) const
 {
   return this->loc_iter==other.loc_iter && (this->loc_iter==this->loc_end || this->bs_iter==other.bs_iter);
 }

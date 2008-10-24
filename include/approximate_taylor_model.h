@@ -71,7 +71,7 @@ ApproximateTaylorModel antiderivative(const ApproximateTaylorModel&, uint);
 ApproximateTaylorModel flow(const ApproximateTaylorModel&);
 ApproximateTaylorModel integrate(const ApproximateTaylorModel&, const Float& time);
 ApproximateTaylorModel hitting(const ApproximateTaylorModel& vf, const ApproximateTaylorModel& g);
-ApproximateTaylorModel disjoint(const ApproximateTaylorModel& vf, const Vector<Interval>& g);
+tribool disjoint(const ApproximateTaylorModel& vf, const Vector<Interval>& g);
 Vector< Interval > solve(const ApproximateTaylorModel&, const Vector<Float>&);
 
 std::ostream& operator<<(std::ostream&, const ApproximateTaylorModel&);

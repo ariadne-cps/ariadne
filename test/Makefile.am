@@ -21,8 +21,8 @@ check_PROGRAMS = \
 	test_discrete_evolution \
 	test_continuous_evolution \
 	test_hybrid_evolution \
-	test_reachability_analyser \
 	test_discretiser \
+	test_reachability_analyser \
 	test_serialization \
 	test_graphics 
 

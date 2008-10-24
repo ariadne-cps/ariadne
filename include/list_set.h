@@ -32,7 +32,6 @@
 #include <vector>
 #include "stlio.h"
 
-
 typedef unsigned int uint;
 
 namespace Ariadne {
@@ -47,7 +46,6 @@ template<class BS>
 class ListSet 
 {
  private:
-  uint _dimension;
   std::vector<BS> _data;
 
  public:
@@ -57,7 +55,7 @@ class ListSet
   virtual ~ListSet() { }
 
   ListSet() { };
-  explicit ListSet(uint) { };
+  explicit ListSet(uint d) { };
   explicit ListSet(const BS& bs) { this->adjoin(bs); }
   template<class BST> ListSet(const ListSet<BST>& ls) {
     this->_data.insert(this->end(),ls.begin(),ls.end()); }
@@ -89,7 +87,7 @@ class ListSet
   const_iterator end() const { return this->_data.end(); };
 
   /*! \brief Returns the denotable set's space dimension. */
-  uint dimension() const { return this->_dimension; }
+  uint dimension() const { if(this->empty()) { return 0; } else { return this->_data.back().dimension(); } }
 
   /*! \brief Removes a set from the list and return it. */
   BS pop() { BS result=this->_data.back(); this->_data.pop_back(); return result; }
@@ -113,7 +111,9 @@ template<class BS>
 std::ostream& 
 operator<<(std::ostream& os, const ListSet<BS>& ls)
 {
-  return os << "ListSet( size=" << ls.size() << " )";
+  os << "ListSet(";
+  if(!ls.empty()) { os << "d=" << ls.dimension() << ","; }
+  return os << "s=" << ls.size() << ")";
 }
 
 

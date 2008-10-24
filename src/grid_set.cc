@@ -27,6 +27,7 @@
 #include "macros.h"
 #include "exceptions.h"
 #include "stlio.h"
+#include "set.h"
 #include "list_set.h"
 #include "grid_set.h"
 
@@ -414,6 +415,18 @@ operator<<(std::ostream& os, const Grid& gr)
 		return result;
 	}
 
+
+
+        size_t BinaryTreeNode::count_enabled_leaf_nodes( const BinaryTreeNode* pNode ) {
+                if(pNode->is_leaf()) { 
+                        return pNode->is_enabled() ? 1u : 0u; 
+                } else {
+                        return count_enabled_leaf_nodes(pNode->left_node())
+                            + count_enabled_leaf_nodes(pNode->right_node());
+                }
+        }
+
+
 	string BinaryTreeNode::tree_to_string() const {
 		string result = "";
 		char trib_value;
@@ -773,7 +786,7 @@ operator<<(std::ostream& os, const Grid& gr)
 
 
 
-/********************************************GridTreeSubset*****************************************/
+/********************************************GridCellListSet*****************************************/
 
 
 GridCellListSet::~GridCellListSet()
@@ -853,14 +866,45 @@ GridCellListSet::clear()
 }
 
 
+void
+GridCellListSet::adjoin(const GridCell& gc) {
+  ARIADNE_ASSERT(this->grid()==gc.grid());
+  this->_list.push_back(gc);
+}
+
+
+void
+GridCellListSet::adjoin(const GridCellListSet& gcls) {
+        ARIADNE_ASSERT(this->grid()==gcls.grid());
+        for(GridCellListSet::const_iterator iter=gcls.begin();
+            iter!=gcls.end(); ++iter) {
+                this->_list.push_back(*iter);
+        }
+}
+
+
+void
+GridCellListSet::adjoin(const GridTreeSet& gts) {
+        ARIADNE_ASSERT(this->grid()==gts.grid());
+        for(GridTreeSet::const_iterator iter=gts.begin();
+            iter!=gts.end(); ++iter) {
+                this->_list.push_back(*iter);
+        }
+}
+
+
 std::ostream&     
 operator<<(std::ostream& os, const GridCellListSet& gcls)
 {
   os << "GridCellListSet("
      << " grid=" << gcls.grid() << ","
      << " size=" << gcls.size() << ","
-     << " cells=" << gcls._list
-     << " )";
+     << " cells=";
+  for(GridCellListSet::const_iterator iter=gcls.begin(); 
+      iter!=gcls.end(); ++iter) {
+    os << (iter==gcls.begin()?'[':',') << iter->box(); 
+  }
+  return os << "] )";
   return os;
 }
 
@@ -968,6 +1012,11 @@ operator<<(std::ostream& os, const GridCellListSet& gcls)
 
 /*********************************************GridTreeSet*********************************************/
 	
+        size_t GridTreeSet::size() const {
+                return BinaryTreeNode::count_enabled_leaf_nodes( this->binary_tree() ); 
+        }
+
+
 	BinaryTreeNode* GridTreeSet::align_with_cell( const GridCell& theCell, const bool stop_on_enabled, bool & has_stopped ) {
 		const uint thisPavingPCellHeight = this->cell().height();
 		const uint otherPavingPCellHeight = theCell.height();
@@ -1122,6 +1171,10 @@ operator<<(std::ostream& os, const GridCellListSet& gcls)
 
 /*************************************FRIENDS OF GridTreeSet*****************************************/
 
+        GridTreeSet outer_approximation(const Box& theBox, const Grid& theGrid, const uint depth) {
+          return outer_approximation(ImageSet(theBox),theGrid,depth);
+        }
+
 	bool subset( const GridCell& theCell, const GridTreeSubset& theSet ) {
 		throw NotImplemented(__PRETTY_FUNCTION__);
 	}
@@ -1163,7 +1216,8 @@ operator<<(std::ostream& os, const GridCellListSet& gcls)
 	}
 
         std::ostream& operator<<(std::ostream& os, const GridTreeSet& theSet) {
-		throw NotImplemented(__PRETTY_FUNCTION__);
+          return os << "GridTreeSet(d="<<theSet.dimension()
+                    <<",s="<<theSet.size()<<")";
 	}
  
 

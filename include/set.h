@@ -62,6 +62,29 @@ class ImageSet
   std::ostream& write(std::ostream&) const;
 };
 
+template<class Mdl>
+class ModelSet
+  : public CompactSetInterface
+{
+  Mdl _model;
+ public:
+  typedef Vector<Interval> BoxType;
+  ModelSet(const Mdl& mdl) : _model(mdl) { }
+  const BoxType& domain() { return this->_model.domain(); }
+  ModelSet* clone() const { return new ModelSet<Mdl>(*this); }
+  uint dimension() const { return this->_model.result_size(); }
+  tribool disjoint(const Vector<Interval>& bx) const { 
+    return Ariadne::disjoint(this->_model,bx); }
+  tribool subset(const Vector<Interval>& bx) const { 
+    return Ariadne::subset(this->_model.range(),bx) || indeterminate; }
+  Vector<Interval> bounding_box() const { 
+    return this->_model.range(); }
+  std::ostream& write(std::ostream& os) const {
+    return os << "ModelSet( " << this->_model << ")"; }
+};
+ 
+
+
 class ConstraintSet
   : public RegularSetInterface
 {

@@ -72,7 +72,9 @@ ApproximateTaylorModel::ApproximateTaylorModel(uint rs, uint as, ushort o, ushor
 
 
 ApproximateTaylorModel::ApproximateTaylorModel(const Vector<I>& d)
-  : _data(new Data(d,midpoint(d),IdentityFunction(d.size()).expansion(Vector<A>(midpoint(d)),1u)))
+  : _data(new Data(Vector<I>(d.size(),Interval(-1,1)),
+                   Vector<R>(d.size(),Float(0)),
+                   ScalingFunction(d).expansion(Vector<R>(d.size(),0),1u)))
 {
 }
 
@@ -794,6 +796,13 @@ ApproximateTaylorModel::truncate(const Vector<Interval>& domain, const Vector<Fl
   ARIADNE_NOT_IMPLEMENTED;
 }
 
+
+tribool 
+disjoint(const ApproximateTaylorModel& f, 
+         const Vector<Interval>& g)
+{
+  return disjoint(f.range(),g) || indeterminate;
+}
 
 
 std::ostream&

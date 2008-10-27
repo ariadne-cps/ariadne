@@ -400,6 +400,11 @@ namespace Ariadne {
 			 */
 			static void restrict( BinaryTreeNode * pThisNode, const BinaryTreeNode * pOtherNode );
 			
+			/*! \brief This method removed enabled nodes of \a pOtherNode from \a pThisNode.
+			 * Note that, this method is recursive.
+			 */
+			static void remove( BinaryTreeNode * pThisNode, const BinaryTreeNode * pOtherNode );
+			
 			//@}
 	};
 
@@ -827,6 +832,12 @@ namespace Ariadne {
 			 *  root cell of this set is >= the height of the primary root cell of \a theOtherSubPaving.
 			 */
 			void restrict_to_lower( const GridTreeSubset& theOtherSubPaving );
+			
+			/*! \brief This method is uset to remove \a theOtherSubPaving from this set.
+			 *  Note that, here we require that the height of the primary root cell of
+			 *  this set is >= the height of the primary root cell of \a theOtherSubPaving.
+			 */
+			void remove_from_lower( const GridTreeSubset& theOtherSubPaving );
 
 			/*! \brief This method changes the primary cell of this GridTreeSet.
 			 *  We only can increase the height of the primary cell, this is why

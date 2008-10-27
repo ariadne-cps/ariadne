@@ -240,7 +240,7 @@ std::ostream& operator<<(std::ostream& os, const Grid& gr)
 }
 
 /****************************************BinaryTreeNode**********************************************/
-
+	
 	void BinaryTreeNode::restrict( BinaryTreeNode * pThisNode, const BinaryTreeNode * pOtherNode ){
 		if( ( pThisNode != NULL ) && ( pOtherNode != NULL ) ){
 			if( pThisNode->is_leaf() && pOtherNode->is_leaf() ){
@@ -273,7 +273,48 @@ std::ostream& operator<<(std::ostream& os, const Grid& gr)
 			}
 		}
 	}
-
+	
+	void BinaryTreeNode::remove( BinaryTreeNode * pThisNode, const BinaryTreeNode * pOtherNode ){
+		if( ( pThisNode != NULL ) && ( pOtherNode != NULL ) ){
+			if( pThisNode->is_leaf() && pOtherNode->is_leaf() ){
+				if( pThisNode->is_enabled() && pOtherNode->is_enabled() ){
+					//Both nodes are enabled leaf nodes: Make a regular subtraction, i.e. set the false
+					pThisNode->_isEnabled = false;
+				} else {
+					//DO NOTHING: In all other cases there is nothing to be done
+				}
+			} else {
+				if( !pThisNode->is_leaf() && pOtherNode->is_leaf() ){
+					if( pOtherNode->is_enabled() ){
+						//Turn the node into a disabled leaf, since we subtract all below
+						pThisNode->make_leaf(false);
+					} else {
+						//DO NOTHING: We are trying to remove a disabled node
+					}
+				} else {
+					if( pThisNode->is_leaf() ) {
+						if( pThisNode->is_enabled() ){
+							//This is an enabled leaf node and so we might subtract smth from it
+							//The pOtherNode is not a leaf, due to previous checks so we split
+							//pThisNode and then do the recursion as in case on two non-leaf nodes
+							pThisNode->split();
+						} else {
+							//DO NOTHING: We are trying to remove from a disabled leaf node. Whatever
+							//we are trying to remove, will not have any effect on the result. We return
+							//because in all remaining cases we need to do recursion for sub trees.
+							return;
+						}
+					} else {
+						//We will have to do the recursion to remove the leaf nodes
+					}
+					//Both nodes are non-leaf nodes now: Go recursively left and right
+					remove( pThisNode->_pLeftNode, pOtherNode->_pLeftNode );
+					remove( pThisNode->_pRightNode, pOtherNode->_pRightNode );
+				}
+			}
+		}
+	}
+	
 	void BinaryTreeNode::restore_node( BinaryTreeNode * theCurrentNode, uint & arr_index, uint & leaf_counter,
 					const BooleanArray& theTree, const BooleanArray& theEnabledCells) {
 		//If we are not done with the the tree yet
@@ -1217,6 +1258,56 @@ operator<<(std::ostream& os, const GridCellListSet& gcls)
 		}
 	}
 
+	void GridTreeSet::remove_from_lower( const GridTreeSubset& theOtherSubPaving ){
+		//The root of the binary tree of the current Paving
+		BinaryTreeNode * pBinaryTreeNode = this->_pRootTreeNode;
+		
+		//The primary cell of this paving is higher then the one of the other paving.
+		//1. We locate the path to the primary cell node common with the other paving
+		BinaryWord rootNodePath = GridCell::primary_cell_path( this->cell().grid().dimension(), this->cell().height(), theOtherSubPaving.cell().height() );
+		
+		//2. Add the suffix path from the primary cell to the root node of
+		//theOtherSubPaving. This is needed in order to be able to reach this root.
+		BinaryWord suffixPath = theOtherSubPaving.cell().word();
+		for( int i = 0; i < suffixPath.size() ; i++ ){
+			rootNodePath.push_back( suffixPath[i] );
+		}
+		
+		//3. Remove theOtherSubPaving from this binary tree assuming the path prefix rootNodePath
+		uint position = 0;
+		//Iterate the path, get to the root cell of theOtherSubPaving
+		while( position < rootNodePath.size() ){
+			if( pBinaryTreeNode->is_leaf() ){
+				//If we are in the leaf node then
+				if( pBinaryTreeNode->is_disabled() ){
+					//if it is disabled, then we are removing from not-enabled cells
+					//so there is nothing to be done and thus we simply terminate
+					return;
+				} else {
+					//If it is an enabled leaf node then, because we still need to go further
+					//to reach the root cell of theOtherSubPaving, we split this node
+					pBinaryTreeNode->split();
+				}
+			} else {
+				//If this is not a leaf node then we need to follow the path and then do removal
+			}
+			//Follow the path and do the removal, the other branch stays intact
+			pBinaryTreeNode = (rootNodePath[position]) ? pBinaryTreeNode->right_node() : pBinaryTreeNode->left_node();
+			
+			//Move to the next path element
+			position++;
+		}
+		if( pBinaryTreeNode->is_disabled() ){
+			//If we are in a disabled leaf node the the result of the
+			//removal does not change this set and so we just return
+			return;
+		} else {
+			//We have two aligned binary trees we have to subtract enabled
+			//nodes of theOtherSubPaving._pRootTreeNode from pBinaryTreeNode
+			BinaryTreeNode::remove( pBinaryTreeNode, theOtherSubPaving.binary_tree() );
+		}
+	}
+	
 	void GridTreeSet::restrict( const GridTreeSubset& theOtherSubPaving ) {
 		const uint thisPavingPCellHeight = this->cell().height();
 		const uint otherPavingPCellHeight = theOtherSubPaving.cell().height();
@@ -1239,8 +1330,20 @@ operator<<(std::ostream& os, const GridCellListSet& gcls)
 	}
 	
 	void GridTreeSet::remove( const GridTreeSubset& theOtherSubPaving ) {
-		//!!!!
-		throw NotImplemented(__PRETTY_FUNCTION__);
+		const uint thisPavingPCellHeight = this->cell().height();
+		const uint otherPavingPCellHeight = theOtherSubPaving.cell().height();
+		
+		ARIADNE_ASSERT( this->cell().grid() == theOtherSubPaving.cell().grid() );
+
+		//In case theOtherSubPaving has the primary cell that is higher then this one
+		//we extend it, i.e. reroot it to the same height primary cell.		
+		if( thisPavingPCellHeight < otherPavingPCellHeight ){
+			up_to_primary_cell( otherPavingPCellHeight );
+		}
+		
+		//Now it is simple to remove theOtherSubPaving elements from this set,
+		//since this set's primary cell is not lower then for the other one.
+		remove_from_lower( theOtherSubPaving );
 	}
 
 /*************************************FRIENDS OF BinaryTreeNode*************************************/

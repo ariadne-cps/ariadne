@@ -1830,25 +1830,25 @@ GridCellListSet::end() const
                 return result;
         }
 
-        template<class G> void plot(G& theGraphic, const GridCell& theGridCell) {
-          plot(theGraphic,theGridCell.box());
+        template<class G> void draw(G& theGraphic, const GridCell& theGridCell) {
+          draw(theGraphic,theGridCell.box());
         }
 
-        template<class G> void plot(G& theGraphic, const GridCellListSet& theGridCellListSet) {
+        template<class G> void draw(G& theGraphic, const GridCellListSet& theGridCellListSet) {
           for(GridCellListSet::const_iterator iter=theGridCellListSet.begin(); iter!=theGridCellListSet.end(); ++iter) {
-            plot(theGraphic,iter->box());
+            draw(theGraphic,iter->box());
           }
         }
 
-        template<class G> void plot(G& theGraphic, const GridTreeSet& theGridTreeSet) {
+        template<class G> void draw(G& theGraphic, const GridTreeSet& theGridTreeSet) {
           for(GridTreeSet::const_iterator iter=theGridTreeSet.begin(); iter!=theGridTreeSet.end(); ++iter) {
-            plot(theGraphic,iter->box());
+            draw(theGraphic,iter->box());
           }
         }
 
-        template<class G> void plot(G& theGraphic, const CompactSetInterface& theSet) {
-                static const int PLOTTING_DEPTH=16;
-                plot(theGraphic,outer_approximation(theSet,Grid(theSet.dimension()),PLOTTING_DEPTH));
+        template<class G> void draw(G& theGraphic, const CompactSetInterface& theSet) {
+                static const int DRAWING_DEPTH=16;
+                draw(theGraphic,outer_approximation(theSet,Grid(theSet.dimension()),DRAWING_DEPTH));
         }
 
 } // namespace Ariadne

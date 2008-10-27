@@ -18,6 +18,7 @@ SRC = \
 	point.cc \
 	box.cc \
 	zonotope.cc \
+	polytope.cc \
 	set.cc \
 	curve.cc \
 	grid_set.cc \
@@ -28,7 +29,6 @@ SRC = \
 	discretiser.cc \
 	analyser.cc \
 	logging.cc \
-	geometry2d.cc \
 	graphics.cc 
 
 

@@ -159,12 +159,12 @@ class ProjectionFunction
   //! Construct the identity function in dimension \a n.
   ProjectionFunction(uint n) 
     : FunctionBase<ProjectionTransformation>(Range(0,n),n) { }
+  //! Construct the projection functions which maps variables \f$x_i,\ldots,\x_{i+m-1}\f$ in $\R^n\f$ to \f$x'_0\ldots x'_{m-1}\f$.
+  ProjectionFunction(uint m, uint n, uint i) 
+    : FunctionBase<ProjectionTransformation>(m,n,i) { }
   //! Construct a projection function based on the array \a p.
   ProjectionFunction(const array<uint>& p, uint as) 
     : FunctionBase<ProjectionTransformation>(p,as) { }
-  //! Construct a projection function based on the range \a rng.
-  ProjectionFunction(const Range& rng, uint as) 
-    : FunctionBase<ProjectionTransformation>(rng,as) { }
   std::ostream& write(std::ostream& os) const {
     return os << "ProjectionFunction( p=" << this->p() << " )"; }
 };

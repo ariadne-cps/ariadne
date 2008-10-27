@@ -26,6 +26,8 @@
 #include "tuple.h"
 #include "vector.h"
 #include "matrix.h"
+#include "function.h"
+#include "approximate_taylor_model.h"
 #include "zonotope.h"
 #include "list_set.h"
 #include "grid_set.h"

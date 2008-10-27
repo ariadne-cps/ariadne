@@ -1,5 +1,5 @@
 /****************************************************************************
- *            geometry2d.cc
+ *            polytope.cc
  *
  *  Copyright  2007-8  Alberto Casagrande, Pieter Collins
  *
@@ -29,12 +29,11 @@
 #include "box.h"
 #include "zonotope.h"
 #include "curve.h"
-#include "list_set.h"
-#include "grid_set.h"
+#include "function.h"
 
 #include "approximate_taylor_model.h"
 
-#include "geometry2d.h"
+#include "polytope.h"
 
 namespace Ariadne { 
 
@@ -216,93 +215,85 @@ PlanarProjectionMap::PlanarProjectionMap()
 }
 
 
-PlanarProjectionMap::PlanarProjectionMap(uint d, uint i, uint j)
-  : _d(d), _i(i), _j(j) 
-{ 
-  if(i>=d || j>=d) { 
-    ARIADNE_THROW(InvalidCoordinate,"PlanarProjectionMap::PlanarProjectionMap(uint d, uint i, uint j)",
-                  "d="<<d<<", i="<<i<<", j="<<j); 
-  }
-}
-  
 
-size_t
-PlanarProjectionMap::argument_size() const 
+Vector<Float>
+apply(const ProjectionFunction& map, const Vector<Float>& v)  
 {
-  return this->_d;
+  ARIADNE_ASSERT(v.size()==map.argument_size());
+  Vector<Float> result(map.result_size());
+  for(uint i=0; i!=map.result_size(); ++i) {
+    result[i]=v[map[i]];
+  }
+  return result;
 }
 
 Point
-PlanarProjectionMap::operator()(const Point& pt) const 
+apply(const ProjectionFunction& map, const Point& pt)  
 {
-  Point result(2);
-  ARIADNE_ASSERT(pt.dimension()==this->_d);
-  result[0]=pt[this->_i]; 
-  result[1]=pt[this->_j]; 
+  ARIADNE_ASSERT(pt.dimension()==map.argument_size());
+  Point result(map.result_size());
+  for(uint i=0; i!=map.result_size(); ++i) {
+    result[i]=pt[map[i]];
+  }
   return result;
 }
 
 
 Box
-PlanarProjectionMap::operator()(const Box& bx) const 
+apply(const ProjectionFunction& map, const Box& bx)  
 {
-  Box result(2); 
-  ARIADNE_ASSERT(bx.dimension()==this->_d);
-  result[0].l = bx[this->_i].l;
-  result[0].u = bx[this->_i].u;
-  result[1].l = bx[this->_j].l;
-  result[1].u = bx[this->_j].u;
+  ARIADNE_ASSERT(bx.dimension()==map.argument_size());
+  Box result(map.result_size()); 
+  for(uint i=0; i!=map.result_size(); ++i) {
+    result[i].l = bx[map[i]].l;
+    result[i].u = bx[map[i]].u;
+  }
   return result;
 }
 
 
 Zonotope 
-PlanarProjectionMap::operator() (const Zonotope& z) const 
+apply(const ProjectionFunction& map, const Zonotope& z)  
 {
-  const PlanarProjectionMap& map=*this;
-  Point new_centre=map(z.centre());
+  Point new_centre=apply(map,z.centre());
   Matrix<Float> new_generators(2u,z.number_of_generators());
   for(size_t i=0; i!=z.number_of_generators(); ++i) {
-    column(new_generators,i)=map(Vector<Float>(column(z.generators(),i)));
+    column(new_generators,i)=apply(map,Vector<Float>(column(z.generators(),i)));
   }
   return Zonotope(new_centre,new_generators);
 }
 
 
 Polytope
-PlanarProjectionMap::operator() (const Polytope& p) const 
+apply(const ProjectionFunction& map, const Polytope& p)  
 {
-  Polytope result(2);
+  Polytope result(map.result_size());
   for(size_t i=0; i!=p.size(); ++i) {
     Point v=p[i];
-    Point pt=(*this)(v);
+    Point pt=apply(map,v);
     result.new_vertex(pt);
   }
-  return reduce2d(result);
+  if(result.dimension()==2) {
+    return reduce2d(result); 
+  } else {
+    return result;
+  }
 }
 
 
 InterpolatedCurve
-PlanarProjectionMap::operator()(const InterpolatedCurve& curve) const
+apply(const ProjectionFunction& map, const InterpolatedCurve& curve) 
 {
-  const PlanarProjectionMap& map=*this;
   InterpolatedCurve::const_iterator iter=curve.begin();
   InterpolatedCurve::const_iterator end=curve.end();
-  InterpolatedCurve result(map(iter->second));
+  InterpolatedCurve result(apply(map,iter->second));
   while(iter!=curve.end()) {
     ++iter;
-    result.insert(iter->first,map(iter->second));
+    result.insert(iter->first,apply(map,iter->second));
   }
   return result;
 }
 
-
-std::ostream& 
-operator<<(std::ostream& os, const PlanarProjectionMap& ppm) 
-{
-  return os << "PlanarProjectionMap( argument_dimension=" << ppm._d
-            << ", x_variable=" << ppm._i << ", y_variable=" << ppm._j << " )";
-}
 
 
 

@@ -32,7 +32,8 @@
 #include "function.h"
 #include "point.h"
 #include "box.h"
-#include "geometry2d.h"
+#include "curve.h"
+#include "polytope.h"
 #include "graphics.h"
 
 #ifdef HAVE_GTK_H
@@ -48,21 +49,71 @@ namespace Ariadne {
 static const int DEFAULT_WIDTH = 800;
 static const int DEFAULT_HEIGHT = 800;
 
-static void 
-trace(cairo_t *cr, const Box& bx);
 
-static void 
-trace(cairo_t *cr, const Polytope& p);
+std::vector<Point> interpolation_points(const InterpolatedCurve& c) {
+    std::vector<Point> result;
+    for(InterpolatedCurve::const_iterator iter=c.begin(); iter!=c.end(); ++iter) {
+        result.push_back(iter->second);
+    }
+    return result;
+}
+
+std::vector<Point> corner_points(const Box& bx) {
+    std::vector<Point> result(2,Point(bx.dimension()));
+    for(uint i=0; i!=bx.dimension(); ++i) {
+        result[0][i]=bx[i].lower();
+        result[1][i]=bx[i].upper();
+    }
+    //std::cerr<<"corner_points("<<bx<<")="<<result<<std::endl;
+    return result;
+}
+
+
+Box bounding_box(const std::vector<Point>& points) {
+  ARIADNE_ASSERT(!points.empty());
+  Box result(points[0]);
+  for(uint i=1; i!=points.size(); ++i) {
+    const Point& pt=points[i];
+    result=hull(result,pt);
+  }
+  return result;
+}
+
+
+std::vector<Point> apply(const ProjectionFunction& map, const std::vector<Point> & points) {
+  //std::cerr<<"apply(Projection map, list<Point> pts): map="<<map<<", pts="<<points<<std::endl;
+  std::vector<Point> result;
+  for(size_t i=0; i!=points.size(); ++i) {
+    const Point& pt=points[i];
+    Point ppt(map.result_size());
+    for(size_t j=0; j!=map.result_size(); ++j) {
+      ppt[j]=pt[map[j]];
+    }
+    result.push_back(ppt);
+  }
+  return result;
+}
+
+
+std::vector<Point> extremal(const std::vector<Point> & points) {
+  Polytope polytope=static_cast<const Polytope&>(points);
+  return reduce2d(polytope);
+}
+  
 
 struct GraphicsObject {
-  enum ShapeKind { BOX, POLYTOPE, CURVE };
-  GraphicsObject(Colour fc, Polytope sh) : fill_colour(fc), shape(sh) { }
-  Colour fill_colour;
-  Polytope shape;
+    enum ShapeKind { BOX, POLYTOPE, CURVE };
+    GraphicsObject(Colour fc, Box bx) : kind(BOX), fill_colour(fc), shape(corner_points(bx)) { }
+    GraphicsObject(Colour fc, Polytope pl) : kind(POLYTOPE), fill_colour(fc), shape(pl) { }
+    GraphicsObject(Colour fc, InterpolatedCurve cv) : kind(CURVE), fill_colour(fc), shape(interpolation_points(cv)) { }
+    ShapeKind kind;
+    Colour fill_colour;
+    std::vector<Point> shape;
 };
 
 static void 
-draw(cairo_t *cr, const Box& bounding_box, const std::vector<GraphicsObject>& objects, 
+plot(cairo_t *cr, const Box& bounding_box, const ProjectionFunction& projection,
+     const std::vector<GraphicsObject>& objects, 
      int canvas_width, int canvas_height);
 
 
@@ -91,6 +142,11 @@ Graphic::Graphic()
 }
 
 
+void Graphic::set_projection_map(const ProjectionFunction& p) 
+{
+  this->_data->projection=p;
+}
+
 void Graphic::set_bounding_box(const Box& bx) 
 {
   ARIADNE_ASSERT(bx.dimension()==0 || bx.dimension()==2 || bx.dimension()==this->_data->projection.argument_size());
@@ -113,6 +169,11 @@ void Graphic::set_line_colour(Colour lc)
 { 
 }
 
+void Graphic::set_line_colour(double r, double g, double b)
+{ 
+  this->set_line_colour(Colour(r,g,b));
+}
+
 void Graphic::set_fill_style(bool fs) 
 {
 }
@@ -122,15 +183,31 @@ void Graphic::set_fill_colour(Colour fc)
   this->_data->fill_colour=fc;
 }
 
-
-void Graphic::plot(const Box& bx) {
-    ARIADNE_ASSERT(bx.dimension()==2);
-    this->_data->objects.push_back(GraphicsObject(this->_data->fill_colour,polytope(bx)));
+void Graphic::set_fill_colour(double r, double g, double b)
+{ 
+  this->set_fill_colour(Colour(r,g,b));
 }
 
-void Graphic::plot(const Polytope& p) {
-    ARIADNE_ASSERT(p.dimension()==2);
-    this->_data->objects.push_back(GraphicsObject(this->_data->fill_colour,polytope(p)));
+
+void Graphic::draw(const Box& bx) {
+    if(this->_data->objects.empty() && this->_data->projection.argument_size() != bx.dimension()) {
+      this->_data->projection=ProjectionFunction(2,bx.dimension(),0); }
+    ARIADNE_ASSERT(bx.dimension()==this->_data->projection.argument_size());
+    this->_data->objects.push_back(GraphicsObject(this->_data->fill_colour,bx));
+}
+
+void Graphic::draw(const Polytope& p) {
+    if(this->_data->objects.empty() && this->_data->projection.argument_size() != p.dimension()) {
+      this->_data->projection=ProjectionFunction(2,p.dimension(),0); }
+    ARIADNE_ASSERT(p.dimension()==this->_data->projection.argument_size());
+    this->_data->objects.push_back(GraphicsObject(this->_data->fill_colour,p));
+}
+
+void Graphic::draw(const InterpolatedCurve& c) {
+    if(this->_data->objects.empty() && this->_data->projection.argument_size() != c.dimension()) {
+      this->_data->projection=ProjectionFunction(2,c.dimension(),0); }
+    ARIADNE_ASSERT(c.dimension()==this->_data->projection.argument_size());
+    this->_data->objects.push_back(GraphicsObject(this->_data->fill_colour,c));
 }
 
 void Graphic::clear() {
@@ -139,21 +216,22 @@ void Graphic::clear() {
 
 
 
-void trace(cairo_t *cr, const Box& bx) 
+void trace_box(cairo_t *cr, const std::vector<Point>& pts) 
 {
-    // std::cerr << "trace(cairo_t *cr, Box bx) bx="<<bx<<std::endl;
-    cairo_move_to (cr, bx[0].lower(), bx[1].lower());
-    cairo_line_to (cr, bx[0].upper(), bx[1].lower());
-    cairo_line_to (cr, bx[0].upper(), bx[1].upper());
-    cairo_line_to (cr, bx[0].lower(), bx[1].upper());
-    cairo_line_to (cr, bx[0].lower(), bx[1].lower());
+    //std::cerr << "trace_box(cairo_t *cr, std::vector<Point> pts) pts="<<pts<<std::endl;
+    cairo_move_to (cr, pts[0][0], pts[0][1]);
+    cairo_line_to (cr, pts[1][0], pts[0][1]);
+    cairo_line_to (cr, pts[1][0], pts[1][1]);
+    cairo_line_to (cr, pts[0][0], pts[1][1]);
+    cairo_line_to (cr, pts[0][0], pts[0][1]);
 }
 
-void trace(cairo_t *cr, const Polytope& p) 
+
+void trace_polytope(cairo_t *cr, const std::vector<Point>& p) 
 {
-    // std::cerr << "trace(cairo_t *cr, Polytope p) p="<<p<<std::endl;
-    ARIADNE_ASSERT(p.dimension()==2);
+    //std::cerr << "trace_polytope(cairo_t *cr, std::vector<Point> p) p="<<p<<std::endl;
     ARIADNE_ASSERT(p.size()>=3);
+    ARIADNE_ASSERT(p[0].size()==2);
     cairo_move_to (cr, p[0][0], p[0][1]);
     for(uint i=1; i!=p.size(); ++i) {
       cairo_line_to (cr, p[i][0], p[i][1]); 
@@ -161,9 +239,34 @@ void trace(cairo_t *cr, const Polytope& p)
     cairo_line_to (cr, p[0][0], p[0][1]); 
 }
 
-void draw(cairo_t *cr, const Box& bounding_box, const std::vector<GraphicsObject>& objects, int canvas_width, int canvas_height) 
+void trace_curve(cairo_t *cr, const std::vector<Point>& cv) 
 {
-    //std::cerr<<"Draw(...)\n"<<std::flush;
+    //std::cerr << "trace_curve(cairo_t *cr, InterpolatedCurve cv) cv="<<cv<<std::endl;
+    ARIADNE_ASSERT(cv.size()>=2);
+    ARIADNE_ASSERT(cv[0].size()==2);
+    cairo_move_to (cr, cv[0][0], cv[0][1]);
+    for(uint i=1; i!=cv.size(); ++i) {
+      cairo_line_to (cr, cv[i][0], cv[i][1]); 
+    }
+}
+
+
+void trace(cairo_t *cr, const GraphicsObject::ShapeKind kind, const std::vector<Point>& pts) 
+{
+    switch(kind) {
+        case GraphicsObject::BOX: trace_box(cr,pts); return;
+        case GraphicsObject::POLYTOPE: trace_polytope(cr,extremal(pts)); return;
+        case GraphicsObject::CURVE: trace_curve(cr,pts); return;
+    }
+}
+
+
+
+
+void plot(cairo_t *cr, const Box& bounding_box, const ProjectionFunction& projection, 
+          const std::vector<GraphicsObject>& objects, int canvas_width, int canvas_height) 
+{
+    //std::cerr<<"Plot(...)\n"<<std::flush;
 
     // Compute extreme values
     if(objects.empty()) {
@@ -175,12 +278,16 @@ void draw(cairo_t *cr, const Box& bounding_box, const std::vector<GraphicsObject
     // Gives the bounding box for the actual used area
     Box bbox;
     if(bounding_box.dimension()==0) {
-      bbox=objects[0].shape.bounding_box();
-      for(uint i=1; i!=objects.size(); ++i) {
-        bbox=hull(bbox,objects[i].shape.bounding_box()); 
-      }
+        if(objects.empty()) { 
+            bbox=Box(2,Interval(-1,1));
+        } else {
+            bbox=Ariadne::bounding_box(apply(projection,objects[0].shape));
+            for(uint i=1; i!=objects.size(); ++i) {
+                bbox=hull(bbox,Ariadne::bounding_box(apply(projection,objects[i].shape))); 
+            }
+        }
     } else {
-      bbox=bounding_box;
+        bbox=bounding_box;
     }
 
 
@@ -209,21 +316,21 @@ void draw(cairo_t *cr, const Box& bounding_box, const std::vector<GraphicsObject
     cairo_translate(cr, tr0, tr1);
     
     for(uint i=0; i!=objects.size(); ++i) {
-        const Colour& fc=objects[i].fill_colour;
-        const Polytope& p=objects[i].shape;
-        cairo_set_source_rgb (cr, fc.red, fc.green, fc.blue);
-        trace (cr,p);
-        cairo_fill (cr);
+        if(objects[i].kind!=GraphicsObject::CURVE) {
+            trace(cr,objects[i].kind,apply(projection,objects[i].shape));
+            const Colour& fc=objects[i].fill_colour;
+            cairo_set_source_rgb (cr, fc.red, fc.green, fc.blue);
+            cairo_fill (cr);
+        }
     }
     
     cairo_set_source_rgb (cr, 0,0,0);
     for(uint i=0; i!=objects.size(); ++i) {
-        const Polytope& p=objects[i].shape;
-        trace (cr,p);
+        trace(cr,objects[i].kind,apply(projection,objects[i].shape));
         cairo_stroke (cr);
     }
 
-    trace (cr,lbbox);
+    trace (cr,GraphicsObject::BOX,corner_points(lbbox));
     cairo_stroke (cr);
 
     cairo_destroy (cr);
@@ -241,16 +348,17 @@ Graphic::write(const char* filename)
     const int canvas_height = DEFAULT_HEIGHT;
 
     const Box& bounding_box=this->_data->bounding_box;
+    const ProjectionFunction& projection=this->_data->projection;
     const std::vector<GraphicsObject>& objects=this->_data->objects;
 
     surface = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, canvas_width, canvas_height);
     cr = cairo_create (surface);
  
-    draw(cr, bounding_box, objects, canvas_width, canvas_height);
-
-   cairo_surface_write_to_png (surface, (std::string(filename)+".png").c_str());
+    Ariadne::plot(cr, bounding_box, projection, objects, canvas_width, canvas_height);
+    
+    cairo_surface_write_to_png (surface, (std::string(filename)+".png").c_str());
    
-   cairo_surface_destroy (surface);
+    cairo_surface_destroy (surface);
 
 
 }
@@ -262,13 +370,14 @@ Graphic::write(const char* filename)
 void
 paint (GtkWidget      *widget,
        GdkEventExpose *eev,
-       gpointer        data)
+       gpointer        gdata)
 {
     cairo_t *cr;
   
-    const Graphic::Data* impl=static_cast<Graphic::Data*>(data);
-    const Box& bounding_box =impl->bounding_box;
-    const std::vector<GraphicsObject>& objects=impl->objects;
+    const Graphic::Data* data=static_cast<Graphic::Data*>(gdata);
+    const Box& bounding_box =data->bounding_box;
+    const ProjectionFunction& projection =data->projection;
+    const std::vector<GraphicsObject>& objects=data->objects;
 
     gint canvas_width  = widget->allocation.width;
     gint canvas_height = widget->allocation.height;
@@ -277,7 +386,7 @@ paint (GtkWidget      *widget,
     cr = gdk_cairo_create (widget->window);
 
     // Draw Cairo objects
-    draw(cr, bounding_box, objects, canvas_width, canvas_height);
+    Ariadne::plot(cr, bounding_box, projection, objects, canvas_width, canvas_height);
 }
 
 void Graphic::display() 

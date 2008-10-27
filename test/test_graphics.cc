@@ -23,8 +23,11 @@
  
 #include "function.h"
 #include "graphics.h"
+#include "point.h"
 #include "box.h"
 #include "zonotope.h"
+#include "polytope.h"
+#include "curve.h"
 #include "approximate_taylor_model.h"
 #include "set.h"
 #include "grid_set.h"
@@ -63,27 +66,47 @@ int main(int argc, char **argv)
     
 
     Graphic g;
-    g.set_fill_colour(Colour(0.5,1.0,1.0));
-    g.plot(bx1);
-    g.plot(bx2);
-    g.plot(bx3);
-    g.plot(bx4);
-    g.plot(bx5);
-    g.set_fill_colour(Colour(0.0,0.5,0.5));
-    g.plot(polytope(z1));
-    g.plot(polytope(ts1));
+    g << fill_colour(0.5,1.0,1.0)
+      << bx1
+      << bx2
+      << bx3
+      << bx4
+      << bx5;
+    g << fill_colour(0.0,0.5,0.5)
+      << polytope(z1)
+      << polytope(ts1);
     g.write("test_graphics-bx1");
     
-    g.set_fill_colour(Colour(1.0,1.0,0.5));
+    g << fill_colour(1.0,1.0,0.5);
     //g.display();
 
     g.clear();
 
-    g.set_fill_colour(Colour(1.0,0.5,1.0));
-    g.plot(bx1);
-    g.plot(bx2);
-    g.plot(bx5);
+    g.set_fill_colour(1.0,0.5,1.0);
+    g.draw(bx1);
+    g.draw(bx2);
+    g.set_fill_colour(magenta);
+    g.draw(bx5);
     g.write("test_graphics-bx2");
+
+
+    Box bx2d(2); bx2d[0]=Interval(0.2,0.4); bx2d[1]=Interval(0.2,0.5);
+    Box bx3d(3); bx3d[0]=Interval(0.2,0.4); bx3d[1]=Interval(0.2,0.5); bx3d[2]=Interval(0.2,0.7);
+    g.clear();
+    g.set_projection_map(ProjectionFunction(2,3,1));
+    g.draw(bx3d);
+    g.write("test_graphics-bx3");
+   
+
+    InterpolatedCurve cv(Point(2,0.0));
+    for(int i=1; i<=10; ++i) {
+      Point pt(2); pt[0]=i/10.; pt[1]=sqr(pt[0]);
+      cv.insert(i,pt);
+    }
+
+    g.clear();
+    g.draw(cv);
+    g.write("test_graphics-cv");
 
     GridTreeSet gts(2);
     gts.adjoin_outer_approximation(ImageSet(bx1), 6);
@@ -91,17 +114,17 @@ int main(int argc, char **argv)
     gts.adjoin_outer_approximation(ImageSet(bx3), 8);
     gts.adjoin_outer_approximation(ImageSet(bx4), 9);
     gts.adjoin_outer_approximation(ImageSet(bx5),10);
-    //gts.recombine();
+    gts.recombine();
 
     g.clear();
     Box bbox(2); bbox[0]=Interval(-1,1); bbox[1]=Interval(-1,1);
     g.set_bounding_box(bbox);
-    plot(g,gts);
+    g << gts;
     g.write("test_graphics-gts1");
 
     g.clear();
     g.set_bounding_box(Box());
-    plot(g,gts);
+    draw(g,gts);
     g.write("test_graphics-gts2");
     
 

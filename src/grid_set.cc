@@ -175,7 +175,7 @@ Grid::subdivision_index(uint d, const real_type& x) const
 {
   
   Float half=0.5;
-  int n=floor(add_approx(div_approx(sub_approx(x,this->_data->_origin[d]),this->_data->_lengths[d]),half));
+  int n=int(floor(add_approx(div_approx(sub_approx(x,this->_data->_origin[d]),this->_data->_lengths[d]),half)));
   Float sc=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],n));
     if(sc == x) { 
       return n; 
@@ -195,7 +195,7 @@ Grid::subdivision_lower_index(uint d, const real_type& x) const
 {
   
   
-  int n=floor(div_down(sub_down(x,this->_data->_origin[d]),this->_data->_lengths[d]));
+  int n=int(floor(div_down(sub_down(x,this->_data->_origin[d]),this->_data->_lengths[d])));
   if(x>=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],(n+1)))) {
     return n+1;
   } else {
@@ -210,7 +210,7 @@ Grid::subdivision_upper_index(uint d, const real_type& x) const
 {
   
   
-  int n=ceil(div_up(sub_up(x,this->_data->_origin[d]),this->_data->_lengths[d]));
+  int n=int(ceil(div_up(sub_up(x,this->_data->_origin[d]),this->_data->_lengths[d])));
   if(x<=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],(n-1)))) {
     return n-1;
   } else {

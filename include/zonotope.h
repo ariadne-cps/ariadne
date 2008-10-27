@@ -212,6 +212,9 @@ Zonotope::Zonotope(uint d, uint m, const X* ptr)
 {
 }
 
+class Polytope;
+Polytope polytope(const Zonotope& z);
+template<class G> void draw(G& g, const Zonotope& z) { g.draw(polytope(z)); }
 
 } // namespace Ariadne
 

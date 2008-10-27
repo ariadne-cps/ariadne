@@ -521,8 +521,17 @@ HybridSetIterator<DS,HBS>::increment_loc()
 
 template<class G, class BS> inline 
 void 
-plot(G& graphic, const std::pair<int,BS>& hs) { 
-  plot(graphic,hs.second); 
+draw(G& graphic, const std::pair<int,BS>& hs) { 
+  draw(graphic,hs.second); 
+}
+
+template<class G, class DS> inline 
+void 
+draw(G& graphic, const std::map<int,DS>& hds) { 
+  for(typename std::map<int,DS>::const_iterator loc_iter=hds.begin();
+      loc_iter!=hds.end(); ++loc_iter) {
+    draw(graphic,loc_iter->second); 
+  }
 }
 
 

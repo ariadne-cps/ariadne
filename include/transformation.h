@@ -75,6 +75,10 @@ struct ProjectionTransformation
   ProjectionTransformation(const array<uint>& p, uint as) 
     : _as(as), _p(p) 
   { for(uint i=0; i!=_p.size(); ++i) { ARIADNE_ASSERT(p[i]<as); } }
+  ProjectionTransformation(uint rs, uint as, uint i) 
+    : _as(as), _p(rs)
+  { ARIADNE_ASSERT(rs+i<=as);
+    for(uint j=0; j!=_p.size(); ++j) { _p[j]=i+j; } }
   ProjectionTransformation(const Range& rng, uint as) 
     : _as(as), _p(rng.size())
   { ARIADNE_ASSERT(rng.start()+rng.size()<=as);

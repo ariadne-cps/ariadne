@@ -1,5 +1,5 @@
 /****************************************************************************
- *            geometry2d.h
+ *            polytope.h
  *
  *  Copyright  2005-8  Alberto Casagrande, Pieter Collins
  *
@@ -21,11 +21,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#ifndef ARIADNE_GEOMETRY2D_H
-#define ARIADNE_GEOMETRY2D_H
+#ifndef ARIADNE_POLYTOPE_H
+#define ARIADNE_POLYTOPE_H
 
-/*! \file geometry2d.h
- *  \brief Classes for two-dimensional geometry output.
+/*! \file polytope.h
+ *  \brief Polytope class for geometry output.
  */
  
 #include <iostream>
@@ -116,4 +116,4 @@ PlanarProjectionMap::operator()(const Vector<X>& v) const
 } // namespace Ariadne
 
 
-#endif /* ARIADNE_OUTPUT_GEOMETRY2D_H */
+#endif /* ARIADNE_POLYTOPE_H */

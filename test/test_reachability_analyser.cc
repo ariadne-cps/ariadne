@@ -175,6 +175,9 @@ class TestReachabilityAnalyser
       =Ariadne::bounding_boxes(system.state_space(),bound);
     Box bounding_box=bounding_boxes[loc];
 
+    analyser.verbosity=0;
+    analyser.parameters().transient_time=4.0;
+    cout << analyser.parameters();
     HybridGridTreeSet& chain_reach_set=*analyser.chain_reach(system,initial_set,bounding_boxes);
     plot("test_reachability_analyser-map_chain_reach.png",bounding_box,chain_reach_set[loc],initial_set[loc]);
   }

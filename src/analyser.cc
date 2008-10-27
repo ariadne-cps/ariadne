@@ -207,7 +207,6 @@ upper_evolve(const SystemType& system,
              const CompactSetType& initial_set,
              const TimeType& time) const
 {
-  verbosity=0;
   ARIADNE_LOG(2,"HybridAnalyser::upper_evolve(...)\n");
   GTS initial;
   int grid_depth = this->_parameters->grid_depth;
@@ -325,7 +324,6 @@ chain_reach(const SystemType& system,
             const BoundingSetType& bounding_domain) const
 {
   // FIXME: Use tree sets throughout
-  uint verbosity=0;
 
   HybridTime hybrid_transient_time(this->_parameters->transient_time,this->_parameters->transient_steps);
   HybridTime hybrid_lock_to_grid_time(this->_parameters->lock_to_grid_time,this->_parameters->lock_to_grid_steps);
@@ -335,18 +333,18 @@ chain_reach(const SystemType& system,
   ARIADNE_LOG(5,"initial_set="<<initial_set<<"\n");
 
   //GTS bounding; bounding.adjoin_inner_approximation(bounding_domain,grid_depth);
-  GTS bounding; bounding.adjoin_outer_approximation(bounding_domain,grid_depth);
+  GTS bounding; bounding.adjoin_outer_approximation(bounding_domain,grid_depth); bounding.recombine();
   ARIADNE_LOG(5,"bounding_size="<<bounding.size()<<"\n");
 
   GTS initial; initial.adjoin_outer_approximation(initial_set,grid_depth);
   ARIADNE_LOG(5,"initial_size="<<initial.size()<<"\n");
 
-  GTS transient=this->_upper_reach(system,initial,hybrid_transient_time,grid_depth);
+  GTS transient,evolve;
+  make_lpair(transient,evolve)=this->_upper_reach_evolve(system,initial,hybrid_transient_time,grid_depth);
   ARIADNE_LOG(5,"transient_size="<<transient.size()<<"\n");
-  GTS evolve= this->_upper_evolve(system,initial,hybrid_transient_time,grid_depth);
   ARIADNE_LOG(5,"evolve_size="<<evolve.size()<<"\n");
   GTS reach=evolve;
-  GTS found=reach;
+  GTS found=this->_upper_reach(system,reach,hybrid_transient_time,grid_depth);
   while(!found.empty()) {
     ARIADNE_LOG(5,"found.empty()="<<found.empty()<<"\n");
     reach.adjoin(found);
@@ -358,6 +356,8 @@ chain_reach(const SystemType& system,
     found.restrict(bounding);
     ARIADNE_LOG(5,"bounded_new_size="<<found.size()<<"\n");
   }
+  reach.adjoin(transient);
+  reach.recombine();
   GTS* result=new GTS(reach);
   return result;
 }

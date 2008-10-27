@@ -912,6 +912,9 @@ namespace Ariadne {
 		
                         //@{
 			//! \name List operations
+			/*! \brief True if the set is empty. */
+                        bool empty() const; 
+
 			/*! \brief The number of activated cells in the set. */
                         size_t size() const; 
                         //@}
@@ -1776,6 +1779,10 @@ namespace Ariadne {
 			GridTreeSubset::_pRootTreeNode = NULL;
 		}
 	}
+	
+        inline bool GridTreeSet::empty() const {
+                return BinaryTreeNode::count_enabled_leaf_nodes( this->binary_tree() ) == 0; 
+        }
 	
         inline size_t GridTreeSet::size() const {
                 return BinaryTreeNode::count_enabled_leaf_nodes( this->binary_tree() ); 

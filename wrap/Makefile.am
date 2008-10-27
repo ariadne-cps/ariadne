@@ -13,6 +13,8 @@ python_MODULES = .libs/ariadne.so .libs/interval.so .libs/differentiation.so
 
 lib_LTLIBRARIES = $(python_LIBS)
 
+wrap: python
+
 python: $(python_LIBS)
 
 install-exec-local:

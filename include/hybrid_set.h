@@ -448,6 +448,19 @@ class HybridGridTreeSet
     return this->find(q)->second;
   }
 
+  bool empty() const { 
+    for(locations_const_iterator loc_iter=this->locations_begin(); 
+        loc_iter!=this->locations_end(); ++loc_iter) {
+      if(!loc_iter->second.empty()) { return false; } }
+    return true; }
+
+  size_t size() const { 
+    size_t result=0; 
+    for(locations_const_iterator loc_iter=this->locations_begin(); 
+        loc_iter!=this->locations_end(); ++loc_iter) {
+      result+=loc_iter->second.size(); } 
+    return result; }
+
   HybridGridCellListSet cells() const { ARIADNE_NOT_IMPLEMENTED; }
   HybridListSet<Box> boxes() const { ARIADNE_NOT_IMPLEMENTED; }
 

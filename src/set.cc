@@ -24,10 +24,11 @@
 #include "macros.h"
 #include "function.h"
 #include "set.h"
+#include "geometry.h"
 
 namespace Ariadne {
 
- 
+
 ImageSet::ImageSet()
   : _domain(), _function_ptr(new IdentityFunction(0))
 { 
@@ -70,8 +71,8 @@ ImageSet::disjoint(const Vector<Interval>& bx) const
   } else if(dynamic_cast<const ScalingFunction*>(&*this->_function_ptr)) {
     return Ariadne::disjoint(bx,this->_function_ptr->evaluate(this->_domain));
   } else {
-    std::cerr<<*this->_function_ptr<<std::endl;
-    ARIADNE_NOT_IMPLEMENTED;
+    static const int MAX_SUBDIVISIONS=8;
+    return Ariadne::disjoint(this->domain(),*this->_function_ptr,bx,radius(bx)/MAX_SUBDIVISIONS);
   }
 }
 
@@ -79,14 +80,19 @@ ImageSet::disjoint(const Vector<Interval>& bx) const
 tribool
 ImageSet::intersects(const Vector<Interval>& bx) const 
 { 
-  ARIADNE_NOT_IMPLEMENTED;
+  static const int MAX_SUBDIVISIONS=8;
+  return !Ariadne::disjoint(this->domain(),*this->_function_ptr,bx,radius(bx)/MAX_SUBDIVISIONS);
 }
 
 
 tribool
 ImageSet::subset(const Vector<Interval>& bx) const 
 { 
-  ARIADNE_NOT_IMPLEMENTED;
+  if(Ariadne::subset(this->bounding_box(),bx)) {
+    return true;
+  } else {
+    return indeterminate;
+  }
 }
 
 

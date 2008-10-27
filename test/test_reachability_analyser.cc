@@ -116,6 +116,13 @@ class TestReachabilityAnalyser
     
   }
 
+  template<class S> void plot(const char* name, const Box& bounding_box, const S& set) {
+    Graphic g;
+    g << fill_colour(white) << bounding_box << line_style(true);
+    g << fill_colour(blue) << set;
+    g.write(name);
+  }
+
   template<class S, class IS> void plot(const char* name, const Box& bounding_box, const S& set, const IS& initial_set) {
     Graphic g;
     g << fill_colour(white) << bounding_box;
@@ -138,7 +145,6 @@ class TestReachabilityAnalyser
   }
 
   void test_lower_reach_evolve() {  
-    cout << "test_lower_reach() not used\n";
     DiscreteState loc(1);
     Box bounding_box(2,bound);
     cout << "Computing timed evolve set" << endl;
@@ -183,7 +189,7 @@ class TestReachabilityAnalyser
   }
   
   void test() {
-    ARIADNE_TEST_SKIP(test_lower_reach_evolve());
+    ARIADNE_TEST_CALL(test_lower_reach_evolve());
     ARIADNE_TEST_CALL(test_upper_reach_evolve());
     ARIADNE_TEST_CALL(test_chain_reach());
   }

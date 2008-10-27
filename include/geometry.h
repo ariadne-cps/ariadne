@@ -34,15 +34,6 @@
 
 namespace Ariadne {
 
-template<class BS>
-class ListSet
-  : public std::vector<BS>
-{
-  void adjoin(const BS& bs) { 
-    this->push_back(bs); }
-  void adjoin(const std::vector<BS>& bs) {
-    this->insert(this->end(),bs.begin(),bs.end()); }
-};
 
 inline
 uint irmax(const Box& bx) {
@@ -78,6 +69,13 @@ std::pair<Box,Box> split(const Box& bx, uint i)
 }
 
 inline
+Box split(const Box& bx, bool lr)
+{
+  uint i=irmax(bx);
+  return split(bx,i,lr);
+}
+
+inline
 std::pair<Box,Box> split(const Box& bx) {
   return split(irmax(bx));
 }
@@ -87,10 +85,11 @@ template<class F>
 tribool 
 disjoint(const Box& d, const F& f, const Box& b, const Float& eps)
 {
-  Box fd=f(d);
+  Box fd=f.evaluate(d);
+  Box fc=f.evaluate(Box(midpoint(d)));
   if(disjoint(fd,b)) { 
     return true;
-  } else if(subset(fd,b)) {
+  } else if(subset(fc,b)) {
     return false;
   } else if(d.radius()<eps) {
     return indeterminate;
@@ -105,7 +104,8 @@ tribool
 subset(const Box& d, const F& f, const Box& b, const Float& eps)
 {
   Box fd=f(d);
-  if(subset(fd,b)) { 
+  Box fc=f(Box(midpoint(d)));
+  if(subset(fc,b)) { 
     return true;
   } else if(disjoint(fd,b)) {
     return false;

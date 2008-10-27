@@ -171,7 +171,7 @@ lower_reach(const SystemType& system,
   initial.adjoin_lower_approximation(initial_set,grid_depth+4);
  
   for(GTS::const_iterator bs_iter=initial.begin(); bs_iter!=initial.end(); ++bs_iter) {
-    reach.adjoin(this->_discretiser->lower_evolution(system,*bs_iter,time,grid_depth).intermediate());
+    reach.adjoin(this->_discretiser->lower_evolution(system,*bs_iter,time,grid_depth).reach());
   }
   return &reach;
 }

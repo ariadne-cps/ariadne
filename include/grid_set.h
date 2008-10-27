@@ -820,12 +820,43 @@ namespace Ariadne {
 			 *  We use the primary cell (enclosed in this paving) of height \a primary_cell_hight and represented 
 			 *  by the paving's binary node \a pBinaryTreeNode. When adding the outer approximation, we compute it
 			 *  up to the level of accuracy given by \a max_mince_depth. This parameter defines, how many subdivisions
-			 *  of the vinary tree we should make to get the proper cells for outer approximating \a theSet.
+			 *  of the binary tree we should make to get the proper cells for outer approximating \a theSet.
 			 *  This method is recursive, the parameter \a pPath defines the path to the current node pBinaryTreeNode
 			 *  from the root node in recursive calls, thus the initial call for this method must be done with an empty word.
 			 */
-			template<class Set> void adjoin_outer_approximation( BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
+			void adjoin_outer_approximation( BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
+                                                         const uint max_mince_depth, const CompactSetInterface& theSet, BinaryWord * pPath );
+
+			/*! \brief This method adjoins the inner approximation of \a theSet (computed on the fly) to this paving.
+			 *  We use the primary cell (enclosed in this paving) of height \a primary_cell_height and represented 
+			 *  by the paving's binary node \a pBinaryTreeNode. When adding the inner approximation, we compute it
+			 *  up to the level of accuracy given by \a max_mince_depth. This parameter defines, how many subdivisions
+			 *  of the binary tree we should make to get the proper cells for inner approximating \a theSet.
+			 *  This method is recursive, the parameter \a pPath defines the path to the current node pBinaryTreeNode
+			 *  from the root node in recursive calls, thus the initial call for this method must be done with an empty word.
+			 */
+			template<class Set> void adjoin_inner_approximation( BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
 										const uint max_mince_depth, const Set& theSet, BinaryWord * pPath );
+
+			/*! \brief This method adjoins the lower approximation of \a theSet (computed on the fly) to this paving.
+			 *  We use the primary cell (enclosed in this paving) of height \a primary_cell_hight and represented 
+			 *  by the paving's binary node \a pBinaryTreeNode. When adding the lower approximation, we compute it
+			 *  up to the level of accuracy given by \a max_mince_depth. This parameter defines, how many subdivisions
+			 *  of the binary tree we should make to get the proper cells for lower approximating \a theSet.
+			 *  This method is recursive, the parameter \a pPath defines the path to the current node pBinaryTreeNode
+			 *  from the root node in recursive calls, thus the initial call for this method must be done with an empty word.
+                         *  The approximation method does not recombine cells, as knowing that both children intersect a set is more
+                         *  information than knowing that the parent does.
+			 */
+			void adjoin_lower_approximation( BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
+                                                         const uint max_mince_depth, const OvertSetInterface& theSet, BinaryWord * pPath );
+
+			/*! \brief This method adjoins the lower approximation of \a theSet (computed on the fly) to this paving.
+			 *  It is specialised for open sets, for which we have the superset() operator. If a set is a superset of
+                         *  a cell, then we know it intersects the cell and all its children.
+			 */
+			void adjoin_lower_approximation( BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
+                                                         const uint max_mince_depth, const OpenSetInterface& theSet, BinaryWord * pPath );
 
 			/*! \brief This method is uset to do restriction of this set to the set given by
 			 *  \a theOtherSubPaving Note that, here we require that the height of the primary
@@ -991,6 +1022,9 @@ namespace Ariadne {
 			//@{
 			//! \name Geometric Approximation
 
+			/*! \brief Adjoin an inner approximation to a given set, computing to the given depth. */
+			template<class Set> void adjoin_inner_approximation( const Set& theSet, const uint depth );
+			
 			/*! \brief Adjoin an over approximation to box, computing to the given depth. */
 			void adjoin_over_approximation( const Box& theBox, const uint depth );
 			/*! \brief Adjoin an outer approximation to a given set, computing to the given depth.
@@ -1005,12 +1039,25 @@ namespace Ariadne {
 			 */
 			void adjoin_outer_approximation( const CompactSetInterface& theSet, const uint depth );
 			
-			/*! \brief Adjoin an inner approximation to a given set, computing to the given depth. */
-			template<class Set> void adjoin_inner_approximation( const Set& theSet, const uint depth );
-			
 			/*! \brief Adjoin a lower approximation to a given set, computing to the given depth. 
 			*   A lower approximation comprises all cells intersecting a given set. */
-			template<class Set> void adjoin_lower_approximation( const Set& theSet, const uint depth );
+                        void adjoin_lower_approximation( const OvertSetInterface& theSet, const uint depth );
+
+			/*! \brief Adjoin a lower approximation to a given set, computing to the given depth. 
+			*   A lower approximation comprises all cells intersecting a given set. */
+                        void adjoin_inner_approximation( const OpenSetInterface& theSet, const uint depth );
+
+			/*! \brief Adjoin a lower approximation to a given set, computing to the given depth. 
+			*   A lower approximation comprises all cells intersecting a given set. */
+                        void adjoin_inner_approximation( const OpenSetInterface& theSet, const Box& bounding_box, const uint depth );
+
+			/*! \brief Adjoin a lower approximation to a given set, computing to the given depth. 
+			*   A lower approximation comprises all cells intersecting a given set. */
+                        void adjoin_lower_approximation( const LocatedSetInterface& theSet, const uint depth );
+
+			/*! \brief Adjoin a lower approximation to a given set, computing to the given depth. 
+			*   A lower approximation comprises all cells intersecting a given set. */
+                        void adjoin_lower_approximation( const OvertSetInterface& theSet, const Box& bounding_box, const uint depth );
 
 			//@}
 	};
@@ -1824,13 +1871,6 @@ namespace Ariadne {
 		}
 	}
 	
-	template<class Set> inline void GridTreeSet::adjoin_inner_approximation( const Set& theSet, const uint depth ) {
-		throw NotImplemented(__PRETTY_FUNCTION__);
-	}
-	
-	template<class Set> inline void GridTreeSet::adjoin_lower_approximation( const Set& theSet, const uint depth ) {
-		throw NotImplemented(__PRETTY_FUNCTION__);
-	}
 
 /*************************************FRIENDS OF BinaryTreeNode*************************************/
 

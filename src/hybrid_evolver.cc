@@ -204,7 +204,6 @@ _evolution(EnclosureListType& final_sets,
   typedef boost::shared_ptr< const FunctionInterface > FunctionConstPointer;
 
   ARIADNE_LOG(5,__PRETTY_FUNCTION__<<"\n");
-  assert(semantics==UPPER_SEMANTICS);
 
   const IntegerType maximum_steps=maximum_hybrid_time.second;
   const Float maximum_time=maximum_hybrid_time.first;
@@ -248,7 +247,7 @@ _evolution(EnclosureListType& final_sets,
     TimeModelType initial_time_model=current_set.fourth;
     if(initial_time_model.range()[0].lower()>=maximum_time || initial_steps>=maximum_steps) {
       final_sets.adjoin(EnclosureType(initial_location,this->_toolbox->set(initial_set_model)));
-    } else if(ENABLE_SUBDIVISIONS
+    } else if(UPPER_SEMANTICS && ENABLE_SUBDIVISIONS
               && (radius(initial_set_model.range())>this->_parameters->maximum_enclosure_radius)) 
     {
       // Subdivide
@@ -578,6 +577,9 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     intermediate_sets.adjoin(EnclosureType(initial_location,final_set_model));
     working_sets.push_back(make_tuple(initial_location,initial_steps,final_set_model,final_time_model));
   }
+
+
+  // FIXME: Lower semantics
 
   // Process discrete transitions
   ARIADNE_LOG(6,"Computing discrete transitions\n");

@@ -22,7 +22,7 @@
  */
  
 /*! \file set.h
- *  \brief Image and preimages of boxes in Euclidean space.
+ *  \brief Images and preimages of boxes in Euclidean space.
  */
 
 #ifndef ARIADNE_SET_H
@@ -50,8 +50,8 @@ class ImageSet
   ImageSet();
   ImageSet(const BoxType& dom);
   ImageSet(const BoxType& dom, const FunctionInterface& fn);
-  const BoxType& domain() { return this->_domain; }
-  const FunctionInterface& function() { return *this->_function_ptr; }
+  const BoxType& domain() const { return this->_domain; }
+  const FunctionInterface& function() const { return *this->_function_ptr; }
   bool operator==(const ImageSet& ims) const { return this->_domain==ims._domain && this->_function_ptr==ims._function_ptr; }
   ImageSet* clone() const;
   uint dimension() const;
@@ -70,7 +70,7 @@ class ModelSet
  public:
   typedef Vector<Interval> BoxType;
   ModelSet(const Mdl& mdl) : _model(mdl) { }
-  const BoxType& domain() { return this->_model.domain(); }
+  const BoxType& domain() const { return this->_model.domain(); }
   ModelSet* clone() const { return new ModelSet<Mdl>(*this); }
   uint dimension() const { return this->_model.result_size(); }
   tribool disjoint(const Vector<Interval>& bx) const { 
@@ -93,8 +93,8 @@ class ConstraintSet
  public:
   typedef Vector<Interval> BoxType;
   ConstraintSet(const BoxType& codom, const FunctionInterface& fn);
-  const BoxType& codomain() { return this->_codomain; }
-  const FunctionInterface& function() { return *this->_function_ptr; };
+  const BoxType& codomain() const { return this->_codomain; }
+  const FunctionInterface& function() const { return *this->_function_ptr; };
 
   ConstraintSet* clone() const;
   uint dimension() const;

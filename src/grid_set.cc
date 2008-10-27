@@ -697,7 +697,7 @@ operator<<(std::ostream& os, const Grid& gr)
 			}
 			//Otherwise increase the height and recompute the new borders
 			primary_cell_at_height( ++height, leftBottomCorner, rightTopCorner);
-		}while(true);
+		}while( true );
 		
 		return height;
 	}
@@ -1170,25 +1170,17 @@ operator<<(std::ostream& os, const GridCellListSet& gcls)
 
 	void GridTreeSet::adjoin_outer_approximation( const CompactSetInterface& theSet, const uint depth ) {
 		Grid theGrid( this->cell().grid() );
-		ARIADNE_ASSERT( theSet.dimension() == this->cell().dimension());
+		ARIADNE_ASSERT( theSet.dimension() == this->cell().dimension() );
 		
-		//1. Computes the smalled primary cell (on the grid) containing theSet
-		const uint theSetBoxHeight = GridCell::smallest_primary_cell_height( theSet.bounding_box() );
+		//1. Compute the smallest GridCell (corresponding to the primary cell)
+		//   that encloses the theSet (after it is mapped onto theGrid).
+		const GridCell theOverApproxCell = over_approximation( theSet.bounding_box(), theGrid );
+		//Compute the primary cell for the outer approximation stepping up by the number of dimensions
+		const GridCell theOuterApproxCell( theOverApproxCell.grid(), theOverApproxCell.height() + theGrid.dimension(), BinaryWord() );
 
-		//2. Allocates the paving for this outer approximation
-		//IVAN S. ZAPREEV
-		//WARNING: We need to have the bounding box on the grid, in order to compute proper primary cell for the GridTreeSet
-		// A) We need to get the box representing the block theSetGridBlock in the grid theGrid
-		// B) We create a trivial grid with with no scaling
-		// C) We use this grid and the Lattice block of the theSetGridBlock to create a new GridBlock
-		// D) The resulting GridBlock will be in the grid theGrid i.e. it's bounding_box() method will
-		//     return us it's box in the grid theGrid but not in the original space
-		
-                const GridCell theSetBoxCell(theGrid,theSetBoxHeight,BinaryWord());
-
-		//3. Align this paving and paving enclosing the provided set
+		//2. Align this paving and paving enclosing the provided set
 		bool has_stopped = false;
-		BinaryTreeNode* pBinaryTreeNode = align_with_cell( theSetBoxCell, true, has_stopped );
+		BinaryTreeNode* pBinaryTreeNode = align_with_cell( theOuterApproxCell, true, has_stopped );
 		
 		//If the outer aproximation of the bounding box of the provided set is enclosed
 		//in an enabled cell of this paving, then there is nothing to be done. The latter
@@ -1197,17 +1189,18 @@ operator<<(std::ostream& os, const GridCellListSet& gcls)
 			//Compute the depth to which we must mince the outer approximation of the adjoining set.
 			//This depth is relative to the root of the constructed paving, which has been alligned
 			//with the binary tree node pBinaryTreeNode.
-			const uint max_mince_depth = theSetBoxCell.height() * theSetBoxCell.dimension() + depth;
+			const uint max_mince_depth = theOuterApproxCell.height() * theOuterApproxCell.dimension() + depth;
 			
 			//Adjoin the outer approximation, computing it on the fly.
 			BinaryWord * pEmptyPath = new BinaryWord(); 
-			adjoin_outer_approximation( pBinaryTreeNode, theSetBoxCell.height(), max_mince_depth, theSet, pEmptyPath );
+			adjoin_outer_approximation( pBinaryTreeNode, theOuterApproxCell.height(), max_mince_depth, theSet, pEmptyPath );
 
 			delete pEmptyPath;
 		}
 	}
 
 	void GridTreeSet::restrict( const GridTreeSubset& theOtherSubPaving ) {
+		//!!!!
 		throw NotImplemented(__PRETTY_FUNCTION__);
 	}
 	
@@ -1216,6 +1209,7 @@ operator<<(std::ostream& os, const GridCellListSet& gcls)
 	}
 	
 	void GridTreeSet::remove( const GridTreeSubset& theOtherSubPaving ) {
+		//!!!!
 		throw NotImplemented(__PRETTY_FUNCTION__);
 	}
 
@@ -1224,13 +1218,16 @@ operator<<(std::ostream& os, const GridCellListSet& gcls)
 /*************************************FRIENDS OF GridCell*****************************************/
 
         GridCell over_approximation(const Box& theBox, const Grid& theGrid) {
-                Box theDyadicBox(theBox.size());
-                for(uint i=0; i!=theBox.size(); ++i) {
-                  theDyadicBox[i]=(theBox[i]-theGrid.origin()[i])/theGrid.lengths()[i]; }
-                uint height=GridCell::smallest_primary_cell_height( theDyadicBox );
-                return GridCell(theGrid,height,BinaryWord());
+		Box theDyadicBox( theBox.size() );
+		//Convert the box to theGrid coordinates
+		for( uint i = 0; i != theBox.size(); ++i ) {
+			theDyadicBox[i] = ( theBox[i] - theGrid.origin()[i] ) / theGrid.lengths()[i];
+		}
+		//Compute the smallest primary cell, enclosing this grid
+		uint height = GridCell::smallest_primary_cell_height( theDyadicBox );
+		//Create the GridCell, corresponding to this cell
+		return GridCell( theGrid, height, BinaryWord() );
         }
-
 
 /*************************************FRIENDS OF GridTreeSet*****************************************/
 
@@ -1266,16 +1263,19 @@ operator<<(std::ostream& os, const GridCellListSet& gcls)
 	bool intersects( const Box& theBox, const GridTreeSubset& theSet ) {
 		throw NotImplemented(__PRETTY_FUNCTION__);
 	}
-
+	
 	GridTreeSet join( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 ) {
+		//!!!!
 		throw NotImplemented(__PRETTY_FUNCTION__);
 	}
 	
 	GridTreeSet intersection( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 ) {
+		//!!!!
 		throw NotImplemented(__PRETTY_FUNCTION__);
 	}
 	
 	GridTreeSet difference( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 ) {
+		//!!!!
 		throw NotImplemented(__PRETTY_FUNCTION__);
 	}
 

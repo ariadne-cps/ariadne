@@ -91,7 +91,12 @@ namespace Ariadne {
 	GridTreeSet intersection(const GridTreeSubset& theSet1, const GridTreeSubset& theSet2);
 	GridTreeSet difference(const GridTreeSubset& theSet1, const GridTreeSubset& theSet2);
 	
-        GridCell over_approximation(const Box& theBox, const Grid& theGrid);
+	/*! /brief Creates an outer approximation for the \a theBox on \a theGrid. \a theBox
+	 * is in the original sopace coordinates. We compute the over approximation as the
+	 * smallest primary cell on the Grid, such that it contains \a theBox (after it's
+	 * mapping on \a theGrid )
+	 */
+        GridCell over_approximation( const Box& theBox, const Grid& theGrid );
         GridTreeSet outer_approximation(const Box& theBox, const Grid& theGrid, const uint depth);
         GridTreeSet outer_approximation(const CompactSetInterface& theSet, const Grid& theGrid, const uint depth);
         GridTreeSet outer_approximation(const CompactSetInterface& theSet, const uint depth);
@@ -438,7 +443,8 @@ namespace Ariadne {
 
 			/*! \brief Construct a cell based on \a theGrid, the primary cell of level \a theHeight,
 			 * and the path to the SubPaving's root cell which is accessible from the primary cell
-			 * via the path \a _theWord.
+			 * via the path \a _theWord. Note that, \a theHeight is the height relative to the Grid,
+			 * but not to the original space!
 			 */
 			GridCell(const Grid& theGrid, const uint theHeight, const BinaryWord& theWord);
 			

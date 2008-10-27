@@ -22,7 +22,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -214,7 +213,7 @@ void test_binary_tree() {
 string createPavingCellOutput(const string& grid, const string& heigth, const string& binary_word, const string& box){
 	string result;
 	result =  "\n The grid: Grid( "+grid+" )\n";
-	result += " Primary root cell's higth: "+heigth+"\n";
+	result += " Primary root cell's height: "+heigth+"\n";
 	result += " The path to the cell from the primary root cell: "+binary_word+"\n";
 	result += " The cell's box: "+box+"\n";
 	return result;
@@ -233,7 +232,9 @@ void test_grid_paving_cursor(){
 	string expected_result;
 	
 	//Allocate the Grid
-	Grid theGrid( 3, 1.0 );
+	Vector<Float> origin(3); origin.set(0,-0.25); origin.set(1,0.25); origin.set(2,1.5);
+	Vector<Float> lengths(3); lengths.set(0, 0.25); lengths.set(1, 0.25); lengths.set(2, 0.25);
+	Grid theGrid( origin, lengths );
 
 	//Define the higth of the primary root cell.
 	const uint theHeight = 2;
@@ -268,23 +269,23 @@ void test_grid_paving_cursor(){
 	// !!!
 	print_title("Check the created Cursor data on a small subpaving");
 	expected_result = "\n The underlying subpaving:";
-	expected_result += createSubPavingOutput("origin=[-0.25,0.25,1.5], lengths=[0.25,0.25,0.25]","2","01","[-0.5,0]x[0.5,1]x[1.25,2.25]","?1-01+0");
+	expected_result += createSubPavingOutput("origin=[-0.25,0.25,1.5], lengths=[0.25,0.25,0.25]","2","01","[[-0.5:0],[0.5:1],[1.25:2.25]]","?1-01+0");
 	expected_result += " The current stack index: 0\n";
 	expected_result += " The current stack data: \n";
 	expected_result += " Element 0: isLeaf = 0, isEnabled = 0, isDisabled = 0\n";
 	expected_result += " The current grid cell: ";
-	expected_result += createPavingCellOutput("origin=[-0.25,0.25,1.5], lengths=[0.25,0.25,0.25]","2","01","[-0.5,0]x[0.5,1]x[1.25,2.25]");
+	expected_result += createPavingCellOutput("origin=[-0.25,0.25,1.5], lengths=[0.25,0.25,0.25]","2","01","[[-0.5:0],[0.5:1],[1.25:2.25]]");
 	TEST_TO_STRING_RESULT("The sub-tree based paving cursor (initial): ", expected_result, theGSPCursorSmall);
 
 	// !!!
 	print_title("Check the created Cursor data on a large subpaving");
 	expected_result = "\n The underlying subpaving:";
-	expected_result += createSubPavingOutput("origin=[-0.25,0.25,1.5], lengths=[0.25,0.25,0.25]", "2","e","[-0.5,0.5]x[0,1]x[1.25,2.25]","?1?1?1+01-01?1-01+01?1?1+01+01?1+01-0");
+	expected_result += createSubPavingOutput("origin=[-0.25,0.25,1.5], lengths=[0.25,0.25,0.25]", "2","e","[[-0.5:0.5],[0:1],[1.25:2.25]]","?1?1?1+01-01?1-01+01?1?1+01+01?1+01-0");
 	expected_result += " The current stack index: 0\n";
 	expected_result += " The current stack data: \n";
 	expected_result += " Element 0: isLeaf = 0, isEnabled = 0, isDisabled = 0\n";
 	expected_result += " The current grid cell: ";
-	expected_result += createPavingCellOutput("origin=[-0.25,0.25,1.5], lengths=[0.25,0.25,0.25]","2","e","[-0.5,0.5]x[0,1]x[1.25,2.25]");
+	expected_result += createPavingCellOutput("origin=[-0.25,0.25,1.5], lengths=[0.25,0.25,0.25]","2","e","[[-0.5:0.5],[0:1],[1.25:2.25]]");
 	TEST_TO_STRING_RESULT("The root-node based paving cursor (initial): ", expected_result, theGSPCursorLarge);
 	
 	// !!!
@@ -296,17 +297,17 @@ void test_grid_paving_cursor(){
 	theGSPCursorLarge.move_left();
 	theGSPCursorLarge.move_right();
 	const GridTreeSubset tmpSubPaving = *theGSPCursorLarge;
-	expected_result = createSubPavingOutput("origin=[-0.25,0.25,1.5], lengths=[0.25,0.25,0.25]","2","01","[-0.5,0]x[0.5,1]x[1.25,2.25]","?1-01+0");
+	expected_result = createSubPavingOutput("origin=[-0.25,0.25,1.5], lengths=[0.25,0.25,0.25]","2","01","[[-0.5:0],[0.5:1],[1.25:2.25]]","?1-01+0");
 	TEST_TO_STRING_RESULT("The cursor has moved and we have the following subpaving: ", expected_result, tmpSubPaving);
 	expected_result = "\n The underlying subpaving:";
-	expected_result += createSubPavingOutput("origin=[-0.25,0.25,1.5], lengths=[0.25,0.25,0.25]","2","e","[-0.5,0.5]x[0,1]x[1.25,2.25]","?1?1?1+01-01?1-01+01?1?1+01+01?1+01-0");
+	expected_result += createSubPavingOutput("origin=[-0.25,0.25,1.5], lengths=[0.25,0.25,0.25]","2","e","[[-0.5:0.5],[0:1],[1.25:2.25]]","?1?1?1+01-01?1-01+01?1?1+01+01?1+01-0");
 	expected_result += " The current stack index: 2\n";
 	expected_result += " The current stack data: \n";
 	expected_result += " Element 0: isLeaf = 0, isEnabled = 0, isDisabled = 0\n";
 	expected_result += " Element 1: isLeaf = 0, isEnabled = 0, isDisabled = 0\n";
 	expected_result += " Element 2: isLeaf = 0, isEnabled = 0, isDisabled = 0\n";
 	expected_result += " The current grid cell: ";
-	expected_result += createPavingCellOutput("origin=[-0.25,0.25,1.5], lengths=[0.25,0.25,0.25]","2","01","[-0.5,0]x[0.5,1]x[1.25,2.25]");
+	expected_result += createPavingCellOutput("origin=[-0.25,0.25,1.5], lengths=[0.25,0.25,0.25]","2","01","[[-0.5:0],[0.5:1],[1.25:2.25]]");
 	TEST_TO_STRING_RESULT("The cursor's state is: ", expected_result, theGSPCursorLarge);
 	
 	// !!!
@@ -337,13 +338,13 @@ void test_grid_paving_cursor(){
 	theGSPCursorSmall.move_left();
 	print_comment("Test the present state of theGSPCursorSmall");
 	expected_result = "\n The underlying subpaving:";
-	expected_result += createSubPavingOutput("origin=[-0.25,0.25,1.5], lengths=[0.25,0.25,0.25]","2","01","[-0.5,0]x[0.5,1]x[1.25,2.25]","?1-01+0");
+	expected_result += createSubPavingOutput("origin=[-0.25,0.25,1.5], lengths=[0.25,0.25,0.25]","2","01","[[-0.5:0],[0.5:1],[1.25:2.25]]","?1-01+0");
 	expected_result += " The current stack index: 1\n";
 	expected_result += " The current stack data: \n";
 	expected_result += " Element 0: isLeaf = 0, isEnabled = 0, isDisabled = 0\n";
 	expected_result += " Element 1: isLeaf = 1, isEnabled = 0, isDisabled = 1\n";
 	expected_result += " The current grid cell: ";
-	expected_result += createPavingCellOutput("origin=[-0.25,0.25,1.5], lengths=[0.25,0.25,0.25]","2","010","[-0.5,0]x[0.5,1]x[1.25,1.75]");
+	expected_result += createPavingCellOutput("origin=[-0.25,0.25,1.5], lengths=[0.25,0.25,0.25]","2","010","[[-0.5:0],[0.5:1],[1.25:1.75]]");
 	TEST_TO_STRING_RESULT("The cursor's state is: ", expected_result, theGSPCursorSmall);
 	print_comment("Try to get to the node on the left");
 	ARIADNE_TEST_THROW(theGSPCursorSmall.move_left(), NotAllowedMoveException );
@@ -394,7 +395,9 @@ void test_grid_paving_const_iterator(){
 	string expected_result[8];
 	
 	//Allocate the Grid
-	Grid theGrid( 2, 1.0 );
+	Vector<Float> origin(2); origin.set(0, -0.25); origin.set(1, 0.25);
+	Vector<Float> lengths(2); lengths.set(0, 0.25); lengths.set(1, 0.25);
+	Grid theGrid( origin, lengths );
 	
 	//Define the higth of the primary root cell.
 	const uint theHeight = 2;
@@ -409,7 +412,7 @@ void test_grid_paving_const_iterator(){
 	print_title("Test the sequence in which GridPavingIterator goes through the tree leafs ");
 	print_comment("The tree depth is 0 and all leaf nodes are enabled");
 
-	expected_result[0] = createPavingCellOutput( "origin=[-0.25,0.25], lengths=[0.25,0.25]","2","e","[-0.5,0.5]x[0,1]");
+	expected_result[0] = createPavingCellOutput( "origin=[-0.25,0.25], lengths=[0.25,0.25]","2","e","[[-0.5:0.5],[0:1]]");
 
 	test_iterator( expected_result, theGridSubPavingLarge, 1 );
 
@@ -420,9 +423,9 @@ void test_grid_paving_const_iterator(){
 	//Mince the tree to the certain higth
 	pRootTreeNode->mince(1);
 
-	expected_result[0] = createPavingCellOutput( "origin=[-0.25,0.25], lengths=[0.25,0.25]","2","0","[-0.5,0]x[0,1]");
+	expected_result[0] = createPavingCellOutput( "origin=[-0.25,0.25], lengths=[0.25,0.25]","2","0","[[-0.5:0],[0:1]]");
 
-	expected_result[1] = createPavingCellOutput( "origin=[-0.25,0.25], lengths=[0.25,0.25]","2","1","[0,0.5]x[0,1]");
+	expected_result[1] = createPavingCellOutput( "origin=[-0.25,0.25], lengths=[0.25,0.25]","2","1","[[0:0.5],[0:1]]");
 
 	test_iterator( expected_result, theGridSubPavingLarge, 2 );
 
@@ -433,13 +436,13 @@ void test_grid_paving_const_iterator(){
 	//Mince the tree to the certain higth
 	pRootTreeNode->mince(2);
 
-	expected_result[0] = createPavingCellOutput( "origin=[-0.25,0.25], lengths=[0.25,0.25]","2","00","[-0.5,0]x[0,0.5]");
+	expected_result[0] = createPavingCellOutput( "origin=[-0.25,0.25], lengths=[0.25,0.25]","2","00","[[-0.5:0],[0:0.5]]");
 
-	expected_result[1] = createPavingCellOutput( "origin=[-0.25,0.25], lengths=[0.25,0.25]","2","01","[-0.5,0]x[0.5,1]");
+	expected_result[1] = createPavingCellOutput( "origin=[-0.25,0.25], lengths=[0.25,0.25]","2","01","[[-0.5:0],[0.5:1]]");
 
-	expected_result[2] = createPavingCellOutput( "origin=[-0.25,0.25], lengths=[0.25,0.25]","2","10","[0,0.5]x[0,0.5]");
+	expected_result[2] = createPavingCellOutput( "origin=[-0.25,0.25], lengths=[0.25,0.25]","2","10","[[0:0.5],[0:0.5]]");
 
-	expected_result[3] = createPavingCellOutput( "origin=[-0.25,0.25], lengths=[0.25,0.25]","2","11","[0,0.5]x[0.5,1]");
+	expected_result[3] = createPavingCellOutput( "origin=[-0.25,0.25], lengths=[0.25,0.25]","2","11","[[0:0.5],[0.5:1]]");
 
 	test_iterator( expected_result, theGridSubPavingLarge, 4 );
 
@@ -450,21 +453,21 @@ void test_grid_paving_const_iterator(){
 	//Mince the tree to the certain higth
 	pRootTreeNode->mince(3);
 
-	expected_result[0] = createPavingCellOutput( "origin=[-0.25,0.25], lengths=[0.25,0.25]","2","000","[-0.5,-0.25]x[0,0.5]");
+	expected_result[0] = createPavingCellOutput( "origin=[-0.25,0.25], lengths=[0.25,0.25]","2","000","[[-0.5:-0.25],[0:0.5]]");
 
-	expected_result[1] = createPavingCellOutput( "origin=[-0.25,0.25], lengths=[0.25,0.25]","2","001","[-0.25,0]x[0,0.5]");
+	expected_result[1] = createPavingCellOutput( "origin=[-0.25,0.25], lengths=[0.25,0.25]","2","001","[[-0.25:0],[0:0.5]]");
 
-	expected_result[2] = createPavingCellOutput( "origin=[-0.25,0.25], lengths=[0.25,0.25]","2","010","[-0.5,-0.25]x[0.5,1]");
+	expected_result[2] = createPavingCellOutput( "origin=[-0.25,0.25], lengths=[0.25,0.25]","2","010","[[-0.5:-0.25],[0.5:1]]");
 
-	expected_result[3] = createPavingCellOutput( "origin=[-0.25,0.25], lengths=[0.25,0.25]","2","011","[-0.25,0]x[0.5,1]");
+	expected_result[3] = createPavingCellOutput( "origin=[-0.25,0.25], lengths=[0.25,0.25]","2","011","[[-0.25:0],[0.5:1]]");
 
-	expected_result[4] = createPavingCellOutput( "origin=[-0.25,0.25], lengths=[0.25,0.25]","2","100","[0,0.25]x[0,0.5]");
+	expected_result[4] = createPavingCellOutput( "origin=[-0.25,0.25], lengths=[0.25,0.25]","2","100","[[0:0.25],[0:0.5]]");
 
-	expected_result[5] = createPavingCellOutput( "origin=[-0.25,0.25], lengths=[0.25,0.25]","2","101","[0.25,0.5]x[0,0.5]");
+	expected_result[5] = createPavingCellOutput( "origin=[-0.25,0.25], lengths=[0.25,0.25]","2","101","[[0.25:0.5],[0:0.5]]");
 
-	expected_result[6] = createPavingCellOutput( "origin=[-0.25,0.25], lengths=[0.25,0.25]","2","110","[0,0.25]x[0.5,1]");
+	expected_result[6] = createPavingCellOutput( "origin=[-0.25,0.25], lengths=[0.25,0.25]","2","110","[[0:0.25],[0.5:1]]");
 
-	expected_result[7] = createPavingCellOutput( "origin=[-0.25,0.25], lengths=[0.25,0.25]","2","111","[0.25,0.5]x[0.5,1]");
+	expected_result[7] = createPavingCellOutput( "origin=[-0.25,0.25], lengths=[0.25,0.25]","2","111","[[0.25:0.5],[0.5:1]]");
 
 	test_iterator( expected_result, theGridSubPavingLarge, 8 );
 	
@@ -497,7 +500,7 @@ void test_grid_paving_const_iterator(){
 	//Reuse some of the previous result strings
 	expected_result_tmp[0] = expected_result[1];
 	expected_result_tmp[1] = expected_result[2];
-	expected_result_tmp[2] = createPavingCellOutput( "origin=[-0.25,0.25], lengths=[0.25,0.25]","2","11","[0,0.5]x[0.5,1]");
+	expected_result_tmp[2] = createPavingCellOutput( "origin=[-0.25,0.25], lengths=[0.25,0.25]","2","11","[[0:0.5],[0.5:1]]");
 	
 	test_iterator( expected_result_tmp, theGridSubPavingLarge, 3 );
 
@@ -521,7 +524,7 @@ void test_grid_paving_const_iterator(){
 	//Reuse some of the previous result strings
 	expected_result_tmp[0] = expected_result[1];
 	expected_result_tmp[1] = expected_result[2];
-	expected_result_tmp[2] = createPavingCellOutput( "origin=[-0.25,0.25], lengths=[0.25,0.25]","2","10","[0,0.5]x[0,0.5]");
+	expected_result_tmp[2] = createPavingCellOutput( "origin=[-0.25,0.25], lengths=[0.25,0.25]","2","10","[[0:0.5],[0:0.5]]");
 	expected_result_tmp[3] = expected_result[7];
 
 	test_iterator( expected_result_tmp, theGridSubPavingLarge, 4 );
@@ -546,7 +549,9 @@ void test_grid_sub_paving(){
 	string expected_result;
 	
 	//Allocate the Grid, one Dimension
-	const Grid theOneDimGrid(1, 0.5);
+	Vector<Float> originOne(1); originOne.set(0, 0.0);
+	Vector<Float> lengthsOne(1); lengthsOne.set(0, 0.5);
+	const Grid theOneDimGrid( originOne, lengthsOne );
 
 	//Define the higth of the primary root cell.
 	const uint theHeight = 2;
@@ -565,7 +570,7 @@ void test_grid_sub_paving(){
 	
 	//
 	print_title("Test Mincing operations of GridTreeSubset on the one dimensional Grid");
-	expected_result =  createSubPavingOutput("lengths=[0.5]","2","01","[0,0.5]","+0");
+	expected_result =  createSubPavingOutput("origin=[0], lengths=[0.5]","2","01","[[0:0.5]]","+0");
 	TEST_TO_STRING_RESULT("The initial paving: ", expected_result, theGridSPOneDim);
 	
 	//Mince to the level two from the root of the paving, this should give
@@ -575,13 +580,13 @@ void test_grid_sub_paving(){
 	print_comment("Minced the sub-paving to depth 2");
 	string expected_result_arr[4];
 
-	expected_result_arr[0] =  createPavingCellOutput( "lengths=[0.5]","2","0100","[0,0.125]");
+	expected_result_arr[0] =  createPavingCellOutput( "origin=[0], lengths=[0.5]","2","0100","[[0:0.125]]");
 
-	expected_result_arr[1] =  createPavingCellOutput( "lengths=[0.5]","2","0101","[0.125,0.25]");
+	expected_result_arr[1] =  createPavingCellOutput( "origin=[0], lengths=[0.5]","2","0101","[[0.125:0.25]]");
 
-	expected_result_arr[2] =  createPavingCellOutput( "lengths=[0.5]","2","0110","[0.25,0.375]");
+	expected_result_arr[2] =  createPavingCellOutput( "origin=[0], lengths=[0.5]","2","0110","[[0.25:0.375]]");
 
-	expected_result_arr[3] =  createPavingCellOutput( "lengths=[0.5]","2","0111","[0.375,0.5]");
+	expected_result_arr[3] =  createPavingCellOutput( "origin=[0], lengths=[0.5]","2","0111","[[0.375:0.5]]");
 
 	test_iterator( expected_result_arr, theGridSPOneDim, 4 );
 	
@@ -592,9 +597,9 @@ void test_grid_sub_paving(){
 
 	print_comment("Subdivide the sub-paving to cell width 0.4, this should give us two sub cells");
 	string expected_result_arr_tmp[2];
-	expected_result_arr_tmp[0] =  createPavingCellOutput( "lengths=[0.5]","2","010","[0,0.25]");
+	expected_result_arr_tmp[0] =  createPavingCellOutput( "origin=[0], lengths=[0.5]","2","010","[[0:0.25]]");
 
-	expected_result_arr_tmp[1] =  createPavingCellOutput( "lengths=[0.5]","2","011","[0.25,0.5]");
+	expected_result_arr_tmp[1] =  createPavingCellOutput( "origin=[0], lengths=[0.5]","2","011","[[0.25:0.5]]");
 
 	theGridSPOneDim.subdivide(0.4);
 
@@ -614,8 +619,9 @@ void test_grid_sub_paving(){
 	// !!!
 	print_title("Test Mincing operations of GridTreeSubset on the two dimensional Grid");
 	//Allocate the Grid, one Dimension
-	//const Grid theTwoDimGrid(Box("[0,1]x[0,2]"),LatticeBlock("[1,5]x[-1,3]"));
-	const Grid theTwoDimGrid( 2, 1.0 );
+	Vector<Float> originTwo(2); originTwo.set(0, -0.25); originTwo.set(1, 0.5);
+	Vector<Float> lengthsTwo(2); lengthsTwo.set(0, 0.25); lengthsTwo.set(1, 0.5);
+	const Grid theTwoDimGrid( originTwo, lengthsTwo );
 
 	//Create the GridTreeSubset
 	GridTreeSubset theGridSPTwoDim( theTwoDimGrid, theHeight, thePathToSubPavingRoot, pRootTreeNode );
@@ -624,20 +630,20 @@ void test_grid_sub_paving(){
 	theGridSPTwoDim.recombine();
 	theGridSPTwoDim.mince(2);
 
-	expected_result_arr[0] =  createPavingCellOutput( "origin=[-0.25,0.5], lengths=[0.25,0.5]","2","0100","[-0.5,-0.25]x[1,1.5]");
+	expected_result_arr[0] =  createPavingCellOutput( "origin=[-0.25,0.5], lengths=[0.25,0.5]","2","0100","[[-0.5:-0.25],[1:1.5]]");
 
-	expected_result_arr[1] =  createPavingCellOutput( "origin=[-0.25,0.5], lengths=[0.25,0.5]","2","0101","[-0.5,-0.25]x[1.5,2]");
+	expected_result_arr[1] =  createPavingCellOutput( "origin=[-0.25,0.5], lengths=[0.25,0.5]","2","0101","[[-0.5:-0.25],[1.5:2]]");
 
-	expected_result_arr[2] =  createPavingCellOutput( "origin=[-0.25,0.5], lengths=[0.25,0.5]","2","0110","[-0.25,0]x[1,1.5]");
+	expected_result_arr[2] =  createPavingCellOutput( "origin=[-0.25,0.5], lengths=[0.25,0.5]","2","0110","[[-0.25:0],[1:1.5]]");
 
-	expected_result_arr[3] =  createPavingCellOutput( "origin=[-0.25,0.5], lengths=[0.25,0.5]","2","0111","[-0.25,0]x[1.5,2]");
+	expected_result_arr[3] =  createPavingCellOutput( "origin=[-0.25,0.5], lengths=[0.25,0.5]","2","0111","[[-0.25:0],[1.5:2]]");
 
 	test_iterator( expected_result_arr, theGridSPTwoDim, 4 );
 
 	print_comment("Recombine and Subdivide the sub-paving to cell width 0.5, this should give us four sub cells");
 	//At this moment the coordinate cell widths are: for x -- 0.25 and for y -- 0.5 
 	theGridSPTwoDim.recombine();
-	theGridSPTwoDim.subdivide(0.5);
+	theGridSPTwoDim.subdivide(0.51);
 
 	test_iterator( expected_result_arr, theGridSPTwoDim, 4 );
 
@@ -645,7 +651,7 @@ void test_grid_sub_paving(){
 	//At this moment the coordinate cell widths are: for x -- 0.25 and for y -- 0.5 
 	theGridSPTwoDim.subdivide(0.4);
 
-	expected_result =  createSubPavingOutput("origin=[-0.25,0.5], lengths=[0.25,0.5]","2","01","[-0.5,0]x[1,2]",
+	expected_result = createSubPavingOutput("origin=[-0.25,0.5], lengths=[0.25,0.5]","2","01","[[-0.5:0],[1:2]]",
 						"?1?1?1?1+01+01?1+01+01?1?1+01+01?1+01+01?1?1?1+01+01?1+01+01?1?1+01+01?1+01+0");
 	TEST_TO_STRING_RESULT("The sub paving with 16 leaf nodes: ", expected_result, theGridSPTwoDim);
 	
@@ -659,30 +665,29 @@ void test_grid_paving(){
 	// !!!
 	print_title("Test allocation of a trivial GridTreeSet");
 	GridTreeSet * pTrivialPaving = new GridTreeSet(4, true);
-	expected_result = createSubPavingOutput("lengths=[1,1,1,1]", "0", "e", "[0,1]x[0,1]x[0,1]x[0,1]", "+0");
+	expected_result = createSubPavingOutput("origin=[0,0,0,0], lengths=[1,1,1,1]", "0", "e", "[[0:1],[0:1],[0:1],[0:1]]", "+0");
 	TEST_TO_STRING_RESULT("A trivial paving for [0,1]x[0,1]x[0,1]x[0,1], enabled cell: ", expected_result, (*pTrivialPaving) );
 
 	// !!!
 	print_title("Test GridTreeSet copy constructor");
 	GridTreeSet theTrivialPaving( ( *pTrivialPaving ) );
 	pTrivialPaving->mince(1);
-	string expected_result_minced = createSubPavingOutput("lengths=[1,1,1,1]", "0", "e", "[0,1]x[0,1]x[0,1]x[0,1]", "?1+01+0");
+	string expected_result_minced = createSubPavingOutput("origin=[0,0,0,0], lengths=[1,1,1,1]", "0", "e", "[[0:1],[0:1],[0:1],[0:1]]", "?1+01+0");
 	TEST_TO_STRING_RESULT("Minced trivial paving for [0,1]x[0,1]x[0,1]x[0,1], enabled cell: ", expected_result_minced, (*pTrivialPaving) );
 	TEST_TO_STRING_RESULT("A copy of the original paving, should stay unchanged: ", expected_result, theTrivialPaving );
 
 	// !!!
 	print_title("Test GridTreeSet (Grid, Box) constructor");
-	expected_result = createSubPavingOutput("origin=[-0.25,0.5], lengths=[0.25,0.5]", "4", "e", "[-1.5,2.5]x[-2,6]", "-0");
+	expected_result = createSubPavingOutput("origin=[-0.25,0.5], lengths=[0.25,0.5]", "4", "e", "[[-1.5:2.5],[-2:6]]", "-0");
 	//Allocate the Grid, one Dimension
-	//const Grid theTwoDimGrid(Box("[0,1]x[0,2]"),LatticeBlock("[1,5]x[-1,3]"));
-	const Grid theTwoDimGrid(make_vector<Float>("[0,0]"),make_vector<Float>("[1,2]"));
+	const Grid theTwoDimGrid(make_vector<Float>("[-0.25,0.5]"),make_vector<Float>("[0.25,0.5]"));
 	//Note: the box is related to the grid, but not to the original space
 	GridTreeSet theTwoDimPaving( theTwoDimGrid, make_box("[0,1.5]x[-1.5,3.5]") );
 	TEST_TO_STRING_RESULT("The resulting GridTreeSet: ", expected_result, theTwoDimPaving );
 
 	// !!!
 	print_title("Test GridTreeSet (Grid, Height, BooleanArray, BooleanArray) constructor");
-	expected_result = createSubPavingOutput("origin=[-0.25,0.5], lengths=[0.25,0.5]", "2", "e", "[-0.5,0.5]x[0,2]", "?1?1+01-01?1?1+01-01+0");
+	expected_result = createSubPavingOutput("origin=[-0.25,0.5], lengths=[0.25,0.5]", "2", "e", "[[-0.5:0.5],[0:2]]", "?1?1+01-01?1?1+01-01+0");
 	BooleanArray theTree(9), theEnabledLeafs(5);
 	theTree[0] = true;
 	theTree[1] = true;
@@ -744,18 +749,18 @@ void test_adjoin_operation_one(){
 	GridCell theHigherLevelCell( theGrid, theHigherCellHeight, theHigherCellPath );
 
 	print_comment("The GridCell with the primary root cell height = 2");
-	expected_result = createPavingCellOutput("lengths=[1,1]","2","1010","[2,3]x[-1,0]");
+	expected_result = createPavingCellOutput("origin=[0,0], lengths=[1,1]","2","1010","[[2:3],[-1:0]]");
 	TEST_TO_STRING_RESULT("The initial GridCell: ", expected_result, theHigherLevelCell );
 	
 	//Define the higth of the primary root cell.
 	//Create the GridTreeSet with the box is related to the grid, but not to the original space
 	GridTreeSet theOneCellPaving( theGrid, true );
-	expected_result = createSubPavingOutput("lengths=[1,1]", "0", "e", "[0,1]x[0,1]", "+0");
+	expected_result = createSubPavingOutput("origin=[0,0], lengths=[1,1]", "0", "e", "[[0:1],[0:1]]", "+0");
 	print_comment("The GridTreeSet with the primary root cell height = 0");
 	TEST_TO_STRING_RESULT("The initial GridTreeSet: ", expected_result, theOneCellPaving );
 	
 	theOneCellPaving.adjoin( theHigherLevelCell );
-	expected_result = createSubPavingOutput("lengths=[1,1]", "2", "e", "[-1,3]x[-1,3]", "?1?1?1-01?1-01+01-01?1?1-01?1+01-01-0");
+	expected_result = createSubPavingOutput("origin=[0,0], lengths=[1,1]", "2", "e", "[[-1:3],[-1:3]]", "?1?1?1-01?1-01+01-01?1?1-01?1+01-01-0");
 	TEST_TO_STRING_RESULT("The GridTreeSet after adding the cell: ", expected_result, theOneCellPaving );
 }
 
@@ -775,7 +780,7 @@ void test_adjoin_operation_two(){
 	GridCell theLowerLevelCell( theGrid, theLowerCellHeight, theLowerCellPath );
 
 	print_comment("The GridCell with the primary root cell height = 1");
-	expected_result = createPavingCellOutput("lengths=[1,1]","1","11","[0,1]x[0,1]");
+	expected_result = createPavingCellOutput("origin=[0,0], lengths=[1,1]","1","11","[[0:1],[0:1]]");
 	TEST_TO_STRING_RESULT("The initial GridCell: ", expected_result, theLowerLevelCell );
 	
 	//Define the higth of the primary root cell.
@@ -790,12 +795,12 @@ void test_adjoin_operation_two(){
 	
 	//Create the GridTreeSet with the box is related to the grid, but not to the original space
 	GridTreeSet theOneCellPaving( theGrid, theHeight, pRootTreeNode );
-	expected_result = createSubPavingOutput("lengths=[1,1]", "2", "e", "[-1,3]x[-1,3]", "?1-01?1?1-01?1+01-01-0");
+	expected_result = createSubPavingOutput("origin=[0,0], lengths=[1,1]", "2", "e", "[[-1:3],[-1:3]]", "?1-01?1?1-01?1+01-01-0");
 	print_comment("The GridTreeSet with the primary root cell height = 2");
 	TEST_TO_STRING_RESULT("The initial GridTreeSet: ", expected_result, theOneCellPaving );
 	
 	theOneCellPaving.adjoin( theLowerLevelCell );
-	expected_result = createSubPavingOutput("lengths=[1,1]", "2", "e", "[-1,3]x[-1,3]", "?1?1?1-01?1-01+01-01?1?1-01?1+01-01-0");
+	expected_result = createSubPavingOutput("origin=[0,0], lengths=[1,1]", "2", "e", "[[-1:3],[-1:3]]", "?1?1?1-01?1-01+01-01?1?1-01?1+01-01-0");
 	TEST_TO_STRING_RESULT("The GridTreeSet after adding the cell: ", expected_result, theOneCellPaving );
 }
 
@@ -817,7 +822,7 @@ void test_adjoin_operation_three(){
 	GridCell theLowerLevelCell( theGrid, theLowerCellHeight, theLowerCellPath );
 
 	print_comment("The GridCell with the primary root cell height = 2");
-	expected_result = createPavingCellOutput("lengths=[1,1]","2","0011","[0,1]x[0,1]");
+	expected_result = createPavingCellOutput("origin=[0,0], lengths=[1,1]","2","0011","[[0:1],[0:1]]");
 	TEST_TO_STRING_RESULT("The initial GridCell: ", expected_result, theLowerLevelCell );
 	
 	//Define the higth of the primary root cell.
@@ -832,12 +837,12 @@ void test_adjoin_operation_three(){
 	
 	//Create the GridTreeSet with the box is related to the grid, but not to the original space
 	GridTreeSet theOneCellPaving( theGrid, theHeight, pRootTreeNode );
-	expected_result = createSubPavingOutput("lengths=[1,1]", "2", "e", "[-1,3]x[-1,3]", "?1-01?1?1-01?1+01-01-0");
+	expected_result = createSubPavingOutput("origin=[0,0], lengths=[1,1]", "2", "e", "[[-1:3],[-1:3]]", "?1-01?1?1-01?1+01-01-0");
 	print_comment("The GridTreeSet with the primary root cell height = 2");
 	TEST_TO_STRING_RESULT("The initial GridTreeSet: ", expected_result, theOneCellPaving );
 	
 	theOneCellPaving.adjoin( theLowerLevelCell );
-	expected_result = createSubPavingOutput("lengths=[1,1]", "2", "e", "[-1,3]x[-1,3]", "?1?1?1-01?1-01+01-01?1?1-01?1+01-01-0");
+	expected_result = createSubPavingOutput("origin=[0,0], lengths=[1,1]", "2", "e", "[[-1:3],[-1:3]]", "?1?1?1-01?1-01+01-01?1?1-01?1+01-01-0");
 	TEST_TO_STRING_RESULT("The GridTreeSet after adding the cell: ", expected_result, theOneCellPaving );
 }
 
@@ -863,36 +868,36 @@ void test_adjoin_outer_approximation_operation(){
 	
 	//Create the GridTreeSet with the box is related to the grid, but not to the original space
 	GridTreeSet theOneCellPaving( theTrivialGrid, theHeight, pRootTreeNode );
-	expected_result = createSubPavingOutput("lengths=[1,1]", "2", "e", "[-1,3]x[-1,3]", "?1-01?1?1-01?1+01-01-0");
+	expected_result = createSubPavingOutput("origin=[0,0], lengths=[1,1]", "2", "e", "[[-1:3],[-1:3]]", "?1-01?1?1-01?1+01-01-0");
 	print_comment("The GridTreeSet with the primary root cell height = 2");
 	TEST_TO_STRING_RESULT("The initial GridTreeSet: ", expected_result, theOneCellPaving );
 	
 	theOneCellPaving.adjoin_outer_approximation( static_cast<const LocatedSetInterface&>(initialRectangle), 2 );
 	
-	string tree = "?1-01?1-01?1?1?1?1?1?1-01+01?1-01+01?1?1+01+01?1+01+01?1?1?1-01+01?1-01+01?1?1+01+01?1+01+01";
-	tree += "?1?1?1?1+01-01?1+01-01-01?1?1?1+01-01?1+01-01-01?1?1?1?1?1-01+01?1-01+01?1?1+01+01?1+01+01?1+01-01";
-	tree += "?1?1?1?1+01-01?1+01-01-01-0";
-	expected_result = createSubPavingOutput("lengths=[1,1]", "3", "e", "[-5,3]x[-5,3]", tree);
+	string tree = "?1?1?1-01?1-01?1?1?1?1?1?1-01+01?1-01+01?1?1+01+01?1+01+01?1?1?1-01+01?1-01+01?1?1+01+01";
+	tree += "?1+01+01?1?1?1?1+01-01?1+01-01-01?1?1?1+01-01?1+01-01-01?1?1?1?1?1-01+01?1-01+01?1?1+01+01";
+	tree += "?1+01+01?1+01-01?1?1?1?1+01-01?1+01-01-01-01-01-0";
+	expected_result = createSubPavingOutput("origin=[0,0], lengths=[1,1]", "4", "e", "[[-5:11],[-5:11]]", tree);
 	TEST_TO_STRING_RESULT("The GridTreeSet after adding the cell: ", expected_result, theOneCellPaving );
 
 	print_comment("Recombined GridTreeSet after adding the cell: ");
 	string expected_result_arr[16];
-	expected_result_arr[0] = createPavingCellOutput( "lengths=[1,1]","3","11000001","[-1,-0.5]x[-0.5,0]");
-	expected_result_arr[1] = createPavingCellOutput( "lengths=[1,1]","3","11000011","[-0.5,0]x[-0.5,0]");
-	expected_result_arr[2] = createPavingCellOutput( "lengths=[1,1]","3","110001","[-1,0]x[0,1]");
-	expected_result_arr[3] = createPavingCellOutput( "lengths=[1,1]","3","11001001","[0,0.5]x[-0.5,0]");
-	expected_result_arr[4] = createPavingCellOutput( "lengths=[1,1]","3","11001011","[0.5,1]x[-0.5,0]");
-	expected_result_arr[5] = createPavingCellOutput( "lengths=[1,1]","3","110011","[0,1]x[0,1]");
-	expected_result_arr[6] = createPavingCellOutput( "lengths=[1,1]","3","11010000","[-1,-0.5]x[1,1.5]");
-	expected_result_arr[7] = createPavingCellOutput( "lengths=[1,1]","3","11010010","[-0.5,0]x[1,1.5]");
-	expected_result_arr[8] = createPavingCellOutput( "lengths=[1,1]","3","11011000","[0,0.5]x[1,1.5]");
-	expected_result_arr[9] = createPavingCellOutput( "lengths=[1,1]","3","11011010","[0.5,1]x[1,1.5]");
-	expected_result_arr[10] = createPavingCellOutput( "lengths=[1,1]","3","11100001","[1,1.5]x[-0.5,0]");
-	expected_result_arr[11] = createPavingCellOutput( "lengths=[1,1]","3","11100011","[1.5,2]x[-0.5,0]");
-	expected_result_arr[12] = createPavingCellOutput( "lengths=[1,1]","3","111001","[1,2]x[0,1]");
-	expected_result_arr[13] = createPavingCellOutput( "lengths=[1,1]","3","111010","[2,3]x[-1,0]");
-	expected_result_arr[14] = createPavingCellOutput( "lengths=[1,1]","3","11110000","[1,1.5]x[1,1.5]");
-	expected_result_arr[15] = createPavingCellOutput( "lengths=[1,1]","3","11110010","[1.5,2]x[1,1.5]");
+	expected_result_arr[0] = createPavingCellOutput( "origin=[0,0], lengths=[1,1]","4","0011000001","[[-1:-0.5],[-0.5:0]]");
+	expected_result_arr[1] = createPavingCellOutput( "origin=[0,0], lengths=[1,1]","4","0011000011","[[-0.5:0],[-0.5:0]]");
+	expected_result_arr[2] = createPavingCellOutput( "origin=[0,0], lengths=[1,1]","4","00110001","[[-1:0],[0:1]]");
+	expected_result_arr[3] = createPavingCellOutput( "origin=[0,0], lengths=[1,1]","4","0011001001","[[0:0.5],[-0.5:0]]");
+	expected_result_arr[4] = createPavingCellOutput( "origin=[0,0], lengths=[1,1]","4","0011001011","[[0.5:1],[-0.5:0]]");
+	expected_result_arr[5] = createPavingCellOutput( "origin=[0,0], lengths=[1,1]","4","00110011","[[0:1],[0:1]]");
+	expected_result_arr[6] = createPavingCellOutput( "origin=[0,0], lengths=[1,1]","4","0011010000","[[-1:-0.5],[1:1.5]]");
+	expected_result_arr[7] = createPavingCellOutput( "origin=[0,0], lengths=[1,1]","4","0011010010","[[-0.5:0],[1:1.5]]");
+	expected_result_arr[8] = createPavingCellOutput( "origin=[0,0], lengths=[1,1]","4","0011011000","[[0:0.5],[1:1.5]]");
+	expected_result_arr[9] = createPavingCellOutput( "origin=[0,0], lengths=[1,1]","4","0011011010","[[0.5:1],[1:1.5]]");
+	expected_result_arr[10] = createPavingCellOutput( "origin=[0,0], lengths=[1,1]","4","0011100001","[[1:1.5],[-0.5:0]]");
+	expected_result_arr[11] = createPavingCellOutput( "origin=[0,0], lengths=[1,1]","4","0011100011","[[1.5:2],[-0.5:0]]");
+	expected_result_arr[12] = createPavingCellOutput( "origin=[0,0], lengths=[1,1]","4","00111001","[[1:2],[0:1]]");
+	expected_result_arr[13] = createPavingCellOutput( "origin=[0,0], lengths=[1,1]","4","00111010","[[2:3],[-1:0]]");
+	expected_result_arr[14] = createPavingCellOutput( "origin=[0,0], lengths=[1,1]","4","0011110000","[[1:1.5],[1:1.5]]");
+	expected_result_arr[15] = createPavingCellOutput( "origin=[0,0], lengths=[1,1]","4","0011110010","[[1.5:2],[1:1.5]]");
 	theOneCellPaving.recombine();
 	test_iterator( expected_result_arr, theOneCellPaving, 16 );
 	
@@ -907,11 +912,11 @@ void test_adjoin_outer_approximation_operation(){
 	//space in this case we will get much more elements, e.g. the cells
 	//  [-1,0]x[0,2], [0,2]x[0,2] will be subdivided as well
 	theOuterApproxGridTreeSet.recombine();
-	expected_result_arr[0] = createPavingCellOutput( "lengths=[2,2]","3","11000011","[-1,0]x[-1,0]");
-	expected_result_arr[1] = createPavingCellOutput( "lengths=[2,2]","3","1100011","[-1,0]x[0,2]");
-	expected_result_arr[2] = createPavingCellOutput( "lengths=[2,2]","3","11001001","[0,1]x[-1,0]");
-	expected_result_arr[3] = createPavingCellOutput( "lengths=[2,2]","3","11001011","[1,2]x[-1,0]");
-	expected_result_arr[4] = createPavingCellOutput( "lengths=[2,2]","3","110011","[0,2]x[0,2]");
+	expected_result_arr[0] = createPavingCellOutput( "origin=[0,0], lengths=[2,2]","3","11000011","[[-1:0],[-1:0]]");
+	expected_result_arr[1] = createPavingCellOutput( "origin=[0,0], lengths=[2,2]","3","1100011","[[-1:0],[0:2]]");
+	expected_result_arr[2] = createPavingCellOutput( "origin=[0,0], lengths=[2,2]","3","11001001","[[0:1],[-1:0]]");
+	expected_result_arr[3] = createPavingCellOutput( "origin=[0,0], lengths=[2,2]","3","11001011","[[1:2],[-1:0]]");
+	expected_result_arr[4] = createPavingCellOutput( "origin=[0,0], lengths=[2,2]","3","110011","[[0:2],[0:2]]");
 	test_iterator( expected_result_arr, theOuterApproxGridTreeSet, 5 );
 }
 

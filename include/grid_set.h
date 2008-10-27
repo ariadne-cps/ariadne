@@ -92,7 +92,7 @@ namespace Ariadne {
 	GridTreeSet difference(const GridTreeSubset& theSet1, const GridTreeSubset& theSet2);
 	
 	/*! /brief Creates an outer approximation for the \a theBox on \a theGrid. \a theBox
-	 * is in the original sopace coordinates. We compute the over approximation as the
+	 * is in the original space coordinates. We compute the over approximation as the
 	 * smallest primary cell on the Grid, such that it contains \a theBox (after it's
 	 * mapping on \a theGrid )
 	 */
@@ -119,8 +119,6 @@ namespace Ariadne {
 			NotAllowedMoveException(const std::string& str) : std::logic_error(str) { }
 	};
 
-
-
         /*! \ingroup Grid
          *
          *  \brief An infinite, uniform grid of rectangles in Euclidean space.
@@ -131,8 +129,7 @@ namespace Ariadne {
          *  This should be more general, and will unify the concepts of Paving and Cover,
          *  as well as different types of covers.
          */
-        class Grid
-        { 
+        class Grid {
                 typedef double dyadic_type;
                 typedef int integer_type;
                 typedef Float real_type;
@@ -202,11 +199,6 @@ namespace Ariadne {
                 // Pointer to data. We can test grids for equality using reference semantics since data is a constant.
                 boost::shared_ptr<Data> _data;
         };
-        
-
-
-
-
 
 	/*! \brief The binary tree node.
 	 *
@@ -217,7 +209,7 @@ namespace Ariadne {
 	 * \b Storage: We only store pointers to the left and right subtrees and the tribool
 	 * value indicating whether this cell is enabled/disabled or we do not know.
 	 */
-	class BinaryTreeNode{
+	class BinaryTreeNode {
 		protected: 
 			/*! \brief Defines whether the given node of the tree is on/off or we do not know*/
 			tribool _isEnabled;
@@ -340,10 +332,14 @@ namespace Ariadne {
 			void mince(const uint depth);
 			
 			//@}
-
 			
 			//@{
 			//! \name Operations
+			
+			/*! \brief Copy all the data (including the sub-nodes) from the node pointed by \a pOtherNode into the given node.
+			 * Note that here we will create copies of the sub nodes, and NOT just copy pointers to them!
+			 */
+			void copy_from( const BinaryTreeNode * pOtherNode );
 			
 			/*! \brief This method recombined the sub tree nodes. Note that, the two leaf nodes with
 			 * the same parent are removed if they have the same value of isEnabled fields.
@@ -398,6 +394,12 @@ namespace Ariadne {
 			 */
 			static BinaryTreeNode * prepend_tree( const BinaryWord & rootNodePath, BinaryTreeNode * oldRootNode);
 			
+			/*! \brief This method restricts \a pThisNode to \a pOtherNode.
+			 * In essance we do the inplace AND on the tree node pThisNode.
+			 * Note that, this method is recursive.
+			 */
+			static void restrict( BinaryTreeNode * pThisNode, const BinaryTreeNode * pOtherNode );
+			
 			//@}
 	};
 
@@ -408,9 +410,7 @@ namespace Ariadne {
 	 * NOTE: The "Primary root cell" is the cell that the \a GridTreeSet can be rooted to
 	 * (the \a GridTreeSubset can be rooted to a non primary cell).
 	 */
-	class GridCell
-        // : public BoxExpression< GridCell > 
-        {
+	class GridCell {
 		protected:
 			/*! \brief The intrinsic grid of the cell. Note that grids are internally passed by reference. */
 			Grid _theGrid;
@@ -528,11 +528,6 @@ namespace Ariadne {
 			static BinaryWord primary_cell_path( const uint dimensions, const uint topPCellHeight, const uint bottomPCellHeight);
 	};
 
-
-
-
-
-
         /*! \ingroup Grid 
          *  \ingroup DenotableSet
          *
@@ -542,8 +537,7 @@ namespace Ariadne {
          *  over-approximation to a basic set.
          *
          */
-        class GridCellListSet 
-        {
+        class GridCellListSet {
             private:
                 Grid _grid;
                 std::vector<GridCell> _list;
@@ -574,7 +568,6 @@ namespace Ariadne {
                 GridCellListSet(const GridTreeSet& gts);
                 //@}
                 
-                
                 //@{ 
                 //! \name Conversion operators.
                 
@@ -582,9 +575,6 @@ namespace Ariadne {
                 operator ListSet< Box >() const;
                 //operator ListSet< Vector<Interval> >() const;
                 //@}
-                
-  
-  
                 
                 //@{ 
                 //! \name Access operations.
@@ -612,7 +602,6 @@ namespace Ariadne {
                 const_iterator find(GridCell& gc) const;
                 
                 //@}
-                
   
                 //@{ 
                 //! \name Modifying operations
@@ -656,8 +645,8 @@ namespace Ariadne {
                 //! \name Approximation methods
                 //! Adjoin an over approximation to the set \a bx, computing to depth \a d.
                 void adjoin_over_approximation(const Vector<Interval>& bx, uint d) { ARIADNE_NOT_IMPLEMENTED; }
-                //! Adjoin an outer approximation to the set \a s, computing to depth \a d.
-                void adjoin_outer_approximation(const CompactSetInterface& s, uint d) { ARIADNE_NOT_IMPLEMENTED; }
+                //! Adjoin an outer approximation to the set \a theSet, computing to depth \a depth.
+                void adjoin_outer_approximation(const CompactSetInterface& theSet, uint depth) { ARIADNE_NOT_IMPLEMENTED; }
                 //@}
                 
                 //@{ 
@@ -667,10 +656,6 @@ namespace Ariadne {
                 friend std::ostream& operator<<(std::ostream& os, const GridCellListSet& gcls);
                 //@}
         };
-
-
-
-
 
 	/*! \brief This class represents a subpaving of a paving. Note that, the subtree enclosed into
 	 * this class is just a pointer to the node in the tree of some paving. This class is not
@@ -836,6 +821,18 @@ namespace Ariadne {
 			 */
 			template<class Set> void adjoin_outer_approximation( BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
 										const uint max_mince_depth, const Set& theSet, BinaryWord * pPath );
+
+			/*! \brief This method is uset to do restriction of this set to the set given by
+			 *  \a theOtherSubPaving Note that, here we require that the height of the primary
+			 *  root cell of this set is >= the height of the primary root cell of \a theOtherSubPaving.
+			 */
+			void restrict_to_lower( const GridTreeSubset& theOtherSubPaving );
+
+			/*! \brief This method changes the primary cell of this GridTreeSet.
+			 *  We only can increase the height of the primary cell, this is why
+			 *  if toPCellHeight <= this->cell().height(), then nothing is done.
+			 */
+			void up_to_primary_cell( const uint toPCellHeight );
 
 		public:
 			//@{
@@ -1005,7 +1002,6 @@ namespace Ariadne {
 	};
 
 	/*! \brief This class represents a cursor/iterator that can be used to traverse a subtree. */
-	/* PIETER: It might be better to have the GridCell as a data field rather than a subclass. */
 	class GridTreeCursor {
 		private:
 			//The size with which the stack size will be incremented
@@ -1120,7 +1116,7 @@ namespace Ariadne {
 	};
 	
 	/*! \brief This class allows to iterate through the enabled leaf nodes of GridTreeSubset.
-	 * The return objects for this iterator are constant GridCell
+	 * The return objects for this iterator are constant GridCells.
 	 */
 	class GridTreeConstIterator : public boost::iterator_facade< GridTreeConstIterator, GridCell const, boost::forward_traversal_tag > {
 		private:
@@ -1269,6 +1265,16 @@ namespace Ariadne {
 			_isEnabled = true;
 		} else {
 			throw NotALeafNodeException(__PRETTY_FUNCTION__);
+		}
+	}
+
+	inline void BinaryTreeNode::copy_from( const BinaryTreeNode * pOtherNode ){
+		if( pOtherNode != NULL ){
+			_isEnabled = pOtherNode->_isEnabled;
+			if( _pLeftNode != NULL){ delete _pLeftNode; _pLeftNode = NULL; }
+			if( _pRightNode != NULL){ delete _pRightNode; _pRightNode = NULL; }
+			if( pOtherNode->_pLeftNode != NULL ){ _pLeftNode = new BinaryTreeNode( * (pOtherNode->_pLeftNode) ); }
+			if( pOtherNode->_pRightNode != NULL ){ _pRightNode = new BinaryTreeNode( * (pOtherNode->_pRightNode) ); }
 		}
 	}
 	
@@ -1618,21 +1624,13 @@ namespace Ariadne {
 	
 /*********************************************GridCellListSet***********************************************/
 
-inline
-GridCellListSet::const_iterator
-GridCellListSet::begin() const
-{
-  return this->_list.begin();
-}
+	inline GridCellListSet::const_iterator GridCellListSet::begin() const {
+		return this->_list.begin();
+	}
 
-
-inline
-GridCellListSet::const_iterator
-GridCellListSet::end() const
-{
-  return this->_list.end();
-}
-
+	inline GridCellListSet::const_iterator GridCellListSet::end() const {
+		return this->_list.end();
+	}
 
 /********************************************GridTreeSubset******************************************/
 	
@@ -1766,6 +1764,10 @@ GridCellListSet::end() const
 			GridTreeSubset::_pRootTreeNode = NULL;
 		}
 	}
+	
+        inline size_t GridTreeSet::size() const {
+                return BinaryTreeNode::count_enabled_leaf_nodes( this->binary_tree() ); 
+        }
 	
         inline dimension_type GridTreeSet::dimension( ) const {
                 return grid().dimension();

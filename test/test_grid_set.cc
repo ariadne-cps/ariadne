@@ -920,6 +920,86 @@ void test_adjoin_outer_approximation_operation(){
 	test_iterator( expected_result_arr, theOuterApproxGridTreeSet, 5 );
 }
 
+void test_restrict() {
+	string expected_result_arr[3];
+	
+	//Allocate a trivial Grid
+	Grid theTrivialGrid(2, 1.0);
+	
+	//Define the higths of the primary root cell.
+	const uint theHeightTwo = 2;
+	const uint theHeightThree = 3;
+
+	//Create the binary tree with two enabled nodes;
+	BinaryTreeNode * pTwoEnabledNodeTreeH2 = new BinaryTreeNode(false);
+	pTwoEnabledNodeTreeH2->split();
+	pTwoEnabledNodeTreeH2->right_node()->split();
+	pTwoEnabledNodeTreeH2->right_node()->left_node()->split();
+	pTwoEnabledNodeTreeH2->right_node()->left_node()->left_node()->set_enabled();
+	pTwoEnabledNodeTreeH2->right_node()->left_node()->right_node()->split();
+	pTwoEnabledNodeTreeH2->right_node()->left_node()->right_node()->left_node()->set_enabled();
+	//Create the GridTreeSet
+	GridTreeSet theTwoCellPavingH2( theTrivialGrid, theHeightTwo, pTwoEnabledNodeTreeH2 );
+
+	//Create another binary tree
+	BinaryTreeNode * pThreeEnabledNodeTreeH2 = new BinaryTreeNode( *pTwoEnabledNodeTreeH2 );
+	pThreeEnabledNodeTreeH2->left_node()->split();
+	pThreeEnabledNodeTreeH2->left_node()->left_node()->set_enabled();
+	pThreeEnabledNodeTreeH2->right_node()->left_node()->right_node()->right_node()->set_enabled();
+	pThreeEnabledNodeTreeH2->right_node()->left_node()->right_node()->left_node()->set_disabled();
+	pThreeEnabledNodeTreeH2->right_node()->left_node()->left_node()->split();
+	pThreeEnabledNodeTreeH2->right_node()->left_node()->left_node()->right_node()->set_disabled();
+	
+	//Create another GridTreeSet
+	GridTreeSet theThreeCellPavingH2( theTrivialGrid, theHeightTwo, pThreeEnabledNodeTreeH2 );
+
+	//Create another binary tree
+	BinaryTreeNode * pThreeEnabledNodeTreeH3 = new BinaryTreeNode(false);
+	pThreeEnabledNodeTreeH3->split();
+	pThreeEnabledNodeTreeH3->right_node()->split();
+	pThreeEnabledNodeTreeH3->right_node()->right_node()->copy_from( pThreeEnabledNodeTreeH2 );
+	BinaryWord thePathToSubPavingRoot;
+	thePathToSubPavingRoot.push_back(true);
+	thePathToSubPavingRoot.push_back(true);
+	//Create the GridTreeSubset
+	GridTreeSubset theThreeCellSubPavingH3( theTrivialGrid, theHeightThree , thePathToSubPavingRoot, pThreeEnabledNodeTreeH3->right_node()->right_node() );
+	
+	// !!!
+	print_title("Test restrict operation: GridTreeSet1.restrict( GridTreeSet2 )");
+	print_comment("The initial GridTreeSet1: ");
+	expected_result_arr[0] = createPavingCellOutput("origin=[0,0], lengths=[1,1]","2","00","[[-1:1],[-1:1]]");
+	expected_result_arr[1] = createPavingCellOutput("origin=[0,0], lengths=[1,1]","2","1000","[[1:2],[-1:0]]");
+	expected_result_arr[2] = createPavingCellOutput("origin=[0,0], lengths=[1,1]","2","1011","[[2:3],[0:1]]");
+	test_iterator( expected_result_arr, theThreeCellPavingH2, 3 );
+	print_comment("The initial GridTreeSet2: ");
+	expected_result_arr[0] = createPavingCellOutput("origin=[0,0], lengths=[1,1]","2","100","[[1:2],[-1:1]]");
+	expected_result_arr[1] = createPavingCellOutput("origin=[0,0], lengths=[1,1]","2","1010","[[2:3],[-1:0]]");
+	test_iterator( expected_result_arr, theTwoCellPavingH2, 2 );
+	print_comment("The result after restrict: ");
+	theThreeCellPavingH2.restrict( theTwoCellPavingH2 );
+	expected_result_arr[0] = createPavingCellOutput("origin=[0,0], lengths=[1,1]","2","1000","[[1:2],[-1:0]]");
+	test_iterator( expected_result_arr, theThreeCellPavingH2, 1 );
+
+	// !!!
+	print_title("Test restrict operation: GridTreeSet.restrict( GridTreeSubset )");
+	print_comment("The initial GridTreeSet: ");
+	expected_result_arr[0] = createPavingCellOutput("origin=[0,0], lengths=[1,1]","2","100","[[1:2],[-1:1]]");
+	expected_result_arr[1] = createPavingCellOutput("origin=[0,0], lengths=[1,1]","2","1010","[[2:3],[-1:0]]");
+	test_iterator( expected_result_arr, theTwoCellPavingH2, 2 );
+	print_comment("The initial GridTreeSubset: ");
+	expected_result_arr[0] = createPavingCellOutput("origin=[0,0], lengths=[1,1]","3","1100","[[-1:1],[-1:1]]");
+	expected_result_arr[1] = createPavingCellOutput("origin=[0,0], lengths=[1,1]","3","111000","[[1:2],[-1:0]]");
+	expected_result_arr[2] = createPavingCellOutput("origin=[0,0], lengths=[1,1]","3","111011","[[2:3],[0:1]]");
+	test_iterator( expected_result_arr, theThreeCellSubPavingH3, 3 );
+	print_comment("The result after restrict: ");
+	theTwoCellPavingH2.restrict( theThreeCellSubPavingH3 );
+	expected_result_arr[0] = createPavingCellOutput("origin=[0,0], lengths=[1,1]","3","111000","[[1:2],[-1:0]]");
+	test_iterator( expected_result_arr, theTwoCellPavingH2, 1 );
+	
+	//TODO: Test the case when the GridTreeSet has primary cell of the level 3
+	//	The GridTreeSubset is at level 1 and it's primary cell is at level 2
+}
+
 int main() {
 	
 	test_binary_tree();
@@ -941,6 +1021,8 @@ int main() {
 	test_adjoin_operation_three();
 
 	test_adjoin_outer_approximation_operation();
+
+	test_restrict();
 	
 	return ARIADNE_TEST_FAILURES;
 }

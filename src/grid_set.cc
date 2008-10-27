@@ -39,7 +39,6 @@ typedef size_t size_type;
 
 
 /****************************************Grid**********************************************/
-
  
 struct Grid::Data 
 { 
@@ -47,28 +46,19 @@ struct Grid::Data
   Vector<Float> _lengths; 
 };
 
-
-
 Grid::~Grid()
 {
 }
-
-
-
  
 Grid::Grid()
   : _data(new Data())
 {
 }
-
-
  
 Grid::Grid(const Grid& gr)
   : _data(gr._data)
 {
 }
-
-
  
 Grid::Grid(uint d)
   : _data(new Data())
@@ -77,7 +67,6 @@ Grid::Grid(uint d)
   Vector<Float> lengths(d,Float(1));
   this->_create(origin,lengths);
 }
-
  
 Grid::Grid(uint d, Float l)
   : _data(new Data())
@@ -87,16 +76,12 @@ Grid::Grid(uint d, Float l)
   this->_create(origin,lengths);
 }
 
- 
-
 Grid::Grid(const Vector<Float>& lengths)
   : _data(new Data())
 {
   Vector<Float> origin(lengths.size(),0);
   this->_create(origin,lengths);
 }
-
-
  
 Grid::Grid(const Vector<Float>& origin, const Vector<Float>& lengths)
   : _data(new Data())
@@ -107,73 +92,44 @@ Grid::Grid(const Vector<Float>& origin, const Vector<Float>& lengths)
   this->_create(origin,lengths);
 }
 
-
- 
-
-
-
-void
-Grid::_create(const Vector<Float>& origin, const Vector<Float>& lengths) 
+void Grid::_create(const Vector<Float>& origin, const Vector<Float>& lengths) 
 {
   this->_data->_origin=origin;
   this->_data->_lengths=lengths;
 }
 
-
-
-
-uint
-Grid::dimension() const
+uint Grid::dimension() const
 {
   return this->_data->_lengths.size();
 }
 
-
-
-const Vector<Float>&
-Grid::origin() const
+const Vector<Float>& Grid::origin() const
 {
   return this->_data->_origin;
 }
 
-
-
-const Vector<Float>&
-Grid::lengths() const
+const Vector<Float>& Grid::lengths() const
 {
   return this->_data->_lengths;
 }
 
-
-
-
-
-Float
-Grid::coordinate(uint d, dyadic_type x) const 
+Float Grid::coordinate(uint d, dyadic_type x) const 
 {
   return add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],x));
 }
 
-
-Float
-Grid::subdivision_coordinate(uint d, dyadic_type x) const 
+Float Grid::subdivision_coordinate(uint d, dyadic_type x) const 
 {
   return add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],x));
 }
 
-
-Float
-Grid::subdivision_coordinate(uint d, integer_type n) const 
+Float Grid::subdivision_coordinate(uint d, integer_type n) const 
 {
   return add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],n));
 }
 
-
- 
-int
-Grid::subdivision_index(uint d, const real_type& x) const 
+int Grid::subdivision_index(uint d, const real_type& x) const 
 {
-  
   Float half=0.5;
   int n=int(floor(add_approx(div_approx(sub_approx(x,this->_data->_origin[d]),this->_data->_lengths[d]),half)));
   Float sc=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],n));
@@ -187,14 +143,9 @@ Grid::subdivision_index(uint d, const real_type& x) const
       ARIADNE_THROW(InvalidGridPosition,std::setprecision(20)<<"Grid::subdivision_index(uint d,real_type x)","d="<<d<<", x="<<x<<", this->origin[d]="<<this->_data->_origin[d]<<", this->lengths[d]="<<this->_data->_lengths[d]<<" (closest value is "<<sc<<")");
     }
 }
-
-
  
-int
-Grid::subdivision_lower_index(uint d, const real_type& x) const 
+int Grid::subdivision_lower_index(uint d, const real_type& x) const 
 {
-  
-  
   int n=int(floor(div_down(sub_down(x,this->_data->_origin[d]),this->_data->_lengths[d])));
   if(x>=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],(n+1)))) {
     return n+1;
@@ -202,14 +153,9 @@ Grid::subdivision_lower_index(uint d, const real_type& x) const
     return n;
   }
 }
-
-
  
-int
-Grid::subdivision_upper_index(uint d, const real_type& x) const 
+int Grid::subdivision_upper_index(uint d, const real_type& x) const 
 {
-  
-  
   int n=int(ceil(div_up(sub_up(x,this->_data->_origin[d]),this->_data->_lengths[d])));
   if(x<=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],(n-1)))) {
     return n-1;
@@ -217,12 +163,8 @@ Grid::subdivision_upper_index(uint d, const real_type& x) const
     return n;
   }
 }
-
-
-
  
-bool 
-Grid::operator==(const Grid& g) const
+bool Grid::operator==(const Grid& g) const
 {
   if(this->_data==g._data) { 
     return true; 
@@ -230,19 +172,13 @@ Grid::operator==(const Grid& g) const
     return this->_data->_origin==g._data->_origin && this->_data->_lengths==g._data->_lengths;
   }
 }
-
-
  
-bool 
-Grid::operator!=(const Grid& g) const
+bool Grid::operator!=(const Grid& g) const
 {
   return !(*this==g);
 }
 
-
-
-array<double>
-Grid::index(const Vector<Float>& pt) const
+array<double> Grid::index(const Vector<Float>& pt) const
 {
         array<double> res(pt.size());
         for(size_t i=0; i!=res.size(); ++i) {
@@ -251,10 +187,7 @@ Grid::index(const Vector<Float>& pt) const
         return res;
 }
 
-
-
-array<double>
-Grid::lower_index(const Vector<Interval>& bx) const {
+array<double> Grid::lower_index(const Vector<Interval>& bx) const {
         array<double> res(bx.size());
         for(size_t i=0; i!=res.size(); ++i) {
                 res[i]=subdivision_lower_index(i,bx[i].lower());
@@ -262,10 +195,7 @@ Grid::lower_index(const Vector<Interval>& bx) const {
         return res;
 }
 
-
-
-array<double>
-Grid::upper_index(const Vector<Interval>& bx) const {
+array<double> Grid::upper_index(const Vector<Interval>& bx) const {
         array<double> res(bx.size());
         for(size_type i=0; i!=res.size(); ++i) {
                 res[i]=subdivision_upper_index(i,bx[i].upper());
@@ -273,12 +203,7 @@ Grid::upper_index(const Vector<Interval>& bx) const {
         return res;
 }
 
-
-
-
-
-Vector<Float>
-Grid::point(const array<int>& a) const
+Vector<Float> Grid::point(const array<int>& a) const
 {
   Vector<Float> res(a.size());
   for(size_type i=0; i!=res.size(); ++i) {
@@ -287,9 +212,7 @@ Grid::point(const array<int>& a) const
   return res;
 }
 
-
-Vector<Float>
-Grid::point(const array<double>& a) const
+Vector<Float> Grid::point(const array<double>& a) const
 {
   Vector<float> res(a.size());
   for(size_type i=0; i!=res.size(); ++i) {
@@ -298,10 +221,7 @@ Grid::point(const array<double>& a) const
   return res;
 }
 
-
-
-Vector<Interval>
-Grid::box(const array<double>& lower, const array<double>& upper) const
+Vector<Interval> Grid::box(const array<double>& lower, const array<double>& upper) const
 {
         Vector<Interval> res(lower.size());
         for(size_type i=0; i!=res.size(); ++i) {
@@ -311,10 +231,7 @@ Grid::box(const array<double>& lower, const array<double>& upper) const
         return res;
 }
 
-
-
-std::ostream& 
-operator<<(std::ostream& os, const Grid& gr) 
+std::ostream& operator<<(std::ostream& os, const Grid& gr) 
 {
         os << "Grid( ";
         os << "origin=" << gr.origin() << ", ";
@@ -322,11 +239,40 @@ operator<<(std::ostream& os, const Grid& gr)
         return os;
 }
 
-
-
-
-
 /****************************************BinaryTreeNode**********************************************/
+
+	void BinaryTreeNode::restrict( BinaryTreeNode * pThisNode, const BinaryTreeNode * pOtherNode ){
+		if( ( pThisNode != NULL ) && ( pOtherNode != NULL ) ){
+			if( pThisNode->is_leaf() && pOtherNode->is_leaf() ){
+				//Both nodes are leaf nodes: Make a regular AND
+				pThisNode->_isEnabled = (pThisNode->_isEnabled && pOtherNode->_isEnabled);
+			} else {
+				if( !pThisNode->is_leaf() && pOtherNode->is_leaf() ){
+					if( pOtherNode->is_enabled() ){
+						//DO NOTHING: The restriction will not affect pThisNode
+					} else {
+						//Turn the node a disabled leaf, since we do AND with false
+						pThisNode->make_leaf(false);
+					}
+				} else {
+					if( pThisNode->is_leaf() && !pOtherNode->is_leaf() ){
+						if( pThisNode->is_enabled() ){
+							//If this node is enabled then copy in the other node
+							//Since it will be their intersection any ways
+							pThisNode->copy_from( pOtherNode );
+						} else {
+							//DO NOTHING: The restriction is empty in this case
+							//because this node is a disabled leaf
+						}
+					} else {
+						//Both nodes are non-leaf nodes: Go recursively left and right
+						restrict( pThisNode->_pLeftNode, pOtherNode->_pLeftNode );
+						restrict( pThisNode->_pRightNode, pOtherNode->_pRightNode );
+					}
+				}
+			}
+		}
+	}
 
 	void BinaryTreeNode::restore_node( BinaryTreeNode * theCurrentNode, uint & arr_index, uint & leaf_counter,
 					const BooleanArray& theTree, const BooleanArray& theEnabledCells) {
@@ -414,8 +360,6 @@ operator<<(std::ostream& os, const Grid& gr)
 		
 		return result;
 	}
-
-
 
         size_t BinaryTreeNode::count_enabled_leaf_nodes( const BinaryTreeNode* pNode ) {
                 if(pNode->is_leaf()) { 
@@ -656,21 +600,19 @@ operator<<(std::ostream& os, const Grid& gr)
 
 /*********************************************GridCell***********************************************/
 
-        // PIETER: TODO: Ivan, please take a look at this code.
-        bool GridCell::operator==(const GridCell& other) const {
+        bool GridCell::operator==( const GridCell& other ) const {
                 return this->_theGrid == other._theGrid && 
-                        this->_theHeight == other._theHeight && this->_theWord == other._theWord;
+                        this->_theHeight == other._theHeight &&
+			this->_theWord == other._theWord;
         }      
 
         // PIETER: TODO: Ivan, please take a look at operator< to make sure it's
         // independant of the presentation of the cell.
         bool GridCell::operator<(const GridCell& other) const {
-                ARIADNE_ASSERT(this->_theGrid==other._theGrid);
+                ARIADNE_ASSERT( this->_theGrid == other._theGrid );
                 return this->_theHeight < other._theHeight || 
-                        (this->_theHeight == other._theHeight && this->_theWord < other._theWord);
+                        ( this->_theHeight == other._theHeight && this->_theWord < other._theWord );
         }      
-
-
 
 	Box GridCell::primary_cell( const uint theHeight, const dimension_type dimensions ) {
 		int leftBottomCorner = 0, rightTopCorner = 1;
@@ -940,7 +882,6 @@ GridCellListSet::remove(const GridCellListSet& gcls) {
         *this=result;
 }     
 
-
 void
 GridCellListSet::remove(const GridTreeSet& gts) {
         ARIADNE_ASSERT(this->grid()==gts.grid());
@@ -970,10 +911,6 @@ operator<<(std::ostream& os, const GridCellListSet& gcls)
   return os << "] )";
   return os;
 }
-
-
-
-
 
 /********************************************GridTreeSubset*****************************************/
 
@@ -1074,11 +1011,19 @@ operator<<(std::ostream& os, const GridCellListSet& gcls)
 	}
 
 /*********************************************GridTreeSet*********************************************/
-	
-        size_t GridTreeSet::size() const {
-                return BinaryTreeNode::count_enabled_leaf_nodes( this->binary_tree() ); 
-        }
 
+	void GridTreeSet::up_to_primary_cell( const uint toPCellHeight ){
+		const uint fromPCellHeight = this->cell().height();
+		
+		//The primary cell of this paving is lower then the one in the other paving so this
+		//paving's has to be rerooted to another primary cell and then we merge the pavings.
+		//1. Compute the path 
+		BinaryWord primaryCellPath = GridCell::primary_cell_path( this->cell().grid().dimension(), toPCellHeight, fromPCellHeight );
+		//2. Substitute the root node of the paiving with the extended tree
+		this->_pRootTreeNode = BinaryTreeNode::prepend_tree( primaryCellPath, this->_pRootTreeNode );
+		//3. Update the GridCell that corresponds to the root of this GridTreeSubset
+		this->_theGridCell = GridCell( this->_theGridCell.grid(), toPCellHeight, BinaryWord() );
+	}
 
 	BinaryTreeNode* GridTreeSet::align_with_cell( const GridCell& theCell, const bool stop_on_enabled, bool & has_stopped ) {
 		const uint thisPavingPCellHeight = this->cell().height();
@@ -1108,14 +1053,8 @@ operator<<(std::ostream& os, const GridCellListSet& gcls)
 			}
 		} else {
 			if( thisPavingPCellHeight < otherPavingPCellHeight ) {
-				//The primary cell of this paving is lower then the one in the other paving so this
-				//paving's has to be rerooted to another primary cell and then we merge the pavings.
-				//1. Compute the path 
-				BinaryWord primaryCellPath = GridCell::primary_cell_path( this->cell().grid().dimension(), otherPavingPCellHeight, thisPavingPCellHeight );
-				//2. Substitute the root node of the paiving with the extended tree
-				pBinaryTreeNode = ( this->_pRootTreeNode = BinaryTreeNode::prepend_tree( primaryCellPath, this->_pRootTreeNode ) );
-				//3. Update the GridCell that corresponds to the root of this GridTreeSubset
-				this->_theGridCell = GridCell( this->_theGridCell.grid(), otherPavingPCellHeight, BinaryWord() );
+				up_to_primary_cell( otherPavingPCellHeight );
+				pBinaryTreeNode = this->_pRootTreeNode;
 			} else {
 				//If we are rooted to the same primary cell, then there
 				//is nothing to be done, except adding the enabled cell
@@ -1199,9 +1138,91 @@ operator<<(std::ostream& os, const GridCellListSet& gcls)
 		}
 	}
 
+	void GridTreeSet::restrict_to_lower( const GridTreeSubset& theOtherSubPaving ){
+		//The root of the binary tree of the current Paving
+		BinaryTreeNode * pBinaryTreeNode = this->_pRootTreeNode;
+		
+		//The primary cell of this paving is higher then the one of the other paving.
+		//1. We locate the path to the primary cell node common with the other paving
+		BinaryWord rootNodePath = GridCell::primary_cell_path( this->cell().grid().dimension(), this->cell().height(), theOtherSubPaving.cell().height() );
+		
+		//2. Add the suffix path from the primary cell to the root node of
+		//theOtherSubPaving. This is needed in order to be able to reach this root.
+		BinaryWord suffixPath = theOtherSubPaving.cell().word();
+		for( int i = 0; i < suffixPath.size() ; i++ ){
+			rootNodePath.push_back( suffixPath[i] );
+		}
+		
+		//3. Restrict this binary tree to the other one assuming the path prefix rootNodePath
+		uint position = 0;
+		//This will point to the children nodes that do not have chance for being in the restriction
+		BinaryTreeNode * pBranchToDisable = NULL;
+		//Iterate the path, get to the root cell of theOtherSubPaving
+		while( position < rootNodePath.size() ){
+			if( pBinaryTreeNode->is_leaf() ){
+				//If we are in the leaf node then
+				if( pBinaryTreeNode->is_disabled() ){
+					//if it is disabled, then the intersection with
+					//the other set is empty so we just return
+					return;
+				} else {
+					//If it is an enabled leaf node then, because we still need to go further to reach the root cell of
+					//theOtherSubPaving, we split this node and disable the leaf that does not intersect with the other set
+					pBinaryTreeNode->split();
+				}
+			} else {
+				//If this is not a leaf node then we need to follow the path and disable the child
+				//node that is not on the path, because it will not make it into the intersection
+			}
+			//Follow the path and diable the other branch
+			if( rootNodePath[position] ){
+				pBranchToDisable = pBinaryTreeNode->left_node();
+				pBinaryTreeNode = pBinaryTreeNode->right_node();
+			} else {
+				pBranchToDisable = pBinaryTreeNode->right_node();
+				pBinaryTreeNode = pBinaryTreeNode->left_node();
+			}
+			//Move the unused branch into a disabled leaf node
+			pBranchToDisable->make_leaf(false);
+			
+			//Move to the next path element
+			position++;
+		}
+		if( pBinaryTreeNode->is_enabled() ){
+			//If we ended up in a leaf node that is disabled, this meand that it is the only enabled node
+			//in this GridTreeSet. At this point it corresponds to the root node of the theOtherSubPaving
+			//and since we need to do the restriction to that set, we just need to copy it to this node.
+			pBinaryTreeNode->copy_from( theOtherSubPaving.binary_tree() );
+			//Return since there is nothing else we need to do
+			return;
+		} else {
+			if( pBinaryTreeNode->is_disabled() ){
+				//if we are in a disabled leaf node the the result of the
+				//restriction is an empty set and we just return
+				return;
+			} else {
+				//If it is two binary tree we have, then we need to restrict
+				//pBinaryTreeNode to theOtherSubPaving._pRootTreeNode
+				BinaryTreeNode::restrict( pBinaryTreeNode, theOtherSubPaving.binary_tree() );
+			}
+		}
+	}
+
 	void GridTreeSet::restrict( const GridTreeSubset& theOtherSubPaving ) {
-		//!!!!
-		throw NotImplemented(__PRETTY_FUNCTION__);
+		const uint thisPavingPCellHeight = this->cell().height();
+		const uint otherPavingPCellHeight = theOtherSubPaving.cell().height();
+		
+		ARIADNE_ASSERT( this->cell().grid() == theOtherSubPaving.cell().grid() );
+
+		//In case theOtherSubPaving has the primary cell that is higher then this one
+		//we extend it, i.e. reroot it to the same height primary cell.		
+		if( thisPavingPCellHeight < otherPavingPCellHeight ){
+			up_to_primary_cell( otherPavingPCellHeight );
+		}
+		
+		//Now it is simple to restrict this set to another, since this set's
+		//primary cell is not lower then for the other one
+		restrict_to_lower( theOtherSubPaving );
 	}
 	
 	void GridTreeSet::remove( const GridCell& theCell ) {

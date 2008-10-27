@@ -460,7 +460,13 @@ namespace Ariadne {
 			/*! \brief The upper and lower bound in the \a i<sup>th</sup> coordinate. */
 			Interval operator[](dimension_type i) const;
 			
-			/*! \brief Serialize the current object state, this is mostly needed for testing */
+                        /*! \brief The equality operator. */
+                        bool operator==(const GridCell& otherCell) const;
+
+                        /*! \brief A total order on cells on the same grid, by height and word prefix. */
+                        bool operator<(const GridCell& otherCell) const;
+
+                        /*! \brief Serialize the current object state, this is mostly needed for testing */
 			string to_string() const;
 
 			/*! \brief this method computes the box in the original space based on the \a theGrid,
@@ -626,8 +632,10 @@ namespace Ariadne {
                 void adjoin(const GridTreeSet& gts);
                 //! Restricts to cells contained in \a gts.
                 void restrict(const GridTreeSet& gts);
-                //! Removes cells contained in \a bl.
+                //! Removes cells contained in \a gts.
                 void remove(const GridTreeSet& gts);
+                //! Removes cells contained in \a gcls. \deprecated
+                void remove(const GridCellListSet& gcls);
                 //@}
                 
                 //@{
@@ -935,6 +943,9 @@ namespace Ariadne {
 			/*! \brief Adjoin (make inplace union with) a single cell. */
 			void adjoin( const GridCell& theCell );
 			
+			/*! \brief Adjoin (make inplace union with) a list of cells. */
+			void adjoin( const GridCellListSet& theCell );
+			
 			/*! \brief Remove a single cell. */
 			void remove( const GridCell& theCell );
 
@@ -1110,9 +1121,6 @@ namespace Ariadne {
 			/*! \brief When set to true indicates that this is the "end iterator" */
 			bool _is_in_end_state;
 			
-			/*! \brief We do not want to have the default constructor here */
-			GridTreeConstIterator();
-			
 			/*! \brief the cursor object that is created based on the given sub paving*/
 			GridTreeCursor _pGridTreeCursor;
 			
@@ -1154,6 +1162,9 @@ namespace Ariadne {
 		public:
 			//@{
 			//! \name Constructors
+			
+                        /*! \brief Expose a default constructor for hybrid iterators. */
+			GridTreeConstIterator();
 			
 			/*! \brief The constructor that accepts the subpacing \a pSubPaving to iterate on
 			 * The paramerter \a firstLastNone indicatges whether we want to position the iterator
@@ -1484,6 +1495,10 @@ namespace Ariadne {
 
 /****************************************GridTreeConstIterator************************************/
 	
+        inline GridTreeConstIterator::GridTreeConstIterator(  ) :
+                _pGridTreeCursor(0)  {  
+        }
+
 	inline GridTreeConstIterator::GridTreeConstIterator( const GridTreeConstIterator& theGridPavingIter ) : 
 			_is_in_end_state(theGridPavingIter._is_in_end_state), _pGridTreeCursor(theGridPavingIter._pGridTreeCursor) {
 		//Copy everything
@@ -1760,6 +1775,12 @@ GridCellListSet::end() const
 			//Add the enabled cell to the binary tree.
 			pBinaryTreeNode->add_enabled( theCell.word() );
 		}
+	}
+	
+	inline void GridTreeSet::adjoin( const GridCellListSet& theListSet ) {
+                for(GridCellListSet::const_iterator theCellIter=theListSet.begin(); theCellIter!=theListSet.end(); ++theCellIter) {
+                        this->adjoin(*theCellIter); 
+                }
 	}
 	
 	inline void GridTreeSet::adjoin( const GridTreeSubset& theOtherSubPaving ) {

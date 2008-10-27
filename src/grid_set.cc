@@ -656,6 +656,22 @@ operator<<(std::ostream& os, const Grid& gr)
 
 /*********************************************GridCell***********************************************/
 
+        // PIETER: TODO: Ivan, please take a look at this code.
+        bool GridCell::operator==(const GridCell& other) const {
+                return this->_theGrid == other._theGrid && 
+                        this->_theHeight == other._theHeight && this->_theWord == other._theWord;
+        }      
+
+        // PIETER: TODO: Ivan, please take a look at operator< to make sure it's
+        // independant of the presentation of the cell.
+        bool GridCell::operator<(const GridCell& other) const {
+                ARIADNE_ASSERT(this->_theGrid==other._theGrid);
+                return this->_theHeight < other._theHeight || 
+                        (this->_theHeight == other._theHeight && this->_theWord < other._theWord);
+        }      
+
+
+
 	Box GridCell::primary_cell( const uint theHeight, const dimension_type dimensions ) {
 		int leftBottomCorner = 0, rightTopCorner = 1;
 		//The zero level coordinates are known, so we need to iterate only for higher level primary cells
@@ -867,6 +883,15 @@ GridCellListSet::clear()
 
 
 void
+GridCellListSet::unique_sort()
+{
+  std::sort(this->_list.begin(),this->_list.end());
+  iterator unique_end = std::unique(this->_list.begin(),this->_list.end());
+  //this->erase(unique_end,this->end());
+}
+
+
+void
 GridCellListSet::adjoin(const GridCell& gc) {
   ARIADNE_ASSERT(this->grid()==gc.grid());
   this->_list.push_back(gc);
@@ -890,6 +915,44 @@ GridCellListSet::adjoin(const GridTreeSet& gts) {
             iter!=gts.end(); ++iter) {
                 this->_list.push_back(*iter);
         }
+}
+
+
+void
+GridCellListSet::remove(const GridCellListSet& gcls) {
+        ARIADNE_ASSERT(this->grid()==gcls.grid());
+        std::cerr<<"Warning: using GridCellListSet::remove(GridCellListSet) which may not be correct"<<std::endl;
+        const_cast<GridCellListSet&>(gcls).unique_sort();
+        // TODO: Use efficient algorithm!
+        GridCellListSet result(this->grid());
+        for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
+                bool found=false;
+                for(const_iterator cmp_iter=gcls.begin(); 
+                    cmp_iter!=gcls.end(); ++cmp_iter) {
+                          if(*iter==*cmp_iter) { 
+                                  found=true; break;
+                          }
+                }
+                if(!found) {
+                        result._list.push_back(*iter);
+                }
+        }
+        *this=result;
+}     
+
+
+void
+GridCellListSet::remove(const GridTreeSet& gts) {
+        ARIADNE_ASSERT(this->grid()==gts.grid());
+        iterator insert=this->_list.begin();
+        for(const_iterator iter=this->begin();
+            iter!=this->end(); ++iter) {
+                if(!subset(*iter,gts)) {
+                        *insert=*iter; 
+                        ++insert;
+                }
+        }
+        this->_list.erase(insert,this->_list.end());
 }
 
 
@@ -1175,6 +1238,7 @@ operator<<(std::ostream& os, const GridCellListSet& gcls)
           return outer_approximation(ImageSet(theBox),theGrid,depth);
         }
 
+        // PIETER: TODO: IMPORTANT!! Ivan, please implement this code.
 	bool subset( const GridCell& theCell, const GridTreeSubset& theSet ) {
 		throw NotImplemented(__PRETTY_FUNCTION__);
 	}

@@ -62,34 +62,54 @@ class TestReachabilityAnalyser
   static HybridAnalyser build_analyser()
   {
     EvolutionParameters parameters;
-    parameters.maximum_enclosure_radius=0.25;
-    parameters.grid_length=0.0625;
-    parameters.maximum_step_size=0.125;
-    parameters.lock_to_grid_time=0.5;
+    parameters.maximum_enclosure_radius=0.5;
+    parameters.grid_length=1.0;
+    parameters.grid_depth=4;
+    parameters.maximum_step_size=0.25;
+    parameters.lock_to_grid_time=1.0;
     
     Grid grid(2);
     HybridEvolver evolver(parameters);
     EvolverInterface<HybridAutomaton,DefaultHybridEnclosureType>& evolver_interface
       =evolver;
     //HybridDiscretiser<EnclosureType> discretiser(evolver);
-    return HybridAnalyser(parameters,evolver_interface);
+    HybridAnalyser analyser(parameters,evolver_interface);
+    cout << "Done building analyser\n";
+    return analyser;
   }
 
   TestReachabilityAnalyser()
     : analyser(build_analyser()),
-      system("Henon Map"),
-      grid(make_vector<Float>("[0.25,0.25]")),
-      bound(-8,8),
+      system(),
+      grid(2),
+      bound(-4,4),
       reach_time(2.0,3)
   {
-    DiscreteState loc(1);
+    cout << "Done initialising variables\n";
+    DiscreteState location(1);
 
+    /*
     Function<Henon> henon(make_point("(1.5,-0.375)"));
-    system.new_mode(DiscreteState(1),ConstantFunction(Vector<Float>(0),2));
+    system.new_mode(location,ConstantFunction(Vector<Float>(2,0.0),2));
     system.new_forced_transition(DiscreteEvent(1),DiscreteState(1),DiscreteState(1),henon,ConstantFunction(Vector<Float>(1,1.0),2));
+    ImageSet initial_box(make_box("[0.99,1.01]x[-0.01,0.01]"));
+    */
+    /*
+    Function<VanDerPol> vdp(make_point("(0.75)"));
+    system.new_mode(location,vdp);
+    ImageSet initial_box(make_box("[0.99,1.01]x[-0.01,0.01]"));
+    */
+    Matrix<Float> A=make_matrix<Float>("[-0.5,-1.0;1.0,-0.5]");
+    Vector<Float> b=make_vector<Float>("[0.0,0.0]");
+    AffineFunction aff(A,b);
+    system.new_mode(location,aff);
+    cout << "Done building system\n";
 
-    ImageSet initial_box(make_box("[-6.96875,-6.9375]x[-6.96875,-6.9375]"));
-    initial_set[loc]=initial_box;
+    ImageSet initial_box(make_box("[1.99,2.01]x[-0.01,0.01]"));
+    initial_set[location]=initial_box;
+    cout << "Done creating initial set\n" << endl;
+
+    cout << "system=" << system << endl;
     cout << "initial_set=" << initial_set << endl;
 
     //ARIADNE_ASSERT(subset(initial_set[loc],bounding_set[loc]));
@@ -121,6 +141,7 @@ class TestReachabilityAnalyser
     DiscreteState loc(1);
     Box bounding_box(2,bound);
     HybridGridTreeSet& upper_reach_set=*analyser.upper_reach(system,initial_set,reach_time);
+    cout << "upper_reach_set="<<upper_reach_set<<std::endl;
     const GridTreeSet& upper_reach=upper_reach_set[loc];
     ImageSet& initial=initial_set[loc];
     //cout << "Reached " << upper_reach.size() << " cells out of " << upper_reach.capacity() << endl << endl;
@@ -139,9 +160,9 @@ class TestReachabilityAnalyser
   }
   
   void test() {
-    ARIADNE_TEST_CALL(test_lower_reach());
+    //ARIADNE_TEST_CALL(test_lower_reach());
     ARIADNE_TEST_CALL(test_upper_reach());
-    ARIADNE_TEST_CALL(test_chain_reach());
+    //ARIADNE_TEST_CALL(test_chain_reach());
   }
 
 };

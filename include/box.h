@@ -31,9 +31,13 @@
 #include "numeric.h"
 #include "vector.h"
 
+#include "set_interface.h"
+
 namespace Ariadne {
 
-class Box : public Vector<Interval>
+class Box
+  : public SetInterface,
+    public Vector<Interval>
 {
  public:
   typedef Float real_type;
@@ -42,10 +46,24 @@ class Box : public Vector<Interval>
   template<class T1, class T2> Box(const T1& t1, const T2& t2) : Vector<Interval>(t1,t2) { }
   static Box unit_box(uint n) { return Box(n,Interval(-1,1)); }
   static Box upper_quadrant(uint n) { return Box(n,Interval(0,inf())); }
-  uint dimension() const { return this->size(); }
   Vector<Float> centre() const { return midpoint(*this); }
   Float radius() const { 
     Float dmax=0; for(uint i=0; i!=this->size(); ++i) { dmax=max(dmax,(*this)[i].width()); } return up(dmax/2); }
+
+  virtual Box* clone() const { return new Box(*this); }
+  virtual uint dimension() const { return this->size(); }
+  virtual tribool disjoint(const Vector<Interval>& other) const { 
+    return Ariadne::disjoint(*this,other); }
+  virtual tribool intersects(const Vector<Interval>& other) const { 
+    return !Ariadne::disjoint(*this,other); }
+  virtual tribool superset(const Vector<Interval>& other) const { 
+    return Ariadne::subset(other,*this); }
+  virtual tribool subset(const Vector<Interval>& other) const { 
+    return Ariadne::subset(*this,other); }
+  virtual Vector<Interval> bounding_box() const { 
+    return *this; }
+  virtual std::ostream& write(std::ostream& os) const {
+    return os << *static_cast<const Vector<Interval>*>(this); }
 };
 
 Box make_box(const std::string&);

@@ -34,6 +34,7 @@
 
 
 #include "tribool.h"
+#include "set_interface.h"
 
 namespace Ariadne {
 
@@ -61,6 +62,7 @@ class HybridOvertSetInterface
  public:
   virtual HybridOvertSetInterface* clone() const = 0;
   virtual tribool intersects(const HybridBox& bx) const = 0;
+  virtual OvertSetInterface const& operator[](DiscreteState) const = 0;
 };
 
 class HybridOpenSetInterface 
@@ -69,6 +71,7 @@ class HybridOpenSetInterface
  public:
   virtual HybridOpenSetInterface* clone() const = 0;
   virtual tribool superset(const HybridBox& bx) const = 0;
+  virtual OpenSetInterface const& operator[](DiscreteState) const = 0;
 };
 
 class HybridClosedSetInterface
@@ -76,6 +79,7 @@ class HybridClosedSetInterface
  public:
   virtual HybridClosedSetInterface* clone() const = 0;
   virtual tribool disjoint(const HybridBox& bx) const = 0;
+  virtual ClosedSetInterface const& operator[](DiscreteState) const = 0;
 };
 
 class HybridCompactSetInterface
@@ -84,6 +88,7 @@ class HybridCompactSetInterface
   virtual HybridCompactSetInterface* clone() const = 0;
   virtual tribool subset(const HybridBoxes& bx) const = 0;
   virtual HybridBoxes bounding_box() const = 0;
+  virtual CompactSetInterface const& operator[](DiscreteState) const = 0;
 };
 
 class HybridRegularSetInterface 
@@ -91,6 +96,7 @@ class HybridRegularSetInterface
     public virtual HybridClosedSetInterface
 {
   virtual HybridRegularSetInterface* clone() const = 0;
+  virtual RegularSetInterface const& operator[](DiscreteState) const = 0;
 };
 
 class HybridLocatedSetInterface 
@@ -98,6 +104,7 @@ class HybridLocatedSetInterface
     public virtual HybridCompactSetInterface
 {
   virtual HybridLocatedSetInterface* clone() const = 0;
+  virtual LocatedSetInterface const& operator[](DiscreteState) const = 0;
 };
 
 class HybridSetInterface 
@@ -105,6 +112,7 @@ class HybridSetInterface
     public virtual HybridLocatedSetInterface
 {
   virtual HybridSetInterface* clone() const = 0;
+  virtual SetInterface const& operator[](DiscreteState) const = 0;
 };
     
 

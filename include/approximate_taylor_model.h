@@ -153,6 +153,9 @@ class ApproximateTaylorModel {
   //! \brief The range of values the Taylor model can take. 
   BoxType range() const;
   
+  //! \brief The range of values the Taylor model can take. 
+  BoxType bounding_box() const;
+  
   //! \brief Evaluate the Taylor model at the point \a x. 
   BoxType evaluate(const BoxType& x) const;
   PointType evaluate(const PointType& x) const;

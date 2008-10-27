@@ -41,6 +41,7 @@ namespace Ariadne {
 //! delegated to the class implementing the method that needs it. Currently
 //! used to present a semi-stable interface to users.
 struct EvolutionParameters {
+  typedef int IntType;
   typedef double TimeType;
   typedef double RealType;
   
@@ -83,9 +84,14 @@ struct EvolutionParameters {
   //! Decreasing this value increases the accuracy of the computation. 
   RealType grid_length;
 
+  //! \brief Set the depth used for approximation on a grid
+  //! Increasing this value increases the accuracy of the computation. 
+  IntType grid_depth;
+
   //! \brief Set the size of the region used for computation. 
   //! Increasing this value reduces the risk of error due to missing orbits which leave the bounding domain. 
   RealType bounding_domain_size;
+
 };
 
 inline
@@ -97,6 +103,7 @@ EvolutionParameters::EvolutionParameters()
     maximum_enclosure_radius(0.5),
     lock_to_grid_time(1.0),
     grid_length(0.125),
+    grid_depth(6),
     bounding_domain_size(8.0)
 {
 }

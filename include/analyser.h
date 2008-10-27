@@ -153,17 +153,29 @@ class HybridAnalyser
   typedef HybridCompactSetInterface CoSI;
  public:
   // Helper functions for operators on lists of sets.
-  GTS _upper_reach(const Sys& sys, const GTS& set, const T& time) const {
+  GTS _upper_reach(const Sys& sys, const GTS& set, const T& time, const int accuracy) const {
     GTS result(set.grid()); GCLS cells=set.cells();
     for(GCLS::const_iterator bs=cells.begin(); bs!=cells.end(); ++bs) {
-      Orbit<GC> orbit=this->_discretiser->upper_evolve(sys,*bs,time);
+      Orbit<GC> orbit=this->_discretiser->upper_evolve(sys,*bs,time,accuracy);
       GCLS reach=orbit.intermediate();
       result.adjoin(reach); }
     return result; }
-  GTS _upper_evolve(const Sys& sys, const GTS& set, const T& time) const {
+  GTS _upper_evolve(const Sys& sys, const GTS& set, const T& time, const int accuracy) const {
     GTS result(set.grid()); GCLS cells=set.cells();
     for(GCLS::const_iterator bs=cells.begin(); bs!=cells.end(); ++bs) {
-      result.adjoin(this->_discretiser->upper_evolve(sys,HybridGridCell(*bs),time).final()); }
+      result.adjoin(this->_discretiser->upper_evolve(sys,HybridGridCell(*bs),time,accuracy).final()); }
+    return result; }
+  // Helper functions for operators on lists of sets.
+  GCLS _upper_reach(const Sys& sys, const GCLS& cells, const T& time, const int accuracy) const {
+    GCLS result(cells.grid());
+    for(GCLS::const_iterator bs=cells.begin(); bs!=cells.end(); ++bs) {
+      Orbit<GC> orbit=this->_discretiser->upper_evolve(sys,*bs,time,accuracy);
+      result.adjoin(orbit.reach()); }
+    return result; }
+  GCLS _upper_evolve(const Sys& sys, const GCLS& cells, const T& time, const int accuracy) const {
+    GCLS result(cells.grid()); 
+    for(GCLS::const_iterator bs=cells.begin(); bs!=cells.end(); ++bs) {
+      result.adjoin(this->_discretiser->upper_evolve(sys,HybridGridCell(*bs),time,accuracy).final()); }
     return result; }
  private:
   // Helper functions for approximating sets

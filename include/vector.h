@@ -140,7 +140,8 @@ template<class X> std::ostream& operator<<(std::ostream& os, const Vector<X>& v)
 template<class X> std::istream& operator>>(std::istream& is, Vector<X>& v) {
   std::vector<X> vec;
   is >> vec;
-  v=Vector<X>(vec.size(),&v[0]);
+  X* ptr=&vec[0];
+  v=Vector<X>(vec.size(),ptr);
   return is;
 }
 

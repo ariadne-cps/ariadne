@@ -62,7 +62,6 @@ class HybridDiscretiser
   typedef std::pair<DiscreteState,ES> EnclosureType;
  private:
   boost::shared_ptr< EvolverInterface<SystemType,EnclosureType>  > _evolver;
-  uint _accuracy;
  public:
   //@{
   //! \name Constructors and destructors
@@ -70,7 +69,7 @@ class HybridDiscretiser
   //! \brief Construct from evolution parameters and a method for evolving basic sets, 
   //!  and a scheme for approximating sets.
   HybridDiscretiser(const EvolverInterface<SystemType,EnclosureType>& evolver)
-    : _evolver(evolver.clone()), _accuracy(8) { }
+    : _evolver(evolver.clone()) { }
       
   //! \brief Make a dynamically-allocated copy.
   HybridDiscretiser<ES>* clone() const { return new HybridDiscretiser<ES>(*this); }
@@ -85,19 +84,20 @@ class HybridDiscretiser
   virtual Orbit<BasicSetType> 
   lower_evolve(const SystemType& system, 
                const BasicSetType& initial_set, 
-               const TimeType& time) const;
+               const TimeType& time, const int accuracy) const;
   
   //! \brief Compute lower approximations to the reachable and evolved sets 
   //! of \a system starting in \a initial_set over \a time. */
   virtual Orbit<BasicSetType> 
   upper_evolve(const SystemType& system, 
                const BasicSetType& initial_set, 
-               const TimeType& time) const;
+               const TimeType& time, const int accuracy) const;
 
  private:
   EnclosureType _enclosure(const BasicSetType& bs) const;
   Orbit<BasicSetType> _discretise(const Orbit<EnclosureType>& orb,
-                                  const BasicSetType& initial_set) const;
+                                  const BasicSetType& initial_set,
+                                  const int accuracy) const;
   
 };
 

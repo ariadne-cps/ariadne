@@ -196,6 +196,13 @@ ApproximateTaylorModel::range() const
 }
 
 
+Vector<Interval>
+ApproximateTaylorModel::bounding_box() const
+{ 
+  return Ariadne::evaluate(this->expansion(),this->domain());
+}
+
+
 
 const ApproximateTaylorModel::DifferentialVectorType&
 ApproximateTaylorModel::expansion() const

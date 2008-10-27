@@ -130,6 +130,10 @@ HybridAutomaton::~HybridAutomaton()
 { 
 }
 
+HybridAutomaton::HybridAutomaton()
+{ 
+}
+
 HybridAutomaton::HybridAutomaton(const std::string& name)
   : _name(name) 
 { 

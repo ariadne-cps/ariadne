@@ -267,6 +267,9 @@ class HybridAutomaton
  public:
   //@{
   //! \name Constructors and destructors 
+  //! \brief Construct an empty automaton with no name
+  HybridAutomaton();
+  
   //! \brief Construct an empty automaton with the given name
   HybridAutomaton(const std::string& name);
   

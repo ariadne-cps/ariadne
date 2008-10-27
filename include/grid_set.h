@@ -1036,6 +1036,9 @@ namespace Ariadne {
 			void updateTheCurrentGridCell( tribool left_or_right );
 			
 		public:
+                        /*! \brief Default constructor constructs an invalid cursor. */
+			GridTreeCursor();
+			
 			/*! \brief The constructor that accepts the subpaving to cursor on */
 			GridTreeCursor(const GridTreeSubset * pSubPaving);
 			
@@ -1165,9 +1168,11 @@ namespace Ariadne {
 			//@{
 			//! \name Constructors
 			
-                        /*! \brief Expose a default constructor for hybrid iterators. */
+                        /*! \brief Default constructor constructs an invalid iterator. 
+                         *  \internal Note that a default constructor is required for compliance with the 
+                         *  STL Trivial Iterator concept. */
 			GridTreeConstIterator();
-			
+
 			/*! \brief The constructor that accepts the subpacing \a pSubPaving to iterate on
 			 * The paramerter \a firstLastNone indicatges whether we want to position the iterator
 			 * on the first enabled leaf node (firstLastNone == true) or the last one (firstLastNone == false)
@@ -1507,10 +1512,6 @@ namespace Ariadne {
 
 /****************************************GridTreeConstIterator************************************/
 	
-        inline GridTreeConstIterator::GridTreeConstIterator(  ) :
-                _pGridTreeCursor(0)  {  
-        }
-
 	inline GridTreeConstIterator::GridTreeConstIterator( const GridTreeConstIterator& theGridPavingIter ) : 
 			_is_in_end_state(theGridPavingIter._is_in_end_state), _pGridTreeCursor(theGridPavingIter._pGridTreeCursor) {
 		//Copy everything

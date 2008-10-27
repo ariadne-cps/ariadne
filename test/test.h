@@ -32,6 +32,7 @@
 #include <exception>
 
 int ARIADNE_TEST_FAILURES=0;
+int ARIADNE_TEST_SKIPPED=0;
 
 // This needs to be a function since we do not want to evaluate the result twice,
 // and can't store it in a variable since we don't know it's type.
@@ -63,6 +64,17 @@ ariadne_check(std::ostream& os, const R& r, const ER& er) {
             << "CALLING " << #function << "\n"                          \
             << "****************************************\n" << std::endl; \
   function; \
+  std::cout << std::endl;          \
+} \
+
+
+/*! \brief Calls a function */
+#define ARIADNE_TEST_SKIP(function) \
+{ \
+  std::cout << "****************************************\n"             \
+            << "SKIPPING " << #function << "\n"                          \
+            << "****************************************\n" << std::endl; \
+  ++ARIADNE_TEST_SKIPPED;                                               \
   std::cout << std::endl;          \
 } \
 

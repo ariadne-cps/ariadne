@@ -180,7 +180,7 @@ class TestReachabilityAnalyser
   }
   
   void test() {
-    ARIADNE_TEST_CALL(test_lower_reach_evolve());
+    ARIADNE_TEST_SKIP(test_lower_reach_evolve());
     ARIADNE_TEST_CALL(test_upper_reach_evolve());
     ARIADNE_TEST_CALL(test_chain_reach());
   }
@@ -191,9 +191,7 @@ class TestReachabilityAnalyser
 int main(int nargs, const char* args[]) 
 {
   TestReachabilityAnalyser().test();
-  cerr << "INCOMPLETE ";
-  //cerr << "SKIPPED ";
-  //++ARIADNE_TEST_FAILURES;
+  if(ARIADNE_TEST_SKIPPED) { cerr << "INCOMPLETE "; }
   return ARIADNE_TEST_FAILURES;
 }
 

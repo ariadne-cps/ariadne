@@ -33,6 +33,7 @@
 #include <boost/iterator.hpp>
 #include <boost/iterator_adaptors.hpp>
 
+#include <boost/shared_ptr.hpp>
 
 #include "macros.h"
 #include "stlio.h"
@@ -81,11 +82,9 @@ bounding_boxes(const std::map<DiscreteState,uint> space, Interval bound)
 }
 
 
-// FIXME: This class doesn't work
-
 template< class DS, class HBS >
-class HybridSetIterator
-  : public boost::iterator_facade<HybridSetIterator<DS,HBS>,
+class HybridSetConstIterator
+  : public boost::iterator_facade<HybridSetConstIterator<DS,HBS>,
                                   HBS,
                                   boost::forward_traversal_tag,
                                   HBS
@@ -93,8 +92,8 @@ class HybridSetIterator
 
 {
  public:
-  HybridSetIterator(const std::map<DiscreteState,DS>&, bool);
-  bool equal(const HybridSetIterator<DS,HBS>&) const;
+  HybridSetConstIterator(const std::map<DiscreteState,DS>&, bool);
+  bool equal(const HybridSetConstIterator<DS,HBS>&) const;
   HBS dereference() const;
   void increment();
  private:
@@ -155,7 +154,7 @@ class HybridListSet
  public:
   typedef typename std::map< DiscreteState,ListSet<ES> >::iterator locations_iterator;
   typedef typename std::map< DiscreteState,ListSet<ES> >::const_iterator locations_const_iterator;
-  typedef HybridSetIterator< ListSet<ES>, std::pair<DiscreteState,ES> > const_iterator;
+  typedef HybridSetConstIterator< ListSet<ES>, std::pair<DiscreteState,ES> > const_iterator;
   locations_iterator locations_begin() { 
     return this->std::map<DiscreteState,ListSet<ES> >::begin(); }
   locations_iterator locations_end() { 
@@ -274,7 +273,7 @@ class HybridGridCellListSet
     locations_iterator;
   typedef std::map<DiscreteState,GridCellListSet>::const_iterator 
     locations_const_iterator;
-  typedef HybridSetIterator<GridCellListSet,HybridGridCell> 
+  typedef HybridSetConstIterator<GridCellListSet,HybridGridCell> 
     const_iterator;
 
   HybridGridCellListSet() { };
@@ -329,7 +328,7 @@ class HybridGridTreeSet
  public:
   typedef std::map<DiscreteState,GridTreeSet>::iterator locations_iterator;
   typedef std::map<DiscreteState,GridTreeSet>::const_iterator locations_const_iterator;
-  typedef HybridSetIterator<GridTreeSet,HybridGridCell> const_iterator;
+  typedef HybridSetConstIterator<GridTreeSet,HybridGridCell> const_iterator;
  public:
   locations_iterator locations_begin() { 
     return this->std::map<DiscreteState,GridTreeSet>::begin(); }
@@ -507,8 +506,8 @@ inline void HybridGridCellListSet::remove(const HybridGridTreeSet& hgts)  {
 }
 
 template<class DS, class HBS> inline
-HybridSetIterator<DS,HBS>::
-HybridSetIterator(const std::map<DiscreteState,DS>& map, bool end)
+HybridSetConstIterator<DS,HBS>::
+HybridSetConstIterator(const std::map<DiscreteState,DS>& map, bool end)
   : loc_begin(map.begin()),
     loc_end(map.end()),
     loc_iter(end?loc_end:loc_begin)
@@ -522,7 +521,7 @@ HybridSetIterator(const std::map<DiscreteState,DS>& map, bool end)
 
 template<class DS, class HBS> inline
 bool
-HybridSetIterator<DS,HBS>::equal(const HybridSetIterator<DS,HBS>& other) const
+HybridSetConstIterator<DS,HBS>::equal(const HybridSetConstIterator<DS,HBS>& other) const
 {
   return this->loc_iter==other.loc_iter && (this->loc_iter==this->loc_end || this->bs_iter==other.bs_iter);
 }
@@ -530,15 +529,17 @@ HybridSetIterator<DS,HBS>::equal(const HybridSetIterator<DS,HBS>& other) const
 
 template<class DS, class HBS> inline
 HBS
-HybridSetIterator<DS,HBS>::dereference() const
+HybridSetConstIterator<DS,HBS>::dereference() const
 {
   return HBS(loc_iter->first,*this->bs_iter);
+  //this->hybrid_cell=HBS(loc_iter->first,*this->bs_iter);
+  //return this->hybrid_cell;
 }
 
 
 template<class DS, class HBS> inline
 void
-HybridSetIterator<DS,HBS>::increment() 
+HybridSetConstIterator<DS,HBS>::increment() 
 {
   ++this->bs_iter;
   this->increment_loc();
@@ -546,7 +547,7 @@ HybridSetIterator<DS,HBS>::increment()
 
 template<class DS, class HBS> inline
 void
-HybridSetIterator<DS,HBS>::increment_loc() 
+HybridSetConstIterator<DS,HBS>::increment_loc() 
 {
   while(bs_iter==loc_iter->second.end()) {
     ++loc_iter;

@@ -512,6 +512,10 @@ std::ostream& operator<<(std::ostream& os, const Grid& gr)
 
 /********************************************GridTreeCursor***************************************/
 	
+        GridTreeCursor::GridTreeCursor(  ) :
+                _currentStackIndex(-1), _pSubPaving(0), _theCurrentGridCell( Grid(), 0, BinaryWord() ) {
+        }
+
 	string GridTreeCursor::to_string() const{
 		stringstream tmp_stream;
 		string result = "\n The underlying subpaving:"+_pSubPaving->to_string();
@@ -532,6 +536,11 @@ std::ostream& operator<<(std::ostream& os, const Grid& gr)
 
 
 /****************************************GridTreeConstIterator************************************/
+
+        GridTreeConstIterator::GridTreeConstIterator(  ) :
+                _pGridTreeCursor()  {  
+            
+        }
 
 	void GridTreeConstIterator::find_next_enabled_leaf() {
 		if( _pGridTreeCursor.is_left_child() ) {

@@ -86,15 +86,8 @@ HybridAnalyser::_upper_reach(const HybridAutomaton& sys,
   HybridGridTreeSet result(set.grid()); 
   HybridGridTreeSet cells=set; 
   cells.mince(accuracy);    
-  for(HybridGridTreeSet::locations_const_iterator loc_iter=cells.locations_begin(); loc_iter!=cells.locations_end(); ++loc_iter) {
-    DiscreteState const& q=loc_iter->first;
-    GridTreeSet const& loc_cells=loc_iter->second;
-    for(GridTreeSet::const_iterator cell_iter=loc_cells.begin(); cell_iter!=loc_cells.end(); ++cell_iter) {
-      HybridGridCell hybrid_cell(q,*cell_iter);
-      Orbit<HybridGridCell> orbit=this->_discretiser->upper_evolution(sys,hybrid_cell,time,accuracy);
-      HybridGridCellListSet reach=orbit.reach();
-      result.adjoin(reach); 
-    }
+  for(HybridGridTreeSet::const_iterator iter=cells.begin(); iter!=cells.end(); ++iter) {
+    result.adjoin(this->_discretiser->upper_evolution(sys,*iter,time,accuracy).reach());
   }
   return result; 
 }
@@ -106,12 +99,9 @@ HybridAnalyser::_upper_evolve(const HybridAutomaton& sys,
                               const HybridTime& time, 
                               const int accuracy) const 
 {
-  std::cerr<<"  upper_evolve"<<std::endl;
   GTS result(set.grid()); GTS cells=set; cells.mince(accuracy); 
-  for(HybridGridTreeSet::locations_const_iterator loc_iter=cells.locations_begin(); loc_iter!=cells.locations_end(); ++loc_iter) {
-    for(GridTreeSet::const_iterator cell_iter=loc_iter->second.begin(); cell_iter!=loc_iter->second.end(); ++cell_iter) {
-      result.adjoin(this->_discretiser->upper_evolution(sys,HybridGridCell(loc_iter->first,*cell_iter),time,accuracy).final()); 
-    } 
+  for(HybridGridTreeSet::const_iterator iter=cells.begin(); iter!=cells.end(); ++iter) {
+    result.adjoin(this->_discretiser->upper_evolution(sys,*iter,time,accuracy).final()); 
   }
   return result; 
 }
@@ -123,16 +113,24 @@ HybridAnalyser::_upper_reach_evolve(const HybridAutomaton& sys,
                                     const HybridTime& time, 
                                     const int accuracy) const 
 {
-  std::cerr<<"  upper_reach_evolve"<<std::endl;
   std::pair<GTS,GTS> result(GTS(set.grid()),GTS(set.grid()));
   GTS& reach=result.first; GTS& evolve=result.second;
   GTS cells=set; cells.mince(accuracy); 
+
+  /*
   for(HybridGridTreeSet::locations_const_iterator loc_iter=cells.locations_begin(); loc_iter!=cells.locations_end(); ++loc_iter) {
     for(GridTreeSet::const_iterator cell_iter=loc_iter->second.begin(); cell_iter!=loc_iter->second.end(); ++cell_iter) {
       Orbit<HybridGridCell> evolution=this->_discretiser->upper_evolution(sys,HybridGridCell(loc_iter->first,*cell_iter),time,accuracy);
       reach.adjoin(evolution.reach()); 
       evolve.adjoin(evolution.final()); 
     } 
+  }
+  */
+
+  for(HybridGridTreeSet::const_iterator iter=cells.begin(); iter!=cells.end(); ++iter) {
+      Orbit<HybridGridCell> evolution=this->_discretiser->upper_evolution(sys,*iter,time,accuracy);
+      reach.adjoin(evolution.reach()); 
+      evolve.adjoin(evolution.final()); 
   }
   return result; 
 }
@@ -240,7 +238,7 @@ upper_reach(const SystemType& system,
             const CompactSetType& initial_set,
             const TimeType& time) const
 {
-  verbosity=6;
+  verbosity=0;
   ARIADNE_LOG(2,"HybridAnalyser::upper_reach(system,set,time)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   GTS initial;
@@ -280,7 +278,7 @@ upper_reach_evolve(const SystemType& system,
                    const CompactSetType& initial_set,
                    const TimeType& time) const
 {
-  verbosity=6;
+  verbosity=0;
   ARIADNE_LOG(2,"HybridAnalyser::upper_reach(system,set,time)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   GTS initial;

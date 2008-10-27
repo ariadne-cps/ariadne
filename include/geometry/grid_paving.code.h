@@ -641,7 +641,7 @@ namespace Ariadne {
 				} else {
 					//We should not mince any further, so since the node is a leaf and
 					//it's cell is not disjoint from theSet, we mark the node as enabled.
-					if( pBinaryTreeNode->is_leaf() ){
+					if( ! pBinaryTreeNode->is_leaf() ){
 						//If the node is not leaf, then we make it an enabled one
 						pBinaryTreeNode->make_leaf(true);
 					} else {

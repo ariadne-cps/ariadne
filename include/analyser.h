@@ -111,9 +111,16 @@ class HybridAnalyser
                                           const HybridTime& time) const;
   
   /*! \brief Compute a lower-approximation to the reachable set of \a system starting in \a initial_set up to \a time \a. */
-  virtual HybridGridTreeSet* lower_reach(const HybridAutomaton& system, 
-                                        const HybridOvertSetInterface& initial_set, 
-                                        const HybridTime& time) const;
+  virtual HybridGridTreeSet*
+  lower_reach(const HybridAutomaton& system, 
+              const HybridOvertSetInterface& initial_set, 
+              const HybridTime& time) const;
+  
+  /*! \brief Compute a lower-approximation to the reachable and evolved sets of \a system starting in \a initial_set up to \a time \a. */
+  virtual std::pair<HybridGridTreeSet*,HybridGridTreeSet*>
+  lower_reach_evolve(const HybridAutomaton& system, 
+                     const HybridOvertSetInterface& initial_set, 
+                     const HybridTime& time) const;
   
   /*! \brief Compute an approximation to the set obtained by iterating \a time times \a system starting in \a initial_set. */
   virtual HybridGridTreeSet* upper_evolve(const HybridAutomaton& system, 
@@ -124,6 +131,12 @@ class HybridAnalyser
   virtual HybridGridTreeSet* upper_reach(const HybridAutomaton& system, 
                                         const HybridCompactSetInterface& initial_set, 
                                         const HybridTime& time) const;
+  
+  /*! \brief Compute an approximation to the reachable and evolved sets of \a system starting in \a initial_set iterating at most \a time times. */
+  virtual std::pair<HybridGridTreeSet*,HybridGridTreeSet*>
+  upper_reach_evolve(const HybridAutomaton& system, 
+                     const HybridCompactSetInterface& initial_set, 
+                     const HybridTime& time) const;
   
   /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set. */
   virtual HybridGridTreeSet* chain_reach(const HybridAutomaton& system, 
@@ -155,6 +168,7 @@ class HybridAnalyser
   // Helper functions for operators on lists of sets.
   GTS _upper_reach(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
   GTS _upper_evolve(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
+  std::pair<GTS,GTS> _upper_reach_evolve(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
  private:
   // Helper functions for approximating sets
   HybridGrid _grid(HybridSpace hspc) const { 

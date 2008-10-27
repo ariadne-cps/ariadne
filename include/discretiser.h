@@ -82,16 +82,16 @@ class HybridDiscretiser
   //! \brief Compute lower approximations to the reachable and evolved sets 
   //! of \a system starting in \a initial_set over \a time. */
   virtual Orbit<BasicSetType> 
-  lower_evolve(const SystemType& system, 
-               const BasicSetType& initial_set, 
-               const TimeType& time, const int accuracy) const;
+  lower_evolution(const SystemType& system, 
+                  const BasicSetType& initial_set, 
+                  const TimeType& time, const int accuracy) const;
   
   //! \brief Compute lower approximations to the reachable and evolved sets 
   //! of \a system starting in \a initial_set over \a time. */
   virtual Orbit<BasicSetType> 
-  upper_evolve(const SystemType& system, 
-               const BasicSetType& initial_set, 
-               const TimeType& time, const int accuracy) const;
+  upper_evolution(const SystemType& system, 
+                  const BasicSetType& initial_set, 
+                  const TimeType& time, const int accuracy) const;
 
  private:
   EnclosureType _enclosure(const BasicSetType& bs) const;

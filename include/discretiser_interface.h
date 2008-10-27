@@ -66,13 +66,12 @@ class DiscretiserInterface<HybridAutomaton>
   
   /*! \brief Compute a lower-approximation to the the reachable and evolved sets under the system evolution. */
   virtual Orbit<BasicSetType> 
-  lower_evolve(const SystemType& f, const BasicSetType& s, const TimeType& t, const int accuracy) const = 0;
+  lower_evolution(const SystemType& f, const BasicSetType& s, const TimeType& t, const int accuracy) const = 0;
   
   /*! \brief Compute a lower-approximation to the the reachable and evolved sets under the system evolution. */
   virtual Orbit<BasicSetType> 
-  upper_evolve(const SystemType& f, const BasicSetType& s, const TimeType& t, const int accuracy) const = 0;
+  upper_evolution(const SystemType& f, const BasicSetType& s, const TimeType& t, const int accuracy) const = 0;
 };
-
 
 
   

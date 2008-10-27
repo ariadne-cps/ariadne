@@ -136,7 +136,7 @@ void TestDiscretiser::test_discrete_time() const
 
   // Compute the reachable sets
   Orbit<HybridGridCell> discrete_orbit
-    = discretiser.upper_evolve(ha,hybrid_initial_cell,htime,depth);
+    = discretiser.upper_evolution(ha,hybrid_initial_cell,htime,depth);
   cout << "Finished computing grid evolution." << endl;
 
   GridCellListSet const& reach_cells=discrete_orbit.reach()[location];
@@ -232,7 +232,7 @@ void TestDiscretiser::test_continuous_time() const
 
   // Compute the reachable sets
   Orbit<HybridGridCell> discrete_orbit
-    = discretiser.upper_evolve(hvdp,hybrid_initial_cell,htime,depth);
+    = discretiser.upper_evolution(hvdp,hybrid_initial_cell,htime,depth);
   GridCellListSet const& reach_cells=discrete_orbit.reach()[location];
   GridCellListSet const& intermediate_cells=discrete_orbit.intermediate()[location];
   GridCellListSet const& final_cells=discrete_orbit.final()[location];

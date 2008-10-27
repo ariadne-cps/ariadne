@@ -81,10 +81,10 @@ typedef std::pair<DiscreteState,DefaultEnclosureType> DefaultHybridEnclosureType
 template<class ES>
 Orbit<typename HybridDiscretiser<ES>::BasicSetType> 
 HybridDiscretiser<ES>::
-lower_evolve(const SystemType& system, 
-             const BasicSetType& initial_set, 
-             const TimeType& time,
-             const int accuracy) const
+lower_evolution(const SystemType& system, 
+                const BasicSetType& initial_set, 
+                const TimeType& time,
+                const int accuracy) const
 {
   return this->_discretise(this->_evolver->orbit(system,this->_enclosure(initial_set),time,LOWER_SEMANTICS),initial_set,accuracy);
 }
@@ -92,10 +92,10 @@ lower_evolve(const SystemType& system,
 template<class ES>
 Orbit<typename HybridDiscretiser<ES>::BasicSetType> 
 HybridDiscretiser<ES>::
-upper_evolve(const SystemType& system, 
-             const BasicSetType& initial_set, 
-             const TimeType& time,
-             const int accuracy) const
+upper_evolution(const SystemType& system, 
+                const BasicSetType& initial_set, 
+                const TimeType& time,
+                const int accuracy) const
 {
   ARIADNE_LOG(3,ARIADNE_PRETTY_FUNCTION);
   EnclosureType enclosure=this->_enclosure(initial_set);

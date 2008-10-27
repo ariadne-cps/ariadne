@@ -547,7 +547,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
 
   // Compute continuous evolution
   ARIADNE_LOG(6,"Computing continuous evolution\n");
-  if(blocking_data.initially_active) {
+  if( blocking_data.initially_active || ( possibly(blocking_data.initially_active) && semantics==LOWER_SEMANTICS ) ) {
     ARIADNE_LOG(6,"  No continuous evolution\n");
     reach_set_model=initial_set_model;
     reach_sets.adjoin(EnclosureType(initial_location,reach_set_model));
@@ -557,9 +557,15 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     reach_sets.adjoin(EnclosureType(initial_location,reach_set_model));
   } else if(blocking_data.finally_active) {
     ARIADNE_LOG(6,"  Continuous evolution for finite time to invariant/guard\n");
-    reach_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,zero_time,blocking_data.touching_time_interval.upper());
-    final_set_model=this->_toolbox->integration_step(flow_model,initial_set_model,blocking_data.touching_time_interval.upper());
-    reach_sets.adjoin(EnclosureType(initial_location,reach_set_model));
+    if(semantics==UPPER_SEMANTICS) {
+      reach_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,zero_time,blocking_data.touching_time_interval.upper());
+      final_set_model=this->_toolbox->integration_step(flow_model,initial_set_model,blocking_data.touching_time_interval.upper());
+      reach_sets.adjoin(EnclosureType(initial_location,reach_set_model));
+    } else { // semantics==LOWER_SEMANTICS
+      reach_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,zero_time,blocking_data.touching_time_interval.lower());
+      final_set_model=this->_toolbox->integration_step(flow_model,initial_set_model,blocking_data.touching_time_interval.lower());
+      reach_sets.adjoin(EnclosureType(initial_location,reach_set_model));
+    }
   } else {
     ARIADNE_LOG(6,"  Continuous evolution for maximum time; unwinding time differentce\n");
     ARIADNE_ASSERT(blocking_data.predicate_kind==TIME);
@@ -579,7 +585,6 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
   }
 
 
-  // FIXME: Lower semantics
 
   // Process discrete transitions
   ARIADNE_LOG(6,"Computing discrete transitions\n");
@@ -592,14 +597,18 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
       const FunctionInterface* reset_ptr=&transition.reset();
       TimeModelType active_time_model;
       TimeModelType jump_time_model;
-      if(blocking_data.initially_active) {
+
+      if( definitely(blocking_data.initially_active) || ( possibly(blocking_data.initially_active) && semantics==LOWER_SEMANTICS ) ) {
+        // In this case there is no continuous evolution
         SetModelType jump_set_model
           =this->_toolbox->compose(*reset_ptr,initial_set_model);
-        
-        working_sets.push_back(make_tuple(jump_location,initial_steps+1,jump_set_model,initial_time_model));
+        if( ( semantics==UPPER_SEMANTICS && possibly(data.initially_active) ) || definitely(data.initially_active) ) {
+          working_sets.push_back(make_tuple(jump_location,initial_steps+1,jump_set_model,initial_time_model));
+          intermediate_sets.adjoin(EnclosureType(jump_location,jump_set_model));
+        }
         reach_sets.adjoin(EnclosureType(initial_location,initial_set_model));
-        intermediate_sets.adjoin(EnclosureType(jump_location,jump_set_model));
       } else {
+        // In this case may be continuous evolution
         if(data.crossing_kind==TRANSVERSE) {
           if(data.initially_active) {
             active_time_model=this->_toolbox->reachability_time(zero_time,data.crossing_time_model);
@@ -611,10 +620,14 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
                                 initial_time_model+Vector<Float>(1u,maximum_evolution_time));
           } 
         } else {
-          Float lower_active_time
-            = data.initially_active ? zero_time : data.touching_time_interval.lower();
-          Float upper_active_time
-            = data.finally_active ? step_size : data.touching_time_interval.upper();
+          Float lower_active_time, upper_active_time;
+          if(semantics==UPPER_SEMANTICS) {
+             lower_active_time = data.initially_active ? zero_time : data.touching_time_interval.lower();
+             upper_active_time = data.finally_active ? step_size : data.touching_time_interval.upper();
+          } else { // semantics==LOWER_SEMANTICS
+             lower_active_time = definitely(data.initially_active) ? zero_time : data.touching_time_interval.upper();
+             upper_active_time = definitely(data.finally_active) ? step_size : data.touching_time_interval.lower();
+          }
           TimeModelType lower_active_time_model=this->_toolbox->constant_time_model(lower_active_time,initial_time_model.domain());
           TimeModelType upper_active_time_model=this->_toolbox->constant_time_model(upper_active_time,initial_time_model.domain());
           active_time_model=this->_toolbox->reachability_time(lower_active_time_model,upper_active_time_model);
@@ -623,7 +636,10 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
         SetModelType active_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,active_time_model);
         SetModelType jump_set_model=this->_toolbox->compose(*reset_ptr,active_set_model);
         
-        working_sets.push_back(make_tuple(jump_location,initial_steps+1,jump_set_model,jump_time_model));
+        if(semantics==UPPER_SEMANTICS || data.predicate_kind==ACTIVATION
+           || data.crossing_kind==TRANSVERSE) {
+          working_sets.push_back(make_tuple(jump_location,initial_steps+1,jump_set_model,jump_time_model));
+        }
         intermediate_sets.adjoin(EnclosureType(initial_location,active_set_model));
         intermediate_sets.adjoin(EnclosureType(jump_location,jump_set_model));
       }

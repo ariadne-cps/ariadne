@@ -48,13 +48,6 @@ struct EvolutionParameters {
   //! \brief Default constructer gives reasonable values. 
   EvolutionParameters();
 
-  //! \brief The time after which an evolver may approximate computed sets on a grid,
-  //! in order to use previously cached results for the grid. Increasing this 
-  //! parameter may improve the accuracy of the computations.  
-  //! If there is recurrence in the system, then this parameter should be set to 
-  //! the average recurrence time, if known. Used for discrete-time computation.
-  uint lock_to_grid_steps;
-    
   //! \brief A suggested minimum step size for integration. 
   //! This value may be ignored if an integration step cannot be performed without reducing the step size below this value. 
   TimeType minimum_step_size;
@@ -70,6 +63,17 @@ struct EvolutionParameters {
   //! Decreasing this value increases the accuracy of the computation of an over-approximation. 
   RealType maximum_enclosure_radius;
 
+
+  //! \brief The time after which an VectorFieldEvolver may approximate computed sets on a grid,
+  //! when computing transient behaviour in a reachability computation.
+  //! Setting this value to the time at which transients die out can improve the
+  //! speed of the computations.
+  //!
+  TimeType transient_time;
+
+  //! \brief See transient_time.
+  uint transient_steps;
+    
   //! \brief The time after which an VectorFieldEvolver may approximate computed sets on a grid,
   //! in order to use previously cached integration results for the grid. Increasing this 
   //! parameter improves the accuracy of the computations. Setting this parameter too
@@ -80,6 +84,13 @@ struct EvolutionParameters {
   //!
   TimeType lock_to_grid_time;
 
+  //! \brief The time after which an evolver may approximate computed sets on a grid,
+  //! in order to use previously cached results for the grid. Increasing this 
+  //! parameter may improve the accuracy of the computations.  
+  //! If there is recurrence in the system, then this parameter should be set to 
+  //! the average recurrence time, if known. Used for discrete-time computation.
+  uint lock_to_grid_steps;
+    
   //! \brief Set the length of the approximation grid. 
   //! Decreasing this value increases the accuracy of the computation. 
   RealType grid_length;
@@ -96,12 +107,14 @@ struct EvolutionParameters {
 
 inline
 EvolutionParameters::EvolutionParameters() 
-  : lock_to_grid_steps(1),
-    minimum_step_size(0.0),
+  : minimum_step_size(0.0),
     maximum_step_size(1.0),
     minimum_enclosure_radius(0.0),
     maximum_enclosure_radius(0.5),
+    transient_time(4.0),
+    transient_steps(4),
     lock_to_grid_time(1.0),
+    lock_to_grid_steps(1),
     grid_length(0.125),
     grid_depth(6),
     bounding_domain_size(8.0)

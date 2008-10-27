@@ -388,7 +388,35 @@ class HybridGridTreeSet
         this->insert(make_pair(loc_iter->first,new_gts)); }
       this->find(loc_iter->first)->second.adjoin(loc_iter->second); } }
 
-  void adjoin_lower_approximation(const HybridOvertSetInterface& hs) { ARIADNE_NOT_IMPLEMENTED; };
+  void remove(const HybridGridTreeSet& hgts) {
+    for(HybridGridTreeSet::locations_const_iterator loc_iter=hgts.locations_begin(); loc_iter!=hgts.locations_end(); ++loc_iter) {
+      if(this->has_location(loc_iter->first)) {
+        this->find(loc_iter->first)->second.remove(loc_iter->second); } } }
+
+  void restrict(const HybridGridTreeSet& hgts) {
+    for(HybridGridTreeSet::locations_const_iterator loc_iter=hgts.locations_begin(); loc_iter!=hgts.locations_end(); ++loc_iter) {
+      if(this->has_location(loc_iter->first)) {
+        this->find(loc_iter->first)->second.restrict(loc_iter->second); } } }
+
+  void adjoin_inner_approximation(const HybridBoxes& hbxs, const int depth) { 
+    for(HybridBoxes::const_iterator loc_iter=hbxs.begin();
+        loc_iter!=hbxs.end(); ++loc_iter)
+    {
+      DiscreteState loc=loc_iter->first;
+      if(!this->has_location(loc)) {
+        this->insert(make_pair(loc,GridTreeSet(loc_iter->second.dimension()))); }
+      (*this)[loc].adjoin_inner_approximation(loc_iter->second,depth); } }
+
+  void adjoin_lower_approximation(const HybridOvertSetInterface& hs, const int depth) { 
+    HybridSpace hspc=hs.space();
+    for(HybridSpace::const_iterator loc_iter=hspc.begin();
+        loc_iter!=hspc.end(); ++loc_iter)
+    {
+      DiscreteState loc=loc_iter->first;
+      if(!this->has_location(loc)) {
+        this->insert(make_pair(loc,GridTreeSet(loc_iter->second))); }
+      (*this)[loc].adjoin_lower_approximation(hs[loc],depth); } }
+
   void adjoin_outer_approximation(const HybridCompactSetInterface& hs, const int depth) { 
     HybridSpace hspc=hs.space();
     for(HybridSpace::const_iterator loc_iter=hspc.begin();
@@ -423,6 +451,15 @@ class HybridGridTreeSet
 
   HybridGridCellListSet cells() const { ARIADNE_NOT_IMPLEMENTED; }
   HybridListSet<Box> boxes() const { ARIADNE_NOT_IMPLEMENTED; }
+
+  void mince(int depth) {
+    for(locations_iterator loc_iter=this->locations_begin(); 
+        loc_iter!=this->locations_end(); ++loc_iter) {
+      loc_iter->second.mince(depth); } }
+  void recombine() {
+    for(locations_iterator loc_iter=this->locations_begin(); 
+        loc_iter!=this->locations_end(); ++loc_iter) {
+      loc_iter->second.recombine(); } }
  public:
   // HybridSetInterface methods
   HybridGridTreeSet* clone() const { return new HybridGridTreeSet(*this); }

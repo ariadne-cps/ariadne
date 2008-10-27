@@ -64,7 +64,7 @@ class TestReachabilityAnalyser
     EvolutionParameters parameters;
     parameters.maximum_enclosure_radius=0.5;
     parameters.grid_length=1.0;
-    parameters.grid_depth=4;
+    parameters.grid_depth=8;
     parameters.maximum_step_size=0.25;
     parameters.lock_to_grid_time=1.0;
     
@@ -83,7 +83,7 @@ class TestReachabilityAnalyser
       system(),
       grid(2),
       bound(-4,4),
-      reach_time(2.0,3)
+      reach_time(4.0,3)
   {
     cout << "Done initialising variables\n";
     DiscreteState location(1);
@@ -126,26 +126,46 @@ class TestReachabilityAnalyser
     g.write(name);
   }
 
-  void test_lower_reach() {  
+  template<class ES, class RS, class IS> void plot(const char* name, const Box& bounding_box, 
+                                                   const ES& evolve_set, const RS& reach_set, const IS& initial_set) {
+    Graphic g;
+    g << fill_colour(white) << bounding_box;
+    g << line_style(true);
+    g << fill_colour(green) << reach_set;
+    g << fill_colour(red) << evolve_set;
+    g << fill_colour(blue) << initial_set;
+    g.write(name);
+  }
+
+  void test_lower_reach_evolve() {  
     cout << "test_lower_reach() not used\n";
-  /*
+    DiscreteState loc(1);
+    Box bounding_box(2,bound);
+    cout << "Computing timed evolve set" << endl;
+    HybridGridTreeSet& hybrid_lower_evolve=*analyser.lower_evolve(system,initial_set,reach_time);
     cout << "Computing timed reachable set" << endl;
-    GridMaskSet lower_reach=map_analyser->lower_reach(system,initial_set,Rational(1));
-    cout << "Reached " << lower_reach.size() << " cells out of " << lower_reach.capacity() << endl << endl;
-    plot("test_reachability_analyser-map_lower_reach.eps",bounding_box,lower_reach,initial_set);
-  */
+    HybridGridTreeSet& hybrid_lower_reach=*analyser.lower_reach(system,initial_set,reach_time);
+    GridTreeSet& lower_evolve=hybrid_lower_evolve[loc];
+    GridTreeSet& lower_reach=hybrid_lower_reach[loc];
+    cout << "Evolved to " << lower_evolve.size() << " cells " << endl << endl;
+    cout << "Reached " << lower_reach.size() << " cells " << endl << endl;
+    plot("test_reachability_analyser-map_lower_reach_evolve.png",bounding_box,lower_evolve,lower_reach,initial_set);
   }
   
-  void test_upper_reach() {  
+  void test_upper_reach_evolve() {  
     cout << "Computing timed reachable set" << endl;
     DiscreteState loc(1);
     Box bounding_box(2,bound);
+    HybridGridTreeSet& upper_evolve_set=*analyser.upper_evolve(system,initial_set,reach_time);
+    cout << "upper_evolve_set="<<upper_evolve_set<<std::endl;
     HybridGridTreeSet& upper_reach_set=*analyser.upper_reach(system,initial_set,reach_time);
     cout << "upper_reach_set="<<upper_reach_set<<std::endl;
+ 
+    const GridTreeSet& upper_evolve=upper_evolve_set[loc];
     const GridTreeSet& upper_reach=upper_reach_set[loc];
     ImageSet& initial=initial_set[loc];
     //cout << "Reached " << upper_reach.size() << " cells out of " << upper_reach.capacity() << endl << endl;
-    plot("test_reachability_analyser-map_upper_reach.eps",bounding_box,upper_reach,initial);
+    plot("test_reachability_analyser-map_upper_reach_evolve.png",bounding_box,upper_evolve,upper_reach,initial);
   }
   
   void test_chain_reach() {  
@@ -156,13 +176,13 @@ class TestReachabilityAnalyser
     Box bounding_box=bounding_boxes[loc];
 
     HybridGridTreeSet& chain_reach_set=*analyser.chain_reach(system,initial_set,bounding_boxes);
-    plot("test_reachability_analyser-map_chain_reach.eps",bounding_box,chain_reach_set[loc],initial_set[loc]);
+    plot("test_reachability_analyser-map_chain_reach.png",bounding_box,chain_reach_set[loc],initial_set[loc]);
   }
   
   void test() {
-    //ARIADNE_TEST_CALL(test_lower_reach());
-    ARIADNE_TEST_CALL(test_upper_reach());
-    //ARIADNE_TEST_CALL(test_chain_reach());
+    ARIADNE_TEST_CALL(test_lower_reach_evolve());
+    ARIADNE_TEST_CALL(test_upper_reach_evolve());
+    ARIADNE_TEST_CALL(test_chain_reach());
   }
 
 };

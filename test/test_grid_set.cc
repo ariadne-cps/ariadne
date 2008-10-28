@@ -63,15 +63,15 @@ void print_comment(const char * pComment){
 	cout.flush(); \
 }
 
-#define TEST_BINARY_TREE( pMsg, expected_result, pBinaryTreeRoot) \
+#define TEST_BINARY_TREE( pMsg, expected_result, theBinaryTreeRoot ) \
 { \
-	string actual_result = (pBinaryTreeRoot)->tree_to_string(); \
+	string actual_result = theBinaryTreeRoot.tree_to_string(); \
 	TEST_RESULT_STRING( pMsg, actual_result, expected_result ) \
 }
 
-#define TEST_BINARY_TREE_NODE( pMsg, expected_result, pBinaryTreeRoot) \
+#define TEST_BINARY_TREE_NODE( pMsg, expected_result, theBinaryTreeRoot ) \
 { \
-	string actual_result = (pBinaryTreeRoot)->node_to_string(); \
+	string actual_result = theBinaryTreeRoot.node_to_string(); \
 	TEST_RESULT_STRING( pMsg, actual_result, expected_result ) \
 }
 
@@ -95,46 +95,49 @@ void test_binary_tree() {
 	// !!!
 	print_title("Allocate an ebabled node and manipulate it");
 
-	BinaryTreeNode * pBinaryTreeRoot = new BinaryTreeNode(true);
+	BinaryTreeNode theBinaryTreeRoot(true);
 	expected_result = "+0";
-	TEST_BINARY_TREE("Initial tree node", expected_result, pBinaryTreeRoot );
+	TEST_BINARY_TREE("Initial tree node", expected_result, theBinaryTreeRoot );
 
-	pBinaryTreeRoot->set_disabled();
-	expected_result = "isLeaf = 1, isEnabled = 0, isDisabled = 1";
-	TEST_BINARY_TREE_NODE( "Disable the node", expected_result, pBinaryTreeRoot );
-
-	print_comment("Making the leaf node intermediate should cause the IsALeafNodeException exception");
-	ARIADNE_TEST_THROW( pBinaryTreeRoot->set_unknown(), IsALeafNodeException);
-	expected_result = "isLeaf = 1, isEnabled = 0, isDisabled = 1";
-	TEST_BINARY_TREE_NODE( "The node still have to be disabled", expected_result, pBinaryTreeRoot );
+	theBinaryTreeRoot.set_disabled();
+	print_comment("Disable the node");
+	BinaryTreeNode expected_node1(false);
+	ARIADNE_TEST_COMPARE( expected_node1, ==, theBinaryTreeRoot );
 	
-	pBinaryTreeRoot->set_enabled();
-	expected_result = "isLeaf = 1, isEnabled = 1, isDisabled = 0";
-	TEST_BINARY_TREE_NODE( "Enable the node", expected_result, pBinaryTreeRoot );
+	print_comment("Making the leaf node intermediate should cause the IsALeafNodeException exception");
+	ARIADNE_TEST_THROW( theBinaryTreeRoot.set_unknown(), IsALeafNodeException);
+
+	print_comment("The node still have to be disabled");
+	ARIADNE_TEST_COMPARE( expected_node1, ==, theBinaryTreeRoot );
+	
+	print_comment("Enable the node");
+	theBinaryTreeRoot.set_enabled();
+	BinaryTreeNode expected_node2(true);
+	ARIADNE_TEST_COMPARE( expected_node2, ==, theBinaryTreeRoot );
 	
 	// !!!
 	print_title("Split the enabled node");
 	print_comment("Should mark the node as intermediate and create two enabled subnodes");
 
-	pBinaryTreeRoot->split();
+	theBinaryTreeRoot.split();
 	expected_result = "?1+01+0";
-	TEST_BINARY_TREE("Splitted node tree", expected_result, pBinaryTreeRoot);
+	TEST_BINARY_TREE("Splitted node tree", expected_result, theBinaryTreeRoot );
 	expected_result = "isLeaf = 0, isEnabled = 0, isDisabled = 0";
-	TEST_BINARY_TREE_NODE( "Splitted node", expected_result, pBinaryTreeRoot );
+	TEST_BINARY_TREE_NODE( "Splitted node", expected_result, theBinaryTreeRoot );
 
 	// !!!
 	print_title("Split a splited node");
 	print_comment("We expect an unchanged tree, since it is already split");
-	pBinaryTreeRoot->mince(1);
+	theBinaryTreeRoot.mince(1);
 	expected_result = "?1+01+0";
-	TEST_BINARY_TREE("Unchanged tree", expected_result, pBinaryTreeRoot);
+	TEST_BINARY_TREE("Unchanged tree", expected_result, theBinaryTreeRoot );
 	
 	// !!!
 	print_title("Copy the node by using the copy constructor");
 	print_comment("The entire subtree should be copied");
-	BinaryTreeNode theBinaryTreeCopy( *pBinaryTreeRoot );
+	BinaryTreeNode theBinaryTreeCopy( theBinaryTreeRoot );
 	expected_result = "?1+01+0";
-	TEST_BINARY_TREE("Copied tree", expected_result, &theBinaryTreeCopy);
+	TEST_BINARY_TREE("Copied tree", expected_result, theBinaryTreeCopy);
 	
 	// !!!
 	print_title("Recombine the new tree and see what happens");
@@ -142,69 +145,67 @@ void test_binary_tree() {
 	print_comment("The old tree should remain unchanged");
 	theBinaryTreeCopy.recombine();
 	expected_result = "+0";
-	TEST_BINARY_TREE("Reduced tree", expected_result, &theBinaryTreeCopy);
+	TEST_BINARY_TREE("Reduced tree", expected_result, theBinaryTreeCopy );
 	expected_result = "?1+01+0";
-	TEST_BINARY_TREE("The original tree", expected_result, pBinaryTreeRoot);
+	TEST_BINARY_TREE("The original tree", expected_result, theBinaryTreeRoot );
 	
 	// !!!
 	print_title("Disable the left tree leaf, recombine the tree and split the disabled leaf to level 3");
-	pBinaryTreeRoot->left_node()->set_disabled();
+	theBinaryTreeRoot.left_node()->set_disabled();
 	expected_result = "?1-01+0";
-	TEST_BINARY_TREE("A tree with disabled left node", expected_result, pBinaryTreeRoot);
-	pBinaryTreeRoot->recombine();
+	TEST_BINARY_TREE("A tree with disabled left node", expected_result, theBinaryTreeRoot );
+	theBinaryTreeRoot.recombine();
 	expected_result = "?1-01+0";
-	TEST_BINARY_TREE("A tree after recombination", expected_result, pBinaryTreeRoot);
-	pBinaryTreeRoot->left_node()->mince(3);
+	TEST_BINARY_TREE("A tree after recombination", expected_result, theBinaryTreeRoot );
+	theBinaryTreeRoot.left_node()->mince(3);
 	expected_result = "?1-01+0";
-	TEST_BINARY_TREE("A tree after splitting the disabled node", expected_result, pBinaryTreeRoot);
-	pBinaryTreeRoot->mince(3);
+	TEST_BINARY_TREE("A tree after splitting the disabled node", expected_result, theBinaryTreeRoot );
+	theBinaryTreeRoot.mince(3);
 	expected_result = "?1-01?1?1+01+01?1+01+0";
-	TEST_BINARY_TREE("A tree after splitting the root node", expected_result, pBinaryTreeRoot);
+	TEST_BINARY_TREE("A tree after splitting the root node", expected_result, theBinaryTreeRoot );
 	print_comment("Testing the depth of the binary tree");
-	ARIADNE_TEST_EQUAL(pBinaryTreeRoot->depth(), 3);
+	ARIADNE_TEST_EQUAL(theBinaryTreeRoot.depth(), 3);
 
 	// !!!
 	print_title("Disable the left most enabled leaf, recombine the tree");
-	pBinaryTreeRoot->right_node()->left_node()->left_node()->set_disabled();
+	theBinaryTreeRoot.right_node()->left_node()->left_node()->set_disabled();
 	expected_result = "?1-01?1?1-01+01?1+01+0";
-	TEST_BINARY_TREE("A tree with enabled left-most leaf", expected_result, pBinaryTreeRoot);
-	pBinaryTreeRoot->recombine();
+	TEST_BINARY_TREE("A tree with enabled left-most leaf", expected_result, theBinaryTreeRoot );
+	theBinaryTreeRoot.recombine();
 	expected_result = "?1-01?1?1-01+01+0";
-	TEST_BINARY_TREE("A tree after recombination", expected_result, pBinaryTreeRoot);
-	
-	delete pBinaryTreeRoot;
+	TEST_BINARY_TREE("A tree after recombination", expected_result, theBinaryTreeRoot );
 	
 	// !!!
 	print_title("Testing the add_enabled( BinaryWord& ) method");
-	pBinaryTreeRoot = new BinaryTreeNode(true);
+	BinaryTreeNode theNewBinaryTreeRoot(true);
 	BinaryWord binaryWord;
 	print_comment("Adding enabled node to an enabled node, the former one is defined by an empty path");
-	pBinaryTreeRoot->add_enabled( binaryWord );
+	theNewBinaryTreeRoot.add_enabled( binaryWord );
 	expected_result = "+0";
-	TEST_BINARY_TREE("The binary tree should stay intact, i.e. consist of one enabled node", expected_result, pBinaryTreeRoot);
+	TEST_BINARY_TREE("The binary tree should stay intact, i.e. consist of one enabled node", expected_result, theNewBinaryTreeRoot );
 	
 	print_comment("Adding enabled sub node, path: (true,false) to a disabled node");
-	pBinaryTreeRoot->set_disabled();
+	theNewBinaryTreeRoot.set_disabled();
 	binaryWord.push_back(true);
 	binaryWord.push_back(false);
-	pBinaryTreeRoot->add_enabled( binaryWord );
+	theNewBinaryTreeRoot.add_enabled( binaryWord );
 	expected_result = "?1-01?1+01-0";
-	TEST_BINARY_TREE("The binary tree have five nodes, four leafs and one (true, false) is enabled", expected_result, pBinaryTreeRoot);
+	TEST_BINARY_TREE("The binary tree have five nodes, four leafs and one (true, false) is enabled", expected_result, theNewBinaryTreeRoot );
 
 	print_comment("Adding enabled sub node, path: (true) to a disabled node");
 	binaryWord = BinaryWord();
 	binaryWord.push_back(true);
-	pBinaryTreeRoot->add_enabled( binaryWord );
+	theNewBinaryTreeRoot.add_enabled( binaryWord );
 	expected_result = "?1-01+0";
-	TEST_BINARY_TREE("The binary tree have three nodes, two leafs and one (true) is enabled", expected_result, pBinaryTreeRoot);
+	TEST_BINARY_TREE("The binary tree have three nodes, two leafs and one (true) is enabled", expected_result, theNewBinaryTreeRoot );
 
 	print_comment("Adding enabled sub node, path: (true,false) to a disabled node");
 	binaryWord = BinaryWord();
 	binaryWord.push_back(false);
 	binaryWord.push_back(true);
-	pBinaryTreeRoot->add_enabled( binaryWord );
+	theNewBinaryTreeRoot.add_enabled( binaryWord );
 	expected_result = "?1?1-01+01+0";
-	TEST_BINARY_TREE("The binary tree have five nodes, four leafs and two (false, true) and (true) are enabled", expected_result, pBinaryTreeRoot);
+	TEST_BINARY_TREE("The binary tree have five nodes, four leafs and two (false, true) and (true) are enabled", expected_result, theNewBinaryTreeRoot );
 }
 
 /*
@@ -686,7 +687,7 @@ void test_grid_paving(){
 	TEST_TO_STRING_RESULT("The resulting GridTreeSet: ", expected_result, theTwoDimPaving );
 
 	// !!!
-	print_title("Test GridTreeSet (Grid, Height, BooleanArray, BooleanArray) constructor");
+	print_title("Test GridTreeSet (Grid, Height, BooleanArray, BooleanArray ) constructor");
 	expected_result = createSubPavingOutput("origin=[-0.25,0.5], lengths=[0.25,0.5]", "2", "e", "[[-0.5:0.5],[0:2]]", "?1?1+01-01?1?1+01-01+0");
 	BooleanArray theTree(9), theEnabledLeafs(5);
 	theTree[0] = true;

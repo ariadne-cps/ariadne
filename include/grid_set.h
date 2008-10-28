@@ -238,7 +238,7 @@ namespace Ariadne {
 			 *  the used data, i.e. \a theTree and \a theEnabledCells. It is used in the
 			 *  constructor \a BinaryTreeNode( const BooleanArray& , const BooleanArray& )
 			 */
-			void restore_node( BinaryTreeNode * theCurrentNode, uint & arr_index, uint & leaf_counter,
+			void restore_node( BinaryTreeNode * pCurrentNode, uint & arr_index, uint & leaf_counter,
 						const BooleanArray& theTree, const BooleanArray& theEnabledCells);
 			
 			/*! \brief This method is used in constructors for the node initialization */
@@ -296,7 +296,12 @@ namespace Ariadne {
 
 			/*! \brief Returns the depth of the sub-tree rooted to the given node, i.e. the depth of it's deepest node */
 			uint depth() const;
-
+			
+			/*! \brief Allows to compare to binaty tree nodes */
+			bool operator==(const BinaryTreeNode & otherNode ) const;
+			
+			static bool is_equal_nodes( const BinaryTreeNode * pFirstNode, const BinaryTreeNode * pSecondNode );
+			
 			//@}
 			
 			//@{

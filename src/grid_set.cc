@@ -241,6 +241,31 @@ std::ostream& operator<<(std::ostream& os, const Grid& gr)
 
 /****************************************BinaryTreeNode**********************************************/
 	
+	bool BinaryTreeNode::is_equal_nodes( const BinaryTreeNode * pFirstNode, const BinaryTreeNode * pSecondNode ) {
+		bool result = true;
+		
+		if( pFirstNode != pSecondNode){
+			//If the pointers do not reference the same objects
+			if( ( pFirstNode != NULL ) && ( pSecondNode != NULL ) ){
+				//And both nodes are not null
+				if( ! ( (* pFirstNode) == ( * pSecondNode ) ) ){
+					//If the objects referenced by the pointers do not contain equal data
+					result = false;
+				}
+			} else {
+				//One of the nodes is null and the other is not
+				result = false;
+			}
+		}
+		return result;
+	}
+	
+	bool BinaryTreeNode::operator==(const BinaryTreeNode & otherNode ) const {
+		return (this->_isEnabled == otherNode._isEnabled) &&
+			is_equal_nodes( this->_pLeftNode , otherNode._pLeftNode ) &&
+			is_equal_nodes( this->_pRightNode , otherNode._pRightNode );
+	}
+
 	void BinaryTreeNode::restrict( BinaryTreeNode * pThisNode, const BinaryTreeNode * pOtherNode ){
 		if( ( pThisNode != NULL ) && ( pOtherNode != NULL ) ){
 			if( pThisNode->is_leaf() && pOtherNode->is_leaf() ){
@@ -315,26 +340,23 @@ std::ostream& operator<<(std::ostream& os, const Grid& gr)
 		}
 	}
 	
-	void BinaryTreeNode::restore_node( BinaryTreeNode * theCurrentNode, uint & arr_index, uint & leaf_counter,
+	void BinaryTreeNode::restore_node( BinaryTreeNode * pCurrentNode, uint & arr_index, uint & leaf_counter,
 					const BooleanArray& theTree, const BooleanArray& theEnabledCells) {
 		//If we are not done with the the tree yet
 		if( arr_index < theTree.size() ) {
 			//If we are in a non-leaf node then go further
 			if( theTree[arr_index] ) {
-					theCurrentNode->split();
+					pCurrentNode->split();
 					//IVAN S. ZAPREEV:
 					//NOTE: We assume a correct input, i.e. both children are present
 					//NOTE: We increase the arr_index before calling recursion for each
 					//      of the subnodes of the tree
-					restore_node( theCurrentNode->left_node(), ++arr_index, leaf_counter, theTree, theEnabledCells );
-					restore_node( theCurrentNode->right_node(), ++arr_index, leaf_counter, theTree, theEnabledCells );
+					restore_node( pCurrentNode->_pLeftNode, ++arr_index, leaf_counter, theTree, theEnabledCells );
+					restore_node( pCurrentNode->_pRightNode, ++arr_index, leaf_counter, theTree, theEnabledCells );
 			} else {
 				//If we are in a leaf node then chek if it needs to be enabled/disabled
-				if( theEnabledCells[leaf_counter] ) {
-					theCurrentNode->set_enabled();
-				} else {
-					theCurrentNode->set_disabled();
-				}
+				pCurrentNode->_isEnabled = theEnabledCells[leaf_counter];
+				
 				leaf_counter++;
 			}
 		}

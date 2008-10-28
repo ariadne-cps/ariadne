@@ -249,7 +249,7 @@ std::ostream& operator<<(std::ostream& os, const Grid& gr)
 			if( ( pFirstNode != NULL ) && ( pSecondNode != NULL ) ){
 				//And both nodes are not null
 				if( ! ( (* pFirstNode) == ( * pSecondNode ) ) ){
-					//If the objects referenced by the pointers do not contain equal data
+					//The objects referenced by the pointers do not contain equal data
 					result = false;
 				}
 			} else {
@@ -261,8 +261,10 @@ std::ostream& operator<<(std::ostream& os, const Grid& gr)
 	}
 	
 	bool BinaryTreeNode::operator==(const BinaryTreeNode & otherNode ) const {
-		return (this->_isEnabled == otherNode._isEnabled) &&
-			is_equal_nodes( this->_pLeftNode , otherNode._pLeftNode ) &&
+		return ( ( this->_isEnabled == otherNode._isEnabled ) ||
+			 ( indeterminate( this->_isEnabled     ) &&
+			   indeterminate( otherNode._isEnabled ) ) )		    &&
+			is_equal_nodes( this->_pLeftNode , otherNode._pLeftNode )   &&
 			is_equal_nodes( this->_pRightNode , otherNode._pRightNode );
 	}
 

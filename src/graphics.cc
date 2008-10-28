@@ -58,6 +58,12 @@ std::vector<Point> interpolation_points(const InterpolatedCurve& c) {
     return result;
 }
 
+inline
+std::vector<Point> vertices(const Polytope& pl) {
+    return pl.vertices();
+}
+
+
 std::vector<Point> corner_points(const Box& bx) {
     std::vector<Point> result(2,Point(bx.dimension()));
     for(uint i=0; i!=bx.dimension(); ++i) {
@@ -96,15 +102,15 @@ std::vector<Point> apply(const ProjectionFunction& map, const std::vector<Point>
 
 
 std::vector<Point> extremal(const std::vector<Point> & points) {
-  Polytope polytope=static_cast<const Polytope&>(points);
-  return reduce2d(polytope);
+  Polytope polytope(points);
+  return reduce2d(polytope).vertices();
 }
   
 
 struct GraphicsObject {
     enum ShapeKind { BOX, POLYTOPE, CURVE };
     GraphicsObject(Colour fc, Box bx) : kind(BOX), fill_colour(fc), shape(corner_points(bx)) { }
-    GraphicsObject(Colour fc, Polytope pl) : kind(POLYTOPE), fill_colour(fc), shape(pl) { }
+    GraphicsObject(Colour fc, Polytope pl) : kind(POLYTOPE), fill_colour(fc), shape(vertices(pl)) { }
     GraphicsObject(Colour fc, InterpolatedCurve cv) : kind(CURVE), fill_colour(fc), shape(interpolation_points(cv)) { }
     ShapeKind kind;
     Colour fill_colour;

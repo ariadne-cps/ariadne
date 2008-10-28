@@ -55,61 +55,46 @@ Polytope polytope(const Polytope& p);
 Polytope polytope(const ApproximateTaylorModel& ts);
 
 Point baricentre(const Polytope& p);
+
 bool operator<(const Point& pt1, const Point& pt2);
 
 Polytope& reduce2d(Polytope& p);
 Float slope2d(const Point& pt1, const Point& pt2);
 
 class Polytope
-  : public std::vector<Point>  
+  : public LocatedSetInterface
 { 
  public: 
   Polytope() { }
   Polytope(uint d) { }
-  Polytope(const std::vector<Point>& v) : std::vector<Point>(v) { }
-  void new_vertex(const Point& v) { ARIADNE_ASSERT(this->size()==0 || v.dimension()==this->front().dimension()); this->push_back(v); }
-  uint dimension() const { if(this->size()==0) { return 0; } return this->front().dimension(); }
-  size_t number_of_vertices() const { return this->size(); }
-  const std::vector<Point>& vertices() const { return *this; }
-  std::vector<Point>& vertices() { return *this; }
-  std::vector<Point>::const_iterator vertices_begin() const { return this->begin(); }
-  std::vector<Point>::const_iterator vertices_end() const { return this->end(); }
-  Box bounding_box() const;
+  Polytope(const std::vector<Point>& v) : _vertices(v) { }
+
+  void new_vertex(const Point& v) { 
+    ARIADNE_ASSERT(this->_vertices.size()==0 || v.dimension()==this->_vertices.front().dimension()); 
+    this->_vertices.push_back(v); }
+  size_t number_of_vertices() const { return this->_vertices.size(); }
+  const Point& vertex(size_t i) const { return this->_vertices[i]; }
+  const std::vector<Point>& vertices() const { return this->_vertices; }
+  std::vector<Point>& vertices() { return this->_vertices; }
+  std::vector<Point>::const_iterator vertices_begin() const { return this->_vertices.begin(); }
+  std::vector<Point>::const_iterator vertices_end() const { return this->_vertices.end(); }
+ 
+  virtual Polytope* clone() const { return new Polytope(*this); }
+  virtual uint dimension() const { if(this->_vertices.size()==0) { return 0; } return this->_vertices.front().dimension(); }
+  virtual tribool disjoint(const Vector<Interval>& bx) const;
+  virtual tribool intersects(const Vector<Interval>& bx) const;
+  virtual tribool subset(const Vector<Interval>& bx) const;
+  virtual Vector<Interval> bounding_box() const;
+  virtual std::ostream& write(std::ostream& os) const { return os << *this; }
+  
+  friend Polytope convex_hull(const Polytope& p1, const Polytope& p2);
+  friend Point baricentre(const Polytope& p);
+ private:
+  std::vector<Point> _vertices;
 };
 
+std::ostream& operator<<(std::ostream& os, const Polytope& p);
 
-class PlanarProjectionMap
-{
- public:
-  PlanarProjectionMap();
-  PlanarProjectionMap(uint d, uint i, uint j);
-  size_t argument_size() const;
-  template<class X> Vector<X> operator() (const Vector<X>& v) const;
-  Point operator() (const Point& pt) const;
-  Box operator() (const Box& bx) const;
-  Zonotope operator() (const Zonotope& z) const;
-  Polytope operator() (const Polytope& z) const;
-  InterpolatedCurve operator() (const InterpolatedCurve& c) const;
- private:
-  friend std::ostream& operator<<(std::ostream&, const PlanarProjectionMap&);
- private:
-  uint _d;
-  uint _i;
-  uint _j;
-};
-       
-
-
-template<class X>
-Vector<X>
-PlanarProjectionMap::operator()(const Vector<X>& v) const 
-{
-  Vector<X> result(2); 
-  ARIADNE_ASSERT(v.size()==this->_d);
-  result[0]=v[this->_i]; 
-  result[1]=v[this->_j]; 
-  return result;
-}
 
 
 

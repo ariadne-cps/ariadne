@@ -145,6 +145,7 @@ template<class X> std::istream& operator>>(std::istream& is, Vector<X>& v) {
   return is;
 }
 
+bool contains(const Vector<Interval>& v1, const Vector<Float>& v2);
 bool subset(const Vector<Float>& v1, const Vector<Interval>& v2);
 bool subset(const Vector<Interval>& v1, const Vector<Interval>& v2);
 bool disjoint(const Vector<Interval>& v1, const Vector<Interval>& v2);

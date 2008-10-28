@@ -65,10 +65,6 @@ class Polyhedron
   //@{ 
   //! \name Constructors and destructor
 
-  //! \brief Virtual destructor.
-  virtual ~Polyhedron();
-  
-  
   //! \brief Default constructor constructs a polytope in zero dimensions with no constraints.
   explicit Polyhedron();
   

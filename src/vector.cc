@@ -30,6 +30,15 @@ template class boost::numeric::ublas::vector<Ariadne::Interval>;
 
 namespace Ariadne {
 
+bool contains(const Vector<Interval>& v1, const Vector<Float>& v2)
+{
+  ARIADNE_ASSERT(v1.size()==v2.size());
+  for(size_t i=0; i!=v1.size(); ++i) {
+    if(!contains(v1[i],v2[i])) { return false; }
+  }
+  return true;
+}
+
 bool subset(const Vector<Float>& v1, const Vector<Interval>& v2)
 {
   ARIADNE_ASSERT(v1.size()==v2.size());

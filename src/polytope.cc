@@ -37,30 +37,43 @@
 
 namespace Ariadne { 
 
-Box Polytope::bounding_box() const
+
+tribool 
+Polytope::disjoint(const Vector<Interval>& bx) const {
+  return Ariadne::disjoint(this->bounding_box(),bx) or indeterminate;
+}
+
+tribool 
+Polytope::intersects(const Vector<Interval>& bx) const {
+  return Ariadne::contains(bx,baricentre(*this)) or indeterminate;
+}
+
+tribool 
+Polytope::subset(const Vector<Interval>& bx) const {
+  return Ariadne::subset(this->bounding_box(),bx) or indeterminate;
+}
+
+Vector<Interval> 
+Polytope::bounding_box() const
 {
   const Polytope& p=*this;
-  Box res(p[0]);
-  for(uint i=1; i!=p.size(); ++i) {
-    res=hull(res,p[i]);
+  Vector<Interval> res(p._vertices[0]);
+  for(uint i=1; i!=p._vertices.size(); ++i) {
+    res=hull(res,p._vertices[i]);
   }
   return res;
 }
 
 
-bool 
-operator<(const Point& pt1, const Point& pt2)
+std::ostream& 
+operator<<(std::ostream& os, const Polytope& p)
 {
-  ARIADNE_ASSERT(pt1.dimension()==pt2.dimension());
-  for(uint i=0; i!=pt1.dimension(); ++i) {
-    if(pt1[i]<pt2[i]) {
-      return true; 
-    } else if(pt1[i]>pt2[i]) {
-      return false;
-    }
-  }
-  return false;
+  return os << "Polytope( vertices=" << p.vertices() << " )";
 }
+
+
+
+
 
 
 Float 
@@ -182,7 +195,7 @@ Polytope& reduce2d(Polytope& p)
   }
   new_vertices.pop_back();
   
-  new_vertices.swap(p);
+  new_vertices.swap(p.vertices());
   return p;
 }
 
@@ -190,7 +203,7 @@ Polytope& reduce2d(Polytope& p)
 Point 
 baricentre(const Polytope& p) 
 {
-  const std::vector<Point>& vertices=p;
+  const std::vector<Point>& vertices=p.vertices();
   Point baricentre(p.dimension());
   
   for (size_t j=0; j!=vertices.size(); ++j) {
@@ -208,11 +221,6 @@ baricentre(const Polytope& p)
 
 
 
-
-PlanarProjectionMap::PlanarProjectionMap()
-  : _d(2), _i(0), _j(1) 
-{ 
-}
 
 
 
@@ -268,8 +276,8 @@ Polytope
 apply(const ProjectionFunction& map, const Polytope& p)  
 {
   Polytope result(map.result_size());
-  for(size_t i=0; i!=p.size(); ++i) {
-    Point v=p[i];
+  for(size_t i=0; i!=p.number_of_vertices(); ++i) {
+    Point const& v=p.vertex(i);
     Point pt=apply(map,v);
     result.new_vertex(pt);
   }

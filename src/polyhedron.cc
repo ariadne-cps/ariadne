@@ -62,11 +62,6 @@ Polytope polytope(const Polyhedron& p);
 
 
 
-Polyhedron::~Polyhedron()
-{
-}
-
-
 Polyhedron::Polyhedron()
   : ConstraintSet(Box(0),ConstantFunction(Vector<Float>(0,1.0),0))
 {

@@ -43,6 +43,7 @@ class Point : public Vector<Float>
   static Point origin(uint n) { return Point(n,0.0); }
   uint dimension() const { return this->size(); }
   Vector<Float> centre() const { return *this; }
+  friend bool operator<(const Point& pt1, const Point& pt2);
 };
 
 Point make_point(const std::string&);

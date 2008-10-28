@@ -19,6 +19,7 @@ SRC = \
 	box.cc \
 	zonotope.cc \
 	polytope.cc \
+	polyhedron.cc \
 	set.cc \
 	curve.cc \
 	grid_set.cc \

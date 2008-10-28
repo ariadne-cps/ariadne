@@ -146,6 +146,12 @@ namespace Ariadne {
       return os;
     }
 
+    inline BinaryWord make_binary_word(const std::string& str) {
+          BinaryWord res;
+          std::stringstream ss(str);
+          ss >> res;
+          return res;
+    }
     
 } // namespace Ariadne
   

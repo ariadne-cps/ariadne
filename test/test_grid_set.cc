@@ -428,10 +428,31 @@ void test_iterator( const string expected_result[], const GridTreeSubset & theGr
 	int elements_count = 0;
 	for (GridTreeSubset::const_iterator it = theGridTreeSubset.begin(), end = theGridTreeSubset.end(); it != end; it++, elements_count++) {
 		TEST_TO_STRING_RESULT("The next iterator node is: ", expected_result[elements_count], (*it) );
-		//cout<< (*it).to_string() << endl;
 	}
 	print_comment("Test that we iterated through the right number of nodes");
 	ARIADNE_TEST_EQUAL(elements_count, expected_number_elements);
+}
+
+void test_iterator( const std::vector<GridCell *> expected_result, const GridTreeSubset & theGridTreeSubset, const int expected_number_elements ){
+	int elements_count = 0;
+	for (GridTreeSubset::const_iterator it = theGridTreeSubset.begin(), end = theGridTreeSubset.end(); it != end; it++, elements_count++) {
+		if( elements_count < expected_number_elements ){
+			print_comment("The next iterator node is: ");
+			ARIADNE_TEST_COMPARE( (*expected_result[elements_count]), == , (*it) );
+		} else {
+			//DO NOTHING: Just continue itarating through the elements but no further checks
+		}
+	}
+	print_comment("Test that we iterated through the right number of nodes");
+	ARIADNE_TEST_EQUAL( elements_count , expected_number_elements );
+}
+
+void clean_vector( std::vector<GridCell *> & vector ){
+	for(int i = 0; i < vector.size(); i++ ){
+		if( vector[i] != NULL ) {
+			delete vector[i]; vector[i] = NULL;
+		}
+	}
 }
 
 void test_grid_paving_const_iterator(){
@@ -964,7 +985,7 @@ void test_adjoin_outer_approximation_operation(){
 }
 
 void test_restrict() {
-	string expected_result_arr[3];
+	std::vector< GridCell* > expected_result_arr(3);
 	
 	//Allocate a trivial Grid
 	Grid theTrivialGrid(2, 1.0);
@@ -1010,41 +1031,51 @@ void test_restrict() {
 	// !!!
 	print_title("Test restrict operation: GridTreeSet1.restrict( GridTreeSet2 )");
 	print_comment("The initial GridTreeSet1: ");
-	expected_result_arr[0] = createPavingCellOutput("origin=[0,0], lengths=[1,1]","2","00","[[-1:1],[-1:1]]");
-	expected_result_arr[1] = createPavingCellOutput("origin=[0,0], lengths=[1,1]","2","1000","[[1:2],[-1:0]]");
-	expected_result_arr[2] = createPavingCellOutput("origin=[0,0], lengths=[1,1]","2","1011","[[2:3],[0:1]]");
+	expected_result_arr[0] = new GridCell( theTrivialGrid, 2, make_binary_word("[0,0]") );
+	expected_result_arr[1] = new GridCell( theTrivialGrid, 2, make_binary_word("[1,0,0,0]") );
+	expected_result_arr[2] = new GridCell( theTrivialGrid, 2, make_binary_word("[1,0,1,1]") );
 	test_iterator( expected_result_arr, theThreeCellPavingH2, 3 );
+	clean_vector( expected_result_arr );
+
 	print_comment("The initial GridTreeSet2: ");
-	expected_result_arr[0] = createPavingCellOutput("origin=[0,0], lengths=[1,1]","2","100","[[1:2],[-1:1]]");
-	expected_result_arr[1] = createPavingCellOutput("origin=[0,0], lengths=[1,1]","2","1010","[[2:3],[-1:0]]");
+	expected_result_arr[0] = new GridCell( theTrivialGrid, 2, make_binary_word("[1,0,0]") );
+	expected_result_arr[1] = new GridCell( theTrivialGrid, 2, make_binary_word("[1,0,1,0]") );
 	test_iterator( expected_result_arr, theTwoCellPavingH2, 2 );
+	clean_vector( expected_result_arr );
+
 	print_comment("The result after restrict: ");
 	theThreeCellPavingH2.restrict( theTwoCellPavingH2 );
-	expected_result_arr[0] = createPavingCellOutput("origin=[0,0], lengths=[1,1]","2","1000","[[1:2],[-1:0]]");
+	expected_result_arr[0] = new GridCell( theTrivialGrid, 2, make_binary_word("[1,0,0,0]") );
 	test_iterator( expected_result_arr, theThreeCellPavingH2, 1 );
+	clean_vector( expected_result_arr );
 
 	// !!!
 	print_title("Test restrict operation: GridTreeSet.restrict( GridTreeSubset )");
 	print_comment("The initial GridTreeSet: ");
-	expected_result_arr[0] = createPavingCellOutput("origin=[0,0], lengths=[1,1]","2","100","[[1:2],[-1:1]]");
-	expected_result_arr[1] = createPavingCellOutput("origin=[0,0], lengths=[1,1]","2","1010","[[2:3],[-1:0]]");
+	expected_result_arr[0] = new GridCell( theTrivialGrid, 2, make_binary_word("[1,0,0]") );
+	expected_result_arr[1] = new GridCell( theTrivialGrid, 2, make_binary_word("[1,0,1,0]") );
 	test_iterator( expected_result_arr, theTwoCellPavingH2, 2 );
+	clean_vector( expected_result_arr );
+
 	print_comment("The initial GridTreeSubset: ");
-	expected_result_arr[0] = createPavingCellOutput("origin=[0,0], lengths=[1,1]","3","1100","[[-1:1],[-1:1]]");
-	expected_result_arr[1] = createPavingCellOutput("origin=[0,0], lengths=[1,1]","3","111000","[[1:2],[-1:0]]");
-	expected_result_arr[2] = createPavingCellOutput("origin=[0,0], lengths=[1,1]","3","111011","[[2:3],[0:1]]");
+	expected_result_arr[0] = new GridCell( theTrivialGrid, 3, make_binary_word("[1,1,0,0]") );
+	expected_result_arr[1] = new GridCell( theTrivialGrid, 3, make_binary_word("[1,1,1,0,0,0]") );
+	expected_result_arr[2] = new GridCell( theTrivialGrid, 3, make_binary_word("[1,1,1,0,1,1]") );
 	test_iterator( expected_result_arr, theThreeCellSubPavingH3, 3 );
+	clean_vector( expected_result_arr );
+
 	print_comment("The result after restrict: ");
 	theTwoCellPavingH2.restrict( theThreeCellSubPavingH3 );
-	expected_result_arr[0] = createPavingCellOutput("origin=[0,0], lengths=[1,1]","3","111000","[[1:2],[-1:0]]");
+	expected_result_arr[0] = new GridCell( theTrivialGrid, 3, make_binary_word("[1,1,1,0,0,0]") );
 	test_iterator( expected_result_arr, theTwoCellPavingH2, 1 );
+	clean_vector( expected_result_arr );
 	
 	//TODO: Test the case when the GridTreeSet has primary cell of the level 3
 	//	The GridTreeSubset is at level 1 and it's primary cell is at level 2
 }
 
 void test_remove() {
-	string expected_result_arr[3];
+	std::vector< GridCell* > expected_result_arr(3);
 	
 	//Allocate a trivial Grid
 	Grid theTrivialGrid(2, 1.0);
@@ -1090,36 +1121,46 @@ void test_remove() {
 	// !!!
 	print_title("Test remove operation: GridTreeSet1.remove( GridTreeSet2 )");
 	print_comment("The initial GridTreeSet1: ");
-	expected_result_arr[0] = createPavingCellOutput("origin=[0,0], lengths=[1,1]","2","00","[[-1:1],[-1:1]]");
-	expected_result_arr[1] = createPavingCellOutput("origin=[0,0], lengths=[1,1]","2","1000","[[1:2],[-1:0]]");
-	expected_result_arr[2] = createPavingCellOutput("origin=[0,0], lengths=[1,1]","2","1011","[[2:3],[0:1]]");
+	expected_result_arr[0] = new GridCell( theTrivialGrid, 2, make_binary_word("[0,0]") );
+	expected_result_arr[1] = new GridCell( theTrivialGrid, 2, make_binary_word("[1,0,0,0]") );
+	expected_result_arr[2] = new GridCell( theTrivialGrid, 2, make_binary_word("[1,0,1,1]") );
 	test_iterator( expected_result_arr, theThreeCellPavingH2, 3 );
+	clean_vector( expected_result_arr );
+
 	print_comment("The initial GridTreeSet2: ");
-	expected_result_arr[0] = createPavingCellOutput("origin=[0,0], lengths=[1,1]","2","100","[[1:2],[-1:1]]");
-	expected_result_arr[1] = createPavingCellOutput("origin=[0,0], lengths=[1,1]","2","1010","[[2:3],[-1:0]]");
+	expected_result_arr[0] = new GridCell( theTrivialGrid, 2, make_binary_word("[1,0,0]") );
+	expected_result_arr[1] = new GridCell( theTrivialGrid, 2, make_binary_word("[1,0,1,0]") );
 	test_iterator( expected_result_arr, theTwoCellPavingH2, 2 );
+	clean_vector( expected_result_arr );
+
 	print_comment("The result after removal: ");
 	theThreeCellPavingH2.remove( theTwoCellPavingH2 );
-	expected_result_arr[0] = createPavingCellOutput("origin=[0,0], lengths=[1,1]","2","00","[[-1:1],[-1:1]]");
-	expected_result_arr[1] = createPavingCellOutput("origin=[0,0], lengths=[1,1]","2","1011","[[2:3],[0:1]]");
+	expected_result_arr[0] = new GridCell( theTrivialGrid, 2, make_binary_word("[0,0]") );
+	expected_result_arr[1] = new GridCell( theTrivialGrid, 2, make_binary_word("[1,0,1,1]") );
 	test_iterator( expected_result_arr, theThreeCellPavingH2, 2 );
+	clean_vector( expected_result_arr );
 
 	// !!!
 	print_title("Test remove operation: GridTreeSet.remove( GridTreeSubset )");
 	print_comment("The initial GridTreeSet: ");
-	expected_result_arr[0] = createPavingCellOutput("origin=[0,0], lengths=[1,1]","2","100","[[1:2],[-1:1]]");
-	expected_result_arr[1] = createPavingCellOutput("origin=[0,0], lengths=[1,1]","2","1010","[[2:3],[-1:0]]");
+	expected_result_arr[0] = new GridCell( theTrivialGrid, 2, make_binary_word("[1,0,0]") );
+	expected_result_arr[1] = new GridCell( theTrivialGrid, 2, make_binary_word("[1,0,1,0]") );
 	test_iterator( expected_result_arr, theTwoCellPavingH2, 2 );
+	clean_vector( expected_result_arr );
+
 	print_comment("The initial GridTreeSubset: ");
-	expected_result_arr[0] = createPavingCellOutput("origin=[0,0], lengths=[1,1]","3","1100","[[-1:1],[-1:1]]");
-	expected_result_arr[1] = createPavingCellOutput("origin=[0,0], lengths=[1,1]","3","111000","[[1:2],[-1:0]]");
-	expected_result_arr[2] = createPavingCellOutput("origin=[0,0], lengths=[1,1]","3","111011","[[2:3],[0:1]]");
+	expected_result_arr[0] = new GridCell( theTrivialGrid, 3, make_binary_word("[1,1,0,0]") );
+	expected_result_arr[1] = new GridCell( theTrivialGrid, 3, make_binary_word("[1,1,1,0,0,0]") );
+	expected_result_arr[2] = new GridCell( theTrivialGrid, 3, make_binary_word("[1,1,1,0,1,1]") );
 	test_iterator( expected_result_arr, theThreeCellSubPavingH3, 3 );
+	clean_vector( expected_result_arr );
+
 	print_comment("The result after remove: ");
 	theTwoCellPavingH2.remove( theThreeCellSubPavingH3 );
-	expected_result_arr[0] = createPavingCellOutput("origin=[0,0], lengths=[1,1]","3","111001","[[1:2],[0:1]]");
-	expected_result_arr[1] = createPavingCellOutput("origin=[0,0], lengths=[1,1]","3","111010","[[2:3],[-1:0]]");
+	expected_result_arr[0] = new GridCell( theTrivialGrid, 3, make_binary_word("[1,1,1,0,0,1]") );
+	expected_result_arr[1] = new GridCell( theTrivialGrid, 3, make_binary_word("[1,1,1,0,1,0]") );
 	test_iterator( expected_result_arr, theTwoCellPavingH2, 2 );
+	clean_vector( expected_result_arr );
 	
 	//TODO: Test the case when the GridTreeSet has primary cell of the level 3
 	//	The GridTreeSubset is at level 1 and it's primary cell is at level 2

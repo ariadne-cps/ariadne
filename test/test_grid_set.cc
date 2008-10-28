@@ -433,7 +433,7 @@ void test_iterator( const string expected_result[], const GridTreeSubset & theGr
 	ARIADNE_TEST_EQUAL(elements_count, expected_number_elements);
 }
 
-void test_iterator( const std::vector<GridCell *> expected_result, const GridTreeSubset & theGridTreeSubset, const int expected_number_elements ){
+void test_iterator( const std::vector<GridCell *> &expected_result, const GridTreeSubset & theGridTreeSubset, const int expected_number_elements ){
 	int elements_count = 0;
 	for (GridTreeSubset::const_iterator it = theGridTreeSubset.begin(), end = theGridTreeSubset.end(); it != end; it++, elements_count++) {
 		if( elements_count < expected_number_elements ){
@@ -764,7 +764,6 @@ void test_grid_paving(){
 	theTree[8] = false;  theEnabledLeafs[4] = true;
 	GridTreeSet theTwoDimTreePaving( theTwoDimGrid, 2, theTree, theEnabledLeafs );
 	TEST_TO_STRING_RESULT("The resulting GridTreeSet: ", expected_result, theTwoDimTreePaving );
-	
 }
 
 void test_grid_paving_cell(){
@@ -945,25 +944,26 @@ void test_adjoin_outer_approximation_operation(){
 	TEST_TO_STRING_RESULT("The GridTreeSet after adding the cell: ", expected_result, theOneCellPaving );
 
 	print_comment("Recombined GridTreeSet after adding the cell: ");
-	string expected_result_arr[16];
-	expected_result_arr[0] = createPavingCellOutput( "origin=[0,0], lengths=[1,1]","4","0011000001","[[-1:-0.5],[-0.5:0]]");
-	expected_result_arr[1] = createPavingCellOutput( "origin=[0,0], lengths=[1,1]","4","0011000011","[[-0.5:0],[-0.5:0]]");
-	expected_result_arr[2] = createPavingCellOutput( "origin=[0,0], lengths=[1,1]","4","00110001","[[-1:0],[0:1]]");
-	expected_result_arr[3] = createPavingCellOutput( "origin=[0,0], lengths=[1,1]","4","0011001001","[[0:0.5],[-0.5:0]]");
-	expected_result_arr[4] = createPavingCellOutput( "origin=[0,0], lengths=[1,1]","4","0011001011","[[0.5:1],[-0.5:0]]");
-	expected_result_arr[5] = createPavingCellOutput( "origin=[0,0], lengths=[1,1]","4","00110011","[[0:1],[0:1]]");
-	expected_result_arr[6] = createPavingCellOutput( "origin=[0,0], lengths=[1,1]","4","0011010000","[[-1:-0.5],[1:1.5]]");
-	expected_result_arr[7] = createPavingCellOutput( "origin=[0,0], lengths=[1,1]","4","0011010010","[[-0.5:0],[1:1.5]]");
-	expected_result_arr[8] = createPavingCellOutput( "origin=[0,0], lengths=[1,1]","4","0011011000","[[0:0.5],[1:1.5]]");
-	expected_result_arr[9] = createPavingCellOutput( "origin=[0,0], lengths=[1,1]","4","0011011010","[[0.5:1],[1:1.5]]");
-	expected_result_arr[10] = createPavingCellOutput( "origin=[0,0], lengths=[1,1]","4","0011100001","[[1:1.5],[-0.5:0]]");
-	expected_result_arr[11] = createPavingCellOutput( "origin=[0,0], lengths=[1,1]","4","0011100011","[[1.5:2],[-0.5:0]]");
-	expected_result_arr[12] = createPavingCellOutput( "origin=[0,0], lengths=[1,1]","4","00111001","[[1:2],[0:1]]");
-	expected_result_arr[13] = createPavingCellOutput( "origin=[0,0], lengths=[1,1]","4","00111010","[[2:3],[-1:0]]");
-	expected_result_arr[14] = createPavingCellOutput( "origin=[0,0], lengths=[1,1]","4","0011110000","[[1:1.5],[1:1.5]]");
-	expected_result_arr[15] = createPavingCellOutput( "origin=[0,0], lengths=[1,1]","4","0011110010","[[1.5:2],[1:1.5]]");
+	std::vector< GridCell* > expected_result_arr(16);
+	expected_result_arr[0] = new GridCell( theTrivialGrid, 4, make_binary_word("[0,0,1,1,0,0,0,0,0,1]") );
+	expected_result_arr[1] = new GridCell( theTrivialGrid, 4, make_binary_word("[0,0,1,1,0,0,0,0,1,1]") );
+	expected_result_arr[2] = new GridCell( theTrivialGrid, 4, make_binary_word("[0,0,1,1,0,0,0,1]") );
+	expected_result_arr[3] = new GridCell( theTrivialGrid, 4, make_binary_word("[0,0,1,1,0,0,1,0,0,1]") );
+	expected_result_arr[4] = new GridCell( theTrivialGrid, 4, make_binary_word("[0,0,1,1,0,0,1,0,1,1]") );
+	expected_result_arr[5] = new GridCell( theTrivialGrid, 4, make_binary_word("[0,0,1,1,0,0,1,1]") );
+	expected_result_arr[6] = new GridCell( theTrivialGrid, 4, make_binary_word("[0,0,1,1,0,1,0,0,0,0]") );
+	expected_result_arr[7] = new GridCell( theTrivialGrid, 4, make_binary_word("[0,0,1,1,0,1,0,0,1,0]") );
+	expected_result_arr[8] = new GridCell( theTrivialGrid, 4, make_binary_word("[0,0,1,1,0,1,1,0,0,0]") );
+	expected_result_arr[9] = new GridCell( theTrivialGrid, 4, make_binary_word("[0,0,1,1,0,1,1,0,1,0]") );
+	expected_result_arr[10] = new GridCell( theTrivialGrid, 4, make_binary_word("[0,0,1,1,1,0,0,0,0,1]") );
+	expected_result_arr[11] = new GridCell( theTrivialGrid, 4, make_binary_word("[0,0,1,1,1,0,0,0,1,1]") );
+	expected_result_arr[12] = new GridCell( theTrivialGrid, 4, make_binary_word("[0,0,1,1,1,0,0,1]") );
+	expected_result_arr[13] = new GridCell( theTrivialGrid, 4, make_binary_word("[0,0,1,1,1,0,1,0]") );
+	expected_result_arr[14] = new GridCell( theTrivialGrid, 4, make_binary_word("[0,0,1,1,1,1,0,0,0,0]") );
+	expected_result_arr[15] = new GridCell( theTrivialGrid, 4, make_binary_word("[0,0,1,1,1,1,0,0,1,0]") );
 	theOneCellPaving.recombine();
 	test_iterator( expected_result_arr, theOneCellPaving, 16 );
+	clean_vector( expected_result_arr );
 	
 	// !!!
 	print_title("Create an outer_approximation of the rectangle on the scaling grid and get the GridTreeSet");
@@ -976,12 +976,13 @@ void test_adjoin_outer_approximation_operation(){
 	//space in this case we will get much more elements, e.g. the cells
 	//  [-1,0]x[0,2], [0,2]x[0,2] will be subdivided as well
 	theOuterApproxGridTreeSet.recombine();
-	expected_result_arr[0] = createPavingCellOutput( "origin=[0,0], lengths=[2,2]","3","11000011","[[-1:0],[-1:0]]");
-	expected_result_arr[1] = createPavingCellOutput( "origin=[0,0], lengths=[2,2]","3","1100011","[[-1:0],[0:2]]");
-	expected_result_arr[2] = createPavingCellOutput( "origin=[0,0], lengths=[2,2]","3","11001001","[[0:1],[-1:0]]");
-	expected_result_arr[3] = createPavingCellOutput( "origin=[0,0], lengths=[2,2]","3","11001011","[[1:2],[-1:0]]");
-	expected_result_arr[4] = createPavingCellOutput( "origin=[0,0], lengths=[2,2]","3","110011","[[0:2],[0:2]]");
+	expected_result_arr[0] = new GridCell( theScalingGrid, 3, make_binary_word("[1,1,0,0,0,0,1,1]") );
+	expected_result_arr[1] = new GridCell( theScalingGrid, 3, make_binary_word("[1,1,0,0,0,1,1]") );
+	expected_result_arr[2] = new GridCell( theScalingGrid, 3, make_binary_word("[1,1,0,0,1,0,0,1]") );
+	expected_result_arr[3] = new GridCell( theScalingGrid, 3, make_binary_word("[1,1,0,0,1,0,1,1]") );
+	expected_result_arr[4] = new GridCell( theScalingGrid, 3, make_binary_word("[1,1,0,0,1,1]") );
 	test_iterator( expected_result_arr, theOuterApproxGridTreeSet, 5 );
+	clean_vector( expected_result_arr );
 }
 
 void test_restrict() {

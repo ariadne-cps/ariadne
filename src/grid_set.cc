@@ -156,12 +156,12 @@ int Grid::subdivision_lower_index(uint d, const real_type& x) const
  
 int Grid::subdivision_upper_index(uint d, const real_type& x) const 
 {
-  int n=int(ceil(div_up(sub_up(x,this->_data->_origin[d]),this->_data->_lengths[d])));
-  if(x<=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],(n-1)))) {
-    return n-1;
-  } else {
-    return n;
-  }
+	int n=int(ceil(div_up(sub_up(x,this->_data->_origin[d]),this->_data->_lengths[d])));
+	if(x<=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],(n-1)))) {
+		return n-1;
+	} else {
+		return n;
+	}
 }
  
 bool Grid::operator==(const Grid& g) const
@@ -632,7 +632,7 @@ std::ostream& operator<<(std::ostream& os, const Grid& gr)
 			}
 		}
 	}
-
+	
 	bool GridTreeConstIterator::navigate_to(bool firstLast){
 		bool isEnabledLeafFound = false;
 		if( _pGridTreeCursor.is_leaf() ){
@@ -1189,14 +1189,14 @@ operator<<(std::ostream& os, const GridCellListSet& gcls)
         // FIXME: This method can fail if we cannot determine which of a node's children intersects
         // the set (if any)
         void GridTreeSet::adjoin_lower_approximation( BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
-                                                      const uint max_mince_depth,  const OvertSetInterface& theSet, BinaryWord * pPath ){
+							const uint max_mince_depth,  const OvertSetInterface& theSet, BinaryWord * pPath ){
 		//Compute the cell correspomding to the current node
 		GridCell theCurrentCell( GridTreeSubset::_theGridCell.grid(), primary_cell_height, *pPath );
 
 		if( bool( theSet.intersects( theCurrentCell.box() ) ) ) {
                         if( pPath->size() >= max_mince_depth ) {
-                                //We should not mince any further, so since
-                                //it's cell is intersects from theSet, we mark the node as enabled.
+				//We should not mince any further, so since
+				//it's cell is intersects from theSet, we mark the node as enabled.
                                 if( pBinaryTreeNode->is_leaf() ) {
                                         pBinaryTreeNode->set_enabled(); 
                                 }

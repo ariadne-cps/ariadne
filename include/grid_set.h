@@ -384,7 +384,7 @@ namespace Ariadne {
 			 *  the number of enabled leaf nodes in the subtree
                          *  rooted at pNode.
 			 */
-                         static size_t count_enabled_leaf_nodes( const BinaryTreeNode* pNode );
+			static size_t count_enabled_leaf_nodes( const BinaryTreeNode* pNode );
 
 			/*! \brief Starting in the \a pRootTreeNode node as at the root, this method finds(creates)
 			 *  the leaf node defined by the \a path and marks it as enabled. If some prefix of the \a path
@@ -475,14 +475,14 @@ namespace Ariadne {
 
 			/*! \brief The upper and lower bound in the \a i<sup>th</sup> coordinate. */
 			Interval operator[](dimension_type i) const;
-			
-                        /*! \brief The equality operator. */
-                        bool operator==(const GridCell& otherCell) const;
 
-                        /*! \brief A total order on cells on the same grid, by height and word prefix. */
-                        bool operator<(const GridCell& otherCell) const;
+			/*! \brief The equality operator. */
+			bool operator==(const GridCell& otherCell) const;
 
-                        /*! \brief Serialize the current object state, this is mostly needed for testing */
+			/*! \brief A total order on cells on the same grid, by height and word prefix. */
+			bool operator<(const GridCell& otherCell) const;
+
+			/*! \brief Serialize the current object state, this is mostly needed for testing */
 			string to_string() const;
 
 			/*! \brief this method computes the box in the original space based on the \a theGrid,
@@ -663,7 +663,7 @@ namespace Ariadne {
                 //! \name Input/output operators 
                 
                 //! Write to an output stream.
-                friend std::ostream& operator<<(std::ostream& os, const GridCellListSet& gcls);
+		friend std::ostream& operator<<(std::ostream& os, const GridCellListSet& gcls);
                 //@}
         };
 
@@ -735,9 +735,10 @@ namespace Ariadne {
 			 */
 			GridCell cell() const;
 			
-			/*! \brief Allows to test if the two subpavings are equal, this is determined by
-			 * the fact that they are rooted to the same binary tree. In other words we check
-			 * that the values of \a _pRootTreeNode are the same
+			/*! \brief Allows to test if the two subpavings are "equal". The method returns true if
+			 * the grida are equal and the binary trees are equal. Note that, only in case both 
+			 * GridTreeSubset objects are recombines, this method is guaranteed to tell you that
+			 * the two GridTreeSubset represent equal sets.
 			*/
 			bool operator==(const GridTreeSubset& anotherGridTreeSubset) const;
 			
@@ -1233,10 +1234,10 @@ namespace Ariadne {
 		public:
 			//@{
 			//! \name Constructors
-			
-                        /*! \brief Default constructor constructs an invalid iterator. 
-                         *  \internal Note that a default constructor is required for compliance with the 
-                         *  STL Trivial Iterator concept. */
+
+			/*! \brief Default constructor constructs an invalid iterator. 
+			 *  \internal Note that a default constructor is required for compliance with the 
+			 *  STL Trivial Iterator concept. */
 			GridTreeConstIterator();
 
 			/*! \brief The constructor that accepts the subpacing \a pSubPaving to iterate on
@@ -1269,6 +1270,7 @@ namespace Ariadne {
 /***************************************Inline functions*********************************************/
 
 /****************************************BinaryTreeNode**********************************************/
+	
 	inline void BinaryTreeNode::init( tribool isEnabled, BinaryTreeNode* pLeftNode, BinaryTreeNode* pRightNode ){
 		_isEnabled = isEnabled;
 		_pLeftNode = pLeftNode;
@@ -1758,8 +1760,9 @@ namespace Ariadne {
 		return _pRootTreeNode->depth();
 	}
 
-	inline bool GridTreeSubset::operator==(const GridTreeSubset& anotherGridTreeSubset) const{
-		return this->_pRootTreeNode == anotherGridTreeSubset._pRootTreeNode;
+	inline bool GridTreeSubset::operator==(const GridTreeSubset& anotherGridTreeSubset) const {
+		return ( this->_theGridCell == anotherGridTreeSubset._theGridCell ) &&
+			( ( * this->_pRootTreeNode ) == ( * anotherGridTreeSubset._pRootTreeNode ) );
 	}
 	
 	inline GridTreeSubset::const_iterator GridTreeSubset::begin() const {

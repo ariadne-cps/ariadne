@@ -47,7 +47,7 @@ The homepage of %Ariadne is <a href="http://ariadne.parades.rm.cnr.it/">http://a
 
 You can check out the latest version on the Subversion repository by typing:
 
-  \code svn checkout http://svn.parades.rm.cnr.it/ariadne/ \endcode
+  \code svn checkout http://svn.parades.rm.cnr.it/ariadne/ariadne/trunk/ ariadne/ \endcode
 
 To make the code documentation, change to the ariadne/trunk/ directory and type:
 
@@ -59,22 +59,26 @@ To compile %Ariadne, you will need:
   - A C++ compiler (we recommend g++ version 4.0.2 or higher, which can be downloaded from <a href="http://gcc.gnu.org/">http://gcc.gnu.org</a>) 
   - A version of the 'make' utility (such as GNU make <a href="http://www.gnu.org/software/make/">http://www.gnu.org/software/make/</a>)
 
-You will also need the following libraries:
+  - The Boost C++ Libraries (version 1.35.0 or higher) <a href="http://www.boost.org/">http://www.boost.org/</a>.
+
+\subsection Optional Optional packages
+
+To enable optional support for multiple-precision arithmetic, you will need:
   - The GNU Multiple-Precision Library (version 4.1.2 or higher)  <a href="http://www.swox.com/gmp/">http://www.swox.com/gmp/</a>.
   - MPFR Library (version 2.2.1 or higher) <a href="http://www.mpfr.org/">http://www.mpfr.org/</a>.
-  - The Boost C++ Libraries (version 1.35.0) <a href="http://www.boost.org/">http://www.boost.org/</a>.
-  - TBLAS (version 0.4.1 or higher) <a href="http://homepages.cwi.nl/~collins/software/">http://homepages.cwi.nl/~collins/software/</a>.
-  - TLAPACK (version 0.4.1 or higher) <a href="http://homepages.cwi.nl/~collins/software/">http://homepages.cwi.nl/~collins/software/</a>.
 
-The following libraries are optional:
-  - The Parma Polyhedra Library (version 0.9 or higher) <a href="http://www.cs.unipr.it/ppl/">http://www.cs.unipr.it/ppl/</a>.
+To use the plotting facilities, you will need:
+  - cairo (version 1.7 or higher) <a href="http://www.cairographics.org/">http://www.cairographics.org/</a>.
+
+To enable pop-up draphics windows, you will need:
+  - the GTK+ toolkit (version 2.0 or higher) <a href="http://www.gtk.org/">http://www.gtk.org/</a>.
 
 For the Python interface, you will also need:
-  - Python (version 2.4) <a href="http://www.python.org/">http://www.python.org/</a>.
+  - Python (version 2.4 or higher) <a href="http://www.python.org/">http://www.python.org/</a>.
 
 To make the source code documentation, you will need:
   - Doxygen (version 1.4.6 or higher is recommended) 
-       <a href="http://www.stack.nl/~dimitri/doxygen/">http://www.stack.nl/~dimitri/doxygen/</a>
+       <a href="http://www.stack.nl/~dimitri/doxygen/">http://www.stack.nl/~dimitri/doxygen/</a>.
 
 To build the source code from the Subversion repository, you will also need
   - GNU autotools
@@ -83,6 +87,9 @@ To build the source code from the Subversion repository, you will also need
       - libtool <a href="http://www.gnu.org/software/libtool/">http://www.gnu.org/software/libtool/</a>.
   - GNU m4 <a href="http://www.gnu.org/software/m4/">http://www.gnu.org/software/m4/</a>.
   - Perl <a href="http://www.perl.org/">http://www.perl.org/</a>.
+
+All the above packages are available for Linux/Unix, Apple OSX and Microsoft Windows operating systems. 
+They are standard packages for most Linux distributions.
 
 \section installation Installation from a source tarball
 
@@ -97,22 +104,16 @@ From main source directory, type
   make
   make install
 \endcode
-The default installation directory for the library is $/usr/local/lib/, and for the Python interface is /usr/local/python/.
+The default installation directory for the library is /usr/local/lib/ (or /usr/local/lib64 on 64-bit machines), and for the Python interface is /usr/lib/python/2.x/site-packages/.
 These defaults can be changed by using the --prefix flag to ./configure, as in
 \code 
   ./configure --prefix=$HOME
 \endcode
 
-By default, the C++ library is compiled with Float64 support and without FloatMP support, and the Python interface is compiled to use Float64 as the default floating-point type. The flags \c --disable-float64 or \c --enable-floatmp can be used to disable support for Float64 or enable support for FloatMP, respectively. If Float64 support is disabled, then the Python interface is automatically compiled with FloatMP support. To compile the Python interface with FloatMP support, use \c --enable-python=FloatMP.
-
+By default, the C++ library is compiled with support for double-precision floating-point numbers (64 bit). The flags \c --enable-mp can be used to enable support for multiple-precision floating-point numbers.
 For example, to configure with multiple-precision floating-point support enabled, use
 \code 
-  ./configure --enable-floatmp
-\endcode
-
-To configure using the multiple-precision floating point type in the Python interface, and install in the user directory, use
-\code 
-  ./configure --prefix=$HOME --enable-python=FloatMP
+  ./configure --enable-mp
 \endcode
 
 \section svninstallation Installation from the Subversion repository

@@ -55,7 +55,7 @@ class Polyhedron;
  *  \brief A polyhedron (not necessarily bounded polyhedral set) described by a system of linear inequalities.
  *
  *  The set is described as
- *  \f$ x\in\mathbb{R}^d \mid Ax \leq b , \f$
+ *  \f$ \{ x\in\mathbb{R}^d \mid Ax \leq b \} \f$
  *  where \f$A\f$ is a \f$n\times d\f$ matrix and \f$b\f$ is a vector of size \f$n\f$.
  */ 
 class Polyhedron 
@@ -90,9 +90,9 @@ class Polyhedron
   
   //@{
   //! \name Data access
+
   //! \brief The number of constraints. 
   size_t number_of_constraints() const { return this->b().size(); }
-
   //! \brief The matrix \f$A\f$ in the inequalities \f$Ax\leq b\f$. 
   Matrix<Float> A() const { return -dynamic_cast<const AffineFunction&>(this->function()).A(); }
   //! \brief The vector \f$b\f$ in the inequalities \f$Ax\leq b\f$. 
@@ -102,13 +102,14 @@ class Polyhedron
   
   //@{
   //! \name Geometric operations
+
   //! \brief Tests if the polyhedron is empty. (Not currently implemented.)
   virtual tribool empty() const;
 
   //! \brief Tests if the polyhedron is bounded. (Not currently implemented.)
   virtual tribool bounded() const;
 
-  //! \brief The \a i<sup>th</th> defining halfspace. 
+  //! \brief The \a i<sup>th</sup> defining halfspace. 
   Polyhedron halfspace(size_t i) const;
 
   //! \brief Convert to a polytope. 
@@ -128,9 +129,13 @@ class Polyhedron
 
   //@}
 
+  //@{
+  //! \name Input/output.
+
   //! \brief Write to an output stream. 
   std::ostream& write(std::ostream& os) const;
   //@}
+
 };
 
   

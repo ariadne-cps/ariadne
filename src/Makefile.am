@@ -21,6 +21,7 @@ SRC = \
 	polytope.cc \
 	polyhedron.cc \
 	set.cc \
+	geometry.cc \
 	curve.cc \
 	grid_set.cc \
 	hybrid_set.cc \

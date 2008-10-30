@@ -154,13 +154,6 @@ ConstraintSet::superset(const Vector<Interval>& bx) const
 }
 
 
-Vector<Interval>
-ConstraintSet::bounding_box() const 
-{ 
-  ARIADNE_NOT_IMPLEMENTED;
-}
-
-
 std::ostream&
 ConstraintSet::write(std::ostream& os) const 
 { 

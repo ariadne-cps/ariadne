@@ -57,6 +57,14 @@ bool subset(const Vector<Interval>& v1, const Vector<Interval>& v2)
   return true;
 }
 
+bool empty(const Vector<Interval>& v) 
+{
+  for(size_t i=0; i!=v.size(); ++i) {
+    if(empty(v[i])) { return true; }
+  }
+  return false;
+}
+
 Vector<Float> midpoint(const Vector<Interval>& v) 
 {
   Vector<Float> r(v.size());

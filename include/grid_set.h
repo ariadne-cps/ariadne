@@ -790,7 +790,7 @@ namespace Ariadne {
 			//@}
 	};
 
-	/* \brief The GridTreeSet class that represents a set of cells with mixed integer and dyadic coordinates.
+	/*! \brief The GridTreeSet class that represents a set of cells with mixed integer and dyadic coordinates.
 	 * The cells can be enabled or disabled (on/off), indicating whether they belong to the paving or not.
 	 * It is possible to have cells that are neither on nor off, indicating that they have enabled and
 	 * disabled sub cells.

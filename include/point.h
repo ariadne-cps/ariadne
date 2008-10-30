@@ -33,17 +33,21 @@
 
 namespace Ariadne {
 
-class Point : public Vector<Float>
+//! A point in Euclidean space.
+class Point
+ : public Vector<Float>
 {
  public:
   typedef Float real_type;
+  //! Default constructor contructs the singleton point in zero dimensions.
   Point() : Vector<Float>() { }
   template<class T> Point(const T& t) : Vector<Float>(t) { }
   template<class T1, class T2> Point(const T1& t1, const T2& t2) : Vector<Float>(t1,t2) { }
+  //! The origin in \a n dimensions.
   static Point origin(uint n) { return Point(n,0.0); }
+  //! The dimension of the point.
   uint dimension() const { return this->size(); }
   Vector<Float> centre() const { return *this; }
-  friend bool operator<(const Point& pt1, const Point& pt2);
 };
 
 Point make_point(const std::string&);

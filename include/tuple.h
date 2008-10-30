@@ -89,6 +89,8 @@ namespace Ariadne {
       inline ltuple(T1& t1, T2& t2) : first(t1), second(t2) { }
       inline ltuple<T1,T2> operator=(const tuple<T1,T2>& rv) { 
         this->first=rv.first; this->second=rv.second; return *this; }
+      inline ltuple<T1,T2> operator=(const std::pair<T1,T2>& rv) { 
+        this->first=rv.first; this->second=rv.second; return *this; }
       T1& first; T2& second;
     };
 

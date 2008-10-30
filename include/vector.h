@@ -130,6 +130,18 @@ bool operator==(const Vector<X1>& v1, const Vector<X2>& v2)
 }
 
 
+template<class X1, class X2>
+bool operator<(const Vector<X1>& v1, const Vector<X2>& v2)
+{
+  if(v1.size()!=v2.size()) { return false; }
+  for(size_t i=0; i!=v1.size(); ++i) {
+    if(v1[i]<v2[i]) { return true; }
+    else if(v1[i]>v2[i]) { return false; }
+  }
+  return true;
+}
+
+
 template<class X> std::ostream& operator<<(std::ostream& os, const Vector<X>& v) {
   if(v.size()==0) { os << '['; }
   for(size_t i=0; i!=v.size(); ++i) { 
@@ -149,6 +161,7 @@ bool contains(const Vector<Interval>& v1, const Vector<Float>& v2);
 bool subset(const Vector<Float>& v1, const Vector<Interval>& v2);
 bool subset(const Vector<Interval>& v1, const Vector<Interval>& v2);
 bool disjoint(const Vector<Interval>& v1, const Vector<Interval>& v2);
+bool empty(const Vector<Interval>& v);
 
 Vector<Interval> hull(const Vector<Interval>& v1, const Vector<Interval>& v2);
 Vector<Interval> intersection(const Vector<Interval>& v1, const Vector<Interval>& v2);

@@ -30,19 +30,7 @@
 
 namespace Ariadne {
 
-bool 
-operator<(const Point& pt1, const Point& pt2) 
-{
-  ARIADNE_ASSERT(pt1.dimension()==pt2.dimension());
-  for(uint i=0; i!=pt1.dimension(); ++i) {
-    if(pt1[i]<pt2[i]) {
-      return true; 
-    } else if(pt1[i]>pt2[i]) {
-      return false;
-    }
-  }
-  return false;
-}
+
 Point make_point(const std::string& str)
 {
   std::vector<Float> vec;

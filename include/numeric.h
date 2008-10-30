@@ -177,6 +177,14 @@ inline bool equal(Interval i1, Interval i2) {
   return i1.l==i2.l && i1.u==i2.u;
 }
 
+inline bool empty(Interval i) { 
+  return i.l>i.u;
+}
+
+inline bool bounded(Interval i) { 
+  return i.l!=-inf() && i.u!=+inf();
+}
+
 inline Interval intersection(Interval i1, Interval i2) { 
   if(i1.l>i2.u || i1.u<i2.l) { return Interval(1,-1); }
   return Interval(max(i1.l,i2.l),min(i1.u,i2.u));

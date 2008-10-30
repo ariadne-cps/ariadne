@@ -434,34 +434,16 @@ std::ostream& operator<<(std::ostream& os, const Grid& gr)
                             + count_enabled_leaf_nodes(pNode->right_node());
                 }
         }
-
-
-	string BinaryTreeNode::tree_to_string() const {
-		string result = "";
-		char trib_value;
-
-		//Get the node's _isEnabled value
-		if( is_enabled() ){
-			trib_value = '+';
+	
+	void BinaryTreeNode::tree_to_binary_words( BinaryWord & tree, BinaryWord & leaves ) const {
+		if( is_leaf() ) {
+			tree.push_back( false );
+			leaves.push_back( definitely( _isEnabled ) );
 		} else {
-			if( is_disabled() ){
-				trib_value = '-';
-			} else {
-				trib_value = '?';
-			}
+			tree.push_back( true );
+			_pLeftNode->tree_to_binary_words( tree, leaves );
+			_pRightNode->tree_to_binary_words( tree, leaves );
 		}
-		result += trib_value;
-		
-		//Indicate whether it is a leaf or not
-		if( is_leaf() ){
-			result += "0";
-		} else {
-			result += "1";
-			result += _pLeftNode->tree_to_string();
-			result += "1";
-			result += _pRightNode->tree_to_string();
-		}
-		return result;
 	}
 	
 	void BinaryTreeNode::add_enabled( const BinaryTreeNode * pOtherSubTree, const BinaryWord & path ){
@@ -576,29 +558,6 @@ std::ostream& operator<<(std::ostream& os, const Grid& gr)
 	}
 
 /********************************************GridTreeCursor***************************************/
-	
-        GridTreeCursor::GridTreeCursor(  ) :
-                _currentStackIndex(-1), _pSubPaving(0), _theCurrentGridCell( Grid(), 0, BinaryWord() ) {
-        }
-
-	string GridTreeCursor::to_string() const{
-		stringstream tmp_stream;
-		string result = "\n The underlying subpaving:"+_pSubPaving->to_string();
-
-		tmp_stream << _currentStackIndex;
-		result += "\n The current stack index: " + tmp_stream.str();
-		tmp_stream.str("");
-
-		result += "\n The current stack data: \n";
-		for(int i = 0; i <= _currentStackIndex; i++){
-			tmp_stream << i;
-			result += " Element " + tmp_stream.str() + ": "+ _theStack[i]->node_to_string()+"\n";
-			tmp_stream.str("");
-		}
-		result += " The current grid cell: " + _theCurrentGridCell.to_string();
-		return result;
-	}
-
 
 /****************************************GridTreeConstIterator************************************/
 
@@ -786,63 +745,22 @@ std::ostream& operator<<(std::ostream& os, const Grid& gr)
 		
 		return theBinaryPath;
 	}
-		
-	/*! \brief Serialize the current object state, this is mostly needed for testing */
-	string GridCell::to_string() const{
-		//Write the grid data to the string stream
-		stringstream tmp_stream;
-		tmp_stream << _theGrid;
-		
-		//Get the Grid data
-		string result = "\n The grid: " + tmp_stream.str();
-		tmp_stream.str("");
-		
-		//Get the Primary cell height
-		tmp_stream << _theHeight;
-		result += "\n Primary root cell's height: " + tmp_stream.str();
-		tmp_stream.str("");
-		
-		//Get the binary word path to the subpaving root cell
-		tmp_stream << _theWord;
-		result += "\n The path to the cell from the primary root cell: " + tmp_stream.str();
-		tmp_stream.str("");
-		
-		//Print the Box corresponding to this cell
-		tmp_stream << _theBox;
-		result += "\n The cell's box: " + tmp_stream.str();
-		tmp_stream.str("");
-		
-		return result;
-	}
-
-
-
-
+	
 /********************************************GridCellListSet*****************************************/
-
 
 GridCellListSet::~GridCellListSet()
 {
 }
-
 
 GridCellListSet::GridCellListSet(const Grid& g)
   : _grid(g), _list()
 {
 }
 
-
-
-
 GridCellListSet::GridCellListSet(const GridTreeSet& gts)
   : _grid(gts.grid()), _list(gts.begin(),gts.end())
 {
 }
-
-
-
-
-
 
 GridCellListSet::operator ListSet<Box>() const
 {
@@ -853,13 +771,11 @@ GridCellListSet::operator ListSet<Box>() const
   return result;
 }
 
-
 const Grid& 
 GridCellListSet::grid() const 
 {
   return this->_grid; 
 }
-
 
 uint
 GridCellListSet::dimension() const 
@@ -867,20 +783,17 @@ GridCellListSet::dimension() const
   return this->_grid.dimension(); 
 }
 
-
 uint
 GridCellListSet::size() const 
 {
   return this->_list.size(); 
 }
 
-
 GridCell
 GridCellListSet::operator[](uint i) const 
 {
   return this->_list[i]; 
 }
-
 
 GridCell
 GridCellListSet::pop() 
@@ -890,13 +803,11 @@ GridCellListSet::pop()
   return back;
 }
 
-
 void
 GridCellListSet::clear()
 {
   this->_list.clear();
 }
-
 
 void
 GridCellListSet::unique_sort()
@@ -906,13 +817,11 @@ GridCellListSet::unique_sort()
   //this->erase(unique_end,this->end());
 }
 
-
 void
 GridCellListSet::adjoin(const GridCell& gc) {
   ARIADNE_ASSERT(this->grid()==gc.grid());
   this->_list.push_back(gc);
 }
-
 
 void
 GridCellListSet::adjoin(const GridCellListSet& gcls) {
@@ -923,7 +832,6 @@ GridCellListSet::adjoin(const GridCellListSet& gcls) {
         }
 }
 
-
 void
 GridCellListSet::adjoin(const GridTreeSet& gts) {
         ARIADNE_ASSERT(this->grid()==gts.grid());
@@ -932,7 +840,6 @@ GridCellListSet::adjoin(const GridTreeSet& gts) {
                 this->_list.push_back(*iter);
         }
 }
-
 
 void
 GridCellListSet::remove(const GridCellListSet& gcls) {
@@ -969,7 +876,6 @@ GridCellListSet::remove(const GridTreeSet& gts) {
         }
         this->_list.erase(insert,this->_list.end());
 }
-
 
 std::ostream&     
 operator<<(std::ostream& os, const GridCellListSet& gcls)
@@ -1072,18 +978,7 @@ operator<<(std::ostream& os, const GridCellListSet& gcls)
 		
 		throw NotImplemented(__PRETTY_FUNCTION__);
 	}
-			
-	/*! \brief Serialize the current object state, this is mostly needed for testing */
-	string GridTreeSubset::to_string() const{
-		//Call the super class's method to get the Cell's information
-		string result = _theGridCell.to_string();
-		
-		//Print the SubPaving's binary tree
-		result += "\n The subpaving's tree: " + _pRootTreeNode->tree_to_string();
-		
-		return result;
-	}
-
+	
 /*********************************************GridTreeSet*********************************************/
 
 	void GridTreeSet::up_to_primary_cell( const uint toPCellHeight ){
@@ -1185,7 +1080,6 @@ operator<<(std::ostream& os, const GridCellListSet& gcls)
 		}
 	}
 
-
         // FIXME: This method can fail if we cannot determine which of a node's children intersects
         // the set (if any)
         void GridTreeSet::adjoin_lower_approximation( BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
@@ -1230,8 +1124,7 @@ operator<<(std::ostream& os, const GridCellListSet& gcls)
 			pPath->pop_back();
 		}
         }
-
-
+	
         void GridTreeSet::adjoin_lower_approximation( BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
                                                       const uint max_mince_depth,  const OpenSetInterface& theSet, BinaryWord * pPath ){
 		//Compute the cell correspomding to the current node
@@ -1267,9 +1160,7 @@ operator<<(std::ostream& os, const GridCellListSet& gcls)
 			pPath->pop_back();
 		}
 	}
-
-
-
+	
 	void GridTreeSet::adjoin_outer_approximation( const CompactSetInterface& theSet, const uint depth ) {
 		Grid theGrid( this->cell().grid() );
 		ARIADNE_ASSERT( theSet.dimension() == this->cell().dimension() );
@@ -1300,29 +1191,25 @@ operator<<(std::ostream& os, const GridCellListSet& gcls)
 			delete pEmptyPath;
 		}
 	}
-
+	
         // FIXME: The following three methods should adjoin an approximation at the given height and depth.
         // The use of GridCell(...) is a hack.
 	void GridTreeSet::adjoin_lower_approximation( const LocatedSetInterface& theSet, const uint heightdepth ) {
                 this->adjoin_lower_approximation(theSet,GridCell(this->grid(),heightdepth,BinaryWord()).box(),heightdepth);
         }
-
-
+	
 	void GridTreeSet::adjoin_lower_approximation( const OvertSetInterface& theSet, const uint heightdepth ) {
                 this->adjoin_lower_approximation(theSet,GridCell(this->grid(),heightdepth,BinaryWord()).box(),heightdepth);
         }
-
-
+	
 	void GridTreeSet::adjoin_inner_approximation( const OpenSetInterface& theSet, const uint heightdepth ) {
                 this->adjoin_lower_approximation(theSet,GridCell(this->grid(),heightdepth,BinaryWord()).box(),heightdepth);
         }
-
-
+	
         void GridTreeSet::adjoin_lower_approximation( const OvertSetInterface& theSet, const Box& theBoundingBox, const uint depth ) {
 
 		Grid theGrid( this->cell().grid() );
 		ARIADNE_ASSERT( theSet.dimension() == this->cell().dimension() );
-		
                   
                 //1. Compute the smallest GridCell (corresponding to the primary cell)
 		//   that encloses the theSet (after it is mapped onto theGrid).
@@ -1349,7 +1236,7 @@ operator<<(std::ostream& os, const GridCellListSet& gcls)
                         const OpenSetInterface* theOpenVersionOfSet = dynamic_cast<const OpenSetInterface*>(&theSet);
                         //const LocatedSetInterface* theLocatedVersionOfSet = dynamic_cast<const LocatedSetInterface*>(&theSet);
                         const OvertSetInterface* theOvertVersionOfSet = dynamic_cast<const OvertSetInterface*>(&theSet);
-                        if(theOpenVersionOfSet) {
+                        if( theOpenVersionOfSet ) {
                                 adjoin_lower_approximation( pBinaryTreeNode, theOuterApproxCell.height(), max_mince_depth, *theOpenVersionOfSet, pEmptyPath );
                         } else {
                                 adjoin_lower_approximation( pBinaryTreeNode, theOuterApproxCell.height(), max_mince_depth, *theOvertVersionOfSet, pEmptyPath );
@@ -1581,13 +1468,6 @@ operator<<(std::ostream& os, const GridCellListSet& gcls)
 		//!!!!
 		throw NotImplemented(__PRETTY_FUNCTION__);
 	}
-
-        std::ostream& operator<<(std::ostream& os, const GridTreeSet& theSet) {
-          return os << "GridTreeSet(d="<<theSet.dimension()
-                    <<",s="<<theSet.size()<<")";
-	}
- 
-
 
 } // namespace Ariadne
 

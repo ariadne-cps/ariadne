@@ -146,13 +146,40 @@ namespace Ariadne {
       return os;
     }
 
-    inline BinaryWord make_binary_word(const std::string& str) {
-          BinaryWord res;
-          std::stringstream ss(str);
-          ss >> res;
-          return res;
-    }
-    
+	/*! \brief Provides a method to fill a BinaryWord with a new data form the stream
+	 * Ther data format is either "[0,1,0,1,1]" or equivalently "01011".
+	 */
+	inline std::istream& operator>>(std::istream& input_stream, BinaryWord& binary_word) {
+		//Clear the binary word, as we assume that we input
+		//new data and the old one is not needed.
+		binary_word.clear();
+		//Read the first stream symbol to check the input format
+		char symbol;
+		input_stream >> symbol;
+		if( symbol == '[' ) {
+			//If it is a standard std:vector input then put
+			//the symbol back and use it's input operator
+			std::vector<bool> & bool_vector = binary_word;
+			input_stream.putback( symbol );
+			input_stream >> bool_vector;
+		} else {
+			//Otherwise read a sequence of 0 and 1.
+			while( input_stream && ( symbol =='0' || symbol =='1' ) ) {
+				binary_word.push_back( symbol == '0' ? 0 : 1);
+				input_stream.get( symbol );
+			}
+			input_stream.putback( symbol );
+		}
+		return input_stream;
+	}
+
+	inline BinaryWord make_binary_word(const std::string& string_data) {
+		BinaryWord binary_word;
+		std::stringstream string_input_stream( string_data );
+		string_input_stream >> binary_word;
+		return binary_word;
+	}
+
 } // namespace Ariadne
   
 #endif /* ARIADNE_BINARY_WORD_H */

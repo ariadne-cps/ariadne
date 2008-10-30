@@ -47,7 +47,6 @@
 #include "set_interface.h"
 #include "vector.h"
 
-
 using namespace std;
 using namespace Ariadne;
 
@@ -75,8 +74,11 @@ namespace Ariadne {
 	/*Declarations of classes in other files*/
         template<class BS> class ListSet;
 
+	std::ostream& operator<<(std::ostream& output_stream, const BinaryTreeNode & binary_tree );
 	std::ostream& operator<<(std::ostream& os, const GridCell& theGridCell);
+	std::ostream& operator<<(std::ostream& os, const GridTreeCursor& theGridTreeCursor);
         std::ostream& operator<<(std::ostream& os, const GridTreeSet& theGridCellListSet);
+        std::ostream& operator<<(std::ostream& os, const GridTreeSubset& theGridTreeSubset);
         std::ostream& operator<<(std::ostream& os, const GridTreeSet& theGridTreeSet);
 
 	bool subset(const GridCell& theCell, const GridTreeSubset& theSet);
@@ -351,10 +353,12 @@ namespace Ariadne {
 			 */
 			void recombine();
 			
-			/*! \brief Creates a string representing the binary tree rooted to the given node */
-			string tree_to_string() const;
-
-			/*! \brief Creates a string representing the given node */
+			/*! \brief Stores the binary tree in a form of two arrays, their structure is the same as needed for
+			 *   the BinaryTreeNode( const BooleanArray& , const BooleanArray&  ) constructor
+			 */
+			void tree_to_binary_words( BinaryWord & tree, BinaryWord & leaves ) const;
+			
+			/*! \brief Stores the binary tree node as a string*/
 			string node_to_string() const;
 			
 			/*! \brief Finds(creates) the leaf node defined by the \a path and marks it as enabled.
@@ -481,9 +485,6 @@ namespace Ariadne {
 
 			/*! \brief A total order on cells on the same grid, by height and word prefix. */
 			bool operator<(const GridCell& otherCell) const;
-
-			/*! \brief Serialize the current object state, this is mostly needed for testing */
-			string to_string() const;
 
 			/*! \brief this method computes the box in the original space based on the \a theGrid,
 			 *  and a cell which is obtained by traversing the path given by \a _theWord from the
@@ -726,9 +727,6 @@ namespace Ariadne {
 			
 			/*! Recalculate the depth of the tree rooted at \a _pRootTreeNode */
 			uint depth() const;
-			
-			/*! \brief Serialize the current object state, this is mostly needed for testing */
-			virtual string to_string() const;
 
 			/*! \brief Returns the \a GridCell corresponding to the ROOT NODE of this \a GridTreeSubset
 			 * WARNING: It is NOT the primary cell of the paving! 
@@ -1101,6 +1099,8 @@ namespace Ariadne {
 			 * if left_or_right == indeterminate then we are going one level up.
 			 */
 			void updateTheCurrentGridCell( tribool left_or_right );
+
+			friend std::ostream& operator<<(std::ostream& os, const GridTreeCursor& theGridTreeCursor);
 			
 		public:
                         /*! \brief Default constructor constructs an invalid cursor. */
@@ -1160,12 +1160,11 @@ namespace Ariadne {
 			 */
 			GridTreeCursor& move(bool left_or_right);
 
-			/*! \brief Covert to a GridCell. */
+			/*! \brief Convert to a GridCell. */
 			const GridCell& cell() const;
 			
 			/*! \brief Allows to test if the two cursors are equal, this is determined by
-			 * the fact that they store the same nodes in \a _theStack[_currentStackIndex].
-			 * In other words we check that they point to the same binary-tree node.
+			 * the fact that they point to the same binary-tree node.
 			 * NOTE: if _currentStackIndex < 0 for at least one of the cursors then the
 			 * result is always false.
 			*/
@@ -1180,9 +1179,6 @@ namespace Ariadne {
 			 * reference to the GridTreeSubset for the current node.
 			 */
 			const GridTreeSubset operator*() const;
-			
-			/*! \brief Serialize the current cursor state, this is mostly needed for testing */
-			string to_string() const;
 	};
 	
 	/*! \brief This class allows to iterate through the enabled leaf nodes of GridTreeSubset.
@@ -1265,7 +1261,6 @@ namespace Ariadne {
 				
 			//@}
 	};
-
 	
 /***************************************Inline functions*********************************************/
 
@@ -1350,7 +1345,7 @@ namespace Ariadne {
 			if( pOtherNode->_pRightNode != NULL ){ _pRightNode = new BinaryTreeNode( * (pOtherNode->_pRightNode) ); }
 		}
 	}
-	
+
 	inline void BinaryTreeNode::set_disabled() {
 		if ( is_leaf() ) {
 			_isEnabled = false;
@@ -1385,27 +1380,26 @@ namespace Ariadne {
 	inline void BinaryTreeNode::add_enabled( const BinaryWord& path ){
 		add_enabled( this, path, 0 );
 	}
-
+	
 	inline void BinaryTreeNode::mince(const uint depth) {
 		mince_node(this, depth);
 	}
-
+	
 	inline void BinaryTreeNode::recombine() {
 		recombine_node(this);
 	}
-
+	
 	inline string BinaryTreeNode::node_to_string() const {
-		string result = "";
-		result += "isLeaf = ";
-		result += is_leaf() ? "1" : "0";
-		result += ", isEnabled = ";
-		result += is_enabled() ? "1" : "0";
-		result += ", isDisabled = ";
-		result += is_disabled() ? "1" : "0";
-		return  result;
+		stringstream tmp_stream;
+		tmp_stream << "BinaryTreeNode( isLeaf = " << is_leaf() << ", isEnabled = " << is_enabled() << ", isDisabled = " << is_disabled() << " )";
+		return tmp_stream.str();
 	}
-
+	
 /********************************************GridTreeCursor***************************************/
+	
+        inline GridTreeCursor::GridTreeCursor(  ) :
+                _currentStackIndex(-1), _pSubPaving(0), _theCurrentGridCell( Grid(), 0, BinaryWord() ) {
+        }
 
 	inline GridTreeCursor::GridTreeCursor(const GridTreeCursor & theSubPaving) :
 						_currentStackIndex(theSubPaving._currentStackIndex), _theStack(theSubPaving._theStack), 
@@ -1555,7 +1549,7 @@ namespace Ariadne {
 	inline const GridCell& GridTreeCursor::cell() const {
 		return _theCurrentGridCell;
 	}
-
+	
 	inline bool GridTreeCursor::operator==(const GridTreeCursor& anotherGridTreeCursor) const {
 		bool areEqual = false;
 		if( (this->_currentStackIndex >=0) && (anotherGridTreeCursor._currentStackIndex >=0 ) ){
@@ -1563,7 +1557,7 @@ namespace Ariadne {
 		}
 		return areEqual;
 	}
-
+	
 	inline GridTreeSubset GridTreeCursor::operator*() {
 		//IVAN S ZAPREEV:
 		//NOTE: The first three parameters define the location of the _theStack[ _currentStackIndex ]
@@ -1641,10 +1635,8 @@ namespace Ariadne {
 /*********************************************GridCell***********************************************/
 	
 	inline GridCell::GridCell(const GridCell& theGridCell):
-									_theGrid(theGridCell._theGrid),
-									_theHeight(theGridCell._theHeight),
-									_theWord(theGridCell._theWord),
-									_theBox(theGridCell._theBox){
+				_theGrid(theGridCell._theGrid), _theHeight(theGridCell._theHeight),
+				_theWord(theGridCell._theWord), _theBox(theGridCell._theBox) {
 	}
 	
 	inline GridCell::GridCell(const Grid& theGrid, const uint theHeight, const BinaryWord& theWord) :
@@ -1654,9 +1646,9 @@ namespace Ariadne {
 	}
 
 	inline GridCell::GridCell(const Grid& theGrid, const uint theHeight,
-								const BinaryWord& theWord, const Box& theBox):
-								_theGrid(theGrid), _theHeight(theHeight),
-								_theWord(theWord), _theBox(theBox) {
+				const BinaryWord& theWord, const Box& theBox):
+					_theGrid(theGrid), _theHeight(theHeight),
+					_theWord(theWord), _theBox(theBox) {
 	}
 	
 	inline void GridCell::primary_cell_at_height( const uint theHeight, int & leftBottomCorner, int & rightTopCorner ) {
@@ -1772,16 +1764,10 @@ namespace Ariadne {
 	inline GridTreeSubset::const_iterator GridTreeSubset::end() const {
 		return GridTreeSubset::const_iterator(this, indeterminate);
 	}
-
-	/*! \brief Stream insertion operator. */
-	inline std::ostream& operator<<(std::ostream& os, const GridCell& gridPavingCell){
-		return os << gridPavingCell.to_string();
-	}
-
+	
 	inline const BinaryTreeNode * GridTreeSubset::binary_tree() const {
 		return _pRootTreeNode;
 	}
-
 
 /*********************************************GridTreeSet*********************************************/
 	
@@ -1878,47 +1864,86 @@ namespace Ariadne {
 			pBinaryTreeNode->add_enabled( theOtherSubPaving.binary_tree(), theOtherSubPaving.cell().word() );
 		}
 	}
-	
 
-/*************************************FRIENDS OF BinaryTreeNode*************************************/
+/**************************************FRIENDS OF BinaryTreeNode***************************************/
 
-	inline std::ostream& operator<<(std::ostream & theOstream, const BinaryTreeNode & theBinaryTreeRoot ){
-		return theOstream << theBinaryTreeRoot.tree_to_string();
+	/*! \brief Stream insertion operator, prints out two binary arrays, one is the tree structure
+	 *  and the other is the true/false (enabled/disabled) values for the leaf nodes
+	 */	
+	inline std::ostream& operator<<(std::ostream& output_stream, const BinaryTreeNode & binary_tree ) {
+		BinaryWord tree, leaves;
+		binary_tree.tree_to_binary_words( tree, leaves );
+		return output_stream << "BinaryTreeNode( Tree: " << tree << ", Leaves: " << leaves << ")";
 	}
 
-/*************************************FRIENDS OF GridTreeSet*****************************************/
+/****************************************FRIENDS OF GridCell*******************************************/
 
+	/*! \brief Stream insertion operator for the GridCell. */
+	inline std::ostream& operator<<(std::ostream& os, const GridCell& gridPavingCell){
+		//Write the grid data to the string stream
+		return os << "GridCell( " << gridPavingCell.grid() <<
+		", Primary cell height: " << gridPavingCell.height() << 
+		", Path to the root: " << gridPavingCell.word() <<
+		", Box: " << gridPavingCell.box() << " )";
+	}
+
+/*************************************FRIENDS OF GridTreeCursor*****************************************/
+
+	inline std::ostream& operator<<(std::ostream& os, const GridTreeCursor& theGridTreeCursor){
+		const int curr_stack_idx = theGridTreeCursor._currentStackIndex;
+		os << "GridTreeCursor( " << theGridTreeCursor._pSubPaving <<
+			", Curr. stack index: " << curr_stack_idx  <<
+		", Stack data: [ ";
+		for(int i = 0; i <= curr_stack_idx; i++){
+			os << theGridTreeCursor._theStack[i]->node_to_string() << ( ( i < curr_stack_idx ) ? "" : ", ");
+		}
+		return os<<" ], " << theGridTreeCursor._theCurrentGridCell << " )";
+	}
+
+/*************************************FRIENDS OF GridTreeSubset*****************************************/
+
+	inline std::ostream& operator<<(std::ostream& os, const GridTreeSubset& theGridTreeSubset) {
+		return os << "GridTreeSubset( Primary cell: " << theGridTreeSubset.cell() << ", " << (*theGridTreeSubset.binary_tree()) <<" )";
+	}
+	
+/***************************************FRIENDS OF GridTreeSet******************************************/
+	
+        inline std::ostream& operator<<(std::ostream& os, const GridTreeSet& theGridTreeSet) {
+		const GridTreeSubset& theGridTreeSubset = theGridTreeSet;
+		return os << "GridTreeSet( " << theGridTreeSubset << " )";
+	}
+	
         inline GridTreeSet outer_approximation(const CompactSetInterface& theSet, const uint depth) {
                 Grid theGrid(theSet.dimension());
                 return outer_approximation(theSet,theGrid,depth);
         }
-
+	
         inline GridTreeSet outer_approximation(const CompactSetInterface& theSet, const Grid& theGrid, const uint depth) {
                 GridTreeSet result(theGrid);
                 result.adjoin_outer_approximation(theSet,depth);
                 return result;
         }
+	
+	template<class G> void draw(G& theGraphic, const GridCell& theGridCell) {
+		draw(theGraphic,theGridCell.box());
+	}
+	
+	template<class G> void draw(G& theGraphic, const GridCellListSet& theGridCellListSet) {
+		for(GridCellListSet::const_iterator iter=theGridCellListSet.begin(); iter!=theGridCellListSet.end(); ++iter) {
+			draw(theGraphic,iter->box());
+		}
+	}
 
-        template<class G> void draw(G& theGraphic, const GridCell& theGridCell) {
-          draw(theGraphic,theGridCell.box());
-        }
+	template<class G> void draw(G& theGraphic, const GridTreeSet& theGridTreeSet) {
+		for(GridTreeSet::const_iterator iter=theGridTreeSet.begin(); iter!=theGridTreeSet.end(); ++iter) {
+			draw(theGraphic,iter->box());
+		}
+	}
 
-        template<class G> void draw(G& theGraphic, const GridCellListSet& theGridCellListSet) {
-          for(GridCellListSet::const_iterator iter=theGridCellListSet.begin(); iter!=theGridCellListSet.end(); ++iter) {
-            draw(theGraphic,iter->box());
-          }
-        }
-
-        template<class G> void draw(G& theGraphic, const GridTreeSet& theGridTreeSet) {
-          for(GridTreeSet::const_iterator iter=theGridTreeSet.begin(); iter!=theGridTreeSet.end(); ++iter) {
-            draw(theGraphic,iter->box());
-          }
-        }
-
-        template<class G> void draw(G& theGraphic, const CompactSetInterface& theSet) {
-                static const int DRAWING_DEPTH=16;
-                draw(theGraphic,outer_approximation(theSet,Grid(theSet.dimension()),DRAWING_DEPTH));
-        }
+	template<class G> void draw(G& theGraphic, const CompactSetInterface& theSet) {
+		static const int DRAWING_DEPTH=16;
+		draw(theGraphic,outer_approximation(theSet,Grid(theSet.dimension()),DRAWING_DEPTH));
+	}
 
 } // namespace Ariadne
 

@@ -146,6 +146,33 @@ operator<<(std::ostream& os, const EvolverInterface<SYS,ES>& e) {
 }
 
 
+/*! \ingroup EvaluatorInterfaces \ingroup Evolvers
+ *  \brief Interface for evolving a system and discretising the result on a grid.
+ */
+template<class SYS, class BS>
+class DiscreteEvolverInterface
+{
+ public:
+  typedef SYS SystemType;
+  typedef typename SYS::TimeType TimeType;
+  typedef BS BasicSetType;
+ 
+  /*! \brief Destructor. */
+  virtual ~DiscreteEvolverInterface() { };
+  
+  /*! \brief Make a dynamically-allocated copy. */
+  virtual DiscreteEvolverInterface<SystemType,BasicSetType>* clone() const = 0;
+  
+  /*! \brief Compute a lower-approximation to the the reachable and evolved sets under the system evolution. */
+  virtual Orbit<BasicSetType> 
+  lower_evolution(const SystemType& f, const BasicSetType& s, const TimeType& t, const int accuracy) const = 0;
+  
+  /*! \brief Compute a lower-approximation to the the reachable and evolved sets under the system evolution. */
+  virtual Orbit<BasicSetType> 
+  upper_evolution(const SystemType& f, const BasicSetType& s, const TimeType& t, const int accuracy) const = 0;
+};
+
+
 } // namespace Ariadne
 
 

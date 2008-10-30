@@ -29,7 +29,7 @@
 #include "polytope.h"
 #include "curve.h"
 #include "approximate_taylor_model.h"
-#include "set.h"
+#include "function_set.h"
 #include "grid_set.h"
 
 using namespace Ariadne;

@@ -21,8 +21,8 @@ check_PROGRAMS = \
 	test_discrete_evolution \
 	test_continuous_evolution \
 	test_hybrid_evolution \
-	test_discretiser \
-	test_reachability_analyser \
+	test_discretised_evolution \
+	test_reachability_analysis \
 	test_serialization \
 	test_graphics 
 
@@ -49,9 +49,8 @@ test_hybrid_evolution_SOURCES=test_hybrid_evolution.cc
 
 test_grid_set_SOURCES=test_grid_set.cc
 
-test_discretiser_SOURCES=test_discretiser.cc
-test_discrete_evolver_SOURCES=test_discrete_evolver.cc
-test_reachability_analyser_SOURCES=test_reachability_analyser.cc
+test_discretised_evolution_SOURCES=test_discretised_evolution.cc
+test_reachability_analysis_SOURCES=test_reachability_analysis.cc
 
 test_serialization_SOURCES=test_serialization.cc
 test_graphics_SOURCES=test_graphics.cc

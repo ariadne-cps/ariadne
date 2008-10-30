@@ -1,5 +1,5 @@
 /***************************************************************************
- *            analyser.h
+ *            reachability_analyser.h
  *
  *  Copyright  2006-8  Alberto Casagrande, Pieter Collins
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file analyser.h
+/*! \file reachability_analyser.h
  *  \brief Methods for computing abstract reachable sets.
  */
 
-#ifndef ARIADNE_ANALYSER_H
-#define ARIADNE_ANALYSER_H
+#ifndef ARIADNE_REACHABILITY_ANALYSER_H
+#define ARIADNE_REACHABILITY_ANALYSER_H
 
 #include <boost/smart_ptr.hpp>
 
@@ -34,8 +34,6 @@
 #include "hybrid_set_interface.h"
 
 #include "evolver_interface.h"
-#include "discretiser_interface.h"
-#include "analyser_interface.h"
 
 #include "orbit.h"
 #include "grid_set.h"
@@ -67,13 +65,12 @@ typedef std::pair<DiscreteState,DefaultEnclosureType> DefaultHybridEnclosureType
 /*! \brief A class for performing reachability analysis on a hybrid system.
  *  \ingroup Analysers
  */
-class HybridAnalyser
-  : public AnalyserInterface<HybridAutomaton>
-  , public Loggable
+class HybridReachabilityAnalyser
+  : public Loggable
 {
  private:
   boost::shared_ptr< EvolutionParameters > _parameters;
-  boost::shared_ptr< DiscretiserInterface<HybridAutomaton> > _discretiser;
+  boost::shared_ptr< DiscreteEvolverInterface<HybridAutomaton,HybridGridCell> > _discretiser;
  public:
   typedef HybridAutomaton SystemType;
   typedef HybridTime TimeType;
@@ -87,11 +84,15 @@ class HybridAnalyser
  public:
   //@{
   //! \name Constructors and destructors
+  /*! \brief Virtual destructor */
+  virtual ~HybridReachabilityAnalyser();
+
   /*! \brief Construct from evolution parameters and a method for evolving basic sets. */
-  HybridAnalyser(const EvolutionParameters& parameters, 
-                 const EvolverInterface<HybridAutomaton,DefaultHybridEnclosureType>& evolver);
+  HybridReachabilityAnalyser(const EvolutionParameters& parameters, 
+                             const EvolverInterface<HybridAutomaton,DefaultHybridEnclosureType>& evolver);
+
   /*! \brief Make a dynamically-allocated copy. */
-  HybridAnalyser* clone() const { return new HybridAnalyser(*this); }
+  virtual HybridReachabilityAnalyser* clone() const { return new HybridReachabilityAnalyser(*this); }
   //@}
   
   //@{ 
@@ -179,4 +180,4 @@ class HybridAnalyser
 } // namespace Ariadne
 
 
-#endif // ARIADNE_ANALYSER_H
+#endif // ARIADNE_REACHABILITY_ANALYSER_H

@@ -30,7 +30,7 @@
 #include "matrix.h"
 #include "function.h"
 
-#include "set.h"
+#include "function_set.h"
 #include "hybrid_set.h"
 
 using namespace std;

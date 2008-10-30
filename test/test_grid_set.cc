@@ -33,7 +33,7 @@
 #include "tribool.h"
 #include "numeric.h"
 
-#include "set.h"
+#include "function_set.h"
 #include "grid_set.h"
 #include "set_interface.h"
 

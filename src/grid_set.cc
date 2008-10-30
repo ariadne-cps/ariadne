@@ -27,7 +27,7 @@
 #include "macros.h"
 #include "exceptions.h"
 #include "stlio.h"
-#include "set.h"
+#include "function_set.h"
 #include "list_set.h"
 #include "grid_set.h"
 

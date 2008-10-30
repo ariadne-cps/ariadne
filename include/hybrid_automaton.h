@@ -26,6 +26,7 @@
 
 #include <string>
 #include <iostream>
+#include <vector>
 #include <set>
 
 #include <boost/shared_ptr.hpp>

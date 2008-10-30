@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_reachability_analyser.cc
+ *            test_reachability_analysis.cc
  *
  *  Copyright  2006-8  Pieter Collins
  *
@@ -31,8 +31,8 @@
 #include "hybrid_automaton.h"
 #include "evolution_parameters.h"
 #include "hybrid_evolver.h"
-#include "discretiser.h"
-#include "analyser.h"
+#include "discrete_evolver.h"
+#include "reachability_analyser.h"
 #include "graphics.h"
 #include "logging.h"
 
@@ -46,10 +46,10 @@ using Ariadne::Models::Henon;
 
 
 
-class TestReachabilityAnalyser 
+class TestReachabilityAnalysis 
 {  
 
-  HybridAnalyser analyser;
+  HybridReachabilityAnalyser analyser;
   HybridAutomaton system;
   Grid grid;
   Interval bound;
@@ -59,7 +59,7 @@ class TestReachabilityAnalyser
   typedef ApproximateTaylorModel EnclosureType;
 
  public:
-  static HybridAnalyser build_analyser()
+  static HybridReachabilityAnalyser build_analyser()
   {
     EvolutionParameters parameters;
     parameters.maximum_enclosure_radius=0.5;
@@ -73,12 +73,12 @@ class TestReachabilityAnalyser
     EvolverInterface<HybridAutomaton,DefaultHybridEnclosureType>& evolver_interface
       =evolver;
     //HybridDiscretiser<EnclosureType> discretiser(evolver);
-    HybridAnalyser analyser(parameters,evolver_interface);
+    HybridReachabilityAnalyser analyser(parameters,evolver_interface);
     cout << "Done building analyser\n";
     return analyser;
   }
 
-  TestReachabilityAnalyser()
+  TestReachabilityAnalysis()
     : analyser(build_analyser()),
       system(),
       grid(2),
@@ -199,7 +199,7 @@ class TestReachabilityAnalyser
 
 int main(int nargs, const char* args[]) 
 {
-  TestReachabilityAnalyser().test();
+  TestReachabilityAnalysis().test();
   if(ARIADNE_TEST_SKIPPED) { cerr << "INCOMPLETE "; }
   return ARIADNE_TEST_FAILURES;
 }

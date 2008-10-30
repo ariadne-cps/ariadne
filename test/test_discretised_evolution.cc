@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_discretiser.cc
+ *            test_discretised_evolution.cc
  *
  *  Copyright  2006-8  Pieter Collins
  *
@@ -35,7 +35,7 @@
 #include "hybrid_automaton.h"
 #include "hybrid_evolver.h"
 #include "orbit.h"
-#include "discretiser.h"
+#include "discrete_evolver.h"
 #include "graphics.h"
 
 #include "models.h"
@@ -48,7 +48,7 @@ using namespace Ariadne;
 using namespace std;
 using Models::VanDerPol;
 
-class TestDiscretiser
+class TestDiscretisedEvolution
 {
  public:
   void test() const;
@@ -60,18 +60,18 @@ class TestDiscretiser
 
 int main() 
 {
-  TestDiscretiser().test();
+  TestDiscretisedEvolution().test();
   return ARIADNE_TEST_FAILURES;
 }
 
-void TestDiscretiser::test() const
+void TestDiscretisedEvolution::test() const
 {
   ARIADNE_TEST_CALL(test_discrete_time());
   ARIADNE_TEST_CALL(test_continuous_time());
 }
 
 
-void TestDiscretiser::test_discrete_time() const
+void TestDiscretisedEvolution::test_discrete_time() const
 {
   typedef DefaultEnclosureType ApproximateTaylorModel;
   typedef std::pair<DiscreteState,DefaultEnclosureType> DefaultHybridEnclosureType;
@@ -94,7 +94,7 @@ void TestDiscretiser::test_discrete_time() const
 
   // Set up the evaluators
   HybridEvolver evolver(parameters);
-  HybridDiscretiser< DefaultEnclosureType > discretiser(evolver);
+  HybridDiscreteEvolver< DefaultEnclosureType > discrete_evolver(evolver);
 
   
   // Set up the vector field
@@ -136,7 +136,7 @@ void TestDiscretiser::test_discrete_time() const
 
   // Compute the reachable sets
   Orbit<HybridGridCell> discrete_orbit
-    = discretiser.upper_evolution(ha,hybrid_initial_cell,htime,depth);
+    = discrete_evolver.upper_evolution(ha,hybrid_initial_cell,htime,depth);
   cout << "Finished computing grid evolution." << endl;
 
   GridCellListSet const& reach_cells=discrete_orbit.reach()[location];
@@ -158,7 +158,7 @@ void TestDiscretiser::test_discrete_time() const
     //fig << fill_colour(magenta) << intermediate_cells;
     fig << fill_colour(yellow) << initial_cell;
     fig << fill_colour(green) << final_cells;
-    fig.write("test_discretiser-henon-cells");
+    fig.write("test_discrete_evolver-henon-cells");
   }
 
   // Print the intial, evolve and reach sets
@@ -170,11 +170,11 @@ void TestDiscretiser::test_discrete_time() const
     //fig << fill_colour(magenta) << intermediate_set;
     fig << fill_colour(yellow) << initial_set;
     fig << fill_colour(green) << final_set;
-    fig.write("test_discretiser-henon-sets");
+    fig.write("test_discrete_evolver-henon-sets");
   }
 }
 
-void TestDiscretiser::test_continuous_time() const
+void TestDiscretisedEvolution::test_continuous_time() const
 {
   typedef DefaultEnclosureType ApproximateTaylorModel;
   typedef std::pair<DiscreteState,DefaultEnclosureType> DefaultHybridEnclosureType;
@@ -195,7 +195,7 @@ void TestDiscretiser::test_continuous_time() const
 
   // Set up the evaluators
   HybridEvolver evolver(parameters);
-  HybridDiscretiser< DefaultEnclosureType > discretiser(evolver);
+  HybridDiscreteEvolver< DefaultEnclosureType > discrete_evolver(evolver);
 
   
   // Set up the vector field
@@ -232,7 +232,7 @@ void TestDiscretiser::test_continuous_time() const
 
   // Compute the reachable sets
   Orbit<HybridGridCell> discrete_orbit
-    = discretiser.upper_evolution(hvdp,hybrid_initial_cell,htime,depth);
+    = discrete_evolver.upper_evolution(hvdp,hybrid_initial_cell,htime,depth);
   GridCellListSet const& reach_cells=discrete_orbit.reach()[location];
   GridCellListSet const& intermediate_cells=discrete_orbit.intermediate()[location];
   GridCellListSet const& final_cells=discrete_orbit.final()[location];
@@ -252,7 +252,7 @@ void TestDiscretiser::test_continuous_time() const
     fig << fill_colour(magenta) << intermediate_cells;
     fig << fill_colour(blue) << initial_cell;
     fig << fill_colour(blue) << final_cells;
-    fig.write("test_discretiser-vdp-cells");
+    fig.write("test_discretised_evolution-vdp-cells");
   }
 
   // Print the intial, evolve and reach sets
@@ -264,7 +264,7 @@ void TestDiscretiser::test_continuous_time() const
     fig << fill_colour(magenta) << intermediate_set;
     fig << fill_colour(blue) << initial_set;
     fig << fill_colour(blue) << final_set;
-    fig.write("test_discretiser-vdp-sets");
+    fig.write("test_discretised_evolution-vdp-sets");
   }
 
 

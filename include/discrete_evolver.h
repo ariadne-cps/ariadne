@@ -1,5 +1,5 @@
 /***************************************************************************
- *            discretiser.h
+ *            discrete_evolver.h
  *
  *  Copyright  2006-8  Alberto Casagrande, Pieter Collins
  * 
@@ -21,27 +21,26 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file discretiser.h
+/*! \file discrete_evolver.h
  *  \brief Methods for computing the evolution of systems on grids/pavings.
  */
 
-#ifndef ARIADNE_DISCRETISER_H
-#define ARIADNE_DISCRETISER_H
+#ifndef ARIADNE_DISCRETE_EVOLVER_H
+#define ARIADNE_DISCRETE_EVOLVER_H
 
 #include <boost/smart_ptr.hpp>
 
 #include "evolver_interface.h"
-#include "discretiser_interface.h"
+#include "hybrid_automaton.h"
 
 #include "logging.h"
 
 
 namespace Ariadne {
   
+class HybridAutomaton;
 class HybridGridCell;
-class HybridGridCellListSet;
-
-template<class SYS> class DiscretiserInterface;
+class HybridGridTreeSet;
 
 typedef int DiscreteState;
 class HybridAutomaton;
@@ -50,14 +49,14 @@ class HybridAutomaton;
  *  \brief A class for computing the evolution of a discrete-time autonomous system.
  */
 template<class ES>
-class HybridDiscretiser
-  : public DiscretiserInterface<HybridAutomaton>
+class HybridDiscreteEvolver
+  : public DiscreteEvolverInterface<HybridAutomaton,HybridGridCell>
   , public Loggable
 {
-  typedef HybridTime TimeType;
+  typedef typename HybridAutomaton::TimeType TimeType;
   typedef HybridAutomaton SystemType;
   typedef HybridGridCell BasicSetType;
-  typedef HybridGridCellListSet DenotableSetType;
+  typedef HybridGridTreeSet DenotableSetType;
   typedef ES ContinuousEnclosureType;
   typedef std::pair<DiscreteState,ES> EnclosureType;
  private:
@@ -68,11 +67,11 @@ class HybridDiscretiser
   
   //! \brief Construct from evolution parameters and a method for evolving basic sets, 
   //!  and a scheme for approximating sets.
-  HybridDiscretiser(const EvolverInterface<SystemType,EnclosureType>& evolver)
+  HybridDiscreteEvolver(const EvolverInterface<SystemType,EnclosureType>& evolver)
     : _evolver(evolver.clone()) { }
       
   //! \brief Make a dynamically-allocated copy.
-  HybridDiscretiser<ES>* clone() const { return new HybridDiscretiser<ES>(*this); }
+  HybridDiscreteEvolver<ES>* clone() const { return new HybridDiscreteEvolver<ES>(*this); }
   
   //@}
   
@@ -105,4 +104,4 @@ class HybridDiscretiser
 } // namespace Ariadne
 
 
-#endif /* ARIADNE_DISCRETISER_H */
+#endif /* ARIADNE_DISCRETE_EVOLVER_H */

@@ -20,16 +20,16 @@ SRC = \
 	zonotope.cc \
 	polytope.cc \
 	polyhedron.cc \
-	set.cc \
-	geometry.cc \
 	curve.cc \
+	function_set.cc \
 	grid_set.cc \
 	hybrid_set.cc \
+	geometry.cc \
 	hybrid_automaton.cc \
 	orbit.cc \
 	hybrid_evolver.cc \
-	discretiser.cc \
-	analyser.cc \
+	discrete_evolver.cc \
+	reachability_analyser.cc \
 	logging.cc \
 	graphics.cc 
 

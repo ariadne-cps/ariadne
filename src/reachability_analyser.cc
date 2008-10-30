@@ -47,10 +47,9 @@
 
 #include "evolution_parameters.h"
 #include "evolver_interface.h"
-#include "discretiser_interface.h"
 
-#include "discretiser.h"
-#include "analyser.h"
+#include "discrete_evolver.h"
+#include "reachability_analyser.h"
 #include "logging.h"
 
 
@@ -63,11 +62,17 @@ static const double DEFAULT_GRID_LENGTH=0.125;
 static int verbosity=global_verbosity;
 
 
-HybridAnalyser::
-HybridAnalyser(const EvolutionParameters& parameters, 
+HybridReachabilityAnalyser::
+~HybridReachabilityAnalyser()
+{
+}
+
+
+HybridReachabilityAnalyser::
+HybridReachabilityAnalyser(const EvolutionParameters& parameters, 
                const EvolverInterface<HybridAutomaton,DefaultHybridEnclosureType>& evolver)
   : _parameters(new EvolutionParameters(parameters))
-  , _discretiser(new HybridDiscretiser<DefaultEnclosureType>(evolver))
+  , _discretiser(new HybridDiscreteEvolver<DefaultEnclosureType>(evolver))
 {
 }
 
@@ -78,7 +83,7 @@ HybridAnalyser(const EvolutionParameters& parameters,
 
 // Helper functions for operators on lists of sets.
 HybridGridTreeSet
-HybridAnalyser::_upper_reach(const HybridAutomaton& sys, 
+HybridReachabilityAnalyser::_upper_reach(const HybridAutomaton& sys, 
                              const HybridGridTreeSet& set, 
                              const HybridTime& time, 
                              const int accuracy) const 
@@ -94,7 +99,7 @@ HybridAnalyser::_upper_reach(const HybridAutomaton& sys,
 
 
 HybridGridTreeSet
-HybridAnalyser::_upper_evolve(const HybridAutomaton& sys, 
+HybridReachabilityAnalyser::_upper_evolve(const HybridAutomaton& sys, 
                               const HybridGridTreeSet& set, 
                               const HybridTime& time, 
                               const int accuracy) const 
@@ -108,7 +113,7 @@ HybridAnalyser::_upper_evolve(const HybridAutomaton& sys,
 
 
 std::pair<HybridGridTreeSet,HybridGridTreeSet>
-HybridAnalyser::_upper_reach_evolve(const HybridAutomaton& sys, 
+HybridReachabilityAnalyser::_upper_reach_evolve(const HybridAutomaton& sys, 
                                     const HybridGridTreeSet& set, 
                                     const HybridTime& time, 
                                     const int accuracy) const 
@@ -138,8 +143,8 @@ HybridAnalyser::_upper_reach_evolve(const HybridAutomaton& sys,
 
 
 
-HybridAnalyser::ConcreteSetType*
-HybridAnalyser::
+HybridReachabilityAnalyser::ConcreteSetType*
+HybridReachabilityAnalyser::
 lower_evolve(const SystemType& system, 
              const OvertSetType& initial_set,
              const TimeType& time) const
@@ -158,8 +163,8 @@ lower_evolve(const SystemType& system,
 
 
 
-HybridAnalyser::ConcreteSetType*
-HybridAnalyser::
+HybridReachabilityAnalyser::ConcreteSetType*
+HybridReachabilityAnalyser::
 lower_reach(const SystemType& system, 
             const OvertSetType& initial_set,
             const TimeType& time) const
@@ -178,8 +183,8 @@ lower_reach(const SystemType& system,
 
 
 
-std::pair<HybridAnalyser::ConcreteSetType*,HybridAnalyser::ConcreteSetType*>
-HybridAnalyser::
+std::pair<HybridReachabilityAnalyser::ConcreteSetType*,HybridReachabilityAnalyser::ConcreteSetType*>
+HybridReachabilityAnalyser::
 lower_reach_evolve(const SystemType& system, 
                    const OvertSetType& initial_set,
                    const TimeType& time) const
@@ -201,13 +206,13 @@ lower_reach_evolve(const SystemType& system,
 }
 
 
-HybridAnalyser::ConcreteSetType*
-HybridAnalyser::
+HybridReachabilityAnalyser::ConcreteSetType*
+HybridReachabilityAnalyser::
 upper_evolve(const SystemType& system, 
              const CompactSetType& initial_set,
              const TimeType& time) const
 {
-  ARIADNE_LOG(2,"HybridAnalyser::upper_evolve(...)\n");
+  ARIADNE_LOG(2,"HybridReachabilityAnalyser::upper_evolve(...)\n");
   GTS initial;
   int grid_depth = this->_parameters->grid_depth;
   initial.adjoin_outer_approximation(initial_set,grid_depth);
@@ -231,14 +236,14 @@ upper_evolve(const SystemType& system,
 
 
 
-HybridAnalyser::ConcreteSetType*
-HybridAnalyser::
+HybridReachabilityAnalyser::ConcreteSetType*
+HybridReachabilityAnalyser::
 upper_reach(const SystemType& system, 
             const CompactSetType& initial_set,
             const TimeType& time) const
 {
   verbosity=0;
-  ARIADNE_LOG(2,"HybridAnalyser::upper_reach(system,set,time)\n");
+  ARIADNE_LOG(2,"HybridReachabilityAnalyser::upper_reach(system,set,time)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   GTS initial;
   int grid_depth = this->_parameters->grid_depth;
@@ -271,14 +276,14 @@ upper_reach(const SystemType& system,
 }
 
 
-std::pair<HybridAnalyser::ConcreteSetType*,HybridAnalyser::ConcreteSetType*>
-HybridAnalyser::
+std::pair<HybridReachabilityAnalyser::ConcreteSetType*,HybridReachabilityAnalyser::ConcreteSetType*>
+HybridReachabilityAnalyser::
 upper_reach_evolve(const SystemType& system, 
                    const CompactSetType& initial_set,
                    const TimeType& time) const
 {
   verbosity=0;
-  ARIADNE_LOG(2,"HybridAnalyser::upper_reach(system,set,time)\n");
+  ARIADNE_LOG(2,"HybridReachabilityAnalyser::upper_reach(system,set,time)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   GTS initial;
   int grid_depth = this->_parameters->grid_depth;
@@ -317,8 +322,8 @@ upper_reach_evolve(const SystemType& system,
 
 
 
-HybridAnalyser::ConcreteSetType*
-HybridAnalyser::
+HybridReachabilityAnalyser::ConcreteSetType*
+HybridReachabilityAnalyser::
 chain_reach(const SystemType& system, 
             const CompactSetType& initial_set,
             const BoundingSetType& bounding_domain) const
@@ -366,8 +371,8 @@ chain_reach(const SystemType& system,
 
 
 
-HybridAnalyser::ConcreteSetType*
-HybridAnalyser::
+HybridReachabilityAnalyser::ConcreteSetType*
+HybridReachabilityAnalyser::
 viable(const SystemType& system, 
        const CompactSetType& bounding_set) const
 {
@@ -377,7 +382,7 @@ viable(const SystemType& system,
 
 
 tribool
-HybridAnalyser::
+HybridReachabilityAnalyser::
 verify(const SystemType& system, 
        const LocatedSetType& initial_set, 
        const RegularSetType& safe_set) const

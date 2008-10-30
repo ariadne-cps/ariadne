@@ -1,5 +1,5 @@
 /***************************************************************************
- *            discretiser.cc
+ *            discrete_evolver.cc
  *
  *  Copyright  2006-8  Alberto Casagrande, Pieter Collins
  *
@@ -21,11 +21,11 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "discretiser.h"
+#include "discrete_evolver.h"
 
 #include "approximate_taylor_model.h"
 #include "orbit.h"
-#include "set.h"
+#include "function_set.h"
 #include "grid_set.h"
 #include "hybrid_set.h"
 #include "hybrid_automaton.h"
@@ -79,8 +79,8 @@ typedef ApproximateTaylorModel DefaultEnclosureType;
 typedef std::pair<DiscreteState,DefaultEnclosureType> DefaultHybridEnclosureType;
 
 template<class ES>
-Orbit<typename HybridDiscretiser<ES>::BasicSetType> 
-HybridDiscretiser<ES>::
+Orbit<typename HybridDiscreteEvolver<ES>::BasicSetType> 
+HybridDiscreteEvolver<ES>::
 lower_evolution(const SystemType& system, 
                 const BasicSetType& initial_set, 
                 const TimeType& time,
@@ -90,8 +90,8 @@ lower_evolution(const SystemType& system,
 }
 
 template<class ES>
-Orbit<typename HybridDiscretiser<ES>::BasicSetType> 
-HybridDiscretiser<ES>::
+Orbit<typename HybridDiscreteEvolver<ES>::BasicSetType> 
+HybridDiscreteEvolver<ES>::
 upper_evolution(const SystemType& system, 
                 const BasicSetType& initial_set, 
                 const TimeType& time,
@@ -108,16 +108,16 @@ upper_evolution(const SystemType& system,
 }
 
 template<class ES>
-typename HybridDiscretiser<ES>::EnclosureType 
-HybridDiscretiser<ES>::
+typename HybridDiscreteEvolver<ES>::EnclosureType 
+HybridDiscreteEvolver<ES>::
 _enclosure(const BasicSetType& initial_set) const
 {
   return EnclosureType(initial_set.first,ES(initial_set.second.box()));
 }
 
 template<class ES>
-Orbit<typename HybridDiscretiser<ES>::BasicSetType> 
-HybridDiscretiser<ES>::
+Orbit<typename HybridDiscreteEvolver<ES>::BasicSetType> 
+HybridDiscreteEvolver<ES>::
 _discretise(const Orbit<EnclosureType>& continuous_orbit,
             const BasicSetType& initial_set,
             const int accuracy) const
@@ -143,6 +143,6 @@ _discretise(const Orbit<EnclosureType>& continuous_orbit,
  
 }
 
-template class HybridDiscretiser<DefaultEnclosureType>;
+template class HybridDiscreteEvolver<DefaultEnclosureType>;
 
 } // namespace Ariadne

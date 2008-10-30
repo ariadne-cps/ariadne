@@ -1,5 +1,5 @@
 /***************************************************************************
- *            set.h
+ *            function_set.h
  *
  *  Copyright 2008  Pieter Collins
  * 
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file set.h
+/*! \file function_set.h
  *  \brief Images and preimages of boxes in Euclidean space.
  */
 
-#ifndef ARIADNE_SET_H
-#define ARIADNE_SET_H
+#ifndef ARIADNE_FUNCTION_SET_H
+#define ARIADNE_FUNCTION_SET_H
 
 #include <iosfwd>
 

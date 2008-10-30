@@ -39,7 +39,7 @@
 #include "function.h"
 
 #include "set_interface.h"
-#include "set.h"
+#include "function_set.h"
 
 namespace Ariadne {  
   

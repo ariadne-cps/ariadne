@@ -807,18 +807,19 @@ namespace Ariadne {
 
 			friend class GridTreeCursor;
 
-			/*! \brief This method takes the primary cell of \a theCell and if it is:
-			 *   (a) higher then for this paving, pre-pends \a _pRootTreeNodeis.
-			 *   (b) lower then for this paving, locates it in this paging's tree.
-			 *   (c) equal to the hight of this paving's primary cell, does nothing.
+			/*! \brief This method takes the height of the primary cell
+			 *  \a otherPavingPCellHeight and if it is:
+			 *    (a) higher then for this paving, pre-pends \a _pRootTreeNodeis.
+			 *    (b) lower then for this paving, locates it in this paging's tree.
+			 *    (c) equal to the hight of this paving's primary cell, does nothing.
 			 *  This method returns the node corresponding to the primary cell of
-			 *   \a theCell in the (updated) paving.
+			 *  height \a otherPavingPCellHeight in the (updated) paving.
 			 *  If \a stop_on_enabled is set tro true then for the case (b) if we meet
 			 *  a leaf node on the path from the primary onde of the paving to the primary
-			 *  node of the cell, we stop locating the primary cell of \a theCell and set
-			 *  \a has_stopped to true.
+			 *  node of the cell, we stop locating the node corresponding to the primary
+			 *  cell of height \a otherPavingPCellHeight and set \a has_stopped to true.
 			 */
-			BinaryTreeNode* align_with_cell( const GridCell& theCell, const bool stop_on_enabled, bool & has_stopped );
+			BinaryTreeNode* align_with_cell( const uint otherPavingPCellHeight, const bool stop_on_enabled, bool & has_stopped );
 
 			/*! \brief This method adjoins the outer approximation of \a theSet (computed on the fly) to this paving.
 			 *  We use the primary cell (enclosed in this paving) of height \a primary_cell_hight and represented 
@@ -1834,9 +1835,11 @@ namespace Ariadne {
         }
 
 	inline void GridTreeSet::adjoin( const GridCell& theCell ) {
+		ARIADNE_ASSERT( this->grid() == theCell.grid() );
+		
 		bool has_stopped = false;
 		//Align the paving and the cell
-		BinaryTreeNode* pBinaryTreeNode = align_with_cell( theCell, true, has_stopped );
+		BinaryTreeNode* pBinaryTreeNode = align_with_cell( theCell.height(), true, has_stopped );
 		
 		//If we are not trying to adjoin something into an enabled sub cell of the paving
 		if( ! has_stopped ){
@@ -1852,9 +1855,11 @@ namespace Ariadne {
 	}
 	
 	inline void GridTreeSet::adjoin( const GridTreeSubset& theOtherSubPaving ) {
+		ARIADNE_ASSERT( this->grid() == theOtherSubPaving.cell().grid() );
+		
 		bool has_stopped = false;
 		//Align the paving and the cell
-		BinaryTreeNode* pBinaryTreeNode = align_with_cell( theOtherSubPaving.cell(), true, has_stopped );
+		BinaryTreeNode* pBinaryTreeNode = align_with_cell( theOtherSubPaving.cell().height(), true, has_stopped );
 		
 		//If we are not trying to adjoin something into an enabled sub cell of the paving
 		if( ! has_stopped ){

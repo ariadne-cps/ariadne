@@ -1038,7 +1038,7 @@ namespace Ariadne {
 			 */
 			friend GridTreeSet intersection( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 );
 	
-			/*! \brief The difference of two grid paving sets. */
+			/*! \brief The difference of two grid paving sets. (Results in theSet1 minus theSet2) */
 			friend GridTreeSet difference( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 );
 
 			//@}

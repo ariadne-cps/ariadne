@@ -1136,6 +1136,190 @@ void test_remove() {
 	//	The GridTreeSubset is at level 1 and it's primary cell is at level 2
 }
 
+void test_cell_subset() {
+		
+	//Allocate a trivial Grid two dimensional grid
+	Grid theTrivialGrid(2, 1.0);
+	
+	const uint smallHeight = 0;
+	const uint mediumHeight = 1;
+	const uint bigHeight = 2;
+
+	//Create the cell, will be rooted to the primary cell mediumHeight
+	GridCell theCell( theTrivialGrid, mediumHeight, make_binary_word("110") );
+
+	//Create the binary tree, will be rooted to the primary cell of height bigHeight
+	BinaryTreeNode * pBinaryTreeRoot = new BinaryTreeNode(true);
+	pBinaryTreeRoot->split();
+	pBinaryTreeRoot->left_node()->split();
+	pBinaryTreeRoot->right_node()->split();
+	pBinaryTreeRoot->left_node()->right_node()->set_disabled();
+	pBinaryTreeRoot->right_node()->left_node()->set_disabled();
+	
+	pBinaryTreeRoot->left_node()->left_node()->split();
+	pBinaryTreeRoot->left_node()->left_node()->right_node()->split();
+	pBinaryTreeRoot->left_node()->left_node()->left_node()->split();
+	pBinaryTreeRoot->left_node()->left_node()->right_node()->left_node()->set_disabled();
+	pBinaryTreeRoot->left_node()->left_node()->left_node()->right_node()->set_disabled();
+	
+	//Create the GridTreeSubset, will be rooted to the primary cell of height smallHeight
+	GridTreeSubset theSmallSubPaving( theTrivialGrid, smallHeight, make_binary_word("0011"),
+						pBinaryTreeRoot->left_node()->left_node()->right_node()->right_node() );
+	
+	// !!!
+	print_title("Test subset operation GridCell (height=1), GridTreeSubset.mince(2) (height=0)");
+	theSmallSubPaving.mince(2);
+	print_comment("theCell");
+	cout << theCell << endl;
+	print_comment("theSmallSubPaving");
+	cout << theSmallSubPaving << endl;
+	ARIADNE_TEST_EQUAL( subset( theCell, theSmallSubPaving), false );
+	
+	// !!!
+	print_title("Test subset operation GridCell (height=1), GridTreeSubset.recombine() (height=0)");
+	theSmallSubPaving.recombine();
+	print_comment("theCell");
+	cout << theCell << endl;
+	print_comment("theSmallSubPaving");
+	cout << theSmallSubPaving << endl;
+	ARIADNE_TEST_EQUAL( subset( theCell, theSmallSubPaving), false );
+	
+	//Create the GridTreeSubset, will be rooted to the primary cell of height bigHeight
+	GridTreeSubset theBigSubPaving( theTrivialGrid, bigHeight, make_binary_word("0011"),
+						pBinaryTreeRoot->left_node()->left_node()->right_node()->right_node() );
+	
+	// !!!
+	print_title("Test subset operation GridCell (height=1), GridTreeSubset.mince(2) (height=2)");
+	theSmallSubPaving.mince(2);
+	print_comment("theCell");
+	cout << theCell << endl;
+	print_comment("theBigSubPaving");
+	cout << theBigSubPaving << endl;
+	ARIADNE_TEST_EQUAL( subset( theCell, theBigSubPaving), true );
+	
+	// !!!
+	print_title("Test subset operation GridCell (height=1), GridTreeSubset.recombine() (height=2)");
+	theSmallSubPaving.recombine();
+	print_comment("theCell");
+	cout << theCell << endl;
+	print_comment("theBigSubPaving");
+	cout << theBigSubPaving << endl;
+	ARIADNE_TEST_EQUAL( subset( theCell, theBigSubPaving), true );
+	
+	// !!!
+	print_title("Test subset operation GridCell (height=1), GridTreeSubset.mince(2), left_node()->left_node()->set_disabled() (height=2)");
+	theSmallSubPaving.mince(2);
+	theSmallSubPaving.binary_tree()->left_node()->left_node()->set_disabled();
+	print_comment("theCell");
+	cout << theCell << endl;
+	print_comment("theBigSubPaving");
+	cout << theBigSubPaving << endl;
+	ARIADNE_TEST_EQUAL( subset( theCell, theBigSubPaving), false );
+	
+	// !!!
+	print_title("Test subset operation GridCell (height=1), GridTreeSubset.mince(2), left_node()->left_node()->set_enabled(), right_node()->make_leaf(false) (height=2)");
+	theSmallSubPaving.mince(2);
+	theSmallSubPaving.binary_tree()->left_node()->left_node()->set_enabled();
+	theSmallSubPaving.binary_tree()->right_node()->make_leaf(false);
+	print_comment("theCell");
+	cout << theCell << endl;
+	print_comment("theBigSubPaving");
+	cout << theBigSubPaving << endl;
+	ARIADNE_TEST_EQUAL( subset( theCell, theBigSubPaving), true );
+
+	//Create the GridTreeSub, will be rooted to the primary cell of height smallHeight
+	GridTreeSet theSmallPaving( theTrivialGrid, smallHeight, pBinaryTreeRoot->left_node()->left_node()->right_node()->right_node() );
+	//Restore the binary tree
+	theSmallPaving.binary_tree()->right_node()->set_enabled();
+	theSmallPaving.binary_tree()->right_node()->split();
+	
+	// !!!
+	print_title("Test subset operation GridCell (height=1), GridTreeSet.mince(2) (after restoring the binary tree) (height=2)");
+	theSmallPaving.mince(2);
+	print_comment("theCell");
+	cout << theCell << endl;
+	print_comment("theSmallPaving");
+	cout << theSmallPaving << endl;
+	ARIADNE_TEST_EQUAL( subset( theCell, theSmallPaving), true );
+	
+	// !!!
+	print_title("Test subset operation GridCell (height=1), GridTreeSet.recombine() (height=2)");
+	theSmallPaving.recombine();
+	print_comment("theCell");
+	cout << theCell << endl;
+	print_comment("theSmallPaving");
+	cout << theSmallPaving << endl;
+	ARIADNE_TEST_EQUAL( subset( theCell, theSmallPaving), true );
+	
+	// !!!
+	print_title("Test subset operation GridCell (height=1), GridTreeSet.mince(2), left_node()->left_node()->set_disabled() (height=2)");
+	theSmallPaving.mince(2);
+	theSmallPaving.binary_tree()->left_node()->left_node()->set_disabled();
+	print_comment("theCell");
+	cout << theCell << endl;
+	print_comment("theSmallPaving");
+	cout << theSmallPaving << endl;
+	ARIADNE_TEST_EQUAL( subset( theCell, theSmallPaving), false );
+	
+	// !!!
+	print_title("Test subset operation GridCell (height=1), GridTreeSet.mince(2), left_node()->left_node()->set_enabled(), ...right_node()->make_leaf(false) (height=2)");
+	theSmallPaving.mince(2);
+	theSmallPaving.binary_tree()->left_node()->left_node()->set_enabled();
+	theSmallPaving.binary_tree()->right_node()->make_leaf(false);
+	print_comment("theCell");
+	cout << theCell << endl;
+	print_comment("theSmallPaving");
+	cout << theSmallPaving << endl;
+	ARIADNE_TEST_EQUAL( subset( theCell, theSmallPaving), true );
+	
+	//Create the GridTreeSub, will be rooted to the primary cell of height bigHeight
+	GridTreeSet theBigPaving( theTrivialGrid, bigHeight, pBinaryTreeRoot );
+	//Restore the binary tree
+	theBigPaving.binary_tree()->left_node()->left_node()->right_node()->right_node()->right_node()->set_enabled();
+	theBigPaving.binary_tree()->left_node()->left_node()->right_node()->right_node()->right_node()->split();
+	
+	// !!!
+	print_title("Test subset operation GridCell (height=1), GridTreeSet.mince(6) (after restoring the binary tree) (height=2)");
+	theBigPaving.mince(6);
+	print_comment("theCell");
+	cout << theCell << endl;
+	print_comment("theBigPaving");
+	cout << theBigPaving << endl;
+	ARIADNE_TEST_EQUAL( subset( theCell, theBigPaving), true );
+	
+	// !!!
+	print_title("Test subset operation GridCell (height=1), GridTreeSet.recombine() (height=2)");
+	theBigPaving.recombine();
+	print_comment("theCell");
+	cout << theCell << endl;
+	print_comment("theBigPaving");
+	cout << theBigPaving << endl;
+	ARIADNE_TEST_EQUAL( subset( theCell, theBigPaving), true );
+	
+	// !!!
+	print_title("Test subset operation GridCell (height=1), GridTreeSet.mince(6), ...left_node()->left_node()->set_disabled() (height=2)");
+	theBigPaving.mince(6);
+	theBigPaving.binary_tree()->left_node()->left_node()->right_node()->right_node()->left_node()->left_node()->set_disabled();
+	print_comment("theCell");
+	cout << theCell << endl;
+	print_comment("theBigPaving");
+	cout << theBigPaving << endl;
+	ARIADNE_TEST_EQUAL( subset( theCell, theBigPaving), false );
+	
+	// !!!
+	print_title("Test subset operation GridCell (height=1), GridTreeSet.mince(6), ...left_node()->left_node()->set_enabled(), ...right_node()->make_leaf(false) (height=2)");
+	theBigPaving.mince(6);
+	theBigPaving.binary_tree()->left_node()->left_node()->right_node()->right_node()->left_node()->left_node()->set_enabled();
+	theBigPaving.binary_tree()->left_node()->left_node()->right_node()->right_node()->right_node()->make_leaf(false);
+	print_comment("theCell");
+	cout << theCell << endl;
+	print_comment("theBigPaving");
+	cout << theBigPaving << endl;
+	ARIADNE_TEST_EQUAL( subset( theCell, theBigPaving), true );
+	
+	delete pBinaryTreeRoot; pBinaryTreeRoot = NULL;
+}
+
 int main() {
 	
 	test_binary_tree();
@@ -1161,6 +1345,8 @@ int main() {
 	test_restrict();
 	
 	test_remove();
+	
+	test_cell_subset();
 	
 	return ARIADNE_TEST_FAILURES;
 }

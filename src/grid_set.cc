@@ -241,6 +241,39 @@ std::ostream& operator<<(std::ostream& os, const Grid& gr)
 
 /****************************************BinaryTreeNode**********************************************/
 	
+	bool BinaryTreeNode::is_enabled( const BinaryWord & path, const uint position) const {
+		bool result = false ;
+		
+		if( this->is_leaf() ){
+			//If we are in an enabled leaf node then the answer is true.
+			//Since path.size() >= 0, the node defined by the path is a
+			//subnode of an enabled node, thus we return true.
+			result = is_enabled();
+		} else {
+			if( position < path.size() ) {
+				//The path is not complete yet and we are in a
+				//non-leaf node, so we follow the path in the tree
+				if( path[ position ] ) {
+					result = right_node()->is_enabled( path, position + 1 );
+				} else {
+					result = left_node()->is_enabled( path, position + 1 );
+				}
+			} else {
+				//We are somewhere in the tree in a non-leaf node,
+				//this node corresponds to the node given by the path
+				//If both left and right sub trees are fully enabled,
+				//then the cell defined by the binary path is "enabled"
+				//in this tree otherwise it is not.
+					
+				//TODO: May be this is not optimal (improve?)
+				BinaryTreeNode thisNodeCopy( *this );
+				thisNodeCopy.recombine();
+				result = thisNodeCopy.is_enabled();
+			}
+		}
+		return result;
+	}
+
 	bool BinaryTreeNode::is_equal_nodes( const BinaryTreeNode * pFirstNode, const BinaryTreeNode * pSecondNode ) {
 		bool result = true;
 		
@@ -1250,10 +1283,7 @@ operator<<(std::ostream& os, const GridCellListSet& gcls)
 		
 		//2. Add the suffix path from the primary cell to the root node of
 		//theOtherSubPaving. This is needed in order to be able to reach this root.
-		BinaryWord suffixPath = theOtherSubPaving.cell().word();
-		for( size_t i = 0; i < suffixPath.size() ; i++ ){
-			rootNodePath.push_back( suffixPath[i] );
-		}
+		rootNodePath.append( theOtherSubPaving.cell().word() );
 		
 		//3. Restrict this binary tree to the other one assuming the path prefix rootNodePath
 		uint position = 0;
@@ -1320,10 +1350,7 @@ operator<<(std::ostream& os, const GridCellListSet& gcls)
 		
 		//2. Add the suffix path from the primary cell to the root node of
 		//theOtherSubPaving. This is needed in order to be able to reach this root.
-		BinaryWord suffixPath = theOtherSubPaving.cell().word();
-		for( size_t i = 0; i < suffixPath.size() ; i++ ){
-			rootNodePath.push_back( suffixPath[i] );
-		}
+		rootNodePath.append( theOtherSubPaving.cell().word() );
 		
 		//3. Remove theOtherSubPaving from this binary tree assuming the path prefix rootNodePath
 		uint position = 0;
@@ -1401,7 +1428,7 @@ operator<<(std::ostream& os, const GridCellListSet& gcls)
 /*************************************FRIENDS OF BinaryTreeNode*************************************/
 
 /*************************************FRIENDS OF GridCell*****************************************/
-
+	
         GridCell over_approximation(const Box& theBox, const Grid& theGrid) {
 		Box theDyadicBox( theBox.size() );
 		//Convert the box to theGrid coordinates
@@ -1413,16 +1440,94 @@ operator<<(std::ostream& os, const GridCellListSet& gcls)
 		//Create the GridCell, corresponding to this cell
 		return GridCell( theGrid, height, BinaryWord() );
         }
+	
+	bool subset(const GridCell& theCellOne, const GridCell& theCellTwo, BinaryWord * pPathPrefixOne, BinaryWord * pPathPrefixTwo, uint *pPrimaryCellHeight ) {
+		//Test that the Grids are equal
+		ARIADNE_ASSERT( theCellOne.grid() == theCellTwo.grid() );
+
+		//Test that the binary words are empty, otherwise the results of computations are undefined
+		bool isDefault = false;
+		if( ( pPathPrefixOne == NULL ) && ( pPathPrefixTwo == NULL ) ) {
+			//If both parameters are null, then the user does not
+			//need this data, so we allocate tepmorary objects
+			pPathPrefixOne = new BinaryWord();
+			pPathPrefixTwo = new BinaryWord();
+			isDefault = true;
+		} else {
+			if( ( pPathPrefixOne == NULL ) || ( pPathPrefixTwo == NULL ) ) {
+				//TODO: Find some better way to notify the user that
+				//only one of the required pointers is not NULL.
+				ARIADNE_ASSERT( false );
+			} else {
+				//DO NOTHING: Both parameters are not NULL, so it
+				//is user data and isDefault should stay false.
+			}
+		}
+		
+		//Check if theCellOne is a subset of theCellTwo:
+		
+		//01 Align the cell's primary cells by finding path prefixes
+		uint primary_cell_height;
+		if( theCellOne.height() < theCellTwo.height() ) {
+			primary_cell_height = theCellTwo.height();
+			pPathPrefixOne->append( GridCell::primary_cell_path( theCellOne.grid().dimension(), theCellTwo.height(), theCellOne.height() ) );
+		} else {
+			primary_cell_height = theCellOne.height();
+			if( theCellOne.height() > theCellTwo.height() ){
+				pPathPrefixTwo->append( GridCell::primary_cell_path( theCellOne.grid().dimension(), theCellOne.height(), theCellTwo.height() ) );
+			} else {
+				//DO NOTHING: The cells are rooted to the same primary cell
+			}
+		}
+		if( pPrimaryCellHeight != NULL ){
+			*pPrimaryCellHeight = primary_cell_height;
+		}
+		
+		//02 Add the rest of the paths to the path prefixes to get the complete paths
+		pPathPrefixOne->append( theCellOne.word() );
+		pPathPrefixTwo->append( theCellTwo.word() );
+		
+		//03 theCellOne is a subset of theCellTwo if pathPrefixTwo is a prefix of pathPrefixOne
+		bool result = pPathPrefixTwo->is_prefix( *pPathPrefixOne );
+		
+		//04 If working with default parameters, then release memory
+		if( isDefault ) {
+			delete pPathPrefixOne;
+			delete pPathPrefixTwo;
+		}
+
+		return result;
+	}
 
 /*************************************FRIENDS OF GridTreeSet*****************************************/
 
         GridTreeSet outer_approximation(const Box& theBox, const Grid& theGrid, const uint depth) {
           return outer_approximation(ImageSet(theBox),theGrid,depth);
         }
-
-        // PIETER: TODO: IMPORTANT!! Ivan, please implement this code.
+	
 	bool subset( const GridCell& theCell, const GridTreeSubset& theSet ) {
-		throw NotImplemented(__PRETTY_FUNCTION__);
+		bool result = false;
+		
+		//Test that the Grids are equal
+		ARIADNE_ASSERT( theCell.grid() == theSet.grid() );
+		
+		//Test if theCell is a subset of theSet, first check
+		//if the cell can be a subset of the given tree.
+		BinaryWord pathPrefixCell, pathPrefixSet;
+		if( subset( theCell, theSet.cell(), &pathPrefixCell, &pathPrefixSet) ) {
+			//It can and thus pathPrefixSet is a prefix of pathPrefixCell. Both
+			//paths start in the same primary cell. Also note that pathPrefixSet
+			//is a path from primary_cell_height to the root node of the binary
+			//tree in theSet. Therefore, removing 0..pathPrefixSet.size() elements
+			//from pathPrefixCell will give us a path to theCell in the tree of theSet.
+			pathPrefixCell.erase( pathPrefixCell.begin(), pathPrefixCell.begin() + pathPrefixSet.size() );
+			
+			//Check that the cell given by pathPrefixCell is enabled in the tree of theSet
+			result = theSet.binary_tree()->is_enabled( pathPrefixCell );
+		} else {
+			//DO NOTHING: the cell is a strict superset of the tree
+		}
+		return result;
 	}
 	
 	bool overlap( const GridCell& theCell, const GridTreeSubset& theSet ) {

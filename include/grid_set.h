@@ -81,6 +81,8 @@ namespace Ariadne {
         std::ostream& operator<<(std::ostream& os, const GridTreeSubset& theGridTreeSubset);
         std::ostream& operator<<(std::ostream& os, const GridTreeSet& theGridTreeSet);
 
+	bool subset( const GridCell& theCellOne, const GridCell& theCellTwo, BinaryWord * pPathPrefixOne = NULL,
+			BinaryWord * pPathPrefixTwo = NULL, uint * pPrimaryCellHeight = NULL );
 	bool subset(const GridCell& theCell, const GridTreeSubset& theSet);
 	bool overlap(const GridCell& theCell, const GridTreeSubset& theSet);
 	bool subset(const GridTreeSubset& theSet1, const GridTreeSubset& theSet2);
@@ -283,6 +285,13 @@ namespace Ariadne {
 			
 			/*! \brief Returns true if the node is marked as enabled, otherwise false */
 			bool is_enabled() const;
+
+			/*! \brief This method returns true if the given path defines a node in the tree that is either enabled
+			 *  or is in a "virtual" subtree of some enabled node (note that enabled nodes can only be leafs).
+			 * Note that: \a path is treated as if it is rooted to this node, we assume that the path starts
+			 * from position \a position of \a path. The parameter \a position is used for recursive calls only.
+			 */
+			bool is_enabled( const BinaryWord & path, const uint position = 0) const;
 			
 			/*! \brief Returns true if the node is marked as disabled, otherwise false */
 			bool is_disabled() const;
@@ -444,6 +453,13 @@ namespace Ariadne {
 			GridCell(const Grid& theGrid, const uint theHeight, const BinaryWord& theWord, const Box& theBox);
 			
 			friend class GridTreeCursor;
+
+			/*! \brief Tests if theCellOne is a subset of theCellTwo, the paths to the cells,
+			 *  aligned to some common primary cell, which height will be referenced by
+			 *  \a pPrimaryCellHeight, are returned as \a pathPrefixOne and \a pathPrefixTwo
+			 */
+			friend 	bool subset( const GridCell& theCellOne, const GridCell& theCellTwo, BinaryWord * pPathPrefixOne,
+						BinaryWord * pPathPrefixTwo, uint * pPrimaryCellHeight );
 
 			/*! \brief having \a theHeight the height of the primary cell, with \a leftBottomCorner and \a rightTopCorner
 			 * defining the primary cell corners for \a theHeight-1, we recompute \a leftBottomCorner and \a rightTopCorner

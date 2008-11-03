@@ -1,7 +1,7 @@
 /***************************************************************************
  *            binary_word.h
  *
- *  Copyright  2004-8  Alberto Casagrande, Pieter Collins
+ *  Copyright  2004-8  Alberto Casagrande, Pieter Collins, Ivan S. Zapreev
  *
  ****************************************************************************/
 
@@ -78,76 +78,84 @@
 
 namespace Ariadne {
 
-    /*! \ingroup BinaryTree
-     *  \brief A statically-allocated binary word of fixed maximum length.
-     */
-    class BinaryWord 
-      : public std::vector<bool>
-    {
-     private:
-      typedef unsigned char byte_type;
-      // The number of bits per byte
-      static const size_type _bits_per_byte=std::numeric_limits<byte_type>::digits;
-     public:
-      typedef std::vector<bool>::const_iterator const_iterator;
+	/*! \ingroup BinaryTree
+	*  \brief A statically-allocated binary word of fixed maximum length.
+	*/
+	class BinaryWord : public std::vector<bool> {
+		private:
+			typedef unsigned char byte_type;
+			// The number of bits per byte
+			static const size_type _bits_per_byte=std::numeric_limits<byte_type>::digits;
+		public:
+			typedef std::vector<bool>::const_iterator const_iterator;
 
-      //! \brief Default constructor makes an empty word. 
-      BinaryWord() : std::vector<bool>() { }
-      
-      //! Comparison operator. 
-      bool operator<(const BinaryWord& w) const;
-      
-      //! \brief The number of machine bytes the word takes up. 
-      size_type bytes() const { return (size()+_bits_per_byte-1)/_bits_per_byte; }
-      
-      //! \brief Sets the last bit to \a x.  
-      void set_back (bool x) { (*this)[this->size()-1]=x; }
-      
-      //! \brief true if the word is a prefix of the other word. 
-      bool is_prefix(const BinaryWord& b) const;
-      
-      //! \brief true if the word is a subword of the other word. 
-      bool is_subword(const BinaryWord& b) const;
+			//! \brief Default constructor makes an empty word. 
+			BinaryWord() : std::vector<bool>() { }
 
-    };
-       
-    inline bool 
-    BinaryWord::operator<(const BinaryWord& w) const { 
-      for(size_type i=0; i!=std::min(this->size(),w.size()); ++i) {
-        if((*this)[i]!=w[i]) { return (*this)[i]<w[i]; } }
-      return this->size() < w.size(); 
-    }
+			//! Comparison operator. 
+			bool operator<(const BinaryWord& w) const;
 
-    inline bool 
-    BinaryWord::is_prefix(const BinaryWord& b) const {
-      if(this->size()>b.size()) { return false; }
-      for(size_type i=0; i!=this->size(); ++i) { if((*this)[i] != b[i]) { return false; } }
-      return true;
-    }
-      
-    inline bool 
-    BinaryWord::is_subword(const BinaryWord& b) const {
-      if(this->size() > b.size()) { return false; }
-      for(size_type i=0; i!=b.size()-this->size()+1; ++i) { 
-        size_type j=0;
-        while(j!=this->size() && (*this)[j]==b[i+j]) { ++j; }
-        if(j==this->size()) { return true; }
-      }
-      return false;
-    }
+			//! \brief The number of machine bytes the word takes up. 
+			size_type bytes() const { return (size()+_bits_per_byte-1)/_bits_per_byte; }
 
-       
-    inline std::ostream& 
-    operator<<(std::ostream& os, const BinaryWord& bw) 
-    {
-      if(bw.empty()) { return os << 'e'; }
-      for(size_t i=0; i!=bw.size(); ++i) {
-        os << bw[i]; }
-      return os;
-    }
+			//! \brief Sets the last bit to \a x.  
+			void set_back (bool x) { (*this)[this->size()-1]=x; }
+
+			//! \brief true if this word is a prefix of the other word \a b.
+			bool is_prefix(const BinaryWord& b) const;
+
+			//! \brief true if the word is a subword of the other word. 
+			bool is_subword(const BinaryWord& b) const;
+
+			//! \brief appends the binary word \a binaryWord
+			void append( const BinaryWord& binaryWord );
+	};
+
+	inline bool  BinaryWord::operator<(const BinaryWord& w) const { 
+		for( size_type i = 0; i != std::min( this->size(),w.size() ); ++i ) {
+			if( (*this)[i] != w[i] ) {
+				return (*this)[i] < w[i];
+			}
+		}
+		return this->size() < w.size(); 
+	}
+
+	inline bool BinaryWord::is_prefix( const BinaryWord& b ) const {
+		if( this->size() > b.size() ) {
+			return false;
+		}
+		for( size_type i=0; i != this->size(); ++i ) {
+			if( (*this)[i] != b[i] ) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	inline bool BinaryWord::is_subword(const BinaryWord& b) const {
+		if( this->size() > b.size() ) {
+			return false;
+		}
+		for( size_type i = 0; i != ( b.size() - this->size() + 1 ); ++i ) { 
+			size_type j=0;
+			while( j != this->size() && (*this)[j] == b[i+j] ) {
+				++j;
+			}
+			if( j == this->size() ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	inline void BinaryWord::append( const BinaryWord& binaryWord ) {
+		for( size_t i = 0; i < binaryWord.size() ; i++ ){
+			this->push_back( binaryWord[i] );
+		}
+	}
 
 	/*! \brief Provides a method to fill a BinaryWord with a new data form the stream
-	 * Ther data format is either "[0,1,0,1,1]" or equivalently "01011".
+	 *  The data format is either "[0,1,0,1,1]" or equivalently "01011".
 	 */
 	inline std::istream& operator>>(std::istream& input_stream, BinaryWord& binary_word) {
 		//Clear the binary word, as we assume that we input
@@ -173,11 +181,27 @@ namespace Ariadne {
 		return input_stream;
 	}
 
+	/*! \brief allocates a new binary word created from a string.
+	 *  The data format is either "[0,1,0,1,1]" or equivalently "01011".
+	 */
 	inline BinaryWord make_binary_word(const std::string& string_data) {
 		BinaryWord binary_word;
 		std::stringstream string_input_stream( string_data );
 		string_input_stream >> binary_word;
 		return binary_word;
+	}
+	
+	/*! \brief Serializes data into a stream.
+	 * The data format is "01011" or "e" for an empty word.
+	 */
+	inline std::ostream& operator<<(std::ostream& os, const BinaryWord& bw) {
+		if( bw.empty() ) {
+			return os << 'e';
+		}
+		for(size_t i=0; i!=bw.size(); ++i) {
+			os << bw[i];
+		}
+		return os;
 	}
 
 } // namespace Ariadne

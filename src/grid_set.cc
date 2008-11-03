@@ -1579,8 +1579,24 @@ operator<<(std::ostream& os, const GridCellListSet& gcls)
 	}
 	
 	GridTreeSet intersection( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 ) {
-		//!!!!
-		throw NotImplemented(__PRETTY_FUNCTION__);
+		//Test that the Grids are equal
+		ARIADNE_ASSERT( theSet1.grid() == theSet2.grid() );
+		
+		//Compute the highest primary cell 
+		const uint heightSet1 = theSet1.cell().height();
+		const uint heightSet2 = theSet2.cell().height();
+		const uint maxPCHeight = ( heightSet1 <  heightSet2 ) ? heightSet2 : heightSet1;
+		
+		//Create the resulting GridTreeSet
+		GridTreeSet resultSet( theSet1.grid(), maxPCHeight, new BinaryTreeNode() );
+		
+		//Adjoin the first set
+		resultSet.adjoin( theSet1 );
+		//Intersect the result with the second set
+		resultSet.restrict( theSet2 );
+		
+		//Return the result
+		return resultSet;
 	}
 	
 	GridTreeSet difference( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 ) {

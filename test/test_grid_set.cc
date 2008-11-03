@@ -1352,6 +1352,37 @@ void test_subsets_join() {
 	ARIADNE_TEST_EQUAL( expectedResultSet, resultSet);
 }
 
+void test_subsets_intersect() {
+
+	//Allocate a trivial Grid two dimensional grid
+	Grid theTrivialGrid(2, 1.0);
+	
+	const uint smallHeight = 1;
+	const uint bigHeight = 2;
+	
+	//Make set one
+	BinaryWord tree = make_binary_word("1100100");
+	BinaryWord leaves = make_binary_word("1010");
+	BinaryTreeNode binaryTreeRootOne( tree, leaves );
+	GridTreeSubset theSet1( theTrivialGrid, smallHeight, BinaryWord(), &binaryTreeRootOne );
+	
+	//Make set two
+	tree = make_binary_word("1100100");
+	leaves = make_binary_word("0111");
+	BinaryTreeNode binaryTreeRootTwo( tree, leaves );
+	GridTreeSubset theSet2( theTrivialGrid, bigHeight, make_binary_word("00"), &binaryTreeRootTwo );
+
+	// !!!
+	print_title("Intersect theSet1 and theSet2, should give us a set rooted to the primary cell of height 2");
+	print_comment("theSet1");
+	cout << theSet1 << endl;
+	print_comment("theSet2");
+	cout << theSet2 << endl;
+	GridTreeSet resultSet = intersection( theSet1, theSet2 );
+	GridTreeSet expectedResultSet( theTrivialGrid, bigHeight, make_binary_word("11110010000"), make_binary_word("001000") );
+	ARIADNE_TEST_EQUAL( expectedResultSet, resultSet);
+}
+
 int main() {
 	
 	test_binary_tree();
@@ -1381,6 +1412,8 @@ int main() {
 	test_cell_subset();
 	
 	test_subsets_join();
+	
+	test_subsets_intersect();
 	
 	return ARIADNE_TEST_FAILURES;
 }

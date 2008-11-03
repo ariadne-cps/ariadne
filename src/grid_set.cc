@@ -241,6 +241,14 @@ std::ostream& operator<<(std::ostream& os, const Grid& gr)
 
 /****************************************BinaryTreeNode**********************************************/
 	
+	bool BinaryTreeNode::all_enabled() const {
+		if( is_leaf() ) {
+			return is_enabled();
+		} else {
+			return ( left_node()->all_enabled() && right_node()->all_enabled() );
+		}
+	}
+
 	bool BinaryTreeNode::is_enabled( const BinaryWord & path, const uint position) const {
 		bool result = false ;
 		
@@ -264,11 +272,7 @@ std::ostream& operator<<(std::ostream& os, const Grid& gr)
 				//If both left and right sub trees are fully enabled,
 				//then the cell defined by the binary path is "enabled"
 				//in this tree otherwise it is not.
-					
-				//TODO: May be this is not optimal (improve?)
-				BinaryTreeNode thisNodeCopy( *this );
-				thisNodeCopy.recombine();
-				result = thisNodeCopy.is_enabled();
+				result = all_enabled();
 			}
 		}
 		return result;
@@ -1555,8 +1559,23 @@ operator<<(std::ostream& os, const GridCellListSet& gcls)
 	}
 	
 	GridTreeSet join( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 ) {
-		//!!!!
-		throw NotImplemented(__PRETTY_FUNCTION__);
+		//Test that the Grids are equal
+		ARIADNE_ASSERT( theSet1.grid() == theSet2.grid() );
+		
+		//Compute the highest primary cell 
+		const uint heightSet1 = theSet1.cell().height();
+		const uint heightSet2 = theSet2.cell().height();
+		const uint maxPCHeight = ( heightSet1 <  heightSet2 ) ? heightSet2 : heightSet1;
+		
+		//Create the resulting GridTreeSet
+		GridTreeSet resultSet( theSet1.grid(), maxPCHeight, new BinaryTreeNode() );
+		
+		//Adjoin the sets
+		resultSet.adjoin( theSet1 );
+		resultSet.adjoin( theSet2 );
+		
+		//Return the result
+		return resultSet;
 	}
 	
 	GridTreeSet intersection( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 ) {

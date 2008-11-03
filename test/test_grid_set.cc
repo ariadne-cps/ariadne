@@ -1320,6 +1320,38 @@ void test_cell_subset() {
 	delete pBinaryTreeRoot; pBinaryTreeRoot = NULL;
 }
 
+void test_subsets_join() {
+
+	//Allocate a trivial Grid two dimensional grid
+	Grid theTrivialGrid(2, 1.0);
+	
+	const uint smallHeight = 1;
+	const uint bigHeight = 2;
+	
+	//Make set one
+	BinaryWord tree = make_binary_word("1100100");
+	BinaryWord leaves = make_binary_word("1010");
+	BinaryTreeNode binaryTreeRootOne( tree, leaves );
+	GridTreeSubset theSet1( theTrivialGrid, smallHeight, BinaryWord(), &binaryTreeRootOne );
+	
+	//Make set two
+	tree = make_binary_word("1100100");
+	leaves = make_binary_word("0101");
+	BinaryTreeNode binaryTreeRootTwo( tree, leaves );
+	GridTreeSubset theSet2( theTrivialGrid, bigHeight, make_binary_word("00"), &binaryTreeRootTwo );
+
+	// !!!
+	print_title("Join theSet1 and theSet2, when recombined they should give us the primary cell of height 1 rooted to the primary cell of height 2");
+	print_comment("theSet1");
+	cout << theSet1 << endl;
+	print_comment("theSet2");
+	cout << theSet2 << endl;
+	GridTreeSet resultSet = join( theSet1, theSet2 );
+	resultSet.recombine();
+	GridTreeSet expectedResultSet( theTrivialGrid, bigHeight, make_binary_word("11000"), make_binary_word("1000") );
+	ARIADNE_TEST_EQUAL( expectedResultSet, resultSet);
+}
+
 int main() {
 	
 	test_binary_tree();
@@ -1347,6 +1379,8 @@ int main() {
 	test_remove();
 	
 	test_cell_subset();
+	
+	test_subsets_join();
 	
 	return ARIADNE_TEST_FAILURES;
 }

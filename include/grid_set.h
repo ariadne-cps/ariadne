@@ -286,6 +286,9 @@ namespace Ariadne {
 			/*! \brief Returns true if the node is marked as enabled, otherwise false */
 			bool is_enabled() const;
 
+			/*! \brief Returns true if all leaf nodes in the tree rooted to this node are enabled, otherwise false */
+			bool all_enabled() const;
+
 			/*! \brief This method returns true if the given path defines a node in the tree that is either enabled
 			 *  or is in a "virtual" subtree of some enabled node (note that enabled nodes can only be leafs).
 			 * Note that: \a path is treated as if it is rooted to this node, we assume that the path starts

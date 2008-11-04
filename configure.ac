@@ -29,26 +29,26 @@ AC_STDC_HEADERS
 AC_CHECK_HEADER([boost/version.hpp],,AC_MSG_ERROR([Boost library is missing. You must install it.]))
 
 # Check for GMP (optional)
-AC_CHECK_HEADER([gmpxx.h],[AC_DEFINE([HAVE_GMPXX_H],[1],[Define to 1 if you have the <gmpxx.h> header file.])],AC_MSG_WARN([GNU Multiple Precision (GMP) library development files are missing. You cannot use Integer or Rational numbers.]))
+AC_CHECK_HEADER([gmpxx.h],[AC_DEFINE([HAVE_GMPXX_H],[1],[Define to 1 if you have the <gmpxx.h> header file.])],AC_MSG_ERROR([GNU Multiple Precision (GMP) library development files are missing. You must install it.]))
 
 # Check for MPFR (optional)
 AC_CHECK_HEADER([mpfr.h],[AC_DEFINE([HAVE_MPFR_H],[1],[Define to 1 if you have the <mpfr.h> header file.])],AC_MSG_WARN([MPFR library development files are missing. You cannot use multiple-precision floating-point numbers.]))
 
 # Check for GTK (optional)
-PKG_CHECK_MODULES(GTK, gtk+-2.0 >= 2.2, [AC_DEFINE([HAVE_GTK_H],[1],[Define to 1 if you have the <gtk.h> header file.])],AC_MSG_WARN([GTK library development files are missing. You cannot use graphics windows.]) )
+PKG_CHECK_MODULES(GTK, gtk+-2.0 >= 2.2, [AC_DEFINE([HAVE_GTK_H],[1],[Define to 1 if you have the <gtk.h> header file.])],AC_MSG_ERROR([GTK library development files are missing. You must install it.]) )
 
 # Check for Cairo (optional)
-PKG_CHECK_MODULES(CAIRO, cairo, [AC_DEFINE([HAVE_CAIRO_H],[1],[Define to 1 if you have the <cairo.h> header file.])],AC_MSG_WARN([Cairo library development files are missing. You cannot use graphics facilities.]))
+PKG_CHECK_MODULES(CAIRO, cairo, [AC_DEFINE([HAVE_CAIRO_H],[1],[Define to 1 if you have the <cairo.h> header file.])],AC_MSG_ERROR([Cairo library development files are missing. You must install it.]))
 
 # Find Python paths
 AM_PATH_PYTHON(2.5,, :)
 AC_MSG_NOTICE([PYTHON_VERSION=$PYTHON_PREFIX])
 AC_MSG_NOTICE([PYTHON_VERSION=$PYTHON_VERSION])
-AM_CHECK_PYTHON_HEADERS(,[AC_MSG_ERROR(could not find Python headers)])
+AM_CHECK_PYTHON_HEADERS(,[AC_MSG_ERROR(Could not find Python headers. You must install it.)])
 CPPFLAGS="$CPPFLAGS $PYTHON_INCLUDES"
 
 # Check for Boost python library (optional)
-AC_CHECK_HEADER([boost/python.hpp],[AC_DEFINE([HAVE_BOOST_PYTHON_HPP],[1],[Define to 1 if you have the <boost/python.hpp> header file.])],AC_MSG_WARN([Boost Python library development files are missing. You cannot compile the Python interface.]))
+AC_CHECK_HEADER([boost/python.hpp],[AC_DEFINE([HAVE_BOOST_PYTHON_HPP],[1],[Define to 1 if you have the <boost/python.hpp> header file.])],AC_MSG_ERROR([Boost Python library development files are missing. You must install it.]))
 
 # Check for Doxygen (optional)
 AC_PATH_PROG(DOXYGEN, doxygen)

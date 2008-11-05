@@ -69,9 +69,17 @@ HybridReachabilityAnalyser::
 
 
 HybridReachabilityAnalyser::
-HybridReachabilityAnalyser(const EvolutionParameters& parameters, 
+HybridReachabilityAnalyser(const EvolverInterface<HybridAutomaton,DefaultHybridEnclosureType>& evolver)
+  : _parameters(new EvolutionParametersType())
+  , _discretiser(new HybridDiscreteEvolver<DefaultEnclosureType>(evolver))
+{
+}
+
+
+HybridReachabilityAnalyser::
+HybridReachabilityAnalyser(const EvolutionParametersType& parameters, 
                const EvolverInterface<HybridAutomaton,DefaultHybridEnclosureType>& evolver)
-  : _parameters(new EvolutionParameters(parameters))
+  : _parameters(new EvolutionParametersType(parameters))
   , _discretiser(new HybridDiscreteEvolver<DefaultEnclosureType>(evolver))
 {
 }
@@ -149,7 +157,7 @@ lower_evolve(const SystemType& system,
              const OvertSetType& initial_set,
              const TimeType& time) const
 {
-  int grid_depth = this->_parameters->grid_depth;
+  int grid_depth = this->_parameters->maximum_grid_depth;
   GTS initial; GTS& final=*new GTS();
 
   // Improve accuracy of initial set for lower computations
@@ -169,7 +177,7 @@ lower_reach(const SystemType& system,
             const OvertSetType& initial_set,
             const TimeType& time) const
 {
-  int grid_depth = this->_parameters->grid_depth+4;
+  int grid_depth = this->_parameters->maximum_grid_depth+4;
   GTS initial; GTS& reach=*new GTS();
   
   // Improve accuracy of initial set for lower computations
@@ -189,7 +197,7 @@ lower_reach_evolve(const SystemType& system,
                    const OvertSetType& initial_set,
                    const TimeType& time) const
 {
-  int grid_depth = this->_parameters->grid_depth;
+  int grid_depth = this->_parameters->maximum_grid_depth;
   GTS initial; 
   
   GTS& reach=*new GTS; GTS& evolve=*new GTS;
@@ -214,7 +222,7 @@ upper_evolve(const SystemType& system,
 {
   ARIADNE_LOG(2,"HybridReachabilityAnalyser::upper_evolve(...)\n");
   GTS initial;
-  int grid_depth = this->_parameters->grid_depth;
+  int grid_depth = this->_parameters->maximum_grid_depth;
   initial.adjoin_outer_approximation(initial_set,grid_depth);
   ARIADNE_LOG(4,"initial="<<initial<<"\n");
   GTS& evolve=*new GTS(initial);
@@ -246,7 +254,7 @@ upper_reach(const SystemType& system,
   ARIADNE_LOG(2,"HybridReachabilityAnalyser::upper_reach(system,set,time)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   GTS initial;
-  int grid_depth = this->_parameters->grid_depth;
+  int grid_depth = this->_parameters->maximum_grid_depth;
   ARIADNE_LOG(3,"grid_depth="<<grid_depth<<"\n");
   initial.adjoin_outer_approximation(initial_set,grid_depth);
   ARIADNE_LOG(4,"initial"<<initial<<"\n");
@@ -286,7 +294,7 @@ upper_reach_evolve(const SystemType& system,
   ARIADNE_LOG(2,"HybridReachabilityAnalyser::upper_reach(system,set,time)\n");
   ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
   GTS initial;
-  int grid_depth = this->_parameters->grid_depth;
+  int grid_depth = this->_parameters->maximum_grid_depth;
   ARIADNE_LOG(3,"grid_depth="<<grid_depth<<"\n");
   initial.adjoin_outer_approximation(initial_set,grid_depth);
   ARIADNE_LOG(4,"initial"<<initial<<"\n");
@@ -332,12 +340,12 @@ chain_reach(const SystemType& system,
 
   HybridTime hybrid_transient_time(this->_parameters->transient_time,this->_parameters->transient_steps);
   HybridTime hybrid_lock_to_grid_time(this->_parameters->lock_to_grid_time,this->_parameters->lock_to_grid_steps);
-  int grid_depth = this->_parameters->grid_depth;
+  int grid_depth = this->_parameters->maximum_grid_depth;
 
   ARIADNE_LOG(5,"bounding_domain="<<bounding_domain<<"\n");
   ARIADNE_LOG(5,"initial_set="<<initial_set<<"\n");
 
-  //GTS bounding; bounding.adjoin_inner_approximation(bounding_domain,grid_depth);
+  //GTS bounding; bounding.adjoin_inner_approximation(bounding_domain,grid_depth); 
   GTS bounding; bounding.adjoin_outer_approximation(bounding_domain,grid_depth); bounding.recombine();
   ARIADNE_LOG(5,"bounding_size="<<bounding.size()<<"\n");
 

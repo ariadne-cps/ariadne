@@ -216,7 +216,10 @@ class ApproximateTaylorModel {
 
 class Polytope;
 Polytope polytope(const ApproximateTaylorModel& ts);
-template<class G> void draw(G& g, const ApproximateTaylorModel& ts) { g.draw(polytope(ts)); }
+
+template<class G> void draw(G& g, const ApproximateTaylorModel& ts) { 
+  g.draw(ts.bounding_box()); }
+//g.draw(polytope(ts)); }
 
 
 } //namespace Ariadne

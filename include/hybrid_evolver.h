@@ -77,12 +77,15 @@ class HybridEvolver
 {
   typedef Ariadne::DefaultModelType ModelType;
  public:
+  typedef ContinuousEvolutionParameters EvolutionParametersType;
   typedef HybridAutomaton::TimeType TimeType;
   typedef int IntegerType;
   typedef Float RealType;
   typedef HybridAutomaton SystemType;
   typedef ModelType ContinuousEnclosureType;
-  typedef pair<DiscreteState,ContinuousEnclosureType> EnclosureType;
+  typedef pair<DiscreteState,ContinuousEnclosureType> HybridEnclosureType;
+  typedef HybridEnclosureType EnclosureType;
+  typedef Orbit<EnclosureType> OrbitType;
   typedef ListSet<EnclosureType> EnclosureListType;
   typedef Float ContinuousTimeType;
  public:
@@ -91,7 +94,7 @@ class HybridEvolver
   HybridEvolver();
   
   //! \brief Construct from parameters using a default integrator.
-  HybridEvolver(const EvolutionParameters& parameters);
+  HybridEvolver(const EvolutionParametersType& parameters);
   
   /*! \brief Make a dynamically-allocated copy. */
   HybridEvolver* clone() const { return new HybridEvolver(*this); }
@@ -99,8 +102,8 @@ class HybridEvolver
   //@{
   //! \name Parameters controlling the evolution.
   //! \brief A reference to the parameters controlling the evolution.
-  EvolutionParameters& parameters() { return *this->_parameters; }
-  const EvolutionParameters& parameters() const { return *this->_parameters; }
+  EvolutionParametersType& parameters() { return *this->_parameters; }
+  const EvolutionParametersType& parameters() const { return *this->_parameters; }
 
   //@}
   
@@ -135,7 +138,7 @@ class HybridEvolver
                                Semantics semantics, bool reach) const;
 
  private:
-  boost::shared_ptr< EvolutionParameters > _parameters;
+  boost::shared_ptr< EvolutionParametersType > _parameters;
   boost::shared_ptr< ToolboxInterface<ModelType> > _toolbox;
   //boost::shared_ptr< EvolutionProfiler >  _profiler;
 };

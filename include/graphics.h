@@ -116,6 +116,12 @@ inline void draw(Graphic& g, const InterpolatedCurve& c) { g.draw(c); }
 
 template<class SET> Graphic& operator<<(Graphic& g, const SET& set) { draw(g,set); return g; }
 
+template<class SET> void plot(const char* filename, const SET& set) { 
+  Graphic g; draw(g,set); g.write(filename); }
+
+template<class SET> void plot(const char* filename, const Box& bbox, const Colour& fc, const SET& set) { 
+  Graphic g; g.set_bounding_box(bbox); g.set_fill_colour(fc); draw(g,set); g.write(filename); }
+
 
 
 

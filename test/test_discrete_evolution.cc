@@ -77,7 +77,7 @@ void TestDiscreteEvolver::test() const
   parameters.maximum_step_size=step_size;
 
   // Set up the evaluators
-  HybridEvolver evolver;
+  HybridEvolver evolver(parameters);
   
   // Define the initial box
   Box initial_box(2); 

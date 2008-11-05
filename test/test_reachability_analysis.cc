@@ -63,8 +63,8 @@ class TestReachabilityAnalysis
   {
     EvolutionParameters parameters;
     parameters.maximum_enclosure_radius=0.5;
-    parameters.grid_length=1.0;
-    parameters.grid_depth=8;
+    parameters.grid_lengths=1.0;
+    parameters.maximum_grid_depth=8;
     parameters.maximum_step_size=0.25;
     parameters.lock_to_grid_time=1.0;
     

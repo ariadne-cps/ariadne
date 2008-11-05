@@ -25,10 +25,27 @@
 #include <string>
 #include <vector>
 
+#include <cstdarg>
+
 #include "box.h"
 #include "stlio.h"
 
 namespace Ariadne {
+
+Box::Box(uint d, const Float& x0l, const Float& x0u, ...)
+  : Vector<Interval>(d)
+{
+  assert(d>=1); 
+  va_list args; 
+  va_start(args,x0u);
+  (*this)[0]=Interval(x0l,x0u);
+  for(uint i=1; i!=d; ++i) { 
+    Float xil=va_arg(args,Float);
+    Float xiu=va_arg(args,Float);
+    (*this)[i]=Interval(xil,xiu); 
+  } 
+  va_end(args);
+}
 
 Box make_box(const std::string& str)
 {

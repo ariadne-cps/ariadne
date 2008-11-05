@@ -98,6 +98,12 @@ operator<<(std::ostream& os, const Orbit<ES>& orb)
   return os;
 }
 
+template<class G, class ES> void draw(G& graphic, const Orbit<ES>& orbit) 
+{
+  draw(graphic,orbit.reach()); 
+  draw(graphic,orbit.initial());
+  draw(graphic,orbit.final());
+}
 
 } // namespace Ariadne
 

@@ -72,15 +72,15 @@ class DegenerateCrossingException { };
 
 
 HybridEvolver::HybridEvolver()
-  : _parameters(new EvolutionParameters()),
+  : _parameters(new EvolutionParametersType()),
     _toolbox(new DynamicalToolbox<ModelType>())
 {
 }
 
 
 
-HybridEvolver::HybridEvolver(const EvolutionParameters& p)
-  : _parameters(new EvolutionParameters(p)),
+HybridEvolver::HybridEvolver(const EvolutionParametersType& p)
+  : _parameters(new EvolutionParametersType(p)),
     _toolbox(new DynamicalToolbox<ModelType>())
 {
 }

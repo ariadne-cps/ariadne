@@ -34,6 +34,8 @@
 
 #include "function.h"
 
+#include "approximate_taylor_model.h"
+
 #include "function_set.h"
 #include "grid_set.h"
 #include "hybrid_set.h"
@@ -50,5 +52,8 @@
 #include "hybrid_evolver.h"
 #include "discrete_evolver.h"
 #include "reachability_analyser.h"
+
+#include "serialization.h"
+#include "graphics.h"
 
 #endif

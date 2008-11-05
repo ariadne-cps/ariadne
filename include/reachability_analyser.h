@@ -69,9 +69,10 @@ class HybridReachabilityAnalyser
   : public Loggable
 {
  private:
-  boost::shared_ptr< EvolutionParameters > _parameters;
+  boost::shared_ptr< DiscreteEvolutionParameters > _parameters;
   boost::shared_ptr< DiscreteEvolverInterface<HybridAutomaton,HybridGridCell> > _discretiser;
  public:
+  typedef DiscreteEvolutionParameters EvolutionParametersType;
   typedef HybridAutomaton SystemType;
   typedef HybridTime TimeType;
   typedef HybridOpenSetInterface OpenSetType;
@@ -87,8 +88,11 @@ class HybridReachabilityAnalyser
   /*! \brief Virtual destructor */
   virtual ~HybridReachabilityAnalyser();
 
+  /*! \brief Construct from a method for evolving basic sets. */
+  HybridReachabilityAnalyser(const EvolverInterface<HybridAutomaton,DefaultHybridEnclosureType>& evolver);
+
   /*! \brief Construct from evolution parameters and a method for evolving basic sets. */
-  HybridReachabilityAnalyser(const EvolutionParameters& parameters, 
+  HybridReachabilityAnalyser(const EvolutionParametersType& parameters, 
                              const EvolverInterface<HybridAutomaton,DefaultHybridEnclosureType>& evolver);
 
   /*! \brief Make a dynamically-allocated copy. */
@@ -98,9 +102,9 @@ class HybridReachabilityAnalyser
   //@{ 
   //! \name Methods to set and get the parameters controlling the accuracy.
   /*! \brief The parameters controlling the accuracy. */
-  const EvolutionParameters& parameters() const { return *this->_parameters; }
+  const EvolutionParametersType& parameters() const { return *this->_parameters; }
   /*! \brief A reference to the parameters controlling the accuracy. */
-  EvolutionParameters& parameters() { return *this->_parameters; }
+  EvolutionParametersType& parameters() { return *this->_parameters; }
   //@}
   
   
@@ -173,7 +177,7 @@ class HybridReachabilityAnalyser
  private:
   // Helper functions for approximating sets
   HybridGrid _grid(HybridSpace hspc) const { 
-    return HybridGrid(hspc,this->_parameters->grid_length); }
+    return HybridGrid(hspc,this->_parameters->grid_lengths); }
 };
 
 

@@ -117,11 +117,6 @@ struct GraphicsObject {
     std::vector<Point> shape;
 };
 
-static void 
-plot(cairo_t *cr, const Box& bounding_box, const ProjectionFunction& projection,
-     const std::vector<GraphicsObject>& objects, 
-     int canvas_width, int canvas_height);
-
 
 
 struct Graphic::Data 
@@ -221,6 +216,12 @@ void Graphic::clear() {
 }
 
 
+#ifdef HAVE_CAIRO_H
+
+static void 
+plot(cairo_t *cr, const Box& bounding_box, const ProjectionFunction& projection,
+     const std::vector<GraphicsObject>& objects, 
+     int canvas_width, int canvas_height);
 
 void trace_box(cairo_t *cr, const std::vector<Point>& pts) 
 {
@@ -369,8 +370,6 @@ Graphic::write(const char* filename)
 
 }
 
-
-
 #ifdef HAVE_GTK_H
 
 void
@@ -435,14 +434,29 @@ void Graphic::display()
 
 }
 
-#else
+#else // NO GTK_H
 
 void Graphic::display() 
 {
     throw std::runtime_error("No facilities for displaying graphics are available.");
 }
 
-#endif
+#endif // HAVE_GTK_H
+
+#else // NO CAIRO_H
+
+void 
+Graphic::write(const char* filename) 
+{
+    throw std::runtime_error("No facilities for drawing graphics are available.");
+}
+
+void Graphic::display() 
+{
+    throw std::runtime_error("No facilities for displaying graphics are available.");
+}
+
+#endif // HAVE_CAIRO_H
 
 
 

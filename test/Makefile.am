@@ -5,7 +5,7 @@ TESTS_ENVIRONMENT = ./run_test.sh
 
 
 INCLUDES = -I$(top_srcdir)/include
-LIBS = -lmpfr -lgmpxx -lgmp $(GTK_LIBS) -lboost_serialization 
+LIBS = $(GTK_LIBS)
 LDADD = ../src/libariadne.la $(LIBS)
 
 check_PROGRAMS = \

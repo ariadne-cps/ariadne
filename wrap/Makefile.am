@@ -1,8 +1,7 @@
-LIBS = -lboost_python -lmpfr -lgmpxx -lgtk-x11-2.0 -lcairo -lboost_serialization
-
 AM_LDFLAGS = -module
-CXX_FLAGS = -Wall -O2 -fpic
-INCLUDES = -I$(top_srcdir)/include 
+CXX_FLAGS = -Wall -O2 -fpic 
+INCLUDES = -I$(top_srcdir)/include $(PYTHON_INCLUDES)
+LIBS += $(BOOST_PYTHON_LIB) $(PYTHON_LIB) $(GTK_LIBS) 
 
 pythondir=${pkgpyexecdir}
 libdir=${pyexecdir}
@@ -11,11 +10,14 @@ python_DATA = __init__.py
 python_LIBS = ariadne.la interval.la differentiation.la
 python_MODULES = .libs/ariadne.so .libs/interval.so .libs/differentiation.so
 
-lib_LTLIBRARIES = $(python_LIBS)
+python_LTLIBRARIES = 
+if WANT_PYTHON_INTERFACE
+  python_LTLIBRARIES += $(python_LIBS)
+endif
 
 wrap: python
 
-python: $(python_LIBS)
+python: $(python_LTLIBRARIES)
 
 install-exec-local:
 	echo "Using the installer " $(INSTALL)

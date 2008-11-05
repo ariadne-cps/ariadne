@@ -5,7 +5,7 @@ phony: lib
 lib: libariadne.la
 
 INCLUDES = -I$(top_srcdir)/include $(CAIRO_CFLAGS) $(GTK_CFLAGS)
-LDADD = -lmpfr -lgmpxx $(GTK_LIBS) -lboost_serialization  
+LDADD = $(GTK_LIBS)
 
 SRC = \
 	numeric.cc \

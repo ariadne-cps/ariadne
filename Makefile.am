@@ -4,7 +4,10 @@ EXTRA_DIST = Doxyfile
 
 CXXFLAGS += -Wall 
 
-.PHONY: shiny doc lib python examples check-lib check-python 
+.PHONY: shiny doc all lib wrap examples check-lib check-python 
+
+all: lib wrap tests examples
+
 shiny: maintainer-clean
 	-rm -rf *~ */*~
 	-rm -f *.log */*.log */*.eps
@@ -22,11 +25,11 @@ doc:
 lib: 
 	(cd src; make lib)
 
-lib-numeric:
-	(cd src; make libnumeric.la)
-
 wrap: lib
 	(cd wrap; make wrap)
+
+python: lib
+	(cd wrap; make python)
 
 tests: lib
 	(cd test; make tests)

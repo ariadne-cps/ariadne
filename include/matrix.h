@@ -33,6 +33,8 @@
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/io.hpp>
 
+#include <cstdarg>
+
 #include "macros.h"
 #include "exceptions.h"
 #include "numeric.h"
@@ -55,6 +57,7 @@ class Matrix
     : boost::numeric::ublas::matrix<X>(r,c) { for(size_t i=0; i!=r; ++i) { for(size_t j=0; j!=c; ++j) { (*this)(i,j)=ptr[i*c+j]; } } }
   template<class XX> Matrix(size_t r, size_t c, const XX* ptr, int ri, int ci)
     : boost::numeric::ublas::matrix<X>(r,c) { for(size_t i=0; i!=r; ++i) { for(size_t j=0; j!=c; ++j) { (*this)(i,j)=ptr[i*ri+j*ci]; } } }
+  Matrix(size_t r, size_t c, const Float& x0, ... );
   size_t row_size() const { return this->size1(); }
   size_t column_size() const { return this->size2(); }
   template<class XX> bool operator==(const Matrix<XX>& mx) const;
@@ -67,6 +70,16 @@ class Matrix
   static Matrix<X> identity(size_t n) { Matrix<X> I(n,n); for(size_t i=0; i!=n; ++i) { I[i][i]=1; } return I; }
 
 };
+
+template<class X> Matrix<X>::Matrix(size_t r, size_t c, const Float& x0, ...) 
+  : ublas::matrix<X>(r,c) 
+{
+  assert(r>=1 && c>=1); va_list args; va_start(args,x0);
+  (*this)[0][0]=x0; 
+  for(size_t j=1; j!=c; ++j) { (*this)[0][j]=va_arg(args,Float); } 
+  for(size_t i=1; i!=r; ++i) { for(size_t j=0; j!=c; ++j) { (*this)[i][j]=va_arg(args,Float); } }
+  va_end(args);
+}
 
 template<class X> Matrix<X> make_matrix(const std::string& str) {
   Matrix<X> res;

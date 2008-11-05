@@ -29,6 +29,7 @@
 #define ARIADNE_ARRAY_H
 
 #include <cstddef>
+#include <cstdarg>
 #include <stdexcept>
 
 namespace Ariadne {
@@ -55,6 +56,10 @@ class array {
   explicit array(const size_type n) : _size(n), _ptr(new value_type[_size]) { }
   /*! \brief Constructs an array of size \a n with elements initialised to \a x. */
   array(const size_type n, const value_type& x) : _size(n), _ptr(new value_type[_size]) { fill(x); }
+  /*! \brief Constructs an array of size \a n with elements initialised by the variable argument list x0,x1,... . */
+  array(const size_type n, const value_type& x0, const value_type& x1, ...) : _size(n), _ptr(new value_type[_size]) {
+    if(n<2) { throw std::out_of_range("array: size is less than number of arguments"); } 
+    va_list args; va_start(args,x1); _ptr[0]=x0; _ptr[1]=x1; for(size_t i=2; i!=n; ++i) { _ptr[i]=va_arg(args,T); } va_end(args); }
   /*! \brief Constructs an array from the range \a first to \a last. */
   template<class ForwardIterator> array(ForwardIterator first, ForwardIterator last)
     : _size(std::distance(first,last)), _ptr(new value_type[_size]) { fill(first); }

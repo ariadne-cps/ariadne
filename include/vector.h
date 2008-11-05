@@ -34,6 +34,7 @@
 
 #include <string>
 #include <sstream>
+#include <cstdarg>
 
 #include "macros.h"
 #include "numeric.h"
@@ -55,6 +56,7 @@ class Vector
     : ublas::vector<X>(n) { for(size_t i=0; i!=this->size(); ++i) { (*this)[i]=0; } }
   Vector(size_t n, const X& t)
     : ublas::vector<X>(n) { for(size_t i=0; i!=this->size(); ++i) { (*this)[i]=t; } }
+  Vector(size_t n, const Float& t0, const Float& t1, ...);
   template<class XX> Vector(size_t n, const XX* ptr)
     : ublas::vector<X>(n) { for(size_t i=0; i!=this->size(); ++i) { (*this)[i]=ptr[i]; } }
   template<class XX> Vector(const Vector<XX>& v)
@@ -78,6 +80,15 @@ typedef ublas::range Range;
 using ublas::range;
 using ublas::slice;
 using ublas::identity_matrix;
+
+template<class X> Vector<X>::Vector(size_t n, const Float& t0, const Float& t1, ...) 
+  : ublas::vector<X>(n) 
+{
+  assert(n>=2); va_list args; va_start(args,t1);
+  (*this)[0]=t0; (*this)[1]=t1; 
+  for(size_t i=2; i!=n; ++i) { (*this)[i]=va_arg(args,Float); } 
+  va_end(args);
+}
 
 
 template<class X>

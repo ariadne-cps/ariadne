@@ -208,7 +208,9 @@ class TestDifferentialVector {
 
 
 int main() {
+#ifdef HAVE_GMPXX_H
   TestDifferentialVector< SparseDifferential<Rational> > t1;
+#endif
   cout << "INCOMPLETE " << flush;
   return ARIADNE_TEST_FAILURES;
 }

@@ -63,7 +63,6 @@ namespace Ariadne {
 	class BinaryTreeNode;
 	class Grid;
 	class GridCell;
-	class GridCellListSet;
 	class GridTreeSet;
 	class GridTreeSubset;
 
@@ -77,7 +76,6 @@ namespace Ariadne {
 	std::ostream& operator<<(std::ostream& output_stream, const BinaryTreeNode & binary_tree );
 	std::ostream& operator<<(std::ostream& os, const GridCell& theGridCell);
 	std::ostream& operator<<(std::ostream& os, const GridTreeCursor& theGridTreeCursor);
-        std::ostream& operator<<(std::ostream& os, const GridTreeSet& theGridCellListSet);
         std::ostream& operator<<(std::ostream& os, const GridTreeSubset& theGridTreeSubset);
         std::ostream& operator<<(std::ostream& os, const GridTreeSet& theGridTreeSet);
 
@@ -561,127 +559,6 @@ namespace Ariadne {
 			static BinaryWord primary_cell_path( const uint dimensions, const uint topPCellHeight, const uint bottomPCellHeight);
 	};
 
-        /*! \ingroup Grid 
-         *  \ingroup DenotableSet
-         *
-         *  \brief A denotable set on a grid, defined as a list of cells.
-         *  
-         *  A cell list set is useful for storing small sparse sets, such as an 
-         *  over-approximation to a basic set.
-         *
-         */
-        class GridCellListSet {
-            private:
-                Grid _grid;
-                std::vector<GridCell> _list;
-            public:
-                //! The type used for iterating through the cells in the list. 
-                typedef std::vector<GridCell>::iterator iterator;
-                typedef std::vector<GridCell>::const_iterator const_iterator;
-                
-                //! A tag describing the type of set.
-                //typedef denotable_set_tag set_category;
-                //! The type of basic set used in the list.
-                typedef GridCell basic_set_type;
-                //! The type of denotable real number defining the vertices and cells of the grid.
-                typedef Float real_type;
-                //! The type of denotable point contained by the set.
-                typedef Vector<Float> state_type;
-                //! The type of basic set contained by the denotable set.
-                typedef GridCell value_type;
-                
-                //@{
-                //! \name Constructors.
-                
-                //! \brief Virtual destructor. */
-                virtual ~GridCellListSet();
-                //! \brief Construct an empty set based on a Grid.
-                explicit GridCellListSet(const Grid& g);
-                //! Convert from a GridTreeSet.
-                GridCellListSet(const GridTreeSet& gts);
-                //@}
-                
-                //@{ 
-                //! \name Conversion operators.
-                
-                //! Convert to a list of ordinary boxes.
-                operator ListSet< Box >() const;
-                //operator ListSet< Vector<Interval> >() const;
-                //@}
-                
-                //@{ 
-                //! \name Access operations.
-                
-                //! The underlying grid.
-                const Grid& grid() const;
-                
-                //! The numeber of cells in the list.
-                uint size() const;
-                
-                //! The \a i th cell in the list.
-                GridCell operator[] (const uint i) const;
-                
-                //! A constant iterator to the beginning of the list.
-                const_iterator begin() const;
-  
-                //! A constant iterator to the end of the list.
-                const_iterator end() const;
-                
-                //! Tests if the set contains a cell. Works faster on a sorted list. 
-                bool contains(GridCell& gc) const;
-                
-                //! Attempts to find a cell in the list. Works faster on a sorted list. 
-                //! This function may not be needed.
-                const_iterator find(GridCell& gc) const;
-                
-                //@}
-  
-                //@{ 
-                //! \name Modifying operations
-                
-                //! Empties the set.
-                void clear();
-                
-                //! Removes and returns the last cell in the list.
-                GridCell pop();
-                
-                //! Sorts the cells lexicographically, removing duplicates.
-                void unique_sort();
-                //@}
-                
-                //@{ 
-                //! \name Union, intersection and difference
-                
-                //! Append the cell \a c to the list.
-                void adjoin(const GridCell& gc);
-                //! Append the cells of \a cls to the list.
-                void adjoin(const GridCellListSet& gcls);
-                //! Adjoins cells contained in \a gts.
-                void adjoin(const GridTreeSet& gts);
-                //! Restricts to cells contained in \a gts.
-                void restrict(const GridTreeSet& gts);
-                //! Removes cells contained in \a gts.
-                void remove(const GridTreeSet& gts);
-                //! Removes cells contained in \a gcls. \deprecated
-                void remove(const GridCellListSet& gcls);
-                //@}
-                
-                //@{
-                //! \name SetInterface methods
-                //! These operators are needed for compliance with the set interface. 
-                //! Returns the set's dimension.
-                uint dimension() const;
-   
-                //@}
-                
-                //@{ 
-                //! \name Input/output operators 
-                
-                //! Write to an output stream.
-		friend std::ostream& operator<<(std::ostream& os, const GridCellListSet& gcls);
-                //@}
-        };
-
 	/*! \brief This class represents a subpaving of a paving. Note that, the subtree enclosed into
 	 * this class is just a pointer to the node in the tree of some paving. This class is not
 	 * responsible for deallocation of that original tree.
@@ -795,9 +672,6 @@ namespace Ariadne {
 			
 			/*! \brief Convert to a list of ordinary boxes, unrelated to the grid. */
 			operator ListSet<Box>() const;
-			
-			/*! \brief Convert to a list of cells. */
-			operator GridCellListSet() const;
 			
 			//@}
 	};
@@ -1015,9 +889,6 @@ namespace Ariadne {
 
 			/*! \brief Adjoin (make inplace union with) a single cell. */
 			void adjoin( const GridCell& theCell );
-			
-			/*! \brief Adjoin (make inplace union with) a list of cells. */
-			void adjoin( const GridCellListSet& theCell );
 			
 			/*! \brief Remove a single cell. */
 			void remove( const GridCell& theCell );
@@ -1704,16 +1575,6 @@ namespace Ariadne {
                 return _theBox[i];
 	}
 	
-/*********************************************GridCellListSet***********************************************/
-
-	inline GridCellListSet::const_iterator GridCellListSet::begin() const {
-		return this->_list.begin();
-	}
-
-	inline GridCellListSet::const_iterator GridCellListSet::end() const {
-		return this->_list.end();
-	}
-
 /********************************************GridTreeSubset******************************************/
 	
 	inline GridTreeSubset::GridTreeSubset( const Grid& theGrid, const uint theHeight,
@@ -1868,12 +1729,6 @@ namespace Ariadne {
 		}
 	}
 	
-	inline void GridTreeSet::adjoin( const GridCellListSet& theListSet ) {
-                for(GridCellListSet::const_iterator theCellIter=theListSet.begin(); theCellIter!=theListSet.end(); ++theCellIter) {
-                        this->adjoin(*theCellIter); 
-                }
-	}
-	
 	inline void GridTreeSet::adjoin( const GridTreeSubset& theOtherSubPaving ) {
 		ARIADNE_ASSERT( this->grid() == theOtherSubPaving.cell().grid() );
 		
@@ -1953,12 +1808,6 @@ namespace Ariadne {
 		draw(theGraphic,theGridCell.box());
 	}
 	
-	template<class G> void draw(G& theGraphic, const GridCellListSet& theGridCellListSet) {
-		for(GridCellListSet::const_iterator iter=theGridCellListSet.begin(); iter!=theGridCellListSet.end(); ++iter) {
-			draw(theGraphic,iter->box());
-		}
-	}
-
 	template<class G> void draw(G& theGraphic, const GridTreeSet& theGridTreeSet) {
 		for(GridTreeSet::const_iterator iter=theGridTreeSet.begin(); iter!=theGridTreeSet.end(); ++iter) {
 			draw(theGraphic,iter->box());

@@ -287,8 +287,6 @@ class HybridGridCellListSet
   void restrict(const HybridGridTreeSet&);
   void restrict(const HybridGridCellListSet&);
 
-  void restrict(const HybridBoxes& boxes) { ARIADNE_NOT_IMPLEMENTED; }
-
   void unique_sort() { 
     for(locations_iterator loc_iter=this->locations_begin();
         loc_iter!=this->locations_end(); ++loc_iter) {
@@ -315,7 +313,6 @@ class HybridGridCellListSet
     return const_iterator(*this,false); }
   const_iterator end() const { 
     return const_iterator(*this,true); }
- private:
 };
 
 

@@ -672,14 +672,6 @@ namespace Ariadne {
                 //@}
                 
                 //@{ 
-                //! \name Approximation methods
-                //! Adjoin an over approximation to the set \a bx, computing to depth \a d.
-                void adjoin_over_approximation(const Vector<Interval>& bx, uint d) { ARIADNE_NOT_IMPLEMENTED; }
-                //! Adjoin an outer approximation to the set \a theSet, computing to depth \a depth.
-                void adjoin_outer_approximation(const CompactSetInterface& theSet, uint depth) { ARIADNE_NOT_IMPLEMENTED; }
-                //@}
-                
-                //@{ 
                 //! \name Input/output operators 
                 
                 //! Write to an output stream.

@@ -50,7 +50,7 @@ typedef int DiscreteState;
 
 class HybridGrid;
 class HybridGridCell;
-class HybridGridCellListSet;
+class HybridGridTreeSet;
 class HybridGridTreeSet;
 
 template<class ES> class HybridListSet;
@@ -164,7 +164,7 @@ class HybridReachabilityAnalyser
   typedef HybridListSet<Box> BxLS;
   typedef HybridGrid Gr;
   typedef HybridGridCell GC;
-  typedef HybridGridCellListSet GCLS;
+  typedef HybridGridTreeSet GCLS;
   typedef HybridGridTreeSet GTS;
   typedef HybridOpenSetInterface OpSI;
   typedef HybridOvertSetInterface OvSI;

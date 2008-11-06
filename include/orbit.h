@@ -38,7 +38,7 @@ template<class ES> class Orbit;
 
 template<class BS> class ListSet;
 class HybridGridCell;
-class HybridGridCellListSet;
+class HybridGridTreeSet;
 
 template<>
 class Orbit<HybridGridCell>
@@ -46,12 +46,12 @@ class Orbit<HybridGridCell>
   class Data;
  public:
   Orbit(const HybridGridCell&);
-  Orbit(const HybridGridCell&, const HybridGridCellListSet&,
-        const HybridGridCellListSet&, const HybridGridCellListSet&);
+  Orbit(const HybridGridCell&, const HybridGridTreeSet&,
+        const HybridGridTreeSet&, const HybridGridTreeSet&);
   HybridGridCell const& initial() const;
-  HybridGridCellListSet const& reach() const;
-  HybridGridCellListSet const& intermediate() const;
-  HybridGridCellListSet const& final() const;
+  HybridGridTreeSet const& reach() const;
+  HybridGridTreeSet const& intermediate() const;
+  HybridGridTreeSet const& final() const;
  private:
   boost::shared_ptr<Data> _data;
 };

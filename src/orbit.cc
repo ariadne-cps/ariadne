@@ -124,9 +124,9 @@ struct Orbit<HybridGridCell>::Data {
   Data(const HybridGridCell& initial_set) 
     : initial(initial_set) { }
   HybridGridCell initial;
-  HybridGridCellListSet reach;
-  HybridGridCellListSet intermediate;
-  HybridGridCellListSet final;
+  HybridGridTreeSet reach;
+  HybridGridTreeSet intermediate;
+  HybridGridTreeSet final;
 };
 
 Orbit<HybridGridCell>::
@@ -137,9 +137,9 @@ Orbit(const HybridGridCell& initial_set)
 
 Orbit<HybridGridCell>::
 Orbit(const HybridGridCell& initial_set,
-      const HybridGridCellListSet& reach_set,
-      const HybridGridCellListSet& intermediate_set,
-      const HybridGridCellListSet& final_set)
+      const HybridGridTreeSet& reach_set,
+      const HybridGridTreeSet& intermediate_set,
+      const HybridGridTreeSet& final_set)
   : _data(new Data(initial_set))
 {
   this->_data->reach=reach_set;
@@ -154,21 +154,21 @@ initial() const
   return this->_data->initial;
 }
 
-HybridGridCellListSet const&
+HybridGridTreeSet const&
 Orbit<HybridGridCell>::
 reach() const
 {
   return this->_data->reach;
 }
 
-HybridGridCellListSet const&
+HybridGridTreeSet const&
 Orbit<HybridGridCell>::
 intermediate() const
 {
   return this->_data->intermediate;
 }
 
-HybridGridCellListSet const&
+HybridGridTreeSet const&
 Orbit<HybridGridCell>::
 final() const
 {

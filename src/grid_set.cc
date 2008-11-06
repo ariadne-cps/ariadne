@@ -1546,15 +1546,23 @@ operator<<(std::ostream& os, const GridCellListSet& gcls)
 		throw NotImplemented(__PRETTY_FUNCTION__);
 	}
 
-	bool subset( const Box& theBox, const GridTreeSubset& theSet ) {
+        bool superset( const GridTreeSubset& theSet, const Box& theBox ) {
 		throw NotImplemented(__PRETTY_FUNCTION__);
 	}
 	
-	bool disjoint( const Box& theBox, const GridTreeSubset& theSet ) {
+        bool subset( const GridTreeSubset& theSet, const Box& theBox ) {
 		throw NotImplemented(__PRETTY_FUNCTION__);
 	}
 	
-	bool intersects( const Box& theBox, const GridTreeSubset& theSet ) {
+        bool disjoint( const GridTreeSubset& theSet, const Box& theBox ) {
+		throw NotImplemented(__PRETTY_FUNCTION__);
+	}
+	
+        bool intersects( const GridTreeSubset& theSet, const Box& theBox ) {
+		throw NotImplemented(__PRETTY_FUNCTION__);
+	}
+	
+        Box bounding_box( const GridTreeSubset& theSet ) {
 		throw NotImplemented(__PRETTY_FUNCTION__);
 	}
 	

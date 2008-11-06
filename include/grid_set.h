@@ -87,9 +87,12 @@ namespace Ariadne {
 	bool overlap(const GridCell& theCell, const GridTreeSubset& theSet);
 	bool subset(const GridTreeSubset& theSet1, const GridTreeSubset& theSet2);
 	bool overlap(const GridTreeSubset& theSet1, const GridTreeSubset& theSet2);
-	bool subset(const Box& theBox, const GridTreeSubset& theSet);
-	bool disjoint(const Box& theBox, const GridTreeSubset& theSet);
-	bool intersects(const Box& theBox, const GridTreeSubset& theSet);
+
+        bool subset(const GridTreeSubset& theSet, const Box& theBox);
+        bool superset(const GridTreeSubset& theSet, const Box& theBox);
+        bool disjoint(const GridTreeSubset& theSet, const Box& theBox);
+        bool intersects(const GridTreeSubset& theSet, const Box& theBox);
+        Box bounding_box(const GridTreeSubset& theSet);
 	
 	GridTreeSet join(const GridTreeSubset& theSet1, const GridTreeSubset& theSet2);
 	GridTreeSet intersection(const GridTreeSubset& theSet1, const GridTreeSubset& theSet2);
@@ -987,14 +990,20 @@ namespace Ariadne {
 
 			/* PIETER: We may want the two predicates below to return tribool, reflecting the case that the box is an
 			* approximation. Unfortunately, this is very difficult for subset. */
-			/*! \brief Tests if a box is a subset of a set. */
-			friend bool subset( const Box& theBox, const GridTreeSubset& theSet );
+			/*! \brief Tests if a grid set is a subset of a box. */
+                        friend bool subset( const GridTreeSubset& theSet, const Box& theBox );
 	
-			/*! \brief Tests if a box is disjoint from (the closure of) a grid set. */
-			friend bool disjoint( const Box& theBox, const GridTreeSubset& theSet );
+			/*! \brief Tests if a grid set is a superset of a box. */
+                        friend bool superset( const GridTreeSubset& theSet, const Box& theBox );
 	
-			/*! \brief Tests if a box intersects thea set. */
-			friend bool intersects( const Box& theBox, const GridTreeSubset& theSet );
+			/*! \brief Tests if (the closure of) a grid set is disjoint from a box. */
+                        friend bool disjoint( const GridTreeSubset& theSet, const Box& theBox  );
+	
+			/*! \brief Tests if a grid set intersects a box. */
+                        friend bool intersects( const GridTreeSubset& theSet, const Box& theBox );
+
+			/*! \brief Computes a bounding box for a grid set. */
+                        friend Box bounding_box( const GridTreeSubset& theSet );
 
 			//@}
 

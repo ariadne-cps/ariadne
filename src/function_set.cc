@@ -64,6 +64,13 @@ ImageSet::dimension() const
 
 
 tribool
+ImageSet::empty() const 
+{ 
+  return this->_domain.empty();
+}
+
+
+tribool
 ImageSet::disjoint(const Vector<Interval>& bx) const 
 { 
   if(dynamic_cast<const IdentityFunction*>(&*this->_function_ptr)) {

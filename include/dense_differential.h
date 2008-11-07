@@ -27,7 +27,6 @@
 #ifndef ARIADNE_DENSE_DIFFERENTIAL_H
 #define ARIADNE_DENSE_DIFFERENTIAL_H
 
-#include <gmpxx.h>
 #include <cmath>
 #include <limits>
 

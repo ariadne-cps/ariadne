@@ -42,12 +42,14 @@ namespace Ariadne {
     template<class R> GridBlock<R> outer_approximation(const Box<R>& bx, const Grid<R>& g);
     template<class R> GridBlock<R> inner_approximation(const Box<R>& bx, const Grid<R>& g);
 
+    template<class R> GridBlock<R> outer_approximation(const Box<Rational>& bx, const Grid<R>& g);
+    template<class R> GridBlock<R> inner_approximation(const Box<Rational>& bx, const Grid<R>& g);
 
-    template<class R> GridCellListSet<R> outer_approximation(const Polytope<R>& pltp, const Grid<R>& g);
-    template<class R> GridCellListSet<R> inner_approximation(const Polytope<R>& pltp, const Grid<R>& g);
+    template<class R, class X> GridCellListSet<R> outer_approximation(const Polytope<X>& pltp, const Grid<R>& g);
+    template<class R, class X> GridCellListSet<R> inner_approximation(const Polytope<X>& pltp, const Grid<R>& g);
  
-    template<class R> GridCellListSet<R> outer_approximation(const Polyhedron<R>& pltp, const Grid<R>& g);
-    template<class R> GridCellListSet<R> inner_approximation(const Polyhedron<R>& pltp, const Grid<R>& g);
+    template<class R, class X> GridCellListSet<R> outer_approximation(const Polyhedron<X>& pltp, const Grid<R>& g);
+    template<class R, class X> GridCellListSet<R> inner_approximation(const Polyhedron<X>& pltp, const Grid<R>& g);
  
     template<class R> GridCellListSet<R> outer_approximation(const Zonotope<R>& z, const Grid<R>& g);
     template<class R> GridCellListSet<R> inner_approximation(const Zonotope<R>& z, const Grid<R>& g);
@@ -71,7 +73,7 @@ namespace Ariadne {
     template<class R> GridMaskSet<R> outer_approximation(const SetInterface< Box<R> >& set, const FiniteGrid<R>& fg);
     template<class R> GridMaskSet<R> inner_approximation(const SetInterface< Box<R> >& set, const FiniteGrid<R>& fg);
 
-	/**
+ 	/**
 	 *!\ brief This method computes an outer approximation for the set \a theSet on the grid \a theGrid.
 	 * Note that, the depth is the total number of subdivisions (in all dimensions) of the unit cello of the grid.
 	 * This method does the followig:

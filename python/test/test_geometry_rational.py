@@ -1,8 +1,18 @@
 from ariadne import *
 
+g=Grid(2,0.125)
+
+bx=Box([[1,2],[3,4]])
 plt=Polytope([[-1,1],[0,-1],[2,3]])
 plh=approx_polyhedron(plt)
 plt=approx_polytope(plh)
+
+inner_approximation(bx,g)
+outer_approximation(bx,g)
+inner_approximation(plt,g)
+outer_approximation(plt,g)
+inner_approximation(plh,g)
+outer_approximation(plh,g)
 
 qpt=QPoint([1,2])
 qhs=QHalfspace([1,2],3)
@@ -57,6 +67,16 @@ disjoint(qplt,qplh)
 disjoint(qplh,qplt)
 disjoint(qplh,qplh)
 intersection(qplh,qplh)
+
+inner_approximation(qbx,g)
+outer_approximation(qbx,g)
+inner_approximation(qplt,g)
+outer_approximation(qplt,g)
+inner_approximation(qplh,g)
+outer_approximation(qplh,g)
+
+print qbx, outer_approximation(qbx,g).bounding_box()
+print qbx, inner_approximation(qbx,g).bounding_box()
 
 eps=EpsPlot()
 eps.open("geometry-rational.eps",Box([[-5,5],[-5,5]]))

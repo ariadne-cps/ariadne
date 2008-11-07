@@ -64,7 +64,7 @@ namespace Ariadne {
       typedef int integer_type;
       typedef long int long_integer_type;
       typedef R real_type;
-      
+      typedef Rational rational_type;
      public:
       /*! \brief Destructor. */
       ~Grid();

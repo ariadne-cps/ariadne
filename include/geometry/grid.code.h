@@ -260,8 +260,6 @@ template<class R>
 typename Grid<R>::integer_type
 Grid<R>::subdivision_lower_index(dimension_type d, const real_type& x) const 
 {
-  
-  
   integer_type n=floor(div_down(sub_down(x,this->_data->_origin[d]),this->_data->_lengths[d]));
   if(x>=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],(n+1)))) {
     return n+1;
@@ -271,12 +269,12 @@ Grid<R>::subdivision_lower_index(dimension_type d, const real_type& x) const
 }
 
 
+  
+  
 template<class R> 
 typename Grid<R>::integer_type
 Grid<R>::subdivision_upper_index(dimension_type d, const real_type& x) const 
 {
-  
-  
   integer_type n=ceil(div_up(sub_up(x,this->_data->_origin[d]),this->_data->_lengths[d]));
   if(x<=add_approx(this->_data->_origin[d],mul_approx(this->_data->_lengths[d],(n-1)))) {
     return n-1;

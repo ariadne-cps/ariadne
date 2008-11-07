@@ -91,6 +91,7 @@ void export_grid()
 template<class R>
 void export_grid_set() 
 {
+  typedef Rational Q;
   typedef Interval<R> I;
 
   typedef Vector<R> RVector;
@@ -115,11 +116,15 @@ void export_grid_set()
   typedef ListSet<RZonotope> RZonotopeListSet;
   typedef PartitionTreeSet<R> RPartitionTreeSet;
   
+  typedef Box<Q> QBox;
+  typedef Polyhedron<Q> QPolyhedron;
+  typedef Polytope<Q> QPolytope;
 
   class_<RGridCell> grid_cell_class("GridCell",init<const RGrid&>());
   grid_cell_class.def("dimension", &RGridCell::dimension);
   grid_cell_class.def("__getitem__", &RGridCell::operator[]);
   grid_cell_class.def("lattice_set", &RGridCell::lattice_set,return_value_policy<copy_const_reference>());
+  grid_cell_class.def("bounding_box", &RGridCell::bounding_box);
   grid_cell_class.def(self_ns::str(self));
   
 
@@ -127,6 +132,7 @@ void export_grid_set()
   grid_block_class.def(init<RGridCell>());
   grid_block_class.def("dimension", &RGridBlock::dimension);
   grid_block_class.def("lattice_set", &RGridBlock::lattice_set,return_value_policy<copy_const_reference>());
+  grid_block_class.def("bounding_box", &RGridBlock::bounding_box);
   grid_block_class.def(self_ns::str(self));
 
 
@@ -204,7 +210,11 @@ void export_grid_set()
   def("outer_approximation",(RGridBlock(*)(const RBox&,const RGrid&))(&outer_approximation));
   def("inner_approximation",(RGridBlock(*)(const RBox&,const RGrid&))(&inner_approximation));
 
+  def("outer_approximation",(RGridBlock(*)(const QBox&,const RGrid&))(&outer_approximation));
+  def("inner_approximation",(RGridBlock(*)(const QBox&,const RGrid&))(&inner_approximation));
 
+  def("outer_approximation",(RGridCellListSet(*)(const QPolytope&,const RGrid&))(&outer_approximation));
+  def("outer_approximation",(RGridCellListSet(*)(const QPolyhedron&,const RGrid&))(&outer_approximation));
   def("outer_approximation",(RGridCellListSet(*)(const RPolyhedron&,const RGrid&))(&outer_approximation));
   def("outer_approximation",(RGridCellListSet(*)(const RPolytope&,const RGrid&))(&outer_approximation));
   def("outer_approximation",(RGridCellListSet(*)(const RZonotope&,const RGrid&))(&outer_approximation));
@@ -212,6 +222,8 @@ void export_grid_set()
   def("outer_approximation",(RGridMaskSet(*)(const RZonotopeListSet&,const RFiniteGrid&))(&outer_approximation));
   def("outer_approximation",(RGridMaskSet(*)(const RSetInterface&,const RFiniteGrid&))(&outer_approximation));
 
+  def("inner_approximation",(RGridCellListSet(*)(const QPolytope&,const RGrid&))(&inner_approximation));
+  def("inner_approximation",(RGridCellListSet(*)(const QPolyhedron&,const RGrid&))(&inner_approximation));
   def("inner_approximation",(RGridCellListSet(*)(const RPolytope&,const RGrid&))(&inner_approximation));
   def("inner_approximation",(RGridCellListSet(*)(const RPolyhedron&,const RGrid&))(&inner_approximation));
   def("inner_approximation",(RGridCellListSet(*)(const RZonotope&,const RGrid&))(&inner_approximation));

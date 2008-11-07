@@ -211,6 +211,7 @@ template<class R>
 void
 instantiate_grid_approximation()
 {
+  typedef Rational Q;
   typedef Interval<R> I;
   tribool tb;
   uint dpth=0;
@@ -222,6 +223,10 @@ instantiate_grid_approximation()
   TaylorSet<R>* ts=0;
   SetInterface< Box<R> >* set=0;
   
+  Box<Q>* qbx=0;
+  Polytope<Q>* qpltp=0;
+  Polyhedron<Q>* qplhd=0;
+
   Grid<R>* g=0;
   FiniteGrid<R>* fg=0;
   GridBlock<R>* gb=0;
@@ -246,6 +251,10 @@ instantiate_grid_approximation()
   *gcls=outer_approximation(*ts,*g);
   *gcls=outer_approximation(*set,*g);
   
+  *gb=outer_approximation(*qbx,*g);
+  *gcls=outer_approximation(*qpltp,*g);
+  *gcls=outer_approximation(*qplhd,*g);
+
   //  *gcls=fuzzy_outer_approximation(*pltp,*g);
   //  *gcls=fuzzy_outer_approximation(*plhd,*g);
   *gcls=fuzzy_outer_approximation(*z,*g);
@@ -254,6 +263,10 @@ instantiate_grid_approximation()
   *gcls=inner_approximation(*plhd,*g);
   *gcls=inner_approximation(*z,*g);
   *gcls=inner_approximation(*set,*g);
+
+  *gb=inner_approximation(*qbx,*g);
+  *gcls=inner_approximation(*qpltp,*g);
+  *gcls=inner_approximation(*qplhd,*g);
 
   *gcls=outer_approximation(*bxls,*g);
   *gms=outer_approximation(*bxls,*fg);
@@ -351,6 +364,42 @@ inner_approximation(const Box<R>& bx, const Grid<R>& g)
 
 template<class R>
 GridBlock<R>
+outer_approximation(const Box<Rational>& bx, const Grid<R>& g) 
+{
+  if(bx.empty()) {
+    return GridBlock<R>(g);
+  }
+  IndexArray lower(bx.dimension());
+  IndexArray upper(bx.dimension());
+  for(size_type i=0; i!=bx.dimension(); ++i) {
+    Interval<R> ivl(bx[i]);
+    lower[i]=g.subdivision_upper_index(i,ivl.lower())-1;
+    upper[i]=g.subdivision_lower_index(i,ivl.upper())+1;
+  }
+  return GridBlock<R>(g,lower,upper);
+}
+  
+
+template<class R>
+GridBlock<R>
+inner_approximation(const Box<Rational>& bx, const Grid<R>& g) 
+{
+  if(bx.empty()) {
+    return GridBlock<R>(g);
+  }
+  IndexArray lower(bx.dimension());
+  IndexArray upper(bx.dimension());
+  for(size_type i=0; i!=bx.dimension(); ++i) {
+    Interval<Rational> const& ivl(bx[i]);
+    lower[i]=g.subdivision_lower_index(i,ivl.lower().get_d())+1;
+    upper[i]=g.subdivision_upper_index(i,ivl.upper().get_d())-1;
+  }
+  return GridBlock<R>(g,lower,upper);
+}
+  
+
+template<class R>
+GridBlock<R>
 outer_approximation(const Point< Interval<R> >& ipt, const Grid<R>& g) 
 {
   return outer_approximation(Box<R>(ipt),g);
@@ -365,31 +414,31 @@ inner_approximation(const Point< Interval<R> >& ipt, const Grid<R>& g)
 
 
 
-template<class R>
+template<class R, class X>
 GridCellListSet<R>
-outer_approximation(const Polyhedron<R>& ph, const Grid<R>& g) 
+outer_approximation(const Polyhedron<X>& ph, const Grid<R>& g) 
 {
   return ::outer_approximation_of_basic_set(ph,g);
 }
 
-template<class R>
+template<class R, class X>
 GridCellListSet<R>
-inner_approximation(const Polyhedron<R>& ph, const Grid<R>& g) 
+inner_approximation(const Polyhedron<X>& ph, const Grid<R>& g) 
 {
   return ::inner_approximation_of_basic_set(ph,g);
 }
 
 
-template<class R>
+template<class R, class X>
 GridCellListSet<R>
-outer_approximation(const Polytope<R>& p, const Grid<R>& g) 
+outer_approximation(const Polytope<X>& p, const Grid<R>& g) 
 {
   return ::outer_approximation_of_basic_set(p,g);
 }
 
-template<class R>
+template<class R, class X>
 GridCellListSet<R>
-inner_approximation(const Polytope<R>& p, const Grid<R>& g) 
+inner_approximation(const Polytope<X>& p, const Grid<R>& g) 
 {
   return ::inner_approximation_of_basic_set(p,g);
 }

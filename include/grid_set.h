@@ -2,6 +2,7 @@
  *            grid_set.h
  *
  *  Copyright  2008  Ivan S. Zapreev, Pieter Collins
+ *            ivan.zapreev@gmail.com, pieter.collins@cwi.nl
  *
  ****************************************************************************/
 
@@ -43,6 +44,8 @@
 #include "exceptions.h"
 #include "box.h"
 #include "point.h"
+
+#include "numeric.h"
 
 #include "set_interface.h"
 #include "vector.h"
@@ -697,17 +700,21 @@ namespace Ariadne {
 
 			/*! \brief This method takes the height of the primary cell
 			 *  \a otherPavingPCellHeight and if it is:
-			 *    (a) higher then for this paving, pre-pends \a _pRootTreeNodeis.
+			 *    (a) higher then for this paving, pre-pends \a _pRootTreeNode.
 			 *    (b) lower then for this paving, locates it in this paging's tree.
 			 *    (c) equal to the hight of this paving's primary cell, does nothing.
 			 *  This method returns the node corresponding to the primary cell of
 			 *  height \a otherPavingPCellHeight in the (updated) paving.
-			 *  If \a stop_on_enabled is set tro true then for the case (b) if we meet
-			 *  a leaf node on the path from the primary onde of the paving to the primary
+			 *  If \a stop_on_enabled is set to true then for the case (b) if we meet
+			 *  a leaf node on the path from the primary node of the paving to the primary
+			 *  node of the cell, we stop locating the node corresponding to the primary
+			 *  cell of height \a otherPavingPCellHeight and set \a has_stopped to true.
+			 *  If \a stop_on_disabled is set to true then for the case (b) if we meet
+			 *  a leaf node on the path from the primary node of the paving to the primary
 			 *  node of the cell, we stop locating the node corresponding to the primary
 			 *  cell of height \a otherPavingPCellHeight and set \a has_stopped to true.
 			 */
-			BinaryTreeNode* align_with_cell( const uint otherPavingPCellHeight, const bool stop_on_enabled, bool & has_stopped );
+			BinaryTreeNode* align_with_cell( const uint otherPavingPCellHeight, const bool stop_on_enabled, const bool stop_on_disabled, bool & has_stopped );
 
 			/*! \brief This method adjoins the outer approximation of \a theSet (computed on the fly) to this paving.
 			 *  We use the primary cell (enclosed in this paving) of height \a primary_cell_hight and represented 
@@ -1720,7 +1727,7 @@ namespace Ariadne {
 		
 		bool has_stopped = false;
 		//Align the paving and the cell
-		BinaryTreeNode* pBinaryTreeNode = align_with_cell( theCell.height(), true, has_stopped );
+		BinaryTreeNode* pBinaryTreeNode = align_with_cell( theCell.height(), true, false, has_stopped );
 		
 		//If we are not trying to adjoin something into an enabled sub cell of the paving
 		if( ! has_stopped ){
@@ -1734,7 +1741,7 @@ namespace Ariadne {
 		
 		bool has_stopped = false;
 		//Align the paving and the cell
-		BinaryTreeNode* pBinaryTreeNode = align_with_cell( theOtherSubPaving.cell().height(), true, has_stopped );
+		BinaryTreeNode* pBinaryTreeNode = align_with_cell( theOtherSubPaving.cell().height(), true, false, has_stopped );
 		
 		//If we are not trying to adjoin something into an enabled sub cell of the paving
 		if( ! has_stopped ){

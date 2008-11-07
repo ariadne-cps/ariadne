@@ -2,6 +2,7 @@
  *            grid_set.cc
  *
  *  Copyright  2008  Ivan S. Zapreev, Pieter Collins
+ *            ivan.zapreev@gmail.com, pieter.collins@cwi.nl
  *
  ****************************************************************************/
 
@@ -417,7 +418,7 @@ std::ostream& operator<<(std::ostream& os, const Grid& gr)
 					mince_node( pCurrentNode->_pRightNode, remaining_depth );
 				}
 			} else {
-				throw std::runtime_error(__PRETTY_FUNCTION__);
+				throw std::runtime_error( __PRETTY_FUNCTION__ );
 			}
 		}
 	}
@@ -443,7 +444,7 @@ std::ostream& operator<<(std::ostream& os, const Grid& gr)
 				}
 			}
 		} else {
-			throw std::runtime_error(__PRETTY_FUNCTION__);
+			throw std::runtime_error( __PRETTY_FUNCTION__ );
 		}
 	}
 	
@@ -873,7 +874,7 @@ std::ostream& operator<<(std::ostream& os, const Grid& gr)
 		this->_theGridCell = GridCell( this->_theGridCell.grid(), toPCellHeight, BinaryWord() );
 	}
 
-	BinaryTreeNode* GridTreeSet::align_with_cell( const uint otherPavingPCellHeight, const bool stop_on_enabled, bool & has_stopped ) {
+	BinaryTreeNode* GridTreeSet::align_with_cell( const uint otherPavingPCellHeight, const bool stop_on_enabled, const bool stop_on_disabled, bool & has_stopped ) {
 		const uint thisPavingPCellHeight = this->cell().height();
 		
 		//The current root node of the GridTreeSet
@@ -887,7 +888,9 @@ std::ostream& operator<<(std::ostream& os, const Grid& gr)
 			
 			//2. Locate the binary tree node corresponding to this primnary cell
 			uint position = 0;
-			while( position < primaryCellPath.size() && !( has_stopped = ( pBinaryTreeNode->is_enabled() && stop_on_enabled ) ) ){
+			while( position < primaryCellPath.size() && !( has_stopped = (
+					( pBinaryTreeNode->is_enabled() && stop_on_enabled ) ||
+					( pBinaryTreeNode->is_disabled() && stop_on_disabled ) ) ) ){
 				//Split the node, if it is not a leaf it will not be changed
 				pBinaryTreeNode->split();
 				//Follow the next path step
@@ -1043,7 +1046,7 @@ std::ostream& operator<<(std::ostream& os, const Grid& gr)
 
 		//2. Align this paving and paving enclosing the provided set
 		bool has_stopped = false;
-		BinaryTreeNode* pBinaryTreeNode = align_with_cell( outer_approx_primary_cell_height, true, has_stopped );
+		BinaryTreeNode* pBinaryTreeNode = align_with_cell( outer_approx_primary_cell_height, true, false, has_stopped );
 		
 		//If the outer aproximation of the bounding box of the provided set is enclosed
 		//in an enabled cell of this paving, then there is nothing to be done. The latter
@@ -1093,7 +1096,7 @@ std::ostream& operator<<(std::ostream& os, const Grid& gr)
 
 		//2. Align this paving and paving enclosing the provided set
 		bool has_stopped = false;
-		BinaryTreeNode* pBinaryTreeNode = align_with_cell( outer_approx_primary_cell_height, true, has_stopped );
+		BinaryTreeNode* pBinaryTreeNode = align_with_cell( outer_approx_primary_cell_height, true, false, has_stopped );
 		
 		//If the lower aproximation of the bounding box of the provided set is enclosed
 		//in an enabled cell of this paving, then there is nothing to be done. The latter
@@ -1251,7 +1254,51 @@ std::ostream& operator<<(std::ostream& os, const Grid& gr)
 	}
 	
 	void GridTreeSet::remove( const GridCell& theCell ) {
-		throw NotImplemented(__PRETTY_FUNCTION__);
+		ARIADNE_ASSERT( this->grid() == theCell.grid() );
+		
+		//If needed, extend the tree of this paving and then find it's the
+		//primary cell common with the primary cell of the provided GridCell
+		//If we encounter a disabled node then we do not move on, since then
+		//there is nothing to remove, otherwise we split the node and go down
+		bool has_stopped = false;
+		BinaryTreeNode* pCurrentPrimaryCell = align_with_cell( theCell.height(), false, true, has_stopped );
+		
+		if( ! has_stopped ) {
+			//Follow theCell.word() path in the tree rooted to pCommonPrimaryCell,
+			//do that until we encounter a leaf node, then stop
+			BinaryWord path = theCell.word();
+			int position = 0;
+			for(; position < path.size(); position++ ) {
+				//If we are in a leaf node then
+				if( pCurrentPrimaryCell->is_leaf() ) {
+					break;
+				}
+				pCurrentPrimaryCell = path[position] ? pCurrentPrimaryCell->right_node() : pCurrentPrimaryCell->left_node();
+			}
+			
+			//Check if we stopped because it was a leaf node
+			if( pCurrentPrimaryCell->is_leaf() ) {
+				if( pCurrentPrimaryCell->is_enabled() ) {
+					//If the node is a leaf and enabled then continue following the path by splitting nodes
+					for(; position < path.size(); position++ ) {
+						pCurrentPrimaryCell->split();
+						pCurrentPrimaryCell = path[position] ? pCurrentPrimaryCell->right_node() : pCurrentPrimaryCell->left_node();
+					}
+					//Disable the sub-tree rooted to the tree node we navigated to
+					pCurrentPrimaryCell->set_disabled();
+				} else {
+					//DO NOTHING: The leaf node turns out to be already off,
+					//so there is nothing to remove from
+				}
+			} else {
+				//We followed the path to the cell, but we are still in some non-leaf node at this
+				//point it does no matter what is below, and we just remove the entire sub-tree.
+				pCurrentPrimaryCell->make_leaf( false );
+			}
+		} else {
+			//DO NOTHING: If we stopped it means that we were in a
+			//disabled node, so there is nothing to remove from
+		}
 	}
 	
 	void GridTreeSet::remove( const GridTreeSubset& theOtherSubPaving ) {

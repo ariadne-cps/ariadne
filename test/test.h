@@ -1,8 +1,8 @@
 /***************************************************************************
  *            test.h
  *
- *  Copyright  2007  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl
+ *  Copyright  2007  Alberto Casagrande, Pieter Collins, Ivan S. Zapreev
+ *  casagrande@dimi.uniud.it, pieter.collins@cwi.nl, ivan.zapreev@gmail.com
  ****************************************************************************/
 
 /*
@@ -41,6 +41,25 @@ bool
 ariadne_check(std::ostream& os, const R& r, const ER& er) {
   os << r; return (r==er);
 }
+
+//This is the variable that stores counter for the number of test cases
+//The value is used and updated in the next two macro definitions
+int test_case_counter = 0;
+
+/*! \brief Print the title for the test case */
+#define ARIADNE_PRINT_TEST_CASE_TITLE( pTitle ) \
+{\
+	cout << endl << "***" << ++test_case_counter << ": "<< pTitle << "***" << endl; \
+	cout.flush(); \
+}\
+
+
+/*! \brief Print the comment for the test */
+#define ARIADNE_PRINT_TEST_COMMENT( pComment ) \
+{ \
+	cout << "* COMMENT: " << pComment << "" << endl; \
+	cout.flush(); \
+}\
 
 
 /*! \brief Catches an exception and writes a diagnostic to standard output and standard error. */
@@ -224,6 +243,33 @@ class variable expression; \
   catch(...) { \
     std::cout << "caught exception as expected\n" << std::endl; \
   } \
+} \
+
+/*! \brief Check the iterator of the GridTreeSudset by iterating through all it's values and
+ * comparing them with the valus in the vector \a expected_result, the total number of iterated 
+ * elements should coincide with the value of \a expected_number_elements
+ */
+#define ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result, theGridTreeSubset, expected_number_elements ) \
+{ \
+	int elements_count = 0; \
+	for (GridTreeSubset::const_iterator it = theGridTreeSubset.begin(), end = theGridTreeSubset.end(); it != end; it++, elements_count++) { \
+		if( elements_count < expected_number_elements ) { \
+			ARIADNE_PRINT_TEST_COMMENT("The next iterator node is: "); \
+			ARIADNE_TEST_COMPARE( (*expected_result[elements_count]), == , (*it) ); \
+		} \
+	} \
+	ARIADNE_PRINT_TEST_COMMENT("Test that we iterated through the right number of nodes"); \
+	ARIADNE_TEST_EQUAL( elements_count , expected_number_elements ); \
+} \
+
+/*! \brief clean std::vector, i.e. delete memory of it's non NULL elements and set them to NULL in the vector */
+#define ARIADNE_CLEAN_TEST__VECTOR( vector ) \
+{ \
+	for(int i = 0; i < vector.size(); i++ ) { \
+		if( vector[i] != NULL ) { \
+			delete vector[i]; vector[i] = NULL; \
+		} \
+	} \
 } \
 
 #endif // ARIADNE_TEST_H

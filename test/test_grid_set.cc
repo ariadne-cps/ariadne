@@ -1227,6 +1227,7 @@ void test_cell_subset() {
 	cout << theBigSubPaving << endl;
 	ARIADNE_TEST_EQUAL( subset( theCell, theBigSubPaving), true );
 
+
 	//Create the GridTreeSub, will be rooted to the primary cell of height smallHeight
 	GridTreeSet theSmallPaving( theTrivialGrid, smallHeight, pBinaryTreeRoot->left_node()->left_node()->right_node()->right_node() );
 	//Restore the binary tree
@@ -1272,8 +1273,10 @@ void test_cell_subset() {
 	cout << theSmallPaving << endl;
 	ARIADNE_TEST_EQUAL( subset( theCell, theSmallPaving), true );
 	
+	
 	//Create the GridTreeSub, will be rooted to the primary cell of height bigHeight
-	GridTreeSet theBigPaving( theTrivialGrid, bigHeight, pBinaryTreeRoot );
+  BinaryTreeNode * pBinaryTreeRoot2 = new BinaryTreeNode(*pBinaryTreeRoot);
+	GridTreeSet theBigPaving( theTrivialGrid, bigHeight, pBinaryTreeRoot2 );
 	//Restore the binary tree
 	theBigPaving.binary_tree()->left_node()->left_node()->right_node()->right_node()->right_node()->set_enabled();
 	theBigPaving.binary_tree()->left_node()->left_node()->right_node()->right_node()->right_node()->split();
@@ -1316,8 +1319,7 @@ void test_cell_subset() {
 	print_comment("theBigPaving");
 	cout << theBigPaving << endl;
 	ARIADNE_TEST_EQUAL( subset( theCell, theBigPaving), true );
-	
-	delete pBinaryTreeRoot; pBinaryTreeRoot = NULL;
+
 }
 
 void test_subsets_join() {

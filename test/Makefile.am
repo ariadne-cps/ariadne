@@ -48,6 +48,7 @@ test_continuous_evolution_SOURCES=test_continuous_evolution.cc
 test_hybrid_evolution_SOURCES=test_hybrid_evolution.cc
 
 test_grid_set_SOURCES=test_grid_set.cc
+test_hybrid_set_SOURCES=test_hybrid_set.cc
 
 test_discretised_evolution_SOURCES=test_discretised_evolution.cc
 test_reachability_analysis_SOURCES=test_reachability_analysis.cc

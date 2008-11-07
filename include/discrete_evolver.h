@@ -30,6 +30,7 @@
 
 #include <boost/smart_ptr.hpp>
 
+#include "numeric.h"
 #include "evolver_interface.h"
 #include "hybrid_automaton.h"
 

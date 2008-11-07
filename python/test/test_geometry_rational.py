@@ -1,5 +1,9 @@
 from ariadne import *
 
+plt=Polytope([[-1,1],[0,-1],[2,3]])
+plh=approx_polyhedron(plt)
+plt=approx_polytope(plh)
+
 qpt=QPoint([1,2])
 qhs=QHalfspace([1,2],3)
 qbx=QBox([[1,2],[3,4]])

@@ -68,6 +68,8 @@ namespace Ariadne {
   
     template<class R> Polytope<R> polytope(const Box<R>& bx);
     template<class X> Polytope<typename traits<X>::arithmetic_type> polytope(const Polyhedron<X>& plhd);
+
+    template<class R> Polytope<R> approx_polytope(const Polyhedron<R>& plhd);
   
 
 

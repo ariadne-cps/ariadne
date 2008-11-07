@@ -72,6 +72,8 @@ namespace Ariadne {
     template<class X> Polyhedron<X> polyhedron(const Halfspace<X>& hs) ;
     template<class X> Polyhedron<typename traits<X>::arithmetic_type> polyhedron(const Polytope<X>& p) ;
 
+    template<class R> Polyhedron<R> approx_polyhedron(const Polytope<R>& pltp);
+
     template<class X> std::ostream& operator<<(std::ostream& os, const Polyhedron<X>& p);
     template<class X> std::istream& operator>>(std::istream& os, Polyhedron<X>& p);
 

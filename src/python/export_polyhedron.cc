@@ -161,6 +161,7 @@ void export_polyhedron()
 
   def("polyhedron", (Polyhedron<R>(*)(const Halfspace<R>&))(&polyhedron));
   def("polyhedron", (Polyhedron<R>(*)(const Box<R>&))(&polyhedron));
+  def("approx_polyhedron", (Polyhedron<R>(*)(const Polytope<R>&))(&approx_polyhedron));
   def("disjoint", (tribool(*)(const Polyhedron<R>&, const Box<R>&))(&disjoint));
   def("disjoint", (tribool(*)(const Box<R>&, const Polyhedron<R>&))(&disjoint));
   def("disjoint", (tribool(*)(const Polyhedron<R>&, const Polytope<R>&))(&disjoint));

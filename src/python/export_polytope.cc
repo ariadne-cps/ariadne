@@ -109,6 +109,7 @@ void export_polytope()
   polytope_class.def(self_ns::str(self));
 
   def("polytope", (Polytope<R>(*)(const Box<R>&))(&polytope));
+  def("approx_polytope", (Polytope<R>(*)(const Polyhedron<R>&))(&approx_polytope));
   def("disjoint", (tribool(*)(const Polytope<R>&, const Polytope<R>&))(&disjoint));
   def("subset", (tribool(*)(const Polytope<R>&, const Polytope<R>&))(&subset));
   def("convex_hull", (Polytope<R>(*)(const Polytope<R>&, const Polytope<R>&))(&convex_hull));

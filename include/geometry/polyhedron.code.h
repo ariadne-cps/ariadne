@@ -775,6 +775,50 @@ polyhedron(const Polytope<X>& pltp)
 }
 
 
+template<class R>
+Polyhedron<R>
+approx_polyhedron(const Polytope<R>& pltp)
+{
+  typedef typename traits<R>::approximate_arithmetic_type A;
+  
+  dimension_type d=pltp.dimension();
+  size_type nv=pltp.number_of_vertices();
+  
+  if(nv==0) {
+    // empty polytope; return empty polyhedron
+    array<R> data(d+1,R(0));
+    data[d]=-1;
+    return Polyhedron<R>(d,1,data.begin());
+  }
+  
+  const Matrix<A> G=pltp.generators();
+  
+  std::vector< Vector<A> > result;
+  std::vector< Vector<A> > argument;
+  
+  Vector<A> tmp(d+1);
+  
+  for(size_type j=0; j!=nv; ++j) {
+    for(size_type i=0; i!=d+1u; ++i) {
+      tmp(i)=G(i,j);
+    }
+    argument.push_back(tmp);
+  }
+  
+  ddconv(result,argument);     
+  
+  size_type nc=result.size();
+  array<R> data((d+1)*nc);
+  for(size_type i=0; i!=nc; ++i) {
+    for(size_type j=0; j!=d+1u; ++j) {
+      data[i*(d+1u)+j]=R(result[i](j));
+    }
+  }
+  
+  return Polyhedron<R>(d,nc,data.begin());
+}
+
+
 
 template<class X>
 std::string
@@ -854,6 +898,7 @@ Polyhedron<X>::_instantiate()
   tribool tb;
   Point<R> pt;
   Box<R> bx;
+  Polytope<R> pl;
   Halfspace<X> hs;
   Polytope<X> c;
   Polyhedron<X> p;
@@ -882,6 +927,8 @@ Polyhedron<X>::_instantiate()
   p=polyhedron(hs);
   p=polyhedron(bx);
   ip=polyhedron(c);
+
+  p=approx_polyhedron(pl);
 }
 
 

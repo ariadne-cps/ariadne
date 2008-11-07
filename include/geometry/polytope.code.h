@@ -333,6 +333,53 @@ polytope(const Polyhedron<X>& plhd)
 }
 
 
+template<class R>
+Polytope<R>
+approx_polytope(const Polyhedron<R>& plhd)
+{
+  typedef typename traits<R>::approximate_arithmetic_type A;
+  
+  dimension_type d=plhd.dimension();
+  size_type nc=plhd.number_of_constraints();
+  
+  const Matrix<A> a=plhd.A();
+  const Vector<A> b=plhd.b();
+  
+  std::vector< Vector<A> > constraints;
+  std::vector< Vector<A> > generators;
+  
+  Vector<A> tmp(d+1);
+  // Add positivity constraint
+  tmp(d)=1;
+  constraints.push_back(tmp);
+  for(size_type i=0; i!=nc; ++i) {
+    for(size_type j=0; j!=d; ++j) {
+      tmp(j)=-a(i,j);
+    }
+    tmp(d)=b(i);
+    constraints.push_back(tmp);
+  }
+  
+  ddconv(generators,constraints);
+  
+  size_type nv=generators.size();
+  for(size_type j=0; j!=nv; ++j) {
+    if(generators[j](d)==0) {
+      //std::cerr << "Warning: Unbounded polytope\n";
+      ARIADNE_THROW(UnboundedSet,"Polytope::Polytope(Polyhedron plhd)","plhd="<<plhd<<", generators="<<generators);
+    }
+  }
+  array<R> data(nv*(d+1));
+  for(size_type j=0; j!=nv; ++j) {
+    for(size_type i=0; i!=d+1u; ++i) {
+      data[j*(d+1)+i]=R(generators[j](i));
+    }
+  }
+  Polytope<R> pltp(d,nv,data.begin());
+  return pltp;
+}
+
+
 template<class X>
 dimension_type 
 Polytope<X>::dimension() const
@@ -533,6 +580,7 @@ Polytope<X>::_instantiate()
   tribool tb;
   Point<R>* pt=0;
   Box<R>* bx=0;
+  Polyhedron<R>* ph=0;
   Polytope<X>* p=0;
   Polyhedron<X>* h=0;
   Polytope<I>* ip=0;
@@ -551,6 +599,7 @@ Polytope<X>::_instantiate()
   *ip=polytope(*h);
   *ih=polyhedron(*p);
   
+  *p=approx_polytope(*ph);
 }
 
 

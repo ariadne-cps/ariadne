@@ -416,10 +416,10 @@ Polyhedron<X>::Polyhedron(const Box<R>& bx)
   dimension_type d=bx.dimension();
   MatrixSlice<X> constraints=this->_constraints();
   for(size_type i=0; i!=d; ++i) {
-    constraints(i,i)=static_cast<X>(1);
-    constraints(i,d)=-bx.lower_bound(i);
-    constraints(i+d,i)=static_cast<X>(-1); 
-    constraints(i+d,d)=bx.upper_bound(i);
+    constraints(2*i,i)=static_cast<X>(1);
+    constraints(2*i,d)=-bx.lower_bound(i);
+    constraints(2*i+1,i)=static_cast<X>(-1); 
+    constraints(2*i+1,d)=bx.upper_bound(i);
   }
 }
 
@@ -455,7 +455,7 @@ Polyhedron<X>::Polyhedron(dimension_type d, size_type nc, const X* data)
 
 template<class X>
 Polyhedron<X>::Polyhedron(const Matrix<X>& A,
-                                    const Vector<X>& b) 
+                          const Vector<X>& b) 
   : _dimension(A.number_of_columns()), 
     _number_of_constraints(A.number_of_rows()), 
     _data((A.number_of_columns()+1)*A.number_of_rows())
@@ -486,6 +486,24 @@ Polyhedron<X>::Polyhedron(const PointList<X>& pts)
 }
 
 
+template<class X>
+Polyhedron<X>::Polyhedron(const std::vector< Halfspace<X> >& hsv)
+  : _dimension(hsv[0].dimension()), _number_of_constraints(0), _data()
+{
+  for(size_type i=0; i!=hsv.size(); ++i) {
+    this->new_constraint(hsv[i]);
+  }
+}
+
+
+template<class X>
+Polyhedron<X>::Polyhedron(const Halfspace<X>& hs)
+  : _dimension(hs.dimension()), _number_of_constraints(0), _data()
+{
+  this->new_constraint(hs);
+}
+
+
 
 template<class X>
 void
@@ -495,6 +513,7 @@ Polyhedron<X>::new_constraint(const Halfspace<X>& c)
   dimension_type d=this->_dimension;
   size_type sz=this->_data.size();
   this->_data.resize(sz+d+1u);
+  ++this->_number_of_constraints;
   for(dimension_type i=0; i!=d; ++i) {
     this->_data[sz+i]=c.data()[i];
     this->_data[sz+d]=c.data()[d];
@@ -696,6 +715,14 @@ closed_intersection(const Polyhedron<X>& plhd, const Box<typename Polyhedron<X>:
 }
 
 
+template<class X>
+Polyhedron<X> 
+polyhedron(const Halfspace<X>& hs)
+{
+  return Polyhedron<X>(hs);
+}
+
+
 template<class R>
 Polyhedron<R> 
 polyhedron(const Box<R>& r)
@@ -768,9 +795,9 @@ Polyhedron<X>::write(std::ostream& os) const
     os << ( i==0 ? "[" : "," );
     for(size_type j=0; j!=d; ++j) {
       os << ( j==0 ? "(" : ",");
-      os << this->_data[i*(d+1)+j]; 
+      os << X(-this->_data[i*(d+1)+j]); 
     }
-    os << ":" << this->_data[i*(d+1)+d] << ")";
+    os << ";" << this->_data[i*(d+1)+d] << ")";
   }
   os << "] )";
   return os;
@@ -827,6 +854,7 @@ Polyhedron<X>::_instantiate()
   tribool tb;
   Point<R> pt;
   Box<R> bx;
+  Halfspace<X> hs;
   Polytope<X> c;
   Polyhedron<X> p;
   Polyhedron<F> ip;
@@ -851,6 +879,7 @@ Polyhedron<X>::_instantiate()
   closed_intersection(p,bx);
   open_intersection(p,p);
   
+  p=polyhedron(hs);
   p=polyhedron(bx);
   ip=polyhedron(c);
 }

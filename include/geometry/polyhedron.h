@@ -68,8 +68,9 @@ namespace Ariadne {
     template<class X> Polyhedron<X> closed_intersection(const Polyhedron<X>& plhd, const Box<typename Polyhedron<X>::real_type>& r) ;
     template<class X> Polyhedron<X> closed_intersection(const Box<typename Polyhedron<X>::real_type>& r, const Polyhedron<X>& plhd) ;
 
-    template<class R> Polyhedron<R> polyhedron(const Box<R>& A) ;
-    template<class X> Polyhedron<typename traits<X>::arithmetic_type> polyhedron(const Polytope<X>& A) ;
+    template<class R> Polyhedron<R> polyhedron(const Box<R>& bx) ;
+    template<class X> Polyhedron<X> polyhedron(const Halfspace<X>& hs) ;
+    template<class X> Polyhedron<typename traits<X>::arithmetic_type> polyhedron(const Polytope<X>& p) ;
 
     template<class X> std::ostream& operator<<(std::ostream& os, const Polyhedron<X>& p);
     template<class X> std::istream& operator>>(std::istream& os, Polyhedron<X>& p);
@@ -128,8 +129,14 @@ namespace Ariadne {
        */
       explicit Polyhedron(const Matrix<X>& C);
             
+      /*! \brief Construct from a list of halfspaces. */
+      explicit Polyhedron(const std::vector< Halfspace<X> >& hsv);
+            
       /*! \brief Construct from a list of points. */
       explicit Polyhedron(const PointList<X>& pts);
+            
+      /*! \brief Convert from a halfspace. */
+      explicit Polyhedron(const Halfspace<X>& hs);
             
       /*! \brief Convert from a box. */
       explicit Polyhedron(const Box<R>& bx);

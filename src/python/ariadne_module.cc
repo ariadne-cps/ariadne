@@ -197,6 +197,7 @@ BOOST_PYTHON_MODULE(ariadne)
   export_point<Rational>();
   export_segment<Rational>();
   export_interpolated_curve<Rational>();
+  export_box<Rational>();
   export_polytope<Rational>();
   export_polyhedron<Rational>();
 

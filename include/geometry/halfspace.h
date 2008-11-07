@@ -59,7 +59,7 @@ namespace Ariadne {
       //@{ 
       //! \name Constructors
       /*! \brief Construct the degenerate halfspace \f$\sum_{i=0}^{d-1} 0 x_i \geq 0 \f$ in \f$\R^d\f$. */
-      explicit Halfspace(dimension_type d) : _data(d+1u) { }
+      explicit Halfspace(dimension_type d=0) : _data(d+1u) { }
       /*! \brief Construct the halfspace \f$\sum_{i=0}^{d-1} c_i x_i + c_d \geq 0 \f$. */
       template<class XX> explicit Halfspace(dimension_type d, const XX* c) : _data(c,c+d+1u) { }
       /*! \brief Construct the halfspace \f$\sum_{i=0}^{d-1} a_i x_i \leq b \f$. */
@@ -77,6 +77,16 @@ namespace Ariadne {
       //! \name Geometric operations
       /*! \brief The dimension the halfspace lies in. */
       dimension_type dimension() const { return this->_data.size()-1; }
+      /*! \brief The complement of the halfspace. */
+      Halfspace<X> complement() const { Halfspace<X> res(*this); 
+        for(size_t i=0; i!=res._data.size(); ++i) { res._data[i]=-res._data[i]; } return res; }
+      /*! \brief Test whether the halfspace contains a point. */
+      template<class XX> tribool contains(const Point<XX>& pt) const {
+        typedef typename traits<X,XX>::arithmetic_type F;
+        const Halfspace<X>& hs=*this; ARIADNE_ASSERT(pt.dimension()==hs.dimension());
+        F dot=hs.data()[hs.dimension()];
+        for(dimension_type i=0; i!=hs.dimension(); ++i) { dot+=pt[i]*hs.data()[i]; }
+        return (dot>0 ? tribool(true) : dot<0 ? tribool(false) : indeterminate); }
       //@}
     };
     
@@ -85,21 +95,15 @@ namespace Ariadne {
     tribool 
     satisfies(const Point<X1>& pt, const Halfspace<X2>& hs)
     {
-      ARIADNE_ASSERT(pt.dimension()==hs.dimension());
-      typedef typename traits<X1,X2>::arithmetic_type F;
-      F dot=hs.data()[hs.dimension()];
-      for(dimension_type i=0; i!=hs.dimension(); ++i) {
-        dot+=pt[i]*hs.data()[i];
-      }
-      return (dot>0 ? tribool(true) : dot<0 ? tribool(false) : indeterminate);
+      return hs.contains(pt);
     }
 
 
     template<class X>
     std::ostream& operator<<(std::ostream& os, const Halfspace<X>& hsp) {
       for(dimension_type i=0; i!=hsp.dimension(); ++i) {
-        os << (i==0?"[":",") << X(-hsp.data()[i]); }
-      return os << ";" << hsp.data()[hsp.dimension()] << "]";
+        os << (i==0?"(":",") << X(-hsp.data()[i]); }
+      return os << ";" << hsp.data()[hsp.dimension()] << ")";
     }
 
   

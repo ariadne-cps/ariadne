@@ -258,29 +258,31 @@ Polytope<X>::Polytope(const Box<R>& bx)
       this->_generators_()(i,j)=(*v)[i];
     }
     this->_generators_()(d,j)=1;
+    ++j;
   }
 }
 
 
-template<class X>
-Polytope<X>
-polytope(const Box<X>& r)
+
+template<class R>
+Polytope<R>
+polytope(const Box<R>& r)
 {
   dimension_type d=r.dimension();
   size_type nv=r.number_of_vertices();
-  array<X> data((d+1)*nv);
+  array<R> data((d+1)*nv);
   size_type j=0;
-  for(typename Box<X>::vertices_const_iterator v=r.vertices_begin();
+  for(typename Box<R>::vertices_const_iterator v=r.vertices_begin();
       v!=r.vertices_end(); ++v)
   {
     for(size_type i=0; i!=d; ++i) {
       data[j]=(*v)[i];
       ++j;
     }
-    data[d]=1;
+    data[j]=1;
     ++j;
   }
-  return Polytope<X>(d,nv,data.begin());
+  return Polytope<R>(d,nv,data.begin());
 }  
 
 
@@ -391,7 +393,6 @@ template<class X>
 Box<typename Polytope<X>::R> 
 Polytope<X>::bounding_box() const
 {
-  //std::cerr << "Polytope<X>::bounding_box()" << std::endl;
   typename Polytope<X>::vertices_const_iterator pt_iter=this->vertices_begin();
   Box<R> result(*pt_iter);
   ++pt_iter;

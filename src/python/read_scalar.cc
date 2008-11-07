@@ -181,6 +181,7 @@ read_scalar(Interval<R>& x, const boost::python::object& obj)
 template void read_scalar(ApproximateFloatPy&, const boost::python::object&);
 template void read_scalar(FloatPy&, const boost::python::object&);
 template void read_scalar(IntervalPy&, const boost::python::object&);
+template void read_scalar(Interval<Rational>&, const boost::python::object&);
 
 
 

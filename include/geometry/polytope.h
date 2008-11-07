@@ -66,7 +66,7 @@ namespace Ariadne {
     template<class X> Box<typename Polytope<X>::real_type> bounding_box(const Polytope<X>& pltp);
     template<class X> Polytope<X> convex_hull(const Polytope<X>& pltp1, const Polytope<X>& pltp2);
   
-    template<class X> Polytope<X> polytope(const Box<typename Polytope<X>::real_type>& r);
+    template<class R> Polytope<R> polytope(const Box<R>& bx);
     template<class X> Polytope<typename traits<X>::arithmetic_type> polytope(const Polyhedron<X>& plhd);
   
 

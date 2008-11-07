@@ -174,7 +174,7 @@ ddconv(std::vector< Vector<R> >&  result,
           for(size_type js=number_of_lines; js!=number_of_generators; ++js) {
             if(saturation_matrix(k,js)==1) {
               // test for adjacent rays
-              // rays are considered adjacent if they jointly saturate d-2 constraints
+              // rays are considered adjacent if they jointly saturate d-l-2 constraints
               // TODO: check if the above statement is correct
               int asum=0;
               for(size_type i=0; i!=k; ++i) {
@@ -182,7 +182,7 @@ ddconv(std::vector< Vector<R> >&  result,
                   ++asum;
                 }
               }
-              if(asum>=dimension-2) { // rays are adjacent
+              if(asum>=int(dimension)-int(number_of_lines)-2) { // rays are adjacent
                 ARIADNE_LOG(7,"    js="<<js<<" v=" <<v<<" g="<<generators[js]<<"\n");
                 R dot=inner_product(constraints[k],v);
                 R dots=inner_product(constraints[k],generators[js]);

@@ -990,7 +990,7 @@ void test_restrict() {
 	//	The GridTreeSubset is at level 1 and it's primary cell is at level 2
 }
 
-void test_remove() {
+void test_remove_one() {
 	std::vector< GridCell* > expected_result_arr(3);
 	
 	//Allocate a trivial Grid
@@ -1080,6 +1080,75 @@ void test_remove() {
 	
 	//TODO: Test the case when the GridTreeSet has primary cell of the level 3
 	//	The GridTreeSubset is at level 1 and it's primary cell is at level 2
+}
+
+void test_remove_two() {
+	std::vector< GridCell* > expected_result_arr(4);
+	
+	//Allocate a trivial Grid
+	Grid theTrivialGrid(2, 1.0);
+	
+	//Define the higths of the primary root cell.
+	const uint theHeightZero = 0;
+	const uint theHeightOne = 1;
+	const uint theHeightTwo = 2;
+	
+	//Create a GridTreeSet and its copies
+	GridTreeSet theSet01( theTrivialGrid, theHeightOne, make_binary_word("110010100"), make_binary_word("10001") );
+	GridTreeSet theSet02( theSet01 );
+	GridTreeSet theSet03( theSet01 );
+	GridTreeSet theSet04( theSet01 );
+	GridTreeSet theSet05( theSet01 );
+	GridTreeSet theSet06( theSet01 );
+	
+	//Create the cells we will be removing and test removals on the copies of the set
+	
+	ARIADNE_PRINT_TEST_CASE_TITLE("Remove a GridCell (p.c. height=0) form a GridTreeSet(p.c. height=1): The cell is a subset.");
+	GridCell lowerPrimaryCellSubset( theTrivialGrid, theHeightZero, make_binary_word("11") );
+	theSet01.remove( lowerPrimaryCellSubset );
+	expected_result_arr[0] = new GridCell( theTrivialGrid, theHeightOne, make_binary_word("00") );
+	expected_result_arr[1] = new GridCell( theTrivialGrid, theHeightOne, make_binary_word("1110") );
+	ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theSet01, 2 );
+	ARIADNE_CLEAN_TEST__VECTOR( expected_result_arr );
+	
+	ARIADNE_PRINT_TEST_CASE_TITLE("Remove a GridCell (p.c. height=0) form a GridTreeSet(p.c. height=1): The cell does not intersect the set.");
+	GridCell lowerPrimaryCellNoIntersection( theTrivialGrid, theHeightZero, make_binary_word("00") );
+	theSet02.remove( lowerPrimaryCellNoIntersection );
+	expected_result_arr[0] = new GridCell( theTrivialGrid, theHeightOne, make_binary_word("00") );
+	expected_result_arr[1] = new GridCell( theTrivialGrid, theHeightOne, make_binary_word("111") );
+	ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theSet02, 2 );
+	ARIADNE_CLEAN_TEST__VECTOR( expected_result_arr );
+	
+	ARIADNE_PRINT_TEST_CASE_TITLE("Remove a GridCell (p.c. height=0) form a GridTreeSet(p.c. height=1): The cell intersects the set.");
+	GridCell lowerPrimaryCellIntersection( theTrivialGrid, theHeightZero, BinaryWord() );
+	theSet03.remove( lowerPrimaryCellIntersection );
+	expected_result_arr[0] = new GridCell( theTrivialGrid, theHeightOne, make_binary_word("00") );
+	ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theSet03, 1 );
+	ARIADNE_CLEAN_TEST__VECTOR( expected_result_arr );
+	
+	ARIADNE_PRINT_TEST_CASE_TITLE("Remove a GridCell (p.c. height=2) form a GridTreeSet(p.c. height=1): The cell is a subset.");
+	GridCell higherPrimaryCellSubset( theTrivialGrid, theHeightTwo, make_binary_word("000011") );
+	theSet04.remove( higherPrimaryCellSubset );
+	expected_result_arr[0] = new GridCell( theTrivialGrid, theHeightTwo, make_binary_word("00000") );
+	expected_result_arr[1] = new GridCell( theTrivialGrid, theHeightTwo, make_binary_word("000010") );
+	expected_result_arr[2] = new GridCell( theTrivialGrid, theHeightTwo, make_binary_word("00111") );
+	ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theSet04, 3 );
+	ARIADNE_CLEAN_TEST__VECTOR( expected_result_arr );
+	
+	ARIADNE_PRINT_TEST_CASE_TITLE("Remove a GridCell (p.c. height=2) form a GridTreeSet(p.c. height=1): The cell does not intersect the set.");
+	GridCell higherPrimaryCellNoIntersection( theTrivialGrid, theHeightTwo, make_binary_word("010") );
+	theSet05.remove( higherPrimaryCellNoIntersection );
+	expected_result_arr[0] = new GridCell( theTrivialGrid, theHeightTwo, make_binary_word("0000") );
+	expected_result_arr[1] = new GridCell( theTrivialGrid, theHeightTwo, make_binary_word("00111") );
+	ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theSet05, 2 );
+	ARIADNE_CLEAN_TEST__VECTOR( expected_result_arr );
+	
+	ARIADNE_PRINT_TEST_CASE_TITLE("Remove a GridCell (p.c. height=2) form a GridTreeSet(p.c. height=1): The cell intersects the set.");
+	GridCell higherPrimaryCellIntersection( theTrivialGrid, theHeightTwo, make_binary_word("0011") );
+	theSet06.remove( higherPrimaryCellIntersection );
+	expected_result_arr[0] = new GridCell( theTrivialGrid, theHeightTwo, make_binary_word("0000") );
+	ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theSet06, 1 );
+	ARIADNE_CLEAN_TEST__VECTOR( expected_result_arr );
 }
 
 void test_cell_subset() {
@@ -1385,7 +1454,9 @@ int main() {
 
 	test_restrict();
 	
-	test_remove();
+	test_remove_one();
+	
+	test_remove_two();
 	
 	test_cell_subset();
 	

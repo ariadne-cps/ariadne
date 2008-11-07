@@ -109,6 +109,9 @@ namespace Ariadne {
         GridTreeSet outer_approximation(const CompactSetInterface& theSet, const Grid& theGrid, const uint depth);
         GridTreeSet outer_approximation(const CompactSetInterface& theSet, const uint depth);
 
+        template<class A> void serialize(A& archive, const GridTreeSet& set, const uint version);
+
+
 	/*! \brief The binary-tree node operation is not allowed on a non-leaf node. */
 	class NotALeafNodeException : public std::logic_error {
 		public: 
@@ -780,6 +783,12 @@ namespace Ariadne {
 			//@{
 			//! \name Constructors
 			
+			/*! \brief Create a GridTreeSet based on zero dimensions. 
+                         *  
+                         *  This constructor is needed to use the Boost Serialization library.
+			 */
+			GridTreeSet( );
+			
 			/*! \brief The new root node can only be constructed from the existing tree node.
 			 * Here, \a pRootTreeNode is not copied, we simply store its pointer inside this class.
 			 * Note that, \a pRootTreeNode should correspond to the root node. \a theHeight defines
@@ -909,6 +918,9 @@ namespace Ariadne {
 			/*! \brief Remove cells in another grid paving set. */
 			void remove( const GridTreeSubset& theOtherSubPaving );
 
+                        /*! \brief Restrict to cells with height at most \a uint theHeight. */
+			void restrict_to_height( uint theHeight );
+			
 			/*! \brief Join (make union of) two grid paving sets. */
 			friend GridTreeSet join( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 );
 	
@@ -963,6 +975,11 @@ namespace Ariadne {
                         void adjoin_lower_approximation( const OvertSetInterface& theSet, const Box& bounding_box, const uint depth );
 
 			//@}
+
+			//@{
+			//! \name Input/output routines.
+                        //@}
+
 	};
 
 	/*! \brief This class represents a cursor/iterator that can be used to traverse a subtree. */
@@ -1661,6 +1678,9 @@ namespace Ariadne {
 /*********************************************GridTreeSet*********************************************/
 	
 
+        inline GridTreeSet::GridTreeSet( ) : GridTreeSubset( Grid(), 0, BinaryWord(), new BinaryTreeNode( false ) ){
+	}
+
 	inline GridTreeSet::GridTreeSet( const Grid& theGrid, const bool enable  ) :
 								GridTreeSubset( theGrid, 0, BinaryWord(), new BinaryTreeNode( enable ) ){
 	}
@@ -1811,6 +1831,10 @@ namespace Ariadne {
                 return result;
         }
 	
+        template<class A> void serialize(A& archive, Ariadne::GridTreeSet& set, const unsigned int version) {
+                ARIADNE_NOT_IMPLEMENTED;
+        }
+
 	template<class G> void draw(G& theGraphic, const GridCell& theGridCell) {
 		draw(theGraphic,theGridCell.box());
 	}
@@ -1827,6 +1851,9 @@ namespace Ariadne {
 	}
 
 } // namespace Ariadne
+
+
+
 
 #endif /* GRID_SET */
 

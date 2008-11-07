@@ -1318,6 +1318,24 @@ std::ostream& operator<<(std::ostream& os, const Grid& gr)
 		remove_from_lower( theOtherSubPaving );
 	}
 
+        // Pieter: TODO: Ivan, please could you take a look at this method and see if the implementation could be simplified.
+        // Maybe there could be a GridTreeSet::restrict(GridCell) method, or a GridTreeSet(Grid theGrid, uint theHeight, bool enabled) method
+        void GridTreeSet::restrict_to_height( uint theHeight ) {
+		const uint thisPavingPCellHeight = this->cell().height();
+		
+		//In case theOtherSubPaving has the primary cell that is higher then this one
+		//we extend it, i.e. reroot it to the same height primary cell.		
+		if( thisPavingPCellHeight > theHeight){
+                          std::cerr << "Warning: restricting GridTreeSet of height " << this->cell().height()
+                                    << " to height " << theHeight << ".\n";
+
+                          GridTreeSet restrictionSet( this->grid() );
+                          restrictionSet.adjoin( GridCell( this->grid(), theHeight, BinaryWord() ) );
+                          this->restrict(restrictionSet);
+                }
+                          
+	}
+	
 /*************************************FRIENDS OF BinaryTreeNode*************************************/
 
 /*************************************FRIENDS OF GridCell*****************************************/

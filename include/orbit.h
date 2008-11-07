@@ -45,6 +45,9 @@ class Orbit<HybridGridCell>
 {
   class Data;
  public:
+  typedef HybridGridCell EnclosureType;
+  typedef HybridGridTreeSet EnclosureListType;
+
   Orbit(const HybridGridCell&);
   Orbit(const HybridGridCell&, const HybridGridTreeSet&,
         const HybridGridTreeSet&, const HybridGridTreeSet&);
@@ -69,6 +72,9 @@ class Orbit<HybridTaylorSetType>
   class Data;
   typedef HybridTaylorSetListType list_set_const_iterator;
  public:
+  typedef HybridTaylorSetType EnclosureType;
+  typedef HybridTaylorSetListType EnclosureListType;
+
   Orbit(const HybridTaylorSetType&);
   void adjoin_reach(const HybridTaylorSetType& set);
   void adjoin_intermediate(const HybridTaylorSetType& set);
@@ -90,7 +96,7 @@ template<class ES>
 std::ostream& 
 operator<<(std::ostream& os, const Orbit<ES>& orb)
 {
-  os << "Orbit(\n  initial=" << orb.initial()
+  os << "Orbit(\n  initial=" << typename Orbit<ES>::EnclosureListType(orb.initial())
      << "\n  intermediate=" << orb.intermediate()
      << "\n  reach=" << orb.reach()
      << "\n  final=" << orb.final()

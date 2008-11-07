@@ -145,12 +145,16 @@ class HybridReachabilityAnalyser
   
   /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set. */
   virtual HybridGridTreeSet* chain_reach(const HybridAutomaton& system, 
+                                         const HybridCompactSetInterface& initial_set) const;
+  
+  /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set and remaining in \a bounding_domain. \deprecated */
+  virtual HybridGridTreeSet* chain_reach(const HybridAutomaton& system, 
                                          const HybridCompactSetInterface& initial_set, 
                                          const HybridBoxes& bounding_domain) const;
   
   /*! \brief Compute an outer-approximation to the viability kernel of \a system within \a bounding_set. */
   virtual HybridGridTreeSet* viable(const HybridAutomaton& system, 
-                                   const HybridCompactSetInterface& bounding_set) const;
+                                    const HybridCompactSetInterface& bounding_set) const;
   
   /*! \brief Attempt to verify that the reachable set of \a system starting in \a initial_set remains in \a safe_set. */
   virtual tribool verify(const HybridAutomaton& system, 

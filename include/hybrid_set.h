@@ -43,6 +43,7 @@
 
 #include "hybrid_set_interface.h"
 
+#include "serialization.h"
 
 namespace Ariadne {
 
@@ -164,6 +165,10 @@ class HybridListSet
   typedef typename std::map< DiscreteState,ListSet<ES> >::iterator locations_iterator;
   typedef typename std::map< DiscreteState,ListSet<ES> >::const_iterator locations_const_iterator;
   typedef HybridSetConstIterator< ListSet<ES>, std::pair<DiscreteState,ES> > const_iterator;
+
+  HybridListSet() { }
+  HybridListSet(const std::pair<DiscreteState,ES>& hes) { this->adjoin(hes); }
+
   locations_iterator locations_begin() { 
     return this->std::map<DiscreteState,ListSet<ES> >::begin(); }
   locations_iterator locations_end() { 
@@ -204,6 +209,9 @@ template<class ES>
 class ListSet< std::pair<DiscreteState,ES> >
   : public HybridListSet<ES>
 {
+ public:
+  ListSet() { }
+  ListSet(const std::pair<DiscreteState,ES>& hes) { this->adjoin(hes); }
 };
 
 template<class ES>
@@ -305,6 +313,8 @@ class HybridGridTreeSet
     for(HybridGrid::locations_const_iterator loc_iter = hgrid.
           locations_begin(); loc_iter!=hgrid.locations_end(); ++loc_iter) {
       this->insert(make_pair(loc_iter->first,Grid(loc_iter->second))); } }
+  HybridGridTreeSet(const HybridGridCell& hgc) { 
+    this->adjoin(hgc); }
 
   HybridGrid grid() const { return HybridGrid(*this); }
   
@@ -333,6 +343,10 @@ class HybridGridTreeSet
     for(HybridGridTreeSet::locations_const_iterator loc_iter=hgts.locations_begin(); loc_iter!=hgts.locations_end(); ++loc_iter) {
       if(this->has_location(loc_iter->first)) {
         this->find(loc_iter->first)->second.restrict(loc_iter->second); } } }
+
+  void restrict_to_height(uint h) {
+    for(locations_iterator loc_iter=locations_begin(); loc_iter!=locations_end(); ++loc_iter) {
+        loc_iter->second.restrict_to_height(h); } }
 
   void adjoin_inner_approximation(const HybridBoxes& hbxs, const int depth) { 
     for(HybridBoxes::const_iterator loc_iter=hbxs.begin();
@@ -441,6 +455,13 @@ class HybridGridTreeSet
     return result; }
   std::ostream& write(std::ostream& os) const { 
     return os << static_cast<const std::map<DiscreteState,GridTreeSet>&>(*this); }
+
+ private:
+  /*
+    friend class boost::serialization::access;
+    template<class Archive> void serialize(Archive & ar, const unsigned int version) {
+      ar & static_cast<std::map<int,GridTreeSet>&>(*this); }
+  */
 };
 
 
@@ -496,6 +517,10 @@ HybridSetConstIterator<DS,HBS>::increment_loc()
 }
 
 
+template<class A> void serialize(A& archive, HybridGridTreeSet& set, const unsigned int version) { 
+  archive & static_cast<std::map<int,GridTreeSet>&>(set); }
+
+
 template<class G, class BS> inline 
 void 
 draw(G& graphic, const std::pair<int,BS>& hs) { 
@@ -513,5 +538,9 @@ draw(G& graphic, const std::map<int,DS>& hds) {
 
 
 } // namespace Ariadne
+
+namespace boost { namespace serialization {
+template<class A> void serialize(A& archive, const Ariadne::HybridGridTreeSet& set, const uint version);
+}}
 
 #endif // ARIADNE_HYBRID_SET_H

@@ -333,6 +333,45 @@ upper_reach_evolve(const SystemType& system,
 HybridReachabilityAnalyser::ConcreteSetType*
 HybridReachabilityAnalyser::
 chain_reach(const SystemType& system, 
+            const CompactSetType& initial_set) const
+{
+  HybridTime hybrid_transient_time(this->_parameters->transient_time,this->_parameters->transient_steps);
+  HybridTime hybrid_lock_to_grid_time(this->_parameters->lock_to_grid_time,this->_parameters->lock_to_grid_steps);
+  int maximum_grid_depth = this->_parameters->maximum_grid_depth;
+  int maximum_grid_height = this->_parameters->maximum_grid_height;
+
+  ARIADNE_LOG(5,"initial_set="<<initial_set<<"\n");
+
+  GTS initial; initial.adjoin_outer_approximation(initial_set,maximum_grid_depth);
+  ARIADNE_LOG(5,"initial_size="<<initial.size()<<"\n");
+
+  GTS transient,evolve;
+  make_lpair(transient,evolve)=this->_upper_reach_evolve(system,initial,hybrid_transient_time,maximum_grid_depth);
+  ARIADNE_LOG(5,"transient_size="<<transient.size()<<"\n");
+  ARIADNE_LOG(5,"evolve_size="<<evolve.size()<<"\n");
+  GTS reach=evolve;
+  GTS found=this->_upper_reach(system,reach,hybrid_transient_time,maximum_grid_depth);
+  while(!found.empty()) {
+    ARIADNE_LOG(5,"found.empty()="<<found.empty()<<"\n");
+    reach.adjoin(found);
+    ARIADNE_LOG(5,"result_size="<<found.size()<<"\n");
+    found=this->_upper_evolve(system,found,hybrid_lock_to_grid_time,maximum_grid_depth);
+    ARIADNE_LOG(5,"found_size="<<found.size()<<"\n");
+    found.remove(reach);
+    ARIADNE_LOG(5,"new_size="<<found.size()<<"\n");
+    found.restrict_to_height(maximum_grid_height);
+    ARIADNE_LOG(5,"bounded_new_size="<<found.size()<<"\n");
+  }
+  reach.adjoin(transient);
+  reach.recombine();
+  GTS* result=new GTS(reach);
+  return result;
+}
+
+
+HybridReachabilityAnalyser::ConcreteSetType*
+HybridReachabilityAnalyser::
+chain_reach(const SystemType& system, 
             const CompactSetType& initial_set,
             const BoundingSetType& bounding_domain) const
 {
@@ -340,29 +379,29 @@ chain_reach(const SystemType& system,
 
   HybridTime hybrid_transient_time(this->_parameters->transient_time,this->_parameters->transient_steps);
   HybridTime hybrid_lock_to_grid_time(this->_parameters->lock_to_grid_time,this->_parameters->lock_to_grid_steps);
-  int grid_depth = this->_parameters->maximum_grid_depth;
+  int maximum_grid_depth = this->_parameters->maximum_grid_depth;
 
   ARIADNE_LOG(5,"bounding_domain="<<bounding_domain<<"\n");
   ARIADNE_LOG(5,"initial_set="<<initial_set<<"\n");
 
-  //GTS bounding; bounding.adjoin_inner_approximation(bounding_domain,grid_depth); 
-  GTS bounding; bounding.adjoin_outer_approximation(bounding_domain,grid_depth); bounding.recombine();
+  //GTS bounding; bounding.adjoin_inner_approximation(bounding_domain,maximum_grid_depth); 
+  GTS bounding; bounding.adjoin_outer_approximation(bounding_domain,maximum_grid_depth); bounding.recombine();
   ARIADNE_LOG(5,"bounding_size="<<bounding.size()<<"\n");
 
-  GTS initial; initial.adjoin_outer_approximation(initial_set,grid_depth);
+  GTS initial; initial.adjoin_outer_approximation(initial_set,maximum_grid_depth);
   ARIADNE_LOG(5,"initial_size="<<initial.size()<<"\n");
 
   GTS transient,evolve;
-  make_lpair(transient,evolve)=this->_upper_reach_evolve(system,initial,hybrid_transient_time,grid_depth);
+  make_lpair(transient,evolve)=this->_upper_reach_evolve(system,initial,hybrid_transient_time,maximum_grid_depth);
   ARIADNE_LOG(5,"transient_size="<<transient.size()<<"\n");
   ARIADNE_LOG(5,"evolve_size="<<evolve.size()<<"\n");
   GTS reach=evolve;
-  GTS found=this->_upper_reach(system,reach,hybrid_transient_time,grid_depth);
+  GTS found=this->_upper_reach(system,reach,hybrid_transient_time,maximum_grid_depth);
   while(!found.empty()) {
     ARIADNE_LOG(5,"found.empty()="<<found.empty()<<"\n");
     reach.adjoin(found);
     ARIADNE_LOG(5,"result_size="<<found.size()<<"\n");
-    found=this->_upper_evolve(system,found,hybrid_lock_to_grid_time,grid_depth);
+    found=this->_upper_evolve(system,found,hybrid_lock_to_grid_time,maximum_grid_depth);
     ARIADNE_LOG(5,"found_size="<<found.size()<<"\n");
     found.remove(reach);
     ARIADNE_LOG(5,"new_size="<<found.size()<<"\n");

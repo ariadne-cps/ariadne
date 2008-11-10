@@ -287,6 +287,9 @@ namespace Ariadne {
 			/*! \brief Returns true if the node is marked as enabled, otherwise false */
 			bool is_enabled() const;
 
+			/*! \brief Returns true if some of the leaf nodes in the tree rooted to this node are enabled, otherwise false */
+			bool has_enabled() const;
+
 			/*! \brief Returns true if all leaf nodes in the tree rooted to this node are enabled, otherwise false */
 			bool all_enabled() const;
 

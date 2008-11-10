@@ -242,6 +242,14 @@ std::ostream& operator<<(std::ostream& os, const Grid& gr)
 
 /****************************************BinaryTreeNode**********************************************/
 	
+	bool BinaryTreeNode::has_enabled() const {
+		if( is_leaf() ) {
+			return is_enabled();
+		} else {
+			return ( left_node()->has_enabled() || right_node()->has_enabled() );
+		}
+	}
+	
 	bool BinaryTreeNode::all_enabled() const {
 		if( is_leaf() ) {
 			return is_enabled();
@@ -1369,10 +1377,6 @@ std::ostream& operator<<(std::ostream& os, const Grid& gr)
 					pCurrentNode = pCurrentNode->left_node();
 				}
 			}
-			
-			GridTreeSet restrictionSet( this->grid() );
-			restrictionSet.adjoin( GridCell( this->grid(), theHeight, BinaryWord() ) );
-			this->restrict(restrictionSet);
 		}
 	}
 	
@@ -1482,6 +1486,75 @@ std::ostream& operator<<(std::ostream& os, const Grid& gr)
 		
 		//Test that the Grids are equal
 		ARIADNE_ASSERT( theCell.grid() == theSet.grid() );
+		
+		//If the primary cell of the theCell is lower that that of theSet
+		//Then we re-root theCell to the primary cell theSet.cell().height()
+		const GridCell * pWorkGridCell;
+		const int theSetsPCellHeigh = theSet.cell().height();
+		if( theSetsPCellHeigh > theCell.height() ) {
+			//Compute the path from the primary cell of theSet to the primary cell of theCell
+			BinaryWord pathFromSetsPCellToCell = GridCell::primary_cell_path( theCell.dimension(), theSetsPCellHeigh, theCell.height() );
+			pathFromSetsPCellToCell.append( theCell.word() );
+			pWorkGridCell = new GridCell( theCell.grid(), theSetsPCellHeigh, pathFromSetsPCellToCell );
+		} else {
+			pWorkGridCell = &theCell;
+		}
+
+		//Compute the path for the primary cell of theCell to the primary cell of theSet
+		BinaryWord pathFromPCellCellToSetsRootNode = GridCell::primary_cell_path( theCell.dimension(), pWorkGridCell->height(), theSetsPCellHeigh );
+		//Append the path from the primary cell node to the root binary tree node of theSet
+		pathFromPCellCellToSetsRootNode.append( theSet.cell().word() );
+		
+		const BinaryWord & workCellWord = pWorkGridCell->word();
+		if( workCellWord.is_prefix( pathFromPCellCellToSetsRootNode ) ) {
+			//If the path (from some primary cell) to the cell is a prefix
+			//of the path (from the same primary cell) to the root of the
+			//sub-paving, then theCell contains theSet
+			
+			result = theSet.binary_tree()->has_enabled();
+		} else {
+			if( pathFromPCellCellToSetsRootNode.is_prefix( workCellWord ) ) {
+				//If the path (from some primary cell) to the root of the
+				//binary tree node (defining theSet) is the prefix of the
+				//path (from the same primary cell) to the cell, then the
+				//cell might be somwhere within the tree and we should
+				//check if it intersects with the tree
+				
+				const BinaryTreeNode *pCurrentNode = theSet.binary_tree();
+				//Note that, pathFromPCellCellToSetsRootNode.size() < workCellWord.size()
+				//Because we already checked for workCellWord.is_prefix( pathFromPCellCellToSetsRootNode )
+				//Here we try to find the node corresponding to theCell in the binary tree of theSet
+				//in case we encounter a leaf node then we just stop, because it is enough information for us
+				for( int i = pathFromPCellCellToSetsRootNode.size(); i < workCellWord.size(); i++ ) {
+					if( pCurrentNode->is_leaf() ) {
+						//We reached the leaf node and theCell is it's subset, so we stop now
+						break;
+					} else {
+						//Follow the path to the node corresponding to theCell within the binary tree of theSet
+						pCurrentNode = ( workCellWord[i] ? pCurrentNode->right_node() : pCurrentNode->left_node() );
+					}
+				}
+				
+				//At this point we have the following cases:
+				// 1. pCurrentNode - is a leaf node, contains theCell as a subset, is an enabled node
+				// RESULT: theSet and theCell overlap
+				// 2. pCurrentNode - is a leaf node, contains theCell as a subset, is a disabled node
+				// RESULT: theSet and theCell do not overlap
+				// 3. pCurrentNode - is a non-leaf node, corresponds to theCell, contains enabled sub-nodes
+				// RESULT: theSet and theCell overlap
+				// 4. pCurrentNode - is a non-leaf node, corresponds to theCell, contains no enabled sub-nodes
+				// RESULT: theSet and theCell do not overlap
+				result = pCurrentNode->has_enabled();
+			} else {
+				//DO NOTHING: The pathes to the cell and to the root of
+				//the binary tree (from the same primary cell) diverge
+				//This means that theCell and theSet do not overlap
+			}
+		}
+		
+		if( theSetsPCellHeigh > theCell.height() ) {
+			delete pWorkGridCell;
+		}
 		
 		return result;
 	}

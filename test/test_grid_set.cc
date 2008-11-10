@@ -1179,7 +1179,7 @@ void test_remove_two() {
 	ARIADNE_CLEAN_TEST__VECTOR( expected_result_arr );
 }
 
-void test_cell_subset() {
+void test_cell_subset_subset() {
 		
 	//Allocate a trivial Grid two dimensional grid
 	Grid theTrivialGrid(2, 1.0);
@@ -1458,6 +1458,128 @@ void test_subsets_difference() {
 	ARIADNE_TEST_EQUAL( expectedResultSet, resultSet);
 }
 
+void test_cell_overlap_subset() {
+	
+	//Allocate a trivial Grid two dimensional grid
+	Grid theTrivialGrid(2, 1.0);
+	
+	const uint heightZero = 0;
+	const uint heightOne = 1;
+	const uint heightTwo = 2;
+	
+	BinaryWord tree = make_binary_word("1111001000100");
+	BinaryWord leaves = make_binary_word("1001001");
+	//Create the set and the subset of this set, they are both rooted to the same primary node of heightTwo 
+	GridTreeSet theSet( theTrivialGrid, heightTwo, new BinaryTreeNode( tree, leaves ) );
+	//The subset is basically the zero level primary cell
+	BinaryWord path = make_binary_word("11");
+	GridTreeSubset theSubset( theTrivialGrid, heightOne, path, theSet.binary_tree()->left_node()->left_node()->right_node()->right_node() );
+
+	GridCell theLowCell( theTrivialGrid, heightZero, make_binary_word("111") );		// does intersect with the set and the subset
+	GridCell theMediumCellOne( theTrivialGrid, heightOne, make_binary_word("1000") );	// does not intersect with the set and the subset
+	GridCell theMediumCellTwo( theTrivialGrid, heightOne, make_binary_word("0000") );	// does intersect with the set but not the subset
+	GridCell theHighCellOne( theTrivialGrid, heightTwo, make_binary_word("11") );		// does intersect with the set but not the subset
+	GridCell theHighCellTwo( theTrivialGrid, heightTwo, make_binary_word("01") );		// does not intersect with the set and the subset
+	GridCell theHighCellThree( theTrivialGrid, heightTwo, make_binary_word("00") );		// does intersect with the set and the subset
+	
+	// !!!
+	ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool overlap( const GridCell& , const GridTreeSubset& )");
+	ARIADNE_PRINT_TEST_COMMENT("theSet");
+	cout << theSet << endl;
+	ARIADNE_PRINT_TEST_COMMENT("theLowCell");
+	cout << theLowCell << endl;
+	ARIADNE_TEST_EQUAL( overlap( theLowCell, theSet ), true );
+	
+	// !!!
+	ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool overlap( const GridCell& , const GridTreeSubset& )");
+	ARIADNE_PRINT_TEST_COMMENT("theSet");
+	cout << theSet << endl;
+	ARIADNE_PRINT_TEST_COMMENT("theMediumCellOne");
+	cout << theMediumCellOne << endl;
+	ARIADNE_TEST_EQUAL( overlap( theMediumCellOne, theSet ), false );
+	
+	// !!!
+	ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool overlap( const GridCell& , const GridTreeSubset& )");
+	ARIADNE_PRINT_TEST_COMMENT("theSet");
+	cout << theSet << endl;
+	ARIADNE_PRINT_TEST_COMMENT("theMediumCellTwo");
+	cout << theMediumCellTwo << endl;
+	ARIADNE_TEST_EQUAL( overlap( theMediumCellTwo, theSet ), true );
+	
+	// !!!
+	ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool overlap( const GridCell& , const GridTreeSubset& )");
+	ARIADNE_PRINT_TEST_COMMENT("theSet");
+	cout << theSet << endl;
+	ARIADNE_PRINT_TEST_COMMENT("theHighCellOne");
+	cout << theHighCellOne << endl;
+	ARIADNE_TEST_EQUAL( overlap( theHighCellOne, theSet ), true );
+	
+	// !!!
+	ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool overlap( const GridCell& , const GridTreeSubset& )");
+	ARIADNE_PRINT_TEST_COMMENT("theSet");
+	cout << theSet << endl;
+	ARIADNE_PRINT_TEST_COMMENT("");
+	cout << theHighCellTwo << endl;
+	ARIADNE_TEST_EQUAL( overlap( theHighCellTwo, theSet ), false );
+	
+	// !!!
+	ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool overlap( const GridCell& , const GridTreeSubset& )");
+	ARIADNE_PRINT_TEST_COMMENT("theSet");
+	cout << theSet << endl;
+	ARIADNE_PRINT_TEST_COMMENT("theHighCellThree");
+	cout << theHighCellThree << endl;
+	ARIADNE_TEST_EQUAL( overlap( theHighCellThree, theSet ), true );
+	
+	// !!!
+	ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool overlap( const GridCell& , const GridTreeSet& )");
+	ARIADNE_PRINT_TEST_COMMENT("theSubset");
+	cout << theSubset << endl;
+	ARIADNE_PRINT_TEST_COMMENT("theLowCell");
+	cout << theLowCell << endl;
+	ARIADNE_TEST_EQUAL( overlap( theLowCell, theSubset ), true );
+	
+	// !!!
+	ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool overlap( const GridCell& , const GridTreeSet& )");
+	ARIADNE_PRINT_TEST_COMMENT("theSubset");
+	cout << theSubset << endl;
+	ARIADNE_PRINT_TEST_COMMENT("theMediumCellOne");
+	cout << theMediumCellOne << endl;
+	ARIADNE_TEST_EQUAL( overlap( theMediumCellOne, theSubset ), false );
+	
+	// !!!
+	ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool overlap( const GridCell& , const GridTreeSet& )");
+	ARIADNE_PRINT_TEST_COMMENT("theSubset");
+	cout << theSubset << endl;
+	ARIADNE_PRINT_TEST_COMMENT("theMediumCellTwo");
+	cout << theMediumCellTwo << endl;
+	ARIADNE_TEST_EQUAL( overlap( theMediumCellTwo, theSubset ), false );
+	
+	// !!!
+	ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool overlap( const GridCell& , const GridTreeSet& )");
+	ARIADNE_PRINT_TEST_COMMENT("theSubset");
+	cout << theSubset << endl;
+	ARIADNE_PRINT_TEST_COMMENT("theHighCellOne");
+	cout << theHighCellOne << endl;
+	ARIADNE_TEST_EQUAL( overlap( theHighCellOne, theSubset ), false );
+	
+	// !!!
+	ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool overlap( const GridCell& , const GridTreeSet& )");
+	ARIADNE_PRINT_TEST_COMMENT("theSubset");
+	cout << theSubset << endl;
+	ARIADNE_PRINT_TEST_COMMENT("theHighCellTwo");
+	cout << theHighCellTwo << endl;
+	ARIADNE_TEST_EQUAL( overlap( theHighCellTwo, theSubset ), false );
+	
+	// !!!
+	ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool overlap( const GridCell& , const GridTreeSet& )");
+	ARIADNE_PRINT_TEST_COMMENT("theSubset");
+	cout << theSubset << endl;
+	ARIADNE_PRINT_TEST_COMMENT("theHighCellThree");
+	cout << theHighCellThree << endl;
+	ARIADNE_TEST_EQUAL( overlap( theHighCellThree, theSubset ), true );
+	
+}
+
 int main() {
 	
 	test_binary_tree();
@@ -1486,13 +1608,15 @@ int main() {
 	
 	test_remove_two();
 	
-	test_cell_subset();
+	test_cell_subset_subset();
 	
 	test_subsets_join();
 	
 	test_subsets_intersection();
 	
 	test_subsets_difference();
+	
+	test_cell_overlap_subset();
 	
 	return ARIADNE_TEST_FAILURES;
 }

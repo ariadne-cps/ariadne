@@ -88,12 +88,6 @@ namespace Ariadne {
 	bool overlap(const GridCell& theCell, const GridTreeSubset& theSet);
 	bool subset(const GridTreeSubset& theSet1, const GridTreeSubset& theSet2);
 	bool overlap(const GridTreeSubset& theSet1, const GridTreeSubset& theSet2);
-
-        bool subset(const GridTreeSubset& theSet, const Box& theBox);
-        bool superset(const GridTreeSubset& theSet, const Box& theBox);
-        bool disjoint(const GridTreeSubset& theSet, const Box& theBox);
-        bool intersects(const GridTreeSubset& theSet, const Box& theBox);
-        Box bounding_box(const GridTreeSubset& theSet);
 	
 	GridTreeSet join(const GridTreeSubset& theSet1, const GridTreeSubset& theSet2);
 	GridTreeSet intersection(const GridTreeSubset& theSet1, const GridTreeSubset& theSet2);
@@ -630,6 +624,9 @@ namespace Ariadne {
 			 */
 			GridCell cell() const;
 			
+			/*! \brief Computes a bounding box for a grid set. */
+			Box bounding_box() const;
+			
 			/*! \brief Allows to test if the two subpavings are "equal". The method returns true if
 			 * the grida are equal and the binary trees are equal. Note that, only in case both 
 			 * GridTreeSubset objects are recombines, this method is guaranteed to tell you that
@@ -660,7 +657,42 @@ namespace Ariadne {
 			void recombine();
 			
 			//@}
+			
+			
+			//@{
+			//! \name Geometric Predicates
 
+			/*! \brief Tests if a cell is a subset of a set. */
+			friend bool subset( const GridCell& theCell, const GridTreeSubset& theSet );
+	
+			/*! \brief Tests if a cell is overlaps (intersects as an open set) a paving set. */
+			friend bool overlap( const GridCell& theCell, const GridTreeSubset& theSet );
+
+			/*! \brief Tests if a grid paving set is a subset of another. */
+			friend bool subset( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 );
+	
+			/*! \brief Tests if two grid paving sets overlap (i.e. intersect as open sets.) */
+			friend bool overlap( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 );
+
+			/* PIETER: We may want the two predicates below to return tribool, reflecting the
+			 * case that the box is an approximation. Unfortunately, this is very difficult
+			 * for subset.
+			 */
+
+			/*! \brief Tests if a grid set is a subset of a box. */
+                        bool subset( const Box& theBox ) const;
+	
+			/*! \brief Tests if a grid set is a superset of a box. */
+                        bool superset( const Box& theBox ) const;
+	
+			/*! \brief Tests if (the closure of) a grid set is disjoint from a box. */
+                        bool disjoint( const Box& theBox  ) const;
+	
+			/*! \brief Tests if a grid set intersects a box. */
+                        bool intersects( const Box& theBox ) const;
+			
+			//@}
+			
 			//@{
 			//! \name Iterators
 
@@ -851,52 +883,19 @@ namespace Ariadne {
 			
 		
                         //@{
-			//! \name List operations
+			//! \name Properties
+			
 			/*! \brief True if the set is empty. */
                         bool empty() const; 
 
 			/*! \brief The number of activated cells in the set. */
                         size_t size() const; 
-                        //@}
-
-
-			//@{
-			//! \name Geometric Predicates
 
 			/*! \brief The dimension of the set. */
 			dimension_type dimension() const;
 
-			/*! \brief Tests if a cell is a subset of a set. */
-			friend bool subset( const GridCell& theCell, const GridTreeSubset& theSet );
-	
-			/*! \brief Tests if a cell is overlaps (intersects as an open set) a paving set. */
-			friend bool overlap( const GridCell& theCell, const GridTreeSubset& theSet );
-
-			/*! \brief Tests if a grid paving set is a subset of another. */
-			friend bool subset( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 );
-	
-			/*! \brief Tests if two grid paving sets overlap (i.e. intersect as open sets.) */
-			friend bool overlap( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 );
-
-			/* PIETER: We may want the two predicates below to return tribool, reflecting the case that the box is an
-			* approximation. Unfortunately, this is very difficult for subset. */
-			/*! \brief Tests if a grid set is a subset of a box. */
-                        friend bool subset( const GridTreeSubset& theSet, const Box& theBox );
-	
-			/*! \brief Tests if a grid set is a superset of a box. */
-                        friend bool superset( const GridTreeSubset& theSet, const Box& theBox );
-	
-			/*! \brief Tests if (the closure of) a grid set is disjoint from a box. */
-                        friend bool disjoint( const GridTreeSubset& theSet, const Box& theBox  );
-	
-			/*! \brief Tests if a grid set intersects a box. */
-                        friend bool intersects( const GridTreeSubset& theSet, const Box& theBox );
-
-			/*! \brief Computes a bounding box for a grid set. */
-                        friend Box bounding_box( const GridTreeSubset& theSet );
-
-			//@}
-
+                        //@}
+			
 			//@{
 			//! \name Geometric Operations
 			/* PIETER: You may prefer to make inplace operations may return
@@ -917,9 +916,9 @@ namespace Ariadne {
 			
 			/*! \brief Remove cells in another grid paving set. */
 			void remove( const GridTreeSubset& theOtherSubPaving );
-
-                        /*! \brief Restrict to cells with height at most \a uint theHeight. */
-			void restrict_to_height( uint theHeight );
+			
+                        /*! \brief Restrict to cells rooted to the primary cell with the height (at most) \a theHeight. */
+			void restrict_to_height( const uint theHeight );
 			
 			/*! \brief Join (make union of) two grid paving sets. */
 			friend GridTreeSet join( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 );
@@ -928,10 +927,10 @@ namespace Ariadne {
 			 *  intersection of the boundaries of the two sets are not included in the result.
 			 */
 			friend GridTreeSet intersection( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 );
-	
+			
 			/*! \brief The difference of two grid paving sets. (Results in theSet1 minus theSet2) */
 			friend GridTreeSet difference( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 );
-
+			
 			//@}
 
 			//@{
@@ -1645,7 +1644,13 @@ namespace Ariadne {
 	inline GridCell GridTreeSubset::cell() const {
 		return _theGridCell;
 	}
-
+	
+        inline Box GridTreeSubset::bounding_box() const {
+		//The box corresponding to the root node of theSet,
+		//not the primary cell but theSet.binary_tree();
+		return _theGridCell.box();
+	}
+	
 	inline void GridTreeSubset::mince( const uint theNewDepth ) {
 		_pRootTreeNode->mince( theNewDepth );
 	}

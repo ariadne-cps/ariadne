@@ -626,12 +626,12 @@ void test_grid_paving(){
 	GridTreeSet expected_result1( trivialFourDimGrid , 0, make_binary_word("0"), make_binary_word("1") );
 	ARIADNE_PRINT_TEST_COMMENT("A trivial paving for [0,1]x[0,1]x[0,1]x[0,1], enabled cell: ");
 	ARIADNE_TEST_EQUAL( expected_result1, (*pTrivialPaving) );
-
+	
 	// !!!
 	ARIADNE_PRINT_TEST_CASE_TITLE("Test GridTreeSet copy constructor");
 	GridTreeSet theTrivialPaving( ( *pTrivialPaving ) );
 	pTrivialPaving->mince(1);
-
+	
 	ARIADNE_PRINT_TEST_COMMENT("Minced trivial paving for [0,1]x[0,1]x[0,1]x[0,1], enabled cell: ");
 	GridTreeSet expected_result_minced(trivialFourDimGrid , 0, make_binary_word("100"), make_binary_word("11") );
 	ARIADNE_TEST_EQUAL( expected_result_minced, (*pTrivialPaving) );
@@ -673,6 +673,34 @@ void test_grid_paving(){
 	pRootTreeNode->right_node()->left_node()->left_node()->set_enabled();
 	GridTreeSet expected_result3( theTwoDimGrid, 2, pRootTreeNode );
 	ARIADNE_TEST_EQUAL( expected_result3, theTwoDimTreePaving );
+
+	// !!!
+	//Create a trivial 2-dimensional Grid
+	Grid trivialTwoDimGrid( make_vector<Float>("[0,0]"), make_vector<Float>("[1,1]") );
+	ARIADNE_PRINT_TEST_CASE_TITLE("Test GridTreeSet::restrict_to_height( const uint theHeight )");
+	GridTreeSet initialTreeSetOne( trivialTwoDimGrid, 2, make_binary_word("1111001000100"), make_binary_word("10010001") );
+	GridTreeSet initialTreeSetOneCopyOne( initialTreeSetOne );
+	GridTreeSet initialTreeSetOneCopyTwo( initialTreeSetOne );
+	
+	ARIADNE_PRINT_TEST_COMMENT("The initialTreeSetOne.cell().height() == 2, theHeight == 3, nothing should change");
+	initialTreeSetOne.restrict_to_height( 3 );
+	ARIADNE_TEST_EQUAL( initialTreeSetOneCopyOne, initialTreeSetOne );
+	
+	ARIADNE_PRINT_TEST_COMMENT("The initialTreeSetOneCopyOne.cell().height() == 2, theHeight == 1");
+	initialTreeSetOneCopyOne.restrict_to_height( 1 );
+	GridTreeSet expectedTreeSetOne( trivialTwoDimGrid, 2, make_binary_word("11110010000"), make_binary_word("100100") );
+	ARIADNE_TEST_EQUAL( expectedTreeSetOne, initialTreeSetOneCopyOne );
+	
+	ARIADNE_PRINT_TEST_COMMENT("The initialTreeSetOneCopyTwo.cell().height() == 2, theHeight == 0");
+	initialTreeSetOneCopyTwo.restrict_to_height( 0 );
+	GridTreeSet expectedTreeSetTwo( trivialTwoDimGrid, 2, make_binary_word("111010000"), make_binary_word("00100") );
+	ARIADNE_TEST_EQUAL( expectedTreeSetTwo, initialTreeSetOneCopyTwo );
+	
+	ARIADNE_PRINT_TEST_COMMENT("The initialTreeSetTwo.cell().height() == 1, theHeight == 0");
+	GridTreeSet initialTreeSetTwo( trivialTwoDimGrid, 1, make_binary_word("11000"), make_binary_word("100") );
+	initialTreeSetTwo.restrict_to_height( 0 );
+	GridTreeSet expectedTreeSetThree( trivialTwoDimGrid, 1, make_binary_word("100"), make_binary_word("00") );
+	ARIADNE_TEST_EQUAL( expectedTreeSetThree, initialTreeSetTwo );
 }
 
 void test_grid_paving_cell(){

@@ -859,6 +859,22 @@ std::ostream& operator<<(std::ostream& os, const Grid& gr)
 		return result;
 	}
 
+        bool GridTreeSubset::superset( const Box& theBox ) const {
+		throw NotImplemented(__PRETTY_FUNCTION__);
+	}
+	
+        bool GridTreeSubset::subset( const Box& theBox ) const {
+		throw NotImplemented(__PRETTY_FUNCTION__);
+	}
+	
+        bool GridTreeSubset::disjoint( const Box& theBox ) const {
+		throw NotImplemented(__PRETTY_FUNCTION__);
+	}
+	
+        bool GridTreeSubset::intersects( const Box& theBox ) const {
+		throw NotImplemented(__PRETTY_FUNCTION__);
+	}
+	
 /*********************************************GridTreeSet*********************************************/
 
 	void GridTreeSet::up_to_primary_cell( const uint toPCellHeight ){
@@ -1317,23 +1333,47 @@ std::ostream& operator<<(std::ostream& os, const Grid& gr)
 		//since this set's primary cell is not lower then for the other one.
 		remove_from_lower( theOtherSubPaving );
 	}
-
-        // Pieter: TODO: Ivan, please could you take a look at this method and see if the implementation could be simplified.
-        // Maybe there could be a GridTreeSet::restrict(GridCell) method, or a GridTreeSet(Grid theGrid, uint theHeight, bool enabled) method
-        void GridTreeSet::restrict_to_height( uint theHeight ) {
+	
+	void GridTreeSet::restrict_to_height( const uint theHeight ) {
 		const uint thisPavingPCellHeight = this->cell().height();
 		
-		//In case theOtherSubPaving has the primary cell that is higher then this one
-		//we extend it, i.e. reroot it to the same height primary cell.		
 		if( thisPavingPCellHeight > theHeight){
-                          std::cerr << "Warning: restricting GridTreeSet of height " << this->cell().height()
-                                    << " to height " << theHeight << ".\n";
+			std::cerr << "Warning: restricting GridTreeSet of height " << this->cell().height() << " to height " << theHeight << ".\n";
 
-                          GridTreeSet restrictionSet( this->grid() );
-                          restrictionSet.adjoin( GridCell( this->grid(), theHeight, BinaryWord() ) );
-                          this->restrict(restrictionSet);
-                }
-                          
+			BinaryWord pathToPCell = GridCell::primary_cell_path( this->dimension(), thisPavingPCellHeight, theHeight );
+			
+			//Go throught the tree and disable all the leaves that
+			//are not rooted to the primary cell defined by this path
+			BinaryTreeNode * pCurrentNode = _pRootTreeNode;
+			for( int i = 0; i < pathToPCell.size(); i++ ) {
+				if( pCurrentNode->is_leaf() ){
+					if( pCurrentNode->is_enabled() ){
+						//If we are in an enabled leaf node then we split.
+						//There are still cells to remove.
+						pCurrentNode->split();
+					} else {
+						//If we are in a disabled leaf node then we stop.
+						//There is nothing to be done, because there are
+						//no more enabled cells to remove
+						break;
+					}
+				}
+				//If we are here, then we are in a non-leaf node
+				if( pathToPCell[i] ){
+					//Go to the right, and remove anything on the left
+					pCurrentNode->left_node()->make_leaf(false);
+					pCurrentNode = pCurrentNode->right_node();
+				} else {
+					//Go to the left, and remove anything on the right
+					pCurrentNode->right_node()->make_leaf(false);
+					pCurrentNode = pCurrentNode->left_node();
+				}
+			}
+			
+			GridTreeSet restrictionSet( this->grid() );
+			restrictionSet.adjoin( GridCell( this->grid(), theHeight, BinaryWord() ) );
+			this->restrict(restrictionSet);
+		}
 	}
 	
 /*************************************FRIENDS OF BinaryTreeNode*************************************/
@@ -1410,11 +1450,7 @@ std::ostream& operator<<(std::ostream& os, const Grid& gr)
 		return result;
 	}
 
-/*************************************FRIENDS OF GridTreeSet*****************************************/
-
-        GridTreeSet outer_approximation(const Box& theBox, const Grid& theGrid, const uint depth) {
-          return outer_approximation(ImageSet(theBox),theGrid,depth);
-        }
+/*************************************FRIENDS OF GridTreeSubset*****************************************/
 	
 	bool subset( const GridCell& theCell, const GridTreeSubset& theSet ) {
 		bool result = false;
@@ -1442,7 +1478,12 @@ std::ostream& operator<<(std::ostream& os, const Grid& gr)
 	}
 	
 	bool overlap( const GridCell& theCell, const GridTreeSubset& theSet ) {
-		throw NotImplemented(__PRETTY_FUNCTION__);
+		bool result = false;
+		
+		//Test that the Grids are equal
+		ARIADNE_ASSERT( theCell.grid() == theSet.grid() );
+		
+		return result;
 	}
 
 	bool subset( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 ) {
@@ -1453,25 +1494,11 @@ std::ostream& operator<<(std::ostream& os, const Grid& gr)
 		throw NotImplemented(__PRETTY_FUNCTION__);
 	}
 
-        bool superset( const GridTreeSubset& theSet, const Box& theBox ) {
-		throw NotImplemented(__PRETTY_FUNCTION__);
-	}
-	
-        bool subset( const GridTreeSubset& theSet, const Box& theBox ) {
-		throw NotImplemented(__PRETTY_FUNCTION__);
-	}
-	
-        bool disjoint( const GridTreeSubset& theSet, const Box& theBox ) {
-		throw NotImplemented(__PRETTY_FUNCTION__);
-	}
-	
-        bool intersects( const GridTreeSubset& theSet, const Box& theBox ) {
-		throw NotImplemented(__PRETTY_FUNCTION__);
-	}
-	
-        Box bounding_box( const GridTreeSubset& theSet ) {
-		throw NotImplemented(__PRETTY_FUNCTION__);
-	}
+/*************************************FRIENDS OF GridTreeSet*****************************************/
+
+        GridTreeSet outer_approximation(const Box& theBox, const Grid& theGrid, const uint depth) {
+          return outer_approximation(ImageSet(theBox),theGrid,depth);
+        }
 	
 	GridTreeSet join( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 ) {
 		//Test that the Grids are equal

@@ -430,47 +430,47 @@ class HybridGridTreeSet
   // HybridSetInterface methods
   HybridGridTreeSet* clone() const { return new HybridGridTreeSet(*this); }
   HybridSpace space() const { return HybridSpace(*this); }
-	
-	tribool disjoint(const HybridBox& hbx) const { 
-		locations_const_iterator loc_iter = this->find( hbx.first );
-		return loc_iter != this->locations_end() || loc_iter->second.disjoint( hbx.second );
-	}
-	
-	tribool intersects(const HybridBox& hbx) const { 
-		locations_const_iterator loc_iter = this->find( hbx.first );
-		return loc_iter != this->locations_end() && loc_iter->second.intersects( hbx.second );
-	}
-	
-	tribool superset(const HybridBox& hbx) const { 
-		locations_const_iterator loc_iter=this->find(hbx.first);
-		return loc_iter!=this->locations_end() && loc_iter->second.superset( hbx.second );
-	}
-	
-	tribool subset(const HybridBoxes& hbx) const  { 
-		for( locations_const_iterator loc_iter = this->locations_begin(); loc_iter != this->locations_end(); ++loc_iter ) {
-			if( !loc_iter->second.empty() ) { 
-				HybridBoxes::const_iterator hbx_loc_iter = hbx.find( loc_iter->first ); 
-				if( hbx_loc_iter != hbx.end() && ! loc_iter->second.subset( hbx_loc_iter->second ) ) {
-					return false;
-				}
-			}
-		}
-		return true;
-	}
-	
-	HybridBoxes bounding_box() const {  
-		HybridBoxes result;
-		for( locations_const_iterator loc_iter = this->locations_begin(); loc_iter != this->locations_end(); ++loc_iter ) {
-			if( !loc_iter->second.empty() ) {
-				result.insert( std::make_pair( loc_iter->first, loc_iter->second.bounding_box() ) );
-			}
-		} 
-		return result;
-	}
+    
+    tribool disjoint(const HybridBox& hbx) const { 
+        locations_const_iterator loc_iter = this->find( hbx.first );
+        return loc_iter != this->locations_end() || loc_iter->second.disjoint( hbx.second );
+    }
+    
+    tribool intersects(const HybridBox& hbx) const { 
+        locations_const_iterator loc_iter = this->find( hbx.first );
+        return loc_iter != this->locations_end() && loc_iter->second.intersects( hbx.second );
+    }
+    
+    tribool superset(const HybridBox& hbx) const { 
+        locations_const_iterator loc_iter=this->find(hbx.first);
+        return loc_iter!=this->locations_end() && loc_iter->second.superset( hbx.second );
+    }
+    
+    tribool subset(const HybridBoxes& hbx) const  { 
+        for( locations_const_iterator loc_iter = this->locations_begin(); loc_iter != this->locations_end(); ++loc_iter ) {
+            if( !loc_iter->second.empty() ) { 
+                HybridBoxes::const_iterator hbx_loc_iter = hbx.find( loc_iter->first ); 
+                if( hbx_loc_iter != hbx.end() && ! loc_iter->second.subset( hbx_loc_iter->second ) ) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    
+    HybridBoxes bounding_box() const {  
+        HybridBoxes result;
+        for( locations_const_iterator loc_iter = this->locations_begin(); loc_iter != this->locations_end(); ++loc_iter ) {
+            if( !loc_iter->second.empty() ) {
+                result.insert( std::make_pair( loc_iter->first, loc_iter->second.bounding_box() ) );
+            }
+        } 
+        return result;
+    }
 
-	std::ostream& write(std::ostream& os) const { 
-		return os << static_cast<const std::map<DiscreteState,GridTreeSet>&>(*this);
-	}
+    std::ostream& write(std::ostream& os) const { 
+        return os << static_cast<const std::map<DiscreteState,GridTreeSet>&>(*this);
+    }
 
  private:
   /*

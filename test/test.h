@@ -49,16 +49,16 @@ int test_case_counter = 0;
 /*! \brief Print the title for the test case */
 #define ARIADNE_PRINT_TEST_CASE_TITLE( pTitle ) \
 {\
-	cout << endl << "***" << ++test_case_counter << ": "<< pTitle << "***" << endl; \
-	cout.flush(); \
+    cout << endl << "***" << ++test_case_counter << ": "<< pTitle << "***" << endl; \
+    cout.flush(); \
 }\
 
 
 /*! \brief Print the comment for the test */
 #define ARIADNE_PRINT_TEST_COMMENT( pComment ) \
 { \
-	cout << "* COMMENT: " << pComment << "" << endl; \
-	cout.flush(); \
+    cout << "* COMMENT: " << pComment << "" << endl; \
+    cout.flush(); \
 }\
 
 
@@ -251,25 +251,25 @@ class variable expression; \
  */
 #define ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result, theGridTreeSubset, expected_number_elements ) \
 { \
-	int elements_count = 0; \
-	for (GridTreeSubset::const_iterator it = theGridTreeSubset.begin(), end = theGridTreeSubset.end(); it != end; it++, elements_count++) { \
-		if( elements_count < expected_number_elements ) { \
-			ARIADNE_PRINT_TEST_COMMENT("The next iterator node is: "); \
-			ARIADNE_TEST_COMPARE( (*expected_result[elements_count]), == , (*it) ); \
-		} \
-	} \
-	ARIADNE_PRINT_TEST_COMMENT("Test that we iterated through the right number of nodes"); \
-	ARIADNE_TEST_EQUAL( elements_count , expected_number_elements ); \
+    int elements_count = 0; \
+    for (GridTreeSubset::const_iterator it = theGridTreeSubset.begin(), end = theGridTreeSubset.end(); it != end; it++, elements_count++) { \
+        if( elements_count < expected_number_elements ) { \
+            ARIADNE_PRINT_TEST_COMMENT("The next iterator node is: "); \
+            ARIADNE_TEST_COMPARE( (*expected_result[elements_count]), == , (*it) ); \
+        } \
+    } \
+    ARIADNE_PRINT_TEST_COMMENT("Test that we iterated through the right number of nodes"); \
+    ARIADNE_TEST_EQUAL( elements_count , expected_number_elements ); \
 } \
 
 /*! \brief clean std::vector, i.e. delete memory of it's non NULL elements and set them to NULL in the vector */
 #define ARIADNE_CLEAN_TEST__VECTOR( vector ) \
 { \
-	for(int i = 0; i < vector.size(); i++ ) { \
-		if( vector[i] != NULL ) { \
-			delete vector[i]; vector[i] = NULL; \
-		} \
-	} \
+    for(int i = 0; i < vector.size(); i++ ) { \
+        if( vector[i] != NULL ) { \
+            delete vector[i]; vector[i] = NULL; \
+        } \
+    } \
 } \
 
 #endif // ARIADNE_TEST_H

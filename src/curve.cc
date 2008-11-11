@@ -40,14 +40,14 @@ Curve::~Curve()
 
 
 Curve::Curve(const FunctionInterface& f) 
-  : _function_ptr(f.clone())
+    : _function_ptr(f.clone())
 {
-  assert(this->_function_ptr->argument_size()==1);
+    assert(this->_function_ptr->argument_size()==1);
 }
 
 
 Curve::Curve(const Curve& c) 
-  : _function_ptr(c._function_ptr->clone())
+    : _function_ptr(c._function_ptr->clone())
 {
 }
 
@@ -55,21 +55,21 @@ Curve::Curve(const Curve& c)
 Curve* 
 Curve::clone() const 
 {
-  return new Curve(*this);
+    return new Curve(*this);
 }
 
 
 uint 
 Curve::dimension() const 
 {
-  return this->_function_ptr->result_size();
+    return this->_function_ptr->result_size();
 }
 
 
 ushort 
 Curve::smoothness() const 
 {
-  return this->_function_ptr->smoothness();
+    return this->_function_ptr->smoothness();
 }
 
 
@@ -77,16 +77,16 @@ Curve::smoothness() const
 Point 
 Curve::value(const Float& s) const 
 {
-  Vector<Float> v(1,&s);
-  return Point(this->_function_ptr->evaluate(v));
+    Vector<Float> v(1,&s);
+    return Point(this->_function_ptr->evaluate(v));
 }
 
 
 Vector< Float > 
 Curve::tangent(const Float& s) const 
 {
-  Vector<Float> v(1,&s);
-  return column(this->_function_ptr->jacobian(v),0);
+    Vector<Float> v(1,&s);
+    return column(this->_function_ptr->jacobian(v),0);
 }
 
 
@@ -94,7 +94,7 @@ Curve::tangent(const Float& s) const
 std::ostream& 
 Curve::write(std::ostream& os) const 
 {
-  return os << "Curve( function=" << *this->_function_ptr << " )";
+    return os << "Curve( function=" << *this->_function_ptr << " )";
 }
 
  

@@ -33,10 +33,10 @@ namespace Ariadne {
 
 Point make_point(const std::string& str)
 {
-  std::vector<Float> vec;
-  std::stringstream ss(str);
-  read_sequence(ss,vec,'(',')',',');
-  return Point(vec.size(),&vec[0]);
+    std::vector<Float> vec;
+    std::stringstream ss(str);
+    read_sequence(ss,vec,'(',')',',');
+    return Point(vec.size(),&vec[0]);
 }
 
 } //namespace Ariadne

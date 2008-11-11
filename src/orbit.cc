@@ -30,17 +30,17 @@
 namespace Ariadne {
 
 struct Orbit<HybridTaylorSetType>::Data {
-  Data(const HybridTaylorSetType& initial_set) 
-    : initial(initial_set) { }
-  HybridTaylorSetType initial;
-  HybridTaylorSetListType reach;
-  HybridTaylorSetListType intermediate;
-  HybridTaylorSetListType final;
+    Data(const HybridTaylorSetType& initial_set) 
+        : initial(initial_set) { }
+    HybridTaylorSetType initial;
+    HybridTaylorSetListType reach;
+    HybridTaylorSetListType intermediate;
+    HybridTaylorSetListType final;
 };
 
 Orbit<HybridTaylorSetType>::
 Orbit(const HybridTaylorSetType& initial_set)
-  : _data(new Data(initial_set))
+    : _data(new Data(initial_set))
 {
 }
 
@@ -48,21 +48,21 @@ void
 Orbit<HybridTaylorSetType>::
 adjoin_reach(const HybridTaylorSetType& set)
 {
-  this->_data->reach.adjoin(set);
+    this->_data->reach.adjoin(set);
 }
 
 void
 Orbit<HybridTaylorSetType>::
 adjoin_intermediate(const HybridTaylorSetType& set)
 {
-  this->_data->intermediate.adjoin(set);
+    this->_data->intermediate.adjoin(set);
 }
 
 void
 Orbit<HybridTaylorSetType>::
 adjoin_final(const HybridTaylorSetType& set)
 {
-  this->_data->final.adjoin(set);
+    this->_data->final.adjoin(set);
 }
 
 
@@ -70,21 +70,21 @@ void
 Orbit<HybridTaylorSetType>::
 adjoin_reach(const HybridTaylorSetListType& list_set)
 {
-  this->_data->reach.adjoin(list_set);
+    this->_data->reach.adjoin(list_set);
 }
 
 void
 Orbit<HybridTaylorSetType>::
 adjoin_intermediate(const HybridTaylorSetListType& list_set)
 {
-  this->_data->intermediate.adjoin(list_set);
+    this->_data->intermediate.adjoin(list_set);
 }
 
 void
 Orbit<HybridTaylorSetType>::
 adjoin_final(const HybridTaylorSetListType& list_set)
 {
-  this->_data->final.adjoin(list_set);
+    this->_data->final.adjoin(list_set);
 }
 
 
@@ -92,28 +92,28 @@ HybridTaylorSetType const&
 Orbit<HybridTaylorSetType>::
 initial() const
 {
-  return this->_data->initial;
+    return this->_data->initial;
 }
 
 HybridTaylorSetListType const&
 Orbit<HybridTaylorSetType>::
 reach() const
 {
-  return this->_data->reach;
+    return this->_data->reach;
 }
 
 HybridTaylorSetListType const&
 Orbit<HybridTaylorSetType>::
 intermediate() const
 {
-  return this->_data->intermediate;
+    return this->_data->intermediate;
 }
 
 HybridTaylorSetListType const&
 Orbit<HybridTaylorSetType>::
 final() const
 {
-  return this->_data->final;
+    return this->_data->final;
 }
 
 
@@ -121,17 +121,17 @@ final() const
 
 
 struct Orbit<HybridGridCell>::Data {
-  Data(const HybridGridCell& initial_set) 
-    : initial(initial_set) { }
-  HybridGridCell initial;
-  HybridGridTreeSet reach;
-  HybridGridTreeSet intermediate;
-  HybridGridTreeSet final;
+    Data(const HybridGridCell& initial_set) 
+        : initial(initial_set) { }
+    HybridGridCell initial;
+    HybridGridTreeSet reach;
+    HybridGridTreeSet intermediate;
+    HybridGridTreeSet final;
 };
 
 Orbit<HybridGridCell>::
 Orbit(const HybridGridCell& initial_set)
-  : _data(new Data(initial_set))
+    : _data(new Data(initial_set))
 {
 }
 
@@ -140,39 +140,39 @@ Orbit(const HybridGridCell& initial_set,
       const HybridGridTreeSet& reach_set,
       const HybridGridTreeSet& intermediate_set,
       const HybridGridTreeSet& final_set)
-  : _data(new Data(initial_set))
+    : _data(new Data(initial_set))
 {
-  this->_data->reach=reach_set;
-  this->_data->intermediate=intermediate_set;
-  this->_data->final=final_set;
+    this->_data->reach=reach_set;
+    this->_data->intermediate=intermediate_set;
+    this->_data->final=final_set;
 }
 
 HybridGridCell const&
 Orbit<HybridGridCell>::
 initial() const
 {
-  return this->_data->initial;
+    return this->_data->initial;
 }
 
 HybridGridTreeSet const&
 Orbit<HybridGridCell>::
 reach() const
 {
-  return this->_data->reach;
+    return this->_data->reach;
 }
 
 HybridGridTreeSet const&
 Orbit<HybridGridCell>::
 intermediate() const
 {
-  return this->_data->intermediate;
+    return this->_data->intermediate;
 }
 
 HybridGridTreeSet const&
 Orbit<HybridGridCell>::
 final() const
 {
-  return this->_data->final;
+    return this->_data->final;
 }
 
 

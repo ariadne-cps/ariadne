@@ -45,65 +45,65 @@ template<class ES> class ListSet< std::pair<DiscreteState,ES> >;
 template<class BS>
 class ListSet 
 {
- private:
-  std::vector<BS> _data;
+  private:
+    std::vector<BS> _data;
 
- public:
-  typedef typename std::vector<BS>::const_iterator const_iterator;
-  typedef BS value_type;
+  public:
+    typedef typename std::vector<BS>::const_iterator const_iterator;
+    typedef BS value_type;
 
-  virtual ~ListSet() { }
+    virtual ~ListSet() { }
 
-  ListSet() { };
-  explicit ListSet(uint d) { };
-  explicit ListSet(const BS& bs) { this->adjoin(bs); }
-  template<class BST> ListSet(const ListSet<BST>& ls) {
-    this->_data.insert(this->end(),ls.begin(),ls.end()); }
-  template<class Iter> ListSet(Iter first, Iter last) {
-    this->_data.insert(this->end(),first,last); };
-
-
-  /*! \brief Tests if the sets are equal. Tests equality of sequences, 
-   *  including ordering. */   
-  bool operator==(const ListSet<BS>& other) const { return this->_data==other._data; }
+    ListSet() { };
+    explicit ListSet(uint d) { };
+    explicit ListSet(const BS& bs) { this->adjoin(bs); }
+    template<class BST> ListSet(const ListSet<BST>& ls) {
+        this->_data.insert(this->end(),ls.begin(),ls.end()); }
+    template<class Iter> ListSet(Iter first, Iter last) {
+        this->_data.insert(this->end(),first,last); };
 
 
-  /*! \brief Returns true if the list is empty. */
-  bool empty() const { return this->_data.empty(); }
+    /*! \brief Tests if the sets are equal. Tests equality of sequences, 
+     *  including ordering. */   
+    bool operator==(const ListSet<BS>& other) const { return this->_data==other._data; }
 
-  /*! \brief Returns the number of basic sets forming this object. */
-  size_t size() const { return this->_data.size(); }
 
-  /*! \brief Accesses the i-th BasicSet. */
-  const BS& operator[](size_t i) const { return this->_data[i]; };
+    /*! \brief Returns true if the list is empty. */
+    bool empty() const { return this->_data.empty(); }
+
+    /*! \brief Returns the number of basic sets forming this object. */
+    size_t size() const { return this->_data.size(); }
+
+    /*! \brief Accesses the i-th BasicSet. */
+    const BS& operator[](size_t i) const { return this->_data[i]; };
   
-  /*! \brief Make the set empty. */
-  void clear() { this->_data.clear(); }
+    /*! \brief Make the set empty. */
+    void clear() { this->_data.clear(); }
       
-  /*! \brief A constant iterator to the beginning of the list of basic sets. */
-  const_iterator begin() const { return this->_data.begin(); }
+    /*! \brief A constant iterator to the beginning of the list of basic sets. */
+    const_iterator begin() const { return this->_data.begin(); }
   
-  /*! \brief A constant iterator to the end of the list of basic sets. */
-  const_iterator end() const { return this->_data.end(); };
+    /*! \brief A constant iterator to the end of the list of basic sets. */
+    const_iterator end() const { return this->_data.end(); };
 
-  /*! \brief Returns the denotable set's space dimension. */
-  uint dimension() const { if(this->empty()) { return 0; } else { return this->_data.back().dimension(); } }
+    /*! \brief Returns the denotable set's space dimension. */
+    uint dimension() const { if(this->empty()) { return 0; } else { return this->_data.back().dimension(); } }
 
-  /*! \brief Removes a set from the list and return it. */
-  BS pop() { BS result=this->_data.back(); this->_data.pop_back(); return result; }
+    /*! \brief Removes a set from the list and return it. */
+    BS pop() { BS result=this->_data.back(); this->_data.pop_back(); return result; }
 
-  /*! \brief Pushes a basic set to the end of the list. */
-  void push_back(const BS& bs) { this->_data.push_back(bs); }
+    /*! \brief Pushes a basic set to the end of the list. */
+    void push_back(const BS& bs) { this->_data.push_back(bs); }
 
-  /*! \brief Adjoins (makes union with) a basic set. */
-  void adjoin(const BS& bs) { 
-    ARIADNE_ASSERT(this->empty() || this->_data.back().dimension()==bs.dimension());
-    this->_data.push_back(bs); }
+    /*! \brief Adjoins (makes union with) a basic set. */
+    void adjoin(const BS& bs) { 
+        ARIADNE_ASSERT(this->empty() || this->_data.back().dimension()==bs.dimension());
+        this->_data.push_back(bs); }
 
-  /*! \brief Adjoins (makes union with) another list set. */
-  void adjoin(const ListSet<BS>& ls) { 
-    ARIADNE_ASSERT(this->empty() || ls.empty() || this->_data.back().dimension()==ls._data.back().dimension());
-    this->_data.insert(this->_data.end(),ls.begin(),ls.end()); }
+    /*! \brief Adjoins (makes union with) another list set. */
+    void adjoin(const ListSet<BS>& ls) { 
+        ARIADNE_ASSERT(this->empty() || ls.empty() || this->_data.back().dimension()==ls._data.back().dimension());
+        this->_data.insert(this->_data.end(),ls.begin(),ls.end()); }
 };      
   
 
@@ -111,17 +111,17 @@ template<class BS>
 std::ostream& 
 operator<<(std::ostream& os, const ListSet<BS>& ls)
 {
-  os << "ListSet(";
-  if(!ls.empty()) { os << "d=" << ls.dimension() << ","; }
-  return os << "s=" << ls.size() << ")";
+    os << "ListSet(";
+    if(!ls.empty()) { os << "d=" << ls.dimension() << ","; }
+    return os << "s=" << ls.size() << ")";
 }
 
 
 template<class G, class BS> 
 void 
 draw(G& graphic, const ListSet<BS>& ls) { 
-  for(typename ListSet<BS>::const_iterator iter=ls.begin(); 
-      iter!=ls.end();  ++iter) { draw(graphic,*iter); } 
+    for(typename ListSet<BS>::const_iterator iter=ls.begin(); 
+        iter!=ls.end();  ++iter) { draw(graphic,*iter); } 
 }
 
 

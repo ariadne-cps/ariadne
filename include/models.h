@@ -46,19 +46,19 @@ static const uint SMOOTH=255;
  *          x'=x
  */
 struct Henon : FunctionData<2,2,2> {
-  template<class R, class A, class P>
-  void compute(R& r, const A& x, const P& p) const {
-    r[0]=p[0]-x[0]*x[0]+p[1]*x[1];
-    r[1]=x[0];
-  }
+    template<class R, class A, class P>
+    void compute(R& r, const A& x, const P& p) const {
+        r[0]=p[0]-x[0]*x[0]+p[1]*x[1];
+        r[1]=x[0];
+    }
 };
                    
 struct HenonInverse : FunctionData<2,2,2> {
-  template<class R, class A, class P>
-  void compute(R& r, const A& x, const P& p) const {
-    r[0]=x[1]; 
-    r[1]=(p[0]-x[1]*x[1]+x[0])/p[1];
-  }
+    template<class R, class A, class P>
+    void compute(R& r, const A& x, const P& p) const {
+        r[0]=x[1]; 
+        r[1]=(p[0]-x[1]*x[1]+x[0])/p[1];
+    }
 };
                    
   
@@ -70,12 +70,12 @@ struct HenonInverse : FunctionData<2,2,2> {
  *          dotv=-delta*v-x*(alpha+beta*x*x)+gamma*cos(omega*t+phi);
  */
 struct Duffing : FunctionData<3,3,6> {
-  template<class R, class A, class P>
-  void compute(R& r, const A& x, const P& p) const {
-    r[0]=x[1];
-    r[1]=-p[0]*x[1]-x[0]*(p[2]+p[1]*x[0]*x[0])+p[3]*cos(p[4]*x[2]+p[5]);
-    r[2]=1.0;
-  }
+    template<class R, class A, class P>
+    void compute(R& r, const A& x, const P& p) const {
+        r[0]=x[1];
+        r[1]=-p[0]*x[1]-x[0]*(p[2]+p[1]*x[0]*x[0])+p[3]*cos(p[4]*x[2]+p[5]);
+        r[2]=1.0;
+    }
 };
                    
 
@@ -88,11 +88,11 @@ struct Duffing : FunctionData<3,3,6> {
  *                 dotv=mu*(1-x*x)*v-x
  */
 struct VanDerPol : FunctionData<2,2,1> {
-  template<class R, class A, class P>
-  void compute(R& r, const A& x, const P& p) const {
-    r[0]=x[1];
-    r[1]=p[0]*(1-x[0]*x[0])*x[1]-x[0];
-  }
+    template<class R, class A, class P>
+    void compute(R& r, const A& x, const P& p) const {
+        r[0]=x[1];
+        r[1]=p[0]*(1-x[0]*x[0])*x[1]-x[0];
+    }
 };
 
 
@@ -105,12 +105,12 @@ struct VanDerPol : FunctionData<2,2,1> {
  *                 dott=1
  */
 struct ForcedVanDerPol : FunctionData<3,3,3> {
-  template<class R, class A, class P>
-  void compute(R& r, const A& x, const P& p) const {
-    r[0]=x[1];
-    r[1]=p[0]*(1.0-x[0]*x[0])*x[1]-x[0]+p[1]*sin(p[2]*x[2]);
-    r[2]=1.0;
-  }
+    template<class R, class A, class P>
+    void compute(R& r, const A& x, const P& p) const {
+        r[0]=x[1];
+        r[1]=p[0]*(1.0-x[0]*x[0])*x[1]-x[0]+p[1]*sin(p[2]*x[2]);
+        r[2]=1.0;
+    }
 };
 
 
@@ -124,20 +124,20 @@ struct ForcedVanDerPol : FunctionData<3,3,3> {
  *  The standard parameters for the %Lorenz attractor are \f$\sigma=10\f$, \f$\beta = 8/3\f$ and \f$\rho=28\f$.
  */
 struct Lorenz : FunctionData<3,3,3> {
-  template<class R, class A, class P>
-  void compute(R& r, const A& x, const P& p) const {
-    r[0]=p[2]*(x[1]-x[0]);
-    r[1]=p[1]*x[0]-x[1]-x[0]*x[2];
-    r[2]=-p[0]*x[2]+x[0]*x[1];
-  }
+    template<class R, class A, class P>
+    void compute(R& r, const A& x, const P& p) const {
+        r[0]=p[2]*(x[1]-x[0]);
+        r[1]=p[1]*x[0]-x[1]-x[0]*x[2];
+        r[2]=-p[0]*x[2]+x[0]*x[1];
+    }
 };
   
 
 //! The singularly forced Van der Pol oscillator.
 class SingularVanDerPol
-  : public HybridAutomaton
+    : public HybridAutomaton
 {
-  SingularVanDerPol(const Vector<Interval>& p);
+    SingularVanDerPol(const Vector<Interval>& p);
 };
 
 } // namespace Models

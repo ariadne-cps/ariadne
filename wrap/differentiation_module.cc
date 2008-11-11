@@ -25,11 +25,11 @@
 #include <boost/python.hpp>
 
 namespace Ariadne {
-  typedef double Float;
-  class Interval;
-  template<class X> class DenseDifferential;
-  template<class X> class SparseDifferential;
-  template<class DIFF> class DifferentialVector;
+typedef double Float;
+class Interval;
+template<class X> class DenseDifferential;
+template<class X> class SparseDifferential;
+template<class DIFF> class DifferentialVector;
 }
 
 template<class DIFF> void export_differential();
@@ -39,13 +39,13 @@ using namespace Ariadne;
 
 BOOST_PYTHON_MODULE(differentiation)
 {
-  export_differential< Ariadne::DenseDifferential<Ariadne::Float> >();
-  export_differential< DenseDifferential<Interval> >();
-  export_differential< SparseDifferential<Float> >();
-  export_differential< SparseDifferential<Interval> >();
+    export_differential< Ariadne::DenseDifferential<Ariadne::Float> >();
+    export_differential< DenseDifferential<Interval> >();
+    export_differential< SparseDifferential<Float> >();
+    export_differential< SparseDifferential<Interval> >();
 
-  export_differential_vector< DenseDifferential<Float> >();
-  export_differential_vector< DenseDifferential<Interval> >();
-  export_differential_vector< SparseDifferential<Float> >();
-  export_differential_vector< SparseDifferential<Interval> >();
+    export_differential_vector< DenseDifferential<Float> >();
+    export_differential_vector< DenseDifferential<Interval> >();
+    export_differential_vector< SparseDifferential<Float> >();
+    export_differential_vector< SparseDifferential<Interval> >();
 }

@@ -41,14 +41,14 @@
 namespace Ariadne {
 
 template<class T> std::ostream& repr(std::ostream& os, const T& t) {
-  return os << t;
+    return os << t;
 }
 
 
 template<class T> std::string __repr__(const T& t) {
-  std::stringstream ss;
-  repr(ss,t);
-  return ss.str();
+    std::stringstream ss;
+    repr(ss,t);
+    return ss.str();
 }
 
 
@@ -68,13 +68,13 @@ template<class X>
 void
 read_array(array<X>& ary, const boost::python::object& obj)
 {
-  // See "Extracting C++ objects" in the Boost Python tutorial
-  boost::python::list elements=boost::python::extract<boost::python::list>(obj);
-  int n=boost::python::len(elements);
-  ary.resize(n);
-  for(int i=0; i!=n; ++i) {
-    read_scalar(ary[i], elements[i]);
-  }
+    // See "Extracting C++ objects" in the Boost Python tutorial
+    boost::python::list elements=boost::python::extract<boost::python::list>(obj);
+    int n=boost::python::len(elements);
+    ary.resize(n);
+    for(int i=0; i!=n; ++i) {
+        read_scalar(ary[i], elements[i]);
+    }
 }
 
 }

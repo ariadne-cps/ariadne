@@ -34,7 +34,7 @@ using namespace Ariadne;
 
 BOOST_PYTHON_MODULE(interval)
 {
-  export_interval();
-  export_vector<Interval>();
-  export_matrix<Interval>();
+    export_interval();
+    export_vector<Interval>();
+    export_matrix<Interval>();
 }

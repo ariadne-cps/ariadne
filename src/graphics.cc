@@ -76,34 +76,34 @@ std::vector<Point> corner_points(const Box& bx) {
 
 
 Box bounding_box(const std::vector<Point>& points) {
-  ARIADNE_ASSERT(!points.empty());
-  Box result(points[0]);
-  for(uint i=1; i!=points.size(); ++i) {
-    const Point& pt=points[i];
-    result=hull(result,pt);
-  }
-  return result;
+    ARIADNE_ASSERT(!points.empty());
+    Box result(points[0]);
+    for(uint i=1; i!=points.size(); ++i) {
+        const Point& pt=points[i];
+        result=hull(result,pt);
+    }
+    return result;
 }
 
 
 std::vector<Point> apply(const ProjectionFunction& map, const std::vector<Point> & points) {
-  //std::cerr<<"apply(Projection map, list<Point> pts): map="<<map<<", pts="<<points<<std::endl;
-  std::vector<Point> result;
-  for(size_t i=0; i!=points.size(); ++i) {
-    const Point& pt=points[i];
-    Point ppt(map.result_size());
-    for(size_t j=0; j!=map.result_size(); ++j) {
-      ppt[j]=pt[map[j]];
+    //std::cerr<<"apply(Projection map, list<Point> pts): map="<<map<<", pts="<<points<<std::endl;
+    std::vector<Point> result;
+    for(size_t i=0; i!=points.size(); ++i) {
+        const Point& pt=points[i];
+        Point ppt(map.result_size());
+        for(size_t j=0; j!=map.result_size(); ++j) {
+            ppt[j]=pt[map[j]];
+        }
+        result.push_back(ppt);
     }
-    result.push_back(ppt);
-  }
-  return result;
+    return result;
 }
 
 
 std::vector<Point> extremal(const std::vector<Point> & points) {
-  Polytope polytope(points);
-  return reduce2d(polytope).vertices();
+    Polytope polytope(points);
+    return reduce2d(polytope).vertices();
 }
   
 
@@ -121,11 +121,11 @@ struct GraphicsObject {
 
 struct Graphic::Data 
 {
-  Data() : bounding_box(0), projection(2) { }
-  Box bounding_box;
-  ProjectionFunction projection;
-  Colour fill_colour;
-  std::vector<GraphicsObject> objects;
+    Data() : bounding_box(0), projection(2) { }
+    Box bounding_box;
+    ProjectionFunction projection;
+    Colour fill_colour;
+    std::vector<GraphicsObject> objects;
 };
 
 
@@ -138,24 +138,24 @@ Graphic::~Graphic()
 Graphic::Graphic()
     : _data(new Data()) 
 { 
-  this->_data->bounding_box=Box(0);
-  this->_data->projection=ProjectionFunction(2);
+    this->_data->bounding_box=Box(0);
+    this->_data->projection=ProjectionFunction(2);
 }
 
 
 void Graphic::set_projection_map(const ProjectionFunction& p) 
 {
-  this->_data->projection=p;
+    this->_data->projection=p;
 }
 
 void Graphic::set_bounding_box(const Box& bx) 
 {
-  ARIADNE_ASSERT(bx.dimension()==0 || bx.dimension()==2 || bx.dimension()==this->_data->projection.argument_size());
-  if(bx.dimension()>2) {
-    this->_data->bounding_box=this->_data->projection(bx);
-  } else {
-    this->_data->bounding_box=bx;
-  }
+    ARIADNE_ASSERT(bx.dimension()==0 || bx.dimension()==2 || bx.dimension()==this->_data->projection.argument_size());
+    if(bx.dimension()>2) {
+        this->_data->bounding_box=this->_data->projection(bx);
+    } else {
+        this->_data->bounding_box=bx;
+    }
 }
 
 void Graphic::set_line_style(bool ls) 
@@ -172,7 +172,7 @@ void Graphic::set_line_colour(Colour lc)
 
 void Graphic::set_line_colour(double r, double g, double b)
 { 
-  this->set_line_colour(Colour(r,g,b));
+    this->set_line_colour(Colour(r,g,b));
 }
 
 void Graphic::set_fill_style(bool fs) 
@@ -181,32 +181,32 @@ void Graphic::set_fill_style(bool fs)
 
 void Graphic::set_fill_colour(Colour fc)
 { 
-  this->_data->fill_colour=fc;
+    this->_data->fill_colour=fc;
 }
 
 void Graphic::set_fill_colour(double r, double g, double b)
 { 
-  this->set_fill_colour(Colour(r,g,b));
+    this->set_fill_colour(Colour(r,g,b));
 }
 
 
 void Graphic::draw(const Box& bx) {
     if(this->_data->objects.empty() && this->_data->projection.argument_size() != bx.dimension()) {
-      this->_data->projection=ProjectionFunction(2,bx.dimension(),0); }
+        this->_data->projection=ProjectionFunction(2,bx.dimension(),0); }
     ARIADNE_ASSERT(bx.dimension()==this->_data->projection.argument_size());
     this->_data->objects.push_back(GraphicsObject(this->_data->fill_colour,bx));
 }
 
 void Graphic::draw(const Polytope& p) {
     if(this->_data->objects.empty() && this->_data->projection.argument_size() != p.dimension()) {
-      this->_data->projection=ProjectionFunction(2,p.dimension(),0); }
+        this->_data->projection=ProjectionFunction(2,p.dimension(),0); }
     ARIADNE_ASSERT(p.dimension()==this->_data->projection.argument_size());
     this->_data->objects.push_back(GraphicsObject(this->_data->fill_colour,p));
 }
 
 void Graphic::draw(const InterpolatedCurve& c) {
     if(this->_data->objects.empty() && this->_data->projection.argument_size() != c.dimension()) {
-      this->_data->projection=ProjectionFunction(2,c.dimension(),0); }
+        this->_data->projection=ProjectionFunction(2,c.dimension(),0); }
     ARIADNE_ASSERT(c.dimension()==this->_data->projection.argument_size());
     this->_data->objects.push_back(GraphicsObject(this->_data->fill_colour,c));
 }
@@ -241,7 +241,7 @@ void trace_polytope(cairo_t *cr, const std::vector<Point>& p)
     ARIADNE_ASSERT(p[0].size()==2);
     cairo_move_to (cr, p[0][0], p[0][1]);
     for(uint i=1; i!=p.size(); ++i) {
-      cairo_line_to (cr, p[i][0], p[i][1]); 
+        cairo_line_to (cr, p[i][0], p[i][1]); 
     }
     cairo_line_to (cr, p[0][0], p[0][1]); 
 }
@@ -253,7 +253,7 @@ void trace_curve(cairo_t *cr, const std::vector<Point>& cv)
     ARIADNE_ASSERT(cv[0].size()==2);
     cairo_move_to (cr, cv[0][0], cv[0][1]);
     for(uint i=1; i!=cv.size(); ++i) {
-      cairo_line_to (cr, cv[i][0], cv[i][1]); 
+        cairo_line_to (cr, cv[i][0], cv[i][1]); 
     }
 }
 
@@ -261,9 +261,9 @@ void trace_curve(cairo_t *cr, const std::vector<Point>& cv)
 void trace(cairo_t *cr, const GraphicsObject::ShapeKind kind, const std::vector<Point>& pts) 
 {
     switch(kind) {
-        case GraphicsObject::BOX: trace_box(cr,pts); return;
-        case GraphicsObject::POLYTOPE: trace_polytope(cr,extremal(pts)); return;
-        case GraphicsObject::CURVE: trace_curve(cr,pts); return;
+    case GraphicsObject::BOX: trace_box(cr,pts); return;
+    case GraphicsObject::POLYTOPE: trace_polytope(cr,extremal(pts)); return;
+    case GraphicsObject::CURVE: trace_curve(cr,pts); return;
     }
 }
 
@@ -277,8 +277,8 @@ void plot(cairo_t *cr, const Box& bounding_box, const ProjectionFunction& projec
 
     // Compute extreme values
     if(objects.empty()) {
-      cairo_destroy (cr);
-      return; 
+        cairo_destroy (cr);
+        return; 
     }
 
     // Test if a bounding box has been given explicitly; if not, compute one 
@@ -467,7 +467,7 @@ Colour::Colour(double rd, double gr, double bl, bool tr)
 Colour::Colour(const char* nm, double rd, double gr, double bl, bool tr) 
     : name(nm), red(rd), green(gr), blue(bl), transparant(tr) { }
 std::ostream& operator<<(std::ostream& os, const Colour& c) {
-  return os << "Colour( name=" << c.name << ", r=" << c.red << ", g=" << c.green << ", b=" << c.blue << " )"; }
+    return os << "Colour( name=" << c.name << ", r=" << c.red << ", g=" << c.green << ", b=" << c.blue << " )"; }
 
 
 const Colour transparant=Colour();

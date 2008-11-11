@@ -859,7 +859,7 @@ void test_adjoin_outer_approximation_operation(){
     
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE("Test adjoining_outer_approximation a SetInterface to the GridTreeSet");
-        ImageSet initialRectangle( make_box("[-0.5,1.5]x[-0.3,1.0]") );
+    ImageSet initialRectangle( make_box("[-0.5,1.5]x[-0.3,1.0]") );
     
     //Define the higth of the primary root cell.
     const uint theHeight = 2;
@@ -1207,7 +1207,7 @@ void test_cell_subset_subset() {
     
     //Create the GridTreeSubset, will be rooted to the primary cell of height smallHeight
     GridTreeSubset theSmallSubPaving( theTrivialGrid, smallHeight, make_binary_word("0011"),
-                        pBinaryTreeRoot->left_node()->left_node()->right_node()->right_node() );
+                                      pBinaryTreeRoot->left_node()->left_node()->right_node()->right_node() );
     
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE("Test subset operation GridCell (height=1), GridTreeSubset.mince(2) (height=0)");
@@ -1229,7 +1229,7 @@ void test_cell_subset_subset() {
     
     //Create the GridTreeSubset, will be rooted to the primary cell of height bigHeight
     GridTreeSubset theBigSubPaving( theTrivialGrid, bigHeight, make_binary_word("0011"),
-                        pBinaryTreeRoot->left_node()->left_node()->right_node()->right_node() );
+                                    pBinaryTreeRoot->left_node()->left_node()->right_node()->right_node() );
     
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE("Test subset operation GridCell (height=1), GridTreeSubset.mince(2) (height=2)");

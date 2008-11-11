@@ -32,13 +32,13 @@ namespace Ariadne {
 
 Matrix<Float> 
 midpoint(const Matrix<Interval>& A) {
-  Matrix<Float> R(A.row_size(),A.column_size());
-  for(size_t i=0; i!=A.row_size(); ++i) {
-    for(size_t j=0; j!=A.row_size(); ++j) {
-      R[i][j]=A[i][j].midpoint();
+    Matrix<Float> R(A.row_size(),A.column_size());
+    for(size_t i=0; i!=A.row_size(); ++i) {
+        for(size_t j=0; j!=A.row_size(); ++j) {
+            R[i][j]=A[i][j].midpoint();
+        }
     }
-  }
-  return R;
+    return R;
 }
 
 

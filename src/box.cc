@@ -33,43 +33,43 @@
 namespace Ariadne {
 
 Box::Box(uint d, const Float& x0l, const Float& x0u, ...)
-  : Vector<Interval>(d)
+    : Vector<Interval>(d)
 {
-  assert(d>=1); 
-  va_list args; 
-  va_start(args,x0u);
-  (*this)[0]=Interval(x0l,x0u);
-  for(uint i=1; i!=d; ++i) { 
-    Float xil=va_arg(args,Float);
-    Float xiu=va_arg(args,Float);
-    (*this)[i]=Interval(xil,xiu); 
-  } 
-  va_end(args);
+    assert(d>=1); 
+    va_list args; 
+    va_start(args,x0u);
+    (*this)[0]=Interval(x0l,x0u);
+    for(uint i=1; i!=d; ++i) { 
+        Float xil=va_arg(args,Float);
+        Float xiu=va_arg(args,Float);
+        (*this)[i]=Interval(xil,xiu); 
+    } 
+    va_end(args);
 }
 
 Box make_box(const std::string& str)
 {
-  // Representation as a literal 
-  //   "[a1,b1]x[a2,b2]x...x[an,bn]" 
+    // Representation as a literal 
+    //   "[a1,b1]x[a2,b2]x...x[an,bn]" 
 
-  std::stringstream ss(str);
-  std::vector<Interval> vec;
-  Interval ivl; 
-  char c;
+    std::stringstream ss(str);
+    std::vector<Interval> vec;
+    Interval ivl; 
+    char c;
 
-  c='x';
-  while(c=='x') {
-    ss >> ivl;
-    vec.push_back(ivl);
-    c=' ';
-    while( ss && c==' ') {
-      ss >> c;
+    c='x';
+    while(c=='x') {
+        ss >> ivl;
+        vec.push_back(ivl);
+        c=' ';
+        while( ss && c==' ') {
+            ss >> c;
+        }
     }
-  }
-  if(ss) {
-    ss.putback(c);
-  }
-  return Box(vec.size(),&vec[0]);
+    if(ss) {
+        ss.putback(c);
+    }
+    return Box(vec.size(),&vec[0]);
 }
 
 } //namespace Ariadne

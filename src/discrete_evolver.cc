@@ -38,13 +38,13 @@ outer_approximation(const ListSet<ES>& ls,
                     const Grid& gr,
                     const uint accuracy)
 {
-  GridTreeSet result(gr);
-  for(typename ListSet<ES>::const_iterator 
-        iter=ls.begin(); iter!=ls.end(); ++iter)
-  {
-    result.adjoin_outer_approximation(*iter,accuracy);
-  }
-  return result;
+    GridTreeSet result(gr);
+    for(typename ListSet<ES>::const_iterator 
+            iter=ls.begin(); iter!=ls.end(); ++iter)
+        {
+            result.adjoin_outer_approximation(*iter,accuracy);
+        }
+    return result;
 }
 
 
@@ -54,20 +54,20 @@ outer_approximation(const HybridListSet<ES>& hls,
                     const HybridGrid& hgr,
                     const int accuracy)
 {
-  HybridGridTreeSet result;
-  for(typename HybridListSet<ES>::const_iterator 
-        iter=hls.begin(); iter!=hls.end(); ++iter)
-  {
-    DiscreteState loc=iter->first;
-    const ES& es=iter->second;
-    if(result.find(loc)==result.locations_end()) {
-      result.insert(make_pair(loc,GridTreeSet(hgr[loc])));
-    }
-    GridTreeSet& gts=result[loc];
-    gts.adjoin_outer_approximation(ImageSet(es.range()),accuracy);
-    //gts.adjoin_outer_approximation(ModelSet<ES>(es),accuracy);
-  }
-  return result;
+    HybridGridTreeSet result;
+    for(typename HybridListSet<ES>::const_iterator 
+            iter=hls.begin(); iter!=hls.end(); ++iter)
+        {
+            DiscreteState loc=iter->first;
+            const ES& es=iter->second;
+            if(result.find(loc)==result.locations_end()) {
+                result.insert(make_pair(loc,GridTreeSet(hgr[loc])));
+            }
+            GridTreeSet& gts=result[loc];
+            gts.adjoin_outer_approximation(ImageSet(es.range()),accuracy);
+            //gts.adjoin_outer_approximation(ModelSet<ES>(es),accuracy);
+        }
+    return result;
 }
 
 
@@ -86,7 +86,7 @@ lower_evolution(const SystemType& system,
                 const TimeType& time,
                 const int accuracy) const
 {
-  return this->_discretise(this->_evolver->orbit(system,this->_enclosure(initial_set),time,LOWER_SEMANTICS),initial_set,accuracy);
+    return this->_discretise(this->_evolver->orbit(system,this->_enclosure(initial_set),time,LOWER_SEMANTICS),initial_set,accuracy);
 }
 
 template<class ES>
@@ -97,14 +97,14 @@ upper_evolution(const SystemType& system,
                 const TimeType& time,
                 const int accuracy) const
 {
-  ARIADNE_LOG(3,ARIADNE_PRETTY_FUNCTION);
-  EnclosureType enclosure=this->_enclosure(initial_set);
-  ARIADNE_LOG(4,"enclosure="<<enclosure<<"\n");
-  Orbit<EnclosureType> continuous_orbit=this->_evolver->orbit(system,enclosure,time,UPPER_SEMANTICS);
-  ARIADNE_LOG(5,"continuous_orbit="<<continuous_orbit<<"\nOK\n");
-  Orbit<BasicSetType> discrete_orbit=this->_discretise(continuous_orbit,initial_set,accuracy);
-  ARIADNE_LOG(5,"discrete_orbit="<<discrete_orbit<<"\n");
-  return discrete_orbit;
+    ARIADNE_LOG(3,ARIADNE_PRETTY_FUNCTION);
+    EnclosureType enclosure=this->_enclosure(initial_set);
+    ARIADNE_LOG(4,"enclosure="<<enclosure<<"\n");
+    Orbit<EnclosureType> continuous_orbit=this->_evolver->orbit(system,enclosure,time,UPPER_SEMANTICS);
+    ARIADNE_LOG(5,"continuous_orbit="<<continuous_orbit<<"\nOK\n");
+    Orbit<BasicSetType> discrete_orbit=this->_discretise(continuous_orbit,initial_set,accuracy);
+    ARIADNE_LOG(5,"discrete_orbit="<<discrete_orbit<<"\n");
+    return discrete_orbit;
 }
 
 template<class ES>
@@ -112,7 +112,7 @@ typename HybridDiscreteEvolver<ES>::EnclosureType
 HybridDiscreteEvolver<ES>::
 _enclosure(const BasicSetType& initial_set) const
 {
-  return EnclosureType(initial_set.first,ES(initial_set.second.box()));
+    return EnclosureType(initial_set.first,ES(initial_set.second.box()));
 }
 
 template<class ES>
@@ -122,24 +122,24 @@ _discretise(const Orbit<EnclosureType>& continuous_orbit,
             const BasicSetType& initial_set,
             const int accuracy) const
 {
-  ARIADNE_LOG(3,ARIADNE_PRETTY_FUNCTION<<"\n");
-  ARIADNE_LOG(6,"continuous_reach_set="<<continuous_orbit.reach()<<"\n");
-  DenotableSetType reach_set
-    = outer_approximation(continuous_orbit.reach(),
-                          HybridGrid(continuous_orbit.reach().space(),Float(1)),
-                          accuracy);
-  ARIADNE_LOG(4,"reach_set="<<reach_set<<"\n");
-  DenotableSetType intermediate_set
-    = outer_approximation(continuous_orbit.intermediate(),
-                          HybridGrid(continuous_orbit.intermediate().space(),Float(1)),
-                          accuracy);
-  ARIADNE_LOG(4,"intermediate_set="<<intermediate_set<<"\n");
-  DenotableSetType final_set
-    = outer_approximation(continuous_orbit.final(),
-                          HybridGrid(continuous_orbit.final().space(),Float(1)),
-                          accuracy);
-  ARIADNE_LOG(4,"final_set="<<final_set<<"\n");
-  return Orbit<BasicSetType>(initial_set,reach_set,intermediate_set,final_set);
+    ARIADNE_LOG(3,ARIADNE_PRETTY_FUNCTION<<"\n");
+    ARIADNE_LOG(6,"continuous_reach_set="<<continuous_orbit.reach()<<"\n");
+    DenotableSetType reach_set
+        = outer_approximation(continuous_orbit.reach(),
+                              HybridGrid(continuous_orbit.reach().space(),Float(1)),
+                              accuracy);
+    ARIADNE_LOG(4,"reach_set="<<reach_set<<"\n");
+    DenotableSetType intermediate_set
+        = outer_approximation(continuous_orbit.intermediate(),
+                              HybridGrid(continuous_orbit.intermediate().space(),Float(1)),
+                              accuracy);
+    ARIADNE_LOG(4,"intermediate_set="<<intermediate_set<<"\n");
+    DenotableSetType final_set
+        = outer_approximation(continuous_orbit.final(),
+                              HybridGrid(continuous_orbit.final().space(),Float(1)),
+                              accuracy);
+    ARIADNE_LOG(4,"final_set="<<final_set<<"\n");
+    return Orbit<BasicSetType>(initial_set,reach_set,intermediate_set,final_set);
  
 }
 

@@ -42,12 +42,12 @@ class InterpolatedCurve;
 class ProjectionFunction;
 
 struct Colour {
-  Colour();
-  Colour(double rd, double gr, double bl, bool tr=true);
-  Colour(const char* nm, double rd, double gr, double bl, bool tr=true);
-  std::string name;
-  double red, green, blue;
-  bool transparant;
+    Colour();
+    Colour(double rd, double gr, double bl, bool tr=true);
+    Colour(const char* nm, double rd, double gr, double bl, bool tr=true);
+    std::string name;
+    double red, green, blue;
+    bool transparant;
 };
 
 std::ostream& operator<<(std::ostream& os, const Colour& c);
@@ -117,10 +117,10 @@ inline void draw(Graphic& g, const InterpolatedCurve& c) { g.draw(c); }
 template<class SET> Graphic& operator<<(Graphic& g, const SET& set) { draw(g,set); return g; }
 
 template<class SET> void plot(const char* filename, const SET& set) { 
-  Graphic g; draw(g,set); g.write(filename); }
+    Graphic g; draw(g,set); g.write(filename); }
 
 template<class SET> void plot(const char* filename, const Box& bbox, const Colour& fc, const SET& set) { 
-  Graphic g; g.set_bounding_box(bbox); g.set_fill_colour(fc); draw(g,set); g.write(filename); }
+    Graphic g; g.set_bounding_box(bbox); g.set_fill_colour(fc); draw(g,set); g.write(filename); }
 
 
 

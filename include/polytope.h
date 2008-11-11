@@ -61,49 +61,49 @@ Float slope2d(const Point& pt1, const Point& pt2);
 
 //! A polytope in Euclidean space, defined by a list of extreme points.
 class Polytope
-  : public LocatedSetInterface
+    : public LocatedSetInterface
 { 
- public: 
-  typedef std::vector<Point>::const_iterator const_iterator;
+  public: 
+    typedef std::vector<Point>::const_iterator const_iterator;
 
-  //! \brief Default constructor constructs an empty polytope in zero dimensions. 
-  Polytope() { }
-  //! \brief Construct an empty polytope in \a d dimensions. 
-  Polytope(uint d) { }
-  //! \brief Construct polytope with vertices in \a v.
-  Polytope(const std::vector<Point>& v) : _vertices(v) { }
+    //! \brief Default constructor constructs an empty polytope in zero dimensions. 
+    Polytope() { }
+    //! \brief Construct an empty polytope in \a d dimensions. 
+    Polytope(uint d) { }
+    //! \brief Construct polytope with vertices in \a v.
+    Polytope(const std::vector<Point>& v) : _vertices(v) { }
 
-  //! \brief Add a new vertex \a v to the current vertices.
-  void new_vertex(const Point& v) { 
-    ARIADNE_ASSERT(this->_vertices.size()==0 || v.dimension()==this->_vertices.front().dimension()); 
-    this->_vertices.push_back(v); }
-  //! \brief The number of points defining the polytope. Note that an interior point is counted by this method.
-  size_t number_of_vertices() const { return this->_vertices.size(); }
-  //! \brief The \a i<sup>th</sup> vertex.
-  const Point& vertex(size_t i) const { return this->_vertices[i]; }
-  const std::vector<Point>& vertices() const { return this->_vertices; }
-  std::vector<Point>& vertices() { return this->_vertices; }
-  //! \brief A constant iterator pointing to the first vertex.
-  const_iterator vertices_begin() const { return this->_vertices.begin(); }
-  //! \brief A constant iterator pointing to the past-the-end vertex.
-  const_iterator vertices_end() const { return this->_vertices.end(); }
-  //! \brief Reduce the description of the polytope by removing all non-extreme points from the list of vertices. (Not currently implemented)
-  void reduce() { ARIADNE_NOT_IMPLEMENTED; }
+    //! \brief Add a new vertex \a v to the current vertices.
+    void new_vertex(const Point& v) { 
+        ARIADNE_ASSERT(this->_vertices.size()==0 || v.dimension()==this->_vertices.front().dimension()); 
+        this->_vertices.push_back(v); }
+    //! \brief The number of points defining the polytope. Note that an interior point is counted by this method.
+    size_t number_of_vertices() const { return this->_vertices.size(); }
+    //! \brief The \a i<sup>th</sup> vertex.
+    const Point& vertex(size_t i) const { return this->_vertices[i]; }
+    const std::vector<Point>& vertices() const { return this->_vertices; }
+    std::vector<Point>& vertices() { return this->_vertices; }
+    //! \brief A constant iterator pointing to the first vertex.
+    const_iterator vertices_begin() const { return this->_vertices.begin(); }
+    //! \brief A constant iterator pointing to the past-the-end vertex.
+    const_iterator vertices_end() const { return this->_vertices.end(); }
+    //! \brief Reduce the description of the polytope by removing all non-extreme points from the list of vertices. (Not currently implemented)
+    void reduce() { ARIADNE_NOT_IMPLEMENTED; }
  
-  virtual Polytope* clone() const { return new Polytope(*this); }
-  virtual uint dimension() const { if(this->_vertices.size()==0) { return 0; } return this->_vertices.front().dimension(); }
-  virtual tribool disjoint(const Vector<Interval>& bx) const;
-  virtual tribool intersects(const Vector<Interval>& bx) const;
-  virtual tribool subset(const Vector<Interval>& bx) const;
-  virtual Vector<Interval> bounding_box() const;
-  virtual std::ostream& write(std::ostream& os) const { return os << *this; }
+    virtual Polytope* clone() const { return new Polytope(*this); }
+    virtual uint dimension() const { if(this->_vertices.size()==0) { return 0; } return this->_vertices.front().dimension(); }
+    virtual tribool disjoint(const Vector<Interval>& bx) const;
+    virtual tribool intersects(const Vector<Interval>& bx) const;
+    virtual tribool subset(const Vector<Interval>& bx) const;
+    virtual Vector<Interval> bounding_box() const;
+    virtual std::ostream& write(std::ostream& os) const { return os << *this; }
   
-  //! \brief The convex hull of two polytopes.
-  friend Polytope convex_hull(const Polytope& p1, const Polytope& p2);
-  //! \brief The baricentre of a polytope.
-  friend Point baricentre(const Polytope& p);
- private:
-  std::vector<Point> _vertices;
+    //! \brief The convex hull of two polytopes.
+    friend Polytope convex_hull(const Polytope& p1, const Polytope& p2);
+    //! \brief The baricentre of a polytope.
+    friend Point baricentre(const Polytope& p);
+  private:
+    std::vector<Point> _vertices;
 };
 
 std::ostream& operator<<(std::ostream& os, const Polytope& p);

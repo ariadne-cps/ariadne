@@ -34,38 +34,38 @@
 #include "exceptions.h"
 
 #define ARIADNE_THROW(except,func,msg)          \
-{ \
-  std::stringstream ss; \
-  ss << #except " in " << func << " " << msg;    \
-  throw except(ss.str()); \
-} \
+    { \
+        std::stringstream ss; \
+        ss << #except " in " << func << " " << msg;    \
+        throw except(ss.str()); \
+    } \
 
 #define ARIADNE_ASSERT(expression) \
-{ \
-  bool result = (expression); \
-  if(!result) { \
-    ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<__FUNCTION__,"Assertion `" << #expression << "' failed.\n"); \
-  } \
-} \
+    { \
+        bool result = (expression); \
+        if(!result) { \
+            ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<__FUNCTION__,"Assertion `" << #expression << "' failed.\n"); \
+        } \
+    } \
 
 #define ARIADNE_ASSERT_MSG(expression,error)             \
-{ \
-  bool result = (expression); \
-  if(!result) { \
-    ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<__PRETTY_FUNCTION__,"Assertion `" << #expression << "' failed.\n"<<"  "<<error<<"\n"); \
-  } \
-} \
+    { \
+        bool result = (expression); \
+        if(!result) { \
+            ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<__PRETTY_FUNCTION__,"Assertion `" << #expression << "' failed.\n"<<"  "<<error<<"\n"); \
+        } \
+    } \
 
 #define ARIADNE_ASSERT_EQUAL(expression1,expression2)    \
-{ \
-  bool result = ((expression1) == (expression2));       \
-  if(!result) { \
-    ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<__PRETTY_FUNCTION__,"Assertion `" << #expression1 << "==" << #expression2 << "' failed.\n"<<"  "<<expression1<<" != "<<expression2<<"\n"); \
-  } \
-} \
+    { \
+        bool result = ((expression1) == (expression2));       \
+        if(!result) { \
+            ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<__PRETTY_FUNCTION__,"Assertion `" << #expression1 << "==" << #expression2 << "' failed.\n"<<"  "<<expression1<<" != "<<expression2<<"\n"); \
+        } \
+    } \
 
-#define ARIADNE_NOT_IMPLEMENTED                        \
-  throw NotImplemented(__PRETTY_FUNCTION__); 
+#define ARIADNE_NOT_IMPLEMENTED                 \
+    throw NotImplemented(__PRETTY_FUNCTION__); 
 
 #if defined(linux) || defined(__linux) || defined(__linux__)
 #define ARIADNE_PRETTY_FUNCTION __PRETTY_FUNCTION__

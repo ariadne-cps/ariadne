@@ -32,9 +32,9 @@ void calculus_submodule();
 
 BOOST_PYTHON_MODULE(ariadne)
 {
-  numeric_submodule();
-  linear_algebra_submodule();
-  differentiation_submodule();
-  function_submodule();
-  calculus_submodule();
+    numeric_submodule();
+    linear_algebra_submodule();
+    differentiation_submodule();
+    function_submodule();
+    calculus_submodule();
 }

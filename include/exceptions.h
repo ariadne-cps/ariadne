@@ -33,33 +33,33 @@
 
 
 class NotImplemented : public std::logic_error {
- public:
-  NotImplemented(const std::string& str) : std::logic_error(str) { }
+  public:
+    NotImplemented(const std::string& str) : std::logic_error(str) { }
 };
 
 class DivideByZeroException : public std::runtime_error {
- public:
-  DivideByZeroException(const std::string& str) : std::runtime_error(str) { }
+  public:
+    DivideByZeroException(const std::string& str) : std::runtime_error(str) { }
 };
 
 class IncompatibleSizes : public std::runtime_error {
- public:
-  IncompatibleSizes(const std::string& str) : std::runtime_error(str) { }
+  public:
+    IncompatibleSizes(const std::string& str) : std::runtime_error(str) { }
 };
 
 class InvalidGridPosition : public std::runtime_error {
- public:
-  InvalidGridPosition(const std::string& str) : std::runtime_error(str) { }
+  public:
+    InvalidGridPosition(const std::string& str) : std::runtime_error(str) { }
 };
 
 class InvalidCoordinate : public std::runtime_error {
- public:
-  InvalidCoordinate(const std::string& str) : std::runtime_error(str) { }
+  public:
+    InvalidCoordinate(const std::string& str) : std::runtime_error(str) { }
 };
 
 class InvalidInput : public std::runtime_error {
- public:
-  InvalidInput(const std::string& str) : std::runtime_error(str) { }
+  public:
+    InvalidInput(const std::string& str) : std::runtime_error(str) { }
 };
 
 #endif

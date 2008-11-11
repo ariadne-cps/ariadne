@@ -33,12 +33,12 @@ using namespace Ariadne;
 
 template<class X0, class X1, class X2>
 Vector<X0> __mul__(const Matrix<X1>& A1, const Vector<X2>& v2) {
-  return prod(A1,v2); 
+    return prod(A1,v2); 
 }
 
 template<class X0, class X1, class X2>
 Matrix<X0> __mul__(const Matrix<X1>& A1, const Matrix<X2>& A2) {
-  return prod(A1,A2); 
+    return prod(A1,A2); 
 }
 
 
@@ -109,8 +109,8 @@ template void export_matrix<Float>();
 template void export_matrix<Interval>();
 
 void linear_algebra_submodule() {
-  //export_vector<Float>();
-  export_vector<Interval>();
-  //export_matrix<Float>();
-  export_matrix<Interval>();
+    //export_vector<Float>();
+    export_vector<Interval>();
+    //export_matrix<Float>();
+    export_matrix<Interval>();
 }

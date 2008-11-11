@@ -42,79 +42,79 @@ namespace Ariadne {
 
 //! \brief A set defined as the image of a box under a continuous function.
 class ImageSet
-  : public LocatedSetInterface
+    : public LocatedSetInterface
 {
-  Vector<Interval> _domain;
-  boost::shared_ptr<FunctionInterface> _function_ptr;
- public:
-  typedef Vector<Interval> BoxType;
-  //! \brief Default constructor constructs the singleton in \f$\R^0\f$.
-  ImageSet();
-  //! \brief Construct the image of \a dom under the identity function.
-  ImageSet(const BoxType& dom);
-  //! \brief Construct the image of \a dom under the function \a fn.
-  ImageSet(const BoxType& dom, const FunctionInterface& fn);
-  //! \brief The box used to define the set.
-  const BoxType& domain() const { return this->_domain; }
-  //! \brief The function used to define the set.
-  const FunctionInterface& function() const { return *this->_function_ptr; }
-  //! \brief Equality operator. Compares functions by referential equality.
-  bool operator==(const ImageSet& ims) const { return this->_domain==ims._domain && this->_function_ptr==ims._function_ptr; }
+    Vector<Interval> _domain;
+    boost::shared_ptr<FunctionInterface> _function_ptr;
+  public:
+    typedef Vector<Interval> BoxType;
+    //! \brief Default constructor constructs the singleton in \f$\R^0\f$.
+    ImageSet();
+    //! \brief Construct the image of \a dom under the identity function.
+    ImageSet(const BoxType& dom);
+    //! \brief Construct the image of \a dom under the function \a fn.
+    ImageSet(const BoxType& dom, const FunctionInterface& fn);
+    //! \brief The box used to define the set.
+    const BoxType& domain() const { return this->_domain; }
+    //! \brief The function used to define the set.
+    const FunctionInterface& function() const { return *this->_function_ptr; }
+    //! \brief Equality operator. Compares functions by referential equality.
+    bool operator==(const ImageSet& ims) const { return this->_domain==ims._domain && this->_function_ptr==ims._function_ptr; }
 
-  ImageSet* clone() const;
-  uint dimension() const;
-  tribool empty() const;
-  tribool disjoint(const Vector<Interval>&) const;
-  tribool intersects(const Vector<Interval>&) const;
-  tribool subset(const Vector<Interval>&) const;
-  Vector<Interval> bounding_box() const;
-  std::ostream& write(std::ostream&) const;
+    ImageSet* clone() const;
+    uint dimension() const;
+    tribool empty() const;
+    tribool disjoint(const Vector<Interval>&) const;
+    tribool intersects(const Vector<Interval>&) const;
+    tribool subset(const Vector<Interval>&) const;
+    Vector<Interval> bounding_box() const;
+    std::ostream& write(std::ostream&) const;
 };
 
 template<class Mdl>
 class ModelSet
-  : public CompactSetInterface
+    : public CompactSetInterface
 {
-  Mdl _model;
- public:
-  typedef Vector<Interval> BoxType;
-  ModelSet(const Mdl& mdl) : _model(mdl) { }
-  const BoxType& domain() const { return this->_model.domain(); }
-  ModelSet* clone() const { return new ModelSet<Mdl>(*this); }
-  uint dimension() const { return this->_model.result_size(); }
-  tribool disjoint(const Vector<Interval>& bx) const { 
-    return Ariadne::disjoint(this->_model,bx); }
-  tribool subset(const Vector<Interval>& bx) const { 
-    return Ariadne::subset(this->_model.range(),bx) || indeterminate; }
-  Vector<Interval> bounding_box() const { 
-    return this->_model.range(); }
-  std::ostream& write(std::ostream& os) const {
-    return os << "ModelSet( " << this->_model << ")"; }
+    Mdl _model;
+  public:
+    typedef Vector<Interval> BoxType;
+    ModelSet(const Mdl& mdl) : _model(mdl) { }
+    const BoxType& domain() const { return this->_model.domain(); }
+    ModelSet* clone() const { return new ModelSet<Mdl>(*this); }
+    uint dimension() const { return this->_model.result_size(); }
+    tribool disjoint(const Vector<Interval>& bx) const { 
+        return Ariadne::disjoint(this->_model,bx); }
+    tribool subset(const Vector<Interval>& bx) const { 
+        return Ariadne::subset(this->_model.range(),bx) || indeterminate; }
+    Vector<Interval> bounding_box() const { 
+        return this->_model.range(); }
+    std::ostream& write(std::ostream& os) const {
+        return os << "ModelSet( " << this->_model << ")"; }
 };
  
 
 
 //! \brief A set defined as the preimage of a box (the \em codomain) under a continuous function. The set is described as \f$S=f^{-1}(B) = \{ x \mid f(x)\in B\}\f$ where \f$B\f$ is the codomain and \f$f\f$ the function.
 class ConstraintSet
-  : public RegularSetInterface
+    : public RegularSetInterface
 {
-  Vector<Interval> _codomain;
-  boost::shared_ptr<FunctionInterface> _function_ptr;
- public:
-  typedef Vector<Interval> BoxType;
-  //! \brief Construct the preimage of \a codom under \a fn.
-  ConstraintSet(const BoxType& codom, const FunctionInterface& fn);
-  //! \brief The codomain of the set.
-  const BoxType& codomain() const { return this->_codomain; }
-  //! \brief The function used to define the set.
-  const FunctionInterface& function() const { return *this->_function_ptr; };
+    Vector<Interval> _codomain;
+    boost::shared_ptr<FunctionInterface> _function_ptr;
+  public:
+    typedef Vector<Interval> BoxType;
+    //! \brief Construct the preimage of \a codom under \a fn.
+    ConstraintSet(const BoxType& codom, const FunctionInterface& fn);
+    //! \brief The codomain of the set.
+    const BoxType& codomain() const { return this->_codomain; }
+    //! \brief The function used to define the set.
+    const FunctionInterface& function() const { return *this->_function_ptr; };
 
-  ConstraintSet* clone() const;
-  uint dimension() const;
-  tribool disjoint(const Vector<Interval>&) const;
-  tribool intersects(const Vector<Interval>&) const;
-  tribool superset(const Vector<Interval>&) const;
-  std::ostream& write(std::ostream&) const;
+    ConstraintSet* clone() const;
+    uint dimension() const;
+    tribool disjoint(const Vector<Interval>&) const;
+    tribool intersects(const Vector<Interval>&) const;
+    tribool superset(const Vector<Interval>&) const;
+    std::ostream& write(std::ostream&) const;
 };
 
 } // namespace Ariadne 

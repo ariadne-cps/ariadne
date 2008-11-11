@@ -73,109 +73,109 @@ class AffineModel;
  */
 
 class Zonotope {
- private:
-  Vector<Float> _centre;
-  Matrix<Float> _generators;
-  Vector<Float> _error;
- public:
-  //@{
-  //! \name Constructors
-  /*! \brief Default constructor yields a zonotope with dimension zero and no generators. */
-  explicit Zonotope();
-  /*! \brief Construct a zonotope of dimension \a d with no generators. */
-  explicit Zonotope(uint d);
-  /*! \brief Construct a zonotope of dimension \a n with centre at the origin and \a m generators. */
-  explicit Zonotope(uint d, uint m);
+  private:
+    Vector<Float> _centre;
+    Matrix<Float> _generators;
+    Vector<Float> _error;
+  public:
+    //@{
+    //! \name Constructors
+    /*! \brief Default constructor yields a zonotope with dimension zero and no generators. */
+    explicit Zonotope();
+    /*! \brief Construct a zonotope of dimension \a d with no generators. */
+    explicit Zonotope(uint d);
+    /*! \brief Construct a zonotope of dimension \a n with centre at the origin and \a m generators. */
+    explicit Zonotope(uint d, uint m);
   
-  /*! \brief Construct from centre, generators, and a uniform error term. */
-  explicit Zonotope(const Vector<Float>& c, const Matrix<Float>& G, const Vector<Float>& e);
-  /*! \brief Construct from centre and generators. */
-  explicit Zonotope(const Vector<Float>& c, const Matrix<Float>& G);
-  /*! \brief Construct from interval centre and a generator matrix. */
-  explicit Zonotope(const Vector<Interval>& c, const Matrix<Float>& G);
-  /*! \brief Construct from centre and an interval generator matrix. */
-  explicit Zonotope(const Vector<Float>& c, const Matrix<Interval>& G);
-  /*! \brief Construct from an interval centre and an interval generator matrix. */
-  explicit Zonotope(const Vector<Interval>& c, const Matrix<Interval>& G);
-  
-  
-  /*! \brief Construct a zonotope of dimension \a d with centre at the origin and \a m generators from the data beginning at \a ptr. */
-  template<class XX> explicit Zonotope(uint d, uint m, const XX* ptr);
-  
-  /*! \brief Convert from a box. */
-  Zonotope(const Box& r);
-  /*! \brief Copy constructor. */
-  Zonotope(const Zonotope& z);
-  /*! \brief Copy assignment operator. */
-  Zonotope& operator=(const Zonotope& z);
-  
-  //@}
-  
-  //@{ 
-  //! \name Data access
-  /*! \brief The dimension of the zonotope. */
-  uint dimension() const;
-  
-  /*! \brief The number of generators of the zonotope. */
-  uint number_of_generators() const;
-  
-  /*! \brief The domain. */
-  Vector<Interval> domain() const;
-  
-  /*! \brief The centre. */
-  const Vector<Float>& centre() const;
-  
-  /*! \brief The matrix of principle directions. */
-  const Matrix<Float>& generators() const;
-  
-  /*! \brief The uniform error bound. */
-  const Vector<Float>& error() const;
-  
-  /*! \brief A bounding box for the set. */
-  Vector<Interval> bounding_box() const;
-  
-  /*! \brief The radius of the set in the supremum norm. */
-  Float radius() const;
-  
-  /*! \brief Test if the set contains a point. */
-  tribool contains(const Point& pt) const;
-  
-  //@}
+    /*! \brief Construct from centre, generators, and a uniform error term. */
+    explicit Zonotope(const Vector<Float>& c, const Matrix<Float>& G, const Vector<Float>& e);
+    /*! \brief Construct from centre and generators. */
+    explicit Zonotope(const Vector<Float>& c, const Matrix<Float>& G);
+    /*! \brief Construct from interval centre and a generator matrix. */
+    explicit Zonotope(const Vector<Interval>& c, const Matrix<Float>& G);
+    /*! \brief Construct from centre and an interval generator matrix. */
+    explicit Zonotope(const Vector<Float>& c, const Matrix<Interval>& G);
+    /*! \brief Construct from an interval centre and an interval generator matrix. */
+    explicit Zonotope(const Vector<Interval>& c, const Matrix<Interval>& G);
   
   
-  //@{
-  //! \name Geometric binary predicates
-  /*! \brief Tests disjointness of \a z and \a r. */
-  friend tribool disjoint(const Zonotope& z, const Box& r);
-  /*! \brief Tests if \a z and \a r intersect. */
-  friend tribool intersects(const Zonotope& z, const Box& r);
-  /*! \brief Tests inclusion of \a z in \a r. */
-  friend tribool subset(const Zonotope& z, const Box& r);
-  /*! \brief Tests disjointness of \a r and \a z. */
-  friend tribool disjoint(const Box& r, const Zonotope& z);
-  //@}
+    /*! \brief Construct a zonotope of dimension \a d with centre at the origin and \a m generators from the data beginning at \a ptr. */
+    template<class XX> explicit Zonotope(uint d, uint m, const XX* ptr);
   
-  //@{
-  //! \name Approximation operations.
-  /*! \brief Compute an simplified approximation of the zonotope \a z. */
-  friend Zonotope approximation(const Zonotope& z);
-  /*! \brief Compute an over-approximation of the zonotope \a z. */
-  friend Zonotope over_approximation(const Zonotope& z);
-  /*! \brief Compute an over-approximation of the zonotope \a z without a uniform error term. */
-  friend Zonotope error_free_over_approximation(const Zonotope&);
-  /*! \brief Compute an over-approximation of the zonotope \a z by a non-coordinate aligned orthotope. */
-  friend Zonotope orthogonal_over_approximation(const Zonotope&);
-  /*! \brief Compute an over-approximation of a zonotope \a z with nonsingular generator matrix. */
-  friend Zonotope nonsingular_over_approximation(const Zonotope&);
-  /*! \brief Compute a cascade-over-approximation of the zonotope \a z with \a b blocks of \a d generators. */
-  friend Zonotope cascade_over_approximation(const Zonotope& z, uint b);
-  //@}
+    /*! \brief Convert from a box. */
+    Zonotope(const Box& r);
+    /*! \brief Copy constructor. */
+    Zonotope(const Zonotope& z);
+    /*! \brief Copy assignment operator. */
+    Zonotope& operator=(const Zonotope& z);
   
-  //@{
-  //! \name Function operations.
-  /*! \brief Compute the image of \a z under a function given by the concrete model \a am. */
-  friend Zonotope apply(const AffineModel& am, const Zonotope& z);
-  //@}
+    //@}
+  
+    //@{ 
+    //! \name Data access
+    /*! \brief The dimension of the zonotope. */
+    uint dimension() const;
+  
+    /*! \brief The number of generators of the zonotope. */
+    uint number_of_generators() const;
+  
+    /*! \brief The domain. */
+    Vector<Interval> domain() const;
+  
+    /*! \brief The centre. */
+    const Vector<Float>& centre() const;
+  
+    /*! \brief The matrix of principle directions. */
+    const Matrix<Float>& generators() const;
+  
+    /*! \brief The uniform error bound. */
+    const Vector<Float>& error() const;
+  
+    /*! \brief A bounding box for the set. */
+    Vector<Interval> bounding_box() const;
+  
+    /*! \brief The radius of the set in the supremum norm. */
+    Float radius() const;
+  
+    /*! \brief Test if the set contains a point. */
+    tribool contains(const Point& pt) const;
+  
+    //@}
+  
+  
+    //@{
+    //! \name Geometric binary predicates
+    /*! \brief Tests disjointness of \a z and \a r. */
+    friend tribool disjoint(const Zonotope& z, const Box& r);
+    /*! \brief Tests if \a z and \a r intersect. */
+    friend tribool intersects(const Zonotope& z, const Box& r);
+    /*! \brief Tests inclusion of \a z in \a r. */
+    friend tribool subset(const Zonotope& z, const Box& r);
+    /*! \brief Tests disjointness of \a r and \a z. */
+    friend tribool disjoint(const Box& r, const Zonotope& z);
+    //@}
+  
+    //@{
+    //! \name Approximation operations.
+    /*! \brief Compute an simplified approximation of the zonotope \a z. */
+    friend Zonotope approximation(const Zonotope& z);
+    /*! \brief Compute an over-approximation of the zonotope \a z. */
+    friend Zonotope over_approximation(const Zonotope& z);
+    /*! \brief Compute an over-approximation of the zonotope \a z without a uniform error term. */
+    friend Zonotope error_free_over_approximation(const Zonotope&);
+    /*! \brief Compute an over-approximation of the zonotope \a z by a non-coordinate aligned orthotope. */
+    friend Zonotope orthogonal_over_approximation(const Zonotope&);
+    /*! \brief Compute an over-approximation of a zonotope \a z with nonsingular generator matrix. */
+    friend Zonotope nonsingular_over_approximation(const Zonotope&);
+    /*! \brief Compute a cascade-over-approximation of the zonotope \a z with \a b blocks of \a d generators. */
+    friend Zonotope cascade_over_approximation(const Zonotope& z, uint b);
+    //@}
+  
+    //@{
+    //! \name Function operations.
+    /*! \brief Compute the image of \a z under a function given by the concrete model \a am. */
+    friend Zonotope apply(const AffineModel& am, const Zonotope& z);
+    //@}
 };
 
 
@@ -208,7 +208,7 @@ std::istream& operator>>(std::istream& is, Zonotope& z);
 
 template<class X> inline
 Zonotope::Zonotope(uint d, uint m, const X* ptr)
-  : _centre(d,ptr), _generators(d,m,ptr+d), _error(d)
+    : _centre(d,ptr), _generators(d,m,ptr+d), _error(d)
 {
 }
 

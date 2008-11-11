@@ -72,75 +72,75 @@ typedef std::pair<DiscreteState,DefaultEnclosureType> DefaultHybridEnclosureType
  * The actual evolution steps are performed by the HybridEvolver class.
  */
 class HybridEvolver
-  : public EvolverBase< HybridAutomaton,DefaultHybridEnclosureType>
-  , public Loggable
+    : public EvolverBase< HybridAutomaton,DefaultHybridEnclosureType>
+    , public Loggable
 {
-  typedef Ariadne::DefaultModelType ModelType;
- public:
-  typedef ContinuousEvolutionParameters EvolutionParametersType;
-  typedef HybridAutomaton::TimeType TimeType;
-  typedef int IntegerType;
-  typedef Float RealType;
-  typedef HybridAutomaton SystemType;
-  typedef ModelType ContinuousEnclosureType;
-  typedef pair<DiscreteState,ContinuousEnclosureType> HybridEnclosureType;
-  typedef HybridEnclosureType EnclosureType;
-  typedef Orbit<EnclosureType> OrbitType;
-  typedef ListSet<EnclosureType> EnclosureListType;
-  typedef Float ContinuousTimeType;
- public:
+    typedef Ariadne::DefaultModelType ModelType;
+  public:
+    typedef ContinuousEvolutionParameters EvolutionParametersType;
+    typedef HybridAutomaton::TimeType TimeType;
+    typedef int IntegerType;
+    typedef Float RealType;
+    typedef HybridAutomaton SystemType;
+    typedef ModelType ContinuousEnclosureType;
+    typedef pair<DiscreteState,ContinuousEnclosureType> HybridEnclosureType;
+    typedef HybridEnclosureType EnclosureType;
+    typedef Orbit<EnclosureType> OrbitType;
+    typedef ListSet<EnclosureType> EnclosureListType;
+    typedef Float ContinuousTimeType;
+  public:
     
-  //! \brief Default constructor.
-  HybridEvolver();
+    //! \brief Default constructor.
+    HybridEvolver();
   
-  //! \brief Construct from parameters using a default integrator.
-  HybridEvolver(const EvolutionParametersType& parameters);
+    //! \brief Construct from parameters using a default integrator.
+    HybridEvolver(const EvolutionParametersType& parameters);
   
-  /*! \brief Make a dynamically-allocated copy. */
-  HybridEvolver* clone() const { return new HybridEvolver(*this); }
+    /*! \brief Make a dynamically-allocated copy. */
+    HybridEvolver* clone() const { return new HybridEvolver(*this); }
 
-  //@{
-  //! \name Parameters controlling the evolution.
-  //! \brief A reference to the parameters controlling the evolution.
-  EvolutionParametersType& parameters() { return *this->_parameters; }
-  const EvolutionParametersType& parameters() const { return *this->_parameters; }
+    //@{
+    //! \name Parameters controlling the evolution.
+    //! \brief A reference to the parameters controlling the evolution.
+    EvolutionParametersType& parameters() { return *this->_parameters; }
+    const EvolutionParametersType& parameters() const { return *this->_parameters; }
 
-  //@}
+    //@}
   
 
-  //@{
-  //! \name Evolution using abstract sets.
-  //! \brief Compute an approximation to the orbit set using upper semantics. 
-  Orbit<EnclosureType> orbit(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
+    //@{
+    //! \name Evolution using abstract sets.
+    //! \brief Compute an approximation to the orbit set using upper semantics. 
+    Orbit<EnclosureType> orbit(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
 
 
-  //! \brief Compute an approximation to the evolution set using upper semantics. 
-  EnclosureListType evolve(const SystemType& system, const EnclosureType& initial_set, const TimeType& time) const {
-    EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate; 
-    this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS,false); 
+    //! \brief Compute an approximation to the evolution set using upper semantics. 
+    EnclosureListType evolve(const SystemType& system, const EnclosureType& initial_set, const TimeType& time) const {
+        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate; 
+        this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS,false); 
         return final; }
 
-  //! \brief Compute an approximation to the evolution set under upper semantics. 
-  EnclosureListType reach(const SystemType& system, const EnclosureType& initial_set, const TimeType& time) const {
+    //! \brief Compute an approximation to the evolution set under upper semantics. 
+    EnclosureListType reach(const SystemType& system, const EnclosureType& initial_set, const TimeType& time) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate; 
         this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS,true); 
         return intermediate; }
 
- protected:
-  virtual void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate, 
-                          const SystemType& system, const EnclosureType& initial, const TimeType& time, 
-                          Semantics semantics, bool reach) const;
+  protected:
+    virtual void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate, 
+                            const SystemType& system, const EnclosureType& initial, const TimeType& time, 
+                            Semantics semantics, bool reach) const;
 
-  typedef tuple<DiscreteState, IntegerType, ModelType, ModelType> HybridTimedSetType;
-  virtual void _evolution_step(std::vector< HybridTimedSetType >& working_sets, 
-                               EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,  
-                               const SystemType& system, const HybridTimedSetType& current_set, const TimeType& time, 
-                               Semantics semantics, bool reach) const;
+    typedef tuple<DiscreteState, IntegerType, ModelType, ModelType> HybridTimedSetType;
+    virtual void _evolution_step(std::vector< HybridTimedSetType >& working_sets, 
+                                 EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,  
+                                 const SystemType& system, const HybridTimedSetType& current_set, const TimeType& time, 
+                                 Semantics semantics, bool reach) const;
 
- private:
-  boost::shared_ptr< EvolutionParametersType > _parameters;
-  boost::shared_ptr< ToolboxInterface<ModelType> > _toolbox;
-  //boost::shared_ptr< EvolutionProfiler >  _profiler;
+  private:
+    boost::shared_ptr< EvolutionParametersType > _parameters;
+    boost::shared_ptr< ToolboxInterface<ModelType> > _toolbox;
+    //boost::shared_ptr< EvolutionProfiler >  _profiler;
 };
 
 

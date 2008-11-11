@@ -133,65 +133,65 @@ inline Float med_approx(Float x, Float y) { return (x+y)/2; }
 
 //! \brief Intervals supporting interval arithmetic.
 class Interval {
- public:
-  Interval() : l(0.0), u(0.0) { }
-  Interval(uint m) : l(m), u(m) { }
-  Interval(int n) : l(n), u(n) { }
-  Interval(Float x) : l(x), u(x) { }
-  Interval(const Interval& i) : l(i.l), u(i.u) { }
+  public:
+    Interval() : l(0.0), u(0.0) { }
+    Interval(uint m) : l(m), u(m) { }
+    Interval(int n) : l(n), u(n) { }
+    Interval(Float x) : l(x), u(x) { }
+    Interval(const Interval& i) : l(i.l), u(i.u) { }
   
-  Interval(Float lower, Float upper) : l(lower), u(upper) { }
+    Interval(Float lower, Float upper) : l(lower), u(upper) { }
 #ifdef HAVE_GMPXX_H
-  Interval(Rational q);
-  Interval(Rational lower, Rational upper);
+    Interval(Rational q);
+    Interval(Rational lower, Rational upper);
 #endif // HAVE_GMPXX_H 
 
-  const Float& lower() const { return l; }
-  const Float& upper() const { return u; }
-  const Float midpoint() const { return (l+u)/2; }
-  const Float radius() const { return up((u-l)/2); }
-  const Float width() const { return up(u-l); }
+    const Float& lower() const { return l; }
+    const Float& upper() const { return u; }
+    const Float midpoint() const { return (l+u)/2; }
+    const Float radius() const { return up((u-l)/2); }
+    const Float width() const { return up(u-l); }
 
-  bool empty() const { return l>u; }
-  bool singleton() const { return l==u; }
+    bool empty() const { return l>u; }
+    bool singleton() const { return l==u; }
 
-  void set_lower(const Float& lower) { l=lower; }
-  void set_upper(const Float& upper) { u=upper; }
- public:
-  double l, u;
+    void set_lower(const Float& lower) { l=lower; }
+    void set_upper(const Float& upper) { u=upper; }
+  public:
+    double l, u;
 };
 
 inline Float midpoint(Interval i) { 
-  return (i.l+i.u)/2; 
+    return (i.l+i.u)/2; 
 }
 
 inline Float radius(Interval i) { 
-  return up((i.u-i.l)/2); 
+    return up((i.u-i.l)/2); 
 }
 
 inline Float width(Interval i) { 
-  return up(i.u-i.l); 
+    return up(i.u-i.l); 
 }
 
 inline bool equal(Interval i1, Interval i2) { 
-  return i1.l==i2.l && i1.u==i2.u;
+    return i1.l==i2.l && i1.u==i2.u;
 }
 
 inline bool empty(Interval i) { 
-  return i.l>i.u;
+    return i.l>i.u;
 }
 
 inline bool bounded(Interval i) { 
-  return i.l!=-inf() && i.u!=+inf();
+    return i.l!=-inf() && i.u!=+inf();
 }
 
 inline Interval intersection(Interval i1, Interval i2) { 
-  if(i1.l>i2.u || i1.u<i2.l) { return Interval(1,-1); }
-  return Interval(max(i1.l,i2.l),min(i1.u,i2.u));
+    if(i1.l>i2.u || i1.u<i2.l) { return Interval(1,-1); }
+    return Interval(max(i1.l,i2.l),min(i1.u,i2.u));
 }
 
 inline Interval hull(Interval i1, Interval i2) { 
-  return Interval(min(i1.l,i2.l),max(i1.u,i2.u));
+    return Interval(min(i1.l,i2.l),max(i1.u,i2.u));
 }
 
 Interval trunc(Interval, uint eps);
@@ -259,15 +259,15 @@ inline Interval operator/(Interval i1, Float x2) { return div(i1,x2); }
 inline Interval operator/(Float x1, Interval i2) { return mul(rec(i2),x1); }
 
 inline tribool operator>(Interval i1, Interval i2) { 
-  if(i1.lower()>i2.upper()) { return true; }
-  else if(i1.upper()<=i2.lower()) { return false; }
-  else { return indeterminate; }
+    if(i1.lower()>i2.upper()) { return true; }
+    else if(i1.upper()<=i2.lower()) { return false; }
+    else { return indeterminate; }
 }
 
 inline tribool operator<(Interval i1, Interval i2) { 
-  if(i1.upper()<i2.lower()) { return true; }
-  else if(i1.lower()>=i2.upper()) { return false; }
-  else { return indeterminate; }
+    if(i1.upper()<i2.lower()) { return true; }
+    else if(i1.lower()>=i2.upper()) { return false; }
+    else { return indeterminate; }
 }
 
 
@@ -279,7 +279,7 @@ inline bool subset(Float x, Interval i) { return i.l<=x && x<=i.u; }
 inline bool subset(Interval i1, Interval i2) { return i2.l<=i1.l && i1.u<=i2.u; }
 
 template<class A> void serialize(A& a, Interval& ivl, const uint version) {
-  a & ivl.l & ivl.u; }
+    a & ivl.l & ivl.u; }
 
 std::ostream& operator<<(std::ostream&, const Interval&);
 std::istream& operator>>(std::istream&, Interval&);

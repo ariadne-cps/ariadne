@@ -49,75 +49,75 @@ typedef std::map<DiscreteState,Box> HybridBoxes;
 
 class HybridSetInterfaceBase 
 {
- public:
-  virtual ~HybridSetInterfaceBase() { };
-  virtual HybridSetInterfaceBase* clone() const = 0;
-  virtual HybridSpace space() const = 0;
-  virtual std::ostream& write(std::ostream& os) const = 0;
+  public:
+    virtual ~HybridSetInterfaceBase() { };
+    virtual HybridSetInterfaceBase* clone() const = 0;
+    virtual HybridSpace space() const = 0;
+    virtual std::ostream& write(std::ostream& os) const = 0;
 };
 
 class HybridOvertSetInterface 
-  : public virtual HybridSetInterfaceBase 
+    : public virtual HybridSetInterfaceBase 
 {
- public:
-  virtual HybridOvertSetInterface* clone() const = 0;
-  virtual tribool intersects(const HybridBox& bx) const = 0;
-  virtual OvertSetInterface const& operator[](DiscreteState) const = 0;
+  public:
+    virtual HybridOvertSetInterface* clone() const = 0;
+    virtual tribool intersects(const HybridBox& bx) const = 0;
+    virtual OvertSetInterface const& operator[](DiscreteState) const = 0;
 };
 
 class HybridOpenSetInterface 
-  : public virtual HybridOvertSetInterface 
+    : public virtual HybridOvertSetInterface 
 {
- public:
-  virtual HybridOpenSetInterface* clone() const = 0;
-  virtual tribool superset(const HybridBox& bx) const = 0;
-  virtual OpenSetInterface const& operator[](DiscreteState) const = 0;
+  public:
+    virtual HybridOpenSetInterface* clone() const = 0;
+    virtual tribool superset(const HybridBox& bx) const = 0;
+    virtual OpenSetInterface const& operator[](DiscreteState) const = 0;
 };
 
 class HybridClosedSetInterface
-  : public virtual HybridSetInterfaceBase {
- public:
-  virtual HybridClosedSetInterface* clone() const = 0;
-  virtual tribool disjoint(const HybridBox& bx) const = 0;
-  virtual ClosedSetInterface const& operator[](DiscreteState) const = 0;
+    : public virtual HybridSetInterfaceBase {
+  public:
+    virtual HybridClosedSetInterface* clone() const = 0;
+    virtual tribool disjoint(const HybridBox& bx) const = 0;
+    virtual ClosedSetInterface const& operator[](DiscreteState) const = 0;
 };
 
 class HybridCompactSetInterface
-  : public virtual HybridClosedSetInterface {
- public:
-  virtual HybridCompactSetInterface* clone() const = 0;
-  virtual tribool subset(const HybridBoxes& bx) const = 0;
-  virtual HybridBoxes bounding_box() const = 0;
-  virtual CompactSetInterface const& operator[](DiscreteState) const = 0;
+    : public virtual HybridClosedSetInterface {
+  public:
+    virtual HybridCompactSetInterface* clone() const = 0;
+    virtual tribool subset(const HybridBoxes& bx) const = 0;
+    virtual HybridBoxes bounding_box() const = 0;
+    virtual CompactSetInterface const& operator[](DiscreteState) const = 0;
 };
 
 class HybridRegularSetInterface 
-  : public virtual HybridOpenSetInterface,
-    public virtual HybridClosedSetInterface
+    : public virtual HybridOpenSetInterface,
+      public virtual HybridClosedSetInterface
 {
-  virtual HybridRegularSetInterface* clone() const = 0;
-  virtual RegularSetInterface const& operator[](DiscreteState) const = 0;
+    virtual HybridRegularSetInterface* clone() const = 0;
+    virtual RegularSetInterface const& operator[](DiscreteState) const = 0;
 };
 
 class HybridLocatedSetInterface 
-  : public virtual HybridOvertSetInterface,
-    public virtual HybridCompactSetInterface
+    : public virtual HybridOvertSetInterface,
+      public virtual HybridCompactSetInterface
 {
-  virtual HybridLocatedSetInterface* clone() const = 0;
-  virtual LocatedSetInterface const& operator[](DiscreteState) const = 0;
+    virtual HybridLocatedSetInterface* clone() const = 0;
+    virtual LocatedSetInterface const& operator[](DiscreteState) const = 0;
 };
 
 class HybridSetInterface 
-  : public virtual HybridRegularSetInterface,
-    public virtual HybridLocatedSetInterface
+    : public virtual HybridRegularSetInterface,
+      public virtual HybridLocatedSetInterface
 {
-  virtual HybridSetInterface* clone() const = 0;
-  virtual SetInterface const& operator[](DiscreteState) const = 0;
+    virtual HybridSetInterface* clone() const = 0;
+    virtual SetInterface const& operator[](DiscreteState) const = 0;
 };
     
 
 inline std::ostream& operator<<(std::ostream& os, const HybridSetInterfaceBase& s) {
-  return s.write(os); 
+    return s.write(os); 
 }
 
 

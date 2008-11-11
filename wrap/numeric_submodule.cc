@@ -30,28 +30,28 @@ using namespace boost::python;
 using namespace Ariadne;
 
 void read(Interval& ivl, const boost::python::object& obj) {
-  boost::python::extract<boost::python::list> lx(obj);
-  boost::python::extract<boost::python::tuple> tx(obj);
-  boost::python::extract<double> dx(obj);
-  boost::python::extract<Interval> ix(obj);
+    boost::python::extract<boost::python::list> lx(obj);
+    boost::python::extract<boost::python::tuple> tx(obj);
+    boost::python::extract<double> dx(obj);
+    boost::python::extract<Interval> ix(obj);
 
-  if(lx.check()) {
-    boost::python::list lst=lx();
-    assert(boost::python::len(lst)==2);
-    double l=boost::python::extract<double>(lst[0]);
-    double u=boost::python::extract<double>(lst[1]);
-    ivl=Interval(l,u);
-  } else if(tx.check()) {
-    boost::python::tuple tpl=tx();
-    assert(boost::python::len(tpl)==2);
-    double l=boost::python::extract<double>(tpl[0]);
-    double u=boost::python::extract<double>(tpl[1]);
-    ivl=Interval(l,u);
-  } else if(dx.check()) {
-    ivl=static_cast<Interval>(dx());
-  } else if(ix.check()) {
-    ivl=ix();
-  }
+    if(lx.check()) {
+        boost::python::list lst=lx();
+        assert(boost::python::len(lst)==2);
+        double l=boost::python::extract<double>(lst[0]);
+        double u=boost::python::extract<double>(lst[1]);
+        ivl=Interval(l,u);
+    } else if(tx.check()) {
+        boost::python::tuple tpl=tx();
+        assert(boost::python::len(tpl)==2);
+        double l=boost::python::extract<double>(tpl[0]);
+        double u=boost::python::extract<double>(tpl[1]);
+        ivl=Interval(l,u);
+    } else if(dx.check()) {
+        ivl=static_cast<Interval>(dx());
+    } else if(ix.check()) {
+        ivl=ix();
+    }
 }
 
 
@@ -124,6 +124,6 @@ void export_interval()
 void 
 numeric_submodule()
 {
-  export_float();
-  export_interval();
+    export_float();
+    export_interval();
 }

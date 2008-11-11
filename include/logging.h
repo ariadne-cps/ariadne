@@ -31,14 +31,14 @@
 
 //! Send a message to the global logging stream. 
 #define ARIADNE_LOG(level,msg)                                  \
-  if(verbosity >= level) { std::clog << msg << std::flush; }
+    if(verbosity >= level) { std::clog << msg << std::flush; }
 
 namespace Ariadne {
   
 struct Loggable {
- public:
-  Loggable() : verbosity(0) { }
-  mutable int verbosity;
+  public:
+    Loggable() : verbosity(0) { }
+    mutable int verbosity;
 };
 
 // Global log output file

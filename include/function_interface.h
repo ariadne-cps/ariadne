@@ -40,26 +40,26 @@ template<class X> class DifferentialVector;
 
 //! \brief Interface for functions whose derivatives can be computed.
 class FunctionInterface {
- public:
-  virtual ~FunctionInterface() { };
-  virtual FunctionInterface* clone() const = 0;
+  public:
+    virtual ~FunctionInterface() { };
+    virtual FunctionInterface* clone() const = 0;
      
-  virtual ushort smoothness() const = 0;
-  virtual uint argument_size() const = 0;
-  virtual uint result_size() const = 0;
+    virtual ushort smoothness() const = 0;
+    virtual uint argument_size() const = 0;
+    virtual uint result_size() const = 0;
 
-  virtual Vector<Float> evaluate(const Vector<Float>& x) const = 0;
-  virtual Vector<Interval> evaluate(const Vector<Interval>& x) const = 0;
-  virtual Matrix<Float> jacobian(const Vector<Float>& x) const = 0;
-  virtual Matrix<Interval> jacobian(const Vector<Interval>& x) const = 0;
-  virtual DifferentialVector< SparseDifferential<Float> > expansion(const Vector<Float>& x, const ushort& s) const = 0;
-  virtual DifferentialVector< SparseDifferential<Interval> > expansion(const Vector<Interval>& x, const ushort& s) const = 0;
+    virtual Vector<Float> evaluate(const Vector<Float>& x) const = 0;
+    virtual Vector<Interval> evaluate(const Vector<Interval>& x) const = 0;
+    virtual Matrix<Float> jacobian(const Vector<Float>& x) const = 0;
+    virtual Matrix<Interval> jacobian(const Vector<Interval>& x) const = 0;
+    virtual DifferentialVector< SparseDifferential<Float> > expansion(const Vector<Float>& x, const ushort& s) const = 0;
+    virtual DifferentialVector< SparseDifferential<Interval> > expansion(const Vector<Interval>& x, const ushort& s) const = 0;
   
-  virtual std::ostream& write(std::ostream& os) const = 0;
+    virtual std::ostream& write(std::ostream& os) const = 0;
 };
 
 inline std::ostream& operator<<(std::ostream& os, const FunctionInterface& f) {
-  return f.write(os); 
+    return f.write(os); 
 }
 
 

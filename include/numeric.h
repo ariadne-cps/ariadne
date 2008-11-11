@@ -249,6 +249,10 @@ inline Interval& operator-=(Interval& i1, Interval i2) { i1=sub(i1,i2); return i
 inline Interval& operator*=(Interval& i1, Interval i2) { i1=mul(i1,i2); return i1; }
 inline Interval& operator/=(Interval& i1, Interval i2) { i1=mul(i1,rec(i2)); return i1; }
 
+inline Interval operator+(Interval i1, Float x2) { return Interval(down(i1.l+x2),up(i1.u+x2)); };
+inline Interval operator+(Float x1, Interval i2) { return Interval(down(x1+i2.l),up(x1+i2.u)); };
+inline Interval operator-(Interval i1, Float x2) { return Interval(down(i1.l-x2),up(i1.u-x2)); };
+inline Interval operator-(Float x1, Interval i2) { return Interval(down(x1-i2.u),up(x1-i2.l)); };
 inline Interval operator*(Interval i1, Float x2) { return mul(i1,x2); }
 inline Interval operator*(Float x1, Interval i2) { return mul(i2,x1); }
 inline Interval operator/(Interval i1, Float x2) { return div(i1,x2); }

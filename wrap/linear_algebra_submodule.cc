@@ -109,8 +109,8 @@ template void export_matrix<Float>();
 template void export_matrix<Interval>();
 
 void linear_algebra_submodule() {
-  export_vector<Float>();
+  //export_vector<Float>();
   export_vector<Interval>();
-  export_matrix<Float>();
+  //export_matrix<Float>();
   export_matrix<Interval>();
 }

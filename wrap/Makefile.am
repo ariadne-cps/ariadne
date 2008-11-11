@@ -43,9 +43,11 @@ INTERVAL_SRC = interval_module.cc numeric_submodule.cc linear_algebra_submodule.
 
 DIFFERENTIATION_SRC = differentiation_module.cc differentiation_submodule.cc 
 
-ARIADNE_SRC = ariadne_module.cc \
+ARIADNE_SRC = utilities.cc \
+	ariadne_module.cc \
 	numeric_submodule.cc \
 	linear_algebra_submodule.cc \
 	differentiation_submodule.cc \
-	function_submodule.cc
+	function_submodule.cc \
+	calculus_submodule.cc
 

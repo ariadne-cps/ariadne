@@ -135,6 +135,8 @@ class SparseDifferential
   const_iterator end() const { return this->_data.end(); }
   uint argument_size() const { return this->_as; }
   uint degree() const { return this->_deg; }
+  const X& operator[](const uint& j) const { 
+    return this->operator[](MultiIndex::unit(this->_as,j)); }
   const X& operator[](const MultiIndex& a) const { 
     ARIADNE_ASSERT(a.number_of_variables()==this->argument_size()); 
     const_iterator iter=this->_data.find(a); 

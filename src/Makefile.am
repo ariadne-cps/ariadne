@@ -13,6 +13,7 @@ SRC = \
 	matrix.cc \
 	dense_differential.cc \
 	sparse_differential.cc \
+	taylor_variable.cc  \
 	approximate_taylor_model.cc  \
 	dynamical_toolbox.cc \
 	point.cc \

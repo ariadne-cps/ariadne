@@ -1711,6 +1711,19 @@ inline const BinaryTreeNode * GridTreeSubset::binary_tree() const {
     return _pRootTreeNode;
 }
 
+inline tribool GridTreeSubset::intersects( const Box& theBox ) const {
+    //Check if the box of the root cell intersects with theBox,
+    //if not then theBox does not intersect with the cell,
+    //otherwise we need to find at least one enabled node
+    //in the binary tree, such that it's box intersects theBox.
+
+    ARIADNE_ASSERT( theBox.dimension() == cell().dimension() );
+
+    BinaryWord pathCopy( cell().word() );
+    
+    return GridTreeSubset::intersects( binary_tree(), grid(), cell().height(), pathCopy, theBox );    
+}
+
 /*********************************************GridTreeSet*********************************************/
     
 

@@ -405,7 +405,7 @@ class BinaryTreeNode {
      *  rooted at pNode.
      */
     static size_t count_enabled_leaf_nodes( const BinaryTreeNode* pNode );
-
+    
     /*! \brief Starting in the \a pRootTreeNode node as at the root, this method finds(creates)
      *  the leaf node defined by the \a path and marks it as enabled. If some prefix of the \a path
      *  references an enabled node then nothing is done.
@@ -413,30 +413,38 @@ class BinaryTreeNode {
      *  Therefore, the initial call of this method should be done with \a position == 0;
      */
     static void add_enabled( BinaryTreeNode* pRootTreeNode, const BinaryWord& path, const uint position = 0 );
-
+    
     /*! \brief Creates a binary tree of the height rootNodePath.size(), puts the subtree oldRootNode
      * into the node defined by the path \a rootNodePath, returns the root node of the extended tree.
      */
     static BinaryTreeNode * prepend_tree( const BinaryWord & rootNodePath, BinaryTreeNode * oldRootNode);
-            
+    
     /*! \brief This method restricts \a pThisNode to \a pOtherNode.
      * In essance we do the inplace AND on the tree node pThisNode.
      * Note that, this method is recursive.
      */
     static void restrict( BinaryTreeNode * pThisNode, const BinaryTreeNode * pOtherNode );
-            
+    
     /*! \brief This method removed enabled nodes of \a pOtherNode from \a pThisNode.
      * Note that, this method is recursive.
      */
     static void remove( BinaryTreeNode * pThisNode, const BinaryTreeNode * pOtherNode );
-                        
+    
     /*! \brief checks if two trees overlap in a set-theory sence.
      * I.e. we assume that pRootNodeOne and pRootNodeTwo correspond to the same (virtual) root
      * and then we see if the enabled leaf node of one tree contain enabled leaf nodes of
      * another tree as their (virtual) children.
      */
     static bool overlap( const BinaryTreeNode * pRootNodeOne, const BinaryTreeNode * pRootNodeTwo );
-
+    
+    /*! \brief checks if the tree pRootNodeOne is a subset of the tree pRootNodeTwo, in a set-theory sence.
+     * I.e. we assume that pRootNodeOne and pRootNodeTwo correspond to the same (virtual) root
+     * and then we see if every enabled leaf node of pRootNodeOne is contained in the enabled leaf nodes of
+     * pRootNodeTwo, or it is covered by the enabled leaf nodes of pRootNodeTwo. When we write, contained and
+     * covered then we mean: is a subnode in the (virtual) tree and all it's subnodes in the (virtual) tree.
+     */
+    static bool subset( const BinaryTreeNode * pRootNodeOne, const BinaryTreeNode * pRootNodeTwo );
+    
     //@}
 };
 
@@ -472,7 +480,7 @@ class GridCell {
      *  aligned to some common primary cell, which height will be referenced by
      *  \a pPrimaryCellHeight, are returned as \a pathPrefixOne and \a pathPrefixTwo
      */
-    friend     bool subset( const GridCell& theCellOne, const GridCell& theCellTwo, BinaryWord * pPathPrefixOne,
+    friend bool subset( const GridCell& theCellOne, const GridCell& theCellTwo, BinaryWord * pPathPrefixOne,
                             BinaryWord * pPathPrefixTwo, uint * pPrimaryCellHeight );
 
     /*! \brief having \a theHeight the height of the primary cell, with \a leftBottomCorner and \a rightTopCorner
@@ -678,7 +686,7 @@ class GridTreeSubset {
     /*! \brief Tests if a cell is overlaps (intersects as an open set) a paving set. */
     friend bool overlap( const GridCell& theCell, const GridTreeSubset& theSet );
 
-    /*! \brief Tests if a grid paving set is a subset of another. */
+    /*! \brief Tests if a grid set \a theSet1 is a subset of \a theSet2. */
     friend bool subset( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 );
     
     /*! \brief Tests if two grid paving sets overlap (i.e. intersect as open sets.)

@@ -623,10 +623,46 @@ bool BinaryTreeNode::overlap( const BinaryTreeNode * pRootNodeOne, const BinaryT
                 //and the second node has an enabled sub-node
                 result = pRootNodeOne->is_enabled() && pRootNodeTwo->has_enabled();
             } else {
-                //Both nodes are non-lead nodes, then the trees intersect if
-                //either their left or right branches intersect
+                //Both nodes are non-lead nodes, then the trees overlap if
+                //either their left or right branches overlap
                 result = overlap( pRootNodeOne->left_node(), pRootNodeTwo->left_node() ) || 
                     overlap( pRootNodeOne->right_node(), pRootNodeTwo->right_node() );
+            }
+        }
+    }
+        
+    return result;
+}
+
+bool BinaryTreeNode::subset( const BinaryTreeNode * pRootNodeOne, const BinaryTreeNode * pRootNodeTwo ) {
+    bool result = false;
+
+    bool isNodeOneALeaf = pRootNodeOne->is_leaf();
+    bool isNodeTwoALeaf = pRootNodeTwo->is_leaf();
+        
+    if( isNodeOneALeaf && isNodeTwoALeaf ) {
+        //If both nodes are leaves, then pRootNodeOne is a subset of pRootNodeTwo if:
+        // 1. both of the nodes are enabled or
+        // 2. pRootNodeOne is disabled (represents an empty set)
+        result = ( ! pRootNodeOne->is_enabled() ) || pRootNodeTwo->is_enabled(); 
+    } else {
+        if( ! isNodeOneALeaf && isNodeTwoALeaf ){
+            //If pRootNodeTwo is a leaf then pRootNodeOne is a subset of pRootNodeTwo if:
+            // 1. pRootNodeTwo is enabled or
+            // 2. pRootNodeOne has no enabled sub-nodes
+            result = pRootNodeTwo->is_enabled() || ( ! pRootNodeOne->has_enabled() );
+        } else {
+            if( isNodeOneALeaf && ! isNodeTwoALeaf ){
+                //If pRootNodeOne is a leaf then pRootNodeOne is a subset of pRootNodeTwo if:
+                // 1. pRootNodeOne is disabled or
+                // 2. all of the pRootNodeTwo's leaf nodes are enabled
+                result = ( ! pRootNodeOne->is_enabled() ) || pRootNodeTwo->all_enabled();
+            } else {
+                //Both nodes are non-lead nodes, then pRootNodeOne is a subset of pRootNodeTwo
+                //if sub-trees of pRootNodeOne are subsets of the subtrees of pRootNodeTwo
+                result = subset( pRootNodeOne->left_node(), pRootNodeTwo->left_node() )
+                         &&
+                         subset( pRootNodeOne->right_node(), pRootNodeTwo->right_node() );
             }
         }
     }
@@ -1587,14 +1623,203 @@ bool overlap( const GridCell& theCell, const GridTreeSubset& theSet ) {
         
     return result;
 }
+
+/*! \brief This is a helper method, it receives two GridTreeSubset elements
+ *  then it computes the primary cell that is common to them in a sence that
+ *  these sets can be rooted to it. After that the method updates the paths
+ *  with the information about the paths from the found primary cell to the
+ *  root binary tree nodes of both sets.
+ */
+static void common_primary_cell_path(const GridTreeSubset& theSet1, const GridTreeSubset& theSet2, BinaryWord &pathCommonPCtoRC1, BinaryWord &pathCommonPCtoRC2 ) {
+    //Get the root cells for the subsets
+    GridCell rootCell1 = theSet1.cell();
+    GridCell rootCell2 = theSet2.cell();
+    //Get the heights of the primary cells for both subsets
+    const int heightPC1 = rootCell1.height();
+    const int heightPC2 = rootCell2.height();
+    if( heightPC2 > heightPC1 ) {
+        //Compute the path from the common primary cell to the root cell of theSet1
+        pathCommonPCtoRC1 = GridCell::primary_cell_path( rootCell1.dimension(), heightPC2, heightPC1 );
+        pathCommonPCtoRC1.append( rootCell1.word() );
+        //Compute the path from the common primary cell to the root cell of theSet2
+        pathCommonPCtoRC2 = rootCell2.word();
+    } else {
+        //Compute the path from the common primary cell to the root cell of theSet2
+        pathCommonPCtoRC1 = rootCell1.word();
+        //Compute the path from the common primary cell to the root cell of theSet1
+        pathCommonPCtoRC2 = GridCell::primary_cell_path( rootCell1.dimension(), heightPC1, heightPC2 );
+        pathCommonPCtoRC2.append( rootCell2.word() );
+    }
+}
+
+/*! \brief this method locates the node in the tree rooted to pSuperTreeRootNode that corresponds to
+ *  the path pathFromSuperToSub. In case we encounter a leaf node then we stop and return the node
+ */
+static const BinaryTreeNode * locate_node( const BinaryTreeNode * pSuperTreeRootNode, const BinaryWord& pathFromSuperToSub ){
+    //Locate the node in the pSuperTreeRootNode such that it corresponds to pSubTreeRootNode
+    const BinaryTreeNode * pCurrentSuperTreeNode = pSuperTreeRootNode;
+    for( int i = 0; i < pathFromSuperToSub.size(); i++ ) {
+        if( pCurrentSuperTreeNode->is_leaf() ) {
+            //We are in the leaf node and we have not yet reached the node
+            //corresponding to pSubTreeRootNode, because i < pathFromSuperToSub.size()
+            break;
+        } else {
+            pCurrentSuperTreeNode = ( pathFromSuperToSub[i] ? pCurrentSuperTreeNode->right_node() : pCurrentSuperTreeNode->left_node() );
+        }
+    }
+    return pCurrentSuperTreeNode;
+}
+
+/*! \brief This is a helper functiuon for bool subset( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 )
+ *  pSuperTreeRootNode is the root tree node, pathFromSuperToSub is the path from this root node to the root node
+ *  pSubTreeRootNode. In general we see if the set represented by pSubTreeRootNode is a subset of pSuperTreeRootNode.
+ *  If pSubTreeRootNode has no enabled leaf nodes then the result is always true, else if pSuperTreeRootNode has no
+ *  enabled leaf nodes then the result is always false.
+ */
+static bool subset(const BinaryTreeNode * pSubTreeRootNode, const BinaryTreeNode * pSuperTreeRootNode, const BinaryWord & pathFromSuperToSub) {
+    bool result = false;
+
+    //Check if both sets are not empty
+    if( pSubTreeRootNode->has_enabled() ) {
+        if( pSuperTreeRootNode->has_enabled() ) {
+            //Locate the node in pSuperTreeRootNode, by following the path pathFromSuperToSub
+            const BinaryTreeNode * pCurrentSuperTreeNode = locate_node( pSuperTreeRootNode, pathFromSuperToSub );
+            
+            if( pCurrentSuperTreeNode->is_leaf() ) {
+                //If we've reached the leaf node then pSubTreeRootNode is a subset of pSuperTreeRootNode if this
+                //node is enabled, otherwise not. This is because we know that pSubTreeRootNode is not empty.
+                result = pCurrentSuperTreeNode->is_enabled();
+            } else {
+                //At this point pCurrentSuperTreeNode corresponds to pSubTreeRootNode
+                //So the trees are aligned now and we can continue checking further.
+                result = BinaryTreeNode::subset( pSubTreeRootNode, pCurrentSuperTreeNode );
+            }
+        } else {
+            //Nothing is a subset of an empty set except for an empty
+            //set, but we know that pSubTreeRootNode is not empty.
+            result = false;
+        }
+    } else {
+        //An empty set is a subset of any set including the empty set itself
+        result = true;
+    }
+
+    return result;
+}
+
+/*! \brief This is a helper functiuon for bool subset( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 )
+ *  pSuperTreeRootNode is the root tree node, pathFromSuperToSub is the path from this root node to the root node
+ *  pSubTreeRootNode. In general we see if the set represented by pSuperTreeRootNode is a subset of pSubTreeRootNode.
+ *  If pSuperTreeRootNode has no enabled leaf nodes then the result is always true, else if pSubTreeRootNode has no
+ *  enabled leaf nodes then the result is always false.
+ */
+static bool subset( const BinaryTreeNode * pSuperTreeRootNode, const BinaryWord & pathFromSuperToSub, const BinaryTreeNode * pSubTreeRootNode ) {
+    bool result = false;
     
+    //First we iterate throught the path pathFromSuperToSub trying to reach the common node with pSubTreeRootNode
+    //Since we want to know if pSuperTreeRootNode is a subset of pSubTreeRootNode, the branches of pSuperTreeRootNode
+    //that we ommit traveling the path pathFromSuperToSub, should contain no enabled leaf nodes. Because otherwise 
+    //pSuperTreeRootNode is not a subset of pSubTreeRootNode. Apart from this, once we encounter a leaf node on the
+    //path we stop because the we can already decide if pSuperTreeRootNode is a subset of pSubTreeRootNode.
+    int path_element = 0;
+    bool areExtraLeavesDisabled = true;
+    const BinaryTreeNode *pCurrentSuperTreeNode = pSuperTreeRootNode;
+    while( ( path_element < pathFromSuperToSub.size() ) && areExtraLeavesDisabled ) {
+        if( pCurrentSuperTreeNode->is_leaf() ){
+            //We ended up in a leaf node so we have to stop iterating through the path
+            break;
+        } else {
+            if( pathFromSuperToSub[ path_element ] ) {
+                //The path goes right, check if the left branch has no enabled leaves
+                areExtraLeavesDisabled = ! pCurrentSuperTreeNode->left_node()->has_enabled();
+                pCurrentSuperTreeNode = pCurrentSuperTreeNode->right_node();
+            } else {
+                //The path goes left, check if the right branch has no enabled leaves
+                areExtraLeavesDisabled = ! pCurrentSuperTreeNode->right_node()->has_enabled();
+                pCurrentSuperTreeNode = pCurrentSuperTreeNode->left_node();
+            }
+        }
+        path_element++;
+    }
+    
+    if( areExtraLeavesDisabled ) {
+        //If pSuperTreeRootNode does not have enabled leaves that are outside the bounding cell of
+        //pSubTreeRootNode, this means that pSuperTreeRootNode can be a subset of pSubTreeRootNode.
+        //Now we have to check that:
+        if( pCurrentSuperTreeNode->is_leaf() ) {
+            //A) We reached a leaf node, when following the path, then
+            if( pCurrentSuperTreeNode->is_enabled() ) {
+                //1. If it is enabled then it depends on whether we followed the path to the end
+                if( path_element < pathFromSuperToSub.size() ) {
+                    //1.1 If the path was not finished then pSuperTreeRootNode is a superset of pSubTreeRootNode
+                    result = false;
+                } else {
+                    //1.2 If the path was ended, i.e. pCurrentSuperTreeNode and pSubTreeRootNode are
+                    //aligned, then we simply need to check if one tree is a subset of another:
+                    //     bool subset(const BinaryTreeNode *, const BinaryTreeNode * )
+                    result = BinaryTreeNode::subset( pCurrentSuperTreeNode, pSubTreeRootNode );
+                }
+            } else {
+                //2. if it is disabled then pSuperTreeRootNode is empty and thus is a subset of theSet2
+                result = true;
+            }
+        } else {
+            //B) We are in a non-leaf node, so we definitely reached the end of the path,
+            //thus proceed like in case A.1.2 (the root nodes of both trees are aligned )
+            result = BinaryTreeNode::subset( pCurrentSuperTreeNode, pSubTreeRootNode );
+        }
+    } else {
+        //If there are enabled leaf nodes in theSet1 that are outside of the bounding cell of
+        //pSubTreeRootNode, then clearly pSuperTreeRootNode is not a subset of pSubTreeRootNode.
+        result = false;
+    }
+    return result;
+}
+
 bool subset( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 ) {
-    throw NotImplemented(__PRETTY_FUNCTION__);
+    bool result = false;
+        
+    //Test that the Grids are equal
+    ARIADNE_ASSERT( theSet1.grid() == theSet2.grid() );
+    
+    //Define paths for the root cells of theSet1 and theSet2 from the common primary cell
+    BinaryWord pathCommonPCtoRC1;
+    BinaryWord pathCommonPCtoRC2;
+    //Get the paths from the common primary cell to the root nodes of the set's binary trees
+    common_primary_cell_path( theSet1, theSet2, pathCommonPCtoRC1, pathCommonPCtoRC2 );
+    
+    //At this point we know paths from the common primary cell
+    //to the root nodes of both subsets. If one of these paths is a prefix of
+    //the other one, then there is a chance that theSet1 is a subset of theSet2.
+    //If not, then they definitely do not overlap.
+    if( pathCommonPCtoRC1.is_prefix( pathCommonPCtoRC2 ) ) {
+        //In this case theSet2 is a subset of the bounding cell of theSet1. Still 
+        //it is possible that theSet1 is a subset of theSet2 if all cells of theSet1
+        //outside the bounding box of theSet2 are disabled cells. This we check by
+        //following the path from the foor of theSet1 to the root of theSet2.
+        pathCommonPCtoRC2.erase_prefix( pathCommonPCtoRC1.size() );
+        result = subset( theSet1.binary_tree(), pathCommonPCtoRC2, theSet2.binary_tree() );
+    } else {
+        if( pathCommonPCtoRC2.is_prefix( pathCommonPCtoRC1 ) ) {
+            //Since pathCommonPCtoRC2 is a prefix of pathCommonPCtoRC1,
+            //theSet1 can be a subset of theSet2. This is because theSet1
+            //lies within the bounding cell of theSet2
+            pathCommonPCtoRC1.erase_prefix( pathCommonPCtoRC2.size() );
+            result = subset( theSet1.binary_tree(), theSet2.binary_tree(), pathCommonPCtoRC1 );
+        } else {
+            //theSet1 is a definitely not a subset of theSet2 Since their bounding boxes
+            //are disjoint, due to paths (from the common primary cell to their root nodes)
+            //that have different suffixes.
+            result = false;
+        }
+    }
+
+    return result;
 }
     
 /*! \brief This is a helper functiuon for bool overlap( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 )
- *  pSuperTreeRootNode is the root tree node, pathFromSuperToSub is the path from this root node to the root node pSubTreeRootNode
- *  In general we see if the sets represented by pSuperTreeRootNode and pSubTreeRootNode overlap.
+ *  pSuperTreeRootNode is the root tree node, pathFromSuperToSub is the path from this root node to the root node
+ *  pSubTreeRootNode. In general we see if the sets represented by pSuperTreeRootNode and pSubTreeRootNode overlap.
  *  If at least one of pSuperTreeRootNode and pSubTreeRootNode have no enabled leaf nodes then the result is always false.
  */
 static bool overlap(const BinaryTreeNode * pSuperTreeRootNode, const BinaryWord & pathFromSuperToSub, const BinaryTreeNode * pSubTreeRootNode) {
@@ -1602,17 +1827,9 @@ static bool overlap(const BinaryTreeNode * pSuperTreeRootNode, const BinaryWord 
         
     //Check if both sets are not empty
     if( pSuperTreeRootNode->has_enabled() && pSubTreeRootNode->has_enabled() ) {
-        //Locate the node in the pSuperTreeRootNode such that it corresponds to pSubTreeRootNode
-        const BinaryTreeNode * pCurrentSuperTreeNode = pSuperTreeRootNode;
-        for( int i = 0; i < pathFromSuperToSub.size(); i++ ) {
-            if( pCurrentSuperTreeNode->is_leaf() ) {
-                //We are in the leaf node and we have not yet reached the node
-                //corresponding to pSubTreeRootNode, because i < pathFromSuperToSub.size()
-                break;
-            } else {
-                pCurrentSuperTreeNode = ( pathFromSuperToSub[i] ? pCurrentSuperTreeNode->right_node() : pCurrentSuperTreeNode->left_node() );
-            }
-        }
+
+        //Locate the node in pSuperTreeRootNode, by following the path pathFromSuperToSub
+        const BinaryTreeNode * pCurrentSuperTreeNode = locate_node( pSuperTreeRootNode, pathFromSuperToSub );
             
         if( pCurrentSuperTreeNode->is_leaf() ) {
             //If we've reached the leaf node then the sets overlap if this node is enabled,
@@ -1620,6 +1837,7 @@ static bool overlap(const BinaryTreeNode * pSuperTreeRootNode, const BinaryWord 
             result = pCurrentSuperTreeNode->is_enabled();
         } else {
             //At this point pCurrentSuperTreeNode corresponds to pSubTreeRootNode
+            //So the trees are aligned now and we can continue checking further.
             result = BinaryTreeNode::overlap( pCurrentSuperTreeNode, pSubTreeRootNode );
         }
     }
@@ -1632,37 +1850,14 @@ bool overlap( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 ) {
         
     //Test that the Grids are equal
     ARIADNE_ASSERT( theSet1.grid() == theSet2.grid() );
-        
+    
     //Define paths for the root cells of theSet1 and theSet2 from the common primary cell
     BinaryWord pathCommonPCtoRC1;
     BinaryWord pathCommonPCtoRC2;
-    //The height of the common primary cell
-    uint heightCommonPC;
-    //Get the root cells for the subsets
-    GridCell rootCell1 = theSet1.cell();
-    GridCell rootCell2 = theSet2.cell();
-    //Get the heights of the primary cells for both subsets
-    const int heightPC1 = rootCell1.height();
-    const int heightPC2 = rootCell2.height();
-    if( heightPC2 > heightPC1 ) {
-        //And update the heifght of the common primary cell
-        heightCommonPC = heightPC2;
-        //Compute the path from the common primary cell to the root cell of theSet1
-        pathCommonPCtoRC1 = GridCell::primary_cell_path( rootCell1.dimension(), heightPC2, heightPC1 );
-        pathCommonPCtoRC1.append( rootCell1.word() );
-        //Compute the path from the common primary cell to the root cell of theSet2
-        pathCommonPCtoRC2 = rootCell2.word();
-    } else {
-        //And update the heifght of the common primary cell
-        heightCommonPC = heightPC1;
-        //Compute the path from the common primary cell to the root cell of theSet2
-        pathCommonPCtoRC1 = rootCell1.word();
-        //Compute the path from the common primary cell to the root cell of theSet1
-        pathCommonPCtoRC2 = GridCell::primary_cell_path( rootCell1.dimension(), heightPC1, heightPC2 );
-        pathCommonPCtoRC2.append( rootCell2.word() );
-    }
-        
-    //At this point we know paths from the common primary cell (heightCommonPC) 
+    //Get the paths from the common primary cell to the root nodes of the set's binary trees
+    common_primary_cell_path( theSet1, theSet2, pathCommonPCtoRC1, pathCommonPCtoRC2 );
+
+    //At this point we know paths from the common primary cell
     //to the root nodes of both subsets. If one of these paths is a prefix of
     //the other one, then there is a chance that the subsets overlap.
     //If not, then they definitely do not overlap.
@@ -1676,7 +1871,8 @@ bool overlap( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 ) {
             pathCommonPCtoRC1.erase_prefix( pathCommonPCtoRC2.size() );
             result = overlap( theSet2.binary_tree(), pathCommonPCtoRC1, theSet1.binary_tree() );
         } else {
-            //DO NOTHING: The sets do not overlap
+            //The sets do not overlap
+            result = false;
         }
     }
         

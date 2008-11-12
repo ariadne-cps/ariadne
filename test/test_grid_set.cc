@@ -1673,6 +1673,81 @@ void test_subset_overlap_subset() {
     
 }
 
+void test_subset_subset_subset() {
+    
+    //Allocate a trivial Grid two dimensional grid
+    Grid theTrivialGrid(2, 1.0);
+    
+    const uint heightZero = 0;
+    const uint heightOne = 1;
+    const uint heightTwo = 2;
+    const uint heightThree = 3;
+    
+    //Create the set and the subset of this set, they are both rooted to the same primary node of heightTwo 
+    //theSetOne = [-1,0]x[-1,0] U [0,1]x[0,1] U [1,1]x[3,3]
+    GridTreeSet theSetOne( theTrivialGrid, heightTwo, new BinaryTreeNode( make_binary_word("1111001000100"), make_binary_word("1001001") ) );
+    //theSubsetOne = [-1,0]x[-1,0] U [0,1]x[0,1]
+    GridTreeSubset theSubsetOne( theTrivialGrid, heightTwo, make_binary_word("0"), theSetOne.binary_tree()->left_node() );
+
+    // !!!
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool subset( const GridTreeSubset& theSetOne, const GridTreeSubset& theSubsetOne )");
+    ARIADNE_PRINT_TEST_COMMENT("theSetOne");
+    cout << theSetOne << endl;
+    ARIADNE_PRINT_TEST_COMMENT("theSubsetOne");
+    cout << theSubsetOne << endl;
+    ARIADNE_TEST_EQUAL( subset( theSetOne, theSubsetOne ), false );
+    
+    // !!!
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool subset( const GridTreeSubset& theSubsetOne, const GridTreeSubset& theSetOne )");
+    ARIADNE_TEST_EQUAL( subset( theSubsetOne, theSetOne ), true );
+    
+    //Make two subsets such that the tree of the first one is a super tree of the second one,
+    //but the second one contains the first one as a set
+    BinaryTreeNode binaryTreeRootTwo( make_binary_word("1111001000100"), make_binary_word("1001000") ); 
+    //theSubSetTwo = [-1,0]x[-1,0] U [0,1]x[0,1]
+    GridTreeSubset theSubSetTwo( theTrivialGrid, heightTwo, BinaryWord(), &binaryTreeRootTwo );
+    BinaryTreeNode binaryTreeRootThree( make_binary_word("100"), make_binary_word("10") ); 
+    //theSubSetThree = [-1,1]x[-1,3]
+    GridTreeSubset theSubSetThree( theTrivialGrid, heightThree, make_binary_word("110"), &binaryTreeRootThree );
+    
+    // !!!
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool subset( const GridTreeSubset& theSubSetTwo, const GridTreeSubset& theSubSetThree )");
+    ARIADNE_PRINT_TEST_COMMENT("theSubSetTwo");
+    cout << theSubSetTwo << endl;
+    ARIADNE_PRINT_TEST_COMMENT("theSubSetThree");
+    cout << theSubSetThree << endl;
+    ARIADNE_TEST_EQUAL( subset( theSubSetTwo, theSubSetThree ), true );
+    
+    // !!!
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool subset( const GridTreeSubset& theSubSetThree, const GridTreeSubset& theSubSetTwo )");
+    ARIADNE_TEST_EQUAL( subset( theSubSetThree, theSubSetTwo ), false );
+    
+    // !!!
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool subset( const GridTreeSubset& theSubSetTwo, const GridTreeSubset& theSubSetThree )");
+    ARIADNE_PRINT_TEST_COMMENT("Mince theSubSetThree to depth 10, just to make things more complex");
+    theSubSetThree.mince(10);
+    ARIADNE_TEST_EQUAL( subset( theSubSetTwo, theSubSetThree ), true );
+    
+    //Create a new set which is a subset of theSubSetThree but is not a superset of theSubSetTwo
+    BinaryTreeNode binaryTreeRootFour( binaryTreeRootThree );
+    binaryTreeRootFour.recombine();
+    binaryTreeRootFour.mince(5);
+    binaryTreeRootFour.left_node()->left_node()->left_node()->left_node()->left_node()->set_disabled();
+    //theSubSetThree = [-1,1]x[-1,3] \ [-1,-1]x[-0.5,-0.5]
+    GridTreeSubset theSubSetFour( theTrivialGrid, heightThree, make_binary_word("110"), &binaryTreeRootFour );
+    
+    // !!!
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool subset( const GridTreeSubset& theSubSetFour, const GridTreeSubset& theSubSetThree )");
+    ARIADNE_PRINT_TEST_COMMENT("theSubSetFour");
+    cout << theSubSetFour << endl;
+    ARIADNE_TEST_EQUAL( subset( theSubSetFour, theSubSetThree ), true );
+    
+    // !!!
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing bool subset( const GridTreeSubset& theSubSetTwo, const GridTreeSubset& theSubSetFour )");
+    ARIADNE_TEST_EQUAL( subset( theSubSetTwo, theSubSetFour ), false );
+    
+}
+
 int main() {
     
     test_binary_tree();
@@ -1712,6 +1787,8 @@ int main() {
     test_cell_overlap_subset();
     
     test_subset_overlap_subset();
+    
+    test_subset_subset_subset();
     
     return ARIADNE_TEST_FAILURES;
 }

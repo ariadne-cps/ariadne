@@ -48,37 +48,77 @@ class Box
     Box(uint d, const Float& x0l, const Float& x0u, ...);
     template<class T> Box(const T& t) : Vector<Interval>(t) { }
     template<class T1, class T2> Box(const T1& t1, const T2& t2) : Vector<Interval>(t1,t2) { }
+
     //! The unit box \f$[-1,1]^n\f$ in \a n dimensions.
-    static Box unit_box(uint n) { return Box(n,Interval(-1,1)); }
+    static Box unit_box(uint n) {
+        return Box(n,Interval(-1,1));
+    }
+
     //! The upper quadrant box \f$[0,infty]^n\f$ in \a n dimensions.
-    static Box upper_quadrant(uint n) { return Box(n,Interval(0,inf())); }
+    static Box upper_quadrant(uint n) {
+        return Box(n,Interval(0,inf()));
+    }
+
     //! An approximation to the centre of the box.
-    Vector<Float> centre() const { return midpoint(*this); }
+    Vector<Float> centre() const {
+        return midpoint(*this);
+    }
+
     //! The radius of the box in the supremum norm.
     Float radius() const { 
-        Float dmax=0; for(uint i=0; i!=this->size(); ++i) { dmax=max(dmax,(*this)[i].width()); } return up(dmax/2); }
+        Float dmax=0;
+        for(uint i=0; i!=this->size(); ++i) {
+            dmax = max( dmax, (*this)[i].width() );
+        }
+        return up(dmax/2);
+    }
+
     //! Test if the box is empty.
     bool empty() const { 
-        return Ariadne::empty(*this); }
-    //! Test if the box is bounded.
-    bool bounded() const { 
-        for(uint i=0; i!=this->Vector<Interval>::size(); ++i) {
-            if(!Ariadne::bounded((*this)[i])) { return false; } } return true; }
+        return Ariadne::empty(*this);
+    }
 
-    virtual Box* clone() const { return new Box(*this); }
-    virtual uint dimension() const { return this->size(); }
+    //! Test if the box is bounded.
+    bool bounded() const {
+        for(uint i=0; i!=this->Vector<Interval>::size(); ++i) {
+            if(!Ariadne::bounded((*this)[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    virtual Box* clone() const {
+        return new Box(*this);
+    }
+
+    virtual uint dimension() const {
+        return this->size();
+    }
+
     virtual tribool disjoint(const Vector<Interval>& other) const { 
-        return Ariadne::disjoint(*this,other); }
+        return Ariadne::disjoint(*this, other);
+    }
+
     virtual tribool intersects(const Vector<Interval>& other) const { 
-        return !Ariadne::disjoint(*this,other); }
+        return !Ariadne::disjoint(*this, other);
+    }
+
     virtual tribool superset(const Vector<Interval>& other) const { 
-        return Ariadne::subset(other,*this); }
+        return Ariadne::subset(other, *this);
+    }
+
     virtual tribool subset(const Vector<Interval>& other) const { 
-        return Ariadne::subset(*this,other); }
+        return Ariadne::subset(*this, other);
+    }
+
     virtual Vector<Interval> bounding_box() const { 
-        return *this; }
+        return *this;
+    }
+
     virtual std::ostream& write(std::ostream& os) const {
-        return os << *static_cast<const Vector<Interval>*>(this); }
+        return os << *static_cast<const Vector<Interval>*>(this);
+    }
 };
 
 Box make_box(const std::string&);

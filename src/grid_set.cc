@@ -811,7 +811,7 @@ Box GridCell::grid_box_to_space(const Box & theGridBox, const Grid& theGrid ){
 // 1. Compute the primary cell located the the height \a theHeight above the zero level,
 // 2. Compute the cell defined by the path \a theWord (from the primary cell).
 // 3. Use Grid data to compute the box coordinates in the original space.
-Box GridCell::compute_box(const Grid& theGrid, const uint theHeight, const BinaryWord& theWord){
+Box GridCell::compute_box(const Grid& theGrid, const uint theHeight, const BinaryWord& theWord) {
     //1. Obtain the primary-cell box, related to some grid
     const uint dimensions = theGrid.dimension();
     Box  theTmpBox( primary_cell( theHeight , dimensions ) );
@@ -883,7 +883,7 @@ void GridTreeSubset::subdivide( Float theMaxCellWidth ) {
             max_subdiv_dim = i;
         }
     }
-        
+    
     //3. Let the maximum number of subdivisions M has to be done in dimension K  with the total number of
     //   dimensions N: 1 <= K <= N. This means that from this cell down we have to do M splits for dimension K.
     uint needed_num_tree_subdiv = 0;
@@ -932,22 +932,118 @@ GridTreeSubset::operator ListSet<Box>() const {
     return result;
 }
 
-bool GridTreeSubset::superset( const Box& theBox ) const {
-    throw NotImplemented(__PRETTY_FUNCTION__);
-}
-
-bool GridTreeSubset::subset( const Box& theBox ) const {
-    throw NotImplemented(__PRETTY_FUNCTION__);
-}
-
-bool GridTreeSubset::disjoint( const Box& theBox ) const {
-    throw NotImplemented(__PRETTY_FUNCTION__);
-}
-
-bool GridTreeSubset::intersects( const Box& theBox ) const {
-    throw NotImplemented(__PRETTY_FUNCTION__);
-}
+tribool GridTreeSubset::superset( const Box& theBox ) const {
+    //Check that the box corresponding to the root of the set
+    //contains theBox as a subset. If not then the set can
+    //not be the superset, otherwise for all sub-cells of the
+    //set, such that they are not disjoint from theBox we have
+    //to follow the tree untill the leaves, and if the leaf
+    //node's box is disjoint from theBox then it is all fine otherwise
+    //if it is not, then if it is enabled then it is fine,
+    //but if it is disabled, then clearly the set is not a
+    //superset of theBox and so we can stop the tree exploration.
     
+    throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+tribool GridTreeSubset::subset( const Box& theBox ) const {
+    //Check that the box corresponding to the root node of the set
+    //is not disjoint from theBox. If it is then the set is not a
+    //subset of theBox otherwise we need to traverse the tree and check
+    //if all it's enabled nodes give boxes that are subsets of theBox.
+    
+    throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+tribool GridTreeSubset::disjoint( const Box& theBox ) const {
+    //Check that the box corresponding to the root node of the set
+    //is disjoint from theBox. If it is then the set is disjoint
+    //from theBox otherwise we need to traverse the tree and check
+    //if all it's enabled nodes give boxes that are disjoint from theBox.
+    
+    throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+tribool GridTreeSubset::intersects( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
+                                    const uint theHeight, BinaryWord &theWord, const Box& theBox ) {
+    tribool result;
+    
+    //Check if the current node intersects with theBox
+    Box theCellsBox = GridCell::compute_box( theGrid, theHeight, theWord );
+    tribool doPossiblyIntersect = theCellsBox.intersects( theBox );
+    
+    if( doPossiblyIntersect || indeterminate( doPossiblyIntersect ) ) {
+        //If there is a possible intersection then we do the checking
+        if( pCurrentNode->is_leaf() ) {
+            //If this is a leaf node then
+            if( pCurrentNode->is_enabled() ){
+                //If the node is enabled, then we have a possible intersection
+                result = doPossiblyIntersect;
+            } else {
+                //Since the node is disabled, there can be no intersection
+                result = false;
+            }
+        } else {
+            //The node is not a leaf and the intersection is possible so check the left sub-node
+            theWord.push_back(false);
+            const tribool result_left = intersects( pCurrentNode->left_node(), theGrid, theHeight, theWord, theBox );
+            theWord.pop_back();
+            
+            //
+            //WARNING: I know how to write a shorter code, like:
+            //          if( ! ( result = definitely( result_left ) ) ) {
+            //              ...
+            //          }
+            // I DO NOT DO THIS ON PERPOSE, KEEP THE CODE EASILY UNDERSTANDABLE!
+            //
+            if( result_left ) {
+                //If we definitely have intersection for the left branch then answer is true
+                result = true;
+            } else {
+                //If we still not sure/ or do not know then try to search further, i.e. check the right node
+                theWord.push_back(true);
+                const tribool result_right = intersects( pCurrentNode->right_node(), theGrid, theHeight, theWord, theBox );
+                theWord.pop_back();
+                if( result_right ) {
+                    //If we definitely have intersection for the right branch then answer is true
+                    result = true;
+                } else {
+                    //Now either we have indeterminate answers or we do not know, if one
+                    //if the answers for one of the branches was indeterminate then we
+                    //report indeterminate, otherwise it is definitely false.
+                    if( indeterminate( result_left ) || indeterminate( result_right )  ) {
+                        result = indeterminate;
+                    } else {
+                        result = false;
+                    }
+                    //ERROR: Substituting the above if statement with the following conditional assignement DOES NOT WORK:
+                    //    result = ( ( indeterminate( result_left ) || indeterminate( result_right ) ) ? indeterminate : false );
+                    //In this case, if we need to assign false, the proper branch of the conditional statement is executed,
+                    //but somehow the value of the "result" variable becomes indeterminate!
+                }
+            }
+        }
+    } else {
+        //If there is no intersection then we just stop with a negative result
+        result = false;
+    }
+    
+    return result;
+}
+
+tribool GridTreeSubset::intersects( const Box& theBox ) const {
+    //Check if the box of the root cell intersects with theBox,
+    //if not then theBox does not intersect with the cell,
+    //otherwise we need to find at least one enabled node
+    //in the binary tree, such that it's box intersects theBox.
+
+    ARIADNE_ASSERT( theBox.dimension() == cell().dimension() );
+
+    BinaryWord pathCopy( cell().word() );
+    
+    return GridTreeSubset::intersects( binary_tree(), grid(), cell().height(), pathCopy, theBox );    
+}
+
 /*********************************************GridTreeSet*********************************************/
 
 void GridTreeSet::up_to_primary_cell( const uint toPCellHeight ){
@@ -963,7 +1059,8 @@ void GridTreeSet::up_to_primary_cell( const uint toPCellHeight ){
     this->_theGridCell = GridCell( this->_theGridCell.grid(), toPCellHeight, BinaryWord() );
 }
 
-BinaryTreeNode* GridTreeSet::align_with_cell( const uint otherPavingPCellHeight, const bool stop_on_enabled, const bool stop_on_disabled, bool & has_stopped ) {
+BinaryTreeNode* GridTreeSet::align_with_cell( const uint otherPavingPCellHeight, const bool stop_on_enabled,
+                                              const bool stop_on_disabled, bool & has_stopped ) {
     const uint thisPavingPCellHeight = this->cell().height();
         
     //The current root node of the GridTreeSet
@@ -977,9 +1074,9 @@ BinaryTreeNode* GridTreeSet::align_with_cell( const uint otherPavingPCellHeight,
             
         //2. Locate the binary tree node corresponding to this primnary cell
         uint position = 0;
-        while( position < primaryCellPath.size() && !( has_stopped = (
-                                                                      ( pBinaryTreeNode->is_enabled() && stop_on_enabled ) ||
-                                                                      ( pBinaryTreeNode->is_disabled() && stop_on_disabled ) ) ) ){
+        while( position < primaryCellPath.size() &&
+               !( has_stopped = ( ( pBinaryTreeNode->is_enabled() && stop_on_enabled ) ||
+                                  ( pBinaryTreeNode->is_disabled() && stop_on_disabled ) ) ) ){
             //Split the node, if it is not a leaf it will not be changed
             pBinaryTreeNode->split();
             //Follow the next path step

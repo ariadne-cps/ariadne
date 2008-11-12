@@ -575,6 +575,7 @@ class GridCell {
      *  if not, then we return an empty binary word.
      */
     static BinaryWord primary_cell_path( const uint dimensions, const uint topPCellHeight, const uint bottomPCellHeight);
+
 };
 
 /*! \brief This class represents a subpaving of a paving. Note that, the subtree enclosed into
@@ -601,7 +602,17 @@ class GridTreeSubset {
      * one has to make in order to have sub-intervals of the width <= \a theMaxWidth
      */
     uint compute_number_subdiv( Float theWidth, const Float theMaxWidth) const;
-        
+
+    /*! \brief This method checks whether \a theBox intersects with the set defined by
+     *  \a pCurrentNode, \a theGrid, the primary cell (\a theHeight) to which this
+     *  tree is (virtually) rooted via the path theWord. This is done using the recursive
+     *  procedure by checking the cells of the tree that intersect with the box and going
+     * down to the leaves. When reaching a leaf node that is enabled we conclude that we
+     * have an intersection. If there are no such nodes then there is not intersection.
+     */
+    static tribool intersects( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
+                            const uint theHeight, BinaryWord &theWord, const Box& theBox );
+    
   public:
     /*! \brief A short name for the constant iterator */
     typedef GridTreeConstIterator const_iterator;
@@ -700,16 +711,16 @@ class GridTreeSubset {
      */
 
     /*! \brief Tests if a grid set is a subset of a box. */
-    bool subset( const Box& theBox ) const;
+    tribool subset( const Box& theBox ) const;
     
     /*! \brief Tests if a grid set is a superset of a box. */
-    bool superset( const Box& theBox ) const;
+    tribool superset( const Box& theBox ) const;
     
     /*! \brief Tests if (the closure of) a grid set is disjoint from a box. */
-    bool disjoint( const Box& theBox  ) const;
+    tribool disjoint( const Box& theBox  ) const;
     
     /*! \brief Tests if a grid set intersects a box. */
-    bool intersects( const Box& theBox ) const;
+    tribool intersects( const Box& theBox ) const;
             
     //@}
             
@@ -1876,9 +1887,6 @@ template<class G> void draw(G& theGraphic, const CompactSetInterface& theSet) {
 }
 
 } // namespace Ariadne
-
-
-
 
 #endif /* GRID_SET */
 

@@ -70,20 +70,11 @@ class ToolboxInterface
     typedef Vector<Interval> BoxType;
     typedef Interval IntervalType;
     typedef FunctionInterface FunctionType;
+    typedef SetModelType EnclosureType;
   public:
     //! \brief Virtual destructor.
     virtual ~ToolboxInterface() { }
 
-    //! \brief Compose a function with a set model.
-    virtual SetModelType 
-    compose(const FunctionInterface& function, 
-            const SetModelType& set_model) const = 0;
-  
-    //! \brief Compose a function model with a set model.
-    virtual SetModelType 
-    compose(const FlowModelType& function_model, 
-            const SetModelType& set_model) const = 0;
-  
     //! \brief Test if a box satisfies the constraint given by the guard. Returns \a true is all points
     //! in the box satisfy the constraint, \a false if all points do not satisfy the constraint, and 
     //! indeterminate otherwise.
@@ -122,19 +113,16 @@ class ToolboxInterface
                   const SetModelType& initial_set_model) const = 0;
   
     //! \brief Computes the image of the set defined by \a set_model under the \a map.
-    /*
-      virtual SetModelType 
-      reset_step(const FunctionType& map, 
-      const SetModelType& set_model) const = 0;  
-    */
+    virtual SetModelType 
+    reset_step(const FunctionType& map, 
+               const SetModelType& set_model) const = 0;  
 
     //! \brief Computes the image of the set defined by \a set_model under the approximation of the map 
     //! given by \a map_model.
-    /*
-      virtual SetModelType 
-      reset_step(const MapModelType& map_model, 
-      const SetModelType& set_model) const = 0;
-    */
+    virtual SetModelType 
+    reset_step(const MapModelType& map_model, 
+               const SetModelType& set_model) const = 0;
+
 
     //! \brief Computes the points reached by evolution of the \a initial_set_model under the flow
     //! given by \a flow_model. The \a integration_time gives the time all points should be flowed.
@@ -236,8 +224,8 @@ class ToolboxInterface
 
     //! \brief A model for the constant time function \a t over the domain \a d.
     virtual TimeModelType 
-    constant_time_model(const Float& t, 
-                        const BoxType& d) const = 0;
+    time_model(const Float& t, 
+               const BoxType& d) const = 0;
 
   
     //! \brief Computed a pair \f$(h,B)\f$ such that the flow of the vector_field \a vf starting in
@@ -250,17 +238,13 @@ class ToolboxInterface
                 const RealType& maximum_bound_diameter) const = 0;
 
 
-    //@{ \name Conversion operations
-
-    //! \brief Converts a set to a model (Unstable)
-    virtual SetModelType model(const SetType& s) const = 0;
-
-    //! \brief Converts a model to a set (Unstable)
-    virtual SetType set(const SetModelType& s) const = 0;
-
-    //@}
-
     //@{ \name Set-based operations
+    //! \brief Compute a model for the given box \a bx.
+    virtual SetModelType set_model(const BoxType& bx) const = 0;
+    //! \brief Compute a model for the given enclosure \a e.
+    virtual SetModelType set_model(const EnclosureType& e) const = 0;
+    //! \brief Compute an enclosure for the set model \a s.
+    virtual EnclosureType enclosure(const SetModelType& s) const = 0;
     //! \brief Tests if the set described by the model \a s is disjoint from the box \a box.
     virtual tribool disjoint(const SetModelType& s, const BoxType& bx) const = 0;
     //! \brief A box containing the set \a s.

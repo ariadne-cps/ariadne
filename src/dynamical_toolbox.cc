@@ -39,46 +39,9 @@
 
 namespace Ariadne {
 
-static int verbosity = 0;
-
 class DegenerateCrossingException { };
 class NonInvertibleFunctionException { };
 
-
-
-
-
-
-/*
-template<class Mdl>
-typename DynamicalToolbox<Mdl>::ModelType
-DynamicalToolbox<Mdl>::
-model(const FunctionType& f) const
-{
-    Vector<I> domain=set.domain().position_vectors();
-    Vector<R> midpoint=Ariadne::midpoint(domain);
-    Vector<A> centre=Vector<A>(set.centre().position_vector());
-    Matrix<A> const& generators=reinterpret_cast<Matrix<A>const&>(set.generators());
-    return ApproximateTaylorModel<R>::affine(domain,midpoint,centre,generators,this->_spacial_order,this->_smoothness);
-}
-*/
-
-  
-/*
-template<class Mdl>
-typename DynamicalToolbox<Mdl>::ModelType
-DynamicalToolbox<Mdl>::
-set(const BoxType& box) const
-{
-    uint n=model.result_size();
-    uint m=model.argument_size();
-    Vector<I> set_centre(n);
-    Matrix<R> set_generators(n,m);
-    make_lpair(set_centre,set_generators) = affine_model(model);
-    ES enclosure_set(Point<I>(set_centre),set_generators);
-    return enclosure_set;
-}
-*/
 
 
   
@@ -96,32 +59,10 @@ DynamicalToolbox()
 template<class Mdl>
 typename DynamicalToolbox<Mdl>::SetModelType
 DynamicalToolbox<Mdl>::
-compose(const FunctionInterface& function, 
-        const SetModelType& set_model) const
-{
-    FlowModelType function_model=this->map_model(function,set_model.range());
-    return Ariadne::compose(function_model,set_model);
-}
-
-template<class Mdl>
-typename DynamicalToolbox<Mdl>::SetModelType
-DynamicalToolbox<Mdl>::
-compose(const FlowModelType& function_model, 
-        const SetModelType& set_model) const
+reset_step(const FlowModelType& function_model, 
+           const SetModelType& set_model) const
 {
     return Ariadne::compose(function_model,set_model);
-}
-
-template<class Mdl>
-typename DynamicalToolbox<Mdl>::SetModelType
-DynamicalToolbox<Mdl>::
-integration_step(const FlowModelType& flow_model, 
-                 const SetModelType& initial_set_model, 
-                 const TimeType& integration_time) const
-{
-    uint ng=initial_set_model.argument_size();
-    Mdl integration_time_model = Mdl::constant(Vector<I>(ng,I(-1,1)),Vector<R>(ng,R(0)),Vector<A>(1,A(integration_time)),_order,_smoothness);
-    return this->integration_step(flow_model,initial_set_model,integration_time_model);                   
 }
 
 
@@ -139,6 +80,8 @@ integration_step(const FlowModelType& flow_model,
 
     return final_set_model;
 }
+
+
 
 
 
@@ -168,55 +111,6 @@ reachability_step(const FlowModelType& flow_model,
 }
 
 
-
-template<class Mdl>
-typename DynamicalToolbox<Mdl>::SetModelType
-DynamicalToolbox<Mdl>::
-reachability_step(const FlowModelType& flow_model, 
-                  const SetModelType& initial_set_model, 
-                  const TimeType& initial_time, 
-                  const TimeType& final_time) const
-{
-    uint ng=initial_set_model.argument_size();
-    Mdl initial_time_model = Mdl::constant(Vector<I>(ng,I(-1,1)),Vector<R>(ng,R(0)),
-                                           Vector<A>(1,A(initial_time)),_order,_smoothness);
-    Mdl final_time_model = Mdl::constant(Vector<I>(ng,I(-1,1)),Vector<R>(ng,R(0)),
-                                         Vector<A>(1,A(final_time)),_order,_smoothness);
-    return this->reachability_step(flow_model,initial_set_model,initial_time_model,final_time_model);
-}
-
-
-template<class Mdl>
-typename DynamicalToolbox<Mdl>::SetModelType
-DynamicalToolbox<Mdl>::
-reachability_step(const FlowModelType& flow_model, 
-                  const SetModelType& initial_set_model, 
-                  const TimeType& initial_time, 
-                  const TimeModelType& final_time_model) const
-{
-    uint ng=initial_set_model.argument_size();
-    Mdl initial_time_model = Mdl::constant(Vector<Interval>(ng,I(-1,1)),Vector<Float>(ng,R(0)),
-                                           Vector<Float>(1,initial_time),_order,_smoothness);
-    return this->reachability_step(flow_model,initial_set_model,initial_time_model,final_time_model);
-}
-
-
-template<class Mdl>
-typename DynamicalToolbox<Mdl>::SetModelType
-DynamicalToolbox<Mdl>::
-reachability_step(const FlowModelType& flow_model, 
-                  const SetModelType& initial_set_model, 
-                  const TimeModelType& initial_time_model, 
-                  const TimeType& final_time) const
-{
-    uint ng=initial_set_model.argument_size();
-    Mdl final_time_model = Mdl::constant(Vector<Interval>(ng,I(-1,1)),Vector<Float>(ng,R(0)),
-                                         Vector<Float>(1,final_time),_order,_smoothness);
-    return this->reachability_step(flow_model,initial_set_model,initial_time_model,final_time_model);
-}
-
-  
-
 template<class Mdl>
 typename DynamicalToolbox<Mdl>::SetModelType
 DynamicalToolbox<Mdl>::
@@ -250,54 +144,6 @@ reachability_step(const FlowModelType& flow_model,
     return reach_set_model;
 }
 
-
-
-template<class Mdl>
-typename DynamicalToolbox<Mdl>::TimeModelType
-DynamicalToolbox<Mdl>::
-reachability_time(const TimeModelType& initial_time_model, 
-                  const TimeModelType& final_time_model) const
-{
-    ARIADNE_ASSERT(initial_time_model.argument_size()==final_time_model.argument_size());
-    uint ng=initial_time_model.argument_size();
-
-    ModelType expanded_initial_time_model=embed(initial_time_model,Vector<I>(ng+1,I(-1,1)),Vector<R>(ng+1,R(0)),0u);
-    ARIADNE_LOG(6,"expanded_initial_time_model="<<expanded_initial_time_model<<"\n");
-    ModelType expanded_final_time_model=embed(final_time_model,Vector<I>(ng+1,I(-1,1)),Vector<R>(ng+1,R(0)),0u);
-    ARIADNE_LOG(6,"expanded_final_time_model="<<expanded_final_time_model<<"\n");
-  
-    ModelType time_interval_model=ModelType::affine(I(-1,1),R(0),A(0.5),A(0.5),_order,_smoothness);
-    ARIADNE_LOG(6,"time_interval_time_model="<<time_interval_model<<"\n");
-    ModelType expanded_time_interval_model=embed(time_interval_model,Vector<I>(ng+1,I(-1,1)),Vector<R>(ng+1,R(0)),ng);
-    ARIADNE_LOG(6,"expanded_time_interval_model="<<expanded_time_interval_model<<"\n");
-    ModelType expanded_reach_time_model=expanded_initial_time_model+expanded_time_interval_model*(expanded_final_time_model-expanded_initial_time_model);
-    ARIADNE_LOG(6,"expanded_reach_time_model="<<expanded_reach_time_model<<"\n");
-    return expanded_reach_time_model;
-}
-
-
-template<class Mdl>
-typename DynamicalToolbox<Mdl>::TimeModelType
-DynamicalToolbox<Mdl>::
-reachability_time(const TimeType& initial_time, 
-                  const TimeModelType& final_time_model) const
-{
-    Mdl initial_time_model = Mdl::constant(final_time_model.domain(),final_time_model.centre(),
-                                           Vector<Float>(1,initial_time),_order,_smoothness);
-    return this->reachability_time(initial_time_model,final_time_model);
-}
-
-
-template<class Mdl>
-typename DynamicalToolbox<Mdl>::TimeModelType
-DynamicalToolbox<Mdl>::
-reachability_time(const TimeModelType& initial_time_model, 
-                  const TimeType& final_time) const
-{
-    Mdl final_time_model = Mdl::constant(initial_time_model.domain(),initial_time_model.centre(),
-                                         Vector<Float>(1,final_time),_order,_smoothness);
-    return this->reachability_time(initial_time_model,final_time_model);
-}
 
 
 
@@ -409,123 +255,6 @@ touching_time_interval(const ModelType& guard_model,
 
 
 
-
-
-    
-template<class Mdl>
-tribool
-DynamicalToolbox<Mdl>::
-active(const FunctionType& guard_function, const BoxType& box) const
-{
-    IntervalType range=guard_function.evaluate(box)[0];
-    if(range.lower()>0) {
-        return true;
-    } else if(range.upper()<0) {
-        return false; 
-    } else {
-        return indeterminate;
-    }
-}
-
-
-
-template<class Mdl>
-tribool
-DynamicalToolbox<Mdl>::
-active(const ModelType& guard_model, const ModelType& set_model) const
-{
-    IntervalType range=compose(guard_model,set_model).range()[0];
-    if(range.upper()<0) { 
-        return false; 
-    } else if(range.lower()>0) {
-        return true;
-    } else {
-        return indeterminate;
-    }
-}
-
-template<class Mdl>
-tribool
-DynamicalToolbox<Mdl>::
-active(const FunctionType& guard_function, const ModelType& set_model) const
-{
-    ModelType guard_model(set_model.range(),guard_function,this->_spacial_order,this->_smoothness);
-    return this->active(guard_model,set_model);
-}
-
-template<class Mdl>
-Mdl
-DynamicalToolbox<Mdl>::set(Mdl const& model) const
-{ 
-    return model;
-}
-
-template<class Mdl>
-Mdl
-DynamicalToolbox<Mdl>::model(Mdl const& set) const
-{ 
-    return set;
-}
-
-
-
-template<class Mdl>
-Mdl
-DynamicalToolbox<Mdl>::map_model(FunctionInterface const& f, Vector<Interval> const& bx) const
-{ 
-    ARIADNE_ASSERT(f.argument_size()==bx.size());
-
-    Mdl map_model(bx,f,_order,_smoothness);
-    ARIADNE_LOG(6,"map_model = "<<map_model<<"\n");
-
-    return map_model;
-}
-
-
-template<class Mdl>
-Mdl
-DynamicalToolbox<Mdl>::flow_model(FunctionInterface const& vf, Vector<Interval> const& bx, Float const& h, Vector<Interval> const& bb) const
-{ 
-    Mdl vector_field_model(bb,vf,_order,_smoothness);
-    ARIADNE_LOG(6,"vector_field_model = "<<vector_field_model<<"\n");
-  
-    // Use flow function on model type
-    Mdl flow_model=Ariadne::flow(vector_field_model);
-    ARIADNE_LOG(6,"flow_model = "<<flow_model<<"\n");
-
-    return flow_model;
-}
-
-
-template<class Mdl>
-Mdl
-DynamicalToolbox<Mdl>::predicate_model(FunctionInterface const& g, Vector<Interval> const& bx) const
-{ 
-    ARIADNE_ASSERT(g.result_size()==1);
-    ARIADNE_ASSERT(g.argument_size()==bx.size());
-
-    Mdl predicate_model(bx,g,_order,_smoothness);
-    ARIADNE_LOG(6,"predicate_model = "<<predicate_model<<"\n");
-
-    return predicate_model;
-}
-
-//! \brief A model for the constant time function \a t over the domain \a d.
-template<class Mdl>
-Mdl
-DynamicalToolbox<Mdl>::
-constant_time_model(const Float& t, 
-                    const BoxType& bx) const
-{
-    Mdl time_model=Mdl::constant(bx,midpoint(bx),Vector<Float>(1u,t),_order,_smoothness);
-    ARIADNE_LOG(6,"time_model = "<<time_model<<"\n");
-
-    return time_model;
-}
-
-
-
-
 template<class Mdl>
 std::pair<Float, Vector<Interval> >
 DynamicalToolbox<Mdl>::flow_bounds(FunctionInterface const& vf, 
@@ -597,6 +326,107 @@ DynamicalToolbox<Mdl>::flow_bounds(FunctionInterface const& vf,
 
     return std::make_pair(h,nb);
 }
+
+
+
+template<class Mdl>
+tribool
+DynamicalToolbox<Mdl>::
+active(const PredicateModelType& guard_model, const SetModelType& set_model) const
+{
+    IntervalType range=compose(guard_model,set_model).range()[0];
+    return this->_tribool(range);
+}
+
+
+
+
+template<class Mdl>
+Mdl
+DynamicalToolbox<Mdl>::map_model(FunctionInterface const& f, Vector<Interval> const& bx) const
+{ 
+    ARIADNE_ASSERT(f.argument_size()==bx.size());
+
+    Mdl map_model(bx,f,_order,_smoothness);
+    ARIADNE_LOG(6,"map_model = "<<map_model<<"\n");
+
+    return map_model;
+}
+
+
+template<class Mdl>
+Mdl
+DynamicalToolbox<Mdl>::flow_model(FunctionInterface const& vf, Vector<Interval> const& bx, Float const& h, Vector<Interval> const& bb) const
+{ 
+    Mdl vector_field_model(bb,vf,_order,_smoothness);
+    ARIADNE_LOG(6,"vector_field_model = "<<vector_field_model<<"\n");
+  
+    // Use flow function on model type
+    Mdl flow_model=Ariadne::flow(vector_field_model);
+    ARIADNE_LOG(6,"flow_model = "<<flow_model<<"\n");
+
+    return flow_model;
+}
+
+
+template<class Mdl>
+Mdl
+DynamicalToolbox<Mdl>::predicate_model(FunctionInterface const& g, Vector<Interval> const& bx) const
+{ 
+    ARIADNE_ASSERT(g.result_size()==1);
+    ARIADNE_ASSERT(g.argument_size()==bx.size());
+
+    Mdl predicate_model(bx,g,_order,_smoothness);
+    ARIADNE_LOG(6,"predicate_model = "<<predicate_model<<"\n");
+
+    return predicate_model;
+}
+
+//! \brief A model for the constant time function \a t over the domain \a d.
+template<class Mdl>
+Mdl
+DynamicalToolbox<Mdl>::
+time_model(const Float& t, 
+           const BoxType& bx) const
+{
+    Mdl time_model=Mdl::constant(bx,midpoint(bx),Vector<Float>(1u,t),_order,_smoothness);
+    ARIADNE_LOG(6,"time_model = "<<time_model<<"\n");
+
+    return time_model;
+}
+
+
+//! \brief A model for the set f\a bx.
+template<class Mdl>
+Mdl
+DynamicalToolbox<Mdl>::
+set_model(const BoxType& bx) const
+{
+    SetModelType set_model(bx,IdentityFunction(bx.size()),this->_order,this->_smoothness);
+    return set_model;
+ }
+
+
+//! \brief A model for the enclosure \a es.
+template<class Mdl>
+Mdl
+DynamicalToolbox<Mdl>::
+set_model(const EnclosureType& es) const
+{
+    return es;
+}
+
+
+//! \brief An enclosure for the set model \a s.
+template<class Mdl>
+typename DynamicalToolbox<Mdl>::EnclosureType
+DynamicalToolbox<Mdl>::
+enclosure(const SetModelType& s) const
+{
+    return s;
+}
+
+
 
 
 

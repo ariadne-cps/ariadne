@@ -226,7 +226,7 @@ _evolution(EnclosureListType& final_sets,
         ContinuousEnclosureType initial_continuous_set;
         make_lpair(initial_location,initial_continuous_set)=initial_set;
         ARIADNE_LOG(6,"initial_location = "<<initial_location<<"\n");
-        ModelType initial_set_model=this->_toolbox->model(initial_continuous_set);
+        ModelType initial_set_model=this->_toolbox->set_model(initial_continuous_set);
         ARIADNE_LOG(6,"initial_set_model = "<<initial_set_model<<"\n");
         ModelType initial_time_model
             =ModelType::constant(initial_set_model.domain(),initial_set_model.centre(),
@@ -246,7 +246,7 @@ _evolution(EnclosureListType& final_sets,
         SetModelType initial_set_model=current_set.third;
         TimeModelType initial_time_model=current_set.fourth;
         if(initial_time_model.range()[0].lower()>=maximum_time || initial_steps>=maximum_steps) {
-            final_sets.adjoin(EnclosureType(initial_location,this->_toolbox->set(initial_set_model)));
+            final_sets.adjoin(initial_location,this->_toolbox->enclosure(initial_set_model));
         } else if(UPPER_SEMANTICS && ENABLE_SUBDIVISIONS
                   && (radius(initial_set_model.range())>this->_parameters->maximum_enclosure_radius)) 
             {
@@ -573,7 +573,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
         Interval initial_time_range=initial_time_model.range()[0];
         Float final_time=initial_time_range.lower()+step_size;
         ARIADNE_LOG(8,"    initial_time_model="<<initial_time_model<<"\n");
-        final_time_model=this->_toolbox->constant_time_model(final_time,initial_time_model.domain());
+        final_time_model=this->_toolbox->time_model(final_time,initial_time_model.domain());
         ARIADNE_LOG(8,"    final_time_model="<<final_time_model<<"\n");
         TimeModelType integration_time_model=final_time_model-initial_time_model;
         ARIADNE_LOG(8,"    integration_time_model="<<integration_time_model<<"\n");
@@ -601,7 +601,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
             if( definitely(blocking_data.initially_active) || ( possibly(blocking_data.initially_active) && semantics==LOWER_SEMANTICS ) ) {
                 // In this case there is no continuous evolution
                 SetModelType jump_set_model
-                    =this->_toolbox->compose(*reset_ptr,initial_set_model);
+                    =this->_toolbox->reset_step(*reset_ptr,initial_set_model);
                 if( ( semantics==UPPER_SEMANTICS && possibly(data.initially_active) ) || definitely(data.initially_active) ) {
                     working_sets.push_back(make_tuple(jump_location,initial_steps+1,jump_set_model,initial_time_model));
                     intermediate_sets.adjoin(EnclosureType(jump_location,jump_set_model));
@@ -628,13 +628,13 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
                         lower_active_time = definitely(data.initially_active) ? zero_time : data.touching_time_interval.upper();
                         upper_active_time = definitely(data.finally_active) ? step_size : data.touching_time_interval.lower();
                     }
-                    TimeModelType lower_active_time_model=this->_toolbox->constant_time_model(lower_active_time,initial_time_model.domain());
-                    TimeModelType upper_active_time_model=this->_toolbox->constant_time_model(upper_active_time,initial_time_model.domain());
+                    TimeModelType lower_active_time_model=this->_toolbox->time_model(lower_active_time,initial_time_model.domain());
+                    TimeModelType upper_active_time_model=this->_toolbox->time_model(upper_active_time,initial_time_model.domain());
                     active_time_model=this->_toolbox->reachability_time(lower_active_time_model,upper_active_time_model);
                     jump_time_model=this->_toolbox->reachability_time(initial_time_model+lower_active_time_model,initial_time_model+upper_active_time_model);
                 }
                 SetModelType active_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,active_time_model);
-                SetModelType jump_set_model=this->_toolbox->compose(*reset_ptr,active_set_model);
+                SetModelType jump_set_model=this->_toolbox->reset_step(*reset_ptr,active_set_model);
         
                 if(semantics==UPPER_SEMANTICS || data.predicate_kind==ACTIVATION
                    || data.crossing_kind==TRANSVERSE) {

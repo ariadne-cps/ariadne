@@ -946,22 +946,75 @@ tribool GridTreeSubset::superset( const Box& theBox ) const {
     throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
-tribool GridTreeSubset::subset( const Box& theBox ) const {
-    //Check that the box corresponding to the root node of the set
-    //is not disjoint from theBox. If it is then the set is not a
-    //subset of theBox otherwise we need to traverse the tree and check
-    //if all it's enabled nodes give boxes that are subsets of theBox.
+tribool GridTreeSubset::subset( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
+                                const uint theHeight, BinaryWord &theWord, const Box& theBox ) {
+    tribool result;
     
-    throw NotImplemented(__PRETTY_FUNCTION__);
-}
-
-tribool GridTreeSubset::disjoint( const Box& theBox ) const {
-    //Check that the box corresponding to the root node of the set
-    //is disjoint from theBox. If it is then the set is disjoint
-    //from theBox otherwise we need to traverse the tree and check
-    //if all it's enabled nodes give boxes that are disjoint from theBox.
+    //Check if the current node intersects with theBox
+    Box theCellsBox = GridCell::compute_box( theGrid, theHeight, theWord );
+    tribool isASubset = theCellsBox.subset( theBox );
     
-    throw NotImplemented(__PRETTY_FUNCTION__);
+    if( isASubset ){
+        //It does not matter if pCurrentNode has enableds leaves or not we already know that the cell
+        //corresponding to this node is geometrically a subset of theBox.
+        result = true;
+    } else {
+        //If the cell corresponding to pCurrentNode is not a subset, then
+        if( pCurrentNode->is_leaf() && ! isASubset ) {
+            //If pCurrentNode is a leaf node and geometrically the cell (corresponding to the node theCellsBox) is not a
+            //subset of theBox, then: if it is enabled then pCurrentNode is not a subset of theBox but otherwise it is.
+            result = ! pCurrentNode->is_enabled();
+        } else {
+            if( pCurrentNode->is_leaf() && indeterminate( isASubset ) ) {
+                //If we are in a leaf node but we do not know for sure if the given cell
+                //is a subset of theBox then we can only check if it is enabled or not
+                if( pCurrentNode->is_enabled() ){
+                    //For an enabled-leaf node (a filled cell) we do not know if it is a subset of theBox
+                    result = indeterminate;
+                } else {
+                    //The node is disabled, so it represents an empty set, which is a subset of any set
+                    result = true;
+                }
+            } else {
+                //The node is not a leaf, and we either know that the cell of pCurrentNode is not a geometrical subset
+                //of theBox or we are not sure that it is, This means that we can do recursion to sort things out.
+                theWord.push_back(false);
+                const tribool result_left = subset( pCurrentNode->left_node(), theGrid, theHeight, theWord, theBox );
+                theWord.pop_back();
+                
+                if( !result_left ) {
+                    //If the left branch is not a subset, then there is no need to check the right one
+                    result = false;
+                } else {
+                    //if we still do not know the answer, then we check the right branch
+                    theWord.push_back(true);
+                    const tribool result_right = subset( pCurrentNode->right_node(), theGrid, theHeight, theWord, theBox );
+                    theWord.pop_back();
+                    
+                    if( !result_right ) {
+                        //IF: The right sub-node reports false, then the result is false
+                        //NOTE: We already sorted out the case of ( (!result_left) == true) before
+                        result = false;
+                    } else {
+                        if( result_left && result_right ) {
+                            //ELSE: If both sub-nodes report true then it is true
+                            result = true;
+                        } else {
+                            if( indeterminate(result_left) || indeterminate(result_right) ) {
+                                //ELSE: If one of the sub-nodes reports indeterminate then indeterminate,
+                                result = indeterminate;
+                            } else {
+                                //ELSE: An impossible situation
+                                ARIADNE_ASSERT( false );
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    return result;
 }
 
 tribool GridTreeSubset::intersects( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,

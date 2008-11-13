@@ -602,6 +602,15 @@ class GridTreeSubset {
      * one has to make in order to have sub-intervals of the width <= \a theMaxWidth
      */
     uint compute_number_subdiv( Float theWidth, const Float theMaxWidth) const;
+    
+    /*! \brief This method checks whether the set defined by \a pCurrentNode is a subset
+     *  of \a theBox. The set of \a pCurrentNode is defined by \a theGrid, the primary
+     *  cell (\a theHeight) to which this tree is (virtually) rooted via the path theWord.
+     *  This is a recursive procedure and it returns true only if all enabled sub-cells of
+     *  \a pCurrentNode are sub-sets of \a theBox.
+     */
+    static tribool subset( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
+                           const uint theHeight, BinaryWord &theWord, const Box& theBox );
 
     /*! \brief This method checks whether \a theBox intersects with the set defined by
      *  \a pCurrentNode, \a theGrid, the primary cell (\a theHeight) to which this
@@ -611,9 +620,10 @@ class GridTreeSubset {
      * have an intersection. If there are no such nodes then there is not intersection.
      */
     static tribool intersects( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
-                            const uint theHeight, BinaryWord &theWord, const Box& theBox );
+                               const uint theHeight, BinaryWord &theWord, const Box& theBox );
     
   public:
+    
     /*! \brief A short name for the constant iterator */
     typedef GridTreeConstIterator const_iterator;
             
@@ -1709,6 +1719,30 @@ inline GridTreeSubset::const_iterator GridTreeSubset::end() const {
     
 inline const BinaryTreeNode * GridTreeSubset::binary_tree() const {
     return _pRootTreeNode;
+}
+
+
+inline tribool GridTreeSubset::subset( const Box& theBox ) const {
+    //Check that the box corresponding to the root node of the set
+    //is not disjoint from theBox. If it is then the set is not a
+    //subset of theBox otherwise we need to traverse the tree and check
+    //if all it's enabled nodes give boxes that are subsets of theBox.
+    
+    ARIADNE_ASSERT( theBox.dimension() == cell().dimension() );
+
+    BinaryWord pathCopy( cell().word() );
+    
+    return GridTreeSubset::subset( binary_tree(), grid(), cell().height(), pathCopy, theBox );    
+}
+
+inline tribool GridTreeSubset::disjoint( const Box& theBox ) const {
+    //Simply check if the box does not intersect with the set
+
+    ARIADNE_ASSERT( theBox.dimension() == cell().dimension() );
+
+    BinaryWord pathCopy( cell().word() );
+    
+    return ! GridTreeSubset::intersects( binary_tree(), grid(), cell().height(), pathCopy, theBox );    
 }
 
 inline tribool GridTreeSubset::intersects( const Box& theBox ) const {

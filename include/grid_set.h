@@ -977,9 +977,6 @@ class GridTreeSet : public GridTreeSubset {
     //@{
     //! \name Geometric Approximation
 
-    /*! \brief Adjoin an inner approximation to a given set, computing to the given depth. */
-    template<class Set> void adjoin_inner_approximation( const Set& theSet, const uint depth );
-            
     /*! \brief Adjoin an over approximation to box, computing to the given depth. */
     void adjoin_over_approximation( const Box& theBox, const uint depth );
     /*! \brief Adjoin an outer approximation to a given set, computing to the given depth.
@@ -994,25 +991,25 @@ class GridTreeSet : public GridTreeSubset {
      */
     void adjoin_outer_approximation( const CompactSetInterface& theSet, const uint depth );
             
-    /*! \brief Adjoin a lower approximation to a given set, computing to the given depth. 
+    /*! \brief Adjoin a lower approximation to a given set, computing to the given height and depth. 
      *   A lower approximation comprises all cells intersecting a given set. */
-    void adjoin_lower_approximation( const OvertSetInterface& theSet, const uint depth );
+    void adjoin_lower_approximation( const OvertSetInterface& theSet, const uint height, const uint depth );
 
-    /*! \brief Adjoin a lower approximation to a given set, computing to the given depth. 
+    /*! \brief Adjoin a lower approximation to a given set restricted to the given bounding box, computing to the given depth. 
      *   A lower approximation comprises all cells intersecting a given set. */
-    void adjoin_inner_approximation( const OpenSetInterface& theSet, const uint depth );
-
-    /*! \brief Adjoin a lower approximation to a given set, computing to the given depth. 
-     *   A lower approximation comprises all cells intersecting a given set. */
-    void adjoin_inner_approximation( const OpenSetInterface& theSet, const Box& bounding_box, const uint depth );
+    void adjoin_lower_approximation( const OvertSetInterface& theSet, const Box& bounding_box, const uint depth );
 
     /*! \brief Adjoin a lower approximation to a given set, computing to the given depth. 
      *   A lower approximation comprises all cells intersecting a given set. */
     void adjoin_lower_approximation( const LocatedSetInterface& theSet, const uint depth );
 
-    /*! \brief Adjoin a lower approximation to a given set, computing to the given depth. 
+    /*! \brief Adjoin an inner approximation to a given set, computing to the given height and depth. 
      *   A lower approximation comprises all cells intersecting a given set. */
-    void adjoin_lower_approximation( const OvertSetInterface& theSet, const Box& bounding_box, const uint depth );
+    void adjoin_inner_approximation( const OpenSetInterface& theSet, const uint height, const uint depth );
+
+    /*! \brief Adjoin an inner approximation to a given set restricted to the given bounding box, computing to the given depth. 
+     *   A lower approximation comprises all cells intersecting a given set. */
+    void adjoin_inner_approximation( const OpenSetInterface& theSet, const Box& bounding_box, const uint depth );
 
     //@}
 

@@ -1297,16 +1297,12 @@ void GridTreeSet::adjoin_outer_approximation( const CompactSetInterface& theSet,
 //    adjoin_lower_approximation( const OvertSetInterface& , const Box& , const uint  )
 // TODO:Think of another representation in terms of covers but not pavings, then the implementation
 // will be different, this is why, for now we do not fix these things.
-void GridTreeSet::adjoin_lower_approximation( const LocatedSetInterface& theSet, const uint heightdepth ) {
-    this->adjoin_lower_approximation( theSet, GridCell( this->grid(), heightdepth, BinaryWord() ).box(), heightdepth );
+void GridTreeSet::adjoin_lower_approximation( const LocatedSetInterface& theSet, const uint depth ) {
+    this->adjoin_lower_approximation( theSet, theSet.bounding_box(), depth );
 }
 
-void GridTreeSet::adjoin_lower_approximation( const OvertSetInterface& theSet, const uint heightdepth ) {
-    this->adjoin_lower_approximation( theSet, GridCell( this->grid(), heightdepth, BinaryWord()).box(),heightdepth );
-}
-
-void GridTreeSet::adjoin_inner_approximation( const OpenSetInterface& theSet, const uint heightdepth ) {
-    throw NotImplemented(__PRETTY_FUNCTION__);
+void GridTreeSet::adjoin_lower_approximation( const OvertSetInterface& theSet, const uint height, const uint depth ) {
+    this->adjoin_lower_approximation( theSet, GridCell( this->grid(), height, BinaryWord()).box(),depth );
 }
 
 void GridTreeSet::adjoin_lower_approximation( const OvertSetInterface& theSet, const Box& theBoundingBox, const uint depth ) {
@@ -1346,6 +1342,14 @@ void GridTreeSet::adjoin_lower_approximation( const OvertSetInterface& theSet, c
         }
         delete pEmptyPath;
     }
+}
+
+void GridTreeSet::adjoin_inner_approximation( const OpenSetInterface& theSet, const uint height, const uint depth ) {
+    throw NotImplemented(__PRETTY_FUNCTION__);
+}
+
+void GridTreeSet::adjoin_inner_approximation( const OpenSetInterface& theSet, const Box& theBoundingBox, const uint depth ) {
+    throw NotImplemented(__PRETTY_FUNCTION__);
 }
 
 void GridTreeSet::restrict_to_lower( const GridTreeSubset& theOtherSubPaving ){

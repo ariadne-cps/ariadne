@@ -355,9 +355,9 @@ class HybridGridTreeSet
                 DiscreteState loc=loc_iter->first;
                 if(!this->has_location(loc)) {
                     this->insert(make_pair(loc,GridTreeSet(loc_iter->second.dimension()))); }
-                (*this)[loc].adjoin_inner_approximation(loc_iter->second,depth); } }
+                (*this)[loc].adjoin_inner_approximation(loc_iter->second,loc_iter->second,depth); } }
 
-    void adjoin_lower_approximation(const HybridOvertSetInterface& hs, const int depth) { 
+    void adjoin_lower_approximation(const HybridOvertSetInterface& hs, const int height, const int depth) { 
         HybridSpace hspc=hs.space();
         for(HybridSpace::const_iterator loc_iter=hspc.begin();
             loc_iter!=hspc.end(); ++loc_iter)
@@ -365,7 +365,7 @@ class HybridGridTreeSet
                 DiscreteState loc=loc_iter->first;
                 if(!this->has_location(loc)) {
                     this->insert(make_pair(loc,GridTreeSet(loc_iter->second))); }
-                (*this)[loc].adjoin_lower_approximation(hs[loc],depth); } }
+                (*this)[loc].adjoin_lower_approximation(hs[loc],height,depth); } }
 
     void adjoin_outer_approximation(const HybridCompactSetInterface& hs, const int depth) { 
         HybridSpace hspc=hs.space();

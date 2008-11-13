@@ -79,7 +79,7 @@ TestVector::test_misc()
     cout << "v0=" << flush; cout << v0 << endl;
     Vector<Float> v1(n,vptr);
     cout << "v1=" << v1 << endl;
-    Vector<Float> v2=make_vector<Float>("[2.375,4.25,-1.25]");
+    Vector<Float> v2=Vector<Float>("[2.375,4.25,-1.25]");
     cout << "v2=" << v2 << endl;
     cout << "norm(v1)=" << norm(v1) << "  norm(v2)=" << norm(v2) << endl;
     assert(norm(v1)==4);
@@ -92,8 +92,8 @@ TestVector::test_misc()
     cout << endl;
     
     Vector<Float> vf0;
-    v1=make_vector<Float>("[0.25,-1.5]");
-    v2=make_vector<Float>("[-0.5,2.25]");
+    v1=Vector<Float>("[0.25,-1.5]");
+    v2=Vector<Float>("[-0.5,2.25]");
     vf0=-v1;
     cout << vf0 << " = -" << v1 << endl;
     vf0=Vector<Float>(v1)+v2;
@@ -108,16 +108,16 @@ TestVector::test_misc()
     cout << vf0 << " = " << v1 << " / " << x << endl;
     cout << endl;
   
-    Vector< Interval > iv1=make_vector<Interval>("[[0.984375,1.015625],[2.25,2.375],[4.0,4.375],[-0.03125,0.015625]]");
+    Vector< Interval > iv1=Vector<Interval>("[[0.984375,1.015625],[2.25,2.375],[4.0,4.375],[-0.03125,0.015625]]");
     cout << "iv1=" << iv1 << endl;
     cout << "norm(iv1)=" << norm(iv1) << endl;
     cout << "norm(iv1).upper()=" << norm(iv1).upper() << endl;
 
-    Vector< Interval > iv2=make_vector<Interval>("[[-1,1],[-1,1]]");
+    Vector< Interval > iv2=Vector<Interval>("[[-1,1],[-1,1]]");
     cout << "iv2=" << iv2 << endl;
     Vector< Interval > iv3(3);
     cout << "iv3=" << iv3 << endl;
-    iv3=make_vector<Interval>("[[4.25,4.25],[2.375,2.375]]");
+    iv3=Vector<Interval>("[[4.25,4.25],[2.375,2.375]]");
     cout << "iv3=" << iv3 << endl;
     Interval ix=Interval(-2,1);
  
@@ -148,7 +148,7 @@ TestVector::test_misc()
     cout << iv1 << " = " << iv2 << " / " << ix << endl;
     cout << endl;
    
-    v1==make_vector<Float>("[-1.25,0.75]");
+    v1==Vector<Float>("[-1.25,0.75]");
     iv0=iv1+v1;
     cout << iv0 << " = " << iv1 << " + " << v1 << endl;
     iv0=v1+iv1;
@@ -172,8 +172,8 @@ TestVector::test_misc()
 
     iv0=v1;
     iv0/=ix;
-    iv0=make_vector<Interval>("[2,1]");
-    iv1=make_vector<Interval>("[0,1]");
+    iv0=Vector<Interval>("[2,1]");
+    iv1=Vector<Interval>("[0,1]");
     /*
       ARIADNE_TEST_ASSERT( (iv0+=Vector<Interval>("[0,1]")) == Vector<Interval>("[2,2]") );
       ARIADNE_TEST_ASSERT( (iv0-=Vector<Interval>("[0,1]")) == Vector<Interval>("[2,1]") );

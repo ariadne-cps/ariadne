@@ -99,8 +99,8 @@ class TestReachabilityAnalysis
           system.new_mode(location,vdp);
           ImageSet initial_box(make_box("[0.99,1.01]x[-0.01,0.01]"));
         */
-        Matrix<Float> A=make_matrix<Float>("[-0.5,-1.0;1.0,-0.5]");
-        Vector<Float> b=make_vector<Float>("[0.0,0.0]");
+        Matrix<Float> A=Matrix<Float>("[-0.5,-1.0;1.0,-0.5]");
+        Vector<Float> b=Vector<Float>("[0.0,0.0]");
         AffineFunction aff(A,b);
         system.new_mode(location,aff);
         cout << "Done building system\n";

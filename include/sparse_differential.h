@@ -167,6 +167,11 @@ class SparseDifferential
     friend SparseDifferential<X> derivative<>(const SparseDifferential<X>& x, uint i);
     friend SparseDifferential<X> antiderivative<>(const SparseDifferential<X>& x, uint i);
   public:
+    iterator begin() { return this->_data.begin(); }
+    iterator end() { return this->_data.end(); }
+    std::map<MultiIndex,X>& data() { return this->_data; }
+    const std::map<MultiIndex,X>& data() const { return this->_data; }
+  public:
     void cleanup() { 
         typedef typename std::map<MultiIndex,X>::iterator iterator;
         iterator iter=this->_data.begin(); 

@@ -25,11 +25,36 @@
 #include "vector.h"
 #include "matrix.h"
 
+#include "utilities.h"
+
 #include <boost/python.hpp>
 
 using namespace boost::python;
 
 using namespace Ariadne;
+
+template<class X> Vector<X>*
+make_vector(const boost::python::object& obj) 
+{
+  array<X> a; read_array(a,obj);
+  return new Vector<X>(a.size(),a.begin());
+}
+
+template<class X> Matrix<X>*
+make_matrix(const boost::python::object& obj) 
+{
+  boost::python::list elements=boost::python::extract<boost::python::list>(obj);
+  int m=boost::python::len(elements);
+  boost::python::list row=boost::python::extract<boost::python::list>(elements[0]);
+  int n=boost::python::len(row);
+  Matrix<X>* Aptr=new Matrix<X>(m,n);
+  for(int i=0; i!=m; ++i) {
+    row=boost::python::extract<boost::python::list>(elements[i]);
+    if(boost::python::len(row)!=n) { throw std::runtime_error("Matrix with rows of different sizes"); }
+    for(int j=0; j!=n; ++j) { X x; read_scalar(x,row[j]); Aptr->set(i,j,x); }
+  }
+  return Aptr;
+}
 
 template<class X0, class X1, class X2>
 Vector<X0> __mul__(const Matrix<X1>& A1, const Vector<X2>& v2) {
@@ -49,7 +74,7 @@ void export_vector()
     typedef Vector<X> V;
 
     class_< Vector<X> > vector_class("Vector",init<int>());
-    //vector_class.def(init<const boost::python::object&>());
+    vector_class.def("__init__", make_constructor(&make_vector<X>) );
     vector_class.def("__len__", &Vector<X>::size);
     vector_class.def("__setitem__", (void(Vector<X>::*)(size_t,const double&)) &Vector<X>::set);
     vector_class.def("__setitem__", (void(Vector<X>::*)(size_t,const X&)) &Vector<X>::set);
@@ -77,7 +102,7 @@ template<class X>
 void export_matrix()
 {
     class_< Matrix<X> > matrix_class("Matrix",init<size_t,size_t>());
-    //matrix_class.def(init<const boost::python::object&>());
+    matrix_class.def("__init__", make_constructor(&make_matrix<X>) );
     matrix_class.def("rows", &Matrix<X>::row_size);
     matrix_class.def("columns", &Matrix<X>::column_size);
     matrix_class.def("row_size", &Matrix<X>::row_size);

@@ -56,8 +56,10 @@ class Vector
         : ublas::vector<X>(n) { for(size_t i=0; i!=this->size(); ++i) { (*this)[i]=0; } }
     Vector(size_t n, const X& t)
         : ublas::vector<X>(n) { for(size_t i=0; i!=this->size(); ++i) { (*this)[i]=t; } }
-    Vector(size_t n, const Float& t0, const Float& t1, ...);
-    template<class XX> Vector(size_t n, const XX* ptr)
+    Vector(int n, const double& t0, const double& t1, ...);
+    Vector(const std::string& str) 
+        : ublas::vector<X>() { std::stringstream ss(str); ss >> *this; }
+    template<class XX> Vector(int n, const XX* ptr)
         : ublas::vector<X>(n) { for(size_t i=0; i!=this->size(); ++i) { (*this)[i]=ptr[i]; } }
     template<class XX> Vector(const Vector<XX>& v)
         : ublas::vector<X>(v) { }
@@ -73,20 +75,18 @@ class Vector
     template<class T> void set(size_t i, const T& x) { (*this)[i] = x; }
 };
 
-template<class X> Vector<X> make_vector(const std::string&);
-
 typedef ublas::slice Slice;
 typedef ublas::range Range;
 using ublas::range;
 using ublas::slice;
 using ublas::identity_matrix;
 
-template<class X> Vector<X>::Vector(size_t n, const Float& t0, const Float& t1, ...) 
+template<class X> Vector<X>::Vector(int n, const double& t0, const double& t1, ...) 
     : ublas::vector<X>(n) 
 {
     assert(n>=2); va_list args; va_start(args,t1);
     (*this)[0]=t0; (*this)[1]=t1; 
-    for(size_t i=2; i!=n; ++i) { (*this)[i]=va_arg(args,Float); } 
+    for(size_t i=2; i!=n; ++i) { (*this)[i]=va_arg(args,double); } 
     va_end(args);
 }
 
@@ -196,15 +196,6 @@ inline Vector<Interval> box(size_t d, Float* ptr) {
     for(size_t i=0; i!=d; ++i) { 
         bx[i]=Interval(ptr[2*i],ptr[2*i+1]); }
     return bx;
-}
-
-template<class X> Vector<X> 
-make_vector(const std::string& str)
-{
-    Vector<X> res;
-    std::stringstream ss(str);
-    ss >> res;
-    return res;
 }
 
 

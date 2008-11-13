@@ -1684,7 +1684,7 @@ void test_subset_subset_subset() {
     const uint heightThree = 3;
     
     //Create the set and the subset of this set, they are both rooted to the same primary node of heightTwo 
-    //theSetOne = [-1,0]x[-1,0] U [0,1]x[0,1] U [1,1]x[3,3]
+    //theSetOne = [-1,0]x[-1,0] U [0,1]x[0,1] U [1,3]x[1,3]
     GridTreeSet theSetOne( theTrivialGrid, heightTwo, new BinaryTreeNode( make_binary_word("1111001000100"), make_binary_word("1001001") ) );
     //theSubsetOne = [-1,0]x[-1,0] U [0,1]x[0,1]
     GridTreeSubset theSubsetOne( theTrivialGrid, heightTwo, make_binary_word("0"), theSetOne.binary_tree()->left_node() );
@@ -1756,7 +1756,7 @@ void test_subset_overlaps_box() {
     const uint heightTwo = 2;
     
     //Create the set and the subset of this set, they are both rooted to the same primary node of heightTwo 
-    //theSetOne = [-1,0]x[-1,0] U [0,1]x[0,1] U [1,1]x[3,3]
+    //theSetOne = [-1,0]x[-1,0] U [0,1]x[0,1] U [1,3]x[1,3]
     GridTreeSet theSetOne( theTrivialGrid, heightTwo, new BinaryTreeNode( make_binary_word("1111001000100"), make_binary_word("1001001") ) );
 
     // !!!
@@ -1828,7 +1828,7 @@ void test_subset_subset_box(){
     const uint heightTwo = 2;
     
     //Create the set rooted to the primary node of heightTwo 
-    //theSetOne = [-1,0]x[-1,0] U [0,1]x[0,1] U [1,1]x[3,3]
+    //theSetOne = [-1,0]x[-1,0] U [0,1]x[0,1] U [1,3]x[1,3]
     GridTreeSet theSetOne( theTrivialGrid, heightTwo, new BinaryTreeNode( make_binary_word("1111001000100"), make_binary_word("1001001") ) );
 
     // !!!
@@ -1938,6 +1938,93 @@ void test_subset_subset_box(){
     
 }
 
+void test_subset_superset_box(){
+    //Allocate a trivial Grid two dimensional grid
+    Grid theTrivialGrid(2, 1.0);
+    
+    const uint heightTwo = 2;
+    
+    //Create the set and the subset of this set, they are both rooted to the same primary node of heightTwo 
+    //theSetOne = [-1,0]x[-1,0] U [0,1]x[0,1] U [1,2]x[1,2] U [1,2]x[2,3] U [2,3]x[1,2] U [2,3]x[2,3]
+    GridTreeSet theSetOne( theTrivialGrid, heightTwo, new BinaryTreeNode( make_binary_word("1111001000101100100"), make_binary_word("1001001111") ) );
+
+    // !!!
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::superset( const Box& box ) ");
+    ARIADNE_PRINT_TEST_COMMENT("A box that is disjoint from the set and is placed outside the set's box");
+    Box box = make_box("[5.0,6.0]x[7.0,8.0]");
+    cout << "theSetOne: " << theSetOne << endl;
+    cout << "Box: " << box << endl;
+    ARIADNE_TEST_EQUAL( theSetOne.superset( box ), false );
+
+    // !!!
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::superset( const Box& box ) ");
+    ARIADNE_PRINT_TEST_COMMENT("A box that is disjoint from the set and is placed within the set's box");
+    box = make_box("[-0.5,0.5]x[1.5,2.5]");
+    cout << "theSetOne: " << theSetOne << endl;
+    cout << "Box: " << box << endl;
+    ARIADNE_TEST_EQUAL( theSetOne.superset( box ), false );
+
+    // !!!
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::superset( const Box& box ) ");
+    ARIADNE_PRINT_TEST_COMMENT("A box that is disjoint from the set but shares a borders with the set's box");
+    box = make_box("[-2.0,-1.0]x[-1.0,2.0]");
+    cout << "theSetOne: " << theSetOne << endl;
+    cout << "Box: " << box << endl;
+    ARIADNE_TEST_EQUAL( theSetOne.superset( box ), false );
+
+    // !!!
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::superset( const Box& box ) ");
+    ARIADNE_PRINT_TEST_COMMENT("A box that only overlaps the set and is partially covered by it's cells");
+    box = make_box("[1.5,2.5]x[1.5,3.5]");
+    cout << "theSetOne: " << theSetOne << endl;
+    cout << "Box: " << box << endl;
+    ARIADNE_TEST_EQUAL( theSetOne.superset( box ), false );
+
+    // !!!
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::superset( const Box& box ) ");
+    ARIADNE_PRINT_TEST_COMMENT("A box that coincides with a cell of the set");
+    box = make_box("[-1.0,-1.0]x[0.0,0.0]");
+    cout << "theSetOne: " << theSetOne << endl;
+    cout << "Box: " << box << endl;
+    ARIADNE_TEST_EQUAL( theSetOne.superset( box ), true );
+
+    // !!!
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::superset( const Box& box ) ");
+    ARIADNE_PRINT_TEST_COMMENT("A box that is within the set and shares a border with an enabled cell");
+    box = make_box("[-1.0,1.0]x[1.0,2.0]");
+    cout << "theSetOne: " << theSetOne << endl;
+    cout << "Box: " << box << endl;
+    ARIADNE_TEST_EQUAL( theSetOne.superset( box ), false );
+
+    // !!!
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::superset( const Box& box ) ");
+    ARIADNE_PRINT_TEST_COMMENT("A box that is partially covered by two enabled cells of the set");
+    box = make_box("[-0.5,0.5]x[-0.5,0.5]");
+    cout << "theSetOne: " << theSetOne << endl;
+    cout << "Box: " << box << endl;
+    ARIADNE_TEST_EQUAL( theSetOne.superset( box ), false );
+
+    // !!!
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::superset( const Box& box ) ");
+    ARIADNE_PRINT_TEST_COMMENT("A box that is a subset of an enabled cell");
+    box = make_box("[1.5,1.8]x[1.3,1.9]");
+    cout << "theSetOne: " << theSetOne << endl;
+    cout << "Box: " << box << endl;
+    ARIADNE_TEST_EQUAL( theSetOne.superset( box ), true );
+
+    // !!!
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::superset( const Box& box ) ");
+    ARIADNE_PRINT_TEST_COMMENT("A box that is covered by several enabled cells of the set");
+    box = make_box("[1.5,2.5]x[1.5,2.5]");
+    cout << "theSetOne: " << theSetOne << endl;
+    cout << "Box: " << box << endl;
+    ARIADNE_TEST_EQUAL( theSetOne.superset( box ), true );
+    
+    //TODO: I do not know how to test indeterminate result of the superset relation here.
+    //I need two boxes for which we can not determine if they one is a superset of another.
+
+}
+
 int main() {
     
     test_binary_tree();
@@ -1983,6 +2070,8 @@ int main() {
     test_subset_overlaps_box();
     
     test_subset_subset_box();
+    
+    test_subset_superset_box();
     
     return ARIADNE_TEST_FAILURES;
 }

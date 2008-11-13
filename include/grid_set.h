@@ -603,6 +603,16 @@ class GridTreeSubset {
      */
     uint compute_number_subdiv( Float theWidth, const Float theMaxWidth) const;
     
+    /*! \brief This method checks whether the set defined by \a pCurrentNode is a superset
+     *  of \a theBox, in case when it is known that the cell corresponding to the root of
+     *  pCurrentNode [and defined by \a theGrid, the primary cell (\a theHeight) to which
+     *  this tree is (virtually) rooted via the path theWord] encloses \a theBox.
+     *  This is a recursive procedure and it returns true only if there are no disabled
+     *  cells in \a pCurrentNode that intersect with theBox.
+     */
+    static tribool covers( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
+                                const uint theHeight, BinaryWord &theWord, const Box& theBox );
+    
     /*! \brief This method checks whether the set defined by \a pCurrentNode is a subset
      *  of \a theBox. The set of \a pCurrentNode is defined by \a theGrid, the primary
      *  cell (\a theHeight) to which this tree is (virtually) rooted via the path theWord.
@@ -1731,6 +1741,23 @@ inline const BinaryTreeNode * GridTreeSubset::binary_tree() const {
     return _pRootTreeNode;
 }
 
+inline tribool GridTreeSubset::superset( const Box& theBox ) const {
+    //Simply check if theBox is covered by the set and then make sure that
+    //all tree cells that are not disjoint from theBox are enabled
+
+    ARIADNE_ASSERT( theBox.dimension() == cell().dimension() );
+
+    tribool isASubSet = theBox.subset( cell().box() );
+    if( ! isASubSet ) {
+        //If the box is not covered by the cell corresponding to the root node
+        //of the set, then clearly theBox is not a subset of this set.
+        return false;
+    } else {
+        //Otherwise, is theBox is possibly a subset then we try to see furhter 
+        BinaryWord pathCopy( cell().word() );
+        return GridTreeSubset::covers( binary_tree(), grid(), cell().height(), pathCopy, theBox );    
+    }
+}
 
 inline tribool GridTreeSubset::subset( const Box& theBox ) const {
     //Check that the box corresponding to the root node of the set

@@ -932,18 +932,74 @@ GridTreeSubset::operator ListSet<Box>() const {
     return result;
 }
 
-tribool GridTreeSubset::superset( const Box& theBox ) const {
-    //Check that the box corresponding to the root of the set
-    //contains theBox as a subset. If not then the set can
-    //not be the superset, otherwise for all sub-cells of the
-    //set, such that they are not disjoint from theBox we have
-    //to follow the tree untill the leaves, and if the leaf
-    //node's box is disjoint from theBox then it is all fine otherwise
-    //if it is not, then if it is enabled then it is fine,
-    //but if it is disabled, then clearly the set is not a
-    //superset of theBox and so we can stop the tree exploration.
+tribool GridTreeSubset::covers( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
+                                const uint theHeight, BinaryWord &theWord, const Box& theBox ) {
+    tribool result;
     
-    throw NotImplemented(__PRETTY_FUNCTION__);
+    //Check if the current node's cell intersects with theBox
+    Box theCellsBox = GridCell::compute_box( theGrid, theHeight, theWord );
+    tribool doIntersect = theCellsBox.overlaps( theBox );
+    
+    if( ! doIntersect ) {
+        //If theBox does not intersect with the cell then for the covering relation
+        //is is not important if we add or remove this cell, so we return true
+        result = true;
+    } else {
+        //If the cell possibly intersects with theBox then
+        if( pCurrentNode->is_leaf() ) {
+            if( pCurrentNode->is_enabled() ){
+                //If this is an enabled node that possibly or definitely intersects
+                //with theBox then the covering property is fine, so we return true
+                result = true;
+            } else {
+                //If the node is disabled then if it definitely intersects with theBox
+                //we have to report false, as there is not covering, in case it is only
+                //possible intersecting with theBox then we return possibly. The latter
+                //is because we are not completely sure, if the intersection does not
+                //have place then the covering property is not broken.
+                result = ! doIntersect;
+            }
+        } else {
+            //The node is not a leaf so we need to go down and see if the cell
+            //falls into sub cells for which we can sort things out
+            theWord.push_back(false);
+            const tribool result_left = covers( pCurrentNode->left_node(), theGrid, theHeight, theWord, theBox );
+            theWord.pop_back();
+            
+            if( ! result_left) {
+                //If there is definitely no covering property then this is all
+                //we need to know so there is not need to check the other branch.
+                result = false;
+            } else {
+                //If the covering property holds or is possible, then we still
+                //need to check the second branch because it can change the outcome.
+                theWord.push_back(true);
+                const tribool result_right = covers( pCurrentNode->right_node(), theGrid, theHeight, theWord, theBox );
+                theWord.pop_back();
+                
+                if( !result_right ) {
+                    //IF: The right sub-node reports false, then the result is false
+                    //NOTE: We already sorted out the case of ( (!result_left) == true) before
+                    result = false;
+                } else {
+                    if( result_left && result_right ) {
+                        //ELSE: If both sub-nodes report true then it is true
+                        result = true;
+                    } else {
+                        if( indeterminate(result_left) || indeterminate(result_right) ) {
+                            //ELSE: If one of the sub-nodes reports indeterminate then indeterminate,
+                            result = indeterminate;
+                        } else {
+                            //ELSE: An impossible situation
+                            ARIADNE_ASSERT( false );
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    return result;
 }
 
 tribool GridTreeSubset::subset( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,

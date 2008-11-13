@@ -27,6 +27,10 @@
 
 namespace Ariadne {
 
+inline void acc(Interval& e, const Interval& d) {
+    e+=d;
+}
+
 inline void acc(Interval& e, Float& x, const Float& y) {
     Float z=x;
     x+=y;
@@ -46,6 +50,28 @@ inline void acc(Interval& e, Float& x, const Float& y, const Float& z) {
 }
 
 
+void
+TaylorVariable::sweep(const Float& m)
+{
+    for(iterator iter=this->_expansion.begin(); iter!=this->end(); ) {
+        Float a=abs(iter->second);
+        if(abs(iter->second)<=m) {
+            this->_error+=Interval(-a,a);
+            this->_expansion.data().erase(iter++);
+        } else {
+            ++iter;
+        }
+    }
+}
+
+void
+TaylorVariable::clean()
+{
+    this->sweep(0.0);
+}
+
+
+
 TaylorVariable&
 TaylorVariable::operator+=(const TaylorVariable& x)
 {
@@ -54,6 +80,7 @@ TaylorVariable::operator+=(const TaylorVariable& x)
         Float& tref=(*this)[iter->first];
         acc(this->_error,tref,xref);
     }
+    acc(this->_error,x._error);
     return *this;
 }
 
@@ -97,6 +124,24 @@ TaylorVariable::operator-=(const Interval& x)
 }
 
 TaylorVariable&
+TaylorVariable::operator*=(const Float& x)
+{
+    if(x==0) {
+        this->_expansion*=0;
+        this->_error=0;
+    } else {
+        this->_error*=x;
+        for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
+            Float& tref=const_cast<Float&>(iter->second);
+            Interval s=tref*Interval(x);
+            tref=midpoint(s);
+            this->_error+=(s-midpoint(s));
+        }
+    }
+    return *this;
+}
+
+TaylorVariable&
 TaylorVariable::operator*=(const Interval& x)
 {
     if(x==0) {
@@ -113,6 +158,21 @@ TaylorVariable::operator*=(const Interval& x)
     }
     return *this;
 }
+
+TaylorVariable&
+TaylorVariable::operator/=(const Float& x)
+{
+    this->_error/=x;
+    Interval r=Interval(1)/x;
+    for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
+        Float& tref=const_cast<Float&>(iter->second);
+        Interval s=tref*r;
+        tref=midpoint(s);
+        this->_error+=(s-midpoint(s));
+    }
+    return *this;
+}
+
 
 TaylorVariable&
 TaylorVariable::operator/=(const Interval& x)
@@ -173,32 +233,76 @@ operator/(const TaylorVariable& x, const Float& c) {
     TaylorVariable r(x); r/=Interval(c); return r;
 }
 
+TaylorVariable 
+operator+(const Float& c, const TaylorVariable& x) {
+    TaylorVariable r(x); r+=Interval(c); return r;
+}
+
+TaylorVariable 
+operator-(const Float& c, const TaylorVariable& x) {
+    TaylorVariable r(x); r-=Interval(c); return neg(r);
+}
+
+TaylorVariable 
+operator*(const Float& c, const TaylorVariable& x) {
+    TaylorVariable r(x); r*=Interval(c); return r;
+}
+
+TaylorVariable 
+operator/(const Float& c, const TaylorVariable& x) {
+    TaylorVariable r(x); r/=Interval(c); return rec(r);
+}
+
 
 
 TaylorVariable max(const TaylorVariable& x, const TaylorVariable& y) {
-    ARIADNE_NOT_IMPLEMENTED;
+    ARIADNE_ASSERT(x.argument_size()==y.argument_size());
+    Interval xr=x.range();
+    Interval yr=y.range();
+    if(xr.lower()>=yr.upper()) {
+        return x;
+    } else if(yr.lower()>=xr.upper()) {
+        return y;
+    } else {
+        TaylorVariable z(x.argument_size());
+        z.set_value(max(x.value(),y.value()));
+        z.set_error(max(xr,yr)-max(x.value(),y.value()));
+        return z;
+    }
 }
 
 TaylorVariable min(const TaylorVariable& x, const TaylorVariable& y) {
-    ARIADNE_NOT_IMPLEMENTED;
+    return -max(-x,-y);
 }
 
 TaylorVariable abs(const TaylorVariable& x) {
-    ARIADNE_NOT_IMPLEMENTED;
+    Interval xr=x.range();    
+    if(xr.lower()>=0.0) {
+        return x;
+    } else if(xr.upper()<=0.0) {
+        return -x;
+    } else {
+        TaylorVariable z(x.argument_size());
+        Float xv=x.value();
+        z.set_value(abs(xv));
+        z.set_error(abs(xr)-abs(xv));
+        return z;
+    }
+
 }
 
-TaylorVariable add(const TaylorVariable& x, const TaylorVariable& y) {
-    TaylorVariable r=x;
-    r+=y;
-    return r;
-}
-
-Interval sum(const TaylorVariable& x) {
+Interval _sum(const TaylorVariable& x) {
     typedef TaylorVariable::const_iterator const_iterator;
     Interval r=0;
     for(const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         r+=xiter->second;
     }
+    return r;
+}
+
+TaylorVariable add(const TaylorVariable& x, const TaylorVariable& y) {
+    TaylorVariable r=x;
+    r+=y;
     return r;
 }
 
@@ -212,7 +316,7 @@ TaylorVariable mul(const TaylorVariable& x, const TaylorVariable& y) {
             acc(e,r[xiter->first+yiter->first],xiter->second,yiter->second);
         }
     }
-    e += x.error() * sum(y) + sum(x) * y.error() + x.error() * y.error();
+    e += x.error() * _sum(y) + _sum(x) * y.error() + x.error() * y.error();
     return r;
 }
 
@@ -220,69 +324,185 @@ TaylorVariable neg(const TaylorVariable& x) {
     return TaylorVariable(-x.expansion(),-x.error());
 }
 
-struct TaylorSeries {
-    TaylorSeries(uint d) : expansion(d), error(0) { }
-    Float& operator[](uint i) { return expansion[i]; }
-    array<Float> expansion;
-    Interval error;
-};
+Vector<Interval> 
+TaylorVariable::domain() const
+{
+    return Vector<Interval>(this->argument_size(),Interval(-1,1));
+}
 
 Interval 
 TaylorVariable::range() const {
     Interval r=this->error();
     for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
-        r+=iter->second*Interval(-1,1);
+        if(iter==this->begin()) {
+            r+=iter->second;
+        } else {
+            r+=iter->second*Interval(-1,1);
+        }
     }
     return r;
 }
  
+Interval 
+TaylorVariable::evaluate(const Vector<Interval>& v) const
+{
+    ARIADNE_ASSERT(subset(v,this->domain()));
+    Interval r=this->error();
+    for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
+        Interval t=iter->second;
+        for(uint j=0; j!=iter->first.size(); ++j) {
+            t*=pow(v[j],iter->first[j]);
+        }
+        r+=t;
+    }
+    return r;
+}
+
+template<class X> class Series;  
+
+struct TaylorSeries {
+    typedef Series<Interval>(*series_function_pointer)(uint,const Interval&); 
+    TaylorSeries(uint d) : expansion(d+1), error(0) { }
+    TaylorSeries(uint degree, series_function_pointer function, 
+                 const Float& centre, const Interval& domain);
+    uint degree() const { return expansion.size()-1; }
+    Float& operator[](uint i) { return expansion[i]; }
+    array<Float> expansion;
+    Interval error;
+    void sweep(Float e) { 
+        for(uint i=0; i<=degree(); ++i) {
+            if(abs(expansion[i])<=e) { 
+                error+=expansion[i]*Interval(-1,1); 
+                expansion[i]=0; } } }
+};
+
+TaylorSeries::TaylorSeries(uint d, series_function_pointer fn, 
+                           const Float& c, const Interval& r)
+    : expansion(d+1), error(0) 
+{
+    Series<Interval> centre_series=fn(d,Interval(c));
+    Series<Interval> range_series=fn(d,r);
+    Interval p=1;
+    for(uint i=0; i!=d; ++i) {
+        this->expansion[i]=midpoint(centre_series[i]);
+        this->error+=(centre_series[i]-this->expansion[i])*p;
+        p*=r;
+    }
+    this->expansion[d]=midpoint(centre_series[d]);
+    this->error+=(range_series[d]-this->expansion[d])*p;
+}
+
+
+std::ostream& 
+operator<<(std::ostream& os, const TaylorSeries& ts) {
+    return os<<"TS("<<ts.expansion<<","<<ts.error<<")";
+}
+
 
 TaylorVariable 
-compose(const TaylorSeries& ts, const TaylorVariable& tv)
+_compose(const TaylorSeries& ts, const TaylorVariable& tv, Float eps)
 {
+    std::cerr<<"\ncompose\n";
+    std::cerr<<"\n  ts="<<ts<<"\n  tv="<<tv<<"\n";
     Float& vref=const_cast<Float&>(tv.expansion().value());
     Float vtmp=vref; 
     vref=0.0;
-    TaylorVariable r(tv);
+    TaylorVariable r(tv.argument_size());
     r+=ts.expansion[ts.expansion.size()-1];
     for(uint i=1; i!=ts.expansion.size(); ++i) {
+        std::cerr<<"    r="<<r<<std::endl;
         r=r*tv;
         r+=ts.expansion[ts.expansion.size()-i-1];
+        r.sweep(eps);
     }
+    std::cerr<<"    r="<<r<<std::endl;
+    r+=ts.error;
+    std::cerr<<"    r="<<r<<std::endl;
     vref=vtmp;
     return r;
 }
 
+TaylorVariable 
+compose(const TaylorSeries& ts, const TaylorVariable& tv)
+{
+    return _compose(ts,tv,0.0);
+}
+
+
 TaylorVariable rec(const TaylorVariable& x) {
-    ARIADNE_NOT_IMPLEMENTED;
+    static const uint DEG=18;
+    return compose(TaylorSeries(DEG,&Series<Interval>::rec,
+                                x.value(),x.range()),x);
+}
+
+TaylorVariable sqr(const TaylorVariable& x) {
+    TaylorVariable r=x*x;
+    return r;
 }
 
 TaylorVariable pow(const TaylorVariable& x, int n) {
-    ARIADNE_NOT_IMPLEMENTED;
+    TaylorVariable r(x.argument_size()); r+=1;
+    TaylorVariable p(x);
+    while(n) {
+        if(n%2) { r=r*p; } 
+        p=sqr(p);
+        n/=2;
+    }
+    return r;
 }
 
 TaylorVariable sqrt(const TaylorVariable& x) {
-    ARIADNE_NOT_IMPLEMENTED;
+    static const uint DEG=18;
+    return compose(TaylorSeries(DEG,&Series<Interval>::sqrt,
+                                x.value(),x.range()),x);
 }
 
 TaylorVariable exp(const TaylorVariable& x) {
-    ARIADNE_NOT_IMPLEMENTED;
+    static const uint DEG=18;
+    return compose(TaylorSeries(DEG,&Series<Interval>::exp,
+                                x.value(),x.range()),x);
 }
 
 TaylorVariable log(const TaylorVariable& x) {
-    ARIADNE_NOT_IMPLEMENTED;
+    static const uint DEG=18;
+    return compose(TaylorSeries(DEG,&Series<Interval>::log,
+                                x.value(),x.range()),x);
 }
 
 TaylorVariable sin(const TaylorVariable& x) {
-    ARIADNE_NOT_IMPLEMENTED;
+    static const uint DEG=18;
+    return compose(TaylorSeries(DEG,&Series<Interval>::sin,
+                                x.value(),x.range()),x);
 }
 
 TaylorVariable cos(const TaylorVariable& x) {
-    ARIADNE_NOT_IMPLEMENTED;
+    static const uint DEG=18;
+    return compose(TaylorSeries(DEG,&Series<Interval>::cos,
+                                x.value(),x.range()),x);
 }
 
 TaylorVariable tan(const TaylorVariable& x) {
-    ARIADNE_NOT_IMPLEMENTED;
+    static const uint DEG=18;
+    return compose(TaylorSeries(DEG,&Series<Interval>::tan,
+                                x.value(),x.range()),x);
+}
+
+TaylorVariable asin(const TaylorVariable& x) {
+    static const uint DEG=18;
+    return compose(TaylorSeries(DEG,&Series<Interval>::asin,
+                                x.value(),x.range()),x);
+}
+
+TaylorVariable acos(const TaylorVariable& x) {
+    static const uint DEG=18;
+    return compose(TaylorSeries(DEG,&Series<Interval>::acos,
+                                x.value(),x.range()),x);
+}
+
+TaylorVariable atan(const TaylorVariable& x) {
+    static const uint DEG=18;
+    return compose(TaylorSeries(DEG,&Series<Interval>::atan,
+                                x.value(),x.range()),x);
 }
 
 

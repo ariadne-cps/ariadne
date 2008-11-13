@@ -88,6 +88,11 @@ void export_taylor_variable()
     taylor_variable_class.def( init< uint >());
     taylor_variable_class.def( init< uint, uint >());
     taylor_variable_class.def("error", (const I&(T::*)()const) &T::error, return_value_policy<copy_const_reference>());
+    taylor_variable_class.def("sweep", &TaylorVariable::sweep);
+    taylor_variable_class.def("clean", &TaylorVariable::clean);
+    taylor_variable_class.def("domain", &TaylorVariable::domain);
+    taylor_variable_class.def("range", &TaylorVariable::range);
+    taylor_variable_class.def("evaluate", &TaylorVariable::evaluate);
     taylor_variable_class.def("__getitem__", &get_item<T,A>);
     taylor_variable_class.def("__setitem__",&set_item<T,A,D>);
     taylor_variable_class.def("__setitem__",&set_item<T,A,R>);
@@ -98,6 +103,12 @@ void export_taylor_variable()
     taylor_variable_class.def(self/self);
     taylor_variable_class.def(self+R());
     taylor_variable_class.def(self-R());
+    taylor_variable_class.def(self*R());
+    taylor_variable_class.def(self/R());
+    taylor_variable_class.def(R()+self);
+    taylor_variable_class.def(R()-self);
+    taylor_variable_class.def(R()*self);
+    taylor_variable_class.def(R()/self);
     taylor_variable_class.def(self+=R());
     taylor_variable_class.def(self-=R());
     taylor_variable_class.def(self*=R());

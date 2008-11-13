@@ -65,6 +65,25 @@ class Series
     array<X> _data;
 };
 
+template<class X> Series<X> operator+(X c, const Series<X>& x) {
+    Series<X> r(x); r+=c; return r; }
+
+template<class X> Series<X> operator-(X c, const Series<X>& x) {
+    Series<X> r(neg(x)); r+=c; return r; }
+
+template<class X> Series<X> neg(const Series<X>& x) {
+    ARIADNE_NOT_IMPLEMENTED; }
+
+template<class X> Series<X> rec(const Series<X>& x) {
+    ARIADNE_NOT_IMPLEMENTED; }
+
+template<class X> Series<X> sqr(const Series<X>& x) {
+    ARIADNE_NOT_IMPLEMENTED; }
+
+template<class X> Series<X> sqrt(const Series<X>& x) {
+    ARIADNE_NOT_IMPLEMENTED; }
+
+
 template<class X>
 Series<X> 
 Series<X>::rec(uint d, const X& c) 
@@ -165,15 +184,17 @@ template<class X>
 Series<X> 
 Series<X>::tan(uint d, const X& c)
 {
-    return sin(d,c)/cos(d,c);
+    ARIADNE_NOT_IMPLEMENTED;
+    //return sin(d,c)/cos(d,c);
 }
 
 template<class X>  
 Series<X> 
 Series<X>::asin(uint d, const X& c)
 {
-    if(d==0) { return Series<X>::constant(d,Ariadne::atan(c)); }
-    Series<X> y = X(1)/Ariadne::sqrt(X(1)-Ariadne::pow(Series<X>::variable(d-1,c),2u));
+    if(d==0) { Series<X> y(d); y[0]=Ariadne::asin(c); return y; }
+    Series<X> y(d-1); y[0]=c; y[1]=X(1);
+    y = Ariadne::rec(Ariadne::sqrt(X(1)-Ariadne::sqr(y)));
     return antiderivative(y,Ariadne::asin(c));
 }
 
@@ -181,8 +202,9 @@ template<class X>
 Series<X> 
 Series<X>::acos(uint d, const X& c)
 {
-    if(d==0) { return Series<X>::constant(d,Ariadne::atan(c)); }
-    Series<X> y = X(-1)/Ariadne::sqrt(X(1)-pow(Series<X>::variable(d-1,c),2u));
+    if(d==0) { Series<X> y(d); y[0]=Ariadne::acos(c); return y; }
+    Series<X> y(d-1); y[0]=c; y[1]=X(1);
+    y = Ariadne::neg(Ariadne::rec(Ariadne::sqrt(X(1)-Ariadne::sqr(y))));
     return antiderivative(y,Ariadne::acos(c));
 }
 
@@ -190,8 +212,9 @@ template<class X>
 Series<X> 
 Series<X>::atan(uint d, const X& c)
 {
-    if(d==0) { return Series<X>::constant(d,Ariadne::atan(c)); } 
-    Series<X> y = X(1)/(X(1)+pow(Series<X>::variable(d-1,c),2u));
+    if(d==0) { Series<X> y(d); y[0]=Ariadne::atan(c); return y; } 
+    Series<X> y(d-1); y[0]=c; y[1]=X(1);
+    y = Ariadne::rec(Ariadne::sqrt(X(1)+Ariadne::sqr(y)));
     return antiderivative(y,Ariadne::atan(c));
 }
 

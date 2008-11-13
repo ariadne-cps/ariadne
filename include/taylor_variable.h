@@ -121,6 +121,9 @@ class TaylorVariable
     const SparseDifferential<Float>& expansion() const { return this->_expansion; }
     const Interval& error() const { return this->_error; }
     Interval& error() { return this->_error; }
+    void set_error(const Interval& e) { this->_error=e; }
+    const Float& value() const { return this->_expansion.value(); }
+    void set_value(const Float& x) { return this->_expansion.set_value(x); }
 
 
     Float& operator[](const uint& j) { return this->_expansion[j]; }
@@ -154,11 +157,14 @@ class TaylorVariable
     TaylorVariable& operator+=(const Interval& c);
     TaylorVariable& operator-=(const Float& c);
     TaylorVariable& operator-=(const Interval& c);
+    TaylorVariable& operator*=(const Float& c);
     TaylorVariable& operator*=(const Interval& c);
+    TaylorVariable& operator/=(const Float& c);
     TaylorVariable& operator/=(const Interval& c);
 
+    Vector<Interval> domain() const;
     Interval range() const;
-    Interval evaluate(const Interval& x) const;
+    Interval evaluate(const Vector<Interval>& x) const;
 
     friend TaylorVariable operator+(const TaylorVariable& x);
     friend TaylorVariable operator-(const TaylorVariable& x);
@@ -170,7 +176,8 @@ class TaylorVariable
     friend TaylorVariable derivative(const TaylorVariable& x, uint i);
     friend TaylorVariable antiderivative(const TaylorVariable& x, uint i);
   public:
-    void cleanup();
+    void clean();
+    void sweep(const Float& eps);
 };
 
 

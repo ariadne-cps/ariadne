@@ -1147,7 +1147,7 @@ void test_remove_two() {
     ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theSet02, 2 );
     ARIADNE_CLEAN_TEST__VECTOR( expected_result_arr );
     
-    ARIADNE_PRINT_TEST_CASE_TITLE("Remove a GridCell (p.c. height=0) form a GridTreeSet(p.c. height=1): The cell intersects the set.");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Remove a GridCell (p.c. height=0) form a GridTreeSet(p.c. height=1): The cell overlaps the set.");
     GridCell lowerPrimaryCellIntersection( theTrivialGrid, theHeightZero, BinaryWord() );
     theSet03.remove( lowerPrimaryCellIntersection );
     expected_result_arr[0] = new GridCell( theTrivialGrid, theHeightOne, make_binary_word("00") );
@@ -1171,7 +1171,7 @@ void test_remove_two() {
     ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theSet05, 2 );
     ARIADNE_CLEAN_TEST__VECTOR( expected_result_arr );
     
-    ARIADNE_PRINT_TEST_CASE_TITLE("Remove a GridCell (p.c. height=2) form a GridTreeSet(p.c. height=1): The cell intersects the set.");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Remove a GridCell (p.c. height=2) form a GridTreeSet(p.c. height=1): The cell overlaps the set.");
     GridCell higherPrimaryCellIntersection( theTrivialGrid, theHeightTwo, make_binary_word("0011") );
     theSet06.remove( higherPrimaryCellIntersection );
     expected_result_arr[0] = new GridCell( theTrivialGrid, theHeightTwo, make_binary_word("0000") );
@@ -1619,7 +1619,7 @@ void test_subset_overlap_subset() {
     BinaryWord treeOne = make_binary_word("11110100001010100");
     BinaryWord leavesOne = make_binary_word("010010001");
     BinaryTreeNode binaryTreeRootOne( treeOne, leavesOne ); 
-    //Create a set that intersects with theSet but not the theSubset
+    //Create a set that overlaps with theSet but not the theSubset
     GridTreeSubset theSubSetOne( theTrivialGrid, heightThree, make_binary_word("11"), &binaryTreeRootOne );
     
     // !!!
@@ -1650,7 +1650,7 @@ void test_subset_overlap_subset() {
     cout << theSubSetTwo << endl;
     ARIADNE_TEST_EQUAL( overlap( theSubSetOne, theSubSetTwo ), false );
 
-    //Make a set that intersects with theSet: Just root it to height zero and
+    //Make a set that overlaps with theSet: Just root it to height zero and
     //reuse the tree make a copy of the tree to avoid double deallocations.
     GridTreeSet theSetOne( theTrivialGrid, heightZero, new BinaryTreeNode( binaryTreeRootOne ) );
     
@@ -1748,7 +1748,7 @@ void test_subset_subset_subset() {
     
 }
 
-void test_subset_intersects_box() {
+void test_subset_overlaps_box() {
     
     //Allocate a trivial Grid two dimensional grid
     Grid theTrivialGrid(2, 1.0);
@@ -1760,61 +1760,61 @@ void test_subset_intersects_box() {
     GridTreeSet theSetOne( theTrivialGrid, heightTwo, new BinaryTreeNode( make_binary_word("1111001000100"), make_binary_word("1001001") ) );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::intersects( const Box& box ) ");
-    ARIADNE_PRINT_TEST_COMMENT("A box that does not intersects with theSetOne");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::overlaps( const Box& box ) ");
+    ARIADNE_PRINT_TEST_COMMENT("A box that does not overlaps with theSetOne");
     Box box = make_box("[-2.0,-1.5]x[10,20]");
     cout << "theSetOne: " << theSetOne << endl;
     cout << "Box: " << box << endl;
-    ARIADNE_TEST_EQUAL( theSetOne.intersects( box ), false );
+    ARIADNE_TEST_EQUAL( theSetOne.overlaps( box ), false );
 
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::intersects( const Box& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::overlaps( const Box& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that encloses theSetOne as a strict subset");
     box = make_box("[-2.0,4.0]x[-2.0,4.0]");
     cout << "theSetOne: " << theSetOne << endl;
     cout << "Box: " << box << endl;
-    ARIADNE_TEST_EQUAL( theSetOne.intersects( box ), true );
+    ARIADNE_TEST_EQUAL( theSetOne.overlaps( box ), true );
     
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::intersects( const Box& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::overlaps( const Box& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that coincides with one cell of theSetOne");
     box = make_box("[-1.0,0.0]x[-1.0,0.0]");
     cout << "theSetOne: " << theSetOne << endl;
     cout << "Box: " << box << endl;
-    ARIADNE_TEST_EQUAL( theSetOne.intersects( box ), true );
+    ARIADNE_TEST_EQUAL( theSetOne.overlaps( box ), true );
     
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::intersects( const Box& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::overlaps( const Box& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that is a subset of one cell of theSetOne");
     box = make_box("[1.5,2.5]x[1.5,2.5]");
     cout << "theSetOne: " << theSetOne << endl;
     cout << "Box: " << box << endl;
-    ARIADNE_TEST_EQUAL( theSetOne.intersects( box ), true );
+    ARIADNE_TEST_EQUAL( theSetOne.overlaps( box ), true );
     
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::intersects( const Box& box ) ");
-    ARIADNE_PRINT_TEST_COMMENT("A box that intersects two out of three enabled cells of theSetOne");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::overlaps( const Box& box ) ");
+    ARIADNE_PRINT_TEST_COMMENT("A box that overlaps two out of three enabled cells of theSetOne");
     box = make_box("[0.3,1.7]x[0.6,1.2]");
     cout << "theSetOne: " << theSetOne << endl;
     cout << "Box: " << box << endl;
-    ARIADNE_TEST_EQUAL( theSetOne.intersects( box ), true );
+    ARIADNE_TEST_EQUAL( theSetOne.overlaps( box ), true );
     
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::intersects( const Box& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::overlaps( const Box& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that is located within the bounding box of theSetOne but does not intersect any enabled cells");
     box = make_box("[-0.6,-0.3]x[1.5,3.0]");
     cout << "theSetOne: " << theSetOne << endl;
     cout << "Box: " << box << endl;
-    ARIADNE_TEST_EQUAL( theSetOne.intersects( box ), false );
+    ARIADNE_TEST_EQUAL( theSetOne.overlaps( box ), false );
     
     // !!!
-    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::intersects( const Box& box ) ");
+    ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::overlaps( const Box& box ) ");
     ARIADNE_PRINT_TEST_COMMENT("A box that shares a border with some of the enabled cells of theSetOne");
     box = make_box("[-1.0,1.0]x[1.0,3.0]");
     cout << "theSetOne: " << theSetOne << endl;
     cout << "Box: " << box << endl;
-    //NOTE: The common border makes Box:intersects(Box) return true so we have an intersection here
-    ARIADNE_TEST_EQUAL( theSetOne.intersects( box ), true );
+    //NOTE: The common border makes Box:overlaps(Box) return false so we have no intersection here
+    ARIADNE_TEST_EQUAL( theSetOne.overlaps( box ), false );
 
     //TODO: I do not know how to test indeterminate result of the intersection here
     //Somehow I need two boxes for which we can not determine if they intersect or not.
@@ -1833,7 +1833,7 @@ void test_subset_subset_box(){
 
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE("Testing tribool GridTreeSubset::subset( const Box& box ) ");
-    ARIADNE_PRINT_TEST_COMMENT("A box that does not intersects with theSetOne");
+    ARIADNE_PRINT_TEST_COMMENT("A box that does not intersect with theSetOne");
     Box box = make_box("[-2.0,-1.5]x[10,20]");
     cout << "theSetOne: " << theSetOne << endl;
     cout << "Box: " << box << endl;
@@ -1980,7 +1980,7 @@ int main() {
     
     test_subset_subset_subset();
     
-    test_subset_intersects_box();
+    test_subset_overlaps_box();
     
     test_subset_subset_box();
     

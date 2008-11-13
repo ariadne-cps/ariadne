@@ -148,7 +148,7 @@ class Zonotope {
     /*! \brief Tests disjointness of \a z and \a r. */
     friend tribool disjoint(const Zonotope& z, const Box& r);
     /*! \brief Tests if \a z and \a r intersect. */
-    friend tribool intersects(const Zonotope& z, const Box& r);
+    friend tribool overlaps(const Zonotope& z, const Box& r);
     /*! \brief Tests inclusion of \a z in \a r. */
     friend tribool subset(const Zonotope& z, const Box& r);
     /*! \brief Tests disjointness of \a r and \a z. */
@@ -187,7 +187,7 @@ Box bounding_box(const Zonotope& z);
 
 tribool contains(const Zonotope& z, const Point& pt);
 tribool disjoint(const Zonotope& z, const Box& r);
-tribool intersects(const Zonotope& z, const Box& r);
+tribool overlaps(const Zonotope& z, const Box& r);
 tribool subset(const Zonotope& z, const Box& r);
 
 

@@ -128,7 +128,7 @@ disjoint(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Box
 tribool 
 overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const Box& bx, const Float& eps)
 {
-    if(ovs.intersects(bx)) {
+    if(ovs.overlaps(bx)) {
         if(ops.superset(bx)) { 
             return true; 
         } else if(bx.radius()<eps) {

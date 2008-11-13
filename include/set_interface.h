@@ -78,8 +78,8 @@ class OvertSetInterface
 {
   public:
     virtual OvertSetInterface* clone() const = 0;
-    //! \brief Tests if the set intersects \a bx.
-    virtual tribool intersects(const Vector<Interval>& bx) const = 0;
+    //! \brief Tests if the set overlaps \a bx.
+    virtual tribool overlaps(const Vector<Interval>& bx) const = 0;
     //! \brief Tests if \a ovs overlaps \a ops, to a tolerance of \a eps.
     friend tribool overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const Float& eps);
 };

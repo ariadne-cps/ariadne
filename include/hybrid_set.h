@@ -133,10 +133,10 @@ class HybridImageSet
     virtual ImageSet const& operator[](DiscreteState q) const {
         ARIADNE_ASSERT(this->find(q)!=this->locations_end());
         return this->find(q)->second; }
-    virtual tribool intersects(const HybridBox& hbx) const { 
+    virtual tribool overlaps(const HybridBox& hbx) const { 
         locations_const_iterator loc_iter=this->find(hbx.first);
         return loc_iter!=this->locations_end()
-            && loc_iter->second.intersects(hbx.second); }
+            && loc_iter->second.overlaps(hbx.second); }
     virtual tribool disjoint(const HybridBox& hbx) const { 
         locations_const_iterator loc_iter=this->find(hbx.first);
         return loc_iter!=this->locations_end()
@@ -436,9 +436,9 @@ class HybridGridTreeSet
         return loc_iter != this->locations_end() || loc_iter->second.disjoint( hbx.second );
     }
     
-    tribool intersects(const HybridBox& hbx) const { 
+    tribool overlaps(const HybridBox& hbx) const { 
         locations_const_iterator loc_iter = this->find( hbx.first );
-        return loc_iter != this->locations_end() && loc_iter->second.intersects( hbx.second );
+        return loc_iter != this->locations_end() && loc_iter->second.overlaps( hbx.second );
     }
     
     tribool superset(const HybridBox& hbx) const { 

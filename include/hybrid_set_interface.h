@@ -61,7 +61,7 @@ class HybridOvertSetInterface
 {
   public:
     virtual HybridOvertSetInterface* clone() const = 0;
-    virtual tribool intersects(const HybridBox& bx) const = 0;
+    virtual tribool overlaps(const HybridBox& bx) const = 0;
     virtual OvertSetInterface const& operator[](DiscreteState) const = 0;
 };
 

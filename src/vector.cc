@@ -141,6 +141,17 @@ bool disjoint(const Vector<Interval>& v1, const Vector<Interval>& v2)
     return false;
 }
 
+bool overlap(const Vector<Interval>& v1, const Vector<Interval>& v2) 
+{
+    ARIADNE_ASSERT(v1.size()==v2.size());
+    for(size_t i=0; i!=v1.size(); ++i) {
+        if(v1[i].u<=v2[i].l || v1[i].l>=v2[i].u) {
+            return false;
+        }
+    }
+    return true;
+}
+
 Vector<Interval> intersection(const Vector<Interval>& v1, const Vector<Interval>& v2);
 Vector<Float> midpoint(const Vector<Interval>& v);
 

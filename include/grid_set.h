@@ -612,15 +612,28 @@ class GridTreeSubset {
     static tribool subset( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
                            const uint theHeight, BinaryWord &theWord, const Box& theBox );
 
-    /*! \brief This method checks whether \a theBox intersects with the set defined by
+    /*! \brief This method checks whether \a theBox is disjoint from the set defined by
      *  \a pCurrentNode, \a theGrid, the primary cell (\a theHeight) to which this
      *  tree is (virtually) rooted via the path theWord. This is done using the recursive
      *  procedure by checking the cells of the tree that intersect with the box and going
-     * down to the leaves. When reaching a leaf node that is enabled we conclude that we
-     * have an intersection. If there are no such nodes then there is not intersection.
+     *  down to the leaves. When reaching a leaf node that is enabled we conclude that we
+     *  have an intersection. If there are no such nodes then there is no intersection,
+     *  and the sets are disjoint.
      */
-    static tribool intersects( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
-                               const uint theHeight, BinaryWord &theWord, const Box& theBox );
+    static tribool disjoint( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
+                             const uint theHeight, BinaryWord &theWord, const Box& theBox );
+    
+    /*! \brief This method checks whether \a theBox overlaps the set defined by
+     *  \a pCurrentNode, \a theGrid, the primary cell (\a theHeight) to which this
+     *  tree is (virtually) rooted via the path theWord. This is done using the recursive
+     *  procedure by checking the cells of the tree that overlap the box and going
+     *  down to the leaves. When reaching a leaf node that is enabled we conclude that we
+     *  have an overlap. If there are no such nodes then there is no overlap. Note that this 
+     *  method cannot be implemented using disjoint since disjoint tests if the closures 
+     *  are disjoint, and overlaps tests if the interiors are not disjoint.
+     */
+    static tribool overlaps( const BinaryTreeNode* pCurrentNode, const Grid& theGrid,
+                             const uint theHeight, BinaryWord &theWord, const Box& theBox );
     
   public:
     
@@ -704,7 +717,7 @@ class GridTreeSubset {
     /*! \brief Tests if a cell is a subset of a set. */
     friend bool subset( const GridCell& theCell, const GridTreeSubset& theSet );
     
-    /*! \brief Tests if a cell is overlaps (intersects as an open set) a paving set. */
+    /*! \brief Tests if a cell overlaps (as an open set) a paving set. */
     friend bool overlap( const GridCell& theCell, const GridTreeSubset& theSet );
 
     /*! \brief Tests if a grid set \a theSet1 is a subset of \a theSet2. */
@@ -729,8 +742,8 @@ class GridTreeSubset {
     /*! \brief Tests if (the closure of) a grid set is disjoint from a box. */
     tribool disjoint( const Box& theBox  ) const;
     
-    /*! \brief Tests if a grid set intersects a box. */
-    tribool intersects( const Box& theBox ) const;
+    /*! \brief Tests if a grid set overlaps a box. */
+    tribool overlaps( const Box& theBox ) const;
             
     //@}
             
@@ -829,7 +842,7 @@ class GridTreeSet : public GridTreeSubset {
 
     /*! \brief This method adjoins the lower approximation of \a theSet (computed on the fly) to this paving.
      *  It is specialised for open sets, for which we have the superset() operator. If a set is a superset of
-     *  a cell, then we know it intersects the cell and all its children.
+     *  a cell, then we know it overlaps the cell and all its children.
      */
     void adjoin_lower_approximation( BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
                                      const uint max_mince_depth, const OpenSetInterface& theSet, BinaryWord * pPath );
@@ -1739,20 +1752,20 @@ inline tribool GridTreeSubset::disjoint( const Box& theBox ) const {
 
     BinaryWord pathCopy( cell().word() );
     
-    return ! GridTreeSubset::intersects( binary_tree(), grid(), cell().height(), pathCopy, theBox );    
+    return GridTreeSubset::disjoint( binary_tree(), grid(), cell().height(), pathCopy, theBox );    
 }
 
-inline tribool GridTreeSubset::intersects( const Box& theBox ) const {
-    //Check if the box of the root cell intersects with theBox,
+inline tribool GridTreeSubset::overlaps( const Box& theBox ) const {
+    //Check if the box of the root cell overlaps with theBox,
     //if not then theBox does not intersect with the cell,
     //otherwise we need to find at least one enabled node
-    //in the binary tree, such that it's box intersects theBox.
+    //in the binary tree, such that it's box overlaps theBox.
 
     ARIADNE_ASSERT( theBox.dimension() == cell().dimension() );
 
     BinaryWord pathCopy( cell().word() );
     
-    return GridTreeSubset::intersects( binary_tree(), grid(), cell().height(), pathCopy, theBox );    
+    return GridTreeSubset::overlaps( binary_tree(), grid(), cell().height(), pathCopy, theBox );    
 }
 
 /*********************************************GridTreeSet*********************************************/

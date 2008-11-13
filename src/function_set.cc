@@ -85,7 +85,7 @@ ImageSet::disjoint(const Vector<Interval>& bx) const
 
 
 tribool
-ImageSet::intersects(const Vector<Interval>& bx) const 
+ImageSet::overlaps(const Vector<Interval>& bx) const 
 { 
     static const int MAX_SUBDIVISIONS=8;
     return !Ariadne::disjoint(this->domain(),*this->_function_ptr,bx,radius(bx)/MAX_SUBDIVISIONS);
@@ -148,7 +148,7 @@ ConstraintSet::disjoint(const Vector<Interval>& bx) const
 
 
 tribool
-ConstraintSet::intersects(const Vector<Interval>& bx) const 
+ConstraintSet::overlaps(const Vector<Interval>& bx) const 
 { 
     ARIADNE_NOT_IMPLEMENTED;
 }

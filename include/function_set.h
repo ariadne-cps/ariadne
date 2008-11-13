@@ -65,7 +65,7 @@ class ImageSet
     uint dimension() const;
     tribool empty() const;
     tribool disjoint(const Vector<Interval>&) const;
-    tribool intersects(const Vector<Interval>&) const;
+    tribool overlaps(const Vector<Interval>&) const;
     tribool subset(const Vector<Interval>&) const;
     Vector<Interval> bounding_box() const;
     std::ostream& write(std::ostream&) const;
@@ -112,7 +112,7 @@ class ConstraintSet
     ConstraintSet* clone() const;
     uint dimension() const;
     tribool disjoint(const Vector<Interval>&) const;
-    tribool intersects(const Vector<Interval>&) const;
+    tribool overlaps(const Vector<Interval>&) const;
     tribool superset(const Vector<Interval>&) const;
     std::ostream& write(std::ostream&) const;
 };

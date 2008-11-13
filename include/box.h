@@ -100,8 +100,8 @@ class Box
         return Ariadne::disjoint(*this, other);
     }
 
-    virtual tribool intersects(const Vector<Interval>& other) const { 
-        return !Ariadne::disjoint(*this, other);
+    virtual tribool overlaps(const Vector<Interval>& other) const { 
+        return Ariadne::overlap(*this, other);
     }
 
     virtual tribool superset(const Vector<Interval>& other) const { 

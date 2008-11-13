@@ -44,7 +44,7 @@ Polytope::disjoint(const Vector<Interval>& bx) const {
 }
 
 tribool 
-Polytope::intersects(const Vector<Interval>& bx) const {
+Polytope::overlaps(const Vector<Interval>& bx) const {
     return Ariadne::contains(bx,baricentre(*this)) or indeterminate;
 }
 

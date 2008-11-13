@@ -95,6 +95,8 @@ void export_vector()
     vector_class.def(self /= double());
     vector_class.def(self /= X());
     vector_class.def(boost::python::self_ns::str(self));
+
+    def("norm",(X(*)(const Vector<X>&)) &norm);
 }
 
 
@@ -126,6 +128,9 @@ void export_matrix()
     //matrix_class.def("transpose", &Matrix::transpose);
     //matrix_class.def("solve", &Matrix::solve);
     matrix_class.def(boost::python::self_ns::str(self));    // __str__
+
+    def("norm",(X(*)(const Matrix<X>&)) &norm);
+    def("inverse",(Matrix<X>(*)(const Matrix<X>&)) &inverse);
 }
 
 template void export_vector<Float>();

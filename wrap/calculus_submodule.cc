@@ -116,12 +116,14 @@ void export_taylor_variable()
     taylor_variable_class.def(self_ns::str(self));
     taylor_variable_class.def("__repr__",&__repr__<T>);
 
-    taylor_variable_class.def("variables",&make_taylor_variables);
-    taylor_variable_class.staticmethod("variables");
 
-    def("constant",(T(*)(uint, const R&))&T::constant);
-    def("variable",(T(*)(uint, const R&, uint))&T::variable);
+    taylor_variable_class.def("constant",(T(*)(uint, const R&))&T::constant);
+    taylor_variable_class.def("variable",(T(*)(uint, const R&, uint))&T::variable);
+    taylor_variable_class.def("variables",&make_taylor_variables);
   
+    taylor_variable_class.staticmethod("constant");
+    taylor_variable_class.staticmethod("variable");
+    taylor_variable_class.staticmethod("variables");
 
     def("max",(T(*)(const T&,const T&))&max);
     def("min",(T(*)(const T&,const T&))&min);

@@ -38,6 +38,7 @@
 #include "macros.h"
 #include "exceptions.h"
 #include "numeric.h"
+#include "tuple.h"
 
 namespace Ariadne {
 
@@ -57,7 +58,7 @@ class Matrix
         : boost::numeric::ublas::matrix<X>(r,c) { for(size_t i=0; i!=r; ++i) { for(size_t j=0; j!=c; ++j) { (*this)(i,j)=ptr[i*c+j]; } } }
     template<class XX> Matrix(size_t r, size_t c, const XX* ptr, int ri, int ci)
         : boost::numeric::ublas::matrix<X>(r,c) { for(size_t i=0; i!=r; ++i) { for(size_t j=0; j!=c; ++j) { (*this)(i,j)=ptr[i*ri+j*ci]; } } }
-    Matrix(int r, int c, const double& x0, ... );
+    Matrix(size_t r, size_t c, const double& x0, ... );
     Matrix(const std::string& str)
         : ublas::matrix<X>() { std::stringstream ss(str); ss >> *this; }
     size_t row_size() const { return this->size1(); }
@@ -73,19 +74,19 @@ class Matrix
 
 };
 
-template<class X> Matrix<X>::Matrix(int r, int c, const double& x0, ...) 
-    : ublas::matrix<X>(r,c) 
-{
-    assert(r>=1 && c>=1); va_list args; va_start(args,x0);
-    (*this)[0][0]=x0; 
-    for(size_t j=1; j!=c; ++j) { (*this)[0][j]=va_arg(args,double); } 
-    for(size_t i=1; i!=r; ++i) { for(size_t j=0; j!=c; ++j) { (*this)[i][j]=va_arg(args,double); } }
-    va_end(args);
-}
-
-
-template<class X> Matrix<X> inverse(const Matrix<X>& A);
 template<class X> X norm(const Matrix<X>& A);
+
+template<class X> std::ostream& operator<<(std::ostream& os, const Matrix<X>& A);
+template<class X> std::istream& operator>>(std::istream& is, Matrix<X>& A);
+
+Matrix<Float> inverse(const Matrix<Float>& A);
+Matrix<Interval> inverse(const Matrix<Interval>& A);
+
+Matrix<Float> triangular_multiplier(const Matrix<Float>& A);
+tuple< Matrix<Float>, Matrix<Float> > orthogonal_decomposition(const Matrix<Float>&);
+
+Matrix<Float> midpoint(const Matrix<Interval>&);
+
 
 /*
 template<class X> inline Vector<X> operator*(const Matrix<X>& A, const Vector<X>& v) {
@@ -135,6 +136,16 @@ operator* (const ublas::matrix_expression<E1> &e1,
 */
 
 
+template<class X> Matrix<X>::Matrix(size_t r, size_t c, const double& x0, ...) 
+    : boost::numeric::ublas::matrix<X>(r,c) 
+{
+    assert(r>=1 && c>=1); va_list args; va_start(args,x0);
+    (*this)[0][0]=x0; 
+    for(size_t j=1; j!=c; ++j) { (*this)[0][j]=va_arg(args,double); } 
+    for(size_t i=1; i!=r; ++i) { for(size_t j=0; j!=c; ++j) { (*this)[i][j]=va_arg(args,double); } }
+    va_end(args);
+}
+
 template<class X> template<class XX> bool Matrix<X>::operator==(const Matrix<XX>& A2) const 
 {
     const Matrix<X>& A1=*this;
@@ -152,27 +163,6 @@ template<class X> template<class XX> bool Matrix<X>::operator==(const Matrix<XX>
 }
 
 
-
-template<class X> Matrix<X> inverse(const Matrix<X>& A) 
-{
-    assert(A.row_size()==A.column_size());
-    if(A.row_size()==1) {
-        Matrix<X> I(1,1);
-        I[0][0]=1/A[0][0];
-        return I;
-    }
-    if(A.row_size()==2) {
-        Matrix<X> I(2,2);
-        X rdet = 1/(A[0][0]*A[1][1] - A[0][1] * A[1][0]);
-        I[0][0]=A[1][1]*rdet;
-        I[0][1]=-A[0][1]*rdet;
-        I[1][0]=-A[1][0]*rdet;
-        I[1][1]=A[0][0]*rdet;
-        return I;
-    }
-    assert(false);
-}
-
 template<class X> X norm(const Matrix<X>& A) 
 {
     X result=0;
@@ -187,16 +177,13 @@ template<class X> X norm(const Matrix<X>& A)
 }
 
 
-Matrix<Float> midpoint(const Matrix<Interval>& A);
-
-
 
 template<class X> std::ostream& operator<<(std::ostream& os, const Matrix<X>& A) {
-    if(A.row_size()==0 || A.column_size()==0) { os << '['; }
+    if(A.row_size()==0 || A.column_size()==0) { os << "["; }
     for(size_t i=0; i!=A.row_size(); ++i) { 
         for(size_t j=0; j!=A.column_size(); ++j) { 
-            os << (j==0 ? (i==0 ? '[' : ';') : ',') << A(i,j); } }
-    return os << ']';
+            os << (j==0 ? (i==0 ? "[" : "; ") : ",") << A(i,j); } }
+    return os << "]";
 }
 
 

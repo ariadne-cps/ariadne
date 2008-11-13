@@ -53,6 +53,18 @@ make_differential(const uint& as, const uint& d, const boost::python::object& ob
 
 
 template<class DIFF>
+boost::python::list
+make_differential_variables(const uint& d, const Vector<Interval>& x) 
+{
+    boost::python::list result;
+    for(uint i=0; i!=x.size(); ++i) {
+        result.append(DIFF::variable(x.size(),d,midpoint(x[i]),i));
+    }
+    return result;
+}
+
+
+template<class DIFF>
 DifferentialVector<DIFF>*
 make_differential_vector(const uint& rs, const uint& as, const uint& d, const boost::python::object& obj) 
 {
@@ -119,8 +131,13 @@ void export_differential()
     differential_class.def(self/=X());
     differential_class.def(self_ns::str(self));
   
-    def("constant",(D(*)(uint, ushort, const X&))&D::constant);
-    def("variable",(D(*)(uint, ushort, const X&, uint))&D::variable);
+    differential_class.def("constant",(D(*)(uint, ushort, const X&))&D::constant);
+    differential_class.def("variable",(D(*)(uint, ushort, const X&, uint))&D::variable);
+    differential_class.def("variables",&make_differential_variables<D>);
+
+    differential_class.staticmethod("constant");
+    differential_class.staticmethod("variable");
+    differential_class.staticmethod("variables");
 
     def("max",(D(*)(const D&,const D&))&max<X>);
     def("min",(D(*)(const D&,const D&))&min<X>);

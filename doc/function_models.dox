@@ -1,5 +1,5 @@
 /***************************************************************************
- *            function_models.h
+ *            function_models.dox
  *
  *  Copyright  2007  Pieter Collins
  *
@@ -23,7 +23,7 @@
 
 /*! 
 
-\file function_models.h
+\file function_models.dox
 \brief Documentation on polynomial models of functions
 
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            geometric_representation.h
+ *            geometric_representation.dox
  *
  *  Copyright  2004-7  Pieter Collins
  *
@@ -23,7 +23,7 @@
 
 /*! 
 
-\file geometric_representation.h
+\file geometric_representation.dox
 \brief Documentation for geometric sets and operations
 
 

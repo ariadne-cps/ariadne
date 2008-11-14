@@ -1,5 +1,5 @@
 /***************************************************************************
- *            linear_programming.h
+ *            linear_programming.dox
  *
  *  Copyright  2004-7  Pieter Collins
  *
@@ -24,7 +24,7 @@
 
 /*! 
 
-\file linear_programming.h
+\file linear_programming.dox
 \brief Documentation on linear programming
 
 

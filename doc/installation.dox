@@ -1,5 +1,5 @@
 /***************************************************************************
- *            installation.h
+ *            installation.dox
  *
  *  Copyright  2004-8  Pieter Collins
  *
@@ -23,7 +23,7 @@
 
 /*! 
 
-\file installation.h
+\file installation.dox
 \brief Installation guide of Doxygen documentation
 
 \page installation Installation Guide

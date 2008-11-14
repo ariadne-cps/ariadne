@@ -1,5 +1,5 @@
 /***************************************************************************
- *            documentation/linear_algebra.h
+ *            documentation/linear_algebra.dox
  *
  *  Copyright  2004-7  Pieter Collins
  *
@@ -24,7 +24,7 @@
 
 /*! 
 
-\file linear_algebra.h
+\file linear_algebra.dox
 \brief Documentation on linear algebra
 
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            integration_methods.h
+ *            integration_methods.dox
  *
  *  Copyright  2004-7  Pieter Collins
  *
@@ -23,7 +23,7 @@
 
 /*! 
 
-\file integration_methods.h
+\file integration_methods.dox
 \brief Documentation on  methods for integration
 
 

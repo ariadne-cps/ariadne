@@ -1,5 +1,5 @@
 /***************************************************************************
- *            modules.h
+ *            modules.dox
  *
  *  Copyright  2006  Pieter Collins
  *
@@ -24,7 +24,7 @@
 #ifndef _ARIADNE_MODULES_H
 #define _ARIADNE_MODULES_H
 
-/*! \file modules.h
+/*! \file modules.dox
  * \brief Documentation for %Ariadne modules.
  */
 

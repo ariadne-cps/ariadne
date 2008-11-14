@@ -1,5 +1,5 @@
 /***************************************************************************
- *            coding_guidelines.h
+ *            coding_guidelines.dox
  *
  *  Copyright  2007  Pieter Collins
  *
@@ -23,7 +23,7 @@
 
 /*! 
 
-\file coding_guidelines.h
+\file coding_guidelines.dox
 \brief Standards and guidelines for writing C++ and Python code
 
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            tutorial.h
+ *            tutorial.dox
  *
  *  Copyright  2004-8  Pieter Collins
  *
@@ -23,7 +23,7 @@
 
 /*!
  
-\file tutorial.h
+\file tutorial.dox
 \brief Tutorial on %Ariadne's features (outdated).
 
 \page tutorial Tutorial (Outdated)

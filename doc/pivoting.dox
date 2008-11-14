@@ -1,5 +1,5 @@
 /***************************************************************************
- *            pivoting.h
+ *            pivoting.dox
  *
  *  Copyright  2004-7  Pieter Collins
  *
@@ -23,7 +23,7 @@
 
 /*! 
 
-\file pivoting.h
+\file pivoting.dox
 \brief Documentation on pivoting and permutations
 
 

@@ -56,6 +56,16 @@ class HybridSetInterfaceBase
     virtual std::ostream& write(std::ostream& os) const = 0;
 };
 
+class HybridBoundedSetInterface 
+    : public virtual HybridSetInterfaceBase 
+{
+  public:
+    virtual HybridBoundedSetInterface* clone() const = 0;
+    virtual tribool subset(const HybridBoxes& bx) const = 0;
+    virtual HybridBoxes bounding_box() const = 0;
+    virtual BoundedSetInterface const& operator[](DiscreteState) const = 0;
+};
+
 class HybridOvertSetInterface 
     : public virtual HybridSetInterfaceBase 
 {
@@ -75,7 +85,8 @@ class HybridOpenSetInterface
 };
 
 class HybridClosedSetInterface
-    : public virtual HybridSetInterfaceBase {
+    : public virtual HybridSetInterfaceBase 
+{
   public:
     virtual HybridClosedSetInterface* clone() const = 0;
     virtual tribool disjoint(const HybridBox& bx) const = 0;
@@ -83,11 +94,11 @@ class HybridClosedSetInterface
 };
 
 class HybridCompactSetInterface
-    : public virtual HybridClosedSetInterface {
+    : public virtual HybridBoundedSetInterface 
+    , public virtual HybridClosedSetInterface 
+{
   public:
     virtual HybridCompactSetInterface* clone() const = 0;
-    virtual tribool subset(const HybridBoxes& bx) const = 0;
-    virtual HybridBoxes bounding_box() const = 0;
     virtual CompactSetInterface const& operator[](DiscreteState) const = 0;
 };
 

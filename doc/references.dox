@@ -1,5 +1,5 @@
 /***************************************************************************
- *            references.h
+ *            references.dox
  *
  *  Copyright  2004-7  Pieter Collins
  *
@@ -23,7 +23,7 @@
 
 /*! 
 
-\file references.h
+\file references.dox
 \brief References to the scientific literature
 
 

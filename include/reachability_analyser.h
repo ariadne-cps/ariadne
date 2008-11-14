@@ -32,8 +32,8 @@
 
 
 #include "hybrid_set_interface.h"
-
 #include "evolver_interface.h"
+#include "reachability_analyser_interface.h"
 
 #include "orbit.h"
 #include "grid_set.h"
@@ -65,7 +65,8 @@ typedef std::pair<DiscreteState,DefaultEnclosureType> DefaultHybridEnclosureType
 /*! \brief A class for performing reachability analysis on a hybrid system.
  */
 class HybridReachabilityAnalyser
-    : public Loggable
+    : public ReachabilityAnalyserInterface<HybridAutomaton>
+    , public Loggable
 {
   private:
     boost::shared_ptr< DiscreteEvolutionParameters > _parameters;

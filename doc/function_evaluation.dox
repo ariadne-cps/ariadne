@@ -1,5 +1,5 @@
 /***************************************************************************
- *            function_evaluation.h
+ *            function_evaluation.dox
  *
  *  Copyright  2004-7  Pieter Collins
  *
@@ -23,7 +23,7 @@
 
 /*! 
 
-\file function_evaluation.h
+\file function_evaluation.dox
 \brief Documentation on evaluation of functions
 
 

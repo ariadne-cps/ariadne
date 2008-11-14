@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_evolution_methods.h
+ *            hybrid_evolution_methods.dox
  *
  *  Copyright  2004-7  Pieter Collins
  *
@@ -23,7 +23,7 @@
 
 /*! 
 
-\file hybrid_evolution_methods.h
+\file hybrid_evolution_methods.dox
 \brief Documentation on methods for evolution of hybrid systems
 
 

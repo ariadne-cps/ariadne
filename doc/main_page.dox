@@ -1,5 +1,5 @@
 /***************************************************************************
- *            main_page.h
+ *            main_page.dox
  *
  *  Copyright  2004-8  Pieter Collins
  *
@@ -23,7 +23,7 @@
 
 /*! 
 
-\file main_page.h
+\file main_page.dox
 \brief Main page of Doxygen documentation
 
 

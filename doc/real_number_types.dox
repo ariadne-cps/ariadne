@@ -1,5 +1,5 @@
 /***************************************************************************
- *            real_number_types.h
+ *            real_number_types.dox
  *
  *  Copyright  2004-7  Pieter Collins
  *
@@ -24,7 +24,7 @@
 
 /*! 
 
-\file real_number_types.h
+\file real_number_types.dox
 \brief Documentation on real number types
 
 

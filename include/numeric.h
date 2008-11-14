@@ -46,12 +46,12 @@ typedef unsigned long ulong;
 namespace Ariadne {
 
 #ifdef DOXYGEN
-#ifdef HAVE_GMPXX_H
-//! \brief Integers of arbitrary size.
+//! \brief Integers of arbitrary size. 
+//! (Only available if the Gnu Multiple Precision library (GMP) is installed.)
 class Integer { };
 //! \brief Rationals numbers.
+//! (Only available if the Gnu Multiple Precision library (GMP) is installed.)
 class Rational { };
-#endif // HAVE_GMPXX_H 
 //! \brief Floating point numbers (double precision).
 class Float { };
 #endif // DOXYGEN

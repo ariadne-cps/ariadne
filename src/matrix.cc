@@ -21,12 +21,19 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include <numeric.h>
+#include "config.h"
+
+#include "numeric.h"
 #include "vector.h"
 #include "matrix.h"
 
 template class boost::numeric::ublas::matrix<Ariadne::Float>;
 template class boost::numeric::ublas::matrix<Ariadne::Interval>;
+
+#ifdef HAVE_GMPXX_H
+template class boost::numeric::ublas::matrix<Ariadne::Rational>;
+#endif // HAVE_GMPXX_H
+
 
 namespace Ariadne {
 
@@ -103,6 +110,13 @@ inverse(const Matrix<Interval>& A)
     return lu_inverse(A);
 }
 
+#ifdef HAVE_GMPXX_H
+Matrix<Rational>
+inverse(const Matrix<Rational>& A)
+{
+    return lu_inverse(A);
+}
+#endif // HAVE_GMPXX_H
 
 Matrix<Float> triangular_multiplier(const Matrix<Float>& A, size_t b);
 
@@ -237,6 +251,9 @@ orthogonal_decomposition(const Matrix<Float>& A)
 
 template class Matrix<Float>;
 template class Matrix<Interval>;
+#ifdef HAVE_GMPXX_H
+template class Matrix<Rational>;
+#endif
 
 } // namespace Ariadne
 

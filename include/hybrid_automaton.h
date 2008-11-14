@@ -21,6 +21,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+/*! \file hybrid_automaton.h
+ *  \brief Main hybrid system class.
+ */
+
 #ifndef ARIADNE_HYBRID_AUTOMATON_H
 #define ARIADNE_HYBRID_AUTOMATON_H
 
@@ -43,7 +47,9 @@ struct HybridTime :
 };
 
 
+//! \brief Type of a discrete state of a hybrid system.
 typedef int DiscreteState;
+//! \brief Type of a  discrete event of a hybrid system.
 typedef int DiscreteEvent;
 
 class HybridSpace;
@@ -56,12 +62,13 @@ class HybridAutomaton;
 class FunctionInterface;
 
 
-/*! \ingroup HybridTime
- * \brief A discrete mode of a hybrid automaton, comprising continuous evolution given by a vector field
+/*! \brief A discrete mode of a hybrid automaton, comprising continuous evolution given by a vector field
  * within and invariant constraint set. 
  *
  * A %DiscreteMode can only be created using the new_mode() method in
  * the %HybridAutomaton class.
+ *
+ * \sa \link Ariadne::HybridAutomaton \c HybridAutomaton \endlink, \link Ariadne::DiscreteTransition \c DiscreteTransition \endlink
  */
 class DiscreteMode {
     friend class HybridAutomaton;
@@ -123,12 +130,13 @@ inline bool operator<(const DiscreteMode& mode1, const DiscreteMode& mode2) {
 
 
 
-/*! \ingroup HybridTime
- * \brief A discrete transition of a hybrid automaton, representing an instantaneous
+/*! \brief A discrete transition of a hybrid automaton, representing an instantaneous
  * jump from one discrete mode to another, governed by an activation set and a reset map.
  *
  * A %DiscreteTransition can only be created using the new_transition() method in
  * the %HybridAutomaton class.
+ *
+ * \sa \link Ariadne::HybridAutomaton \c HybridAutomaton \endlink, \link Ariadne::DiscreteMode \c DiscreteMode \endlink
  */
 class DiscreteTransition
 {
@@ -219,8 +227,7 @@ inline bool operator<(const DiscreteTransition& transition1, const DiscreteTrans
 
 
 
-/*! \ingroup System \ingroup HybridTime
- *  \brief A hybrid automaton, comprising continuous-time behaviour
+/*! \brief A hybrid automaton, comprising continuous-time behaviour
  *  at each discrete mode, coupled by instantaneous discrete transitions.
  *  The state space is given by a hybrid set.  
  *
@@ -242,6 +249,15 @@ inline bool operator<(const DiscreteTransition& transition1, const DiscreteTrans
  * mode to a \a target mode. 
  * There can be at most one discrete transition in an automaton
  * with the same event and source.
+ *
+ * A discrete transision can either be \em forced or \em unforced.
+ * A forced transition much occur as soon as it is activated.
+ * An unforced transition may occur at any time it is activated,
+ * but is only forced to occur if the continuous evolution is
+ * blocked by an invariant.
+ *
+ * \sa \link Ariadne::DiscreteMode \c DiscreteMode \endlink, \link Ariadne::DiscreteTransition \c DiscreteTransition \endlink
+
  */
 class HybridAutomaton
 {
@@ -268,6 +284,7 @@ class HybridAutomaton
   public:
     //@{
     //! \name Constructors and destructors 
+
     //! \brief Construct an empty automaton with no name
     HybridAutomaton();
   
@@ -300,21 +317,21 @@ class HybridAutomaton
                                       const FunctionInterface& invariants);
 
     //! \brief Adds an invariants to a mode of the automaton.
-    //
-    //    \param mode is the discrete mode.
-    //    \param invariants is the new invariants condition.
+    //!
+    //!    \param mode is the discrete mode.
+    //!    \param invariants is the new invariants condition.
    
     const DiscreteMode& new_invariant(const DiscreteMode& mode,
                                       const FunctionInterface& invariants);
 
     
     //! \brief Adds a discrete transition to the automaton using the discrete states to specify the source and target modes.
-    //   
-    //    \param event is the transition's event.
-    //    \param source is the transition's source location.
-    //    \param target is the transition's target location.
-    //    \param reset is the transition's reset.
-    //    \param activation is the transition's activation region.
+    //!   
+    //!    \param event is the transition's event.
+    //!    \param source is the transition's source location.
+    //!    \param target is the transition's target location.
+    //!    \param reset is the transition's reset.
+    //!    \param activation is the transition's activation region.
     const DiscreteTransition& new_transition(DiscreteEvent event,
                                              DiscreteState source, 
                                              DiscreteState target,
@@ -324,12 +341,12 @@ class HybridAutomaton
 
     //! \brief Adds a forced (urgent) discrete transition to the automaton 
     //! using the discrete states to specify the source and target modes.
-    //   
-    //    \param event is the transition's event.
-    //    \param source is the transition's source location.
-    //    \param target is the transition's target location.
-    //    \param reset is the transition's reset.
-    //    \param activation is the transition's activation region.
+    //!   
+    //!    \param event is the transition's event.
+    //!    \param source is the transition's source location.
+    //!    \param target is the transition's target location.
+    //!    \param reset is the transition's reset.
+    //!    \param activation is the transition's activation region.
     const DiscreteTransition& new_forced_transition(DiscreteEvent event,
                                                     DiscreteState source, 
                                                     DiscreteState target,
@@ -338,12 +355,12 @@ class HybridAutomaton
 
     //! \brief Adds an unforced (non-urgent) discrete transition to the automaton 
     //! using the discrete states to specify the source and target modes.
-    //   
-    //    \param event is the transition's event.
-    //    \param source is the transition's source location.
-    //    \param target is the transition's target location.
-    //    \param reset is the transition's reset.
-    //    \param activation is the transition's activation region.
+    //!   
+    //!    \param event is the transition's event.
+    //!    \param source is the transition's source location.
+    //!    \param target is the transition's target location.
+    //!    \param reset is the transition's reset.
+    //!    \param activation is the transition's activation region.
     const DiscreteTransition& new_unforced_transition(DiscreteEvent event,
                                                       DiscreteState source, 
                                                       DiscreteState target,
@@ -351,12 +368,13 @@ class HybridAutomaton
                                                       const FunctionInterface& activation);
 
     //! \brief Adds a discrete transition to the automaton using the discrete modes to specify the source and target.
-    //   
-    //    \param event is the discrete transition's discrete event. 
-    //    \param source is the discrete transition's source mode.
-    //    \param target is the discrete transition's target mode.
-    //    \param reset is the discrete transition's reset.
-    //    \param activation is the discrete transition's activation region.
+    //!   
+    //!    \param event is the discrete transition's discrete event. 
+    //!    \param source is the discrete transition's source mode.
+    //!    \param target is the discrete transition's target mode.
+    //!    \param reset is the discrete transition's reset.
+    //!    \param activation is the discrete transition's activation region.
+    //!    \param forced determines whether the transition is forced or unforced.
     const DiscreteTransition& new_transition(DiscreteEvent event,
                                              const DiscreteMode& source, 
                                              const DiscreteMode& target,
@@ -368,6 +386,7 @@ class HybridAutomaton
   
     //@{ 
     //! \name Data access and queries. 
+
     //! \brief Returns the hybrid automaton's name. 
     const std::string& name() const;
 

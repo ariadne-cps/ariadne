@@ -1,8 +1,8 @@
 /***************************************************************************
- *            main_page.h
+ *            installation.h
  *
- *  Copyright  2004-7  Pieter Collins
- *  Pieter.Collins@cwi.nl
+ *  Copyright  2004-8  Pieter Collins
+ *
  ****************************************************************************/
 
 /*
@@ -23,27 +23,13 @@
 
 /*! 
 
-\file main_page.h
-\brief Main page of Doxygen documentation
+\file installation.h
+\brief Installation guide of Doxygen documentation
 
-
-
-\mainpage
-
-\section Introduction
-
-%Ariadne is a C++ package for set-based analysis of dynamical and control systems, including reachability analysis and verification.
-
-\section Documentation
-
-Look at the <a href="tutorial.html">Tutorial</a> for a guide on how to use %Ariadne to perform reachability analysis of dynamic systems using the Python interface to %Ariadne. 
-A more detailed description of %Ariadne's capabilities can be found in the documentation for the individual <a href="modules.html">Modules</a>.
-Some information on the mathematical foundations of %Ariadne can be found in the <a href="pages.html">Related Pages</a>.
+\page installation Installation Guide
 
 
 \section Download
-
-The homepage of %Ariadne is <a href="http://ariadne.parades.rm.cnr.it/">http://ariadne.parades.rm.cnr.it/</a>.
 
 You can check out the latest version on the Subversion repository by typing:
 
@@ -123,5 +109,12 @@ If installing from the Subversion repository, change to the ariadne/trunk/ direc
   ./bootstrap
 \endcode
 And follow the directions above.
+
+\section troubleshooting Troubleshooting
+
+- If you don't have write-access to your machine's system files, you can insall Ariadne locally by configuring with the command <code> ./configure --prefix=$HOME </code> .
+
+- Make sure the library (and Python interface, if used) can be found by the system! On Unix/Linux systems, if you are installing to you user (home) directory, you may need to add the following to your \tt .bashrc or \tt .bash_profile files:
+   <code>       export PYTHONPATH+=:$HOME/lib/python2.5/site-packages:$HOME/lib64/python2.5/site-packages</code> .
 
 */

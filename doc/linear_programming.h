@@ -2,7 +2,7 @@
  *            linear_programming.h
  *
  *  Copyright  2004-7  Pieter Collins
- *  Pieter.Collins@cwi.nl
+ *
  ****************************************************************************/
 
 /*

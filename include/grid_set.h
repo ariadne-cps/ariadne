@@ -124,9 +124,7 @@ class NotAllowedMoveException : public std::logic_error {
     NotAllowedMoveException(const std::string& str) : std::logic_error(str) { }
 };
 
-/*! \ingroup Grid
- *
- *  \brief An infinite, uniform grid of rectangles in Euclidean space.
+/*! \brief An infinite, uniform grid of rectangles in Euclidean space.
  *  
  *  \internal Maybe a Grid should be a type of Paving or Cover. 
  *  Then rather than having GridXXX classes, we can have classes such that cells of
@@ -879,7 +877,7 @@ class GridTreeSet : public GridTreeSubset {
     //@{
     //! \name Constructors
             
-    /*! \brief Create a GridTreeSet based on zero dimensions. 
+    /*! \brief Create a %GridTreeSet based on zero dimensions. 
      *  
      *  This constructor is needed to use the Boost Serialization library.
      */
@@ -934,7 +932,7 @@ class GridTreeSet : public GridTreeSubset {
     //@{
     //! \name Cloning
             
-    /*! \brief Return a new dynamically-allocated copy of the GridTreeSet.
+    /*! \brief Return a new dynamically-allocated copy of the %GridTreeSet.
      *  In this case, all the data is copied.
      */
     GridTreeSet* clone() const;
@@ -942,7 +940,7 @@ class GridTreeSet : public GridTreeSubset {
     //@}
             
     /*! \brief Destructor, removes all the dynamically allocated data, any */
-    /* GridTreeSubset referencing this GridTreeSet becomes invalid. */
+    /* GridTreeSubset referencing this %GridTreeSet becomes invalid. */
     virtual ~GridTreeSet();
             
         
@@ -983,7 +981,12 @@ class GridTreeSet : public GridTreeSubset {
             
     /*! \brief Restrict to cells rooted to the primary cell with the height (at most) \a theHeight. */
     void restrict_to_height( const uint theHeight );
+ 
+    //@}
             
+    //@{
+    //! \name Geometric Operations
+           
     /*! \brief Join (make union of) two grid paving sets. */
     friend GridTreeSet join( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 );
     
@@ -1000,7 +1003,7 @@ class GridTreeSet : public GridTreeSubset {
     //@{
     //! \name Geometric Approximation
 
-    /*! \brief Adjoin an over approximation to box, computing to the given depth. */
+    /*! \brief Adjoin an over approximation to box, computing to the given depth. \precondition Precondition: The box must have nonempty interior. */
     void adjoin_over_approximation( const Box& theBox, const uint depth );
     /*! \brief Adjoin an outer approximation to a given set, computing to the given depth.
      *! This method computes an outer approximation for the set \a theSet on the grid \a theGrid.

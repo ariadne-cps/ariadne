@@ -2,7 +2,7 @@
  *            integration_methods.h
  *
  *  Copyright  2004-7  Pieter Collins
- *  Pieter.Collins@cwi.nl
+ *
  ****************************************************************************/
 
 /*
@@ -24,8 +24,7 @@
 /*! 
 
 \file integration_methods.h
-\brief Documentation on integration methods
-
+\brief Documentation on  methods for integration
 
 
 \page integration Integration Methods
@@ -198,8 +197,7 @@ Suppose the integration time depends on \f$x\f$. We therefore want to compute \f
 We have
 \f[ \begin{aligned} y(x,s(x)) &= y(x,s(x)))-y(x,s(c)) + y(x,s(c)) \\
                            &= y'(x,s(\xi)) \bigl( s(x) - s(c) \bigr) + y(x,s(c)) \\
-                           &= f(\xi) \, \grad s(\xi) \cdot(x-c) + y(x,s(c)) \\
-                           &\in y(x,s(c)) + \bigl( f(B) \grad s(B) \bigr) \cdot (x-c)  \end{aligned} \f]
-\f[
+                           &= f(\xi) \, \nabla s(\xi) \cdot(x-c) + y(x,s(c)) \\
+                           &\in y(x,s(c)) + \bigl( f(B) \nabla s(B) \bigr) \cdot (x-c)  \end{aligned} \f]
 
 */

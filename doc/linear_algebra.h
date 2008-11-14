@@ -2,7 +2,7 @@
  *            documentation/linear_algebra.h
  *
  *  Copyright  2004-7  Pieter Collins
- *  Pieter.Collins@cwi.nl
+ *
  ****************************************************************************/
 
 /*
@@ -24,7 +24,7 @@
 
 /*! 
 
-\file documentation/linear_programming.h
+\file linear_algebra.h
 \brief Documentation on linear algebra
 
 

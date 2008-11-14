@@ -1,0 +1,67 @@
+/*!
+ 
+\file overview.h
+\brief Overview of %Ariadne's capabilities
+
+\page overview Overview
+
+%Ariadne comprises a number of modules, which may be roughly classifies into <em>user modules</em>, including core data types, system classes and analysis tools, and <em>internal modules</em> which are used by the kernel and which the average user need not be concerned about.
+
+- Main user classes
+   - System class \link Ariadne::HybridAutomaton \c HybridAutomaton \endlink for defining hybrid systems,
+   - Evaluation classes \link Ariadne::HybridEvolver \c HybridEvolver<S> \endlink for computing the evolution of a hybrid system from a given initial set, \link Ariadne::ReachabilityAnalyser \c ReachabilityAnalyser \endlink for performing global reachability analysis
+   - Output classes \link Ariadne::Graphic \c Graphic \endlink for plotting sets and orbits and \link Ariadne::Archive \c Archive \endlink classes for data persistence.
+
+- Auxiliary user classes, used to define systems and store output.
+   - Numeric classes, including \link Ariadne::Float \c Float \endlink and \link Ariadne::Interval \c Interval \endlink types and the optional \link Ariadne::Integer \c Integer \endlink and \link Ariadne::Rational \c Rational \endlink types. 
+   - Linear algebra classes, \link Ariadne::Vector \c Vector<X> \endlink and \link Ariadne::Matrix \c Matrix<X> \endlink, templated on the numerical type.
+   - Function classes, including the general \link Ariadne::FunctionInterface \c FunctionInterface \endlink, concrete \link Ariadne::IdentityFunction \c IdentityFunction \endlink and \link Ariadne::AffineFunction \c AffineFunction \endlink types, and \link Ariadne::Function \c Function<T> \endlink template for user-defined nonlinear functions.
+   - Geometric classes, including affine geometric types such as \link Ariadne::Point \c Point \endlink, \link Ariadne::Box \c Box \endlink and \link Ariadne::Polyhedron \c Polyhedron \endlink, and general \link Ariadne::ImageSet \c ImageSet \endlink and \link Ariadne::ConstraintSet \c ConstraintSet \endlink objects, and abstract interfaces such as \link Ariadne::OpenSetInterface \c OpenSetInterface \endlink, \link Ariadne::OvertSetInterface \c OvertSetInterface \endlink and \link Ariadne::CompactSetInterface \c CompactSetInterface \endlink.
+   - Storage class \link Ariadne::Orbit \c Orbit<S> \endlink for storing evolution traces and \link Ariadne::GridTreeSet \c GridTreeSet \endlink for storing reached sets.
+
+- Internal classes, used for computations.
+  - Automatic differentiation classes \link Ariadne::SparseDifferential \c SparseDifferential \endlink, \link Ariadne::DenseDifferential \c DenseDifferential \endlink and \link Ariadne::DifferentialVector \c DifferentialVector<D> \endlink.
+  - Differential calculus classes, including \link Ariadne::TaylorVariable \c TaylorVariable \endlink class for high-order polynomial approximation to dependent quantities, and the \link Ariadne::DynamicalToolbox \c TaylorCalculus \endlink class exporting standard operations needed for computing system evolution.
+
+
+\section overview_system Building a Hybrid System
+
+In order to use %Ariadne for reachability analysis, it is first necessary to build a hybrid system. The \link Ariadne::HybridAutomaton \c HybridAutomaton \endlink class is the main %Ariadne class for describing hybrid systems. A %HybridAutomaton comprises \link Ariadne::DiscreteMode \c DiscreteMode \endlink and \link Ariadne::DiscreteTransition \c DiscreteTransition \endlink objects to describe the modes (including continuous dynamics and invariants) and the discrete transitions (describing guards/activation predicates and reset relations.
+
+An %Ariadne automaton must be built explicitly using the 
+  \link Ariadne::HybridAutomaton::new_mode() \c new_mode \endlink, 
+  \link Ariadne::HybridAutomaton::new_invariant() \c new_invariant \endlink, 
+  \link Ariadne::HybridAutomaton::new_forced_transition() \c new_forced_transition \endlink and 
+  \link Ariadne::HybridAutomaton::new_unforced_transition() \c new_forced_transition \endlink 
+methods.
+
+All resets, flows and guards are specified using <em>functions</em>. A function is just a mapping from \f$\R^m\f$ to \f$\R^n\f$.
+Unfortunately, since %Ariadne uses specialised automatic differentiation functionality, an %Ariadne function cannot be specified directly from a C++ function, but must be defined using the a function object. The \link Ariadne::Function \c Function<T> \endlink can be used to wrap user function objects to conform to the %Ariadne interface. Additionally, concrete function types such as \link Ariadne::AffineFunction \c AffineFunction \endlink can be used to avoid having to explicitly define and wrap a C++ function object.
+
+The \link Ariadne::Vector \c Vector \endlink and \link Ariadne::Matrix \c Matrix \endlink template classes may be useful for specifying the parameters of a user function or builtin function type.
+
+
+\section overview_analyser Building an Evolver or Analyser
+
+In order to analyse a hybrid system, we need an <em>Evolver</em> or <em>Analyser</em> class.
+An Evolver class is used to perform simulations, and computes the evolution up to a given time starting from an initial <em>enclosure</em> set. An Analyser class is used to perform global analysis, and computes the evolution starting from an arbitrary given set. Internally, an Analyser class typically uses an Evolver to perform the evolution, and then performs a discretization of the evolved set on a grid.
+
+An evolver class satisfies the interface \link Ariadne::EvolverInterface \c EvolverInterface<SYS,ES> \endlink, where \c ES is the template parameter giving the type used for the enclosure sets. The \link Ariadne::HybridEvolver \c HybridEvolver<S> \endlink class is an evolver for hybrid systems using the type \c S to specify the continuous part of the enclosure set.
+To build an Evolver class, we need to specify a type of <em>dynamical calculus</em> to use for the evolution, give <em>evolution parameters</em> to specify the accuracy of the computation. The dynamical calculus class must satisfy the \link Ariadne::ToolboxInterface \c CalculusInterface<SET,MAP,FLOW> \endlink, where the template parameter \c SET is the type used to specify the continuous state set \c S. (The available dynamical calculus classes can be found by looking at subclasses of the \link Ariadne::ToolboxInterface \c CalculusInterface \endlink.) The evolution parameters are passed using the \link Ariadne::ContinuousEvolutionParameters \c ContinuousEvolutionParameters \endlink class. Note that not all parameters need be used by a given Evolver class. 
+
+A reachability analyser class satisfies the interface \link Ariadne::ReachabilityAnalyserInterface \c ReachabilityAnalyserInterface<SYS> \endlink.
+The class \link Ariadne::HybridReachabilityAnalyser \c HybridReachabilityAnalyser \endlink may be used to perform reachability analysis of hybrid systems. It can be constructed from a \link Ariadne::HybridEvolver \c HybridEvolver<S> \endlink class, with parameters given by \link Ariadne::DiscreteEvolutionParameters \c DiscreteEvolutionParameters \endlink.
+
+\remark We use Evolver and Analyser classes rather than functions to perform the analysis since different methods require different user parameters to specify the accuracy.
+
+\section tutorial_system_hybrid Performing Simulations or Reachability Analysis
+
+The functionality available for computing (rigorous) simulations and reachability analysis can be found in the documentation for \link Ariadne::EvolverInterface \c EvolverInterface<SYS,ES> \endlink and \link Ariadne::ReachabilityAnalyserInterface \c ReachabilityAnalyserInterface<SYS> \endlink.
+
+See the documentation for the Ariadne::SetBasedHybridAutomaton.
+
+
+\section overview_semantics Lower and upper semantics (Forthcoming)
+
+In this section, we describe the different between lower (liveness; simulation) semantics, and upper (safety; model checking) semantics.
+*/

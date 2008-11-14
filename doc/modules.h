@@ -2,7 +2,7 @@
  *            modules.h
  *
  *  Copyright  2006  Pieter Collins
- *  Pieter.Collins@cwi.nl
+ *
  ****************************************************************************/
 
 /*
@@ -28,171 +28,55 @@
  * \brief Documentation for %Ariadne modules.
  */
 
-/*!\addtogroup Base Base Modules
- * \brief Fundamental classes and operations, mostly implemented as wrappers 
- * around other libraries.
- *
- * \defgroup Container Container
- * \ingroup Base
- * \brief Array and other container classes for data storage
- * 
- * \defgroup Traversal Traversal
- * \ingroup Base
- * \brief Iterator classes for data traversal
- * 
- * \defgroup Numeric Numeric
- * \ingroup Base
- * \brief Numerical types and intervals.
- *
- * In this module, we define %Ariadne's base numerical types, and interval 
- * arithmetic. The main classes are the various <em>real number types</em>
- * which must either conform to the ExactArithmetic interface or the 
- * ApproximateArithmetic interface. This use of standard operations allows
- * new classes to be easily dropped in as wrappers. Currently, the Float64 and
- * FloatMP classes support approximate arithmetic, algebraic and transcendental
- * functions, and the Dyadic and Rational classes support exact arithmetic, but
- * no algebraic or transcendental operations. Further, Dyadic does not support
- * division, but does support the median() operation.
- *
- * Interval arithmetic and functions are provided through the Interval<Real>
- * template. Note that Interval<Real> is not part of the Geometry module, so
- * does not support the same geometric operations.
- *
- * Additionally, rounded operations are provided using the round_down
- * and round_up rounding types. Approximate arithmetic without control of the
- * rounding mode can be specified by the approx rounding type, and exact 
- * arithmetic (the default) can be specified explicitly using the exact 
- * rounding type.
- *
- * Note that to prevent accidental calls to approximate functions, all 
- * non-exact operations must be explicitly qualified. This means that the
- * operation operator*(Float64,Float64) generates an error at compile-time,  
- * even though Float64 is based on the C++ double type, which has an 
- * (approximate) multiplication operator. Use 
- * mul(Float64,Float64,RoundApproximate) instead.
- * 
- * We use the following abbreviations for template parameters 
- * for classes and concepts in this module:
- *  - \b Q: Rational
- *  - \b F: Float 
- *  - \b I: Interval<Float>
- *  - \b A: Rational, Interval<Float>
- *  - \b R: Rational, Float
- *  - \b X: Rational, Float, Interval<Float>
- *
- * Here, Float refers to any floating-point type, such as Float64 or FloatMP.
- * 
- * \internal The above template names are currently not used consistently
- *
- * See the page \ref realnumbertypes for more information.
- *
- * \defgroup LinearAlgebra Linear Algebra
- * \ingroup Base
- * \brief Vector, matrix and tensor classes, solution of linear equations,
- * LU and QR factorisation and singular value decomposition.
- * 
- * Basic types are represented by the classes Vector, Matrix
- * and Tensor. Specialist types include PermutationMatrix and DiagonalMatrix.
- * Operations such as vector sums and matrix-vector products are
- * accessed using operator overloading. Expression templates and slices are 
- * used to improve efficiency.
- * 
- * More complicated matrix operations, such as factorisation, are represented
- * by sub-classes which contain the factorised data, from which the factors 
- * can easily be extracted.
- *
- * Currently sparse and structured (e.g. triangular, symmetric, banded) 
- * matrices are not directly supported, except to the extent needed for the
- * matrix decomposition classes, or for derivative tensors.
- *
- * All classes support exact arithmetic and interval arithmetic.
- *
- * We use the following abbreviations for template parameters for classes 
- * in this module:
- *  - \b SCA: Scalar
- *  - \b VEC: Vector
- *  - \b MX: Matrix
- *  - \b TEN: Tensor
- * 
- * \defgroup LinearProgramming Linear Programming
- * \ingroup Base
- * \brief Classes and functions for solving linear programming problems (including feasibility problems).
- *
- * The LinearProgram class supports construction and solution of linear 
- * programming problems. Tests for feasibility only are also possible. The 
- * computations are performed by a BLAS/LAPACK style lpslv() routing.
- *
- *
- * \defgroup Differentiation Automatic Differentiation
- * \ingroup Base
- * \brief Support for automatic differentiation using Taylor expansions
- *
- * In this core module are the classes used to compute derivatives
- * of functions.
+/*!\defgroup UserModules UserModules
  */
 
-/*!\defgroup Combinatoric Combinatoric Module
- * \brief Combinatoric sets and maps, based either on integer lattices or
- * partition trees.
+/*!\defgroup SystemModule System Module
+ * \ingroup UserModules
+ * \brief Abstract base classes for system interface, and some commonly used systems.
  *
+ * Systems fall into three basic classes, namely <em>discrete-time 
+ * systems</em>, <em>continuous-time systems</em>, and <em>hybrid-time 
+ * systems</em>, which are a combination of dicrete-time and hybrid-time 
+ * systems. There is a further subdivision into
+ * <em>dynamical systems</em>, which are deterministic, <em>multivalued
+ * systems</em>, which are nondeterministic, and
+ * <em>control systems</em> in which control inputs and noise may be present.
  * 
- * \defgroup ArrayOperations Array Operations
- * \ingroup Combinatoric
- * \brief Operations on integer arrays
+ * A system is defined by an algorithm to approximate the image of a basic set,
+ * and possibly to approximate the derivative over a basic set.
+ * It is <em>not</em> the purpose of the classes in the system module to
+ * compute the image of denotable sets; this is the purpose of the Evaluation 
+ * module.
  *
- * \defgroup BinaryTree Binary Words and Trees
- * \ingroup Combinatoric
- * \brief Classes for binary words and binary trees.
+ * We use the following abbreviations for template parameters for classes in this module:
+ *  - \b FN: %Function
+ *  - \b MP: %Map
+ *  - \b VF: %VectorField
  *
- * 
- * \defgroup Lattice Lattice Sets and Functions
- * \ingroup Combinatoric
- * \brief Classes for integer lattices.
- *
- * An <em>integer lattice</em> is a subset of \f$\mathbb{Z}^n\f$. Integer 
- * lattices provide a representation for sets in \f$\mathbb{R}^n\f$ based on
- * coordinate-aligned grids.
- *
- * As well as sets of cells, %Ariadne also supports maps between lattices.
- * The most useful form takes a single grid cell to a set of grid cells, and
- * so is a type of multivalued map. Hence, no LatticeMap class is given.
- *
- * In a future version, methods will be provided to export integer lattice sets
- * and maps to the CHomP family of computational homology programs.
- *
- * 
- * \defgroup SubdivisionTree Subdivision Tree Sets and Functions
- * \ingroup Combinatoric
- * \brief Classes for binary subdivision trees.
- *
- * A <em>subdivision tree</em> is a binary tree describing a subdivision of 
- * a rectangle (<em>unit cell</em>) into smaller cells. The subdivision is 
- * described by a SubdivisionSequence giving the coordinate of the ith 
- * subdivision, and a BinaryTree giving the subdivisions.
- *
- * e.g. The cell described by the SubdivisionSequence '[0,0,1,...]' and the 
- * BinaryWord '[0,1,1]' is given by subdividing the unit interval twice in the 
- * \f$x_0\f$ direction, first taking the lower half, and then the upper half, 
- * and by subdividing once in the \f$x_1\f$ direction, taking the upper half.
- * This gives the dyadic rectangle '[0.25,0.5]x[0.5,1.0]'.
+ * See the page on \ref function for more information.
  */
 
-/*!\defgroup Function Function Module
- * \brief Functions on Euclidean space.
+/*! \defgroup EvaluationModule Evaluation Module
+ *  \ingroup UserModules
+ *  \brief Functions and methods for computing the evolution of a system and solving equations.
+ */
+
+/*! \defgroup CoreModules Core Modules
+ *
+ *  \brief Core classes and functions used for both system specification and internal computation.
+ */
+
+/*! \defgroup Function Function Module
+ *  \ingroup CoreModules
+ *  \brief Functions on Euclidean space.
  *
  * In this module are the classes used to represent concrete functions in Euclidean space.
  * These functions can be used as the building blocks for geometric objects and dynamic systems.
- *
- * \defgroup FunctionTypes Function Types
- * \ingroup Function
- * \brief General and specialised function classes.
- *
- * \defgroup FunctionModel Function Models
- * \ingroup Function
- * \brief Approximate models of general (differentiable) functions.
  */
 
 /*!\defgroup Geometry Geometry Module
+ * \ingroup CoreModules
  * \brief Geometric calculus module.
  *
  * In this module are the classes used to represent sets and approximations to 
@@ -263,113 +147,143 @@
  */
 
 /*!\defgroup Storage Storage Module
+ * \ingroup CoreModules
  * \brief Classes for representing discretised sets
+ *
+ * A <em>subdivision tree</em> is a binary tree describing a subdivision of 
+ * a rectangle (<em>unit cell</em>) into smaller cells. The subdivision is 
+ * described by a SubdivisionSequence giving the coordinate of the ith 
+ * subdivision, and a BinaryTree giving the subdivisions.
+ *
+ * e.g. The cell described by the SubdivisionSequence '[0,0,1,...]' and the 
+ * BinaryWord '[0,1,1]' is given by subdividing the unit interval twice in the 
+ * \f$x_0\f$ direction, first taking the lower half, and then the upper half, 
+ * and by subdividing once in the \f$x_1\f$ direction, taking the upper half.
+ * This gives the dyadic rectangle '[0.25,0.5]x[0.5,1.0]'.
  *
  * Denotable sets are unions of basic sets of a simple kind, typically boxes.
  * In addition to the fundamental geometric predicates, denotable sets must also 
  * support iteration through their elements, and union (join) with basic sets 
  * and denotable sets of the same kind. 
- *
- * \defgroup Grid Grid Sets 
- * \ingroup Storage
- * \brief Sets based on grids.
- *
- * \defgroup PartitionTree Partition Tree Sets
- * \ingroup Storage
- * \brief Sets based on partition trees.
-*/
+ */
 
-/*!\defgroup System System Module
- * \brief Abstract base classes for system interface, and some commonly used systems.
+/* \defgroup NumericModule Numeric Module
+ * \ingroup CoreModules
+ * \brief Numerical types and intervals.
  *
- * Systems fall into three basic classes, namely <em>discrete-time 
- * systems</em>, <em>continuous-time systems</em>, and <em>hybrid-time 
- * systems</em>, which are a combination of dicrete-time and hybrid-time 
- * systems. There is a further subdivision into
- * <em>dynamical systems</em>, which are deterministic, <em>multivalued
- * systems</em>, which are nondeterministic, and
- * <em>control systems</em> in which control inputs and noise may be present.
+ * In this module, we define %Ariadne's base numerical types, and interval 
+ * arithmetic. The main classes are the various <em>real number types</em>
+ * which must either conform to the ExactArithmetic interface or the 
+ * ApproximateArithmetic interface. This use of standard operations allows
+ * new classes to be easily dropped in as wrappers. Currently, the Float64 and
+ * FloatMP classes support approximate arithmetic, algebraic and transcendental
+ * functions, and the Dyadic and Rational classes support exact arithmetic, but
+ * no algebraic or transcendental operations. Further, Dyadic does not support
+ * division, but does support the median() operation.
+ *
+ * Interval arithmetic and functions are provided through the Interval<Real>
+ * template. Note that Interval<Real> is not part of the Geometry module, so
+ * does not support the same geometric operations.
+ *
+ * Additionally, rounded operations are provided using the round_down
+ * and round_up rounding types. Approximate arithmetic without control of the
+ * rounding mode can be specified by the approx rounding type, and exact 
+ * arithmetic (the default) can be specified explicitly using the exact 
+ * rounding type.
+ *
+ * Note that to prevent accidental calls to approximate functions, all 
+ * non-exact operations must be explicitly qualified. This means that the
+ * operation operator*(Float64,Float64) generates an error at compile-time,  
+ * even though Float64 is based on the C++ double type, which has an 
+ * (approximate) multiplication operator. Use 
+ * mul(Float64,Float64,RoundApproximate) instead.
  * 
- * A system is defined by an algorithm to approximate the image of a basic set,
- * and possibly to approximate the derivative over a basic set.
- * It is <em>not</em> the purpose of the classes in the system module to
- * compute the image of denotable sets; this is the purpose of the Evaluation 
- * module.
+ * We use the following abbreviations for template parameters 
+ * for classes and concepts in this module:
+ *  - \b Q: Rational
+ *  - \b F: Float 
+ *  - \b I: Interval<Float>
+ *  - \b A: Rational, Interval<Float>
+ *  - \b R: Rational, Float
+ *  - \b X: Rational, Float, Interval<Float>
  *
- * We use the following abbreviations for template parameters for classes in this module:
- *  - \b FN: %Function
- *  - \b MP: %Map
- *  - \b VF: %VectorField
- *
- * See the page on \ref function for more information.
- *
- * \defgroup DiscreteTime Discrete-Time Systems
- * \ingroup System
- * \brief Discrete-time systems.
- *
- * \defgroup ContinuousTime Continuous-Time Systems
- * \ingroup System 
- * \brief Continuous-time systems.
- *
- * \defgroup HybridTime Hybrid-Time Systems
- * \ingroup System 
- * \brief Hybrid-time systems.
- *
- * \defgroup NumericalSystem Numerical and Discretised Systems
- * \ingroup System
- * \brief Numerical and discretised systems, such as transition systems.
- */
-
-/*! \defgroup Evaluation Evaluation Module
- *  \brief Functions and methods for computing the evolution of a system and solving equations.
- *
+ * Here, Float refers to any floating-point type, such as Float64 or FloatMP.
  * 
- *  \defgroup EvaluatorInterfaces Interfaces
- *  \ingroup Evaluation
- *  \brief Interfaces for Evaluator classes.
+ * \internal The above template names are currently not used consistently
  *
- *  \defgroup Approximators Approximators
- *  \ingroup Evaluation
- *  \brief Evaluators for approximating sets.
- *
- *  \defgroup Solvers Solving Equations
- *  \ingroup Evaluation
- *  \brief Functions for solving systems of equations and detecting crossings.
- *
- *  \defgroup Applicators Evaluating images
- *  \ingroup Evaluation
- *  \brief Functions for iterating forward discrete-time systems.
- *
- *  \defgroup Integrators Integration
- *  \ingroup Evaluation
- *  \brief Classes for integrating continuous-time systems.
- *
- *  \defgroup Evolvers System Evolution
-  *  \ingroup Evaluation
- *  \brief Classes for computing the evolution of dynamic systems.
- *
- *  \defgroup Analysers System Analysis
- *  \ingroup Evaluation
- *  \brief Classes for analysing the behaviour of dynamic systems.
- *
+ * See the page \ref realnumbertypes for more information.
  */
 
-/*! \defgroup Input Input Module
+/*
+ * \defgroup LinearAlgebraModule Linear Algebra
+ * \ingroup CoreModules
+ * \brief Vector, matrix and tensor classes, solution of linear equations,
+ * LU and QR factorisation and singular value decomposition.
+ * 
+ * Basic types are represented by the classes Vector, Matrix
+ * and Tensor. Specialist types include PermutationMatrix and DiagonalMatrix.
+ * Operations such as vector sums and matrix-vector products are
+ * accessed using operator overloading. Expression templates and slices are 
+ * used to improve efficiency.
+ * 
+ * More complicated matrix operations, such as factorisation, are represented
+ * by sub-classes which contain the factorised data, from which the factors 
+ * can easily be extracted.
  *
- *  \defgroup Modelica Modelica Input
- *  \ingroup Input 
- *  \brief Modelica input.
+ * Currently sparse and structured (e.g. triangular, symmetric, banded) 
+ * matrices are not directly supported, except to the extent needed for the
+ * matrix decomposition classes, or for derivative tensors.
+ *
+ * All classes support exact arithmetic and interval arithmetic.
+ *
+ * We use the following abbreviations for template parameters for classes 
+ * in this module:
+ *  - \b SCA: Scalar
+ *  - \b VEC: Vector
+ *  - \b MX: Matrix
+ *  - \b TEN: Tensor
+ * 
  */
 
-/*! \defgroup Output Output Module
+/*! \defgroup OutputModules Output Modules
  *
- *  \defgroup Postscript Postscript Output
- *  \ingroup Output 
- *  \brief Encapsulated Postscript output.
+ *  \defgroup GraphicsModule Graphical Output
+ *  \ingroup OutputModules
+ *  \brief Graphical output.
  *
- *  \defgroup CHomP Homology Output
- *  \ingroup Output 
+ *  \defgroup SerializationModule Serialization
+ *  \ingroup OutputModules 
+ *  \brief Input/Output to a text or html archive.
+ *
+ *  \defgroup CHomPModule Homology Output
+ *  \ingroup OutputModules 
  *  \brief Homology Output.
+ */
+
+/*!\defgroup InternalModules Internal Modules
+ * \brief Modules used for internal computations; not directly needed by users.
+ */
+
+/* \defgroup LinearProgrammingModule Linear Programming
+ * \ingroup InternalModules
+ * \brief Classes and functions for solving linear programming problems (including feasibility problems).
+ *
+ * The LinearProgram class supports construction and solution of linear 
+ * programming problems. Tests for feasibility only are also possible. The 
+ * computations are performed by a BLAS/LAPACK style lpslv() routing.
+ */
+
+/* \defgroup DifferentiationModule Automatic Differentiation
+ * \ingroup InternalModules
+ * \brief Support for automatic differentiation using Taylor expansions
+ *
+ * In this core module are the classes used to compute derivatives
+ * of functions.
+ */
+
+/*!\defgroup CalculusModule Calculus Module
+ * \ingroup InternalModules
+ * \brief Calculus operations.
  */
 
 

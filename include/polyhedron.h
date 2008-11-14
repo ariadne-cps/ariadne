@@ -51,8 +51,7 @@ class Polyhedron;
 
 
 
-/*! \ingroup BasicSet
- *  \brief A polyhedron (not necessarily bounded polyhedral set) described by a system of linear inequalities.
+/*! \brief A polyhedron (not necessarily bounded polyhedral set) described by a system of linear inequalities.
  *
  *  The set is described as
  *  \f$ \{ x\in\mathbb{R}^d \mid Ax \leq b \} \f$

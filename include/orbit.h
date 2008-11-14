@@ -34,6 +34,24 @@
 
 namespace Ariadne {
 
+#ifdef DOXYGEN
+//! \brief Class for storing evolution data.
+template<class E> class Orbit {
+  public:
+    //! The type used to store a single enclosure set.
+    typedef E EnclosureType;
+    //! The type used to store a list of enclosure sets.
+    typedef EL EnclosureListType;
+    //! The initial set of the orbit.
+    EnclosureType const& initial() const;
+    //! The set of points reached by evolution from the given initial set over the evolution time.
+    EnclosureListType const& reach() const;
+    //! The set of points reached by evolution from the given initial set at the final evolution time.
+    EnclosureListType const& final() const;
+};
+#endif
+
+
 template<class ES> class Orbit;
 
 template<class BS> class ListSet;

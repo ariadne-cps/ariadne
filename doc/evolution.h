@@ -2,7 +2,7 @@
  *            evoluation.h
  *
  *  Copyright  2007  Pieter Collins
- *  Pieter.Collins@cwi.nl
+ *
  ****************************************************************************/
 
 /*
@@ -23,7 +23,7 @@
 
 /*! 
 
-\file documentation/evolution.h
+\file evolution.h
 \brief Documentation evolution of dynamic systems
 
 

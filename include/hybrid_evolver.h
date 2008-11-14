@@ -66,8 +66,7 @@ typedef ApproximateTaylorModel DefaultModelType;
 typedef ApproximateTaylorModel DefaultEnclosureType;
 typedef std::pair<DiscreteState,DefaultEnclosureType> DefaultHybridEnclosureType;
 
-/*! \ingroup Evolve 
- *  \brief A class for computing the evolution of a hybrid system. 
+/*! \brief A class for computing the evolution of a hybrid system. 
  *
  * The actual evolution steps are performed by the HybridEvolver class.
  */

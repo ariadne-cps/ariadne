@@ -76,8 +76,7 @@ Vector< Interval > solve(const ApproximateTaylorModel&, const Vector<Float>&);
 
 std::ostream& operator<<(std::ostream&, const ApproximateTaylorModel&);
 
-/* \brief A taylor_model with multivalued output, using a den.
- *  \ingroup FunctionModel
+/* \brief A taylor_model with multivalued output.
  */
 class ApproximateTaylorModel {
     typedef Interval I;

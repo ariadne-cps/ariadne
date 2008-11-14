@@ -49,8 +49,7 @@ class AffineModel;
 
 
 
-/*!\ingroup BasicSet
- * \brief A zonotope of arbitrary dimension.
+/*!\brief A zonotope of arbitrary dimension.
  * 
  * A zonotope is a set of the form \f$c+Ge\f$, where \f$||e||_{\infty}\leq1\f$.
  * The columns of the matrix \f$G\f$ are the <em>generators</em> of the 

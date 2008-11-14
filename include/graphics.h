@@ -78,6 +78,7 @@ inline FillColour fill_colour(const Colour& c) { return FillColour(c); }
 inline FillColour fill_colour(double r, double g, double b) { return FillColour(Colour(r,g,b)); }
     
 
+//! \brief Class for plotting figures.
 class Graphic {
   public:
     ~Graphic();

@@ -41,21 +41,36 @@ template<class X> class DifferentialVector;
 //! \brief Interface for functions whose derivatives can be computed.
 class FunctionInterface {
   public:
+    //! \brief Virtual destructor.
     virtual ~FunctionInterface() { };
+    //! \brief Create a dynamically-allocated copy.
     virtual FunctionInterface* clone() const = 0;
      
+    //! \brief The smoothness of the function.
     virtual ushort smoothness() const = 0;
+    //! \brief The number of arguments to the function.
     virtual uint argument_size() const = 0;
+    //! \brief The number of result variables of the function.
     virtual uint result_size() const = 0;
 
+    //! \brief Compute an approximation to the value of the function at the point \a x.
     virtual Vector<Float> evaluate(const Vector<Float>& x) const = 0;
+    //! \brief Compute an over-approximation to the values of the function over the domain \a x. This method provides an <em>interval extension</em> of the function.
     virtual Vector<Interval> evaluate(const Vector<Interval>& x) const = 0;
+    //! \brief Compute an approximation to the Jacobian derivative matrix \f$(Df)_{ij}=\partial f_i/\partial x_j\f$ of the function at the point \a x.
     virtual Matrix<Float> jacobian(const Vector<Float>& x) const = 0;
+    //! \brief Compute an over-approximation to the Jacobian derivative matrix \f$(Df)_{ij}=\partial f_i/\partial x_j\f$ of the function over the domain \a x.
     virtual Matrix<Interval> jacobian(const Vector<Interval>& x) const = 0;
-    virtual DifferentialVector< SparseDifferential<Float> > expansion(const Vector<Float>& x, const ushort& s) const = 0;
-    virtual DifferentialVector< SparseDifferential<Interval> > expansion(const Vector<Interval>& x, const ushort& s) const = 0;
+    //! \brief Compute an approximation to all the parital derivatives \f$D^\alpha f_{i}=\partial^{|\alpha|} f_i/\partial x_\alpha\f$ of the function at the point \a x up to degree \a d.
+    virtual DifferentialVector< SparseDifferential<Float> > expansion(const Vector<Float>& x, const ushort& d) const = 0;
+    //! \brief Compute over-approximations to all the parital derivatives \f$D^\alpha f_{i}=\partial^{|\alpha|} f_i/\partial x_\alpha\f$ of the function over the domain \a x up to degree \a d.
+    virtual DifferentialVector< SparseDifferential<Interval> > expansion(const Vector<Interval>& x, const ushort& d) const = 0;
   
+    //! \brief Write to an output stream.
     virtual std::ostream& write(std::ostream& os) const = 0;
+
+    //! \brief Write to an output stream. Calls the write(std::ostream&) method to perform dynamic dispatching.
+    friend std::ostream& operator<<(std::ostream& os, const FunctionInterface& f);
 };
 
 inline std::ostream& operator<<(std::ostream& os, const FunctionInterface& f) {

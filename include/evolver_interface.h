@@ -40,8 +40,7 @@ template<class ES> class Orbit;
 enum Semantics { LOWER_SEMANTICS, UPPER_SEMANTICS }; 
 
   
-/*! \ingroup EvaluatorInterfaces \ingroup Evolvers
- *  \brief Interface for evolving a dynamic system.
+/*! \brief Interface for evolving a dynamic system.
  */
 template<class SYS, class ES> 
 class EvolverInterface 
@@ -146,8 +145,7 @@ operator<<(std::ostream& os, const EvolverInterface<SYS,ES>& e) {
 }
 
 
-/*! \ingroup EvaluatorInterfaces \ingroup Evolvers
- *  \brief Interface for evolving a system and discretising the result on a grid.
+/*! \brief Interface for evolving a system and discretising the result on a grid.
  */
 template<class SYS, class BS>
 class DiscreteEvolverInterface

@@ -2,7 +2,7 @@
  *            function_models.h
  *
  *  Copyright  2007  Pieter Collins
- *  Pieter.Collins@cwi.nl
+ *
  ****************************************************************************/
 
 /*

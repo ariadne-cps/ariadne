@@ -78,8 +78,7 @@
 
 namespace Ariadne {
 
-/*! \ingroup BinaryTree
- *  \brief A statically-allocated binary word of fixed maximum length.
+/*! \brief A statically-allocated binary word of fixed maximum length.
  */
 class BinaryWord : public std::vector<bool> {
   private:

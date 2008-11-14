@@ -2,7 +2,7 @@
  *            geometric_representation.h
  *
  *  Copyright  2004-7  Pieter Collins
- *  Pieter.Collins@cwi.nl
+ *
  ****************************************************************************/
 
 /*

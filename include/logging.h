@@ -21,7 +21,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-
+/*! \file logging.h
+ *  \brief Support for writing debugging output to a logging stream.
+ */
 
 #ifndef ARIADNE_LOGGING_H
 #define ARIADNE_LOGGING_H

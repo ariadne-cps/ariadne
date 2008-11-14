@@ -63,7 +63,6 @@ typedef std::pair<DiscreteState,DefaultEnclosureType> DefaultHybridEnclosureType
 
 
 /*! \brief A class for performing reachability analysis on a hybrid system.
- *  \ingroup Analysers
  */
 class HybridReachabilityAnalyser
     : public Loggable

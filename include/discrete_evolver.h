@@ -46,8 +46,7 @@ class HybridGridTreeSet;
 typedef int DiscreteState;
 class HybridAutomaton;
 
-/*! \ingroup Evolvers
- *  \brief A class for computing the evolution of a discrete-time autonomous system.
+/*!  \brief A class for computing the evolution of a discrete-time autonomous system.
  */
 template<class ES>
 class HybridDiscreteEvolver

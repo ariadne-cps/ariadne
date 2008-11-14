@@ -24,6 +24,7 @@
 /*! \file function.h
  *  \brief Concrete function types.
  */
+
 #ifndef ARIADNE_FUNCTION_H
 #define ARIADNE_FUNCTION_H
 

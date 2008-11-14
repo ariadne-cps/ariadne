@@ -21,10 +21,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file dynamical_toolbox.h
- *  \brief Toolbox for dynamical systems. 
+/*! \file toolbox_base.h
+ *  \brief Base class for dynamical calculus routines containing implementations of routings which can be naturally composed from other routines. 
  */
-
 
 #ifndef ARIADNE_TOOLBOX_BASE_H
 #define ARIADNE_TOOLBOX_BASE_H

@@ -28,6 +28,10 @@
 #ifndef ARIADNE_ARIADNE_H
 #define ARIADNE_ARIADNE_H
 
+//! \brief Top-level %Ariadne namespace
+namespace Ariadne {
+}
+
 #include "numeric.h"
 #include "vector.h"
 #include "matrix.h"

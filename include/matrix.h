@@ -40,39 +40,115 @@
 #include "numeric.h"
 #include "tuple.h"
 
+using namespace boost::numeric;
+
 namespace Ariadne {
 
-/// A matrix over a field.
+/// A matrix over a field. See also \link Ariadne::Vector \c Vector<X> \endlink.
 template<class X>
 class Matrix
-    : public boost::numeric::ublas::matrix<X>
+    : public ublas::matrix<X>
 {
   public:
+    //@{
+    //! \name Constructors
+
+    //! Default constructor makes a \f$0\times0\f$ matrix.
     Matrix()
-        : boost::numeric::ublas::matrix<X>() { }
-    template<class AE> Matrix(const boost::numeric::ublas::matrix_expression<AE> &ae)
-        : boost::numeric::ublas::matrix<X>(ae) { }
+        : ublas::matrix<X>() { }
+
+    //! Construct a matrix with \a r rows and \a c columns with values initialised to zero.
     Matrix(size_t r, size_t c)
-        : boost::numeric::ublas::matrix<X>(r,c) { for(size_t i=0; i!=r; ++i) { for(size_t j=0; j!=c; ++j) { (*this)(i,j)=0; } } }
+        : ublas::matrix<X>(r,c) { for(size_t i=0; i!=r; ++i) { for(size_t j=0; j!=c; ++j) { (*this)(i,j)=0; } } }
+    
+    //! Construct a matrix with \a r rows and \a c columns, with values initialised from the C-style array beginning at \a ptr in row-major format. The value in the \a i<sup>th</sup> row and \a j<sup>th</sup> column of the resulting matrix is \a ptr[i*c+j].
     template<class XX> Matrix(size_t r, size_t c, const XX* ptr)
-        : boost::numeric::ublas::matrix<X>(r,c) { for(size_t i=0; i!=r; ++i) { for(size_t j=0; j!=c; ++j) { (*this)(i,j)=ptr[i*c+j]; } } }
+        : ublas::matrix<X>(r,c) { for(size_t i=0; i!=r; ++i) { for(size_t j=0; j!=c; ++j) { (*this)(i,j)=ptr[i*c+j]; } } }
+    
+    //! Construct a matrix with \a r rows and \a c columns, with values initialised from the C-style array beginning at \a ptr. The C-style array stores a matrix with row increment \a ri and column increment \a ci.
     template<class XX> Matrix(size_t r, size_t c, const XX* ptr, int ri, int ci)
-        : boost::numeric::ublas::matrix<X>(r,c) { for(size_t i=0; i!=r; ++i) { for(size_t j=0; j!=c; ++j) { (*this)(i,j)=ptr[i*ri+j*ci]; } } }
+        : ublas::matrix<X>(r,c) { for(size_t i=0; i!=r; ++i) { for(size_t j=0; j!=c; ++j) { (*this)(i,j)=ptr[i*ri+j*ci]; } } }
+    //! Construct a matrix with \a r rows and \a c columns, with values initialised from a variadic argument list. WARNING: The values in the list must all be double-precision type; in particular, constants must be floating-point values \c 2.0 rather integer values \c 2 .
     Matrix(size_t r, size_t c, const double& x0, ... );
+    //! Construct a matrix from a string in Matlab format, with entries in a row separated with commas, and rows separated with semicolons. e.g. <tt>"[a00, a01, a02; a10, a11, a12]"</tt>.
     Matrix(const std::string& str)
         : ublas::matrix<X>() { std::stringstream ss(str); ss >> *this; }
+
+    template<class AE> Matrix(const ublas::matrix_expression<AE> &ae)
+        : ublas::matrix<X>(ae) { }
+    template<class AE> Matrix<X>& operator=(const ublas::matrix_expression<AE> &ae) { this->ublas::matrix<X>::operator=(ae); return *this; }
+    //@}
+
+    //@{
+    //! \name Comparison operators
+    
+    //! \brief Equality operator. Allows comparison with a matrix using another real type.
+    template<class XX> bool operator==(const Matrix<XX>& A) const;
+    //@}
+
+    //@{
+    //! \name Data access
+    
+  
+    //! \brief The number of rows of the matrix.
     size_t row_size() const { return this->size1(); }
+    //! \brief The number of columns of the matrix.
     size_t column_size() const { return this->size2(); }
-    template<class XX> bool operator==(const Matrix<XX>& mx) const;
+    //! \brief Get the value stored in the \a i<sup>th</sup> row and \a j<sup>th</sup> column.
+    const X& get(size_t i, size_t j) const { return (*this)[i][j]; }
+    //! \brief Set the value stored in the \a i<sup>th</sup> row and \a j<sup>th</sup> column to \a x.
+    template<class T> void set(size_t i, size_t j, const T& x) { (*this)[i][j] = x; }
+
+#ifdef DOXYGEN
+    //! \brief C-style subscripting operator.
+    X& operator[][](size_t i, size_t j);
+    //! \brief C-style constant subscripting operator.
+    const X& operator[][](size_t i, size_t j) const;
+#else
     const X* operator[](size_t r) const { return &this->operator()(r,0); }
     X* operator[](size_t r) { return &this->operator()(r,0); }
-    const X& get(size_t i, size_t j) const { return (*this)[i][j]; }
-    template<class T> void set(size_t i, size_t j, const T& x) { (*this)[i][j] = x; }
-  
-    static Matrix<X> zero(size_t r, size_t c) { return Matrix<X>(r,c); }
-    static Matrix<X> identity(size_t n) { Matrix<X> I(n,n); for(size_t i=0; i!=n; ++i) { I[i][i]=1; } return I; }
+#endif
+    //@}
 
-};
+    //@{
+    //! \name Static constructors
+
+    //! \brief The zero matrix with \a r rows and \a c columns.
+    static Matrix<X> zero(size_t r, size_t c) { return Matrix<X>(r,c); }
+    //! \brief The itentity matrix with \a n rows and \a n columns.
+    static Matrix<X> identity(size_t n) { Matrix<X> I(n,n); for(size_t i=0; i!=n; ++i) { I[i][i]=1; } return I; }
+    //@}
+    
+
+#ifdef DOXYGEN
+    //! \brief The supremum norm of the matrix \a A, defined as \f$||A||_\infty=\max_i \sum_j |A_{ij}|\f$.
+    friend template<class X> X norm(const Matrix<X>& A);
+
+     //! \brief %Matrix negation.
+    friend template<class X> Matrix<X> operator-(const Matrix<X>& A);
+    //! \brief %Matrix addition.
+    friend template<class X> Matrix<X> operator+(const Matrix<X>& A1, const Matrix<X>& A2);
+    //! \brief %Matrix subtraction.
+    friend template<class X> Matrix<X> operator-(const Matrix<X>& A1, const Matrix<X>& A2);
+    //! \brief %Scalar multiplication.
+    friend template<class X> Matrix<X> operator*(const X& s, const Matrix<X>& A);
+    //! \brief %Scalar multiplication.
+    friend template<class X> Matrix<X> operator*(const Matrix<X>& A, const X& s);
+    //! \brief %Scalar division.
+    friend template<class X> Matrix<X> operator/(const Matrix<X>& A, const X& s);
+
+    //! \brief %Matrix-vector multiplication.
+    friend template<class X> Vector<X> operator*(const Matrix<X>& A, const Vector<X>& v);
+    //! \brief %Matrix-matrix multiplication.
+    friend template<class X> Vector<X> operator*(const Matrix<X>& A1, const Matrix<X>& A2);
+
+    //! \brief Write to an output stream.
+    friend template<class X> std::ostream& operator<<(std::ostream& os, const Matrix<X>& A);
+    //! \brief Read from an output stream.
+    friend template<class X> std::istream& operator>>(std::istream& is, Matrix<X>& A);
+#endif
+
+    };
 
 template<class X> X norm(const Matrix<X>& A);
 
@@ -82,6 +158,10 @@ template<class X> std::istream& operator>>(std::istream& is, Matrix<X>& A);
 Matrix<Float> inverse(const Matrix<Float>& A);
 Matrix<Interval> inverse(const Matrix<Interval>& A);
 
+#ifdef HAVE_GMPXX_H
+Matrix<Rational> inverse(const Matrix<Rational>& A);
+#endif // HAVE_GMPXX_H
+
 Matrix<Float> triangular_multiplier(const Matrix<Float>& A);
 tuple< Matrix<Float>, Matrix<Float> > orthogonal_decomposition(const Matrix<Float>&);
 
@@ -90,11 +170,11 @@ Matrix<Float> midpoint(const Matrix<Interval>&);
 
 /*
 template<class X> inline Vector<X> operator*(const Matrix<X>& A, const Vector<X>& v) {
-    return boost::numeric::ublas::prod(A,v);
+    return ublas::prod(A,v);
 }
  
 template<class X> inline Matrix<X> operator*(const Matrix<X>& A, const Matrix<X>& B) {
-    return boost::numeric::ublas::prod(A,B);
+    return ublas::prod(A,B);
 }
  
 
@@ -137,7 +217,7 @@ operator* (const ublas::matrix_expression<E1> &e1,
 
 
 template<class X> Matrix<X>::Matrix(size_t r, size_t c, const double& x0, ...) 
-    : boost::numeric::ublas::matrix<X>(r,c) 
+    : ublas::matrix<X>(r,c) 
 {
     assert(r>=1 && c>=1); va_list args; va_start(args,x0);
     (*this)[0][0]=x0; 

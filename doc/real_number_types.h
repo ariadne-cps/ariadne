@@ -2,7 +2,7 @@
  *            real_number_types.h
  *
  *  Copyright  2004-7  Pieter Collins
- *  Pieter.Collins@cwi.nl
+ *
  ****************************************************************************/
 
 /*
@@ -29,7 +29,7 @@
 
 
 
-\page realnumbertypes Real Number Types
+\page realnumbertypes Real Number Types (Outdated)
 
 \section Introduction
 

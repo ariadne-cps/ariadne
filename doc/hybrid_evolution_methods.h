@@ -2,7 +2,7 @@
  *            hybrid_evolution_methods.h
  *
  *  Copyright  2004-7  Pieter Collins
- *  Pieter.Collins@cwi.nl
+ *
  ****************************************************************************/
 
 /*

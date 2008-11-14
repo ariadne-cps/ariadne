@@ -46,7 +46,6 @@ class Box;
 // Forward declarations for friends
 class CurveInterface;
 
-//! \ingroup SetInterface
 /*! \brief A curve in Euclidean space
  */
 class CurveInterface
@@ -75,7 +74,6 @@ inline std::ostream& operator<<(std::ostream& os, const CurveInterface& c) {
     
 
 
-//! \ingroup ExactSet
 /*! \brief A curve in Euclidean space
  */
 class Curve

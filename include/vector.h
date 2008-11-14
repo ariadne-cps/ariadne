@@ -44,35 +44,108 @@ using namespace boost::numeric;
 
 namespace Ariadne {
 
-/// A vector over a field.
+//! \brief A vector over a field. See also \link Ariadne::Matrix \c Matrix<X> \endlink.
 template<class X>
 class Vector
-    : public boost::numeric::ublas::vector<X>
+    : public ublas::vector<X>
 {
   public:
+    //@{
+    //! \name Constructors
+
+    //! \brief Default constructor constructs a vector with no elements.
     Vector()
         : ublas::vector<X>() { }
+    //! \brief Construct a vector of size \a n, with elements initialised to zero.
     Vector(size_t n)
         : ublas::vector<X>(n) { for(size_t i=0; i!=this->size(); ++i) { (*this)[i]=0; } }
+    //! \brief Construct a vector of size \a n, with elements initialised to \a t.
     Vector(size_t n, const X& t)
         : ublas::vector<X>(n) { for(size_t i=0; i!=this->size(); ++i) { (*this)[i]=t; } }
-    Vector(size_t n, const double& t0, const double& t1, ...);
-    Vector(const std::string& str) 
-        : ublas::vector<X>() { std::stringstream ss(str); ss >> *this; }
+    //! \brief Construct a vector of size \a n, with values initialised from the C-style array beginning at \a ptr.
     template<class XX> Vector(size_t n, const XX* ptr)
         : ublas::vector<X>(n) { for(size_t i=0; i!=this->size(); ++i) { (*this)[i]=ptr[i]; } }
+    //! \brief Construct a vector of size \a n, with values initialised from a variadic argument list. WARNING: The values in the list must all be double-precision type; in particular, constants must be floating-point values \c 2.0 rather integer values \c 2 .
+    Vector(size_t n, const double& t0, const double& t1, ...);
+    //! \brief Construct a matrix from a string literal, with entries enclosed in square braces and separated by commass. e.g. <tt>"[1, 2.3, 4.2]"</tt>.
+    Vector(const std::string& str) 
+        : ublas::vector<X>() { std::stringstream ss(str); ss >> *this; }
+    //! \brief Copy constructor allows conversion from a vector using another numerical type.
     template<class XX> Vector(const Vector<XX>& v)
         : ublas::vector<X>(v) { }
+#ifdef DOXYGEN
+    //! \brief Copy assignement allows conversion from a vector using another numerical type.
+    template<class XX> Vector<X>& operator=(const Vector<XX> &v);
+#endif
     template<class E> Vector(const ublas::vector_expression<E> &ve)
         : ublas::vector<X>(ve) { }
     template<class E> Vector<X>& operator=(const ublas::vector_expression<E> &ve) { 
         this->ublas::vector<X>::operator=(ve); return *this; }
+    //@}
+
+    //@{
+    //! \name Static constructors
+
+    //! \brief The zero vector of size \a n.
     static Vector<X> zero(size_t n) { return Vector<Float>(n,0.0); }
+    //! \brief The vector of size \a n with all entries equal to one.
     static Vector<X> one(size_t n) { return Vector<Float>(n,1.0); }
+    //! \brief The unit vector \f$e_i\f$ with value one in the \a i<sup>th</sup> entry, and zero otherwise.
     static Vector<X> unit(size_t n,size_t i) { 
         ARIADNE_ASSERT(i<n); Vector<Float> result(n,0.0); result[i]=1.0; return result; }
+    //@}
+
+    //@{
+    //! \name Data access
+
+#ifdef DOXYGEN
+    //! \brief The number of elements of the vector.
+    size_t size() const;
+#endif
+    //! \brief Get the value stored in the \a i<sup>th</sup> element.
     const X& get(size_t i) const { return (*this)[i]; }
+    //! \brief Set the value stored in the \a i<sup>th</sup> element to \a x.
     template<class T> void set(size_t i, const T& x) { (*this)[i] = x; }
+#ifdef DOXYGEN
+    //! \brief C-style subscripting operator.
+    X& operator[](size_t i);
+    //! \brief C-style constant subscripting operator.
+    const X& operator[](size_t i) const;
+#endif
+    //@}
+
+#ifdef DOXYGEN
+    //! \brief Equality operator.
+    friend template<class X1, class X2> bool operator==(const Vector<X1>& v1, const Vector<X2>& v2);
+    //! \brief Inequality operator.
+    friend template<class X1, class X2> bool operator!=(const Vector<X1>& v1, const Vector<X2>& v2);
+
+     //! \brief %Vector negation.
+    friend template<class X> Vector<X> operator-(const Vector<X>& v);
+    //! \brief %Vector addition.
+    friend template<class X> Vector<X> operator+(const Vector<X>& v1, const Vector<X>& v2);
+    //! \brief %Vector subtraction.
+    friend template<class X> Vector<X> operator-(const Vector<X>& v1, const Vector<X>& v2);
+    //! \brief %Scalar multiplication.
+    friend template<class X> Vector<X> operator*(const X& s, const Vector<X>& v);
+    //! \brief %Scalar multiplication.
+    friend template<class X> Vector<X> operator*(const Vector<X>& v, const X& s);
+    //! \brief %Scalar division.
+    friend template<class X> Vector<X> operator/(const Vector<X>& v, const X& s);
+
+    //! \brief The supremum norm.
+    friend template<class X> X norm(const Vector<X>& v);
+
+    //! \brief Join (catenate, make the direct sum of) two vectors.
+    friend template<class X> Vector<X> join(const Vector<X>& v1, const Vector<X>& v2);
+    //! \brief Join a vector and a scalar.
+    friend template<class X> Vector<X> join(const Vector<X>& v1, const X& s2); 
+
+    //! \brief Write to an output stream.
+    friend template<class X> std::ostream& operator<<(std::ostream& os, const Vector<X>& v);
+    //! \brief Read from an output stream.
+    friend template<class X> std::istream& operator>>(std::istream& is, Vector<X>& v);
+#endif // DOXYGEN
 };
 
 typedef ublas::slice Slice;

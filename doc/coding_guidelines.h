@@ -2,7 +2,7 @@
  *            coding_guidelines.h
  *
  *  Copyright  2007  Pieter Collins
- *  Pieter.Collins@cwi.nl
+ *
  ****************************************************************************/
 
 /*
@@ -35,22 +35,21 @@
 
  - Remember that identifiers beginning with two underscores __XXX, __xxx or an underscore and a capital letter _Xxx are reserved for the compiler.
 
- - For most classes
-    - Header files xxx.h should contain the interface and Doxygen documentation.
-    - Header files xxx.inline.h should contain inline functions.
-    - Header files xxx.template.h should contain non-inline template functions for template classes and functions which are not designed to be explicitly instantiated.
-    - Header files xxx.code.h should contain non-inline template functions for template classes and functions which are designed to be explicitly instantiated.
-    - Source files xxx.cc should contain non-template, non-inline code and explicit template instantiations.
+ - Each class should be in a single header file, which should include strongly related classes and methods.
+    - Header files xxx.h should contain the interface, inline functions, templated code which is not explicitly instantiated and Doxygen documentation.
+    - Source files xxx.cc should contain ordinary non-inline source code, templated code which is meant to be explicitly instantiated, internal code only used in the source file and explicit template instantiations.
 
  - For wrappers and classes with only inline functions, the function definitions may be in the class body or in the file xxx.h.
 
- - To ease template instantiation, non-member functions related to a class should not require explicit instantiation. This can be forced by providing an _instantiate() method in the class which calls all related functions.
+ - To ease template instantiation, non-member functions related to a class should not require explicit instantiation. 
+
+ - The use of a private static _instantiate() method to enforce template instantiation does not work with all compilers and all optimization settings, and must not be used.
 
 <b>C++ Indentation</b>
 
- - The basic indentation size is two spaces.
+ - The basic indentation size is four spaces.
  - Tabs must not be used for indentation
- - Namespaces
+ - Namespaces should not be indented
  - Scope classifiers (public, protected, private) should be indented by half the basic indentation.
 
 <b>Common mistakes</b>

@@ -369,7 +369,7 @@ void test_grid_paving_const_iterator(){
     expected_result[0] = new GridCell( theGrid, 2, make_binary_word("") );
     
     ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result, theGridSubPavingLarge, 1 );
-    ARIADNE_CLEAN_TEST__VECTOR( expected_result );
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result );
 
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE("Test the sequence in which GridPavingIterator goes through the tree leafs ");
@@ -382,7 +382,7 @@ void test_grid_paving_const_iterator(){
     expected_result[1] =  new GridCell( theGrid, 2, make_binary_word("1") );
 
     ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result, theGridSubPavingLarge, 2 );
-    ARIADNE_CLEAN_TEST__VECTOR( expected_result );
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result );
 
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE("Test the sequence in which GridPavingIterator goes through the tree leafs ");
@@ -397,7 +397,7 @@ void test_grid_paving_const_iterator(){
     expected_result[3] =  new GridCell( theGrid, 2, make_binary_word("11") );
 
     ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result, theGridSubPavingLarge, 4 );
-    ARIADNE_CLEAN_TEST__VECTOR( expected_result );
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result );
 
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE("Test the sequence in which GridPavingIterator goes through the tree leafs ");
@@ -416,7 +416,7 @@ void test_grid_paving_const_iterator(){
     expected_result[7] = new GridCell( theGrid, 2, make_binary_word("111") );
     
     ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result, theGridSubPavingLarge, 8 );
-    ARIADNE_CLEAN_TEST__VECTOR( expected_result );
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result );
     
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE("Disable some of the leaf nodes and test GridPavingIterator");
@@ -436,7 +436,7 @@ void test_grid_paving_const_iterator(){
     expected_result_tmp[3] = new GridCell( theGrid, 2, make_binary_word("111") );
 
     ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_tmp, theGridSubPavingLarge, 4 );
-    ARIADNE_CLEAN_TEST__VECTOR( expected_result_tmp );
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_tmp );
 
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE("Recombine the tree and test GridPavingIterator");
@@ -451,7 +451,7 @@ void test_grid_paving_const_iterator(){
     expected_result_tmp[2] = new GridCell( theGrid, 2, make_binary_word("11") );
     
     ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_tmp, theGridSubPavingLarge, 3 );
-    ARIADNE_CLEAN_TEST__VECTOR( expected_result_tmp );
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_tmp );
 
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE("Mince the tree back to level 3, enable/disable some nodes, recombine and and test GridPavingIterator");
@@ -477,7 +477,7 @@ void test_grid_paving_const_iterator(){
     expected_result_tmp[3] = new GridCell( theGrid, 2, make_binary_word("111") );
 
     ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_tmp, theGridSubPavingLarge, 4 );
-    ARIADNE_CLEAN_TEST__VECTOR( expected_result_tmp );
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_tmp );
 
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE("Test how the constant Cursor can be retrieved from the Constant iterator");
@@ -539,7 +539,7 @@ void test_grid_sub_paving(){
     expected_result_arr[3] = new GridCell( theOneDimGrid, theHeight, make_binary_word("0111") );
 
     ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theGridSPOneDim, 4 );
-    ARIADNE_CLEAN_TEST__VECTOR( expected_result_arr );
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
     
     ARIADNE_PRINT_TEST_COMMENT("Recombine and subdivide the sub-paving to cell width 1.1");
     theGridSPOneDim.recombine();
@@ -555,7 +555,7 @@ void test_grid_sub_paving(){
     expected_result_arr[1] = new GridCell( theOneDimGrid, theHeight, make_binary_word("011") );
 
     ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theGridSPOneDim, 2 );
-    ARIADNE_CLEAN_TEST__VECTOR( expected_result_arr );
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
     
     ARIADNE_PRINT_TEST_COMMENT("Subdivide the sub-paving to cell width 0.126, this should give us four sub cells");
     theGridSPOneDim.subdivide(0.126);
@@ -573,7 +573,7 @@ void test_grid_sub_paving(){
     theGridSPOneDim.subdivide(0.126);
 
     ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theGridSPOneDim, 4 );
-    ARIADNE_CLEAN_TEST__VECTOR( expected_result_arr );
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
 
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE("Test Mincing operations of GridTreeSubset on the two dimensional Grid");
@@ -601,7 +601,7 @@ void test_grid_sub_paving(){
     theGridSPTwoDim.subdivide(0.51);
 
     ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theGridSPTwoDim, 4 );
-    ARIADNE_CLEAN_TEST__VECTOR( expected_result_arr );
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
 
     ARIADNE_PRINT_TEST_COMMENT("Subdivide the sub-paving to cell width 0.4, this should give us sixteen sub cells");
     //At this moment the coordinate cell widths are: for x -- 0.25 and for y -- 0.5 
@@ -885,7 +885,7 @@ void test_adjoin_outer_approximation_operation(){
     leaves = make_binary_word("0001011111010111111010010100010111111010100000");
     GridTreeSet expected_grid_tree_set2( theTrivialGrid, 4, tree, leaves );
     ARIADNE_TEST_EQUAL( expected_grid_tree_set2, theOneCellPaving );
-
+    
     ARIADNE_PRINT_TEST_COMMENT("Recombined GridTreeSet after adding the cell: ");
     std::vector< GridCell* > expected_result_arr(16);
     expected_result_arr[0] = new GridCell( theTrivialGrid, 4, make_binary_word("[0,0,1,1,0,0,0,0,0,1]") );
@@ -906,7 +906,7 @@ void test_adjoin_outer_approximation_operation(){
     expected_result_arr[15] = new GridCell( theTrivialGrid, 4, make_binary_word("[0,0,1,1,1,1,0,0,1,0]") );
     theOneCellPaving.recombine();
     ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theOneCellPaving, 16 );
-    ARIADNE_CLEAN_TEST__VECTOR( expected_result_arr );
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
     
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE("Create an outer_approximation of the rectangle on the scaling grid and get the GridTreeSet");
@@ -925,7 +925,162 @@ void test_adjoin_outer_approximation_operation(){
     expected_result_arr[3] = new GridCell( theScalingGrid, 3, make_binary_word("[1,1,0,0,1,0,1,1]") );
     expected_result_arr[4] = new GridCell( theScalingGrid, 3, make_binary_word("[1,1,0,0,1,1]") );
     ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theOuterApproxGridTreeSet, 5 );
-    ARIADNE_CLEAN_TEST__VECTOR( expected_result_arr );
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
+}
+
+void test_adjoin_inner_approximation_operation_one(){
+    //Allocate a trivial Grid
+    Grid theTrivialGrid(2, 1.0);
+    
+    const uint heightZero = 0;
+    const uint heightOne = 1;
+    const uint heightTwo = 2;
+    
+    //Create an empty set to which we will be adding inner approximations
+    //theSetTwo = empty, with the bounding box [0,1]x[0,1]
+    GridTreeSet theSetZero( theTrivialGrid, heightZero, new BinaryTreeNode( make_binary_word("0"), make_binary_word("0") ) );
+    GridTreeSet theSetZeroCopy( theSetZero );
+    Box theBoxZeroOne = make_box("[-0.9,-0.1]x[0.1,0.9]");
+    Box theBoundingBoxZeroOne = make_box("[0.01,0.99]x[0.01,0.99]");
+
+    // !!!
+    ARIADNE_PRINT_TEST_CASE_TITLE(" theSetZero.adjoin_inner_approximation( theBoxZeroOne, 0, 4) ");
+    ARIADNE_PRINT_TEST_COMMENT("theSetZero");
+    cout << theSetZero << endl;
+    ARIADNE_PRINT_TEST_COMMENT("theBoxZeroOne");
+    cout << theBoxZeroOne << endl;
+    ARIADNE_PRINT_TEST_COMMENT("Nothing should be added since nothing of theBoxZeroOne intersects with the primary cell of height zero.");
+    theSetZero.adjoin_inner_approximation( theBoxZeroOne, heightZero, 4);
+    ARIADNE_TEST_EQUAL( theSetZero , theSetZeroCopy );
+    
+    // !!!
+    ARIADNE_PRINT_TEST_CASE_TITLE(" theSetZero.adjoin_inner_approximation( theBoxZeroOne, theBoundingBoxZeroOne, 4) ");
+    ARIADNE_PRINT_TEST_COMMENT("theBoundingBoxZeroOne");
+    cout << theBoundingBoxZeroOne << endl;
+    ARIADNE_PRINT_TEST_COMMENT("Nothing should be added since theBoundingBoxZeroOne is rooted to the primary cell of height zero.");
+    theSetZero.adjoin_inner_approximation( theBoxZeroOne, theBoundingBoxZeroOne, 4);
+    ARIADNE_TEST_EQUAL( theSetZero, theSetZeroCopy );
+    
+    // !!!
+    ARIADNE_PRINT_TEST_CASE_TITLE(" theSetZero.adjoin_inner_approximation( theBoxZeroOne, 1, 4) ");
+    ARIADNE_PRINT_TEST_COMMENT("The complete inner approximation of theBoxZeroOne should be added sine it is enclosed in the primary cell of height one.");
+    theSetZero.adjoin_inner_approximation( theBoxZeroOne, heightOne, 4);
+    std::vector< GridCell* > expected_result_arr( 4 );
+    expected_result_arr[0] = new GridCell( theTrivialGrid, heightOne, make_binary_word("010011") );
+    expected_result_arr[1] = new GridCell( theTrivialGrid, heightOne, make_binary_word("010110") );
+    expected_result_arr[2] = new GridCell( theTrivialGrid, heightOne, make_binary_word("011001") );
+    expected_result_arr[3] = new GridCell( theTrivialGrid, heightOne, make_binary_word("011100") );
+    ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theSetZero, 4 );
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
+}
+
+void test_adjoin_inner_approximation_operation_two(){
+    //Allocate a trivial Grid
+    Grid theTrivialGrid(2, 1.0);
+    
+    const uint heightZero = 0;
+    const uint heightOne = 1;
+    const uint heightTwo = 2;
+    
+    //Create an empty set to which we will be adding inner approximations
+    //theSetTwo = empty, with the bounding box [-1,1]x[-1,1]
+    GridTreeSet theSetOne( theTrivialGrid, heightOne, new BinaryTreeNode( make_binary_word("0"), make_binary_word("0") ) );
+    GridTreeSet theSetOneCopy( theSetOne );
+    Box theBoxOneOne = make_box("[-1.9,-0.1]x[0.1,1.5]");
+    Box theBoundingBoxOneOne = make_box("[-0.99,0.99]x[-0.99,1.99]");
+    
+    // !!!
+    ARIADNE_PRINT_TEST_CASE_TITLE(" theSetOne.adjoin_inner_approximation( theBoxOneOne, 1, 4) ");
+    ARIADNE_PRINT_TEST_COMMENT("theSetOne");
+    cout << theSetOne << endl;
+    ARIADNE_PRINT_TEST_COMMENT("theBoxOneOne");
+    cout << theBoxOneOne << endl;
+    theSetOne.adjoin_inner_approximation( theBoxOneOne, heightOne, 4);
+    std::vector< GridCell* > expected_result_arr( 15 );
+    expected_result_arr[0] = new GridCell( theTrivialGrid, heightOne, make_binary_word("010001") );
+    expected_result_arr[1] = new GridCell( theTrivialGrid, heightOne, make_binary_word("010011") );
+    expected_result_arr[2] = new GridCell( theTrivialGrid, heightOne, make_binary_word("010100") );
+    expected_result_arr[3] = new GridCell( theTrivialGrid, heightOne, make_binary_word("010101") );
+    expected_result_arr[4] = new GridCell( theTrivialGrid, heightOne, make_binary_word("010110") );
+    expected_result_arr[5] = new GridCell( theTrivialGrid, heightOne, make_binary_word("010111") );
+    expected_result_arr[6] = new GridCell( theTrivialGrid, heightOne, make_binary_word("011001") );
+    expected_result_arr[7] = new GridCell( theTrivialGrid, heightOne, make_binary_word("011100") );
+    expected_result_arr[8] = new GridCell( theTrivialGrid, heightOne, make_binary_word("011101") );
+    ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theSetOne, 9 );
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
+    
+    // !!!
+    ARIADNE_PRINT_TEST_CASE_TITLE(" theSetOneCopy.adjoin_inner_approximation( theBoxOneOne, theBoundingBoxOneOne, 4) ");
+    ARIADNE_PRINT_TEST_COMMENT("theBoundingBoxZeroOne");
+    cout << theBoundingBoxOneOne << endl;
+    ARIADNE_PRINT_TEST_COMMENT("Nothing should be added since theBoundingBoxOneOne is rooted to the primary cell of height two.");
+    theSetOneCopy.adjoin_inner_approximation( theBoxOneOne, theBoundingBoxOneOne, 4);
+    expected_result_arr[0]  = new GridCell( theTrivialGrid, heightTwo, make_binary_word("00010001") );
+    expected_result_arr[1]  = new GridCell( theTrivialGrid, heightTwo, make_binary_word("00010011") );
+    expected_result_arr[2]  = new GridCell( theTrivialGrid, heightTwo, make_binary_word("00010100") );
+    expected_result_arr[3]  = new GridCell( theTrivialGrid, heightTwo, make_binary_word("00010101") );
+    expected_result_arr[4]  = new GridCell( theTrivialGrid, heightTwo, make_binary_word("00010110") );
+    expected_result_arr[5]  = new GridCell( theTrivialGrid, heightTwo, make_binary_word("00010111") );
+    expected_result_arr[6]  = new GridCell( theTrivialGrid, heightTwo, make_binary_word("00011001") );
+    expected_result_arr[7]  = new GridCell( theTrivialGrid, heightTwo, make_binary_word("00011100") );
+    expected_result_arr[8]  = new GridCell( theTrivialGrid, heightTwo, make_binary_word("00011101") );
+    expected_result_arr[9]  = new GridCell( theTrivialGrid, heightTwo, make_binary_word("01000000") );
+    expected_result_arr[10] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("01000001") );
+    expected_result_arr[11] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("01000010") );
+    expected_result_arr[12] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("01000011") );
+    expected_result_arr[13] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("01001000") );
+    expected_result_arr[14] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("01001001") );
+    ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theSetOneCopy, 15 );
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
+}
+
+void test_adjoin_inner_approximation_operation_three(){
+    //Allocate a trivial Grid
+    Grid theTrivialGrid(2, 1.0);
+    
+    const uint heightZero = 0;
+    const uint heightOne = 1;
+    const uint heightTwo = 2;
+
+    //Create a more complex set set to which we will be adding inner approximations
+    //theSetTwo = [-1,0]x[-1,0] U [0,1]x[0,1] U [1,3]x[1,3]
+    //The set's bounding box is [-1,3]x[-1,3]
+    GridTreeSet theSetTwo( theTrivialGrid, heightTwo, new BinaryTreeNode( make_binary_word("1111001000100"), make_binary_word("1001001") ) );
+    GridTreeSet theSetTwoCopy( theSetTwo );
+    Box theBoxTwoOne = make_box("[0.49,1.51]x[0.49,1.51]");
+    
+    // !!!
+    ARIADNE_PRINT_TEST_CASE_TITLE(" theSetTwo.adjoin_inner_approximation( theBoxTwoOne, 1, 4) ");
+    ARIADNE_PRINT_TEST_COMMENT("theSetTwo");
+    cout << theSetTwo << endl;
+    ARIADNE_PRINT_TEST_COMMENT("theBoxTwoOne");
+    cout << theBoxTwoOne << endl;
+    theSetTwo.adjoin_inner_approximation( theBoxTwoOne, heightOne, 4);
+    std::vector< GridCell* > expected_result_arr( 11 );
+    expected_result_arr[0] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("0000") );
+    expected_result_arr[1] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("0011") );
+    expected_result_arr[2] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("11") );
+    ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theSetTwo, 3 );
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
+    
+    // !!!
+    ARIADNE_PRINT_TEST_CASE_TITLE(" theSetTwoCopy.adjoin_inner_approximation( theBoxTwoOne, 2, 4) ");
+    ARIADNE_PRINT_TEST_COMMENT("theSetTwoCopy");
+    cout << theSetTwoCopy << endl;
+    theSetTwoCopy.adjoin_inner_approximation( theBoxTwoOne, heightTwo, 4);
+    expected_result_arr[0] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("0000") );
+    expected_result_arr[1] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("0011") );
+    expected_result_arr[2] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("01101000") );
+    expected_result_arr[3] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("01101001") );
+    expected_result_arr[4] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("01101010") );
+    expected_result_arr[5] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("01101011") );
+    expected_result_arr[6] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("10010100") );
+    expected_result_arr[7] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("10010101") );
+    expected_result_arr[8] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("10010110") );
+    expected_result_arr[9] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("10010111") );
+    expected_result_arr[10] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("11") );
+    ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theSetTwoCopy, 11 );
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
 }
 
 void test_restrict() {
@@ -979,19 +1134,19 @@ void test_restrict() {
     expected_result_arr[1] = new GridCell( theTrivialGrid, 2, make_binary_word("[1,0,0,0]") );
     expected_result_arr[2] = new GridCell( theTrivialGrid, 2, make_binary_word("[1,0,1,1]") );
     ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theThreeCellPavingH2, 3 );
-    ARIADNE_CLEAN_TEST__VECTOR( expected_result_arr );
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
 
     ARIADNE_PRINT_TEST_COMMENT("The initial GridTreeSet2: ");
     expected_result_arr[0] = new GridCell( theTrivialGrid, 2, make_binary_word("[1,0,0]") );
     expected_result_arr[1] = new GridCell( theTrivialGrid, 2, make_binary_word("[1,0,1,0]") );
     ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theTwoCellPavingH2, 2 );
-    ARIADNE_CLEAN_TEST__VECTOR( expected_result_arr );
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
 
     ARIADNE_PRINT_TEST_COMMENT("The result after restrict: ");
     theThreeCellPavingH2.restrict( theTwoCellPavingH2 );
     expected_result_arr[0] = new GridCell( theTrivialGrid, 2, make_binary_word("[1,0,0,0]") );
     ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theThreeCellPavingH2, 1 );
-    ARIADNE_CLEAN_TEST__VECTOR( expected_result_arr );
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
 
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE("Test restrict operation: GridTreeSet.restrict( GridTreeSubset )");
@@ -999,20 +1154,20 @@ void test_restrict() {
     expected_result_arr[0] = new GridCell( theTrivialGrid, 2, make_binary_word("[1,0,0]") );
     expected_result_arr[1] = new GridCell( theTrivialGrid, 2, make_binary_word("[1,0,1,0]") );
     ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theTwoCellPavingH2, 2 );
-    ARIADNE_CLEAN_TEST__VECTOR( expected_result_arr );
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
 
     ARIADNE_PRINT_TEST_COMMENT("The initial GridTreeSubset: ");
     expected_result_arr[0] = new GridCell( theTrivialGrid, 3, make_binary_word("[1,1,0,0]") );
     expected_result_arr[1] = new GridCell( theTrivialGrid, 3, make_binary_word("[1,1,1,0,0,0]") );
     expected_result_arr[2] = new GridCell( theTrivialGrid, 3, make_binary_word("[1,1,1,0,1,1]") );
     ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theThreeCellSubPavingH3, 3 );
-    ARIADNE_CLEAN_TEST__VECTOR( expected_result_arr );
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
 
     ARIADNE_PRINT_TEST_COMMENT("The result after restrict: ");
     theTwoCellPavingH2.restrict( theThreeCellSubPavingH3 );
     expected_result_arr[0] = new GridCell( theTrivialGrid, 3, make_binary_word("[1,1,1,0,0,0]") );
     ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theTwoCellPavingH2, 1 );
-    ARIADNE_CLEAN_TEST__VECTOR( expected_result_arr );
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
     
     //TODO: Test the case when the GridTreeSet has primary cell of the level 3
     //    The GridTreeSubset is at level 1 and it's primary cell is at level 2
@@ -1069,20 +1224,20 @@ void test_remove_one() {
     expected_result_arr[1] = new GridCell( theTrivialGrid, 2, make_binary_word("[1,0,0,0]") );
     expected_result_arr[2] = new GridCell( theTrivialGrid, 2, make_binary_word("[1,0,1,1]") );
     ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theThreeCellPavingH2, 3 );
-    ARIADNE_CLEAN_TEST__VECTOR( expected_result_arr );
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
 
     ARIADNE_PRINT_TEST_COMMENT("The initial GridTreeSet2: ");
     expected_result_arr[0] = new GridCell( theTrivialGrid, 2, make_binary_word("[1,0,0]") );
     expected_result_arr[1] = new GridCell( theTrivialGrid, 2, make_binary_word("[1,0,1,0]") );
     ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theTwoCellPavingH2, 2 );
-    ARIADNE_CLEAN_TEST__VECTOR( expected_result_arr );
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
 
     ARIADNE_PRINT_TEST_COMMENT("The result after removal: ");
     theThreeCellPavingH2.remove( theTwoCellPavingH2 );
     expected_result_arr[0] = new GridCell( theTrivialGrid, 2, make_binary_word("[0,0]") );
     expected_result_arr[1] = new GridCell( theTrivialGrid, 2, make_binary_word("[1,0,1,1]") );
     ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theThreeCellPavingH2, 2 );
-    ARIADNE_CLEAN_TEST__VECTOR( expected_result_arr );
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
 
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE("Test remove operation: GridTreeSet.remove( GridTreeSubset )");
@@ -1090,21 +1245,21 @@ void test_remove_one() {
     expected_result_arr[0] = new GridCell( theTrivialGrid, 2, make_binary_word("[1,0,0]") );
     expected_result_arr[1] = new GridCell( theTrivialGrid, 2, make_binary_word("[1,0,1,0]") );
     ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theTwoCellPavingH2, 2 );
-    ARIADNE_CLEAN_TEST__VECTOR( expected_result_arr );
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
 
     ARIADNE_PRINT_TEST_COMMENT("The initial GridTreeSubset: ");
     expected_result_arr[0] = new GridCell( theTrivialGrid, 3, make_binary_word("[1,1,0,0]") );
     expected_result_arr[1] = new GridCell( theTrivialGrid, 3, make_binary_word("[1,1,1,0,0,0]") );
     expected_result_arr[2] = new GridCell( theTrivialGrid, 3, make_binary_word("[1,1,1,0,1,1]") );
     ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theThreeCellSubPavingH3, 3 );
-    ARIADNE_CLEAN_TEST__VECTOR( expected_result_arr );
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
 
     ARIADNE_PRINT_TEST_COMMENT("The result after remove: ");
     theTwoCellPavingH2.remove( theThreeCellSubPavingH3 );
     expected_result_arr[0] = new GridCell( theTrivialGrid, 3, make_binary_word("[1,1,1,0,0,1]") );
     expected_result_arr[1] = new GridCell( theTrivialGrid, 3, make_binary_word("[1,1,1,0,1,0]") );
     ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theTwoCellPavingH2, 2 );
-    ARIADNE_CLEAN_TEST__VECTOR( expected_result_arr );
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
     
     //TODO: Test the case when the GridTreeSet has primary cell of the level 3
     //    The GridTreeSubset is at level 1 and it's primary cell is at level 2
@@ -1137,7 +1292,7 @@ void test_remove_two() {
     expected_result_arr[0] = new GridCell( theTrivialGrid, theHeightOne, make_binary_word("00") );
     expected_result_arr[1] = new GridCell( theTrivialGrid, theHeightOne, make_binary_word("1110") );
     ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theSet01, 2 );
-    ARIADNE_CLEAN_TEST__VECTOR( expected_result_arr );
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
     
     ARIADNE_PRINT_TEST_CASE_TITLE("Remove a GridCell (p.c. height=0) form a GridTreeSet(p.c. height=1): The cell does not intersect the set.");
     GridCell lowerPrimaryCellNoIntersection( theTrivialGrid, theHeightZero, make_binary_word("00") );
@@ -1145,14 +1300,14 @@ void test_remove_two() {
     expected_result_arr[0] = new GridCell( theTrivialGrid, theHeightOne, make_binary_word("00") );
     expected_result_arr[1] = new GridCell( theTrivialGrid, theHeightOne, make_binary_word("111") );
     ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theSet02, 2 );
-    ARIADNE_CLEAN_TEST__VECTOR( expected_result_arr );
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
     
     ARIADNE_PRINT_TEST_CASE_TITLE("Remove a GridCell (p.c. height=0) form a GridTreeSet(p.c. height=1): The cell overlaps the set.");
     GridCell lowerPrimaryCellIntersection( theTrivialGrid, theHeightZero, BinaryWord() );
     theSet03.remove( lowerPrimaryCellIntersection );
     expected_result_arr[0] = new GridCell( theTrivialGrid, theHeightOne, make_binary_word("00") );
     ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theSet03, 1 );
-    ARIADNE_CLEAN_TEST__VECTOR( expected_result_arr );
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
     
     ARIADNE_PRINT_TEST_CASE_TITLE("Remove a GridCell (p.c. height=2) form a GridTreeSet(p.c. height=1): The cell is a subset.");
     GridCell higherPrimaryCellSubset( theTrivialGrid, theHeightTwo, make_binary_word("000011") );
@@ -1161,7 +1316,7 @@ void test_remove_two() {
     expected_result_arr[1] = new GridCell( theTrivialGrid, theHeightTwo, make_binary_word("000010") );
     expected_result_arr[2] = new GridCell( theTrivialGrid, theHeightTwo, make_binary_word("00111") );
     ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theSet04, 3 );
-    ARIADNE_CLEAN_TEST__VECTOR( expected_result_arr );
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
     
     ARIADNE_PRINT_TEST_CASE_TITLE("Remove a GridCell (p.c. height=2) form a GridTreeSet(p.c. height=1): The cell does not intersect the set.");
     GridCell higherPrimaryCellNoIntersection( theTrivialGrid, theHeightTwo, make_binary_word("010") );
@@ -1169,14 +1324,14 @@ void test_remove_two() {
     expected_result_arr[0] = new GridCell( theTrivialGrid, theHeightTwo, make_binary_word("0000") );
     expected_result_arr[1] = new GridCell( theTrivialGrid, theHeightTwo, make_binary_word("00111") );
     ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theSet05, 2 );
-    ARIADNE_CLEAN_TEST__VECTOR( expected_result_arr );
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
     
     ARIADNE_PRINT_TEST_CASE_TITLE("Remove a GridCell (p.c. height=2) form a GridTreeSet(p.c. height=1): The cell overlaps the set.");
     GridCell higherPrimaryCellIntersection( theTrivialGrid, theHeightTwo, make_binary_word("0011") );
     theSet06.remove( higherPrimaryCellIntersection );
     expected_result_arr[0] = new GridCell( theTrivialGrid, theHeightTwo, make_binary_word("0000") );
     ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theSet06, 1 );
-    ARIADNE_CLEAN_TEST__VECTOR( expected_result_arr );
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
 }
 
 void test_cell_subset_subset() {
@@ -2027,51 +2182,32 @@ void test_subset_superset_box(){
 
 int main() {
     
-    test_binary_tree();
-    
-    test_grid_paving_cursor();
-
-    test_grid_paving_const_iterator();
-
-    test_grid_paving_cell();
-    
-    test_grid_sub_paving();
-    
-    test_grid_paving();
-    
-    test_adjoin_operation_one();
-    
-    test_adjoin_operation_two();
-    
-    test_adjoin_operation_three();
-
-    test_adjoin_outer_approximation_operation();
-
-    test_restrict();
-    
-    test_remove_one();
-    
-    test_remove_two();
-    
-    test_cell_subset_subset();
-    
-    test_subsets_join();
-    
-    test_subsets_intersection();
-    
-    test_subsets_difference();
-    
-    test_cell_overlap_subset();
-    
-    test_subset_overlap_subset();
-    
-    test_subset_subset_subset();
-    
-    test_subset_overlaps_box();
-    
-    test_subset_subset_box();
-    
-    test_subset_superset_box();
+    //test_binary_tree();
+    //test_grid_paving_cursor();
+    //test_grid_paving_const_iterator();
+    //test_grid_paving_cell();
+    //test_grid_sub_paving();
+    //test_grid_paving();
+    //test_adjoin_operation_one();
+    //test_adjoin_operation_two();
+    //test_adjoin_operation_three();
+    //test_adjoin_outer_approximation_operation();
+    test_adjoin_inner_approximation_operation_one();
+    test_adjoin_inner_approximation_operation_two();
+    test_adjoin_inner_approximation_operation_three();
+    //test_restrict();
+    //test_remove_one();
+    //test_remove_two();
+    //test_cell_subset_subset();
+    //test_subsets_join();
+    //test_subsets_intersection();
+    //test_subsets_difference();
+    //test_cell_overlap_subset();
+    //test_subset_overlap_subset();
+    //test_subset_subset_subset();
+    //test_subset_overlaps_box();
+    //test_subset_subset_box();
+    //test_subset_superset_box();
     
     return ARIADNE_TEST_FAILURES;
 }

@@ -1265,10 +1265,10 @@ void GridTreeSet::adjoin_outer_approximation( BinaryTreeNode * pBinaryTreeNode, 
     GridCell theCurrentCell( GridTreeSubset::_theGridCell.grid(), primary_cell_height, *pPath );
 
     const OpenSetInterface* pOpenSet=dynamic_cast<const OpenSetInterface*>(static_cast<const SetInterfaceBase*>(&theSet));
-
+    
     if( bool( theSet.disjoint( theCurrentCell.box() ) ) ) {
-        //DO NOTHING: We are in the node's representation in the original space is disjoint
-        //            from pSet and thus there will be nothing added to this cell.
+        //DO NOTHING: We are in the node whoes representation in the original space is
+        //disjoint from pSet and thus there will be nothing added to this cell.
     } else if( pOpenSet && bool( pOpenSet->superset( theCurrentCell.box() ) ) ) {
         pBinaryTreeNode->make_leaf(true);
     } else {
@@ -1321,10 +1321,13 @@ void GridTreeSet::adjoin_lower_approximation( BinaryTreeNode * pBinaryTreeNode, 
 
     if( bool( theSet.overlaps( theCurrentCell.box() ) ) ) {
         if( pPath->size() >= max_mince_depth ) {
-            //We should not mince any further.
-            //If the cell is not a leaf, then some subset is enabled,
-            //so the lower approximation does not add any information.
-            //If the cell is a leaf, we mark it as enabled.
+            //We should not mince any further. If the cell is not a leaf, then some subset is enabled, so the
+            //lower approximation does not add any information. If the cell is a leaf, we mark it as enabled.
+            //TODO: Pieter, according to the implementation, if a node is not a leaf, it does not mean that
+            //it has enabled children! To test for this one has to call pBinaryTreeNode->has_enabled().
+            //For a robust implementation I suggest to make the node an enabled leaf and then to mince it to the depth 
+            //(max_mince_depth - pPath->size()). Similar to how you approch the case of adjoining lower approximation
+            //of the OpenSetInterface set. Yet, there the current implementation also seems to be flawed.
             if( pBinaryTreeNode->is_leaf() ) {
                 pBinaryTreeNode->set_enabled(); 
             }
@@ -1349,10 +1352,15 @@ void GridTreeSet::adjoin_lower_approximation( BinaryTreeNode * pBinaryTreeNode, 
     
 void GridTreeSet::adjoin_lower_approximation( BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
                                               const uint max_mince_depth,  const OpenSetInterface& theSet, BinaryWord * pPath ){
-    //Compute the cell correspomding to the current node
+    //Compute the cell corresponding to the current node
     GridCell theCurrentCell( GridTreeSubset::_theGridCell.grid(), primary_cell_height, *pPath );
-
+    
     if( bool( theSet.superset( theCurrentCell.box() ) ) ) {
+        //TODO: Pieter, do not you need to make the given node enabled before mincing it? Otherwise, it
+        //can happen that you will mince disabled nodes. It seems to me that the given node belongs to
+        //the lower approximation of theSet, so the node added to this set and so it has to be enabled.
+        //TODO: Pieter, why do you call mince on the given set instead of calling it on the node? This seems
+        //to be incorrect, especially because you are mincing to the depth max_mince_depth - pPath->size().
         this->mince( max_mince_depth - pPath->size() );
     } else if ( bool( theSet.overlaps( theCurrentCell.box() ) ) ) {
         if( pPath->size() >= max_mince_depth ) {
@@ -1365,14 +1373,13 @@ void GridTreeSet::adjoin_lower_approximation( BinaryTreeNode * pBinaryTreeNode, 
             }
         } else {
             //Since we still do not have the finest cells for the outer approximation of theSet, we split 
-            if( pBinaryTreeNode->is_leaf() ) { 
-                pBinaryTreeNode->split();
-            }
+            pBinaryTreeNode->split();  //NOTE: splitting a non-leaf node does not do any harm
+            
             //Check the left branch
             pPath->push_back(false);
             adjoin_lower_approximation( pBinaryTreeNode->left_node(), primary_cell_height, max_mince_depth, theSet, pPath );
             //Check the right branch
-            pPath->push_back(false);
+            pPath->push_back(true);
             adjoin_lower_approximation( pBinaryTreeNode->right_node(), primary_cell_height, max_mince_depth, theSet, pPath );
         }        
     }
@@ -1414,10 +1421,6 @@ void GridTreeSet::adjoin_outer_approximation( const CompactSetInterface& theSet,
     }
 }
 
-// FIXME: The following three methods should adjoin an approximation at the given height and depth.
-// The use of GridCell(...) is a hack. In essence it would be better to align the binary tree with
-// the heightdepth and then do things like in:
-//    adjoin_lower_approximation( const OvertSetInterface& , const Box& , const uint  )
 // TODO:Think of another representation in terms of covers but not pavings, then the implementation
 // will be different, this is why, for now we do not fix these things.
 void GridTreeSet::adjoin_lower_approximation( const LocatedSetInterface& theSet, const uint depth ) {
@@ -1425,23 +1428,12 @@ void GridTreeSet::adjoin_lower_approximation( const LocatedSetInterface& theSet,
 }
 
 void GridTreeSet::adjoin_lower_approximation( const OvertSetInterface& theSet, const uint height, const uint depth ) {
-    this->adjoin_lower_approximation( theSet, GridCell( this->grid(), height, BinaryWord()).box(),depth );
-}
-
-void GridTreeSet::adjoin_lower_approximation( const OvertSetInterface& theSet, const Box& theBoundingBox, const uint depth ) {
-
     Grid theGrid( this->cell().grid() );
     ARIADNE_ASSERT( theSet.dimension() == this->cell().dimension() );
-                  
-    //1. Compute the smallest GridCell (corresponding to the primary cell)
-    //   that encloses the theSet (after it is mapped onto theGrid).
-    const GridCell theOverApproxCell = over_approximation( theBoundingBox, theGrid );
-    //Compute the height of the primary cell for the outer approximation stepping up by the number of dimensions
-    const uint outer_approx_primary_cell_height = theOverApproxCell.height() + theGrid.dimension();
-
-    //2. Align this paving and paving enclosing the provided set
+    
+    //Align this paving and paving at the given height
     bool has_stopped = false;
-    BinaryTreeNode* pBinaryTreeNode = align_with_cell( outer_approx_primary_cell_height, true, false, has_stopped );
+    BinaryTreeNode* pBinaryTreeNode = align_with_cell( height, true, false, has_stopped );
         
     //If the lower aproximation of the bounding box of the provided set is enclosed
     //in an enabled cell of this paving, then there is nothing to be done. The latter
@@ -1450,7 +1442,7 @@ void GridTreeSet::adjoin_lower_approximation( const OvertSetInterface& theSet, c
         //Compute the depth to which we must mince the outer approximation of the adjoining set.
         //This depth is relative to the root of the constructed paving, which has been alligned
         //with the binary tree node pBinaryTreeNode.
-        const uint max_mince_depth = outer_approx_primary_cell_height * theGrid.dimension() + depth;
+        const uint max_mince_depth = height * theGrid.dimension() + depth;
             
         //Adjoin the outer approximation, computing it on the fly.
         BinaryWord * pEmptyPath = new BinaryWord(); 
@@ -1459,20 +1451,119 @@ void GridTreeSet::adjoin_lower_approximation( const OvertSetInterface& theSet, c
         //const LocatedSetInterface* theLocatedVersionOfSet = dynamic_cast<const LocatedSetInterface*>(&theSet);
         const OvertSetInterface* theOvertVersionOfSet = dynamic_cast<const OvertSetInterface*>(&theSet);
         if( theOpenVersionOfSet ) {
-            adjoin_lower_approximation( pBinaryTreeNode, outer_approx_primary_cell_height, max_mince_depth, *theOpenVersionOfSet, pEmptyPath );
+            adjoin_lower_approximation( pBinaryTreeNode, height, max_mince_depth, *theOpenVersionOfSet, pEmptyPath );
         } else {
-            adjoin_lower_approximation( pBinaryTreeNode, outer_approx_primary_cell_height, max_mince_depth, *theOvertVersionOfSet, pEmptyPath );
+            adjoin_lower_approximation( pBinaryTreeNode, height, max_mince_depth, *theOvertVersionOfSet, pEmptyPath );
         }
         delete pEmptyPath;
     }
 }
 
+void GridTreeSet::adjoin_lower_approximation( const OvertSetInterface& theSet, const Box& theBoundingBox, const uint depth ) {
+    Grid theGrid( this->cell().grid() );
+    ARIADNE_ASSERT( theSet.dimension() == this->cell().dimension() );
+    ARIADNE_ASSERT( theBoundingBox.dimension() == this->cell().dimension() );
+    
+    //Compute the smallest the primary cell that encloses the theSet (after it is mapped onto theGrid).
+    const GridCell theOverApproxCell = over_approximation( theBoundingBox, theGrid );
+    //Compute the height of the primary cell for the outer approximation stepping
+    //up by the number of dimensions, the latter ensures that theSet is a proper
+    //subset of the primary cell at the computed height.
+    const uint height = theOverApproxCell.height() + theGrid.dimension();
+    
+    //Adjoin the lower approximation with the bounding cell
+    //being the primary cell at the given height
+    adjoin_lower_approximation( theSet, height, depth );
+}
+
+void GridTreeSet::adjoin_inner_approximation( BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
+                                              const uint max_mince_depth, const OpenSetInterface& theSet, BinaryWord * pPath ) {
+    //Compute the cell corresponding to the current node
+    GridCell theCurrentCell( GridTreeSubset::_theGridCell.grid(), primary_cell_height, *pPath );
+
+    if( ! pBinaryTreeNode->is_enabled() ) {
+        //If this it is not an enabled leaf node then we can add something to it.
+        if( bool( theSet.superset( theCurrentCell.box() ) ) ) {
+            //If this node's box is a subset of theSet then it belongs to the inner approximation
+            //Thus we need to make it an enabled leaf and then do the mincing to the maximum depth
+            //TODO: (Ask Pieter) The latter mincing might be unnecessary, since we already have this
+            //node sorted out. Also, if the tree rooted to this node has enabled leaves do we improve
+            //inner approximation by turning the entire tree into a fully enabled tree?
+            pBinaryTreeNode->make_leaf( true );
+            pBinaryTreeNode->mince( max_mince_depth - pPath->size() );
+        } else if ( bool( theSet.overlaps( theCurrentCell.box() ) ) ) {
+            //If theSet overlaps with the box corresponding to the given node in the original
+            //space, then there might be something to add from the inner approximation of theSet.
+            if( pPath->size() >= max_mince_depth ) {
+                //DO NOTHING: Since it is the maximum depth to which we were allowed to mince
+                //and we know that the node's box only overlaps with theSet but is not it's
+                //subset we have to exclude it from the inner approximation of theSet.
+            } else {
+                //Since we still do not have the finest cells for the outer approximation of theSet, we split 
+                pBinaryTreeNode->split();  //NOTE: splitting a non-leaf node does not do any harm
+                
+                //Check the left branch
+                pPath->push_back(false);
+                adjoin_inner_approximation( pBinaryTreeNode->left_node(), primary_cell_height, max_mince_depth, theSet, pPath );
+                //Check the right branch
+                pPath->push_back(true);
+                adjoin_inner_approximation( pBinaryTreeNode->right_node(), primary_cell_height, max_mince_depth, theSet, pPath );
+            }
+        } else {
+            //DO NOTHING: the node's box is disjoint from theSet and thus it or it's
+            //sub nodes can not be the part of the inner approximation of theSet.
+        }
+    } else {
+        //DO NOTHING: If this is an enabled leaf node we are in, then there is nothing to add to it
+        //TODO: We could mince the node until the depth (max_mince_depth - pPath->size()) but I do
+        //not know if it makes any sence to do this, since this does not change the result.
+    }
+    
+    //Return to the previous level, since the initial call is made
+    //with the empty word, we check that it is not yet empty.
+    if( pPath->size() > 0 ) {
+        pPath->pop_back();
+    }
+}
+
 void GridTreeSet::adjoin_inner_approximation( const OpenSetInterface& theSet, const uint height, const uint depth ) {
-    throw NotImplemented(__PRETTY_FUNCTION__);
+    Grid theGrid( this->cell().grid() );
+    ARIADNE_ASSERT( theSet.dimension() == this->cell().dimension() );
+
+    //Align this paving and paving at the given height
+    bool has_stopped = false;
+    BinaryTreeNode* pBinaryTreeNode = align_with_cell( height, true, false, has_stopped );
+        
+    //If the inner aproximation of the bounding box of the provided set is enclosed
+    //in an enabled cell of this paving, then there is nothing to be done. The latter
+    //is because adjoining the inner approx of the set will not change this paving.
+    if( ! has_stopped ){
+        //Compute the depth to which we must mince the inner approximation of the adjoining set.
+        //This depth is relative to the root of the constructed paving, which has been alligned
+        //with the binary tree node pBinaryTreeNode.
+        const uint max_mince_depth = height * theGrid.dimension() + depth;
+        
+        //Adjoin the inner approximation, computing it on the fly.
+        BinaryWord * pEmptyPath = new BinaryWord(); 
+        adjoin_inner_approximation( pBinaryTreeNode, height, max_mince_depth, theSet, pEmptyPath );
+        delete pEmptyPath;
+    }
 }
 
 void GridTreeSet::adjoin_inner_approximation( const OpenSetInterface& theSet, const Box& theBoundingBox, const uint depth ) {
-    throw NotImplemented(__PRETTY_FUNCTION__);
+    Grid theGrid( this->cell().grid() );
+    ARIADNE_ASSERT( theSet.dimension() == this->cell().dimension() );
+    ARIADNE_ASSERT( theBoundingBox.dimension() == this->cell().dimension() );
+    
+    //Compute the smallest the primary cell that encloses the theSet (after it is mapped onto theGrid).
+    const GridCell theOverApproxCell = over_approximation( theBoundingBox, theGrid );
+    //Compute the height of the smallest primary cell that encloses the box
+    //Note that, since we will need to adjoin inner approximation bounded by
+    //the theBoundingBox, it is enough to take this cell's height and not to
+    //go higher. Remember that the inner approximations consists of the cells
+    //that are subsets of the set theSet Adjoin the inner approximation with
+    //the bounding cell being the primary cell at the given height.
+    adjoin_inner_approximation( theSet, theOverApproxCell.height(), depth );
 }
 
 void GridTreeSet::restrict_to_lower( const GridTreeSubset& theOtherSubPaving ){
@@ -1713,7 +1804,7 @@ void GridTreeSet::restrict_to_height( const uint theHeight ) {
 
 /*************************************FRIENDS OF GridCell*****************************************/
     
-GridCell over_approximation(const Box& theBox, const Grid& theGrid) {
+GridCell over_approximation( const Box& theBox, const Grid& theGrid) {
     Box theDyadicBox( theBox.size() );
     //Convert the box to theGrid coordinates
     for( uint i = 0; i != theBox.size(); ++i ) {

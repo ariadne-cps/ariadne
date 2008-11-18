@@ -832,8 +832,8 @@ class GridTreeSet : public GridTreeSubset {
      *  This method is recursive, the parameter \a pPath defines the path to the current node pBinaryTreeNode
      *  from the root node in recursive calls, thus the initial call for this method must be done with an empty word.
      */
-    template<class Set> void adjoin_inner_approximation( BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
-                                                         const uint max_mince_depth, const Set& theSet, BinaryWord * pPath );
+    void adjoin_inner_approximation( BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
+                                     const uint max_mince_depth, const OpenSetInterface& theSet, BinaryWord * pPath );
 
     /*! \brief This method adjoins the lower approximation of \a theSet (computed on the fly) to this paving.
      *  We use the primary cell (enclosed in this paving) of height \a primary_cell_hight and represented 
@@ -1003,10 +1003,13 @@ class GridTreeSet : public GridTreeSubset {
     //@{
     //! \name Geometric Approximation
 
-    /*! \brief Adjoin an over approximation to box, computing to the given depth. \precondition Precondition: The box must have nonempty interior. */
+    /*! \brief Adjoin an over approximation to box, computing to the given depth.
+     *  \precondition Precondition: The box must have nonempty interior.
+     */
     void adjoin_over_approximation( const Box& theBox, const uint depth );
+    
     /*! \brief Adjoin an outer approximation to a given set, computing to the given depth.
-     *! This method computes an outer approximation for the set \a theSet on the grid \a theGrid.
+     *  This method computes an outer approximation for the set \a theSet on the grid \a theGrid.
      *  Note that, the depth is the total number of subdivisions (in all dimensions) of the unit
      *  cell of the grid. This method does the followig:
      * 1. Computes the smallest Primary cell enclosing \a theSet
@@ -1018,23 +1021,28 @@ class GridTreeSet : public GridTreeSubset {
     void adjoin_outer_approximation( const CompactSetInterface& theSet, const uint depth );
             
     /*! \brief Adjoin a lower approximation to a given set, computing to the given height and depth. 
-     *   A lower approximation comprises all cells intersecting a given set. */
+     *   A lower approximation comprises all cells intersecting a given set.
+     */
     void adjoin_lower_approximation( const OvertSetInterface& theSet, const uint height, const uint depth );
 
     /*! \brief Adjoin a lower approximation to a given set restricted to the given bounding box, computing to the given depth. 
-     *   A lower approximation comprises all cells intersecting a given set. */
+     *   A lower approximation comprises all cells intersecting a given set.
+     */
     void adjoin_lower_approximation( const OvertSetInterface& theSet, const Box& bounding_box, const uint depth );
 
     /*! \brief Adjoin a lower approximation to a given set, computing to the given depth. 
-     *   A lower approximation comprises all cells intersecting a given set. */
+     *   A lower approximation comprises all cells intersecting a given set.
+     */
     void adjoin_lower_approximation( const LocatedSetInterface& theSet, const uint depth );
 
     /*! \brief Adjoin an inner approximation to a given set, computing to the given height and depth. 
-     *   A lower approximation comprises all cells intersecting a given set. */
+     *   An inner approximation comprises all cells that are sub-cells of the given set.
+     */
     void adjoin_inner_approximation( const OpenSetInterface& theSet, const uint height, const uint depth );
 
     /*! \brief Adjoin an inner approximation to a given set restricted to the given bounding box, computing to the given depth. 
-     *   A lower approximation comprises all cells intersecting a given set. */
+     *   An inner approximation comprises all cells that are sub-cells of the given set.
+     */
     void adjoin_inner_approximation( const OpenSetInterface& theSet, const Box& bounding_box, const uint depth );
 
     //@}

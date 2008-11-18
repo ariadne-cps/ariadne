@@ -115,13 +115,13 @@ class HybridReachabilityAnalyser
                                             const HybridOvertSetInterface& initial_set, 
                                             const HybridTime& time) const;
   
-    /*! \brief Compute a lower-approximation to the reachable set of \a system starting in \a initial_set up to \a time \a. */
+    /*! \brief Compute a lower-approximation to the reachable set of \a system starting in \a initial_set up to \a time. */
     virtual HybridGridTreeSet*
     lower_reach(const HybridAutomaton& system, 
                 const HybridOvertSetInterface& initial_set, 
                 const HybridTime& time) const;
   
-    /*! \brief Compute a lower-approximation to the reachable and evolved sets of \a system starting in \a initial_set up to \a time \a. */
+    /*! \brief Compute a lower-approximation to the reachable and evolved sets of \a system starting in \a initial_set up to \a time. */
     virtual std::pair<HybridGridTreeSet*,HybridGridTreeSet*>
     lower_reach_evolve(const HybridAutomaton& system, 
                        const HybridOvertSetInterface& initial_set, 

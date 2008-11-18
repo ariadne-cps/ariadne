@@ -56,13 +56,43 @@ make_matrix(const boost::python::object& obj)
   return Aptr;
 }
 
+template<class X0, class X1>
+Matrix<X0> __neg__(const Matrix<X1>& A1) {
+    return -A1;
+}
+
 template<class X0, class X1, class X2>
-Vector<X0> __mul__(const Matrix<X1>& A1, const Vector<X2>& v2) {
+Matrix<X0> __add__(const Matrix<X1>& A1, const X2& A2) {
+    return A1+A2;
+}
+
+template<class X0, class X1, class X2>
+Matrix<X0> __sub__(const Matrix<X1>& A1, const X2& A2) {
+    return A1-A2;
+}
+
+template<class X0, class X1, class X2>
+Matrix<X0> __mul__(const Matrix<X1>& A1, const X2& s2) {
+    return A1*s2;
+}
+
+template<class X0, class X1, class X2>
+Matrix<X0> __div__(const Matrix<X1>& A1, const X2& s2) {
+    return A1/s2;
+}
+
+template<class X0, class X1, class X2>
+Matrix<X0> __mul__(const X1& s1, const Matrix<X2>& A2) {
+    return s1*A2;
+}
+
+template<class X0, class X1, class X2>
+Vector<X0> __mvmul__(const Matrix<X1>& A1, const Vector<X2>& v2) {
     return prod(A1,v2); 
 }
 
 template<class X0, class X1, class X2>
-Matrix<X0> __mul__(const Matrix<X1>& A1, const Matrix<X2>& A2) {
+Matrix<X0> __mmmul__(const Matrix<X1>& A1, const Matrix<X2>& A2) {
     return prod(A1,A2); 
 }
 
@@ -112,17 +142,14 @@ void export_matrix()
     matrix_class.def("__setitem__", (void(Matrix<X>::*)(size_t,size_t,const double&)) &Matrix<X>::set);
     matrix_class.def("__setitem__", (void(Matrix<X>::*)(size_t,size_t,const X&)) &Matrix<X>::set);
     matrix_class.def("__getitem__", &Matrix<X>::get, return_value_policy<copy_const_reference>());
-    matrix_class.def(-self);        // __neg__
-    matrix_class.def(self + self);  // __add__
-    matrix_class.def(self - self);  // __sub__
-    matrix_class.def(X() * self);  // __mul__
-    //matrix_class.def(self * X());  // __mul__
-    matrix_class.def(self / X());  // __div__
-    matrix_class.def(double() * self);  // __mul__
-    //matrix_class.def(self * double());  // __mul__
-    matrix_class.def(self / double());  // __div__
-    matrix_class.def("__mul__",(Vector<X>(*)(const Matrix<X>&,const Vector<X>&))&__mul__);
-    matrix_class.def("__mul__",(Matrix<X>(*)(const Matrix<X>&,const Matrix<X>&))&__mul__);
+    matrix_class.def("__neg__", (Matrix<X>(*)(const Matrix<X>&)) &__neg__);
+    matrix_class.def("__add__", (Matrix<X>(*)(const Matrix<X>&,const Matrix<X>&)) &__add__);
+    matrix_class.def("__sub__", (Matrix<X>(*)(const Matrix<X>&,const Matrix<X>&)) &__sub__);
+    matrix_class.def("__mul__", (Matrix<X>(*)(const Matrix<X>&,const X&)) &__mul__);
+    matrix_class.def("__rmul__", (Matrix<X>(*)(const X&,const Matrix<X>&)) &__mul__);
+    matrix_class.def("__div__", (Matrix<X>(*)(const Matrix<X>&,const X&)) &__div__);
+    matrix_class.def("__mul__",(Vector<X>(*)(const Matrix<X>&,const Vector<X>&))&__mvmul__);
+    matrix_class.def("__mul__",(Matrix<X>(*)(const Matrix<X>&,const Matrix<X>&))&__mmmul__);
     //matrix_class.def("inverse", &inverse<X>);
     //matrix_class.def("determinant", &Matrix::determinant);
     //matrix_class.def("transpose", &Matrix::transpose);

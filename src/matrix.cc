@@ -55,18 +55,49 @@ lu_inverse(const Matrix<X>& M)
     typedef X RealType;
     assert(M.row_size()==M.column_size());
     
-    size_t n=M.row_size();
+    size_t m=M.row_size();
+    size_t n=M.column_size();
     Matrix<RealType> A=M;
     Matrix<RealType> B=Matrix<RealType>::identity(n);
     
+    // Array of row pivots. The value p[i] gives the row
+    // swapped with the ith row in the ith stage.
+    array<size_t> p(m);
+    for(size_t k=0; k!=m; ++k) { p[k]=k; }
+   
 
-    for(size_t k=0; k!=n; ++k) {
-        // FIXME: Use column pivoting
-        assert(A[k][k]!=0);
+    for(size_t k=0; k!=std::min(m,n); ++k) {
+        // Choose a pivot row
+        size_t iamax=k;
+        X amax=0;
+        for(size_t i=k; i!=m; ++i) {
+            if(abs(A[i][k])>amax) {
+                iamax=i;
+                amax=abs(A[i][k]);
+            }
+        }
+        
+        // Set pivot row
+        size_t i=iamax;
+        p[k]=i;
+        
+        // Swap rows of both A and B
+        for(size_t j=k; j!=n; ++j) {
+            X tmp=A[k][j];
+            A[k][j]=A[i][j];
+            A[i][j]=tmp;
+        }
+        
+        for(size_t j=0; j!=n; ++j) {
+            X tmp=B[k][j];
+            B[k][j]=B[i][j];
+            B[i][j]=tmp;
+        }
+
         RealType r  = 1/A[k][k];
         for(size_t i=k+1; i!=n; ++i) {
             RealType s=A[i][k] * r;
-            for(size_t j=0; j<=k; ++j) {
+            for(size_t j=0; j!=n; ++j) {
                 B[i][j] -= s * B[k][j];
             }
             for(size_t j=k+1; j!=n; ++j) {
@@ -74,7 +105,7 @@ lu_inverse(const Matrix<X>& M)
             }
             A[i][k] = 0;
         }
-        for(size_t j=0; j<=k; ++j) {
+        for(size_t j=0; j!=n; ++j) {
             B[k][j] *= r;
         }
         for(size_t j=k+1; j!=n; ++j) {
@@ -83,6 +114,7 @@ lu_inverse(const Matrix<X>& M)
         A[k][k] = 1;
     }
 
+    // Backsubstitute to find inverse
     for(size_t k=n; k!=0; ) {
         --k;
         for(size_t i=0; i!=k; ++i) {
@@ -93,7 +125,9 @@ lu_inverse(const Matrix<X>& M)
             A[i][k] = 0;
         }
     }
-    
+
+    // No need to repivot!
+
     return B;
 }
 

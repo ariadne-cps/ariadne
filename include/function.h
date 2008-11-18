@@ -160,7 +160,7 @@ class ProjectionFunction
     //! Construct the identity function in dimension \a n.
     ProjectionFunction(uint n) 
         : FunctionBase<ProjectionTransformation>(Range(0,n),n) { }
-    //! Construct the projection functions which maps variables \f$x_i,\ldots,x_{i+m-1}\f$ in $\R^n\f$ to \f$x'_0\ldots x'_{m-1}\f$.
+    //! Construct the projection functions which maps variables \f$x_i,\ldots,x_{i+m-1}\f$ in \f$\R^n\f$ to \f$x'_0\ldots x'_{m-1}\f$.
     ProjectionFunction(uint m, uint n, uint i) 
         : FunctionBase<ProjectionTransformation>(m,n,i) { }
     //! Construct a projection function based on the array \a p.

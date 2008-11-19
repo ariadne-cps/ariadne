@@ -66,8 +66,8 @@ typedef unsigned short dimension_type;
 class BinaryTreeNode;
 class Grid;
 class GridCell;
-class GridTreeSet;
 class GridTreeSubset;
+class GridTreeSet;
 
 class GridTreeCursor;
 class GridTreeConstIterator;
@@ -312,7 +312,7 @@ class BinaryTreeNode {
 
     /*! \brief Returns the depth of the sub-tree rooted to the given node, i.e. the depth of it's deepest node */
     uint depth() const;
-            
+    
     /*! \brief Allows to compare to binaty tree nodes */
     bool operator==(const BinaryTreeNode & otherNode ) const;
             
@@ -355,8 +355,13 @@ class BinaryTreeNode {
     //@}
             
     //@{
-    //! \name Operations
-            
+    //! \name
+    
+    /*! \brief Allows to assign one binary tree node to the other, this is done by copying
+     * the nodes value and the sub-trees. The sub-trees of this node are deallocated.
+     */
+    BinaryTreeNode& operator=(const BinaryTreeNode & otherNode );
+    
     /*! \brief Copy all the data (including the sub-nodes) from the node pointed by \a pOtherNode into the given node.
      * Note that here we will create copies of the sub nodes, and NOT just copy pointers to them!
      */
@@ -518,7 +523,10 @@ class GridCell {
 
     /*! \brief The equality operator. */
     bool operator==(const GridCell& otherCell) const;
-
+    
+    /*! \brief Allows to assign one GridCell to another */
+    GridCell& operator=( const GridCell & otherNode );
+    
     /*! \brief A total order on cells on the same grid, by height and word prefix. */
     bool operator<(const GridCell& otherCell) const;
 
@@ -660,6 +668,9 @@ class GridTreeSubset {
      * of the corresponding GridTreeSet.
      */
     GridTreeSubset( const Grid& theGrid, const uint theHeight, const BinaryWord& theWord, BinaryTreeNode * pRootTreeNode );
+    
+    /*! \brief A copy constructor that only copies the pointer to the root of the binary tree and the cell */
+    GridTreeSubset( const GridTreeSubset &otherSubset);
             
     //@}
 
@@ -768,7 +779,9 @@ class GridTreeSubset {
 
     //@{
     //! \name Conversions 
-    /*  PIETER: These conversions are not strictly necessary, but may be useful. */
+
+    /*! \brief An assignment operator that only copies the pointer to the root of the binary tree and the cell */
+    GridTreeSubset& operator=( const GridTreeSubset &otherSubset);
             
     /*! \brief Convert to a list of ordinary boxes, unrelated to the grid. */
     operator ListSet<Box>() const;
@@ -878,27 +891,26 @@ class GridTreeSet : public GridTreeSubset {
     //! \name Constructors
             
     /*! \brief Create a %GridTreeSet based on zero dimensions. 
-     *  
      *  This constructor is needed to use the Boost Serialization library.
      */
     GridTreeSet( );
             
     /*! \brief The new root node can only be constructed from the existing tree node.
-     * Here, \a pRootTreeNode is not copied, we simply store its pointer inside this class.
-     * Note that, \a pRootTreeNode should correspond to the root node. \a theHeight defines
-     * the height of the primary root cell corresponding to the \a pRootTreeNode node.
+     *  Here, \a pRootTreeNode is not copied, we simply store its pointer inside this class.
+     *  Note that, \a pRootTreeNode should correspond to the root node. \a theHeight defines
+     *  the height of the primary root cell corresponding to the \a pRootTreeNode node.
      */
     GridTreeSet( const Grid& theGrid, const uint theHeight, BinaryTreeNode * pRootTreeNode );
             
     /*! \brief The copy constructor that actually copies all the data,
-     * including the paving tree. I.e. the new copy of the tree is created
+     *  including the paving tree. I.e. the new copy of the tree is created.
      */
     GridTreeSet( const GridTreeSet & theGridTreeSet );
 
     /*! A simple constructor that creates the [0, 1]*...*[0, 1] cell in the
-     * \a theDimension - dimensional space. Here we assume that we have a non scaling
-     * grid with no shift of the coordinates. I.e. Grid._data._origin = {0, ..., 0}
-     * and Grid._data._lengths = {1, ..., 1}. If enable == true then the cell is enabled
+     *  \a theDimension - dimensional space. Here we assume that we have a non scaling
+     *  grid with no shift of the coordinates. I.e. Grid._data._origin = {0, ..., 0}
+     *  and Grid._data._lengths = {1, ..., 1}. If enable == true then the cell is enabled
      */
     explicit GridTreeSet( const uint theDimension, const bool enable = false );
 
@@ -913,10 +925,10 @@ class GridTreeSet : public GridTreeSubset {
     explicit GridTreeSet( const Grid& theGrid, const Box & theBoundingBox );
             
     /*! \brief Construct the paving based on the block's coordinates, defined by: \a theLeftLowerPoint
-     * and \a theRightUpperPoint. These are the coordinates in the lattice defined by theGrid.
-     * The primary cell, enclosing the given block of cells is computed automatically and the
-     * binary tree is rooted to that cell. The \a theEnabledCells array defines the enabled/disabled
-     * 0-level cells of the block (lexicographic order).
+     *  and \a theRightUpperPoint. These are the coordinates in the lattice defined by theGrid.
+     *  The primary cell, enclosing the given block of cells is computed automatically and the
+     *  binary tree is rooted to that cell. The \a theEnabledCells array defines the enabled/disabled
+     *  0-level cells of the block (lexicographic order).
      */
     explicit GridTreeSet( const Grid& theGrid, const IndexArray theLeftLowerPoint,
                           const IndexArray theRightUpperPoint, const BooleanArray& theEnabledCells );
@@ -930,7 +942,7 @@ class GridTreeSet : public GridTreeSubset {
     //@}
 
     //@{
-    //! \name Cloning
+    //! \name Cloning/Copying
             
     /*! \brief Return a new dynamically-allocated copy of the %GridTreeSet.
      *  In this case, all the data is copied.
@@ -1096,9 +1108,16 @@ class GridTreeCursor {
     /*! \brief The constructor that accepts the subpaving to cursor on */
     GridTreeCursor(const GridTreeSubset * pSubPaving);
             
-    /*! \brief The simple copy copnstructor */
-    GridTreeCursor(const GridTreeCursor & pSubPaving);
-            
+    /*! \brief The simple copy constructor, this constructor copies the pointer to
+     *  GridTreeSubset and thus the internal stack information remains valid.
+     */
+    GridTreeCursor(const GridTreeCursor & otherCursor);
+    
+    /*! \brief This is an assignment operator that acts similar to the copy
+     *  constructor. Here we copy the pointer to underlying GridTreeSubset.
+     */
+    GridTreeCursor & operator=(const GridTreeCursor & otherCursor);
+
     /*! This destructor does not deallocate the enclosed sub paving. */
     ~GridTreeCursor();
 
@@ -1230,10 +1249,18 @@ class GridTreeConstIterator : public boost::iterator_facade< GridTreeConstIterat
      */
     explicit GridTreeConstIterator( const GridTreeSubset * pSubPaving, const tribool firstLastNone );
             
-    /*! \brief The copy constructor */
-    GridTreeConstIterator( const GridTreeConstIterator& gridPavingIter );
-            
+    /*! \brief The copy constructor that copies the current state by copying the
+     *   underlying GridTreeCursor. The latter is copied by it's copy constructor.
+     */
+    GridTreeConstIterator( const GridTreeConstIterator& theGridPavingIter );
+    
     //@}
+
+    /*! \brief An assignment operator that copies the current state by copying the
+     *  underlying GridTreeCursor. The latter is copied by it's assignment operator.
+     */
+    GridTreeConstIterator & operator=( const GridTreeConstIterator& theGridPavingIter );
+
             
     /*! This destructor only deallocates the GridTreeCursor, note that the
      * latter one does not deallocate the enclosed sub paving.
@@ -1350,10 +1377,9 @@ inline void BinaryTreeNode::set_unknown() {
 }
 
 inline void BinaryTreeNode::make_leaf(tribool is_enabled ){
-    //WARNING: No checks for NON-NULL pointer values, for performance reasons
-    delete _pLeftNode; _pLeftNode= NULL;
-    delete _pRightNode; _pRightNode= NULL;
     _isEnabled = is_enabled;
+    if( _pLeftNode != NULL ) { delete _pLeftNode; _pLeftNode= NULL; }
+    if( _pRightNode != NULL ) { delete _pRightNode; _pRightNode= NULL; }
 }
     
 inline void BinaryTreeNode::split() {
@@ -1381,17 +1407,40 @@ inline string BinaryTreeNode::node_to_string() const {
     tmp_stream << "BinaryTreeNode( isLeaf = " << is_leaf() << ", isEnabled = " << is_enabled() << ", isDisabled = " << is_disabled() << " )";
     return tmp_stream.str();
 }
+
+inline BinaryTreeNode& BinaryTreeNode::operator=( const BinaryTreeNode & otherNode ) {
+    //Copy the node value
+    _isEnabled = otherNode._isEnabled;
     
+    //Deallocate memory for the children, if any
+    if( _pLeftNode != NULL ){ delete _pLeftNode; _pLeftNode = NULL; }
+    if( _pRightNode != NULL ){ delete _pRightNode; _pRightNode = NULL; }
+    
+    //Copy the children trees from the otherNode
+    if( otherNode._pLeftNode != NULL ) { _pLeftNode = new BinaryTreeNode( * ( otherNode._pLeftNode ) ); }
+    if( otherNode._pRightNode != NULL ) { _pRightNode = new BinaryTreeNode( * ( otherNode._pRightNode ) ); }
+
+    return *this;
+}
+
 /********************************************GridTreeCursor***************************************/
     
 inline GridTreeCursor::GridTreeCursor(  ) :
     _currentStackIndex(-1), _pSubPaving(0), _theCurrentGridCell( Grid(), 0, BinaryWord() ) {
 }
 
-inline GridTreeCursor::GridTreeCursor(const GridTreeCursor & theSubPaving) :
-    _currentStackIndex(theSubPaving._currentStackIndex), _theStack(theSubPaving._theStack), 
-    _pSubPaving(theSubPaving._pSubPaving), _theCurrentGridCell(theSubPaving._theCurrentGridCell){
-    //Copy everything
+inline GridTreeCursor::GridTreeCursor(const GridTreeCursor & otherCursor) :
+    _currentStackIndex(otherCursor._currentStackIndex), _theStack(otherCursor._theStack), 
+    _pSubPaving(otherCursor._pSubPaving), _theCurrentGridCell(otherCursor._theCurrentGridCell){
+}
+
+inline GridTreeCursor& GridTreeCursor::operator=(const GridTreeCursor & otherCursor) {
+    _currentStackIndex = otherCursor._currentStackIndex;
+    _theStack = otherCursor._theStack; 
+    _pSubPaving = otherCursor._pSubPaving;
+    _theCurrentGridCell = otherCursor._theCurrentGridCell;
+    
+    return *this;
 }
 
 inline GridTreeCursor::GridTreeCursor(const GridTreeSubset * pSubPaving) : 
@@ -1566,6 +1615,13 @@ inline GridTreeConstIterator::GridTreeConstIterator( const GridTreeConstIterator
     //Copy everything
 }
 
+inline GridTreeConstIterator& GridTreeConstIterator::operator=( const GridTreeConstIterator& theGridPavingIter ){
+    _is_in_end_state = theGridPavingIter._is_in_end_state;
+    _pGridTreeCursor = theGridPavingIter._pGridTreeCursor;
+    
+    return *this;
+}
+
 inline GridTreeConstIterator::GridTreeConstIterator( const GridTreeSubset * pSubPaving, const tribool firstLastNone ):
     _pGridTreeCursor(pSubPaving) {
     if( ! indeterminate( firstLastNone ) ){
@@ -1669,12 +1725,26 @@ inline dimension_type GridCell::dimension() const {
 inline Interval GridCell::operator[](dimension_type i) const {
     return _theBox[i];
 }
+
+inline GridCell& GridCell::operator=(const GridCell & otherCell ) {
+    _theGrid = otherCell._theGrid;
+    _theHeight = otherCell._theHeight;
+    _theWord = otherCell._theWord;
+    _theBox = otherCell._theBox;
+    
+    return *this;
+}
+
     
 /********************************************GridTreeSubset******************************************/
     
 inline GridTreeSubset::GridTreeSubset( const Grid& theGrid, const uint theHeight,
-                                       const BinaryWord& theWord, BinaryTreeNode * pRootTreeNode ): _theGridCell(theGrid, theHeight, theWord) {
-    _pRootTreeNode = pRootTreeNode;
+                                       const BinaryWord& theWord, BinaryTreeNode * pRootTreeNode ) :
+                                       _pRootTreeNode(pRootTreeNode), _theGridCell(theGrid, theHeight, theWord) {
+}
+
+inline GridTreeSubset::GridTreeSubset( const GridTreeSubset &otherSubset ) : _pRootTreeNode(otherSubset._pRootTreeNode),
+                                                                             _theGridCell(otherSubset._theGridCell) {
 }
 
 inline GridTreeSubset::~GridTreeSubset() {
@@ -1804,6 +1874,13 @@ inline tribool GridTreeSubset::overlaps( const Box& theBox ) const {
     BinaryWord pathCopy( cell().word() );
     
     return GridTreeSubset::overlaps( binary_tree(), grid(), cell().height(), pathCopy, theBox );    
+}
+
+inline GridTreeSubset& GridTreeSubset::operator=( const GridTreeSubset &otherSubset) {
+    _pRootTreeNode = otherSubset._pRootTreeNode;
+    _theGridCell = otherSubset._theGridCell;
+    
+    return *this;
 }
 
 /*********************************************GridTreeSet*********************************************/

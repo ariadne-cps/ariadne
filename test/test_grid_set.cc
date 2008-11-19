@@ -2182,32 +2182,43 @@ void test_subset_superset_box(){
 
 int main() {
     
-    //test_binary_tree();
-    //test_grid_paving_cursor();
-    //test_grid_paving_const_iterator();
-    //test_grid_paving_cell();
-    //test_grid_sub_paving();
-    //test_grid_paving();
-    //test_adjoin_operation_one();
-    //test_adjoin_operation_two();
-    //test_adjoin_operation_three();
-    //test_adjoin_outer_approximation_operation();
+    test_binary_tree();
+
+    test_grid_paving_cursor();
+
+    test_grid_paving_const_iterator();
+
+    test_grid_paving_cell();
+
+    test_grid_sub_paving();
+
+    test_grid_paving();
+
+    test_adjoin_operation_one();
+    test_adjoin_operation_two();
+    test_adjoin_operation_three();
+
+    test_adjoin_outer_approximation_operation();
     test_adjoin_inner_approximation_operation_one();
     test_adjoin_inner_approximation_operation_two();
     test_adjoin_inner_approximation_operation_three();
-    //test_restrict();
-    //test_remove_one();
-    //test_remove_two();
-    //test_cell_subset_subset();
-    //test_subsets_join();
-    //test_subsets_intersection();
-    //test_subsets_difference();
-    //test_cell_overlap_subset();
-    //test_subset_overlap_subset();
-    //test_subset_subset_subset();
-    //test_subset_overlaps_box();
-    //test_subset_subset_box();
-    //test_subset_superset_box();
+
+    test_restrict();
+
+    test_remove_one();
+    test_remove_two();
+
+    test_cell_subset_subset();
+
+    test_subsets_join();
+    test_subsets_intersection();
+    test_subsets_difference();
+    test_cell_overlap_subset();
+    test_subset_overlap_subset();
+    test_subset_subset_subset();
+    test_subset_overlaps_box();
+    test_subset_subset_box();
+    test_subset_superset_box();
     
     return ARIADNE_TEST_FAILURES;
 }

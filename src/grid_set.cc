@@ -1358,7 +1358,7 @@ void GridTreeSet::adjoin_lower_approximation( BinaryTreeNode * pBinaryTreeNode, 
     if( bool( theSet.superset( theCurrentCell.box() ) ) ) {
         //TODO: Pieter, do not you need to make the given node enabled before mincing it? Otherwise, it
         //can happen that you will mince disabled nodes. It seems to me that the given node belongs to
-        //the lower approximation of theSet, so the node added to this set and so it has to be enabled.
+        //the lower approximation of theSet, so the node should be added to this set and thus has to be enabled.
         //TODO: Pieter, why do you call mince on the given set instead of calling it on the node? This seems
         //to be incorrect, especially because you are mincing to the depth max_mince_depth - pPath->size().
         this->mince( max_mince_depth - pPath->size() );

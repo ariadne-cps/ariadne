@@ -257,6 +257,12 @@ void trace_curve(cairo_t *cr, const std::vector<Point>& cv)
     }
 }
 
+std::string str(double x) {
+    std::stringstream ss;
+    ss << x;
+    return ss.str();
+}
+
 
 void trace(cairo_t *cr, const GraphicsObject::ShapeKind kind, const std::vector<Point>& pts) 
 {
@@ -273,9 +279,14 @@ void trace(cairo_t *cr, const GraphicsObject::ShapeKind kind, const std::vector<
 void plot(cairo_t *cr, const Box& bounding_box, const ProjectionFunction& projection, 
           const std::vector<GraphicsObject>& objects, int canvas_width, int canvas_height) 
 {
+    const int left_margin=80;
+    const int bottom_margin=40;
+    const int top_margin=10;
+    const int right_margin=10;
+
     //std::cerr<<"Plot(...)\n"<<std::flush;
 
-    // Compute extreme values
+    // Test if there are no objects to be drawn
     if(objects.empty()) {
         cairo_destroy (cr);
         return; 
@@ -299,29 +310,37 @@ void plot(cairo_t *cr, const Box& bounding_box, const ProjectionFunction& projec
 
 
     // The bounding box for the actual used area
-    Box lbbox=bbox+Vector<Interval>(2,Interval(-0.075,0.075));
+    Box lbbox=bbox;
+    lbbox[0]+=Interval(-1,1)*(bbox[0].radius()/25);
+    lbbox[1]+=Interval(-1,1)*(bbox[1].radius()/25);
 
-    // The bounding box for the entire figure
-    Box gbbox=bbox+Vector<Interval>(2,Interval(-0.1,0.1));
-  
+
     //std::cerr<<"  bbox="<<bbox<<"\n  lbbox="<<lbbox<<"\n  gbbox="<<gbbox<<std::endl;
 
     // clear background 
     cairo_set_source_rgb (cr, 1,1,1);
     cairo_paint (cr);
 
-    // compute user to canvas coordinate transformation
     cairo_set_line_width (cr,0.001);
 
+    // Save canvas coordinates
+    cairo_save (cr);
+
     // compute user to canvas coordinate transformation
-    double sc0=canvas_width/gbbox[0].width();
-    double sc1=-canvas_height/gbbox[1].width();
-    double tr0=-gbbox[0].lower();
-    double tr1=-gbbox[1].upper();
-    //std::cerr << "  sc0="<<sc0<<", sc1="<<sc1<<", tr0="<<tr0<<", tr1="<<tr1<<std::endl;
+    double ctr0=left_margin;
+    double ctr1=top_margin;
+    double sc0=(canvas_width-left_margin-right_margin)/lbbox[0].width();
+    double sc1=-(canvas_height-top_margin-bottom_margin)/lbbox[1].width();
+    double utr0=-lbbox[0].lower();
+    double utr1=-lbbox[1].upper();
+
+    // Scale to user coordinates
+    cairo_translate(cr, ctr0, ctr1);
     cairo_scale (cr, sc0,sc1);
-    cairo_translate(cr, tr0, tr1);
+    cairo_translate(cr, utr0, utr1);
     
+
+    // Fill shapes
     for(uint i=0; i!=objects.size(); ++i) {
         if(objects[i].kind!=GraphicsObject::CURVE) {
             trace(cr,objects[i].kind,apply(projection,objects[i].shape));
@@ -331,13 +350,53 @@ void plot(cairo_t *cr, const Box& bounding_box, const ProjectionFunction& projec
         }
     }
     
+    // Trace curves and shapes
     cairo_set_source_rgb (cr, 0,0,0);
     for(uint i=0; i!=objects.size(); ++i) {
         trace(cr,objects[i].kind,apply(projection,objects[i].shape));
         cairo_stroke (cr);
     }
 
-    trace (cr,GraphicsObject::BOX,corner_points(lbbox));
+    // Restore canvas coordinates
+    cairo_restore (cr);
+
+    // Set text font
+    cairo_select_font_face (cr, "roman",CAIRO_FONT_SLANT_NORMAL,CAIRO_FONT_WEIGHT_NORMAL);
+    cairo_set_font_size (cr, 30);
+
+    // Set text colour
+    cairo_set_source_rgb (cr, 0., 0., 0.);
+
+    // Get axis label text
+    std::string text_xl=str(bbox[0].lower());
+    std::string text_xu=str(bbox[0].upper());
+    std::string text_yl=str(bbox[1].lower());
+    std::string text_yu=str(bbox[1].upper());
+
+    // Write axis labels
+    cairo_text_extents_t te;
+    cairo_text_extents (cr, text_xl.c_str(), &te);
+    cairo_move_to(cr, left_margin-2, canvas_height-bottom_margin+4+te.height);
+    cairo_show_text (cr, text_xl.c_str());
+    cairo_text_extents (cr, text_xu.c_str(), &te);
+    cairo_move_to(cr, canvas_width-te.width-4, canvas_height-bottom_margin+4+te.height);
+    cairo_show_text (cr, text_xu.c_str());
+
+    cairo_text_extents (cr, text_yl.c_str(), &te);
+    cairo_move_to(cr, left_margin-te.width-6, canvas_width-bottom_margin+2);
+    cairo_show_text (cr, text_yl.c_str());
+    cairo_text_extents (cr, text_yu.c_str(), &te);
+    cairo_move_to(cr, left_margin-te.width-6, top_margin+te.height+2);
+    cairo_show_text (cr, text_yu.c_str());
+    
+    // Draw bounding box
+    cairo_set_line_width (cr, 2.0);
+    cairo_set_source_rgb (cr, 0.0, 0.0, 0.0);
+    cairo_move_to (cr, left_margin, canvas_height-bottom_margin);
+    cairo_line_to (cr, canvas_width-right_margin, canvas_height-bottom_margin);
+    cairo_line_to (cr, canvas_width-right_margin, top_margin);
+    cairo_line_to (cr, left_margin, top_margin);
+    cairo_line_to (cr, left_margin, canvas_height-bottom_margin);
     cairo_stroke (cr);
 
     cairo_destroy (cr);

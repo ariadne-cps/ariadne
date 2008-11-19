@@ -178,15 +178,16 @@ lower_reach(const SystemType& system,
             const OvertSetType& initial_set,
             const TimeType& time) const
 {
-    int grid_depth = this->_parameters->maximum_grid_depth+4;
-    int grid_height = this->_parameters->maximum_grid_height;
+    int initial_grid_depth = this->_parameters->initial_grid_depth;
+    int maximum_grid_depth = this->_parameters->maximum_grid_depth;
+    int maximum_grid_height = this->_parameters->maximum_grid_height;
     GTS initial; GTS& reach=*new GTS();
   
     // Improve accuracy of initial set for lower computations
-    initial.adjoin_lower_approximation(initial_set,grid_height,grid_depth+4);
+    initial.adjoin_lower_approximation(initial_set,maximum_grid_height,initial_grid_depth);
  
     for(GTS::const_iterator bs_iter=initial.begin(); bs_iter!=initial.end(); ++bs_iter) {
-        reach.adjoin(this->_discretiser->lower_evolution(system,*bs_iter,time,grid_depth).reach());
+        reach.adjoin(this->_discretiser->lower_evolution(system,*bs_iter,time,maximum_grid_depth).reach());
     }
     return &reach;
 }
@@ -199,17 +200,18 @@ lower_reach_evolve(const SystemType& system,
                    const OvertSetType& initial_set,
                    const TimeType& time) const
 {
-    int grid_depth = this->_parameters->maximum_grid_depth;
-    int grid_height = this->_parameters->maximum_grid_height;
+    int initial_grid_depth = this->_parameters->initial_grid_depth;
+    int maximum_grid_depth = this->_parameters->maximum_grid_depth;
+    int maximum_grid_height = this->_parameters->maximum_grid_height;
     GTS initial; 
   
     GTS& reach=*new GTS; GTS& evolve=*new GTS;
 
     // Improve accuracy of initial set for lower computations
-    initial.adjoin_lower_approximation(initial_set,grid_height,grid_depth+4);
+    initial.adjoin_lower_approximation(initial_set,maximum_grid_height,initial_grid_depth);
 
     for(GTS::const_iterator bs_iter=initial.begin(); bs_iter!=initial.end(); ++bs_iter) {
-        Orbit<GC> orbit = this->_discretiser->lower_evolution(system,*bs_iter,time,grid_depth);
+        Orbit<GC> orbit = this->_discretiser->lower_evolution(system,*bs_iter,time,maximum_grid_depth);
         reach.adjoin(orbit.reach());
         evolve.adjoin(orbit.final());
     }

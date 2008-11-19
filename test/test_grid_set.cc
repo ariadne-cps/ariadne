@@ -996,17 +996,13 @@ void test_adjoin_inner_approximation_operation_two(){
     ARIADNE_PRINT_TEST_COMMENT("theBoxOneOne");
     cout << theBoxOneOne << endl;
     theSetOne.adjoin_inner_approximation( theBoxOneOne, heightOne, 4);
-    std::vector< GridCell* > expected_result_arr( 15 );
+    std::vector< GridCell* > expected_result_arr( 7 );
     expected_result_arr[0] = new GridCell( theTrivialGrid, heightOne, make_binary_word("010001") );
     expected_result_arr[1] = new GridCell( theTrivialGrid, heightOne, make_binary_word("010011") );
-    expected_result_arr[2] = new GridCell( theTrivialGrid, heightOne, make_binary_word("010100") );
-    expected_result_arr[3] = new GridCell( theTrivialGrid, heightOne, make_binary_word("010101") );
-    expected_result_arr[4] = new GridCell( theTrivialGrid, heightOne, make_binary_word("010110") );
-    expected_result_arr[5] = new GridCell( theTrivialGrid, heightOne, make_binary_word("010111") );
-    expected_result_arr[6] = new GridCell( theTrivialGrid, heightOne, make_binary_word("011001") );
-    expected_result_arr[7] = new GridCell( theTrivialGrid, heightOne, make_binary_word("011100") );
-    expected_result_arr[8] = new GridCell( theTrivialGrid, heightOne, make_binary_word("011101") );
-    ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theSetOne, 9 );
+    expected_result_arr[2] = new GridCell( theTrivialGrid, heightOne, make_binary_word("0101") );
+    expected_result_arr[3] = new GridCell( theTrivialGrid, heightOne, make_binary_word("011001") );
+    expected_result_arr[4] = new GridCell( theTrivialGrid, heightOne, make_binary_word("01110") );
+    ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theSetOne, 5 );
     ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
     
     // !!!
@@ -1017,20 +1013,12 @@ void test_adjoin_inner_approximation_operation_two(){
     theSetOneCopy.adjoin_inner_approximation( theBoxOneOne, theBoundingBoxOneOne, 4);
     expected_result_arr[0]  = new GridCell( theTrivialGrid, heightTwo, make_binary_word("00010001") );
     expected_result_arr[1]  = new GridCell( theTrivialGrid, heightTwo, make_binary_word("00010011") );
-    expected_result_arr[2]  = new GridCell( theTrivialGrid, heightTwo, make_binary_word("00010100") );
-    expected_result_arr[3]  = new GridCell( theTrivialGrid, heightTwo, make_binary_word("00010101") );
-    expected_result_arr[4]  = new GridCell( theTrivialGrid, heightTwo, make_binary_word("00010110") );
-    expected_result_arr[5]  = new GridCell( theTrivialGrid, heightTwo, make_binary_word("00010111") );
-    expected_result_arr[6]  = new GridCell( theTrivialGrid, heightTwo, make_binary_word("00011001") );
-    expected_result_arr[7]  = new GridCell( theTrivialGrid, heightTwo, make_binary_word("00011100") );
-    expected_result_arr[8]  = new GridCell( theTrivialGrid, heightTwo, make_binary_word("00011101") );
-    expected_result_arr[9]  = new GridCell( theTrivialGrid, heightTwo, make_binary_word("01000000") );
-    expected_result_arr[10] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("01000001") );
-    expected_result_arr[11] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("01000010") );
-    expected_result_arr[12] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("01000011") );
-    expected_result_arr[13] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("01001000") );
-    expected_result_arr[14] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("01001001") );
-    ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theSetOneCopy, 15 );
+    expected_result_arr[2]  = new GridCell( theTrivialGrid, heightTwo, make_binary_word("000101") );
+    expected_result_arr[3]  = new GridCell( theTrivialGrid, heightTwo, make_binary_word("00011001") );
+    expected_result_arr[4]  = new GridCell( theTrivialGrid, heightTwo, make_binary_word("0001110") );
+    expected_result_arr[5]  = new GridCell( theTrivialGrid, heightTwo, make_binary_word("010000") );
+    expected_result_arr[6] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("0100100") );
+    ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theSetOneCopy, 7 );
     ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
 }
 
@@ -1056,7 +1044,7 @@ void test_adjoin_inner_approximation_operation_three(){
     ARIADNE_PRINT_TEST_COMMENT("theBoxTwoOne");
     cout << theBoxTwoOne << endl;
     theSetTwo.adjoin_inner_approximation( theBoxTwoOne, heightOne, 4);
-    std::vector< GridCell* > expected_result_arr( 11 );
+    std::vector< GridCell* > expected_result_arr( 5 );
     expected_result_arr[0] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("0000") );
     expected_result_arr[1] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("0011") );
     expected_result_arr[2] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("11") );
@@ -1070,16 +1058,10 @@ void test_adjoin_inner_approximation_operation_three(){
     theSetTwoCopy.adjoin_inner_approximation( theBoxTwoOne, heightTwo, 4);
     expected_result_arr[0] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("0000") );
     expected_result_arr[1] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("0011") );
-    expected_result_arr[2] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("01101000") );
-    expected_result_arr[3] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("01101001") );
-    expected_result_arr[4] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("01101010") );
-    expected_result_arr[5] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("01101011") );
-    expected_result_arr[6] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("10010100") );
-    expected_result_arr[7] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("10010101") );
-    expected_result_arr[8] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("10010110") );
-    expected_result_arr[9] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("10010111") );
-    expected_result_arr[10] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("11") );
-    ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theSetTwoCopy, 11 );
+    expected_result_arr[2] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("011010") );
+    expected_result_arr[3] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("100101") );
+    expected_result_arr[4] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("11") );
+    ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theSetTwoCopy, 5 );
     ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
 }
 

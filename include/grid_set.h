@@ -834,8 +834,8 @@ class GridTreeSet : public GridTreeSubset {
      *  This method is recursive, the parameter \a pPath defines the path to the current node pBinaryTreeNode
      *  from the root node in recursive calls, thus the initial call for this method must be done with an empty word.
      */
-    void adjoin_outer_approximation( BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
-                                     const uint max_mince_depth, const CompactSetInterface& theSet, BinaryWord * pPath );
+    static void adjoin_outer_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
+                                            const uint max_mince_depth, const CompactSetInterface& theSet, BinaryWord * pPath );
 
     /*! \brief This method adjoins the inner approximation of \a theSet (computed on the fly) to this paving.
      *  We use the primary cell (enclosed in this paving) of height \a primary_cell_height and represented 
@@ -845,8 +845,8 @@ class GridTreeSet : public GridTreeSubset {
      *  This method is recursive, the parameter \a pPath defines the path to the current node pBinaryTreeNode
      *  from the root node in recursive calls, thus the initial call for this method must be done with an empty word.
      */
-    void adjoin_inner_approximation( BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
-                                     const uint max_mince_depth, const OpenSetInterface& theSet, BinaryWord * pPath );
+    static void adjoin_inner_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
+                                            const uint max_mince_depth, const OpenSetInterface& theSet, BinaryWord * pPath );
 
     /*! \brief This method adjoins the lower approximation of \a theSet (computed on the fly) to this paving.
      *  We use the primary cell (enclosed in this paving) of height \a primary_cell_hight and represented 
@@ -858,15 +858,15 @@ class GridTreeSet : public GridTreeSubset {
      *  The approximation method does not recombine cells, as knowing that both children intersect a set is more
      *  information than knowing that the parent does.
      */
-    void adjoin_lower_approximation( BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
-                                     const uint max_mince_depth, const OvertSetInterface& theSet, BinaryWord * pPath );
+    static void adjoin_lower_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
+                                            const uint max_mince_depth, const OvertSetInterface& theSet, BinaryWord * pPath );
 
     /*! \brief This method adjoins the lower approximation of \a theSet (computed on the fly) to this paving.
      *  It is specialised for open sets, for which we have the superset() operator. If a set is a superset of
      *  a cell, then we know it overlaps the cell and all its children.
      */
-    void adjoin_lower_approximation( BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
-                                     const uint max_mince_depth, const OpenSetInterface& theSet, BinaryWord * pPath );
+    static void adjoin_lower_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
+                                            const uint max_mince_depth, const OpenSetInterface& theSet, BinaryWord * pPath );
 
     /*! \brief This method is uset to do restriction of this set to the set given by
      *  \a theOtherSubPaving Note that, here we require that the height of the primary

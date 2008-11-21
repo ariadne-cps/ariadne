@@ -73,8 +73,10 @@ using std::min;
 using std::max;
 using std::abs;
 
-uint fac(uint n);
-uint bin(uint n, uint k);
+unsigned int fac(unsigned int n);
+unsigned long int fac(unsigned long int n);
+unsigned int bin(unsigned int n, unsigned int k);
+unsigned long int bin(unsigned long int n, unsigned long int k);
 
 template<class X> X pi();
 

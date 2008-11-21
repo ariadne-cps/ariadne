@@ -339,15 +339,13 @@ TestInterval::test_misc()
     }
 
     {
-#ifdef HAVE_GMPXX_H
-        Interval e(Rational(2.71828182845904),Rational(2.71828182845905));
+        Interval e(2.7182818284590451,2.7182818284590455);
         Interval loge=log(e);
         ARIADNE_TEST_PRINT(e);
         ARIADNE_TEST_COMPARE(loge.lower(),<,1);
         ARIADNE_TEST_COMPARE(loge.lower(),>,0.9999999999998);
         ARIADNE_TEST_COMPARE(loge.upper(),>,1);
         ARIADNE_TEST_COMPARE(loge.upper(),<,1.000000000002);
-#endif // HAVE_GMPXX_H
     }
 
 
@@ -358,9 +356,9 @@ TestInterval::test_misc()
         Interval sinx=sin(x);
         ARIADNE_TEST_PRINT(x);
         ARIADNE_TEST_COMPARE(sinx.lower(),<,0.0);
-        ARIADNE_TEST_COMPARE(sinx.lower(),>,-2e-15);
+        ARIADNE_TEST_COMPARE(sinx.lower(),>,-1e-14);
         ARIADNE_TEST_COMPARE(sinx.upper(),>,0.0);
-        ARIADNE_TEST_COMPARE(sinx.upper(),<,+2e-15);
+        ARIADNE_TEST_COMPARE(sinx.upper(),<,+1e-14);
         ARIADNE_TEST_ASSERT(sinx.lower()<sinx.upper());
     }
 
@@ -370,9 +368,9 @@ TestInterval::test_misc()
         Interval cosx=cos(x);
         ARIADNE_TEST_PRINT(x);
         ARIADNE_TEST_COMPARE(cosx.lower(),<,0.0);
-        ARIADNE_TEST_COMPARE(cosx.lower(),>,-2e-15);
+        ARIADNE_TEST_COMPARE(cosx.lower(),>,-1e-14);
         ARIADNE_TEST_COMPARE(cosx.upper(),>,0.0);
-        ARIADNE_TEST_COMPARE(cosx.upper(),<,+2e-15);
+        ARIADNE_TEST_COMPARE(cosx.upper(),<,+1e-14);
         ARIADNE_TEST_ASSERT(cosx.lower()<cosx.upper());
     }
 

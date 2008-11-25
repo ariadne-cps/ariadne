@@ -34,12 +34,14 @@
 
 #include "set_interface.h"
 
+
 namespace Ariadne {
 
 typedef size_t size_type;
 
 
 /****************************************Grid**********************************************/
+
  
 struct Grid::Data 
 { 
@@ -1695,7 +1697,7 @@ void GridTreeSet::remove( const GridCell& theCell ) {
         //Follow theCell.word() path in the tree rooted to pCommonPrimaryCell,
         //do that until we encounter a leaf node, then stop
         BinaryWord path = theCell.word();
-        int position = 0;
+        uint position = 0;
         for(; position < path.size(); position++ ) {
             //If we are in a leaf node then
             if( pCurrentPrimaryCell->is_leaf() ) {
@@ -1757,7 +1759,7 @@ void GridTreeSet::restrict_to_height( const uint theHeight ) {
         //Go throught the tree and disable all the leaves that
         //are not rooted to the primary cell defined by this path
         BinaryTreeNode * pCurrentNode = _pRootTreeNode;
-        for( int i = 0; i < pathToPCell.size(); i++ ) {
+        for( uint i = 0; i < pathToPCell.size(); i++ ) {
             if( pCurrentNode->is_leaf() ){
                 if( pCurrentNode->is_enabled() ){
                     //If we are in an enabled leaf node then we split.
@@ -1894,18 +1896,18 @@ bool overlap( const GridCell& theCell, const GridTreeSubset& theSet ) {
     //If the primary cell of the theCell is lower that that of theSet
     //Then we re-root theCell to the primary cell theSet.cell().height()
     const GridCell * pWorkGridCell;
-    const int theSetsPCellHeigh = theSet.cell().height();
-    if( theSetsPCellHeigh > theCell.height() ) {
+    const uint theSetsPCellHeight = theSet.cell().height();
+    if( theSetsPCellHeight > theCell.height() ) {
         //Compute the path from the primary cell of theSet to the primary cell of theCell
-        BinaryWord pathFromSetsPCellToCell = GridCell::primary_cell_path( theCell.dimension(), theSetsPCellHeigh, theCell.height() );
+        BinaryWord pathFromSetsPCellToCell = GridCell::primary_cell_path( theCell.dimension(), theSetsPCellHeight, theCell.height() );
         pathFromSetsPCellToCell.append( theCell.word() );
-        pWorkGridCell = new GridCell( theCell.grid(), theSetsPCellHeigh, pathFromSetsPCellToCell );
+        pWorkGridCell = new GridCell( theCell.grid(), theSetsPCellHeight, pathFromSetsPCellToCell );
     } else {
         pWorkGridCell = &theCell;
     }
 
     //Compute the path for the primary cell of theCell to the primary cell of theSet
-    BinaryWord pathFromPCellCellToSetsRootNode = GridCell::primary_cell_path( theCell.dimension(), pWorkGridCell->height(), theSetsPCellHeigh );
+    BinaryWord pathFromPCellCellToSetsRootNode = GridCell::primary_cell_path( theCell.dimension(), pWorkGridCell->height(), theSetsPCellHeight );
     //Append the path from the primary cell node to the root binary tree node of theSet
     pathFromPCellCellToSetsRootNode.append( theSet.cell().word() );
         
@@ -1929,7 +1931,7 @@ bool overlap( const GridCell& theCell, const GridTreeSubset& theSet ) {
             //Because we already checked for workCellWord.is_prefix( pathFromPCellCellToSetsRootNode )
             //Here we try to find the node corresponding to theCell in the binary tree of theSet
             //in case we encounter a leaf node then we just stop, because it is enough information for us
-            for( int i = pathFromPCellCellToSetsRootNode.size(); i < workCellWord.size(); i++ ) {
+            for( uint i = pathFromPCellCellToSetsRootNode.size(); i < workCellWord.size(); i++ ) {
                 if( pCurrentNode->is_leaf() ) {
                     //We reached the leaf node and theCell is it's subset, so we stop now
                     break;
@@ -1956,7 +1958,7 @@ bool overlap( const GridCell& theCell, const GridTreeSubset& theSet ) {
         }
     }
         
-    if( theSetsPCellHeigh > theCell.height() ) {
+    if( theSetsPCellHeight > theCell.height() ) {
         delete pWorkGridCell;
     }
         
@@ -1997,7 +1999,7 @@ static void common_primary_cell_path(const GridTreeSubset& theSet1, const GridTr
 static const BinaryTreeNode * locate_node( const BinaryTreeNode * pSuperTreeRootNode, const BinaryWord& pathFromSuperToSub ){
     //Locate the node in the pSuperTreeRootNode such that it corresponds to pSubTreeRootNode
     const BinaryTreeNode * pCurrentSuperTreeNode = pSuperTreeRootNode;
-    for( int i = 0; i < pathFromSuperToSub.size(); i++ ) {
+    for( uint i = 0; i < pathFromSuperToSub.size(); i++ ) {
         if( pCurrentSuperTreeNode->is_leaf() ) {
             //We are in the leaf node and we have not yet reached the node
             //corresponding to pSubTreeRootNode, because i < pathFromSuperToSub.size()
@@ -2060,7 +2062,7 @@ static bool subset( const BinaryTreeNode * pSuperTreeRootNode, const BinaryWord 
     //that we ommit traveling the path pathFromSuperToSub, should contain no enabled leaf nodes. Because otherwise 
     //pSuperTreeRootNode is not a subset of pSubTreeRootNode. Apart from this, once we encounter a leaf node on the
     //path we stop because the we can already decide if pSuperTreeRootNode is a subset of pSubTreeRootNode.
-    int path_element = 0;
+    uint path_element = 0;
     bool areExtraLeavesDisabled = true;
     const BinaryTreeNode *pCurrentSuperTreeNode = pSuperTreeRootNode;
     while( ( path_element < pathFromSuperToSub.size() ) && areExtraLeavesDisabled ) {

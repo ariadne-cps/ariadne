@@ -40,9 +40,6 @@
 
 namespace Ariadne {
 
-uint fac(uint n);
-uint bin(uint n, uint k);
-
 class MultiIndex;
 template<class X> class Array;
 template<class X> class Vector;

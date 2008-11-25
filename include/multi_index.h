@@ -34,8 +34,8 @@
 
 namespace Ariadne {
 
-uint fac(uint);
-uint bin(uint,uint);
+uint32_t fac(uint32_t);
+uint32_t bin(uint32_t,uint32_t);
 
 typedef unsigned char uchar;
 

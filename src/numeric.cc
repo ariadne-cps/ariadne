@@ -23,6 +23,7 @@
  
 #include <iostream>
 #include <cassert>
+#include <stdint.h>
 #include <fenv.h>
 
 #include "config.h"
@@ -53,28 +54,28 @@ inline void set_rounding_mode(rounding_mode_t rnd) { fesetround(rnd); }
 inline rounding_mode_t get_rounding_mode() { return fegetround(); }
 
 
-unsigned int 
-fac(unsigned int n) 
+uint32_t 
+fac(uint32_t n) 
 { 
     ARIADNE_ASSERT(n<13); // Maximum factorial in 32 bits
-    unsigned int  r=1; 
-    for(unsigned int i=1; i<=n; ++i) { 
+    uint32_t  r=1; 
+    for(uint32_t i=1; i<=n; ++i) { 
         r*=i; 
     } 
     return r; 
 }
 
 
-unsigned int 
-bin(unsigned int n, unsigned int k) 
+uint32_t 
+bin(uint32_t n, uint32_t k) 
 { 
     ARIADNE_ASSERT(n<32);  // Maximum computable bin(n,n/2) in 32 bits
                            // Note that this is shorter than the maximum representable factorial
     if(k>n+1) { std::cerr << "bin("<<n<<","<<k<<")\n"; }
     if(k==n+1) { return 0; }
     ARIADNE_ASSERT(k>=0 && k<=n);
-    unsigned int r=1; 
-    for(unsigned int i=1; i<=k; ++i) { 
+    uint32_t r=1; 
+    for(uint32_t i=1; i<=k; ++i) { 
         r*=(n+1-i); 
         r/=i; 
     } 
@@ -82,28 +83,28 @@ bin(unsigned int n, unsigned int k)
 }
 
 
-unsigned long int 
-fac(unsigned long int n) 
+uint64_t 
+fac(uint64_t n) 
 { 
     ARIADNE_ASSERT(n<21); // Maximum factorial in 64 bits
-    unsigned long int  r=1; 
-    for(uint i=1; i<=n; ++i) { 
+    uint64_t  r=1; 
+    for(uint64_t i=1; i<=n; ++i) { 
         r*=i; 
     } 
     return r; 
 }
 
 
-unsigned long int 
-bin(unsigned long int n, unsigned long int k) 
+uint64_t 
+bin(uint64_t n, uint64_t k) 
 { 
     //ARIADNE_ASSERT(n<13); 
     ARIADNE_ASSERT(n<21); // Maximum factorial in 64 bits
     if(k>n+1) { std::cerr << "bin("<<n<<","<<k<<")\n"; }
     if(k==n+1) { return 0; }
     ARIADNE_ASSERT(k>=0 && k<=n);
-    unsigned long int r=1; 
-    for(unsigned long int i=1; i<=k; ++i) { 
+    uint64_t r=1; 
+    for(uint64_t i=1; i<=k; ++i) { 
         r*=(n+1-i); 
         r/=i; 
     } 
@@ -207,7 +208,7 @@ double texp(double x) {
 // Correctly rounded exponential function
 double exp_rnd(double x) 
 {
-    static const long int c[7]={ 1, 6, -360, 15120, -604800, 23950080, -946218790 };
+    static const int64_t c[7]={ 1, 6, -360, 15120, -604800, 23950080, -946218790 };
 
     // Set w=r(exp(r)+1)/(exp(r)-1). 
     // Then w=2 + s/c1 + s^2/c2 + ...
@@ -258,7 +259,7 @@ double exp_rnd(double x)
 
 
 double log_rnd(double x) { 
-    static const long int c[12]={ 1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23 };
+    static const int64_t c[12]={ 1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23 };
 
     assert(x>0.0);
     // Write x=2^ny with 1/sqrt(2) <= y <= sqrt(2)
@@ -381,7 +382,7 @@ double cos_rnd(double x) {
 double pos_sin_rnd_series(double x) { 
     assert(x>=0.0);
     assert(x<=pi_up/4);
-    static const long int c[9]={ 1, -6, 120, -5040, 362880, -39916800, 6227020800, -1307674368000, 355687428096000 };
+    static const int64_t c[9]={ 1, -6, 120, -5040, 362880, -39916800, 6227020800, -1307674368000, 355687428096000 };
    
     // Compute sin(x) by Taylor series 
     volatile double s,w,y;
@@ -395,7 +396,7 @@ double pos_sin_rnd_series(double x) {
 double neg_sin_rnd_series(double x) { 
     assert(x>=0.0);
     assert(x<=pi_up/4);
-    static const long int c[9]={ 1, -6, 120, -5040, 362880, -39916800, 6227020800, -1307674368000, 355687428096000 };
+    static const int64_t c[9]={ 1, -6, 120, -5040, 362880, -39916800, 6227020800, -1307674368000, 355687428096000 };
    
     // Compute sin(x) by Taylor series 
     volatile double s,w,y;
@@ -411,7 +412,7 @@ double pos_cos_rnd_series(double x) {
     assert(x>=0.0);
     assert(x<=pi_up/4);
 
-    static const long int c[9]={ 1, -2, 24, -720, 40320, -3628800, 479001600, -87178291200, 20922789888000 };
+    static const int64_t c[9]={ 1, -2, 24, -720, 40320, -3628800, 479001600, -87178291200, 20922789888000 };
     
     // Compute cos(x) by Taylor series. Since cos(x) is decreasing in x^2, 
     // we need to use opposite rounding for the computation of x^2
@@ -428,7 +429,7 @@ double neg_cos_rnd_series(double x) {
     assert(x>=0.0);
     assert(x<=pi_up/4);
 
-    static const long int c[9]={ 1, -2, 24, -720, 40320, -3628800, 479001600, -87178291200, 20922789888000 };
+    static const int64_t c[9]={ 1, -2, 24, -720, 40320, -3628800, 479001600, -87178291200, 20922789888000 };
     volatile double s,y;
     s=x*x;
     y=0.0;
@@ -478,12 +479,12 @@ double tan_rnd_series(double x) {
     assert(x<=+pi_up/8);
 
     // Numerators of Taylor coefficients
-    static const long int cn[13]={ 
+    static const int64_t cn[13]={ 
         1, 1, 2, 17, 62, 1382, 21844, 929569, 6404582, 443861162,
         18888466084, 113927491862, 58870668456604 };
 
     // Denominators of Taylor coefficients
-    static const long long int cd[13]={
+    static const int64_t cd[13]={
         1, 3, 15, 315, 2835, 155925, 6081075, 638512875, 10854718875, 1856156927625, 
         194896477400625, 2900518163668125, 3698160658676859375 };
 

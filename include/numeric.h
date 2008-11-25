@@ -33,6 +33,7 @@
 
 #include <cmath>
 #include <limits>
+#include <stdint.h>
 
 #include "tribool.h"
 
@@ -73,10 +74,10 @@ using std::min;
 using std::max;
 using std::abs;
 
-unsigned int fac(unsigned int n);
-unsigned long int fac(unsigned long int n);
-unsigned int bin(unsigned int n, unsigned int k);
-unsigned long int bin(unsigned long int n, unsigned long int k);
+uint32_t fac(uint32_t n);
+uint64_t fac(uint64_t n);
+uint32_t bin(uint32_t n, uint32_t k);
+uint64_t bin(uint64_t n, uint64_t k);
 
 template<class X> X pi();
 

@@ -33,7 +33,6 @@
 
 #include <cmath>
 #include <limits>
-#include <stdint.h>
 
 #include "tribool.h"
 
@@ -74,10 +73,13 @@ using std::min;
 using std::max;
 using std::abs;
 
+uint16_t fac(uint16_t n);
 uint32_t fac(uint32_t n);
 uint64_t fac(uint64_t n);
+uint16_t bin(uint16_t n, uint16_t k);
 uint32_t bin(uint32_t n, uint32_t k);
 uint64_t bin(uint64_t n, uint64_t k);
+
 
 template<class X> X pi();
 

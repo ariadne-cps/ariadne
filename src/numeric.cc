@@ -54,6 +54,34 @@ inline void set_rounding_mode(rounding_mode_t rnd) { fesetround(rnd); }
 inline rounding_mode_t get_rounding_mode() { return fegetround(); }
 
 
+uint16_t 
+fac(uint16_t n) 
+{ 
+    ARIADNE_ASSERT(n<9); // Maximum factorial in 32 bits
+    uint16_t  r=1; 
+    for(uint16_t i=1; i<=n; ++i) { 
+        r*=i; 
+    } 
+    return r; 
+}
+
+
+uint16_t 
+bin(uint16_t n, uint16_t k) 
+{ 
+    ARIADNE_ASSERT(n<16);  // Maximum computable bin(n,n/2) using 16 bits
+                           // Note that this is shorter than the maximum representable factorial
+    if(k>n+1) { std::cerr << "bin("<<n<<","<<k<<")\n"; }
+    if(k==n+1) { return 0; }
+    ARIADNE_ASSERT(k<=n);
+    uint16_t r=1; 
+    for(uint16_t i=1; i<=k; ++i) { 
+        r*=(n+1-i); 
+        r/=i; 
+    } 
+    return r; 
+}
+
 uint32_t 
 fac(uint32_t n) 
 { 
@@ -69,11 +97,11 @@ fac(uint32_t n)
 uint32_t 
 bin(uint32_t n, uint32_t k) 
 { 
-    ARIADNE_ASSERT(n<32);  // Maximum computable bin(n,n/2) in 32 bits
+    ARIADNE_ASSERT(n<31);  // Maximum computable bin(n,n/2) using 32 bits
                            // Note that this is shorter than the maximum representable factorial
     if(k>n+1) { std::cerr << "bin("<<n<<","<<k<<")\n"; }
     if(k==n+1) { return 0; }
-    ARIADNE_ASSERT(k>=0 && k<=n);
+    ARIADNE_ASSERT(k<=n);
     uint32_t r=1; 
     for(uint32_t i=1; i<=k; ++i) { 
         r*=(n+1-i); 
@@ -83,7 +111,8 @@ bin(uint32_t n, uint32_t k)
 }
 
 
-uint64_t 
+
+uint64_t
 fac(uint64_t n) 
 { 
     ARIADNE_ASSERT(n<21); // Maximum factorial in 64 bits
@@ -95,14 +124,14 @@ fac(uint64_t n)
 }
 
 
-uint64_t 
+uint64_t
 bin(uint64_t n, uint64_t k) 
 { 
-    //ARIADNE_ASSERT(n<13); 
-    ARIADNE_ASSERT(n<21); // Maximum factorial in 64 bits
+    ARIADNE_ASSERT(n<63);  // Maximum computable bin(n,n/2) using 64 bits
+                           // Note that this is shorter than the maximum representable factorial
     if(k>n+1) { std::cerr << "bin("<<n<<","<<k<<")\n"; }
     if(k==n+1) { return 0; }
-    ARIADNE_ASSERT(k>=0 && k<=n);
+    ARIADNE_ASSERT(k<=n);
     uint64_t r=1; 
     for(uint64_t i=1; i<=k; ++i) { 
         r*=(n+1-i); 
@@ -130,7 +159,7 @@ static inline char rounding_mode_char()
     return '?';
 }
 
-static inline double horner_rnd(int n, double x, const long int* c) 
+static inline double horner_rnd(int n, double x, const long long int* c) 
 {
     volatile double y=1./c[n];
     for(int i=n-1; i>=0; --i) {
@@ -139,7 +168,7 @@ static inline double horner_rnd(int n, double x, const long int* c)
     return y;
 }
 
-static inline double horner_opp(int n, double x, const long int* c) 
+static inline double horner_opp(int n, double x, const long long int* c) 
 {
     volatile double y=-1./c[n];
     for(int i=n-1; i>=0; --i) {
@@ -208,7 +237,7 @@ double texp(double x) {
 // Correctly rounded exponential function
 double exp_rnd(double x) 
 {
-    static const int64_t c[7]={ 1, 6, -360, 15120, -604800, 23950080, -946218790 };
+    static const long long int c[7]={ 1LL, 6LL, -360LL, 15120LL, -604800LL, 23950080LL, -946218790LL };
 
     // Set w=r(exp(r)+1)/(exp(r)-1). 
     // Then w=2 + s/c1 + s^2/c2 + ...
@@ -259,7 +288,7 @@ double exp_rnd(double x)
 
 
 double log_rnd(double x) { 
-    static const int64_t c[12]={ 1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23 };
+    static const long long int c[12]={ 1LL, 3LL, 5LL, 7LL, 9LL, 11LL, 13LL, 15LL, 17LL, 19LL, 21LL, 23LL };
 
     assert(x>0.0);
     // Write x=2^ny with 1/sqrt(2) <= y <= sqrt(2)
@@ -382,7 +411,7 @@ double cos_rnd(double x) {
 double pos_sin_rnd_series(double x) { 
     assert(x>=0.0);
     assert(x<=pi_up/4);
-    static const int64_t c[9]={ 1, -6, 120, -5040, 362880, -39916800, 6227020800, -1307674368000, 355687428096000 };
+    static const long long int c[9]={ 1LL, -6LL, 120LL, -5040LL, 362880LL, -39916800LL, 6227020800LL, -1307674368000LL, 355687428096000LL };
    
     // Compute sin(x) by Taylor series 
     volatile double s,w,y;
@@ -396,7 +425,7 @@ double pos_sin_rnd_series(double x) {
 double neg_sin_rnd_series(double x) { 
     assert(x>=0.0);
     assert(x<=pi_up/4);
-    static const int64_t c[9]={ 1, -6, 120, -5040, 362880, -39916800, 6227020800, -1307674368000, 355687428096000 };
+    static const long long int c[9]={ 1LL, -6LL, 120LL, -5040LL, 362880LL, -39916800LL, 6227020800LL, -1307674368000LL, 355687428096000LL };
    
     // Compute sin(x) by Taylor series 
     volatile double s,w,y;
@@ -412,7 +441,7 @@ double pos_cos_rnd_series(double x) {
     assert(x>=0.0);
     assert(x<=pi_up/4);
 
-    static const int64_t c[9]={ 1, -2, 24, -720, 40320, -3628800, 479001600, -87178291200, 20922789888000 };
+    static const long long int c[9]={ 1LL, -2LL, 24LL, -720LL, 40320LL, -3628800LL, 479001600LL, -87178291200LL, 20922789888000LL };
     
     // Compute cos(x) by Taylor series. Since cos(x) is decreasing in x^2, 
     // we need to use opposite rounding for the computation of x^2
@@ -429,7 +458,7 @@ double neg_cos_rnd_series(double x) {
     assert(x>=0.0);
     assert(x<=pi_up/4);
 
-    static const int64_t c[9]={ 1, -2, 24, -720, 40320, -3628800, 479001600, -87178291200, 20922789888000 };
+    static const long long int c[9]={ 1LL, -2LL, 24LL, -720LL, 40320LL, -3628800LL, 479001600LL, -87178291200LL, 20922789888000LL };
     volatile double s,y;
     s=x*x;
     y=0.0;
@@ -480,13 +509,13 @@ double tan_rnd_series(double x) {
 
     // Numerators of Taylor coefficients
     static const int64_t cn[13]={ 
-        1, 1, 2, 17, 62, 1382, 21844, 929569, 6404582, 443861162,
-        18888466084, 113927491862, 58870668456604 };
+        1LL, 1LL, 2LL, 17LL, 62LL, 1382LL, 21844LL, 929569LL, 6404582LL, 443861162LL,
+        18888466084LL, 113927491862LL, 58870668456604LL };
 
     // Denominators of Taylor coefficients
     static const int64_t cd[13]={
-        1, 3, 15, 315, 2835, 155925, 6081075, 638512875, 10854718875, 1856156927625, 
-        194896477400625, 2900518163668125, 3698160658676859375 };
+        1LL, 3LL, 15LL, 315LL, 2835LL, 155925LL, 6081075LL, 638512875LL, 10854718875LL, 1856156927625LL, 
+        194896477400625LL, 2900518163668125LL, 3698160658676859375LL };
 
 
     // To get enough accuracy, we need |x|<pi/8

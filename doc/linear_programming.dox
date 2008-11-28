@@ -102,7 +102,7 @@ For then \f$0=y^TAx \leq c^Tx < 0\f$, a contradiction.
 \section robustcertificate Certificates of robust (in)feasibility
 
 A robust certificate for the primal feasibility problem \f$Ax=b;\ x\geq0\f$ is a base \f$B\f$ such that \f$A_B\f$ is nonsingular, and an \f$x_N>0\f$ such that \f$-A_B^{-1}A_Nx_N>0\f$; this is equivalent to \f$Ax=b;\ x>0\f$.
-A robust certificate of infeasibility is a point \f$y\f$ such that \f$A^Ty<0\f$ and \f$b^Tx>0\f$.
+A robust certificate of infeasibility is a point \f$y\f$ such that \f$A^Ty<0\f$ and \f$b^Ty>0\f$.
 
 <b>Theorem</b>
 Suppose \f$Ax=b;\ x\geq0\f$ is robust. Then either \f$A\f$ has full row rank and there exists \f$x>0\f$ such that \f$Ax=b\f$, or there exists \f$y\f$ such that \f$A^T<0\f$ and \f$b^Ty>0\f$.
@@ -215,7 +215,8 @@ To solve the robust problem, we first find a solution to the standard problem, a
 \section simplexalgorithmconstrainst The simplex algorithm with constraints
 
   Suppose we wish to update a basis of the standard linear programming problem.
-   - The current point \f$x_B=A_B^{-1} (b - A_N x_N)\f$ (with \f$x_L=l_L; x_U=u_U\f$).
+   - The current point \f$x_B=A_B^{-1} (b - A_N x_N) = A_B^{-1}(b-A_Ll_L-A_Uu_U) \f$ (with \f$x_L=l_L; x_U=u_U\f$).
+   - The current dual variables are \f$y={(A_B^T)}^{-1}c_B;\ y^T = c_B^T A_B^{-1}\f$.
 
 \section feasibilityalgorithms Algorithms for feasibility 
 
@@ -239,7 +240,7 @@ Suppose we have a basic feasible solution \f$y\f$ of \f$A^Ty\leq c\f$ and we wis
    Find a set of basic variables \f$B\f$ so that \f$ A_B\f$ is nonsingular, where \f$ A_B\f$ is the matrix formed from the columns of \f$A\f$ in \f$B\f$.
    Initialise \f$x_N\f$ to \f$l\f$ for non-basic variables, and set \f$x_B=A_B^{-1}(b-A_Nx_N)\f$. Then \f$Ax=b\f$, but possibly not \f$l_B\leq x_B\leq u_B\f$.
    <br>
-   Let \f$c_i=-1\f$ if \f$x_i<l_i\f$ and \f$c_i=-1\f$ if \f$x_i>u_i\f$.
+   Let \f$c_i=-1\f$ if \f$x_i<l_i\f$ and \f$c_i=+1\f$ if \f$x_i>u_i\f$.
    Now minimise \f$c^Tx\f$, but relax the currently violated constraints.
 
    \b Remark: Since we do not assume the existence of \f$\pm\infty\f$ in our number types, we use \f$l=0,\ u=-1\f$ for the constraint \f$x\geq0\f$; this is the only unbounded constraint we allow.

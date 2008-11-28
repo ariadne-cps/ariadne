@@ -21,6 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "config.h"
+
 #include "utilities.h"
 
 #include "numeric.h"
@@ -65,7 +67,12 @@ read_scalar(unsigned long int& n, const boost::python::object& obj)
 }
 
 
+#ifdef HAVE_GMPXX_H
+
+typedef mpz_class Integer;
+
 /*
+
 
 void
 read_scalar(Integer& z, const boost::python::object& obj)
@@ -82,6 +89,7 @@ read_scalar(Integer& z, const boost::python::object& obj)
     }
 }
  
+*/
 
 void
 read_scalar(Rational& q, const boost::python::object& obj)
@@ -104,7 +112,8 @@ read_scalar(Rational& q, const boost::python::object& obj)
     }
 }
 
-*/
+#endif
+
 
 void
 read_scalar(Float& x, const boost::python::object& obj)

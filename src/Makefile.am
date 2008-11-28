@@ -11,6 +11,7 @@ SRC = \
 	numeric.cc \
 	vector.cc \
 	matrix.cc \
+	linear_programming.cc \
 	dense_differential.cc \
 	sparse_differential.cc \
 	taylor_variable.cc  \

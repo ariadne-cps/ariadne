@@ -21,9 +21,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+#include "config.h"
+
 #include "numeric.h"
 #include "vector.h"
 #include "matrix.h"
+
+#include "linear_programming.h"
 
 #include "utilities.h"
 
@@ -32,6 +36,17 @@
 using namespace boost::python;
 
 using namespace Ariadne;
+
+template<class X> const char* python_name(const char* name);
+template<> const char* python_name<Float>(const char* name) { 
+    return (std::string("")+name).c_str(); }
+template<> const char* python_name<Interval>(const char* name) { 
+    return (std::string("I")+name).c_str(); }
+template<> const char* python_name<Rational>(const char* name) { 
+    return (std::string("Q")+name).c_str(); }
+
+
+    
 
 template<class X> Vector<X>*
 make_vector(const boost::python::object& obj) 
@@ -103,7 +118,7 @@ void export_vector()
 {
     typedef Vector<X> V;
 
-    class_< Vector<X> > vector_class("Vector",init<int>());
+    class_< Vector<X> > vector_class(python_name<X>("Vector"),init<int>());
     vector_class.def("__init__", make_constructor(&make_vector<X>) );
     vector_class.def("__len__", &Vector<X>::size);
     vector_class.def("__setitem__", (void(Vector<X>::*)(size_t,const double&)) &Vector<X>::set);
@@ -133,7 +148,7 @@ void export_vector()
 template<class X>
 void export_matrix()
 {
-    class_< Matrix<X> > matrix_class("Matrix",init<size_t,size_t>());
+    class_< Matrix<X> > matrix_class(python_name<X>("Matrix"),init<size_t,size_t>());
     matrix_class.def("__init__", make_constructor(&make_matrix<X>) );
     matrix_class.def("rows", &Matrix<X>::row_size);
     matrix_class.def("columns", &Matrix<X>::column_size);
@@ -160,14 +175,36 @@ void export_matrix()
     def("inverse",(Matrix<X>(*)(const Matrix<X>&)) &inverse);
 }
 
+template<class X>
+void export_linear_programming()
+{
+    class_<tribool> tribool_class("tribool",no_init);
+    tribool_class.def(boost::python::self_ns::str(self));
+    
+    def("feasible",(tribool(*)(const Matrix<X>&,const Vector<X>&,const Vector<X>&,const Vector<X>&)) &feasible);
+}
+   
 template void export_vector<Float>();
 template void export_vector<Interval>();
 template void export_matrix<Float>();
 template void export_matrix<Interval>();
 
+
+#ifdef HAVE_GMPXX_H
+template void export_vector<Rational>();
+template void export_matrix<Rational>();
+template void export_linear_programming<Rational>();
+#endif
+
+
 void linear_algebra_submodule() {
-    //export_vector<Float>();
+    export_vector<Float>();
     export_vector<Interval>();
-    //export_matrix<Float>();
+    export_matrix<Float>();
     export_matrix<Interval>();
+#ifdef HAVE_GMPXX_H
+    export_vector<Rational>();
+    export_matrix<Rational>();
+    export_linear_programming<Rational>();
+#endif
 }

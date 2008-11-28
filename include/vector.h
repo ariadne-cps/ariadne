@@ -135,6 +135,8 @@ class Vector
 
     //! \brief The supremum norm.
     friend template<class X> X norm(const Vector<X>& v);
+    //! \brief The inner product.
+    friend template<class X> X dot(const Vector<X>& v1, const Vector<X>& v2);
 
     //! \brief Join (catenate, make the direct sum of) two vectors.
     friend template<class X> Vector<X> join(const Vector<X>& v1, const Vector<X>& v2);
@@ -178,6 +180,17 @@ template<class X>
 X norm(const Vector<X>& v)
 {
     return Ariadne::sup_norm(v);
+}
+
+template<class X>
+X dot(const Vector<X>& v1, const Vector<X>& v2)
+{
+    ARIADNE_ASSERT(v1.size()==v2.size());
+    X r=0;
+    for(size_t i=0; i!=v1.size(); ++i) {
+        r+=v1[i]*v2[i];
+    }
+    return r;
 }
 
 template<class X>

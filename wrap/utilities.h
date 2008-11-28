@@ -58,10 +58,14 @@ void read_scalar(long int&, const boost::python::object&);
 void read_scalar(unsigned int&, const boost::python::object&);
 void read_scalar(unsigned long int&, const boost::python::object&);
 void read_scalar(double&, const boost::python::object&);
-//void read_scalar(Integer&, const boost::python::object&);
-//void read_scalar(Rational&, const boost::python::object&);
 void read_scalar(Float&, const boost::python::object&);
 void read_scalar(Interval&, const boost::python::object&);
+
+#ifdef HAVE_GMPXX_H
+//void read_scalar(Integer&, const boost::python::object&);
+void read_scalar(Rational&, const boost::python::object&);
+#endif
+
 
 // Read a array variable of type X from a Python object
 template<class X> 

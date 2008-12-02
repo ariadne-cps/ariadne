@@ -47,9 +47,9 @@ class TestInterval
     void test();
   private:
     void test_concept();
-    void test_misc();
     void test_class();
     void test_conversion();
+    void test_misc();
 };
 
 
@@ -142,22 +142,22 @@ TestInterval::test_misc()
 
     // Constructor from approximate values
     Interval ivld4(2.1,3.2);
-    ARIADNE_TEST_ASSERT(ivld4.lower()<=2.1);
-    ARIADNE_TEST_ASSERT(ivld4.upper()>=3.2);
+    ARIADNE_TEST_COMPARE(ivld4.lower(),<=,2.1);
+    ARIADNE_TEST_COMPARE(ivld4.upper(),>=,3.2);
 
 #ifdef HAVE_GMPXX_H
     // Approximate constructor from a single value
     Interval ivld5(Rational(1,3));
-    ARIADNE_TEST_ASSERT(ivld5.lower()<Rational(1,3));
-    ARIADNE_TEST_ASSERT(ivld5.upper()>Rational(1,3));
+    ARIADNE_TEST_COMPARE(ivld5.lower(),<,Rational(1,3));
+    ARIADNE_TEST_COMPARE(ivld5.upper(),>,Rational(1,3));
 #else
     Interval ivld5(1./3.);
 #endif // HAVE_GMPXX_H
 
     // Exact constructor from a single value
     Interval ivld6(Float(1.25));
-    ARIADNE_TEST_ASSERT(ivld6.lower()==Float(1.25));
-    ARIADNE_TEST_ASSERT(ivld6.upper()==Float(1.25));
+    ARIADNE_TEST_EQUAL(ivld6.lower(),Float(1.25));
+    ARIADNE_TEST_EQUAL(ivld6.upper(),Float(1.25));
   
     Interval ivlq1(1.1,2.2);
     Interval ivlq2(1.125,1.125);
@@ -199,7 +199,7 @@ TestInterval::test_misc()
     cout << "midpoint(" << ivlf1 << ")=" << ivlf1.midpoint() << endl;
     cout << "radius(" << ivlf2 << ")=" << radius(ivlf2) << endl;
     cout << "width(" << ivlf2 << ")=" << width(ivlf2) << endl;
-    ARIADNE_TEST_ASSERT(ivlf1.midpoint()==Float(2.3125));
+    ARIADNE_TEST_EQUAL(ivlf1.midpoint(),Float(2.3125));
   
     try {
         string input("[1.125,2.25] ");
@@ -207,7 +207,7 @@ TestInterval::test_misc()
     
         iss >> ivld2;
         cout << "ivld1=" << ivld1 << "  ivld2=" << ivld2 << endl;
-        ARIADNE_TEST_ASSERT(equal(ivld1,ivld2));
+        ARIADNE_TEST_BINARY_PREDICATE(equal,ivld1,ivld2);
         ARIADNE_TEST_ASSERT(ivld1.lower()==ivld2.lower() && ivld1.upper()==ivld2.upper());
     
         ARIADNE_TEST_ASSERT(equal(ivld1,ivld2));
@@ -261,14 +261,14 @@ TestInterval::test_misc()
         cout << endl;
     
         // Check to make sure aliases are handled correctly
-        ivlf1=ivlf3; ivlf1=ivlf2-ivlf1; ARIADNE_TEST_ASSERT(equal(ivlf1,I(ivlf2-ivlf3)));
-        ivlf1=ivlf3; ivlf1=ivlf2*ivlf1; ARIADNE_TEST_ASSERT(equal(ivlf1,I(ivlf2*ivlf3)));
-        ivlf1=ivlf2; ivlf1=ivlf1*ivlf3; ARIADNE_TEST_ASSERT(equal(ivlf1,I(ivlf2*ivlf3)));
-        ivlf1=ivlf2; ivlf1=ivlf1*f3; ARIADNE_TEST_ASSERT(equal(ivlf1,I(ivlf2*f3)));
-        ivlf1=ivlf3; ivlf1=f2*ivlf1; ARIADNE_TEST_ASSERT(equal(ivlf1,I(f2*ivlf3)));
-        ivlf1=ivlf2; ivlf1=ivlf1/ivlf3; ARIADNE_TEST_ASSERT(equal(ivlf1,I(ivlf2/ivlf3)));
-        ivlf1=ivlf2; ivlf1=ivlf1/f3; ARIADNE_TEST_ASSERT(equal(ivlf1,I(ivlf2/f3)));
-        ivlf1=ivlf3; ivlf1=f2/ivlf1; ARIADNE_TEST_ASSERT(equal(ivlf1,I(f2/ivlf3)));
+        ivlf1=ivlf3; ivlf1=ivlf2-ivlf1; ARIADNE_TEST_BINARY_PREDICATE(equal,ivlf1+1,I(ivlf2-ivlf3));
+        ivlf1=ivlf3; ivlf1=ivlf2*ivlf1; ARIADNE_TEST_BINARY_PREDICATE(equal,ivlf1,I(ivlf2*ivlf3));
+        ivlf1=ivlf2; ivlf1=ivlf1*ivlf3; ARIADNE_TEST_BINARY_PREDICATE(equal,ivlf1,I(ivlf2*ivlf3));
+        ivlf1=ivlf2; ivlf1=ivlf1*f3; ARIADNE_TEST_BINARY_PREDICATE(equal,ivlf1,I(ivlf2*f3));
+        ivlf1=ivlf3; ivlf1=f2*ivlf1; ARIADNE_TEST_BINARY_PREDICATE(equal,ivlf1,I(f2*ivlf3));
+        ivlf1=ivlf2; ivlf1=ivlf1/ivlf3; ARIADNE_TEST_BINARY_PREDICATE(equal,ivlf1,I(ivlf2/ivlf3));
+        ivlf1=ivlf2; ivlf1=ivlf1/f3; ARIADNE_TEST_BINARY_PREDICATE(equal,ivlf1,I(ivlf2/f3));
+        ivlf1=ivlf3; ivlf1=f2/ivlf1; ARIADNE_TEST_BINARY_PREDICATE(equal,ivlf1,I(f2/ivlf3));
     
 
         ivlq1 = ivlq2+ivlq3;

@@ -155,7 +155,7 @@ int test_case_counter = 0;
 /*! \brief Evaluates \a expression and checks if the result is equal to \a expected. */
 #define ARIADNE_TEST_CHECK(expression,expected)                         \
     {                                                                   \
-        std::cout << #expression << ": " << std::flush;                 \
+        std::cout << #expression << ": " << (expression) << std::flush; \
         bool ok = ariadne_check(std::cout,expression,expected);         \
         if(ok) {                                                        \
             std::cout << "\n" << std::endl;                             \
@@ -170,6 +170,34 @@ int test_case_counter = 0;
 /*! \brief Evaluates \a expression and checks if the result is equal to \a expected. */
 #define ARIADNE_TEST_EQUAL(expression,expected)                         \
     ARIADNE_TEST_CHECK(expression,expected)                             \
+                                                                        \
+/*! \brief Evaluates \a expression and checks if the result is equal to \a expected. */
+#define ARIADNE_TEST_UNARY_PREDICATE(predicate,argument)    \
+    {                                                                   \
+        std::cout << #predicate << "(" << #argument << ") with " << #argument << "=" << (argument) << ": " << std::flush; \
+        bool ok = predicate((argument));                  \
+        if(ok) {                                                        \
+            std::cout << "true\n" << std::endl;                         \
+        } else {                                                        \
+            ++ARIADNE_TEST_FAILURES;                                    \
+            std::cout << "\nERROR: false" << std::endl;                 \
+            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Predicate `" << #predicate << "(" << #argument << ")' with " << #argument << "=" << (argument) << " is false." << std::endl; \
+        }                                                               \
+    }       
+                                                                        \
+/*! \brief Evaluates \a expression and checks if the result is equal to \a expected. */
+#define ARIADNE_TEST_BINARY_PREDICATE(predicate,argument1,argument2)    \
+    {                                                                   \
+        std::cout << #predicate << "(" << (#argument1) << "," << (#argument2) << ") with " << #argument1 << "=" << (argument1) << ", " << #argument2 << "=" << (argument2) << ": " << std::flush; \
+        bool ok = predicate((argument1),(argument2));                  \
+        if(ok) {                                                        \
+            std::cout << "true\n" << std::endl;                         \
+        } else {                                                        \
+            ++ARIADNE_TEST_FAILURES;                                    \
+            std::cout << "\nERROR: false" << std::endl;                 \
+            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Predicate `" << #predicate << "(" << #argument1 << "," << #argument2 << ")' with " << #argument1 << "=" << (argument1) << "; " << #argument2 << "=" << (argument2) << " is false." << std::endl; \
+        }                                                               \
+    }       
                                                                         \
 /*! \brief Evaluates \a expression and checks if the result compares correctly with \a expected. */
 #define ARIADNE_TEST_COMPARE(expression,comparison,expected)            \

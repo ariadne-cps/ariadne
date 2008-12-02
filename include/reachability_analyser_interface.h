@@ -30,6 +30,7 @@
 
 #include <boost/smart_ptr.hpp>
 
+#include "set_interface.h"
 #include "hybrid_set_interface.h"
 
 namespace Ariadne {
@@ -38,22 +39,30 @@ namespace Ariadne {
 
 template<class SYS> class ReachabilityAnalyserInterface;
 
-#ifdef DOXYGEN 
-/*! \ingroup EvaluatorInterfaces \ingroup Analysers
- *  \brief Interface for computing (chain) reachable sets of a dynamic system.
+/*! \brief Interface for computing (chain) reachable sets of a dynamic system.
+ *
+ * \sa \link Ariadne::EvolverInterface \c EvolverInterface<SYS,ES> \endlink
  */
 template<class SYS> class ReachabilityAnalyserInterface {
   public:  
     //! \brief The type of the system.
     typedef SYS SystemType;
     //! \brief The type used to define the elapsed evolution time for the system type.
-    typedef typename SYS::TimeType TimeType;
-    typedef OvertSetInterface OvertSetType;
-    typedef CompactSetInterface CompactSetType;
-    typedef LocatedSetInterface LocatedSetType;
-    typedef RegularSetInterface RegularSetType;
-    typedef BoundedSetInterface BoundedSetType;
-    typedef GridTreeSet SetApproximationType;
+    typedef typename SystemType::TimeType TimeType;
+    //! \brief The type used to describe the state space of the system evolution.
+    typedef typename SystemType::StateSpaceType StateSpaceType;
+    //! \brief The type used to describe the interface for overt sets in the state space, which are used as initial sets for lower reachability analysis.
+    typedef typename StateSpaceType::OvertSetInterfaceType OvertSetInterfaceType;
+    //! \brief The type used to describe the interface for compact sets in the state space, which are used as initial sets for upper reachability analysis.
+    typedef typename StateSpaceType::CompactSetInterfaceType CompactSetInterfaceType;
+    //! \brief The type used to describe the interface for located sets in the state space, which are used as initial sets for verification.
+    typedef typename StateSpaceType::LocatedSetInterfaceType LocatedSetInterfaceType;
+    //! \brief The type used to describe the interface for regular sets in the state space, which are used as safe sets for verification.
+    typedef typename StateSpaceType::RegularSetInterfaceType RegularSetInterfaceType;
+    //! \brief The type used to describe the interface for bounded sets in the state space.
+    typedef typename StateSpaceType::BoundedSetInterfaceType BoundedSetInterfaceType;
+    //! \brief The type used to describe the type used for concrete approximations to sets.
+    typedef typename StateSpaceType::SetApproximationType SetApproximationType;
   public:
     //! \brief Virtual destructor.
     virtual ~ReachabilityAnalyserInterface() { }
@@ -64,124 +73,49 @@ template<class SYS> class ReachabilityAnalyserInterface {
     //! \brief Compute an approximation to the set obtained by iterating \a steps times \a system starting in \a initial_set.
     virtual SetApproximationType* 
     lower_evolve(const SystemType& system, 
-                 const OvertSetType& initial_set, 
+                 const OvertSetInterfaceType& initial_set, 
                  const TimeType& steps) const = 0;
     
     //! \brief Compute an approximation to the reachable set of \a system starting in \a initial_set iterating at most \a steps times.
     virtual SetApproximationType* 
     lower_reach(const SystemType& system, 
-                const OvertSetType& initial_set, 
+                const OvertSetInterfaceType& initial_set, 
                 const TimeType& steps) const = 0;
     
     //! \brief Compute an approximation to the set obtained by iterating \a steps times \a system starting in \a initial_set.
     virtual SetApproximationType*
     upper_evolve(const SystemType& system, 
-                 const CompactSetType& initial_set, 
+                 const CompactSetInterfaceType& initial_set, 
                  const TimeType& steps) const = 0;
     
     //! \brief Compute an approximation to the reachable set 
     //! of \a system starting in \a initial_set iterating at most \a steps times.
     virtual SetApproximationType* 
     upper_reach(const SystemType& system, 
-                const CompactSetType& initial_set, 
+                const CompactSetInterfaceType& initial_set, 
                 const TimeType& steps) const = 0;
     
     //! \brief Compute an outer-approximation to the chain-reachable set 
     //! of \a system starting in \a initial_set.
     virtual SetApproximationType* 
     chain_reach(const SystemType& system, 
-                const CompactSetType& initial_set,
-                const BoundedSetType& bounding_set) const = 0;
+                const CompactSetInterfaceType& initial_set) const = 0;
     
     //! \brief Compute an outer-approximation to the viability kernel 
     //! of \a system within \a bounding_set.
     virtual SetApproximationType* 
     viable(const SystemType& system, 
-           const CompactSetType& bounding_set) const = 0;
+           const CompactSetInterfaceType& bounding_set) const = 0;
     
     //! \brief Attempt to verify that the reachable set 
     //! of \a system starting in \a initial_set remains in \a safe_set.
     virtual tribool 
     verify(const SystemType& system, 
-           const LocatedSetType& initial_set, 
-           const RegularSetType& safe_set) const = 0;
+           const LocatedSetInterfaceType& initial_set, 
+           const RegularSetInterfaceType& safe_set) const = 0;
     //@}
     
 };
-#endif // DOXYGEN 
-
-
-
-/* \ingroup EvaluatorInterfaces \ingroup Analysers
- *  \brief Interface for computing (chain) reachable sets of a hybrid system.
- */
-template<> 
-class ReachabilityAnalyserInterface<HybridAutomaton> 
-{
-  public:  
-  public:  
-    // \brief The type of the system.
-    typedef HybridAutomaton SystemType;
-    //  \brief The type used to define the elapsed evolution time for the system type.
-    typedef HybridTime TimeType;
-    typedef HybridOvertSetInterface OvertSetType;
-    typedef HybridCompactSetInterface CompactSetType;
-    typedef HybridLocatedSetInterface LocatedSetType;
-    typedef HybridRegularSetInterface RegularSetType;
-    typedef HybridBoundedSetInterface BoundedSetType;
-    typedef HybridGridTreeSet SetApproximationType;
-  public:
-    //  \brief Virtual destructor. */
-    virtual ~ReachabilityAnalyserInterface() { }
-    
-    //@{
-    //  \name Evaluation of maps on abstract sets
-    
-    //  \brief Compute an approximation to the set obtained by iterating \a steps times \a system starting in \a initial_set.
-    virtual HybridGridTreeSet* 
-    lower_evolve(const HybridAutomaton& system, 
-                 const HybridOvertSetInterface& initial_set, 
-                 const HybridTime& steps) const = 0;
-    
-    //  \brief Compute an approximation to the reachable set of \a system starting in \a initial_set iterating at most \a steps times.
-    virtual HybridGridTreeSet* 
-    lower_reach(const HybridAutomaton& system, 
-                const HybridOvertSetInterface& initial_set, 
-                const HybridTime& steps) const = 0;
-    
-    //  \brief Compute an approximation to the set obtained by iterating \a steps times \a system starting in \a initial_set.
-    virtual HybridGridTreeSet*
-    upper_evolve(const HybridAutomaton& system, 
-                 const HybridCompactSetInterface& initial_set, 
-                 const HybridTime& steps) const = 0;
-    
-    //  \brief Compute an approximation to the reachable set 
-    //  of \a system starting in \a initial_set iterating at most \a steps times.
-    virtual HybridGridTreeSet* 
-    upper_reach(const HybridAutomaton& system, 
-                const HybridCompactSetInterface& initial_set, 
-                const HybridTime& steps) const = 0;
-    
-    //  \brief Compute an outer-approximation to the chain-reachable set 
-    //  of \a system starting in \a initial_set.
-    virtual HybridGridTreeSet* 
-    chain_reach(const HybridAutomaton& system, 
-                const HybridCompactSetInterface& initial_set,
-                const HybridBoxes& bounding_set) const = 0;
-    
-    //  \brief Compute an outer-approximation to the viability kernel 
-    //  of \a system within \a bounding_set.
-    virtual HybridGridTreeSet* viable(const HybridAutomaton& system, 
-                                      const HybridCompactSetInterface& bounding_set) const = 0;
-    
-    //  \brief Attempt to verify that the reachable set 
-    //  of \a system starting in \a initial_set remains in \a safe_set.
-    virtual tribool verify(const HybridAutomaton& system, const HybridLocatedSetInterface& initial_set, const HybridRegularSetInterface& safe_set) const = 0;
-    //@}
-    
-};
-
-
 
 
 } // namespace Ariadne

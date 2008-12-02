@@ -175,14 +175,17 @@ If \f$A\f$ is of full row rank, by choosing a basis such that the basis matrix \
 
 The constrained primal linear programming problem is
 \f[ \text{(CP)} \qquad \min c^Tx \text{ s.t. } Ax=b;\ l\leq x\leq u . \f]
-Given lower bounded variables \f$x_L\f$ and upper bounded variables \f$x_L\f$, the problem becomes 
+Given lower bounded variables \f$x_L\f$ and upper bounded variables \f$x_U\f$, the problem becomes 
 \f[ \min c^Tx \text{ s.t. } Ax=b;\ x_L\geq l_L;\ x_U\leq u_U\f]
 and the dual problem is
 \f[ \text{(DCP)} \qquad \max\ (b^T - l_L^TA_L^T - u_U^T A_U^T)y+l_L^Tc_L + u_U^Tc_U \ \text{ s.t. }\  A_L^Ty\leq c_L;\ A_U^Ty\geq c_U . \f]
 Note that the objective function can be written \f$b^T y +l_L^T (c_L - A_L^Ty) + u_U^T(c_U - A_U^Ty)\f$
 
 <b>Theorem</b>
-Suppose \f$Ax=b;\ l\leq x\leq u\f$ is robust. Then either \f$A\f$ is nonsingular, and there exists \f$x\f$ such that \f$Ax=b\f$ and \f$l<x<u\f$, or there exists column index sets \f$L,U\f$ and \f$y\f$ such that \f$ (b^T-l_L^TA_L^T-u_U^TA_U^T)y>0,\ A_L^Ty<0,\ A_U^Ty>0 . \f$
+The constrained primal linear programming problem \f$Ax=b;\ l\leq x\leq u\f$ is infeasible if, and only if, there exists a partition \f$L,U\f$ of the columns of \f$A\f$, and \f$y\f$ such that \f$ y (b-TA_L l_L - A_U u_U)>0,\ y A_L \leq 0,\ y A_U \geq 0 . \f$
+
+<b>Theorem</b>
+Suppose \f$Ax=b;\ l\leq x\leq u\f$ is robust. Then either \f$A\f$ is nonsingular, and there exists \f$x_N\f$ such that \f$x_B = A_B^{-1} A_N x_N\f$ and \f$l<x<u\f$, or there exists column index sets \f$L,U\f$ and \f$y\f$ such that \f$ (b^T-l_L^TA_L^T-u_U^TA_U^T)y>0,\ A_L^Ty<0,\ A_U^Ty>0 . \f$
 
 To solve the robust problem, we first find a solution to the standard problem, and then try to force saturated constraints to be positive as before.
 
@@ -191,18 +194,22 @@ To solve the robust problem, we first find a solution to the standard problem, a
 
   Suppose we wish to update a basis of the standard linear programming problem.
    - The current point \f$x_B=A_B^{-1} (b - A_N x_N)\f$ (with \f$x_N=0\f$), and satisfies \f$x_B\geq0\f$.
+       - If lower and upper constraints are being used, the non-basic variables are \f$x_L=l_L\f$ and \f$x_U=u_U\f$.
    - The current dual variables are \f$y={(A_B^T)}^{-1}c_B;\ y^T = c_B^T A_B^{-1}\f$.
-   - The reduced costs are \f$z_N=c_N-A_N^T {(A_B^T)}^{-1} c_B; \ z_N^T = c_N^T - c_B^T A_B^{-1} A_N\f$.
-   - If the reduced costs are all positive, the algorithm terminates. Otherwise, select \f$s\f$ such that \f$z_s<0\f$.
+   - The reduced costs are \f$z_N=c_N-A_N^T y; \ z_N^T = c_N^T - y^T A_N\f$.
+   - If the reduced costs are all positive, the optimum has been found and the algorithm terminates. Otherwise, select \f$s\f$ such that \f$z_s<0\f$.
    - The direction to move the basic variables is \f$d=A_B^{-1}a_{s}\f$ where \f$a_{s}\f$ is the \f$s^\textrm{th}\f$ column of \f$A\f$.
    - Choose \f$t\f$ maximal so that \f$x_B-td\geq 0\f$; if the update is being used for feasibility, constraints violated by \f$v\f$ may be violated by \f$v-td\f$. Choose \f$r\f$ corresponding to a newly saturated constraint.
+       - If lower and upper constraints are being used, we must be careful not to violate constraints on the new basic variable. The change in the new basic variable is \f$t\f$, and we must have \f$0 \leq |t| \leq u_s-l_s\f$, with \f$t\leq0\f$ if \f$x_s=u_s\f$, and \f$t\geq0\f$ if \f$x_s=u_s\f$.
    - Replace \f$x_r\f$ by \f$x_s\f$ to obtain new basic \f$B'\f$, and update \f$A_B^{-1}\f$.
-     - We have \f$A_B^{-1} A_B = I\f$ and \f$A_B^{-1}a_s=d\f$ and we want \f$A_{B'}a_s = e_r\f$ if \f$x_r\f$ is the \f$r^\mathrm{th}\f$ basis variable..
+     - We have \f$A_B^{-1} A_B = I\f$ and \f$A_B^{-1}a_s=d\f$ and we want \f$A_{B'}^{-1}a_s = e_r\f$ if \f$x_r\f$ is the \f$r^\mathrm{th}\f$ basis variable..
      - Let \f$d=A_{B}^{-1} a_s\f$ where \f$a_s\f$ is the \f$s^\mathrm{th}\f$ column of \f$A\f$.
      - For \f$p\neq r\f$, subtract \f$\mathrm{B}_{rq}\,d_p/d_r\f$ from \f$\mathrm{B}_{pq}\f$ for all \f$q\f$.
      - Then divide \f$\mathrm{B}_{rq}\f$ by \f$d_r\f$ for all \f$q\f$.
      <br>   
      - Succinctly, \f$A_{B'}^{-1} := A_B^{-1} - (d-e_r) r^T / d_r\f$ where \f$d=A_B^{-1}a_s\f$ and \f$r^T=e_r^T A_B^{-1}\f$.
+     <br>   
+     - The new value \f$x_s\f$ is given by \f$x_s'=x_s+t\f$. The other basic variables \f$x_i\f$ are given by \f$x_i'=x_i-t d_i\f$.
 
 \section dualsimplexalgorithm The dual revised simplex algorithm
 

@@ -47,6 +47,7 @@ ARIADNE_SRC = utilities.cc \
 	ariadne_module.cc \
 	numeric_submodule.cc \
 	linear_algebra_submodule.cc \
+	optimization_submodule.cc \
 	differentiation_submodule.cc \
 	function_submodule.cc \
 	calculus_submodule.cc

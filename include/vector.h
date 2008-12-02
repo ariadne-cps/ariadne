@@ -239,6 +239,16 @@ bool operator<(const Vector<X1>& v1, const Vector<X2>& v2)
 }
 
 
+template<class X>
+bool operator<=(const Vector<X>& v, const X& c)
+{
+    for(size_t i=0; i!=v.size(); ++i) {
+        if(v[i]>c) { return false; }
+    }
+    return true;
+}
+
+
 template<class X> std::ostream& operator<<(std::ostream& os, const Vector<X>& v) {
     if(v.size()==0) { os << '['; }
     for(size_t i=0; i!=v.size(); ++i) { 

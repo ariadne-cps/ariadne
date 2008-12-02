@@ -49,10 +49,35 @@ namespace Ariadne {
 
 typedef int DiscreteState;
 
+class HybridGridTreeSet;
+class HybridImageSet;
+class HybridConstraintSet;
+
+
+
+
+//! \brief A hybrid space \f$\bigsqcup_{q\in Q} \R^{d_q}\f$ with discrete states \f$Q\f$.
 class HybridSpace 
     : public std::map<DiscreteState,uint>
 {
   public:
+    //! \brief The interface satisified by bounded sets in the space.
+    typedef HybridBoundedSetInterface BoundedSetInterfaceType;
+    //! \brief The interface satisified by overt sets in the space.
+    typedef HybridOvertSetInterface OvertSetInterfaceType;
+    //! \brief The interface satisified by over sets in the space.
+    typedef HybridOpenSetInterface OpenSetInterfaceType;
+    //! \brief The interface satisified by closed sets in the space.
+    typedef HybridClosedSetInterface ClosedSetInterfaceType;
+    //! \brief The interface satisified by compact sets in the space.
+    typedef HybridCompactSetInterface CompactSetInterfaceType;
+    //! \brief The interface satisified by regular sets in the space.
+    typedef HybridRegularSetInterface RegularSetInterfaceType;
+    //! \brief The interface satisified by located sets in the space.
+    typedef HybridLocatedSetInterface LocatedSetInterfaceType;
+    //! \brief The type of approximations to sets in the space.
+    typedef HybridGridTreeSet SetApproximationType;
+
     typedef std::map<DiscreteState,uint>::const_iterator 
     locations_const_iterator;
     

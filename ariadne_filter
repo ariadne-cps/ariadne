@@ -21,6 +21,8 @@ s/System:://g
 s/Evaluation:://g
 s/Output:://g
 
+s/Ariadne:://g
+
 s/std::vector/vector/g
 s/std::pair/pair/g
 

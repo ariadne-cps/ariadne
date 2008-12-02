@@ -141,6 +141,9 @@ class RegularSetInterface
 };
 
 
+class GridTreeSet;
+
+
 //! \brief Interface for located (overt and compact) sets. 
 class LocatedSetInterface 
     : public virtual OvertSetInterface,
@@ -168,6 +171,34 @@ class SetInterface
 inline std::ostream& operator<<(std::ostream& os, const SetInterfaceBase& s) {
     return s.write(os); 
 }
+
+
+//! \brief A Euclidean space \f$\R^d\f$ of dimension \a d.
+class EuclideanSpace 
+{
+  public:
+    //! \brief The interface satisified by bounded sets in the space.
+    typedef BoundedSetInterface BoundedSetInterfaceType;
+    //! \brief The interface satisified by overt sets in the space.
+    typedef OvertSetInterface OvertSetInterfaceType;
+    //! \brief The interface satisified by over sets in the space.
+    typedef OpenSetInterface OpenSetInterfaceType;
+    //! \brief The interface satisified by closed sets in the space.
+    typedef ClosedSetInterface ClosedSetInterfaceType;
+    //! \brief The interface satisified by compact sets in the space.
+    typedef CompactSetInterface CompactSetInterfaceType;
+    //! \brief The interface satisified by regular sets in the space.
+    typedef RegularSetInterface RegularSetInterfaceType;
+    //! \brief The interface satisified by located sets in the space.
+    typedef LocatedSetInterface LocatedSetInterfaceType;
+    //! \brief The type of approximations to sets in the space.
+    typedef GridTreeSet SetApproximationType;
+  public:
+    EuclideanSpace(const size_t& d) : _dimension(d) { }
+    const size_t& dimension() const { return this->_dimension; }
+  private:
+    size_t _dimension;
+};
 
 
 } // namespace Ariadne

@@ -41,6 +41,9 @@ enum Semantics { LOWER_SEMANTICS, UPPER_SEMANTICS };
 
   
 /*! \brief Interface for evolving a dynamic system.
+ *
+ * \sa \link Ariadne::ToolboxInterface \c CalculusInterface<S,M,F> \endlink
+ *   , \link Ariadne::ReachabilityAnalyserInterface \c ReachabilityAnalyserInterface<SYS> \endlink
  */
 template<class SYS, class ES> 
 class EvolverInterface 

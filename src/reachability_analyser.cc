@@ -151,10 +151,10 @@ HybridReachabilityAnalyser::_upper_reach_evolve(const HybridAutomaton& sys,
 
 
 
-HybridReachabilityAnalyser::ConcreteSetType*
+HybridGridTreeSet*
 HybridReachabilityAnalyser::
 lower_evolve(const SystemType& system, 
-             const OvertSetType& initial_set,
+             const OvertSetInterfaceType& initial_set,
              const TimeType& time) const
 {
     int grid_depth = this->_parameters->maximum_grid_depth;
@@ -172,10 +172,10 @@ lower_evolve(const SystemType& system,
 
 
 
-HybridReachabilityAnalyser::ConcreteSetType*
+HybridReachabilityAnalyser::SetApproximationType*
 HybridReachabilityAnalyser::
 lower_reach(const SystemType& system, 
-            const OvertSetType& initial_set,
+            const OvertSetInterfaceType& initial_set,
             const TimeType& time) const
 {
     int initial_grid_depth = this->_parameters->initial_grid_depth;
@@ -194,10 +194,10 @@ lower_reach(const SystemType& system,
 
 
 
-std::pair<HybridReachabilityAnalyser::ConcreteSetType*,HybridReachabilityAnalyser::ConcreteSetType*>
+std::pair<HybridReachabilityAnalyser::SetApproximationType*,HybridReachabilityAnalyser::SetApproximationType*>
 HybridReachabilityAnalyser::
 lower_reach_evolve(const SystemType& system, 
-                   const OvertSetType& initial_set,
+                   const OvertSetInterfaceType& initial_set,
                    const TimeType& time) const
 {
     int initial_grid_depth = this->_parameters->initial_grid_depth;
@@ -219,10 +219,10 @@ lower_reach_evolve(const SystemType& system,
 }
 
 
-HybridReachabilityAnalyser::ConcreteSetType*
+HybridReachabilityAnalyser::SetApproximationType*
 HybridReachabilityAnalyser::
 upper_evolve(const SystemType& system, 
-             const CompactSetType& initial_set,
+             const CompactSetInterfaceType& initial_set,
              const TimeType& time) const
 {
     ARIADNE_LOG(2,"HybridReachabilityAnalyser::upper_evolve(...)\n");
@@ -249,10 +249,10 @@ upper_evolve(const SystemType& system,
 
 
 
-HybridReachabilityAnalyser::ConcreteSetType*
+HybridReachabilityAnalyser::SetApproximationType*
 HybridReachabilityAnalyser::
 upper_reach(const SystemType& system, 
-            const CompactSetType& initial_set,
+            const CompactSetInterfaceType& initial_set,
             const TimeType& time) const
 {
     verbosity=0;
@@ -289,10 +289,10 @@ upper_reach(const SystemType& system,
 }
 
 
-std::pair<HybridReachabilityAnalyser::ConcreteSetType*,HybridReachabilityAnalyser::ConcreteSetType*>
+std::pair<HybridReachabilityAnalyser::SetApproximationType*,HybridReachabilityAnalyser::SetApproximationType*>
 HybridReachabilityAnalyser::
 upper_reach_evolve(const SystemType& system, 
-                   const CompactSetType& initial_set,
+                   const CompactSetInterfaceType& initial_set,
                    const TimeType& time) const
 {
     verbosity=0;
@@ -335,10 +335,10 @@ upper_reach_evolve(const SystemType& system,
 
 
 
-HybridReachabilityAnalyser::ConcreteSetType*
+HybridReachabilityAnalyser::SetApproximationType*
 HybridReachabilityAnalyser::
 chain_reach(const SystemType& system, 
-            const CompactSetType& initial_set) const
+            const CompactSetInterfaceType& initial_set) const
 {
     HybridTime hybrid_transient_time(this->_parameters->transient_time,this->_parameters->transient_steps);
     HybridTime hybrid_lock_to_grid_time(this->_parameters->lock_to_grid_time,this->_parameters->lock_to_grid_steps);
@@ -374,14 +374,15 @@ chain_reach(const SystemType& system,
 }
 
 
-HybridReachabilityAnalyser::ConcreteSetType*
+HybridReachabilityAnalyser::SetApproximationType*
 HybridReachabilityAnalyser::
 chain_reach(const SystemType& system, 
-            const CompactSetType& initial_set,
-            const BoundingSetType& bounding_domain) const
+            const CompactSetInterfaceType& initial_set,
+            const BoundingSetType& bounding_set) const
 {
     // FIXME: Use tree sets throughout
 
+    HybridBoxes bounding_domain=bounding_set;
     HybridTime hybrid_transient_time(this->_parameters->transient_time,this->_parameters->transient_steps);
     HybridTime hybrid_lock_to_grid_time(this->_parameters->lock_to_grid_time,this->_parameters->lock_to_grid_steps);
     int maximum_grid_depth = this->_parameters->maximum_grid_depth;
@@ -423,10 +424,10 @@ chain_reach(const SystemType& system,
 
 
 
-HybridReachabilityAnalyser::ConcreteSetType*
+HybridReachabilityAnalyser::SetApproximationType*
 HybridReachabilityAnalyser::
 viable(const SystemType& system, 
-       const CompactSetType& bounding_set) const
+       const CompactSetInterfaceType& bounding_set) const
 {
     ARIADNE_NOT_IMPLEMENTED;
 }
@@ -436,8 +437,8 @@ viable(const SystemType& system,
 tribool
 HybridReachabilityAnalyser::
 verify(const SystemType& system, 
-       const LocatedSetType& initial_set, 
-       const RegularSetType& safe_set) const
+       const LocatedSetInterfaceType& initial_set, 
+       const RegularSetInterfaceType& safe_set) const
 {
     ARIADNE_NOT_IMPLEMENTED;
 }

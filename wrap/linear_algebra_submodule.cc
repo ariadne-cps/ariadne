@@ -27,8 +27,6 @@
 #include "vector.h"
 #include "matrix.h"
 
-#include "linear_programming.h"
-
 #include "utilities.h"
 
 #include <boost/python.hpp>
@@ -175,15 +173,6 @@ void export_matrix()
     def("inverse",(Matrix<X>(*)(const Matrix<X>&)) &inverse);
 }
 
-template<class X>
-void export_linear_programming()
-{
-    class_<tribool> tribool_class("tribool",no_init);
-    tribool_class.def(boost::python::self_ns::str(self));
-    
-    def("feasible",(tribool(*)(const Matrix<X>&,const Vector<X>&,const Vector<X>&,const Vector<X>&)) &feasible);
-}
-   
 template void export_vector<Float>();
 template void export_vector<Interval>();
 template void export_matrix<Float>();
@@ -193,7 +182,6 @@ template void export_matrix<Interval>();
 #ifdef HAVE_GMPXX_H
 template void export_vector<Rational>();
 template void export_matrix<Rational>();
-template void export_linear_programming<Rational>();
 #endif
 
 
@@ -205,6 +193,5 @@ void linear_algebra_submodule() {
 #ifdef HAVE_GMPXX_H
     export_vector<Rational>();
     export_matrix<Rational>();
-    export_linear_programming<Rational>();
 #endif
 }

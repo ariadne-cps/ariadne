@@ -37,9 +37,32 @@ using namespace boost::numeric;
 
 namespace Ariadne {
 
-//! Test if there exists a point \f$e\f$ with \f$l \leq e \leq u\f$ and \f$l\leq Ae=b\f$.
-template<class X> tribool feasible(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u);
+enum VariableType { BASIS, NONBASIS, LOWER, UPPER, FEASIBLE, INFEASIBLE };
+std::ostream& operator<<(std::ostream& os, VariableType t);
 
+
+//! Test if there exists a point \f$x\f$ with \f$0 \leq x\f$ and \f$Ax=b\f$.
+template<class X> tribool 
+primal_feasible(const Matrix<X>& A, const Vector<X>& b);
+
+//! Test if there exists a point \f$y\f$ with \f$yA\leq c\f$.
+template<class X> tribool 
+dual_feasible(const Matrix<X>& A, const Vector<X>& c);
+
+//! Test if there exists a point \f$x\f$ with \f$l \leq x \leq u\f$ and \f$Ax=b\f$.
+template<class X> tribool 
+constrained_feasible(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u);
+
+//! Tests if \f$yb>\f$ and $\fyA\leq 0\f$.
+template<class X> void 
+verify_infeasibility(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& y);
+
+template<class X> std::pair< array<size_t>, Matrix<X> > 
+compute_basis(const Matrix<X>& A);
+   
+    
+template<class X>
+bool lpstep(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& c, array<size_t>& p, Matrix<X>& B, Vector<X>& x);
 
 } // namespace Ariadne
 

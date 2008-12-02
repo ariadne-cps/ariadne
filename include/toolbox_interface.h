@@ -41,7 +41,10 @@ template<class X> class Vector;
 
 
 
-/*! \brief Tools for analysing dynamical systems based on function models. */
+/*! \brief Tools for analysing dynamical systems based on function models. 
+ * 
+ * \sa \link Ariadne::EvolverInterface \c EvolverInterface<SYS,ES>
+ */
 template<class Mdl> 
 class ToolboxInterface
 {

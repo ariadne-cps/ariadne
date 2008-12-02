@@ -21,6 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+#include "config.h"
+
 #include "numeric.h"
 
 #include <boost/python.hpp>
@@ -56,9 +58,24 @@ void read(Interval& ivl, const boost::python::object& obj) {
 
 
 
+void export_tribool()
+{
+    class_<tribool> tribool_class("tribool",no_init);
+    tribool_class.def(boost::python::self_ns::str(self));
+}
+
 void export_float() 
 {
 }
+
+#ifdef HAVE_GMPXX_H
+void export_rational()
+{
+    class_<Rational> rational_class("Rational",init<int,int>());
+    rational_class.def(boost::python::self_ns::str(self));
+    rational_class.def("__less__",(bool(*)(const Rational&, const Rational&)) &operator<);
+}
+#endif
 
 void export_interval() 
 {
@@ -124,6 +141,11 @@ void export_interval()
 void 
 numeric_submodule()
 {
+    export_tribool();
     export_float();
     export_interval();
+
+#ifdef HAVE_GMPXX_H
+    export_rational();
+#endif
 }

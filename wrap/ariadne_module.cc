@@ -26,6 +26,7 @@
 
 void numeric_submodule();
 void linear_algebra_submodule();
+void optimization_submodule();
 void differentiation_submodule();
 void function_submodule();
 void calculus_submodule();
@@ -34,6 +35,7 @@ BOOST_PYTHON_MODULE(ariadne)
 {
     numeric_submodule();
     linear_algebra_submodule();
+    optimization_submodule();
     differentiation_submodule();
     function_submodule();
     calculus_submodule();

@@ -61,7 +61,6 @@ static const double DEFAULT_GRID_LENGTH=0.125;
 
 static int verbosity=global_verbosity;
 
-
 HybridReachabilityAnalyser::
 ~HybridReachabilityAnalyser()
 {
@@ -233,11 +232,12 @@ upper_evolve(const SystemType& system,
     GTS& evolve=*new GTS(initial);
     ARIADNE_LOG(4,"initial_evolve="<<evolve<<"\n");
     Float real_time=time.first;
+    uint discrete_steps=time.second;
     Float lock_to_grid_time=this->_parameters->lock_to_grid_time;
     uint time_steps=uint(real_time/lock_to_grid_time);
     Float remainder_time=real_time-time_steps*lock_to_grid_time;
-    HybridTime hybrid_lock_to_grid_time(lock_to_grid_time,time_steps);
-    HybridTime hybrid_remainder_time(remainder_time,time_steps);
+    HybridTime hybrid_lock_to_grid_time(lock_to_grid_time,discrete_steps);
+    HybridTime hybrid_remainder_time(remainder_time,discrete_steps);
     for(uint i=0; i!=time_steps; ++i) {
         evolve=this->_upper_evolve(system,evolve,hybrid_lock_to_grid_time,grid_depth);
     }
@@ -255,7 +255,7 @@ upper_reach(const SystemType& system,
             const CompactSetInterfaceType& initial_set,
             const TimeType& time) const
 {
-    verbosity=0;
+    verbosity=global_verbosity;
     ARIADNE_LOG(2,"HybridReachabilityAnalyser::upper_reach(system,set,time)\n");
     ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
     GTS initial;
@@ -268,13 +268,16 @@ upper_reach(const SystemType& system,
     GTS& reach=*new GTS(evolve);
     ARIADNE_LOG(4,"reach="<<reach<<"\n");
     Float real_time=time.first;
+    uint discrete_steps=time.second;
     Float lock_to_grid_time = this->_parameters->lock_to_grid_time;
     uint time_steps=uint(real_time/lock_to_grid_time);
     Float remainder_time=real_time-time_steps*lock_to_grid_time;
-    HybridTime hybrid_lock_to_grid_time(lock_to_grid_time,time_steps);
-    HybridTime hybrid_remainder_time(remainder_time,time_steps);
-    ARIADNE_LOG(5,"evolve="<<evolve<<"\n");
+    HybridTime hybrid_lock_to_grid_time(lock_to_grid_time,discrete_steps);
+    HybridTime hybrid_remainder_time(remainder_time,discrete_steps);
+    ARIADNE_LOG(5,"real_time="<<real_time<<"\n");
+    ARIADNE_LOG(5,"time_steps="<<time_steps<<"  lock_to_grid_time="<<lock_to_grid_time<<"\n");
     for(uint i=0; i!=time_steps; ++i) {
+        ARIADNE_LOG(5,"computing "<<i<<"-th reachability step...\n");
         reach.adjoin(this->_upper_reach(system,evolve,hybrid_lock_to_grid_time,grid_depth));
         ARIADNE_LOG(5,"reach="<<reach<<"\n");
         reach.recombine();
@@ -282,6 +285,7 @@ upper_reach(const SystemType& system,
         evolve=this->_upper_evolve(system,evolve,hybrid_lock_to_grid_time,grid_depth);
         ARIADNE_LOG(5,"evolve="<<evolve<<"\n");
     }
+    ARIADNE_LOG(5,"remainder_time="<<remainder_time<<"\n");
     reach.adjoin(this->_upper_reach(system,evolve,hybrid_remainder_time,grid_depth));
     reach.recombine();
     ARIADNE_LOG(4,"final_reach="<<reach<<"\n");
@@ -295,7 +299,7 @@ upper_reach_evolve(const SystemType& system,
                    const CompactSetInterfaceType& initial_set,
                    const TimeType& time) const
 {
-    verbosity=0;
+    verbosity=global_verbosity;
     ARIADNE_LOG(2,"HybridReachabilityAnalyser::upper_reach(system,set,time)\n");
     ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
     GTS initial;
@@ -308,11 +312,12 @@ upper_reach_evolve(const SystemType& system,
     GTS& reach=*new GTS(initial);
     ARIADNE_LOG(4,"reach="<<reach<<"\n");
     Float real_time=time.first;
+    uint discrete_steps=time.second;
     Float lock_to_grid_time = this->_parameters->lock_to_grid_time;
     uint time_steps=uint(real_time/lock_to_grid_time);
     Float remainder_time=real_time-time_steps*lock_to_grid_time;
-    HybridTime hybrid_lock_to_grid_time(lock_to_grid_time,time_steps);
-    HybridTime hybrid_remainder_time(remainder_time,time_steps);
+    HybridTime hybrid_lock_to_grid_time(lock_to_grid_time,discrete_steps);
+    HybridTime hybrid_remainder_time(remainder_time,discrete_steps);
     ARIADNE_LOG(5,"evolve="<<evolve<<"\n");
     for(uint i=0; i!=time_steps; ++i) {
         reach.adjoin(this->_upper_reach(system,evolve,hybrid_lock_to_grid_time,grid_depth));

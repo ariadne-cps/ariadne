@@ -113,25 +113,26 @@ int main()
 
 
     /// Create a ReachabilityAnalyser object
+    global_verbosity = 6;
     HybridReachabilityAnalyser analyser(evolver);
     analyser.parameters().lock_to_grid_time = 32.0;
-    analyser.parameters().grid_lengths = 0.02;
+    analyser.parameters().grid_lengths = 0.2;
     std::cout <<  analyser.parameters() << std::endl;
 
     HybridImageSet initial_set;
     initial_set[l1]=initial_box;
 
-    HybridTime reach_time(4.0,6);
+    HybridTime reach_time(4.0,2);
 
     plot("ball-initial_set1",bounding_box, Colour(0.0,0.5,1.0), initial_set);
 
     // Compute evolved sets (i.e. at the evolution time) and reach sets (i.e. up to the evolution time) using lower semantics.
     // These functions run a bunch of simulations with bounded approximation errors and combines the results.
     // If the desired evolution time can not be attained without exceeding the error bounds, then the run discarded (without warning)
-    std::cout << "Computing lower reach set... " << std::flush;
-    HybridGridTreeSet* lower_reach_set_ptr = analyser.lower_reach(ball,initial_set,reach_time);
-    std::cout << "done." << std::endl;
-    plot("ball-lower_reach",bounding_box, Colour(0.0,0.5,1.0), *lower_reach_set_ptr);
+ //   std::cout << "Computing lower reach set... " << std::flush;
+ //   HybridGridTreeSet* lower_reach_set_ptr = analyser.lower_reach(ball,initial_set,reach_time);
+ //   std::cout << "done." << std::endl;
+ //   plot("ball-lower_reach",bounding_box, Colour(0.0,0.5,1.0), *lower_reach_set_ptr);
 
     // Compute evolved sets and reach sets using upper semantics.
     // These functions compute over-approximations to the evolved and reachabe sets. Subdivision is used

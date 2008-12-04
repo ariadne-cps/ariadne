@@ -172,7 +172,7 @@ int main()
     HybridImageSet initial_set;
     initial_set[l2]=initial_box;
 
-    HybridTime reach_time(64.0,6);
+    HybridTime reach_time(64.0,2);
 
     plot("watertank-initial_set1",bounding_box, Colour(0.0,0.5,1.0), initial_set);
 

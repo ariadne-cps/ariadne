@@ -31,6 +31,7 @@
 #include "function.h"
 #include "approximate_taylor_model.h"
 
+#include "zonotope.h"
 
 namespace Ariadne {
 
@@ -809,6 +810,24 @@ disjoint(const ApproximateTaylorModel& f,
          const Vector<Interval>& g)
 {
     return disjoint(f.range(),g) || indeterminate;
+}
+
+
+Zonotope 
+zonotope(const ApproximateTaylorModel& f)
+{
+    Vector<Float> c=f.expansion().get_value();
+    Matrix<Float> G=f.expansion().get_jacobian();
+    Vector<Float> e(f.result_size());
+    for(uint i=0; i!=f.result_size(); ++i) {
+        const SparseDifferential<Float>& d=f.expansion()[i];
+        for(SparseDifferential<Float>::const_iterator iter=d.begin(); iter!=d.end(); ++iter) {
+            if(iter->first.degree()>=2) {
+                e[i]=add_up(e[i],abs(iter->second));
+            }
+        }
+    }
+    return Zonotope(c,G,e);
 }
 
 

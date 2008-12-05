@@ -105,7 +105,9 @@ int main(int argc, char **argv)
     }
 
     g.clear();
+    g.set_line_colour(1,0,0);
     g.draw(cv);
+    g.set_line_colour(0,0,0);
     g.write("test_graphics-cv");
 
     GridTreeSet gts(2);

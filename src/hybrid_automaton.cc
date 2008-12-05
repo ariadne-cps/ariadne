@@ -36,6 +36,14 @@ class HybridSet {};
 
 class HybridSpace : public std::map<DiscreteState,DimensionType> {};
 
+
+std::ostream& 
+operator<<(std::ostream& os, const HybridTime& ht) 
+{
+    return os << "("<<ht.continuous_time<<","<<ht.discrete_time<<")";
+}
+
+
 uint 
 DiscreteMode::
 dimension() const 

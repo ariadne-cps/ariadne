@@ -39,12 +39,25 @@
 
 namespace Ariadne {  
 
-struct HybridTime :
-        public std::pair<double,int>
+//! \brief A value in a hybrid time domain, being a pair comprising a real \a continuous_time 
+//! and an integer \a discrete_time. 
+//!
+//! When a %HybridTime is used to define a bound on a hybrid evolution, the evolution should
+//! stop when <em>either</em> the continuous time or the discrete time reaches the bounding
+//! value. This is to ensure that the evolution time is finite; in particular, that no
+//! Zeno behaviour occurs.
+struct HybridTime
 {
+    //! \brief The continuous (real, physical) time.
+    double continuous_time;
+    //! \brief The number of discrete steps taken.
+    int discrete_time;
+  public:
     HybridTime(double t, int n)
-        : std::pair<double,int>(t,n) { } 
+        : continuous_time(t), discrete_time(n) { } 
 };
+
+std::ostream& operator<<(std::ostream& os, const HybridTime& ht);
 
 
 //! \brief Type of a discrete state of a hybrid system.
@@ -263,7 +276,7 @@ class HybridAutomaton
 {
   public:
     //! \brief The type used to represent time. 
-    typedef std::pair<double,int> TimeType;
+    typedef HybridTime TimeType;
     //! \brief The type used to represent real numbers. 
     typedef double RealType ;
     //! \brief The type used to describe the state space. 

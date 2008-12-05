@@ -205,8 +205,8 @@ _evolution(EnclosureListType& final_sets,
 
     ARIADNE_LOG(5,__PRETTY_FUNCTION__<<"\n");
 
-    const IntegerType maximum_steps=maximum_hybrid_time.second;
-    const Float maximum_time=maximum_hybrid_time.first;
+    const IntegerType maximum_steps=maximum_hybrid_time.discrete_time;
+    const Float maximum_time=maximum_hybrid_time.continuous_time;
 
     const uint spacial_order=2;
     const uint temporal_order=4;

@@ -231,8 +231,8 @@ upper_evolve(const SystemType& system,
     ARIADNE_LOG(4,"initial="<<initial<<"\n");
     GTS& evolve=*new GTS(initial);
     ARIADNE_LOG(4,"initial_evolve="<<evolve<<"\n");
-    Float real_time=time.first;
-    uint discrete_steps=time.second;
+    Float real_time=time.continuous_time;
+    uint discrete_steps=time.discrete_time;
     Float lock_to_grid_time=this->_parameters->lock_to_grid_time;
     uint time_steps=uint(real_time/lock_to_grid_time);
     Float remainder_time=real_time-time_steps*lock_to_grid_time;
@@ -267,8 +267,8 @@ upper_reach(const SystemType& system,
     ARIADNE_LOG(4,"evolve="<<evolve<<"\n");
     GTS& reach=*new GTS(evolve);
     ARIADNE_LOG(4,"reach="<<reach<<"\n");
-    Float real_time=time.first;
-    uint discrete_steps=time.second;
+    Float real_time=time.continuous_time;
+    uint discrete_steps=time.discrete_time;
     Float lock_to_grid_time = this->_parameters->lock_to_grid_time;
     uint time_steps=uint(real_time/lock_to_grid_time);
     Float remainder_time=real_time-time_steps*lock_to_grid_time;
@@ -311,8 +311,8 @@ upper_reach_evolve(const SystemType& system,
     ARIADNE_LOG(4,"evolve="<<evolve<<"\n");
     GTS& reach=*new GTS(initial);
     ARIADNE_LOG(4,"reach="<<reach<<"\n");
-    Float real_time=time.first;
-    uint discrete_steps=time.second;
+    Float real_time=time.continuous_time;
+    uint discrete_steps=time.discrete_time;
     Float lock_to_grid_time = this->_parameters->lock_to_grid_time;
     uint time_steps=uint(real_time/lock_to_grid_time);
     Float remainder_time=real_time-time_steps*lock_to_grid_time;

@@ -32,6 +32,21 @@ using namespace Ariadne;
 
 namespace Ariadne {
 
+void read(TaylorVariable& tv, const boost::python::object& obj) {
+    uint as;
+    uint d;
+    Interval e;
+    array<Float> x;
+    boost::python::tuple tup=extract<boost::python::tuple>(obj);
+    assert(len(tup)==4);
+    as=extract<uint>(tup[0]);
+    d=extract<uint>(tup[1]);
+    read_scalar(e,tup[2]);
+    read_array(x,tup[3]);
+    tv=TaylorVariable(as,d,e,x.begin());
+}
+   
+
 TaylorVariable*
 make_taylor_variable(const uint& as, const uint& d, const Interval& e, const boost::python::object& obj) 
 {

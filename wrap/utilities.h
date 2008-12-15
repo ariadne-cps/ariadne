@@ -44,6 +44,11 @@ template<class T> std::ostream& repr(std::ostream& os, const T& t) {
     return os << t;
 }
 
+template<class T> std::string __str__(const T& t) {
+    std::stringstream ss;
+    ss << t;
+    return ss.str();
+}
 
 template<class T> std::string __repr__(const T& t) {
     std::stringstream ss;

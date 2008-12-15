@@ -21,6 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+
 #include "numeric.h"
 #include "function_set.h"
 #include "grid_set.h"
@@ -32,45 +33,33 @@ using namespace boost::python;
 
 
 
-void export_grid_set() 
+
+void export_grid() 
 {
     typedef Vector<Float> RVector;
     typedef Vector<Interval> IVector;
   
-    class Zonotope;
-
-    class_< Grid > grid_class("Grid",init<uint>());
+    class_< Grid > grid_class("Grid",no_init);
+    grid_class.def(init<uint>());
     grid_class.def(init<uint,Float>());
-    grid_class.def(init<RVector,RVector>());
+    grid_class.def(init< Vector<Float>, Vector<Float> >());
     grid_class.def("dimension", &Grid::dimension);
-    grid_class.def("origin", &Grid::origin);
-    grid_class.def("lengths", &Grid::lengths);
+    grid_class.def("origin", &Grid::origin, return_value_policy<copy_const_reference>());
+    grid_class.def("lengths", &Grid::lengths, return_value_policy<copy_const_reference>());
     grid_class.def(self_ns::str(self));
+}
 
 
-    class_<Cell> cell_class("Cell",no_init);
-    cell_class.def("dimension", &Cell::dimension);
-    cell_class.def("box", &Cell::box);
+void export_grid_cell() 
+{
+    class_<GridCell> cell_class("GridCell",no_init);
+    cell_class.def("dimension", &GridCell::dimension);
+    cell_class.def("box", &GridCell::box, return_value_policy<copy_const_reference>());
     cell_class.def(self_ns::str(self));
-  
+}
 
-    class_<CellList> cell_list_class("CellList",init<const Grid&>());
-    cell_list_class.def(init<CellList>());
-    cell_list_class.def("clear", &CellList::clear);
-    cell_list_class.def("dimension", &CellList::dimension);
-    cell_list_class.def("size", &CellList::size);
-    cell_list_class.def("__len__", &CellList::size);
-    //cell_list_class.def("__getitem__", &__getitem__<CellList>);
-    //cell_list_class.def("__iter__", iterator<CellList>());
-    cell_list_class.def("pop", &CellList::pop);
-    cell_list_class.def("unique_sort", &CellList::unique_sort);
-    cell_list_class.def("adjoin", (void(CellList::*)(const Cell&))(&CellList::adjoin));
-    cell_list_class.def("adjoin", (void(CellList::*)(const CellList&))(&CellList::adjoin));
-    cell_list_class.def("adjoin_over_approximation", &CellList::adjoin_over_approximation);
-    cell_list_class.def("adjoin_outer_approximation", &CellList::adjoin_outer_approximation);
-    cell_list_class.def(self_ns::str(self));
 
- 
+void export_grid_tree_set() {
     class_<GridTreeSet> grid_tree_set_class("GridTreeSet",init<Grid>());
     grid_tree_set_class.def(init<uint>());
     grid_tree_set_class.def(init<GridTreeSet>());
@@ -79,21 +68,17 @@ void export_grid_set()
     grid_tree_set_class.def("dimension", &GridTreeSet::dimension);
     grid_tree_set_class.def("clear", &GridTreeSet::clear);
     grid_tree_set_class.def("grid", &GridTreeSet::grid,return_value_policy<copy_const_reference>());
-    grid_tree_set_class.def("adjoin", (void(GridTreeSet::*)(const Cell&))(&GridTreeSet::adjoin));
-    grid_tree_set_class.def("adjoin", (void(GridTreeSet::*)(const CellList&))(&GridTreeSet::adjoin));
-    grid_tree_set_class.def("adjoin", (void(GridTreeSet::*)(const GridTreeSet&))(&GridTreeSet::adjoin));
-    grid_tree_set_class.def("restrict", (void(GridTreeSet::*)(const CellList&))(&GridTreeSet::restrict));
-    grid_tree_set_class.def("restrict", (void(GridTreeSet::*)(const GridTreeSet&))(&GridTreeSet::restrict));
-    grid_tree_set_class.def("remove", (void(GridTreeSet::*)(const GridTreeSet&))(&GridTreeSet::remove));
-    grid_tree_set_class.def("adjoin_over_approximation", &GridTreeSet::adjoin_over_approximation);
-    grid_tree_set_class.def("adjoin_outer_approximation", &GridTreeSet::adjoin_outer_approximation);
-    grid_tree_set_class.def("adjoin_inner_approximation", &GridTreeSet::adjoin_inner_approximation);
-    grid_tree_set_class.def("neighbourhood", &GridTreeSet::neighbourhood);
-    grid_tree_set_class.def("adjoining", &GridTreeSet::adjoining);
+    grid_tree_set_class.def("adjoin", (void(GridTreeSet::*)(const GridCell&))(&GridTreeSet::adjoin));
+    grid_tree_set_class.def("adjoin", (void(GridTreeSet::*)(const GridTreeSubset&))(&GridTreeSet::adjoin));
+    grid_tree_set_class.def("restrict", (void(GridTreeSet::*)(const GridTreeSubset&))(&GridTreeSet::restrict));
+    grid_tree_set_class.def("remove", (void(GridTreeSet::*)(const GridTreeSubset&))(&GridTreeSet::remove));
+    grid_tree_set_class.def("adjoin_over_approximation", (void(GridTreeSet::*)(const Box&,const uint)) &GridTreeSet::adjoin_over_approximation);
+    grid_tree_set_class.def("adjoin_outer_approximation", (void(GridTreeSet::*)(const CompactSetInterface&,const uint)) &GridTreeSet::adjoin_outer_approximation);
+    grid_tree_set_class.def("adjoin_inner_approximation", (void(GridTreeSet::*)(const OpenSetInterface&,const uint,const uint)) &GridTreeSet::adjoin_inner_approximation);
     grid_tree_set_class.def("size", &GridTreeSet::size);
-    grid_tree_set_class.def("capacity", &GridTreeSet::capacity);
     grid_tree_set_class.def("__len__", &GridTreeSet::size);
-    //grid_tree_set_class.def("__iter__", iterator<GridTreeSet>());
+    //grid_tree_set_class.def("__iter__", boost::python::iterator<GridTreeSet>());
+    //grid_tree_set_class.def("__iter__", boost::python::const_iterator<GridTreeSet>());
     grid_tree_set_class.def(self_ns::str(self));
 
 
@@ -107,7 +92,10 @@ void export_grid_set()
 }
 
 
-storage_submodule()
+void storage_submodule()
 {
-    export_grid_set();
+    export_grid();
+    export_grid_cell();
+    export_grid_tree_set();
 }
+

@@ -261,7 +261,7 @@ TestInterval::test_misc()
         cout << endl;
     
         // Check to make sure aliases are handled correctly
-        ivlf1=ivlf3; ivlf1=ivlf2-ivlf1; ARIADNE_TEST_BINARY_PREDICATE(equal,ivlf1+1,I(ivlf2-ivlf3));
+        ivlf1=ivlf3; ivlf1=ivlf2-ivlf1; ARIADNE_TEST_BINARY_PREDICATE(equal,ivlf1,I(ivlf2-ivlf3));
         ivlf1=ivlf3; ivlf1=ivlf2*ivlf1; ARIADNE_TEST_BINARY_PREDICATE(equal,ivlf1,I(ivlf2*ivlf3));
         ivlf1=ivlf2; ivlf1=ivlf1*ivlf3; ARIADNE_TEST_BINARY_PREDICATE(equal,ivlf1,I(ivlf2*ivlf3));
         ivlf1=ivlf2; ivlf1=ivlf1*f3; ARIADNE_TEST_BINARY_PREDICATE(equal,ivlf1,I(ivlf2*f3));

@@ -32,6 +32,8 @@
 #include "approximate_taylor_model.h"
 
 #include "zonotope.h"
+#include "polytope.h"
+#include "graphics.h"
 
 namespace Ariadne {
 
@@ -886,5 +888,8 @@ operator<<(latexstream& texs, const ApproximateTaylorModel& p)
 }
 
 
+void draw(Figure& fig, const ApproximateTaylorModel& atm) {
+    draw(fig,zonotope(atm));
+}
 
 } // namespace Ariadne

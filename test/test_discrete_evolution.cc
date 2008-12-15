@@ -126,7 +126,7 @@ void TestDiscreteEvolver::test() const
     //cout << "reach_set=" << hybrid_reach_set << endl;
   
     // Print the intial, evolve and reach sets
-    Graphic fig;
+    Figure fig;
     fig << line_style(true) << fill_colour(cyan) << hybrid_reach_set;
     fig << fill_colour(yellow) << hybrid_evolve_set;
     fig << fill_colour(blue) << initial_set;

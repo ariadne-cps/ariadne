@@ -1383,6 +1383,16 @@ void GridTreeSet::adjoin_lower_approximation( const Grid & theGrid, BinaryTreeNo
     }
 }
     
+void GridTreeSet::adjoin_over_approximation( const Box& theBox, const uint depth ) {
+    // FIXME: This adjoins an outer approximation; change to ensure only overlapping cells are adjoined
+    for(size_t i=0; i!=theBox.dimension(); ++i) {
+        if(theBox[i].lower()>=theBox[i].upper()) {
+            ARIADNE_THROW(std::runtime_error,"GridTreeSet::adjoin_over_approximation(Box,uint)","Box "<<theBox<<" has empty interior.");
+        }
+    }
+    this->adjoin_outer_approximation(theBox,depth);
+}
+
 void GridTreeSet::adjoin_outer_approximation( const CompactSetInterface& theSet, const uint depth ) {
     Grid theGrid( this->cell().grid() );
     ARIADNE_ASSERT( theSet.dimension() == this->cell().dimension() );
@@ -1666,6 +1676,13 @@ void GridTreeSet::remove_from_lower( const GridTreeSubset& theOtherSubPaving ){
     }
 }
     
+void GridTreeSet::clear(  ) {
+    // TODO: Pieter: This implementation may not be optimal. Please could you
+    // check this, Ivan.
+    *this=GridTreeSet(this->grid());
+}
+
+
 void GridTreeSet::restrict( const GridTreeSubset& theOtherSubPaving ) {
     const uint thisPavingPCellHeight = this->cell().height();
     const uint otherPavingPCellHeight = theOtherSubPaving.cell().height();

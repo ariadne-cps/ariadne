@@ -117,14 +117,14 @@ class TestReachabilityAnalysis
     }
 
     template<class S> void plot(const char* name, const Box& bounding_box, const S& set) {
-        Graphic g;
+        Figure g;
         g << fill_colour(white) << bounding_box << line_style(true);
         g << fill_colour(blue) << set;
         g.write(name);
     }
 
     template<class S, class IS> void plot(const char* name, const Box& bounding_box, const S& set, const IS& initial_set) {
-        Graphic g;
+        Figure g;
         g << fill_colour(white) << bounding_box;
         g << line_style(true);
         g << fill_colour(red) << set;
@@ -135,7 +135,7 @@ class TestReachabilityAnalysis
 
     template<class ES, class RS, class IS> void plot(const char* name, const Box& bounding_box, 
                                                      const ES& evolve_set, const RS& reach_set, const IS& initial_set) {
-        Graphic g;
+        Figure g;
         g << fill_colour(white) << bounding_box;
         g << line_style(true);
         g << fill_colour(green) << reach_set;

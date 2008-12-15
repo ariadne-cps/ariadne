@@ -65,7 +65,7 @@ int main(int argc, char **argv)
     ConstraintSet cs1(Box(1u,Interval(-1,0)),radius);
     
 
-    Graphic g;
+    Figure g;
     g << fill_colour(0.5,1.0,1.0)
       << bx1
       << bx2

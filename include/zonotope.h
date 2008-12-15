@@ -35,6 +35,8 @@
 #include "vector.h"
 #include "matrix.h"
 
+#include "set_interface.h"
+
 namespace Ariadne {
 
 template<class X> class Vector;
@@ -47,6 +49,7 @@ template<class BS> class ListSet;
 
 class AffineModel;
 
+class Figure;
 
 
 /*!\brief A zonotope of arbitrary dimension.
@@ -71,14 +74,19 @@ class AffineModel;
  * (kd+i)th element.
  */
 
-class Zonotope {
+
+class Zonotope 
+    : public CompactSetInterface
+{
   private:
     Vector<Float> _centre;
     Matrix<Float> _generators;
     Vector<Float> _error;
   public:
     //@{
-    //! \name Constructors
+    //! \name Constructors and destructors
+    /*! \brief Virtual destructor. */
+    virtual ~Zonotope();
     /*! \brief Default constructor yields a zonotope with dimension zero and no generators. */
     explicit Zonotope();
     /*! \brief Construct a zonotope of dimension \a d with no generators. */
@@ -107,6 +115,8 @@ class Zonotope {
     Zonotope(const Zonotope& z);
     /*! \brief Copy assignment operator. */
     Zonotope& operator=(const Zonotope& z);
+    /*! \brief Cloning operator. */
+    Zonotope* clone() const;
   
     //@}
   
@@ -138,6 +148,11 @@ class Zonotope {
   
     /*! \brief Test if the set contains a point. */
     tribool contains(const Point& pt) const;
+  
+    /*! \brief Test if the set is disjoint from a box. */
+    tribool disjoint(const Vector<Interval>& bx) const;
+    /*! \brief Test if the set is a subset of a box. */
+    tribool subset(const Vector<Interval>& bx) const;
   
     //@}
   
@@ -175,6 +190,12 @@ class Zonotope {
     /*! \brief Compute the image of \a z under a function given by the concrete model \a am. */
     friend Zonotope apply(const AffineModel& am, const Zonotope& z);
     //@}
+  
+    //@{
+    //! \name Input/output.
+    /*! \brief Write to an output stream. */
+    std::ostream& write(std::ostream& os) const;
+    //@}
 };
 
 
@@ -211,9 +232,7 @@ Zonotope::Zonotope(uint d, uint m, const X* ptr)
 {
 }
 
-class Polytope;
-Polytope polytope(const Zonotope& z);
-template<class G> void draw(G& g, const Zonotope& z) { g.draw(polytope(z)); }
+void draw(Figure& fig, const Zonotope& z);
 
 } // namespace Ariadne
 

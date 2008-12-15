@@ -150,7 +150,7 @@ void TestDiscretisedEvolution::test_discrete_time() const
 
     // Print the intial, evolve and reach sets
     {
-        Graphic fig;
+        Figure fig;
         fig.set_bounding_box(Box(2,Interval(-3,3)));
         fig << line_style(true);
         fig << line_style(true);
@@ -163,7 +163,7 @@ void TestDiscretisedEvolution::test_discrete_time() const
 
     // Print the intial, evolve and reach sets
     {
-        Graphic fig;
+        Figure fig;
         fig.set_bounding_box(Box(2,Interval(-3,3)));
         fig << line_style(true);
         fig << fill_colour(cyan) << reach_set;
@@ -244,7 +244,7 @@ void TestDiscretisedEvolution::test_continuous_time() const
 
     // Print the intial, evolve and reach sets
     {
-        Graphic fig;
+        Figure fig;
         fig.set_bounding_box(Box(2,Interval(-3,3)));
         fig << line_style(true);
         fig << line_style(true);
@@ -257,7 +257,7 @@ void TestDiscretisedEvolution::test_continuous_time() const
 
     // Print the intial, evolve and reach sets
     {
-        Graphic fig;
+        Figure fig;
         fig.set_bounding_box(Box(2,Interval(-3,3)));
         fig << line_style(true);
         fig << fill_colour(cyan) << reach_set;

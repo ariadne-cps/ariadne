@@ -127,7 +127,7 @@ void TestContinuousEvolution::test() const
     // cout << "Plotting sets" << endl;
     // cout << "evolve_set=" << hybrid_evolve_set << endl;
     // cout << "reach_set=" << hybrid_reach_set << endl;
-    Graphic fig;
+    Figure fig;
     fig << line_style(true) << fill_colour(cyan) << hybrid_reach_set;
     fig << fill_colour(magenta) << hybrid_evolve_set;
     fig << fill_colour(blue) << initial_set;

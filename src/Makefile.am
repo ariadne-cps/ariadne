@@ -24,6 +24,7 @@ SRC = \
 	polyhedron.cc \
 	curve.cc \
 	function_set.cc \
+	taylor_set.cc \
 	grid_set.cc \
 	hybrid_set.cc \
 	geometry.cc \

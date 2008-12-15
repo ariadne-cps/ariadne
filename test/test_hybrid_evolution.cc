@@ -157,7 +157,7 @@ void TestHybridEvolution::test() const
     ARIADNE_TEST_PRINT(hybrid_intermediate_set);
   
     cout << "Plotting sets... " << flush;
-    Graphic fig;
+    Figure fig;
     fig << line_style(true);
     fig << fill_colour(cyan) << hybrid_reach_set;
     fig << fill_colour(magenta) << hybrid_intermediate_set;

@@ -976,6 +976,9 @@ class GridTreeSet : public GridTreeSubset {
      *a reference to *this, allowing chaining of operations.
      */
 
+    /*! \brief Clears the set (makes empty set on same grid). */
+    void clear( );
+            
     /*! \brief Adjoin (make inplace union with) a single cell. */
     void adjoin( const GridCell& theCell );
             

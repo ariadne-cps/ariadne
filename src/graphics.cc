@@ -58,11 +58,9 @@ std::vector<Point> interpolation_points(const InterpolatedCurve& c) {
     return result;
 }
 
-inline
 std::vector<Point> vertices(const Polytope& pl) {
     return pl.vertices();
 }
-
 
 std::vector<Point> corner_points(const Box& bx) {
     std::vector<Point> result(2,Point(bx.dimension()));
@@ -108,10 +106,11 @@ std::vector<Point> extremal(const std::vector<Point> & points) {
   
 
 struct GraphicsObject {
-    enum ShapeKind { BOX, POLYTOPE, CURVE };
+    enum ShapeKind { POINT, BOX, POLYTOPE, CURVE };
+    GraphicsObject(Colour lc, Point pt) : kind(POINT), line_colour(lc), fill_colour(), shape(std::vector<Point>(1,pt)) { }
     GraphicsObject(Colour lc, Colour fc, Box bx) : kind(BOX), line_colour(lc), fill_colour(fc), shape(corner_points(bx)) { }
     GraphicsObject(Colour lc, Colour fc, Polytope pl) : kind(POLYTOPE), line_colour(lc), fill_colour(fc), shape(vertices(pl)) { }
-    GraphicsObject(Colour lc, Colour fc, InterpolatedCurve cv) : kind(CURVE), line_colour(lc), fill_colour(fc), shape(interpolation_points(cv)) { }
+    GraphicsObject(Colour lc, InterpolatedCurve cv) : kind(CURVE), line_colour(lc), fill_colour(), shape(interpolation_points(cv)) { }
     ShapeKind kind;
     Colour line_colour;
     Colour fill_colour;
@@ -120,9 +119,9 @@ struct GraphicsObject {
 
 
 
-struct Graphic::Data 
+struct Figure::Data 
 {
-    Data() : bounding_box(0), projection(2) { }
+    Data() : bounding_box(0), projection(2), current_line_colour(0,0,0), current_fill_colour(1,1,1) { }
     Box bounding_box;
     ProjectionFunction projection;
     Colour current_line_colour;
@@ -131,13 +130,13 @@ struct Graphic::Data
 };
 
 
-Graphic::~Graphic()
+Figure::~Figure()
 {
     delete this->_data;
 }
 
  
-Graphic::Graphic()
+Figure::Figure()
     : _data(new Data()) 
 { 
     this->_data->bounding_box=Box(0);
@@ -145,12 +144,12 @@ Graphic::Graphic()
 }
 
 
-void Graphic::set_projection_map(const ProjectionFunction& p) 
+void Figure::set_projection_map(const ProjectionFunction& p) 
 {
     this->_data->projection=p;
 }
 
-void Graphic::set_bounding_box(const Box& bx) 
+void Figure::set_bounding_box(const Box& bx) 
 {
     ARIADNE_ASSERT(bx.dimension()==0 || bx.dimension()==2 || bx.dimension()==this->_data->projection.argument_size());
     if(bx.dimension()>2) {
@@ -160,61 +159,68 @@ void Graphic::set_bounding_box(const Box& bx)
     }
 }
 
-void Graphic::set_line_style(bool ls) 
+void Figure::set_line_style(bool ls) 
 {
 }
 
-void Graphic::set_line_width(double lw) 
+void Figure::set_line_width(double lw) 
 {
 }
 
-void Graphic::set_line_colour(Colour lc)
+void Figure::set_line_colour(Colour lc)
 { 
     this->_data->current_line_colour=lc;
 }
 
-void Graphic::set_line_colour(double r, double g, double b)
+void Figure::set_line_colour(double r, double g, double b)
 { 
     this->set_line_colour(Colour(r,g,b));
 }
 
-void Graphic::set_fill_style(bool fs) 
+void Figure::set_fill_style(bool fs) 
 {
 }
 
-void Graphic::set_fill_colour(Colour fc)
+void Figure::set_fill_colour(Colour fc)
 { 
     this->_data->current_fill_colour=fc;
 }
 
-void Graphic::set_fill_colour(double r, double g, double b)
+void Figure::set_fill_colour(double r, double g, double b)
 { 
     this->set_fill_colour(Colour(r,g,b));
 }
 
 
-void Graphic::draw(const Box& bx) {
+void Figure::draw(const Point& pt) {
+    if(this->_data->objects.empty() && this->_data->projection.argument_size() != pt.dimension()) {
+        this->_data->projection=ProjectionFunction(2,pt.dimension(),0); }
+    ARIADNE_ASSERT(pt.dimension()==this->_data->projection.argument_size());
+    this->_data->objects.push_back(GraphicsObject(this->_data->current_line_colour,pt));
+}
+
+void Figure::draw(const Box& bx) {
     if(this->_data->objects.empty() && this->_data->projection.argument_size() != bx.dimension()) {
         this->_data->projection=ProjectionFunction(2,bx.dimension(),0); }
     ARIADNE_ASSERT(bx.dimension()==this->_data->projection.argument_size());
     this->_data->objects.push_back(GraphicsObject(this->_data->current_line_colour,this->_data->current_fill_colour,bx));
 }
 
-void Graphic::draw(const Polytope& p) {
+void Figure::draw(const Polytope& p) {
     if(this->_data->objects.empty() && this->_data->projection.argument_size() != p.dimension()) {
         this->_data->projection=ProjectionFunction(2,p.dimension(),0); }
     ARIADNE_ASSERT(p.dimension()==this->_data->projection.argument_size());
     this->_data->objects.push_back(GraphicsObject(this->_data->current_line_colour,this->_data->current_fill_colour,p));
 }
 
-void Graphic::draw(const InterpolatedCurve& c) {
+void Figure::draw(const InterpolatedCurve& c) {
     if(this->_data->objects.empty() && this->_data->projection.argument_size() != c.dimension()) {
         this->_data->projection=ProjectionFunction(2,c.dimension(),0); }
     ARIADNE_ASSERT(c.dimension()==this->_data->projection.argument_size());
-    this->_data->objects.push_back(GraphicsObject(this->_data->current_line_colour,this->_data->current_fill_colour,c));
+    this->_data->objects.push_back(GraphicsObject(this->_data->current_line_colour,c));
 }
 
-void Graphic::clear() {
+void Figure::clear() {
     this->_data->objects.clear();
 }
 
@@ -225,6 +231,12 @@ static void
 plot(cairo_t *cr, const Box& bounding_box, const ProjectionFunction& projection,
      const std::vector<GraphicsObject>& objects, 
      int canvas_width, int canvas_height);
+
+void trace_point(cairo_t *cr, const std::vector<Point>& pts) 
+{
+    static const double RADIUS=0.01;
+    cairo_arc (cr, pts[0][0], pts[0][1], RADIUS, 0, 2*M_PI);
+}
 
 void trace_box(cairo_t *cr, const std::vector<Point>& pts) 
 {
@@ -270,6 +282,7 @@ std::string str(double x) {
 void trace(cairo_t *cr, const GraphicsObject::ShapeKind kind, const std::vector<Point>& pts) 
 {
     switch(kind) {
+    case GraphicsObject::POINT: trace_point(cr,pts); return;
     case GraphicsObject::BOX: trace_box(cr,pts); return;
     case GraphicsObject::POLYTOPE: trace_polytope(cr,extremal(pts)); return;
     case GraphicsObject::CURVE: trace_curve(cr,pts); return;
@@ -354,7 +367,7 @@ void plot(cairo_t *cr, const Box& bounding_box, const ProjectionFunction& projec
 
     // Fill shapes
     for(uint i=0; i!=objects.size(); ++i) {
-        if(objects[i].kind!=GraphicsObject::CURVE) {
+        if(objects[i].kind==GraphicsObject::BOX || objects[i].kind==GraphicsObject::POLYTOPE) {
             trace(cr,objects[i].kind,apply(projection,objects[i].shape));
             const Colour& fc=objects[i].fill_colour;
             cairo_set_source_rgb (cr, fc.red, fc.green, fc.blue);
@@ -367,6 +380,9 @@ void plot(cairo_t *cr, const Box& bounding_box, const ProjectionFunction& projec
         const Colour& lc=objects[i].line_colour;
         cairo_set_source_rgb (cr, lc.red, lc.green, lc.blue);
         trace(cr,objects[i].kind,apply(projection,objects[i].shape));
+        if(objects[i].kind==GraphicsObject::POINT) {
+            cairo_fill (cr);
+        }
         cairo_stroke (cr);
     }
 
@@ -418,7 +434,7 @@ void plot(cairo_t *cr, const Box& bounding_box, const ProjectionFunction& projec
 
 
 void 
-Graphic::write(const char* filename) 
+Figure::write(const char* filename) 
 {
     cairo_surface_t *surface;
     cairo_t *cr;
@@ -451,7 +467,7 @@ paint (GtkWidget      *widget,
 {
     cairo_t *cr;
   
-    const Graphic::Data* data=static_cast<Graphic::Data*>(gdata);
+    const Figure::Data* data=static_cast<Figure::Data*>(gdata);
     const Box& bounding_box =data->bounding_box;
     const ProjectionFunction& projection =data->projection;
     const std::vector<GraphicsObject>& objects=data->objects;
@@ -466,7 +482,7 @@ paint (GtkWidget      *widget,
     Ariadne::plot(cr, bounding_box, projection, objects, canvas_width, canvas_height);
 }
 
-void Graphic::display() 
+void Figure::display() 
 {
     
     GtkWidget *window;
@@ -493,7 +509,7 @@ void Graphic::display()
     // connect our drawing method to the "expose" signal
     g_signal_connect (G_OBJECT (canvas), "expose-event",
                       G_CALLBACK (paint),
-                      const_cast<Graphic::Data*>(this->_data));  //  here we can pass a pointer to a custom data structure 
+                      const_cast<Figure::Data*>(this->_data));  //  here we can pass a pointer to a custom data structure 
 
     // pack canvas widget into window
     gtk_container_add (GTK_CONTAINER (window), canvas);
@@ -508,7 +524,7 @@ void Graphic::display()
 
 #else // NO GTK_H
 
-void Graphic::display() 
+void Figure::display() 
 {
     throw std::runtime_error("No facilities for displaying graphics are available.");
 }
@@ -518,12 +534,12 @@ void Graphic::display()
 #else // NO CAIRO_H
 
 void 
-Graphic::write(const char* filename) 
+Figure::write(const char* filename) 
 {
     throw std::runtime_error("No facilities for drawing graphics are available.");
 }
 
-void Graphic::display() 
+void Figure::display() 
 {
     throw std::runtime_error("No facilities for displaying graphics are available.");
 }

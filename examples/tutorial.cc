@@ -261,7 +261,7 @@ int main()
 
     {
         // Use main graphics facilities
-        Graphic g;
+        Figure g;
         g.set_bounding_box(Box(2,14,18,0,1));
         g.set_projection_map(ProjectionFunction(2,0,1));
 

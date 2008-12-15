@@ -31,11 +31,9 @@
 #include <iosfwd>
 #include <string>
 
-#include "box.h"
-#include "polytope.h"
-
 namespace Ariadne {
 
+class Point;
 class Box;
 class Polytope;
 class InterpolatedCurve;
@@ -79,10 +77,10 @@ inline FillColour fill_colour(double r, double g, double b) { return FillColour(
     
 
 //! \brief Class for plotting figures.
-class Graphic {
+class Figure {
   public:
-    ~Graphic();
-    Graphic();
+    ~Figure();
+    Figure();
     void set_projection_map(const ProjectionFunction&);
     void set_bounding_box(const Box&);
     void set_line_style(bool);
@@ -92,6 +90,7 @@ class Graphic {
     void set_fill_style(bool);
     void set_fill_colour(Colour);
     void set_fill_colour(double, double, double);
+    void draw(const Point&);
     void draw(const Box&);
     void draw(const Polytope&);
     void draw(const InterpolatedCurve&);
@@ -105,23 +104,24 @@ class Graphic {
 };
 
 
-Graphic& operator<<(Graphic& g, const LineStyle& ls) { g.set_line_style(ls); return g; }
-Graphic& operator<<(Graphic& g, const LineWidth& lw) { g.set_line_width(lw); return g; }
-Graphic& operator<<(Graphic& g, const LineColour& lc) { g.set_line_colour(lc); return g; }
-Graphic& operator<<(Graphic& g, const FillStyle& fs) { g.set_fill_style(fs); return g; }
-Graphic& operator<<(Graphic& g, const FillColour& fc) { g.set_fill_colour(fc); return g; }
+inline Figure& operator<<(Figure& g, const LineStyle& ls) { g.set_line_style(ls); return g; }
+inline Figure& operator<<(Figure& g, const LineWidth& lw) { g.set_line_width(lw); return g; }
+inline Figure& operator<<(Figure& g, const LineColour& lc) { g.set_line_colour(lc); return g; }
+inline Figure& operator<<(Figure& g, const FillStyle& fs) { g.set_fill_style(fs); return g; }
+inline Figure& operator<<(Figure& g, const FillColour& fc) { g.set_fill_colour(fc); return g; }
 
-inline void draw(Graphic& g, const Box& bx) { g.draw(bx); }
-inline void draw(Graphic& g, const Polytope& p) { g.draw(p); }
-inline void draw(Graphic& g, const InterpolatedCurve& c) { g.draw(c); }
+inline void draw(Figure& g, const Point& pt) { g.draw(pt); }
+inline void draw(Figure& g, const Box& bx) { g.draw(bx); }
+inline void draw(Figure& g, const Polytope& p) { g.draw(p); }
+inline void draw(Figure& g, const InterpolatedCurve& c) { g.draw(c); }
 
-template<class SET> Graphic& operator<<(Graphic& g, const SET& set) { draw(g,set); return g; }
+template<class SET> Figure& operator<<(Figure& g, const SET& set) { draw(g,set); return g; }
 
 template<class SET> void plot(const char* filename, const SET& set) { 
-    Graphic g; draw(g,set); g.write(filename); }
+    Figure g; draw(g,set); g.write(filename); }
 
 template<class SET> void plot(const char* filename, const Box& bbox, const Colour& fc, const SET& set) { 
-    Graphic g; g.set_bounding_box(bbox); g.set_fill_colour(fc); draw(g,set); g.write(filename); }
+    Figure g; g.set_bounding_box(bbox); g.set_fill_colour(fc); draw(g,set); g.write(filename); }
 
 
 

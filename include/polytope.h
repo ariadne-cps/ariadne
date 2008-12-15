@@ -39,6 +39,8 @@
 #include "macros.h"
 #include "point.h"
 
+#include "set_interface.h"
+
 namespace Ariadne {
 
 template<class X> class Vector;

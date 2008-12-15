@@ -35,6 +35,9 @@
 #include "box.h"
 #include "list_set.h"
 
+#include "polytope.h"
+#include "graphics.h"
+
 
 namespace Ariadne {
 
@@ -150,6 +153,11 @@ norm_grtr(const Vector<Float>& v1, const Vector<Float>& v2)
 
 
  
+Zonotope::~Zonotope()
+{
+}
+
+ 
 Zonotope::Zonotope()
     : _centre(), _generators(), _error()
 {
@@ -223,6 +231,13 @@ Zonotope::operator=(const Zonotope& z)
 }
 
        
+Zonotope*
+Zonotope::clone() const
+{
+    return new Zonotope(*this);
+}
+
+ 
 uint
 Zonotope::dimension() const
 {
@@ -285,6 +300,28 @@ tribool
 Zonotope::contains(const Point& pt) const
 {
     return Ariadne::contains(*this,pt);
+}
+
+
+tribool
+Zonotope::disjoint(const Vector<Interval>& bx) const
+{
+    return Ariadne::disjoint(*this,Box(bx));
+}
+
+
+tribool
+Zonotope::subset(const Vector<Interval>& bx) const
+{
+    return Ariadne::subset(*this,Box(bx));
+}
+
+
+
+std::ostream&
+Zonotope::write(std::ostream& os) const
+{
+    return os << *this;
 }
 
 
@@ -482,10 +519,21 @@ error_free_over_approximation(const Zonotope& z)
 {
     uint d=z.dimension();
     uint m=z.number_of_generators();
-    Matrix<Float> nG(d,m+d);
+    
+    // Count number of nonzero error values
+    uint e=0; 
+    for(uint i=0; i!=d; ++i) { 
+        if(z.error()[i]!=0) { ++e; }
+    }
+    Matrix<Float> nG(d,m+e);
     project(nG,range(0,d),range(0,m))=z.generators();
+    
+    uint j=m;
     for(uint i=0; i!=d; ++i) {
-        nG(i,i+m)=z.error()[i];
+        if(z.error()[i]!=0) {
+            nG(i,j)=z.error()[i];
+            ++j;
+        }
     }
     return Zonotope(z.centre(),nG);
 }
@@ -663,12 +711,21 @@ orthogonal_over_approximation(const Zonotope< Interval >& z)
 std::ostream&
 operator<<(std::ostream& os, const Zonotope& z) 
 {
-    os << "["<<z.centre();
+    os << "[";
+    for(uint i=0; i!=z.dimension(); ++i) {
+            os << (i==0 ? '(' : ',') << z.centre()[i];
+    }
+    os << "),";
     for(uint j=0; j!=z.number_of_generators(); ++j) {
         for(uint i=0; i!=z.dimension(); ++i) {
-            os << (i==0 ? ';' : ',') << z.generators()[i][j];
+            os << (i==0 ? '[' : ',') << z.generators()[i][j];
         }
+        os << "],";
     }
+    for(uint i=0; i!=z.dimension(); ++i) {
+        os << (i==0 ? '{' : ',') << z.error()[i];
+    }
+    os << '}';
     os << "]";
     return os;
 }
@@ -691,8 +748,11 @@ operator>>(std::istream& is, Zonotope& z)
 
 
 
-// Test vertices individually. Highly inefficient!! 
-
+tribool
+subset(const Zonotope& z, const Box& r)
+{
+    return subset(z.bounding_box(),r);
+}
 
 
 /* Set up linear program to solve 
@@ -929,6 +989,12 @@ contains(const Zonotope& z, const Point& pt)
     //std::clog << lp.tableau() << std::endl;
     return result;
 }
+
+
+void draw(Figure& fig, const Zonotope& z) {
+    fig.draw(polytope(error_free_over_approximation(z)));
+}
+
 
 } // namespace Ariadne
 

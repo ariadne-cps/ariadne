@@ -64,7 +64,11 @@ void append(V& v, const C& c)
 
 namespace Ariadne {
  
+// Allow subdivisions in upper evolution
 const bool ENABLE_SUBDIVISIONS = false;
+// Allow premature termination of lower evolution
+const bool ENABLE_PREMATURE_TERMINATION = false;
+
 static const int BLOCKING_EVENT = -2;
 using boost::shared_ptr;
 
@@ -245,22 +249,26 @@ _evolution(EnclosureListType& final_sets,
         IntegerType initial_steps=current_set.second;
         SetModelType initial_set_model=current_set.third;
         TimeModelType initial_time_model=current_set.fourth;
+        RealType initial_set_radius=radius(initial_set_model.range());
         if(initial_time_model.range()[0].lower()>=maximum_time || initial_steps>=maximum_steps) {
             final_sets.adjoin(initial_location,this->_toolbox->enclosure(initial_set_model));
         } else if(UPPER_SEMANTICS && ENABLE_SUBDIVISIONS
-                  && (radius(initial_set_model.range())>this->_parameters->maximum_enclosure_radius)) 
-            {
-                // Subdivide
-                uint nd=initial_set_model.result_size();
-                TimedSetModelType initial_timed_set_model=join(initial_set_model,initial_time_model);
-                array< TimedSetModelType > subdivisions=this->_toolbox->subdivide(initial_timed_set_model);
-                for(uint i=0; i!=subdivisions.size(); ++i) {
-                    TimedSetModelType const& subdivided_timed_set_model=subdivisions[i];
-                    SetModelType subdivided_set_model=Ariadne::project(subdivided_timed_set_model,range(0,nd));
-                    TimeModelType subdivided_time_model=Ariadne::project(subdivided_timed_set_model,range(nd,nd+1));
-                    working_sets.push_back(make_tuple(initial_location,initial_steps,subdivided_time_model,subdivided_set_model));
-                }
-            } else {
+                  && (initial_set_radius>this->_parameters->maximum_enclosure_radius)) {
+            // Subdivide
+            uint nd=initial_set_model.result_size();
+            TimedSetModelType initial_timed_set_model=join(initial_set_model,initial_time_model);
+            array< TimedSetModelType > subdivisions=this->_toolbox->subdivide(initial_timed_set_model);
+            for(uint i=0; i!=subdivisions.size(); ++i) {
+                TimedSetModelType const& subdivided_timed_set_model=subdivisions[i];
+                SetModelType subdivided_set_model=Ariadne::project(subdivided_timed_set_model,range(0,nd));
+                TimeModelType subdivided_time_model=Ariadne::project(subdivided_timed_set_model,range(nd,nd+1));
+                working_sets.push_back(make_tuple(initial_location,initial_steps,subdivided_time_model,subdivided_set_model));
+            }
+        } else if(LOWER_SEMANTICS && ENABLE_PREMATURE_TERMINATION && initial_set_radius>this->_parameters->maximum_enclosure_radius) {
+            std::cerr << "WARNING: Terminating lower evolution at time " << initial_time_model
+                      << " and set " << initial_set_model << " due to maximum radius being exceeded.";
+        } else {
+            // Compute evolution
             this->_evolution_step(working_sets,
                                   final_sets,reach_sets,intermediate_sets,
                                   system,current_set,maximum_hybrid_time,

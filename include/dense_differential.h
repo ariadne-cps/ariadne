@@ -294,12 +294,11 @@ evaluate(const DenseDifferential<X>& y, const Vector<X>& x)
 
     X r(zero);
     for(MultiIndex j(ms); j.degree()<=d; ++j) {
-        X sf=fac(j);
         X t=one;
         for(uint k=0; k!=ms; ++k) {
             t=t*val[k][j[k]];
         }
-        t*=X(y[j]/sf);
+        t*=y[j];
         r+=t;
     }
     return r;
@@ -338,7 +337,7 @@ evaluate(const DenseDifferential<X>& y, const Vector<Y>& x)
         for(uint k=0; k!=ms; ++k) {
             t=t*val[k][j[k]];
         }
-        t*=Y(y[j]/sf);
+        t*=y[j];
         r+=t;
     }
     return r;

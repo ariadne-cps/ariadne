@@ -105,13 +105,13 @@ class SparseDifferential
     typedef typename std::map<MultiIndex,X>::iterator iterator;
     typedef typename std::map<MultiIndex,X>::const_iterator const_iterator;
 
-    SparseDifferential() : _as(1), _deg(0), _data() { }
-    //explicit SparseDifferential(int c) : _as(0), _deg(0), _data() { this->set_value(c); }
-    SparseDifferential(uint as, uint deg) : _as(as), _deg(deg), _data() { _data[MultiIndex(as)]=0; }
+    explicit SparseDifferential() : _as(0), _deg(0), _data() { _data[MultiIndex(0)]=0; }
+    //explicit SparseDifferential(uint as) : _as(as), _deg(1), _data() { _data[MultiIndex(as)]=0; }
+    explicit SparseDifferential(uint as, uint deg) : _as(as), _deg(deg), _data() { _data[MultiIndex(as)]=0; }
     template<class XX> SparseDifferential(uint as, uint deg, const XX* ptr) : _as(as), _deg(deg), _data() { 
-        for(MultiIndex j(as); j.degree()<=deg; ++j) { if(*ptr!=0) { _data[j]=*ptr; } ++ptr; } }
+        _data[MultiIndex(as)]=0; for(MultiIndex j(as); j.degree()<=deg; ++j) { if(*ptr!=0) { _data[j]=*ptr; } ++ptr; } }
     template<class XX> SparseDifferential(const SparseDifferential<XX>& x) : _as(x.argument_size()), _deg(x.degree()), _data() { 
-        for(typename SparseDifferential<XX>::const_iterator iter=x.begin(); iter!=x.end(); ++iter) {
+        _data[MultiIndex(x.argument_size())]=0; for(typename SparseDifferential<XX>::const_iterator iter=x.begin(); iter!=x.end(); ++iter) {
             if(iter->second!=0) { this->_data[iter->first]=X(iter->second); } } }
 
     SparseDifferential<X>& operator=(const X& c) { this->_data.clear(); this->_data[MultiIndex(this->argument_size())]=c; return *this; }
@@ -531,8 +531,9 @@ evaluate(const SparseDifferential<X>& y, const Vector<Y>& x)
             for(uint k=0; k!=ms; ++k) {
                 t=t*val[k][j[k]];
             }
-            t*=(c/fac(j));
+            t*=c;
             r+=t;
+            //std::cerr<<" j="<<j<<" c="<<c<<" r="<<r<<std::endl;
         }
     return r;
 }

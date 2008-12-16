@@ -250,7 +250,7 @@ bool MultiIndex::operator<(const MultiIndex& a2) const {
     } else {
         for(uint i=0; i!=a1.number_of_variables(); ++i) {
             if(a1[i]!=a2[i]) { 
-                return a1[i]<a2[i];
+                return a1[i]>a2[i];
             }
         }
         return false;

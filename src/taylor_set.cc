@@ -31,8 +31,11 @@
 #include "function.h"
 #include "approximate_taylor_model.h"
 
+#include "geometry.h"
 #include "taylor_variable.h"
 #include "taylor_set.h"
+
+#include "grid_set.h"
 
 #include "zonotope.h"
 #include "polytope.h"
@@ -55,6 +58,12 @@ TaylorSet::TaylorSet(const ApproximateTaylorModel& atm)
 }
 
 
+
+Vector<Interval> 
+TaylorSet::domain() const
+{
+    return Vector<Interval>(this->_variables[0].argument_size(),Interval(-1,1));
+}
 
 
 
@@ -126,6 +135,59 @@ zonotope(const TaylorSet& ts)
 }
 
 
+
+
+pair<TaylorSet,TaylorSet>
+TaylorSet::split(uint j) const
+{
+    const TaylorSet& ts=*this;
+    pair<TaylorSet,TaylorSet> result(ts.dimension(),ts.dimension());
+    for(uint i=0; i!=ts.dimension(); ++i) {
+        make_lpair(result.first[i],result.second[i])=Ariadne::split(ts[i],j);
+    }
+    return result;
+}
+
+
+void
+adjoin_outer_approximation(const TaylorSet& set, const Box& domain, Float eps, GridTreeSet& grid_set, uint depth)
+{
+    uint d=set.dimension();
+    Box range(set.dimension());
+    for(uint i=0; i!=set.dimension(); ++i) {
+        range[i]=evaluate(set[i].expansion(),domain);
+    }
+    if(range.radius()<eps) {
+        for(uint i=0; i!=set.dimension(); ++i) {
+            range[i]+=set[i].error();
+        }
+        grid_set.adjoin_over_approximation(range,depth);
+    } else {
+        Box domain1(d),domain2(d);
+        make_lpair(domain1,domain2)=split(domain);
+        adjoin_outer_approximation(set,domain1,eps,grid_set,depth);
+        adjoin_outer_approximation(set,domain2,eps,grid_set,depth);
+    }    
+}
+
+GridTreeSet 
+outer_approximation(const TaylorSet& set, uint depth) 
+{
+    return outer_approximation(set,Grid(set.dimension()),depth);
+}
+
+
+GridTreeSet 
+outer_approximation(const TaylorSet& set, const Grid& grid, uint depth)
+{
+    ARIADNE_ASSERT(set.dimension()==grid.dimension());
+    Box domain=set.domain();
+    GridTreeSet grid_set(grid);
+    Float eps=1.0/(1<<depth);
+    adjoin_outer_approximation(set,domain,eps,grid_set,depth);
+    return grid_set;
+}
+
 std::ostream&
 TaylorSet::write(std::ostream& os) const
 {
@@ -136,10 +198,59 @@ TaylorSet::write(std::ostream& os) const
     return os;
 }
 
+Vector<Interval> evaluate(const TaylorSet& ts, const Vector<Interval>& iv) {
+    Vector<Interval> r(ts.dimension());
+    for(uint i=0; i!=r.size(); ++i) {
+        r[i]=ts[i].evaluate(iv);
+    }
+    return r;
+}
+
+Vector<Interval> evaluate(const TaylorSet& ts, const Vector<Float>& v) {
+    Vector<Interval> r(ts.dimension());
+    for(uint i=0; i!=r.size(); ++i) {
+        r[i]=ts[i].evaluate(v);
+    }
+    return r;
+}
+
+Vector<Interval> error(const TaylorSet& ts) {
+    Vector<Interval> r(ts.dimension());
+    for(uint i=0; i!=r.size(); ++i) {
+        r[i]=ts[i].error();
+    }
+    return r;
+}
 
 
 void draw(Figure& fig, const TaylorSet& ts) {
-    draw(fig,zonotope(ts));
+    static const double MAX_NEGLIGABLE_NORM=1e-10;
+    if(ts.dimension()==2 && ts.number_of_generators()==2 && norm(error(ts))<MAX_NEGLIGABLE_NORM) {
+        std::vector<Point> pts;
+        Vector<Float> s(2); 
+        s[0]=-1; s[1]=-1;
+        for(uint i=0; i!=16; ++i) {
+            pts.push_back(midpoint(evaluate(ts,s)));
+            s[0]+=1./8;
+        }
+        for(uint i=0; i!=16; ++i) {
+            pts.push_back(midpoint(evaluate(ts,s)));
+            s[1]+=1./8;
+        }
+        for(uint i=0; i!=16; ++i) {
+            pts.push_back(midpoint(evaluate(ts,s)));
+            s[0]-=1./8;
+        }
+        for(uint i=0; i!=16; ++i) {
+            pts.push_back(midpoint(evaluate(ts,s)));
+            s[1]-=1./8;
+        }
+       fig.draw(pts);
+    }
+    else {
+        draw(fig,zonotope(ts));
+    }
+
 }
 
 } // namespace Ariadne

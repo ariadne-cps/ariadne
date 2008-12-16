@@ -77,7 +77,7 @@ Box split(const Box& bx, bool lr)
 
 inline
 std::pair<Box,Box> split(const Box& bx) {
-    return split(irmax(bx));
+    return split(bx,irmax(bx));
 }
 
 

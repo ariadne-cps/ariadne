@@ -43,6 +43,8 @@ class TaylorModel;
 class ApproximateTaylorModel;
 
 class Zonotope;
+class Grid;
+class GridTreeSet;
 class Figure;
 
 class TaylorSet 
@@ -61,14 +63,20 @@ class TaylorSet
     const TaylorVariable& operator[](uint i) const { return this->_variables[i]; }
     TaylorVariable& operator[](uint i) { return this->_variables[i]; }
 
+    Vector<Interval> domain() const;
+
     TaylorSet* clone() const { return new TaylorSet(*this); } 
     tribool disjoint(const Vector<Interval>&) const;
     tribool overlaps(const Vector<Interval>&) const;
     tribool subset(const Vector<Interval>&) const;
     Vector<Interval> bounding_box() const;
     std::ostream& write(std::ostream& os) const;
+    
+    pair<TaylorSet,TaylorSet> split(uint dim) const;
 };
 
+GridTreeSet outer_approximation(const TaylorSet& set, uint depth);
+GridTreeSet outer_approximation(const TaylorSet& set, const Grid& grid, uint depth);
 Zonotope zonotope(const TaylorSet& ts);
 void draw(Figure& g, const TaylorSet& ts);
 

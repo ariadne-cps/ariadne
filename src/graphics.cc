@@ -106,11 +106,12 @@ std::vector<Point> extremal(const std::vector<Point> & points) {
   
 
 struct GraphicsObject {
-    enum ShapeKind { POINT, BOX, POLYTOPE, CURVE };
+    enum ShapeKind { POINT, BOX, POLYTOPE, CURVE, SHAPE };
     GraphicsObject(Colour lc, Point pt) : kind(POINT), line_colour(lc), fill_colour(), shape(std::vector<Point>(1,pt)) { }
     GraphicsObject(Colour lc, Colour fc, Box bx) : kind(BOX), line_colour(lc), fill_colour(fc), shape(corner_points(bx)) { }
     GraphicsObject(Colour lc, Colour fc, Polytope pl) : kind(POLYTOPE), line_colour(lc), fill_colour(fc), shape(vertices(pl)) { }
     GraphicsObject(Colour lc, InterpolatedCurve cv) : kind(CURVE), line_colour(lc), fill_colour(), shape(interpolation_points(cv)) { }
+    GraphicsObject(Colour lc, Colour fc, const std::vector<Point>& pts) : kind(SHAPE), line_colour(lc), fill_colour(fc), shape(pts) { }
     ShapeKind kind;
     Colour line_colour;
     Colour fill_colour;
@@ -197,6 +198,12 @@ void Figure::draw(const Point& pt) {
         this->_data->projection=ProjectionFunction(2,pt.dimension(),0); }
     ARIADNE_ASSERT(pt.dimension()==this->_data->projection.argument_size());
     this->_data->objects.push_back(GraphicsObject(this->_data->current_line_colour,pt));
+}
+
+void Figure::draw(const std::vector<Point>& pts) {
+    ARIADNE_ASSERT(!pts.empty());
+    ARIADNE_ASSERT(pts[0].dimension()==this->_data->projection.argument_size());
+    this->_data->objects.push_back(GraphicsObject(this->_data->current_line_colour,this->_data->current_fill_colour,pts));
 }
 
 void Figure::draw(const Box& bx) {
@@ -286,6 +293,7 @@ void trace(cairo_t *cr, const GraphicsObject::ShapeKind kind, const std::vector<
     case GraphicsObject::BOX: trace_box(cr,pts); return;
     case GraphicsObject::POLYTOPE: trace_polytope(cr,extremal(pts)); return;
     case GraphicsObject::CURVE: trace_curve(cr,pts); return;
+    case GraphicsObject::SHAPE: trace_polytope(cr,pts); return;
     }
 }
 
@@ -364,10 +372,11 @@ void plot(cairo_t *cr, const Box& bounding_box, const ProjectionFunction& projec
     cairo_scale (cr, sc0,sc1);
     cairo_translate(cr, utr0, utr1);
     
-
     // Fill shapes
     for(uint i=0; i!=objects.size(); ++i) {
-        if(objects[i].kind==GraphicsObject::BOX || objects[i].kind==GraphicsObject::POLYTOPE) {
+        if(objects[i].kind==GraphicsObject::BOX || objects[i].kind==GraphicsObject::POLYTOPE 
+            || objects[i].kind==GraphicsObject::SHAPE) 
+        {
             trace(cr,objects[i].kind,apply(projection,objects[i].shape));
             const Colour& fc=objects[i].fill_colour;
             cairo_set_source_rgb (cr, fc.red, fc.green, fc.blue);
@@ -375,7 +384,7 @@ void plot(cairo_t *cr, const Box& bounding_box, const ProjectionFunction& projec
         }
     }
     
-    // Trace curves and shapes
+    // Trace curves and points
     for(uint i=0; i!=objects.size(); ++i) {
         const Colour& lc=objects[i].line_colour;
         cairo_set_source_rgb (cr, lc.red, lc.green, lc.blue);

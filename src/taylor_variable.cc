@@ -506,6 +506,56 @@ TaylorVariable atan(const TaylorVariable& x) {
 }
 
 
+inline int pow2(uint k) { return 1<<k; }
+inline int powm1(uint k) { return (k%2) ? -1 : +1; }
+
+
+pair<TaylorVariable,TaylorVariable>
+split(const TaylorVariable& tv, uint j) 
+{
+    uint as=tv.argument_size();
+    uint deg=tv.expansion().degree();
+    const SparseDifferential<Float>& expansion=tv.expansion();
+
+    MultiIndex index(as);
+    Float value;
+    
+    SparseDifferential<Float> expansion1(as,deg);
+	for(SparseDifferential<Float>::const_iterator iter=expansion.begin();
+        iter!=expansion.end(); ++iter) 
+    {
+        index=iter->first;
+        value=iter->second;
+        uint k=index[j];
+        for(uint l=0; l<=k; ++l) {
+            index.set(j,l);
+            expansion1[index] += bin(k,l) * value / pow2(k);
+        }
+    }
+
+    SparseDifferential<Float> expansion2(as,deg);
+	for(SparseDifferential<Float>::const_iterator iter=expansion.begin();
+        iter!=expansion.end(); ++iter) 
+    {
+        index=iter->first;
+        value=iter->second;
+        uint k=index[j];
+        for(uint l=0; l<=k; ++l) {
+            index.set(j,l);
+            // Need brackets in expression below to avoid converting negative signed
+            // integer to unsigned
+            expansion2[index] += powm1(k-l) * (bin(k,l) * value / pow2(k));
+        }
+    }
+    // FIXME: Add roundoff errors when computing new expansions
+    
+    Interval error1=tv.error();
+    Interval error2=tv.error();
+        
+    return make_pair(TaylorVariable(expansion1,error1),TaylorVariable(expansion2,error2));
+}
+
+
 
 std::ostream& 
 operator<<(std::ostream& os, const TaylorVariable& tv) {

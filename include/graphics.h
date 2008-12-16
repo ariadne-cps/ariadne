@@ -30,6 +30,7 @@
 
 #include <iosfwd>
 #include <string>
+#include <vector>
 
 namespace Ariadne {
 
@@ -90,6 +91,7 @@ class Figure {
     void set_fill_style(bool);
     void set_fill_colour(Colour);
     void set_fill_colour(double, double, double);
+    void draw(const std::vector<Point>&); // Draw a shape bounded by a list of points
     void draw(const Point&);
     void draw(const Box&);
     void draw(const Polytope&);

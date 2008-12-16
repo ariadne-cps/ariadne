@@ -86,10 +86,11 @@ TaylorVariable sin(const TaylorVariable& x);
 TaylorVariable cos(const TaylorVariable& x);
 TaylorVariable tan(const TaylorVariable& x);
 
+pair<TaylorVariable,TaylorVariable> split(const TaylorVariable& x, uint j);
 Vector<Interval> evaluate(const TaylorVariable& y, const Vector<Interval>& z);
 TaylorVariable compose(const TaylorSeries& x, const TaylorVariable& y);
-TaylorVariable derivative(const TaylorVariable& x, uint i);
-TaylorVariable antiderivative(const TaylorVariable& x, uint i);
+TaylorVariable derivative(const TaylorVariable& x, uint j);
+TaylorVariable antiderivative(const TaylorVariable& x, uint j);
 
 
 

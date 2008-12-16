@@ -29,6 +29,7 @@
 #include "polytope.h"
 #include "polyhedron.h"
 #include "taylor_set.h"
+#include "grid_set.h"
 
 #include "utilities.h"
 
@@ -80,6 +81,10 @@ template<class T> T* make(const boost::python::object& obj)
     return t;
 }
 
+template<class SET> boost::python::tuple split(const SET& s, uint i) {
+    std::pair<SET,SET> res=s.split(i);
+    return boost::python::make_tuple(res.first,res.second);
+}
 
 
 class OpenSetWrapper
@@ -185,6 +190,8 @@ void export_taylor_set()
 {
     class_<TaylorSet,bases<CompactSetInterface> > taylor_set_class("TaylorSet",no_init);
     taylor_set_class.def("__init__", make_constructor(&make<TaylorSet>) );
+    taylor_set_class.def("split", &split<TaylorSet>);
+    taylor_set_class.def("outer_approximation", (GridTreeSet(*)(const TaylorSet&,uint)) &outer_approximation);
     taylor_set_class.def("__str__",&__str__<TaylorSet>);
     
     def("zonotope", (Zonotope(*)(const TaylorSet&)) &zonotope);

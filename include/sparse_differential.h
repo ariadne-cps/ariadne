@@ -96,6 +96,7 @@ template<class X> SparseDifferential<X> antiderivative(const SparseDifferential<
 template<class X>
 class SparseDifferential
 {
+    static const uint MAX_DEGREE=65535;
     static const X _zero;
   public:
     typedef MultiIndex IndexType;
@@ -106,7 +107,7 @@ class SparseDifferential
     typedef typename std::map<MultiIndex,X>::const_iterator const_iterator;
 
     explicit SparseDifferential() : _as(0), _deg(0), _data() { _data[MultiIndex(0)]=0; }
-    //explicit SparseDifferential(uint as) : _as(as), _deg(1), _data() { _data[MultiIndex(as)]=0; }
+    explicit SparseDifferential(uint as) : _as(as), _deg(MAX_DEGREE), _data() { _data[MultiIndex(as)]=0; }
     explicit SparseDifferential(uint as, uint deg) : _as(as), _deg(deg), _data() { _data[MultiIndex(as)]=0; }
     template<class XX> SparseDifferential(uint as, uint deg, const XX* ptr) : _as(as), _deg(deg), _data() { 
         _data[MultiIndex(as)]=0; for(MultiIndex j(as); j.degree()<=deg; ++j) { if(*ptr!=0) { _data[j]=*ptr; } ++ptr; } }

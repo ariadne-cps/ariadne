@@ -102,7 +102,7 @@ matrix_get_item(const C& c, const I& i, const J& j) {
 
 
 template<class DIFF>
-void export_differential() 
+void export_differential(const char*) 
 {
     typedef typename DIFF::ScalarType X;
     typedef Vector<X> V;
@@ -162,7 +162,7 @@ void export_differential()
 
 template<class DIFF> 
 void
-export_differential_vector()
+export_differential_vector(const char* name)
 {
     typedef typename DIFF::ScalarType X;
     typedef Vector<X> V;
@@ -170,7 +170,7 @@ export_differential_vector()
     typedef DIFF D;
     typedef DifferentialVector<D> DV;
 
-    class_<DV> differential_vector_class("DifferentialVector");
+    class_<DV> differential_vector_class(name);
     differential_vector_class.def("__init__", make_constructor(&make_differential_vector<D>) );
     differential_vector_class.def( init< uint, uint, uint >());
     differential_vector_class.def("__getitem__", &matrix_get_item<DV,int,MultiIndex>);
@@ -203,42 +203,26 @@ export_differential_vector()
 
 }
 
-template void export_differential< DenseDifferential<Float> >();
-template void export_differential< DenseDifferential<Interval> >();
-template void export_differential< SparseDifferential<Float> >();
-template void export_differential< SparseDifferential<Interval> >();
+template void export_differential< DenseDifferential<Float> >(const char*);
+template void export_differential< DenseDifferential<Interval> >(const char*);
+template void export_differential< SparseDifferential<Float> >(const char*);
+template void export_differential< SparseDifferential<Interval> >(const char*);
 
-template void export_differential_vector< DenseDifferential<Float> >();
-template void export_differential_vector< DenseDifferential<Interval> >();
-template void export_differential_vector< SparseDifferential<Float> >();
-template void export_differential_vector< SparseDifferential<Interval> >();
+template void export_differential_vector< DenseDifferential<Float> >(const char*);
+template void export_differential_vector< DenseDifferential<Interval> >(const char*);
+template void export_differential_vector< SparseDifferential<Float> >(const char*);
+template void export_differential_vector< SparseDifferential<Interval> >(const char*);
 
 void differentiation_submodule() 
 {
-    export_differential< DenseDifferential<Float> >();
-    export_differential< DenseDifferential<Interval> >();
-    export_differential< SparseDifferential<Float> >();
-    export_differential< SparseDifferential<Interval> >();
+    export_differential< DenseDifferential<Float> >("DenseDifferential");
+    export_differential< DenseDifferential<Interval> >("IDenseDifferential");
+    export_differential< SparseDifferential<Float> >("SparseDifferential");
+    export_differential< SparseDifferential<Interval> >("ISparseDifferential");
 
-    export_differential_vector< DenseDifferential<Float> >();
-    export_differential_vector< DenseDifferential<Interval> >();
-    export_differential_vector< SparseDifferential<Float> >();
-    export_differential_vector< SparseDifferential<Interval> >();
+    export_differential_vector< DenseDifferential<Float> >("DenseDifferentialVector");
+    export_differential_vector< DenseDifferential<Interval> >("IDenseDifferentialVector");
+    export_differential_vector< SparseDifferential<Float> >("SparseDifferentialVector");
+    export_differential_vector< SparseDifferential<Interval> >("ISpareDifferentialVector");
 }
 
-
-
-/*
-BOOST_PYTHON_MODULE(differentiation)
-{
-    export_differential< DenseDifferential<Float> >();
-    export_differential< DenseDifferential<Interval> >();
-    export_differential< SparseDifferential<Float> >();
-    export_differential< SparseDifferential<Interval> >();
-
-    export_differential_vector< DenseDifferential<Float> >();
-    export_differential_vector< DenseDifferential<Interval> >();
-    export_differential_vector< SparseDifferential<Float> >();
-    export_differential_vector< SparseDifferential<Interval> >();
-}
-*/

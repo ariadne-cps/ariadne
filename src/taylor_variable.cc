@@ -556,6 +556,21 @@ split(const TaylorVariable& tv, uint j)
 }
 
 
+std::string 
+TaylorVariable::str() const
+{
+    std::stringstream ss;
+    for(SparseDifferential<Float>::const_iterator iter=this->_expansion.begin();
+        iter!=this->_expansion.end(); ++iter) 
+    {
+        const MultiIndex& j=iter->first;
+        const Float& c=iter->second;
+        ss << j << ": " << c << "\n";
+    }
+    ss<<"error: "<<this->_error<<"\n";
+    return ss.str();
+}
+
 
 std::ostream& 
 operator<<(std::ostream& os, const TaylorVariable& tv) {

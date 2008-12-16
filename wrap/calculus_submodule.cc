@@ -32,20 +32,56 @@ using namespace Ariadne;
 
 namespace Ariadne {
 
+void read(MultiIndex& j, const boost::python::object& obj) {
+    array<uint> ary;
+    read_tuple_array(ary,obj);
+    j=MultiIndex(ary.size(),ary.begin());
+}
+
+
 void read(TaylorVariable& tv, const boost::python::object& obj) {
     uint as;
     uint d;
     Interval e;
+    MultiIndex a(0);
     array<Float> x;
     boost::python::tuple tup=extract<boost::python::tuple>(obj);
-    assert(len(tup)==4);
-    as=extract<uint>(tup[0]);
-    d=extract<uint>(tup[1]);
-    read_scalar(e,tup[2]);
-    read_array(x,tup[3]);
-    tv=TaylorVariable(as,d,e,x.begin());
+    assert(len(tup)==2 || len(tup)==4);
+    if(len(tup)==2) {
+        read_scalar(e,tup[0]);
+        boost::python::dict exp=extract<boost::python::dict>(tup[0]);
+        //std::cerr<<exp.items()<<std::endl;
+    } else if(len(tup)==4) {
+        as=extract<uint>(tup[0]);
+        d=extract<uint>(tup[1]);
+        read_scalar(e,tup[2]);
+        read_array(x,tup[3]);
+        tv=TaylorVariable(as,d,e,x.begin());
+    }
 }
    
+
+TaylorVariable*
+make_taylor_variable_from_dict(const boost::python::object& eobj, const boost::python::object& pobj) 
+{
+    Interval e;
+    SparseDifferential<Float> sd;
+    Float c;
+    MultiIndex j(0);
+    read_scalar(e,eobj);
+    boost::python::dict dct=extract<boost::python::dict>(pobj);
+    boost::python::list lst=dct.items();
+    for(uint i=0; i!=len(lst); ++i) {
+        boost::python::tuple tup=extract<boost::python::tuple>(lst[i]);
+        read(j,tup[0]);
+        read_scalar(c,tup[1]);
+        if(i==0) { 
+            sd=SparseDifferential<Float>(j.size());
+        }
+        sd[j]=c;
+    }
+    return new TaylorVariable(sd,e);
+}
 
 TaylorVariable*
 make_taylor_variable(const uint& as, const uint& d, const Interval& e, const boost::python::object& obj) 
@@ -100,6 +136,7 @@ void export_taylor_variable()
 
     class_<T> taylor_variable_class("TaylorVariable");
     taylor_variable_class.def("__init__", make_constructor(&make_taylor_variable) );
+    taylor_variable_class.def("__init__", make_constructor(&make_taylor_variable_from_dict) );
     taylor_variable_class.def( init< uint >());
     taylor_variable_class.def( init< uint, uint >());
     taylor_variable_class.def("error", (const I&(T::*)()const) &T::error, return_value_policy<copy_const_reference>());

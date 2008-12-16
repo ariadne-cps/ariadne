@@ -167,6 +167,8 @@ class TaylorVariable
     Interval range() const;
     Interval evaluate(const Vector<Interval>& x) const;
 
+    std::string str() const;
+
     friend TaylorVariable operator+(const TaylorVariable& x);
     friend TaylorVariable operator-(const TaylorVariable& x);
     friend TaylorVariable operator+(const TaylorVariable& x, const TaylorVariable& y);

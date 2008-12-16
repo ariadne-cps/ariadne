@@ -86,6 +86,20 @@ read_array(array<X>& ary, const boost::python::object& obj)
     }
 }
 
+// Read a array variable of type X from a Python object
+template<class X> 
+void
+read_tuple_array(array<X>& ary, const boost::python::object& obj)
+{
+    // See "Extracting C++ objects" in the Boost Python tutorial
+    boost::python::tuple elements=boost::python::extract<boost::python::tuple>(obj);
+    int n=boost::python::len(elements);
+    ary.resize(n);
+    for(int i=0; i!=n; ++i) {
+        read_scalar(ary[i], elements[i]);
+    }
+}
+
 }
 
 #endif /* ARIADNE_PYTHON_UTILITIES_H */

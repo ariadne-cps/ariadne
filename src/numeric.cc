@@ -711,7 +711,7 @@ Interval sqrt(Interval i)
     set_rounding_mode(round_down);
     Float rl=sqrt_rnd(i.l);
     set_rounding_mode(round_up);
-    Float ru=sqrt_rnd(i.l);
+    Float ru=sqrt_rnd(i.u);
     set_rounding_mode(rnd);
     return Interval(rl,ru);
 }
@@ -722,7 +722,7 @@ Interval exp(Interval i)
     set_rounding_mode(round_down);
     Float rl=exp_rnd(i.l);
     set_rounding_mode(round_up);
-    Float ru=exp_rnd(i.l);
+    Float ru=exp_rnd(i.u);
     set_rounding_mode(rnd);
     return Interval(rl,ru);
 }
@@ -733,7 +733,7 @@ Interval log(Interval i)
     set_rounding_mode(round_down);
     Float rl=log_rnd(i.l);
     set_rounding_mode(round_up);
-    Float ru=log_rnd(i.l);
+    Float ru=log_rnd(i.u);
     set_rounding_mode(rnd);
     return Interval(rl,ru);
 }

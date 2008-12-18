@@ -32,6 +32,11 @@ using namespace Ariadne;
 
 namespace Ariadne {
 
+TaylorVariable mul_cosy(const TaylorVariable&, const TaylorVariable&);
+TaylorVariable mul_rounded(const TaylorVariable&, const TaylorVariable&);
+TaylorVariable mul_ivl(const TaylorVariable&, const TaylorVariable&);
+    
+    
 void read(MultiIndex& j, const boost::python::object& obj) {
     array<uint> ary;
     read_tuple_array(ary,obj);
@@ -138,7 +143,6 @@ void export_taylor_variable()
     taylor_variable_class.def("__init__", make_constructor(&make_taylor_variable) );
     taylor_variable_class.def("__init__", make_constructor(&make_taylor_variable_from_dict) );
     taylor_variable_class.def( init< uint >());
-    taylor_variable_class.def( init< uint, uint >());
     taylor_variable_class.def("error", (const I&(T::*)()const) &T::error, return_value_policy<copy_const_reference>());
     taylor_variable_class.def("sweep", &TaylorVariable::sweep);
     taylor_variable_class.def("clean", &TaylorVariable::clean);
@@ -176,6 +180,10 @@ void export_taylor_variable()
     taylor_variable_class.staticmethod("constant");
     taylor_variable_class.staticmethod("variable");
     taylor_variable_class.staticmethod("variables");
+
+    def("mul_cosy", (T(*)(const T&, const T&)) &mul_cosy);
+    def("mul_rounded", (T(*)(const T&, const T&)) &mul_rounded);
+    def("mul_ivl", (T(*)(const T&, const T&)) &mul_ivl);
 
     def("max",(T(*)(const T&,const T&))&max);
     def("min",(T(*)(const T&,const T&))&min);

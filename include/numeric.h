@@ -134,6 +134,15 @@ inline Float pow_approx(Float x, int n) { return pow(x,n); }
 inline Float rad_up(Float x, Float y) { return up((y-x)/2); }
 inline Float med_approx(Float x, Float y) { return (x+y)/2; }
 
+inline Float add_rnd(Float x, Float y) { return x+y; }
+inline Float sub_rnd(Float x, Float y) { return x-y; }
+inline Float mul_rnd(Float x, Float y) { return x*y; }
+inline Float div_rnd(Float x, Float y) { return x/y; }
+
+inline Float add_opp(Float x, Float y) { volatile Float t=(-x)-y; return -t; }
+inline Float sub_opp(Float x, Float y) { volatile Float t=(-x)+y; return -t; }
+inline Float mul_opp(Float x, Float y) { volatile Float t=(-x)*y; return -t; }
+inline Float div_opp(Float x, Float y) { volatile Float t=(-x)/y; return -t; }
 
 
 //! \brief Intervals supporting interval arithmetic.

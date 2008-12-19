@@ -199,10 +199,10 @@ void export_taylor_variable()
     def("sqrt", (T(*)(const T&))&sqrt);
     def("exp", (T(*)(const T&))&exp);
     def("log", (T(*)(const T&))&log);
+    def("sin", (T(*)(const T&))&sin);
+    def("cos", (T(*)(const T&))&cos);
+    def("tan", (T(*)(const T&))&tan);
     /*
-      def("sin", (T(*)(const T&))&sin);
-      def("cos", (T(*)(const T&))&cos);
-      def("tan", (T(*)(const T&))&tan);
       def("asin", (T(*)(const T&))&asin);
       def("acos", (T(*)(const T&))&acos);
       def("atan", (T(*)(const T&))&atan);

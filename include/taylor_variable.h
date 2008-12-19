@@ -129,6 +129,9 @@ class TaylorVariable
     const Float& value() const { return this->_expansion.value(); }
     Float& value() { return this->_expansion.data()[MultiIndex::zero(this->argument_size())]; }
 
+    void set_error(const Interval& ne) { this->_error=ne; }
+    void set_error(const Float& ne) { this->_error.u=ne; this->_error.l=-ne; }
+
     Float& operator[](uint j) { return this->_expansion[j]; }
     Float& operator[](const MultiIndex& a) { return this->_expansion[a]; }
     const Float& operator[](uint j) const { return this->_expansion[j]; }

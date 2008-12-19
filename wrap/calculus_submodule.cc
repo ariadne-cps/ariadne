@@ -144,7 +144,6 @@ void export_taylor_variable()
     taylor_variable_class.def("__init__", make_constructor(&make_taylor_variable_from_dict) );
     taylor_variable_class.def( init< uint >());
     taylor_variable_class.def("error", (const I&(T::*)()const) &T::error, return_value_policy<copy_const_reference>());
-    taylor_variable_class.def("sweep", &TaylorVariable::sweep);
     taylor_variable_class.def("clean", &TaylorVariable::clean);
     taylor_variable_class.def("domain", &TaylorVariable::domain);
     taylor_variable_class.def("range", &TaylorVariable::range);
@@ -170,6 +169,10 @@ void export_taylor_variable()
     taylor_variable_class.def(self*=R());
     taylor_variable_class.def(self/=R());
     taylor_variable_class.def(self_ns::str(self));
+    taylor_variable_class.def("truncate", &TaylorVariable::truncate,return_value_policy<reference_existing_object>());
+    taylor_variable_class.def("sweep", &TaylorVariable::sweep,return_value_policy<reference_existing_object>());
+
+
     taylor_variable_class.def("__repr__",&__repr__<T>);
 
 
@@ -190,6 +193,7 @@ void export_taylor_variable()
     def("abs",(T(*)(const T&))&abs);
     def("neg",(T(*)(const T&))&neg);
     def("rec",(T(*)(const T&))&rec);
+    def("sqr",(T(*)(const T&))&sqr);
     def("pow",(T(*)(const T&, int))&pow);
 
     def("sqrt", (T(*)(const T&))&sqrt);
@@ -203,6 +207,7 @@ void export_taylor_variable()
       def("acos", (T(*)(const T&))&acos);
       def("atan", (T(*)(const T&))&atan);
     */
+
 }
 
 void calculus_submodule() 

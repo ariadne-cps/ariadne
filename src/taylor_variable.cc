@@ -216,7 +216,7 @@ TaylorVariable::acc(const TaylorVariable& x)
     TaylorVariable& r=*this;
     Interval& re=r.error();
     assert(re.l==-re.u);
-    std::cerr<<std::setprecision(20);
+    //std::cerr<<std::setprecision(20);
     
     set_rounding_mode(round_up);
     Float te=0;
@@ -228,7 +228,7 @@ TaylorVariable::acc(const TaylorVariable& x)
             volatile Float t=-rv;
             volatile Float ml=t-xv;
             te+=(u+ml);
-            std::cerr<<" xv="<<xv<<" rv="<<rv<<" u="<<u<<" ml="<<ml<<" d="<<(u+ml)<<" te="<<te<<"\n";
+            //std::cerr<<" xv="<<xv<<" rv="<<rv<<" u="<<u<<" ml="<<ml<<" d="<<(u+ml)<<" te="<<te<<"\n";
         } 
     }
     re.u+=te/2; re.l=-re.u;
@@ -277,8 +277,23 @@ TaylorVariable::acc(const TaylorVariable& x, const TaylorVariable& y)
         const Ivl& zv=ziter->second;
         te+=(zv.u+zv.ml);
     }
-    re.u+=te/2; re.l=-re.u;
+    te/=2;
+
+    Float xs=0;
+    for(const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+        xs+=abs(xiter->second);
+    }
+
+    Float ys=0;
+    for(const_iterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
+        ys+=abs(yiter->second);
+    }
+
+    const Float& xe=x.error().u;
+    const Float& ye=y.error().u;
     
+    re.u+=xs*ye+ys*ye+te; re.l=-re.u; 
+
     set_rounding_mode(round_nearest);
     for(ivl_const_iterator ziter=z.begin(); ziter!=z.end(); ++ziter) {
         const Ivl& zv=ziter->second;
@@ -288,7 +303,7 @@ TaylorVariable::acc(const TaylorVariable& x, const TaylorVariable& y)
     return r;
 }
 
-void
+TaylorVariable&
 TaylorVariable::sweep(const Float& m)
 {
     for(iterator iter=this->_expansion.begin(); iter!=this->end(); ) {
@@ -300,9 +315,10 @@ TaylorVariable::sweep(const Float& m)
             ++iter;
         }
     }
+    return *this;
 }
 
-void
+TaylorVariable&
 TaylorVariable::truncate(uint d)
 {
     assert(this->_error.l==-this->_error.u);
@@ -319,6 +335,7 @@ TaylorVariable::truncate(uint d)
     this->_error.u+=e;
     this->_error.l=-this->_error.u;
     set_rounding_mode(round_nearest);
+    return *this;
 }
 
 void
@@ -468,6 +485,48 @@ operator*(const Float& c, const TaylorVariable& x) {
 TaylorVariable 
 operator/(const Float& c, const TaylorVariable& x) {
     TaylorVariable r(x); r.scal(Interval(1)/c); return r;
+}
+
+
+
+TaylorVariable 
+operator+(const TaylorVariable& x, const Interval& c) {
+    TaylorVariable r(x); r.acc(c); return r;
+}
+
+TaylorVariable 
+operator-(const TaylorVariable& x, const Interval& c) {
+    TaylorVariable r(x); r.acc(-c); return r;
+}
+
+TaylorVariable 
+operator*(const TaylorVariable& x, const Interval& c) {
+    TaylorVariable r(x); r.scal(c); return r;
+}
+
+TaylorVariable 
+operator/(const TaylorVariable& x, const Interval& c) {
+    TaylorVariable r(x); r.scal(1/c); return r;
+}
+
+TaylorVariable 
+operator+(const Interval& c, const TaylorVariable& x) {
+    TaylorVariable r(x); r.acc(c); return r;
+}
+
+TaylorVariable 
+operator-(const Interval& c, const TaylorVariable& x) {
+    TaylorVariable r=neg(x); r.acc(c); return r;
+}
+
+TaylorVariable 
+operator*(const Interval& c, const TaylorVariable& x) {
+    TaylorVariable r(x); r.scal(c); return r;
+}
+
+TaylorVariable 
+operator/(const Interval& c, const TaylorVariable& x) {
+    TaylorVariable r(x); r.scal(1/c); return r;
 }
 
 
@@ -690,8 +749,8 @@ add_rounded(const TaylorVariable& x, const Float& c) {
     set_rounding_mode(round_up);
     volatile Float rvu=xv+c;
     volatile Float mrvl=(-xv)-c;
-    std::cerr<<"rvl="<<-mrvl<<" rva="<<rva<<" rvu="<<rvu<<"\n";
-    std::cerr<<"rvle="<<rva+mrvl<<" rvue="<<rvu-rva<<"\n";
+    //std::cerr<<"rvl="<<-mrvl<<" rva="<<rva<<" rvu="<<rvu<<"\n";
+    //std::cerr<<"rvle="<<rva+mrvl<<" rvue="<<rvu-rva<<"\n";
     Float rve=max(rvu-rva,rva+mrvl);
     r.value()=(rva);
     re.u+=rve; 
@@ -883,7 +942,7 @@ Interval
 TaylorVariable::range() const {
     Interval r=this->error();
     for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
-        if(iter==this->begin()) {
+        if(iter->first.degree()==0) {
             r+=iter->second;
         } else {
             r+=iter->second*Interval(-1,1);
@@ -908,6 +967,7 @@ TaylorVariable::evaluate(const Vector<Interval>& v) const
 }
 
 template<class X> class Series;  
+typedef Series<Interval>(*series_function_pointer)(uint,const Interval&);
 
 struct TaylorSeries {
     typedef Series<Interval>(*series_function_pointer)(uint,const Interval&); 
@@ -932,13 +992,18 @@ TaylorSeries::TaylorSeries(uint d, series_function_pointer fn,
     Series<Interval> centre_series=fn(d,Interval(c));
     Series<Interval> range_series=fn(d,r);
     Interval p=1;
+    Interval e=r-c;
+    std::cerr<<"\nc="<<c<<" r="<<r<<" e="<<e<<"\n";
+    std::cerr<<"centre_series="<<centre_series<<"\nrange_series="<<range_series<<"\n";
     for(uint i=0; i!=d; ++i) {
         this->expansion[i]=midpoint(centre_series[i]);
         this->error+=(centre_series[i]-this->expansion[i])*p;
-        p*=r;
+        p*=e;
     }
-    this->expansion[d]=midpoint(centre_series[d]);
+    //this->expansion[d]=midpoint(centre_series[d]);
+    this->expansion[d]=midpoint(range_series[d]);
     this->error+=(range_series[d]-this->expansion[d])*p;
+    std::cerr<<"expansion="<<this->expansion<<"\nerror="<<this->error<<"\n";
 }
 
 
@@ -959,14 +1024,14 @@ _compose(const TaylorSeries& ts, const TaylorVariable& tv, Float eps)
     TaylorVariable r(tv.argument_size());
     r+=ts.expansion[ts.expansion.size()-1];
     for(uint i=1; i!=ts.expansion.size(); ++i) {
-        std::cerr<<"    r="<<r<<std::endl;
+        //std::cerr<<"    r="<<r<<std::endl;
         r=r*tv;
         r+=ts.expansion[ts.expansion.size()-i-1];
         r.sweep(eps);
     }
-    std::cerr<<"    r="<<r<<std::endl;
+    //std::cerr<<"    r="<<r<<std::endl;
     r+=ts.error;
-    std::cerr<<"    r="<<r<<std::endl;
+    //std::cerr<<"    r="<<r<<std::endl;
     vref=vtmp;
     return r;
 }
@@ -974,15 +1039,132 @@ _compose(const TaylorSeries& ts, const TaylorVariable& tv, Float eps)
 TaylorVariable 
 compose(const TaylorSeries& ts, const TaylorVariable& tv)
 {
-    return _compose(ts,tv,0.0);
+    return _compose(ts,tv,TaylorVariable::ec);
 }
 
 
-TaylorVariable rec(const TaylorVariable& x) {
-    static const uint DEG=18;
-    return compose(TaylorSeries(DEG,&Series<Interval>::rec,
-                                x.value(),x.range()),x);
+// Compose using the Taylor formula directly. The final term is the Taylor series computed
+// over the range of the series. This method tends to suffer from blow-up of the 
+// truncation error
+TaylorVariable 
+_compose1(const series_function_pointer& fn, const TaylorVariable& tv, Float eps)
+{
+    static const uint DEGREE=18;
+    static const Float TRUNCATION_ERROR=1e-8;
+    uint d=DEGREE;
+    Float c=tv.expansion().value();
+    Interval r=tv.range();
+    Series<Interval> centre_series=fn(d,Interval(c));
+    Series<Interval> range_series=fn(d,r);
+    
+    Float truncation_error_estimate=mag(range_series[d])*pow(mag(r-c),d);
+    if(truncation_error_estimate>TRUNCATION_ERROR) {
+        std::cerr<<"Warning: Truncation error estimate "<<truncation_error_estimate
+                 <<" is greater than maximum allowable truncation error "<<TRUNCATION_ERROR<<"\n";
+    }
+
+    TaylorVariable x=tv-c;
+    TaylorVariable res(tv.argument_size());
+    res+=range_series[d];
+    for(uint i=0; i!=d; ++i) {
+        std::cerr<<"i="<<i<<" r="<<res<<"\n";
+        res=centre_series[d-i-1]+x*res;
+        res.sweep(eps);
+    }
+    std::cerr<<"i="<<d<<" r="<<res<<"\n";
+    return res;
 }
+
+// Compose using the Taylor formula with a constant truncation error. This method
+// is usually better than _compose1 since there is no blow-up of the trunction 
+// error. The radius of convergence of this method is still quite low,
+// typically only half of the radius of convergence of the power series itself
+TaylorVariable 
+_compose2(const series_function_pointer& fn, const TaylorVariable& tv, Float eps)
+{
+    static const uint DEGREE=20;
+    static const Float TRUNCATION_ERROR=1e-8;
+    uint d=DEGREE;
+    Float c=tv.expansion().value();
+    Interval r=tv.range();
+    Series<Interval> centre_series=fn(d,Interval(c));
+    Series<Interval> range_series=fn(d,r);
+    
+    std::cerr<<"c="<<c<<" r="<<r<<" r-c="<<r-c<<" e="<<mag(r-c)<<"\n";
+    std::cerr<<"cs[d]="<<centre_series[d]<<" rs[d]="<<range_series[d]<<"\n";
+    std::cerr<<"cs="<<centre_series<<"\nrs="<<range_series<<"\n";
+    Float truncation_error=mag(range_series[d]-centre_series[d])*pow(mag(r-c),d);
+    std::cerr<<"te="<<truncation_error<<"\n";
+    if(truncation_error>TRUNCATION_ERROR) {
+        std::cerr<<"Warning: Truncation error estimate "<<truncation_error
+                 <<" is greater than maximum allowable truncation error "<<TRUNCATION_ERROR<<"\n";
+    }
+
+    TaylorVariable x=tv-c;
+    TaylorVariable res(tv.argument_size());
+    res+=centre_series[d];
+    for(uint i=0; i!=d; ++i) {
+        res=centre_series[d-i-1]+x*res;
+        res.sweep(eps);
+    }
+    res+=truncation_error*Interval(-1,1);
+    return res;
+}
+
+
+// Compose using the Taylor formula with a constant truncation error. This method
+// is usually better than _compose1 since there is no blow-up of the trunction 
+// error. This method is better than _compose2 since the truncation error is
+// assumed at the ends of the intervals
+TaylorVariable 
+_compose3(const series_function_pointer& fn, const TaylorVariable& tv, Float eps)
+{
+    static const uint DEGREE=20;
+    static const Float TRUNCATION_ERROR=1e-8;
+    uint d=DEGREE;
+    Float c=tv.expansion().value();
+    Interval r=tv.range();
+    Series<Interval> centre_series=fn(d,Interval(c));
+    Series<Interval> range_series=fn(d,r);
+    
+    std::cerr<<"c="<<c<<" r="<<r<<" r-c="<<r-c<<" e="<<mag(r-c)<<"\n";
+    std::cerr<<"cs[d]="<<centre_series[d]<<" rs[d]="<<range_series[d]<<"\n";
+    std::cerr<<"cs="<<centre_series<<"\nrs="<<range_series<<"\n";
+    Interval se=range_series[d]-centre_series[d];
+    Interval e=r-c;
+    Interval p=pow(e,d-1); p.l*=-e.l; p.u*=e.u;
+    std::cerr<<"se="<<se<<" e="<<e<<" p="<<p<<std::endl;
+    // FIXME: Here we assume the dth derivative of f is monotone increasing
+    Float truncation_error=max(se.l*p.l,se.u*p.u);
+    std::cerr<<"te="<<truncation_error<<"\n";
+    if(truncation_error>TRUNCATION_ERROR) {
+        std::cerr<<"Warning: Truncation error estimate "<<truncation_error
+                 <<" is greater than maximum allowable truncation error "<<TRUNCATION_ERROR<<"\n";
+    }
+
+    TaylorVariable x=tv-c;
+    TaylorVariable res(tv.argument_size());
+    res+=centre_series[d];
+    for(uint i=0; i!=d; ++i) {
+        res=centre_series[d-i-1]+x*res;
+        res.sweep(eps);
+    }
+    res+=truncation_error*Interval(-1,1);
+    return res;
+}
+
+
+TaylorVariable 
+_compose(const series_function_pointer& fn, const TaylorVariable& tv, Float eps) {
+    TaylorVariable r1=_compose1(fn,tv,eps);
+    TaylorVariable r2=_compose2(fn,tv,eps);
+    TaylorVariable r3=_compose3(fn,tv,eps);
+    std::cerr<<"\nr1="<<r1<<" "<<r1.range()
+             <<"\nr2="<<r2<<" "<<r2.range()
+             <<"\nr3="<<r3<<" "<<r3.range()<<"\n\n";
+    return r3;
+}
+
 
 TaylorVariable sqr(const TaylorVariable& x) {
     TaylorVariable r=x*x;
@@ -1001,20 +1183,94 @@ TaylorVariable pow(const TaylorVariable& x, int n) {
 }
 
 TaylorVariable sqrt(const TaylorVariable& x) {
-    static const uint DEG=18;
-    return compose(TaylorSeries(DEG,&Series<Interval>::sqrt,
-                                x.value(),x.range()),x);
+    //std::cerr<<"rec(TaylorVariable)\n";
+    // Use a special routine to minimise errors
+    static const Float max_trunc_err=1e-12;
+    static const Float max_sweep_err=1e-12;
+    // Given range [rl,ru], scale by constant a such that rl/a=1-d; ru/a=1+d
+    Interval r=x.range();
+    assert(r.l>0);
+    Float a=(r.l+r.u)/2;
+    set_rounding_mode(round_up);
+    Float eps=(r.u-r.l)/(r.u+r.l);
+    set_rounding_mode(round_nearest);
+    assert(eps<1);
+    Float fdeg=log((1-eps)*max_trunc_err)/log(eps);
+    uint d=uint(fdeg+1);
+    TaylorVariable y=x/a-1;
+    TaylorVariable z(x.argument_size());
+    Series<Interval> sqrt_series=Series<Interval>::sqrt(d,Interval(1));
+    std::cerr<<"sqrt_series="<<sqrt_series<<std::endl;
+    z+=sqrt_series[d];
+    for(uint i=0; i!=d; ++i) {
+        z=sqrt_series[d-i-1] + z * y;
+        z.sweep(max_sweep_err);
+    }
+    Float trunc_err=pow(eps,d)/(1-eps);
+    z+=trunc_err*Interval(-1,1);
+    z*=sqrt(Interval(a));
+    return z;
+}
+
+TaylorVariable rec(const TaylorVariable& x) {
+    //std::cerr<<"rec(TaylorVariable)\n";
+    // Use a special routine to minimise errors
+    static const Float max_trunc_err=1e-12;
+    static const Float max_sweep_err=1e-12;
+    // Given range [rl,ru], scale by constant a such that rl/a=1-d; ru/a=1+d
+    Interval r=x.range();
+    assert(r.l>0);
+    Float a=(r.l+r.u)/2;
+    set_rounding_mode(round_up);
+    Float eps=(r.u-r.l)/(r.u+r.l);
+    set_rounding_mode(round_nearest);
+    assert(eps<1);
+    Float fdeg=log((1-eps)*max_trunc_err)/log(eps);
+    uint d=uint(fdeg+1);
+    TaylorVariable y=x/a-1;
+    TaylorVariable z(x.argument_size());
+    z+=Float(d%2?-1:+1);
+    for(uint i=0; i!=d; ++i) {
+        z=Float((d-i-1)%2?-1:+1) + z * y;
+        z.sweep(max_sweep_err);
+    }
+    Float trunc_err=pow(eps,d)/(1-eps);
+    z+=trunc_err*Interval(-1,1);
+    z*=a;
+    return z;
+}
+
+TaylorVariable log(const TaylorVariable& x) {
+    // Use a special routine to minimise errors
+    static const Float max_trunc_err=1e-12;
+    static const Float max_sweep_err=1e-12;
+    // Given range [rl,ru], scale by constant a such that rl/a=1-d; ru/a=1+d
+    Interval r=x.range();
+    assert(r.l>0);
+    Float a=(r.l+r.u)/2;
+    set_rounding_mode(round_up);
+    Float eps=(r.u-r.l)/(r.u+r.l);
+    set_rounding_mode(round_nearest);
+    assert(eps<1);
+    Float fdeg=log((1-eps)*max_trunc_err)/log(eps);
+    uint d=uint(fdeg+1);
+    TaylorVariable y=x/a-1;
+    TaylorVariable z(x.argument_size());
+    z+=Float(d%2?-1:+1)/d;
+    for(uint i=1; i!=d; ++i) {
+        z=Float((d-i)%2?+1:-1)/(d-i) + z * y;
+        z.sweep(max_sweep_err);
+    }
+    z=z*y;
+    z.sweep(max_sweep_err);
+    Float trunc_err=pow(eps,d)/(1-eps)/d;
+    return z+log(Interval(a))+trunc_err*Interval(-1,1);
 }
 
 TaylorVariable exp(const TaylorVariable& x) {
     static const uint DEG=18;
+    return _compose(&Series<Interval>::exp,x,TaylorVariable::ec);
     return compose(TaylorSeries(DEG,&Series<Interval>::exp,
-                                x.value(),x.range()),x);
-}
-
-TaylorVariable log(const TaylorVariable& x) {
-    static const uint DEG=18;
-    return compose(TaylorSeries(DEG,&Series<Interval>::log,
                                 x.value(),x.range()),x);
 }
 
@@ -1123,7 +1379,8 @@ TaylorVariable::str() const
 
 std::ostream& 
 operator<<(std::ostream& os, const TaylorVariable& tv) {
-    return os << "TaylorVariable( expansion=" << tv.expansion() << ", error=" << tv.error() << " )";
+    return os << "TaylorVariable( expansion=" << tv.expansion() << ", error=" << tv.error() 
+              << ", range="<<tv.range()<<" )";
 }
 
  

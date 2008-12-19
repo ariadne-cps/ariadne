@@ -88,6 +88,7 @@ TaylorVariable tan(const TaylorVariable& x);
 
 pair<TaylorVariable,TaylorVariable> split(const TaylorVariable& x, uint j);
 Vector<Interval> evaluate(const TaylorVariable& y, const Vector<Interval>& z);
+TaylorVariable unscale(const TaylorSeries& x, const Vector<Interval>& bx);
 TaylorVariable compose(const TaylorSeries& x, const TaylorVariable& y);
 TaylorVariable derivative(const TaylorVariable& x, uint j);
 TaylorVariable antiderivative(const TaylorVariable& x, uint j);
@@ -208,8 +209,8 @@ class TaylorVariable
 
   public:
     void clean();
-    void truncate(uint d);
-    void sweep(const Float& eps);
+    TaylorVariable& truncate(uint d);
+    TaylorVariable& sweep(const Float& eps);
 };
 
 TaylorVariable max(const TaylorVariable& x, const TaylorVariable& y);

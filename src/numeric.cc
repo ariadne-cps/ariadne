@@ -302,6 +302,8 @@ double log_rnd(double x) {
     // Note that if z<0 (corresponding to y<1) then we need to use
     // opposite rounding to compute s and w.
 
+    if(x==1.0) { return 0.0; }
+
     int n;
     volatile double y,z,s,t,w,ly;
 

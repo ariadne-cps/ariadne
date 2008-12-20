@@ -23,6 +23,7 @@
  
 #include "config.h"
 
+#include "tribool.h"
 #include "numeric.h"
 
 #include <boost/python.hpp>
@@ -57,11 +58,17 @@ void read(Interval& ivl, const boost::python::object& obj) {
 }
 
 
+std::string __str__(const tribool& tb) {
+    std::stringstream ss;
+    ss<<std::boolalpha;
+    ss<<tb;
+    return ss.str();
+}
 
 void export_tribool()
 {
     class_<tribool> tribool_class("tribool",no_init);
-    tribool_class.def(boost::python::self_ns::str(self));
+    tribool_class.def("__str__", (std::string(*)(const tribool&)) &__str__);
 }
 
 void export_float() 

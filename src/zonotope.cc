@@ -31,6 +31,7 @@
 #include "array.h"
 #include "vector.h"
 #include "matrix.h"
+#include "linear_programming.h"
 #include "point.h"
 #include "box.h"
 #include "list_set.h"
@@ -755,6 +756,45 @@ subset(const Zonotope& z, const Box& r)
 }
 
 
+/* Set up constrained linear program Ax=b, l\leq x\leq u.
+ * Here, A=[I,z.G], b=z.c, l=[r.l,-o], u=[r.u,+o]
+ */
+tribool
+disjoint(const Zonotope& z, const Box& r)
+{
+    ARIADNE_ASSERT(z.dimension()==r.dimension());
+    size_t d=z.dimension();
+    size_t ng=z.number_of_generators();
+    Vector<Interval> er=r+Interval(-1,1)*z.error();
+    const Vector<Float>& zc=z.centre();
+    const Matrix<Float>& zG=z.generators();
+    Matrix<Float> A(d,d+ng);
+    Vector<Float> b(d);
+    Vector<Float> l(d+ng);
+    Vector<Float> u(d+ng);
+    for(size_t i=0; i!=d; ++i) {
+        for(size_t j=0; j!=d; ++j) {
+            A[i][j]=0;
+        }
+        A[i][i]=1;
+        for(size_t j=0; j!=ng; ++j) {
+            A[i][d+j]=zG[i][j];
+        }
+        b[i]=zc[i];
+    }
+    for(size_t j=0; j!=d; ++j) {
+        l[j]=er[j].lower();
+        u[j]=er[j].upper();
+    }
+    for(size_t j=0; j!=ng; ++j) {
+        l[d+j]=-1;
+        u[d+j]=+1;
+    }
+
+    return not constrained_feasible(A,b,l,u);
+}
+
+    
 /* Set up linear program to solve 
  *   \f[x=c+Ge;\ l\leq x\leq u;\ -1\leq e\leq1\f].
  *
@@ -768,7 +808,7 @@ subset(const Zonotope& z, const Box& r)
  * 
  */
 tribool
-disjoint(const Zonotope& z, const Box& r)
+disjoint_old(const Zonotope& z, const Box& r)
 {
     assert(z.dimension()==r.size());
     uint d=z.dimension();
@@ -928,8 +968,6 @@ disjoint(const Zonotope& z1, const Zonotope& z2)
 
 
 /* Set up LP problem to solve \f$c+Ge=p\f$; \f$-1<=e<=1\f$.
- * Change variables so that the problem becomes \f$Ge=p-c-G1;\ 0\leq e\leq2\f$.
- * Change sign of \f$ Ge=p-c-G1\f$ to make right-hand side positive.
  */
 tribool 
 contains(const Zonotope& z, const Point& pt)
@@ -939,54 +977,12 @@ contains(const Zonotope& z, const Point& pt)
     uint d=z.dimension();
     uint m=z.number_of_generators();
   
-    Float zero=0;
-    Float one=1;
-    Float two=2;
-  
-    const Vector<Float>& qc=z.centre();
-    const Vector<Float>& qp=pt;
-    const Matrix<Float>& qG=z.generators();
-    const Vector<Float> qo(m,one);
-    const Vector<Float> zv(m,zero);
-    const Vector<Float> tv(m,two);
-  
-    Vector<Float> qrhs=qp-qc+prod(qG,qo);
-  
-    Matrix<Float> T(d+m+1,m+1);
-  
-    // Set up constraints e+se=2
-    for(uint j=0; j!=m; ++j) {
-        T(j,j)=1;
-        T(j,m)=2;
-    }
-  
-    // Set up constraints Ge \pm ax = p-c+G1
-    for(uint i=0; i!=d; ++i) {
-        if(qrhs(i)>=zero) {
-            for(uint j=0; j!=m; ++j) {
-                T(m+i,j)=qG(i,j); 
-            }
-            T(m+i,m)=qrhs(i);
-        } else {
-            for(uint j=0; j!=m; ++j) {
-                T(m+i,j)=-qG(i,j); 
-            }
-            T(m+i,m)=-qrhs(i);
-        }
-    }
-  
-    // Set up cost function ax^T 1
-    for(uint i=0; i!=d; ++i) {
-        for(uint j=0; j!=m; ++j) {
-            T(m+d,j)-=T(m+i,j);
-        }
-        T(m+d,m)-=T(m+i,m);
-    }
-  
-    LinearProgram<Float> lp(T);
-    //std::clog << lp.tableau() << std::endl;
-    tribool result=lp.is_feasible();
-    //std::clog << lp.tableau() << std::endl;
+    const Matrix<Float>& A=z.generators();
+    Vector<Float> b=pt-z.centre();
+    Vector<Float> l(m,-1.0);
+    Vector<Float> u(m,1.0);
+    
+    tribool result=constrained_feasible(A,b,l,u);
     return result;
 }
 

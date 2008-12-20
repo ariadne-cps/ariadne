@@ -34,70 +34,100 @@
 \section standardprimaldual Standard primal and dual problems
 
 The standard linear programming problem is
-\f[ \text{(P)} \qquad \min c^Tx \text{ s.t. } Ax=b;\ x\geq0.  \f]
+\f[ \text{(P)} \qquad \min cx \text{ s.t. } Ax=b;\ x\geq0.  \f]
 Without loss of generality we can take \f$b\geq0\f$.
 We let \f$x^*\f$ be an optimal point.
 
 The dual to the standard problem is
-\f[ \text{(D)} \qquad \max b^T y \text{ s.t. } A^Ty\leq c \f]
+\f[ \text{(D)} \qquad \max yb \text{ s.t. } yA\leq c \f]
 or alternatively
-\f[ \text{(D)} \qquad \max b^T y \text{ s.t. } A^Ty+z=c;\ z\geq 0. \f]
+\f[ \text{(D)} \qquad \max yb \text{ s.t. } yA+z=c;\ z\geq 0. \f]
 The variables \f$y\f$ are called <em>dual variables</em> and the variables \f$z\f$ are <em>slack variables</em>.
 
-<b>Theorem</b> If \f$x\f$ is feasible for (P) and \f$y\f$ is feasible for (D), then \f[c^Tx \geq b^Ty.\f]
-Further, if \f$x^*\f$ is optimal for (P) and \f$(y^*,z^*)\f$ is optimal for (D), then \f[c^Tx^* = b^Ty^* \qquad \text{and} \qquad x^*\!\cdot\! z^*=0 .\f]
+<b>Theorem</b> If \f$x\f$ is feasible for (P) and \f$y\f$ is feasible for (D), then \f[cx \geq yb.\f]
+Further, if \f$x^*\f$ is optimal for (P) and \f$(y^*,z^*)\f$ is optimal for (D), then \f[cx^* =y^*b \qquad \text{and} \qquad  z^*\!\cdot\!x^*=0 .\f]
 
 The second condition is called <em>complementary slackness</em>.
 
 
-\section optimalbasis Optimal basic solutions 
+\subsection optimalbasis Basic solutions 
 
 A basic solution is given by a set of column indices \f$B\f$ such that the square matrix \f$A_B\f$ formed by the \f$B\f$ columns of \f$A\f$ is nonsingular.
 Then
-\f[x_B=A_B^{-1}b, \ x_N=0; \quad y=(A_B^T)^{-1}c_B; \quad z_B=0, \ z_N=c_N^T-c_B^TA_B^{-1}A_N; \qquad c^Tx = c_B^TA_B^{-1}b = b^T(A_B^T)^{-1}c_B = b^Ty. \f]
+\f[x_B=A_B^{-1}b, \ x_N=0; \quad y=c_BA_B^{-1}; \quad z_B=0, \ z_N=c_N-c_BA_B^{-1}A_N. \f]
+Hence
+\f[ cx = c_BA_B^{-1}b = c_B(A_B)^{-1}b = yb . \f]
+Suppose \f$x^*\f$ is optimal. Then \f$x_B\geq0\f$ and \f[cx = c_B x_B + c_N x_N = c_BA_B^{-1}(b-A_Nx_N)+c_Nx_N = c_BA_B^{-1}b + (c_N-c_BA_B^{-1}A_N)x_N = cx^* + (c_N-c_BA_B^{-1}A_N)x_N,\f] and hence \f$z_N=c_N-c_BA_B^{-1}A_N\geq0\f$.
 
-Suppose \f$x^*\f$ is optimal. Then \f$x_B\geq0\f$ and \f[c^Tx = c_B^T x_B + c_N^T x_N = c_B^TA_B^{-1}(b-A_Nx_N)+c_N^Tx_N = c_B^TA_B^{-1}b + (c_N^T-c_B^TA_B^{-1}A_N)x_N = c^Tx^* + (c_N^T-c_B^TA_B^{-1}A_N)x_N,\f] and hence \f$z_N=c_N^T-c_B^TA_B^{-1}A_N\geq0\f$.
 
+\section boundedoptimisation  Lower and upper bounds on variables
 
-\section robustprimaldual Robust primal and dual problems
+The constrained primal linear programming problem is
+\f[ \text{(CP)} \qquad \min cx \text{ s.t. } Ax=b;\ l\leq x\leq u . \f]
+Given lower bounded variables \f$x_L\f$ and upper bounded variables \f$x_U\f$, the problem becomes 
+\f[ \min cx \text{ s.t. } Ax=b;\ x_L\geq l_L;\ x_U\leq u_U\f]
+and the dual problem is
+\f[ \text{(DCP)} \qquad \max\ y(b - A_Ll_L - A_Uu_U)+c_Ll_L + c_Uu_U \ \text{ s.t. }\  yA_L\leq c_L;\ yA_U\geq c_U . \f]
+Note that the objective function can be written \f$yb +(c_L - yA_L)l_L + (c_U - yA_U)u_U\f$
 
-The robust standard linear programming problem is
-\f[ \text{(RP)} \qquad \min c^Tx \text{ s.t. } Ax=b;\ x>0.  \f]
-and additionally find column indices \f$B\f$ such that \f$A_B\f$ is nonsingular.
-The dual to the standard problem is
-\f[ \text{(RD)} \qquad \max b^T y \text{ s.t. } A^Ty<c \f]
-or alternatively
-\f[ \text{(RD)} \qquad \max b^T y \text{ s.t. } A^Ty+z=c;\ z>0. \f]
+To define a basic solution, we need to split the variables \f$x\f$ into three sets, the basic variables \f$B\f$, the lower bounded variables \f$L\f$ and upper bounded variables \f$U\f$.
+A basic solution then satisfies
+\f[ x_L=l_L, \ x_U=u_U, \ x_B=A_B^{-1}(b-A_Ll_L-A_Uu_U); \quad y=c_B^{-1}A_B; \quad z_B=0,\ z_N=c_N-c_BA_B^{-1}A_N. \f]
 
 
 \section feasibleprimaldual Primal and dual feasibility problems
 
-The primal feasibility problem is
-\f[ \text{(PF)} \qquad Ax=b;\ x\geq0.  \f]
-with dual problems
-\f[ \text{(DPF)} \qquad A^Ty \leq0;\ -b^Ty\leq-\!1 \quad \text{ or } \quad \max b^Ty \text{ s.t. } A^Ty\leq 0.  \f]
-Problem (PF) is solvable iff the first form of (DPF) is unsolvable or the optimal value in the second form is strictly positive.
+ - The primal feasibility problem is
+   \f[ \text{(PF)} \qquad Ax=b;\ x\geq0.  \f]
 
-The dual feasibility problem is
-\f[ \text{(DF)} \qquad A^Ty\leq c \f]
-which has dual
-\f[ \text{(DDF)} \qquad Ax=0,\ c^Tx=-\!1;\ x\geq0 \quad \text{ or } \quad \min c^Tx \text{ s.t. } Ax=0,\ x\geq 0. \f]
-Problem (DF) is solvable iff the first form of (DDF) is unsolvable or the optimal value in the second form is negative.
+ - The dual feasibility problem is
+   \f[ \text{(DF)} \qquad yA\leq c. \f]
 
-\section robustprimaldual Robust feasibility certificates
-
-A <em>robust feasibility certificate</em> for the primal problem is a base \f$B\f$ such that \f$A_B\f$ is nonsingular, and a vector \f$x_N>0\f$ such that \f$-A_B^{-1}A_Nx_N>0\f$, and an infeasibility certificate is a vector \f$y>0\f$ such that \f$A^Ty<c\f$ and \f$b^Ty>0\f$.
-
-A <em>robust feasibility certificate</em> for the dual problem is a vector \f$y\f$ such that \f$A^Ty<c\f$, and an infeasibility certificate is a vector \f$x_N\f$ such that \f$-A_B^{-1}A_Nx_N>0\f$ and \f$c^Tx<0\f$.
-
+ - The dual feasibility problem is
+   \f[ \text{(CF)} \qquad Ax=b; \ l\leq x\leq u. \f]
 
 \section dualcertificate Certificates of infeasibility / Farka's Lemma
 
-A certificate of infeasibility of \f$Ax=b;\ x\geq0\f$ is a vector \f$y\f$ such that \f$A^Ty\leq0\f$ and \f$b^Ty>0\f$.
-For then \f$0\geq y^TAx = y^Tb > 0\f$, a contradiction.
+ - A certificate of infeasibility of \f$Ax=b;\ x\geq0\f$ is a vector \f$y\f$ such that \f$yA\leq0\f$ and \f$yb>0\f$.
+   For then \f$0\geq yAx = yb > 0\f$, a contradiction.
 
-A certificate of infeasibility of \f$A^Ty\leq c\f$ is a vector \f$x\geq0\f$ such that \f$Ax=0\f$ and \f$c^Tx<0\f$.
-For then \f$0=y^TAx \leq c^Tx < 0\f$, a contradiction.
+ - A certificate of infeasibility of \f$yA\leq c\f$ is a vector \f$x\geq0\f$ such that \f$Ax=0\f$ and \f$cx<0\f$.
+   For then \f$0=yAx \leq cx < 0\f$, a contradiction.
+
+ - A certificate of infeasibility of \f$Ax=b;\ l\leq x\leq u\f$ partition into lower and upper variables \f$x_L\f$ and \f$x_U\f$, and a vector \f$y\f$ such that \f$yA_L\leq0\f$, \f$yA_U\geq0\f$ and \f$y(b-A_Ll_L-A_Uu_U)>0\f$. 
+   For then \f[0\geq yA_L(x_L-l_L) - yA_U(u_U-x_U) = yA_Lx_L+A_Ux_U-yA_Ll_L-yA_Uu_U = yAx -yA_Ll_L-yA_Uu_U = yb-yA_Ll_L-yA_Uu_U = y(b-A_Ll_L-A_Uu_U) > 0 .\f]
+
+
+
+\section robustfeasibility Robust feasibility problems
+
+Due to numerical errors, the solution to a feasibility problem may be inaccurate. It is therefore important to be able to validate solutions to feasibility problems. One approach is to use rational arithmetic, but this is frequently too expensive. The alternative is to use interval arithmetic. For this, we need our problems to be <em>robustly</em> solvable.
+
+Note that robustly solving an inequality is straightforward; we merely change \f$\leq\f$ to \f$<\f$. To robustly solve a system of linear equalities, we need to choose a basis and express the basic variables in terms of the non-basic variables.
+
+ - The primal feasibility problem is robustly solvable if there exists a basis \f$B\f$ and non-basic values \f$x_N>0\f$ such that \f$x_B=A_B^{-1}A_Nx_B>0\f$. A certificate of robust infeasibility is a vector \f$y\f$ such that \f$yA<0\f$ and \f$yb>0\f$.
+
+ - The dual feasibility problem is robustly solvable if there exists \f$y\f$ such that \f$yA<c\f$. A certificate of robust infeasibility is a basis \f$B\f$ and an \f$x_N>0\f$ such that \f$x_B=A_B^{-1}A_Nx_N>0\f$ and \f$cx<0\f$.
+
+ - The constrained feasibility problem is robustly solvable if there exists a basis \f$B\f$ and non-basic values \f$x_N\f$ such that \f$x_B=A_B^{-1}A_Nx_B\f$ and \f$l<x<u\f$. A certificate of robust infeasibility is a subdivision into lower and upper variables, and a vector \f$y\f$ such that \f$yA_L<0\f$, \f$yA_U>0\f$ and \f$y(b-A_Ll_L-A_Uu_U)>0\f$.
+
+
+\section solvingrobustfeasibility Robust basic solutions
+
+Given a basis \f$B\f$, and if necessary lower and upper variables \f$L\f$ and \f$U\f$, we can attempt to solve robust feasibility problems by finding a robust basis. We can also set the nonbasic variables to the exact values, as long as the basic variables robustly satisfy the constraints.
+In order to check that a basis gives a solution to the robust dual feasibility problem, 
+
+
+ - Given a basis \f$B\f$ for the primal feasibility problem \f$Ax=b,\ x\geq0\f$, we can take \f$x_B=A_B^{-1}b\f$. 
+   - If some of the variables are still undetermined, we can (optionally) compute \f$A_B^{-1}A_N\f$, and try adding positive linear combinations of columns of this matrix.
+ - To prove infeasibility, we take values \f$x_B\f$ which are negative, and show that they cannot be increased. Suppose \f$x_i<0\f$. Take \f$c=e_i\f$, the corresponding unit basic vector, and try \f$y=cA_B^{-1}\f$.
+
+ - Given a basis \f$B\f$ for the dual feasibility problem \f$yA<c\f$ take \f$y=c_BA_B^{-1}\f$.
+ - To prove infeasibility, find some \f$i\in N\f$ such that \f$(yA)_i>c_i\f$ and \f$x_N=e_i\f$.
+
+<b>TODO:</b> It is not clear whether a robustly solvable problem has a robust basic solution.
+
+
 
 \section robustcertificate Certificates of robust (in)feasibility
 
@@ -129,17 +159,17 @@ Let \f$P\f$ be a matrix with all positive entries. Since \f$A^Ty\leq c\f$ is rob
 \section robustsolve Converting robust feasibility problems to feasibility problems
 
 To solve the robust primal feasibility problem,
-\f[ \text{(RPF)} \qquad Ax=b;\ x>0 \f]
-we choose \f$p>0\f$ and consider the problem
+\f[ \text{(RPF)} \qquad Ax=b;\ x>0;\ A_B\ \text{nonsingular} \f]
+we choose a vector \f$p>0\f$ and consider the problem
 \f[ \min -s \text{ s.t. } Ax + Ap\,s = b;\ x,s\geq0 .\f]
 Let \f$\hat{x}^T=(x\;s)\f$, \f$\hat{A}=(A\;Ap)\f$ and \f$\hat{c}^T=(0\;\mbox{}-\!1)\f$.
 Then we obtain the standard primal optimisation problem 
 \f$ \min \hat{c}^T\hat{x} \text{ s.t. } \hat{A}\hat{x} = b;\ \hat{x}\geq0 . \f$
 If the optimal value is negative, then we have found \f$x^*,s^*\f$ such that \f$A(x^*+ps^*)=b; \ x^*\geq0,\ s^*>0\f$, so taking \f$\tilde{x}=x^*+ps^*\f$, we have \f$A\tilde{x}=b;\ \tilde{x} = x^*+s^*p \geq s^*p > 0\f$.
 If the optimal value is non-negative, then we can attempt to solve the dual robust optimisation problem
-\f$ \max b^Ty \text{ s.t. } Ay<0 \f$.
+\f$ \max yb \text{ s.t. } yA<0 \f$.
 Since if this problem is feasible, it has unbounded solutions, we can instead choose \f$q>0\f$ look for a positive optimal value of
-\f[ \max b^Ty \text{ s.t. } Ay\leq-q . \f]
+\f[ \max yb \text{ s.t. } Ay\leq-q . \f]
 
 To solve the robust dual feasibility problem, 
 \f[ \text{(RDF)} \qquad A^T y + z = c; \ z>0 \quad \text{or} \quad  A^Ty < c, \f]
@@ -161,33 +191,6 @@ Taking \f$\tilde{x} = x-p\f$, we obtain
 \f[ \min b^T \tilde{x} + b^T p \text{ s.t. } A\tilde{x} = -Ap,\ \tilde{x}\geq 0 . \f]
 
 
-
-\section reducedform Reduced linear programming problem
-
-The reduced form of the standard linear programming problem is
-\f[ \min c^Tx \text{ s.t. } x_B+\tilde{A}x_N=b;\ x\geq0 . \f]
-Here, \f$x_B\f$ are the basic variables, and \f$x_N\f$ the non-basic variables.
-
-If \f$A\f$ is of full row rank, by choosing a basis such that the basis matrix \f$A_B\f$ is invertible, we can put any linear programming problem in standard form.
-
-
-\section boundedoptimisation  Lower and upper bounds on variables
-
-The constrained primal linear programming problem is
-\f[ \text{(CP)} \qquad \min c^Tx \text{ s.t. } Ax=b;\ l\leq x\leq u . \f]
-Given lower bounded variables \f$x_L\f$ and upper bounded variables \f$x_U\f$, the problem becomes 
-\f[ \min c^Tx \text{ s.t. } Ax=b;\ x_L\geq l_L;\ x_U\leq u_U\f]
-and the dual problem is
-\f[ \text{(DCP)} \qquad \max\ (b^T - l_L^TA_L^T - u_U^T A_U^T)y+l_L^Tc_L + u_U^Tc_U \ \text{ s.t. }\  A_L^Ty\leq c_L;\ A_U^Ty\geq c_U . \f]
-Note that the objective function can be written \f$b^T y +l_L^T (c_L - A_L^Ty) + u_U^T(c_U - A_U^Ty)\f$
-
-<b>Theorem</b>
-The constrained primal linear programming problem \f$Ax=b;\ l\leq x\leq u\f$ is infeasible if, and only if, there exists a partition \f$L,U\f$ of the columns of \f$A\f$, and \f$y\f$ such that \f$ y (b-TA_L l_L - A_U u_U)>0,\ y A_L \leq 0,\ y A_U \geq 0 . \f$
-
-<b>Theorem</b>
-Suppose \f$Ax=b;\ l\leq x\leq u\f$ is robust. Then either \f$A\f$ is nonsingular, and there exists \f$x_N\f$ such that \f$x_B = A_B^{-1} A_N x_N\f$ and \f$l<x<u\f$, or there exists column index sets \f$L,U\f$ and \f$y\f$ such that \f$ (b^T-l_L^TA_L^T-u_U^TA_U^T)y>0,\ A_L^Ty<0,\ A_U^Ty>0 . \f$
-
-To solve the robust problem, we first find a solution to the standard problem, and then try to force saturated constraints to be positive as before.
 
 
 \section simplexalgorithm The simplex algorithm

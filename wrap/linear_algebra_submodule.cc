@@ -35,6 +35,8 @@ using namespace boost::python;
 
 using namespace Ariadne;
 
+namespace Ariadne {
+
 template<class X> const char* python_name(const char* name);
 template<> const char* python_name<Float>(const char* name) { 
     return (std::string("")+name).c_str(); }
@@ -44,29 +46,44 @@ template<> const char* python_name<Rational>(const char* name) {
     return (std::string("Q")+name).c_str(); }
 
 
-    
-
-template<class X> Vector<X>*
-make_vector(const boost::python::object& obj) 
+template<class X> 
+void read(Vector<X>& v, const boost::python::object& obj) 
 {
-  array<X> a; read_array(a,obj);
-  return new Vector<X>(a.size(),a.begin());
+  array<X> a; 
+  read_array(a,obj);
+  v=Vector<X>(a.size(),a.begin());
 }
 
-template<class X> Matrix<X>*
-make_matrix(const boost::python::object& obj) 
+template<class X> 
+void read(Matrix<X>& A, const boost::python::object& obj) 
 {
   boost::python::list elements=boost::python::extract<boost::python::list>(obj);
   int m=boost::python::len(elements);
   boost::python::list row=boost::python::extract<boost::python::list>(elements[0]);
   int n=boost::python::len(row);
-  Matrix<X>* Aptr=new Matrix<X>(m,n);
+  A=Matrix<X>(m,n);
   for(int i=0; i!=m; ++i) {
     row=boost::python::extract<boost::python::list>(elements[i]);
     if(boost::python::len(row)!=n) { throw std::runtime_error("Matrix with rows of different sizes"); }
-    for(int j=0; j!=n; ++j) { X x; read_scalar(x,row[j]); Aptr->set(i,j,x); }
+    for(int j=0; j!=n; ++j) { X x; read_scalar(x,row[j]); A.set(i,j,x); }
   }
-  return Aptr;
+}
+
+
+template<class X> Vector<X>*
+make_vector(const boost::python::object& obj) 
+{
+    Vector<X>* vptr=new Vector<X>();
+    read(*vptr,obj);
+    return vptr;
+}
+
+template<class X> Matrix<X>*
+make_matrix(const boost::python::object& obj) 
+{
+    Matrix<X>* Aptr=new Matrix<X>();
+    read(*Aptr,obj);
+    return Aptr;
 }
 
 template<class X0, class X1>
@@ -109,6 +126,8 @@ Matrix<X0> __mmmul__(const Matrix<X1>& A1, const Matrix<X2>& A2) {
     return prod(A1,A2); 
 }
 
+
+}
 
 
 template<class X>

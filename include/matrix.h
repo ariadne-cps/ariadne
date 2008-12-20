@@ -151,6 +151,7 @@ class Matrix
     };
 
 template<class X> X norm(const Matrix<X>& A);
+template<class X> Matrix<X> transpose(const Matrix<X>& A);
 
 template<class X> std::ostream& operator<<(std::ostream& os, const Matrix<X>& A);
 template<class X> std::istream& operator>>(std::istream& is, Matrix<X>& A);
@@ -254,6 +255,17 @@ template<class X> X norm(const Matrix<X>& A)
         if(row_sum>result) { result=row_sum; }
     }
     return result;
+}
+
+template<class X> Matrix<X> transpose(const Matrix<X>& A) 
+{
+    Matrix<X> AT(A.column_size(),A.row_size());
+    for(size_t i=0; i!=A.row_size(); ++i) {
+        for(size_t j=0; j!=A.column_size(); ++j) {
+            AT[j][i]=A[i][j];
+        }
+    }
+    return AT;
 }
 
 

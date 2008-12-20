@@ -286,6 +286,11 @@
  * \brief Calculus operations.
  */
 
+/*!\defgroup LinearProgrammingModule Linear Programming Module
+ * \ingroup InternalModules
+ * \brief Linear programming solvers.
+ */
+
 
  
 #endif /* _ARIADNE_MODULES_H */

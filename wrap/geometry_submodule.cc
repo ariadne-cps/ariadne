@@ -41,11 +41,17 @@ using namespace Ariadne;
 
 namespace Ariadne {
 
+template<class X> void read(Matrix<X>& A, const boost::python::object& obj);
+
 void
 read(Point& pt, const boost::python::object& obj) 
 {
   array<Float> ary;
-  read_array(ary,obj);
+  if(boost::python::extract<boost::python::tuple>(obj).check()) {
+      read_tuple_array(ary,obj);
+  } else {
+      read_array(ary,obj);
+  }
   pt=Point(Vector<Float>(ary.size(),ary.begin()));
 }
 
@@ -56,6 +62,18 @@ read(Box& bx, const boost::python::object& obj)
   array<Interval> ary;
   read_array(ary,obj);
   bx=Box(Vector<Interval>(ary.size(),ary.begin()));
+}
+
+void
+read(Zonotope& z, const boost::python::object& obj) 
+{
+    boost::python::tuple tup=boost::python::extract<boost::python::tuple>(obj);
+    Point c;
+    Matrix<Float> GT;
+    assert(len(tup)==2);
+    read(c,tup[0]);
+    read(GT,tup[1]);
+    z=Zonotope(c,transpose(GT));
 }
 
 
@@ -180,10 +198,14 @@ void export_box()
 void export_zonotope() 
 {
     class_<Zonotope,bases<CompactSetInterface,OpenSetInterface> > zonotope_class("Zonotope",no_init);
+    zonotope_class.def("__init__", make_constructor(&make<Zonotope>) );
     zonotope_class.def("centre",&Zonotope::centre,return_value_policy<copy_const_reference>());
     zonotope_class.def("generators",&Zonotope::generators,return_value_policy<copy_const_reference>());
     zonotope_class.def("error",&Zonotope::error,return_value_policy<copy_const_reference>());
     zonotope_class.def("__str__",&__str__<Zonotope>);
+
+    def("contains", (tribool(*)(const Zonotope&,const Point&)) &contains);
+    def("disjoint", (tribool(*)(const Zonotope&,const Box&)) &disjoint);
 }
 
 void export_taylor_set() 

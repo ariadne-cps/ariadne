@@ -40,29 +40,44 @@ namespace Ariadne {
 enum VariableType { BASIS, NONBASIS, LOWER, UPPER, FEASIBLE, INFEASIBLE };
 std::ostream& operator<<(std::ostream& os, VariableType t);
 
-
+//! \ingroup LinearProgrammingModule 
 //! Test if there exists a point \f$x\f$ with \f$0 \leq x\f$ and \f$Ax=b\f$.
 template<class X> tribool 
 primal_feasible(const Matrix<X>& A, const Vector<X>& b);
 
+//! \ingroup LinearProgrammingModule 
 //! Test if there exists a point \f$y\f$ with \f$yA\leq c\f$.
 template<class X> tribool 
 dual_feasible(const Matrix<X>& A, const Vector<X>& c);
 
+//! \ingroup LinearProgrammingModule 
 //! Test if there exists a point \f$x\f$ with \f$l \leq x \leq u\f$ and \f$Ax=b\f$.
 template<class X> tribool 
 constrained_feasible(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u);
 
-//! Tests if \f$yb>\f$ and $\fyA\leq 0\f$.
+//! \ingroup LinearProgrammingModule 
+//! Check whether the assignment of basis, lower and upper variables yields a certificate of feasibility or infeasibility.
+template<class X> tribool 
+verify_constrained_feasible(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, const array<VariableType>& vt);
+
+//! \ingroup LinearProgrammingModule 
+//! Tests if \f$yb>\f$ and \f$yA\leq 0\f$.
 template<class X> void 
 verify_infeasibility(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& y);
 
-template<class X> std::pair< array<size_t>, Matrix<X> > 
+//! \ingroup LinearProgrammingModule 
+//! Compute a permutation \f$p\f$ such that \f$p_{0},\ldots,p_{m-1}\f$ are the basis variables of \f$A\f$, and the inverse matrix \f$A_B^{-1}\f$.
+template<class X> pair< array<size_t>, Matrix<X> > 
 compute_basis(const Matrix<X>& A);
-   
-    
-template<class X>
-bool lpstep(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& c, array<size_t>& p, Matrix<X>& B, Vector<X>& x);
+
+//! \ingroup LinearProgrammingModule 
+//! Perform a single step of the standard linear programming problem, updating the ordered variable array \a p, the inverse basis matrix \a B and the variables \a x.
+template<class X> bool lpstep(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& c, array<size_t>& p, Matrix<X>& B, Vector<X>& x);
+
+
+//! \ingroup LinearProgrammingModule 
+//! Perform a single step of the standard linear programming problem, updating the variable type array \a vt, the ordered variable array \a p, the inverse basis matrix \a B and the variables \a x.
+template<class X> bool lpstep(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& c, const Vector<X>& l, const Vector<X>& u, array<VariableType>& vt, array<size_t>& p, Matrix<X>& B, Vector<X>& x);
 
 } // namespace Ariadne
 

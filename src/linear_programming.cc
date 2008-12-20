@@ -167,7 +167,7 @@ compute_basis(const Matrix<X>& A)
 
     
 template<class X>
-void check(const Matrix<X>& A, const array<size_t>& p, const Matrix<X>& B) 
+void consistency_check(const Matrix<X>& A, const array<size_t>& p, const Matrix<X>& B) 
 {
     const size_t m=A.row_size();
     Matrix<X> A_B(m,m);
@@ -188,7 +188,7 @@ void check(const Matrix<X>& A, const array<size_t>& p, const Matrix<X>& B)
 
 
 template<class X>
-void check(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, const array<VariableType>& vt, const array<size_t>& p, const Matrix<X>& B, const Vector<X>& x) 
+void consistency_check(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, const array<VariableType>& vt, const array<size_t>& p, const Matrix<X>& B, const Vector<X>& x) 
 {
     std::cerr<<"        Checking consistency of B and x\n";
     const size_t m=A.row_size();
@@ -212,6 +212,7 @@ void check(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vec
         size_t j=p[k];
         assert(vt[j]==LOWER || vt[j]==UPPER);
         X xj = (vt[j]==LOWER ? l[j] : u[j]);
+        if(x[j]!=xj) { std::cerr<<"j="<<j<<" x[j]="<<x[j]<<" l/u[j]="<<xj<<std::endl; }
         assert(x[j]==xj);
     }
     Vector<X> z=prod(A,x);
@@ -221,11 +222,11 @@ void check(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vec
 }
 
 
-template<class X>
-void verify_feasibility(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, const array<VariableType> vt)
+template<class XX, class X>
+tribool 
+_verify_feasibility(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, const array<VariableType> vt)
 {
     std::cerr<<"\nChecking feasibility with\n  A="<<A<<" b="<<b<<" l="<<l<<" u="<<u<<"\n  t="<<vt<<"\n"<<std::endl;
-    typedef X XX;
     const size_t m=A.row_size();
     const size_t n=A.column_size();
 
@@ -235,17 +236,55 @@ void verify_feasibility(const Matrix<X>& A, const Vector<X>& b, const Vector<X>&
     // Compute inverse matrix
     Matrix<XX> A_B(m,m);
     for(size_t i=0; i!=m; ++i) { for(size_t j=0; j!=m; ++j) { A_B[i][j]=A[i][p[j]]; } }
-    Matrix<XX> B=A_B.inverse();
+    Matrix<XX> B=inverse(A_B);
     
     // Compute non-basic variables
     Vector<XX> x; 
     for(size_t i=0; i!=n; ++i) { if(vt[i]==LOWER) { x[i]=l[i]; } else if(vt[i]==UPPER) { x[i]=u[i]; } else { x[i]=0; } }
 
-    Vector<XX> x_B = b-prod(B,prod(A,x));
-    for(size_t i=0; i!=m; ++i) { assert(x_B[i]>l[p[i]]); assert(x_B[i]<u[p[i]]); }
+    // Compute non-basic variables
+    Vector<XX> x_B = b-prod(B,Vector<XX>(prod(A,x)));
+    for(size_t i=0; i!=m; ++i) {
+        x[p[i]]=x_B[i];
+    }
+
+    // Check if constraint is not satisfied
+    tribool result=true;
+    for(size_t i=0; i!=m; ++i) {
+        if(!(x_B[i] > l[p[i]]) && (x_B[i]<u[p[i]])) {
+            result=indeterminate;
+        }
+    }
+
+    if(result!=true) {
+        result=false;
+        
+        // Check if 
+    }
+
+    
+
 }
     
-    
+
+#ifdef HAVE_GMPXX_H
+tribool 
+verify_feasibility(const Matrix<Rational>& A, const Vector<Rational>& b, 
+                   const Vector<Rational>& l, const Vector<Rational>& u, 
+                   const array<VariableType>& t) 
+{
+    return _verify_feasibility<Rational>(A,b,l,u,t);
+}
+#endif // HAVE_GMPXX_H
+
+   
+tribool 
+verify_feasibility(const Matrix<Float>& A, const Vector<Float>& b, 
+                   const Vector<Float>& l, const Vector<Float>& u, 
+                   const array<VariableType>& t) 
+{
+    return _verify_feasibility<Interval>(A,b,l,u,t);
+}
    
     
 
@@ -436,6 +475,15 @@ template<class X>
 bool lpstep(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& c, array<size_t>& p, Matrix<X>& B, Vector<X>& x)
 {
     std::cerr<<"lpstep(A,b,c,p,B,x)\n  A="<<A<<" b="<<b<<" c="<<c<<" p="<<p<<" B="<<B<<" x="<<x<<std::endl;
+    assert(A.row_size()==b.size());
+    assert(A.row_size()==B.row_size());
+    assert(A.row_size()==B.column_size());
+    assert(A.column_size()==c.size());
+    assert(A.column_size()==p.size());
+    assert(A.column_size()==x.size());
+
+    for(size_t i=0; i!=p.size(); ++i) { assert(p[i]<p.size()); } 
+
     assert(B==compute_B(A,p));
     assert(x==compute_x(A,b,p,B));
    
@@ -522,7 +570,7 @@ bool lpstep(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& c, array<si
     Vector<X> xx=compute_x(A,b,p,B);
     
     std::cerr<<"      BB="<<BB<<" xx="<<xx<<"\n";
-    check(A,p,B);
+    consistency_check(A,p,B);
 
     return false;
 }
@@ -605,52 +653,59 @@ bool lpstep(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& c, const Ve
     if(r!=s) {
         std::cerr<<"   Swapping basic variable "<<p[r]<<" in position "<<r<<" with non-basic variable "<<p[s]<<" in position "<<s<<"\n";
     } else {
-        std::cerr<<"   Changing non-basic variable "<<p[s]<<" in position "<<s<<" to type "<<vt[p[s]]<<"\n";
+        VariableType nvts=(vt[p[s]]==LOWER ? UPPER : LOWER);
+        std::cerr<<"   Changing non-basic variable "<<p[s]<<" in position "<<s<<" from type "<<vt[p[s]]<<" to type "<<nvts<<"\n";
     }
 
-    
+
     Vector<X> e(m); X dr,xr;
     if(r==s) {
-        dr=1;
         // No change in basic variables. Constraint is due to bounds on x_s
+        dr=1;
         if(vt[p[s]]==LOWER) {
             vt[p[s]]=UPPER;
         } else {
             vt[p[s]]=LOWER;
         }
-        xr=ds*(u[p[s]]-l[p[s]]);
+
+        x[p[s]] = (vt[p[s]]==LOWER ? l[p[s]] : u[p[s]]);
+        for(size_t i=0; i!=m; ++i) {
+            x[p[i]]+=d[i]*t;
+        }
+        
     } else {
+        // Variable p[r] should leave basis, and variable p[s] enter
+        if(r>=m) { std::cerr<<"s="<<s<<" r="<<r<<"\n"; }
+        assert(r<m);
         e[r]=1;
         dr=d[r];
         xr=x[p[r]];
-    }
-
     
-    // Update matrix of inverses
-    X drr=1/dr;
-    Vector<X> Br(m); for(uint j=0; j!=m; ++j) { Br[j]=B[r][j]; }
-    Vector<X> nd(m); for(uint i=0; i!=m; ++i) { nd[i]=(d[i]+e[i])*drr; }
-    for(uint i=0; i!=m; ++i) { 
-        for(uint j=0; j!=m; ++j) {
-            B[i][j]-=nd[i]*Br[j];
+        // Update matrix of inverses
+        std::cerr<<"Updating B\n";
+        X drr=1/dr;
+        Vector<X> Br(m); for(uint j=0; j!=m; ++j) { Br[j]=B[r][j]; }
+        Vector<X> nd(m); for(uint i=0; i!=m; ++i) { nd[i]=(d[i]+e[i])*drr; }
+        for(uint i=0; i!=m; ++i) { 
+            for(uint j=0; j!=m; ++j) {
+                B[i][j]-=nd[i]*Br[j];
+            }
         }
-    }
-
-    // Update state vector x to x-td
-    for(size_t i=0; i!=m; ++i) {
-        x[p[i]]+=d[i]*t;
-    }
-    x[p[s]] += ds*t;
-
-    std::cerr<<"      B="<<B<<"  x="<<x<<"\n";
+        // Update state vector x to x-td
+        for(size_t i=0; i!=m; ++i) {
+            x[p[i]]+=d[i]*t;
+        }
+        x[p[s]] += ds*t;
+        
+        std::cerr<<"      B="<<B<<"  x="<<x<<"\n";
     
-    // Update pivots and variable types
-    std::swap(p[r],p[s]);
-    for(size_t i=0; i!=m; ++i) { vt[p[i]]=BASIS; }
-    vt[p[s]]=(dr>0 ? UPPER : LOWER);
-    X xpr=x[p[r]];
-    x[p[s]] = (dr>0 ? u[p[s]] : l[p[s]]);
-
+        // Update pivots and variable types
+        std::swap(p[r],p[s]);
+        for(size_t i=0; i!=m; ++i) { vt[p[i]]=BASIS; }
+        vt[p[s]]=(dr>0 ? UPPER : LOWER);
+        X xpr=x[p[r]];
+        x[p[s]] = (dr>0 ? u[p[s]] : l[p[s]]);
+    }
 
     std::cerr<<"      vt="<<vt<<"  p="<<p<<"\n";
     
@@ -658,7 +713,7 @@ bool lpstep(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& c, const Ve
     Vector<X> xx=compute_x(A,b,l,u,vt,p,BB);
     
     std::cerr<<"      BB="<<BB<<" xx="<<xx<<"\n";
-    check(A,b,l,u,vt,p,B,x);
+    consistency_check(A,b,l,u,vt,p,B,x);
 
     return false;
     }
@@ -764,6 +819,7 @@ tribool feasible(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, con
         std::cerr << "\n    vt="<<vt<<" x="<<x<<" c="<<c<<"\n";
     }
  
+    std::cerr << "  Checking solution\n";
     // Check solution
     for(size_t i=0; i!=n; ++i) {
         assert(x[i]>=l[i]);
@@ -906,10 +962,110 @@ tribool constrained_feasible(const Matrix<X>& A, const Vector<X>& b, const Vecto
 
     x=compute_x(A,b,l,u,vt,p,B);
 
-    feasible(A,b,l,u,vt,p,B,x);
+    return feasible(A,b,l,u,vt,p,B,x);
 
-    return true;
 }
+
+
+template<class X> tribool
+verify_constrained_feasible(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vector<X>& u, const array<VariableType>& vt)
+{
+    typedef Interval XX;
+    const size_t m=A.row_size();
+    const size_t n=A.column_size();
+
+    array<size_t> p(n);
+    for(size_t i=0, j=0, k=m; i!=n; ++i) {
+        if(vt[i]==BASIS) { p[i]=j; ++j; }
+        else { p[i]=k; ++k; }
+    }
+    
+    Matrix<XX> A_B(m,m);
+    for(size_t i=0; i!=m; ++i) {
+        for(size_t j=0; j!=m; ++j) {
+            A_B[i][j]=A[i][p[j]];
+        }
+    }
+    Matrix<XX> B=inverse(A_B);
+
+    std::cerr<<"A_B="<<A_B<<" B="<<B<<" B*A="<<prod(B,A)<<"\n";
+
+    Vector<XX> x(n);
+    for(size_t i=0; i!=n; ++i) {
+        switch(vt[i]) { case LOWER: x[i]=l[i]; break; case UPPER: x[i]=u[i]; break; case BASIS: x[i]=0.0; break; }
+    }
+
+    // Compute w=A_Nx_N
+    Vector<XX> w(m); 
+    for(size_t k=m; k!=n; ++k) {
+        size_t j=p[k];
+        for(size_t i=0; i!=m; ++i) {
+            w[i]+=A[i][j]*x[j];
+        }
+    }
+
+    // Compute x_B=Bw
+    for(size_t k=0; k!=m; ++k) {
+        size_t j=p[k];
+        for(size_t i=0; i!=m; ++i) {
+            x[j]+=B[k][i]*w[i];
+        }
+    }
+
+    // Test if basic variables satisfy constraints
+    size_t ek=m; // Basic variable not satisfying constraints
+    for(size_t k=0; k!=m; ++k) {
+        size_t j=p[k];
+        if(l[j]<x[j] && x[j]<u[j]) {
+        } else {
+            ek=k;
+            if(l[j]>x[j] || x[j]>u[j]) {
+                break;
+            }
+        }
+    }
+
+    if(ek==m) {
+        std::cerr<<"\nl="<<l<<"\nx="<<x<<" OK\nu="<<u<<"\n\n";
+    }
+    
+    size_t ej=p[ek];
+    if(!(l[ej]>x[ej] || x[ej]>u[ej])) {
+        return indeterminate;
+    }
+
+    Vector<XX> y(m);
+    for(size_t i=0; i!=m; ++i) {
+        y[i]=B[ek][i];
+    }
+    
+    XX yb=0;
+    for(size_t i=0; i!=m; ++i) {
+        yb+=y[i]*(b[i]-w[i]);
+    }
+
+    Vector<XX> yA(n);
+    for(size_t k=m; k!=n; ++k) {
+        size_t j=p[k];
+        for(size_t i=0; i!=m; ++i) {
+            yA[j]+=y[i]*A[i][j];
+        }
+    }
+
+    std::cerr<<"y="<<y<<" y.(b-w)="<<yb<<"yA="<<yA<<std::endl;
+    for(size_t k=m; k!=n; ++k) {
+        size_t j=p[k];
+        if(vt[j]==LOWER && not(yA[j]<0)) { return indeterminate; }
+        if(vt[j]==UPPER && not(yA[j]>0)) { return indeterminate; }
+    }
+
+    return false;
+}
+    
+                
+
+    
+    
 
 
 
@@ -956,6 +1112,11 @@ template void verify_infeasibility(const Matrix<Rational>& A, const Vector<Ratio
 template std::pair< array<size_t>, Matrix<Rational> > compute_basis(const Matrix<Rational>&);
 
 template bool lpstep(const Matrix<Rational>& A, const Vector<Rational>& b, const Vector<Rational>& c, array<size_t>& p, Matrix<Rational>& B, Vector<Rational>& x);
+
+
+template tribool primal_feasible<Float>(const Matrix<Float>&, const Vector<Float>&);
+template tribool dual_feasible<Float>(const Matrix<Float>&, const Vector<Float>&);
+template tribool constrained_feasible<Float>(const Matrix<Float>&, const Vector<Float>&, const Vector<Float>&, const Vector<Float>&);
 
 } // namespace Ariadne
 

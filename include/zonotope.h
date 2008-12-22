@@ -210,6 +210,7 @@ tribool disjoint(const Zonotope& z, const Box& r);
 tribool overlaps(const Zonotope& z, const Box& r);
 tribool subset(const Zonotope& z, const Box& r);
 
+tribool disjoint(const Zonotope& z1, const Zonotope& z2);
 
 ListSet<Zonotope> split(const Zonotope& z);
 

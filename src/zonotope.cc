@@ -750,9 +750,16 @@ operator>>(std::istream& is, Zonotope& z)
 
 
 tribool
-subset(const Zonotope& z, const Box& r)
+subset(const Zonotope& z, const Box& bx)
 {
-    return subset(z.bounding_box(),r);
+    return subset(z.bounding_box(),bx);
+}
+
+
+tribool
+overlaps(const Zonotope& z, const Box& bx) 
+{
+    return !disjoint(z,bx);
 }
 
 
@@ -760,31 +767,25 @@ subset(const Zonotope& z, const Box& r)
  * Here, A=[I,z.G], b=z.c, l=[r.l,-o], u=[r.u,+o]
  */
 tribool
-disjoint(const Zonotope& z, const Box& r)
+disjoint(const Zonotope& z, const Box& bx)
 {
-    ARIADNE_ASSERT(z.dimension()==r.dimension());
+    ARIADNE_ASSERT(z.dimension()==bx.dimension());
     size_t d=z.dimension();
     size_t ng=z.number_of_generators();
-    Vector<Interval> er=r+Interval(-1,1)*z.error();
+    Vector<Interval> ebx=bx+Interval(-1,1)*z.error();
     const Vector<Float>& zc=z.centre();
     const Matrix<Float>& zG=z.generators();
     Matrix<Float> A(d,d+ng);
     Vector<Float> b(d);
     Vector<Float> l(d+ng);
     Vector<Float> u(d+ng);
-    for(size_t i=0; i!=d; ++i) {
-        for(size_t j=0; j!=d; ++j) {
-            A[i][j]=0;
-        }
-        A[i][i]=1;
-        for(size_t j=0; j!=ng; ++j) {
-            A[i][d+j]=zG[i][j];
-        }
-        b[i]=zc[i];
-    }
+
+    project(A,range(0,d),range(0,d))=Matrix<Float>::identity(d);
+    project(A,range(0,d),range(d,d+ng))=zG;
+    b=zc;
     for(size_t j=0; j!=d; ++j) {
-        l[j]=er[j].lower();
-        u[j]=er[j].upper();
+        l[j]=ebx[j].lower();
+        u[j]=ebx[j].upper();
     }
     for(size_t j=0; j!=ng; ++j) {
         l[d+j]=-1;
@@ -795,176 +796,33 @@ disjoint(const Zonotope& z, const Box& r)
 }
 
     
-/* Set up linear program to solve 
- *   \f[x=c+Ge;\ l\leq x\leq u;\ -1\leq e\leq1\f].
- *
- * Change variables to normalize \f$x\f$ and \f$e\f$
- *   \f[x'=x-l,\ e'=e+1;   x'-Ge' = c-G1-l;  0\leq x\leq u-l; \ 0\leq e\leq 2.\f] 
- * 
- * Introduce slack variables sx and se, and artificial variables ax. Problem in standard form
- *   \f[ \begin{matrix}I&0\\0&I\\\pm I&\mp G\end{matrix} \begin{matrix}x'\\e'\end{matrix}
- *        + \begin{matrix}I&&\\&I&\\&&I\end{matrix}\begin{matrix}sx\\se\\ax\end{matrix}
- *             = \begin{matrix}u-l\\2\\\pm(c-G1-l)\end{matrix} \f]
- * 
+/* Set up constrained linear program Ax=b, l\leq x\leq u.
+ * Here, A=[z1.G,z2.G], b=z1.c-z2.c, l=[-o,-o], u=[+o,+o]
+ * Still need to take into account errors, particularly in 
+ * the \a b vector.
  */
-tribool
-disjoint_old(const Zonotope& z, const Box& r)
-{
-    assert(z.dimension()==r.size());
-    uint d=z.dimension();
-    uint m=z.number_of_generators();
-  
-    // Construct tableau for testing intersection of zonotope and rectangle
-    // Box  l<=x<=u
-    // Zonotope  x==c+Ge,  -1<=e<=1
-    // 
-    // Translate x'=x-l,  e'=e+1
-    //   0<=x'<=u-l      ->  x' +     + sx'               == u-l
-    //   0<=e'<=2        ->     +  e' +     + se'         == 2
-    //   x'+l==c+G(e'-1) ->  x' + Ge'             +/- ax' == c-l-G1
-    //  
-    // Change sign of RHS of first equality if necessary
-    // Introduce slack variables for last two inequalities
-    Matrix<Float> T(2*d+m+1,d+m+1);
-  
-    const Vector<Float> l=Ariadne::lower(r)-z.error();
-    const Vector<Float> u=Ariadne::upper(r)+z.error();
-    const Vector<Float>& c=z.centre();
-    const Matrix<Float>& G=z.generators();
-    //const Vector<Float>& e=z.error();
-  
-    const Vector<Float> qo(m,1.0);
-    const Vector<Float> ql=l;
-    const Vector<Float> qu=u;
-    const Vector<Float> qd=qu-ql;
-    const Vector<Float> qc=c;
-    const Matrix<Float> qG=G;
-    const Vector<Float> qrhs=qc-ql-prod(qG,qo);
-  
-    { std::clog << "ql=" << ql << ", qd=" << qd <<", qc=" << qc << ", qrhs=" << qrhs << std::endl; }
-  
-    // Set up constraints x+sx=u-l
-    for(uint i=0; i!=d; ++i) {
-        T(i,i)=1;
-        T(i,d+m)=qu(i)-ql(i);
-    }
-  
-    // Set up constraints e+se=2
-    for(uint j=0; j!=m; ++j) {
-        T(d+j,d+j)=1;
-        T(d+j,d+m)=2;
-    }
-  
-    // Set up constraints x-Ge \pm ax=c-l-G1 
-    for(uint i=0; i!=d; ++i) {
-        if(qrhs(i)>=0.0) {
-            T(i+d+m,i)=1;
-            for(uint j=0; j!=m; ++j) {
-                T(i+d+m,d+j)=-qG(i,j);
-            }
-            T(i+d+m,d+m)=qrhs(i);
-        }
-        else {
-            T(i+d+m,i)=-1;
-            for(uint j=0; j!=m; ++j) {
-                T(i+d+m,d+j)=qG(i,j);
-            }
-            T(i+d+m,d+m)=-qrhs(i);
-        }
-    } 
-  
-    // Set up cost function ax^T1
-    for(uint i=0; i!=d; ++i) {
-        T(2*d+m,i) -= T(i+d+m,i);
-        for(uint j=0; j!=m; ++j) {
-            T(2*d+m,d+j) -= T(i+d+m,d+j);
-        }
-        T(2*d+m,d+m) -= T(i+d+m,d+m);
-    }
-  
-    LinearProgram<Float> lp(T);
-    tribool result=!lp.is_feasible();
-  
-    return result;
-}
-
-
-
 tribool
 disjoint(const Zonotope& z1, const Zonotope& z2)
 {
-    assert(z1.dimension()==z2.dimension());
-  
-    uint d=z1.dimension();
-    const Float zero=0;
-    const Float one=1;
-    uint m1=z1.number_of_generators();
-    uint m2=z2.number_of_generators();
-  
-    Matrix<Float> T(m1+m2+d+1,m1+m2+1);
-  
-    const Vector<Float> qo1(m1,one);
-    const Vector<Float> qo2(m2,one);
-  
-    const Vector<Float>& qc1=z1.centre();
-    const Matrix<Float>& qG1=z1.generators();
-    const Vector<Float>& qc2=z2.centre();
-    const Matrix<Float>& qG2=z2.generators();
-    Vector<Float> qrhs = prod(qG1,qo1) - prod(qG2,qo2) + (qc2 - qc1);
-  
-    // Set up constraints e1 + se1 = 2
-    for(uint j1=0; j1!=m1; ++j1) {
-        T(j1,j1)=1;
-        T(j1,m1+m2)=2;
-    }
-  
-    // Set up constraints e2 + se2 = 2
-    for(uint j2=0; j2!=m2; ++j2) {
-        T(m1+j2,m1+j2)=1;
-        T(m1+j2,m1+m2)=2;
-    }
-  
-    // Set up constraints G1*e1 - G2*e2 = (c2 - G2*1) - (c1 - G1*1)
-    for(uint i=0; i!=d; ++i) {
-        if(qrhs(i)>=zero) {
-            for(uint j1=0; j1!=m1; ++j1) {
-                T(m1+m2+i,j1)=qG1(i,j1);
-            }
-            for(uint j2=0; j2!=m2; ++j2) {
-                T(m1+m2+i,m1+j2)=qG2(i,j2);
-            }
-            T(m1+m2+i,m1+m2)=qrhs(i);
-        }
-        else {
-            for(uint j1=0; j1!=m1; ++j1) {
-                T(m1+m2+i,j1)=-qG1(i,j1);
-            }
-            for(uint j2=0; j2!=m2; ++j2) {
-                T(m1+m2+i,m1+j2)=-qG2(i,j2);
-            }
-            T(m1+m2+i,m1+m2)=-qrhs(i);
-        }
-    } 
-  
-    // Set up cost function ax^T1
-    for(uint i=0; i!=d; ++i) {
-        for(uint j1=0; j1!=m1; ++j1) {
-            T(m1+m2+d,j1) -= T(m1+m2+i,j1);
-        }
-        for(uint j2=0; j2!=m2; ++j2) {
-            T(m1+m2+d,m1+j2) -= T(m1+m2+i,m1+j2);
-        }
-        T(m1+m2+d,m1+m2) -= T(m1+m2+i,m1+m2);
-    }
-  
-    LinearProgram<Float> lp(T);
-  
-    tribool result=!lp.is_feasible();
-  
-    //std::clog << "disjoint(" << z1 << "," << z2 << ")=" << result << std::endl;
-    return result;
-}
+    ARIADNE_ASSERT(z1.dimension()==z2.dimension());
+    size_t d=z1.dimension();
+    size_t ng1=z1.number_of_generators();
+    size_t ng2=z2.number_of_generators();
+    const Vector<Float>& c1=z1.centre();
+    const Matrix<Float>& G1=z1.generators();
+    const Vector<Float>& c2=z2.centre();
+    const Matrix<Float>& G2=z2.generators();
 
+    Matrix<Float> A(d,ng1+ng2);
+    Vector<Float> b(c1-c2);
+    Vector<Float> l(ng1+ng2,-1.0);
+    Vector<Float> u(ng1+ng2,+1.0);
+
+    project(A,range(0,d),range(0,ng1))=G1;
+    project(A,range(0,d),range(ng1,ng1+ng2))=G2;
+
+    return not constrained_feasible(A,b,l,u);
+}
 
 
 /* Set up LP problem to solve \f$c+Ge=p\f$; \f$-1<=e<=1\f$.

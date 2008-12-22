@@ -74,36 +74,57 @@ void export_array(const char* name)
     array_class.def(boost::python::self_ns::str(self));
 }
 
-
-template<class X>
-void export_linear_programming()
+template<class T>
+void export_internal_array(const char* name)
 {
+    class_< array<T> > array_class(name,no_init);
+    array_class.def("__len__", &array<T>::size);
+    array_class.def("__getitem__",&get<T>);
+    array_class.def(boost::python::self_ns::str(self));
+}
+
+
+void export_variable_type()
+{
+    typedef array<VariableType> VariableTypeArray;
+    
     enum_<VariableType> variable_enum("VariableType");
     variable_enum.value("BASIS", BASIS);
     variable_enum.value("LOWER", LOWER);
     variable_enum.value("UPPER", UPPER);
+}
+
+template<class X>
+void export_linear_programming()
+{
     
     def("lpstep",(bool(*)(const Matrix<X>&,const Vector<X>&,const Vector<X>&,array<size_t>&,Matrix<X>&,Vector<X>&)) &lpstep);
+    def("lpstep",(bool(*)(const Matrix<X>&,const Vector<X>&,const Vector<X>&,const Vector<X>&,const Vector<X>&,array<VariableType>&,array<size_t>&,Matrix<X>&,Vector<X>&)) &lpstep);
   
 
     def("primal_feasible",(tribool(*)(const Matrix<X>&,const Vector<X>&)) &primal_feasible);
-    def("primal_feasible",(tribool(*)(const Matrix<X>&,const Vector<X>&)) &dual_feasible);
+    def("dual_feasible",(tribool(*)(const Matrix<X>&,const Vector<X>&)) &dual_feasible);
     def("constrained_feasible",(tribool(*)(const Matrix<X>&,const Vector<X>&,const Vector<X>&,const Vector<X>&)) &constrained_feasible);
 
-    def("verify_infeasibility",(void(*)(const Matrix<X>&,const Vector<X>&,const Vector<X>&)) &verify_infeasibility);
+    def("verify_primal_feasibility",(tribool(*)(const Matrix<X>&,const Vector<X>&,const array<VariableType>&)) &verify_primal_feasibility);
+    def("verify_dual_feasibility",(tribool(*)(const Matrix<X>&,const Vector<X>&,const array<VariableType>&)) &verify_dual_feasibility);
+    def("verify_constrained_feasibility",(tribool(*)(const Matrix<X>&,const Vector<X>&,const Vector<X>&,const Vector<X>&,const array<VariableType>&)) &verify_constrained_feasibility);
+
     def("compute_basis",&python_compute_basis<X>);
 
+    def("constrained_feasible_by_enumeration",(tribool(*)(const Matrix<X>&,const Vector<X>&,const Vector<X>&,const Vector<X>&)) &constrained_feasible_by_enumeration);
 }
    
-//template void export_linear_programming<Float>();
 #ifdef HAVE_GMPXX_H
 template void export_linear_programming<Rational>();
 #endif
 
 
 void optimization_submodule() {
+    export_variable_type();
     export_array<size_t>("SizeArray");
-    //export_linear_programming<Float>();
+    export_internal_array<VariableType>("VariableTypeArray");
+    export_linear_programming<Float>();
 #ifdef HAVE_GMPXX_H
     export_linear_programming<Rational>();
 #endif

@@ -272,15 +272,65 @@ inline Interval operator*(Float x1, Interval i2) { return mul(i2,x1); }
 inline Interval operator/(Interval i1, Float x2) { return div(i1,x2); }
 inline Interval operator/(Float x1, Interval i2) { return mul(rec(i2),x1); }
 
-inline tribool operator>(Interval i1, Interval i2) { 
-    if(i1.lower()>i2.upper()) { return true; }
+inline tribool operator==(Interval i1, Float x2) { 
+    if(i1.upper()<x2 || i1.lower()>x2) { return false; }
+    else if(i1.lower()==x2 && i1.upper()==x2) { return true; }
+    else { return indeterminate; }
+}
+
+inline tribool operator!=(Interval i1, Float x2) { 
+    if(i1.upper()<x2 || i1.lower()>x2) { return true; }
+    else if(i1.lower()==x2 && i1.upper()==x2) { return false; }
+    else { return indeterminate; }
+}
+
+inline tribool operator> (Interval i1, Float x2) { 
+    if(i1.lower()> x2) { return true; }
+    else if(i1.upper()<=x2) { return false; }
+    else { return indeterminate; }
+}
+
+inline tribool operator< (Interval i1, Float x2) { 
+    if(i1.upper()< x2) { return true; }
+    else if(i1.lower()>=x2) { return false; }
+    else { return indeterminate; }
+}
+
+inline tribool operator>=(Interval i1, Float x2) { 
+    if(i1.lower()>=x2) { return true; }
+    else if(i1.upper()< x2) { return false; }
+    else { return indeterminate; }
+}
+
+inline tribool operator<=(Interval i1, Float x2) { 
+    if(i1.upper()<=x2) { return true; }
+    else if(i1.lower()> x2) { return false; }
+    else { return indeterminate; }
+}
+
+
+
+inline tribool operator> (Interval i1, Interval i2) { 
+    if(i1.lower()> i2.upper()) { return true; }
     else if(i1.upper()<=i2.lower()) { return false; }
     else { return indeterminate; }
 }
 
-inline tribool operator<(Interval i1, Interval i2) { 
-    if(i1.upper()<i2.lower()) { return true; }
+inline tribool operator< (Interval i1, Interval i2) { 
+    if(i1.upper()< i2.lower()) { return true; }
     else if(i1.lower()>=i2.upper()) { return false; }
+    else { return indeterminate; }
+}
+
+inline tribool operator>=(Interval i1, Interval i2) { 
+    if(i1.lower()>=i2.upper()) { return true; }
+    else if(i1.upper()< i2.lower()) { return false; }
+    else { return indeterminate; }
+}
+
+inline tribool operator<=(Interval i1, Interval i2) { 
+    if(i1.upper()<=i2.lower()) { return true; }
+    else if(i1.lower()> i2.upper()) { return false; }
     else { return indeterminate; }
 }
 

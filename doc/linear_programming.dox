@@ -97,7 +97,21 @@ A basic solution then satisfies
  - A certificate of infeasibility of \f$Ax=b;\ l\leq x\leq u\f$ partition into lower and upper variables \f$x_L\f$ and \f$x_U\f$, and a vector \f$y\f$ such that \f$yA_L\leq0\f$, \f$yA_U\geq0\f$ and \f$y(b-A_Ll_L-A_Uu_U)>0\f$. 
    For then \f[0\geq yA_L(x_L-l_L) - yA_U(u_U-x_U) = yA_Lx_L+A_Ux_U-yA_Ll_L-yA_Uu_U = yAx -yA_Ll_L-yA_Uu_U = yb-yA_Ll_L-yA_Uu_U = y(b-A_Ll_L-A_Uu_U) > 0 .\f]
 
+ - Alternatively, a certificate of infeasibility of \f$Ax=b;\ l\leq x\leq u\f$ partition into lower, upper and basic variables \f$x_L\f$, \f$x_U\f$ and \f$x_B\f$, and a vector \f$y\f$ such that \f$yA_B=0\f$, \f$yA_L\leq0\f$, \f$yA_U\geq0\f$ and \f$y(b-A_Ll_L-A_Uu_U)>0\f$. 
+   For then \f[0\geq (yA_L)(x_L-l_L) + (yA_U)(x_U-u_U) + (yA_B)x_B = yA_Lx_L+A_Ux_U+yA_Bx_B-yA_Ll_L-yA_Uu_U = y(A_Lx_L+A_Ux_U+A_Bx_B) -yA_Ll_L-yA_Uu_U = yAx-yA_Ll_L-yA_Uu_U = yb-yA_Ll_L-yA_Uu_U = y(b-A_Ll_L-A_Uu_U) > 0 .\f]
 
+
+\section basicfeasibility Basic feasibility testing
+
+Given a partition of variables into upper, lower and basic, we can test for a solution of the constrained feasibility problem.
+ - Set \f$x_L=l_L\f$, \f$x_U=u_U\f$ and \f$x_B=A_B^{-1}(b-A_Nx_N)\f$.
+ - If \f$l_B \leq x_B \leq u_B\f$, then the basis gives a feasible solution.
+ - Otherwise, define \f$c\f$ such that \f$c_j=-1\f$ if \f$x_j<l_j\f$, \f$c_j=+1\f$ if \f$x_j>u_j\f$ and \f$c_j=0\f$ otherwise.
+ - Set \f$y=c_BA_B^{-1}\f$ and \f$z_N=c_N-yA_N\f$. 
+ - If \f$z_L\geq0\f$ and \f$z_U\leq0\f$, then there is no feasible solution. 
+ - Note that \f$z_B=c_B\f$, so we can extend the variable sets taking \f$L'=\{ j\mid x_j\leq l_j\}\f$ and \f$U'=\{j\mid x_j\geq u_j\}\f$
+The correctness of the validation of feasibility is immediate. To prove correctness of the infeasibility validation, suppose \f$\hat{x}\f$ is a feasible point. Then \f$c\hat{x}<cx\f$, but 
+\f[ 0 > c\hat{x}-cx = c_BA_B^{-1}(b-A_N\hat{x}_N)+c_N\hat{x}_N - c_BA_B^{-1}(b-A_Nx_N) - c_Nx_N = (c_N-c_BA_B^{-1}A_N) (\hat{x}_N-x_N) = z_N(\hat{x}_N-x_N) = z_L(\hat{x}_L-x_L) + z_U(\hat{x}_U-x_U) \geq 0\f] since \f$z_L,\hat{x}_L-x_L\geq0\f$ and \f$z_U,\hat{x}_U-x_U\leq0\f$.
 
 \section robustfeasibility Robust feasibility problems
 

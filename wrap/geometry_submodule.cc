@@ -206,6 +206,8 @@ void export_zonotope()
 
     def("contains", (tribool(*)(const Zonotope&,const Point&)) &contains);
     def("disjoint", (tribool(*)(const Zonotope&,const Box&)) &disjoint);
+    def("overlaps", (tribool(*)(const Zonotope&,const Box&)) &overlaps);
+    def("disjoint", (tribool(*)(const Zonotope&,const Zonotope&)) &disjoint);
 }
 
 void export_taylor_set() 

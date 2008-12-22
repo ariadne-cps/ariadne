@@ -108,6 +108,15 @@ make_taylor_variables(const Vector<Interval>& x)
     return result;
 }
 
+   
+
+
+boost::python::tuple
+python_split(const TaylorVariable& x, uint j)
+{
+    std::pair<TaylorVariable,TaylorVariable> res=split(x,j);
+    return boost::python::make_tuple(res.first,res.second);
+}
 
 template<class C, class I, class X> inline 
 void set_item(C& c, const I& i, const X& x) {
@@ -147,7 +156,6 @@ void export_taylor_variable()
     taylor_variable_class.def("clean", &TaylorVariable::clean);
     taylor_variable_class.def("domain", &TaylorVariable::domain);
     taylor_variable_class.def("range", &TaylorVariable::range);
-    taylor_variable_class.def("evaluate", &TaylorVariable::evaluate);
     taylor_variable_class.def("__getitem__", &get_item<T,A>);
     taylor_variable_class.def("__setitem__",&set_item<T,A,D>);
     taylor_variable_class.def("__setitem__",&set_item<T,A,R>);
@@ -171,6 +179,11 @@ void export_taylor_variable()
     taylor_variable_class.def(self_ns::str(self));
     taylor_variable_class.def("truncate", &TaylorVariable::truncate,return_value_policy<reference_existing_object>());
     taylor_variable_class.def("sweep", &TaylorVariable::sweep,return_value_policy<reference_existing_object>());
+    taylor_variable_class.def("evaluate", (Interval(TaylorVariable::*)(const Vector<Float>&)const) &TaylorVariable::evaluate);
+    taylor_variable_class.def("evaluate", (Interval(TaylorVariable::*)(const Vector<Interval>&)const) &TaylorVariable::evaluate);
+
+    def("scale", (T(*)(const T&,const Interval&)) &scale);
+    def("split", &python_split);
 
 
     taylor_variable_class.def("__repr__",&__repr__<T>);
@@ -202,11 +215,13 @@ void export_taylor_variable()
     def("sin", (T(*)(const T&))&sin);
     def("cos", (T(*)(const T&))&cos);
     def("tan", (T(*)(const T&))&tan);
+
     /*
       def("asin", (T(*)(const T&))&asin);
       def("acos", (T(*)(const T&))&acos);
       def("atan", (T(*)(const T&))&atan);
     */
+
 
 }
 

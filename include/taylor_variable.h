@@ -45,7 +45,6 @@ template<class X> class Matrix;
 template<class X> class Series;
 template<class D> class SparseDifferential;
 
-class TaylorSeries;
 class TaylorVariable;
 
 TaylorVariable operator+(const TaylorVariable& x);
@@ -87,11 +86,12 @@ TaylorVariable cos(const TaylorVariable& x);
 TaylorVariable tan(const TaylorVariable& x);
 
 pair<TaylorVariable,TaylorVariable> split(const TaylorVariable& x, uint j);
-Vector<Interval> evaluate(const TaylorVariable& y, const Vector<Interval>& z);
-TaylorVariable unscale(const TaylorSeries& x, const Vector<Interval>& bx);
-TaylorVariable compose(const TaylorSeries& x, const TaylorVariable& y);
 TaylorVariable derivative(const TaylorVariable& x, uint j);
 TaylorVariable antiderivative(const TaylorVariable& x, uint j);
+
+
+// Scale the variabe by post-composing with an affine map taking the interval \a ivl to the unit interval
+TaylorVariable scale(const TaylorVariable& x, const Interval& ivl);
 
 
 
@@ -169,6 +169,8 @@ class TaylorVariable
     Vector<Interval> domain() const;
     Interval range() const;
     Interval evaluate(const Vector<Interval>& x) const;
+    
+    template<class XX> Interval evaluate(const Vector<XX>& x) const;
 
     std::string str() const;
 
@@ -204,7 +206,6 @@ class TaylorVariable
     friend TaylorVariable cos(const TaylorVariable& x);
     friend TaylorVariable tan(const TaylorVariable& x);
 
-    friend TaylorVariable compose(const TaylorSeries& x, const TaylorVariable& y);
     friend TaylorVariable derivative(const TaylorVariable& x, uint i);
     friend TaylorVariable antiderivative(const TaylorVariable& x, uint i);
 
@@ -220,6 +221,9 @@ TaylorVariable max(const TaylorVariable& x, const TaylorVariable& y);
 TaylorVariable min(const TaylorVariable& x, const TaylorVariable& y);
 TaylorVariable abs(const TaylorVariable& x);
     
+template<class XX> Interval TaylorVariable::evaluate(const Vector<XX>& x) const {
+    return this->evaluate(Vector<Interval>(x));
+}
 
 
 

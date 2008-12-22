@@ -956,6 +956,7 @@ TaylorVariable::range() const {
     return r;
 }
  
+
 Interval 
 TaylorVariable::evaluate(const Vector<Interval>& v) const
 {
@@ -1379,6 +1380,27 @@ split(const TaylorVariable& tv, uint j)
         
     return make_pair(TaylorVariable(expansion1,error1),TaylorVariable(expansion2,error2));
 }
+
+
+TaylorVariable
+scale(const TaylorVariable& tv, const Interval& ivl) 
+{
+    // Scale tv so that the interval ivl maps into [-1,1]
+    // The result is given by  (tv-c)*s where c is the centre
+    // and s the reciprocal of the radius of ivl
+    const Float& l=ivl.l;
+    const Float& u=ivl.u;
+    
+    TaylorVariable r=tv;
+    Interval c=Interval(l/2)+Interval(u/2);
+    r-=c;
+    
+    Interval s=2/(Interval(u)-Interval(l));
+    r*=s;
+
+    return r;
+}
+
 
 
 std::string 

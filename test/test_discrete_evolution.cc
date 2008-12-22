@@ -68,8 +68,8 @@ void TestDiscreteEvolver::test() const
 
     // Set up the evolution parameters and grid
     Float time(6.0);
+    uint steps(5);
     Float step_size(0.0625);
-    Float grid_size(0.125);
     Float enclosure_radius(0.25);
     
     EvolutionParameters parameters;
@@ -115,7 +115,7 @@ void TestDiscreteEvolver::test() const
     EnclosureType initial_set(initial_box,IdentityFunction(2),4,1);
     cout << "initial_set=" << initial_set << endl << endl;
     HybridEnclosureType initial_hybrid_set(location,initial_set);
-    HybridTime hybrid_time(1.0,5);
+    HybridTime hybrid_time(time,steps);
 
   
     // Compute the reachable sets

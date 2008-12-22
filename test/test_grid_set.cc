@@ -44,6 +44,12 @@
 using namespace Ariadne;
 using namespace std;
 
+static const uint heightZero = 0;
+static const uint heightOne = 1;
+static const uint heightTwo = 2;
+static const uint heightThree = 3;
+static const uint heightFour = 4;
+    
 void test_binary_tree() {
         
     // !!!
@@ -158,7 +164,7 @@ void test_binary_tree() {
     ARIADNE_TEST_COMPARE( expected_binary_tree, ==, theBinaryTreeRoot );
 
     ARIADNE_PRINT_TEST_COMMENT("Testing the depth of the binary tree");
-    ARIADNE_TEST_EQUAL(theBinaryTreeRoot.depth(), 3);
+    ARIADNE_TEST_EQUAL(theBinaryTreeRoot.depth(), 3u);
 
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE("Disable the left most enabled leaf, recombine the tree");
@@ -613,7 +619,7 @@ void test_grid_sub_paving(){
     ARIADNE_TEST_EQUAL( expected_result, theGridSPTwoDim );
     
     ARIADNE_PRINT_TEST_COMMENT("The depth of the sub-paving's tree should be 4");
-    ARIADNE_TEST_EQUAL( theGridSPTwoDim.depth(), 4 );
+    ARIADNE_TEST_EQUAL( theGridSPTwoDim.depth(), 4u );
 }
 
 void test_grid_paving(){
@@ -932,10 +938,6 @@ void test_adjoin_inner_approximation_operation_one(){
     //Allocate a trivial Grid
     Grid theTrivialGrid(2, 1.0);
     
-    const uint heightZero = 0;
-    const uint heightOne = 1;
-    const uint heightTwo = 2;
-    
     //Create an empty set to which we will be adding inner approximations
     //theSetTwo = empty, with the bounding box [0,1]x[0,1]
     GridTreeSet theSetZero( theTrivialGrid, heightZero, new BinaryTreeNode( make_binary_word("0"), make_binary_word("0") ) );
@@ -950,7 +952,7 @@ void test_adjoin_inner_approximation_operation_one(){
     ARIADNE_PRINT_TEST_COMMENT("theBoxZeroOne");
     cout << theBoxZeroOne << endl;
     ARIADNE_PRINT_TEST_COMMENT("Nothing should be added since nothing of theBoxZeroOne intersects with the primary cell of height zero.");
-    theSetZero.adjoin_inner_approximation( theBoxZeroOne, heightZero, 4);
+    theSetZero.adjoin_inner_approximation( theBoxZeroOne, heightZero, heightFour);
     ARIADNE_TEST_EQUAL( theSetZero , theSetZeroCopy );
     
     // !!!
@@ -977,10 +979,6 @@ void test_adjoin_inner_approximation_operation_one(){
 void test_adjoin_inner_approximation_operation_two(){
     //Allocate a trivial Grid
     Grid theTrivialGrid(2, 1.0);
-    
-    const uint heightZero = 0;
-    const uint heightOne = 1;
-    const uint heightTwo = 2;
     
     //Create an empty set to which we will be adding inner approximations
     //theSetTwo = empty, with the bounding box [-1,1]x[-1,1]
@@ -1026,10 +1024,6 @@ void test_adjoin_inner_approximation_operation_three(){
     //Allocate a trivial Grid
     Grid theTrivialGrid(2, 1.0);
     
-    const uint heightZero = 0;
-    const uint heightOne = 1;
-    const uint heightTwo = 2;
-
     //Create a more complex set set to which we will be adding inner approximations
     //theSetTwo = [-1,0]x[-1,0] U [0,1]x[0,1] U [1,3]x[1,3]
     //The set's bounding box is [-1,3]x[-1,3]
@@ -1071,10 +1065,6 @@ void test_restrict() {
     //Allocate a trivial Grid
     Grid theTrivialGrid(2, 1.0);
     
-    //Define the higths of the primary root cell.
-    const uint theHeightTwo = 2;
-    const uint theHeightThree = 3;
-
     //Create the binary tree with two enabled nodes;
     BinaryTreeNode * pTwoEnabledNodeTreeH2 = new BinaryTreeNode(false);
     pTwoEnabledNodeTreeH2->split();
@@ -1084,7 +1074,7 @@ void test_restrict() {
     pTwoEnabledNodeTreeH2->right_node()->left_node()->right_node()->split();
     pTwoEnabledNodeTreeH2->right_node()->left_node()->right_node()->left_node()->set_enabled();
     //Create the GridTreeSet
-    GridTreeSet theTwoCellPavingH2( theTrivialGrid, theHeightTwo, pTwoEnabledNodeTreeH2 );
+    GridTreeSet theTwoCellPavingH2( theTrivialGrid, heightTwo, pTwoEnabledNodeTreeH2 );
 
     //Create another binary tree
     BinaryTreeNode * pThreeEnabledNodeTreeH2 = new BinaryTreeNode( *pTwoEnabledNodeTreeH2 );
@@ -1096,7 +1086,7 @@ void test_restrict() {
     pThreeEnabledNodeTreeH2->right_node()->left_node()->left_node()->right_node()->set_disabled();
     
     //Create another GridTreeSet
-    GridTreeSet theThreeCellPavingH2( theTrivialGrid, theHeightTwo, pThreeEnabledNodeTreeH2 );
+    GridTreeSet theThreeCellPavingH2( theTrivialGrid, heightTwo, pThreeEnabledNodeTreeH2 );
 
     //Create another binary tree
     BinaryTreeNode * pThreeEnabledNodeTreeH3 = new BinaryTreeNode(false);
@@ -1107,7 +1097,7 @@ void test_restrict() {
     thePathToSubPavingRoot.push_back(true);
     thePathToSubPavingRoot.push_back(true);
     //Create the GridTreeSubset
-    GridTreeSubset theThreeCellSubPavingH3( theTrivialGrid, theHeightThree , thePathToSubPavingRoot, pThreeEnabledNodeTreeH3->right_node()->right_node() );
+    GridTreeSubset theThreeCellSubPavingH3( theTrivialGrid, heightThree , thePathToSubPavingRoot, pThreeEnabledNodeTreeH3->right_node()->right_node() );
     
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE("Test restrict operation: GridTreeSet1.restrict( GridTreeSet2 )");
@@ -1161,10 +1151,6 @@ void test_remove_one() {
     //Allocate a trivial Grid
     Grid theTrivialGrid(2, 1.0);
     
-    //Define the higths of the primary root cell.
-    const uint theHeightTwo = 2;
-    const uint theHeightThree = 3;
-
     //Create the binary tree with two enabled nodes;
     BinaryTreeNode * pTwoEnabledNodeTreeH2 = new BinaryTreeNode(false);
     pTwoEnabledNodeTreeH2->split();
@@ -1174,7 +1160,7 @@ void test_remove_one() {
     pTwoEnabledNodeTreeH2->right_node()->left_node()->right_node()->split();
     pTwoEnabledNodeTreeH2->right_node()->left_node()->right_node()->left_node()->set_enabled();
     //Create the GridTreeSet
-    GridTreeSet theTwoCellPavingH2( theTrivialGrid, theHeightTwo, pTwoEnabledNodeTreeH2 );
+    GridTreeSet theTwoCellPavingH2( theTrivialGrid, heightTwo, pTwoEnabledNodeTreeH2 );
 
     //Create another binary tree
     BinaryTreeNode * pThreeEnabledNodeTreeH2 = new BinaryTreeNode( *pTwoEnabledNodeTreeH2 );
@@ -1186,7 +1172,7 @@ void test_remove_one() {
     pThreeEnabledNodeTreeH2->right_node()->left_node()->left_node()->right_node()->set_disabled();
     
     //Create another GridTreeSet
-    GridTreeSet theThreeCellPavingH2( theTrivialGrid, theHeightTwo, pThreeEnabledNodeTreeH2 );
+    GridTreeSet theThreeCellPavingH2( theTrivialGrid, heightTwo, pThreeEnabledNodeTreeH2 );
 
     //Create another binary tree
     BinaryTreeNode * pThreeEnabledNodeTreeH3 = new BinaryTreeNode(false);
@@ -1197,7 +1183,7 @@ void test_remove_one() {
     thePathToSubPavingRoot.push_back(true);
     thePathToSubPavingRoot.push_back(true);
     //Create the GridTreeSubset
-    GridTreeSubset theThreeCellSubPavingH3( theTrivialGrid, theHeightThree , thePathToSubPavingRoot, pThreeEnabledNodeTreeH3->right_node()->right_node() );
+    GridTreeSubset theThreeCellSubPavingH3( theTrivialGrid, heightThree , thePathToSubPavingRoot, pThreeEnabledNodeTreeH3->right_node()->right_node() );
     
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE("Test remove operation: GridTreeSet1.remove( GridTreeSet2 )");
@@ -1253,13 +1239,8 @@ void test_remove_two() {
     //Allocate a trivial Grid
     Grid theTrivialGrid(2, 1.0);
     
-    //Define the higths of the primary root cell.
-    const uint theHeightZero = 0;
-    const uint theHeightOne = 1;
-    const uint theHeightTwo = 2;
-    
     //Create a GridTreeSet and its copies
-    GridTreeSet theSet01( theTrivialGrid, theHeightOne, make_binary_word("110010100"), make_binary_word("10001") );
+    GridTreeSet theSet01( theTrivialGrid, heightOne, make_binary_word("110010100"), make_binary_word("10001") );
     GridTreeSet theSet02( theSet01 );
     GridTreeSet theSet03( theSet01 );
     GridTreeSet theSet04( theSet01 );
@@ -1269,49 +1250,49 @@ void test_remove_two() {
     //Create the cells we will be removing and test removals on the copies of the set
     
     ARIADNE_PRINT_TEST_CASE_TITLE("Remove a GridCell (p.c. height=0) form a GridTreeSet(p.c. height=1): The cell is a subset.");
-    GridCell lowerPrimaryCellSubset( theTrivialGrid, theHeightZero, make_binary_word("11") );
+    GridCell lowerPrimaryCellSubset( theTrivialGrid, heightZero, make_binary_word("11") );
     theSet01.remove( lowerPrimaryCellSubset );
-    expected_result_arr[0] = new GridCell( theTrivialGrid, theHeightOne, make_binary_word("00") );
-    expected_result_arr[1] = new GridCell( theTrivialGrid, theHeightOne, make_binary_word("1110") );
+    expected_result_arr[0] = new GridCell( theTrivialGrid, heightOne, make_binary_word("00") );
+    expected_result_arr[1] = new GridCell( theTrivialGrid, heightOne, make_binary_word("1110") );
     ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theSet01, 2 );
     ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
     
     ARIADNE_PRINT_TEST_CASE_TITLE("Remove a GridCell (p.c. height=0) form a GridTreeSet(p.c. height=1): The cell does not intersect the set.");
-    GridCell lowerPrimaryCellNoIntersection( theTrivialGrid, theHeightZero, make_binary_word("00") );
+    GridCell lowerPrimaryCellNoIntersection( theTrivialGrid, heightZero, make_binary_word("00") );
     theSet02.remove( lowerPrimaryCellNoIntersection );
-    expected_result_arr[0] = new GridCell( theTrivialGrid, theHeightOne, make_binary_word("00") );
-    expected_result_arr[1] = new GridCell( theTrivialGrid, theHeightOne, make_binary_word("111") );
+    expected_result_arr[0] = new GridCell( theTrivialGrid, heightOne, make_binary_word("00") );
+    expected_result_arr[1] = new GridCell( theTrivialGrid, heightOne, make_binary_word("111") );
     ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theSet02, 2 );
     ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
     
     ARIADNE_PRINT_TEST_CASE_TITLE("Remove a GridCell (p.c. height=0) form a GridTreeSet(p.c. height=1): The cell overlaps the set.");
-    GridCell lowerPrimaryCellIntersection( theTrivialGrid, theHeightZero, BinaryWord() );
+    GridCell lowerPrimaryCellIntersection( theTrivialGrid, heightZero, BinaryWord() );
     theSet03.remove( lowerPrimaryCellIntersection );
-    expected_result_arr[0] = new GridCell( theTrivialGrid, theHeightOne, make_binary_word("00") );
+    expected_result_arr[0] = new GridCell( theTrivialGrid, heightOne, make_binary_word("00") );
     ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theSet03, 1 );
     ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
     
     ARIADNE_PRINT_TEST_CASE_TITLE("Remove a GridCell (p.c. height=2) form a GridTreeSet(p.c. height=1): The cell is a subset.");
-    GridCell higherPrimaryCellSubset( theTrivialGrid, theHeightTwo, make_binary_word("000011") );
+    GridCell higherPrimaryCellSubset( theTrivialGrid, heightTwo, make_binary_word("000011") );
     theSet04.remove( higherPrimaryCellSubset );
-    expected_result_arr[0] = new GridCell( theTrivialGrid, theHeightTwo, make_binary_word("00000") );
-    expected_result_arr[1] = new GridCell( theTrivialGrid, theHeightTwo, make_binary_word("000010") );
-    expected_result_arr[2] = new GridCell( theTrivialGrid, theHeightTwo, make_binary_word("00111") );
+    expected_result_arr[0] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("00000") );
+    expected_result_arr[1] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("000010") );
+    expected_result_arr[2] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("00111") );
     ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theSet04, 3 );
     ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
     
     ARIADNE_PRINT_TEST_CASE_TITLE("Remove a GridCell (p.c. height=2) form a GridTreeSet(p.c. height=1): The cell does not intersect the set.");
-    GridCell higherPrimaryCellNoIntersection( theTrivialGrid, theHeightTwo, make_binary_word("010") );
+    GridCell higherPrimaryCellNoIntersection( theTrivialGrid, heightTwo, make_binary_word("010") );
     theSet05.remove( higherPrimaryCellNoIntersection );
-    expected_result_arr[0] = new GridCell( theTrivialGrid, theHeightTwo, make_binary_word("0000") );
-    expected_result_arr[1] = new GridCell( theTrivialGrid, theHeightTwo, make_binary_word("00111") );
+    expected_result_arr[0] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("0000") );
+    expected_result_arr[1] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("00111") );
     ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theSet05, 2 );
     ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
     
     ARIADNE_PRINT_TEST_CASE_TITLE("Remove a GridCell (p.c. height=2) form a GridTreeSet(p.c. height=1): The cell overlaps the set.");
-    GridCell higherPrimaryCellIntersection( theTrivialGrid, theHeightTwo, make_binary_word("0011") );
+    GridCell higherPrimaryCellIntersection( theTrivialGrid, heightTwo, make_binary_word("0011") );
     theSet06.remove( higherPrimaryCellIntersection );
-    expected_result_arr[0] = new GridCell( theTrivialGrid, theHeightTwo, make_binary_word("0000") );
+    expected_result_arr[0] = new GridCell( theTrivialGrid, heightTwo, make_binary_word("0000") );
     ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, theSet06, 1 );
     ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
 }
@@ -1814,11 +1795,6 @@ void test_subset_subset_subset() {
     
     //Allocate a trivial Grid two dimensional grid
     Grid theTrivialGrid(2, 1.0);
-    
-    const uint heightZero = 0;
-    const uint heightOne = 1;
-    const uint heightTwo = 2;
-    const uint heightThree = 3;
     
     //Create the set and the subset of this set, they are both rooted to the same primary node of heightTwo 
     //theSetOne = [-1,0]x[-1,0] U [0,1]x[0,1] U [1,3]x[1,3]

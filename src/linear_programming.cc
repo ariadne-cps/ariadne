@@ -189,6 +189,7 @@ compute_basis(const Matrix<X>& A)
 template<class X>
 void consistency_check(const Matrix<X>& A, const array<size_t>& p, const Matrix<X>& B) 
 {
+    static const X MAXIMUM_ERROR=1e-8;
     const size_t m=A.row_size();
     Matrix<X> A_B(m,m);
     for(size_t k=0; k!=m; ++k) {
@@ -203,14 +204,15 @@ void consistency_check(const Matrix<X>& A, const array<size_t>& p, const Matrix<
     Matrix<X> Z=prod(B,A_B);
     ARIADNE_LOG(9,"        p_B="<<p_B<<" B="<<B<<" A_B="<<A_B<<" B*A_B-I="<<Z<<"\n");
     for(size_t i=0; i!=m; ++i) { Z[i][i]-=1; }
-    assert(norm(Z)<1e-5);
+    assert(norm(Z)<MAXIMUM_ERROR);
 }
 
 
-// Check that the matrix B is the inverse of the matrix A_B with columns p[0],...,p[m-1] of A.
+// Check that the matrix B is the inverse of the matrix A_B with columns p[0],...,p[m-1] of A and that Ax=b.
 template<class X>
 void consistency_check(const Matrix<X>& A, const Vector<X>& b, const array<size_t>& p, const Matrix<X>& B, const Vector<X>& x) 
 {
+    static const X MAXIMUM_ERROR=1e-8;
     const size_t m=A.row_size();
     const size_t n=A.column_size();
     Matrix<X> A_B(m,m);
@@ -224,11 +226,11 @@ void consistency_check(const Matrix<X>& A, const Vector<X>& b, const array<size_
     Matrix<X> Z=prod(B,A_B);
     ARIADNE_LOG(9,"        B="<<B<<" A_B="<<A_B<<" B*A_B-I="<<Z<<"\n");
     for(size_t i=0; i!=m; ++i) { Z[i][i]-=1; }
-    assert(norm(Z)<1e-5);
+    assert(norm(Z)<MAXIMUM_ERROR);
 
-    Vector<X> z=prod(B,b);
-    for(size_t k=0; k!=m; ++k) { z[k]-=x[p[k]]; }
-    assert(norm(z)<1e-5);
+    Vector<X> z=prod(A,b);
+    for(size_t j=0; j!=n; ++j) { z[j]-=x[j]; }
+    assert(norm(z)<MAXIMUM_ERROR);
 }
 
 
@@ -454,10 +456,9 @@ compute_wx(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vec
 
 template<class X,class XX>
 Vector<XX>
-compute_y(const Matrix<X>& A, const Vector<X>& c, const array<size_t>& p, const Matrix<XX>& B)
+compute_y(const Vector<X>& c, const array<size_t>& p, const Matrix<XX>& B)
 {
-    const size_t m=A.row_size();
-    const size_t n=A.column_size();
+    const size_t m=B.row_size();
     Vector<XX> y(m);
     for(size_t k=0; k!=m; ++k) {
         size_t j=p[k];
@@ -518,7 +519,6 @@ Vector<X>
 compute_d(const Matrix<X>& A, const array<size_t>& p, const Matrix<X>& B, const size_t ks)
 {
     const size_t m=A.row_size();
-    const size_t n=A.column_size();
     size_t js=p[ks];
     Vector<X> d(m);
     for(size_t k=0; k!=m; ++k) {
@@ -555,7 +555,6 @@ std::pair<size_t,X>
 compute_rt(const Vector<X>& l, const Vector<X>& u, const array<VariableType>& vt, const array<size_t>& p, const Vector<X>& x, const Vector<X>& d, const size_t s)
 {
     const size_t m=d.size();
-    const size_t n=x.size();
     size_t r=s;
     X ds=(vt[p[s]]==LOWER ? +1 : -1);
     X t=u[p[s]]-l[p[s]];
@@ -617,9 +616,8 @@ update_x(const Vector<X>& l, const Vector<X>& u, const array<size_t>& p, Vector<
     for(size_t i=0; i!=m; ++i) {
         x[p[i]]+=t*d[i];
     }
-    X ds=(x[p[s]]==l[p[s]]) ? +1 : -1;
     x[p[s]] += t;
-    if(d[r]<0) { x[p[r]]==l[p[r]]; }
+    if(d[r]<0) { x[p[r]]=l[p[r]]; }
     else if(d[r]>0) { x[p[r]]=u[p[r]]; }
     return;
 }
@@ -651,7 +649,7 @@ lpstep(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& c, array<size_t>
 
     const size_t m=A.row_size();
     const size_t n=A.column_size();
-    Vector<X> y=compute_y(A,c,p,B);
+    Vector<X> y=compute_y(c,p,B);
     Vector<X> z=compute_z(A,c,p,y);
     ARIADNE_LOG(7,"      y="<<y<<"\n      z="<<z<<"\n");
 
@@ -716,7 +714,7 @@ bool lpstep(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& c, const Ve
     const size_t m=A.row_size();
     const size_t n=A.column_size();
 
-    Vector<X> y=compute_y(A,c,p,B);
+    Vector<X> y=compute_y(c,p,B);
     Vector<X> z=compute_z(A,c,p,y);
     
     ARIADNE_LOG(9,"      y="<<y<<" z="<<z<<"\n");
@@ -862,7 +860,7 @@ tribool _constrained_feasible(const Matrix<X>& A, const Vector<X>& b, const Vect
         
         if(done) {
             ARIADNE_LOG(9,"  Cannot put infeasible variables into basis.");
-            Vector<X> y=compute_y(A,c,p,B);
+            Vector<X> y=compute_y(c,p,B);
             Vector<X> yA=prod(y,A);
             ARIADNE_LOG(9,"\nCertificate of infeasibility:\n y="<<y<<"\n yA="<<yA<<"\n");
             return false;
@@ -910,7 +908,7 @@ tribool _dual_feasible(const Matrix<X>& A, const Vector<X>& c, array<size_t>& p,
     bool done;
     do {
         lpstep(A,b,c,p,B,x);
-        y=compute_y(A,c,p,B);
+        y=compute_y(c,p,B);
         z=compute_z(A,c,p,y);
         
         done=true;
@@ -1027,7 +1025,7 @@ verify_primal_feasibility(const Matrix<X>& A, const Vector<X>& b, const array<Va
     }
     ARIADNE_LOG(9," c="<<midpoint(c)<<"\n");
 
-    const Vector<XX> y=compute_y(A,c,p,B);
+    const Vector<XX> y=compute_y(c,p,B);
     ARIADNE_LOG(9," y="<<midpoint(y)<<"\n");
 
     const Vector<XX> z=compute_z(A,c,p,y);
@@ -1057,7 +1055,7 @@ verify_dual_feasibility(const Matrix<X>& A, const Vector<X>& c, const array<Vari
     ARIADNE_LOG(9," p="<<p<<"\n");
     Matrix<XX> B=compute_B<XX>(A,p);
     ARIADNE_LOG(9," B="<<midpoint(B)<<"\n");
-    Vector<XX> y=compute_y(A,c,p,B);
+    Vector<XX> y=compute_y(c,p,B);
     ARIADNE_LOG(9," y="<<midpoint(y)<<"\n");
     
     // Compute z=c-yA
@@ -1097,6 +1095,13 @@ verify_dual_feasibility(const Matrix<X>& A, const Vector<X>& c, const array<Vari
     
     ARIADNE_LOG(9," x="<<x<<"\n");
     ARIADNE_LOG(9," cx="<<dot(Vector<XX>(c),x)<<"\n");
+
+    if(possibly(dot(Vector<XX>(c),x)>=0)) { return indeterminate; }
+    for(size_t k=0; k!=m; ++k) {
+        size_t j=p[k];
+        if(possibly(x[j]<=0)) { return indeterminate; }
+    }
+    return false;
 }
 
 template<class X> tribool
@@ -1144,7 +1149,7 @@ verify_constrained_feasibility(const Matrix<X>& A, const Vector<X>& b, const Vec
     }
     ARIADNE_LOG(9," c="<<midpoint(c)<<"\n");
 
-    const Vector<XX> y=compute_y(A,c,p,B);
+    const Vector<XX> y=compute_y(c,p,B);
     ARIADNE_LOG(9," y="<<midpoint(y)<<"\n");
 
     const Vector<XX> z=compute_z(A,c,p,y);
@@ -1214,7 +1219,7 @@ constrained_feasible_by_enumeration(const Matrix<X>& A, const Vector<X>& b,
         array<VariableType> vt(n);
         for(size_t k=0; k!=m; ++k) { vt[p[k]]=BASIS; } 
         for(size_t k=m; k!=n; ++k) { vt[p[k]]=LOWER; } 
-        for(uint cnt=0; cnt!=1<<(n-m); ++cnt) {
+        for(size_t cnt=0; cnt!=1u<<(n-m); ++cnt) {
             for(size_t k=m; k!=n; ++k) {
                 if(vt[p[k]]==LOWER) { vt[p[k]]=UPPER; break; }
                 else { vt[p[k]]=LOWER; }

@@ -60,7 +60,7 @@ void read(TaylorVariable& tv, const boost::python::object& obj) {
         as=extract<uint>(tup[0]);
         d=extract<uint>(tup[1]);
         read_scalar(e,tup[2]);
-        read_array(x,tup[3]);
+        read_list_array(x,tup[3]);
         tv=TaylorVariable(as,d,e,x.begin());
     }
 }
@@ -92,7 +92,7 @@ TaylorVariable*
 make_taylor_variable(const uint& as, const uint& d, const Interval& e, const boost::python::object& obj) 
 {
     array<Float> data;
-    read_array(data,obj);
+    read_list_array(data,obj);
     //assert(data.size()==compute_polynomial_data_size(1u,as,d));
     const Float* ptr=data.begin();
     return new TaylorVariable(as,d,e,ptr);

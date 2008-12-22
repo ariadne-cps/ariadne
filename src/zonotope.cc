@@ -832,7 +832,6 @@ contains(const Zonotope& z, const Point& pt)
 { 
     //std::clog << "Zonotope::contains(const Vector<Float>& )" << std::endl;
     assert(z.dimension()==pt.dimension());
-    uint d=z.dimension();
     uint m=z.number_of_generators();
   
     const Matrix<Float>& A=z.generators();

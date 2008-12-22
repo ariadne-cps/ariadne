@@ -43,7 +43,7 @@ array<T>*
 make_array(const boost::python::object& obj) 
 {
     array<T>* a_ptr=new array<T>();
-    read_array(*a_ptr,obj);
+    read_list_array(*a_ptr,obj);
     return a_ptr;
 }
 

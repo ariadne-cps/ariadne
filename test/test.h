@@ -293,7 +293,7 @@ int test_case_counter = 0;
 /*! \brief clean std::vector, i.e. delete memory of it's non NULL elements and set them to NULL in the vector */
 #define ARIADNE_CLEAN_TEST_VECTOR( vector ) \
     { \
-        for(int i = 0; i < vector.size(); i++ ) { \
+        for(uint i = 0; i < vector.size(); i++ ) { \
             if( vector[i] != NULL ) { \
                 delete vector[i]; vector[i] = NULL; \
             } \

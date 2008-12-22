@@ -253,16 +253,23 @@ TestFloat::test_comparison()
 {
     cout << __PRETTY_FUNCTION__ << endl;
   
-    // Test comparison of two equal numbers
     Float f1(1.25); Float f2(-1.25); Float f3(-2.25); Float f4(1.25);
+
+    // Test comparison of two equal numbers
+    ARIADNE_TEST_ASSERT(f1==f4); ARIADNE_TEST_ASSERT(!(f1!=f4));
+    ARIADNE_TEST_ASSERT(f1<=f4); ARIADNE_TEST_ASSERT(!(f1> f4));
+    ARIADNE_TEST_ASSERT(f1>=f4); ARIADNE_TEST_ASSERT(!(f1< f4));
+
+  
+    // Test comparison of two different numbers
     ARIADNE_TEST_ASSERT(!(f1==f2)); ARIADNE_TEST_ASSERT(f1!=f2); 
     ARIADNE_TEST_ASSERT(!(f1<=f2)); ARIADNE_TEST_ASSERT(f1> f2);
     ARIADNE_TEST_ASSERT(f1>=f2); ARIADNE_TEST_ASSERT(!(f1< f2));
   
-    // Test comparison of two different numbers
-    ARIADNE_TEST_ASSERT(f1==f4); ARIADNE_TEST_ASSERT(!(f1!=f4));
-    ARIADNE_TEST_ASSERT(f1<=f4); ARIADNE_TEST_ASSERT(!(f1> f4));
-    ARIADNE_TEST_ASSERT(f1>=f4); ARIADNE_TEST_ASSERT(!(f1< f4));
+    // Test comparison of two negative numbers
+    ARIADNE_TEST_ASSERT(!(f2==f3)); ARIADNE_TEST_ASSERT(f2!=f3);
+    ARIADNE_TEST_ASSERT(!(f2<=f3)); ARIADNE_TEST_ASSERT(f2> f3);
+    ARIADNE_TEST_ASSERT(f2>=f3); ARIADNE_TEST_ASSERT(!(f2< f3));
   
     // Test comparison with in integer
     int i2=1;
@@ -403,12 +410,12 @@ TestFloat::test_arithmetic()
   
     // Conversion to integer types
     int i3,i4;
-    i3=floor(f1);
-    i4=ceil(f1);
+    i3=int(floor(f1));
+    i4=int(ceil(f1));
     cout << i3 << " < " << f1 << " < " << i4 << endl;
     ARIADNE_TEST_ASSERT(i3==1); ARIADNE_TEST_ASSERT(i4==2);
-    i3=floor(f2);
-    i4=ceil(f2);
+    i3=int(floor(f2));
+    i4=int(ceil(f2));
     cout << i3 << " < " << f2 << " < " << i4 << endl;
     ARIADNE_TEST_ASSERT(i3==-4); ARIADNE_TEST_ASSERT(i4==-3);
   

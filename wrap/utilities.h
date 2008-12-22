@@ -75,7 +75,7 @@ void read_scalar(Rational&, const boost::python::object&);
 // Read a array variable of type X from a Python object
 template<class X> 
 void
-read_array(array<X>& ary, const boost::python::object& obj)
+read_list_array(array<X>& ary, const boost::python::object& obj)
 {
     // See "Extracting C++ objects" in the Boost Python tutorial
     boost::python::list elements=boost::python::extract<boost::python::list>(obj);

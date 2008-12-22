@@ -791,9 +791,8 @@ mul_rounded(const TaylorVariable& x, const Float& c)
         el+=rv+tmp;
     }
     Float e=max(eu,el);
-    r.error().u=x.error().u*c+e;
-    tmp=-x.error().l*c+e;
-    r.error().l=-tmp;
+    re.u=x.error().u*c+e;
+    re.l=-tmp;
     set_rounding_mode(round_nearest);
     return r;
 }
@@ -823,9 +822,9 @@ add_rounded(const TaylorVariable& x, const TaylorVariable& y)
         tmp=(-xv)-yv;
         el+=rv+tmp;
     }
-    r.error().u=x.error().u+y.error().u+eu;
+    re.u=x.error().u+y.error().u+eu;
     tmp=-x.error().l-y.error().l+el;
-    r.error().l=-tmp;
+    re.l=-tmp;
     set_rounding_mode(round_nearest);
     return r;
 }
@@ -1234,7 +1233,7 @@ TaylorVariable rec(const TaylorVariable& x) {
     Float eps=abs((r.u-r.l)/(r.u+r.l));
     set_rounding_mode(round_nearest);
     assert(eps<1);
-    uint d=log((1-eps)*max_trunc_err)/log(eps)+1;
+    uint d=uint(log((1-eps)*max_trunc_err)/log(eps))+1;
     //std::cerr<<"x="<<x<<"\n";
     TaylorVariable y=(x/a)-1;
     //std::cerr<<"y="<<y<<"\n";

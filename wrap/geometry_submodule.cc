@@ -47,11 +47,7 @@ void
 read(Point& pt, const boost::python::object& obj) 
 {
   array<Float> ary;
-  if(boost::python::extract<boost::python::tuple>(obj).check()) {
-      read_tuple_array(ary,obj);
-  } else {
-      read_array(ary,obj);
-  }
+  read_tuple_array(ary,obj);
   pt=Point(Vector<Float>(ary.size(),ary.begin()));
 }
 
@@ -60,7 +56,7 @@ void
 read(Box& bx, const boost::python::object& obj) 
 {
   array<Interval> ary;
-  read_array(ary,obj);
+  read_list_array(ary,obj);
   bx=Box(Vector<Interval>(ary.size(),ary.begin()));
 }
 

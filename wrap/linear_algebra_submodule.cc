@@ -50,7 +50,7 @@ template<class X>
 void read(Vector<X>& v, const boost::python::object& obj) 
 {
   array<X> a; 
-  read_array(a,obj);
+  read_list_array(a,obj);
   v=Vector<X>(a.size(),a.begin());
 }
 

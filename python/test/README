@@ -1,5 +1,0 @@
-If you did not install ariadne on your system, you need to set 
-both the library path and the python path environment variables 
-to execute test_*.py scripts.
-To set such variables use "export LD_LIBRARY_PATH=~/lib/" and 
-"export PYTHONPATH=~/python/"

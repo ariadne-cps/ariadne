@@ -5,181 +5,60 @@ TESTS_ENVIRONMENT = ./run_test.sh
 
 
 INCLUDES = -I$(top_srcdir)/include
-LIBS = -lmpfr -lgmpxx -lgmp -lboost_serialization
+LIBS = $(GTK_LIBS)
 LDADD = ../src/libariadne.la $(LIBS)
 
-BASE_TESTS = \
-	test_tribool \
-	test_array \
-	test_rounding \
-	test_boost \
-	test_mpfr 
-
-NUMERIC_TESTS = \
-	test_rounding \
-	test_integer \
-	test_rational \
+check_PROGRAMS = \
 	test_float \
-	test_interval 
-
-LINEAR_ALGEBRA_TESTS = \
+	test_interval \
 	test_vector \
 	test_matrix \
-	test_linear_algebra
-
-LINEAR_PROGRAMMING_TESTS = \
-	test_linear_program 
-
-COMBINATORIC_TESTS = \
-	test_binary_word \
-	test_lattice \
-	test_subdivision_tree 
-
-FUNCTION_TESTS = \
-	test_index \
-	test_affine_variable \
-	test_affine_model \
-	test_taylor_series \
 	test_differential \
 	test_differential_vector \
-	test_sparse_differential \
-	test_taylor_model \
-	test_polynomial_function
-
-GEOMETRY_TESTS = \
-	test_point \
-	test_box \
-	test_list_set \
+	test_approximate_taylor_model \
 	test_grid_set \
-	test_partition_tree_set \
-	test_zonotope \
-	test_simplex \
-	test_ddconv \
-	test_polytope \
-	test_polyhedron \
-	test_constraint_set \
-	test_level_set \
-	test_grid_paving 
-
-SYSTEM_TESTS = \
-	test_hybrid_automaton 
-
-EVALUATION_TESTS = \
-	test_newton_solver \
-	test_reducer \
-	test_applicator \
-	test_integrator \
-	test_affine_integrator \
-	test_map_evolver \
-	test_vector_field_evolver \
-	test_impact_system_evolver \
-	test_hybrid_evolver \
-	test_discretiser \
-	test_discrete_evolver \
-	test_reachability_analyser
-
-OUTPUT_TESTS = \
+	test_hybrid_set \
+	test_discrete_evolution \
+	test_continuous_evolution \
+	test_hybrid_evolution \
+	test_discretised_evolution \
+	test_reachability_analysis \
 	test_serialization \
-	test_textstream \
-        test_latexstream \
-        test_epsstream \
-	test_chompstream 
-
-check_PROGRAMS = \
-	$(BASE_TESTS) \
-	$(NUMERIC_TESTS) \
-	$(LINEAR_ALGEBRA_TESTS) \
-	$(LINEAR_PROGRAMMING_TESTS) \
-	$(COMBINATORIC_TESTS) \
-	$(FUNCTION_TESTS) \
-	$(GEOMETRY_TESTS) \
-	$(SYSTEM_TESTS) \
-	$(EVALUATION_TESTS) \
-	$(OUTPUT_TESTS)
+	test_graphics 
 
 tests: $(check_PROGRAMS)
 
-test_rounding_LDADD = ../src/libnumeric.la $(LIBS)
-test_integer_LDADD = ../src/libnumeric.la $(LIBS)
-test_rational_LDADD = ../src/libnumeric.la $(LIBS)
-test_float_LDADD = ../src/libnumeric.la $(LIBS)
-test_interval_LDADD = ../src/libnumeric.la $(LIBS)
-check_numericdir = ./
-check_numeric_PROGRAMS = $(NUMERIC_TESTS) 
-check_numeric: $(check_numeric_PROGRAMS)
-
-check_linear_algebradir = ./
-check_linear_algebra_PROGRAMS = $(LINEAR_ALGEBRA_TESTS) 
-check_linear_algebra: $(check_linear_algebra_PROGRAMS)
-
-
-
+#test_integer_LDADD = -lgmp $(LIBS)
+#test_rational_LDADD = -lgmp $(LIBS)
 
 # Explicitly list test sources
-# This should not be necessary!!
-test_tribool_SOURCES=test_tribool.cc
-test_array_SOURCES=test_array.cc
-test_ddconv_SOURCES=test_ddconv.cc
-test_boost_SOURCES=test_boost.cc
-test_mpfr_SOURCES=test_mpfr.cc
-
-test_integer_SOURCES=test_integer.cc
-test_rational_SOURCES=test_rational.cc
 test_float_SOURCES=test_float.cc
 test_interval_SOURCES=test_interval.cc
 
 test_vector_SOURCES=test_vector.cc
 test_matrix_SOURCES=test_matrix.cc
-test_linear_algebra_SOURCES=test_linear_algebra.cc
 
-test_linear_program_SOURCES=test_linear_program.cc
+test_differential_SOURCES=test_differential.cc
+test_differential_vector_SOURCES=test_differential_vector.cc
 
-test_binary_word_SOURCES=test_binary_word.cc
-test_lattice_SOURCES=test_lattice.cc
-test_subdivision_tree_SOURCES=test_subdivision_tree.cc
+test_approximate_taylor_model_SOURCES=test_approximate_taylor_model.cc
 
-test_index_SOURCES=test_index.cc
-test_taylor_series_SOURCES=test_taylor_series.cc
-test_taylor_variable_SOURCES=test_taylor_variable.cc
-test_taylor_derivative_SOURCES=test_taylor_derivative.cc
-test_affine_model_SOURCES=test_affine_model.cc
-test_taylor_model_SOURCES=test_taylor_model.cc
-test_polynomial_function_SOURCES=test_polynomial_function.cc
+test_discrete_evolution_SOURCES=test_discrete_evolution.cc
+test_continuous_evolution_SOURCES=test_continuous_evolution.cc
+test_hybrid_evolution_SOURCES=test_hybrid_evolution.cc
 
-test_point_SOURCES=test_point.cc
-test_list_set_SOURCES=test_list_set.cc
 test_grid_set_SOURCES=test_grid_set.cc
-test_partition_tree_set_SOURCES=test_partition_tree_set.cc
-test_rectangle_SOURCES=test_rectangle.cc
-test_zonotope_SOURCES=test_zonotope.cc
-test_simplex_SOURCES=test_simplex.cc
-test_polytope_SOURCES=test_polytope.cc
-test_polyhedron_SOURCES=test_polyhedron.cc
-test_constraint_set_SOURCES=test_constraint_set.cc
-test_level_set_SOURCES=test_level_set.cc
+test_hybrid_set_SOURCES=test_hybrid_set.cc
 
-test_hybrid_automaton_SOURCES=test_hybrid_automaton.cc
+test_discretised_evolution_SOURCES=test_discretised_evolution.cc
+test_reachability_analysis_SOURCES=test_reachability_analysis.cc
 
-test_newton_solver_SOURCES=test_newton_solver.cc
-test_reducer_SOURCES=test_reducer.cc
-test_applicator_SOURCES=test_applicator.cc
-test_integrator_SOURCES=test_integrator.cc
-test_affine_integrator_SOURCES=test_affine_integrator.cc
-test_map_evolver_SOURCES=test_map_evolver.cc
-test_vector_field_evolver_SOURCES=test_vector_field_evolver.cc
-test_impact_system_evolver_SOURCES=test_impact_system_evolver.cc
-test_hybrid_evolver_SOURCES=test_hybrid_evolver.cc
-test_reachability_analyser_SOURCES=test_reachability_analyser.cc
-
-test_epsstream_SOURCES=test_epsstream.cc 
-test_latexstream_SOURCES=test_latexstream.cc
-test_textstream_SOURCES=test_textstream.cc
-test_chompstream_SOURCES=test_chompstream.cc
-
+test_serialization_SOURCES=test_serialization.cc
+test_graphics_SOURCES=test_graphics.cc
 
 EXTRA_DIST =
 SUBDIRS =
 
 TESTS = $(check_PROGRAMS)
-XFAIL_TESTS = test_boost test_linear_program
+XFAIL_TESTS = 
 testsubdir = ./

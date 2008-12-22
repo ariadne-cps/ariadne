@@ -1,12 +1,7 @@
-#TESTS_ENVIRONMENT = "export PYTHONPATH=$PYTHONPATH:$(top_srcdir)/python/.libs/"
-TESTS_ENVIRONMENT = export PYTHONPATH=$PYTHONPATH:$(top_srcdir)/src/python/.libs/ ; $(PYTHON)
-#pythondir=${prefix}/lib/python2.4
-#pyexecdir=${prefix}/lib/python2.4
-
-#pkgpythondir=${pythondir}/ariadne
+TESTS_ENVIRONMENT = export PYTHONPATH=$PYTHONPATH:$(top_srcdir)/wrap/.libs/ ; $(PYTHON)
 
 pkgpython_DATA = 
 
-check_SCRIPTS = test/test_import.py test/test_numeric.py test/test_linear_algebra.py test/test_geometry_rational.py
+check_SCRIPTS = test_import.py
 
 TESTS = $(check_SCRIPTS)

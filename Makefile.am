@@ -1,10 +1,13 @@
-SUBDIRS = include src test examples python
+SUBDIRS = include src test wrap examples 
 
 EXTRA_DIST = Doxyfile
 
 CXXFLAGS += -Wall 
 
-.PHONY: shiny lib python examples check-lib 
+.PHONY: shiny doc all lib wrap examples check-lib check-python 
+
+all: lib wrap tests examples
+
 shiny: maintainer-clean
 	-rm -rf *~ */*~
 	-rm -f *.log */*.log */*.eps
@@ -16,14 +19,17 @@ shiny: maintainer-clean
 	-rm -f */Makefile
 	-rm -f Makefile
 
+doc:
+	doxygen
+
 lib: 
 	(cd src; make lib)
 
-lib-numeric:
-	(cd src; make libnumeric.la)
+wrap: lib
+	(cd wrap; make wrap)
 
 python: lib
-	(cd src/python; make python)
+	(cd wrap; make python)
 
 tests: lib
 	(cd test; make tests)
@@ -34,11 +40,8 @@ examples: lib
 check-lib: lib
 	(cd test; make check)
 
-check-numeric: lib-numeric
-	(cd test; make check_numeric)
-
 check-python: python
 	(cd python; make check)
 
-install-lib: lib python
+install-lib: lib
 	(cd src; make install)

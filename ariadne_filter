@@ -1,9 +1,16 @@
 SED_COMMAND="
 s/Synaps::dyadic/Dyadic/g
+
+s/\blong long int\b/llint/g
+s/\bunsigned long int\b/ulint/g
+s/\blong int\b/lint/g
+s/\bunsigned int\b/uint/g
+
 s/__gmp_expr<__gmpf_value, __gmpf_value>/MPFloat/g
 s/__gmp_expr<__gmpq_value, __gmpq_value>/Rational/g
 s/__gmp_expr<__gmpz_value, __gmpz_value>/Integer/g
-s/Ariadne:://g
+s/__gmp_expr<__mpz_struct \[1\], __mpz_struct \[1\]>/Integer/g
+s/__gmp_expr<__mpq_struct \[1\], __mpq_struct \[1\]>/Rational/g
 s/Base:://g
 s/Numeric:://g
 s/LinearAlgebra:://g
@@ -13,6 +20,11 @@ s/Geometry:://g
 s/System:://g
 s/Evaluation:://g
 s/Output:://g
+
+s/Ariadne:://g
+
+s/std::vector/vector/g
+s/std::pair/pair/g
 
 s/boost::numeric:://g
 s/boost::logic:://g

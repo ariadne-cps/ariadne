@@ -1,8 +1,8 @@
 /***************************************************************************
  *            ariadne.h
  *
- *  Copyright  2004-8  Alberto Casagrande, Pieter Collins
- *  casagrande@dimi.uniud.it, Pieter.Collins@cwi.nl
+ *  Copyright 2008  Pieter Collins
+ * 
  ****************************************************************************/
 
 /*
@@ -22,30 +22,42 @@
  */
  
 /*! \file ariadne.h
- *  \brief Top-level header file.
+ *  \brief Top-level header file includes all user headers.
  */
 
 #ifndef ARIADNE_ARIADNE_H
 #define ARIADNE_ARIADNE_H
 
-#include <gmpxx.h>
-#include <boost/numeric/interval.hpp>
-#include <boost/numeric/interval/io.hpp>
-
-#include <iostream>
-#include <iomanip>
-
-/*!
- * \brief Top-level namespace
- */
+//! \brief Top-level %Ariadne namespace
 namespace Ariadne {
-
-/*! \brief Classes for describing system models. 
- */
-namespace Models {}
-
 }
 
+#include "numeric.h"
+#include "vector.h"
+#include "matrix.h"
 
+#include "function.h"
 
-#endif /* ARIADNE_ARIADNE_H */
+#include "approximate_taylor_model.h"
+
+#include "function_set.h"
+#include "grid_set.h"
+#include "hybrid_set.h"
+
+#include "point.h"
+#include "box.h"
+#include "polytope.h"
+#include "polyhedron.h"
+
+#include "orbit.h"
+
+#include "hybrid_automaton.h"
+
+#include "hybrid_evolver.h"
+#include "discrete_evolver.h"
+#include "reachability_analyser.h"
+
+#include "serialization.h"
+#include "graphics.h"
+
+#endif

@@ -1,13 +1,14 @@
+# Declare versions
 AC_PREREQ(2.57)
-AC_INIT(ariadne, 0.1.0)
+AC_INIT(ariadne, 0.4)
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src])
 AC_CONFIG_HEADER([config.h])
 
-dnl Checks for programs.
+# Checks for programs.
 AC_PROG_CXX
 
-dnl Checks for libraries.
+# Checks for libraries.
 AC_LANG(C++)
 
 # Disable static libraries
@@ -21,31 +22,55 @@ AC_CHECK_SIZEOF([int])
 AC_CHECK_SIZEOF([size_t])
 AC_CHECK_SIZEOF([long int])
 
-# Check for header files.
+# Check for standard header files.
 AC_STDC_HEADERS
-AC_CHECK_HEADER([mpfr.h],,AC_MSG_ERROR([MPFR library is missing. You must install it.]))
-AC_CHECK_HEADER([gmpxx.h],,AC_MSG_ERROR([GMP library is missing. You must install it.]))
-AC_CHECK_HEADER([cblas.h],[AC_DEFINE([HAVE_CBLAS_H],[1],[Define to 1 if you have the <cblas.h> header file.])],AC_MSG_WARN([CBLAS library is missing. You cannot use Fortran BLAS routines.]))
-AC_CHECK_HEADER([BIAS/BiasType.h],[AC_DEFINE([HAVE_BIAS_H],[1],[Define to 1 if you have the <BIAS/BiasType.h> header file.])],AC_MSG_WARN([BIAS library is missing. You cannot use Profil/BIAS floating-point numbers and intervals.]))
-AC_CHECK_HEADER([Interval.h],[AC_DEFINE([HAVE_PROFIL_INTERVAL_H],[1],[Define to 1 if you have the <Interval.h> header file.])],AC_MSG_WARN([Profil interval library is missing. You cannot use Profil/BIAS floating-point numbers and intervals.]))
-AC_CHECK_HEADER([tblas/tblas.hpp],,AC_MSG_ERROR([TBLAS library is missing. You must install it.]))
-AC_CHECK_HEADER([tlapack/tlapack.hpp],,AC_MSG_ERROR([TLAPACK library is missing. You must install it.]))
-#AC_CHECK_HEADER([ppl.hh],[AC_DEFINE([HAVE_PPL_HH],[1],[Define to 1 if you have the <ppl.hh> header file.])],AC_MSG_WARN([PPL library is missing. Ariadne polyhedral routines cannot be checked against PPL routines.]))
 
-# Check for Boost library
-AC_CHECK_HEADER([boost/version.hpp],,AC_MSG_ERROR([Boost library is missing. You must install it.]))
+# Check for Boost library (required)
+AC_CHECK_HEADER([boost/version.hpp],,[AC_MSG_ERROR([Boost library development files are missing. You must install them.])])
 
-# Find Python paths
-AM_PATH_PYTHON(2.4,, :)
-AC_MSG_NOTICE([PYTHON_VERSION=$PYTHON_PREFIX])
+# Check for GMP (optional)
+AC_CHECK_HEADER([gmpxx.h],[AC_DEFINE([HAVE_GMPXX_H],[1],[Define to 1 if you have the <gmpxx.h> header file.])],[AC_MSG_WARN([GNU Multiple Precision (GMP) library development files are missing. You cannot use Integer or Rational numbers.])])
+
+# Check for MPFR (optional)
+AC_CHECK_HEADER([mpfr.h],[AC_DEFINE([HAVE_MPFR_H],[1],[Define to 1 if you have the <mpfr.h> header file.])],[AC_MSG_WARN([MPFR library development files are missing. You cannot use multiple-precision floating-point numbers.])])
+
+# Check for GTK (optional)
+PKG_CHECK_MODULES(GTK, gtk+-2.0 >= 2.2, [AC_DEFINE([HAVE_GTK_H],[1],[Define to 1 if you have the <gtk.h> header file.])],[AC_MSG_WARN([GTK+-2.0 library development files are missing. You cannot use graphics windows.])])
+
+# Check for Cairo (optional)
+PKG_CHECK_MODULES(CAIRO, cairo, [AC_DEFINE([HAVE_CAIRO_H],[1],[Define to 1 if you have the <cairo.h> header file.])],[AC_MSG_WARN([Cairo library development files are missing. You cannot use graphics facilities.])])
+
+# Find Python paths (optional)
+AM_PATH_PYTHON(2.5,, :)
 AC_MSG_NOTICE([PYTHON_VERSION=$PYTHON_VERSION])
-AM_CHECK_PYTHON_HEADERS(,[AC_MSG_ERROR(could not find Python headers)])
-CPPFLAGS="$CPPFLAGS $PYTHON_INCLUDES"
+AM_CHECK_PYTHON_HEADERS([PYTHON_LIB=-lpython$PYTHON_VERSION ],[AC_MSG_WARN([could not find Python headers. You cannot compile the Python interface.])])
+AC_SUBST(PYTHON_LIB)
 
-# Check for Boost python
-#AC_CHECK_HEADER([boost/python.hpp],,AC_MSG_ERROR([Boost.Python library development files are missing. You must install them.]))
+# Add Python include directory to include path since otherwise check for Boost Python fails
+CPPFLAGS+="$PYTHON_INCLUDES "
 
-# Check for Doxygen
+# Check for Boost python library (optional)
+AC_CHECK_HEADER([boost/python.hpp],[AC_DEFINE([HAVE_BOOST_PYTHON_HPP],[1],[Define to 1 if you have the <boost/python.hpp> header file.]) HAVE_BOOST_PYTHON_HPP=true],[AC_MSG_WARN([Boost Python library development files are missing. You cannot compile the Python interface.])])
+
+
+# Check for GMP library (optional)
+AC_CHECK_LIB([gmp],[main])
+
+# Check for GMPXX library (optional)
+AC_CHECK_LIB([gmpxx],[main])
+
+# Check for MPFR library (optional)
+AC_CHECK_LIB([mpfr],[main])
+
+# Check for Boost Serialization library (required)
+AC_CHECK_LIB([boost_serialization],[main],,[AC_MSG_ERROR([Boost serialization library is missing. You must install the Boost C++ libraries.])])
+
+# Check for Boost Python library (optional)
+AC_CHECK_LIB([boost_python],[main],[BOOST_PYTHON_LIB="-lboost_python " AC_DEFINE([HAVE_LIBBOOST_PYTHON],[1],[Define to 1 if you have the `boost_python` library.]) HAVE_LIBBOOST_PYTHON=true],AC_MSG_WARN([Boost Python library is missing. You cannot use the Python interface.]),[$PYTHON_LIB])
+
+AM_CONDITIONAL([WANT_PYTHON_INTERFACE], [test x$HAVE_BOOST_PYTHON_HPP = xtrue && test x$HAVE_LIBBOOST_PYTHON = xtrue])
+
+# Check for Doxygen (optional)
 AC_PATH_PROG(DOXYGEN, doxygen)
 if test -f "${DOXYGEN}"; then
     BUILD_DOC=yes;
@@ -55,42 +80,27 @@ else
 fi
 
 
-AC_MSG_CHECKING(for floating-point types to instantiate)
-AC_ARG_ENABLE(float64,[AS_HELP_STRING([--enable-float64],[enable compilation of Float64 types (default is enabled)])],
-              [],[enable_float64=yes])
-AC_ARG_ENABLE(floatmp,[AS_HELP_STRING([--enable-floatmp],[enable compilation of FloatMP types (default is enabled)])],
-              [],[enable_floatmp=no])
-AS_IF([test "x$enable_float64" != xno],[enable_float64="yes" AC_DEFINE([ENABLE_FLOAT64],[1],[Define to 1 if you want to enable Float64 compilation]) AC_DEFINE([ARIADNE_STANDARD_ROUNDING],[1],[Define to 1 if you want to use processor rounding modes]) AC_DEFINE([ARIADNE_MPFR_TRANSCENDENTAL],[1],[Define to 1 if you want to use mpfr for transcendental functions])],[])
-AS_IF([test "x$enable_floatmp" != xno],[enable_floatmp="yes" AC_DEFINE([ENABLE_FLOATMP],[1],[Define to 1 if you want to enable FloatMP compilation])],[])
-AC_MSG_RESULT([Float64: $enable_float64  FloatMP: $enable_floatmp])
+# Check whether to use multiple-precision floating-point (default no)
+AC_MSG_CHECKING(whether to use multiple-precision floating-point numbers)
+AC_ARG_ENABLE(mp,[AS_HELP_STRING([--enable-mp],[enable compilation of FloatMP types (default is disabled)])],
+              [AC_DEFINE([ENABLE_MULTIPLE_PRECISION],[1],[Define to 1 if you want to use multiple-precision floating-point numbers.])],
+              [AC_MSG_RESULT([no])],[AC_MSG_RESULT([yes])])
 
+AC_MSG_NOTICE([LIBS=$LIBS])
+AC_MSG_NOTICE([GTK_LIBS=$GTK_LIBS])
+AC_MSG_NOTICE([CAIRO_LIBS=$CAIRO_LIBS])
+AC_MSG_NOTICE([PYTHON_LIB=$PYTHON_LIB])
+AC_MSG_NOTICE([BOOST_PYTHON_LIB=$BOOST_PYTHON_LIB])
+AC_MSG_NOTICE([HAVE_BOOST_PYTHON_HPP='$HAVE_BOOST_PYTHON_HPP'])
+AC_MSG_NOTICE([HAVE_LIBBOOST_PYTHON='$HAVE_LIBBOOST_PYTHON'])
+AC_MSG_NOTICE([WANT_PYTHON_INTERFACE=$WANT_PYTHON_INTERFACE])
 
-AC_MSG_CHECKING([for float-point type in Python interface])
-AC_ARG_ENABLE(python,[AS_HELP_STRING([--enable-python],[enable compilation of python floating-point types (default is Float64)])],
-              [],[if test "x$enable_float64" != xno; then enable_python=Float64; elif test "x$enable_floatmp" != xno; then enable_python=FloatMP; else enable_python=no; fi])
-#Make sure valid type is given for Python floating-point type
-AS_IF([test "x$enable_python" != xno],
-      [if test "x$enable_python" = "xfloat64" -o "x$enable_python" = "xFloat64"; then
-         if test "x$enable_float64" = "xno"; then 
-           AC_MSG_ERROR([Using Float64 for Python interface, but Float64 not instantiated]) 
-         else
-           AC_DEFINE([PYTHON_FLOAT64],[1],[Define to 1 if Float64 is the type used for floating-point numbers in Python])
-           enable_python=Float64 
-         fi
-       elif test "x$enable_python" = "xfloatmp" -o "x$enable_python" = "xFloatMP"; then                                         
-         if test "x$enable_floatmp" = "xno"; then 
-           AC_MSG_ERROR([Using FloatMP for Python interface, but FloatMP not instantiated]) 
-         else 
-           AC_DEFINE([PYTHON_FLOATMP],[1],[Define to 1 if FloatMP is the type used for floating-point numbers in Python])
-           enable_python=FloatMP 
-         fi
-       else
-         AC_MSG_ERROR([Unrecognised floating-point type for Python interface])
-       fi
-      ],[])      
-AS_IF([test "x$enable_python" != xno],[AC_DEFINE_UNQUOTED([PYTHON_FLOAT],[$enable_python],[Define to the type used for floating-point numbers in Python])],[])
-AC_MSG_RESULT([$enable_python])
+AC_SUBST(BOOST_PYTHON_LIB)
 
+# Declare which Makefiles need to be built
+AC_CONFIG_FILES([Makefile include/Makefile src/Makefile wrap/Makefile python/Makefile test/Makefile examples/Makefile])
 
-AC_CONFIG_FILES([Makefile include/Makefile src/Makefile src/python/Makefile python/Makefile test/Makefile examples/Makefile])
+# Output results of autoconf tests
 AC_OUTPUT
+
+

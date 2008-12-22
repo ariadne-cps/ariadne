@@ -141,7 +141,7 @@ class Zonotope
     const Vector<Float>& error() const;
   
     /*! \brief A bounding box for the set. */
-    Vector<Interval> bounding_box() const;
+    Box bounding_box() const;
   
     /*! \brief The radius of the set in the supremum norm. */
     Float radius() const;
@@ -150,9 +150,9 @@ class Zonotope
     tribool contains(const Point& pt) const;
   
     /*! \brief Test if the set is disjoint from a box. */
-    tribool disjoint(const Vector<Interval>& bx) const;
-    /*! \brief Test if the set is a subset of a box. */
-    tribool subset(const Vector<Interval>& bx) const;
+    tribool disjoint(const Box& bx) const;
+    /*! \brief Test if the set is a inside of a box. */
+    tribool inside(const Box& bx) const;
   
     //@}
   
@@ -164,7 +164,7 @@ class Zonotope
     /*! \brief Tests if \a z and \a r intersect. */
     friend tribool overlaps(const Zonotope& z, const Box& r);
     /*! \brief Tests inclusion of \a z in \a r. */
-    friend tribool subset(const Zonotope& z, const Box& r);
+    friend tribool inside(const Zonotope& z, const Box& r);
     /*! \brief Tests disjointness of \a r and \a z. */
     friend tribool disjoint(const Box& r, const Zonotope& z);
     //@}
@@ -208,7 +208,7 @@ Box bounding_box(const Zonotope& z);
 tribool contains(const Zonotope& z, const Point& pt);
 tribool disjoint(const Zonotope& z, const Box& r);
 tribool overlaps(const Zonotope& z, const Box& r);
-tribool subset(const Zonotope& z, const Box& r);
+tribool inside(const Zonotope& z, const Box& r);
 
 tribool disjoint(const Zonotope& z1, const Zonotope& z2);
 

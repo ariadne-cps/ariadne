@@ -250,8 +250,8 @@ TaylorModel::evaluate(const Vector<Interval>& x) const
 TaylorModel
 recentre(const TaylorModel& tm, const Box& bx, const Point& c)
 {
-    ARIADNE_ASSERT(subset(bx,tm.domain()));
-    ARIADNE_ASSERT(subset(c,bx));
+    ARIADNE_ASSERT(inside(bx,tm.domain()));
+    ARIADNE_ASSERT(inside(c,bx));
     typedef Interval I;
 
     SparseDifferentialVector<I> translation=SparseDifferentialVector<I>::variable(tm.argument_size(),tm.argument_size(),tm.order(),c);
@@ -397,7 +397,7 @@ compose(const TaylorModel& p2, const TaylorModel& p1)
 {
     typedef Interval I;
     ARIADNE_ASSERT(p2.centre()==p1.centre_derivatives().value());
-    ARIADNE_ASSERT(subset(p1.range(),p2.domain()));
+    ARIADNE_ASSERT(inside(p1.range(),p2.domain()));
     Box new_domain=p1.domain();
     Point new_centre=p1.centre();
     SparseDifferentialVector<I> new_centre_derivatives=compose(p1.centre_derivatives(),p2.centre_derivatives());

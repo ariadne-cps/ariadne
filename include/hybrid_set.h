@@ -42,6 +42,7 @@
 #include "grid_set.h"
 
 #include "hybrid_set_interface.h"
+#include "box.h"
 
 #include "serialization.h"
 
@@ -166,11 +167,11 @@ class HybridImageSet
         locations_const_iterator loc_iter=this->find(hbx.first);
         return loc_iter!=this->locations_end()
             || loc_iter->second.disjoint(hbx.second); }
-    virtual tribool subset(const HybridBoxes& hbx) const  { 
+    virtual tribool inside(const HybridBoxes& hbx) const  { 
         for(locations_const_iterator loc_iter=this->begin(); loc_iter!=this->locations_end(); ++loc_iter) {
             if(!loc_iter->second.empty()) { 
                 HybridBoxes::const_iterator hbx_loc_iter=hbx.find(loc_iter->first); 
-                if(hbx_loc_iter!=hbx.end() && !loc_iter->second.subset(hbx_loc_iter->second)) { return false; }
+                if(hbx_loc_iter!=hbx.end() && !loc_iter->second.inside(hbx_loc_iter->second)) { return false; }
             } } return true; }
     virtual HybridBoxes bounding_box() const {  
         HybridBoxes result;
@@ -456,22 +457,22 @@ class HybridGridTreeSet
     HybridGridTreeSet* clone() const { return new HybridGridTreeSet(*this); }
     HybridSpace space() const { return HybridSpace(*this); }
     
-    tribool disjoint(const HybridBox& hbx) const { 
+    bool disjoint(const HybridBox& hbx) const { 
         locations_const_iterator loc_iter = this->find( hbx.first );
         return loc_iter != this->locations_end() || loc_iter->second.disjoint( hbx.second );
     }
     
-    tribool overlaps(const HybridBox& hbx) const { 
+    bool overlaps(const HybridBox& hbx) const { 
         locations_const_iterator loc_iter = this->find( hbx.first );
         return loc_iter != this->locations_end() && loc_iter->second.overlaps( hbx.second );
     }
     
-    tribool superset(const HybridBox& hbx) const { 
+    bool superset(const HybridBox& hbx) const { 
         locations_const_iterator loc_iter=this->find(hbx.first);
         return loc_iter!=this->locations_end() && loc_iter->second.superset( hbx.second );
     }
     
-    tribool subset(const HybridBoxes& hbx) const  { 
+    bool subset(const HybridBoxes& hbx) const  { 
         for( locations_const_iterator loc_iter = this->locations_begin(); loc_iter != this->locations_end(); ++loc_iter ) {
             if( !loc_iter->second.empty() ) { 
                 HybridBoxes::const_iterator hbx_loc_iter = hbx.find( loc_iter->first ); 

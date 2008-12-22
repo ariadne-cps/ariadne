@@ -39,25 +39,25 @@ namespace Ariadne {
 
 
 tribool 
-Polytope::disjoint(const Vector<Interval>& bx) const {
-    return Ariadne::disjoint(this->bounding_box(),bx) or indeterminate;
+Polytope::disjoint(const Box& bx) const {
+    return this->bounding_box().disjoint(bx) or indeterminate;
 }
 
 tribool 
-Polytope::overlaps(const Vector<Interval>& bx) const {
-    return Ariadne::contains(bx,baricentre(*this)) or indeterminate;
+Polytope::overlaps(const Box& bx) const {
+    return bx.covers(baricentre(*this)) or indeterminate;
 }
 
 tribool 
-Polytope::subset(const Vector<Interval>& bx) const {
-    return Ariadne::subset(this->bounding_box(),bx) or indeterminate;
+Polytope::inside(const Box& bx) const {
+    return this->bounding_box().inside(bx) or indeterminate;
 }
 
-Vector<Interval> 
+Box 
 Polytope::bounding_box() const
 {
     const Polytope& p=*this;
-    Vector<Interval> res(p._vertices[0]);
+    Box res(p._vertices[0]);
     for(uint i=1; i!=p._vertices.size(); ++i) {
         res=hull(res,p._vertices[i]);
     }

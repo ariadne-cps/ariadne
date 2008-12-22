@@ -66,10 +66,10 @@ class TaylorSet
     Vector<Interval> domain() const;
 
     TaylorSet* clone() const { return new TaylorSet(*this); } 
-    tribool disjoint(const Vector<Interval>&) const;
-    tribool overlaps(const Vector<Interval>&) const;
-    tribool subset(const Vector<Interval>&) const;
-    Vector<Interval> bounding_box() const;
+    tribool disjoint(const Box&) const;
+    tribool overlaps(const Box&) const;
+    tribool inside(const Box&) const;
+    Box bounding_box() const;
     std::ostream& write(std::ostream& os) const;
     
     pair<TaylorSet,TaylorSet> split(uint dim) const;

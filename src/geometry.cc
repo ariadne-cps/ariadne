@@ -45,11 +45,11 @@ overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Floa
 
 
 tribool 
-subset(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float& eps)
+inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float& eps)
 {
     Box bb=ls.bounding_box();
     if(bb.empty()) { return true; }
-    return subset(ls,rs,ls.bounding_box(),eps);
+    return inside(ls,rs,ls.bounding_box(),eps);
 }
 
 
@@ -62,7 +62,7 @@ overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Box&
     if(rs.disjoint(bx)) { 
         return false; 
     }
-    else if(rs.superset(bx)) {
+    else if(rs.covers(bx)) {
         return true; 
     }
     else if(bx.radius()<eps) {
@@ -82,9 +82,9 @@ overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Box&
     
   
 tribool 
-subset(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Box& bx, const Float& eps)
+inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Box& bx, const Float& eps)
 {
-    if(ls.disjoint(bx) || rs.superset(bx)) { 
+    if(ls.disjoint(bx) || rs.covers(bx)) { 
         return true; 
     } else if(bx.radius()<eps) {
         return indeterminate;
@@ -92,11 +92,11 @@ subset(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Box& 
         Box bx1,bx2;
         make_lpair(bx1,bx2)=split(bx);
         if(ls.disjoint(bx1)) {
-            return subset(ls,rs,bx2,eps);
+            return inside(ls,rs,bx2,eps);
         } else if(ls.disjoint(bx2)) {
-            return subset(ls,rs,bx1,eps);
+            return inside(ls,rs,bx1,eps);
         } else {
-            return subset(ls,rs,bx1,eps) && subset(ls,rs,bx2,eps);
+            return inside(ls,rs,bx1,eps) && inside(ls,rs,bx2,eps);
         }
     }
 }
@@ -129,7 +129,7 @@ tribool
 overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const Box& bx, const Float& eps)
 {
     if(ovs.overlaps(bx)) {
-        if(ops.superset(bx)) { 
+        if(ops.covers(bx)) { 
             return true; 
         } else if(bx.radius()<eps) {
             return indeterminate;
@@ -149,17 +149,17 @@ overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const Box& bx
     
   
 tribool 
-subset(const ClosedSetInterface& cls, const OpenSetInterface& ops, const Box& bx, const Float& eps)
+inside(const ClosedSetInterface& cls, const OpenSetInterface& ops, const Box& bx, const Float& eps)
 {
-    if(cls.disjoint(bx) || ops.superset(bx)) { 
+    if(cls.disjoint(bx) || ops.covers(bx)) { 
         return true; 
     } else if(bx.radius()<eps) {
         return indeterminate;
     } else {
         Box bx1,bx2;
         make_lpair(bx1,bx2)=split(bx);
-        if(subset(cls,ops,bx1,eps)) {
-            return subset(cls,ops,bx2,eps);
+        if(inside(cls,ops,bx1,eps)) {
+            return inside(cls,ops,bx2,eps);
         } else {
             return indeterminate;
         }

@@ -984,7 +984,7 @@ void test_adjoin_inner_approximation_operation_two(){
     //theSetTwo = empty, with the bounding box [-1,1]x[-1,1]
     GridTreeSet theSetOne( theTrivialGrid, heightOne, new BinaryTreeNode( make_binary_word("0"), make_binary_word("0") ) );
     GridTreeSet theSetOneCopy( theSetOne );
-    Box theBoxOneOne = make_box("[-1.9,-0.1]x[0.1,1.5]");
+    Box theBoxOneOne = make_box("[-1.9,-0.1]x[0.1,1.75]");
     Box theBoundingBoxOneOne = make_box("[-0.99,0.99]x[-0.99,1.99]");
     
     // !!!

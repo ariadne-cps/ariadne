@@ -78,7 +78,7 @@ class Node {
     friend std::ostream& operator<< (std::ostream&, const Subpaving);
     friend std::ostream& write (std::ostream&, const Node*);
   
-    friend tribool subset(const IntervalVector&, const Subpaving);
+    friend tribool inside(const IntervalVector&, const Subpaving);
   
     friend Node* sivia(IntervalPredicate, const IntervalVector& box, double, tribool);
     friend void expand(Node*);
@@ -95,7 +95,7 @@ class Node {
 double diam(const IntervalVector&, int&);
 uint size(const Subpaving a);
 double volume(const Subpaving a);
-tribool subset(const IntervalVector&, const Subpaving);
+tribool inside(const IntervalVector&, const Subpaving);
 
 Node* regularize(const ImageList&, const IntervalVector&, double);
 
@@ -119,8 +119,8 @@ class Paving {
     friend std::ostream& operator<< (std::ostream&, const Paving&);
 };
 
-inline tribool subset(const IntervalVector& z, const Paving& pv) {
-    return subset(z,pv.root()); }
+inline tribool inside(const IntervalVector& z, const Paving& pv) {
+    return inside(z,pv.root()); }
 
 inline std::ostream& operator<< (std::ostream& os, const Paving& pv) {
     return os << pv._base; }

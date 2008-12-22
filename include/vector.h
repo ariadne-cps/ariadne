@@ -265,10 +265,13 @@ template<class X> std::istream& operator>>(std::istream& is, Vector<X>& v) {
 }
 
 bool contains(const Vector<Interval>& v1, const Vector<Float>& v2);
-bool subset(const Vector<Float>& v1, const Vector<Interval>& v2);
+bool intersect(const Vector<Interval>& v1, const Vector<Interval>& v2);
 bool subset(const Vector<Interval>& v1, const Vector<Interval>& v2);
+
 bool disjoint(const Vector<Interval>& v1, const Vector<Interval>& v2);
 bool overlap(const Vector<Interval>& v1, const Vector<Interval>& v2);
+bool inside(const Vector<Interval>& v1, const Vector<Interval>& v2);
+bool covers(const Vector<Interval>& v1, const Vector<Interval>& v2);
 bool empty(const Vector<Interval>& v);
 
 Vector<Interval> hull(const Vector<Interval>& v1, const Vector<Interval>& v2);

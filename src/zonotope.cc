@@ -281,11 +281,11 @@ Zonotope::domain() const
 }
 
        
-Vector<Interval>
+Box
 Zonotope::bounding_box() const
 {
     const Zonotope& z=*this;
-    Vector<Interval> b=z.centre()+prod(z.generators(),z.domain())+z.error()*Interval(-1,1);
+    Box b=z.centre()+prod(z.generators(),z.domain())+z.error()*Interval(-1,1);
     return b;
 }
 
@@ -305,16 +305,16 @@ Zonotope::contains(const Point& pt) const
 
 
 tribool
-Zonotope::disjoint(const Vector<Interval>& bx) const
+Zonotope::disjoint(const Box& bx) const
 {
     return Ariadne::disjoint(*this,Box(bx));
 }
 
 
 tribool
-Zonotope::subset(const Vector<Interval>& bx) const
+Zonotope::inside(const Box& bx) const
 {
-    return Ariadne::subset(*this,Box(bx));
+    return Ariadne::inside(*this,Box(bx));
 }
 
 
@@ -461,10 +461,10 @@ apply(const AffineModel& am,
     typedef Interval I;
   
     assert(z.centre()==am.centre());
-    if(!subset(z,am.domain())) {
+    if(!inside(z,am.domain())) {
         std::cerr<<"z="<<z<<"\nz.bounding_box()="<<z.bounding_box()<<"\nam.domain()="<<am.domain()<<std::endl;
     }
-    assert(possibly(subset(z,am.domain())));
+    assert(possibly(inside(z,am.domain())));
   
     uint d=z.size();
     uint m=z.number_of_generators();
@@ -750,9 +750,9 @@ operator>>(std::istream& is, Zonotope& z)
 
 
 tribool
-subset(const Zonotope& z, const Box& bx)
+inside(const Zonotope& z, const Box& bx)
 {
-    return subset(z.bounding_box(),bx);
+    return z.bounding_box().inside(bx) || indeterminate;
 }
 
 

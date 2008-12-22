@@ -89,7 +89,7 @@ disjoint(const Box& d, const F& f, const Box& b, const Float& eps)
     Box fc=f.evaluate(Box(midpoint(d)));
     if(disjoint(fd,b)) { 
         return true;
-    } else if(subset(fc,b)) {
+    } else if(inside(fc,b)) {
         return false;
     } else if(d.radius()<eps) {
         return indeterminate;
@@ -101,11 +101,11 @@ disjoint(const Box& d, const F& f, const Box& b, const Float& eps)
 
 template<class F>
 tribool 
-subset(const Box& d, const F& f, const Box& b, const Float& eps)
+inside(const Box& d, const F& f, const Box& b, const Float& eps)
 {
     Box fd=f(d);
     Box fc=f(Box(midpoint(d)));
-    if(subset(fc,b)) { 
+    if(inside(fc,b)) { 
         return true;
     } else if(disjoint(fd,b)) {
         return false;
@@ -113,7 +113,7 @@ subset(const Box& d, const F& f, const Box& b, const Float& eps)
         return indeterminate;
     } else {
         uint i=irmax(d);
-        return subset(split(d,i,0),f,b,eps) && subset(split(d,i,0),f,b,eps);
+        return inside(split(d,i,0),f,b,eps) && inside(split(d,i,0),f,b,eps);
     }
 }
 
@@ -123,7 +123,7 @@ DS remove_subsets(const DS& ls)
     DS result;
     for(uint i=0; i!=ls.size(); ++i) {
         for(uint j=0; j!=ls.size(); ++j) {
-            if(subset(ls[i],ls[j])) {
+            if(inside(ls[i],ls[j])) {
                 break; 
             }
         }
@@ -137,7 +137,7 @@ DS remove_supersets(const DS& ls)
     DS result;
     for(uint i=0; i!=ls.size(); ++i) {
         for(uint j=0; j!=ls.size(); ++j) {
-            if(subset(ls[j],ls[i])) {
+            if(inside(ls[j],ls[i])) {
                 break; 
             }
         }
@@ -149,8 +149,8 @@ DS remove_supersets(const DS& ls)
 //! \brief Tests if \a ls overlaps \a rs, to a tolerance of \a eps.
 tribool overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float& eps);
 
-//! \brief Tests if \a ls is a subset of \a rs, to a tolerance of \a eps.
-tribool subset(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float& eps);
+//! \brief Tests if \a ls is a inside of \a rs, to a tolerance of \a eps.
+tribool inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float& eps);
 
 //! \brief Tests if \a ls is disjoint from \a rs, to a tolerance of \a eps.
 tribool disjoint(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float& eps);
@@ -159,8 +159,8 @@ tribool disjoint(const LocatedSetInterface& ls, const RegularSetInterface& rs, c
 //! \brief Tests if \a ovs overlaps \a ops, to a tolerance of \a eps.
 tribool overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const Float& eps);
 
-//! \brief Tests if \a cps is a subset of \a ops, to a tolerance of \a eps.
-tribool subset(const CompactSetInterface& cps, const OpenSetInterface& ops, const Float& eps);
+//! \brief Tests if \a cps is a inside of \a ops, to a tolerance of \a eps.
+tribool inside(const CompactSetInterface& cps, const OpenSetInterface& ops, const Float& eps);
 
 //! \brief Tests if \a cps is disjoint from \a cls, to a tolerance of \a eps.
 tribool disjoint(const CompactSetInterface& cps, const ClosedSetInterface& cls, const Float& eps);
@@ -171,20 +171,20 @@ tribool disjoint(const CompactSetInterface& cps, const ClosedSetInterface& cls, 
 //! \brief Tests if the intersection of \a ls and \a bx overlaps \a rs, to a tolerance of \a eps.
 tribool overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Box& bx, const Float& eps);
 
-//! \brief Tests if the intersection of \a ls and \a bx is a subset of \a rs, to a tolerance of \a eps.
-tribool subset(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Box& bx, const Float& eps);
+//! \brief Tests if the intersection of \a ls and \a bx is a inside of \a rs, to a tolerance of \a eps.
+tribool inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Box& bx, const Float& eps);
 
-//! \brief Tests if the intersection of \a ls and \a bx is a subset of \a rs, to a tolerance of \a eps.
+//! \brief Tests if the intersection of \a ls and \a bx is a inside of \a rs, to a tolerance of \a eps.
 tribool disjoint(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Box& bx, const Float& eps);
 
 
 //! \brief Tests if the intersection of \a ls and \a bx overlaps \a rs, to a tolerance of \a eps.
 tribool overlap(const OvertSetInterface& ls, const OpenSetInterface& rs, const Box& bx, const Float& eps);
 
-//! \brief Tests if the intersection of \a ls and \a bx is a subset of \a rs, to a tolerance of \a eps.
-tribool subset(const ClosedSetInterface& ls, const OpenSetInterface& rs, const Box& bx, const Float& eps);
+//! \brief Tests if the intersection of \a ls and \a bx is a inside of \a rs, to a tolerance of \a eps.
+tribool inside(const ClosedSetInterface& ls, const OpenSetInterface& rs, const Box& bx, const Float& eps);
 
-//! \brief Tests if the intersection of \a ls and \a bx is a subset of \a rs, to a tolerance of \a eps.
+//! \brief Tests if the intersection of \a ls and \a bx is a inside of \a rs, to a tolerance of \a eps.
 tribool disjoint(const ClosedSetInterface& ls, const ClosedSetInterface& rs, const Box& bx, const Float& eps);
 
 

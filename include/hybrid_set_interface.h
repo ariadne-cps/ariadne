@@ -38,7 +38,6 @@
 
 namespace Ariadne {
 
-class Interval;
 class Box;
 
 class HybridSpace;
@@ -65,7 +64,7 @@ class HybridBoundedSetInterface
 {
   public:
     virtual HybridBoundedSetInterface* clone() const = 0;
-    virtual tribool subset(const HybridBoxes& bx) const = 0;
+    virtual tribool inside(const HybridBoxes& bx) const = 0;
     virtual HybridBoxes bounding_box() const = 0;
     virtual BoundedSetInterface const& operator[](DiscreteState) const = 0;
 };
@@ -86,7 +85,7 @@ class HybridOpenSetInterface
 {
   public:
     virtual HybridOpenSetInterface* clone() const = 0;
-    virtual tribool superset(const HybridBox& bx) const = 0;
+    virtual tribool covers(const HybridBox& bx) const = 0;
     virtual OpenSetInterface const& operator[](DiscreteState) const = 0;
 };
 

@@ -34,7 +34,7 @@ ImageSet::ImageSet()
 { 
 }
 
-ImageSet::ImageSet(const BoxType& dom)
+ImageSet::ImageSet(const Vector<Interval>& dom)
     //  : _domain(dom), _function_ptr(new IdentityFunction(dom.size()))
     : _domain(Vector<Interval>(dom.size(),Interval(-1,1))), 
       _function_ptr(new ScalingFunction(dom))
@@ -42,7 +42,7 @@ ImageSet::ImageSet(const BoxType& dom)
 }
 
 
-ImageSet::ImageSet(const BoxType& dom, const FunctionInterface& fn)
+ImageSet::ImageSet(const Vector<Interval>& dom, const FunctionInterface& fn)
     : _domain(dom), _function_ptr(fn.clone()) 
 { 
     ARIADNE_ASSERT(dom.size()==fn.argument_size()); 
@@ -71,7 +71,7 @@ ImageSet::empty() const
 
 
 tribool
-ImageSet::disjoint(const Vector<Interval>& bx) const 
+ImageSet::disjoint(const Box& bx) const 
 { 
     if(dynamic_cast<const IdentityFunction*>(&*this->_function_ptr)) {
         return Ariadne::disjoint(bx,this->_domain);
@@ -85,7 +85,7 @@ ImageSet::disjoint(const Vector<Interval>& bx) const
 
 
 tribool
-ImageSet::overlaps(const Vector<Interval>& bx) const 
+ImageSet::overlaps(const Box& bx) const 
 { 
     static const int MAX_SUBDIVISIONS=8;
     return !Ariadne::disjoint(this->domain(),*this->_function_ptr,bx,radius(bx)/MAX_SUBDIVISIONS);
@@ -93,9 +93,9 @@ ImageSet::overlaps(const Vector<Interval>& bx) const
 
 
 tribool
-ImageSet::subset(const Vector<Interval>& bx) const 
+ImageSet::inside(const Box& bx) const 
 { 
-    if(Ariadne::subset(this->bounding_box(),bx)) {
+    if(Ariadne::inside(this->bounding_box(),bx)) {
         return true;
     } else {
         return indeterminate;
@@ -103,7 +103,7 @@ ImageSet::subset(const Vector<Interval>& bx) const
 }
 
 
-Vector<Interval>
+Box
 ImageSet::bounding_box() const 
 { 
     return this->_function_ptr->evaluate(this->_domain);
@@ -120,7 +120,7 @@ ImageSet::write(std::ostream& os) const
 
 
 
-ConstraintSet::ConstraintSet(const BoxType& codom, const FunctionInterface& fn) 
+ConstraintSet::ConstraintSet(const Vector<Interval>& codom, const FunctionInterface& fn) 
     : _codomain(codom), _function_ptr(fn.clone()) 
 { 
     ARIADNE_ASSERT(codom.size()==fn.result_size());
@@ -141,21 +141,21 @@ ConstraintSet::dimension() const
 
 
 tribool
-ConstraintSet::disjoint(const Vector<Interval>& bx) const 
+ConstraintSet::disjoint(const Box& bx) const 
 { 
     ARIADNE_NOT_IMPLEMENTED;
 }
 
 
 tribool
-ConstraintSet::overlaps(const Vector<Interval>& bx) const 
+ConstraintSet::overlaps(const Box& bx) const 
 { 
     ARIADNE_NOT_IMPLEMENTED;
 }
 
 
 tribool
-ConstraintSet::superset(const Vector<Interval>& bx) const 
+ConstraintSet::covers(const Box& bx) const 
 { 
     ARIADNE_NOT_IMPLEMENTED;
 }

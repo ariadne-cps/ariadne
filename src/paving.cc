@@ -194,7 +194,7 @@ double volume (const Subpaving a)
                                     }
 
 
-tribool subset(const IntervalVector& z, const Subpaving X)
+tribool inside(const IntervalVector& z, const Subpaving X)
 {
     // v is assumed not to be empty
     assert(X!=NULL);
@@ -204,7 +204,7 @@ tribool subset(const IntervalVector& z, const Subpaving X)
             IntervalVector r;
                 
                 if (is_leaf(X)) {
-                    if (subset(z,box(X))) { return true; }
+                    if (inside(z,box(X))) { return true; }
                         if (!intersection(r,z,box(X))) { return false; }
                             }
                     
@@ -215,9 +215,9 @@ tribool subset(const IntervalVector& z, const Subpaving X)
                                 
                                 if (!is_empty(X->leftChild)&&!is_empty(X->rightChild)) {
                                     if (intersection(Lz,z,box(X->leftChild))) {
-                                        Ltest = subset(Lz,X->leftChild);
+                                        Ltest = inside(Lz,X->leftChild);
                                             if (intersection(Rz,z,box(X->rightChild))) {
-                                                Rtest = subset(Rz,X->rightChild);
+                                                Rtest = inside(Rz,X->rightChild);
                                                     if (Ltest==Rtest) {
                                                         return Ltest; 
                                                             } else {
@@ -228,7 +228,7 @@ tribool subset(const IntervalVector& z, const Subpaving X)
                                                     }
                                                 } else {
                                         if (intersection(Rz,z,box(X->rightChild))) {
-                                            return subset(Rz,X->rightChild);
+                                            return inside(Rz,X->rightChild);
                                                 } else { 
                                             return true;
                                                 }
@@ -237,7 +237,7 @@ tribool subset(const IntervalVector& z, const Subpaving X)
                                 else if (!is_empty(X->leftChild)) {
                                     if (!intersection(Lz,z,box(X->leftChild))) {
                                         return false; }
-                                        Ltest = subset(Lz,X->leftChild);
+                                        Ltest = inside(Lz,X->leftChild);
                                             if (!(Lz==z)) { 
                                                 Rtest = false; }
                                             else { 
@@ -246,7 +246,7 @@ tribool subset(const IntervalVector& z, const Subpaving X)
                                 else {
                                     if (!intersection(Rz,z,box(X->rightChild))) {
                                         return false; }
-                                        Rtest = subset(Rz,X->rightChild);
+                                        Rtest = inside(Rz,X->rightChild);
                                             if (!(Rz==z)) {
                                                 Ltest = false; }
                                             else {
@@ -394,7 +394,7 @@ Subpaving regularize (const ImageList& list, const IntervalVector& hull, double 
 {
     if (list.empty()) { return new Node(hull,false); }
         
-        if (subset(hull,list.front())) { return new Node(hull,true); }
+        if (inside(hull,list.front())) { return new Node(hull,true); }
             
             int maxdiamcomp;
                 if (diam(hull,maxdiamcomp)<eps) { return new Node(hull,true); }

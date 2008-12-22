@@ -108,7 +108,9 @@ void TestDiscretisedEvolution::test_discrete_time() const
     ha.new_forced_transition(event,location,location,henon,ConstantFunction(Vector<Float>(1,1.0),2));
 
     // Define a bounding box for the evolution
+    std::cout<<"making bounding_box"<<std::endl;
     Box bounding_box=make_box("[-4,4]x[-4,4]") ;
+    std::cout<<"bounding_box="<<bounding_box<<"\n"<<std::endl;
     //Box eps_bounding_box=bounding_box.neighbourhood(0.1);
  
     // Define the initial cell

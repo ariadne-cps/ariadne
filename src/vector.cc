@@ -30,6 +30,7 @@ template class boost::numeric::ublas::vector<Ariadne::Interval>;
 
 namespace Ariadne {
 
+
 bool contains(const Vector<Interval>& v1, const Vector<Float>& v2)
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
@@ -39,7 +40,7 @@ bool contains(const Vector<Interval>& v1, const Vector<Float>& v2)
     return true;
 }
 
-bool subset(const Vector<Float>& v1, const Vector<Interval>& v2)
+bool subset(const Vector<Interval>& v1, const Vector<Interval>& v2) 
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
     for(size_t i=0; i!=v1.size(); ++i) {
@@ -48,11 +49,48 @@ bool subset(const Vector<Float>& v1, const Vector<Interval>& v2)
     return true;
 }
 
-bool subset(const Vector<Interval>& v1, const Vector<Interval>& v2) 
+bool intersect(const Vector<Interval>& v1, const Vector<Interval>& v2) 
 {
     ARIADNE_ASSERT(v1.size()==v2.size());
     for(size_t i=0; i!=v1.size(); ++i) {
-        if(!subset(v1[i],v2[i])) { return false; }
+        if(!intersect(v1[i],v2[i])) { return false; }
+    }
+    return true;
+}
+
+
+bool disjoint(const Vector<Interval>& v1, const Vector<Interval>& v2) 
+{
+    ARIADNE_ASSERT(v1.size()==v2.size());
+    for(size_t i=0; i!=v1.size(); ++i) {
+        if(disjoint(v1[i],v2[i])) { return true; }
+    }
+    return false;
+}
+
+bool overlap(const Vector<Interval>& v1, const Vector<Interval>& v2) 
+{
+    ARIADNE_ASSERT(v1.size()==v2.size());
+    for(size_t i=0; i!=v1.size(); ++i) {
+        if(!overlap(v1[i],v2[i])) { return false; }
+    }
+    return true;
+}
+
+bool covers(const Vector<Interval>& v1, const Vector<Interval>& v2) 
+{
+    ARIADNE_ASSERT(v1.size()==v2.size());
+    for(size_t i=0; i!=v1.size(); ++i) {
+        if(!covers(v1[i],v2[i])) { return false; }
+    }
+    return true;
+}
+
+bool inside(const Vector<Interval>& v1, const Vector<Interval>& v2) 
+{
+    ARIADNE_ASSERT(v1.size()==v2.size());
+    for(size_t i=0; i!=v1.size(); ++i) {
+        if(!inside(v1[i],v2[i])) { return false; }
     }
     return true;
 }
@@ -128,28 +166,6 @@ Float volume(const Vector<Interval>& v)
         r*=diam(v[i]);
     }
     return r;
-}
-
-bool disjoint(const Vector<Interval>& v1, const Vector<Interval>& v2) 
-{
-    ARIADNE_ASSERT(v1.size()==v2.size());
-    for(size_t i=0; i!=v1.size(); ++i) {
-        if(v1[i].u<v2[i].l || v1[i].l>v2[i].u) {
-            return true;
-        }
-    }
-    return false;
-}
-
-bool overlap(const Vector<Interval>& v1, const Vector<Interval>& v2) 
-{
-    ARIADNE_ASSERT(v1.size()==v2.size());
-    for(size_t i=0; i!=v1.size(); ++i) {
-        if(v1[i].u<=v2[i].l || v1[i].l>=v2[i].u) {
-            return false;
-        }
-    }
-    return true;
 }
 
 Vector<Interval> intersection(const Vector<Interval>& v1, const Vector<Interval>& v2);

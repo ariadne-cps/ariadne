@@ -37,6 +37,7 @@
 #include "set_interface.h"
 #include "function_interface.h"
 
+#include "box.h"
 
 namespace Ariadne {
 
@@ -47,15 +48,14 @@ class ImageSet
     Vector<Interval> _domain;
     boost::shared_ptr<FunctionInterface> _function_ptr;
   public:
-    typedef Vector<Interval> BoxType;
     //! \brief Default constructor constructs the singleton in \f$\R^0\f$.
     ImageSet();
     //! \brief Construct the image of \a dom under the identity function.
-    ImageSet(const BoxType& dom);
+    ImageSet(const Vector<Interval>& dom);
     //! \brief Construct the image of \a dom under the function \a fn.
-    ImageSet(const BoxType& dom, const FunctionInterface& fn);
+    ImageSet(const Vector<Interval>& dom, const FunctionInterface& fn);
     //! \brief The box used to define the set.
-    const BoxType& domain() const { return this->_domain; }
+    const Vector<Interval>& domain() const { return this->_domain; }
     //! \brief The function used to define the set.
     const FunctionInterface& function() const { return *this->_function_ptr; }
     //! \brief Equality operator. Compares functions by referential equality.
@@ -64,10 +64,10 @@ class ImageSet
     ImageSet* clone() const;
     uint dimension() const;
     tribool empty() const;
-    tribool disjoint(const Vector<Interval>&) const;
-    tribool overlaps(const Vector<Interval>&) const;
-    tribool subset(const Vector<Interval>&) const;
-    Vector<Interval> bounding_box() const;
+    tribool disjoint(const Box&) const;
+    tribool overlaps(const Box&) const;
+    tribool inside(const Box&) const;
+    Box bounding_box() const;
     std::ostream& write(std::ostream&) const;
 };
 
@@ -77,16 +77,15 @@ class ModelSet
 {
     Mdl _model;
   public:
-    typedef Vector<Interval> BoxType;
     ModelSet(const Mdl& mdl) : _model(mdl) { }
-    const BoxType& domain() const { return this->_model.domain(); }
+    const Vector<Interval>& domain() const { return this->_model.domain(); }
     ModelSet* clone() const { return new ModelSet<Mdl>(*this); }
     uint dimension() const { return this->_model.result_size(); }
-    tribool disjoint(const Vector<Interval>& bx) const { 
+    tribool disjoint(const Box& bx) const { 
         return Ariadne::disjoint(this->_model,bx); }
-    tribool subset(const Vector<Interval>& bx) const { 
-        return Ariadne::subset(this->_model.range(),bx) || indeterminate; }
-    Vector<Interval> bounding_box() const { 
+    tribool inside(const Box& bx) const { 
+        return Ariadne::inside(this->_model.range(),bx) || indeterminate; }
+    Box bounding_box() const { 
         return this->_model.range(); }
     std::ostream& write(std::ostream& os) const {
         return os << "ModelSet( " << this->_model << ")"; }
@@ -101,19 +100,18 @@ class ConstraintSet
     Vector<Interval> _codomain;
     boost::shared_ptr<FunctionInterface> _function_ptr;
   public:
-    typedef Vector<Interval> BoxType;
     //! \brief Construct the preimage of \a codom under \a fn.
-    ConstraintSet(const BoxType& codom, const FunctionInterface& fn);
+    ConstraintSet(const Vector<Interval>& codom, const FunctionInterface& fn);
     //! \brief The codomain of the set.
-    const BoxType& codomain() const { return this->_codomain; }
+    const Vector<Interval>& codomain() const { return this->_codomain; }
     //! \brief The function used to define the set.
     const FunctionInterface& function() const { return *this->_function_ptr; };
 
     ConstraintSet* clone() const;
     uint dimension() const;
-    tribool disjoint(const Vector<Interval>&) const;
-    tribool overlaps(const Vector<Interval>&) const;
-    tribool superset(const Vector<Interval>&) const;
+    tribool disjoint(const Box&) const;
+    tribool overlaps(const Box&) const;
+    tribool covers(const Box&) const;
     std::ostream& write(std::ostream&) const;
 };
 

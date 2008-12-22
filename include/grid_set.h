@@ -93,12 +93,6 @@ GridTreeSet join(const GridTreeSubset& theSet1, const GridTreeSubset& theSet2);
 GridTreeSet intersection(const GridTreeSubset& theSet1, const GridTreeSubset& theSet2);
 GridTreeSet difference(const GridTreeSubset& theSet1, const GridTreeSubset& theSet2);
     
-/*! /brief Creates an outer approximation for the \a theBox on \a theGrid. \a theBox
- * is in the original space coordinates. We compute the over approximation as the
- * smallest primary cell on the Grid, such that it contains \a theBox (after it's
- * mapping on \a theGrid )
- */
-GridCell over_approximation( const Box& theBox, const Grid& theGrid );
 GridTreeSet outer_approximation(const Box& theBox, const Grid& theGrid, const uint depth);
 GridTreeSet outer_approximation(const CompactSetInterface& theSet, const Grid& theGrid, const uint depth);
 GridTreeSet outer_approximation(const CompactSetInterface& theSet, const uint depth);
@@ -563,24 +557,31 @@ class GridCell {
      * \a theHeight defines the height of the primary cell above the zero level and
      * \a dimensions is the number of dimension in the considered space
      */
-    static Box primary_cell( const uint theHeight, const dimension_type dimensions );
+    static Vector<Interval> primary_cell_lattice_box( const uint theHeight, const dimension_type dimensions );
             
     /*! \brief Takes a box \a theBox related to some grid and computes the smallest primary cell on
      *   that grid that will contain this box. 
      *   The method returns the hight of that primary cell.
      */
-    static uint smallest_primary_cell_height( const Box& theBox );
+    static uint smallest_enclosing_primary_cell_height( const Vector<Interval>& theLatticeBox );
 
-    /*! \brief Apply grid data \a theGrid to \a theGridBox in order to compute
-     * the box dimensions in the original space
+    /*! /brief Creates an over approximation for the \a theBox on \a theGrid. \a theBox
+     * is in the original space coordinates. We compute the over approximation as the
+     * smallest primary cell on the Grid, such that it contains \a theBox (after it's
+     * mapping on \a theGrid )
      */
-    static Box grid_box_to_space(const Box & theGridBox, const Grid& theGrid );
+    static GridCell smallest_enclosing_primary_cell( const Box & theBox, const Grid& theGrid );
 
     /*! \brief This method returns the path from the \a topPCellHeight to the \a bottomPCellHeight
      *  in the \a dimensions dimensional space. We assume that \a topPCellHeight >= \a bottomPCellHeight
      *  if not, then we return an empty binary word.
      */
     static BinaryWord primary_cell_path( const uint dimensions, const uint topPCellHeight, const uint bottomPCellHeight);
+
+    /*! \brief Apply grid data \a theGrid to \a theLatticeBox in order to compute
+     * the box dimensions in the original space
+     */
+    static Box lattice_box_to_space(const Vector<Interval> & theLatticeBox, const Grid& theGrid );
 
 };
 
@@ -1917,7 +1918,7 @@ inline GridTreeSet::GridTreeSet( const uint theDimension, const bool enable ) :
 }
 
 inline GridTreeSet::GridTreeSet(const Grid& theGrid, const Box & theBoundingBox ) :
-    GridTreeSubset( theGrid, GridCell::smallest_primary_cell_height( theBoundingBox ),
+    GridTreeSubset( theGrid, GridCell::smallest_enclosing_primary_cell_height( theBoundingBox ),
                     BinaryWord(), new BinaryTreeNode( false ) ) {
     //1. The main point here is that we have to compute the smallest primary cell that contains theBoundingBox
     //2. This cell is defined by it's height and becomes the root of the GridTreeSet

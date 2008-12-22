@@ -97,23 +97,21 @@ template<class SET> boost::python::tuple split(const SET& s, uint i) {
 class OpenSetWrapper
   : public OpenSetInterface, public wrapper< OpenSetInterface >
 {
-    typedef Vector<Interval> BS;
   public: 
     OpenSetInterface* clone() const { return this->get_override("clone")(); }
     uint dimension() const { return this->get_override("dimension")(); }
-    tribool superset(const BS& r) const { return this->get_override("superset")(); }
-    tribool overlaps(const BS& r) const { return this->get_override("overlaps")(); }
+    tribool covers(const Box& r) const { return this->get_override("covers")(); }
+    tribool overlaps(const Box& r) const { return this->get_override("overlaps")(); }
     std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
 };
 
 class ClosedSetWrapper
   : public ClosedSetInterface, public wrapper< ClosedSetInterface >
 {
-    typedef Vector<Interval> BS;
   public: 
     ClosedSetInterface* clone() const { return this->get_override("clone")(); }
     uint dimension() const { return this->get_override("dimension")(); }
-    tribool disjoint(const BS& r) const { return this->get_override("disjoint")(); }
+    tribool disjoint(const Box& r) const { return this->get_override("disjoint")(); }
     std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
 };
 
@@ -121,11 +119,10 @@ class ClosedSetWrapper
 class OvertSetWrapper
   : public OvertSetInterface, public wrapper< OvertSetInterface >
 {
-    typedef Vector<Interval> BS;
   public: 
     OvertSetInterface* clone() const { return this->get_override("clone")(); }
     uint dimension() const { return this->get_override("dimension")(); }
-    tribool overlaps(const BS& r) const { return this->get_override("overlaps")(); }
+    tribool overlaps(const Box& r) const { return this->get_override("overlaps")(); }
     std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
 };
 
@@ -133,30 +130,28 @@ class OvertSetWrapper
 class CompactSetWrapper
   : public CompactSetInterface, public wrapper< CompactSetInterface >
 {
-    typedef Vector<Interval> BS;
   public: 
     CompactSetInterface* clone() const { return this->get_override("clone")(); }
     uint dimension() const { return this->get_override("dimension")(); }
-    tribool disjoint(const BS& r) const { return this->get_override("disjoint")(); }
-    tribool subset(const BS& r) const { return this->get_override("subset")(); }
+    tribool disjoint(const Box& r) const { return this->get_override("disjoint")(); }
+    tribool inside(const Box& r) const { return this->get_override("inside")(); }
     tribool bounded() const { return this->get_override("bounded")(); }
-    BS bounding_box() const { return this->get_override("bounding_box")(); }
+    Box bounding_box() const { return this->get_override("bounding_box")(); }
     std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
 };
 
 class LocatedSetWrapper
   : public LocatedSetInterface, public wrapper< LocatedSetInterface >
 {
-    typedef Vector<Interval> BS;
   public: 
     LocatedSetInterface* clone() const { return this->get_override("clone")(); }
     uint dimension() const { return this->get_override("dimension")(); }
-    tribool superset(const BS& r) const { return this->get_override("superset")(); }
-    tribool overlaps(const BS& r) const { return this->get_override("overlaps")(); }
-    tribool disjoint(const BS& r) const { return this->get_override("disjoint")(); }
-    tribool subset(const BS& r) const { return this->get_override("subset")(); }
+    tribool covers(const Box& r) const { return this->get_override("covers")(); }
+    tribool overlaps(const Box& r) const { return this->get_override("overlaps")(); }
+    tribool disjoint(const Box& r) const { return this->get_override("disjoint")(); }
+    tribool inside(const Box& r) const { return this->get_override("inside")(); }
     tribool bounded() const { return this->get_override("bounded")(); }
-    BS bounding_box() const { return this->get_override("bounding_box")(); }
+    Box bounding_box() const { return this->get_override("bounding_box")(); }
     std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
 };
 

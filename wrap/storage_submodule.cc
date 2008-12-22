@@ -86,8 +86,8 @@ void export_grid_tree_set() {
     //def("difference",(GridTreeSet(*)(const GridTreeSet&,const GridTreeSet&))(&difference));
     //def("regular_intersection",(GridTreeSet(*)(const GridTreeSet&,const GridTreeSet&))(&regular_intersection));
     //def("overlap",(tribool(*)(const GridTreeSet&,const GridTreeSet&))(&overlap));
-    //def("subset",(tribool(*)(const GridTreeSet&,const GridTreeSet&))(&subset));
-    //def("subset",(tribool(*)(const CellList&,const GridTreeSet&))(&subset));
+    //def("inside",(tribool(*)(const GridTreeSet&,const GridTreeSet&))(&inside));
+    //def("inside",(tribool(*)(const CellList&,const GridTreeSet&))(&inside));
 
 }
 

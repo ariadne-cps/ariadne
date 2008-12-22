@@ -262,7 +262,7 @@ DynamicalToolbox<Mdl>::flow_bounds(FunctionInterface const& vf,
                                    Float const& hmax, 
                                    Float const& dmax) const
 { 
-    // Try to find a time h and a set b such that subset(r+Interval<R>(0,h)*vf(b),b) holds
+    // Try to find a time h and a set b such that inside(r+Interval<R>(0,h)*vf(b),b) holds
     ARIADNE_LOG(6,"flow_bounds(Function,Box,Time hmax)\n");
     ARIADNE_LOG(7,"  r="<<r<<" hmax="<<hmax<<"\n");
   
@@ -304,7 +304,7 @@ DynamicalToolbox<Mdl>::flow_bounds(FunctionInterface const& vf,
         }
     }
 
-    ARIADNE_ASSERT(possibly(subset(nb,b)));
+    ARIADNE_ASSERT(subset(nb,b));
   
     Vector<Interval> vfb;
     vfb=vf.evaluate(b);
@@ -315,12 +315,12 @@ DynamicalToolbox<Mdl>::flow_bounds(FunctionInterface const& vf,
         vfb=vf.evaluate(b);
         nb=r+ih*vfb;
         ARIADNE_LOG(9,std::setprecision(20)<<"   b="<<b<<" vf="<<vfb<<"\n  nb="<<nb<<"\n");
-        ARIADNE_ASSERT_MSG(possibly(subset(nb,b)),std::setprecision(20)<<"refinement "<<i<<": "<<nb<<" is not a subset of "<<b);
+        ARIADNE_ASSERT_MSG(subset(nb,b),std::setprecision(20)<<"refinement "<<i<<": "<<nb<<" is not a inside of "<<b);
     }
   
     // Check result of operation
     // We use "possibly" here since the bound may touch 
-    ARIADNE_ASSERT(possibly(subset(nb,b)));
+    ARIADNE_ASSERT(subset(nb,b));
   
     ARIADNE_LOG(7,"  h="<<h<<" b="<<nb<<"\n");
 

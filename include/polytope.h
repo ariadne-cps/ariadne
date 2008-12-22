@@ -94,10 +94,10 @@ class Polytope
  
     virtual Polytope* clone() const { return new Polytope(*this); }
     virtual uint dimension() const { if(this->_vertices.size()==0) { return 0; } return this->_vertices.front().dimension(); }
-    virtual tribool disjoint(const Vector<Interval>& bx) const;
-    virtual tribool overlaps(const Vector<Interval>& bx) const;
-    virtual tribool subset(const Vector<Interval>& bx) const;
-    virtual Vector<Interval> bounding_box() const;
+    virtual tribool disjoint(const Box& bx) const;
+    virtual tribool overlaps(const Box& bx) const;
+    virtual tribool inside(const Box& bx) const;
+    virtual Box bounding_box() const;
     virtual std::ostream& write(std::ostream& os) const { return os << *this; }
   
     //! \brief The convex hull of two polytopes.

@@ -92,12 +92,12 @@ class TestReachabilityAnalysis
           Function<Henon> henon(make_point("(1.5,-0.375)"));
           system.new_mode(location,ConstantFunction(Vector<Float>(2,0.0),2));
           system.new_forced_transition(DiscreteEvent(1),DiscreteState(1),DiscreteState(1),henon,ConstantFunction(Vector<Float>(1,1.0),2));
-          ImageSet initial_box(make_box("[0.99,1.01]x[-0.01,0.01]"));
+          ImageSet initial_box(Box("[0.99,1.01]x[-0.01,0.01]"));
         */
         /*
           Function<VanDerPol> vdp(make_point("(0.75)"));
           system.new_mode(location,vdp);
-          ImageSet initial_box(make_box("[0.99,1.01]x[-0.01,0.01]"));
+          ImageSet initial_box(Box("[0.99,1.01]x[-0.01,0.01]"));
         */
         Matrix<Float> A=Matrix<Float>("[-0.5,-1.0;1.0,-0.5]");
         Vector<Float> b=Vector<Float>("[0.0,0.0]");
@@ -112,7 +112,7 @@ class TestReachabilityAnalysis
         cout << "system=" << system << endl;
         cout << "initial_set=" << initial_set << endl;
 
-        //ARIADNE_ASSERT(subset(initial_set[loc],bounding_set[loc]));
+        //ARIADNE_ASSERT(inside(initial_set[loc],bounding_set[loc]));
     
     }
 

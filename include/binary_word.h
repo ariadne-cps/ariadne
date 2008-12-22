@@ -49,7 +49,7 @@
  * The main intended use of these classes in Ariadne is to represent 
  * sets as unions of rectangles on a grid. See the file grid_box.h
  * for the implementation of this representation. 
- * The basic idea is that a subset of Euclidean space contained in some 
+ * The basic idea is that a inside of Euclidean space contained in some 
  * cuboid R can be represented by a union of sets obtained by repeatedly
  * subdividing R in two along the coordinate axes. 
  * The nth subdivision occurs along a coordinate specified by the Grid 

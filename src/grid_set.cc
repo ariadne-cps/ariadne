@@ -760,7 +760,7 @@ bool GridCell::operator<(const GridCell& other) const {
         ( this->_theHeight == other._theHeight && this->_theWord < other._theWord );
 }      
 
-Box GridCell::primary_cell( const uint theHeight, const dimension_type dimensions ) {
+Vector<Interval> GridCell::primary_cell_lattice_box( const uint theHeight, const dimension_type dimensions ) {
     int leftBottomCorner = 0, rightTopCorner = 1;
     //The zero level coordinates are known, so we need to iterate only for higher level primary cells
     for(uint i = 1; i <= theHeight; i++){
@@ -768,18 +768,18 @@ Box GridCell::primary_cell( const uint theHeight, const dimension_type dimension
     }
     // 1.2 Constructing and return the box defining the primary cell (relative to the grid).
         
-    return Box( Vector< Interval >( dimensions, Interval( leftBottomCorner, rightTopCorner ) ) );
+    return Vector< Interval >( dimensions, Interval( leftBottomCorner, rightTopCorner ) );
 }
 
-uint GridCell::smallest_primary_cell_height( const Box& theBox ) {
-    const dimension_type dimensions = theBox.dimension();
+uint GridCell::smallest_enclosing_primary_cell_height( const Vector<Interval>& theLatticeBox ) {
+    const dimension_type dimensions = theLatticeBox.size();
     int leftBottomCorner = 0, rightTopCorner = 1;
     uint height = 0;
     //The zero level coordinates are known, so we need to iterate only for higher level primary cells
     do{
         //Check if the given box is a subset of a primary cell
-        Box primaryCellBox( Vector< Interval >( dimensions, Interval( leftBottomCorner, rightTopCorner ) ) );
-        if( definitely( subset(theBox, primaryCellBox ) ) ) {
+        Vector< Interval > primaryCellBox( dimensions, Interval( leftBottomCorner, rightTopCorner ) );
+        if(  inside(theLatticeBox, primaryCellBox ) ) {
             //If yes then we are done
             break;
         }
@@ -790,20 +790,20 @@ uint GridCell::smallest_primary_cell_height( const Box& theBox ) {
     return height;
 }
 
-/*! \brief Apply grid data \a theGrid to \a theGridBox in order to compute the box dimensions in the original space*/
-Box GridCell::grid_box_to_space(const Box & theGridBox, const Grid& theGrid ){
+/*! \brief Apply grid data \a theGrid to \a theLatticeBox in order to compute the box dimensions in the original space*/
+Box GridCell::lattice_box_to_space(const Vector<Interval> & theLatticeBox, const Grid& theGrid ){
     const uint dimensions = theGrid.dimension();
     Box theTmpBox( dimensions );
         
-    Point theGridOrigin( theGrid.origin() );
+    Vector<Float> theGridOrigin( theGrid.origin() );
     Vector<Float> theGridLengths( theGrid.lengths() );
         
     for(uint current_dimension = 0; current_dimension < dimensions; current_dimension ++){
         const Float theDimLength = theGridLengths[current_dimension];
         const Float theDimOrigin = theGridOrigin[current_dimension];
         //Recompute the new dimension coordinates, detaching them from the grid 
-        theTmpBox[current_dimension].set_lower( add_approx( theDimOrigin, mul_approx( theDimLength, theGridBox[current_dimension].lower() ) ) );
-        theTmpBox[current_dimension].set_upper( add_approx( theDimOrigin, mul_approx( theDimLength, theGridBox[current_dimension].upper() ) ) );
+        theTmpBox[current_dimension].set_lower( add_approx( theDimOrigin, mul_approx( theDimLength, theLatticeBox[current_dimension].lower() ) ) );
+        theTmpBox[current_dimension].set_upper( add_approx( theDimOrigin, mul_approx( theDimLength, theLatticeBox[current_dimension].upper() ) ) );
     }
         
     return theTmpBox;
@@ -816,7 +816,7 @@ Box GridCell::grid_box_to_space(const Box & theGridBox, const Grid& theGrid ){
 Box GridCell::compute_box(const Grid& theGrid, const uint theHeight, const BinaryWord& theWord) {
     //1. Obtain the primary-cell box, related to some grid
     const uint dimensions = theGrid.dimension();
-    Box  theTmpBox( primary_cell( theHeight , dimensions ) );
+    Vector<Interval>  theTmpLatticeBox( primary_cell_lattice_box( theHeight , dimensions ) );
 
     //2. Compute the cell on some grid, corresponding to the binary path from the primary cell.
     uint current_dimension = 0;
@@ -825,18 +825,18 @@ Box GridCell::compute_box(const Grid& theGrid, const uint theHeight, const Binar
         current_dimension = i % dimensions;
         //Compute the middle point of the box's projection onto
         //the dimension \a current_dimension (relative to the grid)
-        Float middlePointInCurrDim = theTmpBox[current_dimension].midpoint();
+        Float middlePointInCurrDim = theTmpLatticeBox[current_dimension].midpoint();
         if( theWord[i] ){
             //Choose the right half
-            theTmpBox[current_dimension].set_lower( middlePointInCurrDim );
+            theTmpLatticeBox[current_dimension].set_lower( middlePointInCurrDim );
         } else {
             //Choose the left half
-            theTmpBox[current_dimension].set_upper( middlePointInCurrDim );
+            theTmpLatticeBox[current_dimension].set_upper( middlePointInCurrDim );
         }
     }
         
     // 3. Use Grid data to compute the box coordinates in the original space.
-    return grid_box_to_space( theTmpBox, theGrid );
+    return lattice_box_to_space( theTmpLatticeBox, theGrid );
 }
     
 BinaryWord GridCell::primary_cell_path( const uint dimensions, const uint topPCellHeight, const uint bottomPCellHeight) {
@@ -1271,7 +1271,7 @@ void GridTreeSet::adjoin_outer_approximation( const Grid & theGrid, BinaryTreeNo
     if( bool( theSet.disjoint( theCurrentCell.box() ) ) ) {
         //DO NOTHING: We are in the node whoes representation in the original space is
         //disjoint from pSet and thus there will be nothing added to this cell.
-    } else if( pOpenSet && bool( pOpenSet->superset( theCurrentCell.box() ) ) ) {
+    } else if( pOpenSet && bool( pOpenSet->covers( theCurrentCell.box() ) ) ) {
         pBinaryTreeNode->make_leaf(true);
     } else {
         //This node's cell is not disjoint from theSet, thus it is possible to adjoin elements
@@ -1352,7 +1352,7 @@ void GridTreeSet::adjoin_lower_approximation( const Grid & theGrid, BinaryTreeNo
     //Compute the cell corresponding to the current node
     GridCell theCurrentCell( theGrid, primary_cell_height, *pPath );
     
-    if( bool( theSet.superset( theCurrentCell.box() ) ) ) {
+    if( bool( theSet.covers( theCurrentCell.box() ) ) ) {
         pBinaryTreeNode->make_leaf(true);
         pBinaryTreeNode->mince( max_mince_depth - pPath->size() );
     } else if ( bool( theSet.overlaps( theCurrentCell.box() ) ) ) {
@@ -1399,7 +1399,7 @@ void GridTreeSet::adjoin_outer_approximation( const CompactSetInterface& theSet,
         
     //1. Compute the smallest GridCell (corresponding to the primary cell)
     //   that encloses the theSet (after it is mapped onto theGrid).
-    const GridCell theOverApproxCell = over_approximation( theSet.bounding_box(), theGrid );
+    const GridCell theOverApproxCell = GridCell::smallest_enclosing_primary_cell( theSet.bounding_box(), theGrid );
     //Compute the height of the primary cell for the outer approximation stepping up by the number of dimensions
     const uint outer_approx_primary_cell_height = theOverApproxCell.height() + theGrid.dimension();
 
@@ -1469,7 +1469,7 @@ void GridTreeSet::adjoin_lower_approximation( const OvertSetInterface& theSet, c
     ARIADNE_ASSERT( theBoundingBox.dimension() == this->cell().dimension() );
     
     //Compute the smallest the primary cell that encloses the theSet (after it is mapped onto theGrid).
-    const GridCell theOverApproxCell = over_approximation( theBoundingBox, theGrid );
+    const GridCell theOverApproxCell = GridCell::smallest_enclosing_primary_cell( theBoundingBox, theGrid );
     
     //Adjoin the lower approximation with the bounding cell being the primary cell at the given height.
     adjoin_lower_approximation( theSet, theOverApproxCell.height(), depth );
@@ -1482,7 +1482,7 @@ void GridTreeSet::adjoin_inner_approximation( const Grid & theGrid, BinaryTreeNo
 
     if( ! pBinaryTreeNode->is_enabled() ) {
         //If this it is not an enabled leaf node then we can add something to it.
-        if( definitely( theSet.superset( theCurrentCell.box() ) ) ) {
+        if( definitely( theSet.covers( theCurrentCell.box() ) ) ) {
             //If this node's box is a subset of theSet then it belongs to the inner approximation
             //Thus we need to make it an enabled leaf and then do the mincing to the maximum depth
             pBinaryTreeNode->make_leaf( true );
@@ -1551,7 +1551,7 @@ void GridTreeSet::adjoin_inner_approximation( const OpenSetInterface& theSet, co
     ARIADNE_ASSERT( theBoundingBox.dimension() == this->cell().dimension() );
     
     //Compute the smallest the primary cell that encloses the theSet (after it is mapped onto theGrid).
-    const GridCell theOverApproxCell = over_approximation( theBoundingBox, theGrid );
+    const GridCell theOverApproxCell = GridCell::smallest_enclosing_primary_cell( theBoundingBox, theGrid );
     
     //Compute the height of the smallest primary cell that encloses the box
     //Note that, since we will need to adjoin inner approximation bounded by
@@ -1807,14 +1807,14 @@ void GridTreeSet::restrict_to_height( const uint theHeight ) {
 
 /*************************************FRIENDS OF GridCell*****************************************/
     
-GridCell over_approximation( const Box& theBox, const Grid& theGrid) {
-    Box theDyadicBox( theBox.size() );
+GridCell GridCell::smallest_enclosing_primary_cell( const Box& theBox, const Grid& theGrid) {
+    Vector<Interval> theLatticeBox( theBox.size() );
     //Convert the box to theGrid coordinates
     for( uint i = 0; i != theBox.size(); ++i ) {
-        theDyadicBox[i] = ( theBox[i] - theGrid.origin()[i] ) / theGrid.lengths()[i];
+        theLatticeBox[i] = ( theBox[i] - theGrid.origin()[i] ) / theGrid.lengths()[i];
     }
     //Compute the smallest primary cell, enclosing this grid
-    uint height = GridCell::smallest_primary_cell_height( theDyadicBox );
+    uint height = GridCell::smallest_enclosing_primary_cell_height( theLatticeBox );
     //Create the GridCell, corresponding to this cell
     return GridCell( theGrid, height, BinaryWord() );
 }
@@ -2241,6 +2241,10 @@ bool overlap( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 ) {
 
 GridTreeSet outer_approximation(const Box& theBox, const Grid& theGrid, const uint depth) {
     return outer_approximation(ImageSet(theBox),theGrid,depth);
+}
+
+GridTreeSet outer_approximation(const Box& theBox, const uint depth) {
+    return outer_approximation(theBox, Grid(theBox.dimension()), depth);
 }
 
 GridTreeSet join( const GridTreeSubset& theSet1, const GridTreeSubset& theSet2 ) {

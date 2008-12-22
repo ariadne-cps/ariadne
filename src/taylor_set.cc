@@ -70,30 +70,30 @@ TaylorSet::domain() const
 
 
 tribool 
-TaylorSet::disjoint(const Vector<Interval>& bx) const
+TaylorSet::disjoint(const Box& bx) const
 {
-    return Ariadne::disjoint(this->bounding_box(),bx) || indeterminate;
+    return this->bounding_box().disjoint(bx) || indeterminate;
 }
 
 
 tribool 
-TaylorSet::overlaps(const Vector<Interval>& bx) const
+TaylorSet::overlaps(const Box& bx) const
 {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
 
 tribool
-TaylorSet::subset(const Vector<Interval>& bx) const
+TaylorSet::inside(const Box& bx) const
 {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
 
-Vector<Interval>
+Box
 TaylorSet::bounding_box() const
 {
-    Vector<Interval> r(this->dimension());
+    Box r(this->dimension());
     for(uint i=0; i!=this->dimension(); ++i) {
         r[i]=(*this)[i].range();
     }

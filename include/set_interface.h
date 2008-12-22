@@ -34,8 +34,7 @@
 
 namespace Ariadne {
 
-class Interval;
-template<class X> class Vector;
+class Box;
 
 class BoundedSetInterface;
 class OpenSetInterface;
@@ -64,11 +63,11 @@ class BoundedSetInterface
     : public virtual SetInterfaceBase {
   public:
     virtual BoundedSetInterface* clone() const = 0;
-    //! \brief Tests if the set is a subset of \a bx.
-    virtual tribool subset(const Vector<Interval>& bx) const = 0;
+    //! \brief Tests if the set is a inside of \a bx.
+    virtual tribool inside(const Box& bx) const = 0;
     //! \brief Returns a bounding box for the set.
     //! If the set is empty, then the first component of the result should be empty. 
-    virtual Vector<Interval> bounding_box() const = 0;
+    virtual Box bounding_box() const = 0;
 };
 
 
@@ -79,7 +78,7 @@ class OvertSetInterface
   public:
     virtual OvertSetInterface* clone() const = 0;
     //! \brief Tests if the set overlaps \a bx.
-    virtual tribool overlaps(const Vector<Interval>& bx) const = 0;
+    virtual tribool overlaps(const Box& bx) const = 0;
     //! \brief Tests if \a ovs overlaps \a ops, to a tolerance of \a eps.
     friend tribool overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const Float& eps);
 };
@@ -90,12 +89,12 @@ class OpenSetInterface
 {
   public:
     virtual OpenSetInterface* clone() const = 0;
-    //! \brief Tests if the set is a superset of \a bx.
-    virtual tribool superset(const Vector<Interval>& bx) const = 0;
+    //! \brief Tests if the set is a covers of \a bx.
+    virtual tribool covers(const Box& bx) const = 0;
     //! \brief Tests if \a ovs overlaps \a ops, to a tolerance of \a eps.
     friend tribool overlap(const OvertSetInterface& ovs, const OpenSetInterface& ops, const Float& eps);
-    //! \brief Tests if \a ls is a subset of \a rs, to a tolerance of \a eps.
-    friend tribool subset(const CompactSetInterface& ls, const OpenSetInterface& rs, const Float& eps);
+    //! \brief Tests if \a ls is a inside of \a rs, to a tolerance of \a eps.
+    friend tribool inside(const CompactSetInterface& ls, const OpenSetInterface& rs, const Float& eps);
 };
 
 //! \brief Interface for closed sets. 
@@ -105,7 +104,7 @@ class ClosedSetInterface
   public:
     virtual ClosedSetInterface* clone() const = 0;
     //! \brief Tests if the set is disjoint from \a bx.
-    virtual tribool disjoint(const Vector<Interval>& bx) const = 0;
+    virtual tribool disjoint(const Box& bx) const = 0;
     //! \brief Tests if \a cps is disjoint from \a cls, to a tolerance of \a eps.
     friend tribool disjoint(const CompactSetInterface& cps, const ClosedSetInterface& cls, const Float& eps);
 };
@@ -118,8 +117,8 @@ class CompactSetInterface
   public:
     virtual CompactSetInterface* clone() const = 0;
     //virtual tribool empty() const = 0;
-    //! \brief Tests if \a ls is a subset of \a rs, to a tolerance of \a eps.
-    friend tribool subset(const CompactSetInterface& ls, const OpenSetInterface& rs, const Float& eps);
+    //! \brief Tests if \a ls is a inside of \a rs, to a tolerance of \a eps.
+    friend tribool inside(const CompactSetInterface& ls, const OpenSetInterface& rs, const Float& eps);
     //! \brief Tests if \a cps is disjoint from \a cls, to a tolerance of \a eps.
     friend tribool disjoint(const CompactSetInterface& cps, const ClosedSetInterface& cls, const Float& eps);
 
@@ -134,8 +133,8 @@ class RegularSetInterface
     //! \brief Tests if \a ls overlaps \a rs, to a tolerance of \a eps.
     friend tribool overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float& eps);
 
-    //! \brief Tests if \a ls is a subset of \a rs, to a tolerance of \a eps.
-    friend tribool subset(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float& eps);
+    //! \brief Tests if \a ls is a inside of \a rs, to a tolerance of \a eps.
+    friend tribool inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float& eps);
     //! \brief Tests if \a ls is disjoint from \a rs, to a tolerance of \a eps.
     friend tribool disjoint(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float& eps);
 };
@@ -153,8 +152,8 @@ class LocatedSetInterface
     //! \brief Tests if \a ls overlaps \a rs, to a tolerance of \a eps.
     friend tribool overlap(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float& eps);
 
-    //! \brief Tests if \a ls is a subset of \a rs, to a tolerance of \a eps.
-    friend tribool subset(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float& eps);
+    //! \brief Tests if \a ls is a inside of \a rs, to a tolerance of \a eps.
+    friend tribool inside(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float& eps);
     //! \brief Tests if \a ls is disjoint from \a rs, to a tolerance of \a eps.
     friend tribool disjoint(const LocatedSetInterface& ls, const RegularSetInterface& rs, const Float& eps);
 };

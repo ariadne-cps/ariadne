@@ -45,7 +45,11 @@ class Box
 
     //! Construct a singleton point in zero dimensions.
     Box() : Vector<Interval>() { }
-    Box(uint d, const Float& x0l, const Float& x0u, ...);
+    //! Construct from an integer giving the dimension and a list of floating-point values 
+    //! giving alternately lower and upper bounds.
+    explicit Box(uint d, const Float& x0l, const Float& x0u, ...);
+
+    // Templated constructor; useful for automatic conversion from vector expressions
     template<class T> Box(const T& t) : Vector<Interval>(t) { }
     template<class T1, class T2> Box(const T1& t1, const T2& t2) : Vector<Interval>(t1,t2) { }
 
@@ -58,6 +62,9 @@ class Box
     static Box upper_quadrant(uint n) {
         return Box(n,Interval(0,inf()));
     }
+
+    //! An explicit case to an interval vector. Useful to prevent ambiguous function overloads.
+    const Vector<Interval>& vector() const { return *this; }
 
     //! An approximation to the centre of the box.
     Vector<Float> centre() const {
@@ -73,12 +80,12 @@ class Box
         return up(dmax/2);
     }
 
-    //! Test if the box is empty.
+    //! \brief Test if the box is empty.
     bool empty() const { 
         return Ariadne::empty(*this);
     }
 
-    //! Test if the box is bounded.
+    //! \brief Test if the box is bounded.
     bool bounded() const {
         for(uint i=0; i!=this->Vector<Interval>::size(); ++i) {
             if(!Ariadne::bounded((*this)[i])) {
@@ -88,40 +95,75 @@ class Box
         return true;
     }
 
+    //! \brief Make a dynamically-allocated copy.
     virtual Box* clone() const {
         return new Box(*this);
     }
 
+    //! \brief Test if the box is a subset of another box.
+    bool subset(const Box& bx) const {
+        return Ariadne::subset(this->vector(),bx.vector());
+    }
+
+    //! \brief Test if the box is a superset of another box.
+    bool superset(const Box& bx) const {
+        return Ariadne::subset(bx.vector(),this->vector());
+    }
+
+    //! \brief Test if the box intersects another box. Returns true even
+    //! if the intersection occurs only on the boundary of the boxes.
+    //! Use Box::overlaps(const Box& bx) to test robust intersection
+    //! of the interiors.
+    bool intersects(const Box& bx) const {
+        return Ariadne::intersect(this->vector(),bx.vector());
+    }
+
+    //! \brief The dimension of the space the box lies in.
     virtual uint dimension() const {
         return this->size();
     }
 
-    virtual tribool disjoint(const Vector<Interval>& other) const { 
-        return Ariadne::disjoint(*this, other);
+    //! \brief Tests if the box is disjoint from another box.
+    //! Only returns true if the closures are disjoint.
+    virtual tribool disjoint(const Box& other) const { 
+        return Ariadne::disjoint(this->vector(), other.vector());
     }
 
-    virtual tribool overlaps(const Vector<Interval>& other) const { 
-        return Ariadne::overlap(*this, other);
+    //! \brief Tests if the box overlaps another box.
+    //! Only returns true if the interior of one box intersects the other.
+    virtual tribool overlaps(const Box& other) const { 
+        return Ariadne::overlap(this->vector(), other.vector());
     }
 
-    virtual tribool superset(const Vector<Interval>& other) const { 
-        return Ariadne::subset(other, *this);
+    //! \brief Tests if the box covers another box.
+    //! Only returns true if the interior of the box is a superset 
+    //! of the closure of the other.
+    virtual tribool covers(const Box& other) const { 
+        return Ariadne::inside(other.vector(), this->vector());
     }
 
-    virtual tribool subset(const Vector<Interval>& other) const { 
-        return Ariadne::subset(*this, other);
+    //! \brief Tests if the box covers another box.
+    //! Only returns true if the closure of the box is a subset 
+    //! of the interior of the other.
+    virtual tribool inside(const Box& other) const { 
+        return Ariadne::inside(this->vector(), other.vector());
     }
 
-    virtual Vector<Interval> bounding_box() const { 
-        return *this;
+    //! \brief Returns an enclosing bounding box for the set.
+    //! The result is guaranteed to contain the box in its interior.
+    virtual Box bounding_box() const { 
+        static const Float min(std::numeric_limits<double>::min());
+        static const Interval eps(-min,+min);
+        return Box((*this)+Vector<Interval>(this->dimension(),eps));
     }
 
+    //! \brief Write to an output stream.
     virtual std::ostream& write(std::ostream& os) const {
         return os << *static_cast<const Vector<Interval>*>(this);
     }
 };
 
-Box make_box(const std::string&);
+Box make_box(const std::string& str);
 
 } // namespace Ariadne
 

@@ -339,8 +339,13 @@ inline Float mag(Interval i) { return max(abs(i.l),abs(i.u)); }
 inline Float mig(Interval i) { return min(abs(i.l),abs(i.u)); }
 
 inline bool contains(Interval i, Float x) { return i.l<=x && x<=i.u; }
-inline bool subset(Float x, Interval i) { return i.l<=x && x<=i.u; }
-inline bool subset(Interval i1, Interval i2) { return i2.l<=i1.l && i1.u<=i2.u; }
+
+inline bool subset(Interval i1, Interval i2) { return i1.l>=i2.l && i1.u<=i2.u; }
+inline bool intersect(Interval i1, Interval i2) { return i1.l<=i2.u && i1.u>=i2.l; }
+inline bool disjoint(Interval i1, Interval i2) { return i1.l>i2.u || i1.u<i2.l; }
+inline bool overlap(Interval i1, Interval i2) { return i1.l<i2.u && i1.u>i2.l; }
+inline bool inside(Interval i1, Interval i2) { return i1.l>i2.l && i1.u<i2.u; }
+inline bool covers(Interval i1, Interval i2) { return i1.l<i2.l && i1.u>i2.u; }
 
 template<class A> void serialize(A& a, Interval& ivl, const uint version) {
     a & ivl.l & ivl.u; }

@@ -169,53 +169,6 @@ tuple< Matrix<Float>, Matrix<Float> > orthogonal_decomposition(const Matrix<Floa
 Matrix<Float> midpoint(const Matrix<Interval>&);
 
 
-/*
-template<class X> inline Vector<X> operator*(const Matrix<X>& A, const Vector<X>& v) {
-    return ublas::prod(A,v);
-}
- 
-template<class X> inline Matrix<X> operator*(const Matrix<X>& A, const Matrix<X>& B) {
-    return ublas::prod(A,B);
-}
- 
-
-template<class E1, class E2>
-inline
-typename ublas::matrix_vector_binary1_traits<typename E1::value_type, E1,
-                                             typename E2::value_type, E2>::result_type
-operator* (const ublas::matrix_expression<E1> &e1,
-           const ublas::vector_expression<E2> &e2) 
-{
-    typedef typename ublas::matrix_vector_binary1_traits<typename E1::value_type, E1,
-    typename E2::value_type, E2>::expression_type expression_type;
-    return expression_type (e1 (), e2 ());
-}
-
-
-template<class E1, class E2>
-inline
-typename ublas::matrix_matrix_binary_traits<typename E1::value_type, E1,
-                                            typename E2::value_type, E2>::result_type
-operator* (const ublas::matrix_expression<E1> &e1,
-           const ublas::matrix_expression<E2> &e2) 
-{
-    typedef typename ublas::matrix_matrix_binary_traits<typename E1::value_type, E1,
-        typename E2::value_type, E2>::expression_type expression_type;
-    return expression_type (e1 (), e2 ());
-}
-
-template<class E1, class T2>
-inline
-typename ublas::matrix_binary_scalar2_traits<E1, const T2, ublas::scalar_multiplies<typename E1::value_type, T2> >::result_type
-operator* (const ublas::matrix_expression<E1> &e1,
-           const T2 &e2) {
-    typedef typename ublas::matrix_binary_scalar2_traits<E1, const T2, 
-        ublas::scalar_multiplies<typename E1::value_type, T2> >::expression_type expression_type;
-    return expression_type (e1 (), e2);
-}
-
-*/
-
 
 template<class X> Matrix<X>::Matrix(size_t r, size_t c, const double& x0, ...) 
     : ublas::matrix<X>(r,c) 

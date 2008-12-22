@@ -31,6 +31,11 @@
 namespace Ariadne {
 
 
+Point::Point(const std::string& str)
+{
+    *this=make_point(str);
+}
+
 Point make_point(const std::string& str)
 {
     std::vector<Float> vec;

@@ -41,6 +41,8 @@ class Point
     typedef Float real_type;
     //! Default constructor contructs the singleton point in zero dimensions.
     Point() : Vector<Float>() { }
+    //! Construct from a string literal of the form "(x1,x2,...,xd)".
+    explicit Point(const std::string& str);
     template<class T> Point(const T& t) : Vector<Float>(t) { }
     template<class T1, class T2> Point(const T1& t1, const T2& t2) : Vector<Float>(t1,t2) { }
     //! The origin in \a n dimensions.

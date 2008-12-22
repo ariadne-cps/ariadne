@@ -47,6 +47,12 @@ Box::Box(uint d, const Float& x0l, const Float& x0u, ...)
     va_end(args);
 }
 
+Box::Box(const std::string& str) 
+{
+    *this=make_box(str);
+}
+
+
 Box make_box(const std::string& str)
 {
     // Representation as a literal 

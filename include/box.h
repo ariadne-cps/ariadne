@@ -53,6 +53,9 @@ class Box
     template<class T> Box(const T& t) : Vector<Interval>(t) { }
     template<class T1, class T2> Box(const T1& t1, const T2& t2) : Vector<Interval>(t1,t2) { }
 
+    //! Construct from a string literal of the form "[a1,b1]x[a2,b2]x...x[ad,bd]".
+    explicit Box(const std::string& str);
+
     //! The unit box \f$[-1,1]^n\f$ in \a n dimensions.
     static Box unit_box(uint n) {
         return Box(n,Interval(-1,1));

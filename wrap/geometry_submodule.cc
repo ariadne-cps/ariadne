@@ -88,13 +88,6 @@ read(TaylorSet& ts, const boost::python::object& obj)
     }
 }
     
-template<class T> T* make(const boost::python::object& obj) 
-{
-    T* t=new T;
-    read(*t,obj);
-    return t;
-}
-
 template<class SET> boost::python::tuple split(const SET& s, uint i) {
     std::pair<SET,SET> res=s.split(i);
     return boost::python::make_tuple(res.first,res.second);

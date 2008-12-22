@@ -117,7 +117,7 @@ class TaylorVariable
     TaylorVariable() : _expansion(), _error(0) { }
     TaylorVariable(uint as) : _expansion(as), _error(0) { }
     TaylorVariable(const SparseDifferential<Float>& d, const Interval& e) : _expansion(d), _error(e) { }
-    template<class XX, class XXX> TaylorVariable(uint as, uint deg, const XX& eps, const XXX* ptr) : _expansion(as,deg,ptr), _error(eps) { }
+    template<class XX, class XXX> TaylorVariable(uint as, uint deg, const XXX* ptr, const XX& eps) : _expansion(as,deg,ptr), _error(eps) { }
 
     TaylorVariable& operator=(const Float& c) { this->_expansion=c; this->_error=0; return *this; }
     TaylorVariable& operator=(const Interval& c) { this->_expansion=c.midpoint(); this->_error=(c-c.midpoint()); return *this; }

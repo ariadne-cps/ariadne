@@ -57,18 +57,18 @@ template<class T> std::string __repr__(const T& t) {
 }
 
 
-void read_scalar(bool&, const boost::python::object&);
-void read_scalar(int&, const boost::python::object&);
-void read_scalar(long int&, const boost::python::object&);
-void read_scalar(unsigned int&, const boost::python::object&);
-void read_scalar(unsigned long int&, const boost::python::object&);
-void read_scalar(double&, const boost::python::object&);
-void read_scalar(Float&, const boost::python::object&);
-void read_scalar(Interval&, const boost::python::object&);
+void read(bool&, const boost::python::object&);
+void read(int&, const boost::python::object&);
+void read(long int&, const boost::python::object&);
+void read(unsigned int&, const boost::python::object&);
+void read(unsigned long int&, const boost::python::object&);
+void read(double&, const boost::python::object&);
+void read(Float&, const boost::python::object&);
+void read(Interval&, const boost::python::object&);
 
 #ifdef HAVE_GMPXX_H
-//void read_scalar(Integer&, const boost::python::object&);
-void read_scalar(Rational&, const boost::python::object&);
+//void read(Integer&, const boost::python::object&);
+void read(Rational&, const boost::python::object&);
 #endif
 
 
@@ -82,7 +82,7 @@ read_list_array(array<X>& ary, const boost::python::object& obj)
     int n=boost::python::len(elements);
     ary.resize(n);
     for(int i=0; i!=n; ++i) {
-        read_scalar(ary[i], elements[i]);
+        read(ary[i], elements[i]);
     }
 }
 
@@ -96,9 +96,34 @@ read_tuple_array(array<X>& ary, const boost::python::object& obj)
     int n=boost::python::len(elements);
     ary.resize(n);
     for(int i=0; i!=n; ++i) {
-        read_scalar(ary[i], elements[i]);
+        read(ary[i], elements[i]);
     }
 }
+
+
+template<class T>
+T* 
+make(const boost::python::object& obj) 
+{
+    T* t=new T;
+    read(*t,obj);
+    return t;
+}
+
+template<class T>
+T* 
+make2(const boost::python::object& obj1,const boost::python::object& obj2) 
+{
+    T* t=new T;
+    read(*t,obj1,obj2);
+    return t;
+}
+
+template<class T> bool check(const boost::python::extract<T>& e) { e(); return e.check(); }
+template<> bool check(const boost::python::extract<boost::python::list>& e);
+template<> bool check(const boost::python::extract<boost::python::dict>& e);
+template<> bool check(const boost::python::extract<boost::python::tuple>& e);
+
 
 }
 

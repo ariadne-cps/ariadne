@@ -65,7 +65,7 @@ void read(Matrix<X>& A, const boost::python::object& obj)
   for(int i=0; i!=m; ++i) {
     row=boost::python::extract<boost::python::list>(elements[i]);
     if(boost::python::len(row)!=n) { throw std::runtime_error("Matrix with rows of different sizes"); }
-    for(int j=0; j!=n; ++j) { X x; read_scalar(x,row[j]); A.set(i,j,x); }
+    for(int j=0; j!=n; ++j) { X x; read(x,row[j]); A.set(i,j,x); }
   }
 }
 

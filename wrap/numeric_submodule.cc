@@ -33,14 +33,6 @@ using namespace boost::python;
 
 using namespace Ariadne;
 
-void read(Float& x, const boost::python::object& obj) {
-    read_scalar(x,obj);
-}
-
-void read(Interval& ivl, const boost::python::object& obj) {
-    read_scalar(ivl,obj);
-}
-
 
 std::string __str__(const tribool& tb) {
     std::stringstream ss;

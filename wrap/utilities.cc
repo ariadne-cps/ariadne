@@ -29,39 +29,37 @@
 
 namespace Ariadne {
 
-void read_interval(Interval& ivl, const boost::python::list& pair);
-void read_interval(Interval& ivl, const boost::python::tuple& pair);
-
-template<class X> void read_array(array<X>& ary, const boost::python::object& obj);
+void read(Interval& ivl, const boost::python::list& pair);
+void read(Interval& ivl, const boost::python::tuple& pair);
 
 
 void
-read_scalar(bool& n, const boost::python::object& obj)
+read(bool& n, const boost::python::object& obj)
 {
     n=boost::python::extract<bool>(obj);
 }
 
 void
-read_scalar(int& n, const boost::python::object& obj)
+read(int& n, const boost::python::object& obj)
 {
     n=boost::python::extract<int>(obj);
 }
 
 void
-read_scalar(long int& n, const boost::python::object& obj)
+read(long int& n, const boost::python::object& obj)
 {
     n=boost::python::extract<long int>(obj);
 }
 
 // Read a scalar variable of type X from a Python object
 void
-read_scalar(unsigned int& n, const boost::python::object& obj)
+read(unsigned int& n, const boost::python::object& obj)
 {
     n=boost::python::extract<unsigned int>(obj);
 }
 
 void
-read_scalar(unsigned long int& n, const boost::python::object& obj)
+read(unsigned long int& n, const boost::python::object& obj)
 {
     n=boost::python::extract<unsigned long int>(obj);
 }
@@ -75,7 +73,7 @@ typedef mpz_class Integer;
 
 
 void
-read_scalar(Integer& z, const boost::python::object& obj)
+read(Integer& z, const boost::python::object& obj)
 {
     boost::python::extract<std::string> sz(obj);
     boost::python::extract<int> nz(obj);
@@ -92,7 +90,7 @@ read_scalar(Integer& z, const boost::python::object& obj)
 */
 
 void
-read_scalar(Rational& q, const boost::python::object& obj)
+read(Rational& q, const boost::python::object& obj)
 {
     boost::python::extract<std::string> sq(obj);
     boost::python::extract<int> nq(obj);
@@ -116,7 +114,7 @@ read_scalar(Rational& q, const boost::python::object& obj)
 
 
 void
-read_scalar(Float& x, const boost::python::object& obj)
+read(Float& x, const boost::python::object& obj)
 {
     boost::python::extract<int> nx(obj);
     boost::python::extract<double> dx(obj);
@@ -132,7 +130,7 @@ read_scalar(Float& x, const boost::python::object& obj)
 
 
 void
-read_scalar(Interval& x, const boost::python::object& obj)
+read(Interval& x, const boost::python::object& obj)
 {
     // The calls lx.check() and tx.check() produce compiler warnings 
     //   "dereferencing type-punned pointer will break strict-aliasing rules"
@@ -146,9 +144,9 @@ read_scalar(Interval& x, const boost::python::object& obj)
     boost::python::extract<Interval> ix(obj);
 
     if(lx.check()) {
-        read_interval(x,lx());
+        read(x,lx());
     } else if(tx.check()) {
-        read_interval(x,tx());
+        read(x,tx());
     } else if(nx.check()) {
         x=static_cast<Interval>(nx());
     } else if(dx.check()) {
@@ -164,25 +162,28 @@ read_scalar(Interval& x, const boost::python::object& obj)
 
 inline
 void
-read_interval(Interval& ivl, const boost::python::list& pair)
+read(Interval& ivl, const boost::python::list& pair)
 {
     if(boost::python::len(pair)!=2) {
         throw std::runtime_error("Interval must be list of pairs representing intervals");
     }
     Float& l=ivl.l; Float& u=ivl.u;
-    read_scalar(l,pair[0]); read_scalar(u,pair[1]);
+    read(l,pair[0]); read(u,pair[1]);
 }
 
 inline
 void
-read_interval(Interval& ivl, const boost::python::tuple& pair)
+read(Interval& ivl, const boost::python::tuple& pair)
 {
     if(boost::python::len(pair)!=2) {
         throw std::runtime_error("Interval must be list of pairs representing intervals");
     }
     Float& l=ivl.l; Float& u=ivl.u;
-    read_scalar(l,pair[0]); read_scalar(u,pair[1]);
+    read(l,pair[0]); read(u,pair[1]);
 }
 
+template<> bool check(const boost::python::extract<boost::python::list>& e) { return e.check(); }
+template<> bool check(const boost::python::extract<boost::python::dict>& e) { return e.check(); }
+template<> bool check(const boost::python::extract<boost::python::tuple>& e) { return e.check(); }
 
 } // namespace Ariadne

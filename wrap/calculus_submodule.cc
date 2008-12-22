@@ -44,58 +44,87 @@ void read(MultiIndex& j, const boost::python::object& obj) {
 }
 
 
-void read(TaylorVariable& tv, const boost::python::object& obj) {
-    uint as;
-    uint d;
-    Interval e;
-    MultiIndex a(0);
-    array<Float> x;
-    boost::python::tuple tup=extract<boost::python::tuple>(obj);
-    assert(len(tup)==2 || len(tup)==4);
-    if(len(tup)==2) {
-        read_scalar(e,tup[0]);
-        boost::python::dict exp=extract<boost::python::dict>(tup[0]);
-        //std::cerr<<exp.items()<<std::endl;
-    } else if(len(tup)==4) {
-        as=extract<uint>(tup[0]);
-        d=extract<uint>(tup[1]);
-        read_scalar(e,tup[2]);
-        read_list_array(x,tup[3]);
-        tv=TaylorVariable(as,d,e,x.begin());
-    }
-}
-   
-
-TaylorVariable*
-make_taylor_variable_from_dict(const boost::python::object& eobj, const boost::python::object& pobj) 
-{
-    Interval e;
-    SparseDifferential<Float> sd;
+void read(SparseDifferential<Float>& sd, const boost::python::object& obj) {
     Float c;
     MultiIndex j(0);
-    read_scalar(e,eobj);
-    boost::python::dict dct=extract<boost::python::dict>(pobj);
+    boost::python::dict dct=extract<boost::python::dict>(obj);
     boost::python::list lst=dct.items();
     for(uint i=0; i!=len(lst); ++i) {
         boost::python::tuple tup=extract<boost::python::tuple>(lst[i]);
         read(j,tup[0]);
-        read_scalar(c,tup[1]);
+        read(c,tup[1]);
         if(i==0) { 
             sd=SparseDifferential<Float>(j.size());
         }
         sd[j]=c;
     }
-    return new TaylorVariable(sd,e);
 }
 
-TaylorVariable*
-make_taylor_variable(const uint& as, const uint& d, const Interval& e, const boost::python::object& obj) 
+
+
+void read(TaylorVariable& tv, const boost::python::object& obj1, const boost::python::object& obj2) {
+    SparseDifferential<Float> sd;
+    Interval e;
+    read(sd,obj1);
+    read(e,obj2); 
+    if(boost::python::extract<Float>(obj2).check() && e.u>=0) { e.l=-e.u; } 
+    else if(e.l!=-e.u) { std::cerr<<"WARNING: TaylorVariable error is not a symmetric interval.\n"; }
+    tv=TaylorVariable(sd,e);
+}
+   
+
+void read(TaylorVariable& tv, const boost::python::object& obj1, const boost::python::object& obj2,
+          const boost::python::object& obj3, const boost::python::object& obj4) 
 {
-    array<Float> data;
-    read_list_array(data,obj);
-    //assert(data.size()==compute_polynomial_data_size(1u,as,d));
-    const Float* ptr=data.begin();
-    return new TaylorVariable(as,d,e,ptr);
+    uint as;
+    uint deg;
+    array<Float> dat;
+    Interval err;
+    read(as,obj1);
+    read(deg,obj2);
+    read_list_array(dat,obj3);
+    read(err,obj4);
+    const Float* ptr=dat.begin();
+    if(boost::python::extract<Float>(obj4).check() && err.u>=0) { err.l=-err.u; } 
+    else if(err.l!=-err.u) { std::cerr<<"WARNING: TaylorVariable error is not a symmetric interval.\n"; }
+    tv=TaylorVariable(as,deg,ptr,err);
+}
+
+void read(TaylorVariable& tv, const boost::python::object& obj);
+
+void read(TaylorVariable& tv, const boost::python::tuple& tup) {
+    if(len(tup)==1) {
+        read(tv,tup[0]);
+    } else if(len(tup)==2) {
+        read(tv,tup[0],tup[1]);
+    } else if(len(tup)==4) {
+        read(tv,tup[0],tup[1],tup[2],tup[3]);
+    }
+}
+
+
+void read(TaylorVariable& tv, const boost::python::object& obj) {
+    if(check(extract<boost::python::tuple>(obj))) {
+         read(tv,extract<boost::python::tuple>(obj)); 
+    } else {
+        SparseDifferential<Float> sd;
+        Interval e=0;
+        read(sd,obj);
+        tv=TaylorVariable(sd,e);
+    } 
+}
+   
+TaylorVariable*
+make_taylor_variable(const uint& as, const uint& deg, const boost::python::object& aobj, const boost::python::object& eobj) 
+{
+    array<Float> dat;
+    Interval err;
+    read_list_array(dat,aobj);
+    const Float* ptr=dat.begin();
+    read(err,eobj);
+    if(boost::python::extract<Float>(eobj).check() && err.u>=0) { err.l=-err.u; } 
+    else if(err.l!=-err.u) { std::cerr<<"WARNING: TaylorVariable error is not a symmetric interval.\n"; }
+    return new TaylorVariable(as,deg,ptr,err);
 }
 
 boost::python::list
@@ -149,8 +178,9 @@ void export_taylor_variable()
 
 
     class_<T> taylor_variable_class("TaylorVariable");
+    taylor_variable_class.def("__init__", make_constructor(&make<TaylorVariable>) );
+    taylor_variable_class.def("__init__", make_constructor(&make2<TaylorVariable>) );
     taylor_variable_class.def("__init__", make_constructor(&make_taylor_variable) );
-    taylor_variable_class.def("__init__", make_constructor(&make_taylor_variable_from_dict) );
     taylor_variable_class.def( init< uint >());
     taylor_variable_class.def("error", (const I&(T::*)()const) &T::error, return_value_policy<copy_const_reference>());
     taylor_variable_class.def("clean", &TaylorVariable::clean);

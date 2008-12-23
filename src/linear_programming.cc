@@ -81,8 +81,8 @@ array<size_t> extend_p(const array<size_t>& p, const size_t n)
         q[j]=n;
     }
     for(size_t k=0; k!=m; ++k) {
-        assert(p[k]<n);
-        assert(q[p[k]]==n);
+        ARIADNE_ASSERT(p[k]<n);
+        ARIADNE_ASSERT(q[p[k]]==n);
         q[p[k]]=k;
     }
     size_t k=m;
@@ -94,7 +94,7 @@ array<size_t> extend_p(const array<size_t>& p, const size_t n)
         r[q[j]]=j;
     }
     for(size_t i=0; i!=m; ++i) { 
-        assert(p[i]==r[i]);
+        ARIADNE_ASSERT(p[i]==r[i]);
     }
     return r;
 }
@@ -204,7 +204,7 @@ void consistency_check(const Matrix<X>& A, const array<size_t>& p, const Matrix<
     Matrix<X> Z=prod(B,A_B);
     ARIADNE_LOG(9,"        p_B="<<p_B<<" B="<<B<<" A_B="<<A_B<<" B*A_B-I="<<Z<<"\n");
     for(size_t i=0; i!=m; ++i) { Z[i][i]-=1; }
-    assert(norm(Z)<MAXIMUM_ERROR);
+    ARIADNE_ASSERT(norm(Z)<MAXIMUM_ERROR);
 }
 
 
@@ -226,11 +226,11 @@ void consistency_check(const Matrix<X>& A, const Vector<X>& b, const array<size_
     Matrix<X> Z=prod(B,A_B);
     ARIADNE_LOG(9,"        B="<<B<<" A_B="<<A_B<<" B*A_B-I="<<Z<<"\n");
     for(size_t i=0; i!=m; ++i) { Z[i][i]-=1; }
-    assert(norm(Z)<MAXIMUM_ERROR);
+    ARIADNE_ASSERT(norm(Z)<MAXIMUM_ERROR);
 
     Vector<X> z=prod(A,b);
     for(size_t j=0; j!=n; ++j) { z[j]-=x[j]; }
-    assert(norm(z)<MAXIMUM_ERROR);
+    ARIADNE_ASSERT(norm(z)<MAXIMUM_ERROR);
 }
 
 
@@ -259,14 +259,14 @@ void consistency_check(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& 
 
     for(size_t k=m; k!=n; ++k) {
         size_t j=p[k];
-        assert(vt[j]==LOWER || vt[j]==UPPER);
+        ARIADNE_ASSERT(vt[j]==LOWER || vt[j]==UPPER);
         X xj = (vt[j]==LOWER ? l[j] : u[j]);
         ARIADNE_ASSERT(x[j]==xj);
     }
     Vector<X> z=prod(A,x);
     ARIADNE_LOG(9,"          A="<<A<<" x="<<x<<" b="<<b<<" Ax="<<z<<"\n");
     z-=b;
-    assert(norm(z)<1e-5);
+    ARIADNE_ASSERT(norm(z)<1e-5);
 }
 
 
@@ -404,7 +404,7 @@ compute_x(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vect
     ARIADNE_LOG(9," x="<<x<<"\n");
 
     Vector<XX> Axmb=prod(A,x)-b;
-    assert(norm(Axmb)<0.00001);
+    ARIADNE_ASSERT(norm(Axmb)<0.00001);
     return x;
 }
 
@@ -449,7 +449,7 @@ compute_wx(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& l, const Vec
     ARIADNE_LOG(9," x="<<x<<"\n");
 
     Vector<X> Axmb=prod(A,x)-b;
-    assert(norm(Axmb)<0.00001);
+    ARIADNE_ASSERT(norm(Axmb)<0.00001);
     return make_pair(w,x);
 }
 
@@ -611,7 +611,7 @@ template<class X>
 void
 update_x(const Vector<X>& l, const Vector<X>& u, const array<size_t>& p, Vector<X>& x, const size_t s, const Vector<X>& d, const size_t r, const X& t)
 {
-    assert(t>=0);
+    ARIADNE_ASSERT(t>=0);
     const size_t m=d.size();
     for(size_t i=0; i!=m; ++i) {
         x[p[i]]+=t*d[i];
@@ -626,7 +626,7 @@ template<class X>
 void
 update_x(const Vector<X>& l, const Vector<X>& u, const array<size_t>& p, Vector<X>& x, const size_t ks, const Vector<X>& d, const X& t)
 {
-    assert(t>=0);
+    ARIADNE_ASSERT(t>=0);
     const size_t m=d.size();
     for(size_t i=0; i!=m; ++i) {
         x[p[i]]+=t*d[i];
@@ -815,11 +815,11 @@ tribool _primal_feasible(const Matrix<X>& A, const Vector<X>& b, array<size_t>& 
  
     // Check solution
     for(size_t i=0; i!=n; ++i) {
-        assert(x[i]>=0.0);
+        ARIADNE_ASSERT(x[i]>=0.0);
     }
     Vector<X> Ax=prod(A,x);
     for(size_t i=0; i!=m; ++i) {
-         assert(Ax[i]==b[i]);
+         ARIADNE_ASSERT(Ax[i]==b[i]);
     }
 
     ARIADNE_LOG(9,"\nFeasible point x="<<x<<"\n Ax="<<Vector<X>(prod(A,x))<<" b="<<b<<"\n");
@@ -867,8 +867,8 @@ tribool _constrained_feasible(const Matrix<X>& A, const Vector<X>& b, const Vect
         }
 
         for(size_t j=0; j!=n; ++j) {
-            if(vt[j]==LOWER) { assert(x[j]==l[j]); }
-            if(vt[j]==UPPER) { assert(x[j]==u[j]); }
+            if(vt[j]==LOWER) { ARIADNE_ASSERT(x[j]==l[j]); }
+            if(vt[j]==UPPER) { ARIADNE_ASSERT(x[j]==u[j]); }
             if(x[j]<l[j]) { c[j]=+1; ll[j]=-inf<X>(); infeasible=true; }
             else if(x[j]>u[j]) { c[j]=-1; uu[j]=+inf<X>(); infeasible=true; }
             else { c[j]=0; }
@@ -879,12 +879,12 @@ tribool _constrained_feasible(const Matrix<X>& A, const Vector<X>& b, const Vect
     ARIADNE_LOG(9,"  Checking solution\n");
     // Check solution
     for(size_t i=0; i!=n; ++i) {
-        assert(x[i]>=l[i]);
-        assert(x[i]<=u[i]);
+        ARIADNE_ASSERT(x[i]>=l[i]);
+        ARIADNE_ASSERT(x[i]<=u[i]);
     }
     Vector<X> Ax=prod(A,x);
     for(size_t i=0; i!=m; ++i) {
-        assert(abs(Ax[i]-b[i])<0.0001);
+        ARIADNE_ASSERT(abs(Ax[i]-b[i])<0.0001);
     }
 
     ARIADNE_LOG(9,"\nFeasible point x="<<x<<"); l="<<l<<" u="<<u<<"\n Ax="<<Vector<X>(prod(A,x))<<" b="<<b);
@@ -980,7 +980,7 @@ tribool constrained_feasible(const Matrix<X>& A, const Vector<X>& b, const Vecto
 
     tribool fs = _constrained_feasible(A,b,l,u,vt,p,B,x);
     tribool vfs = verify_constrained_feasibility(A,b,l,u,vt);
-    assert(indeterminate(vfs) || vfs==fs);
+    ARIADNE_ASSERT(indeterminate(vfs) || vfs==fs);
 
     return vfs;
 }
@@ -994,8 +994,8 @@ verify_primal_feasibility(const Matrix<X>& A, const Vector<X>& b, const array<Va
     const size_t m=A.row_size();
     const size_t n=A.column_size();
 
-    assert(b.size()==m);
-    assert(vt.size()==n);
+    ARIADNE_ASSERT(b.size()==m);
+    ARIADNE_ASSERT(vt.size()==n);
 
     const array<size_t> p=compute_p(vt);
     ARIADNE_LOG(9," p="<<p<<"\n");
@@ -1049,8 +1049,8 @@ verify_dual_feasibility(const Matrix<X>& A, const Vector<X>& c, const array<Vari
     typedef Interval XX;
     const size_t m=A.row_size();
     const size_t n=A.column_size();
-    assert(c.size()==n);
-    assert(vt.size()==n);
+    ARIADNE_ASSERT(c.size()==n);
+    ARIADNE_ASSERT(vt.size()==n);
     array<size_t> p=compute_p(vt);
     ARIADNE_LOG(9," p="<<p<<"\n");
     Matrix<XX> B=compute_B<XX>(A,p);
@@ -1113,10 +1113,10 @@ verify_constrained_feasibility(const Matrix<X>& A, const Vector<X>& b, const Vec
     typedef Interval XX;
     const size_t m=A.row_size();
     const size_t n=A.column_size();
-    assert(b.size()==m);
-    assert(l.size()==n);
-    assert(u.size()==n);
-    assert(vt.size()==n);
+    ARIADNE_ASSERT(b.size()==m);
+    ARIADNE_ASSERT(l.size()==n);
+    ARIADNE_ASSERT(u.size()==n);
+    ARIADNE_ASSERT(vt.size()==n);
 
     const array<size_t> p=compute_p(vt);
     ARIADNE_LOG(9," p="<<p<<"\n");

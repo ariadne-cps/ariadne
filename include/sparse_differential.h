@@ -501,7 +501,7 @@ template<class X, class Y>
 Y
 evaluate(const SparseDifferential<X>& y, const Vector<Y>& x) 
 {
-    //std::cerr<<__PRETTY_FUNCTION__<<std::endl;
+    //std::cerr<<ARIADNE_PRETTY_FUNCTION<<std::endl;
     ARIADNE_ASSERT(y.argument_size()==x.size());
     //std::cerr << "y=" << y << std::endl;
     //std::cerr << "x=" << x << std::endl;

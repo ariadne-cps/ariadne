@@ -507,7 +507,7 @@ ApproximateTaylorModel
 compose(const ApproximateTaylorModel& f,
         const ApproximateTaylorModel& g)
 {
-    //std::cerr<<__PRETTY_FUNCTION__<<std::endl;
+    //std::cerr<<ARIADNE_PRETTY_FUNCTION<<std::endl;
     ARIADNE_ASSERT(f.argument_size()==g.result_size());
     typedef Interval I;
     typedef Float A;
@@ -562,7 +562,7 @@ inverse(const ApproximateTaylorModel& f,
 ApproximateTaylorModel
 implicit(const ApproximateTaylorModel& f)
 {
-    //std::cerr << __PRETTY_FUNCTION__ << std::endl;
+    //std::cerr << ARIADNE_PRETTY_FUNCTION << std::endl;
     typedef Interval I;
     typedef Float A;
     typedef ApproximateTaylorModel::DifferentialVectorType DifferentialVectorType;

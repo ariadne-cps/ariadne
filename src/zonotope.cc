@@ -792,7 +792,7 @@ disjoint(const Zonotope& z, const Box& bx)
         u[d+j]=+1;
     }
 
-    return not constrained_feasible(A,b,l,u);
+    return ! constrained_feasible(A,b,l,u);
 }
 
     
@@ -821,7 +821,7 @@ disjoint(const Zonotope& z1, const Zonotope& z2)
     project(A,range(0,d),range(0,ng1))=G1;
     project(A,range(0,d),range(ng1,ng1+ng2))=G2;
 
-    return not constrained_feasible(A,b,l,u);
+    return ! constrained_feasible(A,b,l,u);
 }
 
 

@@ -317,7 +317,7 @@ Y
 evaluate(const DIFF& x, 
          const Vector<Y>& y)
 {  
-    //std::cerr<<__PRETTY_FUNCTION__<<std::endl;
+    //std::cerr<<ARIADNE_PRETTY_FUNCTION<<std::endl;
     //std::cerr<<" y="<<y<<std::endl;
     //std::cerr<<" x="<<x<<std::endl;
 
@@ -358,7 +358,7 @@ Vector<Y>
 evaluate(const DifferentialVector<DIFF>& x, 
          const Vector<Y>& y)
 {  
-    //std::cerr<<__PRETTY_FUNCTION__<<std::endl;
+    //std::cerr<<ARIADNE_PRETTY_FUNCTION<<std::endl;
     //std::cerr<<" y="<<y<<std::endl;
     //std::cerr<<" x="<<x<<std::endl;
     using namespace std;

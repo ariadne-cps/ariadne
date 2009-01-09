@@ -207,7 +207,7 @@ _evolution(EnclosureListType& final_sets,
 
     typedef boost::shared_ptr< const FunctionInterface > FunctionConstPointer;
 
-    ARIADNE_LOG(5,__PRETTY_FUNCTION__<<"\n");
+    ARIADNE_LOG(5,ARIADNE_PRETTY_FUNCTION<<"\n");
 
     const IntegerType maximum_steps=maximum_hybrid_time.discrete_time;
     const Float maximum_time=maximum_hybrid_time.continuous_time;
@@ -439,7 +439,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
                     data.initially_active=this->_toolbox->active(*data.guard_ptr,initial_set_model);
                     data.finally_active=this->_toolbox->active(*data.guard_ptr,final_set_model);
                     ModelType guard_model=this->_toolbox->predicate_model(*data.guard_ptr,flow_bounds);
-                    if(data.initially_active xor data.finally_active) {
+                    if(data.initially_active ^ data.finally_active) {
                         ARIADNE_LOG(7," Testing crossing time for: "<<data<<"\n");
                         try {
                             data.crossing_time_model=this->_toolbox->crossing_time(guard_model,flow_model,initial_set_model);
@@ -513,8 +513,8 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
                     } else {
                         blocking_data.predicate_kind=MIXED;
                         blocking_data.crossing_kind=TOUCHING;
-                        blocking_data.initially_active=blocking_data.initially_active or data.initially_active;
-                        blocking_data.finally_active=blocking_data.initially_active or data.finally_active;
+                        blocking_data.initially_active=blocking_data.initially_active || data.initially_active;
+                        blocking_data.finally_active=blocking_data.initially_active || data.finally_active;
                         blocking_data.touching_time_interval=min(data.touching_time_interval,blocking_data.touching_time_interval);
                     }
                 }

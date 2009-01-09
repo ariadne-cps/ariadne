@@ -1350,7 +1350,7 @@ inline void BinaryTreeNode::set_enabled() {
     if ( is_leaf() ) {
         _isEnabled = true;
     } else {
-        throw NotALeafNodeException(__PRETTY_FUNCTION__);
+        throw NotALeafNodeException(ARIADNE_PRETTY_FUNCTION);
     }
 }
 
@@ -1368,7 +1368,7 @@ inline void BinaryTreeNode::set_disabled() {
     if ( is_leaf() ) {
         _isEnabled = false;
     } else {
-        throw NotALeafNodeException(__PRETTY_FUNCTION__);
+        throw NotALeafNodeException(ARIADNE_PRETTY_FUNCTION);
     }
 }
     
@@ -1376,7 +1376,7 @@ inline void BinaryTreeNode::set_unknown() {
     if ( ! is_leaf() ) {
         _isEnabled = indeterminate;
     } else {
-        throw IsALeafNodeException(__PRETTY_FUNCTION__);
+        throw IsALeafNodeException(ARIADNE_PRETTY_FUNCTION);
     }
 }
 
@@ -1542,7 +1542,7 @@ inline GridTreeCursor& GridTreeCursor::move_up() {
         //Return the object back
         return ( * this);
     } else {
-        throw NotAllowedMoveException(__PRETTY_FUNCTION__);
+        throw NotAllowedMoveException(ARIADNE_PRETTY_FUNCTION);
     }
 }
     
@@ -1582,7 +1582,7 @@ inline GridTreeCursor& GridTreeCursor::move(bool left_or_right) {
         //Return the object back
         return ( * this);
     } else {
-        throw NotAllowedMoveException(__PRETTY_FUNCTION__);
+        throw NotAllowedMoveException(ARIADNE_PRETTY_FUNCTION);
     }
 }
 

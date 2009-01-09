@@ -347,7 +347,7 @@ double sin_rnd(double x) {
     // Set to true if sin is decreasing so we want opposite rounding
     bool want_opposite=(q<-2||q>=2); 
     // if n is negative then we need to swithc rounding of two_pi
-    volatile double two_pi_corr=((n>=0.0) xor want_opposite) ? two_pi_rnd : two_pi_opp;
+    volatile double two_pi_corr=((n>=0.0) ^ want_opposite) ? two_pi_rnd : two_pi_opp;
 
     // Scale onto interval from -pi to pi
     if(want_opposite) { y=-x+(-n)*(two_pi_corr); y=-y; } else { y=x+n*two_pi_corr; }
@@ -386,7 +386,7 @@ double cos_rnd(double x) {
     // Set to true if cos is decreasing so we want opposite rounding
     bool want_opposite=(q>=0); 
     // if n is negative then we need to swithc rounding of two_pi
-    volatile double two_pi_corr=((n>=0.0) xor want_opposite) ? two_pi_rnd : two_pi_opp;
+    volatile double two_pi_corr=((n>=0.0) ^ want_opposite) ? two_pi_rnd : two_pi_opp;
 
     // Scale onto interval from -pi to pi
     if(want_opposite) { y=-x+(-n)*(two_pi_corr); y=-y; } else { y=x+n*two_pi_corr; }

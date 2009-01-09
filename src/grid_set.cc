@@ -90,7 +90,7 @@ Grid::Grid(const Vector<Float>& origin, const Vector<Float>& lengths)
     : _data(new Data())
 {
     if(origin.size() != lengths.size()) {
-        throw IncompatibleSizes(__PRETTY_FUNCTION__);
+        throw IncompatibleSizes(ARIADNE_PRETTY_FUNCTION);
     }
     this->_create(origin,lengths);
 }
@@ -428,7 +428,7 @@ void BinaryTreeNode::mince_node(BinaryTreeNode * pCurrentNode, const uint depth)
                 mince_node( pCurrentNode->_pRightNode, remaining_depth );
             }
         } else {
-            throw std::runtime_error( __PRETTY_FUNCTION__ );
+            throw std::runtime_error( ARIADNE_PRETTY_FUNCTION );
         }
     }
 }
@@ -454,7 +454,7 @@ void BinaryTreeNode::recombine_node(BinaryTreeNode * pCurrentNode) {
             }
         }
     } else {
-        throw std::runtime_error( __PRETTY_FUNCTION__ );
+        throw std::runtime_error( ARIADNE_PRETTY_FUNCTION );
     }
 }
     

@@ -40,17 +40,17 @@ namespace Ariadne {
 
 tribool 
 Polytope::disjoint(const Box& bx) const {
-    return this->bounding_box().disjoint(bx) or indeterminate;
+    return this->bounding_box().disjoint(bx) || indeterminate;
 }
 
 tribool 
 Polytope::overlaps(const Box& bx) const {
-    return bx.covers(baricentre(*this)) or indeterminate;
+    return bx.covers(baricentre(*this)) || indeterminate;
 }
 
 tribool 
 Polytope::inside(const Box& bx) const {
-    return this->bounding_box().inside(bx) or indeterminate;
+    return this->bounding_box().inside(bx) || indeterminate;
 }
 
 Box 
@@ -105,7 +105,7 @@ Polytope polytope(const Box& bx)
 
 Polytope polytope(const Zonotope& z) 
 {
-    //std::cerr<<__PRETTY_FUNCTION__<<std::endl;
+    //std::cerr<<ARIADNE_PRETTY_FUNCTION<<std::endl;
     Polytope res;
     size_t ng=z.generators().column_size();
     size_t nv=1<<ng;

@@ -52,7 +52,7 @@
     { \
         bool result = (expression); \
         if(!result) { \
-            ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<__PRETTY_FUNCTION__,"Assertion `" << #expression << "' failed.\n"<<"  "<<error<<"\n"); \
+            ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"Assertion `" << #expression << "' failed.\n"<<"  "<<error<<"\n"); \
         } \
     } \
 
@@ -60,12 +60,12 @@
     { \
         bool result = ((expression1) == (expression2));       \
         if(!result) { \
-            ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<__PRETTY_FUNCTION__,"Assertion `" << #expression1 << "==" << #expression2 << "' failed.\n"<<"  "<<expression1<<" != "<<expression2<<"\n"); \
+            ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"Assertion `" << #expression1 << "==" << #expression2 << "' failed.\n"<<"  "<<expression1<<" != "<<expression2<<"\n"); \
         } \
     } \
 
 #define ARIADNE_NOT_IMPLEMENTED                 \
-    throw NotImplemented(__PRETTY_FUNCTION__); 
+    throw NotImplemented(ARIADNE_PRETTY_FUNCTION); 
 
 #if defined(linux) || defined(__linux) || defined(__linux__)
 #define ARIADNE_PRETTY_FUNCTION __PRETTY_FUNCTION__

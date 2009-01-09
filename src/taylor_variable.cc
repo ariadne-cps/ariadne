@@ -1235,29 +1235,29 @@ TaylorVariable rec(const TaylorVariable& x) {
     set_rounding_mode(round_nearest);
     assert(eps<1);
     uint d=uint(log((1-eps)*max_trunc_err)/log(eps))+1;
-    //std::cerr<<"x="<<x<<"\n";
-    TaylorVariable y=(x/a)-1;
-    //std::cerr<<"y="<<y<<"\n";
+    //std::cerr<<"  x="<<x<<"\n";
+    TaylorVariable y=1-(x/a);
+    //std::cerr<<"  y="<<y<<"\n";
     TaylorVariable z(x.argument_size());
     z+=Float(d%2?-1:+1);
     for(uint i=0; i!=d; ++i) {
-        z=Float((d-i-1)%2?-1:+1) + z * y;
+        z=1.0 + z * y;
         z.sweep(max_sweep_err);
     }
-    //std::cerr<<"z="<<z<<"\n";
+    //std::cerr<<"  z="<<z<<"\n";
     Float te=pow(eps,d)/(1-eps);
-    //std::cerr<<"te="<<te<<"\n";
+    //std::cerr<<"  te="<<te<<"\n";
     set_rounding_mode(round_up);
     Float nze=te+z.error().u;
-    //std::cerr<<"nze="<<nze<<"\n";
+    //std::cerr<<"  nze="<<nze<<"\n";
 
     set_rounding_mode(round_nearest);
     z.set_error(nze);
     //z.error().u=nze; 
     //z.error().l=-nze;
-    //std::cerr<<"z="<<z<<"\n";
-    z*=a;
-    //std::cerr<<"z="<<z<<"\n";
+    //std::cerr<<"  z="<<z<<"\n";
+    z/=a;
+    //std::cerr<<"  z="<<z<<"\n";
     return z;
 }
 

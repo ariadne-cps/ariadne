@@ -83,9 +83,15 @@ inline mpq_class abs(mpq_class x) { return x>=0 ? x : mpq_class(-x); }
 #define CW_ROUND_DOWN   ((CW_DEFAULT & ~MCW_RC) | RC_DOWN)
 #define CW_ROUND_NEAR   ((CW_DEFAULT & ~MCW_RC) | RC_NEAR)
 
-unsigned short ROUND_UP      = CW_ROUND_UP;
-unsigned short ROUND_DOWN    = CW_ROUND_DOWN;
-unsigned short ROUND_NEAREST = CW_ROUND_NEAR;
+//unsigned short ROUND_UP      = CW_ROUND_UP;
+//unsigned short ROUND_DOWN    = CW_ROUND_DOWN;
+//unsigned short ROUND_NEAREST = CW_ROUND_NEAR;
+unsigned short ROUND_UP      = 2943;
+unsigned short ROUND_DOWN    = 1919;
+unsigned short ROUND_NEAREST = 895;
+
+static volatile rounding_mode_t grnd;
+inline rounding_mode_t get_control_word() { asm volatile ("fstcw grnd"); return grnd; }
 
 #if defined C_ROUNDING
 
@@ -96,14 +102,21 @@ inline void set_round_nearest() { fesetround(FE_TONEAREST);  }
 inline void set_rounding_mode(rounding_mode_t rnd) { fesetround(rnd); }
 inline rounding_mode_t get_rounding_mode() { return fegetround(); }
 
+inline void c_set_round_nearest() { fesetround(FE_TONEAREST); }
+
 #elif defined ASM_ROUNDING
 
 inline void set_round_up() { asm volatile ("fldcw ROUND_UP"); }
 inline void set_round_down() { asm volatile ("fldcw ROUND_DOWN"); }
 inline void set_round_nearest() { asm volatile ("fldcw ROUND_NEAREST"); }
 
-inline void set_rounding_mode(rounding_mode_t rnd) { fesetround(rnd); }
-inline rounding_mode_t get_rounding_mode(rounding_mode_t rnd) { return fegetround(); }
+inline void c_set_round_nearest() { fesetround(FE_TONEAREST); }
+
+//inline void set_rounding_mode(rounding_mode_t rnd) { asm volatile ("fldcw (%0)" : : "r" (rnd) ); }
+//inline rounding_mode_t get_rounding_mode() { rounding_mode_t rnd asm volatile ("fldcw (%0)" : : "r" (rnd) ); return rnd; }
+
+inline rounding_mode_t get_rounding_mode() { asm volatile ("fstcw grnd"); return grnd; }
+inline void set_rounding_mode(rounding_mode_t rnd) { grnd=rnd; asm volatile ("fldcw grnd"); } 
 
 #elif defined ASM_MACRO_ROUNDING
 
@@ -112,7 +125,9 @@ inline rounding_mode_t get_rounding_mode(rounding_mode_t rnd) { return fegetroun
 #define set_round_nearest()      asm("fldcw ROUND_NEAREST")   
 
 inline void set_rounding_mode(rounding_mode_t rnd) { fesetround(rnd); }
-inline rounding_mode_t get_rounding_mode(rounding_mode_t rnd) { return fegetround(); }
+inline rounding_mode_t get_rounding_mode() { return fegetround(); }
+
+inline void c_set_round_nearest() { fesetround(FE_TONEAREST); }
 
 #endif
 
@@ -349,7 +364,35 @@ void profile_add(int n, int nn) {
 }
 
 
- 
+void test_rounding(volatile double p, volatile double q) 
+{
+    std::cout<<"Testing correct rounding\n";
+    rounding_mode_t fcw=get_control_word();
+    std::cout<<"Initial control word="<<fcw<<"\n";
+    rounding_mode_t rnd=get_rounding_mode();
+    std::cout<<"Initial rounding mode="<<rnd<<"\n";
+    
+    set_round_up();
+    std::cout<<"Up rounding mode="<<get_rounding_mode()<<"\n";
+    volatile double xu=p/q;
+    std::cout<<"  Computed "<<p<<"/"<<q<<"="<<xu<<std::endl;
+    
+    set_round_down();
+    std::cout<<"Down rounding mode="<<get_rounding_mode()<<"\n";
+    volatile double xl=p/q;
+    std::cout<<"  Computed "<<p<<"/"<<q<<"="<<xl<<std::endl;
+    
+    set_round_nearest();
+    std::cout<<"Nearest rounding mode="<<get_rounding_mode()<<"\n";
+    volatile double xn=p/q;
+    std::cout<<"  Computed "<<p<<"/"<<q<<"="<<xn<<std::endl;
+    
+    std::cout<<p<<"/"<<q<<" ~ "<<xn<<std::endl;
+    std::cout<<xl<<" < "<<p<<"/"<<q<<" < "<<xu<<std::endl;
+    set_rounding_mode(rnd);
+    std::cout<<"Restored rounding mode="<<get_rounding_mode()<<"\n";
+}
+
 int main(int argc, const char* argv[]) {
     std::cout<<std::setprecision(20);
     std::cerr<<std::setprecision(20);
@@ -387,7 +430,7 @@ int main(int argc, const char* argv[]) {
         w[i]=z[i];
     }
     
-    int nnn=min(n,4);
+    int nnn=std::min(n,4);
     for(int i=0; i!=nnn; ++i) {
         set_rounding_mode(round_down);
         double r=add_rnd(x[i],y[i]);

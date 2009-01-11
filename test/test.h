@@ -39,7 +39,7 @@ int ARIADNE_TEST_SKIPPED=0;
 template<class R, class ER> 
 bool 
 ariadne_check(std::ostream& os, const R& r, const ER& er) {
-    os << r; return (r==er);
+    os << r << std::flush; return (r==er);
 }
 
 //This is the variable that stores counter for the number of test cases
@@ -155,7 +155,7 @@ int test_case_counter = 0;
 /*! \brief Evaluates \a expression and checks if the result is equal to \a expected. */
 #define ARIADNE_TEST_CHECK(expression,expected)                         \
     {                                                                   \
-        std::cout << #expression << ": " << (expression) << std::flush; \
+        std::cout << #expression << ": " << std::flush; \
         bool ok = ariadne_check(std::cout,expression,expected);         \
         if(ok) {                                                        \
             std::cout << "\n" << std::endl;                             \

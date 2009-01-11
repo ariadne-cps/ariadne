@@ -69,6 +69,7 @@ inline rounding_mode_t get_rounding_mode();
   #define ARIADNE_C99_ROUNDING
 #endif
 
+//#define ARIADNE_C99_ROUNDING
 
 #if defined ARIADNE_C99_ROUNDING
 
@@ -80,10 +81,10 @@ namespace Ariadne {
 
 typedef unsigned short rounding_mode_t;
 
-const rounding_mode_t round_nearest = FE_TONEAREST;
-const rounding_mode_t round_downward = FE_DOWNWARD;
-const rounding_mode_t round_upward = FE_UPWARD;
-const rounding_mode_t round_toward_zero = FE_TOWARDZERO;
+const rounding_mode_t to_nearest = FE_TONEAREST;
+const rounding_mode_t downward = FE_DOWNWARD;
+const rounding_mode_t upward = FE_UPWARD;
+const rounding_mode_t toward_zero = FE_TOWARDZERO;
 
 inline void set_rounding_to_nearest() { fesetround(FE_TONEAREST);  }
 inline void set_rounding_downward() { fesetround(FE_DOWNWARD);  }

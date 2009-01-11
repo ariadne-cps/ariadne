@@ -163,9 +163,9 @@ class Interval {
 
     const Float& lower() const { return l; }
     const Float& upper() const { return u; }
-    const Float midpoint() const { return (l+u)/2; }
-    const Float radius() const { return up((u-l)/2); }
-    const Float width() const { return up(u-l); }
+    const Float midpoint() const { return add_approx(l,u)/2; }
+    const Float radius() const { return sub_up(u,l)/2; }
+    const Float width() const { return sub_up(u,l); }
 
     bool empty() const { return l>u; }
     bool singleton() const { return l==u; }
@@ -179,15 +179,15 @@ class Interval {
 std::ostream& operator<<(std::ostream& os, const Interval& ivl);
 
 inline Float midpoint(Interval i) { 
-    return (i.l+i.u)/2; 
+    return add_approx(i.l,i.u)/2; 
 }
 
 inline Float radius(Interval i) { 
-    return up((i.u-i.l)/2); 
+    return sub_up(i.u,i.l)/2; 
 }
 
 inline Float width(Interval i) { 
-    return up(i.u-i.l); 
+    return sub_up(i.u,i.l); 
 }
 
 inline bool equal(Interval i1, Interval i2) { 

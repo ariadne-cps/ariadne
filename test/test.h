@@ -168,8 +168,20 @@ int test_case_counter = 0;
                                                                         \
                                                                         \
 /*! \brief Evaluates \a expression and checks if the result is equal to \a expected. */
-#define ARIADNE_TEST_EQUAL(expression,expected)                         \
-    ARIADNE_TEST_CHECK(expression,expected)                             \
+#define ARIADNE_TEST_EQUAL(expression1,expression2)                         \
+    {                                                                   \
+        std::cout << #expression1 << " == " << #expression2 << ": " << std::flush; \
+        bool ok = (expression1) == (expression2);                       \
+        if(ok) {                                                        \
+            std::cout << "true\n" << std::endl;                         \
+        } else {                                                        \
+            ++ARIADNE_TEST_FAILURES;                                    \
+            std::cout << "\nERROR: " << #expression1 << ": " << (expression1) \
+                      << "\n     : " << #expression2 << ": " << (expression2) << std::endl; \
+            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Equality `" << #expression1 << " == " << #expression2 << "' failed; " << #expression1 << "=" << (expression1) << "; " << #expression2 << "=" << (expression2) << std::endl; \
+        }                                                               \
+    }                                                                   \
+       
                                                                         \
 /*! \brief Evaluates \a expression and checks if the result is equal to \a expected. */
 #define ARIADNE_TEST_UNARY_PREDICATE(predicate,argument)    \
@@ -200,16 +212,16 @@ int test_case_counter = 0;
     }       
                                                                         \
 /*! \brief Evaluates \a expression and checks if the result compares correctly with \a expected. */
-#define ARIADNE_TEST_COMPARE(expression,comparison,expected)            \
+#define ARIADNE_TEST_COMPARE(expression,comparison,expected)           \
     {                                                                   \
         std::cout << #expression << ": " << (expression) << std::flush; \
         bool ok = (expression) comparison (expected);                   \
         if(ok) {                                                        \
-            std::cout << "\n" << std::endl;                             \
+            std::cout << " " << #comparison << " " << (expected) << "\n" << std::endl; \
         } else {                                                        \
             ++ARIADNE_TEST_FAILURES;                                    \
             std::cout << "\nERROR: expected: " << #expression << #comparison << #expected << std::endl; \
-            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Comparison `" << #expression << #comparison << #expected << "' failed; " << #expression << "=" << (expression) << std::endl; \
+            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Comparison `" << #expression << #comparison << #expected << "' failed; " << #expression << "=" << (expression) << "; " << #expected << "=" << (expected) << std::endl; \
         }                                                               \
     }                                                                   \
                                                                         \

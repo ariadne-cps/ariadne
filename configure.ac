@@ -25,6 +25,9 @@ AC_CHECK_SIZEOF([long int])
 # Check for standard header files.
 AC_STDC_HEADERS
 
+# Check for standard fenv.h (optional)
+AC_CHECK_HEADER([fenv.h],[AC_DEFINE([HAVE_FENV_H],[1],[Define to 1 if you have the <fenv.h> header file.])],[AC_MSG_WARN([Standard C header file fenv.h is missing. Only assembly-language rounding is supported.])])
+
 # Check for Boost library (required)
 AC_CHECK_HEADER([boost/version.hpp],,[AC_MSG_ERROR([Boost library development files are missing. You must install them.])])
 

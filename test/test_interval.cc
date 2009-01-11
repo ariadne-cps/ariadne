@@ -389,6 +389,9 @@ TestInterval::test_misc()
 
 
 int main() {
+    std::cout<<std::setprecision(20);
+    std::cerr<<std::setprecision(20);
+
     TestInterval().test();
    
     cerr << "INCOMPLETE ";

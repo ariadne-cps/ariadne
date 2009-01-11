@@ -176,6 +176,8 @@ class Interval {
     double l, u;
 };
 
+std::ostream& operator<<(std::ostream& os, const Interval& ivl);
+
 inline Float midpoint(Interval i) { 
     return (i.l+i.u)/2; 
 }
@@ -189,6 +191,7 @@ inline Float width(Interval i) {
 }
 
 inline bool equal(Interval i1, Interval i2) { 
+    //std::cerr<<"equal(i1,i2) with i1="<<i1<<"; i2="<<i2<<std::endl;
     return i1.l==i2.l && i1.u==i2.u;
 }
 
@@ -224,8 +227,12 @@ Interval add(Interval, Interval);
 Interval sub(Interval, Interval);
 Interval mul(Interval, Interval);
 Interval div(Interval, Interval);
+Interval add(Interval, Float);
+Interval sub(Interval, Float);
 Interval mul(Interval, Float);
 Interval div(Interval, Float);
+Interval sub(Float, Interval);
+Interval div(Float, Interval);
 Interval sqr(Interval);
 Interval pow(Interval, int);
 Interval pow(Interval, uint);
@@ -254,24 +261,29 @@ inline bool operator!=(const Interval& i1, const Interval& i2) { return i1.l!=i2
 
 inline Interval operator+(Interval i) { return Interval(i.l,i.u); }
 inline Interval operator-(Interval i) { return Interval(-i.u,-i.l); }
-inline Interval operator+(Interval i1, Interval i2) { return Interval(down(i1.l+i2.l),up(i1.u+i2.u)); }
-inline Interval operator-(Interval i1, Interval i2) { return Interval(down(i1.l-i2.u),up(i1.u-i2.l)); };
+inline Interval operator+(Interval i1, Interval i2) { return add(i1,i2); }
+inline Interval operator-(Interval i1, Interval i2) { return sub(i1,i2); }
 inline Interval operator*(Interval i1, Interval i2) { return mul(i1,i2); }
-inline Interval operator/(Interval i1, Interval i2) { return mul(i1,rec(i2)); };
+inline Interval operator/(Interval i1, Interval i2) { return div(i1,i2); };
 
 inline Interval& operator+=(Interval& i1, Interval i2) { i1=add(i1,i2); return i1; }
 inline Interval& operator-=(Interval& i1, Interval i2) { i1=sub(i1,i2); return i1; }
 inline Interval& operator*=(Interval& i1, Interval i2) { i1=mul(i1,i2); return i1; }
-inline Interval& operator/=(Interval& i1, Interval i2) { i1=mul(i1,rec(i2)); return i1; }
+inline Interval& operator/=(Interval& i1, Interval i2) { i1=div(i1,i2); return i1; }
 
-inline Interval operator+(Interval i1, Float x2) { return Interval(down(i1.l+x2),up(i1.u+x2)); };
-inline Interval operator+(Float x1, Interval i2) { return Interval(down(x1+i2.l),up(x1+i2.u)); };
-inline Interval operator-(Interval i1, Float x2) { return Interval(down(i1.l-x2),up(i1.u-x2)); };
-inline Interval operator-(Float x1, Interval i2) { return Interval(down(x1-i2.u),up(x1-i2.l)); };
+inline Interval operator+(Interval i1, Float x2) { return add(i1,x2); }
+inline Interval operator+(Float x1, Interval i2) { return add(i2,x1); }
+inline Interval operator-(Interval i1, Float x2) { return sub(i1,x2); }
+inline Interval operator-(Float x1, Interval i2) { return sub(x1,i2); }
 inline Interval operator*(Interval i1, Float x2) { return mul(i1,x2); }
 inline Interval operator*(Float x1, Interval i2) { return mul(i2,x1); }
 inline Interval operator/(Interval i1, Float x2) { return div(i1,x2); }
-inline Interval operator/(Float x1, Interval i2) { return mul(rec(i2),x1); }
+inline Interval operator/(Float x1, Interval i2) { return div(x1,i2); }
+
+inline Interval& operator+=(Interval& i1, Float x2) { i1=add(i1,x2); return i1; }
+inline Interval& operator-=(Interval& i1, Float x2) { i1=sub(i1,x2); return i1; }
+inline Interval& operator*=(Interval& i1, Float x2) { i1=mul(i1,x2); return i1; }
+inline Interval& operator/=(Interval& i1, Float x2) { i1=div(i1,x2); return i1; }
 
 inline tribool operator==(Interval i1, Float x2) { 
     if(i1.upper()<x2 || i1.lower()>x2) { return false; }

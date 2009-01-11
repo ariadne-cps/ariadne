@@ -26,22 +26,13 @@
 
 #include <iomanip>
 
-#include <fenv.h>
-
+#include "config.h"
+#include "rounding.h"
 #include "numeric.h"
 #include "sparse_differential.h"
 #include "taylor_variable.h"
 
 namespace Ariadne {
-
-typedef int rounding_mode_t;
-
-static const rounding_mode_t round_nearest = FE_TONEAREST;
-static const rounding_mode_t round_down = FE_DOWNWARD;
-static const rounding_mode_t round_up = FE_UPWARD;
-
-inline void set_rounding_mode(rounding_mode_t rnd) { fesetround(rnd); }
-inline rounding_mode_t get_rounding_mode() { return fegetround(); }
 
 inline void acc(Interval& e, const Interval& d) {
     e+=d;
@@ -120,7 +111,7 @@ TaylorVariable::scal(const Float& c)
     // General case with error analysis
     TaylorVariable& x=*this;
     Interval& xe=x.error();
-    set_rounding_mode(round_up);
+    set_rounding_upward();
     volatile Float te=0; // Twice the maximum accumulated error
     for(const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         volatile Float u=xiter->second*c;
@@ -130,7 +121,7 @@ TaylorVariable::scal(const Float& c)
     }
     xe.u+=te/2; xe.l=-xe.u;
 
-    set_rounding_mode(round_nearest);
+    set_rounding_to_nearest();
     for(iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         xiter->second*=c;
     }
@@ -145,7 +136,7 @@ TaylorVariable::scal(const Interval& c)
     // General case with error analysis
     TaylorVariable& x=*this;
     Interval& xe=x.error();
-    set_rounding_mode(round_up);
+    set_rounding_upward();
     volatile Float u,ml;
     Float te=0; // Twice the maximum accumulated error
     for(const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
@@ -162,7 +153,7 @@ TaylorVariable::scal(const Interval& c)
     }
     xe.u+=te/2; xe.l=-xe.u;
 
-    set_rounding_mode(round_nearest);
+    set_rounding_to_nearest();
     Float m=(c.u+c.l)/2;
     for(iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         xiter->second*=m;
@@ -180,14 +171,14 @@ TaylorVariable::acc(const Float& c)
     TaylorVariable& r=*this;
     Float& rv=r.value();
     Interval& re=r.error();
-    set_rounding_mode(round_up);
+    set_rounding_upward();
     volatile Float rvu=rv+c;
     volatile Float mrvl=(-rv)-c;
     //std::cerr<<"re="<<re.u<<" ";
     re.u+=(rvu+mrvl)/2;
     //std::cerr<<"nre="<<re.u<<"\n";
     re.l=-re.u;
-    set_rounding_mode(round_nearest);
+    set_rounding_to_nearest();
     rv+=c;
     return r;
 }
@@ -201,12 +192,12 @@ TaylorVariable::acc(const Interval& c)
     TaylorVariable& r=*this;
     Float& rv=r.value();
     Interval& re=r.error();
-    set_rounding_mode(round_up);
+    set_rounding_upward();
     volatile Float rvu=rv+c.u;
     volatile Float mrvl=(-rv)-c.l;
     re.u+=(rvu+mrvl)/2;
     re.l=-re.u;
-    set_rounding_mode(round_nearest);
+    set_rounding_to_nearest();
     volatile Float m=(c.u+c.l)/2;
     rv+=m;
     return r;
@@ -224,7 +215,7 @@ TaylorVariable::acc(const TaylorVariable& x)
     assert(re.l==-re.u);
     //std::cerr<<std::setprecision(20);
     
-    set_rounding_mode(round_up);
+    set_rounding_upward();
     Float te=0;
     for(const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         const Float& xv=xiter->second;;
@@ -239,7 +230,7 @@ TaylorVariable::acc(const TaylorVariable& x)
     }
     re.u+=te/2; re.l=-re.u;
     
-    set_rounding_mode(round_nearest);
+    set_rounding_to_nearest();
     for(const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         r[xiter->first]+=xiter->second;
     }
@@ -260,7 +251,7 @@ TaylorVariable::acc(const TaylorVariable& x, const TaylorVariable& y)
     assert(re.l==-re.u);
     std::map<MultiIndex,Ivl> z;
 
-    set_rounding_mode(round_up);
+    set_rounding_upward();
     for(const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         for(const_iterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
             const Float& xv=xiter->second;;
@@ -300,7 +291,7 @@ TaylorVariable::acc(const TaylorVariable& x, const TaylorVariable& y)
     
     re.u+=xs*ye+ys*xe+te; re.l=-re.u; 
 
-    set_rounding_mode(round_nearest);
+    set_rounding_to_nearest();
     for(ivl_const_iterator ziter=z.begin(); ziter!=z.end(); ++ziter) {
         const Ivl& zv=ziter->second;
         r[ziter->first]=(zv.u-zv.ml)/2;
@@ -328,7 +319,7 @@ TaylorVariable&
 TaylorVariable::truncate(uint d)
 {
     assert(this->_error.l==-this->_error.u);
-    set_rounding_mode(round_up);
+    set_rounding_upward();
     Float e=0;
     for(iterator iter=this->_expansion.begin(); iter!=this->end(); ) {
         if(iter->first.degree()>d) {
@@ -340,7 +331,7 @@ TaylorVariable::truncate(uint d)
     }
     this->_error.u+=e;
     this->_error.l=-this->_error.u;
-    set_rounding_mode(round_nearest);
+    set_rounding_to_nearest();
     return *this;
 }
 
@@ -683,7 +674,7 @@ mul_ivl(const TaylorVariable& x, const TaylorVariable& y)
     TaylorVariable r(x.argument_size());
     std::map<MultiIndex,Interval> z;
  
-    set_rounding_mode(round_up);
+    set_rounding_upward();
     for(flt_const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         for(flt_const_iterator yiter=x.begin(); yiter!=y.end(); ++yiter) {
             const Float& xv=xiter->second;
@@ -694,13 +685,13 @@ mul_ivl(const TaylorVariable& x, const TaylorVariable& y)
         }
     }
     
-    set_rounding_mode(round_nearest);
+    set_rounding_to_nearest();
     for(ivl_const_iterator ziter=z.begin(); ziter!=z.end(); ++ziter) {
         const Interval& zv=ziter->second;
         r[ziter->first]=(zv.u+zv.l)/2;
     }
     
-    set_rounding_mode(round_up);
+    set_rounding_upward();
     Float re=0;
     for(ivl_const_iterator ziter=z.begin(); ziter!=z.end(); ++ziter) {
         const Interval& zv=ziter->second;
@@ -752,7 +743,7 @@ add_rounded(const TaylorVariable& x, const Float& c) {
     const Float& xv=x.expansion().value();
     Interval& re=r.error();
     Float rva=xv+c;
-    set_rounding_mode(round_up);
+    set_rounding_upward();
     volatile Float rvu=xv+c;
     volatile Float mrvl=(-xv)-c;
     //std::cerr<<"rvl="<<-mrvl<<" rva="<<rva<<" rvu="<<rvu<<"\n";
@@ -761,7 +752,7 @@ add_rounded(const TaylorVariable& x, const Float& c) {
     r.value()=(rva);
     re.u+=rve; 
     tmp=-re.l+rve; re.l=-tmp;
-    set_rounding_mode(round_nearest);
+    set_rounding_to_nearest();
     return r;
 }
 
@@ -776,7 +767,7 @@ mul_rounded(const TaylorVariable& x, const Float& c)
     for(TaylorVariable::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         r[xiter->first]=xiter->second*c;
     }
-    set_rounding_mode(round_up);
+    set_rounding_upward();
     volatile Float eu=0;
     volatile Float el=0;
     for(TaylorVariable::const_iterator riter=r.begin(); riter!=r.end(); ++riter) {
@@ -793,7 +784,7 @@ mul_rounded(const TaylorVariable& x, const Float& c)
     Float e=max(eu,el);
     re.u=x.error().u*c+e;
     re.l=-tmp;
-    set_rounding_mode(round_nearest);
+    set_rounding_to_nearest();
     return r;
 }
 
@@ -807,7 +798,7 @@ add_rounded(const TaylorVariable& x, const TaylorVariable& y)
     for(TaylorVariable::const_iterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
         r[yiter->first]+=yiter->second;
     }
-    set_rounding_mode(round_up);
+    set_rounding_upward();
     volatile Float eu=0;
     volatile Float el=0;
     for(TaylorVariable::const_iterator riter=y.begin(); riter!=y.end(); ++riter) {
@@ -825,7 +816,7 @@ add_rounded(const TaylorVariable& x, const TaylorVariable& y)
     re.u=x.error().u+y.error().u+eu;
     tmp=-x.error().l-y.error().l+el;
     re.l=-tmp;
-    set_rounding_mode(round_nearest);
+    set_rounding_to_nearest();
     return r;
 }
 
@@ -1191,9 +1182,9 @@ TaylorVariable sqrt(const TaylorVariable& x) {
     Interval r=x.range();
     assert(r.l>0);
     Float a=(r.l+r.u)/2;
-    set_rounding_mode(round_up);
+    set_rounding_upward();
     Float eps=(r.u-r.l)/(r.u+r.l);
-    set_rounding_mode(round_nearest);
+    set_rounding_to_nearest();
     assert(eps<1);
     uint d=uint(log((1-eps)*max_trunc_err)/log(eps)+1);
     //std::cerr<<"x="<<x<<std::endl;
@@ -1230,9 +1221,9 @@ TaylorVariable rec(const TaylorVariable& x) {
     Interval r=x.range();
     assert(r.l>0 || r.u<0);
     Float a=(r.l+r.u)/2;
-    set_rounding_mode(round_up);
+    set_rounding_upward();
     Float eps=abs((r.u-r.l)/(r.u+r.l));
-    set_rounding_mode(round_nearest);
+    set_rounding_to_nearest();
     assert(eps<1);
     uint d=uint(log((1-eps)*max_trunc_err)/log(eps))+1;
     //std::cerr<<"  x="<<x<<"\n";
@@ -1247,11 +1238,11 @@ TaylorVariable rec(const TaylorVariable& x) {
     //std::cerr<<"  z="<<z<<"\n";
     Float te=pow(eps,d)/(1-eps);
     //std::cerr<<"  te="<<te<<"\n";
-    set_rounding_mode(round_up);
+    set_rounding_upward();
     Float nze=te+z.error().u;
     //std::cerr<<"  nze="<<nze<<"\n";
 
-    set_rounding_mode(round_nearest);
+    set_rounding_to_nearest();
     z.set_error(nze);
     //z.error().u=nze; 
     //z.error().l=-nze;
@@ -1269,9 +1260,9 @@ TaylorVariable log(const TaylorVariable& x) {
     Interval r=x.range();
     assert(r.l>0);
     Float a=(r.l+r.u)/2;
-    set_rounding_mode(round_up);
+    set_rounding_upward();
     Float eps=(r.u-r.l)/(r.u+r.l);
-    set_rounding_mode(round_nearest);
+    set_rounding_to_nearest();
     assert(eps<1);
     uint d=uint(log((1-eps)*max_trunc_err)/log(eps)+1);
     TaylorVariable y=x/a-1;

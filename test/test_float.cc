@@ -29,6 +29,7 @@
 #include <stdexcept>
 #include <fenv.h>
 
+#include "rounding.h"
 #include "numeric.h"
 
 #include "test.h"
@@ -46,6 +47,7 @@ class TestFloat
     void test_conversion();
     void test_stream();
     void test_comparison();
+    void test_rounding();
     void test_arithmetic();
     void test_function();
 };
@@ -68,6 +70,7 @@ TestFloat::test()
     ARIADNE_TEST_CALL(test_conversion());
     ARIADNE_TEST_CALL(test_stream());
     ARIADNE_TEST_CALL(test_comparison());
+    ARIADNE_TEST_CALL(test_rounding());
     ARIADNE_TEST_CALL(test_arithmetic());
     ARIADNE_TEST_CALL(test_function());
 }
@@ -134,6 +137,20 @@ TestFloat::test_concept()
     b=(x==d); b=(x!=d); b=(x<=d); b=(x>=d); b=(x<d); b=(x>d);
     b=(d==x); b=(d!=x); b=(d<=x); b=(d>=x); b=(d<x); b=(d>x);
     b=(x==x); b=(x!=x); b=(x<=x); b=(x>=x); b=(x<x); b=(x>x);
+
+    // Rounding mode
+    set_rounding_to_nearest();
+    set_rounding_downward();
+    set_rounding_upward();
+    set_rounding_toward_zero();
+
+    set_rounding_mode(to_nearest);
+    set_rounding_mode(downward);
+    set_rounding_mode(upward);
+    set_rounding_mode(toward_zero);
+
+    rounding_mode_t rnd=get_rounding_mode();
+    set_rounding_mode(rnd);
 }
 
 
@@ -306,6 +323,49 @@ TestFloat::test_comparison()
   
 }
   
+void
+TestFloat::test_rounding()
+{
+    volatile double one   = 1;
+    volatile double two   = 2;
+    volatile double three = 3;
+    volatile double five  = 5;
+    const double onethirddown    = 0.33333333333333331483;
+    const double onethirdup      = 0.33333333333333337034;
+    const double onethirdchop    = 0.33333333333333331483;
+    const double onethirdnearest = 0.33333333333333331483;
+    const double twofifthsdown   = 0.39999999999999996669;
+    const double twofifthsup     = 0.40000000000000002220;
+    const double twofifthschop   = 0.39999999999999996669;
+    const double twofifthsnearest= 0.40000000000000002220;
+    
+    set_rounding_mode(downward);
+    double onethirdrounddown=one/three;
+    ARIADNE_TEST_EQUAL(onethirdrounddown, onethirddown);
+    set_rounding_mode(upward);
+    double onethirdroundup=one/three;
+    ARIADNE_TEST_EQUAL(onethirdroundup, onethirdup);
+    set_rounding_mode(toward_zero);
+    double onethirdroundchop=one/three;
+    ARIADNE_TEST_EQUAL(onethirdroundchop, onethirdchop);
+    set_rounding_mode(to_nearest);
+    double onethirdroundnearest=one/three;
+    ARIADNE_TEST_EQUAL(onethirdroundnearest, onethirdnearest);
+
+    set_rounding_downward();
+    double twofifthsrounddown=two/five;
+    ARIADNE_TEST_EQUAL(twofifthsrounddown, twofifthsdown);
+    set_rounding_upward();
+    double twofifthsroundup=two/five;
+    ARIADNE_TEST_EQUAL(twofifthsroundup, twofifthsup);
+    set_rounding_toward_zero();
+    double twofifthsroundchop=two/five;
+    ARIADNE_TEST_EQUAL(twofifthsroundchop, twofifthschop);
+    set_rounding_to_nearest();
+    double twofifthsroundnearest=two/five;
+    ARIADNE_TEST_EQUAL(twofifthsroundnearest, twofifthsnearest);
+}
+
 void
 TestFloat::test_arithmetic()
 {

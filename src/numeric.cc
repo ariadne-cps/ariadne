@@ -24,13 +24,14 @@
 #include <iostream>
 #include <cassert>
 #include <stdint.h>
-#include <fenv.h>
 
 #include "config.h"
 #include "macros.h"
+#include "rounding.h"
 #include "numeric.h"
 
 namespace Ariadne {
+
 
 static const double quarter_pi_up=0.78539816339744839;
 static const double half_pi_up=1.5707963267948968;
@@ -44,15 +45,6 @@ static const double two_pi_approx=6.2831853071795862;
 static const double sqrt2_approx=0.70710678118654757;
 static const double log2_approx=0.6931471805599453094;
   
-typedef int rounding_mode_t;
-
-static const rounding_mode_t round_nearest = FE_TONEAREST;
-static const rounding_mode_t round_down = FE_DOWNWARD;
-static const rounding_mode_t round_up = FE_UPWARD;
-
-inline void set_rounding_mode(rounding_mode_t rnd) { fesetround(rnd); }
-inline rounding_mode_t get_rounding_mode() { return fegetround(); }
-
 
 uint16_t 
 fac(uint16_t n) 
@@ -152,10 +144,10 @@ static inline double next_opp(double x) {
 
 static inline char rounding_mode_char() 
 {
-    if(fegetround()==FE_TONEAREST) { return 'a'; }
-    if(fegetround()==FE_UPWARD) { return 'u'; }
-    if(fegetround()==FE_DOWNWARD) { return 'd'; }
-    if(fegetround()==FE_TOWARDZERO) { return 'z'; }
+    if(get_rounding_mode()==to_nearest) { return 'n'; }
+    if(get_rounding_mode()==downward) { return 'd'; }
+    if(get_rounding_mode()==upward) { return 'u'; }
+    if(get_rounding_mode()==toward_zero) { return 'z'; }
     return '?';
 }
 
@@ -548,11 +540,11 @@ double tan_rnd_series(double x) {
 
 
 static inline Float cos_down(Float x) { 
-    set_rounding_mode(round_down); Float y=cos_rnd(x); return y; 
+    set_rounding_downward(); Float y=cos_rnd(x); return y; 
 }
 
 static inline Float cos_up(Float x) { 
-    set_rounding_mode(round_up); Float y=cos_rnd(x); return y; 
+    set_rounding_upward(); Float y=cos_rnd(x); return y; 
 }
 
 
@@ -638,6 +630,16 @@ Interval div(Interval i1, Interval i2)
 
 
 
+Interval add(Interval i, Float x) 
+{
+    return Interval(down(i.l+x),up(i.u+x)); 
+}
+
+Interval sub(Interval i, Float x) 
+{
+    return Interval(down(i.l-x),up(i.u-x)); 
+}
+
 Interval mul(Interval i, Float x) 
 {
     if(x>=0) {
@@ -660,6 +662,21 @@ Interval div(Interval i, Float x)
 }
 
 
+Interval sub(Float x, Interval i) 
+{
+    return Interval(down(x-i.u),up(x-i.l)); 
+}
+
+Interval div(Float x, Interval i) 
+{
+    if(i.l<=0 && i.u>=0) {
+        return Interval(-inf(),+inf());
+    } else if(x>=0) {
+        return Interval(down(x/i.u),up(x/i.l)); 
+    } else {
+        return Interval(down(x/i.l),up(x/i.u)); 
+    } 
+}
 Interval trunc(Interval x, uint n) 
 {
     Interval e=Interval(pow(2.0,52-n));
@@ -710,9 +727,9 @@ Interval pow(Interval i, uint m)
 Interval sqrt(Interval i)
 {
     rounding_mode_t rnd = get_rounding_mode();
-    set_rounding_mode(round_down);
+    set_rounding_downward();
     Float rl=sqrt_rnd(i.l);
-    set_rounding_mode(round_up);
+    set_rounding_upward();
     Float ru=sqrt_rnd(i.u);
     set_rounding_mode(rnd);
     return Interval(rl,ru);
@@ -721,9 +738,9 @@ Interval sqrt(Interval i)
 Interval exp(Interval i)
 {
     rounding_mode_t rnd = get_rounding_mode();
-    set_rounding_mode(round_down);
+    set_rounding_downward();
     Float rl=exp_rnd(i.l);
-    set_rounding_mode(round_up);
+    set_rounding_upward();
     Float ru=exp_rnd(i.u);
     set_rounding_mode(rnd);
     return Interval(rl,ru);
@@ -732,9 +749,9 @@ Interval exp(Interval i)
 Interval log(Interval i)
 {
     rounding_mode_t rnd = get_rounding_mode();
-    set_rounding_mode(round_down);
+    set_rounding_downward();
     Float rl=log_rnd(i.l);
-    set_rounding_mode(round_up);
+    set_rounding_upward();
     Float ru=log_rnd(i.u);
     set_rounding_mode(rnd);
     return Interval(rl,ru);

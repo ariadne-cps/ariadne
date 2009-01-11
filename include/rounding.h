@@ -26,6 +26,8 @@
  *  May be platform-dependent.
  */
 
+#ifndef ARIADNE_ROUNDING_H
+#define ARIADNE_ROUNDING_H
 
 #ifdef DOXYGEN
 namespace Ariadne {
@@ -69,15 +71,13 @@ inline rounding_mode_t get_rounding_mode();
   #define ARIADNE_C99_ROUNDING
 #endif
 
-//#define ARIADNE_C99_ROUNDING
+
 
 #if defined ARIADNE_C99_ROUNDING
 
 #include <fenv.h>
 
 namespace Ariadne {
-
-#warning "Using standard fenv.h C header file for setting the rounding mode."
 
 typedef unsigned short rounding_mode_t;
 
@@ -99,8 +99,6 @@ inline rounding_mode_t get_rounding_mode() { return fegetround(); }
 
 
 #elif defined ARIADNE_EGCC_ROUNDING
-
-#warning "Using extended GCC inline assembler for setting the rounding mode."
 
 const unsigned short ARIADNE_FENV_BASE = 895;
 const unsigned short ARIADNE_ROUND_TO_NEAREST = ARIADNE_FENV_BASE + 0000;
@@ -133,8 +131,6 @@ inline void set_rounding_toward_zero() { set_rounding_mode(toward_zero); }
 
 #elif defined ARIADNE_MSVC_ROUNDING
 
-#warning "Using Microsoft Visual Studio inline assembler for setting the rounding mode."
-
 const unsigned short ARIADNE_FENV_BASE = 895;
 unsigned short ARIADNE_ROUND_TMP = ARIADNE_FENV_BASE;
 
@@ -164,4 +160,6 @@ inline rounding_mode_t get_rounding_mode() { __asm fstcw ARIADNE_ROUND_TMP; ARIA
 #error "No rounding mode changes specified."
 
 #endif
+
+#endif // ARIADNE_ROUNDING_H
 

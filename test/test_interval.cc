@@ -163,6 +163,8 @@ TestInterval::test_accurate_rounded_arithmetic()
     ARIADNE_TEST_EQUAL(Float(min)-Interval(1.5),Interval(-1.5,eps-1.5));
     ARIADNE_TEST_EQUAL(Float(1+5*eps)/Interval(1+2*eps,1+3*eps),Interval(1+eps,1+3*eps));
 
+    ARIADNE_TEST_EQUAL(sqr(Interval(1-eps,1+eps)),Interval(1-4*eps/2,1+3*eps));
+
     ARIADNE_TEST_EQUAL(pow(Interval(3,5),-1),Interval(0.19999999999999998,0.33333333333333337));
     ARIADNE_TEST_EQUAL(pow(Interval(3,5),-2),Interval(0.039999999999999986955,0.11111111111111114658));
 

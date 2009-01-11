@@ -36,6 +36,7 @@
 #include <stdint.h>
 
 #include "tribool.h"
+#include "rounding.h"
 
 // Simplifying typedefs for unsigned types
 // These may be inclused in other headers,
@@ -218,24 +219,24 @@ inline Float med(Interval i) { return (i.l+i.u)/2; }
 inline Float rad(Interval i) { return up((i.u-i.l)/2); }
 inline Float diam(Interval i) { return up(i.u-i.l); }
 
+inline Interval abs(Interval);
+inline Interval neg(Interval);
+inline Interval add(volatile Interval, volatile Interval);
+inline Interval add(volatile Interval, volatile Float);
+inline Interval sub(volatile Interval, volatile Interval);
+inline Interval sub(volatile Interval, volatile Float);
+inline Interval sub(volatile Float, volatile Interval);
 
+Interval rec(volatile Interval);
+Interval mul(volatile Interval, volatile Interval);
+Interval div(volatile Interval, volatile Interval);
+Interval mul(volatile Interval, volatile Float);
+Interval div(volatile Interval, volatile Float);
+Interval div(volatile Float, volatile Interval);
 
-Interval abs(Interval);
-Interval neg(Interval);
-Interval rec(Interval);
-Interval add(Interval, Interval);
-Interval sub(Interval, Interval);
-Interval mul(Interval, Interval);
-Interval div(Interval, Interval);
-Interval add(Interval, Float);
-Interval sub(Interval, Float);
-Interval mul(Interval, Float);
-Interval div(Interval, Float);
-Interval sub(Float, Interval);
-Interval div(Float, Interval);
 Interval sqr(Interval);
-Interval pow(Interval, int);
 Interval pow(Interval, uint);
+Interval pow(Interval, int);
 
 Interval sqrt(Interval);
 Interval exp(Interval);
@@ -248,6 +249,90 @@ Interval tan(Interval);
 Interval asin(Interval);
 Interval acos(Interval);
 Interval atan(Interval);
+
+
+inline Float mag(Interval i) { return max(abs(i.l),abs(i.u)); }
+inline Float mig(Interval i) { return min(abs(i.l),abs(i.u)); }
+
+inline bool contains(Interval i, Float x) { return i.l<=x && x<=i.u; }
+
+inline bool subset(Interval i1, Interval i2) { return i1.l>=i2.l && i1.u<=i2.u; }
+inline bool intersect(Interval i1, Interval i2) { return i1.l<=i2.u && i1.u>=i2.l; }
+inline bool disjoint(Interval i1, Interval i2) { return i1.l>i2.u || i1.u<i2.l; }
+inline bool overlap(Interval i1, Interval i2) { return i1.l<i2.u && i1.u>i2.l; }
+inline bool inside(Interval i1, Interval i2) { return i1.l>i2.l && i1.u<i2.u; }
+inline bool covers(Interval i1, Interval i2) { return i1.l<i2.l && i1.u>i2.u; }
+
+Interval abs(Interval i) 
+{
+    if(i.l>=0) {
+        return Interval(i.l,i.u);
+    } else if(i.u<=0) {
+        return Interval(-i.u,-i.l);
+    } else {
+        return Interval(0.0,max(-i.l,i.u));
+    }
+}
+
+Interval neg(Interval i) 
+{
+    return Interval(-i.u,-i.l);
+}
+
+Interval add(volatile Interval i1, volatile Interval i2) 
+{
+    rounding_mode_t rnd=get_rounding_mode();
+    set_rounding_mode(downward);
+    volatile double rl=i1.l+i2.l;
+    set_rounding_mode(upward);
+    volatile double ru=i1.u+i2.u;
+    set_rounding_mode(rnd);
+    return Interval(rl,ru);
+}
+
+Interval add(volatile Interval i, volatile Float x) 
+{
+    rounding_mode_t rnd=get_rounding_mode();
+    set_rounding_mode(downward);
+    volatile double rl=i.l+x;
+    set_rounding_mode(upward);
+    volatile double ru=i.u+x;
+    set_rounding_mode(rnd);
+    return Interval(rl,ru);
+}
+
+Interval sub(volatile Interval i1, volatile Interval i2) 
+{
+    rounding_mode_t rnd=get_rounding_mode();
+    set_rounding_mode(downward);
+    volatile double rl=i1.l-i2.u;
+    set_rounding_mode(upward);
+    volatile double ru=i1.u-i2.l;
+    set_rounding_mode(rnd);
+    return Interval(rl,ru);
+}
+
+Interval sub(volatile Interval i, volatile Float x) 
+{
+    rounding_mode_t rnd=get_rounding_mode();
+    set_rounding_mode(downward);
+    volatile double rl=i.l-x;
+    set_rounding_mode(upward);
+    volatile double ru=i.u-x;
+    set_rounding_mode(rnd);
+    return Interval(rl,ru);
+}
+
+Interval sub(volatile Float x, volatile Interval i) 
+{
+    rounding_mode_t rnd=get_rounding_mode();
+    set_rounding_mode(downward);
+    volatile double rl=x-i.u;
+    set_rounding_mode(upward);
+    volatile double ru=x-i.l;
+    set_rounding_mode(rnd);
+    return Interval(rl,ru);
+}
 
 // Standard equality operators
 inline bool operator==(const Interval& i1, const Interval& i2) { return i1.l==i2.l && i1.u==i2.u; }
@@ -346,19 +431,6 @@ inline tribool operator<=(Interval i1, Interval i2) {
     else if(i1.lower()> i2.upper()) { return false; }
     else { return indeterminate; }
 }
-
-
-inline Float mag(Interval i) { return max(abs(i.l),abs(i.u)); }
-inline Float mig(Interval i) { return min(abs(i.l),abs(i.u)); }
-
-inline bool contains(Interval i, Float x) { return i.l<=x && x<=i.u; }
-
-inline bool subset(Interval i1, Interval i2) { return i1.l>=i2.l && i1.u<=i2.u; }
-inline bool intersect(Interval i1, Interval i2) { return i1.l<=i2.u && i1.u>=i2.l; }
-inline bool disjoint(Interval i1, Interval i2) { return i1.l>i2.u || i1.u<i2.l; }
-inline bool overlap(Interval i1, Interval i2) { return i1.l<i2.u && i1.u>i2.l; }
-inline bool inside(Interval i1, Interval i2) { return i1.l>i2.l && i1.u<i2.u; }
-inline bool covers(Interval i1, Interval i2) { return i1.l<i2.l && i1.u>i2.u; }
 
 template<class A> void serialize(A& a, Interval& ivl, const uint version) {
     a & ivl.l & ivl.u; }

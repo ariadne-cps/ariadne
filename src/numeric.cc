@@ -30,6 +30,16 @@
 #include "rounding.h"
 #include "numeric.h"
 
+#if defined ARIADNE_C99_ROUNDING
+#warning "Using standard fenv.h C header file for setting the rounding mode."
+#elif defined ARIADNE_GCC_ROUNDING
+#warning "Using ordinary GCC inline assembler for setting the rounding mode."
+#elif defined ARIADNE_EGCC_ROUNDING
+#warning "Using extended GCC inline assembler for setting the rounding mode."
+#elif defined ARIADNE_MSVC_ROUNDING
+#warning "Using Microsoft Visual Studio inline assembler for setting the rounding mode."
+#endif
+
 namespace Ariadne {
 
 
@@ -556,8 +566,8 @@ inline double _sub_down(volatile double x, volatile double y) { set_rounding_dow
 inline double _sub_up(volatile double x, volatile double y) { set_rounding_upward(); return x-y; }
 inline double _mul_down(volatile double x, volatile double y) { set_rounding_downward(); return x*y; }
 inline double _mul_up(volatile double x, volatile double y) { set_rounding_upward(); return x*y; }
-inline volatile double _div_down(volatile double x, volatile double y) { set_rounding_downward(); return x/y; }
-inline volatile double _div_up(volatile double x, volatile double y) { set_rounding_upward(); return x/y; }
+inline double _div_down(volatile double x, volatile double y) { set_rounding_downward(); return x/y; }
+inline double _div_up(volatile double x, volatile double y) { set_rounding_upward(); return x/y; }
 
 Interval trunc(Interval x, uint n) 
 {
@@ -566,23 +576,7 @@ Interval trunc(Interval x, uint n)
     return y-e;
 }
 
-Interval abs(Interval i) 
-{
-    if(i.l>=0) {
-        return Interval(i.l,i.u);
-    } else if(i.u<=0) {
-        return Interval(-i.u,-i.l);
-    } else {
-        return Interval(0.0,max(-i.l,i.u));
-    }
-}
-
-Interval neg(Interval i) 
-{
-    return Interval(-i.u,-i.l);
-}
-
-Interval rec(Interval i) 
+Interval rec(volatile Interval i) 
 {
     volatile double rl,ru;
     if(i.l>0 || i.u<0) {
@@ -597,28 +591,8 @@ Interval rec(Interval i)
     return Interval(rl,ru);
 }
 
-Interval add(Interval i1, Interval i2) 
-{
-    rounding_mode_t rnd=get_rounding_mode();
-    volatile double rl=_add_down(i1.l,i2.l);
-    volatile double ru=_add_up(i1.u,i2.u);
-    set_rounding_mode(rnd);
-    return Interval(rl,ru);
-}
 
-Interval sub(Interval i1, Interval i2) 
-{
-    rounding_mode_t rnd=get_rounding_mode();
-    set_rounding_mode(downward);
-    volatile double rl=i1.l-i2.u;
-    set_rounding_mode(upward);
-    volatile double ru=i1.u-i2.l;
-    set_rounding_mode(rnd);
-    return Interval(rl,ru);
-}
-
-
-Interval mul(Interval i1, Interval i2) 
+Interval mul(volatile Interval i1, volatile Interval i2) 
 {
     volatile double rl,ru;
     rounding_mode_t rnd=get_rounding_mode();
@@ -656,7 +630,7 @@ Interval mul(Interval i1, Interval i2)
 }
 
 
-Interval div(Interval i1, Interval i2) 
+Interval div(volatile Interval i1, volatile Interval i2) 
 {
     rounding_mode_t rnd=get_rounding_mode();
     volatile double rl,ru;
@@ -687,25 +661,7 @@ Interval div(Interval i1, Interval i2)
 
 
 
-Interval add(Interval i, Float x) 
-{
-    rounding_mode_t rnd=get_rounding_mode();
-    volatile double rl=_add_down(i.l,x);
-    volatile double ru=_add_up(i.u,x);
-    set_rounding_mode(rnd);
-    return Interval(rl,ru);
-}
-
-Interval sub(Interval i, Float x) 
-{
-    rounding_mode_t rnd=get_rounding_mode();
-    volatile double rl=_sub_down(i.l,x);
-    volatile double ru=_sub_up(i.u,x);
-    set_rounding_mode(rnd);
-    return Interval(rl,ru);
-}
-
-Interval mul(Interval i, Float x) 
+Interval mul(volatile Interval i, volatile Float x) 
 {
     rounding_mode_t rnd=get_rounding_mode();
     volatile double rl,ru;
@@ -719,7 +675,7 @@ Interval mul(Interval i, Float x)
 }
 
 
-Interval div(Interval i, Float x) 
+Interval div(volatile Interval i, volatile Float x) 
 {
     rounding_mode_t rnd=get_rounding_mode();
     volatile double rl,ru;
@@ -735,16 +691,7 @@ Interval div(Interval i, Float x)
 }
 
 
-Interval sub(Float x, Interval i) 
-{
-    rounding_mode_t rnd=get_rounding_mode();
-    volatile double rl=_sub_down(x,i.u);
-    volatile double ru=_sub_up(x,i.l);
-    set_rounding_mode(rnd);
-    return Interval(rl,ru);
-}
-
-Interval div(Float x, Interval i) 
+Interval div(volatile Float x, volatile Interval i) 
 {
     rounding_mode_t rnd=get_rounding_mode();
     volatile double rl,ru;
@@ -762,164 +709,21 @@ Interval div(Float x, Interval i)
 Interval sqr(Interval i) 
 {
     rounding_mode_t rnd=get_rounding_mode();
-    Interval r;
+    volatile double rl,ru;
     if(i.l >=0) {
-        r=Interval(_mul_down(i.l,i.l),_mul_up(i.u,i.u));
+        rl=_mul_down(i.l,i.l); ru=_mul_up(i.u,i.u);
     } else if(i.u<=0) {
-        r=Interval(_mul_down(i.u,i.u),_mul_up(i.l,i.l));
+        rl=_mul_down(i.u,i.u); ru=_mul_up(i.l,i.l);
     } else {
+        rl=0.0;
         set_rounding_mode(upward);
-        r=Interval(0.0,max(i.l*i.l,i.u*i.u));
+        ru=max(i.l*i.l,i.u*i.u);
     }
     set_rounding_mode(rnd);
-    return r;
-}
-
-/*
-
-Interval neg(Interval i) 
-{
-    return Interval(-i.u,-i.l);
-}
-
-Interval rec(Interval i) 
-{
-    Interval r;
-    if(i.l>0 || i.u<0) {
-        return Interval(down(1/i.u),up(1/i.l)); 
-    } else {
-        ARIADNE_THROW(DivideByZeroException,"rec(Interval i)","i="<<i<<")");
-    }
-}
-
-Interval add(Interval i1, Interval i2) 
-{
-    return Interval(down(i1.l+i2.l),up(i1.u+i2.u));
-}
-
-Interval sub(Interval i1, Interval i2) 
-{
-    return Interval(down(i1.l-i2.u),up(i1.u-i2.l));
-}
-
-Interval mul(Interval i1, Interval i2) 
-{
-    if(i1.l>=0) {
-        if(i2.l>=0) {
-            return Interval(down(i1.l*i2.l),up(i1.u*i2.u));
-        } else if(i2.u<=0) {
-            return Interval(down(i1.u*i2.l),up(i1.l*i2.u));
-        } else {
-            return Interval(down(i1.u*i2.l),up(i1.u*i2.u));
-        }
-    }
-    else if(i1.u<=0) {
-        if(i2.l>=0) {
-            return Interval(down(i1.l*i2.u),up(i1.u*i2.l));
-        } else if(i2.u<=0) {
-            return Interval(down(i1.u*i2.u),up(i1.l*i2.l));
-        } else {
-            return Interval(down(i1.l*i2.u),up(i1.l*i2.l));
-        }
-    } else {
-        if(i2.l>=0) {
-            return Interval(down(i1.l*i2.u),up(i1.u*i2.u));
-        } else if(i2.u<=0) {
-            return Interval(down(i1.u*i2.l),up(i1.l*i2.l));;
-        } else {
-            return Interval(down(min(i1.u*i2.l,i1.l*i2.u)),up(max(i1.l*i2.l,i1.u*i2.u)));
-        }
-    }
+    return Interval(rl,ru);
 }
 
 
-Interval div(Interval i1, Interval i2) 
-{
-    if(i2.l>=0) {
-        if(i1.l>=0) {
-            return Interval(down(i1.l/i2.u),up(i1.u/i2.l));
-        } else if(i1.u<=0) {
-            return Interval(down(i1.l/i2.l),up(i1.u/i2.u));
-        } else {
-            return Interval(down(i1.l/i2.l),up(i1.u/i2.l));
-        }
-    }
-    else if(i2.u<=0) {
-        if(i1.l>=0) {
-            return Interval(down(i1.l/i2.l),up(i1.u/i2.u));
-        } else if(i1.u<=0) {
-            return Interval(down(i1.u/i2.l),up(i1.l/i2.u));
-        } else {
-            return Interval(down(i1.u/i2.u),up(i1.l/i2.u));;
-        } 
-    }
-    else {
-        return Interval(-inf(),+inf());
-    }
-}
-
-
-
-Interval add(Interval i, Float x) 
-{
-    return Interval(down(i.l+x),up(i.u+x)); 
-}
-
-Interval sub(Interval i, Float x) 
-{
-    return Interval(down(i.l-x),up(i.u-x)); 
-}
-
-Interval mul(Interval i, Float x) 
-{
-    if(x>=0) {
-        return Interval(down(i.l*x),up(i.u*x)); 
-    } else {
-        return Interval(down(i.u*x),up(i.l*x));
-    }
-}
-
-
-Interval div(Interval i, Float x) 
-{
-    if(x>0) {
-        return Interval(down(i.l/x),up(i.u/x)); 
-    } else if(x<0) {
-        return Interval(down(i.u/x),up(i.l/x));
-    } else {
-        return Interval(-inf(),+inf());
-    }
-}
-
-
-Interval sub(Float x, Interval i) 
-{
-    return Interval(down(x-i.u),up(x-i.l)); 
-}
-
-Interval div(Float x, Interval i) 
-{
-    if(i.l<=0 && i.u>=0) {
-        return Interval(-inf(),+inf());
-    } else if(x>=0) {
-        return Interval(down(x/i.u),up(x/i.l)); 
-    } else {
-        return Interval(down(x/i.l),up(x/i.u)); 
-    } 
-}
-
-Interval sqr(Interval i) 
-{
-    if(i.l >=0) {
-        return Interval(down(i.l*i.l),up(i.u*i.u));
-    } else if(i.u<=0) {
-        return Interval(down(i.u*i.u),up(i.l*i.l));
-    } else {
-        return Interval(0.0,up(max(i.l*i.l,i.u*i.u)));
-    }
-}
-
-*/
 
 Interval pow(Interval i, int n) 
 {
@@ -931,7 +735,8 @@ Interval pow(Interval i, int n)
 Interval pow(Interval i, uint m) 
 {
     //std::cerr<<"pow("<<i<<","<<m<<"u)\n";
-    if(m%2==0) { i=abs(i); }
+    const Interval& nvi=i;
+    if(m%2==0) { i=abs(nvi); }
     volatile double rl,ru;
     set_rounding_mode(downward);
     rl=pow_rnd(i.l,m);

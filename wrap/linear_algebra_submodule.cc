@@ -42,9 +42,11 @@ template<> const char* python_name<Float>(const char* name) {
     return (std::string("")+name).c_str(); }
 template<> const char* python_name<Interval>(const char* name) { 
     return (std::string("I")+name).c_str(); }
+
+#ifdef HAVE_GMPXX_H
 template<> const char* python_name<Rational>(const char* name) { 
     return (std::string("Q")+name).c_str(); }
-
+#endif
 
 template<class X> 
 void read(Vector<X>& v, const boost::python::object& obj) 

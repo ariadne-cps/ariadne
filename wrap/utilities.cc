@@ -69,8 +69,6 @@ read(unsigned long int& n, const boost::python::object& obj)
 
 typedef mpz_class Integer;
 
-/*
-
 
 void
 read(Integer& z, const boost::python::object& obj)
@@ -87,7 +85,6 @@ read(Integer& z, const boost::python::object& obj)
     }
 }
  
-*/
 
 void
 read(Rational& q, const boost::python::object& obj)

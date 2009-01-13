@@ -272,9 +272,9 @@ void consistency_check(const Matrix<X>& A, const Vector<X>& b, const Vector<X>& 
 
 template<class X> inline X inf();
 template<> inline Float inf<Float>() { return std::numeric_limits<double>::infinity(); }
-//template<> inline Rational inf<Rational>() { return Rational(1000000); }
+#ifdef HAVE_GMPXX_H
 template<> inline Rational inf<Rational>() { return Rational(1,-0); }
-
+#endif
 
 
 

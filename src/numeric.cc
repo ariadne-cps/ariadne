@@ -27,18 +27,28 @@
 
 #include "config.h"
 #include "macros.h"
+
 #include "rounding.h"
-#include "numeric.h"
 
 #if defined ARIADNE_C99_ROUNDING
-#warning "Using standard fenv.h C header file for setting the rounding mode."
+    #warning "Using standard fenv.h C header file for setting the rounding mode."
+#elif defined ARIADNE_BOOST_ROUNDING
+    #if defined BOOST_NUMERIC_INTERVAL_DETAIL_C99_ROUNDING_CONTROL_HPP
+        #warning "Using Boost interval library standard fenv.h C header for setting the rounding mode."
+    #else 
+        #warning "Using Boost interval library hardware rounding for setting the rounding mode."
+    #endif
 #elif defined ARIADNE_GCC_ROUNDING
-#warning "Using ordinary GCC inline assembler for setting the rounding mode."
+    #warning "Using ordinary GCC inline assembler for setting the rounding mode."
 #elif defined ARIADNE_EGCC_ROUNDING
-#warning "Using extended GCC inline assembler for setting the rounding mode."
+    #warning "Using extended GCC inline assembler for setting the rounding mode."
 #elif defined ARIADNE_MSVC_ROUNDING
-#warning "Using Microsoft Visual Studio inline assembler for setting the rounding mode."
+    #warning "Using Microsoft Visual Studio inline assembler for setting the rounding mode."
+#else
+    #warning "No rounding mode defined."
 #endif
+
+#include "numeric.h"
 
 namespace Ariadne {
 
@@ -154,10 +164,10 @@ static inline double next_opp(double x) {
 
 static inline char rounding_mode_char() 
 {
-    if(get_rounding_mode()==to_nearest) { return 'n'; }
-    if(get_rounding_mode()==downward) { return 'd'; }
-    if(get_rounding_mode()==upward) { return 'u'; }
-    if(get_rounding_mode()==toward_zero) { return 'z'; }
+    if(get_rounding_mode() & 3072==0000) { return 'n'; }
+    if(get_rounding_mode() & 3072==1024) { return 'd'; }
+    if(get_rounding_mode() & 3072==2048) { return 'u'; }
+    if(get_rounding_mode() & 3072==3072) { return 'z'; }
     return '?';
 }
 

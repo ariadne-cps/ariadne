@@ -54,7 +54,8 @@ class TestFloat
 
 
 int main() {
-    cout << std::setprecision(20);
+    std::cout<<std::setprecision(20);
+    std::cerr<<std::setprecision(20);
 
     TestFloat().test();
 

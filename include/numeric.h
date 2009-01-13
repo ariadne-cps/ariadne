@@ -141,10 +141,10 @@ inline Float sub_rnd(Float x, Float y) { return x-y; }
 inline Float mul_rnd(Float x, Float y) { return x*y; }
 inline Float div_rnd(Float x, Float y) { return x/y; }
 
-inline Float add_opp(Float x, Float y) { volatile Float t=(-x)-y; return -t; }
-inline Float sub_opp(Float x, Float y) { volatile Float t=(-x)+y; return -t; }
-inline Float mul_opp(Float x, Float y) { volatile Float t=(-x)*y; return -t; }
-inline Float div_opp(Float x, Float y) { volatile Float t=(-x)/y; return -t; }
+inline Float add_opp(Float x, Float y) { volatile double t=(-x)-y; return -t; }
+inline Float sub_opp(Float x, Float y) { volatile double t=(-x)+y; return -t; }
+inline Float mul_opp(Float x, Float y) { volatile double t=(-x)*y; return -t; }
+inline Float div_opp(Float x, Float y) { volatile double t=(-x)/y; return -t; }
 
 
 //! \brief Intervals supporting interval arithmetic.
@@ -221,18 +221,18 @@ inline Float diam(Interval i) { return up(i.u-i.l); }
 
 inline Interval abs(Interval);
 inline Interval neg(Interval);
-inline Interval add(volatile Interval, volatile Interval);
-inline Interval add(volatile Interval, volatile Float);
-inline Interval sub(volatile Interval, volatile Interval);
-inline Interval sub(volatile Interval, volatile Float);
-inline Interval sub(volatile Float, volatile Interval);
+inline Interval add(Interval, Interval);
+inline Interval add(Interval, Float);
+inline Interval sub(Interval, Interval);
+inline Interval sub(Interval, Float);
+inline Interval sub(Float, Interval);
 
-Interval rec(volatile Interval);
-Interval mul(volatile Interval, volatile Interval);
-Interval div(volatile Interval, volatile Interval);
-Interval mul(volatile Interval, volatile Float);
-Interval div(volatile Interval, volatile Float);
-Interval div(volatile Float, volatile Interval);
+Interval rec(Interval);
+Interval mul(Interval, Interval);
+Interval div(Interval, Interval);
+Interval mul(Interval, Float);
+Interval div(Interval, Float);
+Interval div(Float, Interval);
 
 Interval sqr(Interval);
 Interval pow(Interval, uint);
@@ -279,57 +279,74 @@ Interval neg(Interval i)
     return Interval(-i.u,-i.l);
 }
 
-Interval add(volatile Interval i1, volatile Interval i2) 
+Interval add(Interval i1, Interval i2) 
 {
     rounding_mode_t rnd=get_rounding_mode();
+    volatile double& i1l=i1.l;
+    volatile double& i1u=i1.u;
+    volatile double& i2l=i2.l;
+    volatile double& i2u=i2.u;
     set_rounding_mode(downward);
-    volatile double rl=i1.l+i2.l;
+    volatile double rl=i1l+i2l;
     set_rounding_mode(upward);
-    volatile double ru=i1.u+i2.u;
+    volatile double ru=i1u+i2u;
     set_rounding_mode(rnd);
     return Interval(rl,ru);
 }
 
-Interval add(volatile Interval i, volatile Float x) 
+Interval add(Interval i1, Float x2) 
 {
     rounding_mode_t rnd=get_rounding_mode();
+    volatile double& i1l=i1.l;
+    volatile double& i1u=i1.u;
+    volatile double& x2v=x2;
     set_rounding_mode(downward);
-    volatile double rl=i.l+x;
+    volatile double rl=i1l+x2v;
     set_rounding_mode(upward);
-    volatile double ru=i.u+x;
+    volatile double ru=i1u+x2v;
     set_rounding_mode(rnd);
     return Interval(rl,ru);
 }
 
-Interval sub(volatile Interval i1, volatile Interval i2) 
+Interval sub(Interval i1, Interval i2) 
 {
     rounding_mode_t rnd=get_rounding_mode();
+    volatile double& i1l=i1.l;
+    volatile double& i1u=i1.u;
+    volatile double& i2l=i2.l;
+    volatile double& i2u=i2.u;
     set_rounding_mode(downward);
-    volatile double rl=i1.l-i2.u;
+    volatile double rl=i1l-i2u;
     set_rounding_mode(upward);
-    volatile double ru=i1.u-i2.l;
+    volatile double ru=i1u-i2l;
     set_rounding_mode(rnd);
     return Interval(rl,ru);
 }
 
-Interval sub(volatile Interval i, volatile Float x) 
+Interval sub(Interval i1, Float x2) 
 {
     rounding_mode_t rnd=get_rounding_mode();
+    volatile double& i1l=i1.l;
+    volatile double& i1u=i1.u;
+    volatile double& x2v=x2;
     set_rounding_mode(downward);
-    volatile double rl=i.l-x;
+    volatile double rl=i1l-x2v;
     set_rounding_mode(upward);
-    volatile double ru=i.u-x;
+    volatile double ru=i1u-x2v;
     set_rounding_mode(rnd);
     return Interval(rl,ru);
 }
 
-Interval sub(volatile Float x, volatile Interval i) 
+Interval sub(Float x1, Interval i2) 
 {
     rounding_mode_t rnd=get_rounding_mode();
+    volatile double& x1v=x1;
+    volatile double& i2l=i2.l;
+    volatile double& i2u=i2.u;
     set_rounding_mode(downward);
-    volatile double rl=x-i.u;
+    volatile double rl=x1v-i2u;
     set_rounding_mode(upward);
-    volatile double ru=x-i.l;
+    volatile double ru=x1v-i2l;
     set_rounding_mode(rnd);
     return Interval(rl,ru);
 }

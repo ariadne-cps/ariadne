@@ -59,18 +59,14 @@ inline rounding_mode_t get_rounding_mode();
 }
 #endif
 
-#if defined __i386__ || defined __x86_64 || defined _M_IX86 || defined _M_X86
-  #if defined __GNUC__ && ( __GNUC__ >= 5 || ( __GNUC__ == 4 && __GNUC_MINOR__ >= 4 ) )
-    #define ARIADNE_EGCC_ROUNDING
-//  #elif defined _MSC_VER
-//    #define ARIADNE_MSVC_ROUNDING
-  #else
-    #define ARIADNE_BOOST_ROUNDING
-  #endif
-//#elif defined HAVE_FENV_H
-//  #define ARIADNE_C99_ROUNDING
+#if defined __GNUC__ && ( defined __i386__ || defined __x86_64 || defined _M_IX86 || defined _M_X86 )
+    #if __GNUC__ >= 5 || ( __GNUC__ == 4 && __GNUC_MINOR__ >= 4 )
+        #define ARIADNE_GCC_ROUNDING
+    #else
+        #define ARIADNE_C99_ROUNDING
+    #endif
 #else
-  #define ARIADNE_BOOST_ROUNDING
+    #define ARIADNE_BOOST_ROUNDING
 #endif
 
 
@@ -134,7 +130,7 @@ inline rounding_mode_t get_rounding_mode() { rounding_mode_t rnd; boost::numeric
 
 
 
-#elif defined ARIADNE_EGCC_ROUNDING
+#elif defined ARIADNE_GCC_ROUNDING
 
 const unsigned short ARIADNE_FENV_BASE = 895;
 const unsigned short ARIADNE_ROUND_TO_NEAREST = ARIADNE_FENV_BASE + 0000;
@@ -191,7 +187,9 @@ inline rounding_mode_t get_rounding_mode() { __asm fstcw ARIADNE_ROUND_TMP; ARIA
 
 
 
-#else
+#else // No rounding
+
+namespace Ariadne {
 
 typedef unsigned short rounding_mode_t;
 
@@ -207,6 +205,8 @@ inline void set_rounding_toward_zero() { }
 
 inline void set_rounding_mode(rounding_mode_t rnd) { }
 inline rounding_mode_t get_rounding_mode() { return 0 }
+
+}
 
 #endif
 

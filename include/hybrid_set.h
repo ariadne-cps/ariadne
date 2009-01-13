@@ -83,6 +83,11 @@ class HybridSpace
     locations_const_iterator;
     
     HybridSpace() : std::map<DiscreteState,uint>() { }
+    template<class SET> HybridSpace(const std::map<DiscreteState,SET>& qsmap) {
+        for(typename std::map<DiscreteState,SET>::const_iterator loc_iter
+                =qsmap.begin(); loc_iter!=qsmap.end(); ++loc_iter) {
+            this->insert(make_pair(loc_iter->first,loc_iter->second.dimension())); }
+    }
     template<class HSET> HybridSpace(const HSET& set) {
         for(typename HSET::locations_const_iterator loc_iter
                 =set.locations_begin(); loc_iter!=set.locations_end(); ++loc_iter) {

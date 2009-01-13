@@ -75,6 +75,7 @@
 #include <stdexcept>
 
 #include "macros.h"
+#include "stlio.h"
 
 namespace Ariadne {
 

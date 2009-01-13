@@ -26,6 +26,7 @@ SRC = \
 	function_set.cc \
 	taylor_set.cc \
 	grid_set.cc \
+	approximate_set.cc \
 	hybrid_set.cc \
 	geometry.cc \
 	hybrid_automaton.cc \

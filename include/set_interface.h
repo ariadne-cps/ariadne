@@ -34,6 +34,8 @@
 
 namespace Ariadne {
 
+typedef double Float;
+
 class Box;
 
 class BoundedSetInterface;

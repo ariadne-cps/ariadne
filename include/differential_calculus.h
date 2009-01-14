@@ -1,5 +1,5 @@
 /***************************************************************************
- *            dynamical_toolbox.h
+ *            differential_calculus.h
  *
  *  Copyright  2008  Pieter Collins
  *
@@ -21,18 +21,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file dynamical_toolbox.h
- *  \brief Toolbox for dynamical systems. 
+/*! \file differential_calculus.h
+ *  \brief Methods of differential calculus based on the SparseDifferential class.
  */
 
 
-#ifndef ARIADNE_DYNAMICAL_TOOLBOX_H
-#define ARIADNE_DYNAMICAL_TOOLBOX_H
+#ifndef ARIADNE_DIFFERENTIAL_CALCULUS_H
+#define ARIADNE_DIFFERENTIAL_CALCULUS_H
 
 #include "tribool.h"
 #include "logging.h"
-#include "toolbox_interface.h"
-#include "toolbox_base.h"
+#include "calculus_interface.h"
+#include "calculus_base.h"
 
 /* \brief Top-level namespace. */
 namespace Ariadne {
@@ -51,8 +51,8 @@ class Box;
 
 /*! \brief Tools for analysing dynamical systems based on function models. */
 template<class Mdl> 
-class DynamicalToolbox
-    : public ToolboxBase<Mdl>
+class DifferentialCalculus
+    : public CalculusBase<Mdl>
 {
     typedef Float R;
     typedef Float A;
@@ -82,15 +82,15 @@ class DynamicalToolbox
 
     typedef SetModelType EnclosureType;
   public:
-    using ToolboxBase<Mdl>::verbosity;
-    using ToolboxBase<Mdl>::active;
-    using ToolboxBase<Mdl>::reset_step;
-    using ToolboxBase<Mdl>::integration_step;
-    using ToolboxBase<Mdl>::reachability_step;
+    using CalculusBase<Mdl>::verbosity;
+    using CalculusBase<Mdl>::active;
+    using CalculusBase<Mdl>::reset_step;
+    using CalculusBase<Mdl>::integration_step;
+    using CalculusBase<Mdl>::reachability_step;
 
   public:
     //! \brief Default constructor.
-    DynamicalToolbox();
+    DifferentialCalculus();
 
     //! \brief Test if a set satisfied the constraint given by the guard model. Returns \a true is all 
     //! points in the set satisfy the constraint, \a false if all points do not satisfy the constraint, 
@@ -192,4 +192,4 @@ class DynamicalToolbox
 }
 
 
-#endif /* ARIADNE_DYNAMICAL_TOOLBOX_H */
+#endif /* ARIADNE_DIFFERENTIAL_CALCULUS_H */

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            dynamical_toolbox.cc
+ *            differential_calculus.cc
  *
  *  Copyright  2008  Pieter Collins
  *
@@ -31,7 +31,7 @@
 #include "sparse_differential.h"
 #include "function.h"
 #include "box.h"
-#include "dynamical_toolbox.h"
+#include "differential_calculus.h"
 
 #include "approximate_taylor_model.h"
 
@@ -46,8 +46,8 @@ class NonInvertibleFunctionException { };
 
   
 template<class Mdl>
-DynamicalToolbox<Mdl>::
-DynamicalToolbox() 
+DifferentialCalculus<Mdl>::
+DifferentialCalculus() 
     : _spacial_order(2),
       _temporal_order(4),
       _order(6),
@@ -57,8 +57,8 @@ DynamicalToolbox()
   
 
 template<class Mdl>
-typename DynamicalToolbox<Mdl>::SetModelType
-DynamicalToolbox<Mdl>::
+typename DifferentialCalculus<Mdl>::SetModelType
+DifferentialCalculus<Mdl>::
 reset_step(const FlowModelType& function_model, 
            const SetModelType& set_model) const
 {
@@ -67,8 +67,8 @@ reset_step(const FlowModelType& function_model,
 
 
 template<class Mdl>
-typename DynamicalToolbox<Mdl>::SetModelType
-DynamicalToolbox<Mdl>::
+typename DifferentialCalculus<Mdl>::SetModelType
+DifferentialCalculus<Mdl>::
 integration_step(const FlowModelType& flow_model, 
                  const SetModelType& initial_set_model, 
                  const TimeModelType& integration_time_model) const
@@ -88,8 +88,8 @@ integration_step(const FlowModelType& flow_model,
 
 
 template<class Mdl>
-typename DynamicalToolbox<Mdl>::SetModelType
-DynamicalToolbox<Mdl>::
+typename DifferentialCalculus<Mdl>::SetModelType
+DifferentialCalculus<Mdl>::
 reachability_step(const FlowModelType& flow_model, 
                   const SetModelType& initial_set_model, 
                   const TimeModelType& expanded_reach_time_model) const
@@ -112,8 +112,8 @@ reachability_step(const FlowModelType& flow_model,
 
 
 template<class Mdl>
-typename DynamicalToolbox<Mdl>::SetModelType
-DynamicalToolbox<Mdl>::
+typename DifferentialCalculus<Mdl>::SetModelType
+DifferentialCalculus<Mdl>::
 reachability_step(const FlowModelType& flow_model, 
                   const SetModelType& initial_set_model, 
                   const TimeModelType& initial_time_model, 
@@ -150,8 +150,8 @@ reachability_step(const FlowModelType& flow_model,
 
 // Compute the grazing time using bisections
 template<class Mdl>
-typename DynamicalToolbox<Mdl>::ModelType
-DynamicalToolbox<Mdl>::
+typename DifferentialCalculus<Mdl>::ModelType
+DifferentialCalculus<Mdl>::
 crossing_time(const ModelType& guard_model,
               const ModelType& flow_model, 
               const ModelType& initial_set_model) const
@@ -190,7 +190,7 @@ crossing_time(const ModelType& guard_model,
 // Compute the grazing time using bisections
 template<class Mdl>
 Interval
-DynamicalToolbox<Mdl>::
+DifferentialCalculus<Mdl>::
 touching_time_interval(const ModelType& guard_model, 
                        const ModelType& flow_model, 
                        const ModelType& initial_set_model) const
@@ -257,7 +257,7 @@ touching_time_interval(const ModelType& guard_model,
 
 template<class Mdl>
 std::pair<Float, Vector<Interval> >
-DynamicalToolbox<Mdl>::flow_bounds(FunctionInterface const& vf, 
+DifferentialCalculus<Mdl>::flow_bounds(FunctionInterface const& vf, 
                                    Vector<Interval> const& r, 
                                    Float const& hmax, 
                                    Float const& dmax) const
@@ -331,7 +331,7 @@ DynamicalToolbox<Mdl>::flow_bounds(FunctionInterface const& vf,
 
 template<class Mdl>
 tribool
-DynamicalToolbox<Mdl>::
+DifferentialCalculus<Mdl>::
 active(const PredicateModelType& guard_model, const SetModelType& set_model) const
 {
     IntervalType range=compose(guard_model,set_model).range()[0];
@@ -343,7 +343,7 @@ active(const PredicateModelType& guard_model, const SetModelType& set_model) con
 
 template<class Mdl>
 Mdl
-DynamicalToolbox<Mdl>::map_model(FunctionInterface const& f, Vector<Interval> const& bx) const
+DifferentialCalculus<Mdl>::map_model(FunctionInterface const& f, Vector<Interval> const& bx) const
 { 
     ARIADNE_ASSERT(f.argument_size()==bx.size());
 
@@ -356,7 +356,7 @@ DynamicalToolbox<Mdl>::map_model(FunctionInterface const& f, Vector<Interval> co
 
 template<class Mdl>
 Mdl
-DynamicalToolbox<Mdl>::flow_model(FunctionInterface const& vf, Vector<Interval> const& bx, Float const& h, Vector<Interval> const& bb) const
+DifferentialCalculus<Mdl>::flow_model(FunctionInterface const& vf, Vector<Interval> const& bx, Float const& h, Vector<Interval> const& bb) const
 { 
     Mdl vector_field_model(bb,vf,_order,_smoothness);
     ARIADNE_LOG(6,"vector_field_model = "<<vector_field_model<<"\n");
@@ -371,7 +371,7 @@ DynamicalToolbox<Mdl>::flow_model(FunctionInterface const& vf, Vector<Interval> 
 
 template<class Mdl>
 Mdl
-DynamicalToolbox<Mdl>::predicate_model(FunctionInterface const& g, Vector<Interval> const& bx) const
+DifferentialCalculus<Mdl>::predicate_model(FunctionInterface const& g, Vector<Interval> const& bx) const
 { 
     ARIADNE_ASSERT(g.result_size()==1);
     ARIADNE_ASSERT(g.argument_size()==bx.size());
@@ -385,7 +385,7 @@ DynamicalToolbox<Mdl>::predicate_model(FunctionInterface const& g, Vector<Interv
 //! \brief A model for the constant time function \a t over the domain \a d.
 template<class Mdl>
 Mdl
-DynamicalToolbox<Mdl>::
+DifferentialCalculus<Mdl>::
 time_model(const Float& t, 
            const BoxType& bx) const
 {
@@ -399,7 +399,7 @@ time_model(const Float& t,
 //! \brief A model for the set f\a bx.
 template<class Mdl>
 Mdl
-DynamicalToolbox<Mdl>::
+DifferentialCalculus<Mdl>::
 set_model(const BoxType& bx) const
 {
     SetModelType set_model(bx,IdentityFunction(bx.size()),this->_order,this->_smoothness);
@@ -410,7 +410,7 @@ set_model(const BoxType& bx) const
 //! \brief A model for the enclosure \a es.
 template<class Mdl>
 Mdl
-DynamicalToolbox<Mdl>::
+DifferentialCalculus<Mdl>::
 set_model(const EnclosureType& es) const
 {
     return es;
@@ -419,8 +419,8 @@ set_model(const EnclosureType& es) const
 
 //! \brief An enclosure for the set model \a s.
 template<class Mdl>
-typename DynamicalToolbox<Mdl>::EnclosureType
-DynamicalToolbox<Mdl>::
+typename DifferentialCalculus<Mdl>::EnclosureType
+DifferentialCalculus<Mdl>::
 enclosure(const SetModelType& s) const
 {
     return s;
@@ -432,34 +432,34 @@ enclosure(const SetModelType& s) const
 
 template<class Mdl>
 tribool
-DynamicalToolbox<Mdl>::disjoint(Mdl const&, Vector<Interval> const&) const
+DifferentialCalculus<Mdl>::disjoint(Mdl const&, Vector<Interval> const&) const
 { 
     ARIADNE_NOT_IMPLEMENTED;
 }
 
 template<class Mdl>
 Vector<Interval>
-DynamicalToolbox<Mdl>::bounding_box(Mdl const&) const
+DifferentialCalculus<Mdl>::bounding_box(Mdl const&) const
 { 
     ARIADNE_NOT_IMPLEMENTED;
 }
 
 template<class Mdl>
 array<Mdl> 
-DynamicalToolbox<Mdl>::subdivide(Mdl const&) const
+DifferentialCalculus<Mdl>::subdivide(Mdl const&) const
 { 
     ARIADNE_NOT_IMPLEMENTED;
 }
 
 template<class Mdl>
 Mdl 
-DynamicalToolbox<Mdl>::simplify(Mdl const&) const
+DifferentialCalculus<Mdl>::simplify(Mdl const&) const
 { 
     ARIADNE_NOT_IMPLEMENTED;
 }
 
 
 
-template class DynamicalToolbox<ApproximateTaylorModel>;
+template class DifferentialCalculus<ApproximateTaylorModel>;
 
 }  // namespace Ariadne

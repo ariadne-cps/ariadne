@@ -29,7 +29,7 @@
 #include "function_interface.h"
 #include "approximate_taylor_model.h"
 #include "orbit.h"
-#include "dynamical_toolbox.h"
+#include "differential_calculus.h"
 #include "evolution_parameters.h"
 
 #include "logging.h"
@@ -77,7 +77,7 @@ class DegenerateCrossingException { };
 
 HybridEvolver::HybridEvolver()
     : _parameters(new EvolutionParametersType()),
-      _toolbox(new DynamicalToolbox<ModelType>())
+      _toolbox(new DifferentialCalculus<ModelType>())
 {
 }
 
@@ -85,7 +85,7 @@ HybridEvolver::HybridEvolver()
 
 HybridEvolver::HybridEvolver(const EvolutionParametersType& p)
     : _parameters(new EvolutionParametersType(p)),
-      _toolbox(new DynamicalToolbox<ModelType>())
+      _toolbox(new DifferentialCalculus<ModelType>())
 {
 }
 

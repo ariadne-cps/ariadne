@@ -16,7 +16,7 @@ SRC = \
 	sparse_differential.cc \
 	taylor_variable.cc  \
 	approximate_taylor_model.cc  \
-	dynamical_toolbox.cc \
+	differential_calculus.cc \
 	point.cc \
 	box.cc \
 	zonotope.cc \

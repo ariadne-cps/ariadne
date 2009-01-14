@@ -1,5 +1,5 @@
 /***************************************************************************
- *            toolbox_interface.h
+ *            calculus_interface.h
  *
  *  Copyright  2008  Pieter Collins
  *
@@ -21,13 +21,13 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file toolbox_interface.h
- *  \brief Interfaces for tools for working with dynamical systems. 
+/*! \file calculus_interface.h
+ *  \brief Interfaces for calculus tools useful for working with dynamical systems. 
  */
 
 
-#ifndef ARIADNE_TOOLBOX_INTERFACE_H
-#define ARIADNE_TOOLBOX_INTERFACE_H
+#ifndef ARIADNE_CALCULUS_INTERFACE_H
+#define ARIADNE_CALCULUS_INTERFACE_H
 
 #include "tribool.h"
 
@@ -46,7 +46,7 @@ template<class X> class Vector;
  * \sa \link Ariadne::EvolverInterface \c EvolverInterface<SYS,ES>
  */
 template<class Mdl> 
-class ToolboxInterface
+class CalculusInterface
 {
     typedef Float R;
     typedef Float A;
@@ -76,7 +76,7 @@ class ToolboxInterface
     typedef SetModelType EnclosureType;
   public:
     //! \brief Virtual destructor.
-    virtual ~ToolboxInterface() { }
+    virtual ~CalculusInterface() { }
 
     //! \brief Test if a box satisfies the constraint given by the guard. Returns \a true is all points
     //! in the box satisfy the constraint, \a false if all points do not satisfy the constraint, and 
@@ -263,4 +263,4 @@ class ToolboxInterface
 } //  namespace Ariadne
 
 
-#endif // ARIADNE_TOOLBOX_INTERFACE_H */
+#endif // ARIADNE_CALCULUS_INTERFACE_H */

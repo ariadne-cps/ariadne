@@ -55,7 +55,7 @@ class HybridAutomaton;
 template<class ES> class Orbit;
 
 class EvolutionParameters;
-template<class MDL> class ToolboxInterface;
+template<class MDL> class CalculusInterface;
 
 class EvolutionProfiler;
 
@@ -138,7 +138,7 @@ class HybridEvolver
 
   private:
     boost::shared_ptr< EvolutionParametersType > _parameters;
-    boost::shared_ptr< ToolboxInterface<ModelType> > _toolbox;
+    boost::shared_ptr< CalculusInterface<ModelType> > _toolbox;
     //boost::shared_ptr< EvolutionProfiler >  _profiler;
 };
 

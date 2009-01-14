@@ -1,5 +1,5 @@
 /***************************************************************************
- *            toolbox_base.h
+ *            calculus_base.h
  *
  *  Copyright  2008  Pieter Collins
  *
@@ -21,16 +21,16 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file toolbox_base.h
+/*! \file calculus_base.h
  *  \brief Base class for dynamical calculus routines containing implementations of routings which can be naturally composed from other routines. 
  */
 
-#ifndef ARIADNE_TOOLBOX_BASE_H
-#define ARIADNE_TOOLBOX_BASE_H
+#ifndef ARIADNE_CALCULUS_BASE_H
+#define ARIADNE_CALCULUS_BASE_H
 
 #include "tribool.h"
 #include "logging.h"
-#include "toolbox_interface.h"
+#include "calculus_interface.h"
 
 /* \brief Top-level namespace. */
 namespace Ariadne {
@@ -49,8 +49,8 @@ class Box;
 
 /*! \brief Tools for analysing dynamical systems based on function models. */
 template<class Mdl> 
-class ToolboxBase
-    : public ToolboxInterface<Mdl>
+class CalculusBase 
+    : public CalculusInterface<Mdl>
     , public Loggable
 {
     typedef Float R;
@@ -247,8 +247,8 @@ class ToolboxBase
 
 
 template<class Mdl>
-typename ToolboxBase<Mdl>::TimeModelType
-ToolboxBase<Mdl>::
+typename CalculusBase<Mdl>::TimeModelType
+CalculusBase<Mdl>::
 reachability_time(const TimeModelType& initial_time_model, 
                   const TimeModelType& final_time_model) const
 {
@@ -272,4 +272,4 @@ reachability_time(const TimeModelType& initial_time_model,
 
 
 
-#endif /* ARIADNE_DYNAMICAL_TOOLBOX_H */
+#endif /* ARIADNE_DYNAMICAL_CALCULUS_H */

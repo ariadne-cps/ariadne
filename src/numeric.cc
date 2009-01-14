@@ -586,7 +586,7 @@ Interval trunc(Interval x, uint n)
     return y-e;
 }
 
-Interval rec(volatile Interval i) 
+Interval rec(Interval i) 
 {
     volatile double rl,ru;
     if(i.l>0 || i.u<0) {
@@ -597,12 +597,13 @@ Interval rec(volatile Interval i)
     } else {
         rl=-inf();
         ru=+inf();
+        ARIADNE_THROW(DivideByZeroException,"Interval rec(Interval ivl)","ivl="<<i);
     }
     return Interval(rl,ru);
 }
 
 
-Interval mul(volatile Interval i1, volatile Interval i2) 
+Interval mul(Interval i1, Interval i2) 
 {
     volatile double rl,ru;
     rounding_mode_t rnd=get_rounding_mode();
@@ -640,7 +641,21 @@ Interval mul(volatile Interval i1, volatile Interval i2)
 }
 
 
-Interval div(volatile Interval i1, volatile Interval i2) 
+Interval mul(Interval i1, Float x2) 
+{
+    rounding_mode_t rnd=get_rounding_mode();
+    volatile double rl,ru;
+    if(x2>=0) {
+        rl=_mul_down(i1.l,x2); ru=_mul_up(i1.u,x2);
+    } else {
+        rl=_mul_down(i1.u,x2); ru=_mul_up(i1.l,x2);
+    }
+    set_rounding_mode(rnd);
+    return Interval(rl,ru);
+}
+
+
+Interval div(Interval i1, Interval i2) 
 {
     rounding_mode_t rnd=get_rounding_mode();
     volatile double rl,ru;
@@ -663,6 +678,7 @@ Interval div(volatile Interval i1, volatile Interval i2)
         } 
     }
     else {
+        ARIADNE_THROW(DivideByZeroException,"Interval div(Interval ivl1, Interval ivl2)","ivl1="<<i1<<", ivl2="<<i2);
         rl=-inf(); ru=+inf();
     }
     set_rounding_mode(rnd);
@@ -671,46 +687,33 @@ Interval div(volatile Interval i1, volatile Interval i2)
 
 
 
-Interval mul(volatile Interval i, volatile Float x) 
+Interval div(Interval i1, Float x2) 
 {
     rounding_mode_t rnd=get_rounding_mode();
     volatile double rl,ru;
-    if(x>=0) {
-        rl=_mul_down(i.l,x); ru=_mul_up(i.u,x);
+    if(x2>0) {
+        rl=_div_down(i1.l,x2); ru=_div_up(i1.u,x2); 
+    } else if(x2<0) {
+        rl=_div_down(i1.u,x2); ru=_div_up(i1.l,x2);
     } else {
-        rl=_mul_down(i.u,x); ru=_mul_up(i.l,x);
+        rl=-inf(); ru=+inf(); 
     }
     set_rounding_mode(rnd);
     return Interval(rl,ru);
 }
 
 
-Interval div(volatile Interval i, volatile Float x) 
+Interval div(Float x1, Interval i2) 
 {
     rounding_mode_t rnd=get_rounding_mode();
     volatile double rl,ru;
-    if(x>0) {
-        rl=_div_down(i.l,x); ru=_div_up(i.u,x); 
-    } else if(x<0) {
-        rl=_div_down(i.u,x); ru=_div_up(i.l,x);
-    } else {
+    if(i2.l<=0 && i2.u>=0) {
+        ARIADNE_THROW(DivideByZeroException,"Interval div(Float x1, Interval ivl2)","x1="<<x1<<", ivl2="<<i2);
         rl=-inf(); ru=+inf();
-    }
-    set_rounding_mode(rnd);
-    return Interval(rl,ru);
-}
-
-
-Interval div(volatile Float x, volatile Interval i) 
-{
-    rounding_mode_t rnd=get_rounding_mode();
-    volatile double rl,ru;
-    if(i.l<=0 && i.u>=0) {
-        rl=-inf(); ru=+inf();
-    } else if(x>=0) {
-        rl=_div_down(x,i.u); ru=_div_up(x,i.l); 
+    } else if(x1>=0) {
+        rl=_div_down(x1,i2.u); ru=_div_up(x1,i2.l); 
     } else {
-        rl=_div_down(x,i.l); ru=_div_up(x,i.u); 
+        rl=_div_down(x1,i2.l); ru=_div_up(x1,i2.u); 
     } 
     set_rounding_mode(rnd);
     return Interval(rl,ru);

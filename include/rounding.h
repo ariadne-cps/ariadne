@@ -60,7 +60,7 @@ inline rounding_mode_t get_rounding_mode();
 #endif
 
 #if defined __GNUC__ && ( defined __i386__ || defined __x86_64 || defined _M_IX86 || defined _M_X86 )
-    #if __GNUC__ >= 5 || ( __GNUC__ == 4 && __GNUC_MINOR__ >= 4 )
+    #if __GNUC__ >= 5 || ( __GNUC__ == 4 && __GNUC_MINOR__ >= 3 )
         #define ARIADNE_GCC_ROUNDING
     #else
         #define ARIADNE_C99_ROUNDING

@@ -950,8 +950,13 @@ class GridTreeSet : public GridTreeSubset {
     //@}
 
     //@{
-    //! \name Cloning/Copying
+    //! \name Cloning/Copying/Assignment
             
+    /*! \brief The copy assignment operator, which copies all the data 
+     *  including the paving tree if necessary.
+     */
+    GridTreeSet& operator=( const GridTreeSet & theGridTreeSet );
+
     /*! \brief Return a new dynamically-allocated copy of the %GridTreeSet.
      *  In this case, all the data is copied.
      */
@@ -1901,63 +1906,6 @@ inline GridTreeSubset& GridTreeSubset::operator=( const GridTreeSubset &otherSub
 /*********************************************GridTreeSet*********************************************/
     
 
-inline GridTreeSet::GridTreeSet( ) : GridTreeSubset( Grid(), 0, BinaryWord(), new BinaryTreeNode( false ) ){
-}
-
-inline GridTreeSet::GridTreeSet( const Grid& theGrid, const bool enable  ) :
-    GridTreeSubset( theGrid, 0, BinaryWord(), new BinaryTreeNode( enable ) ){
-}
-
-inline GridTreeSet::GridTreeSet( const Grid& theGrid, const uint theHeight, BinaryTreeNode * pRootTreeNode ) : 
-    GridTreeSubset( theGrid, theHeight, BinaryWord(), pRootTreeNode ){
-}
-
-inline GridTreeSet::GridTreeSet( const GridCell& theGridCell  ) :
-    GridTreeSubset( theGridCell.grid(), 0, BinaryWord(), new BinaryTreeNode( false ) ){
-    this->adjoin(theGridCell);
-}
-
-inline GridTreeSet::GridTreeSet( const GridTreeSet & theGridTreeSet ) :
-    GridTreeSubset( theGridTreeSet._theGridCell.grid(), theGridTreeSet._theGridCell.height(),
-                    theGridTreeSet._theGridCell.word(), new BinaryTreeNode( *theGridTreeSet._pRootTreeNode )) {
-    //Call the super constructor: Create an exact copy of the tree, copy the bounding box
-}
-
-inline GridTreeSet::GridTreeSet( const uint theDimension, const bool enable ) :
-    GridTreeSubset( Grid( theDimension, Float(1.0) ), 0, BinaryWord(), new BinaryTreeNode( enable )) {
-    //We want a [0,1]x...[0,1] cell in N dimensional space with no sxaling or shift of coordinates:
-    //1. Create a new non scaling grid with no shift of the coordinates
-    //2. The height of the primary cell is zero, since is is [0,1]x...[0,1] itself
-    //3. The binary word that describes the path from the primary cell to the root
-    //   of the tree is empty, because any paving always has a primary cell as a root
-    //4. A new disabled binary tree node, gives us the root for the paving tree
-}
-
-inline GridTreeSet::GridTreeSet(const Grid& theGrid, const Box & theBoundingBox ) :
-    GridTreeSubset( theGrid, GridCell::smallest_enclosing_primary_cell_height( theBoundingBox ),
-                    BinaryWord(), new BinaryTreeNode( false ) ) {
-    //1. The main point here is that we have to compute the smallest primary cell that contains theBoundingBox
-    //2. This cell is defined by it's height and becomes the root of the GridTreeSet
-    //3. Point 2. implies that the word to the root of GridTreeSubset should be set to
-    //   empty and we have only one disabled node in the binary tree
-}
-    
-inline GridTreeSet::GridTreeSet( const Grid& theGrid, uint theHeight, const BooleanArray& theTree, const BooleanArray& theEnabledCells ) :
-    GridTreeSubset( theGrid, theHeight, BinaryWord(), new BinaryTreeNode( theTree, theEnabledCells ) ) {
-    //Use the super class constructor and the binary tree constructed from the arrays: theTree and theEnabledCells
-}
-
-inline GridTreeSet* GridTreeSet::clone() const {
-    return new GridTreeSet( *this );
-}
-    
-inline GridTreeSet::~GridTreeSet() {
-    if( GridTreeSubset::_pRootTreeNode != NULL){
-        delete GridTreeSubset::_pRootTreeNode;
-        GridTreeSubset::_pRootTreeNode = NULL;
-    }
-}
-    
 inline bool GridTreeSet::empty() const {
     return BinaryTreeNode::count_enabled_leaf_nodes( this->binary_tree() ) == 0; 
 }

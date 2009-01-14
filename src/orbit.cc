@@ -29,6 +29,96 @@
 
 namespace Ariadne {
 
+struct Orbit<TaylorSetType>::Data {
+    Data(const TaylorSetType& initial_set) 
+        : initial(initial_set) { }
+    TaylorSetType initial;
+    TaylorSetListType reach;
+    TaylorSetListType intermediate;
+    TaylorSetListType final;
+};
+
+Orbit<TaylorSetType>::
+Orbit(const TaylorSetType& initial_set)
+    : _data(new Data(initial_set))
+{
+}
+
+void
+Orbit<TaylorSetType>::
+adjoin_reach(const TaylorSetType& set)
+{
+    this->_data->reach.adjoin(set);
+}
+
+void
+Orbit<TaylorSetType>::
+adjoin_intermediate(const TaylorSetType& set)
+{
+    this->_data->intermediate.adjoin(set);
+}
+
+void
+Orbit<TaylorSetType>::
+adjoin_final(const TaylorSetType& set)
+{
+    this->_data->final.adjoin(set);
+}
+
+
+void
+Orbit<TaylorSetType>::
+adjoin_reach(const TaylorSetListType& list_set)
+{
+    this->_data->reach.adjoin(list_set);
+}
+
+void
+Orbit<TaylorSetType>::
+adjoin_intermediate(const TaylorSetListType& list_set)
+{
+    this->_data->intermediate.adjoin(list_set);
+}
+
+void
+Orbit<TaylorSetType>::
+adjoin_final(const TaylorSetListType& list_set)
+{
+    this->_data->final.adjoin(list_set);
+}
+
+
+TaylorSetType const&
+Orbit<TaylorSetType>::
+initial() const
+{
+    return this->_data->initial;
+}
+
+TaylorSetListType const&
+Orbit<TaylorSetType>::
+reach() const
+{
+    return this->_data->reach;
+}
+
+TaylorSetListType const&
+Orbit<TaylorSetType>::
+intermediate() const
+{
+    return this->_data->intermediate;
+}
+
+TaylorSetListType const&
+Orbit<TaylorSetType>::
+final() const
+{
+    return this->_data->final;
+}
+
+
+
+
 struct Orbit<HybridTaylorSetType>::Data {
     Data(const HybridTaylorSetType& initial_set) 
         : initial(initial_set) { }
@@ -117,6 +207,63 @@ final() const
 }
 
 
+
+
+
+struct Orbit<GridCell>::Data {
+    Data(const GridCell& initial_set) 
+        : initial(initial_set) { }
+    GridCell initial;
+    GridTreeSet reach;
+    GridTreeSet intermediate;
+    GridTreeSet final;
+};
+
+Orbit<GridCell>::
+Orbit(const GridCell& initial_set)
+    : _data(new Data(initial_set))
+{
+}
+
+Orbit<GridCell>::
+Orbit(const GridCell& initial_set,
+      const GridTreeSet& reach_set,
+      const GridTreeSet& intermediate_set,
+      const GridTreeSet& final_set)
+    : _data(new Data(initial_set))
+{
+    this->_data->reach=reach_set;
+    this->_data->intermediate=intermediate_set;
+    this->_data->final=final_set;
+}
+
+GridCell const&
+Orbit<GridCell>::
+initial() const
+{
+    return this->_data->initial;
+}
+
+GridTreeSet const&
+Orbit<GridCell>::
+reach() const
+{
+    return this->_data->reach;
+}
+
+GridTreeSet const&
+Orbit<GridCell>::
+intermediate() const
+{
+    return this->_data->intermediate;
+}
+
+GridTreeSet const&
+Orbit<GridCell>::
+final() const
+{
+    return this->_data->final;
+}
 
 
 

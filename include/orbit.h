@@ -55,8 +55,29 @@ template<class E> class Orbit {
 template<class ES> class Orbit;
 
 template<class BS> class ListSet;
+class GridCell;
+class GridTreeSet;
 class HybridGridCell;
 class HybridGridTreeSet;
+
+template<>
+class Orbit<GridCell>
+{
+    class Data;
+  public:
+    typedef GridCell EnclosureType;
+    typedef GridTreeSet EnclosureListType;
+
+    Orbit(const GridCell&);
+    Orbit(const GridCell&, const GridTreeSet&,
+          const GridTreeSet&, const GridTreeSet&);
+    GridCell const& initial() const;
+    GridTreeSet const& reach() const;
+    GridTreeSet const& intermediate() const;
+    GridTreeSet const& final() const;
+  private:
+    boost::shared_ptr<Data> _data;
+};
 
 template<>
 class Orbit<HybridGridCell>
@@ -82,7 +103,34 @@ typedef int DiscreteState;
 class ApproximateTaylorModel;
 typedef ApproximateTaylorModel TaylorSetType;
 typedef std::pair<DiscreteState,TaylorSetType> HybridTaylorSetType;
+typedef ListSet<TaylorSetType> TaylorSetListType;
 typedef ListSet<HybridTaylorSetType> HybridTaylorSetListType;
+
+template<>
+class Orbit<TaylorSetType>
+{
+    class Data;
+    typedef TaylorSetListType list_set_const_iterator;
+  public:
+    typedef TaylorSetType EnclosureType;
+    typedef TaylorSetListType EnclosureListType;
+
+    Orbit(const TaylorSetType&);
+    void adjoin_reach(const TaylorSetType& set);
+    void adjoin_intermediate(const TaylorSetType& set);
+    void adjoin_final(const TaylorSetType& set);
+
+    void adjoin_reach(const TaylorSetListType& set);
+    void adjoin_intermediate(const TaylorSetListType& set);
+    void adjoin_final(const TaylorSetListType& set);
+
+    TaylorSetType const& initial() const;
+    TaylorSetListType const& reach() const;
+    TaylorSetListType const& intermediate() const;
+    TaylorSetListType const& final() const;
+  private:
+    boost::shared_ptr<Data> _data;
+};
 
 template<>
 class Orbit<HybridTaylorSetType>

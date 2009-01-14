@@ -903,6 +903,10 @@ class GridTreeSet : public GridTreeSubset {
      */
     GridTreeSet( const Grid& theGrid, const uint theHeight, BinaryTreeNode * pRootTreeNode );
             
+    /*! \brief Construct a grid tree set from a single cell.
+     */
+    GridTreeSet( const GridCell & theGridCell );
+
     /*! \brief The copy constructor that actually copies all the data,
      *  including the paving tree. I.e. the new copy of the tree is created.
      */
@@ -1899,6 +1903,11 @@ inline GridTreeSet::GridTreeSet( const Grid& theGrid, const bool enable  ) :
 
 inline GridTreeSet::GridTreeSet( const Grid& theGrid, const uint theHeight, BinaryTreeNode * pRootTreeNode ) : 
     GridTreeSubset( theGrid, theHeight, BinaryWord(), pRootTreeNode ){
+}
+
+inline GridTreeSet::GridTreeSet( const GridCell& theGridCell  ) :
+    GridTreeSubset( theGridCell.grid(), 0, BinaryWord(), new BinaryTreeNode( false ) ){
+    this->adjoin(theGridCell);
 }
 
 inline GridTreeSet::GridTreeSet( const GridTreeSet & theGridTreeSet ) :

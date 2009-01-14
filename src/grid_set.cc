@@ -1261,8 +1261,8 @@ BinaryTreeNode* GridTreeSet::align_with_cell( const uint otherPavingPCellHeight,
     return pBinaryTreeNode;
 }
     
-void GridTreeSet::adjoin_outer_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
-                                              const uint max_mince_depth,  const CompactSetInterface& theSet, BinaryWord * pPath ){
+void GridTreeSet::_adjoin_outer_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
+                                               const uint max_mince_depth,  const CompactSetInterface& theSet, BinaryWord * pPath ){
     //Compute the cell correspomding to the current node
     GridCell theCurrentCell( theGrid, primary_cell_height, *pPath );
 
@@ -1285,10 +1285,10 @@ void GridTreeSet::adjoin_outer_approximation( const Grid & theGrid, BinaryTreeNo
                 pBinaryTreeNode->split(); //NOTE: splitting a non-leaf node does not do any harm
                 //Check the left branch
                 pPath->push_back(false);
-                adjoin_outer_approximation( theGrid, pBinaryTreeNode->left_node(), primary_cell_height, max_mince_depth, theSet, pPath );
+                _adjoin_outer_approximation( theGrid, pBinaryTreeNode->left_node(), primary_cell_height, max_mince_depth, theSet, pPath );
                 //Check the right branch
                 pPath->push_back(true);
-                adjoin_outer_approximation( theGrid, pBinaryTreeNode->right_node(), primary_cell_height, max_mince_depth, theSet, pPath );
+                _adjoin_outer_approximation( theGrid, pBinaryTreeNode->right_node(), primary_cell_height, max_mince_depth, theSet, pPath );
             } else {
                 //We should not mince any further, so since the node is a leaf and
                 //it's cell is not disjoint from theSet, we mark the node as enabled.
@@ -1316,8 +1316,8 @@ void GridTreeSet::adjoin_outer_approximation( const Grid & theGrid, BinaryTreeNo
 // a lower approximation, but it is simply less accurate than it could be.
 // TODO:Think of another representation in terms of covers but not pavings, then this problem
 // can be cured in a different fashion.
-void GridTreeSet::adjoin_lower_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
-                                              const uint max_mince_depth,  const OvertSetInterface& theSet, BinaryWord * pPath ){
+void GridTreeSet::_adjoin_lower_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
+                                               const uint max_mince_depth,  const OvertSetInterface& theSet, BinaryWord * pPath ){
     //Compute the cell correspomding to the current node
     GridCell theCurrentCell( theGrid, primary_cell_height, *pPath );
 
@@ -1334,10 +1334,10 @@ void GridTreeSet::adjoin_lower_approximation( const Grid & theGrid, BinaryTreeNo
             pBinaryTreeNode->split(); //NOTE: splitting a non-leaf node does not do any harm
             //Check the left branch
             pPath->push_back(false);
-            adjoin_lower_approximation( theGrid, pBinaryTreeNode->left_node(), primary_cell_height, max_mince_depth, theSet, pPath );
+            _adjoin_lower_approximation( theGrid, pBinaryTreeNode->left_node(), primary_cell_height, max_mince_depth, theSet, pPath );
             //Check the right branch
             pPath->push_back(true);
-            adjoin_lower_approximation( theGrid, pBinaryTreeNode->right_node(), primary_cell_height, max_mince_depth, theSet, pPath );
+            _adjoin_lower_approximation( theGrid, pBinaryTreeNode->right_node(), primary_cell_height, max_mince_depth, theSet, pPath );
         }
     }
     //Return to the previous level, since the initial call is made
@@ -1347,8 +1347,8 @@ void GridTreeSet::adjoin_lower_approximation( const Grid & theGrid, BinaryTreeNo
     }
 }
     
-void GridTreeSet::adjoin_lower_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
-                                              const uint max_mince_depth,  const OpenSetInterface& theSet, BinaryWord * pPath ){
+void GridTreeSet::_adjoin_lower_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
+                                               const uint max_mince_depth,  const OpenSetInterface& theSet, BinaryWord * pPath ){
     //Compute the cell corresponding to the current node
     GridCell theCurrentCell( theGrid, primary_cell_height, *pPath );
     
@@ -1370,10 +1370,10 @@ void GridTreeSet::adjoin_lower_approximation( const Grid & theGrid, BinaryTreeNo
             
             //Check the left branch
             pPath->push_back(false);
-            adjoin_lower_approximation( theGrid, pBinaryTreeNode->left_node(), primary_cell_height, max_mince_depth, theSet, pPath );
+            _adjoin_lower_approximation( theGrid, pBinaryTreeNode->left_node(), primary_cell_height, max_mince_depth, theSet, pPath );
             //Check the right branch
             pPath->push_back(true);
-            adjoin_lower_approximation( theGrid, pBinaryTreeNode->right_node(), primary_cell_height, max_mince_depth, theSet, pPath );
+            _adjoin_lower_approximation( theGrid, pBinaryTreeNode->right_node(), primary_cell_height, max_mince_depth, theSet, pPath );
         }        
     }
     //Return to the previous level, since the initial call is made
@@ -1418,8 +1418,8 @@ void GridTreeSet::adjoin_outer_approximation( const CompactSetInterface& theSet,
             
         //Adjoin the outer approximation, computing it on the fly.
         BinaryWord * pEmptyPath = new BinaryWord(); 
-        adjoin_outer_approximation( GridTreeSubset::_theGridCell.grid(), pBinaryTreeNode, outer_approx_primary_cell_height,
-                                    max_mince_depth, theSet, pEmptyPath );
+        _adjoin_outer_approximation( GridTreeSubset::_theGridCell.grid(), pBinaryTreeNode, outer_approx_primary_cell_height,
+                                     max_mince_depth, theSet, pEmptyPath );
 
         delete pEmptyPath;
     }
@@ -1455,9 +1455,9 @@ void GridTreeSet::adjoin_lower_approximation( const OvertSetInterface& theSet, c
         //const LocatedSetInterface* theLocatedVersionOfSet = dynamic_cast<const LocatedSetInterface*>(&theSet);
         const OvertSetInterface* theOvertVersionOfSet = dynamic_cast<const OvertSetInterface*>(&theSet);
         if( theOpenVersionOfSet ) {
-            adjoin_lower_approximation( GridTreeSubset::_theGridCell.grid(), pBinaryTreeNode, height, max_mince_depth, *theOpenVersionOfSet, pEmptyPath );
+            _adjoin_lower_approximation( GridTreeSubset::_theGridCell.grid(), pBinaryTreeNode, height, max_mince_depth, *theOpenVersionOfSet, pEmptyPath );
         } else {
-            adjoin_lower_approximation( GridTreeSubset::_theGridCell.grid(), pBinaryTreeNode, height, max_mince_depth, *theOvertVersionOfSet, pEmptyPath );
+            _adjoin_lower_approximation( GridTreeSubset::_theGridCell.grid(), pBinaryTreeNode, height, max_mince_depth, *theOvertVersionOfSet, pEmptyPath );
         }
         delete pEmptyPath;
     }
@@ -1475,8 +1475,8 @@ void GridTreeSet::adjoin_lower_approximation( const OvertSetInterface& theSet, c
     adjoin_lower_approximation( theSet, theOverApproxCell.height(), depth );
 }
 
-void GridTreeSet::adjoin_inner_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
-                                              const uint max_mince_depth, const OpenSetInterface& theSet, BinaryWord * pPath ) {
+void GridTreeSet::_adjoin_inner_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
+                                               const uint max_mince_depth, const OpenSetInterface& theSet, BinaryWord * pPath ) {
     //Compute the cell corresponding to the current node
     GridCell theCurrentCell( theGrid, primary_cell_height, *pPath );
 
@@ -1499,10 +1499,10 @@ void GridTreeSet::adjoin_inner_approximation( const Grid & theGrid, BinaryTreeNo
                 
                 //Check the left branch
                 pPath->push_back(false);
-                adjoin_inner_approximation( theGrid, pBinaryTreeNode->left_node(), primary_cell_height, max_mince_depth, theSet, pPath );
+                _adjoin_inner_approximation( theGrid, pBinaryTreeNode->left_node(), primary_cell_height, max_mince_depth, theSet, pPath );
                 //Check the right branch
                 pPath->push_back(true);
-                adjoin_inner_approximation( theGrid, pBinaryTreeNode->right_node(), primary_cell_height, max_mince_depth, theSet, pPath );
+                _adjoin_inner_approximation( theGrid, pBinaryTreeNode->right_node(), primary_cell_height, max_mince_depth, theSet, pPath );
             }
         } else {
             //DO NOTHING: the node's box is disjoint from theSet and thus it or it's
@@ -1540,7 +1540,7 @@ void GridTreeSet::adjoin_inner_approximation( const OpenSetInterface& theSet, co
         
         //Adjoin the inner approximation, computing it on the fly.
         BinaryWord * pEmptyPath = new BinaryWord(); 
-        adjoin_inner_approximation( GridTreeSubset::_theGridCell.grid(), pBinaryTreeNode, height, max_mince_depth, theSet, pEmptyPath );
+        _adjoin_inner_approximation( GridTreeSubset::_theGridCell.grid(), pBinaryTreeNode, height, max_mince_depth, theSet, pEmptyPath );
         delete pEmptyPath;
     }
 }

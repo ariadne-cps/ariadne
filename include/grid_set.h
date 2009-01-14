@@ -501,7 +501,10 @@ class GridCell {
     const Grid& grid() const;
             
     /*! \brief The height of the primary cell to which this cell is rooted. */
-    const uint& height() const;
+    uint height() const;
+            
+    /*! \brief The depth in the grid at which the cell lies. */
+    int depth() const;
             
     /*! \brief The word describing the path in a binary tree from the primary cell of height (this.height()) to this cell. */
     const BinaryWord& word() const;
@@ -835,8 +838,8 @@ class GridTreeSet : public GridTreeSubset {
      *  This method is recursive, the parameter \a pPath defines the path to the current node pBinaryTreeNode
      *  from the root node in recursive calls, thus the initial call for this method must be done with an empty word.
      */
-    static void adjoin_outer_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
-                                            const uint max_mince_depth, const CompactSetInterface& theSet, BinaryWord * pPath );
+    static void _adjoin_outer_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
+                                             const uint max_mince_depth, const CompactSetInterface& theSet, BinaryWord * pPath );
 
     /*! \brief This method adjoins the inner approximation of \a theSet (computed on the fly) to this paving.
      *  We use the primary cell (enclosed in this paving) of height \a primary_cell_height and represented 
@@ -846,8 +849,8 @@ class GridTreeSet : public GridTreeSubset {
      *  This method is recursive, the parameter \a pPath defines the path to the current node pBinaryTreeNode
      *  from the root node in recursive calls, thus the initial call for this method must be done with an empty word.
      */
-    static void adjoin_inner_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
-                                            const uint max_mince_depth, const OpenSetInterface& theSet, BinaryWord * pPath );
+    static void _adjoin_inner_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
+                                             const uint max_mince_depth, const OpenSetInterface& theSet, BinaryWord * pPath );
 
     /*! \brief This method adjoins the lower approximation of \a theSet (computed on the fly) to this paving.
      *  We use the primary cell (enclosed in this paving) of height \a primary_cell_hight and represented 
@@ -859,15 +862,15 @@ class GridTreeSet : public GridTreeSubset {
      *  The approximation method does not recombine cells, as knowing that both children intersect a set is more
      *  information than knowing that the parent does.
      */
-    static void adjoin_lower_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
-                                            const uint max_mince_depth, const OvertSetInterface& theSet, BinaryWord * pPath );
+    static void _adjoin_lower_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
+                                             const uint max_mince_depth, const OvertSetInterface& theSet, BinaryWord * pPath );
 
     /*! \brief This method adjoins the lower approximation of \a theSet (computed on the fly) to this paving.
      *  It is specialised for open sets, for which we have the superset() operator. If a set is a superset of
      *  a cell, then we know it overlaps the cell and all its children.
      */
-    static void adjoin_lower_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
-                                            const uint max_mince_depth, const OpenSetInterface& theSet, BinaryWord * pPath );
+    static void _adjoin_lower_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
+                                             const uint max_mince_depth, const OpenSetInterface& theSet, BinaryWord * pPath );
 
     /*! \brief This method is uset to do restriction of this set to the set given by
      *  \a theOtherSubPaving Note that, here we require that the height of the primary
@@ -1714,8 +1717,12 @@ inline const Grid& GridCell::grid() const {
     return _theGrid;
 }
         
-inline const uint& GridCell::height() const {
+inline uint GridCell::height() const {
     return _theHeight;
+}
+    
+inline int GridCell::depth() const {
+    return _theWord.size() - _theHeight;
 }
     
 inline const BinaryWord& GridCell::word() const {

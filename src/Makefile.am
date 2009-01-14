@@ -32,6 +32,7 @@ SRC = \
 	geometry.cc \
 	hybrid_automaton.cc \
 	orbit.cc \
+	continuous_evolver.cc \
 	hybrid_evolver.cc \
 	discrete_evolver.cc \
 	reachability_analyser.cc \

@@ -31,6 +31,7 @@
 
 #include <vector>
 #include "stlio.h"
+#include "macros.h"
 
 typedef unsigned int uint;
 

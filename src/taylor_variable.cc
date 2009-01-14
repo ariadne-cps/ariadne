@@ -21,8 +21,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-//#define COSY_ARITHMETIC
-#define ROUNDED_ARITHMETIC
+#ifndef ARIADNE_COSY_TAYLOR_ARITHMETIC
+#define ARIADNE_ROUNDED_TAYLOR_ARITHMETIC
+#endif
 
 #include <iomanip>
 
@@ -71,12 +72,12 @@ TaylorVariable mul_rounded(const TaylorVariable&, const Float&);
 TaylorVariable add_rounded(const TaylorVariable&, const TaylorVariable&);
 TaylorVariable mul_rounded(const TaylorVariable&, const TaylorVariable&);
 
-#if defined COSY_ARITHMETIC
+#if defined ARIADNE_COSY_TAYLOR_ARITHMETIC
 inline TaylorVariable add(const TaylorVariable& x, const Float& c) { return add_cosy(x,c); }
 inline TaylorVariable add(const TaylorVariable& x, const TaylorVariable& y) { return add_cosy(x,y); }
 inline TaylorVariable mul(const TaylorVariable& x, const Float& c) { return mul_cosy(x,c); }
 inline TaylorVariable mul(const TaylorVariable& x, const TaylorVariable& y) { return mul_cosy(x,y); }
-#elif defined ROUNDED_ARITHMETIC
+#elif defined ARIADNE_ROUNDED_TAYLOR_ARITHMETIC
 inline TaylorVariable add(const TaylorVariable& x, const Float& c) { return add_rounded(x,c); }
 inline TaylorVariable add(const TaylorVariable& x, const TaylorVariable& y) { return add_rounded(x,y); }
 inline TaylorVariable mul(const TaylorVariable& x, const Float& c) { return mul_rounded(x,c); }
@@ -208,11 +209,10 @@ TaylorVariable&
 TaylorVariable::acc(const TaylorVariable& x)
 {
     // Compute self+=x
-    struct Ivl { double u; double ml; };
-    typedef std::map<MultiIndex,Interval> ivl_const_iterator;  
     TaylorVariable& r=*this;
     Interval& re=r.error();
     assert(re.l==-re.u);
+    assert(x.error().l==-x.error().u);
     //std::cerr<<std::setprecision(20);
     
     set_rounding_upward();
@@ -228,8 +228,10 @@ TaylorVariable::acc(const TaylorVariable& x)
             //std::cerr<<" xv="<<xv<<" rv="<<rv<<" u="<<u<<" ml="<<ml<<" d="<<(u+ml)<<" te="<<te<<"\n";
         } 
     }
-    re.u+=te/2; re.l=-re.u;
-    
+    re.u+=te/2; 
+    re.u+=x.error().u;
+    re.l=-re.u;
+
     set_rounding_to_nearest();
     for(const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         r[xiter->first]+=xiter->second;
@@ -346,7 +348,7 @@ TaylorVariable::clean()
 TaylorVariable&
 operator+=(TaylorVariable& x, const TaylorVariable& y)
 {
-    return x.acc(x);
+    return x.acc(y);
    
 }
 
@@ -1393,6 +1395,93 @@ scale(const TaylorVariable& tv, const Interval& ivl)
 }
 
 
+ 
+void
+_compose1(Vector<TaylorVariable>& r,
+          const Vector<TaylorVariable>& x, 
+          const Vector<TaylorVariable>& y)
+{
+    std::cerr<<"x ="<<x<<"\n";
+    std::cerr<<"ys="<<y<<"\n";
+    // Brute-force, unoptimised approach
+    for(uint i=0; i!=x.size(); ++i) {
+        r[i]=TaylorVariable::constant(y[0].argument_size(),0.0);
+        r[i].set_error(x[i].error());
+        for(TaylorVariable::const_iterator iter=x[i].begin(); iter!=x[i].end(); ++iter) {
+            TaylorVariable t=TaylorVariable::constant(y[0].argument_size(),iter->second);
+            for(uint j=0; j!=iter->first.size(); ++j) {
+                TaylorVariable p=pow(y[j],iter->first[j]);
+                t=t*p;
+            }
+            r[i]+=t;
+            std::cerr<<"a="<<iter->first<<" c="<<iter->second<<" t="<<t<<" r="<<r<<"\n";
+        }
+    }
+}
+
+
+Vector<TaylorVariable> 
+compose(const Vector<TaylorVariable>& x, 
+        const Vector<Interval>& bx, 
+        const Vector<TaylorVariable>& y)
+{
+    if(x.size()==0) { return x; }
+
+    ARIADNE_ASSERT(x.size()>0);
+    ARIADNE_ASSERT(x[0].argument_size()==bx.size());
+    ARIADNE_ASSERT(y.size()==bx.size());
+
+    for(uint i=1; i!=x.size(); ++i) {
+        ARIADNE_ASSERT(x[i].argument_size()==x[0].argument_size());
+    }
+    for(uint j=1; j!=y.size(); ++j) {
+        ARIADNE_ASSERT(y[j].argument_size()==y[0].argument_size());
+    }
+
+
+    Vector<TaylorVariable> ys(y.size());
+    for(uint i=0; i!=y.size(); ++i) {
+        ys[i]=scale(y[i],bx[i]);
+    }
+
+    Vector<TaylorVariable> r(x.size());
+    _compose1(r,x,y);
+    return r;
+}
+
+TaylorVariable 
+compose(const TaylorVariable& x, 
+        const Vector<Interval>& bx, 
+        const Vector<TaylorVariable>& y)
+{
+    Vector<TaylorVariable> xv(1,x);
+    Vector<TaylorVariable> rv=compose(xv,bx,y);
+    return rv[0];
+}
+    
+TaylorVariable 
+compose(const TaylorVariable& x, 
+        const Interval& b, 
+        const TaylorVariable& y)
+{
+    Vector<TaylorVariable> xv(1,x);
+    Vector<Interval> bv(1,b);
+    Vector<TaylorVariable> yv(1,y);
+    Vector<TaylorVariable> rv=compose(xv,bv,yv);
+    return rv[0];
+}
+    
+TaylorVariable 
+compose(const TaylorVariable& x, 
+        const TaylorVariable& y)
+{
+    Vector<TaylorVariable> xv(1,x);
+    Vector<Interval> bv(1,Interval(-1,1));
+    Vector<TaylorVariable> yv(1,y);
+    Vector<TaylorVariable> rv=compose(xv,bv,yv);
+    return rv[0];
+}
+    
 
 std::string 
 TaylorVariable::str() const

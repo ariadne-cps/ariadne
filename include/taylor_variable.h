@@ -93,6 +93,11 @@ TaylorVariable antiderivative(const TaylorVariable& x, uint j);
 // Scale the variabe by post-composing with an affine map taking the interval \a ivl to the unit interval
 TaylorVariable scale(const TaylorVariable& x, const Interval& ivl);
 
+// Compose an array of Taylor variables with another, after scaling by the interval vectors
+Vector<TaylorVariable> compose(const Vector<TaylorVariable>& x, const Vector<Interval>& bx, const Vector<TaylorVariable>& y);
+TaylorVariable compose(const TaylorVariable& x, const Vector<Interval>& bx, const Vector<TaylorVariable>& y);
+TaylorVariable compose(const TaylorVariable& x, const Interval& b, const TaylorVariable& y);
+TaylorVariable compose(const TaylorVariable& x, const TaylorVariable& y);
 
 
 

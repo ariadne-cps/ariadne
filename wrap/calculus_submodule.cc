@@ -173,8 +173,10 @@ void export_taylor_variable()
     typedef Float R;
     typedef Interval I;
     typedef MultiIndex A;
-    typedef Vector<Float> V;
+    typedef Vector<Float> RV;
+    typedef Vector<Interval> IV;
     typedef TaylorVariable T;
+    typedef Vector<TaylorVariable> TV;
 
 
     class_<T> taylor_variable_class("TaylorVariable");
@@ -182,6 +184,7 @@ void export_taylor_variable()
     taylor_variable_class.def("__init__", make_constructor(&make2<TaylorVariable>) );
     taylor_variable_class.def("__init__", make_constructor(&make_taylor_variable) );
     taylor_variable_class.def( init< uint >());
+    taylor_variable_class.def( init< TaylorVariable >());
     taylor_variable_class.def("error", (const I&(T::*)()const) &T::error, return_value_policy<copy_const_reference>());
     taylor_variable_class.def("clean", &TaylorVariable::clean);
     taylor_variable_class.def("domain", &TaylorVariable::domain);
@@ -206,6 +209,8 @@ void export_taylor_variable()
     taylor_variable_class.def(self-=R());
     taylor_variable_class.def(self*=R());
     taylor_variable_class.def(self/=R());
+    taylor_variable_class.def(self+=self);
+    taylor_variable_class.def(self-=self);
     taylor_variable_class.def(self_ns::str(self));
     taylor_variable_class.def("truncate", &TaylorVariable::truncate,return_value_policy<reference_existing_object>());
     taylor_variable_class.def("sweep", &TaylorVariable::sweep,return_value_policy<reference_existing_object>());
@@ -226,6 +231,11 @@ void export_taylor_variable()
     taylor_variable_class.staticmethod("constant");
     taylor_variable_class.staticmethod("variable");
     taylor_variable_class.staticmethod("variables");
+
+    def("compose",(TV(*)(const TV&,const IV&,const TV&)) &compose);
+    def("compose",(T(*)(const T&,const IV&,const TV&)) &compose);
+    def("compose",(T(*)(const T&,const I&,const T&)) &compose);
+    def("compose",(T(*)(const T&,const T&)) &compose);
 
     def("mul_cosy", (T(*)(const T&, const T&)) &mul_cosy);
     def("mul_rounded", (T(*)(const T&, const T&)) &mul_rounded);

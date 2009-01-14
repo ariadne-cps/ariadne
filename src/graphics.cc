@@ -469,10 +469,11 @@ Figure::write(const char* cfilename)
     
     
     std::string filename(cfilename);
-    if(filename.rfind(".")) {
+    if(filename.rfind(".") != std::string::npos) {
     } else {
         filename=filename+".png";
     }
+
     cairo_surface_write_to_png (surface, filename.c_str());
     cairo_surface_destroy (surface);
 

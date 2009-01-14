@@ -1,5 +1,5 @@
 /***************************************************************************
- *            discrete_evolver.cc
+ *            discretiser.cc
  *
  *  Copyright  2006-8  Alberto Casagrande, Pieter Collins
  *
@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "discrete_evolver.h"
+#include "discretiser.h"
 
 #include "approximate_taylor_model.h"
 #include "orbit.h"
@@ -80,8 +80,8 @@ typedef ApproximateTaylorModel DefaultEnclosureType;
 typedef std::pair<DiscreteState,DefaultEnclosureType> DefaultHybridEnclosureType;
 
 template<class ES>
-Orbit<typename ContinuousDiscreteEvolver<ES>::BasicSetType> 
-ContinuousDiscreteEvolver<ES>::
+Orbit<typename ContinuousDiscretiser<ES>::BasicSetType> 
+ContinuousDiscretiser<ES>::
 lower_evolution(const SystemType& system, 
                 const BasicSetType& initial_set, 
                 const TimeType& time,
@@ -91,8 +91,8 @@ lower_evolution(const SystemType& system,
 }
 
 template<class ES>
-Orbit<typename ContinuousDiscreteEvolver<ES>::BasicSetType> 
-ContinuousDiscreteEvolver<ES>::
+Orbit<typename ContinuousDiscretiser<ES>::BasicSetType> 
+ContinuousDiscretiser<ES>::
 upper_evolution(const SystemType& system, 
                 const BasicSetType& initial_set, 
                 const TimeType& time,
@@ -109,16 +109,16 @@ upper_evolution(const SystemType& system,
 }
 
 template<class ES>
-typename ContinuousDiscreteEvolver<ES>::EnclosureType 
-ContinuousDiscreteEvolver<ES>::
+typename ContinuousDiscretiser<ES>::EnclosureType 
+ContinuousDiscretiser<ES>::
 _enclosure(const BasicSetType& initial_set) const
 {
     return EnclosureType(initial_set.box());
 }
 
 template<class ES>
-Orbit<typename ContinuousDiscreteEvolver<ES>::BasicSetType> 
-ContinuousDiscreteEvolver<ES>::
+Orbit<typename ContinuousDiscretiser<ES>::BasicSetType> 
+ContinuousDiscretiser<ES>::
 _discretise(const Orbit<EnclosureType>& continuous_orbit,
             const BasicSetType& initial_set,
             const int accuracy) const
@@ -144,15 +144,15 @@ _discretise(const Orbit<EnclosureType>& continuous_orbit,
  
 }
 
-template class ContinuousDiscreteEvolver<DefaultEnclosureType>;
+template class ContinuousDiscretiser<DefaultEnclosureType>;
 
 
 
 
 
 template<class ES>
-Orbit<typename HybridDiscreteEvolver<ES>::BasicSetType> 
-HybridDiscreteEvolver<ES>::
+Orbit<typename HybridDiscretiser<ES>::BasicSetType> 
+HybridDiscretiser<ES>::
 lower_evolution(const SystemType& system, 
                 const BasicSetType& initial_set, 
                 const TimeType& time,
@@ -162,8 +162,8 @@ lower_evolution(const SystemType& system,
 }
 
 template<class ES>
-Orbit<typename HybridDiscreteEvolver<ES>::BasicSetType> 
-HybridDiscreteEvolver<ES>::
+Orbit<typename HybridDiscretiser<ES>::BasicSetType> 
+HybridDiscretiser<ES>::
 upper_evolution(const SystemType& system, 
                 const BasicSetType& initial_set, 
                 const TimeType& time,
@@ -180,16 +180,16 @@ upper_evolution(const SystemType& system,
 }
 
 template<class ES>
-typename HybridDiscreteEvolver<ES>::EnclosureType 
-HybridDiscreteEvolver<ES>::
+typename HybridDiscretiser<ES>::EnclosureType 
+HybridDiscretiser<ES>::
 _enclosure(const BasicSetType& initial_set) const
 {
     return EnclosureType(initial_set.first,ES(initial_set.second.box()));
 }
 
 template<class ES>
-Orbit<typename HybridDiscreteEvolver<ES>::BasicSetType> 
-HybridDiscreteEvolver<ES>::
+Orbit<typename HybridDiscretiser<ES>::BasicSetType> 
+HybridDiscretiser<ES>::
 _discretise(const Orbit<EnclosureType>& continuous_orbit,
             const BasicSetType& initial_set,
             const int accuracy) const
@@ -215,7 +215,7 @@ _discretise(const Orbit<EnclosureType>& continuous_orbit,
  
 }
 
-template class HybridDiscreteEvolver<DefaultEnclosureType>;
+template class HybridDiscretiser<DefaultEnclosureType>;
 
 } // namespace Ariadne
 
@@ -255,7 +255,7 @@ GridCell make_grid_cell(const Cell& c, const Grid& g) {
 }
 
 std::vector<Cell> 
-successor(const DiscreteEvolverInterface<VectorField,GridCell>& discretiser, 
+successor(const DiscretiserInterface<VectorField,GridCell>& discretiser, 
           const Grid& grid, const VectorField& system, const Cell& cell, Float time, char reachevolve)
 {
     GridCell grid_cell=make_grid_cell(cell,grid);

@@ -35,7 +35,7 @@
 #include "hybrid_automaton.h"
 #include "hybrid_evolver.h"
 #include "orbit.h"
-#include "discrete_evolver.h"
+#include "discretiser.h"
 #include "graphics.h"
 
 #include "models.h"
@@ -94,7 +94,7 @@ void TestDiscretisedEvolution::test_discrete_time() const
 
     // Set up the evaluators
     HybridEvolver evolver(parameters);
-    HybridDiscreteEvolver< DefaultEnclosureType > discrete_evolver(evolver);
+    HybridDiscretiser< DefaultEnclosureType > discrete_evolver(evolver);
 
   
     // Set up the vector field
@@ -201,7 +201,7 @@ void TestDiscretisedEvolution::test_continuous_time() const
 
     // Set up the evaluators
     HybridEvolver evolver(parameters);
-    HybridDiscreteEvolver< DefaultEnclosureType > discrete_evolver(evolver);
+    HybridDiscretiser< DefaultEnclosureType > discretiser(evolver);
 
   
     // Set up the vector field
@@ -238,7 +238,7 @@ void TestDiscretisedEvolution::test_continuous_time() const
 
     // Compute the reachable sets
     Orbit<HybridGridCell> discrete_orbit
-        = discrete_evolver.upper_evolution(hvdp,hybrid_initial_cell,htime,depth);
+        = discretiser.upper_evolution(hvdp,hybrid_initial_cell,htime,depth);
     GridTreeSet const& reach_cells=discrete_orbit.reach()[location];
     GridTreeSet const& intermediate_cells=discrete_orbit.intermediate()[location];
     GridTreeSet const& final_cells=discrete_orbit.final()[location];

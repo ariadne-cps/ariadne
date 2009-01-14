@@ -48,7 +48,7 @@
 #include "evolution_parameters.h"
 #include "evolver_interface.h"
 
-#include "discrete_evolver.h"
+#include "discretiser.h"
 #include "reachability_analyser.h"
 #include "logging.h"
 
@@ -70,7 +70,7 @@ HybridReachabilityAnalyser::
 HybridReachabilityAnalyser::
 HybridReachabilityAnalyser(const EvolverInterface<HybridAutomaton,DefaultHybridEnclosureType>& evolver)
     : _parameters(new EvolutionParametersType())
-    , _discretiser(new HybridDiscreteEvolver<DefaultEnclosureType>(evolver))
+    , _discretiser(new HybridDiscretiser<DefaultEnclosureType>(evolver))
 {
 }
 
@@ -79,7 +79,7 @@ HybridReachabilityAnalyser::
 HybridReachabilityAnalyser(const EvolutionParametersType& parameters, 
                            const EvolverInterface<HybridAutomaton,DefaultHybridEnclosureType>& evolver)
     : _parameters(new EvolutionParametersType(parameters))
-    , _discretiser(new HybridDiscreteEvolver<DefaultEnclosureType>(evolver))
+    , _discretiser(new HybridDiscretiser<DefaultEnclosureType>(evolver))
 {
 }
 

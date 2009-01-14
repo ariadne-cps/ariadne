@@ -1,5 +1,5 @@
 /***************************************************************************
- *            discrete_evolver.h
+ *            discretiser.h
  *
  *  Copyright  2006-8  Alberto Casagrande, Pieter Collins
  * 
@@ -21,17 +21,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file discrete_evolver.h
+/*! \file discretiser.h
  *  \brief Methods for computing the evolution of systems on grids/pavings.
  */
 
-#ifndef ARIADNE_DISCRETE_EVOLVER_H
-#define ARIADNE_DISCRETE_EVOLVER_H
+#ifndef ARIADNE_DISCRETISER_H
+#define ARIADNE_DISCRETISER_H
 
 #include <boost/smart_ptr.hpp>
 
 #include "numeric.h"
 #include "evolver_interface.h"
+#include "discretiser_interface.h"
 #include "hybrid_automaton.h"
 #include "vector_field.h"
 
@@ -54,8 +55,8 @@ class HybridAutomaton;
 /*!  \brief A class for computing the evolution of a discrete-time autonomous system.
  */
 template<class ES>
-class ContinuousDiscreteEvolver
-    : public DiscreteEvolverInterface<VectorField,GridCell>
+class ContinuousDiscretiser
+    : public DiscretiserInterface<VectorField,GridCell>
     , public Loggable
 {
     typedef typename VectorField::TimeType TimeType;
@@ -71,11 +72,11 @@ class ContinuousDiscreteEvolver
   
     //! \brief Construct from evolution parameters and a method for evolving basic sets, 
     //!  and a scheme for approximating sets.
-    ContinuousDiscreteEvolver(const EvolverInterface<SystemType,EnclosureType>& evolver)
+    ContinuousDiscretiser(const EvolverInterface<SystemType,EnclosureType>& evolver)
         : _evolver(evolver.clone()) { }
       
     //! \brief Make a dynamically-allocated copy.
-    ContinuousDiscreteEvolver<ES>* clone() const { return new ContinuousDiscreteEvolver<ES>(*this); }
+    ContinuousDiscretiser<ES>* clone() const { return new ContinuousDiscretiser<ES>(*this); }
   
     //@}
   
@@ -108,8 +109,8 @@ class ContinuousDiscreteEvolver
 /*!  \brief A class for computing the evolution of a discrete-time autonomous system.
  */
 template<class ES>
-class HybridDiscreteEvolver
-    : public DiscreteEvolverInterface<HybridAutomaton,HybridGridCell>
+class HybridDiscretiser
+    : public DiscretiserInterface<HybridAutomaton,HybridGridCell>
     , public Loggable
 {
     typedef typename HybridAutomaton::TimeType TimeType;
@@ -126,11 +127,11 @@ class HybridDiscreteEvolver
   
     //! \brief Construct from evolution parameters and a method for evolving basic sets, 
     //!  and a scheme for approximating sets.
-    HybridDiscreteEvolver(const EvolverInterface<SystemType,EnclosureType>& evolver)
+    HybridDiscretiser(const EvolverInterface<SystemType,EnclosureType>& evolver)
         : _evolver(evolver.clone()) { }
       
     //! \brief Make a dynamically-allocated copy.
-    HybridDiscreteEvolver<ES>* clone() const { return new HybridDiscreteEvolver<ES>(*this); }
+    HybridDiscretiser<ES>* clone() const { return new HybridDiscretiser<ES>(*this); }
   
     //@}
   
@@ -175,10 +176,10 @@ struct Cell {
 GridCell make_grid_cell(const Cell&, const Grid&);
 Cell make_cell(const GridCell&);
 std::ostream& operator<<(std::ostream& os, const Cell& c);
-std::vector<Cell> successor(const DiscreteEvolverInterface<VectorField,GridCell>&, const Grid&, const VectorField&, const Cell&, Float, char);
+std::vector<Cell> successor(const DiscretiserInterface<VectorField,GridCell>&, const Grid&, const VectorField&, const Cell&, Float, char);
 
 } // namespace Ariadne
 
 
 
-#endif /* ARIADNE_DISCRETE_EVOLVER_H */
+#endif /* ARIADNE_DISCRETISER_H */

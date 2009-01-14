@@ -70,7 +70,7 @@ class HybridReachabilityAnalyser
 {
   private:
     boost::shared_ptr< DiscreteEvolutionParameters > _parameters;
-    boost::shared_ptr< DiscreteEvolverInterface<HybridAutomaton,HybridGridCell> > _discretiser;
+    boost::shared_ptr< DiscretiserInterface<HybridAutomaton,HybridGridCell> > _discretiser;
   public:
     typedef DiscreteEvolutionParameters EvolutionParametersType;
     typedef HybridAutomaton SystemType;

@@ -54,7 +54,7 @@ namespace Ariadne {
 #include "hybrid_automaton.h"
 
 #include "hybrid_evolver.h"
-#include "discrete_evolver.h"
+#include "discretiser.h"
 #include "reachability_analyser.h"
 
 #include "serialization.h"

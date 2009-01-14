@@ -218,3 +218,67 @@ _discretise(const Orbit<EnclosureType>& continuous_orbit,
 template class HybridDiscreteEvolver<DefaultEnclosureType>;
 
 } // namespace Ariadne
+
+
+typedef unsigned char uchar;
+
+namespace Ariadne {
+
+Cell make_cell(const GridCell& gc) {
+    const uint max_height=112;
+    const int max_depth=112;
+    const uint max_size=112;
+    assert(gc.height()<max_height);
+    assert(gc.depth()<max_depth);
+    assert(gc.height()+gc.depth()<max_size);
+    
+    std::bitset<112> wd;
+    for(uchar i=0; i!=gc.word().size(); ++i) {
+        wd[i]=gc.word()[i];
+    }
+    Cell c= { gc.height(),gc.depth(),wd };
+    return c;
+}
+
+std::ostream& operator<<(std::ostream& os, const Cell& c) {
+    os<<"("<<int(c.height)<<","<<int(c.depth)<<",";
+    for(uint i=0; i!=c.height+c.depth; ++i) { os<<c.word[i]; }
+    return os<<")";
+}
+
+GridCell make_grid_cell(const Cell& c, const Grid& g) {
+    BinaryWord wd;
+    for(uchar i=0; i!=wd.size(); ++i) {
+        wd.push_back(c.word[i]);
+    }
+    return GridCell(g,c.height,wd);
+}
+
+std::vector<Cell> 
+successor(const DiscreteEvolverInterface<VectorField,GridCell>& discretiser, 
+          const Grid& grid, const VectorField& system, const Cell& cell, Float time, char reachevolve)
+{
+    GridCell grid_cell=make_grid_cell(cell,grid);
+    //std::cerr<<"initial_grid_cell="<<grid_cell<<"\n";
+    GridTreeSet grid_tree_set;
+    ARIADNE_ASSERT(reachevolve=='r' || reachevolve=='e');
+    Orbit<GridCell> orbit=discretiser.upper_evolution(system,grid_cell,time,grid_cell.depth());
+    //std::cerr<<"orbit="<<orbit<<"\n\n";
+    if(reachevolve=='r') {
+        grid_tree_set=orbit.reach();
+    } else if(reachevolve=='e') {
+        grid_tree_set=orbit.final();
+    }
+    grid_tree_set.mince(grid_cell.depth());
+    std::vector<Cell> cells;
+    for(GridTreeSet::const_iterator iter=grid_tree_set.begin();
+        iter!=grid_tree_set.end(); ++iter)
+    {
+        cells.push_back(make_cell(*iter));
+    }
+    return cells;
+}
+
+} // namespace Ariadne
+
+

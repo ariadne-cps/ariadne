@@ -159,9 +159,26 @@ class HybridDiscreteEvolver
   
 };
 
+} // namespace Ariadne
 
+#include <bitset>
+#include <vector>
+
+namespace Ariadne {
+class Grid;
+class GridCell;
+struct Cell {
+    unsigned char height;
+    unsigned char depth;
+    std::bitset<112> word;
+};
+GridCell make_grid_cell(const Cell&, const Grid&);
+Cell make_cell(const GridCell&);
+std::ostream& operator<<(std::ostream& os, const Cell& c);
+std::vector<Cell> successor(const DiscreteEvolverInterface<VectorField,GridCell>&, const Grid&, const VectorField&, const Cell&, Float, char);
 
 } // namespace Ariadne
+
 
 
 #endif /* ARIADNE_DISCRETE_EVOLVER_H */

@@ -120,7 +120,11 @@ Polytope polytope(const Zonotope& z)
         }
         res.new_vertex(pt);
     }
-    return reduce2d(res);
+    if(res.dimension()==2) {
+        return reduce2d(res);
+    } else {
+        return res;
+    }
 }
 
 
@@ -141,6 +145,7 @@ Polytope polytope(const ApproximateTaylorModel& ts)
 
 Polytope& reduce2d(Polytope& p) 
 {
+    ARIADNE_ASSERT(p.dimension()==2);
     //std::cerr << this->_vertices << std::endl;
     std::sort(p.vertices().begin(),p.vertices().end());
     //std::cerr << this->_vertices << std::endl;

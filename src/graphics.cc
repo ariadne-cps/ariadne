@@ -150,6 +150,13 @@ void Figure::set_projection_map(const ProjectionFunction& p)
     this->_data->projection=p;
 }
 
+void Figure::set_projection_map(const PlanarProjectionMap& p) 
+{
+    array<uint> ary(2);
+    ary[0]=p.i; ary[1]=p.j;
+    this->_data->projection=ProjectionFunction(ary,p.n);
+}
+
 void Figure::set_bounding_box(const Box& bx) 
 {
     ARIADNE_ASSERT(bx.dimension()==0 || bx.dimension()==2 || bx.dimension()==this->_data->projection.argument_size());
@@ -443,7 +450,7 @@ void plot(cairo_t *cr, const Box& bounding_box, const ProjectionFunction& projec
 
 
 void 
-Figure::write(const char* filename) 
+Figure::write(const char* cfilename) 
 {
     cairo_surface_t *surface;
     cairo_t *cr;
@@ -460,8 +467,13 @@ Figure::write(const char* filename)
  
     Ariadne::plot(cr, bounding_box, projection, objects, canvas_width, canvas_height);
     
-    cairo_surface_write_to_png (surface, (std::string(filename)+".png").c_str());
-   
+    
+    std::string filename(cfilename);
+    if(filename.rfind(".")) {
+    } else {
+        filename=filename+".png";
+    }
+    cairo_surface_write_to_png (surface, filename.c_str());
     cairo_surface_destroy (surface);
 
 

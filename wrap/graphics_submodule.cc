@@ -55,7 +55,8 @@ using namespace Ariadne;
 void export_figure() 
 {
     class_<Figure> figure_class("Figure",init<>());
-    figure_class.def("set_projection_map",&Figure::set_projection_map);
+    figure_class.def("set_projection_map",(void(Figure::*)(const PlanarProjectionMap&)) &Figure::set_projection_map);
+    figure_class.def("set_projection_map",(void(Figure::*)(const ProjectionFunction&)) &Figure::set_projection_map);
     figure_class.def("set_bounding_box",&Figure::set_bounding_box);
     figure_class.def("set_line_style", (void(Figure::*)(bool)) &Figure::set_line_style);
     figure_class.def("set_line_width", (void(Figure::*)(double)) &Figure::set_line_width);

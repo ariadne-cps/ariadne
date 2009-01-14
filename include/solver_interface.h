@@ -34,7 +34,8 @@
 
 namespace Ariadne {
 
-    
+typedef unsigned int uint;
+  
 class Interval;
 template<class X> class Vector;
 class FunctionInterface;

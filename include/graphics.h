@@ -32,6 +32,8 @@
 #include <string>
 #include <vector>
 
+typedef unsigned int uint;
+
 namespace Ariadne {
 
 class Point;
@@ -39,6 +41,12 @@ class Box;
 class Polytope;
 class InterpolatedCurve;
 class ProjectionFunction;
+
+struct PlanarProjectionMap {
+  public:
+    PlanarProjectionMap(uint nn, uint ii, uint jj) : n(nn), i(ii), j(jj) { }
+    uint n, i, j;
+};
 
 struct Colour {
     Colour();
@@ -83,6 +91,7 @@ class Figure {
     ~Figure();
     Figure();
     void set_projection_map(const ProjectionFunction&);
+    void set_projection_map(const PlanarProjectionMap&);
     void set_bounding_box(const Box&);
     void set_line_style(bool);
     void set_line_width(double);
@@ -124,6 +133,9 @@ template<class SET> void plot(const char* filename, const SET& set) {
 
 template<class SET> void plot(const char* filename, const Box& bbox, const Colour& fc, const SET& set) { 
     Figure g; g.set_bounding_box(bbox); g.set_fill_colour(fc); draw(g,set); g.write(filename); }
+
+template<class SET> void plot(const char* filename, const PlanarProjectionMap& pr, const Box& bbox, const Colour& fc, const SET& set) { 
+    Figure g; g.set_projection_map(pr), g.set_bounding_box(bbox); g.set_fill_colour(fc); draw(g,set); g.write(filename); }
 
 
 

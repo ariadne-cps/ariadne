@@ -887,9 +887,15 @@ operator<<(latexstream& texs, const ApproximateTaylorModel& p)
     return texs;
 }
 
+} // namespace Ariadne
 
+
+
+#include "box.h"
+#include "zonotope.h"
+namespace Ariadne {
 void draw(Figure& fig, const ApproximateTaylorModel& atm) {
+    //fig.draw(Box(atm.bounding_box()));
     draw(fig,zonotope(atm));
 }
-
-} // namespace Ariadne
+}

@@ -31,7 +31,7 @@
 #include "hybrid_automaton.h"
 #include "evolution_parameters.h"
 #include "hybrid_evolver.h"
-#include "discrete_evolver.h"
+#include "discretiser.h"
 #include "reachability_analyser.h"
 #include "graphics.h"
 #include "logging.h"

@@ -158,17 +158,22 @@ class Orbit<HybridTaylorSetType>
     boost::shared_ptr<Data> _data;
 };
 
+template<class ES> std::ostream& operator<<(std::ostream& os, const Orbit< ES >& orb);
+template<> std::ostream& operator<<(std::ostream& os, const Orbit<TaylorSetType>& orb);
+
+
 template<class ES> 
 std::ostream& 
-operator<<(std::ostream& os, const Orbit<ES>& orb)
+operator<<(std::ostream& os, const Orbit< ES >& orb)
 {
-    os << "Orbit(\n  initial=" << typename Orbit<ES>::EnclosureListType(orb.initial())
+    os << "Orbit(\n  initial=" << orb.initial()
        << "\n  intermediate=" << orb.intermediate()
        << "\n  reach=" << orb.reach()
        << "\n  final=" << orb.final()
        << ")\n";
     return os;
 }
+
 
 template<class G, class ES> void draw(G& graphic, const Orbit<ES>& orbit) 
 {

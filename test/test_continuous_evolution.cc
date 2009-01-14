@@ -35,8 +35,7 @@
 #include "zonotope.h"
 #include "list_set.h"
 #include "evolution_parameters.h"
-#include "hybrid_set.h"
-#include "hybrid_evolver.h"
+#include "vector_field_evolver.h"
 #include "graphics.h"
 #include "logging.h"
 
@@ -65,7 +64,6 @@ void TestContinuousEvolution::test() const
     // cout << __PRETTY_FUNCTION__ << endl;
 
     typedef ApproximateTaylorModel EnclosureType;
-    typedef std::pair<DiscreteState,ApproximateTaylorModel> HybridEnclosureType;
 
     // Set up the evolution parameters and grid
     Float time(8.0);
@@ -77,7 +75,7 @@ void TestContinuousEvolution::test() const
     parameters.maximum_step_size=step_size;
 
     // Set up the evaluators
-    HybridEvolver evolver(parameters);
+    VectorFieldEvolver evolver(parameters);
   
     // Define the initial box
     Box initial_box(2); 
@@ -98,26 +96,21 @@ void TestContinuousEvolution::test() const
     // cout << "vdp.jacobian(" << initial_box << ") = " << vdp.jacobian(initial_box) << endl;
     // cout << endl;
   
-    DiscreteState location(23);
-
+ 
     // Make a hybrid automaton for the Van der Pol equation
-    HybridAutomaton vanderpol("Van der Pol");
-    vanderpol.new_mode(location,vdp);
+    VectorField vanderpol(vdp);
 
 
     // Over-approximate the initial set by a grid cell
     Vector<Interval> unit_box(2,Interval(-1,1));
     EnclosureType initial_set=ApproximateTaylorModel(unit_box,ScalingFunction(initial_box),4,1);
     // cout << "initial_set=" << initial_set << endl << endl;
-    HybridEnclosureType initial_hybrid_set(location,initial_set);
-    HybridTime hybrid_time(time,5);
-
   
     // Compute the reachable sets
-    ListSet<HybridEnclosureType> hybrid_evolve_set,hybrid_reach_set;
-    hybrid_evolve_set = evolver.evolve(vanderpol,initial_hybrid_set,hybrid_time);
+    ListSet<EnclosureType> evolve_set,reach_set;
+    evolve_set = evolver.evolve(vanderpol,initial_set,time);
     // cout << "evolve_set=" << hybrid_evolve_set << endl;
-    hybrid_reach_set = evolver.reach(vanderpol,initial_hybrid_set,hybrid_time);
+    reach_set = evolver.reach(vanderpol,initial_set,time);
     // cout << "reach_set=" << hybrid_reach_set << endl;
   
     //// cout << "evolve_set=" << hybrid_evolve_set[location] << endl;
@@ -128,8 +121,8 @@ void TestContinuousEvolution::test() const
     // cout << "evolve_set=" << hybrid_evolve_set << endl;
     // cout << "reach_set=" << hybrid_reach_set << endl;
     Figure fig;
-    fig << line_style(true) << fill_colour(cyan) << hybrid_reach_set;
-    fig << fill_colour(magenta) << hybrid_evolve_set;
+    fig << line_style(true) << fill_colour(cyan) << reach_set;
+    fig << fill_colour(magenta) << evolve_set;
     fig << fill_colour(blue) << initial_set;
     fig.write("test_continuous_evolution-vdp");
 

@@ -235,7 +235,10 @@ Orbit(const GridCell& initial_set,
     this->_data->reach=reach_set;
     this->_data->intermediate=intermediate_set;
     this->_data->final=final_set;
+    std::cerr<<"Orbit<GridCell>::Orbit(...)\n  initial="<<initial_set<<"\n  reach="<<reach_set<<"\n  intermediate="<<intermediate_set<<"\n  final="<<final_set<<"\n\n"<<std::flush;
+    std::cerr<<"orbit="<<*this<<"\n\n"<<std::flush;
 }
+
 
 GridCell const&
 Orbit<GridCell>::
@@ -320,6 +323,19 @@ Orbit<HybridGridCell>::
 final() const
 {
     return this->_data->final;
+}
+
+
+template<> 
+std::ostream& 
+operator<<(std::ostream& os, const Orbit<TaylorSetType>& orb)
+{
+    os << "Orbit(\n  initial=" << Orbit<TaylorSetType>::EnclosureListType(orb.initial()).bounding_boxes()
+       << "\n  intermediate=" << orb.intermediate().bounding_boxes()
+       << "\n  reach=" << orb.reach().bounding_boxes()
+       << "\n  final=" << orb.final().bounding_boxes()
+       << ")\n";
+    return os;
 }
 
 

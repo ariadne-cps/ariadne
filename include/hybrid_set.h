@@ -231,6 +231,13 @@ class HybridListSet
             loc_iter!=hls.locations_end(); ++loc_iter) {  
             (*this)[loc_iter->first].adjoin(loc_iter->second); } }
 
+    HybridListSet<Box> bounding_boxes() const {
+        HybridListSet<Box> result;
+        for(locations_const_iterator loc_iter=this->locations_begin();
+            loc_iter!=this->locations_end(); ++loc_iter) {  
+            result[loc_iter->first]=loc_iter->second.bounding_boxes(); } 
+        return result; }
+
     HybridSpace space() const { return HybridSpace(*this); }
 };
 

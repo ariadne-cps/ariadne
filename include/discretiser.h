@@ -52,15 +52,17 @@ class HybridGridTreeSet;
 typedef int DiscreteState;
 class HybridAutomaton;
 
+
 /*!  \brief A class for computing the evolution of a discrete-time autonomous system.
  */
-template<class ES>
-class ContinuousDiscretiser
-    : public DiscretiserInterface<VectorField,GridCell>
+template<class Sys, class ES>
+class Discretiser
+    : public DiscretiserInterface<Sys,GridCell>
     , public Loggable
 {
-    typedef typename VectorField::TimeType TimeType;
-    typedef VectorField SystemType;
+    typedef int AccuracyType;
+    typedef Sys SystemType;
+    typedef typename SystemType::TimeType TimeType;
     typedef GridCell BasicSetType;
     typedef GridTreeSet DenotableSetType;
     typedef ES EnclosureType;
@@ -72,36 +74,31 @@ class ContinuousDiscretiser
   
     //! \brief Construct from evolution parameters and a method for evolving basic sets, 
     //!  and a scheme for approximating sets.
-    ContinuousDiscretiser(const EvolverInterface<SystemType,EnclosureType>& evolver)
+    Discretiser(const EvolverInterface<SystemType,EnclosureType>& evolver)
         : _evolver(evolver.clone()) { }
       
     //! \brief Make a dynamically-allocated copy.
-    ContinuousDiscretiser<ES>* clone() const { return new ContinuousDiscretiser<ES>(*this); }
+    Discretiser<Sys,ES>* clone() const { return new Discretiser<Sys,ES>(*this); }
   
     //@}
   
     //@{
     //! \name Evaluation on basic sets.
   
-    //! \brief Compute lower approximations to the reachable and evolved sets 
+    //! \brief Compute approximations to the reachable and evolved sets 
     //! of \a system starting in \a initial_set over \a time. */
     virtual Orbit<BasicSetType> 
-    lower_evolution(const SystemType& system, 
-                    const BasicSetType& initial_set, 
-                    const TimeType& time, const int accuracy) const;
+    evolution(const SystemType& system, 
+              const BasicSetType& initial_set, 
+              const TimeType& time, 
+              const AccuracyType accuracy, 
+              const Semantics semantics) const;
   
-    //! \brief Compute lower approximations to the reachable and evolved sets 
-    //! of \a system starting in \a initial_set over \a time. */
-    virtual Orbit<BasicSetType> 
-    upper_evolution(const SystemType& system, 
-                    const BasicSetType& initial_set, 
-                    const TimeType& time, const int accuracy) const;
-
   private:
     EnclosureType _enclosure(const BasicSetType& bs) const;
     Orbit<BasicSetType> _discretise(const Orbit<EnclosureType>& orb,
                                     const BasicSetType& initial_set,
-                                    const int accuracy) const;
+                                    const AccuracyType accuracy) const;
   
 };
 
@@ -113,6 +110,7 @@ class HybridDiscretiser
     : public DiscretiserInterface<HybridAutomaton,HybridGridCell>
     , public Loggable
 {
+    typedef int AccuracyType;
     typedef typename HybridAutomaton::TimeType TimeType;
     typedef HybridAutomaton SystemType;
     typedef HybridGridCell BasicSetType;
@@ -138,48 +136,23 @@ class HybridDiscretiser
     //@{
     //! \name Evaluation on basic sets.
   
-    //! \brief Compute lower approximations to the reachable and evolved sets 
+    //! \brief Compute approximations to the reachable and evolved sets 
     //! of \a system starting in \a initial_set over \a time. */
     virtual Orbit<BasicSetType> 
-    lower_evolution(const SystemType& system, 
-                    const BasicSetType& initial_set, 
-                    const TimeType& time, const int accuracy) const;
+    evolution(const SystemType& system, 
+              const BasicSetType& initial_set, 
+              const TimeType& time, 
+              const AccuracyType accuracy,
+              const Semantics semantics) const;
   
-    //! \brief Compute lower approximations to the reachable and evolved sets 
-    //! of \a system starting in \a initial_set over \a time. */
-    virtual Orbit<BasicSetType> 
-    upper_evolution(const SystemType& system, 
-                    const BasicSetType& initial_set, 
-                    const TimeType& time, const int accuracy) const;
-
   private:
     EnclosureType _enclosure(const BasicSetType& bs) const;
     Orbit<BasicSetType> _discretise(const Orbit<EnclosureType>& orb,
                                     const BasicSetType& initial_set,
-                                    const int accuracy) const;
+                                    const AccuracyType accuracy) const;
   
 };
 
 } // namespace Ariadne
-
-#include <bitset>
-#include <vector>
-
-namespace Ariadne {
-class Grid;
-class GridCell;
-struct Cell {
-    unsigned char height;
-    unsigned char depth;
-    std::bitset<112> word;
-};
-GridCell make_grid_cell(const Cell&, const Grid&);
-Cell make_cell(const GridCell&);
-std::ostream& operator<<(std::ostream& os, const Cell& c);
-std::vector<Cell> successor(const DiscretiserInterface<VectorField,GridCell>&, const Grid&, const VectorField&, const Cell&, Float, char);
-
-} // namespace Ariadne
-
-
 
 #endif /* ARIADNE_DISCRETISER_H */

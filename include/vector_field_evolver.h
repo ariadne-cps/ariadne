@@ -1,5 +1,5 @@
 /***************************************************************************
- *            continuous_evolver.h
+ *            vector_field_evolver.h
  *
  *  Copyright  2007-8  Alberto Casagrande, Pieter Collins
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file continuous_evolver.h
- *  \brief Evolver for continuous systems.
+/*! \file vector_field_evolver.h
+ *  \brief Evolver for vector_field systems.
  */
 
-#ifndef ARIADNE_CONTINUOUS_EVOLVER_H
-#define ARIADNE_CONTINUOUS_EVOLVER_H
+#ifndef ARIADNE_VECTOR_FIELD_EVOLVER_H
+#define ARIADNE_VECTOR_FIELD_EVOLVER_H
 
 #include <string>
 #include <vector>
@@ -57,17 +57,15 @@ template<class MDL> class CalculusInterface;
 
 class EvolutionProfiler;
 
-class ContinuousTime;
-
 
 typedef ApproximateTaylorModel DefaultModelType;
 typedef ApproximateTaylorModel DefaultEnclosureType;
 
-/*! \brief A class for computing the evolution of a continuous system. 
+/*! \brief A class for computing the evolution of a vector_field system. 
  *
- * The actual evolution steps are performed by the ContinuousEvolver class.
+ * The actual evolution steps are performed by the VectorFieldEvolver class.
  */
-class ContinuousEvolver
+class VectorFieldEvolver
     : public EvolverBase< VectorField,DefaultEnclosureType>
     , public Loggable
 {
@@ -82,13 +80,13 @@ class ContinuousEvolver
   public:
     
     //! \brief Default constructor.
-    ContinuousEvolver();
+    VectorFieldEvolver();
   
     //! \brief Construct from parameters using a default integrator.
-    ContinuousEvolver(const EvolutionParametersType& parameters);
+    VectorFieldEvolver(const EvolutionParametersType& parameters);
   
     /*! \brief Make a dynamically-allocated copy. */
-    ContinuousEvolver* clone() const { return new ContinuousEvolver(*this); }
+    VectorFieldEvolver* clone() const { return new VectorFieldEvolver(*this); }
 
     //@{
     //! \name Parameters controlling the evolution.
@@ -138,4 +136,4 @@ class ContinuousEvolver
   
 } // namespace Ariadne
 
-#endif // ARIADNE_CONTINUOUS_EVOLVER_H
+#endif // ARIADNE_VECTOR_FIELD_EVOLVER_H

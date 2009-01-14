@@ -22,7 +22,7 @@
  */
  
 #include "orbit.h"
-#include "continuous_evolver.h"
+#include "vector_field_evolver.h"
 #include "approximate_taylor_model.h"
 
 #include <boost/python.hpp>
@@ -61,5 +61,5 @@ void export_evolver(const char* name)
 void evolution_submodule()
 {
     export_orbit< Orbit<ApproximateTaylorModel> >("ContinuousOrbit");
-    export_evolver<ContinuousEvolver>("VectorFieldEvolver");
+    export_evolver<VectorFieldEvolver>("VectorFieldEvolver");
 }

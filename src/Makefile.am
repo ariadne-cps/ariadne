@@ -32,9 +32,10 @@ SRC = \
 	geometry.cc \
 	hybrid_automaton.cc \
 	orbit.cc \
-	continuous_evolver.cc \
+	vector_field_evolver.cc \
 	hybrid_evolver.cc \
 	discretiser.cc \
+	successor.cc \
 	reachability_analyser.cc \
 	logging.cc \
 	graphics.cc 

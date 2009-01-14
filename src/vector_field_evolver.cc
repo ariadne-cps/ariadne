@@ -1,5 +1,5 @@
 /***************************************************************************
- *            continuous_evolver.cc
+ *            vector_field_evolver.cc
  *
  *  Copyright  2008  Alberto Casagrande, Pieter Collins
  *
@@ -35,7 +35,7 @@
 #include "logging.h"
 
 #include "vector_field.h"
-#include "continuous_evolver.h"
+#include "vector_field_evolver.h"
 
 namespace {
 
@@ -75,7 +75,7 @@ using boost::shared_ptr;
 class DegenerateCrossingException { };
 
 
-ContinuousEvolver::ContinuousEvolver()
+VectorFieldEvolver::VectorFieldEvolver()
     : _parameters(new EvolutionParametersType()),
       _toolbox(new DifferentialCalculus<ModelType>())
 {
@@ -83,15 +83,15 @@ ContinuousEvolver::ContinuousEvolver()
 
 
 
-ContinuousEvolver::ContinuousEvolver(const EvolutionParametersType& p)
+VectorFieldEvolver::VectorFieldEvolver(const EvolutionParametersType& p)
     : _parameters(new EvolutionParametersType(p)),
       _toolbox(new DifferentialCalculus<ModelType>())
 {
 }
 
 
-Orbit<ContinuousEvolver::EnclosureType> 
-ContinuousEvolver::
+Orbit<VectorFieldEvolver::EnclosureType> 
+VectorFieldEvolver::
 orbit(const SystemType& system, 
       const EnclosureType& initial_set, 
       const TimeType& time,
@@ -118,7 +118,7 @@ enum CrossingKind { TRANSVERSE, TOUCHING, NONE, UNKNOWN };
 
 
 void
-ContinuousEvolver::
+VectorFieldEvolver::
 _evolution(EnclosureListType& final_sets, 
            EnclosureListType& reach_sets, 
            EnclosureListType& intermediate_sets, 
@@ -211,7 +211,7 @@ _evolution(EnclosureListType& final_sets,
 
 
 void
-ContinuousEvolver::
+VectorFieldEvolver::
 _evolution_step(std::vector< TimedSetType >& working_sets,
                 EnclosureListType& final_sets, 
                 EnclosureListType& reach_sets, 
@@ -284,7 +284,7 @@ _evolution_step(std::vector< TimedSetType >& working_sets,
     ARIADNE_LOG(6,"final_set_model = "<<final_set_model<<"\n");
     ModelType reach_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,zero_time,integration_time_model);         
     ARIADNE_LOG(6,"reach_set_model = "<<reach_set_model<<"\n");
-    ARIADNE_LOG(4,"Done computing continuous evolution\n");
+    ARIADNE_LOG(4,"Done computing evolution\n");
   
     reach_sets.adjoin(reach_set_model);
 

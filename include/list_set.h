@@ -37,11 +37,14 @@ typedef unsigned int uint;
 
 namespace Ariadne {
 
+class Box;
 template<class ES> class ListSet;
 typedef int DiscreteState;
 
 // Declare template specialisation for hybrid list set
 template<class ES> class ListSet< std::pair<DiscreteState,ES> >;
+
+struct ListSetSummary { uint size, dimension; };
 
 template<class BS>
 class ListSet 
@@ -105,16 +108,31 @@ class ListSet
     void adjoin(const ListSet<BS>& ls) { 
         ARIADNE_ASSERT(this->empty() || ls.empty() || this->_data.back().dimension()==ls._data.back().dimension());
         this->_data.insert(this->_data.end(),ls.begin(),ls.end()); }
+
+    /*! \brief compute a list of the bounding boxes of the set elements. */
+    ListSet<Box> bounding_boxes() const {
+        ListSet<Box> result(this->dimension());
+        for(uint i=0; i!=this->size(); ++i) { 
+            result.adjoin((*this)[i].bounding_box());
+        }
+        return result;
+    }
+
+    /*! Returns a summary of the size and dimension. */
+    ListSetSummary summary() const { ListSetSummary summary = { this->size(),this->dimension() }; return summary; }
+
 };      
   
+inline std::ostream& operator<<(std::ostream& os, const ListSetSummary& lss) {
+    return os << "ListSet( s="<<lss.size<<", d="<<lss.dimension<<")"; }
 
 template<class BS>
 std::ostream& 
 operator<<(std::ostream& os, const ListSet<BS>& ls)
 {
-    os << "ListSet(";
-    if(!ls.empty()) { os << "d=" << ls.dimension() << ","; }
-    return os << "s=" << ls.size() << ")";
+    os << "ListSet";
+    if(!ls.empty()) { for(uint i=0; i!=ls.size(); ++i) { os << (i==0?'(':',') << ls[i]; } }
+    return os << ")";
 }
 
 

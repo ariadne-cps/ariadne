@@ -150,6 +150,19 @@ class SparseDifferential
     static SparseDifferential<X> variable(uint as, uint d, const X& x, uint i) {
         SparseDifferential<X> r(as,d); r._data[MultiIndex::zero(as)]=x; r._data[MultiIndex::unit(as,i)]=1.0; return r; }
 
+    static Vector< SparseDifferential<X> > constants(uint rs, uint as, uint d, const Vector<X>& c) {
+        ARIADNE_ASSERT(c.size()==rs);
+        Vector< SparseDifferential<X> > result(rs,SparseDifferential(as,d));
+        for(uint i=0; i!=rs; ++i) { result[i]=c[i]; }
+        return result;
+    }
+    static Vector< SparseDifferential<X> > variables(uint rs, uint as, uint d, const Vector<X>& x) {
+        ARIADNE_ASSERT(x.size()==rs);  ARIADNE_ASSERT(as==x.size());
+        Vector< SparseDifferential<X> > result(rs,SparseDifferential<X>(as,d));
+        for(uint i=0; i!=rs; ++i) { result[i]=x[i]; result[i][i]=X(1.0); }
+        return result; 
+    }
+
     bool operator==(const SparseDifferential<X>& sd) const {
         if(this->argument_size()!=sd.argument_size()) { return false; }
         for(MultiIndex j(this->argument_size()); j.degree()<=std::max(this->degree(),sd.degree()); ++j) {

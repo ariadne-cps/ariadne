@@ -33,6 +33,10 @@
 
 namespace Ariadne {
 
+typedef double Float;
+class Interval;
+class TaylorVariable;
+
 template<class X> class Vector;
 template<class X> class Matrix;
 template<class X> class SparseDifferential;
@@ -57,14 +61,19 @@ class FunctionInterface {
     virtual Vector<Float> evaluate(const Vector<Float>& x) const = 0;
     //! \brief Compute an over-approximation to the values of the function over the domain \a x. This method provides an <em>interval extension</em> of the function.
     virtual Vector<Interval> evaluate(const Vector<Interval>& x) const = 0;
+
+    virtual Vector<TaylorVariable> evaluate(const Vector<TaylorVariable>& x) const = 0;
+    virtual Vector< SparseDifferential<Float> > evaluate(const Vector< SparseDifferential<Float> >& x) const = 0;
+    virtual Vector< SparseDifferential<Interval> > evaluate(const Vector< SparseDifferential<Interval> >& x) const = 0;
+
     //! \brief Compute an approximation to the Jacobian derivative matrix \f$(Df)_{ij}=\partial f_i/\partial x_j\f$ of the function at the point \a x.
     virtual Matrix<Float> jacobian(const Vector<Float>& x) const = 0;
     //! \brief Compute an over-approximation to the Jacobian derivative matrix \f$(Df)_{ij}=\partial f_i/\partial x_j\f$ of the function over the domain \a x.
     virtual Matrix<Interval> jacobian(const Vector<Interval>& x) const = 0;
     //! \brief Compute an approximation to all the parital derivatives \f$D^\alpha f_{i}=\partial^{|\alpha|} f_i/\partial x_\alpha\f$ of the function at the point \a x up to degree \a d.
-    virtual DifferentialVector< SparseDifferential<Float> > expansion(const Vector<Float>& x, const ushort& d) const = 0;
+    virtual Vector< SparseDifferential<Float> > expansion(const Vector<Float>& x, const ushort& d) const = 0;
     //! \brief Compute over-approximations to all the parital derivatives \f$D^\alpha f_{i}=\partial^{|\alpha|} f_i/\partial x_\alpha\f$ of the function over the domain \a x up to degree \a d.
-    virtual DifferentialVector< SparseDifferential<Interval> > expansion(const Vector<Interval>& x, const ushort& d) const = 0;
+    virtual Vector< SparseDifferential<Interval> > expansion(const Vector<Interval>& x, const ushort& d) const = 0;
   
     //! \brief Write to an output stream.
     virtual std::ostream& write(std::ostream& os) const = 0;

@@ -215,14 +215,20 @@ template void export_differential_vector< SparseDifferential<Interval> >(const c
 
 void differentiation_submodule() 
 {
-    export_differential< DenseDifferential<Float> >("DenseDifferential");
-    export_differential< DenseDifferential<Interval> >("IDenseDifferential");
-    export_differential< SparseDifferential<Float> >("SparseDifferential");
-    export_differential< SparseDifferential<Interval> >("ISparseDifferential");
+    //export_differential< DenseDifferential<Float> >("DenseDifferential");
+    //export_differential< DenseDifferential<Interval> >("IDenseDifferential");
+    //export_differential< SparseDifferential<Float> >("SparseDifferential");
+    //export_differential< SparseDifferential<Interval> >("ISparseDifferential");
 
-    export_differential_vector< DenseDifferential<Float> >("DenseDifferentialVector");
-    export_differential_vector< DenseDifferential<Interval> >("IDenseDifferentialVector");
-    export_differential_vector< SparseDifferential<Float> >("SparseDifferentialVector");
-    export_differential_vector< SparseDifferential<Interval> >("ISpareDifferentialVector");
+    //export_differential_vector< DenseDifferential<Float> >("DenseDifferentialVector");
+    //export_differential_vector< DenseDifferential<Interval> >("IDenseDifferentialVector");
+    //export_differential_vector< SparseDifferential<Float> >("SparseDifferentialVector");
+    //export_differential_vector< SparseDifferential<Interval> >("ISpareDifferentialVector");
+
+    export_differential< SparseDifferential<Float> >("Differential");
+    export_differential< SparseDifferential<Interval> >("IntervalDifferential");
+
+    export_differential_vector< DenseDifferential<Float> >("DifferentialVector");
+    export_differential_vector< DenseDifferential<Interval> >("IntervalDifferentialVector");
 }
 

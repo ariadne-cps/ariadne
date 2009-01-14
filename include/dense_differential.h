@@ -118,10 +118,14 @@ class DenseDifferential
     /// Divide by a constant.
     DenseDifferential<X>& operator/=(const X& c);
 
-    /// The power series of the reciprocal function.
-    static DenseDifferential<X> constant(uint as, uint d, const X& x);
-    /// The power series of the reciprocal function.
+    /// A constant differential in \a as variables at degree \a d with value \a c.
+    static DenseDifferential<X> constant(uint as, uint d, const X& c);
+    /// The \a i<sup>th</sup> variable of \a as at degree \a d with value \a x.
     static DenseDifferential<X> variable(uint as, uint d, const X& x, uint i);
+    /// A vector of constant differentials of size \a rs in \a as variables at degree \a d and value \a c.
+    static Vector< DenseDifferential<X> > constants(uint rs, uint as, uint d, const Vector<X>& c);
+    /// A vector of differential variables of size \a rs in \a as variables (with \a rs equal to \a as) at degree \a d and value \a x.
+    static Vector< DenseDifferential<X> > variables(uint rs, uint as, uint d, const Vector<X>& x);
 
   public:
 #ifdef DOXYGEN
@@ -616,6 +620,26 @@ DenseDifferential<X>
 DenseDifferential<X>::variable(uint as, uint d, const X& x, uint i)  
 { 
     DenseDifferential<X> r(as,d); r._data[0]=x; r._data[1+i]=1; return r;
+}
+
+template<class X>
+Vector< DenseDifferential<X> >
+DenseDifferential<X>::constants(uint rs, uint as, uint d, const Vector<X>& c)  
+{
+    ARIADNE_ASSERT(c.size()==rs);
+    Vector< DenseDifferential<X> > result(rs,DenseDifferential(as,d));
+    for(uint i=0; i!=rs; ++i) { result[i]=c[i]; }
+    return result;
+}
+
+template<class X>
+Vector< DenseDifferential<X> >
+DenseDifferential<X>::variables(uint rs, uint as, uint d, const Vector<X>& x)  
+{ 
+    ARIADNE_ASSERT(rs==x.size()); ARIADNE_ASSERT(as==x.size());
+    Vector< DenseDifferential<X> > r(rs,DenseDifferential(as,d)); 
+    for(uint i=0; i!=rs; ++i) { r[i]=x[i]; r[i][i]=X(1.0); } 
+    return r;
 }
 
  

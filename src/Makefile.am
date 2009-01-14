@@ -17,6 +17,7 @@ SRC = \
 	taylor_variable.cc  \
 	approximate_taylor_model.cc  \
 	differential_calculus.cc \
+	newton_solver.cc \
 	point.cc \
 	box.cc \
 	zonotope.cc \

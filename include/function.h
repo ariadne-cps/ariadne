@@ -39,6 +39,7 @@
 #include "transformation.h"
 #include "sparse_differential.h"
 #include "differential_vector.h"
+#include "taylor_variable.h"
 
 namespace Ariadne {
 
@@ -63,14 +64,23 @@ class FunctionBase
         Vector<Float> r(this->T::result_size()); this->T::compute(r,x); return r; } 
     virtual Vector<Interval> evaluate(const Vector<Interval>& x) const {
         Vector<Interval> r(this->T::result_size()); this->T::compute(r,x); return r; }                          
+    virtual Vector<TaylorVariable> evaluate(const Vector<TaylorVariable>& x) const {
+        Vector<TaylorVariable> r=TaylorVariable::zeroes(this->T::result_size(),this->T::argument_size()); 
+        this->T::compute(r,x); return r; }                          
+    virtual Vector< SparseDifferential<Float> > evaluate(const Vector< SparseDifferential<Float> >& x) const {
+        Vector< SparseDifferential<Float> > r(this->T::result_size()); this->T::compute(r,x); return r; }                          
+    virtual Vector< SparseDifferential<Interval> > evaluate(const Vector< SparseDifferential<Interval> >& x) const {
+        Vector< SparseDifferential<Interval> > r(this->T::result_size()); this->T::compute(r,x); return r; }                          
+
     virtual Matrix<Float> jacobian(const Vector<Float>& x) const {
         return this->_expansion(x,1u).get_jacobian(); }                         
     virtual Matrix<Interval> jacobian(const Vector<Interval>& x) const {
         return this->_expansion(x,1u).get_jacobian(); }                         
-    virtual DifferentialVector< SparseDifferential<Float> > expansion(const Vector<Float>& x, const ushort& s) const {
+    virtual Vector< SparseDifferential<Float> > expansion(const Vector<Float>& x, const ushort& s) const {
         return this->_expansion(x,s); } 
-    virtual DifferentialVector< SparseDifferential<Interval> > expansion(const Vector<Interval>& x, const ushort& s) const {
+    virtual Vector< SparseDifferential<Interval> > expansion(const Vector<Interval>& x, const ushort& s) const {
         return this->_expansion(x,s); }
+
     // TODO: Find a better way for writing functions which can handle transformations which may not have a
     // write() method or operator<<.
     virtual std::ostream& write(std::ostream& os) const  {
@@ -84,6 +94,61 @@ class FunctionBase
         for(uint i=0; i!=as; ++i) { dx[i]=x[i]; }
         for(uint i=0; i!=as; ++i) { dx[i][i]=1; }
         this->T::compute(dr,dx);
+        return dr;
+    }                                             
+};
+
+
+// A wrapper for transformations  
+// This class is for internal use only; we can easily specify parameter types.
+template<class F> 
+class FunctionTemplate
+    : public FunctionInterface
+{
+  private:
+    Vector<Float> p;
+  private:
+    template<class R,class A, class P> 
+    void _compute(R& r, const A& x, const P& p) const { 
+        static_cast<const F&>(*this)._compute(r,x,p); }
+  protected:
+    FunctionTemplate() { }
+  public:
+    virtual Vector<Float> evaluate(const Vector<Float>& x) const {
+        Vector<Float> r(this->result_size()); this->_compute(r,x,p); return r; } 
+    virtual Vector<Interval> evaluate(const Vector<Interval>& x) const {
+        Vector<Interval> r(this->result_size()); this->_compute(r,x,p); return r; }                          
+    virtual Vector<TaylorVariable> evaluate(const Vector<TaylorVariable>& x) const {
+        Vector<TaylorVariable> r=TaylorVariable::zeroes(this->result_size(),this->argument_size()); 
+        this->_compute(r,x,p); return r; }                          
+    virtual Vector< SparseDifferential<Float> > evaluate(const Vector< SparseDifferential<Float> >& x) const {
+        Vector< SparseDifferential<Float> > r(this->result_size()); this->_compute(r,x,p); return r; }                          
+    virtual Vector< SparseDifferential<Interval> > evaluate(const Vector< SparseDifferential<Interval> >& x) const {
+        Vector< SparseDifferential<Interval> > r(this->result_size()); this->_compute(r,x,p); return r; }                          
+
+    virtual Matrix<Float> jacobian(const Vector<Float>& x) const {
+        return this->_expansion(x,1u).get_jacobian(); }                         
+    virtual Matrix<Interval> jacobian(const Vector<Interval>& x) const {
+        return this->_expansion(x,1u).get_jacobian(); }                         
+    virtual Vector< SparseDifferential<Float> > expansion(const Vector<Float>& x, const ushort& s) const {
+        return this->_expansion(x,s); } 
+    virtual Vector< SparseDifferential<Interval> > expansion(const Vector<Interval>& x, const ushort& s) const {
+        return this->_expansion(x,s); }
+
+    // TODO: Find a better way for writing functions which can handle transformations which may not have a
+    // write() method or operator<<.
+    virtual std::ostream& write(std::ostream& os) const  {
+        return os << "Function( result_size="<<this->result_size()<<", argument_size="<<this->argument_size()<<" )"; }
+    
+  private:
+    template<class X> DifferentialVector< SparseDifferential<X> > _expansion(const Vector<X>& x, const ushort& s) const {
+        const uint rs=this->result_size();
+        const uint as=this->argument_size();
+        Vector< SparseDifferential<X> > dx(as,SparseDifferential<X>(as,s));
+        Vector< SparseDifferential<X> > dr(rs,SparseDifferential<X>(as,s));
+        for(uint i=0; i!=as; ++i) { dx[i]=x[i]; }
+        for(uint i=0; i!=as; ++i) { dx[i][i]=1; }
+        this->_compute(dr,dx,p);
         return dr;
     }                                             
 };

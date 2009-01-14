@@ -99,6 +99,9 @@ TaylorVariable compose(const TaylorVariable& x, const Vector<Interval>& bx, cons
 TaylorVariable compose(const TaylorVariable& x, const Interval& b, const TaylorVariable& y);
 TaylorVariable compose(const TaylorVariable& x, const TaylorVariable& y);
 
+Vector<TaylorVariable> implicit(const Vector<TaylorVariable>& x);
+Vector<TaylorVariable> flow(const Vector<TaylorVariable>& vf, const Vector<Interval>& d, const Interval& h, const Vector<Interval>& b);
+
 
 
 
@@ -150,10 +153,18 @@ class TaylorVariable
     uint argument_size() const { return this->_expansion.argument_size(); }
     uint degree() const { return this->_expansion.degree(); }
     
+    static TaylorVariable zero(uint as) {
+        TaylorVariable r(as); r._expansion.set_value(0.0); return r; }
     static TaylorVariable constant(uint as, const Float& c) {
         TaylorVariable r(as); r._expansion.set_value(c); return r; }
     static TaylorVariable variable(uint as, const Float& x, uint i) {
         TaylorVariable r(as); r._expansion.set_value(x); r._expansion.set_gradient(i,1.0); return r; }
+    static Vector<TaylorVariable> zeroes(uint rs, uint as) {
+        Vector<TaylorVariable> result(rs); for(uint i=0; i!=rs; ++i) { 
+            result[i]=TaylorVariable::zero(as); } return result; }
+    static Vector<TaylorVariable> constants(uint as, const Vector<Float>& c) {
+        Vector<TaylorVariable> result(c.size()); for(uint i=0; i!=c.size(); ++i) { 
+            result[i]=TaylorVariable::constant(as,c[i]); } return result; }
     static Vector<TaylorVariable> variables(const Vector<Float>& x) {
         Vector<TaylorVariable> result(x.size()); for(uint i=0; i!=x.size(); ++i) { 
             result[i]=TaylorVariable::variable(x.size(),x[i],i); } return result; }

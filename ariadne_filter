@@ -11,15 +11,6 @@ s/__gmp_expr<__gmpq_value, __gmpq_value>/Rational/g
 s/__gmp_expr<__gmpz_value, __gmpz_value>/Integer/g
 s/__gmp_expr<__mpz_struct \[1\], __mpz_struct \[1\]>/Integer/g
 s/__gmp_expr<__mpq_struct \[1\], __mpq_struct \[1\]>/Rational/g
-s/Base:://g
-s/Numeric:://g
-s/LinearAlgebra:://g
-s/Combinatoric:://g
-s/Function:://g
-s/Geometry:://g
-s/System:://g
-s/Evaluation:://g
-s/Output:://g
 
 s/Ariadne:://g
 

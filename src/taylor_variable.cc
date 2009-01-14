@@ -1483,6 +1483,70 @@ compose(const TaylorVariable& x,
 }
     
 
+inline Vector<Float> centre(const Vector<TaylorVariable>& x) 
+{
+    Vector<Float> c(x.size());
+    for(uint i=0; i!=x.size(); ++i) {
+        c[i]=x[i].value();
+    }
+    return c;
+}
+
+Vector<TaylorVariable>
+implicit(const Vector<TaylorVariable>& f)
+{
+    ARIADNE_NOT_IMPLEMENTED;
+    /*
+
+    //std::cerr << ARIADNE_PRETTY_FUNCTION << std::endl;
+    typedef Interval I;
+    typedef Float A;
+  
+    ARIADNE_ASSERT(f.size()>0);
+    ARIADNE_ASSERT(f[0].argument_size()>f.size());
+    uint m=f[0].argument_size(); 
+    uint n=f.size();
+
+    array<uint> p(n);
+    for(uint i=0; i!=n; ++i) { p[i]=i+m-n; }
+    //std::cerr << "p=" << p << std::endl;
+
+    //std::cerr << "gd=" << gd << std::endl;
+    Vector<Float> gc=project(centre(f),range(m-n,m));
+    //std::cerr << "gc=" << gc << std::endl;
+    Vector<TaylorVariable> projection=TaylorVariable::constants(n,Vector<Float>(m,0.0)); 
+    for(uint i=0; i!=n; ++i) { projection[m-n+i][i]=1.0; }
+    Vector<TaylorVariable> ge=compose(f,Vector<Interval>(projection.size(),Interval(-1,1)),projection);
+    //std::cerr << "ge=" << ge << std::endl;
+    Vector<TaylorVariable> g(gd,gc,ge);
+
+    Vector<Float> z(n);
+    Vector<Interval> iv = solve(g,z);
+    Vector<Float> v = midpoint(iv);
+    //std::cerr<<"iv="<<iv<<std::endl;
+    //std::cerr<<"v="<<v<<std::endl;
+    Vector<Float> t(m);
+    project(t,range(m-n,m))=v;
+    //std::cerr<<"t="<<t<<std::endl;
+
+    Vector<TaylorVariable> fe=f;
+    //std::cerr<<"fe="<<fe<<std::endl;
+    Vector<TaylorVariable> fet=translate(fe,t);
+    //std::cerr<<"fet="<<fet<<std::endl;
+    fet.set_value(Vector<Float>(fe.result_size(),0.0));
+    //std::cerr<<"fet="<<fet<<std::endl;
+
+    Vector<TaylorVariable> he=implicit(fet);
+    //std::cerr<<"he="<<he<<std::endl;
+    he+=v;
+    //std::cerr<<"he="<<he<<std::endl;
+    Vector<Interval> hd=project(f.domain(),range(0,m-n));
+    Vector<Float> hc=project(f.centre(),range(0,m-n));
+    return Vector<TaylorVariable>(hd,hc,he);
+
+    */
+}
+
 std::string 
 TaylorVariable::str() const
 {

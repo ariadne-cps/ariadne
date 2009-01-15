@@ -60,7 +60,9 @@ inline rounding_mode_t get_rounding_mode();
 #endif
 
 #if defined __GNUC__ && ( defined __i386__ || defined __x86_64 || defined _M_IX86 || defined _M_X86 )
-    #if __GNUC__ >= 5 || ( __GNUC__ == 4 && __GNUC_MINOR__ >= 3 )
+    #if ( defined __SSE_MATH__ &&  defined __SSE2__ )
+        #define ARIADNE_SSE_ROUNDING
+    #elif __GNUC__ >= 5 || ( __GNUC__ == 4 && __GNUC_MINOR__ >= 3 )
         #define ARIADNE_GCC_ROUNDING
     #else
         #define ARIADNE_C99_ROUNDING
@@ -70,7 +72,33 @@ inline rounding_mode_t get_rounding_mode();
 #endif
 
 
-#if defined ARIADNE_C99_ROUNDING
+
+#if defined ARIADNE_SSE_ROUNDING
+
+#include <xmmintrin.h>
+
+namespace Ariadne {
+
+typedef unsigned int rounding_mode_t;
+
+const rounding_mode_t to_nearest = _MM_ROUND_NEAREST;
+const rounding_mode_t downward = _MM_ROUND_DOWN;
+const rounding_mode_t upward = _MM_ROUND_UP;
+const rounding_mode_t toward_zero = _MM_ROUND_TOWARD_ZERO;
+
+inline void set_rounding_to_nearest() { _MM_SET_ROUNDING_MODE(_MM_ROUND_NEAREST);  }
+inline void set_rounding_downward() { _MM_SET_ROUNDING_MODE(_MM_ROUND_DOWN);  }
+inline void set_rounding_upward() { _MM_SET_ROUNDING_MODE(_MM_ROUND_UP);  }
+inline void set_rounding_toward_zero() { _MM_SET_ROUNDING_MODE(_MM_ROUND_TOWARD_ZERO);  }
+
+inline void set_rounding_mode(rounding_mode_t rnd) { _MM_SET_ROUNDING_MODE(rnd); }
+inline rounding_mode_t get_rounding_mode() { return _MM_GET_ROUNDING_MODE(); }
+
+} // namespace Ariadne
+
+
+
+#elif defined ARIADNE_C99_ROUNDING
 
 #include <fenv.h>
 

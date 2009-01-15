@@ -42,6 +42,8 @@
     #warning "Using ordinary GCC inline assembler for setting the rounding mode."
 #elif defined ARIADNE_EGCC_ROUNDING
     #warning "Using extended GCC inline assembler for setting the rounding mode."
+#elif defined ARIADNE_SSE_ROUNDING
+    #warning "Using SSE <xmmintrin.h> header file for setting the rounding mode."
 #elif defined ARIADNE_MSVC_ROUNDING
     #warning "Using Microsoft Visual Studio inline assembler for setting the rounding mode."
 #else

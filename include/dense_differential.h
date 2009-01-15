@@ -46,7 +46,6 @@ template<class X> class Vector;
 template<class X> class Matrix;
 template<class X> class Series;
 template<class X> class DenseDifferential;
-template<class D> class DifferentialVector;
 
 
 //! The partial derivatives of a variable with respect to other variables.

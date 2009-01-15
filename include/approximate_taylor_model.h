@@ -30,6 +30,8 @@
 #include <iosfwd>
 #include "numeric.h"
 #include "vector.h"
+#include "sparse_differential.h"
+#include "differential_vector.h"
 
 
 namespace Ariadne {

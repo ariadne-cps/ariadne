@@ -40,7 +40,6 @@ class TaylorVariable;
 template<class X> class Vector;
 template<class X> class Matrix;
 template<class X> class SparseDifferential;
-template<class X> class DifferentialVector;
 
 //! \brief Interface for functions whose derivatives can be computed.
 class FunctionInterface {

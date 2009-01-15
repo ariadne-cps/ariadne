@@ -44,7 +44,6 @@ template<class X> class Matrix;
 template<class X> class Series;
 
 template<class X> class SparseDifferential;
-template<class D> class DifferentialVector;
 
 
 template<class X> SparseDifferential<X> operator+(const SparseDifferential<X>& x);
@@ -102,7 +101,7 @@ class SparseDifferential
     typedef MultiIndex IndexType;
     typedef X ValueType;
     typedef X ScalarType;
-    typedef DifferentialVector< SparseDifferential<X> > VectorType;
+    typedef Vector< SparseDifferential<X> > VectorType;
     typedef typename std::map<MultiIndex,X>::iterator iterator;
     typedef typename std::map<MultiIndex,X>::const_iterator const_iterator;
 
@@ -616,14 +615,6 @@ std::ostream& operator<<(std::ostream& os, const SparseDifferential<X>& x)
     return os << "}";
 }
 
-} // namespace Ariadne
-
-
-
-
-#include "differential_vector.h"
-
-namespace Ariadne {
 
 //! Translate the polynomial given by \a x to one with centre \a v.
 template<class X> 
@@ -633,10 +624,43 @@ translate(const SparseDifferential<X>& x, const Vector<X>& v)
     ARIADNE_ASSERT(x.argument_size()==v.size());
     uint as=x.argument_size();
     uint d=x.degree();
-    DifferentialVector< SparseDifferential<X> > t
-        =DifferentialVector< SparseDifferential<X> >::variable(as,as,d,v);
+    Vector< SparseDifferential<X> > t
+        =SparseDifferential<X>::variables(as,as,d,v);
     return evaluate(x,t);
 }
+
+
+template<class X>
+Vector<X> 
+get_value(const Vector< SparseDifferential<X> >& x) 
+{
+    Vector<X> r(x.size());
+    for(uint i=0; i!=x.size(); ++i) {
+        r[i]=x[i].value();
+    }
+    return r;
+}
+
+template<class X>
+Matrix<X> 
+get_jacobian(const Vector< SparseDifferential<X> >& x) 
+{
+    if(x.size()==0) { return Matrix<X>(); }
+    for(uint i=1; i!=x.size(); ++i) {
+        ARIADNE_ASSERT(x[i].argument_size()==x[0].argument_size());
+    }
+
+    Matrix<X> r(x.size(),x[0].argument_size());
+    for(uint i=0; i!=x.size(); ++i) {
+        for(uint j=0; j!=x[0].argument_size(); ++j) {
+            r[i][j]=x[i].gradient(j);
+
+        }
+    }
+    return r;
+}
+
+
 
 } //namespace Ariadne
 

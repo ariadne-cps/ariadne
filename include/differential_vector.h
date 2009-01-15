@@ -38,6 +38,7 @@
 namespace Ariadne {
 
 template<class X> class Vector;
+template<class DIFF> class DifferentialVector;
 
 
 
@@ -91,6 +92,8 @@ class DifferentialVector
         : Vector<DIFF>(rs,DIFF(as,d)) { }
     DifferentialVector(const Vector<DIFF>& vsd) 
         : Vector<DIFF>(vsd) { }
+    DifferentialVector(uint rs, const DIFF& sd) 
+        : Vector<DIFF>(rs,sd) { }
     template<class XX> DifferentialVector(uint rs, uint as, uint d, const XX* ptr) 
         : Vector<DIFF>(rs,DIFF(as,d)) 
     { 

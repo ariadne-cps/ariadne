@@ -42,7 +42,6 @@ class FunctionInterface;
 
 class MultiIndex;
 template<class X> class SparseDifferential;
-template<class X> class SparseDifferentialVector;
 
 class TaylorModel;
 
@@ -72,8 +71,8 @@ class TaylorModel {
   
     /*! \brief Construct from a domain, centre, and two derivative expansions, one for the centre and one over the entire domain. */
     TaylorModel(const Box& domain, const Point& centre, 
-                const SparseDifferentialVector<I>& centre_derivatives, 
-                const SparseDifferentialVector<I>& domain_derivatives);
+                const Vector< SparseDifferential<Interval> >& centre_derivatives, 
+                const Vector< SparseDifferential<Interval> >& domain_derivatives);
   
     /*! \brief Construct from a domain, centre, an order and a function. */
     TaylorModel(const Box& domain, const Point& centre,
@@ -88,9 +87,9 @@ class TaylorModel {
   
     // Data access
     /*! \brief The data used to define the centre of the Taylor model. */
-    const SparseDifferentialVector<I>& centre_derivatives() const;
+    const Vector< SparseDifferential<Interval> >& centre_derivatives() const;
     /*! \brief The bounds on the derivative values over the domain of the Taylor model. */
-    const SparseDifferentialVector<I>& domain_derivatives() const;
+    const Vector< SparseDifferential<Interval> >& domain_derivatives() const;
   
     // Data access
     /*! \brief The order of the Taylor model. */
@@ -174,12 +173,12 @@ class TaylorModel {
     //template<class R> friend void scale(TaylorModel&,const R&);
   private:
     /* Domain of definition. */
-    Vector<I> _domain;
+    Vector<Interval> _domain;
     /* The centre of the derivative expansion. */
-    Vector<R> _centre;
+    Vector<Float> _centre;
     uint _smoothness; 
-    SparseDifferentialVector<I> _centre_derivatives;
-    SparseDifferentialVector<I> _domain_derivatives;
+    Vector< SparseDifferential<Interval> > _centre_derivatives;
+    Vector< SparseDifferential<Interval> > _domain_derivatives;
 };
 
 

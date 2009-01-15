@@ -28,6 +28,7 @@
 #include "matrix.h"
 #include "multi_index.h"
 #include "sparse_differential.h"
+#include "differential_vector.h"
 #include "function.h"
 #include "approximate_taylor_model.h"
 

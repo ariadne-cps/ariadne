@@ -72,7 +72,7 @@ make_differential_vector(const uint& rs, const uint& as, const uint& d, const bo
     array<X> data;
     read_array(data,obj);
     ARIADNE_ASSERT(data.size()==compute_polynomial_data_size(rs,as,d));
-    DifferentialVector<DIFF>* result=new DifferentialVector<DIFF>(rs,as,d,data.begin());
+    DifferentialVector<DIFF>* result=new DifferentialVector<DIFF>(rs,DIFF(as,d,data.begin()));
     return result;
 }
 

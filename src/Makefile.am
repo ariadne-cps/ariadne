@@ -36,7 +36,6 @@ SRC = \
 	vector_field_evolver.cc \
 	hybrid_evolver.cc \
 	discretiser.cc \
-	successor.cc \
 	reachability_analyser.cc \
 	logging.cc \
 	graphics.cc 

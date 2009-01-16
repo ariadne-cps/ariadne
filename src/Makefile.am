@@ -34,6 +34,7 @@ SRC = \
 	geometry.cc \
 	hybrid_automaton.cc \
 	orbit.cc \
+	map_evolver.cc \
 	vector_field_evolver.cc \
 	hybrid_evolver.cc \
 	discretiser.cc \

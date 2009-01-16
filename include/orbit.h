@@ -106,6 +106,34 @@ typedef std::pair<DiscreteState,TaylorSetType> HybridTaylorSetType;
 typedef ListSet<TaylorSetType> TaylorSetListType;
 typedef ListSet<HybridTaylorSetType> HybridTaylorSetListType;
 
+template<class ES>
+class Orbit
+{
+    typedef ListSet<ES> ESL;
+  public:
+    typedef ES EnclosureType;
+    typedef ListSet<ES> EnclosureListType;
+
+    Orbit(const ES& set) : _initial(set) { }
+    void adjoin_reach(const EnclosureType& set) { this->_reach.adjoin(set); }
+    void adjoin_intermediate(const EnclosureType& set) { this->_intermediate.adjoin(set); }
+    void adjoin_final(const EnclosureType& set) { this->_final.adjoin(set); }
+
+    void adjoin_reach(const EnclosureListType& set) { this->_reach.adjoin(set); }
+    void adjoin_intermediate(const EnclosureListType& set) { this->_intermediate.adjoin(set); }
+    void adjoin_final(const EnclosureListType& set) { this->_final.adjoin(set); }
+
+    EnclosureType const& initial() const { return this->_initial; }
+    EnclosureListType const& reach() const { return this->_reach; }
+    EnclosureListType const& intermediate() const { return this->_intermediate; }
+    EnclosureListType const& final() const { return this->_final; }
+  private:
+    ES _initial;
+    ESL _reach;
+    ESL _intermediate;
+    ESL _final;
+};
+
 template<>
 class Orbit<TaylorSetType>
 {

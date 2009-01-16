@@ -68,6 +68,19 @@ TaylorCalculus::_apply(const FunctionModelType& function_model,
 
 TaylorCalculus::SetModelType
 TaylorCalculus::
+reset_step(const FunctionType& map, 
+           const SetModelType& set_model) const
+{
+    // Direct computation from function
+    return map.evaluate(set_model.variables());
+    // Indirect computation via model
+    BoxType range=set_model.range();
+    return compose(FunctionModelType(range,map).expansion(),range,set_model.variables());
+}
+
+
+TaylorCalculus::SetModelType
+TaylorCalculus::
 reset_step(const FlowModelType& function_model, 
            const SetModelType& set_model) const
 {

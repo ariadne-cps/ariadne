@@ -74,11 +74,23 @@ TaylorFunction::TaylorFunction(const Vector<Interval>& d,
 }
 
 TaylorFunction::TaylorFunction(const Vector<Interval>& d,
-                         const FunctionInterface& f)
+                               const FunctionInterface& f)
     : _domain(d),
       _expansion(f.result_size())
 {
-    ARIADNE_NOT_IMPLEMENTED;
+    ARIADNE_ASSERT(d.size()==f.argument_size());
+    
+    
+    Vector<TaylorVariable> x=TaylorVariable::variables(Vector<Float>(f.argument_size(),0.0));
+    for(uint i=0; i!=x.size(); ++i) {
+        const Interval& di=d[i];
+        Interval dm=add_ivl(di.l/2,di.u/2);
+        Interval dr=sub_ivl(di.u/2,di.l/2);
+        x[i]*=dr;
+        x[i]+=dm;
+    }
+
+    this->_expansion=f.evaluate(x);
 }
 
 

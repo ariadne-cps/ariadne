@@ -212,8 +212,8 @@ TaylorVariable::acc(const TaylorVariable& x)
     // Compute self+=x
     TaylorVariable& r=*this;
     Interval& re=r.error();
-    assert(re.l==-re.u);
-    assert(x.error().l==-x.error().u);
+    //assert(re.l==-re.u);
+    //assert(x.error().l==-x.error().u);
     //std::cerr<<std::setprecision(20);
     
     set_rounding_upward();
@@ -720,7 +720,6 @@ mul_ivl(const TaylorVariable& x, const TaylorVariable& y)
 }
     
 TaylorVariable max(const TaylorVariable& x, const TaylorVariable& y) {
-    ARIADNE_ASSERT(x.argument_size()==y.argument_size());
     Interval xr=x.range();
     Interval yr=y.range();
     if(xr.lower()>=yr.upper()) {
@@ -786,7 +785,7 @@ mul_rounded(const TaylorVariable& x, const Float& c)
     }
     Float e=max(eu,el);
     re.u=x.error().u*c+e;
-    re.l=-tmp;
+    re.l=-re.u;
     set_rounding_to_nearest();
     return r;
 }
@@ -944,7 +943,7 @@ TaylorVariable::range() const {
         if(iter->first.degree()==0) {
             r+=iter->second;
         } else {
-            r+=iter->second*Interval(-1,1);
+            r+=abs(iter->second)*Interval(-1,1);
         }
     }
     return r;
@@ -1430,9 +1429,8 @@ scale(const TaylorVariable& tv, const Interval& ivl)
     
     TaylorVariable r=tv;
     Interval c=Interval(l/2)+Interval(u/2);
-    r-=c;
-    
     Interval s=2/(Interval(u)-Interval(l));
+    r-=c;
     r*=s;
 
     return r;
@@ -1443,22 +1441,22 @@ scale(const TaylorVariable& tv, const Interval& ivl)
 void
 _compose1(Vector<TaylorVariable>& r,
           const Vector<TaylorVariable>& x, 
-          const Vector<TaylorVariable>& y)
+          const Vector<TaylorVariable>& ys)
 {
-    std::cerr<<"x ="<<x<<"\n";
-    std::cerr<<"ys="<<y<<"\n";
+    //std::cerr<<"x ="<<x<<"\n";
+    //std::cerr<<"ys="<<ys<<"\n";
     // Brute-force, unoptimised approach
     for(uint i=0; i!=x.size(); ++i) {
-        r[i]=TaylorVariable::constant(y[0].argument_size(),0.0);
+        r[i]=TaylorVariable::constant(ys[0].argument_size(),0.0);
         r[i].set_error(x[i].error());
         for(TaylorVariable::const_iterator iter=x[i].begin(); iter!=x[i].end(); ++iter) {
-            TaylorVariable t=TaylorVariable::constant(y[0].argument_size(),iter->second);
+            TaylorVariable t=TaylorVariable::constant(ys[0].argument_size(),iter->second);
             for(uint j=0; j!=iter->first.size(); ++j) {
-                TaylorVariable p=pow(y[j],iter->first[j]);
+                TaylorVariable p=pow(ys[j],iter->first[j]);
                 t=t*p;
             }
             r[i]+=t;
-            std::cerr<<"a="<<iter->first<<" c="<<iter->second<<" t="<<t<<" r="<<r<<"\n";
+            //std::cerr<<"a="<<iter->first<<" c="<<iter->second<<" t="<<t<<" r="<<r<<"\n";
         }
     }
 }
@@ -1489,7 +1487,7 @@ compose(const Vector<TaylorVariable>& x,
     }
 
     Vector<TaylorVariable> r(x.size());
-    _compose1(r,x,y);
+    _compose1(r,x,ys);
     return r;
 }
 

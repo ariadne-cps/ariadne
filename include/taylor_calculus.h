@@ -111,6 +111,10 @@ class TaylorCalculus
                                 const SetModelType& initial_set_model) const;
 
   
+    //! \brief Computes the image of the set defined by \a set_model under the map \a map. 
+    SetModelType reset_step(const FunctionType& map, 
+                            const SetModelType& set_model) const;
+  
     //! \brief Computes the image of the set defined by \a set_model under the approximation of the map 
     //! given by \a map_model.
     SetModelType reset_step(const MapModelType& map_model, 

@@ -16,6 +16,7 @@ check_PROGRAMS = \
 	test_differential \
 	test_differential_vector \
 	test_approximate_taylor_model \
+	test_taylor_set \
 	test_grid_set \
 	test_hybrid_set \
 	test_discrete_evolution \

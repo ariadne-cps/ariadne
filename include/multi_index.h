@@ -327,9 +327,13 @@ MultiIndex operator*(const MultiIndex& a, const uint& n) {
 }
 
 inline
-MultiIndex operator*(const MultiIndex& a, const int& n) {
+MultiIndex operator*(const uint& n, const MultiIndex& a) {
     MultiIndex c(a); c*=n; return c;
 }
+
+
+
+
 
 
 inline

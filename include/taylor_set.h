@@ -65,7 +65,8 @@ class TaylorSet
     const TaylorVariable& operator[](uint i) const { return this->_variables[i]; }
     TaylorVariable& operator[](uint i) { return this->_variables[i]; }
 
-    Vector<Interval> domain() const;
+    Vector<Interval> domain() const { return Vector<Interval>(this->number_of_generators(),Interval(-1,+1)); }
+    Vector<TaylorVariable> variables() const { return this->_variables; }
 
     TaylorSet* clone() const { return new TaylorSet(*this); } 
     tribool disjoint(const Box&) const;
@@ -77,8 +78,8 @@ class TaylorSet
     pair<TaylorSet,TaylorSet> split(uint dim) const;
 };
 
-GridTreeSet outer_approximation(const TaylorSet& set, uint depth);
 GridTreeSet outer_approximation(const TaylorSet& set, const Grid& grid, uint depth);
+void adjoin_outer_approximation(GridTreeSet& grid_set, const TaylorSet& set, uint depth);
 Zonotope zonotope(const TaylorSet& ts);
 void draw(Figure& g, const TaylorSet& ts);
 
@@ -93,7 +94,6 @@ TaylorSet::TaylorSet(uint rs, uint as, uint d,
         _variables[i]=TaylorVariable(as,d,eps,ptr);
     }
 }
-
 
 
 } //namespace Ariadne

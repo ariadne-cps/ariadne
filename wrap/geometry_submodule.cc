@@ -199,9 +199,10 @@ void export_taylor_set()
     class_<TaylorSet,bases<CompactSetInterface> > taylor_set_class("TaylorSet",no_init);
     taylor_set_class.def("__init__", make_constructor(&make<TaylorSet>) );
     taylor_set_class.def("split", &split<TaylorSet>);
-    taylor_set_class.def("outer_approximation", (GridTreeSet(*)(const TaylorSet&,uint)) &outer_approximation);
     taylor_set_class.def("__str__",&__str__<TaylorSet>);
     
+    def("outer_approximation", (GridTreeSet(*)(const TaylorSet&,const Grid&,uint)) &outer_approximation);
+    def("adjoin_outer_approximation", (void(*)(GridTreeSet&,const TaylorSet&,uint)) &adjoin_outer_approximation);
     def("zonotope", (Zonotope(*)(const TaylorSet&)) &zonotope);
 }
 

@@ -59,11 +59,6 @@ TaylorSet::TaylorSet(const Vector<TaylorVariable>& tvs)
 
 
 
-Vector<Interval> 
-TaylorSet::domain() const
-{
-    return Vector<Interval>(this->_variables[0].argument_size(),Interval(-1,1));
-}
 
 
 
@@ -86,7 +81,8 @@ TaylorSet::overlaps(const Box& bx) const
 tribool
 TaylorSet::inside(const Box& bx) const
 {
-    return inside(this->bounding_box(),bx) | indeterminate
+    Vector<Interval> bb=this->bounding_box();
+    return Ariadne::inside(bb,bx) || indeterminate;
 }
 
 
@@ -150,8 +146,9 @@ TaylorSet::split(uint j) const
 
 
 void
-adjoin_outer_approximation(const TaylorSet& set, const Box& domain, Float eps, GridTreeSet& grid_set, uint depth)
+_adjoin_outer_approximation(const TaylorSet& set, const Box& domain, Float eps, GridTreeSet& grid_set, uint depth)
 {
+    //std::cerr<<"adjoin_outer_approximation(TaylorSet,Box,Float,GridTreeSet,Nat)\n  domain="<<domain<<"\n";
     uint d=set.dimension();
     Box range(set.dimension());
     for(uint i=0; i!=set.dimension(); ++i) {
@@ -165,8 +162,8 @@ adjoin_outer_approximation(const TaylorSet& set, const Box& domain, Float eps, G
     } else {
         Box domain1(d),domain2(d);
         make_lpair(domain1,domain2)=split(domain);
-        adjoin_outer_approximation(set,domain1,eps,grid_set,depth);
-        adjoin_outer_approximation(set,domain2,eps,grid_set,depth);
+        _adjoin_outer_approximation(set,domain1,eps,grid_set,depth);
+        _adjoin_outer_approximation(set,domain2,eps,grid_set,depth);
     }    
 }
 
@@ -174,9 +171,9 @@ adjoin_outer_approximation(const TaylorSet& set, const Box& domain, Float eps, G
 void
 adjoin_outer_approximation(GridTreeSet& grid_set, const TaylorSet& set, uint depth) 
 {
-    Box domain(set.expansion().argument_size(),Interval(-1,+1));
-    Float eps=pow(2,-(depth/set.dimension()+1))
-        return adjoin_outer_approximation(set,domain,eps,grid_set,depth);
+    Box domain(set.number_of_generators(),Interval(-1,+1));
+    Float eps=1.0/(1<<(depth/set.dimension()+1));
+    return _adjoin_outer_approximation(set,domain,eps,grid_set,depth);
 }
 
 
@@ -184,10 +181,8 @@ GridTreeSet
 outer_approximation(const TaylorSet& set, const Grid& grid, uint depth)
 {
     ARIADNE_ASSERT(set.dimension()==grid.dimension());
-    Box domain=set.domain();
     GridTreeSet grid_set(grid);
-    Float eps=1.0/(1<<depth);
-    adjoin_outer_approximation(set,domain,eps,grid_set,depth);
+    adjoin_outer_approximation(grid_set,set,depth);
     return grid_set;
 }
 

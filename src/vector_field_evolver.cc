@@ -77,7 +77,7 @@ class DegenerateCrossingException { };
 
 VectorFieldEvolver::VectorFieldEvolver()
     : _parameters(new EvolutionParametersType()),
-      _toolbox(new DifferentialCalculus<ModelType>())
+      _toolbox(new DifferentialCalculus<ApproximateTaylorVariable>())
 {
 }
 
@@ -85,7 +85,7 @@ VectorFieldEvolver::VectorFieldEvolver()
 
 VectorFieldEvolver::VectorFieldEvolver(const EvolutionParametersType& p)
     : _parameters(new EvolutionParametersType(p)),
-      _toolbox(new DifferentialCalculus<ModelType>())
+      _toolbox(new DifferentialCalculus<ApproximateTaylorVariable>())
 {
 }
 
@@ -160,13 +160,13 @@ _evolution(EnclosureListType& final_sets,
     {
         // Set up initial timed set models
         ARIADNE_LOG(6,"initial_set = "<<initial_set<<"\n");
-        ModelType initial_set_model=this->_toolbox->set_model(initial_set);
+        SetModelType initial_set_model=this->_toolbox->set_model(initial_set);
         ARIADNE_LOG(6,"initial_set_model = "<<initial_set_model<<"\n");
-        ModelType initial_time_model
+        TimeModelType initial_time_model
             =ModelType::constant(initial_set_model.domain(),initial_set_model.centre(),
                                  Vector<Float>(1,Float(0)),order,smoothness);
         ARIADNE_LOG(6,"initial_time_model = "<<initial_time_model<<"\n");
-        ModelType initial_timed_set_model=join(initial_set_model,initial_time_model);
+        SetModelType initial_timed_set_model=join(initial_set_model,initial_time_model);
         ARIADNE_LOG(6,"initial_timed_set_model = "<<initial_timed_set_model<<"\n");
         working_sets.push_back(make_tuple(initial_set_model,initial_time_model));
     }

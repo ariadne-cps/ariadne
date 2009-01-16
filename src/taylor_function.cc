@@ -1,5 +1,5 @@
 /***************************************************************************
- *            taylor_model.cc
+ *            taylor_function.cc
  *
  *  Copyright 2008  Pieter Collins
  * 
@@ -31,28 +31,28 @@
 #include "differential_vector.h"
 #include "function_interface.h"
 #include "taylor_variable.h"
-#include "taylor_model.h"
+#include "taylor_function.h"
 
 namespace Ariadne {
 
 typedef Vector<Float> Point;
 typedef Vector<Interval> Box;
 
-TaylorModel::TaylorModel() 
+TaylorFunction::TaylorFunction() 
     : _domain(), 
       _expansion()
 {
 }
 
 
-TaylorModel::TaylorModel(uint rs, uint as, ushort o, ushort s) 
+TaylorFunction::TaylorFunction(uint rs, uint as, ushort o, ushort s) 
     : _domain(as,I(-1,1)),
       _expansion(rs,as,o)
 {
 }
 
 
-TaylorModel::TaylorModel(const Vector<Interval>& d,
+TaylorFunction::TaylorFunction(const Vector<Interval>& d,
                          const Vector<TaylorVariable>& e)
     : _domain(d),
       _expansion(e)
@@ -62,7 +62,7 @@ TaylorModel::TaylorModel(const Vector<Interval>& d,
     }
 }
 
-TaylorModel::TaylorModel(const Vector<Interval>& d,
+TaylorFunction::TaylorFunction(const Vector<Interval>& d,
                          const Vector<SparseDifferential<Float> >& e)
     : _domain(d),
       _expansion(e.size())
@@ -73,10 +73,19 @@ TaylorModel::TaylorModel(const Vector<Interval>& d,
     }
 }
 
+TaylorFunction::TaylorFunction(const Vector<Interval>& d,
+                         const FunctionInterface& f)
+    : _domain(d),
+      _expansion(f.result_size())
+{
+    ARIADNE_NOT_IMPLEMENTED;
+}
 
 
 
-TaylorModel::TaylorModel(const Vector<Interval>& d, 
+
+
+TaylorFunction::TaylorFunction(const Vector<Interval>& d, 
                          ushort o, ushort s,
                          const FunctionInterface& f)
     : _domain(d),
@@ -89,32 +98,32 @@ TaylorModel::TaylorModel(const Vector<Interval>& d,
 
 
 /*
-TaylorModel
-TaylorModel::zero(uint rs, uint as)  
+TaylorFunction
+TaylorFunction::zero(uint rs, uint as)  
 {
-    return TaylorModel(Vector<Interval>(as,Interval(-inf(),+inf()),TaylorVariable::constants(rs,as,Vector<Float>(rs,0.0))));
+    return TaylorFunction(Vector<Interval>(as,Interval(-inf(),+inf()),TaylorVariable::constants(rs,as,Vector<Float>(rs,0.0))));
 }
 */
 
 
 
 
-TaylorModel
-TaylorModel::constants(uint as, const Vector<Float>& c)  
+TaylorFunction
+TaylorFunction::constant(const Vector<Interval>& d, const Vector<Float>& c)  
 {
-    ARIADNE_NOT_IMPLEMENTED;
+    return TaylorFunction(d,TaylorVariable::constants(d.size(),c));
 }
 
-TaylorModel
-TaylorModel::variables(uint as, const Vector<Float>& c)  
+TaylorFunction
+TaylorFunction::identity(const Vector<Interval>& d)  
 {
-    ARIADNE_NOT_IMPLEMENTED;
+    return TaylorFunction(d,TaylorVariable::variables(midpoint(d)));
 }
 
 
 
 bool
-TaylorModel::operator==(const TaylorModel& tm) const
+TaylorFunction::operator==(const TaylorFunction& tm) const
 {
     return this->_domain==tm._domain
         && this->_expansion==tm._expansion;
@@ -123,7 +132,7 @@ TaylorModel::operator==(const TaylorModel& tm) const
 
 
 bool
-TaylorModel::operator!=(const TaylorModel& p2) const
+TaylorFunction::operator!=(const TaylorFunction& p2) const
 {
     return !(*this==p2);
 }
@@ -131,14 +140,14 @@ TaylorModel::operator!=(const TaylorModel& p2) const
 
 
 const Vector<Interval>&
-TaylorModel::domain() const
+TaylorFunction::domain() const
 { 
     return this->_domain; 
 }
 
 
 const Vector<Interval>
-TaylorModel::range() const
+TaylorFunction::range() const
 { 
     Vector<Interval> result(this->result_size());
     for(uint i=0; i!=result.size(); ++i) {
@@ -150,7 +159,14 @@ TaylorModel::range() const
 
 
 const Vector<TaylorVariable>&
-TaylorModel::expansion() const
+TaylorFunction::variables() const
+{ 
+    return this->_expansion;
+}
+
+
+const Vector<TaylorVariable>&
+TaylorFunction::expansion() const
 { 
     return this->_expansion;
 }
@@ -159,14 +175,14 @@ TaylorModel::expansion() const
 
 
 uint 
-TaylorModel::argument_size() const
+TaylorFunction::argument_size() const
 { 
     return this->_expansion[0].argument_size(); 
 }
 
 
 uint 
-TaylorModel::result_size() const 
+TaylorFunction::result_size() const 
 { 
     return this->_expansion.size();
 }
@@ -192,8 +208,8 @@ TaylorModel::result_size() const
 
 
 
-TaylorModel 
-TaylorModel::truncate(ushort degree) const
+TaylorFunction 
+TaylorFunction::truncate(ushort degree) const
 {
     ARIADNE_NOT_IMPLEMENTED;
 }
@@ -201,17 +217,17 @@ TaylorModel::truncate(ushort degree) const
 
 
 Vector<Interval> 
-TaylorModel::evaluate(const Vector<Float>& x) const
+TaylorFunction::evaluate(const Vector<Float>& x) const
 {
     return this->evaluate(Vector<Interval>(x));
 }
 
 
 Vector<Interval> 
-TaylorModel::evaluate(const Vector<Interval>& x) const
+TaylorFunction::evaluate(const Vector<Interval>& x) const
 {
     if(this->argument_size()!=x.size()) {
-        ARIADNE_THROW(std::runtime_error,"TaylorModel::evaluate(Vector)","Incompatible argument size");
+        ARIADNE_THROW(std::runtime_error,"TaylorFunction::evaluate(Vector)","Incompatible argument size");
     }
 
     //TODO: Make this MUCH more efficient!
@@ -235,7 +251,7 @@ TaylorModel::evaluate(const Vector<Interval>& x) const
 
 
 Matrix<Float> 
-TaylorModel::jacobian(const Vector<Float>& x) const
+TaylorFunction::jacobian(const Vector<Float>& x) const
 {
     DifferentialVector< SparseDifferential<Float> > y(this->argument_size(),SparseDifferential<Float>(this->argument_size(),1u));
     for(uint j=0; j!=this->argument_size(); ++j) {
@@ -250,32 +266,32 @@ TaylorModel::jacobian(const Vector<Float>& x) const
 }
 
 
-TaylorModel
-recentre(const TaylorModel& tm, const Box& bx, const Point& c)
+TaylorFunction
+recentre(const TaylorFunction& tm, const Box& bx, const Point& c)
 {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
 
 
-TaylorModel
-operator+(const TaylorModel& p1, const TaylorModel& p2)
+TaylorFunction
+operator+(const TaylorFunction& p1, const TaylorFunction& p2)
 {
     ARIADNE_ASSERT(!intersection(p1.domain(),p2.domain()).empty());
     if(p1.domain()==p2.domain()) {
-        return TaylorModel(p1._domain,Vector<TaylorVariable>(p1._expansion+p2._expansion));
+        return TaylorFunction(p1._domain,Vector<TaylorVariable>(p1._expansion+p2._expansion));
     } else {
         ARIADNE_NOT_IMPLEMENTED;
     }
 }
 
 
-TaylorModel
-operator-(const TaylorModel& p1, const TaylorModel& p2)
+TaylorFunction
+operator-(const TaylorFunction& p1, const TaylorFunction& p2)
 {
     ARIADNE_ASSERT(!intersection(p1.domain(),p2.domain()).empty());
     if(p1.domain()==p2.domain()) {
-        return TaylorModel(p1._domain,Vector<TaylorVariable>(p1._expansion-p2._expansion));
+        return TaylorFunction(p1._domain,Vector<TaylorVariable>(p1._expansion-p2._expansion));
     } else {
         ARIADNE_NOT_IMPLEMENTED;
         Box new_domain=intersection(p1.domain(),p2.domain());
@@ -289,10 +305,10 @@ operator-(const TaylorModel& p1, const TaylorModel& p2)
 
 /*
 
-TaylorModel
-mul(const TaylorModel& tm, const Float& x)
+TaylorFunction
+mul(const TaylorFunction& tm, const Float& x)
 {
-    return TaylorModel(tm.domain(),tm.centre(),tm.smoothness(),tm.centre_derivatives()*x);
+    return TaylorFunction(tm.domain(),tm.centre(),tm.smoothness(),tm.centre_derivatives()*x);
 }
 
 */
@@ -301,16 +317,16 @@ mul(const TaylorModel& tm, const Float& x)
 /*
 
 void
-mul(TaylorModel& p0, const TaylorModel& p1, const TaylorModel& p2)
+mul(TaylorFunction& p0, const TaylorFunction& p1, const TaylorFunction& p2)
 {
     if(p1.result_size()!=1u) {
-        ARIADNE_THROW(IncompatibleSizes,"mul(TaylorModel,TaylorModel)","p1.result_size()="<<p1.result_size());
+        ARIADNE_THROW(IncompatibleSizes,"mul(TaylorFunction,TaylorFunction)","p1.result_size()="<<p1.result_size());
     }
     if(p2.result_size()!=1u) {
-        ARIADNE_THROW(IncompatibleSizes,"mul(TaylorModel,TaylorModel)","p2.result_size()="<<p2.result_size());
+        ARIADNE_THROW(IncompatibleSizes,"mul(TaylorFunction,TaylorFunction)","p2.result_size()="<<p2.result_size());
     }
     if(p1.argument_size()!=p2.argument_size()) {
-        ARIADNE_THROW(IncompatibleSizes,"add(TaylorModel p1,TaylorModel p2)","p1.result_size()="<<p1.result_size()<<", p2.result_size()="<<p2.result_size());
+        ARIADNE_THROW(IncompatibleSizes,"add(TaylorFunction p1,TaylorFunction p2)","p1.result_size()="<<p1.result_size()<<", p2.result_size()="<<p2.result_size());
     }
 
     uint rs=1u;
@@ -342,8 +358,8 @@ mul(TaylorModel& p0, const TaylorModel& p1, const TaylorModel& p2)
 
 
 /*
-TaylorModel&
-operator*=(TaylorModel& p0, const Interval& x1)
+TaylorFunction&
+operator*=(TaylorFunction& p0, const Interval& x1)
 {
     for(uint i=0; i!=p0._data.size(); ++i) {
         p0._data[i]*=x1;
@@ -352,47 +368,47 @@ operator*=(TaylorModel& p0, const Interval& x1)
 }
 */
 
-TaylorModel
-compose(const TaylorModel& p1, const TaylorModel& p2)
+TaylorFunction
+compose(const TaylorFunction& p1, const TaylorFunction& p2)
 {
     ARIADNE_ASSERT(subset(p2.range(),p1.domain()));
-    return TaylorModel(p2.domain(),Ariadne::compose(p1.expansion(),p1.domain(),p2.expansion()));
+    return TaylorFunction(p2.domain(),Ariadne::compose(p1.expansion(),p1.domain(),p2.expansion()));
 }
 
 
 
-TaylorModel
-antiderivative(const TaylorModel& tm, uint k) 
+TaylorFunction
+antiderivative(const TaylorFunction& tm, uint k) 
 {
-    return TaylorModel(tm.domain(),antiderivative(tm.expansion(),k));
+    return TaylorFunction(tm.domain(),antiderivative(tm.expansion(),k));
 }
 
 
 
 /*
 void
-compose(TaylorModel& p0, const TaylorModel& p1, const TaylorModel& p2)
+compose(TaylorFunction& p0, const TaylorFunction& p1, const TaylorFunction& p2)
 {
     // TODO: Improve this algorithm as it's critical!!
     if(p1.argument_size()!=p2.result_size()) {
-        ARIADNE_THROW(IncompatibleSizes,"compose(TaylorModel p1,TaylorModel p2)","p1.argument_size()="<<p1.argument_size()<<", p2.result_size()="<<p2.result_size());
+        ARIADNE_THROW(IncompatibleSizes,"compose(TaylorFunction p1,TaylorFunction p2)","p1.argument_size()="<<p1.argument_size()<<", p2.result_size()="<<p2.result_size());
     }
 
     if(p1.order()==0) { 
-        p0=static_cast< TaylorModel >(p1); 
+        p0=static_cast< TaylorFunction >(p1); 
         return;
     }
 
     p0.resize(p1.result_size(),p2.argument_size(),p1.order()*p2.order(),std::max(p1.smoothness(),p2.smoothness()));
   
-    TaylorModel* all_powers=new TaylorModel[p2.result_size()*(p1.order()+1)];
-    TaylorModel* powers[p2.result_size()];
+    TaylorFunction* all_powers=new TaylorFunction[p2.result_size()*(p1.order()+1)];
+    TaylorFunction* powers[p2.result_size()];
     for(uint i=0; i!=p2.result_size(); ++i) {
         powers[i]=all_powers+i*(p1.order()+1);
     }
 
     for(uint i=0; i!=p2.result_size(); ++i) {
-        powers[i][0]=TaylorModel::one(p2.argument_size());
+        powers[i][0]=TaylorFunction::one(p2.argument_size());
         powers[i][1]=p2.component(i);
         if(p1.order()>=2) {
             powers[i][2]=pow(powers[i][1],2);
@@ -402,14 +418,14 @@ compose(TaylorModel& p0, const TaylorModel& p1, const TaylorModel& p2)
         }
     }
   
-    TaylorModel* results=new TaylorModel[p1.result_size()];
+    TaylorFunction* results=new TaylorFunction[p1.result_size()];
     for(uint i=0; i!=p1.result_size(); ++i) {
-        results[i]=TaylorModel::zero(1u,p2.argument_size());
+        results[i]=TaylorFunction::zero(1u,p2.argument_size());
     }
 
     for(uint i=0; i!=p1.result_size(); ++i) {
         for(MultiIndex j(p1.argument_size()); j.degree()<=p1.order(); ++j) {
-            TaylorModel t=TaylorModel::constant(p2.argument_size(),p1.get(i,j));
+            TaylorFunction t=TaylorFunction::constant(p2.argument_size(),p1.get(i,j));
             for(uint k=0; k!=p1.argument_size(); ++k) {
                 t=t*powers[k][j[k]];
             }
@@ -432,10 +448,10 @@ compose(TaylorModel& p0, const TaylorModel& p1, const TaylorModel& p2)
 /*
 
 void
-derivative(TaylorModel& p0, const TaylorModel& p1, uint k)
+derivative(TaylorFunction& p0, const TaylorFunction& p1, uint k)
 {
     if(p1.smoothness()==0) {
-        ARIADNE_THROW(std::runtime_error,"derivative(TaylorModel,uint)"," model has smoothness 0");
+        ARIADNE_THROW(std::runtime_error,"derivative(TaylorFunction,uint)"," model has smoothness 0");
     }
 
     p0.resize(p1.result_size(),p1.argument_size(),p1.order()-1,p1.smoothness()-1);
@@ -457,14 +473,14 @@ derivative(TaylorModel& p0, const TaylorModel& p1, uint k)
 
  /*
 Matrix<Interval> 
-TaylorModel::jacobian(const Vector<Float>& s) const
+TaylorFunction::jacobian(const Vector<Float>& s) const
 {
     return this->jacobian(Vector<Interval>(s));
 }
 
 
 Matrix<Interval> 
-TaylorModel::jacobian(const Vector<Interval>& x) const
+TaylorFunction::jacobian(const Vector<Interval>& x) const
 {
     Matrix<Interval> J(this->result_size(),this->argument_size());
     Box w=x-this->centre();
@@ -509,8 +525,8 @@ TaylorModel::jacobian(const Vector<Interval>& x) const
 
 
  
-TaylorModel 
-inverse(const TaylorModel& p, const Point& v)
+TaylorFunction 
+inverse(const TaylorFunction& p, const Point& v)
 {
     assert(p.result_size()==p.argument_size());
     assert(p.argument_size()==v.size());
@@ -529,7 +545,7 @@ inverse(const TaylorModel& p, const Point& v)
     Box invf=v;
 
     // FIXME: Give correct initial conditions
-    TaylorModel result;
+    TaylorFunction result;
 
     for(MultiIndex m(p.result_size()); m.degree()<=2; ++m) {
         if(m.degree()==0) {
@@ -549,15 +565,22 @@ inverse(const TaylorModel& p, const Point& v)
 
 
  
-TaylorModel 
-implicit(const TaylorModel& p, const Point& v)
+
+TaylorFunction 
+implicit(const TaylorFunction& p)
 {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
+TaylorFunction 
+flow(const TaylorFunction& p, const Vector<Interval>& domain, const Interval& time)
+{
+    return TaylorFunction(domain,flow(p.expansion(),domain,time,p.domain()));
+}
+
 
 array< array<Interval> >
-TaylorModel::_powers(const Vector<Interval>& v) const
+TaylorFunction::_powers(const Vector<Interval>& v) const
 {
     uint order=21;
     array< array<I> > powers(this->argument_size(), array<I>(order));
@@ -579,9 +602,9 @@ TaylorModel::_powers(const Vector<Interval>& v) const
 
 
 std::ostream&
-TaylorModel::write(std::ostream& os) const 
+TaylorFunction::write(std::ostream& os) const 
 {
-    os << "TaylorModel(\n";
+    os << "TaylorFunction(\n";
     for(uint i=0; i!=this->result_size(); ++i) {
         os << "  domain=" << this->domain() << ",\n" << std::flush;
         os << "  range=" << this->range() << ",\n" << std::flush;
@@ -594,7 +617,7 @@ TaylorModel::write(std::ostream& os) const
 
 
 std::ostream&
-operator<<(std::ostream& os, const TaylorModel& p)
+operator<<(std::ostream& os, const TaylorFunction& p)
 {
     return p.write(os);
 }
@@ -603,10 +626,10 @@ operator<<(std::ostream& os, const TaylorModel& p)
 
 /*
 latexstream&
-operator<<(Output::latexstream& texs, const TaylorModel& p)
+operator<<(Output::latexstream& texs, const TaylorFunction& p)
 {
     using namespace Function;
-    texs << "%TaylorModel\n";
+    texs << "%TaylorFunction\n";
     texs << "\\ensuremath{\n";
     texs << "\\left( \\begin{array}{c}\n";
     char var='x';

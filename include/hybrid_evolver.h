@@ -55,6 +55,9 @@ class HybridAutomaton;
 template<class ES> class Orbit;
 
 class EvolutionParameters;
+template<class X> class SparseDifferential;
+typedef SparseDifferential<Float> ApproximateTaylorVariable;
+class TaylorVariable;
 template<class MDL> class CalculusInterface;
 
 class EvolutionProfiler;
@@ -138,7 +141,7 @@ class HybridEvolver
 
   private:
     boost::shared_ptr< EvolutionParametersType > _parameters;
-    boost::shared_ptr< CalculusInterface<ModelType> > _toolbox;
+    boost::shared_ptr< CalculusInterface<ApproximateTaylorVariable> > _toolbox;
     //boost::shared_ptr< EvolutionProfiler >  _profiler;
 };
 

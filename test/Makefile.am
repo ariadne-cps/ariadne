@@ -16,6 +16,7 @@ check_PROGRAMS = \
 	test_differential \
 	test_differential_vector \
 	test_approximate_taylor_model \
+	test_taylor_function \
 	test_taylor_set \
 	test_grid_set \
 	test_hybrid_set \
@@ -43,6 +44,7 @@ test_differential_SOURCES=test_differential.cc
 test_differential_vector_SOURCES=test_differential_vector.cc
 
 test_approximate_taylor_model_SOURCES=test_approximate_taylor_model.cc
+test_taylor_function_SOURCES=test_taylor_function.cc
 
 test_discrete_evolution_SOURCES=test_discrete_evolution.cc
 test_continuous_evolution_SOURCES=test_continuous_evolution.cc
@@ -61,5 +63,5 @@ EXTRA_DIST =
 SUBDIRS =
 
 TESTS = $(check_PROGRAMS)
-XFAIL_TESTS = test_interval
+XFAIL_TESTS = test_interval test_taylor_set test_taylor_function
 testsubdir = ./

@@ -47,28 +47,8 @@ class FunctionInterface;
 template<class X> class Vector;
 class Box;
 class TaylorVariable;
-
-
-template<class Variable>
-class SetModel
-{
-  public:  
-    Vector<Interval> domain() { return Vector<Interval>(_expansion[0].argument_size(),Interval(-1,1)); }
-    const Vector<Variable>& expansion() { return _expansion; }
-  private:
-    Vector<Variable> _expansion;
-};
-
-template<class Variable>
-class FunctionModel 
-{
-  public:  
-    Vector<Interval> domain() { return this->_domain; }
-    const Vector<Variable>& expansion() { return _expansion; }
-  private:
-    Vector<Interval> _domain;
-    Vector<Variable> _expansion;
-};
+class TaylorSet;
+class TaylorFunction;
 
 /*! \brief Tools for analysing dynamical systems based on function models. */
 class TaylorCalculus
@@ -84,18 +64,17 @@ class TaylorCalculus
     ushort _smoothness;
   public:
     //!
-    typedef Float RealType;
     //!
     typedef TaylorVariable VariableType;
-    typedef Vector<TaylorVariable> SetModelType;
     typedef TaylorVariable TimeModelType;
-    typedef  MapModelType;
-    typedef Mdl FlowModelType;
-    typedef Mdl PredicateModelType;
+    typedef TaylorSet SetModelType;
+    typedef TaylorFunction MapModelType;
+    typedef TaylorFunction FlowModelType;
+    typedef TaylorFunction PredicateModelType;
     typedef Float TimeType;
-    //typedef Box<RealType> BoxType;
-    typedef Vector<Interval> BoxType;
+    typedef Float RealType;
     typedef Interval IntervalType;
+    typedef Vector<Interval> BoxType;
     typedef FunctionInterface FunctionType;
 
     typedef SetModelType EnclosureType;
@@ -119,7 +98,7 @@ class TaylorCalculus
     //! \brief Computes an over-approximation to the time interval for which the \a initial_set_model 
     //! touch the set specified by the \a guard model under the \a flow_model. The \a minimum and \a maximum_time 
     //! gives the minimum and maximum time for which the evolution is valid.
-    Interval
+    IntervalType
     touching_time_interval(const PredicateModelType& guard_model, 
                            const FlowModelType& flow_model, 
                            const SetModelType& initial_set_model) const;
@@ -144,6 +123,12 @@ class TaylorCalculus
                                   const SetModelType& initial_set_model, 
                                   const TimeModelType& integration_time_model) const;
   
+    //! \brief Gives the extended time model for the reachability step between the
+    //! \a initial_time_model and the \a final_time_model. The new time is given by
+    //! \f$\tau'(e,s) = (1-s)\tau_0(e)+s\tau_1(e)\f$.
+    TimeModelType reachability_time(const TimeModelType& initial_time_model, 
+                                    const TimeModelType& final_time_model) const;
+
     //! \brief Computes the points reached by evolution of the \a initial_set_model under the flow
     //! given by \a flow_model for times given by \a reachability_time_model. 
     //! The \a reachability_time_model must have one more independent variable than the 
@@ -205,6 +190,8 @@ class TaylorCalculus
     SetModelType simplify(const SetModelType& s) const;
     //@}
 
+  private:
+    SetModelType _apply(const FunctionModelType& f, const SetModelType& s) const;
 };
 
 }

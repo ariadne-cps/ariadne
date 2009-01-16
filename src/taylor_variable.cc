@@ -31,6 +31,7 @@
 #include "rounding.h"
 #include "numeric.h"
 #include "sparse_differential.h"
+#include "differential_vector.h"
 #include "taylor_variable.h"
 
 namespace Ariadne {
@@ -1589,6 +1590,29 @@ implicit(const Vector<TaylorVariable>& f)
 
     */
 }
+
+Vector<TaylorVariable> 
+flow(const Vector<TaylorVariable>& vf, const Vector<Interval>& d, const Interval& h, const Vector<Interval>& b)
+{
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+
+
+TaylorVariable embed(const TaylorVariable& x, uint new_size, uint start)
+{
+    return TaylorVariable(embed(x.expansion(),new_size,start),x.error());
+}
+
+Vector<TaylorVariable> embed(const Vector<TaylorVariable>& x, uint new_size, uint start)
+{
+    Vector<TaylorVariable> r(x.size());
+    for(uint i=0; i!=x.size(); ++i) {
+        r[i]=embed(x[i],new_size,start);
+    }
+    return r;
+}
+
 
 std::string 
 TaylorVariable::str() const

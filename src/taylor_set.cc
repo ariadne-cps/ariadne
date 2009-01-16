@@ -29,10 +29,10 @@
 #include "multi_index.h"
 #include "sparse_differential.h"
 #include "function.h"
-#include "approximate_taylor_model.h"
 
 #include "geometry.h"
 #include "taylor_variable.h"
+#include "taylor_function.h"
 #include "taylor_set.h"
 
 #include "grid_set.h"
@@ -46,6 +46,19 @@ namespace Ariadne {
 TaylorSet::TaylorSet(uint d) 
     : _variables(d)
 {
+}
+
+
+TaylorSet::TaylorSet(const Vector<Interval>& bx) 
+    : _variables(bx.size())
+{
+    for(uint i=0; i!=bx.size(); ++i) {
+        Interval c=Interval(bx[i].l/2)+Interval(bx[i].u/2);
+        Interval r=Interval(bx[i].u/2)-Interval(bx[i].l/2);
+        _variables[i]=TaylorVariable::variable(bx.size(),0.0,i);
+        _variables[i]*=r;
+        _variables[i]+=c;
+    }
 }
 
 
@@ -101,7 +114,7 @@ Zonotope
 zonotope(const TaylorSet& ts)
 {
     uint d=ts.dimension();
-    uint ng=ts.number_of_generators();
+    uint ng=ts.generators_size();
     Vector<Float> c(d);
     Matrix<Float> G(d,ng);
     Vector<Float> e(d);
@@ -144,6 +157,23 @@ TaylorSet::split(uint j) const
     return result;
 }
 
+pair<TaylorSet,TaylorSet>
+TaylorSet::split() const
+{
+    Vector<Interval> bb=this->bounding_box();
+
+    Float rmax=bb[0].radius();
+    uint armax=0;
+    for(uint i=1; i!=bb.size(); ++i) { 
+        if(bb[i].radius()>rmax) {
+            rmax=bb[i].radius();
+            armax=i;
+        }
+    }
+    
+    return this->split(armax);
+}
+
 
 void
 _adjoin_outer_approximation(const TaylorSet& set, const Box& domain, Float eps, GridTreeSet& grid_set, uint depth)
@@ -171,9 +201,11 @@ _adjoin_outer_approximation(const TaylorSet& set, const Box& domain, Float eps, 
 void
 adjoin_outer_approximation(GridTreeSet& grid_set, const TaylorSet& set, uint depth) 
 {
-    Box domain(set.number_of_generators(),Interval(-1,+1));
-    Float eps=1.0/(1<<(depth/set.dimension()+1));
-    return _adjoin_outer_approximation(set,domain,eps,grid_set,depth);
+    //grid_set.adjoin_outer_approximation(zonotope(set),depth);
+    grid_set.adjoin_outer_approximation(set.bounding_box(),depth);
+    //Box domain(set.generators_size(),Interval(-1,+1));
+    //Float eps=1.0/(1<<(depth/set.dimension()+1));
+    //_adjoin_outer_approximation(set,domain,eps,grid_set,depth);
 }
 
 
@@ -223,7 +255,7 @@ Vector<Interval> error(const TaylorSet& ts) {
 
 void draw(Figure& fig, const TaylorSet& ts) {
     static const double MAX_NEGLIGABLE_NORM=1e-10;
-    if(ts.dimension()==2 && ts.number_of_generators()==2 && norm(error(ts))<MAX_NEGLIGABLE_NORM) {
+    if(ts.dimension()==2 && ts.generators_size()==2 && norm(error(ts))<MAX_NEGLIGABLE_NORM) {
         std::vector<Point> pts;
         Vector<Float> s(2); 
         s[0]=-1; s[1]=-1;

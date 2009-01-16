@@ -48,9 +48,9 @@ class Box;
 
 
 /*! \brief Tools for analysing dynamical systems based on function models. */
-template<class Mdl> 
+template<class Var> 
 class CalculusBase 
-    : public CalculusInterface<Mdl>
+    : public CalculusInterface<Var>
     , public Loggable
 {
     typedef Float R;
@@ -58,20 +58,21 @@ class CalculusBase
     typedef Interval I;
   public:
     //!
-    typedef Float RealType;
+    typedef typename CalculusInterface<Var>::FunctionModelType FunctionModelType;
     //!
-    typedef Mdl ModelType;
-    typedef Mdl SetType;
+    typedef typename CalculusInterface<Var>::SetModelType SetModelType;
     //!
-    typedef Mdl SetModelType;
-    typedef Mdl TimeModelType;
-    typedef Mdl MapModelType;
-    typedef Mdl FlowModelType;
-    typedef Mdl PredicateModelType;
-    typedef Float TimeType;
+    typedef typename CalculusInterface<Var>::TimeModelType TimeModelType;
 
-    typedef Vector<Interval> BoxType;
+    typedef FunctionModelType MapModelType;
+    typedef FunctionModelType FlowModelType;
+    typedef FunctionModelType PredicateModelType;
+
+    typedef Float RealType;
     typedef Interval IntervalType;
+    typedef Vector<Interval> BoxType;
+
+    typedef Float TimeType;
     typedef FunctionInterface FunctionType;
     typedef SetModelType EnclosureType;
   protected:
@@ -224,46 +225,20 @@ class CalculusBase
         return this->reachability_step(flow_model,initial_set_model,initial_time_model,this->time_model(final_time,initial_set_model.domain())); }
   
     //! \brief Gives the extended time model for the reachability step between the
-    //! \a initial_time_model and the \a final_time_model. The new time is given by
-    //! \f$\tau'(e,s) = (1-s)\tau_0(e)+s\tau_1(e)\f$.
-    TimeModelType reachability_time(const TimeModelType& initial_time_model, 
-                                    const TimeModelType& final_time_model) const;
-  
-    //! \brief Gives the extended time model for the reachability step between the
     //! \a initial_time and the \a final_time_model. The new time is given by
     //! \f$\tau'(e,s) = (1-s)\tau_0+s\tau_1(e)\f$.
     TimeModelType reachability_time(const TimeType& initial_time, 
                                     const TimeModelType& final_time_model) const {
-        return this->reachability_time(this->time_model(initial_time,final_time_model.domain()),final_time_model); }
+        return static_cast<const CalculusInterface<Var>*>(this)->reachability_time(this->time_model(initial_time,final_time_model.domain()),final_time_model); }
   
     //! \brief Gives the extended time model for the reachability step between the
     //! \a initial_time_model and the \a final_time. The new time is given by
     //! \f$\tau'(e,s) = (1-s)\tau_0(e)+s\tau_1\f$.
     TimeModelType reachability_time(const TimeModelType& initial_time_model, 
                                     const TimeType& final_time) const {
-        return this->reachability_time(initial_time_model,this->time_model(final_time,initial_time_model.domain())); };
-  
+        return static_cast<const CalculusInterface<Var>*>(this)->reachability_time(initial_time_model,this->time_model(final_time,initial_time_model.domain())); };
+
 };
-
-
-template<class Mdl>
-typename CalculusBase<Mdl>::TimeModelType
-CalculusBase<Mdl>::
-reachability_time(const TimeModelType& initial_time_model, 
-                  const TimeModelType& final_time_model) const
-{
-    ARIADNE_ASSERT(initial_time_model.argument_size()==final_time_model.argument_size());
-    uint ng=initial_time_model.argument_size();
-
-    ModelType expanded_initial_time_model=embed(initial_time_model,Vector<I>(ng+1,I(-1,1)),Vector<R>(ng+1,R(0)),0u);
-    ModelType expanded_final_time_model=embed(final_time_model,Vector<I>(ng+1,I(-1,1)),Vector<R>(ng+1,R(0)),0u);
-  
-    ModelType time_interval_model=ModelType::affine(I(-1,1),R(0),A(0.5),A(0.5),1u,0u);
-    ModelType expanded_time_interval_model=embed(time_interval_model,Vector<I>(ng+1,I(-1,1)),Vector<R>(ng+1,R(0)),ng);
-    ModelType expanded_reach_time_model=expanded_initial_time_model+expanded_time_interval_model*(expanded_final_time_model-expanded_initial_time_model);
-
-    return expanded_reach_time_model;
-}
 
 
 

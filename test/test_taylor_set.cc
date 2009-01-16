@@ -24,6 +24,7 @@
 #include <iostream>
 #include "multi_index.h"
 #include "taylor_variable.h"
+#include "zonotope.h"
 #include "taylor_set.h"
 #include "grid_set.h"
 #include "graphics.h"
@@ -52,11 +53,14 @@ TestTaylorSet::test_outer_approximation()
     MultiIndex e1=MultiIndex::unit(2,1);
     Vector<TaylorVariable> tv(2,TaylorVariable(2));
     tv[0][e0]=1.0;
+    tv[0][e1]=0.25;
+    tv[1][e0]=0.5;
     tv[1][e1]=1.0;
     tv[1][2u*e0]=1.0;
 
     TaylorSet ts=TaylorSet(tv);
-    
+    Zonotope z=zonotope(ts);
+
     Grid grid(2);
     uint depth(4);
     GridTreeSet gts=outer_approximation(ts,grid,depth);
@@ -64,8 +68,9 @@ TestTaylorSet::test_outer_approximation()
 
     Box bounding_box=ts.bounding_box()+Vector<Interval>(2,Interval(-1,1));
     plot("test_taylor_set-ts",bounding_box,Colour(0,1,1),ts);
+    plot("test_taylor_set-z",bounding_box,Colour(0,1,0),z);
     plot("test_taylor_set-gts",bounding_box,Colour(0,1,1),gts);
-    plot("test_taylor_set",PlanarProjectionMap(2,0,1),bounding_box,Colour(0,1,1),ts,transparant,gts);
+    plot("test_taylor_set",PlanarProjectionMap(2,0,1),bounding_box,Colour(0,1,0),gts,Colour(1,0,1),z,Colour(0,1,1),ts);
 
     uint height(5);
     BooleanArray tree=make_binary_word("10101111010110110101010010110010010110110010010110100011101101010101001011011000001111111100000011011010000111101010011010001111000001111100001011000101101000111110110000111001000011111001000111100000000");

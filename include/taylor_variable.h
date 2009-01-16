@@ -106,6 +106,10 @@ Vector<TaylorVariable> implicit(const Vector<TaylorVariable>& x);
 Vector<TaylorVariable> flow(const Vector<TaylorVariable>& vf, const Vector<Interval>& d, const Interval& h, const Vector<Interval>& b);
 
 
+TaylorVariable embed(const TaylorVariable& tv, uint as, uint b);
+Vector<TaylorVariable> embed(const Vector<TaylorVariable>& tvs, uint as, uint b);
+
+
 
 
 
@@ -162,6 +166,8 @@ class TaylorVariable
         TaylorVariable r(as); r._expansion.set_value(c); return r; }
     static TaylorVariable variable(uint as, const Float& x, uint i) {
         TaylorVariable r(as); r._expansion.set_value(x); r._expansion.set_gradient(i,1.0); return r; }
+    static TaylorVariable affine(const Float& x, const Vector<Float>& dx) {
+        TaylorVariable r(dx.size()); r._expansion.set_value(x); for(uint j=0; j!=dx.size(); ++j) { r._expansion.set_gradient(j,dx[j]); } return r; }
     static Vector<TaylorVariable> zeroes(uint rs, uint as) {
         Vector<TaylorVariable> result(rs); for(uint i=0; i!=rs; ++i) { 
             result[i]=TaylorVariable::zero(as); } return result; }

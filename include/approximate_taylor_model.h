@@ -104,7 +104,7 @@ class ApproximateTaylorModel {
     ApproximateTaylorModel(const BoxType& domain, const PointType& centre, 
                            const DifferentialVectorType& expansion);
   
-    //! \brief Construct from a domain, centre, and two derivative expansions, one for the centre and one over the entire domain. Included for compatibility with TaylorModel class.
+    //! \brief Construct from a domain, centre, and two derivative expansions, one for the centre and one over the entire domain. Included for compatibility with TaylorFunction class.
     ApproximateTaylorModel(const BoxType& domain, const PointType& centre, 
                            const IntervalDifferentialVectorType& centre_expansion,
                            const IntervalDifferentialVectorType& domain_expansion);

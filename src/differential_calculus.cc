@@ -45,8 +45,8 @@ class NonInvertibleFunctionException { };
 
 
   
-template<class Mdl>
-DifferentialCalculus<Mdl>::
+template<class Var>
+DifferentialCalculus<Var>::
 DifferentialCalculus() 
     : _spacial_order(2),
       _temporal_order(4),
@@ -56,9 +56,9 @@ DifferentialCalculus()
 }
   
 
-template<class Mdl>
-typename DifferentialCalculus<Mdl>::SetModelType
-DifferentialCalculus<Mdl>::
+template<class Var>
+typename DifferentialCalculus<Var>::SetModelType
+DifferentialCalculus<Var>::
 reset_step(const FlowModelType& function_model, 
            const SetModelType& set_model) const
 {
@@ -66,16 +66,16 @@ reset_step(const FlowModelType& function_model,
 }
 
 
-template<class Mdl>
-typename DifferentialCalculus<Mdl>::SetModelType
-DifferentialCalculus<Mdl>::
+template<class Var>
+typename DifferentialCalculus<Var>::SetModelType
+DifferentialCalculus<Var>::
 integration_step(const FlowModelType& flow_model, 
                  const SetModelType& initial_set_model, 
                  const TimeModelType& integration_time_model) const
 {
-    Mdl set_step_model=join(initial_set_model, integration_time_model);
+    SetModelType set_step_model=join(initial_set_model, integration_time_model);
     ARIADNE_LOG(6,"set_step_model = "<<set_step_model<<"\n");
-    Mdl final_set_model=compose(flow_model,set_step_model);
+    SetModelType final_set_model=compose(flow_model,set_step_model);
     ARIADNE_LOG(6,"final_set_model = "<<final_set_model<<"\n");
 
     return final_set_model;
@@ -85,11 +85,28 @@ integration_step(const FlowModelType& flow_model,
 
 
 
+template<class Var>
+typename DifferentialCalculus<Var>::TimeModelType
+DifferentialCalculus<Var>::
+reachability_time(const TimeModelType& initial_time_model, 
+                  const TimeModelType& final_time_model) const
+{
+    ARIADNE_ASSERT(initial_time_model.argument_size()==final_time_model.argument_size());
+    uint ng=initial_time_model.argument_size();
 
+    FunctionModelType expanded_initial_time_model=embed(initial_time_model,Vector<I>(ng+1,I(-1,1)),Vector<R>(ng+1,R(0)),0u);
+    FunctionModelType expanded_final_time_model=embed(final_time_model,Vector<I>(ng+1,I(-1,1)),Vector<R>(ng+1,R(0)),0u);
+  
+    FunctionModelType time_interval_model=FunctionModelType::affine(I(-1,1),R(0),A(0.5),A(0.5),1u,0u);
+    FunctionModelType expanded_time_interval_model=embed(time_interval_model,Vector<I>(ng+1,I(-1,1)),Vector<R>(ng+1,R(0)),ng);
+    FunctionModelType expanded_reach_time_model=expanded_initial_time_model+expanded_time_interval_model*(expanded_final_time_model-expanded_initial_time_model);
 
-template<class Mdl>
-typename DifferentialCalculus<Mdl>::SetModelType
-DifferentialCalculus<Mdl>::
+    return expanded_reach_time_model;
+}
+
+template<class Var>
+typename DifferentialCalculus<Var>::SetModelType
+DifferentialCalculus<Var>::
 reachability_step(const FlowModelType& flow_model, 
                   const SetModelType& initial_set_model, 
                   const TimeModelType& expanded_reach_time_model) const
@@ -111,9 +128,9 @@ reachability_step(const FlowModelType& flow_model,
 }
 
 
-template<class Mdl>
-typename DifferentialCalculus<Mdl>::SetModelType
-DifferentialCalculus<Mdl>::
+template<class Var>
+typename DifferentialCalculus<Var>::SetModelType
+DifferentialCalculus<Var>::
 reachability_step(const FlowModelType& flow_model, 
                   const SetModelType& initial_set_model, 
                   const TimeModelType& initial_time_model, 
@@ -149,12 +166,12 @@ reachability_step(const FlowModelType& flow_model,
 
 
 // Compute the grazing time using bisections
-template<class Mdl>
-typename DifferentialCalculus<Mdl>::ModelType
-DifferentialCalculus<Mdl>::
-crossing_time(const ModelType& guard_model,
-              const ModelType& flow_model, 
-              const ModelType& initial_set_model) const
+template<class Var>
+typename DifferentialCalculus<Var>::TimeModelType
+DifferentialCalculus<Var>::
+crossing_time(const PredicateModelType& guard_model,
+              const FlowModelType& flow_model, 
+              const SetModelType& initial_set_model) const
 {
     uint dimension=flow_model.result_size();
     RealType minimum_time=flow_model.domain()[dimension].lower(); 
@@ -188,12 +205,12 @@ crossing_time(const ModelType& guard_model,
 
 
 // Compute the grazing time using bisections
-template<class Mdl>
-Interval
-DifferentialCalculus<Mdl>::
-touching_time_interval(const ModelType& guard_model, 
-                       const ModelType& flow_model, 
-                       const ModelType& initial_set_model) const
+template<class Var>
+typename DifferentialCalculus<Var>::IntervalType
+DifferentialCalculus<Var>::
+touching_time_interval(const PredicateModelType& guard_model, 
+                       const FlowModelType& flow_model, 
+                       const SetModelType& initial_set_model) const
 {
     ARIADNE_ASSERT(flow_model.result_size()+1==flow_model.argument_size());
     ARIADNE_ASSERT(guard_model.argument_size()==flow_model.result_size());
@@ -255,9 +272,9 @@ touching_time_interval(const ModelType& guard_model,
 
 
 
-template<class Mdl>
+template<class Var>
 std::pair<Float, Vector<Interval> >
-DifferentialCalculus<Mdl>::flow_bounds(FunctionInterface const& vf, 
+DifferentialCalculus<Var>::flow_bounds(FunctionInterface const& vf, 
                                    Vector<Interval> const& r, 
                                    Float const& hmax, 
                                    Float const& dmax) const
@@ -329,9 +346,9 @@ DifferentialCalculus<Mdl>::flow_bounds(FunctionInterface const& vf,
 
 
 
-template<class Mdl>
+template<class Var>
 tribool
-DifferentialCalculus<Mdl>::
+DifferentialCalculus<Var>::
 active(const PredicateModelType& guard_model, const SetModelType& set_model) const
 {
     IntervalType range=compose(guard_model,set_model).range()[0];
@@ -341,55 +358,55 @@ active(const PredicateModelType& guard_model, const SetModelType& set_model) con
 
 
 
-template<class Mdl>
-Mdl
-DifferentialCalculus<Mdl>::map_model(FunctionInterface const& f, Vector<Interval> const& bx) const
+template<class Var>
+typename DifferentialCalculus<Var>::MapModelType
+DifferentialCalculus<Var>::map_model(FunctionInterface const& f, Vector<Interval> const& bx) const
 { 
     ARIADNE_ASSERT(f.argument_size()==bx.size());
 
-    Mdl map_model(bx,f,_order,_smoothness);
+    MapModelType map_model(bx,f,_order,_smoothness);
     ARIADNE_LOG(6,"map_model = "<<map_model<<"\n");
 
     return map_model;
 }
 
 
-template<class Mdl>
-Mdl
-DifferentialCalculus<Mdl>::flow_model(FunctionInterface const& vf, Vector<Interval> const& bx, Float const& h, Vector<Interval> const& bb) const
+template<class Var>
+typename DifferentialCalculus<Var>::FlowModelType
+DifferentialCalculus<Var>::flow_model(FunctionInterface const& vf, Vector<Interval> const& bx, Float const& h, Vector<Interval> const& bb) const
 { 
-    Mdl vector_field_model(bb,vf,_order,_smoothness);
+    FunctionModelType vector_field_model(bb,vf,_order,_smoothness);
     ARIADNE_LOG(6,"vector_field_model = "<<vector_field_model<<"\n");
   
     // Use flow function on model type
-    Mdl flow_model=Ariadne::flow(vector_field_model);
+    FlowModelType flow_model=Ariadne::flow(vector_field_model);
     ARIADNE_LOG(6,"flow_model = "<<flow_model<<"\n");
 
     return flow_model;
 }
 
 
-template<class Mdl>
-Mdl
-DifferentialCalculus<Mdl>::predicate_model(FunctionInterface const& g, Vector<Interval> const& bx) const
+template<class Var>
+typename DifferentialCalculus<Var>::PredicateModelType
+DifferentialCalculus<Var>::predicate_model(FunctionInterface const& g, Vector<Interval> const& bx) const
 { 
     ARIADNE_ASSERT(g.result_size()==1);
     ARIADNE_ASSERT(g.argument_size()==bx.size());
 
-    Mdl predicate_model(bx,g,_order,_smoothness);
+    PredicateModelType predicate_model(bx,g,_order,_smoothness);
     ARIADNE_LOG(6,"predicate_model = "<<predicate_model<<"\n");
 
     return predicate_model;
 }
 
 //! \brief A model for the constant time function \a t over the domain \a d.
-template<class Mdl>
-Mdl
-DifferentialCalculus<Mdl>::
+template<class Var>
+typename DifferentialCalculus<Var>::TimeModelType
+DifferentialCalculus<Var>::
 time_model(const Float& t, 
            const BoxType& bx) const
 {
-    Mdl time_model=Mdl::constant(bx,midpoint(bx),Vector<Float>(1u,t),_order,_smoothness);
+    TimeModelType time_model=TimeModelType::constant(bx,midpoint(bx),Vector<Float>(1u,t),_order,_smoothness);
     ARIADNE_LOG(6,"time_model = "<<time_model<<"\n");
 
     return time_model;
@@ -397,9 +414,9 @@ time_model(const Float& t,
 
 
 //! \brief A model for the set f\a bx.
-template<class Mdl>
-Mdl
-DifferentialCalculus<Mdl>::
+template<class Var>
+typename DifferentialCalculus<Var>::SetModelType
+DifferentialCalculus<Var>::
 set_model(const BoxType& bx) const
 {
     SetModelType set_model(bx,IdentityFunction(bx.size()),this->_order,this->_smoothness);
@@ -408,9 +425,9 @@ set_model(const BoxType& bx) const
 
 
 //! \brief A model for the enclosure \a es.
-template<class Mdl>
-Mdl
-DifferentialCalculus<Mdl>::
+template<class Var>
+typename DifferentialCalculus<Var>::SetModelType
+DifferentialCalculus<Var>::
 set_model(const EnclosureType& es) const
 {
     return es;
@@ -418,9 +435,9 @@ set_model(const EnclosureType& es) const
 
 
 //! \brief An enclosure for the set model \a s.
-template<class Mdl>
-typename DifferentialCalculus<Mdl>::EnclosureType
-DifferentialCalculus<Mdl>::
+template<class Var>
+typename DifferentialCalculus<Var>::EnclosureType
+DifferentialCalculus<Var>::
 enclosure(const SetModelType& s) const
 {
     return s;
@@ -430,36 +447,36 @@ enclosure(const SetModelType& s) const
 
 
 
-template<class Mdl>
+template<class Var>
 tribool
-DifferentialCalculus<Mdl>::disjoint(Mdl const&, Vector<Interval> const&) const
+DifferentialCalculus<Var>::disjoint(SetModelType const&, BoxType const&) const
 { 
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-template<class Mdl>
-Vector<Interval>
-DifferentialCalculus<Mdl>::bounding_box(Mdl const&) const
+template<class Var>
+typename DifferentialCalculus<Var>::BoxType
+DifferentialCalculus<Var>::bounding_box(SetModelType const&) const
 { 
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-template<class Mdl>
-array<Mdl> 
-DifferentialCalculus<Mdl>::subdivide(Mdl const&) const
+template<class Var>
+array<typename DifferentialCalculus<Var>::SetModelType> 
+DifferentialCalculus<Var>::subdivide(SetModelType const&) const
 { 
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-template<class Mdl>
-Mdl 
-DifferentialCalculus<Mdl>::simplify(Mdl const&) const
+template<class Var>
+typename DifferentialCalculus<Var>::SetModelType 
+DifferentialCalculus<Var>::simplify(SetModelType const&) const
 { 
     ARIADNE_NOT_IMPLEMENTED;
 }
 
 
 
-template class DifferentialCalculus<ApproximateTaylorModel>;
+template class DifferentialCalculus<ApproximateTaylorVariable>;
 
 }  // namespace Ariadne

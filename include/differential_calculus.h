@@ -50,9 +50,9 @@ class Box;
 
 
 /*! \brief Tools for analysing dynamical systems based on function models. */
-template<class Mdl> 
+template<class Var> 
 class DifferentialCalculus
-    : public CalculusBase<Mdl>
+    : public CalculusBase<Var>
 {
     typedef Float R;
     typedef Float A;
@@ -64,29 +64,30 @@ class DifferentialCalculus
     ushort _smoothness;
   public:
     //!
-    typedef Float RealType;
+    typedef typename CalculusTypes<Var>::FunctionModelType FunctionModelType;
     //!
-    typedef Mdl ModelType;
-    typedef Mdl SetType;
+    typedef typename CalculusTypes<Var>::SetModelType SetModelType;
     //!
-    typedef Mdl SetModelType;
-    typedef Mdl TimeModelType;
-    typedef Mdl MapModelType;
-    typedef Mdl FlowModelType;
-    typedef Mdl PredicateModelType;
-    typedef Float TimeType;
-    //typedef Box<RealType> BoxType;
-    typedef Vector<Interval> BoxType;
-    typedef Interval IntervalType;
-    typedef FunctionInterface FunctionType;
+    typedef typename CalculusTypes<Var>::TimeModelType TimeModelType;
 
+    typedef FunctionModelType MapModelType;
+    typedef FunctionModelType FlowModelType;
+    typedef FunctionModelType PredicateModelType;
+
+    typedef FunctionModelType ModelType;
+
+    typedef Float RealType;
+    typedef Interval IntervalType;
+    typedef Vector<Interval> BoxType;
+    typedef Float TimeType;
+    typedef FunctionInterface FunctionType;
     typedef SetModelType EnclosureType;
   public:
-    using CalculusBase<Mdl>::verbosity;
-    using CalculusBase<Mdl>::active;
-    using CalculusBase<Mdl>::reset_step;
-    using CalculusBase<Mdl>::integration_step;
-    using CalculusBase<Mdl>::reachability_step;
+    using CalculusBase<Var>::verbosity;
+    using CalculusBase<Var>::active;
+    using CalculusBase<Var>::reset_step;
+    using CalculusBase<Var>::integration_step;
+    using CalculusBase<Var>::reachability_step;
 
   public:
     //! \brief Default constructor.
@@ -126,6 +127,12 @@ class DifferentialCalculus
                                   const SetModelType& initial_set_model, 
                                   const TimeModelType& integration_time_model) const;
   
+    //! \brief Gives the extended time model for the reachability step between the
+    //! \a initial_time_model and the \a final_time_model. The new time is given by
+    //! \f$\tau'(e,s) = (1-s)\tau_0(e)+s\tau_1(e)\f$.
+    TimeModelType reachability_time(const TimeModelType& initial_time_model, 
+                                    const TimeModelType& final_time_model) const;
+
     //! \brief Computes the points reached by evolution of the \a initial_set_model under the flow
     //! given by \a flow_model for times given by \a reachability_time_model. 
     //! The \a reachability_time_model must have one more independent variable than the 

@@ -39,14 +39,38 @@ class Interval;
 class FunctionInterface;
 template<class X> class Vector;
 
+template<class Var> struct CalculusTypes;
 
+class TaylorVariable;
+class TaylorSet;
+class TaylorFunction;
+template<class X> class SparseDifferential;
+typedef SparseDifferential<Float> ApproximateTaylorVariable;
+class ApproximateTaylorModel;
+
+template<> struct CalculusTypes<ApproximateTaylorVariable>
+{
+    typedef ApproximateTaylorVariable VariableType;
+    typedef ApproximateTaylorModel TimeModelType;
+    typedef ApproximateTaylorModel SetModelType;
+    typedef ApproximateTaylorModel FunctionModelType;
+};
+
+template<> struct CalculusTypes<TaylorVariable>
+{
+    typedef TaylorVariable VariableType;
+    typedef TaylorVariable TimeModelType;
+    typedef TaylorSet SetModelType;
+    typedef TaylorFunction FunctionModelType;
+};
 
 /*! \brief Tools for analysing dynamical systems based on function models. 
  * 
  * \sa \link Ariadne::EvolverInterface \c EvolverInterface<SYS,ES>
  */
-template<class Mdl> 
+template<class Var> 
 class CalculusInterface
+    : public CalculusTypes<Var>
 {
     typedef Float R;
     typedef Float A;
@@ -58,20 +82,18 @@ class CalculusInterface
     ushort _smoothness;
   public:
     //!
+    //!
+    typedef typename CalculusTypes<Var>::FunctionModelType FunctionModelType;
+    typedef typename CalculusTypes<Var>::SetModelType SetModelType;
+    typedef typename CalculusTypes<Var>::TimeModelType TimeModelType;
+    //!
+    typedef FunctionModelType MapModelType;
+    typedef FunctionModelType FlowModelType;
+    typedef FunctionModelType GuardModelType;
     typedef Float RealType;
-    //!
-    typedef Mdl ModelType;
-    typedef Mdl SetType;
-    //!
-    typedef Mdl SetModelType;
-    typedef Mdl TimeModelType;
-    typedef Mdl MapModelType;
-    typedef Mdl FlowModelType;
-    typedef Mdl GuardModelType;
-    typedef Float TimeType;
-    //typedef Box<RealType> BoxType;
-    typedef Vector<Interval> BoxType;
     typedef Interval IntervalType;
+    typedef Vector<Interval> BoxType;
+    typedef Float TimeType;
     typedef FunctionInterface FunctionType;
     typedef SetModelType EnclosureType;
   public:

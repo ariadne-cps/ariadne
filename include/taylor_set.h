@@ -42,7 +42,7 @@ template<class X> class Vector;
 template<class X> class Matrix;
 
 class TaylorVariable;
-class TaylorModel;
+class TaylorFunction;
 
 class Zonotope;
 class Grid;
@@ -59,13 +59,19 @@ class TaylorSet
     TaylorSet(uint d=0);
     template<class XE, class XP> TaylorSet(uint rs, uint as, uint d, const XE* eps, const XP* ptr);
     TaylorSet(const Vector<TaylorVariable>& tv);
+    TaylorSet(const Vector<Interval>& bx);
     
     uint dimension() const { return this->_variables.size(); }
-    uint number_of_generators() const { assert(this->_variables.size()>0); return this->_variables[0].expansion().argument_size(); }
+    uint generators_size() const { assert(this->_variables.size()>0); return this->_variables[0].expansion().argument_size(); }
     const TaylorVariable& operator[](uint i) const { return this->_variables[i]; }
     TaylorVariable& operator[](uint i) { return this->_variables[i]; }
 
-    Vector<Interval> domain() const { return Vector<Interval>(this->number_of_generators(),Interval(-1,+1)); }
+    Vector<Interval> domain() const { return Vector<Interval>(this->generators_size(),Interval(-1,+1)); }
+    Vector<Interval> range() const { 
+        Vector<Interval> result(this->_variables.size()); 
+        for(uint i=0; i!=this->_variables.size(); ++i) { 
+            result[i]=this->_variables[i].range(); } 
+        return result; }
     Vector<TaylorVariable> variables() const { return this->_variables; }
 
     TaylorSet* clone() const { return new TaylorSet(*this); } 
@@ -76,6 +82,7 @@ class TaylorSet
     std::ostream& write(std::ostream& os) const;
     
     pair<TaylorSet,TaylorSet> split(uint dim) const;
+    pair<TaylorSet,TaylorSet> split() const;
 };
 
 GridTreeSet outer_approximation(const TaylorSet& set, const Grid& grid, uint depth);

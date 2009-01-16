@@ -77,7 +77,7 @@ class DegenerateCrossingException { };
 
 HybridEvolver::HybridEvolver()
     : _parameters(new EvolutionParametersType()),
-      _toolbox(new DifferentialCalculus<ModelType>())
+      _toolbox(new DifferentialCalculus<ApproximateTaylorVariable>())
 {
 }
 
@@ -85,7 +85,7 @@ HybridEvolver::HybridEvolver()
 
 HybridEvolver::HybridEvolver(const EvolutionParametersType& p)
     : _parameters(new EvolutionParametersType(p)),
-      _toolbox(new DifferentialCalculus<ModelType>())
+      _toolbox(new DifferentialCalculus<ApproximateTaylorVariable>())
 {
 }
 

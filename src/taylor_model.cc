@@ -28,7 +28,9 @@
 #include "matrix.h"
 #include "multi_index.h"
 #include "sparse_differential.h"
-#include "function.h"
+#include "differential_vector.h"
+#include "function_interface.h"
+#include "taylor_variable.h"
 #include "taylor_model.h"
 
 namespace Ariadne {
@@ -38,65 +40,73 @@ typedef Vector<Interval> Box;
 
 TaylorModel::TaylorModel() 
     : _domain(), 
-      _centre(),
-      _centre_derivatives(),
-      _domain_derivatives() 
+      _expansion()
 {
 }
 
 
 TaylorModel::TaylorModel(uint rs, uint as, ushort o, ushort s) 
     : _domain(as,I(-1,1)),
-      _centre(Point(as)),
-      _centre_derivatives(rs,as,o),
-      _domain_derivatives(rs,as,o) 
+      _expansion(rs,as,o)
 {
 }
 
 
-TaylorModel::TaylorModel(const Box& d, const Point& c, 
-                         const SparseDifferentialVector<I>& cd, const SparseDifferentialVector<I>& dd)
+TaylorModel::TaylorModel(const Vector<Interval>& d,
+                         const Vector<TaylorVariable>& e)
     : _domain(d),
-      _centre(c),
-      _centre_derivatives(cd),
-      _domain_derivatives(dd)
+      _expansion(e)
 {
+    for(uint i=0; i!=e.size(); ++i) {
+        ARIADNE_ASSERT(d.size()==e[i].argument_size());
+    }
+}
+
+TaylorModel::TaylorModel(const Vector<Interval>& d,
+                         const Vector<SparseDifferential<Float> >& e)
+    : _domain(d),
+      _expansion(e.size())
+{
+    for(uint i=0; i!=e.size(); ++i) {
+        ARIADNE_ASSERT(d.size()==e[i].argument_size());
+        this->_expansion[i]=TaylorVariable(e[i],Interval(0));
+    }
 }
 
 
 
 
-TaylorModel::TaylorModel(const Box& d, const Point& c, 
+TaylorModel::TaylorModel(const Vector<Interval>& d, 
                          ushort o, ushort s,
                          const FunctionInterface& f)
     : _domain(d),
-      _centre(c),
-      _centre_derivatives(f.expansion(c,o)),
-      _domain_derivatives(f.expansion(d,o))
-{
-}
-
-
-
-
-TaylorModel
-TaylorModel::zero(uint rs, uint as)  
-{
-    return TaylorModel(rs,as,0,0);
-}
-
-
-
-TaylorModel
-TaylorModel::one(uint as)  
+      _expansion(f.result_size())
 {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
 
 
+
+/*
 TaylorModel
-TaylorModel::constant(uint as, const R& c)  
+TaylorModel::zero(uint rs, uint as)  
+{
+    return TaylorModel(Vector<Interval>(as,Interval(-inf(),+inf()),TaylorVariable::constants(rs,as,Vector<Float>(rs,0.0))));
+}
+*/
+
+
+
+
+TaylorModel
+TaylorModel::constants(uint as, const Vector<Float>& c)  
+{
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+TaylorModel
+TaylorModel::variables(uint as, const Vector<Float>& c)  
 {
     ARIADNE_NOT_IMPLEMENTED;
 }
@@ -106,8 +116,8 @@ TaylorModel::constant(uint as, const R& c)
 bool
 TaylorModel::operator==(const TaylorModel& tm) const
 {
-    return this->_centre==tm._centre
-        && this->_centre_derivatives==tm._centre_derivatives;
+    return this->_domain==tm._domain
+        && this->_expansion==tm._expansion;
 }
 
 
@@ -120,68 +130,49 @@ TaylorModel::operator!=(const TaylorModel& p2) const
 
 
 
-Box
+const Vector<Interval>&
 TaylorModel::domain() const
 { 
     return this->_domain; 
 }
 
 
-Point
-TaylorModel::centre() const
-{ 
-    return this->_centre; 
-}
-
-
-Box
+const Vector<Interval>
 TaylorModel::range() const
 { 
-    return Box(this->_domain_derivatives.value());
+    Vector<Interval> result(this->result_size());
+    for(uint i=0; i!=result.size(); ++i) {
+        result[i]=this->_expansion[i].range();
+    }
+    return result;
 }
 
 
 
-const SparseDifferentialVector<Interval>&
-TaylorModel::centre_derivatives() const
+const Vector<TaylorVariable>&
+TaylorModel::expansion() const
 { 
-    return this->_centre_derivatives; 
+    return this->_expansion;
 }
 
 
-const SparseDifferentialVector<Interval>&
-TaylorModel::domain_derivatives() const
-{ 
-    return this->_domain_derivatives; 
-}
 
 
 uint 
 TaylorModel::argument_size() const
 { 
-    return this->_centre_derivatives.argument_size(); 
+    return this->_expansion[0].argument_size(); 
 }
 
 
 uint 
 TaylorModel::result_size() const 
 { 
-    return this->_centre_derivatives.result_size();
+    return this->_expansion.size();
 }
 
 
-ushort 
-TaylorModel::order() const 
-{
-    return this->_centre_derivatives.degree();
-}
-      
-
-ushort 
-TaylorModel::smoothness() const 
-{ 
-    return this->_domain_derivatives.degree();
-}
+    
       
 
 
@@ -202,14 +193,18 @@ TaylorModel::smoothness() const
 
 
 TaylorModel 
-TaylorModel::truncate(const Box& domain, const Point& centre,
-                      ushort order, ushort smoothness) const
+TaylorModel::truncate(ushort degree) const
 {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
 
 
+Vector<Interval> 
+TaylorModel::evaluate(const Vector<Float>& x) const
+{
+    return this->evaluate(Vector<Interval>(x));
+}
 
 
 Vector<Interval> 
@@ -219,83 +214,74 @@ TaylorModel::evaluate(const Vector<Interval>& x) const
         ARIADNE_THROW(std::runtime_error,"TaylorModel::evaluate(Vector)","Incompatible argument size");
     }
 
-    // TODO: Make this more efficient
-    Vector<I> w=x-this->centre();
-    Vector<I> result(this->result_size());
-    for(MultiIndex j(this->argument_size()); j.degree()<this->order(); ++j) {
-        I wa=1;
-        for(uint k=0; k!=j.number_of_variables(); ++k) {
-            wa*=pow(w[k],int(j[k]));
-        }
-        for(uint i=0; i!=this->result_size(); ++i) {
-            SparseDifferential<I> cd=this->_centre_derivatives[i];
-            result[i]+=cd[j]*wa;
-            //result[i]+=this->_centre_derivatives[i][j]*wa;
-        }
+    //TODO: Make this MUCH more efficient!
+
+    // Scale x to domain
+    Vector<Interval> scaled_x(x.size());
+    for(uint i=0; i!=x.size(); ++i) {
+        const Interval& d=this->_domain[i];
+        Interval dm=add_ivl(d.l/2,d.u/2);
+        Interval dr=sub_ivl(d.u/2,d.l/2);
+        scaled_x[i]=(x[i]-dm)/dr;
     }
-    for(MultiIndex j=MultiIndex::first(this->argument_size(),this->order()); j.degree()<=this->order(); ++j) {
-        I wa=1;
-        for(uint k=0; k!=j.number_of_variables(); ++k) {
-            wa*=pow(w[k],int(j[k]));
-        }
-        for(uint i=0; i!=this->result_size(); ++i) {
-            result[i]+=this->_domain_derivatives[i][j]*wa;
-        }
+
+    // Compute result
+    Vector<Interval> result(this->result_size());
+    for(uint i=0; i!=result.size(); ++i) {
+        result[i]=this->_expansion[i].evaluate(scaled_x);
     }
     return result;
 }
 
 
+Matrix<Float> 
+TaylorModel::jacobian(const Vector<Float>& x) const
+{
+    DifferentialVector< SparseDifferential<Float> > y(this->argument_size(),SparseDifferential<Float>(this->argument_size(),1u));
+    for(uint j=0; j!=this->argument_size(); ++j) {
+        y[j].set_value(this->domain()[j].midpoint());
+        y[j].set_gradient(j,this->domain()[j].radius());
+    }
+    DifferentialVector< SparseDifferential<Float> > t(this->result_size());
+    for(uint i=0; i!=this->result_size(); ++i) {
+        t[i]=this->_expansion[i].expansion();
+    }
+    return get_jacobian(compose(t-x,y));
+}
+
 
 TaylorModel
 recentre(const TaylorModel& tm, const Box& bx, const Point& c)
 {
-    ARIADNE_ASSERT(inside(bx,tm.domain()));
-    ARIADNE_ASSERT(inside(c,bx));
-    typedef Interval I;
-
-    SparseDifferentialVector<I> translation=SparseDifferentialVector<I>::variable(tm.argument_size(),tm.argument_size(),tm.order(),c);
-  
-    //FIXME: This is incorrect...
-    SparseDifferentialVector<I> new_centre_derivatives=compose(tm.centre_derivatives(),translation);
-    SparseDifferentialVector<I> new_domain_derivatives=compose(tm.domain_derivatives(),translation);
-
-    return TaylorModel(bx,c,new_centre_derivatives,new_domain_derivatives);
+    ARIADNE_NOT_IMPLEMENTED;
 }
 
 
 
 TaylorModel
-add(const TaylorModel& p1, const TaylorModel& p2)
+operator+(const TaylorModel& p1, const TaylorModel& p2)
 {
     ARIADNE_ASSERT(!intersection(p1.domain(),p2.domain()).empty());
-    if(p1.centre()==p2.centre()) {
-        return TaylorModel(intersection(p1.domain(),p2.domain()),
-                           p1.centre(),
-                           p1.centre_derivatives()+p2.centre_derivatives(),
-                           p1.domain_derivatives()+p2.domain_derivatives());
+    if(p1.domain()==p2.domain()) {
+        return TaylorModel(p1._domain,Vector<TaylorVariable>(p1._expansion+p2._expansion));
     } else {
-        Box new_domain=intersection(p1.domain(),p2.domain());
-        Point new_centre=midpoint(new_domain);
-        return add(recentre(p1,new_domain,new_centre),recentre(p2,new_domain,new_centre));
+        ARIADNE_NOT_IMPLEMENTED;
     }
 }
 
 
 TaylorModel
-sub(const TaylorModel& p1, const TaylorModel& p2)
+operator-(const TaylorModel& p1, const TaylorModel& p2)
 {
     ARIADNE_ASSERT(!intersection(p1.domain(),p2.domain()).empty());
-    if(p1.centre()==p2.centre()) {
-        return TaylorModel(intersection(p1.domain(),p2.domain()),
-                           p1.centre(),
-                           p1.centre_derivatives()-p2.centre_derivatives(),
-                           p1.domain_derivatives()-p2.domain_derivatives());
+    if(p1.domain()==p2.domain()) {
+        return TaylorModel(p1._domain,Vector<TaylorVariable>(p1._expansion-p2._expansion));
     } else {
+        ARIADNE_NOT_IMPLEMENTED;
         Box new_domain=intersection(p1.domain(),p2.domain());
         //Point new_centre=new_domain.centre();
         Point new_centre=midpoint(new_domain);
-        return add(recentre(p1,new_domain,new_centre),recentre(p2,new_domain,new_centre));
+        return operator-(recentre(p1,new_domain,new_centre),recentre(p2,new_domain,new_centre));
     }
 }
 
@@ -352,32 +338,6 @@ mul(TaylorModel& p0, const TaylorModel& p1, const TaylorModel& p2)
 */
 
 
-void
-pow(TaylorModel& p0, const TaylorModel& p1, const unsigned int& n)
-{
-    typedef Float R;
-
-    assert(p1.result_size()==1);
-
-    if(n==1) {
-        p0=p1;
-        return;
-    }
-
-    p0=TaylorModel::one(p1.argument_size());
-    if(n==0) {
-        return;
-    }
-
-    TaylorModel tmp(p1);
-    for(uint i=1; i<=n; i*=2) {
-        if(i&n) {
-            p0=tmp*p0;
-        }
-        tmp=tmp*tmp;
-    }
-}
-
 
 
 
@@ -393,28 +353,18 @@ operator*=(TaylorModel& p0, const Interval& x1)
 */
 
 TaylorModel
-compose(const TaylorModel& p2, const TaylorModel& p1)
+compose(const TaylorModel& p1, const TaylorModel& p2)
 {
-    typedef Interval I;
-    ARIADNE_ASSERT(p2.centre()==p1.centre_derivatives().value());
-    ARIADNE_ASSERT(inside(p1.range(),p2.domain()));
-    Box new_domain=p1.domain();
-    Point new_centre=p1.centre();
-    SparseDifferentialVector<I> new_centre_derivatives=compose(p1.centre_derivatives(),p2.centre_derivatives());
-    SparseDifferentialVector<I> new_domain_derivatives=compose(p1.domain_derivatives(),p2.domain_derivatives());
-
-    return TaylorModel(new_domain,new_centre,new_centre_derivatives,new_domain_derivatives);
+    ARIADNE_ASSERT(subset(p2.range(),p1.domain()));
+    return TaylorModel(p2.domain(),Ariadne::compose(p1.expansion(),p1.domain(),p2.expansion()));
 }
 
 
 
 TaylorModel
-derivative(const TaylorModel& tm, uint k) 
+antiderivative(const TaylorModel& tm, uint k) 
 {
-    return TaylorModel(tm.domain(),
-                       tm.centre(),
-                       derivative(tm.centre_derivatives(),k),
-                       derivative(tm.domain_derivatives(),k));
+    return TaylorModel(tm.domain(),antiderivative(tm.expansion(),k));
 }
 
 
@@ -505,17 +455,18 @@ derivative(TaylorModel& p0, const TaylorModel& p1, uint k)
 
 */
 
+ /*
 Matrix<Interval> 
-TaylorModel::jacobian(const Point& s) const
+TaylorModel::jacobian(const Vector<Float>& s) const
 {
-    return this->jacobian(Box(s));
+    return this->jacobian(Vector<Interval>(s));
 }
 
 
 Matrix<Interval> 
-TaylorModel::jacobian(const Box& x) const
+TaylorModel::jacobian(const Vector<Interval>& x) const
 {
-    Matrix<I> J(this->result_size(),this->argument_size());
+    Matrix<Interval> J(this->result_size(),this->argument_size());
     Box w=x-this->centre();
     array< array<I> > powers=this->_powers(w);
 
@@ -553,6 +504,7 @@ TaylorModel::jacobian(const Box& x) const
   
     return J;
 }
+ */
 
 
 
@@ -569,23 +521,24 @@ inverse(const TaylorModel& p, const Point& v)
     typedef Interval I;
 
     Point c=midpoint(Box(p.evaluate(v)));
-    Matrix<I> J=p.jacobian(v);
+    Matrix<Float> J=p.jacobian(v);
   
-    Matrix<I> invJ=inverse(J);
+    Matrix<Float> invJ=inverse(J);
 
     // FIXME: Need to re-solve for image of centre. What should initial set be? Different code needed for Rational?
     Box invf=v;
 
-    TaylorModel result(p.argument_size(),p.result_size(),p.order(),p.smoothness());
+    // FIXME: Give correct initial conditions
+    TaylorModel result;
 
-    for(MultiIndex m(p.result_size()); m.degree()<=p.order(); ++m) {
+    for(MultiIndex m(p.result_size()); m.degree()<=2; ++m) {
         if(m.degree()==0) {
             for(uint i=0; i!=p.argument_size(); ++i) {
-                result._centre_derivatives[i][m]=v[i];
+                result._expansion[i][m]=v[i];
             }
         } else if(m.degree()==1) {
             for(uint i=0; i!=p.argument_size(); ++i) {
-                result._centre_derivatives[i][m]=invJ[i][m.position()-1];
+                result._expansion[i][m]=invJ[i][m.position()-1];
             }
         } else {
             // FIXME: Add code for higher indices
@@ -604,16 +557,17 @@ implicit(const TaylorModel& p, const Point& v)
 
 
 array< array<Interval> >
-TaylorModel::_powers(const Box& v) const
+TaylorModel::_powers(const Vector<Interval>& v) const
 {
-    array< array<I> > powers(this->argument_size(), array<I>(this->order()+1));
+    uint order=21;
+    array< array<I> > powers(this->argument_size(), array<I>(order));
     for(uint i=0; i!=this->argument_size(); ++i) {
         powers[i][0]=1;
-        if(this->order()>=1) {
+        if(order>=1) {
             powers[i][1]=v(i);
-            if(this->order()>=2) {
+            if(order>=2) {
                 powers[i][2]=pow(v(i),2);
-                for(uint j=3; j<=this->order(); ++j) {
+                for(uint j=3; j<=order; ++j) {
                     powers[i][j]=powers[i][2]*powers[i][j-2];
                 }
             }
@@ -630,10 +584,8 @@ TaylorModel::write(std::ostream& os) const
     os << "TaylorModel(\n";
     for(uint i=0; i!=this->result_size(); ++i) {
         os << "  domain=" << this->domain() << ",\n" << std::flush;
-        os << "  centre=" << this->centre() << ",\n" << std::flush;
         os << "  range=" << this->range() << ",\n" << std::flush;
-        os << "  expansion=" << this->_centre_derivatives << ",\n" << std::flush;
-        os << "  bounds=" << this->_domain_derivatives << ",\n" << std::flush;
+        os << "  expansion=" << this->_expansion << ",\n" << std::flush;
     }
     os << ")\n";
     return os;

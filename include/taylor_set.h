@@ -36,14 +36,17 @@
 
 namespace Ariadne {
 
+typedef double Float;
 class Interval;
 template<class X> class Vector;
+template<class X> class Matrix;
 
+class TaylorVariable;
 class TaylorModel;
-class ApproximateTaylorModel;
 
 class Zonotope;
 class Grid;
+class GridCell;
 class GridTreeSet;
 class Figure;
 
@@ -55,8 +58,7 @@ class TaylorSet
   public:
     TaylorSet(uint d=0);
     template<class XE, class XP> TaylorSet(uint rs, uint as, uint d, const XE* eps, const XP* ptr);
-    TaylorSet(const TaylorModel& tm);
-    TaylorSet(const ApproximateTaylorModel& atm);
+    TaylorSet(const Vector<TaylorVariable>& tv);
     
     uint dimension() const { return this->_variables.size(); }
     uint number_of_generators() const { assert(this->_variables.size()>0); return this->_variables[0].expansion().argument_size(); }
@@ -96,4 +98,4 @@ TaylorSet::TaylorSet(uint rs, uint as, uint d,
 
 } //namespace Ariadne
 
-#endif /* ARIADNE_APPROXIMATE_TAYLOR_MODEL_H */
+#endif /* ARIADNE_TAYLOR_SET_H */

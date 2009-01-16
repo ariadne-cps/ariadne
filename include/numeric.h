@@ -234,6 +234,11 @@ Interval mul(Interval, Float);
 Interval div(Interval, Float);
 Interval div(Float, Interval);
 
+inline Interval add_ivl(Float, Float);
+inline Interval sub_ivl(Float, Float);
+inline Interval mul_ivl(Float, Float);
+inline Interval div_ivl(Float, Float);
+
 Interval sqr(Interval);
 Interval pow(Interval, uint);
 Interval pow(Interval, int);
@@ -308,6 +313,19 @@ Interval add(Interval i1, Float x2)
     return Interval(rl,ru);
 }
 
+Interval add_ivl(Float x1, Float x2) 
+{
+    rounding_mode_t rnd=get_rounding_mode();
+    volatile double& x1v=x1;
+    volatile double& x2v=x2;
+    set_rounding_mode(downward);
+    volatile double rl=x1v+x2v;
+    set_rounding_mode(upward);
+    volatile double ru=x1v+x2v;
+    set_rounding_mode(rnd);
+    return Interval(rl,ru);
+}
+
 Interval sub(Interval i1, Interval i2) 
 {
     rounding_mode_t rnd=get_rounding_mode();
@@ -350,6 +368,46 @@ Interval sub(Float x1, Interval i2)
     set_rounding_mode(rnd);
     return Interval(rl,ru);
 }
+
+Interval sub_ivl(Float x1, Float x2) 
+{
+    rounding_mode_t rnd=get_rounding_mode();
+    volatile double& x1v=x1;
+    volatile double& x2v=x2;
+    set_rounding_mode(downward);
+    volatile double rl=x1v-x2v;
+    set_rounding_mode(upward);
+    volatile double ru=x1v-x2v;
+    set_rounding_mode(rnd);
+    return Interval(rl,ru);
+}
+
+Interval mul_ivl(Float x1, Float x2) 
+{
+    rounding_mode_t rnd=get_rounding_mode();
+    volatile double& x1v=x1;
+    volatile double& x2v=x2;
+    set_rounding_mode(downward);
+    volatile double rl=x1v*x2v;
+    set_rounding_mode(upward);
+    volatile double ru=x1v*x2v;
+    set_rounding_mode(rnd);
+    return Interval(rl,ru);
+}
+
+Interval div_ivl(Float x1, Float x2) 
+{
+    rounding_mode_t rnd=get_rounding_mode();
+    volatile double& x1v=x1;
+    volatile double& x2v=x2;
+    set_rounding_mode(downward);
+    volatile double rl=x1v/x2v;
+    set_rounding_mode(upward);
+    volatile double ru=x1v/x2v;
+    set_rounding_mode(rnd);
+    return Interval(rl,ru);
+}
+
 
 // Standard equality operators
 inline bool operator==(const Interval& i1, const Interval& i2) { return i1.l==i2.l && i1.u==i2.u; }

@@ -99,6 +99,9 @@ TaylorVariable compose(const TaylorVariable& x, const Vector<Interval>& bx, cons
 TaylorVariable compose(const TaylorVariable& x, const Interval& b, const TaylorVariable& y);
 TaylorVariable compose(const TaylorVariable& x, const TaylorVariable& y);
 
+TaylorVariable antiderivative(const TaylorVariable& x, uint k);
+Vector<TaylorVariable> antiderivative(const Vector<TaylorVariable>& x, uint k);
+
 Vector<TaylorVariable> implicit(const Vector<TaylorVariable>& x);
 Vector<TaylorVariable> flow(const Vector<TaylorVariable>& vf, const Vector<Interval>& d, const Interval& h, const Vector<Interval>& b);
 

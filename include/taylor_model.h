@@ -56,26 +56,27 @@ TaylorModel derivative(const TaylorModel&, uint);
 
 
 
-/* \brief A taylor_model with multivalued output, using a den.
+/* \brief A taylor_model with multivalued output using the TaylorVariable class.
  */
 class TaylorModel {
     typedef Float R;
     typedef Interval I;
-    typedef Vector<R> Point;
-    typedef Vector<I> Box;
   public:
     /*! \brief Default constructor constructs a Taylor model of order zero with no arguments and no result variables. */
     TaylorModel();
     /*! \brief The zero Taylor model in \a as variables with size \a rs image, order \a o and smoothness \a s, defined on the whole space with centre at the origin. */
     TaylorModel(uint rs, uint as, ushort o, ushort s);
   
-    /*! \brief Construct from a domain, centre, and two derivative expansions, one for the centre and one over the entire domain. */
-    TaylorModel(const Box& domain, const Point& centre, 
-                const Vector< SparseDifferential<Interval> >& centre_derivatives, 
-                const Vector< SparseDifferential<Interval> >& domain_derivatives);
+    /*! \brief Construct from a domain and the expansionn. */
+    TaylorModel(const Vector<Interval>& domain,
+                const Vector<TaylorVariable>& expansion);
+  
+    /*! \brief Construct from a domain and the expansionn. */
+    TaylorModel(const Vector<Interval>& domain,
+                const Vector< SparseDifferential<Float> >& expansion);
   
     /*! \brief Construct from a domain, centre, an order and a function. */
-    TaylorModel(const Box& domain, const Point& centre,
+    TaylorModel(const Vector<Interval>& domain, 
                 ushort order, ushort smoothness,
                 const FunctionInterface& function);
   
@@ -86,107 +87,78 @@ class TaylorModel {
     bool operator!=(const TaylorModel& p) const;
   
     // Data access
+    /*! \brief The data used to define the domain of the Taylor model. */
+    const Vector<Interval>& domain() const;
+    /*! \brief The centre of the Taylor model. */
+    const Vector<Float> centre() const;
+    /*! \brief The range of the Taylor model. */
+    const Vector<Interval> range() const;
     /*! \brief The data used to define the centre of the Taylor model. */
-    const Vector< SparseDifferential<Interval> >& centre_derivatives() const;
-    /*! \brief The bounds on the derivative values over the domain of the Taylor model. */
-    const Vector< SparseDifferential<Interval> >& domain_derivatives() const;
+    const Vector<TaylorVariable>& expansion() const;
   
-    // Data access
-    /*! \brief The order of the Taylor model. */
-    ushort order() const;
-    /*! \brief The smoothness of the function. */
-    ushort smoothness() const;
     /*! \brief The size of the argument. */
     uint argument_size() const;
     /*! \brief The size of the result. */
     uint result_size() const;
+
   
     /// Resizing
     void resize(uint rs, uint as, ushort d, ushort s);
 
-    /*! \brief The domain of validity of the Taylor model. */
-    Box domain() const;
-    /*! \brief The centre of the derivative expansion. */
-    Vector<R> centre() const;
-    /*! \brief The range of values the Taylor model can take. */
-    Box range() const;
-  
     /*! \brief Evaluate the Taylor model at the point \a x. */
-    Vector<I> evaluate(const Vector<I>& x) const;
-    Vector<I> evaluate(const Vector<R>& x) const;
+    Vector<Interval> evaluate(const Vector<Interval>& x) const;
+    Vector<Interval> evaluate(const Vector<Float>& x) const;
   
-    /*! \brief Compute the derivate of the map at a point. */
-    Matrix<I> jacobian(const Vector<I>& s) const;
-    Matrix<I> jacobian(const Vector<R>& s) const;
+    /*! \brief Compute an approximation to Jacobian derivative of the Taylor model at the point \a x. */
+    Matrix<Float> jacobian(const Vector<Float>& x) const;
   
     /*! \brief Truncate to a model of lower order and/or smoothness, possibly on a different domain. */
-    TaylorModel truncate(const Box& domain, const Vector<R>& centre, 
-                         ushort order, ushort smoothness) const;
+    TaylorModel truncate(ushort degree) const;
   
-    /*! \brief The zero Taylor model with result size \a rs and argument size \a as. */
-    static TaylorModel zero(uint rs, uint as);
-    /*! \brief The unit Taylor model with result size 1 and argument size \a as. */
-    static TaylorModel one(uint as);
     /*! \brief The constant Taylor model with result size 1 and argument size \a as. */
-    static TaylorModel constant(uint as, const R& c);
-  
+    static TaylorModel constants(uint as, const Vector<Float>& c);
+     /*! \brief The constant Taylor model with result size 1 and argument size \a as. */
+    static TaylorModel variables(uint as, const Vector<Float>& x);
+ 
     /*! \brief Write to an output stream. */
     std::ostream& write(std::ostream& os) const;
   
-#ifdef DOXYGEN
     /*! \brief Addition. */
-    friend template<class R> TaylorModel operator+(const TaylorModel<R1>&, const TaylorModel<R2>&);
+    friend TaylorModel operator+(const TaylorModel&, const TaylorModel&);
     /*! \brief Subtraction. */
-    friend template<class R> TaylorModel operator-(const TaylorModel<R1>&, const TaylorModel<R2>&);
-    /*! \brief Multiplication. At least one argument must be scalar-valued. */
-    friend template<class R> TaylorModel operator*(const TaylorModel<R1>&, const TaylorModel<R2>&);
+    friend TaylorModel operator-(const TaylorModel&, const TaylorModel&);
   
     /*! \brief Multiplication by a scalar. */
-    friend template<class R> TaylorModel operator*(const R1&, const TaylorModel<R2>&);
+    friend TaylorModel operator*(const Float&, const TaylorModel&);
     /*! \brief Multiplication by a scalar. */
-    friend template<class R> TaylorModel operator*(const TaylorModel<R1>&, const R2&);
+    friend TaylorModel operator*(const TaylorModel&, const Float&);
     /*! \brief Division by a scalar. */
-    friend template<class R> TaylorModel operator/(const TaylorModel<R1>&, const R2&);
+    friend TaylorModel operator/(const TaylorModel&, const Float&);
   
     /*! \brief Composition \f$p\circ q(x)=p(q(x))\f$. */
-    friend template<class R> TaylorModel compose(const TaylorModel<R1>&, const TaylorModel<R2>&);
-    /*! \brief Power of a scalar Taylor model. */
-    friend template<class R> TaylorModel pow(const TaylorModel& p, const unsigned int& n);
+    friend TaylorModel compose(const TaylorModel&, const TaylorModel&);
     /*! \brief Derivative with respect to variable \a k. */
-    friend template<class R> TaylorModel derivative(const TaylorModel&, uint k);
-    /*! \brief Truncate within \a r to a Taylor model of order at most \a d, putting the error into terms of order \a s. */
-    friend template<class R> TaylorModel truncate(const TaylorModel& p, const Rectangle& bb, uint d, uint s);
-#endif
+    friend TaylorModel antiderivative(const TaylorModel&, uint k);
   private:
-    array< array<I> > _powers(const Vector<I>&) const;
+    array< array<Interval> > _powers(const Vector<Interval>&) const;
     void _compute_jacobian() const;
     void _set_argument_size(uint n);
     uint _compute_maximum_component_size() const;
   private:
-    friend TaylorModel recentre(const TaylorModel&, const Box& bx, const Vector<R>&);
-    friend TaylorModel inverse(const TaylorModel&, const Vector<R>&);
-    //template<class R> friend void add(TaylorModel&,const TaylorModel&,const TaylorModel&);
-    //template<class R> friend void sub(TaylorModel&,const TaylorModel&,const TaylorModel&);
-    //template<class R> friend void mul(TaylorModel&,const TaylorModel&,const TaylorModel&);
-    //template<class R> friend void div(TaylorModel&,const TaylorModel&,const TaylorModel&);
-    //template<class R> friend void compose(TaylorModel&,const TaylorModel&,const TaylorModel&);
-    //template<class R> friend void scale(TaylorModel&,const R&);
+    friend TaylorModel recentre(const TaylorModel&, const Vector<Interval>& bx);
+    friend TaylorModel inverse(const TaylorModel&, const Vector<Float>&);
+    //friend void add(TaylorModel&,const TaylorModel&,const TaylorModel&);
+    //friend void sub(TaylorModel&,const TaylorModel&,const TaylorModel&);
+    //friend void mul(TaylorModel&,const TaylorModel&,const TaylorModel&);
+    //friend void div(TaylorModel&,const TaylorModel&,const TaylorModel&);
+    //friend void compose(TaylorModel&,const TaylorModel&,const TaylorModel&);
+    //friend void scale(TaylorModel&,const R&);
   private:
     /* Domain of definition. */
     Vector<Interval> _domain;
-    /* The centre of the derivative expansion. */
-    Vector<Float> _centre;
-    uint _smoothness; 
-    Vector< SparseDifferential<Interval> > _centre_derivatives;
-    Vector< SparseDifferential<Interval> > _domain_derivatives;
+    Vector<TaylorVariable> _expansion;
 };
 
-
-TaylorModel operator*(const TaylorModel& tm, const Interval& ivl);
-TaylorModel operator*(const TaylorModel& tm1, const TaylorModel& tm2);
-
-TaylorModel add(const TaylorModel&, const TaylorModel&);
-TaylorModel sub(const TaylorModel&, const TaylorModel&);
 
 TaylorModel combine(const TaylorModel&, const TaylorModel&);
 TaylorModel join(const TaylorModel&, const TaylorModel&);

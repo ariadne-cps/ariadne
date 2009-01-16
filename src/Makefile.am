@@ -16,6 +16,7 @@ SRC = \
 	sparse_differential.cc \
 	taylor_variable.cc  \
 	approximate_taylor_model.cc  \
+	taylor_model.cc  \
 	differential_calculus.cc \
 	newton_solver.cc \
 	point.cc \
@@ -41,6 +42,8 @@ SRC = \
 	graphics.cc 
 
 
+#	taylor_model.cc 
+#	taylor_set.cc 
 
 lib_LTLIBRARIES = libariadne.la 
 libariadne_la_SOURCES = $(SRC)

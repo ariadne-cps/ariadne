@@ -1329,6 +1329,49 @@ inline int pow2(uint k) { return 1<<k; }
 inline int powm1(uint k) { return (k%2) ? -1 : +1; }
 
 
+
+TaylorVariable antiderivative(const TaylorVariable& x, uint k) {
+    // General case with error analysis
+    TaylorVariable r(x.argument_size());
+    const Interval& xe=x.error();
+    Interval& re=r.error();
+    re=xe;
+    set_rounding_upward();
+    volatile Float u,ml;
+    Float te=0; // Twice the maximum accumulated error
+    for(TaylorVariable::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+        const uint c=xiter->first[k]+1;
+        const Float& xv=xiter->second;
+        volatile Float mxv=-xv;
+        if(xv>=0) {
+            u=xv/c;
+            ml=mxv/c;
+        } else {
+            u=xv/c;
+            ml=mxv/c;
+        }
+        te+=(u+ml);
+    }
+    re.u+=te/2; re.l=-re.u;
+
+    set_rounding_to_nearest();
+    for(TaylorVariable::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+        const uint c=xiter->first[k]+1;
+        r[xiter->first]=xiter->second/c;
+    }
+
+    return r;
+}
+
+Vector<TaylorVariable> antiderivative(const Vector<TaylorVariable>& x, uint k) {
+    Vector<TaylorVariable> r(x.size());
+    for(uint i=0; i!=x.size(); ++i) {
+        r[i]=antiderivative(x[i],k);
+    }
+    return r;
+}
+
+
 pair<TaylorVariable,TaylorVariable>
 split(const TaylorVariable& tv, uint j) 
 {

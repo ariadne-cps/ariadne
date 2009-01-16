@@ -49,11 +49,11 @@ TaylorSet::TaylorSet(uint d)
 }
 
 
-TaylorSet::TaylorSet(const ApproximateTaylorModel& atm) 
-    : _variables(atm.result_size())
+TaylorSet::TaylorSet(const Vector<TaylorVariable>& tvs) 
+    : _variables(tvs.size())
 {
-    for(size_t i=0; i!=atm.result_size(); ++i) {
-        this->_variables[i]=TaylorVariable(atm.expansion()[i],Interval(0));
+    for(size_t i=0; i!=tvs.size(); ++i) {
+        this->_variables[i]=TaylorVariable(tvs[i]);
     }
 }
 

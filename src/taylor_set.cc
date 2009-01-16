@@ -86,7 +86,7 @@ TaylorSet::overlaps(const Box& bx) const
 tribool
 TaylorSet::inside(const Box& bx) const
 {
-    ARIADNE_NOT_IMPLEMENTED;
+    return inside(this->bounding_box(),bx) | indeterminate
 }
 
 
@@ -170,10 +170,13 @@ adjoin_outer_approximation(const TaylorSet& set, const Box& domain, Float eps, G
     }    
 }
 
-GridTreeSet 
-outer_approximation(const TaylorSet& set, uint depth) 
+ 
+void
+adjoin_outer_approximation(GridTreeSet& grid_set, const TaylorSet& set, uint depth) 
 {
-    return outer_approximation(set,Grid(set.dimension()),depth);
+    Box domain(set.expansion().argument_size(),Interval(-1,+1));
+    Float eps=pow(2,-(depth/set.dimension()+1))
+        return adjoin_outer_approximation(set,domain,eps,grid_set,depth);
 }
 
 

@@ -119,6 +119,19 @@ make2(const boost::python::object& obj1,const boost::python::object& obj2)
     return t;
 }
 
+template<class C, class I, class X> inline 
+X get_item(const C& c, const I& i) { return c[i]; }
+
+template<class C, class I, class X> inline 
+void set_item(C& c, const I& i, const X& x) { c[i]=x; }
+
+template<class C, class I, class J, class X> inline 
+X matrix_get_item(const C& c, const I& i, const J& j) { return c[i][j]; }
+
+template<class C, class I, class J, class X> inline 
+void matrix_set_item(C& c, const I& i, const J& j, const X& x) { c[i][j]=x; }
+
+
 template<class T> bool check(const boost::python::extract<T>& e) { e(); return e.check(); }
 template<> bool check(const boost::python::extract<boost::python::list>& e);
 template<> bool check(const boost::python::extract<boost::python::dict>& e);

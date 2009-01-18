@@ -321,7 +321,6 @@ TaylorVariable::sweep(const Float& m)
 TaylorVariable&
 TaylorVariable::truncate(uint d)
 {
-    assert(this->_error.l==-this->_error.u);
     set_rounding_upward();
     Float e=0;
     for(iterator iter=this->_expansion.begin(); iter!=this->end(); ) {
@@ -335,6 +334,71 @@ TaylorVariable::truncate(uint d)
     this->_error.u+=e;
     this->_error.l=-this->_error.u;
     set_rounding_to_nearest();
+    return *this;
+}
+
+TaylorVariable&
+TaylorVariable::truncate(const MultiIndex& a)
+{
+    ARIADNE_ASSERT(a.size()==this->argument_size());
+    set_rounding_upward();
+    Float e=0;
+    for(iterator iter=this->_expansion.begin(); iter!=this->end(); ) {
+        bool erase=false;
+        for(uint i=0; i!=a.size(); ++i) {
+            if(a[i] < iter->first[i]) {
+                erase=true; 
+                break;
+            }
+        }
+        if(erase) {
+            e+=abs(iter->second);
+            this->_expansion.data().erase(iter++);
+        } else {
+            ++iter;
+        }
+    }
+    this->_error.u+=e;
+    this->_error.l=-this->_error.u;
+    set_rounding_to_nearest();
+    return *this;
+}
+
+TaylorVariable&
+TaylorVariable::clobber()
+{
+    this->_error=0;
+    return *this;
+}
+
+TaylorVariable&
+TaylorVariable::clobber(uint o)
+{
+    for(iterator iter=this->_expansion.begin(); iter!=this->end(); ) {
+        const MultiIndex& a=iter->first;
+        if(a.degree()>o) {
+            this->_expansion.data().erase(iter++);
+        } else {
+            ++iter;
+        }
+    }
+    this->_error=0;
+    return *this;
+}
+
+TaylorVariable&
+TaylorVariable::clobber(uint so, uint to)
+{
+    uint n=this->argument_size()-1;
+    for(iterator iter=this->_expansion.begin(); iter!=this->end(); ) {
+        const MultiIndex& a=iter->first;
+        if(a[n]>to || a.degree()>so+a[n]) {
+            this->_expansion.data().erase(iter++);
+        } else {
+            ++iter;
+        }
+    }
+    this->_error=0;
     return *this;
 }
 
@@ -1155,7 +1219,7 @@ _compose3(const series_function_pointer& fn, const TaylorVariable& tv, Float eps
 
 TaylorVariable 
 _compose(const series_function_pointer& fn, const TaylorVariable& tv, Float eps) {
-    return _compose3(fn,tv,eps);;
+    return _compose3(fn,tv,eps);
 }
 
 
@@ -1330,13 +1394,32 @@ inline int powm1(uint k) { return (k%2) ? -1 : +1; }
 
 
 
-TaylorVariable antiderivative(const TaylorVariable& x, uint k) {
+Interval 
+evaluate(const TaylorVariable& tv, const Vector<Interval>& x)
+{
+    return tv.evaluate(x);
+}
+
+Vector<Interval> 
+evaluate(const Vector<TaylorVariable>& tv, const Vector<Interval>& x)
+{
+    Vector<Interval> r(tv.size());
+    for(uint i=0; i!=r.size(); ++i) {
+        r[i]=evaluate(tv[i],x);
+    }
+    return r;
+}
+
+
+TaylorVariable antiderivative(const TaylorVariable& x, const Interval& dk, uint k) {
     // General case with error analysis
     TaylorVariable r(x.argument_size());
     const Interval& xe=x.error();
     Interval& re=r.error();
     re=xe;
     set_rounding_upward();
+    volatile Float dkru=(dk.u-dk.l)/2;
+    volatile Float dkrl=-dk.u; dkrl+=dk.l; dkrl/=(-2);
     volatile Float u,ml;
     Float te=0; // Twice the maximum accumulated error
     for(TaylorVariable::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
@@ -1344,29 +1427,33 @@ TaylorVariable antiderivative(const TaylorVariable& x, uint k) {
         const Float& xv=xiter->second;
         volatile Float mxv=-xv;
         if(xv>=0) {
-            u=xv/c;
-            ml=mxv/c;
+            u=xv*dkru/c;
+            ml=mxv*dkrl/c;
         } else {
-            u=xv/c;
-            ml=mxv/c;
+            u=xv*dkru/c;
+            ml=mxv*dkrl/c;
         }
         te+=(u+ml);
     }
     re.u+=te/2; re.l=-re.u;
 
     set_rounding_to_nearest();
+    Float dkr=(dk.u-dk.l)/2;
+    MultiIndex rindex(r.argument_size());
     for(TaylorVariable::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         const uint c=xiter->first[k]+1;
-        r[xiter->first]=xiter->second/c;
+        rindex=xiter->first;
+        rindex.set(k,c);
+        r[rindex]=xiter->second*dkr/c;
     }
 
     return r;
 }
 
-Vector<TaylorVariable> antiderivative(const Vector<TaylorVariable>& x, uint k) {
+Vector<TaylorVariable> antiderivative(const Vector<TaylorVariable>& x, const Interval& dk, uint k) {
     Vector<TaylorVariable> r(x.size());
     for(uint i=0; i!=x.size(); ++i) {
-        r[i]=antiderivative(x[i],k);
+        r[i]=antiderivative(x[i],dk,k);
     }
     return r;
 }
@@ -1419,7 +1506,7 @@ split(const TaylorVariable& tv, uint j)
 
 
 TaylorVariable
-scale(const TaylorVariable& tv, const Interval& ivl) 
+unscale(const TaylorVariable& tv, const Interval& ivl) 
 {
     // Scale tv so that the interval ivl maps into [-1,1]
     // The result is given by  (tv-c)*s where c is the centre
@@ -1436,6 +1523,15 @@ scale(const TaylorVariable& tv, const Interval& ivl)
     return r;
 }
 
+Vector<TaylorVariable>
+unscale(const Vector<TaylorVariable>& tvs, const Vector<Interval>& ivls) 
+{
+    Vector<TaylorVariable> r(tvs.size());
+    for(uint i=0; i!=r.size(); ++i) {
+        r[i]=unscale(tvs[i],ivls[i]);
+    }
+    return r;
+}
 
  
 void
@@ -1483,11 +1579,15 @@ compose(const Vector<TaylorVariable>& x,
 
     Vector<TaylorVariable> ys(y.size());
     for(uint i=0; i!=y.size(); ++i) {
-        ys[i]=scale(y[i],bx[i]);
+        ys[i]=unscale(y[i],bx[i]);
     }
 
     Vector<TaylorVariable> r(x.size());
     _compose1(r,x,ys);
+    
+    //FIXME: Remove setting error to zero
+    for(uint i=0; i!=r.size(); ++i) { r[i].sweep(1e-8); }
+    for(uint i=0; i!=r.size(); ++i) { r[i].clobber(); }
     return r;
 }
 
@@ -1524,6 +1624,17 @@ compose(const TaylorVariable& x,
     return rv[0];
 }
     
+
+SparseDifferential<Float> expansion(const TaylorVariable& x, const Vector<Interval>& d) {
+    return compose(x,d,TaylorVariable::variables(Vector<Float>(d.size()))).expansion();
+}
+
+Vector< SparseDifferential<Float> > expansion(const Vector<TaylorVariable>& x, const Vector<Interval>& d) {
+    Vector<TaylorVariable> y=compose(x,d,TaylorVariable::variables(Vector<Float>(d.size())));
+    Vector< SparseDifferential<Float> > r(y.size());
+    for(uint i=0; i!=r.size(); ++i) { r[i]=y[i].expansion(); }
+    return r;
+}
 
 inline Vector<Float> centre(const Vector<TaylorVariable>& x) 
 {
@@ -1589,11 +1700,125 @@ implicit(const Vector<TaylorVariable>& f)
     */
 }
 
+std::pair< Interval, Vector<Interval> >
+bounds(Vector<TaylorVariable> const& vfm, 
+       Vector<Interval> const& d, 
+       Float const& hmax,
+       Vector<Interval> dmax) 
+{ 
+    // Try to find a time h and a set b such that inside(r+Interval<R>(0,h)*vf(b),b) holds
+
+    // Set up constants of the method.
+    // TODO: Better estimates of constants
+    const Float INITIAL_MULTIPLIER=2;
+    const Float MULTIPLIER=1.125;
+    //const Float BOX_RADIUS_MULTIPLIER=1.03125;
+    const uint EXPANSION_STEPS=8;
+    const uint REDUCTION_STEPS=8;
+    const uint REFINEMENT_STEPS=4;
+  
+    Vector<Interval> delta=d-midpoint(d);
+  
+    Float h=hmax;
+    Float hmin=hmax/(1<<REDUCTION_STEPS);
+    bool success=false;
+    Vector<Interval> b,nb,df;
+    Interval ih(0,h);
+    while(!success) {
+        ARIADNE_ASSERT(h>hmin);
+        df=evaluate(vfm,d);
+        b=d+(INITIAL_MULTIPLIER*ih)*df+delta;
+        for(uint i=0; i!=EXPANSION_STEPS; ++i) {
+            df=evaluate(vfm,b);
+            nb=d+ih*df;
+            if(subset(nb,b)) {
+                success=true;
+                break;
+            } else {
+                b=d+MULTIPLIER*ih*df+delta;
+            }
+        }
+        if(!success) {
+            h/=2;
+            ih=Interval(0,h);
+        }
+    }
+
+    ARIADNE_ASSERT(subset(nb,b));
+  
+    Vector<Interval> vfb;
+    vfb=evaluate(vfm,b);
+
+    for(uint i=0; i!=REFINEMENT_STEPS; ++i) {
+        b=nb;
+        vfb=evaluate(vfm,b);
+        nb=d+ih*vfb;
+        ARIADNE_ASSERT_MSG(subset(nb,b),std::setprecision(20)<<"refinement "<<i<<": "<<nb<<" is not a inside of "<<b);
+    }
+  
+    // Check result of operation
+    // We use "possibly" here since the bound may touch 
+    ARIADNE_ASSERT(subset(nb,b));
+  
+    return std::make_pair(h,nb);
+}
+
 Vector<TaylorVariable> 
 flow(const Vector<TaylorVariable>& vf, const Vector<Interval>& d, const Interval& h, const Vector<Interval>& b)
 {
-    ARIADNE_NOT_IMPLEMENTED;
+    ARIADNE_ASSERT(h.l==0.0 || h.l==-h.u);
+
+    typedef Interval I;
+    typedef Float A;
+    uint n=vf.size();
+    uint so=1u;
+    uint to=6u;
+
+    for(uint i=0; i!=n; ++i) { const_cast<TaylorVariable&>(vf[i]).clobber(so,to-1); }
+
+    Interval hh(-h.u,h.u);
+
+    Vector<TaylorVariable> y(n,TaylorVariable(n+1));
+    Vector<TaylorVariable> yp(n,TaylorVariable(n+1));
+    Vector<TaylorVariable> yz(n,TaylorVariable(n+1));
+    for(uint i=0; i!=n; ++i) {
+        yz[i].expansion().set_gradient(i,1.0);
+        yz[i]*=sub_ivl(d[i].u/2,d[i].l/2);
+        yz[i]+=add_ivl(d[i].l/2,d[i].u/2);
+    }
+    
+    
+
+    for(uint i=0; i!=n; ++i) {
+        y[i]=yz[i];
+    }
+
+
+    //std::cerr << "\ny[0]=" << y << std::endl << std::endl;
+    for(uint j=0; j!=to; ++j) {
+        yp=compose(vf,b,y);
+        //std::cerr << "yp["<<j+1<<"]=" << yp << std::endl;
+        //for(uint i=0; i!=n; ++i) { yp[i].clobber(so,to-1); }
+        //std::cerr << "yp["<<j+1<<"]=" << yp << std::endl;
+        for(uint i=0; i!=n; ++i) {  
+            y[i]=antiderivative(yp[i],hh,n);
+            y[i]+=yz[i];
+        }
+        //std::cerr << "y["<<j+1<<"]=" << y << std::endl << std::endl;
+    } 
+
+    if(h.l==0) {
+        Vector<TaylorVariable> ht=TaylorVariable::variables(Vector<Float>(n+1,0.0));
+        ht[n].expansion().set_value(0.5);
+        ht[n].expansion().set_gradient(n,0.5);
+        y=compose(y,Vector<Interval>(n+1,Interval(-1,1)),ht);
+    }
+
+    for(uint i=0; i!=n; ++i) { y[i].clobber(so,to); }
+    for(uint i=0; i!=n; ++i) { y[i].sweep(0.0); }
+    return y;
 }
+
 
 
 
@@ -1630,8 +1855,9 @@ TaylorVariable::str() const
 
 std::ostream& 
 operator<<(std::ostream& os, const TaylorVariable& tv) {
-    return os << "TaylorVariable( expansion=" << tv.expansion() << ", error=" << tv.error() 
-              << ", range="<<tv.range()<<" )";
+    //    return os << "TaylorVariable( expansion=" << tv.expansion() << ", error=" << tv.error() 
+    //              << ", range="<<tv.range()<<" )";
+    return os << "TaylorVariable(" << tv.expansion().data() << "," << tv.error() << ")"; 
 }
 
  

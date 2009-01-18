@@ -95,13 +95,11 @@ integration_step(const FlowModelType& flow_model,
                  const SetModelType& initial_set_model, 
                  const TimeModelType& integration_time_model) const
 {
-    // FIXME: Adjoin time model to set
     //SetModelType set_step_model=join(initial_set_model, integration_time_model);
-    SetModelType set_step_model(join(set_step_model.variables(),integration_time_model));
+    SetModelType set_step_model(join(initial_set_model.variables(),integration_time_model));
     ARIADNE_LOG(6,"set_step_model = "<<set_step_model<<"\n");
     SetModelType final_set_model=compose(flow_model.variables(),flow_model.domain(),set_step_model.variables());
     ARIADNE_LOG(6,"final_set_model = "<<final_set_model<<"\n");
-
     return final_set_model;
 }
 
@@ -130,6 +128,32 @@ reachability_time(const TimeModelType& initial_time_model,
     TimeModelType expanded_reach_time_model=expanded_initial_time_model+expanded_time_interval_model*(expanded_final_time_model-expanded_initial_time_model);
 
     return expanded_reach_time_model;
+}
+
+
+TaylorCalculus::SetModelType
+TaylorCalculus::
+reachability_step(const FlowModelType& flow_model, 
+                  const SetModelType& initial_set_model, 
+                  const TimeType& initial_time, 
+                  const TimeType& final_time) const
+{
+    ARIADNE_ASSERT(initial_set_model.dimension()+1==flow_model.argument_size());
+    uint ng=initial_set_model.generators_size();
+
+    TimeModelType expanded_reach_time_model(ng+1);
+    expanded_reach_time_model.expansion().set_value((final_time+initial_time)/2);
+    expanded_reach_time_model.expansion().set_gradient(ng,(final_time-initial_time)/2);
+
+    // FIXME: Embed set model correctly
+    SetModelType expanded_initial_set_model=embed(initial_set_model.variables(),ng+1,0u);
+    ARIADNE_LOG(6,"expanded_initial_set_model="<<expanded_initial_set_model<<"\n");
+    SetModelType expanded_timed_set_model=join(expanded_initial_set_model.variables(),expanded_reach_time_model);
+    ARIADNE_LOG(6,"expanded_timed_set_model="<<expanded_timed_set_model<<"\n");
+    SetModelType reach_set_model=this->_apply(flow_model,expanded_timed_set_model);
+    ARIADNE_LOG(6,"reach_set_model = "<<reach_set_model<<"\n");
+  
+    return reach_set_model;
 }
 
 
@@ -408,7 +432,7 @@ TaylorCalculus::flow_model(FunctionInterface const& vf, Vector<Interval> const& 
     ARIADNE_LOG(6,"vector_field_model = "<<vector_field_model<<"\n");
   
     // Use flow function on model type
-    FlowModelType flow_model=FlowModelType(bx,Ariadne::flow(vector_field_model.variables(),bx,Interval(0,h),bb));
+    FlowModelType flow_model=FlowModelType(join(bx,Interval(0,h)),Ariadne::flow(vector_field_model.variables(),bx,Interval(0,h),bb));
     ARIADNE_LOG(6,"flow_model = "<<flow_model<<"\n");
 
     return flow_model;

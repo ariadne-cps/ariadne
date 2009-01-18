@@ -48,35 +48,30 @@ namespace Ariadne {
   
 template<class Sys, class BS> class Evolver;
 
-class ApproximateTaylorModel;
 class VectorField;
 template<class ES> class Orbit;
 
 class EvolutionParameters;
-typedef SparseDifferential<Float> ApproximateTaylorVariable;
 class TaylorVariable;
-template<class MDL> class CalculusInterface;
+class TaylorSet;
+template<class Var> class CalculusInterface;
 
 class EvolutionProfiler;
 
-
-typedef ApproximateTaylorModel DefaultModelType;
-typedef ApproximateTaylorModel DefaultEnclosureType;
 
 /*! \brief A class for computing the evolution of a vector_field system. 
  *
  * The actual evolution steps are performed by the VectorFieldEvolver class.
  */
 class VectorFieldEvolver
-    : public EvolverBase< VectorField,DefaultEnclosureType>
+    : public EvolverBase< VectorField, TaylorSet >
     , public Loggable
 {
-    typedef Ariadne::DefaultModelType ModelType;
   public:
     typedef ContinuousEvolutionParameters EvolutionParametersType;
     typedef VectorField::TimeType TimeType;
     typedef VectorField SystemType;
-    typedef ModelType EnclosureType;
+    typedef TaylorSet EnclosureType;
     typedef Orbit<EnclosureType> OrbitType;
     typedef ListSet<EnclosureType> EnclosureListType;
   public:
@@ -104,25 +99,15 @@ class VectorFieldEvolver
     //! \brief Compute an approximation to the orbit set using upper semantics. 
     Orbit<EnclosureType> orbit(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
 
-
-    //! \brief Compute an approximation to the evolution set using upper semantics. 
-    EnclosureListType evolve(const SystemType& system, const EnclosureType& initial_set, const TimeType& time) const {
-        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate; 
-        this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS,false); 
-        return final; }
-
-    //! \brief Compute an approximation to the evolution set under upper semantics. 
-    EnclosureListType reach(const SystemType& system, const EnclosureType& initial_set, const TimeType& time) const {
-        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate; 
-        this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS,true); 
-        return intermediate; }
+    using EvolverBase< VectorField, TaylorSet >::evolve;
+    using EvolverBase< VectorField, TaylorSet >::reach;
 
   protected:
     virtual void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate, 
                             const SystemType& system, const EnclosureType& initial, const TimeType& time, 
                             Semantics semantics, bool reach) const;
 
-    typedef tuple<ModelType, ModelType> TimedSetType;
+    typedef tuple<TimeType, EnclosureType> TimedSetType;
     virtual void _evolution_step(std::vector< TimedSetType >& working_sets, 
                                  EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,  
                                  const SystemType& system, const TimedSetType& current_set, const TimeType& time, 
@@ -130,7 +115,7 @@ class VectorFieldEvolver
 
   private:
     boost::shared_ptr< EvolutionParametersType > _parameters;
-    boost::shared_ptr< CalculusInterface<ApproximateTaylorVariable> > _toolbox;
+    boost::shared_ptr< CalculusInterface<TaylorVariable> > _toolbox;
     //boost::shared_ptr< EvolutionProfiler >  _profiler;
 };
 

@@ -86,25 +86,31 @@ TaylorVariable cos(const TaylorVariable& x);
 TaylorVariable tan(const TaylorVariable& x);
 
 pair<TaylorVariable,TaylorVariable> split(const TaylorVariable& x, uint j);
-TaylorVariable derivative(const TaylorVariable& x, uint j);
-TaylorVariable antiderivative(const TaylorVariable& x, uint j);
-
 
 // Scale the variabe by post-composing with an affine map taking the interval \a ivl to the unit interval
-TaylorVariable scale(const TaylorVariable& x, const Interval& ivl);
+TaylorVariable unscale(const TaylorVariable& x, const Interval& ivl);
+Vector<TaylorVariable> unscale(const Vector<TaylorVariable>& x, const Vector<Interval>& bx);
+
+// Evaluate an array of Taylor variables on a vector.
+Vector<Interval> evaluate(const Vector<TaylorVariable>& x, const Vector<Interval>& sy);
+Interval evaluate(const TaylorVariable& x, const Vector<Interval>& sy);
 
 // Compose an array of Taylor variables with another, after scaling by the interval vectors
 Vector<TaylorVariable> compose(const Vector<TaylorVariable>& x, const Vector<Interval>& bx, const Vector<TaylorVariable>& y);
+
+// Wrappers for univariate composition
 TaylorVariable compose(const TaylorVariable& x, const Vector<Interval>& bx, const Vector<TaylorVariable>& y);
 TaylorVariable compose(const TaylorVariable& x, const Interval& b, const TaylorVariable& y);
-TaylorVariable compose(const TaylorVariable& x, const TaylorVariable& y);
 
-TaylorVariable antiderivative(const TaylorVariable& x, uint k);
-Vector<TaylorVariable> antiderivative(const Vector<TaylorVariable>& x, uint k);
+SparseDifferential<Float> expansion(const TaylorVariable& x, const Vector<Interval>& d);
+Vector< SparseDifferential<Float> > expansion(const Vector<TaylorVariable>& x, const Vector<Interval>& d);
 
-Vector<TaylorVariable> implicit(const Vector<TaylorVariable>& x);
+TaylorVariable antiderivative(const TaylorVariable& x, const Interval& dk, uint k);
+Vector<TaylorVariable> antiderivative(const Vector<TaylorVariable>& x, const Interval& dk, uint k);
+
+pair<Vector<Interval>,Interval> bounds(const Vector<TaylorVariable>& vf, const Vector<Interval>& d, const Interval& maxh);
 Vector<TaylorVariable> flow(const Vector<TaylorVariable>& vf, const Vector<Interval>& d, const Interval& h, const Vector<Interval>& b);
-
+Vector<TaylorVariable> implicit(const Vector<TaylorVariable>& x);
 
 TaylorVariable embed(const TaylorVariable& tv, uint as, uint b);
 Vector<TaylorVariable> embed(const Vector<TaylorVariable>& tvs, uint as, uint b);
@@ -231,15 +237,17 @@ class TaylorVariable
     friend TaylorVariable cos(const TaylorVariable& x);
     friend TaylorVariable tan(const TaylorVariable& x);
 
-    friend TaylorVariable derivative(const TaylorVariable& x, uint i);
-    friend TaylorVariable antiderivative(const TaylorVariable& x, uint i);
-
     friend std::ostream& operator<<(std::ostream& os, const TaylorVariable& x);
 
   public:
     void clean();
     TaylorVariable& truncate(uint d);
+    TaylorVariable& truncate(const MultiIndex& a);
     TaylorVariable& sweep(const Float& eps);
+  public:
+    TaylorVariable& clobber();
+    TaylorVariable& clobber(uint o);
+    TaylorVariable& clobber(uint so, uint to);
 };
 
 TaylorVariable max(const TaylorVariable& x, const TaylorVariable& y);

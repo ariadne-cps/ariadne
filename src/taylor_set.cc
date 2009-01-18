@@ -28,7 +28,7 @@
 #include "matrix.h"
 #include "multi_index.h"
 #include "sparse_differential.h"
-#include "function.h"
+#include "function_interface.h"
 
 #include "geometry.h"
 #include "taylor_variable.h"
@@ -48,6 +48,21 @@ TaylorSet::TaylorSet(uint d)
 {
 }
 
+
+TaylorSet::TaylorSet(const FunctionInterface& f, const Vector<Interval>& d) 
+    : _variables(f.result_size())
+{
+    Vector<TaylorVariable> x=TaylorVariable::variables(Vector<Float>(f.argument_size(),0.0));
+    for(uint i=0; i!=x.size(); ++i) {
+        const Interval& di=d[i];
+        Interval dm=add_ivl(di.l/2,di.u/2);
+        Interval dr=sub_ivl(di.u/2,di.l/2);
+        x[i]*=dr;
+        x[i]+=dm;
+    }
+
+    this->_variables=f.evaluate(x);
+}
 
 TaylorSet::TaylorSet(const Vector<Interval>& bx) 
     : _variables(bx.size())
@@ -221,6 +236,7 @@ outer_approximation(const TaylorSet& set, const Grid& grid, uint depth)
 std::ostream&
 TaylorSet::write(std::ostream& os) const
 {
+    return os << "TaylorSet(" << this->_variables << ")";
     os << "TaylorSet(\n";
     os << "  dimension=" << this->dimension() << ",\n" << std::flush;
     os << "  variables=" << this->_variables << ",\n" << std::flush;

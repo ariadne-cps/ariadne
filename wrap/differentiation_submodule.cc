@@ -78,27 +78,18 @@ make_differential_vector(const uint& rs, const uint& as, const uint& d, const bo
 
 
 template<class C, class I, class X> inline 
-void set_item(C& c, const I& i, const X& x) {
-    c[i]=x;
-}
+X get_item(const C& c, const I& i) { return c[i]; }
 
 template<class C, class I, class J, class X> inline 
-void matrix_set_item(C& c, const I& i, const J& j, const X& x) {
-    c[i][j]=x;
-}
+X matrix_get_item(const C& c, const I& i, const J& j) { return c[i][j]; }
+
+template<class C, class I, class X> inline 
+void set_item(C& c, const I& i, const X& x) { c[i]=x; }
+
+template<class C, class I, class J, class X> inline 
+void matrix_set_item(C& c, const I& i, const J& j, const X& x) { c[i][j]=x; }
 
 
-template<class C, class I> inline 
-typename C::ValueType 
-get_item(const C& c, const I& i) {
-    return c[i];
-}
-
-template<class C, class I, class J> inline 
-typename C::ValueType::ValueType 
-matrix_get_item(const C& c, const I& i, const J& j) {
-    return c[i][j];
-}
 
 
 template<class DIFF>
@@ -115,7 +106,7 @@ void export_differential(const char*)
     //differential_class.def("__init__", make_constructor(&make_differential<X>) );
     differential_class.def( init< uint, uint >());
     differential_class.def("value", (const X&(D::*)()const) &D::value, return_value_policy<copy_const_reference>());
-    differential_class.def("__getitem__", &get_item<D,MultiIndex>);
+    differential_class.def("__getitem__", &get_item<D,MultiIndex,X>);
     differential_class.def("__setitem__",&set_item<D,MultiIndex,double>);
     differential_class.def("__setitem__",&set_item<D,MultiIndex,X>);
     differential_class.def(-self);
@@ -173,10 +164,10 @@ export_differential_vector(const char* name)
     class_<DV> differential_vector_class(name);
     differential_vector_class.def("__init__", make_constructor(&make_differential_vector<D>) );
     differential_vector_class.def( init< uint, uint, uint >());
-    differential_vector_class.def("__getitem__", &matrix_get_item<DV,int,MultiIndex>);
+    differential_vector_class.def("__getitem__", &matrix_get_item<DV,int,MultiIndex,X>);
     differential_vector_class.def("__setitem__",&matrix_set_item<DV,int,MultiIndex,double>);
+    differential_vector_class.def("__getitem__", &get_item<DV,int,D>);
     differential_vector_class.def("__setitem__",&set_item<DV,int,X>);
-    differential_vector_class.def("__getitem__", &get_item<DV,int>);
     differential_vector_class.def("__setitem__",&set_item<DV,int,D>);
     differential_vector_class.def(-self);
     differential_vector_class.def(self+self);
@@ -228,7 +219,7 @@ void differentiation_submodule()
     export_differential< SparseDifferential<Float> >("Differential");
     export_differential< SparseDifferential<Interval> >("IntervalDifferential");
 
-    export_differential_vector< DenseDifferential<Float> >("DifferentialVector");
-    export_differential_vector< DenseDifferential<Interval> >("IntervalDifferentialVector");
+    export_differential_vector< SparseDifferential<Float> >("DifferentialVector");
+    export_differential_vector< SparseDifferential<Interval> >("IntervalDifferentialVector");
 }
 

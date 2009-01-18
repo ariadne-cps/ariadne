@@ -148,6 +148,13 @@ class TaylorCalculus
     //! given by \a flow_model for times between \a initial_time_model and \a final_time_model.
     SetModelType reachability_step(const FlowModelType& flow_model, 
                                    const SetModelType& initial_set_model, 
+                                   const TimeType& initial_timel, 
+                                   const TimeType& final_time) const;
+  
+    //! \brief Computes the points reached by evolution of the \a initial_set_model under the flow
+    //! given by \a flow_model for times between \a initial_time_model and \a final_time_model.
+    SetModelType reachability_step(const FlowModelType& flow_model, 
+                                   const SetModelType& initial_set_model, 
                                    const TimeModelType& initial_time_model, 
                                    const TimeModelType& final_time_model) const;
   

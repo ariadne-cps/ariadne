@@ -60,6 +60,8 @@ template<class DIFF> DifferentialVector<DIFF> operator-(const DifferentialVector
 template<class DIFF, class Y> Vector<Y> evaluate(const DifferentialVector<DIFF>& x, const Vector<Y>& y);
 template<class DIFF> DifferentialVector<DIFF> evaluate(const DifferentialVector<DIFF>& x, const DifferentialVector<DIFF>& y);
 
+template<class DIFF, class Y> Vector<Y> evaluate(const Vector<DIFF>& x, const Vector<Y>& y);
+
 template<class DIFF> DifferentialVector<DIFF> translate(const DifferentialVector<DIFF>& y, const Vector<typename DIFF::RealType>& c);
 template<class DIFF> DifferentialVector<DIFF> compose(const DifferentialVector<DIFF>& y, const DifferentialVector<DIFF>& z);
 template<class DIFF> DifferentialVector<DIFF> inverse(const DifferentialVector<DIFF>& y);
@@ -114,6 +116,9 @@ class DifferentialVector
     }
     template<class E> DifferentialVector(const ublas::vector_expression<E>& ve) 
         : Vector<DIFF>(ve) { }
+    template<class E> DifferentialVector<DIFF>& operator=(const ublas::vector_expression<E>& ve) {
+        static_cast<Vector<DIFF>&>(*this).operator=(ve); return *this; }
+
 
 
     uint result_size() const { return this->Vector<DIFF>::size(); }
@@ -416,6 +421,14 @@ evaluate(const DifferentialVector<DIFF>& x,
         evaluate(x,static_cast<const Vector<DIFF>&>(y));
     for(uint i=0; i!=r.result_size(); ++i) { r[i].cleanup(); }
     return r;
+}
+
+
+template<class DIFF, class Y> 
+Vector<Y> 
+evaluate(const Vector<DIFF>& x, const Vector<Y>& y)
+{
+    return evaluate(static_cast<DifferentialVector<DIFF>const&>(x),y);
 }
 
 

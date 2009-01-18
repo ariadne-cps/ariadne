@@ -21,6 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+#include "sparse_differential.h"
 #include "taylor_variable.h"
 
 #include <boost/python.hpp>
@@ -49,7 +50,7 @@ void read(SparseDifferential<Float>& sd, const boost::python::object& obj) {
     MultiIndex j(0);
     boost::python::dict dct=extract<boost::python::dict>(obj);
     boost::python::list lst=dct.items();
-    for(uint i=0; i!=len(lst); ++i) {
+    for(int i=0; i!=len(lst); ++i) {
         boost::python::tuple tup=extract<boost::python::tuple>(lst[i]);
         read(j,tup[0]);
         read(c,tup[1]);
@@ -127,12 +128,12 @@ make_taylor_variable(const uint& as, const uint& deg, const boost::python::objec
     return new TaylorVariable(as,deg,ptr,err);
 }
 
-boost::python::list
+Vector<TaylorVariable>
 make_taylor_variables(const Vector<Interval>& x) 
 {
-    boost::python::list result;
+    Vector<TaylorVariable> result(x.size());
     for(uint i=0; i!=x.size(); ++i) {
-        result.append(TaylorVariable::variable(x.size(),midpoint(x[i]),i));
+        result[i]=TaylorVariable::variable(x.size(),midpoint(x[i]),i);
     }
     return result;
 }
@@ -147,21 +148,11 @@ python_split(const TaylorVariable& x, uint j)
     return boost::python::make_tuple(res.first,res.second);
 }
 
-template<class C, class I, class X> inline 
-void set_item(C& c, const I& i, const X& x) {
-    c[i]=x;
-}
 
-
-template<class C, class I> inline 
-typename C::ValueType 
-get_item(const C& c, const I& i) {
-    return c[i];
-}
 
 template<> std::string __repr__(const TaylorVariable& tv) {
     std::stringstream ss;
-    ss << "TV(" << tv.expansion() << "," << tv.error() << ")";
+    ss << "TaylorVariable(" << tv.expansion().data() << "," << tv.error() << ")";
     return ss.str();
 } 
 
@@ -169,12 +160,14 @@ template<> std::string __repr__(const TaylorVariable& tv) {
 
 void export_taylor_variable() 
 {
+    typedef uint N;
     typedef double D;
     typedef Float R;
     typedef Interval I;
     typedef MultiIndex A;
     typedef Vector<Float> RV;
     typedef Vector<Interval> IV;
+    typedef SparseDifferential<Float> SD;
     typedef TaylorVariable T;
     typedef Vector<TaylorVariable> TV;
 
@@ -189,9 +182,8 @@ void export_taylor_variable()
     taylor_variable_class.def("clean", &TaylorVariable::clean);
     taylor_variable_class.def("domain", &TaylorVariable::domain);
     taylor_variable_class.def("range", &TaylorVariable::range);
-    taylor_variable_class.def("__getitem__", &get_item<T,A>);
+    taylor_variable_class.def("__getitem__", &get_item<T,A,R>);
     taylor_variable_class.def("__setitem__",&set_item<T,A,D>);
-    taylor_variable_class.def("__setitem__",&set_item<T,A,R>);
     taylor_variable_class.def(-self);
     taylor_variable_class.def(self+self);
     taylor_variable_class.def(self-self);
@@ -212,30 +204,39 @@ void export_taylor_variable()
     taylor_variable_class.def(self+=self);
     taylor_variable_class.def(self-=self);
     taylor_variable_class.def(self_ns::str(self));
-    taylor_variable_class.def("truncate", &TaylorVariable::truncate,return_value_policy<reference_existing_object>());
+    taylor_variable_class.def("truncate", (TaylorVariable&(TaylorVariable::*)(uint)) &TaylorVariable::truncate,return_value_policy<reference_existing_object>());
     taylor_variable_class.def("sweep", &TaylorVariable::sweep,return_value_policy<reference_existing_object>());
     taylor_variable_class.def("evaluate", (Interval(TaylorVariable::*)(const Vector<Float>&)const) &TaylorVariable::evaluate);
     taylor_variable_class.def("evaluate", (Interval(TaylorVariable::*)(const Vector<Interval>&)const) &TaylorVariable::evaluate);
 
-    def("scale", (T(*)(const T&,const Interval&)) &scale);
     def("split", &python_split);
 
 
     taylor_variable_class.def("__repr__",&__repr__<T>);
 
-
-    taylor_variable_class.def("constant",(T(*)(uint, const R&))&T::constant);
-    taylor_variable_class.def("variable",(T(*)(uint, const R&, uint))&T::variable);
+    taylor_variable_class.def("constant",(T(*)(N, const R&))&T::constant);
+    taylor_variable_class.def("variable",(T(*)(N, const R&, uint))&T::variable);
     taylor_variable_class.def("variables",&make_taylor_variables);
   
     taylor_variable_class.staticmethod("constant");
     taylor_variable_class.staticmethod("variable");
     taylor_variable_class.staticmethod("variables");
 
+    def("expansion", (SD(*)(const T&,const IV&)) &expansion);
+
+    def("unscale", (T(*)(const T&,const I&)) &unscale);
+    def("unscale", (TV(*)(const TV&,const IV&)) &unscale);
+
+    def("evaluate",(IV(*)(const TV&,const IV&)) &evaluate);
+    def("evaluate",(I(*)(const T&,const IV&)) &evaluate);
+
     def("compose",(TV(*)(const TV&,const IV&,const TV&)) &compose);
     def("compose",(T(*)(const T&,const IV&,const TV&)) &compose);
     def("compose",(T(*)(const T&,const I&,const T&)) &compose);
-    def("compose",(T(*)(const T&,const T&)) &compose);
+
+    def("antiderivative",(T(*)(const T&,const I&,N)) &antiderivative);
+
+    def("flow",(TV(*)(const TV&,const IV&,const I&,const IV&)) &flow);
 
     def("mul_cosy", (T(*)(const T&, const T&)) &mul_cosy);
     def("mul_rounded", (T(*)(const T&, const T&)) &mul_rounded);
@@ -256,12 +257,20 @@ void export_taylor_variable()
     def("cos", (T(*)(const T&))&cos);
     def("tan", (T(*)(const T&))&tan);
 
-    /*
+    class_< Vector<TaylorVariable> >("TaylorVariableVector",no_init)
+        .def("__len__",&TV::size)
+        .def("__getitem__",&get_item<TV,N,T>)
+        .def("__setitem__",&set_item<TV,N,T>)
+        .def("__setitem__",&set_item<TV,N,T>)
+        .def(self_ns::str(self))
+        ;
+
+
+/*
       def("asin", (T(*)(const T&))&asin);
       def("acos", (T(*)(const T&))&acos);
       def("atan", (T(*)(const T&))&atan);
     */
-
 
 }
 

@@ -54,10 +54,10 @@ template<class SYS, class ES> class EvolverBase
 
     //! \brief Compute an approximation to the evolution set under the given semantics. 
     ESL reach(const SYS& system, const ES& initial_set, const T& time, Semantics semantics) const {
-        ESL final; ESL reachable; ESL intermediate; this->_evolution(final,reachable,intermediate,system,initial_set,time,semantics,true); return intermediate; }
+        ESL final; ESL reachable; ESL intermediate; this->_evolution(final,reachable,intermediate,system,initial_set,time,semantics,true); return reachable; }
     //! \brief Compute an approximation to the evolution set under the given semantics. 
     std::pair<ESL,ESL> reach_evolve(const SYS& system, const ES& initial_set, const T& time, Semantics semantics) const {
-        ESL final; ESL reachable; ESL intermediate; this->_evolution(final,reachable,intermediate,system,initial_set,time,semantics,true); return std::make_pair(intermediate,final); }
+        ESL final; ESL reachable; ESL intermediate; this->_evolution(final,reachable,intermediate,system,initial_set,time,semantics,true); return std::make_pair(reachable,final); }
 
     //! \brief Compute an approximation to the evolution set under the given semantics. 
     void evolution(ESL& final, const SYS& system, const ES& initial, const T& time, Semantics semantics) const {

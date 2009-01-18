@@ -161,6 +161,8 @@ void export_vector()
     vector_class.def(boost::python::self_ns::str(self));
 
     def("norm",(X(*)(const Vector<X>&)) &norm);
+    def("join",(Vector<X>(*)(const Vector<X>&,const Vector<X>&)) &join);
+    def("join",(Vector<X>(*)(const Vector<X>&,const X&)) &join);
 }
 
 

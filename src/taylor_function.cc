@@ -53,7 +53,7 @@ TaylorFunction::TaylorFunction(uint rs, uint as, ushort o, ushort s)
 
 
 TaylorFunction::TaylorFunction(const Vector<Interval>& d,
-                         const Vector<TaylorVariable>& e)
+                               const Vector<TaylorVariable>& e)
     : _domain(d),
       _expansion(e)
 {
@@ -392,7 +392,7 @@ compose(const TaylorFunction& p1, const TaylorFunction& p2)
 TaylorFunction
 antiderivative(const TaylorFunction& tm, uint k) 
 {
-    return TaylorFunction(tm.domain(),antiderivative(tm.expansion(),k));
+    return TaylorFunction(tm.domain(),antiderivative(tm.expansion(),tm.domain()[k],k));
 }
 
 
@@ -587,7 +587,7 @@ implicit(const TaylorFunction& p)
 TaylorFunction 
 flow(const TaylorFunction& p, const Vector<Interval>& domain, const Interval& time)
 {
-    return TaylorFunction(domain,flow(p.expansion(),domain,time,p.domain()));
+    return TaylorFunction(join(domain,time),flow(p.expansion(),domain,time,p.domain()));
 }
 
 
@@ -616,14 +616,20 @@ TaylorFunction::_powers(const Vector<Interval>& v) const
 std::ostream&
 TaylorFunction::write(std::ostream& os) const 
 {
-    os << "TaylorFunction(\n";
-    for(uint i=0; i!=this->result_size(); ++i) {
-        os << "  domain=" << this->domain() << ",\n" << std::flush;
-        os << "  range=" << this->range() << ",\n" << std::flush;
-        os << "  expansion=" << this->_expansion << ",\n" << std::flush;
+    os << "TaylorFunction( "<<this->_domain<<" , ";
+    for(uint i=0; i!=this->result_size(); ++i) { 
+        os << (i==0?'[':',')<<this->_expansion[i].expansion().data()<<","<<this->_expansion[i].error();
     }
+    return os << "] )";
+    /*
+    os << "TaylorFunction(\n";
+    os << "  domain=" << this->domain() << ",\n" << std::flush;
+    os << "  range=" << this->range() << ",\n" << std::flush;
+    os << "  model=" << this->_expansion << "\n" << std::flush;
+    //os << "  series=" << Ariadne::expansion(this->_expansion,this->_domain) << "\n" << std::flush;
     os << ")\n";
     return os;
+    */
 }
 
 

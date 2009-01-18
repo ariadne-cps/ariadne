@@ -41,8 +41,10 @@ class Interval;
 template<class X> class Vector;
 template<class X> class Matrix;
 
+class FunctionInterface;
 class TaylorVariable;
 class TaylorFunction;
+class TaylorSet;
 
 class Zonotope;
 class Grid;
@@ -58,6 +60,7 @@ class TaylorSet
   public:
     TaylorSet(uint d=0);
     template<class XE, class XP> TaylorSet(uint rs, uint as, uint d, const XE* eps, const XP* ptr);
+    TaylorSet(const FunctionInterface& f, const Vector<Interval>& d);
     TaylorSet(const Vector<TaylorVariable>& tv);
     TaylorSet(const Vector<Interval>& bx);
     

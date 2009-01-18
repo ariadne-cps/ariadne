@@ -81,7 +81,7 @@ read(TaylorSet& ts, const boost::python::object& obj)
 {
     boost::python::list lst=extract<boost::python::list>(obj);
     ts=TaylorSet(len(lst));
-    for(uint i=0; i!=len(lst); ++i) {
+    for(int i=0; i!=len(lst); ++i) {
         TaylorVariable tv;
         read(tv,lst[i]);
         ts[i]=tv;

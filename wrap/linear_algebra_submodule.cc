@@ -138,6 +138,8 @@ void export_vector()
     typedef Vector<X> V;
 
     class_< Vector<X> > vector_class(python_name<X>("Vector"),init<int>());
+    vector_class.def(init<int,double>());
+    vector_class.def(init<int,X>());
     vector_class.def("__init__", make_constructor(&make_vector<X>) );
     vector_class.def("__len__", &Vector<X>::size);
     vector_class.def("__setitem__", (void(Vector<X>::*)(size_t,const double&)) &Vector<X>::set);

@@ -1534,6 +1534,36 @@ unscale(const Vector<TaylorVariable>& tvs, const Vector<Interval>& ivls)
 }
 
  
+TaylorVariable
+scale(const TaylorVariable& tv, const Interval& ivl) 
+{
+    // Scale tv so that the interval [-1,1] maps into ivl
+    // The result is given by  (tv*s)+c where c is the centre
+    // and r the radius of ivl
+    const Float& l=ivl.l;
+    const Float& u=ivl.u;
+    
+    TaylorVariable r=tv;
+    Interval c=add_ivl(l/2,u/2);
+    Interval s=sub_ivl(u/2,l/2);
+    r*=s;
+    r+=c;
+
+    return r;
+}
+
+Vector<TaylorVariable>
+scale(const Vector<TaylorVariable>& tvs, const Vector<Interval>& ivls) 
+{
+    Vector<TaylorVariable> r(tvs.size());
+    for(uint i=0; i!=r.size(); ++i) {
+        r[i]=scale(tvs[i],ivls[i]);
+    }
+    return r;
+}
+
+ 
+
 void
 _compose1(Vector<TaylorVariable>& r,
           const Vector<TaylorVariable>& x, 
@@ -1625,6 +1655,28 @@ compose(const TaylorVariable& x,
 }
     
 
+Vector<TaylorVariable>
+compose(const Matrix<Float>& A, 
+        const Vector<TaylorVariable>& x)
+{
+    Vector<TaylorVariable> r=TaylorVariable::zeroes(A.row_size(),A.column_size());
+    for(uint i=0; i!=A.row_size(); ++i) {
+        for(uint j=0; j!=A.row_size(); ++j) {
+            r[i]+=A[i][j]*x[j];
+        }
+    }
+    return r;
+}
+
+    
+
+Vector<TaylorVariable>
+_compose(const Vector<TaylorVariable>& x, const Vector<TaylorVariable>& y)
+{
+    Vector<Interval> d(y.size(),Interval(-1,+1));
+    return compose(x,d,y);
+}
+
 SparseDifferential<Float> expansion(const TaylorVariable& x, const Vector<Interval>& d) {
     return compose(x,d,TaylorVariable::variables(Vector<Float>(d.size()))).expansion();
 }
@@ -1645,10 +1697,90 @@ inline Vector<Float> centre(const Vector<TaylorVariable>& x)
     return c;
 }
 
-Vector<TaylorVariable>
-implicit(const Vector<TaylorVariable>& f)
+Vector<Float> 
+value(const Vector<TaylorVariable>& x) {
+    Vector<Float> r(x.size());
+    for(uint i=0; i!=x.size(); ++i) {
+        r[i]=x[i].expansion().value();
+    }
+    return r;
+}
+
+
+Matrix<Float> 
+jacobian(const Vector<TaylorVariable>& x, const Vector<Float>& sy) 
 {
-    ARIADNE_NOT_IMPLEMENTED;
+    for(uint i=0; i!=x.size(); ++i) { ARIADNE_ASSERT(x[i].argument_size()==sy.size()); }
+    const uint rs=x.size();
+    const uint as=sy.size();
+
+    Matrix<Float> J(rs,as);
+    for(uint i=0; i!=x.size(); ++i) {
+        for(uint j=0; j!=x[0].argument_size(); ++j) {
+            for(TaylorVariable::const_iterator k=x[i].begin(); k!=x[i].end(); ++k) {
+                Float c=k->first[j];
+                c*=k->second;
+                if(c!=0) {
+                    for(uint l=0; l!=as; ++l) {
+                        if(l==j) {
+                            c*=pow(sy[l],k->first[l]-1);
+                        } else {
+                            c*=pow(sy[l],k->first[l]);
+                        }
+                    }
+                }
+                J[i][j]+=c;
+            }
+        }
+    }
+    return J;
+}
+
+
+Vector<TaylorVariable>
+implicit(const Vector<TaylorVariable>& f, const Vector<Interval>& d)
+{
+    //std::cerr << ARIADNE_PRETTY_FUNCTION << std::endl;    
+    ARIADNE_ASSERT(f.size()>=1);
+    ARIADNE_ASSERT(f[0].argument_size()>=f.size());
+    for(uint i=1; i!=f.size(); ++i) { 
+        ARIADNE_ASSERT(f[i].argument_size()==f[0].argument_size()); }
+
+    const uint frs=f.size();
+    const uint fas=f[0].argument_size();
+    
+    Vector<TaylorVariable> fs=unscale(f,d);
+    Vector<TaylorVariable> p=TaylorVariable::zeroes(fas,frs);
+    for(uint i=0; i!=frs; ++i) { p[i+(fas-frs)]=TaylorVariable::variable(frs,0.0,i); }
+    
+    Vector<TaylorVariable> pfs=_compose(fs,p);
+
+    Vector<TaylorVariable> h=TaylorVariable::zeroes(frs,fas-frs);
+    for(uint i=0; i!=frs; ++i) { h[i].error()=Interval(-1,+1); }
+
+    Vector<TaylorVariable> id=TaylorVariable::variables(Vector<Float>(frs,1.0));
+    std::cerr<<"join(id,h)="<<join(id,h)<<std::endl;
+
+    for(uint k=0; k!=6; ++k) {
+        std::cerr<<"h=="<<h<<std::endl;
+        Vector<TaylorVariable> fxhx=_compose(fs,join(id,h));
+        std::cerr<<"f(x,h(x))="<<fxhx<<std::endl;
+        Matrix<Float> J=jacobian(pfs,value(h));
+        std::cerr<<"J="<<J<<std::endl;
+        Matrix<Float> Jinv=inverse(J);
+        std::cerr<<"Jinv="<<Jinv<<std::endl;
+        for(uint i=0; i!=frs; ++i) { h[i].error()=0.0; }
+        h-=compose(Jinv,fxhx);
+    }
+
+    h=scale(h,project(d,range(fas-frs,fas)));
+
+    return h;
+
+    
+    //f(x,h(x))=0 D1f+D2fDh=0; Dh=D2f^-*D1f; 
+    // h' = h - Dg^- g;  f(x,h+d)=f(x,h)+D2f(x,h)d
+    // h' = h - D2f- * f(x,h(x))
     /*
 
     //std::cerr << ARIADNE_PRETTY_FUNCTION << std::endl;

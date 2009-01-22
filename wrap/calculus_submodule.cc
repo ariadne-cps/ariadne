@@ -167,6 +167,7 @@ void export_taylor_variable()
     typedef MultiIndex A;
     typedef Vector<Float> RV;
     typedef Vector<Interval> IV;
+    typedef Matrix<Float> RMx;
     typedef SparseDifferential<Float> SD;
     typedef TaylorVariable T;
     typedef Vector<TaylorVariable> TV;
@@ -222,10 +223,18 @@ void export_taylor_variable()
     taylor_variable_class.staticmethod("variable");
     taylor_variable_class.staticmethod("variables");
 
+    def("join", (TV(*)(const TV&,const TV&)) &join);
+    def("join", (TV(*)(const TV&,const T&)) &join);
+
     def("expansion", (SD(*)(const T&,const IV&)) &expansion);
+
+    def("jacobian", (RMx(*)(const TV&,const RV&)) &jacobian);
 
     def("unscale", (T(*)(const T&,const I&)) &unscale);
     def("unscale", (TV(*)(const TV&,const IV&)) &unscale);
+ 
+    def("scale", (T(*)(const T&,const I&)) &scale);
+    def("scale", (TV(*)(const TV&,const IV&)) &scale);
 
     def("evaluate",(IV(*)(const TV&,const IV&)) &evaluate);
     def("evaluate",(I(*)(const T&,const IV&)) &evaluate);
@@ -234,9 +243,12 @@ void export_taylor_variable()
     def("compose",(T(*)(const T&,const IV&,const TV&)) &compose);
     def("compose",(T(*)(const T&,const I&,const T&)) &compose);
 
+    def("compose",(TV(*)(const RMx&,const TV&)) &compose);
+
     def("antiderivative",(T(*)(const T&,const I&,N)) &antiderivative);
 
     def("flow",(TV(*)(const TV&,const IV&,const I&,const IV&)) &flow);
+    def("implicit",(TV(*)(const TV&,const IV&)) &implicit);
 
     def("mul_cosy", (T(*)(const T&, const T&)) &mul_cosy);
     def("mul_rounded", (T(*)(const T&, const T&)) &mul_rounded);
@@ -257,7 +269,7 @@ void export_taylor_variable()
     def("cos", (T(*)(const T&))&cos);
     def("tan", (T(*)(const T&))&tan);
 
-    class_< Vector<TaylorVariable> >("TaylorVariableVector",no_init)
+    class_< Vector<TaylorVariable> >("TaylorVariableVector",init<int>())
         .def("__len__",&TV::size)
         .def("__getitem__",&get_item<TV,N,T>)
         .def("__setitem__",&set_item<TV,N,T>)

@@ -91,9 +91,17 @@ pair<TaylorVariable,TaylorVariable> split(const TaylorVariable& x, uint j);
 TaylorVariable unscale(const TaylorVariable& x, const Interval& ivl);
 Vector<TaylorVariable> unscale(const Vector<TaylorVariable>& x, const Vector<Interval>& bx);
 
+// Scale the variabe by post-composing with an affine map taking the unit interval to \a ivl.
+TaylorVariable scale(const TaylorVariable& x, const Interval& ivl);
+Vector<TaylorVariable> scale(const Vector<TaylorVariable>& x, const Vector<Interval>& bx);
+
 // Evaluate an array of Taylor variables on a vector.
 Vector<Interval> evaluate(const Vector<TaylorVariable>& x, const Vector<Interval>& sy);
 Interval evaluate(const TaylorVariable& x, const Vector<Interval>& sy);
+
+Vector<Float> value(const Vector<TaylorVariable>& x);
+Matrix<Float> jacobian(const Vector<TaylorVariable>& x, const Vector<Float>& sy);
+
 
 // Compose an array of Taylor variables with another, after scaling by the interval vectors
 Vector<TaylorVariable> compose(const Vector<TaylorVariable>& x, const Vector<Interval>& bx, const Vector<TaylorVariable>& y);
@@ -101,6 +109,7 @@ Vector<TaylorVariable> compose(const Vector<TaylorVariable>& x, const Vector<Int
 // Wrappers for univariate composition
 TaylorVariable compose(const TaylorVariable& x, const Vector<Interval>& bx, const Vector<TaylorVariable>& y);
 TaylorVariable compose(const TaylorVariable& x, const Interval& b, const TaylorVariable& y);
+Vector<TaylorVariable> compose(const Matrix<Float>& A, const Vector<TaylorVariable>& x);
 
 SparseDifferential<Float> expansion(const TaylorVariable& x, const Vector<Interval>& d);
 Vector< SparseDifferential<Float> > expansion(const Vector<TaylorVariable>& x, const Vector<Interval>& d);
@@ -110,7 +119,7 @@ Vector<TaylorVariable> antiderivative(const Vector<TaylorVariable>& x, const Int
 
 pair<Vector<Interval>,Interval> bounds(const Vector<TaylorVariable>& vf, const Vector<Interval>& d, const Interval& maxh);
 Vector<TaylorVariable> flow(const Vector<TaylorVariable>& vf, const Vector<Interval>& d, const Interval& h, const Vector<Interval>& b);
-Vector<TaylorVariable> implicit(const Vector<TaylorVariable>& x);
+Vector<TaylorVariable> implicit(const Vector<TaylorVariable>& x, const Vector<Interval>& d);
 
 TaylorVariable embed(const TaylorVariable& tv, uint as, uint b);
 Vector<TaylorVariable> embed(const Vector<TaylorVariable>& tvs, uint as, uint b);

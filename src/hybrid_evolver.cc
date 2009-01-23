@@ -27,9 +27,11 @@
 #include "stlio.h"
 #include "vector.h"
 #include "function_interface.h"
-#include "approximate_taylor_model.h"
+#include "taylor_set.h"
+#include "taylor_function.h"
+#include "taylor_variable.h"
 #include "orbit.h"
-#include "differential_calculus.h"
+#include "taylor_calculus.h"
 #include "evolution_parameters.h"
 
 #include "logging.h"
@@ -77,7 +79,7 @@ class DegenerateCrossingException { };
 
 HybridEvolver::HybridEvolver()
     : _parameters(new EvolutionParametersType()),
-      _toolbox(new DifferentialCalculus<ApproximateTaylorVariable>())
+      _toolbox(new TaylorCalculus())
 {
 }
 
@@ -85,7 +87,7 @@ HybridEvolver::HybridEvolver()
 
 HybridEvolver::HybridEvolver(const EvolutionParametersType& p)
     : _parameters(new EvolutionParametersType(p)),
-      _toolbox(new DifferentialCalculus<ApproximateTaylorVariable>())
+      _toolbox(new TaylorCalculus)
 {
 }
 
@@ -126,7 +128,7 @@ struct DetectionData {
     tribool initially_active;
     tribool finally_active;
     Interval touching_time_interval;
-    ApproximateTaylorModel crossing_time_model;
+    TaylorVariable crossing_time_model;
 
     DetectionData()
         : id(0), event(0), guard_ptr()
@@ -193,18 +195,6 @@ _evolution(EnclosureListType& final_sets,
            bool reach) const
 {
     verbosity=0;
-
-  
-    typedef FunctionInterface FunctionType;
-    typedef Vector<Interval> BoxType;
-    typedef ModelType MapModelType;
-    typedef ModelType FlowModelType;
-    typedef ModelType ConstraintModelType; 
-    typedef ModelType SetModelType;
-    typedef ModelType TimeModelType;
-    typedef ModelType TimedSetModelType;
-
-
     typedef boost::shared_ptr< const FunctionInterface > FunctionConstPointer;
 
     ARIADNE_LOG(5,ARIADNE_PRETTY_FUNCTION<<"\n");
@@ -212,10 +202,10 @@ _evolution(EnclosureListType& final_sets,
     const IntegerType maximum_steps=maximum_hybrid_time.discrete_time;
     const Float maximum_time=maximum_hybrid_time.continuous_time;
 
-    const uint spacial_order=2;
-    const uint temporal_order=4;
-    const uint order=spacial_order+temporal_order;
-    const uint smoothness=1;
+    //const uint spacial_order=2;
+    //const uint temporal_order=4;
+    //const uint order=spacial_order+temporal_order;
+    //const uint smoothness=1;
 
 
 
@@ -230,13 +220,12 @@ _evolution(EnclosureListType& final_sets,
         ContinuousEnclosureType initial_continuous_set;
         make_lpair(initial_location,initial_continuous_set)=initial_set;
         ARIADNE_LOG(6,"initial_location = "<<initial_location<<"\n");
-        ModelType initial_set_model=this->_toolbox->set_model(initial_continuous_set);
+        SetModelType initial_set_model=this->_toolbox->set_model(initial_continuous_set);
         ARIADNE_LOG(6,"initial_set_model = "<<initial_set_model<<"\n");
-        ModelType initial_time_model
-            =ModelType::constant(initial_set_model.domain(),initial_set_model.centre(),
-                                 Vector<Float>(1,Float(0)),order,smoothness);
+        TimeModelType initial_time_model
+            =TimeModelType::constant(initial_set_model.domain().size(),0.0);
         ARIADNE_LOG(6,"initial_time_model = "<<initial_time_model<<"\n");
-        ModelType initial_timed_set_model=join(initial_set_model,initial_time_model);
+        TimedSetModelType initial_timed_set_model=join(initial_set_model.variables(),initial_time_model);
         ARIADNE_LOG(6,"initial_timed_set_model = "<<initial_timed_set_model<<"\n");
         working_sets.push_back(make_tuple(initial_location,IntegerType(0),initial_set_model,initial_time_model));
     }
@@ -250,19 +239,19 @@ _evolution(EnclosureListType& final_sets,
         SetModelType initial_set_model=current_set.third;
         TimeModelType initial_time_model=current_set.fourth;
         RealType initial_set_radius=radius(initial_set_model.range());
-        if(initial_time_model.range()[0].lower()>=maximum_time || initial_steps>=maximum_steps) {
+        if(initial_time_model.range().lower()>=maximum_time || initial_steps>=maximum_steps) {
             final_sets.adjoin(initial_location,this->_toolbox->enclosure(initial_set_model));
         } else if(UPPER_SEMANTICS && ENABLE_SUBDIVISIONS
                   && (initial_set_radius>this->_parameters->maximum_enclosure_radius)) {
             // Subdivide
-            uint nd=initial_set_model.result_size();
-            TimedSetModelType initial_timed_set_model=join(initial_set_model,initial_time_model);
+            uint nd=initial_set_model.dimension();
+            SetModelType initial_timed_set_model=join(initial_set_model.variables(),initial_time_model);
             array< TimedSetModelType > subdivisions=this->_toolbox->subdivide(initial_timed_set_model);
             for(uint i=0; i!=subdivisions.size(); ++i) {
                 TimedSetModelType const& subdivided_timed_set_model=subdivisions[i];
-                SetModelType subdivided_set_model=Ariadne::project(subdivided_timed_set_model,range(0,nd));
-                TimeModelType subdivided_time_model=Ariadne::project(subdivided_timed_set_model,range(nd,nd+1));
-                working_sets.push_back(make_tuple(initial_location,initial_steps,subdivided_time_model,subdivided_set_model));
+                SetModelType subdivided_set_model=Vector<TaylorVariable>(project(subdivided_timed_set_model.variables(),range(0,nd)));
+                TimeModelType subdivided_time_model=subdivided_timed_set_model[nd];
+                working_sets.push_back(make_tuple(initial_location,initial_steps,subdivided_set_model,subdivided_time_model));
             }
         } else if(LOWER_SEMANTICS && ENABLE_PREMATURE_TERMINATION && initial_set_radius>this->_parameters->maximum_enclosure_radius) {
             std::cerr << "WARNING: Terminating lower evolution at time " << initial_time_model
@@ -294,14 +283,6 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
                 Semantics semantics, 
                 bool reach) const
 {
-    typedef FunctionInterface FunctionType;
-    typedef Vector<Interval> BoxType;
-    typedef ModelType MapModelType;
-    typedef ModelType FlowModelType;
-    typedef ModelType ConstraintModelType; 
-    typedef ModelType SetModelType;
-    typedef ModelType TimeModelType;
-    typedef ModelType TimedSetModelType;
   
     DiscreteState initial_location(0);
     IntegerType initial_steps;
@@ -346,7 +327,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     // Get bounding boxes for time and space range
     Vector<Interval> initial_set_bounds=initial_set_model.range();
     ARIADNE_LOG(4,"initial_set_range = "<<initial_set_bounds<<"\n");
-    Interval initial_time_range=initial_time_model.range()[0];
+    Interval initial_time_range=initial_time_model.range();
     ARIADNE_LOG(4,"initial_time_range = "<<initial_time_range<<"\n");
   
     //ARIADNE_ASSERT(initial_time_range.width() <= maximum_step_size);
@@ -363,14 +344,14 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     ARIADNE_LOG(6,"flow_model = "<<flow_model<<"\n");
   
     // Compute the integration time model
-    TimeModelType final_time_model=initial_time_model+Vector<Float>(1u,step_size);
+    TimeModelType final_time_model=initial_time_model+step_size;
     ARIADNE_LOG(6,"final_time_model = "<<final_time_model<<"\n");
     TimeModelType integration_time_model=final_time_model-initial_time_model;
   
     // Compute the flow tube (reachable set) model and the final set
-    ModelType final_set_model=this->_toolbox->integration_step(flow_model,initial_set_model,integration_time_model);
+    SetModelType final_set_model=this->_toolbox->integration_step(flow_model,initial_set_model,integration_time_model);
     ARIADNE_LOG(6,"final_set_model = "<<final_set_model<<"\n");
-    ModelType reach_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,zero_time,integration_time_model);         
+    SetModelType reach_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,zero_time,integration_time_model);         
     ARIADNE_LOG(6,"reach_set_model = "<<reach_set_model<<"\n");
     ARIADNE_LOG(4,"Done computing continuous evolution\n");
   
@@ -438,12 +419,12 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
                 } else {
                     data.initially_active=this->_toolbox->active(*data.guard_ptr,initial_set_model);
                     data.finally_active=this->_toolbox->active(*data.guard_ptr,final_set_model);
-                    ModelType guard_model=this->_toolbox->predicate_model(*data.guard_ptr,flow_bounds);
+                    ConstraintModelType guard_model=this->_toolbox->predicate_model(*data.guard_ptr,flow_bounds);
                     if(data.initially_active ^ data.finally_active) {
                         ARIADNE_LOG(7," Testing crossing time for: "<<data<<"\n");
                         try {
                             data.crossing_time_model=this->_toolbox->crossing_time(guard_model,flow_model,initial_set_model);
-                            data.touching_time_interval=data.crossing_time_model.range()[0];
+                            data.touching_time_interval=data.crossing_time_model.range();
                             data.crossing_kind=TRANSVERSE;
                         }
                         catch(DegenerateCrossingException) { ARIADNE_LOG(7," DegenerateCrossing\n"); }
@@ -578,7 +559,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
         ARIADNE_LOG(6,"  Continuous evolution for maximum time; unwinding time differentce\n");
         ARIADNE_ASSERT(blocking_data.predicate_kind==TIME);
         // Try to unwind any differences in time
-        Interval initial_time_range=initial_time_model.range()[0];
+        Interval initial_time_range=initial_time_model.range();
         Float final_time=initial_time_range.lower()+step_size;
         ARIADNE_LOG(8,"    initial_time_model="<<initial_time_model<<"\n");
         final_time_model=this->_toolbox->time_model(final_time,initial_time_model.domain());
@@ -625,7 +606,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
                         active_time_model=this->_toolbox->reachability_time(data.crossing_time_model,maximum_evolution_time);
                         jump_time_model=this->_toolbox->
                             reachability_time(initial_time_model+data.crossing_time_model,
-                                              initial_time_model+Vector<Float>(1u,maximum_evolution_time));
+                                              initial_time_model+maximum_evolution_time);
                     } 
                 } else {
                     Float lower_active_time, upper_active_time;

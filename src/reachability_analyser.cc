@@ -68,18 +68,18 @@ HybridReachabilityAnalyser::
 
 
 HybridReachabilityAnalyser::
-HybridReachabilityAnalyser(const EvolverInterface<HybridAutomaton,DefaultHybridEnclosureType>& evolver)
+HybridReachabilityAnalyser(const EvolverInterface<HybridAutomaton,HybridEnclosureType>& evolver)
     : _parameters(new EvolutionParametersType())
-    , _discretiser(new HybridDiscretiser<DefaultEnclosureType>(evolver))
+    , _discretiser(new HybridDiscretiser<EnclosureType>(evolver))
 {
 }
 
 
 HybridReachabilityAnalyser::
 HybridReachabilityAnalyser(const EvolutionParametersType& parameters, 
-                           const EvolverInterface<HybridAutomaton,DefaultHybridEnclosureType>& evolver)
+                           const EvolverInterface<HybridAutomaton,HybridEnclosureType>& evolver)
     : _parameters(new EvolutionParametersType(parameters))
-    , _discretiser(new HybridDiscretiser<DefaultEnclosureType>(evolver))
+    , _discretiser(new HybridDiscretiser<EnclosureType>(evolver))
 {
 }
 

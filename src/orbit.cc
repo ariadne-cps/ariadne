@@ -23,7 +23,7 @@
  
 #include "orbit.h"
 
-#include "approximate_taylor_model.h"
+#include "taylor_set.h"
 #include "list_set.h"
 #include "hybrid_set.h"
 

@@ -50,13 +50,12 @@ namespace Ariadne {
   
 template<class Sys, class BS> class Evolver;
 
-class ApproximateTaylorModel;
+class TaylorFunction;
+class TaylorSet;
 class HybridAutomaton;
 template<class ES> class Orbit;
 
 class EvolutionParameters;
-template<class X> class SparseDifferential;
-typedef SparseDifferential<Float> ApproximateTaylorVariable;
 class TaylorVariable;
 template<class MDL> class CalculusInterface;
 
@@ -65,27 +64,31 @@ class EvolutionProfiler;
 class HybridTime;
 
 
-typedef ApproximateTaylorModel DefaultModelType;
-typedef ApproximateTaylorModel DefaultEnclosureType;
-typedef std::pair<DiscreteState,DefaultEnclosureType> DefaultHybridEnclosureType;
-
 /*! \brief A class for computing the evolution of a hybrid system. 
  *
  * The actual evolution steps are performed by the HybridEvolver class.
  */
 class HybridEvolver
-    : public EvolverBase< HybridAutomaton,DefaultHybridEnclosureType>
+    : public EvolverBase<HybridAutomaton, std::pair<DiscreteState,TaylorSet> >
     , public Loggable
 {
-    typedef Ariadne::DefaultModelType ModelType;
+    typedef FunctionInterface FunctionType;
+    typedef Vector<Interval> BoxType;
+    typedef TaylorFunction FunctionModelType;
+    typedef FunctionModelType MapModelType;
+    typedef FunctionModelType FlowModelType;
+    typedef FunctionModelType ConstraintModelType; 
+    typedef TaylorVariable TimeModelType;
+    typedef TaylorSet SetModelType;
+    typedef TaylorSet TimedSetModelType;
   public:
     typedef ContinuousEvolutionParameters EvolutionParametersType;
     typedef HybridAutomaton::TimeType TimeType;
     typedef int IntegerType;
     typedef Float RealType;
     typedef HybridAutomaton SystemType;
-    typedef ModelType ContinuousEnclosureType;
-    typedef pair<DiscreteState,ContinuousEnclosureType> HybridEnclosureType;
+    typedef TaylorSet ContinuousEnclosureType;
+    typedef pair<DiscreteState,TaylorSet> HybridEnclosureType;
     typedef HybridEnclosureType EnclosureType;
     typedef Orbit<EnclosureType> OrbitType;
     typedef ListSet<EnclosureType> EnclosureListType;
@@ -133,7 +136,7 @@ class HybridEvolver
                             const SystemType& system, const EnclosureType& initial, const TimeType& time, 
                             Semantics semantics, bool reach) const;
 
-    typedef tuple<DiscreteState, IntegerType, ModelType, ModelType> HybridTimedSetType;
+    typedef tuple<DiscreteState, IntegerType, SetModelType, TimeModelType> HybridTimedSetType;
     virtual void _evolution_step(std::vector< HybridTimedSetType >& working_sets, 
                                  EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,  
                                  const SystemType& system, const HybridTimedSetType& current_set, const TimeType& time, 
@@ -141,7 +144,7 @@ class HybridEvolver
 
   private:
     boost::shared_ptr< EvolutionParametersType > _parameters;
-    boost::shared_ptr< CalculusInterface<ApproximateTaylorVariable> > _toolbox;
+    boost::shared_ptr< CalculusInterface<TaylorVariable> > _toolbox;
     //boost::shared_ptr< EvolutionProfiler >  _profiler;
 };
 

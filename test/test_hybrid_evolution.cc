@@ -27,10 +27,9 @@
 #include "tuple.h"
 #include "vector.h"
 #include "matrix.h"
-#include "sparse_differential.h"
-#include "differential_vector.h"
 #include "function.h"
-#include "approximate_taylor_model.h"
+#include "taylor_set.h"
+#include "taylor_function.h"
 #include "box.h"
 #include "zonotope.h"
 #include "list_set.h"
@@ -58,6 +57,7 @@ class TestHybridEvolution
 
 int main() 
 {
+    return 1;
     TestHybridEvolution().test();
     return ARIADNE_TEST_FAILURES;
 }
@@ -107,8 +107,8 @@ void TestHybridEvolution::test() const
     const DiscreteEvent event3(3);
     const DiscreteEvent event4(4);
 
-    typedef ApproximateTaylorModel EnclosureType;
-    typedef std::pair<DiscreteState,ApproximateTaylorModel> HybridEnclosureType;
+    typedef TaylorSet EnclosureType;
+    typedef pair<DiscreteState,TaylorSet> HybridEnclosureType;
 
     // Set up the evolution parameters and grid
     Float time(3.0);
@@ -139,7 +139,7 @@ void TestHybridEvolution::test() const
 
     // Over-approximate the initial set by a grid cell
     Vector<Interval> unit_box(2,Interval(-1,1));
-    EnclosureType initial_set=ApproximateTaylorModel(unit_box,ScalingFunction(initial_box),4,1);
+    EnclosureType initial_set=TaylorSet(unit_box);
     // cout << "initial_set=" << initial_set << endl << endl;
     HybridEnclosureType initial_hybrid_set(location1,initial_set);
     HybridTime hybrid_time(time,5);

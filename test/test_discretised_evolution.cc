@@ -27,7 +27,7 @@
 #include "vector.h"
 #include "matrix.h"
 #include "function.h"
-#include "approximate_taylor_model.h"
+#include "taylor_set.h"
 #include "zonotope.h"
 #include "list_set.h"
 #include "grid_set.h"
@@ -73,8 +73,8 @@ void TestDiscretisedEvolution::test() const
 
 void TestDiscretisedEvolution::test_discrete_time() const
 {
-    typedef DefaultEnclosureType ApproximateTaylorModel;
-    typedef std::pair<DiscreteState,DefaultEnclosureType> DefaultHybridEnclosureType;
+    typedef TaylorSet EnclosureType;
+    typedef std::pair<DiscreteState,EnclosureType> HybridEnclosureType;
 
     cout << __PRETTY_FUNCTION__ << endl;
 
@@ -94,7 +94,7 @@ void TestDiscretisedEvolution::test_discrete_time() const
 
     // Set up the evaluators
     HybridEvolver evolver(parameters);
-    HybridDiscretiser< DefaultEnclosureType > discrete_evolver(evolver);
+    HybridDiscretiser< EnclosureType > discrete_evolver(evolver);
 
   
     // Set up the vector field
@@ -127,14 +127,14 @@ void TestDiscretisedEvolution::test_discrete_time() const
     cout << "hybrid_time=" << htime << endl << endl;
 
     // Compute the reachable sets
-    Orbit<DefaultHybridEnclosureType> evolve_orbit
+    Orbit<HybridEnclosureType> evolve_orbit
         = evolver.orbit(ha,hybrid_initial_set,htime,UPPER_SEMANTICS);
     cout << "Finished computing evolution." << endl;
 
-    DefaultEnclosureType const& initial_set=evolve_orbit.initial().second.range();
-    ListSet<DefaultEnclosureType> const& reach_set=evolve_orbit.reach()[location];
-    ListSet<DefaultEnclosureType> const& intermediate_set=evolve_orbit.intermediate()[location];
-    ListSet<DefaultEnclosureType> const& final_set=evolve_orbit.final()[location];
+    EnclosureType const& initial_set=evolve_orbit.initial().second.range();
+    ListSet<EnclosureType> const& reach_set=evolve_orbit.reach()[location];
+    ListSet<EnclosureType> const& intermediate_set=evolve_orbit.intermediate()[location];
+    ListSet<EnclosureType> const& final_set=evolve_orbit.final()[location];
 
     // Compute the reachable sets
     Orbit<HybridGridCell> discrete_orbit
@@ -182,8 +182,8 @@ void TestDiscretisedEvolution::test_discrete_time() const
 
 void TestDiscretisedEvolution::test_continuous_time() const
 {
-    typedef DefaultEnclosureType ApproximateTaylorModel;
-    typedef std::pair<DiscreteState,DefaultEnclosureType> DefaultHybridEnclosureType;
+    typedef TaylorSet EnclosureType;
+    typedef pair<DiscreteState,EnclosureType> HybridEnclosureType;
 
     cout << __PRETTY_FUNCTION__ << endl;
 
@@ -201,7 +201,7 @@ void TestDiscretisedEvolution::test_continuous_time() const
 
     // Set up the evaluators
     HybridEvolver evolver(parameters);
-    HybridDiscretiser< DefaultEnclosureType > discretiser(evolver);
+    HybridDiscretiser< EnclosureType > discretiser(evolver);
 
   
     // Set up the vector field
@@ -229,12 +229,12 @@ void TestDiscretisedEvolution::test_continuous_time() const
     cout << "hybrid_time=" << htime << endl << endl;
 
     // Compute the reachable sets
-    Orbit<DefaultHybridEnclosureType> evolve_orbit
+    Orbit<HybridEnclosureType> evolve_orbit
         = evolver.orbit(hvdp,hybrid_initial_set,htime,UPPER_SEMANTICS);
-    DefaultEnclosureType const& initial_set=evolve_orbit.initial().second;
-    ListSet<DefaultEnclosureType> const& reach_set=evolve_orbit.reach()[location];
-    ListSet<DefaultEnclosureType> const& intermediate_set=evolve_orbit.intermediate()[location];
-    ListSet<DefaultEnclosureType> const& final_set=evolve_orbit.final()[location];
+    EnclosureType const& initial_set=evolve_orbit.initial().second;
+    ListSet<EnclosureType> const& reach_set=evolve_orbit.reach()[location];
+    ListSet<EnclosureType> const& intermediate_set=evolve_orbit.intermediate()[location];
+    ListSet<EnclosureType> const& final_set=evolve_orbit.final()[location];
 
     // Compute the reachable sets
     Orbit<HybridGridCell> discrete_orbit

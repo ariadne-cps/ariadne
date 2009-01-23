@@ -38,9 +38,8 @@ namespace Ariadne {
 
 #include "function.h"
 
-#include "approximate_taylor_model.h"
-
 #include "function_set.h"
+#include "taylor_set.h"
 #include "grid_set.h"
 #include "hybrid_set.h"
 

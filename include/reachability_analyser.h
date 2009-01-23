@@ -57,9 +57,6 @@ template<class ES> class HybridListSet;
 class HybridEvolver;
 template<class ES> class HybridDiscretiser;
 
-typedef ApproximateTaylorModel DefaultEnclosureType;
-typedef std::pair<DiscreteState,DefaultEnclosureType> DefaultHybridEnclosureType;
-
 
 
 /*! \brief A class for performing reachability analysis on a hybrid system.
@@ -68,6 +65,8 @@ class HybridReachabilityAnalyser
     : public ReachabilityAnalyserInterface<HybridAutomaton>
     , public Loggable
 {
+    typedef TaylorSet EnclosureType;
+    typedef pair<DiscreteState,TaylorSet> HybridEnclosureType;
   private:
     boost::shared_ptr< DiscreteEvolutionParameters > _parameters;
     boost::shared_ptr< DiscretiserInterface<HybridAutomaton,HybridGridCell> > _discretiser;
@@ -89,11 +88,11 @@ class HybridReachabilityAnalyser
     virtual ~HybridReachabilityAnalyser();
 
     /*! \brief Construct from a method for evolving basic sets. */
-    HybridReachabilityAnalyser(const EvolverInterface<HybridAutomaton,DefaultHybridEnclosureType>& evolver);
+    HybridReachabilityAnalyser(const EvolverInterface<HybridAutomaton,HybridEnclosureType>& evolver);
 
     /*! \brief Construct from evolution parameters and a method for evolving basic sets. */
     HybridReachabilityAnalyser(const EvolutionParametersType& parameters, 
-                               const EvolverInterface<HybridAutomaton,DefaultHybridEnclosureType>& evolver);
+                               const EvolverInterface<HybridAutomaton,HybridEnclosureType>& evolver);
 
     /*! \brief Make a dynamically-allocated copy. */
     virtual HybridReachabilityAnalyser* clone() const { return new HybridReachabilityAnalyser(*this); }

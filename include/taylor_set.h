@@ -93,8 +93,6 @@ void adjoin_outer_approximation(GridTreeSet& grid_set, const TaylorSet& set, uin
 Zonotope zonotope(const TaylorSet& ts);
 void draw(Figure& g, const TaylorSet& ts);
 
-
-
 template<class XE, class XP> 
 TaylorSet::TaylorSet(uint rs, uint as, uint d, 
                      const XE* eps, const XP* ptr)

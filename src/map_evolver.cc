@@ -138,9 +138,6 @@ _evolution(EnclosureListType& final_sets,
 
     ARIADNE_LOG(5,ARIADNE_PRETTY_FUNCTION<<"\n");
 
-    const uint order=2;
-    const uint smoothness=1;
-
     typedef tuple<TimeType, SetModelType> TimedSetType;
     typedef Float RealType;
 

@@ -100,8 +100,8 @@ class Orbit<HybridGridCell>
 
 
 typedef int DiscreteState;
-class ApproximateTaylorModel;
-typedef ApproximateTaylorModel TaylorSetType;
+class TaylorSet;
+typedef class TaylorSet TaylorSetType;
 typedef std::pair<DiscreteState,TaylorSetType> HybridTaylorSetType;
 typedef ListSet<TaylorSetType> TaylorSetListType;
 typedef ListSet<HybridTaylorSetType> HybridTaylorSetListType;

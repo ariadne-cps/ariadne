@@ -23,7 +23,7 @@
  
 #include "discretiser.h"
 
-#include "approximate_taylor_model.h"
+#include "taylor_set.h"
 #include "orbit.h"
 #include "function_set.h"
 #include "grid_set.h"
@@ -74,10 +74,6 @@ outer_approximation(const HybridListSet<ES>& hls,
 
 
 
-
-typedef ApproximateTaylorModel DefaultModelType;
-typedef ApproximateTaylorModel DefaultEnclosureType;
-typedef std::pair<DiscreteState,DefaultEnclosureType> DefaultHybridEnclosureType;
 
 template<class Sys,class ES>
 Orbit<typename Discretiser<Sys,ES>::BasicSetType> 
@@ -137,7 +133,7 @@ _discretise(const Orbit<EnclosureType>& continuous_orbit,
  
 }
 
-template class Discretiser<VectorField,DefaultEnclosureType>;
+template class Discretiser<VectorField,TaylorSet>;
 
 
 
@@ -198,7 +194,7 @@ _discretise(const Orbit<EnclosureType>& continuous_orbit,
  
 }
 
-template class HybridDiscretiser<DefaultEnclosureType>;
+template class HybridDiscretiser<TaylorSet>;
 
 } // namespace Ariadne
 

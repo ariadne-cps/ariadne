@@ -25,7 +25,7 @@
 #include <fstream>
 #include <string>
 
-#include "approximate_taylor_model.h"
+#include "taylor_set.h"
 #include "grid_set.h"
 #include "hybrid_set.h"
 #include "hybrid_automaton.h"
@@ -56,7 +56,8 @@ class TestReachabilityAnalysis
     HybridImageSet initial_set;
     HybridTime reach_time;
  
-    typedef ApproximateTaylorModel EnclosureType;
+    typedef TaylorSet EnclosureType;
+    typedef pair<DiscreteState,TaylorSet> HybridEnclosureType;
 
   public:
     static HybridReachabilityAnalyser build_analyser()
@@ -70,7 +71,7 @@ class TestReachabilityAnalysis
     
         Grid grid(2);
         HybridEvolver evolver(parameters);
-        EvolverInterface<HybridAutomaton,DefaultHybridEnclosureType>& evolver_interface
+        EvolverInterface<HybridAutomaton,HybridEnclosureType>& evolver_interface
             =evolver;
         //HybridDiscretiser<EnclosureType> discretiser(evolver);
         HybridReachabilityAnalyser analyser(parameters,evolver_interface);

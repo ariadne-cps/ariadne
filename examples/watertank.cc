@@ -152,7 +152,9 @@ int main()
 
     std::cout << "Orbit="<<orbit<<std::endl;
     //plot("tutorial-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit.initial());
+    std::cout << "Plotting orbit... "<<std::flush;
     plot("watertank-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit);
+    std::cout << "done." << std::endl;
 
     std::cout << "Computing reach set using HybridEvolver... " << std::flush;
     EnclosureListType reach = evolver.reach(watertank_system,initial_enclosure,evolution_time);

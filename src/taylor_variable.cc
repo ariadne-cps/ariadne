@@ -1758,78 +1758,29 @@ implicit(const Vector<TaylorVariable>& f, const Vector<Interval>& d)
     Vector<TaylorVariable> h=TaylorVariable::zeroes(frs,fas-frs);
     for(uint i=0; i!=frs; ++i) { h[i].error()=Interval(-1,+1); }
 
-    Vector<TaylorVariable> id=TaylorVariable::variables(Vector<Float>(frs,1.0));
-    std::cerr<<"join(id,h)="<<join(id,h)<<std::endl;
-
-    for(uint k=0; k!=6; ++k) {
-        std::cerr<<"h=="<<h<<std::endl;
+    Vector<TaylorVariable> id=TaylorVariable::variables(Vector<Float>(frs,0.0));
+    //std::cerr<<"\nfs="<<fs<<std::endl;
+    //std::cerr<<"pr(fs)="<<pfs<<std::endl;
+    //FIXME: Perform proper convergence test
+    for(uint k=0; k!=10; ++k) {
+        //std::cerr<<"\nh="<<h<<std::endl;
+        //std::cerr<<"\njoin(id,h)="<<join(id,h)<<std::endl;
         Vector<TaylorVariable> fxhx=_compose(fs,join(id,h));
-        std::cerr<<"f(x,h(x))="<<fxhx<<std::endl;
+        //std::cerr<<"f(x,h(x))="<<fxhx<<std::endl;
         Matrix<Float> J=jacobian(pfs,value(h));
-        std::cerr<<"J="<<J<<std::endl;
+        //std::cerr<<"J="<<J<<std::endl;
         Matrix<Float> Jinv=inverse(J);
-        std::cerr<<"Jinv="<<Jinv<<std::endl;
-        for(uint i=0; i!=frs; ++i) { h[i].error()=0.0; }
+        //std::cerr<<"Jinv="<<Jinv<<std::endl;
         h-=compose(Jinv,fxhx);
-    }
+        for(uint i=0; i!=frs; ++i) { h[i].truncate(18); }
+        //std::cerr<<"h="<<h<<std::endl;
+        //FIXME: Don't clobber error here!
+        for(uint i=0; i!=frs; ++i) { h[i].error()=0.0; }
+   }
 
     h=scale(h,project(d,range(fas-frs,fas)));
 
     return h;
-
-    
-    //f(x,h(x))=0 D1f+D2fDh=0; Dh=D2f^-*D1f; 
-    // h' = h - Dg^- g;  f(x,h+d)=f(x,h)+D2f(x,h)d
-    // h' = h - D2f- * f(x,h(x))
-    /*
-
-    //std::cerr << ARIADNE_PRETTY_FUNCTION << std::endl;
-    typedef Interval I;
-    typedef Float A;
-  
-    ARIADNE_ASSERT(f.size()>0);
-    ARIADNE_ASSERT(f[0].argument_size()>f.size());
-    uint m=f[0].argument_size(); 
-    uint n=f.size();
-
-    array<uint> p(n);
-    for(uint i=0; i!=n; ++i) { p[i]=i+m-n; }
-    //std::cerr << "p=" << p << std::endl;
-
-    //std::cerr << "gd=" << gd << std::endl;
-    Vector<Float> gc=project(centre(f),range(m-n,m));
-    //std::cerr << "gc=" << gc << std::endl;
-    Vector<TaylorVariable> projection=TaylorVariable::constants(n,Vector<Float>(m,0.0)); 
-    for(uint i=0; i!=n; ++i) { projection[m-n+i][i]=1.0; }
-    Vector<TaylorVariable> ge=compose(f,Vector<Interval>(projection.size(),Interval(-1,1)),projection);
-    //std::cerr << "ge=" << ge << std::endl;
-    Vector<TaylorVariable> g(gd,gc,ge);
-
-    Vector<Float> z(n);
-    Vector<Interval> iv = solve(g,z);
-    Vector<Float> v = midpoint(iv);
-    //std::cerr<<"iv="<<iv<<std::endl;
-    //std::cerr<<"v="<<v<<std::endl;
-    Vector<Float> t(m);
-    project(t,range(m-n,m))=v;
-    //std::cerr<<"t="<<t<<std::endl;
-
-    Vector<TaylorVariable> fe=f;
-    //std::cerr<<"fe="<<fe<<std::endl;
-    Vector<TaylorVariable> fet=translate(fe,t);
-    //std::cerr<<"fet="<<fet<<std::endl;
-    fet.set_value(Vector<Float>(fe.result_size(),0.0));
-    //std::cerr<<"fet="<<fet<<std::endl;
-
-    Vector<TaylorVariable> he=implicit(fet);
-    //std::cerr<<"he="<<he<<std::endl;
-    he+=v;
-    //std::cerr<<"he="<<he<<std::endl;
-    Vector<Interval> hd=project(f.domain(),range(0,m-n));
-    Vector<Float> hc=project(f.centre(),range(0,m-n));
-    return Vector<TaylorVariable>(hd,hc,he);
-
-    */
 }
 
 std::pair< Interval, Vector<Interval> >

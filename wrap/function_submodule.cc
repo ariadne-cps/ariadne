@@ -26,16 +26,15 @@
 #include "vector.h"
 #include "dense_differential.h"
 #include "sparse_differential.h"
+#include "differential_vector.h"
 #include "function.h"
 
-#include "approximate_taylor_model.h"
 
 #include <boost/python.hpp>
 using namespace boost::python;
 
 using namespace Ariadne;
 
-typedef ApproximateTaylorModel ModelType;
 
 template<class X> 
 array<X>
@@ -236,6 +235,7 @@ void export_python_function()
     python_function_class.def(self_ns::str(self));
 }
 
+/*
 void export_model() 
 {
     typedef ApproximateTaylorModel Model;
@@ -283,10 +283,11 @@ void export_model()
     //def("disjoint",(Model(*)(const Model&,const Vector<I>&)) &disjoint);
     def("solve",(Vector<I>(*)(const Model&,const Vector<R>&)) &solve);
 }
+*/
 
 void function_submodule() {
     export_function_interface();
     export_python_function();
-    export_model();
+    //    export_model();
 }
 

@@ -28,7 +28,7 @@
 #include "zonotope.h"
 #include "polytope.h"
 #include "curve.h"
-#include "approximate_taylor_model.h"
+#include "taylor_set.h"
 #include "function_set.h"
 #include "grid_set.h"
 
@@ -59,7 +59,7 @@ int main(int argc, char **argv)
     Vector<Float> ts1c=z1c-Vector<Float>(2,Float(0.25));
     Matrix<Float> ts1g=z1g;
     AffineFunction afn1(ts1g,ts1c);
-    ApproximateTaylorModel ts1(Box(3,Interval(-1,1)),afn1,1,0);
+    TaylorSet ts1(afn1,Box::unit_box(3));
 
     Function<RadiusSquare> radius(Vector<Float>(1u,0.5));
     ConstraintSet cs1(Box(1u,Interval(-1,0)),radius);

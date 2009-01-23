@@ -31,12 +31,13 @@
 #include "curve.h"
 #include "function.h"
 
-#include "approximate_taylor_model.h"
+#include "taylor_set.h"
 
 #include "polytope.h"
 
 namespace Ariadne { 
 
+Zonotope zonotope(const TaylorSet& ts);
 
 tribool 
 Polytope::disjoint(const Box& bx) const {
@@ -135,11 +136,9 @@ Polytope polytope(const Polytope& p)
 }
 
 
-Polytope polytope(const ApproximateTaylorModel& ts) 
+Polytope polytope(const TaylorSet& ts) 
 {
-    Vector<Float> c=ts.evaluate(ts.centre());
-    Matrix<Float> G=ts.jacobian(ts.centre());
-    return polytope(Zonotope(c,G)); 
+    return polytope(zonotope(ts)); 
 }
 
 

@@ -49,12 +49,12 @@ class Box;
 class Zonotope;
 class Polytope;
 class InterpolatedCurve;
-class ApproximateTaylorModel;
+class TaylorSet;
 
 Polytope polytope(const Box& bx);
 Polytope polytope(const Zonotope& z);
 Polytope polytope(const Polytope& p);
-Polytope polytope(const ApproximateTaylorModel& ts);
+Polytope polytope(const TaylorSet& ts);
 
 Point baricentre(const Polytope& p);
 

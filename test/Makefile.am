@@ -15,7 +15,6 @@ check_PROGRAMS = \
 	test_matrix \
 	test_differential \
 	test_differential_vector \
-	test_approximate_taylor_model \
 	test_taylor_function \
 	test_taylor_set \
 	test_grid_set \

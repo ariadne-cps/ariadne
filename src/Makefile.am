@@ -15,9 +15,7 @@ SRC = \
 	dense_differential.cc \
 	sparse_differential.cc \
 	taylor_variable.cc  \
-	approximate_taylor_model.cc  \
 	taylor_function.cc  \
-	differential_calculus.cc \
 	taylor_calculus.cc \
 	newton_solver.cc \
 	point.cc \

@@ -86,6 +86,7 @@ TaylorVariable cos(const TaylorVariable& x);
 TaylorVariable tan(const TaylorVariable& x);
 
 pair<TaylorVariable,TaylorVariable> split(const TaylorVariable& x, uint j);
+pair< Vector<TaylorVariable>, Vector<TaylorVariable> > split(const Vector<TaylorVariable>& x, uint j);
 
 // Scale the variabe by post-composing with an affine map taking the interval \a ivl to the unit interval
 TaylorVariable unscale(const TaylorVariable& x, const Interval& ivl);
@@ -109,7 +110,6 @@ Vector<TaylorVariable> compose(const Vector<TaylorVariable>& x, const Vector<Int
 // Wrappers for univariate composition
 TaylorVariable compose(const TaylorVariable& x, const Vector<Interval>& bx, const Vector<TaylorVariable>& y);
 TaylorVariable compose(const TaylorVariable& x, const Interval& b, const TaylorVariable& y);
-Vector<TaylorVariable> compose(const Matrix<Float>& A, const Vector<TaylorVariable>& x);
 
 SparseDifferential<Float> expansion(const TaylorVariable& x, const Vector<Interval>& d);
 Vector< SparseDifferential<Float> > expansion(const Vector<TaylorVariable>& x, const Vector<Interval>& d);
@@ -124,7 +124,8 @@ Vector<TaylorVariable> implicit(const Vector<TaylorVariable>& x, const Vector<In
 TaylorVariable embed(const TaylorVariable& tv, uint as, uint b);
 Vector<TaylorVariable> embed(const Vector<TaylorVariable>& tvs, uint as, uint b);
 
-
+bool refines(const TaylorVariable& tv1, const TaylorVariable& tv2);
+bool refines(const Vector<TaylorVariable>& tv1, const Vector<TaylorVariable>& tv2);
 
 
 

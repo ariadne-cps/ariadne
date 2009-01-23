@@ -243,9 +243,8 @@ void export_taylor_variable()
     def("compose",(T(*)(const T&,const IV&,const TV&)) &compose);
     def("compose",(T(*)(const T&,const I&,const T&)) &compose);
 
-    def("compose",(TV(*)(const RMx&,const TV&)) &compose);
-
     def("antiderivative",(T(*)(const T&,const I&,N)) &antiderivative);
+    def("antiderivative",(TV(*)(const TV&,const I&,N)) &antiderivative);
 
     def("flow",(TV(*)(const TV&,const IV&,const I&,const IV&)) &flow);
     def("implicit",(TV(*)(const TV&,const IV&)) &implicit);

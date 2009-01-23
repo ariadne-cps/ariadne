@@ -310,7 +310,7 @@ void trace(cairo_t *cr, const GraphicsObject::ShapeKind kind, const std::vector<
 void plot(cairo_t *cr, const Box& bounding_box, const ProjectionFunction& projection, 
           const std::vector<GraphicsObject>& objects, int canvas_width, int canvas_height) 
 {
-    const int left_margin=80;
+    const int left_margin=160;
     const int bottom_margin=40;
     const int top_margin=10;
     const int right_margin=10;

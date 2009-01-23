@@ -47,6 +47,8 @@
 using namespace Ariadne;
 using namespace std;
 
+int verbosity=0;
+
 class TestHybridEvolution
 {
   private:
@@ -57,8 +59,8 @@ class TestHybridEvolution
 
 int main() 
 {
-    return 1;
     TestHybridEvolution().test();
+    std::cerr<<"INOMPLETE ";
     return ARIADNE_TEST_FAILURES;
 }
 
@@ -111,7 +113,6 @@ void TestHybridEvolution::test() const
     typedef pair<DiscreteState,TaylorSet> HybridEnclosureType;
 
     // Set up the evolution parameters and grid
-    Float time(3.0);
     Float step_size(0.125);
     Float enclosure_radius(0.25);
     
@@ -121,32 +122,26 @@ void TestHybridEvolution::test() const
 
     // Set up the evaluators
     HybridEvolver evolver(parameters);
-  
-    // Define the initial box
-    Box initial_box(2); 
-    initial_box[0]=Interval(-0.01,0.01);
-    initial_box[1]=Interval(0.49,0.51);
-    //initial_box[0]=Interval(-0.02,0.02);
-    //initial_box[1]=Interval(0.48,0.52);
-
-    // cout << "initial_box=" << initial_box << endl;
+    evolver.verbosity = verbosity;
 
 
     // Make a hybrid automaton for the Van der Pol equation
-
     HybridAutomaton automaton=system();
     ARIADNE_TEST_PRINT(automaton);
 
-    // Over-approximate the initial set by a grid cell
-    Vector<Interval> unit_box(2,Interval(-1,1));
-    EnclosureType initial_set=TaylorSet(unit_box);
-    // cout << "initial_set=" << initial_set << endl << endl;
+    // Define the initial box
+    Box initial_box(2, -0.01,0.01, 0.49,0.51);
+    cout << "initial_box=" << initial_box << endl;
+    EnclosureType initial_set=TaylorSet(initial_box);
+    cout << "initial_set=" << initial_set << endl << endl;
     HybridEnclosureType initial_hybrid_set(location1,initial_set);
-    HybridTime hybrid_time(time,5);
+    HybridTime hybrid_evolution_time(0.25,1);
 
   
     // Compute the reachable sets
-    Orbit<HybridEnclosureType> orbit=evolver.orbit(automaton,initial_hybrid_set,hybrid_time);
+    cout << "Computing orbit... "<<std::flush;
+    Orbit<HybridEnclosureType> orbit=evolver.orbit(automaton,initial_hybrid_set,hybrid_evolution_time);
+    cout << "done"<<std::endl;
     ListSet<HybridEnclosureType> hybrid_evolve_set,hybrid_intermediate_set,hybrid_reach_set;
     hybrid_evolve_set = orbit.final();
     hybrid_intermediate_set = orbit.intermediate();
@@ -158,11 +153,12 @@ void TestHybridEvolution::test() const
   
     cout << "Plotting sets... " << flush;
     Figure fig;
+    fig.set_bounding_box(Box(2, -0.25, 0.75, 0.0, 1.0));
     fig << line_style(true);
     fig << fill_colour(cyan) << hybrid_reach_set;
     fig << fill_colour(magenta) << hybrid_intermediate_set;
     fig << fill_colour(blue) << hybrid_evolve_set;
-    fig << fill_colour(blue) << initial_set;
+    fig << fill_colour(red) << initial_set;
     fig.write("test_hybrid_evolution-affine");
     cout << "done" << endl;
 

@@ -1505,6 +1505,17 @@ split(const TaylorVariable& tv, uint j)
 }
 
 
+pair< Vector<TaylorVariable>, Vector<TaylorVariable> >
+split(const Vector<TaylorVariable>& tv, uint j) 
+{
+    Vector<TaylorVariable> r1(tv.size());
+    Vector<TaylorVariable> r2(tv.size());
+    for(uint i=0; i!=tv.size(); ++i) {
+        make_lpair(r1[i],r2[i])=split(tv[i],j);
+    }
+    return make_pair(r1,r2);
+}
+    
 TaylorVariable
 unscale(const TaylorVariable& tv, const Interval& ivl) 
 {
@@ -1563,6 +1574,34 @@ scale(const Vector<TaylorVariable>& tvs, const Vector<Interval>& ivls)
 }
 
  
+       
+
+bool 
+refines(const TaylorVariable& tv1, const TaylorVariable& tv2)
+{
+    TaylorVariable d=tv2;
+    d.error()=0.0;
+    d-=tv1;
+
+    set_rounding_upward();
+    Float e=d.error().u;
+    for(TaylorVariable::const_iterator iter=d.begin(); iter!=d.end(); ++iter) {
+        e+=abs(iter->second);
+    }
+    set_rounding_to_nearest();
+   return e <= tv2.error().u;
+}
+
+bool 
+refines(const Vector<TaylorVariable>& tv1, const Vector<TaylorVariable>& tv2)
+{
+    ARIADNE_ASSERT(tv1.size()==tv2.size());
+    for(uint i=0; i!=tv1.size(); ++i) {
+        if(!refines(tv1,tv2)) { return false; }
+    }
+    return true;
+}
+
 
 void
 _compose1(Vector<TaylorVariable>& r,

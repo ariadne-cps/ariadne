@@ -62,5 +62,5 @@ EXTRA_DIST =
 SUBDIRS =
 
 TESTS = $(check_PROGRAMS)
-XFAIL_TESTS = test_interval test_taylor_set test_taylor_function test_hybrid_evolution test_reachability_analysis
+XFAIL_TESTS = test_interval test_taylor_set test_taylor_function test_reachability_analysis
 testsubdir = ./

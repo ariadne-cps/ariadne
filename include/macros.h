@@ -48,6 +48,14 @@
         } \
     } \
 
+#define ARIADNE_PRECONDITION(expression,error)             \
+    { \
+        bool result = (expression); \
+        if(!result) { \
+            ARIADNE_THROW(std::runtime_error,__FILE__<<":"<<__LINE__<<": "<<ARIADNE_PRETTY_FUNCTION,"Precondition `" << #expression << "' failed.\n"<<"  "<<error<<"\n"); \
+        } \
+    } \
+
 #define ARIADNE_ASSERT_MSG(expression,error)             \
     { \
         bool result = (expression); \

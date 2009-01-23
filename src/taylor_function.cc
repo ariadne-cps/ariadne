@@ -45,9 +45,16 @@ TaylorFunction::TaylorFunction()
 }
 
 
+TaylorFunction::TaylorFunction(uint rs, uint as) 
+    : _domain(as,I(-1,1)),
+      _expansion(rs,as)
+{
+}
+
+
 TaylorFunction::TaylorFunction(uint rs, uint as, ushort o, ushort s) 
     : _domain(as,I(-1,1)),
-      _expansion(rs,as,o)
+      _expansion(rs,as)
 {
 }
 

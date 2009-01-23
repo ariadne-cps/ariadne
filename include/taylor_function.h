@@ -65,7 +65,9 @@ class TaylorFunction {
   public:
     /*! \brief Default constructor constructs a Taylor model of order zero with no arguments and no result variables. */
     TaylorFunction();
-    /*! \brief The zero Taylor model in \a as variables with size \a rs image, order \a o and smoothness \a s, defined on the whole space with centre at the origin. */
+    /*! \brief The zero Taylor model in \a as variables with size \a rs image, defined on the unit box. */
+    TaylorFunction(uint rs, uint as);
+    /*! \brief The zero Taylor model in \a as variables with size \a rs image, order \a o and smoothness \a s, defined on the unit box. */
     TaylorFunction(uint rs, uint as, ushort o, ushort s);
   
     /*! \brief Construct from a domain and the expansionn. */

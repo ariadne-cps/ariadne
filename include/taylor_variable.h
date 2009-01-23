@@ -46,6 +46,7 @@ template<class X> class Series;
 template<class D> class SparseDifferential;
 
 class TaylorVariable;
+template<> class Vector<TaylorVariable>;
 
 TaylorVariable operator+(const TaylorVariable& x);
 TaylorVariable operator-(const TaylorVariable& x);
@@ -184,15 +185,9 @@ class TaylorVariable
         TaylorVariable r(as); r._expansion.set_value(x); r._expansion.set_gradient(i,1.0); return r; }
     static TaylorVariable affine(const Float& x, const Vector<Float>& dx) {
         TaylorVariable r(dx.size()); r._expansion.set_value(x); for(uint j=0; j!=dx.size(); ++j) { r._expansion.set_gradient(j,dx[j]); } return r; }
-    static Vector<TaylorVariable> zeroes(uint rs, uint as) {
-        Vector<TaylorVariable> result(rs); for(uint i=0; i!=rs; ++i) { 
-            result[i]=TaylorVariable::zero(as); } return result; }
-    static Vector<TaylorVariable> constants(uint as, const Vector<Float>& c) {
-        Vector<TaylorVariable> result(c.size()); for(uint i=0; i!=c.size(); ++i) { 
-            result[i]=TaylorVariable::constant(as,c[i]); } return result; }
-    static Vector<TaylorVariable> variables(const Vector<Float>& x) {
-        Vector<TaylorVariable> result(x.size()); for(uint i=0; i!=x.size(); ++i) { 
-            result[i]=TaylorVariable::variable(x.size(),x[i],i); } return result; }
+    static Vector<TaylorVariable> zeroes(uint rs, uint as);
+    static Vector<TaylorVariable> constants(uint as, const Vector<Float>& c);
+    static Vector<TaylorVariable> variables(const Vector<Float>& x);
 
     bool operator==(const TaylorVariable& sd) const {
         return this->_expansion==sd._expansion && this->_error == sd._error; }
@@ -264,11 +259,41 @@ TaylorVariable max(const TaylorVariable& x, const TaylorVariable& y);
 TaylorVariable min(const TaylorVariable& x, const TaylorVariable& y);
 TaylorVariable abs(const TaylorVariable& x);
     
+
+template<> 
+class Vector<TaylorVariable>
+    : public ublas::vector<TaylorVariable>
+{
+  public:
+    Vector() : ublas::vector<TaylorVariable>() { }
+    Vector(uint rs) : ublas::vector<TaylorVariable>(rs) { for(uint i=0; i!=rs; ++i) { (*this)[i]=TaylorVariable(); } }
+    Vector(uint rs, uint as) : ublas::vector<TaylorVariable>(rs) { for(uint i=0; i!=rs; ++i) { (*this)[i]=TaylorVariable(as); } }
+    Vector(uint rs, const TaylorVariable& x) : ublas::vector<TaylorVariable>(rs) { for(uint i=0; i!=rs; ++i) { (*this)[i]=x; } }
+    template<class E> Vector(const ublas::vector_expression<E> &ve) : ublas::vector<TaylorVariable>(ve) { }
+    uint result_size() const { return this->size(); }
+    uint argument_size() const { 
+        ARIADNE_ASSERT(this->size()>0); 
+        for(uint i=1; i!=this->size(); ++i) { ARIADNE_ASSERT((*this)[0].argument_size()==(*this)[i].argument_size()); } 
+        return (*this)[0].argument_size(); }
+    
+    void check() const { for(uint i=0; i!=this->size(); ++i) { ARIADNE_ASSERT((*this)[0].argument_size()==(*this)[i].argument_size()); } }
+};
+
+
+inline Vector<TaylorVariable> TaylorVariable::zeroes(uint rs, uint as) {
+    Vector<TaylorVariable> result(rs); for(uint i=0; i!=rs; ++i) { 
+        result[i]=TaylorVariable::zero(as); } return result; }
+inline Vector<TaylorVariable> TaylorVariable::constants(uint as, const Vector<Float>& c) {
+    Vector<TaylorVariable> result(c.size()); for(uint i=0; i!=c.size(); ++i) { 
+        result[i]=TaylorVariable::constant(as,c[i]); } return result; }
+inline Vector<TaylorVariable> TaylorVariable::variables(const Vector<Float>& x) {
+    Vector<TaylorVariable> result(x.size()); for(uint i=0; i!=x.size(); ++i) { 
+        result[i]=TaylorVariable::variable(x.size(),x[i],i); } return result; }
+
+
 template<class XX> Interval TaylorVariable::evaluate(const Vector<XX>& x) const {
     return this->evaluate(Vector<Interval>(x));
 }
-
-
 
 } // namespace Ariadne
 

@@ -200,6 +200,8 @@ class TestReachabilityAnalysis
 
 int main(int nargs, const char* args[]) 
 {
+    cerr << "SKIPPED "; 
+    return 1;
     TestReachabilityAnalysis().test();
     if(ARIADNE_TEST_SKIPPED) { cerr << "INCOMPLETE "; }
     return ARIADNE_TEST_FAILURES;

@@ -413,6 +413,7 @@ TaylorVariable::clean()
 TaylorVariable&
 operator+=(TaylorVariable& x, const TaylorVariable& y)
 {
+    ARIADNE_ASSERT(x.argument_size()==y.argument_size());
     return x.acc(y);
    
 }
@@ -420,6 +421,7 @@ operator+=(TaylorVariable& x, const TaylorVariable& y)
 TaylorVariable&
 operator-=(TaylorVariable& x, const TaylorVariable& y)
 {
+    ARIADNE_ASSERT(x.argument_size()==y.argument_size());
     return x.acc(neg(y));
 }
 
@@ -491,21 +493,25 @@ operator-(const TaylorVariable& x) {
 
 TaylorVariable 
 operator+(const TaylorVariable& x, const TaylorVariable& y) {
+    ARIADNE_ASSERT(x.argument_size()==y.argument_size());
     TaylorVariable r(x); r.acc(y); return r; 
 }
 
 TaylorVariable 
 operator-(const TaylorVariable& x, const TaylorVariable& y) {
+    ARIADNE_ASSERT(x.argument_size()==y.argument_size());
     TaylorVariable r=neg(y); r.acc(x); return r;
 }
 
 TaylorVariable 
 operator*(const TaylorVariable& x, const TaylorVariable& y) {
+    ARIADNE_ASSERT(x.argument_size()==y.argument_size());
     TaylorVariable r(x.argument_size()); r.acc(x,y); return r;
 }
 
 TaylorVariable 
 operator/(const TaylorVariable& x, const TaylorVariable& y) {
+    ARIADNE_ASSERT(x.argument_size()==y.argument_size());
     TaylorVariable r(x.argument_size()); r.acc(x,rec(y)); return r;
 }
 
@@ -1017,6 +1023,7 @@ TaylorVariable::range() const {
 Interval 
 TaylorVariable::evaluate(const Vector<Interval>& v) const
 {
+    ARIADNE_ASSERT(this->argument_size()==v.size());
     ARIADNE_ASSERT(subset(v,this->domain()));
     Interval r=this->error();
     for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
@@ -1412,6 +1419,7 @@ evaluate(const Vector<TaylorVariable>& tv, const Vector<Interval>& x)
 
 
 TaylorVariable antiderivative(const TaylorVariable& x, const Interval& dk, uint k) {
+    ARIADNE_ASSERT(k<x.argument_size());
     // General case with error analysis
     TaylorVariable r(x.argument_size());
     const Interval& xe=x.error();
@@ -1451,6 +1459,7 @@ TaylorVariable antiderivative(const TaylorVariable& x, const Interval& dk, uint 
 }
 
 Vector<TaylorVariable> antiderivative(const Vector<TaylorVariable>& x, const Interval& dk, uint k) {
+    ARIADNE_ASSERT(k<x.argument_size());
     Vector<TaylorVariable> r(x.size());
     for(uint i=0; i!=x.size(); ++i) {
         r[i]=antiderivative(x[i],dk,k);
@@ -1462,6 +1471,7 @@ Vector<TaylorVariable> antiderivative(const Vector<TaylorVariable>& x, const Int
 pair<TaylorVariable,TaylorVariable>
 split(const TaylorVariable& tv, uint j) 
 {
+    ARIADNE_ASSERT(j<tv.argument_size());
     uint as=tv.argument_size();
     uint deg=tv.expansion().degree();
     const SparseDifferential<Float>& expansion=tv.expansion();
@@ -1508,6 +1518,7 @@ split(const TaylorVariable& tv, uint j)
 pair< Vector<TaylorVariable>, Vector<TaylorVariable> >
 split(const Vector<TaylorVariable>& tv, uint j) 
 {
+    ARIADNE_ASSERT(j<tv.argument_size());
     Vector<TaylorVariable> r1(tv.size());
     Vector<TaylorVariable> r2(tv.size());
     for(uint i=0; i!=tv.size(); ++i) {
@@ -1579,6 +1590,7 @@ scale(const Vector<TaylorVariable>& tvs, const Vector<Interval>& ivls)
 bool 
 refines(const TaylorVariable& tv1, const TaylorVariable& tv2)
 {
+    ARIADNE_ASSERT(tv1.argument_size()==tv2.argument_size());
     TaylorVariable d=tv2;
     d.error()=0.0;
     d-=tv1;
@@ -1612,10 +1624,10 @@ _compose1(Vector<TaylorVariable>& r,
     //std::cerr<<"ys="<<ys<<"\n";
     // Brute-force, unoptimised approach
     for(uint i=0; i!=x.size(); ++i) {
-        r[i]=TaylorVariable::constant(ys[0].argument_size(),0.0);
+        r[i]=TaylorVariable::constant(ys.argument_size(),0.0);
         r[i].set_error(x[i].error());
         for(TaylorVariable::const_iterator iter=x[i].begin(); iter!=x[i].end(); ++iter) {
-            TaylorVariable t=TaylorVariable::constant(ys[0].argument_size(),iter->second);
+            TaylorVariable t=TaylorVariable::constant(ys.argument_size(),iter->second);
             for(uint j=0; j!=iter->first.size(); ++j) {
                 TaylorVariable p=pow(ys[j],iter->first[j]);
                 t=t*p;
@@ -1635,15 +1647,10 @@ compose(const Vector<TaylorVariable>& x,
     if(x.size()==0) { return x; }
 
     ARIADNE_ASSERT(x.size()>0);
-    ARIADNE_ASSERT(x[0].argument_size()==bx.size());
+    ARIADNE_ASSERT(x.argument_size()==bx.size());
     ARIADNE_ASSERT(y.size()==bx.size());
+    ARIADNE_ASSERT(y.argument_size()>=0);
 
-    for(uint i=1; i!=x.size(); ++i) {
-        ARIADNE_ASSERT(x[i].argument_size()==x[0].argument_size());
-    }
-    for(uint j=1; j!=y.size(); ++j) {
-        ARIADNE_ASSERT(y[j].argument_size()==y[0].argument_size());
-    }
 
 
     Vector<TaylorVariable> ys(y.size());
@@ -1657,6 +1664,10 @@ compose(const Vector<TaylorVariable>& x,
     //FIXME: Remove setting error to zero
     for(uint i=0; i!=r.size(); ++i) { r[i].sweep(1e-8); }
     for(uint i=0; i!=r.size(); ++i) { r[i].clobber(); }
+
+    ARIADNE_ASSERT(r.result_size()==x.result_size());
+    ARIADNE_ASSERT(r.argument_size()==y.argument_size());
+
     return r;
 }
 
@@ -1698,6 +1709,8 @@ Vector<TaylorVariable>
 compose(const Matrix<Float>& A, 
         const Vector<TaylorVariable>& x)
 {
+    ARIADNE_ASSERT(A.column_size()==x.size());
+
     Vector<TaylorVariable> r=TaylorVariable::zeroes(A.row_size(),A.column_size());
     for(uint i=0; i!=A.row_size(); ++i) {
         for(uint j=0; j!=A.row_size(); ++j) {
@@ -1749,13 +1762,13 @@ value(const Vector<TaylorVariable>& x) {
 Matrix<Float> 
 jacobian(const Vector<TaylorVariable>& x, const Vector<Float>& sy) 
 {
-    for(uint i=0; i!=x.size(); ++i) { ARIADNE_ASSERT(x[i].argument_size()==sy.size()); }
+    ARIADNE_ASSERT(x.argument_size()==sy.size()); 
     const uint rs=x.size();
     const uint as=sy.size();
 
     Matrix<Float> J(rs,as);
     for(uint i=0; i!=x.size(); ++i) {
-        for(uint j=0; j!=x[0].argument_size(); ++j) {
+        for(uint j=0; j!=x.argument_size(); ++j) {
             for(TaylorVariable::const_iterator k=x[i].begin(); k!=x[i].end(); ++k) {
                 Float c=k->first[j];
                 c*=k->second;
@@ -1780,13 +1793,11 @@ Vector<TaylorVariable>
 implicit(const Vector<TaylorVariable>& f, const Vector<Interval>& d)
 {
     //std::cerr << ARIADNE_PRETTY_FUNCTION << std::endl;    
-    ARIADNE_ASSERT(f.size()>=1);
-    ARIADNE_ASSERT(f[0].argument_size()>=f.size());
-    for(uint i=1; i!=f.size(); ++i) { 
-        ARIADNE_ASSERT(f[i].argument_size()==f[0].argument_size()); }
+    ARIADNE_ASSERT(f.result_size()>=1);
+    ARIADNE_ASSERT(f.argument_size()>=f.result_size());
 
     const uint frs=f.size();
-    const uint fas=f[0].argument_size();
+    const uint fas=f.argument_size();
     
     Vector<TaylorVariable> fs=unscale(f,d);
     Vector<TaylorVariable> p=TaylorVariable::zeroes(fas,frs);
@@ -1819,6 +1830,9 @@ implicit(const Vector<TaylorVariable>& f, const Vector<Interval>& d)
 
     h=scale(h,project(d,range(fas-frs,fas)));
 
+    ARIADNE_ASSERT(h.result_size()==f.result_size());
+    ARIADNE_ASSERT(h.argument_size()+h.result_size()==f.argument_size());
+
     return h;
 }
 
@@ -1828,6 +1842,9 @@ bounds(Vector<TaylorVariable> const& vfm,
        Float const& hmax,
        Vector<Interval> dmax) 
 { 
+    ARIADNE_ASSERT(vfm.result_size()==vfm.argument_size());
+    ARIADNE_ASSERT(vfm.result_size()==d.size());
+    ARIADNE_ASSERT(vfm.result_size()==dmax.size());
     // Try to find a time h and a set b such that inside(r+Interval<R>(0,h)*vf(b),b) holds
 
     // Set up constants of the method.
@@ -1882,12 +1899,17 @@ bounds(Vector<TaylorVariable> const& vfm,
     // We use "possibly" here since the bound may touch 
     ARIADNE_ASSERT(subset(nb,b));
   
+    ARIADNE_ASSERT(b.size()==vfm.size());
     return std::make_pair(h,nb);
 }
 
 Vector<TaylorVariable> 
 flow(const Vector<TaylorVariable>& vf, const Vector<Interval>& d, const Interval& h, const Vector<Interval>& b)
 {
+    ARIADNE_ASSERT(vf.result_size()==vf.argument_size());
+    ARIADNE_ASSERT(vf.size()==d.size());
+    ARIADNE_ASSERT(vf.size()==b.size());
+
     ARIADNE_ASSERT(h.l==0.0 || h.l==-h.u);
 
     typedef Interval I;
@@ -1938,6 +1960,9 @@ flow(const Vector<TaylorVariable>& vf, const Vector<Interval>& d, const Interval
 
     for(uint i=0; i!=n; ++i) { y[i].clobber(so,to); }
     for(uint i=0; i!=n; ++i) { y[i].sweep(0.0); }
+
+    ARIADNE_ASSERT(y.result_size()==vf.result_size());
+    ARIADNE_ASSERT(y.argument_size()==vf.argument_size()+1);
     return y;
 }
 
@@ -1946,11 +1971,13 @@ flow(const Vector<TaylorVariable>& vf, const Vector<Interval>& d, const Interval
 
 TaylorVariable embed(const TaylorVariable& x, uint new_size, uint start)
 {
+    ARIADNE_ASSERT(x.argument_size()+start<=new_size);
     return TaylorVariable(embed(x.expansion(),new_size,start),x.error());
 }
 
 Vector<TaylorVariable> embed(const Vector<TaylorVariable>& x, uint new_size, uint start)
 {
+    ARIADNE_ASSERT(x.argument_size()+start<=new_size);
     Vector<TaylorVariable> r(x.size());
     for(uint i=0; i!=x.size(); ++i) {
         r[i]=embed(x[i],new_size,start);

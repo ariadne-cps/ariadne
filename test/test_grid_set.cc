@@ -51,6 +51,7 @@ static const uint heightThree = 3;
 static const uint heightFour = 4;
     
 void test_binary_tree() {
+    const BinaryTreeNode * BINARY_TREE_NODE_NULL_POINTER = NULL;
         
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE("Allocate an ebabled node and manipulate it");
@@ -80,8 +81,8 @@ void test_binary_tree() {
     ARIADNE_PRINT_TEST_CASE_TITLE("Split the enabled node");
     ARIADNE_PRINT_TEST_COMMENT("Should mark the node as intermediate and create two enabled subnodes");
     theBinaryTreeRoot.split();
-    ARIADNE_TEST_COMPARE( theBinaryTreeRoot.left_node(), !=, NULL );
-    ARIADNE_TEST_COMPARE( theBinaryTreeRoot.right_node(), !=, NULL );
+    ARIADNE_TEST_COMPARE( theBinaryTreeRoot.left_node(), !=, BINARY_TREE_NODE_NULL_POINTER );
+    ARIADNE_TEST_COMPARE( theBinaryTreeRoot.right_node(), !=, BINARY_TREE_NODE_NULL_POINTER );
     ARIADNE_TEST_EQUAL( theBinaryTreeRoot.is_enabled(), false );
     ARIADNE_TEST_EQUAL( theBinaryTreeRoot.is_disabled(), false );
     ARIADNE_TEST_EQUAL( theBinaryTreeRoot.left_node()->is_leaf(), true );
@@ -93,8 +94,8 @@ void test_binary_tree() {
     ARIADNE_PRINT_TEST_CASE_TITLE("Split a splited node");
     ARIADNE_PRINT_TEST_COMMENT("We expect an unchanged tree, since it is already split");
     theBinaryTreeRoot.mince(1);
-    ARIADNE_TEST_COMPARE( theBinaryTreeRoot.left_node(), !=, NULL );
-    ARIADNE_TEST_COMPARE( theBinaryTreeRoot.right_node(), !=, NULL );
+    ARIADNE_TEST_COMPARE( theBinaryTreeRoot.left_node(), !=, BINARY_TREE_NODE_NULL_POINTER );
+    ARIADNE_TEST_COMPARE( theBinaryTreeRoot.right_node(), !=, BINARY_TREE_NODE_NULL_POINTER );
     ARIADNE_TEST_EQUAL( theBinaryTreeRoot.is_enabled(), false );
     ARIADNE_TEST_EQUAL( theBinaryTreeRoot.is_disabled(), false );
     ARIADNE_TEST_EQUAL( theBinaryTreeRoot.left_node()->is_leaf(), true );
@@ -106,8 +107,8 @@ void test_binary_tree() {
     ARIADNE_PRINT_TEST_CASE_TITLE("Copy the node by using the copy constructor");
     ARIADNE_PRINT_TEST_COMMENT("The entire subtree should be copied");
     BinaryTreeNode theBinaryTreeCopy( theBinaryTreeRoot );
-    ARIADNE_TEST_COMPARE( theBinaryTreeCopy.left_node(), !=, NULL );
-    ARIADNE_TEST_COMPARE( theBinaryTreeCopy.right_node(), !=, NULL );
+    ARIADNE_TEST_COMPARE( theBinaryTreeCopy.left_node(), !=, BINARY_TREE_NODE_NULL_POINTER );
+    ARIADNE_TEST_COMPARE( theBinaryTreeCopy.right_node(), !=, BINARY_TREE_NODE_NULL_POINTER );
     ARIADNE_TEST_EQUAL( theBinaryTreeCopy.is_enabled(), false );
     ARIADNE_TEST_EQUAL( theBinaryTreeCopy.is_disabled(), false );
     ARIADNE_TEST_EQUAL( theBinaryTreeCopy.left_node()->is_leaf(), true );
@@ -124,8 +125,8 @@ void test_binary_tree() {
     ARIADNE_TEST_EQUAL( theBinaryTreeCopy.is_leaf(), true );
     ARIADNE_TEST_EQUAL( theBinaryTreeCopy.is_enabled(), true );
     ARIADNE_PRINT_TEST_COMMENT( "The original tree" );
-    ARIADNE_TEST_COMPARE( theBinaryTreeRoot.left_node(), !=, NULL );
-    ARIADNE_TEST_COMPARE( theBinaryTreeRoot.right_node(), !=, NULL );
+    ARIADNE_TEST_COMPARE( theBinaryTreeRoot.left_node(), !=, BINARY_TREE_NODE_NULL_POINTER );
+    ARIADNE_TEST_COMPARE( theBinaryTreeRoot.right_node(), !=, BINARY_TREE_NODE_NULL_POINTER );
     ARIADNE_TEST_EQUAL( theBinaryTreeRoot.is_enabled(), false );
     ARIADNE_TEST_EQUAL( theBinaryTreeRoot.is_disabled(), false );
     ARIADNE_TEST_EQUAL( theBinaryTreeRoot.left_node()->is_leaf(), true );
@@ -141,8 +142,8 @@ void test_binary_tree() {
 
     ARIADNE_PRINT_TEST_COMMENT("A tree after recombination" );
     theBinaryTreeRoot.recombine();
-    ARIADNE_TEST_COMPARE( theBinaryTreeRoot.left_node(), !=, NULL );
-    ARIADNE_TEST_COMPARE( theBinaryTreeRoot.right_node(), !=, NULL );
+    ARIADNE_TEST_COMPARE( theBinaryTreeRoot.left_node(), !=, BINARY_TREE_NODE_NULL_POINTER );
+    ARIADNE_TEST_COMPARE( theBinaryTreeRoot.right_node(), !=, BINARY_TREE_NODE_NULL_POINTER );
 
     ARIADNE_PRINT_TEST_COMMENT( "A tree after splitting the disabled left node" );
     theBinaryTreeRoot.left_node()->mince(3);
@@ -739,6 +740,34 @@ void test_grid_paving_cell(){
     theBinaryPath = GridCell::primary_cell_path( 1, 2, 2 );
     ARIADNE_PRINT_TEST_COMMENT( "Dimension: 1, topCellHeight: 2, bottomCellHeight: 2" );
     ARIADNE_TEST_EQUAL( expected_result , theBinaryPath );
+    
+    Grid theGrid( Vector<Float>("[0.0,0.0]"), Vector<Float>("[1.0,1.0]") );
+    //pFirstCell_01 == pSecondCell_01
+    GridCell * pFirstCell_01 = new GridCell( theGrid, 0, make_binary_word("01") );
+    GridCell * pSecondCell_01 = new GridCell( theGrid, 1, make_binary_word("1101") );
+    //pFirstCell_01 != pThirdCell_01 (pFirstCell_01 is left to pThirdCell_01)
+    GridCell * pThirdCell_01 = new GridCell( theGrid, 2, make_binary_word("001111") );
+    //pFirstCell_01 < pFourthCell_01
+    GridCell * pFourthCell_01 = new GridCell( theGrid, 1, make_binary_word("11011") );
+
+    //!!!
+    ARIADNE_PRINT_TEST_COMMENT( "pFirstCell_01 == pSecondCell_01, check for operator<" );
+    ARIADNE_TEST_EQUAL( false , ( (*pFirstCell_01) < (*pSecondCell_01) )  );
+    //!!!
+    ARIADNE_PRINT_TEST_COMMENT( "pFirstCell_01 == pSecondCell_01, check for operator<" );
+    ARIADNE_TEST_EQUAL( false , ( (*pSecondCell_01) < (*pFirstCell_01) )  );
+    //!!!
+    ARIADNE_PRINT_TEST_COMMENT( "pFirstCell_01 != pThirdCell_01 (pFirstCell_01 is left to pThirdCell_01), check for operator<" );
+    ARIADNE_TEST_EQUAL( true , ( (*pFirstCell_01) < (*pThirdCell_01) )  );
+    //!!!
+    ARIADNE_PRINT_TEST_COMMENT( "pFirstCell_01 != pThirdCell_01 (pFirstCell_01 is left to pThirdCell_01), check for operator<" );
+    ARIADNE_TEST_EQUAL( false , ( (*pThirdCell_01) < (*pFirstCell_01) )  );
+    //!!!
+    ARIADNE_PRINT_TEST_COMMENT( "pFirstCell_01 < pFourthCell_01, check for operator<" );
+    ARIADNE_TEST_EQUAL( true , ( (*pFirstCell_01) < (*pFourthCell_01) )  );
+    //!!!
+    ARIADNE_PRINT_TEST_COMMENT( "pFirstCell_01 < pFourthCell_01, check for operator<" );
+    ARIADNE_TEST_EQUAL( false , ( (*pFourthCell_01) < (*pFirstCell_01) )  );
 }
 
 void test_adjoin_operation_one(){
@@ -2139,15 +2168,15 @@ void test_subset_superset_box(){
 }
 
 int main() {
-    
+/*    
     test_binary_tree();
 
     test_grid_paving_cursor();
 
     test_grid_paving_const_iterator();
-
+*/    
     test_grid_paving_cell();
-
+/*    
     test_grid_sub_paving();
 
     test_grid_paving();
@@ -2177,7 +2206,7 @@ int main() {
     test_subset_overlaps_box();
     test_subset_subset_box();
     test_subset_superset_box();
-    
+*/    
     return ARIADNE_TEST_FAILURES;
 }
 

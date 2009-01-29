@@ -746,44 +746,49 @@ bool GridTreeConstIterator::navigate_to(bool firstLast){
 
 /*********************************************GridCell***********************************************/
 
-bool GridCell::operator==( const GridCell& other ) const {
-    //TODO: 
-    return this->_theGrid == other._theGrid && 
-        this->_theHeight == other._theHeight &&
-        this->_theWord == other._theWord;
-}      
-
 //TODO: Perhaps we can make it more efficient by reducing the height of the words till
 //the minimal primary cell height and then comparing them by height and binary words
-bool GridCell::operator<(const GridCell& other) const {
-    ARIADNE_ASSERT( this->_theGrid == other._theGrid );
+bool GridCell::compare_grid_cells(const GridCell * pCellLeft, const GridCell &cellRight, const uint comparator ) {
+    ARIADNE_ASSERT( pCellLeft->_theGrid == cellRight._theGrid );
     const BinaryWord * pThisWord, * pOtherWord;
     //This is the temporary word to be used if heights are not equal
     BinaryWord rootNodePath;
     bool result;
     
-    if( this->_theHeight == other._theHeight ) {
+    if( pCellLeft->_theHeight == cellRight._theHeight ) {
         //if the primary cells are of the same height, then we just compare the original binary words.
-        pThisWord = & (this->_theWord);
-        pOtherWord = & (other._theWord);
+        pThisWord = & (pCellLeft->_theWord);
+        pOtherWord = & (cellRight._theWord);
     } else {
         //Otherwise we have to re-root the cell with the lowest primary cell
         //to the highest primary cell and then compare the words again,
-        if( this->_theHeight > other._theHeight ){
-            rootNodePath = primary_cell_path( this->_theGrid.dimension() , this->_theHeight, other._theHeight );
-            rootNodePath.append( other._theWord );
-            pThisWord = & (this->_theWord);
+        if( pCellLeft->_theHeight > cellRight._theHeight ){
+            rootNodePath = primary_cell_path( pCellLeft->_theGrid.dimension() , pCellLeft->_theHeight, cellRight._theHeight );
+            rootNodePath.append( cellRight._theWord );
+            pThisWord = & (pCellLeft->_theWord);
             pOtherWord = & (rootNodePath);
         } else {
-            rootNodePath = primary_cell_path( this->_theGrid.dimension() , other._theHeight, this->_theHeight );
-            rootNodePath.append( this->_theWord );
+            rootNodePath = primary_cell_path( pCellLeft->_theGrid.dimension() , cellRight._theHeight, pCellLeft->_theHeight );
+            rootNodePath.append( pCellLeft->_theWord );
             pThisWord = & (rootNodePath);
-            pOtherWord = & (other._theWord);
+            pOtherWord = & (cellRight._theWord);
         }
     }
+    switch( comparator ){
+        case COMPARE_EQUAL : return (*pThisWord) == (*pOtherWord);
+        case COMPARE_LESS : return (*pThisWord) < (*pOtherWord);
+        default: 
+            throw InvalidInput("The method's comparator argument should be either GridCell::COMPARE_EQUAL or GridCell::COMPARE_LESS.");
+    }
+}
 
-    return (*pThisWord) < (*pOtherWord);
+bool GridCell::operator==( const GridCell& other ) const {
+    return compare_grid_cells( this, other, COMPARE_EQUAL );
 }      
+
+bool GridCell::operator<(const GridCell& other) const {
+    return compare_grid_cells( this, other, COMPARE_LESS );
+}
 
 Vector<Interval> GridCell::primary_cell_lattice_box( const uint theHeight, const dimension_type dimensions ) {
     int leftBottomCorner = 0, rightTopCorner = 1;

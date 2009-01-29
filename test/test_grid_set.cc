@@ -751,23 +751,37 @@ void test_grid_paving_cell(){
     GridCell * pFourthCell_01 = new GridCell( theGrid, 1, make_binary_word("11011") );
 
     //!!!
-    ARIADNE_PRINT_TEST_COMMENT( "pFirstCell_01 == pSecondCell_01, check for operator<" );
+    ARIADNE_PRINT_TEST_COMMENT( "pFirstCell_01 == pFirstCell_01, check for operators < and ==" );
+    ARIADNE_TEST_EQUAL( false , ( (*pFirstCell_01) < (*pFirstCell_01) )  );
+    ARIADNE_TEST_EQUAL( true , ( (*pFirstCell_01) == (*pFirstCell_01) )  );
+
+    //!!!
+    ARIADNE_PRINT_TEST_COMMENT( "pFirstCell_01 == pSecondCell_01, check for operators < and ==" );
     ARIADNE_TEST_EQUAL( false , ( (*pFirstCell_01) < (*pSecondCell_01) )  );
+    ARIADNE_TEST_EQUAL( true , ( (*pFirstCell_01) == (*pSecondCell_01) )  );
     //!!!
-    ARIADNE_PRINT_TEST_COMMENT( "pFirstCell_01 == pSecondCell_01, check for operator<" );
+    ARIADNE_PRINT_TEST_COMMENT( "pFirstCell_01 == pSecondCell_01, check for operators < and ==" );
     ARIADNE_TEST_EQUAL( false , ( (*pSecondCell_01) < (*pFirstCell_01) )  );
+    ARIADNE_TEST_EQUAL( true , ( (*pSecondCell_01) == (*pFirstCell_01) )  );
     //!!!
-    ARIADNE_PRINT_TEST_COMMENT( "pFirstCell_01 != pThirdCell_01 (pFirstCell_01 is left to pThirdCell_01), check for operator<" );
+    ARIADNE_PRINT_TEST_COMMENT( "pFirstCell_01 != pThirdCell_01 (pFirstCell_01 is left to pThirdCell_01), check for operators < and ==" );
     ARIADNE_TEST_EQUAL( true , ( (*pFirstCell_01) < (*pThirdCell_01) )  );
+    ARIADNE_TEST_EQUAL( false , ( (*pFirstCell_01) == (*pThirdCell_01) )  );
     //!!!
-    ARIADNE_PRINT_TEST_COMMENT( "pFirstCell_01 != pThirdCell_01 (pFirstCell_01 is left to pThirdCell_01), check for operator<" );
+    ARIADNE_PRINT_TEST_COMMENT( "pFirstCell_01 != pThirdCell_01 (pFirstCell_01 is left to pThirdCell_01), check for operators < and ==" );
     ARIADNE_TEST_EQUAL( false , ( (*pThirdCell_01) < (*pFirstCell_01) )  );
+    ARIADNE_TEST_EQUAL( false , ( (*pThirdCell_01) == (*pFirstCell_01) )  );
     //!!!
-    ARIADNE_PRINT_TEST_COMMENT( "pFirstCell_01 < pFourthCell_01, check for operator<" );
+    ARIADNE_PRINT_TEST_COMMENT( "pFirstCell_01 < pFourthCell_01, check for operators < and ==" );
     ARIADNE_TEST_EQUAL( true , ( (*pFirstCell_01) < (*pFourthCell_01) )  );
+    ARIADNE_TEST_EQUAL( false , ( (*pFirstCell_01) == (*pFourthCell_01) )  );
     //!!!
-    ARIADNE_PRINT_TEST_COMMENT( "pFirstCell_01 < pFourthCell_01, check for operator<" );
+    ARIADNE_PRINT_TEST_COMMENT( "pFirstCell_01 < pFourthCell_01, check for operators < and ==" );
     ARIADNE_TEST_EQUAL( false , ( (*pFourthCell_01) < (*pFirstCell_01) )  );
+    ARIADNE_TEST_EQUAL( false , ( (*pFourthCell_01) == (*pFirstCell_01) )  );
+    //!!!
+    ARIADNE_PRINT_TEST_COMMENT( "pFirstCell_01 < pFourthCell_01, check for an exception in the compare_grid_cells method" );
+    ARIADNE_TEST_THROW( GridCell::compare_grid_cells( pFourthCell_01, (*pFirstCell_01), 1000), InvalidInput );
 }
 
 void test_adjoin_operation_one(){
@@ -2168,15 +2182,15 @@ void test_subset_superset_box(){
 }
 
 int main() {
-/*    
+    
     test_binary_tree();
 
     test_grid_paving_cursor();
 
     test_grid_paving_const_iterator();
-*/    
+   
     test_grid_paving_cell();
-/*    
+    
     test_grid_sub_paving();
 
     test_grid_paving();
@@ -2206,7 +2220,7 @@ int main() {
     test_subset_overlaps_box();
     test_subset_subset_box();
     test_subset_superset_box();
-*/    
+    
     return ARIADNE_TEST_FAILURES;
 }
 

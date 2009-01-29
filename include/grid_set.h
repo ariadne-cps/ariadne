@@ -581,6 +581,20 @@ class GridCell {
      */
     static BinaryWord primary_cell_path( const uint dimensions, const uint topPCellHeight, const uint bottomPCellHeight);
 
+    /*! \brief The constant for the \a bool compare_grid_cells(const GridCell *, const GridCell &, const uint ) function
+    */
+    static const uint COMPARE_EQUAL = 0;
+    static const uint COMPARE_LESS = 1;
+
+    /*! \brief This function allows to compare to cells it is used by the operator== and operator< methods of this class
+     *  The value of \a comparator should be either \a COMPARE_EQUAL or \aCOMPARE_LESS
+     *  The function checks that both cells are on the same grid and then alignes their primary cells.
+     *  The latter is done by extending the binary word of the cell with the lowest primary cell with
+     *  the corresponding prefix. When the words are alligned, wi simply use the == and < operators of
+     *  the \a BinaryWord class.
+     */
+    static bool compare_grid_cells(const GridCell * pCellLeft, const GridCell &cellRight, const uint comparator );
+
     /*! \brief Apply grid data \a theGrid to \a theLatticeBox in order to compute
      * the box dimensions in the original space
      */

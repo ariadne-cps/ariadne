@@ -65,7 +65,7 @@ void append(V& v, const C& c)
 namespace Ariadne {
  
 // Allow subdivisions in upper evolution
-const bool ENABLE_SUBDIVISIONS = true;
+const bool ENABLE_SUBDIVISIONS = false;
 // Allow premature termination of lower evolution
 const bool ENABLE_PREMATURE_TERMINATION = false;
 

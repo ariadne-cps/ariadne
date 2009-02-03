@@ -54,6 +54,7 @@ class ListSet
 
   public:
     typedef typename std::vector<BS>::const_iterator const_iterator;
+    typedef typename std::vector<BS>::iterator iterator;
     typedef BS value_type;
 
     virtual ~ListSet() { }
@@ -90,11 +91,20 @@ class ListSet
     /*! \brief A constant iterator to the end of the list of basic sets. */
     const_iterator end() const { return this->_data.end(); };
 
+    /*! \brief A iterator to the beginning of the list of basic sets. */
+    iterator begin() { return this->_data.begin(); }
+  
+    /*! \brief A iterator to the end of the list of basic sets. */
+    iterator end() { return this->_data.end(); };
+
     /*! \brief Returns the denotable set's space dimension. */
     uint dimension() const { if(this->empty()) { return 0; } else { return this->_data.back().dimension(); } }
 
     /*! \brief Removes a set from the list and return it. */
     BS pop() { BS result=this->_data.back(); this->_data.pop_back(); return result; }
+
+    /*! \brief Removes a set given identified by an iterator from the list. */
+    iterator erase(iterator iter) { return this->_data.erase(iter); }
 
     /*! \brief Pushes a basic set to the end of the list. */
     void push_back(const BS& bs) { this->_data.push_back(bs); }

@@ -99,7 +99,7 @@ HybridReachabilityAnalyser::_upper_reach(const HybridAutomaton& sys,
     HybridGridTreeSet cells=set; 
     cells.mince(accuracy);    
     for(HybridGridTreeSet::const_iterator iter=cells.begin(); iter!=cells.end(); ++iter) {
-        result.adjoin(this->_discretiser->upper_evolution(sys,*iter,time,accuracy).reach());
+        result.adjoin(this->_discretiser->reach(sys,*iter,time,accuracy,UPPER_SEMANTICS));
     }
     return result; 
 }
@@ -113,7 +113,7 @@ HybridReachabilityAnalyser::_upper_evolve(const HybridAutomaton& sys,
 {
     GTS result(set.grid()); GTS cells=set; cells.mince(accuracy); 
     for(HybridGridTreeSet::const_iterator iter=cells.begin(); iter!=cells.end(); ++iter) {
-        result.adjoin(this->_discretiser->upper_evolution(sys,*iter,time,accuracy).final()); 
+        result.adjoin(this->_discretiser->evolve(sys,*iter,time,accuracy,UPPER_SEMANTICS)); 
     }
     return result; 
 }
@@ -140,7 +140,7 @@ HybridReachabilityAnalyser::_upper_reach_evolve(const HybridAutomaton& sys,
     */
 
     for(HybridGridTreeSet::const_iterator iter=cells.begin(); iter!=cells.end(); ++iter) {
-        Orbit<HybridGridCell> evolution=this->_discretiser->upper_evolution(sys,*iter,time,accuracy);
+        Orbit<HybridGridCell> evolution=this->_discretiser->evolution(sys,*iter,time,accuracy,UPPER_SEMANTICS);
         reach.adjoin(evolution.reach()); 
         evolve.adjoin(evolution.final()); 
     }
@@ -164,7 +164,7 @@ lower_evolve(const SystemType& system,
     initial.adjoin_lower_approximation(initial_set,grid_height,grid_depth+4);
 
     for(GTS::const_iterator bs_iter=initial.begin(); bs_iter!=initial.end(); ++bs_iter) {
-        final.adjoin(this->_discretiser->lower_evolution(system,*bs_iter,time,grid_depth).final());
+        final.adjoin(this->_discretiser->evolve(system,*bs_iter,time,grid_depth,LOWER_SEMANTICS));
     }
     return &final;
 }
@@ -186,7 +186,7 @@ lower_reach(const SystemType& system,
     initial.adjoin_lower_approximation(initial_set,maximum_grid_height,initial_grid_depth);
  
     for(GTS::const_iterator bs_iter=initial.begin(); bs_iter!=initial.end(); ++bs_iter) {
-        reach.adjoin(this->_discretiser->lower_evolution(system,*bs_iter,time,maximum_grid_depth).reach());
+        reach.adjoin(this->_discretiser->reach(system,*bs_iter,time,maximum_grid_depth,LOWER_SEMANTICS));
     }
     return &reach;
 }
@@ -210,7 +210,7 @@ lower_reach_evolve(const SystemType& system,
     initial.adjoin_lower_approximation(initial_set,maximum_grid_height,initial_grid_depth);
 
     for(GTS::const_iterator bs_iter=initial.begin(); bs_iter!=initial.end(); ++bs_iter) {
-        Orbit<GC> orbit = this->_discretiser->lower_evolution(system,*bs_iter,time,maximum_grid_depth);
+        Orbit<GC> orbit = this->_discretiser->evolution(system,*bs_iter,time,maximum_grid_depth,LOWER_SEMANTICS);
         reach.adjoin(orbit.reach());
         evolve.adjoin(orbit.final());
     }

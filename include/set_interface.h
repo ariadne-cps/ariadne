@@ -31,6 +31,7 @@
 #include <iosfwd>
 
 #include "tribool.h"
+#include "numeric.h"
 
 namespace Ariadne {
 

@@ -120,9 +120,9 @@ void TestDiscreteEvolver::test() const
   
     // Compute the reachable sets
     ListSet<HybridEnclosureType> hybrid_evolve_set,hybrid_reach_set;
-    hybrid_evolve_set = evolver.evolve(henon,initial_hybrid_set,hybrid_time);
+    hybrid_evolve_set = evolver.evolve(henon,initial_hybrid_set,hybrid_time,UPPER_SEMANTICS);
     //cout << "evolve_set=" << hybrid_evolve_set << endl;
-    hybrid_reach_set = evolver.reach(henon,initial_hybrid_set,hybrid_time);
+    hybrid_reach_set = evolver.reach(henon,initial_hybrid_set,hybrid_time,UPPER_SEMANTICS);
     //cout << "reach_set=" << hybrid_reach_set << endl;
   
     // Print the intial, evolve and reach sets

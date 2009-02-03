@@ -26,29 +26,65 @@
 
 using namespace Ariadne;
 
+//
+// Definition of the dynamics
+//
+// the parameters of the functions are a, b and T
+//
+struct Opening : FunctionData<2,2,3> {
+    template<class R, class A, class P> static void 
+    compute(R& r, const A& x, const P& p) {
+        typename R::value_type x0 = x[0];
+        r[0] = - p[0] * Ariadne::sqrt(x0) + p[1] * x[1]; 
+        r[1] = 1.0/p[2];        
+    }
+};
+
+struct Closing : FunctionData<2,2,3> {
+    template<class R, class A, class P> static void 
+    compute(R& r, const A& x, const P& p) {
+        typename R::value_type x0 = x[0];
+        r[0] = - p[0] * Ariadne::sqrt(x0) + p[1] * x[1]; 
+        r[1] = -1.0/p[2];        
+    }
+};
+
+
+struct OpenValve : FunctionData<2,2,3> {
+    template<class R, class A, class P> static void 
+    compute(R& r, const A& x, const P& p) {
+        typename R::value_type x0 = x[0];
+        r[0] = - p[0] * Ariadne::sqrt(x0) + p[1]; 
+        r[1] = 0.0;        
+    }
+};
+
+struct ClosedValve : FunctionData<2,2,3> {
+    template<class R, class A, class P> static void 
+    compute(R& r, const A& x, const P& p) {
+        typename R::value_type x0 = x[0];
+        r[0] = - p[0] * Ariadne::sqrt(x0); 
+        r[1] = 0;        
+    }
+};
+
 
 int main() 
 {
   
     /// Set the system parameters
-    double a = -0.02;
+    double a = 0.065;
     double b = 0.3;
     double T = 4.0;
     double hmin = 5.5;
     double Delta = 0.05;
     double hmax = 8.0;
-    
-    double A1[4]={a,b,0,0};
-    double b1[2]={0,1.0/T};
+ 
+    Vector<Interval> system_parameters(3);
+    system_parameters[0] = a;
+    system_parameters[1] = Interval(0.3,0.34);
+    system_parameters[2] = T;
 
-    double A2[4]={a,0.0,0.0,0.0};
-    double b2[2]={b,0.0};
-
-    double A3[4]={a,b,0,0};
-    double b3[2]={0,-1.0/T};
-
-    double A4[4]={a,0.0,0.0,0.0};
-    double b4[2]={0.0,0.0};
 
     /// Build the Hybrid System
   
@@ -68,10 +104,10 @@ int main()
     DiscreteEvent e41(41);
   
     /// Create the dynamics
-    AffineFunction dynamic1(Matrix<Float>(2,2,A1),Vector<Float>(2,b1));
-    AffineFunction dynamic2(Matrix<Float>(2,2,A2),Vector<Float>(2,b2));
-    AffineFunction dynamic3(Matrix<Float>(2,2,A3),Vector<Float>(2,b3));
-    AffineFunction dynamic4(Matrix<Float>(2,2,A4),Vector<Float>(2,b4));
+    Function<Opening> dynamic1(system_parameters);
+    Function<OpenValve> dynamic2(system_parameters);
+    Function<Closing> dynamic3(system_parameters);
+    Function<ClosedValve> dynamic4(system_parameters);
     
     cout << "dynamic1 = " << dynamic1 << endl << endl;
     cout << "dynamic2 = " << dynamic2 << endl << endl;
@@ -140,28 +176,29 @@ int main()
 
     std::cout << "Computing evolution starting from location l2, x = 0.0, y = 1.0" << std::endl;
 
-    Box initial_box(2, 0.0,0.001, 1.0,1.001);
+    Box initial_box(2, 0.001,0.002, 1.0,1.001);
     HybridEnclosureType initial_enclosure(l2,initial_box);
     Box bounding_box(2, -0.1,9.1, -0.1,1.1);
   
     HybridTime evolution_time(64.0,6);
- /* 
+  
     std::cout << "Computing orbit... " << std::flush;
     OrbitType orbit = evolver.orbit(watertank_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
 
     std::cout << "Orbit="<<orbit<<std::endl;
     //plot("tutorial-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit.initial());
-    plot("watertank-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit);
+    plot("watertank-nonlinear-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit);
 
+/*
     std::cout << "Computing reach set using HybridEvolver... " << std::flush;
     EnclosureListType reach = evolver.reach(watertank_system,initial_enclosure,evolution_time);
     std::cout << "done." << std::endl;
 
     std::cout << "Orbit="<<reach<<std::endl;
     //plot("tutorial-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit.initial());
-    plot("watertank-reach-evolver",bounding_box, Colour(0.0,0.5,1.0), reach);
-*/
+    plot("watertank-nonlinear-reach-evolver",bounding_box, Colour(0.0,0.5,1.0), reach);
+
 
     /// Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
@@ -174,7 +211,7 @@ int main()
 
     HybridTime reach_time(64.0,2);
 
-    plot("watertank-initial_set1",bounding_box, Colour(0.0,0.5,1.0), initial_set);
+    plot("watertank-nonlinear-initial_set1",bounding_box, Colour(0.0,0.5,1.0), initial_set);
 
     // Compute evolved sets (i.e. at the evolution time) and reach sets (i.e. up to the evolution time) using lower semantics.
     // These functions run a bunch of simulations with bounded approximation errors and combines the results.
@@ -182,16 +219,15 @@ int main()
     std::cout << "Computing lower reach set... " << std::flush;
     HybridGridTreeSet* lower_reach_set_ptr = analyser.lower_reach(watertank_system,initial_set,reach_time);
     std::cout << "done." << std::endl;
-    plot("watertank-lower_reach1",bounding_box, Colour(0.0,0.5,1.0), *lower_reach_set_ptr);
+    plot("watertank-nonlinear-lower_reach1",bounding_box, Colour(0.0,0.5,1.0), *lower_reach_set_ptr);
 
-/*
     // Compute evolved sets and reach sets using upper semantics.
     // These functions compute over-approximations to the evolved and reachabe sets. Subdivision is used
     // as necessary to keep the local errors reasonable. The accumulated global error may be very large.
     std::cout << "Computing upper reach set... " << std::flush;
     HybridGridTreeSet* upper_reach_set_ptr = analyser.upper_reach(watertank_system,initial_set,reach_time);
     std::cout << "done." << std::endl;
-    plot("watertank-upper_reach1",bounding_box, Colour(0.0,0.5,1.0), *upper_reach_set_ptr);
+    plot("watertank-nonlinear-upper_reach1",bounding_box, Colour(0.0,0.5,1.0), *upper_reach_set_ptr);
 
     std::cout << "Computing evolution starting from location l1, x = 0.0, y = 0.0" << std::endl;
 
@@ -199,7 +235,7 @@ int main()
     HybridImageSet initial_set2;
     initial_set2[l1]=initial_box2;
 
-    plot("watertank-initial_set2",bounding_box, Colour(0.0,0.5,1.0), initial_set2);
+    plot("watertank-nonlinear-initial_set2",bounding_box, Colour(0.0,0.5,1.0), initial_set2);
 
     // Compute evolved sets (i.e. at the evolution time) and reach sets (i.e. up to the evolution time) using lower semantics.
     // These functions run a bunch of simulations with bounded approximation errors and combines the results.
@@ -207,7 +243,7 @@ int main()
     std::cout << "Computing lower reach set... " << std::flush;
     lower_reach_set_ptr = analyser.lower_reach(watertank_system,initial_set2,reach_time);
     std::cout << "done." << std::endl;
-    plot("watertank-lower_reach2",bounding_box, Colour(0.0,0.5,1.0), *lower_reach_set_ptr);
+    plot("watertank-nonlinear-lower_reach2",bounding_box, Colour(0.0,0.5,1.0), *lower_reach_set_ptr);
 
     // Compute evolved sets and reach sets using upper semantics.
     // These functions compute over-approximations to the evolved and reachabe sets. Subdivision is used
@@ -215,7 +251,8 @@ int main()
     std::cout << "Computing upper reach set... " << std::flush;
     upper_reach_set_ptr = analyser.upper_reach(watertank_system,initial_set2,reach_time);
     std::cout << "done." << std::endl;
-    plot("watertank-upper_reach2",bounding_box, Colour(0.0,0.5,1.0), *upper_reach_set_ptr);
+    plot("watertank-nonlinear-upper_reach2",bounding_box, Colour(0.0,0.5,1.0), *upper_reach_set_ptr);
+
 */
 
 }

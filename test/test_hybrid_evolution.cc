@@ -146,7 +146,7 @@ void TestHybridEvolution::test() const
 
   
     // Compute the reachable sets
-    Orbit<HybridEnclosureType> orbit=evolver.orbit(automaton,initial_hybrid_set,hybrid_time);
+    Orbit<HybridEnclosureType> orbit=evolver.orbit(automaton,initial_hybrid_set,hybrid_time,UPPER_SEMANTICS);
     ListSet<HybridEnclosureType> hybrid_evolve_set,hybrid_intermediate_set,hybrid_reach_set;
     hybrid_evolve_set = orbit.final();
     hybrid_intermediate_set = orbit.intermediate();

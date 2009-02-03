@@ -144,13 +144,34 @@ class HybridDiscretiser
               const TimeType& time, 
               const AccuracyType accuracy,
               const Semantics semantics) const;
+
+    //! \brief Compute approximations to the reachable set 
+    //! of \a system starting in \a initial_set over \a time. */
+    virtual DenotableSetType 
+    reach(const SystemType& system, 
+                const BasicSetType& initial_set, 
+                const TimeType& time, 
+                const AccuracyType accuracy,
+                const Semantics semantics) const;
+
+    //! \brief Compute approximations to the evolved set 
+    //! of \a system starting in \a initial_set over \a time. */
+    virtual DenotableSetType 
+    evolve(const SystemType& system, 
+                 const BasicSetType& initial_set, 
+                 const TimeType& time, 
+                 const AccuracyType accuracy,
+                 const Semantics semantics) const;
   
   private:
     EnclosureType _enclosure(const BasicSetType& bs) const;
     Orbit<BasicSetType> _discretise(const Orbit<EnclosureType>& orb,
                                     const BasicSetType& initial_set,
                                     const AccuracyType accuracy) const;
-  
+
+    DenotableSetType _discretise(const ListSet<EnclosureType>& ls,
+                                 const BasicSetType& initial_set,
+                                 const AccuracyType accuracy) const;  
 };
 
 } // namespace Ariadne

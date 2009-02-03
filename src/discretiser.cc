@@ -162,6 +162,33 @@ evolution(const SystemType& system,
     return discrete_orbit;
 }
 
+
+template<class ES>
+HybridGridTreeSet 
+HybridDiscretiser<ES>::
+reach(const SystemType& system, 
+            const BasicSetType& initial_set, 
+            const TimeType& time,
+            const AccuracyType accuracy,
+            const Semantics semantics) const
+{
+    return this->_discretise(this->_evolver->reach(system,this->_enclosure(initial_set),time,semantics),initial_set,accuracy);
+}
+
+template<class ES>
+HybridGridTreeSet 
+HybridDiscretiser<ES>::
+evolve(const SystemType& system, 
+             const BasicSetType& initial_set, 
+             const TimeType& time,
+             const AccuracyType accuracy,
+             const Semantics semantics) const
+{
+    return this->_discretise(this->_evolver->evolve(system,this->_enclosure(initial_set),time,semantics),initial_set,accuracy);
+}
+
+
+
 template<class ES>
 typename HybridDiscretiser<ES>::EnclosureType 
 HybridDiscretiser<ES>::
@@ -197,6 +224,24 @@ _discretise(const Orbit<EnclosureType>& continuous_orbit,
     return Orbit<BasicSetType>(initial_set,reach_set,intermediate_set,final_set);
  
 }
+
+template<class ES>
+HybridGridTreeSet
+HybridDiscretiser<ES>::
+_discretise(const ListSet<EnclosureType>& enclosure_list_set,
+            const BasicSetType& initial_set,
+            const int accuracy) const
+{
+    ARIADNE_LOG(3,ARIADNE_PRETTY_FUNCTION<<"\n");
+    ARIADNE_LOG(6,"enclosure_list_set="<<enclosure_list_set<<"\n");
+    DenotableSetType discretised_set
+        = outer_approximation(enclosure_list_set,
+                              HybridGrid(enclosure_list_set.space(),Float(1)),
+                              accuracy);
+    ARIADNE_LOG(4,"discretised_set="<<discretised_set<<"\n");
+    return discretised_set; 
+}
+
 
 template class HybridDiscretiser<DefaultEnclosureType>;
 

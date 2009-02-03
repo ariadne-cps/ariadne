@@ -171,7 +171,7 @@ int main()
     HybridEnclosureType initial_enclosure(heater_off,initial_box);
   
     HybridTime evolution_time(0.25,4);
-  
+/*  
     std::cout << "Computing orbit... " << std::flush;
     OrbitType orbit = evolver.orbit(heating_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
@@ -181,7 +181,7 @@ int main()
     //plot("tutorial-orbit.png",Box(2, 0.0,1.0, 14.0,18.0), Colour(0.0,0.5,1.0), orbit.initial());
     plot("tutorial-orbit.png",Box(2, 0.0,1.0, 14.0,18.0), Colour(0.0,0.5,1.0), orbit);
 
-
+*/
 
     /// Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
@@ -193,6 +193,7 @@ int main()
 
     plot("tutorial-initial_set.png",Box(2, 0.0,1.0, 14.0,18.0), Colour(0.0,0.5,1.0), initial_set);
 
+/*
     // Compute evolved sets (i.e. at the evolution time) and reach sets (i.e. up to the evolution time) using lower semantics.
     // These functions run a bunch of simulations with bounded approximation errors and combines the results.
     // If the desired evolution time can not be attained without exceeding the error bounds, then the run discarded (without warning)
@@ -228,7 +229,7 @@ int main()
     } else {
         std::cerr << "Skipping computation of chain reachable set due to performance issues.";
     }
-
+*/
     {
         // Compute the reach set for times between tlower and tupper. 
         // The intermediate set is stored to an archive file and used to build the initial set for the reach step
@@ -240,6 +241,7 @@ int main()
     
         const HybridGridTreeSet* upper_intermediate_set_ptr = analyser.upper_evolve(heating_system,initial_set,transient_time);
         const HybridGridTreeSet upper_intermediate_set = *upper_intermediate_set_ptr;
+        plot("tutorial-upper_intermediate.png",Box(2, 0.0,1.0, 14.0,18.0), Colour(0.0,0.5,1.0), *upper_intermediate_set_ptr);
     
         std::ofstream output_file_stream("tutorial-transient.txt");
         text_oarchive output_archive(output_file_stream);
@@ -258,6 +260,7 @@ int main()
         plot("tutorial-upper_recurrent.png",Box(2, 0.0,1.0, 14.0,18.0), Colour(0.0,0.5,1.0), *upper_recurrent_set_ptr);
     }
 
+/*
 
     {
         // Use main graphics facilities
@@ -280,5 +283,5 @@ int main()
         // Display the figure in a pop-up window
         if(false) { g.display(); }
     }
-      
+ */     
 }

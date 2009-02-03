@@ -145,7 +145,7 @@ int main()
     Box bounding_box(2, -0.1,9.1, -0.1,1.1);
   
     HybridTime evolution_time(64.0,6);
- /* 
+  
     std::cout << "Computing orbit... " << std::flush;
     OrbitType orbit = evolver.orbit(watertank_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
@@ -161,7 +161,7 @@ int main()
     std::cout << "Orbit="<<reach<<std::endl;
     //plot("tutorial-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit.initial());
     plot("watertank-reach-evolver",bounding_box, Colour(0.0,0.5,1.0), reach);
-*/
+
 
     /// Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
@@ -184,7 +184,6 @@ int main()
     std::cout << "done." << std::endl;
     plot("watertank-lower_reach1",bounding_box, Colour(0.0,0.5,1.0), *lower_reach_set_ptr);
 
-/*
     // Compute evolved sets and reach sets using upper semantics.
     // These functions compute over-approximations to the evolved and reachabe sets. Subdivision is used
     // as necessary to keep the local errors reasonable. The accumulated global error may be very large.
@@ -216,6 +215,6 @@ int main()
     upper_reach_set_ptr = analyser.upper_reach(watertank_system,initial_set2,reach_time);
     std::cout << "done." << std::endl;
     plot("watertank-upper_reach2",bounding_box, Colour(0.0,0.5,1.0), *upper_reach_set_ptr);
-*/
+
 
 }

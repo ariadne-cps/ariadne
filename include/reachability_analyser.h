@@ -34,6 +34,7 @@
 #include "hybrid_set_interface.h"
 #include "evolver_interface.h"
 #include "reachability_analyser_interface.h"
+#include "discretiser.h"
 
 #include "orbit.h"
 #include "grid_set.h"
@@ -70,7 +71,7 @@ class HybridReachabilityAnalyser
 {
   private:
     boost::shared_ptr< DiscreteEvolutionParameters > _parameters;
-    boost::shared_ptr< DiscretiserInterface<HybridAutomaton,HybridGridCell> > _discretiser;
+    boost::shared_ptr< HybridDiscretiser<DefaultEnclosureType> > _discretiser;
   public:
     typedef DiscreteEvolutionParameters EvolutionParametersType;
     typedef HybridAutomaton SystemType;

@@ -261,7 +261,7 @@ upper_evolve(const SystemType& system,
     }
     ARIADNE_LOG(3,"remainder_time="<<remainder_time<<"\n");
     if(!evolve.empty() && remainder_time > 0) {
-        ARIADNE_LOG(3,"computing evolution for reminder time...\n");    
+        ARIADNE_LOG(3,"computing evolution for remainder time...\n");    
         evolve=this->_upper_evolve(system,evolve,hybrid_remainder_time,grid_depth);
     }
     evolve.recombine();
@@ -310,7 +310,7 @@ upper_reach(const SystemType& system,
     }
     ARIADNE_LOG(3,"remainder_time="<<remainder_time<<"\n");
     if(!evolve.empty() && remainder_time > 0) {
-        ARIADNE_LOG(3,"computing evolution for reminder time...\n");    
+        ARIADNE_LOG(3,"computing evolution for remainder time...\n");    
         reach.adjoin(this->_upper_reach(system,evolve,hybrid_remainder_time,grid_depth));
     }
     reach.recombine();
@@ -355,7 +355,7 @@ upper_reach_evolve(const SystemType& system,
     }
     ARIADNE_LOG(3,"remainder_time="<<remainder_time<<"\n");
     if(!evolve.empty() && remainder_time > 0) {
-        ARIADNE_LOG(3,"computing evolution for reminder time...\n");    
+        ARIADNE_LOG(3,"computing evolution for remainder time...\n");    
         make_lpair(found,evolve) = this->_upper_reach_evolve(system,evolve,hybrid_remainder_time,grid_depth);
         reach.adjoin(found);
     }

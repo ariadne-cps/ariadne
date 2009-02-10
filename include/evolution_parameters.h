@@ -196,8 +196,8 @@ ContinuousEvolutionParameters::ContinuousEvolutionParameters()
 
 inline
 DiscreteEvolutionParameters::DiscreteEvolutionParameters() 
-    : transient_time(4.0),
-      transient_steps(4),
+    : transient_time(0.0),
+      transient_steps(0),
       lock_to_grid_time(1.0),
       lock_to_grid_steps(1),
       grid_lengths(1.0),

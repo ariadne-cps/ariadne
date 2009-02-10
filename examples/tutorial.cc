@@ -38,7 +38,7 @@ Float pi_=Ariadne::pi<Float>();
 struct HeaterOn : FunctionData<2,2,4> {
     template<class R, class A, class P> static void 
     compute(R& r, const A& x, const P& p) {
-        //    r[0] = p[0] + p[1] * ( p[2] - p[3] * Ariadne::cos(2*pi_*x[1]) - x[0] );
+        //    r[0] = p[0] + p[1] * ( p[2] - p[3] * Ariadne::cos(2*pi_*x[0]) - x[1] );
         typename R::value_type t0=2*pi_*x[0];
         r[0] = 1.0; 
         r[1] = p[0] + p[1] * ( p[2] - p[3] * (1-sqr(t0)/2) - x[1] );
@@ -48,7 +48,7 @@ struct HeaterOn : FunctionData<2,2,4> {
 struct HeaterOff : FunctionData<2,2,4> {
     template<class R, class A, class P> static void 
     compute(R& r, const A& x, const P& p) {
-        //    r[0] = p[1] * ( p[2] - p[3] * Ariadne::cos(2*pi_*x[1]) - x[0] );
+        //    r[0] = p[1] * ( p[2] - p[3] * Ariadne::cos(2*pi_*x[0]) - x[1] );
         typename R::value_type t0=2*pi_*x[0];
         r[0] = 1.0; 
         r[1] = p[1] * ( p[2] - p[3] * (1-sqr(t0)/2) - x[1] );
@@ -66,7 +66,7 @@ int main()
     /// where \f$T_\mathrm{ext}(t) = T_\mathrm{av} - A \cos(2\pi t)\f$ is the
     /// external temperature and \f$ q(t)\in\{\mathsc{on},\mathsc{off}\}\f$ is the
     /// discrete state of the heater.
-    /// The parameters are the insulation coefficient \f$k\f$, the average 
+    /// The parameters are the insulation coefficient \f$K\f$, the average 
     /// external temperature \f$T_\mathrm{av}\f$, the amplitude of the 
     /// temperature fluctuations \f$A\f$ and the power of the heater \f$P\f$.
     ///
@@ -171,7 +171,7 @@ int main()
     HybridEnclosureType initial_enclosure(heater_off,initial_box);
   
     HybridTime evolution_time(0.25,4);
-/*  
+  
     std::cout << "Computing orbit... " << std::flush;
     OrbitType orbit = evolver.orbit(heating_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
@@ -181,15 +181,16 @@ int main()
     //plot("tutorial-orbit.png",Box(2, 0.0,1.0, 14.0,18.0), Colour(0.0,0.5,1.0), orbit.initial());
     plot("tutorial-orbit.png",Box(2, 0.0,1.0, 14.0,18.0), Colour(0.0,0.5,1.0), orbit);
 
-*/
+
 
     /// Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
 
     HybridImageSet initial_set;
     initial_set[heater_off]=initial_box;
-
-    HybridTime reach_time(0.25,4);
+    global_verbosity = 6;
+    
+    HybridTime reach_time(0.25,1);
 
     plot("tutorial-initial_set.png",Box(2, 0.0,1.0, 14.0,18.0), Colour(0.0,0.5,1.0), initial_set);
 
@@ -235,8 +236,8 @@ int main()
         // The intermediate set is stored to an archive file and used to build the initial set for the reach step
         // Note that because of peculiarities in the Boost serialization library, 
         // the object to be serialized must be declared const.
-        Float tlower=0.5; Float tupper=0.75;
-        HybridTime transient_time(tlower,16);
+        Float tlower=0.25; Float tupper=0.75;
+        HybridTime transient_time(tlower,4);
         HybridTime recurrent_time(tupper-tlower,16);
     
         const HybridGridTreeSet* upper_intermediate_set_ptr = analyser.upper_evolve(heating_system,initial_set,transient_time);

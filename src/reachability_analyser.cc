@@ -118,6 +118,7 @@ HybridReachabilityAnalyser::_upper_evolve(const HybridAutomaton& sys,
         ARIADNE_LOG(5,"Evolving cell = "<<*iter<<"\n");
         result.adjoin(this->_discretiser->evolve(sys,*iter,time,accuracy,UPPER_SEMANTICS)); 
     }
+    ARIADNE_LOG(4,"_upper_evolve result size = "<<result.size()<<"\n");
     return result; 
 }
 
@@ -265,7 +266,7 @@ upper_evolve(const SystemType& system,
         evolve=this->_upper_evolve(system,evolve,hybrid_remainder_time,grid_depth);
     }
     evolve.recombine();
-    ARIADNE_LOG(4,"final_evolve="<<evolve<<"\n");
+    ARIADNE_LOG(4,"final_evolve.size()="<<evolve.size()<<"\n");
     return &evolve;
 }
 
@@ -296,6 +297,7 @@ upper_reach(const SystemType& system,
     HybridTime hybrid_remainder_time(remainder_time,discrete_steps);
     ARIADNE_LOG(3,"real_time="<<real_time<<"\n");
     ARIADNE_LOG(3,"time_steps="<<time_steps<<"  lock_to_grid_time="<<lock_to_grid_time<<"\n");
+    ARIADNE_LOG(3,"discrete_steps="<<discrete_steps<<"\n");    
     GTS found;
     for(uint i=0; i!=time_steps; ++i) {
         ARIADNE_LOG(3,"computing "<<i+1<<"-th reachability step...\n");

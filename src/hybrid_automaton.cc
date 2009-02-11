@@ -96,7 +96,7 @@ DiscreteTransition(DiscreteEvent event,
     : _event(event), _source(&source), _target(&target), 
       _activation(activation.clone()), _reset(reset.clone()), _forced(forced) 
 { 
-    ARIADNE_ASSERT(activation.result_size()==1);
+    ARIADNE_ASSERT(activation.result_size()>=1);
     ARIADNE_ASSERT(activation.argument_size()==source.dimension());
     ARIADNE_ASSERT(reset.argument_size()==source.dimension());
     ARIADNE_ASSERT(reset.result_size()==target.dimension());

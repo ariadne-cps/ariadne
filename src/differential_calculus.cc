@@ -197,7 +197,7 @@ touching_time_interval(const ModelType& guard_model,
 {
     ARIADNE_ASSERT(flow_model.result_size()+1==flow_model.argument_size());
     ARIADNE_ASSERT(guard_model.argument_size()==flow_model.result_size());
-    ARIADNE_ASSERT(guard_model.result_size()==1u);
+    ARIADNE_ASSERT(guard_model.result_size()>=1u);
 
     uint dimension=guard_model.argument_size();
     RealType minimum_time=flow_model.domain()[dimension].lower(); 
@@ -334,8 +334,16 @@ tribool
 DifferentialCalculus<Mdl>::
 active(const PredicateModelType& guard_model, const SetModelType& set_model) const
 {
-    IntervalType range=compose(guard_model,set_model).range()[0];
-    return this->_tribool(range);
+    BoxType range=compose(guard_model,set_model).range();
+    uint dimension=range.size();
+    for(uint i = 0; i < dimension ; i++) {
+      tribool test = this->_tribool(range[i]);
+      if(test == false) return false;   // at least one component is negative
+      if(test == indeterminate) return indeterminate;   // one component is indeterminate
+    }
+    // if the for loop is completed, all components are positive and the guard is true
+    return true;
+    //    return this->_tribool(range);
 }
 
 
@@ -373,7 +381,7 @@ template<class Mdl>
 Mdl
 DifferentialCalculus<Mdl>::predicate_model(FunctionInterface const& g, Vector<Interval> const& bx) const
 { 
-    ARIADNE_ASSERT(g.result_size()==1);
+    ARIADNE_ASSERT(g.result_size()>=1);
     ARIADNE_ASSERT(g.argument_size()==bx.size());
 
     Mdl predicate_model(bx,g,_order,_smoothness);

@@ -119,14 +119,16 @@ class HybridSetConstIterator
     : public boost::iterator_facade<HybridSetConstIterator<DS,HBS>,
                                     HBS,
                                     boost::forward_traversal_tag,
-                                    HBS
+                                    HBS const&
                                     >
 
 {
   public:
+    typedef HBS const& reference;
+  public:
     HybridSetConstIterator(const std::map<DiscreteState,DS>&, bool);
     bool equal(const HybridSetConstIterator<DS,HBS>&) const;
-    HBS dereference() const;
+    const HBS& dereference() const;
     void increment();
   private:
     void increment_loc();
@@ -135,6 +137,7 @@ class HybridSetConstIterator
     typename std::map< DiscreteState,DS>::const_iterator loc_end;
     typename std::map< DiscreteState,DS>::const_iterator loc_iter;
     typename DS::const_iterator bs_iter;
+    mutable HBS hybrid_set;
 };
 
 
@@ -291,6 +294,8 @@ class HybridGridCell
     : public std::pair<DiscreteState,GridCell> 
 {
   public:
+    HybridGridCell()
+        : std::pair<DiscreteState,GridCell>() { }
     HybridGridCell(DiscreteState q,const GridCell& gc)
         : std::pair<DiscreteState,GridCell>(q,gc) { }
     HybridGridCell(const std::pair<DiscreteState,GridCell>& hgc) 
@@ -542,12 +547,11 @@ HybridSetConstIterator<DS,HBS>::equal(const HybridSetConstIterator<DS,HBS>& othe
 
 
 template<class DS, class HBS> inline
-HBS
+HBS const&
 HybridSetConstIterator<DS,HBS>::dereference() const
 {
-    return HBS(loc_iter->first,*this->bs_iter);
-    //this->hybrid_cell=HBS(loc_iter->first,*this->bs_iter);
-    //return this->hybrid_cell;
+    this->hybrid_set=HBS(loc_iter->first,*this->bs_iter);
+    return this->hybrid_set;
 }
 
 

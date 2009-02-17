@@ -188,6 +188,7 @@ class Orbit<HybridTaylorSetType>
 
 template<class ES> std::ostream& operator<<(std::ostream& os, const Orbit< ES >& orb);
 template<> std::ostream& operator<<(std::ostream& os, const Orbit<TaylorSetType>& orb);
+template<> std::ostream& operator<<(std::ostream& os, const Orbit<HybridTaylorSetType>& orb);
 
 
 template<class ES> 

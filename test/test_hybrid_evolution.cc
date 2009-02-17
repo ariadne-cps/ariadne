@@ -162,4 +162,10 @@ void TestHybridEvolution::test() const
     fig.write("test_hybrid_evolution-affine");
     cout << "done" << endl;
 
+    cout << "Plotting orbit... " << flush;
+    fig.clear();
+    fig << orbit;
+    fig.write("test_hybrid_evolution-orbit");
+    cout << "done" << endl;
+
 }

@@ -339,4 +339,17 @@ operator<<(std::ostream& os, const Orbit<TaylorSetType>& orb)
 }
 
 
+template<> 
+std::ostream& 
+operator<<(std::ostream& os, const Orbit<HybridTaylorSetType>& orb)
+{
+    os << "Orbit(\n  initial=" << Orbit<HybridTaylorSetType>::EnclosureListType(orb.initial()).bounding_boxes()
+       << "\n  intermediate=" << orb.intermediate().bounding_boxes()
+       << "\n  reach=" << orb.reach().bounding_boxes()
+       << "\n  final=" << orb.final().bounding_boxes()
+       << ")\n";
+    return os;
+}
+
+
 } // namespace Ariadne

@@ -487,6 +487,9 @@ class GridCell {
     static inline void primary_cell_at_height( const uint theHeight, int & leftBottomCorner, int & rightTopCorner );
 
   public:
+    /*! \brief Default constructor. Needed for some containers and iterators. */
+    GridCell();
+            
     /*! \brief The copy constructor for the \a GridCell */
     GridCell(const GridCell& theGridCell);
 
@@ -1706,6 +1709,11 @@ inline GridTreeCursor const& GridTreeConstIterator::cursor() const {
 }
  
 /*********************************************GridCell***********************************************/
+    
+inline GridCell::GridCell():
+    _theGrid(), _theHeight(),
+    _theWord(), _theBox() {
+}
     
 inline GridCell::GridCell(const GridCell& theGridCell):
     _theGrid(theGridCell._theGrid), _theHeight(theGridCell._theHeight),

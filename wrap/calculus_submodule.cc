@@ -206,10 +206,23 @@ void export_taylor_variable()
     taylor_variable_class.def(self-=self);
     taylor_variable_class.def(self_ns::str(self));
     taylor_variable_class.def("truncate", (TaylorVariable&(TaylorVariable::*)(uint)) &TaylorVariable::truncate,return_value_policy<reference_existing_object>());
-    taylor_variable_class.def("sweep", &TaylorVariable::sweep,return_value_policy<reference_existing_object>());
+    taylor_variable_class.def("sweep", (TaylorVariable&(TaylorVariable::*)(double))&TaylorVariable::sweep,return_value_policy<reference_existing_object>());
+    taylor_variable_class.def("truncate", (TaylorVariable&(TaylorVariable::*)()) &TaylorVariable::truncate,return_value_policy<reference_existing_object>());
+    taylor_variable_class.def("sweep", (TaylorVariable&(TaylorVariable::*)())&TaylorVariable::sweep,return_value_policy<reference_existing_object>());
+    taylor_variable_class.def("set_maximum_degree",&TaylorVariable::set_maximum_degree);
+    taylor_variable_class.def("set_sweep_threshold",&TaylorVariable::set_sweep_threshold);
+    taylor_variable_class.def("maximum_degree",&TaylorVariable::maximum_degree);
+    taylor_variable_class.def("sweep_threshold",&TaylorVariable::sweep_threshold);
+    taylor_variable_class.def("set_default_maximum_degree",&TaylorVariable::set_default_maximum_degree);
+    taylor_variable_class.def("set_default_sweep_threshold",&TaylorVariable::set_default_sweep_threshold);
+    taylor_variable_class.def("default_maximum_degree",&TaylorVariable::default_maximum_degree);
+    taylor_variable_class.def("default_sweep_threshold",&TaylorVariable::default_sweep_threshold);
     taylor_variable_class.def("evaluate", (Interval(TaylorVariable::*)(const Vector<Float>&)const) &TaylorVariable::evaluate);
     taylor_variable_class.def("evaluate", (Interval(TaylorVariable::*)(const Vector<Interval>&)const) &TaylorVariable::evaluate);
-
+    taylor_variable_class.staticmethod("set_default_maximum_degree");
+    taylor_variable_class.staticmethod("set_default_sweep_threshold");
+    taylor_variable_class.staticmethod("default_maximum_degree");
+    taylor_variable_class.staticmethod("default_sweep_threshold");
     def("split", &python_split);
 
 

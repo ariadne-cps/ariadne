@@ -136,6 +136,11 @@ class TaylorVariable
     static const Float _zero;
     SparseDifferential<Float> _expansion;
     Interval _error;
+    double _sweep_threshold;
+    uint _maximum_degree;
+  private:
+    static double _default_sweep_threshold;
+    static uint _default_maximum_degree;
   public:
     static const double em;
     static const double ec;
@@ -148,7 +153,7 @@ class TaylorVariable
 
     TaylorVariable() : _expansion(), _error(0) { }
     TaylorVariable(uint as) : _expansion(as), _error(0) { }
-    TaylorVariable(const SparseDifferential<Float>& d, const Interval& e) : _expansion(d), _error(e) { }
+    TaylorVariable(const SparseDifferential<Float>& d, const Interval& e) : _expansion(d), _error(e), _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree) { }
     template<class XX, class XXX> TaylorVariable(uint as, uint deg, const XXX* ptr, const XX& eps) : _expansion(as,deg,ptr), _error(eps) { }
 
     TaylorVariable& operator=(const Float& c) { this->_expansion=c; this->_error=0; return *this; }
@@ -208,6 +213,15 @@ class TaylorVariable
     
     template<class XX> Interval evaluate(const Vector<XX>& x) const;
 
+    static void set_default_maximum_degree(uint);
+    static void set_default_sweep_threshold(double);
+    static uint default_maximum_degree();
+    static double default_sweep_threshold();
+    void set_maximum_degree(uint md);
+    void set_sweep_threshold(double st);
+    uint maximum_degree() const;
+    double sweep_threshold() const;
+
     std::string str() const;
 
     friend TaylorVariable& operator+=(TaylorVariable& x, const TaylorVariable& y);
@@ -248,7 +262,9 @@ class TaylorVariable
     void clean();
     TaylorVariable& truncate(uint d);
     TaylorVariable& truncate(const MultiIndex& a);
-    TaylorVariable& sweep(const Float& eps);
+    TaylorVariable& truncate();
+    TaylorVariable& sweep(double eps);
+    TaylorVariable& sweep();
   public:
     TaylorVariable& clobber();
     TaylorVariable& clobber(uint o);

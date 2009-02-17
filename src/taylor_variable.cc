@@ -33,6 +33,7 @@
 #include "sparse_differential.h"
 #include "differential_vector.h"
 #include "taylor_variable.h"
+#include "exceptions.h"
 
 namespace Ariadne {
 
@@ -85,6 +86,56 @@ inline TaylorVariable mul(const TaylorVariable& x, const Float& c) { return mul_
 inline TaylorVariable mul(const TaylorVariable& x, const TaylorVariable& y) { return mul_rounded(x,y); }
 #endif
 
+
+double TaylorVariable::_default_sweep_threshold=1e-18;
+uint TaylorVariable::_default_maximum_degree=16;
+
+
+void
+TaylorVariable::set_default_maximum_degree(unsigned int dmd) 
+{
+    if(dmd>31) {
+        std::cerr<<"WARNING: setting default maximum degree of TaylorVariable to "<<dmd<<".\n";
+    }
+    _default_maximum_degree=dmd;
+}
+
+void
+TaylorVariable::set_default_sweep_threshold(double dst) 
+{
+    ARIADNE_ASSERT(dst>=0.0);
+    _default_sweep_threshold=dst;
+}
+
+void
+TaylorVariable::set_maximum_degree(unsigned int md) 
+{
+    if(md>31) {
+        std::cerr<<"WARNING: setting maximum degree of TaylorVariable to "<<md<<".\n";
+    }
+    this->_maximum_degree=md;
+}
+
+void
+TaylorVariable::set_sweep_threshold(double st) 
+{
+    ARIADNE_ASSERT(st>=0.0);
+    _sweep_threshold=st;
+}
+
+uint
+TaylorVariable::maximum_degree() const
+{
+    return this->_maximum_degree;
+}
+
+
+
+double
+TaylorVariable::sweep_threshold() const
+{
+    return this->_sweep_threshold;
+}
 
 
 TaylorVariable&
@@ -304,7 +355,13 @@ TaylorVariable::acc(const TaylorVariable& x, const TaylorVariable& y)
 }
 
 TaylorVariable&
-TaylorVariable::sweep(const Float& m)
+TaylorVariable::sweep()
+{
+    return this->sweep(this->_sweep_threshold);
+}
+
+TaylorVariable&
+TaylorVariable::sweep(double m)
 {
     for(iterator iter=this->_expansion.begin(); iter!=this->end(); ) {
         Float a=abs(iter->second);
@@ -316,6 +373,12 @@ TaylorVariable::sweep(const Float& m)
         }
     }
     return *this;
+}
+
+TaylorVariable&
+TaylorVariable::truncate()
+{
+    return this->truncate(this->_maximum_degree);
 }
 
 TaylorVariable&
@@ -467,6 +530,9 @@ operator*=(TaylorVariable& x, const Interval& c)
 TaylorVariable&
 operator/=(TaylorVariable& x, const Float& c)
 {
+    if(c==0) {
+        ARIADNE_THROW(DivideByZeroException,"operator/=(TaylorVariable x,Float c)","x="<<x<<" c="<<c);
+    }
     return x.scal(Interval(1.0)/c);
 }
 
@@ -474,6 +540,9 @@ operator/=(TaylorVariable& x, const Float& c)
 TaylorVariable&
 operator/=(TaylorVariable& x, const Interval& c)
 {
+    if(c.upper()>=0 && c.lower()<=0) {
+        ARIADNE_THROW(DivideByZeroException,"operator/=(TaylorVariable x,Interval c)","x="<<x<<" c="<<c);
+    }
     return x.scal(1.0/c);
 }
 
@@ -1249,8 +1318,6 @@ TaylorVariable pow(const TaylorVariable& x, int n) {
 TaylorVariable sqrt(const TaylorVariable& x) {
     //std::cerr<<"rec(TaylorVariable)\n";
     // Use a special routine to minimise errors
-    static const Float max_trunc_err=1e-12;
-    static const Float max_sweep_err=1e-12;
     // Given range [rl,ru], scale by constant a such that rl/a=1-d; ru/a=1+d
     Interval r=x.range();
     assert(r.l>0);
@@ -1259,7 +1326,7 @@ TaylorVariable sqrt(const TaylorVariable& x) {
     Float eps=(r.u-r.l)/(r.u+r.l);
     set_rounding_to_nearest();
     assert(eps<1);
-    uint d=uint(log((1-eps)*max_trunc_err)/log(eps)+1);
+    uint d=uint(log((1-eps)*x._sweep_threshold)/log(eps)+1);
     //std::cerr<<"x="<<x<<std::endl;
     //std::cerr<<"x/a="<<x/a<<" a="<<a<<std::endl;
     TaylorVariable y=(x/a)-1.0;
@@ -1271,7 +1338,7 @@ TaylorVariable sqrt(const TaylorVariable& x) {
     z+=sqrt_series[d-1];
     for(uint i=0; i!=d; ++i) {
         z=sqrt_series[d-i-1] + z * y;
-        z.sweep(max_sweep_err);
+        z.sweep();
         //std::cerr<<"z="<<z<<std::endl;
     }
     Float trunc_err=pow(eps,d)/(1-eps)*mag(sqrt_series[d]);
@@ -1288,17 +1355,17 @@ TaylorVariable sqrt(const TaylorVariable& x) {
 TaylorVariable rec(const TaylorVariable& x) {
     //std::cerr<<"rec(TaylorVariable)\n";
     // Use a special routine to minimise errors
-    static const Float max_trunc_err=1e-12;
-    static const Float max_sweep_err=1e-12;
     // Given range [rl,ru], scale by constant a such that rl/a=1-d; ru/a=1+d
     Interval r=x.range();
-    assert(r.l>0 || r.u<0);
+    if(r.upper()>=0 && r.lower()<=0) {
+        ARIADNE_THROW(DivideByZeroException,"rec(TaylorVariable x)","x="<<x);
+    }
     Float a=(r.l+r.u)/2;
     set_rounding_upward();
     Float eps=abs((r.u-r.l)/(r.u+r.l));
     set_rounding_to_nearest();
     assert(eps<1);
-    uint d=uint(log((1-eps)*max_trunc_err)/log(eps))+1;
+    uint d=uint(log((1-eps)*x._sweep_threshold)/log(eps))+1;
     //std::cerr<<"  x="<<x<<"\n";
     TaylorVariable y=1-(x/a);
     //std::cerr<<"  y="<<y<<"\n";
@@ -1306,7 +1373,7 @@ TaylorVariable rec(const TaylorVariable& x) {
     z+=Float(d%2?-1:+1);
     for(uint i=0; i!=d; ++i) {
         z=1.0 + z * y;
-        z.sweep(max_sweep_err);
+        z.sweep();
     }
     //std::cerr<<"  z="<<z<<"\n";
     Float te=pow(eps,d)/(1-eps);
@@ -1327,8 +1394,6 @@ TaylorVariable rec(const TaylorVariable& x) {
 
 TaylorVariable log(const TaylorVariable& x) {
     // Use a special routine to minimise errors
-    static const Float max_trunc_err=1e-12;
-    static const Float max_sweep_err=1e-12;
     // Given range [rl,ru], scale by constant a such that rl/a=1-d; ru/a=1+d
     Interval r=x.range();
     assert(r.l>0);
@@ -1337,23 +1402,23 @@ TaylorVariable log(const TaylorVariable& x) {
     Float eps=(r.u-r.l)/(r.u+r.l);
     set_rounding_to_nearest();
     assert(eps<1);
-    uint d=uint(log((1-eps)*max_trunc_err)/log(eps)+1);
+    uint d=uint(log((1-eps)*x._sweep_threshold)/log(eps)+1);
     TaylorVariable y=x/a-1;
     TaylorVariable z(x.argument_size());
     z+=Float(d%2?-1:+1)/d;
     for(uint i=1; i!=d; ++i) {
         z=Float((d-i)%2?+1:-1)/(d-i) + z * y;
-        z.sweep(max_sweep_err);
+        z.sweep();
     }
     z=z*y;
-    z.sweep(max_sweep_err);
+    z.sweep();
     Float trunc_err=pow(eps,d)/(1-eps)/d;
     return z+log(Interval(a))+trunc_err*Interval(-1,1);
 }
 
 TaylorVariable exp(const TaylorVariable& x) {
     static const uint DEG=18;
-    return _compose(&Series<Interval>::exp,x,TaylorVariable::ec);
+    return _compose(&Series<Interval>::exp,x,x._sweep_threshold);
     return compose(TaylorSeries(DEG,&Series<Interval>::exp,
                                 x.value(),x.range()),x);
 }

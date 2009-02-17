@@ -49,6 +49,7 @@ class TestFloat
     void test_comparison();
     void test_rounding();
     void test_arithmetic();
+    void test_cosine();
     void test_function();
 };
 
@@ -73,6 +74,7 @@ TestFloat::test()
     ARIADNE_TEST_CALL(test_comparison());
     ARIADNE_TEST_CALL(test_rounding());
     ARIADNE_TEST_CALL(test_arithmetic());
+    ARIADNE_TEST_CALL(test_cosine());
     ARIADNE_TEST_CALL(test_function());
 }
 
@@ -543,3 +545,55 @@ TestFloat::test_function()
     //test_inverse_pair("tanh",&tanh_down,&tanh_up,&atanh_down,&atanh_up);
 }
 
+void
+TestFloat::test_cosine()
+
+{   
+    //3.14159265358979323846264338327950288419716939937510
+    static const double pi_down=3.1415926535897931;
+    //static const double pi_approx=3.1415926535897931;
+    static const double pi_up=3.1415926535897936;
+     
+    static const double third_pi_down=1.0471975511965976;
+    static const double third_pi_up=1.0471975511965979;
+    
+    static const double sqrt_half_down=0.70710678118654746;
+    //static const double sqrt_half_approx=0.70710678118654757;
+    static const double sqrt_half_up=0.70710678118654757;
+
+    cout << __PRETTY_FUNCTION__ << endl;
+
+    set_rounding_mode(upward);
+    ARIADNE_TEST_EQUAL(cos_rnd(0.0),1.0);
+    ARIADNE_TEST_EQUAL(cos_rnd(0.0),1.0);
+    ARIADNE_TEST_COMPARE(cos_rnd(third_pi_down),>,0.5);
+    ARIADNE_TEST_COMPARE(cos_rnd(pi_down/4),>,sqrt_half_up);
+    ARIADNE_TEST_COMPARE(cos_rnd(pi_down/2),>,0.0);
+    ARIADNE_TEST_COMPARE(cos_rnd(pi_up/2),<=,0.0);
+    ARIADNE_TEST_COMPARE(cos_rnd(pi_down),>,-1.0);
+    ARIADNE_TEST_COMPARE(cos_rnd(pi_up),>,-1.0);
+    ARIADNE_TEST_COMPARE(cos_rnd(2*pi_down),==,1.0);
+    ARIADNE_TEST_COMPARE(cos_rnd(2*pi_up),==,1.0);
+    ARIADNE_TEST_COMPARE(cos_rnd(3*pi_down),>,-1.0);
+    ARIADNE_TEST_COMPARE(cos_rnd(3*pi_up),>,-1.0);
+
+    set_rounding_mode(downward);
+    ARIADNE_TEST_EQUAL(cos_rnd(0.0),1.0);
+    ARIADNE_TEST_EQUAL(cos_rnd(0.0),1.0);
+    ARIADNE_TEST_COMPARE(cos_rnd(third_pi_up),<,0.5);
+    ARIADNE_TEST_COMPARE(cos_rnd(pi_up/4),<,sqrt_half_down);
+    ARIADNE_TEST_COMPARE(cos_rnd(pi_down/2),>=,0.0);
+    ARIADNE_TEST_COMPARE(cos_rnd(pi_up/2),<,0.0);
+    ARIADNE_TEST_COMPARE(cos_rnd(pi_down),==,-1.0);
+    ARIADNE_TEST_COMPARE(cos_rnd(pi_up),==,-1.0);
+    ARIADNE_TEST_COMPARE(cos_rnd(2*pi_down),<,1.0);
+    ARIADNE_TEST_COMPARE(cos_rnd(2*pi_up),<,1.0);
+    ARIADNE_TEST_COMPARE(cos_rnd(3*pi_down),==,-1.0);
+    ARIADNE_TEST_COMPARE(cos_rnd(3*pi_up),==,-1.0);
+
+    set_rounding_mode(to_nearest);
+
+    double x=1.23; double y=1.23;
+    ARIADNE_TEST_COMPARE(x,<=,y);
+
+}

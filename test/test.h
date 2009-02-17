@@ -215,13 +215,28 @@ int test_case_counter = 0;
 #define ARIADNE_TEST_COMPARE(expression,comparison,expected)           \
     {                                                                   \
         std::cout << #expression << ": " << (expression) << std::flush; \
-        bool ok = (expression) comparison (expected);                   \
+        bool ok = ((expression) comparison (expected));               \
+        if(ok) {                                                        \
+            std::cout << " " << #comparison << " " << (expected) << "\n" << std::endl; \
+        } else {                                                        \
+            ++ARIADNE_TEST_FAILURES;                                    \
+            std::cout << "\nERROR: expected: " << #expression << #comparison << #expected << "=" << (expected) << std::endl; \
+            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Comparison `" << #expression << #comparison << #expected << "' failed; " << #expression << "=" << (expression) << "; " << #expected << "=" << (expected) << std::endl; \
+        }                                                               \
+    }                                                                   \
+                                                                        \
+/*! \brief Evaluates \a expression and checks if the result compares correctly with \a expected. */
+#define ARIADNE_TEST_RESULT_COMPARE(type,expression,comparison,expected) \
+    {                                                                   \
+        type result=(expression);                                       \
+        std::cout << #expression << ": " << result << std::flush; \
+        bool ok = result comparison (expected);               \
         if(ok) {                                                        \
             std::cout << " " << #comparison << " " << (expected) << "\n" << std::endl; \
         } else {                                                        \
             ++ARIADNE_TEST_FAILURES;                                    \
             std::cout << "\nERROR: expected: " << #expression << #comparison << #expected << std::endl; \
-            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Comparison `" << #expression << #comparison << #expected << "' failed; " << #expression << "=" << (expression) << "; " << #expected << "=" << (expected) << std::endl; \
+            std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Comparison `" << #expression << #comparison << #expected << "' failed; " << #expression << "=" << result << "; " << #expected << "=" << (expected) << std::endl; \
         }                                                               \
     }                                                                   \
                                                                         \

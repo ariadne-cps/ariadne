@@ -166,10 +166,10 @@ static inline double next_opp(double x) {
 
 static inline char rounding_mode_char() 
 {
-    if(get_rounding_mode() & 3072==0000) { return 'n'; }
-    if(get_rounding_mode() & 3072==1024) { return 'd'; }
-    if(get_rounding_mode() & 3072==2048) { return 'u'; }
-    if(get_rounding_mode() & 3072==3072) { return 'z'; }
+    if((get_rounding_mode() & 3072) == 0000) { return 'n'; }
+    if((get_rounding_mode() & 3072) == 1024) { return 'd'; }
+    if((get_rounding_mode() & 3072) == 2048) { return 'u'; }
+    if((get_rounding_mode() & 3072) == 3072) { return 'z'; }
     return '?';
 }
 
@@ -345,10 +345,28 @@ double log_rnd(double x) {
     return log2rnd*n+ly;
 }
 
+double pi_rnd() {
+    switch(get_rounding_mode()) {
+        case to_nearest: return pi_approx;
+        case downward: return pi_down;
+        case upward: return pi_up;
+        default: return pi_approx;
+    } 
+}
+
+double pi_opp() {
+    switch(get_rounding_mode()) {
+        case to_nearest: return pi_approx;
+        case downward: return pi_up;
+        case upward: return pi_down;
+        default: return pi_approx;
+    } 
+}
+
 double sin_rnd(double x) { 
     //std::cerr<<"sin_rnd("<<x<<")\n";
-    volatile double two_pi_rnd=next_rnd(two_pi_approx);
-    volatile double two_pi_opp=next_opp(two_pi_approx);
+    volatile double two_pi_rnd=2*pi_rnd();
+    volatile double two_pi_opp=2*pi_opp();
 
     volatile double half_pi_rnd=two_pi_rnd/4;
     volatile double half_pi_opp=two_pi_opp/4;
@@ -361,7 +379,7 @@ double sin_rnd(double x) {
 
     // Set to true if sin is decreasing so we want opposite rounding
     bool want_opposite=(q<-2||q>=2); 
-    // if n is negative then we need to swithc rounding of two_pi
+    // if n is negative then we need to switch rounding of two_pi
     volatile double two_pi_corr=((n>=0.0) ^ want_opposite) ? two_pi_rnd : two_pi_opp;
 
     // Scale onto interval from -pi to pi
@@ -388,37 +406,86 @@ double sin_rnd(double x) {
 
 double cos_rnd(double x) { 
     //std::cerr<<"cos_rnd("<<x<<")\n";
-    volatile double two_pi_rnd=next_rnd(two_pi_approx);
-    volatile double two_pi_opp=next_opp(two_pi_approx);
-    volatile double half_pi_rnd=two_pi_rnd/4;
+    const double pi_rnd=Ariadne::pi_rnd();
+    const double pi_opp=Ariadne::pi_opp();
+    const double half_pi_rnd=pi_rnd/2;
 
-    int q = (long int)(std::floor(x/quarter_pi_approx)) % 8;
-    if(q<-4) { q+=8; } if(q>=4) { q-=8; }     
-    volatile double n=-std::floor(x/two_pi_approx+0.5);
+    if(x==0.0) { return 1.0; }
 
-    volatile double y,w,c;
+    // Compute a constant n such that n*pi<x<(n+1)*pi 
+    long int n_rnd=(long int)(std::floor(div_rnd(x,pi_opp)));
+    long int n_opp=(long int)(std::floor(div_opp(x,pi_rnd)));
     
+    if(n_rnd!=n_opp) { 
+        //std::cerr<<"  n_rnd="<<n_rnd<<" n_opp="<<n_opp<<"\n";
+        if(n_rnd>n_opp) { 
+            // Rounding upwards
+            if(n_rnd%2==0) { return 1.0; }
+            volatile double y1=sub_rnd(pi_rnd*n_rnd,x);
+            volatile double y2=sub_rnd(x,pi_opp*n_rnd);
+            assert(y1>=0 && y2>=0);
+            volatile double w=std::max(y1,y2);
+            return neg_cos_rnd_series(w);
+        } else {
+            // Rounding downwards
+            if(n_rnd%2==0) { return -1.0; }
+            volatile double y1=sub_opp(pi_opp*n_opp,x);
+            volatile double y2=sub_opp(x,pi_rnd*n_opp);
+            assert(y1>=0 && y2>=0);
+            volatile double w=std::max(y1,y2);
+            return pos_cos_rnd_series(w);
+        }
+    }
 
-    // Set to true if cos is decreasing so we want opposite rounding
-    bool want_opposite=(q>=0); 
-    // if n is negative then we need to swithc rounding of two_pi
-    volatile double two_pi_corr=((n>=0.0) ^ want_opposite) ? two_pi_rnd : two_pi_opp;
-
-    // Scale onto interval from -pi to pi
-    if(want_opposite) { y=-x+(-n)*(two_pi_corr); y=-y; } else { y=x+n*two_pi_corr; }
    
+    // Set y=x-n*pi (with opposite rounding) if n is even
+    // and to (n+1)*pi-x (with opposite rounding) if n is odd
+    volatile double y;
+    if(n_rnd%2==0) {
+        y=sub_opp(x,mul_rnd(n_rnd,pi_rnd));
+    } else {
+        y=sub_opp(mul_opp(n_rnd+1,pi_opp),x);
+    }
+
+    int q = (long int)(std::floor(y/quarter_pi_approx)) % 8;
+    assert(q<=4);
+    //std::cerr<<"  n="<<n_rnd<<" y="<<y<<" q="<<q;
+   
+    volatile double w,c;
+    if(q==0) {
+        w=y;
+        //std::cerr<<" w="<<w<<"\n";
+        c=pos_cos_rnd_series(w);
+    } else if(q==1 || q==2) {
+        w=sub_rnd(pi_rnd/2,y);
+        //std::cerr<<" w="<<w<<"\n";
+        if(w>=0.0) { c=pos_sin_rnd_series(w); }
+        else { c=neg_sin_rnd_series(-w); }
+    } else if(q==3 || q==4) {
+        w=sub_opp(pi_opp,y);
+        //std::cerr<<" w="<<w<<"\n";
+        c=neg_cos_rnd_series(w);
+    } else {
+        assert(false);
+    }
+
+    return c;
+
+        
+
+    volatile double z=0.0;
+
     ARIADNE_ASSERT(-two_pi_approx<=y && y<=two_pi_approx);
-
-
+    using std::cerr; using std::endl;
     switch(q) { 
-    case -4: { w = +y + 2*half_pi_rnd; w=+w; c=neg_cos_rnd_series(w); break; }
-    case -3: { w = +y + 1*half_pi_rnd; w=-w; c=neg_sin_rnd_series(w); break; }
-    case -2: { w = +y + 1*half_pi_rnd; w=+w; c=pos_sin_rnd_series(w); break; }
-    case -1: { w = +y + 0*half_pi_rnd; w=-w; c=pos_cos_rnd_series(w); break; }
-    case +0: { w = -y + 0*half_pi_rnd; w=-w; c=pos_cos_rnd_series(w); break; }
-    case +1: { w = -y + 1*half_pi_rnd; w=+w; c=pos_sin_rnd_series(w); break; }
-    case +2: { w = -y + 1*half_pi_rnd; w=-w; c=neg_sin_rnd_series(w); break; }
-    case +3: { w = -y + 2*half_pi_rnd; w=+w; c=neg_cos_rnd_series(w); break; }
+    case -4: { w = +y + 2*half_pi_rnd; w=+w; w=max(w,z); cerr<<w<<endl; c=neg_cos_rnd_series(w); break; }
+    case -3: { w = +y + 1*half_pi_rnd; w=-w; w=max(w,z); cerr<<w<<endl; c=neg_sin_rnd_series(w); break; }
+    case -2: { w = +y + 1*half_pi_rnd; w=+w; w=max(w,z); cerr<<w<<endl; c=pos_sin_rnd_series(w); break; }
+    case -1: { w = +y + 0*half_pi_rnd; w=-w; w=max(w,z); cerr<<w<<endl; c=pos_cos_rnd_series(w); break; }
+    case +0: { w = -y + 0*half_pi_rnd; w=-w; w=max(w,z); cerr<<w<<endl; c=pos_cos_rnd_series(w); break; }
+    case +1: { w = -y + 1*half_pi_rnd; w=+w; w=max(w,z); cerr<<w<<endl; c=pos_sin_rnd_series(w); break; }
+    case +2: { w = -y + 1*half_pi_rnd; w=-w; w=max(w,z); cerr<<w<<endl; c=neg_sin_rnd_series(w); break; }
+    case +3: { w = -y + 2*half_pi_rnd; w=+w; w=max(w,z); cerr<<w<<endl; c=neg_cos_rnd_series(w); break; }
     default: { assert(false); }
     }
 
@@ -428,7 +495,7 @@ double cos_rnd(double x) {
 
 double pos_sin_rnd_series(double x) { 
     ARIADNE_ASSERT(x>=0.0);
-    ARIADNE_ASSERT(x<=pi_up/4);
+    ARIADNE_ASSERT(x<=0.7853981634);
     static const long long int c[9]={ 1LL, -6LL, 120LL, -5040LL, 362880LL, -39916800LL, 6227020800LL, -1307674368000LL, 355687428096000LL };
    
     // Compute sin(x) by Taylor series 
@@ -442,7 +509,7 @@ double pos_sin_rnd_series(double x) {
 
 double neg_sin_rnd_series(double x) { 
     ARIADNE_ASSERT(x>=0.0);
-    ARIADNE_ASSERT(x<=pi_up/4);
+    ARIADNE_ASSERT(x<=0.7853981634);
     static const long long int c[9]={ 1LL, -6LL, 120LL, -5040LL, 362880LL, -39916800LL, 6227020800LL, -1307674368000LL, 355687428096000LL };
    
     // Compute sin(x) by Taylor series 
@@ -457,7 +524,7 @@ double neg_sin_rnd_series(double x) {
 
 double pos_cos_rnd_series(double x) { 
     ARIADNE_ASSERT(x>=0.0);
-    ARIADNE_ASSERT(x<=pi_up/4);
+    ARIADNE_ASSERT(x<=0.7853981634);
 
     static const long long int c[9]={ 1LL, -2LL, 24LL, -720LL, 40320LL, -3628800LL, 479001600LL, -87178291200LL, 20922789888000LL };
     
@@ -474,7 +541,7 @@ double pos_cos_rnd_series(double x) {
 
 double neg_cos_rnd_series(double x) { 
     ARIADNE_ASSERT(x>=0.0);
-    ARIADNE_ASSERT(x<=pi_up/4);
+    ARIADNE_ASSERT(x<=0.7853981634);
 
     static const long long int c[9]={ 1LL, -2LL, 24LL, -720LL, 40320LL, -3628800LL, 479001600LL, -87178291200LL, 20922789888000LL };
     volatile double s,y;
@@ -809,6 +876,9 @@ Interval sin(Interval i)
 
 Interval cos(Interval i)
 {
+    //std::cerr<<"cos("<<i<<")"<<std::endl;
+    ARIADNE_ASSERT(i.lower()<=i.upper());
+
     rounding_mode_t rnd = get_rounding_mode();
 
     static const Interval pi(pi_down,pi_up);

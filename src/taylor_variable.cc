@@ -91,66 +91,6 @@ double TaylorVariable::_default_sweep_threshold=1e-18;
 uint TaylorVariable::_default_maximum_degree=16;
 
 
-uint
-TaylorVariable::default_maximum_degree() 
-{
-    return _default_maximum_degree;
-}
-
-
-
-double
-TaylorVariable::default_sweep_threshold() 
-{
-    return _default_sweep_threshold;
-}
-
-void
-TaylorVariable::set_default_maximum_degree(unsigned int dmd)
-{
-    if(dmd>31) {
-        std::cerr<<"WARNING: setting default maximum degree of TaylorVariable to "<<dmd<<".\n";
-    }
-    _default_maximum_degree=dmd;
-}
-
-void
-TaylorVariable::set_default_sweep_threshold(double dst)
-{
-    ARIADNE_ASSERT(dst>=0.0);
-    _default_sweep_threshold=dst;
-}
-
-void
-TaylorVariable::set_maximum_degree(unsigned int md)
-{
-    if(md>31) {
-        std::cerr<<"WARNING: setting maximum degree of TaylorVariable to "<<md<<".\n";
-    }
-    this->_maximum_degree=md;
-}
-
-void
-TaylorVariable::set_sweep_threshold(double st)
-{
-    ARIADNE_ASSERT(st>=0.0);
-    _sweep_threshold=st;
-}
-
-uint
-TaylorVariable::maximum_degree() const
-{
-    return this->_maximum_degree;
-}
-
-
-
-double
-TaylorVariable::sweep_threshold() const
-{
-    return this->_sweep_threshold;
-}
-
 
 TaylorVariable::TaylorVariable(const SparseDifferential<Float>& d, const Float& e)
     : _expansion(d), _error(e), _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree) 
@@ -159,13 +99,13 @@ TaylorVariable::TaylorVariable(const SparseDifferential<Float>& d, const Float& 
 }
 
 TaylorVariable::TaylorVariable(uint as, uint deg, const double* ptr, const double& err)
-    : _expansion(as,deg,ptr), _error(err) 
+    : _expansion(as,deg,ptr), _error(err), _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree) 
 { 
     if(err<0) { std::cerr<<err<<std::endl; } ARIADNE_ASSERT(this->_error>=0); 
 }
     
 TaylorVariable::TaylorVariable(uint as, uint deg, double d0, ...)
-    : _expansion(as,deg), _error(0) 
+    : _expansion(as,deg), _error(0), _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree) 
 {
     double x=d0;
     va_list args; 
@@ -176,8 +116,10 @@ TaylorVariable::TaylorVariable(uint as, uint deg, double d0, ...)
     } 
     this->_error=x;    
     va_end(args);
-    if(this->_error<0) { std::cerr<<this->_error<<std::endl; } ARIADNE_ASSERT(this->_error>=0); 
+    ARIADNE_ASSERT(this->_error>=0); 
 }
+
+
 
 
 TaylorVariable&
@@ -1103,7 +1045,7 @@ TaylorVariable::domain() const
 
 Interval
 TaylorVariable::range() const {
-    Interval r=this->error();
+    Interval r(-this->error(),+this->error());
     for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
         if(iter->first.degree()==0) {
             r+=iter->second;
@@ -1364,7 +1306,7 @@ TaylorVariable sqrt(const TaylorVariable& x) {
     z+=sqrt_series[d-1];
     for(uint i=0; i!=d; ++i) {
         z=sqrt_series[d-i-1] + z * y;
-        z.sweep();
+        z.sweep(); z.truncate();
         //std::cerr<<"z="<<z<<std::endl;
     }
     Float trunc_err=pow(eps,d)/(1-eps)*mag(sqrt_series[d]);
@@ -1393,13 +1335,16 @@ TaylorVariable rec(const TaylorVariable& x) {
     assert(eps<1);
     uint d=uint(log((1-eps)*x._sweep_threshold)/log(eps))+1;
     //std::cerr<<"  x="<<x<<"\n";
+    //std::cerr<<"  r="<<r<<"\n";
+    //std::cerr<<"  a="<<a<<"\n";
     TaylorVariable y=1-(x/a);
     //std::cerr<<"  y="<<y<<"\n";
     TaylorVariable z(x.argument_size());
     z+=Float(d%2?-1:+1);
     for(uint i=0; i!=d; ++i) {
         z=1.0 + z * y;
-        z.sweep();
+        z.sweep(); z.truncate();
+        //std::cerr<<"z.sweep_threshold="<<z.sweep_threshold()<<"\n";
     }
     //std::cerr<<"  z="<<z<<"\n";
     Float te=pow(eps,d)/(1-eps);
@@ -1410,8 +1355,6 @@ TaylorVariable rec(const TaylorVariable& x) {
 
     set_rounding_to_nearest();
     z.set_error(nze);
-    //z.error().u=nze;
-    //z.error().l=-nze;
     //std::cerr<<"  z="<<z<<"\n";
     z/=a;
     //std::cerr<<"  z="<<z<<"\n";
@@ -1434,7 +1377,7 @@ TaylorVariable log(const TaylorVariable& x) {
     z+=Float(d%2?-1:+1)/d;
     for(uint i=1; i!=d; ++i) {
         z=Float((d-i)%2?+1:-1)/(d-i) + z * y;
-        z.sweep();
+        z.sweep(); z.truncate();
     }
     z=z*y;
     z.sweep();

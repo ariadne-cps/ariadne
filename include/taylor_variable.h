@@ -151,8 +151,8 @@ class TaylorVariable
     typedef std::map<MultiIndex,Float>::iterator iterator;
     typedef std::map<MultiIndex,Float>::const_iterator const_iterator;
 
-    TaylorVariable() : _expansion(0), _error(0) { }
-    TaylorVariable(uint as) : _expansion(as), _error(0) { }
+    TaylorVariable() : _expansion(0), _error(0), _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree) { }
+    TaylorVariable(uint as) : _expansion(as), _error(0), _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree) { }
     TaylorVariable(const SparseDifferential<Float>& d, const Float& e);
     TaylorVariable(uint as, uint deg, const double* ptr, const double& err);
     TaylorVariable(uint as, uint deg, double d0, ...);
@@ -213,14 +213,14 @@ class TaylorVariable
     
     template<class XX> Interval evaluate(const Vector<XX>& x) const;
 
-    static void set_default_maximum_degree(uint);
-    static void set_default_sweep_threshold(double);
-    static uint default_maximum_degree();
-    static double default_sweep_threshold();
-    void set_maximum_degree(uint md);
-    void set_sweep_threshold(double st);
-    uint maximum_degree() const;
-    double sweep_threshold() const;
+    static void set_default_maximum_degree(uint md) { _default_maximum_degree=md; }
+    static void set_default_sweep_threshold(double me) { ARIADNE_ASSERT(me>=0.0); _default_sweep_threshold=me; }
+    static uint default_maximum_degree() { return _default_maximum_degree; }
+    static double default_sweep_threshold() { return _default_sweep_threshold; }
+    void set_maximum_degree(uint md) { this->_maximum_degree=md; }
+    void set_sweep_threshold(double me) { ARIADNE_ASSERT(me>=0.0); this->_sweep_threshold=me; }
+    uint maximum_degree() const { return this->_maximum_degree; }
+    double sweep_threshold() const { return this->_sweep_threshold; }
 
     std::string str() const;
 

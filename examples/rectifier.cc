@@ -174,7 +174,7 @@ int main()
 
     std::cout << "Computing evolution starting from location offoff, t = 0.0, vi = 0.0, vo = 1.0" << std::endl;
 
-    Box initial_box(3, 0.0,0.0, 0.0,0.0, dynamics_parameters[0],dynamics_parameters[0]);
+    Box initial_box(3, 0.25/dynamics_parameters[1],0.25/dynamics_parameters[1], dynamics_parameters[0],dynamics_parameters[0], dynamics_parameters[0],dynamics_parameters[0]);
     HybridEnclosureType initial_enclosure(offoff,initial_box);
 
 //    Box initial_box(3, 0.01,0.01, 3.80423,3.80423, 3.36842,3.36842);

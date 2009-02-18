@@ -146,6 +146,7 @@ inline Float sub_opp(Float x, Float y) { volatile double t=(-x)+y; return -t; }
 inline Float mul_opp(Float x, Float y) { volatile double t=(-x)*y; return -t; }
 inline Float div_opp(Float x, Float y) { volatile double t=(-x)/y; return -t; }
 
+double cos_rnd(double x);
 
 //! \brief Intervals supporting interval arithmetic.
 class Interval {

@@ -61,8 +61,11 @@ class FunctionInterface {
     //! \brief Compute an over-approximation to the values of the function over the domain \a x. This method provides an <em>interval extension</em> of the function.
     virtual Vector<Interval> evaluate(const Vector<Interval>& x) const = 0;
 
+    //! \brief Evaluate the function over a vector of Taylor variables.
     virtual Vector<TaylorVariable> evaluate(const Vector<TaylorVariable>& x) const = 0;
+    //! \brief Evaluate the function over a vector of differentials.
     virtual Vector< SparseDifferential<Float> > evaluate(const Vector< SparseDifferential<Float> >& x) const = 0;
+    //! \brief Evaluate the function over a vector of interval differentials.
     virtual Vector< SparseDifferential<Interval> > evaluate(const Vector< SparseDifferential<Interval> >& x) const = 0;
 
     //! \brief Compute an approximation to the Jacobian derivative matrix \f$(Df)_{ij}=\partial f_i/\partial x_j\f$ of the function at the point \a x.

@@ -195,32 +195,44 @@ touching_time_interval(const ModelType& guard_model,
                        const ModelType& flow_model, 
                        const ModelType& initial_set_model) const
 {
+    //uint old_verbosity = verbosity;
+    //verbosity = 4;
+    ARIADNE_LOG(3,"DifferentialCalculus<Mdl>::touching_time_interval(...)\n");
+
     ARIADNE_ASSERT(flow_model.result_size()+1==flow_model.argument_size());
     ARIADNE_ASSERT(guard_model.argument_size()==flow_model.result_size());
-    ARIADNE_ASSERT(guard_model.result_size()>=1u);
+    ARIADNE_ASSERT(guard_model.result_size()==1u);
 
     uint dimension=guard_model.argument_size();
     RealType minimum_time=flow_model.domain()[dimension].lower(); 
     RealType maximum_time=flow_model.domain()[dimension].upper(); 
   
-    ARIADNE_LOG(6,"\nminimum_time="<<minimum_time<<" maximum_time="<<maximum_time<<"\n");
+    ARIADNE_LOG(4,"\nminimum_time="<<minimum_time<<" maximum_time="<<maximum_time<<"\n");
     ARIADNE_ASSERT(minimum_time<=0);
     ARIADNE_ASSERT(maximum_time>=0);
 
-    ModelType final_set_model=this->integration_step(flow_model,initial_set_model,maximum_time);
+    if(minimum_time<=0.0) minimum_time = 0.0;
+
+    ARIADNE_LOG(4,"flow_model="<<flow_model<<"\n");
+    ARIADNE_LOG(4,"guard_model="<<guard_model<<"\n");
+    ARIADNE_LOG(4,"initial_set_model="<<initial_set_model<<"\n");
+
+    ModelType maximum_time_model=this->time_model(maximum_time,initial_set_model.domain());
+    ModelType final_set_model=this->integration_step(flow_model,initial_set_model,maximum_time_model);
+
+    ARIADNE_LOG(4,"final_set_model="<<final_set_model<<"\n");    
 
     uint refinements=5;
 
     RealType lower_time=minimum_time;
     RealType upper_time=maximum_time;
   
-    if(possibly(this->active(guard_model,initial_set_model))) {
-        lower_time=minimum_time;
-    } else {
+    if(!possibly(this->active(guard_model,initial_set_model))) {
         RealType min_lower_time=minimum_time;
         RealType max_lower_time=maximum_time;
         for(uint i=0; i!=refinements; ++i) {
             RealType new_lower_time=med_approx(min_lower_time,max_lower_time);
+            ARIADNE_LOG(4,"step "<<i<<", testing time "<<new_lower_time<<"\n");
             if(possibly(this->active(guard_model,this->reachability_step(flow_model,initial_set_model,minimum_time,new_lower_time)))) {
                 max_lower_time=new_lower_time;
             } else {
@@ -228,28 +240,31 @@ touching_time_interval(const ModelType& guard_model,
                 lower_time=new_lower_time;
             }
         }
+        
     }
+    ARIADNE_LOG(4,"lower_time="<<lower_time<<" upper_time="<<upper_time<<"\n");
 
-    if(definitely(this->active(guard_model,initial_set_model)) || definitely(!this->active(guard_model,initial_set_model))) {
-        upper_time=minimum_time;
-    } else {
-        RealType min_upper_time=minimum_time;
+
+    if(!possibly(this->active(guard_model,final_set_model))) {
+        RealType min_upper_time=lower_time;
         RealType max_upper_time=maximum_time;
         for(uint i=0; i!=refinements; ++i) {
             RealType new_upper_time=med_approx(min_upper_time,max_upper_time);
-            if(definitely(this->active(guard_model,this->integration_step(flow_model,initial_set_model,new_upper_time)))) {
+            ARIADNE_LOG(4,"step "<<i<<", testing time "<<new_upper_time<<"\n");
+            if(possibly(this->active(guard_model,this->integration_step(flow_model,initial_set_model,new_upper_time)))) {
+                min_upper_time=new_upper_time;
+            } else {
                 max_upper_time=new_upper_time;
                 upper_time=new_upper_time;
-            } else {
-                min_upper_time=new_upper_time;
             }
         }
     }
+    ARIADNE_LOG(4,"lower_time="<<lower_time<<" upper_time="<<upper_time<<"\n");
 
+    //verbosity=old_verbosity;
     //ModelType lower_time_model=ModelType::constant(initial_set_model.domain(),initial_set_model.centre(),Vector<Float>(1u,lower_time),_order,_smoothness);
     //ModelType upper_time_model=ModelType::constant(initial_set_model.domain(),initial_set_model.centre(),Vector<Float>(1u,upper_time),_order,_smoothness);
     return Interval(lower_time,upper_time);
-
 }
 
 
@@ -335,15 +350,17 @@ DifferentialCalculus<Mdl>::
 active(const PredicateModelType& guard_model, const SetModelType& set_model) const
 {
     BoxType range=compose(guard_model,set_model).range();
+ /*
     uint dimension=range.size();
     for(uint i = 0; i < dimension ; i++) {
       tribool test = this->_tribool(range[i]);
-      if(test == false) return false;   // at least one component is negative
-      if(test == indeterminate) return indeterminate;   // one component is indeterminate
+      if(!possibly(test)) return false;   // at least one component is negative
+      if(indeterminate(test)) return indeterminate;   // one component is indeterminate
     }
     // if the for loop is completed, all components are positive and the guard is true
     return true;
-    //    return this->_tribool(range);
+*/
+    return this->_tribool(range[0]);
 }
 
 
@@ -381,7 +398,7 @@ template<class Mdl>
 Mdl
 DifferentialCalculus<Mdl>::predicate_model(FunctionInterface const& g, Vector<Interval> const& bx) const
 { 
-    ARIADNE_ASSERT(g.result_size()>=1);
+    ARIADNE_ASSERT(g.result_size()==1);
     ARIADNE_ASSERT(g.argument_size()==bx.size());
 
     Mdl predicate_model(bx,g,_order,_smoothness);

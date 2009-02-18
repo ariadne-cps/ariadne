@@ -113,7 +113,7 @@ class VectorFieldEvolver
     EnclosureListType reach(const SystemType& system, const EnclosureType& initial_set, const TimeType& time) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate; 
         this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS,true); 
-        return intermediate; }
+        return reachable; }
 
   protected:
     virtual void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate, 

@@ -508,7 +508,8 @@ ApproximateTaylorModel
 compose(const ApproximateTaylorModel& f,
         const ApproximateTaylorModel& g)
 {
-    //std::cerr<<ARIADNE_PRETTY_FUNCTION<<std::endl;
+ //   std::cerr<<ARIADNE_PRETTY_FUNCTION<<std::endl;
+ //   std::cerr<<"f="<<f<<std::endl<<"  g="<<g<<std::endl; 
     ARIADNE_ASSERT(f.argument_size()==g.result_size());
     typedef Interval I;
     typedef Float A;
@@ -611,6 +612,61 @@ implicit(const ApproximateTaylorModel& f)
     Vector<A> hc=project(f.centre(),range(0,m-n));
     return ApproximateTaylorModel(hd,hc,he);
 }
+
+ApproximateTaylorModel
+implicit(const ApproximateTaylorModel& f, uint l)
+{
+    std::cerr << ARIADNE_PRETTY_FUNCTION << std::endl;
+    typedef Interval I;
+    typedef Float A;
+    typedef ApproximateTaylorModel::DifferentialVectorType DifferentialVectorType;
+    std::cerr << f << std::endl;
+  
+    ARIADNE_ASSERT(f.argument_size()>f.result_size());
+    uint m=f.argument_size(); 
+    uint n=f.result_size();
+    
+    array<uint> p(n);
+    for(uint i=0; i!=n; ++i) { p[i]=i+m-n; }
+    //std::cerr << "p=" << p << std::endl;
+
+    // Construct the Taylor model for g(y)=f(c,y)
+    Vector<I> gd=project(f.domain(),range(m-l,m));
+    std::cerr << "gd=" << gd << std::endl;
+    Vector<A> gc=project(f.centre(),range(m-l,m));
+    std::cerr << "gc=" << gc << std::endl;
+    DifferentialVectorType projection(m,l,f.order());
+    for(uint i=0; i!=l; ++i) { projection[m-l+i][i]=1.0; }
+    DifferentialVectorType ge=compose(f.expansion(),projection);
+    std::cerr << "ge=" << ge << std::endl;
+    ApproximateTaylorModel g(gd,gc,ge);
+    std::cerr << "g=" << g << std::endl;
+    
+    Vector<A> z(l);
+    Vector<I> iv = solve(g,z);
+    Vector<A> v = midpoint(iv);
+    std::cerr<<"iv="<<iv<<std::endl;
+    std::cerr<<"v="<<v<<std::endl;
+    Vector<A> t(m);
+    project(t,range(m-l,m))=v;
+    std::cerr<<"t="<<t<<std::endl;
+
+    DifferentialVectorType fe=f.expansion();
+    //std::cerr<<"fe="<<fe<<std::endl;
+    DifferentialVectorType fet=translate(fe,t);
+    //std::cerr<<"fet="<<fet<<std::endl;
+    fet.set_value(Vector<A>(fe.result_size(),0.0));
+    //std::cerr<<"fet="<<fet<<std::endl;
+
+    ApproximateTaylorModel::DifferentialVectorType he=implicit(fet);
+    //std::cerr<<"he="<<he<<std::endl;
+    he+=v;
+    //std::cerr<<"he="<<he<<std::endl;
+    Vector<I> hd=project(f.domain(),range(0,m-n));
+    Vector<A> hc=project(f.centre(),range(0,m-n));
+    return ApproximateTaylorModel(hd,hc,he);
+}
+
 
 // If \f$f:\R^m\rightarrow \R^n\f$, compute the function
 // \f$ h:\R^{m-n}\rightarrow \R^n\f$ satisfying 

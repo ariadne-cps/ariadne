@@ -68,6 +68,7 @@ ApproximateTaylorModel embed(const ApproximateTaylorModel&, const Vector<Interva
 ApproximateTaylorModel compose(const ApproximateTaylorModel&, const ApproximateTaylorModel&);
 ApproximateTaylorModel inverse(const ApproximateTaylorModel&);
 ApproximateTaylorModel implicit(const ApproximateTaylorModel&);
+ApproximateTaylorModel implicit(const ApproximateTaylorModel&, uint);
 ApproximateTaylorModel derivative(const ApproximateTaylorModel&, uint);
 ApproximateTaylorModel antiderivative(const ApproximateTaylorModel&, uint);
 ApproximateTaylorModel flow(const ApproximateTaylorModel&);

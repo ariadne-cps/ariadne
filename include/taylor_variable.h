@@ -135,7 +135,7 @@ class TaylorVariable
 {
     static const Float _zero;
     SparseDifferential<Float> _expansion;
-    Interval _error;
+    Float _error;
     double _sweep_threshold;
     uint _maximum_degree;
   private:
@@ -151,23 +151,23 @@ class TaylorVariable
     typedef std::map<MultiIndex,Float>::iterator iterator;
     typedef std::map<MultiIndex,Float>::const_iterator const_iterator;
 
-    TaylorVariable() : _expansion(), _error(0) { }
+    TaylorVariable() : _expansion(0), _error(0) { }
     TaylorVariable(uint as) : _expansion(as), _error(0) { }
-    TaylorVariable(const SparseDifferential<Float>& d, const Interval& e) : _expansion(d), _error(e), _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree) { }
-    template<class XX, class XXX> TaylorVariable(uint as, uint deg, const XXX* ptr, const XX& eps) : _expansion(as,deg,ptr), _error(eps) { }
+    TaylorVariable(const SparseDifferential<Float>& d, const Float& e);
+    TaylorVariable(uint as, uint deg, const double* ptr, const double& err);
+    TaylorVariable(uint as, uint deg, double d0, ...);
 
     TaylorVariable& operator=(const Float& c) { this->_expansion=c; this->_error=0; return *this; }
-    TaylorVariable& operator=(const Interval& c) { this->_expansion=c.midpoint(); this->_error=(c-c.midpoint()); return *this; }
+    TaylorVariable& operator=(const Interval& c) { this->_expansion=c.midpoint(); this->_error=c.radius(); return *this; }
 
     const SparseDifferential<Float>& expansion() const { return this->_expansion; }
     SparseDifferential<Float>& expansion() { return this->_expansion; }
-    const Interval& error() const { return this->_error; }
-    Interval& error() { return this->_error; }
+    const Float& error() const { return this->_error; }
+    Float& error() { return this->_error; }
     const Float& value() const { return this->_expansion.value(); }
     Float& value() { return this->_expansion.data()[MultiIndex::zero(this->argument_size())]; }
 
-    void set_error(const Interval& ne) { this->_error=ne; }
-    void set_error(const Float& ne) { this->_error.u=ne; this->_error.l=-ne; }
+    void set_error(const Float& ne) { ARIADNE_ASSERT(ne>=0); this->_error=ne; }
 
     Float& operator[](uint j) { return this->_expansion[j]; }
     Float& operator[](const MultiIndex& a) { return this->_expansion[a]; }

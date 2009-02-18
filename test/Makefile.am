@@ -15,6 +15,7 @@ check_PROGRAMS = \
 	test_matrix \
 	test_differential \
 	test_differential_vector \
+	test_taylor_variable \
 	test_taylor_function \
 	test_taylor_set \
 	test_grid_set \
@@ -42,8 +43,9 @@ test_matrix_SOURCES=test_matrix.cc
 test_differential_SOURCES=test_differential.cc
 test_differential_vector_SOURCES=test_differential_vector.cc
 
-test_approximate_taylor_model_SOURCES=test_approximate_taylor_model.cc
+test_taylor_variable_SOURCES=test_taylor_variable.cc
 test_taylor_function_SOURCES=test_taylor_function.cc
+test_taylor_set_SOURCES=test_taylor_set.cc
 
 test_discrete_evolution_SOURCES=test_discrete_evolution.cc
 test_continuous_evolution_SOURCES=test_continuous_evolution.cc

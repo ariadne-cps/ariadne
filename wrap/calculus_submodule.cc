@@ -65,11 +65,10 @@ void read(SparseDifferential<Float>& sd, const boost::python::object& obj) {
 
 void read(TaylorVariable& tv, const boost::python::object& obj1, const boost::python::object& obj2) {
     SparseDifferential<Float> sd;
-    Interval e;
+    Float e;
     read(sd,obj1);
     read(e,obj2); 
-    if(boost::python::extract<Float>(obj2).check() && e.u>=0) { e.l=-e.u; } 
-    else if(e.l!=-e.u) { std::cerr<<"WARNING: TaylorVariable error is not a symmetric interval.\n"; }
+    ARIADNE_ASSERT(e>=0);
     tv=TaylorVariable(sd,e);
 }
    
@@ -80,14 +79,13 @@ void read(TaylorVariable& tv, const boost::python::object& obj1, const boost::py
     uint as;
     uint deg;
     array<Float> dat;
-    Interval err;
+    Float err;
     read(as,obj1);
     read(deg,obj2);
     read_list_array(dat,obj3);
     read(err,obj4);
     const Float* ptr=dat.begin();
-    if(boost::python::extract<Float>(obj4).check() && err.u>=0) { err.l=-err.u; } 
-    else if(err.l!=-err.u) { std::cerr<<"WARNING: TaylorVariable error is not a symmetric interval.\n"; }
+    ARIADNE_ASSERT(err>=0);
     tv=TaylorVariable(as,deg,ptr,err);
 }
 
@@ -109,7 +107,7 @@ void read(TaylorVariable& tv, const boost::python::object& obj) {
          read(tv,extract<boost::python::tuple>(obj)); 
     } else {
         SparseDifferential<Float> sd;
-        Interval e=0;
+        Float e=0;
         read(sd,obj);
         tv=TaylorVariable(sd,e);
     } 
@@ -119,12 +117,11 @@ TaylorVariable*
 make_taylor_variable(const uint& as, const uint& deg, const boost::python::object& aobj, const boost::python::object& eobj) 
 {
     array<Float> dat;
-    Interval err;
+    Float err;
     read_list_array(dat,aobj);
     const Float* ptr=dat.begin();
     read(err,eobj);
-    if(boost::python::extract<Float>(eobj).check() && err.u>=0) { err.l=-err.u; } 
-    else if(err.l!=-err.u) { std::cerr<<"WARNING: TaylorVariable error is not a symmetric interval.\n"; }
+    ARIADNE_ASSERT(err>=0);
     return new TaylorVariable(as,deg,ptr,err);
 }
 
@@ -179,7 +176,7 @@ void export_taylor_variable()
     taylor_variable_class.def("__init__", make_constructor(&make_taylor_variable) );
     taylor_variable_class.def( init< uint >());
     taylor_variable_class.def( init< TaylorVariable >());
-    taylor_variable_class.def("error", (const I&(T::*)()const) &T::error, return_value_policy<copy_const_reference>());
+    taylor_variable_class.def("error", (const R&(T::*)()const) &T::error, return_value_policy<copy_const_reference>());
     taylor_variable_class.def("clean", &TaylorVariable::clean);
     taylor_variable_class.def("domain", &TaylorVariable::domain);
     taylor_variable_class.def("range", &TaylorVariable::range);

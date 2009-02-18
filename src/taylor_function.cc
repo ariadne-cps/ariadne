@@ -76,7 +76,7 @@ TaylorFunction::TaylorFunction(const Vector<Interval>& d,
 {
     for(uint i=0; i!=e.size(); ++i) {
         ARIADNE_ASSERT(d.size()==e[i].argument_size());
-        this->_expansion[i]=TaylorVariable(e[i],Interval(0));
+        this->_expansion[i]=TaylorVariable(e[i],0);
     }
 }
 

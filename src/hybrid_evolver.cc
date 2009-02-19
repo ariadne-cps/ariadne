@@ -457,7 +457,10 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
                             data.touching_time_interval=data.crossing_time_model.range()[0];
                             data.crossing_kind=TRANSVERSE;                       
                         }
-                        catch(DegenerateCrossingException) { ARIADNE_LOG(3," DegenerateCrossing\n"); }
+                        catch(DegenerateCrossingException) { 
+                          ARIADNE_LOG(3," DegenerateCrossing\n"); 
+                          data.touching_time_interval=Interval(zero_time,step_size);
+                        }
                     }
                     if(data.crossing_kind!=TRANSVERSE) {
                         try {
@@ -467,7 +470,10 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
                             data.crossing_kind=TOUCHING;
                             ARIADNE_LOG(4,"Touching transition with touching_time_interval = "<<data.touching_time_interval<<"\n");
                         }
-                        catch(DegenerateCrossingException) { ARIADNE_LOG(3," DegenerateCrossing\n"); }                    
+                        catch(DegenerateCrossingException) { 
+                          ARIADNE_LOG(3," DegenerateCrossing\n"); 
+                          data.touching_time_interval=Interval(zero_time,step_size);
+                        }                    
                     }
                 }
             } else {

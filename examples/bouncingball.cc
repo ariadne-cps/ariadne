@@ -79,7 +79,7 @@ int main()
 
     /// Set the evolution parameters
     evolver.parameters().maximum_enclosure_radius = 0.05;
-    evolver.parameters().maximum_step_size = 0.05;
+    evolver.parameters().maximum_step_size = 0.01;
     std::cout <<  evolver.parameters() << std::endl;
 
     // Declare the type to be used for the system evolution
@@ -89,11 +89,11 @@ int main()
 
     std::cout << "Computing evolution starting from location l1, x = 2.0, v = 0.0" << std::endl;
 
-    Box initial_box(2, 1.99,2.01, -0.01,0.01);
+    Box initial_box(2, 2.0,2.0, 0.0,0.0);
     HybridEnclosureType initial_enclosure(l1,initial_box);
     Box bounding_box(2, -0.1,2.1, -10.1,10.1);
   
-    HybridTime evolution_time(4.0,2);
+    HybridTime evolution_time(4.0,6);
  
     std::cout << "Computing orbit... " << std::flush;
     OrbitType orbit = evolver.orbit(ball,initial_enclosure,evolution_time,UPPER_SEMANTICS);
@@ -110,7 +110,6 @@ int main()
     std::cout << "Reach="<<reach<<std::endl;
     //plot("tutorial-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit.initial());
     plot("ball-reach-evolver",bounding_box, Colour(0.0,0.5,1.0), reach);
-*/
 
     /// Create a ReachabilityAnalyser object
     global_verbosity = 6;
@@ -133,7 +132,7 @@ int main()
     HybridGridTreeSet* lower_reach_set_ptr = analyser.lower_reach(ball,initial_set,reach_time);
     std::cout << "done." << std::endl;
     plot("ball-lower_reach",bounding_box, Colour(0.0,0.5,1.0), *lower_reach_set_ptr);
-/*
+
     // Compute evolved sets and reach sets using upper semantics.
     // These functions compute over-approximations to the evolved and reachabe sets. Subdivision is used
     // as necessary to keep the local errors reasonable. The accumulated global error may be very large.

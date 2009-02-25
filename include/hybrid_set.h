@@ -40,8 +40,10 @@
 #include "function_set.h"
 #include "list_set.h"
 #include "grid_set.h"
+#include "curve.h"
 
 #include "hybrid_set_interface.h"
+#include "point.h"
 #include "box.h"
 
 #include "serialization.h"
@@ -112,6 +114,16 @@ bounding_boxes(const std::map<DiscreteState,uint> space, Interval bound)
         }
     return result;
 }
+
+/*! \brief A point in a hybrid space */
+class HybridPoint 
+    : public std::pair<DiscreteState,Point>
+{
+  public:
+    template<class T> HybridPoint(const T& hpt) : std::pair<DiscreteState,Point>(hpt) { }
+    template<class T1, class T2> HybridPoint(const T1& q, const T2& pt) 
+        : std::pair<DiscreteState,Point>(q,pt) { }
+};
 
 
 template< class DS, class HBS >
@@ -522,6 +534,7 @@ class HybridGridTreeSet
       ar & static_cast<std::map<int,GridTreeSet>&>(*this); }
     */
 };
+
 
 
 template<class DS, class HBS> inline

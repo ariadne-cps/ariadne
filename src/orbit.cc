@@ -21,96 +21,150 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+#include <utility>
+
 #include "orbit.h"
 
+#include "point.h"
+#include "curve.h"
 #include "taylor_set.h"
 #include "list_set.h"
 #include "hybrid_set.h"
 
+#include "hybrid_time.h"
+
 namespace Ariadne {
 
-struct Orbit<TaylorSetType>::Data {
-    Data(const TaylorSetType& initial_set) 
+
+Orbit<Point>::Orbit(const Point& pt)
+    : _curve(new InterpolatedCurve(0.0,pt))
+{ }
+
+void 
+Orbit<Point>::insert(Time t, const Point& pt)
+{
+    this->_curve->insert(t,pt);
+}
+
+
+Orbit<HybridPoint>::Orbit(const HybridPoint& pt)
+    : _curves(new std::vector< std::pair<DiscreteState,InterpolatedCurve> >(1u,make_pair(pt.first,InterpolatedCurve(pt.second))))
+{ }
+
+uint
+Orbit<HybridPoint>::size() const
+{
+    return this->_curves->size();
+}
+
+const InterpolatedCurve& 
+Orbit<HybridPoint>::curve(uint m) const
+{
+    return (*this->_curves)[m].second; 
+}
+
+void 
+Orbit<HybridPoint>::insert(HybridTime ht, HybridPoint& hpt)
+{
+    ARIADNE_ASSERT((uint)ht.discrete_time<=this->size());
+    if(this->size()==ht.discrete_time) {
+        this->_curves->push_back(make_pair(hpt.first,InterpolatedCurve(hpt.second)));
+    } else {
+        (*this->_curves)[ht.discrete_time].second.insert(ht.continuous_time,hpt.second);
+    }
+}
+
+
+template<> 
+std::ostream& 
+operator<<(std::ostream& os, const Orbit< HybridPoint >& orb)
+{
+    return os << orb.curves();
+}
+
+
+struct Orbit<TaylorSet>::Data {
+    Data(const TaylorSet& initial_set) 
         : initial(initial_set) { }
-    TaylorSetType initial;
-    TaylorSetListType reach;
-    TaylorSetListType intermediate;
-    TaylorSetListType final;
+    TaylorSet initial;
+    TaylorSetList reach;
+    TaylorSetList intermediate;
+    TaylorSetList final;
 };
 
-Orbit<TaylorSetType>::
-Orbit(const TaylorSetType& initial_set)
+Orbit<TaylorSet>::
+Orbit(const TaylorSet& initial_set)
     : _data(new Data(initial_set))
 {
 }
 
 void
-Orbit<TaylorSetType>::
-adjoin_reach(const TaylorSetType& set)
+Orbit<TaylorSet>::
+adjoin_reach(const TaylorSet& set)
 {
     this->_data->reach.adjoin(set);
 }
 
 void
-Orbit<TaylorSetType>::
-adjoin_intermediate(const TaylorSetType& set)
+Orbit<TaylorSet>::
+adjoin_intermediate(const TaylorSet& set)
 {
     this->_data->intermediate.adjoin(set);
 }
 
 void
-Orbit<TaylorSetType>::
-adjoin_final(const TaylorSetType& set)
+Orbit<TaylorSet>::
+adjoin_final(const TaylorSet& set)
 {
     this->_data->final.adjoin(set);
 }
 
 
 void
-Orbit<TaylorSetType>::
-adjoin_reach(const TaylorSetListType& list_set)
+Orbit<TaylorSet>::
+adjoin_reach(const TaylorSetList& list_set)
 {
     this->_data->reach.adjoin(list_set);
 }
 
 void
-Orbit<TaylorSetType>::
-adjoin_intermediate(const TaylorSetListType& list_set)
+Orbit<TaylorSet>::
+adjoin_intermediate(const TaylorSetList& list_set)
 {
     this->_data->intermediate.adjoin(list_set);
 }
 
 void
-Orbit<TaylorSetType>::
-adjoin_final(const TaylorSetListType& list_set)
+Orbit<TaylorSet>::
+adjoin_final(const TaylorSetList& list_set)
 {
     this->_data->final.adjoin(list_set);
 }
 
 
-TaylorSetType const&
-Orbit<TaylorSetType>::
+TaylorSet const&
+Orbit<TaylorSet>::
 initial() const
 {
     return this->_data->initial;
 }
 
-TaylorSetListType const&
-Orbit<TaylorSetType>::
+TaylorSetList const&
+Orbit<TaylorSet>::
 reach() const
 {
     return this->_data->reach;
 }
 
-TaylorSetListType const&
-Orbit<TaylorSetType>::
+TaylorSetList const&
+Orbit<TaylorSet>::
 intermediate() const
 {
     return this->_data->intermediate;
 }
 
-TaylorSetListType const&
-Orbit<TaylorSetType>::
+TaylorSetList const&
+Orbit<TaylorSet>::
 final() const
 {
     return this->_data->final;
@@ -119,88 +173,88 @@ final() const
 
 
 
-struct Orbit<HybridTaylorSetType>::Data {
-    Data(const HybridTaylorSetType& initial_set) 
+struct Orbit<HybridTaylorSet>::Data {
+    Data(const HybridTaylorSet& initial_set) 
         : initial(initial_set) { }
-    HybridTaylorSetType initial;
-    HybridTaylorSetListType reach;
-    HybridTaylorSetListType intermediate;
-    HybridTaylorSetListType final;
+    HybridTaylorSet initial;
+    HybridTaylorSetList reach;
+    HybridTaylorSetList intermediate;
+    HybridTaylorSetList final;
 };
 
-Orbit<HybridTaylorSetType>::
-Orbit(const HybridTaylorSetType& initial_set)
+Orbit<HybridTaylorSet>::
+Orbit(const HybridTaylorSet& initial_set)
     : _data(new Data(initial_set))
 {
 }
 
 void
-Orbit<HybridTaylorSetType>::
-adjoin_reach(const HybridTaylorSetType& set)
+Orbit<HybridTaylorSet>::
+adjoin_reach(const HybridTaylorSet& set)
 {
     this->_data->reach.adjoin(set);
 }
 
 void
-Orbit<HybridTaylorSetType>::
-adjoin_intermediate(const HybridTaylorSetType& set)
+Orbit<HybridTaylorSet>::
+adjoin_intermediate(const HybridTaylorSet& set)
 {
     this->_data->intermediate.adjoin(set);
 }
 
 void
-Orbit<HybridTaylorSetType>::
-adjoin_final(const HybridTaylorSetType& set)
+Orbit<HybridTaylorSet>::
+adjoin_final(const HybridTaylorSet& set)
 {
     this->_data->final.adjoin(set);
 }
 
 
 void
-Orbit<HybridTaylorSetType>::
-adjoin_reach(const HybridTaylorSetListType& list_set)
+Orbit<HybridTaylorSet>::
+adjoin_reach(const HybridTaylorSetList& list_set)
 {
     this->_data->reach.adjoin(list_set);
 }
 
 void
-Orbit<HybridTaylorSetType>::
-adjoin_intermediate(const HybridTaylorSetListType& list_set)
+Orbit<HybridTaylorSet>::
+adjoin_intermediate(const HybridTaylorSetList& list_set)
 {
     this->_data->intermediate.adjoin(list_set);
 }
 
 void
-Orbit<HybridTaylorSetType>::
-adjoin_final(const HybridTaylorSetListType& list_set)
+Orbit<HybridTaylorSet>::
+adjoin_final(const HybridTaylorSetList& list_set)
 {
     this->_data->final.adjoin(list_set);
 }
 
 
-HybridTaylorSetType const&
-Orbit<HybridTaylorSetType>::
+HybridTaylorSet const&
+Orbit<HybridTaylorSet>::
 initial() const
 {
     return this->_data->initial;
 }
 
-HybridTaylorSetListType const&
-Orbit<HybridTaylorSetType>::
+HybridTaylorSetList const&
+Orbit<HybridTaylorSet>::
 reach() const
 {
     return this->_data->reach;
 }
 
-HybridTaylorSetListType const&
-Orbit<HybridTaylorSetType>::
+HybridTaylorSetList const&
+Orbit<HybridTaylorSet>::
 intermediate() const
 {
     return this->_data->intermediate;
 }
 
-HybridTaylorSetListType const&
-Orbit<HybridTaylorSetType>::
+HybridTaylorSetList const&
+Orbit<HybridTaylorSet>::
 final() const
 {
     return this->_data->final;
@@ -328,9 +382,9 @@ final() const
 
 template<> 
 std::ostream& 
-operator<<(std::ostream& os, const Orbit<TaylorSetType>& orb)
+operator<<(std::ostream& os, const Orbit<TaylorSet>& orb)
 {
-    os << "Orbit(\n  initial=" << Orbit<TaylorSetType>::EnclosureListType(orb.initial()).bounding_boxes()
+    os << "Orbit(\n  initial=" << Orbit<TaylorSet>::EnclosureListType(orb.initial()).bounding_boxes()
        << "\n  intermediate=" << orb.intermediate().bounding_boxes()
        << "\n  reach=" << orb.reach().bounding_boxes()
        << "\n  final=" << orb.final().bounding_boxes()
@@ -341,9 +395,9 @@ operator<<(std::ostream& os, const Orbit<TaylorSetType>& orb)
 
 template<> 
 std::ostream& 
-operator<<(std::ostream& os, const Orbit<HybridTaylorSetType>& orb)
+operator<<(std::ostream& os, const Orbit<HybridTaylorSet>& orb)
 {
-    os << "Orbit(\n  initial=" << Orbit<HybridTaylorSetType>::EnclosureListType(orb.initial()).bounding_boxes()
+    os << "Orbit(\n  initial=" << Orbit<HybridTaylorSet>::EnclosureListType(orb.initial()).bounding_boxes()
        << "\n  intermediate=" << orb.intermediate().bounding_boxes()
        << "\n  reach=" << orb.reach().bounding_boxes()
        << "\n  final=" << orb.final().bounding_boxes()

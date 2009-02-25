@@ -30,7 +30,10 @@
 
 #include <utility>
 #include <iostream>
+#include <vector>
+#include <map>
 #include <boost/shared_ptr.hpp>
+#include <boost/scoped_ptr.hpp>
 
 namespace Ariadne {
 
@@ -51,14 +54,51 @@ template<class E> class Orbit {
 };
 #endif
 
+typedef double Time;
 
 template<class ES> class Orbit;
 
 template<class BS> class ListSet;
+class Point;
+class InterpolatedCurve;
 class GridCell;
 class GridTreeSet;
 class HybridGridCell;
 class HybridGridTreeSet;
+class HybridPoint;
+class HybridTime;
+
+typedef int DiscreteState;
+class TaylorSet;
+typedef std::pair<DiscreteState,TaylorSet> HybridTaylorSet;
+typedef ListSet<TaylorSet> TaylorSetList;
+typedef ListSet<HybridTaylorSet> HybridTaylorSetList;
+
+template<class ES> std::ostream& operator<<(std::ostream&, const Orbit<ES>&);
+
+template<>
+class Orbit<Point>
+{
+  public:
+    Orbit(const Point& pt);
+    void insert(Time t, const Point& hpt);
+    const InterpolatedCurve& curve() const { return *this->_curve; }
+  private:
+    boost::shared_ptr< InterpolatedCurve > _curve;
+};
+
+template<>
+class Orbit<HybridPoint>
+{
+  public:
+    Orbit(const HybridPoint& hpt);
+    void insert(HybridTime ht, HybridPoint& hpt);
+    uint size() const;
+    const InterpolatedCurve& curve(uint m) const;
+    const std::vector< std::pair<DiscreteState,InterpolatedCurve> >& curves() const { return *this->_curves; }
+  private:
+    boost::shared_ptr<std::vector< std::pair<DiscreteState,InterpolatedCurve> > > _curves;
+};
 
 template<>
 class Orbit<GridCell>
@@ -99,13 +139,6 @@ class Orbit<HybridGridCell>
 };
 
 
-typedef int DiscreteState;
-class TaylorSet;
-typedef class TaylorSet TaylorSetType;
-typedef std::pair<DiscreteState,TaylorSetType> HybridTaylorSetType;
-typedef ListSet<TaylorSetType> TaylorSetListType;
-typedef ListSet<HybridTaylorSetType> HybridTaylorSetListType;
-
 template<class ES>
 class Orbit
 {
@@ -135,60 +168,60 @@ class Orbit
 };
 
 template<>
-class Orbit<TaylorSetType>
+class Orbit<TaylorSet>
 {
     class Data;
-    typedef TaylorSetListType list_set_const_iterator;
+    typedef TaylorSetList list_set_const_iterator;
   public:
-    typedef TaylorSetType EnclosureType;
-    typedef TaylorSetListType EnclosureListType;
+    typedef TaylorSet EnclosureType;
+    typedef TaylorSetList EnclosureListType;
 
-    Orbit(const TaylorSetType&);
-    void adjoin_reach(const TaylorSetType& set);
-    void adjoin_intermediate(const TaylorSetType& set);
-    void adjoin_final(const TaylorSetType& set);
+    Orbit(const TaylorSet&);
+    void adjoin_reach(const TaylorSet& set);
+    void adjoin_intermediate(const TaylorSet& set);
+    void adjoin_final(const TaylorSet& set);
 
-    void adjoin_reach(const TaylorSetListType& set);
-    void adjoin_intermediate(const TaylorSetListType& set);
-    void adjoin_final(const TaylorSetListType& set);
+    void adjoin_reach(const TaylorSetList& set);
+    void adjoin_intermediate(const TaylorSetList& set);
+    void adjoin_final(const TaylorSetList& set);
 
-    TaylorSetType const& initial() const;
-    TaylorSetListType const& reach() const;
-    TaylorSetListType const& intermediate() const;
-    TaylorSetListType const& final() const;
+    TaylorSet const& initial() const;
+    TaylorSetList const& reach() const;
+    TaylorSetList const& intermediate() const;
+    TaylorSetList const& final() const;
   private:
     boost::shared_ptr<Data> _data;
 };
 
 template<>
-class Orbit<HybridTaylorSetType>
+class Orbit<HybridTaylorSet>
 {
     class Data;
-    typedef HybridTaylorSetListType list_set_const_iterator;
+    typedef HybridTaylorSetList list_set_const_iterator;
   public:
-    typedef HybridTaylorSetType EnclosureType;
-    typedef HybridTaylorSetListType EnclosureListType;
+    typedef HybridTaylorSet EnclosureType;
+    typedef HybridTaylorSetList EnclosureListType;
 
-    Orbit(const HybridTaylorSetType&);
-    void adjoin_reach(const HybridTaylorSetType& set);
-    void adjoin_intermediate(const HybridTaylorSetType& set);
-    void adjoin_final(const HybridTaylorSetType& set);
+    Orbit(const HybridTaylorSet&);
+    void adjoin_reach(const HybridTaylorSet& set);
+    void adjoin_intermediate(const HybridTaylorSet& set);
+    void adjoin_final(const HybridTaylorSet& set);
 
-    void adjoin_reach(const HybridTaylorSetListType& set);
-    void adjoin_intermediate(const HybridTaylorSetListType& set);
-    void adjoin_final(const HybridTaylorSetListType& set);
+    void adjoin_reach(const HybridTaylorSetList& set);
+    void adjoin_intermediate(const HybridTaylorSetList& set);
+    void adjoin_final(const HybridTaylorSetList& set);
 
-    HybridTaylorSetType const& initial() const;
-    HybridTaylorSetListType const& reach() const;
-    HybridTaylorSetListType const& intermediate() const;
-    HybridTaylorSetListType const& final() const;
+    HybridTaylorSet const& initial() const;
+    HybridTaylorSetList const& reach() const;
+    HybridTaylorSetList const& intermediate() const;
+    HybridTaylorSetList const& final() const;
   private:
     boost::shared_ptr<Data> _data;
 };
 
 template<class ES> std::ostream& operator<<(std::ostream& os, const Orbit< ES >& orb);
-template<> std::ostream& operator<<(std::ostream& os, const Orbit<TaylorSetType>& orb);
-template<> std::ostream& operator<<(std::ostream& os, const Orbit<HybridTaylorSetType>& orb);
+template<> std::ostream& operator<<(std::ostream& os, const Orbit<TaylorSet>& orb);
+template<> std::ostream& operator<<(std::ostream& os, const Orbit<HybridTaylorSet>& orb);
 
 
 template<class ES> 
@@ -203,12 +236,23 @@ operator<<(std::ostream& os, const Orbit< ES >& orb)
     return os;
 }
 
+template<> 
+std::ostream& 
+operator<<(std::ostream& os, const Orbit< HybridPoint >& orb);
+
 
 template<class G, class ES> void draw(G& graphic, const Orbit<ES>& orbit) 
 {
     draw(graphic,orbit.reach()); 
     draw(graphic,orbit.initial());
     draw(graphic,orbit.final());
+}
+
+template<class G> void draw(G& graphic, const Orbit<HybridPoint>& orbit) 
+{
+    for(uint i=0; i<=orbit.size(); ++i) {
+        draw(graphic,orbit.curve(i));
+    }
 }
 
 } // namespace Ariadne

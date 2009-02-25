@@ -43,6 +43,7 @@
 
 #include "orbit.h"
 
+#include "hybrid_time.h"
 #include "hybrid_automaton.h"
 
 #include "evolution_parameters.h"

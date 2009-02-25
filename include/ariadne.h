@@ -48,6 +48,7 @@ namespace Ariadne {
 #include "polytope.h"
 #include "polyhedron.h"
 
+#include "hybrid_time.h"
 #include "orbit.h"
 
 #include "hybrid_automaton.h"

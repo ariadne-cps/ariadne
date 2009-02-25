@@ -163,8 +163,14 @@ Matrix<Interval> inverse(const Matrix<Interval>& A);
 Matrix<Rational> inverse(const Matrix<Rational>& A);
 #endif // HAVE_GMPXX_H
 
+tuple< Matrix<Float>, Matrix<Float> > qr(const Matrix<Float>&);
+tuple< array<uint>, Matrix<Float>, Matrix<Float> > plu(const Matrix<Float>&);
+
+Vector<Float> row_norms(const Matrix<Float>& A);
+Matrix<Float> triangular_factor(const Matrix<Float>& A);
 Matrix<Float> triangular_multiplier(const Matrix<Float>& A);
 tuple< Matrix<Float>, Matrix<Float> > orthogonal_decomposition(const Matrix<Float>&);
+Matrix<Float> normalise_rows(const Matrix<Float>& A);
 
 Matrix<Float> midpoint(const Matrix<Interval>&);
 

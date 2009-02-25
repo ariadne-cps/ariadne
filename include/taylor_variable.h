@@ -181,6 +181,7 @@ class TaylorVariable
     
     uint argument_size() const { return this->_expansion.argument_size(); }
     uint degree() const { return this->_expansion.degree(); }
+    uint nnz() const { return this->_expansion.data().size(); }
     
     static TaylorVariable zero(uint as) {
         TaylorVariable r(as); r._expansion.set_value(0.0); return r; }

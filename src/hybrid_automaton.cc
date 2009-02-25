@@ -26,6 +26,7 @@
 #include "macros.h"
 #include "stlio.h"
 #include "function_interface.h"
+#include "hybrid_time.h"
 #include "hybrid_automaton.h"
 
 namespace Ariadne {  
@@ -35,13 +36,6 @@ typedef uint DimensionType;
 class HybridSet {};
 
 class HybridSpace : public std::map<DiscreteState,DimensionType> {};
-
-
-std::ostream& 
-operator<<(std::ostream& os, const HybridTime& ht) 
-{
-    return os << "("<<ht.continuous_time<<","<<ht.discrete_time<<")";
-}
 
 
 uint 

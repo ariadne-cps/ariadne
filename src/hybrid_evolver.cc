@@ -36,6 +36,7 @@
 
 #include "logging.h"
 
+#include "hybrid_time.h"
 #include "hybrid_automaton.h"
 #include "hybrid_evolver.h"
 

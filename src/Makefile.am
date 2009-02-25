@@ -16,6 +16,7 @@ SRC = \
 	sparse_differential.cc \
 	taylor_variable.cc  \
 	taylor_function.cc  \
+	simulation_toolbox.cc \
 	taylor_calculus.cc \
 	newton_solver.cc \
 	point.cc \
@@ -40,6 +41,7 @@ SRC = \
 	logging.cc \
 	graphics.cc 
 
+#	hybrid_simulator.cc 
 
 #	taylor_model.cc 
 #	taylor_set.cc 

@@ -35,6 +35,7 @@
 #include "list_set.h"
 #include "evolution_parameters.h"
 #include "orbit.h"
+#include "hybrid_time.h"
 #include "hybrid_set.h"
 #include "hybrid_evolver.h"
 #include "graphics.h"

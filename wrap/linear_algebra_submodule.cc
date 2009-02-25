@@ -128,6 +128,15 @@ Matrix<X0> __mmmul__(const Matrix<X1>& A1, const Matrix<X2>& A2) {
     return prod(A1,A2); 
 }
 
+boost::python::tuple
+wrap_orthogonal_decomposition(const Matrix<Float>& A)
+{
+    Ariadne::tuple<Matrix<Float>,Matrix<Float> > QR=Ariadne::orthogonal_decomposition(A);
+    return boost::python::make_tuple(QR.first,QR.second);
+}
+
+   
+
 
 }
 
@@ -193,9 +202,17 @@ void export_matrix()
     //matrix_class.def("transpose", &Matrix::transpose);
     //matrix_class.def("solve", &Matrix::solve);
     matrix_class.def(boost::python::self_ns::str(self));    // __str__
+    matrix_class.def("__repr__",&__repr__<Matrix<X> >);
 
     def("norm",(X(*)(const Matrix<X>&)) &norm);
     def("inverse",(Matrix<X>(*)(const Matrix<X>&)) &inverse);
+    def("transpose",(Matrix<X>(*)(const Matrix<X>&)) &transpose);
+
+    def("orthogonal_decomposition",&wrap_orthogonal_decomposition);
+    def("row_norms",(Vector<X>(*)(const Matrix<X>&)) &row_norms);
+    def("normalise_rows",(Matrix<X>(*)(const Matrix<X>&)) &normalise_rows);
+    def("triangular_factor",(Matrix<X>(*)(const Matrix<X>&)) &triangular_factor);
+    def("triangular_multiplier",(Matrix<X>(*)(const Matrix<X>&)) &triangular_multiplier);
 }
 
 template void export_vector<Float>();

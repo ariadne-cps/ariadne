@@ -21,6 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+#include <cstdarg>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -30,6 +31,20 @@
 
 namespace Ariadne {
 
+
+Point::Point(uint d, const double& x0,  ...)
+    : Vector<Float>(d)
+{
+    assert(d>=1); 
+    va_list args; 
+    va_start(args,x0);
+    (*this)[0]=x0;
+    for(uint i=1; i!=d; ++i) { 
+        double xi=va_arg(args,double);
+        (*this)[i]=xi; 
+    } 
+    va_end(args);
+}
 
 Point::Point(const std::string& str)
 {

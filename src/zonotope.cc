@@ -618,6 +618,26 @@ cascade_over_approximation(const Zonotope& z, uint cs)
 
 
 
+Zonotope
+orthogonal_over_approximation(const Zonotope& z)
+{
+    
+    Zonotope r=error_free_over_approximation(z);
+    Matrix<Float> J=r.generators();
+
+    const uint m=J.row_size();
+    const uint n=J.column_size();
+
+    Matrix<Float> R(J.row_size(),J.row_size());
+
+    array<Float> column_norm_squares(n);
+
+    for(uint j=0; j!=n; ++j) { }
+
+    // Choose 
+}
+
+
 /*
  
 Zonotope<Interval,R> 

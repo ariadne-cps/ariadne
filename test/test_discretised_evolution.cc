@@ -31,6 +31,7 @@
 #include "zonotope.h"
 #include "list_set.h"
 #include "grid_set.h"
+#include "hybrid_time.h"
 #include "hybrid_set.h"
 #include "hybrid_automaton.h"
 #include "map_evolver.h"

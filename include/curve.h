@@ -148,7 +148,6 @@ std::ostream& operator<<(std::ostream& os, const InterpolatedCurve& curve) {
 
 
 
-
 } // namespace Ariadne
 
 #endif /* ARIADNE_CURVE_H */

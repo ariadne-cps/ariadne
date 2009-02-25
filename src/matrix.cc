@@ -23,6 +23,7 @@
  
 #include "config.h"
 
+#include "rounding.h"
 #include "numeric.h"
 #include "vector.h"
 #include "matrix.h"
@@ -154,6 +155,101 @@ inverse(const Matrix<Rational>& A)
 
 Matrix<Float> triangular_multiplier(const Matrix<Float>& A, size_t b);
 
+// Returns a square matrix R such that A=OR where O is orthogonal,
+// and the sum of the absolute values of the rows of R are
+// at most one.
+//
+// Use Householder transformation H=I-vv' where v=u/|u|
+// and u=a +/- |a|e with a and e the working column of A
+// and corresponding unit vector.
+Matrix<Float>
+triangular_factor(const Matrix<Float>& A)
+{
+    const size_t m=A.row_size();
+    const size_t n=A.column_size();
+
+    Matrix<Float> R=A;
+
+    // Array of column norm squares
+    array<Float> cns(n);
+
+    Vector<Float> u(m);
+
+    for(size_t k=0; k!=min(m,n); ++k) {
+        //std::cerr<<"k="<<k<<" R="<<R<<std::endl;
+
+        bool pivoting=false;
+        if(pivoting) {
+            // Compute column norms
+            for(size_t j=k; j!=n; ++j) {
+                cns[j]=0.0;
+                for(size_t i=k; i!=m; ++i) {
+                    cns[j]+=sqr(R[i][j]);
+                }
+            }
+            
+            // Find largest column norm
+            size_t p=k; Float cnsmax=cns[k];
+            for(size_t j=k+1; j!=n; ++j) {
+                if(cns[j]>cnsmax) {
+                    p=j; cnsmax=cns[j];
+                }
+            }
+            
+            // Swap columns p and k
+            for(size_t i=0; i!=m; ++i) {
+                Float tmp=R[i][k];
+                R[i][k]=R[i][p];
+                R[i][p]=tmp;
+            }
+        }
+
+        // Compute |a| where a is the working column
+        Float nrmas=0.0;
+        for(size_t i=k; i!=m; ++i) {
+            nrmas+=R[i][k]*R[i][k];
+        }
+        Float nrma=sqrt(nrmas);
+
+        // Compute u=a +/- |a|e
+        for(size_t i=k; i!=m; ++i) {
+            u[i]=R[i][k];
+        }
+        if(u[k]>=0) { u[k]+=nrma; }
+        else { u[k]-=nrma; }
+
+        // Compute -2/u.u
+        Float nrmus=0.0;
+        for(size_t i=k; i!=m; ++i) {
+            nrmus+=sqr(u[i]);
+        }
+        Float mtdnu=(-2)/nrmus;
+
+        // For each column b, compute b-=2u(u.b)/u.u
+        for(size_t j=k; j!=n; ++j) {
+            Float udtb=0.0;
+            for(size_t i=k; i!=m; ++i) {
+                udtb+=u[i]*R[i][j];
+            }
+            Float scl=udtb*mtdnu;
+            for(size_t i=k; i!=m; ++i) {
+                R[i][j]+=scl*u[i];
+            }
+        }
+        
+        // For the kth column, set R[k][k]=-/+ |a|
+        // and R[i][k]=0 for i>k
+        for(size_t i=k+1; i!=m; ++i) {
+            R[i][k]=0.0;
+        }
+
+    } // end of loop on working column k
+
+
+    return R;
+        
+}
+
 // Returns a square matrix R such that the first columns of AR are
 // orthogonal, and such that the row absolute value sums are at
 // most 1. Then the image of the unit box under the matrix AR is
@@ -163,14 +259,13 @@ triangular_multiplier(const Matrix<Float>& A)
 {
     return triangular_multiplier(A,0u);
     typedef Float X;
-    size_t m=A.row_size();
-    size_t n=A.column_size();
+    const size_t m=A.row_size();
+    const size_t n=A.column_size();
     Matrix<X> B=A;
     Matrix<X> M=Matrix<X>::identity(n);
     for(size_t c=0; c!=std::min(m,n); ++c) {
         Matrix<X> T=triangular_multiplier(B,c);
         Matrix<X> Tinv=inverse(T);
-        std::cerr<<"    B="<<B<<"  T["<<c<<"]="<<T<<"  Tinv="<<inverse(T)<<"\n";
         B=prod(B,T);
         M=prod(M,T);
     }
@@ -213,6 +308,166 @@ triangular_multiplier(const Matrix<Float>& A, size_t b)
 }    
      
 
+// Compute the orthogonal decomposition A=QR without column pivoting. The 
+// matrix Q is built up as a composition of elementary Householder 
+// transformations H=I-vv' with |v|=1. Note that inv(H)=H'=H. The vector v is 
+// chosen to be a multiple of the first working column of A. 
+
+Vector<Float> 
+row_norms(const Matrix<Float>& A)
+{
+    const size_t m=A.row_size();
+    const size_t n=A.column_size();
+    Vector<Float> r(m);
+
+    rounding_mode_t prev_rounding_mode=get_rounding_mode();
+    set_rounding_mode(upward);
+    for(size_t i=0; i!=m; ++i) {
+        r[i]=0.0;
+        for(size_t j=0; j!=n; ++j) {
+            r[i]+=abs(A[i][j]);
+        }
+    }
+    set_rounding_mode(prev_rounding_mode);
+    
+    return r;
+    
+}
+
+
+Matrix<Float> 
+normalise_rows(const Matrix<Float>& A)
+{
+    const size_t m=A.row_size();
+    const size_t n=A.column_size();
+
+    Matrix<Float> R=A;
+    
+    array<Float> row_asums(m);
+    rounding_mode_t prev_rounding_mode=get_rounding_mode();
+    set_rounding_mode(upward);
+    for(size_t i=0; i!=m; ++i) {
+        row_asums[i]=0.0;
+        for(size_t j=0; j!=n; ++j) {
+            row_asums[i]+=abs(A[i][j]);
+        }
+    }
+    set_rounding_mode(toward_zero);
+    for(size_t i=0; i!=m; ++i) {
+        for(size_t j=0; j!=n; ++j) {
+            R[i][j]/=row_asums[i];
+        }
+    }
+    set_rounding_mode(prev_rounding_mode);
+    
+    return R;
+}
+
+
+tuple< Matrix<Float>, Matrix<Float> > 
+orthogonal_decomposition(const Matrix<Float>& A)
+{
+    typedef Float X;
+
+    size_t m=A.row_size();
+    size_t n=A.column_size();
+    Matrix<X> Q(m,m);
+    Matrix<X> R(A);
+    
+    array<X> p(n);
+    Vector<X> u(m);
+
+    for(size_t i=0; i!=m; ++i) {
+        for(size_t j=0; j!=m; ++j) {
+            Q[i][j]=0.0;
+        }
+        Q[i][i]=1.0;
+    }
+        
+    for(size_t k=0; k!=min(m,n); ++k) {
+        //std::cerr<<"k="<<k<<" Q="<<Q<<" R="<<R<<std::flush;
+
+        // No pivoting
+/* 
+        // Find a pivot column
+        size_t pivot_column=c;
+        X max_column_norm=0.0;
+        for(size_t j=c; j!=n; ++j) {
+            X column_norm=0.0;
+            for(size_t i=c; i!=m; ++i) {
+                column_norm+=abs(R[i][j]);
+            }
+            if(column_norm>max_column_norm) {
+                pivot_column=j;
+                max_column_norm=column_norm;
+            }
+        }
+        size_t j=pivot_column;
+
+        // Swap first column and pivot column
+        for(size_t i=c; i!=m; ++i) {
+            std::swap(R[i][j],R[i][c]);
+        }
+*/        
+
+        // Compute |a| where a is the working column
+        Float nrmas=0.0;
+        for(size_t i=k; i!=m; ++i) {
+            nrmas+=R[i][k]*R[i][k];
+        }
+        Float nrma=sqrt(nrmas);
+        
+        // Compute u=a +/- |a|e
+        for(size_t i=k; i!=m; ++i) {
+            u[i]=R[i][k];
+        }
+        if(u[k]>=0) { u[k]+=nrma; }
+        else { u[k]-=nrma; }
+
+        // Compute -2/u.u
+        Float nrmus=0.0;
+        for(size_t i=k; i!=m; ++i) {
+            nrmus+=sqr(u[i]);
+        }
+        Float mtdnu=(-2)/nrmus;
+
+        // For each column b, compute b-=2u(u.b)/u.u
+        for(size_t j=k; j!=n; ++j) {
+            Float udtb=0.0;
+            for(size_t i=k; i!=m; ++i) {
+                udtb+=u[i]*R[i][j];
+            }
+            Float scl=udtb*mtdnu;
+            for(size_t i=k; i!=m; ++i) {
+                R[i][j]+=scl*u[i];
+            }
+        }
+        
+        // For the kth column, set R[k][k]=-/+ |a|
+        // and R[i][k]=0 for i>k
+        for(size_t i=k+1; i!=m; ++i) {
+            R[i][k]=0.0;
+        }
+
+        // Update Q'=QH = Q(I-2vv')
+        // For each row q, compute q-=2u(u.q)/(u.u)
+        for(size_t i=0; i!=m; ++i) {
+            Float qdtu=0.0;
+            for(size_t j=k; j!=m; ++j) {
+                qdtu+=Q[i][j]*u[j];
+            }
+            Float scl=qdtu*mtdnu;
+            for(size_t j=k; j!=m; ++j) {
+                Q[i][j]+=scl*u[j];
+            }
+        }
+         
+    }
+
+    return make_tuple(Q,R);
+}
+
+/*
 tuple< Matrix<Float>, Matrix<Float> > 
 orthogonal_decomposition(const Matrix<Float>& A)
 {
@@ -282,6 +537,8 @@ orthogonal_decomposition(const Matrix<Float>& A)
 
     return make_tuple(O,R);
 }
+*/
+
 
 template class Matrix<Float>;
 template class Matrix<Interval>;

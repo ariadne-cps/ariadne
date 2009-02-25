@@ -38,10 +38,25 @@
 // Machine epsilon, approximately 2.2e-16;
 const double eps=1./(1<<26)/(1<<26);
 
+#if defined __GNUC__ && ( defined __i386__ || defined __x86_64 || defined _M_IX86 || defined _M_X86 )
+    #if ( defined __SSE_MATH__ &&  defined __SSE2__ )
+        #define ARIADNE_SSE_ROUNDING
+    #elif __GNUC__ >= 5 || ( __GNUC__ == 4 && __GNUC_MINOR__ >= 3 )
+        #define ARIADNE_GCC_ROUNDING
+    #else
+        #define ARIADNE_C99_ROUNDING
+    #endif
+#else
+    #define ARIADNE_BOOST_ROUNDING
+#endif
+
+
 typedef int rounding_mode_t;
 static const rounding_mode_t round_nearest = FE_TONEAREST;
 static const rounding_mode_t round_down = FE_DOWNWARD;
 static const rounding_mode_t round_up = FE_UPWARD;
+
+rounding_mode_t grnd=FE_UPWARD;
 
 inline double max(double x, double y) { return x>=y ? x : y; }
 inline double min(double x, double y) { return x<=y ? x : y; }
@@ -90,10 +105,9 @@ unsigned short ROUND_UP      = 2943;
 unsigned short ROUND_DOWN    = 1919;
 unsigned short ROUND_NEAREST = 895;
 
-static volatile rounding_mode_t grnd;
 inline rounding_mode_t get_control_word() { asm volatile ("fstcw grnd"); return grnd; }
 
-#if defined C_ROUNDING
+#if defined ARIADNE_C99_ROUNDING
 
 inline void set_round_up() { fesetround(FE_UPWARD);  }
 inline void set_round_down() { fesetround(FE_DOWNWARD);  }
@@ -104,7 +118,7 @@ inline rounding_mode_t get_rounding_mode() { return fegetround(); }
 
 inline void c_set_round_nearest() { fesetround(FE_TONEAREST); }
 
-#elif defined ASM_ROUNDING
+#elif defined ARIADNE_GCC_ROUNDING
 
 inline void set_round_up() { asm volatile ("fldcw ROUND_UP"); }
 inline void set_round_down() { asm volatile ("fldcw ROUND_DOWN"); }
@@ -115,10 +129,11 @@ inline void c_set_round_nearest() { fesetround(FE_TONEAREST); }
 //inline void set_rounding_mode(rounding_mode_t rnd) { asm volatile ("fldcw (%0)" : : "r" (rnd) ); }
 //inline rounding_mode_t get_rounding_mode() { rounding_mode_t rnd asm volatile ("fldcw (%0)" : : "r" (rnd) ); return rnd; }
 
-inline rounding_mode_t get_rounding_mode() { asm volatile ("fstcw grnd"); return grnd; }
-inline void set_rounding_mode(rounding_mode_t rnd) { grnd=rnd; asm volatile ("fldcw grnd"); } 
+inline rounding_mode_t get_rounding_mode() { 
+asm volatile ("fstcw grnd"); return grnd; }
+inline void set_rounding_mode(rounding_mode_t rnd) { asm volatile ("fldcw grnd"); } 
 
-#elif defined ASM_MACRO_ROUNDING
+#elif defined ARIADNE_GCC_MACRO_ROUNDING
 
 #define set_round_up()           asm("fldcw ROUND_UP")   
 #define set_round_down()         asm("fldcw ROUND_DOWN")   

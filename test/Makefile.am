@@ -1,4 +1,4 @@
-all: tests
+all: tests profiles
 
 #TESTS_ENVIRONMENT = (function run_tst { $1 > $1.log; }; run_tst )
 TESTS_ENVIRONMENT = ./run_test.sh
@@ -7,6 +7,10 @@ TESTS_ENVIRONMENT = ./run_test.sh
 INCLUDES = -I$(top_srcdir)/include
 LIBS = $(GTK_LIBS)
 LDADD = ../src/libariadne.la $(LIBS)
+
+bin_PROGRAMS = \
+	profile_arithmetic \
+	profile_taylor_variable
 
 check_PROGRAMS = \
 	test_float \
@@ -28,7 +32,10 @@ check_PROGRAMS = \
 	test_serialization \
 	test_graphics 
 
+#	test_hybrid_simulator 
+
 tests: $(check_PROGRAMS)
+profiles: $(bin_PROGRAMS)
 
 #test_integer_LDADD = -lgmp $(LIBS)
 #test_rational_LDADD = -lgmp $(LIBS)
@@ -59,6 +66,9 @@ test_reachability_analysis_SOURCES=test_reachability_analysis.cc
 
 test_serialization_SOURCES=test_serialization.cc
 test_graphics_SOURCES=test_graphics.cc
+
+profile_arithmetic_SOURCES=profile_arithmetic.cc
+profile_taylor_variable_SOURCES=profile_taylor_variable.cc
 
 EXTRA_DIST =
 SUBDIRS =

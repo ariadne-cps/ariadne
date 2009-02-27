@@ -30,41 +30,57 @@
 #include <cassert>
 #include <boost/iterator.hpp>
 #include <boost/iterator_adaptors.hpp>
+#include "macros.h"
 #include "array.h"
 
 namespace Ariadne {
 
-uint32_t fac(uint32_t);
-uint32_t bin(uint32_t,uint32_t);
+uint32_t fac(uint8_t);
+uint32_t bin(uint8_t,uint8_t);
 
 typedef unsigned char uchar;
 
 class MultiIndex {
   public:
+    typedef unsigned int size_type;
+    typedef unsigned char value_type;
+    typedef unsigned char word_type;
+    //typedef unsigned int word_type;
+    //typedef unsigned long long int word_type;
+  public:
+    /*! Destructor. */
+    ~MultiIndex() { _deallocate(this->_p); }
     /*! Construct a multi index of degree \a 0 with \a nv variables. */
-    explicit MultiIndex(uint nv);
+    explicit MultiIndex(size_type nv);
     /*! Construct a multi index with \a nv variables from the array \a ary. */
-    explicit MultiIndex(uint nv, const uint* ary);
+    explicit MultiIndex(size_type nv, const uint* ary);
+    /*! Construct a multi index with \a nv variables from variable arguments. */
+    explicit MultiIndex(size_type nv, int a1, ...);
+
     /*! Copy constructor. */
     MultiIndex(const MultiIndex& a);
     /*! Copy assignment operator. */
     MultiIndex& operator=(const MultiIndex& a);
   
     /*! Construct the zero multi index with \a nv variables. */
-    static MultiIndex zero(uint nv);
+    static MultiIndex zero(size_type nv);
     /*! Construct the unit multi index in variable \a j with \a nv variables. */
-    static MultiIndex unit(uint nv, uint j);
+    static MultiIndex unit(size_type nv, size_type j);
     /*! Construct the first multi index of degree \a d with \a nv variables. */
-    static MultiIndex first(uint nv, uint d);
+    static MultiIndex first(size_type nv, value_type d);
 
+    /*! Resize to hold n variables. */
+    void resize(size_type n);
+    /*! Set all values to zero. */
+    void clear();
     /*! The number of variables. */
-    const uint size() const;
+    size_type size() const;
     /*! The degree of the multi-index, equal to the sum of the number of occurrences of the variables. */
-    const uint degree() const;
-    /*! The number of variables. */
-    const uint number_of_variables() const;
+    value_type degree() const;
+     /*! The number of variables. */
+    size_type number_of_variables() const;
     /*! The number of occurrences of the \a i th variable. */
-    const uint& operator[](const uint& i) const;
+    value_type const& operator[](size_type i) const;
   
     /*! Equality operator. */
     bool operator==(const MultiIndex& a) const;
@@ -81,11 +97,15 @@ class MultiIndex {
     MultiIndex& operator+=(const MultiIndex& a); // inline
     /*! Inplace difference. */
     MultiIndex& operator-=(const MultiIndex& a); // inline
+    /*! Inplace scalar product. */
+    MultiIndex& operator*=(const value_type& a); // inline
     /*! Sum. */
-    MultiIndex operator+(const MultiIndex& a) const; // inline
-    /*! Product. */
-    MultiIndex& operator*=(const uint& a); // inline
-    MultiIndex operator*(const uint& a) const; // inline
+    friend MultiIndex operator+(const MultiIndex& a1, const MultiIndex& a2); // inline
+    /*! Difference. */
+    friend MultiIndex operator-(const MultiIndex& a1, const MultiIndex& a2); // inline
+    /*! Scalar product. */
+    friend MultiIndex operator*(const MultiIndex& a, value_type s); // inline
+    friend MultiIndex operator*(value_type s, const MultiIndex& a); // inline
   
     /*! The position of the element in the array of tensor values. */
     uint position() const;
@@ -96,106 +116,135 @@ class MultiIndex {
     uint number() const;
   
     /*! Set the value of the \a i th index to \a j. */
-    void set_index(const uint& i, const uint j);
+    void set_index(size_type i, value_type j);
     /*! Increment the the \a i th index, thereby increasing the degree. */
-    void increment_index(const uint& i);
+    void increment_index(size_type i);
     /*! Decrement the the \a i th index, thereby decreasing the degree. */
-    void decrement_index(const uint& i);
+    void decrement_index(size_type i);
   
     /*! Set the value of the \a i th index to \a j. */
-    void set(const uint& i, const uint j);
+    void set(size_type i, value_type j);
     friend std::ostream& operator<<(std::ostream&, const MultiIndex&);
   private:
-    uint _degree;
-    array<uint> _occurrences;
+    size_type word_size() const { return _word_size(_n); }
+    word_type& word_at(size_type j) { return reinterpret_cast<word_type*>(_p)[j]; }
+    const word_type& word_at(size_type j) const { return reinterpret_cast<const word_type*>(_p)[j]; }
+    const value_type& at(size_type i) const { return _p[i]; }
+  private:
+    static size_type _word_size(size_type n) { return ((n*sizeof(value_type))/sizeof(word_type)+1); }
+    static value_type* _allocate(size_type n) { return reinterpret_cast<value_type*>(new word_type[_word_size(n)]); }
+    static void _deallocate(value_type* p) { delete[] reinterpret_cast<word_type*>(p); }
+  private:
+    size_type _n;
+    value_type* _p;
 };
       
 
 
     
-inline MultiIndex::MultiIndex(uint nv)
-    : _degree(0), _occurrences(nv,0) 
+inline MultiIndex::MultiIndex(size_type n)
+    : _n(n), _p(_allocate(_n)) 
 {
+    for(uint j=0; j!=word_size(); ++j) { word_at(j)=0; }
 }
 
-inline MultiIndex::MultiIndex(uint nv, const uint* ary)
-    : _degree(0), _occurrences(nv) 
+inline MultiIndex::MultiIndex(size_type n, const uint* ary)
+    : _n(n), _p(_allocate(_n))
 {
-    for(uint i=0; i!=nv; ++i) { this->_occurrences[i]=ary[i]; this->_degree+=ary[i]; }
+    for(uint j=0; j!=word_size(); ++j) { word_at(j)=0; }
+    _p[n]=0; for(uint i=0; i!=n; ++i) { _p[i]=ary[i]; _p[n]+=ary[i]; } 
 }
 
 inline MultiIndex::MultiIndex(const MultiIndex& a)
-    : _degree(a._degree), _occurrences(a._occurrences) 
+    : _n(a.size()), _p(_allocate(_n))
 {
+    for(uint j=0; j!=word_size(); ++j) { this->word_at(j)=a.word_at(j); }
 }
 
 inline MultiIndex& MultiIndex::operator=(const MultiIndex& a) { 
-    this->_degree=a._degree; this->_occurrences=a._occurrences; return *this; }
-
-
-inline MultiIndex MultiIndex::zero(uint nv)
-{
-    return MultiIndex(nv);
+    if(this!=&a) { this->resize(a.size());
+        for(uint j=0; j!=word_size(); ++j) { this->word_at(j)=a.word_at(j); } }
+    return *this;
 }
 
-inline MultiIndex MultiIndex::unit(uint nv, uint j)
+inline MultiIndex MultiIndex::zero(size_type n)
 {
-    MultiIndex result(nv);
-    result._occurrences[j]=1u;
-    result._degree=1u;
+    return MultiIndex(n);
+}
+
+inline MultiIndex MultiIndex::unit(size_type n, size_type j)
+{
+    MultiIndex result(n);
+    result._p[j]=1u;
+    result._p[n]=1u;
     return result;
 }
 
-inline MultiIndex MultiIndex::first(uint nv, uint d)
+inline MultiIndex MultiIndex::first(size_type n, value_type d)
 {
-    MultiIndex result(nv);
-    result._occurrences[0]=d;
-    result._degree=d;
+    MultiIndex result(n);
+    result._p[0]=d;
+    result._p[n]=d;
     return result;
 }
 
-inline const uint MultiIndex::size() const { 
-    return this->_occurrences.size(); 
+inline void MultiIndex::clear()
+{
+    for(uint j=0; j!=word_size(); ++j) { this->word_at(j)=0; }
 }
 
-inline const uint MultiIndex::degree() const { 
-    return this->_degree; 
+inline void MultiIndex::resize(size_type n) { 
+    if(this->_n!=n) { _deallocate(this->_p); this->_n=n; this->_p=_allocate(this->_n); }
 }
 
-inline const uint MultiIndex::number_of_variables() const { 
-    return this->_occurrences.size(); 
+inline MultiIndex::size_type MultiIndex::size() const { 
+    return this->_n; 
 }
 
-inline const uint& MultiIndex::operator[](const uint& i) const {
-    assert(i<this->number_of_variables()); return this->_occurrences[i]; 
+inline MultiIndex::value_type MultiIndex::degree() const { 
+    return this->_p[this->_n]; 
+}
+
+inline MultiIndex::size_type MultiIndex::number_of_variables() const { 
+    return this->_n; 
+}
+
+inline MultiIndex::value_type const& MultiIndex::operator[](size_type i) const {
+    assert(i<this->size()); return this->_p[i];
 }
 
 
 inline bool MultiIndex::operator==(const MultiIndex& a) const { 
-    return this->_occurrences==a._occurrences; 
+    if(this->_n!=a._n) { return false; }
+    for(size_type i=0; i!=this->size(); ++i) { 
+        if(this->at(i)!=a.at(i)) { return false; } }
+    return true;
+    for(size_type j=0; j!=this->word_size(); ++j) { 
+        if(this->word_at(j)!=a.word_at(j)) { return false; } }
+    return true;
 }
 
 inline bool MultiIndex::operator!=(const MultiIndex& a) const { 
     return !(*this==a); 
 }
 
-inline void MultiIndex::set_index(const uint& i, const uint j) { 
-    this->_degree+=(j-this->_occurrences[i]); this->_occurrences[i]=j; 
+inline void MultiIndex::set_index(size_type i, const value_type j) { 
+    this->_p[this->_n]+=(j-this->_p[i]); this->_p[i]=j; 
 }
 
-inline void MultiIndex::increment_index(const uint& i) { 
-    ++this->_occurrences[i]; ++this->_degree; 
+inline void MultiIndex::increment_index(size_type i) { 
+    ++this->_p[i]; ++this->_p[this->_n]; 
 }
 
-inline void MultiIndex::decrement_index(const uint& i) { 
-    if(!(this->_occurrences[i]>0)) { 
+inline void MultiIndex::decrement_index(size_type i) { 
+    if(!(this->_p[i]>0)) { 
         throw std::runtime_error("MultiIndex::decrement_index: the number of occurence of the index must be positive"); 
     }
-    --this->_occurrences[i]; 
-    --this->_degree; 
+    --this->_p[i]; 
+    --this->_p[this->_n]; 
 }
 
-inline void MultiIndex::set(const uint& i, const uint j) { 
+inline void MultiIndex::set(size_type i, value_type j) { 
     this->set_index(i,j); 
 }
 
@@ -207,7 +256,7 @@ inline
 uint MultiIndex::number() const
 {
     uint result=fac(this->degree());
-    for(uint k=0; k!=this->number_of_variables(); ++k) {
+    for(uint k=0; k!=this->size(); ++k) {
         result/=fac((*this)[k]);
     }
     return result;
@@ -217,7 +266,7 @@ inline
 uint MultiIndex::factorial() const
 {
     uint result=1;
-    for(uint k=0; k!=this->number_of_variables(); ++k) {
+    for(uint k=0; k!=this->size(); ++k) {
         result*=fac((*this)[k]);
     }
     return result;
@@ -227,9 +276,9 @@ inline
 uint MultiIndex::position() const
 {
     uint deg=this->degree()-1;
-    uint nvar=this->number_of_variables();
+    uint nvar=this->size();
     uint result=bin(deg+nvar,nvar);
-    for(uint k=0; k!=this->number_of_variables()-1; ++k) {
+    for(uint k=0; k!=this->size()-1; ++k) {
         --nvar;
         deg-=(*this)[k];
         result+=bin(deg+nvar,nvar);
@@ -241,14 +290,21 @@ inline
 bool MultiIndex::operator<(const MultiIndex& a2) const {
     const MultiIndex& a1=*this;
   
-    if(a1.number_of_variables()!=a2.number_of_variables()) {
-        throw std::runtime_error("operator<(SortedIndex,SortedIndex): number of variables must match");
+    if(a1.size()!=a2.size()) {
+        throw std::runtime_error("operator<(MultiIndex,MultiIndex): number of variables must match");
     }
   
     if(a1.degree()!=a2.degree()) {
         return a1.degree()<a2.degree();
     } else {
-        for(uint i=0; i!=a1.number_of_variables(); ++i) {
+        //for(size_type j=0; j!=a1.word_size(); ++j) {
+        for(int j=a1.word_size()-1; j!=-1; --j) {
+            if(a1.word_at(j)!=a2.word_at(j)) { 
+                return a1.word_at(j)>a2.word_at(j);
+            }
+        }
+        return false;
+        for(size_type i=0; i!=a1.size(); ++i) {
             if(a1[i]!=a2[i]) { 
                 return a1[i]>a2[i];
             }
@@ -262,7 +318,7 @@ inline
 MultiIndex& MultiIndex::operator++() 
 {
     MultiIndex& a=*this;
-    const uint& nv=a.number_of_variables();
+    const uint& nv=a.size();
     assert(nv>0);
     if(nv==1) {
         a.increment_index(0);
@@ -288,47 +344,54 @@ MultiIndex& MultiIndex::operator++()
 }
 
 inline
-MultiIndex& MultiIndex::operator+=(const MultiIndex& a2) {
-    for(uint i=0; i!=this->number_of_variables(); ++i) {
-        this->set_index(i,(*this)[i]+a2[i]);
+MultiIndex& MultiIndex::operator+=(const MultiIndex& a) {
+    for(size_type j=0; j!=this->word_size(); ++j) {
+        this->word_at(j)+=a.word_at(j);
+    }
+    return *this;
+    for(size_type i=0; i!=this->size(); ++i) {
+        this->_p[i]+=a._p[i];
+    }
+}
+
+inline
+MultiIndex& MultiIndex::operator-=(const MultiIndex& a) {
+    for(size_type i=0; i!=this->size()+1; ++i) {
+        ARIADNE_ASSERT(this->_p[i]>=a._p[i]);
+        this->_p[i]-=a._p[i];
     }
     return *this;
 }
 
 inline
-MultiIndex& MultiIndex::operator-=(const MultiIndex& a2) {
-    for(uint i=0; i!=this->number_of_variables(); ++i) {
-        this->set_index(i,(*this)[i]-a2[i]);
+MultiIndex& MultiIndex::operator*=(const value_type& s) {
+    for(size_type j=0; j!=this->word_size(); ++j) {
+        this->word_at(j)*=s;
     }
     return *this;
-}
-
-inline
-MultiIndex& MultiIndex::operator*=(const uint& n) {
-    for(uint i=0; i!=this->number_of_variables(); ++i) {
-        this->set_index(i,(*this)[i]*n);
+    for(size_type i=0; i!=this->size()+1; ++i) {
+        this->_p[i]*=s;
     }
-    return *this;
 }
 
 inline
-MultiIndex MultiIndex::operator+(const MultiIndex& a2) const {
-    return MultiIndex(*this)+=a2;
+MultiIndex operator+(const MultiIndex& a1, const MultiIndex& a2) {
+    MultiIndex r(a1); r+=a2; return r;
 }
 
 inline
-MultiIndex operator-(const MultiIndex& a, const MultiIndex& b) {
-    MultiIndex c(a); c-=b; return c;
+MultiIndex operator-(const MultiIndex& a1, const MultiIndex& a2) {
+    MultiIndex r(a1); r-=a2; return r;
 }
 
 inline
-MultiIndex operator*(const MultiIndex& a, const uint& n) {
-    MultiIndex c(a); c*=n; return c;
+MultiIndex operator*(const MultiIndex& a, MultiIndex::value_type s) {
+    MultiIndex r(a); r*=s; return r;
 }
 
 inline
-MultiIndex operator*(const uint& n, const MultiIndex& a) {
-    MultiIndex c(a); c*=n; return c;
+MultiIndex operator*(MultiIndex::value_type s, const MultiIndex& a) {
+    MultiIndex r(a); r*=s; return r;
 }
 
 
@@ -341,7 +404,7 @@ uint
 number(const MultiIndex& i)
 {
     uint result=fac(i.degree());
-    for(uint k=0; k!=i.number_of_variables(); ++k) {
+    for(uint k=0; k!=i.size(); ++k) {
         result/=fac(i[k]);
     }
     return result;
@@ -352,7 +415,7 @@ uint
 fac(const MultiIndex& i)
 {
     uint result=1;
-    for(uint k=0; k!=i.number_of_variables(); ++k) {
+    for(uint k=0; k!=i.size(); ++k) {
         result*=fac(i[k]);
     }
     return result;
@@ -362,9 +425,9 @@ inline
 uint 
 bin(const MultiIndex& n, const MultiIndex& k)
 {
-    assert(n.number_of_variables()==k.number_of_variables());
+    assert(n.size()==k.size());
     uint result=1;
-    for(uint i=0; i!=n.number_of_variables(); ++i) {
+    for(uint i=0; i!=n.size(); ++i) {
         result*=bin(n[i],k[i]);
     }
     return result;
@@ -372,112 +435,9 @@ bin(const MultiIndex& n, const MultiIndex& k)
 
 
 
-
-// New code
-
-
-
-/*
-MultiIndex& operator+=(MultiIndex& a, const MultiIndex& b) {
-    assert(a._as==b._as);
-    a._d+=b._d;
-    for(uint i=0; i!=a._as; ++i) {
-        a._o[i]+=b._o[i];
-    }
-    return a;
-}
-
-MultiIndex& operator-=(MultiIndex& a, const MultiIndex& b) {
-    assert(a._as==b._as);
-    a._d-=b._d;
-    for(uint i=0; i!=a._as; ++i) {
-        assert(a._o[i]>=b._o[i]);
-        a._o[i]-=b._o[i];
-    }
-    return a;
-}
-
-MultiIndex& operator*=(MultiIndex& a, const uint& n) {
-    a._d*=n;
-    for(uint i=0; i!=a._as; ++i) {
-        a._o[i]*=n;
-    }
-    return a;
-}
-
-MultiIndex operator+(const MultiIndex& a, const MultiIndex& b) {
-    MultiIndex c(a); c+=b; return c;
-}
-
-MultiIndex operator*(const MultiIndex& a, const uint& n) {
-    MultiIndex c(a); c*=n; return c;
-}
-
-bool operator==(const MultiIndex& a, const MultiIndex& b) {
-    if(a.argument_size()!=b.argument_size()) { return false; }
-    for(uint i=0; i!=a.argument_size(); ++i) {
-        if(a[i]!=b[i]) { return false; } }
-    return true;
-}
-  
-bool operator<(const MultiIndex& a, const MultiIndex& b) {
-    if(a.degree()==b.degree()) {
-        for(uint i=0; i!=a.argument_size(); ++i) {
-            if(a[i]!=b[i]) { return a[i]>b[i]; } 
-        }
-        return false;
-    } else {
-        return a.degree()<b.degree();
-    }
-}
-
-
-
-class MultiIndexIterator
-    : public boost::iterator_facade<MultiIndexIterator,
-                                    MultiIndex,
-                                    boost::forward_traversal_tag,
-                                    const MultiIndex&,
-                                    const MultiIndex*>
-{
-    MultiIndex _index;
-  public:
-    MultiIndexIterator(const MultiIndex& i) : _index(i) { }
-    MultiIndexIterator(const uint& nv, const uint& d)
-        : _index(MultiIndex(nv)) { this->_index.set_index(0,d); }
-  
-    void increment() {
-        const uint nv=this->_index.number_of_variables();
-        if(this->_index[nv-2]!=0) {
-            this->_index.decrement_index(nv-2);
-            this->_index.increment_index(nv-1);
-            return;
-        } else {
-            uint li=this->_index[nv-1];
-            this->_index.set_index(nv-1,0);
-            for(uint k=nv-1; k!=0; --k) {
-                if(this->_index[k-1]!=0) {
-                    this->_index.decrement_index(k-1);
-                    this->_index.set_index(k,li+1);
-                    return;
-                }
-            }
-            this->_index.set_index(0,li+1);
-        }
-    }
-  
-    const MultiIndex& dereference() const { return this->_index; }
-  
-    bool equal(const MultiIndexIterator& other) const { return this->_index==other._index; }
-};
-
-
-
-*/
-
 inline 
 std::ostream& operator<<(std::ostream& os, const MultiIndex& a) {
-    for(uint i=0; i!=a.size(); ++i) { os << (i==0?'(':',') << a[i]; } 
+    for(uint i=0; i!=a.size(); ++i) { os << (i==0?'(':',') << uint(a[i]); } 
     return os << ')';
 }
 

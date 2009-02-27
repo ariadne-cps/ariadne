@@ -75,9 +75,11 @@ using std::min;
 using std::max;
 using std::abs;
 
+uint32_t fac(uint8_t n);
 uint16_t fac(uint16_t n);
 uint32_t fac(uint32_t n);
 uint64_t fac(uint64_t n);
+uint32_t bin(uint8_t n, uint8_t k);
 uint16_t bin(uint16_t n, uint16_t k);
 uint32_t bin(uint32_t n, uint32_t k);
 uint64_t bin(uint64_t n, uint64_t k);

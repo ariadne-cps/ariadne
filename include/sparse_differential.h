@@ -108,6 +108,8 @@ class SparseDifferential
     explicit SparseDifferential() : _as(0), _deg(0), _data() { _data[MultiIndex(0)]=0; }
     explicit SparseDifferential(uint as) : _as(as), _deg(MAX_DEGREE), _data() { _data[MultiIndex(as)]=0; }
     explicit SparseDifferential(uint as, uint deg) : _as(as), _deg(deg), _data() { _data[MultiIndex(as)]=0; }
+    explicit SparseDifferential(const std::map<MultiIndex,X>& map) : _as(), _deg(), _data(map) {
+        _as=map.begin()->first.size(); _deg=(--map.end())->first.degree(); }
     template<class XX> SparseDifferential(uint as, uint deg, const XX* ptr) : _as(as), _deg(deg), _data() { 
         _data[MultiIndex(as)]=0; for(MultiIndex j(as); j.degree()<=deg; ++j) { if(*ptr!=0) { _data[j]=*ptr; } ++ptr; } }
     template<class XX> SparseDifferential(const SparseDifferential<XX>& x) : _as(x.argument_size()), _deg(x.degree()), _data() { 

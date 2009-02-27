@@ -30,6 +30,8 @@
 #include "config.h"
 #include "rounding.h"
 #include "numeric.h"
+#include "vector.h"
+#include "matrix.h"
 #include "sparse_differential.h"
 #include "differential_vector.h"
 #include "taylor_variable.h"
@@ -92,20 +94,38 @@ uint TaylorVariable::_default_maximum_degree=16;
 
 
 
-TaylorVariable::TaylorVariable(const SparseDifferential<Float>& d, const Float& e)
-    : _expansion(d), _error(e), _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree) 
+TaylorVariable::TaylorVariable()
+    : _argument_size(0), _expansion(), _error(0), 
+      _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree) 
+{ }
+
+TaylorVariable::TaylorVariable(uint as)
+    : _argument_size(as), _expansion(), _error(0), 
+      _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree) 
+{ }
+
+TaylorVariable::TaylorVariable(const std::map<MultiIndex,Float>& d, const Float& e)
+    : _argument_size(), _expansion(d), _error(e), 
+      _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree) 
 { 
+    ARIADNE_ASSERT(!d.empty());
+    this->_argument_size=d.begin()->first.size();
     if(e<0) { std::cerr<<e<<std::endl; } ARIADNE_ASSERT(this->_error>=0); 
 }
 
 TaylorVariable::TaylorVariable(uint as, uint deg, const double* ptr, const double& err)
-    : _expansion(as,deg,ptr), _error(err), _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree) 
+    : _argument_size(as), _expansion(), _error(err), 
+      _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree) 
 { 
+    for(MultiIndex j(as); j.degree()<=deg; ++j) {
+        this->_expansion[j]=*ptr; ++ptr;
+    }
     if(err<0) { std::cerr<<err<<std::endl; } ARIADNE_ASSERT(this->_error>=0); 
 }
     
 TaylorVariable::TaylorVariable(uint as, uint deg, double d0, ...)
-    : _expansion(as,deg), _error(0), _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree) 
+    : _argument_size(as), _expansion(), _error(0), 
+      _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree) 
 {
     double x=d0;
     va_list args; 
@@ -131,7 +151,7 @@ TaylorVariable::scal(const Float& c)
 
     // Shortcuts for special cases
     if(c==0.0) {
-        x._expansion.data().clear();
+        x._expansion.clear();
         xe=0;
         return x;
     }
@@ -345,7 +365,7 @@ TaylorVariable::sweep(double m)
         Float a=abs(iter->second);
         if(abs(iter->second)<=m) {
             this->_error+=a;
-            this->_expansion.data().erase(iter++);
+           _expansion.erase(iter++);
         } else {
             ++iter;
         }
@@ -367,7 +387,7 @@ TaylorVariable::truncate(uint d)
     for(iterator iter=this->_expansion.begin(); iter!=this->end(); ) {
         if(iter->first.degree()>d) {
             e+=abs(iter->second);
-            this->_expansion.data().erase(iter++);
+            this->_expansion.erase(iter++);
         } else {
             ++iter;
         }
@@ -393,7 +413,7 @@ TaylorVariable::truncate(const MultiIndex& a)
         }
         if(erase) {
             e+=abs(iter->second);
-            this->_expansion.data().erase(iter++);
+            this->_expansion.erase(iter++);
         } else {
             ++iter;
         }
@@ -416,7 +436,7 @@ TaylorVariable::clobber(uint o)
     for(iterator iter=this->_expansion.begin(); iter!=this->end(); ) {
         const MultiIndex& a=iter->first;
         if(a.degree()>o) {
-            this->_expansion.data().erase(iter++);
+           _expansion.erase(iter++);
         } else {
             ++iter;
         }
@@ -432,7 +452,7 @@ TaylorVariable::clobber(uint so, uint to)
     for(iterator iter=this->_expansion.begin(); iter!=this->end(); ) {
         const MultiIndex& a=iter->first;
         if(a[n]>to || a.degree()>so+a[n]) {
-            this->_expansion.data().erase(iter++);
+            this->_expansion.erase(iter++);
         } else {
             ++iter;
         }
@@ -651,8 +671,8 @@ TaylorVariable
 add_cosy(const TaylorVariable& x, const Float& c) {
     //std::cerr<<"add_cosy(TaylorVariable,Float)"<<std::endl;
     TaylorVariable r(x);
-    r.expansion().set_value(r.expansion().value()+c);
-    Float t=abs(r.expansion().value());
+    r.set_value(r.value()+c);
+    Float t=abs(r.value());
     r.error()=r.error()+TaylorVariable::em*t;
     return r;
 }
@@ -662,7 +682,6 @@ TaylorVariable
 mul_cosy(const TaylorVariable& x, const Float& c) {
     //std::cerr<<"mul_cosy(TaylorVariable,Float)"<<std::endl;
     uint as=x.argument_size();
-    const SparseDifferential<Float>& expansion=x.expansion();
     const Float& xe=x.error();
 
     static const double em=2.2204460492503131e-16;
@@ -672,8 +691,7 @@ mul_cosy(const TaylorVariable& x, const Float& c) {
     Float s=0;
     Float t=0;
     Float rj;
-    for(SparseDifferential<Float>::const_iterator iter=expansion.begin();
-        iter!=expansion.end(); ++iter)
+    for(TaylorVariable::const_iterator iter=x.begin(); iter!=x.end(); ++iter)
     {
         const MultiIndex& j=iter->first;
         const Float& xj=iter->second;
@@ -704,13 +722,12 @@ add_cosy(const TaylorVariable& x, const TaylorVariable& y)
     Float s=0; // sweep error
     Float t=0; // tally
     Float rj;
-    for(SparseDifferential<Float>::const_iterator yiter=y.expansion().begin();
-        yiter!=y.expansion().end(); ++yiter)
+    for(TaylorVariable::const_iterator yiter=y.begin(); yiter!=y.end(); ++yiter)
     {
         const MultiIndex& j=yiter->first;
         const Float& yj=yiter->second;
-        SparseDifferential<Float>::const_iterator xiter=x.expansion().data().find(j);
-        if(xiter!=x.expansion().end()) {
+        TaylorVariable::const_iterator xiter=x.find(j);
+        if(xiter!=x.end()) {
             const Float& xj=xiter->second;
             rj=xj+yj;
             t=t+max(abs(xj),abs(yj));
@@ -774,7 +791,7 @@ mul_cosy(const TaylorVariable& x, const TaylorVariable& y)
             s=s+abs(rv);
             TaylorVariable::iterator tmpriter=riter;
             --riter;
-            r.expansion().data().erase(tmpriter);
+            r.expansion().erase(tmpriter);
         }
     }
     re=re+(2*TaylorVariable::em)*t+2*s;
@@ -856,7 +873,7 @@ TaylorVariable
 add_rounded(const TaylorVariable& x, const Float& c) {
     //std::cerr<<"add_rounded(TaylorVariable,Float)"<<std::endl;
     TaylorVariable r(x);
-    const Float& xv=x.expansion().value();
+    const Float& xv=x.value();
     Float& re=r.error();
     Float rva=xv+c;
     set_rounding_upward();
@@ -887,7 +904,7 @@ mul_rounded(const TaylorVariable& x, const Float& c)
     volatile Float el=0;
     for(TaylorVariable::const_iterator riter=r.begin(); riter!=r.end(); ++riter) {
         const MultiIndex& j=riter->first;
-        TaylorVariable::const_iterator xiter=x.expansion().data().find(j);
+        TaylorVariable::const_iterator xiter=x.find(j);
         assert(xiter!=x.end());
         const Float& xv=xiter->second;
         const Float& rv=riter->second;
@@ -916,8 +933,8 @@ add_rounded(const TaylorVariable& x, const TaylorVariable& y)
     volatile Float eu=0;
     for(TaylorVariable::const_iterator riter=y.begin(); riter!=y.end(); ++riter) {
         const MultiIndex& j=riter->first;
-        TaylorVariable::const_iterator xiter=x.expansion().data().find(j);
-        TaylorVariable::const_iterator yiter=y.expansion().data().find(j);
+        TaylorVariable::const_iterator xiter=x.find(j);
+        TaylorVariable::const_iterator yiter=y.find(j);
         const Float& xv=xiter->second;
         const Float& yv=yiter->second;
         const Float& rv=riter->second;
@@ -949,8 +966,8 @@ mul_rounded(const TaylorVariable& x, const TaylorVariable& y)
         for(TaylorVariable::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
             const MultiIndex& xj=xiter->first;
             MultiIndex yj=rj-xj;
-            TaylorVariable::const_iterator yiter=y.expansion().data().find(yj);
-            if(yiter!=y.expansion().data().end()) {
+            TaylorVariable::const_iterator yiter=y.find(yj);
+            if(yiter!=y.end()) {
                 const Float& xv=xiter->second;
                 const Float& yv=yiter->second;
                 ru+=xv*yv;
@@ -1034,7 +1051,12 @@ TaylorVariable mul(const TaylorVariable& x, const TaylorVariable& y) {
 */
 
 TaylorVariable neg(const TaylorVariable& x) {
-    return TaylorVariable(-x.expansion(),x.error());
+    TaylorVariable r(x.argument_size());
+    for(TaylorVariable::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+        r[xiter->first] = -xiter->second;
+    }
+    r.error()=x.error();
+    return r;
 }
 
 Vector<Interval>
@@ -1125,7 +1147,7 @@ _compose(const TaylorSeries& ts, const TaylorVariable& tv, Float eps)
 {
     //std::cerr<<"\ncompose\n";
     //std::cerr<<"\n  ts="<<ts<<"\n  tv="<<tv<<"\n";
-    Float& vref=const_cast<Float&>(tv.expansion().value());
+    Float& vref=const_cast<Float&>(tv.value());
     Float vtmp=vref;
     vref=0.0;
     TaylorVariable r(tv.argument_size());
@@ -1159,7 +1181,7 @@ _compose1(const series_function_pointer& fn, const TaylorVariable& tv, Float eps
     static const uint DEGREE=18;
     static const Float TRUNCATION_ERROR=1e-8;
     uint d=DEGREE;
-    Float c=tv.expansion().value();
+    Float c=tv.value();
     Interval r=tv.range();
     Series<Interval> centre_series=fn(d,Interval(c));
     Series<Interval> range_series=fn(d,r);
@@ -1192,7 +1214,7 @@ _compose2(const series_function_pointer& fn, const TaylorVariable& tv, Float eps
     static const uint DEGREE=20;
     static const Float TRUNCATION_ERROR=1e-8;
     uint d=DEGREE;
-    Float c=tv.expansion().value();
+    Float c=tv.value();
     Interval r=tv.range();
     Series<Interval> centre_series=fn(d,Interval(c));
     Series<Interval> range_series=fn(d,r);
@@ -1229,7 +1251,7 @@ _compose3(const series_function_pointer& fn, const TaylorVariable& tv, Float eps
     static const uint DEGREE=20;
     static const Float TRUNCATION_ERROR=1e-8;
     uint d=DEGREE;
-    Float c=tv.expansion().value();
+    Float c=tv.value();
     Interval r=tv.range();
     Series<Interval> centre_series=fn(d,Interval(c));
     Series<Interval> range_series=fn(d,r);
@@ -1507,28 +1529,26 @@ split(const TaylorVariable& tv, uint j)
 {
     ARIADNE_ASSERT(j<tv.argument_size());
     uint as=tv.argument_size();
-    uint deg=tv.expansion().degree();
-    const SparseDifferential<Float>& expansion=tv.expansion();
 
     MultiIndex index(as);
     Float value;
 
-    SparseDifferential<Float> expansion1(as,deg);
-	for(SparseDifferential<Float>::const_iterator iter=expansion.begin();
-        iter!=expansion.end(); ++iter)
+    TaylorVariable r1(as);
+    for(TaylorVariable::const_iterator iter=tv.begin();
+        iter!=tv.end(); ++iter)
     {
         index=iter->first;
         value=iter->second;
         uint k=index[j];
         for(uint l=0; l<=k; ++l) {
             index.set(j,l);
-            expansion1[index] += bin(k,l) * value / pow2(k);
+            r1[index] += bin(k,l) * value / pow2(k);
         }
     }
 
-    SparseDifferential<Float> expansion2(as,deg);
-	for(SparseDifferential<Float>::const_iterator iter=expansion.begin();
-        iter!=expansion.end(); ++iter)
+    TaylorVariable r2(as);
+    for(TaylorVariable::const_iterator iter=tv.begin();
+        iter!=tv.end(); ++iter)
     {
         index=iter->first;
         value=iter->second;
@@ -1537,15 +1557,15 @@ split(const TaylorVariable& tv, uint j)
             index.set(j,l);
             // Need brackets in expression below to avoid converting negative signed
             // integer to unsigned
-            expansion2[index] += powm1(k-l) * (bin(k,l) * value / pow2(k));
+            r2[index] += powm1(k-l) * (bin(k,l) * value / pow2(k));
         }
     }
     // FIXME: Add roundoff errors when computing new expansions
 
-    Float error1=tv.error();
-    Float error2=tv.error();
+    r1.error()=tv.error();
+    r2.error()=tv.error();
 
-    return make_pair(TaylorVariable(expansion1,error1),TaylorVariable(expansion2,error2));
+    return make_pair(r1,r2);
 }
 
 
@@ -1763,14 +1783,22 @@ _compose(const Vector<TaylorVariable>& x, const Vector<TaylorVariable>& y)
     return compose(x,d,y);
 }
 
+SparseDifferential<Float> differential(const TaylorVariable& x) {
+    SparseDifferential<Float> sd(x.argument_size(),x.degree());
+    for(TaylorVariable::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+        sd[xiter->first]=xiter->second;
+    }
+    return sd;
+}
+
 SparseDifferential<Float> expansion(const TaylorVariable& x, const Vector<Interval>& d) {
-    return compose(x,d,TaylorVariable::variables(Vector<Float>(d.size()))).expansion();
+    return differential(compose(x,d,TaylorVariable::variables(Vector<Float>(d.size()))));
 }
 
 Vector< SparseDifferential<Float> > expansion(const Vector<TaylorVariable>& x, const Vector<Interval>& d) {
     Vector<TaylorVariable> y=compose(x,d,TaylorVariable::variables(Vector<Float>(d.size())));
     Vector< SparseDifferential<Float> > r(y.size());
-    for(uint i=0; i!=r.size(); ++i) { r[i]=y[i].expansion(); }
+    for(uint i=0; i!=r.size(); ++i) { r[i]=differential(y[i]); }
     return r;
 }
 
@@ -1787,7 +1815,7 @@ Vector<Float>
 value(const Vector<TaylorVariable>& x) {
     Vector<Float> r(x.size());
     for(uint i=0; i!=x.size(); ++i) {
-        r[i]=x[i].expansion().value();
+        r[i]=x[i].value();
     }
     return r;
 }
@@ -1960,7 +1988,7 @@ flow(const Vector<TaylorVariable>& vf, const Vector<Interval>& d, const Interval
     Vector<TaylorVariable> yp(n,TaylorVariable(n+1));
     Vector<TaylorVariable> yz(n,TaylorVariable(n+1));
     for(uint i=0; i!=n; ++i) {
-        yz[i].expansion().set_gradient(i,1.0);
+        yz[i].set_gradient(i,1.0);
         yz[i]*=sub_ivl(d[i].u/2,d[i].l/2);
         yz[i]+=add_ivl(d[i].l/2,d[i].u/2);
     }
@@ -1987,8 +2015,8 @@ flow(const Vector<TaylorVariable>& vf, const Vector<Interval>& d, const Interval
 
     if(h.l==0) {
         Vector<TaylorVariable> ht=TaylorVariable::variables(Vector<Float>(n+1,0.0));
-        ht[n].expansion().set_value(0.5);
-        ht[n].expansion().set_gradient(n,0.5);
+        ht[n].set_value(0.5);
+        ht[n].set_gradient(n,0.5);
         y=compose(y,Vector<Interval>(n+1,Interval(-1,1)),ht);
     }
 
@@ -2006,7 +2034,7 @@ flow(const Vector<TaylorVariable>& vf, const Vector<Interval>& d, const Interval
 TaylorVariable embed(const TaylorVariable& x, uint new_size, uint start)
 {
     ARIADNE_ASSERT(x.argument_size()+start<=new_size);
-    return TaylorVariable(embed(x.expansion(),new_size,start),x.error());
+    return TaylorVariable(embed(differential(x),new_size,start).data(),x.error());
 }
 
 Vector<TaylorVariable> embed(const Vector<TaylorVariable>& x, uint new_size, uint start)
@@ -2040,7 +2068,7 @@ std::ostream&
 operator<<(std::ostream& os, const TaylorVariable& tv) {
     //    return os << "TaylorVariable( expansion=" << tv.expansion() << ", error=" << tv.error()
     //              << ", range="<<tv.range()<<" )";
-    return os << "TaylorVariable(" << tv.expansion().data() << "," << tv.error() << ")";
+    return os << "TaylorVariable(" << tv.expansion() << "," << tv.error() << ")";
 }
 
 

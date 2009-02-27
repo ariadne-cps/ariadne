@@ -86,9 +86,7 @@ void TestContinuousEvolution::simple_test() const
     std::cout <<"step_size="<<step_size<<std::endl;
     std::cout <<"bounding_box="<<bounding_box<<std::endl;
     std::cout <<"vector_field_model="<<vector_field_model<<std::endl;
-    std::cout <<"vector_field_model_expansion="<<expansion(vector_field_model.variables(),vector_field_model.domain())<<std::endl;
     std::cout <<"flow_model="<<flow_model<<std::endl;
-    std::cout <<"flow_model_expansion="<<expansion(flow_model.variables(),flow_model.domain())<<std::endl;
     std::cout <<"evolve_set="<<evolve_set<<std::endl;
     std::cout <<"reach_set="<<reach_set<<std::endl;
     //std::cout <<"="<<<<std::endl;

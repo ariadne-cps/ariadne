@@ -70,17 +70,6 @@ TaylorFunction::TaylorFunction(const Vector<Interval>& d,
 }
 
 TaylorFunction::TaylorFunction(const Vector<Interval>& d,
-                         const Vector<SparseDifferential<Float> >& e)
-    : _domain(d),
-      _expansion(e.size())
-{
-    for(uint i=0; i!=e.size(); ++i) {
-        ARIADNE_ASSERT(d.size()==e[i].argument_size());
-        this->_expansion[i]=TaylorVariable(e[i],0);
-    }
-}
-
-TaylorFunction::TaylorFunction(const Vector<Interval>& d,
                                const FunctionInterface& f)
     : _domain(d),
       _expansion(f.result_size())
@@ -279,7 +268,7 @@ TaylorFunction::jacobian(const Vector<Float>& x) const
     }
     DifferentialVector< SparseDifferential<Float> > t(this->result_size());
     for(uint i=0; i!=this->result_size(); ++i) {
-        t[i]=this->_expansion[i].expansion();
+        t[i]=SparseDifferential<Float>(this->_expansion[i].expansion());
     }
     return get_jacobian(compose(t-x,y));
 }
@@ -625,7 +614,7 @@ TaylorFunction::write(std::ostream& os) const
 {
     os << "TaylorFunction( "<<this->_domain<<" , ";
     for(uint i=0; i!=this->result_size(); ++i) { 
-        os << (i==0?'[':',')<<this->_expansion[i].expansion().data()<<","<<this->_expansion[i].error();
+        os << (i==0?'[':',')<<this->_expansion[i].expansion()<<","<<this->_expansion[i].error();
     }
     return os << "] )";
     /*

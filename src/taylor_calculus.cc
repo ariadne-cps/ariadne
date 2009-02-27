@@ -142,8 +142,8 @@ reachability_step(const FlowModelType& flow_model,
     uint ng=initial_set_model.generators_size();
 
     TimeModelType expanded_reach_time_model(ng+1);
-    expanded_reach_time_model.expansion().set_value((final_time+initial_time)/2);
-    expanded_reach_time_model.expansion().set_gradient(ng,(final_time-initial_time)/2);
+    expanded_reach_time_model.set_value((final_time+initial_time)/2);
+    expanded_reach_time_model.set_gradient(ng,(final_time-initial_time)/2);
 
     // FIXME: Embed set model correctly
     SetModelType expanded_initial_set_model=embed(initial_set_model.variables(),ng+1,0u);

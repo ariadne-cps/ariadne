@@ -68,10 +68,37 @@ static const double sqrt2_approx=0.70710678118654757;
 static const double log2_approx=0.6931471805599453094;
   
 
+uint32_t 
+fac(uint8_t n) 
+{ 
+    ARIADNE_ASSERT(n<13); // Maximum factorial in 32 bits
+    uint32_t  r=1; 
+    for(uint8_t i=1; i<=n; ++i) { 
+        r*=i; 
+    } 
+    return r; 
+}
+
+uint32_t 
+bin(uint8_t n, uint8_t k) 
+{ 
+    ARIADNE_ASSERT(n<32);  // Maximum computable bin(n,n/2) using 32 bits
+                           // Note that this is shorter than the maximum representable factorial
+    if(k>n+1) { std::cerr << "bin("<<n<<","<<k<<")\n"; }
+    if(k==n+1) { return 0; }
+    ARIADNE_ASSERT(k<=n);
+    uint32_t r=1; 
+    for(uint8_t i=1; i<=k; ++i) { 
+        r*=(n+1-i); 
+        r/=i; 
+    } 
+    return r; 
+}
+
 uint16_t 
 fac(uint16_t n) 
 { 
-    ARIADNE_ASSERT(n<9); // Maximum factorial in 32 bits
+    ARIADNE_ASSERT(n<9); // Maximum factorial in 16 bits
     uint16_t  r=1; 
     for(uint16_t i=1; i<=n; ++i) { 
         r*=i; 

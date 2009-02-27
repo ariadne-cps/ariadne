@@ -33,17 +33,12 @@
 #include "macros.h"
 #include "array.h"
 #include "vector.h"
-#include "matrix.h"
 #include "multi_index.h"
-#include "series.h"
-#include "sparse_differential.h"
 
 namespace Ariadne {
 
 template<class X> class Vector;
 template<class X> class Matrix;
-template<class X> class Series;
-template<class D> class SparseDifferential;
 
 class TaylorVariable;
 template<> class Vector<TaylorVariable>;
@@ -112,8 +107,8 @@ Vector<TaylorVariable> compose(const Vector<TaylorVariable>& x, const Vector<Int
 TaylorVariable compose(const TaylorVariable& x, const Vector<Interval>& bx, const Vector<TaylorVariable>& y);
 TaylorVariable compose(const TaylorVariable& x, const Interval& b, const TaylorVariable& y);
 
-SparseDifferential<Float> expansion(const TaylorVariable& x, const Vector<Interval>& d);
-Vector< SparseDifferential<Float> > expansion(const Vector<TaylorVariable>& x, const Vector<Interval>& d);
+//SparseDifferential<Float> expansion(const TaylorVariable& x, const Vector<Interval>& d);
+//Vector< SparseDifferential<Float> > expansion(const Vector<TaylorVariable>& x, const Vector<Interval>& d);
 
 TaylorVariable antiderivative(const TaylorVariable& x, const Interval& dk, uint k);
 Vector<TaylorVariable> antiderivative(const Vector<TaylorVariable>& x, const Interval& dk, uint k);
@@ -134,7 +129,8 @@ bool refines(const Vector<TaylorVariable>& tv1, const Vector<TaylorVariable>& tv
 class TaylorVariable
 {
     static const Float _zero;
-    SparseDifferential<Float> _expansion;
+    uint _argument_size;
+    std::map<MultiIndex,Float> _expansion;
     Float _error;
     double _sweep_threshold;
     uint _maximum_degree;
@@ -151,46 +147,54 @@ class TaylorVariable
     typedef std::map<MultiIndex,Float>::iterator iterator;
     typedef std::map<MultiIndex,Float>::const_iterator const_iterator;
 
-    TaylorVariable() : _expansion(0), _error(0), _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree) { }
-    TaylorVariable(uint as) : _expansion(as), _error(0), _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree) { }
-    TaylorVariable(const SparseDifferential<Float>& d, const Float& e);
+    TaylorVariable();
+    TaylorVariable(uint as);
+    TaylorVariable(const std::map<MultiIndex,Float>& d, const Float& e);
     TaylorVariable(uint as, uint deg, const double* ptr, const double& err);
     TaylorVariable(uint as, uint deg, double d0, ...);
 
-    TaylorVariable& operator=(const Float& c) { this->_expansion=c; this->_error=0; return *this; }
-    TaylorVariable& operator=(const Interval& c) { this->_expansion=c.midpoint(); this->_error=c.radius(); return *this; }
+    TaylorVariable& operator=(const Float& c) { 
+        this->_expansion.clear(); this->_expansion[MultiIndex::zero(this->argument_size())]=c; this->_error=0; return *this; }
+    TaylorVariable& operator=(const Interval& c) { 
+        this->_expansion.clear(); this->_expansion[MultiIndex::zero(this->argument_size())]=c.midpoint(); this->_error=c.radius(); return *this; }
 
-    const SparseDifferential<Float>& expansion() const { return this->_expansion; }
-    SparseDifferential<Float>& expansion() { return this->_expansion; }
+    const std::map<MultiIndex,Float>& expansion() const { return this->_expansion; }
+    std::map<MultiIndex,Float>& expansion() { return this->_expansion; }
     const Float& error() const { return this->_error; }
     Float& error() { return this->_error; }
-    const Float& value() const { return this->_expansion.value(); }
-    Float& value() { return this->_expansion.data()[MultiIndex::zero(this->argument_size())]; }
+    const Float& value() const { return const_cast<TaylorVariable*>(this)->_expansion[MultiIndex::zero(this->argument_size())]; }
+    Float& value() { return this->_expansion[MultiIndex::zero(this->argument_size())]; }
+    const Float& gradient(uint j) const { return const_cast<TaylorVariable*>(this)->_expansion[MultiIndex::unit(this->argument_size(),j)]; }
+    Float& gradient(uint j) { return this->_expansion[MultiIndex::unit(this->argument_size(),j)]; }
 
     void set_error(const Float& ne) { ARIADNE_ASSERT(ne>=0); this->_error=ne; }
+    void set_value(const Float& c) { this->_expansion[MultiIndex::zero(this->argument_size())]=c; }
+    void set_gradient(uint j, const Float& c) { this->_expansion[MultiIndex::unit(this->argument_size(),j)]=c; }
 
-    Float& operator[](uint j) { return this->_expansion[j]; }
+    Float& operator[](uint j) { return this->_expansion[MultiIndex::unit(this->argument_size(),j)]; }
     Float& operator[](const MultiIndex& a) { return this->_expansion[a]; }
-    const Float& operator[](uint j) const { return this->_expansion[j]; }
-    const Float& operator[](const MultiIndex& a) const { return this->_expansion[a]; }
+    const Float& operator[](uint j) const { return const_cast<TaylorVariable*>(this)->_expansion[MultiIndex::unit(this->argument_size(),j)]; }
+    const Float& operator[](const MultiIndex& a) const { return const_cast<TaylorVariable*>(this)->_expansion[a]; }
 
     iterator begin() { return this->_expansion.begin(); }
     iterator end() { return this->_expansion.end(); }
+    iterator find(const MultiIndex& a) { return this->_expansion.find(a); }
     const_iterator begin() const { return this->_expansion.begin(); }
     const_iterator end() const { return this->_expansion.end(); }
+    const_iterator find(const MultiIndex& a) const { return this->_expansion.find(a); }
     
-    uint argument_size() const { return this->_expansion.argument_size(); }
-    uint degree() const { return this->_expansion.degree(); }
-    uint nnz() const { return this->_expansion.data().size(); }
+    uint argument_size() const { return this->_argument_size; }
+    uint degree() const { return (--this->_expansion.end())->first.degree(); }
+    uint nnz() const { return this->_expansion.size(); }
     
     static TaylorVariable zero(uint as) {
-        TaylorVariable r(as); r._expansion.set_value(0.0); return r; }
+        TaylorVariable r(as); r.set_value(0.0); return r; }
     static TaylorVariable constant(uint as, const Float& c) {
-        TaylorVariable r(as); r._expansion.set_value(c); return r; }
-    static TaylorVariable variable(uint as, const Float& x, uint i) {
-        TaylorVariable r(as); r._expansion.set_value(x); r._expansion.set_gradient(i,1.0); return r; }
+        TaylorVariable r(as); r.set_value(c); return r; }
+    static TaylorVariable variable(uint as, const Float& x, uint j) {
+        TaylorVariable r(as); r.set_value(x); r.set_gradient(j,1.0); return r; }
     static TaylorVariable affine(const Float& x, const Vector<Float>& dx) {
-        TaylorVariable r(dx.size()); r._expansion.set_value(x); for(uint j=0; j!=dx.size(); ++j) { r._expansion.set_gradient(j,dx[j]); } return r; }
+        TaylorVariable r(dx.size()); r.set_value(x); for(uint j=0; j!=dx.size(); ++j) { r.set_gradient(j,dx[j]); } return r; }
     static Vector<TaylorVariable> zeroes(uint rs, uint as);
     static Vector<TaylorVariable> constants(uint as, const Vector<Float>& c);
     static Vector<TaylorVariable> variables(const Vector<Float>& x);

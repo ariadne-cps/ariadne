@@ -69,7 +69,7 @@ void read(TaylorVariable& tv, const boost::python::object& obj1, const boost::py
     read(sd,obj1);
     read(e,obj2); 
     ARIADNE_ASSERT(e>=0);
-    tv=TaylorVariable(sd,e);
+    tv=TaylorVariable(sd.data(),e);
 }
    
 
@@ -109,7 +109,7 @@ void read(TaylorVariable& tv, const boost::python::object& obj) {
         SparseDifferential<Float> sd;
         Float e=0;
         read(sd,obj);
-        tv=TaylorVariable(sd,e);
+        tv=TaylorVariable(sd.data(),e);
     } 
 }
    
@@ -149,7 +149,7 @@ python_split(const TaylorVariable& x, uint j)
 
 template<> std::string __repr__(const TaylorVariable& tv) {
     std::stringstream ss;
-    ss << "TaylorVariable(" << tv.expansion().data() << "," << tv.error() << ")";
+    ss << "TaylorVariable(" << tv.expansion() << "," << tv.error() << ")";
     return ss.str();
 } 
 
@@ -235,8 +235,6 @@ void export_taylor_variable()
 
     def("join", (TV(*)(const TV&,const TV&)) &join);
     def("join", (TV(*)(const TV&,const T&)) &join);
-
-    def("expansion", (SD(*)(const T&,const IV&)) &expansion);
 
     def("jacobian", (RMx(*)(const TV&,const RV&)) &jacobian);
 

@@ -26,7 +26,6 @@
 #include "vector.h"
 #include "matrix.h"
 #include "multi_index.h"
-#include "sparse_differential.h"
 #include "taylor_variable.h"
 #include "taylor_function.h"
 #include "function.h"
@@ -122,7 +121,7 @@ void TestTaylorFunction::test_implicit()
 
 void TestTaylorFunction::test_flow() 
 {
-    Vector< SparseDifferential<Float> > f(2,SparseDifferential<Float>(2,5));
+    Vector< TaylorVariable > f(2,TaylorVariable(2));
     f[0].set_value(-1.0);  f[0].set_gradient(0,-0.8); f[0].set_gradient(1,-0.4);
     f[1].set_value( 0.0);  f[1].set_gradient(0,-0.4); f[1].set_gradient(1,-0.8);
     TaylorFunction vector_field(Vector<Interval>(2,Interval(-2,2)),f);
@@ -145,21 +144,16 @@ void TestTaylorFunction::test_misc()
 
     a=2*MultiIndex::unit(4,2)+MultiIndex::unit(4,1); cout << a << "\n";
 
-    SparseDifferential<Float> y(2,3);
+    TaylorVariable y(2);
     a=MultiIndex::zero(2);   y[a]=2.0;
     a=MultiIndex::unit(2,0); y[a]=1.0;
     a=MultiIndex::unit(2,1); y[a]=1.0;
-    TaylorFunction x(Vector<Interval>::unit_box(2),Vector< SparseDifferential<Float> >(1,y));
+    TaylorFunction x(Vector<Interval>::unit_box(2),Vector< TaylorVariable >(1,y));
     a=MultiIndex::zero(2);   y[a]=3.0;
     a=MultiIndex::unit(2,0); y[a]=0.0;
     a=MultiIndex::unit(2,1); y[a]=1.0;
     cout << x << endl;
     cout << x+x << endl;
-
-    a=MultiIndex(1); 
-    SparseDifferential<Float> z(1,3);
-    z[a]=3; ++a; z[a]=1;
-    cout << z << z*z << z*z*z << endl;
 }
 
 

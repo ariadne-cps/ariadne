@@ -41,6 +41,7 @@ const double eps=1./(1<<26)/(1<<26);
 #if defined __GNUC__ && ( defined __i386__ || defined __x86_64 || defined _M_IX86 || defined _M_X86 )
     #if ( defined __SSE_MATH__ &&  defined __SSE2__ )
         #define ARIADNE_SSE_ROUNDING
+        #define ARIADNE_C99_ROUNDING
     #elif __GNUC__ >= 5 || ( __GNUC__ == 4 && __GNUC_MINOR__ >= 3 )
         #define ARIADNE_GCC_ROUNDING
     #else
@@ -48,6 +49,7 @@ const double eps=1./(1<<26)/(1<<26);
     #endif
 #else
     #define ARIADNE_BOOST_ROUNDING
+    #define ARIADNE_C99_ROUNDING
 #endif
 
 

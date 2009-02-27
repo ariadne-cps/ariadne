@@ -135,21 +135,20 @@ zonotope(const TaylorSet& ts)
     Vector<Float> e(d);
     for(uint i=0; i!=d; ++i) {
         if(ts[i].error()==0) {
-            c[i]=ts[i].expansion().value();
+            c[i]=ts[i].value();
             e[i]=0;
         } else {
-            Interval ce=ts[i].expansion().value()+ts[i].error();
+            Interval ce=ts[i].value()+ts[i].error();
             c[i]=midpoint(ce);
             e[i]=radius(ce);
         }
         for(uint j=0; j!=ng; ++j) {
-            G[i][j]=ts[i].expansion().gradient(j);
+            G[i][j]=ts[i].gradient(j);
         }
     }
 
     for(uint i=0; i!=d; ++i) {
-        const SparseDifferential<Float>& sd=ts[i].expansion();
-        for(SparseDifferential<Float>::const_iterator iter=sd.begin(); iter!=sd.end(); ++iter) {
+        for(TaylorVariable::const_iterator iter=ts[i].begin(); iter!=ts[i].end(); ++iter) {
             if(iter->first.degree()>=2) {
                 e[i]=add_up(e[i],abs(iter->second));
             }
@@ -197,7 +196,7 @@ _adjoin_outer_approximation(const TaylorSet& set, const Box& domain, Float eps, 
     uint d=set.dimension();
     Box range(set.dimension());
     for(uint i=0; i!=set.dimension(); ++i) {
-        range[i]=evaluate(set[i].expansion(),domain);
+        range[i]=evaluate(set[i],domain);
     }
     if(range.radius()<eps) {
         for(uint i=0; i!=set.dimension(); ++i) {

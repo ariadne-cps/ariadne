@@ -65,7 +65,7 @@ class TaylorSet
     TaylorSet(const Vector<Interval>& bx);
     
     uint dimension() const { return this->_variables.size(); }
-    uint generators_size() const { assert(this->_variables.size()>0); return this->_variables[0].expansion().argument_size(); }
+    uint generators_size() const { assert(this->_variables.size()>0); return this->_variables[0].argument_size(); }
     const TaylorVariable& operator[](uint i) const { return this->_variables[i]; }
     TaylorVariable& operator[](uint i) { return this->_variables[i]; }
 

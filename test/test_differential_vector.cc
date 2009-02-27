@@ -138,14 +138,18 @@ class TestDifferentialVector {
         std::cout << "dv((x+c)-c)" <<  translate(translate(dv,c),mc) << std::endl;
         std::cout << "dv(x-c)" << translate(dv,mc) << std::endl;
         std::cout << "dv((x+c)-c)" <<  translate(translate(dv,mc),c) << std::endl;
-        ARIADNE_ASSERT_EQUAL(translate(translate(dv,c),mc),dv);
+        ARIADNE_TEST_EQUAL(translate(translate(dv,c),mc),dv);
     }
 
     void test_differentiate() {  
         double a[]={ 1,2,3,4,5,6,7,8,9,10 };
         DifferentialType y(2,3,a);
         cout << "y=" << y << endl;
-        ARIADNE_ASSERT_EQUAL(derivative(antiderivative(y,0),0),y);
+        ARIADNE_TEST_EXECUTE(antiderivative(y,0));
+        DifferentialType z=antiderivative(y,0);
+        cout << "z=" << z << endl;
+        ARIADNE_TEST_EXECUTE(derivative(z,0));
+        ARIADNE_TEST_EQUAL(derivative(antiderivative(y,0),0),y);
     }
 
     void test_compose() {

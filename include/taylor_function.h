@@ -31,7 +31,6 @@
 #include <iosfwd>
 #include "numeric.h"
 #include "vector.h"
-#include "sparse_differential.h"
 
 namespace Ariadne {
 
@@ -41,7 +40,6 @@ template<class X> class Matrix;
 class FunctionInterface;
 
 class MultiIndex;
-template<class X> class SparseDifferential;
 
 class TaylorFunction;
 
@@ -73,10 +71,6 @@ class TaylorFunction {
     /*! \brief Construct from a domain and the expansionn. */
     TaylorFunction(const Vector<Interval>& domain,
                    const Vector<TaylorVariable>& expansion);
-  
-    /*! \brief Construct from a domain and the expansionn. */
-    TaylorFunction(const Vector<Interval>& domain,
-                   const Vector< SparseDifferential<Float> >& expansion);
   
     /*! \brief Construct from a domain and a function. */
     TaylorFunction(const Vector<Interval>& domain,

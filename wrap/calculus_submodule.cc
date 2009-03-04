@@ -39,7 +39,7 @@ TaylorVariable mul_ivl(const TaylorVariable&, const TaylorVariable&);
     
     
 void read(MultiIndex& j, const boost::python::object& obj) {
-    array<uint> ary;
+    array<int> ary;
     read_tuple_array(ary,obj);
     j=MultiIndex(ary.size(),ary.begin());
 }
@@ -177,7 +177,6 @@ void export_taylor_variable()
     taylor_variable_class.def( init< uint >());
     taylor_variable_class.def( init< TaylorVariable >());
     taylor_variable_class.def("error", (const R&(T::*)()const) &T::error, return_value_policy<copy_const_reference>());
-    taylor_variable_class.def("clean", &TaylorVariable::clean);
     taylor_variable_class.def("domain", &TaylorVariable::domain);
     taylor_variable_class.def("range", &TaylorVariable::range);
     taylor_variable_class.def("__getitem__", &get_item<T,A,R>);
@@ -206,6 +205,7 @@ void export_taylor_variable()
     taylor_variable_class.def("sweep", (TaylorVariable&(TaylorVariable::*)(double))&TaylorVariable::sweep,return_value_policy<reference_existing_object>());
     taylor_variable_class.def("truncate", (TaylorVariable&(TaylorVariable::*)()) &TaylorVariable::truncate,return_value_policy<reference_existing_object>());
     taylor_variable_class.def("sweep", (TaylorVariable&(TaylorVariable::*)())&TaylorVariable::sweep,return_value_policy<reference_existing_object>());
+    taylor_variable_class.def("clean", (TaylorVariable&(TaylorVariable::*)()) &TaylorVariable::clean,return_value_policy<reference_existing_object>());
     taylor_variable_class.def("set_maximum_degree",&TaylorVariable::set_maximum_degree);
     taylor_variable_class.def("set_sweep_threshold",&TaylorVariable::set_sweep_threshold);
     taylor_variable_class.def("maximum_degree",&TaylorVariable::maximum_degree);

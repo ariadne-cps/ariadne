@@ -35,6 +35,15 @@ using std::string;
 #include "taylor_variable.h"
 using namespace Ariadne;
 
+TaylorVariable sum(const Vector<TaylorVariable>& v) {
+    return v[0]+v[1];
+}
+
+TaylorVariable prod(const Vector<TaylorVariable>& v) {
+    return v[0]*v[1];
+}
+
+
 TaylorVariable exp_cos(const Vector<TaylorVariable>& v) {
     return exp(v[0])*cos(v[1]);
 }
@@ -47,29 +56,39 @@ TaylorVariable sigmoid(const Vector<TaylorVariable>& v) {
 typedef TaylorVariable(*TaylorFunctionPtr)(const Vector<TaylorVariable>&);
 
 
-void profile(uint ntries, string name, uint nargs, TaylorFunctionPtr fn) {
+void profile(uint ntries, string name, TaylorFunctionPtr fn, const Vector<TaylorVariable>& args) 
+{
+    TaylorVariable res=fn(args);
+    std::cerr<< "\n" << name << "(" << args << ")=\n  " << res << "\n\n";
     
-    TaylorVariable x(2,1, 0.0,1.0,0.0, 0.0);
-    TaylorVariable y(2,1, 1.0,0.0,0.0, 0.0);
-    TaylorVariable z(2);
-
-    Vector<TaylorVariable> a(nargs); a[0]=x; a[1]=y;
-
     boost::timer tm; double t=0;
  
     tm.restart();
     for(uint i=0; i!=ntries; ++i) {
-        z=fn(a);
+        res=fn(args);
     }
     t=tm.elapsed();
     std::cout << name << ":\n"
               << "  time = "<<std::setprecision(5)<<1000000*(t/ntries)<<"us\n"
-              << "  size = "<<z.nnz()<<"\n"
-              << "  error = "<<z.error()<<"\n"
+              << "  size = "<<res.nnz()<<"\n"
+              << "  error = "<<res.error()<<"\n"
               << std::endl;
 }
 
 int main(int argc, const char* argv[]) {
-    profile(1000,"exp_cos",2,exp_cos);
-    profile(1000,"sigmoid",2,sigmoid);
+    Vector<Float> c(2, 1.0,2.0);
+    
+    Vector<TaylorVariable> v(2,2);
+    v[0]=TaylorVariable(2,1, 0.0,1.0,0.0, 0.0);
+    v[1]=TaylorVariable(2,1, 1.0,0.0,0.0, 0.0);
+    
+    Vector<TaylorVariable> x(2,2);
+    x[0]=TaylorVariable(2,3, 1.0,2.0,0.0,4.0,0.0,6.0,0.0,8.0,9.0,10.0, 0.25);
+    x[1]=TaylorVariable(2,3, 1.0,0.0,3.0,4.0,0.0,6.0,7.0,8.0,0.0,10.0, 0.5);
+    std::cerr<<"v="<<v<<"\nx="<<x<<"\n";
+    
+    profile(100000,"sum",sum,x);
+    profile(10000,"prod",prod,x);
+    profile(1000,"exp_cos",exp_cos,v);
+    profile(1000,"sigmoid",sigmoid,v);
 }

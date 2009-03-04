@@ -65,6 +65,8 @@ inline void acc(Interval& e, Float& x, const Float& y, const Float& z) {
 const double TaylorVariable::em=2.2204460492503131e-16;
 const double TaylorVariable::ec=em/2;
 
+double Polynomial::_zero = 0.0;
+double MapPolynomial::_zero = 0.0;
 
 TaylorVariable add_cosy(const TaylorVariable&, const Float&);
 TaylorVariable mul_cosy(const TaylorVariable&, const Float&);
@@ -95,50 +97,75 @@ uint TaylorVariable::_default_maximum_degree=16;
 
 
 TaylorVariable::TaylorVariable()
-    : _argument_size(0), _expansion(), _error(0), 
-      _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree) 
+    : _expansion(0), _error(0),
+      _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree)
 { }
 
 TaylorVariable::TaylorVariable(uint as)
-    : _argument_size(as), _expansion(), _error(0), 
-      _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree) 
+    : _expansion(as), _error(0),
+      _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree)
 { }
 
 TaylorVariable::TaylorVariable(const std::map<MultiIndex,Float>& d, const Float& e)
-    : _argument_size(), _expansion(d), _error(e), 
-      _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree) 
-{ 
+    : _expansion(d), _error(e),
+      _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree)
+{
     ARIADNE_ASSERT(!d.empty());
-    this->_argument_size=d.begin()->first.size();
-    if(e<0) { std::cerr<<e<<std::endl; } ARIADNE_ASSERT(this->_error>=0); 
+    if(e<0) { std::cerr<<e<<std::endl; } ARIADNE_ASSERT(this->_error>=0);
 }
 
 TaylorVariable::TaylorVariable(uint as, uint deg, const double* ptr, const double& err)
-    : _argument_size(as), _expansion(), _error(err), 
-      _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree) 
-{ 
-    for(MultiIndex j(as); j.degree()<=deg; ++j) {
-        this->_expansion[j]=*ptr; ++ptr;
-    }
-    if(err<0) { std::cerr<<err<<std::endl; } ARIADNE_ASSERT(this->_error>=0); 
-}
-    
-TaylorVariable::TaylorVariable(uint as, uint deg, double d0, ...)
-    : _argument_size(as), _expansion(), _error(0), 
-      _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree) 
+    : _expansion(as), _error(err),
+      _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree)
 {
-    double x=d0;
-    va_list args; 
-    va_start(args,d0);
-    for(MultiIndex a(as); a.degree()<=deg; ++a) {
-        this->_expansion[a]=x;        
-        x=va_arg(args,double);
-    } 
-    this->_error=x;    
-    va_end(args);
-    ARIADNE_ASSERT(this->_error>=0); 
+    for(MultiIndex j(as); j.degree()<=deg; ++j) {
+        if(*ptr!=0.0 || j.degree()<=1) { this->_expansion.append(j,*ptr); }
+        ++ptr;
+    }
+    this->_expansion.sort();
+    if(err<0) { std::cerr<<err<<std::endl; } ARIADNE_ASSERT(this->_error>=0);
 }
 
+TaylorVariable::TaylorVariable(uint as, uint deg, double d0, ...)
+    : _expansion(as), _error(0),
+      _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree)
+{
+    double x=d0;
+    va_list args;
+    va_start(args,d0);
+    for(MultiIndex j(as); j.degree()<=deg; ++j) {
+        if(x!=0.0 || j.degree()<=1) { this->_expansion.append(j,x); }
+        x=va_arg(args,double);
+    }
+    this->_error=x;
+    va_end(args);
+    this->_expansion.sort();
+    ARIADNE_ASSERT(this->_error>=0);
+}
+
+/*
+TaylorVariable::TaylorVariable(uint as, uint deg, double d0, ...)
+    : _expansion(as), _error(0),
+      _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree)
+{
+    double x=d0;
+    va_list args;
+    va_start(args,d0);
+    std::vector<double> values;
+    for(MultiIndex j(as); j.degree()<=deg; ++j) {
+        values.push_back(x);
+        x=va_arg(args,double);
+    }
+    this->_error=x;
+    va_end(args);
+
+    size_t i=0;
+    for(MultiIndex j(as); j.degree()<=deg; ++j) {
+        this->_expansion[j]=values[i]; ++i;
+    }
+    ARIADNE_ASSERT(this->_error>=0);
+}
+*/
 
 
 
@@ -260,16 +287,14 @@ TaylorVariable::acc(const Interval& c)
 }
 
 
-TaylorVariable&
-TaylorVariable::acc(const TaylorVariable& x)
+TaylorVariable& acc1(TaylorVariable& r, const TaylorVariable& x)
 {
     // Compute self+=x
-    TaylorVariable& r=*this;
     Float& re=r.error();
 
     set_rounding_upward();
     Float te=0;
-    for(const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+    for(TaylorVariable::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         const Float& xv=xiter->second;;
         Float& rv=r[xiter->first];
         if(rv!=0) {
@@ -284,7 +309,7 @@ TaylorVariable::acc(const TaylorVariable& x)
     re+=x.error();
 
     set_rounding_to_nearest();
-    for(const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+    for(TaylorVariable::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         r[xiter->first]+=xiter->second;
     }
 
@@ -292,14 +317,76 @@ TaylorVariable::acc(const TaylorVariable& x)
 }
 
 
+TaylorVariable& acc2(TaylorVariable& x, const TaylorVariable& y)
+{
+    // Compute self+=x
+    TaylorVariable r(x.argument_size());
+    
+    set_rounding_upward();
+    Float te=x.error();
+    TaylorVariable::const_iterator xiter=x.begin();
+    TaylorVariable::const_iterator yiter=y.begin();
+    while(xiter!=x.end() && yiter!=y.end()) {
+        if(xiter->first<yiter->first) {
+            ++xiter;
+        } else if(yiter->first<xiter->first) {
+            ++yiter;
+        } else {
+            const Float& xv=xiter->second;
+            const Float& yv=yiter->second;
+            volatile Float u=xv+yv;
+            volatile Float t=-xv;
+            volatile Float ml=t-yv;
+            te+=(u+ml);
+            ++xiter; ++yiter;
+        }
+    }
+    
+    set_rounding_to_nearest();
+    xiter=x.begin();
+    yiter=y.begin();
+    while(xiter!=x.end() && yiter!=y.end()) {
+        if(xiter->first<yiter->first) {
+            r.expansion().append(xiter->first,xiter->second);
+            ++xiter;
+        } else if(yiter->first<xiter->first) {
+            r.expansion().append(yiter->first,yiter->second);
+            ++yiter;
+        } else {
+            r.expansion().append(xiter->first,xiter->second+yiter->second);
+            ++xiter; ++yiter;
+        }
+    }
+    while(xiter!=x.end()) {
+        r.expansion().append(xiter->first,xiter->second);
+        ++xiter;
+    }
+    while(yiter!=y.end()) {
+        r.expansion().append(yiter->first,yiter->second);
+        ++yiter;
+    }
+    
+    x.expansion().swap(r.expansion());
+    x.error()=te/2;
+    
+    return x;
+}
+
+TaylorVariable&
+TaylorVariable::acc(const TaylorVariable& x)
+{
+    return acc1(*this,x);
+}
+
+
 struct Ivl { double u; double ml; };
 
 TaylorVariable&
-TaylorVariable::acc(const TaylorVariable& x, const TaylorVariable& y)
+mulacc1(TaylorVariable& r, const TaylorVariable& x, const TaylorVariable& y)
 {
     // Compute self+=x*y
+    typedef TaylorVariable::const_iterator const_iterator;
     typedef std::map<MultiIndex,Ivl>::const_iterator ivl_const_iterator;
-    TaylorVariable& r=*this;
     Float& re=r.error();
     std::map<MultiIndex,Ivl> z;
 
@@ -350,6 +437,87 @@ TaylorVariable::acc(const TaylorVariable& x, const TaylorVariable& y)
     }
 
     return r;
+}
+
+
+TaylorVariable&
+mulacc2(TaylorVariable& r, const TaylorVariable& x, const TaylorVariable& y)
+{
+    TaylorVariable t(x.argument_size());
+    for(TaylorVariable::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+        set_rounding_upward();
+        double te=0.0;
+        for(TaylorVariable::const_iterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
+            const Float& xv=xiter->second;
+            const Float& yv=yiter->second;
+            volatile Float u=xv*yv;
+            volatile Float ml=-xv; ml=ml*yv;
+            te+=(u+ml);
+        }
+        t.error()=te/2;
+        set_rounding_to_nearest();
+        for(TaylorVariable::const_iterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
+            t.expansion().append(xiter->first,yiter->first,xiter->second*yiter->second);
+        }
+        r+=t;
+        t.expansion().clear();
+    }
+    
+    set_rounding_upward();
+    Float xs=0;
+    for(TaylorVariable::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+        xs+=abs(xiter->second);
+    }
+
+    Float ys=0;
+    for(TaylorVariable::const_iterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
+        ys+=abs(yiter->second);
+    }
+
+    Float& re=r.error();
+    const Float& xe=x.error();
+    const Float& ye=y.error();
+
+    re+=xs*ye+ys*xe+xe*ye;
+
+    set_rounding_to_nearest();
+    r.clean();
+    return r;
+}
+
+TaylorVariable&
+TaylorVariable::mulacc(const TaylorVariable& x, const TaylorVariable& y)
+{
+    return mulacc1(*this,x,y);
+}
+
+
+TaylorVariable&
+TaylorVariable::clean()
+{
+    return this->clean(this->_maximum_degree,this->_sweep_threshold);
+}
+
+TaylorVariable&
+TaylorVariable::clean(uint deg, double eps)
+{
+    TaylorVariable r(this->argument_size());
+    r.error()=this->error();
+    
+    set_rounding_upward();
+    for(TaylorVariable::const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
+        if(iter->first.degree() <= deg && abs(iter->second>=eps)) {
+            r.expansion().append(iter->first,iter->second);
+        } else {
+            r.error()+=abs(iter->second);
+        }
+    }
+    set_rounding_to_nearest();
+    
+    this->expansion().swap(r.expansion());
+    this->error()=r.error();
+           
+    return *this;
 }
 
 TaylorVariable&
@@ -434,8 +602,7 @@ TaylorVariable&
 TaylorVariable::clobber(uint o)
 {
     for(iterator iter=this->_expansion.begin(); iter!=this->end(); ) {
-        const MultiIndex& a=iter->first;
-        if(a.degree()>o) {
+        if(iter->first.degree()>o) {
            _expansion.erase(iter++);
         } else {
             ++iter;
@@ -459,12 +626,6 @@ TaylorVariable::clobber(uint so, uint to)
     }
     this->_error=0;
     return *this;
-}
-
-void
-TaylorVariable::clean()
-{
-    this->sweep(0.0);
 }
 
 
@@ -570,14 +731,15 @@ operator-(const TaylorVariable& x, const TaylorVariable& y) {
 
 TaylorVariable
 operator*(const TaylorVariable& x, const TaylorVariable& y) {
+    if(x.argument_size()!=y.argument_size()) { std::cerr<<"operator*(TaylorVariable x, TaylorVariable y)\n  x="<<x<<" y="<<y<<"\n"; }
     ARIADNE_ASSERT(x.argument_size()==y.argument_size());
-    TaylorVariable r(x.argument_size()); r.acc(x,y); return r;
+    TaylorVariable r(x.argument_size()); r.mulacc(x,y); return r;
 }
 
 TaylorVariable
 operator/(const TaylorVariable& x, const TaylorVariable& y) {
     ARIADNE_ASSERT(x.argument_size()==y.argument_size());
-    TaylorVariable r(x.argument_size()); r.acc(x,rec(y)); return r;
+    TaylorVariable r(x.argument_size()); r.mulacc(x,rec(y)); return r;
 }
 
 
@@ -804,7 +966,7 @@ mul_cosy(const TaylorVariable& x, const TaylorVariable& y)
 TaylorVariable
 mul_ivl(const TaylorVariable& x, const TaylorVariable& y)
 {
-    typedef std::map<MultiIndex,Float>::const_iterator flt_const_iterator;
+    typedef TaylorVariable::const_iterator flt_const_iterator;
     typedef std::map<MultiIndex,Interval>::const_iterator ivl_const_iterator;
     TaylorVariable r(x.argument_size());
     std::map<MultiIndex,Interval> z;
@@ -1499,7 +1661,7 @@ TaylorVariable antiderivative(const TaylorVariable& x, const Interval& dk, uint 
         }
         te+=(u+ml);
     }
-    re+=te/2; 
+    re+=te/2;
 
     set_rounding_to_nearest();
     Float dkr=(dk.u-dk.l)/2;
@@ -1507,7 +1669,7 @@ TaylorVariable antiderivative(const TaylorVariable& x, const Interval& dk, uint 
     for(TaylorVariable::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         const uint c=xiter->first[k]+1;
         rindex=xiter->first;
-        rindex.set(k,c);
+        rindex[k]=c;
         r[rindex]=xiter->second*dkr/c;
     }
 
@@ -1541,7 +1703,7 @@ split(const TaylorVariable& tv, uint j)
         value=iter->second;
         uint k=index[j];
         for(uint l=0; l<=k; ++l) {
-            index.set(j,l);
+            index[j]=l;
             r1[index] += bin(k,l) * value / pow2(k);
         }
     }
@@ -1554,7 +1716,7 @@ split(const TaylorVariable& tv, uint j)
         value=iter->second;
         uint k=index[j];
         for(uint l=0; l<=k; ++l) {
-            index.set(j,l);
+            index[j]=l;
             // Need brackets in expression below to avoid converting negative signed
             // integer to unsigned
             r2[index] += powm1(k-l) * (bin(k,l) * value / pow2(k));
@@ -2052,7 +2214,7 @@ std::string
 TaylorVariable::str() const
 {
     std::stringstream ss;
-    for(SparseDifferential<Float>::const_iterator iter=this->_expansion.begin();
+    for(TaylorVariable::const_iterator iter=this->_expansion.begin();
         iter!=this->_expansion.end(); ++iter)
     {
         const MultiIndex& j=iter->first;

@@ -259,7 +259,7 @@ restrict(const DifferentialVector<DIFF>& x, const array<uint>& p)
     MultiIndex xj(x.argument_size());
     for( ; rj.degree()<=d; ++rj) {
         for(uint k=0; k!=p.size(); ++k) {
-            xj.set(p[k],rj[k]);
+            xj[p[k]]=rj[k];
         }
         for(uint i=0; i!=rs; ++i) {
             r[i][rj]=x[i][xj];
@@ -280,7 +280,7 @@ expand(const DifferentialVector<DIFF>& x, uint as, const array<uint>& p)
     MultiIndex xj(x.argument_size());
     for( ; xj.degree()<=d; ++xj) {
         for(uint k=0; k!=p.size(); ++k) {
-            rj.set(p[k],xj[k]);
+            rj[p[k]]=xj[k];
         }
         for(uint i=0; i!=rs; ++i) {
             r[i][rj]=x[i][xj];
@@ -457,7 +457,7 @@ embed(const DIFF& x,
         {
             const MultiIndex& jx=iter->first;
             for(uint k=0; k!=x.argument_size(); ++k) {
-                jr.set(start+k,jx[k]);
+                jr[start+k]=jx[k];
             }
             r[jr]=iter->second;
         }

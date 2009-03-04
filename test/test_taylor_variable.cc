@@ -102,6 +102,7 @@ void TestTaylorVariable::test_constructors()
     ARIADNE_TEST_CONSTRUCT(TaylorVariable,tv2,(2,3, 1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0, 0.25));
 
     ARIADNE_ASSERT_EQUAL(tv1,tv2);
+    ARIADNE_ASSERT_EQUAL(tv1.value(),1.0);
 }
 
 void TestTaylorVariable::test_predicates()

@@ -2,7 +2,7 @@
  *            taylor_variable.h
  *
  *  Copyright 2008  Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 /*! \file taylor_variable.h
  *  \brief Differential algebra variables with a sparse representation.
  */
@@ -34,6 +34,7 @@
 #include "array.h"
 #include "vector.h"
 #include "multi_index.h"
+#include "polynomial.h"
 
 namespace Ariadne {
 
@@ -128,9 +129,10 @@ bool refines(const Vector<TaylorVariable>& tv1, const Vector<TaylorVariable>& tv
 /*! \brief A class representing a quantity depending on other quantities. */
 class TaylorVariable
 {
+    //typedef Polynomial ExpansionType;
+    typedef MapPolynomial ExpansionType;
     static const Float _zero;
-    uint _argument_size;
-    std::map<MultiIndex,Float> _expansion;
+    ExpansionType _expansion;
     Float _error;
     double _sweep_threshold;
     uint _maximum_degree;
@@ -144,8 +146,8 @@ class TaylorVariable
     typedef MultiIndex IndexType;
     typedef Float ValueType;
     typedef Float ScalarType;
-    typedef std::map<MultiIndex,Float>::iterator iterator;
-    typedef std::map<MultiIndex,Float>::const_iterator const_iterator;
+    typedef ExpansionType::iterator iterator;
+    typedef ExpansionType::const_iterator const_iterator;
 
     TaylorVariable();
     TaylorVariable(uint as);
@@ -153,13 +155,13 @@ class TaylorVariable
     TaylorVariable(uint as, uint deg, const double* ptr, const double& err);
     TaylorVariable(uint as, uint deg, double d0, ...);
 
-    TaylorVariable& operator=(const Float& c) { 
+    TaylorVariable& operator=(const Float& c) {
         this->_expansion.clear(); this->_expansion[MultiIndex::zero(this->argument_size())]=c; this->_error=0; return *this; }
-    TaylorVariable& operator=(const Interval& c) { 
+    TaylorVariable& operator=(const Interval& c) {
         this->_expansion.clear(); this->_expansion[MultiIndex::zero(this->argument_size())]=c.midpoint(); this->_error=c.radius(); return *this; }
 
-    const std::map<MultiIndex,Float>& expansion() const { return this->_expansion; }
-    std::map<MultiIndex,Float>& expansion() { return this->_expansion; }
+    const ExpansionType& expansion() const { return this->_expansion; }
+    ExpansionType& expansion() { return this->_expansion; }
     const Float& error() const { return this->_error; }
     Float& error() { return this->_error; }
     const Float& value() const { return const_cast<TaylorVariable*>(this)->_expansion[MultiIndex::zero(this->argument_size())]; }
@@ -174,7 +176,8 @@ class TaylorVariable
     Float& operator[](uint j) { return this->_expansion[MultiIndex::unit(this->argument_size(),j)]; }
     Float& operator[](const MultiIndex& a) { return this->_expansion[a]; }
     const Float& operator[](uint j) const { return const_cast<TaylorVariable*>(this)->_expansion[MultiIndex::unit(this->argument_size(),j)]; }
-    const Float& operator[](const MultiIndex& a) const { return const_cast<TaylorVariable*>(this)->_expansion[a]; }
+    //const Float& operator[](const MultiIndex& a) const { return const_cast<TaylorVariable*>(this)->_expansion[a]; }
+    const Float& operator[](const MultiIndex& a) const { return this->_expansion[a]; }
 
     iterator begin() { return this->_expansion.begin(); }
     iterator end() { return this->_expansion.end(); }
@@ -182,11 +185,11 @@ class TaylorVariable
     const_iterator begin() const { return this->_expansion.begin(); }
     const_iterator end() const { return this->_expansion.end(); }
     const_iterator find(const MultiIndex& a) const { return this->_expansion.find(a); }
-    
-    uint argument_size() const { return this->_argument_size; }
+
+    uint argument_size() const { return this->_expansion.argument_size(); }
     uint degree() const { return (--this->_expansion.end())->first.degree(); }
     uint nnz() const { return this->_expansion.size(); }
-    
+
     static TaylorVariable zero(uint as) {
         TaylorVariable r(as); r.set_value(0.0); return r; }
     static TaylorVariable constant(uint as, const Float& c) {
@@ -201,7 +204,7 @@ class TaylorVariable
 
     bool operator==(const TaylorVariable& sd) const {
         return this->_expansion==sd._expansion && this->_error == sd._error; }
-    bool operator!=(const TaylorVariable& sd) const { 
+    bool operator!=(const TaylorVariable& sd) const {
         return !(*this==sd); }
 
     TaylorVariable& scal(const Float& c);
@@ -210,12 +213,12 @@ class TaylorVariable
     TaylorVariable& acc(const Float& c);
     TaylorVariable& acc(const Interval& c);
     TaylorVariable& acc(const TaylorVariable& x);
-    TaylorVariable& acc(const TaylorVariable& x, const TaylorVariable& y);
-    
+    TaylorVariable& mulacc(const TaylorVariable& x, const TaylorVariable& y);
+
     Vector<Interval> domain() const;
     Interval range() const;
     Interval evaluate(const Vector<Interval>& x) const;
-    
+
     template<class XX> Interval evaluate(const Vector<XX>& x) const;
 
     static void set_default_maximum_degree(uint md) { _default_maximum_degree=md; }
@@ -264,12 +267,13 @@ class TaylorVariable
     friend std::ostream& operator<<(std::ostream& os, const TaylorVariable& x);
 
   public:
-    void clean();
-    TaylorVariable& truncate(uint d);
+    TaylorVariable& truncate(uint deg);
     TaylorVariable& truncate(const MultiIndex& a);
     TaylorVariable& truncate();
     TaylorVariable& sweep(double eps);
     TaylorVariable& sweep();
+    TaylorVariable& clean(uint deg, double eps);
+    TaylorVariable& clean();
   public:
     TaylorVariable& clobber();
     TaylorVariable& clobber(uint o);
@@ -279,9 +283,9 @@ class TaylorVariable
 TaylorVariable max(const TaylorVariable& x, const TaylorVariable& y);
 TaylorVariable min(const TaylorVariable& x, const TaylorVariable& y);
 TaylorVariable abs(const TaylorVariable& x);
-    
 
-template<> 
+
+template<>
 class Vector<TaylorVariable>
     : public ublas::vector<TaylorVariable>
 {
@@ -292,23 +296,23 @@ class Vector<TaylorVariable>
     Vector(uint rs, const TaylorVariable& x) : ublas::vector<TaylorVariable>(rs) { for(uint i=0; i!=rs; ++i) { (*this)[i]=x; } }
     template<class E> Vector(const ublas::vector_expression<E> &ve) : ublas::vector<TaylorVariable>(ve) { }
     uint result_size() const { return this->size(); }
-    uint argument_size() const { 
-        ARIADNE_ASSERT(this->size()>0); 
-        for(uint i=1; i!=this->size(); ++i) { ARIADNE_ASSERT((*this)[0].argument_size()==(*this)[i].argument_size()); } 
+    uint argument_size() const {
+        ARIADNE_ASSERT(this->size()>0);
+        for(uint i=1; i!=this->size(); ++i) { ARIADNE_ASSERT((*this)[0].argument_size()==(*this)[i].argument_size()); }
         return (*this)[0].argument_size(); }
-    
+
     void check() const { for(uint i=0; i!=this->size(); ++i) { ARIADNE_ASSERT((*this)[0].argument_size()==(*this)[i].argument_size()); } }
 };
 
 
 inline Vector<TaylorVariable> TaylorVariable::zeroes(uint rs, uint as) {
-    Vector<TaylorVariable> result(rs); for(uint i=0; i!=rs; ++i) { 
+    Vector<TaylorVariable> result(rs); for(uint i=0; i!=rs; ++i) {
         result[i]=TaylorVariable::zero(as); } return result; }
 inline Vector<TaylorVariable> TaylorVariable::constants(uint as, const Vector<Float>& c) {
-    Vector<TaylorVariable> result(c.size()); for(uint i=0; i!=c.size(); ++i) { 
+    Vector<TaylorVariable> result(c.size()); for(uint i=0; i!=c.size(); ++i) {
         result[i]=TaylorVariable::constant(as,c[i]); } return result; }
 inline Vector<TaylorVariable> TaylorVariable::variables(const Vector<Float>& x) {
-    Vector<TaylorVariable> result(x.size()); for(uint i=0; i!=x.size(); ++i) { 
+    Vector<TaylorVariable> result(x.size(),x.size()); for(uint i=0; i!=x.size(); ++i) {
         result[i]=TaylorVariable::variable(x.size(),x[i],i); } return result; }
 
 

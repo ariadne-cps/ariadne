@@ -35,6 +35,8 @@
 
 namespace Ariadne {
 
+typedef unsigned int uint;
+    
 typedef Vector<Float> Point;
 typedef Vector<Interval> Box;
 

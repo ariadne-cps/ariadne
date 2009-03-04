@@ -347,6 +347,10 @@ class HybridGridTreeSet
         for(HybridSpace::locations_const_iterator loc_iter = hspace.
                 locations_begin(); loc_iter!=hspace.locations_end(); ++loc_iter) {
             this->insert(make_pair(loc_iter->first,Grid(loc_iter->second))); } }
+    HybridGridTreeSet(const HybridSpace& hspace, const Vector<Float>& lengths) {
+        for(HybridSpace::locations_const_iterator loc_iter = hspace.
+                locations_begin(); loc_iter!=hspace.locations_end(); ++loc_iter) {
+            this->insert(make_pair(loc_iter->first,Grid(lengths))); } }
     HybridGridTreeSet(const HybridGrid& hgrid) { 
         for(HybridGrid::locations_const_iterator loc_iter = hgrid.
                 locations_begin(); loc_iter!=hgrid.locations_end(); ++loc_iter) {

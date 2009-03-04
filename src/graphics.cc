@@ -46,8 +46,10 @@
 
 namespace Ariadne {
 
-static const int DEFAULT_WIDTH = 800;
-static const int DEFAULT_HEIGHT = 800;
+// static const int DEFAULT_WIDTH = 800;
+// static const int DEFAULT_HEIGHT = 800;
+static const int DEFAULT_WIDTH = 1600;
+static const int DEFAULT_HEIGHT = 1600;
 
 
 std::vector<Point> interpolation_points(const InterpolatedCurve& c) {
@@ -364,6 +366,7 @@ void plot(cairo_t *cr, const Box& bounding_box, const ProjectionFunction& projec
     cairo_clip (cr);
     cairo_new_path (cr);
 
+    
     cairo_set_line_width (cr,0.002);
 
     // compute user to canvas coordinate transformation

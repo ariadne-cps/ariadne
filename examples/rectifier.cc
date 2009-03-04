@@ -62,13 +62,13 @@ int main()
 {    
     /// Introduces the parameters
     Vector<Float> dynamics_parameters(5);
-    dynamics_parameters[0] = 1.0; /// Amplitude of the input voltage, Vi
-    dynamics_parameters[1] = 2.0; /// Sinusoid frequency, f
+    dynamics_parameters[0] = 4.0; /// Amplitude of the input voltage, Vi
+    dynamics_parameters[1] = 50.0; /// Sinusoid frequency, f
     dynamics_parameters[2] = 0.1; /// Diode resistance when on, Ron
-//    dynamics_parameters[3] = 0.0001; /// Load capacitance, Cl
-//    dynamics_parameters[4] = 1000.0; /// Load resistance, Rl
-    dynamics_parameters[3] = 0.05; /// Load capacitance, Cl
-    dynamics_parameters[4] = 1.0; /// Load resistance, Rl
+    dynamics_parameters[3] = 0.0001; /// Load capacitance, Cl
+    dynamics_parameters[4] = 1000.0; /// Load resistance, Rl
+//    dynamics_parameters[3] = 0.05; /// Load capacitance, Cl
+//    dynamics_parameters[4] = 1.0; /// Load resistance, Rl
 
     /// Build the Hybrid System
   
@@ -157,7 +157,7 @@ int main()
 
     /// Compute the system evolution
 
-    global_verbosity = 3;
+    global_verbosity = 1;
 
     /// Create a HybridEvolver object
     HybridEvolver evolver;
@@ -174,7 +174,7 @@ int main()
 
     std::cout << "Computing evolution starting from location offoff, t = 0.0, vi = 0.0, vo = 1.0" << std::endl;
 
-    Box initial_box(3, 0.25/dynamics_parameters[1],0.25/dynamics_parameters[1], dynamics_parameters[0],dynamics_parameters[0], dynamics_parameters[0],dynamics_parameters[0]);
+    Box initial_box(3, 0.0,0.0, 0.0,0.0, dynamics_parameters[0],dynamics_parameters[0]);
     HybridEnclosureType initial_enclosure(offoff,initial_box);
 
 //    Box initial_box(3, 0.01,0.01, 3.80423,3.80423, 3.36842,3.36842);
@@ -198,7 +198,8 @@ int main()
 
 ///    Box graphic_box(2,-dynamics_parameters[0]-0.1,dynamics_parameters[0]+0.1,-dynamics_parameters[0]-0.1,dynamics_parameters[0]+0.1);
     Box graphic_box(2,-0.1/dynamics_parameters[1],1.0/dynamics_parameters[1]*1.1,-dynamics_parameters[0]*1.1,dynamics_parameters[0]*1.1);
-    Box graphic_box2(2,-dynamics_parameters[0]*1.1,dynamics_parameters[0]*1.1,-dynamics_parameters[0]*1.1,dynamics_parameters[0]*1.1);
+ //   Box graphic_box2(2,-dynamics_parameters[0]*1.1,dynamics_parameters[0]*1.1,-dynamics_parameters[0]*1.1,dynamics_parameters[0]*1.1);
+    Box graphic_box2(2,-dynamics_parameters[0],dynamics_parameters[0],-3.5,dynamics_parameters[0]);
 
     Figure g;
     array<uint> tvin(2,0,1);
@@ -224,16 +225,17 @@ int main()
     g.clear();
     g.set_bounding_box(graphic_box2);
     g.set_projection_map(ProjectionFunction(vinvout,3));
-    
+/*    
     g << fill_colour(Colour(1.0,1.0,1.0));
     for(int i = -40; i < 40; i++) {
         g << Box(3, 0.0,0.0, -4.0,4.0, 0.1*i,0.1*(i+1));
         g << Box(3, 0.0,0.0, 0.1*i,0.1*(i+1), -4.0,4.0);
     }
+*/
     g << fill_colour(Colour(0.0,0.5,1.0));
     g << orbit;
     g.write("rectifier_orbit_vin_vout");
-
+/*
     /// Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
     analyser.parameters().lock_to_grid_time = 1.0/(dynamics_parameters[1]);
@@ -278,6 +280,6 @@ int main()
     g << fill_colour(Colour(0.0,0.5,1.0));
     g << *upper_reach_set_ptr;
     g.write("rectifier_reach_vin_vout");
-
+*/
 
 }

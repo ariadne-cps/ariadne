@@ -26,53 +26,91 @@
 
 using namespace Ariadne;
 
+typedef HybridEvolver::EnclosureListType EnclosureListType;
+typedef HybridEvolver::ContinuousEnclosureType ContinuousEnclosureType;
+
+
+HybridGridTreeSet 
+outer_approximation(const EnclosureListType& hls,
+                    const HybridGrid& hgr,
+                    const int accuracy)
+{
+    HybridGridTreeSet result;
+    for(EnclosureListType::const_iterator 
+            iter=hls.begin(); iter!=hls.end(); ++iter)
+        {
+            DiscreteState loc=iter->first;
+            const ContinuousEnclosureType& es=iter->second;
+            if(result.find(loc)==result.locations_end()) {
+                result.insert(make_pair(loc,GridTreeSet(hgr[loc])));
+            }
+            GridTreeSet& gts=result[loc];
+            gts.adjoin_outer_approximation(ImageSet(es.range()),accuracy);
+            //gts.adjoin_outer_approximation(ModelSet<ES>(es),accuracy);
+        }
+    return result;
+}
+
+
 //
 // Definition of the nonlinear dynamics for locations Opening and Closing
 // the parameters are a and T
 //
-struct SaturatedZero : FunctionData<4,4,4> {
+struct ZeroSaturated : FunctionData<5,5,4> {
     template<class R, class A, class P> static void 
     compute(R& r, const A& x, const P& p) {
         r[0] = - p[0] * x[0] + x[2] * x[1];   // xdot = -ax + b y
         r[1] = - x[1] / p[1];                 // ydot = -1/r y
         r[2] = 0.0;                           // b and Delta are constant
         r[3] = 0.0;
+        r[4] = 1.0;
     }
 };
 
-struct NotSaturated : FunctionData<4,4,4> {
+struct NotSaturated : FunctionData<5,5,4> {
     template<class R, class A, class P> static void 
     compute(R& r, const A& x, const P& p) {
         r[0] = - p[0] * x[0] + x[2] * x[1];   // xdot = -ax + b y
-        r[1] = ( p[3] * ( p[2] - x[0] - x[3] ) - x[1] ) / p[1];
-              // ydot = 1/r (Kp (R - x - Delta) - y)
-        r[2] = 0.0;                           // b and Delta are constant
+        r[1] = ( p[3] * ( p[2] - x[0] - x[3] ) - x[1] ) / p[1];  // ydot = 1/r (Kp(R-x-Delta)-y)
+        r[2] = 0.0;                         // b and Delta are constant
         r[3] = 0.0;
+        r[4] = 1.0;
     }
 };
 
-struct SaturatedOne : FunctionData<4,4,4> {
+struct OneSaturated : FunctionData<5,5,4> {
     template<class R, class A, class P> static void 
     compute(R& r, const A& x, const P& p) {
         r[0] = - p[0] * x[0] + x[2] * x[1];   // xdot = -ax + b y
-        r[1] = (1.0 - x[1]) / p[1];           // ydot = -1/r (1 - y)
-        r[2] = 0.0;                           // b and Delta are constant
+        r[1] = (1.0 - x[1]) / p[1];                 // ydot = (1 - y)/r
+        r[2] = 0.0;                         // b and Delta are constant
         r[3] = 0.0;
+        r[4] = 1.0;
     }
 };
 
 
-int main() 
+int main(int argc,char *argv[]) 
 {
-     
+    if(argc != 3) {
+      std::cerr << "Usage: watertank-dominante bmin bmax" <<std::endl;
+      return 1;
+    }
+    
     /// Set the system parameters
     double a = 0.02;
-    double bmin = 0.3;
-    double bmax = 0.34;
+    double bmin = atoi(argv[1])*0.0001;
+    double bmax = atoi(argv[2])*0.0001;
+//    double bmax = 0.29999;
     double r = 1.25;
     double Rif = 5.67;
+//    double Delta = 0.001;
     double Delta = 0.05;
     double Kp = 15;
+    double bstep = 0.0025;
+    double dstep = 0.01;
+    
+    std::cout << "bmin = " << bmin <<", bmax = "<< bmax << std::endl << std::flush;
 
     Vector<Interval> system_parameters(4);
     system_parameters[0] = a;
@@ -87,14 +125,15 @@ int main()
     // b: input pressure
     // Delta: sensor error
 
+    /// Build the Hybrid System
   
     /// Create a HybridAutomton object
     HybridAutomaton watertank_system;
   
     /// Create four discrete states
-    DiscreteState l1(1);      // Saturated to Zero
-    DiscreteState l2(2);      // Not Saturated
-    DiscreteState l3(3);      // Saturated to One
+    DiscreteState l1(1);      // Zero saturated
+    DiscreteState l2(2);      // Not saturated
+    DiscreteState l3(3);      // One saturated
   
     /// Create the discrete events
     DiscreteEvent e12(12);
@@ -103,36 +142,36 @@ int main()
     DiscreteEvent e32(32);
   
     /// Create the dynamics
-    Function<SaturatedZero> dynamic1(system_parameters);
+    Function<ZeroSaturated> dynamic1(system_parameters);
     Function<NotSaturated> dynamic2(system_parameters);
-    Function<SaturatedOne> dynamic3(system_parameters);
+    Function<OneSaturated> dynamic3(system_parameters);
     
     cout << "dynamic1 = " << dynamic1 << endl << endl;
     cout << "dynamic2 = " << dynamic2 << endl << endl;
     cout << "dynamic3 = " << dynamic3 << endl << endl;
 
     /// Create the resets
-    IdentityFunction reset_id(4);
+    IdentityFunction reset_id(5);
     cout << "reset_id="<< reset_id << endl << endl;
 
     /// Create the guards.
     /// Guards are true when f(x) = Ax + b > 0
-    /// x >= Rif - Delta
-    AffineFunction guard21(Matrix<Float>(1,4,1.0,0.0,0.0,1.0),
-                          Vector<Float>(1,-Rif));
-    cout << "guard21=" << guard21 << endl << endl;
-    /// x <= Rif - delta
-    AffineFunction guard12(Matrix<Float>(1,4,-1.0,0.0,0.0,-1.0),
+    /// x <= Rif - Delta
+    AffineFunction guard12(Matrix<Float>(1,5, -1.0,0.0,0.0,-1.0,0.0),
                           Vector<Float>(1,Rif));
     cout << "guard12=" << guard12 << endl << endl;
-    /// x >= Rif - 1/Kp - Delta
-    AffineFunction guard32(Matrix<Float>(1,4,1.0,0.0,0.0,1.0),
-                          Vector<Float>(1,-(Rif - 1.0/Kp)));
-    cout << "guard32=" << guard32 << endl << endl;
-    /// x <= Rif - 1/Kp - delta
-    AffineFunction guard23(Matrix<Float>(1,4,-1.0,0.0,0.0,-1.0),
-                          Vector<Float>(1,Rif - 1.0/Kp));
+    /// x >= Rif - Delta
+    AffineFunction guard21(Matrix<Float>(1,5, 1.0,0.0,0.0,1.0,0.0),
+                          Vector<Float>(1,-Rif));
+    cout << "guard21=" << guard21 << endl << endl;
+    /// x <= Rif - 1/Kp - Delta
+    AffineFunction guard23(Matrix<Float>(1,5, -1.0,0.0,0.0,-1.0,0.0),
+                          Vector<Float>(1,(Rif-1.0/Kp)));
     cout << "guard23=" << guard23 << endl << endl;
+    /// x >= Rif - 1/Kp - Delta
+    AffineFunction guard32(Matrix<Float>(1,5, 1.0,0.0,0.0,1.0,0.0),
+                          Vector<Float>(1,(1.0/Kp - Rif)));
+    cout << "guard32=" << guard32 << endl << endl;
 
     /// Create the invariants.
     /// Invariants are true when f(x) = Ax + b < 0
@@ -146,7 +185,7 @@ int main()
 
     watertank_system.new_forced_transition(e12,l1,l2,reset_id,guard12);
     watertank_system.new_forced_transition(e21,l2,l1,reset_id,guard21);
-    watertank_system.new_forced_transition(e23,l2,l3,reset_id,guard23);
+    watertank_system.new_forced_transition(e23,l2,l3,reset_id,guard23);    
     watertank_system.new_forced_transition(e32,l3,l2,reset_id,guard32);
 
     /// Finished building the automaton
@@ -159,8 +198,8 @@ int main()
     HybridEvolver evolver;
 
     /// Set the evolution parameters
-    double maximum_step_size= 0.125;
-    evolver.parameters().maximum_enclosure_radius = 0.25;
+    double maximum_step_size= 0.05;
+    evolver.parameters().maximum_enclosure_radius = 0.5;
     evolver.parameters().maximum_step_size = maximum_step_size;
     std::cout <<  evolver.parameters() << std::endl;
 
@@ -172,51 +211,86 @@ int main()
     typedef HybridEvolver::TimedEnclosureListType TimedEnclosureListType;
 
     double time_step = 0.25;
-    double total_time = 19.5;
-    double skip_time = 25.0;
-    HybridTime evolution_time(skip_time,1);
+    double total_time = 35.0;
+    double skip_time = 35.0;
+    HybridTime evolution_time(skip_time,6);
+    global_verbosity=1;
 
-    std::cout << "Computing timed evolution starting from location l1, x = 0.0, y = 1.0 for " << skip_time << " seconds" << std::endl;
+    Box graphic_box(2, 18.0,skip_time, 5.0,6.0);
+    array<uint> tx(2,4,0);
 
-
-    Box graphic_box(2, 18.0,32.0 , 5.0,6.0);
-    Figure g1, g2;
-    g1.set_bounding_box(graphic_box);
-    g1 << fill_colour(Colour(1.0,1.0,0.0));
-    g1 << Box(2, 18,32, 5.70 - Delta, 5.7 + Delta);
-    g1 << fill_colour(Colour(0.0,1.0,1.0));
-    g1 << Box(2, 18,32, 5.55 - Delta, 5.55 + Delta);
-    g1 << fill_colour(Colour(0.0,0.5,1.0));
-
-    g2.set_bounding_box(graphic_box);
-    g2 << fill_colour(Colour(1.0,1.0,0.0));
-    g2 << Box(2, 18,32, 5.7 - Delta, 5.7 + Delta);
-    g2 << fill_colour(Colour(0.0,1.0,1.0));
-    g2 << Box(2, 18,32, 5.55 - Delta, 5.55 + Delta);
-    g2 << fill_colour(Colour(0.0,0.5,1.0));
+    Vector<Float> lengths(5, 0.25, 1.0, 1.0, 1.0, 1.0);
+    HybridGridTreeSet hgts(watertank_system.state_space(), lengths);
+    uint grid_depth = 18;
+    uint grid_height = 8;
     
-    double step = 0.
-    for( double b = bmin, b < bmax
-    Box initial_box(4, 0.0,0.0, 1.0,1.0, bmin,bmax, -Delta,Delta);
-    HybridEnclosureType initial_enclosure(l3,initial_box);
-
-    TimedEnclosureListType result = evolver.timed_evolution(watertank_system,initial_enclosure,evolution_time,UPPER_SEMANTICS,true);
-
-    cout << "Result size: " << result.size() << endl;
-    for( int i = 0; i < result.size(); i++ ) {
-        Interval t = result[i].first;
-        Box b = result[i].second.second.bounding_box();
-        Interval x = b[0];
-        std::cout << "  t = " << t << ", loc = " << result[i].second.first << ", x = " << x << std::endl;
-        if(result[i].second.first == l1) {
-          g1 << Box(2, t.lower(), t.lower()+maximum_step_size, x.lower(), x.upper());        
-        } else {
-          g2 << Box(2, t.lower(), t.lower()+maximum_step_size, x.lower(), x.upper());        
+    std::cout << "Computing timed evolution starting from location l3, x = 0.0, y = 1.0 for " << skip_time << " seconds" << std::endl;
+    for(double b=bmin ; b < bmax+bstep ; b += bstep) {
+        for(double d=-Delta ; d < Delta+dstep ; d += dstep) {
+            cout << "b = "<< b <<", Delta = "<<d<<std::endl;
+            Box initial_box(5, 0.0,0.0, 1.0,1.0, b,b, d,d, 0.0,0.0);
+            HybridEnclosureType initial_enclosure(l3,initial_box);
+            OrbitType result = evolver.orbit(watertank_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
+            cout<<"Orbit.final=" << result.final() << endl;
+            cout<<"Adjoining result to the grid..."<<std::flush;
+            hgts.adjoin(outer_approximation(result.reach(),hgts.grid(),grid_depth));
+            cout<<"done:"<<hgts.size()<<" total cells."<<std::endl;
+            char filename[30];
+            sprintf(filename,"wt-best-%d-%d",int(b*10000),int(d*10000));
+            cout<<"Saving result to "<<filename<<"..."<<std::flush;
+            Figure g2;            
+            g2.set_bounding_box(graphic_box);
+            g2.set_projection_map(ProjectionFunction(tx,5));        
+            g2 << fill_colour(Colour(0.9,0.9,0.0));
+            g2 << hgts;
+            g2.write(filename);
+            g2.clear();
+            cout<<"done."<<endl<<std::flush;
         }
     }
 
-    g1.write("watertank-dominante-time-l1");
-    g2.write("watertank-dominante-time-l2");
+/*
+    /// Create a ReachabilityAnalyser object
+    HybridReachabilityAnalyser analyser(evolver);
+    analyser.parameters().lock_to_grid_time = total_time;
+    analyser.parameters().maximum_grid_depth= 14;
+    std::cout <<  analyser.parameters() << std::endl;
+
+    HybridImageSet initial_set;
+    initial_set[l1]=result.final()[l1][0].range();
+
+    HybridTime reach_time((total_time-skip_time),4);
+
+    // Compute evolved sets (i.e. at the evolution time) and reach sets (i.e. up to the evolution time) using lower semantics.
+    // These functions run a bunch of simulations with bounded approximation errors and combines the results.
+    // If the desired evolution time can not be attained without exceeding the error bounds, then the run discarded (without warning)
+    global_verbosity = 4;
+    std::cout << "Computing lower reach set... " << std::flush;
+    HybridGridTreeSet* lower_reach_set_ptr = analyser.lower_reach(watertank_system,initial_set,reach_time);
+    std::cout << "done." << std::endl;
+
+
+//    Box graphic_box(2, 18.0,32.0 , 5.0,6.0);
+    Box graphic_box(2, skip_time,total_time , 5.0,7.0);
+    Figure g1;
+    array<uint> tx(2,4,0);
+    g1.set_bounding_box(graphic_box);
+    g1.set_projection_map(ProjectionFunction(tx,5));    
+    g1 << Box(2, 18,32, hmax - Delta, hmax + Delta);
+    g1 << fill_colour(Colour(0.0,1.0,1.0));
+    g1 << Box(2, 18,32, hmin - Delta, hmin + Delta);
+
+    g1 << fill_colour(Colour(0.0,0.5,1.0));
+    g1 << result;
+    
+    g1 << fill_colour(Colour(1.0,1.0,0.0));
+    g1 << result.final();
+    
+    g1 << fill_colour(Colour(0.0,1.0,1.0));
+    g1 << *lower_reach_set_ptr;
+
+    g1.write("watertank-dominato-time");
+//    g2.write("watertank-dominato-time-l2");
 
 /*  
     OrbitType orbit = evolver.timed_evolution(watertank_system,initial_enclosure,evolution_time,UPPER_SEMANTICS,true);
@@ -317,25 +391,6 @@ int main()
     plot("watertank-reach-evolver",bounding_box, Colour(0.0,0.5,1.0), reach);
 
 
-    /// Create a ReachabilityAnalyser object
-    HybridReachabilityAnalyser analyser(evolver);
-    analyser.parameters().lock_to_grid_time = 32.0;
-    analyser.parameters().grid_lengths = 0.05;
-    std::cout <<  analyser.parameters() << std::endl;
-
-    HybridImageSet initial_set;
-    initial_set[l2]=initial_box;
-
-    HybridTime reach_time(64.0,2);
-
-    plot("watertank-initial_set1",bounding_box, Colour(0.0,0.5,1.0), initial_set);
-
-    // Compute evolved sets (i.e. at the evolution time) and reach sets (i.e. up to the evolution time) using lower semantics.
-    // These functions run a bunch of simulations with bounded approximation errors and combines the results.
-    // If the desired evolution time can not be attained without exceeding the error bounds, then the run discarded (without warning)
-    std::cout << "Computing lower reach set... " << std::flush;
-    HybridGridTreeSet* lower_reach_set_ptr = analyser.lower_reach(watertank_system,initial_set,reach_time);
-    std::cout << "done." << std::endl;
     plot("watertank-lower_reach1",bounding_box, Colour(0.0,0.5,1.0), *lower_reach_set_ptr);
 
     // Compute evolved sets and reach sets using upper semantics.
@@ -370,5 +425,5 @@ int main()
     std::cout << "done." << std::endl;
     plot("watertank-upper_reach2",bounding_box, Colour(0.0,0.5,1.0), *upper_reach_set_ptr);
 */
-
+    return 0;
 }

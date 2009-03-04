@@ -192,10 +192,11 @@ lower_reach(const SystemType& system,
     int grid_height = this->_parameters->maximum_grid_height;
     GTS initial; GTS& reach=*new GTS();
   
+    ARIADNE_LOG(3,"Adjoining initial set to the grid...\n");
     // Improve accuracy of initial set for lower computations
     initial.adjoin_lower_approximation(initial_set,grid_height,grid_depth+4);
     ARIADNE_LOG(3,"initial.size()="<<initial.size()<<"\n");    
-    ARIADNE_LOG(3,"computing lower reach set."); 
+    ARIADNE_LOG(3,"Computing lower reach set..."); 
     for(GTS::const_iterator bs_iter=initial.begin(); bs_iter!=initial.end(); ++bs_iter) {
         ARIADNE_LOG(3,".");
         reach.adjoin(this->_discretiser->reach(system,*bs_iter,time,grid_depth,LOWER_SEMANTICS));

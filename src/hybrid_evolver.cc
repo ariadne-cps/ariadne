@@ -192,7 +192,7 @@ _evolution(EnclosureListType& final_sets,
            Semantics semantics, 
            bool reach) const
 {
-    verbosity=0;
+    verbosity=global_verbosity;
 
   
     typedef FunctionInterface FunctionType;
@@ -207,7 +207,7 @@ _evolution(EnclosureListType& final_sets,
 
     typedef boost::shared_ptr< const FunctionInterface > FunctionConstPointer;
 
-    ARIADNE_LOG(5,ARIADNE_PRETTY_FUNCTION<<"\n");
+    ARIADNE_LOG(3,ARIADNE_PRETTY_FUNCTION<<"\n");
 
     const IntegerType maximum_steps=maximum_hybrid_time.discrete_time;
     const Float maximum_time=maximum_hybrid_time.continuous_time;
@@ -269,13 +269,14 @@ _evolution(EnclosureListType& final_sets,
                       << " and set " << initial_set_model << " due to maximum radius being exceeded.";
         } else {
             // Compute evolution
+            ARIADNE_LOG(1,".");
             this->_evolution_step(working_sets,
                                   final_sets,reach_sets,intermediate_sets,
                                   system,current_set,maximum_hybrid_time,
                                   semantics,reach);
         }
     }
-
+    ARIADNE_LOG(1,"\n");
 }
 
 
@@ -460,7 +461,8 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
                         catch(DegenerateCrossingException) { 
                           ARIADNE_LOG(3," DegenerateCrossing\n"); 
                           data.touching_time_interval=Interval(zero_time,step_size);
-                        }
+                          data.crossing_kind=UNKNOWN;                       
+                       }
                     }
                     if(data.crossing_kind!=TRANSVERSE) {
                         try {
@@ -473,6 +475,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
                         catch(DegenerateCrossingException) { 
                           ARIADNE_LOG(3," DegenerateCrossing\n"); 
                           data.touching_time_interval=Interval(zero_time,step_size);
+                          data.crossing_kind=UNKNOWN;                       
                         }                    
                     }
                 }
@@ -508,7 +511,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     for(predicate_iterator iter=detection_data.begin(); iter!=detection_data.end(); ++iter) {
         DetectionData& data=iter->second;
         if(data.predicate_kind==INVARIANT || data.predicate_kind==GUARD) {
-            if(data.initially_active) {
+            if(data.initially_active && data.crossing_kind != UNKNOWN) {
                 blocking_data.predicate_kind=data.predicate_kind;
                 blocking_data.active=indeterminate;
                 blocking_data.initially_active=true;
@@ -758,10 +761,10 @@ timed_evolution(const SystemType& system,
         SetModelType initial_set_model=current_set.third;
         TimeModelType initial_time_model=current_set.fourth;
         RealType initial_set_radius=radius(initial_set_model.range());
-        std::cout << "initial_steps = "<<initial_steps<< std::endl;
-        std::cout << "initial_time_model.range = "<<initial_time_model.range() << std::endl;
-        std::cout << "initial_location = "<<initial_location<< std::endl;
-        std::cout << "initial_set_model.range = "<<initial_set_model.range()<< std::endl;
+        ARIADNE_LOG(5,"initial_steps = "<<initial_steps<<"\n");
+        ARIADNE_LOG(5,"initial_time_model.range = "<<initial_time_model.range() <<"\n");
+        ARIADNE_LOG(5,"initial_location = "<<initial_location<<"\n");
+        ARIADNE_LOG(5,"initial_set_model.range = "<<initial_set_model.range()<<"\n");
 
         if(initial_time_model.range()[0].lower()>=maximum_time || initial_steps>=maximum_steps) {
             Interval final_time(initial_time_model.range()[0]);

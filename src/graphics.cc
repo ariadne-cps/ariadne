@@ -365,10 +365,9 @@ void plot(cairo_t *cr, const Box& bounding_box, const ProjectionFunction& projec
     cairo_line_to (cr, left_margin, canvas_height-bottom_margin);
     cairo_clip (cr);
     cairo_new_path (cr);
-
     
-    cairo_set_line_width (cr,0.002);
-
+    cairo_set_line_width (cr,0.002*min(bbox[0].width(),bbox[1].width()));  
+    
     // compute user to canvas coordinate transformation
     double ctr0=left_margin;
     double ctr1=top_margin;

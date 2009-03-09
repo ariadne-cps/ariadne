@@ -129,8 +129,8 @@ bool refines(const Vector<TaylorVariable>& tv1, const Vector<TaylorVariable>& tv
 /*! \brief A class representing a quantity depending on other quantities. */
 class TaylorVariable
 {
-    //typedef Polynomial ExpansionType;
-    typedef MapPolynomial ExpansionType;
+    typedef Polynomial ExpansionType;
+    //typedef MapPolynomial ExpansionType;
     static const Float _zero;
     ExpansionType _expansion;
     Float _error;
@@ -175,7 +175,7 @@ class TaylorVariable
 
     Float& operator[](uint j) { return this->_expansion[MultiIndex::unit(this->argument_size(),j)]; }
     Float& operator[](const MultiIndex& a) { return this->_expansion[a]; }
-    const Float& operator[](uint j) const { return const_cast<TaylorVariable*>(this)->_expansion[MultiIndex::unit(this->argument_size(),j)]; }
+    const Float& operator[](uint j) const { return this->_expansion[MultiIndex::unit(this->argument_size(),j)]; }
     //const Float& operator[](const MultiIndex& a) const { return const_cast<TaylorVariable*>(this)->_expansion[a]; }
     const Float& operator[](const MultiIndex& a) const { return this->_expansion[a]; }
 

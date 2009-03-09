@@ -31,12 +31,32 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <algorithm>
 #include <boost/iterator.hpp>
 #include <boost/iterator_adaptors.hpp>
 
 #include "multi_index.h"
 
 namespace Ariadne {
+
+class FloatReference {
+  public:
+    FloatReference(double& x) : _x(&x) { }
+    void operator=(FloatReference r) { *_x=*r._x; }
+    void operator=(const Float& x) { *_x=x; }
+    operator Float& () { return *_x; }
+    operator Float const& () const { return *_x; }
+  private:
+    double* _x;
+};
+
+class FloatConstReference {
+  public:
+    FloatConstReference(const double& x) : _x(&x) { }
+    operator Float const& () const { return *_x; }
+  private:
+    const double* _x;
+};
 
 class PolynomialValue;
 class PolynomialReference;
@@ -45,7 +65,6 @@ class PolynomialConstReference;
 class PolynomialValue {
   public:
     PolynomialValue(const MultiIndex& a, const Float& x) : first(a), second(x) { }
-    PolynomialValue(const PolynomialReference& dr);
     MultiIndex first;
     Float second;
 };
@@ -60,34 +79,30 @@ inline std::ostream& operator<<(std::ostream& os, const PolynomialValue& dv) {
 
 class PolynomialReference {
   public:
-    PolynomialReference(unsigned int n, uchar* p) : first(n,p), second(*(double*)(p+(4*((n+3)/4)))) { }
     PolynomialReference& operator=(const PolynomialReference& dr) {
         first=dr.first; second=dr.second; return *this; }
     PolynomialReference& operator=(const PolynomialValue& dv) {
         first=dv.first; second=dv.second; return *this; }
+    operator PolynomialValue() const { 
+        return PolynomialValue(this->first,this->second); }
   public:
     MultiIndexReference first;
-    double& second;
+    FloatReference second;
 };
 
 inline bool operator<(const PolynomialReference& dr1, const PolynomialReference& dr2) {
     return dr1.first < dr2.first;
 }
 
-inline PolynomialValue::PolynomialValue(const PolynomialReference& dr)
-    : first(dr.first), second(dr.second)
-{ }
+inline std::ostream& operator<<(std::ostream& os, PolynomialReference dr) {
+    return os << dr.first << ":" << dr.second;
+}
 
 
 class PolynomialConstReference {
   public:
-    PolynomialConstReference(unsigned int n, const uchar* p) : first(n,p), second(*(const double*)(p+(4*((n+3)/4)))) { }
-    PolynomialConstReference(PolynomialReference dr) : first(dr.first), second(dr.second) { }
-    PolynomialConstReference(const PolynomialConstReference& dr) : first(dr.first), second(dr.second) { }
-    PolynomialConstReference& operator=(const PolynomialConstReference& dr) {
-        first=dr.first; const double* second_ptr=&second; second_ptr=(const double*)(&dr.second); return *this; }
     MultiIndexConstReference first;
-    const double& second;
+    FloatConstReference second;
 };
 
 inline std::ostream& operator<<(std::ostream& os, PolynomialConstReference dr) {
@@ -110,12 +125,13 @@ class PolynomialIterator {
     typedef PolynomialReference& reference;
     typedef PolynomialReference* pointer;
   public:
-    PolynomialIterator(size_type n, void* p) : _n(n), _p(reinterpret_cast<word_type*>(p)), _x((double*)(_p+_offset())) { }
+    PolynomialIterator(size_type n, void* p) : _n(n), _p(reinterpret_cast<word_type*>(p)), 
+        _x(reinterpret_cast<double*>(_p+MultiIndex::_word_size(_n))) { }
     PolynomialIterator(const PolynomialIterator& i) : _n(i._n), _p(i._p), _x(i._x) { }
     PolynomialIterator& operator=(const PolynomialIterator& i) {
         _n=i._n; _p=i._p; _x=i._x; return *this; }
-    int _offset() const { return (_n*sizeof(byte_type))/sizeof(word_type)+1; }
-    int _increment() const { return (_n*sizeof(byte_type)+sizeof(double))/sizeof(word_type)+1; }
+    int _offset() const { return MultiIndex::_word_size(_n); }
+    int _increment() const { return MultiIndex::_element_size(_n); }
     PolynomialIterator& operator++() { _p+=_increment(); _x=(double*)(_p+_offset()); return *this; }
     PolynomialIterator& operator--() { _p-=_increment(); _x=(double*)(_p+_offset()); return *this; }
     PolynomialIterator operator++(int) { PolynomialIterator tmp=*this; ++*this; return tmp; }
@@ -146,8 +162,8 @@ class PolynomialConstIterator {
     PolynomialConstIterator(size_type n, const void* p)
         : _n(n), _p(reinterpret_cast<const word_type*>(p)), _x((const double*)(_p+_offset())) { }
     PolynomialConstIterator(const PolynomialIterator& piter) : _n(piter._n), _p(piter._p), _x(piter._x) { }
-    int _offset() const { return (_n*sizeof(byte_type))/sizeof(word_type)+1; }
-    int _increment() const { return (_n*sizeof(byte_type)+sizeof(double))/sizeof(word_type)+1; }
+    int _offset() const { return MultiIndex::_word_size(_n); }
+    int _increment() const { return MultiIndex::_element_size(_n); }
     PolynomialConstIterator& operator++() { _p+=_increment(); _x=(const double*)(_p+_offset()); return *this; }
     PolynomialConstIterator& operator--() { _p-=_increment(); _x=(const double*)(_p-_offset()); return *this; }
     const PolynomialConstReference& operator*() const {
@@ -192,19 +208,14 @@ class Polynomial
     unsigned int argument_size() const { return _argument_size; }
     unsigned int size() const { return _v.size()/element_size(); }
     void reserve(unsigned int n) { _v.reserve(n*element_size()); }
-    void erase(const_iterator iter) { const_cast<double&>(iter->second)=0.0; }
+    void erase(iterator iter) { iter->second=0.0; }
     void insert(const MultiIndex& a, Float x) {
         assert(a.size()==_argument_size); _insert(a,x); }
-    void insert(const MultiIndex& a1, const MultiIndex& a2, Float x) {
-        assert(a1.size()==_argument_size); assert(a2.size()==_argument_size); _insert(a1,a2,x); }
-    void append(const MultiIndex& a, Float x) { _insert(a,x); }
-    void append(const MultiIndex& a1, const MultiIndex& a2, Float x) { _insert(a1,a2,x); }
-    reference operator[](unsigned int i) { return reference(_argument_size,(byte_type*)(&_v[0]+element_size()*i)); }
-    const_reference operator[](unsigned int i) const {
-        return const_reference(_argument_size,(byte_type*)(&_v[0]+element_size()*i)); }
+    void append(const MultiIndex& a, Float x) { _append(a,x); }
+    void append(const MultiIndex& a1, const MultiIndex& a2, Float x) { _append(a1,a2,x); }
     Float& operator[](const MultiIndex& a) { 
         iterator iter=this->find(a); 
-        if(iter==this->end()) { this->_insert(a,0.0); iter=this->find(a); }
+        if(iter==this->end()) { return this->_insert(a,0.0)->second; }
         return iter->second; }
     const Float& operator[](const MultiIndex& a) const { 
         const_iterator iter=this->find(a); 
@@ -238,12 +249,18 @@ class Polynomial
     const word_type* _end() const { return _v.end().operator->(); }
     word_type* _begin() { return _v.begin().operator->(); }
     word_type* _end() { return _v.end().operator->(); }
-    void _insert(const MultiIndex& a, Float x) {
+    iterator _insert(const MultiIndex& a, Float x) {
+        this->_append(a,x);
+        iterator iter=this->end(); --iter; iterator prev=iter;
+        while(iter!=this->begin()) {  
+            --prev; if(prev->first<a) { break; } else { *iter=*prev; --iter; } }
+        iter->first=a; iter->second=x; return iter; }
+    void _append(const MultiIndex& a, Float x) {
         _v.resize(_v.size()+element_size());
         word_type* vp=_end()-element_size(); const word_type* ap=a.word_begin();
         for(unsigned int j=0; j!=word_size(); ++j) { vp[j]=ap[j]; }
         double* xp=reinterpret_cast<double*>(this->_end())-1; *xp=x; }
-    void _insert(const MultiIndex&  a1, const MultiIndex&  a2, Float x) {
+    void _append(const MultiIndex&  a1, const MultiIndex&  a2, Float x) {
         _v.resize(_v.size()+element_size());
         word_type* vp=_end()-element_size(); const word_type* ap1=a1.word_begin(); const word_type* ap2=a2.word_begin();
         for(unsigned int j=0; j!=word_size(); ++j) { vp[j]=ap1[j]+ap2[j]; }
@@ -276,7 +293,10 @@ inline Polynomial::operator std::map<MultiIndex,Float> () const
 inline std::ostream& operator<<(std::ostream& os, const Polynomial& p) {
     os << "{";
     for(Polynomial::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
-        os << (iter==p.begin() ? ' ' : ',') << iter->first << ":" << iter->second; }
+        os << (iter==p.begin() ? ' ' : ',');
+        for(unsigned int i=0; i!=iter->first.size(); ++i) {
+            os << (i==0?" ":",") << int(iter->first[i]); }
+        os << ":" << iter->second; }
     return os << " }";
 }
 

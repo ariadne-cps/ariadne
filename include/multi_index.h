@@ -138,7 +138,8 @@ class MultiIndex {
     word_type* word_begin() { return reinterpret_cast<word_type*>(_p); }
     const word_type* word_begin() const { return reinterpret_cast<const word_type*>(_p); }
   public:
-    static size_type _word_size(size_type n) { return ((n*sizeof(value_type))/sizeof(word_type)+1); }
+    static size_type _word_size(size_type n) { return ((n*sizeof(byte_type))/sizeof(word_type)+1); }
+    static size_type _element_size(size_type n) { return ((n*sizeof(byte_type))/sizeof(word_type)+1+sizeof(double)/sizeof(word_type)); }
     static value_type* _allocate(size_type n) { return reinterpret_cast<value_type*>(new word_type[_word_size(n)]); }
     static void _deallocate(value_type* p) { delete[] reinterpret_cast<word_type*>(p); }
   private:
@@ -266,16 +267,16 @@ inline bool operator<(const MultiIndex& a1, const MultiIndex& a2) {
     if(a1.degree()!=a2.degree()) {
         return a1.degree()<a2.degree();
     } else {
+        for(MultiIndex::size_type i=0; i!=a1.size(); ++i) {
+            if(a1[i]!=a2[i]) {
+                return a1[i]>a2[i];
+            }
+        }
+        return false;
         //for(size_type j=0; j!=a1.word_size(); ++j) {
         for(int j=a1.word_size()-1; j!=-1; --j) {
             if(a1.word_at(j)!=a2.word_at(j)) {
                 return a1.word_at(j)<a2.word_at(j);
-            }
-        }
-        return false;
-        for(MultiIndex::size_type i=0; i!=a1.size(); ++i) {
-            if(a1[i]!=a2[i]) {
-                return a1[i]>a2[i];
             }
         }
         return false;
@@ -438,8 +439,9 @@ bin(const MultiIndex& n, const MultiIndex& k)
 
 inline
 std::ostream& operator<<(std::ostream& os, const MultiIndex& a) {
-    os << "("<<int(a.degree());
-    for(MultiIndex::size_type i=0; i!=a.size(); ++i) { os << (i==0?';':',') << int(a[i]); }
+    //os << "("<<int(a.degree());
+    //for(MultiIndex::size_type i=0; i!=a.size(); ++i) { os << (i==0?';':',') << int(a[i]); }
+    for(MultiIndex::size_type i=0; i!=a.size(); ++i) { os << (i==0?'(':',') << int(a[i]); }
     return os << ')';
 }
 
@@ -459,7 +461,9 @@ class MultiIndexReference {
     operator MultiIndex& () { return reinterpret_cast<MultiIndex&>(*this); }
     operator MultiIndex const& () const { return reinterpret_cast<MultiIndex const&>(*this); }
     size_type size() const { return this->_n; }
-    value_type* begin() const { return this->_p; }
+    value_type degree() const { return this->_p[this->_n]; }
+    const value_type& operator[](size_type i) const { return this->_p[i]; }
+    const value_type* begin() const { return this->_p; }
     size_type word_size() const { return MultiIndex::_word_size(this->_n); }
     word_type& word_at(size_type j) { return reinterpret_cast<word_type*>(this->_p)[j]; }
     const word_type& word_at(size_type j) const { return reinterpret_cast<const word_type*>(this->_p)[j]; }
@@ -474,8 +478,12 @@ class MultiIndexConstReference {
   public:
     MultiIndexConstReference(size_type n, const void* p) : _n(n), _p(reinterpret_cast<const value_type*>(p)) { }
     MultiIndexConstReference(const MultiIndex& a) : _n(a.size()), _p(a.begin()) { }
-    MultiIndexConstReference(const MultiIndexReference a) : _n(a.size()), _p(a.begin()) { }
+    MultiIndexConstReference(MultiIndexReference a) : _n(a.size()), _p(a.begin()) { }
     operator MultiIndex const& () const { return reinterpret_cast<MultiIndex const&>(*this); }
+    size_type size() const { return this->_n; }
+    value_type degree() const { return this->_p[this->_n]; }
+    const value_type& operator[](size_type i) const { return this->_p[i]; }
+    const value_type* begin() const { return this->_p; }
   private:
     size_type _n; const value_type* _p;
 };

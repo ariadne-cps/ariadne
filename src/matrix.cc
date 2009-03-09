@@ -153,10 +153,8 @@ inverse(const Matrix<Rational>& A)
 }
 #endif // HAVE_GMPXX_H
 
-Matrix<Float> triangular_multiplier(const Matrix<Float>& A, size_t b);
-
-// Returns a square matrix R such that A=OR where O is orthogonal,
-// and the sum of the absolute values of the rows of R are
+// Returns a matrix R such that A=OR where O is a square matrix with
+// orthogonal rows and the sum of the absolute values of the rows of R are
 // at most one.
 //
 // Use Householder transformation H=I-vv' where v=u/|u|
@@ -245,86 +243,62 @@ triangular_factor(const Matrix<Float>& A)
 
     } // end of loop on working column k
 
+    // Scale the rows of R to have sum of absolute values equal to 1
 
+    rounding_mode_t prev_rounding_mode=get_rounding_mode();
+    for(size_t i=0; i!=m; ++i) {
+        set_rounding_mode(upward);
+        Float rsum=0.0;
+        for(size_t j=i; j!=n; ++j) {
+            rsum+=abs(R[i][j]);
+        }
+        set_rounding_mode(toward_zero);
+        for(size_t j=i; j!=n; ++j) {
+            R[i][j]/=rsum;
+        }
+    }
+    set_rounding_mode(prev_rounding_mode);
     return R;
         
 }
 
-// Returns a square matrix R such that the first columns of AR are
-// orthogonal, and such that the row absolute value sums are at
-// most 1. Then the image of the unit box under the matrix AR is
-// an over-approximation of the image of the unit box under A.
+// Returns a matrix T such that the matrix O=AT is a square matrix with
+// orthogonal rows, and such that the row absolute value sums of the inverse of
+// T are at most 1. Then the image of the unit box under the matrix T is
+// an over-approximation of the unit box.
 Matrix<Float>
 triangular_multiplier(const Matrix<Float>& A)
 {
+    ARIADNE_ASSERT(A.row_size()<=A.column_size());
     const size_t m=A.row_size();
     const size_t n=A.column_size();
+
     Matrix<Float> R=triangular_factor(A);
-    for(uint i=0; i!=m; ++i) {
-        Float rs=0.0;
-        for(uint j=0; j!=n; ++j) {
-            rs+=abs(R[i][j]);
+    Matrix<Float> T(n,m); for(size_t i=0; i!=m; ++i) { T[i][i]=1.0; }
+
+    for(size_t i=0; i!=m; ++i) { assert(R[i][i]!=0.0); }
+
+    for(size_t k=m-1; k!=size_t(-1); --k) {
+        Float r=1.0/R[k][k];
+        for(size_t i=0; i!=k; ++i) {
+            Float s=R[i][k]*r;
+            for(size_t j=k; j!=m; ++j) {
+                T[i][j]-=s*T[k][j];
+            }
         }
-        for(uint j=0; j!=n; ++j) {
-             R[i][j]/=rs;
+        for(size_t j=k; j!=m; ++j) {
+            T[k][j]*=r;
         }
     }
-    Matrix<Float> T=inverse(R);
+
     return T;
-    Matrix<Float> B=A;
-    Matrix<Float> M=Matrix<Float>::identity(n);
-    for(size_t c=0; c!=std::min(m,n); ++c) {
-        Matrix<Float> T=triangular_multiplier(B,c);
-        Matrix<Float> Tinv=inverse(T);
-        B=prod(B,T);
-        M=prod(M,T);
-    }
-    return M;
-    return triangular_multiplier(A,0u);
 }
 
-Matrix<Float>
-triangular_multiplier(const Matrix<Float>& A, size_t b)
-{
-    typedef Float X;
 
-    size_t m=A.row_size();
-    size_t n=A.column_size();
-    
-    Matrix<X> T=Matrix<X>::identity(n);
-    
-    array<X> p(n);
-    
-    for(size_t c=0; c!=std::min(m,n); ++c) {
-    //for(size_t c=b; c!=b+1u; ++c) {
 
-        for(size_t j=c; j!=n; ++j) {
-            X ip=0.0;
-            for(size_t i=c; i!=m; ++i) {
-                ip+=A[i][c]*A[i][j];
-            }
-            p[j]=ip;
-        }
-        
-        //T[c][c]=1/p[c];
-        for(size_t j=c+1u; j!=n; ++j) {
-            T[c][j]=-p[j]/p[c];
-            T[c][c]+=abs(T[c][j]);
-        }
-        
-    }
 
-    return T;
-
-}    
-     
-
-// Compute the orthogonal decomposition A=QR without column pivoting. The 
-// matrix Q is built up as a composition of elementary Householder 
-// transformations H=I-vv' with |v|=1. Note that inv(H)=H'=H. The vector v is 
-// chosen to be a multiple of the first working column of A. 
-
-Vector<Float> 
+// Compute the vector of row norms (sums of absolute values) of A
+Vector<Float>
 row_norms(const Matrix<Float>& A)
 {
     const size_t m=A.row_size();
@@ -346,6 +320,7 @@ row_norms(const Matrix<Float>& A)
 }
 
 
+// Scale the rows of A to each have some of absolute values equal to one
 Matrix<Float> 
 normalise_rows(const Matrix<Float>& A)
 {
@@ -375,6 +350,10 @@ normalise_rows(const Matrix<Float>& A)
 }
 
 
+// Compute the orthogonal decomposition A=QR without column pivoting. The
+// matrix Q is built up as a composition of elementary Householder 
+// transformations H=I-vv' with |v|=1. Note that inv(H)=H'=H. The vector v is 
+// chosen to be a multiple of the first working column of A. 
 tuple< Matrix<Float>, Matrix<Float> > 
 orthogonal_decomposition(const Matrix<Float>& A)
 {

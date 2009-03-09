@@ -154,6 +154,7 @@ class TaylorVariable
     TaylorVariable(const std::map<MultiIndex,Float>& d, const Float& e);
     TaylorVariable(uint as, uint deg, const double* ptr, const double& err);
     TaylorVariable(uint as, uint deg, double d0, ...);
+    TaylorVariable(uint as, uint nnz, uint a0, ...);
 
     TaylorVariable& operator=(const Float& c) {
         this->_expansion.clear(); this->_expansion[MultiIndex::zero(this->argument_size())]=c; this->_error=0; return *this; }
@@ -294,6 +295,7 @@ class Vector<TaylorVariable>
     Vector(uint rs) : ublas::vector<TaylorVariable>(rs) { for(uint i=0; i!=rs; ++i) { (*this)[i]=TaylorVariable(); } }
     Vector(uint rs, uint as) : ublas::vector<TaylorVariable>(rs) { for(uint i=0; i!=rs; ++i) { (*this)[i]=TaylorVariable(as); } }
     Vector(uint rs, const TaylorVariable& x) : ublas::vector<TaylorVariable>(rs) { for(uint i=0; i!=rs; ++i) { (*this)[i]=x; } }
+    Vector(uint rs, uint as, uint deg, double d0, ...);
     template<class E> Vector(const ublas::vector_expression<E> &ve) : ublas::vector<TaylorVariable>(ve) { }
     uint result_size() const { return this->size(); }
     uint argument_size() const {

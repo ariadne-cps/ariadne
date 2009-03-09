@@ -61,6 +61,13 @@ int test_case_counter = 0;
         cout.flush();                                                   \
     }                                                                   \
                                                                         \
+/*! \brief Print the comment for the test */
+#define ARIADNE_TEST_WARN( message )                                    \
+    {                                                                   \
+        cout << "WARNING: " << message << "" << endl;                \
+        cerr << "WARNING: " << message << "" << endl;                \
+    }                                                                   \
+                                                                        \
                                                                         \
 /*! \brief Catches an exception and writes a diagnostic to standard output and standard error. */
 #define ARIADNE_TEST_CATCH(message)                                     \

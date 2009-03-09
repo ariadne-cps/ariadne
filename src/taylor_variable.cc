@@ -144,6 +144,30 @@ TaylorVariable::TaylorVariable(uint as, uint deg, double d0, ...)
     ARIADNE_ASSERT(this->_error>=0);
 }
 
+TaylorVariable::TaylorVariable(uint as, uint nnz, uint a0, ...)
+    : _expansion(as), _error(0),
+      _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree)
+{
+    MultiIndex a(as);
+    uint aj=0u;
+    double x=0.0;
+    va_list args;
+    va_start(args,a0);
+    for(uint k=0; k!=nnz; ++k) {
+        for(uint j=0; j!=as; ++j) {
+            if(j!=0 || k!=0) { aj=va_arg(args,uint); }
+            a[j]=aj;
+        }
+        x=va_arg(args,double);
+        this->_expansion[a]=x;
+    }
+    double e=va_arg(args,double);
+    this->error()=e;
+    va_end(args);
+    this->_expansion.sort();
+    ARIADNE_ASSERT(this->_error>=0);
+}
+
 /*
 TaylorVariable::TaylorVariable(uint as, uint deg, double d0, ...)
     : _expansion(as), _error(0),
@@ -2246,6 +2270,29 @@ operator<<(std::ostream& os, const TaylorVariable& tv) {
 }
 
 
+
+Vector<TaylorVariable>::Vector(uint rs, uint as, uint deg, double x0, ...) 
+    : ublas::vector<TaylorVariable>(rs) 
+{
+    double x=x0;
+    va_list args;
+    va_start(args,x0);
+    for(uint i=0; i!=rs; ++i) {
+        (*this)[i]=TaylorVariable(as);
+        for(MultiIndex j(as); j.degree()<=deg; ++j) {
+            if(x!=0.0 || j.degree()<=1) { (*this)[i].expansion().append(j,x); }
+            x=va_arg(args,double);
+        }
+        (*this)[i].error()=x;
+        x=va_arg(args,double);
+        (*this)[i].expansion().sort();
+        (*this)[i].clean();
+    }
+    va_end(args);
+}
+
+    
+    
 } //namespace Ariadne
 
 

@@ -32,6 +32,7 @@
 #include "vector.h"
 #include "set_interface.h"
 
+#include "list_set.h"
 #include "taylor_variable.h"
 
 namespace Ariadne {
@@ -58,12 +59,15 @@ class TaylorSet
   private:
     Vector<TaylorVariable> _variables;
   public:
-    TaylorSet(uint d=0);
+    TaylorSet(uint d=0, uint ng=0);
     template<class XE, class XP> TaylorSet(uint rs, uint as, uint d, const XE* eps, const XP* ptr);
+    TaylorSet(uint rs, uint as, uint deg, double x0, ...);
     TaylorSet(const FunctionInterface& f, const Vector<Interval>& d);
     TaylorSet(const Vector<TaylorVariable>& tv);
     TaylorSet(const Vector<Interval>& bx);
-    
+
+    friend bool operator==(const TaylorSet& ts1, const TaylorSet& ts2);
+
     uint dimension() const { return this->_variables.size(); }
     uint generators_size() const { assert(this->_variables.size()>0); return this->_variables[0].argument_size(); }
     const TaylorVariable& operator[](uint i) const { return this->_variables[i]; }
@@ -78,20 +82,35 @@ class TaylorSet
     Vector<TaylorVariable> variables() const { return this->_variables; }
 
     TaylorSet* clone() const { return new TaylorSet(*this); } 
+    Float radius() const;
     tribool disjoint(const Box&) const;
     tribool overlaps(const Box&) const;
     tribool inside(const Box&) const;
     Box bounding_box() const;
     std::ostream& write(std::ostream& os) const;
     
+    TaylorSet linearise() const;
+    GridTreeSet discretise(const Grid& grid, uint depth) const;
+    GridTreeSet& discretise(GridTreeSet& grid_set, uint depth) const;
+    TaylorSet recondition() const;
+    TaylorSet subsume() const;
     pair<TaylorSet,TaylorSet> split(uint dim) const;
     pair<TaylorSet,TaylorSet> split() const;
+    ListSet<TaylorSet> subdivide(Float rad) const;
+  private:
+    Matrix<Float> jacobian() const;
 };
 
 GridTreeSet outer_approximation(const TaylorSet& set, const Grid& grid, uint depth);
 void adjoin_outer_approximation(GridTreeSet& grid_set, const TaylorSet& set, uint depth);
 Zonotope zonotope(const TaylorSet& ts);
 void draw(Figure& g, const TaylorSet& ts);
+void box_draw(Figure& g, const TaylorSet& ts);
+void affine_draw(Figure& g, const TaylorSet& ts);
+void curve_draw(Figure& g, const TaylorSet& ts);
+void grid_draw(Figure& g, const TaylorSet& ts);
+
+void plot(const char* fn, const Box& bbx, const TaylorSet& ts);
 
 template<class XE, class XP> 
 TaylorSet::TaylorSet(uint rs, uint as, uint d, 

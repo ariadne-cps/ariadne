@@ -109,6 +109,12 @@ class Zonotope
     /*! \brief Construct a zonotope of dimension \a d with centre at the origin and \a m generators from the data beginning at \a ptr. */
     template<class XX> explicit Zonotope(uint d, uint m, const XX* ptr);
   
+    /*! \brief Construct a zonotope of dimension \a d with \a m generators from raw data.
+     *  The data format is (c0,G00,G01,...,G0m,e0,c1,G10,...,G1m,e1,...).
+     */
+    explicit Zonotope(uint d, uint m, double x0, ...);
+  
+
     /*! \brief Convert from a box. */
     Zonotope(const Box& r);
     /*! \brief Copy constructor. */
@@ -117,7 +123,13 @@ class Zonotope
     Zonotope& operator=(const Zonotope& z);
     /*! \brief Cloning operator. */
     Zonotope* clone() const;
+    //@}
   
+  
+    //@{ 
+    //! \name Logical predicates
+    /*! \brief Test for equality of representation. */
+    friend bool operator==(const Zonotope& z1, const Zonotope& z2);
     //@}
   
     //@{ 

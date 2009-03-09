@@ -141,8 +141,20 @@ template<class SET> void plot(const char* filename, const PlanarProjectionMap& p
     Figure g; g.set_projection_map(pr), g.set_bounding_box(bbox); g.set_fill_colour(fc); draw(g,set); g.write(filename); }
 
 template<class SET1, class SET2> 
+void plot(const char* filename, const Box& bbox, const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2) { 
+    Figure g; g.set_fill_colour(fc1); draw(g,set1); g.set_fill_colour(fc2); draw(g,set2); g.write(filename); }
+
+template<class SET1, class SET2> 
 void plot(const char* filename, const PlanarProjectionMap& pr, const Box& bbox, const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2) { 
     Figure g; g.set_bounding_box(bbox); g.set_fill_colour(fc1); draw(g,set1); g.set_fill_colour(fc2); draw(g,set2); g.write(filename); }
+
+template<class SET1, class SET2, class SET3> 
+void plot(const char* filename, const Box& bbox, 
+          const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2, const Colour& fc3, const SET3& set3) 
+{ 
+    Figure g; g.set_bounding_box(bbox); 
+    g.set_fill_colour(fc1); draw(g,set1); g.set_fill_colour(fc2); draw(g,set2); g.set_fill_colour(fc3); draw(g,set3); g.write(filename); 
+}
 
 template<class SET1, class SET2, class SET3> 
 void plot(const char* filename, const PlanarProjectionMap& pr, const Box& bbox, 
@@ -150,6 +162,32 @@ void plot(const char* filename, const PlanarProjectionMap& pr, const Box& bbox,
 { 
     Figure g; g.set_projection_map(pr); g.set_bounding_box(bbox); 
     g.set_fill_colour(fc1); draw(g,set1); g.set_fill_colour(fc2); draw(g,set2); g.set_fill_colour(fc3); draw(g,set3); g.write(filename); 
+}
+
+template<class SET1, class SET2, class SET3, class SET4> 
+void plot(const char* filename, const Box& bbox, 
+          const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2, 
+          const Colour& fc3, const SET3& set3, const Colour& fc4, const SET4& set4) 
+{ 
+    Figure g; g.set_bounding_box(bbox); 
+    g.set_fill_colour(fc1); draw(g,set1); 
+    g.set_fill_colour(fc2); draw(g,set2); 
+    g.set_fill_colour(fc3); draw(g,set3); 
+    g.set_fill_colour(fc4); draw(g,set4);
+    g.write(filename); 
+}
+
+template<class SET1, class SET2, class SET3, class SET4> 
+void plot(const char* filename, const PlanarProjectionMap& pr, const Box& bbox, 
+          const Colour& fc1, const SET1& set1, const Colour& fc2, const SET2& set2, 
+          const Colour& fc3, const SET3& set3, const Colour& fc4, const SET4& set4) 
+{ 
+    Figure g; g.set_projection_map(pr); g.set_bounding_box(bbox); 
+    g.set_fill_colour(fc1); draw(g,set1); 
+    g.set_fill_colour(fc2); draw(g,set2); 
+    g.set_fill_colour(fc3); draw(g,set3); 
+    g.set_fill_colour(fc4); draw(g,set4);
+    g.write(filename); 
 }
 
 

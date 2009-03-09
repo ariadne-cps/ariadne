@@ -257,19 +257,30 @@ triangular_factor(const Matrix<Float>& A)
 Matrix<Float>
 triangular_multiplier(const Matrix<Float>& A)
 {
-    return triangular_multiplier(A,0u);
-    typedef Float X;
     const size_t m=A.row_size();
     const size_t n=A.column_size();
-    Matrix<X> B=A;
-    Matrix<X> M=Matrix<X>::identity(n);
+    Matrix<Float> R=triangular_factor(A);
+    for(uint i=0; i!=m; ++i) {
+        Float rs=0.0;
+        for(uint j=0; j!=n; ++j) {
+            rs+=abs(R[i][j]);
+        }
+        for(uint j=0; j!=n; ++j) {
+             R[i][j]/=rs;
+        }
+    }
+    Matrix<Float> T=inverse(R);
+    return T;
+    Matrix<Float> B=A;
+    Matrix<Float> M=Matrix<Float>::identity(n);
     for(size_t c=0; c!=std::min(m,n); ++c) {
-        Matrix<X> T=triangular_multiplier(B,c);
-        Matrix<X> Tinv=inverse(T);
+        Matrix<Float> T=triangular_multiplier(B,c);
+        Matrix<Float> Tinv=inverse(T);
         B=prod(B,T);
         M=prod(M,T);
     }
     return M;
+    return triangular_multiplier(A,0u);
 }
 
 Matrix<Float>
@@ -284,8 +295,8 @@ triangular_multiplier(const Matrix<Float>& A, size_t b)
     
     array<X> p(n);
     
-    //for(size_t c=0; c!=std::min(m,n); ++c) {
-    for(size_t c=b; c!=b+1u; ++c) {
+    for(size_t c=0; c!=std::min(m,n); ++c) {
+    //for(size_t c=b; c!=b+1u; ++c) {
 
         for(size_t j=c; j!=n; ++j) {
             X ip=0.0;

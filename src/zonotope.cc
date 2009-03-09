@@ -176,6 +176,26 @@ Zonotope::Zonotope(uint d, uint m)
 {
 }
 
+Zonotope::Zonotope(uint d, uint m, double x0, ...)
+    : _centre(d), _generators(d,m), _error(d)
+{
+    double x=x0;
+    va_list args;
+    va_start(args,x0);
+    for(uint i=0; i!=d; ++i) {
+        if(i!=0) { x=va_arg(args,double); }
+        this->_centre[i]=x0;
+        for(uint j=0; j!=m; ++j) {
+            x=va_arg(args,double);
+            this->_generators[i][j]=x;
+        }
+        x=va_arg(args,double);
+        this->_error[i]=x;
+        ARIADNE_ASSERT(this->_error[i]>=0);
+    }
+    va_end(args);
+}
+
  
 Zonotope::Zonotope(const Vector<Float>& c, const Matrix<Float>& G, const Vector<Float>& e)
     : _centre(c), _generators(G), _error(e)
@@ -238,7 +258,13 @@ Zonotope::clone() const
     return new Zonotope(*this);
 }
 
- 
+bool
+operator==(const Zonotope& z1, const Zonotope& z2)
+{
+    return (z1._centre==z2._centre) && (z1._generators==z2._generators)
+        && (z1._error==z2._error);
+}
+
 uint
 Zonotope::dimension() const
 {

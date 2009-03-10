@@ -2,7 +2,7 @@
  *            matrix.cc
  *
  *  Copyright 2008  Alberto Casagrande, Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 #include "config.h"
 
 #include "rounding.h"
@@ -38,7 +38,7 @@ template class boost::numeric::ublas::matrix<Ariadne::Rational>;
 
 namespace Ariadne {
 
-Matrix<Float> 
+Matrix<Float>
 midpoint(const Matrix<Interval>& A) {
     Matrix<Float> R(A.row_size(),A.column_size());
     for(size_t i=0; i!=A.row_size(); ++i) {
@@ -55,17 +55,17 @@ lu_inverse(const Matrix<X>& M)
 {
     typedef X RealType;
     assert(M.row_size()==M.column_size());
-    
+
     size_t m=M.row_size();
     size_t n=M.column_size();
     Matrix<RealType> A=M;
     Matrix<RealType> B=Matrix<RealType>::identity(n);
-    
+
     // Array of row pivots. The value p[i] gives the row
     // swapped with the ith row in the ith stage.
     array<size_t> p(m);
     for(size_t k=0; k!=m; ++k) { p[k]=k; }
-   
+
 
     for(size_t k=0; k!=std::min(m,n); ++k) {
         // Choose a pivot row
@@ -77,18 +77,18 @@ lu_inverse(const Matrix<X>& M)
                 amax=abs(A[i][k]);
             }
         }
-        
+
         // Set pivot row
         size_t i=iamax;
         p[k]=i;
-        
+
         // Swap rows of both A and B
         for(size_t j=k; j!=n; ++j) {
             X tmp=A[k][j];
             A[k][j]=A[i][j];
             A[i][j]=tmp;
         }
-        
+
         for(size_t j=0; j!=n; ++j) {
             X tmp=B[k][j];
             B[k][j]=B[i][j];
@@ -153,6 +153,121 @@ inverse(const Matrix<Rational>& A)
 }
 #endif // HAVE_GMPXX_H
 
+// Compute the vector of row norms (sums of absolute values) of A
+Vector<Float>
+row_norms(const Matrix<Float>& A)
+{
+    const size_t m=A.row_size();
+    const size_t n=A.column_size();
+    Vector<Float> r(m);
+
+    rounding_mode_t prev_rounding_mode=get_rounding_mode();
+    set_rounding_mode(upward);
+    for(size_t i=0; i!=m; ++i) {
+        r[i]=0.0;
+        for(size_t j=0; j!=n; ++j) {
+            r[i]+=abs(A[i][j]);
+        }
+    }
+    set_rounding_mode(prev_rounding_mode);
+
+    return r;
+
+}
+
+
+// Scale the rows of A to each have some of absolute values equal to one
+Matrix<Float>
+normalise_rows(const Matrix<Float>& A)
+{
+    const size_t m=A.row_size();
+    const size_t n=A.column_size();
+
+    Matrix<Float> R=A;
+
+    array<Float> row_asums(m);
+    rounding_mode_t prev_rounding_mode=get_rounding_mode();
+    set_rounding_mode(upward);
+    for(size_t i=0; i!=m; ++i) {
+        row_asums[i]=0.0;
+        for(size_t j=0; j!=n; ++j) {
+            row_asums[i]+=abs(A[i][j]);
+        }
+    }
+    set_rounding_mode(toward_zero);
+    for(size_t i=0; i!=m; ++i) {
+        for(size_t j=0; j!=n; ++j) {
+            R[i][j]/=row_asums[i];
+        }
+    }
+    set_rounding_mode(prev_rounding_mode);
+
+    return R;
+}
+
+
+// Returns a pivot P and matrices L and U such that L is unit lower-triangular,
+// U is upper-trianguler and A=PLU.
+tuple< Pivot, Matrix<Float>, Matrix<Float> >
+triangular_decomposition(const Matrix<Float>& A)
+{
+    typedef Float RealType;
+    assert(A.row_size()==A.column_size());
+
+    size_t m=A.row_size();
+    size_t n=A.column_size();
+    Matrix<RealType> L=Matrix<RealType>::identity(m);
+    Matrix<RealType> U=A;
+
+    // Array of row pivots. The value P[i] gives the row
+    // swapped with the ith row in the ith stage.
+    array<size_t> P(m);
+    for(size_t k=0; k!=m; ++k) { P[k]=k; }
+
+    for(size_t k=0; k!=std::min(m,n); ++k) {
+        // Choose a pivot row
+        size_t iamax=k;
+        RealType amax=0;
+        for(size_t i=k; i!=m; ++i) {
+            if(abs(A[i][k])>amax) {
+                iamax=i;
+                amax=abs(A[i][k]);
+            }
+        }
+
+        // Set pivot row
+        size_t l=iamax;
+        P[k]=l;
+
+        // Swap rows of L and U
+        for(size_t j=0; j!=k; ++j) {
+            RealType tmp=L[k][j];
+            L[k][j]=L[l][j];
+            L[l][j]=tmp;
+        }
+
+        for(size_t j=k; j!=n; ++j) {
+            RealType tmp=U[k][j];
+            U[k][j]=U[l][j];
+            U[l][j]=tmp;
+        }
+
+        RealType r  = 1/U[k][k];
+        for(size_t i=k+1; i!=m; ++i) {
+            RealType s=U[i][k] * r;
+            for(size_t j=k+1; j!=n; ++j) {
+                U[i][j] -= s * U[k][j];
+            }
+            U[i][k] = 0;
+            L[i][k] = s;
+        }
+
+    }
+
+    return make_tuple(P,L,U);
+
+}
+
 // Returns a matrix R such that A=OR where O is a square matrix with
 // orthogonal rows and the sum of the absolute values of the rows of R are
 // at most one.
@@ -160,13 +275,14 @@ inverse(const Matrix<Rational>& A)
 // Use Householder transformation H=I-vv' where v=u/|u|
 // and u=a +/- |a|e with a and e the working column of A
 // and corresponding unit vector.
-Matrix<Float>
+tuple< Matrix<Float>, Pivot>
 triangular_factor(const Matrix<Float>& A)
 {
     const size_t m=A.row_size();
     const size_t n=A.column_size();
 
     Matrix<Float> R=A;
+    Pivot P(n); for(uint i=0; i!=n; ++i) { P[i]=i; }
 
     // Array of column norm squares
     array<Float> cns(n);
@@ -176,7 +292,7 @@ triangular_factor(const Matrix<Float>& A)
     for(size_t k=0; k!=min(m,n); ++k) {
         //std::cerr<<"k="<<k<<" R="<<R<<std::endl;
 
-        bool pivoting=false;
+        bool pivoting=true;
         if(pivoting) {
             // Compute column norms
             for(size_t j=k; j!=n; ++j) {
@@ -185,21 +301,24 @@ triangular_factor(const Matrix<Float>& A)
                     cns[j]+=sqr(R[i][j]);
                 }
             }
-            
+
             // Find largest column norm
-            size_t p=k; Float cnsmax=cns[k];
+            size_t l=k; Float cnsmax=cns[k];
             for(size_t j=k+1; j!=n; ++j) {
                 if(cns[j]>cnsmax) {
-                    p=j; cnsmax=cns[j];
+                    l=j; cnsmax=cns[j];
                 }
             }
-            
-            // Swap columns p and k
+
+            // Swap columns l and k
             for(size_t i=0; i!=m; ++i) {
                 Float tmp=R[i][k];
-                R[i][k]=R[i][p];
-                R[i][p]=tmp;
+                R[i][k]=R[i][l];
+                R[i][l]=tmp;
             }
+
+            // Set pivot element to pivot column
+            P[k]=l;
         }
 
         // Compute |a| where a is the working column
@@ -234,7 +353,7 @@ triangular_factor(const Matrix<Float>& A)
                 R[i][j]+=scl*u[i];
             }
         }
-        
+
         // For the kth column, set R[k][k]=-/+ |a|
         // and R[i][k]=0 for i>k
         for(size_t i=k+1; i!=m; ++i) {
@@ -258,8 +377,9 @@ triangular_factor(const Matrix<Float>& A)
         }
     }
     set_rounding_mode(prev_rounding_mode);
-    return R;
-        
+
+    return make_tuple(R,P);
+
 }
 
 // Returns a matrix T such that the matrix O=AT is a square matrix with
@@ -273,7 +393,9 @@ triangular_multiplier(const Matrix<Float>& A)
     const size_t m=A.row_size();
     const size_t n=A.column_size();
 
-    Matrix<Float> R=triangular_factor(A);
+    Matrix<Float> R; Pivot P;
+    make_ltuple(R,P)=triangular_factor(A);
+
     Matrix<Float> T(n,m); for(size_t i=0; i!=m; ++i) { T[i][i]=1.0; }
 
     for(size_t i=0; i!=m; ++i) { assert(R[i][i]!=0.0); }
@@ -291,70 +413,37 @@ triangular_multiplier(const Matrix<Float>& A)
         }
     }
 
+    for(size_t k=m-1; k!=size_t(-1); --k) {
+        size_t p=P[k];
+        for(size_t i=0; i!=m; ++i) {
+            Float tmp=T[p][i]; T[p][i]=T[k][i]; T[k][i]=tmp;
+        }
+    }
+
     return T;
 }
 
 
 
-
-// Compute the vector of row norms (sums of absolute values) of A
-Vector<Float>
-row_norms(const Matrix<Float>& A)
+Matrix<Float> pivot_matrix(const array<size_t>& pv)
 {
-    const size_t m=A.row_size();
-    const size_t n=A.column_size();
-    Vector<Float> r(m);
-
-    rounding_mode_t prev_rounding_mode=get_rounding_mode();
-    set_rounding_mode(upward);
-    for(size_t i=0; i!=m; ++i) {
-        r[i]=0.0;
-        for(size_t j=0; j!=n; ++j) {
-            r[i]+=abs(A[i][j]);
-        }
+    const size_t n=pv.size();
+    array<size_t> perm(n); for(uint i=0; i!=n; ++i) { perm[i]=i; }
+    for(size_t i=0; i!=n; ++i) {
+        std::swap(perm[i],perm[pv[i]]);
     }
-    set_rounding_mode(prev_rounding_mode);
-    
-    return r;
-    
+    Matrix<Float> P(n,n);
+    for(size_t i=0; i!=n; ++i) {
+        P[i][perm[i]]=1;
+    }
+    return P;
 }
-
-
-// Scale the rows of A to each have some of absolute values equal to one
-Matrix<Float> 
-normalise_rows(const Matrix<Float>& A)
-{
-    const size_t m=A.row_size();
-    const size_t n=A.column_size();
-
-    Matrix<Float> R=A;
-    
-    array<Float> row_asums(m);
-    rounding_mode_t prev_rounding_mode=get_rounding_mode();
-    set_rounding_mode(upward);
-    for(size_t i=0; i!=m; ++i) {
-        row_asums[i]=0.0;
-        for(size_t j=0; j!=n; ++j) {
-            row_asums[i]+=abs(A[i][j]);
-        }
-    }
-    set_rounding_mode(toward_zero);
-    for(size_t i=0; i!=m; ++i) {
-        for(size_t j=0; j!=n; ++j) {
-            R[i][j]/=row_asums[i];
-        }
-    }
-    set_rounding_mode(prev_rounding_mode);
-    
-    return R;
-}
-
 
 // Compute the orthogonal decomposition A=QR without column pivoting. The
-// matrix Q is built up as a composition of elementary Householder 
-// transformations H=I-vv' with |v|=1. Note that inv(H)=H'=H. The vector v is 
-// chosen to be a multiple of the first working column of A. 
-tuple< Matrix<Float>, Matrix<Float> > 
+// matrix Q is built up as a composition of elementary Householder
+// transformations H=I-vv' with |v|=1. Note that inv(H)=H'=H. The vector v is
+// chosen to be a multiple of the first working column of A.
+tuple< Matrix<Float>, Matrix<Float>, Pivot >
 orthogonal_decomposition(const Matrix<Float>& A)
 {
     typedef Float X;
@@ -363,7 +452,8 @@ orthogonal_decomposition(const Matrix<Float>& A)
     size_t n=A.column_size();
     Matrix<X> Q(m,m);
     Matrix<X> R(A);
-    
+    Pivot P(n);
+
     array<X> p(n);
     Vector<X> u(m);
 
@@ -373,32 +463,35 @@ orthogonal_decomposition(const Matrix<Float>& A)
         }
         Q[i][i]=1.0;
     }
-        
+
     for(size_t k=0; k!=min(m,n); ++k) {
         //std::cerr<<"k="<<k<<" Q="<<Q<<" R="<<R<<std::flush;
 
-        // No pivoting
-/* 
-        // Find a pivot column
-        size_t pivot_column=c;
-        X max_column_norm=0.0;
-        for(size_t j=c; j!=n; ++j) {
-            X column_norm=0.0;
-            for(size_t i=c; i!=m; ++i) {
-                column_norm+=abs(R[i][j]);
+        bool pivoting=true;
+        if(pivoting) {
+            // Find a pivot column
+            size_t pivot_column=k;
+            X max_column_norm=0.0;
+            for(size_t j=k; j!=n; ++j) {
+                X column_norm=0.0;
+                for(size_t i=k; i!=m; ++i) {
+                    column_norm+=abs(R[i][j]);
+                }
+                if(column_norm>max_column_norm) {
+                    pivot_column=j;
+                    max_column_norm=column_norm;
+                }
             }
-            if(column_norm>max_column_norm) {
-                pivot_column=j;
-                max_column_norm=column_norm;
-            }
-        }
-        size_t j=pivot_column;
+            size_t l=pivot_column;
 
-        // Swap first column and pivot column
-        for(size_t i=c; i!=m; ++i) {
-            std::swap(R[i][j],R[i][c]);
+            // Swap working column and pivot column
+            for(size_t i=0; i!=m; ++i) {
+                std::swap(R[i][l],R[i][k]);
+            }
+
+            // Set pivot column in result
+            P[k]=l;
         }
-*/        
 
         // Compute |a| where a is the working column
         Float nrmas=0.0;
@@ -406,8 +499,11 @@ orthogonal_decomposition(const Matrix<Float>& A)
             nrmas+=R[i][k]*R[i][k];
         }
         Float nrma=sqrt(nrmas);
-        
+
         // Compute u=a +/- |a|e
+        for(size_t i=0; i!=k; ++i) {
+            u[i]=0.0;
+        }
         for(size_t i=k; i!=m; ++i) {
             u[i]=R[i][k];
         }
@@ -421,7 +517,11 @@ orthogonal_decomposition(const Matrix<Float>& A)
         }
         Float mtdnu=(-2)/nrmus;
 
-        // For each column b, compute b-=2u(u.b)/u.u
+        // Compute H=(1-2uu'/u'u)
+        // Matrix<Float> H(n,n); for(size_t i=0; i!=n; ++i) {
+        // H[i][i]=1.0; for(size_t j=0; j!=n; ++j) { H[i][j]+=u[i]*u[j]*mtdnu; } }
+
+        // For each column b of R, compute b-=2u(u.b)/u.u
         for(size_t j=k; j!=n; ++j) {
             Float udtb=0.0;
             for(size_t i=k; i!=m; ++i) {
@@ -432,14 +532,15 @@ orthogonal_decomposition(const Matrix<Float>& A)
                 R[i][j]+=scl*u[i];
             }
         }
-        
+
         // For the kth column, set R[k][k]=-/+ |a|
         // and R[i][k]=0 for i>k
         for(size_t i=k+1; i!=m; ++i) {
             R[i][k]=0.0;
         }
+        if(u[k]>=0) { R[k][k]=-nrma; } else { R[k][k]=nrma; }
 
-        // Update Q'=QH = Q(I-2vv')
+        // Update Q'=QH = Q(I-2uu'/u'u)
         // For each row q, compute q-=2u(u.q)/(u.u)
         for(size_t i=0; i!=m; ++i) {
             Float qdtu=0.0;
@@ -451,14 +552,14 @@ orthogonal_decomposition(const Matrix<Float>& A)
                 Q[i][j]+=scl*u[j];
             }
         }
-         
+
     }
 
-    return make_tuple(Q,R);
+    return make_tuple(Q,R,P);
 }
 
 /*
-tuple< Matrix<Float>, Matrix<Float> > 
+tuple< Matrix<Float>, Matrix<Float> >
 orthogonal_decomposition(const Matrix<Float>& A)
 {
     typedef Float X;
@@ -467,7 +568,7 @@ orthogonal_decomposition(const Matrix<Float>& A)
     size_t n=A.column_size();
     Matrix<X> O(m,m,0.0);
     Matrix<X> R(A);
-    
+
     array<X> p(n);
 
     for(size_t c=0; c!=min(m,n); ++c) {
@@ -508,7 +609,7 @@ orthogonal_decomposition(const Matrix<Float>& A)
             p[j]=inner_product / pivot_norm_square;
             inner_product_sum += inner_product;
         }
-        
+
         X scale_factor = inner_product_sum / pivot_norm_square;
         for(size_t i=c; i!=m; ++i) {
             O[i][c]=scale_factor * R[i][c];
@@ -522,7 +623,7 @@ orthogonal_decomposition(const Matrix<Float>& A)
         for(size_t i=c; i!=m; ++i) {
             R[i][c] /= pivot_norm_square;
         }
-        
+
     }
 
     return make_tuple(O,R);

@@ -2,7 +2,7 @@
  *            linear_algebra_submodule.cc
  *
  *  Copyright 2008  Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 #include "config.h"
 
 #include "numeric.h"
@@ -38,26 +38,26 @@ using namespace Ariadne;
 namespace Ariadne {
 
 template<class X> const char* python_name(const char* name);
-template<> const char* python_name<Float>(const char* name) { 
+template<> const char* python_name<Float>(const char* name) {
     return (std::string("")+name).c_str(); }
-template<> const char* python_name<Interval>(const char* name) { 
+template<> const char* python_name<Interval>(const char* name) {
     return (std::string("I")+name).c_str(); }
 
 #ifdef HAVE_GMPXX_H
-template<> const char* python_name<Rational>(const char* name) { 
+template<> const char* python_name<Rational>(const char* name) {
     return (std::string("Q")+name).c_str(); }
 #endif
 
-template<class X> 
-void read(Vector<X>& v, const boost::python::object& obj) 
+template<class X>
+void read(Vector<X>& v, const boost::python::object& obj)
 {
-  array<X> a; 
+  array<X> a;
   read_list_array(a,obj);
   v=Vector<X>(a.size(),a.begin());
 }
 
-template<class X> 
-void read(Matrix<X>& A, const boost::python::object& obj) 
+template<class X>
+void read(Matrix<X>& A, const boost::python::object& obj)
 {
   boost::python::list elements=boost::python::extract<boost::python::list>(obj);
   int m=boost::python::len(elements);
@@ -73,7 +73,7 @@ void read(Matrix<X>& A, const boost::python::object& obj)
 
 
 template<class X> Vector<X>*
-make_vector(const boost::python::object& obj) 
+make_vector(const boost::python::object& obj)
 {
     Vector<X>* vptr=new Vector<X>();
     read(*vptr,obj);
@@ -81,7 +81,7 @@ make_vector(const boost::python::object& obj)
 }
 
 template<class X> Matrix<X>*
-make_matrix(const boost::python::object& obj) 
+make_matrix(const boost::python::object& obj)
 {
     Matrix<X>* Aptr=new Matrix<X>();
     read(*Aptr,obj);
@@ -120,22 +120,37 @@ Matrix<X0> __mul__(const X1& s1, const Matrix<X2>& A2) {
 
 template<class X0, class X1, class X2>
 Vector<X0> __mvmul__(const Matrix<X1>& A1, const Vector<X2>& v2) {
-    return prod(A1,v2); 
+    return prod(A1,v2);
 }
 
 template<class X0, class X1, class X2>
 Matrix<X0> __mmmul__(const Matrix<X1>& A1, const Matrix<X2>& A2) {
-    return prod(A1,A2); 
+    return prod(A1,A2);
 }
+
 
 boost::python::tuple
 wrap_orthogonal_decomposition(const Matrix<Float>& A)
 {
-    Ariadne::tuple<Matrix<Float>,Matrix<Float> > QR=Ariadne::orthogonal_decomposition(A);
-    return boost::python::make_tuple(QR.first,QR.second);
+    Ariadne::tuple<Matrix<Float>,Matrix<Float>, Pivot > QRP=Ariadne::orthogonal_decomposition(A);
+    return boost::python::make_tuple(QRP.first,QRP.second,pivot_matrix(QRP.third));
 }
 
-   
+boost::python::tuple
+wrap_triangular_factor(const Matrix<Float>& A)
+{
+    Ariadne::tuple<Matrix<Float>,Pivot > RP=Ariadne::triangular_factor(A);
+    return boost::python::make_tuple(RP.first,pivot_matrix(RP.second));
+}
+
+boost::python::tuple
+wrap_triangular_decomposition(const Matrix<Float>& A)
+{
+    Ariadne::tuple<Pivot,Matrix<Float>,Matrix<Float> > PLU=Ariadne::triangular_decomposition(A);
+    return boost::python::make_tuple(pivot_matrix(PLU.first),PLU.second,PLU.third);
+}
+
+
 
 
 }
@@ -180,6 +195,9 @@ void export_vector()
 template<class X>
 void export_matrix()
 {
+    //class_< Pivot > pivot_class(python_name<X>("Pivot"),no_init);
+    //pivot_class.def(boost::python::self_ns::str(self));    // __str__
+
     class_< Matrix<X> > matrix_class(python_name<X>("Matrix"),init<size_t,size_t>());
     matrix_class.def("__init__", make_constructor(&make_matrix<X>) );
     matrix_class.def("rows", &Matrix<X>::row_size);
@@ -208,11 +226,12 @@ void export_matrix()
     def("inverse",(Matrix<X>(*)(const Matrix<X>&)) &inverse);
     def("transpose",(Matrix<X>(*)(const Matrix<X>&)) &transpose);
 
+    def("triangular_decomposition",&wrap_triangular_decomposition);
     def("orthogonal_decomposition",&wrap_orthogonal_decomposition);
+    def("triangular_factor",&wrap_triangular_factor);
+    def("triangular_multiplier",(Matrix<X>(*)(const Matrix<X>&)) &triangular_multiplier);
     def("row_norms",(Vector<X>(*)(const Matrix<X>&)) &row_norms);
     def("normalise_rows",(Matrix<X>(*)(const Matrix<X>&)) &normalise_rows);
-    def("triangular_factor",(Matrix<X>(*)(const Matrix<X>&)) &triangular_factor);
-    def("triangular_multiplier",(Matrix<X>(*)(const Matrix<X>&)) &triangular_multiplier);
 }
 
 template void export_vector<Float>();

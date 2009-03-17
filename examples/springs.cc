@@ -78,7 +78,7 @@ int main()
     float EVOL_TIME = 25.0; // Evolution time
     int   EVOL_TRANS = 8; // Evolution transitions
     float MAX_ENCLOSURE_RADIUS = 0.02; // Maximum enclosure radius
-    float MAX_STEP_SIZE = 0.02; // Maximum integration step size
+    float MAX_STEP_SIZE = 0.05; // Maximum integration step size
 
     /// Build the Hybrid System
   

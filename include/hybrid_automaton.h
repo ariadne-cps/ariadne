@@ -203,6 +203,11 @@ class DiscreteTransition
         return *this->_reset;
     }
 
+    //! \brief The reset map of the discrete transition. 
+    boost::shared_ptr<const FunctionInterface> reset_ptr() const { 
+        return this->_reset;
+    }
+
     //! \brief True if the transition is forced (occurs as soon as it is activated). 
     bool forced() const { 
         return this->_forced;

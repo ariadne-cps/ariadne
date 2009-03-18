@@ -17,8 +17,8 @@ check_PROGRAMS = \
 	test_interval \
 	test_vector \
 	test_matrix \
+	test_polynomial \
 	test_differential \
-	test_differential_vector \
 	test_taylor_variable \
 	test_taylor_function \
 	test_taylor_set \

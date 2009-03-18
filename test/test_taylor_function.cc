@@ -1,7 +1,7 @@
 /***************************************************************************
- *            test_taylor_function.cc
+ *            test_polynomial.cc
  *
- *  Copyright 2008  Pieter Collins
+ *  Copyright 2009  Pieter Collins
  * 
  ****************************************************************************/
 
@@ -30,20 +30,21 @@
 #include "taylor_function.h"
 #include "function.h"
 #include "models.h"
+#include "polynomial.h"
 
 #include "test.h"
 using namespace std;
 using namespace Ariadne;
 
 template<class R, class A, class P>
-void henon(R& r, const A& x, const P& p) 
+void henon(R& r, const A& x, const P& p)
 {
     r[0]=-(x[0]*x[0])+p[0]-p[1]*x[1];
     r[1]=x[0];
 }
 
 template<class R, class A>
-void spiral(R& r, const A& x) 
+void spiral(R& r, const A& x)
 {
     r[0]=-0.8*x[0]+0.4*x[1]-1.0;
     r[1]=-0.4*x[0]-0.8*x[1];
@@ -52,7 +53,7 @@ void spiral(R& r, const A& x)
 typedef Function<Henon> HenonFunction;
 
 /*
-TaylorFunction henon(const TaylorFunction& x, const Vector<Float>& p) 
+TaylorFunction henon(const TaylorFunction& x, const Vector<Float>& p)
 {
     TaylorFunction r(2,2,x.degree()); henon(r,x,p); return r;
 }
@@ -99,6 +100,17 @@ void TestTaylorFunction::test_constructors()
     ARIADNE_TEST_EQUAL(henon_model,TaylorFunction(domain,expansion))
 }
 
+void TestTaylorFunction::test_restrict() 
+{
+    Vector<Interval> domain(2, -1.0,+1.0, -1.0,+1.0);
+    Vector<TaylorVariable> expansion(1,2,3, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 0.0);
+    Vector<Interval> subdomain(2, 0.25,0.75, -0.5,0.0);
+    Vector<TaylorVariable> subexpansion(1,2,3, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 0.0);
+    TaylorFunction function(domain,expansion);
+    std::cerr<<"\n\n"<<function<<endl;
+    TaylorFunction restricted_function(subdomain,subexpansion);
+    ARIADNE_TEST_EQUAL(restrict(function,subdomain),restricted_function);
+}
 
 void TestTaylorFunction::test_compose()
 {
@@ -147,11 +159,6 @@ void TestTaylorFunction::test_join()
 }
 
 void TestTaylorFunction::test_combine() 
-{
-    
-}
-
-void TestTaylorFunction::test_restrict() 
 {
     
 }

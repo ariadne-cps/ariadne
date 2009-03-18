@@ -282,7 +282,11 @@ restrict(const TaylorFunction& tm, const Box& nd)
     const Vector<Interval>& od=tm.domain();
     ARIADNE_ASSERT(subset(nd,od));
     if(nd==od) { return tm; }
-    Vector<TaylorVariable> sm=Vector<TaylorVariable>(nd);
+    Vector<TaylorVariable> sm=Vector<TaylorVariable>(nd.size(),nd.size());
+    for(uint i=0; i!=nd.size(); ++i) {
+        sm[i].set_value(nd[i].midpoint());
+        sm[i].set_gradient(i,nd[i].radius());
+    }
     return TaylorFunction(nd,compose(tm._expansion,tm._domain,sm));
 }
 

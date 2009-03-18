@@ -28,12 +28,17 @@
 #ifndef ARIADNE_TRANSFORMATION_H
 #define ARIADNE_TRANSFORMATION_H
 
+//#include <vararg>
 #include <iosfwd>
 #include <iostream>
+#include <map>
+#include "array.h"
 
 #include "macros.h"
 
 #include "vector.h"
+#include "matrix.h"
+#include "polynomial.h"
 
 namespace Ariadne {
 
@@ -125,6 +130,25 @@ struct ScalingTransformation
 };
 
 
+struct AffineExpression 
+{
+    AffineExpression(uint as, double c, ...) : _c(c), _g(as) {
+        va_list args; va_start(args,c);
+        for(uint i=0; i!=as; ++i) { _g[i]=va_arg(args,double); } }
+    const uint argument_size() const { return _g.size()-1; }
+    const int smoothness() const { return SMOOTH; }
+    template<class R, class A>
+    void compute(R& r, const A& x) const {
+        r=_c; 
+        for(uint j=0; j!=argument_size(); ++j) {
+            r+=_g[j]*x[j];
+        }
+    }
+  private:
+    array<Float> _c;
+    array<Float> _g;
+};
+
 struct AffineTransformation 
 {
     AffineTransformation(const Matrix<Float>& A, const Vector<Float>& b)
@@ -148,6 +172,19 @@ struct AffineTransformation
     Vector<Float> _b;
 };
 
+
+
+struct PolynomialTransformation
+{
+    PolynomialTransformation();
+    const uint result_size() const { return _p.size(); }
+    const uint argument_size() const { return _p[0].argument_size(); }
+    const int smoothness() const { return SMOOTH; }
+    template<class R, class A>
+    void compute(R& r, const A& x) const;
+  private:
+    std::vector< Polynomial<Float> > _p;
+};
 
 
 

@@ -29,6 +29,7 @@
 #include "numeric.h"
 #include "vector.h"
 #include "matrix.h"
+#include "polynomial.h"
 #include "sparse_differential.h"
 #include "differential_vector.h"
 #include "taylor_variable.h"
@@ -40,10 +41,7 @@ namespace Ariadne {
 const double TaylorVariable::em=2.2204460492503131e-16;
 const double TaylorVariable::ec=em/2;
 
-double Polynomial::_zero = 0.0;
-double MapPolynomial::_zero = 0.0;
-
-TaylorVariable add_cosy(const TaylorVariable&, const Float&);
+template<class X> X Polynomial<X>::_zero = 0.0;
 
 double TaylorVariable::_default_sweep_threshold=1e-18;
 uint TaylorVariable::_default_maximum_degree=16;

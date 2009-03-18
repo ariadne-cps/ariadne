@@ -92,7 +92,7 @@ bool refines(const Vector<TaylorVariable>& tv1, const Vector<TaylorVariable>& tv
  */
 class TaylorVariable
 {
-    typedef Polynomial ExpansionType;
+    typedef Polynomial<Float> ExpansionType;
     //typedef MapPolynomial ExpansionType;
     static const Float _zero;
     ExpansionType _expansion;

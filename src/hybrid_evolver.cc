@@ -304,8 +304,10 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     typedef ModelType TimeModelType;
     typedef ModelType TimedSetModelType;
   
-    //int old_verbosity = verbosity;
+    int old_verbosity = verbosity;
+    verbosity = verbosity - 3;
     //verbosity = 3;
+
 
     ARIADNE_LOG(2,"HybridEvolver::_evolution_step(...)\n");
   
@@ -382,124 +384,141 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     ARIADNE_LOG(6,"reach_set_model = "<<reach_set_model<<"\n");
     ARIADNE_LOG(4,"Done computing continuous evolution for the first time.\n");
 
-    // WARNING: the following code is for UPPER_SEMANTICS only !
-    if(semantics == UPPER_SEMANTICS) {
-        // Test for blocking: 
-        // find a time interval [t0, t1] such that at least one blocking event 
-        // (invariant or urgent transition) is activated 
- 
-        // Test invariants
-        bool blocking=false;
-        Float lower_blocking_time=step_size;
-        Float upper_blocking_time=step_size;
-        for(std::vector< shared_ptr<const FunctionInterface> >::const_iterator
-            iter=invariants.begin(); iter!=invariants.end(); ++iter) 
-        {
-            if(possibly(this->_toolbox->active(**iter,flow_bounds))) {
-                ARIADNE_LOG(2,"One invariant is possibly active.\n");
-                if(possibly(this->_toolbox->active(**iter,reach_set_model))) {
+    // Test for blocking: 
+    // find a time interval [t0, t1] such that at least one blocking event 
+    // (invariant or urgent transition) is activated 
+
+    // Test invariants
+    bool blocking=false;
+    Float lower_blocking_time=step_size;
+    Float upper_blocking_time=step_size;
+    for(std::vector< shared_ptr<const FunctionInterface> >::const_iterator
+        iter=invariants.begin(); iter!=invariants.end(); ++iter) 
+    {
+        if(possibly(this->_toolbox->active(**iter,flow_bounds))) {
+            ARIADNE_LOG(2,"One invariant is possibly active.\n");
+            if(possibly(this->_toolbox->active(**iter,reach_set_model))) {
+                try {
+                    // Compute crossing time
+                    ModelType guard_model=this->_toolbox->predicate_model(**iter,flow_bounds);
+                    TimeModelType crossing_time_model=this->_toolbox->crossing_time(guard_model,flow_model,initial_set_model);                    
+                    if(crossing_time_model.range()[0].lower() < lower_blocking_time)
+                        lower_blocking_time = crossing_time_model.range()[0].lower();
+                    if(crossing_time_model.range()[0].upper() < upper_blocking_time)
+                        upper_blocking_time = crossing_time_model.range()[0].upper();
+                } catch(DegenerateCrossingException) { 
+                    ARIADNE_LOG(3," DegenerateCrossing detected.\n"); 
+                    lower_blocking_time=0.0;
+                }
+            }
+            // If the invariant is finally active, continuous evolution should stop.
+            tribool finally_active = this->_toolbox->active(**iter,final_set_model);
+            if(definitely(finally_active) && semantics == UPPER_SEMANTICS)
+                blocking=true;
+            if(possibly(finally_active) && semantics == LOWER_SEMANTICS)
+                blocking=true;
+        }
+    }
+    
+    ARIADNE_LOG(3,"Blocking time interval after checking invariants = ["<<lower_blocking_time<<","<<upper_blocking_time<<"]\n");
+
+    // Test transitions
+    for(std::set< DiscreteTransition >::const_iterator 
+        iter=transitions.begin(); iter!=transitions.end(); ++iter)
+    {
+        if(iter->forced()) {  // Test only forced transitions
+            shared_ptr<const FunctionInterface> guard_ptr = iter->activation_ptr();
+            if(possibly(this->_toolbox->active(*guard_ptr,flow_bounds))) {
+                ARIADNE_LOG(2,"Forced transition "<<*iter<<" is possibly active.\n");
+                tribool finally_active = this->_toolbox->active(*guard_ptr,final_set_model);                
+                if(possibly(this->_toolbox->active(*guard_ptr,reach_set_model))) {
                     try {
                         // Compute crossing time
-                        ModelType guard_model=this->_toolbox->predicate_model(**iter,flow_bounds);
+                        ModelType guard_model=this->_toolbox->predicate_model(*guard_ptr,flow_bounds);
                         TimeModelType crossing_time_model=this->_toolbox->crossing_time(guard_model,flow_model,initial_set_model);
-                        if(crossing_time_model.range()[0].lower() < lower_blocking_time)
-                            lower_blocking_time = crossing_time_model.range()[0].lower();
-                        if(crossing_time_model.range()[0].upper() < upper_blocking_time)
-                            upper_blocking_time = crossing_time_model.range()[0].upper();
+                        tribool initially_active = this->_toolbox->active(*guard_ptr,initial_set_model);
+                        if(possibly(initially_active)) {
+                            ARIADNE_LOG(3," Transition is possibly intially active.\n");                                   
+                            lower_blocking_time = 0.0;
+                        }                        
+                        if(crossing_time_model.range()[0].lower() >= 0.0) {
+                            lower_blocking_time = min(lower_blocking_time, crossing_time_model.range()[0].lower());
+                            upper_blocking_time = min(upper_blocking_time, crossing_time_model.range()[0].upper());
+                        }
                     } catch(DegenerateCrossingException) { 
                         ARIADNE_LOG(3," DegenerateCrossing detected.\n"); 
                         lower_blocking_time=0.0;
                     }
                 }
-                // If the invariant is finally active, contiunous evolution should stop.
-                if(definitely(this->_toolbox->active(**iter,final_set_model)))
+                // If the transition is finally active, continuous evolution should stop.
+                if(definitely(finally_active) && semantics == UPPER_SEMANTICS)
                     blocking=true;
-            }
+                if(semantics == LOWER_SEMANTICS)
+                    blocking=true;
+             }
         }
-        
-        ARIADNE_LOG(3,"Blocking time interval after checking invariants = ["<<lower_blocking_time<<","<<upper_blocking_time<<"]\n");
+    }
 
-        // Test transitions
-        for(std::set< DiscreteTransition >::const_iterator 
-            iter=transitions.begin(); iter!=transitions.end(); ++iter)
-        {
-            if(iter->forced()) {  // Test only forced transitions
-                shared_ptr<const FunctionInterface> guard_ptr = iter->activation_ptr();
-                if(possibly(this->_toolbox->active(*guard_ptr,flow_bounds))) {
-                    ARIADNE_LOG(2,"Forced transition "<<*iter<<" is possibly active.\n");
-                    if(possibly(this->_toolbox->active(*guard_ptr,reach_set_model))) {
-                        try {
-                            // Compute crossing time
-                            ModelType guard_model=this->_toolbox->predicate_model(*guard_ptr,flow_bounds);
-                            TimeModelType crossing_time_model=this->_toolbox->crossing_time(guard_model,flow_model,initial_set_model);
-                            if(crossing_time_model.range()[0].upper() < 0.0) {
-                                // negative crossing time, check if the transition is initially active
-                                ARIADNE_LOG(3," Negative crossing time! Checking if the transition is initially active.\n");
-                                if(possibly(this->_toolbox->active(*guard_ptr,initial_set_model))) {
-                                    ARIADNE_LOG(3," Transition is initially active.\n");                                   
-                                    lower_blocking_time = 0.0;
-                                    upper_blocking_time = 0.0;
-                                }
-                            } else {
-                                if(crossing_time_model.range()[0].lower() < lower_blocking_time)
-                                    lower_blocking_time = crossing_time_model.range()[0].lower();
-                                if(crossing_time_model.range()[0].upper() < upper_blocking_time)
-                                    upper_blocking_time = crossing_time_model.range()[0].upper();
-                            }
-                        } catch(DegenerateCrossingException) { 
-                            ARIADNE_LOG(3," DegenerateCrossing detected.\n"); 
-                            lower_blocking_time=0.0;
-                        }
-                    }
-                    // If the transition is finally active, contiunous evolution should stop.
-                    if(definitely(this->_toolbox->active(*guard_ptr,final_set_model)))
-                        blocking=true;
-                }
-            }
-        }
+    ARIADNE_LOG(2,"Final blocking time interval = ["<<lower_blocking_time<<","<<upper_blocking_time<<"]\n");
 
-        ARIADNE_LOG(3,"Blocking time interval after checking guards = ["<<lower_blocking_time<<","<<upper_blocking_time<<"]\n");
-        
-        // Blocking times cannot be negative. Reset to zero if it is the case.
-        if(lower_blocking_time < 0.0) lower_blocking_time = 0.0;
-        if(upper_blocking_time <= 0.0) {
-            upper_blocking_time = 0.0;
+    Float blocking_time;
+    if(semantics == UPPER_SEMANTICS) {
+        // With upper semantics, compute evolution up to upper_blocking_time
+        blocking_time = upper_blocking_time;
+    } else { // LOWER_SEMANTICS
+        // With lower semantics, compute evolution up to lower_blocking_time
+        blocking_time = lower_blocking_time;
+    }
+
+/*  REMOVED: it will be possibly added in the case of lower_semantics
+    // If blocking_time is less than step_size, final set should be recomputed
+    if(blocking_time < step_size) {
+        ARIADNE_LOG(3,"Blocking time smaller than step size. Recomputing final set model.\n");
+        TimeModelType blocking_time_model=this->_toolbox->time_model(blocking_time,initial_time_model.domain());
+        final_set_model=this->_toolbox->integration_step(flow_model,initial_set_model,blocking_time_model);
+        ARIADNE_LOG(3,"final_set_model = "<<final_set_model<<"\n");
+        if(semantics == LOWER_SEMANTICS) {
+            // with lower semantics, continuous evolution should be stopped.
             blocking = true;
         }
-        ARIADNE_LOG(2,"Final blocking time interval = ["<<lower_blocking_time<<","<<upper_blocking_time<<"]\n");
+    }
+*/
 
-        // If upper_blocking_time is less than step_size, final set should be recomputed
-        if(upper_blocking_time < step_size) {
-            ARIADNE_LOG(3,"Upper blocking time smaller than step size. Recomputing final set model.\n");
-            TimeModelType upper_blocking_time_model=this->_toolbox->time_model(upper_blocking_time,initial_time_model.domain());
-            final_set_model=this->_toolbox->integration_step(flow_model,initial_set_model,upper_blocking_time_model);
-            ARIADNE_LOG(4,"final_set_model = "<<final_set_model<<"\n");
-        }
-        
-        // Compute discrete evolution: execute every transition that is possibly active.
-        bool activated=false;
+    // Compute discrete evolution
+    bool activated=false;   // this will became true if at least one discrete transition is activated
+    if(semantics == UPPER_SEMANTICS) {        
+        // Upper semantics: execute every transition that is possibly active.
         ARIADNE_LOG(3,"Computing discrete transitions.\n");
         for(std::set< DiscreteTransition >::const_iterator 
             iter=transitions.begin(); iter!=transitions.end(); ++iter)
         {
             shared_ptr<const FunctionInterface> guard_ptr = iter->activation_ptr();
             if(possibly(this->_toolbox->active(*guard_ptr,flow_bounds))) {
-                ARIADNE_LOG(2,"Transition "<<*iter<<" is possibly active.\n");
+                ARIADNE_LOG(2," "<<*iter<<" is possibly active.\n");
                 if(possibly(this->_toolbox->active(*guard_ptr,reach_set_model))) {
                     Float lower_active_time = 0.0;
-                    Float upper_active_time = upper_blocking_time;
+                    Float upper_active_time = step_size;
                     try {
                         // Compute crossing time
                         ModelType guard_model=this->_toolbox->predicate_model(*guard_ptr,flow_bounds);
                         TimeModelType crossing_time_model=this->_toolbox->crossing_time(guard_model,flow_model,initial_set_model);
-                        if(!possibly(this->_toolbox->active(*guard_ptr,initial_set_model))) {
+                        ARIADNE_LOG(3," Crossing time: "<<crossing_time_model.range()[0]<<"\n");
+                        tribool initially_active = this->_toolbox->active(*guard_ptr,initial_set_model);
+                        tribool finally_active = this->_toolbox->active(*guard_ptr,final_set_model);
+                        if(!possibly(initially_active)) {
                             // Transition is NOT initally active
                             lower_active_time = crossing_time_model.range()[0].lower();
                         }
-                        if(!possibly(this->_toolbox->active(*guard_ptr,final_set_model))) {
-                            // Transition is NOT finally active
-                            upper_active_time = crossing_time_model.range()[0].upper();
-                        }
+                        if(iter->forced()) {
+                            // Forced transition
+                            upper_active_time = min(step_size,crossing_time_model.range()[0].upper());
+                        } else  {
+                            // Unforced transition
+                            if(!possibly(finally_active)) {
+                                // Transition is NOT finally active
+                                upper_active_time = crossing_time_model.range()[0].upper();
+                            }
+                        }                        
                     } catch(DegenerateCrossingException) { 
                         ARIADNE_LOG(3," DegenerateCrossing detected.\n"); 
                         lower_active_time=0.0;
@@ -524,10 +543,12 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     
                         SetModelType active_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,active_time_model);
                         SetModelType jump_set_model=this->_toolbox->reset_step(*reset_ptr,active_set_model);
-                        ARIADNE_LOG(4,"initial_location="<<initial_location<<", active_set_model="<<active_set_model<<"\n");
-                        ARIADNE_LOG(4,"jump_location="<<jump_location<<", jump_set_model="<<jump_set_model<<"\n");
+                        ARIADNE_LOG(3,"initial_location="<<initial_location<<", active_set_model="<<active_set_model<<"\n");
+                        ARIADNE_LOG(3,"jump_location="<<jump_location<<", jump_set_model="<<jump_set_model<<"\n");
+                        ARIADNE_LOG(3,"jump_time_mode="<<jump_time_model<<"\n");
                         
                         // Adjoin intermediate and jump sets to the result
+                        ARIADNE_LOG(3,"Adding jump set to the working sets.\n");                                
                         working_sets.push_back(make_tuple(jump_location,initial_steps+1,jump_set_model,jump_time_model));
                         intermediate_sets.adjoin(EnclosureType(initial_location,active_set_model));
                         intermediate_sets.adjoin(EnclosureType(jump_location,jump_set_model));
@@ -537,47 +558,52 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
                 }
             }
         }
-
-        // In the upper semantics, continuous evolution is computed only up to upper_blocking_time
-        // WARNING: this step is executed AFTER the activation of the transitions to improve transition detection.
-        if(upper_blocking_time < step_size) {
-            // recompute continuous evolution
-            ARIADNE_LOG(3,"Upper blocking time smaller than step size. Recomputing continuous evolution.\n");
-            // Compute the flow model
-            flow_model=this->_toolbox->flow_model(*dynamic_ptr,initial_set_bounds,upper_blocking_time,flow_bounds);
-            ARIADNE_LOG(4,"flow_model = "<<flow_model<<"\n"); 
-            // Compute the integration time model
-            final_time_model=initial_time_model+Vector<Float>(1u,upper_blocking_time);
-            ARIADNE_LOG(6,"final_time_model = "<<final_time_model<<"\n");
-            integration_time_model=final_time_model-initial_time_model;
-            ARIADNE_LOG(4, "integration_time_model="<<integration_time_model<<"\n");
-            final_set_model=this->_toolbox->integration_step(flow_model,initial_set_model,integration_time_model);
-            ARIADNE_LOG(4,"final_set_model = "<<final_set_model<<"\n");
-            reach_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,zero_time,integration_time_model);         
-            ARIADNE_LOG(6,"reach_set_model = "<<reach_set_model<<"\n");
-            ARIADNE_LOG(4,"Done computing continuous evolution for the second time.\n");
-        }    
-
-        // Adjoin intermediate and reach set to the results
-        reach_sets.adjoin(EnclosureType(initial_location,reach_set_model));
-        intermediate_sets.adjoin(EnclosureType(initial_location,final_set_model));
-        if(blocking && !activated) {
-            // Blocking: no continuous evolution allowed, no discrete transition activated
-            ARIADNE_LOG(2,"Blocking dected, evolution stopped.\n");
-            final_sets.adjoin(EnclosureType(initial_location,final_set_model));
-        } 
-        if(!blocking) {
-            // Continuous evolution should go on
-            working_sets.push_back(make_tuple(initial_location,initial_steps,final_set_model,final_time_model));
-        }
-
     } else { // LOWER_SEMANTICS, currently not implemented
-        ARIADNE_NOT_IMPLEMENTED;
+        // Lower semantics: execute every transition that is definitely active.        
+        // ARIADNE_NOT_IMPLEMENTED;
+    }
+
+/*  REMOVED, can be possibly re-introduced for lower semantics only
+    // If blocking_time is smaller than step_size, refine continuous evolution
+    // WARNING: this step is executed AFTER the activation of the transitions to improve transition detection.
+    if(blocking_time < step_size && blocking_time > 0.0) {
+        // recompute continuous evolution
+        ARIADNE_LOG(3,"Blocking time smaller than step size. Recomputing continuous evolution.\n");
+        // Compute the flow model
+        flow_model=this->_toolbox->flow_model(*dynamic_ptr,initial_set_bounds,blocking_time,flow_bounds);
+        ARIADNE_LOG(4,"flow_model = "<<flow_model<<"\n"); 
+        // Compute the integration time model
+        final_time_model=initial_time_model+Vector<Float>(1u,blocking_time);
+        ARIADNE_LOG(6,"final_time_model = "<<final_time_model<<"\n");
+        integration_time_model=this->_toolbox->time_model(blocking_time,initial_time_model.domain());
+        ARIADNE_LOG(3, "integration_time_model="<<integration_time_model<<"\n");
+        final_set_model=this->_toolbox->integration_step(flow_model,initial_set_model,integration_time_model);
+        ARIADNE_LOG(4,"final_set_model = "<<final_set_model<<"\n");
+        reach_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,zero_time,integration_time_model);         
+        ARIADNE_LOG(6,"reach_set_model = "<<reach_set_model<<"\n");
+        ARIADNE_LOG(4,"Done computing continuous evolution for the second time.\n");
+    }    
+*/
+    // Adjoin intermediate and reach set to the results
+    reach_sets.adjoin(EnclosureType(initial_location,reach_set_model));
+    intermediate_sets.adjoin(EnclosureType(initial_location,final_set_model));
+    if(blocking && !activated) {
+        // Blocking: no continuous evolution allowed, no discrete transition activated
+        ARIADNE_LOG(2,"Blocking dected, evolution stopped.\n");
+        final_sets.adjoin(EnclosureType(initial_location,final_set_model));
+    } 
+    if(!blocking) {
+        // Continuous evolution should go on
+        ARIADNE_LOG(3,"initial_location="<<initial_location<<", initial_steps="<<initial_steps<<"\n");
+        ARIADNE_LOG(3,"final_set_model="<<final_set_model<<"\n");
+        ARIADNE_LOG(3,"final_time_model="<<final_time_model<<"\n");
+        ARIADNE_LOG(3,"Adding final set to the working sets.\n");        
+        working_sets.push_back(make_tuple(initial_location,initial_steps,final_set_model,final_time_model));
     }
   
     ARIADNE_LOG(2,"Done evolution_step.\n\n");
 
-    //verbosity=old_verbosity;
+    verbosity=old_verbosity;
 }
 
 HybridEvolver::TimedEnclosureListType

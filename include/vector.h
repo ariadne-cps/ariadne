@@ -158,14 +158,6 @@ using ublas::range;
 using ublas::slice;
 using ublas::identity_matrix;
 
-template<class X> Vector<X>::Vector(size_t n, const double& t0, const double& t1, ...) 
-    : ublas::vector<X>(n) 
-{
-    assert(n>=2); va_list args; va_start(args,t1);
-    (*this)[0]=t0; (*this)[1]=t1; 
-    for(size_t i=2; i!=n; ++i) { (*this)[i]=va_arg(args,double); } 
-    va_end(args);
-}
 
 
 template<class X>

@@ -33,10 +33,6 @@ using namespace Ariadne;
 
 namespace Ariadne {
 
-TaylorVariable mul_cosy(const TaylorVariable&, const TaylorVariable&);
-TaylorVariable mul_rounded(const TaylorVariable&, const TaylorVariable&);
-TaylorVariable mul_ivl(const TaylorVariable&, const TaylorVariable&);
-    
     
 void read(MultiIndex& j, const boost::python::object& obj) {
     array<int> ary;
@@ -153,6 +149,17 @@ template<> std::string __repr__(const TaylorVariable& tv) {
     return ss.str();
 } 
 
+TaylorVariable neg(const TaylorVariable&);
+TaylorVariable rec(const TaylorVariable&);
+TaylorVariable sqr(const TaylorVariable&);
+TaylorVariable pow(const TaylorVariable&, int);
+TaylorVariable sqrt(const TaylorVariable&);
+TaylorVariable exp(const TaylorVariable&);
+TaylorVariable log(const TaylorVariable&);
+TaylorVariable sin(const TaylorVariable&);
+TaylorVariable cos(const TaylorVariable&);
+TaylorVariable tan(const TaylorVariable&);
+
 } // namespace Ariadne
 
 void export_taylor_variable() 
@@ -168,7 +175,6 @@ void export_taylor_variable()
     typedef SparseDifferential<Float> SD;
     typedef TaylorVariable T;
     typedef Vector<TaylorVariable> TV;
-
 
     class_<T> taylor_variable_class("TaylorVariable");
     taylor_variable_class.def("__init__", make_constructor(&make<TaylorVariable>) );
@@ -236,8 +242,6 @@ void export_taylor_variable()
     def("join", (TV(*)(const TV&,const TV&)) &join);
     def("join", (TV(*)(const TV&,const T&)) &join);
 
-    def("jacobian", (RMx(*)(const TV&,const RV&)) &jacobian);
-
     def("unscale", (T(*)(const T&,const I&)) &unscale);
     def("unscale", (TV(*)(const TV&,const IV&)) &unscale);
  
@@ -256,10 +260,6 @@ void export_taylor_variable()
 
     def("flow",(TV(*)(const TV&,const IV&,const I&,const IV&)) &flow);
     def("implicit",(TV(*)(const TV&,const IV&)) &implicit);
-
-    def("mul_cosy", (T(*)(const T&, const T&)) &mul_cosy);
-    def("mul_rounded", (T(*)(const T&, const T&)) &mul_rounded);
-    def("mul_ivl", (T(*)(const T&, const T&)) &mul_ivl);
 
     def("max",(T(*)(const T&,const T&))&max);
     def("min",(T(*)(const T&,const T&))&min);

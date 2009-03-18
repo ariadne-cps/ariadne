@@ -31,6 +31,29 @@ template class boost::numeric::ublas::vector<Ariadne::Interval>;
 namespace Ariadne {
 
 
+template<> Vector<Float>::Vector(size_t n, const double& t0, const double& t1, ...)
+    : ublas::vector<Float>(n)
+{
+    assert(n>=2); va_list args; va_start(args,t1);
+    (*this)[0]=t0; (*this)[1]=t1; 
+    for(size_t i=2; i!=n; ++i) { (*this)[i]=va_arg(args,double); } 
+    va_end(args);
+}
+
+template<> Vector<Interval>::Vector(size_t n, const double& t0, const double& t1, ...)
+    : ublas::vector<Interval>(n)
+{
+    assert(n>=2); va_list args; va_start(args,t1);
+    (*this)[0]=Interval(t0,t1);
+    for(size_t i=1; i!=n; ++i) {
+        double l=va_arg(args,double);
+        double u=va_arg(args,double);
+        (*this)[i]=Interval(l,u);
+    }
+    va_end(args);
+}
+
+
 bool contains(const Vector<Interval>& v1, const Vector<Float>& v2)
 {
     ARIADNE_ASSERT(v1.size()==v2.size());

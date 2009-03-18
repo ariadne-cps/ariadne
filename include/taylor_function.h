@@ -38,9 +38,7 @@ template<class X> class Vector;
 template<class X> class Matrix;
 
 class FunctionInterface;
-
 class MultiIndex;
-
 class TaylorFunction;
 
 TaylorFunction recentre(const TaylorFunction&, const Vector<Interval>& bx, const Vector<Float>& pt);
@@ -49,13 +47,11 @@ TaylorFunction truncate(const TaylorFunction&, const Vector<Interval>&, uint, ui
 TaylorFunction compose(const TaylorFunction&, const TaylorFunction&);
 TaylorFunction inverse(const TaylorFunction&);
 TaylorFunction implicit(const TaylorFunction&);
-TaylorFunction flow(const TaylorFunction& vector_field, const Vector<Interval>& domain, const Interval& time);
 TaylorFunction antiderivative(const TaylorFunction&, uint);
 
 
 
-
-/* \brief A taylor_model with multivalued output using the TaylorVariable class.
+/*! \brief A taylor_model with multivalued output using the TaylorVariable class.
  */
 class TaylorFunction {
     typedef Float R;
@@ -104,11 +100,9 @@ class TaylorFunction {
     uint result_size() const;
     
   
-    /// Resizing
-    void resize(uint rs, uint as, ushort d, ushort s);
-
     /*! \brief Evaluate the Taylor model at the point \a x. */
     Vector<Interval> evaluate(const Vector<Interval>& x) const;
+    /*! \brief Evaluate the Taylor model at the point \a x. */
     Vector<Interval> evaluate(const Vector<Float>& x) const;
   
     /*! \brief Compute an approximation to Jacobian derivative of the Taylor model at the point \a x. */
@@ -126,44 +120,56 @@ class TaylorFunction {
     std::ostream& write(std::ostream& os) const;
   
     /*! \brief Addition. */
-    friend TaylorFunction operator+(const TaylorFunction&, const TaylorFunction&);
+    friend TaylorFunction operator+(const TaylorFunction& f, const TaylorFunction& c);
     /*! \brief Subtraction. */
-    friend TaylorFunction operator-(const TaylorFunction&, const TaylorFunction&);
+    friend TaylorFunction operator-(const TaylorFunction& f, const TaylorFunction& c);
   
+    /*! \brief Addition of a constant. */
+    friend TaylorFunction operator+(const TaylorFunction& f, const Vector<Float>& c);
+    /*! \brief Subtraction of a constant. */
+    friend TaylorFunction operator-(const TaylorFunction& f, const Vector<Float>& c);
     /*! \brief Multiplication by a scalar. */
-    friend TaylorFunction operator*(const Float&, const TaylorFunction&);
+    friend TaylorFunction operator*(const Float& c, const TaylorFunction& f);
     /*! \brief Multiplication by a scalar. */
-    friend TaylorFunction operator*(const TaylorFunction&, const Float&);
+    friend TaylorFunction operator*(const TaylorFunction& f, const Float& c);
     /*! \brief Division by a scalar. */
-    friend TaylorFunction operator/(const TaylorFunction&, const Float&);
+    friend TaylorFunction operator/(const TaylorFunction& f, const Float& c);
   
-    /*! \brief Composition \f$p\circ q(x)=p(q(x))\f$. */
-    friend TaylorFunction compose(const TaylorFunction&, const TaylorFunction&);
-    /*! \brief Derivative with respect to variable \a k. */
-    friend TaylorFunction antiderivative(const TaylorFunction&, uint k);
+    //! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
+    friend TaylorFunction compose(const FunctionInterface& f, const TaylorFunction& tg);
+    //! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
+    friend TaylorFunction compose(const TaylorFunction& f, const TaylorFunction& g);
+    //! \brief Antiderivative of \a f with respect to variable \a k.
+    friend TaylorFunction antiderivative(const TaylorFunction& f, uint k);
+    //! \brief The flow of the vector field \a vf defined over a space domain \a d over a time interval \a t.
+    friend TaylorFunction flow(const TaylorFunction& vf, const Vector<Interval>& d, const Interval& t);
+    //! \brief Compute the implicit function of \a f satisfying \f$f(c,h(c))=0\f$,
+    //! where \f$c\f$ is the centre of the domain of \f$f\f$. 
+    friend TaylorFunction implicit(const TaylorFunction& f);
+    //! \brief Compute the inverse function of \a f based at the centre of the domain. */
+    friend TaylorFunction inverse(const TaylorFunction& f);
+    //! \brief Compute the inverse function of \a f based at \f$f(c)\f$. */
+    friend TaylorFunction inverse(const TaylorFunction& f, const Vector<Float>& c);
+    //! \brief Compute the function \f$(f,g)(x)=(f(x),g(x))\f$.
+    friend TaylorFunction join(const TaylorFunction& f, const TaylorFunction& g);
+    //! \brief Compute the function \f$(f\oplus g)(x,y)=(f(x),g(y))\f$.
+    friend TaylorFunction combine(const TaylorFunction& f, const TaylorFunction& g);
+    //! \brief Restrict the function \a f to a subdomain \a d.
+    friend TaylorFunction restrict(const TaylorFunction& f, const Vector<Interval>& d);
+
   private:
     array< array<Interval> > _powers(const Vector<Interval>&) const;
     void _compute_jacobian() const;
     void _set_argument_size(uint n);
     uint _compute_maximum_component_size() const;
-  private:
-    friend TaylorFunction recentre(const TaylorFunction&, const Vector<Interval>& bx);
-    friend TaylorFunction inverse(const TaylorFunction&, const Vector<Float>&);
-    //friend void add(TaylorFunction&,const TaylorFunction&,const TaylorFunction&);
-    //friend void sub(TaylorFunction&,const TaylorFunction&,const TaylorFunction&);
-    //friend void mul(TaylorFunction&,const TaylorFunction&,const TaylorFunction&);
-    //friend void div(TaylorFunction&,const TaylorFunction&,const TaylorFunction&);
-    //friend void compose(TaylorFunction&,const TaylorFunction&,const TaylorFunction&);
-    //friend void scale(TaylorFunction&,const R&);
+    void _resize(uint rs, uint as, ushort d, ushort s);
+
   private:
     /* Domain of definition. */
     Vector<Interval> _domain;
     Vector<TaylorVariable> _expansion;
 };
 
-
-TaylorFunction combine(const TaylorFunction&, const TaylorFunction&);
-TaylorFunction join(const TaylorFunction&, const TaylorFunction&);
 
 std::ostream& operator<<(std::ostream&, const TaylorFunction&);
 

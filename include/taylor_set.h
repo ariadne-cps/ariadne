@@ -53,6 +53,7 @@ class GridCell;
 class GridTreeSet;
 class Figure;
 
+/*! \brief Sets expressed as the image of a box under a polynomial with error bounds. */
 class TaylorSet 
     : public LocatedSetInterface
 {

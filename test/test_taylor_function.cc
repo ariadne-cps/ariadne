@@ -65,9 +65,12 @@ class TestTaylorFunction
   private:
     void test_constructors();
     void test_compose();
+    void test_antiderivative();
     void test_flow();
     void test_implicit();
-    void test_antiderivative();
+    void test_join();
+    void test_combine();
+    void test_restrict();
     void test_misc();
 };
 
@@ -75,10 +78,13 @@ class TestTaylorFunction
 void TestTaylorFunction::test()
 {
     ARIADNE_TEST_CALL(test_constructors());
+    ARIADNE_TEST_CALL(test_antiderivative());
     ARIADNE_TEST_CALL(test_compose());
     ARIADNE_TEST_CALL(test_flow());
     ARIADNE_TEST_CALL(test_implicit());
-    ARIADNE_TEST_CALL(test_antiderivative());
+    ARIADNE_TEST_CALL(test_join());
+    ARIADNE_TEST_CALL(test_combine());
+    ARIADNE_TEST_CALL(test_restrict());
     ARIADNE_TEST_CALL(test_misc());
 }
 
@@ -87,9 +93,10 @@ void TestTaylorFunction::test_constructors()
 {
     HenonFunction henon_function(Vector<Float>(2,1.5,0.25));
     Vector<Interval> domain(2,0.0,1.25,0.5,1.0);
-    
+    Vector<TaylorVariable> expansion(2,2,2, 0.0,0.0,0.0,0.0,0.0,0.0, 0.0, 0.0,0.0,0.0,0.0,0.0,0.0, 0.0);
+
     ARIADNE_TEST_CONSTRUCT(TaylorFunction,henon_model,(domain,henon_function));
-    
+    ARIADNE_TEST_EQUAL(henon_model,TaylorFunction(domain,expansion))
 }
 
 
@@ -98,43 +105,55 @@ void TestTaylorFunction::test_compose()
     HenonFunction henon_function(Vector<Float>(2,1.5,0.25));
     Vector<Interval> domain1(2,0.0,1.25,0.5,1.0);
     TaylorFunction henon_model1(domain1,henon_function);
+    std::cerr<<henon_model1<<std::endl;
     
     Vector<Interval> domain2=henon_model1.range();
     TaylorFunction henon_model2(domain2,henon_function);
-    
+
+    std::cerr<<henon_model2<<std::endl;
     TaylorFunction henon_square=compose(henon_model2,henon_model1);
 }
 
-
-void TestTaylorFunction::test_implicit() 
-{
-    MultiIndex ez=MultiIndex::zero(2);
-    MultiIndex e0=MultiIndex::unit(2,0);
-    MultiIndex e1=MultiIndex::unit(2,1);
-    TaylorVariable x(2);
-    x[ez]=0.0; x[2*e0]=1; x[2*e1]=1;
-    TaylorFunction tm(Vector<Interval>(2,Interval(-1,1)),Vector<TaylorVariable>(1,x));
-    cout << "implicit(x)=" << implicit(tm) << endl;
-    cout << endl;
-}
-
-
-void TestTaylorFunction::test_flow() 
-{
-    Vector< TaylorVariable > f(2,TaylorVariable(2));
-    f[0].set_value(-1.0);  f[0].set_gradient(0,-0.8); f[0].set_gradient(1,-0.4);
-    f[1].set_value( 0.0);  f[1].set_gradient(0,-0.4); f[1].set_gradient(1,-0.8);
-    TaylorFunction vector_field(Vector<Interval>(2,Interval(-2,2)),f);
-    Vector<Interval> domain(2,Interval(-1,1));
-    Interval time(-0.25,0.25);
-    cout << flow(vector_field,domain,time) << std::endl << std::endl;
-}
 
 void TestTaylorFunction::test_antiderivative() 
 {
     Vector<Interval> domain(3,Interval(-1,1));
     TaylorFunction tm=TaylorFunction::constant(domain,Vector<Float>(2,1.0,2.0));
     TaylorFunction atm=antiderivative(tm,1);
+}
+
+void TestTaylorFunction::test_implicit() 
+{
+    Vector<Interval> d(2, -1.0,+1.0, -1.0,+1.0);
+    Vector<TaylorVariable> e(1,2,2, 0.0,0.0,0.0,1.0,0.0,1.0, 0.0);
+    TaylorFunction tf(d,e);
+    cout << "implicit(x)=" << implicit(tf) << endl;
+    cout << endl;
+}
+
+
+void TestTaylorFunction::test_flow() 
+{
+    Vector< TaylorVariable > f(2,2,1, -1.0,-0.8,-0.4, 0.0, 0.0,-0.4,-0.8, 0.0);
+    TaylorFunction vector_field(Vector<Interval>(2,Interval(-2,2)),f);
+    Vector<Interval> domain(2,Interval(-1,1));
+    Interval time(-0.25,0.25);
+    cout << flow(vector_field,domain,time) << std::endl << std::endl;
+}
+
+void TestTaylorFunction::test_join() 
+{
+    
+}
+
+void TestTaylorFunction::test_combine() 
+{
+    
+}
+
+void TestTaylorFunction::test_restrict() 
+{
+    
 }
 
 void TestTaylorFunction::test_misc()

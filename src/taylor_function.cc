@@ -277,9 +277,13 @@ TaylorFunction::jacobian(const Vector<Float>& x) const
 
 
 TaylorFunction
-recentre(const TaylorFunction& tm, const Box& bx, const Point& c)
+restrict(const TaylorFunction& tm, const Box& nd)
 {
-    ARIADNE_NOT_IMPLEMENTED;
+    const Vector<Interval>& od=tm.domain();
+    ARIADNE_ASSERT(subset(nd,od));
+    if(nd==od) { return tm; }
+    Vector<TaylorVariable> sm=Vector<TaylorVariable>(nd);
+    return TaylorFunction(nd,compose(tm._expansion,tm._domain,sm));
 }
 
 
@@ -291,7 +295,8 @@ operator+(const TaylorFunction& p1, const TaylorFunction& p2)
     if(p1.domain()==p2.domain()) {
         return TaylorFunction(p1._domain,Vector<TaylorVariable>(p1._expansion+p2._expansion));
     } else {
-        ARIADNE_NOT_IMPLEMENTED;
+        Box new_domain=intersection(p1.domain(),p2.domain());
+        return operator+(restrict(p1,new_domain),restrict(p2,new_domain));
     }
 }
 
@@ -305,12 +310,23 @@ operator-(const TaylorFunction& p1, const TaylorFunction& p2)
     } else {
         ARIADNE_NOT_IMPLEMENTED;
         Box new_domain=intersection(p1.domain(),p2.domain());
-        //Point new_centre=new_domain.centre();
-        Point new_centre=midpoint(new_domain);
-        return operator-(recentre(p1,new_domain,new_centre),recentre(p2,new_domain,new_centre));
+        return operator-(restrict(p1,new_domain),restrict(p2,new_domain));
     }
 }
 
+
+
+TaylorFunction
+operator+(const TaylorFunction& f, const Vector<Float>& c)
+{
+    return TaylorFunction(f._domain,f._expansion+c);
+}
+
+TaylorFunction
+operator-(const TaylorFunction& f, const Vector<Float>& c)
+{
+    return TaylorFunction(f._domain,f._expansion-c);
+}
 
 
 /*

@@ -130,7 +130,7 @@ int main()
 
     /// Set the evolution parameters
     evolver.parameters().maximum_enclosure_radius = 0.25;
-    evolver.parameters().maximum_step_size = 0.125;
+    evolver.parameters().maximum_step_size = 0.05;
     std::cout <<  evolver.parameters() << std::endl;
 
     // Declare the type to be used for the system evolution
@@ -140,33 +140,24 @@ int main()
 
     std::cout << "Computing evolution starting from location l2, x = 0.0, y = 1.0" << std::endl;
 
-    Box initial_box(2, 0.0,0.001, 1.0,1.001);
+    Box initial_box(2, 0.0,0.00001, 0.99999,1.0);
     HybridEnclosureType initial_enclosure(l2,initial_box);
     Box bounding_box(2, -0.1,9.1, -0.1,1.1);
   
     HybridTime evolution_time(64.0,6);
- /* 
+  
     std::cout << "Computing orbit... " << std::flush;
-    OrbitType orbit = evolver.orbit(watertank_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
+    OrbitType orbit = evolver.orbit(watertank_system,initial_enclosure,evolution_time,LOWER_SEMANTICS);
     std::cout << "done." << std::endl;
 
     std::cout << "Orbit="<<orbit<<std::endl;
     //plot("tutorial-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit.initial());
     plot("watertank-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit);
-
-    std::cout << "Computing reach set using HybridEvolver... " << std::flush;
-    EnclosureListType reach = evolver.reach(watertank_system,initial_enclosure,evolution_time);
-    std::cout << "done." << std::endl;
-
-    std::cout << "Orbit="<<reach<<std::endl;
-    //plot("tutorial-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit.initial());
-    plot("watertank-reach-evolver",bounding_box, Colour(0.0,0.5,1.0), reach);
-*/
-
+/*
     /// Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
     analyser.parameters().lock_to_grid_time = 32.0;
-    analyser.parameters().grid_lengths = 0.05;
+    analyser.parameters().maximum_grid_depth= 14;
     std::cout <<  analyser.parameters() << std::endl;
 
     HybridImageSet initial_set;

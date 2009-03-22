@@ -43,7 +43,7 @@ template<> Vector<Float>::Vector(size_t n, const double& t0, const double& t1, .
 template<> Vector<Interval>::Vector(size_t n, const double& t0, const double& t1, ...)
     : ublas::vector<Interval>(n)
 {
-    assert(n>=2); va_list args; va_start(args,t1);
+    assert(n>=1); va_list args; va_start(args,t1);
     (*this)[0]=Interval(t0,t1);
     for(size_t i=1; i!=n; ++i) {
         double l=va_arg(args,double);

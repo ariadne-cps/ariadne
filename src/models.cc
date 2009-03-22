@@ -24,7 +24,7 @@
 #include "numeric.h"
 #include "vector.h"
 #include "matrix.h"
-#include "sparse_differential.h"
+#include "differential.h"
 #include "taylor_variable.h"
 
 #include "models.h"

@@ -25,5 +25,5 @@
 
 namespace Ariadne {
 template class DenseDifferential<Float>;
-//template class DifferentialVector< DenseDifferential<Float> >;
+//template class Vector< DenseDifferential<Float> >;
 }

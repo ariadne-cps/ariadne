@@ -1,5 +1,5 @@
 /***************************************************************************
- *            sparse_differential.cc
+ *            differential.cc
  *
  *  Copyright 2008  Pieter Collins
  * 
@@ -21,9 +21,9 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "sparse_differential.h"
+#include "differential.h"
 
 namespace Ariadne {
-template class SparseDifferential<Float>;
-//template class Vector< SparseDifferential<Float> >;
+template class Differential<Float>;
+//template class Vector< Differential<Float> >;
 }

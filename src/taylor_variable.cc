@@ -30,8 +30,7 @@
 #include "vector.h"
 #include "matrix.h"
 #include "polynomial.h"
-#include "sparse_differential.h"
-#include "differential_vector.h"
+#include "differential.h"
 #include "taylor_variable.h"
 #include "exceptions.h"
 
@@ -1585,8 +1584,8 @@ compose(const Vector<TaylorVariable>& x,
     _compose1(r,x,ys);
 
     //FIXME: Remove setting error to zero
-    for(uint i=0; i!=r.size(); ++i) { r[i].sweep(1e-8); }
-    for(uint i=0; i!=r.size(); ++i) { r[i].clobber(); }
+    //for(uint i=0; i!=r.size(); ++i) { r[i].sweep(1e-8); }
+    //for(uint i=0; i!=r.size(); ++i) { r[i].clobber(); }
 
     ARIADNE_ASSERT(r.result_size()==x.result_size());
     ARIADNE_ASSERT(r.argument_size()==y.argument_size());
@@ -1652,21 +1651,21 @@ _compose(const Vector<TaylorVariable>& x, const Vector<TaylorVariable>& y)
     return compose(x,d,y);
 }
 
-SparseDifferential<Float> differential(const TaylorVariable& x) {
-    SparseDifferential<Float> sd(x.argument_size(),x.degree());
+Differential<Float> differential(const TaylorVariable& x) {
+    Differential<Float> sd(x.argument_size(),x.degree());
     for(TaylorVariable::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         sd[xiter->first]=xiter->second;
     }
     return sd;
 }
 
-SparseDifferential<Float> expansion(const TaylorVariable& x, const Vector<Interval>& d) {
+Differential<Float> expansion(const TaylorVariable& x, const Vector<Interval>& d) {
     return differential(compose(x,d,TaylorVariable::variables(Vector<Float>(d.size()))));
 }
 
-Vector< SparseDifferential<Float> > expansion(const Vector<TaylorVariable>& x, const Vector<Interval>& d) {
+Vector< Differential<Float> > expansion(const Vector<TaylorVariable>& x, const Vector<Interval>& d) {
     Vector<TaylorVariable> y=compose(x,d,TaylorVariable::variables(Vector<Float>(d.size())));
-    Vector< SparseDifferential<Float> > r(y.size());
+    Vector< Differential<Float> > r(y.size());
     for(uint i=0; i!=r.size(); ++i) { r[i]=differential(y[i]); }
     return r;
 }
@@ -1962,8 +1961,17 @@ Vector<TaylorVariable>::Vector(uint rs, uint as, uint deg, double x0, ...)
     va_end(args);
 }
 
-    
-    
+Vector<Float>
+Vector<TaylorVariable>::value() const
+{
+    Vector<Float> r(this->size());
+    for(uint i=0; i!=this->size(); ++i) {
+        r[i]=(*this)[i].value();
+    }
+    return r;
+}
+
+
 } //namespace Ariadne
 
 

@@ -27,7 +27,7 @@
 #include "vector.h"
 #include "matrix.h"
 #include "multi_index.h"
-#include "sparse_differential.h"
+#include "differential.h"
 #include "function_interface.h"
 
 #include "geometry.h"

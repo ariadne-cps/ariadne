@@ -27,8 +27,7 @@
 #include "vector.h"
 #include "matrix.h"
 #include "multi_index.h"
-#include "sparse_differential.h"
-#include "differential_vector.h"
+#include "differential.h"
 #include "function_interface.h"
 #include "taylor_variable.h"
 #include "taylor_function.h"
@@ -125,6 +124,16 @@ TaylorFunction::constant(const Vector<Interval>& d, const Vector<Float>& c)
 }
 
 TaylorFunction
+TaylorFunction::constant(const Vector<Interval>& d, const Vector<Interval>& r)  
+{
+    Vector<TaylorVariable> e(r.size(),d.size());
+    for(uint i=0; i!=r.size(); ++i) {
+        e[i]=r[i];
+    }
+    return TaylorFunction(d,e);
+}
+
+TaylorFunction
 TaylorFunction::identity(const Vector<Interval>& d)  
 {
     return TaylorFunction(d,TaylorVariable::variables(midpoint(d)));
@@ -135,8 +144,8 @@ TaylorFunction::identity(const Vector<Interval>& d)
 bool
 TaylorFunction::operator==(const TaylorFunction& tm) const
 {
-    return this->_domain==tm._domain
-        && this->_expansion==tm._expansion;
+        return this->_domain==tm._domain
+            && this->_expansion==tm._expansion;
 }
 
 
@@ -263,16 +272,26 @@ TaylorFunction::evaluate(const Vector<Interval>& x) const
 Matrix<Float> 
 TaylorFunction::jacobian(const Vector<Float>& x) const
 {
-    DifferentialVector< SparseDifferential<Float> > y(this->argument_size(),SparseDifferential<Float>(this->argument_size(),1u));
+    Vector< Differential<Float> > y(this->argument_size(),this->argument_size(),1u);
     for(uint j=0; j!=this->argument_size(); ++j) {
         y[j].set_value(this->domain()[j].midpoint());
         y[j].set_gradient(j,this->domain()[j].radius());
     }
-    DifferentialVector< SparseDifferential<Float> > t(this->result_size());
+    Vector< Differential<Float> > t(this->result_size());
     for(uint i=0; i!=this->result_size(); ++i) {
-        t[i]=SparseDifferential<Float>(this->_expansion[i].expansion());
+        t[i]=Differential<Float>(this->_expansion[i].expansion());
     }
-    return get_jacobian(compose(t-x,y));
+    t-=x;
+    std::cerr<<"\n  x="<<x<<"\n  t="<<t<<"\n  y="<<y<<"\n\n";
+    return Ariadne::compose(t,y).jacobian();
+}
+
+
+TaylorFunction
+join(const TaylorFunction& f, const TaylorFunction& g)
+{
+    ARIADNE_ASSERT(f.domain()==g.domain());
+    return TaylorFunction(f.domain(),join(f.expansion(),g.expansion()));
 }
 
 
@@ -284,8 +303,20 @@ restrict(const TaylorFunction& tm, const Box& nd)
     if(nd==od) { return tm; }
     Vector<TaylorVariable> sm=Vector<TaylorVariable>(nd.size(),nd.size());
     for(uint i=0; i!=nd.size(); ++i) {
-        sm[i].set_value(nd[i].midpoint());
-        sm[i].set_gradient(i,nd[i].radius());
+        set_rounding_mode(upward);
+        const Float& l=nd[i].lower();
+        const Float& u=nd[i].upper();
+        volatile Float ce,re,mcl,cu,mrl,ru;
+        mcl=-l; mcl-=u;
+        cu=l+u;
+        ce=(mcl+cu)/4;
+        mrl=l; mrl-=u;
+        ru=u-l;
+        re=mrl+ru;
+        sm[i].set_error(ce+re);
+        set_rounding_mode(to_nearest);
+        sm[i].set_value((l+u)/2);
+        sm[i].set_gradient(i,(u-l)/2);
     }
     return TaylorFunction(nd,compose(tm._expansion,tm._domain,sm));
 }
@@ -597,9 +628,34 @@ inverse(const TaylorFunction& p, const Point& v)
  
 
 TaylorFunction 
-implicit(const TaylorFunction& p)
+implicit(const TaylorFunction& f)
 {
-    ARIADNE_NOT_IMPLEMENTED;
+    // Solve the equation f(x,h(x))=0
+    // Use D1f + D2f Dh = 0, so Dh=-D2f^-1 D1f
+    uint rs=f.result_size();
+    uint fas=f.argument_size();
+    uint has=fas-rs;
+
+    Vector<Interval> h_domain=project(f.domain(),range(0u,has));
+    Vector<Float> h_centre=midpoint(h_domain);
+    Vector<Interval> h_range=project(f.domain(),range(has,fas));
+    TaylorFunction id=TaylorFunction::identity(h_domain);
+    TaylorFunction h0=TaylorFunction::constant(h_domain,h_range);
+    Vector<Float> h_value=h0.expansion().value();
+
+    std::cerr<<"implicit(TaylorFunction f):\n  f="<<f<<"\n";
+    Vector<Float> f_argument=join(h_centre,h_value);
+    Matrix<Float> Df=f.jacobian(f_argument);
+    std::cerr<<"  Df="<<Df<<std::endl;
+    Matrix<Float> J=project(Df,range(has,fas),range(0,rs));
+    std::cerr<<"  D2f="<<J<<std::endl;
+    Matrix<Float> Jinv=inverse(J);
+    Vector<TaylorVariable> fh=compose(f,join(id,h0)).expansion();
+    Vector<TaylorVariable> Jinvmfh=prod(Jinv,fh);
+    TaylorFunction dh(h_domain,Jinvmfh);
+    TaylorFunction h1=h0-dh;
+    std::cerr<<"\n  f="<<f<<"\n  h[0]="<<h0<<"\n  h[1]="<<h1<<"\n\n";
+    return h1;
 }
 
 TaylorFunction 

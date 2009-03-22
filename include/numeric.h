@@ -117,36 +117,74 @@ inline Float asin(Float x) { return std::asin(x); }
 inline Float acos(Float x) { return std::acos(x); }
 inline Float atan(Float x) { return std::atan(x); }
 
-inline Float add_up(Float x, Float y) { return up(x+y); }
-inline Float sub_up(Float x, Float y) { return up(x-y); }
-inline Float mul_up(Float x, Float y) { return up(x*y); }
-inline Float div_up(Float x, Float y) { return up(x/y); }
-inline Float pow_up(Float x, int n) { return up(pow(x,n)); }
-
-inline Float add_down(Float x, Float y) { return down(x+y); }
-inline Float sub_down(Float x, Float y) { return down(x-y); }
-inline Float mul_down(Float x, Float y) { return down(x*y); }
-inline Float div_down(Float x, Float y) { return down(x/y); }
-inline Float pow_down(Float x, int n) { return down(pow(x,n)); }
-
-inline Float add_approx(Float x, Float y) { return x+y; }
-inline Float sub_approx(Float x, Float y) { return x-y; }
-inline Float mul_approx(Float x, Float y) { return x*y; }
-inline Float div_approx(Float x, Float y) { return x/y; }
-inline Float pow_approx(Float x, int n) { return pow(x,n); }
-
-inline Float rad_up(Float x, Float y) { return up((y-x)/2); }
-inline Float med_approx(Float x, Float y) { return (x+y)/2; }
-
-inline Float add_rnd(Float x, Float y) { return x+y; }
-inline Float sub_rnd(Float x, Float y) { return x-y; }
-inline Float mul_rnd(Float x, Float y) { return x*y; }
-inline Float div_rnd(Float x, Float y) { return x/y; }
+inline Float add_rnd(Float x, Float y) { return (volatile double&)x+(volatile double&)y; }
+inline Float sub_rnd(Float x, Float y) { return (volatile double&)x-(volatile double&)y; }
+inline Float mul_rnd(Float x, Float y) { return (volatile double&)x*(volatile double&)y; }
+inline Float div_rnd(Float x, Float y) { return (volatile double&)x/(volatile double&)y; }
 
 inline Float add_opp(Float x, Float y) { volatile double t=(-x)-y; return -t; }
 inline Float sub_opp(Float x, Float y) { volatile double t=(-x)+y; return -t; }
 inline Float mul_opp(Float x, Float y) { volatile double t=(-x)*y; return -t; }
 inline Float div_opp(Float x, Float y) { volatile double t=(-x)/y; return -t; }
+
+Float pow_rnd(Float x, int n);
+Float pow_opp(Float x, int n);
+
+inline Float add_approx(Float x, Float y) { 
+    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest); 
+    volatile Float r=add_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
+inline Float sub_approx(Float x, Float y) {     
+    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest); 
+    volatile Float r=sub_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
+inline Float mul_approx(Float x, Float y) {     
+    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest); 
+    volatile Float r=mul_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
+inline Float div_approx(Float x, Float y) {     
+    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest); 
+    volatile Float r=div_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
+inline Float pow_approx(Float x, int n) {     
+    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest); 
+    volatile Float r=pow_rnd(x,n); set_rounding_mode(rounding_mode); return r; }
+
+inline Float add_up(Float x, Float y) { 
+    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(upward); 
+    volatile Float r=add_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
+inline Float sub_up(Float x, Float y) {     
+    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(upward); 
+    volatile Float r=sub_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
+inline Float mul_up(Float x, Float y) {     
+    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(upward); 
+    volatile Float r=mul_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
+inline Float div_up(Float x, Float y) {     
+    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(upward); 
+    volatile Float r=div_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
+inline Float pow_up(Float x, int n) {     
+    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(upward); 
+    volatile Float r=pow_rnd(x,n); set_rounding_mode(rounding_mode); return r; }
+
+inline Float add_down(Float x, Float y) { 
+    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(downward); 
+    volatile Float r=add_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
+inline Float sub_down(Float x, Float y) {     
+    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(downward); 
+    volatile Float r=sub_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
+inline Float mul_down(Float x, Float y) {     
+    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(downward); 
+    volatile Float r=mul_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
+inline Float div_down(Float x, Float y) {     
+    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(downward); 
+    volatile Float r=div_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
+inline Float pow_down(Float x, int n) {     
+    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(downward); 
+    volatile Float r=pow_rnd(x,n); set_rounding_mode(rounding_mode); return r; }
+
+inline Float med_approx(Float x, Float y) {     
+    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest); 
+    volatile Float r=(x+y)/2; set_rounding_mode(rounding_mode); return r; }inline Float rad_up(Float x, Float y) {     
+    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(upward); 
+    volatile Float r=(y-x)/2; set_rounding_mode(rounding_mode); return r; }
+
+
 
 double cos_rnd(double x);
 

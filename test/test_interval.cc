@@ -310,47 +310,28 @@ TestInterval::test_constructors()
 
 void TestInterval::test_class() 
 {
-    Interval ivlq1(1.1,2.2);
-    Interval ivlq2(1.125,1.125);
-    Interval ivlq3(2.125,3.25);
-  
-    Float f0=-2.25;
-    Float f1=1.5;
-    Float f2=2.25;
-    Float f3=3.125;
-    Float f4=4.0625;
-    Interval ivlf1;
-    Interval ivlf2(f1,f2);
-    Interval ivlf3(f3,f4);
-  
-    Float r1=1.5;
-    Float r2=2.25;
-    Float r3=3.125;
-    Float r4=4.0625;
-    Interval ivlr1;
-    Interval ivlr2(r1,r2);
-    Interval ivlr3(r3,r4);
-    Interval ivlr4(r1,r4);
+    // Test lower, upper, midpoint, radius, width
+    
+    // Tests for exact operations
+    ARIADNE_TEST_EQUAL(Interval(-0.25,0.50).lower(),-0.25);
+    ARIADNE_TEST_EQUAL(Interval(-0.25,0.50).upper(),0.5);
+    ARIADNE_TEST_EQUAL(Interval(-0.25,0.50).midpoint(),0.125);
+    ARIADNE_TEST_EQUAL(Interval(-0.25,0.50).radius(),0.375)
+    ARIADNE_TEST_EQUAL(Interval(-0.25,0.50).width(),0.75);
 
-    cout << "ivlr1=" << ivlr1 << ", ivlr2=" << ivlr2 << ", ivlr3=" << ivlr3 
-         << ", ivlr4=" << ivlr4 << endl;
-  
-    Interval ivlf0(f2,f1);
-    cout << "ivlf0=" << ivlf0 << endl;
-    cout << "ivlf0.empty()=" << ivlf0.empty() << ", ivlf1.empty()=" << ivlf1.empty() << endl;
-  
-    ivlf1=Interval(f1,f3);
-    ivlf2=Interval(f0,f1);
-    ivlf3=Interval(f2,f4);
-    cout << "ivlf1=" << ivlf1 << ", ivlf2=" << ivlf2 << ", ivlf3=" << ivlf3 << endl;
-    cout << "max(ivlf1,ivlf3)=" << max(ivlf1,ivlf3) << endl;
-    cout << "min(ivlf1,ivlf3)=" << min(ivlf1,ivlf3) << endl;
-    cout << "lower(" << ivlf1 << ")=" << ivlf1.lower() << endl;
-    cout << "upper(" << ivlf1 << ")=" << ivlf1.upper() << endl;
-    cout << "midpoint(" << ivlf1 << ")=" << ivlf1.midpoint() << endl;
-    cout << "radius(" << ivlf2 << ")=" << radius(ivlf2) << endl;
-    cout << "width(" << ivlf2 << ")=" << width(ivlf2) << endl;
-    ARIADNE_TEST_EQUAL(ivlf1.midpoint(),Float(2.3125));
+    // Tests for inexact operations
+    ARIADNE_TEST_EQUAL(Interval(-1./3,2./3).lower(),-0.33333333333333331483);
+    ARIADNE_TEST_EQUAL(Interval(-1./3,2./3).upper(),0.66666666666666662966);
+    ARIADNE_TEST_EQUAL(Interval(-1./3,2./3).midpoint(),0.16666666666666665741);
+    ARIADNE_TEST_EQUAL(Interval(-1./3,2./3).radius(),0.5)
+    ARIADNE_TEST_EQUAL(Interval(-1./3,2./3).width(),1.0);
+
+    // Tests for inexact operations
+    ARIADNE_TEST_EQUAL(Interval(div_down(-1,3),div_up(2,3)).lower(),-0.33333333333333337034);
+    ARIADNE_TEST_EQUAL(Interval(div_down(-1,3),div_up(2,3)).upper(),0.66666666666666674068);
+    ARIADNE_TEST_EQUAL(Interval(div_down(-1,3),div_up(2,3)).midpoint(),0.16666666666666668517);
+    ARIADNE_TEST_EQUAL(Interval(div_down(-1,3),div_up(2,3)).radius(),0.50000000000000011102)
+    ARIADNE_TEST_EQUAL(Interval(div_down(-1,3),div_up(2,3)).width(),1.000000000000000222);
 }
 
 void TestInterval::test_input() 

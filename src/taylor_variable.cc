@@ -49,18 +49,24 @@ uint TaylorVariable::_default_maximum_degree=16;
 
 TaylorVariable::TaylorVariable()
     : _polynomial(0), _error(0),
-      _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree)
+      _sweep_threshold(_default_sweep_threshold),
+      _maximum_degree(_default_maximum_degree),
+      _maximum_index(0,_default_maximum_degree)
 { }
 
 TaylorVariable::TaylorVariable(uint as)
     : _polynomial(as), _error(0),
-      _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree)
+      _sweep_threshold(_default_sweep_threshold),
+      _maximum_degree(_default_maximum_degree),
+      _maximum_index(as,_default_maximum_degree)
 { 
 }
 
 TaylorVariable::TaylorVariable(const std::map<MultiIndex,Float>& d, const Float& e)
     : _polynomial(d), _error(e),
-      _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree)
+      _sweep_threshold(_default_sweep_threshold),
+      _maximum_degree(_default_maximum_degree),
+      _maximum_index(d.begin()->first.size(),_default_maximum_degree)
 {
     ARIADNE_ASSERT(!d.empty());
     if(e<0) { std::cerr<<e<<std::endl; } ARIADNE_ASSERT(this->_error>=0);
@@ -68,7 +74,9 @@ TaylorVariable::TaylorVariable(const std::map<MultiIndex,Float>& d, const Float&
 
 TaylorVariable::TaylorVariable(uint as, uint deg, const double* ptr, const double& err)
     : _polynomial(as), _error(err),
-      _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree)
+      _sweep_threshold(_default_sweep_threshold),
+      _maximum_degree(_default_maximum_degree),
+      _maximum_index(as,_default_maximum_degree)
 {
     for(MultiIndex j(as); j.degree()<=deg; ++j) {
         if(*ptr!=0.0 || j.degree()<=1) { this->_polynomial.append(j,*ptr); }
@@ -80,7 +88,9 @@ TaylorVariable::TaylorVariable(uint as, uint deg, const double* ptr, const doubl
 
 TaylorVariable::TaylorVariable(uint as, uint deg, double d0, ...)
     : _polynomial(as), _error(0),
-      _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree)
+      _sweep_threshold(_default_sweep_threshold),
+      _maximum_degree(_default_maximum_degree),
+      _maximum_index(as,_default_maximum_degree)
 {
     double x=d0;
     va_list args;
@@ -97,7 +107,9 @@ TaylorVariable::TaylorVariable(uint as, uint deg, double d0, ...)
 
 TaylorVariable::TaylorVariable(uint as, uint nnz, uint a0, ...)
     : _polynomial(as), _error(0),
-      _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree)
+      _sweep_threshold(_default_sweep_threshold),
+      _maximum_degree(_default_maximum_degree),
+      _maximum_index(as,_default_maximum_degree)
 {
     MultiIndex a(as);
     uint aj=0u;
@@ -576,6 +588,25 @@ TaylorVariable::truncate(const MultiIndex& a)
             }
         }
         if(erase) {
+            e+=abs(iter->second);
+            this->_polynomial.erase(iter++);
+        } else {
+            ++iter;
+        }
+    }
+    this->_error+=e;
+    set_rounding_to_nearest();
+    return *this;
+}
+
+TaylorVariable&
+TaylorVariable::truncate(const MultiIndexBound& b)
+{
+    ARIADNE_ASSERT(b.size()==this->argument_size());
+    set_rounding_upward();
+    Float e=0;
+    for(iterator iter=this->_polynomial.begin(); iter!=this->end(); ) {
+        if(!(iter->first<=b)) {
             e+=abs(iter->second);
             this->_polynomial.erase(iter++);
         } else {

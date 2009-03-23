@@ -46,6 +46,8 @@ class MultiIndexReference;
 class MultiIndexConstReference;
 class MultiIndexElement;
 
+class MultiIndexBound;
+
 class MultiIndex {
   public:
     typedef unsigned int size_type;
@@ -490,6 +492,78 @@ class MultiIndexConstReference {
 
 
 
+
+/*! \brief A bound on a MultiIndex object, allowing different groups of
+ *  variables to have different maximum degrees.
+ */
+class MultiIndexBound {
+  public:
+    typedef MultiIndex::size_type size_type;
+    MultiIndexBound(size_type as, size_type d);
+    MultiIndexBound(const MultiIndex& a);
+    MultiIndexBound(size_type as, size_type ng, size_type g1s, size_type g1d, ...);
+    size_type size() const { return _groups.size(); }
+    friend bool operator<=(const MultiIndex& a, const MultiIndexBound& b);
+  private:
+    array<size_type> _groups;
+    array<size_type> _max_degrees;
+};
+
+inline MultiIndexBound::MultiIndexBound(size_type as, size_type d)
+    : _groups(as), _max_degrees(1u)
+{
+    for(size_type i=0; i!=as; ++i) {
+        _groups[i]=0u;
+    }
+    _max_degrees[0]=d;
 }
+
+
+inline MultiIndexBound::MultiIndexBound(const MultiIndex& a)
+    : _groups(a.size()), _max_degrees(a.size())
+{
+    for(size_type i=0; i!=a.size(); ++i) {
+        _groups[i]=i;
+        _max_degrees[i]=a[i];
+    }
+}
+
+
+inline MultiIndexBound::MultiIndexBound(size_type as, size_type ng, size_type g1s, size_type g1d, ...)
+    : _groups(as), _max_degrees(ng)
+{
+    va_list args; va_start(args,g1d);
+    size_type k=0;
+    for( ; k!=g1s; ++k) {
+        _groups[k]=0;
+    }
+    _max_degrees[0]=g1d;
+    for(size_type i=1; i!=ng; ++i) {
+        size_type nk=k+va_arg(args,int);
+        for( ; k!=nk; ++k) {
+            _groups[k]=i;
+        }
+        _max_degrees[i]=va_arg(args,int);
+    }
+    va_end(args);
+    ARIADNE_ASSERT(k==as);
+}
+
+inline bool operator<=(const MultiIndex& a, const MultiIndexBound& b) {
+    typedef MultiIndex::size_type size_type;
+    array<size_type> degrees(b._max_degrees.size());
+    for(size_type j=0; j!=a.size(); ++j) {
+        degrees[b._groups[j]]+=a[j];
+    }
+    for(size_type k=0; k!=degrees.size(); ++k) {
+        if(degrees[k]>b._max_degrees[k]) {
+            return false;
+        }
+    }
+    return true;
+}
+
+
+} // namespace Ariadne
 
 #endif /* ARIADNE_MULTI_INDEX_H */

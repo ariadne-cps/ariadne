@@ -98,6 +98,7 @@ class TaylorVariable
     Float _error;
     double _sweep_threshold;
     uint _maximum_degree;
+    MultiIndexBound _maximum_index;
   private:
     static double _default_sweep_threshold;
     static uint _default_maximum_degree;
@@ -263,6 +264,8 @@ class TaylorVariable
     TaylorVariable& truncate(uint deg);
     //! \brief Truncate all terms with any coefficient higher than \a a.
     TaylorVariable& truncate(const MultiIndex& a);
+    //! \brief Truncate all terms with any coefficient higher than those given by \a a.
+    TaylorVariable& truncate(const MultiIndexBound& a);
     //! \brief Remove all terms whose coefficient has magnitude
     //! lower than the cutoff threshold of the quantity.
     TaylorVariable& sweep();
@@ -290,9 +293,13 @@ class TaylorVariable
     //@{
     /*! \name Accuracy parameters. */
     //! \brief .
+    void set_maximum_index(MultiIndexBound md) { this->_maximum_index=md; }
+    //! \brief .
     void set_maximum_degree(uint md) { this->_maximum_degree=md; }
     //! \brief .
     void set_sweep_threshold(double me) { ARIADNE_ASSERT(me>=0.0); this->_sweep_threshold=me; }
+    //! \brief .
+    MultiIndexBound maximum_index() const { return this->_maximum_index; }
     //! \brief .
     uint maximum_degree() const { return this->_maximum_degree; }
     //! \brief .

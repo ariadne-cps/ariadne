@@ -95,6 +95,9 @@ class Vector
         ARIADNE_ASSERT(i<n); Vector<X> result(n,0.0); result[i]=1.0; return result; }
     static Vector<X> unit_box(size_t n) { 
         Vector<X> result(n,Interval(-1,1)); return result; }
+    //! \brief The unit vector \f$e_i\f$ with value one in the \a i<sup>th</sup> entry, and zero otherwise.
+    static array< Vector<X> > units(size_t n) {
+        array< Vector<X> > result(n); for(uint i=0; i!=n; ++i) { result[i]=unit(n,i); } return result; }
     //@}
 
     //@{

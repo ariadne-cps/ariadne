@@ -32,8 +32,7 @@
 
 #include "numeric.h"
 #include "vector.h"
-#include "sparse_differential.h"
-#include "differential_vector.h"
+#include "differential.h"
 
 #include "test.h"
 
@@ -47,7 +46,7 @@ class TestDifferential {
     typedef typename DF::ScalarType ScalarType;
     typedef Series<X> SeriesType;
     typedef DF DifferentialType;
-    typedef DifferentialVector<DF> DifferentialVectorType;
+    typedef Vector<DF> DifferentialVectorType;
   private:
     X c1;
     DifferentialType x1,x2,x3;
@@ -167,10 +166,10 @@ void henon(R& r, const A& x, const P& p)
 }
 
 template<class DF>
-DifferentialVector<DF> 
-henon(const DifferentialVector<DF>& x, const Vector<typename DF::ScalarType>& p) 
+Vector<DF>
+henon(const Vector<DF>& x, const Vector<typename DF::ScalarType>& p)
 {
-    DifferentialVector<DF> r(2,2,x.degree()); henon(r,x,p); return r;
+    Vector<DF> r(2,2,x.degree()); henon(r,x,p); return r;
 }
 
 template<class DF>
@@ -180,7 +179,7 @@ class TestDifferentialVector {
     typedef Vector<X> VectorType;
     typedef Series<X> SeriesType;
     typedef DF DifferentialType;
-    typedef DifferentialVector<DF> DifferentialVectorType;
+    typedef Vector<DF> DifferentialVectorType;
   private:
     DifferentialVectorType x1,x2,x3;
   public:
@@ -199,11 +198,8 @@ class TestDifferentialVector {
         ARIADNE_TEST_CALL(test_div());
         ARIADNE_TEST_CALL(test_evaluate());
         ARIADNE_TEST_CALL(test_differentiate());
-        ARIADNE_TEST_CALL(test_translate());
         ARIADNE_TEST_CALL(test_compose());
         ARIADNE_TEST_CALL(test_mapping());
-        ARIADNE_TEST_CALL(test_inverse());
-        ARIADNE_TEST_CALL(test_implicit());
     }
 
     void test_degree() {
@@ -242,21 +238,7 @@ class TestDifferentialVector {
         std::cout << std::endl;
     }
 
-    void test_translate() {
-        Float ac[2]={0,1}; Float adv[10]={1,2,3,4,5,6,7,8,9,10};
-        Vector<X> c(2u,ac); 
-        Vector<X> mc=-c;
-        DifferentialVectorType dv(1u,2u,2u,adv);
-        std::cout << "c=" << c << std::endl;
-        std::cout << "dv="<< dv << std::endl;
-        std::cout << "dv(x+c)" << translate(dv,c) << std::endl;
-        std::cout << "dv((x+c)-c)" <<  translate(translate(dv,c),mc) << std::endl;
-        std::cout << "dv(x-c)" << translate(dv,mc) << std::endl;
-        std::cout << "dv((x+c)-c)" <<  translate(translate(dv,mc),c) << std::endl;
-        ARIADNE_TEST_EQUAL(translate(translate(dv,c),mc),dv);
-    }
-
-    void test_differentiate() {  
+    void test_differentiate() {
         double a[]={ 1,2,3,4,5,6,7,8,9,10 };
         DifferentialType y(2,3,a);
         cout << "y=" << y << endl;
@@ -292,44 +274,12 @@ class TestDifferentialVector {
         DifferentialVectorType hxp(2,2,2,ahxp);
         ARIADNE_TEST_EQUAL(henon(x,p),hxp);
     }
-
-    void test_inverse() {
-        double ax[12]={ 0.0, 2.0, 1.0, 3.0, 4.0, 5.0,   0.0, 1.0, 1.0, 2.0, 3.0, 4.0 };
-        VectorType c(2);
-        DifferentialVectorType id=DifferentialVectorType::variable(2,2,2,c);
-        DifferentialVectorType x(2,2,2,ax);
-        ARIADNE_TEST_PRINT(c);
-        ARIADNE_TEST_PRINT(x);
-        ARIADNE_TEST_PRINT(inverse(x,c));
-        ARIADNE_TEST_EQUAL(compose(x,inverse(x,c)),id);
-        ARIADNE_TEST_EQUAL(compose(inverse(x,c),x),id);
-        ARIADNE_TEST_EQUAL(inverse(inverse(x,c),c),x);
-    }
-
-    void test_implicit() {
-        double ax[30]={ 0.0,  2.0,1.0,3.0,1.0, 4.0,5.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,
-                        0.0,  1.0,1.0,2.0,1.0, 3.0,4.0,0.0,6.0,0.0,7.0,0.0,0.0,0.0,0.0 };
-        VectorType c(2);
-        DifferentialVectorType id1=DifferentialVectorType::variable(1,1,2,VectorType(1));
-        DifferentialVectorType id2=DifferentialVectorType::variable(2,2,2,VectorType(2));
-        DifferentialVectorType id3=DifferentialVectorType::variable(3,3,2,VectorType(3));
-        ARIADNE_TEST_PRINT(id3);
-        DifferentialVectorType x(2,4,2,ax);
-        ARIADNE_TEST_PRINT(x);
-        ARIADNE_TEST_PRINT(implicit(x));
-        DifferentialVectorType y=implicit(x);
-        DifferentialVectorType z=join(DifferentialVectorType::variable(2,2,2,VectorType(2)),y);
-        ARIADNE_TEST_PRINT(z);
-        ARIADNE_TEST_EQUAL(compose(x,z),DifferentialVectorType::constant(2,2,2,VectorType(2)));
-    
-    }
 };
-
 
 int main() {
 #ifdef HAVE_GMPXX_H
-    TestDifferential< SparseDifferential<Rational> > t1;
-    TestDifferentialVector< SparseDifferential<Rational> > t2;
+    TestDifferential< Differential<Rational> > t1;
+    TestDifferentialVector< Differential<Rational> > t2;
 #endif
     cout << "INCOMPLETE " << flush;
     return ARIADNE_TEST_FAILURES;

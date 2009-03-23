@@ -26,7 +26,7 @@
 #include "vector.h"
 #include "matrix.h"
 #include "multi_index.h"
-#include "sparse_differential.h"
+#include "differential.h"
 #include "taylor_variable.h"
 #include "function.h"
 #include "models.h"
@@ -91,7 +91,7 @@ void TestTaylorVariable::test_concept()
     tr.sweep(); tr.truncate(); tr.clean();
 
     t.evaluate(vi); evaluate(t,vi);
-    t.domain(); t.range(); t.expansion(); t.error();
+    t.domain(); t.range(); t.polynomial(); t.error();
     
 }
 

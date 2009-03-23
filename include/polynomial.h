@@ -250,6 +250,8 @@ class Polynomial
     Polynomial(unsigned int s) : _argument_size(s) { }
     Polynomial(unsigned int as, unsigned int deg, double c0, ...);
     template<class XX> Polynomial(const std::map<MultiIndex,XX>&);
+    static Polynomial<X> variable(unsigned int n, unsigned int i);
+    static Vector< Polynomial<X> > variables(unsigned int s);
     bool operator==(const Polynomial<X>& p) const { return this->_v == p._v; }
     bool operator!=(const Polynomial<X>& p) const { return this->_v != p._v; }
     unsigned int argument_size() const { return _argument_size; }
@@ -370,6 +372,10 @@ class Polynomial
     Polynomial(unsigned int as, unsigned int deg, double c0, ...);
     Polynomial(const std::map<MultiIndex,X>& m) : std::map<MultiIndex,X>(m) {
         assert(!m.empty()); _argument_size=m.begin()->first.size(); }
+
+    static Polynomial<X> variable(unsigned int n, unsigned int i);
+    static Vector< Polynomial<X> > variables(unsigned int s);
+
     X& operator[](const MultiIndex& a) {
         return this->std::map<MultiIndex,X>::operator[](a); }
     const X& operator[](const MultiIndex& a) const {
@@ -409,6 +415,11 @@ template<class X> inline Polynomial<X>::Polynomial(uint as, uint deg, double c0,
 
 
 
+template<class X> inline Polynomial<X> operator+(const Polynomial<X>& p) {
+    return p; }
+template<class X> inline Polynomial<X> operator-(const Polynomial<X>& p) {
+    Polynomial<X> r(p.argument_size());  typedef typename Polynomial<X>::const_iterator Iter;
+    for(Iter iter=p.begin(); iter!=p.end(); ++iter) { r[iter->first]-=iter->second; } return r; }
 template<class X> inline Polynomial<X> operator+(const Polynomial<X>& p, const Float& c) {
     Polynomial<X> r(p); r[MultiIndex(p.argument_size())]+=c; return r; }
 template<class X> inline Polynomial<X> operator-(const Polynomial<X>& p, const Float& c) {
@@ -435,8 +446,27 @@ template<class X> inline Polynomial<X> operator*(const Polynomial<X>& p1, const 
             r[a]+=iter1->second*iter2->second; } } return r; }
 template<class X> inline Polynomial<X> operator+(const X& c, const Polynomial<X>& p) {
     return p+c; }
+template<class X> inline Polynomial<X> operator-(const X& c, const Polynomial<X>& p) {
+    return (-p)+c; }
 template<class X> inline Polynomial<X> operator*(const X& c, const Polynomial<X>& p) {
     return p*c; }
+
+template<class X> inline Polynomial<X>& operator+=(Polynomial<X>& p, const Polynomial<X>& q) {
+    typedef typename Polynomial<X>::const_iterator Iter;
+    for(Iter iter=q.begin(); iter!=q.end(); ++iter) { p[iter->first]+=iter->second; } return p; }
+template<class X> inline Polynomial<X>& operator-=(Polynomial<X>& p, const Polynomial<X>& q) {
+    typedef typename Polynomial<X>::const_iterator Iter;
+    for(Iter iter=q.begin(); iter!=q.end(); ++iter) { p[iter->first]-=iter->second; } return p; }
+template<class X> inline Polynomial<X>& operator+=(Polynomial<X>& p, const Float& c) {
+    p[MultiIndex(p.argument_size())]+=c; return p; }
+template<class X> inline Polynomial<X>& operator-=(Polynomial<X>& p, const Float& c) {
+    p[MultiIndex(p.argument_size())]-=c; return p; }
+template<class X> inline Polynomial<X>& operator*=(Polynomial<X>& p, const Float& c) {
+    typedef typename Polynomial<X>::iterator Iter;
+    for(Iter iter=p.begin(); iter!=p.end(); ++iter) { iter->second*=c; } return p; }
+template<class X> inline Polynomial<X>& operator/=(Polynomial<X>& p, const Float& c) {
+    typedef typename Polynomial<X>::iterator Iter;
+    for(Iter iter=p.begin(); iter!=p.end(); ++iter) { iter->second/=c; } return p; }
 
 
 template<class X, class Y>
@@ -475,7 +505,7 @@ Vector<Y> evaluate(const Vector< Polynomial<X> >& p, const Vector<Y>& x)
     //std::cerr<<ARIADNE_PRETTY_FUNCTION<<std::endl;
     ARIADNE_ASSERT(p.size()>0 && p[0].argument_size()==x.size());
 
-    Y zero = x[0]; zero*=0;
+    Y zero = x[0]; zero*=0.0;
 
     Vector<Y> r(p.size(),zero);
 
@@ -486,8 +516,40 @@ Vector<Y> evaluate(const Vector< Polynomial<X> >& p, const Vector<Y>& x)
 }
 
 
+template<class X> inline
+Polynomial<X> compose(const Polynomial<X>& p, const Vector< Polynomial<X> >& q)
+{
+    return evaluate(p,q);
+}
+
+template<class X> inline
+Vector< Polynomial<X> > compose(const Vector< Polynomial<X> >& p, const Vector< Polynomial<X> >& q)
+{
+    return evaluate(p,q);
+}
+
+
+template<class X> inline
+Polynomial<X> embed(const Polynomial<X>& x, uint new_size, uint start)
+{
+    ARIADNE_ASSERT(x.argument_size()+start<=new_size);
+    Polynomial<X> r(new_size);
+    uint old_size=x.argument_size();
+    MultiIndex old_index(old_size);
+    MultiIndex new_index(new_size);
+    for(typename Polynomial<X>::const_iterator iter=x.begin(); iter!=x.end(); ++iter) {
+        old_index=iter->first;
+        for(uint j=0; j!=old_size; ++j) {
+            uint aj=old_index[j];
+            new_index[j+start]=aj;
+        }
+        r.append(new_index,iter->second);
+    }
+    return r;
+}
+
 template<class X>
-inline std::ostream& operator<<(std::ostream& os, const Polynomial<X>& p) {
+std::ostream& operator<<(std::ostream& os, const Polynomial<X>& p) {
     os << "{";
     for(typename Polynomial<X>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
         os << (iter==p.begin() ? "" : ",");
@@ -498,19 +560,18 @@ inline std::ostream& operator<<(std::ostream& os, const Polynomial<X>& p) {
 }
 
 
-template<class X> inline array< Vector<X> > unit_vectors(uint n) {
-    array< Vector<X> > r(n,Vector<X>(n,0));
-    for(uint i=0; i!=n; ++i) { r[i][i]=1; }
-    return r;
+template<class X> Polynomial<X> Polynomial<X>::variable(uint n, uint i) {
+    Polynomial<X> p(n); p[MultiIndex::zero(n)]=0.0; p[MultiIndex::unit(n,i)]=X(1);
+    return p;
 }
 
-template<class X> inline Vector< Polynomial<X> > variables(uint n) {
+template<class X> Vector< Polynomial<X> > Polynomial<X>::variables(uint n) {
     Vector< Polynomial<X> > pv(n,Polynomial<X>(n)); MultiIndex a(n);
     for(uint i=0; i!=n; ++i) { a[i]=1; pv[i][a]=1.0; a[i]=0; }
     return pv; 
 }
 
-template<class X> inline Vector< Polynomial<X> > operator*(const Vector<Float> e, const Polynomial<X>& p) {
+template<class X> Vector< Polynomial<X> > operator*(const Vector<Float> e, const Polynomial<X>& p) {
     Vector< Polynomial<X> > r(e.size(),Polynomial<X>(p.argument_size()));
     for(uint i=0; i!=r.size(); ++i) { r[i]=X(e[i])*p; }
     return r;

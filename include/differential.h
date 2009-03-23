@@ -663,24 +663,8 @@ class Vector< Differential<X> >
         for(uint i=0; i!=rs; ++i) { (*this)[i]=Differential<X>(as,d); } }
     Vector(uint rs, const Differential<X>& sd) : ublas::vector< Differential<X> >(rs) {
         for(uint i=0; i!=rs; ++i) { (*this)[i]=sd; } }
-    template<class XX> Vector(uint rs, uint as, uint d, const XX* ptr)
-        : ublas::vector< Differential<X> >(rs,Differential<X>(as,d))
-    { 
-        for(uint i=0; i!=rs; ++i) { for(MultiIndex j(as); j.degree()<=d; ++j) {
-                if(*ptr!=0) { (*this)[i][j]=*ptr; } ++ptr; } } 
-    }
-    Vector(uint rs, uint as, uint d,
-                       const Vector<X>& v, const Matrix<X>& A)
-        :  ublas::vector< Differential<X> >(rs,Differential<X>()) {
-        ARIADNE_ASSERT(rs==v.size());
-        ARIADNE_ASSERT(rs==A.row_size());
-        ARIADNE_ASSERT(as==A.column_size());
-        for(uint i=0; i!=this->result_size(); ++i) { 
-            (*this)[i]=v[i]; 
-            for(uint j=0; j!=this->argument_size(); ++j) { 
-                const X& x=A[i][j];
-                if(x!=0) { (*this)[i][j]=x; } } } 
-    }
+    template<class XX> Vector(uint rs, uint as, uint d, const XX* ptr);
+    Vector(uint rs, uint as, uint d,const Vector<X>& v, const Matrix<X>& A);
     template<class E> Vector(const ublas::vector_expression<E>& ve)
         : ublas::vector< Differential<X> >(ve) { }
     template<class E> Vector< Differential<X> >& operator=(const ublas::vector_expression<E>& ve) {
@@ -692,7 +676,8 @@ class Vector< Differential<X> >
     uint degree() const { return (*this)[0].degree(); }
 
     Vector<X> value() const {
-        Vector<X> r(this->result_size()); for(uint i=0; i!=r.size(); ++i) { r[i]=(*this)[i].value(); } return r; }
+        Vector<X> r(this->result_size());
+        for(uint i=0; i!=r.size(); ++i) { r[i]=(*this)[i].value(); } return r; }
     Matrix<X> jacobian() const { Matrix<X> r(this->result_size(),this->argument_size());
         for(uint i=0; i!=r.row_size(); ++i) { for(uint j=0; j!=r.column_size(); ++j) { r[i][j]=(*this)[i].gradient(j); } } return r; }
 
@@ -729,6 +714,34 @@ class Vector< Differential<X> >
     }
 
 };
+
+
+template<class X> template<class XX>
+Vector< Differential<X> >::Vector(uint rs, uint as, uint d, const XX* ptr)
+    : ublas::vector< Differential<X> >(rs)
+{ 
+    for(uint i=0; i!=rs; ++i) {
+    (*this)[i]=Differential<X>(as,d);
+        for(MultiIndex j(as); j.degree()<=d; ++j) {
+            if(*ptr!=0) { (*this)[i][j]=*ptr; } ++ptr; } }
+}
+
+template<class X>
+Vector< Differential<X> >::Vector(uint rs, uint as, uint d,
+                                  const Vector<X>& v, const Matrix<X>& A)
+    :  ublas::vector< Differential<X> >(rs,Differential<X>())
+{
+    ARIADNE_ASSERT(rs==v.size());
+    ARIADNE_ASSERT(rs==A.row_size());
+    ARIADNE_ASSERT(as==A.column_size());
+    for(uint i=0; i!=this->result_size(); ++i) {
+        (*this)[i]=v[i];
+        for(uint j=0; j!=this->argument_size(); ++j) {
+            const X& x=A[i][j];
+            if(x!=0) { (*this)[i][j]=x; }
+        }
+    }
+}
 
 
 /*! \brief Compose the series of \a x and the series of \a y, assuming that \a x is centred at the value of \a y. The value of \a y is therefore unused by this method. */

@@ -84,7 +84,6 @@ bool refines(const TaylorVariable& tv1, const TaylorVariable& tv2);
 bool refines(const Vector<TaylorVariable>& tv1, const Vector<TaylorVariable>& tv2);
 
 
-
 /*! \brief A class representing a quantity depending on other quantities. 
  *
  * See also TaylorFunction, TaylorSet.
@@ -217,9 +216,14 @@ class TaylorVariable
     //! \brief Construct a constant quantity in \a as independent variables.
     static TaylorVariable constant(uint as, const Float& c) {
         TaylorVariable r(as); r.set_value(c); return r; }
+    //! \brief Construct the quantity \f$x_j\f$ in \a as independent variables.
+    static TaylorVariable variable(uint as, uint j) {
+        TaylorVariable r(as); r.set_value(0.0); r.set_gradient(j,1.0); return r; }
     //! \brief Construct the quantity \f$c+x_j\f$ in \a as independent variables.
     static TaylorVariable variable(uint as, const Float& c, uint j) {
         TaylorVariable r(as); r.set_value(c); r.set_gradient(j,1.0); return r; }
+    //! \brief Construct the quantity which scales the unit interval onto the interval \a r.
+    static TaylorVariable scaling(uint as, uint j, const Interval& r);
     //! \brief Construct the quantity \f$c+\sum g_jx_j\f$.
     static TaylorVariable affine(const Float& c, const Vector<Float>& g) {
         TaylorVariable r(g.size()); r.set_value(c);
@@ -232,6 +236,7 @@ class TaylorVariable
     static Vector<TaylorVariable> zeroes(uint rs, uint as);
     static Vector<TaylorVariable> constants(uint as, const Vector<Float>& c);
     static Vector<TaylorVariable> variables(const Vector<Float>& x);
+    static Vector<TaylorVariable> scaling(const Vector<Interval>& x);
     //@}
 
     //@{
@@ -461,16 +466,6 @@ class Vector<TaylorVariable>
             ARIADNE_ASSERT((*this)[0].argument_size()==(*this)[i].argument_size()); } }
 };
 
-
-inline Vector<TaylorVariable> TaylorVariable::zeroes(uint rs, uint as) {
-    Vector<TaylorVariable> result(rs); for(uint i=0; i!=rs; ++i) {
-        result[i]=TaylorVariable::zero(as); } return result; }
-inline Vector<TaylorVariable> TaylorVariable::constants(uint as, const Vector<Float>& c) {
-    Vector<TaylorVariable> result(c.size()); for(uint i=0; i!=c.size(); ++i) {
-        result[i]=TaylorVariable::constant(as,c[i]); } return result; }
-inline Vector<TaylorVariable> TaylorVariable::variables(const Vector<Float>& x) {
-    Vector<TaylorVariable> result(x.size(),x.size()); for(uint i=0; i!=x.size(); ++i) {
-        result[i]=TaylorVariable::variable(x.size(),x[i],i); } return result; }
 
 
 } // namespace Ariadne

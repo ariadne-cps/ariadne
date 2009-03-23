@@ -12,6 +12,7 @@ SRC = \
 	vector.cc \
 	matrix.cc \
 	linear_programming.cc \
+	polynomial.cc \
 	differential.cc \
 	taylor_variable.cc  \
 	taylor_function.cc  \

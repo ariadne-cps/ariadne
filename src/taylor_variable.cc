@@ -131,6 +131,17 @@ TaylorVariable::TaylorVariable(uint as, uint nnz, uint a0, ...)
     ARIADNE_ASSERT(this->_error>=0);
 }
 
+TaylorVariable TaylorVariable::scaling(uint as, uint i, const Interval& r)
+{
+    TaylorVariable t(as);
+    Interval rm=add_ivl(r.l/2,r.u/2);
+    Interval rr=sub_ivl(r.u/2,r.l/2);
+    t.set_gradient(i,1.0);
+    t*=rr;
+    t+=rm;
+    return t;
+}
+
 /*
 TaylorVariable::TaylorVariable(uint as, uint deg, double d0, ...)
     : _polynomial(as), _error(0),
@@ -1405,6 +1416,7 @@ TaylorVariable antiderivative(const TaylorVariable& x, const Interval& dk, uint 
     set_rounding_to_nearest();
     Float dkr=(dk.u-dk.l)/2;
     MultiIndex rindex(r.argument_size());
+    r[rindex]=0.0;
     for(TaylorVariable::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         const uint c=xiter->first[k]+1;
         rindex=xiter->first;
@@ -1545,7 +1557,6 @@ scale(const Vector<TaylorVariable>& tvs, const Vector<Interval>& ivls)
 bool
 refines(const TaylorVariable& tv1, const TaylorVariable& tv2)
 {
-    //std::cerr<<"refines(TaylorVariable tv1, TaylorVariable tv2) tv1="<<tv1<<" tv2="<<tv2<<"\n";
     ARIADNE_ASSERT(tv1.argument_size()==tv2.argument_size());
     TaylorVariable d=tv2;
     d.error()=0.0;
@@ -1565,7 +1576,7 @@ refines(const Vector<TaylorVariable>& tv1, const Vector<TaylorVariable>& tv2)
 {
     ARIADNE_ASSERT(tv1.size()==tv2.size());
     for(uint i=0; i!=tv1.size(); ++i) {
-        if(!refines(tv1,tv2)) { return false; }
+        if(!refines(tv1[i],tv2[i])) { return false; }
     }
     return true;
 }
@@ -1715,7 +1726,10 @@ Differential<Float> differential(const TaylorVariable& x) {
 TaylorVariable embed(const TaylorVariable& x, uint new_size, uint start)
 {
     ARIADNE_ASSERT(x.argument_size()+start<=new_size);
-    return TaylorVariable(embed(differential(x),new_size,start).data(),x.error());
+    TaylorVariable r(new_size);
+    r.polynomial()=embed(x.polynomial(),new_size,start);
+    r.set_error(x.error());
+    return r;
 }
 
 Vector<TaylorVariable> embed(const Vector<TaylorVariable>& x, uint new_size, uint start)
@@ -1772,6 +1786,47 @@ Vector<TaylorVariable>::Vector(uint rs, uint as, uint deg, double x0, ...)
         (*this)[i].clean();
     }
     va_end(args);
+}
+
+Vector<TaylorVariable> TaylorVariable::zeroes(uint rs, uint as)
+{
+    Vector<TaylorVariable> result(rs);
+    for(uint i=0; i!=rs; ++i) {
+        result[i]=TaylorVariable::zero(as);
+    }
+    return result;
+}
+
+Vector<TaylorVariable> TaylorVariable::constants(uint as, const Vector<Float>& c)
+{
+    Vector<TaylorVariable> result(c.size());
+    for(uint i=0; i!=c.size(); ++i) {
+        result[i]=TaylorVariable::constant(as,c[i]);
+    }
+    return result;
+}
+
+Vector<TaylorVariable> TaylorVariable::variables(const Vector<Float>& x)
+{
+    Vector<TaylorVariable> result(x.size(),x.size());
+    for(uint i=0; i!=x.size(); ++i) {
+        result[i]=TaylorVariable::variable(x.size(),x[i],i);
+    }
+    return result;
+}
+
+Vector<TaylorVariable> TaylorVariable::scaling(const Vector<Interval>& d)
+{
+    Vector<TaylorVariable> r(d.size(),d.size());
+    for(uint i=0; i!=d.size(); ++i) {
+        const Interval& di=d[i];
+        Interval dm=add_ivl(di.l/2,di.u/2);
+        Interval dr=sub_ivl(di.u/2,di.l/2);
+        r[i].set_gradient(i,1.0);
+        r[i]*=dr;
+        r[i]+=dm;
+    }
+    return r;
 }
 
 Vector<Float>

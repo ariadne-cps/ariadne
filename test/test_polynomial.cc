@@ -57,11 +57,14 @@ void TestPolynomial::test_constructors()
 
 void TestPolynomial::test_variables()
 {
-    Vector< Polynomial<Float> > x=variables<Float>(3);
-    array< Vector<Float> > e=unit_vectors<Float>(2);
+    Vector< Polynomial<Float> > x=Polynomial<Float>::variables(3);
+    array< Vector<Float> > e=Vector<Float>::units(2);
 
     ARIADNE_TEST_EQUAL((x[0]*(x[1]*3.0+x[0])+x[1]*x[2]),Polynomial<Float>(3,2, 0.,0.,0.,0., 1.,3.,0.,0.,1.,0.));
     ARIADNE_TEST_EQUAL((e[1]*(x[0]*(x[1]*3.0+x[0])+x[1]*x[2]))[1],Polynomial<Float>(3,2, 0.,0.,0.,0., 1.,3.,0.,0.,1.,0.));
+    ARIADNE_TEST_EQUAL((e[1]*(x[0]*(x[1]*3.0+x[0])+x[1]*x[2]))[0],Polynomial<Float>(3,0, 0.,0.,0.,0., 0.,0.,0.,0.,0.,0.));
+    ARIADNE_TEST_EQUAL((e[1]*(x[0]*(x[1]*3.0+x[0])+x[1]*x[2]))[0],Polynomial<Float>(3,1, 0.));
+
     
 }
 

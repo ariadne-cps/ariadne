@@ -36,19 +36,61 @@ namespace Ariadne {
 
 template<class X> class Vector;
 template<class X> class Matrix;
+template<class X> class Polynomial;
 
 class FunctionInterface;
 class MultiIndex;
 class TaylorFunction;
 
-TaylorFunction recentre(const TaylorFunction&, const Vector<Interval>& bx, const Vector<Float>& pt);
-TaylorFunction truncate(const TaylorFunction&, const Vector<Interval>&, uint, uint);
+TaylorFunction restrict(const TaylorFunction&, const Vector<Interval>& bx);
+TaylorFunction truncate(const TaylorFunction&, const MultiIndexBound& bd);
 
 TaylorFunction compose(const TaylorFunction&, const TaylorFunction&);
 TaylorFunction inverse(const TaylorFunction&);
 TaylorFunction implicit(const TaylorFunction&);
 TaylorFunction antiderivative(const TaylorFunction&, uint);
 
+class TaylorExpression {
+    typedef unsigned int Nat;
+  public:
+    TaylorExpression(const Vector<Interval>& domain);
+    static TaylorExpression variable(const Vector<Interval>& domain, Nat index);
+    static Vector<TaylorExpression> variables(const Vector<Interval>& domain);
+    const Vector<Interval>& domain() const;
+    const TaylorVariable& model() const;
+    friend TaylorExpression operator+(const Float& c, const TaylorExpression& t);
+    friend TaylorExpression operator-(const Float& c, const TaylorExpression& t);
+    friend TaylorExpression operator*(const Float& c, const TaylorExpression& t);
+    friend TaylorExpression operator/(const Float& c, const TaylorExpression& t);
+    friend TaylorExpression operator+(const Interval& c, const TaylorExpression& t);
+    friend TaylorExpression operator-(const Interval& c, const TaylorExpression& t);
+    friend TaylorExpression operator*(const Interval& c, const TaylorExpression& t);
+    friend TaylorExpression operator/(const Interval& c, const TaylorExpression& t);
+    friend TaylorExpression operator+(const TaylorExpression& t, const Float& c);
+    friend TaylorExpression operator-(const TaylorExpression& t, const Float& c);
+    friend TaylorExpression operator*(const TaylorExpression& t, const Float& c);
+    friend TaylorExpression operator/(const TaylorExpression& t, const Float& c);
+    friend TaylorExpression operator+(const TaylorExpression& t, const Interval& c);
+    friend TaylorExpression operator-(const TaylorExpression& t, const Interval& c);
+    friend TaylorExpression operator*(const TaylorExpression& t, const Interval& c);
+    friend TaylorExpression operator/(const TaylorExpression& t, const Interval& c);
+    friend TaylorExpression operator+(const TaylorExpression& t);
+    friend TaylorExpression operator-(const TaylorExpression& t);
+    friend TaylorExpression operator+(const TaylorExpression& t1, const TaylorExpression& t2);
+    friend TaylorExpression operator-(const TaylorExpression& t1, const TaylorExpression& t2);
+    friend TaylorExpression operator*(const TaylorExpression& t1, const TaylorExpression& t2);
+    friend TaylorExpression operator/(const TaylorExpression& t1, const TaylorExpression& t2);
+    friend TaylorFunction operator*(const TaylorExpression& t, const Vector<Float>& v);
+    friend TaylorFunction operator*(const Vector<Float>& v, const TaylorExpression& t);
+    friend std::ostream& operator<<(std::ostream& os, const TaylorExpression& t);
+  public:
+    TaylorExpression();
+  private:
+    TaylorExpression(const Vector<Interval>& domain, const TaylorVariable& model);
+  private:
+    Vector<Interval> _domain;
+    TaylorVariable _model;
+};
 
 
 /*! \brief A taylor_model with multivalued output using the TaylorVariable class.
@@ -77,6 +119,13 @@ class TaylorFunction {
                    ushort order, ushort smoothness,
                    const FunctionInterface& function);
   
+    /*! \brief Construct from a domain and a polynomial. */
+    TaylorFunction(const Vector<Interval>& domain,
+                   const Vector< Polynomial<Float> >& polynomial);
+  
+    /*! \brief Construct from a domain and a n interval polynomial. */
+    TaylorFunction(const Vector<Interval>& domain,
+                   const Vector< Polynomial<Interval> >& polynomial);
   
     /*! \brief Equality operator. */
     bool operator==(const TaylorFunction& p) const;
@@ -122,6 +171,9 @@ class TaylorFunction {
     /*! \brief Write to an output stream. */
     std::ostream& write(std::ostream& os) const;
   
+    /*! \brief Addition. */
+    friend TaylorFunction& operator+=(TaylorFunction& f, const Vector<Interval>& e);
+
     /*! \brief Addition. */
     friend TaylorFunction operator+(const TaylorFunction& f, const TaylorFunction& c);
     /*! \brief Subtraction. */
@@ -171,6 +223,9 @@ class TaylorFunction {
     friend TaylorFunction combine(const TaylorFunction& f, const TaylorFunction& g);
     //! \brief Restrict the function \a f to a subdomain \a d.
     friend TaylorFunction restrict(const TaylorFunction& f, const Vector<Interval>& d);
+    //! \brief Tests if a function \a f refines another function \a g.
+    //! To be a refinement, the domain of \f f must contain the domain of \a g.
+    friend bool refines(const TaylorFunction& f, const TaylorFunction& g);
 
   private:
     array< array<Interval> > _powers(const Vector<Interval>&) const;

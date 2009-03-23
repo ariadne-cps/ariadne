@@ -39,7 +39,7 @@ class TaylorVariable;
 
 template<class X> class Vector;
 template<class X> class Matrix;
-template<class X> class SparseDifferential;
+template<class X> class Differential;
 
 //! \brief Interface for functions whose derivatives can be computed.
 class FunctionInterface {
@@ -64,18 +64,18 @@ class FunctionInterface {
     //! \brief Evaluate the function over a vector of Taylor variables.
     virtual Vector<TaylorVariable> evaluate(const Vector<TaylorVariable>& x) const = 0;
     //! \brief Evaluate the function over a vector of differentials.
-    virtual Vector< SparseDifferential<Float> > evaluate(const Vector< SparseDifferential<Float> >& x) const = 0;
+    virtual Vector< Differential<Float> > evaluate(const Vector< Differential<Float> >& x) const = 0;
     //! \brief Evaluate the function over a vector of interval differentials.
-    virtual Vector< SparseDifferential<Interval> > evaluate(const Vector< SparseDifferential<Interval> >& x) const = 0;
+    virtual Vector< Differential<Interval> > evaluate(const Vector< Differential<Interval> >& x) const = 0;
 
     //! \brief Compute an approximation to the Jacobian derivative matrix \f$(Df)_{ij}=\partial f_i/\partial x_j\f$ of the function at the point \a x.
     virtual Matrix<Float> jacobian(const Vector<Float>& x) const = 0;
     //! \brief Compute an over-approximation to the Jacobian derivative matrix \f$(Df)_{ij}=\partial f_i/\partial x_j\f$ of the function over the domain \a x.
     virtual Matrix<Interval> jacobian(const Vector<Interval>& x) const = 0;
     //! \brief Compute an approximation to all the parital derivatives \f$D^\alpha f_{i}=\partial^{|\alpha|} f_i/\partial x_\alpha\f$ of the function at the point \a x up to degree \a d.
-    virtual Vector< SparseDifferential<Float> > expansion(const Vector<Float>& x, const ushort& d) const = 0;
+    virtual Vector< Differential<Float> > expansion(const Vector<Float>& x, const ushort& d) const = 0;
     //! \brief Compute over-approximations to all the parital derivatives \f$D^\alpha f_{i}=\partial^{|\alpha|} f_i/\partial x_\alpha\f$ of the function over the domain \a x up to degree \a d.
-    virtual Vector< SparseDifferential<Interval> > expansion(const Vector<Interval>& x, const ushort& d) const = 0;
+    virtual Vector< Differential<Interval> > expansion(const Vector<Interval>& x, const ushort& d) const = 0;
   
     //! \brief Write to an output stream.
     virtual std::ostream& write(std::ostream& os) const = 0;

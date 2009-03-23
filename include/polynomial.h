@@ -37,8 +37,8 @@
 
 #include "multi_index.h"
 
-#define ARIADNE_USE_ARRAY_POLYNOMIAL
-//#define ARIADNE_USE_MAP_POLYNOMIAL
+//#define ARIADNE_USE_ARRAY_POLYNOMIAL
+#define ARIADNE_USE_MAP_POLYNOMIAL
 
 namespace Ariadne {
 
@@ -437,6 +437,53 @@ template<class X> inline Polynomial<X> operator+(const X& c, const Polynomial<X>
     return p+c; }
 template<class X> inline Polynomial<X> operator*(const X& c, const Polynomial<X>& p) {
     return p*c; }
+
+
+template<class X, class Y>
+Y evaluate(const Polynomial<X>& p, const Vector<Y>& x)
+{
+    //std::cerr<<ARIADNE_PRETTY_FUNCTION<<std::endl;
+    ARIADNE_ASSERT(p.argument_size()==x.size());
+
+    Y zero = x[0]; zero*=0;
+    Y one = zero; one+=1;
+
+    Y r=zero;
+
+    for(typename Polynomial<X>::const_iterator iter=p.begin();
+        iter!=p.end(); ++iter)
+    {
+        const MultiIndex& j=iter->first;
+        const X& c=iter->second;
+        Y t=one;
+        for(uint k=0; k!=x.size(); ++k) {
+            for(uint l=0; l!=j[k]; ++l) {
+                t=t*x[k];
+            }
+        }
+        t*=c;
+        r+=t;
+    }
+
+    return r;
+}
+
+
+template<class X, class Y>
+Vector<Y> evaluate(const Vector< Polynomial<X> >& p, const Vector<Y>& x)
+{
+    //std::cerr<<ARIADNE_PRETTY_FUNCTION<<std::endl;
+    ARIADNE_ASSERT(p.size()>0 && p[0].argument_size()==x.size());
+
+    Y zero = x[0]; zero*=0;
+
+    Vector<Y> r(p.size(),zero);
+
+    for(uint i=0; i!=p.size(); ++i) {
+        r[i]=evaluate(p[i],x);
+    }
+    return r;
+}
 
 
 template<class X>

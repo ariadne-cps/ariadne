@@ -21,7 +21,6 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-#include "sparse_differential.h"
 #include "taylor_variable.h"
 
 #include <boost/python.hpp>
@@ -41,7 +40,7 @@ void read(MultiIndex& j, const boost::python::object& obj) {
 }
 
 
-void read(SparseDifferential<Float>& sd, const boost::python::object& obj) {
+void read(Polynomial<Float>& p, const boost::python::object& obj) {
     Float c;
     MultiIndex j(0);
     boost::python::dict dct=extract<boost::python::dict>(obj);
@@ -51,21 +50,21 @@ void read(SparseDifferential<Float>& sd, const boost::python::object& obj) {
         read(j,tup[0]);
         read(c,tup[1]);
         if(i==0) { 
-            sd=SparseDifferential<Float>(j.size());
+            p=Polynomial<Float>(j.size());
         }
-        sd[j]=c;
+        p[j]=c;
     }
 }
 
 
 
 void read(TaylorVariable& tv, const boost::python::object& obj1, const boost::python::object& obj2) {
-    SparseDifferential<Float> sd;
+    Polynomial<Float> p;
     Float e;
-    read(sd,obj1);
+    read(p,obj1);
     read(e,obj2); 
     ARIADNE_ASSERT(e>=0);
-    tv=TaylorVariable(sd.data(),e);
+    tv=TaylorVariable(p,e);
 }
    
 
@@ -102,10 +101,10 @@ void read(TaylorVariable& tv, const boost::python::object& obj) {
     if(check(extract<boost::python::tuple>(obj))) {
          read(tv,extract<boost::python::tuple>(obj)); 
     } else {
-        SparseDifferential<Float> sd;
+        Polynomial<Float> p;
         Float e=0;
-        read(sd,obj);
-        tv=TaylorVariable(sd.data(),e);
+        read(p,obj);
+        tv=TaylorVariable(p,e);
     } 
 }
    
@@ -172,7 +171,6 @@ void export_taylor_variable()
     typedef Vector<Float> RV;
     typedef Vector<Interval> IV;
     typedef Matrix<Float> RMx;
-    typedef SparseDifferential<Float> SD;
     typedef TaylorVariable T;
     typedef Vector<TaylorVariable> TV;
 
@@ -254,12 +252,6 @@ void export_taylor_variable()
     def("compose",(TV(*)(const TV&,const IV&,const TV&)) &compose);
     def("compose",(T(*)(const T&,const IV&,const TV&)) &compose);
     def("compose",(T(*)(const T&,const I&,const T&)) &compose);
-
-    def("antiderivative",(T(*)(const T&,const I&,N)) &antiderivative);
-    def("antiderivative",(TV(*)(const TV&,const I&,N)) &antiderivative);
-
-    def("flow",(TV(*)(const TV&,const IV&,const I&,const IV&)) &flow);
-    def("implicit",(TV(*)(const TV&,const IV&)) &implicit);
 
     def("max",(T(*)(const T&,const T&))&max);
     def("min",(T(*)(const T&,const T&))&min);

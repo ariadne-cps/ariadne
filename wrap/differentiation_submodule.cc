@@ -23,9 +23,7 @@
  
 #include "array.h"
 #include "numeric.h"
-#include "dense_differential.h"
-#include "sparse_differential.h"
-#include "differential_vector.h"
+#include "differential.h"
 
 #include <boost/python.hpp>
 using namespace boost::python;
@@ -33,6 +31,7 @@ using namespace boost::python;
 using namespace Ariadne;
 
 template<class X> void read_array(array<X>&, const boost::python::object& obj) { }
+inline uint compute_polynomial_data_size(uint rs, uint as, uint d) { return rs*Ariadne::bin(d+as,as); }
 
 template<class DIFF>
 DIFF*
@@ -65,14 +64,14 @@ make_differential_variables(const uint& d, const Vector<Interval>& x)
 
 
 template<class DIFF>
-DifferentialVector<DIFF>*
+Vector<DIFF>*
 make_differential_vector(const uint& rs, const uint& as, const uint& d, const boost::python::object& obj) 
 {
     typedef typename DIFF::ScalarType X;
     array<X> data;
     read_array(data,obj);
     ARIADNE_ASSERT(data.size()==compute_polynomial_data_size(rs,as,d));
-    DifferentialVector<DIFF>* result=new DifferentialVector<DIFF>(rs,DIFF(as,d,data.begin()));
+    Vector<DIFF>* result=new Vector<DIFF>(rs,DIFF(as,d,data.begin()));
     return result;
 }
 
@@ -99,10 +98,10 @@ void export_differential(const char*)
     typedef Vector<X> V;
     typedef Series<X> S;
     typedef DIFF D;
-    typedef DifferentialVector<D> DV;
+    typedef Vector<D> DV;
 
 
-    class_<D> differential_class("DenseDifferential");
+    class_<D> differential_class("Differential");
     //differential_class.def("__init__", make_constructor(&make_differential<X>) );
     differential_class.def( init< uint, uint >());
     differential_class.def("value", (const X&(D::*)()const) &D::value, return_value_policy<copy_const_reference>());
@@ -159,7 +158,7 @@ export_differential_vector(const char* name)
     typedef Vector<X> V;
     typedef Series<X> S;
     typedef DIFF D;
-    typedef DifferentialVector<D> DV;
+    typedef Vector<D> DV;
 
     class_<DV> differential_vector_class(name);
     differential_vector_class.def("__init__", make_constructor(&make_differential_vector<D>) );
@@ -178,31 +177,19 @@ export_differential_vector(const char* name)
     differential_vector_class.def(self+=V());
     differential_vector_class.def(self-=V());
     differential_vector_class.def(self*=X());
-    differential_vector_class.def("value", &DV::get_value);
-    differential_vector_class.def("jacobian", &DV::get_jacobian);
+    differential_vector_class.def("value", &DV::value);
+    differential_vector_class.def("jacobian", &DV::jacobian);
     differential_vector_class.def(self_ns::str(self));
 
-    //def("variable",(DV(*)(const Vector<Float>&,ushort)) &DV::variable);
-    //def("variable",(DV(*)(const Vector<Interval>&,ushort)) &DV::variable);
-
-    def("evaluate",(V(*)(const DV&,const V&))&evaluate);
-    //def("compose",(D(*)(const D&,const DV&))&compose);
+    def("compose",(D(*)(const D&,const DV&))&compose);
     def("compose",(DV(*)(const DV&,const DV&))&compose);
-    def("translate",(DV(*)(const DV&,const V&))&translate);
-    def("inverse",(DV(*)(const DV&))&inverse);
-    def("implicit",(DV(*)(const DV&))&implicit);
-
 }
 
-template void export_differential< DenseDifferential<Float> >(const char*);
-template void export_differential< DenseDifferential<Interval> >(const char*);
-template void export_differential< SparseDifferential<Float> >(const char*);
-template void export_differential< SparseDifferential<Interval> >(const char*);
+template void export_differential< Differential<Float> >(const char*);
+template void export_differential< Differential<Interval> >(const char*);
 
-template void export_differential_vector< DenseDifferential<Float> >(const char*);
-template void export_differential_vector< DenseDifferential<Interval> >(const char*);
-template void export_differential_vector< SparseDifferential<Float> >(const char*);
-template void export_differential_vector< SparseDifferential<Interval> >(const char*);
+template void export_differential_vector< Differential<Float> >(const char*);
+template void export_differential_vector< Differential<Interval> >(const char*);
 
 void differentiation_submodule() 
 {
@@ -216,10 +203,10 @@ void differentiation_submodule()
     //export_differential_vector< SparseDifferential<Float> >("SparseDifferentialVector");
     //export_differential_vector< SparseDifferential<Interval> >("ISpareDifferentialVector");
 
-    export_differential< SparseDifferential<Float> >("Differential");
-    export_differential< SparseDifferential<Interval> >("IntervalDifferential");
+    export_differential< Differential<Float> >("Differential");
+    export_differential< Differential<Interval> >("IntervalDifferential");
 
-    export_differential_vector< SparseDifferential<Float> >("DifferentialVector");
-    export_differential_vector< SparseDifferential<Interval> >("IntervalDifferentialVector");
+    export_differential_vector< Differential<Float> >("DifferentialVector");
+    export_differential_vector< Differential<Interval> >("IntervalDifferentialVector");
 }
 

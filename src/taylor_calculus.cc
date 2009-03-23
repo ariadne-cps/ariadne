@@ -432,7 +432,7 @@ TaylorCalculus::flow_model(FunctionInterface const& vf, Vector<Interval> const& 
     ARIADNE_LOG(6,"vector_field_model = "<<vector_field_model<<"\n");
   
     // Use flow function on model type
-    FlowModelType flow_model=FlowModelType(join(bx,Interval(0,h)),Ariadne::flow(vector_field_model.variables(),bx,Interval(0,h),bb));
+    FlowModelType flow_model=Ariadne::flow(vector_field_model,bx,Interval(0,h));
     ARIADNE_LOG(6,"flow_model = "<<flow_model<<"\n");
 
     return flow_model;

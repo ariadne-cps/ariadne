@@ -44,8 +44,8 @@ template<class Var> struct CalculusTypes;
 class TaylorVariable;
 class TaylorSet;
 class TaylorFunction;
-template<class X> class SparseDifferential;
-typedef SparseDifferential<Float> ApproximateTaylorVariable;
+template<class X> class Differential;
+typedef Differential<Float> ApproximateTaylorVariable;
 class ApproximateTaylorModel;
 
 template<> struct CalculusTypes<ApproximateTaylorVariable>

@@ -39,7 +39,7 @@ class TaylorVariable;
 
 template<class X> class Vector;
 template<class X> class Matrix;
-template<class X> class SparseDifferential;
+template<class X> class Differential;
 
 //! \brief Interface for expressions whose derivatives can be computed.
 class ExpressionInterface {
@@ -62,18 +62,18 @@ class ExpressionInterface {
     //! \brief Evaluate the expression over a vector of Taylor variables.
     virtual TaylorVariable evaluate(const Vector<TaylorVariable>& x) const = 0;
     //! \brief Evaluate the expression over a vector of differentials.
-    virtual SparseDifferential<Float> evaluate(const Vector< SparseDifferential<Float> >& x) const = 0;
+    virtual Differential<Float> evaluate(const Vector< Differential<Float> >& x) const = 0;
     //! \brief Evaluate the expression over a vector of interval differentials.
-    virtual SparseDifferential<Interval> evaluate(const Vector< SparseDifferential<Interval> >& x) const = 0;
+    virtual Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const = 0;
 
     //! \brief Compute an approximation to the gradient covector \f$(Df)_{j}=\partial f/\partial x_j\f$ of the expression at the point \a x.
     virtual Vector<Float> gradient(const Vector<Float>& x) const = 0;
     //! \brief Compute an over-approximation to the Jacobian derivative matrix \f$(Df)_{ij}=\partial f/\partial x_j\f$ of the expression over the domain \a x.
     virtual Vector<Interval> jacobian(const Vector<Interval>& x) const = 0;
     //! \brief Compute an approximation to all the parital derivatives \f$D^\alpha f_{i}=\partial^{|\alpha|} f/\partial x_\alpha\f$ of the expression at the point \a x up to degree \a d.
-    virtual SparseDifferential<Float>  expansion(const Vector<Float>& x, const ushort& d) const = 0;
+    virtual Differential<Float>  expansion(const Vector<Float>& x, const ushort& d) const = 0;
     //! \brief Compute over-approximations to all the parital derivatives \f$D^\alpha f_{i}=\partial^{|\alpha|} f/\partial x_\alpha\f$ of the expression over the domain \a x up to degree \a d.
-    virtual SparseDifferential<Interval>  expansion(const Vector<Interval>& x, const ushort& d) const = 0;
+    virtual Differential<Interval>  expansion(const Vector<Interval>& x, const ushort& d) const = 0;
   
     //! \brief Write to an output stream.
     virtual std::ostream& write(std::ostream& os) const = 0;

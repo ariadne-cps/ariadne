@@ -53,7 +53,7 @@ pair< Vector<TaylorVariable>, Vector<TaylorVariable> > split(const Vector<Taylor
 TaylorVariable unscale(const TaylorVariable& x, const Interval& ivl);
 Vector<TaylorVariable> unscale(const Vector<TaylorVariable>& x, const Vector<Interval>& bx);
 
-// Scale the variabe by post-composing with an affine map taking the unit interval to \a ivl.
+// Scale the variable by post-composing with an affine map taking the unit interval to \a ivl.
 TaylorVariable scale(const TaylorVariable& x, const Interval& ivl);
 Vector<TaylorVariable> scale(const Vector<TaylorVariable>& x, const Vector<Interval>& bx);
 
@@ -69,14 +69,12 @@ Vector<TaylorVariable> compose(const Vector<TaylorVariable>& x, const Vector<Int
 TaylorVariable compose(const TaylorVariable& x, const Vector<Interval>& bx, const Vector<TaylorVariable>& y);
 TaylorVariable compose(const TaylorVariable& x, const Interval& b, const TaylorVariable& y);
 
+
 // Antidifferentiation operator
 TaylorVariable antiderivative(const TaylorVariable& x, const Interval& dk, uint k);
 Vector<TaylorVariable> antiderivative(const Vector<TaylorVariable>& x, const Interval& dk, uint k);
 
-pair<Vector<Interval>,Interval> bounds(const Vector<TaylorVariable>& vf, const Vector<Interval>& d, const Interval& maxh);
-Vector<TaylorVariable> flow(const Vector<TaylorVariable>& vf, const Vector<Interval>& d, const Interval& h, const Vector<Interval>& b);
-Vector<TaylorVariable> implicit(const Vector<TaylorVariable>& x, const Vector<Interval>& d);
-
+// Embed the variable in a space of higher dimension
 TaylorVariable embed(const TaylorVariable& tv, uint as, uint b);
 Vector<TaylorVariable> embed(const Vector<TaylorVariable>& tvs, uint as, uint b);
 
@@ -254,8 +252,6 @@ class TaylorVariable
     Interval evaluate(const Vector<Float>& x) const;
     //! \brief Evaluate the quantity over the interval of points \a x.
     Interval evaluate(const Vector<Interval>& x) const;
-
-    template<class XX> Interval evaluate(const Vector<XX>& x) const;
     //@}
 
     //@{
@@ -425,6 +421,13 @@ class TaylorVariable
 TaylorVariable max(const TaylorVariable& x, const TaylorVariable& y);
 TaylorVariable min(const TaylorVariable& x, const TaylorVariable& y);
 TaylorVariable abs(const TaylorVariable& x);
+TaylorVariable neg(const TaylorVariable& x);
+TaylorVariable rec(const TaylorVariable& x);
+TaylorVariable exp(const TaylorVariable& x);
+TaylorVariable log(const TaylorVariable& x);
+TaylorVariable sin(const TaylorVariable& x);
+TaylorVariable cos(const TaylorVariable& x);
+TaylorVariable tan(const TaylorVariable& x);
 
 
 template<>
@@ -439,16 +442,11 @@ class Vector<TaylorVariable>
     Vector(uint rs, uint as, uint deg, double d0, ...);
     template<class E> Vector(const ublas::vector_expression<E> &ve) : ublas::vector<TaylorVariable>(ve) { }
     uint result_size() const { return this->size(); }
-    uint argument_size() const {
-        ARIADNE_ASSERT(this->size()>0);
-        for(uint i=1; i!=this->size(); ++i) { ARIADNE_ASSERT((*this)[0].argument_size()==(*this)[i].argument_size()); }
-        return (*this)[0].argument_size(); }
+    uint argument_size() const { ARIADNE_ASSERT(this->size()>0); return (*this)[0].argument_size(); }
 
-    Vector<Float> value();
-    Matrix<Float> jacobian();
-    
-    Vector<Interval> evaluate(const Vector<Float>&);
-    Vector<Interval> evaluate(const Vector<Interval>&);
+    Vector<Float> value() const;
+    Vector<Interval> evaluate(const Vector<Float>&) const;
+    Vector<Interval> evaluate(const Vector<Interval>&) const;
 
     void check() const {
         for(uint i=0; i!=this->size(); ++i) {
@@ -466,10 +464,6 @@ inline Vector<TaylorVariable> TaylorVariable::variables(const Vector<Float>& x) 
     Vector<TaylorVariable> result(x.size(),x.size()); for(uint i=0; i!=x.size(); ++i) {
         result[i]=TaylorVariable::variable(x.size(),x[i],i); } return result; }
 
-
-template<class XX> Interval TaylorVariable::evaluate(const Vector<XX>& x) const {
-    return this->evaluate(Vector<Interval>(x));
-}
 
 } // namespace Ariadne
 

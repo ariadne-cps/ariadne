@@ -24,9 +24,7 @@
 #include "array.h"
 #include "numeric.h"
 #include "vector.h"
-#include "dense_differential.h"
-#include "sparse_differential.h"
-#include "differential_vector.h"
+#include "differential.h"
 #include "function.h"
 
 
@@ -75,11 +73,11 @@ template<class X> void read(Vector<X>& v, const object& obj) {
 
 
 template<class X> 
-void read(DifferentialVector< SparseDifferential<X> >& td, const object& obj) {
+void read(Vector< Differential<X> >& td, const object& obj) {
     list elements=extract<list>(obj);
     ARIADNE_ASSERT(td.result_size()==uint(len(elements)));
     for(uint i=0; i!=td.size(); ++i) { 
-        boost::python::extract< SparseDifferential<X> > etv(elements[i]);
+        boost::python::extract< Differential<X> > etv(elements[i]);
         boost::python::extract<double> ed(elements[i]);
         if(etv.check()) {
             td[i]=etv(); 
@@ -103,12 +101,12 @@ class FunctionPyWrap
     virtual Vector<Float> evaluate(const Vector<Float>&) const { return this->get_override("evaluate")(); }
     virtual Vector<Interval> evaluate(const Vector<Interval>&) const { return this->get_override("evaluate")(); }
     virtual Vector<TaylorVariable> evaluate(const Vector<TaylorVariable>&) const { return this->get_override("evaluate")(); }
-    virtual Vector< SparseDifferential<Float> > evaluate(const Vector< SparseDifferential<Float> >&) const { return this->get_override("evaluate")(); }
-    virtual Vector< SparseDifferential<Interval> > evaluate(const Vector< SparseDifferential<Interval> >&) const { return this->get_override("evaluate")(); }
+    virtual Vector< Differential<Float> > evaluate(const Vector< Differential<Float> >&) const { return this->get_override("evaluate")(); }
+    virtual Vector< Differential<Interval> > evaluate(const Vector< Differential<Interval> >&) const { return this->get_override("evaluate")(); }
     virtual Matrix<Float> jacobian(const Vector<Float>&) const { return this->get_override("jacobian")(); }
     virtual Matrix<Interval> jacobian(const Vector<Interval>&) const { return this->get_override("jacobian")(); }
-    virtual Vector< SparseDifferential<Float> > expansion(const Vector<Float>&, const ushort&) const { return this->get_override("expansion")(); }
-    virtual Vector< SparseDifferential<Interval> > expansion(const Vector<Interval>&, const ushort&) const { return this->get_override("expansion")(); }
+    virtual Vector< Differential<Float> > expansion(const Vector<Float>&, const ushort&) const { return this->get_override("expansion")(); }
+    virtual Vector< Differential<Interval> > expansion(const Vector<Interval>&, const ushort&) const { return this->get_override("expansion")(); }
     virtual std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
 };
 
@@ -155,32 +153,32 @@ class PythonFunction
         Vector<TaylorVariable> r(this->_result_size); 
         read(r,this->_pyf(x)); 
         return r; }
-    virtual Vector< SparseDifferential<Float> > evaluate (const Vector< SparseDifferential<Float> >& x) const { 
-        Vector< SparseDifferential<Float> > r(this->_result_size); 
+    virtual Vector< Differential<Float> > evaluate (const Vector< Differential<Float> >& x) const {
+        Vector< Differential<Float> > r(this->_result_size);
         read(r,this->_pyf(x)); 
         return r; }
-    virtual Vector< SparseDifferential<Interval> > evaluate (const Vector< SparseDifferential<Interval> >& x) const { 
-        Vector< SparseDifferential<Interval> > r(this->_result_size); 
+    virtual Vector< Differential<Interval> > evaluate (const Vector< Differential<Interval> >& x) const {
+        Vector< Differential<Interval> > r(this->_result_size);
         read(r,this->_pyf(x)); 
         return r; }
     virtual Matrix<Float> jacobian (const Vector<Float>& x) const { 
-        Vector< SparseDifferential<Float> > rj(this->_result_size,this->_argument_size,1u); 
-        Vector< SparseDifferential<Float> > aj=SparseDifferential<Float>::variables(x.size(),x.size(),1u,x); 
+        Vector< Differential<Float> > rj(this->_result_size,this->_argument_size,1u);
+        Vector< Differential<Float> > aj=Differential<Float>::variables(x.size(),x.size(),1u,x);
         read(rj,this->_pyf(aj)); 
         return get_jacobian<Float>(rj); }
     virtual Matrix<Interval> jacobian (const Vector<Interval>& x) const { 
-        Vector< SparseDifferential<Interval> > rj(this->_result_size,this->_argument_size,1u); 
-        Vector< SparseDifferential<Interval> > aj=SparseDifferential<Interval>::variables(x.size(),x.size(),1u,x); 
+        Vector< Differential<Interval> > rj(this->_result_size,this->_argument_size,1u);
+        Vector< Differential<Interval> > aj=Differential<Interval>::variables(x.size(),x.size(),1u,x);
         read(rj,this->_pyf(aj)); 
         return get_jacobian<Interval>(rj); }
-    virtual Vector< SparseDifferential<Float> > expansion (const Vector<Float>& x, const ushort& d) const {  
-        Vector< SparseDifferential<Float> > rd(this->_result_size,this->_argument_size,d); 
-        Vector< SparseDifferential<Float> > ad=SparseDifferential<Float>::variables(x.size(),x.size(),d,x); 
+    virtual Vector< Differential<Float> > expansion (const Vector<Float>& x, const ushort& d) const {
+        Vector< Differential<Float> > rd(this->_result_size,this->_argument_size,d);
+        Vector< Differential<Float> > ad=Differential<Float>::variables(x.size(),x.size(),d,x);
         read(rd,this->_pyf(ad)); 
         return rd; }
-    virtual Vector< SparseDifferential<Interval> > expansion (const Vector<Interval>& x, const ushort& d) const {  
-        Vector< SparseDifferential<Interval> > rd(this->_result_size,this->_argument_size,d); 
-        Vector< SparseDifferential<Interval> > ad=SparseDifferential<Interval>::variables(x.size(),x.size(),d,x); 
+    virtual Vector< Differential<Interval> > expansion (const Vector<Interval>& x, const ushort& d) const {
+        Vector< Differential<Interval> > rd(this->_result_size,this->_argument_size,d);
+        Vector< Differential<Interval> > ad=Differential<Interval>::variables(x.size(),x.size(),d,x);
         read(rd,this->_pyf(ad)); 
         return rd; }
 
@@ -202,8 +200,8 @@ typedef Vector<Float> FV;
 typedef Vector<Interval> IV;
 typedef Matrix<Float> FM;
 typedef Matrix<Interval> IM;
-typedef Vector< SparseDifferential<Float> > FSDV;
-typedef Vector< SparseDifferential<Interval> > ISDV;
+typedef Vector< Differential<Float> > FSDV;
+typedef Vector< Differential<Interval> > ISDV;
 
 void export_function_interface() 
 {
@@ -243,13 +241,13 @@ void export_model()
     typedef Interval I;
     typedef Vector<I> Box;
     typedef Vector<R> Point;
-    typedef DifferentialVector< SparseDifferential<R> > Expansion;
+    typedef DifferentialVector< Differential<R> > Expansion;
 
     class_< Model > function_model_class("ApproximateTaylorModel",init< Vector<I>, Vector<R>, const FunctionInterface&, ushort, ushort>());
     function_model_class.def(init< uint, uint, ushort, ushort >());
     //function_model_class.def(init< Vector<I> >());
-    function_model_class.def(init< Vector<I>, Vector<R>, DifferentialVector< SparseDifferential<R> > >());
-    function_model_class.def(init< Vector<I>, Vector<R>, DifferentialVector< SparseDifferential<R> > >());
+    function_model_class.def(init< Vector<I>, Vector<R>, DifferentialVector< Differential<R> > >());
+    function_model_class.def(init< Vector<I>, Vector<R>, DifferentialVector< Differential<R> > >());
     function_model_class.def(init< Model >());
     function_model_class.def("result_size", &Model::result_size);
     function_model_class.def("argument_size", &Model::argument_size);

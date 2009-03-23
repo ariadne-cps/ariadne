@@ -37,7 +37,7 @@
 #include "vector.h"
 #include "matrix.h"
 #include "transformation.h"
-#include "sparse_differential.h"
+#include "differential.h"
 #include "taylor_variable.h"
 
 namespace Ariadne {
@@ -66,18 +66,18 @@ class FunctionBase
     virtual Vector<TaylorVariable> evaluate(const Vector<TaylorVariable>& x) const {
         Vector<TaylorVariable> r=TaylorVariable::zeroes(this->T::result_size(),this->T::argument_size()); 
         this->T::compute(r,x); return r; }                          
-    virtual Vector< SparseDifferential<Float> > evaluate(const Vector< SparseDifferential<Float> >& x) const {
-        Vector< SparseDifferential<Float> > r(this->T::result_size()); this->T::compute(r,x); return r; }                          
-    virtual Vector< SparseDifferential<Interval> > evaluate(const Vector< SparseDifferential<Interval> >& x) const {
-        Vector< SparseDifferential<Interval> > r(this->T::result_size()); this->T::compute(r,x); return r; }                          
+    virtual Vector< Differential<Float> > evaluate(const Vector< Differential<Float> >& x) const {
+        Vector< Differential<Float> > r(this->T::result_size()); this->T::compute(r,x); return r; }                          
+    virtual Vector< Differential<Interval> > evaluate(const Vector< Differential<Interval> >& x) const {
+        Vector< Differential<Interval> > r(this->T::result_size()); this->T::compute(r,x); return r; }                          
 
     virtual Matrix<Float> jacobian(const Vector<Float>& x) const {
-        return get_jacobian(this->_expansion(x,1u)); }                         
+        return this->_expansion(x,1u).jacobian(); }
     virtual Matrix<Interval> jacobian(const Vector<Interval>& x) const {
-        return get_jacobian(this->_expansion(x,1u)); }                         
-    virtual Vector< SparseDifferential<Float> > expansion(const Vector<Float>& x, const ushort& s) const {
+        return this->_expansion(x,1u).jacobian(); }
+    virtual Vector< Differential<Float> > expansion(const Vector<Float>& x, const ushort& s) const {
         return this->_expansion(x,s); } 
-    virtual Vector< SparseDifferential<Interval> > expansion(const Vector<Interval>& x, const ushort& s) const {
+    virtual Vector< Differential<Interval> > expansion(const Vector<Interval>& x, const ushort& s) const {
         return this->_expansion(x,s); }
 
     // TODO: Find a better way for writing functions which can handle transformations which may not have a
@@ -85,11 +85,11 @@ class FunctionBase
     virtual std::ostream& write(std::ostream& os) const  {
         return os << "Function( result_size="<<this->result_size()<<", argument_size="<<this->argument_size()<<" )"; }
   private:
-    template<class X> Vector< SparseDifferential<X> > _expansion(const Vector<X>& x, const ushort& s) const {
+    template<class X> Vector< Differential<X> > _expansion(const Vector<X>& x, const ushort& s) const {
         const uint rs=this->T::result_size();
         const uint as=this->T::argument_size();
-        Vector< SparseDifferential<X> > dx(as,SparseDifferential<X>(as,s));
-        Vector< SparseDifferential<X> > dr(rs,SparseDifferential<X>(as,s));
+        Vector< Differential<X> > dx(as,Differential<X>(as,s));
+        Vector< Differential<X> > dr(rs,Differential<X>(as,s));
         for(uint i=0; i!=as; ++i) { dx[i]=x[i]; }
         for(uint i=0; i!=as; ++i) { dx[i][i]=1; }
         this->T::compute(dr,dx);
@@ -120,18 +120,18 @@ class FunctionTemplate
     virtual Vector<TaylorVariable> evaluate(const Vector<TaylorVariable>& x) const {
         Vector<TaylorVariable> r=TaylorVariable::zeroes(this->result_size(),this->argument_size()); 
         this->_compute(r,x,p); return r; }                          
-    virtual Vector< SparseDifferential<Float> > evaluate(const Vector< SparseDifferential<Float> >& x) const {
-        Vector< SparseDifferential<Float> > r(this->result_size()); this->_compute(r,x,p); return r; }                          
-    virtual Vector< SparseDifferential<Interval> > evaluate(const Vector< SparseDifferential<Interval> >& x) const {
-        Vector< SparseDifferential<Interval> > r(this->result_size()); this->_compute(r,x,p); return r; }                          
+    virtual Vector< Differential<Float> > evaluate(const Vector< Differential<Float> >& x) const {
+        Vector< Differential<Float> > r(this->result_size()); this->_compute(r,x,p); return r; }                          
+    virtual Vector< Differential<Interval> > evaluate(const Vector< Differential<Interval> >& x) const {
+        Vector< Differential<Interval> > r(this->result_size()); this->_compute(r,x,p); return r; }                          
 
     virtual Matrix<Float> jacobian(const Vector<Float>& x) const {
-        return get_jacobian(this->_expansion(x,1u)); }                         
+        return this->_expansion(x,1u).jacobian(); }
     virtual Matrix<Interval> jacobian(const Vector<Interval>& x) const {
-        return get_jacobian(this->_expansion(x,1u)); }                         
-    virtual Vector< SparseDifferential<Float> > expansion(const Vector<Float>& x, const ushort& s) const {
+        return this->_expansion(x,1u).jacobian(); }
+    virtual Vector< Differential<Float> > expansion(const Vector<Float>& x, const ushort& s) const {
         return this->_expansion(x,s); } 
-    virtual Vector< SparseDifferential<Interval> > expansion(const Vector<Interval>& x, const ushort& s) const {
+    virtual Vector< Differential<Interval> > expansion(const Vector<Interval>& x, const ushort& s) const {
         return this->_expansion(x,s); }
 
     // TODO: Find a better way for writing functions which can handle transformations which may not have a
@@ -140,11 +140,11 @@ class FunctionTemplate
         return os << "Function( result_size="<<this->result_size()<<", argument_size="<<this->argument_size()<<" )"; }
     
   private:
-    template<class X> Vector< SparseDifferential<X> > _expansion(const Vector<X>& x, const ushort& s) const {
+    template<class X> Vector< Differential<X> > _expansion(const Vector<X>& x, const ushort& s) const {
         const uint rs=this->result_size();
         const uint as=this->argument_size();
-        Vector< SparseDifferential<X> > dx(as,SparseDifferential<X>(as,s));
-        Vector< SparseDifferential<X> > dr(rs,SparseDifferential<X>(as,s));
+        Vector< Differential<X> > dx(as,Differential<X>(as,s));
+        Vector< Differential<X> > dr(rs,Differential<X>(as,s));
         for(uint i=0; i!=as; ++i) { dx[i]=x[i]; }
         for(uint i=0; i!=as; ++i) { dx[i][i]=1; }
         this->_compute(dr,dx,p);

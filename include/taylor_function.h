@@ -105,12 +105,16 @@ class TaylorFunction {
     /*! \brief Evaluate the Taylor model at the point \a x. */
     Vector<Interval> evaluate(const Vector<Float>& x) const;
   
-    /*! \brief Compute an approximation to Jacobian derivative of the Taylor model at the point \a x. */
+    /*! \brief Compute an approximation to Jacobian derivative of the Taylor model at the point \a x (Deprecated). */
     Matrix<Float> jacobian(const Vector<Float>& x) const;
+    /*! \brief Compute an approximation to Jacobian derivative of the Taylor model sat the point \a x. */
+    Matrix<Interval> jacobian(const Vector<Interval>& x) const;
   
     /*! \brief Truncate to a model of lower order and/or smoothness, possibly on a different domain. */
     TaylorFunction truncate(ushort degree) const;
   
+    /*! \brief The constant Taylor model with range \a r and argument domain \a d. */
+    static TaylorFunction constant(const Vector<Interval>& d, const Vector<Interval>& r);
     /*! \brief The constant Taylor model with result \a c and argument domain \a d. */
     static TaylorFunction constant(const Vector<Interval>& d, const Vector<Float>& c);
     /*! \brief The identity Taylor model on domain \a d. */
@@ -134,9 +138,21 @@ class TaylorFunction {
     friend TaylorFunction operator*(const TaylorFunction& f, const Float& c);
     /*! \brief Division by a scalar. */
     friend TaylorFunction operator/(const TaylorFunction& f, const Float& c);
+    /*! \brief Addition of a constant. */
+    friend TaylorFunction operator+(const TaylorFunction& f, const Vector<Interval>& c);
+    /*! \brief Subtraction of a constant. */
+    friend TaylorFunction operator-(const TaylorFunction& f, const Vector<Interval>& c);
+    /*! \brief Multiplication by a scalar. */
+    friend TaylorFunction operator*(const Interval& c, const TaylorFunction& f);
+    /*! \brief Multiplication by a scalar. */
+    friend TaylorFunction operator*(const TaylorFunction& f, const Interval& c);
+    /*! \brief Division by a scalar. */
+    friend TaylorFunction operator/(const TaylorFunction& f, const Interval& c);
+    /*! \brief Multiplication by a matrix. */
+    friend TaylorFunction operator*(const Matrix<Interval>& A, const TaylorFunction& f);
   
     //! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
-    friend TaylorFunction compose(const FunctionInterface& f, const TaylorFunction& tg);
+    friend TaylorFunction compose(const FunctionInterface& f, const TaylorFunction& g);
     //! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
     friend TaylorFunction compose(const TaylorFunction& f, const TaylorFunction& g);
     //! \brief Antiderivative of \a f with respect to variable \a k.
@@ -171,6 +187,8 @@ class TaylorFunction {
 };
 
 
+TaylorFunction implicit(const TaylorFunction& f);
+TaylorFunction flow(const TaylorFunction& vf, const Vector<Interval>& d, const Interval& t);
 std::ostream& operator<<(std::ostream&, const TaylorFunction&);
 
 } // namespace Ariadne

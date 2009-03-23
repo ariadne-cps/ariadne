@@ -92,7 +92,6 @@ class TaylorFunction {
     const Vector<Interval> range() const;
     /*! \brief The data used to define the centre of the Taylor model. */
     const Vector<TaylorVariable>& variables() const;
-    const Vector<TaylorVariable>& expansion() const;
   
     /*! \brief The size of the argument. */
     uint argument_size() const;
@@ -183,7 +182,7 @@ class TaylorFunction {
   private:
     /* Domain of definition. */
     Vector<Interval> _domain;
-    Vector<TaylorVariable> _expansion;
+    Vector<TaylorVariable> _variables;
 };
 
 

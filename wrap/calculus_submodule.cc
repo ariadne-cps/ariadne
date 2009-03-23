@@ -144,7 +144,7 @@ python_split(const TaylorVariable& x, uint j)
 
 template<> std::string __repr__(const TaylorVariable& tv) {
     std::stringstream ss;
-    ss << "TaylorVariable(" << tv.expansion() << "," << tv.error() << ")";
+    ss << "TaylorVariable(" << tv.polynomial() << "," << tv.error() << ")";
     return ss.str();
 } 
 

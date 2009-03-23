@@ -94,12 +94,12 @@ TaylorSet::TaylorSet(uint rs, uint as, uint deg, double x0, ...)
     for(uint i=0; i!=rs; ++i) {
         (*this)[i]=TaylorVariable(as);
         for(MultiIndex j(as); j.degree()<=deg; ++j) {
-            if(x!=0.0 || j.degree()<=1) { (*this)[i].expansion().append(j,x); }
+            if(x!=0.0 || j.degree()<=1) { (*this)[i].polynomial().append(j,x); }
             x=va_arg(args,double);
         }
         (*this)[i].error()=x;
         x=va_arg(args,double);
-        (*this)[i].expansion().sort();
+        (*this)[i].polynomial().sort();
         (*this)[i].clean();
     }
     va_end(args);
@@ -305,15 +305,15 @@ TaylorSet::subsume() const
         TaylorVariable::const_iterator iter=this->_variables[i].begin();
         for( ; iter!=this->_variables[i].end() && iter->first.degree()<=1; ++iter) {
             for(uint j=0; j!=ng; ++j) { a[j]=iter->first[j]; }
-            res._variables[i].expansion().append(a,iter->second);
+            res._variables[i].polynomial().append(a,iter->second);
         }
         for(uint j=0; j!=ng; ++j) { a[j]=0; }
         a[ng+i]=1;
-        res._variables[i].expansion().append(a,this->variables()[i].error());
+        res._variables[i].polynomial().append(a,this->variables()[i].error());
         a[ng+i]=0;
         for( ; iter!=this->_variables[i].end() ; ++iter) {
             for(uint j=0; j!=ng; ++j) { a[j]=iter->first[j]; }
-            res._variables[i].expansion().append(a,iter->second);
+            res._variables[i].polynomial().append(a,iter->second);
         }
     }
     return res;

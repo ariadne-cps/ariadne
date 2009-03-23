@@ -41,6 +41,7 @@ namespace Ariadne {
 template<class T1, class T2> class Product;
 template<class X> class Vector;
 template<class X> class Matrix;
+template<class X> class Polynomial;
 
 class TaylorVariable;
 template<> class Vector<TaylorVariable>;
@@ -90,10 +91,10 @@ bool refines(const Vector<TaylorVariable>& tv1, const Vector<TaylorVariable>& tv
  */
 class TaylorVariable
 {
-    typedef Polynomial<Float> ExpansionType;
-    //typedef MapPolynomial ExpansionType;
+    typedef Polynomial<Float> PolynomialType;
+    //typedef MapPolynomial PolynomialType;
     static const Float _zero;
-    ExpansionType _expansion;
+    PolynomialType _polynomial;
     Float _error;
     double _sweep_threshold;
     uint _maximum_degree;
@@ -109,10 +110,10 @@ class TaylorVariable
     typedef MultiIndex IndexType;
     //! \brief The type used for the coefficients.
     typedef Float ValueType;
-    //! \brief An iterator through the (index,coefficient) pairs of the polynomial expansion.
-    typedef ExpansionType::iterator iterator;
-    //! \brief A constant iterator through the (index,coefficient) pairs of the polynomial expansion.
-    typedef ExpansionType::const_iterator const_iterator;
+    //! \brief An iterator through the (index,coefficient) pairs of the polynomial polynomial.
+    typedef PolynomialType::iterator iterator;
+    //! \brief A constant iterator through the (index,coefficient) pairs of the polynomial polynomial.
+    typedef PolynomialType::const_iterator const_iterator;
 
     //@{
     /*! \name Constructors and destructors. */
@@ -120,7 +121,7 @@ class TaylorVariable
     TaylorVariable();
     //! \brief Construct a TaylorVariable in \a as arguments.
     TaylorVariable(uint as);
-    //! \brief Construct from a map giving the polynomial expansion and a constant giving the error.
+    //! \brief Construct from a map giving the polynomial polynomial and a constant giving the error.
     TaylorVariable(const std::map<MultiIndex,Float>& d, const Float& e);
     //! \brief Contruct a %TaylorVariable in \a as arguments of degree \a d
     //! from the raw data given by \a ptr, with error given by \a err.
@@ -147,37 +148,37 @@ class TaylorVariable
 
     //@{
     /*! \name Data access */
-    //! \brief The polynomial expansion.
-    const ExpansionType& expansion() const { return this->_expansion; }
-    //! \brief A reference to the polynomial expansion.
-    ExpansionType& expansion() { return this->_expansion; }
-    //! \brief The error of the polynomial expansion over the domain.
+    //! \brief The polynomial polynomial.
+    const PolynomialType& polynomial() const { return this->_polynomial; }
+    //! \brief A reference to the polynomial polynomial.
+    PolynomialType& polynomial() { return this->_polynomial; }
+    //! \brief The error of the polynomial polynomial over the domain.
     const Float& error() const { return this->_error; }
-    //! \brief A reference to the error of the polynomial expansion over the domain. 
+    //! \brief A reference to the error of the polynomial polynomial over the domain.
     Float& error() { return this->_error; }
-    //! \brief The constant term in the polynomial expansion.
+    //! \brief The constant term in the polynomial polynomial.
     const Float& value() const { return (*this)[MultiIndex::zero(this->argument_size())]; }
-    //! \brief A reference to the constant term in the polynomial expansion.
+    //! \brief A reference to the constant term in the polynomial polynomial.
     Float& value() { return (*this)[MultiIndex::zero(this->argument_size())]; }
     //! \brief The coefficient of the gradient term \f$df/dx_j\f$.
     const Float& gradient(uint j) const { return (*this)[MultiIndex::unit(this->argument_size(),j)]; }
     //! \brief A reference to the coefficient of the gradient term \f$df/dx_j\f$.
     Float& gradient(uint j) { return (*this)[MultiIndex::unit(this->argument_size(),j)]; }
 
-    //! \brief Set the error of the polynomial expansion.
+    //! \brief Set the error of the polynomial polynomial.
     void set_error(const Float& ne) {
         ARIADNE_ASSERT(ne>=0); this->_error=ne; }
-    //! \brief Set the constant term in the polynomial expansion.
+    //! \brief Set the constant term in the polynomial polynomial.
     void set_value(const Float& c) {
-        this->_expansion[MultiIndex::zero(this->argument_size())]=c; }
+        this->_polynomial[MultiIndex::zero(this->argument_size())]=c; }
     //! \brief Set the coefficient of the term \f$df/dx_j\f$.
     void set_gradient(uint j, const Float& c) {
-        this->_expansion[MultiIndex::unit(this->argument_size(),j)]=c; }
+        this->_polynomial[MultiIndex::unit(this->argument_size(),j)]=c; }
 
     //! \brief The coefficient of the term in $x^a$.
-    const Float& operator[](const MultiIndex& a) const { return this->_expansion[a]; }
+    const Float& operator[](const MultiIndex& a) const { return this->_polynomial[a]; }
     //! \brief A read/write reference to the coefficient of the term in $x^a$.
-    Float& operator[](const MultiIndex& a) { return this->_expansion[a]; }
+    Float& operator[](const MultiIndex& a) { return this->_polynomial[a]; }
 
     //! \brief The coefficient of the term \f$df/dx_j\f$.
     const Float& operator[](uint j) const {
@@ -186,25 +187,25 @@ class TaylorVariable
     Float& operator[](uint j) {
         return (*this)[MultiIndex::unit(this->argument_size(),j)]; }
 
-    //! \brief An iterator to the first term in the polynomial expansion.
-    iterator begin() { return this->_expansion.begin(); }
-    //! \brief A constant iterator to the first term in the polynomial expansion.
-    const_iterator begin() const { return this->_expansion.begin(); }
-    //! \brief An iterator to the end of the polynomial expansion.
-    iterator end() { return this->_expansion.end(); }
-    //! \brief A constant iterator to the end of the polynomial expansion.
-    const_iterator end() const { return this->_expansion.end(); }
+    //! \brief An iterator to the first term in the polynomial polynomial.
+    iterator begin() { return this->_polynomial.begin(); }
+    //! \brief A constant iterator to the first term in the polynomial polynomial.
+    const_iterator begin() const { return this->_polynomial.begin(); }
+    //! \brief An iterator to the end of the polynomial polynomial.
+    iterator end() { return this->_polynomial.end(); }
+    //! \brief A constant iterator to the end of the polynomial polynomial.
+    const_iterator end() const { return this->_polynomial.end(); }
     //! \brief An iterator to the term with index \a.
-    iterator find(const MultiIndex& a) { return this->_expansion.find(a); }
+    iterator find(const MultiIndex& a) { return this->_polynomial.find(a); }
     //! \brief A constant iterator to the term with index \a.
-    const_iterator find(const MultiIndex& a) const { return this->_expansion.find(a); }
+    const_iterator find(const MultiIndex& a) const { return this->_polynomial.find(a); }
 
     //! \brief The number of variables in the argument of the quantity.
-    uint argument_size() const { return this->_expansion.argument_size(); }
-    //! \brief The maximum degree of terms in the polynomial expansion.
-    uint degree() const { return (--this->_expansion.end())->first.degree(); }
-    //! \brief The number of nonzero terms in the polynomial expansion.
-    uint nnz() const { return this->_expansion.size(); }
+    uint argument_size() const { return this->_polynomial.argument_size(); }
+    //! \brief The maximum degree of terms in the polynomial polynomial.
+    uint degree() const { return (--this->_polynomial.end())->first.degree(); }
+    //! \brief The number of nonzero terms in the polynomial polynomial.
+    uint nnz() const { return this->_polynomial.size(); }
     //@}
 
     //@{
@@ -236,7 +237,7 @@ class TaylorVariable
     /*! \name Comparison operators. */
     //! \brief Equality operator. Tests equality of representation, including error term.
     bool operator==(const TaylorVariable& sd) const {
-        return this->_expansion==sd._expansion && this->_error == sd._error; }
+        return this->_polynomial==sd._polynomial && this->_error == sd._error; }
     //! \brief Inequality operator.
     bool operator!=(const TaylorVariable& sd) const {
         return !(*this==sd); }

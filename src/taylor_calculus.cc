@@ -75,7 +75,7 @@ reset_step(const FunctionType& map,
     return map.evaluate(set_model.variables());
     // Indirect computation via model
     BoxType range=set_model.range();
-    return compose(FunctionModelType(range,map).expansion(),range,set_model.variables());
+    return compose(FunctionModelType(range,map).variables(),range,set_model.variables());
 }
 
 

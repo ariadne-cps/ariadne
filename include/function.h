@@ -28,11 +28,14 @@
 #ifndef ARIADNE_FUNCTION_H
 #define ARIADNE_FUNCTION_H
 
+#include <cstdarg>
 #include <iosfwd>
 #include <iostream>
+#include "expression_interface.h"
 #include "function_interface.h"
 
 #include "macros.h"
+#include "pointer.h"
 
 #include "vector.h"
 #include "matrix.h"
@@ -98,7 +101,9 @@ class FunctionBase
 };
 
 
-// A wrapper for transformations  
+/*
+
+// A wrapper for transformations
 // This class is for internal use only; we can easily specify parameter types.
 template<class F> 
 class FunctionTemplate
@@ -110,6 +115,8 @@ class FunctionTemplate
     template<class R,class A, class P> 
     void _compute(R& r, const A& x, const P& p) const { 
         static_cast<const F&>(*this)._compute(r,x,p); }
+    template<class X> Vector<X> _evaluate(const Vector<X>& x) const {
+        return static_cast<const F&>(*this)._evaluate(x); }
   protected:
     FunctionTemplate() { }
   public:
@@ -150,6 +157,44 @@ class FunctionTemplate
         this->_compute(dr,dx,p);
         return dr;
     }                                             
+};
+
+*/
+
+// A wrapper for transformations
+// This class is for internal use only; we can easily specify parameter types.
+template<class F> 
+class FunctionTemplate
+    : public FunctionInterface
+{
+  private:
+    template<class X> Vector<X> _evaluate(const Vector<X>& x) const {
+        return static_cast<const F&>(*this)._evaluate(x); }
+  protected:
+    FunctionTemplate() { }
+  public:
+    virtual Vector<Float> evaluate(const Vector<Float>& x) const {
+        return this->_evaluate(x); }
+    virtual Vector<Interval> evaluate(const Vector<Interval>& x) const {
+        return this->_evaluate(x); }
+
+    virtual Vector<TaylorVariable> evaluate(const Vector<TaylorVariable>& x) const {
+        return this->_evaluate(x); }
+
+    virtual Vector< Differential<Float> > evaluate(const Vector< Differential<Float> >& x) const {
+        return this->_evaluate(x); }
+    virtual Vector< Differential<Interval> > evaluate(const Vector< Differential<Interval> >& x) const {
+        return this->_evaluate(x); }
+
+    virtual Matrix<Float> jacobian(const Vector<Float>& x) const {
+        return this->_evaluate(Differential<Float>::variables(1u,x)).jacobian(); }
+    virtual Matrix<Interval> jacobian(const Vector<Interval>& x) const {
+        return this->_evaluate(Differential<Interval>::variables(1u,x)).jacobian(); }
+
+    // TODO: Find a better way for writing functions which can handle transformations which may not have a
+    // write() method or operator<<.
+    virtual std::ostream& write(std::ostream& os) const  {
+        return os << "Function( result_size="<<this->result_size()<<", argument_size="<<this->argument_size()<<" )"; }
 };
 
 
@@ -198,6 +243,158 @@ template<class T> class Function
 
 
 
+
+class FunctionElement
+    : public ExpressionInterface
+{
+  public:
+    typedef unsigned int size_type;
+    typedef unsigned short smoothness_type;
+
+    FunctionElement(const FunctionInterface& f, size_type i)
+        : _fptr(f.clone()), _i(i) { ARIADNE_ASSERT(i<f.result_size()); }
+    FunctionElement(shared_ptr<const FunctionInterface> fptr, size_type i)
+        : _fptr(fptr), _i(i) { ARIADNE_ASSERT(i<fptr->result_size()); }
+    FunctionElement* clone() const { return new FunctionElement(*this); }
+
+    size_type argument_size() const { return _fptr->argument_size(); }
+    smoothness_type smoothness() const { return _fptr->smoothness(); }
+
+    virtual Float evaluate(const Vector<Float>& x) const {
+        return this->_evaluate(x); }
+    virtual Interval evaluate(const Vector<Interval>& x) const {
+        return this->_evaluate(x); }
+    virtual Differential<Float> evaluate(const Vector< Differential<Float> >& x) const {
+        return this->_evaluate(x); }
+    virtual Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const {
+        return this->_evaluate(x); }
+    virtual TaylorVariable evaluate(const Vector<TaylorVariable>& x) const {
+        return this->_evaluate(x); }
+
+    virtual std::ostream& write(std::ostream& os) const { ARIADNE_NOT_IMPLEMENTED; }
+  private:
+    template<class Y> inline Y _evaluate(const Vector<Y>& x) const {
+        return this->_fptr->evaluate(x)[this->_i]; }
+  private:
+    shared_ptr<const FunctionInterface> _fptr;
+    size_type _i;
+};
+
+
+template<>
+class Vector<ExpressionInterface>
+    : public FunctionTemplate< Vector<ExpressionInterface> >
+{
+    friend class FunctionTemplate< Vector<ExpressionInterface> >;
+  public:
+    typedef unsigned int size_type;
+    typedef unsigned short int smoothness_type;
+
+    Vector(size_type n) : _expressions(n) { }
+    size_type size() const { return _expressions.size(); }
+    const ExpressionInterface& operator[](size_type i) const { return *_expressions[i]; }
+    void set(size_type i, shared_ptr<const ExpressionInterface> p) {
+        ARIADNE_ASSERT(this->size()==0 || p->argument_size()==this->argument_size()); _expressions[i]=p; }
+    void set(size_type i, const ExpressionInterface* p) {
+        ARIADNE_ASSERT(this->size()==0 || p->argument_size()==this->argument_size());
+        _expressions[i]=shared_ptr<const ExpressionInterface>(p); }
+
+    virtual Vector<ExpressionInterface>* clone() const {
+        return new Vector<ExpressionInterface>(*this); }
+
+    virtual size_type result_size() const { return _expressions.size(); }
+    virtual size_type argument_size() const { return _expressions[0]->argument_size(); }
+    virtual smoothness_type smoothness() const {
+        smoothness_type res=_expressions[0]->smoothness();
+        for(uint i=1; i!=this->size(); ++i) {
+            res=max(res,_expressions[i]->smoothness()); } return res; }
+
+    virtual std::ostream& write(std::ostream& os) const {
+        for(uint i=0; i!=this->result_size(); ++i) { os<<(*this)[i]; } return os; }
+  private:
+    template<class Y> inline Vector<Y> _evaluate(const Vector<Y>& x) const {
+        Vector<Y> res(this->result_size());
+        for(size_type i=0; i!=this->result_size(); ++i) {
+            res[i]=this->_expressions[i]->evaluate(x); }
+        return res;
+    }
+  private:
+    array< boost::shared_ptr<const ExpressionInterface> > _expressions;
+};
+
+inline Vector<ExpressionInterface>
+join(uint n, const ExpressionInterface* e0, const ExpressionInterface* e1, ...) {
+    Vector<ExpressionInterface> res(n);
+    res.set(0,e0->clone());
+    res.set(1,e1->clone());
+    va_list args; va_start(args,e1);
+    for(uint i=2; i!=n; ++i) {
+        const ExpressionInterface* ei=va_arg(args,const ExpressionInterface*);
+        res.set(i,ei->clone());
+    }
+    return res;
+}
+
+
+class ComposedFunction
+    : public FunctionTemplate<ComposedFunction>
+{
+    friend class FunctionTemplate<ComposedFunction>;
+  public:
+    ComposedFunction(shared_ptr<const FunctionInterface> g, shared_ptr<const FunctionInterface> f)
+        : _f(f), _g(g) { ARIADNE_ASSERT(g->argument_size()==f->result_size()); }
+    ComposedFunction* clone() const { return new ComposedFunction(*this); }
+
+    virtual size_type result_size() const { return this->_g->result_size(); }
+    virtual size_type argument_size() const { return this->_f->argument_size(); }
+    virtual smoothness_type smoothness() const { return min(_f->smoothness(),_g->smoothness()); }
+  private:
+    template<class X> inline Vector<X> _evaluate(const Vector<X>& x) const {
+        return this->_g->evaluate(this->_f->evaluate(x)); }
+  private:
+    shared_ptr<const FunctionInterface> _f;
+    shared_ptr<const FunctionInterface> _g;
+};
+
+class JoinedFunction
+    : public FunctionTemplate<JoinedFunction>
+{
+    friend class FunctionTemplate<JoinedFunction>;
+  public:
+    JoinedFunction(shared_ptr<const FunctionInterface> f1, shared_ptr<const FunctionInterface> f2)
+        : _f1(f1), _f2(f2) { ARIADNE_ASSERT(f1->argument_size()==f2->argument_size()); }
+    JoinedFunction* clone() const { return new JoinedFunction(*this); }
+
+    virtual size_type result_size() const { return _f1->result_size()+_f2->result_size(); }
+    virtual size_type argument_size() const { return _f1->argument_size(); }
+    virtual smoothness_type smoothness() const { return min(_f1->smoothness(),_f2->smoothness()); }
+  private:
+    template<class X> inline Vector<X> _evaluate(const Vector<X>& x) const {
+        return join(_f1->evaluate(x),_f2->evaluate(x)); }
+  private:
+    shared_ptr<const FunctionInterface> _f1;
+    shared_ptr<const FunctionInterface> _f2;
+};
+
+class CombinedFunction
+    : public FunctionTemplate<JoinedFunction>
+{
+  public:
+    CombinedFunction(shared_ptr<const FunctionInterface> f1, shared_ptr<const FunctionInterface> f2)
+        : _f1(f1), _f2(f2) { }
+    CombinedFunction* clone() const { return new CombinedFunction(*this); }
+
+    virtual size_type result_size() const { return _f1->result_size()+_f2->result_size(); }
+    virtual size_type argument_size() const { return _f1->argument_size()+_f2->argument_size(); }
+    virtual smoothness_type smoothness() const { return min(_f1->smoothness(),_f2->smoothness()); }
+  private:
+    template<class X> inline Vector<X> _evaluate(const Vector<X>& x) const {
+        return combine(_f1->evaluate(project(x,range(0,_f1->argument_size()))),
+                       _f2->evaluate(project(x,range(_f1->argument_size(),this->argument_size())))); }
+  private:
+    shared_ptr<const FunctionInterface> _f1;
+    shared_ptr<const FunctionInterface> _f2;
+};
 
 
 
@@ -263,6 +460,7 @@ class ScalingFunction
 };
 
 
+/*
 //! An affine function \f$x\mapsto Ax+b\f$. 
 class AffineFunction
     : public FunctionBase<AffineTransformation>
@@ -274,6 +472,87 @@ class AffineFunction
     std::ostream& write(std::ostream& os) const {
         return os << "AffineFunction( A=" << this->A() << ", b=" << this->b() << " )"; }
 };
+*/
+
+//! An affine function \f$x\mapsto Ax+b\f$. 
+class AffineFunction
+    : public FunctionInterface
+{
+  public:
+    //! Construct an affine function from the matrix \a A and vector \a b.
+    AffineFunction(const Matrix<Interval>& A, const Vector<Interval>& b)
+        : _fA(midpoint(A)), _fb(midpoint(b)), _iA(A), _ib(b) { ARIADNE_ASSERT(A.row_size()==b.size()); }
+
+    const Matrix<Float>& A() const { return _fA; }
+    const Vector<Float>& b() const { return _fb; }
+
+    virtual AffineFunction* clone() const { return new AffineFunction(*this); }
+
+    virtual size_type result_size() const { return _fA.row_size(); }
+    virtual size_type argument_size() const { return _fA.column_size(); }
+    virtual smoothness_type smoothness() const { return 255u; }
+
+    virtual Vector<Float> evaluate(const Vector<Float>& x) const {
+        return prod(_fA,x)+_fb; }
+    virtual Vector<Interval> evaluate(const Vector<Interval>& x) const {
+        return prod(_iA,x)+_ib; }
+    virtual Vector< Differential<Float> > evaluate(const Vector< Differential<Float> >& x) const {
+        return prod(_fA,x)+_fb; }
+    virtual Vector< Differential<Interval> > evaluate(const Vector< Differential<Interval> >& x) const {
+        return prod(_iA,x)+_ib; }
+    virtual Vector<TaylorVariable> evaluate(const Vector<TaylorVariable>& x) const {
+        return prod(_iA,x)+_ib; }
+
+    virtual Matrix<Float> jacobian(const Vector<Float>& x) const {
+        return this->evaluate(Differential<Float>::variables(1u,x)).jacobian(); }
+    virtual Matrix<Interval> jacobian(const Vector<Interval>& x) const {
+        return this->evaluate(Differential<Interval>::variables(1u,x)).jacobian(); }
+
+    virtual std::ostream& write(std::ostream& os) const {
+        return os << "AffineFunction( A="<<_iA<<", b="<<_ib<<" )"; }
+  private:
+    Matrix<Float> _fA; Vector<Float> _fb;
+    Matrix<Interval> _iA; Vector<Interval> _ib;
+};
+
+//! A polynomial function.
+class PolynomialFunction
+    : public FunctionInterface
+{
+  public:
+    PolynomialFunction(const Vector< Polynomial<Float> >& p) : _fp(p), _ip(p) { }
+    PolynomialFunction(const Vector< Polynomial<Interval> >& p) : _fp(midpoint(p)), _ip(p) { }
+
+    virtual PolynomialFunction* clone() const { return new PolynomialFunction(*this); }
+
+    virtual size_type result_size() const { return _fp.size(); }
+    virtual size_type argument_size() const { return _fp[0].argument_size(); }
+    virtual smoothness_type smoothness() const { return 255u; }
+
+    virtual Vector<Float> evaluate(const Vector<Float>& x) const {
+        return Ariadne::evaluate(_fp,x); }
+    virtual Vector<Interval> evaluate(const Vector<Interval>& x) const {
+        return Ariadne::evaluate(_ip,x); }
+    virtual Vector< Differential<Float> > evaluate(const Vector< Differential<Float> >& x) const {
+        return Ariadne::evaluate(_fp,x); }
+
+    virtual Vector< Differential<Interval> > evaluate(const Vector< Differential<Interval> >& x) const {
+        return Ariadne::evaluate(_ip,x); }
+    virtual Vector<TaylorVariable> evaluate(const Vector<TaylorVariable>& x) const {
+        return Ariadne::evaluate(_ip,x); }
+
+    virtual Matrix<Float> jacobian(const Vector<Float>& x) const {
+        return this->evaluate(Differential<Float>::variables(1u,x)).jacobian(); }
+    virtual Matrix<Interval> jacobian(const Vector<Interval>& x) const {
+        return this->evaluate(Differential<Interval>::variables(1u,x)).jacobian(); }
+
+    virtual std::ostream& write(std::ostream& os) const {
+        return os << "PolynomialFunction"<<_ip; }
+  private:
+    Vector< Polynomial<Float> > _fp;
+    Vector< Polynomial<Interval> > _ip;
+};
+
 
 
 } // namespace Ariadne

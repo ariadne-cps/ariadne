@@ -44,6 +44,9 @@ template<class X> class Differential;
 //! \brief Interface for functions whose derivatives can be computed.
 class FunctionInterface {
   public:
+    typedef unsigned int size_type;
+    typedef unsigned short smoothness_type;
+
     //! \brief Virtual destructor.
     virtual ~FunctionInterface() { };
     //! \brief Create a dynamically-allocated copy.
@@ -72,10 +75,12 @@ class FunctionInterface {
     virtual Matrix<Float> jacobian(const Vector<Float>& x) const = 0;
     //! \brief Compute an over-approximation to the Jacobian derivative matrix \f$(Df)_{ij}=\partial f_i/\partial x_j\f$ of the function over the domain \a x.
     virtual Matrix<Interval> jacobian(const Vector<Interval>& x) const = 0;
+/*
     //! \brief Compute an approximation to all the parital derivatives \f$D^\alpha f_{i}=\partial^{|\alpha|} f_i/\partial x_\alpha\f$ of the function at the point \a x up to degree \a d.
     virtual Vector< Differential<Float> > expansion(const Vector<Float>& x, const ushort& d) const = 0;
     //! \brief Compute over-approximations to all the parital derivatives \f$D^\alpha f_{i}=\partial^{|\alpha|} f_i/\partial x_\alpha\f$ of the function over the domain \a x up to degree \a d.
     virtual Vector< Differential<Interval> > expansion(const Vector<Interval>& x, const ushort& d) const = 0;
+*/
   
     //! \brief Write to an output stream.
     virtual std::ostream& write(std::ostream& os) const = 0;

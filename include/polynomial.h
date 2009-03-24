@@ -250,6 +250,8 @@ class Polynomial
     Polynomial(unsigned int s) : _argument_size(s) { }
     Polynomial(unsigned int as, unsigned int deg, double c0, ...);
     template<class XX> Polynomial(const std::map<MultiIndex,XX>&);
+    template<class XX> Polynomial(const Polynomial<XX>& p);
+    template<class XX> Polynomial<X>& operator=(const Polynomial<XX>& p);
     static Polynomial<X> variable(unsigned int n, unsigned int i);
     static Vector< Polynomial<X> > variables(unsigned int s);
     bool operator==(const Polynomial<X>& p) const { return this->_v == p._v; }
@@ -329,6 +331,14 @@ inline Polynomial<X>::Polynomial(const std::map<MultiIndex,XX>& m)
     }
 }
 
+template<class X> template<class XX> inline
+Polynomial<X>::Polynomial(const Polynomial<XX>& p)
+    : _argument_size(p.argument_size())
+{
+    for(typename Polynomial<XX>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
+        this->append(iter->first,X(iter->second)); }
+}
+
 template<class X>
 inline Polynomial<X>::operator std::map<MultiIndex,X> () const
 {
@@ -372,7 +382,7 @@ class Polynomial
     Polynomial(unsigned int as, unsigned int deg, double c0, ...);
     Polynomial(const std::map<MultiIndex,X>& m) : std::map<MultiIndex,X>(m) {
         assert(!m.empty()); _argument_size=m.begin()->first.size(); }
-
+    template<class XX> Polynomial(const Polynomial<XX>& p);
     static Polynomial<X> variable(unsigned int n, unsigned int i);
     static Vector< Polynomial<X> > variables(unsigned int s);
 
@@ -383,7 +393,8 @@ class Polynomial
         if(iter==this->end()) { return _zero; }
         else { return iter->second; } }
     size_type argument_size() const { return this->_argument_size; }
-    void insert(const MultiIndex& a, const X& x) { this->std::map<MultiIndex,Float>::insert(std::make_pair(a,x)); }
+    void insert(const MultiIndex& a, const X& x) {
+        this->std::map<MultiIndex,X>::insert(std::make_pair(a,x)); }
     void insert(const MultiIndex& a1, const MultiIndex& a2, const X& x) { this->insert(a1+a2,x); }
     void append(const MultiIndex& a, const X& x) { this->insert(a,x); }
     void append(const MultiIndex& a1, const MultiIndex& a2, const X& x) { this->insert(a1+a2,x); }
@@ -407,11 +418,20 @@ template<class X> inline Polynomial<X>::Polynomial(uint as, uint deg, double c0,
     this->sort();
 }
 
+template<class X> template<class XX> inline
+Polynomial<X>::Polynomial(const Polynomial<XX>& p)
+    : _argument_size(p.argument_size())
+{
+    for(typename Polynomial<XX>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
+        this->append(iter->first,X(iter->second)); }
+}
+
 #else
 
 #error "No Polynomial class activated."
 
 #endif
+
 
 
 
@@ -468,6 +488,19 @@ template<class X> inline Polynomial<X>& operator/=(Polynomial<X>& p, const Float
     typedef typename Polynomial<X>::iterator Iter;
     for(Iter iter=p.begin(); iter!=p.end(); ++iter) { iter->second/=c; } return p; }
 
+inline Polynomial<Float> midpoint(const Polynomial<Interval>& p) {
+    Polynomial<Float> r(p.argument_size());
+    for(Polynomial<Interval>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
+        r.append(iter->first,midpoint(iter->second)); }
+    return r;
+}
+
+inline Vector< Polynomial<Float> > midpoint(const Vector< Polynomial<Interval> >& p) {
+    Vector< Polynomial<Float> > r(p.size());
+    for(uint i=0; i!=p.size(); ++i) {
+        r[i]=midpoint(p[i]); }
+    return r;
+}
 
 template<class X, class Y>
 Y evaluate(const Polynomial<X>& p, const Vector<Y>& x)

@@ -163,6 +163,12 @@ class Differential
         return result; 
     }
 
+    static Vector< Differential<X> > variables(uint d, const Vector<X>& x) {
+        Vector< Differential<X> > result(x.size(),Differential<X>(x.size(),d));
+        for(uint i=0; i!=x.size(); ++i) { result[i]=x[i]; result[i][i]=X(1.0); }
+        return result; 
+    }
+
     bool operator==(const Differential<X>& sd) const {
         if(this->argument_size()!=sd.argument_size()) { return false; }
         for(MultiIndex j(this->argument_size()); j.degree()<=std::max(this->degree(),sd.degree()); ++j) {
@@ -663,6 +669,7 @@ class Vector< Differential<X> >
         for(uint i=0; i!=rs; ++i) { (*this)[i]=Differential<X>(as,d); } }
     Vector(uint rs, const Differential<X>& sd) : ublas::vector< Differential<X> >(rs) {
         for(uint i=0; i!=rs; ++i) { (*this)[i]=sd; } }
+    template<class XX> Vector(const Vector< Differential<XX> > dv);
     template<class XX> Vector(uint rs, uint as, uint d, const XX* ptr);
     Vector(uint rs, uint as, uint d,const Vector<X>& v, const Matrix<X>& A);
     template<class E> Vector(const ublas::vector_expression<E>& ve)

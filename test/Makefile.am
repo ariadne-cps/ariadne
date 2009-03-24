@@ -17,6 +17,7 @@ check_PROGRAMS = \
 	test_interval \
 	test_vector \
 	test_matrix \
+	test_function \
 	test_polynomial \
 	test_differential \
 	test_taylor_variable \
@@ -48,7 +49,6 @@ test_vector_SOURCES=test_vector.cc
 test_matrix_SOURCES=test_matrix.cc
 
 test_differential_SOURCES=test_differential.cc
-test_differential_vector_SOURCES=test_differential_vector.cc
 
 test_taylor_variable_SOURCES=test_taylor_variable.cc
 test_taylor_function_SOURCES=test_taylor_function.cc

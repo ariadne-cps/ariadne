@@ -171,18 +171,7 @@ class PythonFunction
         Vector< Differential<Interval> > aj=Differential<Interval>::variables(x.size(),x.size(),1u,x);
         read(rj,this->_pyf(aj)); 
         return get_jacobian<Interval>(rj); }
-    virtual Vector< Differential<Float> > expansion (const Vector<Float>& x, const ushort& d) const {
-        Vector< Differential<Float> > rd(this->_result_size,this->_argument_size,d);
-        Vector< Differential<Float> > ad=Differential<Float>::variables(x.size(),x.size(),d,x);
-        read(rd,this->_pyf(ad)); 
-        return rd; }
-    virtual Vector< Differential<Interval> > expansion (const Vector<Interval>& x, const ushort& d) const {
-        Vector< Differential<Interval> > rd(this->_result_size,this->_argument_size,d);
-        Vector< Differential<Interval> > ad=Differential<Interval>::variables(x.size(),x.size(),d,x);
-        read(rd,this->_pyf(ad)); 
-        return rd; }
-
-    virtual std::ostream& write(std::ostream& os) const { 
+    virtual std::ostream& write(std::ostream& os) const {
         os << "Function( ";
         if(this->_name.size()>0) { os << "name=" << this->_name << ", "; }
         os << "result_size="<<this->_result_size;
@@ -211,7 +200,6 @@ void export_function_interface()
     function_interface_class.def("smoothness", pure_virtual(&FunctionInterface::smoothness));
     function_interface_class.def("evaluate",pure_virtual((IV(FunctionInterface::*)(const IV&)const)&FunctionInterface::evaluate));
     function_interface_class.def("jacobian",pure_virtual((IM(FunctionInterface::*)(const IV&)const)&FunctionInterface::jacobian));
-    function_interface_class.def("expansion",pure_virtual((ISDV(FunctionInterface::*)(const IV&,const ushort&)const)&FunctionInterface::expansion));
 }
 
 
@@ -228,8 +216,6 @@ void export_python_function()
     python_function_class.def("evaluate",pure_virtual((IV(FunctionInterface::*)(const IV&)const)&FunctionInterface::evaluate));
     python_function_class.def("jacobian",pure_virtual((FM(FunctionInterface::*)(const FV&)const)&FunctionInterface::jacobian));
     python_function_class.def("jacobian",pure_virtual((IM(FunctionInterface::*)(const IV&)const)&FunctionInterface::jacobian));
-    python_function_class.def("expansion",(FSDV(PythonFunction::*)(const FV&,const ushort&)const)&PythonFunction::expansion);
-    python_function_class.def("expansion",(ISDV(PythonFunction::*)(const IV&,const ushort&)const)&PythonFunction::expansion);
     python_function_class.def(self_ns::str(self));
 }
 

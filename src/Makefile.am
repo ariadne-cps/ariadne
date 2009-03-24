@@ -15,6 +15,7 @@ SRC = \
 	polynomial.cc \
 	differential.cc \
 	taylor_variable.cc  \
+	function.cc \
 	taylor_function.cc  \
 	simulation_toolbox.cc \
 	taylor_calculus.cc \

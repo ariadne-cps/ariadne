@@ -18,6 +18,7 @@ check_PROGRAMS = \
 	test_vector \
 	test_matrix \
 	test_function \
+	test_multi_index \
 	test_polynomial \
 	test_differential \
 	test_taylor_variable \

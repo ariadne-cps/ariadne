@@ -50,6 +50,7 @@ namespace Ariadne {
 template<class X>
 class Polynomial
 {
+    typedef X Real;
   public:
     typedef MultiIndex::size_type size_type;
     typedef typename std::map<MultiIndex,X>::value_type value_type;
@@ -70,6 +71,8 @@ class Polynomial
     Polynomial(unsigned int as) : _argument_size(as) { }
     //! \brief A dense polynomial with coefficients given by a list of doubles.
     Polynomial(unsigned int as, unsigned int deg, double c0, ...);
+    //! \brief A sparse polynomial with coefficients given by a list of indices and coefficients.
+    Polynomial(unsigned int as, unsigned int nnz, int a00, ...);
     //! \brief Construct from a map of (intex,coefficient) pairs.
     template<class XX> Polynomial(const std::map<MultiIndex,XX>& m);
     //! \brief Construct from a polynomial with possibly different coefficient types.
@@ -99,11 +102,11 @@ class Polynomial
 
     //! \brief Reserve space for \a nnz nonzero elements.
     void reserve(size_type nnz) { }
-}
+
     //! \brief Insert the term \f$cx^a\f$ into the polynomial.
     //! The polynomial must not already have a term in \f$x^a\f$.
     void insert(const MultiIndex& a, const Real& c) {
-        assert(a.size()==_argument_size); this->_coefficients.insert(std::make_pair(a,c)); }
+        assert(a.size()==this->_argument_size); this->_coefficients.insert(std::make_pair(a,c)); }
     //! \brief Insert the term \f$cx^a\f$ into the polynomial.
     //! The index \a a must be higher than the index of all currently existing terms.
     void append(const MultiIndex& a, const Real& c) {
@@ -111,7 +114,7 @@ class Polynomial
     //! \brief Insert the term \f$cx^{a_1+a_2}\f$ into the polynomial.
     //! The index \f$a_1+a_2\f$ must be higher than the index of all currently existing terms.
     void append(const MultiIndex& a1, const MultiIndex& a2, const Real& c) {
-        this->insert(a1+a2,c)); }
+        this->insert(a1+a2,c); }
 
     //! \brief A reference to the coefficient of \f$x^a\f$.
     Real& operator[](const MultiIndex& a) {
@@ -193,8 +196,9 @@ class Reference<MultiIndex>
     Reference(MultiIndex& a) : _n(a.size()), _p(a.begin()) { }
     Reference& operator=(const MultiIndex& a) {
         assert(_n==a.size()); this->_assign(a.begin()); return *this; }
-    Reference& operator=(Reference<MultiIndex> a) {
-        assert(_n==a._n); this->_assign(a._p); return *this; }
+    Reference& operator=(const Reference<MultiIndex>& a) {
+        // This is a substitute for the default assignment operator, so must use a const& argument.
+        assert(_n==a.size()); this->_assign(a._p); return *this; }
     operator MultiIndex& () { return reinterpret_cast<MultiIndex&>(*this); }
     operator MultiIndex const& () const { return reinterpret_cast<MultiIndex const&>(*this); }
     size_type size() const { return this->_n; }
@@ -377,6 +381,7 @@ class Polynomial
     Polynomial() : _argument_size() { }
     Polynomial(unsigned int as) : _argument_size(as) { }
     Polynomial(unsigned int as, unsigned int deg, double c0, ...);
+    Polynomial(unsigned int as, unsigned int nnz, int a00, ...);
     template<class XX> Polynomial(const std::map<MultiIndex,XX>& m);
     template<class XX> Polynomial(const Polynomial<XX>& p);
 
@@ -434,11 +439,11 @@ class Polynomial
 
     template<class Y> Y evaluate(const Vector<Y>& x) const;
   public:
-    unsigned int vector_size() const {
+    size_type vector_size() const {
         return _coefficients.size(); }
-    unsigned int word_size() const {
+    size_type word_size() const {
         return (_argument_size*+sizeof_word)/sizeof_word; }
-    unsigned int element_size() const {
+    size_type element_size() const {
         return (_argument_size+sizeof_word)/sizeof_word+sizeof_data/sizeof_word; }
   public:
     const word_type* _begin() const { return _coefficients.begin().operator->(); }
@@ -462,7 +467,7 @@ class Polynomial
         for(unsigned int j=0; j!=word_size(); ++j) { vp[j]=ap1[j]+ap2[j]; }
         data_type* xp=reinterpret_cast<data_type*>(this->_end())-1; *xp=x; }
   private:
-    unsigned int _argument_size;
+    size_type _argument_size;
     std::vector<word_type> _coefficients;
 };
 
@@ -490,7 +495,7 @@ inline void Polynomial<X>::cleanup() {
 #endif
 
 
-template<class X> inline Polynomial<X>::Polynomial(uint as, uint deg, double c0, ...)
+template<class X> inline Polynomial<X>::Polynomial(unsigned int as, unsigned int deg, double c0, ...)
     : _argument_size(as)
 {
     MultiIndex a(as); double x;
@@ -500,6 +505,25 @@ template<class X> inline Polynomial<X>::Polynomial(uint as, uint deg, double c0,
         else { x=va_arg(args,double); }
         if(x!=0) { this->insert(a,x); }
         ++a;
+    }
+    va_end(args);
+    this->cleanup();
+}
+
+template<class X> inline Polynomial<X>::Polynomial(unsigned int as, unsigned int nnz, int a00, ...)
+    : _argument_size(as)
+{
+    MultiIndex a(as);
+    double x;
+    va_list args;
+    va_start(args,a00);
+    for(unsigned int i=0; i!=nnz; ++i) {
+        for(unsigned int j=0; j!=as; ++j) {
+            if(i==0 && j==0) { a[j]=a00; }
+            else { a[j]=va_arg(args,int); }
+        }
+        x=va_arg(args,double);
+        if(x!=0) { this->append(a,x); }
     }
     va_end(args);
     this->cleanup();
@@ -525,12 +549,12 @@ Polynomial<X>::Polynomial(const Polynomial<XX>& p)
 }
 
 
-template<class X> Polynomial<X> Polynomial<X>::variable(uint n, uint i) {
+template<class X> Polynomial<X> Polynomial<X>::variable(unsigned int n, unsigned int i) {
     Polynomial<X> p(n); p[MultiIndex::zero(n)]=0.0; p[MultiIndex::unit(n,i)]=X(1);
     return p;
 }
 
-template<class X> Vector< Polynomial<X> > Polynomial<X>::variables(uint n) {
+template<class X> Vector< Polynomial<X> > Polynomial<X>::variables(unsigned int n) {
     Vector< Polynomial<X> > pv(n,Polynomial<X>(n)); MultiIndex a(n);
     for(uint i=0; i!=n; ++i) { a[i]=1; pv[i][a]=1.0; a[i]=0; }
     return pv; 
@@ -678,7 +702,7 @@ Vector< Polynomial<X> > compose(const Vector< Polynomial<X> >& p, const Vector< 
 
 
 template<class X> inline
-Polynomial<X> embed(const Polynomial<X>& x, uint new_size, uint start)
+Polynomial<X> embed(const Polynomial<X>& x, unsigned int new_size, unsigned int start)
 {
     ARIADNE_ASSERT(x.argument_size()+start<=new_size);
     Polynomial<X> r(new_size);

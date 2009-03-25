@@ -64,6 +64,9 @@ void TestPolynomial::test_concept()
     p=Polynomial<Float>(3);
     p=Polynomial<Float>(cp);
 
+    p=Polynomial<Float>(3,1, 0.0, 0.0,0.0,0.0);
+    p=Polynomial<Float>(3,1, 1,2,3,5.0);
+
     p=Polynomial<Float>::variable(3u,0u);
     p=Polynomial<Float>::variables(3u)[0u];
 
@@ -119,9 +122,10 @@ void TestPolynomial::test_iterator_concept()
 
 void TestPolynomial::test_constructors()
 {
-    ARIADNE_TEST_CONSTRUCT(Polynomial<Float>,p3,(2,1, 1.,2.,3.));
     ARIADNE_TEST_CONSTRUCT(Polynomial<Float>,p1,(3));
     ARIADNE_TEST_CONSTRUCT(Polynomial<Float>,p2,(3,2, 0.,0.,0.,0., 1.,3.,0.,0.,1.,0.));
+    ARIADNE_TEST_CONSTRUCT(Polynomial<Float>,p3,(2,5, 1,2,5.0, 0,0,2.0, 1,0,3.0, 3,0,7.0, 0,1,11.0));
+    //TODO: Case for repeated index
 }
 
 void TestPolynomial::test_variables()
@@ -130,10 +134,10 @@ void TestPolynomial::test_variables()
     array< Vector<Float> > e=Vector<Float>::units(2);
 
     ARIADNE_TEST_EVALUATE(x[0]*(x[1]*3.0+x[0])+x[1]*x[2]);
-    ARIADNE_TEST_EQUAL((x[0]*(x[1]*3.0+x[0])+x[1]*x[2]),Polynomial<Float>(3,2, 0.,0.,0.,0., 1.,3.,0.,0.,1.,0.));
-    ARIADNE_TEST_EQUAL((e[1]*(x[0]*(x[1]*3.0+x[0])+x[1]*x[2]))[1],Polynomial<Float>(3,2, 0.,0.,0.,0., 1.,3.,0.,0.,1.,0.));
-    ARIADNE_TEST_EQUAL((e[1]*(x[0]*(x[1]*3.0+x[0])+x[1]*x[2]))[0],Polynomial<Float>(3,0, 0.,0.,0.,0., 0.,0.,0.,0.,0.,0.));
-    ARIADNE_TEST_EQUAL((e[1]*(x[0]*(x[1]*3.0+x[0])+x[1]*x[2]))[0],Polynomial<Float>(3,1, 0.));
+    ARIADNE_TEST_EQUAL((x[0]*(x[1]*3.0+x[0])+x[1]*x[2]), Polynomial<Float>(3,3, 1,1,0,3.0, 2,0,0,1.0, 0,1,1,1.0));
+    ARIADNE_TEST_EQUAL((e[1]*(x[0]*(x[1]*3.0+x[0])+x[1]*x[2]))[1], Polynomial<Float>(3,3, 1,1,0,3.0, 2,0,0,1.0, 0,1,1,1.0));
+    ARIADNE_TEST_EQUAL((e[1]*(x[0]*(x[1]*3.0+x[0])+x[1]*x[2]))[0], Polynomial<Float>(3));
+    ARIADNE_TEST_EQUAL((e[1]*(x[0]*(x[1]*3.0+x[0])+x[1]*x[2]))[0], Polynomial<Float>(3,0, 0.0));
     
 }
 

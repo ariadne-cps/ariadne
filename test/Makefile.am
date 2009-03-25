@@ -17,11 +17,11 @@ check_PROGRAMS = \
 	test_interval \
 	test_vector \
 	test_matrix \
-	test_function \
 	test_multi_index \
 	test_polynomial \
 	test_differential \
 	test_taylor_variable \
+	test_function \
 	test_taylor_function \
 	test_taylor_set \
 	test_grid_set \

@@ -70,7 +70,7 @@ void profile(uint ntries, string name, TaylorFunctionPtr fn, const Vector<Taylor
     t=tm.elapsed();
     std::cout << name << ":\n"
               << "  time = "<<std::setprecision(5)<<1000000*(t/ntries)<<"us\n"
-              << "  size = "<<res.nnz()<<"\n"
+              << "  size = "<<res.number_of_nonzeros()<<"\n"
               << "  error = "<<res.error()<<"\n"
               << std::endl;
 }

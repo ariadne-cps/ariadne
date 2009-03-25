@@ -40,9 +40,10 @@ void read(MultiIndex& j, const boost::python::object& obj) {
 }
 
 
-void read(Polynomial<Float>& p, const boost::python::object& obj) {
-    Float c;
-    MultiIndex j(0);
+template<class K, class V>
+void read(std::map<K,V>& m, const boost::python::object& obj) {
+    V c;
+    K j;
     boost::python::dict dct=extract<boost::python::dict>(obj);
     boost::python::list lst=dct.items();
     for(int i=0; i!=len(lst); ++i) {
@@ -50,21 +51,21 @@ void read(Polynomial<Float>& p, const boost::python::object& obj) {
         read(j,tup[0]);
         read(c,tup[1]);
         if(i==0) { 
-            p=Polynomial<Float>(j.size());
+            m=std::map<K,V>();
         }
-        p[j]=c;
+        m[j]=c;
     }
 }
 
 
 
 void read(TaylorVariable& tv, const boost::python::object& obj1, const boost::python::object& obj2) {
-    Polynomial<Float> p;
+    std::map<MultiIndex,Float> m;
     Float e;
-    read(p,obj1);
+    read(m,obj1);
     read(e,obj2); 
     ARIADNE_ASSERT(e>=0);
-    tv=TaylorVariable(p,e);
+    tv=TaylorVariable(m,e);
 }
    
 
@@ -101,10 +102,10 @@ void read(TaylorVariable& tv, const boost::python::object& obj) {
     if(check(extract<boost::python::tuple>(obj))) {
          read(tv,extract<boost::python::tuple>(obj)); 
     } else {
-        Polynomial<Float> p;
+        std::map<MultiIndex,Float> m;
         Float e=0;
-        read(p,obj);
-        tv=TaylorVariable(p,e);
+        read(m,obj);
+        tv=TaylorVariable(m,e);
     } 
 }
    

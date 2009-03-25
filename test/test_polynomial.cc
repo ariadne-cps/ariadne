@@ -38,6 +38,8 @@ class TestPolynomial
   public:
     void test();
   private:
+    void test_concept();
+    void test_iterator_concept();
     void test_constructors();
     void test_variables();
 };
@@ -50,9 +52,76 @@ void TestPolynomial::test()
 }
 
 
+void TestPolynomial::test_concept()
+{
+    Float x=0;
+    Vector<Float> v(3);
+    MultiIndex a(3);
+    Polynomial<Float> p(3);
+    const Polynomial<Float> cp(3);
+
+    p=Polynomial<Float>();
+    p=Polynomial<Float>(3);
+    p=Polynomial<Float>(cp);
+
+    p=Polynomial<Float>::variable(3u,0u);
+    p=Polynomial<Float>::variables(3u)[0u];
+
+    p=x;
+
+    p.reserve(2u);
+    p.insert(a,x);
+    p.append(a,x);
+    p.append(a,a,x);
+
+    x=cp[a];
+    p[a]=1.0;
+
+    cp.argument_size();
+    cp.evaluate(v);
+
+    p.erase(p.begin());
+
+    p.check();
+    p.cleanup();
+    p.clear();
+}
+
+void TestPolynomial::test_iterator_concept()
+{
+    MultiIndex a(3);
+    Polynomial<Float> p(3);
+    const Polynomial<Float> cp(3);
+
+    Polynomial<Float>::iterator iter=p.begin(); iter=p.end(); iter=p.find(a);
+    Polynomial<Float>::const_iterator citer=p.begin(); citer=p.end(); citer=p.find(a);
+    citer=p.begin(); citer=cp.end(); citer=cp.find(a);
+
+    Polynomial<Float>::value_type val=*iter;
+    Polynomial<Float>::reference ref=*iter;
+    Polynomial<Float>::pointer ptr=iter.operator->();
+    Polynomial<Float>::const_reference ncref=*iter;
+
+    // WARNING: Cannot convert non-constant pointer to constant pointer
+    //Polynomial<Float>::const_pointer ncptr=iter.operator->();
+
+    Polynomial<Float>::value_type cval=*citer;
+    Polynomial<Float>::const_reference cref=*citer;
+    Polynomial<Float>::const_pointer cptr=citer.operator->();
+
+    ++iter; --iter;
+    ++citer; --citer;
+
+    iter==iter; iter!=iter; citer==citer; citer!=citer;
+    citer==iter; citer!=iter; iter==citer; iter!=citer;
+
+}
+
 void TestPolynomial::test_constructors()
 {
-    Polynomial<Float> p(3);
+    ARIADNE_TEST_CONSTRUCT(Polynomial<Float>,p3,(2,1, 1.,2.,3.));
+    ARIADNE_TEST_CONSTRUCT(Polynomial<Float>,p1,(3));
+    ARIADNE_TEST_CONSTRUCT(Polynomial<Float>,p2,(3,2, 0.,0.,0.,0., 1.,3.,0.,0.,1.,0.));
 }
 
 void TestPolynomial::test_variables()
@@ -60,11 +129,11 @@ void TestPolynomial::test_variables()
     Vector< Polynomial<Float> > x=Polynomial<Float>::variables(3);
     array< Vector<Float> > e=Vector<Float>::units(2);
 
+    ARIADNE_TEST_EVALUATE(x[0]*(x[1]*3.0+x[0])+x[1]*x[2]);
     ARIADNE_TEST_EQUAL((x[0]*(x[1]*3.0+x[0])+x[1]*x[2]),Polynomial<Float>(3,2, 0.,0.,0.,0., 1.,3.,0.,0.,1.,0.));
     ARIADNE_TEST_EQUAL((e[1]*(x[0]*(x[1]*3.0+x[0])+x[1]*x[2]))[1],Polynomial<Float>(3,2, 0.,0.,0.,0., 1.,3.,0.,0.,1.,0.));
     ARIADNE_TEST_EQUAL((e[1]*(x[0]*(x[1]*3.0+x[0])+x[1]*x[2]))[0],Polynomial<Float>(3,0, 0.,0.,0.,0., 0.,0.,0.,0.,0.,0.));
     ARIADNE_TEST_EQUAL((e[1]*(x[0]*(x[1]*3.0+x[0])+x[1]*x[2]))[0],Polynomial<Float>(3,1, 0.));
-
     
 }
 

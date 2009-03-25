@@ -205,7 +205,7 @@ class TaylorVariable
     //! \brief The maximum degree of terms in the polynomial polynomial.
     uint degree() const { return (--this->_polynomial.end())->first.degree(); }
     //! \brief The number of nonzero terms in the polynomial polynomial.
-    uint nnz() const { return this->_polynomial.size(); }
+    uint number_of_nonzeros() const { return this->_polynomial.number_of_nonzeros(); }
     //@}
 
     //@{

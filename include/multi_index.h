@@ -42,24 +42,32 @@ typedef unsigned char uchar;
 typedef double Float;
 
 class MultiIndex;
-class MultiIndexReference;
-class MultiIndexConstReference;
-class MultiIndexElement;
+class MultiIndexValueReference;
 
 class MultiIndexBound;
 
+template<class T> class Reference;
+template<> class Reference<MultiIndex>;
+template<> class Reference<const MultiIndex>;
+
+//! \brief An array of non-negative integers, suitable for storing the
+//! powers of a term in some polynomial expansion, ordered by degree.
 class MultiIndex {
   public:
     typedef unsigned int size_type;
     typedef unsigned char byte_type;
     typedef unsigned int word_type;
-        
+
     typedef byte_type value_type;
+    typedef MultiIndexValueReference reference;
+    typedef const value_type& const_reference;
     //typedef unsigned int word_type;
     //typedef unsigned long long int word_type;
   public:
     /*! Destructor. */
     ~MultiIndex() { _deallocate(this->_p); }
+    /*! Construct a multi index with no coefficients. */
+    explicit MultiIndex();
     /*! Construct a multi index of degree \a 0 with \a nv variables. */
     explicit MultiIndex(size_type nv);
     /*! Construct a multi index with \a nv variables from the array \a ary. */
@@ -90,10 +98,10 @@ class MultiIndex {
      /*! The number of variables. */
     size_type number_of_variables() const;
     /*! The number of occurrences of the \a i th variable. */
-    value_type const& operator[](size_type i) const;
+    const_reference operator[](size_type i) const;
     /*! The number of occurrences of the \a i th variable. */
-    MultiIndexElement operator[](size_type i);
-        
+    reference operator[](size_type i);
+
     /*! Equality operator. */
     friend bool operator==(const MultiIndex& a1, const MultiIndex& a2); // inline
     /*! Inequality operator. */
@@ -117,6 +125,7 @@ class MultiIndex {
     friend MultiIndex operator-(const MultiIndex& a1, const MultiIndex& a2); // inline
     /*! Scalar product. */
     friend MultiIndex operator*(const MultiIndex& a, value_type s); // inline
+    /*! Scalar product. */
     friend MultiIndex operator*(value_type s, const MultiIndex& a); // inline
 
     /*! The position of the element in the array of tensor values. */
@@ -127,6 +136,7 @@ class MultiIndex {
     /*! The number of ordered index arrays with each element occurring the number of times specified by the multi index. */
     unsigned int number() const;
 
+    /*! Write to an output stream. */
     friend std::ostream& operator<<(std::ostream&, const MultiIndex&);
   public:
     value_type& at(size_type i) { return _p[i]; }
@@ -140,36 +150,46 @@ class MultiIndex {
     word_type* word_begin() { return reinterpret_cast<word_type*>(_p); }
     const word_type* word_begin() const { return reinterpret_cast<const word_type*>(_p); }
   public:
-    static size_type _word_size(size_type n) { return ((n*sizeof(byte_type))/sizeof(word_type)+1); }
-    static size_type _element_size(size_type n) { return ((n*sizeof(byte_type))/sizeof(word_type)+1+sizeof(double)/sizeof(word_type)); }
-    static value_type* _allocate(size_type n) { return reinterpret_cast<value_type*>(new word_type[_word_size(n)]); }
-    static void _deallocate(value_type* p) { delete[] reinterpret_cast<word_type*>(p); }
+    static size_type _word_size(size_type n) {
+        return ((n*sizeof(byte_type))/sizeof(word_type)+1); }
+    static size_type _element_size(size_type n) {
+        return ((n*sizeof(byte_type))/sizeof(word_type)+1+sizeof(double)/sizeof(word_type)); }
+    static value_type* _allocate(size_type n) {
+        return reinterpret_cast<value_type*>(new word_type[_word_size(n)]); }
+    static void _deallocate(value_type* p) {
+        delete[] reinterpret_cast<word_type*>(p); }
   private:
     size_type _n;
     value_type* _p;
 };
 
 
-class MultiIndexElement {
+class MultiIndexValueReference {
     typedef MultiIndex::size_type size_type;
     typedef MultiIndex::value_type value_type;
     typedef MultiIndex::word_type word_type;
   private:
     size_type _n; value_type* _p; size_type _i; 
   public:
-    MultiIndexElement(size_type n, value_type* p, size_type i) : _n(n), _p(p), _i(i) { }
+    MultiIndexValueReference(size_type n, value_type* p, size_type i) : _n(n), _p(p), _i(i) { }
     operator const value_type& () { return _p[_i]; }
-    MultiIndexElement& operator=(const value_type& d) { _p[_n]+=(d-_p[_i]); _p[_i]=d; return *this; }
-    MultiIndexElement& operator++() { ++_p[_n]; ++_p[_i]; return *this; }
-    MultiIndexElement& operator--();
+    MultiIndexValueReference& operator=(const value_type& d) { _p[_n]+=(d-_p[_i]); _p[_i]=d; return *this; }
+    MultiIndexValueReference& operator++() { ++_p[_n]; ++_p[_i]; return *this; }
+    MultiIndexValueReference& operator--();
 };
 
-inline MultiIndexElement& MultiIndexElement::operator--() { 
+inline MultiIndexValueReference& MultiIndexValueReference::operator--() {
     if(_p[_i]==0) { 
         ARIADNE_THROW(std::runtime_error,"--MultiIndex[i]"," decrementing zero value at "<<_i<<" in "<<reinterpret_cast<const MultiIndex&>(*this)); }
     ++_p[_n]; ++_p[_i]; return *this; 
 }
 
+
+inline MultiIndex::MultiIndex()
+    : _n(0), _p(_allocate(_n))
+{
+    for(size_type j=0; j!=word_size(); ++j) { word_at(j)=0; }
+}
 
 inline MultiIndex::MultiIndex(size_type n)
     : _n(n), _p(_allocate(_n))
@@ -242,8 +262,8 @@ inline MultiIndex::value_type const& MultiIndex::operator[](size_type i) const {
     assert(i<this->size()); return this->_p[i];
 }
 
-inline MultiIndexElement MultiIndex::operator[](size_type i) {
-    return MultiIndexElement(this->_n,this->_p,i);
+inline MultiIndexValueReference MultiIndex::operator[](size_type i) {
+    return MultiIndexValueReference(this->_n,this->_p,i);
 }
 
 
@@ -448,47 +468,6 @@ std::ostream& operator<<(std::ostream& os, const MultiIndex& a) {
 }
 
 
-
-class MultiIndexReference {
-    typedef MultiIndex::size_type size_type;
-    typedef MultiIndex::value_type value_type;
-    typedef MultiIndex::word_type word_type;
-  public:
-    MultiIndexReference(size_type n, void* p) : _n(n), _p(reinterpret_cast<value_type*>(p)) { }
-    MultiIndexReference(MultiIndex& a) : _n(a.size()), _p(a.begin()) { }
-    MultiIndexReference& operator=(const MultiIndex& a) { assert(_n==a.size());
-        for(size_type j=0; j!=this->word_size(); ++j) { this->word_at(j)=a.word_at(j); } return *this; }
-    MultiIndexReference& operator=(MultiIndexReference a) { assert(_n==a.size());
-        for(size_type j=0; j!=this->word_size(); ++j) { this->word_at(j)=a.word_at(j); } return *this; }
-    operator MultiIndex& () { return reinterpret_cast<MultiIndex&>(*this); }
-    operator MultiIndex const& () const { return reinterpret_cast<MultiIndex const&>(*this); }
-    size_type size() const { return this->_n; }
-    value_type degree() const { return this->_p[this->_n]; }
-    const value_type& operator[](size_type i) const { return this->_p[i]; }
-    const value_type* begin() const { return this->_p; }
-    size_type word_size() const { return MultiIndex::_word_size(this->_n); }
-    word_type& word_at(size_type j) { return reinterpret_cast<word_type*>(this->_p)[j]; }
-    const word_type& word_at(size_type j) const { return reinterpret_cast<const word_type*>(this->_p)[j]; }
-  private:
-    size_type _n; value_type* _p;
-};
-
-class MultiIndexConstReference {
-    typedef MultiIndex::size_type size_type;
-    typedef MultiIndex::value_type value_type;
-    typedef MultiIndex::word_type word_type;
-  public:
-    MultiIndexConstReference(size_type n, const void* p) : _n(n), _p(reinterpret_cast<const value_type*>(p)) { }
-    MultiIndexConstReference(const MultiIndex& a) : _n(a.size()), _p(a.begin()) { }
-    MultiIndexConstReference(MultiIndexReference a) : _n(a.size()), _p(a.begin()) { }
-    operator MultiIndex const& () const { return reinterpret_cast<MultiIndex const&>(*this); }
-    size_type size() const { return this->_n; }
-    value_type degree() const { return this->_p[this->_n]; }
-    const value_type& operator[](size_type i) const { return this->_p[i]; }
-    const value_type* begin() const { return this->_p; }
-  private:
-    size_type _n; const value_type* _p;
-};
 
 
 

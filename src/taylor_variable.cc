@@ -82,7 +82,7 @@ TaylorVariable::TaylorVariable(uint as, uint deg, const double* ptr, const doubl
         if(*ptr!=0.0 || j.degree()<=1) { this->_polynomial.append(j,*ptr); }
         ++ptr;
     }
-    this->_polynomial.sort();
+    this->_polynomial.cleanup();
     if(err<0) { std::cerr<<err<<std::endl; } ARIADNE_ASSERT(this->_error>=0);
 }
 
@@ -101,7 +101,7 @@ TaylorVariable::TaylorVariable(uint as, uint deg, double d0, ...)
     }
     this->_error=x;
     va_end(args);
-    this->_polynomial.sort();
+    this->_polynomial.cleanup();
     ARIADNE_ASSERT(this->_error>=0);
 }
 
@@ -127,7 +127,7 @@ TaylorVariable::TaylorVariable(uint as, uint nnz, uint a0, ...)
     double e=va_arg(args,double);
     this->error()=e;
     va_end(args);
-    this->_polynomial.sort();
+    this->_polynomial.cleanup();
     ARIADNE_ASSERT(this->_error>=0);
 }
 
@@ -592,8 +592,9 @@ TaylorVariable::truncate(const MultiIndex& a)
     Float e=0;
     for(iterator iter=this->_polynomial.begin(); iter!=this->end(); ) {
         bool erase=false;
+        const MultiIndex& b=iter->first;
         for(uint i=0; i!=a.size(); ++i) {
-            if(a[i] < iter->first[i]) {
+            if(a[i] < b[i]) {
                 erase=true;
                 break;
             }
@@ -1782,7 +1783,7 @@ Vector<TaylorVariable>::Vector(uint rs, uint as, uint deg, double x0, ...)
         }
         (*this)[i].error()=x;
         x=va_arg(args,double);
-        (*this)[i].polynomial().sort();
+        (*this)[i].polynomial().cleanup();
         (*this)[i].clean();
     }
     va_end(args);

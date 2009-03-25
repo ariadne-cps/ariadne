@@ -99,7 +99,7 @@ TaylorSet::TaylorSet(uint rs, uint as, uint deg, double x0, ...)
         }
         (*this)[i].error()=x;
         x=va_arg(args,double);
-        (*this)[i].polynomial().sort();
+        (*this)[i].polynomial().cleanup();
         (*this)[i].clean();
     }
     va_end(args);

@@ -239,13 +239,14 @@ class TestDifferentialVector {
     }
 
     void test_differentiate() {
-        double a[]={ 1,2,3,4,5,6,7,8,9,10 };
-        DifferentialType y(2,3,a);
-        cout << "y=" << y << endl;
-        ARIADNE_TEST_EXECUTE(antiderivative(y,0));
-        DifferentialType z=antiderivative(y,0);
-        cout << "z=" << z << endl;
-        ARIADNE_TEST_EXECUTE(derivative(z,0));
+        double ax[]={ 2,12,7,33,24,13 };
+        DifferentialType x(2,2,ax);
+        double ay[]={ 1,2,3,6,7,9,11,12,13,14 };
+        DifferentialType y(2,3,ay);
+        double az[]={ 0, 1.0,0.0, 1.0,3.0,0.0, 2.0,3.5,9.0,0.0, 2.75,4.0,6.5,14.0,0.0 };
+        DifferentialType z(2,4,az);
+        ARIADNE_TEST_EQUAL(derivative(y,0),x);
+        ARIADNE_TEST_EQUAL(antiderivative(y,0),z);
         ARIADNE_TEST_EQUAL(derivative(antiderivative(y,0),0),y);
     }
 
@@ -277,9 +278,11 @@ class TestDifferentialVector {
 };
 
 int main() {
-#ifdef HAVE_GMPXX_H
-    TestDifferential< Differential<Rational> > t1;
-    TestDifferentialVector< Differential<Rational> > t2;
+    TestDifferential< Differential<Float> > tf;
+    TestDifferentialVector< Differential<Float> > tfv;
+#if defined HAVE_GMPXX_H and not defined ARIADNE_USE_ARRAY_EXPANSION
+    TestDifferential< Differential<Rational> > tq;
+    TestDifferentialVector< Differential<Rational> > tqv;
 #endif
     cout << "INCOMPLETE " << flush;
     return ARIADNE_TEST_FAILURES;

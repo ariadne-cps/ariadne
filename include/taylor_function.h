@@ -31,6 +31,7 @@
 #include <iosfwd>
 #include "numeric.h"
 #include "vector.h"
+#include "taylor_variable.h"
 
 namespace Ariadne {
 

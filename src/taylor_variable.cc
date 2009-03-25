@@ -29,7 +29,7 @@
 #include "numeric.h"
 #include "vector.h"
 #include "matrix.h"
-#include "polynomial.h"
+#include "expansion.h"
 #include "differential.h"
 #include "taylor_variable.h"
 #include "exceptions.h"
@@ -40,7 +40,7 @@ namespace Ariadne {
 const double TaylorVariable::em=2.2204460492503131e-16;
 const double TaylorVariable::ec=em/2;
 
-template<class X> X Polynomial<X>::_zero = 0.0;
+template<class X> X Expansion<X>::_zero = 0.0;
 
 double TaylorVariable::_default_sweep_threshold=1e-18;
 uint TaylorVariable::_default_maximum_degree=16;
@@ -48,14 +48,14 @@ uint TaylorVariable::_default_maximum_degree=16;
 
 
 TaylorVariable::TaylorVariable()
-    : _polynomial(0), _error(0),
+    : _expansion(0), _error(0),
       _sweep_threshold(_default_sweep_threshold),
       _maximum_degree(_default_maximum_degree),
       _maximum_index(0,_default_maximum_degree)
 { }
 
 TaylorVariable::TaylorVariable(uint as)
-    : _polynomial(as), _error(0),
+    : _expansion(as), _error(0),
       _sweep_threshold(_default_sweep_threshold),
       _maximum_degree(_default_maximum_degree),
       _maximum_index(as,_default_maximum_degree)
@@ -63,7 +63,7 @@ TaylorVariable::TaylorVariable(uint as)
 }
 
 TaylorVariable::TaylorVariable(const std::map<MultiIndex,Float>& d, const Float& e)
-    : _polynomial(d), _error(e),
+    : _expansion(d), _error(e),
       _sweep_threshold(_default_sweep_threshold),
       _maximum_degree(_default_maximum_degree),
       _maximum_index(d.begin()->first.size(),_default_maximum_degree)
@@ -73,21 +73,21 @@ TaylorVariable::TaylorVariable(const std::map<MultiIndex,Float>& d, const Float&
 }
 
 TaylorVariable::TaylorVariable(uint as, uint deg, const double* ptr, const double& err)
-    : _polynomial(as), _error(err),
+    : _expansion(as), _error(err),
       _sweep_threshold(_default_sweep_threshold),
       _maximum_degree(_default_maximum_degree),
       _maximum_index(as,_default_maximum_degree)
 {
     for(MultiIndex j(as); j.degree()<=deg; ++j) {
-        if(*ptr!=0.0 || j.degree()<=1) { this->_polynomial.append(j,*ptr); }
+        if(*ptr!=0.0 || j.degree()<=1) { this->_expansion.append(j,*ptr); }
         ++ptr;
     }
-    this->_polynomial.cleanup();
+    this->_expansion.cleanup();
     if(err<0) { std::cerr<<err<<std::endl; } ARIADNE_ASSERT(this->_error>=0);
 }
 
 TaylorVariable::TaylorVariable(uint as, uint deg, double d0, ...)
-    : _polynomial(as), _error(0),
+    : _expansion(as), _error(0),
       _sweep_threshold(_default_sweep_threshold),
       _maximum_degree(_default_maximum_degree),
       _maximum_index(as,_default_maximum_degree)
@@ -96,17 +96,17 @@ TaylorVariable::TaylorVariable(uint as, uint deg, double d0, ...)
     va_list args;
     va_start(args,d0);
     for(MultiIndex j(as); j.degree()<=deg; ++j) {
-        if(x!=0.0 || j.degree()<=1) { this->_polynomial.append(j,x); }
+        if(x!=0.0 || j.degree()<=1) { this->_expansion.append(j,x); }
         x=va_arg(args,double);
     }
     this->_error=x;
     va_end(args);
-    this->_polynomial.cleanup();
+    this->_expansion.cleanup();
     ARIADNE_ASSERT(this->_error>=0);
 }
 
 TaylorVariable::TaylorVariable(uint as, uint nnz, uint a0, ...)
-    : _polynomial(as), _error(0),
+    : _expansion(as), _error(0),
       _sweep_threshold(_default_sweep_threshold),
       _maximum_degree(_default_maximum_degree),
       _maximum_index(as,_default_maximum_degree)
@@ -122,12 +122,12 @@ TaylorVariable::TaylorVariable(uint as, uint nnz, uint a0, ...)
             a[j]=aj;
         }
         x=va_arg(args,double);
-        this->_polynomial[a]=x;
+        this->_expansion[a]=x;
     }
     double e=va_arg(args,double);
     this->error()=e;
     va_end(args);
-    this->_polynomial.cleanup();
+    this->_expansion.cleanup();
     ARIADNE_ASSERT(this->_error>=0);
 }
 
@@ -144,7 +144,7 @@ TaylorVariable TaylorVariable::scaling(uint as, uint i, const Interval& r)
 
 /*
 TaylorVariable::TaylorVariable(uint as, uint deg, double d0, ...)
-    : _polynomial(as), _error(0),
+    : _expansion(as), _error(0),
       _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree)
 {
     double x=d0;
@@ -160,7 +160,7 @@ TaylorVariable::TaylorVariable(uint as, uint deg, double d0, ...)
 
     size_t i=0;
     for(MultiIndex j(as); j.degree()<=deg; ++j) {
-        this->_polynomial[j]=values[i]; ++i;
+        this->_expansion[j]=values[i]; ++i;
     }
     ARIADNE_ASSERT(this->_error>=0);
 }
@@ -172,8 +172,8 @@ TaylorVariable::TaylorVariable(uint as, uint deg, double d0, ...)
 TaylorVariable&
 TaylorVariable::operator=(const Float& c)
 {
-    this->_polynomial.clear();
-    this->_polynomial[MultiIndex::zero(this->argument_size())]=c;
+    this->_expansion.clear();
+    this->_expansion[MultiIndex::zero(this->argument_size())]=c;
     this->_error=0;
     return *this;
 }
@@ -181,8 +181,8 @@ TaylorVariable::operator=(const Float& c)
 TaylorVariable&
 TaylorVariable::operator=(const Interval& c)
 {
-    this->_polynomial.clear();
-    this->_polynomial[MultiIndex::zero(this->argument_size())]=c.midpoint();
+    this->_expansion.clear();
+    this->_expansion[MultiIndex::zero(this->argument_size())]=c.midpoint();
     this->_error=c.radius();
     return *this;
 }
@@ -196,7 +196,7 @@ void scal(TaylorVariable& r, const Float& c)
 
     // Shortcuts for special cases
     if(c==0.0) {
-        r.polynomial().clear();
+        r.expansion().clear();
         re=0;
         return;
     }
@@ -363,26 +363,26 @@ void acc2(TaylorVariable& x, const TaylorVariable& y)
     yiter=y.begin();
     while(xiter!=x.end() && yiter!=y.end()) {
         if(xiter->first<yiter->first) {
-            r.polynomial().append(xiter->first,xiter->second);
+            r.expansion().append(xiter->first,xiter->second);
             ++xiter;
         } else if(yiter->first<xiter->first) {
-            r.polynomial().append(yiter->first,yiter->second);
+            r.expansion().append(yiter->first,yiter->second);
             ++yiter;
         } else {
-            r.polynomial().append(xiter->first,xiter->second+yiter->second);
+            r.expansion().append(xiter->first,xiter->second+yiter->second);
             ++xiter; ++yiter;
         }
     }
     while(xiter!=x.end()) {
-        r.polynomial().append(xiter->first,xiter->second);
+        r.expansion().append(xiter->first,xiter->second);
         ++xiter;
     }
     while(yiter!=y.end()) {
-        r.polynomial().append(yiter->first,yiter->second);
+        r.expansion().append(yiter->first,yiter->second);
         ++yiter;
     }
     
-    x.polynomial().swap(r.polynomial());
+    x.expansion().swap(r.expansion());
     x.error()=r.error();
     
     return;
@@ -472,11 +472,11 @@ void mulacc2(TaylorVariable& r, const TaylorVariable& x, const TaylorVariable& y
         t.error()=te/2;
         set_rounding_to_nearest();
         for(TaylorVariable::const_iterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
-            t.polynomial().append(xiter->first,yiter->first,xiter->second*yiter->second);
+            t.expansion().append(xiter->first,yiter->first,xiter->second*yiter->second);
         }
         r+=t;
         //std::cerr<<"  t="<<t<<"\n  r="<<r<<std::endl;
-        t.polynomial().clear();
+        t.expansion().clear();
         t.error()=0.0;
     }
     
@@ -524,14 +524,14 @@ TaylorVariable::clean(uint deg, double eps)
     set_rounding_upward();
     for(TaylorVariable::const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
         if(iter->first.degree()==0 || (iter->first.degree() <= deg && abs(iter->second)>=eps)) {
-            r.polynomial().append(iter->first,iter->second);
+            r.expansion().append(iter->first,iter->second);
         } else {
             r.error()+=abs(iter->second);
         }
     }
     set_rounding_to_nearest();
     
-    this->polynomial().swap(r.polynomial());
+    this->expansion().swap(r.expansion());
     this->error()=r.error();
            
     return *this;
@@ -547,11 +547,11 @@ TaylorVariable&
 TaylorVariable::sweep(double m)
 {
     this->clean(255,m);
-    for(iterator iter=this->_polynomial.begin(); iter!=this->end(); ) {
+    for(iterator iter=this->_expansion.begin(); iter!=this->end(); ) {
         Float a=abs(iter->second);
         if(abs(iter->second)<=m) {
             this->_error+=a;
-           _polynomial.erase(iter++);
+           _expansion.erase(iter++);
         } else {
             ++iter;
         }
@@ -571,10 +571,10 @@ TaylorVariable::truncate(uint d)
     this->clean(d,0.0);
     set_rounding_upward();
     Float e=0;
-    for(iterator iter=this->_polynomial.begin(); iter!=this->end(); ) {
+    for(iterator iter=this->_expansion.begin(); iter!=this->end(); ) {
         if(iter->first.degree()>d) {
             e+=abs(iter->second);
-            this->_polynomial.erase(iter++);
+            this->_expansion.erase(iter++);
         } else {
             ++iter;
         }
@@ -590,7 +590,7 @@ TaylorVariable::truncate(const MultiIndex& a)
     ARIADNE_ASSERT(a.size()==this->argument_size());
     set_rounding_upward();
     Float e=0;
-    for(iterator iter=this->_polynomial.begin(); iter!=this->end(); ) {
+    for(iterator iter=this->_expansion.begin(); iter!=this->end(); ) {
         bool erase=false;
         const MultiIndex& b=iter->first;
         for(uint i=0; i!=a.size(); ++i) {
@@ -601,7 +601,7 @@ TaylorVariable::truncate(const MultiIndex& a)
         }
         if(erase) {
             e+=abs(iter->second);
-            this->_polynomial.erase(iter++);
+            this->_expansion.erase(iter++);
         } else {
             ++iter;
         }
@@ -617,10 +617,10 @@ TaylorVariable::truncate(const MultiIndexBound& b)
     ARIADNE_ASSERT(b.size()==this->argument_size());
     set_rounding_upward();
     Float e=0;
-    for(iterator iter=this->_polynomial.begin(); iter!=this->end(); ) {
+    for(iterator iter=this->_expansion.begin(); iter!=this->end(); ) {
         if(!(iter->first<=b)) {
             e+=abs(iter->second);
-            this->_polynomial.erase(iter++);
+            this->_expansion.erase(iter++);
         } else {
             ++iter;
         }
@@ -640,9 +640,9 @@ TaylorVariable::clobber()
 TaylorVariable&
 TaylorVariable::clobber(uint o)
 {
-    for(iterator iter=this->_polynomial.begin(); iter!=this->end(); ) {
+    for(iterator iter=this->_expansion.begin(); iter!=this->end(); ) {
         if(iter->first.degree()>o) {
-           _polynomial.erase(iter++);
+           _expansion.erase(iter++);
         } else {
             ++iter;
         }
@@ -655,10 +655,10 @@ TaylorVariable&
 TaylorVariable::clobber(uint so, uint to)
 {
     uint n=this->argument_size()-1;
-    for(iterator iter=this->_polynomial.begin(); iter!=this->end(); ) {
+    for(iterator iter=this->_expansion.begin(); iter!=this->end(); ) {
         const MultiIndex& a=iter->first;
         if(a[n]>to || a.degree()>so+a[n]) {
-            this->_polynomial.erase(iter++);
+            this->_expansion.erase(iter++);
         } else {
             ++iter;
         }
@@ -945,7 +945,7 @@ TaylorVariable mul(const TaylorVariable& x, const TaylorVariable& y) {
 TaylorVariable neg(const TaylorVariable& x) {
     TaylorVariable r(x.argument_size());
     for(TaylorVariable::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
-        r.polynomial().append(xiter->first,-xiter->second);
+        r.expansion().append(xiter->first,-xiter->second);
     }
     r.error()=x.error();
     return r;
@@ -1012,23 +1012,23 @@ typedef Series<Interval>(*series_function_pointer)(uint,const Interval&);
 
 struct TaylorSeries {
     typedef Series<Interval>(*series_function_pointer)(uint,const Interval&);
-    TaylorSeries(uint d) : polynomial(d+1), error(0) { }
+    TaylorSeries(uint d) : expansion(d+1), error(0) { }
     TaylorSeries(uint degree, series_function_pointer function,
                  const Float& centre, const Interval& domain);
-    uint degree() const { return polynomial.size()-1; }
-    Float& operator[](uint i) { return polynomial[i]; }
-    array<Float> polynomial;
+    uint degree() const { return expansion.size()-1; }
+    Float& operator[](uint i) { return expansion[i]; }
+    array<Float> expansion;
     Interval error;
     void sweep(Float e) {
         for(uint i=0; i<=degree(); ++i) {
-            if(abs(polynomial[i])<=e) {
-                error+=polynomial[i]*Interval(-1,1);
-                polynomial[i]=0; } } }
+            if(abs(expansion[i])<=e) {
+                error+=expansion[i]*Interval(-1,1);
+                expansion[i]=0; } } }
 };
 
 TaylorSeries::TaylorSeries(uint d, series_function_pointer fn,
                            const Float& c, const Interval& r)
-    : polynomial(d+1), error(0)
+    : expansion(d+1), error(0)
 {
     Series<Interval> centre_series=fn(d,Interval(c));
     Series<Interval> range_series=fn(d,r);
@@ -1037,20 +1037,20 @@ TaylorSeries::TaylorSeries(uint d, series_function_pointer fn,
     //std::cerr<<"\nc="<<c<<" r="<<r<<" e="<<e<<"\n";
     //std::cerr<<"centre_series="<<centre_series<<"\nrange_series="<<range_series<<"\n";
     for(uint i=0; i!=d; ++i) {
-        this->polynomial[i]=midpoint(centre_series[i]);
-        this->error+=(centre_series[i]-this->polynomial[i])*p;
+        this->expansion[i]=midpoint(centre_series[i]);
+        this->error+=(centre_series[i]-this->expansion[i])*p;
         p*=e;
     }
-    //this->polynomial[d]=midpoint(centre_series[d]);
-    this->polynomial[d]=midpoint(range_series[d]);
-    this->error+=(range_series[d]-this->polynomial[d])*p;
-    //std::cerr<<"polynomial="<<this->polynomial<<"\nerror="<<this->error<<"\n";
+    //this->expansion[d]=midpoint(centre_series[d]);
+    this->expansion[d]=midpoint(range_series[d]);
+    this->error+=(range_series[d]-this->expansion[d])*p;
+    //std::cerr<<"expansion="<<this->expansion<<"\nerror="<<this->error<<"\n";
 }
 
 
 std::ostream&
 operator<<(std::ostream& os, const TaylorSeries& ts) {
-    return os<<"TS("<<ts.polynomial<<","<<ts.error<<")";
+    return os<<"TS("<<ts.expansion<<","<<ts.error<<")";
 }
 
 
@@ -1063,11 +1063,11 @@ _compose(const TaylorSeries& ts, const TaylorVariable& tv, Float eps)
     Float vtmp=vref;
     vref=0.0;
     TaylorVariable r(tv.argument_size());
-    r+=ts.polynomial[ts.polynomial.size()-1];
-    for(uint i=1; i!=ts.polynomial.size(); ++i) {
+    r+=ts.expansion[ts.expansion.size()-1];
+    for(uint i=1; i!=ts.expansion.size(); ++i) {
         //std::cerr<<"    r="<<r<<std::endl;
         r=r*tv;
-        r+=ts.polynomial[ts.polynomial.size()-i-1];
+        r+=ts.expansion[ts.expansion.size()-i-1];
         r.sweep(eps);
     }
     //std::cerr<<"    r="<<r<<std::endl;
@@ -1728,7 +1728,7 @@ TaylorVariable embed(const TaylorVariable& x, uint new_size, uint start)
 {
     ARIADNE_ASSERT(x.argument_size()+start<=new_size);
     TaylorVariable r(new_size);
-    r.polynomial()=embed(x.polynomial(),new_size,start);
+    r.expansion()=x.expansion().embed(new_size,start);
     r.set_error(x.error());
     return r;
 }
@@ -1748,8 +1748,8 @@ std::string
 TaylorVariable::str() const
 {
     std::stringstream ss;
-    for(TaylorVariable::const_iterator iter=this->_polynomial.begin();
-        iter!=this->_polynomial.end(); ++iter)
+    for(TaylorVariable::const_iterator iter=this->_expansion.begin();
+        iter!=this->_expansion.end(); ++iter)
     {
         const MultiIndex& j=iter->first;
         const Float& c=iter->second;
@@ -1762,9 +1762,9 @@ TaylorVariable::str() const
 
 std::ostream&
 operator<<(std::ostream& os, const TaylorVariable& tv) {
-    //    return os << "TaylorVariable( polynomial=" << tv.polynomial() << ", error=" << tv.error()
+    //    return os << "TaylorVariable( expansion=" << tv.expansion() << ", error=" << tv.error()
     //              << ", range="<<tv.range()<<" )";
-    return os << "TaylorVariable(" << tv.polynomial() << "," << tv.error() << ")";
+    return os << "TaylorVariable(" << tv.expansion() << "," << tv.error() << ")";
 }
 
 
@@ -1778,12 +1778,12 @@ Vector<TaylorVariable>::Vector(uint rs, uint as, uint deg, double x0, ...)
     for(uint i=0; i!=rs; ++i) {
         (*this)[i]=TaylorVariable(as);
         for(MultiIndex j(as); j.degree()<=deg; ++j) {
-            if(x!=0.0 || j.degree()<=1) { (*this)[i].polynomial().append(j,x); }
+            if(x!=0.0 || j.degree()<=1) { (*this)[i].expansion().append(j,x); }
             x=va_arg(args,double);
         }
         (*this)[i].error()=x;
         x=va_arg(args,double);
-        (*this)[i].polynomial().cleanup();
+        (*this)[i].expansion().cleanup();
         (*this)[i].clean();
     }
     va_end(args);

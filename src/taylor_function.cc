@@ -30,6 +30,7 @@
 #include "vector.h"
 #include "matrix.h"
 #include "multi_index.h"
+#include "polynomial.h"
 #include "differential.h"
 #include "function_interface.h"
 #include "taylor_variable.h"
@@ -276,9 +277,9 @@ TaylorFunction::jacobian(const Vector<Float>& x) const
         s[j].set_value((x[j]-dj.midpoint())/dj.radius());
         s[j].set_gradient(j,1/dj.radius());
     }
-    Vector< Polynomial<Float> > p(this->result_size(),this->argument_size());
+    Vector< Expansion<Float> > p(this->result_size(),this->argument_size());
     for(uint i=0; i!=this->result_size(); ++i) {
-        p[i]=this->variables()[i].polynomial();
+        p[i]=this->variables()[i].expansion();
     }
     Vector< Differential<Float> > d=Ariadne::evaluate(p,s);
     //std::cerr<<"  x="<<x<<"\n  p="<<p<<"\n"<<"  s="<<s<<"\n  p.s="<<d<<"\n  J="<<d.jacobian()<<"\n"<<std::endl;
@@ -295,9 +296,9 @@ TaylorFunction::jacobian(const Vector<Interval>& x) const
         s[j].set_value((x[j]-dj.midpoint())/dj.radius());
         s[j].set_gradient(j,1/dj.radius());
     }
-    Vector< Polynomial<Float> > p(this->result_size(),this->argument_size());
+    Vector< Expansion<Float> > p(this->result_size(),this->argument_size());
     for(uint i=0; i!=this->result_size(); ++i) {
-        p[i]=this->variables()[i].polynomial();
+        p[i]=this->variables()[i].expansion();
     }
     Vector< Differential<Interval> > d=Ariadne::evaluate(p,s);
     //std::cerr<<"  x="<<x<<"\n  p="<<p<<"\n"<<"  s="<<s<<"\n  p.s="<<d<<"\n  J="<<d.jacobian()<<"\n"<<std::endl;
@@ -915,7 +916,7 @@ TaylorFunction::write(std::ostream& os) const
 {
     os << "TaylorFunction( "<<this->_domain<<" , ";
     for(uint i=0; i!=this->result_size(); ++i) { 
-        os << (i==0?'[':',')<<this->_variables[i].polynomial()<<","<<this->_variables[i].error();
+        os << (i==0?'[':',')<<this->_variables[i].expansion()<<","<<this->_variables[i].error();
     }
     return os << "] )";
     /*

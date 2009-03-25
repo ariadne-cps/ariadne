@@ -24,6 +24,5 @@
 #include "differential.h"
 
 namespace Ariadne {
-template class Differential<Float>;
-//template class Vector< Differential<Float> >;
+
 }

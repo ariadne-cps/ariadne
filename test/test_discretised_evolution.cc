@@ -135,10 +135,11 @@ void TestDiscretisedEvolution::test_discrete_time() const
     ListSet<DefaultEnclosureType> const& reach_set=evolve_orbit.reach()[location];
     ListSet<DefaultEnclosureType> const& intermediate_set=evolve_orbit.intermediate()[location];
     ListSet<DefaultEnclosureType> const& final_set=evolve_orbit.final()[location];
+    HybridGrid hgrid(ha.state_space(),Float(1.0));
 
     // Compute the reachable sets
     Orbit<HybridGridCell> discrete_orbit
-        = discrete_evolver.upper_evolution(ha,hybrid_initial_cell,htime,depth);
+        = discrete_evolver.upper_evolution(ha,hybrid_initial_cell,htime,hgrid,depth);
     cout << "Finished computing grid evolution." << endl;
 
     GridTreeSet const& reach_cells=discrete_orbit.reach()[location];
@@ -235,10 +236,11 @@ void TestDiscretisedEvolution::test_continuous_time() const
     ListSet<DefaultEnclosureType> const& reach_set=evolve_orbit.reach()[location];
     ListSet<DefaultEnclosureType> const& intermediate_set=evolve_orbit.intermediate()[location];
     ListSet<DefaultEnclosureType> const& final_set=evolve_orbit.final()[location];
+    HybridGrid hvdpgrid(hvdp.state_space(),Float(1.0));
 
     // Compute the reachable sets
     Orbit<HybridGridCell> discrete_orbit
-        = discretiser.upper_evolution(hvdp,hybrid_initial_cell,htime,depth);
+        = discretiser.upper_evolution(hvdp,hybrid_initial_cell,htime,hvdpgrid,depth);
     GridTreeSet const& reach_cells=discrete_orbit.reach()[location];
     GridTreeSet const& intermediate_cells=discrete_orbit.intermediate()[location];
     GridTreeSet const& final_cells=discrete_orbit.final()[location];

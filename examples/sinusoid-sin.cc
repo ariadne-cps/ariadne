@@ -74,14 +74,15 @@ int main()
     HybridEnclosureType initial_enclosure(l1,initial_box);
   
     HybridTime evolution_time(3*pi<Float>(),2);
- 
+/* 
     std::cout << "Computing orbit... " << std::flush;
     OrbitType orbit = evolver.orbit(sinusoid,initial_enclosure,evolution_time,LOWER_SEMANTICS);
     std::cout << "done." << std::endl;
 
     //std::cout << "Orbit="<<orbit<<std::endl;
-
+*/
     Figure g;
+/*
     Box graphic_box(2, -0.01,2*pi<Float>()+0.01, -1.1,1.6);
     g.set_bounding_box(graphic_box);
     array<uint> p(2,1,0);
@@ -90,12 +91,14 @@ int main()
     g << fill_colour(Colour(0.0,0.5,1.0));
     g << orbit;
     g.write("sinusoid_sin_orbit");
-
+*/
     /// Create a ReachabilityAnalyser object
     global_verbosity = 3;
     HybridReachabilityAnalyser analyser(evolver);
     analyser.parameters().lock_to_grid_time = 2*pi<Float>();
-    analyser.parameters().maximum_grid_depth= 10;
+    analyser.parameters().grid_lengths= 0.5;
+    analyser.parameters().grid = Grid(Vector<Float>(2, 1.0, 0.25));
+    analyser.parameters().hybrid_grid = HybridGrid(sinusoid.state_space(), 0.1);
     std::cout <<  analyser.parameters() << std::endl;
 
     HybridImageSet initial_set;

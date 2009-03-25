@@ -270,11 +270,25 @@ class HybridGrid
     HybridGrid(const HybridSpace& hspc, const Float l=1.0) { 
         for(HybridSpace::locations_const_iterator loc_iter=hspc.begin();
             loc_iter!=hspc.end(); ++loc_iter) {
-            this->insert(make_pair(loc_iter->first,Grid(loc_iter->second,l))); } }
+            this->insert(make_pair(loc_iter->first,Grid(loc_iter->second,l)));
+        }
+    }
+    
+    HybridGrid(const HybridSpace& hspc, const Grid& grid) { 
+        for(HybridSpace::locations_const_iterator loc_iter=hspc.begin();
+            loc_iter!=hspc.end(); ++loc_iter) {
+            this->insert(make_pair(loc_iter->first,Grid(grid))); 
+        } 
+    }
+
     template<class HGSET> HybridGrid(const HGSET& set) {
         for(typename HGSET::locations_const_iterator loc_iter=set.
                 locations_begin(); loc_iter!=set.locations_end(); ++loc_iter) {
             this->insert(make_pair(loc_iter->first,loc_iter->second.grid())); }
+    }
+
+    HybridSpace state_space() const {
+        return HybridSpace(*this);
     }
 
     locations_const_iterator locations_begin() const { 

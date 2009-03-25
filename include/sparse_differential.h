@@ -309,7 +309,7 @@ SparseDifferential<X> operator/(const SparseDifferential<X>& x, const R& c)
 template<class X, class R>
 SparseDifferential<X> operator/(const R& c, const SparseDifferential<X>& x)
 {
-    SparseDifferential<X> r=reX(c)(x); r*=c; return r; 
+    SparseDifferential<X> r=rec(x); r*=X(c); return r;
 }
 
 

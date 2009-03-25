@@ -32,7 +32,6 @@
 
 #include "numeric.h"
 #include "evolver_interface.h"
-#include "discretiser_interface.h"
 #include "hybrid_automaton.h"
 #include "vector_field.h"
 
@@ -42,10 +41,12 @@
 namespace Ariadne {
   
 class VectorField;
+class Grid;
 class GridCell;
 class GridTreeSet;
 
 class HybridAutomaton;
+class HybridGrid;
 class HybridGridCell;
 class HybridGridTreeSet;
 
@@ -57,8 +58,7 @@ class HybridAutomaton;
  */
 template<class Sys, class ES>
 class Discretiser
-    : public DiscretiserInterface<Sys,GridCell>
-    , public Loggable
+    : public Loggable
 {
     typedef int AccuracyType;
     typedef Sys SystemType;
@@ -76,6 +76,9 @@ class Discretiser
     //!  and a scheme for approximating sets.
     Discretiser(const EvolverInterface<SystemType,EnclosureType>& evolver)
         : _evolver(evolver.clone()) { }
+
+    /*! \brief Destructor. */
+    virtual ~Discretiser() { }
       
     //! \brief Make a dynamically-allocated copy.
     Discretiser<Sys,ES>* clone() const { return new Discretiser<Sys,ES>(*this); }
@@ -91,13 +94,30 @@ class Discretiser
     evolution(const SystemType& system, 
               const BasicSetType& initial_set, 
               const TimeType& time, 
+              const Grid& grid,
               const AccuracyType accuracy, 
               const Semantics semantics) const;
+    
+    /*! \brief Compute a lower-approximation to the the reachable and evolved sets under the system evolution. */
+    virtual Orbit<BasicSetType> 
+    lower_evolution(const SystemType& system, 
+                    const BasicSetType& initial_set, 
+                    const TimeType& time, 
+                    const Grid& grid,
+                    const AccuracyType accuracy) const;
   
+    /*! \brief Compute a lower-approximation to the the reachable and evolved sets under the system evolution. */
+    virtual Orbit<BasicSetType> 
+    upper_evolution(const SystemType& system, 
+                    const BasicSetType& initial_set, 
+                    const TimeType& time, 
+                    const Grid& grid,
+                    const AccuracyType accuracy) const;  
   private:
     EnclosureType _enclosure(const BasicSetType& bs) const;
     Orbit<BasicSetType> _discretise(const Orbit<EnclosureType>& orb,
                                     const BasicSetType& initial_set,
+                                    const Grid& grid,                                  
                                     const AccuracyType accuracy) const;
   
 };
@@ -107,8 +127,7 @@ class Discretiser
  */
 template<class ES>
 class HybridDiscretiser
-    : public DiscretiserInterface<HybridAutomaton,HybridGridCell>
-    , public Loggable
+    : public Loggable
 {
     typedef int AccuracyType;
     typedef typename HybridAutomaton::TimeType TimeType;
@@ -142,6 +161,7 @@ class HybridDiscretiser
     evolution(const SystemType& system, 
               const BasicSetType& initial_set, 
               const TimeType& time, 
+              const HybridGrid& grid,
               const AccuracyType accuracy,
               const Semantics semantics) const;
 
@@ -151,6 +171,7 @@ class HybridDiscretiser
     reach(const SystemType& system, 
                 const BasicSetType& initial_set, 
                 const TimeType& time, 
+                const HybridGrid& grid,
                 const AccuracyType accuracy,
                 const Semantics semantics) const;
 
@@ -160,17 +181,37 @@ class HybridDiscretiser
     evolve(const SystemType& system, 
                  const BasicSetType& initial_set, 
                  const TimeType& time, 
+                 const HybridGrid& grid,
                  const AccuracyType accuracy,
                  const Semantics semantics) const;
+
+    /*! \brief Compute a lower-approximation to the the reachable and evolved sets under the system evolution. */
+    virtual Orbit<BasicSetType> 
+    lower_evolution(const SystemType& system, 
+                    const BasicSetType& initial_set, 
+                    const TimeType& time, 
+                    const HybridGrid& grid,
+                    const AccuracyType accuracy) const;
+  
+    /*! \brief Compute a lower-approximation to the the reachable and evolved sets under the system evolution. */
+    virtual Orbit<BasicSetType> 
+    upper_evolution(const SystemType& system, 
+                    const BasicSetType& initial_set, 
+                    const TimeType& time, 
+                    const HybridGrid& grid,
+                    const AccuracyType accuracy) const; 
+
   
   private:
     EnclosureType _enclosure(const BasicSetType& bs) const;
     Orbit<BasicSetType> _discretise(const Orbit<EnclosureType>& orb,
                                     const BasicSetType& initial_set,
+                                    const HybridGrid& grid,
                                     const AccuracyType accuracy) const;
 
     DenotableSetType _discretise(const ListSet<EnclosureType>& ls,
                                  const BasicSetType& initial_set,
+                                 const HybridGrid& grid,
                                  const AccuracyType accuracy) const;  
 };
 

@@ -23,13 +23,13 @@
 
 #include <cstdarg>
 #include "ariadne.h"
+#include "grid_set.h"
 
 using namespace Ariadne;
 
 
 int main() 
-{
-  
+{  
     /// Set the system parameters
     double a = 0.5;
     double g = 9.8;

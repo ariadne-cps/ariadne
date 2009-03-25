@@ -134,9 +134,9 @@ class HybridReachabilityAnalyser
                                             const TimeType& time) const;
   
     /*! \brief Compute an approximation to the reachable set of \a system starting in \a initial_set iterating at most \a time times. */
-    virtual SetApproximationType* upper_reach(const SystemType& system, 
-                                           const CompactSetInterfaceType& initial_set, 
-                                           const TimeType& timeType) const;
+    virtual SetApproximationType* upper_reach(const SystemType& system,                                                 
+                                              const CompactSetInterfaceType& initial_set, 
+                                              const TimeType& timeType) const;
   
     /*! \brief Compute an approximation to the reachable and evolved sets of \a system starting in \a initial_set iterating at most \a time times. */
     virtual std::pair<SetApproximationType*,SetApproximationType*>
@@ -182,7 +182,14 @@ class HybridReachabilityAnalyser
   private:
     // Helper functions for approximating sets
     HybridGrid _grid(HybridSpace hspc) const { 
-        return HybridGrid(hspc,this->_parameters->grid_lengths); }
+        if(this->_parameters->hybrid_grid.state_space() == hspc) {
+            return this->_parameters->hybrid_grid;
+        }
+        if(this->_parameters->grid.dimension() > 0) {
+            return HybridGrid(hspc,this->_parameters->grid);
+        }                
+        return HybridGrid(hspc,this->_parameters->grid_lengths); 
+    }
 };
 
 

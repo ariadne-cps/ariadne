@@ -5,7 +5,8 @@ LDADD = ../src/libariadne.la $(LIBS)
 bin_PROGRAMS=tutorial watertank bouncingball ecoli \
              watertank-nonlinear watertank-time \
              sinusoid-sin 3bouncingballs \
-             rectifier springs cmos_inverter_analoginput
+             rectifier springs cmos_inverter_analoginput \
+             tangent
              
 
 tutorial_SOURCES=tutorial.cc
@@ -19,6 +20,7 @@ sinusoid_sin_SOURCES=sinusoid-sin.cc
 rectifier_SOURCES=rectifier.cc
 springs_SOURCES=springs.cc
 cmos_inverter_analoginput_SOURCES=cmos_inverter_analoginput.cc
+tangent_SOURCES=tangent.cc
 
 examples: $(bin_PROGRAMS)
 

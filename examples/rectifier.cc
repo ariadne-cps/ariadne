@@ -123,12 +123,12 @@ int main()
     dp[4] = 1000.0; /// Load resistance, Rl
 
     /// Introduces the global parameters
-    float TIME_LIMIT = 0.24/dp[1];
-    float TRAN_LIMIT = 3;
+    float TIME_LIMIT = 0.1/dp[1];
+    float TRAN_LIMIT = 1;
     float MAX_ENCL_RADIUS = 0.001/dp[1];
     float MAX_STEP_SIZE = 0.001/dp[1];
     float LOCK_TOGRID_TIME = 1.0/dp[1];
-    float MAX_GRID_DEPTH = 6 + 3 * round(std::log(dp[1]));
+    float MAX_GRID_DEPTH = 12;
 
     /// Build the Hybrid System
   
@@ -248,11 +248,12 @@ int main()
     plot("rectifier_orbit_t_vin", 0, 1, 3, graphic_box, Colour(0.0,0.5,1.0), orbit, -1);
     plot("rectifier_orbit_t_vout", 0, 2, 3, graphic_box, Colour(0.0,0.5,1.0), orbit, -1);
     plot("rectifier_orbit_vin_vout", 1, 2, 3, graphic_box2, Colour(0.0,0.5,1.0), orbit, -1);
-/*
+
     /// Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
     analyser.parameters().lock_to_grid_time = LOCK_TOGRID_TIME;
     analyser.parameters().maximum_grid_depth= MAX_GRID_DEPTH;
+    analyser.parameters().grid = Grid(Vector<Float>(3, 0.25/dp[1], 1.0, 0.5)); 
     std::cout <<  analyser.parameters() << std::endl;
 
     HybridImageSet initial_set;
@@ -264,8 +265,8 @@ int main()
     //HybridGridTreeSet* reach = analyser.chain_reach(rectifier,initial_set);
     std::cout << "done." << std::endl;
 
-    plot("rectifier_reach_t_vin", 0, 1, 3, graphic_box, Colour(0.0,0.5,1.0), *reach, MAX_GRID_DEPTH);
-    plot("rectifier_reach_t_vout", 0, 2, 3, graphic_box, Colour(0.0,0.5,1.0), *reach, MAX_GRID_DEPTH);
-    plot("rectifier_reach_vin_vout", 1, 2, 3, graphic_box2, Colour(0.0,0.5,1.0), *reach, MAX_GRID_DEPTH);
-*/
+    plot("rectifier_reach_t_vin", 0, 1, 3, graphic_box, Colour(0.0,0.5,1.0), *reach, -1);
+    plot("rectifier_reach_t_vout", 0, 2, 3, graphic_box, Colour(0.0,0.5,1.0), *reach, -1);
+    plot("rectifier_reach_vin_vout", 1, 2, 3, graphic_box2, Colour(0.0,0.5,1.0), *reach, -1);
+
 }

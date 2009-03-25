@@ -306,7 +306,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
   
     int old_verbosity = verbosity;
     verbosity = verbosity - 3;
-
+    // verbosity = 3;
 
     ARIADNE_LOG(2,"HybridEvolver::_evolution_step(...)\n");
   
@@ -511,20 +511,28 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
                         ModelType guard_model=this->_toolbox->predicate_model(*guard_ptr,flow_bounds);
                         TimeModelType crossing_time_model=this->_toolbox->crossing_time(guard_model,flow_model,initial_set_model);
                         ARIADNE_LOG(3," Crossing time: "<<crossing_time_model.range()[0]<<"\n");
+                        Float lower_crossing_time = crossing_time_model.range()[0].lower();
+                        Float upper_crossing_time = crossing_time_model.range()[0].lower();                        
+                        if(lower_crossing_time < 0.0 || lower_crossing_time > step_size) {
+                            lower_crossing_time = 0.0;
+                        }
+                        if(upper_crossing_time < 0.0 || upper_crossing_time > step_size) {
+                            upper_crossing_time = step_size;
+                        }                        
                         tribool initially_active = this->_toolbox->active(*guard_ptr,initial_set_model);
                         tribool finally_active = this->_toolbox->active(*guard_ptr,final_set_model);
                         if(!possibly(initially_active)) {
                             // Transition is NOT initally active
-                            lower_active_time = crossing_time_model.range()[0].lower();
+                            lower_active_time = lower_crossing_time;
                         }
                         if(iter->forced()) {
                             // Forced transition
-                            upper_active_time = min(step_size,crossing_time_model.range()[0].upper());
+                            upper_active_time = upper_crossing_time;
                         } else  {
                             // Unforced transition
                             if(!possibly(finally_active)) {
                                 // Transition is NOT finally active
-                                upper_active_time = crossing_time_model.range()[0].upper();
+                                upper_active_time = upper_crossing_time;
                             }
                         }                        
                     } catch(DegenerateCrossingException) { 

@@ -36,8 +36,6 @@
 #include "vector.h"
 #include "matrix.h"
 
-#include "function.h"
-
 #include "set_interface.h"
 #include "function_set.h"
 
@@ -93,9 +91,9 @@ class Polyhedron
     //! \brief The number of constraints. 
     size_t number_of_constraints() const { return this->b().size(); }
     //! \brief The matrix \f$A\f$ in the inequalities \f$Ax\leq b\f$. 
-    Matrix<Float> A() const { return -dynamic_cast<const AffineFunction&>(this->function()).A(); }
-    //! \brief The vector \f$b\f$ in the inequalities \f$Ax\leq b\f$. 
-    Vector<Float> b() const { return dynamic_cast<const AffineFunction&>(this->function()).b(); }
+    Matrix<Float> A() const;
+    //! \brief The vector \f$b\f$ in the inequalities \f$Ax\leq b\f$.
+    Vector<Float> b() const;
     //@}
   
   

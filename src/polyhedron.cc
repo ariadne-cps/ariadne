@@ -94,6 +94,17 @@ Polyhedron::Polyhedron(const Polytope& p)
 
 
 
+Matrix<Float>
+Polyhedron::A() const
+{
+    return -dynamic_cast<const AffineFunction&>(this->function()).A();
+}
+
+Vector<Float>
+Polyhedron::b() const
+{
+    return dynamic_cast<const AffineFunction&>(this->function()).b();
+}
 
 
 

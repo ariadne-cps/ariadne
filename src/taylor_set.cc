@@ -335,7 +335,7 @@ TaylorSet::recondition() const
             scal[i][MultiIndex::unit(this->generators_size(),j)]=T[i][j];
         }
     }
-    return TaylorSet(compose(this->variables(),this->domain(),scal));
+    return TaylorSet(compose(this->variables(),scal));
 }
 
 std::ostream&
@@ -454,11 +454,11 @@ void plot(const char* filename, const Box& bbx, const TaylorSet& set)
 
     int white=0x00FFFFFF;
     int black=0x00000000;
-    int red=0x00FF0000;
-    int green=0x0000FF00;
+    //int red=0x00FF0000;
+    //int green=0x0000FF00;
     int blue=0x000000FF;
-    int background=0xFFFFFFFF;
-    int foreground=0x00FF00FF;
+    //int background=0xFFFFFFFF;
+    //int foreground=0x00FF00FF;
 
     int i,j;
     for(i=0; i!=width; ++i) {
@@ -499,7 +499,7 @@ void plot(const char* filename, const Box& bbx, const TaylorSet& set)
 
 
     cairo_surface_t* surface=cairo_image_surface_create_for_data((unsigned char*)data, format, width, height, stride);
-    cairo_t* cr = cairo_create (surface);
+    //cairo_t* cr = cairo_create (surface);
     cairo_surface_write_to_png (surface, filename);
     cairo_surface_destroy(surface);
 

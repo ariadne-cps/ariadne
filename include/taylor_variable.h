@@ -60,25 +60,24 @@ TaylorVariable scale(const TaylorVariable& x, const Interval& ivl);
 Vector<TaylorVariable> scale(const Vector<TaylorVariable>& x, const Vector<Interval>& bx);
 
 // Evaluate an array of Taylor variables on a vector.
-Vector<Interval> evaluate(const Vector<TaylorVariable>& x, const Vector<Interval>& sy);
 Interval evaluate(const TaylorVariable& x, const Vector<Interval>& sy);
+Vector<Interval> evaluate(const Vector<TaylorVariable>& x, const Vector<Interval>& sy);
 
 
 // Compose an array of Taylor variables with another, after scaling by the interval vectors
-Vector<TaylorVariable> compose(const Vector<TaylorVariable>& x, const Vector<Interval>& bx, const Vector<TaylorVariable>& y);
+TaylorVariable compose(const TaylorVariable& x, const Vector<TaylorVariable>& y);
+Vector<TaylorVariable> compose(const Vector<TaylorVariable>& x, const Vector<TaylorVariable>& y);
 
-// Wrappers for univariate composition
-TaylorVariable compose(const TaylorVariable& x, const Vector<Interval>& bx, const Vector<TaylorVariable>& y);
-TaylorVariable compose(const TaylorVariable& x, const Interval& b, const TaylorVariable& y);
-
+Vector<TaylorVariable> combine(const Vector<TaylorVariable>& x1, const TaylorVariable& x2);
+Vector<TaylorVariable> combine(const Vector<TaylorVariable>& x1, const Vector<TaylorVariable>& x2);
 
 // Antidifferentiation operator
-TaylorVariable antiderivative(const TaylorVariable& x, const Interval& dk, uint k);
-Vector<TaylorVariable> antiderivative(const Vector<TaylorVariable>& x, const Interval& dk, uint k);
+TaylorVariable antiderivative(const TaylorVariable& x, uint k);
+Vector<TaylorVariable> antiderivative(const Vector<TaylorVariable>& x, uint k);
 
 // Embed the variable in a space of higher dimension
-TaylorVariable embed(const TaylorVariable& tv, uint as, uint b);
-Vector<TaylorVariable> embed(const Vector<TaylorVariable>& tvs, uint as, uint b);
+//TaylorVariable embed(const TaylorVariable& tv, uint as, uint b);
+//Vector<TaylorVariable> embed(const Vector<TaylorVariable>& tvs, uint as, uint b);
 
 // Test if a variable refines another
 bool refines(const TaylorVariable& tv1, const TaylorVariable& tv2);
@@ -451,10 +450,13 @@ class Vector<TaylorVariable>
     uint argument_size() const { ARIADNE_ASSERT(this->size()>0); return (*this)[0].argument_size(); }
 
     DomainType domain() const { return (*this)[0].domain(); }
+    Vector< Expansion<Float> > expansion() const;
+    Vector<Float> error() const;
 
     Vector<Float> value() const;
     Vector<Interval> evaluate(const Vector<Float>&) const;
     Vector<Interval> evaluate(const Vector<Interval>&) const;
+
 
     void check() const;
 };

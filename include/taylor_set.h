@@ -2,7 +2,7 @@
  *            taylor_set.h
  *
  *  Copyright 2008  Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 /*! \file taylor_set.h
  *  \brief Sets based on Taylor series.
  */
@@ -54,7 +54,7 @@ class GridTreeSet;
 class Figure;
 
 /*! \brief Sets expressed as the image of a box under a polynomial with error bounds. */
-class TaylorSet 
+class TaylorSet
     : public LocatedSetInterface
 {
   private:
@@ -75,21 +75,21 @@ class TaylorSet
     TaylorVariable& operator[](uint i) { return this->_variables[i]; }
 
     Vector<Interval> domain() const { return Vector<Interval>(this->generators_size(),Interval(-1,+1)); }
-    Vector<Interval> range() const { 
-        Vector<Interval> result(this->_variables.size()); 
-        for(uint i=0; i!=this->_variables.size(); ++i) { 
-            result[i]=this->_variables[i].range(); } 
+    Vector<Interval> range() const {
+        Vector<Interval> result(this->_variables.size());
+        for(uint i=0; i!=this->_variables.size(); ++i) {
+            result[i]=this->_variables[i].range(); }
         return result; }
     Vector<TaylorVariable> variables() const { return this->_variables; }
 
-    TaylorSet* clone() const { return new TaylorSet(*this); } 
+    TaylorSet* clone() const { return new TaylorSet(*this); }
     Float radius() const;
     tribool disjoint(const Box&) const;
     tribool overlaps(const Box&) const;
     tribool inside(const Box&) const;
     Box bounding_box() const;
     std::ostream& write(std::ostream& os) const;
-    
+
     TaylorSet linearise() const;
     GridTreeSet discretise(const Grid& grid, uint depth) const;
     GridTreeSet& discretise(GridTreeSet& grid_set, uint depth) const;
@@ -102,6 +102,9 @@ class TaylorSet
     Matrix<Float> jacobian() const;
 };
 
+TaylorSet apply(const TaylorFunction& f, const TaylorSet& s);
+TaylorSet apply(const FunctionInterface& f, const TaylorSet& s);
+
 GridTreeSet outer_approximation(const TaylorSet& set, const Grid& grid, uint depth);
 void adjoin_outer_approximation(GridTreeSet& grid_set, const TaylorSet& set, uint depth);
 Zonotope zonotope(const TaylorSet& ts);
@@ -113,8 +116,8 @@ void grid_draw(Figure& g, const TaylorSet& ts);
 
 void plot(const char* fn, const Box& bbx, const TaylorSet& ts);
 
-template<class XE, class XP> 
-TaylorSet::TaylorSet(uint rs, uint as, uint d, 
+template<class XE, class XP>
+TaylorSet::TaylorSet(uint rs, uint as, uint d,
                      const XE* eps, const XP* ptr)
     : _variables(rs)
 {

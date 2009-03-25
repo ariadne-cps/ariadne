@@ -44,69 +44,40 @@ typedef Vector<Float> Point;
 typedef Vector<Interval> Box;
 
 TaylorFunction::TaylorFunction()
-    : _domain(),
-      _variables()
+    : _variables()
 {
 }
 
 
-TaylorFunction::TaylorFunction(uint rs, uint as)
-    : _domain(as,I(-1,1)),
-      _variables(rs,as)
-{
-}
-
-
-TaylorFunction::TaylorFunction(uint rs, uint as, ushort o, ushort s)
-    : _domain(as,I(-1,1)),
-      _variables(rs,as)
-{
-}
 
 
 TaylorFunction::TaylorFunction(const Vector<Interval>& d,
                                const Vector< Expansion<Float> >& f)
-    : _domain(d),
-      _variables(f.size())
+    : _variables(d,f)
 {
-    for(uint i=0; i!=f.size(); ++i) {
-        ARIADNE_ASSERT(d.size()==f[i].argument_size());
-    }
-    for(uint i=0; i!=f.size(); ++i) {
-        _variables[i]=TaylorVariable(d,f[i]);
-    }
 }
 
 TaylorFunction::TaylorFunction(const Vector<Interval>& d,
                                const Vector< Expansion<Float> >& f,
                                const Vector<Float>& e)
-    : _domain(d),
-      _variables(e.size())
+    : _variables(d,f,e)
 {
-    for(uint i=0; i!=f.size(); ++i) {
-        ARIADNE_ASSERT(d.size()==f[i].argument_size());
-    }
-    ARIADNE_ASSERT(f.size()==e.size());
-    for(uint i=0; i!=e.size(); ++i) {
-        _variables[i]=TaylorVariable(d,f[i],e[i]);
-    }
 }
 
 
 TaylorFunction::TaylorFunction(const Vector<TaylorVariable>& v)
-    : _domain(v[0].domain()),
-      _variables(v)
+    : _variables(v)
 {
-    for(uint i=1; i!=v.size(); ++i) {
+    for(uint i=1; i<v.size(); ++i) {
         ARIADNE_ASSERT(v[0].domain()==v[i].domain());
     }
 }
 
 TaylorFunction::TaylorFunction(const Vector<Interval>& d,
                                const FunctionInterface& f)
-    : _domain(d),
-      _variables(f.result_size())
+    : _variables(f.result_size(),d)
 {
+    ARIADNE_ASSERT(f.result_size()>0);
     ARIADNE_ASSERT(d.size()==f.argument_size());
     Vector<TaylorVariable> x=TaylorVariable::scaling(d);
     this->_variables=f.evaluate(x);
@@ -115,10 +86,9 @@ TaylorFunction::TaylorFunction(const Vector<Interval>& d,
 
 TaylorFunction::TaylorFunction(const Vector<Interval>& d,
                                const Vector< Polynomial<Float> >& p)
-    : _domain(d),
-      _variables(p.size())
+    : _variables(p.size(),d)
 {
-    ARIADNE_ASSERT(d.size()==p[0].argument_size());
+    for(uint i=0; i!=p.size(); ++i) { ARIADNE_ASSERT(d.size()==p[i].argument_size()); }
 
     Vector<TaylorVariable> x=TaylorVariable::scaling(d);
     this->_variables=Ariadne::evaluate(p,x);
@@ -128,25 +98,7 @@ TaylorFunction::TaylorFunction(const Vector<Interval>& d,
 
 
 
-TaylorFunction::TaylorFunction(const Vector<Interval>& d,
-                         ushort o, ushort s,
-                         const FunctionInterface& f)
-    : _domain(d),
-      _variables(f.result_size())
-{
-    ARIADNE_NOT_IMPLEMENTED;
-}
 
-
-
-
-/*
-TaylorFunction
-TaylorFunction::zero(uint rs, uint as)
-{
-    return TaylorFunction(Vector<Interval>(as,Interval(-inf(),+inf()),TaylorVariable::constants(rs,as,Vector<Float>(rs,0.0))));
-}
-*/
 
 
 
@@ -178,8 +130,7 @@ TaylorFunction::identity(const Vector<Interval>& d)
 bool
 TaylorFunction::operator==(const TaylorFunction& tm) const
 {
-        return this->_domain==tm._domain
-            && this->_variables==tm._variables;
+    return this->_variables==tm._variables;
 }
 
 
@@ -195,7 +146,8 @@ TaylorFunction::operator!=(const TaylorFunction& p2) const
 const Vector<Interval>&
 TaylorFunction::domain() const
 {
-    return this->_domain;
+    ARIADNE_ASSERT(this->_variables.size()>0);
+    return this->_variables[0].domain();
 }
 
 
@@ -281,7 +233,7 @@ TaylorFunction::evaluate(const Vector<Interval>& x) const
     // Scale x to domain
     Vector<Interval> scaled_x(x.size());
     for(uint i=0; i!=x.size(); ++i) {
-        const Interval& d=this->_domain[i];
+        const Interval& d=this->domain()[i];
         Interval dm=add_ivl(d.l/2,d.u/2);
         Interval dr=sub_ivl(d.u/2,d.l/2);
         scaled_x[i]=(x[i]-dm)/dr;
@@ -341,31 +293,15 @@ join(const TaylorFunction& f, const TaylorFunction& g)
     return TaylorFunction(join(f.variables(),g.variables()));
 }
 
+Vector<TaylorVariable> compose(const Vector<TaylorVariable>& f, const Vector<TaylorVariable>& g);
 
 TaylorFunction
-restrict(const TaylorFunction& tm, const Box& nd)
+restrict(const TaylorFunction& f, const Box& d)
 {
-    const Vector<Interval>& od=tm.domain();
-    ARIADNE_ASSERT(subset(nd,od));
-    if(nd==od) { return tm; }
-    Vector<TaylorVariable> sm=Vector<TaylorVariable>(nd.size(),nd.size());
-    for(uint i=0; i!=nd.size(); ++i) {
-        set_rounding_mode(upward);
-        const Float& l=nd[i].lower();
-        const Float& u=nd[i].upper();
-        volatile Float ce,re,mcl,cu,mrl,ru;
-        mcl=-l; mcl-=u;
-        cu=l+u;
-        ce=(mcl+cu)/4;
-        mrl=l; mrl-=u;
-        ru=u-l;
-        re=mrl+ru;
-        sm[i].set_error(ce+re);
-        set_rounding_mode(to_nearest);
-        sm[i].set_value((l+u)/2);
-        sm[i].set_gradient(i,(u-l)/2);
-    }
-    return TaylorFunction(compose(tm._variables,tm._domain,sm));
+    ARIADNE_ASSERT(subset(d,f.domain()));
+    if(d==f.domain()) { return f; }
+    Vector<TaylorVariable> s=TaylorVariable::scaling(d);
+    return TaylorFunction(compose(f._variables,s));
 }
 
 
@@ -399,7 +335,6 @@ operator-(const TaylorFunction& p1, const TaylorFunction& p2)
     if(p1.domain()==p2.domain()) {
         return TaylorFunction(Vector<TaylorVariable>(p1._variables-p2._variables));
     } else {
-        ARIADNE_NOT_IMPLEMENTED;
         Box new_domain=intersection(p1.domain(),p2.domain());
         return operator-(restrict(p1,new_domain),restrict(p2,new_domain));
     }
@@ -506,13 +441,18 @@ operator*=(TaylorFunction& p0, const Interval& x1)
 TaylorFunction
 combine(const TaylorFunction& f1, const TaylorFunction& f2)
 {
-    uint as1=f1.argument_size();
-    uint as2=f2.argument_size();
+    const uint rs1=f1.result_size();
+    const uint rs2=f2.result_size();
+    const uint as1=f1.argument_size();
+    const uint as2=f2.argument_size();
     Vector<Interval> d=join(f1.domain(),f2.domain());
-    Vector<TaylorVariable> ev1=embed(f1.variables(),as1+as2,0u);
-    Vector<TaylorVariable> ev2=embed(f2.variables(),as1+as2,as1);
-    Vector<TaylorVariable> ev=join(ev1,ev2);
-    return TaylorFunction(ev);
+    Vector< Expansion<Float> > f(rs1+rs2);
+    for(uint i=0; i!=rs1; ++i) { f[i]=f1.variables()[i].expansion().embed(as1+as2,0u); }
+    for(uint i=0; i!=rs2; ++i) { f[rs1+i]=f2.variables()[i].expansion().embed(as1+as2,as1); }
+    Vector<Float> e(rs1+rs2);
+    for(uint i=0; i!=rs1; ++i) { e[i]=f1.variables()[i].error(); }
+    for(uint i=0; i!=rs2; ++i) { e[rs1+i]=f1.variables()[i].error(); }
+    return TaylorFunction(d,f,e);
 }
 
 
@@ -523,7 +463,7 @@ compose(const TaylorFunction& g, const TaylorFunction& f)
         std::cerr<<"f.range()="<<f.range()<<" is not a subset of g.domain()="<<g.domain()<<std::endl;
         ARIADNE_ASSERT(subset(f.range(),g.domain()));
     }
-    return TaylorFunction(Ariadne::compose(g.variables(),g.domain(),f.variables()));
+    return TaylorFunction(Ariadne::compose(g.variables(),f.variables()));
 }
 
 
@@ -531,7 +471,7 @@ compose(const TaylorFunction& g, const TaylorFunction& f)
 TaylorFunction
 antiderivative(const TaylorFunction& tm, uint k)
 {
-    return TaylorFunction(antiderivative(tm.variables(),tm.domain()[k],k));
+    return TaylorFunction(antiderivative(tm.variables(),k));
 }
 
 
@@ -833,11 +773,10 @@ bounds(Vector<TaylorVariable> const& vfm,
 }
 
 Vector<TaylorVariable>
-flow(const Vector<TaylorVariable>& vf, const Vector<Interval>& d, const Interval& h, const Vector<Interval>& b)
+flow(const Vector<TaylorVariable>& vf, const Vector<Interval>& d, const Interval& h)
 {
     ARIADNE_ASSERT(vf.result_size()==vf.argument_size());
     ARIADNE_ASSERT(vf.size()==d.size());
-    ARIADNE_ASSERT(vf.size()==b.size());
 
     ARIADNE_ASSERT(h.l==0.0 || h.l==-h.u);
 
@@ -869,12 +808,12 @@ flow(const Vector<TaylorVariable>& vf, const Vector<Interval>& d, const Interval
 
     //std::cerr << "\ny[0]=" << y << std::endl << std::endl;
     for(uint j=0; j!=to; ++j) {
-        yp=compose(vf,b,y);
+        yp=compose(vf,y);
         //std::cerr << "yp["<<j+1<<"]=" << yp << std::endl;
         //for(uint i=0; i!=n; ++i) { yp[i].clobber(so,to-1); }
         //std::cerr << "yp["<<j+1<<"]=" << yp << std::endl;
         for(uint i=0; i!=n; ++i) {
-            y[i]=antiderivative(yp[i],hh,n);
+            y[i]=antiderivative(yp[i],n);
             y[i]+=yz[i];
         }
         //std::cerr << "y["<<j+1<<"]=" << y << std::endl << std::endl;
@@ -883,7 +822,7 @@ flow(const Vector<TaylorVariable>& vf, const Vector<Interval>& d, const Interval
     if(h.l==0) {
         Vector<Interval> d(n+1,Interval(-1,+1)); d[n]=Interval(0,1);
         Vector<TaylorVariable> ht=TaylorVariable::scaling(d);
-        y=compose(y,Vector<Interval>(n+1,Interval(-1,1)),ht);
+        y=compose(y,ht);
     }
 
     //for(uint i=0; i!=n; ++i) { y[i].clobber(so,to); }
@@ -899,7 +838,7 @@ flow(const Vector<TaylorVariable>& vf, const Vector<Interval>& d, const Interval
 TaylorFunction
 flow(const TaylorFunction& p, const Vector<Interval>& domain, const Interval& time)
 {
-    return TaylorFunction(flow(p.variables(),domain,time,p.domain()));
+    return TaylorFunction(flow(p.variables(),domain,time));
 }
 
 
@@ -941,7 +880,7 @@ TaylorFunction::_powers(const Vector<Interval>& v) const
 std::ostream&
 TaylorFunction::write(std::ostream& os) const
 {
-    os << "TaylorFunction( "<<this->_domain<<" , ";
+    os << "TaylorFunction( "<<this->domain()<<" , ";
     for(uint i=0; i!=this->result_size(); ++i) {
         os << (i==0?'[':',')<<this->_variables[i].expansion()<<","<<this->_variables[i].error();
     }

@@ -1422,9 +1422,10 @@ evaluate(const Vector<TaylorVariable>& tv, const Vector<Interval>& x)
 }
 
 
-TaylorVariable antiderivative(const TaylorVariable& x, const Interval& dk, uint k) {
+TaylorVariable antiderivative(const TaylorVariable& x, uint k) {
     ARIADNE_ASSERT(k<x.argument_size());
     // General case with error analysis
+    Interval dk=x.domain()[k];
     TaylorVariable r(x.domain());
     const Float& xe=x.error();
     Float& re=r.error();
@@ -1463,11 +1464,11 @@ TaylorVariable antiderivative(const TaylorVariable& x, const Interval& dk, uint 
     return r;
 }
 
-Vector<TaylorVariable> antiderivative(const Vector<TaylorVariable>& x, const Interval& dk, uint k) {
+Vector<TaylorVariable> antiderivative(const Vector<TaylorVariable>& x, uint k) {
     ARIADNE_ASSERT(k<x.argument_size());
     Vector<TaylorVariable> r(x.size());
     for(uint i=0; i!=x.size(); ++i) {
-        r[i]=antiderivative(x[i],dk,k);
+        r[i]=antiderivative(x[i],k);
     }
     return r;
 }
@@ -1648,17 +1649,16 @@ _compose1(Vector<TaylorVariable>& r,
 
 Vector<TaylorVariable>
 compose(const Vector<TaylorVariable>& x,
-        const Vector<Interval>& bx,
         const Vector<TaylorVariable>& y)
 {
-    if(x.size()==0) { return x; }
-
     ARIADNE_ASSERT(x.size()>0);
-    ARIADNE_ASSERT(x.argument_size()==bx.size());
-    ARIADNE_ASSERT(y.size()==bx.size());
-    ARIADNE_ASSERT(y.argument_size()>=0);
+    ARIADNE_ASSERT(y.size()>0);
+    ARIADNE_ASSERT(y.size()==x[0].domain().size());
 
+    for(uint i=1; i!=x.size(); ++i) { ARIADNE_ASSERT(x[i].domain()==x[0].domain()); }
+    for(uint i=1; i!=x.size(); ++i) { ARIADNE_ASSERT(y[i].domain()==y[0].domain()); }
 
+    Vector<Interval> bx=x[0].domain();
 
     Vector<TaylorVariable> ys(y.size());
     for(uint i=0; i!=y.size(); ++i) {
@@ -1678,37 +1678,12 @@ compose(const Vector<TaylorVariable>& x,
     return r;
 }
 
+
 TaylorVariable
 compose(const TaylorVariable& x,
-        const Vector<Interval>& bx,
         const Vector<TaylorVariable>& y)
 {
-    Vector<TaylorVariable> xv(1,x);
-    Vector<TaylorVariable> rv=compose(xv,bx,y);
-    return rv[0];
-}
-
-TaylorVariable
-compose(const TaylorVariable& x,
-        const Interval& b,
-        const TaylorVariable& y)
-{
-    Vector<TaylorVariable> xv(1,x);
-    Vector<Interval> bv(1,b);
-    Vector<TaylorVariable> yv(1,y);
-    Vector<TaylorVariable> rv=compose(xv,bv,yv);
-    return rv[0];
-}
-
-TaylorVariable
-compose(const TaylorVariable& x,
-        const TaylorVariable& y)
-{
-    Vector<TaylorVariable> xv(1,x);
-    Vector<Interval> bv(1,Interval(-1,1));
-    Vector<TaylorVariable> yv(1,y);
-    Vector<TaylorVariable> rv=compose(xv,bv,yv);
-    return rv[0];
+    return compose(Vector<TaylorVariable>(1u,x),y)[0];
 }
 
 /*
@@ -1745,13 +1720,6 @@ prod(const Matrix<Interval>& A,
 }
 
 */
-
-Vector<TaylorVariable>
-_compose(const Vector<TaylorVariable>& x, const Vector<TaylorVariable>& y)
-{
-    Vector<Interval> d(y.size(),Interval(-1,+1));
-    return compose(x,d,y);
-}
 
 Differential<Float> differential(const TaylorVariable& x) {
     Differential<Float> sd(x.argument_size(),x.degree());

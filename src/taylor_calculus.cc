@@ -45,6 +45,9 @@ class NonInvertibleFunctionException { };
 
 
 
+TaylorVariable embed(const TaylorVariable&, uint, uint);
+Vector<TaylorVariable> embed(const Vector<TaylorVariable>&, uint, uint);
+
 
 
 TaylorCalculus::
@@ -61,7 +64,7 @@ TaylorCalculus::SetModelType
 TaylorCalculus::_apply(const FunctionModelType& function_model,
                        const SetModelType& set_model) const
 {
-    return Ariadne::compose(function_model.variables(),function_model.domain(),set_model.variables());
+    return Ariadne::apply(function_model,set_model);
 }
 
 
@@ -75,7 +78,7 @@ reset_step(const FunctionType& map,
     return map.evaluate(set_model.variables());
     // Indirect computation via model
     BoxType range=set_model.range();
-    return compose(FunctionModelType(range,map).variables(),range,set_model.variables());
+    return apply(FunctionModelType(range,map),set_model);
 }
 
 
@@ -98,7 +101,7 @@ integration_step(const FlowModelType& flow_model,
     //SetModelType set_step_model=join(initial_set_model, integration_time_model);
     SetModelType set_step_model(join(initial_set_model.variables(),integration_time_model));
     ARIADNE_LOG(6,"set_step_model = "<<set_step_model<<"\n");
-    SetModelType final_set_model=compose(flow_model.variables(),flow_model.domain(),set_step_model.variables());
+    SetModelType final_set_model=apply(flow_model,set_step_model);
     ARIADNE_LOG(6,"final_set_model = "<<final_set_model<<"\n");
     return final_set_model;
 }
@@ -139,23 +142,19 @@ reachability_step(const FlowModelType& flow_model,
                   const TimeType& final_time) const
 {
     ARIADNE_ASSERT(initial_set_model.dimension()+1==flow_model.argument_size());
-    uint ng=initial_set_model.generators_size();
 
-    TimeModelType expanded_reach_time_model(ng+1);
-    expanded_reach_time_model.set_value((final_time+initial_time)/2);
-    expanded_reach_time_model.set_gradient(ng,(final_time-initial_time)/2);
+    TimeModelType reach_time_model(1);
+    reach_time_model.set_value((final_time+initial_time)/2);
+    reach_time_model.set_gradient(0u,(final_time-initial_time)/2);
 
     // FIXME: Embed set model correctly
-    SetModelType expanded_initial_set_model=embed(initial_set_model.variables(),ng+1,0u);
-    ARIADNE_LOG(6,"expanded_initial_set_model="<<expanded_initial_set_model<<"\n");
-    SetModelType expanded_timed_set_model=join(expanded_initial_set_model.variables(),expanded_reach_time_model);
+    SetModelType expanded_timed_set_model=combine(initial_set_model.variables(),reach_time_model);
     ARIADNE_LOG(6,"expanded_timed_set_model="<<expanded_timed_set_model<<"\n");
-    SetModelType reach_set_model=this->_apply(flow_model,expanded_timed_set_model);
+    SetModelType reach_set_model=apply(flow_model,expanded_timed_set_model);
     ARIADNE_LOG(6,"reach_set_model = "<<reach_set_model<<"\n");
 
     return reach_set_model;
 }
-
 
 TaylorCalculus::SetModelType
 TaylorCalculus::
@@ -170,9 +169,11 @@ reachability_step(const FlowModelType& flow_model,
     uint ng=initial_set_model.generators_size();
 
     // FIXME: Embed set model correctly
-    SetModelType expanded_initial_set_model=embed(initial_set_model.variables(),ng+1,0u);
+    TimeModelType zero_time=TimeModelType::constant(Interval(-1,+1),0.0);
+    SetModelType expanded_initial_set_model=combine(initial_set_model.variables(),zero_time);
     ARIADNE_LOG(6,"expanded_initial_set_model="<<expanded_initial_set_model<<"\n");
-    SetModelType expanded_timed_set_model=join(expanded_initial_set_model.variables(),expanded_reach_time_model);
+    SetModelType expanded_timed_set_model=expanded_initial_set_model;
+    expanded_timed_set_model[expanded_timed_set_model.dimension()-1]= expanded_reach_time_model;
     ARIADNE_LOG(6,"expanded_timed_set_model="<<expanded_timed_set_model<<"\n");
     SetModelType reach_set_model=this->_apply(flow_model,expanded_timed_set_model);
     ARIADNE_LOG(6,"reach_set_model = "<<reach_set_model<<"\n");
@@ -404,7 +405,7 @@ tribool
 TaylorCalculus::
 active(const PredicateModelType& guard_model, const SetModelType& set_model) const
 {
-    IntervalType range=compose(guard_model.variables(),guard_model.domain(),set_model.variables())[0].range();
+    IntervalType range=compose(guard_model.variables(),set_model.variables())[0].range();
     return this->_tribool(range);
 }
 

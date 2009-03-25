@@ -43,24 +43,34 @@
 
 namespace Ariadne {
 
-#ifndef ARIADNE_USE_ARRAY_EXPANSION
+#if defined DOXYGEN or not defined ARIADNE_USE_ARRAY_EXPANSION
 
 //! \brief A power series expansion with coefficients of some type \a X.
+//! Used in Polynomial, Differential and TaylorVariable classes.
 template<class X>
 class Expansion
 {
     typedef X Real;
   public:
-    typedef MultiIndex::size_type size_type;
-    typedef typename std::map<MultiIndex,X>::value_type value_type;
-    typedef typename std::map<MultiIndex,X>::reference reference;
-    typedef typename std::map<MultiIndex,X>::pointer pointer;
-    typedef typename std::map<MultiIndex,X>::const_reference const_reference;
-    typedef typename std::map<MultiIndex,X>::const_pointer const_pointer;
-    typedef typename std::map<MultiIndex,X>::key_type key_type;
+    //! \brief The type used to represent sizes.
+    typedef unsigned int size_type;
+    //! \brief The type used to index the coefficients.
+    typedef MultiIndex key_type;
+    //! \brief The type of coefficient.
     typedef X data_type;
+    //! \brief The type of an (index,coefficient) pair.
+    typedef typename std::map<MultiIndex,X>::value_type value_type;
+    //! \brief The type of an reference to an (index,coefficient) pair.
+    typedef typename std::map<MultiIndex,X>::reference reference;
+    //! \brief The type of an reference to an (index,coefficient) pair.
+    typedef typename std::map<MultiIndex,X>::const_reference const_reference;
+    //! \brief The type of an iterator through (index,coefficient) pairs.
     typedef typename std::map<MultiIndex,X>::iterator iterator;
+    //! \brief The type of a constant iterator through (index,coefficient) pairs.
     typedef typename std::map<MultiIndex,X>::const_iterator const_iterator;
+
+    //typedef typename std::map<MultiIndex,X>::pointer pointer;
+    //typedef typename std::map<MultiIndex,X>::const_pointer const_pointer;
   private:
     static X _zero;
   public:

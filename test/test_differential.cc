@@ -40,10 +40,26 @@
 using namespace Ariadne;
 using namespace std;
 
+template<class R, class A, class P>
+void henon(R& r, const A& x, const P& p) 
+{
+    r[0]=p[0]-x[0]*x[0]-p[1]*x[1];
+    r[1]=x[0];
+}
+
+template<class DF>
+Vector<DF>
+henon(const Vector<DF>& x, const Vector<typename DF::scalar_type>& p)
+{
+    Vector<DF> r(2,2,x.degree()); henon(r,x,p); return r;
+}
+
+
+
 template<class DF>
 class TestDifferential {
-    typedef typename DF::ScalarType X;
-    typedef typename DF::ScalarType ScalarType;
+    typedef typename DF::scalar_type X;
+    typedef X ScalarType;
     typedef Series<X> SeriesType;
     typedef DF DifferentialType;
     typedef Vector<DF> DifferentialVectorType;
@@ -158,24 +174,10 @@ class TestDifferential {
 
 
 
-template<class R, class A, class P>
-void henon(R& r, const A& x, const P& p) 
-{
-    r[0]=p[0]-x[0]*x[0]-p[1]*x[1];
-    r[1]=x[0];
-}
-
-template<class DF>
-Vector<DF>
-henon(const Vector<DF>& x, const Vector<typename DF::ScalarType>& p)
-{
-    Vector<DF> r(2,2,x.degree()); henon(r,x,p); return r;
-}
-
 template<class DF>
 class TestDifferentialVector {
-    typedef typename DF::ScalarType X;
-    typedef typename DF::ScalarType ScalarType;
+    typedef typename DF::scalar_type X;
+    typedef X ScalarType;
     typedef Vector<X> VectorType;
     typedef Series<X> SeriesType;
     typedef DF DifferentialType;

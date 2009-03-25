@@ -84,16 +84,16 @@ bool refines(const TaylorVariable& tv1, const TaylorVariable& tv2);
 bool refines(const Vector<TaylorVariable>& tv1, const Vector<TaylorVariable>& tv2);
 
 
-/*! \brief A class representing a quantity depending on other quantities. 
+/*! \brief A class representing a quantity depending on other quantities.
+ *  Based on a power series Expansion, scaled to the unit box.
  *
  * See also TaylorFunction, TaylorSet.
  */
 class TaylorVariable
 {
-    typedef Expansion<Float> PolynomialType;
-    //typedef MapPolynomial PolynomialType;
+    typedef Expansion<Float> ExpansionType;
     static const Float _zero;
-    PolynomialType _expansion;
+    ExpansionType _expansion;
     Float _error;
     double _sweep_threshold;
     uint _maximum_degree;
@@ -105,15 +105,17 @@ class TaylorVariable
     static const double em;
     static const double ec;
   public:
+    //! \brief The type used for the coefficients.
     typedef Float ScalarType;
     //! \brief The type used to index the coefficients.
     typedef MultiIndex IndexType;
     //! \brief The type used for the coefficients.
     typedef Float ValueType;
+
     //! \brief An iterator through the (index,coefficient) pairs of the expansion expansion.
-    typedef PolynomialType::iterator iterator;
+    typedef ExpansionType::iterator iterator;
     //! \brief A constant iterator through the (index,coefficient) pairs of the expansion expansion.
-    typedef PolynomialType::const_iterator const_iterator;
+    typedef ExpansionType::const_iterator const_iterator;
 
     //@{
     /*! \name Constructors and destructors. */
@@ -149,9 +151,9 @@ class TaylorVariable
     //@{
     /*! \name Data access */
     //! \brief The expansion expansion.
-    const PolynomialType& expansion() const { return this->_expansion; }
+    const ExpansionType& expansion() const { return this->_expansion; }
     //! \brief A reference to the expansion expansion.
-    PolynomialType& expansion() { return this->_expansion; }
+    ExpansionType& expansion() { return this->_expansion; }
     //! \brief The error of the expansion expansion over the domain.
     const Float& error() const { return this->_error; }
     //! \brief A reference to the error of the expansion expansion over the domain.
@@ -216,10 +218,10 @@ class TaylorVariable
     //! \brief Construct a constant quantity in \a as independent variables.
     static TaylorVariable constant(uint as, const Float& c) {
         TaylorVariable r(as); r.set_value(c); return r; }
-    //! \brief Construct the quantity \f$x_j\f$ in \a as independent variables.
+    //! \brief Construct the quantity \f$x_j\f$ in \a as independent variables. (Deprecated)
     static TaylorVariable variable(uint as, uint j) {
         TaylorVariable r(as); r.set_value(0.0); r.set_gradient(j,1.0); return r; }
-    //! \brief Construct the quantity \f$c+x_j\f$ in \a as independent variables.
+    //! \brief Construct the quantity \f$c+x_j\f$ in \a as independent variables. (Deprecated)
     static TaylorVariable variable(uint as, const Float& c, uint j) {
         TaylorVariable r(as); r.set_value(c); r.set_gradient(j,1.0); return r; }
     //! \brief Construct the quantity which scales the unit interval onto the interval \a r.
@@ -233,10 +235,14 @@ class TaylorVariable
         TaylorVariable r(g.size()); r.set_value(x); r.set_error(e);
         for(uint j=0; j!=g.size(); ++j) { r.set_gradient(j,g[j]); } return r; }
 
+    //! \brief Return the vector of zero variables of size \a rs in \a as arguments.
     static Vector<TaylorVariable> zeroes(uint rs, uint as);
+    //! \brief Return the vector of constants with values \a c in \a as arguments.
     static Vector<TaylorVariable> constants(uint as, const Vector<Float>& c);
+    //! \brief Return the vector of variables with values \a x in \a as arguments. (Deprecated)
     static Vector<TaylorVariable> variables(const Vector<Float>& x);
-    static Vector<TaylorVariable> scaling(const Vector<Interval>& x);
+    //! \brief Return the vector scaling the unit interval onto the domain \a d.
+    static Vector<TaylorVariable> scaling(const Vector<Interval>& d);
     //@}
 
     //@{

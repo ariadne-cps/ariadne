@@ -53,9 +53,6 @@ class Polynomial
     Polynomial(unsigned int as=0u) : Expansion<X>(as) { }
     //! \brief Copy/conversion constructor.
     template<class XX> Polynomial(const Expansion<XX>& e) : Expansion<X>(e) { }
-    //! \brief Copy/conversion assignment.
-    //Polynomial<X>& operator=(const Expansion<X>& e) {
-    //    this->Expansion<X>::operator=(e); return *this; }
     //! \brief A dense polynomial with coefficients given by a list of doubles.
     Polynomial(unsigned int as, unsigned int deg, double c0, ...);
     //! \brief A sparse polynomial with coefficients given by a list of indices and coefficients.

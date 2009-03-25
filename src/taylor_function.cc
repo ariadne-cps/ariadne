@@ -142,7 +142,7 @@ TaylorFunction::constant(const Vector<Interval>& d, const Vector<Interval>& r)
 TaylorFunction
 TaylorFunction::identity(const Vector<Interval>& d)  
 {
-    return TaylorFunction(d,TaylorVariable::variables(midpoint(d)));
+    return TaylorFunction(d,TaylorVariable::scaling(d));
 }
 
 
@@ -853,9 +853,8 @@ flow(const Vector<TaylorVariable>& vf, const Vector<Interval>& d, const Interval
     }
 
     if(h.l==0) {
-        Vector<TaylorVariable> ht=TaylorVariable::variables(Vector<Float>(n+1,0.0));
-        ht[n].set_value(0.5);
-        ht[n].set_gradient(n,0.5);
+        Vector<Interval> d(n+1,Interval(-1,+1)); d[n]=Interval(0,1);
+        Vector<TaylorVariable> ht=TaylorVariable::scaling(d);
         y=compose(y,Vector<Interval>(n+1,Interval(-1,1)),ht);
     }
 

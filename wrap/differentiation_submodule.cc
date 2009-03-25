@@ -37,7 +37,7 @@ template<class DIFF>
 DIFF*
 make_differential(const uint& as, const uint& d, const boost::python::object& obj) 
 {
-    typedef typename DIFF::ScalarType X;
+    typedef typename DIFF::scalar_type X;
     DIFF* result=new DIFF(as,d);
     array<X> data;
     read_array(data,obj);
@@ -67,7 +67,7 @@ template<class DIFF>
 Vector<DIFF>*
 make_differential_vector(const uint& rs, const uint& as, const uint& d, const boost::python::object& obj) 
 {
-    typedef typename DIFF::ScalarType X;
+    typedef typename DIFF::scalar_type X;
     array<X> data;
     read_array(data,obj);
     ARIADNE_ASSERT(data.size()==compute_polynomial_data_size(rs,as,d));
@@ -94,7 +94,7 @@ void matrix_set_item(C& c, const I& i, const J& j, const X& x) { c[i][j]=x; }
 template<class DIFF>
 void export_differential(const char*) 
 {
-    typedef typename DIFF::ScalarType X;
+    typedef typename DIFF::scalar_type X;
     typedef Vector<X> V;
     typedef Series<X> S;
     typedef DIFF D;
@@ -154,7 +154,7 @@ template<class DIFF>
 void
 export_differential_vector(const char* name)
 {
-    typedef typename DIFF::ScalarType X;
+    typedef typename DIFF::scalar_type X;
     typedef Vector<X> V;
     typedef Series<X> S;
     typedef DIFF D;

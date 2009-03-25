@@ -2,7 +2,7 @@
  *            taylor_function.h
  *
  *  Copyright 2008  Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 /*! \file taylor_function.h
  *  \brief Over-approximations of functions based on Taylor expansions.
  */
@@ -106,33 +106,41 @@ class TaylorFunction {
     TaylorFunction(uint rs, uint as);
     /*! \brief The zero Taylor model in \a as variables with size \a rs image, order \a o and smoothness \a s, defined on the unit box. */
     TaylorFunction(uint rs, uint as, ushort o, ushort s);
-  
-    /*! \brief Construct from a domain and the expansionn. */
+
+    /*! \brief Construct from a domain and the expansion. */
     TaylorFunction(const Vector<Interval>& domain,
-                   const Vector<TaylorVariable>& expansion);
-  
+                   const Vector< Expansion<Float> >& expansion);
+
+    /*! \brief Construct from a domain, and expansion and errors. */
+    TaylorFunction(const Vector<Interval>& domain,
+                   const Vector< Expansion<Float> >& expansion,
+                   const Vector<Float>& error);
+
+    /*! \brief Construct from a domain and the expansion. */
+    explicit TaylorFunction(const Vector<TaylorVariable>& variables);
+
     /*! \brief Construct from a domain and a function. */
     TaylorFunction(const Vector<Interval>& domain,
                    const FunctionInterface& function);
-  
+
     /*! \brief Construct from a domain, centre, an order and a function. */
-    TaylorFunction(const Vector<Interval>& domain, 
+    TaylorFunction(const Vector<Interval>& domain,
                    ushort order, ushort smoothness,
                    const FunctionInterface& function);
-  
+
     /*! \brief Construct from a domain and a polynomial. */
     TaylorFunction(const Vector<Interval>& domain,
                    const Vector< Polynomial<Float> >& polynomial);
-  
+
     /*! \brief Construct from a domain and a n interval polynomial. */
     TaylorFunction(const Vector<Interval>& domain,
                    const Vector< Polynomial<Interval> >& polynomial);
-  
+
     /*! \brief Equality operator. */
     bool operator==(const TaylorFunction& p) const;
     /*! \brief Inequality operator. */
     bool operator!=(const TaylorFunction& p) const;
-  
+
     // Data access
     /*! \brief The data used to define the domain of the Taylor model. */
     const Vector<Interval>& domain() const;
@@ -142,36 +150,36 @@ class TaylorFunction {
     const Vector<Interval> range() const;
     /*! \brief The data used to define the centre of the Taylor model. */
     const Vector<TaylorVariable>& variables() const;
-  
+
     /*! \brief The size of the argument. */
     uint argument_size() const;
     /*! \brief The size of the result. */
     uint result_size() const;
-    
-  
+
+
     /*! \brief Evaluate the Taylor model at the point \a x. */
     Vector<Interval> evaluate(const Vector<Interval>& x) const;
     /*! \brief Evaluate the Taylor model at the point \a x. */
     Vector<Interval> evaluate(const Vector<Float>& x) const;
-  
+
     /*! \brief Compute an approximation to Jacobian derivative of the Taylor model at the point \a x (Deprecated). */
     Matrix<Float> jacobian(const Vector<Float>& x) const;
     /*! \brief Compute an approximation to Jacobian derivative of the Taylor model sat the point \a x. */
     Matrix<Interval> jacobian(const Vector<Interval>& x) const;
-  
+
     /*! \brief Truncate to a model of lower order and/or smoothness, possibly on a different domain. */
     TaylorFunction truncate(ushort degree) const;
-  
+
     /*! \brief The constant Taylor model with range \a r and argument domain \a d. */
     static TaylorFunction constant(const Vector<Interval>& d, const Vector<Interval>& r);
     /*! \brief The constant Taylor model with result \a c and argument domain \a d. */
     static TaylorFunction constant(const Vector<Interval>& d, const Vector<Float>& c);
     /*! \brief The identity Taylor model on domain \a d. */
     static TaylorFunction identity(const Vector<Interval>& d);
- 
+
     /*! \brief Write to an output stream. */
     std::ostream& write(std::ostream& os) const;
-  
+
     /*! \brief Addition. */
     friend TaylorFunction& operator+=(TaylorFunction& f, const Vector<Interval>& e);
 
@@ -179,7 +187,7 @@ class TaylorFunction {
     friend TaylorFunction operator+(const TaylorFunction& f, const TaylorFunction& c);
     /*! \brief Subtraction. */
     friend TaylorFunction operator-(const TaylorFunction& f, const TaylorFunction& c);
-  
+
     /*! \brief Addition of a constant. */
     friend TaylorFunction operator+(const TaylorFunction& f, const Vector<Float>& c);
     /*! \brief Subtraction of a constant. */
@@ -202,7 +210,7 @@ class TaylorFunction {
     friend TaylorFunction operator/(const TaylorFunction& f, const Interval& c);
     /*! \brief Multiplication by a matrix. */
     friend TaylorFunction operator*(const Matrix<Interval>& A, const TaylorFunction& f);
-  
+
     //! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
     friend TaylorFunction compose(const FunctionInterface& f, const TaylorFunction& g);
     //! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
@@ -212,7 +220,7 @@ class TaylorFunction {
     //! \brief The flow of the vector field \a vf defined over a space domain \a d over a time interval \a t.
     friend TaylorFunction flow(const TaylorFunction& vf, const Vector<Interval>& d, const Interval& t);
     //! \brief Compute the implicit function of \a f satisfying \f$f(c,h(c))=0\f$,
-    //! where \f$c\f$ is the centre of the domain of \f$f\f$. 
+    //! where \f$c\f$ is the centre of the domain of \f$f\f$.
     friend TaylorFunction implicit(const TaylorFunction& f);
     //! \brief Compute the inverse function of \a f based at the centre of the domain. */
     friend TaylorFunction inverse(const TaylorFunction& f);

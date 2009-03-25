@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 #include "macros.h"
 #include "array.h"
 #include "tuple.h"
@@ -45,7 +45,7 @@ namespace {
 using namespace Ariadne;
 
 template<class V, class Iter> inline
-void append(V& v, Iter begin, Iter end) 
+void append(V& v, Iter begin, Iter end)
 {
     for(;begin!=end;++begin) {
         v.push_back(*begin);
@@ -53,7 +53,7 @@ void append(V& v, Iter begin, Iter end)
 }
 
 template<class V, class C> inline
-void append(V& v, const C& c) 
+void append(V& v, const C& c)
 {
     for(typename C::const_iterator iter=c.begin(); iter!=c.end(); ++iter) {
         v.push_back(*iter);
@@ -61,12 +61,12 @@ void append(V& v, const C& c)
 }
 
 
-} 
+}
 
 
 
 namespace Ariadne {
- 
+
 // Allow subdivisions in upper evolution
 const bool ENABLE_SUBDIVISIONS = false;
 // Allow premature termination of lower evolution
@@ -93,19 +93,19 @@ HybridEvolver::HybridEvolver(const EvolutionParametersType& p)
 }
 
 
-Orbit<HybridEvolver::EnclosureType> 
+Orbit<HybridEvolver::EnclosureType>
 HybridEvolver::
-orbit(const SystemType& system, 
-      const EnclosureType& initial_set, 
+orbit(const SystemType& system,
+      const EnclosureType& initial_set,
       const TimeType& time,
-      Semantics semantics) const 
+      Semantics semantics) const
 {
     Orbit<EnclosureType> orbit(initial_set);
-    EnclosureListType final; 
-    EnclosureListType reachable; 
-    EnclosureListType intermediate; 
+    EnclosureListType final;
+    EnclosureListType reachable;
+    EnclosureListType intermediate;
     this->_evolution(final,reachable,intermediate,
-                     system,initial_set,time,semantics,false); 
+                     system,initial_set,time,semantics,false);
     orbit.adjoin_intermediate(intermediate);
     orbit.adjoin_reach(reachable);
     orbit.adjoin_final(final);
@@ -141,27 +141,27 @@ struct DetectionData {
 
 std::ostream& operator<<(std::ostream& os, const PredicateKind& kind) {
     switch(kind) {
-    case INVARIANT: return os << "INVARIANT"; 
-    case ACTIVATION: return os << "ACTIVATION"; 
-    case GUARD: return os << "GUARD"; 
-    case TIME: return os << "TIME"; 
-    case MIXED: return os << "MIXED"; 
+    case INVARIANT: return os << "INVARIANT";
+    case ACTIVATION: return os << "ACTIVATION";
+    case GUARD: return os << "GUARD";
+    case TIME: return os << "TIME";
+    case MIXED: return os << "MIXED";
     }
-    return os << "INVALID"; 
+    return os << "INVALID";
 }
 
 std::ostream& operator<<(std::ostream& os, const CrossingKind& kind) {
     switch(kind) {
-    case TRANSVERSE: return os << "TRANSVERSE"; 
-        //case CROSSING: return os << "CROSSING"; 
-        //case GRAZING: return os << "GRAZING"; 
-    case TOUCHING: return os << "TOUCHING"; 
-        //case ACTIVE: return os << "ACTIVE"; 
-        //case MISSING: return os << "MISSING"; 
-    case NONE: return os << "NONE"; 
-    case UNKNOWN: return os << "UNKNOWN"; 
+    case TRANSVERSE: return os << "TRANSVERSE";
+        //case CROSSING: return os << "CROSSING";
+        //case GRAZING: return os << "GRAZING";
+    case TOUCHING: return os << "TOUCHING";
+        //case ACTIVE: return os << "ACTIVE";
+        //case MISSING: return os << "MISSING";
+    case NONE: return os << "NONE";
+    case UNKNOWN: return os << "UNKNOWN";
     }
-    return os << "INVALID"; 
+    return os << "INVALID";
 }
 
 std::ostream& operator<<(std::ostream& os, const DetectionData& data) {
@@ -174,10 +174,10 @@ std::ostream& operator<<(std::ostream& os, const DetectionData& data) {
     if(data.crossing_kind!=NONE) {
         os << ", initially_active="<<data.initially_active;
         os << ", finally_active="<<data.finally_active;
-        if(data.touching_time_interval.lower()<=data.touching_time_interval.upper()) { 
+        if(data.touching_time_interval.lower()<=data.touching_time_interval.upper()) {
             os << ", touching_times="<<data.touching_time_interval; }
     }
-    return os <<" } "; 
+    return os <<" } ";
 }
 
 inline bool operator<(const DetectionData& d1, const DetectionData& d2) {
@@ -186,13 +186,13 @@ inline bool operator<(const DetectionData& d1, const DetectionData& d2) {
 
 void
 HybridEvolver::
-_evolution(EnclosureListType& final_sets, 
-           EnclosureListType& reach_sets, 
-           EnclosureListType& intermediate_sets, 
-           const SystemType& system, 
-           const EnclosureType& initial_set, 
-           const TimeType& maximum_hybrid_time, 
-           Semantics semantics, 
+_evolution(EnclosureListType& final_sets,
+           EnclosureListType& reach_sets,
+           EnclosureListType& intermediate_sets,
+           const SystemType& system,
+           const EnclosureType& initial_set,
+           const TimeType& maximum_hybrid_time,
+           Semantics semantics,
            bool reach) const
 {
     verbosity=0;
@@ -224,7 +224,7 @@ _evolution(EnclosureListType& final_sets,
         SetModelType initial_set_model=this->_toolbox->set_model(initial_continuous_set);
         ARIADNE_LOG(6,"initial_set_model = "<<initial_set_model<<"\n");
         TimeModelType initial_time_model
-            =TimeModelType::constant(initial_set_model.domain().size(),0.0);
+            =TimeModelType::constant(initial_set_model.domain(),0.0);
         ARIADNE_LOG(6,"initial_time_model = "<<initial_time_model<<"\n");
         TimedSetModelType initial_timed_set_model=join(initial_set_model.variables(),initial_time_model);
         ARIADNE_LOG(6,"initial_timed_set_model = "<<initial_timed_set_model<<"\n");
@@ -275,16 +275,16 @@ _evolution(EnclosureListType& final_sets,
 void
 HybridEvolver::
 _evolution_step(std::vector< HybridTimedSetType >& working_sets,
-                EnclosureListType& final_sets, 
-                EnclosureListType& reach_sets, 
-                EnclosureListType& intermediate_sets, 
-                const SystemType& system, 
+                EnclosureListType& final_sets,
+                EnclosureListType& reach_sets,
+                EnclosureListType& intermediate_sets,
+                const SystemType& system,
                 const HybridTimedSetType& current_set,
-                const TimeType& maximum_hybrid_time, 
-                Semantics semantics, 
+                const TimeType& maximum_hybrid_time,
+                Semantics semantics,
                 bool reach) const
 {
-  
+
     DiscreteState initial_location(0);
     IntegerType initial_steps;
     SetModelType initial_set_model;
@@ -296,7 +296,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     ARIADNE_LOG(6,"initial_time_model = "<<initial_time_model<<"");
     ARIADNE_LOG(4,"initial_location = "<<initial_location<<"\n");
     ARIADNE_LOG(6,"initial_set_model = "<<initial_set_model<<"\n");
-  
+
     ARIADNE_LOG(2,"steps = "<<initial_steps<<" ");
     ARIADNE_LOG(2,"time_range = "<<initial_time_model.range()<<" ");
     ARIADNE_LOG(2,"location = "<<initial_location<<" ");
@@ -304,68 +304,68 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     ARIADNE_LOG(2,"radius = "<<radius(initial_set_model.range())<<"\n\n");
     //const uint nd=initial_set_model.result_size();
     //const uint ng=initial_set_model.argument_size();
-  
+
 
     /////////////// Main Evolution ////////////////////////////////
 
     const DiscreteMode& initial_mode=system.mode(initial_location);
     const FunctionType* dynamic_ptr=&initial_mode.dynamic();
-  
+
     ARIADNE_LOG(6,"mode="<<initial_mode<<"\n");
     std::vector< shared_ptr<const FunctionInterface> > invariants
         =initial_mode.invariants();
     ARIADNE_LOG(7,"invariants="<<invariants<<"\n");
     const std::set< DiscreteTransition > transitions = system.transitions(initial_location);
     ARIADNE_LOG(7,"transitions="<<transitions<<"\n");
-  
-  
-  
+
+
+
     // Set evolution parameters
     const Float maximum_step_size=this->_parameters->maximum_step_size;
     const Float maximum_bounds_diameter=this->_parameters->maximum_enclosure_radius*2;
     const Float zero_time=0.0;
-  
+
     // Get bounding boxes for time and space range
     Vector<Interval> initial_set_bounds=initial_set_model.range();
     ARIADNE_LOG(4,"initial_set_range = "<<initial_set_bounds<<"\n");
     Interval initial_time_range=initial_time_model.range();
     ARIADNE_LOG(4,"initial_time_range = "<<initial_time_range<<"\n");
-  
+
     //ARIADNE_ASSERT(initial_time_range.width() <= maximum_step_size);
-  
+
     // Compute flow bounds and find flow bounding box
-    Vector<Interval> flow_bounds; 
+    Vector<Interval> flow_bounds;
     Float step_size;
     make_lpair(step_size,flow_bounds)=this->_toolbox->flow_bounds(*dynamic_ptr,initial_set_model.range(),maximum_step_size,maximum_bounds_diameter);
     ARIADNE_LOG(4,"step_size = "<<step_size<<"\n");
     ARIADNE_LOG(4,"flow_bounds = "<<flow_bounds<<"\n");
-  
+
     // Compute the flow model
     FlowModelType flow_model=this->_toolbox->flow_model(*dynamic_ptr,initial_set_bounds,step_size,flow_bounds);
     ARIADNE_LOG(6,"flow_model = "<<flow_model<<"\n");
-  
+
     // Compute the integration time model
     TimeModelType final_time_model=initial_time_model+step_size;
     ARIADNE_LOG(6,"final_time_model = "<<final_time_model<<"\n");
     TimeModelType integration_time_model=final_time_model-initial_time_model;
-  
+
     // Compute the flow tube (reachable set) model and the final set
     SetModelType final_set_model=this->_toolbox->integration_step(flow_model,initial_set_model,integration_time_model);
     ARIADNE_LOG(6,"final_set_model = "<<final_set_model<<"\n");
-    SetModelType reach_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,zero_time,integration_time_model);         
+    SetModelType reach_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,zero_time,integration_time_model);
     ARIADNE_LOG(6,"reach_set_model = "<<reach_set_model<<"\n");
     ARIADNE_LOG(4,"Done computing continuous evolution\n");
-  
-  
-  
 
 
 
 
 
-      
+
+
+
+
     // Compute transitions
-  
+
     ARIADNE_LOG(2,"Evolution step.\n");
 
     ARIADNE_LOG(7,"initial_time_bounds="<<initial_time_model.range()<<"\n");
@@ -374,7 +374,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     ARIADNE_LOG(7,"initial_flow_bounds="<<initial_set_model.range()<<"\n");
     ARIADNE_LOG(7,"final_flow_bounds="<<final_set_model.range()<<"\n");
     ARIADNE_LOG(7,"time_interval="<<Interval(0,step_size)<<"\n");
-  
+
     std::map<int,DetectionData> detection_data;
     ARIADNE_LOG(9,"invariants="<<invariants<<"\n");
     for(std::vector< shared_ptr<const FunctionInterface> >::const_iterator
@@ -390,7 +390,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
         }
 
     ARIADNE_LOG(9,"transitions="<<transitions<<"\n");
-    for(std::set< DiscreteTransition >::const_iterator 
+    for(std::set< DiscreteTransition >::const_iterator
             iter=transitions.begin(); iter!=transitions.end(); ++iter)
         {
             DetectionData new_data;
@@ -401,11 +401,11 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
             new_data.guard_ptr=iter->activation_ptr();
             detection_data.insert(make_pair(new_data.id,new_data));
         }
-  
+
     ARIADNE_LOG(8,"detection_data="<<detection_data<<"\n");
-  
+
     typedef std::map<int,DetectionData>::iterator predicate_iterator;
-    for(predicate_iterator iter=detection_data.begin(); 
+    for(predicate_iterator iter=detection_data.begin();
         iter!=detection_data.end(); ++iter)
         {
             DetectionData& data=iter->second;
@@ -437,12 +437,12 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
                 }
             } else {
                 data.active=false;
-                data.crossing_kind=NONE;                
+                data.crossing_kind=NONE;
             }
         }
-  
+
     ARIADNE_LOG(6,"detection_data="<<detection_data<<"\n");
-  
+
     // Remove inactive transitions
     for(predicate_iterator iter=detection_data.begin(); iter!=detection_data.end(); ) {
         if(!iter->second.active) {
@@ -453,13 +453,13 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     }
 
     ARIADNE_LOG(6,"active_detection_data="<<detection_data<<"\n");
-  
-  
-  
 
 
 
-  
+
+
+
+
 
     // Compute the evolution time for the blocking evolution
     ARIADNE_LOG(6,"Testing for blocking predicate\n");
@@ -503,10 +503,10 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
             }
         }
     }
-  
+
     ARIADNE_LOG(6,"blocking_data="<<blocking_data<<"\n");
 
-  
+
     Float maximum_evolution_time;
     if(semantics==UPPER_SEMANTICS) {
         maximum_evolution_time=blocking_data.touching_time_interval.upper();
@@ -514,15 +514,15 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
         maximum_evolution_time=blocking_data.touching_time_interval.lower();
     }
 
-    
+
     if(maximum_evolution_time>=step_size) {
         ARIADNE_LOG(6,"No restrictions on continuous evolution\n");
         maximum_evolution_time=step_size;
     }
-  
+
     ARIADNE_LOG(6,"maximum_evolution_time="<<maximum_evolution_time<<"\n");
-  
-  
+
+
     // Remove transitions which only occur after the blocking time
     for(predicate_iterator iter=detection_data.begin(); iter!=detection_data.end(); ) {
         if(!iter->second.initially_active && iter->second.touching_time_interval.lower()>maximum_evolution_time) {
@@ -531,8 +531,8 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
             ++iter;
         }
     }
-  
- 
+
+
     ARIADNE_LOG(6,"active_detection_data="<<detection_data<<"\n");
 
     // Compute continuous evolution
@@ -608,7 +608,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
                         jump_time_model=this->_toolbox->
                             reachability_time(initial_time_model+data.crossing_time_model,
                                               initial_time_model+maximum_evolution_time);
-                    } 
+                    }
                 } else {
                     Float lower_active_time, upper_active_time;
                     if(semantics==UPPER_SEMANTICS) {
@@ -625,7 +625,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
                 }
                 SetModelType active_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,active_time_model);
                 SetModelType jump_set_model=this->_toolbox->reset_step(*reset_ptr,active_set_model);
-        
+
                 if(semantics==UPPER_SEMANTICS || data.predicate_kind==ACTIVATION
                    || data.crossing_kind==TRANSVERSE) {
                     working_sets.push_back(make_tuple(jump_location,initial_steps+1,jump_set_model,jump_time_model));
@@ -635,7 +635,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
             }
         }
     }
-  
+
     ARIADNE_LOG(2,"Done evolution_step.\n\n");
 
 }

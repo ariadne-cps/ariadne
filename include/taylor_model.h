@@ -42,7 +42,6 @@ template<class T1, class T2> class Product;
 template<class X> class Vector;
 template<class X> class Matrix;
 template<class X> class Expansion;
-template<class X> class Polynomial;
 
 class TaylorVariable;
 template<> class Vector<TaylorVariable>;
@@ -92,17 +91,13 @@ bool refines(const Vector<TaylorVariable>& tv1, const Vector<TaylorVariable>& tv
  */
 class TaylorVariable
 {
-    typedef Vector<Interval> DomainType;
     typedef Expansion<Float> ExpansionType;
-    typedef Float ErrorType;
     static const Float _zero;
-    DomainType _domain;
     ExpansionType _expansion;
     Float _error;
     double _sweep_threshold;
     uint _maximum_degree;
     MultiIndexBound _maximum_index;
-
   private:
     static double _default_sweep_threshold;
     static uint _default_maximum_degree;
@@ -125,13 +120,22 @@ class TaylorVariable
     //@{
     /*! \name Constructors and destructors. */
     //! \brief Default constructor.
-    explicit TaylorVariable();
-    //! \brief Construct a TaylorVariable over the domain \a d.
-    explicit TaylorVariable(const DomainType& d);
-    //! \brief Construct a TaylorVariable over the domain \a d, with scaled power series expansion \a f and error \a e.
-    explicit TaylorVariable(const DomainType& d, const ExpansionType& f, const ErrorType& e=0);
-    //! \brief Construct a TaylorVariable over the domain \a d from the polynomial \a p.
-    template<class X> explicit TaylorVariable(const DomainType& d, const Polynomial<X>& p);
+    TaylorVariable();
+    //! \brief Construct a TaylorVariable in \a as arguments.
+    TaylorVariable(uint as);
+    //! \brief Construct from a map giving the expansion expansion and a constant giving the error.
+    TaylorVariable(const std::map<MultiIndex,Float>& d, const Float& e);
+    //! \brief Contruct a %TaylorVariable in \a as arguments of degree \a d
+    //! from the raw data given by \a ptr, with error given by \a err.
+    TaylorVariable(uint as, uint deg, const double* ptr, const double& err);
+    //! \brief Construct a %TaylorVariable in \a as arguments of degree \a deg,
+    //! with values given by the double-precision arguments. The last arguments
+    //! is the error of the expansion approximation.
+    TaylorVariable(uint as, uint deg, double d0, ...);
+    //! \brief Construct a %TaylorVariable in \a as arguments with \a nnz nonzero terms,
+    //! given in a list of indices a[0],...,a[k-1] followed by the coefficient c.
+    //! The last argument gives the error of the expansion approximation.
+    TaylorVariable(uint as, uint nnz, uint a0, ...);
     //@}
 
     //@{
@@ -146,35 +150,44 @@ class TaylorVariable
 
     //@{
     /*! \name Data access */
-    //! \brief The domain of the quantity.
-    const Vector<Interval>& domain() const { return this->_domain; }
-    //! \brief The scaled expansion over a unit box.
+    //! \brief The expansion expansion.
     const ExpansionType& expansion() const { return this->_expansion; }
-    //! \brief The error of the expansion over the domain.
-    const ErrorType& error() const { return this->_error; }
-    //! \brief A reference to the expansion.
+    //! \brief A reference to the expansion expansion.
     ExpansionType& expansion() { return this->_expansion; }
-    //! \brief A reference to the error of the expansion over the domain.
-    ErrorType& error() { return this->_error; }
-    //! \brief A reference to the constant term in the expansion.
-    Float& value() { return (*this)[MultiIndex::zero(this->argument_size())]; }
-    //! \brief The constant term in the expansion.
+    //! \brief The error of the expansion expansion over the domain.
+    const Float& error() const { return this->_error; }
+    //! \brief A reference to the error of the expansion expansion over the domain.
+    Float& error() { return this->_error; }
+    //! \brief The constant term in the expansion expansion.
     const Float& value() const { return (*this)[MultiIndex::zero(this->argument_size())]; }
+    //! \brief A reference to the constant term in the expansion expansion.
+    Float& value() { return (*this)[MultiIndex::zero(this->argument_size())]; }
+    //! \brief The coefficient of the gradient term \f$df/dx_j\f$.
+    const Float& gradient(uint j) const { return (*this)[MultiIndex::unit(this->argument_size(),j)]; }
+    //! \brief A reference to the coefficient of the gradient term \f$df/dx_j\f$.
+    Float& gradient(uint j) { return (*this)[MultiIndex::unit(this->argument_size(),j)]; }
 
-    //! \brief Set the error of the expansion.
+    //! \brief Set the error of the expansion expansion.
     void set_error(const Float& ne) {
         ARIADNE_ASSERT(ne>=0); this->_error=ne; }
-    //! \brief Set the constant term in the expansion.
+    //! \brief Set the constant term in the expansion expansion.
     void set_value(const Float& c) {
         this->_expansion[MultiIndex::zero(this->argument_size())]=c; }
-    //! \brief Set the gradient of \a j term in the expansion.
-    void set_gradient(unsigned int j, const Float& c) {
+    //! \brief Set the coefficient of the term \f$df/dx_j\f$.
+    void set_gradient(uint j, const Float& c) {
         this->_expansion[MultiIndex::unit(this->argument_size(),j)]=c; }
 
     //! \brief The coefficient of the term in $x^a$.
     const Float& operator[](const MultiIndex& a) const { return this->_expansion[a]; }
     //! \brief A read/write reference to the coefficient of the term in $x^a$.
     Float& operator[](const MultiIndex& a) { return this->_expansion[a]; }
+
+    //! \brief The coefficient of the term \f$df/dx_j\f$.
+    const Float& operator[](uint j) const {
+        return (*this)[MultiIndex::unit(this->argument_size(),j)]; }
+    //! \brief A reference to the coefficient of the term \f$df/dx_j\f$.
+    Float& operator[](uint j) {
+        return (*this)[MultiIndex::unit(this->argument_size(),j)]; }
 
     //! \brief An iterator to the first term in the expansion expansion.
     iterator begin() { return this->_expansion.begin(); }
@@ -199,43 +212,53 @@ class TaylorVariable
 
     //@{
     /*! \name Named constructors. */
-    //! \brief Construct a constant with value c \a c over the interval \a d.
-    static TaylorVariable constant(const Interval& d, const Float& c);
-    //! \brief Construct the quantity \f$x\f$ over the scalar domain \a d.
-    static TaylorVariable scaling(const Interval& d);
-
     //! \brief Construct the zero quantity in \a as independent variables.
-    static TaylorVariable zero(const DomainType& d);
+    static TaylorVariable zero(uint as) {
+        TaylorVariable r(as); r.set_value(0.0); return r; }
     //! \brief Construct a constant quantity in \a as independent variables.
-    static TaylorVariable constant(const DomainType& d, const Float& c);
-    //! \brief Construct the quantity \f$x_j\f$ over the domain \a d.
-    static TaylorVariable variable(const DomainType& d, unsigned int j);
-    //! \brief Construct the quantity \f$x_j\f$ over the domain \a d.
-    static TaylorVariable scaling(const DomainType& d, unsigned int j);
-
-    //! \brief Construct the quantity \f$c+\sum g_jx_j\f$ over the domain \a d.
-    static TaylorVariable affine(const DomainType& d, const Float& c, const Vector<Float>& g);
+    static TaylorVariable constant(uint as, const Float& c) {
+        TaylorVariable r(as); r.set_value(c); return r; }
+    //! \brief Construct the quantity \f$x_j\f$ in \a as independent variables. (Deprecated)
+    static TaylorVariable variable(uint as, uint j) {
+        TaylorVariable r(as); r.set_value(0.0); r.set_gradient(j,1.0); return r; }
+    //! \brief Construct the quantity \f$c+x_j\f$ in \a as independent variables. (Deprecated)
+    static TaylorVariable variable(uint as, const Float& c, uint j) {
+        TaylorVariable r(as); r.set_value(c); r.set_gradient(j,1.0); return r; }
+    //! \brief Construct the quantity which scales the unit interval onto the interval \a r.
+    static TaylorVariable scaling(uint as, uint j, const Interval& r);
+    //! \brief Construct the quantity \f$c+\sum g_jx_j\f$.
+    static TaylorVariable affine(const Float& c, const Vector<Float>& g) {
+        TaylorVariable r(g.size()); r.set_value(c);
+        for(uint j=0; j!=g.size(); ++j) { r.set_gradient(j,g[j]); } return r; }
     //! \brief Construct the quantity \f$c+\sum g_jx_j \pm e\f$.
-    static TaylorVariable affine(const DomainType& d, const Float& x, const Vector<Float>& g, const Float& e) ;
+    static TaylorVariable affine(const Float& x, const Vector<Float>& g, const Float& e) {
+        TaylorVariable r(g.size()); r.set_value(x); r.set_error(e);
+        for(uint j=0; j!=g.size(); ++j) { r.set_gradient(j,g[j]); } return r; }
 
+    //! \brief Return the vector of zero variables of size \a rs in \a as arguments.
+    static Vector<TaylorVariable> zeroes(uint rs, uint as);
     //! \brief Return the vector of constants with values \a c in \a as arguments.
-    static Vector<TaylorVariable> constants(const DomainType& d, const Vector<Float>& c);
-    //! \brief Return the vector of variables with values \a x in \a as arguments.
-    static Vector<TaylorVariable> variables(const DomainType& d);
-    //! \brief Return the vector of variables with values \a x in \a as arguments.
-    static Vector<TaylorVariable> scaling(const DomainType& d);
+    static Vector<TaylorVariable> constants(uint as, const Vector<Float>& c);
+    //! \brief Return the vector of variables with values \a x in \a as arguments. (Deprecated)
+    static Vector<TaylorVariable> variables(const Vector<Float>& x);
+    //! \brief Return the vector scaling the unit interval onto the domain \a d.
+    static Vector<TaylorVariable> scaling(const Vector<Interval>& d);
     //@}
 
     //@{
     /*! \name Comparison operators. */
     //! \brief Equality operator. Tests equality of representation, including error term.
-    bool operator==(const TaylorVariable& tv) const;
+    bool operator==(const TaylorVariable& sd) const {
+        return this->_expansion==sd._expansion && this->_error == sd._error; }
     //! \brief Inequality operator.
-    bool operator!=(const TaylorVariable& tv) const { return !(*this==tv); }
+    bool operator!=(const TaylorVariable& sd) const {
+        return !(*this==sd); }
     //@}
 
     //@{
     /*! \name Function operations. */
+    //! \brief The domain of the quantity, always given by \f$[-1,1]^{\mathrm{as}}\f$.
+    Vector<Interval> domain() const;
     //! \brief An over-approximation to the range of the quantity.
     Interval range() const;
     //! \brief Evaluate the quantity at the point \a x.
@@ -431,32 +454,22 @@ class Vector<TaylorVariable>
     : public ublas::vector<TaylorVariable>
 {
   public:
-    typedef Vector<Interval> DomainType;
-
     Vector() : ublas::vector<TaylorVariable>() { }
     Vector(uint rs) : ublas::vector<TaylorVariable>(rs) { for(uint i=0; i!=rs; ++i) { (*this)[i]=TaylorVariable(); } }
-    Vector(uint rs, const Vector<Interval>& d) : ublas::vector<TaylorVariable>(rs) { for(uint i=0; i!=rs; ++i) { (*this)[i]=TaylorVariable(d); } }
+    Vector(uint rs, uint as) : ublas::vector<TaylorVariable>(rs) { for(uint i=0; i!=rs; ++i) { (*this)[i]=TaylorVariable(as); } }
     Vector(uint rs, const TaylorVariable& x) : ublas::vector<TaylorVariable>(rs) { for(uint i=0; i!=rs; ++i) { (*this)[i]=x; } }
-
-    Vector(const Vector<Interval>& d, const Vector< Expansion<Float> >& f)
-        : ublas::vector<TaylorVariable>(f.size())
-        { for(uint i=0; i!=f.size(); ++i) { (*this)[i]=TaylorVariable(d,f[i],0.0); } }
-    Vector(const Vector<Interval>& d, const Vector< Expansion<Float> >& f, const Vector<Float>& e)
-        : ublas::vector<TaylorVariable>(f.size())
-        { ARIADNE_ASSERT(f.size()==e.size()); for(uint i=0; i!=f.size(); ++i) { (*this)[i]=TaylorVariable(d,f[i],e[i]); } }
-
+    Vector(uint rs, uint as, uint deg, double d0, ...);
     template<class E> Vector(const ublas::vector_expression<E> &ve) : ublas::vector<TaylorVariable>(ve) { }
-
     uint result_size() const { return this->size(); }
     uint argument_size() const { ARIADNE_ASSERT(this->size()>0); return (*this)[0].argument_size(); }
-
-    DomainType domain() const { return (*this)[0].domain(); }
 
     Vector<Float> value() const;
     Vector<Interval> evaluate(const Vector<Float>&) const;
     Vector<Interval> evaluate(const Vector<Interval>&) const;
 
-    void check() const;
+    void check() const {
+        for(uint i=0; i!=this->size(); ++i) {
+            ARIADNE_ASSERT((*this)[0].argument_size()==(*this)[i].argument_size()); } }
 };
 
 

@@ -2,7 +2,7 @@
  *            vector.h
  *
  *  Copyright 2008  Alberto Casagrande, Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,13 +20,13 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 /*! \file vector.h
  *  \brief Vectors in Euclidean space.
  */
 
 #ifndef ARIADNE_VECTOR_H
-#define ARIADNE_VECTOR_H 
+#define ARIADNE_VECTOR_H
 
 #include <boost/numeric/ublas/storage.hpp>
 #include <boost/numeric/ublas/vector.hpp>
@@ -68,7 +68,7 @@ class Vector
     //! \brief Construct a vector of size \a n, with values initialised from a variadic argument list. WARNING: The values in the list must all be double-precision type; in particular, constants must be floating-point values \c 2.0 rather integer values \c 2 .
     Vector(size_t n, const double& t0, const double& t1, ...);
     //! \brief Construct a matrix from a string literal, with entries enclosed in square braces and separated by commass. e.g. <tt>"[1, 2.3, 4.2]"</tt>.
-    Vector(const std::string& str) 
+    Vector(const std::string& str)
         : ublas::vector<X>() { std::stringstream ss(str); ss >> *this; }
     //! \brief Copy constructor allows conversion from a vector using another numerical type.
     template<class XX> Vector(const Vector<XX>& v)
@@ -79,7 +79,7 @@ class Vector
 #endif
     template<class E> Vector(const ublas::vector_expression<E> &ve)
         : ublas::vector<X>(ve) { }
-    template<class E> Vector<X>& operator=(const ublas::vector_expression<E> &ve) { 
+    template<class E> Vector<X>& operator=(const ublas::vector_expression<E> &ve) {
         this->ublas::vector<X>::operator=(ve); return *this; }
     //@}
 
@@ -91,9 +91,9 @@ class Vector
     //! \brief The vector of size \a n with all entries equal to one.
     static Vector<X> one(size_t n) { return Vector<Float>(n,1.0); }
     //! \brief The unit vector \f$e_i\f$ with value one in the \a i<sup>th</sup> entry, and zero otherwise.
-    static Vector<X> unit(size_t n,size_t i) { 
+    static Vector<X> unit(size_t n,size_t i) {
         ARIADNE_ASSERT(i<n); Vector<X> result(n,0.0); result[i]=1.0; return result; }
-    static Vector<X> unit_box(size_t n) { 
+    static Vector<X> unit_box(size_t n) {
         Vector<X> result(n,Interval(-1,1)); return result; }
     //! \brief The unit vector \f$e_i\f$ with value one in the \a i<sup>th</sup> entry, and zero otherwise.
     static array< Vector<X> > units(size_t n) {
@@ -146,7 +146,7 @@ class Vector
     //! \brief Join (catenate, make the direct sum of) two vectors.
     friend template<class X> Vector<X> join(const Vector<X>& v1, const Vector<X>& v2);
     //! \brief Join a vector and a scalar.
-    friend template<class X> Vector<X> join(const Vector<X>& v1, const X& s2); 
+    friend template<class X> Vector<X> join(const Vector<X>& v1, const X& s2);
 
     //! \brief Write to an output stream.
     friend template<class X> std::ostream& operator<<(std::ostream& os, const Vector<X>& v);
@@ -191,7 +191,7 @@ X dot(const Vector<X>& v1, const Vector<X>& v2)
 }
 
 template<class X>
-Vector<X> join(const Vector<X>& v1, const Vector<X>& v2) 
+Vector<X> join(const Vector<X>& v1, const Vector<X>& v2)
 {
     size_t n1=v1.size();
     size_t n2=v2.size();
@@ -202,7 +202,7 @@ Vector<X> join(const Vector<X>& v1, const Vector<X>& v2)
 }
 
 template<class X>
-Vector<X> join(const Vector<X>& v1, const X& s2) 
+Vector<X> join(const Vector<X>& v1, const X& s2)
 {
     size_t n1=v1.size();
     Vector<X> r(n1+1);
@@ -211,7 +211,7 @@ Vector<X> join(const Vector<X>& v1, const X& s2)
     return r;
 }
 
-  
+
 
 template<class X1, class X2>
 bool operator==(const Vector<X1>& v1, const Vector<X2>& v2)
@@ -221,6 +221,13 @@ bool operator==(const Vector<X1>& v1, const Vector<X2>& v2)
         if(v1[i]!=v2[i]) { return false; }
     }
     return true;
+}
+
+
+template<class X1, class X2> inline
+bool operator!=(const Vector<X1>& v1, const Vector<X2>& v2)
+{
+    return !(v1==v2);
 }
 
 
@@ -248,7 +255,7 @@ bool operator<=(const Vector<X>& v, const X& c)
 
 template<class X> std::ostream& operator<<(std::ostream& os, const Vector<X>& v) {
     if(v.size()==0) { os << '['; }
-    for(size_t i=0; i!=v.size(); ++i) { 
+    for(size_t i=0; i!=v.size(); ++i) {
         os << (i==0 ? '[' : ',') << v[i]; }
     return os << ']';
 }
@@ -286,11 +293,11 @@ inline Vector<Float> sub_approx(const Vector<Float>& v1, const Vector<Float>& v2
 
 template<class X, class XX> inline Vector<X> vector(size_t d, const XX* ptr) {
     return Vector<Float>(d,ptr); }
-inline Vector<Float> point(size_t d, Float* ptr) { 
+inline Vector<Float> point(size_t d, Float* ptr) {
     return Vector<Float>(d,ptr); }
-inline Vector<Interval> box(size_t d, Float* ptr) { 
-    Vector<Interval> bx(d); 
-    for(size_t i=0; i!=d; ++i) { 
+inline Vector<Interval> box(size_t d, Float* ptr) {
+    Vector<Interval> bx(d);
+    for(size_t i=0; i!=d; ++i) {
         bx[i]=Interval(ptr[2*i],ptr[2*i+1]); }
     return bx;
 }

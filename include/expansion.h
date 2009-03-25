@@ -39,9 +39,12 @@
 #include "multi_index.h"
 
 
-#define ARIADNE_USE_ARRAY_EXPANSION
+//#define ARIADNE_USE_ARRAY_EXPANSION
 
 namespace Ariadne {
+
+template<class X> class Expansion;
+template<class X> class Vector< Expansion<X> >;
 
 #if defined DOXYGEN or not defined ARIADNE_USE_ARRAY_EXPANSION
 
@@ -87,12 +90,12 @@ class Expansion
     //! \brief Construct from a polynomial with possibly different coefficient types.
     template<class XX> Expansion(const Expansion<XX>& p);
 
-    //! \brief The polynomial \f$x_i\f$ in \a as variables.
+    //! \brief The power series expansion \f$x_i\f$ in \a as variables.
     static Expansion<X> variable(unsigned int as, unsigned int i);
-    //! \brief A vector of polynomials of the form \f$(x_0,\ldots,x_{n-1})\f$.
+    //! \brief A vector of power series expansions of the form \f$(x_0,\ldots,x_{n-1})\f$.
     static Vector< Expansion<X> > variables(unsigned int n);
 
-    //! \brief Swap with another polynomial. Included for efficiency.
+    //! \brief Swap with another power series expansion. Included for efficiency.
     void swap(Expansion<X>& p) {
         std::swap(this->_argument_size,p._argument_size);
         std::swap(this->_coefficients,p._coefficients); }
@@ -102,25 +105,27 @@ class Expansion
     //! \brief Inequality operator.
     bool operator!=(const Expansion<X>& p) const { return this->_coefficients != p._coefficients; }
 
-    //! \brief The number of argument variables of the polynomial.
+    //! \brief The number of argument variables of the expansion.
     unsigned int argument_size() const { return this->_argument_size; }
     //! \brief The number of nonzero terms.
     unsigned int number_of_nonzeros() const { return this->_coefficients.size(); }
     //! \brief The degree of the polynomial.
     unsigned int degree() const { return (--this->_coefficients.end())->first.degree(); }
 
+    //! \brief Tests if the expansion has no nonzero coefficients.
+    bool empty() const { return this->_coefficients.empty(); }
     //! \brief Reserve space for \a nnz nonzero elements.
     void reserve(size_type nnz) { }
 
-    //! \brief Insert the term \f$cx^a\f$ into the polynomial.
-    //! If polynomial already has a term in \f$x^a\f$, the coefficients are added.
+    //! \brief Insert the term \f$cx^a\f$ into the expansion.
+    //! If expansion already has a term in \f$x^a\f$, the coefficients are added.
     void insert(const MultiIndex& a, const Real& c) {
         assert(a.size()==this->_argument_size); this->_coefficients[a]+=c; }
-    //! \brief Insert the term \f$cx^a\f$ into the polynomial.
+    //! \brief Insert the term \f$cx^a\f$ into the expansion.
     //! The index \a a must be higher than the index of all currently existing terms.
     void append(const MultiIndex& a, const Real& c) {
         this->insert(a,c); }
-    //! \brief Insert the term \f$cx^{a_1+a_2}\f$ into the polynomial.
+    //! \brief Insert the term \f$cx^{a_1+a_2}\f$ into the expansion.
     //! The index \f$a_1+a_2\f$ must be higher than the index of all currently existing terms.
     void append(const MultiIndex& a1, const MultiIndex& a2, const Real& c) {
         this->insert(a1+a2,c); }
@@ -130,11 +135,11 @@ class Expansion
         return this->_coefficients[a]; }
     //! \brief A constant reference to the coefficient of \f$x^a\f$.
     const Real& operator[](const MultiIndex& a) const {
-        const_iterator iter=this->find(a); 
+        const_iterator iter=this->find(a);
         if(iter==this->end()) { return _zero; }
         else { return iter->second; } }
 
-    //! \brief An iterator to the first nonzero term. 
+    //! \brief An iterator to the first nonzero term.
     iterator begin() { return this->_coefficients.begin(); }
     //! \brief An iterator to the end of the terms.
     iterator end() { return this->_coefficients.end(); }
@@ -194,7 +199,7 @@ class Reference<const X> {
 };
 
 template<>
-class Reference<MultiIndex> 
+class Reference<MultiIndex>
 {
     friend class Reference<const MultiIndex>;
     typedef MultiIndex::size_type size_type;
@@ -403,6 +408,7 @@ class Expansion
     unsigned int number_of_nonzeros() const { return _coefficients.size()/element_size(); }
     unsigned int degree() const { return (--this->_coefficients.end())->first.degree(); }
 
+    bool empty() const { return this->_coefficients.empty(); }
     void reserve(size_type nnz) { this->_coefficients.reserve(nnz*element_size()); }
 
     void insert(const MultiIndex& a, const Real& c) {
@@ -413,26 +419,26 @@ class Expansion
         this->_append(a1,a2,c); }
 
     Real& operator[](const MultiIndex& a) {
-        iterator iter=this->find(a); 
+        iterator iter=this->find(a);
         if(iter==this->end()) { return this->_insert(a,0.0)->second; }
         return iter->second; }
     const Real& operator[](const MultiIndex& a) const {
-        const_iterator iter=this->find(a); 
+        const_iterator iter=this->find(a);
         if(iter==this->end()) { return _zero; }
         else { return iter->second; } }
 
     iterator begin() { return iterator(_argument_size,(byte_type*)_begin()); }
     iterator end() { return iterator(_argument_size,(byte_type*)_end()); }
     iterator find(const MultiIndex& a) {
-        iterator iter=this->begin(); 
-        while(iter!=this->end() && iter->first!=a) { ++iter; } 
+        iterator iter=this->begin();
+        while(iter!=this->end() && iter->first!=a) { ++iter; }
         return iter; }
 
     const_iterator begin() const { return const_iterator(_argument_size,(byte_type*)_begin()); }
     const_iterator end() const { return const_iterator(_argument_size,(byte_type*)_end()); }
     const_iterator find(const MultiIndex& a) const {
-        const_iterator iter=this->begin(); 
-        while(iter!=this->end() && iter->first!=a) { ++iter; } 
+        const_iterator iter=this->begin();
+        while(iter!=this->end() && iter->first!=a) { ++iter; }
         return iter; };
 
     void erase(iterator iter) { iter->second=0.0; }
@@ -474,7 +480,7 @@ class Expansion
     iterator _insert(const MultiIndex& a, const Real& x) {
         this->_append(a,x);
         iterator iter=this->end(); --iter; iterator prev=iter;
-        while(iter!=this->begin()) {  
+        while(iter!=this->begin()) {
             --prev; if(prev->first<a) { break; } else { *iter=*prev; --iter; } }
         iter->first=a; iter->second=x; return iter; }
     void _append(const MultiIndex& a, const Real& x) {
@@ -562,12 +568,6 @@ template<class X> Expansion<X> Expansion<X>::variable(unsigned int n, unsigned i
     return p;
 }
 
-template<class X> Vector< Expansion<X> > Expansion<X>::variables(unsigned int n) {
-    Vector< Expansion<X> > pv(n,Expansion<X>(n)); MultiIndex a(n);
-    for(uint i=0; i!=n; ++i) { a[i]=1; pv[i][a]=1.0; a[i]=0; }
-    return pv; 
-}
-
 
 
 
@@ -604,16 +604,6 @@ Y evaluate(const Expansion<X>& x, const Vector<Y>& y)
     return x.evaluate(y);
 }
 
-template<class X, class Y>
-Vector<Y> evaluate(const Vector< Expansion<X> >& x, const Vector<Y>& y)
-{
-    Vector<Y> r(x.size());
-    for(unsigned int i=0; i!=x.size(); ++i) {
-        r[i]=x[i].evaluate(y);
-    }
-    return r;
-}
-
 
 
 template<class X>
@@ -635,6 +625,15 @@ Expansion<X> Expansion<X>::embed(unsigned int new_size, unsigned int start) cons
     return r;
 }
 
+
+inline Expansion<Float> midpoint(const Expansion<Interval>& pse) {
+    Expansion<Float> r(pse.argument_size());
+    for(Expansion<Interval>::const_iterator iter=pse.begin(); iter!=pse.end(); ++iter) {
+        r.append(iter->first,midpoint(iter->second)); }
+    return r;
+}
+
+
 template<class X>
 std::ostream& operator<<(std::ostream& os, const Expansion<X>& p) {
     if(p.begin()==p.end()) {
@@ -650,12 +649,63 @@ std::ostream& operator<<(std::ostream& os, const Expansion<X>& p) {
 }
 
 
-inline Expansion<Float> midpoint(const Expansion<Interval>& pse) {
-    Expansion<Float> r(pse.argument_size());
-    for(Expansion<Interval>::const_iterator iter=pse.begin(); iter!=pse.end(); ++iter) {
-        r.append(iter->first,midpoint(iter->second)); }
+
+
+template<class X>
+class Vector< Expansion<X> >
+    : public ublas::vector< Expansion<X> >
+{
+    typedef unsigned int uint;
+  public:
+    Vector() : ublas::vector< Expansion<X> >() { }
+    Vector(uint rs) : ublas::vector< Expansion<X> >(rs) { for(uint i=0; i!=rs; ++i) { (*this)[i]=Expansion<X>(); } }
+    Vector(uint rs, const Expansion<X>& x) : ublas::vector< Expansion<X> >(rs) { for(uint i=0; i!=rs; ++i) { (*this)[i]=x; } }
+
+    Vector(uint rs, uint as, uint deg, double c00, ...);
+
+    template<class E> Vector(const ublas::vector_expression<E> &ve) : ublas::vector< Expansion<X> >(ve) { }
+
+    uint result_size() const { return this->size(); }
+    uint argument_size() const { ARIADNE_ASSERT(this->size()>0); return (*this)[0].argument_size(); }
+};
+
+
+template<class X>
+Vector< Expansion<X> >::Vector(uint rs, uint as, uint deg, double c00, ...)
+    : ublas::vector< Expansion<X> >(rs)
+{
+    double x=c00;
+    va_list args;
+    va_start(args,c00);
+    for(uint i=0; i!=rs; ++i) {
+        (*this)[i]=Expansion<X>(as);
+        for(MultiIndex j(as); j.degree()<=deg; ++j) {
+            if(i>0 || j.degree()>0) { x=va_arg(args,double); }
+            if(x!=0.0) { (*this)[i].insert(j,x); }
+        }
+        (*this)[i].cleanup();
+    }
+    va_end(args);
+}
+
+
+template<class X> Vector< Expansion<X> > Expansion<X>::variables(unsigned int n) {
+    Vector< Expansion<X> > pv(n,Expansion<X>(n)); MultiIndex a(n);
+    for(uint i=0; i!=n; ++i) { a[i]=1; pv[i][a]=1.0; a[i]=0; }
+    return pv;
+}
+
+
+template<class X, class Y>
+Vector<Y> evaluate(const Vector< Expansion<X> >& x, const Vector<Y>& y)
+{
+    Vector<Y> r(x.size());
+    for(unsigned int i=0; i!=x.size(); ++i) {
+        r[i]=x[i].evaluate(y);
+    }
     return r;
 }
+
 
 inline Vector< Expansion<Float> > midpoint(const Vector< Expansion<Interval> >& pse) {
     Vector< Expansion<Float> > r(pse.size());
@@ -663,6 +713,8 @@ inline Vector< Expansion<Float> > midpoint(const Vector< Expansion<Interval> >& 
         r[i]=midpoint(pse[i]); }
     return r;
 }
+
+
 
 
 }

@@ -2,7 +2,7 @@
  *            test_polynomial.cc
  *
  *  Copyright 2009  Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 #include <iostream>
 #include "numeric.h"
 #include "vector.h"
@@ -67,8 +67,8 @@ void TestPolynomial::test_concept()
     p=Polynomial<Float>(3,1, 0.0, 0.0,0.0,0.0);
     p=Polynomial<Float>(3,1, 1,2,3,5.0);
 
-    p=Polynomial<Float>::variable(3u,0u);
-    p=Polynomial<Float>::variables(3u)[0u];
+    //p=Polynomial<Float>::variable(3u,0u);
+    //p=Polynomial<Float>::variables(3u)[0u];
 
     p=x;
 
@@ -102,7 +102,7 @@ void TestPolynomial::test_iterator_concept()
 
     Polynomial<Float>::value_type val=*iter;
     Polynomial<Float>::reference ref=*iter;
-    Polynomial<Float>::pointer ptr=iter.operator->();
+    //Polynomial<Float>::pointer ptr=iter.operator->();
     Polynomial<Float>::const_reference ncref=*iter;
 
     // WARNING: Cannot convert non-constant pointer to constant pointer
@@ -110,7 +110,7 @@ void TestPolynomial::test_iterator_concept()
 
     Polynomial<Float>::value_type cval=*citer;
     Polynomial<Float>::const_reference cref=*citer;
-    Polynomial<Float>::const_pointer cptr=citer.operator->();
+    //Polynomial<Float>::const_pointer cptr=citer.operator->();
 
     ++iter; --iter;
     ++citer; --citer;
@@ -138,7 +138,7 @@ void TestPolynomial::test_variables()
     ARIADNE_TEST_EQUAL((e[1]*(x[0]*(x[1]*3.0+x[0])+x[1]*x[2]))[1], Polynomial<Float>(3,3, 1,1,0,3.0, 2,0,0,1.0, 0,1,1,1.0));
     ARIADNE_TEST_EQUAL((e[1]*(x[0]*(x[1]*3.0+x[0])+x[1]*x[2]))[0], Polynomial<Float>(3));
     ARIADNE_TEST_EQUAL((e[1]*(x[0]*(x[1]*3.0+x[0])+x[1]*x[2]))[0], Polynomial<Float>(3,0, 0.0));
-    
+
 }
 
 

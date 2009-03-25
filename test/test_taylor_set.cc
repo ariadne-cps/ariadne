@@ -2,7 +2,7 @@
  *            test_taylor_set.cc
  *
  *  Copyright 2008  Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 #include <iostream>
 #include <iomanip>
 #include "multi_index.h"
@@ -75,8 +75,7 @@ TestTaylorSet::test_subsume()
 void
 TestTaylorSet::test_linearise()
 {
-    Vector<TaylorVariable> tv(2,2,2, 0.0,1.0,0.25,0.0,0.0,0.0, 0.0, 0.0,0.5,1.0,1.0,0.0,0.0, 0.0);
-    TaylorSet ts=TaylorSet(tv);
+    TaylorSet ts(2,2,2, 0.0,1.0,0.25,0.0,0.0,0.0, 0.0, 0.0,0.5,1.0,1.0,0.0,0.0, 0.0);
     Zonotope z=zonotope(ts);
     Box b=ts.bounding_box();
 
@@ -91,21 +90,20 @@ TestTaylorSet::test_linearise()
 void
 TestTaylorSet::test_discretise()
 {
-    Vector<TaylorVariable> tv(2,2,2, 0.0,1.0,0.25,0.0,0.0,0.0, 0.0, 0.0,0.5,1.0,1.0,0.0,0.0, 0.0);
-    TaylorSet ts=TaylorSet(tv);
+    TaylorSet ts(2,2,2, 0.0,1.0,0.25,0.0,0.0,0.0, 0.0, 0.0,0.5,1.0,1.0,0.0,0.0, 0.0);
 
     Grid grid(2);
     uint height(5);
     uint depth(4);
     GridTreeSet gts=ts.discretise(grid,depth);
 
-   
+
     BooleanArray box_tree=make_binary_word("1010111110101011011100100010010110110010010110010101100100111011111100100011100100001111100100011100100001011111100100001000110110110110010010110010010110110010010110010011110010001110011011001000000");
-    BooleanArray box_mask=make_binary_word("0000000101101000101001011010001011010111010110101110010110100111101011010111010110101010010110100000"); 
+    BooleanArray box_mask=make_binary_word("0000000101101000101001011010001011010111010110101110010110100111101011010111010110101010010110100000");
     GridTreeSet expected_box_discretisation=GridTreeSet(grid,height,box_tree,box_mask);
 
     BooleanArray affine_tree=make_binary_word("101011111010101101110010001001011011010110001011001010001110111100101100100010101110010000110111101100100001011110010001001111111000100011101000001110011011001000000");
-    BooleanArray affine_mask=make_binary_word("00000001011010001101001010000100101101010110111010101101001001010010110010110100000"); 
+    BooleanArray affine_mask=make_binary_word("00000001011010001101001010000100101101010110111010101101001001010010110010110100000");
     GridTreeSet expected_affine_discretisation=GridTreeSet(grid,height,affine_tree,affine_mask);
 
     BooleanArray rough_tree=make_binary_word("101011110101101101110001100010110010100011101101101100100101100100001110111101000101000111101100100110100001111100001011000101101000101111100100011011001000000");
@@ -118,7 +116,7 @@ TestTaylorSet::test_discretise()
 
     ARIADNE_TEST_BINARY_PREDICATE(subset,expected_nonlinear_discretisation,gts);
     ARIADNE_TEST_BINARY_PREDICATE(subset,gts,expected_box_discretisation);
-    
+
     if(gts==expected_box_discretisation) {
         ARIADNE_TEST_WARN("Using box over approximation for discretisation of TaylorSet; large errors expected.");
     } else if(gts==expected_affine_discretisation) {
@@ -138,7 +136,7 @@ TestTaylorSet::test_discretise()
 }
 
 
-void 
+void
 TestTaylorSet::test_split()
 {
     TaylorSet ts(2,2,2, 0.0,1.0,0.25,0.0,0.0,0.0, 0.0, 0.0,0.5,1.0,1.0,0.0,0.0, 0.0);
@@ -150,7 +148,7 @@ TestTaylorSet::test_split()
 
     ARIADNE_TEST_EQUAL(ts.split().first,
         TaylorSet(2,2,2, +0.5,0.5,0.25,0.0,0.0,0.0, 0.0, +0.5,+0.75,1.0,0.25,0.0,0.0, 0.0));
-    ARIADNE_TEST_EQUAL(ts.split().second, 
+    ARIADNE_TEST_EQUAL(ts.split().second,
         TaylorSet(2,2,2, -0.5,0.5,0.25,0.0,0.0,0.0, 0.0, +0.0,-0.25,1.0,0.25,0.0,0.0, 0.0));
 
     Box bounding_box=ts.bounding_box()+Vector<Interval>(2,Interval(-1,1));
@@ -162,7 +160,7 @@ TestTaylorSet::test_split()
 
 }
 
-void 
+void
 TestTaylorSet::test_recondition()
 {
     TaylorSet ts(2,2,2, 0.,4.,0.,0.5,0.,0., 0.0,  0.,3.,1.,0.,0.,0., 0.0);
@@ -193,30 +191,29 @@ TestTaylorSet::test_recondition()
          Colour(0,1,1),srts11,Colour(0,1,1),srts12,Colour(1,0,1),srts21,Colour(1,0,1),srts22);
 }
 
-void 
+void
 TestTaylorSet::test_subdivide()
 {
 }
 
-void 
+void
 TestTaylorSet::test_draw()
 {
-    Vector<TaylorVariable> tv(2,2,2, 0.0,1.0,0.25,1.0,0.0,0.0, 0.0, 0.0,0.5,1.0,0.0,0.0,0.0, 0.0);
-    TaylorSet ts=TaylorSet(tv);
+    TaylorSet ts(2,2,2, 0.0,1.0,0.25,1.0,0.0,0.0, 0.0, 0.0,0.5,1.0,0.0,0.0,0.0, 0.0);
     GridTreeSet gts=compute_outer_approximation(ts,Grid(2),6,6);
-    
+
     plot("test_taylor_set-draw-1",gts.bounding_box(),Colour(1,0,1),gts,Colour(0,0,1),ts);
     plot("test_taylor_set-draw-2.png",ts);
 
 }
 
 
-GridTreeSet 
+GridTreeSet
 compute_outer_approximation(const TaylorSet& set, const Grid& grid, uint subd, uint depth)
 {
-    assert(set.dimension()==2); 
+    assert(set.dimension()==2);
     assert(set.generators_size()==2);
-   
+
     GridTreeSet gts(grid);
 
     Float rad=1.0/(1<<subd);
@@ -230,7 +227,7 @@ compute_outer_approximation(const TaylorSet& set, const Grid& grid, uint subd, u
     gts.recombine();
     return gts;
 }
- 
+
 
 int main() {
     TestTaylorSet().test();

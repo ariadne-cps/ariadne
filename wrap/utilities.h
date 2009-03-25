@@ -24,7 +24,7 @@
 /*! \file utilities.h
  *  Commonly used inline methods for the Python interface.
  */
- 
+
 #ifndef ARIADNE_PYTHON_UTILITIES_H
 #define ARIADNE_PYTHON_UTILITIES_H
 
@@ -73,7 +73,7 @@ void read(Rational&, const boost::python::object&);
 
 
 // Read a array variable of type X from a Python object
-template<class X> 
+template<class X>
 void
 read_list_array(array<X>& ary, const boost::python::object& obj)
 {
@@ -87,7 +87,7 @@ read_list_array(array<X>& ary, const boost::python::object& obj)
 }
 
 // Read a array variable of type X from a Python object
-template<class X> 
+template<class X>
 void
 read_tuple_array(array<X>& ary, const boost::python::object& obj)
 {
@@ -102,8 +102,8 @@ read_tuple_array(array<X>& ary, const boost::python::object& obj)
 
 
 template<class T>
-T* 
-make(const boost::python::object& obj) 
+T*
+make(const boost::python::object& obj)
 {
     T* t=new T;
     read(*t,obj);
@@ -111,24 +111,33 @@ make(const boost::python::object& obj)
 }
 
 template<class T>
-T* 
-make2(const boost::python::object& obj1,const boost::python::object& obj2) 
+T*
+make2(const boost::python::object& obj1,const boost::python::object& obj2)
 {
     T* t=new T;
     read(*t,obj1,obj2);
     return t;
 }
 
-template<class C, class I, class X> inline 
+template<class T>
+T*
+make3(const boost::python::object& obj1,const boost::python::object& obj2,const boost::python::object& obj3)
+{
+    T* t=new T;
+    read(*t,obj1,obj2,obj3);
+    return t;
+}
+
+template<class C, class I, class X> inline
 X get_item(const C& c, const I& i) { return c[i]; }
 
-template<class C, class I, class X> inline 
+template<class C, class I, class X> inline
 void set_item(C& c, const I& i, const X& x) { c[i]=x; }
 
-template<class C, class I, class J, class X> inline 
+template<class C, class I, class J, class X> inline
 X matrix_get_item(const C& c, const I& i, const J& j) { return c[i][j]; }
 
-template<class C, class I, class J, class X> inline 
+template<class C, class I, class J, class X> inline
 void matrix_set_item(C& c, const I& i, const J& j, const X& x) { c[i][j]=x; }
 
 

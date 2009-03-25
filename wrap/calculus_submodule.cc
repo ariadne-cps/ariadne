@@ -2,7 +2,7 @@
  *            calculus_submodule.cc
  *
  *  Copyright 2008  Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 #include "taylor_variable.h"
 
 #include <boost/python.hpp>
@@ -32,7 +32,7 @@ using namespace Ariadne;
 
 namespace Ariadne {
 
-    
+
 void read(MultiIndex& j, const boost::python::object& obj) {
     array<int> ary;
     read_tuple_array(ary,obj);
@@ -50,7 +50,7 @@ void read(std::map<K,V>& m, const boost::python::object& obj) {
         boost::python::tuple tup=extract<boost::python::tuple>(lst[i]);
         read(j,tup[0]);
         read(c,tup[1]);
-        if(i==0) { 
+        if(i==0) {
             m=std::map<K,V>();
         }
         m[j]=c;
@@ -58,32 +58,31 @@ void read(std::map<K,V>& m, const boost::python::object& obj) {
 }
 
 
+template<class X>
+void read(Vector<X>& v, const boost::python::object& obj);
 
-void read(TaylorVariable& tv, const boost::python::object& obj1, const boost::python::object& obj2) {
+
+void read(TaylorVariable& tv, const boost::python::object& obj1, const boost::python::object& obj2, const boost::python::object& obj3) {
+    Vector<Interval> d;
     std::map<MultiIndex,Float> m;
     Float e;
-    read(m,obj1);
-    read(e,obj2); 
+    read(d,obj1);
+    read(m,obj2);
+    read(e,obj3);
     ARIADNE_ASSERT(e>=0);
-    tv=TaylorVariable(m,e);
+    tv=TaylorVariable(d,m,e);
 }
-   
 
-void read(TaylorVariable& tv, const boost::python::object& obj1, const boost::python::object& obj2,
-          const boost::python::object& obj3, const boost::python::object& obj4) 
-{
-    uint as;
-    uint deg;
-    array<Float> dat;
-    Float err;
-    read(as,obj1);
-    read(deg,obj2);
-    read_list_array(dat,obj3);
-    read(err,obj4);
-    const Float* ptr=dat.begin();
-    ARIADNE_ASSERT(err>=0);
-    tv=TaylorVariable(as,deg,ptr,err);
+void read(TaylorVariable& tv, const boost::python::object& obj1, const boost::python::object& obj2) {
+    Vector<Interval> d;
+    std::map<MultiIndex,Float> m;
+    Float e;
+    read(d,obj1);
+    read(m,obj2);
+    ARIADNE_ASSERT(e>=0);
+    tv=TaylorVariable(d,m,0.0);
 }
+
 
 void read(TaylorVariable& tv, const boost::python::object& obj);
 
@@ -92,46 +91,25 @@ void read(TaylorVariable& tv, const boost::python::tuple& tup) {
         read(tv,tup[0]);
     } else if(len(tup)==2) {
         read(tv,tup[0],tup[1]);
-    } else if(len(tup)==4) {
-        read(tv,tup[0],tup[1],tup[2],tup[3]);
+    } else if(len(tup)==3) {
+        read(tv,tup[0],tup[1],tup[2]);
     }
 }
 
 
 void read(TaylorVariable& tv, const boost::python::object& obj) {
     if(check(extract<boost::python::tuple>(obj))) {
-         read(tv,extract<boost::python::tuple>(obj)); 
-    } else {
-        std::map<MultiIndex,Float> m;
-        Float e=0;
-        read(m,obj);
-        tv=TaylorVariable(m,e);
-    } 
-}
-   
-TaylorVariable*
-make_taylor_variable(const uint& as, const uint& deg, const boost::python::object& aobj, const boost::python::object& eobj) 
-{
-    array<Float> dat;
-    Float err;
-    read_list_array(dat,aobj);
-    const Float* ptr=dat.begin();
-    read(err,eobj);
-    ARIADNE_ASSERT(err>=0);
-    return new TaylorVariable(as,deg,ptr,err);
+         read(tv,extract<boost::python::tuple>(obj));
+    }
 }
 
 Vector<TaylorVariable>
-make_taylor_variables(const Vector<Interval>& x) 
+make_taylor_variables(const Vector<Interval>& x)
 {
-    Vector<TaylorVariable> result(x.size());
-    for(uint i=0; i!=x.size(); ++i) {
-        result[i]=TaylorVariable::variable(x.size(),midpoint(x[i]),i);
-    }
-    return result;
+    return TaylorVariable::variables(x);
 }
 
-   
+
 
 
 boost::python::tuple
@@ -147,7 +125,7 @@ template<> std::string __repr__(const TaylorVariable& tv) {
     std::stringstream ss;
     ss << "TaylorVariable(" << tv.expansion() << "," << tv.error() << ")";
     return ss.str();
-} 
+}
 
 TaylorVariable neg(const TaylorVariable&);
 TaylorVariable rec(const TaylorVariable&);
@@ -162,7 +140,7 @@ TaylorVariable tan(const TaylorVariable&);
 
 } // namespace Ariadne
 
-void export_taylor_variable() 
+void export_taylor_variable()
 {
     typedef uint N;
     typedef double D;
@@ -178,11 +156,11 @@ void export_taylor_variable()
     class_<T> taylor_variable_class("TaylorVariable");
     taylor_variable_class.def("__init__", make_constructor(&make<TaylorVariable>) );
     taylor_variable_class.def("__init__", make_constructor(&make2<TaylorVariable>) );
-    taylor_variable_class.def("__init__", make_constructor(&make_taylor_variable) );
-    taylor_variable_class.def( init< uint >());
+    taylor_variable_class.def("__init__", make_constructor(&make3<TaylorVariable>) );
+    taylor_variable_class.def( init< IV >());
     taylor_variable_class.def( init< TaylorVariable >());
     taylor_variable_class.def("error", (const R&(T::*)()const) &T::error, return_value_policy<copy_const_reference>());
-    taylor_variable_class.def("domain", &TaylorVariable::domain);
+    taylor_variable_class.def("domain", &TaylorVariable::domain, return_value_policy<copy_const_reference>());
     taylor_variable_class.def("range", &TaylorVariable::range);
     taylor_variable_class.def("__getitem__", &get_item<T,A,R>);
     taylor_variable_class.def("__setitem__",&set_item<T,A,D>);
@@ -230,10 +208,10 @@ void export_taylor_variable()
 
     taylor_variable_class.def("__repr__",&__repr__<T>);
 
-    taylor_variable_class.def("constant",(T(*)(N, const R&))&T::constant);
-    taylor_variable_class.def("variable",(T(*)(N, const R&, uint))&T::variable);
-    taylor_variable_class.def("variables",&make_taylor_variables);
-  
+    taylor_variable_class.def("constant",(T(*)(const IV&, const R&))&T::constant);
+    taylor_variable_class.def("variable",(T(*)(const IV&, uint))&T::variable);
+    taylor_variable_class.def("variables",(TV(*)(const IV&))&T::variables);
+
     taylor_variable_class.staticmethod("constant");
     taylor_variable_class.staticmethod("variable");
     taylor_variable_class.staticmethod("variables");
@@ -243,7 +221,7 @@ void export_taylor_variable()
 
     def("unscale", (T(*)(const T&,const I&)) &unscale);
     def("unscale", (TV(*)(const TV&,const IV&)) &unscale);
- 
+
     def("scale", (T(*)(const T&,const I&)) &scale);
     def("scale", (TV(*)(const TV&,const IV&)) &scale);
 
@@ -286,7 +264,7 @@ void export_taylor_variable()
 
 }
 
-void calculus_submodule() 
+void calculus_submodule()
 {
     export_taylor_variable();
 }

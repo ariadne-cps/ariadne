@@ -2,7 +2,7 @@
  *            taylor_set.cc
  *
  *  Copyright 2008  Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 #include "macros.h"
 #include "exceptions.h"
 #include "numeric.h"
@@ -43,13 +43,13 @@
 
 namespace Ariadne {
 
-TaylorSet::TaylorSet(uint d, uint ng) 
+TaylorSet::TaylorSet(uint d, uint ng)
     : _variables(d,ng)
 {
 }
 
 
-TaylorSet::TaylorSet(const FunctionInterface& f, const Vector<Interval>& d) 
+TaylorSet::TaylorSet(const FunctionInterface& f, const Vector<Interval>& d)
     : _variables(f.result_size())
 {
     Vector<TaylorVariable> x=TaylorVariable::variables(Vector<Float>(f.argument_size(),0.0));
@@ -64,16 +64,9 @@ TaylorSet::TaylorSet(const FunctionInterface& f, const Vector<Interval>& d)
     this->_variables=f.evaluate(x);
 }
 
-TaylorSet::TaylorSet(const Vector<Interval>& bx) 
-    : _variables(bx.size())
+TaylorSet::TaylorSet(const Vector<Interval>& bx)
+    : _variables(TaylorVariable::scaling(bx))
 {
-    for(uint i=0; i!=bx.size(); ++i) {
-        Interval c=Interval(bx[i].l/2)+Interval(bx[i].u/2);
-        Interval r=Interval(bx[i].u/2)-Interval(bx[i].l/2);
-        _variables[i]=TaylorVariable::variable(bx.size(),0.0,i);
-        _variables[i]*=r;
-        _variables[i]+=c;
-    }
 }
 
 
@@ -126,14 +119,14 @@ TaylorSet::radius() const
 }
 
 
-tribool 
+tribool
 TaylorSet::disjoint(const Box& bx) const
 {
     return this->bounding_box().disjoint(bx) || indeterminate;
 }
 
 
-tribool 
+tribool
 TaylorSet::overlaps(const Box& bx) const
 {
     ARIADNE_NOT_IMPLEMENTED;
@@ -160,7 +153,7 @@ TaylorSet::bounding_box() const
 
 
 TaylorSet
-TaylorSet::linearise() const 
+TaylorSet::linearise() const
 {
     TaylorSet res(*this);
     for(uint i=0; i!=this->dimension(); ++i) {
@@ -171,13 +164,13 @@ TaylorSet::linearise() const
 
 
 GridTreeSet
-TaylorSet::discretise(const Grid& g, uint d) const 
+TaylorSet::discretise(const Grid& g, uint d) const
 {
     GridTreeSet gts(g);
     return this->discretise(gts,d);
 }
 
-GridTreeSet& 
+GridTreeSet&
 TaylorSet::discretise(GridTreeSet& gts, uint d) const
 {
     adjoin_outer_approximation(gts,*this,d);
@@ -186,7 +179,7 @@ TaylorSet::discretise(GridTreeSet& gts, uint d) const
 }
 
 
-Zonotope 
+Zonotope
 zonotope(const TaylorSet& ts)
 {
     uint d=ts.dimension();
@@ -197,7 +190,7 @@ zonotope(const TaylorSet& ts)
     for(uint i=0; i!=d; ++i) {
         c[i]=ts[i].value();
         for(uint j=0; j!=ng; ++j) {
-            G[i][j]=ts[i].gradient(j);
+            G[i][j]=ts[i][MultiIndex::unit(ng,j)];
         }
         e[i]=ts[i].error();
     }
@@ -231,12 +224,13 @@ TaylorSet::split(uint j) const
 pair<TaylorSet,TaylorSet>
 TaylorSet::split() const
 {
+    uint ng=this->generators_size();
     Float rmax=0.0;
     uint armax=0;
     for(uint j=0; j!=this->generators_size(); ++j) {
         Float r=0.0;
         for(uint i=0; i!=this->dimension(); ++i) {
-            r+=abs(this->variables()[i].gradient(j));
+            r+=abs(this->variables()[i][MultiIndex::unit(ng,j)]);
         }
         if(r>rmax) {
             rmax=r;
@@ -271,7 +265,7 @@ _adjoin_outer_approximation(const TaylorSet& set, const Box& domain, Float eps, 
 
 
 void
-adjoin_outer_approximation(GridTreeSet& grid_set, const TaylorSet& set, uint depth) 
+adjoin_outer_approximation(GridTreeSet& grid_set, const TaylorSet& set, uint depth)
 {
     //grid_set.adjoin_outer_approximation(zonotope(set),depth);
     //grid_set.adjoin_outer_approximation(set.bounding_box(),depth);
@@ -288,7 +282,7 @@ TaylorSet::jacobian() const
     Matrix<Float> J(this->dimension(),this->generators_size());
     for(uint i=0; i!=this->dimension(); ++i) {
         for(uint j=0; j!=this->generators_size(); ++j) {
-            J[i][j]=this->variables()[i][j];
+            J[i][j]=this->variables()[i][MultiIndex::unit(this->generators_size(),j)];
         }
     }
     return J;
@@ -320,7 +314,7 @@ TaylorSet::subsume() const
 }
 
 
-GridTreeSet 
+GridTreeSet
 outer_approximation(const TaylorSet& set, const Grid& grid, uint depth)
 {
     ARIADNE_ASSERT(set.dimension()==grid.dimension());
@@ -331,14 +325,14 @@ outer_approximation(const TaylorSet& set, const Grid& grid, uint depth)
 
 
 
-TaylorSet 
+TaylorSet
 TaylorSet::recondition() const
 {
     Matrix<Float> T=triangular_multiplier(this->jacobian());
-    Vector<TaylorVariable> scal(T.row_size(),T.column_size()); 
+    Vector<TaylorVariable> scal(T.row_size(),T.column_size());
     for(uint i=0; i!=T.row_size(); ++i) {
         for(uint j=0; j!=T.column_size(); ++j) {
-            scal[i][j]=T[i][j];
+            scal[i][MultiIndex::unit(this->generators_size(),j)]=T[i][j];
         }
     }
     return TaylorSet(compose(this->variables(),this->domain(),scal));
@@ -391,7 +385,7 @@ void affine_draw(Figure& fig, const TaylorSet& ts) {
 void curve_draw(Figure& fig, const TaylorSet& ts) {
     assert(ts.dimension()==2 && ts.generators_size()==2);
     std::vector<Point> pts;
-    Vector<Float> s(2); 
+    Vector<Float> s(2);
     s[0]=-1; s[1]=-1;
     for(uint i=0; i!=16; ++i) {
         pts.push_back(midpoint(evaluate(ts,s)));
@@ -412,7 +406,7 @@ void curve_draw(Figure& fig, const TaylorSet& ts) {
     fig.draw(pts);
 }
 
-void grid_draw(Figure& fig, const TaylorSet& ts) 
+void grid_draw(Figure& fig, const TaylorSet& ts)
 {
     uint depth=12;
     Float rad=1./8;

@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 #include <iomanip>
 
 #include "macros.h"
@@ -45,20 +45,20 @@ class NonInvertibleFunctionException { };
 
 
 
-  
+
 
 TaylorCalculus::
-TaylorCalculus() 
+TaylorCalculus()
     : _spacial_order(2),
       _temporal_order(4),
       _order(6),
       _smoothness(1)
-{ 
+{
 }
-  
+
 
 TaylorCalculus::SetModelType
-TaylorCalculus::_apply(const FunctionModelType& function_model, 
+TaylorCalculus::_apply(const FunctionModelType& function_model,
                        const SetModelType& set_model) const
 {
     return Ariadne::compose(function_model.variables(),function_model.domain(),set_model.variables());
@@ -68,7 +68,7 @@ TaylorCalculus::_apply(const FunctionModelType& function_model,
 
 TaylorCalculus::SetModelType
 TaylorCalculus::
-reset_step(const FunctionType& map, 
+reset_step(const FunctionType& map,
            const SetModelType& set_model) const
 {
     // Direct computation from function
@@ -81,7 +81,7 @@ reset_step(const FunctionType& map,
 
 TaylorCalculus::SetModelType
 TaylorCalculus::
-reset_step(const FlowModelType& function_model, 
+reset_step(const FlowModelType& function_model,
            const SetModelType& set_model) const
 {
     return this->_apply(function_model,set_model);
@@ -91,8 +91,8 @@ reset_step(const FlowModelType& function_model,
 
 TaylorCalculus::SetModelType
 TaylorCalculus::
-integration_step(const FlowModelType& flow_model, 
-                 const SetModelType& initial_set_model, 
+integration_step(const FlowModelType& flow_model,
+                 const SetModelType& initial_set_model,
                  const TimeModelType& integration_time_model) const
 {
     //SetModelType set_step_model=join(initial_set_model, integration_time_model);
@@ -114,7 +114,7 @@ integration_step(const FlowModelType& flow_model,
 
 TaylorCalculus::TimeModelType
 TaylorCalculus::
-reachability_time(const TimeModelType& initial_time_model, 
+reachability_time(const TimeModelType& initial_time_model,
                   const TimeModelType& final_time_model) const
 {
     ARIADNE_ASSERT(initial_time_model.argument_size()==final_time_model.argument_size());
@@ -122,8 +122,8 @@ reachability_time(const TimeModelType& initial_time_model,
 
     TimeModelType expanded_initial_time_model=embed(initial_time_model,ng+1,0u);
     TimeModelType expanded_final_time_model=embed(final_time_model,ng+1,0u);
-  
-    TimeModelType time_interval_model=TimeModelType::affine(0.5,Vector<Float>(1u,0.5));
+
+    TimeModelType time_interval_model=TimeModelType::scaling(Interval(0,1));
     TimeModelType expanded_time_interval_model=embed(time_interval_model,ng+1,ng);
     TimeModelType expanded_reach_time_model=expanded_initial_time_model+expanded_time_interval_model*(expanded_final_time_model-expanded_initial_time_model);
 
@@ -133,9 +133,9 @@ reachability_time(const TimeModelType& initial_time_model,
 
 TaylorCalculus::SetModelType
 TaylorCalculus::
-reachability_step(const FlowModelType& flow_model, 
-                  const SetModelType& initial_set_model, 
-                  const TimeType& initial_time, 
+reachability_step(const FlowModelType& flow_model,
+                  const SetModelType& initial_set_model,
+                  const TimeType& initial_time,
                   const TimeType& final_time) const
 {
     ARIADNE_ASSERT(initial_set_model.dimension()+1==flow_model.argument_size());
@@ -152,15 +152,15 @@ reachability_step(const FlowModelType& flow_model,
     ARIADNE_LOG(6,"expanded_timed_set_model="<<expanded_timed_set_model<<"\n");
     SetModelType reach_set_model=this->_apply(flow_model,expanded_timed_set_model);
     ARIADNE_LOG(6,"reach_set_model = "<<reach_set_model<<"\n");
-  
+
     return reach_set_model;
 }
 
 
 TaylorCalculus::SetModelType
 TaylorCalculus::
-reachability_step(const FlowModelType& flow_model, 
-                  const SetModelType& initial_set_model, 
+reachability_step(const FlowModelType& flow_model,
+                  const SetModelType& initial_set_model,
                   const TimeModelType& expanded_reach_time_model) const
 {
     ARIADNE_ASSERT(initial_set_model.generators_size()+1==expanded_reach_time_model.argument_size());
@@ -168,7 +168,7 @@ reachability_step(const FlowModelType& flow_model,
     // Compute the reachable set
     // Need an extra independent variable to represent time
     uint ng=initial_set_model.generators_size();
-  
+
     // FIXME: Embed set model correctly
     SetModelType expanded_initial_set_model=embed(initial_set_model.variables(),ng+1,0u);
     ARIADNE_LOG(6,"expanded_initial_set_model="<<expanded_initial_set_model<<"\n");
@@ -176,30 +176,30 @@ reachability_step(const FlowModelType& flow_model,
     ARIADNE_LOG(6,"expanded_timed_set_model="<<expanded_timed_set_model<<"\n");
     SetModelType reach_set_model=this->_apply(flow_model,expanded_timed_set_model);
     ARIADNE_LOG(6,"reach_set_model = "<<reach_set_model<<"\n");
-  
+
     return reach_set_model;
 }
 
 
 TaylorCalculus::SetModelType
 TaylorCalculus::
-reachability_step(const FlowModelType& flow_model, 
-                  const SetModelType& initial_set_model, 
-                  const TimeModelType& initial_time_model, 
+reachability_step(const FlowModelType& flow_model,
+                  const SetModelType& initial_set_model,
+                  const TimeModelType& initial_time_model,
                   const TimeModelType& final_time_model) const
 {
     // Compute the reachable set
     // Need an extra independent variable to represent time
     uint ng=initial_set_model.generators_size();
-  
+
     SetModelType expanded_initial_set_model=embed(initial_set_model.variables(),ng+1,0u);
     ARIADNE_LOG(6,"expanded_initial_set_model="<<expanded_initial_set_model<<"\n");
     TimeModelType expanded_initial_time_model=embed(initial_time_model,ng+1,0u);
     ARIADNE_LOG(6,"expanded_initial_time_model="<<expanded_initial_time_model<<"\n");
     TimeModelType expanded_final_time_model=embed(final_time_model,ng+1,0u);
     ARIADNE_LOG(6,"expanded_final_time_model="<<expanded_final_time_model<<"\n");
-  
-    TimeModelType time_interval_model=TimeModelType::affine(0.5,Vector<Float>(1u,0.5));
+
+    TimeModelType time_interval_model=TimeModelType::scaling(Interval(0,1));
     ARIADNE_LOG(6,"time_interval_time_model="<<time_interval_model<<"\n");
     TimeModelType expanded_time_interval_model=embed(time_interval_model,ng+1,ng);
     ARIADNE_LOG(6,"expanded_time_interval_model="<<expanded_time_interval_model<<"\n");
@@ -210,7 +210,7 @@ reachability_step(const FlowModelType& flow_model,
     ARIADNE_LOG(6,"expanded_timed_set_model="<<expanded_timed_set_model<<"\n");
     SetModelType reach_set_model=this->_apply(flow_model,expanded_timed_set_model);
     ARIADNE_LOG(6,"reach_set_model = "<<reach_set_model<<"\n");
-  
+
     return reach_set_model;
 }
 
@@ -223,12 +223,12 @@ reachability_step(const FlowModelType& flow_model,
 TaylorCalculus::TimeModelType
 TaylorCalculus::
 crossing_time(const PredicateModelType& guard_model,
-              const FlowModelType& flow_model, 
+              const FlowModelType& flow_model,
               const SetModelType& initial_set_model) const
 {
     uint dimension=flow_model.result_size();
-    RealType minimum_time=flow_model.domain()[dimension].lower(); 
-    RealType maximum_time=flow_model.domain()[dimension].upper(); 
+    RealType minimum_time=flow_model.domain()[dimension].lower();
+    RealType maximum_time=flow_model.domain()[dimension].upper();
 
     //ARIADNE_ASSERT(minimum_time<=0);
     //ARIADNE_ASSERT(maximum_time>=0);
@@ -240,12 +240,12 @@ crossing_time(const PredicateModelType& guard_model,
     ARIADNE_LOG(6,"hitting_model = "<<hitting_model<<"\n");
     FunctionModelType free_hitting_time_model;
     try {
-        free_hitting_time_model=implicit(hitting_model); 
+        free_hitting_time_model=implicit(hitting_model);
     } catch(NonInvertibleFunctionException) {
         throw DegenerateCrossingException();
     }
     ARIADNE_LOG(6,"free_hitting_time_model = "<<free_hitting_time_model<<"\n");
-    FunctionModelType hitting_time_model=FunctionModelType(Vector<Interval>(initial_set_model.generators_size(),Interval(-1,1)),_apply(free_hitting_time_model,initial_set_model).variables());
+    FunctionModelType hitting_time_model=FunctionModelType(_apply(free_hitting_time_model,initial_set_model).variables());
     ARIADNE_LOG(6,"hitting_time_model = "<<hitting_time_model<<"\n");
     Interval hitting_time_range=hitting_time_model.range()[0];
     ARIADNE_LOG(6,"hitting_time_model = "<<hitting_time_model<<"\n");
@@ -261,8 +261,8 @@ crossing_time(const PredicateModelType& guard_model,
 
 TaylorCalculus::IntervalType
 TaylorCalculus::
-touching_time_interval(const PredicateModelType& guard_model, 
-                       const FlowModelType& flow_model, 
+touching_time_interval(const PredicateModelType& guard_model,
+                       const FlowModelType& flow_model,
                        const SetModelType& initial_set_model) const
 {
     ARIADNE_ASSERT(flow_model.result_size()+1==flow_model.argument_size());
@@ -270,9 +270,9 @@ touching_time_interval(const PredicateModelType& guard_model,
     ARIADNE_ASSERT(guard_model.result_size()==1u);
 
     uint dimension=guard_model.argument_size();
-    RealType minimum_time=flow_model.domain()[dimension].lower(); 
-    RealType maximum_time=flow_model.domain()[dimension].upper(); 
-  
+    RealType minimum_time=flow_model.domain()[dimension].lower();
+    RealType maximum_time=flow_model.domain()[dimension].upper();
+
     ARIADNE_LOG(6,"\nminimum_time="<<minimum_time<<" maximum_time="<<maximum_time<<"\n");
     ARIADNE_ASSERT(minimum_time<=0);
     ARIADNE_ASSERT(maximum_time>=0);
@@ -283,7 +283,7 @@ touching_time_interval(const PredicateModelType& guard_model,
 
     RealType lower_time=minimum_time;
     RealType upper_time=maximum_time;
-  
+
     if(possibly(this->active(guard_model,initial_set_model))) {
         lower_time=minimum_time;
     } else {
@@ -327,15 +327,15 @@ touching_time_interval(const PredicateModelType& guard_model,
 
 
 std::pair<Float, Vector<Interval> >
-TaylorCalculus::flow_bounds(FunctionInterface const& vf, 
-                                   Vector<Interval> const& r, 
-                                   Float const& hmax, 
+TaylorCalculus::flow_bounds(FunctionInterface const& vf,
+                                   Vector<Interval> const& r,
+                                   Float const& hmax,
                                    Float const& dmax) const
-{ 
+{
     // Try to find a time h and a set b such that inside(r+Interval<R>(0,h)*vf(b),b) holds
     ARIADNE_LOG(6,"flow_bounds(Function,Box,Time hmax)\n");
     ARIADNE_LOG(7,"  r="<<r<<" hmax="<<hmax<<"\n");
-  
+
     ARIADNE_ASSERT(vf.argument_size()==r.size());
 
     // Set up constants of the method.
@@ -346,9 +346,9 @@ TaylorCalculus::flow_bounds(FunctionInterface const& vf,
     const uint EXPANSION_STEPS=8;
     const uint REDUCTION_STEPS=8;
     const uint REFINEMENT_STEPS=4;
-  
+
     Vector<Interval> delta=r-midpoint(r);
-  
+
     Float h=hmax;
     Float hmin=hmax/(1<<REDUCTION_STEPS);
     bool success=false;
@@ -375,7 +375,7 @@ TaylorCalculus::flow_bounds(FunctionInterface const& vf,
     }
 
     ARIADNE_ASSERT(subset(nb,b));
-  
+
     Vector<Interval> vfb;
     vfb=vf.evaluate(b);
     ARIADNE_LOG(9,std::setprecision(20)<<"\n\n   b="<<b<<" vf="<<vfb<<"\n  nb="<<nb<<"\n");
@@ -387,11 +387,11 @@ TaylorCalculus::flow_bounds(FunctionInterface const& vf,
         ARIADNE_LOG(9,std::setprecision(20)<<"   b="<<b<<" vf="<<vfb<<"\n  nb="<<nb<<"\n");
         ARIADNE_ASSERT_MSG(subset(nb,b),std::setprecision(20)<<"refinement "<<i<<": "<<nb<<" is not a inside of "<<b);
     }
-  
+
     // Check result of operation
-    // We use "possibly" here since the bound may touch 
+    // We use "possibly" here since the bound may touch
     ARIADNE_ASSERT(subset(nb,b));
-  
+
     ARIADNE_LOG(7,"  h="<<h<<" b="<<nb<<"\n");
 
     return std::make_pair(h,nb);
@@ -414,7 +414,7 @@ active(const PredicateModelType& guard_model, const SetModelType& set_model) con
 
 TaylorCalculus::FunctionModelType
 TaylorCalculus::map_model(FunctionInterface const& f, Vector<Interval> const& bx) const
-{ 
+{
     ARIADNE_ASSERT(f.argument_size()==bx.size());
 
     FunctionModelType map_model(bx,f);
@@ -427,10 +427,10 @@ TaylorCalculus::map_model(FunctionInterface const& f, Vector<Interval> const& bx
 
 TaylorCalculus::FlowModelType
 TaylorCalculus::flow_model(FunctionInterface const& vf, Vector<Interval> const& bx, Float const& h, Vector<Interval> const& bb) const
-{ 
+{
     FunctionModelType vector_field_model(bb,vf);
     ARIADNE_LOG(6,"vector_field_model = "<<vector_field_model<<"\n");
-  
+
     // Use flow function on model type
     FlowModelType flow_model=Ariadne::flow(vector_field_model,bx,Interval(0,h));
     ARIADNE_LOG(6,"flow_model = "<<flow_model<<"\n");
@@ -442,7 +442,7 @@ TaylorCalculus::flow_model(FunctionInterface const& vf, Vector<Interval> const& 
 
 TaylorCalculus::PredicateModelType
 TaylorCalculus::predicate_model(FunctionInterface const& g, Vector<Interval> const& bx) const
-{ 
+{
     ARIADNE_ASSERT(g.result_size()==1);
     ARIADNE_ASSERT(g.argument_size()==bx.size());
 
@@ -456,10 +456,10 @@ TaylorCalculus::predicate_model(FunctionInterface const& g, Vector<Interval> con
 
 TaylorCalculus::TimeModelType
 TaylorCalculus::
-time_model(const Float& t, 
+time_model(const Float& t,
            const BoxType& d) const
 {
-    TimeModelType time_model=TimeModelType::constant(d.size(),t);
+    TimeModelType time_model=TimeModelType::constant(d,t);
     ARIADNE_LOG(6,"time_model = "<<time_model<<"\n");
 
     return time_model;
@@ -503,21 +503,21 @@ enclosure(const SetModelType& s) const
 
 tribool
 TaylorCalculus::disjoint(SetModelType const& set, BoxType const& bx) const
-{ 
+{
     return set.disjoint(bx);
 }
 
 
 TaylorCalculus::BoxType
 TaylorCalculus::bounding_box(SetModelType const& set) const
-{ 
+{
     return set.bounding_box();
 }
 
 
 array<TaylorCalculus::SetModelType>
 TaylorCalculus::subdivide(SetModelType const& set) const
-{ 
+{
     std::pair<SetModelType,SetModelType> split=set.split();
     array<SetModelType> result(2);
     result[0]=split.first;
@@ -526,9 +526,9 @@ TaylorCalculus::subdivide(SetModelType const& set) const
 }
 
 
-TaylorCalculus::SetModelType 
+TaylorCalculus::SetModelType
 TaylorCalculus::simplify(SetModelType const&) const
-{ 
+{
     ARIADNE_NOT_IMPLEMENTED;
 }
 

@@ -2,7 +2,7 @@
  *            test_polynomial.cc
  *
  *  Copyright 2009  Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,13 +20,14 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 #include <iostream>
 #include <iomanip>
 #include "numeric.h"
 #include "vector.h"
 #include "matrix.h"
 #include "multi_index.h"
+#include "expansion.h"
 #include "taylor_variable.h"
 #include "taylor_function.h"
 #include "function.h"
@@ -105,14 +106,14 @@ void TestTaylorFunction::test_constructors()
 {
     HenonFunction henon_function(Vector<Float>(2,1.5,-0.25));
     Vector<Interval> domain(2,0.25,1.25,0.5,1.0);
-    Vector<TaylorVariable> expansion(2,2,2,
-        1.125, -0.75,0.0625, -0.25,0.00,0.00,   0.0,
-        0.750,  0.50,0.0000,  0.00,0.00,0.00,   0.0);
+    Vector< Expansion<Float> > expansion(2,2,2, 1.125, -0.75,0.0625, -0.25,0.00,0.00,
+                                                0.750,  0.50,0.0000,  0.00,0.00,0.00);
     ARIADNE_TEST_CONSTRUCT(TaylorFunction,henon_model,(domain,henon_function));
-    ARIADNE_TEST_EQUAL(henon_model,TaylorFunction(domain,expansion))
+    ARIADNE_TEST_EQUAL(henon_model.variables()[0].expansion(),expansion[0])
+    ARIADNE_TEST_EQUAL(henon_model.variables()[1].expansion(),expansion[1])
 
     Vector<Float> e0=e(2,0); Vector<Float> e1=e(2,1);
-    Polynomial<Float> x=p(2,0); Polynomial<Float> y=p(2,1); 
+    Polynomial<Float> x=p(2,0); Polynomial<Float> y=p(2,1);
     Vector< Polynomial<Float> > polynomial=(1.5-x*x+0.25*y)*e0+x*e1;
     ARIADNE_TEST_CONSTRUCT(TaylorFunction,polynomial_model,(domain,polynomial));
     ARIADNE_TEST_EQUAL(polynomial_model,TaylorFunction(domain,expansion))
@@ -126,20 +127,21 @@ void TestTaylorFunction::test_constructors()
 void TestTaylorFunction::test_restrict()
 {
     Vector<Interval> domain1(2, -1.0,+1.0, -1.0,+1.0);
-    Vector<TaylorVariable> expansion1(1,2,3, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 0.0);
+    Vector< Expansion<Float> > expansion1(1,2,3, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0);
     Vector<Interval> subdomain1(2, -0.25,0.75, -0.5,0.0);
-    Vector<TaylorVariable> subexpansion1(1,2,3, 1.031250, 1.812500,0.625000, 1.812500,0.562500,0.0468750,
-                                            0.875000,0.500000,0.281250,0.156250,  0.0);
+    Vector< Expansion<Float> > subexpansion1(1,2,3, 1.031250, 1.812500,0.625000, 1.812500,0.562500,0.0468750,
+                                             0.875000,0.500000,0.281250,0.156250);
     TaylorFunction function1(domain1,expansion1);
     TaylorFunction restricted_function1(subdomain1,subexpansion1);
     ARIADNE_TEST_EQUAL(restrict(function1,subdomain1),restricted_function1);
 
     Vector<Interval> domain2(1, -1.0,+1.0);
-    Vector<TaylorVariable> expansion2(1,1,1, 0.0, 1.0, 0.0);
+    Vector< Expansion<Float> > expansion2(1,1,1, 0.0, 1.0);
     Vector<Interval> subdomain2(1, 1e-16, 1.0);
-    Vector<TaylorVariable> subexpansion2(1,1,1, 0.50000000000000000,0.49999999999999994, 1.6653345369377348e-16);
-    TaylorFunction function2(domain2,expansion2);
-    TaylorFunction restricted_function2(subdomain2,subexpansion2);
+    Vector< Expansion<Float> > subexpansion2(1,1,1, 0.50000000000000000,0.49999999999999994);
+    Vector<Float> error2(1, 1.6653345369377348e-16);
+    TaylorFunction function2(domain2,expansion2,error2);
+    TaylorFunction restricted_function2(subdomain2,subexpansion2,error2);
     ARIADNE_TEST_EQUAL(restrict(function2,subdomain2),restricted_function2);
 }
 
@@ -179,39 +181,39 @@ void TestTaylorFunction::test_compose()
 }
 
 
-void TestTaylorFunction::test_antiderivative() 
+void TestTaylorFunction::test_antiderivative()
 {
     unsigned int index0=0;
     unsigned int index1=1;
 
     Vector<Interval> domain1(2,Interval(-1,1));
-    Vector<TaylorVariable> expansion1(1,2,0, 3.0, 0.0);
+    Vector< Expansion<Float> > expansion1(1,2,0, 3.0);
     TaylorFunction function1(domain1,expansion1);
-    Vector<TaylorVariable> aexpansion1(1,2,1, 0.0, 0.0,3.0, 0.0);
+    Vector< Expansion<Float> > aexpansion1(1,2,1, 0.0, 0.0,3.0);
     TaylorFunction antiderivative1(domain1,aexpansion1);
     ARIADNE_TEST_EQUAL(antiderivative(function1,index1),antiderivative1);
 
     Vector<Interval> domain2(2, -0.25,0.75, 0.0,0.5);
-    Vector<TaylorVariable> expansion2(1,2,0, 3.0, 0.0);
+    Vector< Expansion<Float> > expansion2(1,2,0, 3.0);
     TaylorFunction function2(domain2,expansion2);
-    Vector<TaylorVariable> aexpansion2(1,2,1, 0.0, 0.0,0.75, 0.0);
+    Vector< Expansion<Float> > aexpansion2(1,2,1, 0.0, 0.0,0.75);
     TaylorFunction antiderivative2(domain2,aexpansion2);
     ARIADNE_TEST_EQUAL(antiderivative(function2,index1),antiderivative2);
 
     Vector<Interval> domain3(2, -0.25,0.75, 0.0,0.5);
-    Vector<TaylorVariable> expansion3(1,2,2, 1.0,2.0,3.0,4.0,5.0,6.0, 0.0);
+    Vector< Expansion<Float> > expansion3(1,2,2, 1.0,2.0,3.0,4.0,5.0,6.0);
     TaylorFunction function3(domain3,expansion3);
-    Vector<TaylorVariable> aexpansion30(1,2,3, 0.0, 0.5,0.0, 0.5,1.5,0.0,
-        0.66666666666666663,1.25,3.0,0.0,  5.5511151231257827e-17);
-    TaylorFunction antiderivative30(domain3,aexpansion30);
+    Vector< Expansion<Float> > aexpansion30(1,2,3, 0.0, 0.5,0.0, 0.5,1.5,0.0,0.66666666666666663,1.25,3.0,0.0);
+    Vector<Float> aerror30(1,5.5511151231257827e-17);
+    TaylorFunction antiderivative30(domain3,aexpansion30,aerror30);
     ARIADNE_TEST_EQUAL(antiderivative(function3,index0),antiderivative30);
-    Vector<TaylorVariable> aexpansion31(1,2,3, 0.0, 0.0,0.25, 0.0,0.5,0.375, 0.0,1.0,0.625,0.5, 0.0);
+    Vector< Expansion<Float> > aexpansion31(1,2,3, 0.0, 0.0,0.25, 0.0,0.5,0.375, 0.0,1.0,0.625,0.5);
     TaylorFunction antiderivative31(domain3,aexpansion31);
     ARIADNE_TEST_EQUAL(antiderivative(function3,index1),antiderivative31);
 
 }
 
-void TestTaylorFunction::test_implicit() 
+void TestTaylorFunction::test_implicit()
 {
     Vector<Interval> df1(2, -1.0,+1.0, -1.0,+1.0);
     Vector<Interval> dh1=project(df1,range(0,1));
@@ -232,7 +234,7 @@ void TestTaylorFunction::test_implicit()
 }
 
 
-void TestTaylorFunction::test_flow() 
+void TestTaylorFunction::test_flow()
 {
     Float a=-0.75; Float b=-0.5; Float c=-1.0;
     Vector<Float> ex=e(2,0); Vector<Float> ey=e(2,1);
@@ -263,7 +265,7 @@ void TestTaylorFunction::test_flow()
 }
 
 
-void TestTaylorFunction::test_join() 
+void TestTaylorFunction::test_join()
 {
     Vector<Interval> domain(2, -0.25,+0.25, -0.5,+0.5);
     Vector< Polynomial<Float> > polynomial1 = (p(2,0)*p(2,0)+2.0*p(2,0)*p(2,1)+3.0*p(2,1)*p(2,1))*e(1,0);
@@ -277,7 +279,7 @@ void TestTaylorFunction::test_join()
 
 }
 
-void TestTaylorFunction::test_combine() 
+void TestTaylorFunction::test_combine()
 {
     // This test contains a regression test to check correct behaviour for a zero component.
     Vector<Interval> domain1(2, -0.25,+0.25, -0.5,+0.5);

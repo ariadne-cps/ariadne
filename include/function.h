@@ -2,7 +2,7 @@
  *            function.h
  *
  *  Copyright 2008  Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 /*! \file function.h
  *  \brief Concrete function types.
  */
@@ -45,9 +45,9 @@
 
 namespace Ariadne {
 
-// A wrapper for transformations  
+// A wrapper for transformations
 // This class is for internal use only; we can easily specify parameter types.
-template<class T> 
+template<class T>
 class FunctionBase
     : public FunctionInterface,
       public T
@@ -63,23 +63,23 @@ class FunctionBase
     virtual uint argument_size() const { return this->T::argument_size(); }
     virtual ushort smoothness() const { return this->T::smoothness(); }
     virtual Vector<Float> evaluate(const Vector<Float>& x) const {
-        Vector<Float> r(this->T::result_size()); this->T::compute(r,x); return r; } 
+        Vector<Float> r(this->T::result_size()); this->T::compute(r,x); return r; }
     virtual Vector<Interval> evaluate(const Vector<Interval>& x) const {
-        Vector<Interval> r(this->T::result_size()); this->T::compute(r,x); return r; }                          
+        Vector<Interval> r(this->T::result_size()); this->T::compute(r,x); return r; }
     virtual Vector<TaylorVariable> evaluate(const Vector<TaylorVariable>& x) const {
-        Vector<TaylorVariable> r=TaylorVariable::zeroes(this->T::result_size(),this->T::argument_size()); 
-        this->T::compute(r,x); return r; }                          
+        Vector<TaylorVariable> r(this->result_size(),TaylorVariable(x.domain()));
+        this->T::compute(r,x); return r; }
     virtual Vector< Differential<Float> > evaluate(const Vector< Differential<Float> >& x) const {
-        Vector< Differential<Float> > r(this->T::result_size()); this->T::compute(r,x); return r; }                          
+        Vector< Differential<Float> > r(this->T::result_size()); this->T::compute(r,x); return r; }
     virtual Vector< Differential<Interval> > evaluate(const Vector< Differential<Interval> >& x) const {
-        Vector< Differential<Interval> > r(this->T::result_size()); this->T::compute(r,x); return r; }                          
+        Vector< Differential<Interval> > r(this->T::result_size()); this->T::compute(r,x); return r; }
 
     virtual Matrix<Float> jacobian(const Vector<Float>& x) const {
         return this->_expansion(x,1u).jacobian(); }
     virtual Matrix<Interval> jacobian(const Vector<Interval>& x) const {
         return this->_expansion(x,1u).jacobian(); }
     virtual Vector< Differential<Float> > expansion(const Vector<Float>& x, const ushort& s) const {
-        return this->_expansion(x,s); } 
+        return this->_expansion(x,s); }
     virtual Vector< Differential<Interval> > expansion(const Vector<Interval>& x, const ushort& s) const {
         return this->_expansion(x,s); }
 
@@ -97,7 +97,7 @@ class FunctionBase
         for(uint i=0; i!=as; ++i) { dx[i][i]=1; }
         this->T::compute(dr,dx);
         return dr;
-    }                                             
+    }
 };
 
 
@@ -105,15 +105,15 @@ class FunctionBase
 
 // A wrapper for transformations
 // This class is for internal use only; we can easily specify parameter types.
-template<class F> 
+template<class F>
 class FunctionTemplate
     : public FunctionInterface
 {
   private:
     Vector<Float> p;
   private:
-    template<class R,class A, class P> 
-    void _compute(R& r, const A& x, const P& p) const { 
+    template<class R,class A, class P>
+    void _compute(R& r, const A& x, const P& p) const {
         static_cast<const F&>(*this)._compute(r,x,p); }
     template<class X> Vector<X> _evaluate(const Vector<X>& x) const {
         return static_cast<const F&>(*this)._evaluate(x); }
@@ -121,23 +121,23 @@ class FunctionTemplate
     FunctionTemplate() { }
   public:
     virtual Vector<Float> evaluate(const Vector<Float>& x) const {
-        Vector<Float> r(this->result_size()); this->_compute(r,x,p); return r; } 
+        Vector<Float> r(this->result_size()); this->_compute(r,x,p); return r; }
     virtual Vector<Interval> evaluate(const Vector<Interval>& x) const {
-        Vector<Interval> r(this->result_size()); this->_compute(r,x,p); return r; }                          
+        Vector<Interval> r(this->result_size()); this->_compute(r,x,p); return r; }
     virtual Vector<TaylorVariable> evaluate(const Vector<TaylorVariable>& x) const {
-        Vector<TaylorVariable> r=TaylorVariable::zeroes(this->result_size(),this->argument_size()); 
-        this->_compute(r,x,p); return r; }                          
+        Vector<TaylorVariable> r=TaylorVariable::zeroes(this->result_size(),this->argument_size());
+        this->_compute(r,x,p); return r; }
     virtual Vector< Differential<Float> > evaluate(const Vector< Differential<Float> >& x) const {
-        Vector< Differential<Float> > r(this->result_size()); this->_compute(r,x,p); return r; }                          
+        Vector< Differential<Float> > r(this->result_size()); this->_compute(r,x,p); return r; }
     virtual Vector< Differential<Interval> > evaluate(const Vector< Differential<Interval> >& x) const {
-        Vector< Differential<Interval> > r(this->result_size()); this->_compute(r,x,p); return r; }                          
+        Vector< Differential<Interval> > r(this->result_size()); this->_compute(r,x,p); return r; }
 
     virtual Matrix<Float> jacobian(const Vector<Float>& x) const {
         return this->_expansion(x,1u).jacobian(); }
     virtual Matrix<Interval> jacobian(const Vector<Interval>& x) const {
         return this->_expansion(x,1u).jacobian(); }
     virtual Vector< Differential<Float> > expansion(const Vector<Float>& x, const ushort& s) const {
-        return this->_expansion(x,s); } 
+        return this->_expansion(x,s); }
     virtual Vector< Differential<Interval> > expansion(const Vector<Interval>& x, const ushort& s) const {
         return this->_expansion(x,s); }
 
@@ -145,7 +145,7 @@ class FunctionTemplate
     // write() method or operator<<.
     virtual std::ostream& write(std::ostream& os) const  {
         return os << "Function( result_size="<<this->result_size()<<", argument_size="<<this->argument_size()<<" )"; }
-    
+
   private:
     template<class X> Vector< Differential<X> > _expansion(const Vector<X>& x, const ushort& s) const {
         const uint rs=this->result_size();
@@ -156,14 +156,14 @@ class FunctionTemplate
         for(uint i=0; i!=as; ++i) { dx[i][i]=1; }
         this->_compute(dr,dx,p);
         return dr;
-    }                                             
+    }
 };
 
 */
 
 // A wrapper for transformations
 // This class is for internal use only; we can easily specify parameter types.
-template<class F> 
+template<class F>
 class FunctionTemplate
     : public FunctionInterface
 {
@@ -199,14 +199,14 @@ class FunctionTemplate
 
 
 template<uint RS, uint AS, uint PS=0u, uint SM=255u>
-struct FunctionData 
+struct FunctionData
 {
     const uint result_size() const { return RS; }
     const uint argument_size() const { return AS; }
     const uint parameter_size() const { return PS; }
     const uint smoothness() const { return SM; }
 };
-  
+
 // FIXME: Make interval computations use interval version of parameters!
 template<class T> struct FunctionWrapper
     : public T
@@ -222,15 +222,15 @@ template<class T> struct FunctionWrapper
 
 //! \brief A wrapper for converting templated C++ functions to %Ariadne functions.
 //!
-//! Given a C++ class T with a (static) template method 
+//! Given a C++ class T with a (static) template method
 //!   <code>template<class R, class A, class P> compute(R& r, const A& a, const P& p);</code>
-//! the type <code>Function<T></code> is an Ariadne function defined by \f$r=f(a)\f$. 
+//! the type <code>Function<T></code> is an Ariadne function defined by \f$r=f(a)\f$.
 //! The constructor for Function<T> takes a Vector<Float> argument which is used for \a p.
-//! 
+//!
 //! The class T must also define meta-data <c>result_size(), argument_size(), parameter_size()
-//! and smoothness()</c>. These are most easily defined by inheriting from the 
+//! and smoothness()</c>. These are most easily defined by inheriting from the
 //! <tt>FunctionData<RS,AS,PS,SM=SMOOTH></tt> class.
-//! 
+//!
 //! The constant \a SMOOTH is used for an arbitrarily-differentiable function.
 template<class T> class Function
     : public FunctionBase< FunctionWrapper<T> >
@@ -404,10 +404,10 @@ class ConstantFunction
 {
   public:
     //! A constant function with value \f$c\in\R^n\f$ and domain \f$\R^m\f$.
-    ConstantFunction(const Vector<Float>& c, uint m) 
+    ConstantFunction(const Vector<Float>& c, uint m)
         : FunctionBase<ConstantTransformation>(c,m) { }
     std::ostream& write(std::ostream& os) const {
-        return os << "ConstantFunction( argument_size=" << this->argument_size() 
+        return os << "ConstantFunction( argument_size=" << this->argument_size()
                   << ", c=" << this->c() << " )"; }
 
 };
@@ -419,13 +419,13 @@ class ProjectionFunction
 {
   public:
     //! Construct the identity function in dimension \a n.
-    ProjectionFunction(uint n) 
+    ProjectionFunction(uint n)
         : FunctionBase<ProjectionTransformation>(Range(0,n),n) { }
     //! Construct the projection functions which maps variables \f$x_i,\ldots,x_{i+m-1}\f$ in \f$\R^n\f$ to \f$x'_0\ldots x'_{m-1}\f$.
-    ProjectionFunction(uint m, uint n, uint i) 
+    ProjectionFunction(uint m, uint n, uint i)
         : FunctionBase<ProjectionTransformation>(m,n,i) { }
     //! Construct a projection function based on the array \a p.
-    ProjectionFunction(const array<uint>& p, uint as) 
+    ProjectionFunction(const array<uint>& p, uint as)
         : FunctionBase<ProjectionTransformation>(p,as) { }
     std::ostream& write(std::ostream& os) const {
         return os << "ProjectionFunction( p=" << this->p() << " )"; }
@@ -438,22 +438,22 @@ class IdentityFunction
 {
   public:
     //! Construct the identity function in dimension \a n.
-    IdentityFunction(uint n) 
+    IdentityFunction(uint n)
         : FunctionBase<IdentityTransformation>(n) { }
     std::ostream& write(std::ostream& os) const {
         return os << "IdentityFunction( size=" << this->result_size() << " )"; }
 };
 
 
-//! An scaling function \f$x_i' = o_i+l_ix_i\f$. 
+//! An scaling function \f$x_i' = o_i+l_ix_i\f$.
 class ScalingFunction
     : public FunctionBase<ScalingTransformation>
 {
   public:
     //! Construct an affine function from the matrix \a A and vector \a b.
-    ScalingFunction(const Vector<Float>& o, const Vector<Float>& l) 
+    ScalingFunction(const Vector<Float>& o, const Vector<Float>& l)
         : FunctionBase<ScalingTransformation>(o,l) { }
-    explicit ScalingFunction(const Vector<Interval>& bx) 
+    explicit ScalingFunction(const Vector<Interval>& bx)
         : FunctionBase<ScalingTransformation>(bx) { }
     std::ostream& write(std::ostream& os) const {
         return os << "ScalingFunction( o=" << this->origin() << ", l=" << this->lengths() << " )"; }
@@ -461,20 +461,20 @@ class ScalingFunction
 
 
 /*
-//! An affine function \f$x\mapsto Ax+b\f$. 
+//! An affine function \f$x\mapsto Ax+b\f$.
 class AffineFunction
     : public FunctionBase<AffineTransformation>
 {
   public:
     //! Construct an affine function from the matrix \a A and vector \a b.
-    AffineFunction(const Matrix<Float>& A, const Vector<Float>& b) 
+    AffineFunction(const Matrix<Float>& A, const Vector<Float>& b)
         : FunctionBase<AffineTransformation>(A,b) { }
     std::ostream& write(std::ostream& os) const {
         return os << "AffineFunction( A=" << this->A() << ", b=" << this->b() << " )"; }
 };
 */
 
-//! An affine function \f$x\mapsto Ax+b\f$. 
+//! An affine function \f$x\mapsto Ax+b\f$.
 class AffineFunction
     : public FunctionInterface
 {

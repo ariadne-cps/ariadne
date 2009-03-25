@@ -45,10 +45,6 @@ class NonInvertibleFunctionException { };
 
 
 
-TaylorVariable embed(const TaylorVariable&, uint, uint);
-Vector<TaylorVariable> embed(const Vector<TaylorVariable>&, uint, uint);
-
-
 
 TaylorCalculus::
 TaylorCalculus()
@@ -122,12 +118,13 @@ reachability_time(const TimeModelType& initial_time_model,
 {
     ARIADNE_ASSERT(initial_time_model.argument_size()==final_time_model.argument_size());
     uint ng=initial_time_model.argument_size();
+    Interval unit_ivl(-1,1);
 
-    TimeModelType expanded_initial_time_model=embed(initial_time_model,ng+1,0u);
-    TimeModelType expanded_final_time_model=embed(final_time_model,ng+1,0u);
+    TimeModelType expanded_initial_time_model=embed(initial_time_model,unit_ivl);
+    TimeModelType expanded_final_time_model=embed(final_time_model,unit_ivl);
 
-    TimeModelType time_interval_model=TimeModelType::scaling(Interval(0,1));
-    TimeModelType expanded_time_interval_model=embed(time_interval_model,ng+1,ng);
+    TimeModelType time_interval_model=TimeModelType::scaling(Interval(-1,1),Interval(0,1));
+    TimeModelType expanded_time_interval_model=embed(Vector<Interval>(ng,unit_ivl),time_interval_model);
     TimeModelType expanded_reach_time_model=expanded_initial_time_model+expanded_time_interval_model*(expanded_final_time_model-expanded_initial_time_model);
 
     return expanded_reach_time_model;
@@ -169,13 +166,11 @@ reachability_step(const FlowModelType& flow_model,
     uint ng=initial_set_model.generators_size();
 
     // FIXME: Embed set model correctly
-    TimeModelType zero_time=TimeModelType::constant(Interval(-1,+1),0.0);
-    SetModelType expanded_initial_set_model=combine(initial_set_model.variables(),zero_time);
+    SetModelType expanded_initial_set_model=embed(initial_set_model.variables(),Vector<Interval>(1,Interval(-1,+1)));
     ARIADNE_LOG(6,"expanded_initial_set_model="<<expanded_initial_set_model<<"\n");
-    SetModelType expanded_timed_set_model=expanded_initial_set_model;
-    expanded_timed_set_model[expanded_timed_set_model.dimension()-1]= expanded_reach_time_model;
+    SetModelType expanded_timed_set_model=join(expanded_initial_set_model.variables(),expanded_reach_time_model);
     ARIADNE_LOG(6,"expanded_timed_set_model="<<expanded_timed_set_model<<"\n");
-    SetModelType reach_set_model=this->_apply(flow_model,expanded_timed_set_model);
+    SetModelType reach_set_model=apply(flow_model,expanded_timed_set_model);
     ARIADNE_LOG(6,"reach_set_model = "<<reach_set_model<<"\n");
 
     return reach_set_model;
@@ -192,17 +187,15 @@ reachability_step(const FlowModelType& flow_model,
     // Compute the reachable set
     // Need an extra independent variable to represent time
     uint ng=initial_set_model.generators_size();
-
-    SetModelType expanded_initial_set_model=embed(initial_set_model.variables(),ng+1,0u);
+    Interval ui(-1,+1);
+    SetModelType expanded_initial_set_model=embed(initial_set_model.variables(),ui);
     ARIADNE_LOG(6,"expanded_initial_set_model="<<expanded_initial_set_model<<"\n");
-    TimeModelType expanded_initial_time_model=embed(initial_time_model,ng+1,0u);
+    TimeModelType expanded_initial_time_model=embed(initial_time_model,ui);
     ARIADNE_LOG(6,"expanded_initial_time_model="<<expanded_initial_time_model<<"\n");
-    TimeModelType expanded_final_time_model=embed(final_time_model,ng+1,0u);
+    TimeModelType expanded_final_time_model=embed(final_time_model,ui);
     ARIADNE_LOG(6,"expanded_final_time_model="<<expanded_final_time_model<<"\n");
 
-    TimeModelType time_interval_model=TimeModelType::scaling(Interval(0,1));
-    ARIADNE_LOG(6,"time_interval_time_model="<<time_interval_model<<"\n");
-    TimeModelType expanded_time_interval_model=embed(time_interval_model,ng+1,ng);
+    TimeModelType expanded_time_interval_model=TimeModelType::scaling(Vector<Interval>(ng+1),Interval(0,1),ng);
     ARIADNE_LOG(6,"expanded_time_interval_model="<<expanded_time_interval_model<<"\n");
     TimeModelType expanded_reach_time_model=expanded_initial_time_model+expanded_time_interval_model*(expanded_final_time_model-expanded_initial_time_model);
 

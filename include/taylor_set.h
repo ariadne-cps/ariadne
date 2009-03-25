@@ -65,6 +65,7 @@ class TaylorSet
     TaylorSet(uint rs, uint as, uint deg, double x0, ...);
     TaylorSet(const FunctionInterface& f, const Vector<Interval>& d);
     TaylorSet(const Vector<TaylorVariable>& tv);
+    TaylorSet(const Vector< Expansion<Float> >& f, const Vector<Float>& e);
     TaylorSet(const Vector<Interval>& bx);
 
     friend bool operator==(const TaylorSet& ts1, const TaylorSet& ts2);

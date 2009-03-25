@@ -50,6 +50,7 @@ TaylorFunction compose(const TaylorFunction&, const TaylorFunction&);
 TaylorFunction inverse(const TaylorFunction&);
 TaylorFunction implicit(const TaylorFunction&);
 TaylorFunction antiderivative(const TaylorFunction&, uint);
+TaylorFunction flow(const TaylorFunction& vf, const Vector<Interval>& d, const Interval& t);
 
 class TaylorExpression {
     typedef unsigned int Nat;
@@ -114,6 +115,7 @@ class TaylorFunction {
 
     /*! \brief Construct from a domain and the expansion. */
     explicit TaylorFunction(const Vector<TaylorVariable>& variables);
+    template<class E> explicit TaylorFunction(const ublas::vector_expression<E>& v);
 
     /*! \brief Construct from a domain and a function. */
     TaylorFunction(const Vector<Interval>& domain,
@@ -152,9 +154,6 @@ class TaylorFunction {
     Vector<Interval> evaluate(const Vector<Interval>& x) const;
     /*! \brief Evaluate the Taylor model at the point \a x. */
     Vector<Interval> evaluate(const Vector<Float>& x) const;
-
-    /*! \brief Compute an approximation to Jacobian derivative of the Taylor model at the point \a x (Deprecated). */
-    Matrix<Float> jacobian(const Vector<Float>& x) const;
     /*! \brief Compute an approximation to Jacobian derivative of the Taylor model sat the point \a x. */
     Matrix<Interval> jacobian(const Vector<Interval>& x) const;
 
@@ -239,9 +238,17 @@ class TaylorFunction {
     Vector<TaylorVariable> _variables;
 };
 
+template<class E> inline
+TaylorFunction::TaylorFunction(const ublas::vector_expression<E>& ve)
+    : _variables(ve)
+{
+    ARIADNE_ASSERT(this->_variables.size()>0);
+    for(uint i=1; i!=this->_variables.size(); ++i) {
+        ARIADNE_ASSERT(this->_variables[0].domain()==this->_variables[i].domain());
+    }
+}
 
-TaylorFunction implicit(const TaylorFunction& f);
-TaylorFunction flow(const TaylorFunction& vf, const Vector<Interval>& d, const Interval& t);
+
 std::ostream& operator<<(std::ostream&, const TaylorFunction&);
 
 } // namespace Ariadne

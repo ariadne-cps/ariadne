@@ -182,9 +182,8 @@ void TestTaylorVariable::test_compose()
 
 void TestTaylorVariable::test_antiderivative()
 {
-    Interval i(-1,+1);
     TaylorVariable tm=TaylorVariable::constant(d(2),1.0);
-    TaylorVariable atm=antiderivative(tm,i,1u);
+    TaylorVariable atm=antiderivative(tm,1u);
 }
 
 

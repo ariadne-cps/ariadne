@@ -52,40 +52,45 @@ TaylorSet::TaylorSet(uint d, uint ng)
 TaylorSet::TaylorSet(const FunctionInterface& f, const Vector<Interval>& d)
     : _variables(f.result_size())
 {
-    Vector<TaylorVariable> x=TaylorVariable::variables(Vector<Float>(f.argument_size(),0.0));
-    for(uint i=0; i!=x.size(); ++i) {
-        const Interval& di=d[i];
-        Interval dm=add_ivl(di.l/2,di.u/2);
-        Interval dr=sub_ivl(di.u/2,di.l/2);
-        x[i]*=dr;
-        x[i]+=dm;
-    }
-
+    Vector<TaylorVariable> x=TaylorVariable::scalings(Vector<Interval>(d.size(),Interval(-1,1)),d);
     this->_variables=f.evaluate(x);
 }
 
 TaylorSet::TaylorSet(const Vector<Interval>& bx)
-    : _variables(TaylorVariable::scaling(bx))
+    : _variables(TaylorVariable::scalings(Vector<Interval>(bx.size(),Interval(-1,1)),bx))
 {
 }
 
 
 TaylorSet::TaylorSet(const Vector<TaylorVariable>& tvs)
-    : _variables(tvs.size())
+    : _variables(tvs)
 {
-    for(size_t i=0; i!=tvs.size(); ++i) {
-        this->_variables[i]=TaylorVariable(tvs[i]);
+    if(this->_variables.size()>0) {
+        Vector<Interval> unit_domain(this->_variables[0].argument_size(),Interval(-1,+1));
+        for(size_t i=0; i!=this->_variables.size(); ++i) {
+            ARIADNE_ASSERT(this->_variables[i].domain()==unit_domain);
+        }
+    }
+}
+
+TaylorSet::TaylorSet(const Vector< Expansion<Float> >& f, const Vector<Float>& e)
+    : _variables(f.size())
+{
+    ARIADNE_ASSERT(f.size()==e.size());
+    if(f.size()>0) {
+        Vector<Interval> unit_domain(f[0].argument_size(),Interval(-1,+1));
+        for(uint i=0; i!=f.size(); ++i) { (*this)[i]=TaylorVariable(unit_domain,f[i],e[i]); }
     }
 }
 
 TaylorSet::TaylorSet(uint rs, uint as, uint deg, double x0, ...)
-    : _variables(rs,as)
+    : _variables(rs)
 {
     double x=x0;
     va_list args;
     va_start(args,x0);
     for(uint i=0; i!=rs; ++i) {
-        (*this)[i]=TaylorVariable(as);
+        (*this)[i]=TaylorVariable(Vector<Interval>(as,Interval(-1,+1)));
         for(MultiIndex j(as); j.degree()<=deg; ++j) {
             if(x!=0.0 || j.degree()<=1) { (*this)[i].expansion().append(j,x); }
             x=va_arg(args,double);
@@ -179,6 +184,17 @@ TaylorSet::discretise(GridTreeSet& gts, uint d) const
 }
 
 
+TaylorSet apply(const FunctionInterface& f, const TaylorSet& s)
+{
+    return f.evaluate(s.variables());
+}
+
+TaylorSet apply(const TaylorFunction& tf, const TaylorSet& s)
+{
+    return compose(tf.variables(),s.variables());
+}
+
+
 Zonotope
 zonotope(const TaylorSet& ts)
 {
@@ -213,12 +229,8 @@ zonotope(const TaylorSet& ts)
 pair<TaylorSet,TaylorSet>
 TaylorSet::split(uint j) const
 {
-    const TaylorSet& ts=*this;
-    pair<TaylorSet,TaylorSet> result(ts.dimension(),ts.dimension());
-    for(uint i=0; i!=ts.dimension(); ++i) {
-        make_lpair(result.first[i],result.second[i])=Ariadne::split(ts[i],j);
-    }
-    return result;
+    pair< Vector<TaylorVariable>, Vector<TaylorVariable> > s=Ariadne::split(this->_variables,j);
+    return make_pair( TaylorSet(s.first.expansion(),s.first.error()), TaylorSet(s.second.expansion(),s.second.error()) );
 }
 
 pair<TaylorSet,TaylorSet>

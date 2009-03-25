@@ -64,10 +64,25 @@ Interval evaluate(const TaylorVariable& x, const Vector<Interval>& sy);
 Vector<Interval> evaluate(const Vector<TaylorVariable>& x, const Vector<Interval>& sy);
 
 
-// Compose an array of Taylor variables with another, after scaling by the interval vectors
+// Compose an array of Taylor variables with another
 TaylorVariable compose(const TaylorVariable& x, const Vector<TaylorVariable>& y);
 Vector<TaylorVariable> compose(const Vector<TaylorVariable>& x, const Vector<TaylorVariable>& y);
 
+// Compose an array of Taylor variables with another, without checking inclusion in domains
+TaylorVariable unchecked_compose(const TaylorVariable& x, const Vector<TaylorVariable>& y);
+Vector<TaylorVariable> unchecked_compose(const Vector<TaylorVariable>& x, const Vector<TaylorVariable>& y);
+
+// Embed the variable in a space of higher dimension
+TaylorVariable embed(const TaylorVariable& tv1, const Interval& d2);
+TaylorVariable embed(const Vector<Interval>& d1, const TaylorVariable& tv2);
+
+Vector<TaylorVariable> embed(const Vector<TaylorVariable>& tv1, const Interval& d2);
+Vector<TaylorVariable> embed(const Vector<TaylorVariable>& tv1, const Vector<Interval>& d2);
+Vector<TaylorVariable> embed(const Vector<Interval>& d1, const Vector<TaylorVariable>& tv2);
+
+// Combine two functions over different domains
+Vector<TaylorVariable> combine(const TaylorVariable& x1, const TaylorVariable& x2);
+Vector<TaylorVariable> combine(const TaylorVariable& x1, const Vector<TaylorVariable>& x2);
 Vector<TaylorVariable> combine(const Vector<TaylorVariable>& x1, const TaylorVariable& x2);
 Vector<TaylorVariable> combine(const Vector<TaylorVariable>& x1, const Vector<TaylorVariable>& x2);
 
@@ -75,9 +90,8 @@ Vector<TaylorVariable> combine(const Vector<TaylorVariable>& x1, const Vector<Ta
 TaylorVariable antiderivative(const TaylorVariable& x, uint k);
 Vector<TaylorVariable> antiderivative(const Vector<TaylorVariable>& x, uint k);
 
-// Embed the variable in a space of higher dimension
-//TaylorVariable embed(const TaylorVariable& tv, uint as, uint b);
-//Vector<TaylorVariable> embed(const Vector<TaylorVariable>& tvs, uint as, uint b);
+Vector<TaylorVariable> implicit(const Vector<TaylorVariable>& f);
+Vector<TaylorVariable> flow(const Vector<TaylorVariable>& vf, const Vector<Interval>& d, const Interval& t);
 
 // Test if a variable refines another
 bool refines(const TaylorVariable& tv1, const TaylorVariable& tv2);
@@ -200,29 +214,37 @@ class TaylorVariable
     /*! \name Named constructors. */
     //! \brief Construct a constant with value c \a c over the interval \a d.
     static TaylorVariable constant(const Interval& d, const Float& c);
+    //! \brief Construct a constant with value c \a c over the interval \a d.
+    static TaylorVariable constant(const Interval& d, const Interval& c);
     //! \brief Construct the quantity \f$x\f$ over the scalar domain \a d.
-    static TaylorVariable scaling(const Interval& d);
+    static TaylorVariable variable(const Interval& d);
+    //! \brief Construct the quantity mapping domain \a d into range \a r..
+    static TaylorVariable scaling(const Interval& d, const Interval& r);
 
     //! \brief Construct the zero quantity in \a as independent variables.
     static TaylorVariable zero(const DomainType& d);
     //! \brief Construct a constant quantity in \a as independent variables.
     static TaylorVariable constant(const DomainType& d, const Float& c);
+    //! \brief Construct a constant quantity in \a as independent variables.
+    static TaylorVariable constant(const DomainType& d, const Interval& c);
     //! \brief Construct the quantity \f$x_j\f$ over the domain \a d.
     static TaylorVariable variable(const DomainType& d, unsigned int j);
-    //! \brief Construct the quantity \f$x_j\f$ over the domain \a d.
-    static TaylorVariable scaling(const DomainType& d, unsigned int j);
+    //! \brief Construct the quantity the domain \a d into the interval \a r, only depending on variable \a j.
+    static TaylorVariable scaling(const DomainType& d, const Interval& r, unsigned int j);
 
     //! \brief Construct the quantity \f$c+\sum g_jx_j\f$ over the domain \a d.
     static TaylorVariable affine(const DomainType& d, const Float& c, const Vector<Float>& g);
-    //! \brief Construct the quantity \f$c+\sum g_jx_j \pm e\f$.
+    //! \brief Construct the quantity \f$c+\sum g_jx_j \pm e\f$ over domain \a d.
     static TaylorVariable affine(const DomainType& d, const Float& x, const Vector<Float>& g, const Float& e) ;
 
-    //! \brief Return the vector of constants with values \a c in \a as arguments.
+    //! \brief Return the vector of constants with values \a c over domain \a d.
     static Vector<TaylorVariable> constants(const DomainType& d, const Vector<Float>& c);
-    //! \brief Return the vector of variables with values \a x in \a as arguments.
+    //! \brief Return the vector of constants with interval values \a c over domain \a d.
+    static Vector<TaylorVariable> constants(const DomainType& d, const Vector<Interval>& c);
+    //! \brief Return the vector of variables with values \a x over domain \a d.
     static Vector<TaylorVariable> variables(const DomainType& d);
-    //! \brief Return the vector of variables with values \a x in \a as arguments.
-    static Vector<TaylorVariable> scaling(const DomainType& d);
+    //! \brief Return the vector scaling the domain \a d into the range \a r. */
+    static Vector<TaylorVariable> scalings(const DomainType& d, const Vector<Interval>& r);
     //@}
 
     //@{
@@ -448,15 +470,16 @@ class Vector<TaylorVariable>
 
     uint result_size() const { return this->size(); }
     uint argument_size() const { ARIADNE_ASSERT(this->size()>0); return (*this)[0].argument_size(); }
+    const Vector<Interval>& domain() const { return (*this)[0].domain(); }
 
-    DomainType domain() const { return (*this)[0].domain(); }
+    Vector<Interval> range() const;
     Vector< Expansion<Float> > expansion() const;
     Vector<Float> error() const;
-
     Vector<Float> value() const;
+
     Vector<Interval> evaluate(const Vector<Float>&) const;
     Vector<Interval> evaluate(const Vector<Interval>&) const;
-
+    Matrix<Interval> jacobian(const Vector<Interval>&) const;
 
     void check() const;
 };

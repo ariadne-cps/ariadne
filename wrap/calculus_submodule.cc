@@ -76,10 +76,8 @@ void read(TaylorVariable& tv, const boost::python::object& obj1, const boost::py
 void read(TaylorVariable& tv, const boost::python::object& obj1, const boost::python::object& obj2) {
     Vector<Interval> d;
     std::map<MultiIndex,Float> m;
-    Float e;
     read(d,obj1);
     read(m,obj2);
-    ARIADNE_ASSERT(e>=0);
     tv=TaylorVariable(d,m,0.0);
 }
 
@@ -228,9 +226,8 @@ void export_taylor_variable()
     def("evaluate",(IV(*)(const TV&,const IV&)) &evaluate);
     def("evaluate",(I(*)(const T&,const IV&)) &evaluate);
 
-    def("compose",(TV(*)(const TV&,const IV&,const TV&)) &compose);
-    def("compose",(T(*)(const T&,const IV&,const TV&)) &compose);
-    def("compose",(T(*)(const T&,const I&,const T&)) &compose);
+    def("compose",(TV(*)(const TV&,const TV&)) &compose);
+    def("compose",(T(*)(const T&,const TV&)) &compose);
 
     def("max",(T(*)(const T&,const T&))&max);
     def("min",(T(*)(const T&,const T&))&min);

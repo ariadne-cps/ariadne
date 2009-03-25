@@ -181,7 +181,7 @@ class MultiIndexValueReference {
 inline MultiIndexValueReference& MultiIndexValueReference::operator--() {
     if(_p[_i]==0) { 
         ARIADNE_THROW(std::runtime_error,"--MultiIndex[i]"," decrementing zero value at "<<_i<<" in "<<reinterpret_cast<const MultiIndex&>(*this)); }
-    ++_p[_n]; ++_p[_i]; return *this; 
+    --_p[_n]; --_p[_i]; return *this;
 }
 
 

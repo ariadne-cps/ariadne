@@ -52,7 +52,7 @@ class VectorField;
 template<class ES> class Orbit;
 
 class EvolutionParameters;
-class TaylorVariable;
+class TaylorModel;
 class TaylorSet;
 template<class Var> class CalculusInterface;
 
@@ -115,7 +115,7 @@ class VectorFieldEvolver
 
   private:
     boost::shared_ptr< EvolutionParametersType > _parameters;
-    boost::shared_ptr< CalculusInterface<TaylorVariable> > _toolbox;
+    boost::shared_ptr< CalculusInterface<TaylorModel> > _toolbox;
     //boost::shared_ptr< EvolutionProfiler >  _profiler;
 };
 

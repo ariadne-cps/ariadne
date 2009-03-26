@@ -22,7 +22,7 @@
  */
  
 /*! \file taylor_calculus.h
- *  \brief Methods of taylor calculus based on the TaylorVariable class.
+ *  \brief Methods of taylor calculus based on the TaylorModel class.
  */
 
 
@@ -46,13 +46,13 @@ class Interval;
 class FunctionInterface;
 template<class X> class Vector;
 class Box;
-class TaylorVariable;
+class TaylorModel;
 class TaylorSet;
 class TaylorFunction;
 
 /*! \brief Tools for analysing dynamical systems based on function models. */
 class TaylorCalculus
-    : public CalculusBase<TaylorVariable>
+    : public CalculusBase<TaylorModel>
 {
     typedef Float R;
     typedef Float A;
@@ -65,8 +65,8 @@ class TaylorCalculus
   public:
     //!
     //!
-    typedef TaylorVariable VariableType;
-    typedef TaylorVariable TimeModelType;
+    typedef TaylorModel VariableType;
+    typedef TaylorModel TimeModelType;
     typedef TaylorSet SetModelType;
     typedef TaylorFunction MapModelType;
     typedef TaylorFunction FlowModelType;
@@ -79,11 +79,11 @@ class TaylorCalculus
 
     typedef SetModelType EnclosureType;
   public:
-    using CalculusBase<TaylorVariable>::verbosity;
-    using CalculusBase<TaylorVariable>::active;
-    using CalculusBase<TaylorVariable>::reset_step;
-    using CalculusBase<TaylorVariable>::integration_step;
-    using CalculusBase<TaylorVariable>::reachability_step;
+    using CalculusBase<TaylorModel>::verbosity;
+    using CalculusBase<TaylorModel>::active;
+    using CalculusBase<TaylorModel>::reset_step;
+    using CalculusBase<TaylorModel>::integration_step;
+    using CalculusBase<TaylorModel>::reachability_step;
 
   public:
     //! \brief Default constructor.

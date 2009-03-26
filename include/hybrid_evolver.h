@@ -56,7 +56,7 @@ class HybridAutomaton;
 template<class ES> class Orbit;
 
 class EvolutionParameters;
-class TaylorVariable;
+class TaylorModel;
 template<class MDL> class CalculusInterface;
 
 class EvolutionProfiler;
@@ -78,7 +78,7 @@ class HybridEvolver
     typedef FunctionModelType MapModelType;
     typedef FunctionModelType FlowModelType;
     typedef FunctionModelType ConstraintModelType; 
-    typedef TaylorVariable TimeModelType;
+    typedef TaylorModel TimeModelType;
     typedef TaylorSet SetModelType;
     typedef TaylorSet TimedSetModelType;
   public:
@@ -144,7 +144,7 @@ class HybridEvolver
 
   private:
     boost::shared_ptr< EvolutionParametersType > _parameters;
-    boost::shared_ptr< CalculusInterface<TaylorVariable> > _toolbox;
+    boost::shared_ptr< CalculusInterface<TaylorModel> > _toolbox;
     //boost::shared_ptr< EvolutionProfiler >  _profiler;
 };
 

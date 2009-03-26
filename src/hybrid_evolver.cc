@@ -29,7 +29,7 @@
 #include "function_interface.h"
 #include "taylor_set.h"
 #include "taylor_function.h"
-#include "taylor_variable.h"
+#include "taylor_model.h"
 #include "orbit.h"
 #include "taylor_calculus.h"
 #include "evolution_parameters.h"
@@ -129,7 +129,7 @@ struct DetectionData {
     tribool initially_active;
     tribool finally_active;
     Interval touching_time_interval;
-    TaylorVariable crossing_time_model;
+    TaylorModel crossing_time_model;
 
     DetectionData()
         : id(0), event(0), guard_ptr()
@@ -224,9 +224,9 @@ _evolution(EnclosureListType& final_sets,
         SetModelType initial_set_model=this->_toolbox->set_model(initial_continuous_set);
         ARIADNE_LOG(6,"initial_set_model = "<<initial_set_model<<"\n");
         TimeModelType initial_time_model
-            =TimeModelType::constant(initial_set_model.domain(),0.0);
+            =TimeModelType::constant(initial_set_model.argument_size(),0.0);
         ARIADNE_LOG(6,"initial_time_model = "<<initial_time_model<<"\n");
-        TimedSetModelType initial_timed_set_model=join(initial_set_model.variables(),initial_time_model);
+        TimedSetModelType initial_timed_set_model=join(initial_set_model.models(),initial_time_model);
         ARIADNE_LOG(6,"initial_timed_set_model = "<<initial_timed_set_model<<"\n");
         working_sets.push_back(make_tuple(initial_location,IntegerType(0),initial_set_model,initial_time_model));
     }
@@ -246,11 +246,11 @@ _evolution(EnclosureListType& final_sets,
                   && (initial_set_radius>this->_parameters->maximum_enclosure_radius)) {
             // Subdivide
             uint nd=initial_set_model.dimension();
-            SetModelType initial_timed_set_model=join(initial_set_model.variables(),initial_time_model);
+            SetModelType initial_timed_set_model=join(initial_set_model.models(),initial_time_model);
             array< TimedSetModelType > subdivisions=this->_toolbox->subdivide(initial_timed_set_model);
             for(uint i=0; i!=subdivisions.size(); ++i) {
                 TimedSetModelType const& subdivided_timed_set_model=subdivisions[i];
-                SetModelType subdivided_set_model=Vector<TaylorVariable>(project(subdivided_timed_set_model.variables(),range(0,nd)));
+                SetModelType subdivided_set_model=Vector<TaylorModel>(project(subdivided_timed_set_model.models(),range(0,nd)));
                 TimeModelType subdivided_time_model=subdivided_timed_set_model[nd];
                 working_sets.push_back(make_tuple(initial_location,initial_steps,subdivided_set_model,subdivided_time_model));
             }

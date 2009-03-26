@@ -41,7 +41,7 @@
 #include "matrix.h"
 #include "transformation.h"
 #include "differential.h"
-#include "taylor_variable.h"
+#include "taylor_model.h"
 
 namespace Ariadne {
 
@@ -66,8 +66,8 @@ class FunctionBase
         Vector<Float> r(this->T::result_size()); this->T::compute(r,x); return r; }
     virtual Vector<Interval> evaluate(const Vector<Interval>& x) const {
         Vector<Interval> r(this->T::result_size()); this->T::compute(r,x); return r; }
-    virtual Vector<TaylorVariable> evaluate(const Vector<TaylorVariable>& x) const {
-        Vector<TaylorVariable> r(this->result_size(),TaylorVariable(x.domain()));
+    virtual Vector<TaylorModel> evaluate(const Vector<TaylorModel>& x) const {
+        Vector<TaylorModel> r(this->result_size(),TaylorModel(x[0].argument_size()));
         this->T::compute(r,x); return r; }
     virtual Vector< Differential<Float> > evaluate(const Vector< Differential<Float> >& x) const {
         Vector< Differential<Float> > r(this->T::result_size()); this->T::compute(r,x); return r; }
@@ -124,8 +124,8 @@ class FunctionTemplate
         Vector<Float> r(this->result_size()); this->_compute(r,x,p); return r; }
     virtual Vector<Interval> evaluate(const Vector<Interval>& x) const {
         Vector<Interval> r(this->result_size()); this->_compute(r,x,p); return r; }
-    virtual Vector<TaylorVariable> evaluate(const Vector<TaylorVariable>& x) const {
-        Vector<TaylorVariable> r=TaylorVariable::zeroes(this->result_size(),this->argument_size());
+    virtual Vector<TaylorModel> evaluate(const Vector<TaylorModel>& x) const {
+        Vector<TaylorModel> r=TaylorModel::zeroes(this->result_size(),this->argument_size());
         this->_compute(r,x,p); return r; }
     virtual Vector< Differential<Float> > evaluate(const Vector< Differential<Float> >& x) const {
         Vector< Differential<Float> > r(this->result_size()); this->_compute(r,x,p); return r; }
@@ -178,7 +178,7 @@ class FunctionTemplate
     virtual Vector<Interval> evaluate(const Vector<Interval>& x) const {
         return this->_evaluate(x); }
 
-    virtual Vector<TaylorVariable> evaluate(const Vector<TaylorVariable>& x) const {
+    virtual Vector<TaylorModel> evaluate(const Vector<TaylorModel>& x) const {
         return this->_evaluate(x); }
 
     virtual Vector< Differential<Float> > evaluate(const Vector< Differential<Float> >& x) const {
@@ -268,7 +268,7 @@ class FunctionElement
         return this->_evaluate(x); }
     virtual Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const {
         return this->_evaluate(x); }
-    virtual TaylorVariable evaluate(const Vector<TaylorVariable>& x) const {
+    virtual TaylorModel evaluate(const Vector<TaylorModel>& x) const {
         return this->_evaluate(x); }
 
     virtual std::ostream& write(std::ostream& os) const { ARIADNE_NOT_IMPLEMENTED; }
@@ -500,7 +500,7 @@ class AffineFunction
         return prod(_fA,x)+_fb; }
     virtual Vector< Differential<Interval> > evaluate(const Vector< Differential<Interval> >& x) const {
         return prod(_iA,x)+_ib; }
-    virtual Vector<TaylorVariable> evaluate(const Vector<TaylorVariable>& x) const {
+    virtual Vector<TaylorModel> evaluate(const Vector<TaylorModel>& x) const {
         return prod(_iA,x)+_ib; }
 
     virtual Matrix<Float> jacobian(const Vector<Float>& x) const {
@@ -538,7 +538,7 @@ class PolynomialFunction
 
     virtual Vector< Differential<Interval> > evaluate(const Vector< Differential<Interval> >& x) const {
         return Ariadne::evaluate(_ip,x); }
-    virtual Vector<TaylorVariable> evaluate(const Vector<TaylorVariable>& x) const {
+    virtual Vector<TaylorModel> evaluate(const Vector<TaylorModel>& x) const {
         return Ariadne::evaluate(_ip,x); }
 
     virtual Matrix<Float> jacobian(const Vector<Float>& x) const {

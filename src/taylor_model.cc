@@ -72,6 +72,14 @@ TaylorModel::TaylorModel(const std::map<MultiIndex,Float>& d, const Float& e)
     if(e<0) { std::cerr<<e<<std::endl; } ARIADNE_ASSERT(this->_error>=0);
 }
 
+TaylorModel::TaylorModel(const Expansion<Float>& f, const Float& e)
+    : _expansion(f), _error(e),
+      _sweep_threshold(_default_sweep_threshold),
+      _maximum_degree(_default_maximum_degree),
+      _maximum_index(f.begin()->first.size(),_default_maximum_degree)
+{
+}
+
 TaylorModel::TaylorModel(uint as, uint deg, const double* ptr, const double& err)
     : _expansion(as), _error(err),
       _sweep_threshold(_default_sweep_threshold),

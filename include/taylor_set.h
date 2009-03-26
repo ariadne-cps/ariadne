@@ -33,7 +33,7 @@
 #include "set_interface.h"
 
 #include "list_set.h"
-#include "taylor_variable.h"
+#include "taylor_model.h"
 
 namespace Ariadne {
 
@@ -43,7 +43,7 @@ template<class X> class Vector;
 template<class X> class Matrix;
 
 class FunctionInterface;
-class TaylorVariable;
+class TaylorModel;
 class TaylorFunction;
 class TaylorSet;
 
@@ -58,30 +58,30 @@ class TaylorSet
     : public LocatedSetInterface
 {
   private:
-    Vector<TaylorVariable> _variables;
+    Vector<TaylorModel> _models;
   public:
     TaylorSet(uint d=0, uint ng=0);
     template<class XE, class XP> TaylorSet(uint rs, uint as, uint d, const XE* eps, const XP* ptr);
     TaylorSet(uint rs, uint as, uint deg, double x0, ...);
     TaylorSet(const FunctionInterface& f, const Vector<Interval>& d);
-    TaylorSet(const Vector<TaylorVariable>& tv);
+    TaylorSet(const Vector<TaylorModel>& tv);
     TaylorSet(const Vector< Expansion<Float> >& f, const Vector<Float>& e);
     TaylorSet(const Vector<Interval>& bx);
 
     friend bool operator==(const TaylorSet& ts1, const TaylorSet& ts2);
 
-    uint dimension() const { return this->_variables.size(); }
-    uint generators_size() const { assert(this->_variables.size()>0); return this->_variables[0].argument_size(); }
-    const TaylorVariable& operator[](uint i) const { return this->_variables[i]; }
-    TaylorVariable& operator[](uint i) { return this->_variables[i]; }
+    uint dimension() const { return this->_models.size(); }
+    uint generators_size() const { assert(this->_models.size()>0); return this->_models[0].argument_size(); }
+    const TaylorModel& operator[](uint i) const { return this->_models[i]; }
+    TaylorModel& operator[](uint i) { return this->_models[i]; }
 
     Vector<Interval> domain() const { return Vector<Interval>(this->generators_size(),Interval(-1,+1)); }
     Vector<Interval> range() const {
-        Vector<Interval> result(this->_variables.size());
-        for(uint i=0; i!=this->_variables.size(); ++i) {
-            result[i]=this->_variables[i].range(); }
+        Vector<Interval> result(this->_models.size());
+        for(uint i=0; i!=this->_models.size(); ++i) {
+            result[i]=this->_models[i].range(); }
         return result; }
-    Vector<TaylorVariable> variables() const { return this->_variables; }
+    Vector<TaylorModel> models() const { return this->_models; }
 
     TaylorSet* clone() const { return new TaylorSet(*this); }
     Float radius() const;
@@ -120,10 +120,10 @@ void plot(const char* fn, const Box& bbx, const TaylorSet& ts);
 template<class XE, class XP>
 TaylorSet::TaylorSet(uint rs, uint as, uint d,
                      const XE* eps, const XP* ptr)
-    : _variables(rs)
+    : _models(rs)
 {
     for(uint i=0; i!=rs; ++i) {
-        _variables[i]=TaylorVariable(as,d,eps,ptr);
+        _models[i]=TaylorModel(as,d,eps,ptr);
     }
 }
 

@@ -31,7 +31,7 @@
 #include <iosfwd>
 #include "numeric.h"
 #include "vector.h"
-#include "taylor_variable.h"
+#include "taylor_model.h"
 
 namespace Ariadne {
 
@@ -59,7 +59,7 @@ class TaylorExpression {
     static TaylorExpression variable(const Vector<Interval>& domain, Nat index);
     static Vector<TaylorExpression> variables(const Vector<Interval>& domain);
     const Vector<Interval>& domain() const;
-    const TaylorVariable& model() const;
+    const TaylorModel& model() const;
     friend TaylorExpression operator+(const Float& c, const TaylorExpression& t);
     friend TaylorExpression operator-(const Float& c, const TaylorExpression& t);
     friend TaylorExpression operator*(const Float& c, const TaylorExpression& t);
@@ -88,14 +88,14 @@ class TaylorExpression {
   public:
     TaylorExpression();
   private:
-    TaylorExpression(const Vector<Interval>& domain, const TaylorVariable& model);
+    TaylorExpression(const Vector<Interval>& domain, const TaylorModel& model);
   private:
     Vector<Interval> _domain;
-    TaylorVariable _model;
+    TaylorModel _model;
 };
 
 
-/*! \brief A taylor_model with multivalued output using the TaylorVariable class.
+/*! \brief A taylor_model with multivalued output using the TaylorModel class.
  */
 class TaylorFunction {
     typedef Float R;
@@ -114,7 +114,7 @@ class TaylorFunction {
                    const Vector<Float>& error);
 
     /*! \brief Construct from a domain and the expansion. */
-    explicit TaylorFunction(const Vector<TaylorVariable>& variables);
+    explicit TaylorFunction(const Vector<TaylorModel>& variables);
     template<class E> explicit TaylorFunction(const ublas::vector_expression<E>& v);
 
     /*! \brief Construct from a domain and a function. */
@@ -142,7 +142,7 @@ class TaylorFunction {
     /*! \brief The range of the Taylor model. */
     const Vector<Interval> range() const;
     /*! \brief The data used to define the centre of the Taylor model. */
-    const Vector<TaylorVariable>& variables() const;
+    const Vector<TaylorModel>& models() const;
 
     /*! \brief The size of the argument. */
     uint argument_size() const;
@@ -235,16 +235,17 @@ class TaylorFunction {
 
   private:
     /* Domain of definition. */
-    Vector<TaylorVariable> _variables;
+    Vector<Interval> _domain;
+    Vector<TaylorModel> _models;
 };
 
 template<class E> inline
 TaylorFunction::TaylorFunction(const ublas::vector_expression<E>& ve)
-    : _variables(ve)
+    : _models(ve)
 {
-    ARIADNE_ASSERT(this->_variables.size()>0);
-    for(uint i=1; i!=this->_variables.size(); ++i) {
-        ARIADNE_ASSERT(this->_variables[0].domain()==this->_variables[i].domain());
+    ARIADNE_ASSERT(this->_models.size()>0);
+    for(uint i=1; i!=this->_models.size(); ++i) {
+        ARIADNE_ASSERT(this->_models[0].domain()==this->_models[i].domain());
     }
 }
 

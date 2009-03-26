@@ -35,7 +35,7 @@ namespace Ariadne {
 
 typedef double Float;
 class Interval;
-class TaylorVariable;
+class TaylorModel;
 
 template<class X> class Vector;
 template<class X> class Matrix;
@@ -65,7 +65,7 @@ class FunctionInterface {
     virtual Vector<Interval> evaluate(const Vector<Interval>& x) const = 0;
 
     //! \brief Evaluate the function over a vector of Taylor variables.
-    virtual Vector<TaylorVariable> evaluate(const Vector<TaylorVariable>& x) const = 0;
+    virtual Vector<TaylorModel> evaluate(const Vector<TaylorModel>& x) const = 0;
     //! \brief Evaluate the function over a vector of differentials.
     virtual Vector< Differential<Float> > evaluate(const Vector< Differential<Float> >& x) const = 0;
     //! \brief Evaluate the function over a vector of interval differentials.

@@ -122,6 +122,8 @@ class TaylorModel
     TaylorModel(uint as);
     //! \brief Construct from a map giving the expansion expansion and a constant giving the error.
     TaylorModel(const std::map<MultiIndex,Float>& d, const Float& e);
+    //! \brief Construct from a map giving the expansion expansion and a constant giving the error.
+    TaylorModel(const Expansion<Float>& f, const Float& e=0.0);
     //! \brief Contruct a %TaylorModel in \a as arguments of degree \a d
     //! from the raw data given by \a ptr, with error given by \a err.
     TaylorModel(uint as, uint deg, const double* ptr, const double& err);

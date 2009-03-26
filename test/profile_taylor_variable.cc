@@ -32,33 +32,33 @@ using std::string;
 #include <boost/timer.hpp>
 #include <boost/progress.hpp>
 
-#include "taylor_variable.h"
+#include "taylor_model.h"
 using namespace Ariadne;
 
-TaylorVariable sum(const Vector<TaylorVariable>& v) {
+TaylorModel sum(const Vector<TaylorModel>& v) {
     return v[0]+v[1];
 }
 
-TaylorVariable prod(const Vector<TaylorVariable>& v) {
+TaylorModel prod(const Vector<TaylorModel>& v) {
     return v[0]*v[1];
 }
 
 
-TaylorVariable exp_cos(const Vector<TaylorVariable>& v) {
+TaylorModel exp_cos(const Vector<TaylorModel>& v) {
     return exp(v[0])*cos(v[1]);
 }
 
-TaylorVariable sigmoid(const Vector<TaylorVariable>& v) {
+TaylorModel sigmoid(const Vector<TaylorModel>& v) {
     const double a=10;
     return exp(-v[0]/a);
 }
 
-typedef TaylorVariable(*TaylorFunctionPtr)(const Vector<TaylorVariable>&);
+typedef TaylorModel(*TaylorFunctionPtr)(const Vector<TaylorModel>&);
 
 
-void profile(uint ntries, string name, TaylorFunctionPtr fn, const Vector<TaylorVariable>& args)
+void profile(uint ntries, string name, TaylorFunctionPtr fn, const Vector<TaylorModel>& args)
 {
-    TaylorVariable res=fn(args);
+    TaylorModel res=fn(args);
     std::cerr<< "\n" << name << "(" << args << ")=\n  " << res << "\n\n";
 
     boost::timer tm; double t=0;
@@ -79,13 +79,13 @@ int main(int argc, const char* argv[]) {
     Vector<Interval> d(2,Interval(-1,+1));
     Vector<Float> c(2, 1.0,2.0);
 
-    Vector<TaylorVariable> v(2,2);
-    v[0]=TaylorVariable::variable(d,0);
-    v[1]=TaylorVariable::constant(d,1.0);
+    Vector<TaylorModel> v(2,2);
+    v[0]=TaylorModel::variable(d,0);
+    v[1]=TaylorModel::constant(d,1.0);
 
-    Vector<TaylorVariable> x(2,2);
-    x[0]=TaylorVariable(d,Expansion<Float>(2,3, 1.0,2.0,0.0,4.0,0.0,6.0,0.0,8.0,9.0,10.0, 0.25));
-    x[1]=TaylorVariable(d,Expansion<Float>(2,3, 1.0,0.0,3.0,4.0,0.0,6.0,7.0,8.0,0.0,10.0, 0.5));
+    Vector<TaylorModel> x(2,2);
+    x[0]=TaylorModel(d,Expansion<Float>(2,3, 1.0,2.0,0.0,4.0,0.0,6.0,0.0,8.0,9.0,10.0, 0.25));
+    x[1]=TaylorModel(d,Expansion<Float>(2,3, 1.0,0.0,3.0,4.0,0.0,6.0,7.0,8.0,0.0,10.0, 0.5));
     std::cerr<<"v="<<v<<"\nx="<<x<<"\n";
 
     profile(100000,"sum",sum,x);

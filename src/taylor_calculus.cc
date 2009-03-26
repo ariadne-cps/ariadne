@@ -28,7 +28,7 @@
 #include "numeric.h"
 #include "vector.h"
 #include "matrix.h"
-#include "taylor_variable.h"
+#include "taylor_model.h"
 #include "taylor_set.h"
 #include "taylor_function.h"
 #include "function.h"
@@ -71,7 +71,7 @@ reset_step(const FunctionType& map,
            const SetModelType& set_model) const
 {
     // Direct computation from function
-    return map.evaluate(set_model.variables());
+    return map.evaluate(set_model.models());
     // Indirect computation via model
     BoxType range=set_model.range();
     return apply(FunctionModelType(range,map),set_model);
@@ -95,7 +95,7 @@ integration_step(const FlowModelType& flow_model,
                  const TimeModelType& integration_time_model) const
 {
     //SetModelType set_step_model=join(initial_set_model, integration_time_model);
-    SetModelType set_step_model(join(initial_set_model.variables(),integration_time_model));
+    SetModelType set_step_model(join(initial_set_model.models(),integration_time_model));
     ARIADNE_LOG(6,"set_step_model = "<<set_step_model<<"\n");
     SetModelType final_set_model=apply(flow_model,set_step_model);
     ARIADNE_LOG(6,"final_set_model = "<<final_set_model<<"\n");
@@ -120,8 +120,8 @@ reachability_time(const TimeModelType& initial_time_model,
     uint ng=initial_time_model.argument_size();
     Interval unit_ivl(-1,1);
 
-    TimeModelType expanded_initial_time_model=embed(initial_time_model,unit_ivl);
-    TimeModelType expanded_final_time_model=embed(final_time_model,unit_ivl);
+    TimeModelType expanded_initial_time_model=embed(initial_time_model,1u);
+    TimeModelType expanded_final_time_model=embed(final_time_model,1u);
 
     TimeModelType time_interval_model=TimeModelType::scaling(Interval(-1,1),Interval(0,1));
     TimeModelType expanded_time_interval_model=embed(Vector<Interval>(ng,unit_ivl),time_interval_model);
@@ -145,7 +145,7 @@ reachability_step(const FlowModelType& flow_model,
     reach_time_model.set_gradient(0u,(final_time-initial_time)/2);
 
     // FIXME: Embed set model correctly
-    SetModelType expanded_timed_set_model=combine(initial_set_model.variables(),reach_time_model);
+    SetModelType expanded_timed_set_model=combine(initial_set_model.models(),reach_time_model);
     ARIADNE_LOG(6,"expanded_timed_set_model="<<expanded_timed_set_model<<"\n");
     SetModelType reach_set_model=apply(flow_model,expanded_timed_set_model);
     ARIADNE_LOG(6,"reach_set_model = "<<reach_set_model<<"\n");
@@ -166,9 +166,9 @@ reachability_step(const FlowModelType& flow_model,
     uint ng=initial_set_model.generators_size();
 
     // FIXME: Embed set model correctly
-    SetModelType expanded_initial_set_model=embed(initial_set_model.variables(),Vector<Interval>(1,Interval(-1,+1)));
+    SetModelType expanded_initial_set_model=embed(initial_set_model.models(),1u);
     ARIADNE_LOG(6,"expanded_initial_set_model="<<expanded_initial_set_model<<"\n");
-    SetModelType expanded_timed_set_model=join(expanded_initial_set_model.variables(),expanded_reach_time_model);
+    SetModelType expanded_timed_set_model=join(expanded_initial_set_model.models(),expanded_reach_time_model);
     ARIADNE_LOG(6,"expanded_timed_set_model="<<expanded_timed_set_model<<"\n");
     SetModelType reach_set_model=apply(flow_model,expanded_timed_set_model);
     ARIADNE_LOG(6,"reach_set_model = "<<reach_set_model<<"\n");
@@ -188,11 +188,11 @@ reachability_step(const FlowModelType& flow_model,
     // Need an extra independent variable to represent time
     uint ng=initial_set_model.generators_size();
     Interval ui(-1,+1);
-    SetModelType expanded_initial_set_model=embed(initial_set_model.variables(),ui);
+    SetModelType expanded_initial_set_model=embed(initial_set_model.models(),1u);
     ARIADNE_LOG(6,"expanded_initial_set_model="<<expanded_initial_set_model<<"\n");
-    TimeModelType expanded_initial_time_model=embed(initial_time_model,ui);
+    TimeModelType expanded_initial_time_model=embed(initial_time_model,1u);
     ARIADNE_LOG(6,"expanded_initial_time_model="<<expanded_initial_time_model<<"\n");
-    TimeModelType expanded_final_time_model=embed(final_time_model,ui);
+    TimeModelType expanded_final_time_model=embed(final_time_model,1u);
     ARIADNE_LOG(6,"expanded_final_time_model="<<expanded_final_time_model<<"\n");
 
     TimeModelType expanded_time_interval_model=TimeModelType::scaling(Vector<Interval>(ng+1),Interval(0,1),ng);
@@ -200,7 +200,7 @@ reachability_step(const FlowModelType& flow_model,
     TimeModelType expanded_reach_time_model=expanded_initial_time_model+expanded_time_interval_model*(expanded_final_time_model-expanded_initial_time_model);
 
     ARIADNE_LOG(6,"expanded_reach_time_model="<<expanded_reach_time_model<<"\n");
-    SetModelType expanded_timed_set_model=join(expanded_initial_set_model.variables(),expanded_reach_time_model);
+    SetModelType expanded_timed_set_model=join(expanded_initial_set_model.models(),expanded_reach_time_model);
     ARIADNE_LOG(6,"expanded_timed_set_model="<<expanded_timed_set_model<<"\n");
     SetModelType reach_set_model=this->_apply(flow_model,expanded_timed_set_model);
     ARIADNE_LOG(6,"reach_set_model = "<<reach_set_model<<"\n");
@@ -239,7 +239,7 @@ crossing_time(const PredicateModelType& guard_model,
         throw DegenerateCrossingException();
     }
     ARIADNE_LOG(6,"free_hitting_time_model = "<<free_hitting_time_model<<"\n");
-    FunctionModelType hitting_time_model=FunctionModelType(_apply(free_hitting_time_model,initial_set_model).variables());
+    FunctionModelType hitting_time_model=FunctionModelType(_apply(free_hitting_time_model,initial_set_model).models());
     ARIADNE_LOG(6,"hitting_time_model = "<<hitting_time_model<<"\n");
     Interval hitting_time_range=hitting_time_model.range()[0];
     ARIADNE_LOG(6,"hitting_time_model = "<<hitting_time_model<<"\n");
@@ -247,7 +247,7 @@ crossing_time(const PredicateModelType& guard_model,
         throw DegenerateCrossingException();
     }
 
-    return hitting_time_model.variables()[0];
+    return hitting_time_model.models()[0];
 }
 
 
@@ -398,7 +398,7 @@ tribool
 TaylorCalculus::
 active(const PredicateModelType& guard_model, const SetModelType& set_model) const
 {
-    IntervalType range=compose(guard_model.variables(),set_model.variables())[0].range();
+    IntervalType range=compose(guard_model.models(),set_model.models())[0].range();
     return this->_tribool(range);
 }
 

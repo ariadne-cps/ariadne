@@ -53,7 +53,7 @@ class Map;
 template<class ES> class Orbit;
 
 class EvolutionParameters;
-class TaylorVariable;
+class TaylorModel;
 template<class Var> class CalculusInterface;
 
 class EvolutionProfiler;
@@ -67,7 +67,7 @@ class MapEvolver
     : public EvolverBase< Map, TaylorSet>
     , public Loggable
 {
-    typedef TaylorVariable VariableType;
+    typedef TaylorModel VariableType;
   public:
     typedef ContinuousEvolutionParameters EvolutionParametersType;
     typedef Map::TimeType TimeType;
@@ -127,7 +127,7 @@ class MapEvolver
 
   private:
     boost::shared_ptr< EvolutionParametersType > _parameters;
-    boost::shared_ptr< CalculusInterface<TaylorVariable> > _toolbox;
+    boost::shared_ptr< CalculusInterface<TaylorModel> > _toolbox;
     //boost::shared_ptr< EvolutionProfiler >  _profiler;
 };
 

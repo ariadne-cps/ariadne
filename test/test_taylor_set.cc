@@ -24,7 +24,7 @@
 #include <iostream>
 #include <iomanip>
 #include "multi_index.h"
-#include "taylor_variable.h"
+#include "taylor_model.h"
 #include "zonotope.h"
 #include "taylor_set.h"
 #include "grid_set.h"

@@ -31,7 +31,7 @@
 #include "function_interface.h"
 
 #include "geometry.h"
-#include "taylor_variable.h"
+#include "taylor_model.h"
 #include "taylor_function.h"
 #include "taylor_set.h"
 
@@ -44,53 +44,53 @@
 namespace Ariadne {
 
 TaylorSet::TaylorSet(uint d, uint ng)
-    : _variables(d,ng)
+    : _models(d,ng)
 {
 }
 
 
 TaylorSet::TaylorSet(const FunctionInterface& f, const Vector<Interval>& d)
-    : _variables(f.result_size())
+    : _models(f.result_size())
 {
-    Vector<TaylorVariable> x=TaylorVariable::scalings(Vector<Interval>(d.size(),Interval(-1,1)),d);
-    this->_variables=f.evaluate(x);
+    Vector<TaylorModel> x=TaylorModel::scalings(Vector<Interval>(d.size(),Interval(-1,1)),d);
+    this->_models=f.evaluate(x);
 }
 
 TaylorSet::TaylorSet(const Vector<Interval>& bx)
-    : _variables(TaylorVariable::scalings(Vector<Interval>(bx.size(),Interval(-1,1)),bx))
+    : _models(TaylorModel::scalings(Vector<Interval>(bx.size(),Interval(-1,1)),bx))
 {
 }
 
 
-TaylorSet::TaylorSet(const Vector<TaylorVariable>& tvs)
-    : _variables(tvs)
+TaylorSet::TaylorSet(const Vector<TaylorModel>& tvs)
+    : _models(tvs)
 {
-    if(this->_variables.size()>0) {
-        Vector<Interval> unit_domain(this->_variables[0].argument_size(),Interval(-1,+1));
-        for(size_t i=0; i!=this->_variables.size(); ++i) {
-            ARIADNE_ASSERT(this->_variables[i].domain()==unit_domain);
+    if(this->_models.size()>0) {
+        Vector<Interval> unit_domain(this->_models[0].argument_size(),Interval(-1,+1));
+        for(size_t i=0; i!=this->_models.size(); ++i) {
+            ARIADNE_ASSERT(this->_models[i].domain()==unit_domain);
         }
     }
 }
 
 TaylorSet::TaylorSet(const Vector< Expansion<Float> >& f, const Vector<Float>& e)
-    : _variables(f.size())
+    : _models(f.size())
 {
     ARIADNE_ASSERT(f.size()==e.size());
     if(f.size()>0) {
         Vector<Interval> unit_domain(f[0].argument_size(),Interval(-1,+1));
-        for(uint i=0; i!=f.size(); ++i) { (*this)[i]=TaylorVariable(unit_domain,f[i],e[i]); }
+        for(uint i=0; i!=f.size(); ++i) { (*this)[i]=TaylorModel(unit_domain,f[i],e[i]); }
     }
 }
 
 TaylorSet::TaylorSet(uint rs, uint as, uint deg, double x0, ...)
-    : _variables(rs)
+    : _models(rs)
 {
     double x=x0;
     va_list args;
     va_start(args,x0);
     for(uint i=0; i!=rs; ++i) {
-        (*this)[i]=TaylorVariable(Vector<Interval>(as,Interval(-1,+1)));
+        (*this)[i]=TaylorModel(Vector<Interval>(as,Interval(-1,+1)));
         for(MultiIndex j(as); j.degree()<=deg; ++j) {
             if(x!=0.0 || j.degree()<=1) { (*this)[i].expansion().append(j,x); }
             x=va_arg(args,double);
@@ -106,7 +106,7 @@ TaylorSet::TaylorSet(uint rs, uint as, uint deg, double x0, ...)
 bool
 operator==(const TaylorSet& ts1,const TaylorSet& ts2)
 {
-    return ts1.variables()==ts2.variables();
+    return ts1.models()==ts2.models();
 }
 
 
@@ -118,7 +118,7 @@ TaylorSet::radius() const
 {
     Float result=0.0;
     for(uint i=0; i!=this->dimension(); ++i) {
-        result=max(result,this->variables()[i].range().radius());
+        result=max(result,this->models()[i].range().radius());
     }
     return result;
 }
@@ -186,12 +186,12 @@ TaylorSet::discretise(GridTreeSet& gts, uint d) const
 
 TaylorSet apply(const FunctionInterface& f, const TaylorSet& s)
 {
-    return f.evaluate(s.variables());
+    return f.evaluate(s.models());
 }
 
 TaylorSet apply(const TaylorFunction& tf, const TaylorSet& s)
 {
-    return compose(tf.variables(),s.variables());
+    return compose(tf.models(),s.models());
 }
 
 
@@ -213,7 +213,7 @@ zonotope(const TaylorSet& ts)
 
     set_rounding_upward();
     for(uint i=0; i!=d; ++i) {
-        for(TaylorVariable::const_iterator iter=ts[i].begin(); iter!=ts[i].end(); ++iter) {
+        for(TaylorModel::const_iterator iter=ts[i].begin(); iter!=ts[i].end(); ++iter) {
             if(iter->first.degree()>=2) {
                 e[i]+=abs(iter->second);
             }
@@ -229,7 +229,7 @@ zonotope(const TaylorSet& ts)
 pair<TaylorSet,TaylorSet>
 TaylorSet::split(uint j) const
 {
-    pair< Vector<TaylorVariable>, Vector<TaylorVariable> > s=Ariadne::split(this->_variables,j);
+    pair< Vector<TaylorModel>, Vector<TaylorModel> > s=Ariadne::split(this->_models,j);
     return make_pair( TaylorSet(s.first.expansion(),s.first.error()), TaylorSet(s.second.expansion(),s.second.error()) );
 }
 
@@ -242,7 +242,7 @@ TaylorSet::split() const
     for(uint j=0; j!=this->generators_size(); ++j) {
         Float r=0.0;
         for(uint i=0; i!=this->dimension(); ++i) {
-            r+=abs(this->variables()[i][MultiIndex::unit(ng,j)]);
+            r+=abs(this->models()[i][MultiIndex::unit(ng,j)]);
         }
         if(r>rmax) {
             rmax=r;
@@ -294,7 +294,7 @@ TaylorSet::jacobian() const
     Matrix<Float> J(this->dimension(),this->generators_size());
     for(uint i=0; i!=this->dimension(); ++i) {
         for(uint j=0; j!=this->generators_size(); ++j) {
-            J[i][j]=this->variables()[i][MultiIndex::unit(this->generators_size(),j)];
+            J[i][j]=this->models()[i][MultiIndex::unit(this->generators_size(),j)];
         }
     }
     return J;
@@ -308,18 +308,18 @@ TaylorSet::subsume() const
     TaylorSet res(d,ng+d);
     MultiIndex a=MultiIndex::zero(ng+d);
     for(uint i=0; i!=d; ++i) {
-        TaylorVariable::const_iterator iter=this->_variables[i].begin();
-        for( ; iter!=this->_variables[i].end() && iter->first.degree()<=1; ++iter) {
+        TaylorModel::const_iterator iter=this->_models[i].begin();
+        for( ; iter!=this->_models[i].end() && iter->first.degree()<=1; ++iter) {
             for(uint j=0; j!=ng; ++j) { a[j]=iter->first[j]; }
-            res._variables[i].expansion().append(a,iter->second);
+            res._models[i].expansion().append(a,iter->second);
         }
         for(uint j=0; j!=ng; ++j) { a[j]=0; }
         a[ng+i]=1;
-        res._variables[i].expansion().append(a,this->variables()[i].error());
+        res._models[i].expansion().append(a,this->models()[i].error());
         a[ng+i]=0;
-        for( ; iter!=this->_variables[i].end() ; ++iter) {
+        for( ; iter!=this->_models[i].end() ; ++iter) {
             for(uint j=0; j!=ng; ++j) { a[j]=iter->first[j]; }
-            res._variables[i].expansion().append(a,iter->second);
+            res._models[i].expansion().append(a,iter->second);
         }
     }
     return res;
@@ -341,22 +341,22 @@ TaylorSet
 TaylorSet::recondition() const
 {
     Matrix<Float> T=triangular_multiplier(this->jacobian());
-    Vector<TaylorVariable> scal(T.row_size(),T.column_size());
+    Vector<TaylorModel> scal(T.row_size(),T.column_size());
     for(uint i=0; i!=T.row_size(); ++i) {
         for(uint j=0; j!=T.column_size(); ++j) {
             scal[i][MultiIndex::unit(this->generators_size(),j)]=T[i][j];
         }
     }
-    return TaylorSet(compose(this->variables(),scal));
+    return TaylorSet(compose(this->models(),scal));
 }
 
 std::ostream&
 TaylorSet::write(std::ostream& os) const
 {
-    return os << "TaylorSet(" << this->_variables << ")";
+    return os << "TaylorSet(" << this->_models << ")";
     os << "TaylorSet(\n";
     os << "  dimension=" << this->dimension() << ",\n" << std::flush;
-    os << "  variables=" << this->_variables << ",\n" << std::flush;
+    os << "  models=" << this->_models << ",\n" << std::flush;
     os << ")\n";
     return os;
 }
@@ -426,7 +426,7 @@ void grid_draw(Figure& fig, const TaylorSet& ts)
     for(Float i=-1; i!=+1; i+=rad) {
         for(Float j=-1; j!=+1; j+=rad) {
             Vector<Interval> pt(2); pt[0]=Interval(i,i+rad); pt[1]=Interval(j,j+rad);
-            gts.adjoin_outer_approximation(Box(evaluate(ts.variables(),pt)),depth);
+            gts.adjoin_outer_approximation(Box(evaluate(ts.models(),pt)),depth);
         }
     }
     gts.recombine();

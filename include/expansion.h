@@ -49,7 +49,7 @@ template<class X> class Vector< Expansion<X> >;
 #if defined DOXYGEN or not defined ARIADNE_USE_ARRAY_EXPANSION
 
 //! \brief A power series expansion with coefficients of some type \a X.
-//! Used in Polynomial, Differential and TaylorVariable classes.
+//! Used in Polynomial, Differential and TaylorModel classes.
 template<class X>
 class Expansion
 {

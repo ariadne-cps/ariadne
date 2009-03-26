@@ -28,7 +28,7 @@
 #include "vector.h"
 #include "matrix.h"
 #include "function.h"
-#include "taylor_variable.h"
+#include "taylor_model.h"
 #include "taylor_set.h"
 #include "taylor_function.h"
 #include "box.h"

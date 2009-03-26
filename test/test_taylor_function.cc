@@ -28,7 +28,7 @@
 #include "matrix.h"
 #include "multi_index.h"
 #include "expansion.h"
-#include "taylor_variable.h"
+#include "taylor_model.h"
 #include "taylor_function.h"
 #include "function.h"
 #include "polynomial.h"
@@ -259,7 +259,7 @@ void TestTaylorFunction::test_flow()
     ARIADNE_TEST_BINARY_PREDICATE(refines,computed_flow,expected_flow);
 
     TaylorFunction flow_error=computed_flow-antiderivative(compose(vector_field,computed_flow),2);
-    for(uint i=0; i!=2; ++i) { const_cast<TaylorVariable&>(flow_error.variables()[i]).sweep(1e-4); }
+    for(uint i=0; i!=2; ++i) { const_cast<TaylorModel&>(flow_error.variables()[i]).sweep(1e-4); }
     ARIADNE_TEST_BINARY_PREDICATE(operator<,norm(flow_error.range()),1e-4);
 
 }

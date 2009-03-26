@@ -14,6 +14,7 @@ SRC = \
 	linear_programming.cc \
 	polynomial.cc \
 	differential.cc \
+	taylor_model.cc  \
 	taylor_variable.cc  \
 	function.cc \
 	taylor_function.cc  \
@@ -40,19 +41,19 @@ SRC = \
 	discretiser.cc \
 	reachability_analyser.cc \
 	logging.cc \
-	graphics.cc 
+	graphics.cc
 
-#	hybrid_simulator.cc 
+#	hybrid_simulator.cc
 
-#	taylor_model.cc 
-#	taylor_set.cc 
+#	taylor_model.cc
+#	taylor_set.cc
 
-lib_LTLIBRARIES = libariadne.la 
+lib_LTLIBRARIES = libariadne.la
 libariadne_la_SOURCES = $(SRC)
 nodist_EXTRA_libariadne_la_SOURCES = dummy.cc
 
-EXTRA_DIST =  
-bin_PROGRAMS = 
+EXTRA_DIST =
+bin_PROGRAMS =
 include_HEADERS =
 
 rounding_CXXFLAGS = -O0

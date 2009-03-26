@@ -1084,33 +1084,6 @@ struct TaylorSeries {
                 expansion[i]=0; } } }
 };
 
-TaylorSeries::TaylorSeries(uint d, series_function_pointer fn,
-                           const Float& c, const Interval& r)
-    : expansion(d+1), error(0)
-{
-    Series<Interval> centre_series=fn(d,Interval(c));
-    Series<Interval> range_series=fn(d,r);
-    Interval p=1;
-    Interval e=r-c;
-    //std::cerr<<"\nc="<<c<<" r="<<r<<" e="<<e<<"\n";
-    //std::cerr<<"centre_series="<<centre_series<<"\nrange_series="<<range_series<<"\n";
-    for(uint i=0; i!=d; ++i) {
-        this->expansion[i]=midpoint(centre_series[i]);
-        this->error+=(centre_series[i]-this->expansion[i])*p;
-        p*=e;
-    }
-    //this->expansion[d]=midpoint(centre_series[d]);
-    this->expansion[d]=midpoint(range_series[d]);
-    this->error+=(range_series[d]-this->expansion[d])*p;
-    //std::cerr<<"expansion="<<this->expansion<<"\nerror="<<this->error<<"\n";
-}
-
-
-std::ostream&
-operator<<(std::ostream& os, const TaylorSeries& ts) {
-    return os<<"TS("<<ts.expansion<<","<<ts.error<<")";
-}
-
 
 TaylorVariable
 _compose(const TaylorSeries& ts, const TaylorVariable& tv, Float eps)

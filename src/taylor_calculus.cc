@@ -239,15 +239,15 @@ crossing_time(const PredicateModelType& guard_model,
         throw DegenerateCrossingException();
     }
     ARIADNE_LOG(6,"free_hitting_time_model = "<<free_hitting_time_model<<"\n");
-    FunctionModelType hitting_time_model=FunctionModelType(_apply(free_hitting_time_model,initial_set_model).models());
+    TimeModelType hitting_time_model=_apply(free_hitting_time_model,initial_set_model)[0];
     ARIADNE_LOG(6,"hitting_time_model = "<<hitting_time_model<<"\n");
-    Interval hitting_time_range=hitting_time_model.range()[0];
+    Interval hitting_time_range=hitting_time_model.range();
     ARIADNE_LOG(6,"hitting_time_model = "<<hitting_time_model<<"\n");
     if(hitting_time_range.lower()<R(minimum_time) || hitting_time_range.upper()>R(maximum_time)) {
         throw DegenerateCrossingException();
     }
 
-    return hitting_time_model.models()[0];
+    return hitting_time_model;
 }
 
 

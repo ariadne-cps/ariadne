@@ -44,7 +44,7 @@ typedef Vector<Float> Point;
 typedef Vector<Interval> Box;
 
 TaylorFunction::TaylorFunction()
-    : _models()
+    : _domain(), _models()
 {
 }
 
@@ -133,7 +133,7 @@ TaylorFunction::constant(const Vector<Interval>& d, const Vector<Interval>& r)
 TaylorFunction
 TaylorFunction::identity(const Vector<Interval>& d)
 {
-    return TaylorFunction(TaylorModel::variables(d));
+    return TaylorFunction(d,TaylorModel::variables(d));
 }
 
 
@@ -185,7 +185,7 @@ TaylorFunction::models() const
 uint
 TaylorFunction::argument_size() const
 {
-    return this->_models[0].argument_size();
+    return this->_domain.size();
 }
 
 
@@ -195,6 +195,12 @@ TaylorFunction::result_size() const
     return this->_models.size();
 }
 
+
+TaylorVariable
+TaylorFunction::operator[](uint i) const
+{
+    return TaylorVariable(this->_domain,this->_models[i]);
+}
 
 
 
@@ -271,7 +277,7 @@ TaylorFunction
 join(const TaylorFunction& f, const TaylorFunction& g)
 {
     ARIADNE_ASSERT(f.domain()==g.domain());
-    return TaylorFunction(join(f.models(),g.models()));
+    return TaylorFunction(f.domain(),join(f.models(),g.models()));
 }
 
 TaylorFunction
@@ -297,9 +303,11 @@ operator+=(TaylorFunction& f, const Vector<Interval>& e)
 TaylorFunction
 operator+(const TaylorFunction& f1, const TaylorFunction& f2)
 {
-    ARIADNE_ASSERT(!intersection(f1.domain(),f2.domain()).empty());
+    ARIADNE_ASSERT_MSG(!intersection(f1.domain(),f2.domain()).empty(),
+                       "operator+(TaylorFunction f1, TaylorFunction f2) with f1="<<f1<<" f2="<<f2<<
+                       ": domains are disjoint");
     if(f1.domain()==f2.domain()) {
-        return TaylorFunction(Vector<TaylorModel>(f1.models()+f2.models()));
+        return TaylorFunction(f1.domain(),Vector<TaylorModel>(f1.models()+f2.models()));
     } else {
         Box new_domain=intersection(f1.domain(),f2.domain());
         return operator+(restrict(f1,new_domain),restrict(f2,new_domain));
@@ -312,7 +320,7 @@ operator-(const TaylorFunction& f1, const TaylorFunction& f2)
 {
     ARIADNE_ASSERT(!intersection(f1.domain(),f2.domain()).empty());
     if(f1.domain()==f2.domain()) {
-        return TaylorFunction(Vector<TaylorModel>(f1.models()+f2.models()));
+        return TaylorFunction(f1.domain(),Vector<TaylorModel>(f1.models()+f2.models()));
     } else {
         Box new_domain=intersection(f1.domain(),f2.domain());
         return operator-(restrict(f1,new_domain),restrict(f2,new_domain));
@@ -324,31 +332,31 @@ operator-(const TaylorFunction& f1, const TaylorFunction& f2)
 TaylorFunction
 operator+(const TaylorFunction& f, const Vector<Float>& c)
 {
-    return TaylorFunction(f.models()+c);
+    return TaylorFunction(f.domain(),Vector<TaylorModel>(f.models()+c));
 }
 
 TaylorFunction
 operator+(const TaylorFunction& f, const Vector<Interval>& c)
 {
-    return TaylorFunction(f.models()+c);
+    return TaylorFunction(f.domain(),Vector<TaylorModel>(f.models()+c));
 }
 
 TaylorFunction
 operator-(const TaylorFunction& f, const Vector<Float>& c)
 {
-    return TaylorFunction(f.models()-c);
+    return TaylorFunction(f.domain(),Vector<TaylorModel>(f.models()-c));
 }
 
 TaylorFunction
 operator-(const TaylorFunction& f, const Vector<Interval>& c)
 {
-    return TaylorFunction(f.models()-c);
+    return TaylorFunction(f.domain(),Vector<TaylorModel>(f.models()-c));
 }
 
 TaylorFunction
 operator*(const Matrix<Interval>& A, const TaylorFunction& f)
 {
-    return TaylorFunction(prod(A,f.models()));
+    return TaylorFunction(f.domain(),Vector<TaylorModel>(prod(A,f.models())));
 }
 
 
@@ -538,7 +546,7 @@ TaylorExpression operator/(const TaylorExpression& t1, const TaylorExpression& t
     ARIADNE_ASSERT(t1._domain==t2._domain); return TaylorExpression(t1._domain,t1._model/t2._model); }
 
 TaylorFunction operator*(const TaylorExpression& t, const Vector<Float>& v) {
-    return TaylorFunction(Vector<TaylorModel>(t._model*v)); }
+    return TaylorFunction(t.domain(),Vector<TaylorModel>(t._model*v)); }
 TaylorFunction operator*(const Vector<Float>& v, const TaylorExpression& t) {
     return t*v; };
 

@@ -41,6 +41,8 @@ template<class X> class Polynomial;
 
 class FunctionInterface;
 class MultiIndex;
+class TaylorModel;
+class TaylorVariable;
 class TaylorFunction;
 
 TaylorFunction restrict(const TaylorFunction&, const Vector<Interval>& bx);
@@ -128,7 +130,6 @@ class TaylorFunction {
     TaylorFunction(const Vector<Interval>& domain,
                    const Vector< Polynomial<Interval> >& polynomial);
 
-    template<class E> explicit TaylorFunction(const ublas::vector_expression<E>& v);
 
     /*! \brief Equality operator. */
     bool operator==(const TaylorFunction& p) const;
@@ -150,7 +151,8 @@ class TaylorFunction {
     /*! \brief The size of the result. */
     uint result_size() const;
 
-
+    /*! \brief The \a ith Taylor variable */
+    TaylorVariable operator[](uint i) const;
     /*! \brief Evaluate the Taylor model at the point \a x. */
     Vector<Interval> evaluate(const Vector<Interval>& x) const;
     /*! \brief Evaluate the Taylor model at the point \a x. */
@@ -239,16 +241,6 @@ class TaylorFunction {
     Vector<Interval> _domain;
     Vector<TaylorModel> _models;
 };
-
-template<class E> inline
-TaylorFunction::TaylorFunction(const ublas::vector_expression<E>& ve)
-    : _models(ve)
-{
-    ARIADNE_ASSERT(this->_models.size()>0);
-    for(uint i=1; i!=this->_models.size(); ++i) {
-        ARIADNE_ASSERT(this->_models[0].domain()==this->_models[i].domain());
-    }
-}
 
 
 std::ostream& operator<<(std::ostream&, const TaylorFunction&);

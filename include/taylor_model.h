@@ -93,6 +93,7 @@ Vector<TaylorModel> flow(const Vector<TaylorModel>& x, const Vector<Interval>& d
  */
 class TaylorModel
 {
+    friend class TaylorVariable;
     typedef Expansion<Float> ExpansionType;
     static const Float _zero;
     ExpansionType _expansion;
@@ -425,6 +426,12 @@ class TaylorModel
     friend TaylorModel cos(const TaylorModel& x);
     //! \brief Tangent.
     friend TaylorModel tan(const TaylorModel& x);
+    //! \brief Inverse sine.
+    friend TaylorModel asin(const TaylorModel& x);
+    //! \brief Inverse cosine.
+    friend TaylorModel acos(const TaylorModel& x);
+    //! \brief Inverse tangent.
+    friend TaylorModel atan(const TaylorModel& x);
     //@}
 
     //@{
@@ -451,6 +458,9 @@ TaylorModel log(const TaylorModel& x);
 TaylorModel sin(const TaylorModel& x);
 TaylorModel cos(const TaylorModel& x);
 TaylorModel tan(const TaylorModel& x);
+TaylorModel asin(const TaylorModel& x);
+TaylorModel acos(const TaylorModel& x);
+TaylorModel atan(const TaylorModel& x);
 
 
 

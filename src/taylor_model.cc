@@ -104,7 +104,7 @@ TaylorModel::TaylorModel(uint as, uint deg, double d0, ...)
     va_list args;
     va_start(args,d0);
     for(MultiIndex j(as); j.degree()<=deg; ++j) {
-        if(x!=0.0 || j.degree()<=1) { this->_expansion.append(j,x); }
+        if(x!=0.0) { this->_expansion.append(j,x); }
         x=va_arg(args,double);
     }
     this->_error=x;
@@ -333,7 +333,7 @@ void acc1(TaylorModel& x, const TaylorModel& y)
     for(TaylorModel::const_iterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
         x[yiter->first]+=yiter->second;
     }
-
+    x.expansion().cleanup();
     return;
 }
 
@@ -377,7 +377,8 @@ void acc2(TaylorModel& x, const TaylorModel& y)
             r.expansion().append(yiter->first,yiter->second);
             ++yiter;
         } else {
-            r.expansion().append(xiter->first,xiter->second+yiter->second);
+            Float c=xiter->second+yiter->second;
+            if(c!=0) { r.expansion().append(xiter->first,c); }
             ++xiter; ++yiter;
         }
     }

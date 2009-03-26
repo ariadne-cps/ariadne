@@ -34,7 +34,7 @@
 #include "array.h"
 #include "vector.h"
 #include "multi_index.h"
-#include "expansion.h"
+#include "taylor_model.h"
 
 namespace Ariadne {
 
@@ -43,7 +43,7 @@ template<class X> class Vector;
 template<class X> class Matrix;
 template<class X> class Expansion;
 template<class X> class Polynomial;
-
+class TaylorModel;
 class TaylorVariable;
 template<> class Vector<TaylorVariable>;
 
@@ -97,6 +97,8 @@ Vector<TaylorVariable> flow(const Vector<TaylorVariable>& vf, const Vector<Inter
 bool refines(const TaylorVariable& tv1, const TaylorVariable& tv2);
 bool refines(const Vector<TaylorVariable>& tv1, const Vector<TaylorVariable>& tv2);
 
+// Restrict to a smaller domain. REQUIRED
+TaylorVariable restrict(const TaylorVariable& x, const Vector<Interval>& d);
 
 /*! \brief A class representing a quantity depending on other quantities.
  *  Based on a power series Expansion, scaled to the unit box.
@@ -106,30 +108,13 @@ bool refines(const Vector<TaylorVariable>& tv1, const Vector<TaylorVariable>& tv
 class TaylorVariable
 {
     typedef Vector<Interval> DomainType;
+    typedef TaylorModel ModelType;
     typedef Expansion<Float> ExpansionType;
     typedef Float ErrorType;
     static const Float _zero;
     DomainType _domain;
-    ExpansionType _expansion;
-    Float _error;
-    double _sweep_threshold;
-    uint _maximum_degree;
-    MultiIndexBound _maximum_index;
-
-  private:
-    static double _default_sweep_threshold;
-    static uint _default_maximum_degree;
+    ModelType _model;
   public:
-    static const double em;
-    static const double ec;
-  public:
-    //! \brief The type used for the coefficients.
-    typedef Float ScalarType;
-    //! \brief The type used to index the coefficients.
-    typedef MultiIndex IndexType;
-    //! \brief The type used for the coefficients.
-    typedef Float ValueType;
-
     //! \brief An iterator through the (index,coefficient) pairs of the expansion expansion.
     typedef ExpansionType::iterator iterator;
     //! \brief A constant iterator through the (index,coefficient) pairs of the expansion expansion.
@@ -141,6 +126,8 @@ class TaylorVariable
     explicit TaylorVariable();
     //! \brief Construct a TaylorVariable over the domain \a d.
     explicit TaylorVariable(const DomainType& d);
+    //! \brief Construct a TaylorVariable over the domain \a d, based on the scaled model \a m.
+    explicit TaylorVariable(const DomainType& d, const TaylorModel& m);
     //! \brief Construct a TaylorVariable over the domain \a d, with scaled power series expansion \a f and error \a e.
     explicit TaylorVariable(const DomainType& d, const ExpansionType& f, const ErrorType& e=0);
     //! \brief Construct a TaylorVariable over the domain \a d from the polynomial \a p.
@@ -150,9 +137,9 @@ class TaylorVariable
     //@{
     /*! \name Assignment to constant values. */
     //! \brief Set equal to a constant, keeping the same number of arguments.
-    TaylorVariable& operator=(const Float& c);
+    TaylorVariable& operator=(const Float& c) { this->_model=c; return *this; }
     //! \brief Set equal to an interval constant, keeping the same number of arguments.
-    TaylorVariable& operator=(const Interval& c);
+    TaylorVariable& operator=(const Interval& c) { this->_model=c; return *this; }
     //! \brief Test if the quantity is a better approximation than \a t throughout the domain.
     bool refines(const TaylorVariable& t);
     //@}
@@ -160,54 +147,53 @@ class TaylorVariable
     //@{
     /*! \name Data access */
     //! \brief The domain of the quantity.
-    const Vector<Interval>& domain() const { return this->_domain; }
+    const DomainType& domain() const { return this->_domain; }
+    //! \brief The scaled expansion over a unit box with error bound.
+    const ModelType& model() const { return this->_model; }
     //! \brief The scaled expansion over a unit box.
-    const ExpansionType& expansion() const { return this->_expansion; }
+    const ExpansionType& expansion() const { return this->_model._expansion; }
     //! \brief The error of the expansion over the domain.
-    const ErrorType& error() const { return this->_error; }
+    const ErrorType& error() const { return this->_model._error; }
+    //! \brief A reference to the scaled expansion over a unit box with error bound.
+    ModelType& model() { return this->_model; }
     //! \brief A reference to the expansion.
-    ExpansionType& expansion() { return this->_expansion; }
+    ExpansionType& expansion() { return this->_model._expansion; }
     //! \brief A reference to the error of the expansion over the domain.
-    ErrorType& error() { return this->_error; }
+    ErrorType& error() { return this->_model._error; }
     //! \brief A reference to the constant term in the expansion.
-    Float& value() { return (*this)[MultiIndex::zero(this->argument_size())]; }
+    Float& value() { return this->_model.value(); }
     //! \brief The constant term in the expansion.
-    const Float& value() const { return (*this)[MultiIndex::zero(this->argument_size())]; }
+    const Float& value() const { return this->_model.value(); }
 
     //! \brief Set the error of the expansion.
-    void set_error(const Float& ne) {
-        ARIADNE_ASSERT(ne>=0); this->_error=ne; }
+    void set_error(const Float& ne) { this->_model.set_error(ne); }
     //! \brief Set the constant term in the expansion.
-    void set_value(const Float& c) {
-        this->_expansion[MultiIndex::zero(this->argument_size())]=c; }
-    //! \brief Set the gradient of \a j term in the expansion.
-    void set_gradient(unsigned int j, const Float& c) {
-        this->_expansion[MultiIndex::unit(this->argument_size(),j)]=c; }
+    void set_value(const Float& c) { this->_model.set_value(c); }
 
     //! \brief The coefficient of the term in $x^a$.
-    const Float& operator[](const MultiIndex& a) const { return this->_expansion[a]; }
+    const Float& operator[](const MultiIndex& a) const { return this->_model[a]; }
     //! \brief A read/write reference to the coefficient of the term in $x^a$.
-    Float& operator[](const MultiIndex& a) { return this->_expansion[a]; }
+    Float& operator[](const MultiIndex& a) { return this->_model[a]; }
 
     //! \brief An iterator to the first term in the expansion expansion.
-    iterator begin() { return this->_expansion.begin(); }
+    iterator begin() { return this->_model.begin(); }
     //! \brief A constant iterator to the first term in the expansion expansion.
-    const_iterator begin() const { return this->_expansion.begin(); }
+    const_iterator begin() const { return this->_model.begin(); }
     //! \brief An iterator to the end of the expansion expansion.
-    iterator end() { return this->_expansion.end(); }
+    iterator end() { return this->_model.end(); }
     //! \brief A constant iterator to the end of the expansion expansion.
-    const_iterator end() const { return this->_expansion.end(); }
+    const_iterator end() const { return this->_model.end(); }
     //! \brief An iterator to the term with index \a.
-    iterator find(const MultiIndex& a) { return this->_expansion.find(a); }
+    iterator find(const MultiIndex& a) { return this->_model.find(a); }
     //! \brief A constant iterator to the term with index \a.
-    const_iterator find(const MultiIndex& a) const { return this->_expansion.find(a); }
+    const_iterator find(const MultiIndex& a) const { return this->_model.find(a); }
 
     //! \brief The number of variables in the argument of the quantity.
-    uint argument_size() const { return this->_expansion.argument_size(); }
+    uint argument_size() const { return this->_model._expansion.argument_size(); }
     //! \brief The maximum degree of terms in the expansion expansion.
-    uint degree() const { return (--this->_expansion.end())->first.degree(); }
+    uint degree() const { return (--this->_model._expansion.end())->first.degree(); }
     //! \brief The number of nonzero terms in the expansion expansion.
-    uint number_of_nonzeros() const { return this->_expansion.number_of_nonzeros(); }
+    uint number_of_nonzeros() const { return this->_model._expansion.number_of_nonzeros(); }
     //@}
 
     //@{
@@ -258,7 +244,7 @@ class TaylorVariable
     //@{
     /*! \name Function operations. */
     //! \brief An over-approximation to the range of the quantity.
-    Interval range() const;
+    Interval range() const { return this->_model.range(); }
     //! \brief Evaluate the quantity at the point \a x.
     Interval evaluate(const Vector<Float>& x) const;
     //! \brief Evaluate the quantity over the interval of points \a x.
@@ -268,51 +254,39 @@ class TaylorVariable
     //@{
     /*! \name Simplification operations. */
     //! \brief Truncate to the default maximum degree of the quantity.
-    TaylorVariable& truncate();
+    TaylorVariable& truncate() { this->_model.truncate(); return *this; }
     //! \brief Truncate to degree \a deg.
-    TaylorVariable& truncate(uint deg);
+    TaylorVariable& truncate(uint deg) { this->_model.truncate(deg); return *this; }
     //! \brief Truncate all terms with any coefficient higher than \a a.
-    TaylorVariable& truncate(const MultiIndex& a);
-    //! \brief Truncate all terms with any coefficient higher than those given by \a a.
-    TaylorVariable& truncate(const MultiIndexBound& a);
+    TaylorVariable& truncate(const MultiIndex& a) { this->_model.truncate(a); return *this; }
+    //! \brief Truncate all terms with any coefficient higher than those given by \a b.
+    TaylorVariable& truncate(const MultiIndexBound& b) { this->_model.truncate(b); return *this; }
     //! \brief Remove all terms whose coefficient has magnitude
     //! lower than the cutoff threshold of the quantity.
-    TaylorVariable& sweep();
+    TaylorVariable& sweep() { this->_model.sweep(); return *this; }
     //! \brief Remove all terms whose coefficient has magnitude less than \a eps.
-    TaylorVariable& sweep(double eps);
+    TaylorVariable& sweep(double eps) { this->_model.sweep(eps); return *this; }
     //! \brief Remove all terms whose degree is higher than \a deg or
     //! whose coefficient has magnitude less than \a eps.
-    TaylorVariable& clean(uint deg, double eps);
+    TaylorVariable& clean(uint deg, double eps) { this->_model.clean(deg,eps); return *this; }
     //! \brief Remove all terms which have high degree or small magnitude.
-    TaylorVariable& clean();
+    TaylorVariable& clean() { this->_model.clean(); return *this; }
     //@}
 
     //@{
     /*! \name Accuracy parameters. */
     //! \brief .
-    static void set_default_maximum_degree(uint md) { _default_maximum_degree=md; }
+    void set_maximum_index(MultiIndexBound md) { this->_model._maximum_index=md; }
     //! \brief .
-    static void set_default_sweep_threshold(double me) { ARIADNE_ASSERT(me>=0.0); _default_sweep_threshold=me; }
+    void set_maximum_degree(uint md) { this->_model._maximum_degree=md; }
     //! \brief .
-    static uint default_maximum_degree() { return _default_maximum_degree; }
+    void set_sweep_threshold(double me) { ARIADNE_ASSERT(me>=0.0); this->_model._sweep_threshold=me; }
     //! \brief .
-    static double default_sweep_threshold() { return _default_sweep_threshold; }
-    //@}
-
-    //@{
-    /*! \name Accuracy parameters. */
+    MultiIndexBound maximum_index() const { return this->_model._maximum_index; }
     //! \brief .
-    void set_maximum_index(MultiIndexBound md) { this->_maximum_index=md; }
+    uint maximum_degree() const { return this->_model._maximum_degree; }
     //! \brief .
-    void set_maximum_degree(uint md) { this->_maximum_degree=md; }
-    //! \brief .
-    void set_sweep_threshold(double me) { ARIADNE_ASSERT(me>=0.0); this->_sweep_threshold=me; }
-    //! \brief .
-    MultiIndexBound maximum_index() const { return this->_maximum_index; }
-    //! \brief .
-    uint maximum_degree() const { return this->_maximum_degree; }
-    //! \brief .
-    double sweep_threshold() const { return this->_sweep_threshold; }
+    double sweep_threshold() const { return this->_model._sweep_threshold; }
     //@}
 
     //@{
@@ -419,6 +393,12 @@ class TaylorVariable
     friend TaylorVariable cos(const TaylorVariable& x);
     //! \brief Tangent.
     friend TaylorVariable tan(const TaylorVariable& x);
+    //! \brief Inverse sine.
+    friend TaylorVariable asin(const TaylorVariable& x);
+    //! \brief Inverse cosine.
+    friend TaylorVariable acos(const TaylorVariable& x);
+    //! \brief Inverse tangent.
+    friend TaylorVariable atan(const TaylorVariable& x);
     //@}
 
     //@{
@@ -428,23 +408,138 @@ class TaylorVariable
     //@}
 
   public:
-    std::string str() const;
-
-    TaylorVariable& clobber();
-    TaylorVariable& clobber(uint o);
-    TaylorVariable& clobber(uint so, uint to);
+    TaylorVariable& clobber() { this->_model.clobber(); return *this; }
+    TaylorVariable& clobber(uint o) { this->_model.clobber(o); return *this; }
+    TaylorVariable& clobber(uint so, uint to) { this->_model.clobber(so,to); return *this; }
 };
 
-TaylorVariable max(const TaylorVariable& x, const TaylorVariable& y);
-TaylorVariable min(const TaylorVariable& x, const TaylorVariable& y);
-TaylorVariable abs(const TaylorVariable& x);
-TaylorVariable neg(const TaylorVariable& x);
-TaylorVariable rec(const TaylorVariable& x);
-TaylorVariable exp(const TaylorVariable& x);
-TaylorVariable log(const TaylorVariable& x);
-TaylorVariable sin(const TaylorVariable& x);
-TaylorVariable cos(const TaylorVariable& x);
-TaylorVariable tan(const TaylorVariable& x);
+
+
+inline TaylorVariable& operator+=(TaylorVariable& x, const Float& c) {
+    x._model+=c; return x; }
+inline TaylorVariable& operator-=(TaylorVariable& x, const Float& c) {
+    x._model-=c; return x; }
+inline TaylorVariable& operator*=(TaylorVariable& x, const Float& c) {
+    x._model*=c; return x; }
+inline TaylorVariable& operator/=(TaylorVariable& x, const Float& c) {
+    x._model*=c; return x; }
+
+inline TaylorVariable& operator+=(TaylorVariable& x, const Interval& c) {
+    x._model+=c; return x; }
+inline TaylorVariable& operator-=(TaylorVariable& x, const Interval& c) {
+    x._model-=c; return x; }
+inline TaylorVariable& operator*=(TaylorVariable& x, const Interval& c) {
+    x._model*=c; return x; }
+inline TaylorVariable& operator/=(TaylorVariable& x, const Interval& c) {
+    x._model*=c; return x; }
+
+
+inline TaylorVariable operator+(const TaylorVariable& x) {
+    return TaylorVariable(x._domain,x._model); }
+inline TaylorVariable operator-(const TaylorVariable& x) {
+    return TaylorVariable(x._domain,-x._model); }
+
+inline TaylorVariable operator+(const TaylorVariable& x, const Float& c) {
+    return TaylorVariable(x._domain,x._model+c); }
+inline TaylorVariable operator-(const TaylorVariable& x, const Float& c) {
+    return TaylorVariable(x._domain,x._model-c); }
+inline TaylorVariable operator*(const TaylorVariable& x, const Float& c) {
+    return TaylorVariable(x._domain,x._model*c); }
+inline TaylorVariable operator/(const TaylorVariable& x, const Float& c) {
+    return TaylorVariable(x._domain,x._model/c); }
+inline TaylorVariable operator+(const TaylorVariable& x, const Interval& c) {
+    return TaylorVariable(x._domain,x._model+c); }
+inline TaylorVariable operator-(const TaylorVariable& x, const Interval& c) {
+    return TaylorVariable(x._domain,x._model-c); }
+inline TaylorVariable operator*(const TaylorVariable& x, const Interval& c) {
+    return TaylorVariable(x._domain,x._model*c); }
+inline TaylorVariable operator/(const TaylorVariable& x, const Interval& c) {
+    return TaylorVariable(x._domain,x._model/c); }
+inline TaylorVariable operator+(const Float& c, const TaylorVariable& x) {
+    return TaylorVariable(x._domain,c+x._model); }
+inline TaylorVariable operator-(const Float& c, const TaylorVariable& x) {
+    return TaylorVariable(x._domain,c-x._model); }
+inline TaylorVariable operator*(const Float& c, const TaylorVariable& x) {
+    return TaylorVariable(x._domain,c*x._model); }
+inline TaylorVariable operator/(const Float& c, const TaylorVariable& x) {
+    return TaylorVariable(x._domain,c/x._model); }
+inline TaylorVariable operator+(const Interval& c, const TaylorVariable& x) {
+    return TaylorVariable(x._domain,c+x._model); }
+inline TaylorVariable operator-(const Interval& c, const TaylorVariable& x) {
+    return TaylorVariable(x._domain,c-x._model); }
+inline TaylorVariable operator*(const Interval& c, const TaylorVariable& x) {
+    return TaylorVariable(x._domain,c*x._model); }
+inline TaylorVariable operator/(const Interval& c, const TaylorVariable& x) {
+    return TaylorVariable(x._domain,c/x._model); }
+
+inline TaylorVariable abs(const TaylorVariable& x) {
+    return TaylorVariable(x._domain,abs(x._model)); }
+inline TaylorVariable neg(const TaylorVariable& x) {
+    return TaylorVariable(x._domain,abs(x._model)); }
+inline TaylorVariable rec(const TaylorVariable& x) {
+    return TaylorVariable(x._domain,rec(x._model)); }
+inline TaylorVariable sqr(const TaylorVariable& x) {
+    return TaylorVariable(x._domain,sqr(x._model)); }
+inline TaylorVariable pow(const TaylorVariable& x, int n) {
+    return TaylorVariable(x._domain,pow(x._model,n)); }
+inline TaylorVariable sqrt(const TaylorVariable& x) {
+    return TaylorVariable(x._domain,sqrt(x._model)); }
+inline TaylorVariable exp(const TaylorVariable& x) {
+    return TaylorVariable(x._domain,exp(x._model)); }
+inline TaylorVariable log(const TaylorVariable& x) {
+    return TaylorVariable(x._domain,log(x._model)); }
+inline TaylorVariable sin(const TaylorVariable& x) {
+    return TaylorVariable(x._domain,sin(x._model)); }
+inline TaylorVariable cos(const TaylorVariable& x) {
+    return TaylorVariable(x._domain,cos(x._model)); }
+inline TaylorVariable tan(const TaylorVariable& x) {
+    return TaylorVariable(x._domain,tan(x._model)); }
+inline TaylorVariable asin(const TaylorVariable& x) {
+    return TaylorVariable(x._domain,asin(x._model)); }
+inline TaylorVariable acos(const TaylorVariable& x) {
+    return TaylorVariable(x._domain,acos(x._model)); }
+inline TaylorVariable atan(const TaylorVariable& x) {
+    return TaylorVariable(x._domain,atan(x._model)); }
+
+
+inline Interval evaluate(const TaylorVariable& tv, const Vector<Interval>& x) {
+    return tv.evaluate(x); }
+
+inline TaylorVariable antiderivative(const TaylorVariable& x, uint k) {
+    return TaylorVariable(x.domain(),antiderivative(x.model(),x.domain()[k],k)); }
+inline TaylorVariable unscale(const TaylorVariable& tv, const Interval& ivl) {
+    return TaylorVariable(tv.domain(),unscale(tv.model(),ivl)); }
+
+inline TaylorVariable embed(const TaylorVariable& tv1, const Interval& dom2) {
+    return TaylorVariable(join(tv1.domain(),dom2),embed(tv1.model(),1u)); }
+inline TaylorVariable embed(const TaylorVariable& tv1, const Vector<Interval>& dom2) {
+    return TaylorVariable(join(tv1.domain(),dom2),embed(tv1.model(),dom2.size())); }
+inline TaylorVariable embed(const Vector<Interval>& dom1, const TaylorVariable& tv2) {
+    return TaylorVariable(join(dom1,tv2.domain()),embed(dom1.size(),tv2.model())); }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 template<>
@@ -484,6 +579,8 @@ class Vector<TaylorVariable>
     void check() const;
 };
 
+inline Vector<Interval> evaluate(const Vector<TaylorVariable>& tv, const Vector<Interval>& x) {
+    Vector<Interval> r(tv.size()); for(uint i=0; i!=tv.size(); ++i) { r[i]=evaluate(tv[i],x); } return r; }
 
 
 } // namespace Ariadne

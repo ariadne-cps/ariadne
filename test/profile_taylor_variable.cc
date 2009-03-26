@@ -76,16 +76,15 @@ void profile(uint ntries, string name, TaylorFunctionPtr fn, const Vector<Taylor
 }
 
 int main(int argc, const char* argv[]) {
-    Vector<Interval> d(2,Interval(-1,+1));
     Vector<Float> c(2, 1.0,2.0);
 
-    Vector<TaylorModel> v(2,2);
-    v[0]=TaylorModel::variable(d,0);
-    v[1]=TaylorModel::constant(d,1.0);
+    Vector<TaylorModel> v(2,TaylorModel(2));
+    v[0]=TaylorModel::variable(2,0);
+    v[1]=TaylorModel::constant(2,1.0);
 
     Vector<TaylorModel> x(2,2);
-    x[0]=TaylorModel(d,Expansion<Float>(2,3, 1.0,2.0,0.0,4.0,0.0,6.0,0.0,8.0,9.0,10.0, 0.25));
-    x[1]=TaylorModel(d,Expansion<Float>(2,3, 1.0,0.0,3.0,4.0,0.0,6.0,7.0,8.0,0.0,10.0, 0.5));
+    x[0]=TaylorModel(Expansion<Float>(2,3, 1.0,2.0,0.0,4.0,0.0,6.0,0.0,8.0,9.0,10.0, 0.25));
+    x[1]=TaylorModel(Expansion<Float>(2,3, 1.0,0.0,3.0,4.0,0.0,6.0,7.0,8.0,0.0,10.0, 0.5));
     std::cerr<<"v="<<v<<"\nx="<<x<<"\n";
 
     profile(100000,"sum",sum,x);

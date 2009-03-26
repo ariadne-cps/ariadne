@@ -52,12 +52,12 @@ TaylorSet::TaylorSet(uint d, uint ng)
 TaylorSet::TaylorSet(const FunctionInterface& f, const Vector<Interval>& d)
     : _models(f.result_size())
 {
-    Vector<TaylorModel> x=TaylorModel::scalings(Vector<Interval>(d.size(),Interval(-1,1)),d);
+    Vector<TaylorModel> x=TaylorModel::scalings(d);
     this->_models=f.evaluate(x);
 }
 
 TaylorSet::TaylorSet(const Vector<Interval>& bx)
-    : _models(TaylorModel::scalings(Vector<Interval>(bx.size(),Interval(-1,1)),bx))
+    : _models(TaylorModel::scalings(bx))
 {
 }
 
@@ -78,8 +78,7 @@ TaylorSet::TaylorSet(const Vector< Expansion<Float> >& f, const Vector<Float>& e
 {
     ARIADNE_ASSERT(f.size()==e.size());
     if(f.size()>0) {
-        Vector<Interval> unit_domain(f[0].argument_size(),Interval(-1,+1));
-        for(uint i=0; i!=f.size(); ++i) { (*this)[i]=TaylorModel(unit_domain,f[i],e[i]); }
+        for(uint i=0; i!=f.size(); ++i) { (*this)[i]=TaylorModel(f[i],e[i]); }
     }
 }
 
@@ -90,7 +89,7 @@ TaylorSet::TaylorSet(uint rs, uint as, uint deg, double x0, ...)
     va_list args;
     va_start(args,x0);
     for(uint i=0; i!=rs; ++i) {
-        (*this)[i]=TaylorModel(Vector<Interval>(as,Interval(-1,+1)));
+        (*this)[i]=TaylorModel(as);
         for(MultiIndex j(as); j.degree()<=deg; ++j) {
             if(x!=0.0 || j.degree()<=1) { (*this)[i].expansion().append(j,x); }
             x=va_arg(args,double);
@@ -191,7 +190,7 @@ TaylorSet apply(const FunctionInterface& f, const TaylorSet& s)
 
 TaylorSet apply(const TaylorFunction& tf, const TaylorSet& s)
 {
-    return compose(tf.models(),s.models());
+    return compose(tf.models(),tf.domain(),s.models());
 }
 
 
@@ -230,7 +229,8 @@ pair<TaylorSet,TaylorSet>
 TaylorSet::split(uint j) const
 {
     pair< Vector<TaylorModel>, Vector<TaylorModel> > s=Ariadne::split(this->_models,j);
-    return make_pair( TaylorSet(s.first.expansion(),s.first.error()), TaylorSet(s.second.expansion(),s.second.error()) );
+    return make_pair( TaylorSet(s.first),
+                      TaylorSet(s.second) );
 }
 
 pair<TaylorSet,TaylorSet>
@@ -347,7 +347,8 @@ TaylorSet::recondition() const
             scal[i][MultiIndex::unit(this->generators_size(),j)]=T[i][j];
         }
     }
-    return TaylorSet(compose(this->models(),scal));
+    Vector<Interval> dom(this->argument_size(),Interval(-1,+1));
+    return TaylorSet(compose(this->models(),dom,scal));
 }
 
 std::ostream&

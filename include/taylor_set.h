@@ -72,6 +72,7 @@ class TaylorSet
 
     uint dimension() const { return this->_models.size(); }
     uint generators_size() const { assert(this->_models.size()>0); return this->_models[0].argument_size(); }
+    uint argument_size() const { return this->_models[0].argument_size(); }
     const TaylorModel& operator[](uint i) const { return this->_models[i]; }
     TaylorModel& operator[](uint i) { return this->_models[i]; }
 

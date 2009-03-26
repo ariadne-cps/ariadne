@@ -50,7 +50,7 @@ TaylorFunction compose(const TaylorFunction&, const TaylorFunction&);
 TaylorFunction inverse(const TaylorFunction&);
 TaylorFunction implicit(const TaylorFunction&);
 TaylorFunction antiderivative(const TaylorFunction&, uint);
-TaylorFunction flow(const TaylorFunction& vf, const Vector<Interval>& d, const Interval& t);
+TaylorFunction flow(const TaylorFunction& vf, const Vector<Interval>& d, const Interval& t, uint o);
 
 class TaylorExpression {
     typedef unsigned int Nat;
@@ -113,9 +113,8 @@ class TaylorFunction {
                    const Vector< Expansion<Float> >& expansion,
                    const Vector<Float>& error);
 
-    /*! \brief Construct from a domain and the expansion. */
-    explicit TaylorFunction(const Vector<TaylorModel>& variables);
-    template<class E> explicit TaylorFunction(const ublas::vector_expression<E>& v);
+    /*! \brief Construct from a domain and the models. */
+    explicit TaylorFunction(const Vector<Interval>& domain, const Vector<TaylorModel>& variables);
 
     /*! \brief Construct from a domain and a function. */
     TaylorFunction(const Vector<Interval>& domain,
@@ -128,6 +127,8 @@ class TaylorFunction {
     /*! \brief Construct from a domain and a n interval polynomial. */
     TaylorFunction(const Vector<Interval>& domain,
                    const Vector< Polynomial<Interval> >& polynomial);
+
+    template<class E> explicit TaylorFunction(const ublas::vector_expression<E>& v);
 
     /*! \brief Equality operator. */
     bool operator==(const TaylorFunction& p) const;
@@ -208,7 +209,7 @@ class TaylorFunction {
     //! \brief Antiderivative of \a f with respect to variable \a k.
     friend TaylorFunction antiderivative(const TaylorFunction& f, uint k);
     //! \brief The flow of the vector field \a vf defined over a space domain \a d over a time interval \a t.
-    friend TaylorFunction flow(const TaylorFunction& vf, const Vector<Interval>& d, const Interval& t);
+    friend TaylorFunction flow(const TaylorFunction& vf, const Vector<Interval>& d, const Interval& t, uint o);
     //! \brief Compute the implicit function of \a f satisfying \f$f(c,h(c))=0\f$,
     //! where \f$c\f$ is the centre of the domain of \f$f\f$.
     friend TaylorFunction implicit(const TaylorFunction& f);

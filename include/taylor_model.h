@@ -75,11 +75,16 @@ pair< Vector<TaylorModel>, Vector<TaylorModel> > split(const Vector<TaylorModel>
 Vector<TaylorModel> unscale(const Vector<TaylorModel>& x, const Vector<Interval>& bx);
 Vector<TaylorModel> scale(const Vector<TaylorModel>& x, const Vector<Interval>& bx);
 Vector<Interval> evaluate(const Vector<TaylorModel>& x, const Vector<Interval>& sy);
-Vector<TaylorModel> compose(const Vector<TaylorModel>& x, const Vector<Interval>& bx, const Vector<TaylorModel>& y);
+Vector<TaylorModel> compose(const Vector<TaylorModel>& x, const Vector<Interval>& d, const Vector<TaylorModel>& y);
 Vector<TaylorModel> antiderivative(const Vector<TaylorModel>& x, const Interval& dk, uint k);
-Vector<TaylorModel> embed(const Vector<TaylorModel>& tvs, uint as, uint b);
-bool refines(const Vector<TaylorModel>& tv1, const Vector<TaylorModel>& tv2);
-
+Vector<TaylorModel> embed(const Vector<TaylorModel>& x, uint as);
+Vector<TaylorModel> embed(uint as, const Vector<TaylorModel>& x);
+Matrix<Interval> jacobian(const Vector<TaylorModel>& x, const Vector<Interval>& d);
+bool refines(const Vector<TaylorModel>& x1, const Vector<TaylorModel>& x2);
+Vector<TaylorModel> combine(const Vector<TaylorModel>& x1, const Vector<TaylorModel>& x2);
+Vector<TaylorModel> combine(const Vector<TaylorModel>& x1, const TaylorModel& x2);
+Vector<TaylorModel> implicit(const Vector<TaylorModel>& x, const Vector<Interval>& cd);
+Vector<TaylorModel> flow(const Vector<TaylorModel>& x, const Vector<Interval>& d, const Interval& h, uint order);
 
 /*! \brief A class representing a quantity depending on other quantities.
  *  Based on a power series Expansion, scaled to the unit box.
@@ -238,10 +243,10 @@ class TaylorModel
     static Vector<TaylorModel> zeroes(uint rs, uint as);
     //! \brief Return the vector of constants with values \a c in \a as arguments.
     static Vector<TaylorModel> constants(uint as, const Vector<Float>& c);
-    //! \brief Return the vector of variables with values \a x in \a as arguments. (Deprecated)
-    static Vector<TaylorModel> variables(const Vector<Float>& x);
+    //! \brief Return the vector of variables on the domain \a d. (Deprecated)
+    static Vector<TaylorModel> variables(const Vector<Interval>& d);
     //! \brief Return the vector scaling the unit interval onto the domain \a d.
-    static Vector<TaylorModel> scaling(const Vector<Interval>& d);
+    static Vector<TaylorModel> scalings(const Vector<Interval>& d);
     //@}
 
     //@{

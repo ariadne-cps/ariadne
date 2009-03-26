@@ -123,8 +123,8 @@ reachability_time(const TimeModelType& initial_time_model,
     TimeModelType expanded_initial_time_model=embed(initial_time_model,1u);
     TimeModelType expanded_final_time_model=embed(final_time_model,1u);
 
-    TimeModelType time_interval_model=TimeModelType::scaling(Interval(-1,1),Interval(0,1));
-    TimeModelType expanded_time_interval_model=embed(Vector<Interval>(ng,unit_ivl),time_interval_model);
+    TimeModelType time_interval_model=TimeModelType::scaling(1u,0u,Interval(0,1));
+    TimeModelType expanded_time_interval_model=embed(ng,time_interval_model);
     TimeModelType expanded_reach_time_model=expanded_initial_time_model+expanded_time_interval_model*(expanded_final_time_model-expanded_initial_time_model);
 
     return expanded_reach_time_model;
@@ -195,7 +195,7 @@ reachability_step(const FlowModelType& flow_model,
     TimeModelType expanded_final_time_model=embed(final_time_model,1u);
     ARIADNE_LOG(6,"expanded_final_time_model="<<expanded_final_time_model<<"\n");
 
-    TimeModelType expanded_time_interval_model=TimeModelType::scaling(Vector<Interval>(ng+1),Interval(0,1),ng);
+    TimeModelType expanded_time_interval_model=TimeModelType::scaling(ng+1,ng,Interval(0,1));
     ARIADNE_LOG(6,"expanded_time_interval_model="<<expanded_time_interval_model<<"\n");
     TimeModelType expanded_reach_time_model=expanded_initial_time_model+expanded_time_interval_model*(expanded_final_time_model-expanded_initial_time_model);
 
@@ -398,7 +398,7 @@ tribool
 TaylorCalculus::
 active(const PredicateModelType& guard_model, const SetModelType& set_model) const
 {
-    IntervalType range=compose(guard_model.models(),set_model.models())[0].range();
+    IntervalType range=compose(guard_model.models(),guard_model.domain(),set_model.models())[0].range();
     return this->_tribool(range);
 }
 
@@ -425,8 +425,9 @@ TaylorCalculus::flow_model(FunctionInterface const& vf, Vector<Interval> const& 
     FunctionModelType vector_field_model(bb,vf);
     ARIADNE_LOG(6,"vector_field_model = "<<vector_field_model<<"\n");
 
+    const uint temporal_order=6;
     // Use flow function on model type
-    FlowModelType flow_model=Ariadne::flow(vector_field_model,bx,Interval(0,h));
+    FlowModelType flow_model=Ariadne::flow(vector_field_model,bx,Interval(0,h),temporal_order);
     ARIADNE_LOG(6,"flow_model = "<<flow_model<<"\n");
 
     return flow_model;
@@ -453,7 +454,7 @@ TaylorCalculus::
 time_model(const Float& t,
            const BoxType& d) const
 {
-    TimeModelType time_model=TimeModelType::constant(d,t);
+    TimeModelType time_model=TimeModelType::constant(d.size(),t);
     ARIADNE_LOG(6,"time_model = "<<time_model<<"\n");
 
     return time_model;

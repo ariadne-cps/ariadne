@@ -1539,13 +1539,14 @@ refines(const TaylorModel& tv1, const TaylorModel& tv2)
 }
 
 
-TaylorModel embed(const TaylorModel& x, uint new_size, uint start)
+TaylorModel embed(const TaylorModel& x, uint as)
 {
-    ARIADNE_ASSERT(x.argument_size()+start<=new_size);
-    TaylorModel r(new_size);
-    r.expansion()=x.expansion().embed(new_size,start);
-    r.set_error(x.error());
-    return r;
+    return TaylorModel(x.expansion().embed(x.argument_size()+as,0u),x.error());
+}
+
+TaylorModel embed(uint as, const TaylorModel& x)
+{
+    return TaylorModel(x.expansion().embed(as+x.argument_size(),as),x.error());
 }
 
 
@@ -1574,16 +1575,12 @@ Vector<TaylorModel> TaylorModel::constants(uint as, const Vector<Float>& c)
     return result;
 }
 
-Vector<TaylorModel> TaylorModel::variables(const Vector<Float>& x)
+Vector<TaylorModel> TaylorModel::variables(const Vector<Interval>& d)
 {
-    Vector<TaylorModel> result(x.size(),x.size());
-    for(uint i=0; i!=x.size(); ++i) {
-        result[i]=TaylorModel::variable(x.size(),x[i],i);
-    }
-    return result;
+    return scalings(d);
 }
 
-Vector<TaylorModel> TaylorModel::scaling(const Vector<Interval>& d)
+Vector<TaylorModel> TaylorModel::scalings(const Vector<Interval>& d)
 {
     Vector<TaylorModel> r(d.size(),d.size());
     for(uint i=0; i!=d.size(); ++i) {
@@ -1634,13 +1631,30 @@ compose(const TaylorModel& x,
     return r;
 }
 
-Vector<TaylorModel> embed(const Vector<TaylorModel>& x, uint new_size, uint start)
+Vector<TaylorModel> embed(const Vector<TaylorModel>& x, uint as)
 {
     Vector<TaylorModel> r(x.size());
     for(uint i=0; i!=x.size(); ++i) {
-        r[i]=embed(x[i],new_size,start);
+        r[i]=embed(x[i],as);
     }
     return r;
+}
+
+Vector<TaylorModel> embed(uint as, const Vector<TaylorModel>& x)
+{
+    Vector<TaylorModel> r(x.size());
+    for(uint i=0; i!=x.size(); ++i) {
+        r[i]=embed(as,x[i]);
+    }
+    return r;
+}
+
+Vector<TaylorModel> combine(const Vector<TaylorModel>& x1, const Vector<TaylorModel>& x2) {
+    return join(embed(x1,x2[0].argument_size()),embed(x1[0].argument_size(),x2));
+}
+
+Vector<TaylorModel> combine(const Vector<TaylorModel>& x1, const TaylorModel& x2) {
+    return join(embed(x1,x2.argument_size()),embed(x1[0].argument_size(),x2));
 }
 
 bool
@@ -1704,7 +1718,23 @@ compose(const Vector<TaylorModel>& x,
     return r;
 }
 
+Matrix<Interval>
+jacobian(const Vector<TaylorModel>& f, const Vector<Interval>& x)
+{
+    ARIADNE_NOT_IMPLEMENTED;
+}
 
+Vector<TaylorModel>
+implicit(const Vector<TaylorModel>& x, const Vector<Interval>& cd)
+{
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+Vector<TaylorModel>
+flow(const Vector<TaylorModel>& x, const Vector<Interval>& d, const Interval& h, uint order)
+{
+    ARIADNE_NOT_IMPLEMENTED;
+}
 
 
 

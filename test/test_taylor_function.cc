@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_polynomial.cc
+ *            test_taylor_function.cc
  *
  *  Copyright 2009  Pieter Collins
  *
@@ -109,8 +109,8 @@ void TestTaylorFunction::test_constructors()
     Vector< Expansion<Float> > expansion(2,2,2, 1.125, -0.75,0.0625, -0.25,0.00,0.00,
                                                 0.750,  0.50,0.0000,  0.00,0.00,0.00);
     ARIADNE_TEST_CONSTRUCT(TaylorFunction,henon_model,(domain,henon_function));
-    ARIADNE_TEST_EQUAL(henon_model.variables()[0].expansion(),expansion[0])
-    ARIADNE_TEST_EQUAL(henon_model.variables()[1].expansion(),expansion[1])
+    ARIADNE_TEST_EQUAL(henon_model.models()[0].expansion(),expansion[0])
+    ARIADNE_TEST_EQUAL(henon_model.models()[1].expansion(),expansion[1])
 
     Vector<Float> e0=e(2,0); Vector<Float> e1=e(2,1);
     Polynomial<Float> x=p(2,0); Polynomial<Float> y=p(2,1);
@@ -253,13 +253,14 @@ void TestTaylorFunction::test_flow()
     TaylorFunction vector_field(d,vfp);
     Vector<Interval> domain(2, -0.5,+0.5, -0.5,+0.5);
     Interval time(-0.25,0.25);
-    TaylorFunction computed_flow=flow(vector_field,domain,time);
+    uint order(6);
+    TaylorFunction computed_flow=flow(vector_field,domain,time,order);
     TaylorFunction expected_flow(join(domain,time),flp);
     expected_flow+=Vector<Interval>(2,Interval(-1e-3,1e-3));
     ARIADNE_TEST_BINARY_PREDICATE(refines,computed_flow,expected_flow);
 
     TaylorFunction flow_error=computed_flow-antiderivative(compose(vector_field,computed_flow),2);
-    for(uint i=0; i!=2; ++i) { const_cast<TaylorModel&>(flow_error.variables()[i]).sweep(1e-4); }
+    for(uint i=0; i!=2; ++i) { const_cast<TaylorModel&>(flow_error.models()[i]).sweep(1e-4); }
     ARIADNE_TEST_BINARY_PREDICATE(operator<,norm(flow_error.range()),1e-4);
 
 }

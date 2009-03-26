@@ -221,7 +221,7 @@ compute_outer_approximation(const TaylorSet& set, const Grid& grid, uint subd, u
     for(Float x=-1.0; x!=1.0; x+=rad) {
         for(Float y=-1.0; y!=1.0; y+=rad) {
             v[0]=Interval(x,x+rad); v[1]=Interval(y,y+rad);
-            gts.adjoin_outer_approximation(Box(evaluate(set.variables(),v)),depth);
+            gts.adjoin_outer_approximation(Box(evaluate(set.models(),v)),depth);
         }
     }
     gts.recombine();

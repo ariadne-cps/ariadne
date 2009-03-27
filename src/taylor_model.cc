@@ -80,92 +80,6 @@ TaylorModel::TaylorModel(const Expansion<Float>& f, const Float& e)
 {
 }
 
-TaylorModel::TaylorModel(uint as, uint deg, const double* ptr, const double& err)
-    : _expansion(as), _error(err),
-      _sweep_threshold(_default_sweep_threshold),
-      _maximum_degree(_default_maximum_degree),
-      _maximum_index(as,_default_maximum_degree)
-{
-    for(MultiIndex j(as); j.degree()<=deg; ++j) {
-        if(*ptr!=0.0 || j.degree()<=1) { this->_expansion.append(j,*ptr); }
-        ++ptr;
-    }
-    this->_expansion.cleanup();
-    if(err<0) { std::cerr<<err<<std::endl; } ARIADNE_ASSERT(this->_error>=0);
-}
-
-TaylorModel::TaylorModel(uint as, uint deg, double d0, ...)
-    : _expansion(as), _error(0),
-      _sweep_threshold(_default_sweep_threshold),
-      _maximum_degree(_default_maximum_degree),
-      _maximum_index(as,_default_maximum_degree)
-{
-    double x=d0;
-    va_list args;
-    va_start(args,d0);
-    for(MultiIndex j(as); j.degree()<=deg; ++j) {
-        if(x!=0.0) { this->_expansion.append(j,x); }
-        x=va_arg(args,double);
-    }
-    this->_error=x;
-    va_end(args);
-    this->_expansion.cleanup();
-    ARIADNE_ASSERT(this->_error>=0);
-}
-
-TaylorModel::TaylorModel(uint as, uint nnz, uint a0, ...)
-    : _expansion(as), _error(0),
-      _sweep_threshold(_default_sweep_threshold),
-      _maximum_degree(_default_maximum_degree),
-      _maximum_index(as,_default_maximum_degree)
-{
-    MultiIndex a(as);
-    uint aj=0u;
-    double x=0.0;
-    va_list args;
-    va_start(args,a0);
-    for(uint k=0; k!=nnz; ++k) {
-        for(uint j=0; j!=as; ++j) {
-            if(j!=0 || k!=0) { aj=va_arg(args,uint); }
-            a[j]=aj;
-        }
-        x=va_arg(args,double);
-        this->_expansion[a]=x;
-    }
-    double e=va_arg(args,double);
-    this->error()=e;
-    va_end(args);
-    this->_expansion.cleanup();
-    ARIADNE_ASSERT(this->_error>=0);
-}
-
-
-
-
-/*
-TaylorModel::TaylorModel(uint as, uint deg, double d0, ...)
-    : _expansion(as), _error(0),
-      _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree)
-{
-    double x=d0;
-    va_list args;
-    va_start(args,d0);
-    std::vector<double> values;
-    for(MultiIndex j(as); j.degree()<=deg; ++j) {
-        values.push_back(x);
-        x=va_arg(args,double);
-    }
-    this->_error=x;
-    va_end(args);
-
-    size_t i=0;
-    for(MultiIndex j(as); j.degree()<=deg; ++j) {
-        this->_expansion[j]=values[i]; ++i;
-    }
-    ARIADNE_ASSERT(this->_error>=0);
-}
-*/
-
 
 
 
@@ -1443,14 +1357,6 @@ TaylorModel& TaylorModel::antidifferentiate(uint k)
     return x;
 }
 
-TaylorModel antiderivative(const TaylorModel& x, const Interval& dk, uint k) {
-    Interval dkr=rad_ivl(dk.l,dk.u);
-    TaylorModel r(x);
-    r.antidifferentiate(k);
-    r*=dkr;
-    return r;
-}
-
 
 pair<TaylorModel,TaylorModel>
 split(const TaylorModel& tv, uint j)
@@ -1736,6 +1642,28 @@ scale(const Vector<TaylorModel>& tvs, const Vector<Interval>& new_codom)
     return r;
 }
 
+TaylorModel antiderivative(const TaylorModel& x, uint k) {
+    TaylorModel r(x);
+    r.antidifferentiate(k);
+    return r;
+}
+
+Vector<TaylorModel> antiderivative(const Vector<TaylorModel>& x, uint k) {
+    Vector<TaylorModel> r(x.size());
+    for(uint i=0; i!=x.size(); ++i) {
+        r[i]=antiderivative(x[i],k);
+    }
+    return r;
+}
+
+TaylorModel antiderivative(const TaylorModel& x, const Interval& dk, uint k) {
+    Interval dkr=rad_ivl(dk.l,dk.u);
+    TaylorModel r(x);
+    r.antidifferentiate(k);
+    r*=dkr;
+    return r;
+}
+
 Vector<TaylorModel> antiderivative(const Vector<TaylorModel>& x, const Interval& dk, uint k) {
     Vector<TaylorModel> r(x.size());
     for(uint i=0; i!=x.size(); ++i) {
@@ -1750,7 +1678,7 @@ compose(const TaylorModel& x,
         const Vector<Interval>& d,
         const Vector<TaylorModel>& y)
 {
-    return compose(Vector<TaylorModel>(1u,x),d,y)[0];
+    return compose(x,scale(y,d));
 }
 
 Vector<TaylorModel>
@@ -1758,11 +1686,7 @@ compose(const Vector<TaylorModel>& x,
         const Vector<Interval>& d,
         const Vector<TaylorModel>& y)
 {
-    Vector<TaylorModel> r(x.size());
-    for(uint i=0; i!=x.size(); ++i) {
-        r[i]=compose(x[i],d,y);
-    }
-    return r;
+    return compose(x,scale(y,d));
 }
 
 Matrix<Interval>
@@ -1778,7 +1702,7 @@ jacobian(const Vector<TaylorModel>& f, const Vector<Interval>& x)
 
 // Compute the Jacobian over the unit domain
 Matrix<Interval>
-jacobian(const Vector<TaylorModel>& f)
+jacobian_range(const Vector<TaylorModel>& f)
 {
     Matrix<Interval> J(f.size(),f[0].argument_size());
     for(uint i=0; i!=f.size(); ++i) {
@@ -1799,40 +1723,42 @@ TaylorModel
 compose(const TaylorModel& x,
         const Vector<TaylorModel>& ys)
 {
-    ARIADNE_ASSERT(x.argument_size()>0);
-    ARIADNE_ASSERT(ys.size()==x.argument_size());
-    for(uint i=1; i!=ys.size(); ++i) { ARIADNE_ASSERT(ys[i].argument_size()==ys[0].argument_size()); }
-
-    uint as=ys[0].argument_size();
-
-    TaylorModel r(as);
-    r.set_error(x.error());
-    for(TaylorModel::const_iterator iter=x.begin(); iter!=x.end(); ++iter) {
-        TaylorModel t=TaylorModel::constant(as,iter->second);
-        for(uint j=0; j!=iter->first.size(); ++j) {
-            TaylorModel p=pow(ys[j],iter->first[j]);
-            t=t*p;
-        }
-        r+=t;
-        //std::cerr<<"a="<<iter->first<<" c="<<iter->second<<" t="<<t<<" r="<<r<<"\n";
-    }
-
-    ARIADNE_ASSERT(r.argument_size()==ys[0].argument_size());
-
-    return r;
+    return compose(Vector<TaylorModel>(1u,x),ys)[0];
 }
 
 Vector<TaylorModel>
 compose(const Vector<TaylorModel>& x,
-        const Vector<TaylorModel>& y)
+        const Vector<TaylorModel>& ys)
 {
-    Vector<TaylorModel> r(x.size());
+    ARIADNE_ASSERT(x.size()>0);
+    ARIADNE_ASSERT(ys.size()==x[0].argument_size());
+    for(uint i=1; i!=x.size(); ++i) { ARIADNE_ASSERT(x[i].argument_size()==x[0].argument_size()); }
+    for(uint i=1; i!=ys.size(); ++i) { ARIADNE_ASSERT(ys[i].argument_size()==ys[0].argument_size()); }
+
+    uint as=ys[0].argument_size();
+
+    Vector<TaylorModel> r(x.size(),TaylorModel(as));
+    TaylorModel t(as);
     for(uint i=0; i!=x.size(); ++i) {
-        r[i]=compose(x[i],y);
+        r[i].set_error(x[i].error());
+        for(TaylorModel::const_iterator iter=x[i].begin(); iter!=x[i].end(); ++iter) {
+            t=iter->second;
+            for(uint j=0; j!=iter->first.size(); ++j) {
+                TaylorModel p=pow(ys[j],iter->first[j]);
+                t=t*p;
+            }
+            r[i]+=t;
+        }
     }
+
     return r;
 }
 
+
+TaylorModel
+implicit(const TaylorModel& f) {
+    return implicit(Vector<TaylorModel>(1u,f))[0];
+}
 
 Vector<TaylorModel>
 implicit(const Vector<TaylorModel>& f)
@@ -1845,12 +1771,16 @@ implicit(const Vector<TaylorModel>& f)
     Vector<TaylorModel> id=TaylorModel::variables(has);
     Vector<TaylorModel> h=TaylorModel::constants(has,h_codom);
 
+    Matrix<Interval> Df=jacobian_range(f);
+    //std::cerr<<"  Df="<<Df<<std::endl;
+    Matrix<Interval> D2f=project(Df,range(0,rs),range(has,fas));
+    //std::cerr<<"  D2f="<<J<<std::endl;
+    Matrix<Interval> D2finv=inverse(D2f);
+
+    Vector<Interval> bound = prod(D2finv,h_codom);
+    ARIADNE_ASSERT(subset(bound,h_codom));
+
     for(uint k=0; k!=10; ++k) {
-        Matrix<Interval> Df=jacobian(f);
-        //std::cerr<<"  Df="<<Df<<std::endl;
-        Matrix<Interval> D2f=project(Df,range(0,rs),range(has,fas));
-        //std::cerr<<"  D2f="<<J<<std::endl;
-        Matrix<Interval> D2finv=inverse(D2f);
 
         for(uint i=0; i!=rs; ++i) { h[i].set_error(0); }
 
@@ -1914,19 +1844,6 @@ flow(const Vector<TaylorModel>& vf, const Vector<Interval>& d, const Interval& h
 
 }
 
-
-
-
-
-Vector<TaylorModel>
-implicit(const Vector<TaylorModel>& f, const Vector<Interval>& fdom)
-{
-    const uint rs=f.size();
-    const uint fas=f[0].argument_size();
-    Vector<Interval> hs_codom=Vector<Interval>(rs,Interval(-1,+1));
-    Vector<Interval> h_codom=project(fdom,range(fas-rs,fas));
-    return rescale(implicit(f),hs_codom,h_codom);
-}
 
 
 

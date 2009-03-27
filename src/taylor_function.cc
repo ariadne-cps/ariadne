@@ -132,13 +132,9 @@ TaylorFunction::constant(const Vector<Interval>& d, const Vector<Float>& c)
 }
 
 TaylorFunction
-TaylorFunction::constant(const Vector<Interval>& d, const Vector<Interval>& r)
+TaylorFunction::constant(const Vector<Interval>& d, const Vector<Interval>& c)
 {
-    Vector<TaylorModel> e(r.size(),TaylorModel(d.size()));
-    for(uint i=0; i!=r.size(); ++i) {
-        e[i]=r[i];
-    }
-    return TaylorFunction(d,e);
+    return TaylorFunction(d,TaylorModel::constants(d.size(),c));
 }
 
 TaylorFunction
@@ -251,36 +247,15 @@ TaylorFunction::evaluate(const Vector<Float>& x) const
 Vector<Interval>
 TaylorFunction::evaluate(const Vector<Interval>& x) const
 {
-    return Ariadne::evaluate(this->_models,x);
-
-    if(this->argument_size()!=x.size()) {
-        ARIADNE_THROW(std::runtime_error,"TaylorFunction::evaluate(Vector)","Incompatible argument size");
-    }
-
-    //TODO: Make this MUCH more efficient!
-
-    // Scale x to domain
-    Vector<Interval> scaled_x(x.size());
-    for(uint i=0; i!=x.size(); ++i) {
-        const Interval& d=this->domain()[i];
-        Interval dm=add_ivl(d.l/2,d.u/2);
-        Interval dr=sub_ivl(d.u/2,d.l/2);
-        scaled_x[i]=(x[i]-dm)/dr;
-    }
-
-    // Compute result
-    Vector<Interval> result(this->result_size());
-    for(uint i=0; i!=result.size(); ++i) {
-        result[i]=Ariadne::evaluate(this->_models[i],scaled_x);
-    }
-    return result;
+    Vector<Interval> sx=Ariadne::evaluate(TaylorModel::scalings(this->_domain),x);
+    return Ariadne::evaluate(this->_models,sx);
 }
 
 
 Matrix<Interval>
 TaylorFunction::jacobian(const Vector<Interval>& x) const
 {
-    return Ariadne::jacobian(this->_models,x);
+    ARIADNE_NOT_IMPLEMENTED;
 }
 
 
@@ -297,7 +272,6 @@ restrict(const TaylorFunction& f, const Vector<Interval>& d)
     ARIADNE_ASSERT(subset(d,f.domain()));
     if(d==f.domain()) { return f; }
     Vector<TaylorModel> s=TaylorModel::rescalings(f.domain(),d);
-    std::cerr<<"f="<<f<<" d="<<d<<" s="<<s<<"\n";
     return TaylorFunction(d,compose(f._models,s));
 }
 
@@ -383,6 +357,12 @@ combine(const TaylorFunction& f1, const TaylorFunction& f2)
 
 
 TaylorFunction
+compose(const FunctionInterface& g, const TaylorFunction& f)
+{
+    return TaylorFunction(f.domain(),g.evaluate(f.models()));
+}
+
+TaylorFunction
 compose(const TaylorFunction& g, const TaylorFunction& f)
 {
     if(!subset(f.range(),g.domain())) {
@@ -408,7 +388,9 @@ compose(const TaylorVariable& g, const TaylorFunction& f)
 TaylorFunction
 antiderivative(const TaylorFunction& f, uint k)
 {
-    return TaylorFunction(f.domain(),antiderivative(f.models(),f.domain()[k],k));
+    Interval fdomkrad=rad_ivl(f.domain()[k].lower(),f.domain()[k].upper());
+    Vector<TaylorModel> ad=antiderivative(f.models(),k); ad*=fdomkrad;
+    return TaylorFunction(f.domain(),ad);
 }
 
 TaylorFunction

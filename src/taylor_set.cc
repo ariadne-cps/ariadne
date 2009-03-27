@@ -196,7 +196,7 @@ TaylorModel apply(const TaylorVariable& tf, const TaylorSet& s)
 
 TaylorSet apply(const TaylorFunction& tf, const TaylorSet& s)
 {
-    return compose(tf.models(),tf.domain(),s.models());
+    return compose(tf.models(),unscale(s.models(),tf.domain()));
 }
 
 

@@ -310,7 +310,7 @@ inline bool overlap(Interval i1, Interval i2) { return i1.l<i2.u && i1.u>i2.l; }
 inline bool inside(Interval i1, Interval i2) { return i1.l>i2.l && i1.u<i2.u; }
 inline bool covers(Interval i1, Interval i2) { return i1.l<i2.l && i1.u>i2.u; }
 
-Interval abs(Interval i)
+inline Interval abs(Interval i)
 {
     if(i.l>=0) {
         return Interval(i.l,i.u);
@@ -321,12 +321,12 @@ Interval abs(Interval i)
     }
 }
 
-Interval neg(Interval i)
+inline Interval neg(Interval i)
 {
     return Interval(-i.u,-i.l);
 }
 
-Interval add(Interval i1, Interval i2)
+inline Interval add(Interval i1, Interval i2)
 {
     rounding_mode_t rnd=get_rounding_mode();
     volatile double& i1l=i1.l;
@@ -341,7 +341,7 @@ Interval add(Interval i1, Interval i2)
     return Interval(rl,ru);
 }
 
-Interval add(Interval i1, Float x2)
+inline Interval add(Interval i1, Float x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
     volatile double& i1l=i1.l;
@@ -355,7 +355,7 @@ Interval add(Interval i1, Float x2)
     return Interval(rl,ru);
 }
 
-Interval add_ivl(Float x1, Float x2)
+inline Interval add_ivl(Float x1, Float x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
     volatile double& x1v=x1;
@@ -368,7 +368,7 @@ Interval add_ivl(Float x1, Float x2)
     return Interval(rl,ru);
 }
 
-Interval sub(Interval i1, Interval i2)
+inline Interval sub(Interval i1, Interval i2)
 {
     rounding_mode_t rnd=get_rounding_mode();
     volatile double& i1l=i1.l;
@@ -383,7 +383,7 @@ Interval sub(Interval i1, Interval i2)
     return Interval(rl,ru);
 }
 
-Interval sub(Interval i1, Float x2)
+inline Interval sub(Interval i1, Float x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
     volatile double& i1l=i1.l;
@@ -397,7 +397,7 @@ Interval sub(Interval i1, Float x2)
     return Interval(rl,ru);
 }
 
-Interval sub(Float x1, Interval i2)
+inline Interval sub(Float x1, Interval i2)
 {
     rounding_mode_t rnd=get_rounding_mode();
     volatile double& x1v=x1;
@@ -411,7 +411,7 @@ Interval sub(Float x1, Interval i2)
     return Interval(rl,ru);
 }
 
-Interval sub_ivl(Float x1, Float x2)
+inline Interval sub_ivl(Float x1, Float x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
     volatile double& x1v=x1;
@@ -424,7 +424,7 @@ Interval sub_ivl(Float x1, Float x2)
     return Interval(rl,ru);
 }
 
-Interval mul_ivl(Float x1, Float x2)
+inline Interval mul_ivl(Float x1, Float x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
     volatile double& x1v=x1;
@@ -437,7 +437,7 @@ Interval mul_ivl(Float x1, Float x2)
     return Interval(rl,ru);
 }
 
-Interval div_ivl(Float x1, Float x2)
+inline Interval div_ivl(Float x1, Float x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
     volatile double& x1v=x1;
@@ -458,6 +458,14 @@ inline Interval med_ivl(Float x1, Float x2)
 inline Interval rad_ivl(Float x1, Float x2)
 {
     return sub_ivl(x2/2,x1/2);
+}
+
+inline Interval med_ivll(Interval i) {
+    return add_ivl(i.l/2,i.u/2);
+}
+
+inline Interval rad_ivl(Interval i) {
+    return sub_ivl(i.u/2,i.l/2);
 }
 
 // Standard equality operators

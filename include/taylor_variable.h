@@ -59,12 +59,6 @@ Interval evaluate(const TaylorVariable& x, const Vector<Interval>& sy);
 // Split the variable over two domains, subdividing along the independent variable j.
 pair<TaylorVariable,TaylorVariable> split(const TaylorVariable& x, uint j);
 
-// Scale the variabe by post-composing with an affine map taking the interval \a ivl to the unit interval
-TaylorVariable unscale(const TaylorVariable& x, const Interval& ivl);
-
-// Scale the variable by post-composing with an affine map taking the unit interval to \a ivl.
-TaylorVariable scale(const TaylorVariable& x, const Interval& ivl);
-
 
 // Embed the variable in a space of higher dimension
 TaylorVariable embed(const TaylorVariable& tv1, const Interval& d2);
@@ -76,39 +70,15 @@ TaylorVariable antiderivative(const TaylorVariable& x, uint k);
 // Implicit function solver
 TaylorVariable implicit(const TaylorVariable& f);
 
-// Compose an array of Taylor variables with another, without checking inclusion in domains
-TaylorVariable unchecked_compose(const TaylorVariable& x, const Vector<TaylorVariable>& y);
-// Compose an array of Taylor variables with another
-TaylorVariable compose(const TaylorVariable& x, const Vector<TaylorVariable>& y);
 
 // Combine two functions over different domains
 Vector<TaylorVariable> combine(const TaylorVariable& x1, const TaylorVariable& x2);
-Vector<TaylorVariable> combine(const TaylorVariable& x1, const Vector<TaylorVariable>& x2);
-Vector<TaylorVariable> combine(const Vector<TaylorVariable>& x1, const TaylorVariable& x2);
-Vector<TaylorVariable> combine(const Vector<TaylorVariable>& x1, const Vector<TaylorVariable>& x2);
-
-Vector<TaylorVariable> embed(const Vector<TaylorVariable>& tv1, const Interval& d2);
-Vector<TaylorVariable> embed(const Vector<TaylorVariable>& tv1, const Vector<Interval>& d2);
-Vector<TaylorVariable> embed(const Vector<Interval>& d1, const Vector<TaylorVariable>& tv2);
-
-bool refines(const Vector<TaylorVariable>& tv1, const Vector<TaylorVariable>& tv2);
-pair< Vector<TaylorVariable>, Vector<TaylorVariable> > split(const Vector<TaylorVariable>& x, uint j);
-Vector<TaylorVariable> unscale(const Vector<TaylorVariable>& x, const Vector<Interval>& bx);
-Vector<TaylorVariable> scale(const Vector<TaylorVariable>& x, const Vector<Interval>& bx);
-Vector<Interval> evaluate(const Vector<TaylorVariable>& x, const Vector<Interval>& sy);
-Vector<TaylorVariable> unchecked_compose(const Vector<TaylorVariable>& x, const Vector<TaylorVariable>& y);
-Vector<TaylorVariable> compose(const Vector<TaylorVariable>& x, const Vector<TaylorVariable>& y);
-Vector<TaylorVariable> antiderivative(const Vector<TaylorVariable>& x, uint k);
-
-Vector<TaylorVariable> implicit(const Vector<TaylorVariable>& f);
-Vector<TaylorVariable> flow(const Vector<TaylorVariable>& vf, const Vector<Interval>& d, const Interval& t);
-
 
 
 /*! \brief A class representing a quantity depending on other quantities.
- *  Based on a power series Expansion, scaled to the unit box.
+ *  Based on a power series expansion, scaled to the unit box.
  *
- * See also TaylorFunction, TaylorSet.
+ * See also Expansion, TaylorModel, TaylorFunction, TaylorSet.
  */
 class TaylorVariable
 {
@@ -147,8 +117,27 @@ class TaylorVariable
     TaylorVariable& operator=(const Float& c) { this->_model=c; return *this; }
     //! \brief Set equal to an interval constant, keeping the same number of arguments.
     TaylorVariable& operator=(const Interval& c) { this->_model=c; return *this; }
-    //! \brief Test if the quantity is a better approximation than \a t throughout the domain.
-    bool refines(const TaylorVariable& t);
+    //@}
+
+    //@{
+    /*! \name Named constructors. */
+    //! \brief Construct a constant quantity in \a as independent variables.
+    static TaylorVariable constant(const DomainType& d, const Float& c);
+    //! \brief Construct a constant quantity in \a as independent variables.
+    static TaylorVariable constant(const DomainType& d, const Interval& c);
+    //! \brief Construct the quantity \f$x_j\f$ over the domain \a d.
+    static TaylorVariable variable(const DomainType& d, unsigned int j);
+    //! \brief Construct the quantity \f$c+\sum g_jx_j\f$ over the domain \a d.
+    static TaylorVariable affine(const DomainType& d, const Float& c, const Vector<Float>& g);
+    //! \brief Construct the quantity \f$c+\sum g_jx_j \pm e\f$ over domain \a d.
+    static TaylorVariable affine(const DomainType& d, const Float& x, const Vector<Float>& g, const Float& e) ;
+
+    //! \brief Return the vector of constants with values \a c over domain \a d.
+    static Vector<TaylorVariable> constants(const DomainType& d, const Vector<Float>& c);
+    //! \brief Return the vector of constants with interval values \a c over domain \a d.
+    static Vector<TaylorVariable> constants(const DomainType& d, const Vector<Interval>& c);
+    //! \brief Return the vector of variables with values \a x over domain \a d.
+    static Vector<TaylorVariable> variables(const DomainType& d);
     //@}
 
     //@{
@@ -201,43 +190,6 @@ class TaylorVariable
     uint degree() const { return (--this->_model._expansion.end())->first.degree(); }
     //! \brief The number of nonzero terms in the expansion expansion.
     uint number_of_nonzeros() const { return this->_model._expansion.number_of_nonzeros(); }
-    //@}
-
-    //@{
-    /*! \name Named constructors. */
-    //! \brief Construct a constant with value c \a c over the interval \a d.
-    static TaylorVariable constant(const Interval& d, const Float& c);
-    //! \brief Construct a constant with value c \a c over the interval \a d.
-    static TaylorVariable constant(const Interval& d, const Interval& c);
-    //! \brief Construct the quantity \f$x\f$ over the scalar domain \a d.
-    static TaylorVariable variable(const Interval& d);
-    //! \brief Construct the quantity mapping domain \a d into range \a r..
-    static TaylorVariable scaling(const Interval& d, const Interval& r);
-
-    //! \brief Construct the zero quantity in \a as independent variables.
-    static TaylorVariable zero(const DomainType& d);
-    //! \brief Construct a constant quantity in \a as independent variables.
-    static TaylorVariable constant(const DomainType& d, const Float& c);
-    //! \brief Construct a constant quantity in \a as independent variables.
-    static TaylorVariable constant(const DomainType& d, const Interval& c);
-    //! \brief Construct the quantity \f$x_j\f$ over the domain \a d.
-    static TaylorVariable variable(const DomainType& d, unsigned int j);
-    //! \brief Construct the quantity the domain \a d into the interval \a r, only depending on variable \a j.
-    static TaylorVariable scaling(const DomainType& d, const Interval& r, unsigned int j);
-
-    //! \brief Construct the quantity \f$c+\sum g_jx_j\f$ over the domain \a d.
-    static TaylorVariable affine(const DomainType& d, const Float& c, const Vector<Float>& g);
-    //! \brief Construct the quantity \f$c+\sum g_jx_j \pm e\f$ over domain \a d.
-    static TaylorVariable affine(const DomainType& d, const Float& x, const Vector<Float>& g, const Float& e) ;
-
-    //! \brief Return the vector of constants with values \a c over domain \a d.
-    static Vector<TaylorVariable> constants(const DomainType& d, const Vector<Float>& c);
-    //! \brief Return the vector of constants with interval values \a c over domain \a d.
-    static Vector<TaylorVariable> constants(const DomainType& d, const Vector<Interval>& c);
-    //! \brief Return the vector of variables with values \a x over domain \a d.
-    static Vector<TaylorVariable> variables(const DomainType& d);
-    //! \brief Return the vector scaling the domain \a d into the range \a r. */
-    static Vector<TaylorVariable> scalings(const DomainType& d, const Vector<Interval>& r);
     //@}
 
     //@{
@@ -297,6 +249,13 @@ class TaylorVariable
     //@}
 
     //@{
+    /*! \name Non-arithmetic operations. */
+    //! \brief Test if the quantity is a better approximation than \a t throughout the domain.
+    friend bool refines(const TaylorVariable& x1, const TaylorVariable& x2);
+    //! \brief Restrict to a subdomain.
+    friend TaylorVariable restrict(const TaylorVariable& x, const DomainType& d);
+    //@}
+
     /*! \name Arithmetic operations. */
     //! \brief Inplace addition of another variable.
     friend TaylorVariable& operator+=(TaylorVariable& x, const TaylorVariable& y);
@@ -513,9 +472,8 @@ inline Interval evaluate(const TaylorVariable& tv, const Vector<Interval>& x) {
     return tv.evaluate(x); }
 
 inline TaylorVariable antiderivative(const TaylorVariable& x, uint k) {
-    return TaylorVariable(x.domain(),antiderivative(x.model(),x.domain()[k],k)); }
-inline TaylorVariable unscale(const TaylorVariable& tv, const Interval& ivl) {
-    return TaylorVariable(tv.domain(),unscale(tv.model(),ivl)); }
+    Interval sf=rad_ivl(x.domain()[k]);
+    return TaylorVariable(x.domain(),antiderivative(x.model(),k)*sf); }
 
 inline TaylorVariable embed(const TaylorVariable& tv1, const Interval& dom2) {
     return TaylorVariable(join(tv1.domain(),dom2),embed(tv1.model(),1u)); }

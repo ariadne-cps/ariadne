@@ -54,7 +54,10 @@ class GridCell;
 class GridTreeSet;
 class Figure;
 
-/*! \brief Sets expressed as the image of a box under a polynomial with error bounds. */
+/*! \brief Sets expressed as the image of a box under a polynomial with error bounds.
+ *
+ *  See also TaylorModel, TaylorVariable, TaylorFunction.
+ */
 class TaylorSet
     : public LocatedSetInterface
 {
@@ -148,6 +151,7 @@ TaylorSet apply(const FunctionInterface& f, const TaylorSet& s);
 GridTreeSet outer_approximation(const TaylorSet& set, const Grid& grid, uint depth);
 void adjoin_outer_approximation(GridTreeSet& grid_set, const TaylorSet& set, uint depth);
 Zonotope zonotope(const TaylorSet& ts);
+
 void draw(Figure& g, const TaylorSet& ts);
 void box_draw(Figure& g, const TaylorSet& ts);
 void affine_draw(Figure& g, const TaylorSet& ts);

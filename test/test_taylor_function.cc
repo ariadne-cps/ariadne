@@ -120,7 +120,7 @@ void TestTaylorFunction::test_constructors()
 
     Vector<TaylorExpression> t=TaylorExpression::variables(domain);
     TaylorFunction variables_model = (1.5-t[0]*t[0]+0.25*t[1])*e0+t[0]*e1;
-    ARIADNE_TEST_EQUAL(variables_model,TaylorFunction(domain,expansion))
+    ARIADNE_TEST_EQUAL(variables_model,TaylorFunction(domain,expansion));
 
 }
 

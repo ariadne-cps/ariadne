@@ -48,11 +48,12 @@ class TaylorModel;
 // Split the variable over two domains, subdividing along the independent variable j.
 pair<TaylorModel,TaylorModel> split(const TaylorModel& x, uint j);
 
-// Scale the variabe by post-composing with an affine map taking the interval \a ivl to the unit interval
-TaylorModel unscale(const TaylorModel& x, const Interval& ivl);
-
-// Scale the variable by post-composing with an affine map taking the unit interval to \a ivl.
+// Scale the variable by post-composing with an affine map taking the unit interval to ivl.
 TaylorModel scale(const TaylorModel& x, const Interval& ivl);
+// Scale the variable by post-composing with an affine map taking the interval ivl to the unit interval
+TaylorModel unscale(const TaylorModel& x, const Interval& ivl);
+// Scale the variable by post-composing with an affine map taking the interval ivl1 to interval \a ivl2
+TaylorModel rescale(const TaylorModel& x, const Interval& ivl1, const Interval& ivl2);
 
 // Evaluate an array of Taylor variables on a vector.
 Interval evaluate(const TaylorModel& x, const Vector<Interval>& sy);
@@ -65,7 +66,7 @@ TaylorModel embed(uint as, const TaylorModel& tv);
 bool refines(const TaylorModel& tv1, const TaylorModel& tv2);
 
 // Antidifferentiation operator
-TaylorModel antiderivative(const TaylorModel& x, const Interval& dk, uint k);
+TaylorModel antiderivative(const TaylorModel& x, uint k);
 
 // Compose an array of Taylor variables with another, assuming that y has been scaled to have unit codomain
 TaylorModel compose(const TaylorModel& x, const Vector<TaylorModel>& y);
@@ -73,29 +74,31 @@ TaylorModel compose(const TaylorModel& x, const Vector<TaylorModel>& y);
 // Compose an array of Taylor variables with another, after scaling by the interval vectors
 TaylorModel compose(const TaylorModel& x, const Vector<Interval>& bx, const Vector<TaylorModel>& y);
 
+// Compute the implicit function f(x,h(x))=0
+TaylorModel implicit(const TaylorModel& f);
+
 // Vector operations which can be evaluated componentwise
 pair< Vector<TaylorModel>, Vector<TaylorModel> > split(const Vector<TaylorModel>& x, uint j);
 Vector<TaylorModel> unscale(const Vector<TaylorModel>& x, const Vector<Interval>& bx);
 Vector<TaylorModel> scale(const Vector<TaylorModel>& x, const Vector<Interval>& bx);
 Vector<Interval> evaluate(const Vector<TaylorModel>& x, const Vector<Interval>& sy);
-Vector<TaylorModel> compose(const Vector<TaylorModel>& x, const Vector<Interval>& d, const Vector<TaylorModel>& y);
 Vector<TaylorModel> compose(const Vector<TaylorModel>& x, const Vector<TaylorModel>& ys);
-Vector<TaylorModel> antiderivative(const Vector<TaylorModel>& x, const Interval& dk, uint k);
+Vector<TaylorModel> antiderivative(const Vector<TaylorModel>& x, uint k);
 Vector<TaylorModel> embed(const Vector<TaylorModel>& x, uint as);
 Vector<TaylorModel> embed(uint as, const Vector<TaylorModel>& x);
-Matrix<Interval> jacobian(const Vector<TaylorModel>& x, const Vector<Interval>& d);
-Matrix<Interval> jacobian(const Vector<TaylorModel>& x);
+//Matrix<Interval> jacobian(const Vector<TaylorModel>& x, const Vector<Interval>& d);
+//Matrix<Interval> jacobian(const Vector<TaylorModel>& x);
 bool refines(const Vector<TaylorModel>& x1, const Vector<TaylorModel>& x2);
 Vector<TaylorModel> combine(const Vector<TaylorModel>& x1, const Vector<TaylorModel>& x2);
 Vector<TaylorModel> combine(const Vector<TaylorModel>& x1, const TaylorModel& x2);
+
+//Vector operations which cannot be computed componentwise
 Vector<TaylorModel> implicit(const Vector<TaylorModel>& x);
-Vector<TaylorModel> implicit(const Vector<TaylorModel>& x, const Vector<Interval>& cd);
 Vector<TaylorModel> flow(const Vector<TaylorModel>& x, const Vector<Interval>& d, const Interval& h, uint order);
 
-/*! \brief A class representing a quantity depending on other quantities.
- *  Based on a power series Expansion, scaled to the unit box.
+/*! \brief A class representing a power series expansion, scaled to the unit box, with an error term.
  *
- * See also TaylorFunction, TaylorSet.
+ * See also Expansion, TaylorVariable, TaylorFunction, TaylorSet.
  */
 class TaylorModel
 {
@@ -136,6 +139,7 @@ class TaylorModel
     TaylorModel(const std::map<MultiIndex,Float>& d, const Float& e);
     //! \brief Construct from a map giving the expansion expansion and a constant giving the error.
     TaylorModel(const Expansion<Float>& f, const Float& e=0.0);
+/*
     //! \brief Contruct a %TaylorModel in \a as arguments of degree \a d
     //! from the raw data given by \a ptr, with error given by \a err.
     TaylorModel(uint as, uint deg, const double* ptr, const double& err);
@@ -147,6 +151,7 @@ class TaylorModel
     //! given in a list of indices a[0],...,a[k-1] followed by the coefficient c.
     //! The last argument gives the error of the expansion approximation.
     TaylorModel(uint as, uint nnz, uint a0, ...);
+*/
     //@}
 
     //@{

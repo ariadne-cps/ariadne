@@ -45,15 +45,15 @@ class TaylorModel;
 class TaylorVariable;
 class TaylorFunction;
 
-TaylorFunction restrict(const TaylorFunction&, const Vector<Interval>& bx);
-TaylorFunction truncate(const TaylorFunction&, const MultiIndexBound& bd);
 
+TaylorFunction restrict(const TaylorFunction&, const Vector<Interval>& bx);
 TaylorVariable compose(const TaylorVariable&, const TaylorFunction&);
 TaylorFunction compose(const TaylorFunction&, const TaylorFunction&);
-TaylorFunction inverse(const TaylorFunction&);
+TaylorFunction compose(const FunctionInterface&, const TaylorFunction&);
 TaylorFunction implicit(const TaylorFunction&);
 TaylorFunction antiderivative(const TaylorFunction&, uint);
 TaylorFunction flow(const TaylorFunction& vf, const Vector<Interval>& d, const Interval& t, uint o);
+
 
 class TaylorExpression {
     typedef unsigned int Nat;
@@ -99,6 +99,8 @@ class TaylorExpression {
 
 
 /*! \brief A taylor_model with multivalued output using the TaylorModel class.
+ *
+ *  See also TaylorModel, TaylorVariable, TaylorFunction.
  */
 class TaylorFunction {
     typedef Float R;
@@ -173,6 +175,9 @@ class TaylorFunction {
     static TaylorFunction constant(const Vector<Interval>& d, const Vector<Float>& c);
     /*! \brief The identity Taylor model on domain \a d. */
     static TaylorFunction identity(const Vector<Interval>& d);
+
+    /*! \brief Truncate terms higher than \a bd. */
+    TaylorFunction& truncate(const MultiIndexBound& bd);
 
     /*! \brief Write to an output stream. */
     std::ostream& write(std::ostream& os) const;

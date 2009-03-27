@@ -139,16 +139,8 @@ TaylorModel::TaylorModel(uint as, uint nnz, uint a0, ...)
     ARIADNE_ASSERT(this->_error>=0);
 }
 
-TaylorModel TaylorModel::scaling(uint as, uint i, const Interval& r)
-{
-    TaylorModel t(as);
-    Interval rm=add_ivl(r.l/2,r.u/2);
-    Interval rr=sub_ivl(r.u/2,r.l/2);
-    t.set_gradient(i,1.0);
-    t*=rr;
-    t+=rm;
-    return t;
-}
+
+
 
 /*
 TaylorModel::TaylorModel(uint as, uint deg, double d0, ...)
@@ -1230,7 +1222,7 @@ TaylorModel pow(const TaylorModel& x, int n) {
 TaylorModel sqrt(const TaylorModel& x) {
     //std::cerr<<"rec(TaylorModel)\n";
     // Use a special routine to minimise errors
-    // Given range [rl,ru], scale by constant a such that rl/a=1-d; ru/a=1+d
+    // Given range [rl,ru], rescale by constant a such that rl/a=1-d; ru/a=1+d
     Interval r=x.range();
     assert(r.l>0);
     Float a=(r.l+r.u)/2;
@@ -1267,7 +1259,7 @@ TaylorModel sqrt(const TaylorModel& x) {
 TaylorModel rec(const TaylorModel& x) {
     //std::cerr<<"rec(TaylorModel)\n";
     // Use a special routine to minimise errors
-    // Given range [rl,ru], scale by constant a such that rl/a=1-d; ru/a=1+d
+    // Given range [rl,ru], rescale by constant a such that rl/a=1-d; ru/a=1+d
     Interval r=x.range();
     if(r.upper()>=0 && r.lower()<=0) {
         ARIADNE_THROW(DivideByZeroException,"rec(TaylorModel x)","x="<<x);
@@ -1307,7 +1299,7 @@ TaylorModel rec(const TaylorModel& x) {
 
 TaylorModel log(const TaylorModel& x) {
     // Use a special routine to minimise errors
-    // Given range [rl,ru], scale by constant a such that rl/a=1-d; ru/a=1+d
+    // Given range [rl,ru], rescale by constant a such that rl/a=1-d; ru/a=1+d
     Interval r=x.range();
     assert(r.l>0);
     Float a=(r.l+r.u)/2;
@@ -1396,46 +1388,69 @@ evaluate(const Vector<TaylorModel>& tv, const Vector<Interval>& x)
 }
 
 
-TaylorModel antiderivative(const TaylorModel& x, const Interval& dk, uint k) {
+TaylorModel& TaylorModel::rescale(const Interval& ocd, const Interval& ncd)
+{
+    TaylorModel& x=*this;
+
+    const double a=ocd.l; const double b=ocd.u;
+    const double c=ncd.l; const double d=ncd.u;
+
+    // Scale the interval [a,b] onto [c,d]
+    // The function is given by x:-> alpha*x+beta where
+    //alpha=(d-c)/(b-a) and beta=(cb-ad)/(b-a)
+    Interval tmp=1.0/sub_ivl(b,a);
+    Interval alpha=sub_ivl(d,c)*tmp;
+    Interval beta=(mul_ivl(c,b)-mul_ivl(a,d))*tmp;
+
+    x*=alpha;
+    x+=beta;
+
+    return x;
+}
+
+
+TaylorModel& TaylorModel::antidifferentiate(uint k)
+{
+    TaylorModel& x=*this;
     ARIADNE_ASSERT(k<x.argument_size());
-    // General case with error analysis
-    TaylorModel r(x.argument_size());
-    const Float& xe=x.error();
-    Float& re=r.error();
-    re=xe;
+
+    Float& xe=x.error();
+    volatile float ml,u;
     set_rounding_upward();
-    volatile Float dkru=(dk.u-dk.l)/2;
-    volatile Float dkrl=-dk.u; dkrl+=dk.l; dkrl/=(-2);
-    volatile Float u,ml;
     Float te=0; // Twice the maximum accumulated error
     for(TaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         const uint c=xiter->first[k]+1;
         const Float& xv=xiter->second;
         volatile Float mxv=-xv;
         if(xv>=0) {
-            u=xv*dkru/c;
-            ml=mxv*dkrl/c;
+            u=xv/c;
+            ml=mxv/c;
         } else {
-            u=xv*dkru/c;
-            ml=mxv*dkrl/c;
+            u=xv/c;
+            ml=mxv/c;
         }
         te+=(u+ml);
     }
-    re+=te/2;
+    xe+=te/2;
 
     set_rounding_to_nearest();
-    Float dkr=(dk.u-dk.l)/2;
-    MultiIndex rindex(r.argument_size());
-    r[rindex]=0.0;
-    for(TaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
-        const uint c=xiter->first[k]+1;
-        rindex=xiter->first;
-        rindex[k]=c;
-        r[rindex]=xiter->second*dkr/c;
+    for(TaylorModel::iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+        ++const_cast<MultiIndex&>(xiter->first)[k];
+        const uint c=xiter->first[k];
+        xiter->second/=c;
     }
 
+    return x;
+}
+
+TaylorModel antiderivative(const TaylorModel& x, const Interval& dk, uint k) {
+    Interval dkr=rad_ivl(dk.l,dk.u);
+    TaylorModel r(x);
+    r.antidifferentiate(k);
+    r*=dkr;
     return r;
 }
+
 
 pair<TaylorModel,TaylorModel>
 split(const TaylorModel& tv, uint j)
@@ -1503,7 +1518,7 @@ unscale(const TaylorModel& tv, const Interval& ivl)
 
 
 TaylorModel
-scale(const TaylorModel& tv, const Interval& ivl)
+rescale(const TaylorModel& tv, const Interval& ivl)
 {
     // Scale tv so that the interval [-1,1] maps into ivl
     // The result is given by  (tv*s)+c where c is the centre
@@ -1576,61 +1591,52 @@ Vector<TaylorModel> TaylorModel::constants(uint as, const Vector<Float>& c)
     return result;
 }
 
-Vector<TaylorModel> TaylorModel::variables(const Vector<Interval>& d)
+Vector<TaylorModel> TaylorModel::constants(uint as, const Vector<Interval>& c)
 {
-    return scalings(d);
+    Vector<TaylorModel> result(c.size());
+    for(uint i=0; i!=c.size(); ++i) {
+        result[i]=TaylorModel::constant(as,c[i]);
+    }
+    return result;
+}
+
+Vector<TaylorModel> TaylorModel::variables(uint as)
+{
+    Vector<TaylorModel> result(as);
+    for(uint i=0; i!=as; ++i) { result[i]=TaylorModel::variable(as,i); }
+    return result;
 }
 
 Vector<TaylorModel> TaylorModel::scalings(const Vector<Interval>& d)
 {
-    Vector<TaylorModel> r(d.size(),d.size());
+    Vector<TaylorModel> result(d.size());
     for(uint i=0; i!=d.size(); ++i) {
-        const Interval& di=d[i];
-        Interval dm=add_ivl(di.l/2,di.u/2);
-        Interval dr=sub_ivl(di.u/2,di.l/2);
-        r[i].set_gradient(i,1.0);
-        r[i]*=dr;
-        r[i]+=dm;
+        result[i]=TaylorModel::scaling(d.size(),i,d[i]);
     }
-    return r;
+    return result;
 }
 
-
-
-
-TaylorModel
-compose(const TaylorModel& x,
-        const Vector<Interval>& d,
-        const Vector<TaylorModel>& y)
+Vector<TaylorModel> TaylorModel::unscalings(const Vector<Interval>& cd)
 {
-    ARIADNE_ASSERT(x.argument_size()>0);
-    ARIADNE_ASSERT(x.argument_size()==d.size());
-    ARIADNE_ASSERT(y.size()==d.size());
-    for(uint i=1; i!=y.size(); ++i) { ARIADNE_ASSERT(y[i].argument_size()==y[0].argument_size()); }
-
-    uint as=y[0].argument_size();
-
-    Vector<TaylorModel> ys(y.size());
-    for(uint i=0; i!=y.size(); ++i) {
-        ys[i]=unscale(y[i],d[i]);
+    Vector<TaylorModel> result(cd.size());
+    for(uint i=0; i!=cd.size(); ++i) {
+        result[i]=TaylorModel::unscaling(cd.size(),i,cd[i]);
     }
-
-    TaylorModel r(as);
-    r.set_error(x.error());
-    for(TaylorModel::const_iterator iter=x.begin(); iter!=x.end(); ++iter) {
-        TaylorModel t=TaylorModel::constant(as,iter->second);
-        for(uint j=0; j!=iter->first.size(); ++j) {
-            TaylorModel p=pow(ys[j],iter->first[j]);
-            t=t*p;
-        }
-        r+=t;
-        //std::cerr<<"a="<<iter->first<<" c="<<iter->second<<" t="<<t<<" r="<<r<<"\n";
-    }
-
-    ARIADNE_ASSERT(r.argument_size()==y[0].argument_size());
-
-    return r;
+    return result;
 }
+
+Vector<TaylorModel> TaylorModel::rescalings(const Vector<Interval>& cd,const Vector<Interval>& d)
+{
+    ARIADNE_ASSERT(cd.size()==d.size());
+    Vector<TaylorModel> result(d.size());
+    for(uint i=0; i!=d.size(); ++i) {
+        result[i]=TaylorModel::rescaling(d.size(),i,cd[i],d[i]);
+    }
+    return result;
+}
+
+
+
 
 Vector<TaylorModel> embed(const Vector<TaylorModel>& x, uint as)
 {
@@ -1689,12 +1695,43 @@ unscale(const Vector<TaylorModel>& tvs, const Vector<Interval>& ivls)
     return r;
 }
 
+TaylorModel
+rescale(const TaylorModel& tv, const Interval& old_codom, const Interval& new_codom)
+{
+    TaylorModel res(tv); res.rescale(old_codom,new_codom); return res;
+}
+
+TaylorModel&
+rescale(TaylorModel& tv, const Interval& old_codom, const Interval& new_codom)
+{
+    tv.rescale(old_codom,new_codom); return tv;
+}
+
 Vector<TaylorModel>
-scale(const Vector<TaylorModel>& tvs, const Vector<Interval>& ivls)
+rescale(const Vector<TaylorModel>& tvs, const Vector<Interval>& old_codom, const Vector<Interval>& new_codom)
 {
     Vector<TaylorModel> r(tvs.size());
     for(uint i=0; i!=r.size(); ++i) {
-        r[i]=scale(tvs[i],ivls[i]);
+        r[i]=rescale(tvs[i],old_codom[i],new_codom[i]);
+    }
+    return r;
+}
+
+Vector<TaylorModel>&
+rescale(Vector<TaylorModel>& tvs, const Vector<Interval>& old_codom, const Vector<Interval>& new_codom)
+{
+    for(uint i=0; i!=tvs.size(); ++i) {
+        rescale(tvs[i],old_codom[i],new_codom[i]);
+    }
+    return tvs;
+}
+
+Vector<TaylorModel>
+scale(const Vector<TaylorModel>& tvs, const Vector<Interval>& new_codom)
+{
+    Vector<TaylorModel> r(tvs);
+    for(uint i=0; i!=tvs.size(); ++i) {
+        r[i].rescale(Interval(-1,+1),new_codom[i]);
     }
     return r;
 }
@@ -1705,6 +1742,15 @@ Vector<TaylorModel> antiderivative(const Vector<TaylorModel>& x, const Interval&
         r[i]=antiderivative(x[i],dk,k);
     }
     return r;
+}
+
+
+TaylorModel
+compose(const TaylorModel& x,
+        const Vector<Interval>& d,
+        const Vector<TaylorModel>& y)
+{
+    return compose(Vector<TaylorModel>(1u,x),d,y)[0];
 }
 
 Vector<TaylorModel>
@@ -1722,21 +1768,165 @@ compose(const Vector<TaylorModel>& x,
 Matrix<Interval>
 jacobian(const Vector<TaylorModel>& f, const Vector<Interval>& x)
 {
-    ARIADNE_NOT_IMPLEMENTED;
+    Vector< Differential<Interval> > dx=Differential<Interval>::variables(1u,x);
+    Vector< Differential<Interval> > df(f.size());
+    for(uint i=0; i!=f.size(); ++i) {
+        df[i]=evaluate(f[i].expansion(),dx);
+    }
+    return jacobian(df);
+}
+
+// Compute the Jacobian over the unit domain
+Matrix<Interval>
+jacobian(const Vector<TaylorModel>& f)
+{
+    Matrix<Interval> J(f.size(),f[0].argument_size());
+    for(uint i=0; i!=f.size(); ++i) {
+        for(TaylorModel::const_iterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
+            for(uint k=0; k!=J.column_size(); ++k) {
+                const uint c=iter->first[k];
+                if(c>0) {
+                    if(iter->first.degree()==1) { J[i][k]+=iter->second; }
+                    else { J[i][k]+=Interval(-c,c)*iter->second; }
+                }
+            }
+        }
+    }
+    return J;
+}
+
+TaylorModel
+compose(const TaylorModel& x,
+        const Vector<TaylorModel>& ys)
+{
+    ARIADNE_ASSERT(x.argument_size()>0);
+    ARIADNE_ASSERT(ys.size()==x.argument_size());
+    for(uint i=1; i!=ys.size(); ++i) { ARIADNE_ASSERT(ys[i].argument_size()==ys[0].argument_size()); }
+
+    uint as=ys[0].argument_size();
+
+    TaylorModel r(as);
+    r.set_error(x.error());
+    for(TaylorModel::const_iterator iter=x.begin(); iter!=x.end(); ++iter) {
+        TaylorModel t=TaylorModel::constant(as,iter->second);
+        for(uint j=0; j!=iter->first.size(); ++j) {
+            TaylorModel p=pow(ys[j],iter->first[j]);
+            t=t*p;
+        }
+        r+=t;
+        //std::cerr<<"a="<<iter->first<<" c="<<iter->second<<" t="<<t<<" r="<<r<<"\n";
+    }
+
+    ARIADNE_ASSERT(r.argument_size()==ys[0].argument_size());
+
+    return r;
 }
 
 Vector<TaylorModel>
-implicit(const Vector<TaylorModel>& x, const Vector<Interval>& cd)
+compose(const Vector<TaylorModel>& x,
+        const Vector<TaylorModel>& y)
 {
-    ARIADNE_NOT_IMPLEMENTED;
+    Vector<TaylorModel> r(x.size());
+    for(uint i=0; i!=x.size(); ++i) {
+        r[i]=compose(x[i],y);
+    }
+    return r;
 }
+
 
 Vector<TaylorModel>
-flow(const Vector<TaylorModel>& x, const Vector<Interval>& d, const Interval& h, uint order)
+implicit(const Vector<TaylorModel>& f)
 {
-    ARIADNE_NOT_IMPLEMENTED;
+    uint rs=f.size();
+    uint fas=f[0].argument_size();
+    uint has=fas-rs;
+
+    Vector<Interval> h_codom(rs,Interval(-1,+1));
+    Vector<TaylorModel> id=TaylorModel::variables(has);
+    Vector<TaylorModel> h=TaylorModel::constants(has,h_codom);
+
+    for(uint k=0; k!=10; ++k) {
+        Matrix<Interval> Df=jacobian(f);
+        //std::cerr<<"  Df="<<Df<<std::endl;
+        Matrix<Interval> D2f=project(Df,range(0,rs),range(has,fas));
+        //std::cerr<<"  D2f="<<J<<std::endl;
+        Matrix<Interval> D2finv=inverse(D2f);
+
+        for(uint i=0; i!=rs; ++i) { h[i].set_error(0); }
+
+        Vector<TaylorModel> idh=join(id,h);
+        Vector<TaylorModel> fidxhx=compose(f,idh);
+        //std::cerr<<"  f(x,h(x))="<<fh<<std::endl;
+        Vector<TaylorModel> dh=prod(D2finv,fidxhx);
+        //std::cerr<<"  dh="<<dh<<std::endl;
+        h=h-dh;
+    }
+
+    //std::cerr<<"\n  f="<<f<<"\n  h[0]="<<h0<<"\n  h[1]="<<h1<<"\n\n";
+    ARIADNE_ASSERT(h.size()==f.size());
+    ARIADNE_ASSERT(h[0].argument_size()+h.size()==f[0].argument_size());
+    return h;
 }
 
+
+Vector<TaylorModel>
+flow(const Vector<TaylorModel>& vf, const Vector<Interval>& d, const Interval& h, uint order)
+{
+    ARIADNE_ASSERT(vf.size()>0);
+    ARIADNE_ASSERT(vf.size()==d.size());
+    for(uint i=0; i!=vf.size(); ++i) { ARIADNE_ASSERT(vf.size()==vf[i].argument_size()); }
+    ARIADNE_ASSERT(h.l<=0.0 && h.u>=0);
+
+    Vector<Interval> vf_domain(vf.size(),Interval(-1,+1));
+    ARIADNE_ASSERT(subset(d,vf_domain));
+
+    Vector<Interval> vf_range(vf.size());
+    for(uint i=0; i!=vf.size(); ++i) { vf_range[i]=vf[i].range(); }
+    ARIADNE_ASSERT(subset(vf_range*h+d,vf_domain));
+
+    uint n=vf.size();
+    Vector<TaylorModel> yz(n,TaylorModel(n+1));
+    for(uint i=0; i!=yz.size(); ++i) { yz[i]=TaylorModel::scaling(n+1,i,d[i]); }
+
+    Vector<TaylorModel> yp(n,TaylorModel(n+1));
+    Vector<TaylorModel> y(yz);
+
+    Interval h_rad=rad_ivl(h.l,h.u);
+
+    //std::cerr << "\ny[0]=" << y << std::endl << std::endl;
+    for(uint j=0; j!=order; ++j) {
+        yp=compose(vf,y);
+        //std::cerr << "yp["<<j+1<<"]=" << yp << std::endl;
+        //for(uint i=0; i!=n; ++i) { yp[i].clobber(so,to-1); }
+        //std::cerr << "yp["<<j+1<<"]=" << yp << std::endl;
+        for(uint i=0; i!=n; ++i) {
+            y[i].antidifferentiate(n);
+            y[i]*=h_rad;
+            y[i]+=yz[i];
+        }
+        //std::cerr << "y["<<j+1<<"]=" << y << std::endl << std::endl;
+    }
+
+    //for(uint i=0; i!=n; ++i) { y[i].clobber(so,to); }
+    for(uint i=0; i!=n; ++i) { y[i].sweep(0.0); }
+
+    return y;
+
+}
+
+
+
+
+
+Vector<TaylorModel>
+implicit(const Vector<TaylorModel>& f, const Vector<Interval>& fdom)
+{
+    const uint rs=f.size();
+    const uint fas=f[0].argument_size();
+    Vector<Interval> hs_codom=Vector<Interval>(rs,Interval(-1,+1));
+    Vector<Interval> h_codom=project(fdom,range(fas-rs,fas));
+    return rescale(implicit(f),hs_codom,h_codom);
+}
 
 
 

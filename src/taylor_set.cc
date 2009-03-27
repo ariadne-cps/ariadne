@@ -353,8 +353,7 @@ TaylorSet::recondition() const
             scal[i][MultiIndex::unit(this->generators_size(),j)]=T[i][j];
         }
     }
-    Vector<Interval> dom(this->argument_size(),Interval(-1,+1));
-    return TaylorSet(compose(this->models(),dom,scal));
+    return TaylorSet(compose(this->models(),scal));
 }
 
 std::ostream&

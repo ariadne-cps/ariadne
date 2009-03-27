@@ -90,7 +90,7 @@ TaylorFunction::TaylorFunction(const Vector<Interval>& d,
 {
     ARIADNE_ASSERT(f.result_size()>0);
     ARIADNE_ASSERT(d.size()==f.argument_size());
-    Vector<TaylorModel> x=TaylorModel::variables(d);
+    Vector<TaylorModel> x=TaylorModel::scalings(d);
     this->_models=f.evaluate(x);
 }
 
@@ -101,7 +101,7 @@ TaylorFunction::TaylorFunction(const Vector<Interval>& d,
 {
     for(uint i=0; i!=p.size(); ++i) { ARIADNE_ASSERT(d.size()==p[i].argument_size()); }
 
-    Vector<TaylorModel> x=TaylorModel::variables(d);
+    Vector<TaylorModel> x=TaylorModel::scalings(d);
     this->_models=Ariadne::evaluate(p,x);
 }
 
@@ -144,7 +144,7 @@ TaylorFunction::constant(const Vector<Interval>& d, const Vector<Interval>& r)
 TaylorFunction
 TaylorFunction::identity(const Vector<Interval>& d)
 {
-    return TaylorFunction(d,TaylorModel::variables(d));
+    return TaylorFunction(d,TaylorModel::scalings(d));
 }
 
 
@@ -296,8 +296,9 @@ restrict(const TaylorFunction& f, const Vector<Interval>& d)
 {
     ARIADNE_ASSERT(subset(d,f.domain()));
     if(d==f.domain()) { return f; }
-    Vector<TaylorModel> s=TaylorModel::variables(d);
-    return TaylorFunction(d,compose(f._models,f._domain,s));
+    Vector<TaylorModel> s=TaylorModel::rescalings(f.domain(),d);
+    std::cerr<<"f="<<f<<" d="<<d<<" s="<<s<<"\n";
+    return TaylorFunction(d,compose(f._models,s));
 }
 
 
@@ -388,7 +389,7 @@ compose(const TaylorFunction& g, const TaylorFunction& f)
         std::cerr<<"f.range()="<<f.range()<<" is not a subset of g.domain()="<<g.domain()<<std::endl;
         ARIADNE_ASSERT(subset(f.range(),g.domain()));
     }
-    return TaylorFunction(f.domain(),Ariadne::compose(g.models(),g.domain(),f.models()));
+    return TaylorFunction(f.domain(),Ariadne::compose(g.models(),unscale(f.models(),g.domain())));
 }
 
 
@@ -417,7 +418,7 @@ implicit(const TaylorFunction& f)
     uint has=f.argument_size()-f.result_size();
     Vector<Interval> hdom=project(f.domain(),range(0,has));
     Vector<Interval> hcodom=project(f.domain(),range(has,fas));
-    return TaylorFunction(hdom,implicit(f.models(),hcodom));
+    return TaylorFunction(hdom,scale(implicit(f.models()),hcodom));
 }
 
 TaylorFunction
@@ -506,7 +507,7 @@ TaylorExpression::TaylorExpression(const Vector<Interval>& domain, const TaylorM
     : _domain(domain), _model(model) { }
 
 TaylorExpression TaylorExpression::variable(const Vector<Interval>& domain, Nat i) {
-    TaylorExpression t(domain); t._model=TaylorModel::variables(domain)[i]; return t; }
+    TaylorExpression t(domain); t._model=TaylorModel::scaling(domain.size(),i,domain[i]); return t; }
 
 Vector<TaylorExpression> TaylorExpression::variables(const Vector<Interval>& domain) {
     Vector<TaylorExpression> r(domain.size(),TaylorExpression(domain));

@@ -254,15 +254,17 @@ void TestTaylorFunction::test_flow()
     Vector<Interval> domain(2, -0.5,+0.5, -0.5,+0.5);
     Interval time(-0.25,0.25);
     uint order(6);
-    TaylorFunction computed_flow=flow(vector_field,domain,time,order);
-    TaylorFunction expected_flow(join(domain,time),flp);
-    expected_flow+=Vector<Interval>(2,Interval(-1e-3,1e-3));
-    ARIADNE_TEST_BINARY_PREDICATE(refines,computed_flow,expected_flow);
+    TaylorFunction computed_flow;
+    ARIADNE_TEST_TRY(
+        computed_flow=flow(vector_field,domain,time,order);
+        TaylorFunction expected_flow(join(domain,time),flp);
+        expected_flow+=Vector<Interval>(2,Interval(-1e-3,1e-3));
+        ARIADNE_TEST_BINARY_PREDICATE(refines,computed_flow,expected_flow);
 
-    TaylorFunction flow_error=computed_flow-antiderivative(compose(vector_field,computed_flow),2);
-    for(uint i=0; i!=2; ++i) { const_cast<TaylorModel&>(flow_error.models()[i]).sweep(1e-4); }
-    ARIADNE_TEST_BINARY_PREDICATE(operator<,norm(flow_error.range()),1e-4);
-
+        TaylorFunction flow_error=computed_flow-antiderivative(compose(vector_field,computed_flow),2);
+        for(uint i=0; i!=2; ++i) { const_cast<TaylorModel&>(flow_error.models()[i]).sweep(1e-4); }
+        ARIADNE_TEST_BINARY_PREDICATE(operator<,norm(flow_error.range()),1e-4);
+    );
 }
 
 

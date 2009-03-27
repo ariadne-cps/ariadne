@@ -67,6 +67,9 @@ bool refines(const TaylorModel& tv1, const TaylorModel& tv2);
 // Antidifferentiation operator
 TaylorModel antiderivative(const TaylorModel& x, const Interval& dk, uint k);
 
+// Compose an array of Taylor variables with another, assuming that y has been scaled to have unit codomain
+TaylorModel compose(const TaylorModel& x, const Vector<TaylorModel>& y);
+
 // Compose an array of Taylor variables with another, after scaling by the interval vectors
 TaylorModel compose(const TaylorModel& x, const Vector<Interval>& bx, const Vector<TaylorModel>& y);
 
@@ -76,13 +79,16 @@ Vector<TaylorModel> unscale(const Vector<TaylorModel>& x, const Vector<Interval>
 Vector<TaylorModel> scale(const Vector<TaylorModel>& x, const Vector<Interval>& bx);
 Vector<Interval> evaluate(const Vector<TaylorModel>& x, const Vector<Interval>& sy);
 Vector<TaylorModel> compose(const Vector<TaylorModel>& x, const Vector<Interval>& d, const Vector<TaylorModel>& y);
+Vector<TaylorModel> compose(const Vector<TaylorModel>& x, const Vector<TaylorModel>& ys);
 Vector<TaylorModel> antiderivative(const Vector<TaylorModel>& x, const Interval& dk, uint k);
 Vector<TaylorModel> embed(const Vector<TaylorModel>& x, uint as);
 Vector<TaylorModel> embed(uint as, const Vector<TaylorModel>& x);
 Matrix<Interval> jacobian(const Vector<TaylorModel>& x, const Vector<Interval>& d);
+Matrix<Interval> jacobian(const Vector<TaylorModel>& x);
 bool refines(const Vector<TaylorModel>& x1, const Vector<TaylorModel>& x2);
 Vector<TaylorModel> combine(const Vector<TaylorModel>& x1, const Vector<TaylorModel>& x2);
 Vector<TaylorModel> combine(const Vector<TaylorModel>& x1, const TaylorModel& x2);
+Vector<TaylorModel> implicit(const Vector<TaylorModel>& x);
 Vector<TaylorModel> implicit(const Vector<TaylorModel>& x, const Vector<Interval>& cd);
 Vector<TaylorModel> flow(const Vector<TaylorModel>& x, const Vector<Interval>& d, const Interval& h, uint order);
 
@@ -223,14 +229,21 @@ class TaylorModel
     //! \brief Construct a constant quantity in \a as independent variables.
     static TaylorModel constant(uint as, const Float& c) {
         TaylorModel r(as); r.set_value(c); return r; }
-    //! \brief Construct the quantity \f$x_j\f$ in \a as independent variables. (Deprecated)
+    //! \brief Construct a constant quantity in \a as independent variables.
+    static TaylorModel constant(uint as, const Interval& d) {
+        TaylorModel r(as); r.set_value(1.0); r*=d; return r; }
+    //! \brief Construct the quantity with expansion \f$x_j\f$ in \a as independent variables.
     static TaylorModel variable(uint as, uint j) {
-        TaylorModel r(as); r.set_value(0.0); r.set_gradient(j,1.0); return r; }
-    //! \brief Construct the quantity \f$c+x_j\f$ in \a as independent variables. (Deprecated)
-    static TaylorModel variable(uint as, const Float& c, uint j) {
-        TaylorModel r(as); r.set_value(c); r.set_gradient(j,1.0); return r; }
-    //! \brief Construct the quantity which scales the unit interval onto the interval \a r.
-    static TaylorModel scaling(uint as, uint j, const Interval& r);
+        TaylorModel r(as); r.set_gradient(j,1.0); return r; }
+    //! \brief Construct the quantity which scales the unit interval into the domain \a d.
+    static TaylorModel scaling(uint as, uint j, const Interval& d) {
+        TaylorModel r(as); r.set_gradient(j,1.0); r.rescale(Interval(-1,1),d); return r; }
+    //! \brief Construct the quantity which scales the codomain \a cd into the unit interval.
+    static TaylorModel unscaling(uint as, uint j, const Interval& d) {
+        TaylorModel r(as); r.set_gradient(j,1.0); r.rescale(d,Interval(-1,+1)); return r; }
+    //! \brief Construct the quantity which scales the interval \a cd onto the interval \a d.
+    static TaylorModel rescaling(uint as, uint j, const Interval& cd, const Interval& d) {
+        TaylorModel r(as); r.set_gradient(j,1.0); r.rescale(cd,d); return r; }
     //! \brief Construct the quantity \f$c+\sum g_jx_j\f$.
     static TaylorModel affine(const Float& c, const Vector<Float>& g) {
         TaylorModel r(g.size()); r.set_value(c);
@@ -244,10 +257,16 @@ class TaylorModel
     static Vector<TaylorModel> zeroes(uint rs, uint as);
     //! \brief Return the vector of constants with values \a c in \a as arguments.
     static Vector<TaylorModel> constants(uint as, const Vector<Float>& c);
-    //! \brief Return the vector of variables on the domain \a d. (Deprecated)
-    static Vector<TaylorModel> variables(const Vector<Interval>& d);
+    //! \brief Return the vector of constants with values \a c in \a as arguments.
+    static Vector<TaylorModel> constants(uint as, const Vector<Interval>& c);
+    //! \brief Return the vector of variables on the unit domain.
+    static Vector<TaylorModel> variables(uint as);
     //! \brief Return the vector scaling the unit interval onto the domain \a d.
     static Vector<TaylorModel> scalings(const Vector<Interval>& d);
+    //! \brief Return the vector scaling the unit interval onto the codomain \a cd.
+    static Vector<TaylorModel> unscalings(const Vector<Interval>& d);
+    //! \brief Return the vector scaling the codomain \a cd onto the domain \a d.
+    static Vector<TaylorModel> rescalings(const Vector<Interval>& cd, const Vector<Interval>& d);
     //@}
 
     //@{
@@ -270,6 +289,12 @@ class TaylorModel
     Interval evaluate(const Vector<Float>& x) const;
     //! \brief Evaluate the quantity over the interval of points \a x.
     Interval evaluate(const Vector<Interval>& x) const;
+    //! \brief Compute the gradient of the expansion.
+    Vector<Interval> gradient() const;
+    //! \brief Scale so that the old codomain maps into the new codomain.
+    TaylorModel& rescale(const Interval& old_codomain, const Interval& new_codomain);
+    //! \brief Compute the antiderivative (in place).
+    TaylorModel& antidifferentiate(uint k);
     //@}
 
     //@{

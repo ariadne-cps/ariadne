@@ -64,7 +64,7 @@ TaylorVariable::TaylorVariable(const DomainType& d, const ExpressionInterface& f
     : _domain(d), _model(f.argument_size())
 {
     ARIADNE_ASSERT(d.size()==f.argument_size());
-    Vector<TaylorModel> x=TaylorModel::variables(d);
+    Vector<TaylorModel> x=TaylorModel::scalings(d);
     this->_model=f.evaluate(x);
 }
 
@@ -491,7 +491,7 @@ check(const Vector<TaylorVariable>& tv)
 }
 
 Vector< Expansion<Float> >
-expansion(const Vector<TaylorVariable>& x) 
+expansion(const Vector<TaylorVariable>& x)
 {
     Vector< Expansion<Float> > r(x.size());
     for(uint i=0; i!=x.size(); ++i) {
@@ -542,7 +542,7 @@ evaluate(const Vector<TaylorVariable>& tv, const Vector<Interval>& x)
 }
 
 Matrix<Interval>
-jacobian(const Vector<TaylorVariable>& tv, const Vector<Interval>& x) 
+jacobian(const Vector<TaylorVariable>& tv, const Vector<Interval>& x)
 {
     ARIADNE_ASSERT(check(tv));
     const Vector<Interval>& dom=tv[0].domain();

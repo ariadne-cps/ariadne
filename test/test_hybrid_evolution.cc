@@ -58,7 +58,7 @@ class TestHybridEvolution
     void test() const;
 };
 
-int main() 
+int main()
 {
     std::cerr<<"SKIPPED "; return 1;
     TestHybridEvolution().test();
@@ -69,6 +69,9 @@ int main()
 HybridAutomaton
 TestHybridEvolution::system()
 {
+    const bool non_urgent=false;
+    const bool urgent=true;
+
     const DiscreteState location1(1);
     const DiscreteState location2(2);
     const DiscreteEvent event3(3);
@@ -82,7 +85,7 @@ TestHybridEvolution::system()
     AffineFunction dynamic1(A,3*b);
     AffineFunction dynamic2(A,-b);
     IdentityFunction reset(2);
-  
+
     Matrix<Float> c(1,2,bdata);
     Vector<Float> d(1,Float(1.0));
     AffineFunction guard3(c,-d);
@@ -93,8 +96,8 @@ TestHybridEvolution::system()
     automaton.new_mode(location1,dynamic1);
     automaton.new_mode(location2,dynamic2);
     //automaton.new_invariant(location2,invariant2);
-    automaton.new_forced_transition(event3,location1,location2,reset,guard3);
-    automaton.new_forced_transition(event4,location2,location1,reset,guard4);
+    automaton.new_transition(event3,location1,location2,reset,guard3,urgent);
+    automaton.new_transition(event4,location2,location1,reset,guard4,urgent);
     //automaton.new_unforced_transition(event4,location2,location1,reset,activation4);
 
     cout << "Finished creating hybrid automaton." << endl;
@@ -117,7 +120,7 @@ void TestHybridEvolution::test() const
     // Set up the evolution parameters and grid
     Float step_size(0.125);
     Float enclosure_radius(0.25);
-    
+
     EvolutionParameters parameters;
     parameters.maximum_enclosure_radius=enclosure_radius;
     parameters.maximum_step_size=step_size;
@@ -139,7 +142,7 @@ void TestHybridEvolution::test() const
     HybridEnclosureType initial_hybrid_set(location1,initial_set);
     HybridTime hybrid_evolution_time(0.25,1);
 
-  
+
     // Compute the reachable sets
     cout << "Computing orbit... "<<std::flush;
     Orbit<HybridEnclosureType> orbit=evolver.orbit(automaton,initial_hybrid_set,hybrid_evolution_time);
@@ -152,7 +155,7 @@ void TestHybridEvolution::test() const
     ARIADNE_TEST_PRINT(hybrid_evolve_set);
     ARIADNE_TEST_PRINT(hybrid_reach_set);
     ARIADNE_TEST_PRINT(hybrid_intermediate_set);
-  
+
     cout << "Plotting sets... " << flush;
     Figure fig;
     fig.set_bounding_box(Box(2, -0.25, 0.75, 0.0, 1.0));

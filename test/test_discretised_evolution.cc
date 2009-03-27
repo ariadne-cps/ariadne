@@ -61,7 +61,7 @@ class TestDiscretisedEvolution
     void test_hybrid_time() const;
 };
 
-int main() 
+int main()
 {
     TestDiscretisedEvolution().test();
     return ARIADNE_TEST_FAILURES;
@@ -96,7 +96,7 @@ void TestDiscretisedEvolution::test_discrete_time() const
     MapEvolver evolver(parameters);
     Discretiser< Map, EnclosureType > discrete_evolver(evolver);
 
-  
+
     // Set up the vector field
     Float a=1.5; Float b=0.375;
     Vector<Float> p(2); p[0]=a; p[1]=b;
@@ -109,7 +109,7 @@ void TestDiscretisedEvolution::test_discrete_time() const
     std::cout<<"making bounding_box"<<std::endl;
     Box bounding_box=make_box("[-4,4]x[-4,4]") ;
     std::cout<<"bounding_box="<<bounding_box<<"\n"<<std::endl;
- 
+
     // Define the initial cell
     Box box=make_box("[1.001,1.002]x[0.501,0.502]");
     GridTreeSet approx_tree_set=outer_approximation(box,grid,depth);
@@ -130,7 +130,7 @@ void TestDiscretisedEvolution::test_discrete_time() const
     ListSet<EnclosureType> const& reach_set=evolve_orbit.reach();
     ListSet<EnclosureType> const& intermediate_set=evolve_orbit.intermediate();
     ListSet<EnclosureType> const& final_set=evolve_orbit.final();
-    
+
     // Compute the reachable sets
     cout << "Computing discretised evolution... " << flush;
     Orbit<GridCell> discrete_orbit
@@ -140,7 +140,7 @@ void TestDiscretisedEvolution::test_discrete_time() const
     GridTreeSet const& reach_cells=discrete_orbit.reach();
     GridTreeSet const& intermediate_cells=discrete_orbit.intermediate();
     GridTreeSet const& final_cells=discrete_orbit.final();
-  
+
     cout << "initial_set=" << initial_set.range() << endl << endl;
     cout << "initial_cell=" << initial_cell.box() << endl << endl;
     cout << "reach_set=" << reach_set << endl << endl;
@@ -195,7 +195,7 @@ void TestDiscretisedEvolution::test_continuous_time() const
     VectorFieldEvolver evolver(parameters);
     Discretiser< VectorField, EnclosureType > discretiser(evolver);
 
-  
+
     // Set up the vector field
     Float mu=0.865;
     Function<VanDerPol> vdp(Vector<Float>(1,&mu));
@@ -205,7 +205,7 @@ void TestDiscretisedEvolution::test_continuous_time() const
     // Define a bounding box for the evolution
     Box bounding_box=make_box("[-4,4]x[-4,4]") ;
     //Box eps_bounding_box=bounding_box.neighbourhood(0.1);
- 
+
     // Define the initial cell
     Box box=make_box("[1.01,1.02]x[0.51,0.52]");
     cout << "box=" << box << endl;
@@ -232,7 +232,7 @@ void TestDiscretisedEvolution::test_continuous_time() const
     GridTreeSet const& reach_cells=discrete_orbit.reach();
     GridTreeSet const& intermediate_cells=discrete_orbit.intermediate();
     GridTreeSet const& final_cells=discrete_orbit.final();
-  
+
     cout << "initial_set=" << initial_set.range() << endl << endl;
     cout << "initial_cell=" << initial_cell.box() << endl << endl;
     cout << "final_set=" << final_set << endl << endl;
@@ -292,7 +292,7 @@ void TestDiscretisedEvolution::test_hybrid_time() const
     HybridEvolver evolver(parameters);
     HybridDiscretiser< EnclosureType > discrete_evolver(evolver);
 
-  
+
     // Set up the vector field
     Float a=1.5; Float b=0.375;
     Vector<Float> p(2); p[0]=a; p[1]=b;
@@ -301,14 +301,14 @@ void TestDiscretisedEvolution::test_hybrid_time() const
     cout << "henon=" << henon << endl;
     HybridAutomaton ha("Henon");
     ha.new_mode(location,IdentityFunction(2));
-    ha.new_forced_transition(event,location,location,henon,ConstantFunction(Vector<Float>(1,1.0),2));
+    ha.new_transition(event,location,location,henon,ConstantFunction(Vector<Float>(1,1.0),2),true);
 
     // Define a bounding box for the evolution
     std::cout<<"making bounding_box"<<std::endl;
     Box bounding_box=make_box("[-4,4]x[-4,4]") ;
     std::cout<<"bounding_box="<<bounding_box<<"\n"<<std::endl;
     //Box eps_bounding_box=bounding_box.neighbourhood(0.1);
- 
+
     // Define the initial cell
     Box box=make_box("[1.001,1.002]x[0.501,0.502]");
     cout << "box=" << box << endl;
@@ -344,7 +344,7 @@ void TestDiscretisedEvolution::test_hybrid_time() const
     GridTreeSet const& reach_cells=discrete_orbit.reach()[location];
     GridTreeSet const& intermediate_cells=discrete_orbit.intermediate()[location];
     GridTreeSet const& final_cells=discrete_orbit.final()[location];
-  
+
     cout << "initial_set=" << initial_set.range() << endl << endl;
     cout << "initial_cell=" << initial_cell.box() << endl << endl;
     cout << "reach_set=" << reach_set << endl << endl;

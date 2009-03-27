@@ -32,6 +32,7 @@
 
 #include "geometry.h"
 #include "taylor_model.h"
+#include "taylor_variable.h"
 #include "taylor_function.h"
 #include "taylor_set.h"
 
@@ -186,6 +187,11 @@ TaylorSet::discretise(GridTreeSet& gts, uint d) const
 TaylorSet apply(const FunctionInterface& f, const TaylorSet& s)
 {
     return f.evaluate(s.models());
+}
+
+TaylorModel apply(const TaylorVariable& tf, const TaylorSet& s)
+{
+    return compose(tf.model(),tf.domain(),s.models());
 }
 
 TaylorSet apply(const TaylorFunction& tf, const TaylorSet& s)

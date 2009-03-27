@@ -75,6 +75,13 @@
 #define ARIADNE_NOT_IMPLEMENTED                 \
     throw NotImplemented(ARIADNE_PRETTY_FUNCTION); 
 
+#define ARIADNE_DEPRECATED(fn,msg)          \
+    static bool first_time=true; \
+    if(first_time) { \
+        first_time=false; \
+        std::cerr<<"Warning: Function" << #fn << " is deprecated. " << #msg << std::endl; \
+    } \
+
 #if defined(linux) || defined(__linux) || defined(__linux__)
 #define ARIADNE_PRETTY_FUNCTION __PRETTY_FUNCTION__
 #elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)

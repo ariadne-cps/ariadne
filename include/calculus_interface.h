@@ -36,12 +36,14 @@ namespace Ariadne {
 template<class T> class array;
 
 class Interval;
+class ExpressionInterface;
 class FunctionInterface;
 template<class X> class Vector;
 
 template<class Var> struct CalculusTypes;
 
 class TaylorModel;
+class TaylorVariable;
 class TaylorSet;
 class TaylorFunction;
 template<class X> class Differential;
@@ -52,6 +54,7 @@ template<> struct CalculusTypes<ApproximateTaylorVariable>
 {
     typedef ApproximateTaylorModel VariableType;
     typedef ApproximateTaylorModel TimeModelType;
+    typedef ApproximateTaylorModel PredicateModelType;
     typedef ApproximateTaylorModel SetModelType;
     typedef ApproximateTaylorModel FunctionModelType;
 };
@@ -60,6 +63,7 @@ template<> struct CalculusTypes<TaylorModel>
 {
     typedef TaylorModel VariableType;
     typedef TaylorModel TimeModelType;
+    typedef TaylorVariable PredicateModelType;
     typedef TaylorSet SetModelType;
     typedef TaylorFunction FunctionModelType;
 };
@@ -86,15 +90,17 @@ class CalculusInterface
     typedef typename CalculusTypes<Var>::FunctionModelType FunctionModelType;
     typedef typename CalculusTypes<Var>::SetModelType SetModelType;
     typedef typename CalculusTypes<Var>::TimeModelType TimeModelType;
+    typedef typename CalculusTypes<Var>::PredicateModelType PredicateModelType;
     //!
     typedef FunctionModelType MapModelType;
     typedef FunctionModelType FlowModelType;
-    typedef FunctionModelType GuardModelType;
+    typedef PredicateModelType GuardModelType;
     typedef Float RealType;
     typedef Interval IntervalType;
     typedef Vector<Interval> BoxType;
     typedef Float TimeType;
     typedef FunctionInterface FunctionType;
+    typedef ExpressionInterface ExpressionType;
     typedef SetModelType EnclosureType;
   public:
     //! \brief Virtual destructor.
@@ -104,12 +110,18 @@ class CalculusInterface
     //! in the box satisfy the constraint, \a false if all points do not satisfy the constraint, and
     //! indeterminate otherwise.
     virtual tribool
+    active(const ExpressionType& guard,
+           const BoxType& box) const = 0;
+    virtual tribool
     active(const FunctionType& guard,
            const BoxType& box) const = 0;
 
     //! \brief Test if a set satisfied the constraint given by the guard. Returns \a true is all points
     //! in the set satisfy the constraint, \a false if all points do not satisfy the constraint, and
     //! indeterminate otherwise.
+    virtual tribool
+    active(const ExpressionType& guard,
+           const SetModelType& set_model) const = 0;
     virtual tribool
     active(const FunctionType& guard,
            const SetModelType& set_model) const = 0;
@@ -133,8 +145,8 @@ class CalculusInterface
     //! the \a guard_model under evolution of the \a flow_model, for times between the \a minimum_time and \a maximum_time.
     //! The crossing must be (differentiably) transverse.
     virtual TimeModelType
-    crossing_time(const FlowModelType& flow_model,
-                  const GuardModelType& guard_model,
+    crossing_time(const GuardModelType& guard_model,
+                  const FlowModelType& flow_model,
                   const SetModelType& initial_set_model) const = 0;
 
     //! \brief Computes the image of the set defined by \a set_model under the \a map.
@@ -244,7 +256,12 @@ class CalculusInterface
 
     //! \brief A model for the real-valued function \a g over the domain \a d.
     virtual GuardModelType
-    predicate_model(const FunctionType& g,
+    predicate_model(const ExpressionInterface& g,
+                    const BoxType& d) const = 0;
+
+    //! \brief A model for the real-valued function \a g over the domain \a d.
+    virtual GuardModelType
+    predicate_model(const FunctionInterface& g,
                     const BoxType& d) const = 0;
 
     //! \brief A model for the constant time function \a t over the domain \a d.

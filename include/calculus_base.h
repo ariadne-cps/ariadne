@@ -63,10 +63,11 @@ class CalculusBase
     typedef typename CalculusInterface<Var>::SetModelType SetModelType;
     //!
     typedef typename CalculusInterface<Var>::TimeModelType TimeModelType;
+    //!
+    typedef typename CalculusInterface<Var>::PredicateModelType PredicateModelType;
 
     typedef FunctionModelType MapModelType;
     typedef FunctionModelType FlowModelType;
-    typedef FunctionModelType PredicateModelType;
 
     typedef Float RealType;
     typedef Interval IntervalType;
@@ -74,6 +75,7 @@ class CalculusBase
 
     typedef Float TimeType;
     typedef FunctionInterface FunctionType;
+    typedef ExpressionInterface ExpressionType;
     typedef SetModelType EnclosureType;
   protected:
     tribool _tribool(const IntervalType& ivl) const { 
@@ -91,7 +93,7 @@ class CalculusBase
     //! points in the set satisfy the constraint, \a false if all points do not satisfy the constraint, 
     //! and indeterminate otherwise.
     virtual tribool active(const PredicateModelType& guard_model, 
-                           const SetModelType& _set_model) const = 0;
+                           const SetModelType& set_model) const = 0;
 
     //! \brief Computes an over-approximation to the time interval for which the \a initial_set_model 
     //! touch the set specified by the \a guard model under the \a flow_model. The \a minimum and \a maximum_time 
@@ -152,8 +154,11 @@ class CalculusBase
     virtual FlowModelType flow_model(const FunctionType& vf, const BoxType& d, 
                                      const TimeType& h, const BoxType& b) const = 0;
 
-    //! \brief A model for the real-valued function \a g over the domain \a d.
+    //! \brief A model for the real-valued function \a g over the domain \a d. \deprecated
     virtual PredicateModelType predicate_model(const FunctionType& g, const BoxType& d) const = 0;
+
+    //! \brief A model for the real-valued function \a g over the domain \a d.
+    virtual PredicateModelType predicate_model(const ExpressionType& g, const BoxType& d) const = 0;
 
     //! \brief A model for the constant time \a t over the box \a d.
     virtual TimeModelType time_model(const Float& t, const BoxType& d) const = 0;
@@ -178,14 +183,18 @@ class CalculusBase
     //! \brief Test if a box satisfies the constraint given by the guard. Returns \a true is all points
     //! in the box satisfy the constraint, \a false if all points do not satisfy the constraint, and 
     //! indeterminate otherwise.
-    tribool active(const FunctionType& guard,  const BoxType& box) const { 
+    tribool active(const ExpressionType& guard,  const BoxType& box) const {
+        return this->_tribool(guard.evaluate(box)); }
+    tribool active(const FunctionType& guard,  const BoxType& box) const {
         return this->_tribool(guard.evaluate(box)[0]); }
 
     //! \brief Test if a set satisfied the constraint given by the guard. Returns \a true is all points
     //! in the set satisfy the constraint, \a false if all points do not satisfy the constraint, and 
     //! indeterminate otherwise.
-    tribool active(const FunctionType& guard,  const SetModelType& set_model) const { 
+    tribool active(const ExpressionType& guard,  const SetModelType& set_model) const {
         return this->active(this->predicate_model(guard,set_model.range()),set_model); }
+    tribool active(const FunctionType& guard,  const SetModelType& set_model) const {
+        return this->active(this->map_model(guard,set_model.range())[0],set_model); }
 
  
     //! \brief Computes the image of the set defined by \a set_model under the \a map.

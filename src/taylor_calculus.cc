@@ -29,6 +29,7 @@
 #include "vector.h"
 #include "matrix.h"
 #include "taylor_model.h"
+#include "taylor_variable.h"
 #include "taylor_set.h"
 #include "taylor_function.h"
 #include "function.h"
@@ -56,13 +57,6 @@ TaylorCalculus()
 }
 
 
-TaylorCalculus::SetModelType
-TaylorCalculus::_apply(const FunctionModelType& function_model,
-                       const SetModelType& set_model) const
-{
-    return Ariadne::apply(function_model,set_model);
-}
-
 
 
 TaylorCalculus::SetModelType
@@ -74,7 +68,7 @@ reset_step(const FunctionType& map,
     return map.evaluate(set_model.models());
     // Indirect computation via model
     BoxType range=set_model.range();
-    return apply(FunctionModelType(range,map),set_model);
+    return Ariadne::apply(FunctionModelType(range,map),set_model);
 }
 
 
@@ -83,7 +77,7 @@ TaylorCalculus::
 reset_step(const FlowModelType& function_model,
            const SetModelType& set_model) const
 {
-    return this->_apply(function_model,set_model);
+    return Ariadne::apply(function_model,set_model);
 }
 
 
@@ -161,9 +155,6 @@ reachability_step(const FlowModelType& flow_model,
 {
     ARIADNE_ASSERT(initial_set_model.generators_size()+1==expanded_reach_time_model.argument_size());
 
-    // Compute the reachable set
-    // Need an extra independent variable to represent time
-    uint ng=initial_set_model.generators_size();
 
     // FIXME: Embed set model correctly
     SetModelType expanded_initial_set_model=embed(initial_set_model.models(),1u);
@@ -202,7 +193,7 @@ reachability_step(const FlowModelType& flow_model,
     ARIADNE_LOG(6,"expanded_reach_time_model="<<expanded_reach_time_model<<"\n");
     SetModelType expanded_timed_set_model=join(expanded_initial_set_model.models(),expanded_reach_time_model);
     ARIADNE_LOG(6,"expanded_timed_set_model="<<expanded_timed_set_model<<"\n");
-    SetModelType reach_set_model=this->_apply(flow_model,expanded_timed_set_model);
+    SetModelType reach_set_model=Ariadne::apply(flow_model,expanded_timed_set_model);
     ARIADNE_LOG(6,"reach_set_model = "<<reach_set_model<<"\n");
 
     return reach_set_model;
@@ -230,16 +221,16 @@ crossing_time(const PredicateModelType& guard_model,
     ARIADNE_ASSERT(guard_model.argument_size()==flow_model.result_size());
     ARIADNE_ASSERT(initial_set_model.dimension()==flow_model.result_size());
 
-    FunctionModelType hitting_model=compose(guard_model,flow_model);
+    PredicateModelType hitting_model=compose(guard_model,flow_model);
     ARIADNE_LOG(6,"hitting_model = "<<hitting_model<<"\n");
-    FunctionModelType free_hitting_time_model;
+    PredicateModelType free_hitting_time_model;
     try {
         free_hitting_time_model=implicit(hitting_model);
     } catch(NonInvertibleFunctionException) {
         throw DegenerateCrossingException();
     }
     ARIADNE_LOG(6,"free_hitting_time_model = "<<free_hitting_time_model<<"\n");
-    TimeModelType hitting_time_model=_apply(free_hitting_time_model,initial_set_model)[0];
+    TimeModelType hitting_time_model=Ariadne::apply(free_hitting_time_model,initial_set_model)[0];
     ARIADNE_LOG(6,"hitting_time_model = "<<hitting_time_model<<"\n");
     Interval hitting_time_range=hitting_time_model.range();
     ARIADNE_LOG(6,"hitting_time_model = "<<hitting_time_model<<"\n");
@@ -261,7 +252,6 @@ touching_time_interval(const PredicateModelType& guard_model,
 {
     ARIADNE_ASSERT(flow_model.result_size()+1==flow_model.argument_size());
     ARIADNE_ASSERT(guard_model.argument_size()==flow_model.result_size());
-    ARIADNE_ASSERT(guard_model.result_size()==1u);
 
     uint dimension=guard_model.argument_size();
     RealType minimum_time=flow_model.domain()[dimension].lower();
@@ -398,7 +388,7 @@ tribool
 TaylorCalculus::
 active(const PredicateModelType& guard_model, const SetModelType& set_model) const
 {
-    IntervalType range=compose(guard_model.models(),guard_model.domain(),set_model.models())[0].range();
+    IntervalType range=Ariadne::apply(guard_model,set_model).range();
     return this->_tribool(range);
 }
 
@@ -438,7 +428,18 @@ TaylorCalculus::flow_model(FunctionInterface const& vf, Vector<Interval> const& 
 TaylorCalculus::PredicateModelType
 TaylorCalculus::predicate_model(FunctionInterface const& g, Vector<Interval> const& bx) const
 {
-    ARIADNE_ASSERT(g.result_size()==1);
+    ARIADNE_DEPRECATED("TaylorCalculus::predicate_model(FunctionInterface,Vector<Interval>","Use ExpressionInterface instead");
+    ARIADNE_ASSERT(g.argument_size()==bx.size());
+
+    FunctionModelType predicate_model(bx,g);
+    ARIADNE_LOG(6,"predicate_model = "<<predicate_model<<"\n");
+
+    return predicate_model[0];
+}
+
+TaylorCalculus::PredicateModelType
+TaylorCalculus::predicate_model(ExpressionInterface const& g, Vector<Interval> const& bx) const
+{
     ARIADNE_ASSERT(g.argument_size()==bx.size());
 
     PredicateModelType predicate_model(bx,g);

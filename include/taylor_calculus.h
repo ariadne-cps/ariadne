@@ -43,6 +43,7 @@ using std::pair;
 template<class T> class array;
 
 class Interval;
+class ExpressionInterface;
 class FunctionInterface;
 template<class X> class Vector;
 class Box;
@@ -70,12 +71,13 @@ class TaylorCalculus
     typedef TaylorSet SetModelType;
     typedef TaylorFunction MapModelType;
     typedef TaylorFunction FlowModelType;
-    typedef TaylorFunction PredicateModelType;
+    typedef TaylorVariable PredicateModelType;
     typedef Float TimeType;
     typedef Float RealType;
     typedef Interval IntervalType;
     typedef Vector<Interval> BoxType;
     typedef FunctionInterface FunctionType;
+    typedef ExpressionInterface ExpressionType;
 
     typedef SetModelType EnclosureType;
   public:
@@ -178,6 +180,9 @@ class TaylorCalculus
                              const TimeType& h, const BoxType& b) const;
 
     //! \brief A model for the real-valued function \a g over the domain \a d.
+    PredicateModelType predicate_model(const ExpressionType& g, const BoxType& d) const;
+
+    //! \brief A model for the real-valued function \a g over the domain \a d. \deprecated
     PredicateModelType predicate_model(const FunctionType& g, const BoxType& d) const;
 
     //! \brief A model for the constant time \a t over the box \a d.
@@ -201,8 +206,6 @@ class TaylorCalculus
     SetModelType simplify(const SetModelType& s) const;
     //@}
 
-  private:
-    SetModelType _apply(const FunctionModelType& f, const SetModelType& s) const;
 };
 
 }

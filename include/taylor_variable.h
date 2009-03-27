@@ -45,40 +45,41 @@ template<class X> class Expansion;
 template<class X> class Polynomial;
 class TaylorModel;
 class TaylorVariable;
-template<> class Vector<TaylorVariable>;
+class ExpressionInterface;
 
-// Split the variable over two domains, subdividing along the independent variable j.
-pair<TaylorVariable,TaylorVariable> split(const TaylorVariable& x, uint j);
-pair< Vector<TaylorVariable>, Vector<TaylorVariable> > split(const Vector<TaylorVariable>& x, uint j);
+// Restrict to a smaller domain. REQUIRED
+TaylorVariable restrict(const TaylorVariable& x, const Vector<Interval>& d);
 
-// Scale the variabe by post-composing with an affine map taking the interval \a ivl to the unit interval
-TaylorVariable unscale(const TaylorVariable& x, const Interval& ivl);
-Vector<TaylorVariable> unscale(const Vector<TaylorVariable>& x, const Vector<Interval>& bx);
-
-// Scale the variable by post-composing with an affine map taking the unit interval to \a ivl.
-TaylorVariable scale(const TaylorVariable& x, const Interval& ivl);
-Vector<TaylorVariable> scale(const Vector<TaylorVariable>& x, const Vector<Interval>& bx);
+// Test if a variable refines another
+bool refines(const TaylorVariable& tv1, const TaylorVariable& tv2);
 
 // Evaluate an array of Taylor variables on a vector.
 Interval evaluate(const TaylorVariable& x, const Vector<Interval>& sy);
-Vector<Interval> evaluate(const Vector<TaylorVariable>& x, const Vector<Interval>& sy);
 
+// Split the variable over two domains, subdividing along the independent variable j.
+pair<TaylorVariable,TaylorVariable> split(const TaylorVariable& x, uint j);
 
-// Compose an array of Taylor variables with another
-TaylorVariable compose(const TaylorVariable& x, const Vector<TaylorVariable>& y);
-Vector<TaylorVariable> compose(const Vector<TaylorVariable>& x, const Vector<TaylorVariable>& y);
+// Scale the variabe by post-composing with an affine map taking the interval \a ivl to the unit interval
+TaylorVariable unscale(const TaylorVariable& x, const Interval& ivl);
 
-// Compose an array of Taylor variables with another, without checking inclusion in domains
-TaylorVariable unchecked_compose(const TaylorVariable& x, const Vector<TaylorVariable>& y);
-Vector<TaylorVariable> unchecked_compose(const Vector<TaylorVariable>& x, const Vector<TaylorVariable>& y);
+// Scale the variable by post-composing with an affine map taking the unit interval to \a ivl.
+TaylorVariable scale(const TaylorVariable& x, const Interval& ivl);
+
 
 // Embed the variable in a space of higher dimension
 TaylorVariable embed(const TaylorVariable& tv1, const Interval& d2);
 TaylorVariable embed(const Vector<Interval>& d1, const TaylorVariable& tv2);
 
-Vector<TaylorVariable> embed(const Vector<TaylorVariable>& tv1, const Interval& d2);
-Vector<TaylorVariable> embed(const Vector<TaylorVariable>& tv1, const Vector<Interval>& d2);
-Vector<TaylorVariable> embed(const Vector<Interval>& d1, const Vector<TaylorVariable>& tv2);
+// Antidifferentiation operator
+TaylorVariable antiderivative(const TaylorVariable& x, uint k);
+
+// Implicit function solver
+TaylorVariable implicit(const TaylorVariable& f);
+
+// Compose an array of Taylor variables with another, without checking inclusion in domains
+TaylorVariable unchecked_compose(const TaylorVariable& x, const Vector<TaylorVariable>& y);
+// Compose an array of Taylor variables with another
+TaylorVariable compose(const TaylorVariable& x, const Vector<TaylorVariable>& y);
 
 // Combine two functions over different domains
 Vector<TaylorVariable> combine(const TaylorVariable& x1, const TaylorVariable& x2);
@@ -86,19 +87,23 @@ Vector<TaylorVariable> combine(const TaylorVariable& x1, const Vector<TaylorVari
 Vector<TaylorVariable> combine(const Vector<TaylorVariable>& x1, const TaylorVariable& x2);
 Vector<TaylorVariable> combine(const Vector<TaylorVariable>& x1, const Vector<TaylorVariable>& x2);
 
-// Antidifferentiation operator
-TaylorVariable antiderivative(const TaylorVariable& x, uint k);
+Vector<TaylorVariable> embed(const Vector<TaylorVariable>& tv1, const Interval& d2);
+Vector<TaylorVariable> embed(const Vector<TaylorVariable>& tv1, const Vector<Interval>& d2);
+Vector<TaylorVariable> embed(const Vector<Interval>& d1, const Vector<TaylorVariable>& tv2);
+
+bool refines(const Vector<TaylorVariable>& tv1, const Vector<TaylorVariable>& tv2);
+pair< Vector<TaylorVariable>, Vector<TaylorVariable> > split(const Vector<TaylorVariable>& x, uint j);
+Vector<TaylorVariable> unscale(const Vector<TaylorVariable>& x, const Vector<Interval>& bx);
+Vector<TaylorVariable> scale(const Vector<TaylorVariable>& x, const Vector<Interval>& bx);
+Vector<Interval> evaluate(const Vector<TaylorVariable>& x, const Vector<Interval>& sy);
+Vector<TaylorVariable> unchecked_compose(const Vector<TaylorVariable>& x, const Vector<TaylorVariable>& y);
+Vector<TaylorVariable> compose(const Vector<TaylorVariable>& x, const Vector<TaylorVariable>& y);
 Vector<TaylorVariable> antiderivative(const Vector<TaylorVariable>& x, uint k);
 
 Vector<TaylorVariable> implicit(const Vector<TaylorVariable>& f);
 Vector<TaylorVariable> flow(const Vector<TaylorVariable>& vf, const Vector<Interval>& d, const Interval& t);
 
-// Test if a variable refines another
-bool refines(const TaylorVariable& tv1, const TaylorVariable& tv2);
-bool refines(const Vector<TaylorVariable>& tv1, const Vector<TaylorVariable>& tv2);
 
-// Restrict to a smaller domain. REQUIRED
-TaylorVariable restrict(const TaylorVariable& x, const Vector<Interval>& d);
 
 /*! \brief A class representing a quantity depending on other quantities.
  *  Based on a power series Expansion, scaled to the unit box.
@@ -132,6 +137,8 @@ class TaylorVariable
     explicit TaylorVariable(const DomainType& d, const ExpansionType& f, const ErrorType& e=0);
     //! \brief Construct a TaylorVariable over the domain \a d from the polynomial \a p.
     template<class X> explicit TaylorVariable(const DomainType& d, const Polynomial<X>& p);
+    //! \brief Construct a TaylorVariable over the domain \a d from the polynomial \a p.
+    explicit TaylorVariable(const DomainType& d, const ExpressionInterface& f);
     //@}
 
     //@{
@@ -517,70 +524,6 @@ inline TaylorVariable embed(const TaylorVariable& tv1, const Vector<Interval>& d
 inline TaylorVariable embed(const Vector<Interval>& dom1, const TaylorVariable& tv2) {
     return TaylorVariable(join(dom1,tv2.domain()),embed(dom1.size(),tv2.model())); }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-template<>
-class Vector<TaylorVariable>
-    : public ublas::vector<TaylorVariable>
-{
-  public:
-    typedef Vector<Interval> DomainType;
-
-    Vector() : ublas::vector<TaylorVariable>() { }
-    Vector(uint rs) : ublas::vector<TaylorVariable>(rs) { for(uint i=0; i!=rs; ++i) { (*this)[i]=TaylorVariable(); } }
-    Vector(uint rs, const Vector<Interval>& d) : ublas::vector<TaylorVariable>(rs) { for(uint i=0; i!=rs; ++i) { (*this)[i]=TaylorVariable(d); } }
-    Vector(uint rs, const TaylorVariable& x) : ublas::vector<TaylorVariable>(rs) { for(uint i=0; i!=rs; ++i) { (*this)[i]=x; } }
-
-    Vector(const Vector<Interval>& d, const Vector< Expansion<Float> >& f)
-        : ublas::vector<TaylorVariable>(f.size())
-        { for(uint i=0; i!=f.size(); ++i) { (*this)[i]=TaylorVariable(d,f[i],0.0); } }
-    Vector(const Vector<Interval>& d, const Vector< Expansion<Float> >& f, const Vector<Float>& e)
-        : ublas::vector<TaylorVariable>(f.size())
-        { ARIADNE_ASSERT(f.size()==e.size()); for(uint i=0; i!=f.size(); ++i) { (*this)[i]=TaylorVariable(d,f[i],e[i]); } }
-
-    template<class E> Vector(const ublas::vector_expression<E> &ve) : ublas::vector<TaylorVariable>(ve) { }
-
-    uint result_size() const { return this->size(); }
-    uint argument_size() const { ARIADNE_ASSERT(this->size()>0); return (*this)[0].argument_size(); }
-    const Vector<Interval>& domain() const { return (*this)[0].domain(); }
-
-    Vector<Interval> range() const;
-    Vector< Expansion<Float> > expansion() const;
-    Vector<Float> error() const;
-    Vector<Float> value() const;
-
-    Vector<Interval> evaluate(const Vector<Float>&) const;
-    Vector<Interval> evaluate(const Vector<Interval>&) const;
-    Matrix<Interval> jacobian(const Vector<Interval>&) const;
-
-    void check() const;
-};
-
-inline Vector<Interval> evaluate(const Vector<TaylorVariable>& tv, const Vector<Interval>& x) {
-    Vector<Interval> r(tv.size()); for(uint i=0; i!=tv.size(); ++i) { r[i]=evaluate(tv[i],x); } return r; }
 
 
 } // namespace Ariadne

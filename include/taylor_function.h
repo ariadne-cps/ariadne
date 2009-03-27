@@ -48,6 +48,7 @@ class TaylorFunction;
 TaylorFunction restrict(const TaylorFunction&, const Vector<Interval>& bx);
 TaylorFunction truncate(const TaylorFunction&, const MultiIndexBound& bd);
 
+TaylorVariable compose(const TaylorVariable&, const TaylorFunction&);
 TaylorFunction compose(const TaylorFunction&, const TaylorFunction&);
 TaylorFunction inverse(const TaylorFunction&);
 TaylorFunction implicit(const TaylorFunction&);
@@ -130,6 +131,9 @@ class TaylorFunction {
     TaylorFunction(const Vector<Interval>& domain,
                    const Vector< Polynomial<Interval> >& polynomial);
 
+    /*! \brief Construct from a vector of Taylor variables. */
+    TaylorFunction(const Vector<TaylorVariable>& variables);
+
 
     /*! \brief Equality operator. */
     bool operator==(const TaylorFunction& p) const;
@@ -206,6 +210,8 @@ class TaylorFunction {
 
     //! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
     friend TaylorFunction compose(const FunctionInterface& f, const TaylorFunction& g);
+    //! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
+    friend TaylorVariable compose(const TaylorVariable& f, const TaylorFunction& g);
     //! \brief Composition \f$f\circ g(x)=f(g(x))\f$.
     friend TaylorFunction compose(const TaylorFunction& f, const TaylorFunction& g);
     //! \brief Antiderivative of \a f with respect to variable \a k.

@@ -105,6 +105,17 @@ TaylorFunction::TaylorFunction(const Vector<Interval>& d,
     this->_models=Ariadne::evaluate(p,x);
 }
 
+TaylorFunction::TaylorFunction(const Vector<TaylorVariable>& v)
+    : _domain(), _models(v.size())
+{
+    ARIADNE_ASSERT(v.size()>0);
+    for(uint i=1; i!=v.size(); ++i) { ARIADNE_ASSERT(v[i].domain()==v[0].domain()); }
+    this->_domain=v[0].domain();
+    for(uint i=0; i!=v.size(); ++i) {
+        this->_models[i]=v[i].model();
+    }
+}
+
 
 
 
@@ -378,6 +389,17 @@ compose(const TaylorFunction& g, const TaylorFunction& f)
         ARIADNE_ASSERT(subset(f.range(),g.domain()));
     }
     return TaylorFunction(f.domain(),Ariadne::compose(g.models(),g.domain(),f.models()));
+}
+
+
+TaylorVariable
+compose(const TaylorVariable& g, const TaylorFunction& f)
+{
+    if(!subset(f.range(),g.domain())) {
+        std::cerr<<"f.range()="<<f.range()<<" is not a subset of g.domain()="<<g.domain()<<std::endl;
+        ARIADNE_ASSERT(subset(f.range(),g.domain()));
+    }
+    return TaylorVariable(f.domain(),Ariadne::compose(g.model(),g.domain(),f.models()));
 }
 
 

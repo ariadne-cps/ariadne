@@ -75,9 +75,9 @@ class HybridEvolver
     typedef FunctionInterface FunctionType;
     typedef Vector<Interval> BoxType;
     typedef TaylorFunction FunctionModelType;
-    typedef FunctionModelType MapModelType;
-    typedef FunctionModelType FlowModelType;
-    typedef FunctionModelType ConstraintModelType; 
+    typedef TaylorFunction MapModelType;
+    typedef TaylorFunction FlowModelType;
+    typedef TaylorVariable ConstraintModelType;
     typedef TaylorModel TimeModelType;
     typedef TaylorSet SetModelType;
     typedef TaylorSet TimedSetModelType;

@@ -44,6 +44,7 @@ template<class X> class Matrix;
 
 class FunctionInterface;
 class TaylorModel;
+class TaylorVariable;
 class TaylorFunction;
 class TaylorSet;
 
@@ -60,50 +61,87 @@ class TaylorSet
   private:
     Vector<TaylorModel> _models;
   public:
+    //! \brief Construct the origin in dimension \a d with \a ng generators.
     TaylorSet(uint d=0, uint ng=0);
-    template<class XE, class XP> TaylorSet(uint rs, uint as, uint d, const XE* eps, const XP* ptr);
-    TaylorSet(uint rs, uint as, uint deg, double x0, ...);
+    //! \brief Construct the image of the box \a d under the function \a f.
     TaylorSet(const FunctionInterface& f, const Vector<Interval>& d);
+    //! \brief Construct from a list of models giving set as the image of a unit box.
     TaylorSet(const Vector<TaylorModel>& tv);
-    TaylorSet(const Vector< Expansion<Float> >& f, const Vector<Float>& e);
+    //! \brief The box \a bx.
     TaylorSet(const Vector<Interval>& bx);
 
+    //! \brief Construct from raw data in the form of dense polynomial expansions with errors.
+    TaylorSet(uint rs, uint as, uint deg, double x0, ...);
+    //! \brief Construct from raw data in the form of a polynomial expansion with errors.
+    TaylorSet(const Vector< Expansion<Float> >& f, const Vector<Float>& e);
+
+    //! \brief Equality operator.
     friend bool operator==(const TaylorSet& ts1, const TaylorSet& ts2);
 
+    //! \brief The dimension the space lies in.
     uint dimension() const { return this->_models.size(); }
+    //! \brief The number of generators of the set.
     uint generators_size() const { assert(this->_models.size()>0); return this->_models[0].argument_size(); }
-    uint argument_size() const { return this->_models[0].argument_size(); }
-    const TaylorModel& operator[](uint i) const { return this->_models[i]; }
-    TaylorModel& operator[](uint i) { return this->_models[i]; }
 
+    //! \brief The Taylor models used to define the set.
+    const Vector<TaylorModel>& models() const { return this->_models; }
+    //! \brief The domain of which the set is an image.
     Vector<Interval> domain() const { return Vector<Interval>(this->generators_size(),Interval(-1,+1)); }
+    //! \brief A box bounding the range of the generating function.
     Vector<Interval> range() const {
         Vector<Interval> result(this->_models.size());
         for(uint i=0; i!=this->_models.size(); ++i) {
             result[i]=this->_models[i].range(); }
         return result; }
-    Vector<TaylorModel> models() const { return this->_models; }
 
-    TaylorSet* clone() const { return new TaylorSet(*this); }
+    uint size() const { return this->_models.size(); }
+    uint argument_size() const { return this->_models[0].argument_size(); }
+    const TaylorModel& operator[](uint i) const { return this->_models[i]; }
+    TaylorModel& operator[](uint i) { return this->_models[i]; }
+
+
+    //! \brief Create a dynamically-allocated copy.
+    virtual TaylorSet* clone() const { return new TaylorSet(*this); }
+    //! \brief Tests if the set is disjoint from a box.
+    virtual tribool disjoint(const Box&) const;
+    //! \brief Tests if the set overlaps a box.
+    virtual tribool overlaps(const Box&) const;
+    //! \brief Tests if the set is a subset of a box.
+    virtual tribool inside(const Box&) const;
+    //! \brief A bounding box for the set.
+    virtual Box bounding_box() const;
+    //! \brief Write to an output stream.
+    virtual std::ostream& write(std::ostream& os) const;
+
+    //! \brief The radius of the set.
     Float radius() const;
-    tribool disjoint(const Box&) const;
-    tribool overlaps(const Box&) const;
-    tribool inside(const Box&) const;
-    Box bounding_box() const;
-    std::ostream& write(std::ostream& os) const;
-
+    //! \brief An over-approximation in the form of a zonotope.
     TaylorSet linearise() const;
+    //! \brief An outer-approximation on a grid.
     GridTreeSet discretise(const Grid& grid, uint depth) const;
+    //! \brief Adjoin an outer-approximation on a grid to an existing set.
     GridTreeSet& discretise(GridTreeSet& grid_set, uint depth) const;
+    //! \brief An over-approximation with better numerical conditioning;
+    //! currently implemented as the orthogonal part of a QR factorisation.
     TaylorSet recondition() const;
+    //! \brief Subsume the constant error terms in new generators.
     TaylorSet subsume() const;
-    pair<TaylorSet,TaylorSet> split(uint dim) const;
+    //! \brief Split by subdividing along generator \a g.
+    pair<TaylorSet,TaylorSet> split(uint g) const;
+    //! \brief Split by subdividing along a judiciously-chosen generator.
     pair<TaylorSet,TaylorSet> split() const;
+    //! \brief Subdivide into sets of maximum radius \a rad.
     ListSet<TaylorSet> subdivide(Float rad) const;
+
+    //! \brief Compute an over-approximation to the image under a function.
+    friend TaylorSet apply(const FunctionInterface& f, const TaylorSet& s);
+    //! \brief Compute an over-approximation to the image under a Taylor function approximation.
+    friend TaylorSet apply(const TaylorFunction& f, const TaylorSet& s);
   private:
     Matrix<Float> jacobian() const;
 };
 
+TaylorModel apply(const TaylorVariable& f, const TaylorSet& s);
 TaylorSet apply(const TaylorFunction& f, const TaylorSet& s);
 TaylorSet apply(const FunctionInterface& f, const TaylorSet& s);
 
@@ -118,15 +156,6 @@ void grid_draw(Figure& g, const TaylorSet& ts);
 
 void plot(const char* fn, const Box& bbx, const TaylorSet& ts);
 
-template<class XE, class XP>
-TaylorSet::TaylorSet(uint rs, uint as, uint d,
-                     const XE* eps, const XP* ptr)
-    : _models(rs)
-{
-    for(uint i=0; i!=rs; ++i) {
-        _models[i]=TaylorModel(as,d,eps,ptr);
-    }
-}
 
 
 } //namespace Ariadne

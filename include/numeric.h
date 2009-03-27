@@ -2,7 +2,7 @@
  *            numeric.h
  *
  *  Copyright 2008  Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 /*! \file numeric.h
  *  \brief Numerical classes.
  */
@@ -48,7 +48,7 @@ typedef unsigned long ulong;
 namespace Ariadne {
 
 #ifdef DOXYGEN
-//! \brief Integers of arbitrary size. 
+//! \brief Integers of arbitrary size.
 //! (Only available if the Gnu Multiple Precision library (GMP) is installed.)
 class Integer { };
 //! \brief Rationals numbers.
@@ -65,7 +65,7 @@ Rational sqr(const Rational& q);
 Rational pow(const Rational& q, int n);
 Rational pow(const Rational& q, uint n);
 #else
-#endif // HAVE_GMPXX_H 
+#endif // HAVE_GMPXX_H
 
 
 typedef double Float;
@@ -130,58 +130,59 @@ inline Float div_opp(Float x, Float y) { volatile double t=(-x)/y; return -t; }
 Float pow_rnd(Float x, int n);
 Float pow_opp(Float x, int n);
 
-inline Float add_approx(Float x, Float y) { 
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest); 
+inline Float add_approx(Float x, Float y) {
+    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest);
     volatile Float r=add_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
-inline Float sub_approx(Float x, Float y) {     
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest); 
+inline Float sub_approx(Float x, Float y) {
+    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest);
     volatile Float r=sub_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
-inline Float mul_approx(Float x, Float y) {     
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest); 
+inline Float mul_approx(Float x, Float y) {
+    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest);
     volatile Float r=mul_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
-inline Float div_approx(Float x, Float y) {     
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest); 
+inline Float div_approx(Float x, Float y) {
+    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest);
     volatile Float r=div_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
-inline Float pow_approx(Float x, int n) {     
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest); 
+inline Float pow_approx(Float x, int n) {
+    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest);
     volatile Float r=pow_rnd(x,n); set_rounding_mode(rounding_mode); return r; }
 
-inline Float add_up(Float x, Float y) { 
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(upward); 
+inline Float add_up(Float x, Float y) {
+    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(upward);
     volatile Float r=add_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
-inline Float sub_up(Float x, Float y) {     
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(upward); 
+inline Float sub_up(Float x, Float y) {
+    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(upward);
     volatile Float r=sub_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
-inline Float mul_up(Float x, Float y) {     
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(upward); 
+inline Float mul_up(Float x, Float y) {
+    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(upward);
     volatile Float r=mul_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
-inline Float div_up(Float x, Float y) {     
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(upward); 
+inline Float div_up(Float x, Float y) {
+    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(upward);
     volatile Float r=div_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
-inline Float pow_up(Float x, int n) {     
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(upward); 
+inline Float pow_up(Float x, int n) {
+    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(upward);
     volatile Float r=pow_rnd(x,n); set_rounding_mode(rounding_mode); return r; }
 
-inline Float add_down(Float x, Float y) { 
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(downward); 
+inline Float add_down(Float x, Float y) {
+    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(downward);
     volatile Float r=add_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
-inline Float sub_down(Float x, Float y) {     
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(downward); 
+inline Float sub_down(Float x, Float y) {
+    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(downward);
     volatile Float r=sub_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
-inline Float mul_down(Float x, Float y) {     
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(downward); 
+inline Float mul_down(Float x, Float y) {
+    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(downward);
     volatile Float r=mul_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
-inline Float div_down(Float x, Float y) {     
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(downward); 
+inline Float div_down(Float x, Float y) {
+    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(downward);
     volatile Float r=div_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
-inline Float pow_down(Float x, int n) {     
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(downward); 
+inline Float pow_down(Float x, int n) {
+    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(downward);
     volatile Float r=pow_rnd(x,n); set_rounding_mode(rounding_mode); return r; }
 
-inline Float med_approx(Float x, Float y) {     
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest); 
-    volatile Float r=(x+y)/2; set_rounding_mode(rounding_mode); return r; }inline Float rad_up(Float x, Float y) {     
-    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(upward); 
+inline Float med_approx(Float x, Float y) {
+    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest);
+    volatile Float r=(x+y)/2; set_rounding_mode(rounding_mode); return r; }
+inline Float rad_up(Float x, Float y) {
+    rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(upward);
     volatile Float r=(y-x)/2; set_rounding_mode(rounding_mode); return r; }
 
 
@@ -196,12 +197,12 @@ class Interval {
     Interval(int n) : l(n), u(n) { }
     Interval(Float x) : l(x), u(x) { }
     Interval(const Interval& i) : l(i.l), u(i.u) { }
-  
+
     Interval(Float lower, Float upper) : l(lower), u(upper) { }
 #ifdef HAVE_GMPXX_H
     Interval(Rational q);
     Interval(Rational lower, Rational upper);
-#endif // HAVE_GMPXX_H 
+#endif // HAVE_GMPXX_H
 
     const Float& lower() const { return l; }
     const Float& upper() const { return u; }
@@ -220,37 +221,37 @@ class Interval {
 
 std::ostream& operator<<(std::ostream& os, const Interval& ivl);
 
-inline Float midpoint(Interval i) { 
-    return add_approx(i.l,i.u)/2; 
+inline Float midpoint(Interval i) {
+    return add_approx(i.l,i.u)/2;
 }
 
-inline Float radius(Interval i) { 
-    return sub_up(i.u,i.l)/2; 
+inline Float radius(Interval i) {
+    return sub_up(i.u,i.l)/2;
 }
 
-inline Float width(Interval i) { 
-    return sub_up(i.u,i.l); 
+inline Float width(Interval i) {
+    return sub_up(i.u,i.l);
 }
 
-inline bool equal(Interval i1, Interval i2) { 
+inline bool equal(Interval i1, Interval i2) {
     //std::cerr<<"equal(i1,i2) with i1="<<i1<<"; i2="<<i2<<std::endl;
     return i1.l==i2.l && i1.u==i2.u;
 }
 
-inline bool empty(Interval i) { 
+inline bool empty(Interval i) {
     return i.l>i.u;
 }
 
-inline bool bounded(Interval i) { 
+inline bool bounded(Interval i) {
     return i.l!=-inf() && i.u!=+inf();
 }
 
-inline Interval intersection(Interval i1, Interval i2) { 
+inline Interval intersection(Interval i1, Interval i2) {
     if(i1.l>i2.u || i1.u<i2.l) { return Interval(1,-1); }
     return Interval(max(i1.l,i2.l),min(i1.u,i2.u));
 }
 
-inline Interval hull(Interval i1, Interval i2) { 
+inline Interval hull(Interval i1, Interval i2) {
     return Interval(min(i1.l,i2.l),max(i1.u,i2.u));
 }
 
@@ -309,7 +310,7 @@ inline bool overlap(Interval i1, Interval i2) { return i1.l<i2.u && i1.u>i2.l; }
 inline bool inside(Interval i1, Interval i2) { return i1.l>i2.l && i1.u<i2.u; }
 inline bool covers(Interval i1, Interval i2) { return i1.l<i2.l && i1.u>i2.u; }
 
-Interval abs(Interval i) 
+Interval abs(Interval i)
 {
     if(i.l>=0) {
         return Interval(i.l,i.u);
@@ -320,12 +321,12 @@ Interval abs(Interval i)
     }
 }
 
-Interval neg(Interval i) 
+Interval neg(Interval i)
 {
     return Interval(-i.u,-i.l);
 }
 
-Interval add(Interval i1, Interval i2) 
+Interval add(Interval i1, Interval i2)
 {
     rounding_mode_t rnd=get_rounding_mode();
     volatile double& i1l=i1.l;
@@ -340,7 +341,7 @@ Interval add(Interval i1, Interval i2)
     return Interval(rl,ru);
 }
 
-Interval add(Interval i1, Float x2) 
+Interval add(Interval i1, Float x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
     volatile double& i1l=i1.l;
@@ -354,7 +355,7 @@ Interval add(Interval i1, Float x2)
     return Interval(rl,ru);
 }
 
-Interval add_ivl(Float x1, Float x2) 
+Interval add_ivl(Float x1, Float x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
     volatile double& x1v=x1;
@@ -367,7 +368,7 @@ Interval add_ivl(Float x1, Float x2)
     return Interval(rl,ru);
 }
 
-Interval sub(Interval i1, Interval i2) 
+Interval sub(Interval i1, Interval i2)
 {
     rounding_mode_t rnd=get_rounding_mode();
     volatile double& i1l=i1.l;
@@ -382,7 +383,7 @@ Interval sub(Interval i1, Interval i2)
     return Interval(rl,ru);
 }
 
-Interval sub(Interval i1, Float x2) 
+Interval sub(Interval i1, Float x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
     volatile double& i1l=i1.l;
@@ -396,7 +397,7 @@ Interval sub(Interval i1, Float x2)
     return Interval(rl,ru);
 }
 
-Interval sub(Float x1, Interval i2) 
+Interval sub(Float x1, Interval i2)
 {
     rounding_mode_t rnd=get_rounding_mode();
     volatile double& x1v=x1;
@@ -410,7 +411,7 @@ Interval sub(Float x1, Interval i2)
     return Interval(rl,ru);
 }
 
-Interval sub_ivl(Float x1, Float x2) 
+Interval sub_ivl(Float x1, Float x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
     volatile double& x1v=x1;
@@ -423,7 +424,7 @@ Interval sub_ivl(Float x1, Float x2)
     return Interval(rl,ru);
 }
 
-Interval mul_ivl(Float x1, Float x2) 
+Interval mul_ivl(Float x1, Float x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
     volatile double& x1v=x1;
@@ -436,7 +437,7 @@ Interval mul_ivl(Float x1, Float x2)
     return Interval(rl,ru);
 }
 
-Interval div_ivl(Float x1, Float x2) 
+Interval div_ivl(Float x1, Float x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
     volatile double& x1v=x1;
@@ -449,13 +450,22 @@ Interval div_ivl(Float x1, Float x2)
     return Interval(rl,ru);
 }
 
+inline Interval med_ivl(Float x1, Float x2)
+{
+    return add_ivl(x1/2,x2/2);
+}
+
+inline Interval rad_ivl(Float x1, Float x2)
+{
+    return sub_ivl(x2/2,x1/2);
+}
 
 // Standard equality operators
 inline bool operator==(const Interval& i1, const Interval& i2) { return i1.l==i2.l && i1.u==i2.u; }
 inline bool operator!=(const Interval& i1, const Interval& i2) { return i1.l!=i2.l || i1.u!=i2.u; }
 
 // Boost-style tribool (in)equality operators
-//inline tribool operator==(const Interval& i1, const Interval& i2) { 
+//inline tribool operator==(const Interval& i1, const Interval& i2) {
 //  if(i1.l>i2.u || i1.u<i2.l) { return false; } else if(i1.l==i2.u && i1.u==i2.l) { return true; } else { return indeterminate; } }
 //inline tribool operator!=(const Interval& i1, const Interval& i2) { return !(i1==i2); }
 
@@ -486,37 +496,37 @@ inline Interval& operator-=(Interval& i1, Float x2) { i1=sub(i1,x2); return i1; 
 inline Interval& operator*=(Interval& i1, Float x2) { i1=mul(i1,x2); return i1; }
 inline Interval& operator/=(Interval& i1, Float x2) { i1=div(i1,x2); return i1; }
 
-inline tribool operator==(Interval i1, Float x2) { 
+inline tribool operator==(Interval i1, Float x2) {
     if(i1.upper()<x2 || i1.lower()>x2) { return false; }
     else if(i1.lower()==x2 && i1.upper()==x2) { return true; }
     else { return indeterminate; }
 }
 
-inline tribool operator!=(Interval i1, Float x2) { 
+inline tribool operator!=(Interval i1, Float x2) {
     if(i1.upper()<x2 || i1.lower()>x2) { return true; }
     else if(i1.lower()==x2 && i1.upper()==x2) { return false; }
     else { return indeterminate; }
 }
 
-inline tribool operator> (Interval i1, Float x2) { 
+inline tribool operator> (Interval i1, Float x2) {
     if(i1.lower()> x2) { return true; }
     else if(i1.upper()<=x2) { return false; }
     else { return indeterminate; }
 }
 
-inline tribool operator< (Interval i1, Float x2) { 
+inline tribool operator< (Interval i1, Float x2) {
     if(i1.upper()< x2) { return true; }
     else if(i1.lower()>=x2) { return false; }
     else { return indeterminate; }
 }
 
-inline tribool operator>=(Interval i1, Float x2) { 
+inline tribool operator>=(Interval i1, Float x2) {
     if(i1.lower()>=x2) { return true; }
     else if(i1.upper()< x2) { return false; }
     else { return indeterminate; }
 }
 
-inline tribool operator<=(Interval i1, Float x2) { 
+inline tribool operator<=(Interval i1, Float x2) {
     if(i1.upper()<=x2) { return true; }
     else if(i1.lower()> x2) { return false; }
     else { return indeterminate; }
@@ -524,25 +534,25 @@ inline tribool operator<=(Interval i1, Float x2) {
 
 
 
-inline tribool operator> (Interval i1, Interval i2) { 
+inline tribool operator> (Interval i1, Interval i2) {
     if(i1.lower()> i2.upper()) { return true; }
     else if(i1.upper()<=i2.lower()) { return false; }
     else { return indeterminate; }
 }
 
-inline tribool operator< (Interval i1, Interval i2) { 
+inline tribool operator< (Interval i1, Interval i2) {
     if(i1.upper()< i2.lower()) { return true; }
     else if(i1.lower()>=i2.upper()) { return false; }
     else { return indeterminate; }
 }
 
-inline tribool operator>=(Interval i1, Interval i2) { 
+inline tribool operator>=(Interval i1, Interval i2) {
     if(i1.lower()>=i2.upper()) { return true; }
     else if(i1.upper()< i2.lower()) { return false; }
     else { return indeterminate; }
 }
 
-inline tribool operator<=(Interval i1, Interval i2) { 
+inline tribool operator<=(Interval i1, Interval i2) {
     if(i1.upper()<=i2.lower()) { return true; }
     else if(i1.lower()> i2.upper()) { return false; }
     else { return indeterminate; }
@@ -554,6 +564,6 @@ template<class A> void serialize(A& a, Interval& ivl, const uint version) {
 std::ostream& operator<<(std::ostream&, const Interval&);
 std::istream& operator>>(std::istream&, Interval&);
 
-} // namespace Ariadne 
+} // namespace Ariadne
 
 #endif

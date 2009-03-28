@@ -88,34 +88,68 @@ make_matrix(const boost::python::object& obj)
     return Aptr;
 }
 
+
+
 template<class X0, class X1>
-Matrix<X0> __neg__(const Matrix<X1>& A1) {
+Vector<X0> __vneg__(const Vector<X1>& v1) {
+    return -v1;
+}
+
+template<class X0, class X1, class X2>
+Vector<X0> __vvadd__(const Vector<X1>& v1, const Vector<X2>& v2) {
+    return v1+v2;
+}
+
+template<class X0, class X1, class X2>
+Vector<X0> __vvsub__(const Vector<X1>& v1, const Vector<X2>& v2) {
+    return v1-v2;
+}
+
+template<class X0, class X1, class X2>
+Vector<X0> __svmul__(const X1& s1, const Vector<X2>& v2) {
+    return s1*v2;
+}
+
+template<class X0, class X1, class X2>
+Vector<X0> __vsmul__(const Vector<X1>& v1, const X2& s2) {
+    return v1*s2;
+}
+
+template<class X0, class X1, class X2>
+Vector<X0> __vsdiv__(const Vector<X1>& v1, const X2& s2) {
+    return v1/s2;
+}
+
+
+
+template<class X0, class X1>
+Matrix<X0> __mneg__(const Matrix<X1>& A1) {
     return -A1;
 }
 
 template<class X0, class X1, class X2>
-Matrix<X0> __add__(const Matrix<X1>& A1, const X2& A2) {
+Matrix<X0> __mmadd__(const Matrix<X1>& A1, const Matrix<X2>& A2) {
     return A1+A2;
 }
 
 template<class X0, class X1, class X2>
-Matrix<X0> __sub__(const Matrix<X1>& A1, const X2& A2) {
+Matrix<X0> __mmsub__(const Matrix<X1>& A1, const Matrix<X2>& A2) {
     return A1-A2;
 }
 
 template<class X0, class X1, class X2>
-Matrix<X0> __mul__(const Matrix<X1>& A1, const X2& s2) {
+Matrix<X0> __smmul__(const X1& s1, const Matrix<X2>& A2) {
+    return s1*A2;
+}
+
+template<class X0, class X1, class X2>
+Matrix<X0> __msmul__(const Matrix<X1>& A1, const X2& s2) {
     return A1*s2;
 }
 
 template<class X0, class X1, class X2>
-Matrix<X0> __div__(const Matrix<X1>& A1, const X2& s2) {
+Matrix<X0> __msdiv__(const Matrix<X1>& A1, const X2& s2) {
     return A1/s2;
-}
-
-template<class X0, class X1, class X2>
-Matrix<X0> __mul__(const X1& s1, const Matrix<X2>& A2) {
-    return s1*A2;
 }
 
 template<class X0, class X1, class X2>
@@ -157,33 +191,16 @@ wrap_triangular_decomposition(const Matrix<Float>& A)
 
 
 template<class X>
-void export_vector()
+void export_vector_class(class_<Vector<X> >& vector_class)
 {
-    typedef Vector<X> V;
-
-    class_< Vector<X> > vector_class(python_name<X>("Vector"),init<int>());
-    vector_class.def(init<int,double>());
-    vector_class.def(init<int,X>());
     vector_class.def("__init__", make_constructor(&make_vector<X>) );
+    vector_class.def(init<int>());
+    vector_class.def(init<int,X>());
     vector_class.def("__len__", &Vector<X>::size);
     vector_class.def("__setitem__", (void(Vector<X>::*)(size_t,const double&)) &Vector<X>::set);
     vector_class.def("__setitem__", (void(Vector<X>::*)(size_t,const X&)) &Vector<X>::set);
     vector_class.def("__getitem__", &Vector<X>::get, return_value_policy<copy_const_reference>());
-    vector_class.def(-self);
-    vector_class.def(self + self);
-    vector_class.def(self - self);
-    vector_class.def(X() * self);
-    vector_class.def(self * X());
-    vector_class.def(self / X());
-    vector_class.def(double() * self);
-    vector_class.def(self * double());
-    vector_class.def(self / double());
-    vector_class.def(self += self);
-    vector_class.def(self -= self);
-    vector_class.def(self *= double());
-    vector_class.def(self *= X());
-    vector_class.def(self /= double());
-    vector_class.def(self /= X());
+    vector_class.def("__neg__", &__vneg__<X,X>);
     vector_class.def(boost::python::self_ns::str(self));
 
     def("norm",(X(*)(const Vector<X>&)) &norm);
@@ -191,30 +208,77 @@ void export_vector()
     def("join",(Vector<X>(*)(const Vector<X>&,const X&)) &join);
 }
 
+template<class X, class Y>
+void export_vector_conversion(class_<Vector<X> >& vector_class)
+{
+    vector_class.def(init<int,Y>());
+    vector_class.def(init< Vector<Y> >());
+}
+
+template<class R, class X, class Y>
+void export_vector_arithmetic(class_<Vector<X> >& vector_class)
+{
+    vector_class.def("__add__",__vvadd__<R,X,Y>);
+    vector_class.def("__sub__",__vvsub__<R,X,Y>);
+    vector_class.def("__rmul__",__vsmul__<R,X,Y>);
+    vector_class.def("__mul__",__vsmul__<R,X,Y>);
+    vector_class.def("__div__",__vsdiv__<R,X,Y>);
+    //vector_class.def(self+=Vector<Y>());
+    //vector_class.def(self-=Vector<Y>());
+    //vector_class.def(self*=Y());
+    //vector_class.def(self/=Y());
+}
+
+
+template<class X> void export_vector()
+{
+    class_< Vector<X> > vector_class(python_name<X>("Vector"),no_init);
+    export_vector_class<X>(vector_class);
+    export_vector_conversion<X,X>(vector_class);
+    export_vector_conversion<X,Float>(vector_class);
+    export_vector_arithmetic<X,X,X>(vector_class);
+    export_vector_arithmetic<X,X,Float>(vector_class);
+}
+
+
+template<> void export_vector<Float>()
+{
+    class_< Vector<Float> > float_vector_class("Vector",no_init);
+    export_vector_class<Float>(float_vector_class);
+    export_vector_conversion<Float,Float>(float_vector_class);
+    export_vector_arithmetic<Float,Float,Float>(float_vector_class);
+    export_vector_arithmetic<Interval,Float,Interval>(float_vector_class);
+}
+
+template<> void export_vector<Interval>()
+{
+    class_< Vector<Interval> > interval_vector_class("IVector",no_init);
+    export_vector_class<Interval>(interval_vector_class);
+    export_vector_conversion<Interval,Float>(interval_vector_class);
+    export_vector_conversion<Interval,Interval>(interval_vector_class);
+    export_vector_arithmetic<Interval,Interval,Float>(interval_vector_class);
+    export_vector_arithmetic<Interval,Interval,Interval>(interval_vector_class);
+    def("midpoint", (Vector<Float>(*)(const Vector<Interval>&)) &midpoint);
+
+}
+
+
+
+
 
 template<class X>
-void export_matrix()
+void export_matrix_class(class_<Matrix<X> >& matrix_class)
 {
-    //class_< Pivot > pivot_class(python_name<X>("Pivot"),no_init);
-    //pivot_class.def(boost::python::self_ns::str(self));    // __str__
-
-    class_< Matrix<X> > matrix_class(python_name<X>("Matrix"),init<size_t,size_t>());
     matrix_class.def("__init__", make_constructor(&make_matrix<X>) );
+    matrix_class.def(init<int,int>());
     matrix_class.def("rows", &Matrix<X>::row_size);
     matrix_class.def("columns", &Matrix<X>::column_size);
     matrix_class.def("row_size", &Matrix<X>::row_size);
     matrix_class.def("column_size", &Matrix<X>::column_size);
-    matrix_class.def("__setitem__", (void(Matrix<X>::*)(size_t,size_t,const double&)) &Matrix<X>::set);
-    matrix_class.def("__setitem__", (void(Matrix<X>::*)(size_t,size_t,const X&)) &Matrix<X>::set);
+    matrix_class.def("__setitem__", (void(Matrix<X>::*)(uint,uint,const double&)) &Matrix<X>::set);
+    matrix_class.def("__setitem__", (void(Matrix<X>::*)(uint,uint,const X&)) &Matrix<X>::set);
     matrix_class.def("__getitem__", &Matrix<X>::get, return_value_policy<copy_const_reference>());
-    matrix_class.def("__neg__", (Matrix<X>(*)(const Matrix<X>&)) &__neg__);
-    matrix_class.def("__add__", (Matrix<X>(*)(const Matrix<X>&,const Matrix<X>&)) &__add__);
-    matrix_class.def("__sub__", (Matrix<X>(*)(const Matrix<X>&,const Matrix<X>&)) &__sub__);
-    matrix_class.def("__mul__", (Matrix<X>(*)(const Matrix<X>&,const X&)) &__mul__);
-    matrix_class.def("__rmul__", (Matrix<X>(*)(const X&,const Matrix<X>&)) &__mul__);
-    matrix_class.def("__div__", (Matrix<X>(*)(const Matrix<X>&,const X&)) &__div__);
-    matrix_class.def("__mul__",(Vector<X>(*)(const Matrix<X>&,const Vector<X>&))&__mvmul__);
-    matrix_class.def("__mul__",(Matrix<X>(*)(const Matrix<X>&,const Matrix<X>&))&__mmmul__);
+    matrix_class.def("__neg__", &__mneg__<X,X>);
     //matrix_class.def("inverse", &inverse<X>);
     //matrix_class.def("determinant", &Matrix::determinant);
     //matrix_class.def("transpose", &Matrix::transpose);
@@ -233,6 +297,58 @@ void export_matrix()
     def("row_norms",(Vector<X>(*)(const Matrix<X>&)) &row_norms);
     def("normalise_rows",(Matrix<X>(*)(const Matrix<X>&)) &normalise_rows);
 }
+
+template<class X, class Y>
+void export_matrix_conversion(class_<Matrix<X> >& matrix_class)
+{
+    matrix_class.def(init< Matrix<Y> >());
+}
+
+template<class R, class X, class Y>
+void export_matrix_arithmetic(class_<Matrix<X> >& matrix_class)
+{
+    matrix_class.def("__add__", &__mmadd__<R,X,Y>);
+    matrix_class.def("__sub__", &__mmsub__<R,X,Y>);
+    matrix_class.def("__mul__", &__msmul__<R,X,Y>);
+    matrix_class.def("__rmul__", &__msmul__<R,X,Y>);
+    matrix_class.def("__div__", &__msdiv__<R,X,Y>);
+    matrix_class.def("__mul__", &__mvmul__<R,X,Y>);
+    matrix_class.def("__mul__", &__mmmul__<R,X,Y>);
+}
+
+
+template<class X> void export_matrix()
+{
+    class_< Matrix<X> > matrix_class(python_name<X>("Matrix"),no_init);
+    export_matrix_class<X>(matrix_class);
+    export_matrix_conversion<X,Float>(matrix_class);
+    export_matrix_conversion<X,X>(matrix_class);
+    export_matrix_arithmetic<X,X,X>(matrix_class);
+    export_matrix_arithmetic<X,X,Float>(matrix_class);
+}
+
+template<> void export_matrix<Float>()
+{
+    class_< Matrix<Float> > matrix_class(python_name<Float>("Matrix"),no_init);
+    export_matrix_class<Float>(matrix_class);
+    export_matrix_conversion<Float,Float>(matrix_class);
+    export_matrix_arithmetic<Float,Float,Float>(matrix_class);
+    export_matrix_arithmetic<Interval,Float,Interval>(matrix_class);
+}
+
+template<> void export_matrix<Interval>()
+{
+    class_< Matrix<Interval> > matrix_class(python_name<Interval>("Matrix"),no_init);
+    export_matrix_class<Interval>(matrix_class);
+    export_matrix_conversion<Interval,Float>(matrix_class);
+    export_matrix_conversion<Interval,Interval>(matrix_class);
+    export_matrix_arithmetic<Interval,Interval,Interval>(matrix_class);
+    export_matrix_arithmetic<Interval,Interval,Float>(matrix_class);
+    def("midpoint", (Matrix<Float>(*)(const Matrix<Interval>&)) &midpoint);
+
+}
+
+
 
 template void export_vector<Float>();
 template void export_vector<Interval>();

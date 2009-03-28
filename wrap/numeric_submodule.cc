@@ -98,7 +98,12 @@ void export_interval()
     interval_class.def(double() / self);
     interval_class.def("lower", &Interval::lower, return_value_policy<copy_const_reference>());
     interval_class.def("upper", &Interval::upper, return_value_policy<copy_const_reference>());
+    interval_class.def("midpoint", &Interval::midpoint);
+    interval_class.def("radius", &Interval::radius);
     interval_class.def(boost::python::self_ns::str(self));
+
+    def("midpoint", &Interval::midpoint);
+    def("radius", &Interval::radius);
 
     def("med", (IFUN) &med);
     def("rad", (IFUN) &rad);

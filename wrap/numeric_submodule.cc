@@ -41,6 +41,8 @@ std::string __str__(const tribool& tb) {
     return ss.str();
 }
 
+
+
 void export_tribool()
 {
     class_<tribool> tribool_class("tribool",no_init);
@@ -100,10 +102,14 @@ void export_interval()
     interval_class.def("upper", &Interval::upper, return_value_policy<copy_const_reference>());
     interval_class.def("midpoint", &Interval::midpoint);
     interval_class.def("radius", &Interval::radius);
+    interval_class.def("__repr__",&__repr__<Interval>);
     interval_class.def(boost::python::self_ns::str(self));
 
     def("midpoint", &Interval::midpoint);
     def("radius", &Interval::radius);
+    def("disjoint", &disjoint);
+    def("subset", &subset);
+    def("intersection", &intersection);
 
     def("med", (IFUN) &med);
     def("rad", (IFUN) &rad);

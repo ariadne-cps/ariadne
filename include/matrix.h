@@ -44,7 +44,6 @@ using namespace boost::numeric;
 
 namespace Ariadne {
 
-typedef array<size_t> Pivot;
 
 /// A matrix over a field. See also \link Ariadne::Vector \c Vector<X> \endlink.
 template<class X>
@@ -144,13 +143,51 @@ class Matrix
     //! \brief %Matrix-matrix multiplication.
     friend template<class X> Vector<X> operator*(const Matrix<X>& A1, const Matrix<X>& A2);
 
+    //! \brief The operator norm using the supremum norm on Euclidean space.
+    //! Given explicitly by \f$\max_i \sum_j |a_{ij}|\f$.
+    friend template<class X> X norm(const Matrix<X>& A);
+
+    //! \brief The transpose matrix.
+    friend template<class X> Matrix<X> transpose(const Matrix<X>& A);
+    //! \brief The inverse matrix.
+    friend template<class X> Matrix<X> inverse(const Matrix<X>& A);
+
+    //! \brief Solve a system of linear equations.
+    //!
+    //! Uses Gaussian elimination with column row pivoting for floating-point matrices.
+    //!
+    //! Uses Gauss-Seidel iteration on a preconditioned system for interval matrices.
+    //! First, an approximate inverse \f$S\f$ to \f$m([A])\f$ is computed using floating-point arithmetic.
+    //! Next, the system is reformulated as \f$S[A][x]=S[b]\f$, or \f$[J][x]=[c]\f$
+    //! The interval matrix \f$S[A]\f$ should be close to the identity
+    //! (if the interval matrix \f$[A]\f$ is well-conditioned
+    //! and the radii of the coefficients are sufficiently small).
+    //!
+    //! If (the preconditioned) \f$[A]\f$ is diagonally-dominant, then an initial bound for the solutions to
+    //! to \f$[A][x]=[b]\f$ can be given as \f$|x_i|\leq |b_i|/(|a_{ii}|-\sum_{j\neq i}|a_{ij}|)\f$.
+    //!
+    //! Any bound \f$[x]\f$ for the solutions can then be iteratively updated using the Gauss-Seidel scheme
+    //! \f$x_i' = x_i\cap (b_i-\sum_{j\neq i} a_{ij}x_j)/a_{ii}\f$.
+    friend template<class X> Vector<X> solve(const Matrix<X>& A, const Vector<X>& b);
+    //! \brief Simultaneously solve multiple linear equations.
+    friend template<class X> Matrix<X> solve(const Matrix<X>& A, const Matrix<X>& b);
+
+    //! \brief The midpoint of an interval matrix.
+    friend Matrix<Float> midpoint(const Matrix<Interval>& A);
+
     //! \brief Write to an output stream.
     friend template<class X> std::ostream& operator<<(std::ostream& os, const Matrix<X>& A);
     //! \brief Read from an output stream.
     friend template<class X> std::istream& operator>>(std::istream& is, Matrix<X>& A);
+
+
 #endif
 
-    };
+};
+
+class PivotMatrix;
+template<class X> class PLUMatrix;
+template<class X> class QRMatrix;
 
 template<class X> X norm(const Matrix<X>& A);
 template<class X> Matrix<X> transpose(const Matrix<X>& A);
@@ -158,28 +195,48 @@ template<class X> Matrix<X> transpose(const Matrix<X>& A);
 template<class X> std::ostream& operator<<(std::ostream& os, const Matrix<X>& A);
 template<class X> std::istream& operator>>(std::istream& is, Matrix<X>& A);
 
-Matrix<Float> inverse(const Matrix<Float>& A);
-Matrix<Interval> inverse(const Matrix<Interval>& A);
+template<class X> Matrix<X> inverse(const Matrix<X>& A);
+template<class X> Matrix<X> solve(const Matrix<X>& A, const Matrix<X>& B);
+template<class X> Vector<X> solve(const Matrix<X>& A, const Vector<X>& B);
 
-#ifdef HAVE_GMPXX_H
-Matrix<Rational> inverse(const Matrix<Rational>& A);
-#endif // HAVE_GMPXX_H
+// Compute the inverse using lower/upper triangular factorization
+template<class X> Matrix<X> lu_inverse(const Matrix<X>& A);
+template<class X> Matrix<X> lu_solve(const Matrix<X>& A, const Matrix<X>& B);
+// Compute the inverse using Gauss-Seidel iteration
+template<class X> Matrix<X> gs_inverse(const Matrix<X>& A);
+template<class X> Matrix<X> gs_solve(const Matrix<X>& A, const Matrix<X>& B);
 
-Matrix<Float> pivot_matrix(const array<size_t>& pv);
+template<class X> PLUMatrix<X> plu(const Matrix<X>& A);
+template<class X> Matrix<X> inverse(const PLUMatrix<X>& A);
+template<class X> Matrix<X> solve(const PLUMatrix<X>& A, const Matrix<X>& B);
+template<class X> Vector<X> solve(const PLUMatrix<X>& A, const Vector<X>& B);
 
-tuple< array<uint>, Matrix<Float>, Matrix<Float> > plu(const Matrix<Float>&);
-tuple< Matrix<Float>, Matrix<Float> > qr(const Matrix<Float>&);
+struct PivotMatrix : public array<size_t> {
+    PivotMatrix(size_t n=0u) : array<size_t>(n) {
+        for(uint i=0; i!=n; ++i) { (*this)[i]=i; } }
+};
 
-tuple< Pivot, Matrix<Float>, Matrix<Float> > triangular_decomposition(const Matrix<Float>& A);
+template<class X> struct PLUMatrix {
+    PivotMatrix P; Matrix<X> LU;
+};
+
+QRMatrix<Float> qr(const Matrix<Float>& A);
+template<class X> struct QRMatrix {
+    Matrix<X> Q; Matrix<X> R;
+};
+
+
+tuple< PivotMatrix, Matrix<Float>, Matrix<Float> > triangular_decomposition(const Matrix<Float>& A);
 
 Vector<Float> row_norms(const Matrix<Float>& A);
-tuple< Matrix<Float>, Pivot> triangular_factor(const Matrix<Float>& A);
+tuple< Matrix<Float>, PivotMatrix> triangular_factor(const Matrix<Float>& A);
 Matrix<Float> triangular_multiplier(const Matrix<Float>& A);
-tuple< Matrix<Float>, Matrix<Float>, Pivot > orthogonal_decomposition(const Matrix<Float>&);
+tuple< Matrix<Float>, Matrix<Float>, PivotMatrix > orthogonal_decomposition(const Matrix<Float>&);
 Matrix<Float> normalise_rows(const Matrix<Float>& A);
 
 Matrix<Float> midpoint(const Matrix<Interval>&);
 
+Matrix<Float> pivot_matrix(const array<size_t>& p);
 
 
 template<class X> Matrix<X>::Matrix(size_t r, size_t c, const double& x0, ...)

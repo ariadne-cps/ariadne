@@ -89,6 +89,24 @@ make_matrix(const boost::python::object& obj)
 }
 
 
+template<class X>
+X __mgetitem__(const Matrix<X>& A, const boost::python::tuple& tup)
+{
+    uint i=boost::python::extract<uint>(tup[0]);
+    uint j=boost::python::extract<uint>(tup[1]);
+    return A[i][j];
+}
+
+template<class X, class XX>
+void __msetitem__(Matrix<X>& A, const boost::python::tuple& tup, const XX& x)
+{
+    uint i=boost::python::extract<uint>(tup[0]);
+    uint j=boost::python::extract<uint>(tup[1]);
+    A[i][j]=X(x);
+}
+
+
+
 
 template<class X0, class X1>
 Vector<X0> __vneg__(const Vector<X1>& v1) {
@@ -119,7 +137,6 @@ template<class X0, class X1, class X2>
 Vector<X0> __vsdiv__(const Vector<X1>& v1, const X2& s2) {
     return v1/s2;
 }
-
 
 
 template<class X0, class X1>
@@ -166,21 +183,21 @@ Matrix<X0> __mmmul__(const Matrix<X1>& A1, const Matrix<X2>& A2) {
 boost::python::tuple
 wrap_orthogonal_decomposition(const Matrix<Float>& A)
 {
-    Ariadne::tuple<Matrix<Float>,Matrix<Float>, Pivot > QRP=Ariadne::orthogonal_decomposition(A);
+    Ariadne::tuple<Matrix<Float>,Matrix<Float>, PivotMatrix > QRP=Ariadne::orthogonal_decomposition(A);
     return boost::python::make_tuple(QRP.first,QRP.second,pivot_matrix(QRP.third));
 }
 
 boost::python::tuple
 wrap_triangular_factor(const Matrix<Float>& A)
 {
-    Ariadne::tuple<Matrix<Float>,Pivot > RP=Ariadne::triangular_factor(A);
+    Ariadne::tuple<Matrix<Float>,PivotMatrix > RP=Ariadne::triangular_factor(A);
     return boost::python::make_tuple(RP.first,pivot_matrix(RP.second));
 }
 
 boost::python::tuple
 wrap_triangular_decomposition(const Matrix<Float>& A)
 {
-    Ariadne::tuple<Pivot,Matrix<Float>,Matrix<Float> > PLU=Ariadne::triangular_decomposition(A);
+    Ariadne::tuple<PivotMatrix,Matrix<Float>,Matrix<Float> > PLU=Ariadne::triangular_decomposition(A);
     return boost::python::make_tuple(pivot_matrix(PLU.first),PLU.second,PLU.third);
 }
 
@@ -201,6 +218,7 @@ void export_vector_class(class_<Vector<X> >& vector_class)
     vector_class.def("__setitem__", (void(Vector<X>::*)(size_t,const X&)) &Vector<X>::set);
     vector_class.def("__getitem__", &Vector<X>::get, return_value_policy<copy_const_reference>());
     vector_class.def("__neg__", &__vneg__<X,X>);
+    vector_class.def("__repr__",&__repr__<Vector<X> >);
     vector_class.def(boost::python::self_ns::str(self));
 
     def("norm",(X(*)(const Vector<X>&)) &norm);
@@ -275,9 +293,9 @@ void export_matrix_class(class_<Matrix<X> >& matrix_class)
     matrix_class.def("columns", &Matrix<X>::column_size);
     matrix_class.def("row_size", &Matrix<X>::row_size);
     matrix_class.def("column_size", &Matrix<X>::column_size);
-    matrix_class.def("__setitem__", (void(Matrix<X>::*)(uint,uint,const double&)) &Matrix<X>::set);
-    matrix_class.def("__setitem__", (void(Matrix<X>::*)(uint,uint,const X&)) &Matrix<X>::set);
-    matrix_class.def("__getitem__", &Matrix<X>::get, return_value_policy<copy_const_reference>());
+    matrix_class.def("__setitem__", &__msetitem__<X,double>);
+    matrix_class.def("__setitem__", &__msetitem__<X,X>);
+    matrix_class.def("__getitem__", &__mgetitem__<X>);
     matrix_class.def("__neg__", &__mneg__<X,X>);
     //matrix_class.def("inverse", &inverse<X>);
     //matrix_class.def("determinant", &Matrix::determinant);
@@ -287,8 +305,11 @@ void export_matrix_class(class_<Matrix<X> >& matrix_class)
     matrix_class.def("__repr__",&__repr__<Matrix<X> >);
 
     def("norm",(X(*)(const Matrix<X>&)) &norm);
-    def("inverse",(Matrix<X>(*)(const Matrix<X>&)) &inverse);
     def("transpose",(Matrix<X>(*)(const Matrix<X>&)) &transpose);
+
+    def("inverse",(Matrix<X>(*)(const Matrix<X>&)) &inverse);
+    def("solve",(Matrix<X>(*)(const Matrix<X>&,const Matrix<X>&)) &solve);
+    //def("solve",(Vector<X>(*)(const Matrix<X>&,const Vector<X>&)) &solve);
 
     def("triangular_decomposition",&wrap_triangular_decomposition);
     def("orthogonal_decomposition",&wrap_orthogonal_decomposition);
@@ -344,8 +365,11 @@ template<> void export_matrix<Interval>()
     export_matrix_conversion<Interval,Interval>(matrix_class);
     export_matrix_arithmetic<Interval,Interval,Interval>(matrix_class);
     export_matrix_arithmetic<Interval,Interval,Float>(matrix_class);
+    def("gs_inverse", (Matrix<Interval>(*)(const Matrix<Interval>&)) &gs_inverse);
+    def("lu_inverse", (Matrix<Interval>(*)(const Matrix<Interval>&)) &lu_inverse);
+    def("gs_solve", (Matrix<Interval>(*)(const Matrix<Interval>&,const Matrix<Interval>&)) &gs_solve);
+    def("lu_solve", (Matrix<Interval>(*)(const Matrix<Interval>&,const Matrix<Interval>&)) &lu_solve);
     def("midpoint", (Matrix<Float>(*)(const Matrix<Interval>&)) &midpoint);
-
 }
 
 

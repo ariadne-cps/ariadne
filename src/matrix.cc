@@ -132,26 +132,180 @@ lu_inverse(const Matrix<X>& M)
     return B;
 }
 
+template<class X> Matrix<X> lu_solve(const Matrix<X>& A, const Matrix<X>& B);
+template<class X> Matrix<X> gs_solve(const Matrix<X>& A, const Matrix<X>& B);
+template<class X> Matrix<X> dd_solve(const Matrix<X>& A, const Matrix<X>& B);
 
-Matrix<Float>
-inverse(const Matrix<Float>& A)
+template<class X> Matrix<X> lu_solve(const Matrix<X>& A, const Matrix<X>& B) {
+    return prod(lu_inverse(A),B);
+}
+
+// Find a starting solution for a diagonally dominant system
+Matrix<Interval> dd_solve(const Matrix<Interval>& A, const Matrix<Interval>& B)
 {
+    const size_t n=B.row_size();
+    const size_t m=B.column_size();
+
+    //Compute 1/(|aii|-sum|aij|) using outward rounding
+    rounding_mode_t rounding_mode=get_rounding_mode();
+    set_rounding_mode(upward);
+    Vector<Float> c(n,0.0);
+    for(size_t i=0; i!=n; ++i) {
+        volatile double& ci=c[i];
+        for(size_t j=0; j!=n; ++j) {
+            if(j!=i) {
+                ci+=mag(A[i][j]);
+            }
+        }
+        ci=ci-mig(A[i][i]);
+        ci=-ci;
+        if(ci<=0.0) {
+            ARIADNE_THROW(std::runtime_error,"dd_solve(Matrix<Interval> A, Matrix<Interval> B)",
+                          "Interval matrix A="<<A<<" is not diagonally-dominant.");
+        }
+        ci=1.0/ci;
+    }
+    set_rounding_mode(rounding_mode);
+
+    // Compute initial solution
+    Matrix<Interval> R(n,m);
+    for(size_t i=0; i!=n; ++i) {
+        Interval ci(-c[i],+c[i]);
+        for(size_t j=0; j!=m; ++j) {
+            R[i][j]=B[i][j]*ci;
+        }
+    }
+
+    return R;
+}
+
+
+template<> Matrix<Interval> gs_solve(const Matrix<Interval>& A, const Matrix<Interval>& B)
+{
+    ARIADNE_ASSERT(A.row_size()==A.column_size());
+    ARIADNE_ASSERT(B.row_size()==A.column_size());
+    const size_t n=B.row_size();
+    const size_t m=B.column_size();
+
+    // Precondition A and B
+    Matrix<Float> J=inverse(midpoint(A));
+    Matrix<Interval> JA=prod(J,A);
+    Matrix<Interval> JB=prod(J,B);
+    //std::cerr<<"J="<<J<<"\nJA="<<JA<<"\nJB="<<JB<<"\n";
+
+    //Matrix<Interval> R=dd_solve(JA,JB);
+    Matrix<Interval> R=lu_inverse(A);
+    //std::cerr<<"R="<<R<<"\n";
+
+    // Perform Gauss-Seidel iteration
+    size_t step=0;
+    while(step<1) {
+        for(size_t i=0; i!=n; ++i) {
+            for(size_t j=0; j!=m; ++j) {
+                // compute R'[i][j] := (JB[i][j] - Sum{k!=j}JA[i][k]*R[k][j]) / JA[i][i]
+                Interval Rij=JB[i][j];
+                for(size_t k=0; k!=n; ++k) {
+                    if(k!=i) {
+                        Rij-=JA[i][k]*R[k][j];
+                    }
+                }
+                Rij/=JA[i][i];
+                R[i][j]=intersection(R[i][j],Rij);
+            }
+        }
+        ++step;
+        //std::cerr<<"R="<<R<<"\n";
+    }
+
+    return R;
+}
+
+template<class X> Matrix<X> gs_inverse(const Matrix<X>& A) {
+    return gs_solve(A,Matrix<X>::identity(A.row_size()));
+}
+
+
+template<class X> Matrix<X> inverse(const Matrix<X>& A) {
     return lu_inverse(A);
 }
 
-Matrix<Interval>
-inverse(const Matrix<Interval>& A)
-{
+template<> Matrix<Interval> inverse<Interval>(const Matrix<Interval>& A) {
     return lu_inverse(A);
 }
 
-#ifdef HAVE_GMPXX_H
-Matrix<Rational>
-inverse(const Matrix<Rational>& A)
-{
-    return lu_inverse(A);
+
+template<class X> Matrix<X> solve(const Matrix<X>& A, const Matrix<X>& B) {
+    return prod(inverse(A),B);
 }
-#endif // HAVE_GMPXX_H
+
+template<> Matrix<Interval> solve(const Matrix<Interval>& A, const Matrix<Interval>& B) {
+    return gs_solve(A,B);
+}
+
+template<class X> Matrix<X> solve(const Matrix<X>& A, const Vector<X>& b) {
+}
+
+
+template<class X>
+Matrix<X>
+solve(const PLUMatrix<X>& A, const Matrix<X>& B)
+{
+    const PivotMatrix& P=A.P;
+    const Matrix<X>& L=A.L;
+    const Matrix<X>& U=A.U;
+
+    // Only work with square matrices L, U
+    assert(L.row_size()==L.column_size());
+    assert(U.row_size()==U.column_size());
+
+    // Check sizes for consistency
+    assert(L.column_size()==U.row_size());
+    assert(P.size()==L.row_size());
+    assert(B.row_size()==P.size());
+
+    // Set constants for sizes
+    const size_t m=B.column_size();
+    const size_t n=B.row_size();
+
+    Matrix<X> R=B;
+
+    // PivotMatrix rows of B
+    for(size_t k=0; k!=n; ++k) {
+        size_t i=P[k];
+        for(size_t j=0; j!=m; ++j) {
+            X tmp=R[i][j];
+            R[i][k]=R[k][j];
+            R[k][j]=tmp;
+        }
+    }
+
+    // Backsubstitute on L
+    for(size_t k=0; k!=n; ++k) {
+        for(size_t i=k+1; i!=n; ++i) {
+            X s=L[i][k];
+            for(size_t j=0; j!=n; ++j) {
+                R[i][j] -= s * R[k][j];
+            }
+        }
+    }
+
+    // Backsubstitute on U with row scaling
+    for(size_t k=n; k!=0; ) {
+        --k;
+        X s=1/U[k][k];
+        for(size_t j=0; j!=m; ++j) {
+            R[k][j] *= s;
+        }
+        for(size_t i=0; i!=k; ++i) {
+            X s=U[i][k];
+            for(size_t j=0; j!=m; ++j) {
+                R[i][j] -= s * R[k][j];
+            }
+        }
+    }
+
+}
+
 
 // Compute the vector of row norms (sums of absolute values) of A
 Vector<Float>
@@ -208,7 +362,7 @@ normalise_rows(const Matrix<Float>& A)
 
 // Returns a pivot P and matrices L and U such that L is unit lower-triangular,
 // U is upper-trianguler and A=PLU.
-tuple< Pivot, Matrix<Float>, Matrix<Float> >
+tuple< PivotMatrix, Matrix<Float>, Matrix<Float> >
 triangular_decomposition(const Matrix<Float>& A)
 {
     typedef Float RealType;
@@ -221,7 +375,7 @@ triangular_decomposition(const Matrix<Float>& A)
 
     // Array of row pivots. The value P[i] gives the row
     // swapped with the ith row in the ith stage.
-    array<size_t> P(m);
+    PivotMatrix P(m);
     for(size_t k=0; k!=m; ++k) { P[k]=k; }
 
     for(size_t k=0; k!=std::min(m,n); ++k) {
@@ -275,14 +429,14 @@ triangular_decomposition(const Matrix<Float>& A)
 // Use Householder transformation H=I-vv' where v=u/|u|
 // and u=a +/- |a|e with a and e the working column of A
 // and corresponding unit vector.
-tuple< Matrix<Float>, Pivot>
+tuple< Matrix<Float>, PivotMatrix>
 triangular_factor(const Matrix<Float>& A)
 {
     const size_t m=A.row_size();
     const size_t n=A.column_size();
 
     Matrix<Float> R=A;
-    Pivot P(n); for(uint i=0; i!=n; ++i) { P[i]=i; }
+    PivotMatrix P(n); for(uint i=0; i!=n; ++i) { P[i]=i; }
 
     // Array of column norm squares
     array<Float> cns(n);
@@ -393,7 +547,7 @@ triangular_multiplier(const Matrix<Float>& A)
     const size_t m=A.row_size();
     const size_t n=A.column_size();
 
-    Matrix<Float> R; Pivot P;
+    Matrix<Float> R; PivotMatrix P;
     make_ltuple(R,P)=triangular_factor(A);
 
     Matrix<Float> T(n,m); for(size_t i=0; i!=m; ++i) { T[i][i]=1.0; }
@@ -443,7 +597,7 @@ Matrix<Float> pivot_matrix(const array<size_t>& pv)
 // matrix Q is built up as a composition of elementary Householder
 // transformations H=I-vv' with |v|=1. Note that inv(H)=H'=H. The vector v is
 // chosen to be a multiple of the first working column of A.
-tuple< Matrix<Float>, Matrix<Float>, Pivot >
+tuple< Matrix<Float>, Matrix<Float>, PivotMatrix >
 orthogonal_decomposition(const Matrix<Float>& A)
 {
     typedef Float X;
@@ -452,7 +606,7 @@ orthogonal_decomposition(const Matrix<Float>& A)
     size_t n=A.column_size();
     Matrix<X> Q(m,m);
     Matrix<X> R(A);
-    Pivot P(n);
+    PivotMatrix P(n);
 
     array<X> p(n);
     Vector<X> u(m);
@@ -632,9 +786,19 @@ orthogonal_decomposition(const Matrix<Float>& A)
 
 
 template class Matrix<Float>;
+template Matrix<Float> inverse(const Matrix<Float>&);
+template Matrix<Float> solve(const Matrix<Float>&, const Matrix<Float>&);
 template class Matrix<Interval>;
+template Matrix<Interval> inverse(const Matrix<Interval>&);
+template Matrix<Interval> lu_inverse(const Matrix<Interval>&);
+template Matrix<Interval> gs_inverse(const Matrix<Interval>&);
+template Matrix<Interval> solve(const Matrix<Interval>&, const Matrix<Interval>&);
+template Matrix<Interval> lu_solve(const Matrix<Interval>&, const Matrix<Interval>&);
+template Matrix<Interval> gs_solve(const Matrix<Interval>&, const Matrix<Interval>&);
 #ifdef HAVE_GMPXX_H
 template class Matrix<Rational>;
+template Matrix<Rational> inverse(const Matrix<Rational>&);
+template Matrix<Rational> solve(const Matrix<Rational>&, const Matrix<Rational>&);
 #endif
 
 } // namespace Ariadne

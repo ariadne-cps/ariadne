@@ -463,6 +463,7 @@ inline
 std::ostream& operator<<(std::ostream& os, const MultiIndex& a) {
     //os << "("<<int(a.degree());
     //for(MultiIndex::size_type i=0; i!=a.size(); ++i) { os << (i==0?';':',') << int(a[i]); }
+    if(a.size()==0) { os << '('; }
     for(MultiIndex::size_type i=0; i!=a.size(); ++i) { os << (i==0?'(':',') << int(a[i]); }
     return os << ')';
 }

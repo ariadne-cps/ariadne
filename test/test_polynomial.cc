@@ -59,6 +59,7 @@ void TestPolynomial::test_concept()
     MultiIndex a(3);
     Polynomial<Float> p(3);
     const Polynomial<Float> cp(3);
+    Vector< Polynomial<Float> > pv(2);
 
     p=Polynomial<Float>();
     p=Polynomial<Float>(3);
@@ -81,13 +82,16 @@ void TestPolynomial::test_concept()
     p[a]=1.0;
 
     cp.argument_size();
-    cp.evaluate(v);
 
     p.erase(p.begin());
 
     p.check();
     p.cleanup();
     p.clear();
+
+    evaluate(p,v);
+    compose(p,pv);
+
 }
 
 void TestPolynomial::test_iterator_concept()

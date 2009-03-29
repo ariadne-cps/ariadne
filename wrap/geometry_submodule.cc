@@ -73,7 +73,7 @@ read(Zonotope& z, const boost::python::object& obj)
 }
 
 
-void read(TaylorVariable& tv, const boost::python::object& obj);
+void read(TaylorModel& tv, const boost::python::object& obj1, const boost::python::object& obj2);
 
 
 void
@@ -82,9 +82,10 @@ read(TaylorSet& ts, const boost::python::object& obj)
     boost::python::list lst=extract<boost::python::list>(obj);
     ts=TaylorSet(len(lst));
     for(int i=0; i!=len(lst); ++i) {
-        TaylorVariable tv;
-        read(tv,lst[i]);
-        ts[i]=tv;
+        boost::python::tuple tup=extract<boost::python::tuple>(lst[i]);
+        TaylorModel tm;
+        read(tm,tup[0],tup[1]);
+        ts[i]=tm;
     }
 }
     

@@ -44,7 +44,9 @@
 namespace Ariadne {
 
 template<class X> class Expansion;
-template<class X> class Vector< Expansion<X> >;
+
+template<class X, class Y> Y evaluate(Expansion<X>&, const Vector<Y>&);
+template<class X> Expansion<X> embed(unsigned int, const Expansion<X>&, unsigned int);
 
 #if defined DOXYGEN or not defined ARIADNE_USE_ARRAY_EXPANSION
 
@@ -166,10 +168,10 @@ class Expansion
         for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
             ARIADNE_ASSERT(iter->first.size()==this->_argument_size); } }
 
-    //! \brief Evaluate the polynomial on a vector \a x over a ring.
-    template<class Y> Y evaluate(const Vector<Y>& x) const;
+    //! \brief Evaluate the polynomial on a vector \a y over a ring.
+    template<class XX, class YY> friend YY evaluate(Expansion<XX>& x, const Vector<YY>& y);
     //! \brief Embed in a space of higher dimension.
-    Expansion<X> embed(unsigned int new_size, unsigned int start) const;
+    template<class XX> friend Expansion<XX> embed(unsigned int before_size, const Expansion<XX>& x, unsigned int after_start);
   private:
     size_type _argument_size;
     std::map<MultiIndex,X> _coefficients;
@@ -463,8 +465,8 @@ class Expansion
 
     void check() { }
 
-    template<class Y> Y evaluate(const Vector<Y>& x) const;
-    Expansion<X> embed(unsigned int new_size, unsigned int start) const;
+    friend template<class XX, class YY> YY evaluate(const Expansion<XX>&, const Vector<YY>& x) const;
+    Expansion<X> embed(unsigned int before_size, const Expansion<X>&, unsigned int after_size) const;
   public:
     size_type vector_size() const {
         return _coefficients.size(); }
@@ -571,24 +573,25 @@ template<class X> Expansion<X> Expansion<X>::variable(unsigned int n, unsigned i
 
 
 
-template<class X> template<class Y>
-Y Expansion<X>::evaluate(const Vector<Y>& x) const
+template<class X, class Y>
+Y evaluate(const Expansion<X>& x, const Vector<Y>& y) 
 {
-    ARIADNE_ASSERT(this->argument_size()==x.size());
-    Y zero = x[0]; zero*=0;
+    ARIADNE_ASSERT_MSG(x.argument_size()==y.size(),
+        "evaluate(Expansion x, Vector y) with x="<<x<<", y="<<y<<": x.argument_size()!=y.size()");
+    Y zero = y[0]; zero*=0;
     Y one = zero; one+=1;
 
     Y r=zero;
-
-    for(typename Expansion<X>::const_iterator iter=this->begin();
-        iter!=this->end(); ++iter)
+    Y t=zero;
+    for(typename Expansion<X>::const_iterator iter=x.begin();
+        iter!=x.end(); ++iter)
     {
         const MultiIndex& j=iter->first;
         const X& c=iter->second;
-        Y t=one;
-        for(uint k=0; k!=x.size(); ++k) {
+        t=one;
+        for(uint k=0; k!=y.size(); ++k) {
             for(uint l=0; l!=j[k]; ++l) {
-                t=t*x[k];
+                t=t*y[k];
             }
         }
         t*=c;
@@ -598,27 +601,21 @@ Y Expansion<X>::evaluate(const Vector<Y>& x) const
     return r;
 }
 
-template<class X, class Y>
-Y evaluate(const Expansion<X>& x, const Vector<Y>& y)
-{
-    return x.evaluate(y);
-}
-
 
 
 template<class X>
-Expansion<X> Expansion<X>::embed(unsigned int new_size, unsigned int start) const
+Expansion<X> embed(unsigned int before_size, const Expansion<X>& x, unsigned int after_size)
 {
-    ARIADNE_ASSERT(this->argument_size()+start<=new_size);
+    uint old_size=x.argument_size();
+    uint new_size=before_size+old_size+after_size;
     Expansion<X> r(new_size);
-    uint old_size=this->argument_size();
     MultiIndex old_index(old_size);
     MultiIndex new_index(new_size);
-    for(typename Expansion<X>::const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
+    for(typename Expansion<X>::const_iterator iter=x.begin(); iter!=x.end(); ++iter) {
         old_index=iter->first;
         for(uint j=0; j!=old_size; ++j) {
             uint aj=old_index[j];
-            new_index[j+start]=aj;
+            new_index[j+before_size]=aj;
         }
         r.append(new_index,iter->second);
     }
@@ -637,7 +634,15 @@ inline Expansion<Float> midpoint(const Expansion<Interval>& pse) {
 template<class X>
 std::ostream& operator<<(std::ostream& os, const Expansion<X>& p) {
     if(p.begin()==p.end()) {
-        return os << "{"<<MultiIndex::zero(p.argument_size())<<":0.0}"; }
+        if(p.argument_size()==0) {
+            return os<<"{ : }"; }
+        else {
+            os<<"{ 0";
+            for(unsigned int i=1; i!=p.argument_size(); ++i) {
+                os<<",0"; }
+            return os << ": }";
+        }
+    }
 
     os << "{";
     for(typename Expansion<X>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
@@ -650,43 +655,6 @@ std::ostream& operator<<(std::ostream& os, const Expansion<X>& p) {
 
 
 
-
-template<class X>
-class Vector< Expansion<X> >
-    : public ublas::vector< Expansion<X> >
-{
-    typedef unsigned int uint;
-  public:
-    Vector() : ublas::vector< Expansion<X> >() { }
-    Vector(uint rs) : ublas::vector< Expansion<X> >(rs) { for(uint i=0; i!=rs; ++i) { (*this)[i]=Expansion<X>(); } }
-    Vector(uint rs, const Expansion<X>& x) : ublas::vector< Expansion<X> >(rs) { for(uint i=0; i!=rs; ++i) { (*this)[i]=x; } }
-
-    Vector(uint rs, uint as, uint deg, double c00, ...);
-
-    template<class E> Vector(const ublas::vector_expression<E> &ve) : ublas::vector< Expansion<X> >(ve) { }
-
-    uint result_size() const { return this->size(); }
-    uint argument_size() const { ARIADNE_ASSERT(this->size()>0); return (*this)[0].argument_size(); }
-};
-
-
-template<class X>
-Vector< Expansion<X> >::Vector(uint rs, uint as, uint deg, double c00, ...)
-    : ublas::vector< Expansion<X> >(rs)
-{
-    double x=c00;
-    va_list args;
-    va_start(args,c00);
-    for(uint i=0; i!=rs; ++i) {
-        (*this)[i]=Expansion<X>(as);
-        for(MultiIndex j(as); j.degree()<=deg; ++j) {
-            if(i>0 || j.degree()>0) { x=va_arg(args,double); }
-            if(x!=0.0) { (*this)[i].insert(j,x); }
-        }
-        (*this)[i].cleanup();
-    }
-    va_end(args);
-}
 
 
 template<class X> Vector< Expansion<X> > Expansion<X>::variables(unsigned int n) {
@@ -701,7 +669,17 @@ Vector<Y> evaluate(const Vector< Expansion<X> >& x, const Vector<Y>& y)
 {
     Vector<Y> r(x.size());
     for(unsigned int i=0; i!=x.size(); ++i) {
-        r[i]=x[i].evaluate(y);
+        r[i]=evaluate(x[i],y);
+    }
+    return r;
+}
+
+
+template<class X> Vector< Expansion<X> > operator*(const Expansion<X>& e, const Vector<Float> v) {
+    Vector< Expansion<X> > r(v.size(),Expansion<X>(e.argument_size()));
+    for(uint i=0; i!=r.size(); ++i) {
+        ARIADNE_ASSERT(v[i]==0.0 || v[i]==1.0);
+        if(v[i]==1.0) { r[i]=e; }
     }
     return r;
 }

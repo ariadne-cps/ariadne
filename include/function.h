@@ -125,7 +125,7 @@ class FunctionTemplate
     virtual Vector<Interval> evaluate(const Vector<Interval>& x) const {
         Vector<Interval> r(this->result_size()); this->_compute(r,x,p); return r; }
     virtual Vector<TaylorModel> evaluate(const Vector<TaylorModel>& x) const {
-        Vector<TaylorModel> r=TaylorModel::zeroes(this->result_size(),this->argument_size());
+        Vector<TaylorModel> r=TaylorModel::zeros(this->result_size(),this->argument_size());
         this->_compute(r,x,p); return r; }
     virtual Vector< Differential<Float> > evaluate(const Vector< Differential<Float> >& x) const {
         Vector< Differential<Float> > r(this->result_size()); this->_compute(r,x,p); return r; }

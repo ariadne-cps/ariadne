@@ -787,22 +787,10 @@ std::ostream& operator<<(std::ostream& os, const Differential<X>& x)
 //! Embed the arguments in a space of dimension \a size, starting at position \a start.
 template<class X>
 Differential<X>
-embed(const Differential<X>& x, 
-      uint size, uint start)
+embed(uint before_size, const Differential<X>& x, 
+      uint after_size)
 {  
-    assert(start+x.argument_size()<=size);
-    Differential<X> r(size,x.degree());
-    MultiIndex jr(size);
-    for(typename Differential<X>::const_iterator iter=x.begin();
-        iter!=x.end(); ++iter)
-        {
-            const MultiIndex& jx=iter->first;
-            for(uint k=0; k!=x.argument_size(); ++k) {
-                jr[start+k]=jx[k];
-            }
-            r[jr]=iter->second;
-        }
-    return r;
+    return Differential<X>(x.degree(),x.expansion().embed(before_size,after_size));
 }
 
 

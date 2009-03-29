@@ -177,17 +177,17 @@ inline Vector< Polynomial<Float> > midpoint(const Vector< Polynomial<Interval> >
 }
 
 
-template<class X, class Y>
+template<class X, class Y> inline
 Y evaluate(const Polynomial<X>& p, const Vector<Y>& x)
 {
-    return p.evaluate(x);
+    return evaluate(static_cast< Expansion<X> >(p),x);
 }
 
 
-template<class X, class Y>
+template<class X, class Y> inline
 Vector<Y> evaluate(const Vector< Polynomial<X> >& p, const Vector<Y>& x)
 {
-    ARIADNE_ASSERT(p.size()>0 && p[0].argument_size()==x.size());\
+    ARIADNE_ASSERT(p.size()>0 && p[0].argument_size()==x.size());
     Y zero = x[0]; zero*=0.0;
     Vector<Y> r(p.size(),zero);
     for(uint i=0; i!=p.size(); ++i) {
@@ -211,22 +211,9 @@ Vector< Polynomial<X> > compose(const Vector< Polynomial<X> >& p, const Vector< 
 
 
 template<class X> inline
-Polynomial<X> embed(const Polynomial<X>& x, unsigned int new_size, unsigned int start)
+Polynomial<X> embed(unsigned int before_size, const Polynomial<X>& x, unsigned int after_size)
 {
-    ARIADNE_ASSERT(x.argument_size()+start<=new_size);
-    Polynomial<X> r(new_size);
-    uint old_size=x.argument_size();
-    MultiIndex old_index(old_size);
-    MultiIndex new_index(new_size);
-    for(typename Polynomial<X>::const_iterator iter=x.begin(); iter!=x.end(); ++iter) {
-        old_index=iter->first;
-        for(uint j=0; j!=old_size; ++j) {
-            uint aj=old_index[j];
-            new_index[j+start]=aj;
-        }
-        r.append(new_index,iter->second);
-    }
-    return r;
+    return x.expansion().embed(before_size,after_size);
 }
 
 template<class X>
@@ -244,7 +231,7 @@ std::ostream& operator<<(std::ostream& os, const Polynomial<X>& p) {
 }
 
 
-template<class X> Vector< Polynomial<X> > operator*(const Vector<Float> e, const Polynomial<X>& p) {
+template<class X> Vector< Polynomial<X> > operator*(const Polynomial<X>& p, const Vector<Float> e) {
     Vector< Polynomial<X> > r(e.size(),Polynomial<X>(p.argument_size()));
     for(uint i=0; i!=r.size(); ++i) { r[i]=p; r[i]*=X(e[i]); }
     return r;

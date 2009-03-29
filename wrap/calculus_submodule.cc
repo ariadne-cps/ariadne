@@ -62,7 +62,17 @@ template<class X>
 void read(Vector<X>& v, const boost::python::object& obj);
 
 
-void read(TaylorVariable& tv, const boost::python::object& obj1, const boost::python::object& obj2, const boost::python::object& obj3) {
+void read(TaylorModel& t, const boost::python::object& obj1, const boost::python::object& obj2) {
+    std::map<MultiIndex,Float> m;
+    Float e;
+    read(m,obj1);
+    read(e,obj2);
+    ARIADNE_ASSERT(e>=0);
+    t=TaylorModel(m,e);
+}
+
+
+void read(TaylorVariable& t, const boost::python::object& obj1, const boost::python::object& obj2, const boost::python::object& obj3) {
     Vector<Interval> d;
     std::map<MultiIndex,Float> m;
     Float e;
@@ -70,15 +80,7 @@ void read(TaylorVariable& tv, const boost::python::object& obj1, const boost::py
     read(m,obj2);
     read(e,obj3);
     ARIADNE_ASSERT(e>=0);
-    tv=TaylorVariable(d,m,e);
-}
-
-void read(TaylorVariable& tv, const boost::python::object& obj1, const boost::python::object& obj2) {
-    Vector<Interval> d;
-    std::map<MultiIndex,Float> m;
-    read(d,obj1);
-    read(m,obj2);
-    tv=TaylorVariable(d,m,0.0);
+    t=TaylorVariable(d,m,e);
 }
 
 
@@ -87,9 +89,7 @@ void read(TaylorVariable& tv, const boost::python::object& obj);
 void read(TaylorVariable& tv, const boost::python::tuple& tup) {
     if(len(tup)==1) {
         read(tv,tup[0]);
-    } else if(len(tup)==2) {
-        read(tv,tup[0],tup[1]);
-    } else if(len(tup)==3) {
+    }else if(len(tup)==3) {
         read(tv,tup[0],tup[1],tup[2]);
     }
 }
@@ -153,7 +153,6 @@ void export_taylor_variable()
 
     class_<T> taylor_variable_class("TaylorVariable");
     taylor_variable_class.def("__init__", make_constructor(&make<TaylorVariable>) );
-    taylor_variable_class.def("__init__", make_constructor(&make2<TaylorVariable>) );
     taylor_variable_class.def("__init__", make_constructor(&make3<TaylorVariable>) );
     taylor_variable_class.def( init< IV >());
     taylor_variable_class.def( init< TaylorVariable >());
@@ -191,16 +190,16 @@ void export_taylor_variable()
     taylor_variable_class.def("set_sweep_threshold",&TaylorVariable::set_sweep_threshold);
     taylor_variable_class.def("maximum_degree",&TaylorVariable::maximum_degree);
     taylor_variable_class.def("sweep_threshold",&TaylorVariable::sweep_threshold);
-    taylor_variable_class.def("set_default_maximum_degree",&TaylorVariable::set_default_maximum_degree);
-    taylor_variable_class.def("set_default_sweep_threshold",&TaylorVariable::set_default_sweep_threshold);
-    taylor_variable_class.def("default_maximum_degree",&TaylorVariable::default_maximum_degree);
-    taylor_variable_class.def("default_sweep_threshold",&TaylorVariable::default_sweep_threshold);
+    //taylor_variable_class.def("set_default_maximum_degree",&TaylorVariable::set_default_maximum_degree);
+    //taylor_variable_class.def("set_default_sweep_threshold",&TaylorVariable::set_default_sweep_threshold);
+    //taylor_variable_class.def("default_maximum_degree",&TaylorVariable::default_maximum_degree);
+    //taylor_variable_class.def("default_sweep_threshold",&TaylorVariable::default_sweep_threshold);
     taylor_variable_class.def("evaluate", (Interval(TaylorVariable::*)(const Vector<Float>&)const) &TaylorVariable::evaluate);
     taylor_variable_class.def("evaluate", (Interval(TaylorVariable::*)(const Vector<Interval>&)const) &TaylorVariable::evaluate);
-    taylor_variable_class.staticmethod("set_default_maximum_degree");
-    taylor_variable_class.staticmethod("set_default_sweep_threshold");
-    taylor_variable_class.staticmethod("default_maximum_degree");
-    taylor_variable_class.staticmethod("default_sweep_threshold");
+    //taylor_variable_class.staticmethod("set_default_maximum_degree");
+    //taylor_variable_class.staticmethod("set_default_sweep_threshold");
+    //taylor_variable_class.staticmethod("default_maximum_degree");
+    //taylor_variable_class.staticmethod("default_sweep_threshold");
     def("split", &python_split);
 
 
@@ -217,20 +216,18 @@ void export_taylor_variable()
     def("join", (TV(*)(const TV&,const TV&)) &join);
     def("join", (TV(*)(const TV&,const T&)) &join);
 
-    def("unscale", (T(*)(const T&,const I&)) &unscale);
-    def("unscale", (TV(*)(const TV&,const IV&)) &unscale);
+    //def("unscale", (T(*)(const T&,const I&)) &unscale);
+    //def("unscale", (TV(*)(const TV&,const IV&)) &unscale);
 
-    def("scale", (T(*)(const T&,const I&)) &scale);
-    def("scale", (TV(*)(const TV&,const IV&)) &scale);
+    //def("scale", (T(*)(const T&,const I&)) &scale);
+    //def("scale", (TV(*)(const TV&,const IV&)) &scale);
 
-    def("evaluate",(IV(*)(const TV&,const IV&)) &evaluate);
+    //def("evaluate",(IV(*)(const TV&,const IV&)) &evaluate);
     def("evaluate",(I(*)(const T&,const IV&)) &evaluate);
 
-    def("compose",(TV(*)(const TV&,const TV&)) &compose);
-    def("compose",(T(*)(const T&,const TV&)) &compose);
+    //def("compose",(TV(*)(const TV&,const TV&)) &compose);
+    //def("compose",(T(*)(const T&,const TV&)) &compose);
 
-    def("max",(T(*)(const T&,const T&))&max);
-    def("min",(T(*)(const T&,const T&))&min);
     def("abs",(T(*)(const T&))&abs);
     def("neg",(T(*)(const T&))&neg);
     def("rec",(T(*)(const T&))&rec);

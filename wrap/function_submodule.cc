@@ -25,6 +25,7 @@
 #include "numeric.h"
 #include "vector.h"
 #include "differential.h"
+#include "taylor_model.h"
 #include "function.h"
 
 
@@ -100,7 +101,7 @@ class FunctionPyWrap
     virtual ushort smoothness() const { return this->get_override("smoothness")(); }
     virtual Vector<Float> evaluate(const Vector<Float>&) const { return this->get_override("evaluate")(); }
     virtual Vector<Interval> evaluate(const Vector<Interval>&) const { return this->get_override("evaluate")(); }
-    virtual Vector<TaylorVariable> evaluate(const Vector<TaylorVariable>&) const { return this->get_override("evaluate")(); }
+    virtual Vector<TaylorModel> evaluate(const Vector<TaylorModel>&) const { return this->get_override("evaluate")(); }
     virtual Vector< Differential<Float> > evaluate(const Vector< Differential<Float> >&) const { return this->get_override("evaluate")(); }
     virtual Vector< Differential<Interval> > evaluate(const Vector< Differential<Interval> >&) const { return this->get_override("evaluate")(); }
     virtual Matrix<Float> jacobian(const Vector<Float>&) const { return this->get_override("jacobian")(); }
@@ -149,8 +150,8 @@ class PythonFunction
         Vector<Interval> r(this->_result_size); 
         read(r,this->_pyf(x)); 
         return r; }
-    virtual Vector<TaylorVariable> evaluate (const Vector<TaylorVariable>& x) const { 
-        Vector<TaylorVariable> r(this->_result_size); 
+    virtual Vector<TaylorModel> evaluate (const Vector<TaylorModel>& x) const {
+        Vector<TaylorModel> r(this->_result_size);
         read(r,this->_pyf(x)); 
         return r; }
     virtual Vector< Differential<Float> > evaluate (const Vector< Differential<Float> >& x) const {

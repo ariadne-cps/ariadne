@@ -45,6 +45,9 @@ template<class X> class Expansion;
 
 class TaylorModel;
 
+class ImplicitFunctionException;
+class FlowBoundsException;
+
 // Split the variable over two domains, subdividing along the independent variable j.
 pair<TaylorModel,TaylorModel> split(const TaylorModel& x, uint j);
 
@@ -76,13 +79,16 @@ TaylorModel compose(const TaylorModel& x, const Vector<Interval>& bx, const Vect
 
 // Compute the implicit function f(x,h(x))=0
 TaylorModel implicit(const TaylorModel& f);
+TaylorModel implicit_step(const TaylorModel& f, const TaylorModel& h);
+
+// Solve the equation f(x)=0
+Interval solve(const TaylorModel& f);
 
 // Vector operations which can be evaluated componentwise
 pair< Vector<TaylorModel>, Vector<TaylorModel> > split(const Vector<TaylorModel>& x, uint j);
 Vector<TaylorModel> unscale(const Vector<TaylorModel>& x, const Vector<Interval>& bx);
 Vector<TaylorModel> scale(const Vector<TaylorModel>& x, const Vector<Interval>& bx);
 Vector<Interval> evaluate(const Vector<TaylorModel>& x, const Vector<Interval>& sy);
-Vector<TaylorModel> compose(const Vector<TaylorModel>& x, const Vector<TaylorModel>& ys);
 Vector<TaylorModel> antiderivative(const Vector<TaylorModel>& x, uint k);
 Vector<TaylorModel> embed(const Vector<TaylorModel>& x, uint as);
 Vector<TaylorModel> embed(uint as, const Vector<TaylorModel>& x);
@@ -91,9 +97,12 @@ Vector<TaylorModel> embed(uint as, const Vector<TaylorModel>& x);
 bool refines(const Vector<TaylorModel>& x1, const Vector<TaylorModel>& x2);
 Vector<TaylorModel> combine(const Vector<TaylorModel>& x1, const Vector<TaylorModel>& x2);
 Vector<TaylorModel> combine(const Vector<TaylorModel>& x1, const TaylorModel& x2);
+Vector<TaylorModel> compose(const Vector<TaylorModel>& f, const Vector<TaylorModel>& g);
 
 //Vector operations which cannot be computed componentwise
-Vector<TaylorModel> implicit(const Vector<TaylorModel>& x);
+Vector<Interval> solve(const Vector<TaylorModel>& f);
+Vector<TaylorModel> implicit(const Vector<TaylorModel>& f);
+Vector<TaylorModel> implicit_step(const Vector<TaylorModel>& f, const Vector<TaylorModel>& h);
 Vector<TaylorModel> flow(const Vector<TaylorModel>& x, const Vector<Interval>& d, const Interval& h, uint order);
 
 /*! \brief A class representing a power series expansion, scaled to the unit box, with an error term.
@@ -104,18 +113,16 @@ class TaylorModel
 {
     friend class TaylorVariable;
     typedef Expansion<Float> ExpansionType;
-    static const Float _zero;
+  private:
     ExpansionType _expansion;
     Float _error;
     double _sweep_threshold;
     uint _maximum_degree;
     MultiIndexBound _maximum_index;
   private:
+    static const double _zero;
     static double _default_sweep_threshold;
     static uint _default_maximum_degree;
-  public:
-    static const double em;
-    static const double ec;
   public:
     //! \brief The type used for the coefficients.
     typedef Float ScalarType;
@@ -139,20 +146,8 @@ class TaylorModel
     TaylorModel(const std::map<MultiIndex,Float>& d, const Float& e);
     //! \brief Construct from a map giving the expansion expansion and a constant giving the error.
     TaylorModel(const Expansion<Float>& f, const Float& e=0.0);
-/*
-    //! \brief Contruct a %TaylorModel in \a as arguments of degree \a d
-    //! from the raw data given by \a ptr, with error given by \a err.
-    TaylorModel(uint as, uint deg, const double* ptr, const double& err);
-    //! \brief Construct a %TaylorModel in \a as arguments of degree \a deg,
-    //! with values given by the double-precision arguments. The last arguments
-    //! is the error of the expansion approximation.
-    TaylorModel(uint as, uint deg, double d0, ...);
-    //! \brief Construct a %TaylorModel in \a as arguments with \a nnz nonzero terms,
-    //! given in a list of indices a[0],...,a[k-1] followed by the coefficient c.
-    //! The last argument gives the error of the expansion approximation.
-    TaylorModel(uint as, uint nnz, uint a0, ...);
-*/
-    //@}
+    //! \brief Fast swap with another Taylor model.
+    void swap(TaylorModel& tm);
 
     //@{
     /*! \name Assignment to constant values. */
@@ -162,6 +157,64 @@ class TaylorModel
     TaylorModel& operator=(const Interval& c);
     //! \brief Test if the quantity is a better approximation than \a t throughout the domain.
     bool refines(const TaylorModel& t);
+    //@}
+
+    //@{
+    /*! \name Named constructors. */
+    //! \brief Construct the zero quantity in \a as independent variables.
+    static TaylorModel zero(uint as) {
+        TaylorModel r(as); return r; }
+    //! \brief Construct a constant quantity in \a as independent variables.
+    static TaylorModel constant(uint as, const Float& c) {
+        TaylorModel r(as); r.set_value(c); return r; }
+    //! \brief Construct a constant quantity in \a as independent variables.
+    static TaylorModel constant(uint as, const Interval& d) {
+        TaylorModel r(as); r.set_value(1.0); r*=d; return r; }
+    //! \brief Construct the quantity with expansion \f$x_j\f$ in \a as independent variables.
+    static TaylorModel variable(uint as, uint j) {
+        TaylorModel r(as); r.set_gradient(j,1.0); return r; }
+    //! \brief Construct the quantity which scales the unit interval into the domain \a d.
+    static TaylorModel scaling(uint as, uint j, const Interval& d) {
+        TaylorModel r(as); r.set_gradient(j,1.0); r.rescale(Interval(-1,1),d); return r; }
+    //! \brief Construct the quantity which scales the codomain \a cd into the unit interval.
+    static TaylorModel unscaling(uint as, uint j, const Interval& d) {
+        TaylorModel r(as); r.set_gradient(j,1.0); r.rescale(d,Interval(-1,+1)); return r; }
+    //! \brief Construct the quantity which scales the interval \a cd onto the interval \a d.
+    static TaylorModel rescaling(uint as, uint j, const Interval& cd, const Interval& d) {
+        TaylorModel r(as); r.set_gradient(j,1.0); r.rescale(cd,d); return r; }
+    //! \brief Construct the quantity \f$c+\sum g_jx_j\f$.
+    static TaylorModel affine(const Float& c, const Vector<Float>& g) {
+        TaylorModel r(g.size()); r.set_value(c);
+        for(uint j=0; j!=g.size(); ++j) { r.set_gradient(j,g[j]); } return r; }
+    //! \brief Construct the quantity \f$c+\sum g_jx_j \pm e\f$.
+    static TaylorModel affine(const Float& x, const Vector<Float>& g, const Float& e) {
+        TaylorModel r(g.size()); r.set_value(x); r.set_error(e);
+        for(uint j=0; j!=g.size(); ++j) { r.set_gradient(j,g[j]); } return r; }
+
+    //! \brief Return the vector of zero variables of size \a rs in \a as arguments.
+    static Vector<TaylorModel> zeros(uint rs, uint as);
+    //! \brief Return the vector of constants with values \a c in \a as arguments.
+    static Vector<TaylorModel> constants(uint as, const Vector<Float>& c);
+    //! \brief Return the vector of constants with values \a c in \a as arguments.
+    static Vector<TaylorModel> constants(uint as, const Vector<Interval>& c);
+    //! \brief Return the vector of variables on the unit domain.
+    static Vector<TaylorModel> variables(uint as);
+    //! \brief Return the vector scaling the unit interval onto the domain \a d.
+    static Vector<TaylorModel> scalings(const Vector<Interval>& d);
+    //! \brief Return the vector scaling the unit interval onto the codomain \a cd.
+    static Vector<TaylorModel> unscalings(const Vector<Interval>& d);
+    //! \brief Return the vector scaling the codomain \a cd onto the domain \a d.
+    static Vector<TaylorModel> rescalings(const Vector<Interval>& cd, const Vector<Interval>& d);
+    //@}
+
+    //@{
+    /*! \name Comparison operators. */
+    //! \brief Equality operator. Tests equality of representation, including error term.
+    bool operator==(const TaylorModel& sd) const {
+        return this->_expansion==sd._expansion && this->_error == sd._error; }
+    //! \brief Inequality operator.
+    bool operator!=(const TaylorModel& sd) const {
+        return !(*this==sd); }
     //@}
 
     //@{
@@ -227,79 +280,41 @@ class TaylorModel
     //@}
 
     //@{
-    /*! \name Named constructors. */
-    //! \brief Construct the zero quantity in \a as independent variables.
-    static TaylorModel zero(uint as) {
-        TaylorModel r(as); r.set_value(0.0); return r; }
-    //! \brief Construct a constant quantity in \a as independent variables.
-    static TaylorModel constant(uint as, const Float& c) {
-        TaylorModel r(as); r.set_value(c); return r; }
-    //! \brief Construct a constant quantity in \a as independent variables.
-    static TaylorModel constant(uint as, const Interval& d) {
-        TaylorModel r(as); r.set_value(1.0); r*=d; return r; }
-    //! \brief Construct the quantity with expansion \f$x_j\f$ in \a as independent variables.
-    static TaylorModel variable(uint as, uint j) {
-        TaylorModel r(as); r.set_gradient(j,1.0); return r; }
-    //! \brief Construct the quantity which scales the unit interval into the domain \a d.
-    static TaylorModel scaling(uint as, uint j, const Interval& d) {
-        TaylorModel r(as); r.set_gradient(j,1.0); r.rescale(Interval(-1,1),d); return r; }
-    //! \brief Construct the quantity which scales the codomain \a cd into the unit interval.
-    static TaylorModel unscaling(uint as, uint j, const Interval& d) {
-        TaylorModel r(as); r.set_gradient(j,1.0); r.rescale(d,Interval(-1,+1)); return r; }
-    //! \brief Construct the quantity which scales the interval \a cd onto the interval \a d.
-    static TaylorModel rescaling(uint as, uint j, const Interval& cd, const Interval& d) {
-        TaylorModel r(as); r.set_gradient(j,1.0); r.rescale(cd,d); return r; }
-    //! \brief Construct the quantity \f$c+\sum g_jx_j\f$.
-    static TaylorModel affine(const Float& c, const Vector<Float>& g) {
-        TaylorModel r(g.size()); r.set_value(c);
-        for(uint j=0; j!=g.size(); ++j) { r.set_gradient(j,g[j]); } return r; }
-    //! \brief Construct the quantity \f$c+\sum g_jx_j \pm e\f$.
-    static TaylorModel affine(const Float& x, const Vector<Float>& g, const Float& e) {
-        TaylorModel r(g.size()); r.set_value(x); r.set_error(e);
-        for(uint j=0; j!=g.size(); ++j) { r.set_gradient(j,g[j]); } return r; }
-
-    //! \brief Return the vector of zero variables of size \a rs in \a as arguments.
-    static Vector<TaylorModel> zeroes(uint rs, uint as);
-    //! \brief Return the vector of constants with values \a c in \a as arguments.
-    static Vector<TaylorModel> constants(uint as, const Vector<Float>& c);
-    //! \brief Return the vector of constants with values \a c in \a as arguments.
-    static Vector<TaylorModel> constants(uint as, const Vector<Interval>& c);
-    //! \brief Return the vector of variables on the unit domain.
-    static Vector<TaylorModel> variables(uint as);
-    //! \brief Return the vector scaling the unit interval onto the domain \a d.
-    static Vector<TaylorModel> scalings(const Vector<Interval>& d);
-    //! \brief Return the vector scaling the unit interval onto the codomain \a cd.
-    static Vector<TaylorModel> unscalings(const Vector<Interval>& d);
-    //! \brief Return the vector scaling the codomain \a cd onto the domain \a d.
-    static Vector<TaylorModel> rescalings(const Vector<Interval>& cd, const Vector<Interval>& d);
-    //@}
-
-    //@{
-    /*! \name Comparison operators. */
-    //! \brief Equality operator. Tests equality of representation, including error term.
-    bool operator==(const TaylorModel& sd) const {
-        return this->_expansion==sd._expansion && this->_error == sd._error; }
-    //! \brief Inequality operator.
-    bool operator!=(const TaylorModel& sd) const {
-        return !(*this==sd); }
-    //@}
-
-    //@{
-    /*! \name Function operations. */
+    /*! \name Function evaluation. */
     //! \brief The domain of the quantity, always given by \f$[-1,1]^{\mathrm{as}}\f$.
     Vector<Interval> domain() const;
     //! \brief An over-approximation to the range of the quantity.
     Interval range() const;
+    //! \brief Compute the gradient of the expansion with respect to the \a jth variable over the domain.
+    Interval gradient_range(uint j) const;
     //! \brief Evaluate the quantity at the point \a x.
     Interval evaluate(const Vector<Float>& x) const;
     //! \brief Evaluate the quantity over the interval of points \a x.
     Interval evaluate(const Vector<Interval>& x) const;
-    //! \brief Compute the gradient of the expansion.
-    Vector<Interval> gradient() const;
+    //@}
+
+    //@{
+    /*! \name Inplace modifications. */
     //! \brief Scale so that the old codomain maps into the new codomain.
     TaylorModel& rescale(const Interval& old_codomain, const Interval& new_codomain);
+    //! \brief Restrict to a subdomain.
+    TaylorModel& restrict(const Vector<Interval>& new_domain);
     //! \brief Compute the antiderivative (in place).
     TaylorModel& antidifferentiate(uint k);
+    //@}
+
+    //@{
+    /*! \name Vectoral function operators. */
+    //! \brief Solve the equation \f$f(x)=0\f$ in the unit box.
+    friend Vector<Interval> solve(const Vector<TaylorModel>& f);
+    //! \brief Compose two models, where the second is scaled so that the codomain is a unit box.
+    friend Vector<TaylorModel> compose(const Vector<TaylorModel>& f, const Vector<TaylorModel>& g);
+    //! \brief Compute the implicit function h satisfying f(x,h(x))=0.
+    friend Vector<TaylorModel> implicit(const Vector<TaylorModel>& f);
+    //! \brief Compute the flow of the vector field \a vf, starting from the box \a d,
+    //! over the time interval \a h, using temporal order \a o.
+    friend Vector<TaylorModel> flow(const Vector<TaylorModel>& vf, 
+                                    const Vector<Interval>& d, const Interval& h, uint o);
     //@}
 
     //@{
@@ -325,7 +340,7 @@ class TaylorModel
     //@}
 
     //@{
-    /*! \name Accuracy parameters. */
+    /*! \name Default accuracy parameters. */
     //! \brief .
     static void set_default_maximum_degree(uint md) { _default_maximum_degree=md; }
     //! \brief .
@@ -422,6 +437,10 @@ class TaylorModel
     friend TaylorModel operator*(const Interval& c, const TaylorModel& x);
     //! \brief Division through a scalar.
     friend TaylorModel operator/(const Interval& c, const TaylorModel& x);
+    //@}
+
+    //@{
+    /*! \name Algebraic and transcendental functions. */
 
     //! \brief Maximum. Throws an error if one variable is not greater than the other
     //! over the entire domain.
@@ -493,6 +512,13 @@ TaylorModel acos(const TaylorModel& x);
 TaylorModel atan(const TaylorModel& x);
 
 
+struct ImplicitFunctionException : public std::runtime_error {
+    ImplicitFunctionException(const std::string& what) : std::runtime_error(what) { }
+};
+
+struct FlowBoundsException : public std::runtime_error {
+    FlowBoundsException(const std::string& what) : std::runtime_error(what) { }
+};
 
 
 } // namespace Ariadne

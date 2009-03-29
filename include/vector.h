@@ -157,10 +157,9 @@ class Vector
 
 typedef ublas::slice Slice;
 typedef ublas::range Range;
-using ublas::range;
-using ublas::slice;
-using ublas::identity_matrix;
 
+inline Range range(uint start, uint stop) { return Range(start,stop); }
+inline Slice slice(uint size, uint start, uint stride) { return Slice(size,start,stride); }
 
 
 template<class X>

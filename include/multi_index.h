@@ -176,6 +176,8 @@ class MultiIndexValueReference {
     MultiIndexValueReference& operator=(const value_type& d) { _p[_n]+=(d-_p[_i]); _p[_i]=d; return *this; }
     MultiIndexValueReference& operator++() { ++_p[_n]; ++_p[_i]; return *this; }
     MultiIndexValueReference& operator--();
+    MultiIndexValueReference& operator+=(int k) { _p[_n]+=k; _p[_i]+=k; return *this; }
+    MultiIndexValueReference& operator-=(int k) { _p[_n]-=k; _p[_i]-=k; return *this; }
 };
 
 inline MultiIndexValueReference& MultiIndexValueReference::operator--() {

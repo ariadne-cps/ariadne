@@ -36,7 +36,7 @@
 #define ARIADNE_THROW(except,func,msg)          \
     { \
         std::stringstream ss; \
-        ss << #except " in " << func << " " << msg;    \
+        ss << #except " in " << func << ": " << msg;    \
         throw except(ss.str()); \
     } \
 

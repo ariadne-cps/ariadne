@@ -1377,13 +1377,13 @@ TaylorModel& TaylorModel::antidifferentiate(uint k)
     ARIADNE_ASSERT(k<x.argument_size());
 
     Float& xe=x.error();
-    volatile float ml,u;
+    volatile double ml,u;
     set_rounding_upward();
     Float te=0; // Twice the maximum accumulated error
     for(TaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         const uint c=xiter->first[k]+1;
-        const Float& xv=xiter->second;
-        volatile Float mxv=-xv;
+        const double& xv=xiter->second;
+        volatile double mxv=-xv;
         if(xv>=0) {
             u=xv/c;
             ml=mxv/c;
@@ -1431,47 +1431,26 @@ evaluate(const Vector<TaylorModel>& tv, const Vector<Interval>& x)
 pair<TaylorModel,TaylorModel>
 split(const TaylorModel& tv, uint j)
 {
-    ARIADNE_ASSERT(j<tv.argument_size());
+    // TODO: improve efficiency of implementation
     uint as=tv.argument_size();
-
-    MultiIndex index(as);
-    Float value;
-
-    TaylorModel r1(as);
-    for(TaylorModel::const_iterator iter=tv.begin();
-        iter!=tv.end(); ++iter)
-    {
-        index=iter->first;
-        value=iter->second;
-        uint k=index[j];
-        for(uint l=0; l<=k; ++l) {
-            index[j]=l;
-            r1[index] += bin(k,l) * value / pow2(k);
-        }
-    }
-
-    TaylorModel r2(as);
-    for(TaylorModel::const_iterator iter=tv.begin();
-        iter!=tv.end(); ++iter)
-    {
-        index=iter->first;
-        value=iter->second;
-        uint k=index[j];
-        for(uint l=0; l<=k; ++l) {
-            index[j]=l;
-            // Need brackets in expression below to avoid converting negative signed
-            // integer to unsigned
-            r2[index] += powm1(k-l) * (bin(k,l) * value / pow2(k));
-        }
-    }
-    // FIXME: Add roundoff errors when computing new expansions
-
-    r1.error()=tv.error();
-    r2.error()=tv.error();
-
+    Vector<TaylorModel> s=TaylorModel::variables(as);
+    s[j]=TaylorModel::scaling(as,j,Interval(-1,0));
+    TaylorModel r1=compose(tv,s);
+    s[j]=TaylorModel::scaling(as,j,Interval(0,+1));
+    TaylorModel r2=compose(tv,s);
     return make_pair(r1,r2);
 }
 
+TaylorModel
+split(const TaylorModel& tv, uint j, bool b)
+{
+    uint as=tv.argument_size();
+    Interval domj=(b?Interval(0,+1):Interval(-1,0));
+    Vector<TaylorModel> s=TaylorModel::variables(as);
+    s[j]=TaylorModel::scaling(as,j,domj);
+    TaylorModel r=compose(tv,s);
+    return r;
+}
 
 
 TaylorModel
@@ -1513,6 +1492,16 @@ rescale(const TaylorModel& tv, const Interval& ivl)
 
 
 
+Float norm(const TaylorModel& h) {
+    set_rounding_mode(upward);
+    Float r=h.error();
+    for(TaylorModel::const_iterator iter=h.begin(); iter!=h.end(); ++iter) {
+        r+=abs(iter->second);
+    }
+    set_rounding_mode(to_nearest);
+    return r;
+}
+
 bool
 refines(const TaylorModel& tv1, const TaylorModel& tv2)
 {
@@ -1520,14 +1509,24 @@ refines(const TaylorModel& tv1, const TaylorModel& tv2)
     TaylorModel d=tv2;
     d.error()=0.0;
     d-=tv1;
+    return norm(d) <= tv2.error();
+}
 
-    set_rounding_upward();
-    Float e=d.error();
-    for(TaylorModel::const_iterator iter=d.begin(); iter!=d.end(); ++iter) {
-        e+=abs(iter->second);
-    }
-    set_rounding_to_nearest();
-    return e <= tv2.error();
+
+bool
+disjoint(const TaylorModel& tv1, const TaylorModel& tv2)
+{
+    ARIADNE_ASSERT(tv1.argument_size()==tv2.argument_size());
+    Float tv1e=tv1.error();
+    Float tv2e=tv2.error();
+    const_cast<TaylorModel&>(tv1).error()=0.0;
+    const_cast<TaylorModel&>(tv2).error()=0.0;
+    TaylorModel d=tv2-tv1;
+    const_cast<TaylorModel&>(tv1).error()=tv1e;
+    const_cast<TaylorModel&>(tv2).error()=tv2e;
+    //std::cerr<<"\ntv1="<<tv1<<"\ntv2="<<tv2<<"\nd="<<d
+    //         <<"\n|d|="<<norm(d)<<" |e|="<<add_up(tv1.error(),tv2.error())<<"\n\n";
+    return norm(d)>add_up(tv1.error(),tv2.error());
 }
 
 
@@ -1541,20 +1540,15 @@ TaylorModel embed(uint as, const TaylorModel& x)
     return TaylorModel(embed(as,x.expansion(),0u),x.error());
 }
 
-Float norm(const TaylorModel& h) {
-    set_rounding_mode(upward);
-    Float r=h.error();
-    for(TaylorModel::const_iterator iter=h.begin(); iter!=h.end(); ++iter) {
-        r+=abs(iter->second);
-    }
-    set_rounding_mode(to_nearest);
-    return r;
-}
 
+///////////////////////////////////////////////////////////////////////////////
+
+// Input/output operators
 
 std::ostream&
 operator<<(std::ostream& os, const TaylorModel& tv) {
-    return os << "TaylorModel(" << tv.expansion() << "," << tv.error() << ")";
+    //os << "TaylorModel";
+    return os << "(" << tv.expansion() << "," << tv.error() << ")";
 }
 
 
@@ -1669,6 +1663,16 @@ refines(const Vector<TaylorModel>& tv1, const Vector<TaylorModel>& tv2)
     return true;
 }
 
+bool
+disjoint(const Vector<TaylorModel>& tv1, const Vector<TaylorModel>& tv2)
+{
+    ARIADNE_ASSERT(tv1.size()==tv2.size());
+    for(uint i=0; i!=tv1.size(); ++i) {
+        if(disjoint(tv1[i],tv2[i])) { return true; }
+    }
+    return false;
+}
+
 pair< Vector<TaylorModel>, Vector<TaylorModel> >
 split(const Vector<TaylorModel>& tv, uint j)
 {
@@ -1678,6 +1682,16 @@ split(const Vector<TaylorModel>& tv, uint j)
         make_lpair(r1[i],r2[i])=split(tv[i],j);
     }
     return make_pair(r1,r2);
+}
+
+Vector<TaylorModel>
+split(const Vector<TaylorModel>& tv, uint j, bool h)
+{
+    Vector<TaylorModel> r(tv.size());
+    for(uint i=0; i!=tv.size(); ++i) {
+        r[i]=split(tv[i],j,h);
+    }
+    return r;
 }
 
 Vector<TaylorModel>
@@ -1774,6 +1788,10 @@ inline Vector<Float> errors(const Vector<TaylorModel>& h) {
 
 inline Vector<Float> norms(const Vector<TaylorModel>& h) {
     Vector<Float> r(h.size()); for(uint i=0; i!=h.size(); ++i) { r[i]=norm(h[i]); } return r; }
+
+Float norm(const Vector<TaylorModel>& h) {
+    return norm(norms(h));
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2024,7 +2042,8 @@ Vector<Interval>
 solve(const Vector<TaylorModel>& f)
 {
     for(uint i=0; i!=f.size(); ++i) { ARIADNE_ASSERT(f[i].argument_size()==f.size()); }
-    return _solve1(f,6);
+    const int number_of_steps=6;
+    return _solve1(f,number_of_steps);
 }
 
 
@@ -2038,7 +2057,7 @@ implicit(const TaylorModel& f) {
 // Basic non-rigorous implicit function iteration; set y = midpoint(inverse(D2f)*compose(f,join(id,h)))
 Vector<TaylorModel> _implicit1(const Vector<TaylorModel>& f, uint n)
 {
-    std::cerr<<__FUNCTION__<<std::endl;
+    //std::cerr<<__FUNCTION__<<std::endl;
     uint rs=f.size(); uint fas=f[0].argument_size(); uint has=fas-rs;
 
     Vector<TaylorModel> id=TaylorModel::variables(has);
@@ -2047,16 +2066,16 @@ Vector<TaylorModel> _implicit1(const Vector<TaylorModel>& f, uint n)
 
     Matrix<Float> D2finv=inverse(jacobian2_value(f));
 
-    std::cerr<<"\n  f="<<f<<std::endl;
-    std::cerr<<"  h="<<h<<"\n\n";
+    //std::cerr<<"\n  f="<<f<<std::endl;
+    //std::cerr<<"  h="<<h<<"\n\n";
     for(uint k=0; k!=n; ++k) {
         fidh=compose(f,join(id,h));
-        std::cerr<<"    fidh="<<fidh<<"\n";
+        //std::cerr<<"    fidh="<<fidh<<"\n";
         dh=prod(D2finv,fidh);
-        std::cerr<<"    dh="<<dh<<"\n";
+        //std::cerr<<"    dh="<<dh<<"\n";
         h-=dh;
         clobber(h);
-        std::cerr<<"\n  h="<<h<<"\n\n";
+        //std::cerr<<"\n  h="<<h<<"\n\n";
     }
     return h;
 }
@@ -2064,7 +2083,7 @@ Vector<TaylorModel> _implicit1(const Vector<TaylorModel>& f, uint n)
 // Basic implicit function iteration; set y = inverse(D2f)*compose(f,join(id,midpoint(h)))
 Vector<TaylorModel> _implicit2(const Vector<TaylorModel>& f, uint n)
 {
-    std::cerr<<__FUNCTION__<<std::endl;
+    //std::cerr<<__FUNCTION__<<std::endl;
     uint rs=f.size(); uint fas=f[0].argument_size(); uint has=fas-rs;
 
     Vector<Interval> domain_h(rs,Interval(-1,+1));
@@ -2072,25 +2091,25 @@ Vector<TaylorModel> _implicit2(const Vector<TaylorModel>& f, uint n)
     Vector<TaylorModel> h=TaylorModel::constants(has,domain_h);
     Vector<TaylorModel> fidh,dh;
 
-    std::cerr<<"\n  f="<<f<<std::endl;
-    std::cerr<<"  h="<<h<<"\n\n";
+    //std::cerr<<"\n  f="<<f<<std::endl;
+    //std::cerr<<"  h="<<h<<"\n\n";
     for(uint k=0; k!=n; ++k) {
         Matrix<Interval> D2finv=inverse(jacobian2(f,join(domain_h,ranges(h))));
-        std::cerr<<"    D2finv="<<D2finv<<"\n";
+        //std::cerr<<"    D2finv="<<D2finv<<"\n";
         clobber(h);
         fidh=compose(f,join(id,h));
-        std::cerr<<"    fidh="<<fidh<<"\n";
+        //std::cerr<<"    fidh="<<fidh<<"\n";
         dh=prod(D2finv,fidh);
-        std::cerr<<"    dh="<<dh<<"\n";
+        //std::cerr<<"    dh="<<dh<<"\n";
         h-=dh;
-        std::cerr<<"\n  h="<<h<<"\n\n";
+        //std::cerr<<"\n  h="<<h<<"\n\n";
     }
     return h;}
 
 // Basic implicit function iteration without updating the matrix D2f
 Vector<TaylorModel> _implicit3(const Vector<TaylorModel>& f, uint n)
 {
-    std::cerr<<__FUNCTION__<<std::endl;
+    //std::cerr<<__FUNCTION__<<std::endl;
     uint rs=f.size(); uint fas=f[0].argument_size(); uint has=fas-rs;
 
     Vector<TaylorModel> id=TaylorModel::variables(has);
@@ -2099,16 +2118,16 @@ Vector<TaylorModel> _implicit3(const Vector<TaylorModel>& f, uint n)
 
     Matrix<Interval> D2finv=inverse(jacobian2_range(f));
 
-    std::cerr<<"\n  f="<<f<<std::endl;
-    std::cerr<<"  h="<<h<<"\n\n";
+    //std::cerr<<"\n  f="<<f<<std::endl;
+    //std::cerr<<"  h="<<h<<"\n\n";
     for(uint k=0; k!=n; ++k) {
         clobber(h);
         fidh=compose(f,join(id,h));
-        std::cerr<<"    fidh="<<fidh<<"\n";
+        //std::cerr<<"    fidh="<<fidh<<"\n";
         dh=prod(D2finv,fidh);
-        std::cerr<<"    dh="<<dh<<"\n";
+        //std::cerr<<"    dh="<<dh<<"\n";
         h-=dh;
-        std::cerr<<"\n  h="<<h<<"\n\n";
+        //std::cerr<<"\n  h="<<h<<"\n\n";
     }
     return h;
 }
@@ -2117,7 +2136,7 @@ Vector<TaylorModel> _implicit3(const Vector<TaylorModel>& f, uint n)
 // The works very poorly due to inaccuracies in the interval computations
 Vector<TaylorModel> _implicit4(const Vector<TaylorModel>& f, uint n)
 {
-    std::cerr<<__FUNCTION__<<std::endl;
+    //std::cerr<<__FUNCTION__<<std::endl;
     uint rs=f.size(); uint fas=f[0].argument_size(); uint has=fas-rs;
 
     Vector<Interval> domain_h(rs,Interval(-1,+1));
@@ -2125,19 +2144,19 @@ Vector<TaylorModel> _implicit4(const Vector<TaylorModel>& f, uint n)
     Vector<TaylorModel> h=TaylorModel::constants(has,domain_h);
     Vector<TaylorModel> fidh,dh;
 
-    std::cerr<<"\n  f="<<f<<std::endl;
-    std::cerr<<"  h="<<h<<"\n\n";
+    //std::cerr<<"\n  f="<<f<<std::endl;
+    //std::cerr<<"  h="<<h<<"\n\n";
     for(uint k=0; k!=n; ++k) {
         Matrix<Interval> D2finv=inverse(jacobian2(f,join(domain_h,ranges(h))));
-        std::cerr<<"    D2finv="<<D2finv<<"\n";
+        //std::cerr<<"    D2finv="<<D2finv<<"\n";
         Vector<Interval> h_err=errors(h);
         clobber(h);
         Vector<TaylorModel> D2finvf=prod(D2finv,f);
         dh=compose(D2finvf,join(id,h));
-        std::cerr<<"    dh="<<dh<<"\n";
-        std::cerr<<"    dh_err="<<norms(dh)<<" h_err="<<h_err<<"\n";
+        //std::cerr<<"    dh="<<dh<<"\n";
+        //std::cerr<<"    dh_err="<<norms(dh)<<" h_err="<<h_err<<"\n";
         h-=dh;
-        std::cerr<<"\n  h="<<h<<"\n\n";
+        //std::cerr<<"\n  h="<<h<<"\n\n";
     }
     return h;
 }
@@ -2147,7 +2166,7 @@ Vector<TaylorModel> _implicit4(const Vector<TaylorModel>& f, uint n)
 // on the system y=g(y)
 Vector<TaylorModel> _implicit5(const Vector<TaylorModel>& f, uint n)
 {
-    std::cerr<<__FUNCTION__<<std::endl;
+    //std::cerr<<__FUNCTION__<<std::endl;
     uint rs=f.size(); uint fas=f[0].argument_size(); uint has=fas-rs;
 
     Vector<Interval> domain_h(rs,Interval(-1,+1));
@@ -2172,11 +2191,29 @@ Vector<TaylorModel> _implicit5(const Vector<TaylorModel>& f, uint n)
     }
 
     // Iterate h'=h(g(x,h(x)))
+    Vector<TaylorModel> h_new;
+    bool contracting=false;
     for(uint k=0; k!=n; ++k) {
-        project(idh,range(has,fas))=compose(g,idh);
+        h_new=compose(g,join(id,h));
+        if(!contracting) {
+            if(refines(h_new,h)) {
+                contracting=true;
+            }
+            if(disjoint(h_new,h)) {
+                ARIADNE_THROW(ImplicitFunctionException,"implicit(Vector<TaylorModel> f)",
+                              "(with f="<<f<<"): Application of Newton solver to "<<h<<" yields "<<h_new<<
+                              " which is disjoint. No solution");
+            }
+        }
+        h=h_new;
     }
 
-    return project(idh,range(has,fas));
+    if(contracting) {
+        return h;
+    } else {
+        ARIADNE_THROW(ImplicitFunctionException,"implicit(Vector<TaylorModel>)",
+                      "Could not verify solution of implicit function to "<<h<<"\n");
+    }
 }
 
 
@@ -2205,6 +2242,8 @@ implicit(const Vector<TaylorModel>& f)
                       "Jacobian "<<D2f<<" is not invertible");
     }
 
+    /* The following code is unneeded; instead we use intersection in the
+     * interval-Newton style contractor
     // Check to see if the implicit function iteration is a contraction in the first step
     Vector<Interval> dom(fas);
     Vector<Interval> h_codom(rs,Interval(-1,+1));
@@ -2222,9 +2261,11 @@ implicit(const Vector<TaylorModel>& f)
     Vector<TaylorModel> h=TaylorModel::constants(has,h_dom);
     Vector<TaylorModel> fidh,deltah;
     Vector<Float> h_err;
+    */
 
     uint number_of_steps=6;
-    h=_implicit5(f,number_of_steps);
+    Vector<TaylorModel> id=TaylorModel::variables(has);
+    Vector<TaylorModel> h=_implicit5(f,number_of_steps);
     /*
     std::cerr<<"\n  f="<<f<<std::endl;
     std::cerr<<"  h="<<h<<"\n\n";
@@ -2243,7 +2284,7 @@ implicit(const Vector<TaylorModel>& f)
     }
     */
 
-    // Perform a final rigorous step to check inclusion
+/*    // Perform a final rigorous step to check inclusion
     Vector<TaylorModel> old_h,idh;
     old_h=h;
     id=TaylorModel::variables(has);
@@ -2256,7 +2297,7 @@ implicit(const Vector<TaylorModel>& f)
     h-=deltah;
     
     if(!refines(h,old_h)) { std::cerr<<"Warning: h="<<h<<" does not refine "<<old_h<<"\n"; }
-
+*/
     // Check that the result has the correct sizes.
     ARIADNE_ASSERT(h.size()==f.size());
     for(uint i=0; i!=h.size(); ++i) {
@@ -2296,17 +2337,25 @@ flow(const Vector<TaylorModel>& vf, const Vector<Interval>& d, const Interval& h
 
     Vector<Interval> vf_range(vf.size());
     for(uint i=0; i!=vf.size(); ++i) { vf_range[i]=vf[i].range(); }
-    ARIADNE_ASSERT(subset(vf_range*h+d,vf_domain));
+    Vector<Interval> flow_range=d+vf_range*h;
+    if(!subset(flow_range,vf_domain)) {
+        ARIADNE_THROW(FlowBoundsException,"flow(Vector<TaylorModel>,Vector<Interval>,Interval,Nat)",
+                      "range "<<flow_range<<" of scaled flow "<<vf<<
+                      " on domain "<<d<<" for time interval "<<h<<
+                      " is not a subset of the unit box");
+    }
 
     uint n=vf.size();
     Vector<TaylorModel> yz(n,TaylorModel(n+1));
-    for(uint i=0; i!=yz.size(); ++i) { yz[i]=TaylorModel::scaling(n+1,i,d[i]); }
+    for(uint i=0; i!=yz.size(); ++i) {
+        yz[i]=TaylorModel::scaling(n+1,i,d[i]); }
     Vector<TaylorModel> y(n);
-    for(uint i=0; i!=y.size(); ++i) { y[i]=TaylorModel::constant(n+1,Interval(-1,+1)); }
+    for(uint i=0; i!=y.size(); ++i) {
+        y[i]=TaylorModel::constant(n+1,Interval(-1,+1)); }
 
     Vector<TaylorModel> old_y(n,TaylorModel(n+1));
 
-    Interval h_rad=rad_ivl(h.l,h.u);
+    Float h_rad=h.upper();
 
     //std::cerr << "\ny[0]=" << y << std::endl << std::endl;
     //std::cerr<<"  y="<<y<<"\n";
@@ -2315,16 +2364,25 @@ flow(const Vector<TaylorModel>& vf, const Vector<Interval>& d, const Interval& h
             y[i].swap(old_y[i]);
         }
 
-        y=_flow_step(vf,yz,h_rad,old_y);
-        if(!refines(y,old_y)) {
-            std::cerr<<"Warning: "<<y<<" is not a refinement of "<<old_y<<"\n";
+        y=compose(vf,y);
+        for(uint i=0; i!=n; ++i) {
+            y[i].antidifferentiate(n);
+            y[i]*=h_rad;
+            y[i]+=yz[i];
         }
-        //std::cerr << "y["<<j+1<<"]=" << y << std::endl << std::endl;
-        //std::cerr<<"  y="<<y<<"\n";
     }
 
     //for(uint i=0; i!=n; ++i) { y[i].clobber(so,to); }
     for(uint i=0; i!=n; ++i) { y[i].sweep(0.0); }
+
+    if(h.l==0) {
+        //Vector<TaylorModel> s=TaylorModel::variables(n+1);
+        //s[n]=TaylorModel::scaling(n+1,n,Interval(0,1));
+        //std::cerr<<"\nsplit="<<split(y,n)<<"\nscale="<<compose(y,s)<<"\n\n";
+        //y=split(y,n).second;
+        //y=compose(y,s);
+        y=split(y,n,true);
+    }
 
     return y;
 

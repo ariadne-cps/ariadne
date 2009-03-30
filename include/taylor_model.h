@@ -48,8 +48,13 @@ class TaylorModel;
 class ImplicitFunctionException;
 class FlowBoundsException;
 
+// The magnitude of the variable
+Float mag(const TaylorModel& tm);
 // Split the variable over two domains, subdividing along the independent variable j.
 pair<TaylorModel,TaylorModel> split(const TaylorModel& x, uint j);
+// Split the variable, subdividing along the independent variable j
+// and taking the lower/upper half depending on whether half is false or true
+TaylorModel split(const TaylorModel& x, uint j, bool half);
 
 // Scale the variable by post-composing with an affine map taking the unit interval to ivl.
 TaylorModel scale(const TaylorModel& x, const Interval& ivl);
@@ -67,6 +72,7 @@ TaylorModel embed(uint as, const TaylorModel& tv);
 
 // Test if a variable refines another
 bool refines(const TaylorModel& tv1, const TaylorModel& tv2);
+bool disjoint(const TaylorModel& tv1, const TaylorModel& tv2);
 
 // Antidifferentiation operator
 TaylorModel antiderivative(const TaylorModel& x, uint k);
@@ -85,14 +91,17 @@ TaylorModel implicit_step(const TaylorModel& f, const TaylorModel& h);
 Interval solve(const TaylorModel& f);
 
 // Vector operations which can be evaluated componentwise
+bool refines(const Vector<TaylorModel>&,const Vector<TaylorModel>&);
+bool disjoint(const Vector<TaylorModel>&,const Vector<TaylorModel>&);
 pair< Vector<TaylorModel>, Vector<TaylorModel> > split(const Vector<TaylorModel>& x, uint j);
+Vector<TaylorModel> split(const Vector<TaylorModel>& x, uint j, bool half);
 Vector<TaylorModel> unscale(const Vector<TaylorModel>& x, const Vector<Interval>& bx);
 Vector<TaylorModel> scale(const Vector<TaylorModel>& x, const Vector<Interval>& bx);
 Vector<Interval> evaluate(const Vector<TaylorModel>& x, const Vector<Interval>& sy);
 Vector<TaylorModel> antiderivative(const Vector<TaylorModel>& x, uint k);
 Vector<TaylorModel> embed(const Vector<TaylorModel>& x, uint as);
 Vector<TaylorModel> embed(uint as, const Vector<TaylorModel>& x);
-//Matrix<Interval> jacobian(const Vector<TaylorModel>& x, const Vector<Interval>& d);
+Matrix<Interval> jacobian(const Vector<TaylorModel>& x, const Vector<Interval>& d);
 //Matrix<Interval> jacobian(const Vector<TaylorModel>& x);
 bool refines(const Vector<TaylorModel>& x1, const Vector<TaylorModel>& x2);
 Vector<TaylorModel> combine(const Vector<TaylorModel>& x1, const Vector<TaylorModel>& x2);
@@ -104,6 +113,8 @@ Vector<Interval> solve(const Vector<TaylorModel>& f);
 Vector<TaylorModel> implicit(const Vector<TaylorModel>& f);
 Vector<TaylorModel> implicit_step(const Vector<TaylorModel>& f, const Vector<TaylorModel>& h);
 Vector<TaylorModel> flow(const Vector<TaylorModel>& x, const Vector<Interval>& d, const Interval& h, uint order);
+
+Float norm(const Vector<TaylorModel>& tv);
 
 /*! \brief A class representing a power series expansion, scaled to the unit box, with an error term.
  *
@@ -131,9 +142,9 @@ class TaylorModel
     //! \brief The type used for the coefficients.
     typedef Float ValueType;
 
-    //! \brief An iterator through the (index,coefficient) pairs of the expansion expansion.
+    //! \brief An iterator through the (index,coefficient) pairs of the expansion.
     typedef ExpansionType::iterator iterator;
-    //! \brief A constant iterator through the (index,coefficient) pairs of the expansion expansion.
+    //! \brief A constant iterator through the (index,coefficient) pairs of the expansion.
     typedef ExpansionType::const_iterator const_iterator;
 
     //@{
@@ -142,9 +153,9 @@ class TaylorModel
     TaylorModel();
     //! \brief Construct a TaylorModel in \a as arguments.
     TaylorModel(uint as);
-    //! \brief Construct from a map giving the expansion expansion and a constant giving the error.
+    //! \brief Construct from a map giving the expansion and a constant giving the error.
     TaylorModel(const std::map<MultiIndex,Float>& d, const Float& e);
-    //! \brief Construct from a map giving the expansion expansion and a constant giving the error.
+    //! \brief Construct from a map giving the expansion and a constant giving the error.
     TaylorModel(const Expansion<Float>& f, const Float& e=0.0);
     //! \brief Fast swap with another Taylor model.
     void swap(TaylorModel& tm);
@@ -219,27 +230,27 @@ class TaylorModel
 
     //@{
     /*! \name Data access */
-    //! \brief The expansion expansion.
+    //! \brief The expansion.
     const ExpansionType& expansion() const { return this->_expansion; }
-    //! \brief A reference to the expansion expansion.
+    //! \brief A reference to the expansion.
     ExpansionType& expansion() { return this->_expansion; }
-    //! \brief The error of the expansion expansion over the domain.
+    //! \brief The error of the expansion over the domain.
     const Float& error() const { return this->_error; }
-    //! \brief A reference to the error of the expansion expansion over the domain.
+    //! \brief A reference to the error of the expansion over the domain.
     Float& error() { return this->_error; }
-    //! \brief The constant term in the expansion expansion.
+    //! \brief The constant term in the expansion.
     const Float& value() const { return (*this)[MultiIndex::zero(this->argument_size())]; }
-    //! \brief A reference to the constant term in the expansion expansion.
+    //! \brief A reference to the constant term in the expansion.
     Float& value() { return (*this)[MultiIndex::zero(this->argument_size())]; }
     //! \brief The coefficient of the gradient term \f$df/dx_j\f$.
     const Float& gradient(uint j) const { return (*this)[MultiIndex::unit(this->argument_size(),j)]; }
     //! \brief A reference to the coefficient of the gradient term \f$df/dx_j\f$.
     Float& gradient(uint j) { return (*this)[MultiIndex::unit(this->argument_size(),j)]; }
 
-    //! \brief Set the error of the expansion expansion.
+    //! \brief Set the error of the expansion.
     void set_error(const Float& ne) {
         ARIADNE_ASSERT(ne>=0); this->_error=ne; }
-    //! \brief Set the constant term in the expansion expansion.
+    //! \brief Set the constant term in the expansion.
     void set_value(const Float& c) {
         this->_expansion[MultiIndex::zero(this->argument_size())]=c; }
     //! \brief Set the coefficient of the term \f$df/dx_j\f$.
@@ -258,13 +269,13 @@ class TaylorModel
     Float& operator[](uint j) {
         return (*this)[MultiIndex::unit(this->argument_size(),j)]; }
 
-    //! \brief An iterator to the first term in the expansion expansion.
+    //! \brief An iterator to the first term in the expansion.
     iterator begin() { return this->_expansion.begin(); }
-    //! \brief A constant iterator to the first term in the expansion expansion.
+    //! \brief A constant iterator to the first term in the expansion.
     const_iterator begin() const { return this->_expansion.begin(); }
-    //! \brief An iterator to the end of the expansion expansion.
+    //! \brief An iterator to the end of the expansion.
     iterator end() { return this->_expansion.end(); }
-    //! \brief A constant iterator to the end of the expansion expansion.
+    //! \brief A constant iterator to the end of the expansion.
     const_iterator end() const { return this->_expansion.end(); }
     //! \brief An iterator to the term with index \a.
     iterator find(const MultiIndex& a) { return this->_expansion.find(a); }
@@ -273,9 +284,9 @@ class TaylorModel
 
     //! \brief The number of variables in the argument of the quantity.
     uint argument_size() const { return this->_expansion.argument_size(); }
-    //! \brief The maximum degree of terms in the expansion expansion.
+    //! \brief The maximum degree of terms in the expansion.
     uint degree() const { return (--this->_expansion.end())->first.degree(); }
-    //! \brief The number of nonzero terms in the expansion expansion.
+    //! \brief The number of nonzero terms in the expansion.
     uint number_of_nonzeros() const { return this->_expansion.number_of_nonzeros(); }
     //@}
 
@@ -303,6 +314,18 @@ class TaylorModel
     TaylorModel& antidifferentiate(uint k);
     //@}
 
+    //@{
+    /*! \name Set-based operations. */
+    //! \brief Test if one model refines (is a subset of) another.
+    friend bool refines(const TaylorModel& tm1, const TaylorModel& tm2);
+    //! \brief Test if one model is disjoint from (is incompatible with) another.
+    friend bool disjoint(const TaylorModel& tm1, const TaylorModel& tm2);
+    //! \brief An over-approximation of the intersection of the sets of functions
+    //! allowed by the two models. It is guaranteed that any function represented
+    //! by both models is also represented by the result.
+    friend TaylorModel intersection(const TaylorModel& tm1, const TaylorModel& tm2);
+    //! \brief The supremum norm of the model, given by \f$|e|+\sum_\alpha |c_\alpha|\f$.
+    friend Float norm(const TaylorModel& tm);
     //@{
     /*! \name Vectoral function operators. */
     //! \brief Solve the equation \f$f(x)=0\f$ in the unit box.
@@ -490,7 +513,8 @@ class TaylorModel
     //@}
 
   public:
-    std::string str() const;
+    std::ostream& str(const std::ostream&) const;
+    std::ostream& repr(const std::ostream&) const;
 
     TaylorModel& clobber();
     TaylorModel& clobber(uint o);

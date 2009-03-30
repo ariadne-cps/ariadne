@@ -147,9 +147,9 @@ TestTaylorSet::test_split()
     make_lpair(ts5,ts6)=ts4.split();
 
     ARIADNE_TEST_EQUAL(ts.split().first,
-        TaylorSet(2,2,2, +0.5,0.5,0.25,0.0,0.0,0.0, 0.0, +0.5,+0.75,1.0,0.25,0.0,0.0, 0.0));
-    ARIADNE_TEST_EQUAL(ts.split().second,
         TaylorSet(2,2,2, -0.5,0.5,0.25,0.0,0.0,0.0, 0.0, +0.0,-0.25,1.0,0.25,0.0,0.0, 0.0));
+    ARIADNE_TEST_EQUAL(ts.split().second,
+        TaylorSet(2,2,2, +0.5,0.5,0.25,0.0,0.0,0.0, 0.0, +0.5,+0.75,1.0,0.25,0.0,0.0, 0.0));
 
     Box bounding_box=ts.bounding_box()+Vector<Interval>(2,Interval(-1,1));
     plot("test_taylor_set-split",bounding_box,

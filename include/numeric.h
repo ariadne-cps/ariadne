@@ -93,6 +93,10 @@ inline Float eps() { return std::numeric_limits<double>::epsilon(); }
 inline Float down(Float x) { return x>0 ? x*(1-2e-16) : x*(1+2e-16); }
 inline Float up(Float x) { return x>0 ? x*(1+2e-16) : x*(1-2e-16); }
 
+// The magnitude of a quantity is the funciton norm; always a real
+//   Provided for consistency with other types for which mag and abs are different
+inline Float mag(Float x) { return abs(x); }
+
 inline Float neg(Float x) { return -x; }
 inline Float rec(Float x) { return 1.0/x; }
 
@@ -460,7 +464,7 @@ inline Interval rad_ivl(Float x1, Float x2)
     return sub_ivl(x2/2,x1/2);
 }
 
-inline Interval med_ivll(Interval i) {
+inline Interval med_ivl(Interval i) {
     return add_ivl(i.l/2,i.u/2);
 }
 

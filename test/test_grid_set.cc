@@ -67,7 +67,7 @@ void test_binary_tree() {
     ARIADNE_TEST_COMPARE( expected_node1, ==, theBinaryTreeRoot );
     
     ARIADNE_PRINT_TEST_COMMENT("Making the leaf node intermediate should cause the IsALeafNodeException exception");
-    ARIADNE_TEST_THROW( theBinaryTreeRoot.set_unknown(), IsALeafNodeException);
+    ARIADNE_TEST_THROWS( theBinaryTreeRoot.set_unknown(), IsALeafNodeException);
 
     ARIADNE_PRINT_TEST_COMMENT("The node still have to be disabled");
     ARIADNE_TEST_COMPARE( expected_node1, ==, theBinaryTreeRoot );
@@ -269,7 +269,7 @@ void test_grid_paving_cursor(){
     
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE("Moving up from the Cursor's root node should cause the NotAllowedMoveException exception");
-    ARIADNE_TEST_THROW( theGSPCursorSmall.move_up(), NotAllowedMoveException);
+    ARIADNE_TEST_THROWS( theGSPCursorSmall.move_up(), NotAllowedMoveException);
     
     // !!!
     ARIADNE_PRINT_TEST_CASE_TITLE("Let's move the cursor of theGSPCursorLarge: left, right, we should be in the root of the smaller subpaving then");
@@ -317,10 +317,10 @@ void test_grid_paving_cursor(){
     ARIADNE_TEST_EQUAL( expected_box, theGSPCursorSmall.cell().box() );
 
     ARIADNE_PRINT_TEST_COMMENT("Try to get to the node on the left");
-    ARIADNE_TEST_THROW(theGSPCursorSmall.move_left(), NotAllowedMoveException );
+    ARIADNE_TEST_THROWS(theGSPCursorSmall.move_left(), NotAllowedMoveException );
 
     ARIADNE_PRINT_TEST_COMMENT("Try to get to the node on the right");
-    ARIADNE_TEST_THROW(theGSPCursorSmall.move_right(), NotAllowedMoveException );
+    ARIADNE_TEST_THROWS(theGSPCursorSmall.move_right(), NotAllowedMoveException );
 
     ARIADNE_PRINT_TEST_COMMENT("The state of theGSPCursorSmall is supposed to remain unchanged");
     ARIADNE_PRINT_TEST_COMMENT("The box pointed by the cursor is: ");
@@ -351,7 +351,7 @@ void test_grid_paving_cursor(){
     ARIADNE_TEST_EQUAL(theGPCursor.is_enabled(), true);
     ARIADNE_PRINT_TEST_COMMENT("Move one node up, to a non-leaf node and try to enable it, the NotALeafNodeException should be thrown");
     theGPCursor.move_up();
-    ARIADNE_TEST_THROW( theGPCursor.set_disabled(), NotALeafNodeException);
+    ARIADNE_TEST_THROWS( theGPCursor.set_disabled(), NotALeafNodeException);
 }
 
 void test_grid_paving_const_iterator(){
@@ -781,7 +781,7 @@ void test_grid_paving_cell(){
     ARIADNE_TEST_EQUAL( false , ( (*pFourthCell_01) == (*pFirstCell_01) )  );
     //!!!
     ARIADNE_PRINT_TEST_COMMENT( "pFirstCell_01 < pFourthCell_01, check for an exception in the compare_grid_cells method" );
-    ARIADNE_TEST_THROW( GridCell::compare_grid_cells( pFourthCell_01, (*pFirstCell_01), 1000), InvalidInput );
+    ARIADNE_TEST_THROWS( GridCell::compare_grid_cells( pFourthCell_01, (*pFirstCell_01), 1000), InvalidInput );
 }
 
 void test_adjoin_operation_one(){

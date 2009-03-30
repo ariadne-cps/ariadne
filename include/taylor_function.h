@@ -176,6 +176,9 @@ class TaylorFunction {
     /*! \brief The identity Taylor model on domain \a d. */
     static TaylorFunction identity(const Vector<Interval>& d);
 
+    /*! \brief Convert to an interval polynomial. */
+    Vector< Polynomial<Interval> > polynomial() const;
+
     /*! \brief Truncate terms higher than \a bd. */
     TaylorFunction& truncate(const MultiIndexBound& bd);
 

@@ -92,7 +92,7 @@ TaylorSet::TaylorSet(uint rs, uint as, uint deg, double x0, ...)
     for(uint i=0; i!=rs; ++i) {
         (*this)[i]=TaylorModel(as);
         for(MultiIndex j(as); j.degree()<=deg; ++j) {
-            if(x!=0.0 || j.degree()<=1) { (*this)[i].expansion().append(j,x); }
+            if(x!=0.0) { (*this)[i].expansion().append(j,x); }
             x=va_arg(args,double);
         }
         (*this)[i].error()=x;

@@ -167,7 +167,7 @@ X sup_norm(const Vector<X>& v)
 {
     X r=0;
     for(size_t i=0; i!=v.size(); ++i) {
-        r=max(r,v[i]);
+        r=max(r,static_cast<X>(abs(v[i])));  // Need static cast for expression templates
     }
     return r;
 }
@@ -207,6 +207,15 @@ Vector<X> join(const Vector<X>& v1, const X& s2)
     Vector<X> r(n1+1);
     ublas::project(r,range(0,n1))=v1;
     r[n1]=s2;
+    return r;
+}
+
+template<class X>
+Vector<X> join(const X& s1, const X& s2)
+{
+    Vector<X> r(2);
+    r[0]=s1;
+    r[1]=s2;
     return r;
 }
 

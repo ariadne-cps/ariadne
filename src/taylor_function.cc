@@ -43,6 +43,17 @@ typedef unsigned int uint;
 typedef Vector<Float> Point;
 typedef Vector<Interval> Box;
 
+
+namespace {
+Vector<Interval> unscale(const Vector<Interval>& x, const Vector<Interval>& d) {
+    Vector<Interval> r(x);
+    for(uint i=0; i!=r.size(); ++i) {
+        (r[i]-=med_ivl(d[i]))/=rad_ivl(d[i]); }
+    return r;
+}
+} // namespace
+
+
 TaylorFunction::TaylorFunction()
     : _domain(), _models()
 {
@@ -144,6 +155,21 @@ TaylorFunction::identity(const Vector<Interval>& d)
 }
 
 
+Polynomial<Interval> polynomial(const TaylorModel& tm) {
+    return Polynomial<Interval>(tm.expansion())+Interval(-tm.error(),+tm.error());
+}
+
+Vector< Polynomial<Interval> > 
+TaylorFunction::polynomial() const
+{
+    Vector<Polynomial<Interval> > p(this->result_size());
+    for(uint i=0; i!=this->result_size(); ++i) {
+        p[i]=Ariadne::polynomial(this->models()[i]); }
+    Vector<Polynomial<Interval> > s(this->argument_size());
+    for(uint j=0; j!=this->argument_size(); ++j) {
+        s[j]=Ariadne::polynomial(TaylorModel::unscaling(this->argument_size(),j,this->domain()[j])); }
+    return compose(p,s);
+}
 
 bool
 TaylorFunction::operator==(const TaylorFunction& tm) const
@@ -255,7 +281,14 @@ TaylorFunction::evaluate(const Vector<Interval>& x) const
 Matrix<Interval>
 TaylorFunction::jacobian(const Vector<Interval>& x) const
 {
-    ARIADNE_NOT_IMPLEMENTED;
+    Matrix<Interval> J=Ariadne::jacobian(this->_models,unscale(x,this->_domain));
+    for(uint j=0; j!=J.column_size(); ++j) {
+        Interval rad=rad_ivl(this->_domain[j]);
+        for(uint i=0; i!=J.row_size(); ++i) {
+            J[i][j]/=rad;
+        }
+    }
+    return J;
 }
 
 
@@ -404,9 +437,26 @@ implicit(const TaylorFunction& f)
 }
 
 TaylorFunction
-flow(const TaylorFunction& f, const Vector<Interval>& d, const Interval& h, const uint o)
+flow(const TaylorFunction& vf, const Vector<Interval>& d, const Interval& h, const uint o)
 {
-    return TaylorFunction(join(d,h),flow(f.models(),d,h,o));
+    ARIADNE_ASSERT(subset(d,vf.domain()));
+    Vector<Interval> euler_step=d+h*vf.range();
+    if(!subset(euler_step,vf.domain())) {
+        ARIADNE_THROW(FlowBoundsException,"flow(TaylorFunction,Box,Interval,Nat)",
+                      "Euler step "<<euler_step<<" of vector field "<<vf<<
+                      " starting in domain "<<d<<" over time interval "<<h<<
+                      " does not remain in domain of vector field.");
+    }
+
+    Vector<TaylorModel> unscaled_vf=unscale(vf.models(),vf.domain());
+    Vector<Interval> unscaled_d=unscale(d,vf.domain());
+    //std::cerr<<"\n"<<unscaled_vf<<"\n"<<unscaled_d<<"\n";
+    //Vector<TaylorModel> unscaled_flw=flow(unscaled_vf,unscaled_d,h,o);
+    //std::cerr<<unscaled_flw<<"\n";
+    //std::cerr<<scale(unscaled_flw,vf.domain());
+    return TaylorFunction(join(d,h),
+        scale(flow(unscale(vf.models(),vf.domain()),unscale(d,vf.domain()),h,o),vf.domain()));
+    
 }
 
 

@@ -75,10 +75,10 @@ class TestTaylorFunction
     void test_jacobian();
     void test_compose();
     void test_antiderivative();
-    void test_flow();
     void test_implicit();
     void test_join();
     void test_combine();
+    void test_flow();
 };
 
 
@@ -98,20 +98,20 @@ TestTaylorFunction::test()
     ARIADNE_TEST_CALL(test_jacobian());
     ARIADNE_TEST_CALL(test_antiderivative());
     ARIADNE_TEST_CALL(test_compose());
-    ARIADNE_TEST_CALL(test_flow());
     ARIADNE_TEST_CALL(test_implicit());
     ARIADNE_TEST_CALL(test_join());
+    ARIADNE_TEST_CALL(test_flow());
 }
 
 
 void TestTaylorFunction::test_constructors()
 {
-    HenonFunction henon_function(Vector<Float>(2,1.5,-0.25));
-    Vector<Interval> domain(2,0.25,1.25,0.5,1.0);
     Vector< Expansion<Float> > expansion(2);
-    expansion[0]=Expansion<Float>(1,2,2, 1.125, -0.75,0.0625, -0.25,0.00,0.00);
-    expansion[1]=Expansion<Float>(1,2,2, 0.750,  0.50,0.0000,  0.00,0.00,0.00);
+    expansion[0]=Expansion<Float>(2,4, 0,0,1.125, 1,0,-0.75, 0,1,0.0625, 2,0,-0.25);
+    expansion[1]=Expansion<Float>(2,2, 0,0,0.750, 1,0,0.50);
 
+    Vector<Interval> domain(2,0.25,1.25,0.5,1.0);
+    HenonFunction henon_function(Vector<Float>(2,1.5,-0.25));
     ARIADNE_TEST_CONSTRUCT(TaylorFunction,henon_model,(domain,henon_function));
     ARIADNE_TEST_EQUAL(henon_model.models()[0].expansion(),expansion[0])
     ARIADNE_TEST_EQUAL(henon_model.models()[1].expansion(),expansion[1])
@@ -140,12 +140,13 @@ void TestTaylorFunction::test_restrict()
     ARIADNE_TEST_EQUAL(restrict(function1,subdomain1),restricted_function1);
 
     Vector<Interval> domain2(1, -1.0,+1.0);
-    Expansion<Float> expansion2(1,1, 0.0, 1.0);
-    Vector<Interval> subdomain2(1, 1e-16, 1.0);
-    Expansion<Float> subexpansion2(1,1, 0.50000000000000000,0.49999999999999994);
-    Vector<Float> error2(1, 1.6653345369377348e-16);
+    Expansion<Float> expansion2(1,2, 0,0.0, 1,1.0);
+    Vector<Float> error2(1, 0.125);
+    Vector<Interval> subdomain2(1, 3e-16, 1.0);
+    Expansion<Float> subexpansion2(1,2, 0,0.50000000000000022, 1,0.49999999999999989);
+    Vector<Float> suberror2(1, 0.12500000000000008);
     TaylorFunction function2(domain2,expansion2*e(1,0),error2);
-    TaylorFunction restricted_function2(subdomain2,subexpansion2*e(1,0),error2);
+    TaylorFunction restricted_function2(subdomain2,subexpansion2*e(1,0),suberror2);
     ARIADNE_TEST_EQUAL(restrict(function2,subdomain2),restricted_function2);
 }
 
@@ -207,7 +208,7 @@ void TestTaylorFunction::test_antiderivative()
     Vector<Interval> domain3(2, -0.25,0.75, 0.0,0.5);
     Expansion<Float> expansion3(2,2, 1.0,2.0,3.0,4.0,5.0,6.0);
     TaylorFunction function3(domain3,expansion3*e(1,0));
-    Expansion<Float> aexpansion30(1,2,3, 0.0, 0.5,0.0, 0.5,1.5,0.0,0.66666666666666663,1.25,3.0,0.0);
+    Expansion<Float> aexpansion30(2,3, 0.0, 0.5,0.0, 0.5,1.5,0.0,0.66666666666666663,1.25,3.0,0.0);
     Vector<Float> aerror30(1,5.5511151231257827e-17);
     TaylorFunction antiderivative30(domain3,aexpansion30*e(1,0),aerror30);
     ARIADNE_TEST_EQUAL(antiderivative(function3,index0),antiderivative30);
@@ -219,6 +220,7 @@ void TestTaylorFunction::test_antiderivative()
 
 void TestTaylorFunction::test_implicit()
 {
+    // Test computation of solution of x^2/8-y/2=0 on [-1,+1]
     Vector<Interval> df1(2, -1.0,+1.0, -1.0,+1.0);
     Vector<Interval> dh1=project(df1,range(0,1));
     Vector< Polynomial<Float> > pf1=(0.125*p(2,0)-0.5*p(2,1))*e(1,0);
@@ -229,46 +231,112 @@ void TestTaylorFunction::test_implicit()
 
     // Test computation of sqrt(4+x)-2 on [-1,+1] by solving 4+x-(y+2)*(y+2)=0
     Vector<Interval> df2(2, -1.0,+1.0, -1.0,+1.0);
-    Vector<Interval> dh2(1, -1.0,+1.0);
+    Vector<Interval> dh2=project(df2,range(0,1));
     Vector< Polynomial<Float> > pf2=(4.0+p(2,0)-(p(2,1)+2.0)*(p(2,1)+2.0))*e(1,0);
     TaylorFunction f2(df2,pf2);
     TaylorFunction i2=TaylorFunction::identity(dh2);
     TaylorFunction h2=implicit(f2);
     ARIADNE_TEST_BINARY_PREDICATE(operator<,norm(compose(f2,join(i2,h2)).range()),1e-6);
+
+    // Test computation of sqrt(4+x)-2 on [0,3] by solving 4+x-(y+2)*(y+2)=0
+    // Note that the solution lies in (-1,+1)
+    Vector<Interval> df3(2, 0.0,+3.0, -1.0,+1.0);
+    Vector<Interval> dh3=project(df3,range(0,1));
+    Vector< Polynomial<Float> > pf3=(4.0+p(2,0)-(p(2,1)+2.0)*(p(2,1)+2.0))*e(1,0);
+    TaylorFunction f3(df3,pf3);
+    TaylorFunction i3=TaylorFunction::identity(dh3);
+    TaylorFunction h3=implicit(f3);
+    ARIADNE_TEST_BINARY_PREDICATE(operator<,norm(compose(f3,join(i3,h3)).range()),1e-6);
 }
 
 
 void TestTaylorFunction::test_flow()
 {
-    Float a=-0.75; Float b=-0.5; Float c=-1.0;
+    {
+        Vector<Float> ex=e(1,0); 
+        Polynomial<Float> x=p(1,0); 
+        Polynomial<Float> x0=p(2,0); Polynomial<Float> t=p(2,1);
+
+        // Test scaling of simple flow dx/dt=3 on the unit interval
+        Vector<Interval> b(1u,Interval(-4,+4));
+        Vector<Interval> d(1u,Interval(-2,0));
+        Interval h(0,0.125);
+        Vector<Polynomial<Float> > vfp=(0.0*x+0.5)*ex;
+        Vector<Polynomial<Float> > flwp=(x0+0.5*t)*ex;
+        TaylorFunction vf(b,vfp);
+        TaylorFunction flw(join(d,h),flwp);
+        //ARIADNE_TEST_PRINT(flwp);
+        //ARIADNE_TEST_PRINT(flw.polynomial());
+        //ARIADNE_TEST_PRINT(flw.polynomial()<<" "<<flwp);
+        //ARIADNE_TEST_PRINT(flow(vf,d,h,4).polynomial());
+        ARIADNE_TEST_EQUAL(flow(vf,d,h,4),flw);
+
+        h=Interval(-0.125,0.125);
+        flw=TaylorFunction(join(d,h),flwp);
+        ARIADNE_TEST_EQUAL(flow(vf,d,h,4),flw);
+    }
+
+    // Test solution of the affine flow
+    //   dx/dt = Ax+b; x(0)=x0
+    // with solution
+    //   x=inv(A)(exp(At)-I)b+exp(At)x0
+
+    // In scalar form, use specific flow
+    //   dx/dt=ax+by+e; dy/dt=cx+dy+f; x(0)=x0; y(0)=y0;
+    // The first terms in the expansion are
+    //   x=(x0+e*t)+(a*(x0+t/2)+b*(y0+f/2))*t+((a*a+b*c)*x0+b*(a+d)*y0)*t*t
+    //      +e*t+(a*e+b*f)*t*t/2+...
     Vector<Float> ex=e(2,0); Vector<Float> ey=e(2,1);
     Polynomial<Float> x=p(2,0); Polynomial<Float> y=p(2,1);
-    Vector< Polynomial<Float> > vfp=(c+a*x-b*y)*ex+(b*x+a*y)*ey;
+    Polynomial<Float> x0=p(3,0); Polynomial<Float> y0=p(3,1); Polynomial<Float> t=p(3,2);
 
-    x=p(3,0); y=p(3,1); Polynomial<Float> t=p(3,2);
-    Vector< Polynomial<Float> > flp=
-        (1.0*x+(-1.0-0.75*x+0.5*y)*t+(0.375+0.15625*x-0.375*y)*t*t
-            +(-0.052083+0.023437*x+0.119791*y)*t*t*t)*ex
-        +(1.0*y+(-0.5*x-0.75*y)*t+(0.25+0.375*x+0.15625*y)*t*t
-            +(-0.125-0.119791*x+0.023437*y)*t*t*t)*ey;
-    Vector<Interval> fle(2,Interval(-1e-3,1e-3)); // extra flow error
+    Float a=-0.75; Float b=-0.50; Float e=-1.0;
+    Float c=+0.50; Float d=-0.75; Float f= 0.0;
 
-    Vector<Interval> d(2, -1.0,+1.0, -1.0,+1.0);
-    TaylorFunction vector_field(d,vfp);
-    Vector<Interval> domain(2, -0.5,+0.5, -0.5,+0.5);
+    Vector<Interval> vf_domain(2, -1.0,+1.0, -1.0,+1.0);
+    Vector< Polynomial<Float> > vf_poly=(e+a*x+b*y)*ex+(f+c*x+d*y)*ey;
+    TaylorFunction vector_field(vf_domain,vf_poly);
+
+    Vector<Interval> flow_domain(2, -0.5,+0.5, -0.5,+0.5);
+    Vector< Polynomial<Float> > flow_poly=flow(vf_poly,6);
+    Vector< Polynomial<Interval> > ivl_flow_poly=flow_poly;
+    Vector<Interval> flow_error(2,Interval(-1e-1,1e-1)); // extra flow error
+
+
     Interval time(-0.25,0.25);
     uint order(6);
     TaylorFunction computed_flow;
-    ARIADNE_TEST_TRY(
-        computed_flow=flow(vector_field,domain,time,order);
-        TaylorFunction expected_flow(join(domain,time),flp);
-        expected_flow+=Vector<Interval>(2,Interval(-1e-3,1e-3));
-        ARIADNE_TEST_BINARY_PREDICATE(refines,computed_flow,expected_flow);
 
-        TaylorFunction flow_error=computed_flow-antiderivative(compose(vector_field,computed_flow),2);
-        for(uint i=0; i!=2; ++i) { const_cast<TaylorModel&>(flow_error.models()[i]).sweep(1e-4); }
-        ARIADNE_TEST_BINARY_PREDICATE(operator<,norm(flow_error.range()),1e-4);
-    );
+    // Expect exception indicating that flow cannot be computed over this time step.
+    ARIADNE_TEST_THROWS(flow(vector_field,flow_domain,time,order),FlowBoundsException);
+
+
+    // Compute flow of vector field
+    time/=2;
+    computed_flow=flow(vector_field,flow_domain,time,order);
+    TaylorFunction expected_flow(join(flow_domain,time),flow_poly);
+    expected_flow+=flow_error;
+
+    ARIADNE_TEST_PRINT(flow_poly);
+    ARIADNE_TEST_PRINT(midpoint(truncate(computed_flow.polynomial(),6)));
+
+    ARIADNE_TEST_PRINT(computed_flow);
+    ARIADNE_TEST_PRINT(expected_flow);
+
+
+    ARIADNE_TEST_PRINT(norm(Vector<TaylorModel>(expected_flow.models()-computed_flow.models())));
+    for(uint i=0; i!=2; ++i) { const_cast<TaylorModel&>(computed_flow.models()[i]).sweep(1e-6); }
+    ARIADNE_TEST_BINARY_PREDICATE(refines,computed_flow,expected_flow);
+
+/*
+    // Test for contraction of single flow step
+    // This is not strictly needed for a valid solution
+    TaylorFunction contracted_flow=antiderivative(compose(vector_field,computed_flow),2);
+    if(!refines(contracted_flow,computed_flow)) {
+        ARIADNE_TEST_WARN("Perron-Frobenius operator is not a contraction on flow "<<
+                            computed_flow<<"; operator yields "<<contracted_flow);
+    }
+*/
 }
 
 

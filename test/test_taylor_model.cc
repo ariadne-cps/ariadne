@@ -37,6 +37,7 @@ using namespace Ariadne;
 
 Vector<Float> v(uint n, uint i) { return Vector<Float>::unit(n,i); }
 TaylorModel ctm(uint m, double c) { return TaylorModel::constant(m,c); }
+TaylorModel ctm(uint m) { return TaylorModel::constant(m,1.0); }
 TaylorModel tm(uint m, uint i) { return TaylorModel::variable(m,i); }
 
 
@@ -55,6 +56,7 @@ class TestTaylorModel
     void test_functions();
     void test_rescale();
     void test_restrict();
+    void test_split();
     void test_antiderivative();
     void test_compose();
     void test_flow();
@@ -65,6 +67,10 @@ class TestTaylorModel
 
 void TestTaylorModel::test()
 {
+    std::cerr<<std::setprecision(16);
+    std::cout<<std::setprecision(16);
+    std::clog<<std::setprecision(16);
+
     ARIADNE_TEST_CALL(test_constructors());
     ARIADNE_TEST_CALL(test_predicates());
     ARIADNE_TEST_CALL(test_approximation());
@@ -72,11 +78,12 @@ void TestTaylorModel::test()
     ARIADNE_TEST_CALL(test_functions());
     ARIADNE_TEST_CALL(test_rescale());
     ARIADNE_TEST_CALL(test_restrict());
+    ARIADNE_TEST_CALL(test_split());
     ARIADNE_TEST_CALL(test_antiderivative());
     ARIADNE_TEST_CALL(test_compose());
     ARIADNE_TEST_CALL(test_flow());
     ARIADNE_TEST_CALL(test_solve());
-    //ARIADNE_TEST_CALL(test_implicit());
+    ARIADNE_TEST_CALL(test_implicit());
 }
 
 
@@ -186,6 +193,20 @@ void TestTaylorModel::test_restrict()
 {
 }
 
+void TestTaylorModel::test_split()
+{
+    TaylorModel x=tm(2,0); TaylorModel y=tm(2,1);
+    TaylorModel t=1+3*x+2*y-5*x*x-7*x*y+11*y*y;
+    TaylorModel es1=-1.75+4*x+5.5*y-1.25*x*x-3.5*x*y+11*y*y;
+    TaylorModel es2=1.25-1*x-1.5*y-1.25*x*x-3.5*x*y+11*y*y;
+
+    ARIADNE_TEST_PRINT(t);
+    ARIADNE_TEST_EQUAL(split(t,0).first,es1);
+    ARIADNE_TEST_EQUAL(split(t,0).second,es2);
+    ARIADNE_TEST_EQUAL(split(t,0,false),es1);
+    ARIADNE_TEST_EQUAL(split(t,0,true),es2);
+}
+
 
 void TestTaylorModel::test_antiderivative()
 {
@@ -197,19 +218,6 @@ void TestTaylorModel::test_antiderivative()
 
 void TestTaylorModel::test_compose()
 {
-}
-
-template<class X> Vector<X> join(const X& x1, const X& x2) {
-    Vector<X> r(2); r[0]=x1; r[1]=x2; return r;
-}
-
-Float norm(const TaylorModel& tm) {
-    set_rounding_mode(upward);
-    Float res=tm.error();
-    for(TaylorModel::const_iterator iter=tm.begin(); iter!=tm.end(); ++iter) {
-        res+=abs(iter->second);
-    }
-    return res;
 }
 
 
@@ -232,11 +240,6 @@ void TestTaylorModel::test_solve()
 
 void TestTaylorModel::test_implicit()
 {
-    std::cerr<<TaylorModel()<<"\n"<<TaylorModel(0)<<"\n"<<TaylorModel::constant(1,0.0)<<"\n";
-    //TaylorModel f(e(2,3, 1,0,1.0, 0,1,4.0, 0,2,1.0),0.0);
-    std::cerr<<std::setprecision(16);
-    std::cout<<std::setprecision(16);
-    std::clog<<std::setprecision(16);
     TaylorModel f(e(2,5, 0,0,0.0000002, 1,0,1.000000000000003, 2,0,0.000000000000003, 0,1,4.000000000000001, 0,2,1.000000000000001),0.0);
     //TaylorModel ha=implicit_approx(Vector<TaylorModel>(1u,f),8)[0];
     //TaylorModel h1=_implicit1(Vector<TaylorModel>(1u,f),4)[0];
@@ -285,7 +288,23 @@ Vector<Interval> range(const Vector<TaylorModel>& tm) {
 }
 
 void TestTaylorModel::test_flow()
-{
+{ //phi=x+3t x=0.25xi+0.25
+    {
+        // Test flow dx/dt=3 on an assymetric domain
+        Vector<TaylorModel> vf=ctm(1,3.0)*v(1,0);
+        Vector<Interval> d1(1, 0.0,0.5);
+        Interval h1(-0.125,0.125);
+        Vector<TaylorModel> phi1=flow(vf,d1,h1,2);
+        Vector<TaylorModel> expected_phi1=(0.25*ctm(2)+0.25*tm(2,0)+0.375*tm(2,1))*v(1,0);
+        ARIADNE_TEST_EQUAL(phi1,expected_phi1);
+
+        Vector<Interval> d2(1, 0.0,0.5);
+        Interval h2(0.0,0.125);
+        Vector<TaylorModel> phi2=flow(vf,d2,h2,2);
+        Vector<TaylorModel> expected_phi2=(0.4375*ctm(2)+0.25*tm(2,0)+0.1875*tm(2,1))*v(1,0);
+        ARIADNE_TEST_EQUAL(phi2,expected_phi2);
+   }
+
     Vector<TaylorModel> vf=ctm(2,2.0)*v(2,0)+tm(2,1)*v(2,1);
     Vector<Interval> d(2, -0.5,0.5, -0.5,0.5);
     Interval h(-0.25,0.25);
@@ -294,6 +313,8 @@ void TestTaylorModel::test_flow()
     Vector<TaylorModel> phi=flow(vf,d,h,o);
     Vector<TaylorModel> next_phi=antiderivative(compose(vf,phi),2);
     ARIADNE_TEST_BINARY_PREDICATE(operator<,(norm(Ariadne::range(phi-next_phi))),0.1);
+
+
 }
 
 

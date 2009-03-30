@@ -162,7 +162,9 @@ class Expansion
 
     //! \brief Clean up the representation of the polynomial, including
     //! sorting the terms and removing zero elements if necessary.
-    void cleanup() { }
+    void cleanup() {
+        for(iterator iter=this->begin(); iter!=this->end(); ) {
+        if(iter->second==0) { this->erase(iter++); } else { ++iter; } } }
     //! \brief Check the representation of the polynomial for consistency.
     void check() {
         for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {

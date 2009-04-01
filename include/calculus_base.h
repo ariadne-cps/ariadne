@@ -20,9 +20,9 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 /*! \file calculus_base.h
- *  \brief Base class for dynamical calculus routines containing implementations of routings which can be naturally composed from other routines. 
+ *  \brief Base class for dynamical calculus routines containing implementations of routings which can be naturally composed from other routines.
  */
 
 #ifndef ARIADNE_CALCULUS_BASE_H
@@ -30,11 +30,16 @@
 
 #include "tribool.h"
 #include "logging.h"
+#include "function_interface.h"
+#include "expression_interface.h"
 #include "calculus_interface.h"
+
+#include "numeric.h"
+#include "vector.h"
 
 /* \brief Top-level namespace. */
 namespace Ariadne {
- 
+
 using std::pair;
 
 
@@ -48,8 +53,8 @@ class Box;
 
 
 /*! \brief Tools for analysing dynamical systems based on function models. */
-template<class Var> 
-class CalculusBase 
+template<class Var>
+class CalculusBase
     : public CalculusInterface<Var>
     , public Loggable
 {
@@ -78,80 +83,80 @@ class CalculusBase
     typedef ExpressionInterface ExpressionType;
     typedef SetModelType EnclosureType;
   protected:
-    tribool _tribool(const IntervalType& ivl) const { 
+    tribool _tribool(const IntervalType& ivl) const {
         if(ivl.lower()>0) { return true; } else if(ivl.upper()<0) { return false; } else { return indeterminate; } }
   public:
     //@{ \name Dynamical operations
 
-    //! \brief Computes the image of the set defined by \a set_model under the approximation of the map 
+    //! \brief Computes the image of the set defined by \a set_model under the approximation of the map
     //! given by \a map_model.
-    virtual SetModelType reset_step(const MapModelType& map_model, 
+    virtual SetModelType reset_step(const MapModelType& map_model,
                                     const SetModelType& set_model) const = 0;
-  
-  
-    //! \brief Test if a set satisfied the constraint given by the guard model. Returns \a true is all 
-    //! points in the set satisfy the constraint, \a false if all points do not satisfy the constraint, 
+
+
+    //! \brief Test if a set satisfied the constraint given by the guard model. Returns \a true is all
+    //! points in the set satisfy the constraint, \a false if all points do not satisfy the constraint,
     //! and indeterminate otherwise.
-    virtual tribool active(const PredicateModelType& guard_model, 
+    virtual tribool active(const PredicateModelType& guard_model,
                            const SetModelType& set_model) const = 0;
 
-    //! \brief Computes an over-approximation to the time interval for which the \a initial_set_model 
-    //! touch the set specified by the \a guard model under the \a flow_model. The \a minimum and \a maximum_time 
+    //! \brief Computes an over-approximation to the time interval for which the \a initial_set_model
+    //! touch the set specified by the \a guard model under the \a flow_model. The \a minimum and \a maximum_time
     //! gives the minimum and maximum time for which the evolution is valid.
-    virtual Interval touching_time_interval(const PredicateModelType& guard_model, 
-                                            const FlowModelType& flow_model, 
+    virtual Interval touching_time_interval(const PredicateModelType& guard_model,
+                                            const FlowModelType& flow_model,
                                             const SetModelType& initial_set_model) const = 0;
 
     //! \brief Computes the time at which points in the \a initial_set_model cross the zero-set of the
     //! the \a guard_model under evolution of the \a flow_model, for times between the \a minimum_time and \a maximum_time.
     //! The crossing must be (differentiably) transverse.
     virtual TimeModelType crossing_time(const PredicateModelType& guard_model,
-                                        const FlowModelType& flow_model, 
+                                        const FlowModelType& flow_model,
                                         const SetModelType& initial_set_model) const = 0;
 
     //! \brief Computes the points reached by evolution of the \a initial_set_model under the flow
-    //! given by \a flow_model. The \a integration_time_model \f$\tau(e)\f$ gives the time the point 
+    //! given by \a flow_model. The \a integration_time_model \f$\tau(e)\f$ gives the time the point
     //! starting at \f$x(e)\f$ should be flowed.
-    virtual SetModelType integration_step(const FlowModelType& flow_model, 
-                                          const SetModelType& initial_set_model, 
+    virtual SetModelType integration_step(const FlowModelType& flow_model,
+                                          const SetModelType& initial_set_model,
                                           const TimeModelType& integration_time_model) const = 0;
-  
+
     //! \brief Computes the points reached by evolution of the \a initial_set_model under the flow
     //! given by \a flow_model for times between \a initial_time_model and \a final_time_model.
-    virtual SetModelType reachability_step(const FlowModelType& flow_model, 
-                                           const SetModelType& initial_set_model, 
-                                           const TimeModelType& initial_time_model, 
+    virtual SetModelType reachability_step(const FlowModelType& flow_model,
+                                           const SetModelType& initial_set_model,
+                                           const TimeModelType& initial_time_model,
                                            const TimeModelType& final_time_model) const = 0;
-  
+
     //! \brief Computes the points reached by evolution of the \a initial_set_model under the flow
-    //! given by \a flow_model for times given by \a reachability_time_model. 
-    //! The \a reachability_time_model must have one more independent variable than the 
+    //! given by \a flow_model for times given by \a reachability_time_model.
+    //! The \a reachability_time_model must have one more independent variable than the
     //! \a initial_set_model.
-    //! 
+    //!
     //! \invariant <code>reachability_time_model.argument_size()==initial_set_model.argument_size()+1</code>
-    virtual SetModelType 
-    reachability_step(const FlowModelType& flow_model, 
-                      const SetModelType& initial_set_model, 
+    virtual SetModelType
+    reachability_step(const FlowModelType& flow_model,
+                      const SetModelType& initial_set_model,
                       const TimeModelType& reachability_time_model) const = 0;
-  
+
     //! \brief Computed a pair \f$(h,B)\f$ such that the flow of the vector_field \a vf starting in
     //! domain \a d remains in \a B for times up to \a h. The maximum allowable \a h and maximum
     //! allowable diameter of \a B are given.
-    virtual pair<TimeType,BoxType> 
-    flow_bounds(const FunctionType& vf, 
-                const BoxType& d, 
-                const RealType& maximum_step_size, 
+    virtual pair<TimeType,BoxType>
+    flow_bounds(const FunctionType& vf,
+                const BoxType& d,
+                const RealType& maximum_step_size,
                 const RealType& maximum_bound_diameter) const = 0;
 
     //@}
-   
+
     //@{ \name Constructing models for functions
     //! \brief A model for the map \a f over the domain \a d.
     virtual MapModelType map_model(const FunctionType& f, const BoxType& d) const = 0;
 
     //! \brief A model for the flow determined by the vector field \a vf over the initial domain \a d,
     //! valid for times up to \a h, assuming that the state remains in the bounding box \a b.
-    virtual FlowModelType flow_model(const FunctionType& vf, const BoxType& d, 
+    virtual FlowModelType flow_model(const FunctionType& vf, const BoxType& d,
                                      const TimeType& h, const BoxType& b) const = 0;
 
     //! \brief A model for the real-valued function \a g over the domain \a d. \deprecated
@@ -181,69 +186,70 @@ class CalculusBase
 
   public:
     //! \brief Test if a box satisfies the constraint given by the guard. Returns \a true is all points
-    //! in the box satisfy the constraint, \a false if all points do not satisfy the constraint, and 
+    //! in the box satisfy the constraint, \a false if all points do not satisfy the constraint, and
     //! indeterminate otherwise.
     tribool active(const ExpressionType& guard,  const BoxType& box) const {
         return this->_tribool(guard.evaluate(box)); }
     tribool active(const FunctionType& guard,  const BoxType& box) const {
-        return this->_tribool(guard.evaluate(box)[0]); }
+        Vector<Interval> range=guard.evaluate(box);
+        return this->_tribool(range[0]); }
 
     //! \brief Test if a set satisfied the constraint given by the guard. Returns \a true is all points
-    //! in the set satisfy the constraint, \a false if all points do not satisfy the constraint, and 
+    //! in the set satisfy the constraint, \a false if all points do not satisfy the constraint, and
     //! indeterminate otherwise.
     tribool active(const ExpressionType& guard,  const SetModelType& set_model) const {
         return this->active(this->predicate_model(guard,set_model.range()),set_model); }
     tribool active(const FunctionType& guard,  const SetModelType& set_model) const {
         return this->active(this->map_model(guard,set_model.range())[0],set_model); }
 
- 
+
     //! \brief Computes the image of the set defined by \a set_model under the \a map.
-    SetModelType reset_step(const FunctionType& map, 
+    SetModelType reset_step(const FunctionType& map,
                             const SetModelType& set_model) const {
         return this->reset_step(this->map_model(map,set_model.range()),set_model); }
-  
+
     //! \brief Computes the points reached by evolution of the \a initial_set_model under the flow
     //! given by \a flow_model. The \a integration_time gives the time all points should be flowed.
-    SetModelType integration_step(const FlowModelType& flow_model, 
-                                  const SetModelType& initial_set_model, 
+    SetModelType integration_step(const FlowModelType& flow_model,
+                                  const SetModelType& initial_set_model,
                                   const TimeType& integration_time) const {
         return this->integration_step(flow_model,initial_set_model,this->time_model(integration_time,initial_set_model.domain())); }
-  
+
     //! \brief Computes the points reached by evolution of the \a initial_set_model under the flow
     //! given by \a flow_model for times between \a initial_time and \a final_time.
-    SetModelType reachability_step(const FlowModelType& flow_model, 
-                                   const SetModelType& initial_set_model, 
-                                   const TimeType& initial_time, 
+    SetModelType reachability_step(const FlowModelType& flow_model,
+                                   const SetModelType& initial_set_model,
+                                   const TimeType& initial_time,
                                    const TimeType& final_time) const {
         return this->reachability_step(flow_model,initial_set_model,this->time_model(initial_time,initial_set_model.domain()),this->time_model(final_time,initial_set_model.domain())); };
-  
+
     //! \brief Computes the points reached by evolution of the \a initial_set_model under the flow
     //! given by \a flow_model for times between \a initial_time and \a final_time_model.
-    SetModelType reachability_step(const FlowModelType& flow_model, 
-                                   const SetModelType& initial_set_model, 
-                                   const TimeType& initial_time, 
+    SetModelType reachability_step(const FlowModelType& flow_model,
+                                   const SetModelType& initial_set_model,
+                                   const TimeType& initial_time,
                                    const TimeModelType& final_time_model) const {
         return this->reachability_step(flow_model,initial_set_model,this->time_model(initial_time,initial_set_model.domain()),final_time_model); }
-  
+
     //! \brief Computes the points reached by evolution of the \a initial_set_model under the flow
     //! given by \a flow_model for times between \a initial_time_model and \a final_time.
-    SetModelType reachability_step(const FlowModelType& flow_model, 
-                                   const SetModelType& initial_set_model, 
-                                   const TimeModelType& initial_time_model, 
+    SetModelType reachability_step(const FlowModelType& flow_model,
+                                   const SetModelType& initial_set_model,
+                                   const TimeModelType& initial_time_model,
                                    const TimeType& final_time) const {
         return this->reachability_step(flow_model,initial_set_model,initial_time_model,this->time_model(final_time,initial_set_model.domain())); }
-  
+
     //! \brief Gives the extended time model for the reachability step between the
     //! \a initial_time and the \a final_time_model. The new time is given by
     //! \f$\tau'(e,s) = (1-s)\tau_0+s\tau_1(e)\f$.
-    TimeModelType reachability_time(const TimeType& initial_time, 
+    TimeModelType reachability_time(const TimeType& initial_time,
                                     const TimeModelType& final_time_model) const {
         return static_cast<const CalculusInterface<Var>*>(this)->reachability_time(this->time_model(initial_time,final_time_model.domain()),final_time_model); }
-  
+
     //! \brief Gives the extended time model for the reachability step between the
     //! \a initial_time_model and the \a final_time. The new time is given by
     //! \f$\tau'(e,s) = (1-s)\tau_0(e)+s\tau_1\f$.
-    TimeModelType reachability_time(const TimeModelType& initial_time_model, 
+    TimeModelType reachability_time(const TimeModelType& initial_time_model,
                                     const TimeType& final_time) const {
         return static_cast<const CalculusInterface<Var>*>(this)->reachability_time(initial_time_model,this->time_model(final_time,initial_time_model.domain())); };
 

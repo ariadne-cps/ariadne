@@ -75,9 +75,9 @@ class FunctionBase
         Vector< Differential<Interval> > r(this->T::result_size()); this->T::compute(r,x); return r; }
 
     virtual Matrix<Float> jacobian(const Vector<Float>& x) const {
-        return this->_expansion(x,1u).jacobian(); }
+        return Ariadne::jacobian(this->_expansion(x,1u)); }
     virtual Matrix<Interval> jacobian(const Vector<Interval>& x) const {
-        return this->_expansion(x,1u).jacobian(); }
+        return Ariadne::jacobian(this->_expansion(x,1u)); }
     virtual Vector< Differential<Float> > expansion(const Vector<Float>& x, const ushort& s) const {
         return this->_expansion(x,s); }
     virtual Vector< Differential<Interval> > expansion(const Vector<Interval>& x, const ushort& s) const {
@@ -187,9 +187,9 @@ class FunctionTemplate
         return this->_evaluate(x); }
 
     virtual Matrix<Float> jacobian(const Vector<Float>& x) const {
-        return this->_evaluate(Differential<Float>::variables(1u,x)).jacobian(); }
+        return Ariadne::jacobian(this->_evaluate(Differential<Float>::variables(1u,x))); }
     virtual Matrix<Interval> jacobian(const Vector<Interval>& x) const {
-        return this->_evaluate(Differential<Interval>::variables(1u,x)).jacobian(); }
+        return Ariadne::jacobian(this->_evaluate(Differential<Interval>::variables(1u,x))); }
 
     // TODO: Find a better way for writing functions which can handle transformations which may not have a
     // write() method or operator<<.
@@ -504,9 +504,9 @@ class AffineFunction
         return prod(_iA,x)+_ib; }
 
     virtual Matrix<Float> jacobian(const Vector<Float>& x) const {
-        return this->evaluate(Differential<Float>::variables(1u,x)).jacobian(); }
+        return Ariadne::jacobian(this->evaluate(Differential<Float>::variables(1u,x))); }
     virtual Matrix<Interval> jacobian(const Vector<Interval>& x) const {
-        return this->evaluate(Differential<Interval>::variables(1u,x)).jacobian(); }
+        return Ariadne::jacobian(this->evaluate(Differential<Interval>::variables(1u,x))); }
 
     virtual std::ostream& write(std::ostream& os) const {
         return os << "AffineFunction( A="<<_iA<<", b="<<_ib<<" )"; }
@@ -542,9 +542,9 @@ class PolynomialFunction
         return Ariadne::evaluate(_ip,x); }
 
     virtual Matrix<Float> jacobian(const Vector<Float>& x) const {
-        return this->evaluate(Differential<Float>::variables(1u,x)).jacobian(); }
+        return Ariadne::jacobian(this->evaluate(Differential<Float>::variables(1u,x))); }
     virtual Matrix<Interval> jacobian(const Vector<Interval>& x) const {
-        return this->evaluate(Differential<Interval>::variables(1u,x)).jacobian(); }
+        return Ariadne::jacobian(this->evaluate(Differential<Interval>::variables(1u,x))); }
 
     virtual std::ostream& write(std::ostream& os) const {
         return os << "PolynomialFunction"<<_ip; }

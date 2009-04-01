@@ -243,6 +243,8 @@ class TaylorFunction {
     //! To be a refinement, the domain of \f f must contain the domain of \a g.
     friend bool refines(const TaylorFunction& f, const TaylorFunction& g);
 
+    // For compatibility wit Vector.
+    uint size() const { return this->result_size(); }
   private:
     array< array<Interval> > _powers(const Vector<Interval>&) const;
     void _compute_jacobian() const;

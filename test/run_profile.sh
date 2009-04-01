@@ -4,14 +4,17 @@ EXECUTABLE=$1
 
 BASENAME=`basename $EXECUTABLE`
 
+# The top-level directory name
+TOPDIR=..
+
 # Set the profile directory name
-PROFILEDIR=../profile
+PROFILEDIR=$TOPDIR/profile
 
 # Make the profile directory if it doesn't already exist
 if test ! -d $PROFILEDIR; then mkdir $PROFILEDIR; fi
 
 # Get the current working revision
-REVISION=`svn info | grep 'Revision' | sed 's/Revision: //'`
+REVISION=`svn info -r HEAD | grep 'Revision' | sed 's/Revision: //'`
 
 # Test if the current working revision is untouched
 if svn status ../ | grep '^M' > /dev/null

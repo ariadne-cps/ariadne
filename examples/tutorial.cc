@@ -143,11 +143,11 @@ int main()
     heating_system.new_mode(heater_off,heater_off_dynamic);
   
     heating_system.new_invariant(heater_off,heater_turn_on_invariant);
-    heating_system.new_unforced_transition(switch_on,heater_off,heater_on,heater_turn_on_reset,heater_turn_on_activation);
-    heating_system.new_forced_transition(switch_off,heater_on,heater_off,heater_turn_off_reset,heater_turn_off_guard);
+    heating_system.new_transition(switch_on,heater_off,heater_on,heater_turn_on_reset,heater_turn_on_activation,nonurgent);
+    heating_system.new_transition(switch_off,heater_on,heater_off,heater_turn_off_reset,heater_turn_off_guard,urgent);
 
-    heating_system.new_forced_transition(midnight,heater_on,heater_on,midnight_reset,midnight_guard);
-    heating_system.new_forced_transition(midnight,heater_off,heater_off,midnight_reset,midnight_guard);
+    heating_system.new_transition(midnight,heater_on,heater_on,midnight_reset,midnight_guard,urgent);
+    heating_system.new_transition(midnight,heater_off,heater_off,midnight_reset,midnight_guard,urgent);
     /// Finished building the automaton
 
 

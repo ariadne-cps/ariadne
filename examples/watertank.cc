@@ -97,7 +97,7 @@ int main()
 
     /// Create the invariants.
     /// Invariants are true when f(x) = Ax + b < 0
-    /// forced transitions do not need an explicit invariant, 
+    /// urgent transitions do not need an explicit invariant,
     /// we need only the invariants for location 2 and 4
     AffineFunction inv2(Matrix<Float>(1,2,1.0,0.0),Vector<Float>(1, - hmax - Delta));//
     cout << "inv2=" << inv2 << endl << endl;
@@ -113,10 +113,10 @@ int main()
     watertank_system.new_invariant(l2,inv2);
     watertank_system.new_invariant(l4,inv4);
 
-    watertank_system.new_forced_transition(e12,l1,l2,reset_y_one,guard12);
-    watertank_system.new_unforced_transition(e23,l2,l3,reset_y_one,guard23);
-    watertank_system.new_forced_transition(e34,l3,l4,reset_y_zero,guard34);
-    watertank_system.new_unforced_transition(e41,l4,l1,reset_y_zero,guard41);
+    watertank_system.new_transition(e12,l1,l2,reset_y_one,guard12,urgent);
+    watertank_system.new_transition(e23,l2,l3,reset_y_one,guard23,nonurgent);
+    watertank_system.new_transition(e34,l3,l4,reset_y_zero,guard34,urgent);
+    watertank_system.new_transition(e41,l4,l1,reset_y_zero,guard41,nonurgent);
 
 
     /// Finished building the automaton

@@ -55,6 +55,7 @@ class HybridAutomaton;
 
 class FunctionInterface;
 
+enum Urgency { nonurgent=0, urgent=1 };
 
 /*! \brief A discrete mode of a hybrid automaton, comprising continuous evolution given by a vector field
  * within and invariant constraint set.
@@ -145,7 +146,7 @@ class DiscreteTransition
     boost::shared_ptr< const FunctionInterface > _reset;
 
     // \brief Whether or not the transition is urgent.
-    bool _urgent;
+    Urgency _urgent;
 
   public:
 
@@ -173,7 +174,7 @@ class DiscreteTransition
     }
 
     //! \brief True if the transition is urgent (occurs as soon as it is activated).
-    bool urgent() const {
+    Urgency urgent() const {
         return this->_urgent;
     }
 
@@ -184,7 +185,7 @@ class DiscreteTransition
                        const DiscreteMode& target,
                        const boost::shared_ptr<const FunctionInterface> reset,
                        const boost::shared_ptr<const FunctionInterface> activation,
-                       bool urgent);
+                       Urgency urgent);
 };
 
 std::ostream& operator<<(std::ostream& os, const DiscreteTransition& dt);
@@ -304,13 +305,13 @@ class HybridAutomaton
     //!    \param target is the transition's target location.
     //!    \param reset is the transition's reset.
     //!    \param activation is the transition's activation region.
-    //!    \param urgent determines whether the transition is urgent or unurgent.
+    //!    \param priority determines whether the transition is urgent or unurgent.
     const DiscreteTransition& new_transition(DiscreteEvent event,
                                              DiscreteState source,
                                              DiscreteState target,
                                              const FunctionInterface& reset,
                                              const FunctionInterface& activation,
-                                             bool urgent=false);
+                                             Urgency priority=nonurgent);
 
 
     //@}

@@ -79,7 +79,7 @@ DiscreteTransition(DiscreteEvent event,
                    const DiscreteMode& target,
                    const boost::shared_ptr< const FunctionInterface > reset,
                    const boost::shared_ptr< const FunctionInterface > activation,
-                   bool urgent)
+                   Urgency urgent)
     : _event(event), _source(&source), _target(&target),
       _activation(activation), _reset(reset), _urgent(urgent)
 {
@@ -188,7 +188,7 @@ HybridAutomaton::new_transition(DiscreteEvent event,
                                 DiscreteState target,
                                 const FunctionInterface &reset,
                                 const FunctionInterface &activation,
-                                bool urgent)
+                                Urgency urgent)
 {
     ARIADNE_ASSERT(event>0);
     if(this->has_transition(event,source)) {

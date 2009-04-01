@@ -440,12 +440,13 @@ TaylorFunction
 flow(const TaylorFunction& vf, const Vector<Interval>& d, const Interval& h, const uint o)
 {
     ARIADNE_ASSERT(subset(d,vf.domain()));
-    Vector<Interval> euler_step=d+h*vf.range();
+    Vector<Interval> vf_range=vf.range();
+    Vector<Interval> euler_step=d+h*vf_range;
     if(!subset(euler_step,vf.domain())) {
         ARIADNE_THROW(FlowBoundsException,"flow(TaylorFunction,Box,Interval,Nat)",
-                      "Euler step "<<euler_step<<" of vector field "<<vf<<
-                      " starting in domain "<<d<<" over time interval "<<h<<
-                      " does not remain in domain of vector field.");
+                      std::setprecision(20)<<"Euler step "<<euler_step<<" of vector field "<<vf<<
+                      " with range "<<vf_range<<" starting in domain "<<d<<
+                      " over time interval "<<h<<" does not remain in domain of vector field.");
     }
 
     Vector<TaylorModel> unscaled_vf=unscale(vf.models(),vf.domain());

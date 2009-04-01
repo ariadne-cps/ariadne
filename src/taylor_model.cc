@@ -2335,6 +2335,8 @@ flow(const Vector<TaylorModel>& vf, const Vector<Interval>& d, const Interval& h
     Vector<Interval> vf_domain(vf.size(),Interval(-1,+1));
     ARIADNE_ASSERT(subset(d,vf_domain));
 
+    // Don't check for flow bounds since this should have been done in calling function
+/*
     Vector<Interval> vf_range(vf.size());
     for(uint i=0; i!=vf.size(); ++i) { vf_range[i]=vf[i].range(); }
     Vector<Interval> flow_range=d+vf_range*h;
@@ -2344,7 +2346,7 @@ flow(const Vector<TaylorModel>& vf, const Vector<Interval>& d, const Interval& h
                       " on domain "<<d<<" for time interval "<<h<<
                       " is not a subset of the unit box");
     }
-
+*/
     uint n=vf.size();
     Vector<TaylorModel> yz(n,TaylorModel(n+1));
     for(uint i=0; i!=yz.size(); ++i) {

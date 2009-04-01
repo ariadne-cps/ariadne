@@ -324,14 +324,14 @@ TaylorCalculus::flow_bounds(FunctionInterface const& vf,
 
     // Set up constants of the method.
     // TODO: Better estimates of constants
-    const Float INITIAL_MULTIPLIER=2;
-    const Float MULTIPLIER=1.125;
-    //const Float BOX_RADIUS_MULTIPLIER=1.03125;
+    const double INITIAL_MULTIPLIER=2;
+    const double MULTIPLIER=1.125;
+    const double BOX_RADIUS_MULTIPLIER=1.03125;
     const uint EXPANSION_STEPS=8;
     const uint REDUCTION_STEPS=8;
     const uint REFINEMENT_STEPS=4;
 
-    Vector<Interval> delta=r-midpoint(r);
+    Vector<Interval> delta=(r-midpoint(r))*(BOX_RADIUS_MULTIPLIER-1);
 
     Float h=hmax;
     Float hmin=hmax/(1<<REDUCTION_STEPS);
@@ -343,13 +343,13 @@ TaylorCalculus::flow_bounds(FunctionInterface const& vf,
         b=r+INITIAL_MULTIPLIER*ih*vf.evaluate(r)+delta;
         for(uint i=0; i!=EXPANSION_STEPS; ++i) {
             df=vf.evaluate(b);
-            nb=r+ih*df;
+            nb=r+delta+ih*df;
             ARIADNE_LOG(9,"  h="<<h<<" b="<<b<<" vf="<<vf.evaluate(b)<<" nb="<<nb<<"\n");
             if(subset(nb,b)) {
                 success=true;
                 break;
             } else {
-                b=r+MULTIPLIER*ih*df+delta;
+                b=r+delta+MULTIPLIER*ih*df;
             }
         }
         if(!success) {
@@ -367,18 +367,46 @@ TaylorCalculus::flow_bounds(FunctionInterface const& vf,
     for(uint i=0; i!=REFINEMENT_STEPS; ++i) {
         b=nb;
         vfb=vf.evaluate(b);
-        nb=r+ih*vfb;
+        nb=r+delta+ih*vfb;
         ARIADNE_LOG(9,std::setprecision(20)<<"   b="<<b<<" vf="<<vfb<<"\n  nb="<<nb<<"\n");
         ARIADNE_ASSERT_MSG(subset(nb,b),std::setprecision(20)<<"refinement "<<i<<": "<<nb<<" is not a inside of "<<b);
     }
 
+
     // Check result of operation
-    // We use "possibly" here since the bound may touch
+    // We use subset rather than inner subset here since the bound may touch
     ARIADNE_ASSERT(subset(nb,b));
+
+    b=nb;
 
     ARIADNE_LOG(7,"  h="<<h<<" b="<<nb<<"\n");
 
-    return std::make_pair(h,nb);
+    // Expand the resulting bound by a small constant for robustness
+    volatile float new_bound;
+    set_rounding_mode(upward);
+    for(uint i=0; i!=b.size(); ++i) {
+        new_bound=b[i].upper();
+        new_bound+=1e-8;
+        new_bound+=1e-8;
+        b[i].u=new_bound;
+    }
+    set_rounding_mode(downward);
+    for(uint i=0; i!=b.size(); ++i) {
+        new_bound=b[i].lower();
+        new_bound-=1e-8;
+        new_bound-=1e-8;
+        b[i].l=new_bound;
+    }
+    set_rounding_mode(to_nearest);
+
+    ARIADNE_ASSERT(subset(r,b));
+
+    if(!subset(r+h*vf.evaluate(b),b)) {
+        std::cerr<<"d="<<r<<"\nh="<<h<<"\nf="<<vf.evaluate(b)<<"\np="<<Vector<Interval>(r+h*vf.evaluate(b))
+                 <<"\nb="<<b<<"\n"; }
+    ARIADNE_ASSERT(subset(r+h*vf.evaluate(b),b));
+
+    return std::make_pair(h,b);
 }
 
 

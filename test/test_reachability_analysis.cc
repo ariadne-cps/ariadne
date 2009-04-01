@@ -88,6 +88,9 @@ class TestReachabilityAnalysis
           reach_time(4.0,3)
     {
         cout << "Done initialising variables\n";
+        std::cout<<std::setprecision(20);
+        std::cerr<<std::setprecision(20);
+        std::clog<<std::setprecision(20);
         DiscreteState location(1);
 
         /*

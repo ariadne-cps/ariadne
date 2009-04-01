@@ -1,10 +1,10 @@
-SUBDIRS = include src test wrap examples 
+SUBDIRS = include src test wrap examples
 
 EXTRA_DIST = Doxyfile
 
-CXXFLAGS += -Wall 
+CXXFLAGS += -Wall
 
-.PHONY: shiny doc all lib wrap examples profiles check-lib check-python 
+.PHONY: shiny doc all lib wrap examples profiles check-lib check-python
 
 all: lib wrap tests examples profiles
 
@@ -22,7 +22,7 @@ shiny: maintainer-clean
 doc:
 	doxygen
 
-lib: 
+lib:
 	(cd src; make lib)
 
 wrap: lib
@@ -42,6 +42,9 @@ check-lib: lib
 
 check-python: python
 	(cd python; make check)
+
+profile-lib: lib profiles
+	(cd test; make profile-lib)
 
 install-lib: lib
 	(cd src; make install)

@@ -1,7 +1,11 @@
 all: tests profiles
 
+profile-lib: $(bin_PROGRAMS)
+	for file in $(bin_PROGRAMS); do ./run_profile.sh $$file; done
+
 #TESTS_ENVIRONMENT = (function run_tst { $1 > $1.log; }; run_tst )
 TESTS_ENVIRONMENT = ./run_test.sh
+PROFILES_ENVIRONMENT = ./run_profile.sh
 
 
 INCLUDES = -I$(top_srcdir)/include

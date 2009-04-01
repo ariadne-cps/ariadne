@@ -66,7 +66,7 @@ int main()
     /// Build the automaton
     ball.new_mode(l1,dynamic);
 
-    ball.new_transition(e11,l1,l1,reset,guard,urgent);
+    ball.new_forced_transition(e11,l1,l1,reset,guard);
 
     /// Finished building the automaton
 

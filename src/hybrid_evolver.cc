@@ -311,7 +311,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     /////////////// Main Evolution ////////////////////////////////
 
     const DiscreteMode& initial_mode=system.mode(initial_location);
-    const FunctionType* dynamic_ptr=&*initial_mode.dynamic();
+    const FunctionType* dynamic_ptr=&initial_mode.dynamic();
 
     ARIADNE_LOG(6,"mode="<<initial_mode<<"\n");
     std::vector< shared_ptr<const FunctionInterface> > invariants
@@ -398,9 +398,9 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
             DetectionData new_data;
             new_data.id=detection_data.size();
             new_data.event=iter->event();
-            new_data.predicate_kind=iter->urgent() ? GUARD : ACTIVATION;
+            new_data.predicate_kind=iter->forced() ? GUARD : ACTIVATION;
             new_data.crossing_kind=UNKNOWN;
-            new_data.guard_ptr=iter->activation();
+            new_data.guard_ptr=iter->activation_ptr();
             detection_data.insert(make_pair(new_data.id,new_data));
         }
 
@@ -586,7 +586,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
         if(data.predicate_kind==ACTIVATION || data.predicate_kind==GUARD) {
             const DiscreteTransition& transition=system.transition(data.event,initial_location);
             DiscreteState jump_location=transition.target().location();
-            const FunctionInterface* reset_ptr=&*transition.reset();
+            const FunctionInterface* reset_ptr=&transition.reset();
             TimeModelType active_time_model;
             TimeModelType jump_time_model;
 

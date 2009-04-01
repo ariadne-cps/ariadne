@@ -14,7 +14,8 @@ LDADD = ../src/libariadne.la $(LIBS)
 
 bin_PROGRAMS = \
 	profile_arithmetic \
-	profile_taylor_variable
+	profile_taylor_variable\
+	profile_taylor_calculus
 
 check_PROGRAMS = \
 	test_float \

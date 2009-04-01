@@ -2,7 +2,7 @@
  *            profile_arithmetic.cc
  *
  *  Copyright 2008  Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -21,10 +21,10 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-#include <cassert> 
-#include <iostream> 
-#include <iomanip> 
-#include <cstdlib> 
+#include <cassert>
+#include <iostream>
+#include <iomanip>
+#include <cstdlib>
 #include <algorithm>
 
 #include <fenv.h>
@@ -131,15 +131,15 @@ inline void c_set_round_nearest() { fesetround(FE_TONEAREST); }
 //inline void set_rounding_mode(rounding_mode_t rnd) { asm volatile ("fldcw (%0)" : : "r" (rnd) ); }
 //inline rounding_mode_t get_rounding_mode() { rounding_mode_t rnd asm volatile ("fldcw (%0)" : : "r" (rnd) ); return rnd; }
 
-inline rounding_mode_t get_rounding_mode() { 
+inline rounding_mode_t get_rounding_mode() {
 asm volatile ("fstcw grnd"); return grnd; }
-inline void set_rounding_mode(rounding_mode_t rnd) { asm volatile ("fldcw grnd"); } 
+inline void set_rounding_mode(rounding_mode_t rnd) { asm volatile ("fldcw grnd"); }
 
 #elif defined ARIADNE_GCC_MACRO_ROUNDING
 
-#define set_round_up()           asm("fldcw ROUND_UP")   
-#define set_round_down()         asm("fldcw ROUND_DOWN")   
-#define set_round_nearest()      asm("fldcw ROUND_NEAREST")   
+#define set_round_up()           asm("fldcw ROUND_UP")
+#define set_round_down()         asm("fldcw ROUND_DOWN")
+#define set_round_nearest()      asm("fldcw ROUND_NEAREST")
 
 inline void set_rounding_mode(rounding_mode_t rnd) { fesetround(rnd); }
 inline rounding_mode_t get_rounding_mode() { return fegetround(); }
@@ -218,24 +218,24 @@ void scal_mr_csy(double& e, size_t n, double* r, const double* x, const double& 
 void profile_dot(int n, int nn) {
     double* x=new double[n];
     double* y=new double[n];
-   
+
     for(int i=0; i!=n; ++i) {
         x[i]=rndm();
         y[i]=rndm();
     }
-    
+
     double m=0,r=0,l=0,u=0;
 
     boost::timer tm; double t=0;
- 
+
     double ql=0; double qu=0;
     dot_lu_rat(ql,qu,n,x,y);
     std::cout<<"lu_rat:        e="<<(qu-ql)/2<<" l="<<ql<<" u="<<qu<<std::endl;
     assert(ql<=qu);
-    
+
     mpq_class qm=0;
     dot_md_rat(qm,n,x,y);
-    
+
     tm.restart();
     for(int i=0; i!=nn; ++i) {
         l=0; u=0;
@@ -245,7 +245,7 @@ void profile_dot(int n, int nn) {
     std::cout<<"lu_std: t="<<std::setprecision(5)<<t
              <<std::setprecision(20)<<" e="<<(u-l)/2<<" l="<<l<<" u="<<u<<std::endl;
     assert(l<=ql && qu<=u);
-    
+
     tm.restart();
     for(int i=0; i!=nn; ++i) {
         l=0; u=0;
@@ -255,7 +255,7 @@ void profile_dot(int n, int nn) {
     std::cout<<"lu_opp: t="<<std::setprecision(5)<<t<<std::setprecision(20)
              <<" e="<<(u-l)/2<<" l="<<l<<" u="<<u<<std::endl;
     assert(l<=ql && qu<=u);
-    
+
     tm.restart();
     for(int i=0; i!=nn; ++i) {
         l=0; u=0;
@@ -265,9 +265,9 @@ void profile_dot(int n, int nn) {
     std::cout<<"lu_ivl: t="<<std::setprecision(5)<<t<<std::setprecision(20)
              <<" e="<<(u-l)/2<<" l="<<l<<" u="<<u<<std::endl;
     assert(l<=ql && qu<=u);
- 
-    
-    
+
+
+
     tm.restart();
     for(int i=0; i!=nn; ++i) {
         m=0; r=0;
@@ -277,7 +277,7 @@ void profile_dot(int n, int nn) {
     std::cout<<"mr_std: t="<<std::setprecision(5)<<t<<std::setprecision(20)
              <<" r="<<r<<" m="<<m<<" e="<<mpq_class(abs(mpq_class(m)-qm)).get_d()<<std::endl;
     assert(abs(mpq_class(m)-qm)<=r);
-    
+
     tm.restart();
     for(int i=0; i!=nn; ++i) {
         m=0; r=0;
@@ -287,7 +287,7 @@ void profile_dot(int n, int nn) {
     std::cout<<"mr_mid: t="<<std::setprecision(5)<<t<<std::setprecision(20)
              <<" r="<<r<<" m="<<m<<" e="<<mpq_class(abs(mpq_class(m)-qm)).get_d()<<std::endl;
     assert(abs(mpq_class(m)-qm)<=r);
-    
+
     tm.restart();
     for(int i=0; i!=nn; ++i) {
         m=0; r=0;
@@ -297,8 +297,8 @@ void profile_dot(int n, int nn) {
     std::cout<<"mr_csy: t="<<std::setprecision(5)<<t<<std::setprecision(20)
              <<" r="<<r<<" m="<<m<<" e="<<mpq_class(abs(mpq_class(m)-qm)).get_d()<<std::endl;
     assert(abs(mpq_class(m)-qm)<=r);
-    
-   
+
+
     delete[] x;
     delete[] y;
 }
@@ -308,16 +308,16 @@ void profile_add(int n, int nn) {
     double* x=new double[n];
     double* y=new double[n];
     double* z=new double[n];
-   
+
     for(int i=0; i!=n; ++i) {
         x[i]=rndm();
         y[i]=rndm();
     }
-    
+
     double r=0;
 
     boost::timer tm; double t=0;
- 
+
     tm.restart();
     for(int i=0; i!=nn; ++i) {
         r=0;
@@ -326,7 +326,7 @@ void profile_add(int n, int nn) {
     t=tm.elapsed();
     std::cout<<"add_mr_std: t="<<std::setprecision(5)<<t<<std::setprecision(20)
              <<" r="<<r<<std::endl;
-    
+
     tm.restart();
     for(int i=0; i!=nn; ++i) {
         r=0;
@@ -335,7 +335,7 @@ void profile_add(int n, int nn) {
     t=tm.elapsed();
     std::cout<<"add_mr_buf: t="<<std::setprecision(5)<<t<<std::setprecision(20)
              <<" r="<<r<<std::endl;
-    
+
     tm.restart();
     for(int i=0; i!=nn; ++i) {
         r=0;
@@ -350,17 +350,17 @@ void profile_add(int n, int nn) {
  void profile_scal(int n, int nn) {
     double* x=new double[n];
     double* z=new double[n];
-   
+
     double c=rndm();
     for(int i=0; i!=n; ++i) {
         x[i]=rndm();
     }
 
-    
+
     double r=0;
 
     boost::timer tm; double t=0;
- 
+
     tm.restart();
     for(int i=0; i!=nn; ++i) {
         r=0;
@@ -369,7 +369,7 @@ void profile_add(int n, int nn) {
     t=tm.elapsed();
     std::cout<<"scal_mr_std: t="<<std::setprecision(5)<<t<<std::setprecision(20)
              <<" r="<<r<<std::endl;
-    
+
     tm.restart();
     for(int i=0; i!=nn; ++i) {
         r=0;
@@ -381,29 +381,29 @@ void profile_add(int n, int nn) {
 }
 
 
-void test_rounding(volatile double p, volatile double q) 
+void test_rounding(volatile double p, volatile double q)
 {
     std::cout<<"Testing correct rounding\n";
     rounding_mode_t fcw=get_control_word();
     std::cout<<"Initial control word="<<fcw<<"\n";
     rounding_mode_t rnd=get_rounding_mode();
     std::cout<<"Initial rounding mode="<<rnd<<"\n";
-    
+
     set_round_up();
     std::cout<<"Up rounding mode="<<get_rounding_mode()<<"\n";
     volatile double xu=p/q;
     std::cout<<"  Computed "<<p<<"/"<<q<<"="<<xu<<std::endl;
-    
+
     set_round_down();
     std::cout<<"Down rounding mode="<<get_rounding_mode()<<"\n";
     volatile double xl=p/q;
     std::cout<<"  Computed "<<p<<"/"<<q<<"="<<xl<<std::endl;
-    
+
     set_round_nearest();
     std::cout<<"Nearest rounding mode="<<get_rounding_mode()<<"\n";
     volatile double xn=p/q;
     std::cout<<"  Computed "<<p<<"/"<<q<<"="<<xn<<std::endl;
-    
+
     std::cout<<p<<"/"<<q<<" ~ "<<xn<<std::endl;
     std::cout<<xl<<" < "<<p<<"/"<<q<<" < "<<xu<<std::endl;
     set_rounding_mode(rnd);
@@ -415,38 +415,38 @@ int main(int argc, const char* argv[]) {
     std::cerr<<std::setprecision(20);
     //srand((unsigned)time(0));
 
-    int n=(1<<14);
-    int nn=(1<<14);
+    int n=(1<<10);
+    int nn=(1<<12);
     if(argc>1) {
         n=(1<<atoi(argv[1]));
     }
     if(argc>2) {
         nn=(1<<atoi(argv[2]));
     }
-    std::cerr<<"n="<<n<<" nn="<<nn<<std::endl;
-    
+    std::cout<<"\nTries="<<n<<"\nVector size="<<nn<<"\n"<<std::endl;
+
     profile_scal(n,nn);
     profile_add(n,nn);
     profile_dot(n,nn);
     return 0;
-    
+
     double* x=new double[n];
     double* y=new double[n];
     double* z=new double[n];
-   
+
     for(int i=0; i!=n; ++i) {
         x[i]=rndm();
         y[i]=rndm();
         z[i]=rndm();
     }
-    
+
     double* w=new double[n];
     double* v=new double[n];
     for(int i=0; i!=n; ++i) {
         v[i]=z[i];
         w[i]=z[i];
     }
-    
+
     int nnn=std::min(n,4);
     for(int i=0; i!=nnn; ++i) {
         set_rounding_mode(round_down);
@@ -458,7 +458,7 @@ int main(int argc, const char* argv[]) {
         assert(r==o);
     }
     set_rounding_mode(round_nearest);
-        
+
     for(int i=0; i!=nnn; ++i) {
         std::cerr<<"x="<<x[i]<<" y="<<y[i]<<" z="<<z[i]<<"\n";
         set_rounding_mode(round_down);
@@ -466,7 +466,7 @@ int main(int argc, const char* argv[]) {
         set_rounding_mode(round_up);
         acc_opp(w[i],x[i],y[i]);
         std::cerr<<" r="<<z[i]<<" o="<<w[i]<<"\n\n\n";
-        assert(z[i]==w[i]); 
+        assert(z[i]==w[i]);
     }
     set_rounding_mode(round_nearest);
 
@@ -493,7 +493,7 @@ void dot_lu_rat(double& l, double& u, size_t n, const double* x, const double* y
         r+=mpq_class(x[i])*mpq_class(y[i]);
     }
     //mpf_class::set_precision(128);
-    std::cerr<<"r="<<r<<"~"<<mpf_class(r)<<"\n";
+    //std::cerr<<"r="<<r<<"~"<<mpf_class(r)<<"\n";
     mpq_class a(r.get_d());
     double d=a.get_d();
     assert(mpq_class(d)==a);
@@ -517,7 +517,7 @@ void dot_lu_rat(double& l, double& u, size_t n, const double* x, const double* y
     assert(mpq_class(u)>=r);
 }
 
-        
+
 void dot_md_rat(mpq_class& m, size_t n, const double* x, const double* y) {
     set_round_nearest();
     for(size_t i=0; i!=n; ++i) {
@@ -582,7 +582,7 @@ void dot_lu_opp2(double& l, double& u, size_t n, const double* x, const double* 
 }
 
 void dot_lu_ord(double& l, double& u, size_t n, const double* x, const double* y) {
-   
+
 }
 
 void dot_mr_std(double& m, double& r, size_t n, const double* x, const double* y) {

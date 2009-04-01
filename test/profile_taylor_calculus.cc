@@ -39,29 +39,21 @@ using std::string;
 #include "taylor_calculus.h"
 #include "function.h"
 #include "box.h"
-using namespace Ariadne;
 
-typedef Polynomial<Float> FPolynomial;
-typedef Vector<Float> FVector;
-typedef Vector<Interval> IVector;
-FPolynomial p(int as, int j) { return FPolynomial::variable(as,j); }
-FVector e(int rs, int i) { return FVector::unit(rs,i); }
+namespace Ariadne {
 
-Float a=1.5; Float b=0.375;
-FPolynomial x=p(2,0); FPolynomial y=p(2,1);
-FVector e0=e(2,0); FVector e1=e(2,1);
-typedef Vector< Polynomial<Float> > FPolyVec;
+typedef Polynomial<Float> FloatPolynomial;
+typedef Vector<Float> FloatVector;
+typedef Vector<Interval> IntervalVector;
+typedef Vector< Polynomial<Float> > FloatPolynomialVec;
 
-PolynomialFunction henon_map =  FPolyVec((a+x*x+b*y)*e0+x*e1);
-PolynomialFunction spiral_vf = FPolyVec((1.0+0.5*x-0.75*y)*e0+(0.75*x+0.25*y)*e1);
-PolynomialFunction affine_pred =  FPolyVec( (x+y-0.25)*e0);
-TaylorFunction spiral_flow_model;
-TaylorVariable affine_pred_model;
+FloatPolynomial p(int as, int j) { return FloatPolynomial::variable(as,j); }
+FloatVector e(int rs, int i) { return FloatVector::unit(rs,i); }
 
-Box unit_box(2, -1,+1,-1,+1);
-TaylorSet unit_box_model=unit_box;
+FloatPolynomial x=p(2,0); FloatPolynomial y=p(2,1);
+FloatPolynomial x0=p(3,0); FloatPolynomial y0=p(3,1); FloatPolynomial t=p(3,2);
+FloatVector e0=e(2,0); FloatVector e1=e(2,1);
 
-//TaylorFunction henon(Box(2, -1,+1,-1,+1),henon_poly);
 
 struct ProfileReset {
     ProfileReset(TaylorCalculus* c_, FunctionInterface& f_, TaylorSet& s_, int n_=1) : c(c_), f(f_), s(s_), n(n_) { }
@@ -69,16 +61,26 @@ struct ProfileReset {
     TaylorSet operator()() const { TaylorSet r=c->reset_step(f,s); for(int i=1; i<n; ++i) { r=c->reset_step(f,s); } return r; }
 };
 
+struct ProfileBounds {
+    ProfileBounds(TaylorCalculus* c_, FunctionInterface& f_, IntervalVector d_, Float h_)
+        : c(c_), f(f_), d(d_), h(h_) { }
+    TaylorCalculus* c; FunctionInterface& f; IntervalVector d; Float h; typedef TaylorFunction Result;
+    Result operator()() const { c->flow_bounds(f,d,h,std::numeric_limits<double>::max()); TaylorFunction r; return r; }
+};
+
 struct ProfileFlow {
-    ProfileFlow(TaylorCalculus* c_, FunctionInterface& f_, IVector d_, Float h_, IVector b_) : c(c_), f(f_), d(d_), h(h_), b(b_) { }
-    TaylorCalculus* c; FunctionInterface& f; Vector<Interval> d; Float h; Vector<Interval> b; typedef TaylorFunction Result;
+    ProfileFlow(TaylorCalculus* c_, FunctionInterface& f_, IntervalVector d_, Float h_, IntervalVector b_)
+        : c(c_), f(f_), d(d_), h(h_), b(b_) { }
+    TaylorCalculus* c; FunctionInterface& f; IntervalVector d; Float h; IntervalVector b;
+    typedef TaylorFunction Result;
     TaylorFunction operator()() const { return c->flow_model(f,d,h,b); }
 };
 
 struct ProfileCrossing {
-    ProfileCrossing(TaylorCalculus* c_, TaylorVariable& g_, TaylorFunction& f_, TaylorSet s_) : c(c_), g(g_), f(f_), s(s_) { }
-    TaylorCalculus* c; TaylorVariable& g; TaylorFunction f; TaylorSet s; typedef TaylorModel Result;
-    TaylorModel operator()() const { return c->crossing_time(g,f,s); }
+    ProfileCrossing(TaylorCalculus* c_, ExpressionInterface& g_, TaylorFunction& f_, TaylorSet s_) : c(c_), g(g_), f(f_), s(s_) { }
+    TaylorCalculus* c; ExpressionInterface& g; TaylorFunction& f; TaylorSet s; typedef TaylorModel Result;
+    TaylorModel operator()() const {
+        return c->crossing_time(g,f,s); }
 };
 
 
@@ -106,8 +108,7 @@ template<> double error(const TaylorModel& t) { return t.error(); }
 template<> unsigned int number_of_nonzeros(const TaylorModel& t) { return t.number_of_nonzeros(); }
 
 template<class Test>
-void
-profile(const char* name, const Test& test, unsigned int tries)
+void profile(const char* name, const Test& test, unsigned int tries)
 {
 
     boost::timer tm; double t=0;
@@ -122,23 +123,78 @@ profile(const char* name, const Test& test, unsigned int tries)
         test();
     }
     t=tm.elapsed();
-    std::cout << std::setw(17) << std::left << name << std::right
-              << std::setw(8) << std::setprecision(5)<<1000000*(t/tries)
-              << std::setw(10) << nnz
-              << std::setw(10) << std::fixed << err
-              << std::setw(8) << tries
+
+    std::cout << std::fixed
+              << std::setw(19) << std::left << name << std::right
+              << std::setw(8) << std::setprecision(1) << 1000*(t/tries)
+              << std::setw(14) << std::setprecision(4) << std::scientific << err
+              << std::setw(6) << nnz
+              << std::setw(9) << std::setprecision(4) << std::fixed << t
+              << "/"  << tries
               << std::endl;
 }
 
+struct ForcedVanDerPol : FunctionData<3,3,3> {
+    template<class R, class A, class P>
+    void compute(R& r, const A& x, const P& p) const {
+        r[0]=x[1];
+        r[1]=p[0]*(1.0-x[0]*x[0])*x[1]-x[0]+p[1]*sin(p[2]*x[2]);
+        r[2]=1.0;
+    }
+};
+
 int main(int argc, const char* argv[]) {
-    int n=(1<<3);
-    if(argc>1) { n=(1<<atoi(argv[1])); }
+
+    int n=1;
+
+    double maximum_step_size=0.125;
+    double maximum_domain_extent=128;
+
+    double a=1.5; double b=0.375;
+    PolynomialFunction henon_map ( (a+x*x+b*y)*e0+x*e1 );
+    TaylorSet henon_initial_set = Box(2, 0.875,1.125, 0.125,0.250);
+
+    a=-0.25; b=0.75; double c=1.0;
+    PolynomialFunction spiral_vector_field = (c+a*x-b*y)*e0+(b*x+a*y)*e1;
+    IntervalVector spiral_domain = Box(2, 1.25,1.5, 0.5,0.75);
+    Float spiral_step_size; IntervalVector spiral_bounding_box;
+    make_lpair(spiral_step_size,spiral_bounding_box) =
+        TaylorCalculus().flow_bounds(spiral_vector_field,spiral_domain,maximum_step_size,maximum_domain_extent);
+
+    Float g=9.8;
+    PolynomialFunction ball_vector_field =  y*e0 - (g + 0.0*x)*e1 ;
+    PolynomialFunction ball_flow = FloatPolynomialVec( (x0+0.5*y0*t)*t*e0 + (y0-g*t)*e1 );
+    IntervalVector ball_domain = Box(2, 1.25,1.75, 0.5,0.5);
+    Float ball_step_size; IntervalVector ball_bounding_box;
+    make_lpair(ball_step_size,ball_bounding_box) =
+        TaylorCalculus().flow_bounds(ball_vector_field,ball_domain,maximum_step_size,maximum_domain_extent);
+
+    TaylorFunction ball_flow_model(join(ball_domain,Interval(0,5.0)),ball_flow);
+
+
+
+    double mu=0.5; a=1.0; double omega=1.0;
+    Function<ForcedVanDerPol> vdp_vf(Vector<Float>(3u,mu,a,omega));
+    Vector<Interval> vdp_dom = Box(3, 1.25,1.5, 0.5,0.75, 0.0,0.0);
+
+
     TaylorCalculus calculus;
 
-    std::cout<<"name                 time(us)  size     error   tries\n";
+    std::cout<<"name                 time(ms)       error  size  time(s)/tries\n";
 
-    profile("apply",ProfileReset(&calculus,henon_map,unit_box_model),n*100);
-    profile("apply*5",ProfileReset(&calculus,henon_map,unit_box_model,5),n*100);
-    profile("flow",ProfileFlow(&calculus,spiral_vf,unit_box/2,0.125,unit_box),n*100);
-    profile("crossing",ProfileCrossing(&calculus,affine_pred_model,spiral_flow_model,unit_box_model),n*100);
+    profile("apply-henon",ProfileReset(&calculus,henon_map,henon_initial_set),n*100);
+    profile("bounds-spiral",ProfileBounds(&calculus,spiral_vector_field,spiral_domain,maximum_step_size),n*8);
+    profile("bounds-ball",ProfileBounds(&calculus,ball_vector_field,ball_domain,maximum_step_size),n*8);
+    profile("flow-spiral",ProfileFlow(&calculus,spiral_vector_field,spiral_domain,spiral_step_size,spiral_bounding_box),n*8);
+    profile("flow-ball",ProfileFlow(&calculus,ball_vector_field,ball_domain,ball_step_size,ball_bounding_box),n*100);
+    //profile("flow-vdp",ProfileFlow(&calculus,vdp_vf,vdp_dom,h),n*1);
+
+    return 0;
+}
+
+} // namespace Ariadne
+
+
+int main(int argc, const char* argv[]) {
+    Ariadne::main(argc,argv);
 }

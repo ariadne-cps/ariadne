@@ -44,15 +44,18 @@ template<class X> class Differential;
 //! \brief Interface for expressions whose derivatives can be computed.
 class ExpressionInterface {
   public:
+    typedef unsigned int size_type;
+    typedef unsigned short smoothness_type;
+
     //! \brief Virtual destructor.
     virtual ~ExpressionInterface() { };
     //! \brief Create a dynamically-allocated copy.
     virtual ExpressionInterface* clone() const = 0;
      
     //! \brief The smoothness of the expression.
-    virtual ushort smoothness() const = 0;
+    virtual smoothness_type smoothness() const = 0;
     //! \brief The number of arguments to the expression.
-    virtual uint argument_size() const = 0;
+    virtual size_type argument_size() const = 0;
 
     //! \brief Compute an approximation to the value of the expression at the point \a x.
     virtual Float evaluate(const Vector<Float>& x) const = 0;

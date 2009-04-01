@@ -149,6 +149,14 @@ class CalculusInterface
                   const FlowModelType& flow_model,
                   const SetModelType& initial_set_model) const = 0;
 
+    //! \brief Computes the time at which points in the \a initial_set_model cross the zero-set of the
+    //! the \a guard under evolution of the \a flow_model, for times between the \a minimum_time and \a maximum_time.
+    //! The crossing must be (differentiably) transverse.
+    virtual TimeModelType
+    crossing_time(const ExpressionInterface& guard,
+                  const FlowModelType& flow_model,
+                  const SetModelType& initial_set_model) const = 0;
+
     //! \brief Computes the image of the set defined by \a set_model under the \a map.
     virtual SetModelType
     reset_step(const FunctionType& map,
@@ -278,6 +286,13 @@ class CalculusInterface
                 const BoxType& d,
                 const RealType& maximum_step_size,
                 const RealType& maximum_bound_diameter) const = 0;
+
+    //! \brief Computed a pair \f$(h,B)\f$ such that the flow of the vector_field \a vf starting in
+    //! domain \a d remains in \a B for times up to \a h. The maximum allowable \a h is given.
+    virtual std::pair<TimeType,BoxType>
+    flow_bounds(const FunctionType& vf,
+                const BoxType& d,
+                const RealType& maximum_step_size) const = 0;
 
 
     //@{ \name Set-based operations

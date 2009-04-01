@@ -108,11 +108,22 @@ class CalculusBase
                                             const SetModelType& initial_set_model) const = 0;
 
     //! \brief Computes the time at which points in the \a initial_set_model cross the zero-set of the
-    //! the \a guard_model under evolution of the \a flow_model, for times between the \a minimum_time and \a maximum_time.
+    //! the \a guard_model under evolution of the \a flow_model.
     //! The crossing must be (differentiably) transverse.
     virtual TimeModelType crossing_time(const PredicateModelType& guard_model,
                                         const FlowModelType& flow_model,
                                         const SetModelType& initial_set_model) const = 0;
+
+    //! \brief Computes the time at which points in the \a initial_set_model cross the zero-set of the
+    //! the \a guard under evolution of the \a flow_model.
+    //! The crossing must be (differentiably) transverse.
+    virtual TimeModelType crossing_time(const ExpressionInterface& guard,
+                                        const FlowModelType& flow_model,
+                                        const SetModelType& initial_set_model) const
+    {
+        PredicateModelType guard_model=this->predicate_model(guard,flow_model.range());
+        return this->crossing_time(guard_model,flow_model,initial_set_model);
+    }
 
     //! \brief Computes the points reached by evolution of the \a initial_set_model under the flow
     //! given by \a flow_model. The \a integration_time_model \f$\tau(e)\f$ gives the time the point
@@ -147,6 +158,17 @@ class CalculusBase
                 const BoxType& d,
                 const RealType& maximum_step_size,
                 const RealType& maximum_bound_diameter) const = 0;
+
+    //! \brief Computed a pair \f$(h,B)\f$ such that the flow of the vector_field \a vf starting in
+    //! domain \a d remains in \a B for times up to \a h. The maximum allowable \a h is given.
+    virtual pair<TimeType,BoxType>
+    flow_bounds(const FunctionType& vf,
+                const BoxType& d,
+                const RealType& maximum_step_size) const
+    {
+        RealType maximum_bound_diameter=std::numeric_limits<double>::max();
+        return this->flow_bounds(vf,d,maximum_step_size,maximum_bound_diameter);
+    }
 
     //@}
 

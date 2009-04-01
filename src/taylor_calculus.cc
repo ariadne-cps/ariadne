@@ -52,7 +52,8 @@ TaylorCalculus()
     : _spacial_order(2),
       _temporal_order(4),
       _order(6),
-      _smoothness(1)
+      _smoothness(1),
+      _maximum_step_size(1.0)
 {
 }
 

@@ -523,6 +523,9 @@ class PolynomialFunction
     PolynomialFunction(const Vector< Polynomial<Float> >& p) : _fp(p), _ip(p) { }
     PolynomialFunction(const Vector< Polynomial<Interval> >& p) : _fp(midpoint(p)), _ip(p) { }
 
+    template<class E> PolynomialFunction(const ublas::vector_expression<E>& p)
+        : _ip(static_cast< Vector< Polynomial<Interval> > >(p)) { _fp=midpoint(_ip); }
+
     virtual PolynomialFunction* clone() const { return new PolynomialFunction(*this); }
 
     virtual size_type result_size() const { return _fp.size(); }
@@ -553,6 +556,38 @@ class PolynomialFunction
     Vector< Polynomial<Interval> > _ip;
 };
 
+
+//! A polynomial expression.
+class PolynomialExpression
+    : public ExpressionInterface
+{
+  public:
+    PolynomialExpression(const Polynomial<Float>& p) : _fp(p), _ip(p) { }
+    PolynomialExpression(const Polynomial<Interval>& p) : _fp(midpoint(p)), _ip(p) { }
+
+    virtual PolynomialExpression* clone() const { return new PolynomialExpression(*this); }
+
+    virtual size_type argument_size() const { return _fp.argument_size(); }
+    virtual smoothness_type smoothness() const { return 255u; }
+
+    virtual Float evaluate(const Vector<Float>& x) const {
+        return Ariadne::evaluate(_fp,x); }
+    virtual Interval evaluate(const Vector<Interval>& x) const {
+        return Ariadne::evaluate(_ip,x); }
+    virtual Differential<Float> evaluate(const Vector< Differential<Float> >& x) const {
+        return Ariadne::evaluate(_fp,x); }
+
+    virtual Differential<Interval> evaluate(const Vector< Differential<Interval> >& x) const {
+        return Ariadne::evaluate(_ip,x); }
+    virtual TaylorModel evaluate(const Vector<TaylorModel>& x) const {
+        return Ariadne::evaluate(_ip,x); }
+
+    virtual std::ostream& write(std::ostream& os) const {
+        return os << "PolynomialExpression"<<_ip; }
+  private:
+    Polynomial<Float> _fp;
+    Polynomial<Interval> _ip;
+};
 
 
 } // namespace Ariadne

@@ -63,6 +63,7 @@ class TaylorCalculus
     ushort _temporal_order;
     ushort _order;
     ushort _smoothness;
+    double _maximum_step_size;
   public:
     //!
     //!
@@ -104,7 +105,9 @@ class TaylorCalculus
     touching_time_interval(const PredicateModelType& guard_model, 
                            const FlowModelType& flow_model, 
                            const SetModelType& initial_set_model) const;
-  
+
+    using CalculusBase<TaylorModel>::crossing_time;
+
     //! \brief Computes the time at which points in the \a initial_set_model cross the zero-set of the
     //! the \a guard_model under evolution of the \a flow_model, for times between the \a minimum_time and \a maximum_time.
     //! The crossing must be (differentiably) transverse.

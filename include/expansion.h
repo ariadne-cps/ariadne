@@ -39,7 +39,7 @@
 #include "multi_index.h"
 
 
-//#define ARIADNE_USE_ARRAY_EXPANSION
+#define ARIADNE_USE_ARRAY_EXPANSION
 
 namespace Ariadne {
 
@@ -264,9 +264,9 @@ FwdIter unique_key(FwdIter first, FwdIter last, Op op) {
                 ++next;
             }
         }
-        if(curr->second!=static_cast<X>(0)) { // Removes zero entries
-            ++curr;
-        }
+        // Removes zero entries; the code below is preferred to the case "curr->second!=0" for tribool results
+        if(curr->second==0) { }
+        else { ++curr; }
     }
     return curr;
 }

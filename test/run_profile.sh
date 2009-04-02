@@ -23,11 +23,11 @@ LOGFILENAME=$PROFILEDIR/$BASENAME-w$REVISION.log
 if test -f $LOGFILENAME; then rm -f $LOGFILENAME; fi
 
 echo -n $BASENAME"... ";
-(echo $HOSTNAME; date; echo; bash $EXECUTABLE $TRIES) 1>  $LOGFILENAME
+(date; echo $HOSTNAME; echo; bash $EXECUTABLE $TRIES; echo) 1>  $LOGFILENAME
 echo "done."
 
 # Test if the current working revision is untouched
-if svn status ../ | grep '^M' > /dev/null
+if svn status $TOPDIR | grep '^M' > /dev/null
 then
     # Revision has been changed since last checked in
     # Write output to file with name $EXECUTABLE-w$REVISION.NUMBER.log
@@ -44,12 +44,13 @@ then
             COPYLOGFILENAME=$PROFILEDIR/$BASENAME-w$REVISION.$NUMBER.log
         fi
     done
-    cp $LOGFILENAME $COPYLOGFILENAME
-    echo $COPYLOGFILENAME
+    (echo `basename $COPYLOGFILENAME`; cat $LOGFILENAME) > $COPYLOGFILENAME
+    echo `basename $LOGFILENAME`; echo cat $LOGFILENAME > $LOGFILENAME
 else
     # Write output to file with name $EXECUTABLE-r$REVISION.log
     MOVELOGFILENAME=$PROFILEDIR/$BASENAME-r$REVISION.log
-    mv -f$LOGFILENAME $MOVELOGFILENAME
+    (echo `basename $MOVELOGFILENAME`; cat $LOGFILENAME) > $MOVELOGFILENAME
+    rm -f $LOGFILENAME
     echo $MOVELOGFILENAME
 fi
 

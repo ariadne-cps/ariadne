@@ -41,8 +41,6 @@ namespace Ariadne {
 const double em=2.2204460492503131e-16;
 const double ec=em/2;
 
-template<class X> X Expansion<X>::_zero = 0.0;
-
 double TaylorModel::_default_sweep_threshold=1e-18;
 uint TaylorModel::_default_maximum_degree=16;
 
@@ -445,7 +443,7 @@ inline void mulacc(TaylorModel& r, const TaylorModel& x, const TaylorModel& y)
 }
 
 } // namespace
- 
+
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1348,7 +1346,7 @@ TaylorModel& TaylorModel::restrict(const Vector<Interval>& nd)
 
     array< array<Interval> > sf(as,array<Interval>(d+1u));
     for(uint j=0; j!=as; ++j) {
-        sf[j][0]=1.0; 
+        sf[j][0]=1.0;
         sf[j][1]=rad_ivl(nd[j]);
         for(uint k=2; k<=d; ++k) {
             sf[j][k]=sf[j][k-1]*sf[j][1];
@@ -1357,13 +1355,14 @@ TaylorModel& TaylorModel::restrict(const Vector<Interval>& nd)
 
     // TODO: separate into roundoff computation and value computation
     for(iterator iter=x.begin(); iter!=x.end(); ++iter) {
-        for(uint j=0; j!=as; ++j) { 
-            Interval c=iter->second;
+        for(uint j=0; j!=as; ++j) {
+            Float& c=iter->second;
+            Interval ci=c;
             for(uint j=0; j!=as; ++j) {
-                c*=sf[j][iter->first[j]];
+                ci*=sf[j][iter->first[j]];
             }
-            iter->second=c.midpoint();
-            x._error=add_up(x._error,mag(c-iter->second));
+            iter->second=ci.midpoint();
+            x._error=add_up(x._error,mag(ci-iter->second));
         }
     }
 
@@ -1397,7 +1396,9 @@ TaylorModel& TaylorModel::antidifferentiate(uint k)
 
     set_rounding_to_nearest();
     for(TaylorModel::iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
-        ++const_cast<MultiIndex&>(xiter->first)[k];
+        const MultiIndex& aconst=xiter->first;
+        MultiIndex& a=const_cast<MultiIndex&>(aconst);
+        ++a[k];
         const uint c=xiter->first[k];
         xiter->second/=c;
     }
@@ -2295,7 +2296,7 @@ implicit(const Vector<TaylorModel>& f)
     fidh=compose(f,idh);
     deltah=prod(D2finv,fidh);
     h-=deltah;
-    
+
     if(!refines(h,old_h)) { std::cerr<<"Warning: h="<<h<<" does not refine "<<old_h<<"\n"; }
 */
     // Check that the result has the correct sizes.

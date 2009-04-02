@@ -2,7 +2,7 @@
 
 phony: lib
 
-lib: libariadne.la
+lib: libariadne.la libcalculus.la
 
 INCLUDES = -I$(top_srcdir)/include $(CAIRO_CFLAGS) $(GTK_CFLAGS)
 LDADD = $(GTK_LIBS)
@@ -43,13 +43,27 @@ SRC = \
 	logging.cc \
 	graphics.cc
 
+CALCULUS_SRC = \
+	numeric.cc \
+	vector.cc \
+	matrix.cc \
+	function.cc \
+	polynomial.cc \
+	differential.cc \
+	taylor_model.cc  \
+	taylor_variable.cc  \
+	taylor_set.cc  \
+	taylor_function.cc  \
+	taylor_calculus.cc
+
 #	hybrid_simulator.cc
 
 #	taylor_model.cc
 #	taylor_set.cc
 
-lib_LTLIBRARIES = libariadne.la
+lib_LTLIBRARIES = libariadne.la libcalculus.la
 libariadne_la_SOURCES = $(SRC)
+libcalculus_la_SOURCES = $(CALCULUS_SRC)
 nodist_EXTRA_libariadne_la_SOURCES = dummy.cc
 
 EXTRA_DIST =

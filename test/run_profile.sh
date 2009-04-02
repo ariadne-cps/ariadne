@@ -2,6 +2,9 @@
 
 EXECUTABLE=$1
 
+TRIES=$[$TRIES+0]
+if test $TRIES -eq 0; then TRIES=""; fi
+
 BASENAME=`basename $EXECUTABLE`
 
 # The top-level directory name
@@ -20,7 +23,7 @@ LOGFILENAME=$PROFILEDIR/$BASENAME-w$REVISION.log
 if test -f $LOGFILENAME; then rm -f $LOGFILENAME; fi
 
 echo -n $BASENAME"... ";
-(echo $HOSTNAME; date; echo; bash $EXECUTABLE) 1>  $LOGFILENAME
+(echo $HOSTNAME; date; echo; bash $EXECUTABLE $TRIES) 1>  $LOGFILENAME
 echo "done."
 
 # Test if the current working revision is untouched

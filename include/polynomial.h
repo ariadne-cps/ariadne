@@ -70,7 +70,7 @@ Polynomial<X>::Polynomial(unsigned int as, unsigned int deg, double c0, ...)
     while(a.degree()<=deg) {
         if(a.degree()==0) { x=c0; }
         else { x=va_arg(args,double); }
-        if(x!=0) { this->insert(a,x); }
+        if(x!=0) { this->append(a,x); }
         ++a;
     }
     va_end(args);
@@ -134,7 +134,7 @@ template<class X> inline Polynomial<X> operator-(const Polynomial<X>& p1, const 
     for(Iter iter=p2.begin(); iter!=p2.end(); ++iter) { r[iter->first]-=iter->second; } return r; }
 template<class X> inline Polynomial<X> operator*(const Polynomial<X>& p1, const Polynomial<X>& p2) {
     ARIADNE_ASSERT(p1.argument_size()==p2.argument_size());
-    Polynomial<X> r(p1.argument_size()); 
+    Polynomial<X> r(p1.argument_size());
     typedef typename Polynomial<X>::const_iterator Iter;
     for(Iter iter1=p1.begin(); iter1!=p1.end(); ++iter1) {
         for(Iter iter2=p2.begin(); iter2!=p2.end(); ++iter2) {

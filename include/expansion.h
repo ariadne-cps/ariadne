@@ -251,6 +251,25 @@ class Reference<const MultiIndex> {
 };
 
 
+template<class FwdIter, class Op>
+FwdIter unique_key(FwdIter first, FwdIter last, Op op) {
+    FwdIter curr=first;
+    FwdIter next=curr;
+    while(next!=last) {
+        if(curr!=next) { *curr=*next; }
+        ++next;
+        while(next!=last && curr->first==next->first) {
+            if(curr->first==next->first) {
+                curr->second=op(curr->second,next->second);
+                ++next;
+            }
+        }
+        if(curr->second!=static_cast<X>(0)) { // Removes zero entries
+            ++curr;
+        }
+    }
+    return curr;
+}
 
 template<class X>
 struct ExpansionValue {
@@ -317,6 +336,9 @@ inline std::ostream& operator<<(std::ostream& os, ExpansionReference<X> dr) {
 }
 
 
+template<class X, class Ref> class ExpansionIterator;
+template<class X, class Ref> std::ostream& operator<<(std::ostream&, const ExpansionIterator<X,Ref>&);
+
 template<class X, class Ref>
 class ExpansionIterator
      : public boost::iterator_facade<ExpansionIterator<X,Ref>,
@@ -326,6 +348,7 @@ class ExpansionIterator
 
 {
     template<class X2, class Ref2> friend class ExpansionIterator;
+    friend std::ostream& operator<< <>(std::ostream&,const ExpansionIterator<X,Ref>&);
     typedef ExpansionIterator<X,Ref> Iter;
   public:
     typedef MultiIndex::size_type size_type;
@@ -353,7 +376,7 @@ class ExpansionIterator
     Iter& decrement() {
         return advance(-1); }
     Iter& advance(difference_type m) {
-        _p+=m*MultiIndex::_element_size(_n);
+        _p+=m*difference_type(MultiIndex::_element_size(_n));
         _x=reinterpret_cast<data_type*>(_p+MultiIndex::_word_size(_n));
         return *this; }
   private:
@@ -410,10 +433,11 @@ class Expansion
 
     unsigned int argument_size() const { return this->_argument_size; }
     unsigned int number_of_nonzeros() const { return _coefficients.size()/element_size(); }
-    unsigned int degree() const { return (--this->_coefficients.end())->first.degree(); }
+    unsigned int degree() const { return (--this->end())->first.degree(); }
 
     bool empty() const { return this->_coefficients.empty(); }
     void reserve(size_type nnz) { this->_coefficients.reserve(nnz*element_size()); }
+    void resize(size_type nnz) { this->_coefficients.resize(nnz*element_size()); }
 
     void insert(const MultiIndex& a, const Real& c) {
         assert(a.size()==_argument_size); this->_insert(a,c); }
@@ -449,25 +473,14 @@ class Expansion
     void clear() { _coefficients.clear(); }
 
     void cleanup() {
-        if(this->_coefficients.empty()) { return; }
         std::sort(this->begin(),this->end());
-        iterator begin=this->begin();
-        iterator curr=this->begin();
-        iterator end=this->end();
-        iterator next=curr; ++next;
-        while(next!=end) {
-            if(curr->first==next->first) {
-                static_cast<X&>(curr->second)+=static_cast<const X&>(next->second); ++next; }
-            else {
-                ++curr; *curr=*next; ++next; }
-        }
-        ++curr;
-        this->_coefficients.resize((curr-begin)*this->element_size());
+        iterator new_end=unique_key(this->begin(),this->end(),std::plus<X>());
+        this->resize(new_end-this->begin());
     }
 
     void check() { }
 
-    friend template<class XX, class YY> YY evaluate(const Expansion<XX>&, const Vector<YY>& x) const;
+    template<class XX, class YY> friend YY evaluate(const Expansion<XX>&, const Vector<YY>& x);
     Expansion<X> embed(unsigned int before_size, const Expansion<X>&, unsigned int after_size) const;
   public:
     size_type vector_size() const {
@@ -511,6 +524,7 @@ template<> class Expansion<Rational>;
 
 #endif
 
+template<class X> X Expansion<X>::_zero = 0.0;
 
 template<class X>
 Expansion<X>::Expansion(unsigned int as, unsigned int deg, double c0, ...)
@@ -576,7 +590,7 @@ template<class X> Expansion<X> Expansion<X>::variable(unsigned int n, unsigned i
 
 
 template<class X, class Y>
-Y evaluate(const Expansion<X>& x, const Vector<Y>& y) 
+Y evaluate(const Expansion<X>& x, const Vector<Y>& y)
 {
     ARIADNE_ASSERT_MSG(x.argument_size()==y.size(),
         "evaluate(Expansion x, Vector y) with x="<<x<<", y="<<y<<": x.argument_size()!=y.size()");

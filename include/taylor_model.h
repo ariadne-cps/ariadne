@@ -32,6 +32,7 @@
 
 #include "macros.h"
 #include "array.h"
+#include "pointer.h"
 #include "vector.h"
 #include "multi_index.h"
 #include "expansion.h"
@@ -124,17 +125,20 @@ class TaylorModel
 {
     friend class TaylorVariable;
     typedef Expansion<Float> ExpansionType;
+  public:
+    class Accuracy;
   private:
     ExpansionType _expansion;
     Float _error;
-    double _sweep_threshold;
-    uint _maximum_degree;
-    MultiIndexBound _maximum_index;
+    mutable shared_ptr<Accuracy> _accuracy_ptr;
   private:
     static const double _zero;
     static double _default_sweep_threshold;
     static uint _default_maximum_degree;
   public:
+    const Accuracy& accuracy() const { return *this->_accuracy_ptr; }
+    shared_ptr<Accuracy> accuracy_ptr() const { return this->_accuracy_ptr; }
+
     //! \brief The type used for the coefficients.
     typedef Float ScalarType;
     //! \brief The type used to index the coefficients.
@@ -153,12 +157,16 @@ class TaylorModel
     TaylorModel();
     //! \brief Construct a TaylorModel in \a as arguments.
     TaylorModel(uint as);
+    //! \brief Construct a TaylorModel in \a as arguments with the given accuracy control.
+    TaylorModel(uint as, shared_ptr<Accuracy> acc);
     //! \brief Construct from a map giving the expansion and a constant giving the error.
     TaylorModel(const std::map<MultiIndex,Float>& d, const Float& e);
     //! \brief Construct from a map giving the expansion and a constant giving the error.
     TaylorModel(const Expansion<Float>& f, const Float& e=0.0);
     //! \brief Fast swap with another Taylor model.
     void swap(TaylorModel& tm);
+    //! \brief Set to zero.
+    void clear();
 
     //@{
     /*! \name Assignment to constant values. */
@@ -336,7 +344,7 @@ class TaylorModel
     friend Vector<TaylorModel> implicit(const Vector<TaylorModel>& f);
     //! \brief Compute the flow of the vector field \a vf, starting from the box \a d,
     //! over the time interval \a h, using temporal order \a o.
-    friend Vector<TaylorModel> flow(const Vector<TaylorModel>& vf, 
+    friend Vector<TaylorModel> flow(const Vector<TaylorModel>& vf,
                                     const Vector<Interval>& d, const Interval& h, uint o);
     //@}
 
@@ -357,7 +365,7 @@ class TaylorModel
     TaylorModel& sweep(double eps);
     //! \brief Remove all terms whose degree is higher than \a deg or
     //! whose coefficient has magnitude less than \a eps.
-    TaylorModel& clean(uint deg, double eps);
+    TaylorModel& clean(const Accuracy& accuracy);
     //! \brief Remove all terms which have high degree or small magnitude.
     TaylorModel& clean();
     //@}
@@ -365,29 +373,29 @@ class TaylorModel
     //@{
     /*! \name Default accuracy parameters. */
     //! \brief .
-    static void set_default_maximum_degree(uint md) { _default_maximum_degree=md; }
+    static void set_default_maximum_degree(uint md);
     //! \brief .
-    static void set_default_sweep_threshold(double me) { ARIADNE_ASSERT(me>=0.0); _default_sweep_threshold=me; }
+    static void set_default_sweep_threshold(double me);
     //! \brief .
-    static uint default_maximum_degree() { return _default_maximum_degree; }
+    static uint default_maximum_degree();
     //! \brief .
-    static double default_sweep_threshold() { return _default_sweep_threshold; }
+    static double default_sweep_threshold();
     //@}
 
     //@{
     /*! \name Accuracy parameters. */
     //! \brief .
-    void set_maximum_index(MultiIndexBound md) { this->_maximum_index=md; }
+    void set_maximum_index(MultiIndexBound md);
     //! \brief .
-    void set_maximum_degree(uint md) { this->_maximum_degree=md; }
+    void set_maximum_degree(uint md);
     //! \brief .
-    void set_sweep_threshold(double me) { ARIADNE_ASSERT(me>=0.0); this->_sweep_threshold=me; }
+    void set_sweep_threshold(double me);
     //! \brief .
-    MultiIndexBound maximum_index() const { return this->_maximum_index; }
+    MultiIndexBound maximum_index() const;
     //! \brief .
-    uint maximum_degree() const { return this->_maximum_degree; }
+    uint maximum_degree() const;
     //! \brief .
-    double sweep_threshold() const { return this->_sweep_threshold; }
+    double sweep_threshold() const;
     //@}
 
     //@{

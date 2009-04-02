@@ -44,38 +44,48 @@ const double ec=em/2;
 double TaylorModel::_default_sweep_threshold=1e-18;
 uint TaylorModel::_default_maximum_degree=16;
 
+struct TaylorModel::Accuracy {
+    friend class TaylorModel;
 
+    Accuracy() : _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree) { }
+    Accuracy(double st, uint md) : _sweep_threshold(st), _maximum_degree(md) { }
+
+    Accuracy max(const Accuracy& acc1, const Accuracy& acc2) {
+        return Accuracy(std::min(acc1._sweep_threshold,acc1._sweep_threshold),std::max(acc1._maximum_degree,acc2._maximum_degree)); }
+    Accuracy min(const Accuracy& acc1, const Accuracy& acc2) {
+        return Accuracy(std::max(acc1._sweep_threshold,acc1._sweep_threshold),std::min(acc1._maximum_degree,acc2._maximum_degree)); }
+
+    bool discard(const Float& x) const { return x<this->_sweep_threshold; }
+    bool discard(const MultiIndex& a) const { return a.degree()>this->_maximum_degree; }
+    bool discard(const MultiIndex& a, const Float& x) const { return this->discard(x) || this->discard(a); }
+
+    double _sweep_threshold;
+    uint _maximum_degree;
+};
 
 TaylorModel::TaylorModel()
-    : _expansion(), _error(),
-      _sweep_threshold(_default_sweep_threshold),
-      _maximum_degree(_default_maximum_degree),
-      _maximum_index(0,_default_maximum_degree)
+    : _expansion(), _error(), _accuracy_ptr(new Accuracy())
 { }
 
 TaylorModel::TaylorModel(uint as)
-    : _expansion(as), _error(0),
-      _sweep_threshold(_default_sweep_threshold),
-      _maximum_degree(_default_maximum_degree),
-      _maximum_index(as,_default_maximum_degree)
+    : _expansion(as), _error(0), _accuracy_ptr(new Accuracy())
+{
+}
+
+TaylorModel::TaylorModel(uint as, shared_ptr<Accuracy> acc)
+    : _expansion(as), _error(0), _accuracy_ptr(acc)
 {
 }
 
 TaylorModel::TaylorModel(const std::map<MultiIndex,Float>& d, const Float& e)
-    : _expansion(d), _error(e),
-      _sweep_threshold(_default_sweep_threshold),
-      _maximum_degree(_default_maximum_degree),
-      _maximum_index(d.begin()->first.size(),_default_maximum_degree)
+    : _expansion(d), _error(e), _accuracy_ptr(new Accuracy())
 {
     ARIADNE_ASSERT(!d.empty());
     if(e<0) { std::cerr<<e<<std::endl; } ARIADNE_ASSERT(this->_error>=0);
 }
 
 TaylorModel::TaylorModel(const Expansion<Float>& f, const Float& e)
-    : _expansion(f), _error(e),
-      _sweep_threshold(_default_sweep_threshold),
-      _maximum_degree(_default_maximum_degree),
-      _maximum_index(f.begin()->first.size(),_default_maximum_degree)
+    : _expansion(f), _error(e), _accuracy_ptr(new Accuracy())
 {
 }
 
@@ -85,6 +95,13 @@ TaylorModel::swap(TaylorModel& tm)
 {
     this->_expansion.swap(tm._expansion);
     std::swap(this->_error,tm._error);
+}
+
+void
+TaylorModel::clear()
+{
+    this->_expansion.clear();
+    this->_error=0.0;
 }
 
 
@@ -189,6 +206,22 @@ void scal(TaylorModel& r, const Interval& c)
     return;
 }
 
+struct UnitMultiIndex { uint argument_size; uint unit_index; };
+
+
+inline void _incr(TaylorModel& r, const MultiIndex& a)
+{
+    for(TaylorModel::iterator iter=r.begin(); iter!=r.end(); ++iter) {
+        static_cast<MultiIndex&>(iter->first)+=a;
+    }
+}
+
+inline void _incr(TaylorModel& r, uint j)
+{
+    for(TaylorModel::iterator iter=r.begin(); iter!=r.end(); ++iter) {
+        ++static_cast<MultiIndex&>(iter->first)[j];
+    }
+}
 
 
 void acc(TaylorModel& r, const Float& c)
@@ -233,6 +266,7 @@ void acc(TaylorModel& r, const Interval& c)
 }
 
 
+// This method is hugely inefficient; use acc2 instead
 void acc1(TaylorModel& x, const TaylorModel& y)
 {
     // Compute self+=y
@@ -323,17 +357,166 @@ void acc2(TaylorModel& x, const TaylorModel& y)
 }
 
 
-inline void acc(TaylorModel& r, const TaylorModel& x)
+inline void _add1(TaylorModel& r, const TaylorModel& x, const TaylorModel& y)
 {
-    acc2(r,x);
+    // Compute r=x+y, assuming r is empty
+    set_rounding_upward();
+    Float te=0.0;
+    TaylorModel::const_iterator xiter=x.begin();
+    TaylorModel::const_iterator yiter=y.begin();
+    while(xiter!=x.end() && yiter!=y.end()) {
+        if(xiter->first<yiter->first) {
+            ++xiter;
+        } else if(yiter->first<xiter->first) {
+            ++yiter;
+        } else {
+            const Float& xv=xiter->second;
+            const Float& yv=yiter->second;
+            volatile Float u=xv+yv;
+            volatile Float t=-xv;
+            volatile Float ml=t-yv;
+            te+=(u+ml);
+            ++xiter; ++yiter;
+        }
+    }
+    r.error()=x.error();
+    r.error()+=y.error();
+    r.error()+=(te/2);
+
+    set_rounding_to_nearest();
+    xiter=x.begin();
+    yiter=y.begin();
+    while(xiter!=x.end() && yiter!=y.end()) {
+        if(xiter->first<yiter->first) {
+            r.expansion().append(xiter->first,xiter->second);
+            ++xiter;
+        } else if(yiter->first<xiter->first) {
+            r.expansion().append(yiter->first,yiter->second);
+            ++yiter;
+        } else {
+            Float c=xiter->second+yiter->second;
+            if(c!=0) { r.expansion().append(xiter->first,c); }
+            ++xiter; ++yiter;
+        }
+    }
+    while(xiter!=x.end()) {
+        r.expansion().append(xiter->first,xiter->second);
+        ++xiter;
+    }
+    while(yiter!=y.end()) {
+        r.expansion().append(yiter->first,yiter->second);
+        ++yiter;
+    }
+
 }
+
+inline void _add2(TaylorModel& r, const TaylorModel& x, const TaylorModel& y)
+{
+    // Compute r=x+y, assuming r is empty
+    set_rounding_upward();
+    Float te=0.0;
+    TaylorModel::const_iterator xiter=x.begin();
+    TaylorModel::const_iterator yiter=y.begin();
+    while(xiter!=x.end() && yiter!=y.end()) {
+        if(xiter->first<yiter->first) {
+            r.expansion().append(xiter->first,xiter->second);
+            ++xiter;
+        } else if(yiter->first<xiter->first) {
+            r.expansion().append(yiter->first,yiter->second);
+            ++yiter;
+        } else {
+            set_rounding_upward();
+            const Float& xv=xiter->second;
+            const Float& yv=yiter->second;
+            volatile Float u=xv+yv;
+            volatile Float t=-xv;
+            volatile Float ml=t-yv;
+            te+=(u+ml);
+            set_rounding_to_nearest();
+            r.expansion().append(xiter->first,xiter->second+yiter->second);
+            ++xiter; ++yiter;
+        }
+    }
+
+    while(xiter!=x.end()) {
+        r.expansion().append(xiter->first,xiter->second);
+        ++xiter;
+    }
+    while(yiter!=y.end()) {
+        r.expansion().append(yiter->first,yiter->second);
+        ++yiter;
+    }
+
+    set_rounding_upward();
+    r.error()=x.error();
+    r.error()+=y.error();
+    r.error()+=(te/2);
+    set_rounding_to_nearest();
+
+}
+
+inline void _add(TaylorModel& r, const TaylorModel& x, const TaylorModel& y)
+{
+    _add2(r,x,y);
+}
+
+inline void _acc(TaylorModel& r, const TaylorModel& x)
+{
+    TaylorModel s(r.argument_size()); _add(s,r,x); s.swap(r);
+}
+
+inline void _sub(TaylorModel& r, const TaylorModel& x, const TaylorModel& y)
+{
+    // Compute r=x+y, assuming r is empty
+    set_rounding_upward();
+    Float te=0.0;
+    TaylorModel::const_iterator xiter=x.begin();
+    TaylorModel::const_iterator yiter=y.begin();
+    while(xiter!=x.end() && yiter!=y.end()) {
+        if(xiter->first<yiter->first) {
+            r.expansion().append(xiter->first,xiter->second);
+            ++xiter;
+        } else if(yiter->first<xiter->first) {
+            r.expansion().append(yiter->first,yiter->second);
+            ++yiter;
+        } else {
+            set_rounding_upward();
+            const Float& xv=xiter->second;
+            const Float& yv=yiter->second;
+            volatile Float u=xv-yv;
+            volatile Float t=-xv;
+            volatile Float ml=t+yv;
+            te+=(u+ml);
+            set_rounding_to_nearest();
+            r.expansion().append(xiter->first,xiter->second+yiter->second);
+            ++xiter; ++yiter;
+        }
+    }
+
+    while(xiter!=x.end()) {
+        r.expansion().append(xiter->first,xiter->second);
+        ++xiter;
+    }
+    while(yiter!=y.end()) {
+        r.expansion().append(yiter->first,yiter->second);
+        ++yiter;
+    }
+
+    set_rounding_upward();
+    r.error()=x.error();
+    r.error()+=y.error();
+    r.error()+=(te/2);
+    set_rounding_to_nearest();
+
+}
+
 
 
 struct Ivl { double u; double ml; };
 
-void mulacc1(TaylorModel& r, const TaylorModel& x, const TaylorModel& y)
+inline void _mul1(TaylorModel& r, const TaylorModel& x, const TaylorModel& y)
 {
-    // Compute self+=x*y
+    // Compute r+=x*y
     typedef TaylorModel::const_iterator const_iterator;
     typedef std::map<MultiIndex,Ivl>::const_iterator ivl_const_iterator;
     Float& re=r.error();
@@ -389,10 +572,14 @@ void mulacc1(TaylorModel& r, const TaylorModel& x, const TaylorModel& y)
 }
 
 
-void mulacc2(TaylorModel& r, const TaylorModel& x, const TaylorModel& y)
+// Compute r+=x*y
+// Compute monomial-by-monomial in y
+// Avoid changing rounding mode
+inline
+void _mul2(TaylorModel& r, const TaylorModel& x, const TaylorModel& y)
 {
-    ARIADNE_ASSERT(r.begin()->first.degree()==0);
     TaylorModel t(x.argument_size());
+    TaylorModel s(x.argument_size());
     for(TaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
         set_rounding_upward();
         double te=0.0;
@@ -408,8 +595,11 @@ void mulacc2(TaylorModel& r, const TaylorModel& x, const TaylorModel& y)
         for(TaylorModel::const_iterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
             t.expansion().append(xiter->first,yiter->first,xiter->second*yiter->second);
         }
-        r+=t;
-        //std::cerr<<"  t="<<t<<"\n  r="<<r<<std::endl;
+        _add2(s,r,t);
+        r.expansion().swap(s.expansion());
+        r.error()=s.error();
+        s.expansion().clear();
+        s.error()=0.0;
         t.expansion().clear();
         t.error()=0.0;
     }
@@ -437,9 +627,128 @@ void mulacc2(TaylorModel& r, const TaylorModel& x, const TaylorModel& y)
 }
 
 
-inline void mulacc(TaylorModel& r, const TaylorModel& x, const TaylorModel& y)
+// Compute r+=x*y
+// Compute monomial-by-monomial in y
+// Change the rounding mode to avoid iterating using opposite rounding
+inline void _mul3(TaylorModel& r, const TaylorModel& x, const TaylorModel& y)
 {
-    mulacc2(r,x,y);
+    TaylorModel t(x.argument_size());
+    for(TaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+        volatile Float pxv=xiter->second;
+        volatile Float nxv=-pxv;
+        volatile Float te=0.0;
+        for(TaylorModel::const_iterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
+            set_rounding_upward();
+            const Float& yv=yiter->second;
+            te+=(pxv*yv)+(nxv*yv);
+            set_rounding_to_nearest();
+            t.expansion().append(xiter->first,yiter->first,xiter->second*yiter->second);
+        }
+        t.error()=te/2;
+        r+=t;
+        //std::cerr<<"  t="<<t<<"\n  r="<<r<<std::endl;
+        t.clear();
+    }
+
+    set_rounding_upward();
+    Float xs=0;
+    for(TaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+        xs+=abs(xiter->second);
+    }
+
+    Float ys=0;
+    for(TaylorModel::const_iterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
+        ys+=abs(yiter->second);
+    }
+
+    Float& re=r.error();
+    const Float& xe=x.error();
+    const Float& ye=y.error();
+    re+=xs*ye+ys*xe+xe*ye;
+
+    r.clean();
+
+    set_rounding_to_nearest();
+    return;
+}
+
+inline void _add(MultiIndex& r, const MultiIndex& a1, const MultiIndex& a2) {
+    for(MultiIndex::size_type j=0; j!=r.word_size(); ++j) {
+        r.word_at(j)=a1.word_at(j)+a2.word_at(j);
+    }
+}
+
+
+// Compute r+=x*y
+// Compute monomial-by-monomial in y
+// Avoid changing rounding mode
+inline
+void _mul4(TaylorModel& r, const TaylorModel& x, const TaylorModel& y, const TaylorModel::Accuracy& accuracy)
+{
+    const uint as=r.argument_size();
+    TaylorModel t(as);
+    TaylorModel s(as);
+    MultiIndex ta(as);
+    Float tv;
+    for(TaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+        double tte=0.0; // trucation error
+        double tre=0.0; // roundoff error
+        const MultiIndex& xa=xiter->first;
+        volatile Float& xv=const_cast<Float&>(static_cast<const Float&>(xiter->second));
+        volatile Float mxv=-xv;
+        volatile Float axv=abs(xv);
+        for(TaylorModel::const_iterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
+            const MultiIndex& ya=yiter->first;
+            volatile Float& yv=const_cast<Float&>(static_cast<const Float&>(yiter->second));
+            set_rounding_to_nearest();
+            ta=xa+ya;
+            tv=xv*yv;
+            set_rounding_upward();
+            if(accuracy.discard(ta,tv)) {
+                tte+=axv*abs(yv);
+            } else {
+                t.expansion().append(ta,tv);
+                tre+=(xv*yv)+(mxv*yv);
+            }
+        }
+        t.error()=tte+(tte/2);
+
+        _add2(s,r,t);
+        r.expansion().swap(s.expansion());
+        r.error()=s.error();
+        s.expansion().clear();
+        s.error()=0.0;
+        t.expansion().clear();
+        t.error()=0.0;
+    }
+
+    set_rounding_upward();
+    Float xs=0;
+    for(TaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+        xs+=abs(xiter->second);
+    }
+
+    Float ys=0;
+    for(TaylorModel::const_iterator yiter=y.begin(); yiter!=y.end(); ++yiter) {
+        ys+=abs(yiter->second);
+    }
+
+    Float& re=r.error();
+    const Float& xe=x.error();
+    const Float& ye=y.error();
+    re+=xs*ye+ys*xe+xe*ye;
+
+    r.clean();
+
+    set_rounding_to_nearest();
+    return;
+}
+
+// In profiling, mul2 yielded best results
+inline void _mul(TaylorModel& r, const TaylorModel& x, const TaylorModel& y)
+{
+    _mul4(r,x,y,r.accuracy());
+    _mul2(r,x,y);
 }
 
 } // namespace
@@ -453,21 +762,43 @@ inline void mulacc(TaylorModel& r, const TaylorModel& x, const TaylorModel& y)
 TaylorModel&
 TaylorModel::clean()
 {
-    return this->clean(this->_maximum_degree,this->_sweep_threshold);
+    return this->clean(*this->_accuracy_ptr);
 }
 
+
+
 TaylorModel&
-TaylorModel::clean(uint deg, double eps)
+TaylorModel::clean(const Accuracy& accuracy)
 {
+
+    set_rounding_upward();
+    TaylorModel::iterator curr=this->begin();
+    TaylorModel::const_iterator adv=curr;
+    while(adv!=this->end()) {
+        if(accuracy.discard(adv->first,adv->second)) {
+            this->error()+=abs(adv->second);
+        } else {
+            if(curr!=adv) { curr->first=adv->first; curr->second=adv->second; }
+            ++curr;
+        }
+        ++adv;
+    }
+    set_rounding_to_nearest();
+    this->expansion().resize(curr-this->begin());
+    return *this;
+
+
+    // Alternative code takes significantly longer
     TaylorModel r(this->argument_size());
+    r.expansion().reserve(this->expansion().size());
     r.error()=this->error();
 
     set_rounding_upward();
     for(TaylorModel::const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
-        if(iter->first.degree()==0 || (iter->first.degree() <= deg && abs(iter->second)>=eps)) {
-            r.expansion().append(iter->first,iter->second);
-        } else {
+        if(accuracy.discard(iter->first,iter->second)) {
             r.error()+=abs(iter->second);
+        } else {
+            r.expansion().append(iter->first,iter->second);
         }
     }
     set_rounding_to_nearest();
@@ -476,52 +807,53 @@ TaylorModel::clean(uint deg, double eps)
     this->error()=r.error();
 
     return *this;
+
 }
+
 
 TaylorModel&
 TaylorModel::sweep()
 {
-    return this->sweep(this->_sweep_threshold);
+    return this->sweep(this->sweep_threshold());
 }
 
 TaylorModel&
 TaylorModel::sweep(double m)
 {
-    this->clean(255,m);
-    for(iterator iter=this->_expansion.begin(); iter!=this->end(); ) {
-        Float a=abs(iter->second);
-        if(abs(iter->second)<=m) {
-            this->_error+=a;
-           _expansion.erase(iter++);
+    TaylorModel r(this->argument_size(),this->_accuracy_ptr);
+    r.expansion().reserve(this->expansion().size());
+    for(TaylorModel::const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
+        if(iter->second>m) {
+            r.expansion().append(iter->first,iter->second);
         } else {
-            ++iter;
+            r.error()+=abs(iter->second);
         }
     }
+    this->expansion().swap(r.expansion());
+    this->error()=r.error();
     return *this;
 }
 
 TaylorModel&
 TaylorModel::truncate()
 {
-    return this->truncate(this->_maximum_degree);
+    return this->truncate(this->maximum_degree());
 }
 
 TaylorModel&
 TaylorModel::truncate(uint d)
 {
-    this->clean(d,0.0);
-    set_rounding_upward();
-    Float e=0;
-    for(iterator iter=this->_expansion.begin(); iter!=this->end(); ) {
+    TaylorModel r(this->argument_size(),this->_accuracy_ptr);
+    r.expansion().reserve(this->expansion().size());
+    for(TaylorModel::const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
         if(iter->first.degree()>d) {
-            e+=abs(iter->second);
-            this->_expansion.erase(iter++);
+            r.expansion().append(iter->first,iter->second);
         } else {
-            ++iter;
+            r.error()+=abs(iter->second);
         }
     }
-    this->_error+=e;
-    set_rounding_to_nearest();
+    this->expansion().swap(r.expansion());
+    this->error()=r.error();
     return *this;
 }
 
@@ -611,6 +943,28 @@ TaylorModel::clobber(uint so, uint to)
 
 ///////////////////////////////////////////////////////////////////////////////
 
+// Accuracy control
+
+void TaylorModel::set_maximum_degree(uint d) {
+    this->_accuracy_ptr->_maximum_degree=d;
+}
+
+void TaylorModel::set_sweep_threshold(double e) {
+    this->_accuracy_ptr->_sweep_threshold=e;
+}
+
+uint TaylorModel::maximum_degree() const {
+    return this->_accuracy_ptr->_maximum_degree;
+}
+
+double TaylorModel::sweep_threshold() const {
+    return this->_accuracy_ptr->_sweep_threshold;
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+
 // Arithmetic operators
 
 TaylorModel&
@@ -618,7 +972,7 @@ operator+=(TaylorModel& x, const TaylorModel& y)
 {
     if(x.argument_size()==0) { x=TaylorModel::zero(y.argument_size()); }
     ARIADNE_ASSERT(x.argument_size()==y.argument_size());
-    acc(x,y); return x;
+    _acc(x,y); return x;
 
 }
 
@@ -627,7 +981,7 @@ operator-=(TaylorModel& x, const TaylorModel& y)
 {
     if(x.argument_size()==0) { x=TaylorModel::zero(y.argument_size()); }
     ARIADNE_ASSERT(x.argument_size()==y.argument_size());
-    acc(x,neg(y)); return x;
+    _acc(x,neg(y)); return x;
 }
 
 
@@ -705,26 +1059,26 @@ operator-(const TaylorModel& x) {
 TaylorModel
 operator+(const TaylorModel& x, const TaylorModel& y) {
     ARIADNE_ASSERT(x.argument_size()==y.argument_size());
-    TaylorModel r(x); acc(r,y); return r;
+    TaylorModel r(x.argument_size()); _add(r,x,y); return r;
 }
 
 TaylorModel
 operator-(const TaylorModel& x, const TaylorModel& y) {
     ARIADNE_ASSERT(x.argument_size()==y.argument_size());
-    TaylorModel r=neg(y); acc(r,x); return r;
+    TaylorModel r=neg(y); _acc(r,x); return r;
 }
 
 TaylorModel
 operator*(const TaylorModel& x, const TaylorModel& y) {
     if(x.argument_size()!=y.argument_size()) { std::cerr<<"operator*(TaylorModel x, TaylorModel y)\n  x="<<x<<" y="<<y<<"\n"; }
     ARIADNE_ASSERT(x.argument_size()==y.argument_size());
-    TaylorModel r(x.argument_size()); r.set_value(0.0); mulacc(r,x,y); return r;
+    TaylorModel r(y.argument_size(),y.accuracy_ptr()); _mul(r,x,y); return r;
 }
 
 TaylorModel
 operator/(const TaylorModel& x, const TaylorModel& y) {
     ARIADNE_ASSERT(x.argument_size()==y.argument_size());
-    TaylorModel r(x.argument_size()); r.set_value(0.0); mulacc(r,x,rec(y)); return r;
+    TaylorModel r(x.argument_size()); _mul(r,x,rec(y)); return r;
 }
 
 
@@ -1169,7 +1523,7 @@ TaylorModel sqrt(const TaylorModel& x) {
     Float eps=(r.u-r.l)/(r.u+r.l);
     set_rounding_to_nearest();
     assert(eps<1);
-    uint d=uint(log((1-eps)*x._sweep_threshold)/log(eps)+1);
+    uint d=uint(log((1-eps)*x.sweep_threshold())/log(eps)+1);
     //std::cerr<<"x="<<x<<std::endl;
     //std::cerr<<"x/a="<<x/a<<" a="<<a<<std::endl;
     TaylorModel y=(x/a)-1.0;
@@ -1208,7 +1562,7 @@ TaylorModel rec(const TaylorModel& x) {
     Float eps=abs((r.u-r.l)/(r.u+r.l));
     set_rounding_to_nearest();
     assert(eps<1);
-    uint d=uint(log((1-eps)*x._sweep_threshold)/log(eps))+1;
+    uint d=uint(log((1-eps)*x.sweep_threshold())/log(eps))+1;
     //std::cerr<<"  x="<<x<<"\n";
     //std::cerr<<"  r="<<r<<"\n";
     //std::cerr<<"  a="<<a<<"\n";
@@ -1246,7 +1600,7 @@ TaylorModel log(const TaylorModel& x) {
     Float eps=(r.u-r.l)/(r.u+r.l);
     set_rounding_to_nearest();
     assert(eps<1);
-    uint d=uint(log((1-eps)*x._sweep_threshold)/log(eps)+1);
+    uint d=uint(log((1-eps)*x.sweep_threshold())/log(eps)+1);
     TaylorModel y=x/a-1;
     TaylorModel z(x.argument_size());
     z+=Float(d%2?-1:+1)/d;
@@ -1262,7 +1616,7 @@ TaylorModel log(const TaylorModel& x) {
 
 TaylorModel exp(const TaylorModel& x) {
     static const uint DEG=18;
-    return _compose(&Series<Interval>::exp,x,x._sweep_threshold);
+    return _compose(&Series<Interval>::exp,x,x.sweep_threshold());
     return compose(TaylorSeries(DEG,&Series<Interval>::exp,
                                 x.value(),x.range()),x);
 }

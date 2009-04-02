@@ -20,9 +20,9 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
-/*!\file test.h 
- * \brief Macros for test suite. 
+
+/*!\file test.h
+ * \brief Macros for test suite.
  */
 
 #ifndef ARIADNE_TEST_H
@@ -36,8 +36,8 @@ int ARIADNE_TEST_SKIPPED=0;
 
 // This needs to be a function since we do not want to evaluate the result twice,
 // and can't store it in a variable since we don't know it's type.
-template<class R, class ER> 
-bool 
+template<class R, class ER>
+bool
 ariadne_check(std::ostream& os, const R& r, const ER& er) {
     os << r << std::flush; return (r==er);
 }
@@ -236,7 +236,7 @@ int test_case_counter = 0;
         std::cout << #expression << ": " << (expression) << std::flush; \
         bool ok = ((expression) comparison (expected));               \
         if(ok) {                                                        \
-            std::cout << " " << #comparison << " " << (expected) << "\n" << std::endl; \
+            std::cout << " " << #comparison << " " << (expected) << ": true\n" << std::endl; \
         } else {                                                        \
             ++ARIADNE_TEST_FAILURES;                                    \
             std::cout << "\nERROR: expected: " << #expression << #comparison << #expected << "=" << (expected) << std::endl; \
@@ -324,7 +324,7 @@ int test_case_counter = 0;
 
 
 /*! \brief Check the iterator of the GridTreeSudset by iterating through all it's values and
- * comparing them with the valus in the vector \a expected_result, the total number of iterated 
+ * comparing them with the valus in the vector \a expected_result, the total number of iterated
  * elements should coincide with the value of \a expected_number_elements
  */
 #define ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result, theGridTreeSubset, expected_number_elements ) \

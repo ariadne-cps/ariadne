@@ -35,37 +35,111 @@ using std::string;
 #include "taylor_model.h"
 using namespace Ariadne;
 
-TaylorModel sum(const Vector<TaylorModel>& v) {
-    return v[0]+v[1];
+template<class A1>
+struct InplaceUnaryClosure {
+    typedef A1 result_type;
+    InplaceUnaryClosure(A1&(*f_)(A1&),const A1& a1_) : f(f_), a1(a1_) { };
+    A1& operator()() const { r=a1; return f(r); }
+    A1&(*f)(A1&); mutable A1 r; const A1& a1;
+};
+
+template<class A1, class A2>
+struct InplaceBinaryClosure {
+    typedef A1 result_type;
+    InplaceBinaryClosure(A1&(*f_)(A1&,const A2&),const A1& a1_,const A2& a2_) : f(f_), a1(a1_), a2(a2_) { };
+    A1& operator()() const { r=a1; return f(r,a2); }
+    A1&(*f)(A1&,const A2&); mutable A1 r; const A1& a1; const A2& a2;
+};
+
+template<class R, class A1>
+struct UnaryClosure {
+    typedef R result_type;
+    UnaryClosure(R(*f_)(const A1&),const A1& a1_) : f(f_), a1(a1_) { };
+    R operator()() const { return f(a1); }
+    R(*f)(const A1&); const A1& a1;
+};
+
+template<class R, class A1, class A2>
+struct BinaryClosure {
+    typedef R result_type;
+    BinaryClosure(R(*f_)(const A1&,const A2&),const A1& a1_, const A2& a2_) : f(f_), a1(a1_), a2(a2_) { };
+    R operator()() const { return f(a1,a2); }
+    R(*f)(const A1&,const A2&); const A1& a1; const A2& a2;
+};
+
+template<class F, class A1>
+InplaceUnaryClosure<A1>
+inplace_bind(const F& f,const A1& a1) {
+    return InplaceUnaryClosure<A1>((A1&(*)(A1&))f,a1);
 }
 
-TaylorModel prod(const Vector<TaylorModel>& v) {
-    return v[0]*v[1];
+template<class F, class A1, class A2>
+InplaceBinaryClosure<A1,A2>
+inplace_bind(const F& f,const A1& a1,const A2& a2) {
+    return InplaceBinaryClosure<A1,A2>((A1&(*)(A1&,const A2&))f,a1,a2);
+}
+
+template<class F, class A1>
+UnaryClosure<A1,A1>
+bind(const F& f,const A1& a1) {
+    return UnaryClosure<A1,A1>((A1(*)(const A1&))f,a1);
+}
+
+template<class F, class A1, class A2>
+BinaryClosure<A1,A1,A2>
+bind(const F& f,const A1& a1,const A2& a2) {
+    return BinaryClosure<A1,A1,A2>((A1(*)(const A1&,const A2&))f,a1,a2);
 }
 
 
-TaylorModel exp_cos(const Vector<TaylorModel>& v) {
-    return exp(v[0])*cos(v[1]);
+
+TaylorModel copy(const TaylorModel& x) {
+    return x;
 }
 
-TaylorModel sigmoid(const Vector<TaylorModel>& v) {
+TaylorModel& iclean(TaylorModel& x) {
+    x.clean(); return x;
+}
+
+TaylorModel& iadd(TaylorModel& x, const Interval& ivl) {
+    return x+=ivl;
+}
+
+TaylorModel& iscal(TaylorModel& x, const Interval& ivl) {
+    return x*=ivl;
+}
+
+TaylorModel sum(const TaylorModel x1, const TaylorModel& x2) {
+    return x1+x2;
+}
+
+TaylorModel prod(const TaylorModel x1, const TaylorModel& x2) {
+    return x1*x2;
+}
+
+
+TaylorModel exp_cos(const TaylorModel x, const TaylorModel& y) {
+    return exp(x)*cos(y);
+}
+
+TaylorModel sigmoid(const TaylorModel x, const TaylorModel& y) {
     const double a=10;
-    return exp(-v[0]/a);
+    return exp(-x/a);
 }
 
 typedef TaylorModel(*TaylorFunctionPtr)(const Vector<TaylorModel>&);
 
-
-void profile(uint ntries, string name, TaylorFunctionPtr fn, const Vector<TaylorModel>& args)
+template<class T>
+void profile(uint ntries, const char* name, const T& run)
 {
-    TaylorModel res=fn(args);
-    std::cerr<< "\n" << name << "(" << args << ")=\n  " << res << "\n\n";
+    typename T::result_type res=run();
+    //std::cerr<< "\n" << name << "(" << args << ")=\n  " << res << "\n\n";
 
     boost::timer tm;
 
     tm.restart();
     for(uint i=0; i!=ntries; ++i) {
-        res=fn(args);
+        res=run();
     }
 
     double total_time = tm.elapsed();
@@ -74,7 +148,7 @@ void profile(uint ntries, string name, TaylorFunctionPtr fn, const Vector<Taylor
     unsigned int size = res.number_of_nonzeros();
 
     std::cout << std::setw(20) << std::left << name << std::right
-              << std::setw(9) << std::fixed << std::setprecision(1) << average_time_in_microseconds << " "
+              << std::setw(10) << std::fixed << std::setprecision(2) << average_time_in_microseconds << " "
               << std::setw(12) << std::scientific << std::setprecision(4) << error
               << std::setw(8) << size
               << std::endl;
@@ -83,32 +157,53 @@ void profile(uint ntries, string name, TaylorFunctionPtr fn, const Vector<Taylor
 int main(int argc, const char* argv[]) {
     uint ntries=100;
     if(argc>1) { ntries=atoi(argv[1]); }
-    std::cerr<<ntries<<std::endl;
 
     Vector<Float> c(2, 1.0,2.0);
+    int i;
 
     Vector<TaylorModel> v(2,TaylorModel(2));
     v[0]=TaylorModel::variable(2,0);
     v[1]=TaylorModel::constant(2,1.0);
 
-    Vector<TaylorModel> x(2,TaylorModel(3));
-    int i=0;
-    std::cerr<<x<<"\n";
-    for(MultiIndex a(3); a.degree()<=5; ++a) {
-        if(i%7<4) { x[0][a]=1/(1.0+i); }
-        if(i%3<2) { x[1][a]=1/(2.0+i); }
-        std::cerr<<x<<"\n";
+    // Use in clean()
+    TaylorModel w(3);
+    i=0;
+    for(MultiIndex a(3); a.degree()<=9; ++a) {
+        if(i%7<3) { w.expansion().append(a,1/(1.0+i*i*i*i*i)); }
+        else if(i%7<4) { w.expansion().append(a,1/(1.0+i)); }
+        ++i;
     }
-    std::cerr<<"v="<<v<<"\nx="<<x<<"\n";
+    w.set_maximum_degree(7);
+    w.set_sweep_threshold(1e-5);
+
+
+    Interval ivl(0.49,0.51);
+    TaylorModel x(3);
+    TaylorModel y(3);
+
+    i=0;
+    for(MultiIndex a(3); a.degree()<=5; ++a) {
+        if(i%7<4) { x[a]=1/(1.0+i); }
+        if(i%3<2) { y[a]=1/(2.0+i); }
+        ++i;
+    }
+
+    TaylorModel xx=x; xx[0]=0.0; xx.clean();
+    //std::cerr<<"v="<<v<<"\nx="<<x<<"\n";
 
     std::cout << std::setw(20) << std::left << "name" << std::right
-              << std::setw(10) << "time(us)"
+              << std::setw(11) << "time(us)"
               << std::setw(12) << "error"
               << std::setw(8) << "size"
               << std::endl;
 
-    profile(ntries*100,"sum-01",sum,x);
-    profile(ntries*10,"prod-01",prod,x);
-    profile(ntries,"exp_cos-01",exp_cos,v);
-    profile(ntries,"sigmoid-01",sigmoid,v);
+    profile(ntries*10000,"iclean-02",inplace_bind(&iclean,w));
+    profile(ntries*10000,"copy-02",bind(&copy,w));
+    profile(ntries*10000,"iadd-noinsert-02",inplace_bind(&iadd,x,ivl));
+    profile(ntries*10000,"iadd-insert-02",inplace_bind(&iadd,x,ivl));
+    profile(ntries*10000,"scal-02",inplace_bind(&iscal,x,ivl));
+    profile(ntries*1000,"sum-02",bind(sum,x,y));
+    profile(ntries*10,"prod-02",bind(prod,x,y));
+    profile(ntries,"exp_cos-01",bind(exp_cos,v[0],v[1]));
+    profile(ntries,"sigmoid-01",bind(sigmoid,v[0]));
 }

@@ -227,7 +227,7 @@ class TaylorVariable
     TaylorVariable& sweep(double eps) { this->_model.sweep(eps); return *this; }
     //! \brief Remove all terms whose degree is higher than \a deg or
     //! whose coefficient has magnitude less than \a eps.
-    TaylorVariable& clean(uint deg, double eps) { this->_model.clean(deg,eps); return *this; }
+    TaylorVariable& clean(const TaylorModel::Accuracy& acc) { this->_model.clean(acc); return *this; }
     //! \brief Remove all terms which have high degree or small magnitude.
     TaylorVariable& clean() { this->_model.clean(); return *this; }
     //@}
@@ -235,17 +235,17 @@ class TaylorVariable
     //@{
     /*! \name Accuracy parameters. */
     //! \brief .
-    void set_maximum_index(MultiIndexBound md) { this->_model._maximum_index=md; }
+    void set_maximum_index(MultiIndexBound md) { this->_model.set_maximum_index(md); }
     //! \brief .
-    void set_maximum_degree(uint md) { this->_model._maximum_degree=md; }
+    void set_maximum_degree(uint md) { this->_model.set_maximum_degree(md); }
     //! \brief .
-    void set_sweep_threshold(double me) { ARIADNE_ASSERT(me>=0.0); this->_model._sweep_threshold=me; }
+    void set_sweep_threshold(double me) { ARIADNE_ASSERT(me>=0.0); this->_model.set_sweep_threshold(me); }
     //! \brief .
-    MultiIndexBound maximum_index() const { return this->_model._maximum_index; }
+    MultiIndexBound maximum_index() const { return this->_model.maximum_index(); }
     //! \brief .
-    uint maximum_degree() const { return this->_model._maximum_degree; }
+    uint maximum_degree() const { return this->_model.maximum_degree(); }
     //! \brief .
-    double sweep_threshold() const { return this->_model._sweep_threshold; }
+    double sweep_threshold() const { return this->_model.sweep_threshold(); }
     //@}
 
     //@{

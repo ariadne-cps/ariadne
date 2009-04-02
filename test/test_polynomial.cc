@@ -43,6 +43,7 @@ class TestPolynomial
     void test_cleanup();
     void test_constructors();
     void test_variables();
+    void test_find();
 };
 
 
@@ -51,6 +52,7 @@ void TestPolynomial::test()
     ARIADNE_TEST_CALL(test_cleanup());
     ARIADNE_TEST_CALL(test_constructors());
     ARIADNE_TEST_CALL(test_variables());
+    ARIADNE_TEST_CALL(test_find());
 }
 
 
@@ -220,7 +222,19 @@ void TestPolynomial::test_variables()
 
 }
 
-
+void TestPolynomial::test_find()
+{
+    Polynomial<Float> p(2,5, 1,2,5.0, 0,0,2.0, 1,0,3.0, 3,0,7.0, 0,1,11.0);
+    MultiIndex a(2);
+    a[0]=1; a[1]=2;
+    ARIADNE_TEST_PRINT(p);
+    ARIADNE_TEST_PRINT(p.find(a)-p.begin());
+    ARIADNE_TEST_COMPARE(p.find(a),!=,p.end());
+    ARIADNE_TEST_EQUAL(p.find(a)->first,a);
+    ARIADNE_TEST_EQUAL(p.find(a)->second,5.0);
+    a[1]=1;
+    ARIADNE_TEST_EQUAL(p.find(a),p.end());
+}
 
 int main() {
     TestPolynomial().test();

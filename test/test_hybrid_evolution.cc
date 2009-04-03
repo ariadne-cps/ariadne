@@ -60,7 +60,7 @@ class TestHybridEvolution
 
 int main()
 {
-    std::cerr<<"SKIPPED "; return 1;
+    //std::cerr<<"SKIPPED "; return 1;
     TestHybridEvolution().test();
     std::cerr<<"INOMPLETE ";
     return ARIADNE_TEST_FAILURES;

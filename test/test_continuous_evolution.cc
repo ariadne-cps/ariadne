@@ -59,7 +59,7 @@ class TestContinuousEvolution
 
 int main() 
 {
-    std::cerr<<"SKIPPED "; return 1;
+    //std::cerr<<"SKIPPED "; return 1;
     TestContinuousEvolution().simple_test();
     TestContinuousEvolution().test();
     return ARIADNE_TEST_FAILURES;

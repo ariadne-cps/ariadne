@@ -1514,6 +1514,11 @@ _compose(const series_function_pointer& fn, const TaylorModel& tm, Float eps) {
 //   bounded domain (rec,sqrt,log,tan)
 //   unbounded domain (exp,sin,cos)
 
+namespace {
+inline int pow2(uint k) { return 1<<k; }
+inline int powm1(uint k) { return (k%2) ? -1 : +1; }
+double rec_fac_up(uint n) { set_rounding_upward(); double r=1.0; for(uint i=1; i<=n; ++i) { r/=i; } return r; }
+}
 
 TaylorModel sqrt(const TaylorModel& x) {
     //std::cerr<<"rec(TaylorModel)\n";
@@ -1614,20 +1619,6 @@ TaylorModel log(const TaylorModel& x) {
     z.sweep();
     Float trunc_err=pow(eps,d)/(1-eps)/d;
     return z+log(Interval(a))+trunc_err*Interval(-1,1);
-}
-
-inline int powm1(uint n) { return n%2?-1:+1; }
-
-double fac_down(uint n) {
-    set_rounding_downward();
-    double r=1.0; for(uint i=1; i<=n; ++i) { r*=i; }
-    return r;
-}
-
-double rec_fac_up(uint n) {
-    set_rounding_upward();
-    double r=1.0; for(uint i=1; i<=n; ++i) { r/=i; }
-    return r;
 }
 
 // Use special code to utilise exp(ax+b)=exp(x)^a*exp(b)
@@ -1767,11 +1758,6 @@ TaylorModel atan(const TaylorModel& x) {
                                 x.value(),x.range()),x);
 }
 
-
-namespace {
-inline int pow2(uint k) { return 1<<k; }
-inline int powm1(uint k) { return (k%2) ? -1 : +1; }
-}
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2493,10 +2479,15 @@ compose(const TaylorModel& x,
     return compose(Vector<TaylorModel>(1u,x),ys)[0];
 }
 
+
+// Compose by computing each and every term individually without caching
+// Easy to implement, but far too slow
+inline
 Vector<TaylorModel>
-compose(const Vector<TaylorModel>& x,
-        const Vector<TaylorModel>& ys)
+_compose1(const Vector<TaylorModel>& x,
+          const Vector<TaylorModel>& ys)
 {
+    //std::cerr<<"compose1"<<std::endl;
     ARIADNE_ASSERT(x.size()>0);
     ARIADNE_ASSERT(ys.size()==x[0].argument_size());
     for(uint i=1; i!=x.size(); ++i) { ARIADNE_ASSERT(x[i].argument_size()==x[0].argument_size()); }
@@ -2519,6 +2510,75 @@ compose(const Vector<TaylorModel>& x,
     }
 
     return r;
+}
+
+
+inline
+Vector<TaylorModel>
+_compose2(const Vector<TaylorModel>& x,
+          const Vector<TaylorModel>& ys)
+{
+    //std::cerr<<"compose2"<<std::endl;
+    ARIADNE_ASSERT(x.size()>0);
+    ARIADNE_ASSERT(ys.size()==x[0].argument_size());
+    shared_ptr<TaylorModel::Accuracy> accuracy_ptr=ys[0].accuracy_ptr();
+    for(uint i=1; i!=x.size(); ++i) { ARIADNE_ASSERT(x[i].argument_size()==x[0].argument_size()); }
+    for(uint i=1; i!=ys.size(); ++i) { ARIADNE_ASSERT_MSG(ys[i].argument_size()==ys[0].argument_size(),"ys="<<ys); }
+
+    uint yrs=ys.size();
+    uint xas=ys.size();
+    uint as=ys[0].argument_size();
+
+    array<uchar> max_power(ys.size());
+    for(uint j=0; j!=ys.size(); ++j) { max_power[j]=1; }
+
+    for(uint i=0; i!=x.size(); ++i) {
+        for(TaylorModel::const_iterator iter=x[i].begin(); iter!=x[i].end(); ++iter) {
+            assert(xas==iter->key().size());
+            for(uint j=0; j!=iter->key().size(); ++j) {
+                max_power[j]=max(max_power[j],iter->key()[j]);
+            }
+        }
+    }
+
+    array< array< TaylorModel > > powers(yrs);
+    for(uint j=0; j!=yrs; ++j) {
+        powers[j].resize(max_power[j]+1);
+        powers[j][0]=ys[j]*0;
+        powers[j][1]=ys[j];
+        for(uint k=2; k!=powers[j].size(); ++k) {
+            powers[j][k]=powers[j][k/2]*powers[j][(k+1)/2];
+        }
+    }
+
+    Vector<TaylorModel> r(x.size(),TaylorModel(as,accuracy_ptr));
+    TaylorModel t(as,accuracy_ptr);
+    MultiIndex a;
+    Float c;
+    for(uint i=0; i!=x.size(); ++i) {
+        r[i].set_error(x[i].error());
+        for(TaylorModel::const_iterator iter=x[i].begin(); iter!=x[i].end(); ++iter) {
+            a=iter->key();
+            c=iter->data();
+            t=c;
+            for(uint j=0; j!=a.size(); ++j) {
+                if(a[j]>0) {
+                    t=t*powers[j][a[j]];
+                }
+            }
+            r[i]+=t;
+        }
+    }
+
+
+    return r;
+}
+
+Vector<TaylorModel>
+compose(const Vector<TaylorModel>& x,
+        const Vector<TaylorModel>& ys)
+{
+    return _compose2(x,ys);
 }
 
 

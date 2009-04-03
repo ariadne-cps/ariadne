@@ -126,7 +126,7 @@ void profile(const char* name, const Test& test, unsigned int tries)
 
     std::cout << std::fixed
               << std::setw(19) << std::left << name << std::right
-              << std::setw(8) << std::setprecision(1) << 1000*(t/tries)
+              << std::setw(10) << std::setprecision(1) << 1000000*(t/tries)
               << std::setw(14) << std::setprecision(4) << std::scientific << err
               << std::setw(6) << nnz
               << std::setw(9) << std::setprecision(4) << std::fixed << t
@@ -145,7 +145,7 @@ struct ForcedVanDerPol : FunctionData<3,3,3> {
 
 int main(int argc, const char* argv[]) {
 
-    int n=1;
+    int n=100;
 
     double maximum_step_size=0.125;
     double maximum_domain_extent=128;
@@ -180,13 +180,13 @@ int main(int argc, const char* argv[]) {
 
     TaylorCalculus calculus;
 
-    std::cout<<"name                 time(ms)       error  size  time(s)/tries\n";
+    std::cout<<"name                   time(us)       error  size  time(s)/tries\n";
 
-    profile("apply-henon",ProfileReset(&calculus,henon_map,henon_initial_set),n*100);
+    profile("apply-henon",ProfileReset(&calculus,henon_map,henon_initial_set),n*1000);
     profile("bounds-spiral",ProfileBounds(&calculus,spiral_vector_field,spiral_domain,maximum_step_size),n*8);
     profile("bounds-ball",ProfileBounds(&calculus,ball_vector_field,ball_domain,maximum_step_size),n*8);
-    profile("flow-spiral",ProfileFlow(&calculus,spiral_vector_field,spiral_domain,spiral_step_size,spiral_bounding_box),n*8);
-    profile("flow-ball",ProfileFlow(&calculus,ball_vector_field,ball_domain,ball_step_size,ball_bounding_box),n*100);
+    profile("flow-spiral",ProfileFlow(&calculus,spiral_vector_field,spiral_domain,spiral_step_size,spiral_bounding_box),n*1);
+    profile("flow-ball",ProfileFlow(&calculus,ball_vector_field,ball_domain,ball_step_size,ball_bounding_box),n*4);
     //profile("flow-vdp",ProfileFlow(&calculus,vdp_vf,vdp_dom,h),n*1);
 
     return 0;

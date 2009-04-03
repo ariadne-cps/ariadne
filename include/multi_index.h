@@ -92,6 +92,8 @@ class MultiIndex {
 
     /*! Resize to hold n variables. */
     void resize(size_type n);
+    /*! Assigns values from another index. Precondition: the size of \a a must equal the current size. */
+    void assign(const MultiIndex& a);
     /*! Set all values to zero. */
     void clear();
     /*! The number of variables. */
@@ -147,22 +149,27 @@ class MultiIndex {
     value_type* begin() { return _p; }
     const value_type* begin() const { return _p; }
   public:
-    size_type word_size() const { return _word_size(_n); }
+    size_type word_size() const { return _nw; }
     word_type& word_at(size_type j) { return reinterpret_cast<word_type*>(_p)[j]; }
     const word_type& word_at(size_type j) const { return reinterpret_cast<const word_type*>(_p)[j]; }
     word_type* word_begin() { return reinterpret_cast<word_type*>(_p); }
     const word_type* word_begin() const { return reinterpret_cast<const word_type*>(_p); }
+    word_type* word_end() { return reinterpret_cast<word_type*>(_p)+word_size(); }
+    const word_type* word_end() const { return reinterpret_cast<const word_type*>(_p)+word_size(); }
   public:
     static size_type _word_size(size_type n) {
         return ((n*sizeof(byte_type))/sizeof(word_type)+1); }
-    template<class X> static size_type _element_size(size_type n) {
+   template<class X> static size_type _element_size(size_type n) {
         return ((n*sizeof(byte_type))/sizeof(word_type)+1+sizeof(X)/sizeof(word_type)); }
     static value_type* _allocate(size_type n) {
         return reinterpret_cast<value_type*>(new word_type[_word_size(n)]); }
+    static value_type* _allocate_words(size_type nw) {
+        return reinterpret_cast<value_type*>(new word_type[nw]); }
     static void _deallocate(value_type* p) {
         delete[] reinterpret_cast<word_type*>(p); }
   private:
     size_type _n;
+    size_type _nw;
     value_type* _p;
 };
 
@@ -196,26 +203,26 @@ inline MultiIndex::~MultiIndex()
 }
 
 inline MultiIndex::MultiIndex()
-    : _n(0), _p(_allocate(_n))
+    : _n(0), _nw(_word_size(_n)), _p(_allocate_words(_nw))
 {
-    for(size_type j=0; j!=word_size(); ++j) { word_at(j)=0; }
+    std::fill(this->word_begin(),this->word_end(),0);
 }
 
 inline MultiIndex::MultiIndex(size_type n)
-    : _n(n), _p(_allocate(_n))
+    : _n(n), _nw(_word_size(_n)), _p(_allocate_words(_nw))
 {
-    for(size_type j=0; j!=word_size(); ++j) { word_at(j)=0; }
+    std::fill(this->word_begin(),this->word_end(),0);
 }
 
 inline MultiIndex::MultiIndex(size_type n, const int* ary)
-    : _n(n), _p(_allocate(_n))
+    : _n(n), _nw(_word_size(_n)), _p(_allocate_words(_nw))
 {
     for(size_type j=0; j!=word_size(); ++j) { word_at(j)=0; }
     _p[n]=0; for(size_type i=0; i!=n; ++i) { _p[i]=ary[i]; _p[n]+=ary[i]; }
 }
 
 inline MultiIndex::MultiIndex(size_type n, int a0, ...)
-    : _n(n), _p(_allocate(_n))
+    : _n(n), _nw(_word_size(_n)), _p(_allocate_words(_nw))
 {
     ARIADNE_ASSERT(n>0);
     _p[0]=a0; _p[_n]=a0;
@@ -228,15 +235,19 @@ inline MultiIndex::MultiIndex(size_type n, int a0, ...)
 }
 
 inline MultiIndex::MultiIndex(const MultiIndex& a)
-    : _n(a.size()), _p(_allocate(_n))
+    : _n(a.size()), _nw(a._nw), _p(_allocate_words(_nw))
 {
-    for(size_type j=0; j!=word_size(); ++j) { this->word_at(j)=a.word_at(j); }
+    this->assign(a);
 }
 
 inline MultiIndex& MultiIndex::operator=(const MultiIndex& a) {
-    if(this!=&a) { this->resize(a.size());
-        for(size_type j=0; j!=word_size(); ++j) { this->word_at(j)=a.word_at(j); } }
+    if(this!=&a) { this->resize(a.size()); this->assign(a); }
     return *this;
+}
+
+inline void MultiIndex::assign(const MultiIndex& a) {
+    //for(size_type j=0; j!=this->word_size(); ++j) { this->word_at(j)=a.word_at(j); }
+    std::copy(a.word_begin(),a.word_end(),this->word_begin());
 }
 
 inline MultiIndex MultiIndex::zero(size_type n)
@@ -262,11 +273,11 @@ inline MultiIndex MultiIndex::first(size_type n, value_type d)
 
 inline void MultiIndex::clear()
 {
-    for(size_type j=0; j!=word_size(); ++j) { this->word_at(j)=0; }
+    std::fill(this->word_begin(),this->word_end(),0);
 }
 
 inline void MultiIndex::resize(size_type n) {
-    if(this->_n!=n) { _deallocate(this->_p); this->_n=n; this->_p=_allocate(this->_n); }
+    if(this->_n!=n) { _deallocate(this->_p); this->_n=n; this->_nw=_word_size(_n); this->_p=_allocate_words(this->_nw); }
 }
 
 inline MultiIndex::size_type MultiIndex::size() const {

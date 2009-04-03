@@ -43,7 +43,10 @@ TaylorModel tm(uint m, uint i) { return TaylorModel::variable(m,i); }
 
 class TestTaylorModel
 {
-    typedef Expansion<Float> e;
+    typedef MultiIndex MI;
+    typedef Expansion<Float> E;
+    typedef Polynomial<Float> P;
+    typedef TaylorModel T;
   public:
     void test();
   private:
@@ -119,7 +122,7 @@ void TestTaylorModel::test_concept()
 
 void TestTaylorModel::test_constructors()
 {
-    ARIADNE_TEST_CONSTRUCT(TaylorModel,tv1,(e(2,3, 1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0), 0.25));
+    ARIADNE_TEST_CONSTRUCT(TaylorModel,tv1,(E(2,3, 1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0), 0.25));
 
     ARIADNE_ASSERT_EQUAL(tv1.value(),1.0);
     ARIADNE_ASSERT_EQUAL(tv1.error(),0.25);
@@ -127,10 +130,10 @@ void TestTaylorModel::test_constructors()
 
 void TestTaylorModel::test_predicates()
 {
-    TaylorModel tv1(e(1,2, 1.00,2.00,3.00), 0.75);
-    TaylorModel tv2(e(1,2, 1.00,1.75,3.25), 0.25);
-    TaylorModel tv3(e(1,2, 1.125,1.75,3.25), 0.25);
-    TaylorModel tv4(e(1,3, 1.00,2.25,3.00,-0.25), 0.25);
+    TaylorModel tv1(E(1,2, 1.00,2.00,3.00), 0.75);
+    TaylorModel tv2(E(1,2, 1.00,1.75,3.25), 0.25);
+    TaylorModel tv3(E(1,2, 1.125,1.75,3.25), 0.25);
+    TaylorModel tv4(E(1,3, 1.00,2.25,3.00,-0.25), 0.25);
 
     ARIADNE_TEST_BINARY_PREDICATE(refines,tv1,tv1);
     ARIADNE_TEST_BINARY_PREDICATE(refines,tv2,tv1);
@@ -140,48 +143,48 @@ void TestTaylorModel::test_predicates()
 
 void TestTaylorModel::test_approximation()
 {
-    ARIADNE_TEST_CONSTRUCT(TaylorModel,tv2,(e(1,2,1.0,2.0,3.0),0.25));
+    ARIADNE_TEST_CONSTRUCT(TaylorModel,tv2,(E(1,2,1.0,2.0,3.0),0.25));
 }
 
 void TestTaylorModel::test_evaluate()
 {
     Vector<Interval> iv(2, 0.25,0.5, -0.75,-0.5);
-    TaylorModel tv(e(2,2,1.0,2.0,3.0,4.0,5.0,6.0),0.25);
+    TaylorModel tv(E(2,2,1.0,2.0,3.0,4.0,5.0,6.0),0.25);
     ARIADNE_TEST_EQUAL(evaluate(tv,iv),Interval(-1,1));
 }
 
 void TestTaylorModel::test_arithmetic()
 {
     //Operations which can be performed exactly with floating-point arithmetic.
-    ARIADNE_TEST_EQUAL(TaylorModel(e(1,2, 1.0,-2.0,3.0), 0.75)+(-3), TaylorModel(e(1,2, -2.0,-2.0,3.0), 0.75));
-    ARIADNE_TEST_EQUAL(TaylorModel(e(1,2, 1.0,-2.0,3.0), 0.75)-(-3), TaylorModel(e(1,2, 4.0,-2.0,3.0), 0.75));
-    ARIADNE_TEST_EQUAL(TaylorModel(e(1,2, 1.0,-2.0,3.0), 0.75)*(-3), TaylorModel(e(1,2, -3.0,6.0,-9.0), 2.25));
-    ARIADNE_TEST_EQUAL(TaylorModel(e(1,2, 1.0,-2.0,3.0), 0.75)/(-4), TaylorModel(e(1,2, -0.25,0.5,-0.75), 0.1875));
-    ARIADNE_TEST_EQUAL(TaylorModel(e(1,2, 1.0,-2.0,3.0), 0.75)+Interval(-1,2), TaylorModel(e(1,2, 1.5,-2.0,3.0), 2.25));
-    ARIADNE_TEST_EQUAL(TaylorModel(e(1,2, 1.0,-2.0,3.0), 0.75)-Interval(-1,2), TaylorModel(e(1,2, 0.5,-2.0,3.0), 2.25));
-    ARIADNE_TEST_EQUAL(TaylorModel(e(1,2, 1.0,-2.0,3.0), 0.75)*Interval(-1,2), TaylorModel(e(1,2, 0.5,-1.0,1.5), 10.5));
-    ARIADNE_TEST_EQUAL(TaylorModel(e(1,2, 1.0,-2.0,3.0), 0.75)/Interval(0.25,2.0), TaylorModel(e(1,2, 2.25,-4.5,6.75), 13.5));
-    ARIADNE_TEST_EQUAL(+TaylorModel(e(1,2, 1.0,-2.0,3.0), 0.75), TaylorModel(e(1,2, 1.0,-2.0,3.0), 0.75));
-    ARIADNE_TEST_EQUAL(-TaylorModel(e(1,2, 1.0,-2.0,3.0), 0.75), TaylorModel(e(1,2, -1.0,2.0,-3.0), 0.75));
-    ARIADNE_TEST_EQUAL(TaylorModel(e(1,2, 1.0,-2.0,3.0), 0.75)+TaylorModel(e(1,2, 3.0,2.0,-4.0), 0.5), TaylorModel(e(1,2, 4.0,0.0,-1.0), 1.25));
-    ARIADNE_TEST_EQUAL(TaylorModel(e(1,2, 1.0,-2.0,3.0), 0.75)-TaylorModel(e(1,2, 3.0,2.0,-4.0), 0.5), TaylorModel(e(1,2, -2.0,-4.0,7.0), 1.25));
-    ARIADNE_TEST_EQUAL(TaylorModel(e(1,2, 0.0,0.0,3.0), 0.75)*TaylorModel(e(1,2, 3.0,2.0,-4.0), 0.5), TaylorModel(e(1,4, 0.0,0.0,9.0,6.0,-12.0), 8.625));
-    ARIADNE_TEST_EQUAL(TaylorModel(e(1,2, 1.0,-2.0,3.0), 0.75)*TaylorModel(e(1,2, 3.0,2.0,-4.0), 0.5), TaylorModel(e(1,4, 3.0,-4.0,1.0,14.0,-12.0), 10.125));
+    ARIADNE_TEST_EQUAL(TaylorModel(E(1,2, 1.0,-2.0,3.0), 0.75)+(-3), TaylorModel(E(1,2, -2.0,-2.0,3.0), 0.75));
+    ARIADNE_TEST_EQUAL(TaylorModel(E(1,2, 1.0,-2.0,3.0), 0.75)-(-3), TaylorModel(E(1,2, 4.0,-2.0,3.0), 0.75));
+    ARIADNE_TEST_EQUAL(TaylorModel(E(1,2, 1.0,-2.0,3.0), 0.75)*(-3), TaylorModel(E(1,2, -3.0,6.0,-9.0), 2.25));
+    ARIADNE_TEST_EQUAL(TaylorModel(E(1,2, 1.0,-2.0,3.0), 0.75)/(-4), TaylorModel(E(1,2, -0.25,0.5,-0.75), 0.1875));
+    ARIADNE_TEST_EQUAL(TaylorModel(E(1,2, 1.0,-2.0,3.0), 0.75)+Interval(-1,2), TaylorModel(E(1,2, 1.5,-2.0,3.0), 2.25));
+    ARIADNE_TEST_EQUAL(TaylorModel(E(1,2, 1.0,-2.0,3.0), 0.75)-Interval(-1,2), TaylorModel(E(1,2, 0.5,-2.0,3.0), 2.25));
+    ARIADNE_TEST_EQUAL(TaylorModel(E(1,2, 1.0,-2.0,3.0), 0.75)*Interval(-1,2), TaylorModel(E(1,2, 0.5,-1.0,1.5), 10.5));
+    ARIADNE_TEST_EQUAL(TaylorModel(E(1,2, 1.0,-2.0,3.0), 0.75)/Interval(0.25,2.0), TaylorModel(E(1,2, 2.25,-4.5,6.75), 13.5));
+    ARIADNE_TEST_EQUAL(+TaylorModel(E(1,2, 1.0,-2.0,3.0), 0.75), TaylorModel(E(1,2, 1.0,-2.0,3.0), 0.75));
+    ARIADNE_TEST_EQUAL(-TaylorModel(E(1,2, 1.0,-2.0,3.0), 0.75), TaylorModel(E(1,2, -1.0,2.0,-3.0), 0.75));
+    ARIADNE_TEST_EQUAL(TaylorModel(E(1,2, 1.0,-2.0,3.0), 0.75)+TaylorModel(E(1,2, 3.0,2.0,-4.0), 0.5), TaylorModel(E(1,2, 4.0,0.0,-1.0), 1.25));
+    ARIADNE_TEST_EQUAL(TaylorModel(E(1,2, 1.0,-2.0,3.0), 0.75)-TaylorModel(E(1,2, 3.0,2.0,-4.0), 0.5), TaylorModel(E(1,2, -2.0,-4.0,7.0), 1.25));
+    ARIADNE_TEST_EQUAL(TaylorModel(E(1,2, 0.0,0.0,3.0), 0.75)*TaylorModel(E(1,2, 3.0,2.0,-4.0), 0.5), TaylorModel(E(1,4, 0.0,0.0,9.0,6.0,-12.0), 8.625));
+    ARIADNE_TEST_EQUAL(TaylorModel(E(1,2, 1.0,-2.0,3.0), 0.75)*TaylorModel(E(1,2, 3.0,2.0,-4.0), 0.5), TaylorModel(E(1,4, 3.0,-4.0,1.0,14.0,-12.0), 10.125));
 }
 
 void TestTaylorModel::test_functions()
 {
-    TaylorModel xz(e(1,1, 0.0, 0.5), 0.0);
-    TaylorModel xo(e(1,1, 1.0, 0.5), 0.0);
+    TaylorModel xz(E(1,1, 0.0, 0.5), 0.0);
+    TaylorModel xo(E(1,1, 1.0, 0.5), 0.0);
 
     //Functions based on their natural defining points
-    ARIADNE_TEST_BINARY_PREDICATE(refines,exp(xz),TaylorModel(e(1,6, 1.00000,0.50000,0.12500,0.02083,0.00260,0.00026,0.00002), 0.00003));
-    ARIADNE_TEST_BINARY_PREDICATE(refines,sin(xz),TaylorModel(e(1,6, 0.00000,0.50000,0.0000,-0.02083,0.00000,0.00026,0.00000), 0.00003));
-    ARIADNE_TEST_BINARY_PREDICATE(refines,cos(xz),TaylorModel(e(1,6, 1.00000,0.0000,-0.12500,0.00000,0.00260,0.0000,-0.00002), 0.00003));
+    ARIADNE_TEST_BINARY_PREDICATE(refines,exp(xz),TaylorModel(E(1,6, 1.00000,0.50000,0.12500,0.02083,0.00260,0.00026,0.00002), 0.00003));
+    ARIADNE_TEST_BINARY_PREDICATE(refines,sin(xz),TaylorModel(E(1,6, 0.00000,0.50000,0.0000,-0.02083,0.00000,0.00026,0.00000), 0.00003));
+    ARIADNE_TEST_BINARY_PREDICATE(refines,cos(xz),TaylorModel(E(1,6, 1.00000,0.0000,-0.12500,0.00000,0.00260,0.0000,-0.00002), 0.00003));
 
-    ARIADNE_TEST_BINARY_PREDICATE(refines,rec(xo),TaylorModel(e(1,6,  1.000000,-0.500000, 0.250000,-0.125000, 0.062500,-0.031250, 0.015625), 0.018));
-    ARIADNE_TEST_BINARY_PREDICATE(refines,sqrt(xo),TaylorModel(e(1,6, 1.000000, 0.250000,-0.031250, 0.007813,-0.002441, 0.000854,-0.000320), 0.0003));
-    ARIADNE_TEST_BINARY_PREDICATE(refines,log(xo),TaylorModel(e(1,6,  0.000000, 0.500000,-0.125000, 0.041667,-0.015625, 0.006250,-0.002604), 0.003));
+    ARIADNE_TEST_BINARY_PREDICATE(refines,rec(xo),TaylorModel(E(1,6,  1.000000,-0.500000, 0.250000,-0.125000, 0.062500,-0.031250, 0.015625), 0.018));
+    ARIADNE_TEST_BINARY_PREDICATE(refines,sqrt(xo),TaylorModel(E(1,6, 1.000000, 0.250000,-0.031250, 0.007813,-0.002441, 0.000854,-0.000320), 0.0003));
+    ARIADNE_TEST_BINARY_PREDICATE(refines,log(xo),TaylorModel(E(1,6,  0.000000, 0.500000,-0.125000, 0.041667,-0.015625, 0.006250,-0.002604), 0.003));
 
 }
 
@@ -232,7 +235,7 @@ Vector<TaylorModel> _implicit5(const Vector<TaylorModel>& f, uint n=4);
 
 void TestTaylorModel::test_solve()
 {
-    TaylorModel f(e(1,3, 0,1.0, 1,4.0, 2,1.0),0.125);
+    TaylorModel f(E(1,3, 0,1.0, 1,4.0, 2,1.0),0.125);
     Interval x=solve(Vector<TaylorModel>(1u,f))[0];
     ARIADNE_TEST_PRINT(x);
     ARIADNE_TEST_PRINT(f.evaluate(Vector<Interval>(1u,x)));
@@ -241,7 +244,7 @@ void TestTaylorModel::test_solve()
 
 void TestTaylorModel::test_implicit()
 {
-    TaylorModel f(e(2,5, 0,0,0.0000002, 1,0,1.000000000000003, 2,0,0.000000000000003, 0,1,4.000000000000001, 0,2,1.000000000000001),0.0);
+    TaylorModel f(E(2,5, 0,0,0.0000002, 1,0,1.000000000000003, 2,0,0.000000000000003, 0,1,4.000000000000001, 0,2,1.000000000000001),0.0);
     //TaylorModel ha=implicit_approx(Vector<TaylorModel>(1u,f),8)[0];
     //TaylorModel h1=_implicit1(Vector<TaylorModel>(1u,f),4)[0];
     //TaylorModel h2=_implicit2(Vector<TaylorModel>(1u,f),4)[0];
@@ -253,7 +256,7 @@ void TestTaylorModel::test_implicit()
     ARIADNE_TEST_PRINT(h5);
     return;
     TaylorModel h=implicit(f);
-    TaylorModel id(e(1,1, 1,1.0),0.0);
+    TaylorModel id(E(1,1, 1,1.0),0.0);
     TaylorModel z(1);
     TaylorModel c=compose(f,join(id,h));
     TaylorModel hh=implicit_step(f,h);

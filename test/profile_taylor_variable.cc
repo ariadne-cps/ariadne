@@ -225,9 +225,9 @@ int main(int argc, const char* argv[]) {
               << std::endl;
     
     typedef TaylorModel TM;
-    std::cerr<<"\n\nexp("<<z<<")=\n  "<<exp(z)<<"\n\n";
-    std::cerr<<"exp(1)="<<Ariadne::exp(1.0)<<"  exp([1:1])="<<Ariadne::exp(Interval(1))<<"\n";
-    //return 0;
+    //std::cerr<<"\n\nexp("<<z<<")=\n  "<<exp(z)<<"\n\n";
+    //std::cerr<<"exp(1)="<<Ariadne::exp(1.0)<<"  exp([1:1])="<<Ariadne::exp(Interval(1))<<"\n";
+
     profile(ntries*10000,"iclean-02",inplace_bind(&iclean,w));
     profile(ntries*10000,"copy-02",bind(&copy,w));
     profile(ntries*10000,"iadd-noinsert-02",inplace_bind(&iadd,x,ivl));

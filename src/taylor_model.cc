@@ -728,8 +728,8 @@ void _mul4(TaylorModel& r, const TaylorModel& x, const TaylorModel& y, const Tay
 }
 
 inline void _mul(TaylorModel& r, const TaylorModel& x, const TaylorModel& y) {
-    _mul2(r,x,y);
-    //_mul4(r,x,y,r.accuracy());
+    //_mul2(r,x,y);
+    _mul4(r,x,y,r.accuracy());
 }
 
 

@@ -35,6 +35,7 @@ using namespace Ariadne;
 
 class TestPolynomial
 {
+    typedef MultiIndex MI;
     typedef Polynomial<Float> P;
   public:
     void test();

@@ -219,8 +219,8 @@ zonotope(const TaylorSet& ts)
     set_rounding_upward();
     for(uint i=0; i!=d; ++i) {
         for(TaylorModel::const_iterator iter=ts[i].begin(); iter!=ts[i].end(); ++iter) {
-            if(iter->first.degree()>=2) {
-                e[i]+=abs(iter->second);
+            if(iter->key().degree()>=2) {
+                e[i]+=abs(iter->data());
             }
         }
     }
@@ -315,17 +315,17 @@ TaylorSet::subsume() const
     MultiIndex a=MultiIndex::zero(ng+d);
     for(uint i=0; i!=d; ++i) {
         TaylorModel::const_iterator iter=this->_models[i].begin();
-        for( ; iter!=this->_models[i].end() && iter->first.degree()<=1; ++iter) {
-            for(uint j=0; j!=ng; ++j) { a[j]=iter->first[j]; }
-            res._models[i].expansion().append(a,iter->second);
+        for( ; iter!=this->_models[i].end() && iter->key().degree()<=1; ++iter) {
+            for(uint j=0; j!=ng; ++j) { a[j]=iter->key()[j]; }
+            res._models[i].expansion().append(a,iter->data());
         }
         for(uint j=0; j!=ng; ++j) { a[j]=0; }
         a[ng+i]=1;
         res._models[i].expansion().append(a,this->models()[i].error());
         a[ng+i]=0;
         for( ; iter!=this->_models[i].end() ; ++iter) {
-            for(uint j=0; j!=ng; ++j) { a[j]=iter->first[j]; }
-            res._models[i].expansion().append(a,iter->second);
+            for(uint j=0; j!=ng; ++j) { a[j]=iter->key()[j]; }
+            res._models[i].expansion().append(a,iter->data());
         }
     }
     return res;

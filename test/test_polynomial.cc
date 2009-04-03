@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_expansion.cc
+ *            test_polynomial.cc
  *
  *  Copyright 2009  Pieter Collins
  *
@@ -26,7 +26,7 @@
 #include "vector.h"
 #include "matrix.h"
 #include "multi_index.h"
-#include "expansion.h"
+#include "polynomial.h"
 
 #include "test.h"
 using namespace std;
@@ -253,20 +253,22 @@ void TestPolynomial::test_indexing()
     p[MultiIndex(3, 2,1,0)]=5.0;
     ARIADNE_TEST_EQUAL(pc[MultiIndex(3, 0,0,0)],0.0);
     ARIADNE_TEST_EQUAL(p.number_of_nonzeros(),3);
-    p[MultiIndex(3, 0,0,0)]=7;
+    ARIADNE_TEST_PRINT(p);
+    ARIADNE_TEST_EXECUTE(p[MultiIndex(3, 0,0,0)]=7);
+    ARIADNE_TEST_PRINT(p);
     ARIADNE_TEST_EQUAL(p.number_of_nonzeros(),4);
     Polynomial<Float>::const_iterator iter=p.begin();
-    ARIADNE_TEST_EQUAL(iter->first,MultiIndex(3, 0,0,0));
-    ARIADNE_TEST_EQUAL(iter->second,7.0);
+    ARIADNE_TEST_EQUAL(iter->key(),MultiIndex(3, 0,0,0));
+    ARIADNE_TEST_EQUAL(iter->data(),7.0);
     ++iter;
-    ARIADNE_TEST_EQUAL(iter->first,MultiIndex(3, 0,1,0));
-    ARIADNE_TEST_EQUAL(iter->second,2.0);
+    ARIADNE_TEST_EQUAL(iter->key(),MultiIndex(3, 0,1,0));
+    ARIADNE_TEST_EQUAL(iter->data(),2.0);
     ++iter;
-    ARIADNE_TEST_EQUAL(iter->first,MultiIndex(3, 0,0,1));
-    ARIADNE_TEST_EQUAL(iter->second,3.0);
+    ARIADNE_TEST_EQUAL(iter->key(),MultiIndex(3, 0,0,1));
+    ARIADNE_TEST_EQUAL(iter->data(),3.0);
     ++iter;
-    ARIADNE_TEST_EQUAL(iter->first,MultiIndex(3, 2,1,0));
-    ARIADNE_TEST_EQUAL(iter->second,5.0);
+    ARIADNE_TEST_EQUAL(iter->key(),MultiIndex(3, 2,1,0));
+    ARIADNE_TEST_EQUAL(iter->data(),5.0);
 
 
 
@@ -310,8 +312,8 @@ void TestPolynomial::test_find()
     ARIADNE_TEST_PRINT(p);
     ARIADNE_TEST_PRINT(p.find(a)-p.begin());
     ARIADNE_TEST_COMPARE(p.find(a),!=,p.end());
-    ARIADNE_TEST_EQUAL(p.find(a)->first,a);
-    ARIADNE_TEST_EQUAL(p.find(a)->second,5.0);
+    ARIADNE_TEST_EQUAL(p.find(a)->key(),a);
+    ARIADNE_TEST_EQUAL(p.find(a)->data(),5.0);
     a[1]=1;
     ARIADNE_TEST_EQUAL(p.find(a),p.end());
 }

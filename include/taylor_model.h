@@ -293,7 +293,7 @@ class TaylorModel
     //! \brief The number of variables in the argument of the quantity.
     uint argument_size() const { return this->_expansion.argument_size(); }
     //! \brief The maximum degree of terms in the expansion.
-    uint degree() const { return (--this->_expansion.end())->first.degree(); }
+    uint degree() const { if(this->_expansion.empty()) { return 0; } else { return (--this->_expansion.end())->key().degree(); } }
     //! \brief The number of nonzero terms in the expansion.
     uint number_of_nonzeros() const { return this->_expansion.number_of_nonzeros(); }
     //@}

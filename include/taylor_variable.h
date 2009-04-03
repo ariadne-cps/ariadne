@@ -185,11 +185,11 @@ class TaylorVariable
     const_iterator find(const MultiIndex& a) const { return this->_model.find(a); }
 
     //! \brief The number of variables in the argument of the quantity.
-    uint argument_size() const { return this->_model._expansion.argument_size(); }
+    uint argument_size() const { return this->_model.argument_size(); }
     //! \brief The maximum degree of terms in the expansion expansion.
-    uint degree() const { return (--this->_model._expansion.end())->first.degree(); }
+    uint degree() const { return this->_model.degree(); }
     //! \brief The number of nonzero terms in the expansion expansion.
-    uint number_of_nonzeros() const { return this->_model._expansion.number_of_nonzeros(); }
+    uint number_of_nonzeros() const { return this->_model.number_of_nonzeros(); }
     //@}
 
     //@{

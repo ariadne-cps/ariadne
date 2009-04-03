@@ -51,6 +51,8 @@ template<class T> class Reference;
 template<> class Reference<MultiIndex>;
 template<> class Reference<const MultiIndex>;
 
+//struct MultiIndexData { unsigned int _n; unsigned int* _p; };
+
 //! \brief An array of non-negative integers, suitable for storing the
 //! powers of a term in some polynomial expansion, ordered by degree.
 class MultiIndex {
@@ -66,7 +68,7 @@ class MultiIndex {
     //typedef unsigned long long int word_type;
   public:
     /*! Destructor. */
-    ~MultiIndex() { _deallocate(this->_p); }
+    ~MultiIndex();
     /*! Construct a multi index with no coefficients. */
     explicit MultiIndex();
     /*! Construct a multi index of degree \a 0 with \a nv variables. */
@@ -153,8 +155,8 @@ class MultiIndex {
   public:
     static size_type _word_size(size_type n) {
         return ((n*sizeof(byte_type))/sizeof(word_type)+1); }
-    static size_type _element_size(size_type n) {
-        return ((n*sizeof(byte_type))/sizeof(word_type)+1+sizeof(double)/sizeof(word_type)); }
+    template<class X> static size_type _element_size(size_type n) {
+        return ((n*sizeof(byte_type))/sizeof(word_type)+1+sizeof(X)/sizeof(word_type)); }
     static value_type* _allocate(size_type n) {
         return reinterpret_cast<value_type*>(new word_type[_word_size(n)]); }
     static void _deallocate(value_type* p) {
@@ -187,6 +189,11 @@ inline MultiIndexValueReference& MultiIndexValueReference::operator--() {
     --_p[_n]; --_p[_i]; return *this;
 }
 
+
+inline MultiIndex::~MultiIndex()
+{
+    _deallocate(_p);
+}
 
 inline MultiIndex::MultiIndex()
     : _n(0), _p(_allocate(_n))

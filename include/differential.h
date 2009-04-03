@@ -724,12 +724,22 @@ Differential<X> compose(const Series<X>& x, const Differential<X>& y)
     uint as=y.argument_size();
     uint d=std::min(x.degree(),y.degree());
 
+    std::cerr<<"\nx="<<x<<"\n";
+    std::cerr<<"y="<<y<<"\n";
     Differential<X> w=y;
+    std::cerr<<"w="<<w<<"\n";
     w[MultiIndex(as)]=0;
+    std::cerr<<"w="<<w<<"\n";
     Differential<X> r(as,d);
+    std::cerr<<"r="<<r<<"\n";
     r[MultiIndex(as)]=x[d];
+    std::cerr<<"r="<<r<<"\n";
     for(uint n=1; n<=d; ++n) {
-        r=r*w; r+=x[d-n];
+        std::cerr<<" n="<<n<<" "<<"x["<<d-n<<"]="<<x[d-n]<<"\n";
+        r=r*w;
+        std::cerr<<"  r="<<r<<"\n";
+        r+=x[d-n];
+        std::cerr<<"  r="<<r<<"\n";
     }
     return r;
 }

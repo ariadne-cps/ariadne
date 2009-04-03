@@ -160,13 +160,16 @@ class Expansion
     //! \brief Remove all nonzero terms.
     void clear() { this->_coefficients.clear(); }
 
-    //! \brief Clean up the representation of the polynomial, including
-    //! sorting the terms and removing zero elements if necessary.
-    void cleanup() {
-        for(iterator iter=this->begin(); iter!=this->end(); ) {
+    void sort() { }
+    void remove_zeros() { for(iterator iter=this->begin(); iter!=this->end(); ) {
         if(iter->second==0) { this->erase(iter++); } else { ++iter; } } }
+
+    //! \brief Clean up the representation of the expansion, including
+    //! sorting the terms and removing zero elements if necessary. Does not
+    //! sum duplicate terms as this may introduce anwanted roundoff error.
+    void cleanup() { this->sort(); this->remove_zeros(); }
     //! \brief Check the representation of the polynomial for consistency.
-    void check() {
+    void check() const {
         for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
             ARIADNE_ASSERT(iter->first.size()==this->_argument_size); } }
 
@@ -219,6 +222,7 @@ class Reference<MultiIndex>
     Reference& operator=(const Reference<MultiIndex>& a) {
         // This is a substitute for the default assignment operator, so must use a const& argument.
         assert(_n==a.size()); this->_assign(a._p); return *this; }
+    inline Reference& operator=(const Reference<const MultiIndex>& a); // inline
     operator MultiIndex& () { return reinterpret_cast<MultiIndex&>(*this); }
     operator MultiIndex const& () const { return reinterpret_cast<MultiIndex const&>(*this); }
     size_type size() const { return this->_n; }
@@ -238,6 +242,7 @@ class Reference<const MultiIndex> {
     typedef MultiIndex::value_type value_type;
     typedef MultiIndex::word_type word_type;
     typedef MultiIndex::const_reference const_reference;
+    friend class Reference<MultiIndex>;
   public:
     Reference(size_type n, const value_type* p) : _n(n), _p(const_cast<value_type*>(p)) { }
     Reference(const MultiIndex& a) : _n(a.size()), _p(const_cast<value_type*>(a.begin())) { }
@@ -250,12 +255,21 @@ class Reference<const MultiIndex> {
     size_type _n; value_type* _p;
 };
 
+inline
+Reference<MultiIndex>& Reference<MultiIndex>::operator=(const Reference<const MultiIndex>& a) {
+    assert(_n==a.size()); this->_assign(a._p); return *this;
+}
+
 template<class V, class K=typename V::first_type> struct first_equals {
     bool operator()(const V& v, const K& k) const { return v.first==k; }
 };
 
 template<class V, class K=typename V::first_type> struct first_less {
     bool operator()(const V& v, const K& k) const { return v.first<k; }
+};
+
+template<class V> struct second_is_zero {
+    bool operator()(const V& v) const { return v.second==0; }
 };
 
 template<class FwdIter, class Op>
@@ -299,6 +313,8 @@ inline std::ostream& operator<<(std::ostream& os, const ExpansionValue<X>& dv) {
 template<class X>
 struct ExpansionReference {
     typedef MultiIndex first_type;
+    ExpansionReference<X>& operator=(const ExpansionReference<const X>& dr) {
+        first=dr.first; second=dr.second; return *this; }
     ExpansionReference<X>& operator=(const ExpansionReference<X>& dr) {
         first=dr.first; second=dr.second; return *this; }
     ExpansionReference<X>& operator=(const ExpansionValue<X>& dv) {
@@ -488,13 +504,16 @@ class Expansion
     void erase(iterator iter) { iter->second=0.0; }
     void clear() { _coefficients.clear(); }
 
-    void cleanup() {
-        std::sort(this->begin(),this->end());
-        iterator new_end=unique_key(this->begin(),this->end(),std::plus<X>());
+    void sort() { std::sort(this->begin(),this->end()); }
+    void remove_zeros() {
+        iterator new_end=std::remove_if(this->begin(),this->end(),second_is_zero<value_type>());
         this->resize(new_end-this->begin());
     }
 
-    void check() { }
+
+    void cleanup() { this->sort(); this->remove_zeros(); }
+
+    void check() const { }
 
     template<class XX, class YY> friend YY evaluate(const Expansion<XX>&, const Vector<YY>& x);
     Expansion<X> embed(unsigned int before_size, const Expansion<X>&, unsigned int after_size) const;
@@ -533,7 +552,7 @@ class Expansion
     void _prepend(const MultiIndex& a, const Real& x) {
         //std::cerr<<"_prepend "<<*this<<" "<<a<<" "<<x<<std::endl;
         _coefficients.resize(_coefficients.size()+element_size());
-        return _allocated_insert(begin(),a,x); }
+        _allocated_insert(begin(),a,x); }
     void _append(const MultiIndex& a, const Real& x) {
         //std::cerr<<"_append "<<*this<<" "<<a<<" "<<x<<std::endl;
         iterator curr=this->end(); --curr; iterator prev=curr; --prev;
@@ -614,6 +633,7 @@ Expansion<X>::Expansion(const std::map<MultiIndex,XX>& m)
     for(typename std::map<MultiIndex,XX>::const_iterator iter=m.begin(); iter!=m.end(); ++iter) {
         this->append(iter->first,X(iter->second));
     }
+    this->remove_zeros();
 }
 
 template<class X> template<class XX> inline

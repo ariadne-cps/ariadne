@@ -1,5 +1,5 @@
 /***************************************************************************
- *            test_polynomial.cc
+ *            test_expansion.cc
  *
  *  Copyright 2009  Pieter Collins
  *
@@ -26,7 +26,7 @@
 #include "vector.h"
 #include "matrix.h"
 #include "multi_index.h"
-#include "polynomial.h"
+#include "expansion.h"
 
 #include "test.h"
 using namespace std;
@@ -35,6 +35,7 @@ using namespace Ariadne;
 
 class TestPolynomial
 {
+    typedef Polynomial<Float> P;
   public:
     void test();
   private:
@@ -42,6 +43,8 @@ class TestPolynomial
     void test_iterator_concept();
     void test_cleanup();
     void test_constructors();
+    void test_indexing();
+    void test_arithmetic();
     void test_variables();
     void test_find();
 };
@@ -51,6 +54,7 @@ void TestPolynomial::test()
 {
     ARIADNE_TEST_CALL(test_cleanup());
     ARIADNE_TEST_CALL(test_constructors());
+    ARIADNE_TEST_CALL(test_indexing());
     ARIADNE_TEST_CALL(test_variables());
     ARIADNE_TEST_CALL(test_find());
 }
@@ -198,14 +202,85 @@ void TestPolynomial::test_cleanup()
 
 void TestPolynomial::test_constructors()
 {
+    // Empty polynomial
     ARIADNE_TEST_CONSTRUCT(Polynomial<Float>,p1,(3));
+    // Dense polynomial
     ARIADNE_TEST_CONSTRUCT(Polynomial<Float>,p2,(3,2, 0.,0.,0.,0., 5.,2.,0.,0.,3.,0.));
+    ARIADNE_TEST_EQUAL(p2[MultiIndex(3, 2,0,0)],5.0);
+    // Sparse polynomial with unordered indiced
     ARIADNE_TEST_CONSTRUCT(Polynomial<Float>,p3,(2,5, 1,2,5.0, 0,0,2.0, 1,0,3.0, 3,0,7.0, 0,1,11.0));
-    //TODO: Case for repeated index
+    ARIADNE_TEST_EQUAL(p3[MultiIndex(2, 1,2)],5.0);
+    ARIADNE_TEST_EQUAL(p3[MultiIndex(2, 0,0)],2.0);
+
+    // Unordered indices
+    ARIADNE_TEST_EQUAL(P(2,5, 1,2,5.0, 0,0,2.0, 1,0,3.0, 3,0,7.0, 0,1,11.0),P(2,5, 0,0,2.0, 1,0,3.0, 0,1,11.0, 3,0,7.0, 1,2,5.0));
+    // Repeated indices
+    ARIADNE_TEST_EQUAL(P(2,5, 1,2,5.0, 0,0,2.0, 1,0,3.0, 1,0,7.0, 1,2,11.0),P(2,3, 0,0,2.0, 1,0,10.0, 1,2,16.0));
 
     // Regression tests
     ARIADNE_TEST_CONSTRUCT(Polynomial<Float>,pr2,(3,0, 0.0));
     ARIADNE_TEST_CONSTRUCT(Polynomial<Float>,pr1,(3,1, 3,0,0, 0.0));
+}
+
+void TestPolynomial::test_indexing()
+{
+    Polynomial<Float> p(3,4, 0,0,0,2.0,  1,0,0,3.0, 1,0,1,5.0, 2,1,0,7.0);
+    const Polynomial<Float>& pc=p;
+    ARIADNE_TEST_EQUAL(p[MultiIndex(3, 1,0,0)],3.0);
+
+    p[MultiIndex(3, 1,0,0)]-=0.5;
+    ARIADNE_TEST_EQUAL(p[MultiIndex(3, 1,0,0)],2.5);
+
+    p[MultiIndex(3, 1,1,0)]=11.0;
+    ARIADNE_TEST_EQUAL(p[MultiIndex(3, 1,1,0)],11.0);
+
+    Polynomial<Float> q(3);
+    q[MultiIndex(3, 0,0,0)]=2.0;
+    q[MultiIndex(3, 0,1,0)]=3.0;
+    ARIADNE_TEST_EQUAL(q.number_of_nonzeros(),2);
+    ARIADNE_TEST_EQUAL(q[MultiIndex(3, 0,0,0)],2.0);
+    ARIADNE_TEST_EQUAL(q[MultiIndex(3, 0,1,0)],3.0);
+    q[MultiIndex(3, 1,0,0)]=5.0;
+    ARIADNE_TEST_EQUAL(q[MultiIndex(3, 1,0,0)],5.0);
+    ARIADNE_TEST_EQUAL(q[MultiIndex(3, 0,1,0)],3.0);
+    q[MultiIndex(3, 0,0,1)]=7.0;
+    ARIADNE_TEST_EQUAL(q[MultiIndex(3, 0,0,1)],7.0);
+    
+    // Test insert at beginning
+    p.clear();
+    p[MultiIndex(3, 0,1,0)]=2.0;
+    p[MultiIndex(3, 0,0,1)]=3.0;
+    p[MultiIndex(3, 2,1,0)]=5.0;
+    ARIADNE_TEST_EQUAL(pc[MultiIndex(3, 0,0,0)],0.0);
+    ARIADNE_TEST_EQUAL(p.number_of_nonzeros(),3);
+    p[MultiIndex(3, 0,0,0)]=7;
+    ARIADNE_TEST_EQUAL(p.number_of_nonzeros(),4);
+    Polynomial<Float>::const_iterator iter=p.begin();
+    ARIADNE_TEST_EQUAL(iter->first,MultiIndex(3, 0,0,0));
+    ARIADNE_TEST_EQUAL(iter->second,7.0);
+    ++iter;
+    ARIADNE_TEST_EQUAL(iter->first,MultiIndex(3, 0,1,0));
+    ARIADNE_TEST_EQUAL(iter->second,2.0);
+    ++iter;
+    ARIADNE_TEST_EQUAL(iter->first,MultiIndex(3, 0,0,1));
+    ARIADNE_TEST_EQUAL(iter->second,3.0);
+    ++iter;
+    ARIADNE_TEST_EQUAL(iter->first,MultiIndex(3, 2,1,0));
+    ARIADNE_TEST_EQUAL(iter->second,5.0);
+
+
+
+}
+
+void TestPolynomial::test_arithmetic()
+{
+    typedef Polynomial<Float> P;
+    ARIADNE_TEST_EQUAL(P(3)+P(3),P(3));
+    ARIADNE_TEST_EQUAL(P(3)+P(3,1, 2,1,0,2.0),P(3,1, 2,1,0,2.0));
+    ARIADNE_TEST_EQUAL(P(3)+P(3,3, 2,1,0,2.0, 0,1,0,3.0, 1,1,0,5.0), P(3,3, 0,1,0,3.0, 1,1,0,5.0, 2,1,0,2.0));
+
+    Polynomial<Float> x0(3); x0[MultiIndex(3, 1,0,0)]=1.0;
+    Polynomial<Float> x1(3); x1[MultiIndex(3, 0,1,0)]=1.0;
 }
 
 void TestPolynomial::test_variables()
@@ -213,6 +288,11 @@ void TestPolynomial::test_variables()
     Vector< Polynomial<Float> > x=Polynomial<Float>::variables(3);
     array< Vector<Float> > e=Vector<Float>::units(2);
 
+    ARIADNE_TEST_EQUAL(x[0], Polynomial<Float>(3,1, 1,0,0,1.0));
+    ARIADNE_TEST_EQUAL(x[1], Polynomial<Float>(3,1, 0,1,0,1.0));
+    ARIADNE_TEST_EQUAL(x[2], Polynomial<Float>(3,1, 0,0,1,1.0));
+    ARIADNE_TEST_EQUAL(x[0]+x[1], Polynomial<Float>(3,2, 1,0,0,1.0, 0,1,0,1.0));
+    ARIADNE_TEST_EQUAL(x[0]*x[1], Polynomial<Float>(3,1, 1,1,0,1.0));
     ARIADNE_TEST_EVALUATE(x[0]*(x[1]*3.0+x[0])+x[1]*x[2]);
     ARIADNE_TEST_EQUAL((x[0]*(x[1]*3.0+x[0])+x[1]*x[2]), Polynomial<Float>(3,3, 1,1,0,3.0, 2,0,0,1.0, 0,1,1,1.0));
     ARIADNE_TEST_EQUAL((e[1]*(x[0]*(x[1]*3.0+x[0])+x[1]*x[2]))[1], Polynomial<Float>(3,3, 1,1,0,3.0, 2,0,0,1.0, 0,1,1,1.0));

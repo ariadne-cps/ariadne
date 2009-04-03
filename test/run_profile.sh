@@ -1,8 +1,9 @@
-#!/bin/sh
+#!/bin/bash
 
 EXECUTABLE=$1
 
-TRIES=$[$TRIES+0]
+TRIES=0$TRIES
+TRIES=$[TRIES]
 if test $TRIES -eq 0; then TRIES=""; fi
 
 BASENAME=`basename $EXECUTABLE`

@@ -165,6 +165,7 @@ void TestTaylorModel::test_arithmetic()
     ARIADNE_TEST_EQUAL(-TaylorModel(e(1,2, 1.0,-2.0,3.0), 0.75), TaylorModel(e(1,2, -1.0,2.0,-3.0), 0.75));
     ARIADNE_TEST_EQUAL(TaylorModel(e(1,2, 1.0,-2.0,3.0), 0.75)+TaylorModel(e(1,2, 3.0,2.0,-4.0), 0.5), TaylorModel(e(1,2, 4.0,0.0,-1.0), 1.25));
     ARIADNE_TEST_EQUAL(TaylorModel(e(1,2, 1.0,-2.0,3.0), 0.75)-TaylorModel(e(1,2, 3.0,2.0,-4.0), 0.5), TaylorModel(e(1,2, -2.0,-4.0,7.0), 1.25));
+    ARIADNE_TEST_EQUAL(TaylorModel(e(1,2, 0.0,0.0,3.0), 0.75)*TaylorModel(e(1,2, 3.0,2.0,-4.0), 0.5), TaylorModel(e(1,4, 0.0,0.0,9.0,6.0,-12.0), 8.625));
     ARIADNE_TEST_EQUAL(TaylorModel(e(1,2, 1.0,-2.0,3.0), 0.75)*TaylorModel(e(1,2, 3.0,2.0,-4.0), 0.5), TaylorModel(e(1,4, 3.0,-4.0,1.0,14.0,-12.0), 10.125));
 }
 

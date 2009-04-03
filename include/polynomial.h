@@ -46,31 +46,79 @@ namespace Ariadne {
 //! \brief A polynomial with coefficients of some type \a X.
 template<class X>
 class Polynomial
-    : public Expansion<X>
 {
+    template<class XX> friend class Polynomial;
+  public:
+    typedef typename Expansion<X>::size_type size_type;
+    typedef typename Expansion<X>::value_type value_type;
+    typedef typename Expansion<X>::reference reference;
+    typedef typename Expansion<X>::const_reference const_reference;
+    typedef typename Expansion<X>::iterator iterator;
+    typedef typename Expansion<X>::const_iterator const_iterator;
   public:
     //! \brief The zero polynomial in \a as variables.
-    Polynomial(unsigned int as=0u) : Expansion<X>(as) { }
+    Polynomial(unsigned int as=0u) : _expansion(as) { }
     //! \brief Copy/conversion constructor.
-    template<class XX> Polynomial(const Expansion<XX>& e) : Expansion<X>(e) { }
+    template<class XX> Polynomial(const Polynomial<XX>& p) : _expansion(p._expansion) { }
+    //! \brief Copy/conversion constructor.
+    template<class XX> explicit Polynomial(const Expansion<XX>& e) : _expansion(e) { }
     //! \brief A dense polynomial with coefficients given by a list of doubles.
     Polynomial(unsigned int as, unsigned int deg, double c0, ...);
     //! \brief A sparse polynomial with coefficients given by a list of indices and coefficients.
     Polynomial(unsigned int as, unsigned int nnz, int a00, ...);
 
+    static Polynomial<X> constant(unsigned int as, const X& c) {
+        Polynomial<X> r(as); r[MultiIndex::zero(as)]=c; return r; }
+    static Polynomial<X> variable(unsigned int as, unsigned int j) {
+        Polynomial<X> r(as); r[MultiIndex::unit(as,j)]=1; return r; }
+    static Vector< Polynomial<X> > variables(unsigned int as) {
+        Vector< Polynomial<X> > r(as); for(unsigned int i=0; i!=as; ++i) { r[i]=variable(as,i); } return r; }
+
+    template<class XX> bool operator==(const Polynomial<XX>& p) {
+        const_cast<Polynomial<X>*>(this)->cleanup(); const_cast<Polynomial<XX>&>(p).cleanup();
+        return this->_expansion==p._expansion; }
+    template<class XX> bool operator!=(const Polynomial<XX>& p) {
+        return !(*this==p); }
+
+    size_type argument_size() const { return this->_expansion.argument_size(); }
+    size_type number_of_nonzeros() const { return this->_expansion.number_of_nonzeros(); }
+    const X& value() const { return this->_expansion[MultiIndex::zero(this->argument_size())]; }
+    X& operator[](const MultiIndex& a) { return this->_expansion[a]; }
+    const X& operator[](const MultiIndex& a) const { return this->_expansion[a]; }
+
+    iterator begin() { return this->_expansion.begin(); }
+    iterator end() { return this->_expansion.end(); }
+    iterator find(const MultiIndex& a) { return this->_expansion.find(a); }
+    const_iterator begin() const { return this->_expansion.begin(); }
+    const_iterator end() const { return this->_expansion.end(); }
+    const_iterator find(const MultiIndex& a) const { return this->_expansion.find(a); }
+
+    void append(const MultiIndex& a1, const MultiIndex& a2, const X& x) { this->_expansion.append(a1,a2,x); }
+    void append(const MultiIndex& a, const X& x) { this->_expansion.append(a,x); }
+    void insert(const MultiIndex& a, const X& x) { this->_expansion.insert(a,x); }
+    void reserve(size_type n) { this->_expansion.reserve(n); }
+    void clear() { this->_expansion.clear(); }
+    void erase(iterator iter) { this->_expansion.erase(iter); }
+
+    const Expansion<X>& expansion() const { return this->_expansion; }
     Polynomial<X>& truncate(unsigned int d);
+
+    void cleanup();
+    void check() const;
+  private:
+    Expansion<X> _expansion;
 };
 
 template<class X>
 Polynomial<X>::Polynomial(unsigned int as, unsigned int deg, double c0, ...)
-    : Expansion<X>(as)
+    : _expansion(as)
 {
     MultiIndex a(as); double x;
     va_list args; va_start(args,c0);
     while(a.degree()<=deg) {
         if(a.degree()==0) { x=c0; }
         else { x=va_arg(args,double); }
-        if(x!=0) { this->append(a,x); }
+        if(x!=0) { this->_expansion.append(a,x); }
         ++a;
     }
     va_end(args);
@@ -79,7 +127,7 @@ Polynomial<X>::Polynomial(unsigned int as, unsigned int deg, double c0, ...)
 
 template<class X>
 Polynomial<X>::Polynomial(unsigned int as, unsigned int nnz, int a00, ...)
-    : Expansion<X>(as)
+    : _expansion(as)
 {
     MultiIndex a(as);
     double x;
@@ -91,13 +139,26 @@ Polynomial<X>::Polynomial(unsigned int as, unsigned int nnz, int a00, ...)
             else { a[j]=va_arg(args,int); }
         }
         x=va_arg(args,double);
-        if(x!=0) { this->append(a,x); }
+        if(x!=0) { this->_expansion.append(a,x); }
     }
     va_end(args);
     this->cleanup();
 }
 
+template<class X>
+void Polynomial<X>::cleanup()
+{
+    Polynomial<X>* self=const_cast<Polynomial<X>*>(this);
+    std::sort(self->_expansion.begin(), self->_expansion.end());
+    iterator new_end=unique_key(self->_expansion.begin(), self->_expansion.end(), std::plus<X>());
+    self->_expansion.resize(new_end-self->_expansion.begin());
+}
 
+template<class X> inline
+void Polynomial<X>::check() const
+{
+    this->_expansion.check();
+}
 
 template<class X> inline Polynomial<X> operator+(const Polynomial<X>& p) {
     return p; }
@@ -185,7 +246,7 @@ inline Vector< Polynomial<Float> > midpoint(const Vector< Polynomial<Interval> >
 template<class X, class Y> inline
 Y evaluate(const Polynomial<X>& p, const Vector<Y>& x)
 {
-    return evaluate(static_cast< Expansion<X> >(p),x);
+    return evaluate(p.expansion(),x);
 }
 
 

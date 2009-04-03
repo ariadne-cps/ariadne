@@ -543,6 +543,7 @@ TaylorModel asin(const TaylorModel& x);
 TaylorModel acos(const TaylorModel& x);
 TaylorModel atan(const TaylorModel& x);
 
+std::ostream& operator<<(std::ostream&, const TaylorModel::Accuracy&);
 
 struct ImplicitFunctionException : public std::runtime_error {
     ImplicitFunctionException(const std::string& what) : std::runtime_error(what) { }

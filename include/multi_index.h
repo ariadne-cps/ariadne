@@ -28,6 +28,7 @@
 #define ARIADNE_MULTI_INDEX_H
 
 #include <cassert>
+#include <cstdarg>
 #include <iostream>
 
 #include "macros.h"
@@ -204,6 +205,19 @@ inline MultiIndex::MultiIndex(size_type n, const int* ary)
 {
     for(size_type j=0; j!=word_size(); ++j) { word_at(j)=0; }
     _p[n]=0; for(size_type i=0; i!=n; ++i) { _p[i]=ary[i]; _p[n]+=ary[i]; }
+}
+
+inline MultiIndex::MultiIndex(size_type n, int a0, ...)
+    : _n(n), _p(_allocate(_n))
+{
+    ARIADNE_ASSERT(n>0);
+    _p[0]=a0; _p[_n]=a0;
+    va_list args; va_start(args,a0);
+    for(size_type i=1; i!=n; ++i) {
+        _p[i]=va_arg(args,int);
+        _p[_n]+=_p[i];
+    }
+    va_end(args);
 }
 
 inline MultiIndex::MultiIndex(const MultiIndex& a)

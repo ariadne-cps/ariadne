@@ -166,6 +166,8 @@ class TestDifferential {
         ARIADNE_TEST_CONSTRUCT(SeriesType,y,(3,ay));
         ARIADNE_TEST_CONSTRUCT(SeriesType,id,(3,aid));
         ARIADNE_TEST_EQUAL(compose(y,x),DifferentialType(2,3,ayx));
+        std::cerr<<"y="<<y<<"\n";
+        std::cerr<<"id="<<id<<"\n";
         ARIADNE_TEST_EQUAL(compose(id,x),x);
     }
 

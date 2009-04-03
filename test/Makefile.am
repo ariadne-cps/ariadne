@@ -23,6 +23,7 @@ check_PROGRAMS = \
 	test_vector \
 	test_matrix \
 	test_multi_index \
+	test_expansion \
 	test_polynomial \
 	test_differential \
 	test_taylor_model \

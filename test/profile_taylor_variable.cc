@@ -92,6 +92,11 @@ bind(const F& f,const A1& a1,const A2& a2) {
 }
 
 
+namespace Ariadne {
+void _mul_clear(TaylorModel& r, const TaylorModel& x, const TaylorModel& y);
+void _mul_full(TaylorModel& r, const TaylorModel& x, const TaylorModel& y);
+}
+
 
 TaylorModel copy(const TaylorModel& x) {
     return x;
@@ -109,12 +114,28 @@ TaylorModel& iscal(TaylorModel& x, const Interval& ivl) {
     return x*=ivl;
 }
 
+TaylorModel& fscal(TaylorModel& x, const Float& c) {
+    return x*=c;
+}
+
+TaylorModel& isum(TaylorModel& x, const TaylorModel& y) {
+    return x+=y;
+}
+
 TaylorModel sum(const TaylorModel x1, const TaylorModel& x2) {
     return x1+x2;
 }
 
 TaylorModel prod(const TaylorModel x1, const TaylorModel& x2) {
     return x1*x2;
+}
+
+TaylorModel prod_full(const TaylorModel x1, const TaylorModel& x2) {
+    TaylorModel r(x2.argument_size(),x2.accuracy_ptr()); _mul_full(r,x1,x2); return r; 
+}
+
+TaylorModel prod_clear(const TaylorModel x1, const TaylorModel& x2) {
+    TaylorModel r(x2.argument_size(),x2.accuracy_ptr()); _mul_clear(r,x1,x2); return r;
 }
 
 
@@ -128,6 +149,7 @@ TaylorModel sigmoid(const TaylorModel x, const TaylorModel& y) {
 }
 
 typedef TaylorModel(*TaylorFunctionPtr)(const Vector<TaylorModel>&);
+
 
 template<class T>
 void profile(uint ntries, const char* name, const T& run)
@@ -155,7 +177,7 @@ void profile(uint ntries, const char* name, const T& run)
 }
 
 int main(int argc, const char* argv[]) {
-    uint ntries=100;
+    uint ntries=20;
     if(argc>1) { ntries=atoi(argv[1]); }
 
     Vector<Float> c(2, 1.0,2.0);
@@ -177,33 +199,47 @@ int main(int argc, const char* argv[]) {
     w.set_sweep_threshold(1e-5);
 
 
-    Interval ivl(0.49,0.51);
+    Interval ivl(0.33,0.49);
+    Float cnst=0.41;
     TaylorModel x(3);
     TaylorModel y(3);
 
+    for(MultiIndex a(3); a.degree()<=7; ++a) {
+        if(i%7<4) { x.expansion().append(a,1/(1.0+i)); }
+    }
     i=0;
     for(MultiIndex a(3); a.degree()<=5; ++a) {
-        if(i%7<4) { x[a]=1/(1.0+i); }
-        if(i%3<2) { y[a]=1/(2.0+i); }
+        if(i%7<4) { x.expansion().append(a,1/(1.0+i)); }
+        if(i%3<2) { y.expansion().append(a,1/(2.0+i)); }
         ++i;
     }
+    y.set_maximum_degree(9);
+    y.set_sweep_threshold(1e-3);
 
-    TaylorModel xx=x; xx[0]=0.0; xx.clean();
-    //std::cerr<<"v="<<v<<"\nx="<<x<<"\n";
+    TaylorModel z(Expansion<Float>(3,4, 0,0,0,1.0, 1,0,0,0.5, 0,1,0,-0.25, 0,0,1,0.625),0.0);
 
     std::cout << std::setw(20) << std::left << "name" << std::right
               << std::setw(11) << "time(us)"
               << std::setw(12) << "error"
               << std::setw(8) << "size"
               << std::endl;
-
+    
+    typedef TaylorModel TM;
+    std::cerr<<"\n\nexp("<<z<<")=\n  "<<exp(z)<<"\n\n";
+    std::cerr<<"exp(1)="<<Ariadne::exp(1.0)<<"  exp([1:1])="<<Ariadne::exp(Interval(1))<<"\n";
+    return 0;
     profile(ntries*10000,"iclean-02",inplace_bind(&iclean,w));
     profile(ntries*10000,"copy-02",bind(&copy,w));
     profile(ntries*10000,"iadd-noinsert-02",inplace_bind(&iadd,x,ivl));
     profile(ntries*10000,"iadd-insert-02",inplace_bind(&iadd,x,ivl));
-    profile(ntries*10000,"scal-02",inplace_bind(&iscal,x,ivl));
-    profile(ntries*1000,"sum-02",bind(sum,x,y));
-    profile(ntries*10,"prod-02",bind(prod,x,y));
+    profile(ntries*10000,"iscal-02",inplace_bind(&iscal,x,ivl));
+    profile(ntries*10000,"fscal-02",inplace_bind(&fscal,x,cnst));
+    profile(ntries*1000,"isum-02",inplace_bind(&isum,x,y));
+    profile(ntries*1000,"sum-02",bind(&sum,x,y));
+    profile(ntries*10,"prod-02",bind(&prod,x,y));
+    profile(ntries*10,"prod_clear-02",bind(&prod_clear,x,y));
+    profile(ntries*10,"prod_full-02",bind(&prod_full,x,y));
+    profile(ntries*1,"exp-02",bind((TM(*)(const TM&))&Ariadne::exp,z));
     profile(ntries,"exp_cos-01",bind(exp_cos,v[0],v[1]));
     profile(ntries,"sigmoid-01",bind(sigmoid,v[0]));
 }

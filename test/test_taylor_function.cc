@@ -92,6 +92,7 @@ TestTaylorFunction::TestTaylorFunction()
 void
 TestTaylorFunction::test()
 {
+    ARIADNE_TEST_CALL(test_antiderivative()); return;
     ARIADNE_TEST_CALL(test_combine());
     ARIADNE_TEST_CALL(test_constructors());
     ARIADNE_TEST_CALL(test_restrict());

@@ -106,6 +106,8 @@ class MultiIndex {
     const_reference operator[](size_type i) const;
     /*! The number of occurrences of the \a i th variable. */
     reference operator[](size_type i);
+    /*! Increment the value of the \a ith element */
+    void increment(size_type i);
 
     /*! Equality operator. */
     friend bool operator==(const MultiIndex& a1, const MultiIndex& a2); // inline
@@ -144,7 +146,7 @@ class MultiIndex {
     /*! Write to an output stream. */
     friend std::ostream& operator<<(std::ostream&, const MultiIndex&);
   public:
-    value_type& at(size_type i) { return _p[i]; }
+    //value_type& at(size_type i) { return _p[i]; }
     const value_type& at(size_type i) const { return _p[i]; }
     value_type* begin() { return _p; }
     const value_type* begin() const { return _p; }
@@ -246,8 +248,8 @@ inline MultiIndex& MultiIndex::operator=(const MultiIndex& a) {
 }
 
 inline void MultiIndex::assign(const MultiIndex& a) {
-    //for(size_type j=0; j!=this->word_size(); ++j) { this->word_at(j)=a.word_at(j); }
-    std::copy(a.word_begin(),a.word_end(),this->word_begin());
+    for(size_type j=0; j!=this->word_size(); ++j) { this->word_at(j)=a.word_at(j); }
+    //std::copy(a.word_begin(),a.word_end(),this->word_begin());
 }
 
 inline MultiIndex MultiIndex::zero(size_type n)
@@ -298,6 +300,10 @@ inline MultiIndex::value_type const& MultiIndex::operator[](size_type i) const {
 
 inline MultiIndexValueReference MultiIndex::operator[](size_type i) {
     return MultiIndexValueReference(this->_n,this->_p,i);
+}
+
+inline void MultiIndex::increment(size_type i) {
+    ++this->_p[i]; ++this->_p[this->_n]; 
 }
 
 
@@ -499,6 +505,7 @@ std::ostream& operator<<(std::ostream& os, const MultiIndex& a) {
     //for(MultiIndex::size_type i=0; i!=a.size(); ++i) { os << (i==0?';':',') << int(a[i]); }
     if(a.size()==0) { os << '('; }
     for(MultiIndex::size_type i=0; i!=a.size(); ++i) { os << (i==0?'(':',') << int(a[i]); }
+    os<<";"<<int(a.degree());
     return os << ')';
 }
 

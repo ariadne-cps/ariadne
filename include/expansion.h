@@ -695,9 +695,10 @@ std::ostream& operator<<(std::ostream& os, const Expansion<X>& p) {
     os << "{";
     for(typename Expansion<X>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
         os << (iter==p.begin() ? "" : ",");
-        os<<iter->key();
+        //os<<iter->key();
         for(unsigned int i=0; i!=iter->key().size(); ++i) {
-            os << (i==0?" ":",") << int(iter->key()[i]); }
+            os << (i==0?"":",") << int(iter->key()[i]); }
+        os<<";"<<int(iter->key().degree());
         os << ":" << iter->data();
     }
     return os << " }";

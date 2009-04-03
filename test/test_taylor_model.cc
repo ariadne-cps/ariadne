@@ -174,10 +174,20 @@ void TestTaylorModel::test_arithmetic()
 
 void TestTaylorModel::test_functions()
 {
+    TaylorModel x(E(1,1, 0.0, 1.0), 0.0);
     TaylorModel xz(E(1,1, 0.0, 0.5), 0.0);
     TaylorModel xo(E(1,1, 1.0, 0.5), 0.0);
 
-    //Functions based on their natural defining points
+    ARIADNE_TEST_PRINT(exp(x));
+    ARIADNE_TEST_PRINT(sin(x));
+    ARIADNE_TEST_PRINT(cos(x));
+
+    //Functions based on their natural defining points with variable dependence 0.5
+    ARIADNE_TEST_BINARY_PREDICATE(refines,exp(T(E(1,1,0.0,1.0),0.0)),T(E(1,6, 1.0,1.00,0.500,0.1667,0.0417,0.0083,0.0014), 0.0004));
+    ARIADNE_TEST_BINARY_PREDICATE(refines,sin(x),T(E(1,6, 0.0,1.0000,0.0,-0.1667,0.0,0.0083,0.0), 0.0003));
+    ARIADNE_TEST_BINARY_PREDICATE(refines,cos(x),T(E(1,6, 1.0000,0.0,-0.5000,0.0,0.0417,0.0,-0.0014), 0.0003));
+
+    //Functions based on their natural defining points with variable dependence 0.5
     ARIADNE_TEST_BINARY_PREDICATE(refines,exp(xz),TaylorModel(E(1,6, 1.00000,0.50000,0.12500,0.02083,0.00260,0.00026,0.00002), 0.00003));
     ARIADNE_TEST_BINARY_PREDICATE(refines,sin(xz),TaylorModel(E(1,6, 0.00000,0.50000,0.0000,-0.02083,0.00000,0.00026,0.00000), 0.00003));
     ARIADNE_TEST_BINARY_PREDICATE(refines,cos(xz),TaylorModel(E(1,6, 1.00000,0.0000,-0.12500,0.00000,0.00260,0.0000,-0.00002), 0.00003));
@@ -185,6 +195,10 @@ void TestTaylorModel::test_functions()
     ARIADNE_TEST_BINARY_PREDICATE(refines,rec(xo),TaylorModel(E(1,6,  1.000000,-0.500000, 0.250000,-0.125000, 0.062500,-0.031250, 0.015625), 0.018));
     ARIADNE_TEST_BINARY_PREDICATE(refines,sqrt(xo),TaylorModel(E(1,6, 1.000000, 0.250000,-0.031250, 0.007813,-0.002441, 0.000854,-0.000320), 0.0003));
     ARIADNE_TEST_BINARY_PREDICATE(refines,log(xo),TaylorModel(E(1,6,  0.000000, 0.500000,-0.125000, 0.041667,-0.015625, 0.006250,-0.002604), 0.003));
+
+    // Test exponential based at log2
+    ARIADNE_TEST_BINARY_PREDICATE(refines,exp(T(E(1,1,0.693147,0.5))),
+                                  T(E(1,6, 2.00000,1.00000,0.25000,0.04166,0.00520,0.00052,0.00004), 0.00006));
 
 }
 
@@ -217,6 +231,22 @@ void TestTaylorModel::test_antiderivative()
     Interval unit_interval(-1,+1);
     TaylorModel tm=TaylorModel::constant(2,1.0);
     TaylorModel atm=antiderivative(tm,1);
+
+    ARIADNE_TEST_EQUAL(antiderivative(T(E(2,1, 0,0,2.0),0.),0),T(E(2,1, 1,0,2.0)));
+    ARIADNE_TEST_EQUAL(antiderivative(T(E(2,1, 0,0,2.0),0.),1),T(E(2,1, 0,1,2.0)));
+    ARIADNE_TEST_EQUAL(antiderivative(T(E(2,1, 1,0,3.0),0.),0),T(E(2,1, 2,0,1.5)));
+    ARIADNE_TEST_EQUAL(antiderivative(T(E(2,1, 2,0,7.5),0.),0),T(E(2,1, 3,0,2.5)));
+    ARIADNE_TEST_EQUAL(antiderivative(T(E(2,1, 2,4,7.5),0.),0),T(E(2,1, 3,4,2.5)));
+    ARIADNE_TEST_EQUAL(antiderivative(T(E(2,1, 2,4,7.5),0.),1),T(E(2,1, 2,5,1.5)));
+
+    // Test error control
+    ARIADNE_TEST_EQUAL(antiderivative(T(E(1,1, 2,2.0),0.),0),T(E(1,1, 3,0.66666666666666663),5.5511151231257827021e-17));
+    ARIADNE_TEST_EQUAL(antiderivative(T(E(1,1, 2,2.0),1.),0),T(E(1,1, 3,0.66666666666666663),1.0000000000000002));
+
+    // Regression test for
+    T t1=T(E(2,6, 0,0,1., 1,0,2., 0,1,3., 2,0,4., 1,1,5., 0,2,6.), 0.);
+    T at1=T(E(2,6, 1,0,1., 2,0,1., 1,1,3., 3,0,1.33333333333333333, 2,1,2.5, 1,2,6.), 1.1102230246251565404e-16);
+    ARIADNE_TEST_EQUAL(antiderivative(t1,0),at1);
 }
 
 
@@ -324,6 +354,7 @@ void TestTaylorModel::test_flow()
 
 int main() {
     TestTaylorModel().test();
+
     std::cout << "INCOMPLETE " << std::flush;
     return ARIADNE_TEST_FAILURES;
 }

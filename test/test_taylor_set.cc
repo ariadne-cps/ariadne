@@ -76,6 +76,7 @@ void
 TestTaylorSet::test_linearise()
 {
     TaylorSet ts(2,2,2, 0.0,1.0,0.25,0.0,0.0,0.0, 0.0, 0.0,0.5,1.0,1.0,0.0,0.0, 0.0);
+
     Zonotope z=zonotope(ts);
     Box b=ts.bounding_box();
 

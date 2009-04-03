@@ -398,10 +398,7 @@ compose(const FunctionInterface& g, const TaylorFunction& f)
 TaylorFunction
 compose(const TaylorFunction& g, const TaylorFunction& f)
 {
-    if(!subset(f.range(),g.domain())) {
-        std::cerr<<"f.range()="<<f.range()<<" is not a subset of g.domain()="<<g.domain()<<std::endl;
-        ARIADNE_ASSERT(subset(f.range(),g.domain()));
-    }
+    ARIADNE_ASSERT_MSG(subset(f.range(),g.domain()),"f.range()="<<f.range()<<" is not a subset of g.domain()="<<g.domain());
     return TaylorFunction(f.domain(),Ariadne::compose(g.models(),unscale(f.models(),g.domain())));
 }
 
@@ -409,10 +406,8 @@ compose(const TaylorFunction& g, const TaylorFunction& f)
 TaylorVariable
 compose(const TaylorVariable& g, const TaylorFunction& f)
 {
-    if(!subset(f.range(),g.domain())) {
-        std::cerr<<"f.range()="<<f.range()<<" is not a subset of g.domain()="<<g.domain()<<std::endl;
-        ARIADNE_ASSERT(subset(f.range(),g.domain()));
-    }
+    ARIADNE_ASSERT_MSG(subset(f.range(),g.domain()),"f.range()="<<f.range()<<" is not a subset of g.domain()="<<g.domain());
+    
     return TaylorVariable(f.domain(),Ariadne::compose(g.model(),g.domain(),f.models()));
 }
 
@@ -421,14 +416,20 @@ compose(const TaylorVariable& g, const TaylorFunction& f)
 TaylorFunction
 antiderivative(const TaylorFunction& f, uint k)
 {
+    ARIADNE_ASSERT_MSG(k<f.argument_size(),"f="<<f<<"\n f.argument_size()="<<f.argument_size()<<" k="<<k);
     Interval fdomkrad=rad_ivl(f.domain()[k].lower(),f.domain()[k].upper());
-    Vector<TaylorModel> ad=antiderivative(f.models(),k); ad*=fdomkrad;
-    return TaylorFunction(f.domain(),ad);
+    TaylorFunction g=f;
+    for(uint i=0; i!=g.size(); ++i) {
+        g._models[i].antidifferentiate(k);
+        g._models[i]*=fdomkrad;
+    }
+    return g;
 }
 
 TaylorFunction
 implicit(const TaylorFunction& f)
 {
+    ARIADNE_ASSERT_MSG(f.argument_size()>f.result_size(),"f.argument_size()<=f.result_size() in implicit(f): f="<<f);
     uint fas=f.argument_size();
     uint has=f.argument_size()-f.result_size();
     Vector<Interval> hdom=project(f.domain(),range(0,has));

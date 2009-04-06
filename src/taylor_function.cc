@@ -450,6 +450,15 @@ flow(const TaylorFunction& vf, const Vector<Interval>& d, const Interval& h, con
                       " over time interval "<<h<<" does not remain in domain of vector field.");
     }
 
+    return unchecked_flow(vf,d,h,o);
+}
+
+// This method should be used if we know already that the flow over time h remains in
+// the domain of the vector field approximation, for example, if this has been
+// checked for the original flow
+TaylorFunction
+unchecked_flow(const TaylorFunction& vf, const Vector<Interval>& d, const Interval& h, const uint o)
+{
     Vector<TaylorModel> unscaled_vf=unscale(vf.models(),vf.domain());
     Vector<Interval> unscaled_d=unscale(d,vf.domain());
     //std::cerr<<"\n"<<unscaled_vf<<"\n"<<unscaled_d<<"\n";
@@ -457,9 +466,10 @@ flow(const TaylorFunction& vf, const Vector<Interval>& d, const Interval& h, con
     //std::cerr<<unscaled_flw<<"\n";
     //std::cerr<<scale(unscaled_flw,vf.domain());
     return TaylorFunction(join(d,h),
-        scale(flow(unscale(vf.models(),vf.domain()),unscale(d,vf.domain()),h,o),vf.domain()));
+        scale(unchecked_flow(unscale(vf.models(),vf.domain()),unscale(d,vf.domain()),h,o),vf.domain()));
     
 }
+
 
 
 

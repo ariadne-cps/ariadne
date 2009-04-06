@@ -441,12 +441,14 @@ TaylorCalculus::map_model(FunctionInterface const& f, Vector<Interval> const& bx
 TaylorCalculus::FlowModelType
 TaylorCalculus::flow_model(FunctionInterface const& vf, Vector<Interval> const& bx, Float const& h, Vector<Interval> const& bb) const
 {
+    ARIADNE_ASSERT(subset(bx+Interval(0,h)*vf.evaluate(bb),bb));
+
     FunctionModelType vector_field_model(bb,vf);
     ARIADNE_LOG(6,"vector_field_model = "<<vector_field_model<<"\n");
 
     const uint temporal_order=6;
     // Use flow function on model type
-    FlowModelType flow_model=Ariadne::flow(vector_field_model,bx,Interval(0,h),temporal_order);
+    FlowModelType flow_model=Ariadne::unchecked_flow(vector_field_model,bx,Interval(0,h),temporal_order);
     ARIADNE_LOG(6,"flow_model = "<<flow_model<<"\n");
 
     return flow_model;

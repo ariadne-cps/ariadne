@@ -50,9 +50,13 @@ TaylorFunction restrict(const TaylorFunction&, const Vector<Interval>& bx);
 TaylorVariable compose(const TaylorVariable&, const TaylorFunction&);
 TaylorFunction compose(const TaylorFunction&, const TaylorFunction&);
 TaylorFunction compose(const FunctionInterface&, const TaylorFunction&);
-TaylorFunction implicit(const TaylorFunction&);
 TaylorFunction antiderivative(const TaylorFunction&, uint);
+TaylorFunction implicit(const TaylorFunction&);
 TaylorFunction flow(const TaylorFunction& vf, const Vector<Interval>& d, const Interval& t, uint o);
+
+TaylorFunction unchecked_compose(const TaylorFunction&, const TaylorFunction&);
+TaylorFunction unchecked_implicit(const TaylorFunction&);
+TaylorFunction unchecked_flow(const TaylorFunction& vf, const Vector<Interval>& d, const Interval& t, uint o);
 
 
 class TaylorExpression {

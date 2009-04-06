@@ -115,6 +115,8 @@ Vector<TaylorModel> implicit(const Vector<TaylorModel>& f);
 Vector<TaylorModel> implicit_step(const Vector<TaylorModel>& f, const Vector<TaylorModel>& h);
 Vector<TaylorModel> flow(const Vector<TaylorModel>& x, const Vector<Interval>& d, const Interval& h, uint order);
 
+Vector<TaylorModel> unchecked_flow(const Vector<TaylorModel>& x, const Vector<Interval>& d, const Interval& h, uint order);
+
 Float norm(const Vector<TaylorModel>& tv);
 
 /*! \brief A class representing a power series expansion, scaled to the unit box, with an error term.

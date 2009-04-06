@@ -2903,30 +2903,8 @@ _flow_step(const Vector<TaylorModel>& vf, const Vector<TaylorModel>& yz, const I
 }
 
 Vector<TaylorModel>
-flow(const Vector<TaylorModel>& vf, const Vector<Interval>& d, const Interval& h, uint order)
+unchecked_flow(const Vector<TaylorModel>& vf, const Vector<Interval>& d, const Interval& h, uint order)
 {
-    ARIADNE_ASSERT(vf.size()>0);
-    ARIADNE_ASSERT(vf.size()==d.size());
-    for(uint i=0; i!=vf.size(); ++i) { ARIADNE_ASSERT(vf.size()==vf[i].argument_size()); }
-    ARIADNE_ASSERT(h.l<=0.0 && h.u>=0);
-
-    ARIADNE_ASSERT(h.l==0.0 || h.l==-h.u);
-
-    Vector<Interval> vf_domain(vf.size(),Interval(-1,+1));
-    ARIADNE_ASSERT(subset(d,vf_domain));
-
-    // Don't check for flow bounds since this should have been done in calling function
-/*
-    Vector<Interval> vf_range(vf.size());
-    for(uint i=0; i!=vf.size(); ++i) { vf_range[i]=vf[i].range(); }
-    Vector<Interval> flow_range=d+vf_range*h;
-    if(!subset(flow_range,vf_domain)) {
-        ARIADNE_THROW(FlowBoundsException,"flow(Vector<TaylorModel>,Vector<Interval>,Interval,Nat)",
-                      "range "<<flow_range<<" of scaled flow "<<vf<<
-                      " on domain "<<d<<" for time interval "<<h<<
-                      " is not a subset of the unit box");
-    }
-*/
     uint n=vf.size();
     Vector<TaylorModel> yz(n,TaylorModel(n+1));
     for(uint i=0; i!=yz.size(); ++i) {
@@ -2967,10 +2945,39 @@ flow(const Vector<TaylorModel>& vf, const Vector<Interval>& d, const Interval& h
     }
 
     return y;
-
 }
 
 
+void
+check_flow(const Vector<TaylorModel>& vf, const Vector<Interval>& d, const Interval& h)
+{
+    ARIADNE_ASSERT(vf.size()>0);
+    ARIADNE_ASSERT(vf.size()==d.size());
+    for(uint i=0; i!=vf.size(); ++i) { ARIADNE_ASSERT(vf.size()==vf[i].argument_size()); }
+    ARIADNE_ASSERT(h.l<=0.0 && h.u>=0);
+
+    ARIADNE_ASSERT(h.l==0.0 || h.l==-h.u);
+
+    Vector<Interval> vf_domain(vf.size(),Interval(-1,+1));
+    ARIADNE_ASSERT(subset(d,vf_domain));
+
+    Vector<Interval> vf_range(vf.size());
+    for(uint i=0; i!=vf.size(); ++i) { vf_range[i]=vf[i].range(); }
+    Vector<Interval> flow_range=d+vf_range*h;
+    if(!subset(flow_range,vf_domain)) {
+        ARIADNE_THROW(FlowBoundsException,"flow(Vector<TaylorModel>,Vector<Interval>,Interval,Nat)",
+                      "range "<<flow_range<<" of scaled flow "<<vf<<
+                      " on domain "<<d<<" for time interval "<<h<<
+                      " is not a subset of the unit box");
+    }
+}
+
+Vector<TaylorModel>
+flow(const Vector<TaylorModel>& vf, const Vector<Interval>& d, const Interval& h, uint o)
+{
+    check_flow(vf,d,h);
+    return unchecked_flow(vf,d,h,o);
+}
 
 
 

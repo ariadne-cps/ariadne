@@ -261,6 +261,19 @@ int test_case_counter = 0;
     }                                                                   \
 
 
+/*! \brief Declares an object \a variable of type \a class (uses the default constructor). */
+#define ARIADNE_TEST_DECLARE(class,variable)                            \
+    {                                                                   \
+        std::cout << #class << " " << #variable << ": " << std::flush;  \
+        try {                                                           \
+            class variable;                                             \
+            std::cout << #variable << "==" << variable << "\n" << std::endl; \
+        }                                                               \
+        ARIADNE_TEST_CATCH("Constructor `" << #class << "" << #variable << "'") \
+    }                                                                   \
+    class variable;                                                     \
+
+
 /*! \brief Constructs object \a variable of type \a class from \a expression. */
 #define ARIADNE_TEST_CONSTRUCT(class,variable,expression)               \
     {                                                                   \
@@ -270,8 +283,8 @@ int test_case_counter = 0;
             std::cout << #variable << "==" << variable << "\n" << std::endl; \
         }                                                               \
         ARIADNE_TEST_CATCH("Constructor `" << #class << "" << #variable << "" << #expression << "'") \
-            }                                                           \
-        class variable expression;                                      \
+    }                                                                   \
+    class variable expression;                                          \
 
 
 /*! \brief Assigns object \a variable from \a expression. */

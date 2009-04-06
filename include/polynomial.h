@@ -74,10 +74,10 @@ class Polynomial
     static Vector< Polynomial<X> > variables(unsigned int as) {
         Vector< Polynomial<X> > r(as); for(unsigned int i=0; i!=as; ++i) { r[i]=variable(as,i); } return r; }
 
-    template<class XX> bool operator==(const Polynomial<XX>& p) {
+    template<class XX> bool operator==(const Polynomial<XX>& p) const {
         const_cast<Polynomial<X>*>(this)->cleanup(); const_cast<Polynomial<XX>&>(p).cleanup();
         return this->_expansion==p._expansion; }
-    template<class XX> bool operator!=(const Polynomial<XX>& p) {
+    template<class XX> bool operator!=(const Polynomial<XX>& p) const {
         return !(*this==p); }
 
     size_type argument_size() const { return this->_expansion.argument_size(); }

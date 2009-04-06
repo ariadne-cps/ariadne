@@ -46,6 +46,7 @@ template<class X> class Expansion;
 
 class TaylorModel;
 
+class IntersectionException;
 class ImplicitFunctionException;
 class FlowBoundsException;
 
@@ -77,6 +78,13 @@ bool disjoint(const TaylorModel& tv1, const TaylorModel& tv2);
 
 // Antidifferentiation operator
 TaylorModel antiderivative(const TaylorModel& x, uint k);
+
+// An over-approximation to the intersection of two Taylor models.
+// Since the intersection cannot be represented exactly in the class of
+// TaylorModels, truncation errors as well as roundoff errors may be present.
+// In the absence of roundoff errors, the result is a subset of both arguments,
+// and is guaranteed to contain any function contained in both arguments.
+TaylorModel intersection(const TaylorModel& x1, const TaylorModel& x2);
 
 // Compose an array of Taylor variables with another, assuming that y has been scaled to have unit codomain
 TaylorModel compose(const TaylorModel& x, const Vector<TaylorModel>& y);
@@ -115,6 +123,8 @@ Vector<TaylorModel> implicit(const Vector<TaylorModel>& f);
 Vector<TaylorModel> implicit_step(const Vector<TaylorModel>& f, const Vector<TaylorModel>& h);
 Vector<TaylorModel> flow(const Vector<TaylorModel>& x, const Vector<Interval>& d, const Interval& h, uint order);
 
+TaylorModel unchecked_compose(const TaylorModel& x, const Vector<Interval>& y);
+Vector<TaylorModel> unchecked_compose(const Vector<TaylorModel>& x, const Vector<Interval>& y);
 Vector<TaylorModel> unchecked_flow(const Vector<TaylorModel>& x, const Vector<Interval>& d, const Interval& h, uint order);
 
 Float norm(const Vector<TaylorModel>& tv);
@@ -546,6 +556,10 @@ TaylorModel acos(const TaylorModel& x);
 TaylorModel atan(const TaylorModel& x);
 
 std::ostream& operator<<(std::ostream&, const TaylorModel::Accuracy&);
+
+struct IntersectionException : public std::runtime_error {
+    IntersectionException(const std::string& what) : std::runtime_error(what) { }
+};
 
 struct ImplicitFunctionException : public std::runtime_error {
     ImplicitFunctionException(const std::string& what) : std::runtime_error(what) { }

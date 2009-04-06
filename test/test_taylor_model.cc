@@ -59,6 +59,7 @@ class TestTaylorModel
     void test_functions();
     void test_rescale();
     void test_restrict();
+    void test_intersection();
     void test_split();
     void test_antiderivative();
     void test_compose();
@@ -70,9 +71,9 @@ class TestTaylorModel
 
 void TestTaylorModel::test()
 {
-    std::cerr<<std::setprecision(16);
-    std::cout<<std::setprecision(16);
-    std::clog<<std::setprecision(16);
+    std::cerr<<std::setprecision(17);
+    std::cout<<std::setprecision(17);
+    std::clog<<std::setprecision(17);
 
     ARIADNE_TEST_CALL(test_constructors());
     ARIADNE_TEST_CALL(test_predicates());
@@ -81,6 +82,7 @@ void TestTaylorModel::test()
     ARIADNE_TEST_CALL(test_functions());
     ARIADNE_TEST_CALL(test_rescale());
     ARIADNE_TEST_CALL(test_restrict());
+    ARIADNE_TEST_CALL(test_intersection());
     ARIADNE_TEST_CALL(test_split());
     ARIADNE_TEST_CALL(test_antiderivative());
     ARIADNE_TEST_CALL(test_compose());
@@ -209,6 +211,19 @@ void TestTaylorModel::test_rescale()
 
 void TestTaylorModel::test_restrict()
 {
+}
+
+void TestTaylorModel::test_intersection()
+{
+    TaylorModel x=tm(2,0); TaylorModel y=tm(2,1); TaylorModel e=tm(2,0)*0+Interval(-1,1);
+
+    // Test intersection with no roundoff errors
+    ARIADNE_TEST_EQUAL(intersection(T(E(1,4, 1.0,-0.75,0.0,3.0,3.25),0.5),T(E(1,4, 1.0,0.0,0.25,2.0,3.0),1.0)),
+        T(E(1,4, 1.0,-0.625,0.0,2.75,3.25),0.50));
+
+    // Test intersection with roundoff errors
+    ARIADNE_TEST_EQUAL(intersection(T(E(1,0, 2./3),0.5),T(E(1,0, 6./5),0.25)),
+        T(E(1,0, 1.0583333333333331),0.10833333333333339));
 }
 
 void TestTaylorModel::test_split()
@@ -355,6 +370,6 @@ void TestTaylorModel::test_flow()
 int main() {
     TestTaylorModel().test();
 
-    std::cout << "INCOMPLETE " << std::flush;
+    std::cerr << "INCOMPLETE " << std::flush;
     return ARIADNE_TEST_FAILURES;
 }

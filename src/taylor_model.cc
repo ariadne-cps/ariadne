@@ -2281,6 +2281,76 @@ Vector<TaylorModel> antiderivative(const Vector<TaylorModel>& x, const Interval&
     return r;
 }
 
+TaylorModel intersection(const TaylorModel& x, const TaylorModel& y) {
+    TaylorModel r(x.argument_size(),x.accuracy_ptr());
+    Float twice_max_error=0.0;
+
+    const Float& xe=x.error();
+    const Float& ye=y.error();
+    volatile Float rv,xv,yv,xu,yu,mxl,myl,u,ml;
+    //const MultiIndex* aptr;
+    MultiIndex a;
+
+    TaylorModel::const_iterator xiter=x.begin();
+    TaylorModel::const_iterator yiter=y.begin();
+    while(xiter!=x.end() || yiter!=y.end()) {
+        //const MultiIndex& xa=xiter->key();
+        //const MultiIndex& ya=yiter->key();
+        if(xiter==x.end()) {
+            a=yiter->key();
+            yv=yiter->data();
+            xv=0.0;
+            ++yiter;
+        } else if(yiter==y.end()) {
+            a=xiter->key();
+            xv=xiter->data();
+            yv=0.0;
+            ++xiter;
+        } else if(xiter->key()==yiter->key()) {
+            a=xiter->key();
+            xv=xiter->data();
+            yv=yiter->data();
+            ++xiter;
+            ++yiter;
+        } else if(xiter->key()<yiter->key()) {
+            a=xiter->key();
+            xv=xiter->data();
+            yv=0.0;
+            ++xiter;
+        } else { // xa>ya 
+            a=yiter->key();
+            yv=yiter->data();
+            xv=0.0;
+            ++yiter;
+        }
+
+        set_rounding_upward();
+        xu=xv+xe;
+        yu=yv+ye;
+        mxl=xe-xv;
+        myl=ye-yv;
+        u=min(xu,yu);
+        ml=min(mxl,myl);
+        if(u+ml<0) {
+            ARIADNE_THROW(IntersectionException,"intersection(TaylorModel,TaylorModel)",x<<" and "<<y<<" are disjoint.");
+        }
+        twice_max_error=max(twice_max_error,(u+ml));
+
+        set_rounding_to_nearest();
+        xu=xv+xe;
+        yu=yv+ye;
+        mxl=xe-xv;
+        myl=ye-yv;
+        u=min(xu,yu);
+        ml=min(mxl,myl);
+        rv=(u-ml)/2;
+        if(rv!=0.0) { r.expansion().append(a,(u-ml)/2); }
+    }
+
+    r.error()=twice_max_error/2;
+    
+    return r;
+}
 
 Vector<Interval> ranges(const Vector<TaylorModel>& f) {
     Vector<Interval> r(f.size()); for(uint i=0; i!=f.size(); ++i) { r[i]=f[i].range(); } return r;
@@ -2772,23 +2842,29 @@ Vector<TaylorModel> _implicit5(const Vector<TaylorModel>& f, uint n)
 
     // Iterate h'=h(g(x,h(x)))
     Vector<TaylorModel> h_new;
-    bool contracting=false;
+    uint number_non_contracting=rs;
+    array<bool> contracting(rs,false);
     for(uint k=0; k!=n; ++k) {
         h_new=compose(g,join(id,h));
-        if(!contracting) {
-            if(refines(h_new,h)) {
-                contracting=true;
-            }
-            if(disjoint(h_new,h)) {
-                ARIADNE_THROW(ImplicitFunctionException,"implicit(Vector<TaylorModel> f)",
-                              "(with f="<<f<<"): Application of Newton solver to "<<h<<" yields "<<h_new<<
-                              " which is disjoint. No solution");
+        for(uint i=0; i!=rs; ++i) {
+            if(!contracting[i]) {
+                if(refines(h_new,h)) {
+                    contracting[i]=true;
+                    --number_non_contracting;
+                }
+                if(disjoint(h_new,h)) {
+                    ARIADNE_THROW(ImplicitFunctionException,"implicit(Vector<TaylorModel> f)",
+                                "(with f="<<f<<"): Application of Newton solver to "<<h<<" yields "<<h_new<<
+                                " which is disjoint. No solution");
+                }
             }
         }
-        h=h_new;
+        for(uint i=0; i!=rs; ++i) {
+            h[i]=intersection(h[i],h_new[i]);
+        }
     }
 
-    if(contracting) {
+    if(number_non_contracting==0) {
         return h;
     } else {
         ARIADNE_THROW(ImplicitFunctionException,"implicit(Vector<TaylorModel>)",
@@ -2906,29 +2982,68 @@ Vector<TaylorModel>
 unchecked_flow(const Vector<TaylorModel>& vf, const Vector<Interval>& d, const Interval& h, uint order)
 {
     uint n=vf.size();
+    Float h_rad=h.upper();
     Vector<TaylorModel> yz(n,TaylorModel(n+1));
     for(uint i=0; i!=yz.size(); ++i) {
         yz[i]=TaylorModel::scaling(n+1,i,d[i]); }
     Vector<TaylorModel> y(n);
+
+    // Set initial conditions
+    // The Perron-Frobenius operator should act as a contraction on this set
     for(uint i=0; i!=y.size(); ++i) {
-        y[i]=TaylorModel::constant(n+1,Interval(-1,+1)); }
+        //y[i]=TaylorModel::constant(n+1,Interval(-1,+1));
 
-    Vector<TaylorModel> old_y(n,TaylorModel(n+1));
+        // Use triple the unit interval because we initially compute expansion over t in [-h,h]
+        // whereas flow box is computed for t in [0,h]
+        // In one dimension, we could have x0=-1, h=1, f(x)=2 and still have
+        // x0+hf(B)\subset B, but taking flow for t in [-h,h] gives flow bounds
+        // [-3,+1].
+        //y[i]=TaylorModel::constant(n+1,Interval(-3,+3));
 
-    Float h_rad=h.upper();
+        y[i]=TaylorModel::constant(n+1,d[i]+vf[i].range()*Interval(-h_rad,+h_rad));
+    }
+
+    Vector<TaylorModel> new_y(n,TaylorModel(n+1));
+
+
+    // Initialise to handle initial conditions and initial time step
+/*
+    new_y=compose(vf,y);
+    for(uint i=0; i!=n; ++i) {
+        new_y[i].antidifferentiate(n);
+        new_y[i]*=h_rad;
+        new_y[i]+=yz[i];
+    }
+    for(uint i=0; i!=n; ++i) {
+        new_y[i].swap(y[i]);
+    }
+*/
 
     //std::cerr << "\ny[0]=" << y << std::endl << std::endl;
     //std::cerr<<"  y="<<y<<"\n";
     for(uint j=0; j!=order+18; ++j) {
+
+        new_y=compose(vf,y);
         for(uint i=0; i!=n; ++i) {
-            y[i].swap(old_y[i]);
+            new_y[i].antidifferentiate(n);
+            new_y[i]*=h_rad;
+            new_y[i]+=yz[i];
+
+            //new_y[i]=intersection(y[i],new_y[i]);
+
+            // The following code ignores disjoint set errors
+            // and simply uses the next iterate as the new approximation
+            // I'm not sure if this is entirely safe
+            try {
+                new_y[i]=intersection(y[i],new_y[i]);
+            }
+            catch(const IntersectionException& e) {
+                std::cerr<<"Warning: "<<e.what()<<"\n";
+            }
         }
 
-        y=compose(vf,y);
         for(uint i=0; i!=n; ++i) {
-            y[i].antidifferentiate(n);
-            y[i]*=h_rad;
-            y[i]+=yz[i];
+            new_y[i].swap(y[i]);
         }
     }
 

@@ -260,8 +260,12 @@ std::ostream& operator<<(std::ostream& os, const ExpansionValue<X>& dv) {
 
 template<class X>
 struct ExpansionReference {
+    typedef MultiIndex::size_type size_type;
+    typedef MultiIndex::word_type word_type;
+
     typedef MultiIndex first_type;
     typedef X second_type;
+    ExpansionReference(size_type n, size_type nw, word_type* p) : _n(n), _nw(nw), _p(p) { }
     ExpansionReference<X>& operator=(const ExpansionReference<const X>& dr) {
         this->key()=dr.key(); this->data()=dr.data(); return *this; }
     ExpansionReference<X>& operator=(const ExpansionReference<X>& dr) {
@@ -276,12 +280,15 @@ struct ExpansionReference {
     const X& data() const { return *reinterpret_cast<const X*>(_p+_nw); }
   private:
     friend class ExpansionReference<const X>;
-    MultiIndex::size_type _n; MultiIndex::size_type _nw; MultiIndex::word_type* _p;
+    size_type _n; size_type _nw; word_type* _p;
 };
 
 template<class X>
 struct ExpansionReference<const X> {
+    typedef MultiIndex::size_type size_type;
+    typedef MultiIndex::word_type word_type;
     typedef MultiIndex first_type;
+    ExpansionReference(size_type n, size_type nw, const word_type* p) : _n(n), _nw(nw), _p(p) { }
     ExpansionReference(const ExpansionReference<X>& r) : _n(r._n), _nw(r._nw), _p(r._p) { }
     operator ExpansionValue<X>() const {
         return ExpansionValue<X>(this->key(),this->data()); }
@@ -289,7 +296,7 @@ struct ExpansionReference<const X> {
     const X& data() const { return
         *reinterpret_cast<const X*>(_p+_nw); }
   private:
-    MultiIndex::size_type _n; MultiIndex::size_type _nw; MultiIndex::word_type* _p;
+    size_type _n; size_type _nw; const word_type* _p;
 };
 
 template<class X>
@@ -358,7 +365,8 @@ class ExpansionIterator
     Ptr operator->() const {
         return reinterpret_cast<Ptr>(const_cast<Iter*>(this)); }
     Ref operator*() const {
-        return reinterpret_cast<Ref>(const_cast<Iter&>(*this)); }
+        return Ref(_n,_nw,_p); }
+        //return reinterpret_cast<Ref>(const_cast<Iter&>(*this)); }
     Iter& increment() {
         return advance(1); }
     Iter& decrement() {
@@ -408,8 +416,8 @@ class Expansion
     typedef ExpansionReference<const X> const_reference;
     typedef ExpansionReference<X>* pointer;
     typedef ExpansionReference<const X>* const_pointer;
-    typedef ExpansionIterator<X,ExpansionReference<X>&, ExpansionReference<X>* > iterator;
-    typedef ExpansionIterator<X,ExpansionReference<const X>const&, ExpansionReference<const X>const* > const_iterator;
+    typedef ExpansionIterator<X,ExpansionReference<X>, ExpansionReference<X>* > iterator;
+    typedef ExpansionIterator<X,ExpansionReference<const X>, ExpansionReference<const X>const* > const_iterator;
   public:
     Expansion() : _argument_size() { }
     Expansion(unsigned int as) : _argument_size(as) { }
@@ -694,7 +702,7 @@ std::ostream& operator<<(std::ostream& os, const Expansion<X>& p) {
 
     os << "{";
     for(typename Expansion<X>::const_iterator iter=p.begin(); iter!=p.end(); ++iter) {
-        os << (iter==p.begin() ? "" : ",");
+        os << (iter==p.begin() ? "" : ", ");
         //os<<iter->key();
         for(unsigned int i=0; i!=iter->key().size(); ++i) {
             os << (i==0?"":",") << int(iter->key()[i]); }

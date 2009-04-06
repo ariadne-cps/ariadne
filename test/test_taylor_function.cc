@@ -92,7 +92,6 @@ TestTaylorFunction::TestTaylorFunction()
 void
 TestTaylorFunction::test()
 {
-    ARIADNE_TEST_CALL(test_antiderivative()); return;
     ARIADNE_TEST_CALL(test_combine());
     ARIADNE_TEST_CALL(test_constructors());
     ARIADNE_TEST_CALL(test_restrict());
@@ -275,60 +274,63 @@ void TestTaylorFunction::test_flow()
         h=Interval(-0.125,0.125);
         flw=TaylorFunction(join(d,h),flwp);
         ARIADNE_TEST_EQUAL(flow(vf,d,h,4),flw);
+
+
     }
 
-    // Test solution of the affine flow
-    //   dx/dt = Ax+b; x(0)=x0
-    // with solution
-    //   x=inv(A)(exp(At)-I)b+exp(At)x0
+    {
+        // Test solution of the affine flow
+        //   dx/dt = Ax+b; x(0)=x0
+        // with solution
+        //   x=inv(A)(exp(At)-I)b+exp(At)x0
 
-    // In scalar form, use specific flow
-    //   dx/dt=ax+by+e; dy/dt=cx+dy+f; x(0)=x0; y(0)=y0;
-    // The first terms in the expansion are
-    //   x=(x0+e*t)+(a*(x0+t/2)+b*(y0+f/2))*t+((a*a+b*c)*x0+b*(a+d)*y0)*t*t
-    //      +e*t+(a*e+b*f)*t*t/2+...
-    Vector<Float> ex=e(2,0); Vector<Float> ey=e(2,1);
-    Polynomial<Float> x=p(2,0); Polynomial<Float> y=p(2,1);
-    Polynomial<Float> x0=p(3,0); Polynomial<Float> y0=p(3,1); Polynomial<Float> t=p(3,2);
+        // In scalar form, use specific flow
+        //   dx/dt=ax+by+e; dy/dt=cx+dy+f; x(0)=x0; y(0)=y0;
+        // The first terms in the expansion are
+        //   x=(x0+e*t)+(a*(x0+t/2)+b*(y0+f/2))*t+((a*a+b*c)*x0+b*(a+d)*y0)*t*t
+        //      +e*t+(a*e+b*f)*t*t/2+...
+        Vector<Float> ex=e(2,0); Vector<Float> ey=e(2,1);
+        Polynomial<Float> x=p(2,0); Polynomial<Float> y=p(2,1);
+        Polynomial<Float> x0=p(3,0); Polynomial<Float> y0=p(3,1); Polynomial<Float> t=p(3,2);
 
-    Float a=-0.75; Float b=-0.50; Float e=-1.0;
-    Float c=+0.50; Float d=-0.75; Float f= 0.0;
+        Float a=-0.75; Float b=-0.50; Float e=-1.0;
+        Float c=+0.50; Float d=-0.75; Float f= 0.0;
 
-    Vector<Interval> vf_domain(2, -1.0,+1.0, -1.0,+1.0);
-    Vector< Polynomial<Float> > vf_poly=(e+a*x+b*y)*ex+(f+c*x+d*y)*ey;
-    TaylorFunction vector_field(vf_domain,vf_poly);
+        Vector<Interval> vf_domain(2, -1.0,+1.0, -1.0,+1.0);
+        Vector< Polynomial<Float> > vf_poly=(e+a*x+b*y)*ex+(f+c*x+d*y)*ey;
+        TaylorFunction vector_field(vf_domain,vf_poly);
 
-    Vector<Interval> flow_domain(2, -0.5,+0.5, -0.5,+0.5);
-    Vector< Polynomial<Float> > flow_poly=flow(vf_poly,6);
-    Vector< Polynomial<Interval> > ivl_flow_poly=flow_poly;
-    Vector<Interval> flow_error(2,Interval(-1e-1,1e-1)); // extra flow error
-
-
-    Interval time(-0.25,0.25);
-    uint order(6);
-    TaylorFunction computed_flow;
-
-    // Expect exception indicating that flow cannot be computed over this time step.
-    ARIADNE_TEST_THROWS(flow(vector_field,flow_domain,time,order),FlowBoundsException);
+        Vector<Interval> flow_domain(2, -0.5,+0.5, -0.5,+0.5);
+        Vector< Polynomial<Float> > flow_poly=flow(vf_poly,6);
+        Vector< Polynomial<Interval> > ivl_flow_poly=flow_poly;
+        Vector<Interval> flow_error(2,Interval(-1e-1,1e-1)); // extra flow error
 
 
-    // Compute flow of vector field
-    time/=2;
-    computed_flow=flow(vector_field,flow_domain,time,order);
-    TaylorFunction expected_flow(join(flow_domain,time),flow_poly);
-    expected_flow+=flow_error;
+        Interval time(-0.25,0.25);
+        uint order(6);
+        TaylorFunction computed_flow;
 
-    ARIADNE_TEST_PRINT(flow_poly);
-    ARIADNE_TEST_PRINT(midpoint(truncate(computed_flow.polynomial(),6)));
-
-    ARIADNE_TEST_PRINT(computed_flow);
-    ARIADNE_TEST_PRINT(expected_flow);
+        // Expect exception indicating that flow cannot be computed over this time step.
+        ARIADNE_TEST_THROWS(flow(vector_field,flow_domain,time,order),FlowBoundsException);
 
 
-    ARIADNE_TEST_PRINT(norm(Vector<TaylorModel>(expected_flow.models()-computed_flow.models())));
-    for(uint i=0; i!=2; ++i) { const_cast<TaylorModel&>(computed_flow.models()[i]).sweep(1e-6); }
-    ARIADNE_TEST_BINARY_PREDICATE(refines,computed_flow,expected_flow);
+        // Compute flow of vector field
+        time/=2;
+        computed_flow=flow(vector_field,flow_domain,time,order);
+        TaylorFunction expected_flow(join(flow_domain,time),flow_poly);
+        expected_flow+=flow_error;
 
+        ARIADNE_TEST_PRINT(flow_poly);
+        ARIADNE_TEST_PRINT(midpoint(truncate(computed_flow.polynomial(),6)));
+
+        ARIADNE_TEST_PRINT(computed_flow);
+        ARIADNE_TEST_PRINT(expected_flow);
+
+
+        ARIADNE_TEST_PRINT(norm(Vector<TaylorModel>(expected_flow.models()-computed_flow.models())));
+        for(uint i=0; i!=2; ++i) { const_cast<TaylorModel&>(computed_flow.models()[i]).sweep(1e-6); }
+        ARIADNE_TEST_BINARY_PREDICATE(refines,computed_flow,expected_flow);
+    }
 /*
     // Test for contraction of single flow step
     // This is not strictly needed for a valid solution
@@ -338,6 +340,21 @@ void TestTaylorFunction::test_flow()
                             computed_flow<<"; operator yields "<<contracted_flow);
     }
 */
+
+    {
+        // Test a flow starting at a corner of the flow bounds with constant derivative 
+        // This test is designed to catch problems due to the flow being computed on the
+        // time interval [0,h], while intermediate steps use [-h,h]
+        Vector< Polynomial< Float > > vector_field_poly = (1.5+p(1,0)*0.0)*e(1,0);
+        Vector<Interval> bounding_box(1, Interval(-1,+1));
+        Vector<Interval> initial_box(1, Interval(-1,-0.5));
+        Interval time_interval(0,1.0);
+        uint order=4;
+        TaylorFunction vector_field(bounding_box,vector_field_poly);
+        TaylorFunction flow_model=flow(vector_field,initial_box,time_interval,order);
+        Vector< Polynomial<Float> > flow_poly = (p(2,0)+1.5*p(2,1))*e(1,0);
+        ARIADNE_TEST_EQUAL(flow_model.polynomial(),flow_poly);
+    }
 }
 
 

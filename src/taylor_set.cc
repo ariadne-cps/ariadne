@@ -398,7 +398,7 @@ void box_draw(Figure& fig, const TaylorSet& ts) {
 }
 
 void affine_draw(Figure& fig, const TaylorSet& ts) {
-    draw(fig,ts.linearise());
+    draw(fig,zonotope(ts));
 }
 
 void curve_draw(Figure& fig, const TaylorSet& ts) {

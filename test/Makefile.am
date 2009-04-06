@@ -75,12 +75,10 @@ test_reachability_analysis_SOURCES=test_reachability_analysis.cc
 test_serialization_SOURCES=test_serialization.cc
 test_graphics_SOURCES=test_graphics.cc
 
-profile_arithmetic_SOURCES=profile_arithmetic.cc
-profile_taylor_variable_SOURCES=profile_taylor_variable.cc
 
 EXTRA_DIST =
 SUBDIRS =
 
 TESTS = $(check_PROGRAMS)
-XFAIL_TESTS = test_continuous_evolution test_hybrid_evolution
+XFAIL_TESTS = 
 testsubdir = ./

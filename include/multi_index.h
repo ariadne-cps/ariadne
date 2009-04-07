@@ -147,32 +147,29 @@ class MultiIndex {
     friend std::ostream& operator<<(std::ostream&, const MultiIndex&);
   public:
     //value_type& at(size_type i) { return _p[i]; }
-    const value_type& at(size_type i) const { return _p[i]; }
-    value_type* begin() { return _p; }
-    const value_type* begin() const { return _p; }
+    const value_type& at(size_type i) const { return reinterpret_cast<const value_type*>(_p)[i]; }
+    value_type& at(size_type i) { return reinterpret_cast<value_type*>(_p)[i]; }
+    value_type* begin() { return reinterpret_cast<value_type*>(_p); }
+    const value_type* begin() const { return reinterpret_cast<const value_type*>(_p); }
   public:
     size_type word_size() const { return _nw; }
-    word_type& word_at(size_type j) { return reinterpret_cast<word_type*>(_p)[j]; }
-    const word_type& word_at(size_type j) const { return reinterpret_cast<const word_type*>(_p)[j]; }
-    word_type* word_begin() { return reinterpret_cast<word_type*>(_p); }
-    const word_type* word_begin() const { return reinterpret_cast<const word_type*>(_p); }
-    word_type* word_end() { return reinterpret_cast<word_type*>(_p)+word_size(); }
-    const word_type* word_end() const { return reinterpret_cast<const word_type*>(_p)+word_size(); }
+    word_type& word_at(size_type j) { return _p[j]; }
+    const word_type& word_at(size_type j) const { return _p[j]; }
+    word_type* word_begin() { return _p; }
+    const word_type* word_begin() const { return _p; }
+    word_type* word_end() { return _p+word_size(); }
+    const word_type* word_end() const { return _p+word_size(); }
   public:
     static size_type _word_size(size_type n) {
         return ((n*sizeof(byte_type))/sizeof(word_type)+1); }
-   template<class X> static size_type _element_size(size_type n) {
-        return ((n*sizeof(byte_type))/sizeof(word_type)+1+sizeof(X)/sizeof(word_type)); }
-    static value_type* _allocate(size_type n) {
-        return reinterpret_cast<value_type*>(new word_type[_word_size(n)]); }
-    static value_type* _allocate_words(size_type nw) {
-        return reinterpret_cast<value_type*>(new word_type[nw]); }
-    static void _deallocate(value_type* p) {
-        delete[] reinterpret_cast<word_type*>(p); }
+    static word_type* _allocate_words(size_type nw) {
+        word_type* p=new word_type[nw]; return p; }
+    static void _deallocate_words(word_type* p) {
+        delete[] p; }
   private:
     size_type _n;
     size_type _nw;
-    value_type* _p;
+    word_type* _p;
 };
 
 
@@ -201,7 +198,7 @@ inline MultiIndexValueReference& MultiIndexValueReference::operator--() {
 
 inline MultiIndex::~MultiIndex()
 {
-    _deallocate(_p);
+    _deallocate_words(_p);
 }
 
 inline MultiIndex::MultiIndex()
@@ -220,18 +217,20 @@ inline MultiIndex::MultiIndex(size_type n, const int* ary)
     : _n(n), _nw(_word_size(_n)), _p(_allocate_words(_nw))
 {
     for(size_type j=0; j!=word_size(); ++j) { word_at(j)=0; }
-    _p[n]=0; for(size_type i=0; i!=n; ++i) { _p[i]=ary[i]; _p[n]+=ary[i]; }
+    value_type* p=reinterpret_cast<value_type*>(_p);
+    p[n]=0; for(size_type i=0; i!=n; ++i) { p[i]=ary[i]; p[n]+=ary[i]; }
 }
 
 inline MultiIndex::MultiIndex(size_type n, int a0, ...)
     : _n(n), _nw(_word_size(_n)), _p(_allocate_words(_nw))
 {
     ARIADNE_ASSERT(n>0);
-    _p[0]=a0; _p[_n]=a0;
+    value_type* p=reinterpret_cast<value_type*>(_p);
+    p[0]=a0; p[_n]=a0;
     va_list args; va_start(args,a0);
     for(size_type i=1; i!=n; ++i) {
-        _p[i]=va_arg(args,int);
-        _p[_n]+=_p[i];
+        p[i]=va_arg(args,int);
+        p[_n]+=p[i];
     }
     va_end(args);
 }
@@ -257,19 +256,19 @@ inline MultiIndex MultiIndex::zero(size_type n)
     return MultiIndex(n);
 }
 
-inline MultiIndex MultiIndex::unit(size_type n, size_type j)
+inline MultiIndex MultiIndex::unit(size_type n, size_type i)
 {
     MultiIndex result(n);
-    result._p[j]=1u;
-    result._p[n]=1u;
+    reinterpret_cast<value_type*>(result._p)[i]=1u;
+    reinterpret_cast<value_type*>(result._p)[n]=1u;
     return result;
 }
 
 inline MultiIndex MultiIndex::first(size_type n, value_type d)
 {
     MultiIndex result(n);
-    result._p[0]=d;
-    result._p[n]=d;
+    reinterpret_cast<value_type*>(result._p)[0]=d;
+    reinterpret_cast<value_type*>(result._p)[n]=d;
     return result;
 }
 
@@ -279,7 +278,7 @@ inline void MultiIndex::clear()
 }
 
 inline void MultiIndex::resize(size_type n) {
-    if(this->_n!=n) { _deallocate(this->_p); this->_n=n; this->_nw=_word_size(_n); this->_p=_allocate_words(this->_nw); }
+    if(this->_n!=n) { _deallocate_words(this->_p); this->_n=n; this->_nw=_word_size(_n); this->_p=_allocate_words(this->_nw); }
 }
 
 inline MultiIndex::size_type MultiIndex::size() const {
@@ -287,7 +286,7 @@ inline MultiIndex::size_type MultiIndex::size() const {
 }
 
 inline MultiIndex::value_type MultiIndex::degree() const {
-    return this->_p[this->_n];
+    return reinterpret_cast<const value_type*>(this->_p)[this->_n];
 }
 
 inline MultiIndex::size_type MultiIndex::number_of_variables() const {
@@ -295,15 +294,15 @@ inline MultiIndex::size_type MultiIndex::number_of_variables() const {
 }
 
 inline MultiIndex::value_type const& MultiIndex::operator[](size_type i) const {
-    assert(i<this->size()); return this->_p[i];
+    assert(i<this->size()); return reinterpret_cast<const value_type*>(this->_p)[i];
 }
 
 inline MultiIndexValueReference MultiIndex::operator[](size_type i) {
-    return MultiIndexValueReference(this->_n,this->_p,i);
+    return MultiIndexValueReference(this->_n,reinterpret_cast<value_type*>(this->_p),i);
 }
 
 inline void MultiIndex::increment(size_type i) {
-    ++this->_p[i]; ++this->_p[this->_n]; 
+    ++reinterpret_cast<value_type*>(this->_p)[i]; ++reinterpret_cast<value_type*>(this->_p)[this->_n]; 
 }
 
 
@@ -386,27 +385,31 @@ MultiIndex& MultiIndex::operator++()
 {
     //std::cerr<<"MultiIndex::operator++() with *this="<<*this<<" "<<std::flush;
     assert(_n>0);
-    if(_n==1) {
-        ++_p[0];
-        ++_p[_n];
+
+    size_type const n=this->_n;
+    value_type* const p=reinterpret_cast<value_type*>(this->_p);
+
+    if(n==1) {
+        ++p[0];
+        ++p[n];
         return *this;
     }
-    if(_p[_n-2]!=0) {
-        --_p[_n-2];
-        ++_p[_n-1];
+    if(p[n-2]!=0) {
+        --p[n-2];
+        ++p[n-1];
         return *this;
     } else {
-        value_type li=_p[_n-1];
-        _p[_n-1]=0;
-        for(size_type k=_n-1; k!=0; --k) {
-            if(_p[k-1]!=0) {
-                --_p[k-1];
-                _p[k]=li+1;
+        value_type li=p[n-1];
+        p[n-1]=0;
+        for(size_type k=n-1; k!=0; --k) {
+            if(p[k-1]!=0) {
+                --p[k-1];
+                p[k]=li+1;
                 return *this;
             }
         }
-        _p[0]=li+1;
-        ++_p[_n];
+        p[0]=li+1;
+        ++p[n];
     }
     return *this;
 }
@@ -440,6 +443,13 @@ MultiIndex& MultiIndex::operator*=(const value_type& s) {
     return *this;
     for(size_type i=0; i!=this->size()+1; ++i) {
         this->_p[i]*=s;
+    }
+}
+
+inline
+void iadd(MultiIndex& r, const MultiIndex& a1, const MultiIndex& a2) {
+    for(MultiIndex::size_type j=0; j!=r.word_size(); ++j) {
+        r.word_at(j)=a1.word_at(j)+a2.word_at(j);
     }
 }
 
@@ -497,7 +507,6 @@ bin(const MultiIndex& n, const MultiIndex& k)
     }
     return result;
 }
-
 
 inline
 std::ostream& operator<<(std::ostream& os, const MultiIndex& a) {

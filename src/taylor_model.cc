@@ -278,6 +278,7 @@ inline void _incr(TaylorModel& r, uint j)
 }
 
 
+inline
 void _acc(TaylorModel& r, const Float& c)
 {
     // Compute self+=c
@@ -303,6 +304,7 @@ void _acc(TaylorModel& r, const Float& c)
 
 
 
+inline
 void _acc(TaylorModel& r, const Interval& c)
 {
     // Compute self+=c

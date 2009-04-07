@@ -190,6 +190,6 @@ void TestTaylorVariable::test_antiderivative()
 
 int main() {
     TestTaylorVariable().test();
-    std::cout << "INCOMPLETE " << std::flush;
+    std::cerr << "INCOMPLETE " << std::flush;
     return ARIADNE_TEST_FAILURES;
 }

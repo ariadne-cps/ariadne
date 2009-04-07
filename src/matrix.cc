@@ -54,7 +54,7 @@ Matrix<X>
 lu_inverse(const Matrix<X>& M)
 {
     typedef X RealType;
-    assert(M.row_size()==M.column_size());
+    ARIADNE_ASSERT_MSG(M.row_size()==M.column_size(),"A="<<M);
 
     size_t m=M.row_size();
     size_t n=M.column_size();
@@ -255,13 +255,13 @@ solve(const PLUMatrix<X>& A, const Matrix<X>& B)
     const Matrix<X>& U=A.U;
 
     // Only work with square matrices L, U
-    assert(L.row_size()==L.column_size());
-    assert(U.row_size()==U.column_size());
+    ARIADNE_ASSERT(L.row_size()==L.column_size());
+    ARIADNE_ASSERT(U.row_size()==U.column_size());
 
     // Check sizes for consistency
-    assert(L.column_size()==U.row_size());
-    assert(P.size()==L.row_size());
-    assert(B.row_size()==P.size());
+    ARIADNE_ASSERT(L.column_size()==U.row_size());
+    ARIADNE_ASSERT(P.size()==L.row_size());
+    ARIADNE_ASSERT(B.row_size()==P.size());
 
     // Set constants for sizes
     const size_t m=B.column_size();
@@ -366,7 +366,7 @@ tuple< PivotMatrix, Matrix<Float>, Matrix<Float> >
 triangular_decomposition(const Matrix<Float>& A)
 {
     typedef Float RealType;
-    assert(A.row_size()==A.column_size());
+    ARIADNE_ASSERT(A.row_size()==A.column_size());
 
     size_t m=A.row_size();
     size_t n=A.column_size();

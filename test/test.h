@@ -193,8 +193,8 @@ int test_case_counter = 0;
             std::cout << "true\n" << std::endl;                         \
         } else {                                                        \
             ++ARIADNE_TEST_FAILURES;                                    \
-            std::cout << "\nERROR: " << #expression1 << ": " << (expression1) \
-                      << "\n     : " << #expression2 << ": " << (expression2) << std::endl; \
+            std::cout << "\nERROR: " << #expression1 << ":\n           " << (expression1) \
+                      << "\n     : " << #expression2 << ":\n           " << (expression2) << std::endl; \
             std::cerr << "ERROR: " << __FILE__ << ":" << __LINE__ << ": " << __PRETTY_FUNCTION__ << ": Equality `" << #expression1 << " == " << #expression2 << "' failed; " << #expression1 << "=" << (expression1) << "; " << #expression2 << "=" << (expression2) << std::endl; \
         }                                                               \
     }                                                                   \

@@ -346,6 +346,8 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     FlowModelType flow_model=this->_toolbox->flow_model(*dynamic_ptr,initial_set_bounds,step_size,flow_bounds);
     ARIADNE_LOG(6,"flow_model = "<<flow_model<<"\n");
 
+    //ARIADNE_ASSERT_MSG(subset(flow_model.range(),flow_bounds),flow_model<<"\n  "<<flow_model.range()<<"\n  "<<flow_bounds);
+
     // Compute the integration time model
     TimeModelType final_time_model=initial_time_model+step_size;
     ARIADNE_LOG(6,"final_time_model = "<<final_time_model<<"\n");

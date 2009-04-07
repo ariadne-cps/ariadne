@@ -25,6 +25,7 @@
 
 #include "macros.h"
 #include "logging.h"
+#include "pointer.h"
 #include "numeric.h"
 #include "vector.h"
 #include "matrix.h"
@@ -78,7 +79,8 @@ TaylorCalculus::
 reset_step(const FlowModelType& function_model,
            const SetModelType& set_model) const
 {
-    return Ariadne::apply(function_model,set_model);
+    ARIADNE_ASSERT(subset(set_model.range(),function_model.domain()));
+    return Ariadne::unchecked_apply(function_model,set_model);
 }
 
 
@@ -92,7 +94,10 @@ integration_step(const FlowModelType& flow_model,
     //SetModelType set_step_model=join(initial_set_model, integration_time_model);
     SetModelType set_step_model(join(initial_set_model.models(),integration_time_model));
     ARIADNE_LOG(6,"set_step_model = "<<set_step_model<<"\n");
-    SetModelType final_set_model=apply(flow_model,set_step_model);
+    //FIXME: Make sure that we never need to check subset of domain in flow range.
+    //ARIADNE_ASSERT(subset(flow_model.domain()[flow_model.size()],integration_time_model.range()));
+    //ARIADNE_ASSERT(subset(flow_model.domain(),set_step_model.range()));
+    SetModelType final_set_model=unchecked_apply(flow_model,set_step_model);
     ARIADNE_LOG(6,"final_set_model = "<<final_set_model<<"\n");
     return final_set_model;
 }
@@ -194,7 +199,7 @@ reachability_step(const FlowModelType& flow_model,
     ARIADNE_LOG(6,"expanded_reach_time_model="<<expanded_reach_time_model<<"\n");
     SetModelType expanded_timed_set_model=join(expanded_initial_set_model.models(),expanded_reach_time_model);
     ARIADNE_LOG(6,"expanded_timed_set_model="<<expanded_timed_set_model<<"\n");
-    SetModelType reach_set_model=Ariadne::apply(flow_model,expanded_timed_set_model);
+    SetModelType reach_set_model=Ariadne::unchecked_apply(flow_model,expanded_timed_set_model);
     ARIADNE_LOG(6,"reach_set_model = "<<reach_set_model<<"\n");
 
     return reach_set_model;
@@ -216,29 +221,37 @@ crossing_time(const PredicateModelType& guard_model,
     RealType minimum_time=flow_model.domain()[dimension].lower();
     RealType maximum_time=flow_model.domain()[dimension].upper();
 
+    Interval flow_time_interval=flow_model.domain()[dimension];
+    ARIADNE_ASSERT(subset(join(initial_set_model.range(),flow_time_interval),flow_model.domain()));
+    
     //ARIADNE_ASSERT(minimum_time<=0);
     //ARIADNE_ASSERT(maximum_time>=0);
     ARIADNE_ASSERT(flow_model.argument_size()==flow_model.result_size()+1);
     ARIADNE_ASSERT(guard_model.argument_size()==flow_model.result_size());
     ARIADNE_ASSERT(initial_set_model.dimension()==flow_model.result_size());
 
-    PredicateModelType hitting_model=compose(guard_model,flow_model);
+    PredicateModelType hitting_model=unchecked_compose(guard_model,flow_model);
     ARIADNE_LOG(6,"hitting_model = "<<hitting_model<<"\n");
     PredicateModelType free_hitting_time_model;
     try {
-        free_hitting_time_model=implicit(hitting_model);
+        free_hitting_time_model=Ariadne::implicit(hitting_model);
     } catch(NonInvertibleFunctionException) {
         throw DegenerateCrossingException();
+    } catch(const std::runtime_error& e) {
+        std::cerr<<e.what();
+        throw e;
     }
+
     ARIADNE_LOG(6,"free_hitting_time_model = "<<free_hitting_time_model<<"\n");
-    TimeModelType hitting_time_model=Ariadne::apply(free_hitting_time_model,initial_set_model)[0];
+    ARIADNE_ASSERT_MSG(free_hitting_time_model.argument_size()==initial_set_model.dimension(),free_hitting_time_model<<initial_set_model);
+    TimeModelType hitting_time_model=Ariadne::apply(free_hitting_time_model,initial_set_model);
     ARIADNE_LOG(6,"hitting_time_model = "<<hitting_time_model<<"\n");
     Interval hitting_time_range=hitting_time_model.range();
     ARIADNE_LOG(6,"hitting_time_model = "<<hitting_time_model<<"\n");
     if(hitting_time_range.lower()<R(minimum_time) || hitting_time_range.upper()>R(maximum_time)) {
         throw DegenerateCrossingException();
     }
-
+    ARIADNE_ASSERT_MSG(hitting_time_model.argument_size()==initial_set_model.argument_size(),hitting_time_model<<initial_set_model);
     return hitting_time_model;
 }
 
@@ -251,10 +264,16 @@ touching_time_interval(const PredicateModelType& guard_model,
                        const FlowModelType& flow_model,
                        const SetModelType& initial_set_model) const
 {
+    //std::cerr<<"touching_time_interval"<<std::endl;
     ARIADNE_ASSERT(flow_model.result_size()+1==flow_model.argument_size());
     ARIADNE_ASSERT(guard_model.argument_size()==flow_model.result_size());
 
     uint dimension=guard_model.argument_size();
+    ARIADNE_ASSERT(subset(initial_set_model.range(),guard_model.domain()));
+    ARIADNE_ASSERT(subset(initial_set_model.range(),project(flow_model.domain(),range(0,dimension))));
+    //ARIADNE_ASSERT_MSG(subset(flow_model.range(),guard_model.domain()),
+    //    flow_model.range()<<"\n"<<guard_model.domain()<<"\n");
+
     RealType minimum_time=flow_model.domain()[dimension].lower();
     RealType maximum_time=flow_model.domain()[dimension].upper();
 
@@ -402,10 +421,8 @@ TaylorCalculus::flow_bounds(FunctionInterface const& vf,
 
     ARIADNE_ASSERT(subset(r,b));
 
-    if(!subset(r+h*vf.evaluate(b),b)) {
-        std::cerr<<"d="<<r<<"\nh="<<h<<"\nf="<<vf.evaluate(b)<<"\np="<<Vector<Interval>(r+h*vf.evaluate(b))
-                 <<"\nb="<<b<<"\n"; }
-    ARIADNE_ASSERT(subset(r+h*vf.evaluate(b),b));
+    ARIADNE_ASSERT_MSG(subset(r+h*vf.evaluate(b),b),
+        "d="<<r<<"\nh="<<h<<"\nf="<<vf.evaluate(b)<<"\np="<<Vector<Interval>(r+h*vf.evaluate(b))<<"\nb="<<b<<"\n");
 
     return std::make_pair(h,b);
 }
@@ -417,7 +434,9 @@ tribool
 TaylorCalculus::
 active(const PredicateModelType& guard_model, const SetModelType& set_model) const
 {
-    IntervalType range=Ariadne::apply(guard_model,set_model).range();
+    //ARIADNE_ASSERT_MSG(subset(set_model.range(),guard_model.domain()),
+    //    "\nset_model.range()="<<set_model.range()<<"\nguard_model="<<guard_model<<"\nset_model="<<set_model);
+    IntervalType range=Ariadne::unchecked_apply(guard_model,set_model).range();
     return this->_tribool(range);
 }
 
@@ -443,10 +462,17 @@ TaylorCalculus::flow_model(FunctionInterface const& vf, Vector<Interval> const& 
 {
     ARIADNE_ASSERT(subset(bx+Interval(0,h)*vf.evaluate(bb),bb));
 
-    FunctionModelType vector_field_model(bb,vf);
+    TaylorModel::Accuracy* accuracy_raw_ptr=new TaylorModel::Accuracy;
+    boost::shared_ptr<TaylorModel::Accuracy> accuracy(accuracy_raw_ptr);
+    accuracy->_maximum_degree=this->_temporal_order;
+    accuracy->_sweep_threshold=1e-10;
+    FunctionModelType vector_field_model(bb,vf,accuracy);
     ARIADNE_LOG(6,"vector_field_model = "<<vector_field_model<<"\n");
+    for(uint i=0; i!=vector_field_model.size(); ++i) {
+        vector_field_model.models()[i].accuracy_ptr()->_maximum_degree+=this->_spacial_order;
+    }
 
-    const uint temporal_order=6;
+    const uint temporal_order=this->_temporal_order;
     // Use flow function on model type
     FlowModelType flow_model=Ariadne::unchecked_flow(vector_field_model,bx,Interval(0,h),temporal_order);
     ARIADNE_LOG(6,"flow_model = "<<flow_model<<"\n");

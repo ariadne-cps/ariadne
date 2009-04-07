@@ -45,24 +45,24 @@ const double ec=em/2;
 double TaylorModel::_default_sweep_threshold=1e-18;
 uint TaylorModel::_default_maximum_degree=16;
 
-struct TaylorModel::Accuracy {
-    friend class TaylorModel;
+TaylorModel::Accuracy::Accuracy() : _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree) { }
+TaylorModel::Accuracy::Accuracy(double st, uint md) : _sweep_threshold(st), _maximum_degree(md) { }
 
-    Accuracy() : _sweep_threshold(_default_sweep_threshold), _maximum_degree(_default_maximum_degree) { }
-    Accuracy(double st, uint md) : _sweep_threshold(st), _maximum_degree(md) { }
+TaylorModel::Accuracy
+max(const TaylorModel::Accuracy& acc1, const TaylorModel::Accuracy& acc2) {
+    return TaylorModel::Accuracy(std::min(acc1._sweep_threshold,acc1._sweep_threshold),
+        std::max(acc1._maximum_degree,acc2._maximum_degree));
+}
 
-    Accuracy max(const Accuracy& acc1, const Accuracy& acc2) {
-        return Accuracy(std::min(acc1._sweep_threshold,acc1._sweep_threshold),std::max(acc1._maximum_degree,acc2._maximum_degree)); }
-    Accuracy min(const Accuracy& acc1, const Accuracy& acc2) {
-        return Accuracy(std::max(acc1._sweep_threshold,acc1._sweep_threshold),std::min(acc1._maximum_degree,acc2._maximum_degree)); }
+TaylorModel::Accuracy
+min(const TaylorModel::Accuracy& acc1, const TaylorModel::Accuracy& acc2) {
+    return TaylorModel::Accuracy(std::max(acc1._sweep_threshold,acc1._sweep_threshold),
+        std::min(acc1._maximum_degree,acc2._maximum_degree));
+}
 
-    bool discard(const Float& x) const { return abs(x)<this->_sweep_threshold; }
-    bool discard(const MultiIndex& a) const { return a.degree()>this->_maximum_degree; }
-    bool discard(const MultiIndex& a, const Float& x) const { return this->discard(x) || this->discard(a); }
-
-    double _sweep_threshold;
-    uint _maximum_degree;
-};
+inline bool TaylorModel::Accuracy::discard(const Float& x) const { return abs(x)<this->_sweep_threshold; }
+inline bool TaylorModel::Accuracy::discard(const MultiIndex& a) const { return a.degree()>this->_maximum_degree; }
+inline bool TaylorModel::Accuracy::discard(const MultiIndex& a, const Float& x) const { return this->discard(x) || this->discard(a); }
 
 std::ostream& operator<<(std::ostream& os, const TaylorModel::Accuracy& acc) {
     return os<<"( sweep_threshold="<<acc._sweep_threshold<<", maximum_degree="<<acc._maximum_degree<<" )";
@@ -71,7 +71,7 @@ std::ostream& operator<<(std::ostream& os, const TaylorModel::Accuracy& acc) {
 
 
 TaylorModel::TaylorModel()
-    : _expansion(), _error(), _accuracy_ptr(new Accuracy())
+    : _expansion(0), _error(), _accuracy_ptr(new Accuracy())
 { }
 
 TaylorModel::TaylorModel(uint as)
@@ -1115,7 +1115,7 @@ operator+(const TaylorModel& x, const TaylorModel& y) {
 
 TaylorModel
 operator-(const TaylorModel& x, const TaylorModel& y) {
-    ARIADNE_ASSERT(x.argument_size()==y.argument_size());
+    ARIADNE_ASSERT_MSG(x.argument_size()==y.argument_size(),"x=("<<x.argument_size()<<")"<<x<<"y="<<y<<"\n");
     TaylorModel r=neg(y); _acc(r,x); return r;
 }
 
@@ -2294,6 +2294,8 @@ TaylorModel intersection(const TaylorModel& x, const TaylorModel& y) {
     TaylorModel::const_iterator xiter=x.begin();
     TaylorModel::const_iterator yiter=y.begin();
     while(xiter!=x.end() || yiter!=y.end()) {
+        // Can't use const MultiIndex& here since references change as the iterators change
+        // We would need to use a smart reference
         //const MultiIndex& xa=xiter->key();
         //const MultiIndex& ya=yiter->key();
         if(xiter==x.end()) {
@@ -2504,7 +2506,7 @@ jacobian2_range(const Vector<TaylorModel>& f)
     uint rs=f.size();
     uint fas=f[0].argument_size();
     uint has=fas-rs;
-    Matrix<Interval> J(rs,has);
+    Matrix<Interval> J(rs,rs);
     for(uint i=0; i!=rs; ++i) {
         for(TaylorModel::const_iterator iter=f[i].begin(); iter!=f[i].end(); ++iter) {
             for(uint k=0; k!=rs; ++k) {
@@ -2526,28 +2528,6 @@ jacobian2_range(const Vector<TaylorModel>& f)
 // Vector operators (compose, solve, implicit, flow
 
 
-TaylorModel
-compose(const TaylorModel& x,
-        const Vector<Interval>& d,
-        const Vector<TaylorModel>& y)
-{
-    return compose(x,scale(y,d));
-}
-
-Vector<TaylorModel>
-compose(const Vector<TaylorModel>& x,
-        const Vector<Interval>& d,
-        const Vector<TaylorModel>& y)
-{
-    return compose(x,scale(y,d));
-}
-
-TaylorModel
-compose(const TaylorModel& x,
-        const Vector<TaylorModel>& ys)
-{
-    return compose(Vector<TaylorModel>(1u,x),ys)[0];
-}
 
 
 // Compose by computing each and every term individually without caching
@@ -2589,16 +2569,11 @@ _compose2(const Vector<TaylorModel>& x,
           const Vector<TaylorModel>& ys)
 {
     //std::cerr<<"compose2"<<std::endl;
-    ARIADNE_ASSERT(x.size()>0);
-    ARIADNE_ASSERT(ys.size()==x[0].argument_size());
-    shared_ptr<TaylorModel::Accuracy> accuracy_ptr=ys[0].accuracy_ptr();
-    for(uint i=1; i!=x.size(); ++i) { ARIADNE_ASSERT(x[i].argument_size()==x[0].argument_size()); }
-    for(uint i=1; i!=ys.size(); ++i) { ARIADNE_ASSERT_MSG(ys[i].argument_size()==ys[0].argument_size(),"ys="<<ys); }
-
     uint yrs=ys.size();
     uint xas=ys.size();
     uint as=ys[0].argument_size();
-
+    shared_ptr<TaylorModel::Accuracy> accuracy_ptr=ys[0].accuracy_ptr();
+    
     array<uchar> max_power(ys.size());
     for(uint j=0; j!=ys.size(); ++j) { max_power[j]=1; }
 
@@ -2645,11 +2620,63 @@ _compose2(const Vector<TaylorModel>& x,
 }
 
 Vector<TaylorModel>
+_compose(const Vector<TaylorModel>& x,
+         const Vector<TaylorModel>& ys)
+{
+    ARIADNE_ASSERT(x.size()>0);
+    ARIADNE_ASSERT(ys.size()==x[0].argument_size());
+    for(uint i=1; i!=x.size(); ++i) { ARIADNE_ASSERT(x[i].argument_size()==x[0].argument_size()); }
+    for(uint i=1; i!=ys.size(); ++i) { ARIADNE_ASSERT_MSG(ys[i].argument_size()==ys[0].argument_size(),"ys="<<ys); }
+
+    return _compose2(x,ys);
+}
+
+
+Vector<TaylorModel>
+unchecked_compose(const Vector<TaylorModel>& x,
+                  const Vector<TaylorModel>& ys)
+{
+    return _compose(x,ys);
+}
+
+TaylorModel
+unchecked_compose(const TaylorModel& x,
+                  const Vector<TaylorModel>& ys)
+{
+    return _compose(Vector<TaylorModel>(1u,x),ys)[0];
+}
+
+Vector<TaylorModel>
 compose(const Vector<TaylorModel>& x,
         const Vector<TaylorModel>& ys)
 {
-    return _compose2(x,ys);
+    return _compose(x,ys);
 }
+
+TaylorModel
+compose(const TaylorModel& x,
+        const Vector<TaylorModel>& ys)
+{
+    return _compose(Vector<TaylorModel>(1u,x),ys)[0];
+}
+
+TaylorModel
+compose(const TaylorModel& x,
+        const Vector<Interval>& d,
+        const Vector<TaylorModel>& y)
+{
+    return _compose(Vector<TaylorModel>(1u,x),unscale(y,d))[0];
+}
+
+Vector<TaylorModel>
+compose(const Vector<TaylorModel>& x,
+        const Vector<Interval>& d,
+        const Vector<TaylorModel>& y)
+{
+    return _compose(x,unscale(y,d));
+}
+
+
 
 
 Vector<Interval>

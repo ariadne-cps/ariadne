@@ -501,8 +501,13 @@ class AffineFunction
     virtual Vector< Differential<Interval> > evaluate(const Vector< Differential<Interval> >& x) const {
         return prod(_iA,x)+_ib; }
     virtual Vector<TaylorModel> evaluate(const Vector<TaylorModel>& x) const {
-        return prod(_iA,x)+_ib; }
-
+        return prod(_iA,x)+_ib;
+        ARIADNE_ASSERT(x.size()==this->argument_size());
+        for(uint i=1; i<x.size(); ++i) { ARIADNE_ASSERT(x[i].argument_size()==x[0].argument_size()); }
+        Vector<TaylorModel> r(this->result_size(),x[0]*0.0);
+        for(uint i=0; i!=r.size(); ++i) { r[i]=_ib[i]; for(uint j=0; j!=x.size(); ++j) { r[i]+=_iA[i][j]*x[j]; } }
+        return r; 
+    }
     virtual Matrix<Float> jacobian(const Vector<Float>& x) const {
         return Ariadne::jacobian(this->evaluate(Differential<Float>::variables(1u,x))); }
     virtual Matrix<Interval> jacobian(const Vector<Interval>& x) const {

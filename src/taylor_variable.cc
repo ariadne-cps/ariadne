@@ -302,7 +302,11 @@ implicit(const Vector<TaylorVariable>& f)
 TaylorVariable implicit(const TaylorVariable& f) {
     Vector<Interval> h_domain=project(f.domain(),range(0u,f.argument_size()-1u));
     Interval h_codomain=f.domain()[f.argument_size()-1u];
-    return TaylorVariable(h_domain,implicit(f.model()).rescale(Interval(-1,+1),h_codomain));
+    TaylorModel h_model=implicit(f.model());
+    ARIADNE_ASSERT(h_model.argument_size()+1==f.model().argument_size());
+    TaylorModel hrs_model=h_model.rescale(Interval(-1,+1),h_codomain);
+    ARIADNE_ASSERT(hrs_model.argument_size()+1==f.model().argument_size());
+    return TaylorVariable(h_domain,hrs_model);
 }
 
 

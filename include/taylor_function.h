@@ -54,6 +54,7 @@ TaylorFunction antiderivative(const TaylorFunction&, uint);
 TaylorFunction implicit(const TaylorFunction&);
 TaylorFunction flow(const TaylorFunction& vf, const Vector<Interval>& d, const Interval& t, uint o);
 
+TaylorVariable unchecked_compose(const TaylorVariable&, const TaylorFunction&);
 TaylorFunction unchecked_compose(const TaylorFunction&, const TaylorFunction&);
 TaylorFunction unchecked_implicit(const TaylorFunction&);
 TaylorFunction unchecked_flow(const TaylorFunction& vf, const Vector<Interval>& d, const Interval& t, uint o);
@@ -128,6 +129,11 @@ class TaylorFunction {
     /*! \brief Construct from a domain and a function. */
     TaylorFunction(const Vector<Interval>& domain,
                    const FunctionInterface& function);
+
+    /*! \brief Construct from a domain, a function, and accuracy paramters. */
+    TaylorFunction(const Vector<Interval>& domain,
+                   const FunctionInterface& function,
+                   shared_ptr<TaylorModel::Accuracy> accuracy_ptr);
 
     /*! \brief Construct from a domain and a polynomial. */
     TaylorFunction(const Vector<Interval>& domain,

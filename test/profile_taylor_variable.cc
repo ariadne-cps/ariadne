@@ -106,11 +106,11 @@ TaylorModel& iclean(TaylorModel& x) {
     x.clean(); return x;
 }
 
-TaylorModel& iadd(TaylorModel& x, const Interval& ivl) {
+TaylorModel& ivladd(TaylorModel& x, const Interval& ivl) {
     return x+=ivl;
 }
 
-TaylorModel& iscal(TaylorModel& x, const Interval& ivl) {
+TaylorModel& ivlscal(TaylorModel& x, const Interval& ivl) {
     return x*=ivl;
 }
 
@@ -230,9 +230,9 @@ int main(int argc, const char* argv[]) {
 
     profile(ntries*10000,"iclean-02",inplace_bind(&iclean,w));
     profile(ntries*10000,"copy-02",bind(&copy,w));
-    profile(ntries*10000,"iadd-noinsert-02",inplace_bind(&iadd,x,ivl));
-    profile(ntries*10000,"iadd-insert-02",inplace_bind(&iadd,x,ivl));
-    profile(ntries*10000,"iscal-02",inplace_bind(&iscal,x,ivl));
+    profile(ntries*10000,"iadd-noinsert-02",inplace_bind(&ivladd,x,ivl));
+    profile(ntries*10000,"iadd-insert-02",inplace_bind(&ivladd,x,ivl));
+    profile(ntries*10000,"iscal-02",inplace_bind(&ivlscal,x,ivl));
     profile(ntries*10000,"fscal-02",inplace_bind(&fscal,x,cnst));
     profile(ntries*1000,"isum-02",inplace_bind(&isum,x,y));
     profile(ntries*1000,"sum-02",bind(&sum,x,y));

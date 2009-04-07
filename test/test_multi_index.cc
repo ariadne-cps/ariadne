@@ -25,7 +25,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "multi_index.h"
+#include "multi_index-2.h"
 
 #include "test.h"
 
@@ -48,24 +48,24 @@ class TestMultiIndex
     void test_constructor() {
         int a1[3]={2,0,3};
         MultiIndex i1(3u,a1);
-        ARIADNE_TEST_EQUAL(i1.number_of_variables(),3);
-        ARIADNE_TEST_EQUAL(i1.degree(),5);
-        ARIADNE_TEST_EQUAL(i1[0],2);
-        ARIADNE_TEST_EQUAL(i1[1],0);
-        ARIADNE_TEST_EQUAL(i1[2],3);
+        ARIADNE_TEST_EQUAL((int)i1.number_of_variables(),3);
+        ARIADNE_TEST_EQUAL((int)i1.degree(),5);
+        ARIADNE_TEST_EQUAL((int)i1[0],2);
+        ARIADNE_TEST_EQUAL((int)i1[1],0);
+        ARIADNE_TEST_EQUAL((int)i1[2],3);
 
         int a2[5]={2,0,3,0,5};
         MultiIndex i2(5,a2);
-        ARIADNE_TEST_EQUAL(i2.number_of_variables(),5);
-        ARIADNE_TEST_EQUAL(i2.degree(),10);
-        ARIADNE_TEST_EQUAL(i2[3],0);
-        ARIADNE_TEST_EQUAL(i2[4],5);
+        ARIADNE_TEST_EQUAL((int)i2.number_of_variables(),5);
+        ARIADNE_TEST_EQUAL((int)i2.degree(),10);
+        ARIADNE_TEST_EQUAL((int)i2[3],0);
+        ARIADNE_TEST_EQUAL((int)i2[4],5);
 
         MultiIndex i3=MultiIndex::unit(9u,2u);
-        ARIADNE_TEST_EQUAL(i3.number_of_variables(),9);
-        ARIADNE_TEST_EQUAL(i3.degree(),1);
-        ARIADNE_TEST_EQUAL(i3[2],1);
-        ARIADNE_TEST_EQUAL(i3[8],0);
+        ARIADNE_TEST_EQUAL((int)i3.number_of_variables(),9);
+        ARIADNE_TEST_EQUAL((int)i3.degree(),1);
+        ARIADNE_TEST_EQUAL((int)i3[2],1);
+        ARIADNE_TEST_EQUAL((int)i3[8],0);
     }
 
     void test_comparison() {

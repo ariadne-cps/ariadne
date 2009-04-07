@@ -148,6 +148,9 @@ TaylorModel apply(const TaylorVariable& f, const TaylorSet& s);
 TaylorSet apply(const TaylorFunction& f, const TaylorSet& s);
 TaylorSet apply(const FunctionInterface& f, const TaylorSet& s);
 
+TaylorModel unchecked_apply(const TaylorVariable& f, const TaylorSet& s);
+TaylorSet unchecked_apply(const TaylorFunction& f, const TaylorSet& s);
+
 GridTreeSet outer_approximation(const TaylorSet& set, const Grid& grid, uint depth);
 void adjoin_outer_approximation(GridTreeSet& grid_set, const TaylorSet& set, uint depth);
 Zonotope zonotope(const TaylorSet& ts);

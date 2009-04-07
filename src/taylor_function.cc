@@ -105,6 +105,18 @@ TaylorFunction::TaylorFunction(const Vector<Interval>& d,
     this->_models=f.evaluate(x);
 }
 
+TaylorFunction::TaylorFunction(const Vector<Interval>& d,
+                               const FunctionInterface& f,
+                               const shared_ptr<TaylorModel::Accuracy> accuracy_ptr)
+    : _domain(d), _models(f.result_size())
+{
+    ARIADNE_ASSERT(f.result_size()>0);
+    ARIADNE_ASSERT(d.size()==f.argument_size());
+    Vector<TaylorModel> x=TaylorModel::scalings(d);
+    for(uint i=0; i!=x.size(); ++i) { x[i].accuracy_ptr()=accuracy_ptr; }
+    this->_models=f.evaluate(x);
+}
+
 
 TaylorFunction::TaylorFunction(const Vector<Interval>& d,
                                const Vector< Polynomial<Float> >& p)
@@ -407,8 +419,13 @@ TaylorVariable
 compose(const TaylorVariable& g, const TaylorFunction& f)
 {
     ARIADNE_ASSERT_MSG(subset(f.range(),g.domain()),"f.range()="<<f.range()<<" is not a subset of g.domain()="<<g.domain());
-    
-    return TaylorVariable(f.domain(),Ariadne::compose(g.model(),g.domain(),f.models()));
+    return TaylorVariable(f.domain(),Ariadne::unchecked_compose(g.model(),unscale(f.models(),g.domain())));
+}
+
+TaylorVariable
+unchecked_compose(const TaylorVariable& g, const TaylorFunction& f)
+{
+        return TaylorVariable(f.domain(),Ariadne::unchecked_compose(g.model(),unscale(f.models(),g.domain())));
 }
 
 

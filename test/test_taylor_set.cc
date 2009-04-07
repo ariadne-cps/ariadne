@@ -232,5 +232,6 @@ compute_outer_approximation(const TaylorSet& set, const Grid& grid, uint subd, u
 
 int main() {
     TestTaylorSet().test();
+    std::cerr<<"INCOMPLETE "<<std::flush;
     return ARIADNE_TEST_FAILURES;
 }

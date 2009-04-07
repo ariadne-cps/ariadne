@@ -51,7 +51,6 @@ DiscreteMode(DiscreteState location,
              const FunctionInterface& dynamic)
     :  _location(location), _dynamic(dynamic.clone()), _invariants() 
 {
-    ARIADNE_ASSERT(dynamic.result_size()==dynamic.argument_size());
 }
 
 
@@ -62,7 +61,10 @@ DiscreteMode(DiscreteState location,
     :  _location(location), _dynamic(dynamic), _invariants(invariants) 
 {
     ARIADNE_ASSERT(dynamic->result_size()==dynamic->argument_size());
-    //ARIADNE_ASSERT(dynamic->argument_size()==invariants->argument_size());
+    for(uint i=0; i!=invariants.size(); ++i) {
+        ARIADNE_ASSERT(invariants[i]->argument_size()==dynamic->argument_size());
+        ARIADNE_ASSERT(invariants[i]->result_size()==1u);
+    }
 }
     
 
@@ -153,6 +155,11 @@ HybridAutomaton::new_mode(DiscreteState location,
     if(this->has_mode(location)) {
         throw std::runtime_error("The hybrid automaton already has a mode with the given id");
     }
+    if(dynamic.result_size()!=dynamic.argument_size()) {
+        ARIADNE_THROW(std::runtime_error,"HybridAutomaton::new_mode(location,dynamic)",
+            "The dynamic has argument size " << dynamic.argument_size()
+                << " and result size " << dynamic.result_size() << ", so does not define a vector field.");
+    }
     this->_modes.insert(DiscreteMode(location,dynamic));
     return this->mode(location);
 }
@@ -167,6 +174,16 @@ HybridAutomaton::new_invariant(DiscreteState location,
         throw std::runtime_error("The location of the invariant must be in the automaton.");
     }
     DiscreteMode& mode=const_cast<DiscreteMode&>(this->mode(location));
+    if(invariant.argument_size()!=mode.dimension()) {
+        ARIADNE_THROW(std::runtime_error,"HybridAutomaton::new_invariant(location,invariant)",
+            "The invariant has argument size " << invariant.argument_size()
+                << " but the mode has state-space dimension " << mode.dimension()); 
+    }
+    if(invariant.result_size()!=1u) {
+        ARIADNE_THROW(std::runtime_error,"HybridAutomaton::new_invariant(location,invariant)",
+            "The invariant has result size " << invariant.result_size()
+                << " but only scalar invariants are currently supported.");
+    }
     boost::shared_ptr< const FunctionInterface > new_invariant(invariant.clone());
     mode._invariants.push_back(new_invariant);
     return mode;

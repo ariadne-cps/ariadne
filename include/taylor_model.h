@@ -45,6 +45,7 @@ template<class X> class Matrix;
 template<class X> class Expansion;
 
 class TaylorModel;
+class TaylorCalculus;
 
 class IntersectionException;
 class ImplicitFunctionException;
@@ -123,8 +124,8 @@ Vector<TaylorModel> implicit(const Vector<TaylorModel>& f);
 Vector<TaylorModel> implicit_step(const Vector<TaylorModel>& f, const Vector<TaylorModel>& h);
 Vector<TaylorModel> flow(const Vector<TaylorModel>& x, const Vector<Interval>& d, const Interval& h, uint order);
 
-TaylorModel unchecked_compose(const TaylorModel& x, const Vector<Interval>& y);
-Vector<TaylorModel> unchecked_compose(const Vector<TaylorModel>& x, const Vector<Interval>& y);
+TaylorModel unchecked_compose(const TaylorModel& x, const Vector<TaylorModel>& y);
+Vector<TaylorModel> unchecked_compose(const Vector<TaylorModel>& x, const Vector<TaylorModel>& y);
 Vector<TaylorModel> unchecked_flow(const Vector<TaylorModel>& x, const Vector<Interval>& d, const Interval& h, uint order);
 
 Float norm(const Vector<TaylorModel>& tv);
@@ -556,6 +557,25 @@ TaylorModel acos(const TaylorModel& x);
 TaylorModel atan(const TaylorModel& x);
 
 std::ostream& operator<<(std::ostream&, const TaylorModel::Accuracy&);
+
+struct TaylorModel::Accuracy {
+    friend class TaylorModel;
+    friend class TaylorCalculus;
+
+    Accuracy();
+    Accuracy(double st, uint md);
+
+    friend Accuracy max(const Accuracy& acc1, const Accuracy& acc2);
+    friend Accuracy min(const Accuracy& acc1, const Accuracy& acc2);
+    friend std::ostream& operator<<(std::ostream& os, const Accuracy& acc);
+  public:
+    bool discard(const Float& x) const;
+    bool discard(const MultiIndex& a) const;
+    bool discard(const MultiIndex& a, const Float& x) const;
+  private:
+    double _sweep_threshold;
+    uint _maximum_degree;
+};
 
 struct IntersectionException : public std::runtime_error {
     IntersectionException(const std::string& what) : std::runtime_error(what) { }

@@ -156,7 +156,7 @@ void TestContinuousEvolution::test() const
     // cout << "Plotting sets" << endl;
     // cout << "evolve_set=" << hybrid_evolve_set << endl;
     // cout << "reach_set=" << hybrid_reach_set << endl;
-    cout << "Plotting sets... " << flush;
+    std::cout << "Plotting...";
     Figure fig;
     fig << line_style(true) << fill_colour(cyan) << orbit.reach();
     fig << fill_colour(magenta) << orbit.intermediate();

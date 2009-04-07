@@ -185,19 +185,32 @@ TaylorSet::discretise(GridTreeSet& gts, uint d) const
 }
 
 
-TaylorSet apply(const FunctionInterface& f, const TaylorSet& s)
+TaylorSet apply(const FunctionInterface& f, const TaylorSet& ts)
 {
-    return f.evaluate(s.models());
+    return f.evaluate(ts.models());
 }
 
-TaylorModel apply(const TaylorVariable& tf, const TaylorSet& s)
+TaylorModel apply(const TaylorVariable& tf, const TaylorSet& ts)
 {
-    return compose(tf.model(),tf.domain(),s.models());
+    ARIADNE_ASSERT_MSG(subset(ts.range(),tf.domain()),"tf="<<tf<<" ts="<<ts);
+    return unchecked_compose(tf.model(),unscale(ts.models(),tf.domain()));
 }
 
-TaylorSet apply(const TaylorFunction& tf, const TaylorSet& s)
+TaylorSet apply(const TaylorFunction& tf, const TaylorSet& ts)
 {
-    return compose(tf.models(),unscale(s.models(),tf.domain()));
+    ARIADNE_ASSERT_MSG(subset(ts.range(),tf.domain()),
+        std::setprecision(18)<<"\n  tf="<<tf<<"\n  ts="<<ts<<"\n  ts.range() ="<<ts.range()<<"\n  tf.domain()="<<tf.domain());
+    return unchecked_compose(tf.models(),unscale(ts.models(),tf.domain()));
+}
+
+TaylorModel unchecked_apply(const TaylorVariable& tf, const TaylorSet& ts)
+{
+    return unchecked_compose(tf.model(),unscale(ts.models(),tf.domain()));
+}
+
+TaylorSet unchecked_apply(const TaylorFunction& tf, const TaylorSet& ts)
+{
+    return unchecked_compose(tf.models(),unscale(ts.models(),tf.domain()));
 }
 
 

@@ -137,10 +137,15 @@ class HybridEvolver
                             Semantics semantics, bool reach) const;
 
     typedef tuple<DiscreteState, IntegerType, SetModelType, TimeModelType> HybridTimedSetType;
-    virtual void _evolution_step(std::vector< HybridTimedSetType >& working_sets, 
-                                 EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,  
-                                 const SystemType& system, const HybridTimedSetType& current_set, const TimeType& time, 
-                                 Semantics semantics, bool reach) const;
+    virtual void _evolution_step1(std::vector< HybridTimedSetType >& working_sets, 
+                                  EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,  
+                                  const SystemType& system, const HybridTimedSetType& current_set, const TimeType& time, 
+                                  Semantics semantics, bool reach) const;
+
+    virtual void _evolution_step2(std::vector< HybridTimedSetType >& working_sets,
+                                  EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,  
+                                  const SystemType& system, const HybridTimedSetType& current_set, const TimeType& time, 
+                                  Semantics semantics, bool reach) const;
 
   private:
     boost::shared_ptr< EvolutionParametersType > _parameters;

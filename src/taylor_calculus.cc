@@ -46,6 +46,96 @@ class DegenerateCrossingException { };
 class NonInvertibleFunctionException { };
 
 
+std::pair<Float, Vector<Interval> >
+flow_bounds(FunctionInterface const& vf,
+            Vector<Interval> const& r,
+            Float const& hmax)
+{
+
+    ARIADNE_ASSERT(vf.argument_size()==r.size());
+
+    // Set up constants of the method.
+    // TODO: Better estimates of constants
+    const double INITIAL_MULTIPLIER=2;
+    const double MULTIPLIER=1.125;
+    const double BOX_RADIUS_MULTIPLIER=1.03125;
+    const uint EXPANSION_STEPS=8;
+    const uint REDUCTION_STEPS=8;
+    const uint REFINEMENT_STEPS=4;
+
+    Vector<Interval> delta=(r-midpoint(r))*(BOX_RADIUS_MULTIPLIER-1);
+
+    Float h=hmax;
+    Float hmin=hmax/(1<<REDUCTION_STEPS);
+    bool success=false;
+    Vector<Interval> b,nb,df;
+    Interval ih(0,h);
+    while(!success) {
+        ARIADNE_ASSERT(h>hmin);
+        b=r+INITIAL_MULTIPLIER*ih*vf.evaluate(r)+delta;
+        for(uint i=0; i!=EXPANSION_STEPS; ++i) {
+            df=vf.evaluate(b);
+            nb=r+delta+ih*df;
+            if(subset(nb,b)) {
+                success=true;
+                break;
+            } else {
+                b=r+delta+MULTIPLIER*ih*df;
+            }
+        }
+        if(!success) {
+            h/=2;
+            ih=Interval(0,h);
+        }
+    }
+
+    ARIADNE_ASSERT(subset(nb,b));
+
+    Vector<Interval> vfb;
+    vfb=vf.evaluate(b);
+
+    for(uint i=0; i!=REFINEMENT_STEPS; ++i) {
+        b=nb;
+        vfb=vf.evaluate(b);
+        nb=r+delta+ih*vfb;
+        ARIADNE_ASSERT_MSG(subset(nb,b),std::setprecision(20)<<"refinement "<<i<<": "<<nb<<" is not a inside of "<<b);
+    }
+
+
+    // Check result of operation
+    // We use subset rather than inner subset here since the bound may touch
+    ARIADNE_ASSERT(subset(nb,b));
+
+    b=nb;
+
+    // Expand the resulting bound by a small constant for robustness
+    volatile float new_bound;
+    set_rounding_mode(upward);
+    for(uint i=0; i!=b.size(); ++i) {
+        new_bound=b[i].upper();
+        new_bound+=1e-8;
+        new_bound+=1e-8;
+        b[i].u=new_bound;
+    }
+    set_rounding_mode(downward);
+    for(uint i=0; i!=b.size(); ++i) {
+        new_bound=b[i].lower();
+        new_bound-=1e-8;
+        new_bound-=1e-8;
+        b[i].l=new_bound;
+    }
+    set_rounding_mode(to_nearest);
+
+    ARIADNE_ASSERT(subset(r,b));
+
+    ARIADNE_ASSERT_MSG(subset(r+h*vf.evaluate(b),b),
+        "d="<<r<<"\nh="<<h<<"\nf="<<vf.evaluate(b)<<"\np="<<Vector<Interval>(r+h*vf.evaluate(b))<<"\nb="<<b<<"\n");
+
+    return std::make_pair(h,b);
+}
+
+
+
 
 
 TaylorCalculus::
@@ -332,102 +422,15 @@ touching_time_interval(const PredicateModelType& guard_model,
 
 std::pair<Float, Vector<Interval> >
 TaylorCalculus::flow_bounds(FunctionInterface const& vf,
-                                   Vector<Interval> const& r,
-                                   Float const& hmax,
-                                   Float const& dmax) const
+                            Vector<Interval> const& r,
+                            Float const& hmax,
+                            Float const& dmax) const
 {
     // Try to find a time h and a set b such that inside(r+Interval<R>(0,h)*vf(b),b) holds
     ARIADNE_LOG(6,"flow_bounds(Function,Box,Time hmax)\n");
     ARIADNE_LOG(7,"  r="<<r<<" hmax="<<hmax<<"\n");
-
-    ARIADNE_ASSERT(vf.argument_size()==r.size());
-
-    // Set up constants of the method.
-    // TODO: Better estimates of constants
-    const double INITIAL_MULTIPLIER=2;
-    const double MULTIPLIER=1.125;
-    const double BOX_RADIUS_MULTIPLIER=1.03125;
-    const uint EXPANSION_STEPS=8;
-    const uint REDUCTION_STEPS=8;
-    const uint REFINEMENT_STEPS=4;
-
-    Vector<Interval> delta=(r-midpoint(r))*(BOX_RADIUS_MULTIPLIER-1);
-
-    Float h=hmax;
-    Float hmin=hmax/(1<<REDUCTION_STEPS);
-    bool success=false;
-    Vector<Interval> b,nb,df;
-    Interval ih(0,h);
-    while(!success) {
-        ARIADNE_ASSERT(h>hmin);
-        b=r+INITIAL_MULTIPLIER*ih*vf.evaluate(r)+delta;
-        for(uint i=0; i!=EXPANSION_STEPS; ++i) {
-            df=vf.evaluate(b);
-            nb=r+delta+ih*df;
-            ARIADNE_LOG(9,"  h="<<h<<" b="<<b<<" vf="<<vf.evaluate(b)<<" nb="<<nb<<"\n");
-            if(subset(nb,b)) {
-                success=true;
-                break;
-            } else {
-                b=r+delta+MULTIPLIER*ih*df;
-            }
-        }
-        if(!success) {
-            h/=2;
-            ih=Interval(0,h);
-        }
-    }
-
-    ARIADNE_ASSERT(subset(nb,b));
-
-    Vector<Interval> vfb;
-    vfb=vf.evaluate(b);
-    ARIADNE_LOG(9,std::setprecision(20)<<"\n\n   b="<<b<<" vf="<<vfb<<"\n  nb="<<nb<<"\n");
-
-    for(uint i=0; i!=REFINEMENT_STEPS; ++i) {
-        b=nb;
-        vfb=vf.evaluate(b);
-        nb=r+delta+ih*vfb;
-        ARIADNE_LOG(9,std::setprecision(20)<<"   b="<<b<<" vf="<<vfb<<"\n  nb="<<nb<<"\n");
-        ARIADNE_ASSERT_MSG(subset(nb,b),std::setprecision(20)<<"refinement "<<i<<": "<<nb<<" is not a inside of "<<b);
-    }
-
-
-    // Check result of operation
-    // We use subset rather than inner subset here since the bound may touch
-    ARIADNE_ASSERT(subset(nb,b));
-
-    b=nb;
-
-    ARIADNE_LOG(7,"  h="<<h<<" b="<<nb<<"\n");
-
-    // Expand the resulting bound by a small constant for robustness
-    volatile float new_bound;
-    set_rounding_mode(upward);
-    for(uint i=0; i!=b.size(); ++i) {
-        new_bound=b[i].upper();
-        new_bound+=1e-8;
-        new_bound+=1e-8;
-        b[i].u=new_bound;
-    }
-    set_rounding_mode(downward);
-    for(uint i=0; i!=b.size(); ++i) {
-        new_bound=b[i].lower();
-        new_bound-=1e-8;
-        new_bound-=1e-8;
-        b[i].l=new_bound;
-    }
-    set_rounding_mode(to_nearest);
-
-    ARIADNE_ASSERT(subset(r,b));
-
-    ARIADNE_ASSERT_MSG(subset(r+h*vf.evaluate(b),b),
-        "d="<<r<<"\nh="<<h<<"\nf="<<vf.evaluate(b)<<"\np="<<Vector<Interval>(r+h*vf.evaluate(b))<<"\nb="<<b<<"\n");
-
-    return std::make_pair(h,b);
+    return Ariadne::flow_bounds(vf,r,hmax);
 }
-
-
 
 
 tribool
@@ -458,8 +461,16 @@ TaylorCalculus::map_model(FunctionInterface const& f, Vector<Interval> const& bx
 
 
 TaylorCalculus::FlowModelType
-TaylorCalculus::flow_model(FunctionInterface const& vf, Vector<Interval> const& bx, Float const& h, Vector<Interval> const& bb) const
+TaylorCalculus::flow_model(FunctionInterface const& vf, Vector<Interval> const& ibx, Float const& h, Vector<Interval> const& bb) const
 {
+    Vector<Interval> bx=ibx;
+
+    // We need the initial box to have nonempty interior to be a valid domain for a function model,
+    // so we expand slightly if one of the components fails this test
+    for(uint i=0; i!=bx.size(); ++i) {
+        Float EPS=1e-8; bx[i]+=Interval(-EPS,+EPS);
+    }
+
     ARIADNE_ASSERT(subset(bx+Interval(0,h)*vf.evaluate(bb),bb));
 
     TaylorModel::Accuracy* accuracy_raw_ptr=new TaylorModel::Accuracy;

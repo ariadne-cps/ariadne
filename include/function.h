@@ -1,5 +1,5 @@
 /***************************************************************************
- *            function.h
+ *            flow_bound.h
  *
  *  Copyright 2008  Pieter Collins
  *
@@ -21,8 +21,8 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file function.h
- *  \brief Concrete function types.
+/*! \file flow_bound.h
+ *  \brief Compute bounds for a flow over a domain.
  */
 
 #ifndef ARIADNE_FUNCTION_H

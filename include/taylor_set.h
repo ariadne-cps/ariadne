@@ -78,6 +78,9 @@ class TaylorSet
     //! \brief Construct from raw data in the form of a polynomial expansion with errors.
     TaylorSet(const Vector< Expansion<Float> >& f, const Vector<Float>& e);
 
+    template<class E> TaylorSet(const ublas::vector_expression<E>& e) {
+        *this = TaylorSet(Vector<TaylorModel>(e())); }
+
     //! \brief Equality operator.
     friend bool operator==(const TaylorSet& ts1, const TaylorSet& ts2);
 
@@ -116,6 +119,8 @@ class TaylorSet
     //! \brief Write to an output stream.
     virtual std::ostream& write(std::ostream& os) const;
 
+    //! \brief The centre of the set.
+    Vector<Float> centre() const;
     //! \brief The radius of the set.
     Float radius() const;
     //! \brief An over-approximation in the form of a zonotope.

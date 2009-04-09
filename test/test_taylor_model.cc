@@ -337,29 +337,22 @@ Vector<Interval> range(const Vector<TaylorModel>& tm) {
 }
 
 void TestTaylorModel::test_flow()
-{ //phi=x+3t x=0.25xi+0.25
+{ 
     {
-        // Test flow dx/dt=3 on an assymetric domain
-        Vector<TaylorModel> vf=ctm(1,3.0)*v(1,0);
-        Vector<Interval> d1(1, 0.0,0.5);
-        Interval h1(-0.125,0.125);
-        Vector<TaylorModel> phi1=flow(vf,d1,h1,2);
+        // Test flow dx/dt=3/8 on an assymetric domain
+        // phi=x0+3t/8 x0=0.25s+0.25
+        Vector<TaylorModel> vf=ctm(1,3.0/8)*v(1,0);
+        Vector<TaylorModel> d1=(0.25+0.25*tm(1,0))*v(1,0);
+        Vector<TaylorModel> phi1=flow(vf,d1,2);
         Vector<TaylorModel> expected_phi1=(0.25*ctm(2)+0.25*tm(2,0)+0.375*tm(2,1))*v(1,0);
         ARIADNE_TEST_EQUAL(phi1,expected_phi1);
-
-        Vector<Interval> d2(1, 0.0,0.5);
-        Interval h2(0.0,0.125);
-        Vector<TaylorModel> phi2=flow(vf,d2,h2,2);
-        Vector<TaylorModel> expected_phi2=(0.4375*ctm(2)+0.25*tm(2,0)+0.1875*tm(2,1))*v(1,0);
-        ARIADNE_TEST_EQUAL(phi2,expected_phi2);
    }
 
-    Vector<TaylorModel> vf=ctm(2,2.0)*v(2,0)+tm(2,1)*v(2,1);
-    Vector<Interval> d(2, -0.5,0.5, -0.5,0.5);
-    Interval h(-0.25,0.25);
+    Vector<TaylorModel> vf=(ctm(2,2.0)*v(2,0)+tm(2,1)*v(2,1))*0.25;
+    Vector<TaylorModel> d=0.5*tm(2,0)*v(2,0)+0.5*tm(2,1)*v(2,1);
     uint o=6;
 
-    Vector<TaylorModel> phi=flow(vf,d,h,o);
+    Vector<TaylorModel> phi=flow(vf,d,o);
     Vector<TaylorModel> next_phi=antiderivative(compose(vf,phi),2);
     ARIADNE_TEST_BINARY_PREDICATE(operator<,(norm(Ariadne::range(phi-next_phi))),0.1);
 

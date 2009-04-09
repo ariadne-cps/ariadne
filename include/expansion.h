@@ -555,7 +555,7 @@ std::ostream& operator<<(std::ostream& os, const Expansion<X>& p) {
         MultiIndex const& a=iter->key();
         for(unsigned int i=0; i!=a.size(); ++i) {
             os << (i==0?"":",") << int(a[i]); }
-        os<<";"<<int(a.degree());
+        //os<<";"<<int(a.degree());
         os << ":" << iter->data();
     }
     return os << "}";

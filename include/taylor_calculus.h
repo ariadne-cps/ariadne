@@ -211,6 +211,9 @@ class TaylorCalculus
 
 };
 
+
+std::pair<Float, Vector<Interval> > flow_bounds(FunctionInterface const&,Vector<Interval> const&,Float const&);
+
 }
 
 

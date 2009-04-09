@@ -69,6 +69,12 @@ std::ostream& operator<<(std::ostream& os, const TaylorModel::Accuracy& acc) {
 }
 
 
+Vector<Interval> unscale(const Vector<Interval>& x, const Vector<Interval>& d) {
+    Vector<Interval> r(x);
+    for(uint i=0; i!=r.size(); ++i) {
+        (r[i]-=med_ivl(d[i]))/=rad_ivl(d[i]); }
+    return r;
+}
 
 TaylorModel::TaylorModel()
     : _expansion(0), _error(), _accuracy_ptr(new Accuracy())
@@ -1777,6 +1783,8 @@ TaylorModel& TaylorModel::rescale(const Interval& ocd, const Interval& ncd)
     // Scale the interval [a,b] onto [c,d]
     // The function is given by x:-> alpha*x+beta where
     //alpha=(d-c)/(b-a) and beta=(cb-ad)/(b-a)
+
+    ARIADNE_ASSERT_MSG(ocd.radius()>0,"Illegal scaling from interval "<<ocd<<" with zero radius to interval "<<ncd);
     Interval tmp=1.0/sub_ivl(b,a);
     Interval alpha=sub_ivl(d,c)*tmp;
     Interval beta=(mul_ivl(c,b)-mul_ivl(a,d))*tmp;
@@ -2994,42 +3002,34 @@ implicit(const Vector<TaylorModel>& f)
 
 
 inline Vector<TaylorModel>
-_flow_step(const Vector<TaylorModel>& vf, const Vector<TaylorModel>& yz, const Interval& h_rad,
+_flow_step(const Vector<TaylorModel>& vf, const Vector<TaylorModel>& yz,
            const Vector<TaylorModel>& phi)
 {
     const uint n=vf.size();
     Vector<TaylorModel> new_phi=compose(vf,phi);
     for(uint i=0; i!=n; ++i) {
         new_phi[i].antidifferentiate(n);
-        new_phi[i]*=h_rad;
         new_phi[i]+=yz[i];
     }
     return new_phi;
 }
 
 Vector<TaylorModel>
-unchecked_flow(const Vector<TaylorModel>& vf, const Vector<Interval>& d, const Interval& h, uint order)
+unchecked_flow(const Vector<TaylorModel>& vf, const Vector<TaylorModel>& y0, uint order)
 {
     uint n=vf.size();
-    Float h_rad=h.upper();
-    Vector<TaylorModel> yz(n,TaylorModel(n+1));
-    for(uint i=0; i!=yz.size(); ++i) {
-        yz[i]=TaylorModel::scaling(n+1,i,d[i]); }
-    Vector<TaylorModel> y(n);
+    assert(y0.size()==n);
+    assert(y0[0].argument_size()==n || y0[0].argument_size()==n+1);
+
+    // Set inital set at time zero; embed in space including time variable if necessary
+    Vector<TaylorModel> yz;
+    if(y0[0].argument_size()==n) { yz=embed(y0,1); } else { yz=y0; }
 
     // Set initial conditions
     // The Perron-Frobenius operator should act as a contraction on this set
+    Vector<TaylorModel> y(n);
     for(uint i=0; i!=y.size(); ++i) {
-        //y[i]=TaylorModel::constant(n+1,Interval(-1,+1));
-
-        // Use triple the unit interval because we initially compute expansion over t in [-h,h]
-        // whereas flow box is computed for t in [0,h]
-        // In one dimension, we could have x0=-1, h=1, f(x)=2 and still have
-        // x0+hf(B)\subset B, but taking flow for t in [-h,h] gives flow bounds
-        // [-3,+1].
-        //y[i]=TaylorModel::constant(n+1,Interval(-3,+3));
-
-        y[i]=TaylorModel::constant(n+1,d[i]+vf[i].range()*Interval(-h_rad,+h_rad));
+        y[i]=TaylorModel::constant(n+1,yz[i].range()+vf[i].range()*Interval(-1,+1));
     }
 
     Vector<TaylorModel> new_y(n,TaylorModel(n+1));
@@ -3055,7 +3055,6 @@ unchecked_flow(const Vector<TaylorModel>& vf, const Vector<Interval>& d, const I
         new_y=compose(vf,y);
         for(uint i=0; i!=n; ++i) {
             new_y[i].antidifferentiate(n);
-            new_y[i]*=h_rad;
             new_y[i]+=yz[i];
 
             //new_y[i]=intersection(y[i],new_y[i]);
@@ -3079,48 +3078,15 @@ unchecked_flow(const Vector<TaylorModel>& vf, const Vector<Interval>& d, const I
     //for(uint i=0; i!=n; ++i) { y[i].clobber(so,to); }
     for(uint i=0; i!=n; ++i) { y[i].sweep(0.0); }
 
-    if(h.l==0) {
-        //Vector<TaylorModel> s=TaylorModel::variables(n+1);
-        //s[n]=TaylorModel::scaling(n+1,n,Interval(0,1));
-        //std::cerr<<"\nsplit="<<split(y,n)<<"\nscale="<<compose(y,s)<<"\n\n";
-        //y=split(y,n).second;
-        //y=compose(y,s);
-        y=split(y,n,true);
-    }
-
     return y;
 }
 
 
-void
-check_flow(const Vector<TaylorModel>& vf, const Vector<Interval>& d, const Interval& h)
-{
-    ARIADNE_ASSERT(vf.size()>0);
-    ARIADNE_ASSERT(vf.size()==d.size());
-    for(uint i=0; i!=vf.size(); ++i) { ARIADNE_ASSERT(vf.size()==vf[i].argument_size()); }
-    ARIADNE_ASSERT(h.l<=0.0 && h.u>=0);
-
-    ARIADNE_ASSERT(h.l==0.0 || h.l==-h.u);
-
-    Vector<Interval> vf_domain(vf.size(),Interval(-1,+1));
-    ARIADNE_ASSERT(subset(d,vf_domain));
-
-    Vector<Interval> vf_range(vf.size());
-    for(uint i=0; i!=vf.size(); ++i) { vf_range[i]=vf[i].range(); }
-    Vector<Interval> flow_range=d+vf_range*h;
-    if(!subset(flow_range,vf_domain)) {
-        ARIADNE_THROW(FlowBoundsException,"flow(Vector<TaylorModel>,Vector<Interval>,Interval,Nat)",
-                      "range "<<flow_range<<" of scaled flow "<<vf<<
-                      " on domain "<<d<<" for time interval "<<h<<
-                      " is not a subset of the unit box");
-    }
-}
 
 Vector<TaylorModel>
-flow(const Vector<TaylorModel>& vf, const Vector<Interval>& d, const Interval& h, uint o)
+flow(const Vector<TaylorModel>& vf, const Vector<TaylorModel>& yz, uint o)
 {
-    check_flow(vf,d,h);
-    return unchecked_flow(vf,d,h,o);
+    return unchecked_flow(vf,yz,o);
 }
 
 

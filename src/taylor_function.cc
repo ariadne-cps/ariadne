@@ -44,14 +44,6 @@ typedef Vector<Float> Point;
 typedef Vector<Interval> Box;
 
 
-namespace {
-Vector<Interval> unscale(const Vector<Interval>& x, const Vector<Interval>& d) {
-    Vector<Interval> r(x);
-    for(uint i=0; i!=r.size(); ++i) {
-        (r[i]-=med_ivl(d[i]))/=rad_ivl(d[i]); }
-    return r;
-}
-} // namespace
 
 
 TaylorFunction::TaylorFunction()
@@ -176,10 +168,15 @@ TaylorFunction::polynomial() const
 {
     Vector<Polynomial<Interval> > p(this->result_size());
     for(uint i=0; i!=this->result_size(); ++i) {
-        p[i]=Ariadne::polynomial(this->models()[i]); }
+        p[i]=Ariadne::polynomial(this->models()[i]);
+    }
+
     Vector<Polynomial<Interval> > s(this->argument_size());
     for(uint j=0; j!=this->argument_size(); ++j) {
-        s[j]=Ariadne::polynomial(TaylorModel::unscaling(this->argument_size(),j,this->domain()[j])); }
+        if(this->domain()[j].radius()<=0) { std::cerr<<"Warning: zero radius in domain of TaylorFunction"<<std::endl; }
+        else { s[j]=Ariadne::polynomial(TaylorModel::unscaling(this->argument_size(),j,this->domain()[j])); }
+    }
+
     return compose(p,s);
 }
 
@@ -476,15 +473,39 @@ flow(const TaylorFunction& vf, const Vector<Interval>& d, const Interval& h, con
 TaylorFunction
 unchecked_flow(const TaylorFunction& vf, const Vector<Interval>& d, const Interval& h, const uint o)
 {
-    Vector<TaylorModel> unscaled_vf=unscale(vf.models(),vf.domain());
-    Vector<Interval> unscaled_d=unscale(d,vf.domain());
-    //std::cerr<<"\n"<<unscaled_vf<<"\n"<<unscaled_d<<"\n";
-    //Vector<TaylorModel> unscaled_flw=flow(unscaled_vf,unscaled_d,h,o);
-    //std::cerr<<unscaled_flw<<"\n";
-    //std::cerr<<scale(unscaled_flw,vf.domain());
-    return TaylorFunction(join(d,h),
-        scale(unchecked_flow(unscale(vf.models(),vf.domain()),unscale(d,vf.domain()),h,o),vf.domain()));
-    
+    uint n=vf.size();
+    Float hmag=mag(h);
+    const Vector<Interval>& b=vf.domain();
+
+    assert(h.l==-h.u || h.l==0);
+
+    // Sanity check that vector field domain has nonempty interior
+    for(uint i=0; i!=n; ++i) { ARIADNE_ASSERT_MSG(b[i].radius()>0.0,"Domain of vector field "<<b<<" has non-empty interior."); }
+    for(uint i=0; i!=n; ++i) { if(d[i].radius()<=0) { std::cerr<<"Initial set "<<d<<" has non-empty interior.\n";  } }
+
+
+    // Scale multiply models by inverse reciprocal of radius
+    Vector<TaylorModel> unit_scaled_vf(vf.size());
+    for(uint i=0; i!=vf.size(); ++i) { unit_scaled_vf[i]=vf.models()[i]*(hmag/rad_ivl(b[i])); }
+    //std::cerr<<"unit_scaled_vf="<<unit_scaled_vf<<std::endl;
+
+    Vector<TaylorModel> y0=TaylorModel::scalings(d);
+    //std::cerr<<"y0="<<y0<<std::endl;
+    Vector<TaylorModel> unit_scaled_y0=embed(unscale(y0,b),1u);
+    //std::cerr<<"unit_scaled_y0"<<unit_scaled_y0<<std::endl;
+
+    Vector<TaylorModel> unit_scaled_flow=unchecked_flow(unit_scaled_vf,unit_scaled_y0,o);
+    //std::cerr<<"unit_scaled_flow="<<unit_scaled_flow<<std::endl;
+
+    Vector<TaylorModel> model_flow=scale(unit_scaled_flow,b);
+    //std::cerr<<"model_flow="<<model_flow<<std::endl;
+
+    if(h.l==0) { model_flow=split(model_flow,d.size(),true); }
+
+    TaylorFunction flow(join(d,h),model_flow);
+    //std::cerr<<"\nflow="<<flow<<"\n"<<std::endl;
+
+    return flow;
 }
 
 
@@ -501,11 +522,12 @@ refines(const TaylorFunction& f, const TaylorFunction& g)
 std::ostream&
 TaylorFunction::write(std::ostream& os) const
 {
-    os << "TaylorFunction( "<<this->domain()<<" , ";
-    for(uint i=0; i!=this->result_size(); ++i) {
-        os << (i==0?'[':',')<<this->_models[i].expansion()<<","<<this->_models[i].error();
-    }
-    return os << "] )";
+    //os << "TaylorFunction( "<<this->domain()<<" , ";
+    //for(uint i=0; i!=this->result_size(); ++i) {
+    //    os << (i==0?'[':',')<<this->_models[i].expansion()<<","<<this->_models[i].error();
+    //}
+    //return os << "] )";
+    return os << "TaylorFunction(d=" << this->domain() << ", p=" << this->polynomial() << " m=" << this->models() << ")";
 }
 
 

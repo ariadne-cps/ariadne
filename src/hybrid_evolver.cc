@@ -69,6 +69,12 @@ void append(V& v, const C& c)
 
 namespace Ariadne {
 
+void wait_for_keypress() {
+    std::string str;
+    //getline(std::cin,str);
+}
+
+
 // Allow subdivisions in upper evolution
 const bool ENABLE_SUBDIVISIONS = false;
 // Allow premature termination of lower evolution
@@ -261,7 +267,7 @@ _evolution(EnclosureListType& final_sets,
                       << " and set " << initial_set_model << " due to maximum radius being exceeded.";
         } else {
             // Compute evolution
-            this->_evolution_step(working_sets,
+            this->_evolution_step1(working_sets,
                                   final_sets,reach_sets,intermediate_sets,
                                   system,current_set,maximum_hybrid_time,
                                   semantics,reach);
@@ -273,10 +279,10 @@ _evolution(EnclosureListType& final_sets,
 
 
 
-
+// Old evolution step using detection data
 void
 HybridEvolver::
-_evolution_step(std::vector< HybridTimedSetType >& working_sets,
+_evolution_step1(std::vector< HybridTimedSetType >& working_sets,
                 EnclosureListType& final_sets,
                 EnclosureListType& reach_sets,
                 EnclosureListType& intermediate_sets,
@@ -320,7 +326,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     const std::set< DiscreteTransition > transitions = system.transitions(initial_location);
     ARIADNE_LOG(7,"transitions="<<transitions<<"\n");
 
-
+    
 
     // Set evolution parameters
     const Float maximum_step_size=this->_parameters->maximum_step_size;
@@ -409,6 +415,23 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     ARIADNE_LOG(8,"detection_data="<<detection_data<<"\n");
 
     typedef std::map<int,DetectionData>::iterator predicate_iterator;
+
+    // Write out the ranges of the 
+    ARIADNE_LOG(6,"time="<<initial_time_model.value()<<"\n");
+    ARIADNE_LOG(6,"centre="<<initial_set_model.centre()<<" radius="<<initial_set_model.radius()<<"\n");
+    ARIADNE_LOG(6,"step_size="<<step_size<<"\n");
+    ARIADNE_LOG(6,"vector="<<dynamic_ptr->evaluate(initial_set_model.centre())<<"\n");
+    for(predicate_iterator iter=detection_data.begin();
+        iter!=detection_data.end(); ++iter)
+    {
+        ARIADNE_LOG(6,"event: "<<iter->first<<
+                      " guard: "<<*iter->second.guard_ptr<<
+                      " guard value: "<<iter->second.guard_ptr->evaluate(initial_set_model.centre())<<"\n");
+    }
+
+    wait_for_keypress();
+
+
     for(predicate_iterator iter=detection_data.begin();
         iter!=detection_data.end(); ++iter)
         {
@@ -577,8 +600,12 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
         intermediate_sets.adjoin(EnclosureType(initial_location,final_set_model));
         working_sets.push_back(make_tuple(initial_location,initial_steps,final_set_model,final_time_model));
     }
+    ARIADNE_LOG(6,"initial_set_model="<<initial_set_model<<"\n");
+    ARIADNE_LOG(6,"flow_model="<<flow_model<<"\n");
+    ARIADNE_LOG(6,"integration_time_model="<<integration_time_model<<"\n");
+    ARIADNE_LOG(6,"final_set_model="<<final_set_model<<"\n");
 
-
+    wait_for_keypress();
 
     // Process discrete transitions
     ARIADNE_LOG(6,"Computing discrete transitions\n");
@@ -641,11 +668,25 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     }
 
     ARIADNE_LOG(2,"Done evolution_step.\n\n");
+    wait_for_keypress();
 
 }
 
 
 
+void
+HybridEvolver::
+_evolution_step2(std::vector< HybridTimedSetType >& working_sets,
+                EnclosureListType& final_sets,
+                EnclosureListType& reach_sets,
+                EnclosureListType& intermediate_sets,
+                const SystemType& system,
+                const HybridTimedSetType& initial_set,
+                const TimeType& maximum_hybrid_time,
+                Semantics semantics,
+                bool reach) const
+{
+}
 
 }  // namespace Ariadne
 

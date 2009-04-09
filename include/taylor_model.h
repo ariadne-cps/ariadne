@@ -51,6 +51,9 @@ class IntersectionException;
 class ImplicitFunctionException;
 class FlowBoundsException;
 
+// Rescale the vector x from the domain d to the unit domain.
+Vector<Interval> unscale(const Vector<Interval>& x, const Vector<Interval>& d);
+
 // The magnitude of the variable
 Float mag(const TaylorModel& tm);
 // Split the variable over two domains, subdividing along the independent variable j.
@@ -122,11 +125,11 @@ Vector<TaylorModel> compose(const Vector<TaylorModel>& f, const Vector<TaylorMod
 Vector<Interval> solve(const Vector<TaylorModel>& f);
 Vector<TaylorModel> implicit(const Vector<TaylorModel>& f);
 Vector<TaylorModel> implicit_step(const Vector<TaylorModel>& f, const Vector<TaylorModel>& h);
-Vector<TaylorModel> flow(const Vector<TaylorModel>& x, const Vector<Interval>& d, const Interval& h, uint order);
+Vector<TaylorModel> flow(const Vector<TaylorModel>& x, const Vector<TaylorModel>& y0, uint order);
 
 TaylorModel unchecked_compose(const TaylorModel& x, const Vector<TaylorModel>& y);
 Vector<TaylorModel> unchecked_compose(const Vector<TaylorModel>& x, const Vector<TaylorModel>& y);
-Vector<TaylorModel> unchecked_flow(const Vector<TaylorModel>& x, const Vector<Interval>& d, const Interval& h, uint order);
+Vector<TaylorModel> unchecked_flow(const Vector<TaylorModel>& x, const Vector<TaylorModel>& y0, uint order);
 
 Float norm(const Vector<TaylorModel>& tv);
 

@@ -30,6 +30,7 @@
 #include "expansion.h"
 #include "taylor_model.h"
 #include "taylor_variable.h"
+#include "taylor_set.h"
 #include "taylor_function.h"
 #include "function.h"
 #include "polynomial.h"
@@ -42,6 +43,7 @@ Vector<Float> e(uint n, uint i) { return Vector<Float>::unit(n,i); }
 Expansion<Float> v(uint n, uint j) { return Expansion<Float>::variable(n,j); }
 Polynomial<Float> p(uint n, uint j) { return Polynomial<Float>::variable(n,j); }
 TaylorVariable t(Vector<Interval> d, uint j) { return TaylorVariable::variable(d,j); }
+
 
 struct Henon {
     uint result_size() const { return 2; }
@@ -57,6 +59,9 @@ struct Henon {
 };
 typedef Function<Henon> HenonFunction;
 
+namespace Ariadne {
+std::pair<Float, Vector<Interval> > flow_bounds(FunctionInterface const&,Vector<Interval> const&,Float const&);
+}
 /*
 TaylorFunction henon(const TaylorFunction& x, const Vector<Float>& p)
 {
@@ -355,6 +360,73 @@ void TestTaylorFunction::test_flow()
         Vector< Polynomial<Float> > flow_poly = (p(2,0)+1.5*p(2,1))*e(1,0);
         ARIADNE_TEST_EQUAL(flow_model.polynomial(),flow_poly);
     }
+
+    {
+        // Test a flow over a small time interval and space domain
+        // This test is designed to catch problems due to scaling of the domains
+
+        // Vector field dtx=1.5
+        Vector< Polynomial< Float > > vector_field_poly = (1.5+p(1,0)*0.0)*e(1,0);
+        Vector<Interval> bounding_box(1, Interval(0.25,0.75));
+        Vector<Interval> initial_box(1, Interval(0.375,0.50));
+        Interval time_interval(0,0.03125);
+        uint order=2;
+        TaylorFunction vector_field(bounding_box,vector_field_poly);
+        TaylorFunction flow_model=flow(vector_field,initial_box,time_interval,order);
+        Vector< Polynomial<Float> > flow_poly = (p(2,0)+1.5*p(2,1))*e(1,0);
+        ARIADNE_TEST_PRINT(vector_field_poly)
+        ARIADNE_TEST_PRINT(flow_model.domain());
+        ARIADNE_TEST_PRINT(flow_model.models());
+        ARIADNE_TEST_EQUAL(flow_model.domain(),join(initial_box,time_interval));
+        ARIADNE_TEST_EQUAL(flow_model.polynomial(),flow_poly);
+    }
+
+
+/*
+    {
+        // Test integration step starting from an initial set
+        Vector<Float> ex=Vector<Float>::unit(2,0);
+        Vector<Float> ey=Vector<Float>::unit(2,1);
+        Polynomial<Float> x=Polynomial<Float>::variable(2,0);
+        Polynomial<Float> y=Polynomial<Float>::variable(2,1);
+        Polynomial<Float> x0=Polynomial<Float>::variable(3,0);
+        Polynomial<Float> y0=Polynomial<Float>::variable(3,1);
+        Polynomial<Float> t=p(3,2);
+        TaylorSet initial_set_model(PolynomialFunction((0.264+0.0005*x)*ex+(0.046+0.0005*y)*ey), Vector<Interval>(2,Interval(-1,+1)));
+        PolynomialFunction vector_field((0.3-0.02*x)*ex+(0.0*y)*ey);
+        double step_size=0.125;
+        TaylorModel integration_time_model=TaylorModel::constant(2,step_size);
+
+        Vector<Interval> flow_domain=initial_set_model.range();
+        Vector<Interval> flow_bound(2, 0.263538,0.264482, 0.0458876,0.0468876);
+        TaylorFunction vector_field_model(flow_bound,vector_field);
+        TaylorFunction flow_model=unchecked_flow(vector_field_model,flow_domain,Interval(0.0,step_size),6);
+        TaylorSet final_set_model=apply(flow_model,TaylorSet(join(initial_set_model.models(),integration_time_model)));
+
+        ARIADNE_TEST_PRINT(vector_field);
+        ARIADNE_TEST_PRINT(initial_set_model);
+        ARIADNE_TEST_PRINT(integration_time_model);
+        ARIADNE_TEST_PRINT(flow_model);
+        ARIADNE_TEST_PRINT(final_set_model);
+
+        for(uint i=0; i!=100; ++i) {
+            Vector<Interval> flow_domain=initial_set_model.range();
+            Vector<Interval> flow_bound=flow_bounds(vector_field,flow_domain,step_size).second;
+            TaylorFunction vector_field_model(flow_bound,vector_field);
+            TaylorFunction flow_model=unchecked_flow(vector_field_model,flow_domain,Interval(0.0,step_size),6);
+            final_set_model=apply(flow_model,TaylorSet(join(initial_set_model.models(),integration_time_model)));
+            initial_set_model=final_set_model;
+            std::cerr<<final_set_model<<"\n";
+        }
+        ARIADNE_TEST_PRINT(final_set_model);
+    }
+*/
+/*
+TaylorSet([({0,0;0:0.26401, 1,0;1:0.000472061},2.53714e-15),({0,0;0:0.0463876, 0,1;1:0.0005},3.48973e-16)])
+flow_model=TaylorFunction( [[0.263538:0.264482],[0.0458876:0.0468876],[0:0.125]], [{ 0,0,0:[-6.25667e-16:-6.99588e-17], 1,0,0:[1:1], 0,0,1:[0.0175693:0.0175693], 1,0,1:[-0.02:-0.02], 0,0,2:[-0.000175693:-0.000175693], 1,0,2:[0.0002:0.0002], 0,0,3:[1.17128e-06:1.17128e-06], 1,0,3:[-1.33333e-06:-1.33333e-06], 0,0,4:[-5.85422e-09:-5.85422e-09], 1,0,4:[6.65833e-09:6.65833e-09], 0,0,5:[1.63649e-11:1.63649e-11] },{ 0,0,0:[-7.63278e-17:7.63278e-17], 0,1,0:[1:1], 0,0,1:[-0.0463876:-0.0463876] }] )
+integration_time_model=({0,0;0:0.125},0)
+final_set_model=TaylorSet([({0,0;0:0.265544, 1,0;1:0.000470882},2.71563e-15),({0,0;0:0.0405892, 0,1;1:0.0005},3.51577e-16)])
+*/
 }
 
 

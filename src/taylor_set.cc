@@ -112,6 +112,16 @@ operator==(const TaylorSet& ts1,const TaylorSet& ts2)
 
 
 
+Vector<Float>
+TaylorSet::centre() const
+{
+    Vector<Float> result(this->dimension());
+    for(uint i=0; i!=this->dimension(); ++i) {
+        result[i]=this->_models[i].value();
+    }
+    return result;
+}
+
 
 
 Float

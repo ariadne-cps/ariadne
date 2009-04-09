@@ -250,6 +250,19 @@ class TaylorModel
     //! \brief Inequality operator.
     bool operator!=(const TaylorModel& sd) const {
         return !(*this==sd); }
+    //! \brief Comparison with another Taylor model.
+    tribool operator<(const TaylorModel& sd) const {
+        return (sd-*this)>0; }
+    //! \brief Comparison with another Taylor model.
+    tribool operator>(const TaylorModel& sd) const {
+        return (*this-sd)>0; }
+
+    //! \brief Comparison with a scalar.
+    tribool operator<(const Float& c) const {
+        return this->range()<c; }
+    //! \brief Comparison with a scalar.
+    tribool operator>(const Float& c) const {
+        return this->range()>c; }
     //@}
 
     //@{

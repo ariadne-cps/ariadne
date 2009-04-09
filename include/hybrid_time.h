@@ -40,10 +40,15 @@ namespace Ariadne {
 //! Zeno behaviour occurs.
 struct HybridTime
 {
+    //! \brief The type used for continuous (real, physical) time.
+    typedef double ContinuousTimeType;
+    //! \brief The type used for discrete time (steps).
+    typedef int DiscreteTimeType;
+
     //! \brief The continuous (real, physical) time.
-    double continuous_time;
+    ContinuousTimeType continuous_time;
     //! \brief The number of discrete steps taken.
-    int discrete_time;
+    DiscreteTimeType discrete_time;
   public:
     HybridTime(double t, int n)
         : continuous_time(t), discrete_time(n) { } 

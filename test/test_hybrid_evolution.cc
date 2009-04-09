@@ -52,10 +52,17 @@ int verbosity=0;
 
 class TestHybridEvolution
 {
+    typedef Vector<Float> FVector;
+    typedef Matrix<Float> FMatrix;
+
+    static const bool non_urgent=false;
+    static const bool urgent=true;
   private:
     static HybridAutomaton system();
   public:
     void test() const;
+    void test_constant_derivative_system() const;
+    void test_affine_system() const;
 };
 
 int main()
@@ -69,9 +76,6 @@ int main()
 HybridAutomaton
 TestHybridEvolution::system()
 {
-    const bool non_urgent=false;
-    const bool urgent=true;
-
     const DiscreteState location1(1);
     const DiscreteState location2(2);
     const DiscreteEvent event3(3);
@@ -105,7 +109,62 @@ TestHybridEvolution::system()
     return automaton;
 }
 
-void TestHybridEvolution::test() const
+void TestHybridEvolution::test_constant_derivative_system() const
+{
+    // Test the system (d(x),d(y))=(1,0) with reset (x',y')=(x-2,y) when x+y>0
+    // Starting in a small box near the origin, the system should return to
+    // the initial condition after time 2
+    DiscreteState q1(1); DiscreteState q2(2); DiscreteEvent e(1);
+    AffineFunction d(FMatrix(2,2, 0.,0.,0.,0.),FVector(2, 1.0,0.));
+    AffineFunction r(FMatrix(2,2, 1.,0.,0.,1.),FVector(2, -2.,0.));
+    AffineFunction g(FMatrix(1,2, 1.,0.,0.,0.),FVector(1, -1.25));
+
+    HybridAutomaton automaton("Constant Derivative System");
+    automaton.new_mode(q1,d);
+    automaton.new_mode(q2,d);
+    automaton.new_transition(e,q1,q2,r,g,urgent);
+
+    TaylorSet initial_enclosure(Box(2, -0.0625,0.0625, -0.0625,+0.0625));
+    HybridTaylorSet initial_set(q1,initial_enclosure);
+
+    HybridEvolver evolver;
+
+    ARIADNE_TEST_PRINT(automaton);
+    ARIADNE_TEST_PRINT(initial_set);
+
+    {
+        // Test continuous evolution without any jumps
+        HybridTime evolution_time(0.5,1);
+        ARIADNE_TEST_PRINT(evolution_time);
+        Orbit<HybridTaylorSet> orbit=evolver.orbit(automaton,initial_set,evolution_time);
+        ARIADNE_TEST_PRINT(orbit);
+        ListSet<HybridTaylorSet> final_set=evolver.evolve(automaton,initial_set,evolution_time);
+        ARIADNE_TEST_PRINT(final_set);
+        HybridTaylorSet expected_final_set(q1,Box(2, +0.4375,+0.5625, -0.0625,+0.0625));
+        ARIADNE_TEST_PRINT(expected_final_set);
+        ARIADNE_TEST_COMPARE(norm(final_set[q1][0].models()-expected_final_set.second.models()),<,1e-15);
+    }
+
+    {
+        // Test continuous evolution with a single transverse jump
+        HybridTime evolution_time(2.0,2);
+        ARIADNE_TEST_PRINT(evolution_time);
+
+        Orbit<HybridTaylorSet> orbit=evolver.orbit(automaton,initial_set,evolution_time);
+        ARIADNE_TEST_PRINT(orbit);
+
+        ListSet<HybridTaylorSet> final_set=evolver.evolve(automaton,initial_set,evolution_time);
+        ARIADNE_TEST_PRINT(final_set);
+        HybridTaylorSet expected_final_set(q2,Box(2, -0.0625,+0.0625, -0.0625,+0.0625));
+        ARIADNE_TEST_PRINT(expected_final_set);
+
+        ARIADNE_TEST_COMPARE(norm(final_set[q2][0].models()-expected_final_set.second.models()),<,1e-14);
+    }
+
+}
+
+
+void TestHybridEvolution::test_affine_system() const
 {
     cout << __PRETTY_FUNCTION__ << endl;
 
@@ -173,4 +232,11 @@ void TestHybridEvolution::test() const
     fig.write("test_hybrid_evolution-orbit");
     cout << "done" << endl;
 
+}
+
+
+void TestHybridEvolution::test() const
+{
+    ARIADNE_TEST_CALL(test_constant_derivative_system());
+    ARIADNE_TEST_CALL(test_affine_system());
 }

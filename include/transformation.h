@@ -132,9 +132,10 @@ struct ScalingTransformation
 
 struct AffineExpression 
 {
-    AffineExpression(uint as, double c, ...) : _c(c), _g(as) {
-        va_list args; va_start(args,c);
-        for(uint i=0; i!=as; ++i) { _g[i]=va_arg(args,double); } }
+    AffineExpression(const Vector<Float>& g, const Float& c) : _c(c), _g(g.begin(),g.end()) { }
+    AffineExpression(uint as, double c, double g0, ...) : _c(c), _g(as) {
+        _g[0]=g0; va_list args; va_start(args,g0);
+        for(uint i=1; i!=as; ++i) { _g[i]=va_arg(args,double); } }
     const uint argument_size() const { return _g.size()-1; }
     const int smoothness() const { return SMOOTH; }
     template<class R, class A>
@@ -145,7 +146,7 @@ struct AffineExpression
         }
     }
   private:
-    array<Float> _c;
+    Float _c;
     array<Float> _g;
 };
 

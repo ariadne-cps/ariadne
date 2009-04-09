@@ -183,7 +183,9 @@ std::ostream& operator<<(std::ostream& os, const DetectionData& data) {
         os << ", initially_active="<<data.initially_active;
         os << ", finally_active="<<data.finally_active;
         if(data.touching_time_interval.lower()<=data.touching_time_interval.upper()) {
-            os << ", touching_times="<<data.touching_time_interval; }
+            os << ", touching_time_interval="<<data.touching_time_interval; }
+        if(data.crossing_kind==TRANSVERSE) {
+            os << ", crossing_time_model="<<data.crossing_time_model; }
     }
     return os <<" } ";
 }
@@ -243,6 +245,7 @@ _evolution(EnclosureListType& final_sets,
     while(!working_sets.empty()) {
         HybridTimedSetType current_set=working_sets.back();
         working_sets.pop_back();
+        ARIADNE_LOG(2,"working_set="<<current_set);
         DiscreteState initial_location=current_set.first;
         IntegerType initial_steps=current_set.second;
         SetModelType initial_set_model=current_set.third;
@@ -313,6 +316,8 @@ _evolution_step1(std::vector< HybridTimedSetType >& working_sets,
     //const uint nd=initial_set_model.result_size();
     //const uint ng=initial_set_model.argument_size();
 
+    TimeType::ContinuousTimeType maximum_time=maximum_hybrid_time.continuous_time;
+    TimeModelType maximum_integration_time_model=maximum_time-initial_time_model;
 
     /////////////// Main Evolution ////////////////////////////////
 
@@ -533,7 +538,7 @@ _evolution_step1(std::vector< HybridTimedSetType >& working_sets,
 
     ARIADNE_LOG(6,"blocking_data="<<blocking_data<<"\n");
 
-
+    // FIXME: Take final time into account here
     Float maximum_evolution_time;
     if(semantics==UPPER_SEMANTICS) {
         maximum_evolution_time=blocking_data.touching_time_interval.upper();
@@ -594,6 +599,7 @@ _evolution_step1(std::vector< HybridTimedSetType >& working_sets,
         ARIADNE_LOG(8,"    final_time_model="<<final_time_model<<"\n");
         TimeModelType integration_time_model=final_time_model-initial_time_model;
         ARIADNE_LOG(8,"    integration_time_model="<<integration_time_model<<"\n");
+        if(integration_time_model>maximum_integration_time_model) { integration_time_model=maximum_integration_time_model; }
         reach_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,zero_time,integration_time_model);
         final_set_model=this->_toolbox->integration_step(flow_model,initial_set_model,integration_time_model);
         reach_sets.adjoin(EnclosureType(initial_location,reach_set_model));
@@ -634,6 +640,10 @@ _evolution_step1(std::vector< HybridTimedSetType >& working_sets,
                     if(data.initially_active) {
                         active_time_model=this->_toolbox->reachability_time(zero_time,data.crossing_time_model);
                         jump_time_model=this->_toolbox->reachability_time(initial_time_model,initial_time_model+data.crossing_time_model);
+                    } else if(data.predicate_kind==GUARD) {
+                        // Not sure if this code is needed.... maybe we can use crossing time as before
+                        active_time_model=this->_toolbox->reachability_time(data.crossing_time_model,maximum_evolution_time);
+                        jump_time_model=initial_time_model+data.crossing_time_model;
                     } else {
                         active_time_model=this->_toolbox->reachability_time(data.crossing_time_model,maximum_evolution_time);
                         jump_time_model=this->_toolbox->
@@ -654,8 +664,16 @@ _evolution_step1(std::vector< HybridTimedSetType >& working_sets,
                     active_time_model=this->_toolbox->reachability_time(lower_active_time_model,upper_active_time_model);
                     jump_time_model=this->_toolbox->reachability_time(initial_time_model+lower_active_time_model,initial_time_model+upper_active_time_model);
                 }
-                SetModelType active_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,active_time_model);
-                SetModelType jump_set_model=this->_toolbox->reset_step(*reset_ptr,active_set_model);
+
+                SetModelType active_set_model;
+                SetModelType jump_set_model;
+                if(data.crossing_kind==TRANSVERSE) {
+                    active_set_model=this->_toolbox->integration_step(flow_model,initial_set_model,data.crossing_time_model);
+                    jump_set_model=this->_toolbox->reset_step(*reset_ptr,active_set_model);
+                } else {
+                    active_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,active_time_model);
+                    jump_set_model=this->_toolbox->reset_step(*reset_ptr,active_set_model);
+                }
 
                 if(semantics==UPPER_SEMANTICS || data.predicate_kind==ACTIVATION
                    || data.crossing_kind==TRANSVERSE) {

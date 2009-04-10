@@ -62,6 +62,7 @@ class TestHybridEvolution
   public:
     void test() const;
     void test_constant_derivative_system() const;
+    void test_bouncing_ball() const;
     void test_affine_system() const;
 };
 
@@ -163,6 +164,55 @@ void TestHybridEvolution::test_constant_derivative_system() const
 
 }
 
+void TestHybridEvolution::test_bouncing_ball() const
+{
+    /// Set the system parameters
+    double a = 0.5; // Coefficient of restitution
+    double g = 9.8; // Constant of gravity
+    double x0 = 5.0; // Initial height
+    double r0 = 1.0/16; // Initial box radius
+
+    /// Create the system functions
+    DiscreteState q1(1);
+    DiscreteState q2(2);
+    DiscreteEvent e12(12);
+    //AffineFunction dynamic(FMatrix(3,3, 0.,1.,0., 0.,0.,0., 0.,0.,0.), FVector(3, 0.0, -g, 1.0));
+    //AffineFunction reset(FMatrix(3,3, 1.0,0.0 ,0.0,-a,0.0, 0.0,0.0,1.0), FVector(3, 0.0,0.0,0.0));
+    //AffineFunction guard(FMatrix(1,3, -1.0,0.0,0.0), FVector(1, 0.0));
+    AffineFunction dynamic(FMatrix(2,2, 0.,1., 0.,0.), FVector(2, 0.0, -g));
+    AffineFunction reset(FMatrix(2,2, 1.0,0.0 ,0.0,-a), FVector(2, 0.0,0.0));
+    AffineFunction guard(FMatrix(1,2, -1.0,0.0), FVector(1, 0.0));
+
+    /// Build the automaton
+    HybridAutomaton automaton;
+    automaton.new_mode(q1,dynamic);
+    automaton.new_mode(q2,dynamic);
+    automaton.new_transition(e12,q1,q2,reset,guard,urgent);
+
+    //TaylorSet initial_enclosure(Box(3, x0-r0,x0+r0, -r0,+r0, 0.0,0.0));
+    TaylorSet initial_enclosure(Box(2, x0-r0,x0+r0, -r0,+r0));
+    HybridTaylorSet initial_set(q1,initial_enclosure);
+
+    HybridEvolver evolver;
+    evolver.parameters().maximum_step_size=0.125;
+
+    ARIADNE_TEST_PRINT(automaton);
+    ARIADNE_TEST_PRINT(initial_set);
+
+    // Test continuous evolution without any jumps
+    HybridTime evolution_time(1.5,2);
+    ARIADNE_TEST_PRINT(evolution_time);
+    Orbit<HybridTaylorSet> orbit=evolver.orbit(automaton,initial_set,evolution_time);
+    ARIADNE_TEST_PRINT(orbit);
+    ARIADNE_TEST_EVALUATE(orbit.intermediate()[q2]);
+    ARIADNE_TEST_EVALUATE(orbit.reach()[q2]);
+    ARIADNE_TEST_EVALUATE(orbit.final()[q2]);
+
+    plot("test_hybrid_evolution-bouncing_ball-orbit",Box(2,-1.,6.,-12.,8.),
+         Colour(.99,.99,.99),Box(2,-2.,0.,-20.,+20.),Colour(0,0.5,1),orbit.reach()[q1],Colour(0,1,1),orbit.reach()[q2]);
+}
+
+
 
 void TestHybridEvolution::test_affine_system() const
 {
@@ -237,6 +287,7 @@ void TestHybridEvolution::test_affine_system() const
 
 void TestHybridEvolution::test() const
 {
-    ARIADNE_TEST_CALL(test_constant_derivative_system());
-    ARIADNE_TEST_CALL(test_affine_system());
+    //ARIADNE_TEST_CALL(test_constant_derivative_system());
+    ARIADNE_TEST_CALL(test_bouncing_ball());
+    //ARIADNE_TEST_CALL(test_affine_system());
 }

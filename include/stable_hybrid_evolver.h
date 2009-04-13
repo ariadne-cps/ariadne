@@ -1,7 +1,7 @@
 /***************************************************************************
- *            development_hybrid_evolver.h
+ *            stable_hybrid_evolver.h
  *
- *  Copyright  2007-8  Alberto Casagrande, Pieter Collins
+ *  Copyright  2007-9  Alberto Casagrande, Pieter Collins, Davide Bresolin
  *
  ****************************************************************************/
 
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file development_hybrid_evolver.h
- *  \brief Evolver for hybrid systems.
+/*! \file stable_hybrid_evolver.h
+ *  \brief The most stable evolver for hybrid systems. 
  */
 
-#ifndef ARIADNE_DEVELOPMENT_HYBRID_EVOLVER_H
-#define ARIADNE_DEVELOPMENT_HYBRID_EVOLVER_H
+#ifndef ARIADNE_STABLE_HYBRID_EVOLVER_H
+#define ARIADNE_STABLE_HYBRID_EVOLVER_H
 
 #include <string>
 #include <vector>
@@ -47,31 +47,35 @@
 #include "logging.h"
 
 namespace Ariadne {  
-  
-template<class Sys, class BS> class Evolver;
 
+class TaylorModel;
+class TaylorVariable;
 class TaylorFunction;
 class TaylorSet;
-class HybridAutomaton;
-template<class ES> class Orbit;
+typedef std::pair<DiscreteState,TaylorSet> HybridTaylorSet;
 
-class EvolutionParameters;
-class TaylorModel;
 template<class MDL> class CalculusInterface;
 
+class EvolutionParameters;
 class EvolutionProfiler;
+template<class ES> class Orbit;
 
 class HybridTime;
+class HybridAutomaton;
+
+
+
 
 
 /*! \brief A class for computing the evolution of a hybrid system. 
  *
  * The actual evolution steps are performed by the HybridEvolver class.
  */
-class HybridEvolver
-    : public EvolverBase<HybridAutomaton, std::pair<DiscreteState,TaylorSet> >
+class StableHybridEvolver
+    : public EvolverBase< HybridAutomaton, HybridTaylorSet>
     , public Loggable
 {
+    typedef TaylorModel ModelType;
     typedef FunctionInterface FunctionType;
     typedef Vector<Interval> BoxType;
     typedef TaylorFunction FunctionModelType;
@@ -90,19 +94,21 @@ class HybridEvolver
     typedef TaylorSet ContinuousEnclosureType;
     typedef pair<DiscreteState,TaylorSet> HybridEnclosureType;
     typedef HybridEnclosureType EnclosureType;
+    typedef pair< Interval , EnclosureType > TimedEnclosureType;
     typedef Orbit<EnclosureType> OrbitType;
     typedef ListSet<EnclosureType> EnclosureListType;
+    typedef std::vector<TimedEnclosureType> TimedEnclosureListType;
     typedef Float ContinuousTimeType;
   public:
     
     //! \brief Default constructor.
-    HybridEvolver();
+    StableHybridEvolver();
   
     //! \brief Construct from parameters using a default integrator.
-    HybridEvolver(const EvolutionParametersType& parameters);
+    StableHybridEvolver(const EvolutionParametersType& parameters);
   
     /*! \brief Make a dynamically-allocated copy. */
-    HybridEvolver* clone() const { return new HybridEvolver(*this); }
+    StableHybridEvolver* clone() const { return new StableHybridEvolver(*this); }
 
     //@{
     //! \name Parameters controlling the evolution.
@@ -115,21 +121,24 @@ class HybridEvolver
 
     //@{
     //! \name Evolution using abstract sets.
-    //! \brief Compute an approximation to the orbit set using upper semantics. 
-    Orbit<EnclosureType> orbit(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
+    //! \brief Compute an approximation to the orbit set using the given semantics. 
+    Orbit<EnclosureType> orbit(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, Semantics semantics) const;
 
 
-    //! \brief Compute an approximation to the evolution set using upper semantics. 
-    EnclosureListType evolve(const SystemType& system, const EnclosureType& initial_set, const TimeType& time) const {
+    //! \brief Compute an approximation to the evolution set using the given semantics. 
+    EnclosureListType evolve(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, Semantics semantics) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate; 
-        this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS,false); 
+        this->_evolution(final,reachable,intermediate,system,initial_set,time,semantics,false); 
         return final; }
 
-    //! \brief Compute an approximation to the evolution set under upper semantics. 
-    EnclosureListType reach(const SystemType& system, const EnclosureType& initial_set, const TimeType& time) const {
+    //! \brief Compute an approximation to the evolution set under the given semantics. 
+    EnclosureListType reach(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, Semantics semantics) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate; 
-        this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS,true); 
-        return intermediate; }
+        this->_evolution(final,reachable,intermediate,system,initial_set,time,semantics,true); 
+        return reachable; }
+
+    TimedEnclosureListType timed_evolution(const SystemType& system, const EnclosureType& initial, 
+        const TimeType& time, Semantics semantics, bool reach) const;
 
   protected:
     virtual void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate, 
@@ -137,19 +146,14 @@ class HybridEvolver
                             Semantics semantics, bool reach) const;
 
     typedef tuple<DiscreteState, IntegerType, SetModelType, TimeModelType> HybridTimedSetType;
-    virtual void _evolution_step1(std::vector< HybridTimedSetType >& working_sets, 
-                                  EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,  
-                                  const SystemType& system, const HybridTimedSetType& current_set, const TimeType& time, 
-                                  Semantics semantics, bool reach) const;
-
-    virtual void _evolution_step2(std::vector< HybridTimedSetType >& working_sets,
-                                  EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,  
-                                  const SystemType& system, const HybridTimedSetType& current_set, const TimeType& time, 
-                                  Semantics semantics, bool reach) const;
+    virtual void _evolution_step(std::vector< HybridTimedSetType >& working_sets, 
+                                 EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,  
+                                 const SystemType& system, const HybridTimedSetType& current_set, const TimeType& time, 
+                                 Semantics semantics, bool reach) const;
 
   private:
     boost::shared_ptr< EvolutionParametersType > _parameters;
-    boost::shared_ptr< CalculusInterface<TaylorModel> > _toolbox;
+    boost::shared_ptr< CalculusInterface<ModelType> > _toolbox;
     //boost::shared_ptr< EvolutionProfiler >  _profiler;
 };
 
@@ -157,4 +161,4 @@ class HybridEvolver
   
 } // namespace Ariadne
 
-#endif // ARIADNE_DEVELOPMENT_HYBRID_EVOLVER_H
+#endif // ARIADNE_STABLE_HYBRID_EVOLVER_H

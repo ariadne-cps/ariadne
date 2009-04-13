@@ -37,6 +37,7 @@
 using namespace std;
 using namespace Ariadne;
 
+
 class TestFloat 
 {
   public:

@@ -38,7 +38,7 @@ Float pi_=Ariadne::pi<Float>();
 struct HeaterOn : FunctionData<2,2,4> {
     template<class R, class A, class P> static void 
     compute(R& r, const A& x, const P& p) {
-        //    r[0] = p[0] + p[1] * ( p[2] - p[3] * Ariadne::cos(2*pi_*x[1]) - x[0] );
+        //    r[0] = p[0] + p[1] * ( p[2] - p[3] * Ariadne::cos(2*pi_*x[0]) - x[1] );
         typename R::value_type t0=2*pi_*x[0];
         r[0] = 1.0; 
         r[1] = p[0] + p[1] * ( p[2] - p[3] * (1-sqr(t0)/2) - x[1] );
@@ -48,7 +48,7 @@ struct HeaterOn : FunctionData<2,2,4> {
 struct HeaterOff : FunctionData<2,2,4> {
     template<class R, class A, class P> static void 
     compute(R& r, const A& x, const P& p) {
-        //    r[0] = p[1] * ( p[2] - p[3] * Ariadne::cos(2*pi_*x[1]) - x[0] );
+        //    r[0] = p[1] * ( p[2] - p[3] * Ariadne::cos(2*pi_*x[0]) - x[1] );
         typename R::value_type t0=2*pi_*x[0];
         r[0] = 1.0; 
         r[1] = p[1] * ( p[2] - p[3] * (1-sqr(t0)/2) - x[1] );
@@ -66,7 +66,7 @@ int main()
     /// where \f$T_\mathrm{ext}(t) = T_\mathrm{av} - A \cos(2\pi t)\f$ is the
     /// external temperature and \f$ q(t)\in\{\mathsc{on},\mathsc{off}\}\f$ is the
     /// discrete state of the heater.
-    /// The parameters are the insulation coefficient \f$k\f$, the average 
+    /// The parameters are the insulation coefficient \f$K\f$, the average 
     /// external temperature \f$T_\mathrm{av}\f$, the amplitude of the 
     /// temperature fluctuations \f$A\f$ and the power of the heater \f$P\f$.
     ///
@@ -155,8 +155,8 @@ int main()
     /// Compute the system evolution
 
 
-    /// Create a HybridEvolver object
-    HybridEvolver evolver;
+    /// Create a StableHybridEvolver object
+    StableHybridEvolver evolver;
 
     /// Set the evolution parameters
     evolver.parameters().maximum_enclosure_radius = 0.25;
@@ -164,8 +164,8 @@ int main()
     std::cout <<  evolver.parameters() << std::endl;
 
     // Declare the type to be used for the system evolution
-    typedef HybridEvolver::EnclosureType HybridEnclosureType;
-    typedef HybridEvolver::OrbitType OrbitType;
+    typedef StableHybridEvolver::EnclosureType HybridEnclosureType;
+    typedef StableHybridEvolver::OrbitType OrbitType;
 
     Box initial_box(2, 0.0,0.015625, 16.0,16.0625);
     HybridEnclosureType initial_enclosure(heater_off,initial_box);
@@ -188,10 +188,12 @@ int main()
 
     HybridImageSet initial_set;
     initial_set[heater_off]=initial_box;
-
-    HybridTime reach_time(0.25,4);
+    global_verbosity = 6;
+    
+    HybridTime reach_time(0.25,1);
 
     plot("tutorial-initial_set.png",Box(2, 0.0,1.0, 14.0,18.0), Colour(0.0,0.5,1.0), initial_set);
+
 
     // Compute evolved sets (i.e. at the evolution time) and reach sets (i.e. up to the evolution time) using lower semantics.
     // These functions run a bunch of simulations with bounded approximation errors and combines the results.
@@ -229,6 +231,35 @@ int main()
         std::cerr << "Skipping computation of chain reachable set due to performance issues.\n";
     }
 
+    {
+        // Compute the reach set for times between tlower and tupper.
+        // The intermediate set is stored to an archive file and used to build the initial set for the reach step
+        // Note that because of peculiarities in the Boost serialization library, 
+        // the object to be serialized must be declared const.
+        Float tlower=0.25; Float tupper=0.75;
+        HybridTime transient_time(tlower,4);
+        HybridTime recurrent_time(tupper-tlower,16);
+    
+        const HybridGridTreeSet* upper_intermediate_set_ptr = analyser.upper_evolve(heating_system,initial_set,transient_time);
+        const HybridGridTreeSet upper_intermediate_set = *upper_intermediate_set_ptr;
+        plot("tutorial-upper_intermediate.png",Box(2, 0.0,1.0, 14.0,18.0), Colour(0.0,0.5,1.0), *upper_intermediate_set_ptr);
+    
+        std::ofstream output_file_stream("tutorial-transient.txt");
+        text_oarchive output_archive(output_file_stream);
+        //output_archive << *upper_intermediate_set_ptr;
+        output_archive << upper_intermediate_set;
+        output_file_stream.close();
+    
+        HybridGridTreeSet rebuilt_upper_intermediate_set;
+    
+        std::ifstream input_file_stream("tutorial-transient.txt");
+        text_iarchive input_archive(input_file_stream);
+        input_archive >> rebuilt_upper_intermediate_set;
+        input_file_stream.close();
+    
+        HybridGridTreeSet* upper_recurrent_set_ptr = analyser.upper_reach(heating_system,initial_set,recurrent_time);
+        plot("tutorial-upper_recurrent.png",Box(2, 0.0,1.0, 14.0,18.0), Colour(0.0,0.5,1.0), *upper_recurrent_set_ptr);
+    }
 
     {
         std::cerr << "Plotting results..."<<std::endl;
@@ -254,10 +285,10 @@ int main()
 
         g.write("tutorial-all.png");
 
-        
+
         // Display the figure in a pop-up window
         if(false) { g.display(); }
 
     }
-      
+
 }

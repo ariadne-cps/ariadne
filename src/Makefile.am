@@ -38,6 +38,7 @@ SRC = \
 	map_evolver.cc \
 	vector_field_evolver.cc \
 	hybrid_evolver.cc \
+	stable_hybrid_evolver.cc \
 	discretiser.cc \
 	reachability_analyser.cc \
 	logging.cc \

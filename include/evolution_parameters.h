@@ -31,9 +31,10 @@
 #include <cstddef>
 #include <boost/smart_ptr.hpp>
 
+#include "grid_set.h"
+#include "hybrid_set.h"
 
 namespace Ariadne {
-  
 
 //! \brief Parameters for controlling the accuracy of continuous evolution methods.
 struct ContinuousEvolutionParameters {
@@ -133,6 +134,18 @@ struct DiscreteEvolutionParameters {
     //! Decreasing this value increases the accuracy of the computation. 
     RealType grid_lengths;
 
+    //! \brief Set the approximation grid. 
+    //!  <br>
+    //! Fine tuning of the grid, with the possibility to have different lengths for every dimension.
+    //! Decreasing this value increases the accuracy of the computation. 
+    Grid grid;
+
+    //! \brief Set the hybrid approximation grid. 
+    //!  <br>
+    //! Fine tuning of the grid, with the possibility to have grids for every discrete location.
+    //! Decreasing this value increases the accuracy of the computation. 
+    HybridGrid hybrid_grid;
+
     //! \brief Set the depth used for approximation on a grid for the initial set in computations using lower semantics.
     //!  <br>
     //! Setting this value to \a d will on a grid with lengths \a l will result in the use of initial boxes
@@ -196,11 +209,13 @@ ContinuousEvolutionParameters::ContinuousEvolutionParameters()
 
 inline
 DiscreteEvolutionParameters::DiscreteEvolutionParameters() 
-    : transient_time(4.0),
-      transient_steps(4),
+    : transient_time(0.0),
+      transient_steps(0),
       lock_to_grid_time(1.0),
       lock_to_grid_steps(1),
       grid_lengths(1.0),
+      grid(),
+      hybrid_grid(HybridSpace(),0.0),
       initial_grid_depth(10),
       initial_grid_density(8),
       maximum_grid_depth(6),
@@ -238,6 +253,8 @@ operator<<(std::ostream& os, const DiscreteEvolutionParameters& p)
 
 
        << ",\n  grid_lengths=" << p.grid_lengths
+       << ",\n  grid=" << p.grid
+       << ",\n  hybrid_grid=" << p.hybrid_grid
        << ",\n  initial_grid_depth=" << p.initial_grid_depth
        << ",\n  initial_grid_density=" << p.initial_grid_density
        << ",\n  maximum_grid_depth=" << p.maximum_grid_depth
@@ -268,6 +285,8 @@ operator<<(std::ostream& os, const EvolutionParameters& p)
        << ",\n  transient_steps=" << p.transient_steps
 
        << ",\n  grid_lengths=" << p.grid_lengths
+       << ",\n  grid=" << p.grid
+       << ",\n  hybrid_grid=" << p.hybrid_grid
        << ",\n  initial_grid_depth=" << p.initial_grid_depth
        << ",\n  initial_grid_density=" << p.initial_grid_density
        << ",\n  maximum_grid_depth=" << p.maximum_grid_depth

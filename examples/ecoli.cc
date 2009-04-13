@@ -107,16 +107,16 @@ int main()
     Colour turquoise(0.0,0.5,1.0);
     Colour green(0.0,1.0,0.25);
 
-    /// Create a HybridEvolver object
+    /// Create a StableHybridEvolver object
     /// Set the evolution parameters
-    HybridEvolver evolver;
+    StableHybridEvolver evolver;
     evolver.parameters().maximum_enclosure_radius = 0.25;
     evolver.parameters().maximum_step_size = 0.25;
     std::cout <<  evolver.parameters() << std::endl;
 
     // Declare the types to be used for the system evolution
-    typedef HybridEvolver::EnclosureType HybridEnclosureType;
-    typedef HybridEvolver::OrbitType OrbitType;
+    typedef StableHybridEvolver::EnclosureType HybridEnclosureType;
+    typedef StableHybridEvolver::OrbitType OrbitType;
 
     Point initial_state(Vector<Float>(4,0.33,0.1,0.1,0.1));
     Box initial_box=Vector<Float>(initial_state)+Vector<Interval>(4,Interval(-1,1)*0.025);

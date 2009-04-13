@@ -102,6 +102,18 @@ class VectorFieldEvolver
     using EvolverBase< VectorField, TaylorSet >::evolve;
     using EvolverBase< VectorField, TaylorSet >::reach;
 
+    //! \brief Compute an approximation to the evolution set using upper semantics.
+    EnclosureListType evolve(const SystemType& system, const EnclosureType& initial_set, const TimeType& time) const {
+        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate; 
+        this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS,false); 
+        return final; }
+
+    //! \brief Compute an approximation to the reachable set under upper semantics.
+    EnclosureListType reach(const SystemType& system, const EnclosureType& initial_set, const TimeType& time) const {
+        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate; 
+        this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS,true); 
+        return reachable; }
+
   protected:
     virtual void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate, 
                             const SystemType& system, const EnclosureType& initial, const TimeType& time, 

@@ -563,6 +563,7 @@ TaylorModel min(const TaylorModel& x, const TaylorModel& y);
 TaylorModel abs(const TaylorModel& x);
 TaylorModel neg(const TaylorModel& x);
 TaylorModel rec(const TaylorModel& x);
+TaylorModel sqrt(const TaylorModel& x);
 TaylorModel exp(const TaylorModel& x);
 TaylorModel log(const TaylorModel& x);
 TaylorModel sin(const TaylorModel& x);

@@ -86,6 +86,8 @@
 #define ARIADNE_PRETTY_FUNCTION __PRETTY_FUNCTION__
 #elif defined(_WIN32) || defined(__WIN32__) || defined(WIN32)
 #define ARIADNE_PRETTY_FUNCTION __FUNCTION__
+#elif defined(darwin) || defined(__darwin) || defined(__darwin__)
+#define ARIADNE_PRETTY_FUNCTION __PRETTY_FUNCTION__
 #else
 #define ARIADNE_PRETTY_FUNCTION ""
 #endif 

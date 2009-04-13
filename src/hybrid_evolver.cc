@@ -1,5 +1,5 @@
 /***************************************************************************
- *            hybrid_evolver.cc
+ *            development_hybrid_evolver.cc
  *
  *  Copyright  2008  Alberto Casagrande, Pieter Collins
  *
@@ -125,6 +125,7 @@ orbit(const SystemType& system,
 
 
 
+namespace{
 
 enum PredicateKind { INVARIANT, ACTIVATION, GUARD, TIME, MIXED };
 enum CrossingKind { TRANSVERSE, TOUCHING, NONE, UNKNOWN };
@@ -196,6 +197,9 @@ std::ostream& operator<<(std::ostream& os, const DetectionData& data) {
 inline bool operator<(const DetectionData& d1, const DetectionData& d2) {
     return d1.id < d2.id;
 }
+
+} // namespace
+
 
 void
 HybridEvolver::

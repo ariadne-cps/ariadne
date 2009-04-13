@@ -23,13 +23,13 @@
 
 #include <cstdarg>
 #include "ariadne.h"
+#include "grid_set.h"
 
 using namespace Ariadne;
 
 
 int main() 
-{
-  
+{  
     /// Set the system parameters
     double a = 0.5;
     double g = 9.8;
@@ -74,36 +74,36 @@ int main()
 
     /// Compute the system evolution
 
-    /// Create a HybridEvolver object
-    HybridEvolver evolver;
+    /// Create a StableHybridEvolver object
+    StableHybridEvolver evolver;
 
     /// Set the evolution parameters
     evolver.parameters().maximum_enclosure_radius = 0.05;
-    evolver.parameters().maximum_step_size = 0.05;
+    evolver.parameters().maximum_step_size = 0.01;
     std::cout <<  evolver.parameters() << std::endl;
 
     // Declare the type to be used for the system evolution
-    typedef HybridEvolver::EnclosureType HybridEnclosureType;
-    typedef HybridEvolver::OrbitType OrbitType;
-    typedef HybridEvolver::EnclosureListType EnclosureListType;
+    typedef StableHybridEvolver::EnclosureType HybridEnclosureType;
+    typedef StableHybridEvolver::OrbitType OrbitType;
+    typedef StableHybridEvolver::EnclosureListType EnclosureListType;
 
     std::cout << "Computing evolution starting from location l1, x = 2.0, v = 0.0" << std::endl;
 
-    Box initial_box(2, 2.0,2.001, 0.0,0.001);
+    Box initial_box(2, 1.999,2.0, 0.0,0.001);
     HybridEnclosureType initial_enclosure(l1,initial_box);
     Box bounding_box(2, -0.1,2.1, -10.1,10.1);
   
     HybridTime evolution_time(4.0,6);
-  
+ 
     std::cout << "Computing orbit... " << std::flush;
     OrbitType orbit = evolver.orbit(ball,initial_enclosure,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
 
-    std::cout << "Orbit="<<orbit<<std::endl;
+    std::cout << "Orbit.final="<<orbit.final()<<std::endl;
     //plot("tutorial-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit.initial());
     plot("ball-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit);
-
-    std::cout << "Computing reach set using HybridEvolver... " << std::flush;
+/*
+    std::cout << "Computing reach set using StableHybridEvolver... " << std::flush;
     EnclosureListType reach = evolver.reach(ball,initial_enclosure,evolution_time);
     std::cout << "done." << std::endl;
 
@@ -111,12 +111,11 @@ int main()
     //plot("tutorial-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit.initial());
     plot("ball-reach-evolver",bounding_box, Colour(0.0,0.5,1.0), reach);
 
-
     /// Create a ReachabilityAnalyser object
     global_verbosity = 6;
     HybridReachabilityAnalyser analyser(evolver);
     analyser.parameters().lock_to_grid_time = 32.0;
-    analyser.parameters().grid_lengths = 0.2;
+    analyser.parameters().maximum_grid_depth= 10;
     std::cout <<  analyser.parameters() << std::endl;
 
     HybridImageSet initial_set;
@@ -129,10 +128,10 @@ int main()
     // Compute evolved sets (i.e. at the evolution time) and reach sets (i.e. up to the evolution time) using lower semantics.
     // These functions run a bunch of simulations with bounded approximation errors and combines the results.
     // If the desired evolution time can not be attained without exceeding the error bounds, then the run discarded (without warning)
- //   std::cout << "Computing lower reach set... " << std::flush;
- //   HybridGridTreeSet* lower_reach_set_ptr = analyser.lower_reach(ball,initial_set,reach_time);
- //   std::cout << "done." << std::endl;
- //   plot("ball-lower_reach",bounding_box, Colour(0.0,0.5,1.0), *lower_reach_set_ptr);
+    std::cout << "Computing lower reach set... " << std::flush;
+    HybridGridTreeSet* lower_reach_set_ptr = analyser.lower_reach(ball,initial_set,reach_time);
+    std::cout << "done." << std::endl;
+    plot("ball-lower_reach",bounding_box, Colour(0.0,0.5,1.0), *lower_reach_set_ptr);
 
     // Compute evolved sets and reach sets using upper semantics.
     // These functions compute over-approximations to the evolved and reachabe sets. Subdivision is used
@@ -141,6 +140,6 @@ int main()
     HybridGridTreeSet* upper_reach_set_ptr = analyser.upper_reach(ball,initial_set,reach_time);
     std::cout << "done." << std::endl;
     plot("ball-upper_reach",bounding_box, Colour(0.0,0.5,1.0), *upper_reach_set_ptr);
-
+*/
 
 }

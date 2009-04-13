@@ -134,6 +134,13 @@ inline Float div_opp(Float x, Float y) { volatile double t=(-x)/y; return -t; }
 Float pow_rnd(Float x, int n);
 Float pow_opp(Float x, int n);
 
+Float sqrt_rnd(Float x);
+Float exp_rnd(Float x);
+Float log_rnd(Float x);
+Float sin_rnd(Float x);
+Float cos_rnd(Float x);
+Float tan_rnd(Float x);
+
 inline Float add_approx(Float x, Float y) {
     rounding_mode_t rounding_mode=get_rounding_mode(); set_rounding_mode(to_nearest);
     volatile Float r=add_rnd(x,y); set_rounding_mode(rounding_mode); return r; }
@@ -191,7 +198,6 @@ inline Float rad_up(Float x, Float y) {
 
 
 
-double cos_rnd(double x);
 
 //! \brief Intervals supporting interval arithmetic.
 class Interval {

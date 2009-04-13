@@ -334,7 +334,7 @@ crossing_time(const PredicateModelType& guard_model,
     PredicateModelType free_hitting_time_model;
     try {
         free_hitting_time_model=Ariadne::implicit(hitting_model);
-    } catch(NonInvertibleFunctionException e) {
+    } catch(const ImplicitFunctionException& e) {
         throw DegenerateCrossingException(e.what());
     } catch(const std::runtime_error& e) {
         std::cerr<<e.what();

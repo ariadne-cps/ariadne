@@ -227,7 +227,7 @@ void TestHybridEvolution::test_affine_system() const
     typedef pair<DiscreteState,TaylorSet> HybridEnclosureType;
 
     // Set up the evolution parameters and grid
-    Float step_size(0.125);
+    Float step_size(0.5);
     Float enclosure_radius(0.25);
 
     EvolutionParameters parameters;

@@ -83,7 +83,10 @@ const bool ENABLE_PREMATURE_TERMINATION = false;
 static const int BLOCKING_EVENT = -2;
 using boost::shared_ptr;
 
-class DegenerateCrossingException { };
+class DegenerateCrossingException : public std::runtime_error {
+  public:
+    DegenerateCrossingException(const char* msg) : std::runtime_error(msg) { }
+};
 
 
 HybridEvolver::HybridEvolver()
@@ -205,7 +208,7 @@ _evolution(EnclosureListType& final_sets,
            Semantics semantics,
            bool reach) const
 {
-    verbosity=0;
+    //verbosity=0;
     typedef boost::shared_ptr< const FunctionInterface > FunctionConstPointer;
 
     ARIADNE_LOG(5,ARIADNE_PRETTY_FUNCTION<<"\n");
@@ -460,7 +463,7 @@ _evolution_step1(std::vector< HybridTimedSetType >& working_sets,
                             data.touching_time_interval=data.crossing_time_model.range();
                             data.crossing_kind=TRANSVERSE;
                         }
-                        catch(DegenerateCrossingException) { ARIADNE_LOG(7," DegenerateCrossing\n"); }
+                        catch(DegenerateCrossingException e) { std::cerr<<e.what()<<"\n"; ARIADNE_LOG(7," DegenerateCrossing\n"); }
                     }
                     if(data.crossing_kind!=TRANSVERSE) {
                         data.touching_time_interval=this->_toolbox->touching_time_interval(guard_model,flow_model,initial_set_model);
@@ -552,6 +555,25 @@ _evolution_step1(std::vector< HybridTimedSetType >& working_sets,
         maximum_evolution_time=step_size;
     }
 
+    // Compute blocking time for time step
+    if(blocking_data.touching_time_interval.lower()>step_size/16) {
+        // If the blocking event is non-transverse and occurs after too long an interval,
+        // just do a time step
+        blocking_data.predicate_kind=TIME;
+        blocking_data.crossing_time_model=this->_toolbox->time_model(blocking_data.touching_time_interval.lower(),initial_time_model.domain());
+    } else if(blocking_data.predicate_kind==TIME) {
+        ARIADNE_LOG(6,"  Continuous evolution for maximum time; unwinding time differentce\n");
+        Interval initial_time_range=initial_time_model.range();
+        Float final_time=initial_time_range.lower()+step_size;
+        ARIADNE_LOG(8,"    initial_time_model="<<initial_time_model<<"\n");
+        final_time_model=this->_toolbox->time_model(final_time,initial_time_model.domain());
+        TimeModelType integration_time_model=final_time_model-initial_time_model;
+        ARIADNE_LOG(8,"    integration_time_model="<<integration_time_model<<"\n");
+        if(integration_time_model>maximum_integration_time_model) { integration_time_model=maximum_integration_time_model; }
+        blocking_data.crossing_time_model=integration_time_model;
+   }
+
+
     ARIADNE_LOG(6,"maximum_evolution_time="<<maximum_evolution_time<<"\n");
 
 
@@ -589,17 +611,8 @@ _evolution_step1(std::vector< HybridTimedSetType >& working_sets,
             reach_sets.adjoin(EnclosureType(initial_location,reach_set_model));
         }
     } else {
-        ARIADNE_LOG(6,"  Continuous evolution for maximum time; unwinding time differentce\n");
         ARIADNE_ASSERT(blocking_data.predicate_kind==TIME);
-        // Try to unwind any differences in time
-        Interval initial_time_range=initial_time_model.range();
-        Float final_time=initial_time_range.lower()+step_size;
-        ARIADNE_LOG(8,"    initial_time_model="<<initial_time_model<<"\n");
-        final_time_model=this->_toolbox->time_model(final_time,initial_time_model.domain());
-        ARIADNE_LOG(8,"    final_time_model="<<final_time_model<<"\n");
-        TimeModelType integration_time_model=final_time_model-initial_time_model;
-        ARIADNE_LOG(8,"    integration_time_model="<<integration_time_model<<"\n");
-        if(integration_time_model>maximum_integration_time_model) { integration_time_model=maximum_integration_time_model; }
+        TimeModelType integration_time_model=blocking_data.crossing_time_model;
         reach_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,zero_time,integration_time_model);
         final_set_model=this->_toolbox->integration_step(flow_model,initial_set_model,integration_time_model);
         reach_sets.adjoin(EnclosureType(initial_location,reach_set_model));

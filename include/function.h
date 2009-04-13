@@ -509,9 +509,9 @@ class AffineFunction
         return r; 
     }
     virtual Matrix<Float> jacobian(const Vector<Float>& x) const {
-        return Ariadne::jacobian(this->evaluate(Differential<Float>::variables(1u,x))); }
+        return this->_fA; }
     virtual Matrix<Interval> jacobian(const Vector<Interval>& x) const {
-        return Ariadne::jacobian(this->evaluate(Differential<Interval>::variables(1u,x))); }
+        return this->_iA; }
 
     virtual std::ostream& write(std::ostream& os) const {
         return os << "AffineFunction( A="<<_iA<<", b="<<_ib<<" )"; }

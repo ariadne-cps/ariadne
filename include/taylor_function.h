@@ -195,13 +195,25 @@ class TaylorFunction {
     /*! \brief Write to an output stream. */
     std::ostream& write(std::ostream& os) const;
 
-    /*! \brief Addition. */
-    friend TaylorFunction& operator+=(TaylorFunction& f, const Vector<Interval>& e);
+    /*! \brief Inplace addition. */
+    friend TaylorFunction& operator+=(TaylorFunction& f, const TaylorFunction& g);
+    /*! \brief Inplace subtraction. */
+    friend TaylorFunction& operator-=(TaylorFunction& f, const TaylorFunction& g);
+    /*! \brief Inplace addition. */
+    friend TaylorFunction& operator+=(TaylorFunction& f, const Vector<Interval>& c);
+    /*! \brief Inplace subtraction. */
+    friend TaylorFunction& operator-=(TaylorFunction& f, const Vector<Interval>& c);
+    /*! \brief Inplace scalar multiplication. */
+    friend TaylorFunction& operator*=(TaylorFunction& f, const Float& c);
+    /*! \brief Inplace scalar division. */
+    friend TaylorFunction& operator/=(TaylorFunction& f, const Float& c);
 
+    /*! \brief Negation. */
+    friend TaylorFunction operator-(const TaylorFunction& f);
     /*! \brief Addition. */
-    friend TaylorFunction operator+(const TaylorFunction& f, const TaylorFunction& c);
+    friend TaylorFunction operator+(const TaylorFunction& f1, const TaylorFunction& f2);
     /*! \brief Subtraction. */
-    friend TaylorFunction operator-(const TaylorFunction& f, const TaylorFunction& c);
+    friend TaylorFunction operator-(const TaylorFunction& f1, const TaylorFunction& f2);
 
     /*! \brief Addition of a constant. */
     friend TaylorFunction operator+(const TaylorFunction& f, const Vector<Float>& c);
@@ -245,8 +257,10 @@ class TaylorFunction {
     friend TaylorFunction inverse(const TaylorFunction& f, const Vector<Float>& c);
     //! \brief Compute the function \f$(f,g)(x)=(f(x),g(x))\f$.
     friend TaylorFunction join(const TaylorFunction& f, const TaylorFunction& g);
+    friend TaylorFunction join(const TaylorFunction& f, const TaylorVariable& g);
     //! \brief Compute the function \f$(f\oplus g)(x,y)=(f(x),g(y))\f$.
     friend TaylorFunction combine(const TaylorFunction& f, const TaylorFunction& g);
+    friend TaylorFunction combine(const TaylorFunction& f, const TaylorVariable& g);
     //! \brief Restrict the function \a f to a subdomain \a d.
     friend TaylorFunction restrict(const TaylorFunction& f, const Vector<Interval>& d);
     //! \brief Tests if a function \a f refines another function \a g.
@@ -268,6 +282,10 @@ class TaylorFunction {
     Vector<TaylorModel> _models;
 };
 
+TaylorFunction join(const TaylorFunction& f, const TaylorFunction& g);
+TaylorFunction join(const TaylorFunction& f, const TaylorVariable& g);
+TaylorFunction combine(const TaylorFunction& f, const TaylorFunction& g);
+TaylorFunction combine(const TaylorFunction& f, const TaylorVariable& g);
 
 std::ostream& operator<<(std::ostream&, const TaylorFunction&);
 

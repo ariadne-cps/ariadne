@@ -1346,7 +1346,9 @@ Interval
 TaylorModel::evaluate(const Vector<Interval>& v) const
 {
     ARIADNE_ASSERT(this->argument_size()==v.size());
-    ARIADNE_ASSERT(subset(v,this->domain()));
+    // Don't check for subset of domain,since this is an internal function, and
+    // subset may fail due to intermediate roundoff errors
+    //ARIADNE_ASSERT(subset(v,this->domain()));
     Interval r=this->error()*Interval(-1,+1);
     for(const_iterator iter=this->begin(); iter!=this->end(); ++iter) {
         Interval t(iter->data());

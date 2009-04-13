@@ -42,17 +42,24 @@
 
 namespace Ariadne {
 
-class DegenerateCrossingException { };
-class NonInvertibleFunctionException { };
+class DegenerateCrossingException : public std::runtime_error {
+  public:
+    DegenerateCrossingException(const std::string& msg) : std::runtime_error(msg) { }
+};
+
+class NonInvertibleFunctionException  : public std::runtime_error {
+  public:
+    NonInvertibleFunctionException(const std::string& msg) : std::runtime_error(msg) { }
+};
 
 
 std::pair<Float, Vector<Interval> >
 flow_bounds(FunctionInterface const& vf,
-            Vector<Interval> const& r,
+            Vector<Interval> const& d,
             Float const& hmax)
 {
 
-    ARIADNE_ASSERT(vf.argument_size()==r.size());
+    ARIADNE_ASSERT(vf.argument_size()==d.size());
 
     // Set up constants of the method.
     // TODO: Better estimates of constants
@@ -63,7 +70,7 @@ flow_bounds(FunctionInterface const& vf,
     const uint REDUCTION_STEPS=8;
     const uint REFINEMENT_STEPS=4;
 
-    Vector<Interval> delta=(r-midpoint(r))*(BOX_RADIUS_MULTIPLIER-1);
+    Vector<Interval> delta=(d-midpoint(d))*(BOX_RADIUS_MULTIPLIER-1);
 
     Float h=hmax;
     Float hmin=hmax/(1<<REDUCTION_STEPS);
@@ -72,15 +79,15 @@ flow_bounds(FunctionInterface const& vf,
     Interval ih(0,h);
     while(!success) {
         ARIADNE_ASSERT(h>hmin);
-        b=r+INITIAL_MULTIPLIER*ih*vf.evaluate(r)+delta;
+        b=d+INITIAL_MULTIPLIER*ih*vf.evaluate(d)+delta;
         for(uint i=0; i!=EXPANSION_STEPS; ++i) {
             df=vf.evaluate(b);
-            nb=r+delta+ih*df;
+            nb=d+delta+ih*df;
             if(subset(nb,b)) {
                 success=true;
                 break;
             } else {
-                b=r+delta+MULTIPLIER*ih*df;
+                b=d+delta+MULTIPLIER*ih*df;
             }
         }
         if(!success) {
@@ -97,7 +104,7 @@ flow_bounds(FunctionInterface const& vf,
     for(uint i=0; i!=REFINEMENT_STEPS; ++i) {
         b=nb;
         vfb=vf.evaluate(b);
-        nb=r+delta+ih*vfb;
+        nb=d+delta+ih*vfb;
         ARIADNE_ASSERT_MSG(subset(nb,b),std::setprecision(20)<<"refinement "<<i<<": "<<nb<<" is not a inside of "<<b);
     }
 
@@ -108,6 +115,7 @@ flow_bounds(FunctionInterface const& vf,
 
     b=nb;
 
+/*
     // Expand the resulting bound by a small constant for robustness
     volatile float new_bound;
     set_rounding_mode(upward);
@@ -125,11 +133,12 @@ flow_bounds(FunctionInterface const& vf,
         b[i].l=new_bound;
     }
     set_rounding_mode(to_nearest);
+*/
 
-    ARIADNE_ASSERT(subset(r,b));
+    ARIADNE_ASSERT(subset(d,b));
 
-    ARIADNE_ASSERT_MSG(subset(r+h*vf.evaluate(b),b),
-        "d="<<r<<"\nh="<<h<<"\nf="<<vf.evaluate(b)<<"\np="<<Vector<Interval>(r+h*vf.evaluate(b))<<"\nb="<<b<<"\n");
+    ARIADNE_ASSERT_MSG(subset(d+h*vf.evaluate(b),b),
+        "d="<<d<<"\nh="<<h<<"\nf(b)="<<vf.evaluate(b)<<"\nd+hf(b)="<<Vector<Interval>(d+h*vf.evaluate(b))<<"\nb="<<b<<"\n");
 
     return std::make_pair(h,b);
 }
@@ -325,8 +334,8 @@ crossing_time(const PredicateModelType& guard_model,
     PredicateModelType free_hitting_time_model;
     try {
         free_hitting_time_model=Ariadne::implicit(hitting_model);
-    } catch(NonInvertibleFunctionException) {
-        throw DegenerateCrossingException();
+    } catch(NonInvertibleFunctionException e) {
+        throw DegenerateCrossingException(e.what());
     } catch(const std::runtime_error& e) {
         std::cerr<<e.what();
         throw e;
@@ -339,7 +348,7 @@ crossing_time(const PredicateModelType& guard_model,
     Interval hitting_time_range=hitting_time_model.range();
     ARIADNE_LOG(6,"hitting_time_model = "<<hitting_time_model<<"\n");
     if(hitting_time_range.lower()<R(minimum_time) || hitting_time_range.upper()>R(maximum_time)) {
-        throw DegenerateCrossingException();
+        ARIADNE_THROW(DegenerateCrossingException,"TaylorCalculus::crossing_time","Hitting time model "<<hitting_time_model<<" range does not lie in integration time range");
     }
     ARIADNE_ASSERT_MSG(hitting_time_model.argument_size()==initial_set_model.argument_size(),hitting_time_model<<initial_set_model);
     return hitting_time_model;
@@ -429,7 +438,14 @@ TaylorCalculus::flow_bounds(FunctionInterface const& vf,
     // Try to find a time h and a set b such that inside(r+Interval<R>(0,h)*vf(b),b) holds
     ARIADNE_LOG(6,"flow_bounds(Function,Box,Time hmax)\n");
     ARIADNE_LOG(7,"  r="<<r<<" hmax="<<hmax<<"\n");
-    return Ariadne::flow_bounds(vf,r,hmax);
+
+    // Expand initial domain slightly if interior is nonempty
+    
+    static const Float EPS=1e-8;
+    Vector<Interval> bx=r;
+    for(uint i=0; i!=bx.size(); ++i) { if(bx[i].lower()==bx[i].upper()) { bx[i]+=Interval(-EPS,+EPS); } }
+
+    return Ariadne::flow_bounds(vf,bx,hmax);
 }
 
 
@@ -465,10 +481,15 @@ TaylorCalculus::flow_model(FunctionInterface const& vf, Vector<Interval> const& 
 {
     Vector<Interval> bx=ibx;
 
+    ARIADNE_ASSERT(subset(bx+Interval(0,h)*vf.evaluate(bb),bb));
+
     // We need the initial box to have nonempty interior to be a valid domain for a function model,
     // so we expand slightly if one of the components fails this test
     for(uint i=0; i!=bx.size(); ++i) {
-        Float EPS=1e-8; bx[i]+=Interval(-EPS,+EPS);
+        static const Float EPS=1e-8;
+        if(bx[i].lower()==bx[i].upper()) {
+            //std::cerr<<"Warning: expanding initial box "<<bx<<std::endl;
+            bx[i]+=Interval(-EPS,+EPS); }
     }
 
     ARIADNE_ASSERT(subset(bx+Interval(0,h)*vf.evaluate(bb),bb));
@@ -496,7 +517,7 @@ TaylorCalculus::flow_model(FunctionInterface const& vf, Vector<Interval> const& 
 TaylorCalculus::PredicateModelType
 TaylorCalculus::predicate_model(FunctionInterface const& g, Vector<Interval> const& bx) const
 {
-    ARIADNE_DEPRECATED("TaylorCalculus::predicate_model(FunctionInterface,Vector<Interval>","Use ExpressionInterface instead");
+    //ARIADNE_DEPRECATED("TaylorCalculus::predicate_model(FunctionInterface,Vector<Interval>","Use ExpressionInterface instead");
     ARIADNE_ASSERT(g.argument_size()==bx.size());
 
     FunctionModelType predicate_model(bx,g);

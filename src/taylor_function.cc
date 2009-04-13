@@ -302,11 +302,31 @@ TaylorFunction::jacobian(const Vector<Interval>& x) const
 
 
 TaylorFunction
+join(const TaylorFunction& f1, const TaylorVariable& f2)
+{
+    ARIADNE_ASSERT(f1.domain()==f2.domain());
+    return TaylorFunction(f1.domain(),join(f1.models(),f2.model()));
+}
+
+TaylorFunction
 join(const TaylorFunction& f, const TaylorFunction& g)
 {
     ARIADNE_ASSERT(f.domain()==g.domain());
     return TaylorFunction(f.domain(),join(f.models(),g.models()));
 }
+
+TaylorFunction
+combine(const TaylorFunction& f1, const TaylorVariable& f2)
+{
+    return TaylorFunction(join(f1.domain(),f2.domain()),combine(f1.models(),f2.model()));
+}
+
+TaylorFunction
+combine(const TaylorFunction& f1, const TaylorFunction& f2)
+{
+    return TaylorFunction(join(f1.domain(),f2.domain()),combine(f1.models(),f2.models()));
+}
+
 
 TaylorFunction
 restrict(const TaylorFunction& f, const Vector<Interval>& d)
@@ -320,10 +340,52 @@ restrict(const TaylorFunction& f, const Vector<Interval>& d)
 
 
 TaylorFunction&
+operator+=(TaylorFunction& f, const TaylorFunction& g)
+{
+    ARIADNE_ASSERT(f.result_size()==g.result_size());
+    ARIADNE_ASSERT(subset(f.domain(),g.domain()));
+    ARIADNE_ASSERT(f.domain()==g.domain());
+    f._models+=g._models;
+    return f;
+}
+
+TaylorFunction&
+operator-=(TaylorFunction& f, const TaylorFunction& g)
+{
+    ARIADNE_ASSERT(f.result_size()==g.result_size());
+    ARIADNE_ASSERT(subset(f.domain(),g.domain()));
+    ARIADNE_ASSERT(f.domain()==g.domain());
+    f._models+=g._models;
+    return f;
+}
+
+TaylorFunction&
 operator+=(TaylorFunction& f, const Vector<Interval>& e)
 {
     ARIADNE_ASSERT(f.result_size()==e.size());
     f._models+=e;
+    return f;
+}
+
+TaylorFunction&
+operator-=(TaylorFunction& f, const Vector<Interval>& e)
+{
+    ARIADNE_ASSERT(f.result_size()==e.size());
+    f._models-=e;
+    return f;
+}
+
+TaylorFunction&
+operator*=(TaylorFunction& f, const Float& c)
+{
+    f._models*=c;
+    return f;
+}
+
+TaylorFunction&
+operator/=(TaylorFunction& f, const Float& c)
+{
+    f._models/=c;
     return f;
 }
 
@@ -356,6 +418,24 @@ operator-(const TaylorFunction& f1, const TaylorFunction& f2)
 }
 
 
+
+TaylorFunction
+operator-(const TaylorFunction& f)
+{
+    return TaylorFunction(f.domain(),Vector<TaylorModel>(-f.models()));
+}
+
+TaylorFunction
+operator*(const TaylorFunction& f, const Float& c)
+{
+    return TaylorFunction(f.domain(),Vector<TaylorModel>(f.models()*c));
+}
+
+TaylorFunction
+operator/(const TaylorFunction& f, const Float& c)
+{
+    return TaylorFunction(f.domain(),Vector<TaylorModel>(f.models()/c));
+}
 
 TaylorFunction
 operator+(const TaylorFunction& f, const Vector<Float>& c)
@@ -391,11 +471,6 @@ operator*(const Matrix<Interval>& A, const TaylorFunction& f)
 
 
 
-TaylorFunction
-combine(const TaylorFunction& f1, const TaylorFunction& f2)
-{
-    return TaylorFunction(join(f1.domain(),f2.domain()),combine(f1.models(),f2.models()));
-}
 
 
 TaylorFunction

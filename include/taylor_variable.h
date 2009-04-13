@@ -380,6 +380,13 @@ class TaylorVariable
 };
 
 
+inline tribool operator>(const TaylorVariable& x, const Float& c) {
+    Interval r=x.range(); if(r.l>c) { return true; } else if(r.u<=c) { return false; } else { return indeterminate; } }
+inline tribool operator<(const TaylorVariable& x, const Float& c) {
+    Interval r=x.range(); if(r.l<c) { return true; } else if(r.u>=c) { return false; } else { return indeterminate; } }
+
+inline tribool operator>(const TaylorVariable& x, const TaylorVariable& y) { return (x-y)>0; }
+inline tribool operator<(const TaylorVariable& x, const TaylorVariable& y) { return (x-y)<0; }
 
 inline TaylorVariable& operator+=(TaylorVariable& x, const Float& c) {
     x._model+=c; return x; }
@@ -437,6 +444,7 @@ inline TaylorVariable operator*(const Interval& c, const TaylorVariable& x) {
     return TaylorVariable(x._domain,c*x._model); }
 inline TaylorVariable operator/(const Interval& c, const TaylorVariable& x) {
     return TaylorVariable(x._domain,c/x._model); }
+
 
 inline TaylorVariable abs(const TaylorVariable& x) {
     return TaylorVariable(x._domain,abs(x._model)); }

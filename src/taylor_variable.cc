@@ -203,21 +203,25 @@ TaylorVariable min(const TaylorVariable& x1, const TaylorVariable& x2) {
 
 
 Interval
-TaylorVariable::evaluate(const Vector<Float>& v) const
+TaylorVariable::evaluate(const Vector<Float>& x) const
 {
-    ARIADNE_NOT_IMPLEMENTED;
+    return this->evaluate(Vector<Interval>(x));
 }
 
 Interval
-TaylorVariable::evaluate(const Vector<Interval>& v) const
+TaylorVariable::evaluate(const Vector<Interval>& x) const
 {
-    ARIADNE_NOT_IMPLEMENTED;
+    Vector<Interval> sx=Ariadne::evaluate(TaylorModel::scalings(this->_domain),x);
+    return Ariadne::evaluate(this->_model,sx);
 }
 
 
 
 TaylorVariable restrict(const TaylorVariable& tv, const Vector<Interval>& d) {
-    ARIADNE_NOT_IMPLEMENTED;
+    ARIADNE_ASSERT(subset(d,tv.domain()));
+    if(d==tv.domain()) { return tv; }
+    Vector<TaylorModel> s=TaylorModel::rescalings(tv.domain(),d);
+    return TaylorVariable(d,compose(tv._model,s));
 }
 
 pair<TaylorVariable,TaylorVariable>

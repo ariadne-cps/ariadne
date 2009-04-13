@@ -226,46 +226,23 @@ int main()
         std::cout << "done." << std::endl;
         plot("tutorial-chain_reach.png",Box(2, 0.0,1.0, 14.0,18.0), Colour(0.0,0.5,1.0), *chain_reach_set_ptr);
     } else {
-        std::cerr << "Skipping computation of chain reachable set due to performance issues.";
-    }
-
-    {
-        // Compute the reach set for times between tlower and tupper. 
-        // The intermediate set is stored to an archive file and used to build the initial set for the reach step
-        // Note that because of peculiarities in the Boost serialization library, 
-        // the object to be serialized must be declared const.
-        Float tlower=0.5; Float tupper=0.75;
-        HybridTime transient_time(tlower,16);
-        HybridTime recurrent_time(tupper-tlower,16);
-    
-        const HybridGridTreeSet* upper_intermediate_set_ptr = analyser.upper_evolve(heating_system,initial_set,transient_time);
-        const HybridGridTreeSet upper_intermediate_set = *upper_intermediate_set_ptr;
-    
-        std::ofstream output_file_stream("tutorial-transient.txt");
-        text_oarchive output_archive(output_file_stream);
-        //output_archive << *upper_intermediate_set_ptr;
-        output_archive << upper_intermediate_set;
-        output_file_stream.close();
-    
-        HybridGridTreeSet rebuilt_upper_intermediate_set;
-    
-        std::ifstream input_file_stream("tutorial-transient.txt");
-        text_iarchive input_archive(input_file_stream);
-        input_archive >> rebuilt_upper_intermediate_set;
-        input_file_stream.close();
-    
-        HybridGridTreeSet* upper_recurrent_set_ptr = analyser.upper_reach(heating_system,initial_set,recurrent_time);
-        plot("tutorial-upper_recurrent.png",Box(2, 0.0,1.0, 14.0,18.0), Colour(0.0,0.5,1.0), *upper_recurrent_set_ptr);
+        std::cerr << "Skipping computation of chain reachable set due to performance issues.\n";
     }
 
 
     {
+        std::cerr << "Plotting results..."<<std::endl;
+
         // Use main graphics facilities
         Figure g;
         g.set_bounding_box(Box(2,14,18,0,1));
-        g.set_projection_map(ProjectionFunction(2,0,1));
+        g.set_projection_map(ProjectionFunction(2,2,0));
+
+        g << fill_colour(Colour(0.5,0.5,0.5));
+        if(chain_reach_set_ptr) { g << *chain_reach_set_ptr; }
 
         g << fill_colour(Colour(1.0,0.0,1.0));
+        std::cerr<<*upper_reach_set_ptr<<std::endl;
         g << *upper_reach_set_ptr;
         g << fill_colour(Colour(0.0,1.0,1.0));
         g << *lower_reach_set_ptr;
@@ -277,8 +254,10 @@ int main()
 
         g.write("tutorial-all.png");
 
+        
         // Display the figure in a pop-up window
         if(false) { g.display(); }
+
     }
       
 }

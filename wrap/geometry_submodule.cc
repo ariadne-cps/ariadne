@@ -73,6 +73,7 @@ read(Zonotope& z, const boost::python::object& obj)
 }
 
 
+template<class X> void read(Vector<X>& vec, const boost::python::object& obj1);
 void read(TaylorModel& tv, const boost::python::object& obj1, const boost::python::object& obj2);
 
 
@@ -199,6 +200,9 @@ void export_taylor_set()
 {
     class_<TaylorSet,bases<CompactSetInterface> > taylor_set_class("TaylorSet",no_init);
     taylor_set_class.def("__init__", make_constructor(&make<TaylorSet>) );
+    taylor_set_class.def(init< Vector<Interval> >());
+    taylor_set_class.def("bounding_box", &TaylorSet::bounding_box);
+    taylor_set_class.def("range", &TaylorSet::bounding_box);
     taylor_set_class.def("split", &split<TaylorSet>);
     taylor_set_class.def("__str__",&__str__<TaylorSet>);
     

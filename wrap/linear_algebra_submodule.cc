@@ -30,6 +30,7 @@
 #include "utilities.h"
 
 #include <boost/python.hpp>
+#include <boost/python/slice.hpp>
 
 using namespace boost::python;
 
@@ -47,6 +48,37 @@ template<> const char* python_name<Interval>(const char* name) {
 template<> const char* python_name<Rational>(const char* name) {
     return (std::string("Q")+name).c_str(); }
 #endif
+
+
+template<class X>
+X __vgetitem__(const Vector<X>& v, int i)
+{
+    if(i<0) { i+=v.size(); }
+    ARIADNE_ASSERT(0<=i && uint(i)<v.size());
+    return v[i];
+}
+
+
+template<class X>
+Vector<X> __vgetslice__(const Vector<X>& v, int start, int stop)
+{
+    if(start<0) { start+=v.size(); }
+    if(stop<0) { stop+=v.size(); }
+    ARIADNE_ASSERT(0<=start && start<=stop && uint(stop)<=v.size());
+    return project(v,range(start,stop));
+}
+
+/* This code is for start:stop:step slices, which we don't use
+template<class X>
+Vector<X> __vgetslice__(const Vector<X>& v, const boost::python::slice& slc)
+{
+    int start=boost::python::extract<int>(slc.start());
+    int stop=boost::python::extract<int>(slc.stop());
+    int step=boost::python::extract<int>(slc.step());
+    ARIADNE_ASSERT(step==1);
+    return project(v,range(start,stop));
+}
+*/
 
 template<class X>
 void read(Vector<X>& v, const boost::python::object& obj)
@@ -216,7 +248,8 @@ void export_vector_class(class_<Vector<X> >& vector_class)
     vector_class.def("__len__", &Vector<X>::size);
     vector_class.def("__setitem__", (void(Vector<X>::*)(size_t,const double&)) &Vector<X>::set);
     vector_class.def("__setitem__", (void(Vector<X>::*)(size_t,const X&)) &Vector<X>::set);
-    vector_class.def("__getitem__", &Vector<X>::get, return_value_policy<copy_const_reference>());
+    vector_class.def("__getitem__", &__vgetitem__<X>);
+    vector_class.def("__getslice__", &__vgetslice__<X>);
     vector_class.def("__neg__", &__vneg__<X,X>);
     vector_class.def("__repr__",&__repr__<Vector<X> >);
     vector_class.def(boost::python::self_ns::str(self));
@@ -277,6 +310,7 @@ template<> void export_vector<Interval>()
     export_vector_arithmetic<Interval,Interval,Float>(interval_vector_class);
     export_vector_arithmetic<Interval,Interval,Interval>(interval_vector_class);
     def("midpoint", (Vector<Float>(*)(const Vector<Interval>&)) &midpoint);
+    def("subset", (bool(*)(const Vector<Interval>&, const Vector<Interval>&)) &subset);
 
 }
 

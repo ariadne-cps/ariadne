@@ -34,19 +34,55 @@ using namespace boost::python;
 using namespace Ariadne;
 
 
-std::string __str__(const tribool& tb) {
-    std::stringstream ss;
-    ss<<std::boolalpha;
-    ss<<tb;
-    return ss.str();
+namespace Ariadne {
+bool definitely(bool b) { return b; }
+bool possibly(bool b) { return b; }
 }
 
+const char * tribool_c_str(tribool tb) {
+  if(indeterminate(tb)) { return "Indeterminate"; }
+  if(tb==true) { return "True"; }
+  else if(tb==false) { return "False"; }
+  else { return "Indeterminate"; }
+}
 
+const char * tribool_c_repr(tribool tb) {
+  if(tb==true) { return "tribool(True)"; }
+  else if(tb==false) { return "tribool(False)"; }
+  else { return "tribool(Indeterminate)"; }
+}
 
-void export_tribool()
-{
-    class_<tribool> tribool_class("tribool",no_init);
-    tribool_class.def("__str__", (std::string(*)(const tribool&)) &__str__);
+tribool tribool_not(tribool tb) { return !tb; }
+bool tribool_nonzero(tribool tb) { return tb==true; }
+tribool tribool_indeterminate() { return indeterminate; }
+
+void export_tribool() {
+
+    class_<tribool> tribool_class("tribool",init<bool>());
+    tribool_class.def(init<int>());
+    tribool_class.def(init<tribool>());
+    tribool_class.def("__eq__", (tribool(*)(tribool,tribool))(&boost::logic::operator==));
+    tribool_class.def("__eq__", (tribool(*)(tribool,bool))(&boost::logic::operator==));
+    tribool_class.def("__neq__", (tribool(*)(tribool,tribool))(&boost::logic::operator!=));
+    tribool_class.def("__neq__", (tribool(*)(tribool,bool))(&boost::logic::operator!=));
+    tribool_class.def("__and__", (tribool(*)(tribool,tribool))(&boost::logic::operator!=));
+    tribool_class.def("__and__", (tribool(*)(tribool,bool))(&boost::logic::operator!=));
+    tribool_class.def("__or__", (tribool(*)(tribool,tribool))(&boost::logic::operator!=));
+    tribool_class.def("__or__", (tribool(*)(tribool,bool))(&boost::logic::operator!=));
+    // WARNING: __not__ is not a special method!
+    tribool_class.def("__not__", (tribool(*)(tribool))(&boost::logic::operator!));
+    tribool_class.def("__nonzero__", &tribool_nonzero);
+    tribool_class.def("__str__", &tribool_c_str);
+    tribool_class.def("__repr__", &tribool_c_repr);
+  
+    def("indeterminate",(tribool(*)(void))&tribool_indeterminate);
+    def("possibly",(bool(*)(bool))&possibly);
+    def("possibly",(bool(*)(tribool))&possibly);
+    def("definitely",(bool(*)(bool))&definitely);
+    def("definitely",(bool(*)(tribool))&definitely);
+    // no facility for wrapping C++ constants
+    // def("Indeterminate",tribool_indeterminate_constant);
+
 }
 
 void export_float() 

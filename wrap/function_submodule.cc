@@ -21,11 +21,15 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
+#include <iostream>
+#include <iomanip>
 #include "array.h"
 #include "numeric.h"
 #include "vector.h"
 #include "differential.h"
+#include "polynomial.h"
 #include "taylor_model.h"
+#include "taylor_function.h"
 #include "function.h"
 
 
@@ -188,10 +192,14 @@ class PythonFunction
 
 typedef Vector<Float> FV;
 typedef Vector<Interval> IV;
-typedef Matrix<Float> FM;
-typedef Matrix<Interval> IM;
+typedef Matrix<Float> FMx;
+typedef Matrix<Interval> IMx;
 typedef Vector< Differential<Float> > FSDV;
 typedef Vector< Differential<Interval> > ISDV;
+typedef TaylorFunction TFM;
+
+template<class F> TaylorFunction call_evaluate(const F& f, const TaylorFunction& tf) {
+    return TaylorFunction(tf.domain(),f.evaluate(tf.models())); }
 
 void export_function_interface() 
 {
@@ -200,7 +208,7 @@ void export_function_interface()
     function_interface_class.def("result_size", pure_virtual(&FunctionInterface::result_size));
     function_interface_class.def("smoothness", pure_virtual(&FunctionInterface::smoothness));
     function_interface_class.def("evaluate",pure_virtual((IV(FunctionInterface::*)(const IV&)const)&FunctionInterface::evaluate));
-    function_interface_class.def("jacobian",pure_virtual((IM(FunctionInterface::*)(const IV&)const)&FunctionInterface::jacobian));
+    function_interface_class.def("jacobian",pure_virtual((IMx(FunctionInterface::*)(const IV&)const)&FunctionInterface::jacobian));
 }
 
 
@@ -215,9 +223,72 @@ void export_python_function()
     python_function_class.def("__call__",pure_virtual((IV(FunctionInterface::*)(const IV&)const)&FunctionInterface::evaluate));
     python_function_class.def("evaluate",pure_virtual((FV(FunctionInterface::*)(const FV&)const)&FunctionInterface::evaluate));
     python_function_class.def("evaluate",pure_virtual((IV(FunctionInterface::*)(const IV&)const)&FunctionInterface::evaluate));
-    python_function_class.def("jacobian",pure_virtual((FM(FunctionInterface::*)(const FV&)const)&FunctionInterface::jacobian));
-    python_function_class.def("jacobian",pure_virtual((IM(FunctionInterface::*)(const IV&)const)&FunctionInterface::jacobian));
+    python_function_class.def("jacobian",pure_virtual((FMx(FunctionInterface::*)(const FV&)const)&FunctionInterface::jacobian));
+    python_function_class.def("jacobian",pure_virtual((IMx(FunctionInterface::*)(const IV&)const)&FunctionInterface::jacobian));
     python_function_class.def(self_ns::str(self));
+}
+
+std::string __str__(const AffineFunction& f) {
+    std::stringstream ss;
+    for(uint i=0; i!=f.result_size(); ++i) {
+        ss<<(i==0?"AffineFunction( ":"; ");
+        if(f.b()[i]!=0) { ss<<f.b()[i]; }
+        for(uint j=0; j!=f.argument_size(); ++j) {
+            if(f.A()[i][j]!=0) {
+                if(f.A()[i][j]>0) { ss<<"+"; } else { ss<<"-"; }
+                if(abs(f.A()[i][j])!=1) { ss<<abs(f.A()[i][j]); } 
+                //ss<<char('x'+j);
+                ss<<"x"<<j;
+            }
+        }
+    }
+    ss<<" )";
+    return ss.str();
+}
+
+void export_affine_function()
+{
+    typedef AffineFunction AF;
+
+    class_<AffineFunction, bases< FunctionInterface > > affine_function_class("AffineFunction", init<Matrix<Float>, Vector<Float> >());
+    affine_function_class.def("argument_size", &AffineFunction::argument_size);
+    affine_function_class.def("result_size", &AffineFunction::result_size);
+    affine_function_class.def("smoothness", &AffineFunction::smoothness);
+    affine_function_class.def("__call__",(FV(AffineFunction::*)(const FV&)const)&AffineFunction::evaluate);
+    affine_function_class.def("__call__",(IV(AffineFunction::*)(const IV&)const)&AffineFunction::evaluate);
+    affine_function_class.def("__call__",(TFM(*)(const AffineFunction&, const TFM&))&call_evaluate<AffineFunction>);
+    affine_function_class.def("evaluate",(FV(AffineFunction::*)(const FV&)const)&AffineFunction::evaluate);
+    affine_function_class.def("evaluate",(IV(AffineFunction::*)(const IV&)const)&AffineFunction::evaluate);
+    affine_function_class.def("evaluate",(TFM(*)(const AffineFunction&, const TFM&))&call_evaluate<AffineFunction>);
+    affine_function_class.def("jacobian",(FMx(AffineFunction::*)(const FV&)const)&AffineFunction::jacobian);
+    affine_function_class.def("jacobian",(IMx(AffineFunction::*)(const IV&)const)&AffineFunction::jacobian);
+    //affine_function_class.def(self_ns::str(self));
+    affine_function_class.def("__str__",(std::string(*)(const AffineFunction&))&__str__);
+}
+
+void export_polynomial()
+{
+    typedef Polynomial<Float> FP;
+
+    Float real;
+    class_< FP > polynomial_class("Polynomial", init<int>());
+    polynomial_class.def("constant", (FP(*)(uint,double)) &FP::constant);
+    polynomial_class.staticmethod("constant");
+    polynomial_class.def("variable", (FP(*)(uint,uint)) &FP::variable);
+    polynomial_class.staticmethod("variable");
+
+    polynomial_class.def("argument_size", &FP::argument_size);
+    polynomial_class.def(self+self);
+    polynomial_class.def(self-self);
+    polynomial_class.def(self*self);
+    polynomial_class.def(self+real);
+    polynomial_class.def(self-real);
+    polynomial_class.def(self*real);
+    polynomial_class.def(self/real);
+    polynomial_class.def(real+self);
+    polynomial_class.def(real-self); 
+    polynomial_class.def(real*self);
+    polynomial_class.def(self_ns::str(self));
 }
 
 /*
@@ -272,7 +343,7 @@ void export_model()
 
 void function_submodule() {
     export_function_interface();
+    export_affine_function();
     export_python_function();
-    //    export_model();
 }
 

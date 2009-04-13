@@ -24,8 +24,7 @@
 #include <iostream>
 #include <vector>
 #include "numeric.h"
-//#include "multi_index.h"
-#include "expansion-2.h"
+#include "expansion.h"
 
 #include "test.h"
 using namespace std;

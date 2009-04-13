@@ -1,5 +1,5 @@
 /***************************************************************************
- *            development_hybrid_evolver.h
+ *            hybrid_evolver.h
  *
  *  Copyright  2007-8  Alberto Casagrande, Pieter Collins
  *
@@ -21,12 +21,12 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
  
-/*! \file development_hybrid_evolver.h
+/*! \file hybrid_evolver.h
  *  \brief Evolver for hybrid systems.
  */
 
-#ifndef ARIADNE_DEVELOPMENT_HYBRID_EVOLVER_H
-#define ARIADNE_DEVELOPMENT_HYBRID_EVOLVER_H
+#ifndef ARIADNE_HYBRID_EVOLVER_H
+#define ARIADNE_HYBRID_EVOLVER_H
 
 #include <string>
 #include <vector>
@@ -52,6 +52,7 @@ template<class Sys, class BS> class Evolver;
 
 class TaylorFunction;
 class TaylorSet;
+typedef std::pair<DiscreteState,TaylorSet> HybridTaylorSet;
 class HybridAutomaton;
 template<class ES> class Orbit;
 
@@ -64,12 +65,13 @@ class EvolutionProfiler;
 class HybridTime;
 
 
+
 /*! \brief A class for computing the evolution of a hybrid system. 
  *
  * The actual evolution steps are performed by the HybridEvolver class.
  */
 class HybridEvolver
-    : public EvolverBase<HybridAutomaton, std::pair<DiscreteState,TaylorSet> >
+    : public EvolverBase<HybridAutomaton,HybridTaylorSet>
     , public Loggable
 {
     typedef FunctionInterface FunctionType;
@@ -157,4 +159,4 @@ class HybridEvolver
   
 } // namespace Ariadne
 
-#endif // ARIADNE_DEVELOPMENT_HYBRID_EVOLVER_H
+#endif // ARIADNE_HYBRID_EVOLVER_H

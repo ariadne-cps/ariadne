@@ -67,7 +67,7 @@ class FunctionBase
     virtual Vector<Interval> evaluate(const Vector<Interval>& x) const {
         Vector<Interval> r(this->T::result_size()); this->T::compute(r,x); return r; }
     virtual Vector<TaylorModel> evaluate(const Vector<TaylorModel>& x) const {
-        Vector<TaylorModel> r(this->result_size(),TaylorModel(x[0].argument_size()));
+        Vector<TaylorModel> r(this->result_size(),TaylorModel(x[0].argument_size(),x[0].accuracy_ptr()));
         this->T::compute(r,x); return r; }
     virtual Vector< Differential<Float> > evaluate(const Vector< Differential<Float> >& x) const {
         Vector< Differential<Float> > r(this->T::result_size()); this->T::compute(r,x); return r; }

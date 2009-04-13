@@ -111,6 +111,20 @@ operator==(const TaylorSet& ts1,const TaylorSet& ts2)
 }
 
 
+void
+TaylorSet::set_accuracy(shared_ptr<TaylorModel::Accuracy> acc_ptr)
+{
+    for(uint i=0; i!=this->dimension(); ++i) {
+        this->_models[i].set_accuracy(acc_ptr);
+    }
+}
+
+shared_ptr<TaylorModel::Accuracy>
+TaylorSet::accuracy_ptr() const
+{
+    return this->_models[0].accuracy_ptr();
+}
+
 
 Vector<Float>
 TaylorSet::centre() const

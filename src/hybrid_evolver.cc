@@ -241,7 +241,7 @@ _evolution(EnclosureListType& final_sets,
         SetModelType initial_set_model=this->_toolbox->set_model(initial_continuous_set);
         ARIADNE_LOG(6,"initial_set_model = "<<initial_set_model<<"\n");
         TimeModelType initial_time_model
-            =TimeModelType::constant(initial_set_model.argument_size(),0.0);
+            =this->_toolbox->time_model(0.0, Vector<Interval>(initial_set_model.argument_size(),Interval(-1,+1)));
         ARIADNE_LOG(6,"initial_time_model = "<<initial_time_model<<"\n");
         TimedSetModelType initial_timed_set_model=join(initial_set_model.models(),initial_time_model);
         ARIADNE_LOG(6,"initial_timed_set_model = "<<initial_timed_set_model<<"\n");

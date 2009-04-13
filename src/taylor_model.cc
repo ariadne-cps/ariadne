@@ -102,6 +102,11 @@ TaylorModel::TaylorModel(const Expansion<Float>& f, const Float& e)
 {
 }
 
+TaylorModel::TaylorModel(const Expansion<Float>& f, const Float& e, shared_ptr<Accuracy> a)
+    : _expansion(f), _error(e), _accuracy_ptr(a)
+{
+}
+
 
 void
 TaylorModel::swap(TaylorModel& tm)
@@ -1953,9 +1958,13 @@ split(const TaylorModel& tv, uint j)
     uint as=tv.argument_size();
     Vector<TaylorModel> s=TaylorModel::variables(as);
     s[j]=TaylorModel::scaling(as,j,Interval(-1,0));
+    s[j].accuracy_ptr()=tv.accuracy_ptr();
     TaylorModel r1=compose(tv,s);
     s[j]=TaylorModel::scaling(as,j,Interval(0,+1));
+    s[j].accuracy_ptr()=tv.accuracy_ptr();
     TaylorModel r2=compose(tv,s);
+    ARIADNE_ASSERT(r1.accuracy_ptr()==tv.accuracy_ptr());
+    ARIADNE_ASSERT(r2.accuracy_ptr()==tv.accuracy_ptr());
     return make_pair(r1,r2);
 }
 
@@ -2050,12 +2059,12 @@ disjoint(const TaylorModel& tv1, const TaylorModel& tv2)
 
 TaylorModel embed(const TaylorModel& x, uint as)
 {
-    return TaylorModel(embed(0u,x.expansion(),as),x.error());
+    return TaylorModel(embed(0u,x.expansion(),as),x.error(),x.accuracy_ptr());
 }
 
 TaylorModel embed(uint as, const TaylorModel& x)
 {
-    return TaylorModel(embed(as,x.expansion(),0u),x.error());
+    return TaylorModel(embed(as,x.expansion(),0u),x.error(),x.accuracy_ptr());
 }
 
 
@@ -2627,6 +2636,7 @@ _compose2(const Vector<TaylorModel>& x,
         }
     }
 
+    ARIADNE_ASSERT(r[0].accuracy_ptr()==ys[0].accuracy_ptr());
 
     return r;
 }
@@ -3052,7 +3062,7 @@ unchecked_flow(const Vector<TaylorModel>& vf, const Vector<TaylorModel>& y0, uin
 
     //std::cerr << "\ny[0]=" << y << std::endl << std::endl;
     //std::cerr<<"  y="<<y<<"\n";
-    for(uint j=0; j!=order+18; ++j) {
+    for(uint j=0; j!=order; ++j) {
 
         new_y=compose(vf,y);
         for(uint i=0; i!=n; ++i) {

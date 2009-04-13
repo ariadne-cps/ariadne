@@ -226,7 +226,7 @@ _evolution(EnclosureListType& final_sets,
         SetModelType initial_set_model=this->_toolbox->set_model(initial_continuous_set);
         ARIADNE_LOG(6,"initial_set_model = "<<initial_set_model<<"\n");
         TimeModelType initial_time_model
-            =TimeModelType::constant(initial_set_model.argument_size(),0.0);
+            =this->_toolbox->time_model(0.0, Vector<Interval>(initial_set_model.argument_size(),Interval(-1,+1)));
         ARIADNE_LOG(6,"initial_time_model = "<<initial_time_model<<"\n");
         TimedSetModelType initial_timed_set_model=join(initial_set_model.models(),initial_time_model);
         ARIADNE_LOG(6,"initial_timed_set_model = "<<initial_timed_set_model<<"\n");
@@ -261,7 +261,7 @@ _evolution(EnclosureListType& final_sets,
                       << " and set " << initial_set_model << " due to maximum radius being exceeded.";
         } else {
             // Compute evolution
-            ARIADNE_LOG(1,".");
+            if(verbosity==1) { ARIADNE_LOG(1,"."); }
             this->_evolution_step(working_sets,
                                   final_sets,reach_sets,intermediate_sets,
                                   system,current_set,maximum_hybrid_time,
@@ -272,6 +272,14 @@ _evolution(EnclosureListType& final_sets,
 }
 
 
+
+uint number_of_nonzero_elements(const TaylorSet& ts) {
+    uint nnz=0;
+    for(uint i=0; i!=ts.dimension(); ++i) {
+        nnz+=ts[i].expansion().size();
+    }
+    return nnz;
+}
 
 
 
@@ -288,7 +296,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
                 bool reach) const
 {
 
-    ARIADNE_LOG(2,"StableHybridEvolver::_evolution_step(...)\n");
+    ARIADNE_LOG(2,"\nStableHybridEvolver::_evolution_step(...)\n");
   
     DiscreteState initial_location(0);
     IntegerType initial_steps;
@@ -304,10 +312,13 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
   
     ARIADNE_LOG(2,"Starting evolution step from:\n");
     ARIADNE_LOG(2,"steps = "<<initial_steps<<" ");
-    ARIADNE_LOG(2,"time_range = "<<initial_time_model.range()<<" ");
+    ARIADNE_LOG(2,"time_range = "<<initial_time_model.range()<<"\n");
     ARIADNE_LOG(2,"location = "<<initial_location<<" ");
     ARIADNE_LOG(2,"box = "<<initial_set_model.range()<<" ");
-    ARIADNE_LOG(2,"radius = "<<radius(initial_set_model.range())<<"\n\n");
+    ARIADNE_LOG(2,"radius = "<<radius(initial_set_model.range())<<"\n");
+    ARIADNE_LOG(2,"nnz = "<<number_of_nonzero_elements(initial_set_model)<<" ");
+    ARIADNE_LOG(3,"initial_time_accuracy = "<<initial_time_model.accuracy()<<" ");
+    ARIADNE_LOG(3,"initial_set_accuracy = "<<initial_set_model[0].accuracy()<<"\n");
     //const uint nd=initial_set_model.result_size();
     //const uint ng=initial_set_model.argument_size();
   
@@ -721,7 +732,7 @@ timed_evolution(const SystemType& system,
         SetModelType initial_set_model=this->_toolbox->set_model(initial_continuous_set);
         ARIADNE_LOG(6,"initial_set_model = "<<initial_set_model<<"\n");
         TimeModelType initial_time_model
-            =ModelType::constant(initial_set_model.domain().size(),0.0);
+            =this->_toolbox->time_model(0.0, Vector<Interval>(initial_set_model.argument_size(),Interval(-1,+1)));
         ARIADNE_LOG(6,"initial_time_model = "<<initial_time_model<<"\n");
         TimedSetModelType initial_timed_set_model=join(initial_set_model.models(),initial_time_model);
         ARIADNE_LOG(6,"initial_timed_set_model = "<<initial_timed_set_model<<"\n");

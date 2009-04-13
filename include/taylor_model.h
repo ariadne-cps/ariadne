@@ -154,6 +154,7 @@ class TaylorModel
   public:
     const Accuracy& accuracy() const { return *this->_accuracy_ptr; }
     shared_ptr<Accuracy> accuracy_ptr() const { return this->_accuracy_ptr; }
+    void set_accuracy(shared_ptr<Accuracy> acc) { this->_accuracy_ptr=acc; }
 
     //! \brief The type used for the coefficients.
     typedef Float ScalarType;
@@ -175,10 +176,12 @@ class TaylorModel
     TaylorModel(uint as);
     //! \brief Construct a TaylorModel in \a as arguments with the given accuracy control.
     TaylorModel(uint as, shared_ptr<Accuracy> acc);
-    //! \brief Construct from a map giving the expansion and a constant giving the error.
+    //! \brief Construct from a map giving the expansion, a constant giving the error, and an accuracy parameter.
     TaylorModel(const std::map<MultiIndex,Float>& d, const Float& e);
-    //! \brief Construct from a map giving the expansion and a constant giving the error.
+    //! \brief Construct from a map giving the expansion, and a constant giving the error.
     TaylorModel(const Expansion<Float>& f, const Float& e=0.0);
+    //! \brief Construct from a map giving the expansion, a constant giving the error, and an accuracy parameter.
+    TaylorModel(const Expansion<Float>& f, const Float& e, shared_ptr<Accuracy> a);
     //! \brief Fast swap with another Taylor model.
     void swap(TaylorModel& tm);
     //! \brief Set to zero.

@@ -224,40 +224,5 @@ int main()
     g << *lower_reach_set_ptr;
     g.write("watertank-time-lower");
 
-/*
-    plot("watertank-lower_reach1",bounding_box, Colour(0.0,0.5,1.0), *lower_reach_set_ptr);
-
-    // Compute evolved sets and reach sets using upper semantics.
-    // These functions compute over-approximations to the evolved and reachabe sets. Subdivision is used
-    // as necessary to keep the local errors reasonable. The accumulated global error may be very large.
-    std::cout << "Computing upper reach set... " << std::flush;
-    HybridGridTreeSet* upper_reach_set_ptr = analyser.upper_reach(watertank_system,initial_set,reach_time);
-    std::cout << "done." << std::endl;
-    plot("watertank-upper_reach1",bounding_box, Colour(0.0,0.5,1.0), *upper_reach_set_ptr);
-
-    std::cout << "Computing evolution starting from location l1, x = 0.0, y = 0.0" << std::endl;
-
-    Box initial_box2(2, 0.0,0.001, 0.0,0.001);
-    HybridImageSet initial_set2;
-    initial_set2[l1]=initial_box2;
-
-    plot("watertank-initial_set2",bounding_box, Colour(0.0,0.5,1.0), initial_set2);
-
-    // Compute evolved sets (i.e. at the evolution time) and reach sets (i.e. up to the evolution time) using lower semantics.
-    // These functions run a bunch of simulations with bounded approximation errors and combines the results.
-    // If the desired evolution time can not be attained without exceeding the error bounds, then the run discarded (without warning)
-    std::cout << "Computing lower reach set... " << std::flush;
-    lower_reach_set_ptr = analyser.lower_reach(watertank_system,initial_set2,reach_time);
-    std::cout << "done." << std::endl;
-    plot("watertank-lower_reach2",bounding_box, Colour(0.0,0.5,1.0), *lower_reach_set_ptr);
-
-    // Compute evolved sets and reach sets using upper semantics.
-    // These functions compute over-approximations to the evolved and reachabe sets. Subdivision is used
-    // as necessary to keep the local errors reasonable. The accumulated global error may be very large.
-    std::cout << "Computing upper reach set... " << std::flush;
-    upper_reach_set_ptr = analyser.upper_reach(watertank_system,initial_set2,reach_time);
-    std::cout << "done." << std::endl;
-    plot("watertank-upper_reach2",bounding_box, Colour(0.0,0.5,1.0), *upper_reach_set_ptr);
-*/
 
 }

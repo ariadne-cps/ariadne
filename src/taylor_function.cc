@@ -69,7 +69,7 @@ TaylorFunction::TaylorFunction(const Vector<Interval>& d,
 {
     for(uint i=0; i!=f.size(); ++i) {
         ARIADNE_ASSERT(d.size()==f[i].argument_size());
-        _models[i]=TaylorModel(f[i]);
+        _models[i]=TaylorModel(f[i],0.0);
     }
 }
 
@@ -195,6 +195,21 @@ TaylorFunction::operator!=(const TaylorFunction& p2) const
 }
 
 
+
+shared_ptr<TaylorModel::Accuracy>
+TaylorFunction::accuracy_ptr() const
+{
+    return this->_models[0].accuracy_ptr();
+}
+
+
+void
+TaylorFunction::set_accuracy(shared_ptr<TaylorModel::Accuracy> acc_ptr)
+{
+    for(uint i=0; i!=this->result_size(); ++i) {
+        this->_models[i].set_accuracy(acc_ptr);
+    }
+}
 
 const Vector<Interval>&
 TaylorFunction::domain() const
@@ -334,7 +349,9 @@ restrict(const TaylorFunction& f, const Vector<Interval>& d)
     ARIADNE_ASSERT(subset(d,f.domain()));
     if(d==f.domain()) { return f; }
     Vector<TaylorModel> s=TaylorModel::rescalings(f.domain(),d);
-    return TaylorFunction(d,compose(f._models,s));
+    TaylorFunction r(d,compose(f._models,s));
+    r.set_accuracy(f.accuracy_ptr());
+    return r;
 }
 
 
@@ -654,7 +671,7 @@ operator<<(Output::latexstream& texs, const TaylorFunction& p)
 */
 
 
-
+/*
 TaylorExpression::TaylorExpression()
     : _domain(), _model() { }
 
@@ -733,5 +750,6 @@ TaylorFunction operator*(const Vector<Float>& v, const TaylorExpression& t) {
 
 std::ostream& operator<<(std::ostream& os, const TaylorExpression& t) {
     return os<<"("<<t._domain<<","<<t._model<<")"; }
+*/
 
 } // namespace Ariadne

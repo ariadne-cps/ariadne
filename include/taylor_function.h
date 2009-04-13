@@ -153,6 +153,10 @@ class TaylorFunction {
     bool operator!=(const TaylorFunction& p) const;
 
     // Data access
+    /*! \brief The accuracy parameter used to control approximation of the Taylor function. */
+    shared_ptr<TaylorModel::Accuracy> accuracy_ptr() const;
+    /*! \brief Set the accuracy parameter used to control approximation of the Taylor function. */
+    void set_accuracy(shared_ptr<TaylorModel::Accuracy> acc);
     /*! \brief The data used to define the domain of the Taylor model. */
     const Vector<Interval>& domain() const;
     /*! \brief The centre of the Taylor model. */

@@ -84,6 +84,11 @@ class TaylorSet
     //! \brief Equality operator.
     friend bool operator==(const TaylorSet& ts1, const TaylorSet& ts2);
 
+    //! \brief Set the accuracy parameters.
+    void set_accuracy(shared_ptr<TaylorModel::Accuracy> acc_ptr);
+    //! \brief Get the accuracy parameters.
+    shared_ptr<TaylorModel::Accuracy> accuracy_ptr() const;
+
     //! \brief The dimension the space lies in.
     uint dimension() const { return this->_models.size(); }
     //! \brief The number of generators of the set.

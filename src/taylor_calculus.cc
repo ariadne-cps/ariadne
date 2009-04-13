@@ -149,11 +149,13 @@ flow_bounds(FunctionInterface const& vf,
 
 TaylorCalculus::
 TaylorCalculus()
-    : _spacial_order(2),
-      _temporal_order(4),
-      _order(6),
+    : _spacial_order(4),
+      _temporal_order(6),
+      _sweep_threshold(1e-10),
+      _order(8),
       _smoothness(1),
-      _maximum_step_size(1.0)
+      _maximum_step_size(1.0),
+      _spacial_accuracy_ptr(new AccuracyType(_sweep_threshold,_spacial_order))
 {
 }
 
@@ -169,7 +171,10 @@ reset_step(const FunctionType& map,
     return map.evaluate(set_model.models());
     // Indirect computation via model
     BoxType range=set_model.range();
-    return Ariadne::apply(FunctionModelType(range,map),set_model);
+    ARIADNE_ASSERT(Ariadne::apply(FunctionModelType(range,map),set_model).accuracy_ptr()==set_model.accuracy_ptr());
+    SetModelType next_set_model=Ariadne::apply(FunctionModelType(range,map),set_model);
+    next_set_model.set_accuracy(this->_spacial_accuracy_ptr);
+    return next_set_model;
 }
 
 
@@ -179,7 +184,10 @@ reset_step(const FlowModelType& function_model,
            const SetModelType& set_model) const
 {
     ARIADNE_ASSERT(subset(set_model.range(),function_model.domain()));
-    return Ariadne::unchecked_apply(function_model,set_model);
+    ARIADNE_ASSERT(Ariadne::apply(function_model,set_model).accuracy_ptr()==set_model.accuracy_ptr());
+    SetModelType next_set_model=Ariadne::unchecked_apply(function_model,set_model);
+    next_set_model.set_accuracy(this->_spacial_accuracy_ptr);
+    return next_set_model;
 }
 
 
@@ -197,7 +205,9 @@ integration_step(const FlowModelType& flow_model,
     //ARIADNE_ASSERT(subset(flow_model.domain()[flow_model.size()],integration_time_model.range()));
     //ARIADNE_ASSERT(subset(flow_model.domain(),set_step_model.range()));
     SetModelType final_set_model=unchecked_apply(flow_model,set_step_model);
+    ARIADNE_ASSERT(final_set_model.accuracy_ptr()==initial_set_model.accuracy_ptr());
     ARIADNE_LOG(6,"final_set_model = "<<final_set_model<<"\n");
+    final_set_model.set_accuracy(this->_spacial_accuracy_ptr);
     return final_set_model;
 }
 
@@ -225,6 +235,7 @@ reachability_time(const TimeModelType& initial_time_model,
     TimeModelType time_interval_model=TimeModelType::scaling(1u,0u,Interval(0,1));
     TimeModelType expanded_time_interval_model=embed(ng,time_interval_model);
     TimeModelType expanded_reach_time_model=expanded_initial_time_model+expanded_time_interval_model*(expanded_final_time_model-expanded_initial_time_model);
+    expanded_reach_time_model.set_accuracy(_spacial_accuracy_ptr);
 
     return expanded_reach_time_model;
 }
@@ -248,6 +259,7 @@ reachability_step(const FlowModelType& flow_model,
     ARIADNE_LOG(6,"expanded_timed_set_model="<<expanded_timed_set_model<<"\n");
     SetModelType reach_set_model=apply(flow_model,expanded_timed_set_model);
     ARIADNE_LOG(6,"reach_set_model = "<<reach_set_model<<"\n");
+    ARIADNE_ASSERT(reach_set_model.accuracy_ptr()==initial_set_model.accuracy_ptr());
 
     return reach_set_model;
 }
@@ -268,6 +280,7 @@ reachability_step(const FlowModelType& flow_model,
     ARIADNE_LOG(6,"expanded_timed_set_model="<<expanded_timed_set_model<<"\n");
     SetModelType reach_set_model=apply(flow_model,expanded_timed_set_model);
     ARIADNE_LOG(6,"reach_set_model = "<<reach_set_model<<"\n");
+    ARIADNE_ASSERT(reach_set_model.accuracy_ptr()==initial_set_model.accuracy_ptr());
 
     return reach_set_model;
 }
@@ -300,6 +313,7 @@ reachability_step(const FlowModelType& flow_model,
     ARIADNE_LOG(6,"expanded_timed_set_model="<<expanded_timed_set_model<<"\n");
     SetModelType reach_set_model=Ariadne::unchecked_apply(flow_model,expanded_timed_set_model);
     ARIADNE_LOG(6,"reach_set_model = "<<reach_set_model<<"\n");
+    ARIADNE_ASSERT(reach_set_model.accuracy_ptr()==initial_set_model.accuracy_ptr());
 
     return reach_set_model;
 }
@@ -351,6 +365,7 @@ crossing_time(const PredicateModelType& guard_model,
         ARIADNE_THROW(DegenerateCrossingException,"TaylorCalculus::crossing_time","Hitting time model "<<hitting_time_model<<" range does not lie in integration time range");
     }
     ARIADNE_ASSERT_MSG(hitting_time_model.argument_size()==initial_set_model.argument_size(),hitting_time_model<<initial_set_model);
+    hitting_time_model.set_accuracy(_spacial_accuracy_ptr);
     return hitting_time_model;
 }
 
@@ -545,6 +560,7 @@ time_model(const Float& t,
            const BoxType& d) const
 {
     TimeModelType time_model=TimeModelType::constant(d.size(),t);
+    time_model.set_accuracy(_spacial_accuracy_ptr);
     ARIADNE_LOG(6,"time_model = "<<time_model<<"\n");
 
     return time_model;
@@ -558,6 +574,7 @@ TaylorCalculus::
 set_model(const BoxType& bx) const
 {
     SetModelType set_model(bx);
+    set_model.set_accuracy(_spacial_accuracy_ptr);
     return set_model;
  }
 
@@ -568,7 +585,9 @@ TaylorCalculus::SetModelType
 TaylorCalculus::
 set_model(const EnclosureType& es) const
 {
-    return es;
+    SetModelType set_model(es);
+    set_model.set_accuracy(_spacial_accuracy_ptr);
+    return set_model;
 }
 
 

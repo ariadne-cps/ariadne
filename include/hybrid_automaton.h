@@ -54,7 +54,7 @@ class DiscreteTransition;
 class HybridAutomaton;  
 
 class FunctionInterface;
-
+class Grid;
 
 /*! \brief A discrete mode of a hybrid automaton, comprising continuous evolution given by a vector field
  * within and invariant constraint set. 
@@ -76,6 +76,8 @@ class DiscreteMode {
     // The discrete mode's invariants.
     std::vector< boost::shared_ptr< const FunctionInterface > > _invariants;
   
+    // The discrete mode's vector field.
+    boost::shared_ptr< const Grid > _grid; 
   public:
     //! \brief The mode's discrete state. 
     DiscreteState location() const { 
@@ -92,6 +94,10 @@ class DiscreteMode {
     //! \brief The discrete mode's invariants. 
     const std::vector< boost::shared_ptr< const FunctionInterface > >& invariants() const {
         return this->_invariants; }
+  
+    //! \brief The discrete mode's default spacial grid. 
+    const Grid& grid() const {
+        return *this->_grid; }
   
     //! \brief The dimension of the discrete mode. 
     uint dimension() const;
@@ -381,6 +387,8 @@ class HybridAutomaton
                                              const FunctionInterface& activation,
                                              bool forced);
   
+    //! \brief Set the grid controlling relative scaling in the mode.
+    void set_grid(DiscreteState location, const Grid& grid);
     //@}
   
     //@{ 

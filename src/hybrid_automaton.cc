@@ -28,6 +28,7 @@
 #include "function_interface.h"
 #include "hybrid_time.h"
 #include "hybrid_automaton.h"
+#include "grid_set.h"
 
 namespace Ariadne {  
 
@@ -49,7 +50,7 @@ dimension() const
 DiscreteMode::
 DiscreteMode(DiscreteState location,
              const FunctionInterface& dynamic)
-    :  _location(location), _dynamic(dynamic.clone()), _invariants() 
+    :  _location(location), _dynamic(dynamic.clone()), _invariants(), _grid(new Grid(dynamic.argument_size()))
 {
 }
 
@@ -58,7 +59,7 @@ DiscreteMode::
 DiscreteMode(DiscreteState location,
              const boost::shared_ptr< const FunctionInterface > dynamic, 
              const std::vector< boost::shared_ptr< const FunctionInterface > >& invariants)
-    :  _location(location), _dynamic(dynamic), _invariants(invariants) 
+    :  _location(location), _dynamic(dynamic), _invariants(invariants), _grid(new Grid(dynamic->argument_size()))
 {
     ARIADNE_ASSERT(dynamic->result_size()==dynamic->argument_size());
     for(uint i=0; i!=invariants.size(); ++i) {
@@ -301,6 +302,21 @@ new_unforced_transition(DiscreteEvent event,
     const DiscreteMode& target_mode=this->mode(target);
     this->_transitions.insert(DiscreteTransition(event,source_mode,target_mode,reset,activation,false));
     return this->transition(event,source);
+}
+
+
+void
+HybridAutomaton::set_grid(DiscreteState location,
+                          const Grid& grid)
+{
+    if(!this->has_mode(location)) {
+        throw std::runtime_error("The automaton does not contain a mode with ths given location id");
+    }
+    DiscreteMode& mode=const_cast<DiscreteMode&>(this->mode(location));
+    if(grid.dimension()!=mode.dimension()) {
+        throw std::runtime_error("The mode of the automaton has a different dimension to the grid.");
+    }
+    mode._grid=shared_ptr<Grid>(new Grid(grid));
 }
 
 

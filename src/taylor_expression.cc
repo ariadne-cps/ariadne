@@ -1,5 +1,5 @@
 /***************************************************************************
- *            taylor_variable.cc
+ *            taylor_expression.cc
  *
  *  Copyright 2008  Pieter Collins
  *
@@ -32,14 +32,14 @@
 #include "expansion.h"
 #include "differential.h"
 #include "taylor_model.h"
-#include "taylor_variable.h"
+#include "taylor_expression.h"
 #include "expression_interface.h"
 #include "exceptions.h"
 
 namespace Ariadne {
 
 
-void _set_scaling(TaylorVariable& x, const Interval& ivl, uint j)
+void _set_scaling(TaylorExpression& x, const Interval& ivl, uint j)
 {
     rounding_mode_t rounding_mode=get_rounding_mode();
     set_rounding_mode(upward);
@@ -61,27 +61,27 @@ void _set_scaling(TaylorVariable& x, const Interval& ivl, uint j)
 
 
 
-TaylorVariable::TaylorVariable()
+TaylorExpression::TaylorExpression()
     : _domain(0), _model(0)
 { }
 
-TaylorVariable::TaylorVariable(const DomainType& d)
+TaylorExpression::TaylorExpression(const DomainType& d)
     : _domain(d), _model(d.size())
 {
 }
 
-TaylorVariable::TaylorVariable(const DomainType& d, const TaylorModel& m)
+TaylorExpression::TaylorExpression(const DomainType& d, const TaylorModel& m)
     : _domain(d), _model(m)
 {
 }
 
-TaylorVariable::TaylorVariable(const DomainType& d, const ExpansionType& f, const ErrorType& e)
+TaylorExpression::TaylorExpression(const DomainType& d, const ExpansionType& f, const ErrorType& e)
     : _domain(d), _model(f,e)
 {
     ARIADNE_ASSERT(d.size()==f.argument_size());
 }
 
-TaylorVariable::TaylorVariable(const DomainType& d, const ExpressionInterface& f)
+TaylorExpression::TaylorExpression(const DomainType& d, const ExpressionInterface& f)
     : _domain(d), _model(f.argument_size())
 {
     ARIADNE_ASSERT(d.size()==f.argument_size());
@@ -90,55 +90,55 @@ TaylorVariable::TaylorVariable(const DomainType& d, const ExpressionInterface& f
 }
 
 
-TaylorVariable TaylorVariable::constant(const Vector<Interval>& d, const Float& c)
+TaylorExpression TaylorExpression::constant(const Vector<Interval>& d, const Float& c)
 {
-    return TaylorVariable(d,TaylorModel::constant(d.size(),c));
+    return TaylorExpression(d,TaylorModel::constant(d.size(),c));
 }
 
-TaylorVariable TaylorVariable::constant(const Vector<Interval>& d, const Interval& c)
+TaylorExpression TaylorExpression::constant(const Vector<Interval>& d, const Interval& c)
 {
-    return TaylorVariable(d,TaylorModel::constant(d.size(),c));
+    return TaylorExpression(d,TaylorModel::constant(d.size(),c));
 }
 
-TaylorVariable TaylorVariable::variable(const Vector<Interval>& d, uint j)
+TaylorExpression TaylorExpression::variable(const Vector<Interval>& d, uint j)
 {
-    return TaylorVariable(d,TaylorModel::scaling(d.size(),j,d[j]));
+    return TaylorExpression(d,TaylorModel::scaling(d.size(),j,d[j]));
 }
 
-Vector<TaylorVariable> TaylorVariable::constants(const Vector<Interval>& d, const Vector<Interval>& c)
+Vector<TaylorExpression> TaylorExpression::constants(const Vector<Interval>& d, const Vector<Interval>& c)
 {
-    Vector<TaylorVariable> x(c.size(),TaylorVariable(d));
+    Vector<TaylorExpression> x(c.size(),TaylorExpression(d));
     for(uint i=0; i!=c.size(); ++i) {
         x[i]=c[i];
     }
     return x;
 }
 
-Vector<TaylorVariable> TaylorVariable::variables(const Vector<Interval>& d)
+Vector<TaylorExpression> TaylorExpression::variables(const Vector<Interval>& d)
 {
-    Vector<TaylorVariable> x(d.size());
+    Vector<TaylorExpression> x(d.size());
     for(uint i=0; i!=d.size(); ++i) {
-        x[i]=TaylorVariable::variable(d,i);
+        x[i]=TaylorExpression::variable(d,i);
     }
     return x;
 }
 
 
 
-bool TaylorVariable::operator==(const TaylorVariable& tv) const
+bool TaylorExpression::operator==(const TaylorExpression& tv) const
 {
     return this->_domain==tv._domain && this->_model==tv._model;
 }
 
 
-TaylorVariable& operator+=(TaylorVariable& x, const TaylorVariable& y) {
+TaylorExpression& operator+=(TaylorExpression& x, const TaylorExpression& y) {
     ARIADNE_ASSERT(subset(x.domain(),y.domain()));
     if(x.domain()==y.domain()) { x._model+=y._model; }
     else { x._model+=restrict(y,x.domain())._model; }
     return x;
 }
 
-TaylorVariable& operator-=(TaylorVariable& x, const TaylorVariable& y) {
+TaylorExpression& operator-=(TaylorExpression& x, const TaylorExpression& y) {
     ARIADNE_ASSERT(subset(x.domain(),y.domain()));
     if(x.domain()==y.domain()) { x._model-=y._model; }
     else { x._model-=restrict(y,x.domain())._model; }
@@ -146,56 +146,56 @@ TaylorVariable& operator-=(TaylorVariable& x, const TaylorVariable& y) {
 }
 
 
-TaylorVariable operator+(const TaylorVariable& x1, const TaylorVariable& x2) {
+TaylorExpression operator+(const TaylorExpression& x1, const TaylorExpression& x2) {
     if(x1._domain==x2._domain) {
-        return TaylorVariable(x1._domain,x1._model+x2._model); }
+        return TaylorExpression(x1._domain,x1._model+x2._model); }
     else {
-        TaylorVariable::DomainType domain=intersection(x1._domain,x2._domain);
-        return TaylorVariable(domain,restrict(x1,domain)._model+restrict(x2,domain)._model);}
+        TaylorExpression::DomainType domain=intersection(x1._domain,x2._domain);
+        return TaylorExpression(domain,restrict(x1,domain)._model+restrict(x2,domain)._model);}
 }
 
-TaylorVariable operator-(const TaylorVariable& x1, const TaylorVariable& x2) {
+TaylorExpression operator-(const TaylorExpression& x1, const TaylorExpression& x2) {
     if(x1._domain==x2._domain) {
-        return TaylorVariable(x1._domain,x1._model-x2._model); }
+        return TaylorExpression(x1._domain,x1._model-x2._model); }
     else {
-        TaylorVariable::DomainType domain=intersection(x1._domain,x2._domain);
-        return TaylorVariable(domain,restrict(x1,domain)._model-restrict(x2,domain)._model);}
+        TaylorExpression::DomainType domain=intersection(x1._domain,x2._domain);
+        return TaylorExpression(domain,restrict(x1,domain)._model-restrict(x2,domain)._model);}
 }
 
-TaylorVariable operator*(const TaylorVariable& x1, const TaylorVariable& x2) {
+TaylorExpression operator*(const TaylorExpression& x1, const TaylorExpression& x2) {
     if(x1._domain==x2._domain) {
-        return TaylorVariable(x1._domain,x1._model*x2._model); }
+        return TaylorExpression(x1._domain,x1._model*x2._model); }
     else {
-        TaylorVariable::DomainType domain=intersection(x1._domain,x2._domain);
-        return TaylorVariable(domain,restrict(x1,domain)._model*restrict(x2,domain)._model);}
+        TaylorExpression::DomainType domain=intersection(x1._domain,x2._domain);
+        return TaylorExpression(domain,restrict(x1,domain)._model*restrict(x2,domain)._model);}
 }
 
-TaylorVariable operator/(const TaylorVariable& x1, const TaylorVariable& x2) {
+TaylorExpression operator/(const TaylorExpression& x1, const TaylorExpression& x2) {
     if(x1._domain==x2._domain) {
-        return TaylorVariable(x1._domain,x1._model/x2._model); }
+        return TaylorExpression(x1._domain,x1._model/x2._model); }
     else {
-        TaylorVariable::DomainType domain=intersection(x1._domain,x2._domain);
-        return TaylorVariable(domain,restrict(x1,domain)._model/restrict(x2,domain)._model);}
+        TaylorExpression::DomainType domain=intersection(x1._domain,x2._domain);
+        return TaylorExpression(domain,restrict(x1,domain)._model/restrict(x2,domain)._model);}
 }
 
 
 
 
 
-TaylorVariable max(const TaylorVariable& x1, const TaylorVariable& x2) {
+TaylorExpression max(const TaylorExpression& x1, const TaylorExpression& x2) {
     if(x1._domain==x2._domain) {
-        return TaylorVariable(x1._domain,max(x1._model,x2._model)); }
+        return TaylorExpression(x1._domain,max(x1._model,x2._model)); }
     else {
-        TaylorVariable::DomainType domain=intersection(x1._domain,x2._domain);
-        return TaylorVariable(domain,max(restrict(x1,domain)._model,restrict(x2,domain)._model));}
+        TaylorExpression::DomainType domain=intersection(x1._domain,x2._domain);
+        return TaylorExpression(domain,max(restrict(x1,domain)._model,restrict(x2,domain)._model));}
 }
 
-TaylorVariable min(const TaylorVariable& x1, const TaylorVariable& x2) {
+TaylorExpression min(const TaylorExpression& x1, const TaylorExpression& x2) {
     if(x1._domain==x2._domain) {
-        return TaylorVariable(x1._domain,min(x1._model,x2._model)); }
+        return TaylorExpression(x1._domain,min(x1._model,x2._model)); }
     else {
-        TaylorVariable::DomainType domain=intersection(x1._domain,x2._domain);
-        return TaylorVariable(domain,min(restrict(x1,domain)._model,restrict(x2,domain)._model));}
+        TaylorExpression::DomainType domain=intersection(x1._domain,x2._domain);
+        return TaylorExpression(domain,min(restrict(x1,domain)._model,restrict(x2,domain)._model));}
 }
 
 
@@ -203,13 +203,13 @@ TaylorVariable min(const TaylorVariable& x1, const TaylorVariable& x2) {
 
 
 Interval
-TaylorVariable::evaluate(const Vector<Float>& x) const
+TaylorExpression::evaluate(const Vector<Float>& x) const
 {
     return this->evaluate(Vector<Interval>(x));
 }
 
 Interval
-TaylorVariable::evaluate(const Vector<Interval>& x) const
+TaylorExpression::evaluate(const Vector<Interval>& x) const
 {
     Vector<Interval> sx=Ariadne::evaluate(TaylorModel::scalings(this->_domain),x);
     return Ariadne::evaluate(this->_model,sx);
@@ -217,39 +217,39 @@ TaylorVariable::evaluate(const Vector<Interval>& x) const
 
 
 
-TaylorVariable restrict(const TaylorVariable& tv, const Vector<Interval>& d) {
+TaylorExpression restrict(const TaylorExpression& tv, const Vector<Interval>& d) {
     ARIADNE_ASSERT(subset(d,tv.domain()));
     if(d==tv.domain()) { return tv; }
     Vector<TaylorModel> s=TaylorModel::rescalings(tv.domain(),d);
-    return TaylorVariable(d,compose(tv._model,s));
+    return TaylorExpression(d,compose(tv._model,s));
 }
 
-pair<TaylorVariable,TaylorVariable>
-split(const TaylorVariable& tv, uint j)
+pair<TaylorExpression,TaylorExpression>
+split(const TaylorExpression& tv, uint j)
 {
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-bool refines(const TaylorVariable& tv1, const TaylorVariable& tv2)
+bool refines(const TaylorExpression& tv1, const TaylorExpression& tv2)
 {
     if(tv1.domain()==tv2.domain()) { return refines(tv1.model(),tv2.model()); } if(subset(tv2.domain(),tv1.domain())) { return refines(restrict(tv1,tv2.domain()).model(),tv2.model()); }
     else { return false; }
 }
 
-Vector<TaylorVariable> compose(const Vector<TaylorVariable>& x, const Vector<TaylorVariable>& y) {
+Vector<TaylorExpression> compose(const Vector<TaylorExpression>& x, const Vector<TaylorExpression>& y) {
     ARIADNE_NOT_IMPLEMENTED; }
-TaylorVariable compose(const TaylorVariable& x, const Vector<TaylorVariable>& y) {
+TaylorExpression compose(const TaylorExpression& x, const Vector<TaylorExpression>& y) {
     ARIADNE_NOT_IMPLEMENTED; }
 
-Vector<TaylorVariable>
+Vector<TaylorExpression>
 prod(const Matrix<Interval>& A,
-     const Vector<TaylorVariable>& x)
+     const Vector<TaylorExpression>& x)
 {
     ARIADNE_ASSERT(x.size()>0);
     ARIADNE_ASSERT(A.column_size()==x.size());
     for(uint i=1; i!=x.size(); ++i) { ARIADNE_ASSERT(x[i].argument_size()==x[0].argument_size()); }
 
-    Vector<TaylorVariable> r(A.row_size(),TaylorVariable(x[0].domain()));
+    Vector<TaylorExpression> r(A.row_size(),TaylorExpression(x[0].domain()));
     for(uint i=0; i!=A.row_size(); ++i) {
         for(uint j=0; j!=A.column_size(); ++j) {
             r[i]+=A[i][j]*x[j];
@@ -259,10 +259,10 @@ prod(const Matrix<Interval>& A,
 }
 
 Matrix<Interval>
-jacobian(const Vector<TaylorVariable>& tv, const Vector<Interval>& x);
+jacobian(const Vector<TaylorExpression>& tv, const Vector<Interval>& x);
 
-Vector<TaylorVariable>
-implicit(const Vector<TaylorVariable>& f)
+Vector<TaylorExpression>
+implicit(const Vector<TaylorExpression>& f)
 {
     ARIADNE_ASSERT(f.size()>0);
     ARIADNE_ASSERT(f.size()<=f[0].argument_size());
@@ -274,8 +274,8 @@ implicit(const Vector<TaylorVariable>& f)
 
     Vector<Interval> h_domain=project(f[0].domain(),range(0u,has));
     Vector<Interval> h_range=project(f[0].domain(),range(has,fas));
-    Vector<TaylorVariable> id=TaylorVariable::variables(h_domain);
-    Vector<TaylorVariable> h=TaylorVariable::constants(h_domain,h_range);
+    Vector<TaylorExpression> id=TaylorExpression::variables(h_domain);
+    Vector<TaylorExpression> h=TaylorExpression::constants(h_domain,h_range);
     //std::cerr<<"\nid="<<id<<"\nh0="<<h0<<"\n";
 
     for(uint k=0; k!=10; ++k) {
@@ -289,10 +289,10 @@ implicit(const Vector<TaylorVariable>& f)
         for(uint i=0; i!=rs; ++i) {
             h[i].set_error(0);
         }
-        Vector<TaylorVariable> idh=join(id,h);
-        Vector<TaylorVariable> fidxhx=compose(f,idh);
+        Vector<TaylorExpression> idh=join(id,h);
+        Vector<TaylorExpression> fidxhx=compose(f,idh);
         //std::cerr<<"  f(x,h(x))="<<fh<<std::endl;
-        Vector<TaylorVariable> dh=prod(D2finv,fidxhx);
+        Vector<TaylorExpression> dh=prod(D2finv,fidxhx);
         //std::cerr<<"  dh="<<dh<<std::endl;
         h=h-dh;
     }
@@ -303,21 +303,21 @@ implicit(const Vector<TaylorVariable>& f)
 
 }
 
-TaylorVariable implicit(const TaylorVariable& f) {
+TaylorExpression implicit(const TaylorExpression& f) {
     Vector<Interval> h_domain=project(f.domain(),range(0u,f.argument_size()-1u));
     Interval h_codomain=f.domain()[f.argument_size()-1u];
     TaylorModel h_model=implicit(f.model());
     ARIADNE_ASSERT(h_model.argument_size()+1==f.model().argument_size());
     TaylorModel hrs_model=h_model.rescale(Interval(-1,+1),h_codomain);
     ARIADNE_ASSERT(hrs_model.argument_size()+1==f.model().argument_size());
-    return TaylorVariable(h_domain,hrs_model);
+    return TaylorExpression(h_domain,hrs_model);
 }
 
 
 
 std::ostream&
-operator<<(std::ostream& os, const TaylorVariable& tv) {
-    return os << "TaylorVariable(" << tv.domain() << "," << tv.expansion() << "," << tv.error() << ")";
+operator<<(std::ostream& os, const TaylorExpression& tv) {
+    return os << "TaylorExpression(" << tv.domain() << "," << tv.expansion() << "," << tv.error() << ")";
 }
 
 
@@ -325,7 +325,7 @@ operator<<(std::ostream& os, const TaylorVariable& tv) {
 
 
 bool
-check(const Vector<TaylorVariable>& tv)
+check(const Vector<TaylorExpression>& tv)
 {
     for(uint i=0; i!=tv.size(); ++i) {
         if(tv[0].domain()!=tv[i].domain()) { return false; }
@@ -334,7 +334,7 @@ check(const Vector<TaylorVariable>& tv)
 }
 
 Vector< Expansion<Float> >
-expansion(const Vector<TaylorVariable>& x)
+expansion(const Vector<TaylorExpression>& x)
 {
     Vector< Expansion<Float> > r(x.size());
     for(uint i=0; i!=x.size(); ++i) {
@@ -344,7 +344,7 @@ expansion(const Vector<TaylorVariable>& x)
 }
 
 Vector<Float>
-error(const Vector<TaylorVariable>& x)
+error(const Vector<TaylorExpression>& x)
 {
     Vector<Float> r(x.size());
     for(uint i=0; i!=x.size(); ++i) {
@@ -354,7 +354,7 @@ error(const Vector<TaylorVariable>& x)
 }
 
 Vector<Float>
-value(const Vector<TaylorVariable>& x)
+value(const Vector<TaylorExpression>& x)
 {
     Vector<Float> r(x.size());
     for(uint i=0; i!=x.size(); ++i) {
@@ -364,7 +364,7 @@ value(const Vector<TaylorVariable>& x)
 }
 
 Vector<Interval>
-ranges(const Vector<TaylorVariable>& x)
+ranges(const Vector<TaylorExpression>& x)
 {
     Vector<Interval> r(x.size());
     for(uint i=0; i!=x.size(); ++i) {
@@ -375,7 +375,7 @@ ranges(const Vector<TaylorVariable>& x)
 
 
 Vector<Interval>
-evaluate(const Vector<TaylorVariable>& tv, const Vector<Interval>& x)
+evaluate(const Vector<TaylorExpression>& tv, const Vector<Interval>& x)
 {
     Vector<Interval> r(tv.size());
     for(uint i=0; i!=tv.size(); ++i) {
@@ -385,7 +385,7 @@ evaluate(const Vector<TaylorVariable>& tv, const Vector<Interval>& x)
 }
 
 Matrix<Interval>
-jacobian(const Vector<TaylorVariable>& tv, const Vector<Interval>& x)
+jacobian(const Vector<TaylorExpression>& tv, const Vector<Interval>& x)
 {
     ARIADNE_ASSERT(check(tv));
     const Vector<Interval>& dom=tv[0].domain();

@@ -29,7 +29,7 @@
 #include "multi_index.h"
 #include "expansion.h"
 #include "taylor_model.h"
-#include "taylor_variable.h"
+#include "taylor_expression.h"
 #include "taylor_set.h"
 #include "taylor_function.h"
 #include "function.h"
@@ -42,7 +42,7 @@ using namespace Ariadne;
 Vector<Float> e(uint n, uint i) { return Vector<Float>::unit(n,i); }
 Expansion<Float> v(uint n, uint j) { return Expansion<Float>::variable(n,j); }
 Polynomial<Float> p(uint n, uint j) { return Polynomial<Float>::variable(n,j); }
-TaylorVariable t(Vector<Interval> d, uint j) { return TaylorVariable::variable(d,j); }
+TaylorExpression t(Vector<Interval> d, uint j) { return TaylorExpression::variable(d,j); }
 
 
 struct Henon {
@@ -128,7 +128,7 @@ void TestTaylorFunction::test_constructors()
     ARIADNE_TEST_EQUAL(polynomial_model,TaylorFunction(domain,expansion))
 
     Vector<TaylorExpression> t=TaylorExpression::variables(domain);
-    TaylorFunction variables_model = (1.5-t[0]*t[0]+0.25*t[1])*e0+t[0]*e1;
+    TaylorFunction variables_model((1.5-t[0]*t[0]+0.25*t[1])*e0+t[0]*e1);
     ARIADNE_TEST_EQUAL(variables_model,TaylorFunction(domain,expansion));
 
 }

@@ -44,7 +44,7 @@ template<class X> class Matrix;
 
 class FunctionInterface;
 class TaylorModel;
-class TaylorVariable;
+class TaylorExpression;
 class TaylorFunction;
 class TaylorSet;
 
@@ -56,7 +56,7 @@ class Figure;
 
 /*! \brief Sets expressed as the image of a box under a polynomial with error bounds.
  *
- *  See also TaylorModel, TaylorVariable, TaylorFunction.
+ *  See also TaylorModel, TaylorExpression, TaylorFunction.
  */
 class TaylorSet
     : public LocatedSetInterface
@@ -154,11 +154,11 @@ class TaylorSet
     Matrix<Float> jacobian() const;
 };
 
-TaylorModel apply(const TaylorVariable& f, const TaylorSet& s);
+TaylorModel apply(const TaylorExpression& f, const TaylorSet& s);
 TaylorSet apply(const TaylorFunction& f, const TaylorSet& s);
 TaylorSet apply(const FunctionInterface& f, const TaylorSet& s);
 
-TaylorModel unchecked_apply(const TaylorVariable& f, const TaylorSet& s);
+TaylorModel unchecked_apply(const TaylorExpression& f, const TaylorSet& s);
 TaylorSet unchecked_apply(const TaylorFunction& f, const TaylorSet& s);
 
 GridTreeSet outer_approximation(const TaylorSet& set, const Grid& grid, uint depth);

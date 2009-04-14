@@ -79,7 +79,7 @@ class HybridEvolver
     typedef TaylorFunction FunctionModelType;
     typedef TaylorFunction MapModelType;
     typedef TaylorFunction FlowModelType;
-    typedef TaylorVariable ConstraintModelType;
+    typedef TaylorExpression ConstraintModelType;
     typedef TaylorModel TimeModelType;
     typedef TaylorSet SetModelType;
     typedef TaylorSet TimedSetModelType;

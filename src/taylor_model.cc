@@ -1958,11 +1958,11 @@ split(const TaylorModel& tv, uint j)
     uint as=tv.argument_size();
     Vector<TaylorModel> s=TaylorModel::variables(as);
     s[j]=TaylorModel::scaling(as,j,Interval(-1,0));
-    s[j].accuracy_ptr()=tv.accuracy_ptr();
     TaylorModel r1=compose(tv,s);
+    r1.set_accuracy(tv.accuracy_ptr());
     s[j]=TaylorModel::scaling(as,j,Interval(0,+1));
-    s[j].accuracy_ptr()=tv.accuracy_ptr();
     TaylorModel r2=compose(tv,s);
+    r2.set_accuracy(tv.accuracy_ptr());
     ARIADNE_ASSERT(r1.accuracy_ptr()==tv.accuracy_ptr());
     ARIADNE_ASSERT(r2.accuracy_ptr()==tv.accuracy_ptr());
     return make_pair(r1,r2);

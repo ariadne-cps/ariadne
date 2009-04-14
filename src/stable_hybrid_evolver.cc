@@ -29,7 +29,7 @@
 #include "function_interface.h"
 #include "taylor_model.h"
 #include "taylor_set.h"
-#include "taylor_variable.h"
+#include "taylor_expression.h"
 #include "taylor_function.h"
 #include "orbit.h"
 #include "taylor_calculus.h"

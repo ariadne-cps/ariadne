@@ -32,7 +32,7 @@
 
 #include "geometry.h"
 #include "taylor_model.h"
-#include "taylor_variable.h"
+#include "taylor_expression.h"
 #include "taylor_function.h"
 #include "taylor_set.h"
 
@@ -214,7 +214,7 @@ TaylorSet apply(const FunctionInterface& f, const TaylorSet& ts)
     return f.evaluate(ts.models());
 }
 
-TaylorModel apply(const TaylorVariable& tf, const TaylorSet& ts)
+TaylorModel apply(const TaylorExpression& tf, const TaylorSet& ts)
 {
     ARIADNE_ASSERT_MSG(subset(ts.range(),tf.domain()),"tf="<<tf<<" ts="<<ts);
     return unchecked_compose(tf.model(),unscale(ts.models(),tf.domain()));
@@ -227,7 +227,7 @@ TaylorSet apply(const TaylorFunction& tf, const TaylorSet& ts)
     return unchecked_compose(tf.models(),unscale(ts.models(),tf.domain()));
 }
 
-TaylorModel unchecked_apply(const TaylorVariable& tf, const TaylorSet& ts)
+TaylorModel unchecked_apply(const TaylorExpression& tf, const TaylorSet& ts)
 {
     return unchecked_compose(tf.model(),unscale(ts.models(),tf.domain()));
 }

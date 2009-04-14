@@ -14,7 +14,7 @@ LDADD = ../src/libariadne.la $(LIBS)
 
 bin_PROGRAMS = \
 	profile_arithmetic \
-	profile_taylor_variable \
+	profile_taylor_model \
 	profile_taylor_calculus \
 	test_misc
 
@@ -28,7 +28,7 @@ check_PROGRAMS = \
 	test_polynomial \
 	test_differential \
 	test_taylor_model \
-	test_taylor_variable \
+	test_taylor_expression \
 	test_taylor_function \
 	test_taylor_set \
 	test_function \
@@ -59,7 +59,7 @@ test_matrix_SOURCES=test_matrix.cc
 
 test_differential_SOURCES=test_differential.cc
 
-test_taylor_variable_SOURCES=test_taylor_variable.cc
+test_taylor_expression_SOURCES=test_taylor_expression.cc
 test_taylor_function_SOURCES=test_taylor_function.cc
 test_taylor_set_SOURCES=test_taylor_set.cc
 

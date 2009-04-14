@@ -34,7 +34,7 @@ using std::string;
 
 #include "numeric.h"
 #include "taylor_set.h"
-#include "taylor_variable.h"
+#include "taylor_expression.h"
 #include "taylor_function.h"
 #include "taylor_calculus.h"
 #include "function.h"
@@ -102,8 +102,8 @@ unsigned int number_of_nonzeros(const T& f) {
     return nnz;
 }
 
-template<> double error(const TaylorVariable& t) { return t.model().error(); }
-template<> unsigned int number_of_nonzeros(const TaylorVariable& t) { return t.model().number_of_nonzeros(); }
+template<> double error(const TaylorExpression& t) { return t.model().error(); }
+template<> unsigned int number_of_nonzeros(const TaylorExpression& t) { return t.model().number_of_nonzeros(); }
 template<> double error(const TaylorModel& t) { return t.error(); }
 template<> unsigned int number_of_nonzeros(const TaylorModel& t) { return t.number_of_nonzeros(); }
 

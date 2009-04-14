@@ -135,11 +135,11 @@ Float norm(const Vector<TaylorModel>& tv);
 
 /*! \brief A class representing a power series expansion, scaled to the unit box, with an error term.
  *
- * See also Expansion, TaylorVariable, TaylorFunction, TaylorSet.
+ * See also Expansion, TaylorExpression, TaylorFunction, TaylorSet.
  */
 class TaylorModel
 {
-    friend class TaylorVariable;
+    friend class TaylorExpression;
     typedef Expansion<Float> ExpansionType;
   public:
     class Accuracy;

@@ -43,7 +43,7 @@ template<class X> class Vector;
 template<class Var> struct CalculusTypes;
 
 class TaylorModel;
-class TaylorVariable;
+class TaylorExpression;
 class TaylorSet;
 class TaylorFunction;
 template<class X> class Differential;
@@ -63,7 +63,7 @@ template<> struct CalculusTypes<TaylorModel>
 {
     typedef TaylorModel VariableType;
     typedef TaylorModel TimeModelType;
-    typedef TaylorVariable PredicateModelType;
+    typedef TaylorExpression PredicateModelType;
     typedef TaylorSet SetModelType;
     typedef TaylorFunction FunctionModelType;
 };

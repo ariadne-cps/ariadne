@@ -76,7 +76,7 @@ class TaylorCalculus
     typedef TaylorSet SetModelType;
     typedef TaylorFunction MapModelType;
     typedef TaylorFunction FlowModelType;
-    typedef TaylorVariable PredicateModelType;
+    typedef TaylorExpression PredicateModelType;
     typedef Float TimeType;
     typedef Float RealType;
     typedef Interval IntervalType;

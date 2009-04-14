@@ -49,7 +49,7 @@
 namespace Ariadne {  
 
 class TaylorModel;
-class TaylorVariable;
+class TaylorExpression;
 class TaylorFunction;
 class TaylorSet;
 typedef std::pair<DiscreteState,TaylorSet> HybridTaylorSet;
@@ -81,7 +81,7 @@ class StableHybridEvolver
     typedef TaylorFunction FunctionModelType;
     typedef TaylorFunction MapModelType;
     typedef TaylorFunction FlowModelType;
-    typedef TaylorVariable ConstraintModelType;
+    typedef TaylorExpression ConstraintModelType;
     typedef TaylorModel TimeModelType;
     typedef TaylorSet SetModelType;
     typedef TaylorSet TimedSetModelType;

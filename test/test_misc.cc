@@ -82,7 +82,7 @@ Vector<Float> e(uint n, uint i) { return Vector<Float>::unit(n,i); }
 Expansion<Float> v(uint n, uint j) { return Expansion<Float>::variable(n,j); }
 Polynomial<Float> p(uint n, uint j) { return Polynomial<Float>::variable(n,j); }
 TaylorModel t(uint n, uint j) { return TaylorModel::variable(n,j); }
-//TaylorVariable t(Vector<Interval> d, uint j) { return TaylorVariable::variable(d,j); }
+//TaylorExpression t(Vector<Interval> d, uint j) { return TaylorExpression::variable(d,j); }
 
 int main() {
             // Vector field dtx=1.5

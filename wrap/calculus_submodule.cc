@@ -23,7 +23,7 @@
 
 #include "function_interface.h"
 #include "polynomial.h"
-#include "taylor_variable.h"
+#include "taylor_expression.h"
 #include "taylor_function.h"
 
 #include <boost/python.hpp>
@@ -35,8 +35,8 @@ using namespace Ariadne;
 
 namespace Ariadne {
 
-TaylorVariable max(const TaylorVariable& x, const TaylorVariable& y);
-TaylorVariable min(const TaylorVariable& x, const TaylorVariable& y);
+TaylorExpression max(const TaylorExpression& x, const TaylorExpression& y);
+TaylorExpression min(const TaylorExpression& x, const TaylorExpression& y);
 
 void read(MultiIndex& j, const boost::python::object& obj) {
     array<int> ary;
@@ -77,7 +77,7 @@ void read(TaylorModel& t, const boost::python::object& obj1, const boost::python
 }
 
 
-void read(TaylorVariable& t, const boost::python::object& obj1, const boost::python::object& obj2, const boost::python::object& obj3) {
+void read(TaylorExpression& t, const boost::python::object& obj1, const boost::python::object& obj2, const boost::python::object& obj3) {
     Vector<Interval> d;
     std::map<MultiIndex,Float> m;
     Float e;
@@ -85,13 +85,13 @@ void read(TaylorVariable& t, const boost::python::object& obj1, const boost::pyt
     read(m,obj2);
     read(e,obj3);
     ARIADNE_ASSERT(e>=0);
-    t=TaylorVariable(d,m,e);
+    t=TaylorExpression(d,m,e);
 }
 
 
-void read(TaylorVariable& tv, const boost::python::object& obj);
+void read(TaylorExpression& tv, const boost::python::object& obj);
 
-void read(TaylorVariable& tv, const boost::python::tuple& tup) {
+void read(TaylorExpression& tv, const boost::python::tuple& tup) {
     if(len(tup)==1) {
         read(tv,tup[0]);
     }else if(len(tup)==3) {
@@ -100,33 +100,33 @@ void read(TaylorVariable& tv, const boost::python::tuple& tup) {
 }
 
 
-void read(TaylorVariable& tv, const boost::python::object& obj) {
+void read(TaylorExpression& tv, const boost::python::object& obj) {
     if(check(extract<boost::python::tuple>(obj))) {
          read(tv,extract<boost::python::tuple>(obj));
     }
 }
 
-Vector<TaylorVariable>
+Vector<TaylorExpression>
 make_taylor_variables(const Vector<Interval>& x)
 {
-    return TaylorVariable::variables(x);
+    return TaylorExpression::variables(x);
 }
 
 
 
 
 boost::python::tuple
-python_split(const TaylorVariable& x, uint j)
+python_split(const TaylorExpression& x, uint j)
 {
-    std::pair<TaylorVariable,TaylorVariable> res=split(x,j);
+    std::pair<TaylorExpression,TaylorExpression> res=split(x,j);
     return boost::python::make_tuple(res.first,res.second);
 }
 
 
 
-template<> std::string __repr__(const TaylorVariable& tv) {
+template<> std::string __repr__(const TaylorExpression& tv) {
     std::stringstream ss;
-    ss << "TaylorVariable(" << tv.expansion() << "," << tv.error() << ")";
+    ss << "TaylorExpression(" << tv.expansion() << "," << tv.error() << ")";
     return ss.str();
 }
 
@@ -162,10 +162,10 @@ std::string __tpoly_str__(const Polynomial<Interval>& pi) {
     return ss.str();
 }
 
-std::string __str__(const TaylorVariable& tv) {
+std::string __str__(const TaylorExpression& tv) {
     std::stringstream ss;
     Polynomial<Interval> p=TaylorFunction(tv.domain(),Vector<TaylorModel>(1,tv.model())).polynomial()[0];
-    ss<<"TaylorVariable"<<__tbox_str__(tv.domain())<<"( "<<__tpoly_str__(p)<<" )";
+    ss<<"TaylorExpression"<<__tbox_str__(tv.domain())<<"( "<<__tpoly_str__(p)<<" )";
     return ss.str();
 }
 
@@ -187,16 +187,16 @@ std::string __str__(const TaylorFunction& tf) {
 
 
 
-TaylorVariable neg(const TaylorVariable&);
-TaylorVariable rec(const TaylorVariable&);
-TaylorVariable sqr(const TaylorVariable&);
-TaylorVariable pow(const TaylorVariable&, int);
-TaylorVariable sqrt(const TaylorVariable&);
-TaylorVariable exp(const TaylorVariable&);
-TaylorVariable log(const TaylorVariable&);
-TaylorVariable sin(const TaylorVariable&);
-TaylorVariable cos(const TaylorVariable&);
-TaylorVariable tan(const TaylorVariable&);
+TaylorExpression neg(const TaylorExpression&);
+TaylorExpression rec(const TaylorExpression&);
+TaylorExpression sqr(const TaylorExpression&);
+TaylorExpression pow(const TaylorExpression&, int);
+TaylorExpression sqrt(const TaylorExpression&);
+TaylorExpression exp(const TaylorExpression&);
+TaylorExpression log(const TaylorExpression&);
+TaylorExpression sin(const TaylorExpression&);
+TaylorExpression cos(const TaylorExpression&);
+TaylorExpression tan(const TaylorExpression&);
 
 } // namespace Ariadne
 
@@ -211,10 +211,10 @@ void export_taylor_variable()
     typedef Vector<Float> RV;
     typedef Vector<Interval> IV;
     typedef Matrix<Float> RMx;
-    typedef TaylorVariable TV;
+    typedef TaylorExpression TV;
     typedef TaylorFunction TF;
 
-    class_<TV> taylor_variable_class("TaylorVariable");
+    class_<TV> taylor_variable_class("TaylorExpression");
     taylor_variable_class.def("__init__", make_constructor(&make<TV>) );
     taylor_variable_class.def("__init__", make_constructor(&make3<TV>) );
     taylor_variable_class.def( init< IV >());
@@ -316,7 +316,7 @@ void export_taylor_function()
     typedef Vector<Float> RV;
     typedef Vector<Interval> IV;
     typedef Matrix<Float> RMx;
-    typedef TaylorVariable TV;
+    typedef TaylorExpression TV;
     typedef TaylorFunction TF;
     typedef FunctionInterface F;
 

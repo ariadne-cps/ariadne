@@ -124,11 +124,11 @@ void TestContinuousEvolution::test() const
     // Set up the vector field
     Float mu=0.5;
     Vector<Float> p(1); p[0]=mu;
-    Function<VanDerPol> vdp(p);
+    UserFunction<VanDerPol> vdp(p);
     // cout << "van_der_pol_function=" << vdp << endl;
     // cout << "van_der_pol_function.parameters()=" << vdp.parameters() << endl;
 
-    //Function evaluation sanity check
+    //UserFunction evaluation sanity check
     // cout << "vdp.evaluate(" << initial_box << ") " << flush; // cout << " = " << vdp.evaluate(initial_box) << endl;
     // cout << "vdp.jacobian(" << initial_box << ") = " << vdp.jacobian(initial_box) << endl;
     // cout << endl;

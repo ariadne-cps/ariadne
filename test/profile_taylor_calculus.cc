@@ -136,7 +136,7 @@ void profile(const char* name, const Test& test, unsigned int tries)
 
 struct ForcedVanDerPol : FunctionData<3,3,3> {
     template<class R, class A, class P>
-    void compute(R& r, const A& x, const P& p) const {
+    static void compute(R& r, const A& x, const P& p) {
         r[0]=x[1];
         r[1]=p[0]*(1.0-x[0]*x[0])*x[1]-x[0]+p[1]*sin(p[2]*x[2]);
         r[2]=1.0;
@@ -174,7 +174,7 @@ int main(int argc, const char* argv[]) {
 
 
     double mu=0.5; a=1.0; double omega=1.0;
-    Function<ForcedVanDerPol> vdp_vf(Vector<Float>(3u,mu,a,omega));
+    UserFunction<ForcedVanDerPol> vdp_vf(Vector<Float>(3u,mu,a,omega));
     Vector<Interval> vdp_dom = Box(3, 1.25,1.5, 0.5,0.75, 0.0,0.0);
 
 

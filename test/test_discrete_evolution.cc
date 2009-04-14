@@ -85,11 +85,11 @@ void TestMapEvolver::test() const
 
     // Set up the vector field
     Vector<Float> p(2); p[0]=1.5; p[1]=0.375;
-    Function<Henon> henon(p);
+    UserFunction<Henon> henon(p);
     cout << "henon_function=" << henon << endl;
     cout << "henon_function.parameters()=" << henon.parameters() << endl;
 
-    //Function evaluation sanity check
+    //UserFunction evaluation sanity check
     Vector<Float> x(2); x[0]=0.5; x[1]=0.25; 
     Vector<Float> hx(2); hx[0]=p[0]-x[0]*x[0]+x[1]*p[1]; hx[1]=x[0];
     ARIADNE_TEST_EQUAL(henon.evaluate(x),hx);
@@ -97,7 +97,7 @@ void TestMapEvolver::test() const
     ARIADNE_TEST_EQUAL(henon.jacobian(x),dhx);
  
 
-    //Function evaluation sanity check
+    //UserFunction evaluation sanity check
     cout << "henon.evaluate(" << initial_box << ") " << flush; cout << " = " << henon.evaluate(initial_box) << endl;
     cout << "henon.jacobian(" << initial_box << ") = " << henon.jacobian(initial_box) << endl;
 

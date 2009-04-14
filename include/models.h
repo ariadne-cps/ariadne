@@ -47,7 +47,7 @@ static const uint SMOOTH=255;
  */
 struct Henon : FunctionData<2,2,2> {
     template<class R, class A, class P>
-    void compute(R& r, const A& x, const P& p) const {
+    static void compute(R& r, const A& x, const P& p) {
         r[0]=p[0]-x[0]*x[0]+p[1]*x[1];
         r[1]=x[0];
     }
@@ -55,7 +55,7 @@ struct Henon : FunctionData<2,2,2> {
                    
 struct HenonInverse : FunctionData<2,2,2> {
     template<class R, class A, class P>
-    void compute(R& r, const A& x, const P& p) const {
+    static void compute(R& r, const A& x, const P& p) {
         r[0]=x[1]; 
         r[1]=(p[0]-x[1]*x[1]+x[0])/p[1];
     }
@@ -71,7 +71,7 @@ struct HenonInverse : FunctionData<2,2,2> {
  */
 struct Duffing : FunctionData<3,3,6> {
     template<class R, class A, class P>
-    void compute(R& r, const A& x, const P& p) const {
+    static void compute(R& r, const A& x, const P& p) {
         r[0]=x[1];
         r[1]=-p[0]*x[1]-x[0]*(p[2]+p[1]*x[0]*x[0])+p[3]*cos(p[4]*x[2]+p[5]);
         r[2]=1.0;
@@ -89,7 +89,7 @@ struct Duffing : FunctionData<3,3,6> {
  */
 struct VanDerPol : FunctionData<2,2,1> {
     template<class R, class A, class P>
-    void compute(R& r, const A& x, const P& p) const {
+    static void compute(R& r, const A& x, const P& p) {
         r[0]=x[1];
         r[1]=p[0]*(1-x[0]*x[0])*x[1]-x[0];
     }
@@ -106,7 +106,7 @@ struct VanDerPol : FunctionData<2,2,1> {
  */
 struct ForcedVanDerPol : FunctionData<3,3,3> {
     template<class R, class A, class P>
-    void compute(R& r, const A& x, const P& p) const {
+    static void compute(R& r, const A& x, const P& p) {
         r[0]=x[1];
         r[1]=p[0]*(1.0-x[0]*x[0])*x[1]-x[0]+p[1]*sin(p[2]*x[2]);
         r[2]=1.0;
@@ -125,7 +125,7 @@ struct ForcedVanDerPol : FunctionData<3,3,3> {
  */
 struct Lorenz : FunctionData<3,3,3> {
     template<class R, class A, class P>
-    void compute(R& r, const A& x, const P& p) const {
+    static void compute(R& r, const A& x, const P& p) {
         r[0]=p[2]*(x[1]-x[0]);
         r[1]=p[1]*x[0]-x[1]-x[0]*x[2];
         r[2]=-p[0]*x[2]+x[0]*x[1];

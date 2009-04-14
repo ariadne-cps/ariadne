@@ -45,19 +45,15 @@ Polynomial<Float> p(uint n, uint j) { return Polynomial<Float>::variable(n,j); }
 TaylorExpression t(Vector<Interval> d, uint j) { return TaylorExpression::variable(d,j); }
 
 
-struct Henon {
-    uint result_size() const { return 2; }
-    uint argument_size() const { return 2; }
-    uint parameter_size() const { return 2; }
-    uint smoothness() const { return 255; }
+struct Henon : public FunctionData<2,2,2> {
     template<class R, class A, class P>
-    void compute(R& r, const A& x, const P& p) const
+    static void compute(R& r, const A& x, const P& p)
     {
         r[0]=-(x[0]*x[0])+p[0]-p[1]*x[1];
         r[1]=x[0];
     }
 };
-typedef Function<Henon> HenonFunction;
+typedef UserFunction<Henon> HenonFunction;
 
 namespace Ariadne {
 std::pair<Float, Vector<Interval> > flow_bounds(FunctionInterface const&,Vector<Interval> const&,Float const&);

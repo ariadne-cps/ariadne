@@ -93,7 +93,7 @@ std::vector<Point> apply(const ProjectionFunction& map, const std::vector<Point>
         const Point& pt=points[i];
         Point ppt(map.result_size());
         for(size_t j=0; j!=map.result_size(); ++j) {
-            ppt[j]=pt[map[j]];
+            ppt[j]=pt[map.p(j)];
         }
         result.push_back(ppt);
     }
@@ -156,14 +156,14 @@ void Figure::set_projection_map(const PlanarProjectionMap& p)
 {
     array<uint> ary(2);
     ary[0]=p.i; ary[1]=p.j;
-    this->_data->projection=ProjectionFunction(ary,p.n);
+    this->_data->projection=ProjectionFunction(2,p.n,ary);
 }
 
 void Figure::set_bounding_box(const Box& bx) 
 {
     ARIADNE_ASSERT(bx.dimension()==0 || bx.dimension()==2 || bx.dimension()==this->_data->projection.argument_size());
     if(bx.dimension()>2) {
-        this->_data->bounding_box=this->_data->projection(bx);
+        this->_data->bounding_box=this->_data->projection.evaluate(bx);
     } else {
         this->_data->bounding_box=bx;
     }

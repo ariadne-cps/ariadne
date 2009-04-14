@@ -218,7 +218,7 @@ int main()
     Box graphic_box(2, -0.1,tmax+0.1, 4.1,6.1);
     g.set_bounding_box(graphic_box);
     array<uint> p(2,2,0);
-    g.set_projection_map(ProjectionFunction(p,3));
+    g.set_projection_map(ProjectionFunction(2,3,p));
 
     g << fill_colour(Colour(0.0,0.5,1.0));
     g << *lower_reach_set_ptr;

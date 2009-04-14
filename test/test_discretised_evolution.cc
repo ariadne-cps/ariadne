@@ -101,7 +101,7 @@ void TestDiscretisedEvolution::test_discrete_time() const
     Float a=1.5; Float b=0.375;
     Vector<Float> p(2); p[0]=a; p[1]=b;
 
-    Function<Henon> henon(p);
+    UserFunction<Henon> henon(p);
     cout << "henon=" << henon << endl;
     Map system(henon);
 
@@ -198,7 +198,7 @@ void TestDiscretisedEvolution::test_continuous_time() const
 
     // Set up the vector field
     Float mu=0.865;
-    Function<VanDerPol> vdp(Vector<Float>(1,&mu));
+    UserFunction<VanDerPol> vdp(Vector<Float>(1,&mu));
     cout << "vdp=" << vdp << endl;
     VectorField system(vdp);
 
@@ -297,7 +297,7 @@ void TestDiscretisedEvolution::test_hybrid_time() const
     Float a=1.5; Float b=0.375;
     Vector<Float> p(2); p[0]=a; p[1]=b;
 
-    Function<Henon> henon(p);
+    UserFunction<Henon> henon(p);
     cout << "henon=" << henon << endl;
     HybridAutomaton ha("Henon");
     ha.new_mode(location,IdentityFunction(2));

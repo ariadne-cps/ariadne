@@ -80,10 +80,8 @@ class DifferenceFunction
     virtual uint result_size() const { return fptr->result_size(); }
     virtual uint argument_size() const { return fptr->argument_size(); }
     virtual ushort smoothness() const { return fptr->smoothness(); }
-    template<class Res, class Args, class Params>
-    void _compute(Res& r, const Args& a, const Params& p) const {
-        //r=fptr->evaluate(a)-a;
-    }
+    template<class Res, class Args> void _compute(Res& r, const Args& a) const { r=fptr->evaluate(a)-a; }
+    template<class Res, class Args> void _compute_approx(Res& r, const Args& a) const { _compute(r,a); }
   private:
     boost::shared_ptr<FunctionInterface> fptr;
 };

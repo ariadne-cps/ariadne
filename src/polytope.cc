@@ -232,22 +232,14 @@ Vector<Float>
 apply(const ProjectionFunction& map, const Vector<Float>& v)  
 {
     ARIADNE_ASSERT(v.size()==map.argument_size());
-    Vector<Float> result(map.result_size());
-    for(uint i=0; i!=map.result_size(); ++i) {
-        result[i]=v[map[i]];
-    }
-    return result;
+    return map.evaluate(v);
 }
 
 Point
 apply(const ProjectionFunction& map, const Point& pt)  
 {
     ARIADNE_ASSERT(pt.dimension()==map.argument_size());
-    Point result(map.result_size());
-    for(uint i=0; i!=map.result_size(); ++i) {
-        result[i]=pt[map[i]];
-    }
-    return result;
+    return Point(map.evaluate(pt));
 }
 
 
@@ -255,12 +247,7 @@ Box
 apply(const ProjectionFunction& map, const Box& bx)  
 {
     ARIADNE_ASSERT(bx.dimension()==map.argument_size());
-    Box result(map.result_size()); 
-    for(uint i=0; i!=map.result_size(); ++i) {
-        result[i].l = bx[map[i]].l;
-        result[i].u = bx[map[i]].u;
-    }
-    return result;
+    return Box(map.evaluate(bx));
 }
 
 

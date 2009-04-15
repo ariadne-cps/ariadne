@@ -156,18 +156,19 @@ Our basic representation of the initial set $I$ is as an image set (we could als
 
 \subsubsection*{Reach-evolve pairs}
 
+In this section we denote a finite collection of sets using calligraphic type $\mathcal{S}$.
 \begin{condition*}[Upper semantics]
-Given an initial set $I$, a pair $(R,E)$ is a valid reach-evolve pair for $H$ if for every hybrid solution $\xi$ starting in $I$ there exists a hybrid time $t$ such that $\xi(t)\in E$ and $\xi([0,t))\subset R$.
+Given an initial set $I$, a pair $(\mathcal{R},\mathcal{E})$ is a valid reach-evolve pair for $H$ if for every hybrid solution $\xi$ starting in $I$ there exists a hybrid time $t$ such that $\xi(t)\in \bigcup\mathcal{E}$ and $\xi([0,t))\subset \bigcup\mathcal{E}$.
 \end{condition*}
 
 \begin{condition*}[Lower semantics]
-A pair $(R,E)$ is a valid reach-evolve pair for an initial set $S$ under \emph{lower semantics} if $R$ and $E$ are each a finite collection of sets $R_\tau$, $E_i$ such that any for any $x\in I$, and any $i$, there is a solution $\xi_i$ starting at $x$ and entering $E_i$, and for any $\tau$ there is a solution $\xi_\tau$ starting at $x$ and entering $R_\tau$.
+A pair $(\mathcal{R},\mathcal{E})$ is a valid reach-evolve pair for an initial set $I$ under \emph{lower semantics} if for any $x\in I$, and any $E\in\mathcal{E}$, there is a solution $\xi_i$ starting at $x$ and entering $E$, and for any $R\in\mathcal{R}$, there is a solution $\xi$ starting at $x$ and entering $R$.
 \end{condition*}
-Ideally, we choose the $R_\tau$ so that they form a ``flow tube'' for the continuous evolution.
+We can generalise to the case that the sets are infinite collections parameterised by a parameter $\lambda$. This is useful for computing flow tubes, where $\lambda$ is the time $t$.
 
 The most convenient computable reach-evolve pair over a time interval $[0,h]$ is given by
 \[ R=\{ \phi(s,t) \mid s\in I \wedge t\in[0,h] \wedge g_B(\phi(s,[0,t]))\leq 0\} \]
-and $E=E_C \bigcup E_e$ where
+and $\mathcal{E}=E_C \bigcup_e E_e$ where
 \[ E_C=\{ \phi(s,h) \mid s\in I \wedge g_B(\phi(s,[0,h]))\leq 0\} \]
 and
 \[ E_e=\{ r_e(\phi(s,t)) \mid s\in I \wedge t\in[0,h] \wedge g_e(\phi(s,t))\geq 0 \wedge g_B(\phi(s,[0,t]))\leq 0 \} \]
@@ -208,7 +209,7 @@ The \emph{tangency set} is defined by the equations $g(\phi(s,t))=0$ and $\nabla
 
 \subsubsection*{Handling transition ordering}
 
-We can handle transitions using \texttt{max} and \texttt{min} functions on the crossing times.
+Given a collection of events $E$ with crossing times $\tau_e$, we need to compute which events occur before We can handle transitions using \texttt{max} and \texttt{min} functions on the crossing times.
 
 \subsection*{Evolution Step in Version 0.4.1}
 

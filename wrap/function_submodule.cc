@@ -2,7 +2,7 @@
  *            function_submodule.cc
  *
  *  Copyright 2008  Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 #include <iostream>
 #include <iomanip>
 #include "array.h"
@@ -39,7 +39,7 @@ using namespace boost::python;
 using namespace Ariadne;
 
 
-template<class X> 
+template<class X>
 array<X>
 extract_array(const boost::python::object& obj)
 {
@@ -50,7 +50,7 @@ extract_array(const boost::python::object& obj)
         boost::python::extract<X> xv(elements[i]);
         boost::python::extract<double> dv(elements[i]);
         if(xv.check()) {
-            result[i]=static_cast<X>(xv()); 
+            result[i]=static_cast<X>(xv());
         } else if(dv.check()) {
             result[i]=static_cast<double>(dv());
         } else {
@@ -63,11 +63,11 @@ extract_array(const boost::python::object& obj)
 template<class X> void read(Vector<X>& v, const object& obj) {
     list elements=extract<list>(obj);
     ARIADNE_ASSERT(v.size()==uint(len(elements)));
-    for(uint i=0; i!=v.size(); ++i) { 
+    for(uint i=0; i!=v.size(); ++i) {
         boost::python::extract<X> xv(elements[i]);
         boost::python::extract<double> dv(elements[i]);
         if(xv.check()) {
-            v[i]=static_cast<X>(xv()); 
+            v[i]=static_cast<X>(xv());
         } else if(dv.check()) {
             v[i]=static_cast<double>(dv());
         } else {
@@ -77,15 +77,15 @@ template<class X> void read(Vector<X>& v, const object& obj) {
 }
 
 
-template<class X> 
+template<class X>
 void read(Vector< Differential<X> >& td, const object& obj) {
     list elements=extract<list>(obj);
     ARIADNE_ASSERT(td.result_size()==uint(len(elements)));
-    for(uint i=0; i!=td.size(); ++i) { 
+    for(uint i=0; i!=td.size(); ++i) {
         boost::python::extract< Differential<X> > etv(elements[i]);
         boost::python::extract<double> ed(elements[i]);
         if(etv.check()) {
-            td[i]=etv(); 
+            td[i]=etv();
         } else if(ed.check()) {
             td[i]=ed();
         } else {
@@ -119,7 +119,7 @@ template<class X, class D>
 inline Matrix<X> get_jacobian(const Vector<D>& d) {
     const uint rs=d.size(); const uint as=d[0].argument_size();
     Matrix<X> J(rs,as);
-    for(uint i=0; i!=rs; ++i) { 
+    for(uint i=0; i!=rs; ++i) {
         for(uint j=0; j!=as; ++j) {
             J[i][j]=d[i][j];
         }
@@ -128,7 +128,7 @@ inline Matrix<X> get_jacobian(const Vector<D>& d) {
 }
 
 
-   
+
 class PythonFunction
     : public FunctionInterface
 {
@@ -136,9 +136,9 @@ class PythonFunction
     PythonFunction(std::string& nm, uint rs, uint as, const object& pyf) : _name(nm), _result_size(rs), _argument_size(as), _pyf(pyf) { }
     PythonFunction(uint rs, uint as, const object& pyf) : _name(), _result_size(rs), _argument_size(as), _pyf(pyf) { }
     PythonFunction(const object& pyf)
-        : _name(), 
-          _result_size(extract<int>(pyf.attr("result_size"))), 
-          _argument_size(extract<int>(pyf.attr("argument_size"))), 
+        : _name(),
+          _result_size(extract<int>(pyf.attr("result_size"))),
+          _argument_size(extract<int>(pyf.attr("argument_size"))),
           _pyf(pyf) { }
 
     PythonFunction* clone() const { return new PythonFunction(*this); }
@@ -146,35 +146,35 @@ class PythonFunction
     virtual uint argument_size() const { return this->_argument_size; }
     virtual ushort smoothness() const { return 255; }
 
-    virtual Vector<Float> evaluate (const Vector<Float>& x) const { 
-        Vector<Float> r(this->_result_size); 
-        read(r,this->_pyf(x)); 
+    virtual Vector<Float> evaluate (const Vector<Float>& x) const {
+        Vector<Float> r(this->_result_size);
+        read(r,this->_pyf(x));
         return r; }
-    virtual Vector<Interval> evaluate (const Vector<Interval>& x) const { 
-        Vector<Interval> r(this->_result_size); 
-        read(r,this->_pyf(x)); 
+    virtual Vector<Interval> evaluate (const Vector<Interval>& x) const {
+        Vector<Interval> r(this->_result_size);
+        read(r,this->_pyf(x));
         return r; }
     virtual Vector<TaylorModel> evaluate (const Vector<TaylorModel>& x) const {
         Vector<TaylorModel> r(this->_result_size);
-        read(r,this->_pyf(x)); 
+        read(r,this->_pyf(x));
         return r; }
     virtual Vector< Differential<Float> > evaluate (const Vector< Differential<Float> >& x) const {
         Vector< Differential<Float> > r(this->_result_size);
-        read(r,this->_pyf(x)); 
+        read(r,this->_pyf(x));
         return r; }
     virtual Vector< Differential<Interval> > evaluate (const Vector< Differential<Interval> >& x) const {
         Vector< Differential<Interval> > r(this->_result_size);
-        read(r,this->_pyf(x)); 
+        read(r,this->_pyf(x));
         return r; }
-    virtual Matrix<Float> jacobian (const Vector<Float>& x) const { 
+    virtual Matrix<Float> jacobian (const Vector<Float>& x) const {
         Vector< Differential<Float> > rj(this->_result_size,this->_argument_size,1u);
         Vector< Differential<Float> > aj=Differential<Float>::variables(x.size(),x.size(),1u,x);
-        read(rj,this->_pyf(aj)); 
+        read(rj,this->_pyf(aj));
         return get_jacobian<Float>(rj); }
-    virtual Matrix<Interval> jacobian (const Vector<Interval>& x) const { 
+    virtual Matrix<Interval> jacobian (const Vector<Interval>& x) const {
         Vector< Differential<Interval> > rj(this->_result_size,this->_argument_size,1u);
         Vector< Differential<Interval> > aj=Differential<Interval>::variables(x.size(),x.size(),1u,x);
-        read(rj,this->_pyf(aj)); 
+        read(rj,this->_pyf(aj));
         return get_jacobian<Interval>(rj); }
     virtual std::ostream& write(std::ostream& os) const {
         os << "Function( ";
@@ -201,7 +201,7 @@ typedef TaylorFunction TFM;
 template<class F> TaylorFunction call_evaluate(const F& f, const TaylorFunction& tf) {
     return TaylorFunction(tf.domain(),f.evaluate(tf.models())); }
 
-void export_function_interface() 
+void export_function_interface()
 {
     class_<FunctionPyWrap, boost::noncopyable> function_interface_class("FunctionInterface");
     function_interface_class.def("argument_size", pure_virtual(&FunctionInterface::argument_size));
@@ -212,7 +212,7 @@ void export_function_interface()
 }
 
 
-void export_python_function() 
+void export_python_function()
 {
     class_<PythonFunction, bases< FunctionInterface > > python_function_class("AriadneFunction", init<object>());
     python_function_class.def(init<uint,uint,object>());
@@ -236,7 +236,7 @@ std::string __str__(const AffineFunction& f) {
         for(uint j=0; j!=f.argument_size(); ++j) {
             if(f.A()[i][j]!=0) {
                 if(f.A()[i][j]>0) { ss<<"+"; } else { ss<<"-"; }
-                if(abs(f.A()[i][j])!=1) { ss<<abs(f.A()[i][j]); } 
+                if(abs(f.A()[i][j])!=1) { ss<<abs(f.A()[i][j]); }
                 //ss<<char('x'+j);
                 ss<<"x"<<j;
             }
@@ -286,64 +286,17 @@ void export_polynomial()
     polynomial_class.def(self*real);
     polynomial_class.def(self/real);
     polynomial_class.def(real+self);
-    polynomial_class.def(real-self); 
+    polynomial_class.def(real-self);
     polynomial_class.def(real*self);
     polynomial_class.def(self_ns::str(self));
 }
 
-/*
-void export_model() 
-{
-    typedef ApproximateTaylorModel Model;
-    typedef Float R;
-    typedef Interval I;
-    typedef Vector<I> Box;
-    typedef Vector<R> Point;
-    typedef DifferentialVector< Differential<R> > Expansion;
 
-    class_< Model > function_model_class("ApproximateTaylorModel",init< Vector<I>, Vector<R>, const FunctionInterface&, ushort, ushort>());
-    function_model_class.def(init< uint, uint, ushort, ushort >());
-    //function_model_class.def(init< Vector<I> >());
-    function_model_class.def(init< Vector<I>, Vector<R>, DifferentialVector< Differential<R> > >());
-    function_model_class.def(init< Vector<I>, Vector<R>, DifferentialVector< Differential<R> > >());
-    function_model_class.def(init< Model >());
-    function_model_class.def("result_size", &Model::result_size);
-    function_model_class.def("argument_size", &Model::argument_size);
-    function_model_class.def("order", &Model::order);
-    function_model_class.def("smoothness", &Model::smoothness);
-    function_model_class.def("domain", &Model::domain);
-    function_model_class.def("centre", &Model::centre);
-    function_model_class.def("range", &Model::range);
-    function_model_class.def("expansion", &Model::expansion, return_value_policy<copy_const_reference>());
-    function_model_class.def("identity", &Model::identity);
-    function_model_class.staticmethod("identity");
-    //function_model_class.def("set",(void(Model::*)(uint,const MultiIndex&,const R&)) &Model::set);
-    //function_model_class.def("get",(R(Model::*)(uint,const MultiIndex&)const) &Model::get);
-    //function_model_class.def("truncate",&Model::truncate);
-    function_model_class.def("evaluate",(Vector<I>(Model::*)(const Vector<I>&)const) &Model::evaluate);
-    function_model_class.def("jacobian",(Matrix<I>(Model::*)(const Vector<I>&)const) &Model::jacobian);
-    function_model_class.def("__add__",(Model(*)(const Model&,const Model&)) &Ariadne::operator+);
-    function_model_class.def("__sub__",(Model(*)(const Model&,const Model&)) &Ariadne::operator-);
-    function_model_class.def(self_ns::str(self));
- 
-    def("evaluate",(Vector<I>(Model::*)(const Vector<I>&)const) &Model::evaluate);
-    def("project",(Model(*)(const Model&,const Slice&)) &project);
-    def("join",(Model(*)(const Model&,const Model&)) &join);
-    def("compose",(Model(*)(const Model&,const Model&)) &compose);
-    //def("inverse",(Model(*)(const Model&)) &inverse);
-    def("implicit",(Model(*)(const Model&)) &implicit);
-    //def("derivative",(Model(*)(const Model&, uint)) &derivative);
-    def("flow",(Model(*)(const Model&)) &flow);
-    //def("integrate",(Model(*)(const Model&,const R&)) &integrate);
-    def("hitting",(Model(*)(const Model&,const Model&)) &hitting);
-    //def("disjoint",(Model(*)(const Model&,const Vector<I>&)) &disjoint);
-    def("solve",(Vector<I>(*)(const Model&,const Vector<R>&)) &solve);
-}
-*/
 
 void function_submodule() {
     export_function_interface();
     export_affine_function();
+    export_polynomial();
     export_python_function();
 }
 

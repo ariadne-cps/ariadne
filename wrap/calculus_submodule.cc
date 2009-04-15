@@ -38,6 +38,12 @@ namespace Ariadne {
 TaylorExpression max(const TaylorExpression& x, const TaylorExpression& y);
 TaylorExpression min(const TaylorExpression& x, const TaylorExpression& y);
 
+TaylorExpression midpoint(const TaylorExpression& x) {
+    TaylorExpression r=x;
+    r.set_error(0.0);
+    return r;
+}
+
 void read(MultiIndex& j, const boost::python::object& obj) {
     array<int> ary;
     read_tuple_array(ary,obj);
@@ -89,20 +95,20 @@ void read(TaylorExpression& t, const boost::python::object& obj1, const boost::p
 }
 
 
-void read(TaylorExpression& tv, const boost::python::object& obj);
+void read(TaylorExpression& te, const boost::python::object& obj);
 
-void read(TaylorExpression& tv, const boost::python::tuple& tup) {
+void read(TaylorExpression& te, const boost::python::tuple& tup) {
     if(len(tup)==1) {
-        read(tv,tup[0]);
+        read(te,tup[0]);
     }else if(len(tup)==3) {
-        read(tv,tup[0],tup[1],tup[2]);
+        read(te,tup[0],tup[1],tup[2]);
     }
 }
 
 
-void read(TaylorExpression& tv, const boost::python::object& obj) {
+void read(TaylorExpression& te, const boost::python::object& obj) {
     if(check(extract<boost::python::tuple>(obj))) {
-         read(tv,extract<boost::python::tuple>(obj));
+         read(te,extract<boost::python::tuple>(obj));
     }
 }
 
@@ -124,9 +130,9 @@ python_split(const TaylorExpression& x, uint j)
 
 
 
-template<> std::string __repr__(const TaylorExpression& tv) {
+template<> std::string __repr__(const TaylorExpression& te) {
     std::stringstream ss;
-    ss << "TaylorExpression(" << tv.expansion() << "," << tv.error() << ")";
+    ss << "TaylorExpression(" << te.expansion() << "," << te.error() << ")";
     return ss.str();
 }
 
@@ -143,7 +149,8 @@ std::string __tbox_str__(const Vector<Interval>& d) {
 std::string __tpoly_str__(const Polynomial<Interval>& pi) {
     std::stringstream ss;
     bool first=true;
-    Float r=radius(pi.begin()->data());
+    Float r;
+    if(pi.expansion().size()==0) { r=0.0; } else { r=radius(pi.begin()->data()); }
     for(Polynomial<Interval>::const_iterator iter=pi.begin(); iter!=pi.end(); ++iter) {
         MultiIndex a=iter->key();
         Float v=midpoint(iter->data());
@@ -162,10 +169,10 @@ std::string __tpoly_str__(const Polynomial<Interval>& pi) {
     return ss.str();
 }
 
-std::string __str__(const TaylorExpression& tv) {
+std::string __str__(const TaylorExpression& te) {
     std::stringstream ss;
-    Polynomial<Interval> p=TaylorFunction(tv.domain(),Vector<TaylorModel>(1,tv.model())).polynomial()[0];
-    ss<<"TaylorExpression"<<__tbox_str__(tv.domain())<<"( "<<__tpoly_str__(p)<<" )";
+    Polynomial<Interval> p=TaylorFunction(te.domain(),Vector<TaylorModel>(1,te.model())).polynomial()[0];
+    ss<<"TaylorExpression"<<__tbox_str__(te.domain())<<"( "<<__tpoly_str__(p)<<" )";
     return ss.str();
 }
 
@@ -211,98 +218,109 @@ void export_taylor_variable()
     typedef Vector<Float> RV;
     typedef Vector<Interval> IV;
     typedef Matrix<Float> RMx;
-    typedef TaylorExpression TV;
+    typedef TaylorExpression TE;
     typedef TaylorFunction TF;
+    typedef Polynomial<Float> RP;
+    typedef Polynomial<Interval> IP;
 
-    class_<TV> taylor_variable_class("TaylorExpression");
-    taylor_variable_class.def("__init__", make_constructor(&make<TV>) );
-    taylor_variable_class.def("__init__", make_constructor(&make3<TV>) );
-    taylor_variable_class.def( init< IV >());
-    taylor_variable_class.def( init< IV >());
-    taylor_variable_class.def( init< TV >());
-    taylor_variable_class.def("error", (const R&(TV::*)()const) &TV::error, return_value_policy<copy_const_reference>());
-    taylor_variable_class.def("domain", &TV::domain, return_value_policy<copy_const_reference>());
-    taylor_variable_class.def("range", &TV::range);
-    taylor_variable_class.def("__getitem__", &get_item<TV,A,R>);
-    taylor_variable_class.def("__setitem__",&set_item<TV,A,D>);
-    taylor_variable_class.def(-self);
-    taylor_variable_class.def(self+self);
-    taylor_variable_class.def(self-self);
-    taylor_variable_class.def(self*self);
-    taylor_variable_class.def(self/self);
-    taylor_variable_class.def(self+R());
-    taylor_variable_class.def(self-R());
-    taylor_variable_class.def(self*R());
-    taylor_variable_class.def(self/R());
-    taylor_variable_class.def(R()+self);
-    taylor_variable_class.def(R()-self);
-    taylor_variable_class.def(R()*self);
-    taylor_variable_class.def(R()/self);
-    taylor_variable_class.def(self+=R());
-    taylor_variable_class.def(self-=R());
-    taylor_variable_class.def(self*=R());
-    taylor_variable_class.def(self/=R());
-    taylor_variable_class.def(self+=self);
-    taylor_variable_class.def(self-=self);
-    taylor_variable_class.def(self>R());
-    taylor_variable_class.def(self>self);
-    taylor_variable_class.def(self<self);
-    //taylor_variable_class.def(self_ns::str(self));
-    taylor_variable_class.def("__str__",(std::string(*)(const TV&)) &__str__);
-    taylor_variable_class.def("truncate", (TV&(TV::*)(uint)) &TV::truncate,return_value_policy<reference_existing_object>());
-    taylor_variable_class.def("sweep", (TV&(TV::*)(double))&TV::sweep,return_value_policy<reference_existing_object>());
-    taylor_variable_class.def("truncate", (TV&(TV::*)()) &TV::truncate,return_value_policy<reference_existing_object>());
-    taylor_variable_class.def("sweep", (TV&(TV::*)())&TV::sweep,return_value_policy<reference_existing_object>());
-    taylor_variable_class.def("clean", (TV&(TV::*)()) &TV::clean,return_value_policy<reference_existing_object>());
-    taylor_variable_class.def("set_maximum_degree",&TV::set_maximum_degree);
-    taylor_variable_class.def("set_sweep_threshold",&TV::set_sweep_threshold);
-    taylor_variable_class.def("maximum_degree",&TV::maximum_degree);
-    taylor_variable_class.def("sweep_threshold",&TV::sweep_threshold);
-    //taylor_variable_class.def("set_default_maximum_degree",&TV::set_default_maximum_degree);
-    //taylor_variable_class.def("set_default_sweep_threshold",&TV::set_default_sweep_threshold);
-    //taylor_variable_class.def("default_maximum_degree",&TV::default_maximum_degree);
-    //taylor_variable_class.def("default_sweep_threshold",&TV::default_sweep_threshold);
-    taylor_variable_class.def("__call__", (Interval(TV::*)(const Vector<Float>&)const) &TV::evaluate);
-    taylor_variable_class.def("__call__", (Interval(TV::*)(const Vector<Interval>&)const) &TV::evaluate);
-    taylor_variable_class.def("evaluate", (Interval(TV::*)(const Vector<Float>&)const) &TV::evaluate);
-    taylor_variable_class.def("evaluate", (Interval(TV::*)(const Vector<Interval>&)const) &TV::evaluate);
-    //taylor_variable_class.staticmethod("set_default_maximum_degree");
-    //taylor_variable_class.staticmethod("set_default_sweep_threshold");
-    //taylor_variable_class.staticmethod("default_maximum_degree");
-    //taylor_variable_class.staticmethod("default_sweep_threshold");
+    class_<TE> taylor_expression_class("TaylorExpression");
+    taylor_expression_class.def("__init__", make_constructor(&make<TE>) );
+    taylor_expression_class.def("__init__", make_constructor(&make3<TE>) );
+    taylor_expression_class.def( init< IV >());
+    taylor_expression_class.def( init< IV, RP >());
+    taylor_expression_class.def("error", (const R&(TE::*)()const) &TE::error, return_value_policy<copy_const_reference>());
+    taylor_expression_class.def("domain", &TE::domain, return_value_policy<copy_const_reference>());
+    taylor_expression_class.def("range", &TE::range);
+    taylor_expression_class.def("__getitem__", &get_item<TE,A,R>);
+    taylor_expression_class.def("__setitem__",&set_item<TE,A,D>);
+    taylor_expression_class.def(-self);
+    taylor_expression_class.def(self+self);
+    taylor_expression_class.def(self-self);
+    taylor_expression_class.def(self*self);
+    taylor_expression_class.def(self/self);
+    taylor_expression_class.def(self+R());
+    taylor_expression_class.def(self-R());
+    taylor_expression_class.def(self*R());
+    taylor_expression_class.def(self/R());
+    taylor_expression_class.def(R()+self);
+    taylor_expression_class.def(R()-self);
+    taylor_expression_class.def(R()*self);
+    taylor_expression_class.def(R()/self);
+    taylor_expression_class.def(self+=R());
+    taylor_expression_class.def(self-=R());
+    taylor_expression_class.def(self*=R());
+    taylor_expression_class.def(self/=R());
+    taylor_expression_class.def(self+I());
+    taylor_expression_class.def(self-I());
+    taylor_expression_class.def(self*I());
+    taylor_expression_class.def(self/I());
+    taylor_expression_class.def(self+=I());
+    taylor_expression_class.def(self-=I());
+    taylor_expression_class.def(self*=I());
+    taylor_expression_class.def(self/=I());
+    taylor_expression_class.def(self+=self);
+    taylor_expression_class.def(self-=self);
+    taylor_expression_class.def(self>R());
+    taylor_expression_class.def(self>self);
+    taylor_expression_class.def(self<self);
+    //taylor_expression_class.def(self_ns::str(self));
+    taylor_expression_class.def("__str__",(std::string(*)(const TE&)) &__str__);
+    taylor_expression_class.def("truncate", (TE&(TE::*)(uint)) &TE::truncate,return_value_policy<reference_existing_object>());
+    taylor_expression_class.def("sweep", (TE&(TE::*)(double))&TE::sweep,return_value_policy<reference_existing_object>());
+    taylor_expression_class.def("truncate", (TE&(TE::*)()) &TE::truncate,return_value_policy<reference_existing_object>());
+    taylor_expression_class.def("sweep", (TE&(TE::*)())&TE::sweep,return_value_policy<reference_existing_object>());
+    taylor_expression_class.def("clean", (TE&(TE::*)()) &TE::clean,return_value_policy<reference_existing_object>());
+    taylor_expression_class.def("set_maximum_degree",&TE::set_maximum_degree);
+    taylor_expression_class.def("set_sweep_threshold",&TE::set_sweep_threshold);
+    taylor_expression_class.def("maximum_degree",&TE::maximum_degree);
+    taylor_expression_class.def("sweep_threshold",&TE::sweep_threshold);
+    //taylor_expression_class.def("set_default_maximum_degree",&TE::set_default_maximum_degree);
+    //taylor_expression_class.def("set_default_sweep_threshold",&TE::set_default_sweep_threshold);
+    //taylor_expression_class.def("default_maximum_degree",&TE::default_maximum_degree);
+    //taylor_expression_class.def("default_sweep_threshold",&TE::default_sweep_threshold);
+    taylor_expression_class.def("__call__", (Interval(TE::*)(const Vector<Float>&)const) &TE::evaluate);
+    taylor_expression_class.def("__call__", (Interval(TE::*)(const Vector<Interval>&)const) &TE::evaluate);
+    taylor_expression_class.def("evaluate", (Interval(TE::*)(const Vector<Float>&)const) &TE::evaluate);
+    taylor_expression_class.def("evaluate", (Interval(TE::*)(const Vector<Interval>&)const) &TE::evaluate);
+    //taylor_expression_class.staticmethod("set_default_maximum_degree");
+    //taylor_expression_class.staticmethod("set_default_sweep_threshold");
+    //taylor_expression_class.staticmethod("default_maximum_degree");
+    //taylor_expression_class.staticmethod("default_sweep_threshold");
     def("split", &python_split);
 
 
-    taylor_variable_class.def("__repr__",&__repr__<TV>);
+    taylor_expression_class.def("__repr__",&__repr__<TE>);
 
-    taylor_variable_class.def("constant",(TV(*)(const IV&, const R&))&TV::constant);
-    taylor_variable_class.def("variable",(TV(*)(const IV&, uint))&TV::variable);
-    taylor_variable_class.def("variables",(TF(*)(const IV&))&TV::variables);
+    taylor_expression_class.def("constant",(TE(*)(const IV&, const R&))&TE::constant);
+    taylor_expression_class.def("variable",(TE(*)(const IV&, uint))&TE::variable);
+    taylor_expression_class.def("variables",(TF(*)(const IV&))&TE::variables);
 
-    taylor_variable_class.staticmethod("constant");
-    taylor_variable_class.staticmethod("variable");
-    taylor_variable_class.staticmethod("variables");
+    taylor_expression_class.staticmethod("constant");
+    taylor_expression_class.staticmethod("variable");
+    taylor_expression_class.staticmethod("variables");
 
-    def("evaluate",(I(*)(const TV&,const IV&)) &evaluate);
+    def("midpoint",(TE(*)(const TE&)) &midpoint);
+    def("refines",(bool(*)(const TE&,const TE&)) &refines);
+    def("evaluate",(I(*)(const TE&,const IV&)) &evaluate);
 
-    //def("compose",(TV(*)(const TV&,const TV&)) &compose);
-    //def("compose",(T(*)(const T&,const TV&)) &compose);
+    //def("compose",(TE(*)(const TE&,const TE&)) &compose);
+    //def("compose",(T(*)(const T&,const TE&)) &compose);
 
-    def("max",(TV(*)(const TV&,const TV&))&max);
-    def("min",(TV(*)(const TV&,const TV&))&min);
-    def("abs",(TV(*)(const TV&))&abs);
+    def("max",(TE(*)(const TE&,const TE&))&max);
+    def("min",(TE(*)(const TE&,const TE&))&min);
+    def("abs",(TE(*)(const TE&))&abs);
 
-    def("neg",(TV(*)(const TV&))&neg);
-    def("rec",(TV(*)(const TV&))&rec);
-    def("sqr",(TV(*)(const TV&))&sqr);
-    def("pow",(TV(*)(const TV&, int))&pow);
+    def("neg",(TE(*)(const TE&))&neg);
+    def("rec",(TE(*)(const TE&))&rec);
+    def("sqr",(TE(*)(const TE&))&sqr);
+    def("pow",(TE(*)(const TE&, int))&pow);
 
-    def("sqrt", (TV(*)(const TV&))&sqrt);
-    def("exp", (TV(*)(const TV&))&exp);
-    def("log", (TV(*)(const TV&))&log);
-    def("sin", (TV(*)(const TV&))&sin);
-    def("cos", (TV(*)(const TV&))&cos);
-    def("tan", (TV(*)(const TV&))&tan);
+    def("sqrt", (TE(*)(const TE&))&sqrt);
+    def("exp", (TE(*)(const TE&))&exp);
+    def("log", (TE(*)(const TE&))&log);
+    def("sin", (TE(*)(const TE&))&sin);
+    def("cos", (TE(*)(const TE&))&cos);
+    def("tan", (TE(*)(const TE&))&tan);
 
 }
 
@@ -316,7 +334,7 @@ void export_taylor_function()
     typedef Vector<Float> RV;
     typedef Vector<Interval> IV;
     typedef Matrix<Float> RMx;
-    typedef TaylorExpression TV;
+    typedef TaylorExpression TE;
     typedef TaylorFunction TF;
     typedef FunctionInterface F;
 
@@ -327,8 +345,8 @@ void export_taylor_function()
     taylor_function_class.def("argument_size", &TaylorFunction::argument_size);
     taylor_function_class.def("domain", &TaylorFunction::domain, return_value_policy<copy_const_reference>());
     taylor_function_class.def("range", &TaylorFunction::range);
-    taylor_function_class.def("__getitem__", &get_item<TF,N,TV>);
-    taylor_function_class.def("__setitem__",&set_item<TF,N,TV>);
+    taylor_function_class.def("__getitem__", &get_item<TF,N,TE>);
+    taylor_function_class.def("__setitem__",&set_item<TF,N,TE>);
     taylor_function_class.def(-self);
     taylor_function_class.def(self+self);
     taylor_function_class.def(self-self);
@@ -378,19 +396,20 @@ void export_taylor_function()
 
     taylor_function_class.staticmethod("constant");
     taylor_function_class.staticmethod("identity");
- 
-    def("join", (TF(*)(const TF&,const TF&)) &join);
-    def("join", (TF(*)(const TF&,const TV&)) &join);
 
-    def("combine", (TF(*)(const TF&,const TV&)) &combine);
+    def("join", (TF(*)(const TF&,const TF&)) &join);
+    def("join", (TF(*)(const TF&,const TE&)) &join);
+    def("join", (TF(*)(const TE&,const TE&)) &join);
+
+    def("combine", (TF(*)(const TF&,const TE&)) &combine);
     def("combine", (TF(*)(const TF&,const TF&)) &combine);
 
     def("evaluate",(IV(TF::*)(const RV&)const) &TF::evaluate);
     def("evaluate",(IV(TF::*)(const IV&)const) &TF::evaluate);
-    def("compose",(TV(*)(const TV&,const TF&)) &compose);
+    def("compose",(TE(*)(const TE&,const TF&)) &compose);
     def("compose",(TF(*)(const TF&,const TF&)) &compose);
     def("compose",(TF(*)(const F&,const TF&)) &compose);
-    def("implicit",(TV(*)(const TV&)) &implicit);
+    def("implicit",(TE(*)(const TE&)) &implicit);
     def("implicit",(TF(*)(const TF&)) &implicit);
     def("antiderivative",(TF(*)(const TF&,N)) &antiderivative);
     def("flow",(TF(*)(const TF&,const IV&,const I&, N)) &flow);

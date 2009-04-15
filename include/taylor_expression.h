@@ -109,6 +109,8 @@ class TaylorExpression
     template<class X> explicit TaylorExpression(const DomainType& d, const Polynomial<X>& p);
     //! \brief Construct a TaylorExpression over the domain \a d from the polynomial \a p.
     explicit TaylorExpression(const DomainType& d, const ExpressionInterface& f);
+    //! \brief Construct a TaylorExpression over the domain \a d from the polynomial \a p.
+    explicit TaylorExpression(const DomainType& d, const Polynomial<Float>& p);
     //@}
 
     //@{

@@ -30,6 +30,7 @@
 #include "vector.h"
 #include "matrix.h"
 #include "expansion.h"
+#include "polynomial.h"
 #include "differential.h"
 #include "taylor_model.h"
 #include "taylor_expression.h"
@@ -87,6 +88,14 @@ TaylorExpression::TaylorExpression(const DomainType& d, const ExpressionInterfac
     ARIADNE_ASSERT(d.size()==f.argument_size());
     Vector<TaylorModel> x=TaylorModel::scalings(d);
     this->_model=f.evaluate(x);
+}
+
+TaylorExpression::TaylorExpression(const DomainType& d, const Polynomial<Float>& p)
+    : _domain(d), _model(p.argument_size())
+{
+    ARIADNE_ASSERT(d.size()==p.argument_size());
+    Vector<TaylorModel> x=TaylorModel::scalings(d);
+    this->_model=Ariadne::evaluate(p,x);
 }
 
 

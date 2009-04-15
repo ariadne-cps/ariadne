@@ -163,7 +163,7 @@ Polynomial<Interval> polynomial(const TaylorModel& tm) {
     return Polynomial<Interval>(tm.expansion())+Interval(-tm.error(),+tm.error());
 }
 
-Vector< Polynomial<Interval> > 
+Vector< Polynomial<Interval> >
 TaylorFunction::polynomial() const
 {
     Vector<Polynomial<Interval> > p(this->result_size());
@@ -328,6 +328,13 @@ join(const TaylorFunction& f, const TaylorFunction& g)
 {
     ARIADNE_ASSERT(f.domain()==g.domain());
     return TaylorFunction(f.domain(),join(f.models(),g.models()));
+}
+
+TaylorFunction
+join(const TaylorExpression& f1, const TaylorExpression& f2)
+{
+    ARIADNE_ASSERT(f1.domain()==f2.domain());
+    return TaylorFunction(f1.domain(),join(f1.model(),f2.model()));
 }
 
 TaylorFunction

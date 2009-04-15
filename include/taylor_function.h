@@ -221,6 +221,7 @@ class TaylorFunction {
     //! \brief Compute the function \f$(f,g)(x)=(f(x),g(x))\f$.
     friend TaylorFunction join(const TaylorFunction& f, const TaylorFunction& g);
     friend TaylorFunction join(const TaylorFunction& f, const TaylorExpression& g);
+    friend TaylorFunction join(const TaylorExpression& f, const TaylorExpression& g);
     //! \brief Compute the function \f$(f\oplus g)(x,y)=(f(x),g(y))\f$.
     friend TaylorFunction combine(const TaylorFunction& f, const TaylorFunction& g);
     friend TaylorFunction combine(const TaylorFunction& f, const TaylorExpression& g);
@@ -247,6 +248,7 @@ class TaylorFunction {
 
 TaylorFunction join(const TaylorFunction& f, const TaylorFunction& g);
 TaylorFunction join(const TaylorFunction& f, const TaylorExpression& g);
+TaylorFunction join(const TaylorExpression& f, const TaylorExpression& g);
 TaylorFunction combine(const TaylorFunction& f, const TaylorFunction& g);
 TaylorFunction combine(const TaylorFunction& f, const TaylorExpression& g);
 

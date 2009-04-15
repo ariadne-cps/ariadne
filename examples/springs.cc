@@ -157,10 +157,9 @@ int main()
 
     /// Compute the system evolution
 
-    global_verbosity = 1;
-
     /// Create a StableHybridEvolver object
     StableHybridEvolver evolver;
+    evolver.verbosity = 1;
 
     /// Set the evolution parameters
     evolver.parameters().maximum_enclosure_radius = MAX_ENCLOSURE_RADIUS;

@@ -60,7 +60,6 @@ namespace Ariadne {
 static const double DEFAULT_MAXIMUM_ENCLOSURE_RADIUS=0.25;
 static const double DEFAULT_GRID_LENGTH=0.125;
 
-static int verbosity=global_verbosity;
 
 HybridReachabilityAnalyser::
 ~HybridReachabilityAnalyser()
@@ -256,7 +255,6 @@ upper_reach(const SystemType& system,
             const CompactSetInterfaceType& initial_set,
             const TimeType& time) const
 {
-    verbosity=global_verbosity;
     ARIADNE_LOG(2,"HybridReachabilityAnalyser::upper_reach(system,set,time)\n");
     ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
     GTS initial;
@@ -300,7 +298,6 @@ upper_reach_evolve(const SystemType& system,
                    const CompactSetInterfaceType& initial_set,
                    const TimeType& time) const
 {
-    verbosity=global_verbosity;
     ARIADNE_LOG(2,"HybridReachabilityAnalyser::upper_reach(system,set,time)\n");
     ARIADNE_LOG(3,"initial_set="<<initial_set<<"\n");
     GTS initial;

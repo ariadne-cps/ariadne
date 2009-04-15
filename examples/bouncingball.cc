@@ -112,8 +112,8 @@ int main()
     plot("ball-reach-evolver",bounding_box, Colour(0.0,0.5,1.0), reach);
 
     /// Create a ReachabilityAnalyser object
-    global_verbosity = 6;
     HybridReachabilityAnalyser analyser(evolver);
+    analyser.verbosity = 6;
     analyser.parameters().lock_to_grid_time = 32.0;
     analyser.parameters().maximum_grid_depth= 10;
     std::cout <<  analyser.parameters() << std::endl;

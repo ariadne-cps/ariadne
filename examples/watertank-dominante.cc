@@ -196,6 +196,7 @@ int main(int argc,char *argv[])
 
     /// Create a StableHybridEvolver object
     StableHybridEvolver evolver;
+    evolver.verbosity = 1;
 
     /// Set the evolution parameters
     double maximum_step_size= 0.05;
@@ -214,7 +215,6 @@ int main(int argc,char *argv[])
     double total_time = 35.0;
     double skip_time = 35.0;
     HybridTime evolution_time(skip_time,6);
-    global_verbosity=1;
 
     Box graphic_box(2, 18.0,skip_time, 5.0,6.0);
     array<uint> tx(2,4,0);
@@ -252,6 +252,7 @@ int main(int argc,char *argv[])
 /*
     /// Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
+    analyser.verbosity = 4;
     analyser.parameters().lock_to_grid_time = total_time;
     analyser.parameters().maximum_grid_depth= 14;
     std::cout <<  analyser.parameters() << std::endl;
@@ -264,7 +265,6 @@ int main(int argc,char *argv[])
     // Compute evolved sets (i.e. at the evolution time) and reach sets (i.e. up to the evolution time) using lower semantics.
     // These functions run a bunch of simulations with bounded approximation errors and combines the results.
     // If the desired evolution time can not be attained without exceeding the error bounds, then the run discarded (without warning)
-    global_verbosity = 4;
     std::cout << "Computing lower reach set... " << std::flush;
     HybridGridTreeSet* lower_reach_set_ptr = analyser.lower_reach(watertank_system,initial_set,reach_time);
     std::cout << "done." << std::endl;

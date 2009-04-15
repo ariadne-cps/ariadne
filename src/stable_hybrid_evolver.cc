@@ -200,7 +200,6 @@ _evolution(EnclosureListType& final_sets,
            Semantics semantics, 
            bool reach) const
 {
-    verbosity=global_verbosity;
 
 
 

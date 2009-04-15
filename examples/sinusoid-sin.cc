@@ -93,8 +93,8 @@ int main()
     g.write("sinusoid_sin_orbit");
 */
     /// Create a ReachabilityAnalyser object
-    global_verbosity = 3;
     HybridReachabilityAnalyser analyser(evolver);
+    analyser.verbosity = 3;
     analyser.parameters().lock_to_grid_time = 2*pi<Float>();
     analyser.parameters().grid_lengths= 0.5;
     analyser.parameters().grid = Grid(Vector<Float>(2, 1.0, 0.25));

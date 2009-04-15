@@ -329,10 +329,9 @@ int main()
 
     /// Computes the system evolution
 
-    global_verbosity = 1;
-
     /// Creates a StableHybridEvolver object
     StableHybridEvolver evolver;
+    evolver.verbosity = 1;
 
     /// Sets the evolution parameters
     evolver.parameters().maximum_enclosure_radius = MAX_ENCLOSURE_RADIUS;
@@ -355,8 +354,8 @@ int main()
 
 /*
     /// Creates a ReachabilityAnalyser object
-    global_verbosity = 6;
     HybridReachabilityAnalyser analyser(evolver);
+    analyser.verbosity = 1;
     analyser.parameters().lock_to_grid_time = LOCK_TO_GRID_TIME;
     analyser.parameters().maximum_grid_depth= MAX_GRID_DEPTH;
 

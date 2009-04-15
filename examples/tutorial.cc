@@ -185,11 +185,11 @@ int main()
 
     /// Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
+    analyser.verbosity = 6;
 
     HybridImageSet initial_set;
     initial_set[heater_off]=initial_box;
-    global_verbosity = 6;
-    
+
     HybridTime reach_time(0.25,1);
 
     plot("tutorial-initial_set.png",Box(2, 0.0,1.0, 14.0,18.0), Colour(0.0,0.5,1.0), initial_set);

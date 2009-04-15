@@ -21,6 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "expression_interface.h"
 #include "function_interface.h"
 #include "polynomial.h"
 #include "taylor_expression.h"
@@ -177,6 +178,10 @@ std::string __str__(const TaylorExpression& te) {
 }
 
 
+TaylorFunction __getslice__(const TaylorFunction& tf, int start, int stop) {
+    return TaylorFunction(tf.domain(),Vector<TaylorModel>(project(tf.models(),range(start,stop))));
+}
+
 
 std::string __str__(const TaylorFunction& tf) {
     std::stringstream ss;
@@ -282,6 +287,7 @@ void export_taylor_variable()
     taylor_expression_class.def("__call__", (Interval(TE::*)(const Vector<Interval>&)const) &TE::evaluate);
     taylor_expression_class.def("evaluate", (Interval(TE::*)(const Vector<Float>&)const) &TE::evaluate);
     taylor_expression_class.def("evaluate", (Interval(TE::*)(const Vector<Interval>&)const) &TE::evaluate);
+    taylor_expression_class.def("polynomial", (Polynomial<Interval>(TE::*)()const) &TE::polynomial);
     //taylor_expression_class.staticmethod("set_default_maximum_degree");
     //taylor_expression_class.staticmethod("set_default_sweep_threshold");
     //taylor_expression_class.staticmethod("default_maximum_degree");
@@ -302,8 +308,10 @@ void export_taylor_variable()
     def("midpoint",(TE(*)(const TE&)) &midpoint);
     def("refines",(bool(*)(const TE&,const TE&)) &refines);
     def("evaluate",(I(*)(const TE&,const IV&)) &evaluate);
+    def("derivative",(TE(*)(const TE&,N)) &derivative);
+    def("antiderivative",(TE(*)(const TE&,N)) &antiderivative);
 
-    //def("compose",(TE(*)(const TE&,const TE&)) &compose);
+    //def("/*compose*/",(TE(*)(const TE&,const TE&)) &compose);
     //def("compose",(T(*)(const T&,const TE&)) &compose);
 
     def("max",(TE(*)(const TE&,const TE&))&max);
@@ -336,6 +344,7 @@ void export_taylor_function()
     typedef Matrix<Float> RMx;
     typedef TaylorExpression TE;
     typedef TaylorFunction TF;
+    typedef ExpressionInterface E;
     typedef FunctionInterface F;
 
     class_<TF> taylor_function_class("TaylorFunction");
@@ -345,6 +354,7 @@ void export_taylor_function()
     taylor_function_class.def("argument_size", &TaylorFunction::argument_size);
     taylor_function_class.def("domain", &TaylorFunction::domain, return_value_policy<copy_const_reference>());
     taylor_function_class.def("range", &TaylorFunction::range);
+    taylor_function_class.def("__getslice__", &__getslice__);
     taylor_function_class.def("__getitem__", &get_item<TF,N,TE>);
     taylor_function_class.def("__setitem__",&set_item<TF,N,TE>);
     taylor_function_class.def(-self);
@@ -408,6 +418,7 @@ void export_taylor_function()
     def("evaluate",(IV(TF::*)(const IV&)const) &TF::evaluate);
     def("compose",(TE(*)(const TE&,const TF&)) &compose);
     def("compose",(TF(*)(const TF&,const TF&)) &compose);
+    def("compose",(TE(*)(const E&,const TF&)) &compose);
     def("compose",(TF(*)(const F&,const TF&)) &compose);
     def("implicit",(TE(*)(const TE&)) &implicit);
     def("implicit",(TF(*)(const TF&)) &implicit);

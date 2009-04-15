@@ -29,8 +29,11 @@
 #include "differential.h"
 #include "polynomial.h"
 #include "taylor_model.h"
+#include "taylor_expression.h"
 #include "taylor_function.h"
 #include "function.h"
+
+#include "utilities.h"
 
 
 #include <boost/python.hpp>
@@ -93,6 +96,23 @@ void read(Vector< Differential<X> >& td, const object& obj) {
         }
     }
 }
+
+class ExpressionPyWrap
+    : public ExpressionInterface
+    , public wrapper< ExpressionInterface >
+{
+    virtual ExpressionInterface* clone() const { return this->get_override("clone")(); };
+    virtual std::string name() const { return this->get_override("name")(); }
+    virtual uint result_size() const { return this->get_override("result_size")(); }
+    virtual uint argument_size() const { return this->get_override("argument_size")(); }
+    virtual ushort smoothness() const { return this->get_override("smoothness")(); }
+    virtual Float evaluate(const Vector<Float>&) const { return this->get_override("evaluate")(); }
+    virtual Interval evaluate(const Vector<Interval>&) const { return this->get_override("evaluate")(); }
+    virtual TaylorModel evaluate(const Vector<TaylorModel>&) const { return this->get_override("evaluate")(); }
+    virtual Differential<Float> evaluate(const Vector< Differential<Float> >&) const { return this->get_override("evaluate")(); }
+    virtual Differential<Interval> evaluate(const Vector< Differential<Interval> >&) const { return this->get_override("evaluate")(); }
+    virtual std::ostream& write(std::ostream&) const { return this->get_override("write")(); }
+};
 
 class FunctionPyWrap
     : public FunctionInterface
@@ -200,6 +220,16 @@ typedef TaylorFunction TFM;
 
 template<class F> TaylorFunction call_evaluate(const F& f, const TaylorFunction& tf) {
     return TaylorFunction(tf.domain(),f.evaluate(tf.models())); }
+template<class E> TaylorExpression call_evaluate_expression(const E& f, const TaylorFunction& tf) {
+    return TaylorExpression(tf.domain(),f.evaluate(tf.models())); }
+
+void export_expression_interface()
+{
+    class_<ExpressionPyWrap, boost::noncopyable> expression_interface_class("ExpressionInterface");
+    expression_interface_class.def("argument_size", pure_virtual(&ExpressionInterface::argument_size));
+    expression_interface_class.def("smoothness", pure_virtual(&ExpressionInterface::smoothness));
+    expression_interface_class.def("evaluate",pure_virtual((Interval(ExpressionInterface::*)(const IV&)const)&ExpressionInterface::evaluate));
+}
 
 void export_function_interface()
 {
@@ -228,6 +258,22 @@ void export_python_function()
     python_function_class.def(self_ns::str(self));
 }
 
+std::string __str__(const AffineExpression& f) {
+    std::stringstream ss;
+    ss<<"AffineExpression( ";
+    if(f.b()!=0) { ss<<f.b(); }
+    for(uint j=0; j!=f.argument_size(); ++j) {
+        if(f.a()[j]!=0) {
+            if(f.a()[j]>0) { ss<<"+"; } else { ss<<"-"; }
+            if(abs(f.a()[j])!=1) { ss<<abs(f.a()[j]); }
+            //ss<<char('x'+j);
+            ss<<"x"<<j;
+        }
+    }
+    ss<<" )";
+    return ss.str();
+}
+
 std::string __str__(const AffineFunction& f) {
     std::stringstream ss;
     for(uint i=0; i!=f.result_size(); ++i) {
@@ -246,6 +292,31 @@ std::string __str__(const AffineFunction& f) {
     return ss.str();
 }
 
+void export_affine_expression()
+{
+    typedef Float F;
+    typedef Interval I;
+    typedef AffineExpression AE;
+    typedef TaylorExpression TE;
+
+    class_<AffineExpression, bases< ExpressionInterface > > affine_expression_class("AffineExpression", init<Vector<Float>, Float> ());
+    affine_expression_class.def("argument_size", &AffineExpression::argument_size);
+    affine_expression_class.def("smoothness", &AffineExpression::smoothness);
+    affine_expression_class.def("__call__",(F(AffineExpression::*)(const FV&)const)&AffineExpression::evaluate);
+    affine_expression_class.def("__call__",(I(AffineExpression::*)(const IV&)const)&AffineExpression::evaluate);
+    affine_expression_class.def("__call__",(TE(*)(const AffineExpression&,const TFM&))&call_evaluate_expression<AffineExpression>);
+    affine_expression_class.def("__add__",(AffineExpression(*)(const AffineExpression&,const AffineExpression&))&operator+);
+    affine_expression_class.def("__mul__",(AffineExpression(*)(const AffineExpression&,const Interval&))&operator*);
+    affine_expression_class.def("evaluate",(F(AffineExpression::*)(const FV&)const)&AffineExpression::evaluate);
+    affine_expression_class.def("evaluate",(I(AffineExpression::*)(const IV&)const)&AffineExpression::evaluate);
+    affine_expression_class.def("evaluate",(TE(*)(const AffineExpression&,const TFM&))&call_evaluate_expression<AffineExpression>);
+    //affine_expression_class.def(self_ns::str(self));
+    affine_expression_class.def("__str__",(std::string(*)(const AffineExpression&))&__str__);
+    affine_expression_class.def("__repr__",(std::string(*)(const AffineExpression&))&__str__);
+
+    def("derivative",(Interval(*)(const AffineExpression&,uint)) &derivative);
+}
+
 void export_affine_function()
 {
     typedef AffineFunction AF;
@@ -254,6 +325,7 @@ void export_affine_function()
     affine_function_class.def("argument_size", &AffineFunction::argument_size);
     affine_function_class.def("result_size", &AffineFunction::result_size);
     affine_function_class.def("smoothness", &AffineFunction::smoothness);
+    affine_function_class.def("__getitem__",(AffineExpression(AffineFunction::*)(uint)const)&AffineFunction::operator[]);
     affine_function_class.def("__call__",(FV(AffineFunction::*)(const FV&)const)&AffineFunction::evaluate);
     affine_function_class.def("__call__",(IV(AffineFunction::*)(const IV&)const)&AffineFunction::evaluate);
     affine_function_class.def("__call__",(TFM(*)(const AffineFunction&, const TFM&))&call_evaluate<AffineFunction>);
@@ -264,20 +336,22 @@ void export_affine_function()
     affine_function_class.def("jacobian",(IMx(AffineFunction::*)(const IV&)const)&AffineFunction::jacobian);
     //affine_function_class.def(self_ns::str(self));
     affine_function_class.def("__str__",(std::string(*)(const AffineFunction&))&__str__);
+    affine_function_class.def("__repr__",(std::string(*)(const AffineFunction&))&__str__);
 }
 
+template<class X>
 void export_polynomial()
 {
-    typedef Polynomial<Float> FP;
+    typedef Polynomial<X> P;
 
-    Float real;
-    class_< FP > polynomial_class("Polynomial", init<int>());
-    polynomial_class.def("constant", (FP(*)(uint,double)) &FP::constant);
+    X real;
+    class_< P > polynomial_class(python_name<X>("Polynomial"), init<int>());
+    polynomial_class.def("constant", (P(*)(uint,double)) &P::constant);
     polynomial_class.staticmethod("constant");
-    polynomial_class.def("variable", (FP(*)(uint,uint)) &FP::variable);
+    polynomial_class.def("variable", (P(*)(uint,uint)) &P::variable);
     polynomial_class.staticmethod("variable");
 
-    polynomial_class.def("argument_size", &FP::argument_size);
+    polynomial_class.def("argument_size", &P::argument_size);
     polynomial_class.def(self+self);
     polynomial_class.def(self-self);
     polynomial_class.def(self*self);
@@ -289,14 +363,18 @@ void export_polynomial()
     polynomial_class.def(real-self);
     polynomial_class.def(real*self);
     polynomial_class.def(self_ns::str(self));
+
 }
 
 
 
 void function_submodule() {
+    export_expression_interface();
+    export_affine_expression();
     export_function_interface();
     export_affine_function();
-    export_polynomial();
+    export_polynomial<Float>();
+    export_polynomial<Interval>();
     export_python_function();
 }
 

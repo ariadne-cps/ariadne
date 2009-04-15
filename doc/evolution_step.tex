@@ -145,7 +145,7 @@ The main algorithms for computing with functions are as follows
 Other algorithms which may be useful are
 \begin{description}
 \item \texttt{antiderivative(Expression f, Nat k):ExpressionModel}\\ For $f:\R^{m}\rightarrow\R$, compute a function $h:\R^{m}\rightarrow\R$ such that $dh/dx_k=f=0$.
-\item \texttt{gradient(Expression f,???):???}
+\item \texttt{derivative(Expression f,Nat i):Expression}
 \end{description}
 
 \section{Evolution Steps}
@@ -207,9 +207,43 @@ The \emph{tangency set} is defined by the equations $g(\phi(s,t))=0$ and $\nabla
 \end{enumerate}
 \end{algorithm*}
 
+If the implicit function theorem does not solve $g(\phi(x_0,\tau(x_0)))=0$, then we can compute approximations to the first hitting time as follows:
+
+For under-approximation to $\tau(x_0)$, assume $g(x_0)<0$. Consider the differential equation $d\tau(x_0,s)/ds = -g(\phi(x_0,\tau(x_0,s)))$ with $\tau(x_0,0)<0$. As $s\to\infty$, $\tau(x_0,s)\to \tau(x_0)$ from below.
+If $g(x_0)>0$, then $\tau(x_0,s)<0$ for $s>0$.
+
+For over-approximation to $\tau(x_0)$, we can solve $d\tau(x_0,s)/ds=-g(\phi(x_0,\tau(x_0,s)))$ with $\tau(\phi(x_0,h),0)=h$.
+Then if $g(\phi(x_0,h))<0$, we have $g\tau(x_0,s)>h$ for all $s>0$.
+
+A better over-approximation can be obtained by first considering $d\tau/ds=\nabla g\cdot f$. As $s\to\infty$, $\tau$ approached a time at which $g(\phi(x_0,t))$ has a maximum/minimum. If $g(x_1)>0$, then we do not go past any crossings. However, if $g(x_1)<0$, we may go to a region in which $g(x_1)>0$. This can improve the crossing time near a tangency.
+
+
+
+
+
 \subsubsection*{Handling transition ordering}
 
 Given a collection of events $E$ with crossing times $\tau_e$, we need to compute which events occur before We can handle transitions using \texttt{max} and \texttt{min} functions on the crossing times.
+
+
+\begin{algorithm*}\mbox{}
+ \begin{enumerate}
+ \item Compute definitely initially active blocking transitions. If there is at least one initially active blocking transitions, apply all such transitions and exit.
+ \item Compute the flow $\phi:\R^n\times\R\rightarrow\R$ over a spacial domain $D$ and time domain $[-h,+h]$.
+ \item For each blocking guard (invariant or urgent action) 
+  \begin{enumerate}
+   \item If the transition is possibly active, compute the crossing time model as a function $D\rightarrow\R$.
+  \end{enumerate}
+ \item Add the special blocking transitions of final evolution time and final step time
+ \item Compute the blocking transitions with minimal crossing time, and the minimum of the crossing times.
+ \item If there are multiple blocking transitions, and the time at which they occur is small, make the blocking transition a time evolution.
+ \item Compute the minimum and maximum activation times of the non-urgent transitions.
+
+\end{enumerate}
+\end{algorithm*}
+
+
+
 
 \subsection*{Evolution Step in Version 0.4.1}
 

@@ -39,6 +39,7 @@ template<class X> class Vector;
 template<class X> class Matrix;
 template<class X> class Polynomial;
 
+class ExpressionInterface;
 class FunctionInterface;
 class MultiIndex;
 class TaylorModel;
@@ -47,6 +48,7 @@ class TaylorFunction;
 
 
 TaylorFunction restrict(const TaylorFunction&, const Vector<Interval>& bx);
+TaylorExpression compose(const ExpressionInterface&, const TaylorFunction&);
 TaylorExpression compose(const TaylorExpression&, const TaylorFunction&);
 TaylorFunction compose(const TaylorFunction&, const TaylorFunction&);
 TaylorFunction compose(const FunctionInterface&, const TaylorFunction&);

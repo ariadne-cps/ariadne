@@ -66,6 +66,7 @@ TaylorExpression embed(const Vector<Interval>& d1, const TaylorExpression& tv2);
 
 // Antidifferentiation operator
 TaylorExpression antiderivative(const TaylorExpression& x, uint k);
+TaylorExpression derivative(const TaylorExpression& x, uint k);
 
 // Implicit function solver
 TaylorExpression implicit(const TaylorExpression& f);
@@ -162,6 +163,8 @@ class TaylorExpression
     Float& value() { return this->_model.value(); }
     //! \brief The constant term in the expansion.
     const Float& value() const { return this->_model.value(); }
+    //! \brief A polynomial representation.
+    Polynomial<Interval> polynomial() const;
 
     //! \brief Set the error of the expansion.
     void set_error(const Float& ne) { this->_model.set_error(ne); }
@@ -484,6 +487,10 @@ inline Interval evaluate(const TaylorExpression& tv, const Vector<Interval>& x) 
 inline TaylorExpression antiderivative(const TaylorExpression& x, uint k) {
     Interval sf=rad_ivl(x.domain()[k]);
     return TaylorExpression(x.domain(),antiderivative(x.model(),k)*sf); }
+
+inline TaylorExpression derivative(const TaylorExpression& x, uint k) {
+    Interval sf=1/rad_ivl(x.domain()[k]);
+    return TaylorExpression(x.domain(),derivative(x.model(),k)*sf); }
 
 inline TaylorExpression embed(const TaylorExpression& tv1, const Interval& dom2) {
     return TaylorExpression(join(tv1.domain(),dom2),embed(tv1.model(),1u)); }

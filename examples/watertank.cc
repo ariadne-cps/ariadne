@@ -127,6 +127,7 @@ int main()
 
     /// Create a StableHybridEvolver object
     StableHybridEvolver evolver;
+    evolver.verbosity = 1;
 
     /// Set the evolution parameters
     evolver.parameters().maximum_enclosure_radius = 0.25;

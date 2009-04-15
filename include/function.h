@@ -297,6 +297,9 @@ class AffineExpression
         _g[0]=g0; va_list args; va_start(args,g0);
         for(uint i=1; i!=as; ++i) { _g[i]=va_arg(args,double); } }
 
+    const Vector<Interval>& a() const { return _g; }
+    const Interval& b() const { return _c; }
+
     virtual AffineExpression* clone() const { return new AffineExpression(*this); }
 
     virtual size_type argument_size() const { return _g.size(); }
@@ -314,8 +317,11 @@ class AffineExpression
 
     virtual Vector<Interval> gradient() const { return this->_g; }
 
-    virtual std::ostream& write(std::ostream& os) const { return os << *this; }
+    virtual std::ostream& write(std::ostream& os) const { return os<<"AffineExpression( a="<<this->_g<<", b="<<this->_c<<" )"; }
   private:
+    friend AffineExpression operator+(const AffineExpression&, const AffineExpression&);
+    friend AffineExpression operator*(const Interval&, const AffineExpression&);
+    friend Interval derivative(const AffineExpression&, uint);
     template<class R, class A>
     void compute(R& r, const A& x) const {
         r=x[0]*0+_c; for(uint j=0; j!=argument_size(); ++j) { r+=_g[j]*x[j]; } }
@@ -324,6 +330,12 @@ class AffineExpression
     Vector<Interval> _g;
 };
 
+inline AffineExpression operator+(const AffineExpression& f1, const AffineExpression& f2) {
+    return AffineExpression(Vector<Interval>(f1._g+f2._g),f1._c*f2._c); }
+inline AffineExpression operator*(const Interval& c, const AffineExpression& f) {
+    return AffineExpression(Vector<Interval>(c*f._g),c*f._c); }
+inline AffineExpression operator*(const AffineExpression& f, const Interval& c) { return c*f; }
+inline Interval derivative(const AffineExpression& f, uint k) { return f._g[k]; }
 
 class PolynomialExpression
     : public ExpressionInterface,

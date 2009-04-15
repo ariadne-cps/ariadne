@@ -40,6 +40,12 @@
 
 namespace Ariadne {
 
+template<class X> inline const char* python_name(const char* name);
+template<> inline const char* python_name<Float>(const char* name) {
+    return (std::string("")+name).c_str(); }
+template<> inline const char* python_name<Interval>(const char* name) {
+    return (std::string("I")+name).c_str(); }
+
 template<class T> std::ostream& repr(std::ostream& os, const T& t) {
     return os << t;
 }
@@ -127,6 +133,9 @@ make3(const boost::python::object& obj1,const boost::python::object& obj2,const 
     read(*t,obj1,obj2,obj3);
     return t;
 }
+
+template<class C, class I0, class I1, class X> inline
+X get_slice(const C& c, const I0& i0, const I1& i1) { return project(c,range(i0,i1)); }
 
 template<class C, class I, class X> inline
 X get_item(const C& c, const I& i) { return c[i]; }

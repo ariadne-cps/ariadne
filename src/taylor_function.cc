@@ -32,6 +32,7 @@
 #include "multi_index.h"
 #include "polynomial.h"
 #include "differential.h"
+#include "expression_interface.h"
 #include "function_interface.h"
 #include "taylor_expression.h"
 #include "taylor_function.h"
@@ -297,7 +298,7 @@ TaylorFunction::evaluate(const Vector<Float>& x) const
 Vector<Interval>
 TaylorFunction::evaluate(const Vector<Interval>& x) const
 {
-    Vector<Interval> sx=Ariadne::evaluate(TaylorModel::scalings(this->_domain),x);
+    Vector<Interval> sx=Ariadne::evaluate(TaylorModel::unscalings(this->_domain),x);
     return Ariadne::evaluate(this->_models,sx);
 }
 
@@ -497,6 +498,12 @@ operator*(const Matrix<Interval>& A, const TaylorFunction& f)
 
 
 
+TaylorExpression
+compose(const ExpressionInterface& g, const TaylorFunction& f)
+{
+    return TaylorExpression(f.domain(),g.evaluate(f.models()));
+}
+
 TaylorFunction
 compose(const FunctionInterface& g, const TaylorFunction& f)
 {
@@ -522,6 +529,12 @@ TaylorExpression
 unchecked_compose(const TaylorExpression& g, const TaylorFunction& f)
 {
         return TaylorExpression(f.domain(),Ariadne::unchecked_compose(g.model(),unscale(f.models(),g.domain())));
+}
+
+TaylorFunction
+unchecked_compose(const TaylorFunction& g, const TaylorFunction& f)
+{
+        return TaylorFunction(f.domain(),Ariadne::unchecked_compose(g.models(),unscale(f.models(),g.domain())));
 }
 
 

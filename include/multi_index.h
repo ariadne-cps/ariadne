@@ -108,6 +108,8 @@ class MultiIndex {
     reference operator[](size_type i);
     /*! Increment the value of the \a ith element */
     void increment(size_type i);
+    /*! Decrement the value of the \a ith element */
+    void decrement(size_type i);
 
     /*! Equality operator. */
     friend bool operator==(const MultiIndex& a1, const MultiIndex& a2); // inline
@@ -303,6 +305,11 @@ inline MultiIndexValueReference MultiIndex::operator[](size_type i) {
 
 inline void MultiIndex::increment(size_type i) {
     ++reinterpret_cast<value_type*>(this->_p)[i]; ++reinterpret_cast<value_type*>(this->_p)[this->_n]; 
+}
+
+inline void MultiIndex::decrement(size_type i) {
+    ARIADNE_ASSERT(reinterpret_cast<value_type*>(this->_p)[i]>0u);
+    --reinterpret_cast<value_type*>(this->_p)[i]; --reinterpret_cast<value_type*>(this->_p)[this->_n];
 }
 
 

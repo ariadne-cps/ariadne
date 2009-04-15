@@ -147,6 +147,8 @@ void export_interval()
     def("subset", &subset);
     def("intersection", &intersection);
 
+    def("mag", (Float(*)(Interval)) &mag);
+
     def("med", (IFUN) &med);
     def("rad", (IFUN) &rad);
     def("diam", (IFUN) &diam);

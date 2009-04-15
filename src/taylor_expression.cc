@@ -133,6 +133,23 @@ Vector<TaylorExpression> TaylorExpression::variables(const Vector<Interval>& d)
 }
 
 
+Polynomial<Interval> polynomial(const TaylorModel& tm);
+
+Polynomial<Interval>
+TaylorExpression::polynomial() const
+{
+    Polynomial<Interval> p(this->argument_size());
+    p=Ariadne::polynomial(this->model());
+
+    Vector<Polynomial<Interval> > s(this->argument_size());
+    for(uint j=0; j!=this->argument_size(); ++j) {
+        if(this->domain()[j].radius()<=0) { std::cerr<<"Warning: zero radius in domain of TaylorFunction"<<std::endl; }
+        else { s[j]=Ariadne::polynomial(TaylorModel::unscaling(this->argument_size(),j,this->domain()[j])); }
+    }
+
+    return compose(p,s);
+}
+
 
 bool TaylorExpression::operator==(const TaylorExpression& tv) const
 {
@@ -220,7 +237,7 @@ TaylorExpression::evaluate(const Vector<Float>& x) const
 Interval
 TaylorExpression::evaluate(const Vector<Interval>& x) const
 {
-    Vector<Interval> sx=Ariadne::evaluate(TaylorModel::scalings(this->_domain),x);
+    Vector<Interval> sx=Ariadne::evaluate(TaylorModel::unscalings(this->_domain),x);
     return Ariadne::evaluate(this->_model,sx);
 }
 

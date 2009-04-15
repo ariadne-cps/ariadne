@@ -83,6 +83,9 @@ bool disjoint(const TaylorModel& tv1, const TaylorModel& tv2);
 // Antidifferentiation operator
 TaylorModel antiderivative(const TaylorModel& x, uint k);
 
+// Differentiation operator; discards error term
+TaylorModel derivative(const TaylorModel& x, uint k);
+
 // An over-approximation to the intersection of two Taylor models.
 // Since the intersection cannot be represented exactly in the class of
 // TaylorModels, truncation errors as well as roundoff errors may be present.

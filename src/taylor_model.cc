@@ -1928,6 +1928,46 @@ TaylorModel& TaylorModel::antidifferentiate(uint k)
     _antidifferentiate2(*this,k); return *this;
 }
 
+// Compute derivative by computing term-by-term, switching the rounding mode
+// May be slow if no assembly rounding mode switching is available.
+
+
+TaylorModel derivative(const TaylorModel& x, uint k)
+{
+    ARIADNE_ASSERT(k<x.argument_size());
+    TaylorModel r(x.argument_size(),x.accuracy_ptr());
+
+    //std::cerr<<"xe="<<xe<<"\n";
+    volatile Float tre=0; // Twice the maximum accumulated roundoff error
+    double xv;
+    volatile double u,ml,mxv;
+    MultiIndex a(x.argument_size());
+    uint c;
+    for(TaylorModel::iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+        c=xiter->key().at(k);
+        if(c!=0) {
+            a=xiter->key();
+            xv=xiter->data();
+            mxv=-xv;
+
+            if(c!=1 && c!=2 && c!=4) {
+                set_rounding_upward();
+                u=xv*c;
+                ml=mxv*c;
+                tre+=(u+ml);
+                set_rounding_to_nearest();
+            }
+            --a[k];
+            xv*=c;
+            r.expansion().append(a,xv);
+        }
+    }
+    r.error()=(tre/2);
+
+    return r;
+}
+
+
 
 ///////////////////////////////////////////////////////////////////////////////
 

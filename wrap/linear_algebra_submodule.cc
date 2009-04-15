@@ -38,11 +38,6 @@ using namespace Ariadne;
 
 namespace Ariadne {
 
-template<class X> const char* python_name(const char* name);
-template<> const char* python_name<Float>(const char* name) {
-    return (std::string("")+name).c_str(); }
-template<> const char* python_name<Interval>(const char* name) {
-    return (std::string("I")+name).c_str(); }
 
 #ifdef HAVE_GMPXX_H
 template<> const char* python_name<Rational>(const char* name) {

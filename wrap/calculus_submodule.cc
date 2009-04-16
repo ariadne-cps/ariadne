@@ -172,8 +172,9 @@ std::string __tpoly_str__(const Polynomial<Interval>& pi) {
 
 std::string __str__(const TaylorExpression& te) {
     std::stringstream ss;
-    Polynomial<Interval> p=TaylorFunction(te.domain(),Vector<TaylorModel>(1,te.model())).polynomial()[0];
+    Polynomial<Interval> p=te.polynomial();
     ss<<"TaylorExpression"<<__tbox_str__(te.domain())<<"( "<<__tpoly_str__(p)<<" )";
+    ss<<"( m=" << te.model()<<" )";
     return ss.str();
 }
 
@@ -234,6 +235,7 @@ void export_taylor_variable()
     taylor_expression_class.def( init< IV >());
     taylor_expression_class.def( init< IV, RP >());
     taylor_expression_class.def("error", (const R&(TE::*)()const) &TE::error, return_value_policy<copy_const_reference>());
+    taylor_expression_class.def("argument_size", &TE::argument_size);
     taylor_expression_class.def("domain", &TE::domain, return_value_policy<copy_const_reference>());
     taylor_expression_class.def("range", &TE::range);
     taylor_expression_class.def("__getitem__", &get_item<TE,A,R>);
@@ -424,6 +426,9 @@ void export_taylor_function()
     def("implicit",(TF(*)(const TF&)) &implicit);
     def("antiderivative",(TF(*)(const TF&,N)) &antiderivative);
     def("flow",(TF(*)(const TF&,const IV&,const I&, N)) &flow);
+
+    def("unchecked_compose",(TE(*)(const TE&,const TF&)) &unchecked_compose);
+    def("unchecked_compose",(TF(*)(const TF&,const TF&)) &unchecked_compose);
     def("unchecked_flow",(TF(*)(const TF&,const IV&,const I&, N)) &unchecked_flow);
 
 

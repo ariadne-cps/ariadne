@@ -862,7 +862,7 @@ TaylorModel::sweep(double m)
         if(abs(adv->data())>=m) {
             *curr=*adv; ++curr;
         } else {
-            this->error()+=adv->data();
+            this->error()+=abs(adv->data());
         }
         ++adv;
     }

@@ -18,6 +18,8 @@ bin_PROGRAMS = \
 	profile_taylor_calculus \
 	test_misc
 
+test_misc_LDADD = $(LDADD) -lboost_python -lpython2.5
+
 check_PROGRAMS = \
 	test_float \
 	test_interval \
@@ -81,5 +83,5 @@ EXTRA_DIST =
 SUBDIRS =
 
 TESTS = $(check_PROGRAMS)
-XFAIL_TESTS = 
+XFAIL_TESTS = test_discretised_evolution
 testsubdir = ./

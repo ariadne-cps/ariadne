@@ -550,7 +550,7 @@ class AffineFunction
         return AffineExpression(g,_ib[i]); }
 
     virtual std::ostream& write(std::ostream& os) const {
-        return os << "AffineFunction( A="<<_iA<<", b="<<_ib<<" )"; }
+        return os << "AffineFunction( A="<<midpoint(_iA)<<", b="<<midpoint(_ib)<<" )"; }
   private:
     Matrix<Float> _fA; Vector<Float> _fb;
     Matrix<Interval> _iA; Vector<Interval> _ib;

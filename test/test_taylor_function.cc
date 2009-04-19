@@ -238,7 +238,7 @@ void TestTaylorFunction::test_implicit()
     TaylorFunction i2=TaylorFunction::identity(dh2);
     TaylorFunction h2=implicit(f2);
     ARIADNE_TEST_BINARY_PREDICATE(operator<,norm(compose(f2,join(i2,h2)).range()),1e-6);
-
+    ARIADNE_TEST_PRINT(*h2.accuracy_ptr());
     // Test computation of sqrt(4+x)-2 on [0,3] by solving 4+x-(y+2)*(y+2)=0
     // Note that the solution lies in (-1,+1)
     Vector<Interval> df3(2, 0.0,+3.0, -1.0,+1.0);
@@ -247,7 +247,7 @@ void TestTaylorFunction::test_implicit()
     TaylorFunction f3(df3,pf3);
     TaylorFunction i3=TaylorFunction::identity(dh3);
     TaylorFunction h3=implicit(f3);
-    ARIADNE_TEST_BINARY_PREDICATE(operator<,norm(compose(f3,join(i3,h3)).range()),1e-6);
+    ARIADNE_TEST_BINARY_PREDICATE(operator<,norm(compose(f3,join(i3,h3)).range()),2e-5);
 }
 
 

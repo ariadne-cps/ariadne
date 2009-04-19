@@ -87,6 +87,7 @@ void export_tribool() {
 
 void export_float() 
 {
+    def("rec",(Float(*)(Float)) &rec); 
 }
 
 #ifdef HAVE_GMPXX_H
@@ -157,6 +158,7 @@ void export_interval()
     def("abs", (IFUN) &abs, "interval absolute value function");
     def("pow",  (IZFUN) &pow, "interval power function");
     def("sqr", (IFUN) &sqr, "interval square function");
+    def("rec", (IFUN) &rec);
     def("sqrt", (IFUN) &sqrt);
     def("exp", (IFUN) &exp);
     def("log", (IFUN) &log);

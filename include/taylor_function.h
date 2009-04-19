@@ -47,6 +47,9 @@ class TaylorExpression;
 class TaylorFunction;
 
 
+TaylorFunction embed(const TaylorFunction& tv1, const Vector<Interval>& d2);
+TaylorFunction embed(const TaylorFunction& tv1, const Interval& d2);
+TaylorFunction embed(const Vector<Interval>& d1, const TaylorFunction& tv2);
 TaylorFunction restrict(const TaylorFunction&, const Vector<Interval>& bx);
 TaylorExpression compose(const ExpressionInterface&, const TaylorFunction&);
 TaylorExpression compose(const TaylorExpression&, const TaylorFunction&);
@@ -141,8 +144,10 @@ class TaylorFunction {
     /*! \brief Compute an approximation to Jacobian derivative of the Taylor model sat the point \a x. */
     Matrix<Interval> jacobian(const Vector<Interval>& x) const;
 
-    /*! \brief Truncate to a model of lower order and/or smoothness, possibly on a different domain. */
-    TaylorFunction truncate(ushort degree) const;
+    /*! \brief Truncate to a model of lower order and/or smoothness. */
+    TaylorFunction& truncate(ushort degree);
+    /*! \brief Set the error to zero. */
+    TaylorFunction& clobber();
 
     /*! \brief The constant Taylor model with range \a r and argument domain \a d. */
     static TaylorFunction constant(const Vector<Interval>& d, const Vector<Interval>& r);

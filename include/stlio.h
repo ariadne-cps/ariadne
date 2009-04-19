@@ -40,6 +40,7 @@
 #include "array.h"
 #include "tuple.h"
 
+#include "boost/shared_ptr.hpp"
 
 
 namespace Ariadne {
@@ -88,6 +89,23 @@ write_map_sequence(std::ostream& os, InputIterator first, InputIterator last,
     os << opening;
     while(first!=last) {
         os << first->first << descriptor << first->second;
+        ++first;
+        if(first != last) {
+            os << separator;
+        }
+    }
+    os << closing;
+    return os;
+}
+
+template<class InputIterator>
+std::ostream&
+write_map_pointer_sequence(std::ostream& os, InputIterator first, InputIterator last, 
+                           char opening='{', char closing='}', char separator=',', char descriptor=':')
+{
+    os << opening;
+    while(first!=last) {
+        os << first->first << descriptor << *first->second;
         ++first;
         if(first != last) {
             os << separator;
@@ -269,6 +287,14 @@ std::ostream&
 operator<<(std::ostream &os, const std::map<K,T,C>& m) 
 {
     return Ariadne::write_map_sequence(os,m.begin(), m.end(), '{', '}');
+}
+
+template<class K, class T, class C> 
+inline 
+std::ostream& 
+operator<<(std::ostream &os, const std::map<K,boost::shared_ptr<T>,C>& m)
+{
+    return Ariadne::write_map_pointer_sequence(os,m.begin(), m.end(), '{', '}');
 }
 
 

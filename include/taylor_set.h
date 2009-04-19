@@ -42,6 +42,7 @@ class Interval;
 template<class X> class Vector;
 template<class X> class Matrix;
 
+class ExpressionInterface;
 class FunctionInterface;
 class TaylorModel;
 class TaylorExpression;
@@ -106,6 +107,7 @@ class TaylorSet
         return result; }
 
     uint size() const { return this->_models.size(); }
+    uint result_size() const { return this->_models.size(); }
     uint argument_size() const { return this->_models[0].argument_size(); }
     const TaylorModel& operator[](uint i) const { return this->_models[i]; }
     TaylorModel& operator[](uint i) { return this->_models[i]; }
@@ -156,6 +158,7 @@ class TaylorSet
 
 TaylorModel apply(const TaylorExpression& f, const TaylorSet& s);
 TaylorSet apply(const TaylorFunction& f, const TaylorSet& s);
+TaylorModel apply(const ExpressionInterface& f, const TaylorSet& s);
 TaylorSet apply(const FunctionInterface& f, const TaylorSet& s);
 
 TaylorModel unchecked_apply(const TaylorExpression& f, const TaylorSet& s);

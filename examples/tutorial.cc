@@ -155,8 +155,8 @@ int main()
     /// Compute the system evolution
 
 
-    /// Create a StableHybridEvolver object
-    StableHybridEvolver evolver;
+    /// Create a HybridEvolver object
+    HybridEvolver evolver;
 
     /// Set the evolution parameters
     evolver.parameters().maximum_enclosure_radius = 0.25;
@@ -164,8 +164,8 @@ int main()
     std::cout <<  evolver.parameters() << std::endl;
 
     // Declare the type to be used for the system evolution
-    typedef StableHybridEvolver::EnclosureType HybridEnclosureType;
-    typedef StableHybridEvolver::OrbitType OrbitType;
+    typedef HybridEvolver::EnclosureType HybridEnclosureType;
+    typedef HybridEvolver::OrbitType OrbitType;
 
     Box initial_box(2, 0.0,0.015625, 16.0,16.0625);
     HybridEnclosureType initial_enclosure(heater_off,initial_box);

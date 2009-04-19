@@ -74,8 +74,8 @@ int main()
 
     /// Compute the system evolution
 
-    /// Create a StableHybridEvolver object
-    StableHybridEvolver evolver;
+    /// Create a HybridEvolver object
+    HybridEvolver evolver;
 
     /// Set the evolution parameters
     evolver.parameters().maximum_enclosure_radius = 0.05;
@@ -83,9 +83,9 @@ int main()
     std::cout <<  evolver.parameters() << std::endl;
 
     // Declare the type to be used for the system evolution
-    typedef StableHybridEvolver::EnclosureType HybridEnclosureType;
-    typedef StableHybridEvolver::OrbitType OrbitType;
-    typedef StableHybridEvolver::EnclosureListType EnclosureListType;
+    typedef HybridEvolver::EnclosureType HybridEnclosureType;
+    typedef HybridEvolver::OrbitType OrbitType;
+    typedef HybridEvolver::EnclosureListType EnclosureListType;
 
     std::cout << "Computing evolution starting from location l1, x = 2.0, v = 0.0" << std::endl;
 
@@ -103,7 +103,7 @@ int main()
     //plot("tutorial-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit.initial());
     plot("ball-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit);
 /*
-    std::cout << "Computing reach set using StableHybridEvolver... " << std::flush;
+    std::cout << "Computing reach set using HybridEvolver... " << std::flush;
     EnclosureListType reach = evolver.reach(ball,initial_enclosure,evolution_time);
     std::cout << "done." << std::endl;
 

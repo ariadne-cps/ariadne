@@ -344,7 +344,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     const FunctionType* dynamic_ptr=&initial_mode.dynamic();
   
     ARIADNE_LOG(6,"mode="<<initial_mode<<"\n");
-    std::vector< shared_ptr<const FunctionInterface> > invariants
+    std::map< DiscreteEvent, shared_ptr<const FunctionInterface> > invariants
         =initial_mode.invariants();
     ARIADNE_LOG(7,"invariants="<<invariants<<"\n");
     const std::set< DiscreteTransition > transitions = system.transitions(initial_location);
@@ -394,32 +394,33 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     // Test invariants
     bool blocking=false;
     Float lower_blocking_time=step_size;
-    for(std::vector< shared_ptr<const FunctionInterface> >::const_iterator
+    for(std::map< DiscreteEvent, shared_ptr<const FunctionInterface> >::const_iterator
         iter=invariants.begin(); iter!=invariants.end(); ++iter) 
     {
-        if(possibly(this->_toolbox->active(**iter,flow_bounds))) {
+        shared_ptr<const FunctionInterface> guard_ptr = iter->second;
+        if(possibly(this->_toolbox->active(*guard_ptr,flow_bounds))) {
             ARIADNE_LOG(2,"One invariant is possibly active.\n");
             if(semantics == UPPER_SEMANTICS) {
                 // For upper semantics, test if at at least one blocking event 
                 // (invariant or urgent transition) is definitely finally activate.
-                if(definitely(this->_toolbox->active(**iter,final_set_model))) {
+                if(definitely(this->_toolbox->active(*guard_ptr,final_set_model))) {
                     blocking=true;
                     break;              // Skip other invariants
                 }
             } else {    // LOWER_SEMANTICS
                 // For lower semantics, find a time t0 such that no blocking events are 
                 // (possibly) activated before t0.
-                if(possibly(this->_toolbox->active(**iter,initial_set_model))) {
+                if(possibly(this->_toolbox->active(*guard_ptr,initial_set_model))) {
                     // Invariant is initially active. No continuous evolution possible
                     blocking = true;
                     lower_blocking_time = 0.0;
                     break;              // Skip remaining invariants      
                 }                
-                if(possibly(this->_toolbox->active(**iter,reach_set_model))) {
+                if(possibly(this->_toolbox->active(*guard_ptr,reach_set_model))) {
                     blocking = true;
                     try {
                         // Compute crossing time
-                        ConstraintModelType guard_model=this->_toolbox->predicate_model(**iter,flow_bounds);
+                        ConstraintModelType guard_model=this->_toolbox->predicate_model(*guard_ptr,flow_bounds);
                         TimeModelType crossing_time_model=this->_toolbox->crossing_time(guard_model,flow_model,initial_set_model);                    
                         lower_blocking_time = min(lower_blocking_time, crossing_time_model.range().lower());
                     } catch(DegenerateCrossingException) { 
@@ -427,7 +428,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
                         lower_blocking_time=0.0;
                     }
                 } else {
-                    if(possibly(this->_toolbox->active(**iter,final_set_model))) {
+                    if(possibly(this->_toolbox->active(*guard_ptr,final_set_model))) {
                         blocking=true;                
                     }
                 }

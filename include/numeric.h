@@ -271,6 +271,8 @@ inline Float med(Interval i) { return (i.l+i.u)/2; }
 inline Float rad(Interval i) { return up((i.u-i.l)/2); }
 inline Float diam(Interval i) { return up(i.u-i.l); }
 
+inline Interval max(Interval,Interval);
+inline Interval min(Interval,Interval);
 inline Interval abs(Interval);
 inline Interval neg(Interval);
 inline Interval add(Interval, Interval);
@@ -319,6 +321,17 @@ inline bool disjoint(Interval i1, Interval i2) { return i1.l>i2.u || i1.u<i2.l; 
 inline bool overlap(Interval i1, Interval i2) { return i1.l<i2.u && i1.u>i2.l; }
 inline bool inside(Interval i1, Interval i2) { return i1.l>i2.l && i1.u<i2.u; }
 inline bool covers(Interval i1, Interval i2) { return i1.l<i2.l && i1.u>i2.u; }
+
+inline Interval max(Interval i1, Interval i2)
+{
+    return Interval(max(i1.lower(),i2.lower()),max(i1.upper(),i2.upper()));
+}
+
+inline Interval min(Interval i1, Interval i2)
+{
+    return Interval(min(i1.lower(),i2.lower()),min(i1.upper(),i2.upper()));
+}
+
 
 inline Interval abs(Interval i)
 {

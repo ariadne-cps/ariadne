@@ -105,19 +105,24 @@ class TaylorCalculus
     //! \brief Computes an over-approximation to the time interval for which the \a initial_set_model 
     //! touch the set specified by the \a guard model under the \a flow_model. The \a minimum and \a maximum_time 
     //! gives the minimum and maximum time for which the evolution is valid.
-    IntervalType
-    touching_time_interval(const PredicateModelType& guard_model, 
-                           const FlowModelType& flow_model, 
-                           const SetModelType& initial_set_model) const;
+    IntervalType scaled_touching_time_interval(const BaseModelType& guard_flow_set_model) const;
+
+    //! \brief Computes an over-approximation to the time interval for which the \a initial_set_model 
+    //! touch the set specified by the \a guard model under the \a flow_model. The \a minimum and \a maximum_time 
+    //! gives the minimum and maximum time for which the evolution is valid.
+    IntervalType touching_time_interval(const PredicateModelType& guard_model,
+                                        const FlowModelType& flow_model, 
+                                        const SetModelType& initial_set_model) const;
 
     using CalculusBase<TaylorModel>::crossing_time;
 
-    //! \brief Computes the time at which points in the \a initial_set_model cross the zero-set of the
-    //! the \a guard_model under evolution of the \a flow_model, for times between the \a minimum_time and \a maximum_time.
-    //! The crossing must be (differentiably) transverse.
+    //! \brief Computes the time at which points cross the guard.
     TimeModelType crossing_time(const PredicateModelType& guard_model,
-                                const FlowModelType& flow_model, 
+                                const FlowModelType& flow_model,
                                 const SetModelType& initial_set_model) const;
+
+    //! \brief Computes the time at which points in the unit domain cross zero.
+    TimeModelType scaled_crossing_time(const BaseModelType& guard_flow_set_model) const;
 
   
     //! \brief Computes the image of the set defined by \a set_model under the map \a map. 
@@ -136,12 +141,23 @@ class TaylorCalculus
                                   const SetModelType& initial_set_model, 
                                   const TimeModelType& integration_time_model) const;
   
+    //! \brief Computes the points reached by evolution of the \a flow_set_model
+    //! over the unit scaled integraton time model.
+    SetModelType integration_step(const FlowSetModelType& flow_set_model, 
+                                  const TimeModelType& scaled_integration_time_model) const;
+  
     //! \brief Gives the extended time model for the reachability step between the
     //! \a initial_time_model and the \a final_time_model. The new time is given by
     //! \f$\tau'(e,s) = (1-s)\tau_0(e)+s\tau_1(e)\f$.
     TimeModelType reachability_time(const TimeModelType& initial_time_model, 
                                     const TimeModelType& final_time_model) const;
 
+    //! \brief Computes the points reached by evolution of the \a flow_set_model
+    //! over the unit scaled integraton time model.
+    SetModelType reachability_step(const FlowSetModelType& flow_set_model,
+                                   const TimeModelType& scaled_initial_time_model,
+                                   const TimeModelType& scaled_final_time_model) const;
+  
     //! \brief Computes the points reached by evolution of the \a initial_set_model under the flow
     //! given by \a flow_model for times given by \a reachability_time_model. 
     //! The \a reachability_time_model must have one more independent variable than the 
@@ -194,6 +210,9 @@ class TaylorCalculus
 
     //! \brief A model for the constant time \a t over the box \a d.
     TimeModelType time_model(const Float& t, const BoxType& d) const;
+
+    //! \brief A model for the constant time \a t over the box \a d.
+    TimeModelType time_model(const Interval& t, const BoxType& d) const;
 
 
     //@{ \name Set-based operations

@@ -212,6 +212,42 @@ integration_step(const FlowModelType& flow_model,
 }
 
 
+TaylorCalculus::SetModelType
+TaylorCalculus::
+integration_step(const FlowSetModelType& flow_set_model,
+                 const TimeModelType& scaled_integration_time_model) const
+{
+    //SetModelType set_step_model=join(initial_set_model, integration_time_model);
+    Vector<BaseModelType> unit_set_model=BaseModelType::variables(scaled_integration_time_model.argument_size());
+    Vector<BaseModelType> timed_unit_set_model=join(unit_set_model,scaled_integration_time_model);
+    SetModelType final_set_model=unchecked_compose(flow_set_model.models(),timed_unit_set_model);
+    final_set_model.set_accuracy(this->_spacial_accuracy_ptr);
+    return final_set_model;
+}
+
+
+TaylorCalculus::SetModelType
+TaylorCalculus::
+reachability_step(const FlowSetModelType& flow_set_model,
+                  const TimeModelType& scaled_initial_time_model,
+                  const TimeModelType& scaled_final_time_model) const
+{
+    //SetModelType set_step_model=join(initial_set_model, integration_time_model);
+    uint spacial_generators=flow_set_model.argument_size()-1;
+    Vector<BaseModelType> embedded_parameter_model=BaseModelType::variables(flow_set_model.argument_size());
+    for(uint i=0; i!=spacial_generators+1; ++i) { embedded_parameter_model[i].set_accuracy(this->_spacial_accuracy_ptr); }
+    BaseModelType embedded_initial_time_model=embed(scaled_initial_time_model,1u);
+    BaseModelType embedded_final_time_model=embed(scaled_final_time_model,1u);
+    BaseModelType time_model=embedded_parameter_model[spacial_generators]/2;
+    embedded_parameter_model[spacial_generators]=
+        embedded_initial_time_model*(0.5-time_model)+embedded_final_time_model*(0.5+time_model);
+    SetModelType reach_set_model=unchecked_compose(flow_set_model.models(),embedded_parameter_model);
+    ARIADNE_LOG(6,"reach_set_model = "<<reach_set_model<<"\n");
+    reach_set_model.set_accuracy(this->_spacial_accuracy_ptr);
+    return reach_set_model;
+}
+
+
 
 
 
@@ -322,7 +358,8 @@ reachability_step(const FlowModelType& flow_model,
 
 
 
-// Compute the grazing time using bisections
+// Compute the crossing time using the implicit function theorem
+
 
 TaylorCalculus::TimeModelType
 TaylorCalculus::
@@ -336,7 +373,7 @@ crossing_time(const PredicateModelType& guard_model,
 
     Interval flow_time_interval=flow_model.domain()[dimension];
     ARIADNE_ASSERT(subset(join(initial_set_model.range(),flow_time_interval),flow_model.domain()));
-    
+
     //ARIADNE_ASSERT(minimum_time<=0);
     //ARIADNE_ASSERT(maximum_time>=0);
     ARIADNE_ASSERT(flow_model.argument_size()==flow_model.result_size()+1);
@@ -353,7 +390,7 @@ crossing_time(const PredicateModelType& guard_model,
     } catch(const std::runtime_error& e) {
         std::cerr<<e.what();
         throw e;
-    }
+     }
 
     ARIADNE_LOG(6,"free_hitting_time_model = "<<free_hitting_time_model<<"\n");
     ARIADNE_ASSERT_MSG(free_hitting_time_model.argument_size()==initial_set_model.dimension(),free_hitting_time_model<<initial_set_model);
@@ -362,10 +399,27 @@ crossing_time(const PredicateModelType& guard_model,
     Interval hitting_time_range=hitting_time_model.range();
     ARIADNE_LOG(6,"hitting_time_model = "<<hitting_time_model<<"\n");
     if(hitting_time_range.lower()<R(minimum_time) || hitting_time_range.upper()>R(maximum_time)) {
-        ARIADNE_THROW(DegenerateCrossingException,"TaylorCalculus::crossing_time","Hitting time model "<<hitting_time_model<<" range does not lie in integration time range");
+        ARIADNE_THROW(DegenerateCrossingException,"TaylorCalculus::crossing_time","Hitting time model "<<hitting_time_model<<" ange does not lie in integration time range");
     }
     ARIADNE_ASSERT_MSG(hitting_time_model.argument_size()==initial_set_model.argument_size(),hitting_time_model<<initial_set_model);
     hitting_time_model.set_accuracy(_spacial_accuracy_ptr);
+    return hitting_time_model;
+}
+
+
+TaylorCalculus::TimeModelType
+TaylorCalculus::
+scaled_crossing_time(const BaseModelType& guard_flow_set_model) const
+{
+    TimeModelType hitting_time_model;
+    try {
+        hitting_time_model=Ariadne::implicit(guard_flow_set_model);
+    } catch(const ImplicitFunctionException& e) {
+        throw DegenerateCrossingException(e.what());
+    } catch(const std::runtime_error& e) {
+        std::cerr<<e.what();
+        throw e;
+    }
     return hitting_time_model;
 }
 
@@ -426,6 +480,63 @@ touching_time_interval(const PredicateModelType& guard_model,
         for(uint i=0; i!=refinements; ++i) {
             RealType new_upper_time=med_approx(min_upper_time,max_upper_time);
             if(definitely(this->active(guard_model,this->integration_step(flow_model,initial_set_model,new_upper_time)))) {
+                max_upper_time=new_upper_time;
+                upper_time=new_upper_time;
+            } else {
+                min_upper_time=new_upper_time;
+            }
+        }
+    }
+
+    //FunctionModelType lower_time_model=FunctionModelType::constant(initial_set_model.domain(),initial_set_model.centre(),Vector<Float>(1u,lower_time),_order,_smoothness);
+    //FunctionModelType upper_time_model=FunctionModelType::constant(initial_set_model.domain(),initial_set_model.centre(),Vector<Float>(1u,upper_time),_order,_smoothness);
+    return Interval(lower_time,upper_time);
+
+}
+
+
+
+TaylorCalculus::IntervalType
+TaylorCalculus::
+scaled_touching_time_interval(const BaseModelType& guard_flow_set_model) const
+{
+    //std::cerr<<"touching_time_interval"<<std::endl;
+    static const uint refinements=5;
+
+    Float minimum_time=0.0;
+    Float maximum_time=1.0;
+
+    Vector<Interval> space_domain(guard_flow_set_model.argument_size()-1,Interval(-1,+1));
+    Interval initial_guard_range=evaluate(guard_flow_set_model,join(space_domain,Interval(minimum_time)));
+    Interval final_guard_range=evaluate(guard_flow_set_model,join(space_domain,Interval(maximum_time)));
+
+    Float lower_time=minimum_time;
+    Float upper_time=maximum_time;
+
+    if(possibly(initial_guard_range==0)) {
+        lower_time=minimum_time;
+    } else {
+        RealType min_lower_time=minimum_time;
+        RealType max_lower_time=maximum_time;
+        for(uint i=0; i!=refinements; ++i) {
+            RealType new_lower_time=med_approx(min_lower_time,max_lower_time);
+            if(possibly(evaluate(guard_flow_set_model,join(space_domain,Interval(minimum_time,new_lower_time)))==0.0)) {
+                max_lower_time=new_lower_time;
+            } else {
+                min_lower_time=new_lower_time;
+                lower_time=new_lower_time;
+            }
+        }
+    }
+
+    if(definitely(initial_guard_range.lower()>0) || definitely(initial_guard_range.upper()<0)) {
+        upper_time=minimum_time;
+    } else {
+        RealType min_upper_time=minimum_time;
+        RealType max_upper_time=maximum_time;
+        for(uint i=0; i!=refinements; ++i) {
+            RealType new_upper_time=med_approx(min_upper_time,max_upper_time);
+            if(definitely(evaluate(guard_flow_set_model,join(space_domain,Interval(new_upper_time))).lower()>0.0)) {
                 max_upper_time=new_upper_time;
                 upper_time=new_upper_time;
             } else {
@@ -557,6 +668,18 @@ TaylorCalculus::predicate_model(ExpressionInterface const& g, Vector<Interval> c
 TaylorCalculus::TimeModelType
 TaylorCalculus::
 time_model(const Float& t,
+           const BoxType& d) const
+{
+    TimeModelType time_model=TimeModelType::constant(d.size(),t);
+    time_model.set_accuracy(_spacial_accuracy_ptr);
+    ARIADNE_LOG(6,"time_model = "<<time_model<<"\n");
+
+    return time_model;
+}
+
+TaylorCalculus::TimeModelType
+TaylorCalculus::
+time_model(const Interval& t,
            const BoxType& d) const
 {
     TimeModelType time_model=TimeModelType::constant(d.size(),t);

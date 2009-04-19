@@ -32,6 +32,7 @@
 #include <iostream>
 #include <vector>
 #include <set>
+#include <map>
 
 #include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
@@ -53,6 +54,7 @@ class DiscreteMode;
 class DiscreteTransition;  
 class HybridAutomaton;  
 
+class ExpressionInterface;
 class FunctionInterface;
 class Grid;
 
@@ -66,15 +68,17 @@ class Grid;
  */
 class DiscreteMode {
     friend class HybridAutomaton;
+    typedef boost::shared_ptr<const FunctionInterface> FunctionPtr;
+    typedef boost::shared_ptr<const FunctionInterface> ExpressionPtr;
   private:
     
     // The discrete mode's discrete state.
     DiscreteState _location;
   
     // The discrete mode's vector field.
-    boost::shared_ptr< const FunctionInterface > _dynamic; 
+    FunctionPtr _dynamic; 
     // The discrete mode's invariants.
-    std::vector< boost::shared_ptr< const FunctionInterface > > _invariants;
+    std::map< DiscreteEvent, FunctionPtr > _invariants;
   
     // The discrete mode's vector field.
     boost::shared_ptr< const Grid > _grid; 
@@ -88,11 +92,11 @@ class DiscreteMode {
         return *this->_dynamic; }
   
     //! \brief The discrete mode's dynamic (a vector field). 
-    boost::shared_ptr<const FunctionInterface> dynamic_ptr() const { 
+    FunctionPtr dynamic_ptr() const { 
         return this->_dynamic; }
   
     //! \brief The discrete mode's invariants. 
-    const std::vector< boost::shared_ptr< const FunctionInterface > >& invariants() const {
+    const std::map< DiscreteEvent, FunctionPtr >& invariants() const {
         return this->_invariants; }
   
     //! \brief The discrete mode's default spacial grid. 
@@ -116,8 +120,8 @@ class DiscreteMode {
 
     // Construct from objects managed by shared pointers (for internal use) 
     DiscreteMode(DiscreteState location,
-                 const boost::shared_ptr< const FunctionInterface > dynamic, 
-                 const std::vector< boost::shared_ptr< const FunctionInterface > >& invariants);
+                 const FunctionPtr dynamic, 
+                 const std::vector< FunctionPtr >& invariants);
     
 };
   
@@ -135,6 +139,8 @@ inline bool operator<(const DiscreteMode& mode1, const DiscreteMode& mode2) {
  *
  * A %DiscreteTransition can only be created using the new_transition() method in
  * the %HybridAutomaton class.
+ *
+ * An invariant is modelled by a discrete transition with negative event id and null reset pointer.
  *
  * \sa \link Ariadne::HybridAutomaton \c HybridAutomaton \endlink, \link Ariadne::DiscreteMode \c DiscreteMode \endlink
  */
@@ -273,7 +279,12 @@ class HybridAutomaton
     typedef double RealType ;
     //! \brief The type used to describe the state space. 
     typedef HybridSpace StateSpaceType;
- 
+
+    typedef boost::shared_ptr<const ExpressionInterface> ExpressionPtr;
+    typedef boost::shared_ptr<const FunctionInterface> FunctionPtr;
+
+
+    typedef std::map< DiscreteEvent, boost::shared_ptr<const FunctionInterface> >::const_iterator invariant_const_iterator;
     typedef std::set< DiscreteTransition >::const_iterator discrete_transition_const_iterator;
     typedef std::set< DiscreteMode >::const_iterator discrete_mode_const_iterator;
   private:
@@ -417,6 +428,12 @@ class HybridAutomaton
   
     //! \brief The discrete transitions from location \a source. 
     std::set< DiscreteTransition > transitions(DiscreteState source) const;
+
+    //! \brief The blocking events (invariants and urgent transitions) in \a location. 
+    std::map<DiscreteEvent,FunctionPtr> blocking_guards(DiscreteState location) const;
+
+    //! \brief The permissive events (invariants and urgent transitions) in \a location.
+    std::map<DiscreteEvent,FunctionPtr> permissive_guards(DiscreteState location) const;
 
     //! \brief The state space of the system. 
     HybridSpace state_space() const;

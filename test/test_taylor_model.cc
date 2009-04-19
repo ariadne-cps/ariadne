@@ -299,6 +299,17 @@ void TestTaylorModel::test_implicit()
     TaylorModel h5=_implicit5(Vector<TaylorModel>(1u,f))[0];
     ARIADNE_TEST_PRINT(h2);
     ARIADNE_TEST_PRINT(h5);
+
+    {
+        //Test computation of sqrt(4+x)-2 on [-1,+1] by solving 4+x-(y+2)*(y+2)=0
+        TaylorModel f2=4+tm(2,0)-(sqr(tm(2,1)+2));
+        TaylorModel i2=tm(1,0);
+        TaylorModel h2=implicit(f2);
+        ARIADNE_TEST_PRINT(f2);
+        ARIADNE_TEST_PRINT(h2);
+        ARIADNE_TEST_BINARY_PREDICATE(operator<,mag(compose(f2,join(i2,h2)).range()),1e-6);
+    }
+
     return;
     TaylorModel h=implicit(f);
     TaylorModel id(E(1,1, 1,1.0),0.0);
@@ -329,6 +340,7 @@ void TestTaylorModel::test_implicit()
     TaylorModel d=h-hh;
     std::cerr<<"h-hh="<<d<<"\n";
     std::cerr<<"|h-hh|="<<norm(h-hh)<<" he="<<he<<"\n\n\n";
+
 }
 
 namespace Ariadne {
@@ -348,12 +360,17 @@ void TestTaylorModel::test_flow()
         ARIADNE_TEST_EQUAL(phi1,expected_phi1);
    }
 
+    // Test flow dx/dt=1/4; dy/dt=y/4 on domain [0.5,0.5]x[0.5,0.5]
+    // 
     Vector<TaylorModel> vf=(ctm(2,2.0)*v(2,0)+tm(2,1)*v(2,1))*0.25;
-    Vector<TaylorModel> d=0.5*tm(2,0)*v(2,0)+0.5*tm(2,1)*v(2,1);
+    Vector<TaylorModel> dom=0.5*tm(2,0)*v(2,0)+0.5*tm(2,1)*v(2,1);
     uint o=6;
 
-    Vector<TaylorModel> phi=flow(vf,d,o);
-    Vector<TaylorModel> next_phi=antiderivative(compose(vf,phi),2);
+    Vector<TaylorModel> phi=flow(vf,dom,o);
+    Vector<TaylorModel> next_phi=antiderivative(compose(vf,phi),2)+embed(dom,1u);
+    ARIADNE_TEST_PRINT(vf);
+    ARIADNE_TEST_PRINT(phi);
+    ARIADNE_TEST_PRINT(next_phi);
     ARIADNE_TEST_BINARY_PREDICATE(operator<,(norm(Ariadne::range(phi-next_phi))),0.1);
 
 

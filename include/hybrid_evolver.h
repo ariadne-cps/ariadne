@@ -64,7 +64,7 @@ class EvolutionProfiler;
 
 class HybridTime;
 
-
+typedef int DiscreteEvent;
 
 /*! \brief A class for computing the evolution of a hybrid system. 
  *
@@ -74,6 +74,9 @@ class HybridEvolver
     : public EvolverBase<HybridAutomaton,HybridTaylorSet>
     , public Loggable
 {
+    typedef boost::shared_ptr<const ExpressionInterface> ExpressionPtr;
+    typedef boost::shared_ptr<const FunctionInterface> FunctionPtr;
+    typedef ExpressionInterface ExpressionType;
     typedef FunctionInterface FunctionType;
     typedef Vector<Interval> BoxType;
     typedef TaylorFunction FunctionModelType;
@@ -81,6 +84,7 @@ class HybridEvolver
     typedef TaylorFunction FlowModelType;
     typedef TaylorExpression ConstraintModelType;
     typedef TaylorModel TimeModelType;
+    typedef TaylorSet FlowSetModelType;
     typedef TaylorSet SetModelType;
     typedef TaylorSet TimedSetModelType;
   public:
@@ -123,13 +127,13 @@ class HybridEvolver
 
 
     //! \brief Compute an approximation to the evolution set using upper semantics. 
-    EnclosureListType evolve(const SystemType& system, const EnclosureType& initial_set, const TimeType& time) const {
+    EnclosureListType evolve(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate; 
         this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS,false); 
         return final; }
 
     //! \brief Compute an approximation to the evolution set under upper semantics. 
-    EnclosureListType reach(const SystemType& system, const EnclosureType& initial_set, const TimeType& time) const {
+    EnclosureListType reach(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const {
         EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate; 
         this->_evolution(final,reachable,intermediate,system,initial_set,time,UPPER_SEMANTICS,true); 
         return intermediate; }
@@ -140,17 +144,41 @@ class HybridEvolver
                             Semantics semantics, bool reach) const;
 
     typedef tuple<DiscreteState, EventListType, SetModelType, TimeModelType> HybridTimedSetType;
-    virtual void _evolution_step1(std::vector< HybridTimedSetType >& working_sets, 
+    virtual void _evolution_step(std::vector< HybridTimedSetType >& working_sets,
                                   EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,  
                                   const SystemType& system, const HybridTimedSetType& current_set, const TimeType& time, 
                                   Semantics semantics, bool reach) const;
 
-    virtual void _evolution_step2(std::vector< HybridTimedSetType >& working_sets,
-                                  EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,  
-                                  const SystemType& system, const HybridTimedSetType& current_set, const TimeType& time, 
-                                  Semantics semantics, bool reach) const;
+  protected:
+    void compute_initially_active_events(std::map<DiscreteEvent,tribool>&,
+                                         const std::map<DiscreteEvent,FunctionPtr>&,
+                                         const ContinuousEnclosureType&) const;
 
-  private:
+    void compute_flow_model(FlowSetModelType&, BoxType&, Float&,
+                            FunctionPtr, const SetModelType&) const;
+    void compute_flow_model(FunctionModelType&, BoxType&,
+                            FunctionPtr, const BoxType&) const;
+
+    void compute_blocking_events(std::map<DiscreteEvent,TimeModelType>&, std::set<DiscreteEvent>&,
+                                 const std::map<DiscreteEvent,FunctionPtr>& guards,
+                                 const FlowSetModelType& flow_set_model) const;
+
+    void compute_blocking_time(std::set<DiscreteEvent>&, TimeModelType&,
+                               const std::map<DiscreteEvent,TimeModelType>&) const;
+
+    void compute_activation_times(std::map<DiscreteEvent,std::pair<TimeModelType,TimeModelType> >&, 
+                                  const std::map<DiscreteEvent,FunctionPtr>& activations,
+                                  const FlowSetModelType& flow_set_model) const;
+
+
+  protected:
+    // Special events
+    static const DiscreteEvent starting_event;
+    static const DiscreteEvent finishing_event;
+    static const DiscreteEvent blocking_event;
+    static const DiscreteEvent final_time_event;
+
+ private:
     boost::shared_ptr< EvolutionParametersType > _parameters;
     boost::shared_ptr< CalculusInterface<TaylorModel> > _toolbox;
     //boost::shared_ptr< EvolutionProfiler >  _profiler;

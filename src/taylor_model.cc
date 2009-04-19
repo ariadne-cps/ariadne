@@ -420,6 +420,7 @@ inline void _add2(TaylorModel& r, const TaylorModel& x, const TaylorModel& y)
             r.expansion().append(yiter->key(),yiter->data());
             ++yiter;
         } else {
+            assert(xiter->key()==yiter->key());
             volatile Float& xv=const_cast<Float&>(static_cast<const Float&>(xiter->data()));
             volatile Float& yv=const_cast<Float&>(static_cast<const Float&>(yiter->data()));
             set_rounding_upward();
@@ -764,6 +765,41 @@ void _mul_clear(TaylorModel& r, const TaylorModel& x, const TaylorModel& y)
 ///////////////////////////////////////////////////////////////////////////////
 
 // Truncation and error control
+
+
+TaylorModel&
+TaylorModel::unique_sort()
+{
+    this->_expansion.sort();
+
+    TaylorModel::const_iterator advanced =this->begin();
+    TaylorModel::const_iterator end =this->end();
+    TaylorModel::iterator current=this->begin();
+    Float te=0.0;
+    while(advanced!=end) {
+        current->key()=advanced->key();
+        volatile double u=advanced->data();
+        volatile double ml=-advanced->data();
+        volatile double v=advanced->data();
+        ++advanced;
+        while(advanced!=end && advanced->key()==current->key()) {
+            const Float& xv=advanced->data();
+            set_rounding_upward();
+            u+=xv;
+            ml-=xv;
+            set_rounding_to_nearest();
+            v+=xv;
+        }
+        current->data()=v;
+        te+=(u+ml);
+    }
+    set_rounding_upward();
+    this->error()+=te;
+    set_rounding_to_nearest();
+    this->_expansion.resize(current-this->begin());
+
+    return *this;
+}
 
 
 TaylorModel&
@@ -1364,6 +1400,7 @@ TaylorModel::evaluate(const Vector<Interval>& v) const
     }
     return r;
 }
+
 
 //////////////////////////////////////////////////////////////////////////////
 
@@ -1986,6 +2023,54 @@ evaluate(const Vector<TaylorModel>& tv, const Vector<Interval>& x)
     Vector<Interval> r(tv.size());
     for(uint i=0; i!=r.size(); ++i) {
         r[i]=evaluate(tv[i],x);
+    }
+    return r;
+}
+
+
+TaylorModel
+partial_evaluate(const TaylorModel& x, uint k, Float c)
+{
+    ARIADNE_ASSERT(c==1);
+
+    TaylorModel r(x.argument_size()-1,x.accuracy_ptr());
+    TaylorModel s(x.argument_size()-1,x.accuracy_ptr());
+    array<TaylorModel> p(x.degree()+1,TaylorModel(x.argument_size()-1,x.accuracy_ptr()));
+    
+    array<Interval> cpowers(x.degree()+3);
+    cpowers[0]=1; cpowers[1]=c; cpowers[2]=sqr(cpowers[1]);
+    for(uint i=3; i!=cpowers.size(); ++i) { cpowers[i]=cpowers[i/2]*cpowers[(i+1)/2]; }
+
+    MultiIndex ra(r.argument_size());
+    for(TaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+        const MultiIndex& xa=xiter->key();
+        const Float& xv=xiter->data();
+        MultiIndex::value_type xak=xa[k];
+        for(uint i=0; i!=k; ++i) { ra[i]=xa[i]; }
+        for(uint i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1]; }
+        assert(ra.degree()+xak==xa.degree());
+        p[xak].expansion().append(ra,xv);
+    }
+    for(uint i=1; i!=p.size(); ++i) {
+        p[i]*=cpowers[i];
+    }
+
+    r=p[0];
+    r.set_error(x.error());
+    for(uint i=1; i!=p.size(); ++i) {
+        _add(s,r,p[i]);
+        r.swap(s);
+        s.clear();
+    }
+    return r;
+}
+
+Vector<TaylorModel>
+partial_evaluate(const Vector<TaylorModel>& tv, uint k, Float c)
+{
+    Vector<TaylorModel> r(tv.size());
+    for(uint i=0; i!=r.size(); ++i) {
+        r[i]=partial_evaluate(tv[i],k,c);
     }
     return r;
 }
@@ -2966,6 +3051,7 @@ Vector<TaylorModel> _implicit5(const Vector<TaylorModel>& f, uint n)
 Vector<TaylorModel>
 implicit(const Vector<TaylorModel>& f)
 {
+
     // Check that the arguments are suitable
     ARIADNE_ASSERT(f.size()>0);
     for(uint i=1; i!=f.size(); ++i) { ARIADNE_ASSERT(f[i].argument_size()==f[0].argument_size()); }
@@ -3011,6 +3097,16 @@ implicit(const Vector<TaylorModel>& f)
     uint number_of_steps=6;
     Vector<TaylorModel> id=TaylorModel::variables(has);
     Vector<TaylorModel> h=_implicit5(f,number_of_steps);
+
+    // Perform proper Newton step improvements
+    Vector<Interval> domain_h(h[0].argument_size(),Interval(-1,+1));
+    for(uint i=0; i!=3; ++i) {
+        D2finv=inverse(jacobian2(f,join(domain_h,ranges(h))));
+        clobber(h);
+        Vector<TaylorModel> fidh=compose(f,join(id,h));
+        Vector<TaylorModel> dh=prod(D2finv,fidh);
+        h-=dh;
+    }
     /*
     std::cerr<<"\n  f="<<f<<std::endl;
     std::cerr<<"  h="<<h<<"\n\n";

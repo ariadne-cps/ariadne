@@ -28,6 +28,7 @@
 #include "matrix.h"
 #include "multi_index.h"
 #include "differential.h"
+#include "expression_interface.h"
 #include "function_interface.h"
 
 #include "geometry.h"
@@ -208,6 +209,11 @@ TaylorSet::discretise(GridTreeSet& gts, uint d) const
     return gts;
 }
 
+
+TaylorModel apply(const ExpressionInterface& f, const TaylorSet& ts)
+{
+    return f.evaluate(ts.models());
+}
 
 TaylorSet apply(const FunctionInterface& f, const TaylorSet& ts)
 {

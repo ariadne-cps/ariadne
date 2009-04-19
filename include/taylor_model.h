@@ -71,6 +71,11 @@ TaylorModel rescale(const TaylorModel& x, const Interval& ivl1, const Interval& 
 
 // Evaluate an array of Taylor variables on a vector.
 Interval evaluate(const TaylorModel& x, const Vector<Interval>& sy);
+// Evaluate an array of Taylor variables on a vector.
+TaylorModel partial_evaluate(const TaylorModel& x, uint k, Float c);
+// Substitute the TaylorModel y in the  kth variable of \a x.
+// Precondition: x.argument_size()==y.argument_size()+1
+TaylorModel substitute(const TaylorModel& x, uint k, const TaylorModel& y);
 
 // Embed the variable in a space of higher dimension
 TaylorModel embed(const TaylorModel& tv, uint as);
@@ -114,6 +119,8 @@ Vector<TaylorModel> split(const Vector<TaylorModel>& x, uint j, bool half);
 Vector<TaylorModel> unscale(const Vector<TaylorModel>& x, const Vector<Interval>& bx);
 Vector<TaylorModel> scale(const Vector<TaylorModel>& x, const Vector<Interval>& bx);
 Vector<Interval> evaluate(const Vector<TaylorModel>& x, const Vector<Interval>& sy);
+Vector<TaylorModel> partial_evaluate(const Vector<TaylorModel>& x, uint k, Float sy);
+Vector<TaylorModel> substitute(const Vector<TaylorModel>& x, uint k, const TaylorModel& y);
 Vector<TaylorModel> antiderivative(const Vector<TaylorModel>& x, uint k);
 Vector<TaylorModel> embed(const Vector<TaylorModel>& x, uint as);
 Vector<TaylorModel> embed(uint as, const Vector<TaylorModel>& x);
@@ -403,6 +410,8 @@ class TaylorModel
     TaylorModel& clean(const Accuracy& accuracy);
     //! \brief Remove all terms which have high degree or small magnitude.
     TaylorModel& clean();
+    //! \brief Sort the terms in index order and combine terms with the same index.
+    TaylorModel& unique_sort();
     //@}
 
     //@{

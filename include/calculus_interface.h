@@ -62,6 +62,7 @@ template<> struct CalculusTypes<ApproximateTaylorVariable>
 template<> struct CalculusTypes<TaylorModel>
 {
     typedef TaylorModel VariableType;
+    typedef TaylorModel BaseModelType;
     typedef TaylorModel TimeModelType;
     typedef TaylorExpression PredicateModelType;
     typedef TaylorSet SetModelType;
@@ -87,11 +88,13 @@ class CalculusInterface
   public:
     //!
     //!
+    typedef typename CalculusTypes<Var>::BaseModelType BaseModelType;
     typedef typename CalculusTypes<Var>::FunctionModelType FunctionModelType;
     typedef typename CalculusTypes<Var>::SetModelType SetModelType;
     typedef typename CalculusTypes<Var>::TimeModelType TimeModelType;
     typedef typename CalculusTypes<Var>::PredicateModelType PredicateModelType;
     //!
+    typedef SetModelType FlowSetModelType;
     typedef FunctionModelType MapModelType;
     typedef FunctionModelType FlowModelType;
     typedef PredicateModelType GuardModelType;
@@ -134,12 +137,35 @@ class CalculusInterface
            const SetModelType& _set_model) const = 0;
 
     //! \brief Computes an over-approximation to the time interval for which the \a initial_set_model
-    //! touch the set specified by the \a guard model under the \a flow_model. The \a minimum and \a maximum_time
+    //! touch the set specified by the \a guard_model under the \a flow_model. The \a minimum and \a maximum_time
     //! gives the minimum and maximum time for which the evolution is valid.
     virtual Interval
     touching_time_interval(const GuardModelType& guard_model,
                            const FlowModelType& flow_model,
                            const SetModelType& initial_set_model) const = 0;
+
+    //! \brief Computes an over-approximation to the time interval for which the \a initial_set_model
+    //! touch the set specified by the \a guard under the \a flow_model. The \a minimum and \a maximum_time
+    //! gives the minimum and maximum time for which the evolution is valid.
+    virtual Interval
+    touching_time_interval(const ExpressionInterface& guard,
+                           const FlowModelType& flow_model,
+                           const SetModelType& initial_set_model) const = 0;
+
+    //! \brief Computes an over-approximation to the time interval for which the \a initial_set_model
+    //! touch the set specified by the \a guard under the \a flow_model. The \a minimum and \a maximum_time
+    //! gives the minimum and maximum time for which the evolution is valid. (Deprecated; guard should be an expression)
+    virtual Interval
+    touching_time_interval(const FunctionInterface& guard,
+                           const FlowModelType& flow_model,
+                           const SetModelType& initial_set_model) const = 0;
+
+    //! \brief Computes an over-approximation to the time interval for which the \a initial_set_model
+    //! touch the set specified by the \a guard under the \a flow_model. The \a minimum and \a maximum_time
+    //! gives the minimum and maximum time for which the evolution is valid. (Deprecated; guard should be an expression)
+    virtual Interval
+    scaled_touching_time_interval(const FunctionInterface& guard,
+                                  const FlowSetModelType& flow_set_model) const = 0;
 
     //! \brief Computes the time at which points in the \a initial_set_model cross the zero-set of the
     //! the \a guard_model under evolution of the \a flow_model, for times between the \a minimum_time and \a maximum_time.
@@ -157,6 +183,21 @@ class CalculusInterface
                   const FlowModelType& flow_model,
                   const SetModelType& initial_set_model) const = 0;
 
+    //! \brief Computes the time at which points in the \a initial_set_model cross the zero-set of the
+    //! the \a guard under evolution of the \a flow_model, for times between the \a minimum_time and \a maximum_time.
+    //! The crossing must be (differentiably) transverse. (Deprecated; guard should be an expression)
+    virtual TimeModelType
+    crossing_time(const FunctionInterface& guard_function,
+                  const FlowModelType& flow_model,
+                  const SetModelType& initial_set_model) const = 0;
+
+    //! \brief Computes the time at which points in the \a flow_set_model cross the zero-set of the
+    //! the \a guard under.
+    //! The crossing must be (differentiably) transverse. (Deprecated; guard should be an expression)
+    virtual TimeModelType
+    scaled_crossing_time(const FunctionInterface& guard_function,
+                         const FlowSetModelType& flow_set_model) const = 0;
+
     //! \brief Computes the image of the set defined by \a set_model under the \a map.
     virtual SetModelType
     reset_step(const FunctionType& map,
@@ -168,6 +209,12 @@ class CalculusInterface
     reset_step(const MapModelType& map_model,
                const SetModelType& set_model) const = 0;
 
+
+    //! \brief Computes the points reached by evolution of the \a flow_set_model
+    //! at time \a scaled_integration_time.
+    virtual SetModelType
+    integration_step(const FlowSetModelType& flow_set_model,
+                     const TimeModelType& scaled_integration_time_model) const = 0;
 
     //! \brief Computes the points reached by evolution of the \a initial_set_model under the flow
     //! given by \a flow_model. The \a integration_time gives the time all points should be flowed.
@@ -227,6 +274,13 @@ class CalculusInterface
                       const TimeModelType& initial_time_model,
                       const TimeModelType& final_time_model) const = 0;
 
+    //! \brief Computes the points reached by evolution of the \a flow_set_model 
+    //! for unit-scaled times between \a scaled_initial_time_model and \a scaled_final_time_model.
+    virtual SetModelType
+    reachability_step(const FlowSetModelType& flow_set_model,
+                      const TimeModelType& scaled_initial_time_model,
+                      const TimeModelType& scaled_final_time_model) const = 0;
+
     //! \brief Gives the extended time model for the reachability step between the
     //! \a initial_time_model and the \a final_time_model. The new time is given by
     //! \f$\tau'(e,s) = (1-s)\tau_0(e)+s\tau_1(e)\f$.
@@ -275,6 +329,11 @@ class CalculusInterface
     //! \brief A model for the constant time function \a t over the domain \a d.
     virtual TimeModelType
     time_model(const Float& t,
+               const BoxType& d) const = 0;
+
+    //! \brief A model for the constant time function \a t over the domain \a d.
+    virtual TimeModelType
+    time_model(const Interval& t,
                const BoxType& d) const = 0;
 
 

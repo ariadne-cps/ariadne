@@ -26,8 +26,8 @@
 
 using namespace Ariadne;
 
-typedef StableHybridEvolver::EnclosureListType EnclosureListType;
-typedef StableHybridEvolver::ContinuousEnclosureType ContinuousEnclosureType;
+typedef HybridEvolver::EnclosureListType EnclosureListType;
+typedef HybridEvolver::ContinuousEnclosureType ContinuousEnclosureType;
 
 
 HybridGridTreeSet 
@@ -194,8 +194,8 @@ int main(int argc,char *argv[])
 
     /// Compute the system evolution
 
-    /// Create a StableHybridEvolver object
-    StableHybridEvolver evolver;
+    /// Create a HybridEvolver object
+    HybridEvolver evolver;
     evolver.verbosity = 1;
 
     /// Set the evolution parameters
@@ -205,11 +205,11 @@ int main(int argc,char *argv[])
     std::cout <<  evolver.parameters() << std::endl;
 
     // Declare the type to be used for the system evolution
-    typedef StableHybridEvolver::EnclosureType HybridEnclosureType;
-    typedef StableHybridEvolver::OrbitType OrbitType;
-    typedef StableHybridEvolver::EnclosureListType EnclosureListType;
-    typedef ListSet<StableHybridEvolver::ContinuousEnclosureType> ListSetType;
-    typedef StableHybridEvolver::TimedEnclosureListType TimedEnclosureListType;
+    typedef HybridEvolver::EnclosureType HybridEnclosureType;
+    typedef HybridEvolver::OrbitType OrbitType;
+    typedef HybridEvolver::EnclosureListType EnclosureListType;
+    typedef ListSet<HybridEvolver::ContinuousEnclosureType> ListSetType;
+    typedef HybridEvolver::TimedEnclosureListType TimedEnclosureListType;
 
     double time_step = 0.25;
     double total_time = 35.0;
@@ -382,7 +382,7 @@ int main(int argc,char *argv[])
     g.write("watertank-dominato-orbit");
 
 
-    std::cout << "Computing reach set using StableHybridEvolver... " << std::flush;
+    std::cout << "Computing reach set using HybridEvolver... " << std::flush;
     EnclosureListType reach = evolver.reach(watertank_system,initial_enclosure,evolution_time);
     std::cout << "done." << std::endl;
 

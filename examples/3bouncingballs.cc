@@ -312,9 +312,9 @@ int main()
 
     /// Sets the initial state parameters
 //    Box initial_box(12, 2.0,2.0, table_y,table_y, 4.0,4.0,table_y,table_y, 6.0,6.0,table_y,table_y, 4.0,4.0, 0.0,0.0, 0.0,0.0, 0.0,0.0, 0.0,0.0, 0.0,0.0);
-//    StableHybridEvolver::EnclosureType initial_enclosure(all_on_pre12collision,initial_box);
+//    HybridEvolver::EnclosureType initial_enclosure(all_on_pre12collision,initial_box);
     Box initial_box(12, 1.0,1.0, table_y,table_y, 2.0,2.0, table_y,table_y, 3.0,3.0,table_y,table_y, 9.0,9.0, 0.0,0.0, 0.0,0.0, 0.0,0.0, 0.0,0.0, 0.0,0.0);
-    StableHybridEvolver::EnclosureType initial_enclosure(all_on_pre12collision,initial_box);
+    HybridEvolver::EnclosureType initial_enclosure(all_on_pre12collision,initial_box);
 
 
     /// Shows the automaton
@@ -329,8 +329,8 @@ int main()
 
     /// Computes the system evolution
 
-    /// Creates a StableHybridEvolver object
-    StableHybridEvolver evolver;
+    /// Creates a HybridEvolver object
+    HybridEvolver evolver;
     evolver.verbosity = 1;
 
     /// Sets the evolution parameters
@@ -341,7 +341,7 @@ int main()
     HybridTime evol_limits(EVOL_TIME,EVOL_TRANS);
  
     std::cout << "Computing orbit... " << std::flush;
-    StableHybridEvolver::OrbitType orbit = evolver.orbit(balls,initial_enclosure,evol_limits,UPPER_SEMANTICS);
+    HybridEvolver::OrbitType orbit = evolver.orbit(balls,initial_enclosure,evol_limits,UPPER_SEMANTICS);
 
     std::cout << "Orbit="<<orbit<<std::endl;
 

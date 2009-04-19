@@ -159,6 +159,8 @@ class TaylorExpression
     ExpansionType& expansion() { return this->_model._expansion; }
     //! \brief A reference to the error of the expansion over the domain.
     ErrorType& error() { return this->_model._error; }
+    //! \brief The centre of the expansion (the value of the constant term).
+    Float centre() { return this->_model.value(); }
     //! \brief A reference to the constant term in the expansion.
     Float& value() { return this->_model.value(); }
     //! \brief The constant term in the expansion.

@@ -219,6 +219,16 @@ TaylorFunction::domain() const
 }
 
 
+const Vector<Float>
+TaylorFunction::centre() const
+{
+    Vector<Float> result(this->result_size());
+    for(uint i=0; i!=result.size(); ++i) {
+        result[i]=this->_models[i].value();
+    }
+    return result;
+}
+
 const Vector<Interval>
 TaylorFunction::range() const
 {
@@ -280,10 +290,22 @@ TaylorFunction::operator[](uint i) const
 
 
 
-TaylorFunction
-TaylorFunction::truncate(ushort degree) const
+TaylorFunction&
+TaylorFunction::truncate(ushort degree)
 {
-    ARIADNE_NOT_IMPLEMENTED;
+    for(uint i=0; i!=this->size(); ++i) {
+        this->_models[i].truncate(degree);
+    }
+    return *this;
+}
+
+TaylorFunction&
+TaylorFunction::clobber()
+{
+    for(uint i=0; i!=this->size(); ++i) {
+        this->_models[i].clobber();
+    }
+    return *this;
 }
 
 
@@ -350,6 +372,24 @@ combine(const TaylorFunction& f1, const TaylorFunction& f2)
     return TaylorFunction(join(f1.domain(),f2.domain()),combine(f1.models(),f2.models()));
 }
 
+
+TaylorFunction
+embed(const TaylorFunction& f, const Interval& d)
+{
+    return TaylorFunction(join(f.domain(),d),embed(f.models(),1u));
+}
+
+TaylorFunction
+embed(const TaylorFunction& f, const Vector<Interval>& d)
+{
+    return TaylorFunction(join(f.domain(),d),embed(f.models(),d.size()));
+}
+
+TaylorFunction
+embed(const Vector<Interval>& d, const TaylorFunction& f)
+{
+    return TaylorFunction(join(d,f.domain()),embed(d.size(),f.models()));
+}
 
 TaylorFunction
 restrict(const TaylorFunction& f, const Vector<Interval>& d)

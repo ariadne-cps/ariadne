@@ -41,7 +41,7 @@ namespace Ariadne {
   
       
 /*! \ingroup Solvers
- *  \brief Interval Newton solver.
+ *  \brief Interval Newton solver. Uses the contractor \f$[x']=x_0-Df^{-1}([x])f(x_0)\f$.
  */
 class IntervalNewtonSolver
     : public SolverBase
@@ -52,6 +52,30 @@ class IntervalNewtonSolver
     IntervalNewtonSolver(Float max_error, uint max_steps) : SolverBase(max_error,max_steps) { }
     
     /*! \brief Solve \f$f(x)=0\f$, using the interval Newton method. */
+    Vector<Interval>
+    solve(const FunctionInterface& f, 
+          const Vector<Interval>& pt); 
+    
+    /*! \brief Solve \f$f(x)=x\f$, using the interval Newton method. */
+    Vector<Interval>
+    fixed_point(const FunctionInterface& f, 
+                const Vector<Interval>& pt); 
+};            
+    
+    
+/*! \ingroup Solvers
+ *  \brief Krawczyk solver. Uses the contractor \f$[x']=x_0-Mf(x_0)+(I-MDf([x])([x]-x_0)\f$
+ *  where \f$M\f$ is typically \f$Df^{-1}(x_0)\f$.
+ */
+class KrawczykSolver
+    : public SolverBase
+    , public Loggable
+{
+  public:
+    /*! \brief Constructor. */
+    KrawczykSolver(Float max_error, uint max_steps) : SolverBase(max_error,max_steps) { }
+    
+    /*! \brief Solve \f$f(x)=0\f$, using the Krawczyk contractor. */
     Vector<Interval>
     solve(const FunctionInterface& f, 
           const Vector<Interval>& pt); 

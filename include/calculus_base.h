@@ -63,6 +63,8 @@ class CalculusBase
     typedef Interval I;
   public:
     //!
+    typedef typename CalculusInterface<Var>::BaseModelType BaseModelType;
+    //!
     typedef typename CalculusInterface<Var>::FunctionModelType FunctionModelType;
     //!
     typedef typename CalculusInterface<Var>::SetModelType SetModelType;
@@ -73,6 +75,7 @@ class CalculusBase
 
     typedef FunctionModelType MapModelType;
     typedef FunctionModelType FlowModelType;
+    typedef SetModelType FlowSetModelType;
 
     typedef Float RealType;
     typedef Interval IntervalType;
@@ -107,6 +110,54 @@ class CalculusBase
                                             const FlowModelType& flow_model,
                                             const SetModelType& initial_set_model) const = 0;
 
+    //! \brief Computes an over-approximation to the time interval for which the \a initial_set_model
+    //! touch the set specified by the \a guard model under the \a flow_model. The \a minimum and \a maximum_time
+    //! gives the minimum and maximum time for which the evolution is valid.
+    virtual Interval touching_time_interval(const ExpressionInterface& guard,
+                                            const FlowModelType& flow_model,
+                                            const SetModelType& initial_set_model) const
+    {
+        PredicateModelType guard_model=this->predicate_model(guard,flow_model.range());
+        return this->touching_time_interval(guard_model,flow_model,initial_set_model);
+    }
+
+    //! \brief Computes an over-approximation to the time interval for which the \a initial_set_model
+    //! touch the set specified by the \a guard model under the \a flow_model. The \a minimum and \a maximum_time
+    //! gives the minimum and maximum time for which the evolution is valid. Deprecated
+    virtual Interval touching_time_interval(const FunctionInterface& guard,
+                                            const FlowModelType& flow_model,
+                                            const SetModelType& initial_set_model) const
+    {
+        PredicateModelType guard_model=this->map_model(guard,flow_model.range())[0];
+        return this->touching_time_interval(guard_model,flow_model,initial_set_model);
+    }
+
+    //! \brief Computes an over-approximation to the touching time interval scaling the flow step to [-1,+1]
+    virtual Interval scaled_touching_time_interval(const BaseModelType& guard_flow_set_model) const = 0;
+
+    //! \brief Computes an over-approximation to the time interval for which the \a initial_set_model
+    //! touch the set specified by the \a guard model under the \a flow_model. The \a minimum and \a maximum_time
+    //! gives the minimum and maximum time for which the evolution is valid. Deprecated
+    virtual Interval scaled_touching_time_interval(const ExpressionInterface& guard,
+                                                   const FlowSetModelType& flow_set_model) const
+    {
+        BaseModelType guard_flow_set_model=apply(guard,flow_set_model);
+        return this->scaled_touching_time_interval(guard_flow_set_model);
+    }
+
+    //! \brief Computes an over-approximation to the time interval for which the \a initial_set_model
+    //! touch the set specified by the \a guard model under the \a flow_model. The \a minimum and \a maximum_time
+    //! gives the minimum and maximum time for which the evolution is valid. Deprecated
+    virtual Interval scaled_touching_time_interval(const FunctionInterface& guard,
+                                                     const FlowSetModelType& flow_set_model) const
+    {
+        BaseModelType guard_flow_set_model=apply(guard,flow_set_model)[0];
+        return this->scaled_touching_time_interval(guard_flow_set_model);
+    }
+
+
+    //! \brief Computes the time at which points in the \a initial_set_model cross the zero-set of the
+    //! the \a guard under evolution of the \a flow_model.
     //! \brief Computes the time at which points in the \a initial_set_model cross the zero-set of the
     //! the \a guard_model under evolution of the \a flow_model.
     //! The crossing must be (differentiably) transverse.
@@ -123,6 +174,38 @@ class CalculusBase
     {
         PredicateModelType guard_model=this->predicate_model(guard,flow_model.range());
         return this->crossing_time(guard_model,flow_model,initial_set_model);
+    }
+
+    //! \brief Computes the time at which points in the \a initial_set_model cross the zero-set of the
+    //! the \a guard under evolution of the \a flow_model.
+    //! The crossing must be (differentiably) transverse.
+    virtual TimeModelType crossing_time(const FunctionInterface& guard,
+                                        const FlowModelType& flow_model,
+                                        const SetModelType& initial_set_model) const
+    {
+        PredicateModelType guard_model=this->map_model(guard,flow_model.range())[0];
+        return this->crossing_time(guard_model,flow_model,initial_set_model);
+    }
+
+    //! The crossing must be (differentiably) transverse.
+    virtual TimeModelType scaled_crossing_time(const BaseModelType& guard_flow_set_model) const = 0;
+
+    //! \brief Computes the time at which points in the \a initial_set_model cross the zero-set of the
+    //! the \a guard under evolution of the \a flow_model.
+    //! The crossing must be (differentiably) transverse.
+    virtual TimeModelType scaled_crossing_time(const ExpressionInterface& guard,
+                                               const FlowSetModelType& flow_set_model) const
+    {
+        return this->scaled_crossing_time(apply(guard,flow_set_model));
+    }
+
+    //! \brief Computes the time at which points in the \a initial_set_model cross the zero-set of the
+    //! the \a guard under evolution of the \a flow_model.
+    //! The crossing must be (differentiably) transverse.
+    virtual TimeModelType scaled_crossing_time(const FunctionInterface& guard,
+                                               const FlowSetModelType& flow_set_model) const
+    {
+        return this->scaled_crossing_time(apply(guard,flow_set_model)[0]);
     }
 
     //! \brief Computes the points reached by evolution of the \a initial_set_model under the flow

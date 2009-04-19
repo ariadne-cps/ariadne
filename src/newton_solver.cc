@@ -114,4 +114,52 @@ IntervalNewtonSolver::fixed_point(const FunctionInterface& f,
   throw EvaluationException("No result found -- maximum number of steps reached");
 }
 
+Vector<Interval>
+KrawczykSolver::solve(const FunctionInterface& f,
+                      const Vector<Interval>& ix)
+{
+  const double& e=this->maximum_error();
+  uint n=this->maximum_number_of_steps();
+  ARIADNE_LOG(1,"verbosity="<<verbosity<<"\n");
+  Vector<Interval> x(ix);
+  Vector<Interval> r(x);
+  Matrix<Float> I=Matrix<Float>::identity(ix.size());
+  while(n>0) {
+    ARIADNE_LOG(4,"Testing for root in "<<x<<"\n");
+    ARIADNE_LOG(5,"  e="<<radius(x)<<"  x="<<x<<"\n");
+    Vector<Float> m=midpoint(x);
+    ARIADNE_LOG(5,"  m="<<m<<"\n");
+    Vector<Interval> im(m);
+    Vector<Interval> fm=f.evaluate(im);
+    ARIADNE_LOG(5,"  f(m)="<<fm<<"\n");
+    Matrix<Interval> J=f.jacobian(x);
+    ARIADNE_LOG(5,"  Df(r)="<<J<<"\n");
+    Matrix<Interval> M=inverse(midpoint(J));
+    ARIADNE_LOG(5,"  inverse(Df(m))="<<M<<"\n");
+    Vector<Interval> dx=prod(M,fm)-prod(Matrix<Interval>(I-prod(M,J)),Vector<Interval>(x-m));
+    ARIADNE_LOG(5,"  dx="<<dx<<"\n");
+    Vector<Interval> nx= m - dx;
+    ARIADNE_LOG(5,"  nx="<<nx<<"\n");
+    Vector<Interval> nr(nx);
+    ARIADNE_LOG(5,"  nr="<<nr<<"\n");
+
+    if(subset(nr,r) && radius(nx) < e) {
+      return nr;
+    }
+    if(disjoint(nr,r)) {
+      throw EvaluationException("No result found -- disjoint");
+    }
+    r=intersection(nr,r);
+    x=r;
+    n=n-1;
+  }
+  throw EvaluationException("No result found -- maximum number of steps reached");
+}
+
+Vector<Interval>
+KrawczykSolver::fixed_point(const FunctionInterface& f,
+                            const Vector<Interval>& ix)
+{
+    ARIADNE_NOT_IMPLEMENTED;
+}
 } // namespace Ariadne

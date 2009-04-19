@@ -48,7 +48,7 @@
 using namespace Ariadne;
 using namespace std;
 
-int verbosity=0;
+int evolver_verbosity=0;
 
 class TestHybridEvolution
 {
@@ -66,11 +66,13 @@ class TestHybridEvolution
     void test_affine_system() const;
 };
 
-int main()
+int main(int argc, const char* argv[])
 {
+    if(argc>=1) { evolver_verbosity=atoi(argv[0]); }
+    
     //std::cerr<<"SKIPPED "; return 1;
     TestHybridEvolution().test();
-    std::cerr<<"INOMPLETE ";
+    std::cerr<<"INCOMPLETE ";
     return ARIADNE_TEST_FAILURES;
 }
 
@@ -129,6 +131,7 @@ void TestHybridEvolution::test_constant_derivative_system() const
     HybridTaylorSet initial_set(q1,initial_enclosure);
 
     HybridEvolver evolver;
+    evolver.verbosity=evolver_verbosity;
 
     ARIADNE_TEST_PRINT(automaton);
     ARIADNE_TEST_PRINT(initial_set);
@@ -194,6 +197,7 @@ void TestHybridEvolution::test_bouncing_ball() const
     HybridTaylorSet initial_set(q1,initial_enclosure);
 
     HybridEvolver evolver;
+    evolver.verbosity=evolver_verbosity;
     evolver.parameters().maximum_step_size=0.125;
 
     ARIADNE_TEST_PRINT(automaton);
@@ -236,7 +240,7 @@ void TestHybridEvolution::test_affine_system() const
 
     // Set up the evaluators
     HybridEvolver evolver(parameters);
-    evolver.verbosity = verbosity;
+    evolver.verbosity = evolver_verbosity;
 
 
     // Make a hybrid automaton for the Van der Pol equation

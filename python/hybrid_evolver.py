@@ -40,7 +40,7 @@ Interval.is_zero=is_zero
 Interval.is_pos=is_pos
 
 
-class HybridEvolver:
+class HybridEvolverPrototype:
 
     temporal_order=4;
     spacial_order=2;
@@ -50,7 +50,9 @@ class HybridEvolver:
     blocking_event=-3
     invariant_event=-3
 
-
+    def __init__(self):
+        pass
+    
     def possibly_touching(self,guard,set):
         guard_range=guard(set)
         if not isinstance(guard_range,Interval):
@@ -588,6 +590,14 @@ class HybridEvolver:
         jumped_sets.append(evolved_set)
         return ((reachable_set,),jumped_sets)
 
+    def orbit(self, system, initial_set, evolution_time, semantics):
+        """Returns a tuple of (reach,evolve,intermediate) sets"""
+        reach=HybridTaylorSetList([])
+        evolve=HybridTaylorSetList([])
+        intermediate=HybridTaylorSetList([])
+
+        print "HybridEvolverPrototype.orbit(system,initial_set,evolution_time,semantics) is not implemented"
+        return (reach,evolve,intermediate)
 
 class Mode:
     def __init__(self,dynamic,guard,reset=None):

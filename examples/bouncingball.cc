@@ -75,7 +75,7 @@ int main()
     /// Compute the system evolution
 
     /// Create a HybridEvolver object
-    HybridEvolver evolver;
+    StableHybridEvolver evolver;
 
     /// Set the evolution parameters
     evolver.parameters().maximum_enclosure_radius = 0.05;
@@ -93,7 +93,7 @@ int main()
     HybridEnclosureType initial_enclosure(l1,initial_box);
     Box bounding_box(2, -0.1,2.1, -10.1,10.1);
   
-    HybridTime evolution_time(4.0,6);
+    HybridTime evolution_time(4.0,4);
  
     std::cout << "Computing orbit... " << std::flush;
     OrbitType orbit = evolver.orbit(ball,initial_enclosure,evolution_time,UPPER_SEMANTICS);

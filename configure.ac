@@ -50,7 +50,7 @@ AM_CHECK_PYTHON_HEADERS([PYTHON_LIB=-lpython$PYTHON_VERSION ],[AC_MSG_WARN([coul
 AC_SUBST(PYTHON_LIB)
 
 # Add Python include directory to include path since otherwise check for Boost Python fails
-CPPFLAGS+="$PYTHON_INCLUDES "
+CPPFLAGS+=" $PYTHON_INCLUDES "
 
 # Check for Boost python library (optional)
 AC_CHECK_HEADER([boost/python.hpp],[AC_DEFINE([HAVE_BOOST_PYTHON_HPP],[1],[Define to 1 if you have the <boost/python.hpp> header file.]) HAVE_BOOST_PYTHON_HPP=true],[AC_MSG_WARN([Boost Python library development files are missing. You cannot compile the Python interface.])])

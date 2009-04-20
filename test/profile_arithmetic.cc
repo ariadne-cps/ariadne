@@ -34,6 +34,8 @@
 #include <boost/timer.hpp>
 #include <boost/progress.hpp>
 
+// Needed for MAC OS X, where uint is not defined
+typedef unsigned int uint;
 
 // Machine epsilon, approximately 2.2e-16;
 const double eps=1./(1<<26)/(1<<26);
@@ -107,7 +109,7 @@ unsigned short ROUND_UP      = 2943;
 unsigned short ROUND_DOWN    = 1919;
 unsigned short ROUND_NEAREST = 895;
 
-inline rounding_mode_t get_control_word() { asm volatile ("fstcw grnd"); return grnd; }
+inline rounding_mode_t get_control_word() { rounding_mode_t grnd; asm volatile ("fstcw %0" : "=m" (grnd) ); return grnd; }
 
 #if defined ARIADNE_C99_ROUNDING
 
@@ -131,9 +133,8 @@ inline void c_set_round_nearest() { fesetround(FE_TONEAREST); }
 //inline void set_rounding_mode(rounding_mode_t rnd) { asm volatile ("fldcw (%0)" : : "r" (rnd) ); }
 //inline rounding_mode_t get_rounding_mode() { rounding_mode_t rnd asm volatile ("fldcw (%0)" : : "r" (rnd) ); return rnd; }
 
-inline rounding_mode_t get_rounding_mode() {
-asm volatile ("fstcw grnd"); return grnd; }
-inline void set_rounding_mode(rounding_mode_t rnd) { asm volatile ("fldcw grnd"); }
+inline rounding_mode_t get_rounding_mode() { rounding_mode_t grnd; asm volatile ("fstcw %0" : "=m" (grnd) ); return grnd; }
+inline void set_rounding_mode(rounding_mode_t rnd) { asm volatile ("fldcw %0" : : "m" (rnd) ); }
 
 #elif defined ARIADNE_GCC_MACRO_ROUNDING
 

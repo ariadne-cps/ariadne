@@ -123,8 +123,8 @@ int main()
     dp[4] = 1000.0; /// Load resistance, Rl
 
     /// Introduces the global parameters
-    float TIME_LIMIT = 0.1/dp[1];
-    float TRAN_LIMIT = 1;
+    float TIME_LIMIT = 1.0/dp[1];
+    float TRAN_LIMIT = 5;
     float MAX_ENCL_RADIUS = 0.001/dp[1];
     float MAX_STEP_SIZE = 0.001/dp[1];
     float LOCK_TOGRID_TIME = 1.0/dp[1];
@@ -212,7 +212,7 @@ int main()
     /// Compute the system evolution
 
     /// Create a HybridEvolver object
-    HybridEvolver evolver;
+    StableHybridEvolver evolver;
     evolver.verbosity = 1;
 
     /// Set the evolution parameters
@@ -244,10 +244,14 @@ int main()
     Box graphic_box(2,0.0,1.0/dp[1],-dp[0],dp[0]);
     Box graphic_box2(2,-dp[0],dp[0],2.0,dp[0]);
 
+    std::cout << "Plotting results..." << std::flush;
+
     plot("rectifier_orbit_t_vin", 0, 1, 3, graphic_box, Colour(0.0,0.5,1.0), orbit, -1);
     plot("rectifier_orbit_t_vout", 0, 2, 3, graphic_box, Colour(0.0,0.5,1.0), orbit, -1);
     plot("rectifier_orbit_vin_vout", 1, 2, 3, graphic_box2, Colour(0.0,0.5,1.0), orbit, -1);
 
+    std::cout << "done." << std::endl;
+/*
     /// Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
     analyser.parameters().lock_to_grid_time = LOCK_TOGRID_TIME;
@@ -267,5 +271,5 @@ int main()
     plot("rectifier_reach_t_vin", 0, 1, 3, graphic_box, Colour(0.0,0.5,1.0), *reach, -1);
     plot("rectifier_reach_t_vout", 0, 2, 3, graphic_box, Colour(0.0,0.5,1.0), *reach, -1);
     plot("rectifier_reach_vin_vout", 1, 2, 3, graphic_box2, Colour(0.0,0.5,1.0), *reach, -1);
-
+*/
 }

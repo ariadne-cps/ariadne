@@ -109,7 +109,8 @@ int main()
     double EVOL_TIME = 2.0;
     int EVOL_TRANS = 9;
     double MAX_ENCLOSURE_RADIUS = 0.02;
-    double MAX_STEP_SIZE = 0.02;
+    double MAX_STEP_SIZE = 0.01;
+    int VERBOSITY = 1;
 
     /// Sets the analyzer parameters
     double LOCK_TO_GRID_TIME = 3.0;
@@ -330,8 +331,8 @@ int main()
     /// Computes the system evolution
 
     /// Creates a HybridEvolver object
-    HybridEvolver evolver;
-    evolver.verbosity = 1;
+    StableHybridEvolver evolver;
+    evolver.verbosity = VERBOSITY;
 
     /// Sets the evolution parameters
     evolver.parameters().maximum_enclosure_radius = MAX_ENCLOSURE_RADIUS;
@@ -343,7 +344,7 @@ int main()
     std::cout << "Computing orbit... " << std::flush;
     HybridEvolver::OrbitType orbit = evolver.orbit(balls,initial_enclosure,evol_limits,UPPER_SEMANTICS);
 
-    std::cout << "Orbit="<<orbit<<std::endl;
+    std::cout << std::endl << "Orbit.final.size()="<<orbit.final().size()<<std::endl;
 
     plot("3balls-x1y1_orbit", 0, 1, numVariables, bounding_box_pos, Colour(0.0,0.5,1.0), orbit, -1);
     plot("3balls-x2y2_orbit", 2, 3, numVariables, bounding_box_pos, Colour(0.0,0.5,1.0), orbit, -1);

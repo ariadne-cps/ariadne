@@ -76,7 +76,7 @@ int main()
     float x2_0 = 3.0; // Initial position for the second spring
     float st = 1.9; // Stickyness
     float EVOL_TIME = 25.0; // Evolution time
-    int   EVOL_TRANS = 8; // Evolution transitions
+    int   EVOL_TRANS = 4; // Evolution transitions
     float MAX_ENCLOSURE_RADIUS = 0.02; // Maximum enclosure radius
     float MAX_STEP_SIZE = 0.05; // Maximum integration step size
 
@@ -158,7 +158,7 @@ int main()
     /// Compute the system evolution
 
     /// Create a HybridEvolver object
-    HybridEvolver evolver;
+    StableHybridEvolver evolver;
     evolver.verbosity = 1;
 
     /// Set the evolution parameters

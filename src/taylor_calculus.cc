@@ -285,15 +285,15 @@ reachability_step(const FlowModelType& flow_model,
                   const TimeType& final_time) const
 {
     ARIADNE_ASSERT(initial_set_model.dimension()+1==flow_model.argument_size());
-
+    
     TimeModelType reach_time_model(1);
     reach_time_model.set_value((final_time+initial_time)/2);
     reach_time_model.set_gradient(0u,(final_time-initial_time)/2);
 
     // FIXME: Embed set model correctly
     SetModelType expanded_timed_set_model=combine(initial_set_model.models(),reach_time_model);
-    ARIADNE_LOG(6,"expanded_timed_set_model="<<expanded_timed_set_model<<"\n");
-    SetModelType reach_set_model=apply(flow_model,expanded_timed_set_model);
+    ARIADNE_LOG(6,"expanded_timed_set_model="<<expanded_timed_set_model<<"\n");   
+    SetModelType reach_set_model=unchecked_apply(flow_model,expanded_timed_set_model);
     ARIADNE_LOG(6,"reach_set_model = "<<reach_set_model<<"\n");
     ARIADNE_ASSERT(reach_set_model.accuracy_ptr()==initial_set_model.accuracy_ptr());
 
@@ -314,7 +314,7 @@ reachability_step(const FlowModelType& flow_model,
     ARIADNE_LOG(6,"expanded_initial_set_model="<<expanded_initial_set_model<<"\n");
     SetModelType expanded_timed_set_model=join(expanded_initial_set_model.models(),expanded_reach_time_model);
     ARIADNE_LOG(6,"expanded_timed_set_model="<<expanded_timed_set_model<<"\n");
-    SetModelType reach_set_model=apply(flow_model,expanded_timed_set_model);
+    SetModelType reach_set_model=unchecked_apply(flow_model,expanded_timed_set_model);
     ARIADNE_LOG(6,"reach_set_model = "<<reach_set_model<<"\n");
     ARIADNE_ASSERT(reach_set_model.accuracy_ptr()==initial_set_model.accuracy_ptr());
 
@@ -446,6 +446,7 @@ touching_time_interval(const PredicateModelType& guard_model,
     RealType maximum_time=flow_model.domain()[dimension].upper();
 
     ARIADNE_LOG(6,"\nminimum_time="<<minimum_time<<" maximum_time="<<maximum_time<<"\n");
+    //std::cout << "minimum_time="<<minimum_time<<" maximum_time="<<maximum_time<<"\n" << std::flush;
     ARIADNE_ASSERT(minimum_time<=0);
     ARIADNE_ASSERT(maximum_time>=0);
 
@@ -457,35 +458,41 @@ touching_time_interval(const PredicateModelType& guard_model,
     RealType upper_time=maximum_time;
 
     if(possibly(this->active(guard_model,initial_set_model))) {
+        //std::cerr << "  predicate is initially active, lower_time = 0.0" << std::endl;
         lower_time=minimum_time;
     } else {
+        //std::cerr << "  predicate is NOT initially active." << std::endl;   
         RealType min_lower_time=minimum_time;
         RealType max_lower_time=maximum_time;
         for(uint i=0; i!=refinements; ++i) {
             RealType new_lower_time=med_approx(min_lower_time,max_lower_time);
-            if(possibly(this->active(guard_model,this->reachability_step(flow_model,initial_set_model,minimum_time,new_lower_time)))) {
+            if(possibly(this->active(guard_model,this->reachability_step(flow_model,initial_set_model,min_lower_time,new_lower_time)))) {
                 max_lower_time=new_lower_time;
             } else {
                 min_lower_time=new_lower_time;
-                lower_time=new_lower_time;
             }
         }
+        lower_time=min_lower_time;
+        //std::cerr << "  lower_time = " << lower_time << std::endl;
     }
 
-    if(definitely(this->active(guard_model,initial_set_model)) || definitely(!this->active(guard_model,initial_set_model))) {
-        upper_time=minimum_time;
+    if(possibly(this->active(guard_model,final_set_model))) {
+        //std::cerr << "  predicate is finally active, upper_time = "<< maximum_time << std::endl;
+        upper_time=maximum_time;
     } else {
+        //std::cerr << "  predicate is NOT finally active." << std::endl;   
         RealType min_upper_time=minimum_time;
         RealType max_upper_time=maximum_time;
         for(uint i=0; i!=refinements; ++i) {
             RealType new_upper_time=med_approx(min_upper_time,max_upper_time);
-            if(definitely(this->active(guard_model,this->integration_step(flow_model,initial_set_model,new_upper_time)))) {
-                max_upper_time=new_upper_time;
-                upper_time=new_upper_time;
-            } else {
+            if(possibly(this->active(guard_model,this->reachability_step(flow_model,initial_set_model,new_upper_time,max_upper_time)))) {
                 min_upper_time=new_upper_time;
+            } else {
+                max_upper_time=new_upper_time;
             }
         }
+        upper_time=max_upper_time;            
+        //std::cerr << "  upper_time = " << upper_time << std::endl;
     }
 
     //FunctionModelType lower_time_model=FunctionModelType::constant(initial_set_model.domain(),initial_set_model.centre(),Vector<Float>(1u,lower_time),_order,_smoothness);

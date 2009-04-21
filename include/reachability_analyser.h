@@ -69,7 +69,7 @@ class HybridReachabilityAnalyser
     typedef pair<DiscreteState,TaylorSet> HybridEnclosureType;
   private:
     boost::shared_ptr< DiscreteEvolutionParameters > _parameters;
-    boost::shared_ptr< DiscretiserInterface<HybridAutomaton,HybridGridCell> > _discretiser;
+    boost::shared_ptr< HybridDiscretiser<EnclosureType> > _discretiser;
   public:
     typedef DiscreteEvolutionParameters EvolutionParametersType;
     typedef HybridAutomaton SystemType;
@@ -180,7 +180,14 @@ class HybridReachabilityAnalyser
   private:
     // Helper functions for approximating sets
     HybridGrid _grid(HybridSpace hspc) const { 
-        return HybridGrid(hspc,this->_parameters->grid_lengths); }
+        if(this->_parameters->hybrid_grid.state_space() == hspc) {
+            return this->_parameters->hybrid_grid;
+        }
+        if(this->_parameters->grid.dimension() > 0) {
+            return HybridGrid(hspc,this->_parameters->grid);
+        }                
+        return HybridGrid(hspc,this->_parameters->grid_lengths); 
+    }
 };
 
 

@@ -228,7 +228,7 @@ TaylorModel apply(const TaylorExpression& tf, const TaylorSet& ts)
 
 TaylorSet apply(const TaylorFunction& tf, const TaylorSet& ts)
 {
-    ARIADNE_ASSERT_MSG(subset(ts.range(),tf.domain()),
+    ARIADNE_ASSERT_MSG(possibly(subset(ts.range(),tf.domain())),
         std::setprecision(18)<<"\n  tf="<<tf<<"\n  ts="<<ts<<"\n  ts.range() ="<<ts.range()<<"\n  tf.domain()="<<tf.domain());
     return unchecked_compose(tf.models(),unscale(ts.models(),tf.domain()));
 }

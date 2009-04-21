@@ -146,7 +146,7 @@ class StableHybridEvolver
                             const SystemType& system, const EnclosureType& initial, const TimeType& time, 
                             Semantics semantics, bool reach) const;
 
-    typedef tuple<DiscreteState, EventListType, SetModelType, TimeModelType> HybridTimedSetType;
+    typedef tuple<DiscreteState, IntegerType, SetModelType, TimeModelType> HybridTimedSetType;
     virtual void _evolution_step(std::vector< HybridTimedSetType >& working_sets, 
                                  EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,  
                                  const SystemType& system, const HybridTimedSetType& current_set, const TimeType& time, 

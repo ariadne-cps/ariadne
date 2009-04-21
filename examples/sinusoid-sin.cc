@@ -56,12 +56,13 @@ int main()
     /// Compute the system evolution
 
     /// Create a HybridEvolver object
-    HybridEvolver evolver;
+    StableHybridEvolver evolver;
 
     /// Set the evolution parameters
     evolver.parameters().maximum_enclosure_radius = 0.05;
     evolver.parameters().maximum_step_size = 0.05;
     std::cout <<  evolver.parameters() << std::endl;
+    evolver.verbosity=1;
 
     // Declare the type to be used for the system evolution
     typedef HybridEvolver::EnclosureType HybridEnclosureType;
@@ -74,15 +75,14 @@ int main()
     HybridEnclosureType initial_enclosure(l1,initial_box);
   
     HybridTime evolution_time(3*pi<Float>(),2);
-/* 
+
     std::cout << "Computing orbit... " << std::flush;
     OrbitType orbit = evolver.orbit(sinusoid,initial_enclosure,evolution_time,LOWER_SEMANTICS);
     std::cout << "done." << std::endl;
 
     //std::cout << "Orbit="<<orbit<<std::endl;
-*/
+    
     Figure g;
-/*
     Box graphic_box(2, -0.01,2*pi<Float>()+0.01, -1.1,1.6);
     g.set_bounding_box(graphic_box);
     array<uint> p(2,1,0);
@@ -91,7 +91,7 @@ int main()
     g << fill_colour(Colour(0.0,0.5,1.0));
     g << orbit;
     g.write("sinusoid_sin_orbit");
-*/
+
     /// Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
     analyser.verbosity = 3;

@@ -123,12 +123,13 @@ int main()
     dp[4] = 1000.0; /// Load resistance, Rl
 
     /// Introduces the global parameters
-    float TIME_LIMIT = 1.0/dp[1];
-    float TRAN_LIMIT = 5;
+    float TIME_LIMIT = 2.0/dp[1];
+    float TRAN_LIMIT = 6;
     float MAX_ENCL_RADIUS = 0.001/dp[1];
     float MAX_STEP_SIZE = 0.001/dp[1];
     float LOCK_TOGRID_TIME = 1.0/dp[1];
-    float MAX_GRID_DEPTH = 12;
+    float MAX_GRID_DEPTH = 19;
+    int VERBOSITY=1;
 
     /// Build the Hybrid System
   
@@ -213,7 +214,7 @@ int main()
 
     /// Create a HybridEvolver object
     StableHybridEvolver evolver;
-    evolver.verbosity = 1;
+    evolver.verbosity = VERBOSITY;
 
     /// Set the evolution parameters
     evolver.parameters().maximum_enclosure_radius = MAX_ENCL_RADIUS;

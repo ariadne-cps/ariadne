@@ -130,11 +130,11 @@ void TestDiscretisedEvolution::test_discrete_time() const
     ListSet<EnclosureType> const& reach_set=evolve_orbit.reach();
     ListSet<EnclosureType> const& intermediate_set=evolve_orbit.intermediate();
     ListSet<EnclosureType> const& final_set=evolve_orbit.final();
-
+    
     // Compute the reachable sets
     cout << "Computing discretised evolution... " << flush;
     Orbit<GridCell> discrete_orbit
-        = discrete_evolver.upper_evolution(system,initial_cell,steps,depth);
+        = discrete_evolver.upper_evolution(system,initial_cell,steps,grid,depth);
     cout << "done." << endl;
 
     GridTreeSet const& reach_cells=discrete_orbit.reach();
@@ -227,7 +227,7 @@ void TestDiscretisedEvolution::test_continuous_time() const
     // Compute the reachable sets
     cout << "Computing discretised evolution... " << flush;
     Orbit<GridCell> discrete_orbit
-        = discretiser.upper_evolution(system,initial_cell,time,depth);
+        = discretiser.upper_evolution(system,initial_cell,time,grid,depth);
     cout << "done." << endl;
     GridTreeSet const& reach_cells=discrete_orbit.reach();
     GridTreeSet const& intermediate_cells=discrete_orbit.intermediate();
@@ -332,13 +332,14 @@ void TestDiscretisedEvolution::test_hybrid_time() const
     ListSet<EnclosureType> const& reach_set=evolve_orbit.reach()[location];
     ListSet<EnclosureType> const& intermediate_set=evolve_orbit.intermediate()[location];
     ListSet<EnclosureType> const& final_set=evolve_orbit.final()[location];
+    HybridGrid hagrid(ha.state_space(),Float(1.0));
 
     // Compute the reachable sets
     cout << "Computing discretised evolution... " << flush;
     //Orbit<HybridGridCell> discrete_orbit
     //    = discrete_evolver.upper_evolution(ha,hybrid_initial_cell,htime,depth);
     Orbit<HybridGridCell> discrete_orbit
-        = discrete_evolver.evolution(ha,hybrid_initial_cell,htime,depth,UPPER_SEMANTICS);
+        = discrete_evolver.evolution(ha,hybrid_initial_cell,htime,hagrid,depth,UPPER_SEMANTICS);
     cout << "done." << endl;
 
     GridTreeSet const& reach_cells=discrete_orbit.reach()[location];

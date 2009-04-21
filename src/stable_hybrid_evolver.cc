@@ -211,7 +211,7 @@ _evolution(EnclosureListType& final_sets,
     const Float maximum_time=maximum_hybrid_time.continuous_time;
 
 
-    typedef tuple<DiscreteState, EventListType, SetModelType, TimeModelType> HybridTimedSetType;
+    typedef tuple<DiscreteState, IntegerType, SetModelType, TimeModelType> HybridTimedSetType;
 
     std::vector< HybridTimedSetType > working_sets;
 
@@ -229,7 +229,7 @@ _evolution(EnclosureListType& final_sets,
         ARIADNE_LOG(6,"initial_time_model = "<<initial_time_model<<"\n");
         TimedSetModelType initial_timed_set_model=join(initial_set_model.models(),initial_time_model);
         ARIADNE_LOG(6,"initial_timed_set_model = "<<initial_timed_set_model<<"\n");
-        working_sets.push_back(make_tuple(initial_location,EventListType(),initial_set_model,initial_time_model));
+        working_sets.push_back(make_tuple(initial_location,0,initial_set_model,initial_time_model));
     }
 
 
@@ -237,8 +237,7 @@ _evolution(EnclosureListType& final_sets,
         HybridTimedSetType current_set=working_sets.back();
         working_sets.pop_back();
         DiscreteState initial_location=current_set.first;
-        EventListType initial_events=current_set.second;
-        IntegerType initial_steps=initial_events.size();
+        IntegerType initial_steps=current_set.second;
         SetModelType initial_set_model=current_set.third;
         TimeModelType initial_time_model=current_set.fourth;
         RealType initial_set_radius=radius(initial_set_model.range());
@@ -254,7 +253,7 @@ _evolution(EnclosureListType& final_sets,
                 TimedSetModelType const& subdivided_timed_set_model=subdivisions[i];
                 SetModelType subdivided_set_model=Vector<TaylorModel>(project(subdivided_timed_set_model.models(),range(0,nd)));
                 TimeModelType subdivided_time_model=subdivided_timed_set_model[nd];
-                working_sets.push_back(make_tuple(initial_location,initial_events,subdivided_set_model,subdivided_time_model));
+                working_sets.push_back(make_tuple(initial_location,initial_steps,subdivided_set_model,subdivided_time_model));
             }
         } else if(semantics == LOWER_SEMANTICS && ENABLE_PREMATURE_TERMINATION && initial_set_radius>this->_parameters->maximum_enclosure_radius) {
             std::cerr << "WARNING: Terminating lower evolution at time " << initial_time_model
@@ -275,7 +274,6 @@ _evolution(EnclosureListType& final_sets,
                         <<" t="<<std::setw(7)<<std::fixed<<initial_time_model.value()
                         <<" r="<<std::setw(7)<<initial_set_model.radius()
                         <<" c="<<initial_set_model.centre()
-                        <<" e="<<initial_events
                         <<"                        ");
         }
 
@@ -312,14 +310,11 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
   
     DiscreteState initial_location(0);
     IntegerType initial_steps;
-    EventListType initial_events;
     SetModelType initial_set_model;
     TimeModelType initial_time_model;
     ARIADNE_LOG(9,"working_set = "<<current_set<<"\n");
-    make_ltuple(initial_location,initial_events,initial_set_model,initial_time_model)=current_set;
-    initial_steps=initial_events.size();
+    make_ltuple(initial_location,initial_steps,initial_set_model,initial_time_model)=current_set;
 
-    ARIADNE_LOG(4,"initial_events = "<<initial_events<<"\n");
     ARIADNE_LOG(4,"initial_steps = "<<initial_steps<<"\n");
     ARIADNE_LOG(6,"initial_time_model = "<<initial_time_model<<"");
     ARIADNE_LOG(4,"initial_location = "<<initial_location<<"\n");
@@ -331,7 +326,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     ARIADNE_LOG(2,"location = "<<initial_location<<" ");
     ARIADNE_LOG(2,"box = "<<initial_set_model.range()<<" ");
     ARIADNE_LOG(2,"radius = "<<radius(initial_set_model.range())<<"\n");
-    ARIADNE_LOG(2,"nnz = "<<number_of_nonzero_elements(initial_set_model)<<" ");
+    // ARIADNE_LOG(2,"nnz = "<<number_of_nonzero_elements(initial_set_model)<<" ");
     ARIADNE_LOG(3,"initial_time_accuracy = "<<initial_time_model.accuracy()<<" ");
     ARIADNE_LOG(3,"initial_set_accuracy = "<<initial_set_model[0].accuracy()<<"\n");
     //const uint nd=initial_set_model.result_size();
@@ -513,13 +508,13 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
                 if(possibly(this->_toolbox->active(*guard_ptr,reach_set_model))) {
                     Float lower_active_time = 0.0;
                     Float upper_active_time = step_size;
+                    ConstraintModelType guard_model=this->_toolbox->predicate_model(*guard_ptr,flow_bounds);
                     try {
                         // Compute crossing time
-                        ConstraintModelType guard_model=this->_toolbox->predicate_model(*guard_ptr,flow_bounds);
                         TimeModelType crossing_time_model=this->_toolbox->crossing_time(guard_model,flow_model,initial_set_model);
                         ARIADNE_LOG(3," Crossing time: "<<crossing_time_model.range()<<"\n");
                         Float lower_crossing_time = crossing_time_model.range().lower();
-                        Float upper_crossing_time = crossing_time_model.range().lower();
+                        Float upper_crossing_time = crossing_time_model.range().upper();
                         if(lower_crossing_time < 0.0 || lower_crossing_time > step_size) {
                             lower_crossing_time = 0.0;
                         }
@@ -544,8 +539,11 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
                         }                        
                     } catch(DegenerateCrossingException) { 
                         ARIADNE_LOG(3," DegenerateCrossing detected.\n"); 
-                        lower_active_time=0.0;
-                        upper_active_time=step_size;
+                        ARIADNE_LOG(3," Computing active time interval using bisections...");
+                        Interval active_time_interval = this->_toolbox->touching_time_interval(guard_model,flow_model,initial_set_model);
+                        lower_active_time=active_time_interval.lower();
+                        upper_active_time=active_time_interval.upper();
+                        ARIADNE_LOG(3,"done\n");
                     }
                     ARIADNE_LOG(2,"Activation time = ["<<lower_active_time<<","<<upper_active_time<<"]\n");
                     
@@ -559,22 +557,21 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
                         TimeModelType upper_active_time_model=this->_toolbox->time_model(upper_active_time,initial_time_model.domain());
                         TimeModelType active_time_model=this->_toolbox->reachability_time(lower_active_time_model,upper_active_time_model);
                         TimeModelType jump_time_model=this->_toolbox->reachability_time(initial_time_model+lower_active_time_model,initial_time_model+upper_active_time_model);
+                        ARIADNE_LOG(4,"jump_time_model="<<jump_time_model<<"\n");
                         
                         // Compute activation set model and jump set model
                         shared_ptr<const FunctionInterface> reset_ptr=iter->reset_ptr();
                         DiscreteState jump_location=iter->target().location();
                         DiscreteEvent jump_event=iter->event();
 
-                        SetModelType active_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,active_time_model);
-                        EventListType jump_events=initial_events; jump_events.push_back(jump_event);
-                        SetModelType jump_set_model=this->_toolbox->reset_step(*reset_ptr,active_set_model);
+                        SetModelType active_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,lower_active_time,upper_active_time);
                         ARIADNE_LOG(4,"initial_location="<<initial_location<<", active_set_model="<<active_set_model<<"\n");
+                        SetModelType jump_set_model=this->_toolbox->reset_step(*reset_ptr,active_set_model);
                         ARIADNE_LOG(4,"jump_location="<<jump_location<<", jump_set_model="<<jump_set_model<<"\n");
-                        ARIADNE_LOG(4,"jump_time_mode="<<jump_time_model<<"\n");
                         
                         // Adjoin intermediate and jump sets to the result
                         ARIADNE_LOG(3,"Adding jump set to the working sets.\n");                                
-                        working_sets.push_back(make_tuple(jump_location,jump_events,jump_set_model,jump_time_model));
+                        working_sets.push_back(make_tuple(jump_location,initial_steps+1,jump_set_model,jump_time_model));
                         intermediate_sets.adjoin(EnclosureType(initial_location,active_set_model));
                         intermediate_sets.adjoin(EnclosureType(jump_location,jump_set_model));
                     } else {
@@ -597,11 +594,9 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
                 if(definitely(this->_toolbox->active(*guard_ptr,initial_set_model))) {
                     ARIADNE_LOG(3," "<<*iter<<" is initially active. Adding jump set to the working sets.\n");                                
                     activated = true;     // at least one transition have been activated
-                    EventListType jump_events=initial_events;
-                    jump_events.push_back(iter->event());
                     SetModelType jump_set_model=this->_toolbox->reset_step(*reset_ptr,initial_set_model);
                     // Adjoin intermediate and jump sets to the result
-                    working_sets.push_back(make_tuple(jump_location,jump_events,jump_set_model,initial_time_model));
+                    working_sets.push_back(make_tuple(jump_location,initial_steps+1,jump_set_model,initial_time_model));
                     intermediate_sets.adjoin(EnclosureType(jump_location,jump_set_model));
                 }
             } else {    // lower_blocking_time > 0.0
@@ -642,24 +637,23 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
                             activated = true;     // at least one transition have been activated
                             // Compute activation time models
                             TimeModelType lower_active_time_model=this->_toolbox->time_model(lower_active_time,initial_time_model.domain());
+                            ARIADNE_LOG(4,"lower_active_time_model="<<lower_active_time_model<<"\n");                                           
                             TimeModelType upper_active_time_model=this->_toolbox->time_model(upper_active_time,initial_time_model.domain());
-                            TimeModelType active_time_model=this->_toolbox->reachability_time(lower_active_time_model,upper_active_time_model);
+                            ARIADNE_LOG(4,"upper_active_time_model="<<upper_active_time_model<<"\n");
                             TimeModelType jump_time_model=this->_toolbox->reachability_time(initial_time_model+lower_active_time_model,initial_time_model+upper_active_time_model);
-                        
+                            ARIADNE_LOG(4,"jump_time_model="<<jump_time_model<<"\n");
+                            
                             // Compute activation set model and jump set model
                             shared_ptr<const FunctionInterface> reset_ptr=iter->reset_ptr();
                             DiscreteState jump_location=iter->target().location();
-                            EventListType jump_events=initial_events;
-                            jump_events.push_back(iter->event());
-                            SetModelType active_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,active_time_model);
-                            SetModelType jump_set_model=this->_toolbox->reset_step(*reset_ptr,active_set_model);
+                            SetModelType active_set_model=this->_toolbox->reachability_step(flow_model,initial_set_model,lower_active_time,upper_active_time);
                             ARIADNE_LOG(4,"initial_location="<<initial_location<<", active_set_model="<<active_set_model<<"\n");
+                            SetModelType jump_set_model=this->_toolbox->reset_step(*reset_ptr,active_set_model);
                             ARIADNE_LOG(4,"jump_location="<<jump_location<<", jump_set_model="<<jump_set_model<<"\n");
-                            ARIADNE_LOG(4,"jump_time_mode="<<jump_time_model<<"\n");
                         
                             // Adjoin intermediate and jump sets to the result
                             ARIADNE_LOG(3,"Adding jump set to the working sets.\n");                                
-                            working_sets.push_back(make_tuple(jump_location,jump_events,jump_set_model,jump_time_model));
+                            working_sets.push_back(make_tuple(jump_location,initial_steps+1,jump_set_model,jump_time_model));
                             intermediate_sets.adjoin(EnclosureType(initial_location,active_set_model));
                             intermediate_sets.adjoin(EnclosureType(jump_location,jump_set_model));
                         } else {
@@ -705,7 +699,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
         ARIADNE_LOG(4,"final_set_model="<<final_set_model<<"\n");
         ARIADNE_LOG(4,"final_time_model="<<final_time_model<<"\n");
         ARIADNE_LOG(3,"Adding final set to the working sets.\n");        
-        working_sets.push_back(make_tuple(initial_location,initial_events,final_set_model,final_time_model));
+        working_sets.push_back(make_tuple(initial_location,initial_steps,final_set_model,final_time_model));
     }
   
     ARIADNE_LOG(2,"Done evolution_step.\n\n");
@@ -739,7 +733,7 @@ timed_evolution(const SystemType& system,
 
 
 
-    typedef tuple<DiscreteState, EventListType, SetModelType, TimeModelType> HybridTimedSetType;
+    typedef tuple<DiscreteState, IntegerType, SetModelType, TimeModelType> HybridTimedSetType;
 
     std::vector< HybridTimedSetType > working_sets;
 
@@ -757,7 +751,7 @@ timed_evolution(const SystemType& system,
         ARIADNE_LOG(6,"initial_time_model = "<<initial_time_model<<"\n");
         TimedSetModelType initial_timed_set_model=join(initial_set_model.models(),initial_time_model);
         ARIADNE_LOG(6,"initial_timed_set_model = "<<initial_timed_set_model<<"\n");
-        working_sets.push_back(make_tuple(initial_location,EventListType(),initial_set_model,initial_time_model));
+        working_sets.push_back(make_tuple(initial_location,0,initial_set_model,initial_time_model));
     }
 
 
@@ -765,8 +759,7 @@ timed_evolution(const SystemType& system,
         HybridTimedSetType current_set=working_sets.back();
         working_sets.pop_back();
         DiscreteState initial_location=current_set.first;
-        EventListType initial_events=current_set.second;
-        IntegerType initial_steps=initial_events.size();
+        IntegerType initial_steps=current_set.second;
         SetModelType initial_set_model=current_set.third;
         TimeModelType initial_time_model=current_set.fourth;
         RealType initial_set_radius=radius(initial_set_model.range());
@@ -789,7 +782,7 @@ timed_evolution(const SystemType& system,
                 TimedSetModelType const& subdivided_timed_set_model=subdivisions[i];
                 SetModelType subdivided_set_model=Vector<TaylorModel>(project(subdivided_timed_set_model.models(),range(0,nd)));
                 TimeModelType subdivided_time_model=subdivided_timed_set_model[nd];
-                working_sets.push_back(make_tuple(initial_location,initial_events,subdivided_set_model,subdivided_time_model));
+                working_sets.push_back(make_tuple(initial_location,initial_steps,subdivided_set_model,subdivided_time_model));
             }
         } else if(semantics == LOWER_SEMANTICS && ENABLE_PREMATURE_TERMINATION && initial_set_radius>this->_parameters->maximum_enclosure_radius) {
             Interval final_time(initial_time_model.range());

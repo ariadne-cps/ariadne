@@ -297,8 +297,8 @@ double exp_rnd(double x)
     log2=(n>0.0) ? next_opp(log2_approx) : next_rnd(log2_approx);
     r=x+(-n)*log2;
 
-    ARIADNE_ASSERT(r>=-0.4);
-    ARIADNE_ASSERT(r<=+0.4);
+    //ARIADNE_ASSERT(r>=-0.4);
+    //ARIADNE_ASSERT(r<=+0.4);
 
     if(r<0) {  
         // Compute w by standard Horner's rule gives correct rounding since w is monotone increasing in s

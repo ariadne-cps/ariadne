@@ -80,6 +80,7 @@ int main()
     /// Set the evolution parameters
     evolver.parameters().maximum_enclosure_radius = 0.05;
     evolver.parameters().maximum_step_size = 0.01;
+    evolver.verbosity = 4;
     std::cout <<  evolver.parameters() << std::endl;
 
     // Declare the type to be used for the system evolution

@@ -26,6 +26,7 @@
 #include "taylor_set.h"
 #include "orbit.h"
 #include "function_set.h"
+#include "polytope.h"
 #include "grid_set.h"
 #include "hybrid_set.h"
 #include "map.h"
@@ -43,8 +44,8 @@ outer_approximation(const ListSet<ES>& ls,
     for(typename ListSet<ES>::const_iterator 
             iter=ls.begin(); iter!=ls.end(); ++iter)
         {
-            result.adjoin_outer_approximation(*iter,accuracy);
-            //result.adjoin_outer_approximation(ImageSet(iter->range()),accuracy);
+            //            result.adjoin_outer_approximation(*iter,accuracy);
+            result.adjoin_outer_approximation(ImageSet(iter->range()),accuracy);
         }
     return result;
 }
@@ -56,7 +57,7 @@ outer_approximation(const HybridListSet<ES>& hls,
                     const HybridGrid& hgr,
                     const int accuracy)
 {
-    HybridGridTreeSet result;
+    HybridGridTreeSet result(hgr);
     for(typename HybridListSet<ES>::const_iterator 
             iter=hls.begin(); iter!=hls.end(); ++iter)
         {
@@ -66,8 +67,7 @@ outer_approximation(const HybridListSet<ES>& hls,
                 result.insert(make_pair(loc,GridTreeSet(hgr[loc])));
             }
             GridTreeSet& gts=result[loc];
-            gts.adjoin_outer_approximation(es,accuracy);
-            //gts.adjoin_outer_approximation(ImageSet(es.range()),accuracy;)
+            gts.adjoin_outer_approximation(ImageSet(es.range()),accuracy);
             //gts.adjoin_outer_approximation(ModelSet<ES>(es),accuracy);
         }
     return result;
@@ -75,12 +75,19 @@ outer_approximation(const HybridListSet<ES>& hls,
 
 
 
+
+
+//typedef ApproximateTaylorModel DefaultModelType;
+//typedef ApproximateTaylorModel DefaultEnclosureType;
+//typedef std::pair<DiscreteState,DefaultEnclosureType> DefaultHybridEnclosureType;
+
 template<class Sys,class ES>
 Orbit<typename Discretiser<Sys,ES>::BasicSetType> 
 Discretiser<Sys,ES>::
 evolution(const SystemType& system, 
           const BasicSetType& initial_set, 
           const TimeType& time,
+          const Grid& grid,
           const AccuracyType accuracy,
           const Semantics semantics) const
 {
@@ -89,18 +96,40 @@ evolution(const SystemType& system,
     ARIADNE_LOG(4,"enclosure="<<enclosure<<"\n");
     Orbit<EnclosureType> continuous_orbit=this->_evolver->orbit(system,enclosure,time,semantics);
     ARIADNE_LOG(5,"continuous_orbit="<<continuous_orbit<<"\nOK\n");
-    Orbit<BasicSetType> discrete_orbit=this->_discretise(continuous_orbit,initial_set,accuracy);
+    Orbit<BasicSetType> discrete_orbit=this->_discretise(continuous_orbit,initial_set,grid,accuracy);
     ARIADNE_LOG(5,"discrete_orbit="<<discrete_orbit<<"\n");
     return discrete_orbit;
 }
 
+template<class Sys,class ES>
+Orbit<typename Discretiser<Sys,ES>::BasicSetType> 
+Discretiser<Sys,ES>::
+lower_evolution(const SystemType& system, 
+                const BasicSetType& initial_set, 
+                const TimeType& time,
+                const Grid& grid,
+                const AccuracyType accuracy) const
+{
+    return this->evolution(system, initial_set, time, grid, accuracy, LOWER_SEMANTICS); 
+}
+
+template<class Sys,class ES>
+Orbit<typename Discretiser<Sys,ES>::BasicSetType> 
+Discretiser<Sys,ES>::
+upper_evolution(const SystemType& system, 
+                const BasicSetType& initial_set, 
+                const TimeType& time,
+                const Grid& grid,
+                const AccuracyType accuracy) const
+{
+    return this->evolution(system, initial_set, time, grid, accuracy, UPPER_SEMANTICS); 
+}
 
 template<class Sys, class ES>
 typename Discretiser<Sys,ES>::EnclosureType 
 Discretiser<Sys,ES>::
 _enclosure(const BasicSetType& initial_set) const
 {
-    ARIADNE_LOG(3,ARIADNE_PRETTY_FUNCTION<<"\n");
     return EnclosureType(initial_set.box());
 }
 
@@ -109,23 +138,24 @@ Orbit<typename Discretiser<Sys,ES>::BasicSetType>
 Discretiser<Sys, ES>::
 _discretise(const Orbit<EnclosureType>& continuous_orbit,
             const BasicSetType& initial_set,
+            const Grid& grid,
             const int accuracy) const
 {
     ARIADNE_LOG(3,ARIADNE_PRETTY_FUNCTION<<"\n");
     ARIADNE_LOG(6,"continuous_reach_set="<<continuous_orbit.reach().bounding_boxes()<<"\n");
     DenotableSetType reach_set
         = outer_approximation(continuous_orbit.reach(),
-                              Grid(continuous_orbit.reach().dimension(),Float(1)),
+                              grid,
                               accuracy);
     ARIADNE_LOG(4,"reach_set="<<reach_set<<"\n");
     DenotableSetType intermediate_set
         = outer_approximation(continuous_orbit.intermediate(),
-                              Grid(continuous_orbit.intermediate().dimension(),Float(1)),
+                              grid,
                               accuracy);
     ARIADNE_LOG(4,"intermediate_set="<<intermediate_set<<"\n");
     DenotableSetType final_set
         = outer_approximation(continuous_orbit.final(),
-                              Grid(continuous_orbit.final().dimension(),Float(1)),
+                              grid,
                               accuracy);
     ARIADNE_LOG(4,"final_set="<<final_set<<"\n");
     Orbit<BasicSetType> orbit(initial_set,reach_set,intermediate_set,final_set);
@@ -135,6 +165,7 @@ _discretise(const Orbit<EnclosureType>& continuous_orbit,
 }
 
 template class Discretiser<VectorField,TaylorSet>;
+template class Discretiser<Map,TaylorSet>;
 
 
 
@@ -146,25 +177,79 @@ HybridDiscretiser<ES>::
 evolution(const SystemType& system, 
           const BasicSetType& initial_set, 
           const TimeType& time,
+          const HybridGrid& grid,
           const AccuracyType accuracy,
           const Semantics semantics) const
 {
     ARIADNE_LOG(3,ARIADNE_PRETTY_FUNCTION<<"\n");
     EnclosureType enclosure=this->_enclosure(initial_set);
-    ARIADNE_LOG(4,"\nenclosure="<<enclosure<<"\n//enclosure\n\n");
+    ARIADNE_LOG(4,"enclosure"<<enclosure<<"\n");
     Orbit<EnclosureType> continuous_orbit=this->_evolver->orbit(system,enclosure,time,semantics);
-    ARIADNE_LOG(5,"\ncontinuous_orbit="<<continuous_orbit<<"//continuous_orbit\n\n");
-    Orbit<BasicSetType> discrete_orbit=this->_discretise(continuous_orbit,initial_set,accuracy);
-    ARIADNE_LOG(5,"\ndiscrete_orbit="<<discrete_orbit<<"\n//discrete_orbit\n");
+    ARIADNE_LOG(5,"continuous_orbit reach size="<<continuous_orbit.reach().size()<<"\n");
+    ARIADNE_LOG(5,"continuous_orbit final size="<<continuous_orbit.final().size()<<"\nOK\n");
+    Orbit<BasicSetType> discrete_orbit=this->_discretise(continuous_orbit,initial_set,grid,accuracy);
+    ARIADNE_LOG(5,"discrete_orbit reach size="<<discrete_orbit.reach().size()<<"\n");
+    ARIADNE_LOG(5,"discrete_orbit final size="<<discrete_orbit.final().size()<<"\n");
     return discrete_orbit;
 }
+
+
+template<class ES>
+HybridGridTreeSet 
+HybridDiscretiser<ES>::
+reach(const SystemType& system, 
+            const BasicSetType& initial_set, 
+            const TimeType& time,
+            const HybridGrid& grid,
+            const AccuracyType accuracy,
+            const Semantics semantics) const
+{
+    return this->_discretise(this->_evolver->reach(system,this->_enclosure(initial_set),time,semantics),initial_set,grid,accuracy);
+}
+
+template<class ES>
+HybridGridTreeSet 
+HybridDiscretiser<ES>::
+evolve(const SystemType& system, 
+             const BasicSetType& initial_set, 
+             const TimeType& time,
+             const HybridGrid& grid,
+             const AccuracyType accuracy,
+             const Semantics semantics) const
+{
+    return this->_discretise(this->_evolver->evolve(system,this->_enclosure(initial_set),time,semantics),initial_set,grid,accuracy);
+}
+
+template<class ES>
+Orbit<typename HybridDiscretiser<ES>::BasicSetType> 
+HybridDiscretiser<ES>::
+lower_evolution(const SystemType& system, 
+                const BasicSetType& initial_set, 
+                const TimeType& time, 
+                const HybridGrid& grid,
+                const AccuracyType accuracy) const 
+{ 
+    return this->evolution(system, initial_set, time, grid, accuracy, LOWER_SEMANTICS); 
+}
+
+template<class ES>
+Orbit<typename HybridDiscretiser<ES>::BasicSetType> 
+HybridDiscretiser<ES>::
+upper_evolution(const SystemType& system, 
+                const BasicSetType& initial_set, 
+                const TimeType& time, 
+                const HybridGrid& grid,
+                const AccuracyType accuracy) const 
+{ 
+    return this->evolution(system, initial_set, time, grid, accuracy, UPPER_SEMANTICS); 
+}
+
 
 template<class ES>
 typename HybridDiscretiser<ES>::EnclosureType 
 HybridDiscretiser<ES>::
 _enclosure(const BasicSetType& initial_set) const
 {
-    ARIADNE_LOG(3,ARIADNE_PRETTY_FUNCTION<<"\n");
     return EnclosureType(initial_set.first,ES(initial_set.second.box()));
 }
 
@@ -173,35 +258,52 @@ Orbit<typename HybridDiscretiser<ES>::BasicSetType>
 HybridDiscretiser<ES>::
 _discretise(const Orbit<EnclosureType>& continuous_orbit,
             const BasicSetType& initial_set,
+            const HybridGrid& grid,
             const int accuracy) const
 {
-    ARIADNE_LOG(3,ARIADNE_PRETTY_FUNCTION<<"\n");
+    ARIADNE_LOG(3,"HybridDiscretiser<ES>::_discretise(...)"<<"\n");
     ARIADNE_LOG(6,"continuous_orbit="<<continuous_orbit<<"\n");
-    HybridGrid grid(continuous_orbit.reach().space(),Float(1));
-    ARIADNE_LOG(8,"grid="<<grid<<"\n");
-    ARIADNE_LOG(8,"continuous_reach_set="<<continuous_orbit.reach()<<"\n");
-    ARIADNE_LOG(9,"\ncomputing outer approximation of continuous reach set...");
     DenotableSetType reach_set
         = outer_approximation(continuous_orbit.reach(),
                               grid,
                               accuracy);
-    ARIADNE_LOG(4,"done computing reach_set\n");
-    ARIADNE_LOG(4,"reach_set="<<reach_set<<"\n");
+    ARIADNE_LOG(4,"reach_set size="<<reach_set.size()<<"\n");
+    ARIADNE_LOG(6,"reach_set="<<reach_set<<"\n");
     DenotableSetType intermediate_set
         = outer_approximation(continuous_orbit.intermediate(),
-                              HybridGrid(continuous_orbit.intermediate().space(),Float(1)),
+                              grid,
                               accuracy);
-    ARIADNE_LOG(4,"intermediate_set="<<intermediate_set<<"\n");
+    ARIADNE_LOG(4,"intermediate_set size="<<intermediate_set.size()<<"\n");
+    ARIADNE_LOG(6,"intermediate_set="<<intermediate_set<<"\n");
     DenotableSetType final_set
         = outer_approximation(continuous_orbit.final(),
-                              HybridGrid(continuous_orbit.final().space(),Float(1)),
+                              grid,
                               accuracy);
-    ARIADNE_LOG(4,"final_set="<<final_set<<"\n");
+    ARIADNE_LOG(4,"final_set size="<<final_set.size()<<"\n");
+    ARIADNE_LOG(6,"final_set="<<final_set<<"\n");
     return Orbit<BasicSetType>(initial_set,reach_set,intermediate_set,final_set);
  
 }
 
-template class Discretiser<Map,TaylorSet>;
+template<class ES>
+HybridGridTreeSet
+HybridDiscretiser<ES>::
+_discretise(const ListSet<EnclosureType>& enclosure_list_set,
+            const BasicSetType& initial_set,
+            const HybridGrid& grid,
+            const int accuracy) const
+{
+    ARIADNE_LOG(3,ARIADNE_PRETTY_FUNCTION<<"\n");
+    ARIADNE_LOG(6,"enclosure_list_set="<<enclosure_list_set<<"\n");
+    DenotableSetType discretised_set
+        = outer_approximation(enclosure_list_set,
+                              grid,
+                              accuracy);
+    ARIADNE_LOG(4,"discretised_set="<<discretised_set<<"\n");
+    return discretised_set; 
+}
+
+
 template class HybridDiscretiser<TaylorSet>;
 
 } // namespace Ariadne

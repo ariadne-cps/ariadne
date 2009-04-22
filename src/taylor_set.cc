@@ -499,6 +499,10 @@ void draw(Figure& fig, const TaylorSet& ts) {
 } // namespace Ariadne
 
 
+#include "config.h"
+
+#ifdef HAVE_CAIRO_H
+
 #include <cairo/cairo.h>
 
 namespace Ariadne {
@@ -567,11 +571,20 @@ void plot(const char* filename, const Box& bbx, const TaylorSet& set)
     cairo_surface_write_to_png (surface, filename);
     cairo_surface_destroy(surface);
 
-
-
 }
-
-
 
 } // namespace Ariadne
 
+
+#else // Not HAVE_CAIRO_H
+
+namespace Ariadne {
+
+void plot(const char* filename, const Box& bbx, const TaylorSet& set)
+{
+    throw std::runtime_error("No facilities for drawing graphics are available.");
+}
+
+}
+
+#endif // HAVE_CAIRO_H

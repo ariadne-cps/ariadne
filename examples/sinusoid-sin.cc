@@ -12,7 +12,7 @@ struct GenSinusoid : FunctionData<2,2,0> {
     template<class R, class A, class P> static void 
     compute(R& r, const A& x, const P& p) {
 	      r[0] = 1.0;
-        r[1] = Ariadne::cos(x[0]);
+        r[1] = Ariadne::sin(x[0]+pi<Float>()/2);
     }
 };
 

@@ -520,6 +520,10 @@ class GridCell {
 
     /*! \brief The upper and lower bound in the \a i<sup>th</sup> coordinate. */
     Interval operator[](dimension_type i) const;
+	
+	/*! \brief Allows to split the given cell into two sub-cells. When isRight == true
+	 * then we return the right sub-cell, otherwise the left one */
+	GridCell split(bool isRight) const;
 
     /*! \brief The equality operator. */
     bool operator==(const GridCell& otherCell) const;

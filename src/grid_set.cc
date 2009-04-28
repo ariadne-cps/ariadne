@@ -746,6 +746,12 @@ bool GridTreeConstIterator::navigate_to(bool firstLast){
 
 /*********************************************GridCell***********************************************/
 
+GridCell GridCell::split(bool isRight) const {
+    BinaryWord theWord = _theWord;
+    theWord.push_back( isRight );
+    return GridCell( _theGrid, _theHeight, theWord);
+}
+
 //TODO: Perhaps we can make it more efficient by reducing the height of the words till
 //the minimal primary cell height and then comparing them by height and binary words
 bool GridCell::compare_grid_cells(const GridCell * pCellLeft, const GridCell &cellRight, const uint comparator ) {
@@ -868,7 +874,7 @@ Box GridCell::compute_box(const Grid& theGrid, const uint theHeight, const Binar
     // 3. Use Grid data to compute the box coordinates in the original space.
     return lattice_box_to_space( theTmpLatticeBox, theGrid );
 }
-    
+
 BinaryWord GridCell::primary_cell_path( const uint dimensions, const uint topPCellHeight, const uint bottomPCellHeight) {
     BinaryWord theBinaryPath;
         

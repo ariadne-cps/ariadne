@@ -782,6 +782,23 @@ void test_grid_paving_cell(){
     //!!!
     ARIADNE_PRINT_TEST_COMMENT( "pFirstCell_01 < pFourthCell_01, check for an exception in the compare_grid_cells method" );
     ARIADNE_TEST_THROWS( GridCell::compare_grid_cells( pFourthCell_01, (*pFirstCell_01), 1000), InvalidInput );
+    
+    //!!!
+    ARIADNE_PRINT_TEST_COMMENT( "Test Cell splitting, dimension: 2" );
+    string word = "001111";
+    GridCell * pThirdCell_To_Split = new GridCell( theGrid, 2, make_binary_word( word ) );
+    Box expected_cell_box = make_box("[0.5,1.0]x[0.5,1.0]");
+    ARIADNE_PRINT_TEST_COMMENT("The initial GridCell, as given by it's box: ");
+    ARIADNE_TEST_EQUAL( expected_cell_box, pThirdCell_To_Split->box() );
+    ARIADNE_PRINT_TEST_COMMENT("The left sub-box of the initial GridCell, as given by it's box: ");
+    Box expected_left_sub_cell_box = make_box("[0.5,0.75]x[0.5,1.0]");
+    ARIADNE_TEST_EQUAL( expected_left_sub_cell_box, pThirdCell_To_Split->split(false).box() );
+    ARIADNE_PRINT_TEST_COMMENT("The right sub-box of the initial GridCell, as given by it's box: ");
+    Box expected_right_sub_cell_box = make_box("[0.75,1.0]x[0.5,1.0]");
+    ARIADNE_TEST_EQUAL( expected_right_sub_cell_box, pThirdCell_To_Split->split(true).box() );
+    ARIADNE_PRINT_TEST_COMMENT("The word of the initial GridCell: ");
+    BinaryWord expected_cell_word = make_binary_word( word );
+    ARIADNE_TEST_EQUAL( expected_cell_word, pThirdCell_To_Split->word() );
 }
 
 void test_adjoin_operation_one(){
@@ -2182,15 +2199,15 @@ void test_subset_superset_box(){
 }
 
 int main() {
-    
+
     test_binary_tree();
 
     test_grid_paving_cursor();
 
     test_grid_paving_const_iterator();
-   
+
     test_grid_paving_cell();
-    
+
     test_grid_sub_paving();
 
     test_grid_paving();
@@ -2220,7 +2237,7 @@ int main() {
     test_subset_overlaps_box();
     test_subset_subset_box();
     test_subset_superset_box();
-    
+
     return ARIADNE_TEST_FAILURES;
 }
 

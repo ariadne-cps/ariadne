@@ -485,6 +485,17 @@ class GridAbstractCell {
      */
     static inline void primary_cell_at_height( const uint theHeight, int & leftBottomCorner, int & rightTopCorner );
 
+    /*! \brief This function allows to compare to cells it is used by the operator== and operator< methods of this class
+     *  The value of \a comparator should be either \a COMPARE_EQUAL or \aCOMPARE_LESS
+     *  The function checks that both cells are on the same grid and then alignes their primary cells.
+     *  The latter is done by extending the binary word of the cell with the lowest primary cell with
+     *  the corresponding prefix. When the words are alligned, wi simply use the == and < operators of
+     *  the \a BinaryWord class.
+     *  NOTE: Since the function is only based on comparison of the Grids, the words definings the cells and the
+     *  primary cell heights we can use it in sub-classes for comparing cells of the same types
+     */
+    static bool compare_abstract_grid_cells(const GridAbstractCell * pCellLeft, const GridAbstractCell &cellRight, const uint comparator );
+
   public:
 
     /*! \brief The constant for the grid cells comparison */
@@ -1877,6 +1888,10 @@ inline bool GridCell::operator<(const GridCell& other) const {
     return compare_grid_cells( this, other, COMPARE_LESS );
 }
 
+inline bool GridCell::compare_grid_cells(const GridCell * pCellLeft, const GridCell &cellRight, const uint comparator ) {
+    return GridAbstractCell::compare_abstract_grid_cells( pCellLeft, cellRight, comparator );
+}
+
 /*********************************************GridOpenCell***********************************************/
 
 inline GridOpenCell::GridOpenCell(const Grid& theGrid, const uint theHeight, const BinaryWord& theWord, const Box& theBox) :
@@ -1901,6 +1916,10 @@ inline bool GridOpenCell::operator==( const GridOpenCell& other ) const {
 
 inline bool GridOpenCell::operator<(const GridOpenCell& other) const {
     return compare_grid_cells( this, other, COMPARE_LESS );
+}
+
+inline bool GridOpenCell::compare_grid_cells(const GridOpenCell * pCellLeft, const GridOpenCell &cellRight, const uint comparator ) {
+    return GridAbstractCell::compare_abstract_grid_cells( pCellLeft, cellRight, comparator );
 }
 
 /********************************************GridTreeSubset******************************************/

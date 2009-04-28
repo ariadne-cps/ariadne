@@ -824,22 +824,13 @@ BinaryWord GridAbstractCell::primary_cell_path( const uint dimensions, const uin
     return theBinaryPath;
 }
 
-/*********************************************GridCell***********************************************/
-
-GridCell GridCell::split(bool isRight) const {
-    BinaryWord theWord = _theWord;
-    theWord.push_back( isRight );
-    return GridCell( _theGrid, _theHeight, theWord);
-}
-
 //TODO: Perhaps we can make it more efficient by reducing the height of the words till
 //the minimal primary cell height and then comparing them by height and binary words
-bool GridCell::compare_grid_cells(const GridCell * pCellLeft, const GridCell &cellRight, const uint comparator ) {
+bool GridAbstractCell::compare_abstract_grid_cells(const GridAbstractCell * pCellLeft, const GridAbstractCell &cellRight, const uint comparator ) {
     ARIADNE_ASSERT( pCellLeft->_theGrid == cellRight._theGrid );
     const BinaryWord * pThisWord, * pOtherWord;
     //This is the temporary word to be used if heights are not equal
     BinaryWord rootNodePath;
-    bool result;
     
     if( pCellLeft->_theHeight == cellRight._theHeight ) {
         //if the primary cells are of the same height, then we just compare the original binary words.
@@ -866,6 +857,14 @@ bool GridCell::compare_grid_cells(const GridCell * pCellLeft, const GridCell &ce
         default: 
             throw InvalidInput("The method's comparator argument should be either GridAbstractCell::COMPARE_EQUAL or GridAbstractCell::COMPARE_LESS.");
     }
+}
+
+/*********************************************GridCell***********************************************/
+
+GridCell GridCell::split(bool isRight) const {
+    BinaryWord theWord = _theWord;
+    theWord.push_back( isRight );
+    return GridCell( _theGrid, _theHeight, theWord);
 }
 
 GridCell GridCell::smallest_enclosing_primary_cell( const Box& theBox, const Grid& theGrid) {
@@ -918,6 +917,8 @@ GridOpenCell GridCell::interior() const {
 
 /*********************************************GridOpenCell******************************************/
 
+//TODO: Change this, because we can bump into the problem (due to round off)
+//of having the cell borders on the grid wider than needed.
 Box GridOpenCell::compute_box(const Grid& theGrid, const uint theHeight, const BinaryWord& theWord) {
     //1. Compute the box corresponding the the left bottom quadrant of the open cell
     Box result =  GridCell::compute_box( theGrid, theHeight, theWord );
@@ -930,15 +931,11 @@ Box GridOpenCell::compute_box(const Grid& theGrid, const uint theHeight, const B
         result[dim] = dim_interval;
     }
     
-    //3. Return the resulting open box
+    //3. Return the resulting box
     return result;
 }
 
 GridOpenCell GridOpenCell::split(tribool isRight) const {
-    throw NotImplemented( ARIADNE_PRETTY_FUNCTION );
-}
-
-bool GridOpenCell::compare_grid_cells(const GridOpenCell * pCellLeft, const GridOpenCell &cellRight, const uint comparator ) {
     throw NotImplemented( ARIADNE_PRETTY_FUNCTION );
 }
    

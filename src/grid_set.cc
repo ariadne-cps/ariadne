@@ -743,6 +743,86 @@ bool GridTreeConstIterator::navigate_to(bool firstLast){
     return isEnabledLeafFound;
 }
 
+/*****************************************GridAbstractCell*******************************************/
+
+Vector<Interval> GridAbstractCell::primary_cell_lattice_box( const uint theHeight, const dimension_type dimensions ) {
+    int leftBottomCorner = 0, rightTopCorner = 1;
+    //The zero level coordinates are known, so we need to iterate only for higher level primary cells
+    for(uint i = 1; i <= theHeight; i++){
+        primary_cell_at_height(i, leftBottomCorner, rightTopCorner);
+    }
+    // 1.2 Constructing and return the box defining the primary cell (relative to the grid).
+        
+    return Vector< Interval >( dimensions, Interval( leftBottomCorner, rightTopCorner ) );
+}
+
+uint GridAbstractCell::smallest_enclosing_primary_cell_height( const Vector<Interval>& theLatticeBox ) {
+    const dimension_type dimensions = theLatticeBox.size();
+    int leftBottomCorner = 0, rightTopCorner = 1;
+    uint height = 0;
+    //The zero level coordinates are known, so we need to iterate only for higher level primary cells
+    do{
+        //Check if the given box is a subset of a primary cell
+        Vector< Interval > primaryCellBox( dimensions, Interval( leftBottomCorner, rightTopCorner ) );
+        if(  inside(theLatticeBox, primaryCellBox ) ) {
+            //If yes then we are done
+            break;
+        }
+        //Otherwise increase the height and recompute the new borders
+        primary_cell_at_height( ++height, leftBottomCorner, rightTopCorner);
+    }while( true );
+        
+    return height;
+}
+
+uint GridAbstractCell::smallest_enclosing_primary_cell_height( const Box& theBox, const Grid& theGrid) {
+    Vector<Interval> theLatticeBox( theBox.size() );
+    //Convert the box to theGrid coordinates
+    for( uint i = 0; i != theBox.size(); ++i ) {
+        theLatticeBox[i] = ( theBox[i] - theGrid.origin()[i] ) / theGrid.lengths()[i];
+    }
+    //Compute and return the smallest primary cell, enclosing this box on the grid
+    return smallest_enclosing_primary_cell_height( theLatticeBox );
+}
+
+/*! \brief Apply grid data \a theGrid to \a theLatticeBox in order to compute the box dimensions in the original space*/
+Box GridAbstractCell::lattice_box_to_space(const Vector<Interval> & theLatticeBox, const Grid& theGrid ){
+    const uint dimensions = theGrid.dimension();
+    Box theTmpBox( dimensions );
+        
+    Vector<Float> theGridOrigin( theGrid.origin() );
+    Vector<Float> theGridLengths( theGrid.lengths() );
+        
+    for(uint current_dimension = 0; current_dimension < dimensions; current_dimension ++){
+        const Float theDimLength = theGridLengths[current_dimension];
+        const Float theDimOrigin = theGridOrigin[current_dimension];
+        //Recompute the new dimension coordinates, detaching them from the grid 
+        theTmpBox[current_dimension].set_lower( add_approx( theDimOrigin, mul_approx( theDimLength, theLatticeBox[current_dimension].lower() ) ) );
+        theTmpBox[current_dimension].set_upper( add_approx( theDimOrigin, mul_approx( theDimLength, theLatticeBox[current_dimension].upper() ) ) );
+    }
+        
+    return theTmpBox;
+}
+
+BinaryWord GridAbstractCell::primary_cell_path( const uint dimensions, const uint topPCellHeight, const uint bottomPCellHeight) {
+    BinaryWord theBinaryPath;
+        
+    //The path from one primary cell to another consists of alternating subsequences
+    //of length \a dimensions. These subsequences consist either of ones or zeroes.
+    //Odd primary cell height means that the first subsequence will consist of all
+    //ones. Even primary cell height indicates the the first subsequence will consis
+    //of all zeroes. This is due to the way we do the space subdivisions.
+    if( topPCellHeight > bottomPCellHeight ){
+        for( uint i = topPCellHeight; i > bottomPCellHeight; i-- ){
+            bool odd_height = (i % 2) != 0;
+            for( uint j = 0; j < dimensions; j++ ){
+                theBinaryPath.push_back( odd_height );
+            }
+        }
+    }
+        
+    return theBinaryPath;
+}
 
 /*********************************************GridCell***********************************************/
 
@@ -784,65 +864,13 @@ bool GridCell::compare_grid_cells(const GridCell * pCellLeft, const GridCell &ce
         case COMPARE_EQUAL : return (*pThisWord) == (*pOtherWord);
         case COMPARE_LESS : return (*pThisWord) < (*pOtherWord);
         default: 
-            throw InvalidInput("The method's comparator argument should be either GridCell::COMPARE_EQUAL or GridCell::COMPARE_LESS.");
+            throw InvalidInput("The method's comparator argument should be either GridAbstractCell::COMPARE_EQUAL or GridAbstractCell::COMPARE_LESS.");
     }
 }
 
-bool GridCell::operator==( const GridCell& other ) const {
-    return compare_grid_cells( this, other, COMPARE_EQUAL );
-}      
-
-bool GridCell::operator<(const GridCell& other) const {
-    return compare_grid_cells( this, other, COMPARE_LESS );
-}
-
-Vector<Interval> GridCell::primary_cell_lattice_box( const uint theHeight, const dimension_type dimensions ) {
-    int leftBottomCorner = 0, rightTopCorner = 1;
-    //The zero level coordinates are known, so we need to iterate only for higher level primary cells
-    for(uint i = 1; i <= theHeight; i++){
-        primary_cell_at_height(i, leftBottomCorner, rightTopCorner);
-    }
-    // 1.2 Constructing and return the box defining the primary cell (relative to the grid).
-        
-    return Vector< Interval >( dimensions, Interval( leftBottomCorner, rightTopCorner ) );
-}
-
-uint GridCell::smallest_enclosing_primary_cell_height( const Vector<Interval>& theLatticeBox ) {
-    const dimension_type dimensions = theLatticeBox.size();
-    int leftBottomCorner = 0, rightTopCorner = 1;
-    uint height = 0;
-    //The zero level coordinates are known, so we need to iterate only for higher level primary cells
-    do{
-        //Check if the given box is a subset of a primary cell
-        Vector< Interval > primaryCellBox( dimensions, Interval( leftBottomCorner, rightTopCorner ) );
-        if(  inside(theLatticeBox, primaryCellBox ) ) {
-            //If yes then we are done
-            break;
-        }
-        //Otherwise increase the height and recompute the new borders
-        primary_cell_at_height( ++height, leftBottomCorner, rightTopCorner);
-    }while( true );
-        
-    return height;
-}
-
-/*! \brief Apply grid data \a theGrid to \a theLatticeBox in order to compute the box dimensions in the original space*/
-Box GridCell::lattice_box_to_space(const Vector<Interval> & theLatticeBox, const Grid& theGrid ){
-    const uint dimensions = theGrid.dimension();
-    Box theTmpBox( dimensions );
-        
-    Vector<Float> theGridOrigin( theGrid.origin() );
-    Vector<Float> theGridLengths( theGrid.lengths() );
-        
-    for(uint current_dimension = 0; current_dimension < dimensions; current_dimension ++){
-        const Float theDimLength = theGridLengths[current_dimension];
-        const Float theDimOrigin = theGridOrigin[current_dimension];
-        //Recompute the new dimension coordinates, detaching them from the grid 
-        theTmpBox[current_dimension].set_lower( add_approx( theDimOrigin, mul_approx( theDimLength, theLatticeBox[current_dimension].lower() ) ) );
-        theTmpBox[current_dimension].set_upper( add_approx( theDimOrigin, mul_approx( theDimLength, theLatticeBox[current_dimension].upper() ) ) );
-    }
-        
-    return theTmpBox;
+GridCell GridCell::smallest_enclosing_primary_cell( const Box& theBox, const Grid& theGrid) {
+    //Create the GridCell, corresponding to the smallest primary cell, enclosing this box
+    return GridCell( theGrid, smallest_enclosing_primary_cell_height(theBox, theGrid), BinaryWord() );
 }
 
 //The box is not related to the Grid, whereas the binary tree is related to the Lattice of the grid:
@@ -875,26 +903,45 @@ Box GridCell::compute_box(const Grid& theGrid, const uint theHeight, const Binar
     return lattice_box_to_space( theTmpLatticeBox, theGrid );
 }
 
-BinaryWord GridCell::primary_cell_path( const uint dimensions, const uint topPCellHeight, const uint bottomPCellHeight) {
-    BinaryWord theBinaryPath;
-        
-    //The path from one primary cell to another consists of alternating subsequences
-    //of length \a dimensions. These subsequences consist either of ones or zeroes.
-    //Odd primary cell height means that the first subsequence will consist of all
-    //ones. Even primary cell height indicates the the first subsequence will consis
-    //of all zeroes. This is due to the way we do the space subdivisions.
-    if( topPCellHeight > bottomPCellHeight ){
-        for( uint i = topPCellHeight; i > bottomPCellHeight; i-- ){
-            bool odd_height = (i % 2) != 0;
-            for( uint j = 0; j < dimensions; j++ ){
-                theBinaryPath.push_back( odd_height );
-            }
-        }
+//This method appends \a dimension() zeroes to the binary word defining this cell
+//and return a GridOpenCell created with the given grid, primany cell height and
+//the newly created word for the low-left cell of the open cell
+GridOpenCell GridCell::interior() const {
+    BinaryWord theOpenCellWord = _theWord;
+    for(int i = 0; i < _theGrid.dimension(); i++) {
+        theOpenCellWord.push_back(false);
     }
-        
-    return theBinaryPath;
+    //The open cell will be defined by the given new word, i.e. the path to the
+    //left-bottom sub-quadrant cell but the box and the rest will be the same
+    return GridOpenCell( _theGrid, _theHeight, theOpenCellWord, box() );
 }
+
+/*********************************************GridOpenCell******************************************/
+
+Box GridOpenCell::compute_box(const Grid& theGrid, const uint theHeight, const BinaryWord& theWord) {
+    //1. Compute the box corresponding the the left bottom quadrant of the open cell
+    Box result =  GridCell::compute_box( theGrid, theHeight, theWord );
     
+    //2. To construct the proper box we need to take the right top corner
+    //   of the current result and double it in each dimension.
+    for(int dim = 0; dim < theGrid.dimension(); dim++){
+        Interval dim_interval = result[dim];
+        dim_interval.set_upper( add_approx( dim_interval.lower(), 2 * dim_interval.width() ) );
+        result[dim] = dim_interval;
+    }
+    
+    //3. Return the resulting open box
+    return result;
+}
+
+GridOpenCell GridOpenCell::split(tribool isRight) const {
+    throw NotImplemented( ARIADNE_PRETTY_FUNCTION );
+}
+
+bool GridOpenCell::compare_grid_cells(const GridOpenCell * pCellLeft, const GridOpenCell &cellRight, const uint comparator ) {
+    throw NotImplemented( ARIADNE_PRETTY_FUNCTION );
+}
+   
 /********************************************GridTreeSubset*****************************************/
 
 void GridTreeSubset::subdivide( Float theMaxCellWidth ) {
@@ -1913,18 +1960,6 @@ void GridTreeSet::restrict_to_height( const uint theHeight ) {
 /*************************************FRIENDS OF BinaryTreeNode*************************************/
 
 /*************************************FRIENDS OF GridCell*****************************************/
-    
-GridCell GridCell::smallest_enclosing_primary_cell( const Box& theBox, const Grid& theGrid) {
-    Vector<Interval> theLatticeBox( theBox.size() );
-    //Convert the box to theGrid coordinates
-    for( uint i = 0; i != theBox.size(); ++i ) {
-        theLatticeBox[i] = ( theBox[i] - theGrid.origin()[i] ) / theGrid.lengths()[i];
-    }
-    //Compute the smallest primary cell, enclosing this grid
-    uint height = GridCell::smallest_enclosing_primary_cell_height( theLatticeBox );
-    //Create the GridCell, corresponding to this cell
-    return GridCell( theGrid, height, BinaryWord() );
-}
     
 bool subset(const GridCell& theCellOne, const GridCell& theCellTwo, BinaryWord * pPathPrefixOne, BinaryWord * pPathPrefixTwo, uint *pPrimaryCellHeight ) {
     //Test that the Grids are equal

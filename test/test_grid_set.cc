@@ -710,7 +710,7 @@ void test_grid_paving(){
     ARIADNE_TEST_EQUAL( expectedTreeSetThree, initialTreeSetTwo );
 }
 
-void test_grid_paving_cell(){
+void test_grid_cell(){
     BinaryWord expected_result;
 
     // !!!
@@ -784,7 +784,7 @@ void test_grid_paving_cell(){
     ARIADNE_TEST_THROWS( GridCell::compare_grid_cells( pFourthCell_01, (*pFirstCell_01), 1000), InvalidInput );
     
     //!!!
-    ARIADNE_PRINT_TEST_COMMENT( "Test Cell splitting, dimension: 2" );
+    ARIADNE_PRINT_TEST_CASE_TITLE("Test Cell splitting, dimension: 2");
     string word = "001111";
     GridCell * pThirdCell_To_Split = new GridCell( theGrid, 2, make_binary_word( word ) );
     Box expected_cell_box = make_box("[0.5,1.0]x[0.5,1.0]");
@@ -799,6 +799,31 @@ void test_grid_paving_cell(){
     ARIADNE_PRINT_TEST_COMMENT("The word of the initial GridCell: ");
     BinaryWord expected_cell_word = make_binary_word( word );
     ARIADNE_TEST_EQUAL( expected_cell_word, pThirdCell_To_Split->word() );
+    
+    //!!!
+    ARIADNE_PRINT_TEST_CASE_TITLE("Test taking the cell's interior, dimension: 2");
+    ARIADNE_PRINT_TEST_COMMENT("The interior of the grid cell given by the box of the corresponding open grid cell: ");
+    ARIADNE_TEST_EQUAL( expected_cell_box, pThirdCell_To_Split->interior().box() );
+}
+
+void test_grid_open_cell(){
+    
+    //Allocate a trivial Grid two dimensional grid
+    Grid theTrivialGrid(2, 1.0);
+    
+    //!!!
+    ARIADNE_PRINT_TEST_CASE_TITLE("Constructing a trivial open cell, dimension: 2");
+    GridOpenCell trivialOpenCell = GridOpenCell( theTrivialGrid, 0, BinaryWord() );
+    Box expected_trivial_open_cell_box = make_box("[0.0,2.0]x[0.0,2.0]");
+    ARIADNE_PRINT_TEST_COMMENT("The trivial open cell, as given by its box:");
+    ARIADNE_TEST_EQUAL( expected_trivial_open_cell_box, trivialOpenCell.box() );
+    
+    //!!!
+    ARIADNE_PRINT_TEST_CASE_TITLE("Constructing an open cell, dimension: 2");
+    GridOpenCell openCell = GridOpenCell( theTrivialGrid, 2, make_binary_word( "0011111" ) );
+    Box expected_open_cell_box = make_box("[0.75,1.25]x[0.5,1.5]");
+    ARIADNE_PRINT_TEST_COMMENT("The open cell, as given by its box:");
+    ARIADNE_TEST_EQUAL( expected_open_cell_box, openCell.box() );
 }
 
 void test_adjoin_operation_one(){
@@ -2206,7 +2231,9 @@ int main() {
 
     test_grid_paving_const_iterator();
 
-    test_grid_paving_cell();
+    test_grid_cell();
+
+    test_grid_open_cell();
 
     test_grid_sub_paving();
 

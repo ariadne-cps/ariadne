@@ -66,7 +66,7 @@ int main()
     /// Build the automaton
     ball.new_mode(l1,dynamic);
 
-    ball.new_forced_transition(e11,l1,l1,reset,guard);
+    //ball.new_forced_transition(e11,l1,l1,reset,guard);
 
     /// Finished building the automaton
 
@@ -75,12 +75,12 @@ int main()
     /// Compute the system evolution
 
     /// Create a HybridEvolver object
-    StableHybridEvolver evolver;
+    HybridEvolver evolver;
 
     /// Set the evolution parameters
     evolver.parameters().maximum_enclosure_radius = 0.05;
     evolver.parameters().maximum_step_size = 0.1;
-    evolver.verbosity = 4;
+    evolver.verbosity = 1;
     std::cout <<  evolver.parameters() << std::endl;
 
     // Declare the type to be used for the system evolution
@@ -100,7 +100,7 @@ int main()
     OrbitType orbit = evolver.orbit(ball,initial_enclosure,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
 
-    std::cout << "Orbit.final="<<orbit.final()<<std::endl;
+    std::cout << "Orbit="<<orbit<<std::endl;
     //plot("tutorial-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit.initial());
     plot("ball-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit);
 /*

@@ -200,12 +200,9 @@ _evolution(EnclosureListType& final_sets,
            Semantics semantics, 
            bool reach) const
 {
-
-    
-
     typedef boost::shared_ptr< const FunctionInterface > FunctionConstPointer;
 
-    ARIADNE_LOG(3,ARIADNE_PRETTY_FUNCTION<<"\n");
+    ARIADNE_LOG(5,ARIADNE_PRETTY_FUNCTION<<"\n");
 
     const IntegerType maximum_steps=maximum_hybrid_time.discrete_time;
     const Float maximum_time=maximum_hybrid_time.continuous_time;

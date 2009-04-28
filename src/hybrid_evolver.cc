@@ -216,19 +216,12 @@ _evolution(EnclosureListType& final_sets,
            Semantics semantics,
            bool reach) const
 {
-    //verbosity=0;
     typedef boost::shared_ptr< const FunctionInterface > FunctionConstPointer;
 
     ARIADNE_LOG(5,ARIADNE_PRETTY_FUNCTION<<"\n");
 
     const IntegerType maximum_steps=maximum_hybrid_time.discrete_time;
     const Float maximum_time=maximum_hybrid_time.continuous_time;
-
-    //const uint spacial_order=2;
-    //const uint temporal_order=4;
-    //const uint order=spacial_order+temporal_order;
-    //const uint smoothness=1;
-
 
 
     typedef tuple<DiscreteState, EventListType, SetModelType, TimeModelType> HybridTimedSetType;
@@ -264,7 +257,7 @@ _evolution(EnclosureListType& final_sets,
         RealType initial_set_radius=radius(initial_set_model.range());
         if(initial_time_model.range().lower()>=maximum_time || initial_events.size()>=uint(maximum_steps)) {
             final_sets.adjoin(initial_location,this->_toolbox->enclosure(initial_set_model));
-        } else if(UPPER_SEMANTICS && ENABLE_SUBDIVISIONS
+        } else if(semantics == UPPER_SEMANTICS && ENABLE_SUBDIVISIONS
                   && (initial_set_radius>this->_parameters->maximum_enclosure_radius)) {
             // Subdivide
             uint nd=initial_set_model.dimension();
@@ -276,7 +269,7 @@ _evolution(EnclosureListType& final_sets,
                 TimeModelType subdivided_time_model=subdivided_timed_set_model[nd];
                 working_sets.push_back(make_tuple(initial_location,initial_events,subdivided_set_model,subdivided_time_model));
             }
-        } else if(LOWER_SEMANTICS && ENABLE_PREMATURE_TERMINATION && initial_set_radius>this->_parameters->maximum_enclosure_radius) {
+        } else if(semantics == LOWER_SEMANTICS && ENABLE_PREMATURE_TERMINATION && initial_set_radius>this->_parameters->maximum_enclosure_radius) {
             std::cerr << "WARNING: Terminating lower evolution at time " << initial_time_model
                       << " and set " << initial_set_model << " due to maximum radius being exceeded.";
         } else {
@@ -286,6 +279,19 @@ _evolution(EnclosureListType& final_sets,
                                   system,current_set,maximum_hybrid_time,
                                   semantics,reach);
         }
+
+        if(verbosity==1) {
+            ARIADNE_LOG(1,"\n"
+                        <<"#w="<<std::setw(4)<<working_sets.size()
+                        <<"#r="<<std::setw(4)<<std::left<<reach_sets.size()
+                        <<" s="<<std::setw(3)<<std::left<<initial_events.size()
+                        <<" t="<<std::setw(7)<<std::fixed<<initial_time_model.value()
+                        <<" r="<<std::setw(7)<<initial_set_model.radius()
+                        <<" c="<<initial_set_model.centre()
+                        <<" e="<<initial_events
+                        <<"                        \n");
+        }
+
     }
 
 }
@@ -419,7 +425,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     ARIADNE_ASSERT(set_model.result_size()==mode.dimension());
 
 
-
+/*
     ARIADNE_LOG(1,"\r"
         <<"#w="<<std::setw(4)<<working_sets.size()
         <<" #r="<<std::setw(4)<<std::left<<reach_sets.size()
@@ -429,7 +435,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
         <<" c="<<set_model.centre()
         <<" e="<<events
         <<"                        ");
-
+*/
     ARIADNE_LOG(2,"\n\n");
     ARIADNE_LOG(2,"events = "<<events<<" ");
     ARIADNE_LOG(2,"time_range = "<<time_model.range()<<" ");
@@ -464,6 +470,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
                 DiscreteState jump_location=iter->target().location();
                 std::vector<DiscreteEvent> jump_events=events;
                 jump_events.push_back(iter->event());
+                ARIADNE_LOG(1,"Pushing back "<<jump_set_model<<" into working_sets\n");
                 working_sets.push_back(make_tuple(jump_location,jump_events,jump_set_model,jump_time_model));
             }
         }
@@ -552,7 +559,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     // TODO: Make this a function; 
 
     SetModelType reachable_set=this->_toolbox->reachability_step(flow_set_model,time_model,blocking_time_model);
-    reach_sets.insert(make_pair(location,reachable_set));
+    reach_sets.adjoin(make_pair(location,reachable_set));
     ARIADNE_LOG(2,"reachable_set.argument_size()="<<reachable_set.argument_size()<<"\n");
     ARIADNE_LOG(2,"reachable_set.range()="<<reachable_set.range()<<"\n");
 
@@ -568,12 +575,12 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
             const DiscreteEvent event=*iter;
             if(event==finishing_event) {
                 // TODO: Better estimate to use smaller blocking time
-                intermediate_sets.insert(make_pair(location,evolved_set_model));
+                intermediate_sets.adjoin(make_pair(location,evolved_set_model));
                 working_sets.push_back(make_tuple(location,events,evolved_set_model,final_time_model));
             } else if(event==final_time_event) {
-                final_sets.insert(make_pair(location,evolved_set_model));
+                final_sets.adjoin(make_pair(location,evolved_set_model));
             } else if(event>=0) { // not an invariant
-                intermediate_sets.insert(make_pair(location,evolved_set_model));
+                intermediate_sets.adjoin(make_pair(location,evolved_set_model));
                 const DiscreteTransition& transition=system.transition(event,location);
                 SetModelType jump_set_model=apply(*transition.reset_ptr(),evolved_set_model);
                 DiscreteState jump_location=transition.target().location();

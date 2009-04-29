@@ -1007,7 +1007,36 @@ Box GridOpenCell::compute_box(const Grid& theGrid, const uint theHeight, const B
 }
 
 GridOpenCell GridOpenCell::split(tribool isRight) const {
-    throw NotImplemented( ARIADNE_PRETTY_FUNCTION );
+    BinaryWord theNewBaseCellPath = _theWord;
+    uint theNewPrimaryCellHeight;
+    if( indeterminate( isRight ) ) {
+        //Return the middle open cell (isRight == unknown)
+        theNewBaseCellPath.push_back( true );
+        theNewPrimaryCellHeight = _theHeight;
+    } else {
+        if( definitely( isRight ) ) {
+            //Return the right-most open cell (isRight == true)
+            //1. First determine in which dimention we are going to split
+            //NOTE: We use theNewBaseCellPath.size() but not theNewBaseCellPath.size()-1 because
+            //we want to determine the dimension in which will be the next split, but not the
+            //dimension in which we had the last split.
+            const uint dim = theNewBaseCellPath.size() % _theGrid.dimension();
+            //2. Then get the neighboring cell in this dimension
+            GridCell neighboringCell = GridCell::neighboringCell( _theGrid, _theHeight, theNewBaseCellPath, dim );
+            //3. Get the neighboring's cell height and word, because heigh might change
+            theNewBaseCellPath = neighboringCell.word();
+            theNewPrimaryCellHeight = neighboringCell.height();
+            //4. Take the left half of the new base cell
+            theNewBaseCellPath.push_back( false );
+        } else {
+            //Return the left-most open cell (isRight == false)
+            theNewBaseCellPath.push_back( false );
+            theNewPrimaryCellHeight = _theHeight;
+        }
+    }
+    
+    //Construct the new open cell and return it
+    return GridOpenCell( _theGrid, theNewPrimaryCellHeight, theNewBaseCellPath );
 }
    
 /********************************************GridTreeSubset*****************************************/

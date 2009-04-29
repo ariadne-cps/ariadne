@@ -806,6 +806,44 @@ void test_grid_cell(){
     ARIADNE_TEST_EQUAL( expected_cell_box, pThirdCell_To_Split->interior().box() );
 }
 
+void test_grid_open_cell_two(){
+    //Allocate a trivial Grid two dimensional grid
+    Grid theTrivialGrid(2, 1.0);
+    
+    //!!!
+    ARIADNE_PRINT_TEST_CASE_TITLE("Construct a trivial open cell and split it, dimension: 2");
+    GridOpenCell trivialOpenCell = GridOpenCell( theTrivialGrid, 0, BinaryWord() );
+    Box expected_trivial_open_cell_box = make_box("[0.0,2.0]x[0.0,2.0]");
+    ARIADNE_PRINT_TEST_COMMENT("The trivial open cell, as given by its box:");
+    ARIADNE_TEST_EQUAL( expected_trivial_open_cell_box, trivialOpenCell.box() );
+    ARIADNE_PRINT_TEST_COMMENT("The left open sub cell, as given by its box:");
+    Box expected_left_open_cell_box = make_box("[0.0,1.0]x[0.0,2.0]");
+    ARIADNE_TEST_EQUAL( expected_left_open_cell_box, trivialOpenCell.split( false ).box() );
+    ARIADNE_PRINT_TEST_COMMENT("The middle open sub cell, as given by its box:");
+    Box expected_middle_open_cell_box = make_box("[0.5,1.5]x[0.0,2.0]");
+    ARIADNE_TEST_EQUAL( expected_middle_open_cell_box, trivialOpenCell.split( indeterminate ).box() );
+    ARIADNE_PRINT_TEST_COMMENT("The right open sub cell, as given by its box:");
+    Box expected_right_open_cell_box = make_box("[1.0,2.0]x[0.0,2.0]");
+    ARIADNE_TEST_EQUAL( expected_right_open_cell_box, trivialOpenCell.split( true ).box() );
+    
+    //!!!
+    ARIADNE_PRINT_TEST_CASE_TITLE("Construct an open cell 01 height=2 and split it, dimension: 2");
+    GridOpenCell openCell01 = GridOpenCell( theTrivialGrid, 2, make_binary_word( "0011111" ) );
+    Box expected_open_cell_box01 = make_box("[0.75,1.25]x[0.5,1.5]");
+    ARIADNE_PRINT_TEST_COMMENT("The open cell, as given by its box:");
+    ARIADNE_TEST_EQUAL( expected_open_cell_box01, openCell01.box() );
+    ARIADNE_PRINT_TEST_COMMENT("The left open sub cell, as given by its box:");
+    Box expected_left_open_cell_box01 = make_box("[0.75,1.25]x[0.5,1.0]");
+    ARIADNE_TEST_EQUAL( expected_left_open_cell_box01, openCell01.split( false ).box() );
+    ARIADNE_PRINT_TEST_COMMENT("The middle open sub cell, as given by its box:");
+    Box expected_middle_open_cell_box01 = make_box("[0.75,1.25]x[0.75,1.25]");
+    ARIADNE_TEST_EQUAL( expected_middle_open_cell_box01, openCell01.split( indeterminate ).box() );
+    ARIADNE_PRINT_TEST_COMMENT("The right open sub cell, as given by its box:");
+    Box expected_right_open_cell_box01 = make_box("[0.75,1.25]x[1.0,1.5]");
+    ARIADNE_TEST_EQUAL( expected_right_open_cell_box01, openCell01.split( true ).box() );
+    
+}
+
 void test_grid_open_cell_one(){
     
     //Allocate a trivial Grid two dimensional grid
@@ -2367,6 +2405,8 @@ int main() {
     test_grid_cell();
 
     test_grid_open_cell_one();
+
+    test_grid_open_cell_two();
 
     test_grid_sub_paving();
 

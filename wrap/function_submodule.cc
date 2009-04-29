@@ -363,7 +363,7 @@ void export_polynomial()
     monomial_class.def("data",(const X&(M::*)()const) &M::data,return_value_policy<copy_const_reference>());
     monomial_class.def(self_ns::str(self));
 
-    double flt;
+    //double flt;
     X real;
     class_< P > polynomial_class(python_name<X>("Polynomial"), init<int>());
     polynomial_class.def("constant", (P(*)(uint,double)) &P::constant);
@@ -394,7 +394,7 @@ void export_polynomial()
     polynomial_class.def("__mul__",&__mul__< Vector<Polynomial<X> >, Polynomial<X>, Vector<Float> >);
 
     class_< Vector<P> > polynomial_function_class(python_name<X>("PolynomialVector"), no_init);
-    polynomial_function_class.def("__getitem__",(const P&(Vector<P>::*)(uint)const)&Vector<P>::operator[],return_value_policy<copy_const_reference>());
+    polynomial_function_class.def("__getitem__",(const P&(Vector<P>::*)(size_t)const)&Vector<P>::operator[],return_value_policy<copy_const_reference>());
     polynomial_function_class.def(self_ns::str(self));
 }
 

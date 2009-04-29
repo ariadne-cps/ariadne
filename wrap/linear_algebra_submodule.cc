@@ -248,6 +248,8 @@ void export_vector_class(class_<Vector<X> >& vector_class)
     vector_class.def("__neg__", &__vneg__<X,X>);
     vector_class.def("__repr__",&__repr__<Vector<X> >);
     vector_class.def(boost::python::self_ns::str(self));
+    vector_class.def("unit",&Vector<X>::unit);
+    vector_class.staticmethod("unit");
 
     def("norm",(X(*)(const Vector<X>&)) &norm);
     def("join",(Vector<X>(*)(const Vector<X>&,const Vector<X>&)) &join);

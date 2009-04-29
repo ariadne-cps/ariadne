@@ -26,6 +26,8 @@
 #include "array.h"
 #include "numeric.h"
 #include "vector.h"
+#include "expansion.h"
+#include "multi_index.h"
 #include "differential.h"
 #include "polynomial.h"
 #include "taylor_model.h"
@@ -339,11 +341,29 @@ void export_affine_function()
     affine_function_class.def("__repr__",(std::string(*)(const AffineFunction&))&__str__);
 }
 
+void export_multi_index()
+{
+    class_< MultiIndex > multi_index_class("MultiIndex", no_init);
+    //    multi_index_class.def("__getitem__",(MultiIndex::value_type(MultiIndex::*)(const MultiIndex::size_type&)const) &MultiIndex::operator[]);
+    multi_index_class.def("degree",(MultiIndex::value_type(MultiIndex::*)()const) &MultiIndex::degree);
+    multi_index_class.def(self_ns::str(self));
+}
+
+
 template<class X>
 void export_polynomial()
 {
+    typedef ExpansionValue<X> M;
     typedef Polynomial<X> P;
 
+    class_< M > monomial_class(python_name<X>("Monomial"), no_init);
+    monomial_class.def("key",(MultiIndex&(M::*)())&M::key,return_value_policy<reference_existing_object>());
+    //monomial_class.def("data",&monomial_data<X>,return_value_policy<reference_existing_object>());
+    //monomial_class.def("data",(X&(M::*)()) &M::data,return_value_policy<reference_existing_object>());
+    monomial_class.def("data",(const X&(M::*)()const) &M::data,return_value_policy<copy_const_reference>());
+    monomial_class.def(self_ns::str(self));
+
+    double flt;
     X real;
     class_< P > polynomial_class(python_name<X>("Polynomial"), init<int>());
     polynomial_class.def("constant", (P(*)(uint,double)) &P::constant);
@@ -355,6 +375,13 @@ void export_polynomial()
     polynomial_class.def(self+self);
     polynomial_class.def(self-self);
     polynomial_class.def(self*self);
+    //polynomial_class.def(self+flt);
+    //polynomial_class.def(self-flt);
+    //polynomial_class.def(self*flt);
+    //polynomial_class.def(self/flt);
+    //polynomial_class.def(flt+self);
+    //polynomial_class.def(flt-self);
+    //polynomial_class.def(flt*self);
     polynomial_class.def(self+real);
     polynomial_class.def(self-real);
     polynomial_class.def(self*real);
@@ -362,13 +389,19 @@ void export_polynomial()
     polynomial_class.def(real+self);
     polynomial_class.def(real-self);
     polynomial_class.def(real*self);
+    polynomial_class.def("__iter__",boost::python::iterator<P>());
     polynomial_class.def(self_ns::str(self));
+    polynomial_class.def("__mul__",&__mul__< Vector<Polynomial<X> >, Polynomial<X>, Vector<Float> >);
 
+    class_< Vector<P> > polynomial_function_class(python_name<X>("PolynomialVector"), no_init);
+    polynomial_function_class.def("__getitem__",(const P&(Vector<P>::*)(uint)const)&Vector<P>::operator[],return_value_policy<copy_const_reference>());
+    polynomial_function_class.def(self_ns::str(self));
 }
 
 
 
 void function_submodule() {
+    export_multi_index();
     export_expression_interface();
     export_affine_expression();
     export_function_interface();

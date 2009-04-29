@@ -150,6 +150,45 @@ template<class C, class I, class J, class X> inline
 void matrix_set_item(C& c, const I& i, const J& j, const X& x) { c[i][j]=x; }
 
 
+
+template<class R, class A>
+R __neg__(const A& a) { return static_cast<R>(-a); }
+
+template<class R, class A1, class A2>
+R __add__(const A1& a1, const A2& a2) { return static_cast<R>(a1+a2); }
+
+template<class R, class A1, class A2>
+R __sub__(const A1& a1, const A2& a2) { return static_cast<R>(a1-a2); }
+
+template<class R, class A1, class A2>
+R __mul__(const A1& a1, const A2& a2) { return static_cast<R>(a1*a2); }
+
+template<class R, class A1, class A2>
+R __div__(const A1& a1, const A2& a2) { return static_cast<R>(a1/a2); }
+
+template<class R, class A1, class A2>
+R __prod__(const A1& a1, const A2& a2) { return static_cast<R>(prod(a1,a2)); }
+
+/*
+template<class R, class A, class T=A>
+R __neg__(const A& a) { return static_cast<R>(-static_cast<T>(a)); }
+
+template<class R, class A1, class A2, class T1=A1, class T2=A2>
+R __add__(const A1& a1, const A2& a2) { return static_cast<R>(static_cast<T1>(a1)+static_cast<T2>(a2)); }
+
+template<class R, class A1, class A2, class T1=A1, class T2=A2>
+R __sub__(const A1& a1, const A2& a2) { return static_cast<R>(static_cast<T1>(a1)-static_cast<T2>(a2)); }
+
+template<class R, class A1, class A2, class T1=A1, class T2=A2>
+R __mul__(const A1& a1, const A2& a2) { return static_cast<R>(static_cast<T1>(a1)*static_cast<T2>(a2)); }
+
+template<class R, class A1, class A2, class T1=A1, class T2=A2>
+R __div__(const A1& a1, const A2& a2) { return static_cast<R>(static_cast<T1>(a1)/static_cast<T2>(a2)); }
+
+template<class R, class A1, class A2, class T1=A1, class T2=A2>
+R __prod__(const A1& a1, const A2& a2) { return static_cast<R>(prod(static_cast<T1>(a1),static_cast<T2>(a2))); }
+*/
+
 template<class T> bool check(const boost::python::extract<T>& e) { e(); return e.check(); }
 template<> bool check(const boost::python::extract<boost::python::list>& e);
 template<> bool check(const boost::python::extract<boost::python::dict>& e);

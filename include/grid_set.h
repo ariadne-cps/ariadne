@@ -623,10 +623,13 @@ class GridCell: public GridAbstractCell {
     /*! \brief Allows to convert the given GridCell into an open grid cell (GridOpenCell)*/
     GridOpenCell interior() const;
     
+    /*! \brief this method computes the box corresponding to this cell in the grid lattice.*/
+    static Vector<Interval> compute_lattice_box( const uint dimensions, const uint theHeight, const BinaryWord& theWord );
+    
     /*! \brief this method computes the box in the original space based on the \a theGrid,
      *  and a cell which is obtained by traversing the path given by \a _theWord from the
      * primary cell located at the heigth \a theHeight above the zero level cells
-     * (relative to the grid). This method is abstract.
+     * (relative to the grid).
      */
     static Box compute_box(const Grid& theGrid, const uint theHeight, const BinaryWord& theWord);
 
@@ -645,18 +648,27 @@ class GridCell: public GridAbstractCell {
      *  the \a BinaryWord class.
      */
     static bool compare_grid_cells(const GridCell * pCellLeft, const GridCell &cellRight, const uint comparator );
+    
+    /*! \brief Computes the neighboring cell to the given cell (defined by \a theGrid, \a theHeight, \a theWord)
+     *  in the given dimension \a dim. The resulting cell will the of the same size as the given one.
+     */
+    static GridCell neighboringCell( const Grid& theGrid, const uint theHeight, const BinaryWord& theWord, const uint dim );
 };
 
 /*! \brief An open cell of a grid paving. This cell is open and the path from the root cell defines
  *  its lower left sub cell wheres the complete open cell is a union of 4 cells.
  * 
  * This class does not contain the tree structure, so cannot be used in cursors/iterators.
+ * NOTE: The open cell is defined by its base cell which is a simple GridCell corresponding
+ * to the left-most quadrant cell of the open cell. In this respect, height() and word() return
+ * values defining the base cell and box() returns the entire box related to the open cell.
+ * This box should be treated as an open set, i.e. its borders should be excluded.
  */
 class GridOpenCell: public GridAbstractCell {
   protected:
     
     friend class GridCell;
-            
+    
     /*! \brief The box is given as an explicit parameter. This should only be used
      *  by friend classes which have already computed the box.
      */
@@ -685,10 +697,8 @@ class GridOpenCell: public GridAbstractCell {
     /*! \brief A total order on cells on the same grid, by height and word prefix. */
     bool operator<(const GridOpenCell& otherCell) const;
     
-    /*! \brief this method computes the box in the original space based on the \a theGrid,
-     *  and a cell which is obtained by traversing the path given by \a _theWord from the
-     * primary cell located at the heigth \a theHeight above the zero level cells
-     * (relative to the grid). This method is abstract.
+    /*! \brief this method computes the box in the original space based on the \a theGrid.
+     * This box should be treated as an open set. I.e. the borders of the box must be excluded.
      */
     static Box compute_box(const Grid& theGrid, const uint theHeight, const BinaryWord& theWord);
 
@@ -1040,10 +1050,10 @@ class GridTreeSet : public GridTreeSubset {
      */
     explicit GridTreeSet( const Grid& theGrid, const bool enable = false  );
 
-    /*! \brief Construct an empty tree. The \a theBoundingBox is used to define the lattice
+    /*! \brief Construct an empty tree. The \a theLatticeBox is used to define the lattice
      *  block (in theGrid) that will correspond to the root of the paving tree \a pRootTreeNode.
      */
-    explicit GridTreeSet( const Grid& theGrid, const Box & theBoundingBox );
+    explicit GridTreeSet( const Grid& theGrid, const Box & theLatticeBox );
             
     /*! \brief Construct the paving based on the block's coordinates, defined by: \a theLeftLowerPoint
      *  and \a theRightUpperPoint. These are the coordinates in the lattice defined by theGrid.
@@ -1890,6 +1900,12 @@ inline bool GridCell::operator<(const GridCell& other) const {
 
 inline bool GridCell::compare_grid_cells(const GridCell * pCellLeft, const GridCell &cellRight, const uint comparator ) {
     return GridAbstractCell::compare_abstract_grid_cells( pCellLeft, cellRight, comparator );
+}
+
+//The box is not related to the Grid, i.e. it is in the original space, whereas the binary tree is related to the Lattice of the grid:
+inline Box GridCell::compute_box(const Grid& theGrid, const uint theHeight, const BinaryWord& theWord) {
+    //Compute the lattice box and then map it to the original space using the grid data
+    return lattice_box_to_space( GridCell::compute_lattice_box( theGrid.dimension(), theHeight, theWord ), theGrid );
 }
 
 /*********************************************GridOpenCell***********************************************/

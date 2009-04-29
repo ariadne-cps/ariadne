@@ -872,14 +872,12 @@ GridCell GridCell::smallest_enclosing_primary_cell( const Box& theBox, const Gri
     return GridCell( theGrid, smallest_enclosing_primary_cell_height(theBox, theGrid), BinaryWord() );
 }
 
-//The box is not related to the Grid, whereas the binary tree is related to the Lattice of the grid:
+//Computes the box corresponding the the cell defined by the primary cell and the binary word.
+//The resulting box is not relaterd to the original space, but is a lattice box.
 // 1. Compute the primary cell located the the height \a theHeight above the zero level,
 // 2. Compute the cell defined by the path \a theWord (from the primary cell).
-// 3. Use Grid data to compute the box coordinates in the original space.
-Box GridCell::compute_box(const Grid& theGrid, const uint theHeight, const BinaryWord& theWord) {
-    //1. Obtain the primary-cell box, related to some grid
-    const uint dimensions = theGrid.dimension();
-    Vector<Interval>  theTmpLatticeBox( primary_cell_lattice_box( theHeight , dimensions ) );
+Vector<Interval> GridCell::compute_lattice_box( const uint dimensions, const uint theHeight, const BinaryWord& theWord ) {
+    Vector<Interval> theResultLatticeBox( primary_cell_lattice_box( theHeight , dimensions ) );
 
     //2. Compute the cell on some grid, corresponding to the binary path from the primary cell.
     uint current_dimension = 0;
@@ -888,18 +886,16 @@ Box GridCell::compute_box(const Grid& theGrid, const uint theHeight, const Binar
         current_dimension = i % dimensions;
         //Compute the middle point of the box's projection onto
         //the dimension \a current_dimension (relative to the grid)
-        Float middlePointInCurrDim = theTmpLatticeBox[current_dimension].midpoint();
+        Float middlePointInCurrDim = theResultLatticeBox[current_dimension].midpoint();
         if( theWord[i] ){
             //Choose the right half
-            theTmpLatticeBox[current_dimension].set_lower( middlePointInCurrDim );
+            theResultLatticeBox[current_dimension].set_lower( middlePointInCurrDim );
         } else {
             //Choose the left half
-            theTmpLatticeBox[current_dimension].set_upper( middlePointInCurrDim );
+            theResultLatticeBox[current_dimension].set_upper( middlePointInCurrDim );
         }
     }
-        
-    // 3. Use Grid data to compute the box coordinates in the original space.
-    return lattice_box_to_space( theTmpLatticeBox, theGrid );
+    return theResultLatticeBox;
 }
 
 //This method appends \a dimension() zeroes to the binary word defining this cell
@@ -915,24 +911,99 @@ GridOpenCell GridCell::interior() const {
     return GridOpenCell( _theGrid, _theHeight, theOpenCellWord, box() );
 }
 
-/*********************************************GridOpenCell******************************************/
+//NOTE: The cell defined byt the method's arguments is called the base cell.
+//NOTE: Here we work with the lattice boxes that are in the grid
+GridCell GridCell::neighboringCell( const Grid& theGrid, const uint theHeight, const BinaryWord& theWord, const uint dim ) {
+    const uint dimensions = theGrid.dimension();
+    //1. Extend the base cell in the given dimension (dim) by it's half width. This way
+    //   we are sure that we get a box that overlaps with the required neighboring cell.
+    //NOTE: This box is in the original space, but not on the lattice
+    Vector<Interval> baseCellBoxInLattice =  GridCell::compute_lattice_box( dimensions, theHeight, theWord );
+    const Float upperBorderOverlapping = add_approx( baseCellBoxInLattice[dim].upper(), baseCellBoxInLattice[dim].width() / 2 );
 
-//TODO: Change this, because we can bump into the problem (due to round off)
-//of having the cell borders on the grid wider than needed.
-Box GridOpenCell::compute_box(const Grid& theGrid, const uint theHeight, const BinaryWord& theWord) {
-    //1. Compute the box corresponding the the left bottom quadrant of the open cell
-    Box result =  GridCell::compute_box( theGrid, theHeight, theWord );
+    //2. Now check if the neighboring cell can be rooted to the given primary cell. For that
+    //   we simply use the box computed in 1. and get the primary cell that encloses it.
+    //NOTE: In fact, we only need to take about the upper border, because the lower border does not change.
+    int leftBottomCorner = 0, rightTopCorner = 1; uint height = 0;
+    do{
+        if( upperBorderOverlapping <= rightTopCorner ) {
+            //As soon as we fall into the primary cell we are done
+            break;
+        }
+        //Otherwise increase the height and recompute the new borders
+        primary_cell_at_height( ++height, leftBottomCorner, rightTopCorner);
+    } while(true);
     
-    //2. To construct the proper box we need to take the right top corner
-    //   of the current result and double it in each dimension.
-    for(int dim = 0; dim < theGrid.dimension(); dim++){
-        Interval dim_interval = result[dim];
-        dim_interval.set_upper( add_approx( dim_interval.lower(), 2 * dim_interval.width() ) );
-        result[dim] = dim_interval;
+    //3. If it can not then we take the lowest required primary cell to root this cell to and
+    //   to re-route the given base cell of GridOpenCell to that one.
+    uint theBaseCellHeight = theHeight;
+    BinaryWord theBaseCellWord = theWord;
+    if( height > theBaseCellHeight ) {
+        //If we need a higher primary cell then extend the height and the word for the case cell 
+        theBaseCellWord = primary_cell_path( dimensions, height, theBaseCellHeight );
+        theBaseCellWord.append( theWord );
+        theBaseCellHeight = height;
     }
     
-    //3. Return the resulting box
-    return result;
+    //4. We need to start from the end of the new (extended) word representing the base cell. Then
+    //   we go backwards and look for the longest prefix of the given word such that the upper
+    //   border computed in 1. is less than the boxe's upper border (in the given dimension).
+    BinaryWord theBaseCellWordPrefix = theBaseCellWord;
+    for( int position = ( theBaseCellWord.size() - 1 ); position >= 0; position-- ){
+        //Only consider the dimension that we need, otherwise
+        //there is not change of size in this dimension.
+        if( position % dimensions == dim ) {
+            //Ge the lattice box and see if the upper border is the box in the
+            //required dimension is larger than the one we computed in 1.
+            Box boxInLattice = GridCell::compute_lattice_box( dimensions, theBaseCellHeight, theBaseCellWordPrefix );
+            if( boxInLattice[dim].upper() >= upperBorderOverlapping ) {
+                //We found the smallest cell containing both the base
+                //and its neighboring cell in the given dimension
+                break;
+            }
+        }
+        
+        //Pop the last element from the back, since we do not need it any longer
+        theBaseCellWordPrefix.pop_back();
+    }
+    
+    //5. When this entry in the word is found from that point on we have to inverse the path in such
+    //   a way that every component in the dimension from this point till the end of the word is
+    //   inverted. This will provide us with the path to the neighborind cell in the given dimension
+    
+    // NOTE: Here we start index from theBaseCellWordPrefix.size() because theBaseCellWordPrefix.size()-1
+    // Corresponds to of the required dimension and this is the smallest box that includes the neighboring
+    // cells so the element at theBaseCellWord[theBaseCellWordPrefix.size()-1] must not be inverted!
+    for( int index = theBaseCellWordPrefix.size(); index < theBaseCellWord.size(); index++){
+        if( index % dimensions == dim ) {
+            //If this element of the path corresponds to the needed dimension then we need to invert it
+            theBaseCellWord[index] = !theBaseCellWord[index];
+        }
+    }
+    
+    return GridCell( theGrid, theBaseCellHeight, theBaseCellWord );
+}
+
+/*********************************************GridOpenCell******************************************/
+
+//NOTE: In this method we immediately start working with the 
+//boxes in the original space, not on the lattice of the grid.
+Box GridOpenCell::compute_box(const Grid& theGrid, const uint theHeight, const BinaryWord& theWord) {
+    const Box baseCellBox = GridCell( theGrid, theHeight, theWord ).box();
+    Box openCellBox( theGrid.dimension() );
+    
+    //Go through all the dimensions, compute the neighborind boxes and take the
+    //lower border from latticeBoxBaseCell, and the upper from the neighborind box.
+    for(int dim = 0; dim < theGrid.dimension(); dim++){
+        GridCell neighborindCell = GridCell::neighboringCell( theGrid, theHeight, theWord, dim );
+        Interval dimensionInterval;
+        dimensionInterval.set_lower( baseCellBox[dim].lower() );
+        dimensionInterval.set_upper( (neighborindCell.box())[dim].upper() );
+
+        openCellBox[dim] = dimensionInterval;
+    }
+    
+    return openCellBox;
 }
 
 GridOpenCell GridOpenCell::split(tribool isRight) const {
@@ -1317,8 +1388,8 @@ GridTreeSet::GridTreeSet( const uint theDimension, const bool enable ) :
     //4. A new disabled binary tree node, gives us the root for the paving tree
 }
 
-GridTreeSet::GridTreeSet(const Grid& theGrid, const Box & theBoundingBox ) :
-    GridTreeSubset( theGrid, GridCell::smallest_enclosing_primary_cell_height( theBoundingBox ),
+GridTreeSet::GridTreeSet(const Grid& theGrid, const Box & theLatticeBox ) :
+    GridTreeSubset( theGrid, GridCell::smallest_enclosing_primary_cell_height( theLatticeBox ),
                     BinaryWord(), new BinaryTreeNode( false ) ) {
     //1. The main point here is that we have to compute the smallest primary cell that contains theBoundingBox
     //2. This cell is defined by it's height and becomes the root of the GridTreeSet

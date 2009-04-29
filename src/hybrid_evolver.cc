@@ -344,7 +344,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     //
     //    If the transition is definitely not initially active and the crossing
     //    is transverse, then there are no problems. If the transition is
-    //    possibly initially active, then the crossing may be in the "wrong" 
+    //    possibly initially active, then the crossing may be in the "wrong"
     //    direction, i.e. the transition may become inactive. In this case, we
     //    have upper semantics (otherwise we would already have terminated the
     //    evolution) and the transition is considered inactive for evolution
@@ -457,7 +457,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     std::map<DiscreteEvent,tribool> initially_active_events;
     this->compute_initially_active_events(initially_active_events, guards, set_model);
     ARIADNE_LOG(2,"initially_active_events = "<<initially_active_events<<"\n\n");
-    
+
     // Test for initially active events, and process these as requred
     if(definitely(initially_active_events[blocking_event])) {
         // No continuous evolution; just apply discrete events
@@ -522,7 +522,7 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     ARIADNE_LOG(3,"event_blocking_times="<<event_blocking_times<<"\n");
     ARIADNE_LOG(2,"event_blocking_times="<<event_blocking_time_intervals<<"\n");
     ARIADNE_LOG(2,"non_transverse_events="<<non_transverse_events<<"\n\n");
-    
+
     // Compute blocking events
     std::set<DiscreteEvent> blocking_events;
     TimeModelType blocking_time_model;
@@ -562,16 +562,18 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     }
     ARIADNE_LOG(2,"activation_times="<<activation_time_intervals<<"\n\n");
 
-    
+
 
     // Compute sets
-    // TODO: Make this a function; 
+    // TODO: Make this a function;
 
-    SetModelType reachable_set=this->_toolbox->reachability_step(flow_set_model,time_model,blocking_time_model);
+    ARIADNE_LOG(4,"flow_set_model="<<flow_set_model<<"\n");
+    ARIADNE_LOG(4,"zero_time_model="<<zero_time_model<<"\n");
+    ARIADNE_LOG(4,"blocking_time_model="<<blocking_time_model<<"\n");
+    SetModelType reachable_set=this->_toolbox->reachability_step(flow_set_model,zero_time_model,blocking_time_model);
     reach_sets.adjoin(make_pair(location,reachable_set));
     ARIADNE_LOG(2,"reachable_set.argument_size()="<<reachable_set.argument_size()<<"\n");
     ARIADNE_LOG(2,"reachable_set.range()="<<reachable_set.range()<<"\n");
-
     if(semantics==LOWER_SEMANTICS && blocking_events.size()!=1) {
         // No further evolution
     } else {
@@ -599,6 +601,8 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
             }
         }
     }
+
+    wait_for_keypress();
 }
 
 
@@ -632,7 +636,7 @@ crossing_time(FunctionPtr guard_ptr, const FlowSetModelType& flow_set_model) con
 void HybridEvolver::
 compute_initially_active_events(std::map<DiscreteEvent,tribool>& initially_active_events,
                                 const std::map<DiscreteEvent,FunctionPtr>& guards,
-                                const ContinuousEnclosureType& initial_set) const 
+                                const ContinuousEnclosureType& initial_set) const
 {
     typedef TimeModelType GuardValueModelType;
     tribool blocking_event_initially_active=false;
@@ -888,7 +892,7 @@ compute_activation_times(std::map<DiscreteEvent,tuple<TimeModelType,TimeModelTyp
     const std::set< DiscreteTransition > transitions = system.transitions(initial_location);
     ARIADNE_LOG(7,"transitions="<<transitions<<"\n");
 
-    
+
 
     // Set evolution parameters
     const Float maximum_step_size=this->_parameters->maximum_step_size;
@@ -978,7 +982,7 @@ compute_activation_times(std::map<DiscreteEvent,tuple<TimeModelType,TimeModelTyp
 
     typedef std::map<int,DetectionData>::iterator predicate_iterator;
 
-    // Write out the ranges of the 
+    // Write out the ranges of the
     ARIADNE_LOG(6,"time="<<initial_time_model.value()<<"\n");
     ARIADNE_LOG(6,"centre="<<initial_set_model.centre()<<" radius="<<initial_set_model.radius()<<"\n");
     ARIADNE_LOG(6,"step_size="<<step_size<<"\n");

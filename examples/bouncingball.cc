@@ -28,33 +28,34 @@
 using namespace Ariadne;
 
 
-int main() 
-{  
+int main()
+{
     /// Set the system parameters
     double a = 0.5;
     double g = 9.8;
-    
+
     double A[4]={0,1.0,0,0};
     double b[2]={0,-g};
 
     /// Build the Hybrid System
-  
+
     /// Create a HybridAutomton object
     HybridAutomaton ball;
-  
+
     /// Create four discrete states
     DiscreteState l1(1);
-   
+
     /// Create the discrete events
     DiscreteEvent e11(11);
-  
+
     /// Create the dynamics
     AffineFunction dynamic(Matrix<Float>(2,2,A),Vector<Float>(2,b));
-    
+
     cout << "dynamic = " << dynamic << endl << endl;
 
     /// Create the resets
-    AffineFunction reset(Matrix<Float>(2,2,1.0,0.0,0.0,-a),Vector<Float>(2,0.0,0.0));
+    double bounce = 0.01; // Extra bounce from ground, needed to prevent zeno behaviour
+    AffineFunction reset(Matrix<Float>(2,2,1.0,0.0,0.0,-a),Vector<Float>(2,bounce,0.0));
     cout << "reset=" << reset << endl << endl;
 
     /// Create the guards.
@@ -62,11 +63,11 @@ int main()
     AffineFunction guard(Matrix<Float>(1,2,-1.0,0.0),Vector<Float>(1,0.0));
     cout << "guard=" << guard << endl << endl;
 
-  
+
     /// Build the automaton
     ball.new_mode(l1,dynamic);
 
-    //ball.new_forced_transition(e11,l1,l1,reset,guard);
+    ball.new_forced_transition(e11,l1,l1,reset,guard);
 
     /// Finished building the automaton
 
@@ -79,7 +80,7 @@ int main()
 
     /// Set the evolution parameters
     evolver.parameters().maximum_enclosure_radius = 0.05;
-    evolver.parameters().maximum_step_size = 0.1;
+    evolver.parameters().maximum_step_size = 1.0/64;
     evolver.verbosity = 1;
     std::cout <<  evolver.parameters() << std::endl;
 
@@ -93,9 +94,9 @@ int main()
     Box initial_box(2, 1.999,2.0, 0.0,0.001);
     HybridEnclosureType initial_enclosure(l1,initial_box);
     Box bounding_box(2, -0.1,2.1, -10.1,10.1);
-  
+
     HybridTime evolution_time(4.0,4);
- 
+
     std::cout << "Computing orbit... " << std::flush;
     OrbitType orbit = evolver.orbit(ball,initial_enclosure,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;

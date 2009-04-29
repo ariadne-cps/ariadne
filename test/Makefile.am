@@ -87,5 +87,5 @@ EXTRA_DIST =
 SUBDIRS =
 
 TESTS = $(check_PROGRAMS)
-XFAIL_TESTS = test_discretised_evolution
+XFAIL_TESTS = 
 testsubdir = ./

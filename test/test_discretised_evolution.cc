@@ -69,9 +69,9 @@ int main()
 
 void TestDiscretisedEvolution::test() const
 {
+    ARIADNE_TEST_CALL(test_hybrid_time());
     //ARIADNE_TEST_CALL(test_discrete_time());
     //ARIADNE_TEST_CALL(test_continuous_time());
-    ARIADNE_TEST_CALL(test_hybrid_time());
 }
 
 
@@ -159,7 +159,7 @@ void TestDiscretisedEvolution::test_discrete_time() const
         fig << fill_colour(cyan) << reach_cells;
         fig << fill_colour(yellow) << initial_cell;
         fig << fill_colour(green) << final_cells;
-        fig.write("test_discrete_evolver-henon-cells");
+        fig.write("test_discretised_evolution-henon-cells");
     }
 
     // Print the intial, evolve and reach sets
@@ -170,7 +170,7 @@ void TestDiscretisedEvolution::test_discrete_time() const
         fig << fill_colour(cyan) << reach_set;
         fig << fill_colour(yellow) << initial_set;
         fig << fill_colour(green) << final_set;
-        fig.write("test_discrete_evolver-henon-sets");
+        fig.write("test_discretised_evolution-henon-sets");
     }
 }
 
@@ -181,7 +181,7 @@ void TestDiscretisedEvolution::test_continuous_time() const
     cout << __PRETTY_FUNCTION__ << endl;
 
     // Set up the evolution parameters and grid
-    Float time(3.0);
+    Float time(1.0);
     Float maximum_step_size(0.125);
     Float maximum_enclosure_radius(0.25);
     int depth=8;
@@ -310,7 +310,7 @@ void TestDiscretisedEvolution::test_hybrid_time() const
     //Box eps_bounding_box=bounding_box.neighbourhood(0.1);
 
     // Define the initial cell
-    Box box=make_box("[1.001,1.002]x[0.501,0.502]");
+    Box box=make_box("[1.0001,1.0002]x[0.5001,0.5002]");
     cout << "box=" << box << endl;
     GridTreeSet approx_tree_set=outer_approximation(box,grid,depth);
     GridCell initial_cell=*approx_tree_set.begin();
@@ -324,9 +324,13 @@ void TestDiscretisedEvolution::test_hybrid_time() const
 
     // Compute the reachable sets
     cout << "Computing evolution... " << flush;
+    // evolver.verbosity=1;
     Orbit<HybridEnclosureType> evolve_orbit
         = evolver.orbit(ha,hybrid_initial_set,htime,UPPER_SEMANTICS);
     cout << "done." << endl;
+
+    cout << "enclosure_orbit="<<evolve_orbit<<endl;
+    cout << evolve_orbit.reach()<<endl;
 
     EnclosureType const& initial_set=evolve_orbit.initial().second.range();
     ListSet<EnclosureType> const& reach_set=evolve_orbit.reach()[location];

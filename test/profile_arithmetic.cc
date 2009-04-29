@@ -27,12 +27,13 @@
 #include <cstdlib>
 #include <algorithm>
 
-#include <fenv.h>
-
-#include <gmpxx.h>
-
 #include <boost/timer.hpp>
 #include <boost/progress.hpp>
+
+#if defined HAVE_FENV_H && defined HAVE_GMPXX_H
+
+#include <fenv.h>
+#include <gmpxx.h>
 
 // Needed for MAC OS X, where uint is not defined
 typedef unsigned int uint;
@@ -707,3 +708,11 @@ void scal_mr_csy(double& e, size_t n, double* r, const double* x, const double& 
     e=e+d;
     e=e*(1+eps/2);
 }
+
+#else // No fenv.h or no gmpxx.h
+
+int main() {
+    std::cout << "SKIPPED " << std::endl;
+}
+
+#endif

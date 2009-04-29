@@ -322,4 +322,109 @@ It is not clear to me what happens if the above assumptions are not respected, t
 
 \noindent Currently, the code follows the most conservative approach: if something goes wrong in the computation of the \texttt{crossing\_time}, the transition is activated on the whole interval $[0, \mathtt{step\_size}]$ for upper semantics, and it is not activated at all for lower semantics. Is this the best we ca do, or there is a clever approach to solve these situations?
 
+
+
+\subsection*{Evolution Step in Version 0.4.3}
+
+\begin{enumerate}
+\item Extract data about working set and location
+
+\item Find all blocking events (invariants and urgent transitions) which are
+active at the starting time. If any events are definitely active,
+the corresponding reset occurs, and there is no continuous evolution.
+If there are possibly active events, these occur along with continuous
+evolution for upper semantics, and evolution terminates with lower
+semantics.
+
+\begin{tabbing}
+Input: \= \texttt{Set starting\_set},\\
+       \> \texttt{map<Event,Expression> guards}\\
+Output: \= \texttt{map<Event,Tribool> initially\_active}\\
+     \> \qquad (includes special "blocking event")
+\end{tabbing}
+
+\item Compute the continuous evolution for a fixed step size h, over the
+time interval [-h,+h]
+
+\begin{tabbing}
+Input: \=\texttt{Function:\ dynamic},\\
+       \>\texttt{Box:\ domain} or  \texttt{SetModel\ initial\_set},\\
+       \>\texttt{Time:\ maximum\_step\_size}\\
+Output: \=
+        \texttt{FunctionModel:\ flow\_model}
+           or \texttt{SetModel:\ flow\_set\_model}\\
+        \> \texttt{Box:\ flow\_bounds}\\
+\end{tabbing}
+
+
+\item For each blocking event, compute the crossing time with the guard set.
+The computed crossing time may lie outside the flow time interval;
+any such crossings will be ignored. Non-transverse crossings may have
+large crossing time intervals.
+
+If the transition is definitely not initially active and the crossing
+is transverse, then there are no problems. If the transition is
+possibly initially active, then the crossing may be in the "wrong"
+direction, i.e. the transition may become inactive. In this case, we
+have upper semantics (otherwise we would already have terminated the
+evolution) and the transition is considered inactive for evolution
+purposes.
+
+If the crossing is not transverse, then lower evolution is blocking
+and upper evolution considers the transition as non-urgent. However,
+we should probably evolve close to the transition, and maybe split
+the evolution across the transversality boundary.
+
+\begin{tabbing}
+Input: \= \texttt{map<Event,Expression>:\ resets}, \\
+       \> \texttt{Box:\ flow\_bounds} \\
+       \> \quad or \texttt{FunctionModel:\ flow\_model} \\
+       \> \quad or \texttt{SetModel:\ flow\_set\_model} \\
+Output: \= \texttt{map<Event,ExpressionModel>\ crossing\_times}, \\
+        \> \texttt{set<Event>\ tangential\_events}
+\end{tabbing}
+
+\item Compute the blocking time and blocking events. The blocking time is
+the minimum of the computed crossing times.
+
+If there is a single  blocking event, the crossing is tranverse, and
+occurs between the starting and finishing times, then evolution
+proceeds according to this event.
+
+If there are multiple blocking events, and the upper bound of the
+crossing time range is large, then we set the finishing time to
+just below the crossing time. This means that in the next step
+we may be better able to resolve the crossing.
+
+If there are multiple blocking events and the upper bound of the
+blocking time range is small, then lower evolution terminates, and
+upper evolution proceeds according to the crossing time of each
+blocking event.
+
+\begin{tabbing}
+Input: \= \texttt{map<Event,ExpressionModel>:\ crossing\_times} \\
+Output: \= \texttt{set<Event>\ blocking\_events}, \\
+        \> \texttt{ExpressionModel:\ blocking\_time}
+\end{tabbing}
+
+\item Compute the initial and final activation times of the non-blocking
+events. Tangential crossings are included in this computation,
+as they are treated as non-urgent.
+
+Compute the maximum of the initial activation time and starting time,
+and the minimum of the final activation time and finishing/blocking
+time.
+
+\begin{tabbing}
+Input: \= \texttt{map<Event,Expression>:\ guards}, \\
+       \> \texttt{Box:\ domain} \\
+       \> \quad or \texttt{FunctionModel:\ flow\_model} \\
+       \> \quad or \texttt{SetModel:\ flow\_set\_model} \\
+Output: \= \texttt{map<Event,pair<ExpressionModel,ExpressionModel>>:\ initial/final\_times}
+\end{tabbing}
+
+\item Apply the flows, guards and resets according to the computed
+event times.
+\end{enumerate}
+
 \end{document}

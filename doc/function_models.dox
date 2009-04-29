@@ -49,12 +49,14 @@ If \f$s=-1\f$ then the model is assumed to be \em exact, i.e. a polynomial.
 The following operations on functions are supported:
  - Evaluation: If \f$p\f$ is a \f$(d,s)\f$-model \f$\mathbb{R}^m\rightarrow\mathbb{R}^n\f$, then \f$p(c_1,\ldots,c_m)\f$ is an interval.
  - Partial evaluation: If \f$p\f$ is a \f$(d,s)\f$-model \f$\mathbb{R}^m\rightarrow\mathbb{R}^n\f$, then \f$p(\cdot,\ldots,c_j,\ldots,\cdot)\f$ is a \f$(d,s)\f$-model \f$\mathbb{R}^{m-1}\rightarrow\mathbb{R}^n\f$.
+ - Variable substitution: If \f$p\f$ is a \f$(d,s)\f$-model \f$\mathbb{R}^m\rightarrow\mathbb{R}^n\f$,  and \f$q\f$ is a \f$(d,s)\f$-model \f$\mathbb{R}^{m-1}\rightarrow \R\f$, then \f$p(\cdot,\ldots,q(\cdot),\ldots,\cdot)\f$ is a \f$(d,s)\f$-model \f$\mathbb{R}^{m-1}\rightarrow\mathbb{R}^n\f$.
 
  - Addition/Subtraction: If \f$p\f$ and \f$q\f$ are \f$(d,s)\f$-models \f$\mathbb{R}^m\rightarrow\mathbb{R}^n\f$, then so are \f$p+q\f$ and \f$p-q\f$.
- - Multiplication: If \f$s\f$ is a scalar \f$(d,s)\f$-model and \f$p\f$ is a \f$(d,s)\f$-model, then \f$s\times p\f$ is a \f$(d,s)\f$-model.
+ - Multiplication: If \f$s\f$ is a scalar model \f$(d,s)\f$-model and \f$p\f$ is a \f$(d,s)\f$-model, then \f$s\times p\f$ is a \f$(d,s)\f$-model.
  - Division: If \f$s\f$ is a scalar model and \f$s(x)\neq0\f$, then \f$1/s\f$ is a \f$(d,s)\f$-model.
 
  - Differentiation: If \f$p\f$ is an \f$(d,s)\f$-model, then the single-variable derivative \f$\frac{\partial p}{\partial x_i}\f$ is a \f$(d-1,s-1)\f$-model.
+ - Differentiation: If \f$p\f$ is an \f$(d,s)\f$-model, then the single-variable integral \f$\int^{x_j} p(x_1,\ldots,\xi_j,\ldots,x_m)\,d\xi_j\f$ is a \f$(d,s)\f$-model.
 
  - Direct sum (combine): If \f$p_1:\mathbb{R}^{m_1}\rightarrow\mathbb{R}^{n_1}\f$ and \f$p_2:\mathbb{R}^{m_2}\rightarrow\mathbb{R}^{n_2}\f$ are \f$(d,s)\f$ models, then so is \f$p_1\oplus p_2 : \mathbb{R}^{m_1+m_2}\rightarrow\mathbb{R}^{n_1+n_2}\f$ given by \f$(p_1\oplus p_2)(x_1,x_2):=(p_1(x_1),p_2(x_2))\f$.
  - Cartesian product (join): If \f$p_1:\mathbb{R}^{m}\rightarrow\mathbb{R}^{n_1}\f$ and \f$p_2:\mathbb{R}^{m}\rightarrow\mathbb{R}^{n_2}\f$ are \f$(d,s)\f$ models, then so is \f$p_1 \times p_2 : \mathbb{R}^{m}\rightarrow\mathbb{R}^{n_1+n_2}\f$ given by \f$(p_1\times p_2)(x):= (p_1(x),p_2(x))\f$.

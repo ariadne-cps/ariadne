@@ -132,7 +132,7 @@ orbit(const SystemType& system,
 namespace{
 
 enum PredicateKind { INVARIANT, ACTIVATION, GUARD, TIME, MIXED };
-enum CrossingKind { TRANSVERSE, TOUCHING, NONE, UNKNOWN };
+enum CrossingKind { POSITIVE, NEGATIVE, TRANSVERSE, TOUCHING, NONE, UNKNOWN };
 
 
 struct DetectionData {
@@ -168,7 +168,8 @@ std::ostream& operator<<(std::ostream& os, const PredicateKind& kind) {
 
 std::ostream& operator<<(std::ostream& os, const CrossingKind& kind) {
     switch(kind) {
-    case TRANSVERSE: return os << "TRANSVERSE";
+    case TRANSVERSE: case POSITIVE: case NEGATIVE:
+        return os << "TRANSVERSE";
         //case CROSSING: return os << "CROSSING";
         //case GRAZING: return os << "GRAZING";
     case TOUCHING: return os << "TOUCHING";
@@ -474,10 +475,16 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
                 working_sets.push_back(make_tuple(jump_location,jump_events,jump_set_model,jump_time_model));
             }
         }
+        // Adjoin reach and intermediate sets
+        reach_sets.insert(make_pair(location,set_model));
+        intermediate_sets.insert(make_pair(location,set_model));
+        // No need for further work this step
         return;
 
     } else if(possibly(initially_active_events[blocking_event]) && semantics==LOWER_SEMANTICS) {
         ARIADNE_LOG(2,"Terminating lower evolution due to possibly initially active invariant or urgent transition.");
+        reach_sets.insert(make_pair(location,set_model));
+        intermediate_sets.insert(make_pair(location,set_model));
         return;
     }
 
@@ -543,14 +550,16 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
     }
 
     // Compute activation times
-    std::map< DiscreteEvent,std::pair<TimeModelType,TimeModelType> > activation_times;
-    compute_activation_times(activation_times,activations,flow_set_model);
+    std::map< DiscreteEvent,tuple<TimeModelType,TimeModelType> > activation_times;
+    this->compute_activation_times(activation_times,activations,flow_set_model,blocking_time_model,semantics);
 
     // Display activation time ranges
-    std::map< DiscreteEvent,std::pair<Interval,Interval> > activation_time_intervals;
-    for(std::map< DiscreteEvent, std::pair<TimeModelType,TimeModelType> >::const_iterator
-            iter=activation_times.begin(); iter!=activation_times.end(); ++iter) {
-        activation_time_intervals[iter->first]=std::make_pair(iter->second.first.range(),iter->second.second.range()); }
+    std::map< DiscreteEvent,tuple<Interval> > activation_time_intervals;
+    for(std::map< DiscreteEvent, tuple<TimeModelType,TimeModelType> >::const_iterator
+            iter=activation_times.begin(); iter!=activation_times.end(); ++iter)
+    {
+        activation_time_intervals.insert(make_pair(iter->first,make_tuple(iter->second.second.range())));
+    }
     ARIADNE_LOG(2,"activation_times="<<activation_time_intervals<<"\n\n");
 
     
@@ -593,6 +602,33 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
 }
 
 
+tribool HybridEvolver::
+active(FunctionPtr guard_ptr, const SetModelType& set) const
+{
+    typedef TimeModelType GuardValueModelType;
+    GuardValueModelType guard_set_model = apply(*guard_ptr,set)[0];
+    Interval guard_range=guard_set_model.range();
+    tribool guard_initially_active=guard_range.lower()>0 ? tribool(true) : guard_range.upper()<0 ? tribool(false) : indeterminate;
+    return guard_initially_active;
+}
+
+
+HybridEvolver::TimeModelType HybridEvolver::
+crossing_time(FunctionPtr guard_ptr, const FlowSetModelType& flow_set_model) const
+{
+    try {
+        TimeModelType crossing_time_model=this->_toolbox->scaled_crossing_time(*guard_ptr,flow_set_model);
+        return crossing_time_model;
+    }
+    catch(DegenerateCrossingException e) {
+        BoxType space_domain=project(flow_set_model.domain(),range(0,flow_set_model.argument_size()-1));
+        Interval touching_time_interval=this->_toolbox->scaled_touching_time_interval(*guard_ptr,flow_set_model);
+        TimeModelType touching_time_model=this->_toolbox->time_model(touching_time_interval,space_domain);
+        return touching_time_model;
+    } // end non-transverse crossing
+}
+
+
 void HybridEvolver::
 compute_initially_active_events(std::map<DiscreteEvent,tribool>& initially_active_events,
                                 const std::map<DiscreteEvent,FunctionPtr>& guards,
@@ -601,14 +637,10 @@ compute_initially_active_events(std::map<DiscreteEvent,tribool>& initially_activ
     typedef TimeModelType GuardValueModelType;
     tribool blocking_event_initially_active=false;
     for(std::map<DiscreteEvent,FunctionPtr>::const_iterator iter=guards.begin(); iter!=guards.end(); ++iter) {
-        GuardValueModelType guard_set_model = apply(*iter->second,initial_set)[0];
-        Interval guard_range=guard_set_model.range();
-        if(guard_set_model.range().lower()>0) {
-            initially_active_events.insert(std::make_pair(iter->first,tribool(true)));
-            blocking_event_initially_active=true;
-        } else if(guard_set_model.range().upper()>=0) {
-            initially_active_events.insert(std::make_pair(iter->first,tribool(indeterminate)));
-            blocking_event_initially_active = blocking_event_initially_active || indeterminate;
+        tribool initially_active=this->active(iter->second,initial_set);
+        if(possibly(initially_active)) {
+            initially_active_events.insert(std::make_pair(iter->first,initially_active));
+            blocking_event_initially_active = blocking_event_initially_active || initially_active;
         }
     }
     initially_active_events.insert(std::make_pair(blocking_event,blocking_event_initially_active));
@@ -640,6 +672,7 @@ compute_flow_model(FunctionModelType& , BoxType&,
 {
     ARIADNE_NOT_IMPLEMENTED;
 }
+
 
 void HybridEvolver::
 compute_blocking_events(std::map<DiscreteEvent,TimeModelType>& event_blocking_times,
@@ -695,6 +728,7 @@ compute_blocking_events(std::map<DiscreteEvent,TimeModelType>& event_blocking_ti
     return;
 }
 
+
 void HybridEvolver::
 compute_blocking_time(std::set<DiscreteEvent>& blocking_events,
                       TimeModelType& blocking_time,
@@ -734,13 +768,107 @@ compute_blocking_time(std::set<DiscreteEvent>& blocking_events,
     return;
 }
 
+
 void HybridEvolver::
-compute_activation_times(std::map<DiscreteEvent,std::pair<TimeModelType,TimeModelType> >&,
-                         const std::map<DiscreteEvent,FunctionPtr>& activations, const FlowSetModelType& flow_set_model) const
+compute_activation_events(std::map<DiscreteEvent,tuple<tribool,TimeModelType,tribool> >& activation_events,
+                          const std::map<DiscreteEvent,FunctionPtr>& activations, const FlowSetModelType& flow_set_model) const
 {
-    if(!activations.empty()) {
-        ARIADNE_WARN("HybridEvolver::compute_activation_times(...) is not implemented; non-urgent transitions will be ignored.");
+    SetModelType initial_set_model=partial_evaluate(flow_set_model.models(),flow_set_model.argument_size()-1,0.0);
+    SetModelType final_set_model=partial_evaluate(flow_set_model.models(),flow_set_model.argument_size()-1,1.0);
+    for(std::map<DiscreteEvent,FunctionPtr>::const_iterator iter=activations.begin(); iter!=activations.end(); ++iter) {
+        DiscreteEvent event=iter->first;
+        FunctionPtr activation_ptr=iter->second;
+        tribool active=this->active(activation_ptr,flow_set_model);
+        if(possibly(active)) {
+            tribool initially_active=this->active(activation_ptr,initial_set_model);
+            tribool finally_active=this->active(activation_ptr,final_set_model);
+            TimeModelType crossing_time_model=this->crossing_time(activation_ptr,flow_set_model);
+            activation_events.insert(make_pair(event,make_tuple(initially_active,crossing_time_model,finally_active)));
+        }
     }
+
+}
+
+
+void HybridEvolver::
+compute_activation_times(std::map<DiscreteEvent,tuple<TimeModelType,TimeModelType> >& activation_times,
+                         const std::map<DiscreteEvent,FunctionPtr>& activations,
+                         const FlowSetModelType& flow_set_model,
+                         const TimeModelType& blocking_time_model,
+                         const Semantics semantics) const
+{
+    SetModelType initial_set_model=partial_evaluate(flow_set_model.models(),flow_set_model.argument_size()-1,0.0);
+    SetModelType final_set_model=partial_evaluate(flow_set_model.models(),flow_set_model.argument_size()-1,1.0);
+    TimeModelType zero_time_model=blocking_time_model*0.0;
+
+    for(std::map<DiscreteEvent,FunctionPtr>::const_iterator iter=activations.begin(); iter!=activations.end(); ++iter) {
+        DiscreteEvent event=iter->first;
+        FunctionPtr activation_ptr=iter->second;
+
+        // Compute whether the event might be enabled on the entire time interval
+        tribool active=this->active(activation_ptr,flow_set_model);
+
+        if(definitely(active)) {
+            // The event is enabled over the entire time interval
+            activation_times.insert(make_pair(event,make_tuple(zero_time_model,blocking_time_model)));
+        } else if(possibly(active)) {
+            // Compute whether the event is enabled at the beginning and end of the time interval
+            tribool initially_active=this->active(activation_ptr,initial_set_model);
+            tribool finally_active=this->active(activation_ptr,final_set_model);
+
+            TimeModelType crossing_time_model=this->crossing_time(activation_ptr,flow_set_model);
+
+            TimeModelType lower_crossing_time_model=crossing_time_model-crossing_time_model.error();
+            TimeModelType upper_crossing_time_model=crossing_time_model+crossing_time_model.error();
+            lower_crossing_time_model.set_error(0);
+            upper_crossing_time_model.set_error(0);
+
+            TimeModelType lower_active_time_model, upper_active_time_model;
+
+            // Determine lower activation time
+            if(definitely(not(initially_active))) {
+                switch(semantics) {
+                    case UPPER_SEMANTICS: lower_active_time_model=lower_crossing_time_model; break;
+                    case LOWER_SEMANTICS: lower_active_time_model=upper_crossing_time_model; break;
+                }
+            } else if(definitely(initially_active)) {
+                lower_active_time_model=0.0;
+            } else {
+                switch(semantics) {
+                    case UPPER_SEMANTICS: lower_active_time_model=zero_time_model; break;
+                    case LOWER_SEMANTICS: lower_active_time_model=upper_crossing_time_model; break;
+                }
+            }
+
+            // Compute upper activation time
+            if(definitely(not(finally_active))) {
+                switch(semantics) {
+                    case UPPER_SEMANTICS: upper_active_time_model=upper_crossing_time_model; break;
+                    case LOWER_SEMANTICS: upper_active_time_model=lower_crossing_time_model; break;
+                }
+            } else if(definitely(finally_active)) {
+                upper_active_time_model=blocking_time_model;
+            } else {
+                switch(semantics) {
+                    case UPPER_SEMANTICS: upper_active_time_model=blocking_time_model; break;
+                    case LOWER_SEMANTICS: upper_active_time_model=upper_crossing_time_model; break;
+                }
+            }
+
+            // In case of lower semantics, event may not be
+            switch(semantics) {
+                case UPPER_SEMANTICS:
+                    activation_times.insert(make_pair(event,make_tuple(lower_active_time_model,upper_active_time_model)));
+                    break;
+                case LOWER_SEMANTICS:
+                    if(lower_active_time_model<upper_active_time_model) {
+                        activation_times.insert(make_pair(event,make_tuple(lower_active_time_model,upper_active_time_model)));
+                    }
+                    break;
+            }
+        }
+    }
+
 }
 
 /*

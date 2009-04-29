@@ -2028,40 +2028,56 @@ evaluate(const Vector<TaylorModel>& tv, const Vector<Interval>& x)
 }
 
 
+
 TaylorModel
 partial_evaluate(const TaylorModel& x, uint k, Float c)
 {
-    ARIADNE_ASSERT(c==1);
+    ARIADNE_ASSERT(c==1 || c==0);
 
     TaylorModel r(x.argument_size()-1,x.accuracy_ptr());
-    TaylorModel s(x.argument_size()-1,x.accuracy_ptr());
-    array<TaylorModel> p(x.degree()+1,TaylorModel(x.argument_size()-1,x.accuracy_ptr()));
-    
-    array<Interval> cpowers(x.degree()+3);
-    cpowers[0]=1; cpowers[1]=c; cpowers[2]=sqr(cpowers[1]);
-    for(uint i=3; i!=cpowers.size(); ++i) { cpowers[i]=cpowers[i/2]*cpowers[(i+1)/2]; }
-
     MultiIndex ra(r.argument_size());
-    for(TaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
-        const MultiIndex& xa=xiter->key();
-        const Float& xv=xiter->data();
-        MultiIndex::value_type xak=xa[k];
-        for(uint i=0; i!=k; ++i) { ra[i]=xa[i]; }
-        for(uint i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1]; }
-        assert(ra.degree()+xak==xa.degree());
-        p[xak].expansion().append(ra,xv);
-    }
-    for(uint i=1; i!=p.size(); ++i) {
-        p[i]*=cpowers[i];
+    if(c==0) {
+        for(TaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+            const MultiIndex& xa=xiter->key();
+            MultiIndex::value_type xak=xa[k];
+            if(xak==0) {
+                const Float& xv=xiter->data();
+                for(uint i=0; i!=k; ++i) { ra[i]=xa[i]; }
+                for(uint i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1]; }
+                r.expansion().append(ra,xv);
+            }
+        }
+        r.set_error(x.error());
+    } else if(c==1) {
+        TaylorModel s(x.argument_size()-1,x.accuracy_ptr());
+        array<TaylorModel> p(x.degree()+1,TaylorModel(x.argument_size()-1,x.accuracy_ptr()));
+        
+        array<Interval> cpowers(x.degree()+3);
+        cpowers[0]=1; cpowers[1]=c; cpowers[2]=sqr(cpowers[1]);
+        for(uint i=3; i!=cpowers.size(); ++i) { cpowers[i]=cpowers[i/2]*cpowers[(i+1)/2]; }
+
+        for(TaylorModel::const_iterator xiter=x.begin(); xiter!=x.end(); ++xiter) {
+            const MultiIndex& xa=xiter->key();
+            const Float& xv=xiter->data();
+            MultiIndex::value_type xak=xa[k];
+            for(uint i=0; i!=k; ++i) { ra[i]=xa[i]; }
+            for(uint i=k; i!=ra.size(); ++i) { ra[i]=xa[i+1]; }
+            assert(ra.degree()+xak==xa.degree());
+            p[xak].expansion().append(ra,xv);
+        }
+        for(uint i=1; i!=p.size(); ++i) {
+            p[i]*=cpowers[i];
+        }
+
+        r=p[0];
+        r.set_error(x.error());
+        for(uint i=1; i!=p.size(); ++i) {
+            _add(s,r,p[i]);
+            r.swap(s);
+            s.clear();
+        }
     }
 
-    r=p[0];
-    r.set_error(x.error());
-    for(uint i=1; i!=p.size(); ++i) {
-        _add(s,r,p[i]);
-        r.swap(s);
-        s.clear();
-    }
     return r;
 }
 

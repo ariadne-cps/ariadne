@@ -45,20 +45,27 @@ struct lpair
         this->first=rv.first; this->second=rv.second; return *this; }
     T1& first; T2& second;
 };
-  
+
 template<class T1,class T2> inline
 lpair<T1,T2> make_lpair(T1& t1, T2& t2) {
     return lpair<T1,T2>(t1,t2);
 }
-  
+
 
 /*! \brief A tuple of possibly different types. */
-template<class T1, class T2, class T3=void, class T4=void> struct tuple;
-  
+template<class T1, class T2=void, class T3=void, class T4=void> struct tuple;
+
 /*! \brief A tuple of references, suitable as use as an lvalue for a function returning a pair. */
-template<class T1, class T2, class T3=void, class T4=void> struct ltuple;
-  
-    
+template<class T1, class T2=void, class T3=void, class T4=void> struct ltuple;
+
+
+template<class T1> 
+struct tuple<T1,void,void,void>
+{
+    inline tuple(const T1& t1) : first(t1) { }
+    T1 first; 
+};
+
 template<class T1, class T2> 
 struct tuple<T1,T2,void,void>
 {
@@ -82,6 +89,17 @@ struct tuple
 };
 
 
+
+template<class T1> 
+struct ltuple<T1,void,void,void>
+{
+    inline ltuple(T1& t1) : first(t1) { }
+    inline ltuple<T1> operator=(const tuple<T1>& rv) {
+        this->first=rv.first; return *this; }
+    inline ltuple<T1> operator=(const T1& rv) {
+        this->first=rv; return *this; }
+    T1& first; 
+};
 
 template<class T1, class T2> 
 struct ltuple<T1,T2,void,void>
@@ -111,8 +129,13 @@ struct ltuple
         this->first=rv.first; this->second=rv.second; this->third=rv.third; this->fourth=rv.fourth; return *this; }
     T1& first; T2& second; T3& third; T4& fourth;
 };
-  
 
+
+
+template<class T1> inline
+tuple<T1> make_tuple(const T1& t1) {
+    return tuple<T1>(t1);
+}
 
 template<class T1,class T2> inline
 tuple<T1,T2> make_tuple(const T1& t1, const T2& t2) {
@@ -129,6 +152,11 @@ tuple<T1,T2,T3,T4> make_tuple(const T1& t1, const T2& t2, const T3& t3, const T4
     return tuple<T1,T2,T3,T4>(t1,t2,t3,t4);
 }
 
+
+template<class T1> inline
+ltuple<T1> make_ltuple(T1& t1) {
+    return ltuple<T1>(t1);
+}
 
 template<class T1,class T2> inline
 ltuple<T1,T2> make_ltuple(T1& t1, T2& t2) {
@@ -147,7 +175,7 @@ ltuple<T1,T2,T3,T4> make_ltuple(T1& t1, T2& t2, T3& t3, T4& t4) {
 
 
 
-  
+
 } // namespace Ariadne
 
 #endif /* ARIADNE_TUPLE_H */

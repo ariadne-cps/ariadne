@@ -199,6 +199,14 @@ operator>>(std::istream& is, array<T>& a) {
     return is;
 }
 
+template<class T1> 
+inline 
+std::ostream& 
+operator<<(std::ostream &os, const tuple<T1>& t)
+{
+    return os << '(' << t.first << ',' << ')';
+}
+
 template<class T1, class T2> 
 inline 
 std::ostream& 

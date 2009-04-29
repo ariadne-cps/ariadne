@@ -150,6 +150,10 @@ class HybridEvolver
                                   Semantics semantics, bool reach) const;
 
   protected:
+    tribool active(FunctionPtr guard, const SetModelType& set) const;
+
+    TimeModelType crossing_time(FunctionPtr guard, const FlowSetModelType& flow_set) const;
+
     void compute_initially_active_events(std::map<DiscreteEvent,tribool>&,
                                          const std::map<DiscreteEvent,FunctionPtr>&,
                                          const ContinuousEnclosureType&) const;
@@ -166,9 +170,15 @@ class HybridEvolver
     void compute_blocking_time(std::set<DiscreteEvent>&, TimeModelType&,
                                const std::map<DiscreteEvent,TimeModelType>&) const;
 
-    void compute_activation_times(std::map<DiscreteEvent,std::pair<TimeModelType,TimeModelType> >&, 
+    void compute_activation_events(std::map<DiscreteEvent,tuple<tribool,TimeModelType,tribool> >&,
                                   const std::map<DiscreteEvent,FunctionPtr>& activations,
                                   const FlowSetModelType& flow_set_model) const;
+
+    void compute_activation_times(std::map<DiscreteEvent,tuple<TimeModelType,TimeModelType> >&,
+                                  const std::map<DiscreteEvent,FunctionPtr>& activations,
+                                  const FlowSetModelType& flow_set_model,
+                                  const TimeModelType& blocking_time_model,
+                                  const Semantics sematics) const;
 
 
   protected:

@@ -1038,7 +1038,45 @@ GridOpenCell GridOpenCell::split(tribool isRight) const {
     //Construct the new open cell and return it
     return GridOpenCell( _theGrid, theNewPrimaryCellHeight, theNewBaseCellPath );
 }
-   
+
+GridOpenCell * GridOpenCell::smallest_open_subcell( const GridOpenCell &theOpenCell, const Box & theBox ) {
+    GridOpenCell * pSmallestOpenCell = NULL;
+    //If the box of the givel open cell covers the given box
+    if( theOpenCell.box().covers( theBox ) ) {
+        //First check the left sub cell
+        pSmallestOpenCell = smallest_open_subcell( theOpenCell.split( false ), theBox );
+        if( pSmallestOpenCell == NULL ) {
+            //If the left sub cell does not cover theBox then check the middle sub cell
+            pSmallestOpenCell = smallest_open_subcell( theOpenCell.split( indeterminate ), theBox );
+            if( pSmallestOpenCell == NULL ) {
+                //If the middle sub cell does not cover the box then check the right subcell
+                pSmallestOpenCell = smallest_open_subcell( theOpenCell.split( true ), theBox );
+                if( pSmallestOpenCell == NULL ) {
+                    //If the right sub cell does not cover the box then the open cell
+                    //theOpenCell is the smallest GridOpenCell covering theBox.
+                    pSmallestOpenCell = new GridOpenCell( theOpenCell.grid(), theOpenCell.height(),
+                                                          theOpenCell.word(), theOpenCell.box() );
+                }
+            }
+        }
+    }
+    
+    //Return the result, is null If the box of theOpenCell does not cover the given box
+    return pSmallestOpenCell;
+}
+
+GridOpenCell GridOpenCell::outer_approximation( const Box & theBox, const Grid& theGrid ){
+    //01. First we find the smallest primary GridCell that contain the given Box.
+    GridCell thePrimaryCell = GridCell::smallest_enclosing_primary_cell( theBox, theGrid );
+    
+    //02. Second we start subdividing it to find out the root cell for the smallest open cell containing theBox
+    //NOTE: smallest_open_subcell returns NULL or a pointer to new open cell, but here we are sure that
+    //we can not get NULL because of the choice of thePrimaryCell, therefore we do the following:
+    GridOpenCell * pOpenCell = GridOpenCell::smallest_open_subcell( thePrimaryCell.interior(), theBox );
+    GridOpenCell theOpenCell = (* pOpenCell); delete pOpenCell; //Deallocate the memory, to avoid the memory leaks
+    return theOpenCell;
+}
+
 /********************************************GridTreeSubset*****************************************/
 
 void GridTreeSubset::subdivide( Float theMaxCellWidth ) {

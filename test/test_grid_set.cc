@@ -840,8 +840,100 @@ void test_grid_open_cell_two(){
     ARIADNE_TEST_EQUAL( expected_middle_open_cell_box01, openCell01.split( indeterminate ).box() );
     ARIADNE_PRINT_TEST_COMMENT("The right open sub cell, as given by its box:");
     Box expected_right_open_cell_box01 = make_box("[0.75,1.25]x[1.0,1.5]");
-    ARIADNE_TEST_EQUAL( expected_right_open_cell_box01, openCell01.split( true ).box() );
+    ARIADNE_TEST_EQUAL( expected_right_open_cell_box01, openCell01.split( true ).box() );   
+}
+
+void test_grid_open_cell_three(){
+    //Allocate a trivial Grid two dimensional grid
+    Grid theGrid(2, 1.0);
     
+    //!!!
+    ARIADNE_PRINT_TEST_CASE_TITLE("Construct a [0.0,1.0]x[0.0,1.0] box and make and open over approximation, dimension: 2");
+    Box theBox = make_box("[0.0,1.0]x[0.0,1.0]");
+    Box expectedOpenCellBox = make_box("[-1.0,3.0]x[-1.0,3.0]");
+    BinaryWord expectedOpenCellWord = make_binary_word("00");
+    uint expectedOpenCellHeight = 2;
+    GridOpenCell actualOpenCell = GridOpenCell::outer_approximation( theBox, theGrid );
+    ARIADNE_TEST_EQUAL( expectedOpenCellBox, actualOpenCell.box() );   
+    ARIADNE_TEST_EQUAL( expectedOpenCellWord, actualOpenCell.word() );
+    ARIADNE_TEST_EQUAL( expectedOpenCellHeight, actualOpenCell.height() );
+    
+    //!!!
+    ARIADNE_PRINT_TEST_CASE_TITLE("Construct a [-0.5,0.5]x[-0.5,0.5] box and make and open over approximation, dimension: 2");
+    theBox = make_box("[-0.5,0.5]x[-0.5,0.5]");
+    expectedOpenCellBox = make_box("[-1.0,1.0]x[-1.0,1.0]");
+    expectedOpenCellWord = make_binary_word("00");
+    expectedOpenCellHeight = 1;
+    actualOpenCell = GridOpenCell::outer_approximation( theBox, theGrid );
+    ARIADNE_TEST_EQUAL( expectedOpenCellBox, actualOpenCell.box() );   
+    ARIADNE_TEST_EQUAL( expectedOpenCellWord, actualOpenCell.word() );
+    ARIADNE_TEST_EQUAL( expectedOpenCellHeight, actualOpenCell.height() );
+    
+    //!!!
+    ARIADNE_PRINT_TEST_CASE_TITLE("Construct a [0.1,0.3]x[0.1,0.3] box and make and open over approximation, dimension: 2");
+    theBox = make_box("[0.1,0.3]x[0.1,0.3]");
+    expectedOpenCellBox = make_box("[0.0,0.5]x[0.0,0.5]");
+    expectedOpenCellWord = make_binary_word("0000");
+    expectedOpenCellHeight = 0;
+    actualOpenCell = GridOpenCell::outer_approximation( theBox, theGrid );
+    ARIADNE_TEST_EQUAL( expectedOpenCellBox, actualOpenCell.box() );   
+    ARIADNE_TEST_EQUAL( expectedOpenCellWord, actualOpenCell.word() );
+    ARIADNE_TEST_EQUAL( expectedOpenCellHeight, actualOpenCell.height() );
+    
+    //!!!
+    ARIADNE_PRINT_TEST_CASE_TITLE("Construct a [0.1,0.3]x[0.1,0.6] box and make and open over approximation, dimension: 2");
+    theBox = make_box("[0.1,0.3]x[0.1,0.6]");
+    expectedOpenCellBox = make_box("[0.0,0.5]x[0.0,1.0]");
+    expectedOpenCellWord = make_binary_word("000");
+    expectedOpenCellHeight = 0;
+    actualOpenCell = GridOpenCell::outer_approximation( theBox, theGrid );
+    ARIADNE_TEST_EQUAL( expectedOpenCellBox, actualOpenCell.box() );   
+    ARIADNE_TEST_EQUAL( expectedOpenCellWord, actualOpenCell.word() );
+    ARIADNE_TEST_EQUAL( expectedOpenCellHeight, actualOpenCell.height() );
+    
+    //!!!
+    ARIADNE_PRINT_TEST_CASE_TITLE("Construct a [0.5,0.6]x[0.1,0.6] box and make and open over approximation, dimension: 2");
+    theBox = make_box("[0.5,0.6]x[0.1,0.6]");
+    expectedOpenCellBox = make_box("[0.25,0.75]x[0.0,1.0]");
+    expectedOpenCellWord = make_binary_word("001");
+    expectedOpenCellHeight = 0;
+    actualOpenCell = GridOpenCell::outer_approximation( theBox, theGrid );
+    ARIADNE_TEST_EQUAL( expectedOpenCellBox, actualOpenCell.box() );   
+    ARIADNE_TEST_EQUAL( expectedOpenCellWord, actualOpenCell.word() );
+    ARIADNE_TEST_EQUAL( expectedOpenCellHeight, actualOpenCell.height() );
+    
+    //!!!
+    ARIADNE_PRINT_TEST_CASE_TITLE("Construct a [0.6,0.7]x[0.1,0.6] box and make and open over approximation, dimension: 2");
+    theBox = make_box("[0.6,0.7]x[0.1,0.6]");
+    expectedOpenCellBox = make_box("[0.25,0.75]x[0.0,1.0]");
+    expectedOpenCellWord = make_binary_word("001");
+    expectedOpenCellHeight = 0;
+    actualOpenCell = GridOpenCell::outer_approximation( theBox, theGrid );
+    ARIADNE_TEST_EQUAL( expectedOpenCellBox, actualOpenCell.box() );   
+    ARIADNE_TEST_EQUAL( expectedOpenCellWord, actualOpenCell.word() );
+    ARIADNE_TEST_EQUAL( expectedOpenCellHeight, actualOpenCell.height() );
+    
+    //!!!
+    ARIADNE_PRINT_TEST_CASE_TITLE("Construct a [0.9,1.1]x[0.9,1.1] box and make and open over approximation, dimension: 2");
+    theBox = make_box("[0.9,1.1]x[0.9,1.1]");
+    expectedOpenCellBox = make_box("[0.875,1.125]x[0.875,1.125]");
+    expectedOpenCellWord = make_binary_word("0011111111");
+    expectedOpenCellHeight = 2;
+    actualOpenCell = GridOpenCell::outer_approximation( theBox, theGrid );
+    ARIADNE_TEST_EQUAL( expectedOpenCellBox, actualOpenCell.box() );   
+    ARIADNE_TEST_EQUAL( expectedOpenCellWord, actualOpenCell.word() );
+    ARIADNE_TEST_EQUAL( expectedOpenCellHeight, actualOpenCell.height() );
+    
+    //!!!
+    ARIADNE_PRINT_TEST_CASE_TITLE("Construct a [0.2,0.3]x[0.7,0.8] box and make and open over approximation, dimension: 2");
+    theBox = make_box("[0.2,0.3]x[0.7,0.8]");
+    expectedOpenCellBox = make_box("[0.1875,0.3125]x[0.6875,0.8125]");
+    expectedOpenCellWord = make_binary_word("01001111");
+    expectedOpenCellHeight = 0;
+    actualOpenCell = GridOpenCell::outer_approximation( theBox, theGrid );
+    ARIADNE_TEST_EQUAL( expectedOpenCellBox, actualOpenCell.box() );   
+    ARIADNE_TEST_EQUAL( expectedOpenCellWord, actualOpenCell.word() );
+    ARIADNE_TEST_EQUAL( expectedOpenCellHeight, actualOpenCell.height() );
 }
 
 void test_grid_open_cell_one(){
@@ -2405,8 +2497,8 @@ int main() {
     test_grid_cell();
 
     test_grid_open_cell_one();
-
     test_grid_open_cell_two();
+    test_grid_open_cell_three();
 
     test_grid_sub_paving();
 

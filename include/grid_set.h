@@ -655,8 +655,8 @@ class GridCell: public GridAbstractCell {
     static GridCell neighboringCell( const Grid& theGrid, const uint theHeight, const BinaryWord& theWord, const uint dim );
 };
 
-/*! \brief An open cell of a grid paving. This cell is open and the path from the root cell defines
- *  its lower left sub cell wheres the complete open cell is a union of 4 cells.
+/*! \brief An open cell of a grid paving. This cell is open and the path from the primary cell
+ *  defines its lower left sub cell wheres the complete open cell is a union of 4 cells.
  * 
  * This class does not contain the tree structure, so cannot be used in cursors/iterators.
  * NOTE: The open cell is defined by its base cell which is a simple GridCell corresponding
@@ -673,6 +673,14 @@ class GridOpenCell: public GridAbstractCell {
      *  by friend classes which have already computed the box.
      */
     GridOpenCell(const Grid& theGrid, const uint theHeight, const BinaryWord& theWord, const Box& theBox);
+    
+    /*! \brief This method allows to find the smallest open cell that contains \a theBox.
+     *  The search is started from \a theOpenCell that is an open cell covering \a theBox.
+     *  Note: This method is recursive and it assumes that \a theOpenCell
+     *  and \a theBox are on the same Grid! The latter is not checked, but only assumed.
+     *  In the open cell based on \a theOpenCell does not cover \a theBox this method returns NULL.
+     */
+    static GridOpenCell * smallest_open_subcell( const GridOpenCell &theOpenCell, const Box & theBox );
     
   public:
     /*! \brief Default constructor. Needed for some containers and iterators. */
@@ -710,6 +718,11 @@ class GridOpenCell: public GridAbstractCell {
      *  the \a BinaryWord class.
      */
     static bool compare_grid_cells(const GridOpenCell * pCellLeft, const GridOpenCell &cellRight, const uint comparator );
+    
+    /*! \brief This method computes the smallest open cell that contains the given box \a theBox
+     *  (in the original space), taking into account the given grid \a theGrid.
+     */
+    static GridOpenCell outer_approximation( const Box & theBox, const Grid& theGrid );
 };
 
 /*! \brief This class represents a subpaving of a paving. Note that, the subtree enclosed into

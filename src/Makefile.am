@@ -5,7 +5,8 @@ phony: lib
 lib: libariadne.la libcalculus.la
 
 INCLUDES = -I$(top_srcdir)/include $(CAIRO_CFLAGS) $(GTK_CFLAGS)
-LDADD = $(GTK_LIBS)
+LIBS +=  $(CAIRO_LIBS) $(GTK_LIBS)
+LDADD =  $(LIBS)
 
 SRC = \
 	numeric.cc \

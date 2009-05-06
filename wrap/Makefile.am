@@ -1,7 +1,7 @@
 AM_LDFLAGS = -module
-CXX_FLAGS = -Wall -O2 -fpic 
+CXX_FLAGS = -Wall -O2 -fpic
 INCLUDES = -I$(top_srcdir)/include $(PYTHON_INCLUDES)
-LIBS += $(BOOST_PYTHON_LIB) $(PYTHON_LIB) $(GTK_LIBS) 
+LIBS += $(BOOST_PYTHON_LIB) $(PYTHON_LIB) $(CAIRO_LIBS) $(GTK_LIBS)
 
 pythondir=${pkgpyexecdir}
 libdir=${pyexecdir}
@@ -10,7 +10,7 @@ python_DATA = __init__.py
 python_LIBS = ariadne.la interval.la differentiation.la
 python_MODULES = .libs/ariadne.so .libs/interval.so .libs/differentiation.so
 
-python_LTLIBRARIES = 
+python_LTLIBRARIES =
 if WANT_PYTHON_INTERFACE
   python_LTLIBRARIES += $(python_LIBS)
 endif
@@ -34,14 +34,14 @@ interval_la_SOURCES=$(INTERVAL_SRC)
 interval_la_LIBADD = ../src/numeric.lo
 
 differentiation_la_SOURCES=$(DIFFERENTIATION_SRC)
-differentiation_la_LIBADD = ../src/numeric.lo ../src/vector.lo ../src/matrix.lo 
+differentiation_la_LIBADD = ../src/numeric.lo ../src/vector.lo ../src/matrix.lo
 
 ariadne_la_SOURCES=$(ARIADNE_SRC)
 ariadne_la_LIBADD = ../src/libariadne.la
 
-INTERVAL_SRC = interval_module.cc numeric_submodule.cc linear_algebra_submodule.cc 
+INTERVAL_SRC = interval_module.cc numeric_submodule.cc linear_algebra_submodule.cc
 
-DIFFERENTIATION_SRC = differentiation_module.cc differentiation_submodule.cc 
+DIFFERENTIATION_SRC = differentiation_module.cc differentiation_submodule.cc
 
 ARIADNE_SRC = utilities.cc \
 	ariadne_module.cc \

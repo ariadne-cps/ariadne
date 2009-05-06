@@ -8,17 +8,16 @@ TESTS_ENVIRONMENT = ./run_test.sh
 PROFILES_ENVIRONMENT = ./run_profile.sh
 
 
-INCLUDES = -I$(top_srcdir)/include
-LIBS = $(GTK_LIBS)
+INCLUDES = -I$(top_srcdir)/include $(CAIRO_CFLAGS) $(GTK_CFLAGS)
+LIBS += $(CAIRO_LIBS) $(GTK_LIBS)
 LDADD = ../src/libariadne.la $(LIBS)
 
 bin_PROGRAMS = \
 	profile_arithmetic \
 	profile_taylor_model \
 	profile_taylor_calculus
-#	test_misc
 
-test_misc_LDADD = $(LDADD) -lboost_python -lpython2.5
+#test_misc_LDADD = $(LDADD) -lboost_python -lpython2.5
 
 check_PROGRAMS = \
 	test_float \
@@ -53,10 +52,9 @@ profiles: $(bin_PROGRAMS)
 #test_rational_LDADD = -lgmp $(LIBS)
 
 # Explicitly list profile sources
-profile_arithmetic_SOURCES=profile_arithmetic.cc
-profile_taylor_model_SOURCES=profile_taylor_model.cc
-profile_taylor_calculus_SOURCES=profile_taylor_calculus.cc
-test_misc_SOURCES=test_misc.cc
+#profile_arithmetic_SOURCES=profile_arithmetic.cc
+#profile_taylor_model_SOURCES=profile_taylor_model.cc
+#profile_taylor_calculus_SOURCES=profile_taylor_calculus.cc
 
 # Explicitly list test sources
 test_float_SOURCES=test_float.cc
@@ -87,5 +85,5 @@ EXTRA_DIST =
 SUBDIRS =
 
 TESTS = $(check_PROGRAMS)
-XFAIL_TESTS = 
+XFAIL_TESTS =
 testsubdir = ./

@@ -8,6 +8,11 @@ CXXFLAGS += -Wall
 
 all: lib wrap tests examples profiles
 
+# Show the values of the environment variables
+evn:
+	@echo 'INCLUDES =' $(INCLUDES)
+	@echo 'LIBS =' $(LIBS)
+
 shiny: maintainer-clean
 	-rm -rf *~ */*~
 	-rm -f *.log */*.log */*.eps

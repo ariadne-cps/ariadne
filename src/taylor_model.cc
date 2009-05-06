@@ -925,7 +925,7 @@ TaylorModel::truncate(uint d)
         if(adeg<=d) {
         //if(adeg<=byte_d) {
         //if(a.degree()<=byte_d) {
-            
+
             r.expansion().append(iter->key(),iter->data());
         } else {
             r.error()+=abs(iter->data());
@@ -1730,7 +1730,7 @@ TaylorModel sin(const TaylorModel& x) {
     if(y.error()>two_pi/2 || mag(y.range())*rec_fac_up(x.maximum_degree())>1) {
         r.error()=1.0;
     } else {
-        _mul(s,y,y); 
+        _mul(s,y,y);
 
         int d=(x.maximum_degree()+3)/2;
         Float srad=mag(s.range());
@@ -2051,7 +2051,7 @@ partial_evaluate(const TaylorModel& x, uint k, Float c)
     } else if(c==1) {
         TaylorModel s(x.argument_size()-1,x.accuracy_ptr());
         array<TaylorModel> p(x.degree()+1,TaylorModel(x.argument_size()-1,x.accuracy_ptr()));
-        
+
         array<Interval> cpowers(x.degree()+3);
         cpowers[0]=1; cpowers[1]=c; cpowers[2]=sqr(cpowers[1]);
         for(uint i=3; i!=cpowers.size(); ++i) { cpowers[i]=cpowers[i/2]*cpowers[(i+1)/2]; }
@@ -2481,7 +2481,7 @@ TaylorModel intersection(const TaylorModel& x, const TaylorModel& y) {
             xv=xiter->data();
             yv=0.0;
             ++xiter;
-        } else { // xa>ya 
+        } else { // xa>ya
             a=yiter->key();
             yv=yiter->data();
             xv=0.0;
@@ -2512,7 +2512,7 @@ TaylorModel intersection(const TaylorModel& x, const TaylorModel& y) {
     }
 
     r.error()=twice_max_error/2;
-    
+
     return r;
 }
 
@@ -2685,6 +2685,23 @@ jacobian2_range(const Vector<TaylorModel>& f)
     return J;
 }
 
+
+Interval
+jacobian2(const TaylorModel& f, const Vector<Interval>& x)
+{
+    return jacobian2(Vector<TaylorModel>(1u,f),x)[0][0];
+}
+
+Float
+jacobian2_value(const TaylorModel& f)
+{
+    return jacobian2_value(Vector<TaylorModel>(1u,f))[0][0];
+}
+
+Interval jacobian2_range(const TaylorModel& f) {
+    return jacobian2_range(Vector<TaylorModel>(1u,f))[0][0];
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 // Vector operators (compose, solve, implicit, flow
@@ -2735,7 +2752,7 @@ _compose2(const Vector<TaylorModel>& x,
     uint xas=ys.size();
     uint as=ys[0].argument_size();
     shared_ptr<TaylorModel::Accuracy> accuracy_ptr=ys[0].accuracy_ptr();
-    
+
     array<uchar> max_power(ys.size());
     for(uint j=0; j!=ys.size(); ++j) { max_power[j]=1; }
 

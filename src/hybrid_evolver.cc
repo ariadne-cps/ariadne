@@ -26,6 +26,7 @@
 #include "tuple.h"
 #include "stlio.h"
 #include "vector.h"
+#include "matrix.h"
 #include "expression_interface.h"
 #include "function_interface.h"
 #include "taylor_set.h"
@@ -633,6 +634,18 @@ crossing_time(FunctionPtr guard_ptr, const FlowSetModelType& flow_set_model) con
 }
 
 
+Interval jacobian2_range(const TaylorModel& tm);
+
+Interval HybridEvolver::
+normal_derivative(FunctionPtr guard_ptr, const FlowSetModelType& flow_set_model, const TimeModelType& crossing_time_model) const
+{
+    typedef TimeModelType GuardValueModelType;
+    GuardValueModelType guard_flow_set_model=apply(*guard_ptr,flow_set_model)[0];
+    Interval normal_derivative=jacobian2_range(guard_flow_set_model);
+    return normal_derivative;
+}
+
+
 void HybridEvolver::
 compute_initially_active_events(std::map<DiscreteEvent,tribool>& initially_active_events,
                                 const std::map<DiscreteEvent,FunctionPtr>& guards,
@@ -696,9 +709,14 @@ compute_blocking_events(std::map<DiscreteEvent,TimeModelType>& event_blocking_ti
         tribool active = this->_toolbox->active(*guard_ptr,positive_flow_set_model);
         if(possibly(active)) {
             TimeModelType crossing_time_model;
+            Interval normal_derivative;
             try {
                 crossing_time_model=this->_toolbox->scaled_crossing_time(*guard_ptr,flow_set_model);
-                event_blocking_times[event]=crossing_time_model;
+                normal_derivative=this->normal_derivative(guard_ptr,flow_set_model,crossing_time_model);
+                assert(normal_derivative.lower()>0 || normal_derivative.upper()<0);
+                if(normal_derivative.lower()>0) {
+                    event_blocking_times[event]=crossing_time_model;
+                }
             }
             catch(DegenerateCrossingException e) {
                 BoxType space_domain=project(flow_set_model.domain(),range(0,flow_set_model.argument_size()-1));

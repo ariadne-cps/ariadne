@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 /*! \file hybrid_evolver.h
  *  \brief Evolver for hybrid systems.
  */
@@ -46,8 +46,8 @@
 
 #include "logging.h"
 
-namespace Ariadne {  
-  
+namespace Ariadne {
+
 template<class Sys, class BS> class Evolver;
 
 class TaylorFunction;
@@ -66,7 +66,7 @@ class HybridTime;
 
 typedef int DiscreteEvent;
 
-/*! \brief A class for computing the evolution of a hybrid system. 
+/*! \brief A class for computing the evolution of a hybrid system.
  *
  * The actual evolution steps are performed by the HybridEvolver class.
  */
@@ -101,13 +101,13 @@ class HybridEvolver
     typedef ListSet<EnclosureType> EnclosureListType;
     typedef Float ContinuousTimeType;
   public:
-    
+
     //! \brief Default constructor.
     HybridEvolver();
-  
+
     //! \brief Construct from parameters using a default integrator.
     HybridEvolver(const EvolutionParametersType& parameters);
-  
+
     /*! \brief Make a dynamically-allocated copy. */
     HybridEvolver* clone() const { return new HybridEvolver(*this); }
 
@@ -118,41 +118,43 @@ class HybridEvolver
     const EvolutionParametersType& parameters() const { return *this->_parameters; }
 
     //@}
-  
+
 
     //@{
     //! \name Evolution using abstract sets.
-    //! \brief Compute an approximation to the orbit set using the given semantics. 
+    //! \brief Compute an approximation to the orbit set using the given semantics.
     Orbit<EnclosureType> orbit(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const;
 
 
-    //! \brief Compute an approximation to the evolution set using the given semantics. 
+    //! \brief Compute an approximation to the evolution set using the given semantics.
     EnclosureListType evolve(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const {
-        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate; 
-        this->_evolution(final,reachable,intermediate,system,initial_set,time,semantics,false); 
+        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
+        this->_evolution(final,reachable,intermediate,system,initial_set,time,semantics,false);
         return final; }
 
-    //! \brief Compute an approximation to the evolution set under the given semantics. 
+    //! \brief Compute an approximation to the evolution set under the given semantics.
     EnclosureListType reach(const SystemType& system, const EnclosureType& initial_set, const TimeType& time, Semantics semantics=UPPER_SEMANTICS) const {
-        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate; 
-        this->_evolution(final,reachable,intermediate,system,initial_set,time,semantics,true); 
+        EnclosureListType final; EnclosureListType reachable; EnclosureListType intermediate;
+        this->_evolution(final,reachable,intermediate,system,initial_set,time,semantics,true);
         return reachable; }
 
   protected:
-    virtual void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate, 
-                            const SystemType& system, const EnclosureType& initial, const TimeType& time, 
+    virtual void _evolution(EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
+                            const SystemType& system, const EnclosureType& initial, const TimeType& time,
                             Semantics semantics, bool reach) const;
 
     typedef tuple<DiscreteState, EventListType, SetModelType, TimeModelType> HybridTimedSetType;
     virtual void _evolution_step(std::vector< HybridTimedSetType >& working_sets,
-                                  EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,  
-                                  const SystemType& system, const HybridTimedSetType& current_set, const TimeType& time, 
+                                  EnclosureListType& final, EnclosureListType& reachable, EnclosureListType& intermediate,
+                                  const SystemType& system, const HybridTimedSetType& current_set, const TimeType& time,
                                   Semantics semantics, bool reach) const;
 
   protected:
     tribool active(FunctionPtr guard, const SetModelType& set) const;
 
     TimeModelType crossing_time(FunctionPtr guard, const FlowSetModelType& flow_set) const;
+
+    Interval normal_derivative(FunctionPtr guard, const FlowSetModelType& flow_set, const TimeModelType& crossing_time) const;
 
     void compute_initially_active_events(std::map<DiscreteEvent,tribool>&,
                                          const std::map<DiscreteEvent,FunctionPtr>&,
@@ -162,6 +164,9 @@ class HybridEvolver
                             FunctionPtr, const SetModelType&) const;
     void compute_flow_model(FunctionModelType&, BoxType&,
                             FunctionPtr, const BoxType&) const;
+
+    void compute_crossing_time_and_direction(TimeModelType&, Interval&,
+                                             FunctionPtr guard, const FlowSetModelType& flow_set) const;
 
     void compute_blocking_events(std::map<DiscreteEvent,TimeModelType>&, std::set<DiscreteEvent>&,
                                  const std::map<DiscreteEvent,FunctionPtr>& guards,
@@ -195,7 +200,7 @@ class HybridEvolver
 };
 
 
-  
+
 } // namespace Ariadne
 
 #endif // ARIADNE_HYBRID_EVOLVER_H

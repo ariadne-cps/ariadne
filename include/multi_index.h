@@ -33,6 +33,7 @@
 
 #include "macros.h"
 #include "array.h"
+#include "numeric.h"
 
 namespace Ariadne {
 

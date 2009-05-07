@@ -56,7 +56,7 @@ int main()
     /// Compute the system evolution
 
     /// Create a HybridEvolver object
-    StableHybridEvolver evolver;
+    HybridEvolver evolver;
 
     /// Set the evolution parameters
     evolver.parameters().maximum_enclosure_radius = 0.05;

@@ -178,7 +178,7 @@ int main()
 
     /// Constants
     float EVOL_TIME = 2.0/dp[10]; /// Evolution time
-    int EVOL_TRANS = 5; /// Evolution transitions
+    int EVOL_TRANS = 15; /// Evolution transitions
     float MAX_ENCL_RADIUS = 0.005; /// Maximum enclosure radius
     float MAX_STEP_SIZE = 0.005; /// Maximum step size
 
@@ -335,7 +335,7 @@ int main()
     /// Compute the system evolution
 
     /// Create a HybridEvolver object
-    StableHybridEvolver evolver;
+    HybridEvolver evolver;
     evolver.verbosity = 1;
 
     /// Set the evolution parameters

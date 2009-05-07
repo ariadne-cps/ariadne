@@ -52,9 +52,9 @@ profiles: $(bin_PROGRAMS)
 #test_rational_LDADD = -lgmp $(LIBS)
 
 # Explicitly list profile sources
-#profile_arithmetic_SOURCES=profile_arithmetic.cc
-#profile_taylor_model_SOURCES=profile_taylor_model.cc
-#profile_taylor_calculus_SOURCES=profile_taylor_calculus.cc
+profile_arithmetic_SOURCES=profile_arithmetic.cc
+profile_taylor_model_SOURCES=profile_taylor_model.cc
+profile_taylor_calculus_SOURCES=profile_taylor_calculus.cc
 
 # Explicitly list test sources
 test_float_SOURCES=test_float.cc

@@ -124,7 +124,7 @@ int main()
 
     /// Introduces the global parameters
     float TIME_LIMIT = 2.0/dp[1];
-    float TRAN_LIMIT = 3;
+    float TRAN_LIMIT = 6;
     float MAX_ENCL_RADIUS = 0.001/dp[1];
     float MAX_STEP_SIZE = 0.001/dp[1];
     float LOCK_TOGRID_TIME = 1.0/dp[1];
@@ -213,7 +213,7 @@ int main()
     /// Compute the system evolution
 
     /// Create a HybridEvolver object
-    StableHybridEvolver evolver;
+    HybridEvolver evolver;
     evolver.verbosity = VERBOSITY;
 
     /// Set the evolution parameters

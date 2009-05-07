@@ -82,7 +82,8 @@ int main()
  
     Vector<Interval> system_parameters(3);
     system_parameters[0] = a;
-    system_parameters[1] = Interval(0.3,0.34);
+//    system_parameters[1] = Interval(0.3,0.34);        // Now parameters can be given as intervals !!
+    system_parameters[1] = b;
     system_parameters[2] = T;
 
 
@@ -167,6 +168,7 @@ int main()
     /// Set the evolution parameters
     evolver.parameters().maximum_enclosure_radius = 0.25;
     evolver.parameters().maximum_step_size = 0.125;
+    evolver.verbosity = 0;
     std::cout <<  evolver.parameters() << std::endl;
 
     // Declare the type to be used for the system evolution
@@ -176,9 +178,9 @@ int main()
 
     std::cout << "Computing evolution starting from location l2, x = 0.0, y = 1.0" << std::endl;
 
-    Box initial_box(2, 0.001,0.002, 1.0,1.001);
+    Box initial_box(2, 1.001,1.001, 1.0,1.0);
     HybridEnclosureType initial_enclosure(l2,initial_box);
-    Box bounding_box(2, -0.1,9.1, -0.1,1.1);
+    Box bounding_box(2, -0.1,10.1, -0.1,1.1);
   
     HybridTime evolution_time(64.0,6);
   
@@ -186,10 +188,12 @@ int main()
     OrbitType orbit = evolver.orbit(watertank_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
 
-    std::cout << "Orbit="<<orbit<<std::endl;
+    std::cout << "Orbit.reach.size()="<<orbit.reach().size()<<std::endl;
+    std::cout << "Orbit.final.size()="<<orbit.final().size()<<std::endl;
     //plot("tutorial-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit.initial());
     plot("watertank-nonlinear-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit);
-
+    plot("watertank-nonlinear-final",bounding_box, Colour(0.0,0.5,1.0), orbit.final());
+    
 /*
     std::cout << "Computing reach set using HybridEvolver... " << std::flush;
     EnclosureListType reach = evolver.reach(watertank_system,initial_enclosure,evolution_time);

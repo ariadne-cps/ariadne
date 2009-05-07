@@ -242,7 +242,7 @@ double pow_rnd(double x, int n)
 double sqrt_rnd(double x) 
 { 
     // long int c[]={ 0, 6, -360, 15120, -604800, 23950080, -946218790, 37362124800 };
-    ARIADNE_ASSERT(x>=0);
+    ARIADNE_ASSERT_MSG(x>=0, " x = "<<x<<"\n");
     
     if(x==0.0) { return 0.0; }
     int n; volatile double y,a,b;

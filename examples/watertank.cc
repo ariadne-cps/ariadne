@@ -126,7 +126,7 @@ int main()
     /// Compute the system evolution
 
     /// Create a HybridEvolver object
-    StableHybridEvolver evolver;
+    HybridEvolver evolver;
     evolver.verbosity = 1;
 
     /// Set the evolution parameters
@@ -141,8 +141,8 @@ int main()
 
     std::cout << "Computing evolution starting from location l2, x = 0.0, y = 1.0" << std::endl;
 
-    Box initial_box(2, 0.0,0.001, 1.0,1.001);
-    HybridEnclosureType initial_enclosure(l2,initial_box);
+    Box initial_box(2, 0.0,0.001, 0.0,0.001);
+    HybridEnclosureType initial_enclosure(l1,initial_box);
     Box bounding_box(2, -0.1,9.1, -0.1,1.1);
   
     HybridTime evolution_time(64.0,6);
@@ -161,7 +161,7 @@ int main()
     EnclosureListType reach = evolver.reach(watertank_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
 
-    std::cout << "Orbit="<<reach<<std::endl;
+    std::cout << "Plotting reach set... "<<std::flush;
     //plot("tutorial-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit.initial());
     plot("watertank-reach-evolver",bounding_box, Colour(0.0,0.5,1.0), reach);
 

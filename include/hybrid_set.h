@@ -228,7 +228,17 @@ class HybridListSet
     const_iterator end() const { 
         return const_iterator(*this,true); }
 
-    using std::map< DiscreteState,ListSet<ES> >::insert;
+    /*! \brief Returns the number of basic hybrid sets forming this object. */
+    size_t size() const { 
+        size_t s = 0;
+        for(locations_const_iterator loc_iter=this->locations_begin();
+            loc_iter!=this->locations_end(); ++loc_iter) {  
+            s += loc_iter->second.size(); 
+        } 
+        return s;
+    }
+
+    //using std::map< DiscreteState,ListSet<ES> >::insert;
 
     //using std::map<DiscreteState,ListSet<ES> >::operator[];
     ListSet<ES>& operator[](const DiscreteState& q) {
@@ -257,7 +267,6 @@ class HybridListSet
 };
 
 
-
 template<class ES>
 class ListSet< std::pair<DiscreteState,ES> >
     : public HybridListSet<ES>
@@ -266,6 +275,7 @@ class ListSet< std::pair<DiscreteState,ES> >
     ListSet() { }
     ListSet(const std::pair<DiscreteState,ES>& hes) { this->adjoin(hes); }
 };
+
 
 template<class ES>
 std::ostream& 

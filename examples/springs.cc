@@ -158,7 +158,7 @@ int main()
     /// Compute the system evolution
 
     /// Create a HybridEvolver object
-    StableHybridEvolver evolver;
+    HybridEvolver evolver;
     evolver.verbosity = 1;
 
     /// Set the evolution parameters

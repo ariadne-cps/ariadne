@@ -106,8 +106,8 @@ int main()
     double table_y = 3; // Height of the table
 
     /// Sets the evolution parameters
-    double EVOL_TIME = 2.0;
-    int EVOL_TRANS = 9;
+    double EVOL_TIME = 4.0;
+    int EVOL_TRANS = 15;
     double MAX_ENCLOSURE_RADIUS = 0.02;
     double MAX_STEP_SIZE = 0.01;
     int VERBOSITY = 1;
@@ -331,7 +331,7 @@ int main()
     /// Computes the system evolution
 
     /// Creates a HybridEvolver object
-    StableHybridEvolver evolver;
+    HybridEvolver evolver;
     evolver.verbosity = VERBOSITY;
 
     /// Sets the evolution parameters

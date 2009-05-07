@@ -936,6 +936,41 @@ void test_grid_open_cell_three(){
     ARIADNE_TEST_EQUAL( expectedOpenCellHeight, actualOpenCell.height() );
 }
 
+void test_grid_open_cell_four(){
+    //Allocate a trivial Grid two dimensional grid
+    Grid theGrid(2, 1.0);
+    
+    //!!!
+    ARIADNE_PRINT_TEST_CASE_TITLE("Test that the open cell overlaps with itself, dimension: 2");
+    GridOpenCell leftOpenCell = GridOpenCell( theGrid, 2, make_binary_word( "0011111" ) );
+    GridOpenCell rightOpenCell = GridOpenCell( theGrid, 2, make_binary_word( "0011111" ) );
+    ARIADNE_TEST_EQUAL( GridOpenCell::overlap( leftOpenCell, rightOpenCell ), true );   
+    
+    //!!!
+    ARIADNE_PRINT_TEST_CASE_TITLE("Test that the open cells [0.0,1.0]x[0.0,1.0] and [-0.25,0.25]x[0.0,1.0] overlap, dimension: 2");
+    Box expectedLeftOpenCellBox = make_box("[0.0,1.0]x[0.0,1.0]");
+    leftOpenCell = GridOpenCell( theGrid, 0, make_binary_word( "00" ) );
+    Box expectedRightOpenCellBox = make_box("[-0.25,0.25]x[0.0,1.0]");
+    rightOpenCell = GridOpenCell( theGrid, 1, make_binary_word( "01101" ) );
+    //First check that the cells result in correct boxes
+    ARIADNE_TEST_EQUAL( expectedLeftOpenCellBox, leftOpenCell.box() );
+    ARIADNE_TEST_EQUAL( expectedRightOpenCellBox, rightOpenCell.box() );
+    //Test the overlap
+    ARIADNE_TEST_EQUAL( GridOpenCell::overlap( leftOpenCell, rightOpenCell ), true );
+    
+    //!!!
+    ARIADNE_PRINT_TEST_CASE_TITLE("Test that the open cells [0.0,0.5]x[0.5,1.5] and [0.5,1.0]x[0.5,1.5] overlap, dimension: 2");
+    expectedLeftOpenCellBox = make_box("[0.0,0.5]x[0.5,1.5]");
+    leftOpenCell = GridOpenCell( theGrid, 0, make_binary_word( "010" ) );
+    expectedRightOpenCellBox = make_box("[0.5,1.0]x[0.5,1.5]");
+    rightOpenCell = GridOpenCell( theGrid, 0, make_binary_word( "110" ) );
+    //First check that the cells result in correct boxes
+    ARIADNE_TEST_EQUAL( expectedLeftOpenCellBox, leftOpenCell.box() );
+    ARIADNE_TEST_EQUAL( expectedRightOpenCellBox, rightOpenCell.box() );
+    //Test the overlap
+    ARIADNE_TEST_EQUAL( GridOpenCell::overlap( leftOpenCell, rightOpenCell ), false );
+}
+
 void test_grid_open_cell_one(){
     
     //Allocate a trivial Grid two dimensional grid
@@ -2499,6 +2534,7 @@ int main() {
     test_grid_open_cell_one();
     test_grid_open_cell_two();
     test_grid_open_cell_three();
+    test_grid_open_cell_four();
 
     test_grid_sub_paving();
 

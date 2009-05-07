@@ -705,6 +705,9 @@ class GridOpenCell: public GridAbstractCell {
     /*! \brief A total order on cells on the same grid, by height and word prefix. */
     bool operator<(const GridOpenCell& otherCell) const;
     
+    /*! \brief Tests if the two open cells overlap */
+    static bool overlap( const GridOpenCell & theLeftOpenCell, const GridOpenCell & theRightOpenCell );
+    
     /*! \brief this method computes the box in the original space based on the \a theGrid.
      * This box should be treated as an open set. I.e. the borders of the box must be excluded.
      */
@@ -1949,6 +1952,10 @@ inline bool GridOpenCell::operator<(const GridOpenCell& other) const {
 
 inline bool GridOpenCell::compare_grid_cells(const GridOpenCell * pCellLeft, const GridOpenCell &cellRight, const uint comparator ) {
     return GridAbstractCell::compare_abstract_grid_cells( pCellLeft, cellRight, comparator );
+}
+
+inline bool GridOpenCell::overlap( const GridOpenCell & theLeftOpenCell, const GridOpenCell & theRightOpenCell ) {
+    return definitely( theLeftOpenCell.box().overlaps(  theRightOpenCell.box() ) );
 }
 
 /********************************************GridTreeSubset******************************************/

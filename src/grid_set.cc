@@ -946,35 +946,21 @@ GridCell GridCell::neighboringCell( const Grid& theGrid, const uint theHeight, c
     }
     
     //4. We need to start from the end of the new (extended) word representing the base cell. Then
-    //   we go backwards and look for the longest prefix of the given word such that the upper
-    //   border computed in 1. is less than the boxe's upper border (in the given dimension).
-    BinaryWord theBaseCellWordPrefix = theBaseCellWord;
-    for( int position = ( theBaseCellWord.size() - 1 ); position >= 0; position-- ){
-        //Only consider the dimension that we need, otherwise
-        //there is not change of size in this dimension.
-        if( position % dimensions == dim ) {
-            //Ge the lattice box and see if the upper border is the box in the
-            //required dimension is larger than the one we computed in 1.
-            Box boxInLattice = GridCell::compute_lattice_box( dimensions, theBaseCellHeight, theBaseCellWordPrefix );
-            if( boxInLattice[dim].upper() >= upperBorderOverlapping ) {
-                //We found the smallest cell containing both the base
-                //and its neighboring cell in the given dimension
-                break;
-            }
+    //   we go backwards and look for the smallest cell such that the upper border computed in 1.
+    //   is less than the cell's box upper border (in the given dimension). This is indicated by incountering
+    //   the first zero in the path to the base cell in dimension dim from the end of the path
+    int position;
+    for( position = ( theBaseCellWord.size() - 1 ); position >= 0; position-- ){
+        //Only consider the dimension that we need and look for the first opotrunity to invert the path suffix.
+        if( ( position % dimensions == dim ) && ( theBaseCellWord[position] == 0 ) ) {
+            break;
         }
-        
-        //Pop the last element from the back, since we do not need it any longer
-        theBaseCellWordPrefix.pop_back();
     }
     
     //5. When this entry in the word is found from that point on we have to inverse the path in such
     //   a way that every component in the dimension from this point till the end of the word is
     //   inverted. This will provide us with the path to the neighborind cell in the given dimension
-    
-    // NOTE: Here we start index from theBaseCellWordPrefix.size() because theBaseCellWordPrefix.size()-1
-    // Corresponds to of the required dimension and this is the smallest box that includes the neighboring
-    // cells so the element at theBaseCellWord[theBaseCellWordPrefix.size()-1] must not be inverted!
-    for( int index = theBaseCellWordPrefix.size(); index < theBaseCellWord.size(); index++){
+    for( int index = position; index < theBaseCellWord.size(); index++){
         if( index % dimensions == dim ) {
             //If this element of the path corresponds to the needed dimension then we need to invert it
             theBaseCellWord[index] = !theBaseCellWord[index];
@@ -986,24 +972,25 @@ GridCell GridCell::neighboringCell( const Grid& theGrid, const uint theHeight, c
 
 /*********************************************GridOpenCell******************************************/
 
-//NOTE: In this method we immediately start working with the 
-//boxes in the original space, not on the lattice of the grid.
+//NOTE: In this method first works with the boxes on the lattice, to make
+//      computation exact, and then maps them to the original space.
 Box GridOpenCell::compute_box(const Grid& theGrid, const uint theHeight, const BinaryWord& theWord) {
-    const Box baseCellBox = GridCell( theGrid, theHeight, theWord ).box();
-    Box openCellBox( theGrid.dimension() );
+    Vector<Interval> baseCellBoxInLattice =  GridCell::compute_lattice_box( theGrid.dimension(), theHeight, theWord );
+    Box openCellBoxInLattice( theGrid.dimension() );
     
-    //Go through all the dimensions, compute the neighborind boxes and take the
-    //lower border from latticeBoxBaseCell, and the upper from the neighborind box.
+    //Go through all the dimensions, and double the box size in the positive axis direction.
     for(int dim = 0; dim < theGrid.dimension(); dim++){
-        GridCell neighborindCell = GridCell::neighboringCell( theGrid, theHeight, theWord, dim );
-        Interval dimensionInterval;
-        dimensionInterval.set_lower( baseCellBox[dim].lower() );
-        dimensionInterval.set_upper( (neighborindCell.box())[dim].upper() );
-
-        openCellBox[dim] = dimensionInterval;
+        Interval openCellBoxInLatticeDimInterval;
+        Interval baseCellBoxInLatticeDimInterval = baseCellBoxInLattice[dim];
+        openCellBoxInLatticeDimInterval.set_lower( baseCellBoxInLatticeDimInterval.lower() );
+        openCellBoxInLatticeDimInterval.set_upper(   baseCellBoxInLatticeDimInterval.upper() +
+                                                   ( baseCellBoxInLatticeDimInterval.upper() -
+                                                     baseCellBoxInLatticeDimInterval.lower() ) );
+        
+        openCellBoxInLattice[dim] = openCellBoxInLatticeDimInterval;
     }
     
-    return openCellBox;
+    return lattice_box_to_space( openCellBoxInLattice, theGrid );
 }
 
 GridOpenCell GridOpenCell::split(tribool isRight) const {
@@ -1065,7 +1052,7 @@ GridOpenCell * GridOpenCell::smallest_open_subcell( const GridOpenCell &theOpenC
     return pSmallestOpenCell;
 }
 
-GridOpenCell GridOpenCell::outer_approximation( const Box & theBox, const Grid& theGrid ){
+GridOpenCell GridOpenCell::outer_approximation( const Box & theBox, const Grid& theGrid ) {
     //01. First we find the smallest primary GridCell that contain the given Box.
     GridCell thePrimaryCell = GridCell::smallest_enclosing_primary_cell( theBox, theGrid );
     
@@ -1688,9 +1675,9 @@ void GridTreeSet::adjoin_outer_approximation( const CompactSetInterface& theSet,
         
     //1. Compute the smallest GridCell (corresponding to the primary cell)
     //   that encloses the theSet (after it is mapped onto theGrid).
-    const GridCell theOverApproxCell = GridCell::smallest_enclosing_primary_cell( theSet.bounding_box(), theGrid );
+    const uint height = GridCell::smallest_enclosing_primary_cell_height( theSet.bounding_box(), theGrid );
     //Compute the height of the primary cell for the outer approximation stepping up by the number of dimensions
-    const uint outer_approx_primary_cell_height = theOverApproxCell.height() + theGrid.dimension();
+    const uint outer_approx_primary_cell_height = height + theGrid.dimension();
 
     //2. Align this paving and paving enclosing the provided set
     bool has_stopped = false;
@@ -1758,10 +1745,10 @@ void GridTreeSet::adjoin_lower_approximation( const OvertSetInterface& theSet, c
     ARIADNE_ASSERT( theBoundingBox.dimension() == this->cell().dimension() );
     
     //Compute the smallest the primary cell that encloses the theSet (after it is mapped onto theGrid).
-    const GridCell theOverApproxCell = GridCell::smallest_enclosing_primary_cell( theBoundingBox, theGrid );
+    const uint height = GridCell::smallest_enclosing_primary_cell_height( theBoundingBox, theGrid );
     
     //Adjoin the lower approximation with the bounding cell being the primary cell at the given height.
-    adjoin_lower_approximation( theSet, theOverApproxCell.height(), depth );
+    adjoin_lower_approximation( theSet, height, depth );
 }
 
 void GridTreeSet::_adjoin_inner_approximation( const Grid & theGrid, BinaryTreeNode * pBinaryTreeNode, const uint primary_cell_height,
@@ -1840,7 +1827,7 @@ void GridTreeSet::adjoin_inner_approximation( const OpenSetInterface& theSet, co
     ARIADNE_ASSERT( theBoundingBox.dimension() == this->cell().dimension() );
     
     //Compute the smallest the primary cell that encloses the theSet (after it is mapped onto theGrid).
-    const GridCell theOverApproxCell = GridCell::smallest_enclosing_primary_cell( theBoundingBox, theGrid );
+    const uint height = GridCell::smallest_enclosing_primary_cell_height( theBoundingBox, theGrid );
     
     //Compute the height of the smallest primary cell that encloses the box
     //Note that, since we will need to adjoin inner approximation bounded by
@@ -1848,7 +1835,7 @@ void GridTreeSet::adjoin_inner_approximation( const OpenSetInterface& theSet, co
     //go higher. Remember that the inner approximations consists of the cells
     //that are subsets of the set theSet Adjoin the inner approximation with
     //the bounding cell being the primary cell at the given height.
-    adjoin_inner_approximation( theSet, theOverApproxCell.height(), depth );
+    adjoin_inner_approximation( theSet, height, depth );
 }
 
 void GridTreeSet::restrict_to_lower( const GridTreeSubset& theOtherSubPaving ){

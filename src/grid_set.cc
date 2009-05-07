@@ -908,7 +908,7 @@ GridOpenCell GridCell::interior() const {
     }
     //The open cell will be defined by the given new word, i.e. the path to the
     //left-bottom sub-quadrant cell but the box and the rest will be the same
-    return GridOpenCell( _theGrid, _theHeight, theOpenCellWord, box() );
+    return GridOpenCell( _theGrid, _theHeight, theOpenCellWord, _theBox );
 }
 
 //NOTE: The cell defined byt the method's arguments is called the base cell.
@@ -952,7 +952,7 @@ GridCell GridCell::neighboringCell( const Grid& theGrid, const uint theHeight, c
     int position;
     for( position = ( theBaseCellWord.size() - 1 ); position >= 0; position-- ){
         //Only consider the dimension that we need and look for the first opotrunity to invert the path suffix.
-        if( ( position % dimensions == dim ) && ( theBaseCellWord[position] == 0 ) ) {
+        if( ( position % dimensions == dim ) && !theBaseCellWord[position] ) {
             break;
         }
     }
@@ -969,6 +969,7 @@ GridCell GridCell::neighboringCell( const Grid& theGrid, const uint theHeight, c
     
     return GridCell( theGrid, theBaseCellHeight, theBaseCellWord );
 }
+
 
 /*********************************************GridOpenCell******************************************/
 
@@ -1062,6 +1063,111 @@ GridOpenCell GridOpenCell::outer_approximation( const Box & theBox, const Grid& 
     GridOpenCell * pOpenCell = GridOpenCell::smallest_open_subcell( thePrimaryCell.interior(), theBox );
     GridOpenCell theOpenCell = (* pOpenCell); delete pOpenCell; //Deallocate the memory, to avoid the memory leaks
     return theOpenCell;
+}
+
+GridTreeSet GridOpenCell::closure() const {
+    //01. First we compute the height of the primary cell that encloses the given open cell
+    const int newHeight = smallest_enclosing_primary_cell_height( _theBox, _theGrid );
+    
+    //02. Re-route (if needed) the base cell to the new primary cell
+    uint theBaseCellHeight = _theHeight;
+    BinaryWord theBaseCellWord = _theWord;
+    //If we need a higher primary cell then extend the height and the word for the base cell 
+    if( newHeight > theBaseCellHeight ) {
+        theBaseCellWord = primary_cell_path( _theGrid.dimension(), newHeight, theBaseCellHeight );
+        theBaseCellWord.append( _theWord );
+        theBaseCellHeight = newHeight;
+    }
+
+    //03. Allocate the resulting GridTreeSet with the root at the needed height
+    GridTreeSet theResultSet( _theGrid, theBaseCellHeight, new BinaryTreeNode( false ) );
+    
+    //04. The preparations are done, now we need to add the base cell to the
+    //    resulting GridTreeSet and to compute and add the other neighboring cells.
+    BinaryWord tmpWord;
+    open_cell_elements( theResultSet, theBaseCellWord, tmpWord );
+    
+    return theResultSet;
+}
+
+void GridOpenCell::open_cell_elements( GridTreeSet& theResultSet, BinaryWord& theBaseCellWord, BinaryWord& cellPosition ) const {
+    if( cellPosition.size() < _theGrid.dimension() ) {
+        //Choose the left direction in the current dimension
+        cellPosition.push_back( false );
+        open_cell_elements( theResultSet, theBaseCellWord, cellPosition );
+        cellPosition.pop_back( );
+        //Choose the right direction in the current dimension
+        cellPosition.push_back( true );
+        open_cell_elements( theResultSet, theBaseCellWord, cellPosition );
+        cellPosition.pop_back( );
+    } else {
+        //We have constructed the cell position relative to the base cell
+        //for the case of _theGrid.dimension() dimensional space, now it
+        //is time to compute this cell and adjoin it to theResultSet
+        neighboring_cell( theResultSet, theBaseCellWord, cellPosition );
+    }
+}
+
+void GridOpenCell::neighboring_cell( GridTreeSet& theResultSet, BinaryWord& theBaseCellWord, BinaryWord& cellPosition ) const {
+    const int num_dimensions = _theGrid.dimension();
+    //01. Allocate the array of size _theGrid.dimensions() in which we will store
+    //    the position in the path theBaseCellWord, for each dimension, from which on
+    //    we need to inverse the path to get the proper neighboring cell.
+    int invert_position[ num_dimensions ];
+    const int NO_INVERSE_POSITION = theBaseCellWord.size();
+    //Initialize the array with NO_INVERSE_POSITION to make sure that the inversion positions
+    //for the dimensions that are not set to one in cellPosition will be undefined. Also,
+    //count the required number of iverse dimensions
+    int inverseDimensionsNumber = 0;
+    for( int i = 0; i < num_dimensions; i++ ) {
+        invert_position[ i ] = NO_INVERSE_POSITION;
+        inverseDimensionsNumber += cellPosition[i];
+    }
+    
+    //02. Create the path to the neighboring cell and initialize it with the path to the base cell
+    BinaryWord theNeighborCellWord = theBaseCellWord;
+    
+    //03. We need to start from the end of the new (extended) word representing the base cell. Then
+    //    we go backwards and, for each dimension in which we need to move from the base cell, look
+    //    for the first zero in the path. This position, for each dimension, will indicate the path
+    //    suffix which has to be inverted to get the neighboring cell defined by cellPosition
+    int firstInversePosition = NO_INVERSE_POSITION;
+    if( inverseDimensionsNumber > 0 ) {
+        //If there is a need to do inverses, i.e. we are not adding the base cell itself
+        int foundNumberOfInverses = 0;
+        for( int position = ( theNeighborCellWord.size() - 1 ); position >= 0; position-- ){
+            //Only consider the dimension that we need and look for the first opotrunity to invert the path suffix.
+            int dimension = position % num_dimensions;
+            //If we need to inverse in this dimension and this is the first found position in 
+            //this dimension from which on we should inverse then save the position index.
+            if( cellPosition[ dimension ] && !theNeighborCellWord[ position ] && 
+                ( invert_position[ dimension ] == NO_INVERSE_POSITION ) ) {
+                invert_position[ dimension ] = position;
+                //Since it will typically be the case the the binary word to the base cell will be
+                //longer than the number of dimensions, we also find the first inverse positions.
+                if( position < firstInversePosition ) {
+                    firstInversePosition = position;
+                }
+                //Incremenet the number of fount inverses and check if this is all we need, if yes then break
+                foundNumberOfInverses += 1;
+                if( foundNumberOfInverses == inverseDimensionsNumber ) {
+                    break;
+                }
+            }
+        }
+    }
+    
+    //04. Since now all the inversion positions are found, we need to go through the path again and
+    //    inverse it in the needed dimesnions starting from (corresponding) the found positions on.
+    //    This will provide us with the path to the neighborind cell in the given dimension
+    for( int index = firstInversePosition; index < theNeighborCellWord.size(); index++ ) {
+        int dimension = index % num_dimensions;
+        if( cellPosition[ dimension ] && ( index >= invert_position[ dimension ] ) ) {
+            theNeighborCellWord[index] = !theNeighborCellWord[index];
+        }
+    }
+    
+    theResultSet.adjoin( GridCell( _theGrid, theResultSet.cell().height(), theNeighborCellWord ) );
 }
 
 /********************************************GridTreeSubset*****************************************/
@@ -1428,7 +1534,7 @@ GridTreeSet::GridTreeSet( const Grid& theGrid, const uint theHeight, BinaryTreeN
 }
 
 GridTreeSet::GridTreeSet( const GridCell& theGridCell  ) :
-    GridTreeSubset( theGridCell.grid(), 0, BinaryWord(), new BinaryTreeNode( false ) ){
+    GridTreeSubset( theGridCell.grid(), theGridCell.height(), BinaryWord(), new BinaryTreeNode( false ) ){
     this->adjoin(theGridCell);
 }
 

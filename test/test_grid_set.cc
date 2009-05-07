@@ -971,152 +971,386 @@ void test_grid_open_cell_four(){
     ARIADNE_TEST_EQUAL( GridOpenCell::overlap( leftOpenCell, rightOpenCell ), false );
 }
 
+void test_grid_open_cell_five() {
+    //The vector for storing the results
+    std::vector< GridCell* > expected_result_arr(4);
+    
+    //Allocate a trivial Grid two dimensional grid
+    Grid theTrivialGrid(2, 1.0);
+    
+    //!!! 00
+    ARIADNE_PRINT_TEST_CASE_TITLE("Construct closure of an open cell 00 height=0, dimension: 2");
+    GridOpenCell openCell = GridOpenCell( theTrivialGrid, 0, BinaryWord() );
+    
+    uint theHeight = 2;
+    expected_result_arr[0] = new GridCell( theTrivialGrid, theHeight, make_binary_word("0011") );
+    expected_result_arr[1] = new GridCell( theTrivialGrid, theHeight, make_binary_word("0110") );
+    expected_result_arr[2] = new GridCell( theTrivialGrid, theHeight, make_binary_word("1001") );
+    expected_result_arr[3] = new GridCell( theTrivialGrid, theHeight, make_binary_word("1100") );
+    
+    GridTreeSet closureSet = openCell.closure();
+    ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, closureSet, 4 );
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
+    
+    //!!! 01
+    ARIADNE_PRINT_TEST_CASE_TITLE("Construct closure of an open cell 01 height=2, dimension: 2");
+    openCell = GridOpenCell( theTrivialGrid, 2, make_binary_word( "0011111" ) );
+    
+    theHeight = 2;
+    expected_result_arr[0] = new GridCell( theTrivialGrid, theHeight, make_binary_word("0011111") );
+    expected_result_arr[1] = new GridCell( theTrivialGrid, theHeight, make_binary_word("0110101") );
+    expected_result_arr[2] = new GridCell( theTrivialGrid, theHeight, make_binary_word("1001010") );
+    expected_result_arr[3] = new GridCell( theTrivialGrid, theHeight, make_binary_word("1100000") );
+    
+    closureSet = openCell.closure();
+    ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, closureSet, 4 );
+    
+    //!!! 02
+    ARIADNE_PRINT_TEST_CASE_TITLE("Construct closure of an open cell 01 height=1, dimension: 2");
+    openCell = GridOpenCell( theTrivialGrid, 1, make_binary_word( "11111" ) );
+    
+    closureSet = openCell.closure();
+    ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, closureSet, 4 );
+    
+    //!!! 03
+    ARIADNE_PRINT_TEST_CASE_TITLE("Construct closure of an open cell 01 height=1, dimension: 2");
+    openCell = GridOpenCell( theTrivialGrid, 0, make_binary_word( "111" ) );
+    
+    closureSet = openCell.closure();
+    ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, closureSet, 4 );
+
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
+    
+    //!!! 04
+    ARIADNE_PRINT_TEST_CASE_TITLE("Construct closure of an open cell 02 height=2, dimension: 2");
+    openCell = GridOpenCell( theTrivialGrid, 2, make_binary_word( "00110101" ) );
+    
+    theHeight = 2;
+    expected_result_arr[0] = new GridCell( theTrivialGrid, theHeight, make_binary_word("00110101") );
+    expected_result_arr[1] = new GridCell( theTrivialGrid, theHeight, make_binary_word("00110111") );
+    expected_result_arr[2] = new GridCell( theTrivialGrid, theHeight, make_binary_word("01100000") );
+    expected_result_arr[3] = new GridCell( theTrivialGrid, theHeight, make_binary_word("01100010") );
+    
+    closureSet = openCell.closure();
+    ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, closureSet, 4 );
+    
+    //!!! 05
+    ARIADNE_PRINT_TEST_CASE_TITLE("Construct closure of an open cell 02 height=1, dimension: 2");
+    openCell = GridOpenCell( theTrivialGrid, 1, make_binary_word( "110101" ) );
+    
+    closureSet = openCell.closure();
+    ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, closureSet, 4 );
+    
+    //!!! 06
+    ARIADNE_PRINT_TEST_CASE_TITLE("Construct closure of an open cell 02 height=0, dimension: 2");
+    openCell = GridOpenCell( theTrivialGrid, 0, make_binary_word( "0101" ) );
+    
+    closureSet = openCell.closure();
+    ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, closureSet, 4 );
+
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
+    
+    //!!! 07
+    ARIADNE_PRINT_TEST_CASE_TITLE("Construct closure of an open cell 03 height=2, dimension: 2");
+    openCell = GridOpenCell( theTrivialGrid, 2, make_binary_word( "000111111" ) );
+    
+    theHeight = 2;
+    expected_result_arr[0] = new GridCell( theTrivialGrid, theHeight, make_binary_word("000111111") );
+    expected_result_arr[1] = new GridCell( theTrivialGrid, theHeight, make_binary_word("001101010") );
+    expected_result_arr[2] = new GridCell( theTrivialGrid, theHeight, make_binary_word("010010101") );
+    expected_result_arr[3] = new GridCell( theTrivialGrid, theHeight, make_binary_word("011000000") );
+    
+    closureSet = openCell.closure();
+    ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, closureSet, 4 );
+    
+    //!!! 08
+    ARIADNE_PRINT_TEST_CASE_TITLE("Construct closure of an open cell 03 height=1, dimension: 2");
+    openCell = GridOpenCell( theTrivialGrid, 1, make_binary_word( "0111111" ) );
+    
+    closureSet = openCell.closure();
+    ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, closureSet, 4 );
+
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
+   
+    //!!! 09
+    ARIADNE_PRINT_TEST_CASE_TITLE("Construct closure of an open cell 04 height=2, dimension: 2");
+    openCell = GridOpenCell( theTrivialGrid, 2, make_binary_word( "00000001" ) );
+
+    theHeight = 2;
+    expected_result_arr[0] = new GridCell( theTrivialGrid, theHeight, make_binary_word("00000001") );
+    expected_result_arr[1] = new GridCell( theTrivialGrid, theHeight, make_binary_word("00000011") );
+    expected_result_arr[2] = new GridCell( theTrivialGrid, theHeight, make_binary_word("00000100") );
+    expected_result_arr[3] = new GridCell( theTrivialGrid, theHeight, make_binary_word("00000110") );
+    
+    closureSet = openCell.closure();
+    ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, closureSet, 4 );
+    
+    //!!! 10
+    ARIADNE_PRINT_TEST_CASE_TITLE("Construct closure of an open cell 04 height=1, dimension: 2");
+    openCell = GridOpenCell( theTrivialGrid, 1, make_binary_word( "000001" ) );
+    
+    closureSet = openCell.closure();
+    ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, closureSet, 4 );
+
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
+    
+    //!!! 11
+    ARIADNE_PRINT_TEST_CASE_TITLE("Construct closure of an open cell 05 height=2, dimension: 2");
+    openCell = GridOpenCell( theTrivialGrid, 2, make_binary_word( "00000011" ) );
+
+    theHeight = 2;
+    expected_result_arr[0] = new GridCell( theTrivialGrid, theHeight, make_binary_word("00000011") );
+    expected_result_arr[1] = new GridCell( theTrivialGrid, theHeight, make_binary_word("00000110") );
+    expected_result_arr[2] = new GridCell( theTrivialGrid, theHeight, make_binary_word("00001001") );
+    expected_result_arr[3] = new GridCell( theTrivialGrid, theHeight, make_binary_word("00001100") );
+    
+    closureSet = openCell.closure();
+    ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, closureSet, 4 );
+    
+    //!!! 12
+    ARIADNE_PRINT_TEST_CASE_TITLE("Construct closure of an open cell 05 height=1, dimension: 2");
+    openCell = GridOpenCell( theTrivialGrid, 1, make_binary_word( "000011" ) );
+    
+    closureSet = openCell.closure();
+    ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, closureSet, 4 );
+
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
+    
+    //!!! 13
+    ARIADNE_PRINT_TEST_CASE_TITLE("Construct closure of an open cell 06 height=2, dimension: 2");
+    openCell = GridOpenCell( theTrivialGrid, 2, make_binary_word( "00000010" ) );
+
+    theHeight = 2;
+    expected_result_arr[0] = new GridCell( theTrivialGrid, theHeight, make_binary_word("00000010") );
+    expected_result_arr[1] = new GridCell( theTrivialGrid, theHeight, make_binary_word("00000011") );
+    expected_result_arr[2] = new GridCell( theTrivialGrid, theHeight, make_binary_word("00001000") );
+    expected_result_arr[3] = new GridCell( theTrivialGrid, theHeight, make_binary_word("00001001") );
+    
+    closureSet = openCell.closure();
+    ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, closureSet, 4 );
+    
+    //!!! 14
+    ARIADNE_PRINT_TEST_CASE_TITLE("Construct closure of an open cell 06 height=1, dimension: 2");
+    openCell = GridOpenCell( theTrivialGrid, 1, make_binary_word( "000010" ) );
+    
+    closureSet = openCell.closure();
+    ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, closureSet, 4 );
+
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
+    
+    //!!! 15
+    ARIADNE_PRINT_TEST_CASE_TITLE("Construct closure of an open cell 07 height=2, dimension: 2");
+    openCell = GridOpenCell( theTrivialGrid, 2, make_binary_word( "00000000" ) );
+
+    theHeight = 2;
+    expected_result_arr[0] = new GridCell( theTrivialGrid, theHeight, make_binary_word("00000000") );
+    expected_result_arr[1] = new GridCell( theTrivialGrid, theHeight, make_binary_word("00000001") );
+    expected_result_arr[2] = new GridCell( theTrivialGrid, theHeight, make_binary_word("00000010") );
+    expected_result_arr[3] = new GridCell( theTrivialGrid, theHeight, make_binary_word("00000011") );
+    
+    closureSet = openCell.closure();
+    ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, closureSet, 4 );
+    
+    //!!! 16
+    ARIADNE_PRINT_TEST_CASE_TITLE("Construct closure of an open cell 07 height=1, dimension: 2");
+    openCell = GridOpenCell( theTrivialGrid, 1, make_binary_word( "000000" ) );
+    
+    closureSet = openCell.closure();
+    ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, closureSet, 4 );
+
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
+    
+    //!!! 17
+    ARIADNE_PRINT_TEST_CASE_TITLE("Construct closure of an open cell 08 height=2, dimension: 2");
+    openCell = GridOpenCell( theTrivialGrid, 2, make_binary_word( "0000001" ) );
+
+    theHeight = 2;
+    expected_result_arr[0] = new GridCell( theTrivialGrid, theHeight, make_binary_word("0000001") );
+    expected_result_arr[1] = new GridCell( theTrivialGrid, theHeight, make_binary_word("0000011") );
+    expected_result_arr[2] = new GridCell( theTrivialGrid, theHeight, make_binary_word("0000100") );
+    expected_result_arr[3] = new GridCell( theTrivialGrid, theHeight, make_binary_word("0000110") );
+    
+    closureSet = openCell.closure();
+    ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, closureSet, 4 );
+    
+    //!!! 18
+    ARIADNE_PRINT_TEST_CASE_TITLE("Construct closure of an open cell 08 height=1, dimension: 2");
+    openCell = GridOpenCell( theTrivialGrid, 1, make_binary_word( "00001" ) );
+    
+    closureSet = openCell.closure();
+    ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, closureSet, 4 );
+
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
+    
+    //!!! 19
+    ARIADNE_PRINT_TEST_CASE_TITLE("Construct closure of an open cell 09 height=2, dimension: 2");
+    openCell = GridOpenCell( theTrivialGrid, 2, make_binary_word( "0000" ) );
+
+    theHeight = 2;
+    expected_result_arr[0] = new GridCell( theTrivialGrid, theHeight, make_binary_word("0000") );
+    expected_result_arr[1] = new GridCell( theTrivialGrid, theHeight, make_binary_word("0001") );
+    expected_result_arr[2] = new GridCell( theTrivialGrid, theHeight, make_binary_word("0010") );
+    expected_result_arr[3] = new GridCell( theTrivialGrid, theHeight, make_binary_word("0011") );
+    
+    closureSet = openCell.closure();
+    ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, closureSet, 4 );
+    
+    //!!! 20
+    ARIADNE_PRINT_TEST_CASE_TITLE("Construct closure of an open cell 09 height=1, dimension: 2");
+    openCell = GridOpenCell( theTrivialGrid, 1, make_binary_word( "00" ) );
+    
+    closureSet = openCell.closure();
+    ARIADNE_TEST_GRID_TREE_SUBSET_ITERATOR( expected_result_arr, closureSet, 4 );
+
+    ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
+}
+
 void test_grid_open_cell_one(){
     
     //Allocate a trivial Grid two dimensional grid
     Grid theTrivialGrid(2, 1.0);
     
-    //!!!
+    //!!! 00
     ARIADNE_PRINT_TEST_CASE_TITLE("Constructing a trivial open cell, dimension: 2");
     GridOpenCell trivialOpenCell = GridOpenCell( theTrivialGrid, 0, BinaryWord() );
     Box expected_trivial_open_cell_box = make_box("[0.0,2.0]x[0.0,2.0]");
     ARIADNE_PRINT_TEST_COMMENT("The trivial open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_trivial_open_cell_box, trivialOpenCell.box() );
     
-    //!!!
+    //!!! 01
     ARIADNE_PRINT_TEST_CASE_TITLE("Constructing an open cell 01 height=2, dimension: 2");
     GridOpenCell openCell01 = GridOpenCell( theTrivialGrid, 2, make_binary_word( "0011111" ) );
     Box expected_open_cell_box01 = make_box("[0.75,1.25]x[0.5,1.5]");
     ARIADNE_PRINT_TEST_COMMENT("The open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_open_cell_box01, openCell01.box() );
     
-    //!!!
+    //!!! 02
     ARIADNE_PRINT_TEST_CASE_TITLE("Constructing an open cell 01 height=1, dimension: 2");
     GridOpenCell openCell02 = GridOpenCell( theTrivialGrid, 1, make_binary_word( "11111" ) );
     Box expected_open_cell_box02 = make_box("[0.75,1.25]x[0.5,1.5]");
     ARIADNE_PRINT_TEST_COMMENT("The open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_open_cell_box02, openCell02.box() );
     
-    //!!!
+    //!!! 03
     ARIADNE_PRINT_TEST_CASE_TITLE("Constructing an open cell 01 height=0, dimension: 2");
     GridOpenCell openCell03 = GridOpenCell( theTrivialGrid, 0, make_binary_word( "111" ) );
     Box expected_open_cell_box03 = make_box("[0.75,1.25]x[0.5,1.5]");
     ARIADNE_PRINT_TEST_COMMENT("The open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_open_cell_box03, openCell03.box() );
     
-    //!!!
+    //!!! 04
     ARIADNE_PRINT_TEST_CASE_TITLE("Constructing an open cell 02 height=2, dimension: 2");
     GridOpenCell openCell04 = GridOpenCell( theTrivialGrid, 2, make_binary_word( "00110101" ) );
     Box expected_open_cell_box04 = make_box("[0.0,0.5]x[0.75,1.25]");
     ARIADNE_PRINT_TEST_COMMENT("The open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_open_cell_box04, openCell04.box() );
     
-    //!!!
+    //!!! 05
     ARIADNE_PRINT_TEST_CASE_TITLE("Constructing an open cell 02 height=1, dimension: 2");
     GridOpenCell openCell05 = GridOpenCell( theTrivialGrid, 1, make_binary_word( "110101" ) );
     Box expected_open_cell_box05 = make_box("[0.0,0.5]x[0.75,1.25]");
     ARIADNE_PRINT_TEST_COMMENT("The open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_open_cell_box05, openCell05.box() );
     
-    //!!!
+    //!!! 06
     ARIADNE_PRINT_TEST_CASE_TITLE("Constructing an open cell 02 height=0, dimension: 2");
     GridOpenCell openCell06 = GridOpenCell( theTrivialGrid, 0, make_binary_word( "0101" ) );
     Box expected_open_cell_box06 = make_box("[0.0,0.5]x[0.75,1.25]");
     ARIADNE_PRINT_TEST_COMMENT("The open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_open_cell_box06, openCell06.box() );
     
-    //!!!
+    //!!! 07
     ARIADNE_PRINT_TEST_CASE_TITLE("Constructing an open cell 03 height=2, dimension: 2");
     GridOpenCell openCell07 = GridOpenCell( theTrivialGrid, 2, make_binary_word( "000111111" ) );
     Box expected_open_cell_box07 = make_box("[-0.125,0.125]x[0.75,1.25]");
     ARIADNE_PRINT_TEST_COMMENT("The open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_open_cell_box07, openCell07.box() );
     
-    //!!!
+    //!!! 08
     ARIADNE_PRINT_TEST_CASE_TITLE("Constructing an open cell 03 height=1, dimension: 2");
     GridOpenCell openCell08 = GridOpenCell( theTrivialGrid, 1, make_binary_word( "0111111" ) );
     Box expected_open_cell_box08 = make_box("[-0.125,0.125]x[0.75,1.25]");
     ARIADNE_PRINT_TEST_COMMENT("The open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_open_cell_box08, openCell08.box() );
     
-    //!!!
+    //!!! 09
     ARIADNE_PRINT_TEST_CASE_TITLE("Constructing an open cell 04 height=2, dimension: 2");
     GridOpenCell openCell09 = GridOpenCell( theTrivialGrid, 2, make_binary_word( "00000001" ) );
     Box expected_open_cell_box09 = make_box("[-1.0,-0.5]x[-0.75,-0.25]");
     ARIADNE_PRINT_TEST_COMMENT("The open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_open_cell_box09, openCell09.box() );
     
-    //!!!
+    //!!! 10
     ARIADNE_PRINT_TEST_CASE_TITLE("Constructing an open cell 04 height=1, dimension: 2");
     GridOpenCell openCell10 = GridOpenCell( theTrivialGrid, 1, make_binary_word( "000001" ) );
     Box expected_open_cell_box10 = make_box("[-1.0,-0.5]x[-0.75,-0.25]");
     ARIADNE_PRINT_TEST_COMMENT("The open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_open_cell_box10, openCell10.box() );
     
-    //!!!
+    //!!! 11
     ARIADNE_PRINT_TEST_CASE_TITLE("Constructing an open cell 05 height=2, dimension: 2");
     GridOpenCell openCell11 = GridOpenCell( theTrivialGrid, 2, make_binary_word( "00000011" ) );
     Box expected_open_cell_box11 = make_box("[-0.75,-0.25]x[-0.75,-0.25]");
     ARIADNE_PRINT_TEST_COMMENT("The open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_open_cell_box11, openCell11.box() );
     
-    //!!!
+    //!!! 12
     ARIADNE_PRINT_TEST_CASE_TITLE("Constructing an open cell 05 height=1, dimension: 2");
     GridOpenCell openCell12 = GridOpenCell( theTrivialGrid, 1, make_binary_word( "000011" ) );
     Box expected_open_cell_box12 = make_box("[-0.75,-0.25]x[-0.75,-0.25]");
     ARIADNE_PRINT_TEST_COMMENT("The open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_open_cell_box12, openCell12.box() );
     
-    //!!!
+    //!!! 13
     ARIADNE_PRINT_TEST_CASE_TITLE("Constructing an open cell 06 height=2, dimension: 2");
     GridOpenCell openCell13 = GridOpenCell( theTrivialGrid, 2, make_binary_word( "00000010" ) );
     Box expected_open_cell_box13 = make_box("[-0.75,-0.25]x[-1.0,-0.5]");
     ARIADNE_PRINT_TEST_COMMENT("The open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_open_cell_box13, openCell13.box() );
     
-    //!!!
+    //!!! 14
     ARIADNE_PRINT_TEST_CASE_TITLE("Constructing an open cell 06 height=1, dimension: 2");
     GridOpenCell openCell14 = GridOpenCell( theTrivialGrid, 1, make_binary_word( "000010" ) );
     Box expected_open_cell_box14 = make_box("[-0.75,-0.25]x[-1.0,-0.5]");
     ARIADNE_PRINT_TEST_COMMENT("The open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_open_cell_box14, openCell14.box() );
     
-    //!!!
+    //!!! 15
     ARIADNE_PRINT_TEST_CASE_TITLE("Constructing an open cell 07 height=2, dimension: 2");
     GridOpenCell openCell15 = GridOpenCell( theTrivialGrid, 2, make_binary_word( "00000000" ) );
     Box expected_open_cell_box15 = make_box("[-1.0,-0.5]x[-1.0,-0.5]");
     ARIADNE_PRINT_TEST_COMMENT("The open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_open_cell_box15, openCell15.box() );
     
-    //!!!
+    //!!! 16
     ARIADNE_PRINT_TEST_CASE_TITLE("Constructing an open cell 07 height=1, dimension: 2");
     GridOpenCell openCell16 = GridOpenCell( theTrivialGrid, 1, make_binary_word( "000000" ) );
     Box expected_open_cell_box16 = make_box("[-1.0,-0.5]x[-1.0,-0.5]");
     ARIADNE_PRINT_TEST_COMMENT("The open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_open_cell_box16, openCell16.box() );
     
-    //!!!
+    //!!! 17
     ARIADNE_PRINT_TEST_CASE_TITLE("Constructing an open cell 08 height=2, dimension: 2");
     GridOpenCell openCell17 = GridOpenCell( theTrivialGrid, 2, make_binary_word( "0000001" ) );
     Box expected_open_cell_box17 = make_box("[-0.75,-0.25]x[-1.0,0.0]");
     ARIADNE_PRINT_TEST_COMMENT("The open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_open_cell_box17, openCell17.box() );
     
-    //!!!
+    //!!! 18
     ARIADNE_PRINT_TEST_CASE_TITLE("Constructing an open cell 08 height=1, dimension: 2");
     GridOpenCell openCell18 = GridOpenCell( theTrivialGrid, 1, make_binary_word( "00001" ) );
     Box expected_open_cell_box18 = make_box("[-0.75,-0.25]x[-1.0,0.0]");
     ARIADNE_PRINT_TEST_COMMENT("The open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_open_cell_box18, openCell18.box() );
     
-    //!!!
+    //!!! 19
     ARIADNE_PRINT_TEST_CASE_TITLE("Constructing an open cell 09 height=2, dimension: 2");
     GridOpenCell openCell19 = GridOpenCell( theTrivialGrid, 2, make_binary_word( "0000" ) );
     Box expected_open_cell_box19 = make_box("[-1.0,1.0]x[-1.0,1.0]");
     ARIADNE_PRINT_TEST_COMMENT("The open cell, as given by its box:");
     ARIADNE_TEST_EQUAL( expected_open_cell_box19, openCell19.box() );
     
-    //!!!
+    //!!! 20
     ARIADNE_PRINT_TEST_CASE_TITLE("Constructing an open cell 09 height=1, dimension: 2");
     GridOpenCell openCell20 = GridOpenCell( theTrivialGrid, 1, make_binary_word( "00" ) );
     Box expected_open_cell_box20 = make_box("[-1.0,1.0]x[-1.0,1.0]");
@@ -2535,6 +2769,7 @@ int main() {
     test_grid_open_cell_two();
     test_grid_open_cell_three();
     test_grid_open_cell_four();
+    test_grid_open_cell_five();
 
     test_grid_sub_paving();
 

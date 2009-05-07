@@ -674,6 +674,26 @@ class GridOpenCell: public GridAbstractCell {
      */
     GridOpenCell(const Grid& theGrid, const uint theHeight, const BinaryWord& theWord, const Box& theBox);
     
+    /*! \brief This method allows to enumerate the GridCells that constitute the given
+     *  GridOpenCell and add them to the \a theResultSet. Note that this method must be
+     *  provided with \a theResultSet that has the primary cell being the cell enclosing
+     *  the GridOpenCell. Also \a theBaseCellWord has to be the path to the base cell of
+     *  \a theBaseCellWord relative to theResultSet.cell().height(). I.e. the height of
+     *  the primary cell to which \a theResultSet is mounted. When called initially \a
+     *  cellPosition should be an empty word. This is a technical parameter used in the
+     *  method's recursivce calls.
+     */  
+    void open_cell_elements( GridTreeSet& theResultSet, BinaryWord& theBaseCellWord, BinaryWord& cellPosition ) const;
+    
+    /*! \brief This method allows to compute the neighboring (to the right) cell of
+     *  the base cell given by theResultSet.cell().height() and \a theBaseCellWord
+     *  and adjoin it to \a theResultSet. Here \a cellPosition is the position of
+     *  the neighboring cell with resect to the base cell in the grid().dimensions()
+     *  dimensional space. Note that if \a cellPosition consists of grid().dimensions()
+     *  zeroes then we adjoin the base cell itself.
+     */
+    void neighboring_cell( GridTreeSet& theResultSet, BinaryWord& theBaseCellWord, BinaryWord& cellPosition ) const;
+    
     /*! \brief This method allows to find the smallest open cell that contains \a theBox.
      *  The search is started from \a theOpenCell that is an open cell covering \a theBox.
      *  Note: This method is recursive and it assumes that \a theOpenCell
@@ -705,11 +725,15 @@ class GridOpenCell: public GridAbstractCell {
     /*! \brief A total order on cells on the same grid, by height and word prefix. */
     bool operator<(const GridOpenCell& otherCell) const;
     
+    /*! \brief Computes all the cells that constitute the GridOpenCell in the form of the GridTreeSet.*/
+    GridTreeSet closure() const;
+    
     /*! \brief Tests if the two open cells overlap */
     static bool overlap( const GridOpenCell & theLeftOpenCell, const GridOpenCell & theRightOpenCell );
     
     /*! \brief this method computes the box in the original space based on the \a theGrid.
      * This box should be treated as an open set. I.e. the borders of the box must be excluded.
+     * Note tha, \a theHeight and \a theWord define the left bottom cell (base cell) of the open cell.
      */
     static Box compute_box(const Grid& theGrid, const uint theHeight, const BinaryWord& theWord);
 

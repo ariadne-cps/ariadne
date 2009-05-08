@@ -739,7 +739,11 @@ class GridOpenCell: public GridAbstractCell {
     
     /*! \brief Computes the intersection of two GridOpenCell as a list of open cells whoes union
      * gives the intersection. This is done becase the intersection can no always be represented
-     * as one open cell. If the intersection is empty then it returns an empty vector
+     * as one open cell. If the intersection is empty then it returns an empty vector.
+     * WARNING: This operation is expensive because we do not always get a single cell as a result.
+     * Moreover, currently intersecting an open cell with itself or a subcell sharing a common border
+     * with the cell will result in more that one open cell. Still the operation is robust, it always
+     * results in a set of open cells whoes union is the exact intersection of the given open cells.
      */
     static std::vector<GridOpenCell> intersection( const GridOpenCell & theLeftOpenCell, const GridOpenCell & theRightOpenCell );
     

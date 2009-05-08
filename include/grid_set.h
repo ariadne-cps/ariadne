@@ -80,6 +80,7 @@ template<class BS> class ListSet;
 
 std::ostream& operator<<(std::ostream& output_stream, const BinaryTreeNode & binary_tree );
 std::ostream& operator<<(std::ostream& os, const GridCell& theGridCell);
+std::ostream& operator<<(std::ostream& os, const GridOpenCell& theGridOpenCell );
 std::ostream& operator<<(std::ostream& os, const GridTreeCursor& theGridTreeCursor);
 std::ostream& operator<<(std::ostream& os, const GridTreeSubset& theGridTreeSubset);
 std::ostream& operator<<(std::ostream& os, const GridTreeSet& theGridTreeSet);
@@ -495,7 +496,7 @@ class GridAbstractCell {
      *  primary cell heights we can use it in sub-classes for comparing cells of the same types
      */
     static bool compare_abstract_grid_cells(const GridAbstractCell * pCellLeft, const GridAbstractCell &cellRight, const uint comparator );
-
+    
   public:
 
     /*! \brief The constant for the grid cells comparison */
@@ -674,25 +675,24 @@ class GridOpenCell: public GridAbstractCell {
      */
     GridOpenCell(const Grid& theGrid, const uint theHeight, const BinaryWord& theWord, const Box& theBox);
     
-    /*! \brief This method allows to enumerate the GridCells that constitute the given
-     *  GridOpenCell and add them to the \a theResultSet. Note that this method must be
-     *  provided with \a theResultSet that has the primary cell being the cell enclosing
-     *  the GridOpenCell. Also \a theBaseCellWord has to be the path to the base cell of
-     *  \a theBaseCellWord relative to theResultSet.cell().height(). I.e. the height of
-     *  the primary cell to which \a theResultSet is mounted. When called initially \a
-     *  cellPosition should be an empty word. This is a technical parameter used in the
-     *  method's recursivce calls.
+    /*! \brief This method allows to enumerate the GridCells that are located in the positive
+     *  axis direction from the base cell. The base cell is defined by \a theHeight and
+     *  \a theBaseCellWord. When called \a cellPosition should be an empty word. This is a
+     *  technical parameter used in the method's recursivce calls. \a theResultSet is the vector
+     *  to which all the neighboring cell will be added, i.e. it is a return parameter.
+     *  NOTE: The cell defined by \a theHeight, \a theBaseCellWord will also be in \a theResultSet.
      */  
-    void open_cell_elements( GridTreeSet& theResultSet, BinaryWord& theBaseCellWord, BinaryWord& cellPosition ) const;
+    void neighboring_cells( const uint theHeight, const BinaryWord& theBaseCellWord,
+                            BinaryWord& cellPosition, GridTreeSet& theResultSet ) const;
     
     /*! \brief This method allows to compute the neighboring (to the right) cell of
-     *  the base cell given by theResultSet.cell().height() and \a theBaseCellWord
-     *  and adjoin it to \a theResultSet. Here \a cellPosition is the position of
-     *  the neighboring cell with resect to the base cell in the grid().dimensions()
-     *  dimensional space. Note that if \a cellPosition consists of grid().dimensions()
-     *  zeroes then we adjoin the base cell itself.
+     *  the base cell given by \a theHeight and \a theBaseCellWord. Here \a cellPosition
+     *  is the position of the neighboring cell with resect to the base cell in the
+     *  theGrid.dimensions() dimensional space. Note that if \a cellPosition consists
+     *  of theGrid.dimensions() zeroes then we adjoin the base cell itself.
      */
-    void neighboring_cell( GridTreeSet& theResultSet, BinaryWord& theBaseCellWord, BinaryWord& cellPosition ) const;
+    static GridCell neighboring_cell( const Grid& theGrid, const uint theHeight,
+                                      const BinaryWord& theBaseCellWord, BinaryWord& cellPosition );
     
     /*! \brief This method allows to find the smallest open cell that contains \a theBox.
      *  The search is started from \a theOpenCell that is an open cell covering \a theBox.
@@ -701,6 +701,15 @@ class GridOpenCell: public GridAbstractCell {
      *  In the open cell based on \a theOpenCell does not cover \a theBox this method returns NULL.
      */
     static GridOpenCell * smallest_open_subcell( const GridOpenCell &theOpenCell, const Box & theBox );
+    
+    /*! \brief Takes the cell \a theCell of the set where it belongs, \a theSet, and see if it has
+     *  neighbors in this set. If yes then it creates the open cell lying inside theSet such that
+     *  it covers the borders. All such open cells are added to the vector \a result. \a cellPosition
+     *  is a technical parameter that has to be set to an empty word. Also, this method add the interior
+     *  of theCell to the vector \a result.
+     */
+    static void cover_cell_and_borders( const GridCell& theCell, const GridTreeSet& theSet,
+                                        BinaryWord& cellPosition, std::vector<GridOpenCell>& result );
     
   public:
     /*! \brief Default constructor. Needed for some containers and iterators. */
@@ -727,6 +736,12 @@ class GridOpenCell: public GridAbstractCell {
     
     /*! \brief Computes all the cells that constitute the GridOpenCell in the form of the GridTreeSet.*/
     GridTreeSet closure() const;
+    
+    /*! \brief Computes the intersection of two GridOpenCell as a list of open cells whoes union
+     * gives the intersection. This is done becase the intersection can no always be represented
+     * as one open cell. If the intersection is empty then it returns an empty vector
+     */
+    static std::vector<GridOpenCell> intersection( const GridOpenCell & theLeftOpenCell, const GridOpenCell & theRightOpenCell );
     
     /*! \brief Tests if the two open cells overlap */
     static bool overlap( const GridOpenCell & theLeftOpenCell, const GridOpenCell & theRightOpenCell );
@@ -2183,6 +2198,16 @@ inline std::ostream& operator<<(std::ostream& output_stream, const BinaryTreeNod
     BinaryWord tree, leaves;
     binary_tree.tree_to_binary_words( tree, leaves );
     return output_stream << "BinaryTreeNode( Tree: " << tree << ", Leaves: " << leaves << ")";
+}
+
+/****************************************FRIENDS OF GridOpenCell*******************************************/
+
+inline std::ostream& operator<<(std::ostream& os, const GridOpenCell& theGridOpenCell ) {
+    //Write the grid data to the string stream
+    return os << "GridOpenCell( " << theGridOpenCell.grid() <<
+        ", Primary cell height: " << theGridOpenCell.height() << 
+        ", Base cell path: " << theGridOpenCell.word() <<
+        ", Box (closure): " << theGridOpenCell.box() << " )";
 }
 
 /****************************************FRIENDS OF GridCell*******************************************/

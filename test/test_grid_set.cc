@@ -38,7 +38,6 @@
 #include "grid_set.h"
 #include "set_interface.h"
 
-
 #include "test.h"
 
 using namespace Ariadne;
@@ -1205,8 +1204,88 @@ void test_grid_open_cell_five() {
     ARIADNE_CLEAN_TEST_VECTOR( expected_result_arr );
 }
 
-void test_grid_open_cell_one(){
+void test_grid_open_cell_six() {
+    std::vector<GridOpenCell> expectedResult;
+    std::vector<GridOpenCell> actualResult;
+    uint theHeight;
     
+    //Allocate a trivial Grid two dimensional grid
+    Grid theTrivialGrid(2, 1.0);
+
+    //!!! 00
+    ARIADNE_PRINT_TEST_CASE_TITLE("Intersect the open cell with itself, dimension: 2");
+    GridOpenCell openCellOne = GridOpenCell( theTrivialGrid, 0, BinaryWord() );
+    GridOpenCell openCellTwo = GridOpenCell( theTrivialGrid, 0, BinaryWord() );
+    
+    theHeight = 2;
+    expectedResult.push_back( GridOpenCell( theTrivialGrid, theHeight, make_binary_word( "001100" ) ) );
+    expectedResult.push_back( GridOpenCell( theTrivialGrid, theHeight, make_binary_word( "001101" ) ) );
+    expectedResult.push_back( GridOpenCell( theTrivialGrid, theHeight, make_binary_word( "001110" ) ) );
+    expectedResult.push_back( GridOpenCell( theTrivialGrid, theHeight, make_binary_word( "001111" ) ) );
+    expectedResult.push_back( GridOpenCell( theTrivialGrid, theHeight, make_binary_word( "011000" ) ) );
+    expectedResult.push_back( GridOpenCell( theTrivialGrid, theHeight, make_binary_word( "011010" ) ) );
+    expectedResult.push_back( GridOpenCell( theTrivialGrid, theHeight, make_binary_word( "100100" ) ) );
+    expectedResult.push_back( GridOpenCell( theTrivialGrid, theHeight, make_binary_word( "100101" ) ) );
+    expectedResult.push_back( GridOpenCell( theTrivialGrid, theHeight, make_binary_word( "110000" ) ) );
+
+    actualResult = GridOpenCell::intersection( openCellOne, openCellTwo );
+    
+    ARIADNE_TEST_EQUAL( expectedResult, actualResult );
+    expectedResult.erase( expectedResult.begin(), expectedResult.end() );
+
+    //!!! 01
+    ARIADNE_PRINT_TEST_CASE_TITLE("Intersect an open cell with an open cell that is a robust subset, dimension: 2");
+    openCellOne = GridOpenCell( theTrivialGrid, 0, make_binary_word( "00" ) );
+    openCellTwo = GridOpenCell( theTrivialGrid, 0, make_binary_word( "0011" ) );
+    
+    theHeight = 0;
+    expectedResult.push_back( GridOpenCell( theTrivialGrid, theHeight, make_binary_word( "0011" ) ) );
+
+    actualResult = GridOpenCell::intersection( openCellOne, openCellTwo );
+    
+    ARIADNE_TEST_EQUAL( expectedResult, actualResult );
+    expectedResult.erase( expectedResult.begin(), expectedResult.end() );
+
+    //!!! 02
+    ARIADNE_PRINT_TEST_CASE_TITLE("Intersect two overlapping open cells, dimension: 2");
+    openCellOne = GridOpenCell( theTrivialGrid, 0, make_binary_word( "00" ) );
+    openCellTwo = GridOpenCell( theTrivialGrid, 0, make_binary_word( "1011" ) );
+    
+    theHeight = 0;
+    expectedResult.push_back( GridOpenCell( theTrivialGrid, theHeight, make_binary_word( "101100" ) ) );
+    expectedResult.push_back( GridOpenCell( theTrivialGrid, theHeight, make_binary_word( "101101" ) ) );
+    expectedResult.push_back( GridOpenCell( theTrivialGrid, theHeight, make_binary_word( "111000" ) ) );
+
+    actualResult = GridOpenCell::intersection( openCellOne, openCellTwo );
+    
+    ARIADNE_TEST_EQUAL( expectedResult, actualResult );
+    expectedResult.erase( expectedResult.begin(), expectedResult.end() );
+
+    //!!! 03
+    ARIADNE_PRINT_TEST_CASE_TITLE("Intersect two non-overlapping open cells, dimension: 2");
+    openCellOne = GridOpenCell( theTrivialGrid, 0, make_binary_word( "0000" ) );
+    openCellTwo = GridOpenCell( theTrivialGrid, 0, make_binary_word( "1000" ) );
+    
+    actualResult = GridOpenCell::intersection( openCellOne, openCellTwo );
+    
+    ARIADNE_TEST_EQUAL( expectedResult, actualResult );
+    expectedResult.erase( expectedResult.begin(), expectedResult.end() );
+
+    //!!! 04
+    ARIADNE_PRINT_TEST_CASE_TITLE("Intersect two overlapping open cells whoes intersection is just one GridCell, dimension: 2");
+    openCellOne = GridOpenCell( theTrivialGrid, 0, make_binary_word( "0000" ) );
+    openCellTwo = GridOpenCell( theTrivialGrid, 2, make_binary_word( "0001101111" ) );
+    
+    theHeight = 0;
+    expectedResult.push_back( GridOpenCell( theTrivialGrid, theHeight, make_binary_word( "00010100" ) ) );
+    
+    actualResult = GridOpenCell::intersection( openCellOne, openCellTwo );
+    
+    ARIADNE_TEST_EQUAL( expectedResult, actualResult );
+    expectedResult.erase( expectedResult.begin(), expectedResult.end() );
+}
+
+void test_grid_open_cell_one(){
     //Allocate a trivial Grid two dimensional grid
     Grid theTrivialGrid(2, 1.0);
     
@@ -2770,6 +2849,7 @@ int main() {
     test_grid_open_cell_three();
     test_grid_open_cell_four();
     test_grid_open_cell_five();
+    test_grid_open_cell_six();
 
     test_grid_sub_paving();
 

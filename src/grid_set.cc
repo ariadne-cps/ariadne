@@ -1085,31 +1085,33 @@ GridTreeSet GridOpenCell::closure() const {
     //04. The preparations are done, now we need to add the base cell to the
     //    resulting GridTreeSet and to compute and add the other neighboring cells.
     BinaryWord tmpWord;
-    open_cell_elements( theResultSet, theBaseCellWord, tmpWord );
+    neighboring_cells( theResultSet.cell().height(), theBaseCellWord, tmpWord, theResultSet );
     
     return theResultSet;
 }
 
-void GridOpenCell::open_cell_elements( GridTreeSet& theResultSet, BinaryWord& theBaseCellWord, BinaryWord& cellPosition ) const {
+void GridOpenCell::neighboring_cells( const uint theHeight, const BinaryWord& theBaseCellWord,
+                                      BinaryWord& cellPosition, GridTreeSet& theResultSet ) const {
     if( cellPosition.size() < _theGrid.dimension() ) {
         //Choose the left direction in the current dimension
         cellPosition.push_back( false );
-        open_cell_elements( theResultSet, theBaseCellWord, cellPosition );
+        GridOpenCell::neighboring_cells( theHeight, theBaseCellWord, cellPosition, theResultSet );
         cellPosition.pop_back( );
         //Choose the right direction in the current dimension
         cellPosition.push_back( true );
-        open_cell_elements( theResultSet, theBaseCellWord, cellPosition );
+        GridOpenCell::neighboring_cells( theHeight, theBaseCellWord, cellPosition, theResultSet );
         cellPosition.pop_back( );
     } else {
         //We have constructed the cell position relative to the base cell
         //for the case of _theGrid.dimension() dimensional space, now it
-        //is time to compute this cell and adjoin it to theResultSet
-        neighboring_cell( theResultSet, theBaseCellWord, cellPosition );
+        //is time to compute this cell and add it to theResultSet
+        theResultSet.adjoin( GridOpenCell::neighboring_cell( _theGrid, theHeight, theBaseCellWord, cellPosition ) );
     }
 }
 
-void GridOpenCell::neighboring_cell( GridTreeSet& theResultSet, BinaryWord& theBaseCellWord, BinaryWord& cellPosition ) const {
-    const int num_dimensions = _theGrid.dimension();
+GridCell GridOpenCell::neighboring_cell( const Grid& theGrid, const uint theHeight,
+                                         const BinaryWord& theBaseCellWord, BinaryWord& cellPosition ) {
+    const uint num_dimensions = theGrid.dimension();
     //01. Allocate the array of size _theGrid.dimensions() in which we will store
     //    the position in the path theBaseCellWord, for each dimension, from which on
     //    we need to inverse the path to get the proper neighboring cell.
@@ -1167,7 +1169,73 @@ void GridOpenCell::neighboring_cell( GridTreeSet& theResultSet, BinaryWord& theB
         }
     }
     
-    theResultSet.adjoin( GridCell( _theGrid, theResultSet.cell().height(), theNeighborCellWord ) );
+    return GridCell( theGrid, theHeight, theNeighborCellWord );
+}
+
+void GridOpenCell::cover_cell_and_borders( const GridCell& theCell, const GridTreeSet& theSet,
+                                  BinaryWord& cellPosition, std::vector<GridOpenCell>& result ) {
+    if( cellPosition.size() < theCell.grid().dimension() ) {
+        //Choose the left direction in the current dimension
+        cellPosition.push_back( false );
+        cover_cell_and_borders( theCell, theSet, cellPosition, result );
+        cellPosition.pop_back( );
+        //Choose the right direction in the current dimension
+        cellPosition.push_back( true );
+        cover_cell_and_borders( theCell, theSet, cellPosition, result );
+        cellPosition.pop_back( );
+    } else {
+        //We have constructed the cell position relative to the base cell
+        //for the case of _theGrid.dimension() dimensional space, now it
+        //is time to compute this cell and add it to result
+        GridCell neighborCell = GridOpenCell::neighboring_cell( theCell.grid(), theCell.height(), theCell.word(), cellPosition );
+        //Check if the found neighboring cell is in theSet
+        if( theSet.binary_tree()->is_enabled( neighborCell.word() ) ) {
+            //So this cell is the enabled neighbor of theCell therefore we need to cover the boundary
+            //Appending the position of the neighboring cell to theCell.word() should give us the path
+            //To the base cell of the GridOpenCell that covers this direction
+            BinaryWord coverCellBaseWord = theCell.word(); coverCellBaseWord.append( cellPosition );
+            //Add the resulting cover cell
+            result.push_back( GridOpenCell( theCell.grid(), theCell.height(), coverCellBaseWord ) );
+        }
+    }
+}
+
+std::vector<GridOpenCell> GridOpenCell::intersection( const GridOpenCell & theLeftOpenCell, const GridOpenCell & theRightOpenCell ) {
+    std::vector<GridOpenCell> result;
+    
+    //01 First check if one open cell is a subset of another open cell or if they overlap
+    if( theLeftOpenCell.box().covers( theRightOpenCell.box() ) ) {
+            //If theRightOpenCell is a subset of theLeftOpenCell
+        result.push_back( theRightOpenCell );
+    } else {
+        if( theRightOpenCell.box().covers( theLeftOpenCell.box() ) ) {
+            //If theLeftOpenCell is a subset of theRightOpenCell
+            result.push_back( theLeftOpenCell );
+        } else {
+            if( theRightOpenCell.box().overlaps( theLeftOpenCell.box() ) ) {
+                //02 If the open cells overlap then let us get the cells contained by the two open cells
+                GridTreeSet theLeftCellSet = theLeftOpenCell.closure();
+                GridTreeSet theRightCellSet = theRightOpenCell.closure();
+                
+                //03 Then we compute their intersection
+                GridTreeSet intersectionSet = ::intersection( theLeftCellSet, theRightCellSet );
+                //NOTE: It seems to me there is no need to recombine the resulting set, it will not reduce anything
+                
+                //04 Iterate through all the cells in the intersection and first add their interiors to the resulting set, second
+                //check if the two cells have common border and/or vertex and if they do then add extra open cells, lying withing
+                //the intersection and covering the common border and/or vertex.
+                for ( GridTreeSubset::const_iterator it = intersectionSet.begin(), end = intersectionSet.end(); it != end; it++) {
+                    //Cover the interior of the cell and the borders with the cells bordered with
+                    //the given one in each  positive direction in each dimension. The borders
+                    //are covered only if the neighboring cell is also in the intersection set.
+                    BinaryWord tmpWord;
+                    cover_cell_and_borders( (*it), intersectionSet, tmpWord, result );
+                }
+            }
+        }
+    }
+    
+    return result;
 }
 
 /********************************************GridTreeSubset*****************************************/

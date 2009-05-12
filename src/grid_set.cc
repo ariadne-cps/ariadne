@@ -1174,7 +1174,8 @@ GridCell GridOpenCell::neighboring_cell( const Grid& theGrid, const uint theHeig
 
 void GridOpenCell::cover_cell_and_borders( const GridCell& theCell, const GridTreeSet& theSet,
                                   BinaryWord& cellPosition, std::vector<GridOpenCell>& result ) {
-    if( cellPosition.size() < theCell.grid().dimension() ) {
+    const int num_dimensions = theCell.grid().dimension();
+    if( cellPosition.size() < num_dimensions ) {
         //Choose the left direction in the current dimension
         cellPosition.push_back( false );
         cover_cell_and_borders( theCell, theSet, cellPosition, result );
@@ -1191,9 +1192,13 @@ void GridOpenCell::cover_cell_and_borders( const GridCell& theCell, const GridTr
         //Check if the found neighboring cell is in theSet
         if( theSet.binary_tree()->is_enabled( neighborCell.word() ) ) {
             //So this cell is the enabled neighbor of theCell therefore we need to cover the boundary
-            //Appending the position of the neighboring cell to theCell.word() should give us the path
-            //To the base cell of the GridOpenCell that covers this direction
-            BinaryWord coverCellBaseWord = theCell.word(); coverCellBaseWord.append( cellPosition );
+            BinaryWord coverCellBaseWord = theCell.word();
+            //Take the given word theCell.word() and then add the directions from the cellPosition
+            //The latter start from the first axis till the last one, but the path in coverCellBaseWord
+            //currently ends at some other axis so we need to align them when appending cellPosition
+            for( int i = 0; i < num_dimensions ; i++ ) {
+                coverCellBaseWord.push_back( cellPosition[ coverCellBaseWord.size() % num_dimensions ] );
+            }
             //Add the resulting cover cell
             result.push_back( GridOpenCell( theCell.grid(), theCell.height(), coverCellBaseWord ) );
         }

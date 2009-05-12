@@ -1283,6 +1283,21 @@ void test_grid_open_cell_six() {
     
     ARIADNE_TEST_EQUAL( expectedResult, actualResult );
     expectedResult.erase( expectedResult.begin(), expectedResult.end() );
+
+    //!!! 05
+    ARIADNE_PRINT_TEST_CASE_TITLE("Intersect two overlapping open cells based on x-splitted primary cells, dimension: 2");
+    openCellOne = GridOpenCell( theTrivialGrid, 0, make_binary_word( "0" ) );
+    openCellTwo = GridOpenCell( theTrivialGrid, 0, make_binary_word( "1" ) );
+    
+    theHeight = 2;
+    expectedResult.push_back( GridOpenCell( theTrivialGrid, theHeight, make_binary_word( "0011100" ) ) );
+    expectedResult.push_back( GridOpenCell( theTrivialGrid, theHeight, make_binary_word( "0011110" ) ) );
+    expectedResult.push_back( GridOpenCell( theTrivialGrid, theHeight, make_binary_word( "0110100" ) ) );
+    
+    actualResult = GridOpenCell::intersection( openCellOne, openCellTwo );
+    
+    ARIADNE_TEST_EQUAL( expectedResult, actualResult );
+    expectedResult.erase( expectedResult.begin(), expectedResult.end() );
 }
 
 void test_grid_open_cell_one(){

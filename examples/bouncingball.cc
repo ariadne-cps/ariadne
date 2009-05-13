@@ -23,7 +23,6 @@
 
 #include <cstdarg>
 #include "ariadne.h"
-#include "grid_set.h"
 
 using namespace Ariadne;
 
@@ -104,6 +103,9 @@ int main()
     std::cout << "Orbit="<<orbit<<std::endl;
     //plot("tutorial-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit.initial());
     plot("ball-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit);
+    
+    textplot("ball-orbit.txt",orbit);
+    
 /*
     std::cout << "Computing reach set using HybridEvolver... " << std::flush;
     EnclosureListType reach = evolver.reach(ball,initial_enclosure,evolution_time);

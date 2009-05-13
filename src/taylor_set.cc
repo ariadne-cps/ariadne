@@ -41,7 +41,7 @@
 
 #include "zonotope.h"
 #include "polytope.h"
-#include "graphics.h"
+#include "graphics_interface.h"
 
 namespace Ariadne {
 
@@ -436,15 +436,15 @@ Vector<Interval> error(const TaylorSet& ts) {
 }
 
 
-void box_draw(Figure& fig, const TaylorSet& ts) {
-    fig.draw(ts.bounding_box());
+void box_draw(GraphicsInterface& fig, const TaylorSet& ts) {
+    draw(fig,ts.bounding_box());
 }
 
-void affine_draw(Figure& fig, const TaylorSet& ts) {
+void affine_draw(GraphicsInterface& fig, const TaylorSet& ts) {
     draw(fig,zonotope(ts));
 }
 
-void curve_draw(Figure& fig, const TaylorSet& ts) {
+void curve_draw(GraphicsInterface& fig, const TaylorSet& ts) {
     assert(ts.dimension()==2 && ts.generators_size()==2);
     std::vector<Point> pts;
     Vector<Float> s(2);
@@ -468,7 +468,7 @@ void curve_draw(Figure& fig, const TaylorSet& ts) {
     fig.draw(pts);
 }
 
-void grid_draw(Figure& fig, const TaylorSet& ts)
+void grid_draw(GraphicsInterface& fig, const TaylorSet& ts)
 {
     uint depth=12;
     Float rad=1./8;
@@ -483,7 +483,7 @@ void grid_draw(Figure& fig, const TaylorSet& ts)
     draw(fig,gts);
 }
 
-void draw(Figure& fig, const TaylorSet& ts) {
+void draw(GraphicsInterface& fig, const TaylorSet& ts) {
     box_draw(fig,ts);
 /*
     static const double MAX_NEGLIGABLE_NORM=1e-10;

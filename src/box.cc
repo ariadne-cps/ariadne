@@ -29,9 +29,30 @@
 
 #include "box.h"
 #include "stlio.h"
+#include "point.h"
+
+typedef unsigned int uint;
 
 namespace Ariadne {
 
+//
+// Helper function needed to extract the set of vertices from a box
+//
+void make_vertices(const Box& bx, uint i, uint n, Point& pt, std::vector<Point>& v) {
+    ARIADNE_ASSERT(i <= n);
+    if(i == n) {    // base case: we are at the last dimension of the box
+        pt[i] = bx[i].lower();
+        v.push_back(pt);
+        pt[i] = bx[i].upper();
+        v.push_back(pt);
+    } else {        // recursive case: we are still scanning dimensions
+        pt[i] = bx[i].lower();
+        make_vertices(bx, i+1, n, pt, v);
+        pt[i] = bx[i].upper();
+        make_vertices(bx, i+1, n, pt, v);
+    }
+}
+        
 Box::Box(uint d, const Float& x0l, const Float& x0u, ...)
     : Vector<Interval>(d)
 {
@@ -50,6 +71,16 @@ Box::Box(uint d, const Float& x0l, const Float& x0u, ...)
 Box::Box(const std::string& str) 
 {
     *this=make_box(str);
+}
+
+std::vector<Point> Box::vertices() const {
+    std::vector<Point> v;
+    uint n = this->dimension();
+    if(n > 0) {
+        Point pt(n);
+        make_vertices(*this, 0, n-1, pt, v);
+    }     
+    return v;
 }
 
 

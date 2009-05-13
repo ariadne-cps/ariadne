@@ -51,9 +51,8 @@ class TaylorSet;
 
 class Zonotope;
 class Grid;
-class GridCell;
 class GridTreeSet;
-class Figure;
+class GraphicsInterface;
 
 /*! \brief Sets expressed as the image of a box under a polynomial with error bounds.
  *
@@ -168,11 +167,11 @@ GridTreeSet outer_approximation(const TaylorSet& set, const Grid& grid, uint dep
 void adjoin_outer_approximation(GridTreeSet& grid_set, const TaylorSet& set, uint depth);
 Zonotope zonotope(const TaylorSet& ts);
 
-void draw(Figure& g, const TaylorSet& ts);
-void box_draw(Figure& g, const TaylorSet& ts);
-void affine_draw(Figure& g, const TaylorSet& ts);
-void curve_draw(Figure& g, const TaylorSet& ts);
-void grid_draw(Figure& g, const TaylorSet& ts);
+void draw(GraphicsInterface& g, const TaylorSet& ts);
+void box_draw(GraphicsInterface& g, const TaylorSet& ts);
+void affine_draw(GraphicsInterface& g, const TaylorSet& ts);
+void curve_draw(GraphicsInterface& g, const TaylorSet& ts);
+void grid_draw(GraphicsInterface& g, const TaylorSet& ts);
 
 void plot(const char* fn, const Box& bbx, const TaylorSet& ts);
 

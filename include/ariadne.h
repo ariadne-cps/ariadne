@@ -60,5 +60,6 @@ namespace Ariadne {
 
 #include "serialization.h"
 #include "graphics.h"
+#include "textplot.h"
 
 #endif

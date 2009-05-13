@@ -45,8 +45,11 @@
 #include "hybrid_set_interface.h"
 #include "point.h"
 #include "box.h"
+#include "orbit.h"
 
 #include "serialization.h"
+
+#include "graphics_interface.h"
 
 namespace Ariadne {
 
@@ -619,16 +622,23 @@ HybridSetConstIterator<DS,HBS>::increment_loc()
 template<class A> void serialize(A& archive, HybridGridTreeSet& set, const unsigned int version) { 
     archive & static_cast<std::map<int,GridTreeSet>&>(set); }
 
-
-template<class G, class BS> inline 
+template<class BS> inline
 void 
-draw(G& graphic, const std::pair<int,BS>& hs) { 
+draw(GraphicsInterface& graphic, const Orbit< std::pair<int,BS> >& orbit) {
+    draw(graphic,orbit.reach()); 
+    draw(graphic,orbit.initial());
+    draw(graphic,orbit.final());
+}    
+
+template<class BS> inline 
+void 
+draw(GraphicsInterface& graphic, const std::pair<int,BS>& hs) { 
     draw(graphic,hs.second); 
 }
 
-template<class G, class DS> inline 
+template<class DS> inline 
 void 
-draw(G& graphic, const std::map<int,DS>& hds) { 
+draw(GraphicsInterface& graphic, const std::map<int,DS>& hds) { 
     for(typename std::map<int,DS>::const_iterator loc_iter=hds.begin();
         loc_iter!=hds.end(); ++loc_iter) {
         draw(graphic,loc_iter->second); 

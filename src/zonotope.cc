@@ -890,7 +890,7 @@ contains(const Zonotope& z, const Point& pt)
 }
 
 
-void draw(Figure& fig, const Zonotope& z) {
+void draw(GraphicsInterface& fig, const Zonotope& z) {
     fig.draw(polytope(error_free_over_approximation(z)));
 }
 

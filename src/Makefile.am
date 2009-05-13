@@ -43,7 +43,8 @@ SRC = \
 	discretiser.cc \
 	reachability_analyser.cc \
 	logging.cc \
-	graphics.cc
+	graphics.cc \
+	textplot.cc
 
 CALCULUS_SRC = \
 	numeric.cc \

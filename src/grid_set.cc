@@ -2752,5 +2752,20 @@ GridTreeSet difference( const GridTreeSubset& theSet1, const GridTreeSubset& the
     return resultSet;
 }
 
+void draw(GraphicsInterface& theGraphic, const GridCell& theGridCell) {
+    draw(theGraphic,theGridCell.box());
+}
+    
+void draw(GraphicsInterface& theGraphic, const GridTreeSet& theGridTreeSet) {
+    for(GridTreeSet::const_iterator iter=theGridTreeSet.begin(); iter!=theGridTreeSet.end(); ++iter) {
+        draw(theGraphic,iter->box());
+    }
+}
+
+void draw(GraphicsInterface& theGraphic, const CompactSetInterface& theSet) {
+    static const int DRAWING_DEPTH=16;
+    draw(theGraphic,outer_approximation(theSet,Grid(theSet.dimension()),DRAWING_DEPTH));
+}
+
 } // namespace Ariadne
 

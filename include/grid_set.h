@@ -50,6 +50,8 @@
 #include "set_interface.h"
 #include "vector.h"
 
+#include "graphics_interface.h"
+
 using namespace std;
 using namespace Ariadne;
 
@@ -73,7 +75,6 @@ class GridTreeSet;
 
 class GridTreeCursor;
 class GridTreeConstIterator;
-
     
 /*Declarations of classes in other files*/
 template<class BS> class ListSet;
@@ -715,7 +716,8 @@ class GridOpenCell: public GridAbstractCell {
     /*! \brief Default constructor. Needed for some containers and iterators. */
     GridOpenCell();
 
-    /*! \brief Construct a cell based on \a theGrid, the primary cell of level \a theHeight,     * and the path to the SubPaving's root cell which is accessible from the primary cell
+    /*! \brief Construct a cell based on \a theGrid, the primary cell of level \a theHeight,
+     * and the path to the SubPaving's root cell which is accessible from the primary cell
      * via the path \a _theWord. Note that, \a theHeight is the height relative to the Grid,
      * but not to the original space!
      */
@@ -2266,20 +2268,12 @@ template<class A> void serialize(A& archive, Ariadne::GridTreeSet& set, const un
     ARIADNE_NOT_IMPLEMENTED;
 }
 
-template<class G> void draw(G& theGraphic, const GridCell& theGridCell) {
-    draw(theGraphic,theGridCell.box());
-}
+void draw(GraphicsInterface& theGraphic, const GridCell& theGridCell); 
     
-template<class G> void draw(G& theGraphic, const GridTreeSet& theGridTreeSet) {
-    for(GridTreeSet::const_iterator iter=theGridTreeSet.begin(); iter!=theGridTreeSet.end(); ++iter) {
-        draw(theGraphic,iter->box());
-    }
-}
+void draw(GraphicsInterface& theGraphic, const GridTreeSet& theGridTreeSet);
 
-template<class G> void draw(G& theGraphic, const CompactSetInterface& theSet) {
-    static const int DRAWING_DEPTH=16;
-    draw(theGraphic,outer_approximation(theSet,Grid(theSet.dimension()),DRAWING_DEPTH));
-}
+void draw(GraphicsInterface& theGraphic, const CompactSetInterface& theSet);
+
 
 } // namespace Ariadne
 

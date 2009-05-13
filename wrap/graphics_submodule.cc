@@ -23,8 +23,9 @@
  
 #include "config.h"
 
-#include "graphics.h"
 #include "point.h"
+#include "graphics_interface.h"
+#include "graphics.h"
 #include "box.h"
 #include "zonotope.h"
 #include "polytope.h"
@@ -67,8 +68,8 @@ void export_figure()
     figure_class.def("draw",(void(*)(Figure&,const Box&))&draw);
     figure_class.def("draw",(void(*)(Figure&,const Zonotope&))&draw);
     figure_class.def("draw",(void(*)(Figure&,const Polytope&))&draw);
-    figure_class.def("draw",(void(*)(Figure&,const TaylorSet&))&draw);
-    figure_class.def("draw",(void(*)(Figure&,const GridTreeSet&))&draw);
+    figure_class.def("draw",(void(*)(GraphicsInterface&,const TaylorSet&))&draw);
+    figure_class.def("draw",(void(*)(GraphicsInterface&,const GridTreeSet&))&draw);
     //figure_class.def("draw",(void(*)(Figure&,const Polyhedron&))&draw);
     figure_class.def("draw",(void(*)(Figure&,const InterpolatedCurve&))&draw);
     figure_class.def("clear",&Figure::clear);

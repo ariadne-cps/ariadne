@@ -405,5 +405,21 @@ operator<<(std::ostream& os, const Orbit<HybridTaylorSet>& orb)
     return os;
 }
 
+template<class ES> void draw(GraphicsInterface& graphic, const Orbit<ES>& orbit) 
+{
+    draw(graphic,orbit.reach()); 
+    draw(graphic,orbit.initial());
+    draw(graphic,orbit.final());
+}
+
+
+
+void draw(GraphicsInterface& graphic, const Orbit<HybridPoint>& orbit) 
+{
+    for(uint i=0; i<=orbit.size(); ++i) {
+        draw(graphic,orbit.curve(i));
+    }
+}
+
 
 } // namespace Ariadne

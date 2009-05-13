@@ -35,6 +35,8 @@
 
 namespace Ariadne {
 
+class Point;
+
 //! A box in Euclidean space.
 class Box
     : public SetInterface,
@@ -68,6 +70,9 @@ class Box
 
     //! An explicit case to an interval vector. Useful to prevent ambiguous function overloads.
     const Vector<Interval>& vector() const { return *this; }
+
+    //! The set of vertices of the box.
+    std::vector<Point> vertices() const;
 
     //! An approximation to the centre of the box.
     Vector<Float> centre() const {

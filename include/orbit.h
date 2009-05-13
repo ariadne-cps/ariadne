@@ -36,6 +36,7 @@
 #include <boost/scoped_ptr.hpp>
 
 #include "numeric.h"
+#include "graphics_interface.h"
 
 namespace Ariadne {
 
@@ -242,20 +243,9 @@ template<>
 std::ostream& 
 operator<<(std::ostream& os, const Orbit< HybridPoint >& orb);
 
+template<class ES> void draw(GraphicsInterface& graphic, const Orbit<ES>& orbit);
 
-template<class G, class ES> void draw(G& graphic, const Orbit<ES>& orbit) 
-{
-    draw(graphic,orbit.reach()); 
-    draw(graphic,orbit.initial());
-    draw(graphic,orbit.final());
-}
-
-template<class G> void draw(G& graphic, const Orbit<HybridPoint>& orbit) 
-{
-    for(uint i=0; i<=orbit.size(); ++i) {
-        draw(graphic,orbit.curve(i));
-    }
-}
+void draw(GraphicsInterface& graphic, const Orbit<HybridPoint>& orbit);
 
 } // namespace Ariadne
 

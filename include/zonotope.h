@@ -37,6 +37,8 @@
 
 #include "set_interface.h"
 
+#include "graphics_interface.h"
+
 namespace Ariadne {
 
 template<class X> class Vector;
@@ -245,7 +247,7 @@ Zonotope::Zonotope(uint d, uint m, const X* ptr)
 {
 }
 
-void draw(Figure& fig, const Zonotope& z);
+void draw(GraphicsInterface& fig, const Zonotope& z);
 
 } // namespace Ariadne
 

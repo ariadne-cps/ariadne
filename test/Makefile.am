@@ -41,7 +41,8 @@ check_PROGRAMS = \
 	test_discretised_evolution \
 	test_reachability_analysis \
 	test_serialization \
-	test_graphics
+	test_graphics \
+	test_textplot
 
 #	test_hybrid_simulator
 
@@ -79,7 +80,7 @@ test_discretised_evolution_SOURCES=test_discretised_evolution.cc
 test_reachability_analysis_SOURCES=test_reachability_analysis.cc
 test_serialization_SOURCES=test_serialization.cc
 test_graphics_SOURCES=test_graphics.cc
-
+test_textplot_SOURCES=test_textplot.cc
 
 EXTRA_DIST =
 SUBDIRS =

@@ -33,6 +33,8 @@
 #include "stlio.h"
 #include "macros.h"
 
+#include "graphics_interface.h"
+
 typedef unsigned int uint;
 
 namespace Ariadne {
@@ -146,9 +148,9 @@ operator<<(std::ostream& os, const ListSet<BS>& ls)
 }
 
 
-template<class G, class BS> 
+template<class BS> 
 void 
-draw(G& graphic, const ListSet<BS>& ls) { 
+draw(GraphicsInterface& graphic, const ListSet<BS>& ls) { 
     for(typename ListSet<BS>::const_iterator iter=ls.begin(); 
         iter!=ls.end();  ++iter) { draw(graphic,*iter); } 
 }

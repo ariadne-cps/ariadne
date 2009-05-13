@@ -32,6 +32,8 @@
 #include <string>
 #include <vector>
 
+#include "graphics_interface.h"
+
 typedef unsigned int uint;
 
 namespace Ariadne {
@@ -86,7 +88,9 @@ inline FillColour fill_colour(double r, double g, double b) { return FillColour(
     
 
 //! \brief Class for plotting figures.
-class Figure {
+class Figure 
+    : public GraphicsInterface
+{
   public:
     ~Figure();
     Figure();
@@ -120,11 +124,6 @@ inline Figure& operator<<(Figure& g, const LineWidth& lw) { g.set_line_width(lw)
 inline Figure& operator<<(Figure& g, const LineColour& lc) { g.set_line_colour(lc); return g; }
 inline Figure& operator<<(Figure& g, const FillStyle& fs) { g.set_fill_style(fs); return g; }
 inline Figure& operator<<(Figure& g, const FillColour& fc) { g.set_fill_colour(fc); return g; }
-
-inline void draw(Figure& g, const Point& pt) { g.draw(pt); }
-inline void draw(Figure& g, const Box& bx) { g.draw(bx); }
-inline void draw(Figure& g, const Polytope& p) { g.draw(p); }
-inline void draw(Figure& g, const InterpolatedCurve& c) { g.draw(c); }
 
 template<class SET> Figure& operator<<(Figure& g, const SET& set) { draw(g,set); return g; }
 

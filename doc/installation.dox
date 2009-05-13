@@ -26,7 +26,7 @@
 \file installation.dox
 \brief Installation guide of Doxygen documentation
 
-\page installation Installation Guide
+\page installation_page Installation Guide
 
 
 \section Download
@@ -122,7 +122,7 @@ And follow the directions above.
 
 - If you don't have write-access to your machine's system files, you can insall %Ariadne locally by configuring with the command <code> ./configure --prefix=$HOME </code> .
 
-- Make sure the library (and Python interface, if used) can be found by the system! On Unix/Linux systems, if you are installing to you user (home) directory, you may need to add the following to your \tt .bashrc or \tt .bash_profile files:
+- Make sure the library (and Python interface, if used) can be found by the system! On Unix/Linux systems, if you are installing to you user (home) directory, you may need to add the following to your \c .bashrc or \c .bash_profile files:
    <code>       export PYTHONPATH+=:$HOME/lib/python2.5/site-packages:$HOME/lib64/python2.5/site-packages</code> .
 
 */

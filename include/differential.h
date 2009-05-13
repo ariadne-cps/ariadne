@@ -119,57 +119,58 @@ class Differential
     //! \brief The type of a constant iterator through (index,coefficient) pairs..
     typedef typename Expansion<X>::const_iterator const_iterator;
 
-    //! \brief .
+    //! \brief Default constructor constructs a differential with degree zero in no variables.
     explicit Differential() : _expansion(0), _degree(0) { _expansion[MultiIndex(0)]=0; }
-    //! \brief .
+    //! \brief Constructs a differential with degree zero in \a as variables.
     explicit Differential(uint as) : _expansion(as), _degree(MAX_DEGREE) { _expansion[MultiIndex(as)]=0; }
-    //! \brief .
+    //! \brief Constructs a differential with degree \a deg in \a as variables.
     explicit Differential(uint as, uint deg) : _expansion(as),_degree(deg) { _expansion[MultiIndex(as)]=0; }
-    //! \brief .
+    //! \brief Construct a differential from a mapping giving a coefficient for a finite number of multi-indices.
     explicit Differential(const std::map<MultiIndex,X>& map) : _expansion(map),_degree() { }
 
-    //! \brief .
+    //! \brief Construct a dense differential of degree \a deg in \a as variables from a list of coefficients beginning at \a ptr.
     template<class XX> Differential(uint as, uint deg, const XX* ptr) : _expansion(as), _degree(deg) {
         for(MultiIndex j(as); j.degree()<=deg; ++j) { if(*ptr!=0) { _expansion[j]=*ptr; } ++ptr; } }
-    //! \brief .
+    //! \brief Conversion constructor from a different numerical type.
     template<class XX> Differential(const Differential<XX>& x)
         : _expansion(x.expansion()), _degree(x.degree()) { }
 
-    //! \brief .
+    //! \brief Set the differential equal to a constant, without changing the degree or number of arguments.
     Differential<X>& operator=(const X& c) {
         this->_expansion.clear(); this->_expansion[MultiIndex(this->argument_size())]=c; return *this; }
 
-    //! \brief .
-    static Differential<X> constant(uint as, uint d, const X& c) {
-        Differential<X> r(as,d); r.set_value(c); return r; }
-    //! \brief .
-    static Differential<X> variable(uint as, uint d, const X& x, uint i) {
-        Differential<X> r(as,d); r._expansion[MultiIndex::zero(as)]=x;
-        r._expansion[MultiIndex::unit(as,i)]=1.0; return r; }
+    //! \brief A constant differential of degree \a deg in \a as arguments with value \a c.
+    static Differential<X> constant(uint as, uint deg, const X& c) {
+        Differential<X> r(as,deg); r.set_value(c); return r; }
+    //! \brief A differential of degree \a deg in \a as arguments representing the quantity \f$v+x_j\f$.
+    static Differential<X> variable(uint as, uint deg, const X& v, uint j) {
+        Differential<X> r(as,deg); r._expansion[MultiIndex::zero(as)]=v;
+        r._expansion[MultiIndex::unit(as,j)]=1.0; return r; }
 
-    //! \brief .
-    static Vector< Differential<X> > constants(uint rs, uint as, uint d, const Vector<X>& c) {
+    //! \brief A vector of \a rs constant differentials of degree \a deg in \a as arguments with values \a c[j].
+    static Vector< Differential<X> > constants(uint rs, uint as, uint deg, const Vector<X>& c) {
         ARIADNE_ASSERT(c.size()==rs);
-        Vector< Differential<X> > result(rs,Differential(as,d));
+        Vector< Differential<X> > result(rs,Differential(as,deg));
         for(uint i=0; i!=rs; ++i) { result[i]=c[i]; }
         return result;
     }
-    //! \brief .
-    static Vector< Differential<X> > variables(uint rs, uint as, uint d, const Vector<X>& x) {
-        ARIADNE_ASSERT(x.size()==rs);  ARIADNE_ASSERT(as==x.size());
-        Vector< Differential<X> > result(rs,Differential<X>(as,d));
-        for(uint i=0; i!=rs; ++i) { result[i]=x[i]; result[i][i]=X(1.0); }
+    //! \brief A vector of \a rs differentials of degree \a deg in \a as arguments with values \f$v_i+x_i\f$. 
+    //! \pre \a rs == \a as == c.size().
+    static Vector< Differential<X> > variables(uint rs, uint as, uint deg, const Vector<X>& v) {
+        ARIADNE_ASSERT(v.size()==rs);  ARIADNE_ASSERT(as==v.size());
+        Vector< Differential<X> > result(rs,Differential<X>(as,deg));
+        for(uint i=0; i!=rs; ++i) { result[i]=v[i]; result[i][i]=X(1.0); }
         return result; 
     }
 
-    //! \brief .
-    static Vector< Differential<X> > variables(uint d, const Vector<X>& x) {
-        Vector< Differential<X> > result(x.size(),Differential<X>(x.size(),d));
+    //! \brief \brief A vector of differentials of degree \a deg in \a as arguments with values \f$c_i+x_i\f$. 
+    static Vector< Differential<X> > variables(uint deg, const Vector<X>& x) {
+        Vector< Differential<X> > result(x.size(),Differential<X>(x.size(),deg));
         for(uint i=0; i!=x.size(); ++i) { result[i]=x[i]; result[i][i]=X(1.0); }
         return result; 
     }
 
-    //! \brief .
+    //! \brief Equality operator. Tests equality of representation, so comparing two differentials which are mathematically equal may return false if the structural zeros are different.
     bool operator==(const Differential<X>& sd) const {
         if(this->argument_size()!=sd.argument_size()) { return false; }
         for(MultiIndex j(this->argument_size()); j.degree()<=std::max(this->degree(),sd.degree()); ++j) {
@@ -177,116 +178,116 @@ class Differential
         return true;
     }
 
-    //! \brief .
+    //! \brief Inequality operator.
     bool operator!=(const Differential<X>& sd) const {
         return !(*this==sd); }
 
-    //! \brief .
+    //! \brief The number of independent variables.
     uint argument_size() const { return this->_expansion.argument_size(); }
-    //! \brief .
+    //! \brief The maximum degree of the stored terms.
     uint degree() const { return this->_degree; }
-    //! \brief .
+    //! \brief The internal representation of the polynomial expansion.
     const Expansion<X>& expansion() const { return this->_expansion; }
-    //! \brief .
+    //! \brief A reference to the internal representation of the polynomial expansion.
     Expansion<X>& expansion() { return this->_expansion; }
-    //! \brief .
+    //! \brief The value of the differential i.e. the coefficient of \f$1\f$.
     const X& value() const { return this->operator[](MultiIndex(this->argument_size())); }
-    //! \brief .
+    //! \brief The coefficient of \f$x_j\f$.
     const X& gradient(uint j) const { return this->operator[](MultiIndex::unit(this->argument_size(),j)); }
 
 
-    //! \brief .
+    //! \brief A reference to the coefficient of \f$x_j\f$.
     X& operator[](const uint& j) {
         return this->_expansion[MultiIndex::unit(this->argument_size(),j)]; }
-    //! \brief .
+    //! \brief The coefficient of \f$x_j\f$.
     const X& operator[](const uint& j) const {
         return this->operator[](MultiIndex::unit(this->argument_size(),j)); }
-    //! \brief .
+    //! \brief The coefficient of \f$x^a\f$ i.e. \f$\prod x_j^{a_j}\f$.
     X& operator[](const MultiIndex& a) {
         ARIADNE_ASSERT(a.number_of_variables()==this->argument_size()); return this->_expansion[a]; }
-    //! \brief .
+    //! \brief A reference to the coefficient of \f$x^a\f$.
     const X& operator[](const MultiIndex& a) const { 
         ARIADNE_ASSERT(a.number_of_variables()==this->argument_size()); 
         const_iterator iter=this->_expansion.find(a);
         if(iter==this->_expansion.end()) { return _zero; } else { return iter->data(); } }
 
-    //! \brief .
+    //! \brief Set the degree to be equal to \a d.
     void set_degree(uint d) { this->_degree = d; }
-    //! \brief .
+    //! \brief Set the coefficient of the constant term to \a c.
     void set_value(const X& c) { this->operator[](MultiIndex(this->argument_size()))=c; }
-    //! \brief .
+    //! \brief Set the coefficient of the term in \f$x_j\f$ to \a d.
     void set_gradient(uint j, const X& d) { this->operator[](MultiIndex::unit(this->argument_size(),j))=d; }
 
-    //! \brief .
+    //! \brief An iterator to the first structural nonzero.
     iterator begin() { return this->_expansion.begin(); }
-    //! \brief .
+    //! \brief An iterator to past-the-end structural nonzero.
     iterator end() { return this->_expansion.end(); }
-    //! \brief .
+    //! \brief A constant iterator to the first structural nonzero.
     const_iterator begin() const { return this->_expansion.begin(); }
-    //! \brief .
+    //! \brief A constant iterator to past-the-end structural nonzero.
     const_iterator end() const { return this->_expansion.end(); }
 
-    //! \brief .
+    //! \brief Set all coefficients to zero.
     void clear() { this->_expansion.clear(); }
-    //! \brief .
+    //! \brief Remove all terms with coefficient \f$0\f$.
     void cleanup() { this->_expansion.cleanup(); }
 
 
-    //! \brief .
+    //! \brief Inplace addition.
     template<class XX> friend Differential<XX>& operator+=(Differential<XX>& x, const Differential<XX>& y);
-    //! \brief .
+    //! \brief Inplace subtraction.
     template<class XX> friend Differential<XX>& operator-=(Differential<XX>& x, const Differential<XX>& y);
 
-    //! \brief .
+    //! \brief Inplace addition of a constant.
     template<class XX, class RR> friend Differential<XX>& operator+=(Differential<XX>& x, const RR& c);
-    //! \brief .
+    //! \brief Inplace subtraction of a constant.
     template<class XX, class RR> friend Differential<XX>& operator-=(Differential<XX>& x, const RR& c);
-    //! \brief .
+    //! \brief Inplace multiplication by constant.
     template<class XX, class RR> friend Differential<XX>& operator*=(Differential<XX>& x, const RR& c);
-    //! \brief .
+    //! \brief Inplace division by a constant.
     template<class XX, class RR> friend Differential<XX>& operator/=(Differential<XX>& x, const RR& c);
 
-    //! \brief .
+    //! \brief Unary plus.
     friend Differential<X> operator+<>(const Differential<X>& x);
-    //! \brief .
+    //! \brief Unary minus.
     friend Differential<X> operator-<>(const Differential<X>& x);
-    //! \brief .
+    //! \brief Addition.
     friend Differential<X> operator+<>(const Differential<X>& x, const Differential<X>& y);
-    //! \brief .
+    //! \brief Subtraction.
     friend Differential<X> operator-<>(const Differential<X>& x, const Differential<X>& y);
-    //! \brief .
+    //! \brief Multiplication.
     friend Differential<X> operator*<>(const Differential<X>& x, const Differential<X>& y);
-    //! \brief .
+    //! \brief Division.
     friend Differential<X> operator/<>(const Differential<X>& x, const Differential<X>& y);
 
-    //! \brief .
+    //! \brief Negation.
     friend Differential<X> neg<>(const Differential<X>& x);
-    //! \brief .
+    //! \brief Reciprocal.
     friend Differential<X> rec<>(const Differential<X>& x);
-    //! \brief .
+    //! \brief Integer power.
     friend Differential<X> pow<>(const Differential<X>& x, int n);
-    //! \brief .
+    //! \brief Square.
     friend Differential<X> sqr<>(const Differential<X>& x);
-    //! \brief .
+    //! \brief Square root.
     friend Differential<X> sqrt<>(const Differential<X>& x);
-    //! \brief .
+    //! \brief Exponential function.
     friend Differential<X> exp<>(const Differential<X>& x);
-    //! \brief .
+    //! \brief Natural logarithm.
     friend Differential<X> log<>(const Differential<X>& x);
-    //! \brief .
+    //! \brief Sine function.
     friend Differential<X> sin<>(const Differential<X>& x);
-    //! \brief .
+    //! \brief Cosine function.
     friend Differential<X> cos<>(const Differential<X>& x);
-    //! \brief .
+    //! \brief Tangent function.
     friend Differential<X> tan<>(const Differential<X>& x);
 
-    //! \brief .
+    //! \brief Compose by a power series in one variable.
     friend Differential<X> compose<>(const Series<X>& x, const Differential<X>& y);
-    //! \brief .
+    //! \brief Compose differentials at a point.
     friend Differential<X> compose<>(const Differential<X>& x, const Vector< Differential<X> >& y);
-    //! \brief .
+    //! \brief Compute the differential of the derivative.
     friend Differential<X> derivative<>(const Differential<X>& x, uint i);
-    //! \brief .
+    //! \brief Compute an antiderivative with respect to the variable \a i.
     friend Differential<X> antiderivative<>(const Differential<X>& x, uint i);
   private:
     Expansion<X> _expansion;

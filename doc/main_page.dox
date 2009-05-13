@@ -1,5 +1,5 @@
 /***************************************************************************
- *            main_page.dox
+ *            main_page
  *
  *  Copyright  2004-8  Pieter Collins
  *
@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! 
+/*!
 
 \file main_page.dox
 \brief Main page of Doxygen documentation
@@ -31,24 +31,53 @@
 
 \section mainpage_introduction Introduction
 
-%Ariadne is a C++ package for set-based analysis of dynamical and control systems, including reachability analysis, robust simulation and safety verification. The package can handle systems with reset, flow and guard predicates given by nonlinear functions, making it one of the most general-purpose reachability tools available. 
+%Ariadne is a C++ package for set-based analysis of dynamical and control systems, including reachability analysis, robust simulation and safety verification. The package can handle systems with reset, flow and guard predicates given by nonlinear functions, making it one of the most general-purpose reachability tools available.
 
 The homepage of %Ariadne is <a href="http://ariadne.parades.rm.cnr.it/">http://ariadne.parades.rm.cnr.it/</a>.
 
 \section mainpage_installation Installation
 
-Full instructions on downloading and installing %Ariadne can be found on the <a href="installation.html">%Installation</a> page.
+Full instructions on downloading and installing %Ariadne can be found on the \link installation_page %Installation \endlink page.
 
 
 \section mainpage_getting_started Getting Started
 
-An overview of %Ariadne's capabilities is given on the <a href="overview.html">Overview</a> documentation page.
+An overview of %Ariadne's capabilities is given on the \ref overview_page documentation page.
 
-An example of the use of %Ariadne for reachability analysis of a simple hybrid system is given in the <a href="../examples/tutorial.cc">tutorial.cc</a> file. The same example using the python interface is given in <a href="../examples/tutorial.py">tutorial.py</a>  (forthcoming).
+A more detailed explanation of the hybrid automaton class can be found on the \ref hybrid_automaton_page documentation page.
 
-\section mainpage_documentation Further Documentation
+A more detailed explanation of how to analyse a hybrid system can be found on the \ref system_analysis_page documentation page.
 
-A more detailed description of %Ariadne's capabilities can be found in the documentation for the individual <a href="modules.html">Modules</a>.
-Some more information on the mathematical foundations of %Ariadne can be found in the <a href="pages.html">Related Pages</a>.
+An example of the use of %Ariadne for reachability analysis of a simple hybrid system is given on the \link tutorial_page Tutorial \endlink page. The example is contained in the file  \link examples/tutorial.cc tutorial.cc \endlink. The same example using the python interface is given in \link python/tutorial.py tutorial.py \endlink (forthcoming).
 
+
+\section mainpage_advanced_usage Advanced Usage
+
+A guide for advanced users on to use the internal Taylor calculus can be found on the \ref taylor_calculus_page documentation page.
+
+\section mainpage_mathematical_foundations Mathematical Foundations
+
+More information on the mathematical foundations of %Ariadne can be found on the following pages:
+
+ - \ref numeric_page
+ - \ref linear_algebra_page
+ - \ref linear_programming_page
+ - \ref function_evaluation_page
+ - \ref function_models_page
+ - \ref geometry_page
+ - \ref evolution_page
+ - \ref integration_page
+ - \ref hybrid_evolution_page
+
+ - \ref references_page
+
+
+\section developer_documentation Developer Documentation
+
+\htmlonly A more detailed description of Ariadne's capabilities can be found in the documentation for the individual <a href="modules.html">Modules</a> and <a href="annotated.html">Classes</a>.  \endhtmlonly
+\latexonly A more detailed description of Ariadne's capabilities can be found in the documentation for the individual Modules and Classes. \endlatexonly
+Coding guideline are given on the \ref coding_guidelines_page documentation page.
+
+\example examples/tutorial.cc
+Tutorial example.
 */

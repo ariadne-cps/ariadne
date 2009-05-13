@@ -54,7 +54,7 @@
  *  - \b MP: %Map
  *  - \b VF: %VectorField
  *
- * See the page on \ref function for more information.
+ * See the page on \ref function_evaluation_page for more information.
  */
 
 /*! \defgroup EvaluationModule Evaluation Module
@@ -62,10 +62,14 @@
  *  \brief Functions and methods for computing the evolution of a system and solving equations.
  */
 
+
+
+
 /*! \defgroup CoreModules Core Modules
  *
  *  \brief Core classes and functions used for both system specification and internal computation.
  */
+
 
 /*! \defgroup Function Function Module
  *  \ingroup CoreModules
@@ -74,6 +78,7 @@
  * In this module are the classes used to represent concrete functions in Euclidean space.
  * These functions can be used as the building blocks for geometric objects and dynamic systems.
  */
+
 
 /*!\defgroup Geometry Geometry Module
  * \ingroup CoreModules
@@ -105,7 +110,7 @@
  *  - \b GS: GridSet
  *  - \b PTS: PartitionTreeSet
  *
- * See \ref geometric for more information.
+ * See \ref geometry_page for more information.
  * 
  * \defgroup BasicSet Basic Sets
  * \ingroup Geometry
@@ -146,6 +151,7 @@
  * sets, one for each component of the state space.
  */
 
+
 /*!\defgroup Storage Storage Module
  * \ingroup CoreModules
  * \brief Classes for representing discretised sets
@@ -167,26 +173,19 @@
  * and denotable sets of the same kind. 
  */
 
-/* \defgroup NumericModule Numeric Module
+
+
+
+/*!\defgroup NumericModule Numeric Module
  * \ingroup CoreModules
  * \brief Numerical types and intervals.
+ * \details In this module, we define %Ariadne's base numerical types, and interval 
+ * arithmetic. The main classes are \ref Ariadne::Integer "Integer", 
+ * \ref Ariadne::Rational "Rational", \ref Ariadne::Float "Float"  and 
+ * \ref Ariadne::Interval "Interval" classes.
  *
- * In this module, we define %Ariadne's base numerical types, and interval 
- * arithmetic. The main classes are the various <em>real number types</em>
- * which must either conform to the ExactArithmetic interface or the 
- * ApproximateArithmetic interface. This use of standard operations allows
- * new classes to be easily dropped in as wrappers. Currently, the Float64 and
- * FloatMP classes support approximate arithmetic, algebraic and transcendental
- * functions, and the Dyadic and Rational classes support exact arithmetic, but
- * no algebraic or transcendental operations. Further, Dyadic does not support
- * division, but does support the median() operation.
- *
- * Interval arithmetic and functions are provided through the Interval<Real>
- * template. Note that Interval<Real> is not part of the Geometry module, so
- * does not support the same geometric operations.
- *
- * Additionally, rounded operations are provided using the round_down
- * and round_up rounding types. Approximate arithmetic without control of the
+ * Rounded operations on \ref Ariadne::Float "Float" are provided using the \c _down
+ * and \c _up suffixes. Approximate arithmetic without control of the
  * rounding mode can be specified by the approx rounding type, and exact 
  * arithmetic (the default) can be specified explicitly using the exact 
  * rounding type.
@@ -214,14 +213,15 @@
  * See the page \ref realnumbertypes for more information.
  */
 
-/*
+/*!
  * \defgroup LinearAlgebraModule Linear Algebra
  * \ingroup CoreModules
- * \brief Vector, matrix and tensor classes, solution of linear equations,
+ * \brief %Vector, matrix and tensor classes, solution of linear equations,
  * LU and QR factorisation and singular value decomposition.
  * 
- * Basic types are represented by the classes Vector, Matrix
- * and Tensor. Specialist types include PermutationMatrix and DiagonalMatrix.
+ * \details Basic types are represented by the classes \ref Ariadne::Vector "Vector" 
+ * and \ref Ariadne::Matrix "Matrix".
+ * Specialist types include PermutationMatrix and DiagonalMatrix.
  * Operations such as vector sums and matrix-vector products are
  * accessed using operator overloading. Expression templates and slices are 
  * used to improve efficiency.
@@ -241,7 +241,6 @@
  *  - \b SCA: Scalar
  *  - \b VEC: Vector
  *  - \b MX: Matrix
- *  - \b TEN: Tensor
  * 
  */
 

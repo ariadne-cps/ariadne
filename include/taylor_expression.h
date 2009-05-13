@@ -186,9 +186,9 @@ class TaylorExpression
     iterator end() { return this->_model.end(); }
     //! \brief A constant iterator to the end of the expansion expansion.
     const_iterator end() const { return this->_model.end(); }
-    //! \brief An iterator to the term with index \a.
+    //! \brief An iterator to the term with index \a a.
     iterator find(const MultiIndex& a) { return this->_model.find(a); }
-    //! \brief A constant iterator to the term with index \a.
+    //! \brief A constant iterator to the term with index \a a.
     const_iterator find(const MultiIndex& a) const { return this->_model.find(a); }
 
     //! \brief The number of variables in the argument of the quantity.
@@ -241,17 +241,17 @@ class TaylorExpression
 
     //@{
     /*! \name Accuracy parameters. */
-    //! \brief .
+    //! \brief Specify a bound on the terms which may be present in the expansion.
     void set_maximum_index(MultiIndexBound md) { this->_model.set_maximum_index(md); }
-    //! \brief .
+    //! \brief Specify the maximum degree \a md for terms which may be present in the expansion.
     void set_maximum_degree(uint md) { this->_model.set_maximum_degree(md); }
-    //! \brief .
+    //! \brief Specify the minimum absolute value \a me for coefficients of terms which may be present in the expansion.
     void set_sweep_threshold(double me) { ARIADNE_ASSERT(me>=0.0); this->_model.set_sweep_threshold(me); }
-    //! \brief .
+    //! \copydoc TaylorModel::maximum_index()
     MultiIndexBound maximum_index() const { return this->_model.maximum_index(); }
-    //! \brief .
+    //! \copydoc TaylorModel::maximum_degree()
     uint maximum_degree() const { return this->_model.maximum_degree(); }
-    //! \brief .
+    //! \copydoc TaylorModel::sweep_threshold()
     double sweep_threshold() const { return this->_model.sweep_threshold(); }
     //@}
 

@@ -28,7 +28,7 @@
 
 
 
-\page functionevaluation Function Evaluation
+\page function_evaluation_page Function Evaluation
 
 %Ariadne is primarily a module for set-based computation.
 For this reason, functions are best defined by their actions on sets.

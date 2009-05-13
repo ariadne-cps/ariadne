@@ -28,7 +28,7 @@
 
 
 
-\page codingguidelines Coding Guidelines
+\page coding_guidelines_page Coding Guidelines
 
 \section cppcodingstandards C++ Coding Standards
  - Use C++ casts rather than C-style casts. i.e. use static_cast<T>(x) and not (T)x.

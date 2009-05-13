@@ -28,7 +28,7 @@
 
 
 
-\page geometric Geometric Representation
+\page geometry_page Geometric Representation
 
 \section Introduction
 
@@ -77,9 +77,8 @@ Combining lower-approximation and outer-approximation, we obtain an approximatio
 A BasicSet provides a building block for representing more complicated sets.
 Mathematically, a BasicSet type represents elements of a countable base of a topological space.
 More precisely, a BasicSet represents the \em closure of a basic set for the topology.
-The specification of the Basic Set concept is given by the class \ref Ariadne::BasicSetConcept.
 
-Generic classes fulfilling the BasicSet concept are Cuboid (Ariadne::Rectangle), Polytope (Ariadne::Polytope), Polyhedron (Ariadne::Polyhedron), Zonotope (Ariadne::Zonotope), Sphere (Ariadne::Sphere) and Ellipsoid (Ariadne::Ellipsoid).
+Generic classes fulfilling the BasicSet concept are Box (Ariadne::Box), Polytope (Ariadne::Polytope), Polyhedron (Ariadne::Polyhedron), Zonotope (Ariadne::Zonotope), Sphere (Ariadne::Sphere) and Ellipsoid (Ariadne::Ellipsoid).
 Subtypes are Simplex (Ariadne::Simplex) and Parallelotope (Ariadne::Parallelotope). 
 At some point in the future, it is planned to support a TaylorSet type as a higher-order generalisation of Zonotope.
 

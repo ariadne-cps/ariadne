@@ -21,35 +21,35 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! 
+/*!
 
 \file hybrid_evolution_methods.dox
 \brief Documentation on methods for evolution of hybrid systems
 
 
 
-\page hybrid_evolution Hybrid Evolution Methods
+\page hybrid_evolution_page Hybrid Evolution Methods
 
-The evolution of a hybrid system takes place in a number of steps. 
-Each step consists of a continuous evolution, followed by at most one discrete transition. 
+The evolution of a hybrid system takes place in a number of steps.
+Each step consists of a continuous evolution, followed by at most one discrete transition.
 Since the time of a discrete transition may depend on the initial state, the evolution time needs to be stored as well as the point. Both the set and evolution times are stored as a polynomial "model".
 
 
-\rationale
+\remark
 
-An alternative approach is to take evolution steps of a fixed time interval. However, this means that a point may undergo several discrete events in an evolution step, and the dispatching of this evolution may be hard to compute. 
+An alternative approach is to take evolution steps of a fixed time interval. However, this means that a point may undergo several discrete events in an evolution step, and the dispatching of this evolution may be hard to compute.
 
 
 \section hybrid_timed_set Timed hybrid sets
 
 
-Due to the need to keep track of transition times, a hybrid evolution is defined on timed hybrid sets. 
+Due to the need to keep track of transition times, a hybrid evolution is defined on timed hybrid sets.
 A timed hybrid set consists of a model for the state and for the evolution time. The evolution time is either a rational constant or a function model (e.g. an affine model) defined on the same variables as the set model: \f[ X = c + Ge; \quad t=s+re. \f]
-Where possible, an evolution will end at an exact time. 
+Where possible, an evolution will end at an exact time.
 
 \section evolution_traces Evolution traces
 
-An evolution dispatcher is an algorithm which computes how long the integration needs to procees, and which discrete events need to be processed. 
+An evolution dispatcher is an algorithm which computes how long the integration needs to procees, and which discrete events need to be processed.
 The maximum allowable integration time is computed by evaluating all the constraint conditions and testing for the smallest integration time.
 If the flow is transverse to the constraint set, then a differentiable model for the integration time can be constructed.
 
@@ -68,7 +68,7 @@ The box may be subdivided if
  - The crossing is transverse, but takes longer than half the integration step.
 The integration time is reduced if
  - The crossing is transverse, is started after half the integration step, but is not completed within the integration step.
- 
+
 If one of the smallest integration times corresponds to a guard, then the guard is activated and the flow to the guard set is computed.
 
 
@@ -100,14 +100,14 @@ The evolution is also terminated if the computation cannot determine whether an 
 Let \f$s(x)\f$ be the time needed to flow from \f$x\f$ to the guard set \f$g(x)=0\f$.
 The switching time \f$s(x)\f$ satisfies the equation \f$g\bigr(\Phi_1(x,s(x))\bigl) = 0\f$.
 Then \f$s(x)\f$ satisfies
-\f[ - \nabla s(x) = \frac{\nabla g(\Phi_1(x,s(x)))\cdot D\Phi_1(x,s(x))}{\nabla g(\Phi_1(x,s(x))\cdot f_1(\Phi_1(x,s(x)))} 
-                  = \frac{\nabla g(y)\cdot D\Phi_1(x,s(x))}{\nabla g(y)\cdot f_1(y)} 
+\f[ - \nabla s(x) = \frac{\nabla g(\Phi_1(x,s(x)))\cdot D\Phi_1(x,s(x))}{\nabla g(\Phi_1(x,s(x))\cdot f_1(\Phi_1(x,s(x)))}
+                  = \frac{\nabla g(y)\cdot D\Phi_1(x,s(x))}{\nabla g(y)\cdot f_1(y)}
 \f]
 
 \section forced_transitions Forced transitions
 
 Let \f$s(x)\f$ be the time needed to flow from \f$x\f$ to the guard set \f$g(x)=0\f$.
-Then the transition is given by 
+Then the transition is given by
 \f[ \Psi(x,t) = \Phi_2(r(\Phi_1(x,s(x))),t-s(x)) . \f]
 and the Jacobian derivative is
 \f[ D\Psi(x,t) \in D\Phi_2(B_2)\,Dr(B_1)\,D\Phi_1(B_1) \, + \, \bigl( D\Phi_2(B_2) \, Dr(B_1) \, f_1(B_1) - f_2(B_2) \bigr) \nabla s(x) . \f]
@@ -124,7 +124,7 @@ The <em>saltation map</em> \f$\Psi(x,0)\f$ satisfies
             &= -f_2(\zeta)\,s(x) + Dr(\eta)\,f(\eta)\,s(x) + r(c) + Dr(\xi)\,(x-c) \\[\jot]
 
             &\in r(c) + Dr(\xi)\cdot(x-c) + \bigl(Dr(B_1)\,f(B_1)-f_2(B_2)\bigr)\cdot s(x)
-\end{aligned}\f] 
+\end{aligned}\f]
 
 The evolution \f$\Psi(x,t)\f$ satisfies
 \f[\begin{aligned}
@@ -133,11 +133,11 @@ The evolution \f$\Psi(x,t)\f$ satisfies
             &= \dot{\Phi}_2\bigl(r(\Phi_1(x,s(x))),\sigma\bigr)\,(s(c)-s(x)) + \Phi_2\bigl(r(\Phi_1(x,s(x))),t-s(c)\bigr) \\
             &= -f_2\bigl(\Phi_2\bigl(r(\Phi_1(x,s(x))),\sigma\bigr)\bigr)\,(s(c)-s(x)) + \bigr[ \Phi_2\bigl(r(\Phi_1(x,s(x))),t-s(c)\bigr) - \Phi_2\bigl(r(\Phi_1(x,s(c))),t-s(c)\bigr) \bigr] + \Phi_2\bigl(r(\Phi_1(x,s(c))),t-s(c)\bigr) \\
             &= -f_2(\zeta)\, s(x) + D\Phi_2\bigl(r(\Phi_1(x,\tau)),t-s(c)\bigr) Dr(\Phi_1(x,\tau))\,f_1(\Phi_1(x,\tau))\,(s(x)-s(c)) + \Phi_2\bigl(r(\Phi_1(x,s(c))),t-s(c)\bigr)  \\
-\end{aligned}\f] 
+\end{aligned}\f]
 If \f$s\f$ is an approximation to \f$s(c)\f$, then the evolution \f$\Psi(x,t)\f$ can be computed by
 \f[\begin{aligned}
-    \Psi(x,t) &= \Phi_2\bigl(\Psi(\Phi_1(x,s),0),t-s\bigr) = \Phi_2^{t-s} \circ \Psi^0 \circ \Phi_1^s(x,t) 
-\end{aligned}\f] 
+    \Psi(x,t) &= \Phi_2\bigl(\Psi(\Phi_1(x,s),0),t-s\bigr) = \Phi_2^{t-s} \circ \Psi^0 \circ \Phi_1^s(x,t)
+\end{aligned}\f]
 
 
 
@@ -148,7 +148,7 @@ If the switching time is bounded by \f$[-h,+h]\f$, then the saltation map is giv
 \f[\begin{aligned}
     \Psi(x,0) &:= \Phi_2\bigl(r(\Phi_1(x,s(x))),-s(x)\bigr) \\[\jot]
               &\in  r(X+[-h,h]f_1(B_1))+[-h,h]f_2(B_2)
-\end{aligned}\f] 
+\end{aligned}\f]
 
 
 \section unforced_transitions Unforced transitions
@@ -160,7 +160,12 @@ Consider a transition which can occur at any time in the interval \f$[-h,+h\f$].
                                 &=  -t\,f_2\left(\Phi_2\bigl(r(\Phi_1(x,t)),\tau\bigr)\right) + \bigl[ r(\Phi_1(x,t)) - r(\Phi_1(x,0)) \bigr] + r(\Phi_1(x,0)) \\
                                 &= -t\,f_2(\zeta) + t\,Dr(\Phi_1(x,\tau))\,f_1(\Phi_1(x,\tau)) + r(x) \\
                                 &= \bigl(Dr(\eta)\,f_1(\eta)-f_2(\zeta)\bigr)\cdot t + Dr(\xi)\cdot(x-c) + r(c) \\[\jot]
-                                &\in r(c) + Dr(X)\cdot(x-c) + \bigl(Dr(B_1)\,f_1(B_1) - f_2(B_2) \bigr) \cdot t 
+                                &\in r(c) + Dr(X)\cdot(x-c) + \bigl(Dr(B_1)\,f_1(B_1) - f_2(B_2) \bigr) \cdot t
 \end{aligned} \f]
-If we additionally wish to flow forward a time \f$h\f$, then 
+If we additionally wish to flow forward a time \f$h\f$, then
+
+\section latex_documentation Additional Documentation
+
+For more information, see the documentation at <A HREF="../doc/evolution_step.pdf">evolution_step.pdf</A>.
+
 */

@@ -37,7 +37,8 @@
 namespace Ariadne {
 
 //! \brief Parameters for controlling the accuracy of continuous evolution methods.
-struct ContinuousEvolutionParameters {
+class ContinuousEvolutionParameters {
+  public:
     typedef uint UnsignedIntType;
     typedef double RealType;
 
@@ -68,9 +69,29 @@ struct ContinuousEvolutionParameters {
 
 
 //! \brief Parameters for controlling the accuracy of discretised evolution methods and reachability analysis.
-struct DiscreteEvolutionParameters {
+class DiscreteEvolutionParametersFoo {
+  public:
+    //! \brief Default constructer gives reasonable values. 
+    DiscreteEvolutionParametersFoo();
+
+    //! \brief The time after which infinite-time upper-evolution routines
+    //! may approximate computed sets on a grid. 
+    double transient_time;
+
+    //! \brief The number of discrete steps after which infinite-time upper evolution 
+    //! routines may approximate computed sets on the grid. 
+    //! \details See the #transient_time parameter.
+    unsigned int transient_steps;
+};
+
+//! \brief Parameters for controlling the accuracy of discretised evolution methods and reachability analysis.
+class DiscreteEvolutionParameters {
+  public:
+    //! \brief The integer type.
     typedef int IntType;
+    //! \brief The unsigned integer type.
     typedef uint UnsignedIntType;
+    //! \brief The real type.
     typedef double RealType;
   
     //! \brief Default constructer gives reasonable values. 
@@ -78,7 +99,7 @@ struct DiscreteEvolutionParameters {
 
     //! \brief The time after which infinite-time upper-evolution routines
     //! may approximate computed sets on a grid. 
-    //!  <br> 
+    //! \details
     //! This value should be set to the time after which the transient
     //! behaviour has mostly died out. If there are no transients (i.e. the system evolves
     //! for a certain time and then stops), then this parameter should be set to a value 
@@ -91,8 +112,8 @@ struct DiscreteEvolutionParameters {
     RealType transient_time;
 
     //! \brief The number of discrete steps after which infinite-time upper evolution 
-    //! routines may approximate computed sets on the grid. (See the \link DiscreteEvolutionParameters::transient_time \c transient_time \endlink parameter.) 
-    //! <br>
+    //! routines may approximate computed sets on the grid. 
+    //! \details
     //! Note that the transients are assumed to have died out after <em>either</em> 
     //! transient_time or transient_steps has been reached. 
     //! <br> 
@@ -102,26 +123,28 @@ struct DiscreteEvolutionParameters {
     //! Setting this value to the number of steps at which transients die out can improve the
     //! speed and accuracy of the computations. 
     //! <br> 
-    //! This parameter is only used by chain_reach routine.
+    //! This parameter is only used by chain_reach() routine.
+    //! \sa #transient_time
     UnsignedIntType transient_steps;
-    
+    // (See the #transient_time parameter.) 
+
     //! \brief The time after which an upper evolution or reachability analysis routine
     //! may approximate computed sets on a grid, in order to use previously cached 
     //! integration results for the grid. 
-    //! <br>
+    //! \details
     //! Increasing this parameter improves the accuracy of the computations. 
     //! Setting this parameter too low usually results in meaningless computations. 
     //! As a rule of thumb, a typical system trajectory should move at least four 
     //! times the grid size between locking to the grid. <br>
     //! For forced oscillators, this parameter should be set to the forcing time, 
     //! or a multiple or fraction thereof. 
-    //!  <br>
+    //! <br>
     //! This parameter is only used for continuous-time computation.
     RealType lock_to_grid_time;
 
     //! \brief The time after which an evolver may approximate computed sets on a grid,
     //! in order to use previously cached results for the grid. 
-    //!  <br>
+    //! \details
     //! Increasing this parameter may improve the accuracy of the computations.  
     //! If there is recurrence in the system, then this parameter should be set to 
     //! the average recurrence time, if known. 
@@ -130,24 +153,24 @@ struct DiscreteEvolutionParameters {
     UnsignedIntType lock_to_grid_steps;
     
     //! \brief Set the length of the approximation grid. 
-    //!  <br>
+    //! \details
     //! Decreasing this value increases the accuracy of the computation. 
     RealType grid_lengths;
 
     //! \brief Set the approximation grid. 
-    //!  <br>
+    //! \details
     //! Fine tuning of the grid, with the possibility to have different lengths for every dimension.
     //! Decreasing this value increases the accuracy of the computation. 
     Grid grid;
 
     //! \brief Set the hybrid approximation grid. 
-    //!  <br>
+    //! \details
     //! Fine tuning of the grid, with the possibility to have grids for every discrete location.
     //! Decreasing this value increases the accuracy of the computation. 
     HybridGrid hybrid_grid;
 
     //! \brief Set the depth used for approximation on a grid for the initial set in computations using lower semantics.
-    //!  <br>
+    //! \details
     //! Setting this value to \a d will on a grid with lengths \a l will result in the use of initial boxes
     //! with sides of length \f$l/2^{d}\f$.
     //! If the initial set is an open set, then this parameter may be unused; instead the initial sets are points,
@@ -155,45 +178,46 @@ struct DiscreteEvolutionParameters {
     //!  <br> 
     //! Increasing this value increases the accuracy of the computation of lower evolution.
     //!  <br> 
-    //! This parameter is only used in the lower_evolve and lower_reach routines.
+    //! This parameter is only used in the lower_evolve() and lower_reach() routines.
     IntType initial_grid_depth;
 
     //! \brief Set the density of initial values on a grid for the initial set in computations using lower semantics.
-    //!  <br>
+    //! \details
     //! Setting this value to \a g will on a grid with lengths \a l will result in the use of one initial box
-    //! (one simulation) for each cell of size \f$l/2^g\f$. If the \link DiscreteEvolutionParameters::initial_grid_depth \c initial_grid_depth \endlink parameter is higher, then
+    //! (one simulation) for each cell of size \f$l/2^g\f$. If the #initial_grid_depth parameter is higher, then
     //! the initial sets will be smaller than the specified cell. 
     //!  <br> 
-    //! Increasing this value increases the number of initial sets used in the computation of lower_evolve and lower_reach.
+    //! Increasing this value increases the number of initial sets used in the computation of lower_evolve() and lower_reach().
     //! and decreases their spacing.
     //!  <br> 
-    //! This parameter is only used in the lower_evolve and lower_reach routines.
+    //! This parameter is only used in the lower_evolve() and lower_reach() routines.
     //! \internal Pieter: I don't like the name of this parameter very much, any other suggestions?
     IntType initial_grid_density;
 
     //! \brief Set the depth used for approximation on a grid for computations using upper semantics.
-    //!  <br>
+    //! \details
     //! Increasing this value increases the accuracy of the computation. 
     //!  <br> 
-    //! This parameter is only used in upper_evolve, upper_reach and chain_reach routines.
+    //! This parameter is only used in upper_evolve(), upper_reach() and chain_reach() routines.
     IntType maximum_grid_depth;
 
     //! \brief Set the maximum height used for approximation on a grid for chain reachability computations.
-    //!  <br>
+    //! \details
     //! Increasing this value increases domain over which computation is performed. 
     //!  <br> 
-    //! This parameter is only used in the chain_reach routine.
+    //! This parameter is only used in the chain_reach() routine.
     IntType maximum_grid_height;
 
     //! \brief Set the size of the region used for computation. 
-    //!  <br>
+    //! \details
     //! Increasing this value reduces the risk of error due to missing orbits which leave the bounding domain. 
     RealType maximum_bounding_domain_size;
 
 };
 
-struct EvolutionParameters
-    : ContinuousEvolutionParameters, DiscreteEvolutionParameters 
+//! \brief Parameters for controlling the accuracy of evolution methods and reachability analysis.
+class EvolutionParameters
+    : public ContinuousEvolutionParameters, public DiscreteEvolutionParameters 
 { };
 
 

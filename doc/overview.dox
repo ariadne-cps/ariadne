@@ -3,14 +3,14 @@
 \file overview.dox
 \brief Overview of %Ariadne's capabilities
 
-\page overview Overview
+\page overview_page Overview
 
 %Ariadne comprises a number of modules, which may be roughly classifies into <em>user modules</em>, including core data types, system classes and analysis tools, and <em>internal modules</em> which are used by the kernel and which the average user need not be concerned about.
 
 - Main user classes
    - System class \link Ariadne::HybridAutomaton \c HybridAutomaton \endlink for defining hybrid systems,
-   - Evaluation classes \link Ariadne::HybridEvolver \c HybridEvolver \endlink for computing the evolution of a hybrid system from a given initial set, \link Ariadne::ReachabilityAnalyser \c ReachabilityAnalyser \endlink for performing global reachability analysis
-   - Output classes \link Ariadne::Graphic \c Graphic \endlink for plotting sets and orbits and \link Ariadne::Archive \c Archive \endlink classes for data persistence.
+   - Evaluation classes \link Ariadne::HybridEvolver \c HybridEvolver \endlink for computing the evolution of a hybrid system from a given initial set, \link Ariadne::HybridReachabilityAnalyser \c HybridReachabilityAnalyser \endlink for performing global reachability analysis
+   - Output classes \link Ariadne::Figure \c Figure \endlink for plotting sets and orbits and \link Ariadne::InputArchive \c InputArchive \endlink and \link Ariadne::OutputArchive \c OutputArchive \endlink classes for data persistence.
 
 - Auxiliary user classes, used to define systems and store output.
    - Numeric classes, including \link Ariadne::Float \c Float \endlink and \link Ariadne::Interval \c Interval \endlink types and the optional \link Ariadne::Integer \c Integer \endlink and \link Ariadne::Rational \c Rational \endlink types.
@@ -20,7 +20,7 @@
    - Storage class \link Ariadne::Orbit \c Orbit<S> \endlink for storing evolution traces and \link Ariadne::GridTreeSet \c GridTreeSet \endlink for storing reached sets.
 
 - Internal classes, used for computations.
-  - Automatic differentiation classes \link Ariadne::SparseDifferential \c SparseDifferential \endlink, \link Ariadne::DenseDifferential \c DenseDifferential \endlink and \link Ariadne::DifferentialVector \c DifferentialVector<D> \endlink.
+  - Automatic differentiation classes \link Ariadne::Differential \c Differential \endlink.
   - Differential calculus classes, including \link Ariadne::TaylorExpression \c TaylorExpression \endlink class for high-order polynomial approximation to dependent quantities, and the \link Ariadne::TaylorCalculus \c TaylorCalculus \endlink class exporting standard operations needed for computing system evolution.
 
 
@@ -48,7 +48,7 @@ In order to analyse a hybrid system, we need an <em>Evolver</em> or <em>Analyser
 An Evolver class is used to perform simulations, and computes the evolution up to a given time starting from an initial <em>enclosure</em> set. An Analyser class is used to perform global analysis, and computes the evolution starting from an arbitrary given set. Internally, an Analyser class typically uses an Evolver to perform the evolution, and then performs a discretization of the evolved set on a grid.
 
 An evolver class satisfies the interface \link Ariadne::EvolverInterface \c EvolverInterface<SYS,ES> \endlink, where \c ES is the template parameter giving the type used for the enclosure sets. The \link Ariadne::HybridEvolver \c HybridEvolver<S> \endlink class is an evolver for hybrid systems using the type \c S to specify the continuous part of the enclosure set.
-To build an Evolver class, we need to specify a type of <em>dynamical calculus</em> to use for the evolution, give <em>evolution parameters</em> to specify the accuracy of the computation. The dynamical calculus class must satisfy the \link Ariadne::ToolboxInterface \c CalculusInterface<SET,MAP,FLOW> \endlink, where the template parameter \c SET is the type used to specify the continuous state set \c S. (The available dynamical calculus classes can be found by looking at subclasses of the \link Ariadne::ToolboxInterface \c CalculusInterface \endlink.) The evolution parameters are passed using the \link Ariadne::ContinuousEvolutionParameters \c ContinuousEvolutionParameters \endlink class. Note that not all parameters need be used by a given Evolver class.
+To build an Evolver class, we need to specify a type of <em>dynamical calculus</em> to use for the evolution, give <em>evolution parameters</em> to specify the accuracy of the computation. The dynamical calculus class must satisfy the \link Ariadne::CalculusInterface \c CalculusInterface<SET,MAP,FLOW> \endlink, where the template parameter \c SET is the type used to specify the continuous state set \c S. (The available dynamical calculus classes can be found by looking at subclasses of the \link Ariadne::CalculusInterface \c CalculusInterface \endlink.) The evolution parameters are passed using the \link Ariadne::ContinuousEvolutionParameters \c ContinuousEvolutionParameters \endlink class. Note that not all parameters need be used by a given Evolver class.
 
 A reachability analyser class satisfies the interface \link Ariadne::ReachabilityAnalyserInterface \c ReachabilityAnalyserInterface<SYS> \endlink.
 The class \link Ariadne::HybridReachabilityAnalyser \c HybridReachabilityAnalyser \endlink may be used to perform reachability analysis of hybrid systems. It can be constructed from a \link Ariadne::HybridEvolver \c HybridEvolver \endlink class, with parameters given by \link Ariadne::DiscreteEvolutionParameters \c DiscreteEvolutionParameters \endlink.

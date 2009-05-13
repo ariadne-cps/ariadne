@@ -26,7 +26,7 @@
 \file tutorial.dox
 \brief Tutorial on %Ariadne's features (outdated).
 
-\page tutorial Tutorial (Outdated)
+\page tutorial_page Tutorial (Outdated)
 
 In this page we present a quick-start guide to %Ariadne, with an overview of the core types and structures, a guide on how to build and analyse dynamic systems.
 
@@ -98,7 +98,7 @@ The semantics of this operator have not been determined, since Python has differ
 
 The main design decision is whether to use a single "Ariadne" slicing semantics which is used for any and all interfaces, or whether to use the natural semantics for the given environment. For the C++ API, we could provide STL \c valarray semantics <c> v[slice(start,size,stride=1)] </c> and Python semantics <c> v[range(start,finish,stride=1)] </c>.
 
-\sa  \ref LinearAlgebra sub-module, Ariadne::Vector, Ariadne::Covector, Ariadne::Matrix
+\sa  \ref LinearAlgebraModule, Ariadne::Vector, Ariadne::Matrix
 
 <br><br>
 
@@ -250,7 +250,6 @@ disc = ConstraintSet(radius_function,codomain) # create
 
 In general, the \c ConstraintSet class is useful for specifying constraints on the evolution, such as guard sets, and the \c ImageSet class may be more useful for creating initial state sets. In general, a \c ConstraintSet need not be bounded, and even if it is, it may be impossible to find a bounding box. An \c ImageSet may have an empty interior, and is generally not suitable for specifying domains for a flow.
 
-\endcode
 
 Built-in constraint sets \c RectangularSet and \c PolyhedralSet are provided for convenience. For example, the call
 \code
@@ -309,7 +308,7 @@ See the documentation for the Ariadne::SetBasedHybridAutomaton.
 \note The current distinction between "SetBased" and "ConstraintBased" hybrid systems may at some point be eliminated.
 
 
-\sa \ref System, Ariadne::Map, Ariadne::VectorField, Ariadne::SetBasedHybridAutomaton
+\sa \ref SystemModule, Ariadne::Map, Ariadne::VectorField, Ariadne::SetBasedHybridAutomaton
 
 \note 
 The rationale for having separate "Function" and "System" classes is that the "Function" classes are supposed to be elementary building blocks which can be used for a variety of purposes, whereas a "Map" or "VectorField" object is tagged as specifying a dynamic system Further, extra information such as variable and parameter names may be attached to system classes.

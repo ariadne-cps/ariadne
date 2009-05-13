@@ -51,7 +51,7 @@ class IntersectionException;
 class ImplicitFunctionException;
 class FlowBoundsException;
 
-// Rescale the vector x from the domain d to the unit domain.
+// Rescale the vector x from the domain d to the unit domain.330
 Vector<Interval> unscale(const Vector<Interval>& x, const Vector<Interval>& d);
 
 // The magnitude of the variable
@@ -327,9 +327,9 @@ class TaylorModel
     iterator end() { return this->_expansion.end(); }
     //! \brief A constant iterator to the end of the expansion.
     const_iterator end() const { return this->_expansion.end(); }
-    //! \brief An iterator to the term with index \a.
+    //! \brief An iterator to the term with index \a a.
     iterator find(const MultiIndex& a) { return this->_expansion.find(a); }
-    //! \brief A constant iterator to the term with index \a.
+    //! \brief A constant iterator to the term with index \a a.
     const_iterator find(const MultiIndex& a) const { return this->_expansion.find(a); }
 
     //! \brief The number of variables in the argument of the quantity.
@@ -416,30 +416,33 @@ class TaylorModel
 
     //@{
     /*! \name Default accuracy parameters. */
-    //! \brief .
+    //! \brief Set the default maximum degree.
     static void set_default_maximum_degree(uint md);
-    //! \brief .
+    //! \brief Set the default sweep threshold.
     static void set_default_sweep_threshold(double me);
-    //! \brief .
+    //! \brief The default maximum degree.
     static uint default_maximum_degree();
-    //! \brief .
+    //! \brief The default sweep threshold.
     static double default_sweep_threshold();
     //@}
 
     //@{
     /*! \name Accuracy parameters. */
-    //! \brief .
-    void set_maximum_index(MultiIndexBound md);
-    //! \brief .
+    //! \brief Specify a bound on the terms which may be present in the expansion.
+    void set_maximum_index(MultiIndexBound ma);
+    //! \brief Specify the maximum degree \a md for terms which may be present in the expansion.
     void set_maximum_degree(uint md);
-    //! \brief .
+    //! \brief Specify the minimum absolute value \a me for coefficients of terms which may be present in the expansion.
     void set_sweep_threshold(double me);
-    //! \brief .
+    //! \brief The maximum index of terms which may be present in the expansion.
+    //! Any term with index \f$a\not\leq a_{\max}\f$ will be assimilated into the error term when truncate() or clean() are called.
     MultiIndexBound maximum_index() const;
-    //! \brief .
+    //! \brief The maximum degree for terms which may be present in the expansion.
+    //! Any term with degree \f$d>d_{\max}\f$ will be assimilated into the error term when truncate() or clean() are called.
     uint maximum_degree() const;
-    //! \brief .
-    double sweep_threshold() const;
+     //! \brief The minimum absolute value for coefficients of terms which may be present in the expansion.
+    //! Any term with coefficient \f$c\f$ with \f$|c|<e_{\max}\f$ will be assimilated into the error term when sweep() or clean() are called.
+   double sweep_threshold() const;
     //@}
 
     //@{

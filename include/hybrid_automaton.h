@@ -348,6 +348,7 @@ class HybridAutomaton
     //!    \param target is the transition's target location.
     //!    \param reset is the transition's reset.
     //!    \param activation is the transition's activation region.
+    //!    \param forced determines whether the transision is forced (urgent) or unforced (permissive).
     const DiscreteTransition& new_transition(DiscreteEvent event,
                                              DiscreteState source, 
                                              DiscreteState target,

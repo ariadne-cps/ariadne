@@ -71,7 +71,7 @@ template<> struct CalculusTypes<TaylorModel>
 
 /*! \brief Tools for analysing dynamical systems based on function models.
  *
- * \sa \link Ariadne::EvolverInterface \c EvolverInterface<SYS,ES>
+ * \sa \link Ariadne::EvolverInterface \c EvolverInterface<SYS,ES> \endlink
  */
 template<class Var>
 class CalculusInterface

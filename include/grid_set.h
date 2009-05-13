@@ -409,7 +409,7 @@ class BinaryTreeNode {
     /*! \brief Starting in the \a pRootTreeNode node as at the root, this method finds(creates)
      *  the leaf node defined by the \a path and marks it as enabled. If some prefix of the \a path
      *  references an enabled node then nothing is done.
-     *  NOTE: This is a recursive method on the position (\a position) in the binary path (\path).
+     *  NOTE: This is a recursive method on the position (\a position) in the binary path (\a path).
      *  Therefore, the initial call of this method should be done with \a position == 0;
      */
     static void add_enabled( BinaryTreeNode* pRootTreeNode, const BinaryWord& path, const uint position = 0 );
@@ -487,7 +487,7 @@ class GridAbstractCell {
     static inline void primary_cell_at_height( const uint theHeight, int & leftBottomCorner, int & rightTopCorner );
 
     /*! \brief This function allows to compare to cells it is used by the operator== and operator< methods of this class
-     *  The value of \a comparator should be either \a COMPARE_EQUAL or \aCOMPARE_LESS
+     *  The value of \a comparator should be either \a COMPARE_EQUAL or \a COMPARE_LESS
      *  The function checks that both cells are on the same grid and then alignes their primary cells.
      *  The latter is done by extending the binary word of the cell with the lowest primary cell with
      *  the corresponding prefix. When the words are alligned, wi simply use the == and < operators of
@@ -642,7 +642,7 @@ class GridCell: public GridAbstractCell {
     static GridCell smallest_enclosing_primary_cell( const Box & theBox, const Grid& theGrid );
 
     /*! \brief This function allows to compare to cells it is used by the operator== and operator< methods of this class
-     *  The value of \a comparator should be either \a COMPARE_EQUAL or \aCOMPARE_LESS
+     *  The value of \a comparator should be either \a COMPARE_EQUAL or \a COMPARE_LESS
      *  The function checks that both cells are on the same grid and then alignes their primary cells.
      *  The latter is done by extending the binary word of the cell with the lowest primary cell with
      *  the corresponding prefix. When the words are alligned, wi simply use the == and < operators of
@@ -757,7 +757,7 @@ class GridOpenCell: public GridAbstractCell {
     static Box compute_box(const Grid& theGrid, const uint theHeight, const BinaryWord& theWord);
 
     /*! \brief This function allows to compare to cells it is used by the operator== and operator< methods of this class
-     *  The value of \a comparator should be either \a COMPARE_EQUAL or \aCOMPARE_LESS
+     *  The value of \a comparator should be either \a COMPARE_EQUAL or \a COMPARE_LESS
      *  The function checks that both cells are on the same grid and then alignes their primary cells.
      *  The latter is done by extending the binary word of the cell with the lowest primary cell with
      *  the corresponding prefix. When the words are alligned, wi simply use the == and < operators of
@@ -1214,7 +1214,7 @@ class GridTreeSet : public GridTreeSubset {
     //! \name Geometric Approximation
 
     /*! \brief Adjoin an over approximation to box, computing to the given depth.
-     *  \precondition Precondition: The box must have nonempty interior.
+     *  \pre The box must have nonempty interior.
      */
     void adjoin_over_approximation( const Box& theBox, const uint depth );
     
@@ -1224,7 +1224,7 @@ class GridTreeSet : public GridTreeSubset {
      *  cell of the grid. This method does the followig:
      * 1. Computes the smallest Primary cell enclosing \a theSet
      * 2. Allocates the paving for this cell
-     * 3. Minces the paving to the level: depth + <the primary cell hight>
+     * 3. Minces the paving to the level: depth + \<the primary cell height\>
      * 4. Iterates through the enabled leaf nodes of the paving (all the nodes are initially enabled)
      * 5. Disables the cells that are disjoint with the \a theSet
      */

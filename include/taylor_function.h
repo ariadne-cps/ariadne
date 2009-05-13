@@ -235,7 +235,7 @@ class TaylorFunction {
     //! \brief Restrict the function \a f to a subdomain \a d.
     friend TaylorFunction restrict(const TaylorFunction& f, const Vector<Interval>& d);
     //! \brief Tests if a function \a f refines another function \a g.
-    //! To be a refinement, the domain of \f f must contain the domain of \a g.
+    //! To be a refinement, the domain of \a f must contain the domain of \a g.
     friend bool refines(const TaylorFunction& f, const TaylorFunction& g);
 
     // For compatibility wit Vector.

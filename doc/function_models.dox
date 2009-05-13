@@ -28,7 +28,7 @@
 
 
 
-\page function_models Function Models
+\page function_models_page Function Models
 
 A \em model for a function \f$f:\mathbb{R}^m\rightarrow \mathbb{R}^n\f$ is a polynomial approximation of \f$f\f$ on some domain \f$D\f$.
 A model is described by two parameters, the \em degree and the \em smoothness.

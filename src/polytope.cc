@@ -88,19 +88,7 @@ slope2d(const Point& pt1, const Point& pt2)
 
 Polytope polytope(const Box& bx) 
 {
-    ARIADNE_ASSERT(bx.dimension()==2);
-    Polytope result(2);
-    Point pt(2);
-    pt[0]=bx[0].lower();
-    pt[1]=bx[1].lower();
-    result.new_vertex(pt);
-    pt[0]=bx[0].upper();
-    result.new_vertex(pt);
-    pt[1]=bx[1].upper();
-    result.new_vertex(pt);
-    pt[0]=bx[0].lower();
-    result.new_vertex(pt);
-    return result;
+    return Polytope(bx.vertices());
 }
 
 

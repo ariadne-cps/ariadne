@@ -36,9 +36,11 @@ typedef unsigned int uint;
 namespace Ariadne {
 
 //
-// Helper function needed to extract the set of vertices from a box
+// Helper functions needed to extract the set of vertices from a box
 //
-void make_vertices(const Box& bx, uint i, uint n, Point& pt, std::vector<Point>& v) {
+void make_vertices_down(const Box& bx, uint i, uint n, Point& pt, std::vector<Point>& v);
+
+void make_vertices_up(const Box& bx, uint i, uint n, Point& pt, std::vector<Point>& v) {
     ARIADNE_ASSERT(i <= n);
     if(i == n) {    // base case: we are at the last dimension of the box
         pt[i] = bx[i].lower();
@@ -47,11 +49,27 @@ void make_vertices(const Box& bx, uint i, uint n, Point& pt, std::vector<Point>&
         v.push_back(pt);
     } else {        // recursive case: we are still scanning dimensions
         pt[i] = bx[i].lower();
-        make_vertices(bx, i+1, n, pt, v);
+        make_vertices_up(bx, i+1, n, pt, v);
         pt[i] = bx[i].upper();
-        make_vertices(bx, i+1, n, pt, v);
+        make_vertices_down(bx, i+1, n, pt, v);
     }
 }
+
+void make_vertices_down(const Box& bx, uint i, uint n, Point& pt, std::vector<Point>& v) {
+    ARIADNE_ASSERT(i <= n);
+    if(i == n) {    // base case: we are at the last dimension of the box
+        pt[i] = bx[i].upper();
+        v.push_back(pt);
+        pt[i] = bx[i].lower();
+        v.push_back(pt);
+    } else {        // recursive case: we are still scanning dimensions
+        pt[i] = bx[i].upper();
+        make_vertices_up(bx, i+1, n, pt, v);
+        pt[i] = bx[i].lower();
+        make_vertices_down(bx, i+1, n, pt, v);
+    }
+}
+
         
 Box::Box(uint d, const Float& x0l, const Float& x0u, ...)
     : Vector<Interval>(d)
@@ -75,10 +93,10 @@ Box::Box(const std::string& str)
 
 std::vector<Point> Box::vertices() const {
     std::vector<Point> v;
-    uint n = this->dimension();
+    uint n = this->dimension();    
     if(n > 0) {
         Point pt(n);
-        make_vertices(*this, 0, n-1, pt, v);
+        make_vertices_up(*this, 0, n-1, pt, v);
     }     
     return v;
 }

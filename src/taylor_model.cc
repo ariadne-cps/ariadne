@@ -1577,6 +1577,11 @@ TaylorModel sqrt(const TaylorModel& x) {
     // Use a special routine to minimise errors
     // Given range [rl,ru], rescale by constant a such that rl/a=1-d; ru/a=1+d
     Interval r=x.range();
+
+    if(r.l<=0) {
+        ARIADNE_THROW(DomainException,"sqrt",x.range());
+    }
+
     assert(r.l>0);
     Float a=(r.l+r.u)/2;
     set_rounding_upward();
@@ -1653,7 +1658,9 @@ TaylorModel log(const TaylorModel& x) {
     // Use a special routine to minimise errors
     // Given range [rl,ru], rescale by constant a such that rl/a=1-d; ru/a=1+d
     Interval r=x.range();
-    assert(r.l>0);
+    if(r.l<=0) {
+        ARIADNE_THROW(DomainException,"sqrt",x.range());
+    }
     Float a=(r.l+r.u)/2;
     set_rounding_upward();
     Float eps=(r.u-r.l)/(r.u+r.l);

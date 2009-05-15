@@ -121,6 +121,16 @@ TaylorFunction::TaylorFunction(const Vector<Interval>& d,
     this->_models=Ariadne::evaluate(p,x);
 }
 
+TaylorFunction::TaylorFunction(const Vector<Interval>& d,
+                               const Vector< Polynomial<Interval> >& p)
+    : _domain(d), _models(p.size())
+{
+    for(uint i=0; i!=p.size(); ++i) { ARIADNE_ASSERT(d.size()==p[i].argument_size()); }
+
+    Vector<TaylorModel> x=TaylorModel::scalings(d);
+    this->_models=Ariadne::evaluate(p,x);
+}
+
 TaylorFunction::TaylorFunction(const Vector<TaylorExpression>& v)
     : _domain(), _models(v.size())
 {
@@ -216,6 +226,16 @@ const Vector<Interval>&
 TaylorFunction::domain() const
 {
     return this->_domain;
+}
+
+const Vector<Interval>
+TaylorFunction::codomain() const
+{
+    Vector<Interval> result(this->result_size());
+    for(uint i=0; i!=result.size(); ++i) {
+        result[i]=this->_models[i].range();
+    }
+    return result;
 }
 
 

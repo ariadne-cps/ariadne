@@ -91,9 +91,19 @@ void export_float()
 }
 
 #ifdef HAVE_GMPXX_H
+void export_integer()
+{
+    class_<Integer> integer_class("Integer",init<int>());
+    integer_class.def(boost::python::self_ns::str(self));
+    integer_class.def("__less__",(bool(*)(const Integer&, const Integer&)) &operator<);
+}
+#endif
+
+#ifdef HAVE_GMPXX_H
 void export_rational()
 {
     class_<Rational> rational_class("Rational",init<int,int>());
+    rational_class.def(init<int>());
     rational_class.def(boost::python::self_ns::str(self));
     rational_class.def("__less__",(bool(*)(const Rational&, const Rational&)) &operator<);
 }
@@ -122,6 +132,10 @@ void export_interval()
     class_< Interval > interval_class("Interval");
     interval_class.def(init<double,double>());
     interval_class.def(init<double>());
+#ifdef HAVE_GMPXX_H
+    interval_class.def(init<Rational>());
+    interval_class.def(init<Rational,Rational>());
+#endif
     interval_class.def(-self);
     interval_class.def(self + self);
     interval_class.def(self - self);
@@ -139,7 +153,7 @@ void export_interval()
     interval_class.def("upper", &Interval::upper, return_value_policy<copy_const_reference>());
     interval_class.def("midpoint", &Interval::midpoint);
     interval_class.def("radius", &Interval::radius);
-    interval_class.def("__repr__",&__repr__<Interval>);
+    interval_class.def("__repr__",&__cstr__<Interval>);
     interval_class.def(boost::python::self_ns::str(self));
 
     def("midpoint", &Interval::midpoint);
@@ -180,6 +194,7 @@ numeric_submodule()
     export_interval();
 
 #ifdef HAVE_GMPXX_H
+    export_integer();
     export_rational();
 #endif
 }

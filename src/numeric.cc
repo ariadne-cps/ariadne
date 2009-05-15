@@ -22,7 +22,9 @@
  */
  
 #include <iostream>
+#include <iomanip>
 #include <cassert>
+#include <limits>
 #include <stdint.h>
 
 #include "config.h"
@@ -976,19 +978,71 @@ Rational pow(const Rational& q, int n) {
 }
 
 
-Interval::Interval(Rational q)
-    : l(down(q.get_d())), u(up(q.get_d())) { }
+Interval::Interval(Rational q) : l(q.get_d()), u(l) { 
+    rounding_mode_t rounding_mode=get_rounding_mode();
+    set_rounding_mode(downward);
+    while(l>q) { l-=std::numeric_limits<double>::min(); }
+    set_rounding_mode(upward);
+    while(u<q) { u+=std::numeric_limits<double>::min(); }
+    set_rounding_mode(rounding_mode);
+}
 
-Interval::Interval(Rational lower, Rational upper)
-    : l(down(lower.get_d())), u(up(upper.get_d())) { }
+Interval::Interval(Rational ql, Rational qu) : l(ql.get_d()), u(qu.get_d())  { 
+    rounding_mode_t rounding_mode=get_rounding_mode();
+    set_rounding_mode(downward);
+    while(l>ql) { l-=std::numeric_limits<double>::min(); }
+    set_rounding_mode(upward);
+    while(u<qu) { u+=std::numeric_limits<double>::min(); }
+    set_rounding_mode(rounding_mode);
+}
+
 
 #endif // HAVE_GMPXX_H 
 
 
+/*
 std::ostream& 
 operator<<(std::ostream& os, const Interval& ivl)
 {
     return os << '[' << ivl.l << ':' << ivl.u << ']';
+}
+*/
+
+std::ostream& 
+operator<<(std::ostream& os, const Interval& ivl)
+{
+    if(ivl.l==ivl.u) {
+        return os << std::setprecision(18) << ivl.l;
+    }
+
+    std::stringstream iss,uss;
+    iss << std::setprecision(18) << ivl.l;
+    uss << std::setprecision(18) << ivl.u;
+
+    std::string lstr,ustr;
+    iss >> lstr; uss >> ustr;
+
+    uint i;
+    for(i=0; (i<std::min(lstr.size(),ustr.size()) && lstr[i]==ustr[i]); ++i) {
+        os << lstr[i];
+    }
+    os << "[";
+    if(i==lstr.size()) { 
+        os << "0";
+    }
+    for(uint li=i; li != lstr.size(); ++li) {
+        os << lstr[li];
+    }
+    os << ":";
+    if(i==ustr.size()) { 
+        os << "0";
+    }
+    for(uint ui=i; ui != ustr.size(); ++ui) {
+        os << ustr[ui];
+    }
+    os << "]";
+    return os;
+
 }
 
 std::istream& 

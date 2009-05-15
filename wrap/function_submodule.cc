@@ -399,6 +399,45 @@ void export_polynomial()
 }
 
 
+void export_polynomial_expression()
+{
+    typedef PolynomialExpression P;
+    Float flt;
+    Interval ivl;
+
+    class_< P > polynomial_expression_class("PolynomialExpression", init<int,int>());
+    polynomial_expression_class.def("constant", (P(*)(uint,double)) &P::constant);
+    polynomial_expression_class.staticmethod("constant");
+    polynomial_expression_class.def("variable", (P(*)(uint,uint)) &P::variable); 
+    polynomial_expression_class.staticmethod("variable");
+
+    polynomial_expression_class.def("argument_size", &P::argument_size);
+
+    polynomial_expression_class.def(+self);
+    polynomial_expression_class.def(-self);
+    polynomial_expression_class.def(self+self);
+    polynomial_expression_class.def(self-self);
+    polynomial_expression_class.def(self*self);
+
+    polynomial_expression_class.def(self+flt);
+    polynomial_expression_class.def(self-flt);
+    polynomial_expression_class.def(self*flt);
+    polynomial_expression_class.def(self/flt);
+    polynomial_expression_class.def(flt+self);
+    polynomial_expression_class.def(flt-self);
+    polynomial_expression_class.def(flt*self);
+
+    polynomial_expression_class.def(self+ivl);
+    polynomial_expression_class.def(self-ivl);
+    polynomial_expression_class.def(self*ivl);
+    polynomial_expression_class.def(self/ivl);
+    polynomial_expression_class.def(ivl+self);
+    polynomial_expression_class.def(ivl-self);
+    polynomial_expression_class.def(ivl*self);
+
+    polynomial_expression_class.def(self_ns::str(self));
+
+}
 
 void function_submodule() {
     export_multi_index();
@@ -408,6 +447,7 @@ void function_submodule() {
     export_affine_function();
     export_polynomial<Float>();
     export_polynomial<Interval>();
+    export_polynomial_expression();
     export_python_function();
 }
 

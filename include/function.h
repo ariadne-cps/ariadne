@@ -349,6 +349,7 @@ class PolynomialExpression
 {
   public:
     PolynomialExpression() : Polynomial<Interval>() { }
+    PolynomialExpression(uint n, uint j) : Polynomial<Interval>(Polynomial<Interval>::variable(n,j)) { }
     PolynomialExpression(const Polynomial<Float>& p) : Polynomial<Interval>(p) { }
     PolynomialExpression(const Polynomial<Interval>& p) : Polynomial<Interval>(p) { }
     PolynomialExpression& operator=(const Polynomial<Interval>& p) { this->Polynomial<Interval>::operator=(p); return *this; }

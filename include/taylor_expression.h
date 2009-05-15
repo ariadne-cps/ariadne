@@ -47,6 +47,9 @@ class TaylorModel;
 class TaylorExpression;
 class ExpressionInterface;
 
+// Remove the error term
+TaylorExpression midpoint(const TaylorExpression& x);
+
 // Restrict to a smaller domain. REQUIRED
 TaylorExpression restrict(const TaylorExpression& x, const Vector<Interval>& d);
 
@@ -147,6 +150,8 @@ class TaylorExpression
     /*! \name Data access */
     //! \brief The domain of the quantity.
     const DomainType& domain() const { return this->_domain; }
+    //! \brief An over-approximation to the range of the quantity; not necessarily tight.
+    const Interval codomain() const { return this->_model.range(); }
     //! \brief The scaled expansion over a unit box with error bound.
     const ModelType& model() const { return this->_model; }
     //! \brief The scaled expansion over a unit box.

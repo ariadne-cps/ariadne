@@ -123,6 +123,8 @@ class TaylorFunction {
     void set_accuracy(shared_ptr<TaylorModel::Accuracy> acc);
     /*! \brief The data used to define the domain of the Taylor model. */
     const Vector<Interval>& domain() const;
+    /*! \brief A rough bound for the range of the function. */
+    const Vector<Interval> codomain() const;
     /*! \brief The centre of the Taylor model. */
     const Vector<Float> centre() const;
     /*! \brief The range of the Taylor model. */

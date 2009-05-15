@@ -287,6 +287,15 @@ prod(const Matrix<Interval>& A,
 Matrix<Interval>
 jacobian(const Vector<TaylorExpression>& tv, const Vector<Interval>& x);
 
+TaylorExpression
+midpoint(const TaylorExpression& f)
+{
+    TaylorModel tm=f.model();
+    tm.set_error(0.0);
+    return TaylorExpression(f.domain(),tm);
+}
+
+
 Vector<TaylorExpression>
 implicit(const Vector<TaylorExpression>& f)
 {

@@ -406,6 +406,23 @@ template<class X> Vector< Polynomial<X> > operator*(const Polynomial<X>& p, cons
     return r;
 }
 
+
+
+inline Polynomial<Interval> operator+(const Polynomial<Interval>& p, const Float& c) {
+    return p+Interval(c); }
+inline Polynomial<Interval> operator-(const Polynomial<Interval>& p, const Float& c) {
+    return p-Interval(c); }
+inline Polynomial<Interval> operator*(const Polynomial<Interval>& p, const Float& c) {
+    return p*Interval(c); }
+inline Polynomial<Interval> operator/(const Polynomial<Interval>& p, const Float& c) {
+    return p/Interval(c); }
+inline Polynomial<Interval> operator+(const Float& c, const Polynomial<Interval>& p) {
+    return Interval(c)+p; }
+inline Polynomial<Interval> operator-(const Float& c, const Polynomial<Interval>& p) {
+    return Interval(c)-p; }
+inline Polynomial<Interval> operator*(const Float& c, const Polynomial<Interval>& p) {
+    return Interval(c)*p; }
+
 }
 
 #endif /* ARIADNE_POLYNOMIAL_H */

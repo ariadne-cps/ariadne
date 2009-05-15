@@ -80,7 +80,7 @@ More information on the mathematical foundations of %Ariadne can be found on the
 Coding guideline are given on the \ref coding_guidelines_page documentation page.
 
 \example examples/tutorial.cc A simple nonlinear model of a heating system.
+\example examples/tutorial.py A tutorial on using the Python interface.
 
-\example examples/tutorial-boost_power_converter.cc An affine hybrid automaton model of the boost power converter.
 
 */

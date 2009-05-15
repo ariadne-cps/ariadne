@@ -171,14 +171,14 @@ void export_point()
 {
     class_<Point> point_class("Point",no_init);
     point_class.def("__init__", make_constructor(&make<Point>) );
-    point_class.def("__str__",&__str__<Point>);
+    point_class.def("__str__",&__cstr__<Point>);
 }
 
 void export_box() 
 {
     class_<Box,bases<CompactSetInterface,OpenSetInterface> > box_class("Box",init<>());
     box_class.def("__init__", make_constructor(&make<Box>) );
-    box_class.def("__str__",&__str__<Box>);
+    box_class.def("__str__",&__cstr__<Box>);
 }
 
 void export_zonotope() 
@@ -188,7 +188,7 @@ void export_zonotope()
     zonotope_class.def("centre",&Zonotope::centre,return_value_policy<copy_const_reference>());
     zonotope_class.def("generators",&Zonotope::generators,return_value_policy<copy_const_reference>());
     zonotope_class.def("error",&Zonotope::error,return_value_policy<copy_const_reference>());
-    zonotope_class.def("__str__",&__str__<Zonotope>);
+    zonotope_class.def("__str__",&__cstr__<Zonotope>);
 
     def("contains", (tribool(*)(const Zonotope&,const Point&)) &contains);
     def("disjoint", (tribool(*)(const Zonotope&,const Box&)) &disjoint);
@@ -204,7 +204,7 @@ void export_taylor_set()
     taylor_set_class.def("bounding_box", &TaylorSet::bounding_box);
     taylor_set_class.def("range", &TaylorSet::bounding_box);
     taylor_set_class.def("split", &split<TaylorSet>);
-    taylor_set_class.def("__str__",&__str__<TaylorSet>);
+    taylor_set_class.def("__str__",&__cstr__<TaylorSet>);
     
     def("outer_approximation", (GridTreeSet(*)(const TaylorSet&,const Grid&,uint)) &outer_approximation);
     def("adjoin_outer_approximation", (void(*)(GridTreeSet&,const TaylorSet&,uint)) &adjoin_outer_approximation);

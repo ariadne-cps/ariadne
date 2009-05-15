@@ -318,8 +318,6 @@ void plot_reachable_sets(const HybridAutomaton& system, const HybridReachabiltyA
 
 int main() 
 {
-
-
     // Create the system
     HybridAutomaton heating_system=create_heating_system();
     

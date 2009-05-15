@@ -46,21 +46,13 @@ template<> inline const char* python_name<Float>(const char* name) {
 template<> inline const char* python_name<Interval>(const char* name) {
     return (std::string("I")+name).c_str(); }
 
-template<class T> std::ostream& repr(std::ostream& os, const T& t) {
-    return os << t;
-}
 
-template<class T> std::string __str__(const T& t) {
+template<class T> std::string __cstr__(const T& t) {
     std::stringstream ss;
     ss << t;
     return ss.str();
 }
 
-template<class T> std::string __repr__(const T& t) {
-    std::stringstream ss;
-    repr(ss,t);
-    return ss.str();
-}
 
 
 void read(bool&, const boost::python::object&);

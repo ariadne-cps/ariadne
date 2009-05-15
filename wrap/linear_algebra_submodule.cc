@@ -246,7 +246,7 @@ void export_vector_class(class_<Vector<X> >& vector_class)
     vector_class.def("__getitem__", &__vgetitem__<X>);
     vector_class.def("__getslice__", &__vgetslice__<X>);
     vector_class.def("__neg__", &__vneg__<X,X>);
-    vector_class.def("__repr__",&__repr__<Vector<X> >);
+    vector_class.def("__repr__",&__cstr__<Vector<X> >);
     vector_class.def(boost::python::self_ns::str(self));
     vector_class.def("unit",&Vector<X>::unit);
     vector_class.staticmethod("unit");
@@ -333,7 +333,7 @@ void export_matrix_class(class_<Matrix<X> >& matrix_class)
     //matrix_class.def("transpose", &Matrix::transpose);
     //matrix_class.def("solve", &Matrix::solve);
     matrix_class.def(boost::python::self_ns::str(self));    // __str__
-    matrix_class.def("__repr__",&__repr__<Matrix<X> >);
+    matrix_class.def("__repr__",&__cstr__<Matrix<X> >);
 
     def("norm",(X(*)(const Matrix<X>&)) &norm);
     def("transpose",(Matrix<X>(*)(const Matrix<X>&)) &transpose);

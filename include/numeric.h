@@ -69,6 +69,8 @@ class Float { };
 
 
 #ifdef HAVE_GMPXX_H
+typedef mpz_class Integer;
+
 typedef mpq_class Rational;
 Rational sqr(const Rational& q);
 Rational pow(const Rational& q, int n);

@@ -1,5 +1,5 @@
 /***************************************************************************
- *            tutorial-boost_power_converter.cc
+ *            boost_power_converter.cc
  *
  *  Copyright  2009  Pieter Collins
  *
@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! \file tutorial-boost_power_converter.cc */
+/*! \file boost_power_converter.cc */
 
 #include "ariadne.h"
 

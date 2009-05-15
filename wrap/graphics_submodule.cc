@@ -41,11 +41,11 @@ using namespace boost::python;
 
 
 namespace Ariadne { 
-void draw(Figure& fig, const Point& p);
-void draw(Figure& fig, const Box& p);
-void draw(Figure& fig, const Zonotope& z);
-void draw(Figure& fig, const Polytope& p);
-void draw(Figure& fig, const InterpolatedCurve& c);
+void draw(GraphicsInterface& fig, const Point& p);
+void draw(GraphicsInterface& fig, const Box& p);
+void draw(GraphicsInterface& fig, const Zonotope& z);
+void draw(GraphicsInterface& fig, const Polytope& p);
+void draw(GraphicsInterface& fig, const InterpolatedCurve& c);
 }
 
 
@@ -64,14 +64,14 @@ void export_figure()
     figure_class.def("set_line_colour", (void(Figure::*)(double,double,double)) &Figure::set_line_colour);
     figure_class.def("set_fill_style", (void(Figure::*)(bool)) &Figure::set_fill_style);
     figure_class.def("set_fill_colour", (void(Figure::*)(double,double,double)) &Figure::set_fill_colour);
-    figure_class.def("draw",(void(*)(Figure&,const Point&))&draw);
-    figure_class.def("draw",(void(*)(Figure&,const Box&))&draw);
-    figure_class.def("draw",(void(*)(Figure&,const Zonotope&))&draw);
-    figure_class.def("draw",(void(*)(Figure&,const Polytope&))&draw);
+    figure_class.def("draw",(void(*)(GraphicsInterface&,const Point&))&draw);
+    figure_class.def("draw",(void(*)(GraphicsInterface&,const Box&))&draw);
+    figure_class.def("draw",(void(*)(GraphicsInterface&,const Zonotope&))&draw);
+    figure_class.def("draw",(void(*)(GraphicsInterface&,const Polytope&))&draw);
     figure_class.def("draw",(void(*)(GraphicsInterface&,const TaylorSet&))&draw);
     figure_class.def("draw",(void(*)(GraphicsInterface&,const GridTreeSet&))&draw);
     //figure_class.def("draw",(void(*)(Figure&,const Polyhedron&))&draw);
-    figure_class.def("draw",(void(*)(Figure&,const InterpolatedCurve&))&draw);
+    figure_class.def("draw",(void(*)(GraphicsInterface&,const InterpolatedCurve&))&draw);
     figure_class.def("clear",&Figure::clear);
     figure_class.def("display",&Figure::display);
     figure_class.def("write",&Figure::write);

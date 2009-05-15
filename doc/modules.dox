@@ -28,6 +28,11 @@
  * \brief Documentation for %Ariadne modules.
  */
 
+/*! \brief The main %Ariadne namespace.
+ */
+namespace Ariadne {
+}
+
 /*!\defgroup UserModules UserModules
  */
 

@@ -91,10 +91,10 @@ class DenseDifferential
     const Vector<X>& data() const;
     /// A reference to the array of derivative values.
     Vector<X>& data();
-    /// A reference to the \a i<sup> th</sup> derivative \f$D^af=d^{|a|}f/dx_1^{a_1}\cdots dx_n^{a_n}\f$.
+    /// A reference to the \a i<sup>th</sup> derivative \f$D^af=d^{|a|}f/dx_1^{a_1}\cdots dx_n^{a_n}\f$.
     X& operator[](const MultiIndex& a); 
     X& operator[](const uint& j);
-    /// The \a i<sup> th</sup> derivative \f$D^af=d^{|a|}f/dx_1^{a_1}\cdots dx_n^{a_n}\f$.
+    /// The \a i<sup>th</sup> derivative \f$D^af=d^{|a|}f/dx_1^{a_1}\cdots dx_n^{a_n}\f$.
     const X& operator[](const MultiIndex& a) const; 
     const X& operator[](const uint& j) const;
   

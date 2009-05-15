@@ -90,12 +90,18 @@ class FunctionTemplate
 };
 
 
+//! \brief A convenience class defining the meta-data of an %Ariadne function.
 template<uint RS, uint AS, uint PS=0u, uint SM=255u>
-struct FunctionData
+class FunctionData
 {
+  public:
+    //! 
     static const uint result_size() { return RS; }
+    //! 
     static const uint argument_size() { return AS; }
+    //! 
     static const uint parameter_size() { return PS; }
+    //! 
     static const uint smoothness() { return SM; }
 };
 
@@ -381,6 +387,18 @@ class ConstantFunction
     : public FunctionTemplate<ConstantFunction>
 {
   public:
+    ConstantFunction(uint rs, double c0, ...) : _as(), _c(rs) { 
+        ARIADNE_ASSERT(rs>0); va_list args; va_start(args,c0); 
+        _c[0]=c0; for(size_t i=1; i!=rs; ++i) { _c[i]=va_arg(args,double); } _as=va_arg(args,int); 
+        va_end(args); 
+    }
+
+    ConstantFunction(uint rs, Interval c0, ...) : _as(), _c(rs) { 
+        ARIADNE_ASSERT(rs>0); double l,u; va_list args; va_start(args,c0); 
+        _c[0]=c0; for(size_t i=1; i!=rs; ++i) { l=va_arg(args,double); u=va_arg(args,double); _c[i]=Interval(l,u); } _as=va_arg(args,int); 
+        va_end(args); 
+    }
+
     ConstantFunction(const Vector<Float>& c, uint as) : _as(as), _c(c) { }
     ConstantFunction(const Vector<Interval>& c, uint as) : _as(as), _c(c) { }
     ConstantExpression operator[](uint i) const { return ConstantExpression(_as,this->_c[i]); }
@@ -510,9 +528,20 @@ class AffineFunction
     : public FunctionInterface
 {
   public:
+
     //! Construct an affine function from the matrix \a A and vector \a b.
     AffineFunction(const Matrix<Interval>& A, const Vector<Interval>& b)
         : _fA(midpoint(A)), _fb(midpoint(b)), _iA(A), _ib(b) { ARIADNE_ASSERT(A.row_size()==b.size()); }
+
+    AffineFunction(uint rs, double b0, ...) : _fA(), _fb(rs) { 
+        ARIADNE_ASSERT(rs>0); 
+        va_list args; va_start(args,b0); 
+        _fb[0]=b0; for(size_t i=1; i!=rs; ++i) { _fb[i]=va_arg(args,double); } 
+        uint as=va_arg(args,int); ARIADNE_ASSERT(as>0); _fA=Matrix<Float>(rs,as);
+        for(size_t i=0; i!=rs; ++i) { for(size_t j=0; i!=as; ++j) { _fA[i][j]=va_arg(args,double); } } 
+        va_end(args); 
+        _iA=Matrix<Interval>(_fA); _ib=Vector<Interval>(_fb);
+    }
 
     const Matrix<Float>& A() const { return _fA; }
     const Vector<Float>& b() const { return _fb; }

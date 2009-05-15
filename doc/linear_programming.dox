@@ -323,6 +323,4 @@ We can convert the standard dual feasibility problem into a primal linear progra
 
  - lprfsd() Solve the dual feasibility problem \f$Ax\leq b\f$.
 
-\section lpsolverspackages Other linear programming packages
-Koberstein · Uwe H. Suhl
 */

@@ -37,7 +37,7 @@ An %Ariadne automaton must be built explicitly using the
 methods.
 
 All resets, flows and guards are specified using <em>functions</em>. A function is just a mapping from \f$\R^m\f$ to \f$\R^n\f$.
-Unfortunately, since %Ariadne uses specialised automatic differentiation functionality, an %Ariadne function cannot be specified directly from a C++ function, but must be defined using the a function object. The \link Ariadne::UserFunction \c UserFunction<F> \endlink can be used to wrap user function objects to conform to the %Ariadne interface. Additionally, concrete function types such as \link Ariadne::AffineFunction \c AffineFunction \endlink can be used to avoid having to explicitly define and wrap a C++ function object.
+Unfortunately, since %Ariadne uses specialised automatic differentiation functionality, an %Ariadne function cannot be specified directly from a C++ function, but must be defined using the a function object derived from the \link Ariadne::FunctionInterface \c FunctionInterface \endlink. The \link Ariadne::UserFunction \c UserFunction<F> \endlink can be used to wrap user function objects to conform to the %Ariadne interface. Additionally, concrete function types such as \link Ariadne::AffineFunction \c AffineFunction \endlink can be used to avoid having to explicitly define and wrap a C++ function object.
 
 The \link Ariadne::Vector \c Vector \endlink and \link Ariadne::Matrix \c Matrix \endlink template classes may be useful for specifying the parameters of a user function or builtin function type.
 
@@ -57,7 +57,7 @@ The class \link Ariadne::HybridReachabilityAnalyser \c HybridReachabilityAnalyse
 
 \section tutorial_system_hybrid Performing Simulations or Reachability Analysis
 
-The functionality available for computing (rigorous) simulations and reachability analysis can be found in the documentation for \link Ariadne::EvolverInterface \c EvolverInterface<SYS,ES> \endlink and \link Ariadne::ReachabilityAnalyserInterface \c ReachabilityAnalyserInterface<SYS> \endlink.
+The functionality available for computing (rigorous) simulations, discretising sets and systems, and performing reachability analysis can be found in the documentation for \link Ariadne::EvolverInterface \c EvolverInterface<SYS,ES> \endlink, \link Ariadne::DiscretiserInterface \c DiscretiserInterface<SYS,BS> \endlink and \link Ariadne::ReachabilityAnalyserInterface \c ReachabilityAnalyserInterface<SYS> \endlink.
 
 See the documentation for the Ariadne::HybridAutomaton.
 

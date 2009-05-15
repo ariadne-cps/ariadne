@@ -48,13 +48,22 @@ typedef unsigned long ulong;
 namespace Ariadne {
 
 #ifdef DOXYGEN
-//! \brief Integers of arbitrary size.
+//! \brief Integers of arbitrary size with exact arithmetic.
 //! (Only available if the Gnu Multiple Precision library (GMP) is installed.)
+//! \details
+//! Unlike C++ and the Python 2, integer division is performed exactly and returns a rational.
+//! The operations \c quot(Integer,Integer) and \c rem(Integer,Integer) can be used to perform integer division. 
 class Integer { };
-//! \brief Rationals numbers.
+//! \brief %Rational numbers with exact arithmetic.
 //! (Only available if the Gnu Multiple Precision library (GMP) is installed.)
 class Rational { };
-//! \brief Floating point numbers (double precision).
+//! \brief Floating point numbers (double precision) using approxiamate arithmetic.
+//! \details 
+//! The \c Float class represents floating-point numbers. Since most arithmetic operations on floating-point numbers can only be performed approximately, %Ariadne uses <em>interval arithmetic</em> to represent the results of floating-point computations. The result of any floating-point computation is represented as an interval \f$[l,u]\f$ enclosing the exact value of the result. In this way, round-off errors can be propagated automatically. 
+//! 
+//! Ariadne floating-point numbers can be constructed by conversion from built-in C++ types or from string literals. Note that a string literal representing a \c Float must be exacly representable on the machine. Hence <c>%Float(3.3)</c> and <c>%Float("3.25")</c> are both valid (the former has a value of \f$3.2999999999999998224\ldots\f$) but <c>%Float("3.3")</c> is an error. 
+//! \note Constructing a %Float from a string literal is currently not supported!
+//! \sa Interval
 class Float { };
 #endif // DOXYGEN
 
@@ -199,7 +208,20 @@ inline Float rad_up(Float x, Float y) {
 
 
 
-//! \brief Intervals supporting interval arithmetic.
+//! \brief Intervals with floating-point endpoints supporting outwardly-rounded arithmetic.
+//! \details 
+//! Note that <c>%Interval(3.3)</c> yields the singleton interval \f$[3.2999999999999998224,3.2999999999999998224]\f$ (the constant is first interpreted by the C++ compiler to give a C++ \c double, whereas <c>%Interval("3.3")</c> yields the interval \f$[3.2999999999999998224,3.3000000000000002665]\f$ enclosing \f$3.3\f$.
+//! 
+//! Comparison tests on \c Interval use the idea that an interval represents a single number with an unknown value. Hence the result is of type \c tribool, which can take values { \c True, \c False, \c Indeterminate }.  Hence a test \f$[l_1,u_1]\leq [l_2,u_2]\f$ returns \c True if \f$u_1\leq u_2\f$, since in this case \f$x_1\leq x_2\f$ whenever \f$x_1\in[l_1,u_2]\f$ and \f$x_2\in[l_2,u_2]\f$, \c False if \f$l_1>u_2\f$, since in this case we know \f$x_1>x_2\f$, and \c Indeterminate otherwise, since in this case we can find \f$x_1,x_2\f$ making the result either true or false. In the case of equality, the comparison \f$[l_1,u_1]\f$==\f$[l_2,u_2]\f$ only returns \c True if both intervals are singletons, since otherwise we can find values making the result either true of false.
+//!
+//! To obtain the lower and upper bounds of an interval, use \c ivl.lower() and \c ivl.upper(). 
+//! To obtain the midpoint and radius, use \c ivl.midpoint() and \c ivl.radius().
+//! Alternatives \c midpoint(ivl) and \c radius(ivl) are also provided. 
+//! Note that \c midpoint and \c radius return approximations to the true midpoint and radius of the interval. If \f$m\f$ and \f$r\f$ are the returned midpoint and radius of the interval \f$[l,u]\f$, the using exact arithmetic, we guarentee \f$m-r\leq l\f$ and \f$m+r\geq u\f$
+//! 
+//! To test if an interval contains a point or another interval, use \c encloses(Interval,Float) or \c encloses(Interval,Interval). 
+//! The test \c refines(Interval,Interval) can also be used. 
+//! \sa Float
 class Interval {
   public:
     Interval() : l(0.0), u(0.0) { }

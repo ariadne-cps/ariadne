@@ -1,5 +1,5 @@
 /***************************************************************************
- *            main_page
+ *            main_page.dox
  *
  *  Copyright  2004-8  Pieter Collins
  *
@@ -48,7 +48,7 @@ A more detailed explanation of the hybrid automaton class can be found on the \r
 
 A more detailed explanation of how to analyse a hybrid system can be found on the \ref system_analysis_page documentation page.
 
-An example of the use of %Ariadne for reachability analysis of a simple hybrid system is given on the \link tutorial_page Tutorial \endlink page. The example is contained in the file  \link examples/tutorial.cc tutorial.cc \endlink. The same example using the python interface is given in \link python/tutorial.py tutorial.py \endlink (forthcoming).
+An example of the use of %Ariadne for reachability analysis of a simple hybrid system is given on the \ref tutorial_page  page. The example is contained in the file  \link examples/tutorial.cc tutorial.cc \endlink. The same example using the python interface is given in \link python/tutorial.py tutorial.py \endlink (forthcoming).
 
 
 \section mainpage_advanced_usage Advanced Usage
@@ -67,6 +67,7 @@ More information on the mathematical foundations of %Ariadne can be found on the
  - \ref geometry_page
  - \ref evolution_page
  - \ref integration_page
+ - \ref hybrid_systems_page
  - \ref hybrid_evolution_page
 
  - \ref references_page
@@ -78,6 +79,8 @@ More information on the mathematical foundations of %Ariadne can be found on the
 \latexonly A more detailed description of Ariadne's capabilities can be found in the documentation for the individual Modules and Classes. \endlatexonly
 Coding guideline are given on the \ref coding_guidelines_page documentation page.
 
-\example examples/tutorial.cc
-Tutorial example.
+\example examples/tutorial.cc A simple nonlinear model of a heating system.
+
+\example examples/tutorial-boost_power_converter.cc An affine hybrid automaton model of the boost power converter.
+
 */

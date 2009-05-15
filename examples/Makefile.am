@@ -2,7 +2,9 @@ INCLUDES = -I$(top_srcdir)/include
 LIBS +=  $(CAIRO_LIBS) $(GTK_LIBS)
 LDADD = ../src/libariadne.la $(LIBS)
 
-bin_PROGRAMS=tutorial watertank bouncingball ecoli \
+bin_PROGRAMS=tutorial \
+             tutorial-boost_power_converter \
+             watertank bouncingball ecoli \
              watertank-nonlinear watertank-time \
              sinusoid-sin 3bouncingballs \
              rectifier springs cmos_inverter_analoginput \
@@ -24,3 +26,4 @@ rectifier_oneloc_SOURCES=rectifier_oneloc.cc
 
 examples: $(bin_PROGRAMS)
 
+3bouncingballs_SOURCES = boost_power_converter.cc

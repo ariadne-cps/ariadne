@@ -26,6 +26,7 @@ shiny: maintainer-clean
 
 doc:
 	doxygen
+	(cd latex; make)
 
 lib:
 	(cd src; make lib)

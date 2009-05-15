@@ -120,7 +120,11 @@ Polytope polytope(const Zonotope& z)
 Polytope polytope(const Polytope& p) 
 {
     Polytope r=p;
-    return reduce2d(r);
+    if(r.dimension()==2) {
+        return reduce2d(r);
+    } else {
+        return r;
+    }
 }
 
 

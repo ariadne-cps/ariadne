@@ -270,6 +270,7 @@ class ConstantExpression
 };
 
 
+//! A coordinate projection \f$\pi:\R^n\rightarrow\R\f$ given by \f$\pi(x)=x_j\f$.
 class ProjectionExpression
     : public ExpressionInterface
 {
@@ -293,6 +294,7 @@ class ProjectionExpression
 
 
 
+//! An affine expression \f$f:\R^n\rightarrow\R\f$ given by \f$f(x)=\sum_{i=0}^{n-1} a_i x_i + b\f$.
 class AffineExpression
     : public ExpressionInterface
 {
@@ -343,6 +345,7 @@ inline AffineExpression operator*(const Interval& c, const AffineExpression& f) 
 inline AffineExpression operator*(const AffineExpression& f, const Interval& c) { return c*f; }
 inline Interval derivative(const AffineExpression& f, uint k) { return f._g[k]; }
 
+//! A polynomial expression \f$p:\R^n\rightarrow\R\f$.
 class PolynomialExpression
     : public ExpressionInterface,
       public Polynomial<Interval>

@@ -77,6 +77,12 @@ Schulz's method is an iterative method for computing matrix inverses:
 The interval version is given by:
 \f[ [B_{k+1}] = m[B_k] \,  \Bigl( \sum_{i=0}^{n-1} \bigl(I-A\,m[B_k]\bigr)^i \Bigr) \, + \, [B_k]\,\bigl(1-A\,m[B_k]\bigr)^n .  \f]
 
+\section matrix_inverse_derivative Derivative of Matrix Inverse
+
+If \f$B=A^{-1}\f$, then 
+\f[ \fbox{$ \dot{B} = B\dot{A}B $} \f]
+
+
 \subsection gauss_seidell_matrix_inverse Gauss-Seidel Iteration
 
 Gauss-Seidel iteration is a method for solving linear equations \f$Ax=b\f$, which can also be used to compute inverses using \f$AB=I\f$. The scheme is

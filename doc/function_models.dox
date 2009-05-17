@@ -75,10 +75,27 @@ Given \f$f\f$, an \f$s=1\f$ model can be computed by taking
 \f[ [b] \ni f(c); \quad [A] \ni Df(X) \f]
 
 
-\section matrix_inverse_derivative Derivative of Matrix Inverse
 
-If \f$B=A^{-1}\f$, then 
-\f[ \fbox{$ \dot{B} = B\dot{A}B $} \f]
+\section function_model_contractors Theory of Contractors
+
+Consider the equation \f$f_i(x_1,\ldots,x_k)=x_i\f$ for \f$i=1,\ldots,k\f$. A \e contractor is a set-based over-approximation to the \f$f_i\f$ working on a class of set with an \e intersection operation. (Actually, all we require of the intersection operation is that it is an over-approximation to the set-theoretic intersection, and that the intersection of \a X and \a Y is a subset of both \a X and \a Y.)
+
+A contractor is \e monotone if \f$f_i(X_1,\ldots,X_k)\subset f_i(Y_1,\ldots,Y_k)\f$ if \f$X_i \subset Y_i\f$ for all \f$i\f$. 
+Suppose \f$f_i(X_1,\ldots,X_k)=Y_i\subset X_i\f$, and \f$Y_j\subset X_j\f$ for \f$j\neq i\f$. Then \f$f_i(Y_1,\ldots,Y_k)\subset f_i(X_1,\ldots,X_k)\subset Y_i\f$.
+
+
+A system of contractors applies updates \f$X_i'=f_i(X_1,\ldots,X_k)\cap X_i\f$, possibly performing multiple updates simultaneously. 
+If \f$f_i\f$ is monotone and \f$f_i(X_1,\ldots,X_k)\subset X_i\f$ at one stage, then inclusion holds at all stages. 
+We can therefore apply contractors \f$f_i\f$ sequentially or in parallel. If for any \f$i\f$, \f$f_i(X_1,\ldots,X_k)\cap X_i = \emptyset\f$, then there is no fixed-point. If for all \f$i\f$, \f$f_i(X_1,\ldots,X_k)\subset X_i\f$, then there is at least one solution in \f$X_1\times\cdots\times X_k\f$.
+
+The Taylor calculus operations are not monotone, since refining an argument may cause terms to be swept into the error. Further, the intersection of two Taylor expressions need not be a subset of either argument due to round-off error. 
+However, both operations are over-approximations of the exact operations, and this allows us to prove the existence of solutions.
+
+Suppose \f$f_i\f$ are monotone contractors, \f$\hat{f}_i\f$ are non-monotone numerical over-approximations to the \f$f_i\f$, and \f$\sqcap\f$ is an over-approximation to the intersection operator. 
+Consider a system of contractors, \f$X_i'=\hat{f}_i(X_1,\ldots,X_k) \sqcap X_i\f$.
+Suppose that for all \f$i\f$ at some stage of the operation, \f$\hat{f}_i(X_1,\ldots,X_k) \subset X_i\f$. Then the final result contains a solution of \f$f_i(x_1,\ldots,x_k)=x_i;\ i=1,\ldots,k\f$.
+
+Consider the two-variable case. Suppose \f$\hat{f}_1(X_1,X_2)\subset X_1\f$, and that after applying some numerical contractors to obtain \f$(Y_1,Y_2)\f$ we have \f$\hat{f}_2(Y_1,Y_2)\subset Y_2\f$. Let \f$\tilde{Y}_1\f$ be the set obtained by applying the monotone contractors. Then \f$f_2(\tilde{Y}_1,Y_2)\subset f_2(Y_1,Y_2) \subset \hat{f}_2(Y_1,Y_2) \subset Y_2\f$, and \f$f_1(\tilde{Y}_1,Y_2)\subset \tilde{Y}_1\f$. Hence \f$(\tilde{Y}_1,Y_2)\f$ contains a solution, and therefore so does \f$(Y_1,Y_2)\f$.
 
 
 */

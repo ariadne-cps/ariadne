@@ -48,12 +48,11 @@ A more detailed explanation of the hybrid automaton class can be found on the \r
 
 A more detailed explanation of how to analyse a hybrid system can be found on the \ref system_analysis_page documentation page.
 
-An example of the use of %Ariadne for reachability analysis of a simple hybrid system is given on the \ref tutorial_page  page. The example is contained in the file  \link examples/tutorial.cc tutorial.cc \endlink. The same example using the python interface is given in \link python/tutorial.py tutorial.py \endlink (forthcoming).
-
+An example of the use of %Ariadne for reachability analysis of a simple hybrid system is given on the \ref tutorial_page  page. The example is contained in the file  \link examples/tutorial.cc tutorial.cc \endlink. 
 
 \section mainpage_advanced_usage Advanced Usage
 
-A guide for advanced users on to use the internal Taylor calculus can be found on the \ref taylor_calculus_page documentation page.
+A guide for advanced users on to use the internal data types including the function calculus and Taylor calculus can be found on the \ref python_tutorial_page documentation page.
 
 \section mainpage_mathematical_foundations Mathematical Foundations
 

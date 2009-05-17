@@ -76,8 +76,20 @@ print "v:",v
 A=IMatrix([[1,[2,3],4],[1.5,1.1,2]])
 print "A:",A
 
+# Solve the linear equation Ax=b
+solve(A,b)
+
 
 print "\n\n\n\n\n"
+
+
+
+argument_size=2
+function=lambda x:sqrt(sqr(x[0])+sqr(x[1]))
+f=UserExpression(argument_size,function)
+
+
+
 
 # Create a Polynomial expression in three unknowns, with value \f$x_0\f$.
 #px=PolynomialExpression.variable(3,0)
@@ -100,6 +112,9 @@ def p(n,j):
 #p+=i; p-=i; p*=i; p/=i;
 
 print "\n\n\n\n\n"
+
+
+
 
 
 # Create a box to act as the domain of a Taylor expression
@@ -125,6 +140,20 @@ print "x:",x,"\ny:",y,"\nz:",z
 # Make a shorthand for constructing Taylor expressions
 def t(d,j):
     return TaylorExpression.variable(d,j)
+
+#Create a TaylorExpression from a PolynomialExpression
+t=TaylorExpression(p,D)
+
+# The domain D of x.
+x.domain()
+# A not-necessarily tight over-approximation to p(D)+/-e.
+x.codomain()
+# An over-approximation to p(D)+/-e.
+x.range()
+# The function m(x) defined by m(s(x)) = p(x), where s is the scaling function from the unit box to the domain D.
+x.model()
+# Convert to a polynomial expression.
+x.polynomial()
 
 # Arithmetic on Taylor expressions
 +x; -x; x+y; x-y; x*y; x/y;
@@ -159,22 +188,71 @@ sqrt(x);
 exp(x); log(x);
 sin(x), cos(x), tan(x/100)
 
+x=embed(x,box([-1,1]))
+
 #Join x and y into a TaylorFunction
 f=join(x,y)
 print "join(x,y):",f
+
+x=combine(x,y)
+print x.domain()
+
+# Compose a TaylorExpression and a TaylorFunction
+print compose(x,g)
+
+# Compose two TaylorFunctions and a TaylorFunction
+compose(join(x,y),g)
+
+# Compose an polynomial expression and a TaylorFunction
+print compose(p,f)
+
 
 gd=box([[0,10],[1,7]])
 print f.codomain(),gd
 
 
-assert( subset(f.codomain(),gd) )
 g=t(gd,0)*t(gd,1)
 print compose(g,f)
+
+assert( subset(f.codomain(),gd) )
 
 print compose(p(2,0)*p(2,1),join(t(3,0),t(3,1)))
 
 # Create a TaylorFunction equal to the identity on dom
 f=TaylorFunction.identity(d)
 print "f:",f
+
+implicit(f)
+
+implicit(x)
+
+antiderivative(f,j)
+
+derivative(midpoint(f),j)
+
+derivative(midpoint(f),[j0,j1])
+
+flow(f,D,h,B)
+flow(tf,D,h)
+
+## Contractors
+
+refines(x0,x1)
+subset(x0,x1)
+intersects(x0,x1)
+
+
+intersection(x0,x1)
+
+
+# Newton contractor to solve f(x,h(x))=0
+f=(4+tx)*tx
+h=inverse(derivative2(f))*compose(f,join(i,h))
+
+# Picard operator to solve dot(phi)(x,t) = f(phi(x,t))
+f=tx
+phi=antiderivative(compose(f,phi),i)
+
+
 
 # End

@@ -22,7 +22,7 @@
  */
 
 /*!
- 
+
 \file tutorial.dox
 \brief Tutorial on %Ariadne's features (outdated).
 
@@ -34,9 +34,9 @@ In this tutorial, we show how to use %Ariadne to model and analyse a hybrid auto
 
 \section tutorial_system_model The Hybrid Automaton Model
 
-The system represents a heating system used to control the temperature in a room. The temperature is affected by to the external temperature, which is assumed to vary sinusoidally, and is controlled by a heater which may either be on or off. The heater is turned on whenever the temperature falls below a certain threshold, and is turned off whenever the temperature rises above a certain threshold. 
+The system represents a heating system used to control the temperature in a room. The temperature is affected by to the external temperature, which is assumed to vary sinusoidally, and is controlled by a heater which may either be on or off. The heater is turned on whenever the temperature falls below a certain threshold, and is turned off whenever the temperature rises above a certain threshold.
 
-The system has two discrete modes, \f$\textsc{On}\f$ and \f$\textsc{Off}\f$, representing the state of the heater. There are three events, \f$\textsc{TurnOn}\f$, \f$\textsc{TurnOff}\f$ and \f$\textsc{Midnight}\f$; the first two representing switching the heater, and the last being a reset of the clock at the beginning of a new day. 
+The system has two discrete modes, \f$\textsc{On}\f$ and \f$\textsc{Off}\f$, representing the state of the heater. There are three events, \f$\textsc{TurnOn}\f$, \f$\textsc{TurnOff}\f$ and \f$\textsc{Midnight}\f$; the first two representing switching the heater, and the last being a reset of the clock at the beginning of a new day.
 
 The system has two continuous variables, \em temperature \f$T\f$ and \em time-of-day \f$\tau\f$.
 The system is described by three parameters, the heater power \f$H\f$, the insulation level \f$K\f$, the average external temperature \f$T_E\f$, the amplitude of the temperature fluctuations \f$T_A\f$.
@@ -57,7 +57,7 @@ In this example, the same parameters and variables are used in each mode, so thi
 
 Now define the nonlinear functions used in the system definition.
 
-\skipline // System dynamic 
+\skipline // System dynamic
 \until };
 \until };
 
@@ -102,7 +102,7 @@ Create the system modes.
 \skipline //
 \until heater_off_dynamic
 
-Create the system transitions 
+Create the system transitions
 
 \skipline //
 \until heater_turn_off_guard
@@ -123,7 +123,7 @@ The following function creates a HybridEvolver object, which is a class which ca
 \until }
 
 We now compute the evolution of the system.
-\skipline compute_heating_system_evolution
+\skipline compute_evolution
 \until {
 
 Define the intial set and evolution time.
@@ -133,8 +133,7 @@ Define the intial set and evolution time.
 
 Compute the reachable and evolved sets.
 
-\skipline //
-\until evolver.reach_evolve
+\skipline evolver.reach_evolve
 
 Compute the trajectories parameterised by time.
 
@@ -142,8 +141,8 @@ Compute the trajectories parameterised by time.
 
 Write the sets to standard output and to a file.
 
-\skipline // 
-\until plot
+\skipline write
+\skipline plot
 
 End of function
 
@@ -158,39 +157,36 @@ End of function
 
 Create a ReachabilityAnalyser object.
 
-\skipline //
-\until analyser
+\skipline analyser
 
-Set the initial set and evolution time.
+Set the initial set.
 
-\skipline //
+\skipline initial_set
 \until initial_set[
-\until reach_time
+
+Set the evolution time.
+\skipline reach_time
 
 Compute lower-approximation to the finite-time evolved set.
 
-\skipline //
-\until tutorial-lower_evolve
+\skipline lower_evolve
+\skipline plot
 
 Compute lower-approximation to the finite-time reachable set.
 
-\skipline //
-\until tutorial-lower_reach
+\skipline lower_reach
 
 Compute over-approximation to the finite-time evolved set.
 
-\skipline //
-\until tutorial-upper_evolve
+\skipline upper_evolve
 
 Compute over-approximation to the finite-time reachable set.
 
-\skipline //
-\until tutorial-upper_reach
+\skipline upper_reach
 
 Compute over-approximation to the infinite-time chain-reachable set.
 
-\skipline //
-\until tutorial-chain_reach
+\skipline chain_reach
 
 End of function.
 
@@ -226,15 +222,15 @@ In the future, it will be possible to create \c VectorSlice and \c MatrixSlice o
 
 The semantics of this operator have not been determined, since Python has different conventions from C++ libraries such as the STL \c valarray class, glas and uBlas \c vector classes and Matlab classes. For example, if \c v is the vector <c>[0,1,2,3,4,5,6,7,8,9]</c>, then different possibilities are
 
- - Python: <c> v[start:finish:stride] </c>  e.g. <c>v[1:6:2]</c> = <c>v[1:7:2]</c> = <c>[1,3,5]</c>; 
+ - Python: <c> v[start:finish:stride] </c>  e.g. <c>v[1:6:2]</c> = <c>v[1:7:2]</c> = <c>[1,3,5]</c>;
 
- - C++ STL \c valarray : <c> v[slice(start,size,stride)]</c> e.g.  <c> v[slice(1,3,2)]</c>\c  = <c>[3,5,7]</c>; 
+ - C++ STL \c valarray : <c> v[slice(start,size,stride)]</c> e.g.  <c> v[slice(1,3,2)]</c>\c  = <c>[3,5,7]</c>;
 
- - C++ uBlas: \c <c> project(v,slice(start,stride,size)) </c>  e.g.  <c>project(v,slice(1,2,3))</c> = <c>[1,3,5]</c>; 
+ - C++ uBlas: \c <c> project(v,slice(start,stride,size)) </c>  e.g.  <c>project(v,slice(1,2,3))</c> = <c>[1,3,5]</c>;
 
- - C++ glas: \c <c> slice(start,finish,stride)) </c>  e.g.  <c>v[slice(1,6,2)])</c> = <c>v[slice(1,7,2)])</c> = <c>[1,3,5]</c>; 
+ - C++ glas: \c <c> slice(start,finish,stride)) </c>  e.g.  <c>v[slice(1,6,2)])</c> = <c>v[slice(1,7,2)])</c> = <c>[1,3,5]</c>;
 
- - Matlab: <c> v(first:stride:last) </c> with one-based indexing; e.g. <c>v(2:2:6)</c> = <c>v(2:2;7)</c> = <c>[1,3,5]</c>;  
+ - Matlab: <c> v(first:stride:last) </c> with one-based indexing; e.g. <c>v(2:2:6)</c> = <c>v(2:2;7)</c> = <c>[1,3,5]</c>;
 
 The main design decision is whether to use a single "Ariadne" slicing semantics which is used for any and all interfaces, or whether to use the natural semantics for the given environment. For the C++ API, we could provide STL \c valarray semantics <c> v[slice(start,size,stride=1)] </c> and Python semantics <c> v[range(start,finish,stride=1)] </c>.
 
@@ -243,17 +239,17 @@ The main design decision is whether to use a single "Ariadne" slicing semantics 
 <br><br>
 
 
-  
+
 
 \section python_tutorial_function Functions
 
-Currently %Ariadne provides a \c FunctionInterface class which specifies functions \f$f:\R^n\rightarrow\R^m\f$, i.e. functions of a single vector-valued variable. 
+Currently %Ariadne provides a \c FunctionInterface class which specifies functions \f$f:\R^n\rightarrow\R^m\f$, i.e. functions of a single vector-valued variable.
 
 There are currently two ways of creating user-defined functions, either via the Python interface or in C++.
 
 \subsection tutorial_function_python Python functions
 
-An %Ariadne function can be constructed directly from a Python function. 
+An %Ariadne function can be constructed directly from a Python function.
 \code
 def henon_function(x):
     return [ 1.5-x[0]*x[0]+0.375*x[1], x[0] ]
@@ -289,7 +285,7 @@ class HenonFunction:
         return [ p[0]-x[0]*x[0]+p[1]*x[1], x[0] ]
 
 henon = AriadneFunction( HenonFunction( [1.5,0.375] ) )
-\endcode   
+\endcode
 
 Unfortunately, since all calls to the function require the Python interpreter, function evaluations will be much less efficient than a native C++
 

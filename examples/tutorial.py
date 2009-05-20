@@ -31,8 +31,9 @@ def box(x): return IVector(x)
 # Print a list of all available classes and functions
 print dir(),"\n"
 
-# Print a list of all available classes and functions
-print dir()
+###############################################################################
+# Numeric submodule
+###############################################################################
 
 # Create an integer
 z=Integer(8)
@@ -67,54 +68,83 @@ print "i:",i
 i=Interval(Rational(11,10),Rational(14,10)) # Creates the interval [1.09999999999999987:1.40000000000000013]
 print "i:",i
 
+print "\n\n"
+
+###############################################################################
+# Linear Algebra submodule
+###############################################################################
 
 # Create an interval vector
-v=IVector([1,[2,3],4])
-print "v:",v
+b=IVector([1,[2,3],4])
+print "b:",b
 
 # Create an interval matrix
-A=IMatrix([[1,[2,3],4],[1.5,1.1,2]])
+A=IMatrix([[1,[2,3],4],[1.5,1.1,2],[0,0,1]])
 print "A:",A
 
 # Solve the linear equation Ax=b
 solve(A,b)
 
+print "\n\n"
 
-print "\n\n\n\n\n"
+###############################################################################
+# Function submodule
+###############################################################################
 
-
-
+# Create a user-defined scalar-valued function
 argument_size=2
 function=lambda x:sqrt(sqr(x[0])+sqr(x[1]))
 f=UserExpression(argument_size,function)
+print f(Vector([4,3]))
+print f(IVector([4,3]))
 
+result_size=2
+argument_size=3
+function=lambda (x):[sqrt(sqr(x[0])+sqr(x[1])),x[1]+x[2]]
+f=UserFunction(result_size,argument_size,function)
+print f
+print f(Vector([4,3,0]))
+print f.evaluate(IVector([4,3,0]))
+
+print "\n"
 
 
 
 # Create a Polynomial expression in three unknowns, with value \f$x_0\f$.
-#px=PolynomialExpression.variable(3,0)
+p=PolynomialExpression.variable(3,0)
+print p
 
 # Make a shorthand for constructing Polynomial expressions
 def p(n,j):
     return PolynomialExpression.variable(n,j)
 
 # Arithmetic for Polynomial expressions
-#+p; -p; p+q; p-q; p*q;
+p=PolynomialExpression.variable(3,0)
+q=PolynomialExpression.variable(3,1)
+c=Float(1.0)
+i=Interval(0.875,1.125)
 
-#p+c; p-c; p*c; p/c;
-#c+p; c-p; c*p;
+print +p, -p;
+print p+q, p-q, p*q;
 
-#p+i; p-i; p*i; p/i;
-#i+p; i-p; i*p;
+print p+c, p-c, p*c, p/c;
+print c+p, c-p, c*p;
 
-#p+=q; p-=q;
-#p+=c; p-=c; p*=c; p/=c;
-#p+=i; p-=i; p*=i; p/=i;
+print p+i, p-i, p*i, p/i;
+print i+p, i-p, i*p;
 
-print "\n\n\n\n\n"
+p+=q; p-=q;
+p+=c; p-=c; p*=c; p/=c;
+p+=i; p-=i; p*=i; p/=i;
+
+print "\n\n"
 
 
 
+
+###############################################################################
+# Calculus submodule
+###############################################################################
 
 
 # Create a box to act as the domain of a Taylor expression
@@ -123,26 +153,29 @@ print "d:",d
 
 # Create the TaylorExpression representing the function x1 on the domain d
 t=TaylorExpression.variable(d,1)
-print "t:",t
+print "t:",t,"\n"
 
 # Create all TaylorExpression variables on the domain dom
 tv=TaylorExpression.variables(d)
 print "tv[0]:",tv[0]
 print "tv[1]:",tv[1]
 print "tv[2]:",tv[2]
+print
 
 # Make shorthands for the variable names
 x=tv[0]
 y=tv[1]
 z=tv[2]
-print "x:",x,"\ny:",y,"\nz:",z
+print "x:",x,"\ny:",y,"\nz:",z,"\n"
 
 # Make a shorthand for constructing Taylor expressions
 def t(d,j):
     return TaylorExpression.variable(d,j)
 
 #Create a TaylorExpression from a PolynomialExpression
-t=TaylorExpression(p,D)
+p=PolynomialExpression.variable(3,0)
+tp=TaylorExpression(d,p)
+print "p:",p,"\ntp: ",tp,"\n"
 
 # The domain D of x.
 x.domain()
@@ -150,8 +183,6 @@ x.domain()
 x.codomain()
 # An over-approximation to p(D)+/-e.
 x.range()
-# The function m(x) defined by m(s(x)) = p(x), where s is the scaling function from the unit box to the domain D.
-x.model()
 # Convert to a polynomial expression.
 x.polynomial()
 
@@ -170,12 +201,12 @@ i+x; i-x; i*x; i/x;
 
 # Inplace operations
 x+=y; x-=y;
-x+=c; x-=c; x*=c; x/=c; 
-x+=i; x-=i; x*=i; x/=i; 
+x+=c; x-=c; x*=c; x/=c;
+x+=i; x-=i; x*=i; x/=i;
 
 # Reset x
-x=v[0]; 
-x=v[1]; 
+x=tv[0];
+y=tv[1];
 
 # Comparison functions
 min(x,y); max(x,y); abs(x);
@@ -184,74 +215,163 @@ min(x,y); max(x,y); abs(x);
 neg(x); rec(x); sqr(x); pow(x,n);
 
 # Algebraic and transcendental functions
-sqrt(x); 
-exp(x); log(x);
+sqrt(x);
+exp(x); #log(x);
 sin(x), cos(x), tan(x/100)
+print
 
-x=embed(x,box([-1,1]))
+# Non-arithmetic functions
+
+# Restrict to a subdomain
+d1=box([[-1,1],[-1,1]])
+d2=box([[-0.125,0.125],[0.5,0.75]])
+w=t(d1,0)*t(d1,1)
+rw=restrict(w,d2)
+print "restrict(w,d2):",rw
+
+# Embed the domain of x in a space of higher dimension
+d=Box([[-1,+1]])
+ex=embed(x,d)
+print "embed(x,d):",ex
 
 #Join x and y into a TaylorFunction
 f=join(x,y)
 print "join(x,y):",f
 
-x=combine(x,y)
-print x.domain()
+g=combine(x,y)
+print "combine(x,y):",g
+print
 
-# Compose a TaylorExpression and a TaylorFunction
-print compose(x,g)
+# Function composition
+d=IVector([[4,7],[1,6],[-1,1]])
+th=TaylorFunction.identity(d)
+cd=th.codomain()
 
-# Compose two TaylorFunctions and a TaylorFunction
-compose(join(x,y),g)
+f=AffineFunction(Matrix([[2,1,0],[1,1,1]]),Vector([1,1]))
+g=PolynomialExpression.variable(3,0)
 
-# Compose an polynomial expression and a TaylorFunction
-print compose(p,f)
+tg=TaylorExpression(cd,g)
+tf=TaylorFunction(cd,f)
 
+# Compose an expression and a Taylor function
+compose(g,th)
+print "compose(g,th):",compose(g,th)
 
-gd=box([[0,10],[1,7]])
-print f.codomain(),gd
+# Compose a function and a Taylor function
+compose(f,th)
+print "compose(f,th):",compose(f,th)
 
+# Compose two Taylor functions
+assert(subset(th.codomain(),tf.domain()))
+tr=compose(tf,th)
+print "compose(tf,th):",compose(tf,th)
 
-g=t(gd,0)*t(gd,1)
-print compose(g,f)
+# Compose a Taylor expression and a Taylor function
+assert(subset(th.codomain(),tg.domain()))
+tr=compose(tg,th)
+print "compose(tg,th):",compose(tg,th)
+print
 
-assert( subset(f.codomain(),gd) )
+# Solution of parameterised algebraic equations
 
-print compose(p(2,0)*p(2,1),join(t(3,0),t(3,1)))
+# Compute the solution h to the vector equation f(x,h(x))=0
+d=box([[-1,1],[-1,1],[-1,1]])
+a=t(d,0)
+x=t(d,1)
+y=t(d,2)
+f=join(a+4*x+y,x+y)
+print "f:",f
+h=implicit(f)
+print "implicit(f):",h
 
-# Create a TaylorFunction equal to the identity on dom
-f=TaylorFunction.identity(d)
+# Compute the solution h to the scalar equation g(x,h(x))=0
+# with f(x,y)=4+x-y^2, so y=sqrt(4+x)
+d=box([[-1,1],[-1,1]])
+x=t(d,0)
+y=t(d,1)
+g=x-4*y+y*y
+print "g:",g
+h=implicit(g)
+print "implicit(g):",h
+print
+
+# Differentiation, integration and differential equations
+f=1+2*x+3*x*y+x*x
 print "f:",f
 
-implicit(f)
+# Compute the derivative of f with respect to x[j], assuming that the error is constant
+df0=derivative(f,0)
+df1=derivative(f,1)
+print "derivative(f,0):",df0
+print "derivative(f,1):",df1
 
-implicit(x)
+# Compute an antiderivative of f with respect to x[j]
+# The value is zero at the midpoint of the domain of x[j]
+if0=antiderivative(f,0)
+if1=antiderivative(f,1)
+print "antiderivative(f,0):",if0
+print "antiderivative(f,1):",if1
 
-antiderivative(f,j)
-
-derivative(midpoint(f),j)
-
-derivative(midpoint(f),[j0,j1])
-
-flow(f,D,h,B)
-flow(tf,D,h)
+# Compute the flow of the Taylor function tf starting in the domain D for time interval [-h,+h]
+b=box([[-2,2]])
+d=box([[-1,1]])
+h=0.5
+o=6 # Temporal order
+f=TaylorFunction.identity(b)
+phi=flow(f,d,h,o)
+print "phi:",phi
+print
 
 ## Contractors
 
-refines(x0,x1)
-subset(x0,x1)
-intersects(x0,x1)
+x1=x+x*x/2
+x2=x+Interval(-1,1)
+print "x1:",x1
+print "x2:",x1
+
+b=refines(x1,x2)
+print "refines(x1,x2):",b
+b=disjoint(x1,x2)
+print "disjoint(x1,x2):",b
+
+y=intersection(x1,x2)
+print "intersection(x1,x2):",y
+print
+
+# Set up algebraic equation
+d1=Box([[-1,1]])
+d2=Interval(-1,1)
+d=join(d1,d2)
+x=TaylorExpression.variable(d,0)
+y=TaylorExpression.variable(d,1)
+f=x-4*y+y*y
+i=TaylorFunction.identity(d1)
+h=TaylorExpression.constant(d1,Interval(-1,+1))
+
+# Newton contractor to solve f(x,h(x))=0 for scalar f
+h=intersection(rec(derivative(f,1).range())*compose(f,join(i,h)),h)
+print "h:",phi
+print
 
 
-intersection(x0,x1)
-
-
-# Newton contractor to solve f(x,h(x))=0
-f=(4+tx)*tx
-h=inverse(derivative2(f))*compose(f,join(i,h))
+# Set up differential equation
+b=Box([[-1,1],[-1,1]])
+o=TaylorExpression.constant(b,1)
+x=TaylorExpression.variable(b,0)
+y=TaylorExpression.variable(b,1)
+f=join(o,x) # [dot(x),dot(y)]=[1,x]
+d=Box([[0,0.125],[0,0.125]])
+h=Float(0.5)
+d0=join(d,Interval(-h,+h))
+x0=TaylorExpression.variable(d0,0)
+y0=TaylorExpression.variable(d0,1)
+t=TaylorExpression.variable(d0,2)
+phi=join(x0,y0)
 
 # Picard operator to solve dot(phi)(x,t) = f(phi(x,t))
-f=tx
-phi=antiderivative(compose(f,phi),i)
+phi=antiderivative(compose(f,phi),2)
+print "phi:",phi
+print
 
 
 

@@ -2,7 +2,7 @@
  *            numeric_submodule.cc
  *
  *  Copyright 2008  Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 #include "config.h"
 #include "utilities.h"
 
@@ -74,7 +74,7 @@ void export_tribool() {
     tribool_class.def("__nonzero__", &tribool_nonzero);
     tribool_class.def("__str__", &tribool_c_str);
     tribool_class.def("__repr__", &tribool_c_repr);
-  
+
     def("indeterminate",(tribool(*)(void))&tribool_indeterminate);
     def("possibly",(bool(*)(bool))&possibly);
     def("possibly",(bool(*)(tribool))&possibly);
@@ -85,9 +85,22 @@ void export_tribool() {
 
 }
 
-void export_float() 
+void export_float()
 {
-    def("rec",(Float(*)(Float)) &rec); 
+    def("rec",(Float(*)(Float)) &Ariadne::rec);
+    def("sqr",(Float(*)(Float)) &Ariadne::sqr);
+    def("sqrt", (Float(*)(Float)) &Ariadne::sqrt);
+
+    def("exp", (Float(*)(Float)) &Ariadne::exp);
+    def("log", (Float(*)(Float)) &Ariadne::log);
+
+    def("sin", (Float(*)(Float)) &Ariadne::sin);
+    def("cos", (Float(*)(Float)) &Ariadne::cos);
+    def("tan", (Float(*)(Float)) &Ariadne::tan);
+    def("asin", (Float(*)(Float)) &Ariadne::asin);
+    def("acos", (Float(*)(Float)) &Ariadne::acos);
+    def("atan", (Float(*)(Float)) &Ariadne::atan);
+
 }
 
 #ifdef HAVE_GMPXX_H
@@ -109,7 +122,7 @@ void export_rational()
 }
 #endif
 
-void export_interval() 
+void export_interval()
 {
     using boost::python::class_;
     using boost::python::init;
@@ -121,11 +134,11 @@ void export_interval()
     //typedef Interval (*IFUN)(const Interval&);
     //typedef Interval (*IZFUN)(const Interval&, int n);
     //typedef Interval (*INFUN)(const Interval&, unsigned int n);
-    
+
     typedef Interval (*IFUN)(Interval);
     typedef Interval (*IZFUN)(Interval, int n);
     typedef Interval (*INFUN)(Interval, unsigned int n);
-    
+
     def("down",&down);
     def("up",&up);
 
@@ -186,7 +199,7 @@ void export_interval()
 }
 
 
-void 
+void
 numeric_submodule()
 {
     export_tribool();

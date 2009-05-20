@@ -2,7 +2,7 @@
  *            geometry_submodule.cc
  *
  *  Copyright 2008  Pieter Collins
- * 
+ *
  ****************************************************************************/
 
 /*
@@ -20,7 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
- 
+
 #include "config.h"
 
 #include "point.h"
@@ -44,7 +44,7 @@ namespace Ariadne {
 template<class X> void read(Matrix<X>& A, const boost::python::object& obj);
 
 void
-read(Point& pt, const boost::python::object& obj) 
+read(Point& pt, const boost::python::object& obj)
 {
   array<Float> ary;
   read_tuple_array(ary,obj);
@@ -53,7 +53,7 @@ read(Point& pt, const boost::python::object& obj)
 
 
 void
-read(Box& bx, const boost::python::object& obj) 
+read(Box& bx, const boost::python::object& obj)
 {
   array<Interval> ary;
   read_list_array(ary,obj);
@@ -61,7 +61,7 @@ read(Box& bx, const boost::python::object& obj)
 }
 
 void
-read(Zonotope& z, const boost::python::object& obj) 
+read(Zonotope& z, const boost::python::object& obj)
 {
     boost::python::tuple tup=boost::python::extract<boost::python::tuple>(obj);
     Point c;
@@ -78,7 +78,7 @@ void read(TaylorModel& tv, const boost::python::object& obj1, const boost::pytho
 
 
 void
-read(TaylorSet& ts, const boost::python::object& obj) 
+read(TaylorSet& ts, const boost::python::object& obj)
 {
     boost::python::list lst=extract<boost::python::list>(obj);
     ts=TaylorSet(len(lst));
@@ -89,7 +89,7 @@ read(TaylorSet& ts, const boost::python::object& obj)
         ts[i]=tm;
     }
 }
-    
+
 template<class SET> boost::python::tuple split(const SET& s, uint i) {
     std::pair<SET,SET> res=s.split(i);
     return boost::python::make_tuple(res.first,res.second);
@@ -99,7 +99,7 @@ template<class SET> boost::python::tuple split(const SET& s, uint i) {
 class OpenSetWrapper
   : public OpenSetInterface, public wrapper< OpenSetInterface >
 {
-  public: 
+  public:
     OpenSetInterface* clone() const { return this->get_override("clone")(); }
     uint dimension() const { return this->get_override("dimension")(); }
     tribool covers(const Box& r) const { return this->get_override("covers")(); }
@@ -110,7 +110,7 @@ class OpenSetWrapper
 class ClosedSetWrapper
   : public ClosedSetInterface, public wrapper< ClosedSetInterface >
 {
-  public: 
+  public:
     ClosedSetInterface* clone() const { return this->get_override("clone")(); }
     uint dimension() const { return this->get_override("dimension")(); }
     tribool disjoint(const Box& r) const { return this->get_override("disjoint")(); }
@@ -121,7 +121,7 @@ class ClosedSetWrapper
 class OvertSetWrapper
   : public OvertSetInterface, public wrapper< OvertSetInterface >
 {
-  public: 
+  public:
     OvertSetInterface* clone() const { return this->get_override("clone")(); }
     uint dimension() const { return this->get_override("dimension")(); }
     tribool overlaps(const Box& r) const { return this->get_override("overlaps")(); }
@@ -132,7 +132,7 @@ class OvertSetWrapper
 class CompactSetWrapper
   : public CompactSetInterface, public wrapper< CompactSetInterface >
 {
-  public: 
+  public:
     CompactSetInterface* clone() const { return this->get_override("clone")(); }
     uint dimension() const { return this->get_override("dimension")(); }
     tribool disjoint(const Box& r) const { return this->get_override("disjoint")(); }
@@ -145,7 +145,7 @@ class CompactSetWrapper
 class LocatedSetWrapper
   : public LocatedSetInterface, public wrapper< LocatedSetInterface >
 {
-  public: 
+  public:
     LocatedSetInterface* clone() const { return this->get_override("clone")(); }
     uint dimension() const { return this->get_override("dimension")(); }
     tribool covers(const Box& r) const { return this->get_override("covers")(); }
@@ -167,21 +167,21 @@ void export_set_interface() {
 }
 
 
-void export_point() 
+void export_point()
 {
     class_<Point> point_class("Point",no_init);
     point_class.def("__init__", make_constructor(&make<Point>) );
     point_class.def("__str__",&__cstr__<Point>);
 }
 
-void export_box() 
+void export_box()
 {
-    class_<Box,bases<CompactSetInterface,OpenSetInterface> > box_class("Box",init<>());
+    class_<Box,bases<CompactSetInterface,OpenSetInterface,Vector<Interval> > > box_class("Box",init<>());
     box_class.def("__init__", make_constructor(&make<Box>) );
     box_class.def("__str__",&__cstr__<Box>);
 }
 
-void export_zonotope() 
+void export_zonotope()
 {
     class_<Zonotope,bases<CompactSetInterface,OpenSetInterface> > zonotope_class("Zonotope",no_init);
     zonotope_class.def("__init__", make_constructor(&make<Zonotope>) );
@@ -196,7 +196,7 @@ void export_zonotope()
     def("disjoint", (tribool(*)(const Zonotope&,const Zonotope&)) &disjoint);
 }
 
-void export_taylor_set() 
+void export_taylor_set()
 {
     class_<TaylorSet,bases<CompactSetInterface> > taylor_set_class("TaylorSet",no_init);
     taylor_set_class.def("__init__", make_constructor(&make<TaylorSet>) );
@@ -205,7 +205,7 @@ void export_taylor_set()
     taylor_set_class.def("range", &TaylorSet::bounding_box);
     taylor_set_class.def("split", &split<TaylorSet>);
     taylor_set_class.def("__str__",&__cstr__<TaylorSet>);
-    
+
     def("outer_approximation", (GridTreeSet(*)(const TaylorSet&,const Grid&,uint)) &outer_approximation);
     def("adjoin_outer_approximation", (void(*)(GridTreeSet&,const TaylorSet&,uint)) &adjoin_outer_approximation);
     def("zonotope", (Zonotope(*)(const TaylorSet&)) &zonotope);

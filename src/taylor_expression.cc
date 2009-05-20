@@ -98,6 +98,14 @@ TaylorExpression::TaylorExpression(const DomainType& d, const Polynomial<Float>&
     this->_model=Ariadne::evaluate(p,x);
 }
 
+TaylorExpression::TaylorExpression(const DomainType& d, const Polynomial<Interval>& p)
+    : _domain(d), _model(p.argument_size())
+{
+    ARIADNE_ASSERT(d.size()==p.argument_size());
+    Vector<TaylorModel> x=TaylorModel::scalings(d);
+    this->_model=Ariadne::evaluate(p,x);
+}
+
 
 TaylorExpression TaylorExpression::constant(const Vector<Interval>& d, const Float& c)
 {
@@ -258,8 +266,25 @@ split(const TaylorExpression& tv, uint j)
 
 bool refines(const TaylorExpression& tv1, const TaylorExpression& tv2)
 {
-    if(tv1.domain()==tv2.domain()) { return refines(tv1.model(),tv2.model()); } if(subset(tv2.domain(),tv1.domain())) { return refines(restrict(tv1,tv2.domain()).model(),tv2.model()); }
+    if(tv1.domain()==tv2.domain()) { return refines(tv1.model(),tv2.model()); }
+    if(subset(tv2.domain(),tv1.domain())) { return refines(restrict(tv1,tv2.domain()).model(),tv2.model()); }
     else { return false; }
+}
+
+bool disjoint(const TaylorExpression& tv1, const TaylorExpression& tv2)
+{
+    if(tv1.domain()==tv2.domain()) {
+        return disjoint(tv1.model(),tv2.model());
+    } else {
+        Vector<Interval> domain=intersection(tv1.domain(),tv2.domain());
+        return disjoint(restrict(tv1,domain).model(),restrict(tv2,domain).model());
+    }
+}
+
+TaylorExpression intersection(const TaylorExpression& tv1, const TaylorExpression& tv2)
+{
+    ARIADNE_ASSERT(tv1.domain()==tv2.domain());
+    return TaylorExpression(tv1.domain(),intersection(tv1.model(),tv2.model()));
 }
 
 Vector<TaylorExpression> compose(const Vector<TaylorExpression>& x, const Vector<TaylorExpression>& y) {

@@ -219,7 +219,7 @@ template<class X> inline Polynomial<X>& operator*=(Polynomial<X>& p, const X& c)
     typedef typename Polynomial<X>::iterator Iter;
     if(c==0) { p.clear(); }
     for(Iter iter=p.begin(); iter!=p.end(); ++iter) { iter->data()*=c; } return p; }
-template<class X> inline Polynomial<X>& operator/=(Polynomial<X>& p, const Float& c) {
+template<class X> inline Polynomial<X>& operator/=(Polynomial<X>& p, const X& c) {
     typedef typename Polynomial<X>::iterator Iter;
     for(Iter iter=p.begin(); iter!=p.end(); ++iter) { iter->data()/=c; } return p; }
 
@@ -423,6 +423,14 @@ inline Polynomial<Interval> operator-(const Float& c, const Polynomial<Interval>
 inline Polynomial<Interval> operator*(const Float& c, const Polynomial<Interval>& p) {
     return Interval(c)*p; }
 
+inline Polynomial<Interval>& operator+=(Polynomial<Interval>& p, const Float& c) {
+    return p+=Interval(c); }
+inline Polynomial<Interval>& operator-=(Polynomial<Interval>& p, const Float& c) {
+    return p-=Interval(c); }
+inline Polynomial<Interval>& operator*=(Polynomial<Interval>& p, const Float& c) {
+    return p*=Interval(c); }
+inline Polynomial<Interval>& operator/=(Polynomial<Interval>& p, const Float& c) {
+    return p/=Interval(c); }
 }
 
 #endif /* ARIADNE_POLYNOMIAL_H */

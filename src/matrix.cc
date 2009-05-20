@@ -242,7 +242,8 @@ template<> Matrix<Interval> solve(const Matrix<Interval>& A, const Matrix<Interv
     return gs_solve(A,B);
 }
 
-template<class X> Matrix<X> solve(const Matrix<X>& A, const Vector<X>& b) {
+template<class X> Vector<X> solve(const Matrix<X>& A, const Vector<X>& b) {
+    return prod(lu_inverse(A),b);
 }
 
 
@@ -788,6 +789,7 @@ orthogonal_decomposition(const Matrix<Float>& A)
 template class Matrix<Float>;
 template Matrix<Float> inverse(const Matrix<Float>&);
 template Matrix<Float> solve(const Matrix<Float>&, const Matrix<Float>&);
+template Vector<Float> solve(const Matrix<Float>&, const Vector<Float>&);
 template class Matrix<Interval>;
 template Matrix<Interval> inverse(const Matrix<Interval>&);
 template Matrix<Interval> lu_inverse(const Matrix<Interval>&);
@@ -795,10 +797,12 @@ template Matrix<Interval> gs_inverse(const Matrix<Interval>&);
 template Matrix<Interval> solve(const Matrix<Interval>&, const Matrix<Interval>&);
 template Matrix<Interval> lu_solve(const Matrix<Interval>&, const Matrix<Interval>&);
 template Matrix<Interval> gs_solve(const Matrix<Interval>&, const Matrix<Interval>&);
+template Vector<Interval> solve(const Matrix<Interval>&, const Vector<Interval>&);
 #ifdef HAVE_GMPXX_H
 template class Matrix<Rational>;
 template Matrix<Rational> inverse(const Matrix<Rational>&);
 template Matrix<Rational> solve(const Matrix<Rational>&, const Matrix<Rational>&);
+template Vector<Rational> solve(const Matrix<Rational>&, const Vector<Rational>&);
 #endif
 
 } // namespace Ariadne

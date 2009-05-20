@@ -340,7 +340,7 @@ void export_matrix_class(class_<Matrix<X> >& matrix_class)
 
     def("inverse",(Matrix<X>(*)(const Matrix<X>&)) &inverse);
     def("solve",(Matrix<X>(*)(const Matrix<X>&,const Matrix<X>&)) &solve);
-    //def("solve",(Vector<X>(*)(const Matrix<X>&,const Vector<X>&)) &solve);
+    def("solve",(Vector<X>(*)(const Matrix<X>&,const Vector<X>&)) &solve);
 
     def("triangular_decomposition",&wrap_triangular_decomposition);
     def("orthogonal_decomposition",&wrap_orthogonal_decomposition);

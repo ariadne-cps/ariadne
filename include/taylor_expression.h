@@ -55,6 +55,10 @@ TaylorExpression restrict(const TaylorExpression& x, const Vector<Interval>& d);
 
 // Test if a variable refines another
 bool refines(const TaylorExpression& tv1, const TaylorExpression& tv2);
+// Test if two variables definitely represent different quantities
+bool disjoint(const TaylorExpression& x1, const TaylorExpression& x2);
+// Test if two variables definitely represent different quantities
+TaylorExpression intersection(const TaylorExpression& x1, const TaylorExpression& x2);
 
 // Evaluate an array of Taylor variables on a vector.
 Interval evaluate(const TaylorExpression& x, const Vector<Interval>& sy);
@@ -75,8 +79,6 @@ TaylorExpression derivative(const TaylorExpression& x, uint k);
 TaylorExpression implicit(const TaylorExpression& f);
 
 
-// Combine two functions over different domains
-Vector<TaylorExpression> combine(const TaylorExpression& x1, const TaylorExpression& x2);
 
 
 /*! \brief A class representing a quantity depending on other quantities.
@@ -109,12 +111,13 @@ class TaylorExpression
     explicit TaylorExpression(const DomainType& d, const TaylorModel& m);
     //! \brief Construct a TaylorExpression over the domain \a d, with scaled power series expansion \a f and error \a e.
     explicit TaylorExpression(const DomainType& d, const ExpansionType& f, const ErrorType& e=0);
-    //! \brief Construct a TaylorExpression over the domain \a d from the polynomial \a p.
-    template<class X> explicit TaylorExpression(const DomainType& d, const Polynomial<X>& p);
-    //! \brief Construct a TaylorExpression over the domain \a d from the polynomial \a p.
+
+    //! \brief Construct a TaylorExpression over the domain \a d from the expression \a f.
     explicit TaylorExpression(const DomainType& d, const ExpressionInterface& f);
     //! \brief Construct a TaylorExpression over the domain \a d from the polynomial \a p.
     explicit TaylorExpression(const DomainType& d, const Polynomial<Float>& p);
+    //! \brief Construct a TaylorExpression over the domain \a d from the interval polynomial \a p.
+    explicit TaylorExpression(const DomainType& d, const Polynomial<Interval>& p);
     //@}
 
     //@{
@@ -264,6 +267,10 @@ class TaylorExpression
     /*! \name Non-arithmetic operations. */
     //! \brief Test if the quantity is a better approximation than \a t throughout the domain.
     friend bool refines(const TaylorExpression& x1, const TaylorExpression& x2);
+    //! \brief Test if the quantities are disjoint.
+    friend bool disjoint(const TaylorExpression& x1, const TaylorExpression& x2);
+    //! \brief Test if the quantities are disjoint.
+    friend TaylorExpression intersection(const TaylorExpression& x1, const TaylorExpression& x2);
     //! \brief Restrict to a subdomain.
     friend TaylorExpression restrict(const TaylorExpression& x, const DomainType& d);
     //@}
@@ -486,6 +493,7 @@ inline TaylorExpression acos(const TaylorExpression& x) {
     return TaylorExpression(x._domain,acos(x._model)); }
 inline TaylorExpression atan(const TaylorExpression& x) {
     return TaylorExpression(x._domain,atan(x._model)); }
+
 
 
 inline Interval evaluate(const TaylorExpression& tv, const Vector<Interval>& x) {

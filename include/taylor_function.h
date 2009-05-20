@@ -51,18 +51,23 @@ TaylorFunction embed(const TaylorFunction& tv1, const Vector<Interval>& d2);
 TaylorFunction embed(const TaylorFunction& tv1, const Interval& d2);
 TaylorFunction embed(const Vector<Interval>& d1, const TaylorFunction& tv2);
 TaylorFunction restrict(const TaylorFunction&, const Vector<Interval>& bx);
+bool refines(const TaylorFunction&, const TaylorFunction&);
+bool disjoint(const TaylorFunction&, const TaylorFunction&);
+TaylorFunction intersection(const TaylorFunction&, const TaylorFunction&);
 TaylorExpression compose(const ExpressionInterface&, const TaylorFunction&);
 TaylorExpression compose(const TaylorExpression&, const TaylorFunction&);
 TaylorFunction compose(const TaylorFunction&, const TaylorFunction&);
 TaylorFunction compose(const FunctionInterface&, const TaylorFunction&);
 TaylorFunction antiderivative(const TaylorFunction&, uint);
 TaylorFunction implicit(const TaylorFunction&);
-TaylorFunction flow(const TaylorFunction& vf, const Vector<Interval>& d, const Interval& t, uint o);
+TaylorFunction flow(const TaylorFunction& vf, const Vector<Interval>& d, const Interval& h, uint o);
+TaylorFunction flow(const TaylorFunction& vf, const Vector<Interval>& d, const Float& h, uint o);
 
 TaylorExpression unchecked_compose(const TaylorExpression&, const TaylorFunction&);
 TaylorFunction unchecked_compose(const TaylorFunction&, const TaylorFunction&);
 TaylorFunction unchecked_implicit(const TaylorFunction&);
-TaylorFunction unchecked_flow(const TaylorFunction& vf, const Vector<Interval>& d, const Interval& t, uint o);
+TaylorFunction unchecked_flow(const TaylorFunction& vf, const Vector<Interval>& d, const Interval& h, uint o);
+TaylorFunction unchecked_flow(const TaylorFunction& vf, const Vector<Interval>& d, const Float& h, uint o);
 
 
 
@@ -234,6 +239,8 @@ class TaylorFunction {
     //! \brief Compute the function \f$(f\oplus g)(x,y)=(f(x),g(y))\f$.
     friend TaylorFunction combine(const TaylorFunction& f, const TaylorFunction& g);
     friend TaylorFunction combine(const TaylorFunction& f, const TaylorExpression& g);
+    friend TaylorFunction combine(const TaylorExpression& f, const TaylorFunction& g);
+    friend TaylorFunction combine(const TaylorExpression& f, const TaylorExpression& g);
     //! \brief Restrict the function \a f to a subdomain \a d.
     friend TaylorFunction restrict(const TaylorFunction& f, const Vector<Interval>& d);
     //! \brief Tests if a function \a f refines another function \a g.
@@ -260,6 +267,8 @@ TaylorFunction join(const TaylorFunction& f, const TaylorExpression& g);
 TaylorFunction join(const TaylorExpression& f, const TaylorExpression& g);
 TaylorFunction combine(const TaylorFunction& f, const TaylorFunction& g);
 TaylorFunction combine(const TaylorFunction& f, const TaylorExpression& g);
+TaylorFunction combine(const TaylorExpression& f, const TaylorFunction& g);
+TaylorFunction combine(const TaylorExpression& f, const TaylorExpression& g);
 
 std::ostream& operator<<(std::ostream&, const TaylorFunction&);
 

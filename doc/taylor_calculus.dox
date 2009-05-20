@@ -21,7 +21,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-/*! 
+/*!
  * \file taylor_calculus.dox
  * \brief Documentation Ariadne's Taylor calculus
  */
@@ -85,7 +85,7 @@ As well as matrix and vector arithmetic, %Ariadne provides a \c solve routine fo
 
 \section python_tutorial_functional_calculus Functional Calculus
 
-%Ariadne supports nonlinear functions by means of two abstract classes, the ExpressionInterface for scalar functions \f$f:\R^m\rightarrow\R\f$ and the FunctionInterface for functions \f$f:\R^m\rightarrow\R^n\f$. These interfaces cannot be directly manipulated. Instead, they can be converted to numerical TaylorExpression and TaylorFunction types which can then be worked with. 
+%Ariadne supports nonlinear functions by means of two abstract classes, the ExpressionInterface for scalar functions \f$f:\R^m\rightarrow\R\f$ and the FunctionInterface for functions \f$f:\R^m\rightarrow\R^n\f$. These interfaces cannot be directly manipulated. Instead, they can be converted to numerical TaylorExpression and TaylorFunction types which can then be worked with.
 
 \subsection taylor_calculus_nonlinear User-Defined Functions
 
@@ -98,7 +98,7 @@ The UserExpression and UserFunction allow the creation of user-defined %Ariadne 
 
 \dontinclude examples/tutorial.py
 
-The PolynomialExpression and PolynomialFunction classes provide concrete implementations of the function calculus. 
+The PolynomialExpression and PolynomialFunction classes provide concrete implementations of the function calculus.
 
 A PolynomialExpression represents a scalar polynomial function in multiple variables, with coefficients represented by intervals to take into account roundoff error. A polynomial expression can be created by using the PolynomialExpression.variable(n,j), which creates the polynomial \f$p(x)=x_j\f$ for \f$x\in\R^n\f$:
 
@@ -126,15 +126,15 @@ The core type is a TaylorExpression, which is a polynomial representation \a p o
 
 Rather than represent a Taylor expression by the polynomial \a p itself, we use a scaled model \a m such that
 \f[ m(\xi) = p(s(\xi)) \f]
-where 
-\f[ s:[-1,+1]^n \rightarrow [a_1,b_1]\times\cdots\times[a_n,b_n] = D\f] 
+where
+\f[ s:[-1,+1]^n \rightarrow [a_1,b_1]\times\cdots\times[a_n,b_n] = D\f]
 is the scaling function given by
 \f[ s_i(\xi) = \frac{a_i+b_i}{2} + \frac{b_i-a_i}{2} \xi_i . \f]
 The use of the scaled model \a m gives better accuracy over the domain of the expression.
 
 \sa \ref function_models_page
 
-\subsection taylor_calculus_creating 
+\subsection taylor_calculus_creating
 
 The simplest way to create a Taylor expression is to use the named constructor variable(D,j), which constructs a Taylor expression for the function \f$f(x)=x_j\f$ on the domain \f$D\f$:
 
@@ -156,17 +156,15 @@ A Taylor expression can also be constructed as an approximations to any object s
 \skipline =TaylorExpression
 
 
-The following functions are available to inspect the Taylor expression. 
+The following functions are available to inspect the Taylor expression.
 The domain() function returns the domain of validity \a D.
 The codomain() returns the over-approximation to the image of the domain given by
-\f[ c_0 \pm \left(\textstyle\sum_{|\alpha|\neq0} |c_\alpha| + e \right) . \f] 
+\f[ c_0 \pm \left(\textstyle\sum_{|\alpha|\neq0} |c_\alpha| + e \right) . \f]
 The range() also gives an over-approximation to the image of the domain, but may be more accurate (and slower).
-The model() function gives the underlying scaled function model \a m.
 The polynomial() function gives an interval polynomial representation of the function which is only valid on the domain.
 \skipline .domain
 \skipline .codomain
 \skipline .range
-\skipline .model
 \skipline .polynomial
 
 \subsection taylor_calculus_arithmetic Arithmetical Operators
@@ -191,7 +189,7 @@ abs(x) returns x if is (provably) positive on the entire domain, -x if x is (pro
 
 \skipline min
 
-The standard %Ariadne arithmetical functions \c neg, \c rec, \c sqr and \c pow are provided. 
+The standard %Ariadne arithmetical functions \c neg, \c rec, \c sqr and \c pow are provided.
 The \c rec function throws a DivideByZeroException if zero lies in the codomain of \a x, as does \c pow(x,n) for negative \a n.
 
 \skipline neg
@@ -217,9 +215,9 @@ We can combine TaylorExpression objects into TaylorFunction objects using the \c
 
 \subsection taylor_calculus_composition Composition
 
-The main use of the Taylor calculus is to perform composition of functions and solution of equations. 
+The main use of the Taylor calculus is to perform composition of functions and solution of equations.
 
-We can compose TaylorFunction objects \f$f\f$ and \f$g\f$ to obtain the function \f$f\circ g\f$.
+We can compose TaylorFunction objects \f$f\f$ and \f$h\f$ to obtain the function \f$f\circ h\f$.
 
 \skipline compose
 
@@ -234,7 +232,7 @@ We can also compose Expression interface objects and FunctionInterface objects.
 
 \subsection taylor_calculus_algebraic Solving Algebraic Equations
 
-We can use Taylor functions to solve parameterised algebraic equations using the operator \c implicit. 
+We can use Taylor functions to solve parameterised algebraic equations using the operator \c implicit.
 If \f$f:D_1\times D_2\rightarrow \R^n\f$ with \f$D_2\subset\R^n\f$ then the operator \c implicit(f) attempts to compute a function \a h such that \f$f(x,h(x))=0\f$ for \f$x\in D_m\f$. The function \f$h\f$ must satisfy \f$h(D_1)\subset D_2\f$.
 
 \skipline implicit
@@ -258,12 +256,9 @@ If a derivative with respect to more than one variable is requires, the form \c 
 
 Given a function \f$f:B\rightarrow\R^n\f$, a domain \a D which is a subset of \a B and a time step \a h, a function \f$\phi:D\times[-h,+h]\rightarrow B\f$ satisfying \f$\frac{d}{dt}\phi(x,t) = f(\phi(x,t))\f$ and \f$\phi(x,0)=x\f$ can be computed using the \c flow operator:
 
-
-\skipline flow
-
 If \f$f\f$ is a Taylor function, then the domain \a B is the domain of the function model, so the flow can be computed using:
 
-\skipline flow
+\skipline flow(
 
 \subsection taylor_calculus_comparisons Comparisons
 
@@ -276,13 +271,18 @@ If \f$f_1(x)=p_1(x)+e_1\f$ and \f$f_2(x)=p_2(x)+e_2\f$, then \c intersect(f_1,f_
 
 
 \skipline refines
-\skipline subset
-\skipline intersect
+\skipline disjoint
+\skipline intersection
+
 
 \subsection taylor_calculus_contractors Contractors
 
+We can use a variant of the interval Newton method to improve solutions to algebraic equations.
+
 \skipline Newton
 \until derivative
+
+We can use Picard iteration to improve solutions to differential equations.
 
 \skipline Picard
 \until antiderivative

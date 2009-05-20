@@ -99,6 +99,8 @@ class Matrix
     const X& get(size_t i, size_t j) const { return (*this)[i][j]; }
     //! \brief Set the value stored in the \a i<sup>th</sup> row and \a j<sup>th</sup> column to \a x.
     template<class T> void set(size_t i, size_t j, const T& x) { (*this)[i][j] = x; }
+    //! \brief A pointer to the first element of the data storage.
+    const X* begin() const { return &this->operator()(0,0); }
 
 #ifdef DOXYGEN
     //! \brief C-style subscripting operator.

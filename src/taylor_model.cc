@@ -2328,6 +2328,14 @@ Vector<TaylorModel> combine(const Vector<TaylorModel>& x1, const TaylorModel& x2
     return join(embed(x1,x2.argument_size()),embed(x1[0].argument_size(),x2));
 }
 
+Vector<TaylorModel> combine(const TaylorModel& x1, const Vector<TaylorModel>& x2) {
+    return join(embed(x1,x2[0].argument_size()),embed(x1.argument_size(),x2));
+}
+
+Vector<TaylorModel> combine(const TaylorModel& x1, const TaylorModel& x2) {
+    return join(embed(x1,x2.argument_size()),embed(x1.argument_size(),x2));
+}
+
 bool
 refines(const Vector<TaylorModel>& tv1, const Vector<TaylorModel>& tv2)
 {

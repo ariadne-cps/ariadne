@@ -95,13 +95,13 @@ template<uint RS, uint AS, uint PS=0u, uint SM=255u>
 class FunctionData
 {
   public:
-    //! 
+    //!
     static const uint result_size() { return RS; }
-    //! 
+    //!
     static const uint argument_size() { return AS; }
-    //! 
+    //!
     static const uint parameter_size() { return PS; }
-    //! 
+    //!
     static const uint smoothness() { return SM; }
 };
 
@@ -357,6 +357,8 @@ class PolynomialExpression
     PolynomialExpression(const Polynomial<Interval>& p) : Polynomial<Interval>(p) { }
     PolynomialExpression& operator=(const Polynomial<Interval>& p) { this->Polynomial<Interval>::operator=(p); return *this; }
 
+    static PolynomialExpression variable(uint n, uint j) {
+        return Polynomial<Interval>::variable(n,j); }
 
     virtual PolynomialExpression* clone() const { return new PolynomialExpression(*this); }
 
@@ -380,7 +382,7 @@ class PolynomialExpression
         for(uint i=0; i!=g.size(); ++i) { g[i]=derivative(*this,i); }
         return g; }
 
-    virtual std::ostream& write(std::ostream& os) const { return os << *this; }
+    virtual std::ostream& write(std::ostream& os) const { return os << static_cast<Polynomial<Interval>const&>(*this); }
 };
 
 
@@ -391,16 +393,16 @@ class ConstantFunction
     : public FunctionTemplate<ConstantFunction>
 {
   public:
-    ConstantFunction(uint rs, double c0, ...) : _as(), _c(rs) { 
-        ARIADNE_ASSERT(rs>0); va_list args; va_start(args,c0); 
-        _c[0]=c0; for(size_t i=1; i!=rs; ++i) { _c[i]=va_arg(args,double); } _as=va_arg(args,int); 
-        va_end(args); 
+    ConstantFunction(uint rs, double c0, ...) : _as(), _c(rs) {
+        ARIADNE_ASSERT(rs>0); va_list args; va_start(args,c0);
+        _c[0]=c0; for(size_t i=1; i!=rs; ++i) { _c[i]=va_arg(args,double); } _as=va_arg(args,int);
+        va_end(args);
     }
 
-    ConstantFunction(uint rs, Interval c0, ...) : _as(), _c(rs) { 
-        ARIADNE_ASSERT(rs>0); double l,u; va_list args; va_start(args,c0); 
-        _c[0]=c0; for(size_t i=1; i!=rs; ++i) { l=va_arg(args,double); u=va_arg(args,double); _c[i]=Interval(l,u); } _as=va_arg(args,int); 
-        va_end(args); 
+    ConstantFunction(uint rs, Interval c0, ...) : _as(), _c(rs) {
+        ARIADNE_ASSERT(rs>0); double l,u; va_list args; va_start(args,c0);
+        _c[0]=c0; for(size_t i=1; i!=rs; ++i) { l=va_arg(args,double); u=va_arg(args,double); _c[i]=Interval(l,u); } _as=va_arg(args,int);
+        va_end(args);
     }
 
     ConstantFunction(const Vector<Float>& c, uint as) : _as(as), _c(c) { }
@@ -537,13 +539,13 @@ class AffineFunction
     AffineFunction(const Matrix<Interval>& A, const Vector<Interval>& b)
         : _fA(midpoint(A)), _fb(midpoint(b)), _iA(A), _ib(b) { ARIADNE_ASSERT(A.row_size()==b.size()); }
 
-    AffineFunction(uint rs, double b0, ...) : _fA(), _fb(rs) { 
-        ARIADNE_ASSERT(rs>0); 
-        va_list args; va_start(args,b0); 
-        _fb[0]=b0; for(size_t i=1; i!=rs; ++i) { _fb[i]=va_arg(args,double); } 
+    AffineFunction(uint rs, double b0, ...) : _fA(), _fb(rs) {
+        ARIADNE_ASSERT(rs>0);
+        va_list args; va_start(args,b0);
+        _fb[0]=b0; for(size_t i=1; i!=rs; ++i) { _fb[i]=va_arg(args,double); }
         uint as=va_arg(args,int); ARIADNE_ASSERT(as>0); _fA=Matrix<Float>(rs,as);
-        for(size_t i=0; i!=rs; ++i) { for(size_t j=0; i!=as; ++j) { _fA[i][j]=va_arg(args,double); } } 
-        va_end(args); 
+        for(size_t i=0; i!=rs; ++i) { for(size_t j=0; i!=as; ++j) { _fA[i][j]=va_arg(args,double); } }
+        va_end(args);
         _iA=Matrix<Interval>(_fA); _ib=Vector<Interval>(_fb);
     }
 
@@ -570,7 +572,7 @@ class AffineFunction
         for(uint i=1; i<x.size(); ++i) { ARIADNE_ASSERT(x[i].argument_size()==x[0].argument_size()); }
         Vector<TaylorModel> r(this->result_size(),x[0]*0.0);
         for(uint i=0; i!=r.size(); ++i) { r[i]=_ib[i]; for(uint j=0; j!=x.size(); ++j) { r[i]+=_iA[i][j]*x[j]; } }
-        return r; 
+        return r;
     }
     virtual Matrix<Float> jacobian(const Vector<Float>& x) const {
         return this->_fA; }

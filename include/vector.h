@@ -147,6 +147,10 @@ class Vector
     friend template<class X> Vector<X> join(const Vector<X>& v1, const Vector<X>& v2);
     //! \brief Join a vector and a scalar.
     friend template<class X> Vector<X> join(const Vector<X>& v1, const X& s2);
+    //! \brief Join a scalar and a vector.
+    friend template<class X> Vector<X> join(const X& s1, const Vector<X>& v2);
+    //! \brief Join two scalars.
+    friend template<class X> Vector<X> join(const X& s1, const X& s2);
 
     //! \brief Write to an output stream.
     friend template<class X> std::ostream& operator<<(std::ostream& os, const Vector<X>& v);
@@ -207,6 +211,16 @@ Vector<X> join(const Vector<X>& v1, const X& s2)
     Vector<X> r(n1+1);
     ublas::project(r,range(0,n1))=v1;
     r[n1]=s2;
+    return r;
+}
+
+template<class X>
+Vector<X> join(const X& s1, const Vector<X>& v2)
+{
+    size_t n2=v2.size();
+    Vector<X> r(1+n2);
+    r[0]=s1;
+    ublas::project(r,range(1,n2+1))=v2;
     return r;
 }
 

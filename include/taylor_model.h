@@ -129,6 +129,8 @@ Matrix<Interval> jacobian(const Vector<TaylorModel>& x, const Vector<Interval>& 
 bool refines(const Vector<TaylorModel>& x1, const Vector<TaylorModel>& x2);
 Vector<TaylorModel> combine(const Vector<TaylorModel>& x1, const Vector<TaylorModel>& x2);
 Vector<TaylorModel> combine(const Vector<TaylorModel>& x1, const TaylorModel& x2);
+Vector<TaylorModel> combine(const TaylorModel& x1, const Vector<TaylorModel>& x2);
+Vector<TaylorModel> combine(const TaylorModel& x1, const TaylorModel& x2);
 Vector<TaylorModel> compose(const Vector<TaylorModel>& f, const Vector<TaylorModel>& g);
 
 //Vector operations which cannot be computed componentwise

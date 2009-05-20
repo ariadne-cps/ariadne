@@ -144,6 +144,9 @@ void matrix_set_item(C& c, const I& i, const J& j, const X& x) { c[i][j]=x; }
 
 
 template<class R, class A>
+R __pos__(const A& a) { return static_cast<R>(a); }
+
+template<class R, class A>
 R __neg__(const A& a) { return static_cast<R>(-a); }
 
 template<class R, class A1, class A2>
@@ -160,6 +163,12 @@ R __div__(const A1& a1, const A2& a2) { return static_cast<R>(a1/a2); }
 
 template<class R, class A1, class A2>
 R __prod__(const A1& a1, const A2& a2) { return static_cast<R>(prod(a1,a2)); }
+
+template<class R, class A1, class A2>
+R __rsub__(const A1& a1, const A2& a2) { return static_cast<R>(a2-a1); }
+
+template<class R, class A1, class A2>
+R __rdiv__(const A1& a1, const A2& a2) { return static_cast<R>(a2/a1); }
 
 /*
 template<class R, class A, class T=A>

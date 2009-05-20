@@ -24,6 +24,7 @@
 #include "expression_interface.h"
 #include "function_interface.h"
 #include "polynomial.h"
+#include "function.h"
 #include "taylor_expression.h"
 #include "taylor_function.h"
 
@@ -78,6 +79,10 @@ template<class X>
 void read(Vector<X>& v, const boost::python::object& obj);
 
 
+void read(TaylorModel& t, const boost::python::object& obj) {
+    t=boost::python::extract<TaylorModel>(obj);
+}
+
 void read(TaylorModel& t, const boost::python::object& obj1, const boost::python::object& obj2) {
     std::map<MultiIndex,Float> m;
     Float e;
@@ -105,7 +110,7 @@ void read(TaylorExpression& te, const boost::python::object& obj);
 void read(TaylorExpression& te, const boost::python::tuple& tup) {
     if(len(tup)==1) {
         read(te,tup[0]);
-    }else if(len(tup)==3) {
+    } else if(len(tup)==3) {
         read(te,tup[0],tup[1],tup[2]);
     }
 }
@@ -154,18 +159,23 @@ std::string __tpoly_str__(const Polynomial<Interval>& pi) {
     std::stringstream ss;
     bool first=true;
     Float r;
-    if(pi.expansion().size()==0) { r=0.0; } else { r=radius(pi.begin()->data()); }
-    for(Polynomial<Interval>::const_iterator iter=pi.begin(); iter!=pi.end(); ++iter) {
-        MultiIndex a=iter->key();
-        Float v=midpoint(iter->data());
-        if(abs(v)<1e-15) { r+=abs(v); v=0; }
-        if(v!=0) {
-            if(v>0 && !first) { ss<<"+"; }
-            first=false;
-            if(v<0) { ss<<"-"; }
-            if(abs(v)!=1) { ss<<abs(v); }
-            for(uint j=0; j!=a.size(); ++j) {
-                if(a[j]!=0) { ss<<"x"<<j; if(a[j]!=1) { ss<<"^"<<int(a[j]); } }
+    if(pi.expansion().size()==0) {
+        r=0.0;
+        ss << "0";
+    } else {
+        r=radius(pi.begin()->data());
+        for(Polynomial<Interval>::const_iterator iter=pi.begin(); iter!=pi.end(); ++iter) {
+            MultiIndex a=iter->key();
+            Float v=midpoint(iter->data());
+            if(abs(v)<1e-15) { r+=abs(v); v=0; }
+            if(v!=0) {
+                if(v>0 && !first) { ss<<"+"; }
+                first=false;
+                if(v<0) { ss<<"-"; }
+                if(abs(v)!=1) { ss<<abs(v); }
+                for(uint j=0; j!=a.size(); ++j) {
+                    if(a[j]!=0) { ss<<"x"<<j; if(a[j]!=1) { ss<<"^"<<int(a[j]); } }
+                }
             }
         }
     }
@@ -231,6 +241,10 @@ TaylorExpression sin(const TaylorExpression&);
 TaylorExpression cos(const TaylorExpression&);
 TaylorExpression tan(const TaylorExpression&);
 
+PolynomialExpression polynomial(const TaylorExpression& te) {
+    return te.polynomial();
+}
+
 } // namespace Ariadne
 
 
@@ -248,12 +262,14 @@ void export_taylor_variable()
     typedef TaylorFunction TF;
     typedef Polynomial<Float> RP;
     typedef Polynomial<Interval> IP;
+    typedef ExpressionInterface EI;
 
     class_<TE> taylor_expression_class("TaylorExpression");
     taylor_expression_class.def("__init__", make_constructor(&make<TE>) );
     taylor_expression_class.def("__init__", make_constructor(&make3<TE>) );
     taylor_expression_class.def( init< IV >());
     taylor_expression_class.def( init< IV, RP >());
+    taylor_expression_class.def( init< IV, const EI& >());
     taylor_expression_class.def("error", (const R&(TE::*)()const) &TE::error, return_value_policy<copy_const_reference>());
     taylor_expression_class.def("argument_size", &TE::argument_size);
     taylor_expression_class.def("domain", &TE::domain, return_value_policy<copy_const_reference>());
@@ -320,7 +336,7 @@ void export_taylor_variable()
     taylor_expression_class.def("__call__", (Interval(TE::*)(const Vector<Interval>&)const) &TE::evaluate);
     taylor_expression_class.def("evaluate", (Interval(TE::*)(const Vector<Float>&)const) &TE::evaluate);
     taylor_expression_class.def("evaluate", (Interval(TE::*)(const Vector<Interval>&)const) &TE::evaluate);
-    taylor_expression_class.def("polynomial", (Polynomial<Interval>(TE::*)()const) &TE::polynomial);
+    taylor_expression_class.def("polynomial", (PolynomialExpression(*)(const TE&)) &polynomial);
     //taylor_expression_class.staticmethod("set_default_maximum_degree");
     //taylor_expression_class.staticmethod("set_default_sweep_threshold");
     //taylor_expression_class.staticmethod("default_maximum_degree");
@@ -330,6 +346,7 @@ void export_taylor_variable()
 
 
     taylor_expression_class.def("constant",(TE(*)(const IV&, const R&))&TE::constant);
+    taylor_expression_class.def("constant",(TE(*)(const IV&, const I&))&TE::constant);
     taylor_expression_class.def("variable",(TE(*)(const IV&, uint))&TE::variable);
     //taylor_expression_class.def("variables",(TF(*)(const IV&)) &TE::variables);
     taylor_expression_class.def("variables",&make_taylor_variables);
@@ -339,10 +356,15 @@ void export_taylor_variable()
     taylor_expression_class.staticmethod("variables");
 
     def("midpoint",(TE(*)(const TE&)) &midpoint);
-    def("refines",(bool(*)(const TE&,const TE&)) &refines);
     def("evaluate",(I(*)(const TE&,const IV&)) &evaluate);
     def("derivative",(TE(*)(const TE&,N)) &derivative);
     def("antiderivative",(TE(*)(const TE&,N)) &antiderivative);
+
+    def("refines",(bool(*)(const TE&,const TE&)) &refines);
+    def("disjoint",(bool(*)(const TE&,const TE&)) &disjoint);
+    def("intersection",(TE(*)(const TE&,const TE&)) &intersection);
+
+    def("restrict",(TE(*)(const TE&,const IV&)) &restrict);
 
     def("embed",(TE(*)(const TE&,const Interval&)) &embed);
     def("embed",(TE(*)(const TE&,const IV&)) &embed);
@@ -455,10 +477,16 @@ void export_taylor_function()
     taylor_function_class.staticmethod("constant");
     taylor_function_class.staticmethod("identity");
 
+    def("refines", (bool(*)(const TF&,const TF&)) &refines);
+    def("disjoint", (bool(*)(const TF&,const TF&)) &disjoint);
+    def("intersection", (TF(*)(const TF&,const TF&)) &intersection);
+
     def("join", (TF(*)(const TF&,const TF&)) &join);
     def("join", (TF(*)(const TF&,const TE&)) &join);
     def("join", (TF(*)(const TE&,const TE&)) &join);
 
+    def("combine", (TF(*)(const TE&,const TE&)) &combine);
+    def("combine", (TF(*)(const TE&,const TF&)) &combine);
     def("combine", (TF(*)(const TF&,const TE&)) &combine);
     def("combine", (TF(*)(const TF&,const TF&)) &combine);
 
@@ -477,10 +505,12 @@ void export_taylor_function()
     def("implicit",(TF(*)(const TF&)) &implicit);
     def("antiderivative",(TF(*)(const TF&,N)) &antiderivative);
     def("flow",(TF(*)(const TF&,const IV&,const I&, N)) &flow);
+    def("flow",(TF(*)(const TF&,const IV&,const R&, N)) &flow);
 
     def("unchecked_compose",(TE(*)(const TE&,const TF&)) &unchecked_compose);
     def("unchecked_compose",(TF(*)(const TF&,const TF&)) &unchecked_compose);
     def("unchecked_flow",(TF(*)(const TF&,const IV&,const I&, N)) &unchecked_flow);
+    def("unchecked_flow",(TF(*)(const TF&,const IV&,const R&, N)) &unchecked_flow);
 
 
 

@@ -381,6 +381,18 @@ join(const TaylorExpression& f1, const TaylorExpression& f2)
 }
 
 TaylorFunction
+combine(const TaylorExpression& f1, const TaylorExpression& f2)
+{
+    return TaylorFunction(join(f1.domain(),f2.domain()),combine(f1.model(),f2.model()));
+}
+
+TaylorFunction
+combine(const TaylorExpression& f1, const TaylorFunction& f2)
+{
+    return TaylorFunction(join(f1.domain(),f2.domain()),combine(f1.model(),f2.models()));
+}
+
+TaylorFunction
 combine(const TaylorFunction& f1, const TaylorExpression& f2)
 {
     return TaylorFunction(join(f1.domain(),f2.domain()),combine(f1.models(),f2.model()));
@@ -422,7 +434,33 @@ restrict(const TaylorFunction& f, const Vector<Interval>& d)
     return r;
 }
 
+bool
+refines(const TaylorFunction& f1, const TaylorFunction& f2) {
+    ARIADNE_ASSERT(f1.result_size()==f2.result_size());
+    for(uint i=0; i!=f1.result_size(); ++i) {
+        if(!refines(f1[i],f2[i])) { return false; }
+    }
+    return true;
+}
 
+bool
+disjoint(const TaylorFunction& f1, const TaylorFunction& f2) {
+    ARIADNE_ASSERT(f1.result_size()==f2.result_size());
+    for(uint i=0; i!=f1.result_size(); ++i) {
+        if(disjoint(f1[i],f2[i])) { return true; }
+    }
+    return false;
+}
+
+TaylorFunction
+intersection(const TaylorFunction& f1, const TaylorFunction& f2) {
+    ARIADNE_ASSERT(f1.result_size()==f2.result_size());
+    TaylorFunction r(f1.result_size());
+    for(uint i=0; i!=r.result_size(); ++i) {
+        r[i]=intersection(f1[i],f2[i]);
+    }
+    return r;
+}
 
 TaylorFunction&
 operator+=(TaylorFunction& f, const TaylorFunction& g)
@@ -624,6 +662,18 @@ implicit(const TaylorFunction& f)
 }
 
 TaylorFunction
+flow(const TaylorFunction& vf, const Vector<Interval>& d, const Float& h, const uint o)
+{
+    return flow(vf,d,Interval(-h,+h),o);
+}
+
+TaylorFunction
+unchecked_flow(const TaylorFunction& vf, const Vector<Interval>& d, const Float& h, const uint o)
+{
+    return unchecked_flow(vf,d,Interval(-h,+h),o);
+}
+
+TaylorFunction
 flow(const TaylorFunction& vf, const Vector<Interval>& d, const Interval& h, const uint o)
 {
     ARIADNE_ASSERT(subset(d,vf.domain()));
@@ -682,12 +732,6 @@ unchecked_flow(const TaylorFunction& vf, const Vector<Interval>& d, const Interv
 
 
 
-
-bool
-refines(const TaylorFunction& f, const TaylorFunction& g)
-{
-    return refines(f.models(),g.models());
-}
 
 
 

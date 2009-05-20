@@ -67,16 +67,6 @@ class TestHybridEvolution
     void test_affine_system() const;
 };
 
-int main(int argc, const char* argv[])
-{
-    if(argc>=1) { evolver_verbosity=atoi(argv[0]); }
-    
-    //std::cerr<<"SKIPPED "; return 1;
-    TestHybridEvolution().test();
-    std::cerr<<"INCOMPLETE ";
-    return ARIADNE_TEST_FAILURES;
-}
-
 HybridAutomaton
 TestHybridEvolution::system()
 {
@@ -296,3 +286,88 @@ void TestHybridEvolution::test() const
     ARIADNE_TEST_CALL(test_bouncing_ball());
     //ARIADNE_TEST_CALL(test_affine_system());
 }
+
+
+
+
+
+// Test the HybridEvolver class on two-dimensional examples with simple flows and resets
+class TestHybridEvolver
+{
+  private:
+    DiscreteState q1,q2;
+    DiscreteEvent e;
+    HybridEvolver evolver;
+    PolynomialExpression z,o,x,y;
+    PolynomialExpression x0,y0,t;
+  public:
+    TestHybridEvolver();
+    HybridAutomaton make_hybrid_automaton(const PolynomialExpression& guard);
+
+    void test();
+    void test_transverse_crossing();
+
+};
+
+TestHybridEvolver::TestHybridEvolver()
+    : evolver()
+{
+    // Set up convenience variables
+    q1=DiscreteState(1);
+    q2=DiscreteState(2);
+    e=DiscreteEvent(3);
+
+    z=PolynomialExpression::constant(2,0.0);
+    o=PolynomialExpression::constant(2,1.0);
+    x=PolynomialExpression::variable(2,0);
+    y=PolynomialExpression::variable(2,1);
+    x0=PolynomialExpression::variable(3,0);
+    y0=PolynomialExpression::variable(3,1);
+    t=PolynomialExpression::variable(3,2);
+}
+
+HybridAutomaton TestHybridEvolver::make_hybrid_automaton(const PolynomialExpression& guard)
+{
+    HybridAutomaton system;
+    system.new_mode(q1,PolynomialFunction(join(o,z)));
+    system.new_mode(q2,PolynomialFunction(join(z,o)));
+    system.new_transition(e,q1,q2,IdentityFunction(2),PolynomialFunction(guard),true);
+    return system;
+}
+
+void TestHybridEvolver::test_transverse_crossing()
+{
+    Float r=1.0/8;
+    PolynomialExpression guard=2*x+y-2;
+    HybridAutomaton system=make_hybrid_automaton(guard);
+    Box initial_box(2, -r,+r, -r,+r);
+    HybridTaylorSet initial_set(q1,initial_box);
+    HybridTime evolution_time(2.0,3);
+
+    ListSet<HybridTaylorSet> evolved_set=evolver.evolve(system,initial_set,evolution_time,UPPER_SEMANTICS);
+    std::cerr<<evolved_set<<"\n\n";
+
+    PolynomialFunction f=join(1.0-0.5*y,1.0+1.0*x+1.5*y);
+    Vector<Interval> error(2,Interval(-1e-5,1e-5));
+    std::cerr<<f<<"\n";
+    TaylorSet expected_evolved_set(f,initial_box);
+    std::cerr<<expected_evolved_set<<"\n";
+    ARIADNE_TEST_BINARY_PREDICATE(refines,evolved_set[q2][0].models(),expected_evolved_set.models()+error);
+}
+
+void TestHybridEvolver::test() {
+    ARIADNE_TEST_CALL(test_transverse_crossing());
+}
+
+
+int main(int argc, const char* argv[])
+{
+    if(argc>=1) { evolver_verbosity=atoi(argv[0]); }
+
+    //std::cerr<<"SKIPPED "; return 1;
+    TestHybridEvolution().test();
+    TestHybridEvolver().test();
+    std::cerr<<"INCOMPLETE ";
+    return ARIADNE_TEST_FAILURES;
+}
+

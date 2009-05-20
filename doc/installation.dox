@@ -104,10 +104,17 @@ These defaults can be changed by using the --prefix flag to ./configure, as in
   ./configure --prefix=$HOME
 \endcode
 
+<!--> 
 By default, the C++ library is compiled with support for double-precision floating-point numbers (64 bit). The flags \c --enable-mp can be used to enable support for multiple-precision floating-point numbers.
 For example, to configure with multiple-precision floating-point support enabled, use
 \code
   ./configure --enable-mp
+\endcode
+</!--> 
+
+To compile with debugging support, use
+\code
+  ./configure CXXFLAGS='-g -O0'
 \endcode
 
 \section svninstallation Installation from the Subversion repository

@@ -1,5 +1,7 @@
+AM_CXXFLAGS = -Wall
+
 INCLUDES = -I$(top_srcdir)/include
-LIBS +=  $(CAIRO_LIBS) $(GTK_LIBS)
+LIBS +=  $(BOOST_LIBS) $(CAIRO_LIBS) $(GTK_LIBS)
 LDADD = ../src/libariadne.la $(LIBS)
 
 bin_PROGRAMS=tutorial \

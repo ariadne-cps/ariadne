@@ -2,7 +2,7 @@ SUBDIRS = include src test wrap examples
 
 EXTRA_DIST = Doxyfile
 
-CXXFLAGS += -Wall
+AM_CXXFLAGS = -Wall
 
 .PHONY: shiny doc all lib wrap examples profiles check-lib check-python
 

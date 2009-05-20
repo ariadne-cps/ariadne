@@ -1,5 +1,6 @@
+AM_CXXFLAGS = -Wall -fpic
 AM_LDFLAGS = -module
-CXX_FLAGS = -Wall -O2 -fpic
+
 INCLUDES = -I$(top_srcdir)/include $(PYTHON_INCLUDES)
 LIBS += $(BOOST_PYTHON_LIB) $(PYTHON_LIB) $(CAIRO_LIBS) $(GTK_LIBS)
 

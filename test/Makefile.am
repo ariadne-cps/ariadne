@@ -7,6 +7,7 @@ profile-lib: $(bin_PROGRAMS)
 TESTS_ENVIRONMENT = ./run_test.sh
 PROFILES_ENVIRONMENT = ./run_profile.sh
 
+AM_CXXFLAGS = -Wall
 
 INCLUDES = -I$(top_srcdir)/include $(CAIRO_CFLAGS) $(GTK_CFLAGS)
 LIBS += $(CAIRO_LIBS) $(GTK_LIBS)

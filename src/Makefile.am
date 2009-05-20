@@ -4,8 +4,10 @@ phony: lib
 
 lib: libariadne.la libcalculus.la
 
+AM_CXXFLAGS = -Wall
+
 INCLUDES = -I$(top_srcdir)/include $(CAIRO_CFLAGS) $(GTK_CFLAGS)
-LIBS +=  $(CAIRO_LIBS) $(GTK_LIBS)
+LIBS =  $(CAIRO_LIBS) $(GTK_LIBS)
 LDADD =  $(LIBS)
 
 SRC = \

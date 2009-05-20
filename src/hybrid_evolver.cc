@@ -854,7 +854,7 @@ compute_activation_times(std::map<DiscreteEvent,tuple<TimeModelType,TimeModelTyp
                     case LOWER_SEMANTICS: lower_active_time_model=upper_crossing_time_model; break;
                 }
             } else if(definitely(initially_active)) {
-                lower_active_time_model=0.0;
+                lower_active_time_model=zero_time_model;
             } else {
                 switch(semantics) {
                     case UPPER_SEMANTICS: lower_active_time_model=zero_time_model; break;

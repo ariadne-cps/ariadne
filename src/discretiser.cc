@@ -217,7 +217,9 @@ evolve(const SystemType& system,
              const AccuracyType accuracy,
              const Semantics semantics) const
 {
-    return this->_discretise(this->_evolver->evolve(system,this->_enclosure(initial_set),time,semantics),initial_set,grid,accuracy);
+    EnclosureType initial_enclosure=this->_enclosure(initial_set);
+    ListSet<EnclosureType> final_enclosures=this->_evolver->evolve(system,initial_enclosure,time,semantics);
+    return this->_discretise(final_enclosures,initial_set,grid,accuracy);
 }
 
 template<class ES>

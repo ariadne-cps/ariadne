@@ -176,7 +176,10 @@ lower_evolve(const SystemType& system,
     ARIADNE_LOG(3,"computing lower evolution.");
     for(GTS::const_iterator bs_iter=initial.begin(); bs_iter!=initial.end(); ++bs_iter) {
         ARIADNE_LOG(3,".");
-        final.adjoin(this->_discretiser->evolve(system,*bs_iter,time,this->_grid(system.state_space()),grid_depth,LOWER_SEMANTICS));
+        GC cell=*bs_iter;
+        Gr grid=this->_grid(system.state_space());
+        GTS cell_final=this->_discretiser->evolve(system,cell,time,grid,grid_depth,LOWER_SEMANTICS);
+        final.adjoin(cell_final);
     }
     ARIADNE_LOG(3,"\n");
     return &final;
@@ -202,7 +205,10 @@ lower_reach(const SystemType& system,
     ARIADNE_LOG(3,"Computing lower reach set..."); 
     for(GTS::const_iterator bs_iter=initial.begin(); bs_iter!=initial.end(); ++bs_iter) {
         ARIADNE_LOG(3,".");
-        reach.adjoin(this->_discretiser->reach(system,*bs_iter,time,this->_grid(system.state_space()),grid_depth,LOWER_SEMANTICS));
+        GC cell=*bs_iter;
+        Gr grid=this->_grid(system.state_space());
+        GTS cell_reach=this->_discretiser->reach(system,cell,time,grid,grid_depth,LOWER_SEMANTICS);
+        reach.adjoin(cell_reach);
     }
     ARIADNE_LOG(3,"\n");
     return &reach;

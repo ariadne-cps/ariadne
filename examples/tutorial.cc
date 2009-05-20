@@ -144,6 +144,7 @@ HybridAutomaton create_heating_system()
     heating_system.new_forced_transition(midnight,heater_on,heater_on,midnight_reset,midnight_guard);
     heating_system.new_forced_transition(midnight,heater_off,heater_off,midnight_reset,midnight_guard);
 
+    return heating_system;
 }
 
 HybridEvolver create_evolver()
@@ -155,6 +156,8 @@ HybridEvolver create_evolver()
     evolver.parameters().maximum_enclosure_radius = 0.25;
     evolver.parameters().maximum_step_size = 0.0625;
     cout <<  evolver.parameters() << endl;
+
+    return evolver;
 }
 
 
@@ -177,9 +180,11 @@ void compute_evolution(const HybridAutomaton& heating_system, const HybridEvolve
     HybridTime evolution_time(0.25,4);
   
     // Compute reachable and evolved sets
+    cout << "Computing evolved sets... " << flush;
     HybridEnclosureListType reach,evolve;
     make_lpair(reach,evolve)=evolver.reach_evolve(heating_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
-    
+    cout << "done." << endl;
+
     // Compute the orbit.
     cout << "Computing orbit... " << flush;
     OrbitType orbit = evolver.orbit(heating_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
@@ -285,7 +290,7 @@ void compute_reachable_sets_with_serialisation(const HybridAutomaton& heating_sy
 /*
 void plot_reachable_sets(const HybridAutomaton& system, const HybridReachabiltyAnalyser analyser)
 {
-    std::cerr << "Plotting results..."<<std::endl;
+    std::cout << "Plotting results..."<<std::endl;
 
     // Use main graphics facilities
     Figure g;
@@ -296,7 +301,6 @@ void plot_reachable_sets(const HybridAutomaton& system, const HybridReachabiltyA
     if(chain_reach_set_ptr) { g << *chain_reach_set_ptr; }
 
     g << fill_colour(Colour(1.0,0.0,1.0));
-    std::cerr<<*upper_reach_set_ptr<<std::endl;
     g << *upper_reach_set_ptr;
     g << fill_colour(Colour(0.0,1.0,1.0));
     g << *lower_reach_set_ptr;

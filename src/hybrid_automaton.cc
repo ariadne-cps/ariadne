@@ -27,6 +27,7 @@
 #include "stlio.h"
 #include "function_interface.h"
 #include "hybrid_time.h"
+#include "hybrid_set.h"
 #include "hybrid_automaton.h"
 #include "grid_set.h"
 
@@ -35,8 +36,6 @@ namespace Ariadne {
 typedef uint DimensionType;
 
 class HybridSet {};
-
-class HybridSpace : public std::map<DiscreteState,DimensionType> {};
 
 
 uint
@@ -484,6 +483,25 @@ HybridAutomaton::name() const
     return this->_name;
 }
 
+Grid
+HybridAutomaton::grid(DiscreteState location) const
+{
+    ARIADNE_ASSERT(this->has_mode(location));
+    const DiscreteMode& mode=this->mode(location);
+    return Grid(mode.dimension());
+}
+
+HybridGrid
+HybridAutomaton::grid() const
+{
+    HybridGrid result;
+    for(discrete_mode_const_iterator mode_iter=this->_modes.begin();
+        mode_iter!=this->_modes.end(); ++mode_iter)
+    {
+        result[mode_iter->location()]=Grid(mode_iter->dimension());
+    }
+    return result;
+}
 
 std::ostream&
 operator<<(std::ostream& os, const HybridAutomaton& ha)

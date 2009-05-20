@@ -156,7 +156,7 @@ class HybridSetConstIterator
 };
 
 
-//! A set comprising a %ListSet in each location.
+//! A set comprising an ImageSet in each location.
 class HybridImageSet
     : public std::map<DiscreteState,ImageSet>
     , public HybridLocatedSetInterface
@@ -204,6 +204,12 @@ class HybridImageSet
     virtual std::ostream& write(std::ostream& os) const { return os << "HybridImageSet(...)"; }
 };
 
+
+//! A set comprising a ConstraintSet in each location.
+class HybridConstraintSet
+    : public std::map<DiscreteState,ConstraintSet>
+{
+};
 
 //! A set comprising a %ListSet in each location.
 template<class ES>

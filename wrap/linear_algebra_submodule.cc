@@ -136,6 +136,11 @@ void __msetitem__(Matrix<X>& A, const boost::python::tuple& tup, const XX& x)
 
 
 template<class X0, class X1>
+Vector<X0> __vpos__(const Vector<X1>& v1) {
+    return +v1;
+}
+
+template<class X0, class X1>
 Vector<X0> __vneg__(const Vector<X1>& v1) {
     return -v1;
 }
@@ -165,6 +170,11 @@ Vector<X0> __vsdiv__(const Vector<X1>& v1, const X2& s2) {
     return v1/s2;
 }
 
+
+template<class X0, class X1>
+Matrix<X0> __mpos__(const Matrix<X1>& A1) {
+    return +A1;
+}
 
 template<class X0, class X1>
 Matrix<X0> __mneg__(const Matrix<X1>& A1) {
@@ -247,6 +257,8 @@ void export_vector_class(class_<Vector<X> >& vector_class)
     vector_class.def("__getslice__", &__vgetslice__<X>);
     vector_class.def("__neg__", &__vneg__<X,X>);
     vector_class.def("__repr__",&__cstr__<Vector<X> >);
+    vector_class.def("__pos__",__pos__< Vector<X>, Vector<X> >);
+    vector_class.def("__neg__",__neg__< Vector<X>, Vector<X> >);
     vector_class.def(boost::python::self_ns::str(self));
     vector_class.def("unit",&Vector<X>::unit);
     vector_class.staticmethod("unit");
@@ -327,6 +339,7 @@ void export_matrix_class(class_<Matrix<X> >& matrix_class)
     matrix_class.def("__setitem__", &__msetitem__<X,double>);
     matrix_class.def("__setitem__", &__msetitem__<X,X>);
     matrix_class.def("__getitem__", &__mgetitem__<X>);
+    matrix_class.def("__pos__", &__mpos__<X,X>);
     matrix_class.def("__neg__", &__mneg__<X,X>);
     //matrix_class.def("inverse", &inverse<X>);
     //matrix_class.def("determinant", &Matrix::determinant);

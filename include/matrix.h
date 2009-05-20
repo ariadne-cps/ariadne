@@ -127,6 +127,8 @@ class Matrix
     //! \brief The supremum norm of the matrix \a A, defined as \f$||A||_\infty=\max_i \sum_j |A_{ij}|\f$.
     friend template<class X> X norm(const Matrix<X>& A);
 
+     //! \brief %Matrix unary plus.
+    friend template<class X> Matrix<X> operator+(const Matrix<X>& A);
      //! \brief %Matrix negation.
     friend template<class X> Matrix<X> operator-(const Matrix<X>& A);
     //! \brief %Matrix addition.
@@ -267,6 +269,10 @@ template<class X> template<class XX> bool Matrix<X>::operator==(const Matrix<XX>
     return true;
 }
 
+template<class X> Matrix<X> operator+(const Matrix<X>& A)
+{
+    return A;
+}
 
 template<class X> X norm(const Matrix<X>& A)
 {

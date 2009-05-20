@@ -136,6 +136,7 @@ void export_interval()
     //typedef Interval (*INFUN)(const Interval&, unsigned int n);
 
     typedef Interval (*IFUN)(Interval);
+    typedef Interval (*IIFUN)(Interval,Interval);
     typedef Interval (*IZFUN)(Interval, int n);
     typedef Interval (*INFUN)(Interval, unsigned int n);
 
@@ -149,6 +150,7 @@ void export_interval()
     interval_class.def(init<Rational>());
     interval_class.def(init<Rational,Rational>());
 #endif
+    interval_class.def(+self);
     interval_class.def(-self);
     interval_class.def(self + self);
     interval_class.def(self - self);
@@ -180,6 +182,9 @@ void export_interval()
     def("med", (IFUN) &med);
     def("rad", (IFUN) &rad);
     def("diam", (IFUN) &diam);
+
+    def("max", (IIFUN) &max);
+    def("min", (IIFUN) &min);
 
     def("trunc", (INFUN) &trunc, "truncate to n binary digits");
     def("abs", (IFUN) &abs, "interval absolute value function");

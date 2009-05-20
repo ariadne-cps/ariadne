@@ -125,6 +125,8 @@ class Vector
     //! \brief Inequality operator.
     friend template<class X1, class X2> bool operator!=(const Vector<X1>& v1, const Vector<X2>& v2);
 
+     //! \brief %Vector unary plus.
+    friend template<class X> Vector<X> operator+(const Vector<X>& v);
      //! \brief %Vector negation.
     friend template<class X> Vector<X> operator-(const Vector<X>& v);
     //! \brief %Vector addition.
@@ -165,6 +167,12 @@ typedef ublas::range Range;
 inline Range range(uint start, uint stop) { return Range(start,stop); }
 inline Slice slice(uint size, uint start, uint stride) { return Slice(size,start,stride); }
 
+
+template<class X>
+Vector<X> operator+(const Vector<X>& v)
+{
+    return v;
+}
 
 template<class X>
 X sup_norm(const Vector<X>& v)

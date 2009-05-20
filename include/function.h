@@ -305,6 +305,13 @@ class AffineExpression
         _g[0]=g0; va_list args; va_start(args,g0);
         for(uint i=1; i!=as; ++i) { _g[i]=va_arg(args,double); } }
 
+    static AffineExpression constant(uint n, Float c) {
+        return AffineExpression(Vector<Float>(n),c); }
+    static AffineExpression constant(uint n, Interval c) {
+        return AffineExpression(Vector<Interval>(n),c); }
+    static AffineExpression variable(uint n, uint j) {
+        return AffineExpression(Vector<Interval>::unit(n,j),Interval(0.0)); }
+
     const Vector<Interval>& a() const { return _g; }
     const Interval& b() const { return _c; }
 
@@ -357,6 +364,10 @@ class PolynomialExpression
     PolynomialExpression(const Polynomial<Interval>& p) : Polynomial<Interval>(p) { }
     PolynomialExpression& operator=(const Polynomial<Interval>& p) { this->Polynomial<Interval>::operator=(p); return *this; }
 
+    static PolynomialExpression constant(uint n, Float c) {
+        return Polynomial<Interval>::constant(n,c); }
+    static PolynomialExpression constant(uint n, Interval c) {
+        return Polynomial<Interval>::constant(n,c); }
     static PolynomialExpression variable(uint n, uint j) {
         return Polynomial<Interval>::variable(n,j); }
 
@@ -598,6 +609,7 @@ class PolynomialFunction
   public:
     PolynomialFunction(const Vector< Polynomial<Float> >& p) : _p(p) { }
     PolynomialFunction(const Vector< Polynomial<Interval> >& p) : _p(p) { }
+    PolynomialFunction(const PolynomialExpression& p) : _p(1,p) { }
 
     template<class E> PolynomialFunction(const ublas::vector_expression<E>& p)
         : _p(static_cast< Vector< Polynomial<Interval> > >(p)) { }
@@ -632,7 +644,9 @@ class PolynomialFunction
     Vector< Polynomial<Interval> > _p;
 };
 
-
+inline PolynomialFunction join(const PolynomialExpression& p1, const PolynomialExpression& p2) {
+    return join(static_cast<const Polynomial<Interval>&>(p1),static_cast<const Polynomial<Interval>&>(p2));
+}
 
 class FunctionElement
     : public ExpressionInterface

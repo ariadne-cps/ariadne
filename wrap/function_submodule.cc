@@ -373,6 +373,11 @@ void export_affine_expression()
     typedef TaylorExpression TE;
 
     class_<AffineExpression, bases< ExpressionInterface > > affine_expression_class("AffineExpression", init<Vector<Float>, Float> ());
+    affine_expression_class.def("constant", (AE(*)(uint,double)) &AE::constant);
+    affine_expression_class.def("constant", (AE(*)(uint,Interval)) &AE::constant);
+    affine_expression_class.staticmethod("constant");
+    affine_expression_class.def("variable", (AE(*)(uint,uint)) &AE::variable);
+    affine_expression_class.staticmethod("variable");
     affine_expression_class.def("argument_size", &AffineExpression::argument_size);
     affine_expression_class.def("smoothness", &AffineExpression::smoothness);
     affine_expression_class.def("__call__",(F(AffineExpression::*)(const FV&)const)&AffineExpression::evaluate);
@@ -480,6 +485,7 @@ void export_polynomial_expression()
 
     class_< PE, bases<ExpressionInterface> > polynomial_expression_class("PolynomialExpression", init<int,int>());
     polynomial_expression_class.def("constant", (PE(*)(uint,double)) &PE::constant);
+    polynomial_expression_class.def("constant", (PE(*)(uint,Interval)) &PE::constant);
     polynomial_expression_class.staticmethod("constant");
     polynomial_expression_class.def("variable", (PE(*)(uint,uint)) &PE::variable);
     polynomial_expression_class.staticmethod("variable");

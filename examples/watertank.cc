@@ -141,22 +141,23 @@ int main()
 
     std::cout << "Computing evolution starting from location l2, x = 0.0, y = 1.0" << std::endl;
 
-    Box initial_box(2, 0.0,0.001, 0.0,0.001);
+    Box initial_box(2, 0.0,0.00, 0.0,0.00);
     HybridEnclosureType initial_enclosure(l1,initial_box);
     Box bounding_box(2, -0.1,9.1, -0.1,1.1);
   
-    HybridTime evolution_time(64.0,6);
+    HybridTime evolution_time(80.0,5);
   
     std::cout << "Computing orbit... " << std::flush;
     OrbitType orbit = evolver.orbit(watertank_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
 
-    std::cout << "Orbit="<<orbit<<std::endl;
+    std::cout << "Orbit.final size="<<orbit.final().size()<<std::endl;
     //plot("tutorial-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit.initial());
     std::cout << "Plotting orbit... "<<std::flush;
     plot("watertank-orbit",bounding_box, Colour(0.0,0.5,1.0), orbit);
     std::cout << "done." << std::endl;
 
+/*
     std::cout << "Computing reach set using HybridEvolver... " << std::flush;
     EnclosureListType reach = evolver.reach(watertank_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
     std::cout << "done." << std::endl;
@@ -218,6 +219,6 @@ int main()
     upper_reach_set_ptr = analyser.upper_reach(watertank_system,initial_set2,reach_time);
     std::cout << "done." << std::endl;
     plot("watertank-upper_reach2",bounding_box, Colour(0.0,0.5,1.0), *upper_reach_set_ptr);
-
+*/
 
 }

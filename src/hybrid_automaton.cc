@@ -201,7 +201,7 @@ new_transition(DiscreteEvent event,
                const FunctionInterface &activation,
                bool forced)
 {
-    ARIADNE_ASSERT(event>0);
+    ARIADNE_ASSERT_MSG(event>0, "Transition event should be positive.");
     DiscreteEvent event_id=event;
     DiscreteState source_id=source.location();
     DiscreteState target_id=target.location();
@@ -237,7 +237,7 @@ HybridAutomaton::new_transition(DiscreteEvent event,
                                 const FunctionInterface &activation,
                                 bool forced)
 {
-    ARIADNE_ASSERT(event>0);
+    ARIADNE_ASSERT_MSG(event>0, "Transition event should be positive.");
     if(this->has_transition(event,source)) {
         throw std::runtime_error("The automaton already has a transition with the given id and source id.");
     }
@@ -262,7 +262,7 @@ new_forced_transition(DiscreteEvent event,
                       const FunctionInterface &reset,
                       const FunctionInterface &activation)
 {
-    ARIADNE_ASSERT(event>0);
+    ARIADNE_ASSERT_MSG(event>0, "Transition event should be positive.");
     if(this->has_transition(event,source)) {
         throw std::runtime_error("The automaton already has a transition with the given id and source id.");
     }
@@ -288,7 +288,7 @@ new_unforced_transition(DiscreteEvent event,
                         const FunctionInterface &reset,
                         const FunctionInterface &activation)
 {
-    ARIADNE_ASSERT(event>0);
+    ARIADNE_ASSERT_MSG(event>0, "Transition event should be positive.");
     if(this->has_transition(event,source)) {
         throw std::runtime_error("The automaton already has a transition with the given id and source id.");
     }

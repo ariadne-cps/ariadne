@@ -53,8 +53,7 @@ int main()
     cout << "dynamic = " << dynamic << endl << endl;
 
     /// Create the resets
-    double bounce = 0.00; // Extra bounce from ground, needed to prevent zeno behaviour
-    AffineFunction reset(Matrix<Float>(2,2,1.0,0.0,0.0,-a),Vector<Float>(2,bounce,0.0));
+    AffineFunction reset(Matrix<Float>(2,2,1.0,0.0,0.0,-a),Vector<Float>(2,0.0,0.0));
     cout << "reset=" << reset << endl << endl;
 
     /// Create the guards.

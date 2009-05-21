@@ -38,7 +38,7 @@ int main()
     double Delta = 0.05;
     double hmax = 5.70;
     double tmax = 20.0;
-    double dmax = 5.0;
+    double dmax = 15.0;
     
     double A1[9]={a,b,0,
                   0,0,0,
@@ -157,6 +157,7 @@ int main()
     /// Set the evolution parameters
     evolver.parameters().maximum_enclosure_radius = 0.1;
     evolver.parameters().maximum_step_size = 0.1;
+    evolver.verbosity=1;
     std::cout <<  evolver.parameters() << std::endl;
 
     // Declare the type to be used for the system evolution

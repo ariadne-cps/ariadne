@@ -214,6 +214,9 @@ class TaylorCalculus
     //! \brief A model for the constant time \a t over the box \a d.
     TimeModelType time_model(const Interval& t, const BoxType& d) const;
 
+    //! \brief A model for the constant time \a t with argument size \a size.
+    TimeModelType time_model(const Float& t, uint size) const;
+
 
     //@{ \name Set-based operations
     //! \brief Compute a model for the given box \a bx.

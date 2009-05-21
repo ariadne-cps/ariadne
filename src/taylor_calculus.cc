@@ -695,6 +695,18 @@ time_model(const Interval& t,
     return time_model;
 }
 
+TaylorCalculus::TimeModelType
+TaylorCalculus::
+time_model(const Float& t,
+           uint size) const
+{
+    TimeModelType time_model=TimeModelType::constant(size,t);
+    time_model.set_accuracy(_spacial_accuracy_ptr);
+    ARIADNE_LOG(6,"time_model = "<<time_model<<"\n");
+
+    return time_model;
+}
+
 
 //! \brief A model for the set f\a bx.
 

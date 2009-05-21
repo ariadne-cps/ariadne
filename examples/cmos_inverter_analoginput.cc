@@ -178,8 +178,8 @@ int main()
 
     /// Constants
     float EVOL_TIME = 2.0/dp[10]; /// Evolution time
-    int EVOL_TRANS = 4; /// Evolution transitions
-    float MAX_ENCL_RADIUS = 0.005; /// Maximum enclosure radius
+    int EVOL_TRANS = 3; /// Evolution transitions
+    float MAX_ENCL_RADIUS = 5.0e-8; /// Maximum enclosure radius
     float MAX_STEP_SIZE = 0.005; /// Maximum step size
 
     // std::cout << "Enter Maximum number of discrete transitions:";
@@ -335,7 +335,7 @@ int main()
     /// Compute the system evolution
 
     /// Create a HybridEvolver object
-    StableHybridEvolver evolver;
+    HybridEvolver evolver;
     evolver.verbosity = 1;
 
     /// Set the evolution parameters

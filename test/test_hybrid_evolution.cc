@@ -385,9 +385,9 @@ void TestHybridEvolver::test_transverse_cubic_crossing()
 
 void TestHybridEvolver::test_transverse_cube_root_crossing()
 {
-    Float r=1.0/16;
+    Float r=1.0/32;
     Float tol=1e-5;
-    PolynomialExpression guard=((x-1)*(x-1)+1.0)*(x-1)-y;
+    PolynomialExpression guard=((x-1)*(x-1)+1.0)*(x-1)-y-1./64;
     HybridAutomaton system=make_hybrid_automaton(guard);
     Box initial_box(2, -r,+r, -r,+r);
     HybridTaylorSet initial_set(q1,initial_box);

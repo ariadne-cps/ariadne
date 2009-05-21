@@ -194,6 +194,14 @@ TestTaylorSet::test_split()
          Colour(0,0.8,1),ts5,
          Colour(0,0.9,1),ts6);
 
+    // Test split with an error term
+    ts=TaylorSet(2,2,2, 0.5,1.0,0.25,0.0,0.0,0.0, 2.5, 0.0,0.5,1.0,1.0,0.0,0.0, 1.0);
+    ARIADNE_TEST_EQUAL(ts.split().first,
+        TaylorSet(2,2,2, -0.75,1.0,0.25,0.0,0.0,0.0, 1.25, 0.0,0.5,1.0,1.0,0.0,0.0, 1.0));
+    ARIADNE_TEST_EQUAL(ts.split().second,
+        TaylorSet(2,2,2, 1.75,1.0,0.25,0.0,0.0,0.0, 1.25, 0.0,0.5,1.0,1.0,0.0,0.0, 1.0));
+    
+
 }
 
 void

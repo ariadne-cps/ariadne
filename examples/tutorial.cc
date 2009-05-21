@@ -97,16 +97,20 @@ HybridAutomaton create_heating_system()
     HybridAutomaton heating_system;
   
     // Set the system dynamic parameters
-    Float P=1.0;
+    Float P=4.0;
     Float k=1.0;
     Float Tav=16.0;
     Float Tamp=8.0;
     
     // Set the system control parameters
     Float Toff=22.0;
-    Float Ton_upper=16.0;
-    Float Ton_lower=15.0;
+    Float Ton_upper=15.125;
+    Float Ton_lower=14.875;
   
+    // Old values
+    // Float Ton_upper=15.0;
+    // Float Ton_lower=14.5;
+
     // Create the two discrete state 
     DiscreteState heater_on(1);
     DiscreteState heater_off(2);
@@ -136,8 +140,9 @@ HybridAutomaton create_heating_system()
     heating_system.new_mode(heater_off,heater_off_dynamic);
   
     // Create the system transitions for switching the heater
-    heating_system.new_invariant(heater_off,heater_turn_on_invariant);
-    heating_system.new_unforced_transition(switch_on,heater_off,heater_on,heater_turn_on_reset,heater_turn_on_activation);
+    //heating_system.new_invariant(heater_off,heater_turn_on_invariant);
+    //heating_system.new_unforced_transition(switch_on,heater_off,heater_on,heater_turn_on_reset,heater_turn_on_activation);
+    heating_system.new_forced_transition(switch_on,heater_off,heater_on,heater_turn_on_reset,heater_turn_on_activation);
     heating_system.new_forced_transition(switch_off,heater_on,heater_off,heater_turn_off_reset,heater_turn_off_guard);
 
     // Create the system transitions for resetting the clock at midnight
@@ -180,11 +185,17 @@ void compute_evolution(const HybridAutomaton& heating_system, const HybridEvolve
     HybridTime evolution_time(1.5,4);
   
     // Compute reachable and evolved sets
-    cout << "Computing evolved sets... " << flush;
+    cout << "Computing reach and evolve sets... " << flush;
     HybridEnclosureListType reach,evolve;
     make_lpair(reach,evolve)=evolver.reach_evolve(heating_system,initial,evolution_time,UPPER_SEMANTICS);
-    plot("tutorial-reach_evolve.png",Box(2, 0.0,1.0, 14.0,19.0),
+    cout << "done." << endl;
+    cout << "Plotting reach and evolve sets... " << flush;
+    plot("tutorial-reach_evolve.png",Box(2, 0.0,1.0, 14.0,21.0),
          Colour(0.0,0.5,1.0), reach, Colour(0.0,0.25,0.5), initial, Colour(0.25,0.0,0.5), evolve);
+    plot("tutorial-reach_evolve-off.png",Box(2, 0.0,1.0, 14.0,21.0),
+         Colour(0.0,0.5,1.0), reach[heater_off], Colour(0.0,0.25,0.5), initial, Colour(0.25,0.0,0.5), evolve[heater_off]);
+    plot("tutorial-reach_evolve-on.png",Box(2, 0.0,1.0, 14.0,21.0),
+         Colour(0.0,0.5,1.0), reach[heater_on], Colour(0.0,0.25,0.5), initial, Colour(0.25,0.0,0.5), evolve[heater_on]);
     cout << "done." << endl;
 
     // Compute the orbit.
@@ -193,8 +204,12 @@ void compute_evolution(const HybridAutomaton& heating_system, const HybridEvolve
     cout << "done." << endl;
 
     // Write the orbit to standard output and plot.
+    cout << "Writing orbit... " << flush;
     write("tutorial-orbit.txt",orbit);
-    plot("tutorial-orbit.png",Box(2, 0.0,1.0, 14.0,19.0), Colour(0.0,0.5,1.0), orbit);
+    cout << "done." << endl;
+    cout << "Plotting orbit... " << flush;
+    plot("tutorial-orbit.png",Box(2, 0.0,1.0, 14.0,21.0), Colour(0.0,0.5,1.0), orbit);
+    cout << "done." << endl;
 }
 
 
@@ -227,7 +242,7 @@ void compute_reachable_sets(const HybridAutomaton& heating_system, const HybridE
     HybridGridTreeSet lower_reach_set = analyser.lower_reach(heating_system,initial_set,reach_time);
     std::cout << "done." << std::endl;
 
-    plot("tutorial-lower_reach_evolve.png",Box(2, 0.0,1.0, 14.0,19.0),
+    plot("tutorial-lower_reach_evolve.png",Box(2, 0.0,1.0, 14.0,21.0),
          Colour(0.0,0.5,1.0), lower_reach_set,
          Colour(0.0,0.25,0.5), initial_set,
          Colour(0.25,0.0,0.5), lower_evolve_set);
@@ -244,7 +259,7 @@ void compute_reachable_sets(const HybridAutomaton& heating_system, const HybridE
     HybridGridTreeSet upper_reach_set = analyser.upper_reach(heating_system,initial_set,reach_time);
     std::cout << "done." << std::endl;
 
-    plot("tutorial-upper_reach_evolve.png",Box(2, 0.0,1.0, 14.0,19.0),
+    plot("tutorial-upper_reach_evolve.png",Box(2, 0.0,1.0, 14.0,21.0),
          Colour(0.0,0.5,1.0), upper_reach_set,
          Colour(0.0,0.25,0.5), initial_set,
          Colour(0.25,0.0,0.5), upper_evolve_set);
@@ -253,7 +268,7 @@ void compute_reachable_sets(const HybridAutomaton& heating_system, const HybridE
     std::cout << "Computing chain reach set... " << std::flush;
     HybridGridTreeSet chain_reach_set = analyser.chain_reach(heating_system,initial_set);
     std::cout << "done." << std::endl;
-    plot("tutorial-chain_reach.png",Box(2, 0.0,1.0, 14.0,19.0), Colour(0.0,0.5,1.0), chain_reach_set);
+    plot("tutorial-chain_reach.png",Box(2, 0.0,1.0, 14.0,21.0), Colour(0.0,0.5,1.0), chain_reach_set);
 }
 
 

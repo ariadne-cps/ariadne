@@ -340,9 +340,9 @@ TaylorSet::split() const
     }
 
     if(emax>rmax) {
-        pair<TaylorSet,TaylorSet> result(*this,*this);
-        TaylorModel model1=result.first._models[aemax];
-        TaylorModel model2=result.second._models[aemax];
+        pair<TaylorSet,TaylorSet> result=make_pair(*this,*this);
+        TaylorModel& model1=result.first._models[aemax];
+        TaylorModel& model2=result.second._models[aemax];
         model1.set_error(emax/2);
         model1-=emax/2;
         model2.set_error(emax/2);

@@ -69,22 +69,6 @@ class ContinuousEvolutionParameters {
 
 
 //! \brief Parameters for controlling the accuracy of discretised evolution methods and reachability analysis.
-class DiscreteEvolutionParametersFoo {
-  public:
-    //! \brief Default constructer gives reasonable values. 
-    DiscreteEvolutionParametersFoo();
-
-    //! \brief The time after which infinite-time upper-evolution routines
-    //! may approximate computed sets on a grid. 
-    double transient_time;
-
-    //! \brief The number of discrete steps after which infinite-time upper evolution 
-    //! routines may approximate computed sets on the grid. 
-    //! \details See the #transient_time parameter.
-    unsigned int transient_steps;
-};
-
-//! \brief Parameters for controlling the accuracy of discretised evolution methods and reachability analysis.
 class DiscreteEvolutionParameters {
   public:
     //! \brief The integer type.
@@ -151,23 +135,6 @@ class DiscreteEvolutionParameters {
     //!  <br>
     //! This parameter is only used for discrete-time computation.
     UnsignedIntType lock_to_grid_steps;
-    
-    //! \brief Set the length of the approximation grid. 
-    //! \details
-    //! Decreasing this value increases the accuracy of the computation. 
-    RealType grid_lengths;
-
-    //! \brief Set the approximation grid. 
-    //! \details
-    //! Fine tuning of the grid, with the possibility to have different lengths for every dimension.
-    //! Decreasing this value increases the accuracy of the computation. 
-    Grid grid;
-
-    //! \brief Set the hybrid approximation grid. 
-    //! \details
-    //! Fine tuning of the grid, with the possibility to have grids for every discrete location.
-    //! Decreasing this value increases the accuracy of the computation. 
-    HybridGrid hybrid_grid;
 
     //! \brief Set the depth used for approximation on a grid for the initial set in computations using lower semantics.
     //! \details
@@ -211,7 +178,7 @@ class DiscreteEvolutionParameters {
     //! \brief Set the size of the region used for computation. 
     //! \details
     //! Increasing this value reduces the risk of error due to missing orbits which leave the bounding domain. 
-    RealType maximum_bounding_domain_size;
+    //RealType maximum_bounding_domain_size;
 
 };
 
@@ -237,14 +204,10 @@ DiscreteEvolutionParameters::DiscreteEvolutionParameters()
       transient_steps(0),
       lock_to_grid_time(1.0),
       lock_to_grid_steps(1),
-      grid_lengths(1.0),
-      grid(),
-      hybrid_grid(HybridSpace(),0.0),
       initial_grid_depth(10),
       initial_grid_density(8),
       maximum_grid_depth(6),
-      maximum_grid_height(16),
-      maximum_bounding_domain_size(8.0)
+      maximum_grid_height(16)
 { }
 
 
@@ -276,15 +239,12 @@ operator<<(std::ostream& os, const DiscreteEvolutionParameters& p)
        << ",\n  transient_steps=" << p.transient_steps
 
 
-       << ",\n  grid_lengths=" << p.grid_lengths
-       << ",\n  grid=" << p.grid
-       << ",\n  hybrid_grid=" << p.hybrid_grid
        << ",\n  initial_grid_depth=" << p.initial_grid_depth
        << ",\n  initial_grid_density=" << p.initial_grid_density
        << ",\n  maximum_grid_depth=" << p.maximum_grid_depth
        << ",\n  maximum_grid_height=" << p.maximum_grid_height
 
-       << ",\n  maximum_bounding_domain_size=" << p.maximum_bounding_domain_size
+       //<< ",\n  maximum_bounding_domain_size=" << p.maximum_bounding_domain_size
        << "\n)\n";
     return os;
 }
@@ -308,15 +268,12 @@ operator<<(std::ostream& os, const EvolutionParameters& p)
        << ",\n  transient_time=" << p.transient_time
        << ",\n  transient_steps=" << p.transient_steps
 
-       << ",\n  grid_lengths=" << p.grid_lengths
-       << ",\n  grid=" << p.grid
-       << ",\n  hybrid_grid=" << p.hybrid_grid
        << ",\n  initial_grid_depth=" << p.initial_grid_depth
        << ",\n  initial_grid_density=" << p.initial_grid_density
        << ",\n  maximum_grid_depth=" << p.maximum_grid_depth
        << ",\n  maximum_grid_height=" << p.maximum_grid_height
 
-       << ",\n  maximum_bounding_domain_size=" << p.maximum_bounding_domain_size
+       //<< ",\n  maximum_bounding_domain_size=" << p.maximum_bounding_domain_size
        << "\n)\n";
     return os;
 }

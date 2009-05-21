@@ -179,15 +179,6 @@ class HybridReachabilityAnalyser
     std::pair<GTS,GTS> _upper_reach_evolve(const Sys& sys, const GTS& set, const T& time, const int accuracy) const;
   private:
     // Helper functions for approximating sets
-    HybridGrid _grid(HybridSpace hspc) const { 
-        if(this->_parameters->hybrid_grid.state_space() == hspc) {
-            return this->_parameters->hybrid_grid;
-        }
-        if(this->_parameters->grid.dimension() > 0) {
-            return HybridGrid(hspc,this->_parameters->grid);
-        }                
-        return HybridGrid(hspc,this->_parameters->grid_lengths); 
-    }
 };
 
 

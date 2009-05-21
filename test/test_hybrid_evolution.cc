@@ -345,13 +345,10 @@ void TestHybridEvolver::test_transverse_crossing()
     HybridTime evolution_time(2.0,3);
 
     ListSet<HybridTaylorSet> evolved_set=evolver.evolve(system,initial_set,evolution_time,UPPER_SEMANTICS);
-    std::cerr<<evolved_set<<"\n\n";
 
     PolynomialFunction f=join(1.0-0.5*y,1.0+1.0*x+1.5*y);
     Vector<Interval> error(2,Interval(-1e-5,1e-5));
-    std::cerr<<f<<"\n";
     TaylorSet expected_evolved_set(f,initial_box);
-    std::cerr<<expected_evolved_set<<"\n";
     ARIADNE_TEST_BINARY_PREDICATE(refines,evolved_set[q2][0].models(),expected_evolved_set.models()+error);
 }
 

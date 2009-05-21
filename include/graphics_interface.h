@@ -28,6 +28,8 @@
 #ifndef ARIADNE_GRAPHICS_INTERFACE_H
 #define ARIADNE_GRAPHICS_INTERFACE_H
 
+#include "macros.h"
+#include "colour.h"
 
 typedef unsigned int uint;
 
@@ -41,17 +43,26 @@ class Polytope;
 class InterpolatedCurve;
 class Zonotope;
 
-    
+class Colour;
+
 //! \brief Base interface for plotting and drawing classes.
 class GraphicsInterface {
   public:
     virtual ~GraphicsInterface() { };
-    virtual void draw(const std::vector<Point>&) { }; // Draw a shape bounded by a list of points
-    virtual void draw(const Point&) { };
-    virtual void draw(const Box&) { };
-    virtual void draw(const Polytope&) { };
-    virtual void draw(const InterpolatedCurve&) { };
-    virtual void close() { };
+    virtual void set_line_style(bool) { };
+    virtual void set_line_width(double) { };
+    virtual void set_line_colour(Colour) { };
+    virtual void set_fill_colour(Colour) { };
+    virtual bool get_line_style() const { return true; };
+    virtual double get_line_width() const { return 1.0; };
+    virtual Colour get_line_colour() const { return black; };
+    virtual bool get_fill_style() const { return true; };
+    virtual Colour get_fill_colour() const { return white; };
+    virtual void draw(const std::vector<Point>&) = 0; // Draw a shape bounded by a list of points
+    virtual void draw(const Point&) = 0;
+    virtual void draw(const Box&) = 0;
+    virtual void draw(const Polytope&) = 0;
+    virtual void draw(const InterpolatedCurve&) = 0;
 };
 
 inline void draw(GraphicsInterface& g, const Point& pt) { g.draw(pt); }

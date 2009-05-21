@@ -16,6 +16,7 @@ LDADD = ../src/libariadne.la $(LIBS)
 bin_PROGRAMS = \
 	profile_arithmetic \
 	profile_taylor_model \
+	profile_taylor_set \
 	profile_taylor_calculus
 
 #test_misc_LDADD = $(LDADD) -lboost_python -lpython2.5

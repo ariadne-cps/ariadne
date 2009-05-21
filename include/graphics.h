@@ -50,27 +50,6 @@ struct PlanarProjectionMap {
     uint n, i, j;
 };
 
-struct Colour {
-    Colour();
-    Colour(double rd, double gr, double bl, bool tr=true);
-    Colour(const char* nm, double rd, double gr, double bl, bool tr=true);
-    std::string name;
-    double red, green, blue;
-    bool transparant;
-};
-
-std::ostream& operator<<(std::ostream& os, const Colour& c);
-
-extern const Colour transparant;
-
-extern const Colour white;
-extern const Colour black;
-extern const Colour red;
-extern const Colour green;
-extern const Colour blue;
-extern const Colour yellow;
-extern const Colour cyan;
-extern const Colour magenta;
 
 struct LineStyle { explicit LineStyle(bool ls) : _style(ls) { } operator bool() const { return this->_style; } private: bool _style; };
 struct LineWidth { explicit LineWidth(double lw) : _width(lw) { } operator double() const { return this->_width; } private: double _width; };
@@ -97,13 +76,22 @@ class Figure
     void set_projection_map(const ProjectionFunction&);
     void set_projection_map(const PlanarProjectionMap&);
     void set_bounding_box(const Box&);
+
     void set_line_style(bool);
     void set_line_width(double);
     void set_line_colour(Colour);
-    void set_line_colour(double, double, double);
     void set_fill_style(bool);
     void set_fill_colour(Colour);
+
+    void set_line_colour(double, double, double);
     void set_fill_colour(double, double, double);
+
+    bool get_line_style() const;
+    double get_line_width() const;
+    Colour get_line_colour() const;
+    bool get_fill_style() const;
+    Colour get_fill_colour() const;
+
     void draw(const std::vector<Point>&); // Draw a shape bounded by a list of points
     void draw(const Point&);
     void draw(const Box&);

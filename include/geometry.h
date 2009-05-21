@@ -34,6 +34,7 @@
 
 namespace Ariadne {
 
+enum Piece { left=0, right=1, middle=2 };
 
 inline
 uint irmax(const Box& bx) {
@@ -50,12 +51,19 @@ uint irmax(const Box& bx) {
 }
  
 inline
-Box split(const Box& bx, uint i, bool lr) {
+Box split(const Box& bx, uint i, Piece lr) {
     Box result(bx);
-    Float c=med_approx(bx[i].lower(),bx[i].upper());
-    if(lr==false) { result[i].u=c; }
-    else { result[i].l=c; }
-    return result;
+    Float& l=result[i].l;
+    Float& u=result[i].u;
+    Float c=med_approx(l,u);
+    if(lr==middle) {
+        l=med_approx(l,c);
+        u=med_approx(c,u);
+    } else { 
+        if(lr==left) { u=c; }
+        else { l=c; }
+    }
+return result;
 }
 
 inline
@@ -69,7 +77,7 @@ std::pair<Box,Box> split(const Box& bx, uint i)
 }
 
 inline
-Box split(const Box& bx, bool lr)
+Box split(const Box& bx, Piece lr)
 {
     uint i=irmax(bx);
     return split(bx,i,lr);
@@ -95,7 +103,7 @@ disjoint(const Box& d, const F& f, const Box& b, const Float& eps)
         return indeterminate;
     } else {
         uint i=irmax(d);
-        return disjoint(split(d,i,0),f,b,eps) || disjoint(split(d,i,0),f,b,eps);
+        return disjoint(split(d,i,left),f,b,eps) || disjoint(split(d,i,left),f,b,eps);
     }
 }
 
@@ -113,7 +121,7 @@ inside(const Box& d, const F& f, const Box& b, const Float& eps)
         return indeterminate;
     } else {
         uint i=irmax(d);
-        return inside(split(d,i,0),f,b,eps) && inside(split(d,i,0),f,b,eps);
+        return inside(split(d,i,left),f,b,eps) && inside(split(d,i,right),f,b,eps);
     }
 }
 

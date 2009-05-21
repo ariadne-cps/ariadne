@@ -1304,6 +1304,12 @@ void GridTreeSubset::subdivide( Float theMaxCellWidth ) {
     mince(needed_num_tree_subdiv);
 }
 
+double GridTreeSubset::measure() const {
+    ARIADNE_NOT_IMPLEMENTED;
+}
+
+
+
 GridTreeSubset::operator ListSet<Box>() const {
     ListSet<Box> result(this->cell().dimension());
 

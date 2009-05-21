@@ -44,6 +44,7 @@
 #include "exceptions.h"
 #include "box.h"
 #include "point.h"
+#include "list_set.h"
 
 #include "numeric.h"
 
@@ -100,6 +101,7 @@ GridTreeSet difference(const GridTreeSubset& theSet1, const GridTreeSubset& theS
 GridTreeSet outer_approximation(const Box& theBox, const Grid& theGrid, const uint depth);
 GridTreeSet outer_approximation(const CompactSetInterface& theSet, const Grid& theGrid, const uint depth);
 GridTreeSet outer_approximation(const CompactSetInterface& theSet, const uint depth);
+template<class BS> GridTreeSet outer_approximation(const ListSet<BS>& theSet, const uint depth);
 
 template<class A> void serialize(A& archive, const GridTreeSet& set, const uint version);
 
@@ -878,6 +880,9 @@ class GridTreeSubset {
             
     /*! Recalculate the depth of the tree rooted at \a _pRootTreeNode */
     uint depth() const;
+
+    /*! The measure (area, volume) of the set in Euclidean space. */
+    double measure() const;
 
     /*! \brief Returns the \a GridCell corresponding to the ROOT NODE of this \a GridTreeSubset
      * WARNING: It is NOT the primary cell of the paving! 
@@ -2263,7 +2268,20 @@ inline GridTreeSet outer_approximation(const CompactSetInterface& theSet, const 
     result.adjoin_outer_approximation(theSet,depth);
     return result;
 }
-    
+
+
+template<class BS>
+GridTreeSet outer_approximation(const ListSet<BS>& theSet, const Grid& theGrid, const uint depth) {
+    ARIADNE_ASSERT_MSG(theSet.dimension()==theGrid.dimension(),"theSet="<<theSet<<", theGrid="<<theGrid);
+    GridTreeSet result(theGrid);
+    for(typename ListSet<BS>::const_iterator iter=theSet.begin(); iter!=theSet.end(); ++iter) {
+        result.adjoin_outer_approximation(*iter,depth);
+    }
+    result.recombine();
+    return result;
+}
+
+
 template<class A> void serialize(A& archive, Ariadne::GridTreeSet& set, const unsigned int version) {
     ARIADNE_NOT_IMPLEMENTED;
 }

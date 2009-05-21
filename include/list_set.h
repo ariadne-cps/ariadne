@@ -147,11 +147,10 @@ operator<<(std::ostream& os, const ListSet<BS>& ls)
     return os << ")";
 }
 
-
-template<class BS> 
+template<class BS>
 void 
 draw(GraphicsInterface& graphic, const ListSet<BS>& ls) { 
-    for(typename ListSet<BS>::const_iterator iter=ls.begin(); 
+    for(typename ListSet<BS>::const_iterator iter=ls.begin();
         iter!=ls.end();  ++iter) { draw(graphic,*iter); } 
 }
 

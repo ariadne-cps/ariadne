@@ -194,6 +194,34 @@ TaylorSet::linearise() const
 }
 
 
+void
+_discretise_step(ListSet<Box>& result, const Vector<TaylorModel>& models, const Vector<Interval>& errors, const Box& domain, const Float& eps)
+{
+    Box range=evaluate(models,domain);
+    if(range.radius()<eps) {
+        result.adjoin(range+errors);
+    } else {
+        std::pair<Box,Box> subdomains=split(domain);
+        _discretise_step(result,models,errors,subdomains.first,eps);
+        _discretise_step(result,models,errors,subdomains.second,eps);
+    }
+}
+
+ListSet<Box>
+TaylorSet::discretise(const Float& eps) const
+{
+    ListSet<Box> result;
+    Box domain=this->domain();
+    Vector<Interval> errors(this->dimension());
+    Vector<TaylorModel> models=this->models();
+    for(uint i=0; i!=errors.size(); ++i) {
+        errors[i]=models[i].error()*Interval(-1,+1);
+        models[i].set_error(0.0);
+    }
+    _discretise_step(result,models,errors,domain,eps);
+    return result;
+}
+
 GridTreeSet
 TaylorSet::discretise(const Grid& g, uint d) const
 {
@@ -286,6 +314,7 @@ TaylorSet::split(uint j) const
 pair<TaylorSet,TaylorSet>
 TaylorSet::split() const
 {
+    uint d=this->dimension();
     uint ng=this->generators_size();
     Float rmax=0.0;
     uint armax=0;
@@ -299,42 +328,234 @@ TaylorSet::split() const
             armax=j;
         }
     }
-    return this->split(armax);
+
+    Float emax=0.0;
+    uint aemax=0;
+    for(uint i=0; i!=d; ++i) {
+        Float e=this->models()[i].error();
+        if(e>emax) {
+            emax=e;
+            aemax=i;
+        }
+    }
+
+    if(emax>rmax) {
+        pair<TaylorSet,TaylorSet> result(*this,*this);
+        TaylorModel model1=result.first._models[aemax];
+        TaylorModel model2=result.second._models[aemax];
+        model1.set_error(emax/2);
+        model1-=emax/2;
+        model2.set_error(emax/2);
+        model2+=emax/2;
+        return result;
+    } else {
+        return this->split(armax);
+    }
 }
 
 
+
 void
-_adjoin_outer_approximation(const TaylorSet& set, const Box& domain, Float eps, GridTreeSet& grid_set, uint depth)
+_adjoin_outer_approximation1(GridTreeSet& grid_set,
+                             const Vector<TaylorModel>& models, const Vector<Interval>& errors,
+                             const Box& domain, Float eps, uint depth)
 {
-    //std::cerr<<"adjoin_outer_approximation(TaylorSet,Box,Float,GridTreeSet,Nat)\n  domain="<<domain<<"\n";
-    uint d=set.dimension();
-    Box range(set.dimension());
-    for(uint i=0; i!=set.dimension(); ++i) {
-        range[i]=evaluate(set[i],domain);
-    }
+    uint d=models.size();
+
+    Box range=evaluate(models,domain);
+    //std::cerr<<"range="<<range<<"\n";
     if(range.radius()<eps) {
-        for(uint i=0; i!=set.dimension(); ++i) {
-            range[i]+=set[i].error();
-        }
-        grid_set.adjoin_over_approximation(range,depth);
+        grid_set.adjoin_over_approximation(range+errors,depth);
     } else {
         Box domain1(d),domain2(d);
         make_lpair(domain1,domain2)=split(domain);
-        _adjoin_outer_approximation(set,domain1,eps,grid_set,depth);
-        _adjoin_outer_approximation(set,domain2,eps,grid_set,depth);
+        _adjoin_outer_approximation1(grid_set,models,errors,domain1,eps,depth);
+        _adjoin_outer_approximation1(grid_set,models,errors,domain2,eps,depth);
     }
 }
 
 
 void
+adjoin_outer_approximation1(GridTreeSet& grid_set, const TaylorSet& set, uint depth)
+{
+    Box domain(set.generators_size(),Interval(-1,+1));
+    Float eps=1.0/(1<<(depth/set.dimension()));
+    Vector<TaylorModel> models=set.models();
+    Vector<Interval> errors(models.size());
+    for(uint i=0; i!=models.size(); ++i) {
+        errors[i]=models[i].error()*Interval(-1,+1);
+        models[i].set_error(0.0);
+    }
+    _adjoin_outer_approximation1(grid_set,models,errors,domain,eps,depth);
+    grid_set.recombine();
+}
+
+void
+_adjoin_outer_approximation2(GridTreeSet& grid_set,
+                             const TaylorSet& set, const Vector<Interval>& errors,
+                             Float eps, uint depth)
+{
+    Box range=set.range();
+    //std::cerr<<"range="<<range<<"\n";
+    if(range.radius()<eps) {
+        grid_set.adjoin_over_approximation(range+errors,depth);
+    } else {
+        std::pair<TaylorSet,TaylorSet> subsets=set.split();
+        _adjoin_outer_approximation2(grid_set,subsets.first,errors,eps,depth);
+        _adjoin_outer_approximation2(grid_set,subsets.second,errors,eps,depth);
+    }
+}
+
+
+void
+adjoin_outer_approximation2(GridTreeSet& grid_set, const TaylorSet& set, uint depth)
+{
+    Box domain(set.generators_size(),Interval(-1,+1));
+    Float eps=1.0/(1<<(depth/set.dimension()));
+    TaylorSet error_free_set(set);
+    Vector<Interval> errors(set.dimension());
+    for(uint i=0; i!=set.dimension(); ++i) {
+        errors[i]=set.models()[i].error()*Interval(-1,+1);
+        const_cast<TaylorModel&>(error_free_set.models()[i]).set_error(0.0);
+    }
+    _adjoin_outer_approximation2(grid_set,error_free_set,errors,eps,depth);
+    grid_set.recombine();
+}
+
+void
+_adjoin_outer_approximation3(GridTreeSet& grid_set, const TaylorSet& set, Box& domain, 
+			     GridOpenCell cell, uint depth)
+{
+    // Compute an over-approximation to the set
+    Box range=evaluate(set.models(),domain);
+
+    // Find an open cell which is a good over-approximation to the range
+    while(true) {
+        GridOpenCell subcell = cell.split(false);
+        if(!subset(range,subcell.box())) {
+            subcell=cell.split(true);
+            if(!subset(range,subcell.box())) {
+                subcell=cell.split(indeterminate);
+                if(!subset(range,subcell.box())) {
+                    break;
+                }
+            }
+        }
+        cell=subcell;
+    }
+
+    if(cell.depth()>=int(depth)) {
+        grid_set.adjoin(cell.closure());
+        return;
+    }
+
+    std::pair<Box,Box> subdomains=split(domain);
+    _adjoin_outer_approximation3(grid_set,set,subdomains.first,cell,depth);
+    _adjoin_outer_approximation3(grid_set,set,subdomains.second,cell,depth);
+    //Box subdomain1=split(domain,left);
+    //Box subdomain2=split(domain,right);
+    //_adjoin_outer_approximation3(grid_set,set,subdomain1,cell,depth);
+    //_adjoin_outer_approximation3(grid_set,set,subdomain2,cell,depth);
+}
+
+void
+adjoin_outer_approximation3(GridTreeSet& grid_set, const TaylorSet& set, uint depth)
+{
+    TaylorSet error_free_set=set.subsume();
+    Box domain=error_free_set.domain();
+    GridOpenCell cell=GridOpenCell::outer_approximation(error_free_set.bounding_box(),grid_set.grid());
+    _adjoin_outer_approximation3(grid_set,error_free_set,domain,cell,depth);
+    grid_set.recombine();
+}
+
+
+void
+_adjoin_outer_approximation4(GridTreeSet& grid_set, const TaylorSet& set,
+                             GridOpenCell cell, uint depth)
+{
+    // Compute an over-approximation to the set
+    Box range=set.range();
+
+    // Find an open cell which is a good over-approximation to the range
+    while(true) {
+        GridOpenCell subcell = cell.split(false);
+        if(!subset(range,subcell.box())) {
+            subcell=cell.split(true);
+            if(!subset(range,subcell.box())) {
+                subcell=cell.split(indeterminate);
+                if(!subset(range,subcell.box())) {
+                    break;
+                }
+            }
+        }
+        cell=subcell;
+    }
+
+    // If the cell is sufficiently small, adjoin it to the grid set
+    if(cell.depth()>=int(depth)) {
+        grid_set.adjoin(cell.closure());
+        return;
+    }
+
+    // Subdivide the TaylorSet and try again
+    std::pair<TaylorSet,TaylorSet> subsets=set.split();
+    _adjoin_outer_approximation4(grid_set,subsets.first,cell,depth);
+    _adjoin_outer_approximation4(grid_set,subsets.second,cell,depth);
+}
+
+void
+adjoin_outer_approximation4(GridTreeSet& grid_set, const TaylorSet& set, uint depth)
+{
+    GridOpenCell cell=GridOpenCell::outer_approximation(set.bounding_box(),grid_set.grid());
+    TaylorSet error_free_set=set.subsume();
+    _adjoin_outer_approximation4(grid_set,error_free_set,cell,depth);
+    grid_set.recombine();
+}
+
+// Profiling suggests that adjoin_outer_approximation1 is most efficient.
+// adjoin_outer_approximation3 (using subdivision of the set) is better than
+// adjoin_outer_approximation2 (using subdivision of the domain).
+void
 adjoin_outer_approximation(GridTreeSet& grid_set, const TaylorSet& set, uint depth)
 {
-    //grid_set.adjoin_outer_approximation(zonotope(set),depth);
-    //grid_set.adjoin_outer_approximation(set.bounding_box(),depth);
-    Box domain(set.generators_size(),Interval(-1,+1));
-    Float eps=1.0/(1<<(depth/set.dimension()+1));
-    _adjoin_outer_approximation(set,domain,eps,grid_set,depth);
-    grid_set.recombine();
+    adjoin_outer_approximation1(grid_set,set,depth);
+}
+
+
+GridTreeSet
+discretise1(const TaylorSet& ts, const Grid& g, uint d) 
+{
+    GridTreeSet gts(g);
+    adjoin_outer_approximation1(gts,ts,d);
+    gts.recombine();
+    return gts;
+}
+
+GridTreeSet
+discretise2(const TaylorSet& ts, const Grid& g, uint d) 
+{
+    GridTreeSet gts(g);
+    adjoin_outer_approximation2(gts,ts,d);
+    gts.recombine();
+    return gts;
+}
+
+GridTreeSet
+discretise3(const TaylorSet& ts, const Grid& g, uint d) 
+{
+    GridTreeSet gts(g);
+    adjoin_outer_approximation3(gts,ts,d);
+    gts.recombine();
+    return gts;
+}
+
+GridTreeSet
+discretise4(const TaylorSet& ts, const Grid& g, uint d)
+{
+    GridTreeSet gts(g);
+    adjoin_outer_approximation4(gts,ts,d);
+    gts.recombine();
+    return gts;
 }
 
 
@@ -353,26 +574,33 @@ TaylorSet::jacobian() const
 TaylorSet
 TaylorSet::subsume() const
 {
+    return this->subsume(0.0);
+}
+
+
+TaylorSet
+TaylorSet::subsume(double eps) const
+{
     uint d=this->dimension();
     uint ng=this->generators_size();
-    TaylorSet res(d,ng+d);
-    MultiIndex a=MultiIndex::zero(ng+d);
+
+    // Compute the number of terms whose error is greater the eps
+    uint ne=0; 
     for(uint i=0; i!=d; ++i) {
-        TaylorModel::const_iterator iter=this->_models[i].begin();
-        for( ; iter!=this->_models[i].end() && iter->key().degree()<=1; ++iter) {
-            for(uint j=0; j!=ng; ++j) { a[j]=iter->key()[j]; }
-            res._models[i].expansion().append(a,iter->data());
-        }
-        for(uint j=0; j!=ng; ++j) { a[j]=0; }
-        a[ng+i]=1;
-        res._models[i].expansion().append(a,this->models()[i].error());
-        a[ng+i]=0;
-        for( ; iter!=this->_models[i].end() ; ++iter) {
-            for(uint j=0; j!=ng; ++j) { a[j]=iter->key()[j]; }
-            res._models[i].expansion().append(a,iter->data());
+        if(this->models()[i].error()>eps) { ++ne; }
+    }
+
+    TaylorSet result(embed(this->models(),ne));
+    uint k=ng; // The in independent variable corresponding to the error term
+    for(uint i=0; i!=d; ++i) {
+        if(result._models[i].error()>eps) {
+            MultiIndex a=MultiIndex::unit(ng+ne,k);
+            result._models[i][a]=result._models[i].error();
+            result._models[i].set_error(0.0);
+            ++k;
         }
     }
-    return res;
+    return result;
 }
 
 
@@ -440,6 +668,18 @@ void box_draw(GraphicsInterface& fig, const TaylorSet& ts) {
     draw(fig,ts.bounding_box());
 }
 
+void boxes_draw(GraphicsInterface& fig, const TaylorSet& ts) {
+    static const double resolution=1.0/8;
+    double line_width=fig.get_line_width();
+    fig.set_line_width(0.0);
+    //fig.set_line_style(false);
+    //fig.set_line_colour(fig.get_fill_colour());
+    draw(fig,ts.discretise(resolution));
+    //fig.set_line_colour(black);
+    fig.set_line_width(line_width);
+    //fig.set_line_style(true);
+}
+
 void affine_draw(GraphicsInterface& fig, const TaylorSet& ts) {
     draw(fig,zonotope(ts));
 }
@@ -484,16 +724,18 @@ void grid_draw(GraphicsInterface& fig, const TaylorSet& ts)
 }
 
 void draw(GraphicsInterface& fig, const TaylorSet& ts) {
-    box_draw(fig,ts);
+    boxes_draw(fig,ts);
 /*
     static const double MAX_NEGLIGABLE_NORM=1e-10;
     if(ts.dimension()==2 && ts.generators_size()==2 && norm(error(ts))<MAX_NEGLIGABLE_NORM) {
+        // Curve draw may miss parts of the set.
         curve_draw(fig,ts);
     }
     else {
-        affine_draw(fig,ts);
+        boxes_draw(fig,ts);
     }
 */
+
 }
 
 } // namespace Ariadne

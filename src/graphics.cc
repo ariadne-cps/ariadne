@@ -109,12 +109,17 @@ std::vector<Point> extremal(const std::vector<Point> & points) {
 
 struct GraphicsObject {
     enum ShapeKind { POINT, BOX, POLYTOPE, CURVE, SHAPE };
-    GraphicsObject(Colour lc, Point pt) : kind(POINT), line_colour(lc), fill_colour(), shape(std::vector<Point>(1,pt)) { }
-    GraphicsObject(Colour lc, Colour fc, Box bx) : kind(BOX), line_colour(lc), fill_colour(fc), shape(corner_points(bx)) { }
-    GraphicsObject(Colour lc, Colour fc, Polytope pl) : kind(POLYTOPE), line_colour(lc), fill_colour(fc), shape(vertices(pl)) { }
-    GraphicsObject(Colour lc, InterpolatedCurve cv) : kind(CURVE), line_colour(lc), fill_colour(), shape(interpolation_points(cv)) { }
+    GraphicsObject(Colour lc, Point pt)
+        : kind(POINT), line_width(1.0), line_colour(lc), fill_colour(), shape(std::vector<Point>(1,pt)) { }
+    GraphicsObject(double lw, Colour lc, Colour fc, Box bx)
+        : kind(BOX), line_width(lw), line_colour(lc), fill_colour(fc), shape(corner_points(bx)) { }
+    GraphicsObject(double lw, Colour lc, Colour fc, Polytope pl)
+        : kind(POLYTOPE), line_width(lw), line_colour(lc), fill_colour(fc), shape(vertices(pl)) { }
+    GraphicsObject(double lw, Colour lc, InterpolatedCurve cv)
+        : kind(CURVE), line_width(lw), line_colour(lc), fill_colour(), shape(interpolation_points(cv)) { }
     GraphicsObject(Colour lc, Colour fc, const std::vector<Point>& pts) : kind(SHAPE), line_colour(lc), fill_colour(fc), shape(pts) { }
     ShapeKind kind;
+    double line_width;
     Colour line_colour;
     Colour fill_colour;
     std::vector<Point> shape;
@@ -124,10 +129,13 @@ struct GraphicsObject {
 
 struct Figure::Data 
 {
-    Data() : bounding_box(0), projection(2), current_line_colour(0,0,0), current_fill_colour(1,1,1) { }
+    Data() : bounding_box(0), projection(2), current_line_width(1.0), current_line_colour(0,0,0), current_fill_colour(0.75,0.75,0.75) { }
     Box bounding_box;
     ProjectionFunction projection;
+    bool current_line_style;
+    double current_line_width;
     Colour current_line_colour;
+    bool current_fill_style;
     Colour current_fill_colour;
     std::vector<GraphicsObject> objects;
 };
@@ -175,6 +183,7 @@ void Figure::set_line_style(bool ls)
 
 void Figure::set_line_width(double lw) 
 {
+    this->_data->current_line_width=lw;
 }
 
 void Figure::set_line_colour(Colour lc)
@@ -201,6 +210,32 @@ void Figure::set_fill_colour(double r, double g, double b)
     this->set_fill_colour(Colour(r,g,b));
 }
 
+bool Figure::get_line_style() const
+{ 
+    return this->_data->current_line_style;
+}
+
+double Figure::get_line_width() const
+{ 
+    return this->_data->current_line_width;
+}
+
+Colour Figure::get_line_colour() const
+{ 
+    return this->_data->current_line_colour;
+}
+
+
+bool Figure::get_fill_style() const
+{ 
+    return this->_data->current_fill_style;
+}
+
+Colour Figure::get_fill_colour() const
+{ 
+    return this->_data->current_fill_colour;
+}
+
 
 void Figure::draw(const Point& pt) {
     if(this->_data->objects.empty() && this->_data->projection.argument_size() != pt.dimension()) {
@@ -219,21 +254,21 @@ void Figure::draw(const Box& bx) {
     if(this->_data->objects.empty() && this->_data->projection.argument_size() != bx.dimension()) {
         this->_data->projection=ProjectionFunction(2,bx.dimension(),0); }
     ARIADNE_ASSERT(bx.dimension()==this->_data->projection.argument_size());
-    this->_data->objects.push_back(GraphicsObject(this->_data->current_line_colour,this->_data->current_fill_colour,bx));
+    this->_data->objects.push_back(GraphicsObject(this->_data->current_line_width,this->_data->current_line_colour,this->_data->current_fill_colour,bx));
 }
 
 void Figure::draw(const Polytope& p) {
     if(this->_data->objects.empty() && this->_data->projection.argument_size() != p.dimension()) {
         this->_data->projection=ProjectionFunction(2,p.dimension(),0); }
     ARIADNE_ASSERT(p.dimension()==this->_data->projection.argument_size());
-    this->_data->objects.push_back(GraphicsObject(this->_data->current_line_colour,this->_data->current_fill_colour,p));
+    this->_data->objects.push_back(GraphicsObject(this->_data->current_line_width,this->_data->current_line_colour,this->_data->current_fill_colour,p));
 }
 
 void Figure::draw(const InterpolatedCurve& c) {
     if(this->_data->objects.empty() && this->_data->projection.argument_size() != c.dimension()) {
         this->_data->projection=ProjectionFunction(2,c.dimension(),0); }
     ARIADNE_ASSERT(c.dimension()==this->_data->projection.argument_size());
-    this->_data->objects.push_back(GraphicsObject(this->_data->current_line_colour,c));
+    this->_data->objects.push_back(GraphicsObject(this->_data->current_line_width,this->_data->current_line_colour,c));
 }
 
 void Figure::clear() {
@@ -395,13 +430,16 @@ void plot(cairo_t *cr, const Box& bounding_box, const ProjectionFunction& projec
     
     // Trace curves and points
     for(uint i=0; i!=objects.size(); ++i) {
-        const Colour& lc=objects[i].line_colour;
-        cairo_set_source_rgb (cr, lc.red, lc.green, lc.blue);
-        trace(cr,objects[i].kind,apply(projection,objects[i].shape));
-        if(objects[i].kind==GraphicsObject::POINT) {
-            cairo_fill (cr);
+        const double& lw=objects[i].line_width;
+        if(lw!=0) {
+            const Colour& lc=objects[i].line_colour;
+            cairo_set_source_rgb (cr, lc.red, lc.green, lc.blue);
+            trace(cr,objects[i].kind,apply(projection,objects[i].shape));
+            if(objects[i].kind==GraphicsObject::POINT) {
+                cairo_fill (cr);
+            }
+            cairo_stroke (cr);
         }
-        cairo_stroke (cr);
     }
 
     // Restore canvas coordinates and unclipped state

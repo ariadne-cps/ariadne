@@ -131,6 +131,8 @@ class TaylorSet
     Float radius() const;
     //! \brief An over-approximation in the form of a zonotope.
     TaylorSet linearise() const;
+    //! \brief An over-approximation in the form of a list of boxes.
+    ListSet<Box> discretise(const Float& eps) const;
     //! \brief An outer-approximation on a grid.
     GridTreeSet discretise(const Grid& grid, uint depth) const;
     //! \brief Adjoin an outer-approximation on a grid to an existing set.
@@ -140,6 +142,8 @@ class TaylorSet
     TaylorSet recondition() const;
     //! \brief Subsume the constant error terms in new generators.
     TaylorSet subsume() const;
+    //! \brief Subsume constant error terms of magnitude greater than \a e in new generators.
+    TaylorSet subsume(double e) const;
     //! \brief Split by subdividing along generator \a g.
     pair<TaylorSet,TaylorSet> split(uint g) const;
     //! \brief Split by subdividing along a judiciously-chosen generator.

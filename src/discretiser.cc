@@ -34,22 +34,6 @@
 
 namespace Ariadne {
 
-template<class ES>
-GridTreeSet 
-outer_approximation(const ListSet<ES>& ls,
-                    const Grid& gr,
-                    const uint accuracy)
-{
-    GridTreeSet result(gr);
-    for(typename ListSet<ES>::const_iterator 
-            iter=ls.begin(); iter!=ls.end(); ++iter)
-        {
-            //            result.adjoin_outer_approximation(*iter,accuracy);
-            result.adjoin_outer_approximation(ImageSet(iter->range()),accuracy);
-        }
-    return result;
-}
-
 
 template<class ES>
 HybridGridTreeSet 

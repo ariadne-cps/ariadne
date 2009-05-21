@@ -660,7 +660,8 @@ orthogonal_over_approximation(const Zonotope& z)
 
     for(uint j=0; j!=n; ++j) { }
 
-    // Choose 
+    return z;
+// Choose 
 }
 
 

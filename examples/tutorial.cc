@@ -174,25 +174,27 @@ void compute_evolution(const HybridAutomaton& heating_system, const HybridEvolve
 
     // Define the initial set
     Box initial_box(2, 0.0,0.015625, 16.0,16.0625);
-    HybridEnclosureType initial_enclosure(heater_off,initial_box);
+    HybridEnclosureType initial(heater_off,initial_box);
   
     // Set the maximum evolution time
-    HybridTime evolution_time(0.25,4);
+    HybridTime evolution_time(1.5,4);
   
     // Compute reachable and evolved sets
     cout << "Computing evolved sets... " << flush;
     HybridEnclosureListType reach,evolve;
-    make_lpair(reach,evolve)=evolver.reach_evolve(heating_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
+    make_lpair(reach,evolve)=evolver.reach_evolve(heating_system,initial,evolution_time,UPPER_SEMANTICS);
+    plot("tutorial-reach_evolve.png",Box(2, 0.0,1.0, 14.0,19.0),
+         Colour(0.0,0.5,1.0), reach, Colour(0.0,0.25,0.5), initial, Colour(0.25,0.0,0.5), evolve);
     cout << "done." << endl;
 
     // Compute the orbit.
     cout << "Computing orbit... " << flush;
-    OrbitType orbit = evolver.orbit(heating_system,initial_enclosure,evolution_time,UPPER_SEMANTICS);
+    OrbitType orbit = evolver.orbit(heating_system,initial,evolution_time,UPPER_SEMANTICS);
     cout << "done." << endl;
 
     // Write the orbit to standard output and plot.
     write("tutorial-orbit.txt",orbit);
-    plot("tutorial-orbit.png",Box(2, 0.0,1.0, 14.0,18.0), Colour(0.0,0.5,1.0), orbit);
+    plot("tutorial-orbit.png",Box(2, 0.0,1.0, 14.0,19.0), Colour(0.0,0.5,1.0), orbit);
 }
 
 
@@ -200,30 +202,35 @@ void compute_reachable_sets(const HybridAutomaton& heating_system, const HybridE
 {
     // Create a ReachabilityAnalyser object
     HybridReachabilityAnalyser analyser(evolver);
+    analyser.parameters().initial_grid_density=10;
+    analyser.parameters().initial_grid_depth=12;
+    analyser.parameters().maximum_grid_depth=12;
+
 
     // Define the initial set
     HybridImageSet initial_set;
     DiscreteState heater_off(2);
-    Box initial_box(2, 0.0,0.015625, 16.0,16.0625);
+    Box initial_box(2, 0.0,0.015625/4, 16.0,16.0+0.0625/16);
     initial_set[heater_off]=initial_box;
 
     // Set the maximum evolution time
-    HybridTime reach_time(0.25,1);
-
-    plot("tutorial-initial_set.png",Box(2, 0.0,1.0, 14.0,18.0), Colour(0.0,0.5,1.0), initial_set);
+    HybridTime reach_time(1.5,4);
 
 
     // Compute lower-approximation to finite-time evolved set using lower-semantics.
     std::cout << "Computing lower evolve set... " << std::flush;
     HybridGridTreeSet* lower_evolve_set_ptr = analyser.lower_evolve(heating_system,initial_set,reach_time);
     std::cout << "done." << std::endl;
-    plot("tutorial-lower_evolve.png",Box(2, 0.0,1.0, 14.0,18.0), Colour(0.0,0.5,1.0), *lower_evolve_set_ptr);
 
     // Compute lower-approximation to finite-time reachable set using lower-semantics.
     std::cout << "Computing lower reach set... " << std::flush;
     HybridGridTreeSet* lower_reach_set_ptr = analyser.lower_reach(heating_system,initial_set,reach_time);
     std::cout << "done." << std::endl;
-    plot("tutorial-lower_reach.png",Box(2, 0.0,1.0, 14.0,18.0), Colour(0.0,0.5,1.0), *lower_reach_set_ptr);
+
+    plot("tutorial-lower_reach_evolve.png",Box(2, 0.0,1.0, 14.0,19.0),
+         Colour(0.0,0.5,1.0), *lower_reach_set_ptr,
+         Colour(0.0,0.25,0.5), initial_set,
+         Colour(0.25,0.0,0.5), *lower_evolve_set_ptr);
 
     // Compute over-approximation to finite-time evolved set using upper semantics.
     // Subdivision is used as necessary to keep the local errors reasonable. 
@@ -231,20 +238,23 @@ void compute_reachable_sets(const HybridAutomaton& heating_system, const HybridE
     std::cout << "Computing upper evolve set... " << std::flush;
     HybridGridTreeSet* upper_evolve_set_ptr = analyser.upper_evolve(heating_system,initial_set,reach_time);
     std::cout << "done." << std::endl;
-    plot("tutorial-upper_evolve.png",Box(2, 0.0,1.0, 14.0,18.0), Colour(0.0,0.5,1.0), *upper_evolve_set_ptr);
 
     // Compute over-approximation to finite-time reachable set using upper semantics.
     std::cout << "Computing upper reach set... " << std::flush;
     HybridGridTreeSet* upper_reach_set_ptr = analyser.upper_reach(heating_system,initial_set,reach_time);
     std::cout << "done." << std::endl;
-    plot("tutorial-upper_reach.png",Box(2, 0.0,1.0, 14.0,18.0), Colour(0.0,0.5,1.0), *upper_reach_set_ptr);
+
+    plot("tutorial-upper_reach_evolve.png",Box(2, 0.0,1.0, 14.0,19.0),
+         Colour(0.0,0.5,1.0), *upper_reach_set_ptr,
+         Colour(0.0,0.25,0.5), initial_set,
+         Colour(0.25,0.0,0.5), *upper_evolve_set_ptr);
 
     // Compute over-approximation to infinite-time chain-reachable set using upper semantics.
     HybridGridTreeSet* chain_reach_set_ptr = 0;
     std::cout << "Computing chain reach set... " << std::flush;
     chain_reach_set_ptr = analyser.chain_reach(heating_system,initial_set);
     std::cout << "done." << std::endl;
-    plot("tutorial-chain_reach.png",Box(2, 0.0,1.0, 14.0,18.0), Colour(0.0,0.5,1.0), *chain_reach_set_ptr);
+    plot("tutorial-chain_reach.png",Box(2, 0.0,1.0, 14.0,19.0), Colour(0.0,0.5,1.0), *chain_reach_set_ptr);
 }
 
 
@@ -287,37 +297,7 @@ void compute_reachable_sets_with_serialisation(const HybridAutomaton& heating_sy
     plot("tutorial-upper_recurrent.png",Box(2, 0.0,1.0, 14.0,18.0), Colour(0.0,0.5,1.0), *upper_recurrent_set_ptr);
 }
 
-/*
-void plot_reachable_sets(const HybridAutomaton& system, const HybridReachabiltyAnalyser analyser)
-{
-    std::cout << "Plotting results..."<<std::endl;
 
-    // Use main graphics facilities
-    Figure g;
-    g.set_bounding_box(Box(2,14,18,0,1));
-    g.set_projection_map(ProjectionFunction(2,2,0));
-
-    g << fill_colour(Colour(0.5,0.5,0.5));
-    if(chain_reach_set_ptr) { g << *chain_reach_set_ptr; }
-
-    g << fill_colour(Colour(1.0,0.0,1.0));
-    g << *upper_reach_set_ptr;
-    g << fill_colour(Colour(0.0,1.0,1.0));
-    g << *lower_reach_set_ptr;
-
-    g << fill_colour(Colour(1.0,1.0,0.0));
-    g << *upper_evolve_set_ptr;
-    g << fill_colour(Colour(1.0,0.0,0.0));
-    g << *lower_evolve_set_ptr;
-
-    g.write("tutorial-all.png");
-
-
-    // Display the figure in a pop-up window
-    if(false) { g.display(); }
-
-}
-*/
 
 
 int main() 

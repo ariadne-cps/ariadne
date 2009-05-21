@@ -699,7 +699,7 @@ unchecked_flow(const TaylorFunction& vf, const Vector<Interval>& d, const Interv
     Float hmag=mag(h);
     const Vector<Interval>& b=vf.domain();
 
-    assert(h.l==-h.u || h.l==0);
+    assert(h.lower()==-h.upper() || h.lower()==0);
 
     // Sanity check that vector field domain has nonempty interior
     for(uint i=0; i!=n; ++i) { ARIADNE_ASSERT_MSG(b[i].radius()>0.0,"Domain of vector field "<<b<<" has non-empty interior."); }
@@ -722,7 +722,7 @@ unchecked_flow(const TaylorFunction& vf, const Vector<Interval>& d, const Interv
     Vector<TaylorModel> model_flow=scale(unit_scaled_flow,b);
     //std::cerr<<"model_flow="<<model_flow<<std::endl;
 
-    if(h.l==0) { model_flow=split(model_flow,d.size(),true); }
+    if(h.lower()==0) { model_flow=split(model_flow,d.size(),true); }
 
     TaylorFunction flow(join(d,h),model_flow);
     //std::cerr<<"\nflow="<<flow<<"\n"<<std::endl;

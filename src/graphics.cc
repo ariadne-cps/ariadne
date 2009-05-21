@@ -303,7 +303,8 @@ void trace_box(cairo_t *cr, const std::vector<Point>& pts)
 void trace_polytope(cairo_t *cr, const std::vector<Point>& p) 
 {
     //std::cerr << "trace_polytope(cairo_t *cr, std::vector<Point> p) p="<<p<<std::endl;
-    ARIADNE_ASSERT(p.size()>=3);
+    //ARIADNE_ASSERT(p.size()>=3);
+    ARIADNE_ASSERT(p.size()>=1);
     ARIADNE_ASSERT(p[0].size()==2);
     cairo_move_to (cr, p[0][0], p[0][1]);
     for(uint i=1; i!=p.size(); ++i) {

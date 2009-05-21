@@ -797,8 +797,11 @@ Box GridAbstractCell::lattice_box_to_space(const Vector<Interval> & theLatticeBo
         const Float theDimLength = theGridLengths[current_dimension];
         const Float theDimOrigin = theGridOrigin[current_dimension];
         //Recompute the new dimension coordinates, detaching them from the grid 
-        theTmpBox[current_dimension].set_lower( add_approx( theDimOrigin, mul_approx( theDimLength, theLatticeBox[current_dimension].lower() ) ) );
-        theTmpBox[current_dimension].set_upper( add_approx( theDimOrigin, mul_approx( theDimLength, theLatticeBox[current_dimension].upper() ) ) );
+        //Compute lower and upper bounds separately, and then set the box lower
+        //and upper values simultaneously to prevent lower temporarily higher than upper.
+        Float lower = add_approx( theDimOrigin, mul_approx( theDimLength, theLatticeBox[current_dimension].lower() ) );
+        Float upper = add_approx( theDimOrigin, mul_approx( theDimLength, theLatticeBox[current_dimension].upper() ) );
+        theTmpBox[current_dimension].set(lower,upper);
     }
         
     return theTmpBox;
@@ -983,11 +986,12 @@ Box GridOpenCell::compute_box(const Grid& theGrid, const uint theHeight, const B
     for(int dim = 0; dim < theGrid.dimension(); dim++){
         Interval openCellBoxInLatticeDimInterval;
         Interval baseCellBoxInLatticeDimInterval = baseCellBoxInLattice[dim];
-        openCellBoxInLatticeDimInterval.set_lower( baseCellBoxInLatticeDimInterval.lower() );
-        openCellBoxInLatticeDimInterval.set_upper(   baseCellBoxInLatticeDimInterval.upper() +
-                                                   ( baseCellBoxInLatticeDimInterval.upper() -
-                                                     baseCellBoxInLatticeDimInterval.lower() ) );
-        
+        Float lower = baseCellBoxInLatticeDimInterval.lower();
+        Float upper = baseCellBoxInLatticeDimInterval.upper() +
+                        ( baseCellBoxInLatticeDimInterval.upper() -
+                          baseCellBoxInLatticeDimInterval.lower() );
+        openCellBoxInLatticeDimInterval.set(lower,upper);
+
         openCellBoxInLattice[dim] = openCellBoxInLatticeDimInterval;
     }
     

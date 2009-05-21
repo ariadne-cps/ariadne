@@ -686,11 +686,13 @@ Interval trunc(Interval x, uint n)
 
 Interval rec(Interval i)
 {
+    const double& il=i.lower();
+    const double& iu=i.upper();
     volatile double rl,ru;
-    if(i.l>0 || i.u<0) {
+    if(il>0 || iu<0) {
         rounding_mode_t rnd=get_rounding_mode();
-        rl=_div_down(1.0,i.u);
-        ru=_div_up(1.0,i.l);
+        rl=_div_down(1.0,iu);
+        ru=_div_up(1.0,il);
         set_rounding_mode(rnd);
     } else {
         rl=-inf();
@@ -703,35 +705,39 @@ Interval rec(Interval i)
 
 Interval mul(Interval i1, Interval i2)
 {
+    const double& i1l=i1.lower();
+    const double& i1u=i1.upper();
+    const double& i2l=i2.lower();
+    const double& i2u=i2.upper();
     volatile double rl,ru;
     rounding_mode_t rnd=get_rounding_mode();
-    if(i1.l>=0) {
-        if(i2.l>=0) {
-            rl=_mul_down(i1.l,i2.l); ru=_mul_up(i1.u,i2.u);
-        } else if(i2.u<=0) {
-            rl=_mul_down(i1.u,i2.l); ru=_mul_up(i1.l,i2.u);
+    if(i1l>=0) {
+        if(i2l>=0) {
+            rl=_mul_down(i1l,i2l); ru=_mul_up(i1u,i2u);
+        } else if(i2u<=0) {
+            rl=_mul_down(i1u,i2l); ru=_mul_up(i1l,i2u);
         } else {
-            rl=_mul_down(i1.u,i2.l); ru=_mul_up(i1.u,i2.u);
+            rl=_mul_down(i1u,i2l); ru=_mul_up(i1u,i2u);
         }
     }
-    else if(i1.u<=0) {
-        if(i2.l>=0) {
-            rl=_mul_down(i1.l,i2.u); ru=_mul_up(i1.u,i2.l);
-        } else if(i2.u<=0) {
-            rl=_mul_down(i1.u,i2.u); ru=_mul_up(i1.l,i2.l);
+    else if(i1u<=0) {
+        if(i2l>=0) {
+            rl=_mul_down(i1l,i2u); ru=_mul_up(i1u,i2l);
+        } else if(i2u<=0) {
+            rl=_mul_down(i1u,i2u); ru=_mul_up(i1l,i2l);
         } else {
-            rl=_mul_down(i1.l,i2.u); ru=_mul_up(i1.l,i2.l);
+            rl=_mul_down(i1l,i2u); ru=_mul_up(i1l,i2l);
         }
     } else {
-        if(i2.l>=0) {
-            rl=_mul_down(i1.l,i2.u); ru=_mul_up(i1.u,i2.u);
-        } else if(i2.u<=0) {
-            rl=_mul_down(i1.u,i2.l); ru=_mul_up(i1.l,i2.l);
+        if(i2l>=0) {
+            rl=_mul_down(i1l,i2u); ru=_mul_up(i1u,i2u);
+        } else if(i2u<=0) {
+            rl=_mul_down(i1u,i2l); ru=_mul_up(i1l,i2l);
         } else {
             set_rounding_mode(downward);
-            rl=min(i1.u*i2.l,i1.l*i2.u);
+            rl=min(i1u*i2l,i1l*i2u);
             set_rounding_mode(upward);
-            ru=max(i1.l*i2.l,i1.u*i2.u);
+            ru=max(i1l*i2l,i1u*i2u);
         }
     }
     set_rounding_mode(rnd);
@@ -742,11 +748,13 @@ Interval mul(Interval i1, Interval i2)
 Interval mul(Interval i1, Float x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
+    const double& i1l=i1.lower();
+    const double& i1u=i1.upper();
     volatile double rl,ru;
     if(x2>=0) {
-        rl=_mul_down(i1.l,x2); ru=_mul_up(i1.u,x2);
+        rl=_mul_down(i1l,x2); ru=_mul_up(i1u,x2);
     } else {
-        rl=_mul_down(i1.u,x2); ru=_mul_up(i1.l,x2);
+        rl=_mul_down(i1u,x2); ru=_mul_up(i1l,x2);
     }
     set_rounding_mode(rnd);
     return Interval(rl,ru);
@@ -756,23 +764,27 @@ Interval mul(Interval i1, Float x2)
 Interval div(Interval i1, Interval i2)
 {
     rounding_mode_t rnd=get_rounding_mode();
+    const double& i1l=i1.lower();
+    const double& i1u=i1.upper();
+    const double& i2l=i2.lower();
+    const double& i2u=i2.upper();
     volatile double rl,ru;
-    if(i2.l>=0) {
-        if(i1.l>=0) {
-            rl=_div_down(i1.l,i2.u); ru=_div_up(i1.u,i2.l);
-        } else if(i1.u<=0) {
-            rl=_div_down(i1.l,i2.l); ru=_div_up(i1.u,i2.u);
+    if(i2l>=0) {
+        if(i1l>=0) {
+            rl=_div_down(i1l,i2u); ru=_div_up(i1u,i2l);
+        } else if(i1u<=0) {
+            rl=_div_down(i1l,i2l); ru=_div_up(i1u,i2u);
         } else {
-            rl=_div_down(i1.l,i2.l); ru=_div_up(i1.u,i2.l);
+            rl=_div_down(i1l,i2l); ru=_div_up(i1u,i2l);
         }
     }
-    else if(i2.u<=0) {
-        if(i1.l>=0) {
-            rl=_div_down(i1.u,i2.u); ru=_div_up(i1.l,i2.l);
-        } else if(i1.u<=0) {
-            rl=_div_down(i1.u,i2.l); ru=_div_up(i1.l,i2.u);
+    else if(i2u<=0) {
+        if(i1l>=0) {
+            rl=_div_down(i1u,i2u); ru=_div_up(i1l,i2l);
+        } else if(i1u<=0) {
+            rl=_div_down(i1u,i2l); ru=_div_up(i1l,i2u);
         } else {
-            rl=_div_down(i1.u,i2.u); ru=_div_up(i1.l,i2.u);
+            rl=_div_down(i1u,i2u); ru=_div_up(i1l,i2u);
         }
     }
     else {
@@ -788,11 +800,13 @@ Interval div(Interval i1, Interval i2)
 Interval div(Interval i1, Float x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
+    const double& i1l=i1.lower();
+    const double& i1u=i1.upper();
     volatile double rl,ru;
     if(x2>0) {
-        rl=_div_down(i1.l,x2); ru=_div_up(i1.u,x2);
+        rl=_div_down(i1l,x2); ru=_div_up(i1u,x2);
     } else if(x2<0) {
-        rl=_div_down(i1.u,x2); ru=_div_up(i1.l,x2);
+        rl=_div_down(i1u,x2); ru=_div_up(i1l,x2);
     } else {
         rl=-inf(); ru=+inf();
     }
@@ -804,14 +818,16 @@ Interval div(Interval i1, Float x2)
 Interval div(Float x1, Interval i2)
 {
     rounding_mode_t rnd=get_rounding_mode();
+    const double& i2l=i2.lower();
+    const double& i2u=i2.upper();
     volatile double rl,ru;
-    if(i2.l<=0 && i2.u>=0) {
+    if(i2l<=0 && i2u>=0) {
         ARIADNE_THROW(DivideByZeroException,"Interval div(Float x1, Interval ivl2)","x1="<<x1<<", ivl2="<<i2);
         rl=-inf(); ru=+inf();
     } else if(x1>=0) {
-        rl=_div_down(x1,i2.u); ru=_div_up(x1,i2.l);
+        rl=_div_down(x1,i2u); ru=_div_up(x1,i2l);
     } else {
-        rl=_div_down(x1,i2.l); ru=_div_up(x1,i2.u);
+        rl=_div_down(x1,i2l); ru=_div_up(x1,i2u);
     }
     set_rounding_mode(rnd);
     return Interval(rl,ru);
@@ -820,15 +836,17 @@ Interval div(Float x1, Interval i2)
 Interval sqr(Interval i)
 {
     rounding_mode_t rnd=get_rounding_mode();
+    const double& il=i.lower();
+    const double& iu=i.upper();
     volatile double rl,ru;
-    if(i.l >=0) {
-        rl=_mul_down(i.l,i.l); ru=_mul_up(i.u,i.u);
-    } else if(i.u<=0) {
-        rl=_mul_down(i.u,i.u); ru=_mul_up(i.l,i.l);
+    if(il>=0) {
+        rl=_mul_down(il,il); ru=_mul_up(iu,iu);
+    } else if(iu<=0) {
+        rl=_mul_down(iu,iu); ru=_mul_up(il,il);
     } else {
         rl=0.0;
         set_rounding_mode(upward);
-        ru=max(i.l*i.l,i.u*i.u);
+        ru=max(il*il,iu*iu);
     }
     set_rounding_mode(rnd);
     return Interval(rl,ru);
@@ -850,9 +868,9 @@ Interval pow(Interval i, uint m)
     if(m%2==0) { i=abs(nvi); }
     volatile double rl,ru;
     set_rounding_mode(downward);
-    rl=pow_rnd(i.l,m);
+    rl=pow_rnd(i.lower(),m);
     set_rounding_mode(upward);
-    ru=pow_rnd(i.u,m);
+    ru=pow_rnd(i.upper(),m);
     return Interval(rl,ru);
 }
 
@@ -862,9 +880,9 @@ Interval sqrt(Interval i)
 {
     rounding_mode_t rnd = get_rounding_mode();
     set_rounding_downward();
-    volatile Float rl=sqrt_rnd(i.l);
+    volatile Float rl=sqrt_rnd(i.lower());
     set_rounding_upward();
-    volatile Float ru=sqrt_rnd(i.u);
+    volatile Float ru=sqrt_rnd(i.upper());
     set_rounding_mode(rnd);
     return Interval(rl,ru);
 }
@@ -873,9 +891,9 @@ Interval exp(Interval i)
 {
     rounding_mode_t rnd = get_rounding_mode();
     set_rounding_downward();
-    volatile Float rl=exp_rnd(i.l);
+    volatile Float rl=exp_rnd(i.lower());
     set_rounding_upward();
-    volatile Float ru=exp_rnd(i.u);
+    volatile Float ru=exp_rnd(i.upper());
     set_rounding_mode(rnd);
     return Interval(rl,ru);
 }
@@ -884,9 +902,9 @@ Interval log(Interval i)
 {
     rounding_mode_t rnd = get_rounding_mode();
     set_rounding_downward();
-    volatile Float rl=log_rnd(i.l);
+    volatile Float rl=log_rnd(i.lower());
     set_rounding_upward();
-    volatile Float ru=log_rnd(i.u);
+    volatile Float ru=log_rnd(i.upper());
     set_rounding_mode(rnd);
     return Interval(rl,ru);
 }
@@ -1011,13 +1029,13 @@ operator<<(std::ostream& os, const Interval& ivl)
 std::ostream&
 operator<<(std::ostream& os, const Interval& ivl)
 {
-    if(ivl.l==ivl.u) {
-        return os << std::setprecision(18) << ivl.l;
+    if(ivl.lower()==ivl.upper()) {
+        return os << std::setprecision(18) << ivl.lower();
     }
 
     std::stringstream iss,uss;
-    iss << std::setprecision(18) << ivl.l;
-    uss << std::setprecision(18) << ivl.u;
+    iss << std::setprecision(18) << ivl.lower();
+    uss << std::setprecision(18) << ivl.upper();
 
     std::string lstr,ustr;
     iss >> lstr; uss >> ustr;
@@ -1060,12 +1078,14 @@ operator<<(std::ostream& os, const Interval& ivl)
 std::istream&
 operator>>(std::istream& is, Interval& ivl)
 {
+    double l,u;
     char cl,cm,cr;
-    is >> cl >> ivl.l >> cm >> ivl.u >> cr;
+    is >> cl >> l >> cm >> u >> cr;
     ARIADNE_ASSERT(is);
     ARIADNE_ASSERT(cl=='[' || cl=='(');
     ARIADNE_ASSERT(cm==':' || cm==',' || cm==';');
     ARIADNE_ASSERT(cr==']' || cr==')');
+    ivl.set(l,u);
     return is;
 }
 

@@ -53,17 +53,17 @@ uint irmax(const Box& bx) {
 inline
 Box split(const Box& bx, uint i, Piece lr) {
     Box result(bx);
-    Float& l=result[i].l;
-    Float& u=result[i].u;
+    Interval& ivl=result[i];
+    const Float& l=ivl.lower();
+    const Float& u=ivl.upper();
     Float c=med_approx(l,u);
     if(lr==middle) {
-        l=med_approx(l,c);
-        u=med_approx(c,u);
+        ivl.set(med_approx(l,c),med_approx(c,u));
     } else { 
-        if(lr==left) { u=c; }
-        else { l=c; }
+        if(lr==left) { ivl.set_upper(c); }
+        else { ivl.set_lower(c); }
     }
-return result;
+    return result;
 }
 
 inline
@@ -71,8 +71,8 @@ std::pair<Box,Box> split(const Box& bx, uint i)
 {
     std::pair<Box,Box> result(bx,bx);
     Float c=med_approx(bx[i].lower(),bx[i].upper());
-    result.first[i].u=c;
-    result.second[i].l=c;
+    result.first[i].set_upper(c);
+    result.second[i].set_lower(c);
     return result;
 }
 

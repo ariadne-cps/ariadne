@@ -37,6 +37,7 @@
 
 #include "tribool.h"
 #include "rounding.h"
+#include "macros.h"
 
 // Simplifying typedefs for unsigned types
 // These may be inclused in other headers,
@@ -232,7 +233,7 @@ class Interval {
     Interval(Float x) : l(x), u(x) { }
     Interval(const Interval& i) : l(i.l), u(i.u) { }
 
-    Interval(Float lower, Float upper) : l(lower), u(upper) { }
+    Interval(Float lower, Float upper) : l(lower), u(upper) { ARIADNE_ASSERT(lower<=upper); }
 #ifdef HAVE_GMPXX_H
     Interval(Rational q);
     Interval(Rational lower, Rational upper);
@@ -247,53 +248,55 @@ class Interval {
     bool empty() const { return l>u; }
     bool singleton() const { return l==u; }
 
-    void set_lower(const Float& lower) { l=lower; }
-    void set_upper(const Float& upper) { u=upper; }
+    void set_lower(const Float& lower) { ARIADNE_ASSERT(lower<=this->u); l=lower; }
+    void set_upper(const Float& upper) { ARIADNE_ASSERT(this->l<=upper); u=upper; }
+    void set(const Float& lower, const Float& upper) { ARIADNE_ASSERT(lower<=upper); l=lower; u=upper; }
   public:
+  private:
     double l, u;
 };
 
 std::ostream& operator<<(std::ostream& os, const Interval& ivl);
 
 inline Float midpoint(Interval i) {
-    return add_approx(i.l,i.u)/2;
+    return add_approx(i.lower(),i.upper())/2;
 }
 
 inline Float radius(Interval i) {
-    return sub_up(i.u,i.l)/2;
+    return sub_up(i.upper(),i.lower())/2;
 }
 
 inline Float width(Interval i) {
-    return sub_up(i.u,i.l);
+    return sub_up(i.upper(),i.lower());
 }
 
 inline bool equal(Interval i1, Interval i2) {
     //std::cerr<<"equal(i1,i2) with i1="<<i1<<"; i2="<<i2<<std::endl;
-    return i1.l==i2.l && i1.u==i2.u;
+    return i1.lower()==i2.lower() && i1.upper()==i2.upper();
 }
 
 inline bool empty(Interval i) {
-    return i.l>i.u;
+    return i.lower()>i.upper();
 }
 
 inline bool bounded(Interval i) {
-    return i.l!=-inf() && i.u!=+inf();
+    return i.lower()!=-inf() && i.upper()!=+inf();
 }
 
 inline Interval intersection(Interval i1, Interval i2) {
-    if(i1.l>i2.u || i1.u<i2.l) { return Interval(1,-1); }
-    return Interval(max(i1.l,i2.l),min(i1.u,i2.u));
+    if(i1.lower()>i2.upper() || i1.upper()<i2.lower()) { return Interval(1,-1); }
+    return Interval(max(i1.lower(),i2.lower()),min(i1.upper(),i2.upper()));
 }
 
 inline Interval hull(Interval i1, Interval i2) {
-    return Interval(min(i1.l,i2.l),max(i1.u,i2.u));
+    return Interval(min(i1.lower(),i2.lower()),max(i1.upper(),i2.upper()));
 }
 
 Interval trunc(Interval, uint eps);
 
-inline Float med(Interval i) { return (i.l+i.u)/2; }
-inline Float rad(Interval i) { return up((i.u-i.l)/2); }
-inline Float diam(Interval i) { return up(i.u-i.l); }
+inline Float med(Interval i) { return (i.lower()+i.upper())/2; }
+inline Float rad(Interval i) { return up((i.upper()-i.lower())/2); }
+inline Float diam(Interval i) { return up(i.upper()-i.lower()); }
 
 inline Interval max(Interval,Interval);
 inline Interval min(Interval,Interval);
@@ -334,17 +337,17 @@ Interval acos(Interval);
 Interval atan(Interval);
 
 
-inline Float mag(Interval i) { return max(abs(i.l),abs(i.u)); }
-inline Float mig(Interval i) { return min(abs(i.l),abs(i.u)); }
+inline Float mag(Interval i) { return max(abs(i.lower()),abs(i.upper())); }
+inline Float mig(Interval i) { return min(abs(i.lower()),abs(i.upper())); }
 
-inline bool contains(Interval i, Float x) { return i.l<=x && x<=i.u; }
+inline bool contains(Interval i, Float x) { return i.lower()<=x && x<=i.upper(); }
 
-inline bool subset(Interval i1, Interval i2) { return i1.l>=i2.l && i1.u<=i2.u; }
-inline bool intersect(Interval i1, Interval i2) { return i1.l<=i2.u && i1.u>=i2.l; }
-inline bool disjoint(Interval i1, Interval i2) { return i1.l>i2.u || i1.u<i2.l; }
-inline bool overlap(Interval i1, Interval i2) { return i1.l<i2.u && i1.u>i2.l; }
-inline bool inside(Interval i1, Interval i2) { return i1.l>i2.l && i1.u<i2.u; }
-inline bool covers(Interval i1, Interval i2) { return i1.l<i2.l && i1.u>i2.u; }
+inline bool subset(Interval i1, Interval i2) { return i1.lower()>=i2.lower() && i1.upper()<=i2.upper(); }
+inline bool intersect(Interval i1, Interval i2) { return i1.lower()<=i2.upper() && i1.upper()>=i2.lower(); }
+inline bool disjoint(Interval i1, Interval i2) { return i1.lower()>i2.upper() || i1.upper()<i2.lower(); }
+inline bool overlap(Interval i1, Interval i2) { return i1.lower()<i2.upper() && i1.upper()>i2.lower(); }
+inline bool inside(Interval i1, Interval i2) { return i1.lower()>i2.lower() && i1.upper()<i2.upper(); }
+inline bool covers(Interval i1, Interval i2) { return i1.lower()<i2.lower() && i1.upper()>i2.upper(); }
 
 inline Interval max(Interval i1, Interval i2)
 {
@@ -359,27 +362,27 @@ inline Interval min(Interval i1, Interval i2)
 
 inline Interval abs(Interval i)
 {
-    if(i.l>=0) {
-        return Interval(i.l,i.u);
-    } else if(i.u<=0) {
-        return Interval(-i.u,-i.l);
+    if(i.lower()>=0) {
+        return Interval(i.lower(),i.upper());
+    } else if(i.upper()<=0) {
+        return Interval(-i.upper(),-i.lower());
     } else {
-        return Interval(0.0,max(-i.l,i.u));
+        return Interval(0.0,max(-i.lower(),i.upper()));
     }
 }
 
 inline Interval neg(Interval i)
 {
-    return Interval(-i.u,-i.l);
+    return Interval(-i.upper(),-i.lower());
 }
 
 inline Interval add(Interval i1, Interval i2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    volatile double& i1l=i1.l;
-    volatile double& i1u=i1.u;
-    volatile double& i2l=i2.l;
-    volatile double& i2u=i2.u;
+    const double& i1l=i1.lower();
+    const double& i1u=i1.upper();
+    const double& i2l=i2.lower();
+    const double& i2u=i2.upper();
     set_rounding_mode(downward);
     volatile double rl=i1l+i2l;
     set_rounding_mode(upward);
@@ -391,8 +394,8 @@ inline Interval add(Interval i1, Interval i2)
 inline Interval add(Interval i1, Float x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    volatile double& i1l=i1.l;
-    volatile double& i1u=i1.u;
+    const double& i1l=i1.lower();
+    const double& i1u=i1.upper();
     volatile double& x2v=x2;
     set_rounding_mode(downward);
     volatile double rl=i1l+x2v;
@@ -418,10 +421,10 @@ inline Interval add_ivl(Float x1, Float x2)
 inline Interval sub(Interval i1, Interval i2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    volatile double& i1l=i1.l;
-    volatile double& i1u=i1.u;
-    volatile double& i2l=i2.l;
-    volatile double& i2u=i2.u;
+    const double& i1l=i1.lower();
+    const double& i1u=i1.upper();
+    const double& i2l=i2.lower();
+    const double& i2u=i2.upper();
     set_rounding_mode(downward);
     volatile double rl=i1l-i2u;
     set_rounding_mode(upward);
@@ -433,8 +436,8 @@ inline Interval sub(Interval i1, Interval i2)
 inline Interval sub(Interval i1, Float x2)
 {
     rounding_mode_t rnd=get_rounding_mode();
-    volatile double& i1l=i1.l;
-    volatile double& i1u=i1.u;
+    const double& i1l=i1.lower();
+    const double& i1u=i1.upper();
     volatile double& x2v=x2;
     set_rounding_mode(downward);
     volatile double rl=i1l-x2v;
@@ -448,8 +451,8 @@ inline Interval sub(Float x1, Interval i2)
 {
     rounding_mode_t rnd=get_rounding_mode();
     volatile double& x1v=x1;
-    volatile double& i2l=i2.l;
-    volatile double& i2u=i2.u;
+    const double& i2l=i2.lower();
+    const double& i2u=i2.upper();
     set_rounding_mode(downward);
     volatile double rl=x1v-i2u;
     set_rounding_mode(upward);
@@ -508,25 +511,25 @@ inline Interval rad_ivl(Float x1, Float x2)
 }
 
 inline Interval med_ivl(Interval i) {
-    return add_ivl(i.l/2,i.u/2);
+    return add_ivl(i.lower()/2,i.upper()/2);
 }
 
 inline Interval rad_ivl(Interval i) {
-    return sub_ivl(i.u/2,i.l/2);
+    return sub_ivl(i.upper()/2,i.lower()/2);
 }
 
 // Standard equality operators
-inline bool operator==(const Interval& i1, const Interval& i2) { return i1.l==i2.l && i1.u==i2.u; }
-inline bool operator!=(const Interval& i1, const Interval& i2) { return i1.l!=i2.l || i1.u!=i2.u; }
+inline bool operator==(const Interval& i1, const Interval& i2) { return i1.lower()==i2.lower() && i1.upper()==i2.upper(); }
+inline bool operator!=(const Interval& i1, const Interval& i2) { return i1.lower()!=i2.lower() || i1.upper()!=i2.upper(); }
 
 // Boost-style tribool (in)equality operators
 //inline tribool operator==(const Interval& i1, const Interval& i2) {
-//  if(i1.l>i2.u || i1.u<i2.l) { return false; } else if(i1.l==i2.u && i1.u==i2.l) { return true; } else { return indeterminate; } }
+//  if(i1.lower()>i2.upper() || i1.upper()<i2.lower()) { return false; } else if(i1.lower()==i2.upper() && i1.upper()==i2.lower()) { return true; } else { return indeterminate; } }
 //inline tribool operator!=(const Interval& i1, const Interval& i2) { return !(i1==i2); }
 
 
-inline Interval operator+(Interval i) { return Interval(i.l,i.u); }
-inline Interval operator-(Interval i) { return Interval(-i.u,-i.l); }
+inline Interval operator+(Interval i) { return Interval(i.lower(),i.upper()); }
+inline Interval operator-(Interval i) { return Interval(-i.upper(),-i.lower()); }
 inline Interval operator+(Interval i1, Interval i2) { return add(i1,i2); }
 inline Interval operator-(Interval i1, Interval i2) { return sub(i1,i2); }
 inline Interval operator*(Interval i1, Interval i2) { return mul(i1,i2); }
@@ -614,7 +617,7 @@ inline tribool operator<=(Interval i1, Interval i2) {
 }
 
 template<class A> void serialize(A& a, Interval& ivl, const uint version) {
-    a & ivl.l & ivl.u; }
+    a & ivl.lower() & ivl.upper(); }
 
 std::ostream& operator<<(std::ostream&, const Interval&);
 std::istream& operator>>(std::istream&, Interval&);

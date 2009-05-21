@@ -400,9 +400,9 @@ class TaylorExpression
 
 
 inline tribool operator>(const TaylorExpression& x, const Float& c) {
-    Interval r=x.range(); if(r.l>c) { return true; } else if(r.u<=c) { return false; } else { return indeterminate; } }
+    Interval r=x.range(); if(r.lower()>c) { return true; } else if(r.upper()<=c) { return false; } else { return indeterminate; } }
 inline tribool operator<(const TaylorExpression& x, const Float& c) {
-    Interval r=x.range(); if(r.l<c) { return true; } else if(r.u>=c) { return false; } else { return indeterminate; } }
+    Interval r=x.range(); if(r.lower()<c) { return true; } else if(r.upper()>=c) { return false; } else { return indeterminate; } }
 
 inline tribool operator>(const TaylorExpression& x, const TaylorExpression& y) { return (x-y)>0; }
 inline tribool operator<(const TaylorExpression& x, const TaylorExpression& y) { return (x-y)<0; }

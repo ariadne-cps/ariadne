@@ -164,8 +164,9 @@ read(Interval& ivl, const boost::python::list& pair)
     if(boost::python::len(pair)!=2) {
         throw std::runtime_error("Interval must be list of pairs representing intervals");
     }
-    Float& l=ivl.l; Float& u=ivl.u;
+    Float l,u;
     read(l,pair[0]); read(u,pair[1]);
+    ivl.set(l,u);
 }
 
 inline
@@ -175,8 +176,9 @@ read(Interval& ivl, const boost::python::tuple& pair)
     if(boost::python::len(pair)!=2) {
         throw std::runtime_error("Interval must be list of pairs representing intervals");
     }
-    Float& l=ivl.l; Float& u=ivl.u;
+    Float l,u;
     read(l,pair[0]); read(u,pair[1]);
+    ivl.set(l,u);
 }
 
 template<> bool check(const boost::python::extract<boost::python::list>& e) { return e.check(); }

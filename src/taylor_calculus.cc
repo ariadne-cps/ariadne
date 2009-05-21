@@ -526,7 +526,8 @@ scaled_touching_time_interval(const BaseModelType& guard_flow_set_model) const
         RealType max_lower_time=maximum_time;
         for(uint i=0; i!=refinements; ++i) {
             RealType new_lower_time=med_approx(min_lower_time,max_lower_time);
-            if(possibly(evaluate(guard_flow_set_model,join(space_domain,Interval(minimum_time,new_lower_time)))==0.0)) {
+            Interval guard_range=evaluate(guard_flow_set_model,join(space_domain,Interval(minimum_time,new_lower_time)));
+            if(possibly(guard_range==0.0)) {
                 max_lower_time=new_lower_time;
             } else {
                 min_lower_time=new_lower_time;
@@ -536,7 +537,7 @@ scaled_touching_time_interval(const BaseModelType& guard_flow_set_model) const
     }
 
     if(definitely(initial_guard_range.lower()>0) || definitely(initial_guard_range.upper()<0)) {
-        upper_time=minimum_time;
+        upper_time=maximum_time;
     } else {
         RealType min_upper_time=minimum_time;
         RealType max_upper_time=maximum_time;

@@ -478,7 +478,20 @@ _evolution_step(std::vector< HybridTimedSetType >& working_sets,
 
     // Compute continuous evolution
     FlowSetModelType flow_set_model; BoxType flow_bounds; Float time_step;
+
+    for(uint i=0; i!=flow_set_model.size(); ++i) {
+        if(flow_set_model[i].error()<0) {
+            std::cerr<<flow_set_model<<std::endl;
+        }
+    }
+
     compute_flow_model(flow_set_model,flow_bounds,time_step,dynamic_ptr,set_model);
+
+    for(uint i=0; i!=flow_set_model.size(); ++i) {
+        if(flow_set_model[i].error()<0) {
+            std::cerr<<flow_set_model<<std::endl;
+        }
+    }
 
     ARIADNE_LOG(2,"flow_bounds = "<<flow_bounds<<"\n")
     ARIADNE_LOG(2,"time_step = "<<time_step<<"\n")

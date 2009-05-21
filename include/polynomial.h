@@ -202,6 +202,13 @@ template<class X> inline Polynomial<X> operator*(const Polynomial<X>& p1, const 
             MultiIndex a=iter1->key()+iter2->key();
             r[a]+=iter1->data()*iter2->data(); } } return r; }
 
+template<class X> inline Polynomial<X> sqr(const Polynomial<X>& p) {
+    return p*p; }
+
+template<class X> inline Polynomial<X> pow(const Polynomial<X>& p, unsigned int m) {
+    Polynomial<X> r=Polynomial<X>::constant(p.argument_size(),1.0); Polynomial<X> q(p);
+    while(m) { if(m%2) { r=r*q; } q=q*q; m/=2; } return r; }
+
 template<class X, class XX> inline Polynomial<X>& operator+=(Polynomial<X>& p, const Polynomial<XX>& q) {
     ARIADNE_ASSERT(p.argument_size()==q.argument_size());
     typedef typename Polynomial<X>::const_iterator Iter;

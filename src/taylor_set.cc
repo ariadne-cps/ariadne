@@ -680,6 +680,32 @@ void boxes_draw(GraphicsInterface& fig, const TaylorSet& ts) {
     //fig.set_line_style(true);
 }
 
+void zonotopes_draw_subdivide(ListSet<Zonotope>& zonotopes, const TaylorSet& set, const double resolution)
+{
+    if(set.bounding_box().radius()>=resolution) {
+        std::pair<TaylorSet,TaylorSet> subdivisions=set.split();
+        zonotopes_draw_subdivide(zonotopes,subdivisions.first,resolution);
+        zonotopes_draw_subdivide(zonotopes,subdivisions.second,resolution);
+    } else {
+        zonotopes.adjoin(zonotope(set));
+    }
+}
+
+void zonotopes_draw(GraphicsInterface& fig, const TaylorSet& ts) {
+    static const double resolution=1.0/8;
+    double old_line_width=fig.get_line_width();
+    Colour old_line_colour=fig.get_line_colour();
+    //fig.set_line_width(0.0);
+    //fig.set_line_style(false);
+    fig.set_line_colour(fig.get_fill_colour());
+    ListSet<Zonotope> zonotopes;
+    zonotopes_draw_subdivide(zonotopes,ts,resolution);
+    draw(fig,zonotopes);
+    fig.set_line_colour(old_line_colour);
+    fig.set_line_width(old_line_width);
+    //fig.set_line_style(true);
+}
+
 void affine_draw(GraphicsInterface& fig, const TaylorSet& ts) {
     draw(fig,zonotope(ts));
 }
@@ -724,7 +750,8 @@ void grid_draw(GraphicsInterface& fig, const TaylorSet& ts)
 }
 
 void draw(GraphicsInterface& fig, const TaylorSet& ts) {
-    boxes_draw(fig,ts);
+    //boxes_draw(fig,ts);
+    zonotopes_draw(fig,ts);
 /*
     static const double MAX_NEGLIGABLE_NORM=1e-10;
     if(ts.dimension()==2 && ts.generators_size()==2 && norm(error(ts))<MAX_NEGLIGABLE_NORM) {

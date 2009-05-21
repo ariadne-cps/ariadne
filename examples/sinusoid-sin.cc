@@ -96,9 +96,7 @@ int main()
     HybridReachabilityAnalyser analyser(evolver);
     analyser.verbosity = 3;
     analyser.parameters().lock_to_grid_time = 2*pi<Float>();
-    analyser.parameters().grid_lengths= 0.5;
-    analyser.parameters().grid = Grid(Vector<Float>(2, 1.0, 0.25));
-    analyser.parameters().hybrid_grid = HybridGrid(sinusoid.state_space(), 0.1);
+    analyser.parameters().maximum_grid_depth+=2;
     std::cout <<  analyser.parameters() << std::endl;
 
     HybridImageSet initial_set;
@@ -107,13 +105,13 @@ int main()
     // HybridTime reach_time(3*pi<Float>(),1);
 
     std::cout << "Computing lower reach set... " << std::flush;
-    HybridGridTreeSet *reach_set_ptr;
-    HybridGridTreeSet *evolve_set_ptr; 
-    make_lpair(reach_set_ptr,evolve_set_ptr) = analyser.lower_reach_evolve(sinusoid,initial_set,evolution_time);
+    HybridGridTreeSet reach_set;
+    HybridGridTreeSet evolve_set;
+    make_lpair(reach_set,evolve_set) = analyser.lower_reach_evolve(sinusoid,initial_set,evolution_time);
     std::cout << "done." << std::endl;
     
-    std::cout << "reach_set.size()=" << reach_set_ptr->size() << std::endl;
-    std::cout << "evolve_set.size()=" << evolve_set_ptr->size() << std::endl;
+    std::cout << "reach_set.size()=" << reach_set.size() << std::endl;
+    std::cout << "evolve_set.size()=" << evolve_set.size() << std::endl;
    
     g.clear();
     Box graphic_box2(2, -0.1,2*pi<Float>()+0.1, -1.1,1.6);
@@ -122,40 +120,40 @@ int main()
     g.set_projection_map(ProjectionFunction(p2,3));
 
     g << fill_colour(Colour(0.0,0.5,1.0));
-    g << *reach_set_ptr;
+    g << reach_set;
     g << fill_colour(Colour(1.0,0.0,0.0));
-    g << *evolve_set_ptr;
+    g << evolve_set;
     g.write("sinusoid_sin_lower");
 
     std::cout << "Computing upper reach set... " << std::flush;
-    make_lpair(reach_set_ptr,evolve_set_ptr) = analyser.upper_reach_evolve(sinusoid,initial_set,evolution_time);
+    make_lpair(reach_set,evolve_set) = analyser.upper_reach_evolve(sinusoid,initial_set,evolution_time);
     std::cout << "done." << std::endl;
     
-    std::cout << "reach_set.size()=" << reach_set_ptr->size() << std::endl;
-    std::cout << "evolve_set.size()=" << evolve_set_ptr->size() << std::endl;
+    std::cout << "reach_set.size()=" << reach_set.size() << std::endl;
+    std::cout << "evolve_set.size()=" << evolve_set.size() << std::endl;
    
     g.clear();
     g.set_bounding_box(graphic_box2);
     g.set_projection_map(ProjectionFunction(p2,3));
 
     g << fill_colour(Colour(0.0,0.5,1.0));
-    g << *reach_set_ptr;
+    g << reach_set;
     g << fill_colour(Colour(1.0,0.0,0.0));
-    g << *evolve_set_ptr;
+    g << evolve_set;
     g.write("sinusoid_sin_upper");
  
     std::cout << "Computing chainreach set... " << std::flush;
-    reach_set_ptr = analyser.chain_reach(sinusoid,initial_set);
+    reach_set = analyser.chain_reach(sinusoid,initial_set);
     std::cout << "done." << std::endl;
     
-    std::cout << "reach_set.size()=" << reach_set_ptr->size() << std::endl;
+    std::cout << "reach_set.size()=" << reach_set.size() << std::endl;
 
     g.clear();
     g.set_bounding_box(graphic_box2);
     g.set_projection_map(ProjectionFunction(p2,3));
 
     g << fill_colour(Colour(0.0,0.5,1.0));
-    g << *reach_set_ptr;
+    g << reach_set;
     g.write("sinusoid_sin_chain");
  
 }

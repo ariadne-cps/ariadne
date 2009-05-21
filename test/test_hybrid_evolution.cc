@@ -305,7 +305,9 @@ class TestHybridEvolver
     HybridAutomaton make_hybrid_automaton(const PolynomialExpression& guard);
 
     void test();
-    void test_transverse_crossing();
+    void test_transverse_linear_crossing();
+    void test_transverse_cubic_crossing();
+    void test_transverse_cube_root_crossing();
 
 };
 
@@ -335,10 +337,11 @@ HybridAutomaton TestHybridEvolver::make_hybrid_automaton(const PolynomialExpress
     return system;
 }
 
-void TestHybridEvolver::test_transverse_crossing()
+void TestHybridEvolver::test_transverse_linear_crossing()
 {
     Float r=1.0/8;
-    PolynomialExpression guard=2*x+y-2;
+    Float tol=1e-5;
+    PolynomialExpression guard=x+y/2-1;
     HybridAutomaton system=make_hybrid_automaton(guard);
     Box initial_box(2, -r,+r, -r,+r);
     HybridTaylorSet initial_set(q1,initial_box);
@@ -346,14 +349,63 @@ void TestHybridEvolver::test_transverse_crossing()
 
     ListSet<HybridTaylorSet> evolved_set=evolver.evolve(system,initial_set,evolution_time,UPPER_SEMANTICS);
 
-    PolynomialFunction f=join(1.0-0.5*y,1.0+1.0*x+1.5*y);
-    Vector<Interval> error(2,Interval(-1e-5,1e-5));
+    PolynomialExpression ct=-guard; // Crossing time
+    PolynomialFunction f=join(x+ct,y+2-ct);
+    Vector<Interval> tolerance(2,Interval(-tol,+tol));
     TaylorSet expected_evolved_set(f,initial_box);
-    ARIADNE_TEST_BINARY_PREDICATE(refines,evolved_set[q2][0].models(),expected_evolved_set.models()+error);
+    ARIADNE_TEST_BINARY_PREDICATE(refines,expected_evolved_set.models(),evolved_set[q2][0].models());
+    ARIADNE_TEST_BINARY_PREDICATE(refines,evolved_set[q2][0].models(),expected_evolved_set.models()+tolerance);
+}
+
+void TestHybridEvolver::test_transverse_cubic_crossing()
+{
+    Float r=1.0/8;
+    Float tol=1e-5;
+    PolynomialExpression guard=x-(1+y*y*y);
+    HybridAutomaton system=make_hybrid_automaton(guard);
+    Box initial_box(2, -r,+r, -r,+r);
+    HybridTaylorSet initial_set(q1,initial_box);
+    HybridTime evolution_time(2.0,3);
+
+    ListSet<HybridTaylorSet> evolved_set=evolver.evolve(system,initial_set,evolution_time,UPPER_SEMANTICS);
+
+    PolynomialExpression ct=-guard; // Crossing time
+
+    PolynomialFunction f=join(x+ct,y+2-ct);
+    Vector<Interval> tolerance(2,Interval(-tol,+tol));
+    TaylorSet expected_evolved_set(f,initial_box);
+    ARIADNE_TEST_BINARY_PREDICATE(refines,expected_evolved_set.models(),evolved_set[q2][0].models());
+    ARIADNE_TEST_BINARY_PREDICATE(refines,evolved_set[q2][0].models(),expected_evolved_set.models()+tolerance);
+}
+
+void TestHybridEvolver::test_transverse_cube_root_crossing()
+{
+    Float r=1.0/8;
+    Float tol=1e-5;
+    PolynomialExpression guard=((x-1)*(x-1)+1.0)*(x-1)-y;
+    HybridAutomaton system=make_hybrid_automaton(guard);
+    Box initial_box(2, -r,+r, -r,+r);
+    HybridTaylorSet initial_set(q1,initial_box);
+    HybridTime evolution_time(2.0,3);
+
+    PolynomialExpression ct=y-pow(y,3)+3*pow(y,5)-12*pow(y,7)+55*pow(y,9)-273*pow(y,11)+1-x;
+    PolynomialFunction f=join(x+ct,y+2-ct);
+    Vector<Interval> tolerance(2,Interval(-tol,+tol));
+    TaylorSet expected_evolved_set(f,initial_box);
+    std::cerr<<"Here\n";
+
+    ListSet<HybridTaylorSet> evolved_set=evolver.evolve(system,initial_set,evolution_time,UPPER_SEMANTICS);
+    std::cerr<<"Here\n";
+
+    ARIADNE_TEST_BINARY_PREDICATE(refines,expected_evolved_set.models(),evolved_set[q2][0].models());
+    ARIADNE_TEST_BINARY_PREDICATE(refines,evolved_set[q2][0].models(),expected_evolved_set.models()+tolerance);
 }
 
 void TestHybridEvolver::test() {
-    ARIADNE_TEST_CALL(test_transverse_crossing());
+    ARIADNE_TEST_CALL(test_transverse_linear_crossing());
+    ARIADNE_TEST_CALL(test_transverse_cubic_crossing());
+    test_transverse_cube_root_crossing();
+    ARIADNE_TEST_CALL(test_transverse_cube_root_crossing());
 }
 
 

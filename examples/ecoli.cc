@@ -143,15 +143,15 @@ int main()
     HybridImageSet initial_set;
     initial_box=Vector<Float>(initial_state)+Vector<Interval>(4,Interval(-1,1)*0.025);
     initial_set[starvation_mode]=initial_box;
-    HybridGridTreeSet* upper_initial_set_ptr = analyser.upper_reach(ecoli_system,initial_set,zero_time);
+    HybridGridTreeSet upper_initial_set = analyser.upper_reach(ecoli_system,initial_set,zero_time);
     std::cout << "Computing reachable and evolved set... " << std::flush;
-    HybridGridTreeSet *upper_evolve_set_ptr, *upper_reach_set_ptr;
-    make_lpair(upper_reach_set_ptr,upper_evolve_set_ptr)= analyser.upper_reach_evolve(ecoli_system,initial_set,reachability_time);
+    HybridGridTreeSet upper_evolve_set, upper_reach_set;
+    make_lpair(upper_reach_set,upper_evolve_set)= analyser.upper_reach_evolve(ecoli_system,initial_set,reachability_time);
     std::cout << "done.\n" << std::endl;
 
-    plot("ecoli-initial.png", projection, bounding_box, turquoise, *upper_initial_set_ptr);
-    plot("ecoli-evolve.png", projection, bounding_box, turquoise, *upper_evolve_set_ptr);
-    plot("ecoli-reach.png", projection, bounding_box, turquoise, *upper_reach_set_ptr);
+    plot("ecoli-initial.png", projection, bounding_box, turquoise, upper_initial_set);
+    plot("ecoli-evolve.png", projection, bounding_box, turquoise, upper_evolve_set);
+    plot("ecoli-reach.png", projection, bounding_box, turquoise, upper_reach_set);
 
 
 }

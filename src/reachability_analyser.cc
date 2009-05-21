@@ -162,7 +162,7 @@ HybridReachabilityAnalyser::_upper_reach_evolve(const HybridAutomaton& sys,
 
 
 
-HybridGridTreeSet*
+HybridReachabilityAnalyser::SetApproximationType
 HybridReachabilityAnalyser::
 lower_evolve(const SystemType& system,
              const OvertSetInterfaceType& initial_set,
@@ -172,7 +172,7 @@ lower_evolve(const SystemType& system,
     int grid_depth = this->_parameters->maximum_grid_depth;
     int grid_height = this->_parameters->maximum_grid_height;
     Gr grid=system.grid();
-    GTS initial; GTS& final=*new GTS();
+    GTS initial; GTS final;
 
     // Improve accuracy of initial set for lower computations
     initial.adjoin_lower_approximation(initial_set,grid_height,grid_depth+4);
@@ -185,12 +185,12 @@ lower_evolve(const SystemType& system,
         final.adjoin(cell_final);
     }
     ARIADNE_LOG(3,"\n");
-    return &final;
+    return final;
 }
 
 
 
-HybridReachabilityAnalyser::SetApproximationType*
+HybridReachabilityAnalyser::SetApproximationType
 HybridReachabilityAnalyser::
 lower_reach(const SystemType& system,
             const OvertSetInterfaceType& initial_set,
@@ -200,7 +200,7 @@ lower_reach(const SystemType& system,
     int grid_depth = this->_parameters->maximum_grid_depth;
     int grid_height = this->_parameters->maximum_grid_height;
     Gr grid=system.grid();
-    GTS initial; GTS& reach=*new GTS();
+    GTS initial; GTS reach;
 
     ARIADNE_LOG(3,"Adjoining initial set to the grid...\n");
     // Improve accuracy of initial set for lower computations
@@ -214,12 +214,12 @@ lower_reach(const SystemType& system,
         reach.adjoin(cell_reach);
     }
     ARIADNE_LOG(3,"\n");
-    return &reach;
+    return reach;
 }
 
 
 
-std::pair<HybridReachabilityAnalyser::SetApproximationType*,HybridReachabilityAnalyser::SetApproximationType*>
+std::pair<HybridReachabilityAnalyser::SetApproximationType,HybridReachabilityAnalyser::SetApproximationType>
 HybridReachabilityAnalyser::
 lower_reach_evolve(const SystemType& system,
                    const OvertSetInterfaceType& initial_set,
@@ -233,7 +233,7 @@ lower_reach_evolve(const SystemType& system,
 
     GTS initial;
 
-    GTS& reach=*new GTS(grid); GTS& evolve=*new GTS(grid);
+    GTS reach=(grid); GTS evolve(grid);
 
     // Improve accuracy of initial set for lower computations
     initial.adjoin_lower_approximation(initial_set,grid_height,grid_depth+4);
@@ -246,11 +246,11 @@ lower_reach_evolve(const SystemType& system,
         evolve.adjoin(orbit.final());
     }
     ARIADNE_LOG(3,"\n");
-    return make_pair(&reach,&evolve);
+    return make_pair(reach,evolve);
 }
 
 
-HybridReachabilityAnalyser::SetApproximationType*
+HybridReachabilityAnalyser::SetApproximationType
 HybridReachabilityAnalyser::
 upper_evolve(const SystemType& system,
              const CompactSetInterfaceType& initial_set,
@@ -258,7 +258,7 @@ upper_evolve(const SystemType& system,
 {
     ARIADNE_LOG(2,"HybridReachabilityAnalyser::upper_evolve(...)\n");
     Gr grid=system.grid();
-    GTS &evolve = *new GTS(grid);
+    GTS evolve = *new GTS(grid);
     int grid_depth = this->_parameters->maximum_grid_depth;
     evolve.adjoin_outer_approximation(initial_set,grid_depth);
     ARIADNE_LOG(4,"initial_evolve.size()="<<evolve.size()<<"\n");
@@ -282,12 +282,12 @@ upper_evolve(const SystemType& system,
     }
     evolve.recombine();
     ARIADNE_LOG(4,"final_evolve.size()="<<evolve.size()<<"\n");
-    return &evolve;
+    return evolve;
 }
 
 
 
-HybridReachabilityAnalyser::SetApproximationType*
+HybridReachabilityAnalyser::SetApproximationType
 HybridReachabilityAnalyser::
 upper_reach(const SystemType& system,
             const CompactSetInterfaceType& initial_set,
@@ -301,7 +301,7 @@ upper_reach(const SystemType& system,
     ARIADNE_LOG(4,"grid_depth="<<grid_depth<<"\n");
     evolve.adjoin_outer_approximation(initial_set,grid_depth);
     ARIADNE_LOG(4,"initial size = "<<evolve.size()<<"\n");
-    GTS& reach=*new GTS(evolve);
+    GTS reach(evolve);
     ARIADNE_LOG(4,"reach size ="<<reach.size()<<"\n");
     Float real_time=time.continuous_time;
     uint discrete_steps=time.discrete_time;
@@ -332,12 +332,12 @@ upper_reach(const SystemType& system,
     }
     reach.recombine();
     ARIADNE_LOG(4,"final_reach size = "<<reach.size()<<"\n");
-    return &reach;
+    return reach;
 }
 
 
 
-std::pair<HybridReachabilityAnalyser::SetApproximationType*,HybridReachabilityAnalyser::SetApproximationType*>
+std::pair<HybridReachabilityAnalyser::SetApproximationType,HybridReachabilityAnalyser::SetApproximationType>
 HybridReachabilityAnalyser::
 upper_reach_evolve(const SystemType& system,
                    const CompactSetInterfaceType& initial_set,
@@ -346,12 +346,12 @@ upper_reach_evolve(const SystemType& system,
     ARIADNE_LOG(2,"HybridReachabilityAnalyser::upper_reach_evolve(system,set,time)\n");
     ARIADNE_LOG(4,"initial_set="<<initial_set<<"\n");
     Gr grid=system.grid();
-    GTS &evolve = *new GTS(grid);
+    GTS evolve(grid);
     int grid_depth = this->_parameters->maximum_grid_depth;
     ARIADNE_LOG(4,"grid_depth="<<grid_depth<<"\n");
     evolve.adjoin_outer_approximation(initial_set,grid_depth);
     ARIADNE_LOG(4,"initial_evolve"<<evolve<<"\n");
-    GTS& reach=*new GTS(evolve);
+    GTS reach(evolve);
     ARIADNE_LOG(4,"reach="<<reach<<"\n");
     Float real_time=time.continuous_time;
     uint discrete_steps=time.discrete_time;
@@ -381,7 +381,7 @@ upper_reach_evolve(const SystemType& system,
     ARIADNE_LOG(4,"reach="<<reach<<"\n");
     evolve.recombine();
     ARIADNE_LOG(4,"evolve="<<evolve<<"\n");
-    return std::make_pair(&reach,&evolve);
+    return std::make_pair(reach,evolve);
 }
 
 
@@ -389,7 +389,7 @@ upper_reach_evolve(const SystemType& system,
 
 
 
-HybridReachabilityAnalyser::SetApproximationType*
+HybridReachabilityAnalyser::SetApproximationType
 HybridReachabilityAnalyser::
 chain_reach(const SystemType& system,
             const CompactSetInterfaceType& initial_set) const
@@ -414,7 +414,7 @@ chain_reach(const SystemType& system,
     evolve.adjoin_outer_approximation(initial_set,maximum_grid_depth);
     ARIADNE_LOG(5,"initial_size="<<evolve.size()<<"\n");
 
-    GTS &reach = *new GTS(grid);
+    GTS reach = GTS(grid);
     if(transient_time > 0.0 || transient_steps > 0) {
         ARIADNE_LOG(3,"Computing transient evolution...\n");
         make_lpair(reach,evolve)=this->_upper_reach_evolve(system,evolve,hybrid_transient_time,maximum_grid_depth);
@@ -435,11 +435,11 @@ chain_reach(const SystemType& system,
         // ARIADNE_LOG(5,"bounded_new_size="<<found.size()<<"\n");
     }
     reach.recombine();
-    return &reach;
+    return reach;
 }
 
 
-HybridReachabilityAnalyser::SetApproximationType*
+HybridReachabilityAnalyser::SetApproximationType
 HybridReachabilityAnalyser::
 chain_reach(const SystemType& system,
             const CompactSetInterfaceType& initial_set,
@@ -473,7 +473,7 @@ chain_reach(const SystemType& system,
     evolve.restrict(bounding);
     ARIADNE_LOG(5,"initial_size="<<evolve.size()<<"\n");
 
-    GTS &reach = *new GTS(grid);
+    GTS reach(grid);
     if(transient_time > 0.0 || transient_steps > 0) {
         ARIADNE_LOG(3,"Computing transient evolution...\n");
         make_lpair(reach,evolve)=this->_upper_reach_evolve(system,evolve,hybrid_transient_time,maximum_grid_depth);
@@ -497,14 +497,14 @@ chain_reach(const SystemType& system,
     }
     reach.recombine();
     reach.restrict(bounding);
-    return &reach;
+    return reach;
 }
 
 
 
 
 
-HybridReachabilityAnalyser::SetApproximationType*
+HybridReachabilityAnalyser::SetApproximationType
 HybridReachabilityAnalyser::
 viable(const SystemType& system,
        const CompactSetInterfaceType& bounding_set) const

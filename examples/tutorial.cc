@@ -219,42 +219,41 @@ void compute_reachable_sets(const HybridAutomaton& heating_system, const HybridE
 
     // Compute lower-approximation to finite-time evolved set using lower-semantics.
     std::cout << "Computing lower evolve set... " << std::flush;
-    HybridGridTreeSet* lower_evolve_set_ptr = analyser.lower_evolve(heating_system,initial_set,reach_time);
+    HybridGridTreeSet lower_evolve_set = analyser.lower_evolve(heating_system,initial_set,reach_time);
     std::cout << "done." << std::endl;
 
     // Compute lower-approximation to finite-time reachable set using lower-semantics.
     std::cout << "Computing lower reach set... " << std::flush;
-    HybridGridTreeSet* lower_reach_set_ptr = analyser.lower_reach(heating_system,initial_set,reach_time);
+    HybridGridTreeSet lower_reach_set = analyser.lower_reach(heating_system,initial_set,reach_time);
     std::cout << "done." << std::endl;
 
     plot("tutorial-lower_reach_evolve.png",Box(2, 0.0,1.0, 14.0,19.0),
-         Colour(0.0,0.5,1.0), *lower_reach_set_ptr,
+         Colour(0.0,0.5,1.0), lower_reach_set,
          Colour(0.0,0.25,0.5), initial_set,
-         Colour(0.25,0.0,0.5), *lower_evolve_set_ptr);
+         Colour(0.25,0.0,0.5), lower_evolve_set);
 
     // Compute over-approximation to finite-time evolved set using upper semantics.
     // Subdivision is used as necessary to keep the local errors reasonable. 
     // The accumulated global error may be very large.
     std::cout << "Computing upper evolve set... " << std::flush;
-    HybridGridTreeSet* upper_evolve_set_ptr = analyser.upper_evolve(heating_system,initial_set,reach_time);
+    HybridGridTreeSet upper_evolve_set = analyser.upper_evolve(heating_system,initial_set,reach_time);
     std::cout << "done." << std::endl;
 
     // Compute over-approximation to finite-time reachable set using upper semantics.
     std::cout << "Computing upper reach set... " << std::flush;
-    HybridGridTreeSet* upper_reach_set_ptr = analyser.upper_reach(heating_system,initial_set,reach_time);
+    HybridGridTreeSet upper_reach_set = analyser.upper_reach(heating_system,initial_set,reach_time);
     std::cout << "done." << std::endl;
 
     plot("tutorial-upper_reach_evolve.png",Box(2, 0.0,1.0, 14.0,19.0),
-         Colour(0.0,0.5,1.0), *upper_reach_set_ptr,
+         Colour(0.0,0.5,1.0), upper_reach_set,
          Colour(0.0,0.25,0.5), initial_set,
-         Colour(0.25,0.0,0.5), *upper_evolve_set_ptr);
+         Colour(0.25,0.0,0.5), upper_evolve_set);
 
     // Compute over-approximation to infinite-time chain-reachable set using upper semantics.
-    HybridGridTreeSet* chain_reach_set_ptr = 0;
     std::cout << "Computing chain reach set... " << std::flush;
-    chain_reach_set_ptr = analyser.chain_reach(heating_system,initial_set);
+    HybridGridTreeSet chain_reach_set = analyser.chain_reach(heating_system,initial_set);
     std::cout << "done." << std::endl;
-    plot("tutorial-chain_reach.png",Box(2, 0.0,1.0, 14.0,19.0), Colour(0.0,0.5,1.0), *chain_reach_set_ptr);
+    plot("tutorial-chain_reach.png",Box(2, 0.0,1.0, 14.0,19.0), Colour(0.0,0.5,1.0), chain_reach_set);
 }
 
 
@@ -276,13 +275,11 @@ void compute_reachable_sets_with_serialisation(const HybridAutomaton& heating_sy
     HybridTime transient_time(tlower,4);
     HybridTime recurrent_time(tupper-tlower,16);
 
-    const HybridGridTreeSet* upper_intermediate_set_ptr = analyser.upper_evolve(heating_system,initial_set,transient_time);
-    const HybridGridTreeSet upper_intermediate_set = *upper_intermediate_set_ptr;
-    plot("tutorial-upper_intermediate.png",Box(2, 0.0,1.0, 14.0,18.0), Colour(0.0,0.5,1.0), *upper_intermediate_set_ptr);
+    const HybridGridTreeSet upper_intermediate_set = analyser.upper_evolve(heating_system,initial_set,transient_time);
+    plot("tutorial-upper_intermediate.png",Box(2, 0.0,1.0, 14.0,18.0), Colour(0.0,0.5,1.0), upper_intermediate_set);
 
     std::ofstream output_file_stream("tutorial-transient.txt");
     text_oarchive output_archive(output_file_stream);
-    //output_archive << *upper_intermediate_set_ptr;
     output_archive << upper_intermediate_set;
     output_file_stream.close();
 
@@ -293,8 +290,8 @@ void compute_reachable_sets_with_serialisation(const HybridAutomaton& heating_sy
     input_archive >> rebuilt_upper_intermediate_set;
     input_file_stream.close();
 
-    HybridGridTreeSet* upper_recurrent_set_ptr = analyser.upper_reach(heating_system,initial_set,recurrent_time);
-    plot("tutorial-upper_recurrent.png",Box(2, 0.0,1.0, 14.0,18.0), Colour(0.0,0.5,1.0), *upper_recurrent_set_ptr);
+    HybridGridTreeSet upper_recurrent_set = analyser.upper_reach(heating_system,initial_set,recurrent_time);
+    plot("tutorial-upper_recurrent.png",Box(2, 0.0,1.0, 14.0,18.0), Colour(0.0,0.5,1.0), upper_recurrent_set);
 }
 
 

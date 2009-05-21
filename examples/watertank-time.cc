@@ -212,7 +212,7 @@ int main()
     // These functions run a bunch of simulations with bounded approximation errors and combines the results.
     // If the desired evolution time can not be attained without exceeding the error bounds, then the run discarded (without warning)
     std::cout << "Computing lower reach set... " << std::flush;
-    HybridGridTreeSet* lower_reach_set_ptr = analyser.lower_reach(watertank_system,initial_set,reach_time);
+    HybridGridTreeSet lower_reach_set = analyser.lower_reach(watertank_system,initial_set,reach_time);
     std::cout << "done." << std::endl;
 
     Figure g;
@@ -222,7 +222,7 @@ int main()
     g.set_projection_map(ProjectionFunction(2,3,p));
 
     g << fill_colour(Colour(0.0,0.5,1.0));
-    g << *lower_reach_set_ptr;
+    g << lower_reach_set;
     g.write("watertank-time-lower");
 
 

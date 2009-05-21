@@ -110,50 +110,50 @@ class HybridReachabilityAnalyser
     //@{
     //! \name Evaluation of systems on abstract sets
     /*! \brief Compute a lower-approximation to the set obtained by evolving \a system for \a time starting in \a initial_set. */
-    virtual HybridGridTreeSet* lower_evolve(const SystemType& system, 
+    virtual SetApproximationType lower_evolve(const SystemType& system,
                                             const OvertSetInterfaceType& initial_set, 
                                             const TimeType& time) const;
   
     /*! \brief Compute a lower-approximation to the reachable set of \a system starting in \a initial_set up to \a time. */
-    virtual SetApproximationType*
+    virtual SetApproximationType
     lower_reach(const SystemType& system, 
                 const OvertSetInterfaceType& initial_set, 
                 const TimeType& time) const;
   
     /*! \brief Compute a lower-approximation to the reachable and evolved sets of \a system starting in \a initial_set up to \a time. */
-    virtual std::pair<HybridGridTreeSet*,HybridGridTreeSet*>
+    virtual std::pair<SetApproximationType,SetApproximationType>
     lower_reach_evolve(const SystemType& system, 
                        const OvertSetInterfaceType& initial_set, 
                        const TimeType& time) const;
   
     /*! \brief Compute an approximation to the set obtained by iterating \a time times \a system starting in \a initial_set. */
-    virtual SetApproximationType* upper_evolve(const SystemType& system, 
+    virtual SetApproximationType upper_evolve(const SystemType& system,
                                             const CompactSetInterfaceType& initial_set, 
                                             const TimeType& time) const;
   
     /*! \brief Compute an approximation to the reachable set of \a system starting in \a initial_set iterating at most \a time times. */
-    virtual SetApproximationType* upper_reach(const SystemType& system, 
+    virtual SetApproximationType upper_reach(const SystemType& system,
                                            const CompactSetInterfaceType& initial_set, 
                                            const TimeType& timeType) const;
   
     /*! \brief Compute an approximation to the reachable and evolved sets of \a system starting in \a initial_set iterating at most \a time times. */
-    virtual std::pair<SetApproximationType*,SetApproximationType*>
+    virtual std::pair<SetApproximationType,SetApproximationType>
     upper_reach_evolve(const SystemType& system, 
                        const CompactSetInterfaceType& initial_set, 
                        const TimeType& time) const;
   
     /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set. */
-    virtual HybridGridTreeSet* chain_reach(const SystemType& system, 
-                                           const CompactSetInterfaceType& initial_set) const;
+    virtual SetApproximationType chain_reach(const SystemType& system,
+                                             const CompactSetInterfaceType& initial_set) const;
   
     /*! \brief Compute an outer-approximation to the chain-reachable set of \a system starting in \a initial_set and remaining in \a bounding_domain. \deprecated */
-    virtual SetApproximationType* chain_reach(const SystemType& system, 
-                                           const CompactSetInterfaceType& initial_set, 
-                                           const BoundingSetType& bounding_domain) const;
+    virtual SetApproximationType chain_reach(const SystemType& system,
+                                             const CompactSetInterfaceType& initial_set, 
+                                             const BoundingSetType& bounding_domain) const;
   
     /*! \brief Compute an outer-approximation to the viability kernel of \a system within \a bounding_set. */
-    virtual HybridGridTreeSet* viable(const HybridAutomaton& system, 
-                                      const HybridCompactSetInterface& bounding_set) const;
+    virtual SetApproximationType viable(const HybridAutomaton& system,
+                                        const HybridCompactSetInterface& bounding_set) const;
   
     /*! \brief Attempt to verify that the reachable set of \a system starting in \a initial_set remains in \a safe_set. */
     virtual tribool verify(const HybridAutomaton& system, 

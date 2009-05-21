@@ -152,9 +152,9 @@ class TestReachabilityAnalysis
         DiscreteState loc(1);
         Box bounding_box(2,bound);
         cout << "Computing timed evolve set" << endl;
-        HybridGridTreeSet& hybrid_lower_evolve=*analyser.lower_evolve(system,initial_set,reach_time);
+        HybridGridTreeSet hybrid_lower_evolve=analyser.lower_evolve(system,initial_set,reach_time);
         cout << "Computing timed reachable set" << endl;
-        HybridGridTreeSet& hybrid_lower_reach=*analyser.lower_reach(system,initial_set,reach_time);
+        HybridGridTreeSet hybrid_lower_reach=analyser.lower_reach(system,initial_set,reach_time);
         GridTreeSet& lower_evolve=hybrid_lower_evolve[loc];
         GridTreeSet& lower_reach=hybrid_lower_reach[loc];
         cout << "Evolved to " << lower_evolve.size() << " cells " << endl << endl;
@@ -166,9 +166,9 @@ class TestReachabilityAnalysis
         cout << "Computing timed reachable set" << endl;
         DiscreteState loc(1);
         Box bounding_box(2,bound);
-        HybridGridTreeSet& upper_evolve_set=*analyser.upper_evolve(system,initial_set,reach_time);
+        HybridGridTreeSet upper_evolve_set=analyser.upper_evolve(system,initial_set,reach_time);
         cout << "upper_evolve_set="<<upper_evolve_set<<std::endl;
-        HybridGridTreeSet& upper_reach_set=*analyser.upper_reach(system,initial_set,reach_time);
+        HybridGridTreeSet upper_reach_set=analyser.upper_reach(system,initial_set,reach_time);
         cout << "upper_reach_set="<<upper_reach_set<<std::endl;
  
         const GridTreeSet& upper_evolve=upper_evolve_set[loc];
@@ -188,7 +188,7 @@ class TestReachabilityAnalysis
         analyser.verbosity=0;
         analyser.parameters().transient_time=4.0;
         cout << analyser.parameters();
-        HybridGridTreeSet& chain_reach_set=*analyser.chain_reach(system,initial_set,bounding_boxes);
+        HybridGridTreeSet chain_reach_set=analyser.chain_reach(system,initial_set,bounding_boxes);
         plot("test_reachability_analyser-map_chain_reach.png",bounding_box,chain_reach_set[loc],initial_set[loc]);
     }
   
